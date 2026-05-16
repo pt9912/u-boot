@@ -303,7 +303,6 @@ Mindestumfang:
 
 ```text
 .
-├── .devcontainer/
 ├── docker/
 ├── scripts/
 ├── docs/
@@ -311,7 +310,15 @@ Mindestumfang:
 ├── CHANGELOG.md
 ├── compose.yaml
 ├── .env.example
+├── u-boot.yaml
 └── .gitignore
+```
+
+Bei aktivierter Devcontainer-Unterstützung (siehe `LH-FA-DEV-001`) zusätzlich:
+
+```text
+.devcontainer/devcontainer.json
+.devcontainer/Dockerfile
 ```
 
 ---
@@ -353,9 +360,10 @@ Regeln:
 
 - erlaubt sind Kleinbuchstaben, Ziffern und Bindestrich
 - beginnt mit einem Kleinbuchstaben
-- endet mit einem Kleinbuchstaben oder einer Ziffer
+- endet mit einem Kleinbuchstaben oder einer Ziffer (entfällt bei einstelligen Namen)
+- minimale Länge: 1 Zeichen
 - maximale Länge: 63 Zeichen
-- regulärer Ausdruck: `^[a-z][a-z0-9-]{0,61}[a-z0-9]$`
+- regulärer Ausdruck: `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`
 
 Ungültige Namen müssen mit einer klaren Fehlermeldung abgelehnt werden.
 
@@ -473,13 +481,13 @@ Das Produkt muss ein gemeinsames Docker-Netzwerk für Services definieren könne
 
 Priorität: MVP
 
-Das Produkt muss persistente Volumes für zustandsbehaftete Dienste erzeugen können.
+Das Produkt muss für aktivierte zustandsbehaftete Dienste persistente Volumes erzeugen können.
 
 Beispiele:
 
-- PostgreSQL-Daten
-- Keycloak-Daten
-- OpenTelemetry-Konfiguration
+- PostgreSQL-Daten (MVP)
+- Keycloak-Daten (V1)
+- OpenTelemetry-Konfiguration (V1)
 
 ---
 
@@ -910,7 +918,7 @@ Die Ausgabe muss optional auch maschinenlesbar erfolgen können (`--json`).
 
 Priorität: MVP
 
-Das Produkt soll eine eigene Projektkonfigurationsdatei verwenden.
+Das Produkt muss eine eigene Projektkonfigurationsdatei verwenden.
 
 Beispiel:
 
@@ -924,7 +932,7 @@ u-boot.yaml
 
 Priorität: MVP
 
-Die Konfigurationsdatei soll mindestens enthalten:
+Die Konfigurationsdatei muss mindestens enthalten:
 
 ```yaml
 project:
@@ -1174,9 +1182,14 @@ Priorität: MVP
 
 Einfache Befehle müssen auf einem typischen Entwicklungsrechner innerhalb folgender Zeiten reagieren (gemessen ohne Docker-Kommunikation, Kaltstart):
 
+MVP:
+
 - `u-boot --help`, `u-boot --version` – unter 200 ms
-- `u-boot config get …` – unter 300 ms
 - `u-boot doctor` (ohne Netz-Wartezeit) – unter 2 s
+
+V1:
+
+- `u-boot config get …` – unter 300 ms
 
 ---
 
@@ -1208,20 +1221,20 @@ u-boot <command> [subcommand] [options]
 
 ### LH-SA-CLI-002 – Vorgesehene Befehle
 
-Priorität: MVP
+Priorität: MVP/V1 gemischt (siehe Spalte)
 
-| Befehl                       | Zweck                              |
-| ---------------------------- | ---------------------------------- |
-| `u-boot init`                | Projekt initialisieren             |
-| `u-boot add <service>`       | Service hinzufügen                 |
-| `u-boot remove <service>`    | Service entfernen                  |
-| `u-boot up`                  | Umgebung starten                   |
-| `u-boot down`                | Umgebung stoppen                   |
-| `u-boot doctor`              | Umgebung prüfen                    |
-| `u-boot logs`                | Logs anzeigen                      |
-| `u-boot generate <artifact>` | Artefakt erzeugen                  |
-| `u-boot config`              | Konfiguration anzeigen oder ändern |
-| `u-boot template list`       | Templates anzeigen                 |
+| Befehl                       | Zweck                              | Priorität |
+| ---------------------------- | ---------------------------------- | --------- |
+| `u-boot init`                | Projekt initialisieren             | MVP       |
+| `u-boot add <service>`       | Service hinzufügen                 | MVP       |
+| `u-boot remove <service>`    | Service entfernen                  | V1        |
+| `u-boot up`                  | Umgebung starten                   | MVP       |
+| `u-boot down`                | Umgebung stoppen                   | MVP       |
+| `u-boot doctor`              | Umgebung prüfen                    | MVP       |
+| `u-boot logs`                | Logs anzeigen                      | V1        |
+| `u-boot generate <artifact>` | Artefakt erzeugen                  | MVP       |
+| `u-boot config`              | Konfiguration anzeigen oder ändern | V1        |
+| `u-boot template list`       | Templates anzeigen                 | V1        |
 
 ---
 
