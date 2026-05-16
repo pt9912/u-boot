@@ -236,6 +236,7 @@ Es muss mindestens folgende Optionen bieten:
 - Für `u-boot init` ist zusätzlich das Flag `--assume-existing` definiert (nicht global, nur für diesen Befehl):
   - Ohne `--assume-existing` wird eine implizite Erkennung als bestehendes Projekt im nicht-interaktiven Modus nicht automatisch akzeptiert.
   - Mit `--assume-existing` wird die implizite Erkennung als bestehendes Projekt in nicht-interaktiven Läufen akzeptiert.
+  - `--yes` ist für diesen Sonderfall **nicht** ausreichend; die implizite Erkennung bleibt abgelehnt, wenn keine `--assume-existing` gesetzt ist.
   - Ohne `--assume-existing` und bei nicht-interaktivem Lauf ist die implizite Erkennung zwingend ablehnend und erzeugt einen fachlichen Fehler.
   - Der Fehlercode für diese Abweisung ist `10`.
 - Bei aktivierter Nicht-Interaktivität darf keine neue Rückfrage erzeugt werden:
@@ -243,7 +244,23 @@ Es muss mindestens folgende Optionen bieten:
   - mit `--yes` wird die vorgesehene Standardentscheidung deterministisch ausgeführt.
 - Für bereits deterministische Ausführungspfade (keine relevante Rückfrage) ist das Verhalten in beiden Modi unverändert.
 
+Bei `u-boot init` gilt zusätzlich die feste Auswertungsreihenfolge im nicht-interaktiven Modus:
+
+- ohne `--assume-existing`: keine implizite Annahme einer bestehenden Projekterkennung, deterministisch abbrechen (Exit-Code `10` bei bestehendem Projekt),
+- mit `--assume-existing`: implizite Annahme als bestehendes Projekt (soweit kompatibel mit den übrigen Validierungen).
+
 Bei destruktiven Operationen (insb. `u-boot down --volumes`) darf eine Löschung nur über den expliziten Freigabepfad (`--yes` oder aktiv bestätigten interaktiven Pfad) erfolgen.
+
+Deterministische Auswertungslogik für bestätigungsrelevante Modi:
+
+- `--yes` und `--no-interactive` sind exklusiv.
+- `--no-interactive` erlaubt keinerlei Rückfragen. Alle Entscheidungswege müssen deterministisch sein oder mit `LH-FA-CLI-006`-Code `2` abbrechen, wenn eine notwendige Bestätigung fehlt.
+- `--yes` erlaubt deterministische Standardpfade ohne Nutzerinteraktion.
+- `--force` und/oder `--backup` sind in nicht-interaktiven Läufen explizit zulässig, weil beide Modi deterministisch arbeiten.
+- `--no-interactive` + `--force` erlaubt das Überschreiben ohne Rückfrage; dabei ist immer eine vollständige Zusammenfassung der betroffenen Pfade auszugeben.
+- `--force` darf keine zusätzlichen Rückfragen erzeugen; die Sicherheitslogik beschränkt sich auf die Validierung der Eingabedaten.
+- `--backup` ist optional. Wenn `--backup` gesetzt ist, dürfen Dateischutz-Szenarien mit automatischer Sicherung deterministisch abgearbeitet werden.
+- Bei fehlender Möglichkeit zur sicheren automatischen Abarbeitung (z. B. fehlender verwalteter Block ohne `--backup` bei vollständig kontrolliertem Überschreiben) muss der Befehl mit Fehlercode `10` abbrechen.
 
 ---
 
@@ -566,6 +583,17 @@ Zusätzliche Strategien über Option:
 - `--backup` – bestehende Datei als `<name>.bak` sichern und ersetzen; ist `<name>.bak` bereits vorhanden, wird automatisch `<name>.bak.1`, `<name>.bak.2`, ... verwendet (kleinster freier numerischer Suffix), ohne vorhandene Backups zu überschreiben.
 - Für bestehende Verzeichnisse (z. B. `docs/`, `scripts/`, `docker/`, `.devcontainer/`) wird der komplette Verzeichnisbaum rekursiv als `<name>.bak*` gesichert und atomar ersetzt.
 - `--force` – bestehende Dateien ohne Rückfrage überschreiben; vor dem Schreiben muss eine Zusammenfassung der betroffenen Pfade ausgegeben werden
+
+Zusätzliche Schutzregeln für strukturierte Konfigurationsdateien (`compose.yaml`, `.env.example`, `README.md`, `CHANGELOG.md`, `.devcontainer/devcontainer.json`):
+
+- bestehende, nicht verwaltete Inhalte bleiben in `--force`-Ausführung erhalten.
+- wird ein `U-BOOT MANAGED BLOCK` erkannt, darf bei `--force` nur dieser Block verändert werden.
+- fehlt ein verwalteter Block in einer vorhandenen Datei:
+  - ist `--backup` gesetzt, wird vor jedem vollständigen Überschreiben der komplette Dateiinhalt gesichert und danach ersetzt.
+  - ist `--backup` nicht gesetzt, wird der Vorgang mit einem fachlichen Fehler (Code `10`) abgebrochen; es erfolgt ein klarer Hinweis auf die nötige Option `--backup`.
+- bei vollständiger Überschreibung ohne verwalteten Block gilt ein vollständiges Backup vor dem Schreiben als Pflicht.
+
+Für `--force`, `--backup` und nicht-interaktive Modi gilt zusätzlich die in `LH-FA-CLI-005A` definierte Entscheidungslogik für Bestätigungen.
 
 ---
 
@@ -1012,6 +1040,18 @@ Die Diagnosefunktion muss mindestens prüfen:
 - Schreibrechte im Projektverzeichnis
 - gültige `compose.yaml`, falls vorhanden
 - gültige `u-boot.yaml`, falls vorhanden
+- falls Devcontainer-Dateien vorhanden sind:
+  - Ist `u-boot.yaml` vorhanden und `devcontainer.enabled == true`, müssen diese Prüfungen mit `error` bewertet werden:
+    - syntaktische Gültigkeit von `.devcontainer/devcontainer.json`
+    - Mindestkompatibilität mit VS Code Dev Containers (`name` gesetzt; mindestens `image` oder `build` vorhanden)
+    - `forwardPorts`-Konsistenz zu aktivierten Services, falls Portangaben existieren
+  - Ist `u-boot.yaml` vorhanden und `devcontainer.enabled == false`, sind die obigen Prüfungen optional (`warn`, keine harte Validierungspflicht).
+  - Ist keine `u-boot.yaml` vorhanden, werden die obigen Prüfungen als ergänzende Qualitätsdiagnosen mit `warn` ausgegeben.
+- falls `.devcontainer/Dockerfile` vorhanden ist: Lesbarkeit und erkennbare Build-Basisstruktur (`FROM` vorhanden)
+- `forwardPorts`-Konsistenzregeln:
+  - Für jeden aktivierten Service mit expliziter `ports`-Zuordnung (TCP) ist der Host-Port in `forwardPorts` enthalten.
+  - bei mehreren TCP-Ports werden eindeutige Portzahlen eingetragen (Duplikate dedupliziert).
+  - UDP- oder nicht eindeutig auflösbare Portangaben dürfen in `forwardPorts` fehlen; dafür ist ein `warn`-Diagnoseeintrag zulässig.
 
 ---
 
@@ -1246,18 +1286,25 @@ project:
 services:
   postgres:
     enabled: false
-  keycloak:
-    enabled: false
-    persistence: embedded
-  otel:
-    enabled: false
 
 devcontainer:
   enabled: false
-  featureSources:
-    allow:
-      - https://ghcr.io/devcontainers/features/node
 ``` 
+
+# Optionale, V1-relevante Felder:
+services:
+  # keycloak:
+  #   enabled: false
+  #   persistence: embedded   # embedded | external-postgres
+  # otel:
+  #   enabled: false
+
+# Optionale, V1-relevante Felder:
+devcontainer:
+  # featureSources:
+  #   allow:
+  #     - https://ghcr.io/devcontainers/features/node
+```
 
 Hinweise:
 
@@ -1387,6 +1434,7 @@ Für `--json`-Antworten gilt zusätzlich:
 - Bei `command == "template"` oder `command == "config"` ist `subcommand` verpflichtend.
 - Die Felder `status`, `command`, `diagnostics` und `exitCode` sind minimal verpflichtend und sollten mit anderen Feldern ergänzt werden.
 
+Für normale (`--json` ohne `--dry-run`/`--diff`) Ausgaben ist der obige Minimalkontrakt bindend.
 Für `--dry-run`- oder `--diff`-Ausgaben mit `--json` gilt zusätzlich das vollständige Schema aus `LH-FA-CLI-007` als bindender Pflichtkontrakt (inkl. `plannedFiles`, `changes`, `dryRun`, `diff`).
 
 Beispiel:
@@ -1987,6 +2035,10 @@ Der MVP muss enthalten:
 - `u-boot init`
 - `u-boot doctor`
 - `u-boot add postgres`
+- `u-boot generate changelog`
+- `u-boot generate readme`
+- `u-boot generate env-example`
+- `u-boot generate devcontainer`
 - `u-boot up`
 - `u-boot down`
 - Erzeugung von `compose.yaml`
