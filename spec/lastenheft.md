@@ -218,6 +218,19 @@ Mindestens müssen folgende Stufen unterstützt werden:
 
 ---
 
+### LH-FA-CLI-005A – Interaktivität und Automatisierung
+
+Priorität: MVP
+
+Das Produkt muss nicht-interaktive Ausführung unterstützen.
+
+Es muss mindestens folgende Optionen bieten:
+
+- `--yes` – Standardfragen automatisch bejahen (für CI/Skripte)
+- `--no-interactive` – keine Rückfragen stellen; erforderliche Bestätigungen mit Fehler abbrechen
+
+---
+
 ### LH-FA-CLI-006 – Exit Codes
 
 Priorität: MVP
@@ -602,9 +615,10 @@ Beispiele:
 
 Verhalten bei erkannter Abhängigkeit:
 
-- Im interaktiven Modus muss das Produkt nachfragen, ob das fehlende Add-on automatisch hinzugefügt werden soll.
-- Im nicht-interaktiven Modus muss das Produkt mit einem Fehler abbrechen und auf die fehlende Abhängigkeit hinweisen.
+- Im interaktiven Modus (Standardmodus) muss das Produkt nachfragen, ob das fehlende Add-on automatisch hinzugefügt werden soll.
+- Im nicht-interaktiven Modus (`--no-interactive`) muss das Produkt mit einem klaren Fehler abbrechen und auf die fehlende Abhängigkeit hinweisen.
 - Über die Option `--with-deps` muss das Produkt fehlende Abhängigkeiten automatisch hinzufügen.
+- Mit `--yes` bzw. `--no-interactive` muss das Verhalten in Skript-/CI-Umgebungen deterministisch und nicht-blockierend sein.
 
 ---
 
@@ -758,6 +772,10 @@ Die Diagnosefunktion muss den Exit Code an die höchste festgestellte Stufe bind
 - nur `OK` → Exit Code `0`
 - mindestens `WARN`, kein `ERROR` → Exit Code `0`
 - mindestens ein `ERROR` → Exit Code ungleich `0`
+
+Optional:
+
+- Mit `--strict` muss mindestens ein `WARN` zu einem Exit Code ungleich `0` führen.
 
 ---
 
@@ -926,6 +944,12 @@ Beispiel:
 u-boot.yaml
 ```
 
+Die Konfiguration muss auch über den Migrationsbefehl gepflegt werden können:
+
+```bash
+u-boot config migrate
+```
+
 ---
 
 ### LH-FA-CONF-002 – Inhalt der Konfiguration
@@ -935,21 +959,26 @@ Priorität: MVP
 Die Konfigurationsdatei muss mindestens enthalten:
 
 ```yaml
+schemaVersion: 1
 project:
   name: my-service
-  template: micronaut-sveltekit
 
 services:
   postgres:
-    enabled: true
+    enabled: false
   keycloak:
-    enabled: true
+    enabled: false
   otel:
-    enabled: true
+    enabled: false
 
 devcontainer:
-  enabled: true
+  enabled: false
 ```
+
+Hinweise:
+
+- `template` ist optional und Bestandteil des V1-Template-Systems.
+- Nicht-mandatorische Add-ons dürfen im MVP auf `enabled: false` stehen.
 
 ---
 
@@ -966,6 +995,22 @@ Das Produkt muss die Konfiguration lesen und bei Befehlen berücksichtigen könn
 Priorität: MVP
 
 Das Produkt muss die Konfiguration aktualisieren können, wenn Add-ons hinzugefügt oder entfernt werden.
+
+---
+
+### LH-FA-CONF-006 – Konfiguration migrieren
+
+Priorität: Later
+
+Das Produkt muss ein Schema-Migrationskommando bereitstellen.
+
+Beispiel:
+
+```bash
+u-boot config migrate
+```
+
+Die Migration muss mit einem klaren Fehler auf unbekannte Zukunftsversionen reagieren und bei Migrationen mit älteren Versionen eine Sicherung anlegen.
 
 ---
 
@@ -1234,6 +1279,7 @@ Priorität: MVP/V1 gemischt (siehe Spalte)
 | `u-boot logs`                | Logs anzeigen                      | V1        |
 | `u-boot generate <artifact>` | Artefakt erzeugen                  | MVP       |
 | `u-boot config`              | Konfiguration anzeigen oder ändern | V1        |
+| `u-boot config migrate`      | Konfigurationsschema migrieren     | Later     |
 | `u-boot template list`       | Templates anzeigen                 | V1        |
 
 ---
@@ -1647,6 +1693,7 @@ Nach dem MVP können ergänzt werden:
 | LH-FA-CLI-002      | Hilfeausgabe                   | MVP       | PH-CLI-002                         | TC-CLI-002   |
 | LH-FA-CLI-004      | Fehlerausgabe                  | MVP       | PH-CLI-004                         | TC-CLI-004   |
 | LH-FA-CLI-005      | Verbosity und Logging          | MVP       | PH-CLI-005                         | TC-CLI-005   |
+| LH-FA-CLI-005A     | Nicht-interaktive Ausführung    | MVP       | PH-CLI-005A                        | TC-CLI-005A  |
 | LH-FA-CLI-006      | Exit Codes                     | MVP       | PH-CLI-006                         | TC-CLI-006   |
 | LH-FA-CLI-007      | Dry Run                        | V1        | PH-CLI-007                         | TC-CLI-007   |
 | LH-FA-INIT-001     | Projekt initialisieren         | MVP       | PH-INIT-001                        | TC-INIT-001  |
@@ -1676,6 +1723,7 @@ Nach dem MVP können ergänzt werden:
 | LH-FA-GEN-005      | Idempotenz                     | MVP       | PH-GEN-005                         | TC-GEN-005   |
 | LH-FA-CONF-003     | Konfiguration lesen            | MVP       | PH-CONF-003                        | TC-CONF-003  |
 | LH-FA-CONF-004     | Konfiguration aktualisieren    | MVP       | PH-CONF-004                        | TC-CONF-004  |
+| LH-FA-CONF-006     | Konfiguration migrieren        | Later     | PH-CONF-006                        | TC-CONF-006  |
 | LH-FA-CONF-005     | Konfiguration ändern           | V1        | PH-CONF-005                        | TC-CONF-005  |
 | LH-FA-TPL-004      | Templates auflisten            | V1        | PH-TPL-004                         | TC-TPL-004   |
 | LH-DA-003          | Schema-Version                 | MVP       | PH-DA-003                          | TC-DA-003    |
@@ -1753,5 +1801,3 @@ Mögliche Optionen:
 | Idempotenz           | Mehrfaches Ausführen führt zum gleichen stabilen Ergebnis                                 |
 | Managed Block        | Automatisch verwalteter Bereich in einer Datei (Markierung: `BEGIN U-BOOT MANAGED BLOCK`) |
 | OTLP                 | OpenTelemetry Protocol – Protokoll zur Übertragung von Logs, Metrics und Traces           |
-
-
