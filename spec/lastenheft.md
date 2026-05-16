@@ -148,6 +148,8 @@ Das Produkt soll mindestens folgende fachliche Module besitzen:
 
 ### LH-FA-CLI-001 – CLI-Aufruf
 
+Priorität: MVP
+
 Das Produkt muss als Kommandozeilenprogramm mit dem Namen `u-boot` aufrufbar sein.
 
 Beispiel:
@@ -159,6 +161,8 @@ u-boot --help
 ---
 
 ### LH-FA-CLI-002 – Hilfeausgabe
+
+Priorität: MVP
 
 Das Produkt muss eine Hilfeausgabe bereitstellen.
 
@@ -173,6 +177,8 @@ Die Hilfeausgabe muss mindestens enthalten:
 
 ### LH-FA-CLI-003 – Versionsausgabe
 
+Priorität: MVP
+
 Das Produkt muss die installierte Version ausgeben können.
 
 Beispiel:
@@ -185,6 +191,8 @@ u-boot --version
 
 ### LH-FA-CLI-004 – Fehlerausgabe
 
+Priorität: MVP
+
 Das Produkt muss verständliche Fehlermeldungen ausgeben.
 
 Fehlermeldungen müssen enthalten:
@@ -196,6 +204,8 @@ Fehlermeldungen müssen enthalten:
 ---
 
 ### LH-FA-CLI-005 – Verbosity und Logging
+
+Priorität: MVP
 
 Das Produkt muss eine konfigurierbare Ausgabeverbosität unterstützen.
 
@@ -210,6 +220,8 @@ Mindestens müssen folgende Stufen unterstützt werden:
 
 ### LH-FA-CLI-006 – Exit Codes
 
+Priorität: MVP
+
 Das Produkt muss aussagekräftige Exit Codes liefern.
 
 Mindestens:
@@ -221,9 +233,43 @@ Mindestens:
 
 ---
 
+### LH-FA-CLI-007 – Dry Run
+
+Priorität: V1
+
+Das Produkt muss für dateiverändernde Befehle einen Dry-Run-Modus unterstützen.
+
+Beispiel:
+
+```bash
+u-boot add postgres --dry-run
+```
+
+Der Dry-Run muss anzeigen, welche Dateien erzeugt, geändert oder gelöscht würden, ohne Änderungen am Dateisystem vorzunehmen.
+
+---
+
+### LH-FA-CLI-008 – Diff-Ausgabe
+
+Priorität: V1
+
+Das Produkt soll bei dateiverändernden Befehlen eine Diff-Ausgabe unterstützen.
+
+Beispiel:
+
+```bash
+u-boot add postgres --diff
+```
+
+Die Diff-Ausgabe muss Unterschiede zwischen aktuellem und geplantem Zustand der betroffenen Dateien zeigen.
+
+---
+
 ## 4.2 Projektinitialisierung
 
 ### LH-FA-INIT-001 – Neues Projekt initialisieren
+
+Priorität: MVP
 
 Das Produkt muss mit folgendem Befehl ein neues Projekt initialisieren können:
 
@@ -234,6 +280,8 @@ u-boot init
 ---
 
 ### LH-FA-INIT-002 – Projektname
+
+Priorität: MVP
 
 Das Produkt muss bei der Initialisierung einen Projektnamen verwenden können.
 
@@ -246,6 +294,8 @@ u-boot init my-service
 ---
 
 ### LH-FA-INIT-003 – Projektstruktur erzeugen
+
+Priorität: MVP
 
 Das Produkt muss eine grundlegende Projektstruktur erzeugen.
 
@@ -268,6 +318,8 @@ Mindestumfang:
 
 ### LH-FA-INIT-004 – Bestehendes Projekt erkennen
 
+Priorität: MVP
+
 Das Produkt muss erkennen, ob es in einem bestehenden Projektverzeichnis ausgeführt wird.
 
 Falls bereits relevante Dateien vorhanden sind, darf das Produkt diese nicht kommentarlos überschreiben.
@@ -275,6 +327,8 @@ Falls bereits relevante Dateien vorhanden sind, darf das Produkt diese nicht kom
 ---
 
 ### LH-FA-INIT-005 – Überschreibschutz
+
+Priorität: MVP
 
 Das Produkt muss vor dem Überschreiben bestehender Dateien schützen.
 
@@ -285,19 +339,23 @@ Standardverhalten ohne Option:
 Zusätzliche Strategien über Option:
 
 - `--backup` – bestehende Datei als `<name>.bak` sichern und ersetzen
-- `--force` – bestehende Datei kommentarlos überschreiben
+- `--force` – bestehende Dateien ohne Rückfrage überschreiben; vor dem Schreiben muss eine Zusammenfassung der betroffenen Pfade ausgegeben werden
 
 ---
 
 ### LH-FA-INIT-006 – Projektnamen-Validierung
 
+Priorität: MVP
+
 Das Produkt muss den Projektnamen validieren.
 
-Mindestregeln:
+Regeln:
 
-- Kleinbuchstaben, Ziffern und Bindestrich erlaubt
-- Beginnt mit einem Buchstaben
-- maximale Länge gemäß Docker-Compose-Konvention
+- erlaubt sind Kleinbuchstaben, Ziffern und Bindestrich
+- beginnt mit einem Kleinbuchstaben
+- endet mit einem Kleinbuchstaben oder einer Ziffer
+- maximale Länge: 63 Zeichen
+- regulärer Ausdruck: `^[a-z][a-z0-9-]{0,61}[a-z0-9]$`
 
 Ungültige Namen müssen mit einer klaren Fehlermeldung abgelehnt werden.
 
@@ -305,19 +363,23 @@ Ungültige Namen müssen mit einer klaren Fehlermeldung abgelehnt werden.
 
 ### LH-FA-INIT-007 – Git-Repository-Initialisierung
 
-Das Produkt muss bei `u-boot init` ein Git-Repository initialisieren, sofern noch keines vorhanden ist.
+Priorität: MVP
 
-Das Verhalten muss über eine Option abschaltbar sein:
+Das Produkt muss Git-Initialisierung als Teil von `u-boot init` unterstützen.
 
-```bash
-u-boot init --no-git
-```
+Verhalten:
+
+- Standardverhalten: aktiviert – ein neues Git-Repository wird angelegt, sofern noch keines vorhanden ist.
+- Abschaltbar über `--no-git`.
+- Ein bereits vorhandenes Repository darf nicht erneut initialisiert werden.
 
 ---
 
 ## 4.3 Devcontainer-Unterstützung
 
 ### LH-FA-DEV-001 – Devcontainer erzeugen
+
+Priorität: MVP
 
 Das Produkt muss eine Devcontainer-Konfiguration erzeugen können.
 
@@ -339,11 +401,15 @@ Mindestdateien:
 
 ### LH-FA-DEV-002 – VS-Code-Kompatibilität
 
+Priorität: MVP
+
 Die erzeugte Devcontainer-Konfiguration muss mit VS Code Dev Containers kompatibel sein.
 
 ---
 
 ### LH-FA-DEV-003 – Devcontainer-Features
+
+Priorität: V1
 
 Das Produkt soll optionale Devcontainer-Features unterstützen.
 
@@ -361,11 +427,15 @@ Beispiele:
 
 ### LH-FA-DEV-004 – Benutzerrechte
 
+Priorität: MVP
+
 Der Devcontainer soll standardmäßig mit einem nicht-root Benutzer arbeiten.
 
 ---
 
 ### LH-FA-DEV-005 – Ports
+
+Priorität: MVP
 
 Das Produkt muss Ports aus aktivierten Services in der Devcontainer-Konfiguration berücksichtigen.
 
@@ -377,11 +447,15 @@ Konkret müssen die Ports der Services in `devcontainer.json` als `forwardPorts`
 
 ### LH-FA-DOC-001 – Compose-Datei erzeugen
 
+Priorität: MVP
+
 Das Produkt muss eine `compose.yaml` erzeugen können.
 
 ---
 
 ### LH-FA-DOC-002 – Dockerfile erzeugen
+
+Priorität: V1
 
 Das Produkt soll bei Bedarf ein Dockerfile für die Anwendungsentwicklung erzeugen können.
 
@@ -389,11 +463,15 @@ Das Produkt soll bei Bedarf ein Dockerfile für die Anwendungsentwicklung erzeug
 
 ### LH-FA-DOC-003 – Netzwerk
 
+Priorität: MVP
+
 Das Produkt muss ein gemeinsames Docker-Netzwerk für Services definieren können.
 
 ---
 
 ### LH-FA-DOC-004 – Volumes
+
+Priorität: MVP
 
 Das Produkt muss persistente Volumes für zustandsbehaftete Dienste erzeugen können.
 
@@ -407,6 +485,8 @@ Beispiele:
 
 ### LH-FA-DOC-005 – Compose-Validierung
 
+Priorität: V1
+
 Das Produkt soll erzeugte Compose-Dateien auf syntaktische Gültigkeit prüfen können.
 
 ---
@@ -414,6 +494,8 @@ Das Produkt soll erzeugte Compose-Dateien auf syntaktische Gültigkeit prüfen k
 ## 4.5 Service-Add-ons
 
 ### LH-FA-ADD-001 – Add-on-Befehl
+
+Priorität: MVP
 
 Das Produkt muss Services über folgenden Befehl hinzufügen können:
 
@@ -424,6 +506,8 @@ u-boot add <service>
 ---
 
 ### LH-FA-ADD-002 – PostgreSQL hinzufügen
+
+Priorität: MVP
 
 Das Produkt muss PostgreSQL als Service hinzufügen können.
 
@@ -445,6 +529,8 @@ Mindestumfang:
 
 ### LH-FA-ADD-003 – Keycloak hinzufügen
 
+Priorität: V1
+
 Das Produkt muss Keycloak als Service hinzufügen können.
 
 Beispiel:
@@ -464,6 +550,8 @@ Mindestumfang:
 ---
 
 ### LH-FA-ADD-004 – OpenTelemetry hinzufügen
+
+Priorität: V1
 
 Das Produkt muss OpenTelemetry-Komponenten hinzufügen können.
 
@@ -485,6 +573,8 @@ Mindestumfang:
 
 ### LH-FA-ADD-005 – Mehrfaches Hinzufügen verhindern
 
+Priorität: MVP
+
 Das Produkt muss erkennen, ob ein Service bereits vorhanden ist.
 
 Ein bereits vorhandener Service darf nicht doppelt eingefügt werden.
@@ -492,6 +582,8 @@ Ein bereits vorhandener Service darf nicht doppelt eingefügt werden.
 ---
 
 ### LH-FA-ADD-006 – Add-on-Abhängigkeiten
+
+Priorität: V1
 
 Das Produkt muss Abhängigkeiten zwischen Add-ons erkennen.
 
@@ -509,6 +601,8 @@ Verhalten bei erkannter Abhängigkeit:
 ---
 
 ### LH-FA-ADD-007 – Service entfernen
+
+Priorität: V1
 
 Das Produkt muss einen Service wieder entfernen können.
 
@@ -532,6 +626,8 @@ Mindestumfang:
 
 ### LH-FA-UP-001 – Umgebung starten
 
+Priorität: MVP
+
 Das Produkt muss die Entwicklungsumgebung starten können.
 
 Beispiel:
@@ -544,11 +640,15 @@ u-boot up
 
 ### LH-FA-UP-002 – Docker Compose verwenden
 
+Priorität: MVP
+
 Der Befehl `u-boot up` muss intern Docker Compose verwenden können.
 
 ---
 
 ### LH-FA-UP-003 – Startstatus anzeigen
+
+Priorität: MVP
 
 Nach dem Start muss das Produkt den Status der relevanten Services anzeigen.
 
@@ -562,6 +662,8 @@ Mindestangaben:
 ---
 
 ### LH-FA-UP-004 – Umgebung stoppen
+
+Priorität: MVP
 
 Das Produkt muss die Umgebung stoppen können.
 
@@ -580,6 +682,8 @@ u-boot down --volumes
 ---
 
 ### LH-FA-UP-005 – Logs anzeigen
+
+Priorität: V1
 
 Das Produkt soll Logs anzeigen können.
 
@@ -601,6 +705,8 @@ Mindestens müssen folgende Optionen unterstützt werden:
 
 ### LH-FA-DIAG-001 – Doctor-Befehl
 
+Priorität: MVP
+
 Das Produkt muss eine Diagnosefunktion bereitstellen.
 
 Beispiel:
@@ -612,6 +718,8 @@ u-boot doctor
 ---
 
 ### LH-FA-DIAG-002 – Lokale Voraussetzungen prüfen
+
+Priorität: MVP
 
 Die Diagnosefunktion muss mindestens prüfen:
 
@@ -626,6 +734,8 @@ Die Diagnosefunktion muss mindestens prüfen:
 ---
 
 ### LH-FA-DIAG-003 – Fehlerklassifikation
+
+Priorität: MVP
 
 Die Diagnosefunktion muss Probleme nach Schweregrad klassifizieren.
 
@@ -645,6 +755,8 @@ Die Diagnosefunktion muss den Exit Code an die höchste festgestellte Stufe bind
 
 ### LH-FA-DIAG-004 – Reparaturhinweise
 
+Priorität: MVP
+
 Die Diagnosefunktion muss bei Problemen konkrete Reparaturhinweise ausgeben.
 
 Beispiel:
@@ -660,6 +772,8 @@ Hint: Start Docker or check your user permissions for /var/run/docker.sock.
 
 ### LH-FA-GEN-001 – Generate-Befehl
 
+Priorität: MVP
+
 Das Produkt muss Generatoren über folgenden Befehl anbieten:
 
 ```bash
@@ -669,6 +783,8 @@ u-boot generate <artifact>
 ---
 
 ### LH-FA-GEN-002 – Changelog erzeugen
+
+Priorität: MVP
 
 Das Produkt muss ein Changelog erzeugen oder aktualisieren können.
 
@@ -682,6 +798,8 @@ u-boot generate changelog
 
 ### LH-FA-GEN-003 – README erzeugen
 
+Priorität: MVP
+
 Das Produkt muss eine README-Datei erzeugen können.
 
 Beispiel:
@@ -694,11 +812,15 @@ u-boot generate readme
 
 ### LH-FA-GEN-004 – Beispiel-ENV erzeugen
 
+Priorität: MVP
+
 Das Produkt muss eine `.env.example` erzeugen oder aktualisieren können.
 
 ---
 
 ### LH-FA-GEN-005 – Idempotenz
+
+Priorität: MVP
 
 Generatoren müssen möglichst idempotent arbeiten.
 
@@ -713,6 +835,8 @@ Das bedeutet:
 ## 4.9 Template-System
 
 ### LH-FA-TPL-001 – Projektvorlagen
+
+Priorität: V1
 
 Das Produkt soll Projektvorlagen unterstützen.
 
@@ -729,6 +853,8 @@ u-boot init --template micronaut-sveltekit
 
 ### LH-FA-TPL-002 – Template-Metadaten
 
+Priorität: V1
+
 Jedes Template soll Metadaten besitzen.
 
 Mindestangaben:
@@ -744,6 +870,8 @@ Mindestangaben:
 
 ### LH-FA-TPL-003 – Eigene Templates
 
+Priorität: Later
+
 Das Produkt soll später eigene lokale Templates unterstützen können.
 
 Beispiel:
@@ -755,6 +883,8 @@ u-boot init --template ./my-template
 ---
 
 ### LH-FA-TPL-004 – Templates auflisten
+
+Priorität: V1
 
 Das Produkt muss verfügbare Templates auflisten können.
 
@@ -778,6 +908,8 @@ Die Ausgabe muss optional auch maschinenlesbar erfolgen können (`--json`).
 
 ### LH-FA-CONF-001 – Projektkonfiguration
 
+Priorität: MVP
+
 Das Produkt soll eine eigene Projektkonfigurationsdatei verwenden.
 
 Beispiel:
@@ -789,6 +921,8 @@ u-boot.yaml
 ---
 
 ### LH-FA-CONF-002 – Inhalt der Konfiguration
+
+Priorität: MVP
 
 Die Konfigurationsdatei soll mindestens enthalten:
 
@@ -813,17 +947,23 @@ devcontainer:
 
 ### LH-FA-CONF-003 – Konfiguration lesen
 
+Priorität: MVP
+
 Das Produkt muss die Konfiguration lesen und bei Befehlen berücksichtigen können.
 
 ---
 
 ### LH-FA-CONF-004 – Konfiguration aktualisieren
 
+Priorität: MVP
+
 Das Produkt muss die Konfiguration aktualisieren können, wenn Add-ons hinzugefügt oder entfernt werden.
 
 ---
 
 ### LH-FA-CONF-005 – Konfiguration anzeigen und ändern
+
+Priorität: V1
 
 Das Produkt muss einen Befehl zum Anzeigen und Ändern der Konfiguration bereitstellen.
 
@@ -845,11 +985,15 @@ Beim Setzen muss die geänderte Konfiguration auf Schema-Konformität geprüft w
 
 ### LH-NFA-USE-001 – Verständliche Bedienung
 
+Priorität: MVP
+
 Das Produkt muss ohne tiefes Vorwissen über die interne Implementierung bedienbar sein.
 
 ---
 
 ### LH-NFA-USE-002 – Klare Befehle
+
+Priorität: MVP
 
 Befehle müssen sprechend, konsistent und kurz sein.
 
@@ -866,11 +1010,15 @@ u-boot up
 
 ### LH-NFA-USE-003 – Lesbare Ausgaben
 
+Priorität: MVP
+
 CLI-Ausgaben müssen klar strukturiert und gut lesbar sein.
 
 ---
 
 ### LH-NFA-USE-004 – Maschinenlesbare Ausgabe
+
+Priorität: V1
 
 Das Produkt soll optional maschinenlesbare Ausgabe unterstützen.
 
@@ -886,11 +1034,15 @@ u-boot doctor --json
 
 ### LH-NFA-REL-001 – Kein stilles Überschreiben
 
+Priorität: MVP
+
 Das Produkt darf bestehende Dateien nicht stillschweigend überschreiben.
 
 ---
 
 ### LH-NFA-REL-002 – Wiederholbare Ausführung
+
+Priorität: MVP
 
 Wiederholte Ausführung desselben Befehls darf das Projekt nicht beschädigen.
 
@@ -898,11 +1050,15 @@ Wiederholte Ausführung desselben Befehls darf das Projekt nicht beschädigen.
 
 ### LH-NFA-REL-003 – Abbruch bei kritischen Fehlern
 
+Priorität: MVP
+
 Bei kritischen Fehlern muss das Produkt abbrechen und eine klare Fehlermeldung ausgeben.
 
 ---
 
 ### LH-NFA-REL-004 – Validierung erzeugter Dateien
+
+Priorität: MVP
 
 Das Produkt soll erzeugte Dateien validieren, soweit passende Validatoren verfügbar sind.
 
@@ -918,6 +1074,8 @@ Beispiele:
 
 ### LH-NFA-MAINT-001 – Modulare Architektur
 
+Priorität: MVP
+
 Das Produkt muss modular aufgebaut sein.
 
 Insbesondere sollen Add-ons, Templates und Generatoren voneinander getrennt implementiert werden.
@@ -926,17 +1084,23 @@ Insbesondere sollen Add-ons, Templates und Generatoren voneinander getrennt impl
 
 ### LH-NFA-MAINT-002 – Erweiterbarkeit
 
+Priorität: MVP
+
 Neue Services müssen mit geringem Aufwand ergänzt werden können.
 
 ---
 
 ### LH-NFA-MAINT-003 – Testbarkeit
 
+Priorität: MVP
+
 Die fachlichen Funktionen müssen automatisiert testbar sein.
 
 ---
 
 ### LH-NFA-MAINT-004 – Dokumentierte Schnittstellen
+
+Priorität: V1
 
 Interne Schnittstellen für Add-ons und Templates sollen dokumentiert werden.
 
@@ -946,17 +1110,23 @@ Interne Schnittstellen für Add-ons und Templates sollen dokumentiert werden.
 
 ### LH-NFA-PORT-001 – Linux-Unterstützung
 
+Priorität: MVP
+
 Das Produkt muss Linux als primäre Plattform unterstützen.
 
 ---
 
 ### LH-NFA-PORT-002 – Keine unnötigen Systemabhängigkeiten
 
+Priorität: MVP
+
 Das Produkt soll möglichst wenige externe Systemabhängigkeiten benötigen.
 
 ---
 
 ### LH-NFA-PORT-003 – Containerfreundlichkeit
+
+Priorität: V1
 
 Das Produkt soll selbst in einem Container oder Devcontainer ausführbar sein können.
 
@@ -966,11 +1136,15 @@ Das Produkt soll selbst in einem Container oder Devcontainer ausführbar sein k�
 
 ### LH-NFA-SEC-001 – Keine Secrets einchecken
 
+Priorität: MVP
+
 Das Produkt darf keine echten Secrets in erzeugte Dateien schreiben.
 
 ---
 
 ### LH-NFA-SEC-002 – Beispielwerte markieren
+
+Priorität: MVP
 
 Beispielwerte in `.env.example` müssen eindeutig als Beispielwerte erkennbar sein.
 
@@ -978,11 +1152,15 @@ Beispielwerte in `.env.example` müssen eindeutig als Beispielwerte erkennbar se
 
 ### LH-NFA-SEC-003 – Sichere Defaults
 
+Priorität: MVP
+
 Das Produkt soll sichere Standardwerte verwenden, soweit dies mit lokaler Entwicklung vereinbar ist.
 
 ---
 
 ### LH-NFA-SEC-004 – Keine verdeckte Ausführung fremder Skripte
+
+Priorität: MVP
 
 Das Produkt darf keine fremden Skripte aus dem Internet ohne ausdrückliche Zustimmung ausführen.
 
@@ -991,6 +1169,8 @@ Das Produkt darf keine fremden Skripte aus dem Internet ohne ausdrückliche Zust
 ## 5.6 Performance
 
 ### LH-NFA-PERF-001 – Schnelle CLI-Antwort
+
+Priorität: MVP
 
 Einfache Befehle müssen auf einem typischen Entwicklungsrechner innerhalb folgender Zeiten reagieren (gemessen ohne Docker-Kommunikation, Kaltstart):
 
@@ -1001,6 +1181,8 @@ Einfache Befehle müssen auf einem typischen Entwicklungsrechner innerhalb folge
 ---
 
 ### LH-NFA-PERF-002 – Startzeit abhängig von Docker
+
+Priorität: MVP
 
 Die Startzeit von `u-boot up` darf von Docker-Images und Services abhängen, muss aber transparent dargestellt werden.
 
@@ -1014,6 +1196,8 @@ Insbesondere muss der Fortschritt einzelner Services (Pull, Create, Start, Healt
 
 ### LH-SA-CLI-001 – Befehlsstruktur
 
+Priorität: MVP
+
 Die CLI soll folgende Grundstruktur verwenden:
 
 ```bash
@@ -1023,6 +1207,8 @@ u-boot <command> [subcommand] [options]
 ---
 
 ### LH-SA-CLI-002 – Vorgesehene Befehle
+
+Priorität: MVP
 
 | Befehl                       | Zweck                              |
 | ---------------------------- | ---------------------------------- |
@@ -1042,6 +1228,8 @@ u-boot <command> [subcommand] [options]
 ## 6.2 Dateischnittstellen
 
 ### LH-SA-FILE-001 – Erzeugte Dateien
+
+Priorität: MVP
 
 Das Produkt soll folgende Dateien erzeugen oder aktualisieren können:
 
@@ -1063,6 +1251,8 @@ docs/
 
 ### LH-SA-FILE-002 – Markierte verwaltete Bereiche
 
+Priorität: MVP
+
 Automatisch verwaltete Bereiche in Dateien sollen markiert werden.
 
 Beispiel:
@@ -1079,11 +1269,15 @@ Beispiel:
 
 ### LH-SA-DOCKER-001 – Docker Compose
 
+Priorität: MVP
+
 Das Produkt muss Docker Compose aufrufen oder kompatible Compose-Dateien erzeugen können.
 
 ---
 
 ### LH-SA-DOCKER-002 – Containerstatus
+
+Priorität: MVP
 
 Das Produkt muss den Status laufender Container auslesen können.
 
@@ -1092,6 +1286,8 @@ Das Produkt muss den Status laufender Container auslesen können.
 ## 7. Datenanforderungen
 
 ### LH-DA-001 – Projektmetadaten
+
+Priorität: MVP
 
 Das Produkt muss Projektmetadaten speichern können.
 
@@ -1106,6 +1302,8 @@ Beispiele:
 ---
 
 ### LH-DA-002 – Service-Metadaten
+
+Priorität: MVP
 
 Das Produkt muss Informationen über aktivierte Services speichern können.
 
@@ -1122,6 +1320,8 @@ Beispiele:
 
 ### LH-DA-003 – Schema-Version
 
+Priorität: MVP
+
 Die Projektkonfiguration muss eine Schema-Version enthalten.
 
 Beispiel:
@@ -1133,6 +1333,8 @@ schemaVersion: 1
 ---
 
 ### LH-DA-004 – Schema-Migration
+
+Priorität: Later
 
 Das Produkt muss mit älteren Schema-Versionen umgehen können.
 
@@ -1149,6 +1351,8 @@ Anforderungen:
 
 ### LH-QA-001 – Automatisierte Tests
 
+Priorität: MVP
+
 Für zentrale Funktionen müssen automatisierte Tests vorhanden sein.
 
 Mindestumfang:
@@ -1163,17 +1367,23 @@ Mindestumfang:
 
 ### LH-QA-002 – Testbare Akzeptanzkriterien
 
+Priorität: MVP
+
 Jede funktionale Anforderung soll durch mindestens einen Akzeptanztest überprüfbar sein.
 
 ---
 
 ### LH-QA-003 – CI-Fähigkeit
 
+Priorität: MVP
+
 Das Projekt soll in einer CI-Umgebung testbar sein.
 
 ---
 
 ### LH-QA-004 – Linting
+
+Priorität: V1
 
 Das Projekt soll Linting für Quellcode und Konfigurationsdateien unterstützen.
 
@@ -1182,6 +1392,8 @@ Das Projekt soll Linting für Quellcode und Konfigurationsdateien unterstützen.
 ## 9. Akzeptanzkriterien
 
 ### LH-AK-001 – Minimaler Init-Flow
+
+Priorität: MVP
 
 Folgender Ablauf muss erfolgreich ausführbar sein:
 
@@ -1202,6 +1414,8 @@ Erwartetes Ergebnis:
 
 ### LH-AK-002 – PostgreSQL-Flow
 
+Priorität: MVP
+
 Folgender Ablauf muss erfolgreich ausführbar sein:
 
 ```bash
@@ -1221,6 +1435,8 @@ Erwartetes Ergebnis:
 
 ### LH-AK-003 – Keycloak-Flow
 
+Priorität: V1
+
 Folgender Ablauf muss erfolgreich ausführbar sein:
 
 ```bash
@@ -1239,6 +1455,8 @@ Erwartetes Ergebnis:
 
 ### LH-AK-004 – OpenTelemetry-Flow
 
+Priorität: V1
+
 Folgender Ablauf muss erfolgreich ausführbar sein:
 
 ```bash
@@ -1250,12 +1468,16 @@ u-boot up
 Erwartetes Ergebnis:
 
 - OpenTelemetry Collector ist konfiguriert
-- OTLP-Endpunkte sind verfügbar
-- Collector-Konfigurationsdatei wurde erzeugt
+- Collector-Konfigurationsdatei wurde erzeugt und ist syntaktisch gültig
+- OTLP/gRPC ist auf `localhost:4317` erreichbar
+- OTLP/HTTP ist auf `localhost:4318` erreichbar
+- Collector-Container erreicht innerhalb von 60 Sekunden den Status `running` oder `healthy`
 
 ---
 
 ### LH-AK-005 – Devcontainer-Flow
+
+Priorität: MVP
 
 Folgender Ablauf muss erfolgreich ausführbar sein:
 
@@ -1273,6 +1495,8 @@ Erwartetes Ergebnis:
 
 ### LH-AK-006 – Idempotenz
 
+Priorität: MVP
+
 Folgender Ablauf darf keine Duplikate erzeugen:
 
 ```bash
@@ -1288,6 +1512,8 @@ Erwartetes Ergebnis:
 ---
 
 ### LH-AK-007 – Changelog-Generator
+
+Priorität: MVP
 
 Folgender Ablauf muss erfolgreich ausführbar sein:
 
@@ -1403,27 +1629,49 @@ Nach dem MVP können ergänzt werden:
 
 ## 13. Traceability-Matrix
 
-| Lastenheft-Kennung | Kurzbeschreibung           | Spätere Ableitung im Pflichtenheft | Testfall    |
-| ------------------ | -------------------------- | ---------------------------------- | ----------- |
-| LH-FA-INIT-001     | Projekt initialisieren     | PH-INIT-001                        | TC-INIT-001 |
-| LH-FA-INIT-003     | Projektstruktur erzeugen   | PH-INIT-003                        | TC-INIT-003 |
-| LH-FA-INIT-007     | Git-Initialisierung        | PH-INIT-007                        | TC-INIT-007 |
-| LH-FA-DEV-001      | Devcontainer erzeugen      | PH-DEV-001                         | TC-DEV-001  |
-| LH-FA-DOC-001      | Compose-Datei erzeugen     | PH-DOC-001                         | TC-DOC-001  |
-| LH-FA-ADD-002      | PostgreSQL hinzufügen      | PH-ADD-002                         | TC-ADD-002  |
-| LH-FA-ADD-003      | Keycloak hinzufügen        | PH-ADD-003                         | TC-ADD-003  |
-| LH-FA-ADD-004      | OpenTelemetry hinzufügen   | PH-ADD-004                         | TC-ADD-004  |
-| LH-FA-ADD-007      | Service entfernen          | PH-ADD-007                         | TC-ADD-007  |
-| LH-FA-UP-001       | Umgebung starten           | PH-UP-001                          | TC-UP-001   |
-| LH-FA-UP-004       | Umgebung stoppen           | PH-UP-004                          | TC-UP-004   |
-| LH-FA-DIAG-001     | Diagnosefunktion           | PH-DIAG-001                        | TC-DIAG-001 |
-| LH-FA-GEN-002      | Changelog erzeugen         | PH-GEN-002                         | TC-GEN-002  |
-| LH-FA-GEN-003      | README erzeugen            | PH-GEN-003                         | TC-GEN-003  |
-| LH-FA-CONF-005     | Konfiguration ändern       | PH-CONF-005                        | TC-CONF-005 |
-| LH-FA-TPL-004      | Templates auflisten        | PH-TPL-004                         | TC-TPL-004  |
-| LH-DA-004          | Schema-Migration           | PH-DA-004                          | TC-DA-004   |
-| LH-NFA-REL-001     | Kein stilles Überschreiben | PH-REL-001                         | TC-REL-001  |
-| LH-NFA-SEC-001     | Keine Secrets einchecken   | PH-SEC-001                         | TC-SEC-001  |
+| Lastenheft-Kennung | Kurzbeschreibung               | Priorität | Spätere Ableitung im Pflichtenheft | Testfall     |
+| ------------------ | ------------------------------ | --------- | ---------------------------------- | ------------ |
+| LH-FA-CLI-002      | Hilfeausgabe                   | MVP       | PH-CLI-002                         | TC-CLI-002   |
+| LH-FA-CLI-004      | Fehlerausgabe                  | MVP       | PH-CLI-004                         | TC-CLI-004   |
+| LH-FA-CLI-005      | Verbosity und Logging          | MVP       | PH-CLI-005                         | TC-CLI-005   |
+| LH-FA-CLI-006      | Exit Codes                     | MVP       | PH-CLI-006                         | TC-CLI-006   |
+| LH-FA-CLI-007      | Dry Run                        | V1        | PH-CLI-007                         | TC-CLI-007   |
+| LH-FA-INIT-001     | Projekt initialisieren         | MVP       | PH-INIT-001                        | TC-INIT-001  |
+| LH-FA-INIT-003     | Projektstruktur erzeugen       | MVP       | PH-INIT-003                        | TC-INIT-003  |
+| LH-FA-INIT-005     | Überschreibschutz              | MVP       | PH-INIT-005                        | TC-INIT-005  |
+| LH-FA-INIT-006     | Projektnamen-Validierung       | MVP       | PH-INIT-006                        | TC-INIT-006  |
+| LH-FA-INIT-007     | Git-Initialisierung            | MVP       | PH-INIT-007                        | TC-INIT-007  |
+| LH-FA-DEV-001      | Devcontainer erzeugen          | MVP       | PH-DEV-001                         | TC-DEV-001   |
+| LH-FA-DEV-005      | forwardPorts                   | MVP       | PH-DEV-005                         | TC-DEV-005   |
+| LH-FA-DOC-001      | Compose-Datei erzeugen         | MVP       | PH-DOC-001                         | TC-DOC-001   |
+| LH-FA-DOC-004      | Volumes                        | MVP       | PH-DOC-004                         | TC-DOC-004   |
+| LH-FA-ADD-002      | PostgreSQL hinzufügen          | MVP       | PH-ADD-002                         | TC-ADD-002   |
+| LH-FA-ADD-003      | Keycloak hinzufügen            | V1        | PH-ADD-003                         | TC-ADD-003   |
+| LH-FA-ADD-004      | OpenTelemetry hinzufügen       | V1        | PH-ADD-004                         | TC-ADD-004   |
+| LH-FA-ADD-005      | Mehrfaches Hinzufügen          | MVP       | PH-ADD-005                         | TC-ADD-005   |
+| LH-FA-ADD-006      | Add-on-Abhängigkeiten          | V1        | PH-ADD-006                         | TC-ADD-006   |
+| LH-FA-ADD-007      | Service entfernen              | V1        | PH-ADD-007                         | TC-ADD-007   |
+| LH-FA-UP-001       | Umgebung starten               | MVP       | PH-UP-001                          | TC-UP-001    |
+| LH-FA-UP-003       | Startstatus anzeigen           | MVP       | PH-UP-003                          | TC-UP-003    |
+| LH-FA-UP-004       | Umgebung stoppen               | MVP       | PH-UP-004                          | TC-UP-004    |
+| LH-FA-UP-005       | Logs anzeigen                  | V1        | PH-UP-005                          | TC-UP-005    |
+| LH-FA-DIAG-001     | Doctor-Befehl                  | MVP       | PH-DIAG-001                        | TC-DIAG-001  |
+| LH-FA-DIAG-002     | Voraussetzungen prüfen         | MVP       | PH-DIAG-002                        | TC-DIAG-002  |
+| LH-FA-DIAG-003     | Exit Code nach Diagnose        | MVP       | PH-DIAG-003                        | TC-DIAG-003  |
+| LH-FA-GEN-002      | Changelog erzeugen             | MVP       | PH-GEN-002                         | TC-GEN-002   |
+| LH-FA-GEN-003      | README erzeugen                | MVP       | PH-GEN-003                         | TC-GEN-003   |
+| LH-FA-GEN-005      | Idempotenz                     | MVP       | PH-GEN-005                         | TC-GEN-005   |
+| LH-FA-CONF-003     | Konfiguration lesen            | MVP       | PH-CONF-003                        | TC-CONF-003  |
+| LH-FA-CONF-004     | Konfiguration aktualisieren    | MVP       | PH-CONF-004                        | TC-CONF-004  |
+| LH-FA-CONF-005     | Konfiguration ändern           | V1        | PH-CONF-005                        | TC-CONF-005  |
+| LH-FA-TPL-004      | Templates auflisten            | V1        | PH-TPL-004                         | TC-TPL-004   |
+| LH-DA-003          | Schema-Version                 | MVP       | PH-DA-003                          | TC-DA-003    |
+| LH-DA-004          | Schema-Migration               | Later     | PH-DA-004                          | TC-DA-004    |
+| LH-NFA-REL-001     | Kein stilles Überschreiben     | MVP       | PH-REL-001                         | TC-REL-001   |
+| LH-NFA-REL-002     | Wiederholbare Ausführung       | MVP       | PH-REL-002                         | TC-REL-002   |
+| LH-NFA-PERF-001    | Antwortzeiten                  | MVP       | PH-PERF-001                        | TC-PERF-001  |
+| LH-NFA-SEC-001     | Keine Secrets einchecken       | MVP       | PH-SEC-001                         | TC-SEC-001   |
+| LH-NFA-SEC-004     | Keine fremde Skriptausführung  | MVP       | PH-SEC-004                         | TC-SEC-004   |
 
 ---
 
