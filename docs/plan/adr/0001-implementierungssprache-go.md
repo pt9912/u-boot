@@ -68,6 +68,14 @@ Offene Folgepunkte (eigene ADRs bei Bedarf):
 
 - Wahl des CLI-Frameworks (`flag` aus stdlib reicht für MVP-Stub; Cobra
   wird mit `add`/`generate`/`config`-Subkommandos wahrscheinlich nötig).
-- `golangci-lint`-Profil und Pflicht-Linter-Set.
+  Inventarisiert in [`docs/plan/planning/in-progress/carveouts.md`](../planning/in-progress/carveouts.md).
 - Paketierung im Detail (`LH-OPEN-002`): GHCR-Image, GitHub Release mit
-  Binary-Artefakten, später ggf. Homebrew/Debian.
+  Binary-Artefakten, später ggf. Homebrew/Debian. GHCR-Pfad wird in
+  [`slice-v1-release-pipeline.md`](../planning/open/slice-v1-release-pipeline.md)
+  geplant; weitere Distributionswege bleiben offen.
+
+Geschlossene Folgepunkte:
+
+- `golangci-lint`-Profil und Pflicht-Linter-Set — entschieden mit
+  [`ADR-0003`](0003-solid-nahes-lint-profil.md) (SOLID-nahes Profil
+  mit 29 Lintern).

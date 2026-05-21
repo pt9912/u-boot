@@ -1662,7 +1662,7 @@ Planning-Artefakte (Slices, Tranchen, Tickets) durchlaufen die Verzeichnisse `op
 
 Priorität: MVP
 
-Jeder **temporäre Carveout** in der u-boot-Codebase muss parallel zu seiner Entstehung einen Slice-Plan in `docs/plan/planning/open/` (oder `next/`) bekommen, der die Aufhebungsbedingung benennt.
+Jeder **temporäre Carveout** in der u-boot-Codebase muss parallel zu seiner Entstehung einen Slice-Plan in `docs/plan/planning/open/` bekommen, der die Aufhebungsbedingung benennt. Sobald der Slice priorisiert wird, wandert er per `git mv` nach `next/` (`LH-FA-PROJDOCS-003`).
 
 Als temporärer Carveout zählt insbesondere:
 

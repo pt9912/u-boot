@@ -29,7 +29,7 @@ verlinkt jeweils auf den Slice-Plan statt nur auf den Commit-Hash.
 - Jeweils Mindestabschnitte: Auslöser, Lieferumfang, Akzeptanz,
   Commit-Hash.
 - Roadmap-Spalte „Artefakt" verweist auf die Slice-Pläne.
-- Eintrag in `carveouts.md` von „temporär" auf aufgehoben verschoben.
+- Zeile in `carveouts.md` entweder entfernen oder mit Verweis auf den Aufhebungs-Commit als gelöst markieren.
 
 ## Out of Scope
 

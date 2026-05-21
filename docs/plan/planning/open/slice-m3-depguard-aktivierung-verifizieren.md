@@ -26,7 +26,7 @@ fail), dann sauber gelassen (Lint muss grün sein).
 - M3-Slice-Plan in `done/` beschreibt das Vorgehen kurz.
 - `make lint` läuft auf dem M3-Stand grün — alle Regeln matchen real,
   kein Block ist tot.
-- Eintrag in `carveouts.md` von „temporär" auf aufgehoben verschoben.
+- Zeile in `carveouts.md` entweder entfernen oder mit Verweis auf den Aufhebungs-Commit als gelöst markieren.
 
 ## Out of Scope
 

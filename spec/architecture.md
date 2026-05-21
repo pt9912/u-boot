@@ -265,7 +265,7 @@ Die folgenden Muster sind verboten und werden im Review abgelehnt:
 
 Diese Architektur ist der Stand vom 2026-05-21. Änderungen erfolgen über neue ADRs, die das ADR-0002 superseden (`LH-FA-PROJDOCS-002`).
 
-Geplante Erweiterungen, die im aktuellen Dokument noch nicht abgebildet sind:
+Geplante Erweiterungen, die im aktuellen Dokument noch nicht abgebildet sind (beide auch im Carveout-Inventar [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md) gelistet, `LH-FA-PROJDOCS-005`):
 
 - HTTP-Driving-Adapter, falls u-boot perspektivisch eine Daemon-Variante bekommen soll.
 - Plugin-System (`LH-OPEN-003`): voraussichtlich als zusätzlicher Driven-Port `PluginRegistry` mit dynamischer Adapter-Auswahl zur Laufzeit.

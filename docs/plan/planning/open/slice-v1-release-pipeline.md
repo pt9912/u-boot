@@ -35,7 +35,7 @@ liefert den Workflow + Trivy-Scan, bevor der Release gemacht wird.
 - `LH-OPEN-002` (Paketierung) wird mit der konkreten Distributions-
   Entscheidung geschlossen (mindestens GHCR-Image, ggf. Binary-
   Release).
-- Eintrag in `carveouts.md` von „temporär" auf aufgehoben verschoben.
+- Zeile in `carveouts.md` entweder entfernen oder mit Verweis auf den Aufhebungs-Commit als gelöst markieren.
 
 ## Bezug
 

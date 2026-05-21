@@ -62,9 +62,13 @@ Bewusst **noch nicht** in diesem Slice:
 - Image-Publish-Workflow (`publish.yml` / GHCR) — kommt mit dem
   Release-Slice (`LH-OPEN-002` Paketierung).
 - Trivy-Image-Scan — Folge-Slice analog `LH-FA-BUILD-006`-Erweiterung.
-- Cluster-Smoke / Integrationstests gegen externe Docker-Engine —
-  separater Slice mit Build-Tag-getriggerten Pfaden
-  (`spec/architecture.md` §5).
+- Compose-Stack-Smoke und Adapter-Integrationstests gegen die externe
+  Docker-Engine — separater Slice mit Build-Tag-getriggerten Pfaden
+  (`spec/architecture.md` §5). Der Begriff „Cluster-Smoke" aus
+  `k-deskflight` (Kubernetes-Smoke gegen `kind`) passt für u-boot
+  nicht, weil u-boot Compose-Stacks orchestriert, nicht Kubernetes;
+  der u-boot-Pendant ist die Integrationsstrecke aus
+  [`slice-v1-docker-integrationstests.md`](../planning/open/slice-v1-docker-integrationstests.md).
 - DCO-Bot / Branch Protection — Folgepflicht im GitHub-UI.
 
 ## Konsequenzen

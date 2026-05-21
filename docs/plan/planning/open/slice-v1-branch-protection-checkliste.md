@@ -30,7 +30,7 @@ GitHub-Repository-Ruleset-JSON-Export für reproduzierbares Setup.
 - Optional `docs/user/branch-protection-ruleset.json` als
   GitHub-Repository-Ruleset-Export (importierbar via UI oder API).
 - README (de/en) Section „Setup" verweist auf die Checkliste.
-- Eintrag in `carveouts.md` von „temporär" auf aufgehoben verschoben.
+- Zeile in `carveouts.md` entweder entfernen oder mit Verweis auf den Aufhebungs-Commit als gelöst markieren.
 
 ## Out of Scope
 

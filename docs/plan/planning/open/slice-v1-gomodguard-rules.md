@@ -24,7 +24,7 @@ mit konkreten Block-/Allow-Regeln versehen.
 - `docs/user/quality.md` §1.2: gomodguard-Zeile bekommt einen
   Spalten-Hinweis auf die Regel-Quelle.
 - `make lint` läuft grün auf dem ersten Commit mit externen Deps.
-- Eintrag in `carveouts.md` von „temporär" auf aufgehoben verschoben.
+- Zeile in `carveouts.md` entweder entfernen oder mit Verweis auf den Aufhebungs-Commit als gelöst markieren.
 
 ## Bezug
 

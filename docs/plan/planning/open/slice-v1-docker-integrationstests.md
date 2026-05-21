@@ -39,14 +39,14 @@ Sobald `internal/adapter/driven/docker/` existiert und über
   `integration-docker` (optional `continue-on-error` bis stabilisiert)
   oder ein eigener Workflow `.github/workflows/integration.yml`.
 - `docs/user/quality.md` §2 Tests wird um den Docker-Pfad ergänzt.
-- Eintrag in `carveouts.md` von „temporär" auf aufgehoben verschoben.
+- Zeile in `carveouts.md` entweder entfernen oder mit Verweis auf den Aufhebungs-Commit als gelöst markieren.
 
 ## Out of Scope
 
 - Andere Build-Tags (`//go:build keycloak`, `//go:build otel`) —
   separate Slices pro Adapter.
-- Cluster-Smoke gegen Kubernetes — eigenes Spec-Anliegen, gehört
-  vermutlich zu `LH-OPEN-003` (Plugin-System).
+- Kubernetes-Smoke — u-boot orchestriert Compose-Stacks, nicht
+  Kubernetes; ein Cluster-Smoke-Pfad ist nicht im Roadmap-Bereich.
 
 ## Bezug
 

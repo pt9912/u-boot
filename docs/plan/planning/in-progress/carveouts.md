@@ -2,7 +2,9 @@
 
 Master-Inventar aller bewussten Carveouts in der u-boot-Codebase
 (`LH-FA-PROJDOCS-005`). Wird laufend gepflegt und liegt deshalb dauerhaft
-in `in-progress/`.
+in `in-progress/`. Die Konvention ist zusätzlich als persistente
+Claude-Memory `feedback-carveouts-need-plans` hinterlegt, damit
+künftige Sessions sie nicht vergessen.
 
 Spalten:
 
@@ -19,7 +21,7 @@ Spalten:
 | -------- | ------ | ----------------- |
 | `COVERAGE_THRESHOLD=0` Bootstrap (`Dockerfile` coverage-Stage, `scripts/coverage-gate.sh`, `LH-FA-BUILD-008`) | temporär | [`open/slice-m3-coverage-threshold-aktivieren.md`](../open/slice-m3-coverage-threshold-aktivieren.md) |
 | `gomodguard_v2.blocked: {}` leer (`.golangci.yml`) | temporär | [`open/slice-v1-gomodguard-rules.md`](../open/slice-v1-gomodguard-rules.md) |
-| `depguard`-Regeln aktiv, matchen nichts (alle 8 Schicht-Blöcke in `.golangci.yml`; `spec/architecture.md` §4) | temporär | scharf-Schalten ist gekoppelt an erste produktive Pakete pro Schicht → [`open/slice-m3-depguard-aktivierung-verifizieren.md`](../open/slice-m3-depguard-aktivierung-verifizieren.md) |
+| `depguard`-Regeln aktiv, matchen nichts (alle 8 Schicht-Blöcke in `.golangci.yml`; `spec/architecture.md` §4) | temporär | [`open/slice-m3-depguard-aktivierung-verifizieren.md`](../open/slice-m3-depguard-aktivierung-verifizieren.md) |
 | `forbidigo.msg` referenziert nicht-existenten "configured logging port" (`.golangci.yml`) | temporär | [`open/slice-v1-logging-port.md`](../open/slice-v1-logging-port.md) |
 | ADR-0004 Folgepunkt: Image-Publish nach GHCR und Trivy-Image-Scan fehlen (`.github/workflows/ci.yml` enthält sie nicht) | temporär | [`open/slice-v1-release-pipeline.md`](../open/slice-v1-release-pipeline.md) |
 | ADR-0004 Folgepunkt: Branch-Protection im GitHub-UI ist nicht im Repo versioniert | temporär | [`open/slice-v1-branch-protection-checkliste.md`](../open/slice-v1-branch-protection-checkliste.md) |
@@ -28,6 +30,10 @@ Spalten:
 | Slice-Pläne für M1, M2, M2b, M2c liegen nicht in `done/` (M2-Review #10); Roadmap referenziert nur Commit-Hashes | temporär | [`open/slice-v1-retroaktive-slice-plaene.md`](../open/slice-v1-retroaktive-slice-plaene.md) |
 | ADR-0001 Folgepunkt: CLI-Framework (`flag` vs. Cobra) ist offen — heute reicht `flag` für `--help`/`--version`, mit Subkommandos wird Cobra fällig | temporär | offener Folgepunkt in ADR-0001 (eigener ADR folgt, wenn der Subkommando-Slice startet, vermutlich M3) |
 | ADR-0003 Folgepunkt: `revive`-Custom-Rules sind nicht konfiguriert (Default-Profil) | temporär | offener Folgepunkt in ADR-0003 (eigener ADR, wenn Default-Profil aufweicht) |
+| `LH-OPEN-002` Paketierung ist offen (`spec/lastenheft.md` §14) — Distributionswege (Binary-Release, Homebrew, Debian/RPM, npm/pip) sind nicht festgelegt | temporär | [`open/slice-v1-release-pipeline.md`](../open/slice-v1-release-pipeline.md) deckt GHCR-Image-Pfad ab; weitere Distributionswege bleiben offen bis MVP-Closure und bekommen einen eigenen Folge-ADR |
+| `LH-OPEN-003` Plugin-System ist offen (`spec/lastenheft.md` §14, auch `spec/architecture.md` §7 als „geplante Erweiterung") — keine Entscheidung zwischen fest-eingebauten Add-ons und nachladbaren Plugins | temporär | bleibt offen bis MVP-Closure; eigener ADR mit dem ersten Add-on-jenseits-PostgreSQL-Slice (vermutlich V1, z. B. Keycloak) |
+| `LH-OPEN-004` Template-Format ist offen (`spec/lastenheft.md` §14) — YAML+Dateien vs. Cookiecutter vs. eigenes Format vs. OCI-Pakete | temporär | bleibt offen bis Template-System-Slice (V1, `LH-FA-TPL-*`); eigener ADR mit dem ersten Template-Slice |
+| HTTP-Driving-Adapter ist als „geplante Erweiterung" in `spec/architecture.md` §7 erwähnt, aber nicht spezifiziert oder gefordert | temporär | aktuell unverbindliche Roadmap-Andeutung; sobald die Daemon-/HTTP-Variante real wird, eigener Slice + ADR (vermutlich Later) |
 
 ## Permanente Carveouts (kein Plan, im Inventar dokumentiert)
 
@@ -44,10 +50,10 @@ Spalten:
 
 `LH-FA-PROJDOCS-005` verlangt: jeder neue temporäre Carveout bekommt
 **parallel** zu seiner Entstehung einen Slice-Plan in `open/` und einen
-Eintrag in dieser Tabelle. Permanente Carveouts kommen ohne Plan, aber
-mit Begründung in das Inventar unten.
+Eintrag in der oberen Tabelle. Permanente Carveouts kommen ohne Plan,
+aber mit Begründung in die zweite Tabelle.
 
-Diese Datei ist die einzige zulässige Ausnahme von der
-`slice-`/`tranche-`-Konvention für Dateinamen in
-`docs/plan/planning/` neben `roadmap.md` (siehe `LH-FA-PROJDOCS-003`
-und [`../README.md`](../README.md)).
+Neben [`roadmap.md`](roadmap.md) ist diese Datei die zweite zulässige
+Ausnahme von der `slice-`/`tranche-`-Konvention für Dateinamen in
+`docs/plan/planning/` (siehe `LH-FA-PROJDOCS-003` und
+[`../README.md`](../README.md)).
