@@ -8,7 +8,7 @@
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
 | Version          | 0.1.0                                                              |
 | Status           | Entwurf                                                            |
-| Datum            | 2026-05-16                                                         |
+| Datum            | 2026-05-21                                                         |
 
 ---
 
@@ -218,6 +218,8 @@ Mindestens müssen folgende Stufen unterstützt werden:
 - `--verbose` – zusätzlich Detailinformationen
 - `--debug` – zusätzlich interne Diagnoseausgaben
 
+Werden mehrere Verbosity-Optionen gleichzeitig angegeben (z. B. `--quiet --verbose`), gewinnt die zuletzt auf der Kommandozeile angegebene Option. Eine Validierungsabweisung wegen Mehrfachangabe erfolgt nicht.
+
 ---
 
 ### LH-FA-CLI-005A – Interaktivität und Automatisierung
@@ -230,7 +232,7 @@ Es muss mindestens folgende Optionen bieten:
 
 - `--yes` – Standardfragen automatisch bejahen (für CI/Skripte).
 - `--no-interactive` – keine Rückfragen stellen; erforderliche Bestätigungen mit klarem Fehler abbrechen.
-- `--yes` und `--no-interactive` sind exklusiv. Bei gleichzeitiger Nutzung ist ein CLI-Fehler zu erzeugen.
+- `--yes` und `--no-interactive` sind exklusiv. Bei gleichzeitiger Nutzung ist ein CLI-Fehler mit Exit-Code `2` (`LH-FA-CLI-006`) zu erzeugen.
 - Für deterministisches Verhalten in Skripten und CI sind beide Modi einzeln nutzbar.
 - Die Optionen sind auf Befehle anzuwenden, die Bestätigungsentscheidungen benötigen (insb. `u-boot init`, `u-boot add`, `u-boot remove`, `u-boot config set`, `u-boot down --volumes`).
 - Für `u-boot init` ist zusätzlich das Flag `--assume-existing` definiert (nicht global, nur für diesen Befehl):
@@ -249,7 +251,7 @@ Bei `u-boot init` gilt zusätzlich die feste Auswertungsreihenfolge im nicht-int
 - ohne `--assume-existing`: keine implizite Annahme einer bestehenden Projekterkennung, deterministisch abbrechen (Exit-Code `10` bei bestehendem Projekt),
 - mit `--assume-existing`: implizite Annahme als bestehendes Projekt (soweit kompatibel mit den übrigen Validierungen).
 
-Bei destruktiven Operationen (insb. `u-boot down --volumes`) darf eine Löschung nur über den expliziten Freigabepfad (`--yes` oder aktiv bestätigten interaktiven Pfad) erfolgen.
+Bei destruktiven Operationen (insb. `u-boot down --volumes` und `u-boot remove --purge`) darf eine Löschung nur über den expliziten Freigabepfad (`--yes` oder aktiv bestätigten interaktiven Pfad) erfolgen. Im nicht-interaktiven Modus ohne `--yes` ist der Befehl mit Exit-Code `10` abzubrechen.
 
 Deterministische Auswertungslogik für bestätigungsrelevante Modi:
 
@@ -421,7 +423,7 @@ Beispielinstanz:
 
 ```json
 {
-  "status": "ok",
+  "status": "warn",
   "command": "add",
   "dryRun": true,
   "diff": false,
@@ -439,6 +441,10 @@ Beispielinstanz:
 ```
 
 Weitere Felder sind erlaubt.
+
+Konvention für `diagnostics[*].code`: LH-Kennung der verursachenden Anforderung (z. B. `LH-FA-DEV-003`, `LH-FA-CLI-007`). Tool-interne Codes ohne LH-Bezug dürfen nur dann verwendet werden, wenn ihre Bedeutung in der Dokumentation festgehalten ist.
+
+Das Feld `status` ist an den höchsten in `diagnostics` enthaltenen `level` gekoppelt: enthält `diagnostics` mindestens einen `error`-Eintrag, ist `status == "error"`; enthält es mindestens einen `warn`-Eintrag (und keinen `error`), ist `status == "warn"`; andernfalls `status == "ok"`. Diese Regel gilt für alle `--json`-Ausgaben (`LH-FA-CLI-007`, `LH-FA-CLI-008`, `LH-NFA-USE-004`).
 
 ---
 
@@ -460,6 +466,25 @@ Wird `--diff` ohne `--dry-run` gesetzt, zeigt sie den geplanten Endzustand als V
 Wird `--diff` mit `--dry-run` kombiniert, gilt dieselbe Vorschau bei vollständigem Schreibschutz.
 
 Bei Kombination von `--diff` mit `--json` ist die komplette JSON-Struktur inkl. Pflichtfeldern aus dem in `LH-FA-CLI-007` definierten Schema auszugeben. Die Felder `dryRun` und `diff` sind dabei korrekt auf den konkreten Ausführungsmodus gesetzt (`dryRun` je nach Aufruf, `diff` immer `true`).
+
+Beispiel für `--diff --json` ohne `--dry-run` (Vorschau mit anschließendem Schreiben):
+
+```json
+{
+  "status": "ok",
+  "command": "add",
+  "dryRun": false,
+  "diff": true,
+  "plannedFiles": [
+    { "path": "compose.yaml", "action": "modify" }
+  ],
+  "changes": [
+    { "path": "compose.yaml", "count": 6 }
+  ],
+  "diagnostics": [],
+  "exitCode": 0
+}
+```
 
 Für reine Vorschau-Workflows gelten die selben Exit-Codes wie bei der Nicht-Diff-Ausgabe.
 
@@ -561,10 +586,9 @@ Relevante Dateien sind mindestens:
 Wenn mindestens eine der Projektsteuerdateien (`u-boot.yaml`, `compose.yaml`, `.env.example`) vorhanden ist, ist das Verzeichnis als bestehendes Projekt zu behandeln.
 Liegt keine Projektsteuerdatei vor, gilt das Verzeichnis nur als wahrscheinliches bestehendes Projekt, wenn mindestens drei Elemente aus dem Mindestumfang der Projektstruktur bereits vorhanden sind.
 In diesem Fall muss `u-boot init` im interaktiven Modus explizit nachfragen, ob das Verzeichnis als bestehendes Projekt behandelt werden soll.
-Im nicht-interaktiven Modus ist die automatische Erkennung nur dann aktiv, wenn `--assume-existing` gesetzt ist.
 `--assume-existing` ist nur für `u-boot init` gültig.
-Bestehende Dateien dürfen in diesem Fall nicht kommentarlos überschrieben werden.
-Läuft `u-boot init` ohne `--assume-existing` nicht-interaktiv und erkennt das Verzeichnis als wahrscheinlich bestehendes Projekt, ist der Befehl mit Exit-Code `10` abzubrechen.
+Das genaue Verhalten im nicht-interaktiven Modus (mit/ohne `--assume-existing`, Exit-Code-Vergabe) ist verbindlich in `LH-FA-CLI-005A` definiert; diese Anforderung wiederholt es nicht.
+Bestehende Dateien dürfen auch bei impliziter oder expliziter Annahme als bestehendes Projekt nicht kommentarlos überschrieben werden; es gilt der Überschreibschutz aus `LH-FA-INIT-005`.
 
 ---
 
@@ -581,13 +605,14 @@ Standardverhalten ohne Option:
 Zusätzliche Strategien über Option:
 
 - `--backup` – bestehende Datei als `<name>.bak` sichern und ersetzen; ist `<name>.bak` bereits vorhanden, wird automatisch `<name>.bak.1`, `<name>.bak.2`, ... verwendet (kleinster freier numerischer Suffix), ohne vorhandene Backups zu überschreiben.
-- Für bestehende Verzeichnisse (z. B. `docs/`, `scripts/`, `docker/`, `.devcontainer/`) wird der komplette Verzeichnisbaum rekursiv als `<name>.bak*` gesichert und atomar ersetzt.
+- Für bestehende Verzeichnisse (z. B. `docs/`, `scripts/`, `docker/`, `.devcontainer/`) wird der komplette Verzeichnisbaum rekursiv als `<name>.bak*` gesichert und innerhalb derselben Operation ersetzt; bei Fehlern während des Ersetzens muss ein Rollback auf den ursprünglichen Zustand durchgeführt werden (POSIX-Atomarität für rekursive Bäume wird nicht garantiert).
 - `--force` – bestehende Dateien ohne Rückfrage überschreiben; vor dem Schreiben muss eine Zusammenfassung der betroffenen Pfade ausgegeben werden
 
 Zusätzliche Schutzregeln für strukturierte Konfigurationsdateien (`compose.yaml`, `.env.example`, `README.md`, `CHANGELOG.md`, `.devcontainer/devcontainer.json`):
 
 - bestehende, nicht verwaltete Inhalte bleiben in `--force`-Ausführung erhalten.
-- wird ein `U-BOOT MANAGED BLOCK` erkannt, darf bei `--force` nur dieser Block verändert werden.
+- wird ein `U-BOOT MANAGED BLOCK` erkannt, darf bei `--force` nur dieser Block verändert werden. Das Markierungsformat pro Dateityp ist in `LH-SA-FILE-002` definiert.
+- für `.devcontainer/devcontainer.json` gilt der JSONC-Markerstil (`// BEGIN U-BOOT MANAGED BLOCK: <name>` / `// END U-BOOT MANAGED BLOCK: <name>`); für strikte JSON-Dateien ohne Kommentar-Support wird die gesamte Datei als verwaltet behandelt und in `u-boot.yaml` referenziert.
 - fehlt ein verwalteter Block in einer vorhandenen Datei:
   - ist `--backup` gesetzt, wird vor jedem vollständigen Überschreiben der komplette Dateiinhalt gesichert und danach ersetzt.
   - ist `--backup` nicht gesetzt, wird der Vorgang mit einem fachlichen Fehler (Code `10`) abgebrochen; es erfolgt ein klarer Hinweis auf die nötige Option `--backup`.
@@ -692,7 +717,7 @@ Für optionale externe Feature-Quellen gilt:
     - `u-boot config set devcontainer.featureSources.allow`
 - Ein einzelnes `--allow-external-feature-sources` kann mehrere explizit erlaubte Quellen über Komma trennen.
 - Die zugelassenen Quellen werden als explizit freigegebene Liste in der Projektkonfiguration gespeichert.
-- Ohne explizit erlaubte Quelle führt der Versuch, externe Quellen zu nutzen, zu einem fachlichen Fehler (`code LH-FA-DEV-003`, Exit-Code `10` oder dokumentiert).
+- Ohne explizit erlaubte Quelle führt der Versuch, externe Quellen zu nutzen, zu einem fachlichen Fehler (`code LH-FA-DEV-003`, Exit-Code `10`).
 - `--yes` allein gilt nicht als Zustimmung für externe Quellen.
 
 ---
@@ -864,7 +889,8 @@ Das Produkt muss erkennen, ob ein Service bereits vorhanden ist.
 
 - Ein bereits vorhandener Service darf nicht doppelt eingefügt werden.
 - Ein Service gilt als registriert, sobald `services.<name>` in `u-boot.yaml` existiert.
-- Er gilt als aktiv vorhanden, wenn `services.<name>.enabled` auf `true` steht (oder nicht gesetzt ist) **und** ein verwalteter Eintrag in `compose.yaml` existiert.
+- Er gilt als aktiv vorhanden, wenn `services.<name>.enabled` explizit auf `true` steht **und** ein verwalteter Eintrag in `compose.yaml` existiert.
+- `services.<name>.enabled` ist immer explizit zu setzen. Ein registrierter Service ohne expliziten `enabled`-Schlüssel gilt als deaktiviert (`false`) und führt bei `u-boot doctor` zu einer `warn`-Diagnose, die das explizite Setzen empfiehlt.
 - Liegt `services.<name>.enabled: false` vor, gilt der Service als deaktiviert (weiterhin registriert), und `u-boot add <service>` darf ihn idempotent reaktivieren.
 - Besteht `services.<name>` nicht in `u-boot.yaml`, aber ein verwalteter Block in `compose.yaml`, darf die Inkonsistenz nicht stillschweigend ignoriert werden. Der Befehl muss mit klarer Diagnose abbrechen und auf manuelle Bereinigung oder Re-Konfiguration verweisen.
 - Besteht `services.<name>` in `u-boot.yaml` mit `enabled: true`, aber der verwaltete Compose-Eintrag fehlt, muss das Verhalten deterministisch sein: `u-boot add <service>` erzeugt den fehlenden Compose-Block wieder.
@@ -888,8 +914,9 @@ Verhalten bei erkannter abhängiger Konfiguration:
 - Ist die optionale Abhängigkeit nicht aktiv, darf Keycloak ohne PostgreSQL angelegt werden.
 
 - Im interaktiven Modus (Standardmodus) muss das Produkt nachfragen, ob das fehlende Add-on automatisch hinzugefügt werden soll.
-- Im nicht-interaktiven Modus (`--no-interactive`) muss das Produkt mit einem klaren Fehler abbrechen und auf die fehlende Abhängigkeit hinweisen.
-- Über die Option `--with-deps` muss das Produkt fehlende Abhängigkeiten automatisch hinzufügen.
+- Im nicht-interaktiven Modus (`--no-interactive`) ohne `--with-deps` muss das Produkt mit Exit-Code `10` abbrechen und auf die fehlende Abhängigkeit hinweisen.
+- Über die Option `--with-deps` muss das Produkt fehlende Abhängigkeiten automatisch hinzufügen. `--with-deps` ist mit `--no-interactive` kombinierbar; in dem Fall werden Abhängigkeiten deterministisch und ohne Rückfrage installiert.
+- Mit `--yes` (ohne `--with-deps`) wird die Standardentscheidung "Abhängigkeit hinzufügen" deterministisch ausgeführt, ohne dass eine Rückfrage gestellt wird.
 - Mit `--yes` oder `--no-interactive` (jeweils exklusiv) muss das Verhalten in Skript-/CI-Umgebungen deterministisch und nicht-blockierend sein.
 
 ---
@@ -917,6 +944,8 @@ Mindestumfang:
 - Volumes nur auf explizite Anforderung (`--purge`) löschen
 - Abhängigkeiten anderer Services prüfen und vor dem Entfernen warnen
 
+`--purge` ist eine destruktive Operation; die Bestätigungs- und Modi-Regeln (`--yes`, `--no-interactive`, interaktive Rückfrage) sind verbindlich in `LH-FA-CLI-005A` definiert. Im nicht-interaktiven Modus ohne `--yes` muss der Aufruf mit Exit-Code `10` abgebrochen werden.
+
 Ist der Service bereits auf `enabled: false`, darf der Aufruf idempotent als No-Op mit klarer Meldung beendet werden.
 
 ---
@@ -931,7 +960,7 @@ Das Produkt muss die Entwicklungsumgebung starten können.
 
 `u-boot up` muss standardmäßig auf den Stabilisierungspfad der aktivierten Dienste warten, bevor der Befehl endet.
 
-- Auflösungszeit ist standardmäßig 60 Sekunden; nach Ablauf erfolgt der Abbruch mit Fehler.
+- Die Standard-Wartezeit beträgt 60 Sekunden; nach Ablauf erfolgt der Abbruch mit Fehler.
 - Die maximale Wartezeit kann über `--timeout <sekunden>` überschrieben werden.
 - `--timeout` akzeptiert nur nicht-negative Ganzzahlen (`>= 0`). Negative Werte führen zu `exit code 2` und klarer Validierungsfehlermeldung.
 - Für Dienste mit Healthcheck ist `healthy` als Zielzustand erforderlich.
@@ -1115,7 +1144,7 @@ Erlaubte Werte für `<artifact>`:
 - `env-example` (`.env.example`)
 - `devcontainer`
 
-Bei unbekanntem Artefakt darf der Befehl nur mit Exit Code `2` abbrechen und muss die erlaubten Werte explizit zurückgeben.
+Bei unbekanntem Artefakt muss der Befehl mit Exit Code `2` abbrechen und die erlaubten Werte explizit zurückgeben.
 
 ---
 
@@ -1289,21 +1318,19 @@ services:
 
 devcontainer:
   enabled: false
-``` 
 
 # Optionale, V1-relevante Felder:
-services:
-  # keycloak:
-  #   enabled: false
-  #   persistence: embedded   # embedded | external-postgres
-  # otel:
-  #   enabled: false
-
-# Optionale, V1-relevante Felder:
-devcontainer:
-  # featureSources:
-  #   allow:
-  #     - https://ghcr.io/devcontainers/features/node
+# services:
+#   keycloak:
+#     enabled: false
+#     persistence: embedded   # embedded | external-postgres
+#   otel:
+#     enabled: false
+#
+# devcontainer:
+#   featureSources:
+#     allow:
+#       - https://ghcr.io/devcontainers/features/node
 ```
 
 Hinweise:
@@ -1315,7 +1342,10 @@ Hinweise:
 - Beim Schreiben wird die Liste dedupliziert.
 - Bei ungültigen oder nicht zugelassenen Quellen ist ein fachlicher Validierungsfehler mit Code `10` zu melden.
 - Nicht-mandatorische Add-ons dürfen im MVP auf `enabled: false` stehen.
+- `services.<name>.enabled` ist immer explizit zu setzen; siehe `LH-FA-ADD-005` für die Default-Konvention.
 - `enabled: false` bedeutet, dass der Service deaktiviert ist und bei erneutem `u-boot add <service>` wieder aktiviert werden kann.
+
+---
 
 ### LH-FA-CONF-003 – Konfiguration lesen
 
@@ -1430,7 +1460,9 @@ Für `--json`-Antworten gilt zusätzlich:
 
 - `diagnostics`, wenn leer, darf als `[]` ausgegeben werden.
 - `diagnostics.level` darf nur `warn` oder `error` enthalten.
+- `diagnostics.code` folgt der Konvention: LH-Kennung der verursachenden Anforderung (z. B. `LH-FA-DEV-003`). Tool-interne Codes ohne LH-Bezug dürfen nur dann verwendet werden, wenn ihre Bedeutung in der Dokumentation festgehalten ist (Verweis: `LH-FA-CLI-007`).
 - `diagnostics.file` ist optional.
+- `status` ist an den höchsten in `diagnostics` enthaltenen `level` gekoppelt: `error` → `status == "error"`; `warn` ohne `error` → `status == "warn"`; sonst `status == "ok"`.
 - Bei `command == "template"` oder `command == "config"` ist `subcommand` verpflichtend.
 - Die Felder `status`, `command`, `diagnostics` und `exitCode` sind minimal verpflichtend und sollten mit anderen Feldern ergänzt werden.
 
@@ -1582,7 +1614,19 @@ Das Produkt soll sichere Standardwerte verwenden, soweit dies mit lokaler Entwic
 
 Priorität: MVP
 
-Das Produkt darf keine fremden Skripte aus dem Internet ohne ausdrückliche Zustimmung ausführen.
+Das Produkt darf keinen externen ausführbaren Code aus nicht freigegebenen Quellen ohne ausdrückliche Zustimmung des Nutzers ausführen.
+
+Konkretisierung des Begriffs "externer Code aus nicht freigegebenen Quellen":
+
+- Devcontainer-Features, Templates oder andere Skripte, die nicht lokal im Repository liegen oder nicht ausdrücklich in `u-boot.yaml` freigegeben sind (siehe `LH-FA-DEV-003`, `devcontainer.featureSources.allow`).
+- ad-hoc geladene Shell-, Python- oder ähnliche Skripte über HTTP(S) oder andere Netzwerk-Quellen.
+
+Nicht erfasst sind:
+
+- Docker-Images, die in `compose.yaml`-Services oder im Devcontainer-Build explizit konfiguriert sind – sie werden durch `docker pull` regulär aus konfigurierten Registries bezogen und gelten als bewusst gewählte Abhängigkeit des Projekts.
+- Pakete, die innerhalb einer Image-Build-Pipeline (z. B. in einem Dockerfile via Paketmanager) installiert werden.
+
+Die Zustimmung ist im interaktiven Modus durch explizite Rückfrage und im nicht-interaktiven Modus durch entsprechende Flag-Optionen (z. B. `--allow-external-feature-sources`) einzuholen.
 
 ---
 
@@ -1676,6 +1720,12 @@ scripts/
 docs/
 ```
 
+Optional, sobald ein Anwendungs-Dockerfile (`LH-FA-DOC-002`) erzeugt wird:
+
+```text
+.dockerignore
+```
+
 ---
 
 ### LH-SA-FILE-002 – Markierte verwaltete Bereiche
@@ -1684,13 +1734,33 @@ Priorität: MVP
 
 Automatisch verwaltete Bereiche in Dateien sollen markiert werden.
 
-Beispiel:
+Markierungsformat je Dateityp:
 
-```yaml
-# BEGIN U-BOOT MANAGED BLOCK: postgres
-# ...
-# END U-BOOT MANAGED BLOCK: postgres
-```
+- YAML, `.env`, `Dockerfile`, Shell-Skripte (`#`-Kommentare):
+
+  ```yaml
+  # BEGIN U-BOOT MANAGED BLOCK: postgres
+  # ...
+  # END U-BOOT MANAGED BLOCK: postgres
+  ```
+
+- Markdown (`README.md`, `CHANGELOG.md`) als HTML-Kommentar:
+
+  ```markdown
+  <!-- BEGIN U-BOOT MANAGED BLOCK: postgres -->
+  ...
+  <!-- END U-BOOT MANAGED BLOCK: postgres -->
+  ```
+
+- JSONC (z. B. `.devcontainer/devcontainer.json`):
+
+  ```jsonc
+  // BEGIN U-BOOT MANAGED BLOCK: postgres
+  // ...
+  // END U-BOOT MANAGED BLOCK: postgres
+  ```
+
+- Strikte JSON-Dateien ohne Kommentar-Support werden nicht inline markiert; die gesamte Datei gilt als verwaltet, und der verwaltete Status ist in `u-boot.yaml` zu hinterlegen.
 
 ---
 
@@ -1771,7 +1841,7 @@ Anforderungen:
 
 - Eine ältere `schemaVersion` muss erkannt und gemeldet werden.
 - Das Produkt muss eine automatische Migration anbieten (`u-boot config migrate`).
-- Vor der Migration muss eine Sicherungsdatei (`u-boot.yaml.bak`) erzeugt werden.
+- Vor der Migration muss eine Sicherungsdatei nach der Backup-Konvention aus `LH-FA-INIT-005` erzeugt werden: primär `u-boot.yaml.bak`; ist bereits ein Backup vorhanden, wird der kleinste freie numerische Suffix verwendet (`u-boot.yaml.bak.1`, `u-boot.yaml.bak.2`, ...) ohne bestehende Backups zu überschreiben.
 - Eine unbekannte (zu neue) `schemaVersion` muss zu einem klaren Fehler führen und das Tool darf in diesem Fall keine Dateien verändern.
 
 ---
@@ -1823,6 +1893,8 @@ Das Projekt soll Linting für Quellcode und Konfigurationsdateien unterstützen.
 ### LH-AK-001 – Minimaler Init-Flow
 
 Priorität: MVP
+
+Vorbedingung: eine erreichbare Docker-Engine und Docker Compose in den jeweils geforderten Mindestversionen (`LH-FA-DIAG-002`, `LH-RISK-001`).
 
 Folgender Ablauf muss erfolgreich ausführbar sein:
 
@@ -2041,6 +2113,7 @@ Der MVP muss enthalten:
 - `u-boot generate devcontainer`
 - `u-boot up`
 - `u-boot down`
+- `u-boot config` (`get`, `set`, gesamte Konfiguration anzeigen)
 - Erzeugung von `compose.yaml`
 - Erzeugung von `.env.example`
 - Erzeugung von `README.md`
