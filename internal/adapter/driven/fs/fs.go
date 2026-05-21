@@ -48,8 +48,11 @@ func (FS) ReadFile(path string) ([]byte, error) {
 	return os.ReadFile(path)
 }
 
-// WriteFile creates parent directories with mode 0o755 and writes the
-// file with the given mode. The write itself is non-atomic.
+// WriteFile creates parent directories with the canonical
+// project-directory mode 0o755 (LH-FA-INIT-003 — directories are
+// shared with collaborators and CI runners, neither benefits from a
+// more restrictive default) and writes the file itself with the
+// caller-supplied mode. The write is non-atomic at this layer.
 func (FS) WriteFile(path string, data []byte, mode iofs.FileMode) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err

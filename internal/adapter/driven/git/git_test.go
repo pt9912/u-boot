@@ -1,6 +1,8 @@
 package git_test
 
 import (
+	"context"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
@@ -23,7 +25,7 @@ func TestGit_IsRepository_OnFreshDirReturnsFalse(t *testing.T) {
 	gitAvailable(t)
 	dir := t.TempDir()
 
-	got, err := git.New().IsRepository(dir)
+	got, err := git.New().IsRepository(context.Background(), dir)
 	if err != nil {
 		t.Fatalf("IsRepository: %v", err)
 	}
@@ -35,12 +37,13 @@ func TestGit_IsRepository_OnFreshDirReturnsFalse(t *testing.T) {
 func TestGit_Init_ThenIsRepositoryReturnsTrue(t *testing.T) {
 	gitAvailable(t)
 	dir := t.TempDir()
+	ctx := context.Background()
 
-	if err := git.New().Init(dir); err != nil {
+	if err := git.New().Init(ctx, dir); err != nil {
 		t.Fatalf("Init: %v", err)
 	}
 
-	got, err := git.New().IsRepository(dir)
+	got, err := git.New().IsRepository(ctx, dir)
 	if err != nil {
 		t.Fatalf("IsRepository post-init: %v", err)
 	}
@@ -49,7 +52,7 @@ func TestGit_Init_ThenIsRepositoryReturnsTrue(t *testing.T) {
 	}
 
 	// Sanity: .git directory exists.
-	if _, err := exec.Command("test", "-d", filepath.Join(dir, ".git")).Output(); err != nil {
+	if _, err := os.Stat(filepath.Join(dir, ".git")); err != nil {
 		t.Fatalf("post-init .git missing: %v", err)
 	}
 }
@@ -59,8 +62,9 @@ func TestGit_IsRepository_MissingBinaryReturnsError(t *testing.T) {
 	// binary itself is missing, the adapter must return an error
 	// rather than silently reporting "not a repo".
 	g := git.WithBinary("/does/not/exist/git-binary")
-	_, err := g.IsRepository(t.TempDir())
+	_, err := g.IsRepository(context.Background(), t.TempDir())
 	if err == nil {
 		t.Fatalf("IsRepository with missing binary: expected error, got nil")
 	}
 }
+

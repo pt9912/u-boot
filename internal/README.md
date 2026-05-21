@@ -19,15 +19,28 @@ internal/
     └── driven/              # konkrete Adapter (docker/, fs/, yaml/, …)
 ```
 
-## Status
+## Status (M3-T1)
 
-Im MVP-Bootstrap leer (nur READMEs je Verzeichnis). Erste Pakete
-entstehen mit dem ersten fachlichen Slice (M3 `u-boot init`).
+Mit M3-T1 ([`docs/plan/planning/in-progress/slice-m3-init-flow.md`](../docs/plan/planning/in-progress/slice-m3-init-flow.md))
+sind die ersten produktiven Pakete entstanden:
 
-Solange `./internal/...` keinen produktiven Code enthält, läuft das
-Coverage-Gate im Bootstrap-Modus mit Schwellwert `0`
-(`LH-FA-BUILD-008`). Mit dem ersten produktiven Paket wird die Schwelle
-in einem Folge-Commit angehoben.
+- `hexagon/domain/`: `Project`, `ProjectName` (mit `NormalizeProjectName`).
+- `hexagon/port/driven/`: `FileSystem`, `YAMLCodec`, `Git`, `Clock`.
+- `adapter/driven/{fs,yaml,git,clock}/`: konkrete Implementierungen.
+
+Noch leer und folgen mit M3-T2 / M3-T3:
+
+- `hexagon/application/` (M3-T2): `InitProjectService`.
+- `hexagon/port/driving/` (M3-T2): `InitProjectUseCase`.
+- `adapter/driving/` (M3-T3): CLI-Commands (Cobra).
+
+## Coverage
+
+`./internal/...` ist seit M3-T1 der Coverage-Scope (`LH-FA-BUILD-008`,
+`LH-FA-BUILD-009`). Bootstrap-Modus ist ab T1 verlassen; aktuelle
+Messung liegt über 90 %. Schwellwert wird in M3-T5 von `0` auf `80`
+gehoben (siehe
+[`slice-m3-coverage-threshold-aktivieren.md`](../docs/plan/planning/in-progress/slice-m3-coverage-threshold-aktivieren.md)).
 
 ## Import-Regeln
 

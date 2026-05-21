@@ -86,6 +86,23 @@ func TestFS_Rename(t *testing.T) {
 	}
 }
 
+func TestFS_Rename_MissingSourceReturnsError(t *testing.T) {
+	// Why: the backup strategy in LH-FA-INIT-005 must be able to tell
+	// "no file to back up" from "the OS swallowed our error". Pin the
+	// error path explicitly.
+	dir := t.TempDir()
+	src := filepath.Join(dir, "missing.txt")
+	dst := filepath.Join(dir, "dst.txt")
+
+	err := fs.New().Rename(src, dst)
+	if err == nil {
+		t.Fatalf("Rename(missing src): expected error, got nil")
+	}
+	if !errors.Is(err, iofs.ErrNotExist) {
+		t.Fatalf("Rename(missing src): error %v does not wrap fs.ErrNotExist", err)
+	}
+}
+
 func TestFS_ReadDir(t *testing.T) {
 	dir := t.TempDir()
 	for _, name := range []string{"a.txt", "b.txt"} {

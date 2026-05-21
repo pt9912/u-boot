@@ -8,11 +8,17 @@ package git
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os/exec"
 
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 )
+
+// gitNotARepoExitCode is the exit code git uses for
+// "not a git repository" and similar fatal-but-categorical
+// failures from rev-parse and friends.
+const gitNotARepoExitCode = 128
 
 // Git is the production git adapter. Construct with [New].
 type Git struct {
@@ -32,17 +38,19 @@ func New() *Git { return &Git{binary: "git"} }
 func WithBinary(path string) *Git { return &Git{binary: path} }
 
 // IsRepository reports whether dir is inside a git work tree. It runs
-// `git -C <dir> rev-parse --is-inside-work-tree` and treats a non-zero
-// exit as "not a repository" (no error). A real I/O / `git` invocation
-// problem is returned as an error.
-func (g Git) IsRepository(dir string) (bool, error) {
-	cmd := exec.CommandContext(context.Background(), g.binary, "-C", dir, "rev-parse", "--is-inside-work-tree")
+// `git -C <dir> rev-parse --is-inside-work-tree` and treats only
+// exit code 128 ("not a git repository") as "no repo, no error".
+// Any other exit code, an I/O problem, or a missing binary is
+// returned as an error so subtle environmental issues do not
+// silently masquerade as "no repo".
+func (g Git) IsRepository(ctx context.Context, dir string) (bool, error) {
+	cmd := exec.CommandContext(ctx, g.binary, "-C", dir, "rev-parse", "--is-inside-work-tree")
 	out, err := cmd.CombinedOutput()
 	if err == nil {
 		return true, nil
 	}
-	if _, ok := err.(*exec.ExitError); ok {
-		// Plain exit-code failure → not a repo.
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) && exitErr.ExitCode() == gitNotARepoExitCode {
 		return false, nil
 	}
 	return false, fmt.Errorf("git rev-parse failed: %w (output: %s)", err, string(out))
@@ -50,8 +58,8 @@ func (g Git) IsRepository(dir string) (bool, error) {
 
 // Init runs `git init` in dir. The caller is expected to have checked
 // [IsRepository] first (LH-FA-INIT-007 forbids re-initializing).
-func (g Git) Init(dir string) error {
-	cmd := exec.CommandContext(context.Background(), g.binary, "-C", dir, "init")
+func (g Git) Init(ctx context.Context, dir string) error {
+	cmd := exec.CommandContext(ctx, g.binary, "-C", dir, "init")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("git init failed: %w (output: %s)", err, string(out))
