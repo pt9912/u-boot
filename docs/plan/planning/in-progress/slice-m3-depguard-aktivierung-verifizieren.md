@@ -1,5 +1,8 @@
 # Slice M3: depguard-Regelaktivierung verifizieren
 
+> **Status:** In progress
+> **DoD:** Vorbereitet seit M2b (depguard aktiv mit list-mode lax); reale Negativ-Verifikation pro Schicht folgt mit M3-T5
+
 ## Auslöser
 
 `LH-FA-ARCH-003` und `spec/architecture.md` §4 definieren acht

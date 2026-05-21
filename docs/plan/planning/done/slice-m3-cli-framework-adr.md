@@ -1,5 +1,8 @@
 # Slice M3: ADR-0005 CLI-Framework Cobra
 
+> **Status:** Done
+> **DoD:** Commit `937adb1` (M3-T3 + ADR-0005)
+
 ## Auslöser
 
 ADR-0001 (Implementierungssprache Go) hat als offenen Folgepunkt:

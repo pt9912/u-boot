@@ -1,5 +1,8 @@
 # Slice M3: `u-boot init`-Flow
 
+> **Status:** In progress
+> **DoD:** T1 ✅ `132d1a1` + `f5c784a` / T2 ✅ `aaf4d8d` + `39387b9` / T3 ✅ `937adb1` + `2b6582c` / T4 + T5 offen
+
 ## Auslöser
 
 Bis M2d ist u-boot ein Bootstrap-Skelett (Build-Infrastruktur, leere

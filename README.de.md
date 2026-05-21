@@ -14,17 +14,20 @@ und wiederkehrende Artefakte (README, CHANGELOG, `.env.example`).
 
 ## Status
 
-**MVP-Bootstrap.** Dieser Commit liefert die Build-Infrastruktur, das
-Projekt-Skelett und einen `u-boot --help` / `u-boot --version`-Stub.
-Subkommandos sind noch nicht implementiert; sie folgen in späteren
-Slices, getrackt unter
+**MVP in Arbeit — `u-boot init` ist live.** Das erste fachliche
+Subkommando ist ausgeliefert (M3-T3): `u-boot init [name] [--no-git]`
+erzeugt die LH-FA-INIT-003-Projektstruktur plus `u-boot.yaml`
+(LH-FA-CONF-002) und initialisiert per Default ein Git-Repository
+(LH-FA-INIT-007). Die weiteren MVP-Subkommandos (`add`, `up`, `down`,
+`doctor`, `generate`, `config`) folgen in M4+; Planung in
 [`docs/plan/planning/`](docs/plan/planning/).
 
 | Phase | Status | Quelle |
 | ----- | ------ | ------ |
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
-| Architekturentscheidungen | 1 ADR | [`docs/plan/adr/`](docs/plan/adr/) |
-| Implementierung | nur Bootstrap | [`docs/plan/planning/`](docs/plan/planning/) |
+| Architekturentscheidungen | 5 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
+| Implementierung | M1–M2d ✅, M3 in progress (T1/T2/T3 ✅) | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
+| Carveouts | 14 temporär (13 mit Slice-Plan, 1 Slice deckt 2), 7 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
 
@@ -37,6 +40,21 @@ make help            # alle Targets auflisten
 make build           # Runtime-Image bauen (Distroless static, nonroot)
 make run             # Smoketest: docker run u-boot --help
 ```
+
+Echtes `u-boot init` gegen ein Host-Verzeichnis (Distroless läuft als
+non-root UID 65532; `--user` matched die Host-UID, damit erzeugte
+Dateien dir gehören):
+
+```bash
+mkdir /tmp/demo && \
+  docker run --rm --user "$(id -u):$(id -g)" \
+    -v /tmp/demo:/work -w /work \
+    u-boot:latest init demo --no-git
+```
+
+Ergebnis: `u-boot.yaml` (`schemaVersion: 1`), `compose.yaml`,
+`README.md`, `CHANGELOG.md`, `.env.example`, `.gitignore`, plus die
+Verzeichnisse `docker/`, `scripts/`, `docs/`.
 
 Inner-Loop-Quality-Gates (`LH-FA-BUILD-005` / `-006`):
 

@@ -54,25 +54,28 @@ Pfeile zeigen die **Aufruf-/Datenfluss-Richtung** zur Laufzeit. Die **Import-Ric
 
 Reine Datentypen und invariantenhaltige Verhaltensregeln ohne I/O.
 
-- **Beispielinhalte:** `Project`, `Service`, `ComposeFile`, `EnvVar`, Value-Objects (`ProjectName`, `Port`, `ImageRef`), Validierungs-Methoden.
+- **Aktuelle Inhalte (M3-T1):** `Project` (Aggregat mit `SchemaVersion`), `ProjectName` (Value-Object mit Regex aus `LH-FA-INIT-006`), `NormalizeProjectName` (deterministische Normalisierung nach `LH-FA-INIT-002`), `ErrInvalidProjectName`-Sentinel.
+- **Geplante Erweiterungen:** `Service`, `Port`, `ImageRef`, `ComposeFile`, `EnvVar` (folgen mit M4/M5 als Add-on-Slices).
 - **Erlaubte Imports:** ausschließlich Go-Standard-Library.
 - **Verbotene Imports:** alle anderen `internal/`-Pakete, externe Libraries mit I/O.
-- **Tests:** Unit-Tests mit `*_test.go` im selben Paket.
+- **Tests:** Unit-Tests mit `*_test.go` im selben Paket; pure Validierung ohne Mocks.
 
 ### 2.2 `hexagon/application`
 
 Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält keine externe I/O.
 
-- **Beispielinhalte:** `InitProjectService`, `AddServiceService`, `RunDoctorService`, `RenderTemplateService`.
+- **Aktuelle Inhalte (M3-T2):** `InitProjectService` orchestriert `FileSystem`/`YAMLCodec`/`Git` zum LH-FA-INIT-001..007-Flow; Templates für die erzeugten Dateien via `embed.FS` + `text/template` (Templates leben unter `application/templates/*.tmpl`); `ubootYAMLConfig`-Struct als Schema-Repräsentation für `u-boot.yaml` (LH-FA-CONF-002).
+- **Geplante Erweiterungen:** `AddServiceService` (LH-FA-ADD-*), `RunDoctorService` (LH-FA-DIAG-*), `UpService`/`DownService` (LH-FA-UP-*), `GenerateService` (LH-FA-GEN-*).
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driving`, `hexagon/port/driven` (zum Konsumieren von Driven-Ports und Implementieren von Driving-Ports).
 - **Verbotene Imports:** `adapter/*`, externe I/O-Libraries.
-- **Tests:** Unit-Tests mit Test-Doubles für Driven-Ports (Fakes oder Mocks in `_test.go`).
+- **Tests:** Unit-Tests mit Test-Doubles für Driven-Ports (Fakes oder Mocks in `_test.go`); Test-Library-Imports (z. B. `yaml.v3` für Fake-YAMLCodec) sind über den `*_test.go`-Carveout in `LH-FA-ARCH-003` erlaubt.
 
 ### 2.3 `hexagon/port/driving`
 
 Interfaces, über die u-boot von außen angesprochen wird.
 
-- **Beispiel:** `InitProjectUseCase`, `AddServiceUseCase` — werden vom CLI-Adapter aufgerufen.
+- **Aktuelle Inhalte (M3-T2):** `InitProjectUseCase` mit `InitProjectRequest`/`Response`; Sentinels `ErrProjectExists` (LH-FA-INIT-004) und `ErrBaseDirMissing` (LH-AK-001) — beide LH-FA-CLI-006 Code 10, vom CLI-Adapter via `ExitCode` gemappt.
+- **Geplante Erweiterungen:** `AddServiceUseCase`, `RemoveServiceUseCase`, `LifecycleUseCase`, `DoctorUseCase`, `GenerateUseCase`, `ConfigUseCase`.
 - **Implementiert von:** Strukturen in `hexagon/application`.
 - **Verwendet von:** `adapter/driving/*` (z. B. `cli/`).
 
@@ -80,7 +83,8 @@ Interfaces, über die u-boot von außen angesprochen wird.
 
 Interfaces, über die `hexagon/application` externe Systeme nutzt.
 
-- **Beispiel:** `DockerEngine` (`Up`, `Down`, `Ps`), `FileSystem` (`ReadFile`, `WriteFile`, `Exists`), `YAMLCodec` (`Marshal`, `Unmarshal`), `Clock`.
+- **Aktuelle Inhalte (M3-T1):** `FileSystem` (`Exists`/`ReadFile`/`WriteFile`/`MkdirAll`/`Rename`/`ReadDir`), `YAMLCodec` (`Marshal`/`Unmarshal`), `Git` (`IsRepository`/`Init`, jeweils mit `context.Context` als erstem Parameter), `Clock` (`Now`). Context-Konvention: nur Ports, deren Adapter blockieren können (Git via `os/exec`), nehmen Context; FS/YAML/Clock bleiben Context-frei (im Paket-Doc begründet).
+- **Geplante Erweiterungen:** `DockerEngine` (`Up`/`Down`/`Ps`/`Logs`/`Exec`, M6), `Logger` (M4, siehe [`slice-m4-logging-port`](../docs/plan/planning/open/slice-m4-logging-port.md)).
 - **Implementiert von:** Strukturen in `adapter/driven/*`.
 - **Verwendet von:** `hexagon/application`.
 
@@ -88,23 +92,27 @@ Interfaces, über die `hexagon/application` externe Systeme nutzt.
 
 Konkrete Driver — Einstiegspunkte aus der Außenwelt.
 
-- **Beispielinhalte:** `cli/` (Cobra-Commands `init`, `add`, `up`, `doctor`, …), perspektivisch ggf. ein HTTP- oder Daemon-Adapter.
+- **Aktuelle Inhalte (M3-T3):** `cli/` mit Cobra v1.10.2 (siehe [`ADR-0005`](../docs/plan/adr/0005-cli-framework-cobra.md)); `init`-Subkommando mit `[name]`-Positional + `--no-git`-Flag; `ExitCode(err)`-Funktion bündelt die LH-FA-CLI-006-Klassifikation (0 / 2 / 10 / 1); `cli.App` mit Functional-Options-Pattern (`WithGetwd` als Test-Seam).
+- **Geplante Erweiterungen:** weitere Subkommandos (`add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `template`) folgen pro Use-Case-Slice; perspektivisch HTTP-/Daemon-Adapter (siehe [`slice-later-http-driving-adapter`](../docs/plan/planning/open/slice-later-http-driving-adapter.md)).
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driving`, externe Libraries (z. B. Cobra).
 - **Verbotene Imports:** `hexagon/application` und `adapter/driven`. Die Instanziierung von Application-Services und Driven-Adaptern erfolgt ausschließlich im Wiring (`cmd/uboot/`), das beide Welten zusammenfügt; der Driving-Adapter erhält fertig konstruierte Driving-Port-Implementierungen per Konstruktor.
+- **Permanenter Carveout:** `contextcheck`-Ausnahme in `.golangci.yml`, weil Cobras `RunE`-Signatur (`func(cmd, args) error`) keinen Context-Parameter kennt — die Closure muss `cmd.Context()` extrahieren und an `runInit` durchreichen. Strikte Propagation passiert eine Ebene tiefer.
 
 ### 2.6 `adapter/driven`
 
 Konkrete externe Adapter — Implementierungen der Driven-Ports.
 
-- **Beispielinhalte:** `docker/` (via `os/exec` oder Docker-SDK gegen die Docker Engine), `fs/` (Dateisystem-IO), `yaml/` (YAML-Codec via `gopkg.in/yaml.v3`), `clock/` (Real-Time, Test-Stub in Tests).
+- **Aktuelle Inhalte (M3-T1):** `fs/` (stdlib `os.*`), `yaml/` (`gopkg.in/yaml.v3`-Wrapper), `git/` (`os/exec git` mit `WithBinary`-Test-Override und Exit-Code-128-Klassifikation als „not a repo"), `clock/` (`time.Now()` in UTC). Jeder Adapter pinnt sein Port-Interface per `var _ driven.X = (*Adapter)(nil)` im Production-Code; Drift bricht den Package-Build.
+- **Geplante Erweiterungen:** `docker/` (Docker-Engine via `os/exec docker compose`, M6), `logger/` (M4, `log/slog`-basiert).
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driven`, externe Libraries.
 - **Verbotene Imports:** `hexagon/application`, `adapter/driving`.
+- **Test-Pfad:** `t.TempDir()` für FS, echte `git`-Binary via `os/exec.LookPath`-Skip (CI-Runner ohne git skippen sauber).
 
 ### 2.7 `cmd/uboot` — Wiring-Schicht
 
 Einziger Ort, an dem `application` und `adapter` zusammen importiert werden.
 
-- Erzeugt konkrete Driven-Adapter (`fsAdapter`, `dockerAdapter`, `yamlCodec`), injiziert sie in `application`-Services, registriert diese als Driving-Ports im CLI-Adapter.
+- **Aktueller Inhalt (M3-T3):** `main.go` instantiiert `fs.New()`/`yaml.New()`/`git.New()`, baut den `InitProjectService` und übergibt ihn dem `cli.New(version, initSvc)`-Konstruktor. Plus signal-aware Context via `signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)` und Error→Exit-Code-Mapping über `cli.ExitCode(err)`. Aktuelle Größe: ~50 Zeilen.
 - Hält keine Geschäftslogik. So klein wie sinnvoll möglich (Größenordnung 150–300 Zeilen `main.go` plus ein paar kleine Wiring-Helper); ab dieser Marke ist eine Aufteilung in mehrere Wiring-Pakete (`internal/wire/<feature>/`) zu erwägen.
 
 ---

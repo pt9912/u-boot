@@ -14,16 +14,20 @@ recurring artefacts (README, CHANGELOG, `.env.example`).
 
 ## Status
 
-**MVP bootstrap.** This commit ships the build infrastructure, the
-project skeleton, and a `u-boot --help` / `u-boot --version` stub. No
-subcommands are implemented yet — they follow in later slices, tracked
-under [`docs/plan/planning/`](docs/plan/planning/).
+**MVP in progress — `u-boot init` is live.** The first functional
+subcommand is shipped (M3-T3): `u-boot init [name] [--no-git]` creates
+the LH-FA-INIT-003 project structure plus `u-boot.yaml`
+(LH-FA-CONF-002) and runs `git init` by default (LH-FA-INIT-007).
+Subsequent MVP subcommands (`add`, `up`, `down`, `doctor`, `generate`,
+`config`) follow in M4+; planning is tracked under
+[`docs/plan/planning/`](docs/plan/planning/).
 
 | Phase | Status | Source |
 | ----- | ------ | ------ |
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
-| Architecture decisions | 1 ADR | [`docs/plan/adr/`](docs/plan/adr/) |
-| Implementation | bootstrap only | [`docs/plan/planning/`](docs/plan/planning/) |
+| Architecture decisions | 5 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
+| Implementation | M1–M2d ✅, M3 in progress (T1/T2/T3 ✅) | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
+| Carveouts | 14 temporär (13 mit Slice-Plan, 1 Slice deckt 2), 7 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
 
@@ -35,6 +39,21 @@ make help            # list all targets
 make build           # build the runtime image (distroless static, nonroot)
 make run             # smoke test: docker run u-boot --help
 ```
+
+Real `u-boot init` against a host directory (distroless runs as
+non-root UID 65532; `--user` matches the host UID so written files
+are owned by you):
+
+```bash
+mkdir /tmp/demo && \
+  docker run --rm --user "$(id -u):$(id -g)" \
+    -v /tmp/demo:/work -w /work \
+    u-boot:latest init demo --no-git
+```
+
+Result: `u-boot.yaml` (`schemaVersion: 1`), `compose.yaml`, `README.md`,
+`CHANGELOG.md`, `.env.example`, `.gitignore`, plus `docker/`, `scripts/`,
+`docs/` directories.
 
 Inner-loop quality gates (`LH-FA-BUILD-005` / `-006`):
 

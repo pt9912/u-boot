@@ -1,5 +1,8 @@
 # Slice M3: Coverage-Schwellwert aktivieren
 
+> **Status:** Done
+> **DoD:** Commit `b4e080e`
+
 ## Auslöser
 
 `LH-FA-BUILD-008` definiert einen Bootstrap-Modus für den Coverage-Gate:
