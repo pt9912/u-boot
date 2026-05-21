@@ -1397,6 +1397,155 @@ Die Migration muss mit einem klaren Fehler auf unbekannte Zukunftsversionen reag
 
 ---
 
+## 4.11 Build- und CI-Infrastruktur des u-boot-Projekts
+
+Diese Sektion definiert die Build- und CI-Infrastruktur für die **u-boot-Codebase selbst**. Sie ist nicht zu verwechseln mit den Anforderungen aus 4.4 (`LH-FA-DOC-*`), die das Verhalten des Generators in den per `u-boot init` erzeugten Zielprojekten beschreiben.
+
+Bezug:
+
+- Implementierungssprache: `LH-OPEN-001` (Go).
+- Vorlage: das Referenzprojekt `k-deskflight` (Docker-only-Workflow, Multi-Stage Dockerfile, Distroless-Runtime).
+
+---
+
+### LH-FA-BUILD-001 – Multi-Stage Dockerfile (u-boot-Repo)
+
+Priorität: MVP
+
+Die u-boot-Codebase muss ein Multi-Stage `Dockerfile` im Repo-Root bereitstellen.
+
+Mindestumfang:
+
+- BuildKit-Direktive in der ersten Zeile: `# syntax=docker/dockerfile:1.7`.
+- Pflicht-Stages im MVP:
+  - `deps` – Modulauflösung (`go mod download`) als Cache-Layer.
+  - `compile` – schnelles Compile-Feedback (`go build`) ohne Tests/Lint.
+  - `test` – `go test ./...`.
+  - `lint` – `golangci-lint run ./...`.
+  - `coverage` – `go test -coverprofile` + Coverage-Gate gegen `COVERAGE_THRESHOLD` (bootstrap-aware: Schwellwert 0 bis erste produktive Pakete in `./internal/...` existieren).
+  - `build` – statisch gelinktes Binary (`CGO_ENABLED=0`, `-ldflags="-s -w"`).
+  - `runtime` – minimales Endimage (`LH-FA-BUILD-002`).
+- Jeder Stage ist ein eigenständiges Build-Ziel und wird per `docker build --target <stage>` einzeln baubar.
+
+---
+
+### LH-FA-BUILD-002 – Runtime-Stage Pflichten
+
+Priorität: MVP
+
+Der `runtime`-Stage des u-boot-Dockerfiles muss folgende Eigenschaften erfüllen:
+
+- Base-Image: `gcr.io/distroless/static-debian12:nonroot` (oder gleichwertig minimal und ohne Shell).
+- Non-root-Benutzer (Distroless-`nonroot`-User, `USER 65532:65532`).
+- `ENTRYPOINT ["/usr/local/bin/u-boot"]`.
+- OCI Image Labels gesetzt:
+  - `org.opencontainers.image.source`
+  - `org.opencontainers.image.description`
+  - `org.opencontainers.image.licenses`
+  - `org.opencontainers.image.title`
+- Keine Build-Toolchain im Endimage; alle Build-Artefakte werden aus dem `build`-Stage per `COPY --from=build` übernommen.
+
+---
+
+### LH-FA-BUILD-003 – Build-Args und Pin-Politik
+
+Priorität: MVP
+
+Das u-boot-Dockerfile muss versions- und schwellwertbezogene Build-Args bereitstellen:
+
+- `ARG GO_VERSION` – mit Default-Pin (z. B. `1.22.6`); Hebung ist Routine ohne separaten Spec-Eintrag.
+- `ARG GOLANGCI_LINT_VERSION` – mit Default-Pin; gleiche Pin-Politik.
+- `ARG COVERAGE_THRESHOLD` – mit Default `0` (bootstrap) und Override-Pfad `make coverage-gate THRESHOLD=…`.
+
+Overrides erfolgen über `docker build --build-arg <NAME>=<value>` bzw. die korrespondierende Makefile-Variable.
+
+---
+
+### LH-FA-BUILD-004 – `.dockerignore` Pflicht
+
+Priorität: MVP
+
+Das u-boot-Repo muss eine `.dockerignore` im Repo-Root bereitstellen.
+
+Mindestens auszuschließen:
+
+- `.git`, `.gitignore`, `.github`
+- IDE-Verzeichnisse: `.idea`, `.vscode`
+- Agent-Verzeichnisse: `.claude`, `.codex`, `.agents`
+- lokale Build-Artefakte und Caches (z. B. `dist/`, `coverage*`, `*.log`)
+
+Die `.dockerignore` selbst gehört nicht ins Image und ist daher auszuschließen, sofern sie nicht von einem Stage-Build benötigt wird.
+
+---
+
+### LH-FA-BUILD-005 – Makefile mit Standard-Targets
+
+Priorität: MVP
+
+Das u-boot-Repo muss ein `Makefile` im Repo-Root bereitstellen.
+
+Pflicht-Eigenschaften:
+
+- `.DEFAULT_GOAL := help`
+- `.PHONY` für alle Targets gesetzt
+- `help`-Target mit Übersicht über alle verfügbaren Targets
+- Variablen mit `?=`-Defaults für Overridability (`IMAGE`, `GO_VERSION`, `GOLANGCI_LINT_VERSION`, `THRESHOLD`)
+
+MVP-Pflicht-Targets:
+
+| Target          | Zweck                                                           |
+| --------------- | --------------------------------------------------------------- |
+| `help`          | Übersicht aller Targets                                         |
+| `deps`          | `docker build --target deps`                                    |
+| `compile`       | `docker build --target compile`                                 |
+| `lint`          | `docker build --target lint`                                    |
+| `test`          | `docker build --target test`                                    |
+| `coverage`      | Alias auf `coverage-gate`                                       |
+| `coverage-gate` | `docker build --target coverage --build-arg COVERAGE_THRESHOLD` |
+| `build`         | `docker build --target runtime`                                 |
+| `run`           | `docker run --rm <image> --help` (Smoketest)                    |
+| `clean`         | lokale Artefakte und gebaute Images entfernen                   |
+
+---
+
+### LH-FA-BUILD-006 – Aggregator-Targets
+
+Priorität: V1
+
+Das Makefile soll Aggregator-Targets bereitstellen:
+
+- `gates` – Inner-Loop-Pflichtgates (`lint` + `test` + `coverage-gate`), PR-blockierend.
+- `ci` – `gates` plus erweiterte Prüfungen (z. B. `govulncheck`), wenn vorhanden.
+- `fullbuild` – `ci` plus `build`; vollständiger Closure-Lauf.
+
+Aggregator-Targets müssen bei Fehler eines untergeordneten Targets mit Non-Zero-Exit abbrechen und die Fehlerursache klar benennen.
+
+---
+
+### LH-FA-BUILD-007 – Docker-only-Workflow
+
+Priorität: MVP
+
+Der Standard-Build-/Test-Workflow muss ohne hostseitige Sprach-Toolchain auskommen.
+
+- Alle MVP- und V1-Pflicht-Targets aus `LH-FA-BUILD-005`/`LH-FA-BUILD-006` müssen ausschließlich `docker build` bzw. `docker run` aufrufen.
+- Voraussetzung am Host: Docker Engine und `make`. Eine Go-Toolchain am Host darf für Standard-Targets nicht vorausgesetzt werden.
+- Carveouts (z. B. ein Bash-Skript, das nicht containerisiert wird) sind im `Makefile`-Header explizit zu dokumentieren.
+
+---
+
+### LH-FA-BUILD-008 – Coverage-Bootstrap
+
+Priorität: MVP
+
+Der `coverage`-Stage muss in der Bootstrap-Phase (noch keine produktiven Pakete in `./internal/...`) deterministisch mit einer leeren Coverage-Eingabe umgehen können.
+
+- Default-Schwellwert `0` (`ARG COVERAGE_THRESHOLD=0`).
+- Sobald `./internal/...` produktive Pakete enthält, wird die Schwelle in einem Folge-Schritt angehoben; der Override-Pfad `make coverage-gate THRESHOLD=…` muss funktionieren.
+- Leere Coverage darf in der Bootstrap-Phase nicht zu einem falschen Grün führen, das echte Test-Failures maskiert; der `go test`-Exit-Code wird über `set -o pipefail` o. ä. an die Gate-Logik durchgereicht.
+
+---
+
 ## 5. Nichtfunktionale Anforderungen
 
 ## 5.1 Benutzbarkeit
@@ -2215,6 +2364,14 @@ Nach dem MVP können ergänzt werden:
 | LH-FA-CONF-004     | Konfiguration aktualisieren    | MVP       | PH-CONF-004                        | TC-CONF-004     |
 | LH-FA-CONF-005     | Konfiguration anzeigen/ändern  | MVP       | PH-CONF-005                        | TC-CONF-005     |
 | LH-FA-CONF-006     | Konfiguration migrieren        | Later     | PH-CONF-006                        | TC-CONF-006     |
+| LH-FA-BUILD-001    | Multi-Stage Dockerfile (u-boot-Repo) | MVP | PH-BUILD-001                       | TC-BUILD-001    |
+| LH-FA-BUILD-002    | Runtime-Stage Pflichten        | MVP       | PH-BUILD-002                       | TC-BUILD-002    |
+| LH-FA-BUILD-003    | Build-Args und Pin-Politik     | MVP       | PH-BUILD-003                       | TC-BUILD-003    |
+| LH-FA-BUILD-004    | `.dockerignore` Pflicht        | MVP       | PH-BUILD-004                       | TC-BUILD-004    |
+| LH-FA-BUILD-005    | Makefile mit Standard-Targets  | MVP       | PH-BUILD-005                       | TC-BUILD-005    |
+| LH-FA-BUILD-006    | Aggregator-Targets             | V1        | PH-BUILD-006                       | TC-BUILD-006    |
+| LH-FA-BUILD-007    | Docker-only-Workflow           | MVP       | PH-BUILD-007                       | TC-BUILD-007    |
+| LH-FA-BUILD-008    | Coverage-Bootstrap             | MVP       | PH-BUILD-008                       | TC-BUILD-008    |
 | LH-DA-003          | Schema-Version                 | MVP       | PH-DA-003                          | TC-DA-003       |
 | LH-DA-004          | Schema-Migration               | Later     | PH-DA-004                          | TC-DA-004       |
 | LH-SA-CLI-001      | Befehlsstruktur                | MVP       | PH-SA-CLI-001                      | TC-SA-CLI-001   |
@@ -2265,7 +2422,7 @@ Nach dem MVP können ergänzt werden:
 | LH-RISK-003        | Zu großer Funktionsumfang      | -                                  | PH-RISK-003                        | TC-RISK-003     |
 | LH-MVP-001         | Muss im MVP enthalten sein     | MVP                               | -                                  | -               |
 | LH-MVP-002         | Kann nach dem MVP folgen       | -                                  | -                                  | -               |
-| LH-OPEN-001        | Implementierungssprache        | -                                  | -                                  | -               |
+| LH-OPEN-001        | Implementierungssprache (Go, entschieden 2026-05-21) | - | -                          | -               |
 | LH-OPEN-002        | Paketierung                   | -                                  | -                                  | -               |
 | LH-OPEN-003        | Plugin-System                  | -                                  | -                                  | -               |
 | LH-OPEN-004        | Template-Format                | -                                  | -                                  | -               |
@@ -2274,16 +2431,18 @@ Nach dem MVP können ergänzt werden:
 
 ## 14. Offene Punkte
 
-### LH-OPEN-001 – Implementierungssprache
+### LH-OPEN-001 – Implementierungssprache (entschieden)
 
-Die Implementierungssprache ist noch festzulegen.
+Entscheidung (2026-05-21): **Go**.
 
-Mögliche Optionen:
+Begründung:
 
-- Go
-- Rust
-- Python
-- TypeScript/Node.js
+- statisch gelinktes Single-Binary erleichtert die Paketierung (`LH-OPEN-002`) und passt zu einer distroless-Runtime ohne Sprach-Laufzeit.
+- erstklassige Unterstützung für CLI-Frameworks, Docker-/Compose-Interaktion, YAML-/JSON-Verarbeitung und Cross-Compilation.
+- konsistent mit dem Stack des Referenzprojekts `k-deskflight`, dessen Build-/CI-Pattern als Vorlage dient (`LH-FA-BUILD-001`/`LH-FA-BUILD-005`).
+- niedrige Laufzeitanforderungen am Zielsystem (keine Toolchain im Endbenutzer-Setup nötig).
+
+Mindest-Toolchain: Go 1.22 oder neuer; die konkrete Pin-Version wird im Dockerfile als `ARG GO_VERSION` geführt (Pin-Hebung ist Routine).
 
 ---
 
