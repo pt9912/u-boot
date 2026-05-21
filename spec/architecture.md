@@ -12,13 +12,13 @@
 
 ## 1. Überblick
 
-u-boot folgt dem **hexagonalen Architektur-Pattern** (auch: *Ports & Adapters*, Alistair Cockburn 2005).
+u-boot folgt dem **hexagonalen Architektur-Pattern** (auch: *Ports & Adapters*, Alistair Cockburn, 2005).
 
-Vier Schichten, klare Verantwortungen, einseitig gerichtete Abhängigkeiten:
+Sechs Schichten plus Wiring, klare Verantwortungen und einseitig gerichtete Abhängigkeiten:
 
 ```
-            ┌──────────────────────────────────────────────────┐
-            │                cmd/uboot (Wiring)                │
+  ┌──────────────────────────────────────────────────┐
+  │                cmd/uboot (Wiring)                │
             │   (instanziiert Application + Adapter; main.go)  │
             └────────────────────┬─────────────────────────────┘
                                  │
@@ -119,7 +119,7 @@ Einziger Ort, an dem `application` und `adapter` zusammen importiert werden.
 | `hexagon/port/driven`    | `hexagon/domain`                                                                          | `hexagon/application`, `hexagon/port/driving`, `adapter/*`            |
 | `adapter/driving`        | `hexagon/domain`, `hexagon/port/driving`, externe Libraries (z. B. Cobra)                | `hexagon/application`, `adapter/driven`                               |
 | `adapter/driven`         | `hexagon/domain`, `hexagon/port/driven`, externe Libraries (z. B. Docker-SDK)            | `hexagon/application`, `adapter/driving`                              |
-| `cmd/uboot`              | alles aus `internal/`                                                                     | (frei — Wiring-Schicht)                                               |
+| `cmd/uboot`              | `internal/...`, Standardbibliothek, externe Libraries                                         | (frei — Wiring-Schicht)                                               |
 
 Begründung der Regeln:
 
