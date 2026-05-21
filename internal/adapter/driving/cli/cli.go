@@ -15,7 +15,9 @@ import (
 	"errors"
 	"io"
 	"os"
+	"strings"
 
+	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
@@ -79,41 +81,58 @@ func (a *App) Execute(ctx context.Context, args []string, stdout, stderr io.Writ
 }
 
 // ExitCode classifies a CLI error into the u-boot exit-code scheme
-// (LH-FA-CLI-006). Pure CLI / flag errors (`flag provided but not
-// defined`, unknown subcommand, missing required arg) map to 2;
-// LH-FA-INIT-004 marker collisions and BaseDir-missing map to 10;
-// everything else falls through to 1 (generic error).
+// (LH-FA-CLI-006):
+//
+//   - 0  — no error
+//   - 2  — pure CLI / flag errors (unknown subcommand, unknown flag,
+//          missing required arg, too many positional args)
+//   - 10 — fachlicher Validierungsfehler: LH-FA-INIT-004 marker
+//          collisions (ErrProjectExists), LH-FA-INIT-006 invalid
+//          project name (ErrInvalidProjectName), LH-AK-001 missing
+//          BaseDir (ErrBaseDirMissing)
+//   - 1  — everything else (generic error)
 //
 // The mapping lives in the driving adapter because exit-code
 // semantics are part of the CLI contract (LH-FA-CLI-006), not of
 // the application use-cases — the application layer returns
 // sentinel errors and lets the adapter translate.
+//
+// Codes 11/12/13–15 (environment, runtime, technical errors) are
+// added by later slices that introduce the corresponding use-case
+// sentinels (`u-boot doctor` for 11, `u-boot up`/`down` for 12).
 func ExitCode(err error) int {
 	if err == nil {
 		return 0
 	}
-	if errors.Is(err, driving.ErrProjectExists) {
+	if isValidationError(err) {
 		return 10
 	}
-	// Cobra exposes its own sentinel for unknown commands /
-	// flags as the wrapped error message; we surface them as
-	// LH-FA-CLI-006 code 2 by inspecting the error type set by
-	// Cobra (UsageError vs. domain error). Cobra returns plain
-	// errors, so we cannot type-assert; we accept the coarse-
-	// grained "2 for usage, 1 for everything else" mapping and
-	// let the caller log the error message.
 	if isUsageError(err) {
 		return 2
 	}
 	return 1
 }
 
+// isValidationError returns true for the LH-FA-CLI-006 code-10
+// sentinels currently known to u-boot. Add new sentinels here as
+// later slices introduce them; the [ExitCode] doc-comment is the
+// authoritative list.
+func isValidationError(err error) bool {
+	return errors.Is(err, driving.ErrProjectExists) ||
+		errors.Is(err, driving.ErrBaseDirMissing) ||
+		errors.Is(err, domain.ErrInvalidProjectName)
+}
+
 // isUsageError detects errors that Cobra raises for malformed CLI
 // input. Cobra does not export a sentinel; we look at the message
-// prefix because that is what reaches us. The set of prefixes is
-// based on the Cobra v1.10 source and pinned in
-// TestExitCode_UsageErrorIsTwo so a future Cobra upgrade that
-// changes the wording fails loudly.
+// prefix because that is what reaches us.
+//
+// Pinned against github.com/spf13/cobra v1.10.2 (see go.mod). A
+// major Cobra upgrade must verify these prefixes still match the
+// strings Cobra emits — the integration tests
+// TestExecute_UnknownCommand / TestExecute_UnknownFlag /
+// TestExecute_InitTooManyArgs exercise the real Cobra path and
+// will fail loudly if the wording changes.
 func isUsageError(err error) bool {
 	if err == nil {
 		return false
@@ -128,13 +147,9 @@ func isUsageError(err error) bool {
 		"accepts ",
 	}
 	for _, p := range prefixes {
-		if hasPrefix(msg, p) {
+		if strings.HasPrefix(msg, p) {
 			return true
 		}
 	}
 	return false
-}
-
-func hasPrefix(s, prefix string) bool {
-	return len(s) >= len(prefix) && s[:len(prefix)] == prefix
 }

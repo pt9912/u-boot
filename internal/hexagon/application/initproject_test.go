@@ -120,7 +120,7 @@ func TestInit_MissingBaseDirRejects(t *testing.T) {
 	if err == nil {
 		t.Fatalf("Init(missing BaseDir): expected error, got nil")
 	}
-	if !errors.Is(err, application.ErrBaseDirMissing) {
+	if !errors.Is(err, driving.ErrBaseDirMissing) {
 		t.Errorf("Init(missing BaseDir): error %v does not wrap ErrBaseDirMissing", err)
 	}
 }

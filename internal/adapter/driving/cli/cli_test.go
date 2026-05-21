@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -191,28 +192,29 @@ func TestExecute_InitTooManyArgs(t *testing.T) {
 	}
 }
 
-func TestExitCode_Mapping(t *testing.T) {
-	if cli.ExitCode(nil) != 0 {
-		t.Errorf("ExitCode(nil) = %d, want 0", cli.ExitCode(nil))
+func TestExitCode_BaseMappings(t *testing.T) {
+	// Tests against the LH-FA-CLI-006-sentinel mappings; the actual
+	// usage-error-string detection is covered by the integration
+	// tests TestExecute_UnknownCommand / TestExecute_UnknownFlag /
+	// TestExecute_InitTooManyArgs which drive the real Cobra path
+	// (and therefore catch a Cobra-string drift on upgrade).
+	cases := []struct {
+		name string
+		err  error
+		want int
+	}{
+		{"nil", nil, 0},
+		{"generic", errors.New("boom"), 1},
+		{"ErrProjectExists (validation)", driving.ErrProjectExists, 10},
+		{"ErrBaseDirMissing (validation)", driving.ErrBaseDirMissing, 10},
+		{"ErrInvalidProjectName (validation)", domain.ErrInvalidProjectName, 10},
+		{"wrapped ErrProjectExists", fmt.Errorf("ctx: %w", driving.ErrProjectExists), 10},
 	}
-	if cli.ExitCode(errors.New("boom")) != 1 {
-		t.Errorf("ExitCode(generic) = %d, want 1", cli.ExitCode(errors.New("boom")))
-	}
-	if cli.ExitCode(driving.ErrProjectExists) != 10 {
-		t.Errorf("ExitCode(ErrProjectExists) = %d, want 10", cli.ExitCode(driving.ErrProjectExists))
-	}
-	// Pinned usage-error prefixes (see isUsageError):
-	for _, prefix := range []string{
-		"unknown command",
-		"unknown flag",
-		"flag needs an argument",
-		"invalid argument",
-		"requires at least 1 arg(s)",
-		"accepts 0 arg(s)",
-	} {
-		err := errors.New(prefix + " — sample")
-		if got := cli.ExitCode(err); got != 2 {
-			t.Errorf("ExitCode(%q) = %d, want 2", prefix, got)
-		}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := cli.ExitCode(tc.err); got != tc.want {
+				t.Errorf("ExitCode(%v) = %d, want %d", tc.err, got, tc.want)
+			}
+		})
 	}
 }

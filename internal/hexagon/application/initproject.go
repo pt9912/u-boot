@@ -70,13 +70,6 @@ func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driv
 	return &InitProjectService{fs: fs, yaml: yaml, git: git}
 }
 
-// ErrBaseDirMissing signals that req.BaseDir does not exist on the
-// filesystem. The acceptance flow LH-AK-001 has the user create the
-// directory (`mkdir demo && cd demo`); the service refuses to invent
-// it because a typoed BaseDir would otherwise quietly initialize an
-// unintended path under the typo.
-var ErrBaseDirMissing = errors.New("base directory does not exist")
-
 // Init runs the init flow per LH-FA-INIT-001..007 / LH-FA-CONF-001..003.
 // M3-T2 covers the happy path plus the default overwrite-rejection
 // branch (LH-FA-INIT-004 hard-marker variant); --backup / --force
@@ -99,7 +92,7 @@ func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRe
 		return driving.InitProjectResponse{}, fmt.Errorf("check BaseDir: %w", err)
 	}
 	if !baseExists {
-		return driving.InitProjectResponse{}, fmt.Errorf("%w: %s", ErrBaseDirMissing, req.BaseDir)
+		return driving.InitProjectResponse{}, fmt.Errorf("%w: %s", driving.ErrBaseDirMissing, req.BaseDir)
 	}
 
 	name, err := s.resolveProjectName(req)

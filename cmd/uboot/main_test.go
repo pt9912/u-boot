@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"context"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -62,5 +64,43 @@ func TestRun_UnknownFlagExits2(t *testing.T) {
 func TestVersionConstantNonEmpty(t *testing.T) {
 	if version == "" {
 		t.Fatal("package-level version must not be empty")
+	}
+}
+
+func TestRun_InitHappyPath_WiresAllAdapters(t *testing.T) {
+	// Integration-style test against the real wiring: real fs, yaml,
+	// git adapters all exercised once. Without --no-git this would
+	// also exercise the git adapter (host git binary required);
+	// staying with --no-git keeps the test self-contained on lean
+	// CI runners.
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+
+	dir := t.TempDir()
+	t.Chdir(dir) // Go 1.24+; PWD is the resolveProjectName fallback source.
+
+	var stdout, stderr bytes.Buffer
+	code := run(context.Background(), []string{"init", "demo", "--no-git"}, &stdout, &stderr)
+
+	if code != 0 {
+		t.Fatalf("init demo --no-git: exit %d, stderr=%q", code, stderr.String())
+	}
+
+	// Spot-check the artefacts produced (LH-FA-INIT-003 mandatory
+	// set). Full per-file content is asserted in the application
+	// layer's unit tests.
+	for _, rel := range []string{
+		"u-boot.yaml", "compose.yaml", "README.md", "CHANGELOG.md",
+		".env.example", ".gitignore",
+		"docker", "scripts", "docs",
+	} {
+		if _, err := os.Stat(filepath.Join(dir, rel)); err != nil {
+			t.Errorf("init did not create %s: %v", rel, err)
+		}
+	}
+
+	if !strings.Contains(stdout.String(), "demo") {
+		t.Errorf("stdout does not mention project name; got %q", stdout.String())
 	}
 }

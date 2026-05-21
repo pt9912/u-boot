@@ -14,6 +14,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/pt9912/u-boot/internal/adapter/driven/fs"
 	"github.com/pt9912/u-boot/internal/adapter/driven/git"
@@ -28,7 +30,15 @@ import (
 var version = "0.1.0-dev"
 
 func main() {
-	os.Exit(run(context.Background(), os.Args[1:], os.Stdout, os.Stderr))
+	// Signal-aware context: Ctrl-C / SIGTERM cancel the use-case
+	// instead of killing the binary. For short operations like `init`
+	// this is unobservable; for long-running subcommands (`up`,
+	// `logs`, `doctor` against external systems) it lets the
+	// application layer abort cleanly.
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	os.Exit(run(ctx, os.Args[1:], os.Stdout, os.Stderr))
 }
 
 // run wires up the dependency graph and dispatches to the CLI app.

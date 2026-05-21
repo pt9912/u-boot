@@ -52,6 +52,18 @@ type InitProjectResponse struct {
 // the M3-T4 slice adds `--backup`/`--force` handling.
 var ErrProjectExists = errors.New("project already initialized")
 
+// ErrBaseDirMissing signals that req.BaseDir does not exist on the
+// filesystem. The acceptance flow LH-AK-001 has the user create the
+// directory (`mkdir demo && cd demo`); the use-case refuses to invent
+// it because a typoed BaseDir would otherwise quietly initialize an
+// unintended path under the typo.
+//
+// Sentinel lives in the driving port (not in the application package)
+// so the CLI adapter can map it to its LH-FA-CLI-006 exit code
+// without violating the depguard rule that forbids adapter→application
+// imports (LH-FA-ARCH-003).
+var ErrBaseDirMissing = errors.New("base directory does not exist")
+
 // InitProjectUseCase is the driving-port for `u-boot init`. The CLI
 // adapter holds a reference and calls [Init] from the Cobra command
 // handler.
