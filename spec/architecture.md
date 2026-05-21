@@ -44,7 +44,7 @@ Vier Schichten, klare Verantwortungen, einseitig gerichtete Abhängigkeiten:
                           └──────────────────────┘
 ```
 
-Pfeile = Import-Richtung. Die innere Welt (`hexagon/`) kennt die äußere Welt (`adapter/`) **nicht**.
+Pfeile zeigen die **Aufruf-/Datenfluss-Richtung** zur Laufzeit. Die **Import-Richtung** ist nicht überall identisch: `application` importiert nur Ports (Interfaces) und kennt die konkreten Adapter nicht; Dependency Injection findet im Wiring (`cmd/uboot/`) statt. Die innere Welt (`hexagon/`) kennt die äußere Welt (`adapter/`) **nicht** — das wird per `depguard` durchgesetzt (`LH-FA-ARCH-003`, siehe §4).
 
 ---
 
@@ -89,14 +89,14 @@ Interfaces, über die `hexagon/application` externe Systeme nutzt.
 Konkrete Driver — Einstiegspunkte aus der Außenwelt.
 
 - **Beispielinhalte:** `cli/` (Cobra-Commands `init`, `add`, `up`, `doctor`, …), perspektivisch ggf. ein HTTP- oder Daemon-Adapter.
-- **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driving`, `hexagon/application` (nur zur Instanziierung im Wiring von `cmd/uboot`).
-- **Verbotene Imports:** `adapter/driven` direkt (Wiring übernimmt `cmd/uboot`).
+- **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driving`, externe Libraries (z. B. Cobra).
+- **Verbotene Imports:** `hexagon/application` und `adapter/driven`. Die Instanziierung von Application-Services und Driven-Adaptern erfolgt ausschließlich im Wiring (`cmd/uboot/`), das beide Welten zusammenfügt; der Driving-Adapter erhält fertig konstruierte Driving-Port-Implementierungen per Konstruktor.
 
 ### 2.6 `adapter/driven`
 
 Konkrete externe Adapter — Implementierungen der Driven-Ports.
 
-- **Beispielinhalte:** `docker/` (`exec`/SDK gegen Docker Engine), `fs/` (Dateisystem-IO), `yaml/` (YAML-Codec via `gopkg.in/yaml.v3`), `clock/` (Real-Time, Test-Stub in Tests).
+- **Beispielinhalte:** `docker/` (via `os/exec` oder Docker-SDK gegen die Docker Engine), `fs/` (Dateisystem-IO), `yaml/` (YAML-Codec via `gopkg.in/yaml.v3`), `clock/` (Real-Time, Test-Stub in Tests).
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driven`, externe Libraries.
 - **Verbotene Imports:** `hexagon/application`, `adapter/driving`.
 
@@ -105,7 +105,7 @@ Konkrete externe Adapter — Implementierungen der Driven-Ports.
 Einziger Ort, an dem `application` und `adapter` zusammen importiert werden.
 
 - Erzeugt konkrete Driven-Adapter (`fsAdapter`, `dockerAdapter`, `yamlCodec`), injiziert sie in `application`-Services, registriert diese als Driving-Ports im CLI-Adapter.
-- Hält keine Geschäftslogik. Idealerweise unter 100 Zeilen `main.go` und ein paar kleine Wiring-Helper.
+- Hält keine Geschäftslogik. So klein wie sinnvoll möglich (Größenordnung 150–300 Zeilen `main.go` plus ein paar kleine Wiring-Helper); ab dieser Marke ist eine Aufteilung in mehrere Wiring-Pakete (`internal/wire/<feature>/`) zu erwägen.
 
 ---
 
@@ -117,7 +117,7 @@ Einziger Ort, an dem `application` und `adapter` zusammen importiert werden.
 | `hexagon/application`    | `hexagon/domain`, `hexagon/port`                                                          | `adapter/*`, externe I/O-Libraries                                    |
 | `hexagon/port/driving`   | `hexagon/domain`                                                                          | `hexagon/application`, `hexagon/port/driven`, `adapter/*`             |
 | `hexagon/port/driven`    | `hexagon/domain`                                                                          | `hexagon/application`, `hexagon/port/driving`, `adapter/*`            |
-| `adapter/driving`        | `hexagon/domain`, `hexagon/port/driving`, externe Libraries (z. B. Cobra)                | `adapter/driven`, `hexagon/application` (außerhalb von `cmd/uboot`)   |
+| `adapter/driving`        | `hexagon/domain`, `hexagon/port/driving`, externe Libraries (z. B. Cobra)                | `hexagon/application`, `adapter/driven`                               |
 | `adapter/driven`         | `hexagon/domain`, `hexagon/port/driven`, externe Libraries (z. B. Docker-SDK)            | `hexagon/application`, `adapter/driving`                              |
 | `cmd/uboot`              | alles aus `internal/`                                                                     | (frei — Wiring-Schicht)                                               |
 
@@ -217,7 +217,11 @@ linters:
 - Unit-Tests stehen als `*_test.go` neben dem produktiven Code im selben Paket.
 - **Domäne:** klassische Property/Value-Tests; keine Mocks nötig.
 - **Application:** Fake-Implementierungen der Driven-Ports im `_test.go`-Paket; keine echte Docker-Engine.
-- **Adapter (driven):** Integrationstests gegen echte Systeme, soweit lokal verfügbar (z. B. Docker-Engine für `adapter/driven/docker`). Ohne Docker-Engine werden diese Tests via Build-Tag (`//go:build docker`) ausgeschlossen.
+- **Adapter (driven):** Integrationstests gegen echte Systeme, soweit lokal verfügbar (z. B. Docker-Engine für `adapter/driven/docker`). Ohne Docker-Engine werden diese Tests via Build-Tag (`//go:build docker`) ausgeschlossen. Build-Tag-Konvention:
+  - Default ist *aus*: `make test` (Stage `test` im Dockerfile, `LH-FA-BUILD-001`) führt Tag-getaggte Tests nicht aus und bleibt damit auch ohne Docker-Socket grün.
+  - Lokal mit verfügbarer Docker-Engine: `go test -tags docker ./...`.
+  - In CI: ein separater Stage / ein separates Make-Target (Folge-Slice) aktiviert das Tag und mountet das Docker-Socket; dieser Pfad ist nicht Bestandteil von `make gates`, sondern ergänzt `make ci` als optionales Integrations-Smoketest-Ziel.
+  - Pro Test-Datei mit dem entsprechenden Tag: erste Zeile `//go:build docker`, leere Zeile, dann `package …`.
 - **Adapter (driving):** Tabellengetriebene Tests gegen den Driving-Port mit Fake-Application.
 - Coverage-Messung (`LH-FA-BUILD-008`) bezieht sich auf `./internal/...`; `./cmd/...` ist ausgeschlossen.
 

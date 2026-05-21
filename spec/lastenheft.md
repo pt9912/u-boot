@@ -1721,23 +1721,15 @@ Die Wiring-Schicht (`cmd/uboot/`) ist die einzige Stelle, an der `application` u
 
 Priorität: MVP
 
-Folgende Import-Regeln gelten verbindlich (Detail-Tabelle in `spec/architecture.md`):
+Die verbindliche Import-Regel-Tabelle, die Begründung der einzelnen Schicht-Pflichten und die Anti-Patterns sind in [`spec/architecture.md`](architecture.md) §3 definiert (Single Source of Truth).
 
-| Schicht                  | darf importieren                       | darf nicht importieren                                                                          |
-| ------------------------ | -------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `hexagon/domain`         | nur Go-Standard-Library                | `hexagon/application`, `hexagon/port`, `adapter`, externe Libraries mit I/O                     |
-| `hexagon/application`    | `hexagon/domain`, `hexagon/port`       | `adapter`, externe I/O-Libraries direkt                                                         |
-| `hexagon/port/driving`   | `hexagon/domain`                       | `hexagon/application`, `hexagon/port/driven`, `adapter`                                         |
-| `hexagon/port/driven`    | `hexagon/domain`                       | `hexagon/application`, `hexagon/port/driving`, `adapter`                                        |
-| `adapter/driving`        | `hexagon/domain`, `hexagon/port/driving`, `hexagon/application` (nur zum Wiring innerhalb von `cmd/`) | direkte Imports von `adapter/driven`                                  |
-| `adapter/driven`         | `hexagon/domain`, `hexagon/port/driven` | `hexagon/application`, `adapter/driving`                                                       |
-| `cmd/uboot`              | alles aus `internal/`                  | (Wiring-Schicht, frei)                                                                          |
-
-Enforcement:
+Pflichten:
 
 - Die Regeln werden im `lint`-Stage (`LH-FA-BUILD-001`) per `golangci-lint` mit `depguard` durchgesetzt; Verstöße sind PR-blockierend.
+- Die `depguard`-Konfiguration in `.golangci.yml` ist deckungsgleich mit der Regel-Tabelle aus `spec/architecture.md` §3 zu halten; Drift wird im Review zurückgewiesen.
 - `//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `Why:`-Kommentar dokumentiert.
-- Solange einzelne Schichten noch keine produktiven Pakete enthalten, dürfen `depguard`-Regelblöcke leer bleiben; die Schicht-Regel ist mit dem ersten Paket scharf zu schalten.
+- `depguard`-Regeln gelten production-only; `*_test.go`-Dateien sind ausgenommen, damit Tests Fakes und Test-Libraries (`testify`, …) frei nutzen können.
+- Solange einzelne Schichten noch keine produktiven Pakete enthalten, dürfen `depguard`-Regelblöcke aktiv sein und nichts treffen — die Schicht-Regeln greifen automatisch, sobald das erste produktive Paket angelegt wird.
 
 ---
 

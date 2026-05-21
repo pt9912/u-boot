@@ -34,7 +34,9 @@ Entscheidungsrelevante Anforderungen aus dem Lastenheft:
   Stable-Version am Entscheidungsdatum).
 - Modul-Pfad: `github.com/pt9912/u-boot`.
 - Repository-Layout nach `LH-FA-BUILD-009`: `cmd/uboot/`, `internal/`,
-  Tests neben Production-Code.
+  Tests neben Production-Code. Die Substruktur unter `internal/`
+  (hexagonale Schichten mit driving/driven-Split) ist in
+  [`ADR-0002`](0002-hexagonale-architektur.md) festgelegt.
 - Runtime-Image: `gcr.io/distroless/static-debian12:nonroot`, statisch
   gelinktes Binary (`CGO_ENABLED=0`, `-ldflags="-s -w"`).
 

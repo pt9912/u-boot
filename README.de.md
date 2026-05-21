@@ -53,9 +53,11 @@ make fullbuild       # ci + build (vollständiger Closure-Lauf)
 
 ```text
 .
-├── cmd/uboot/          # CLI-Entry-Point (`main.go`)
-├── internal/           # nicht-exportierbare Go-Pakete (Coverage-Scope)
-├── spec/               # Lastenheft und weitere Spezifikationen
+├── cmd/uboot/          # CLI-Entry-Point (`main.go`) — Wiring-Schicht
+├── internal/           # hexagonales Layout (siehe spec/architecture.md)
+│   ├── hexagon/{domain,application,port/{driving,driven}}/
+│   └── adapter/{driving,driven}/
+├── spec/               # Lastenheft + Architektur-Spezifikation
 ├── docs/               # ADRs, Planning, User-Doku (LH-FA-PROJDOCS-001)
 ├── scripts/            # Build-Helfer (coverage-gate.sh)
 ├── Dockerfile          # Multi-Stage-Build (LH-FA-BUILD-001)

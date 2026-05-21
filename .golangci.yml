@@ -1,16 +1,20 @@
 # golangci-lint configuration for u-boot (v2 schema).
 #
-# MVP-Bootstrap profile: the 5 default linters + depguard, with one
-# pragmatic exception for fmt.Fprint* (CLI writes to stdout/stderr
-# cannot meaningfully fail in this codebase and would otherwise force
-# `_, _ =`-prefixes on every Fprintln).
+# MVP-Bootstrap profile: the 5 default linters + depguard with active
+# layer rules per LH-FA-ARCH-003 (single source of truth in
+# spec/architecture.md §3 + §4).
 #
-# depguard is enabled with an empty rules map during the bootstrap
-# phase (analog to k-deskflight Slice M1). The concrete layer-rule
-# blocks from spec/architecture.md §4 (LH-FA-ARCH-003) will be wired
-# in with the first productive package under ./internal/... (M3 init
-# slice). //nolint:depguard is forbidden; carveouts go here with a
-# `Why:` comment.
+# Pragmatic exception: fmt.Fprint* on stdout/stderr (CLI writes cannot
+# meaningfully fail and would otherwise force `_, _ =`-prefixes on
+# every Fprintln).
+#
+# depguard rules are deny-only and match production code only
+# (`*_test.go` excluded via leading negative pattern). Until ./internal/
+# contains productive packages the rules match nothing — they activate
+# automatically with the first package per layer (M3 init slice).
+#
+# //nolint:depguard is forbidden; carveouts go here with a `Why:`
+# comment.
 
 version: "2"
 
@@ -32,7 +36,73 @@ linters:
         - fmt.Fprint
 
     depguard:
-      # Layer rules will be filled in with the first productive package
-      # under ./internal/... (M3 slice). Schema reference:
-      # spec/architecture.md §4 (LH-FA-ARCH-003).
-      rules: {}
+      rules:
+        domain-isoliert:
+          files:
+            - '!**/*_test.go'
+            - '**/internal/hexagon/domain/**'
+          deny:
+            - pkg: github.com/pt9912/u-boot/internal/hexagon/application
+              desc: domain must not depend on application (LH-FA-ARCH-003)
+            - pkg: github.com/pt9912/u-boot/internal/hexagon/port
+              desc: domain must not depend on port (LH-FA-ARCH-003)
+            - pkg: github.com/pt9912/u-boot/internal/adapter
+              desc: domain must not depend on adapter (LH-FA-ARCH-003)
+
+        application-no-adapter:
+          files:
+            - '!**/*_test.go'
+            - '**/internal/hexagon/application/**'
+          deny:
+            - pkg: github.com/pt9912/u-boot/internal/adapter
+              desc: application must depend on ports, not on adapter implementations (LH-FA-ARCH-003)
+
+        port-no-application:
+          files:
+            - '!**/*_test.go'
+            - '**/internal/hexagon/port/**'
+          deny:
+            - pkg: github.com/pt9912/u-boot/internal/hexagon/application
+              desc: port must not depend on application (LH-FA-ARCH-003)
+            - pkg: github.com/pt9912/u-boot/internal/adapter
+              desc: port must not depend on adapter (LH-FA-ARCH-003)
+
+        port-driving-no-driven:
+          files:
+            - '!**/*_test.go'
+            - '**/internal/hexagon/port/driving/**'
+          deny:
+            - pkg: github.com/pt9912/u-boot/internal/hexagon/port/driven
+              desc: driving port must not depend on driven port (LH-FA-ARCH-003)
+
+        port-driven-no-driving:
+          files:
+            - '!**/*_test.go'
+            - '**/internal/hexagon/port/driven/**'
+          deny:
+            - pkg: github.com/pt9912/u-boot/internal/hexagon/port/driving
+              desc: driven port must not depend on driving port (LH-FA-ARCH-003)
+
+        adapter-no-application:
+          files:
+            - '!**/*_test.go'
+            - '**/internal/adapter/**'
+          deny:
+            - pkg: github.com/pt9912/u-boot/internal/hexagon/application
+              desc: adapter must implement ports, not consume application (LH-FA-ARCH-003)
+
+        adapter-driving-no-driven:
+          files:
+            - '!**/*_test.go'
+            - '**/internal/adapter/driving/**'
+          deny:
+            - pkg: github.com/pt9912/u-boot/internal/adapter/driven
+              desc: driving adapter must not depend on driven adapter — wire via cmd/uboot (LH-FA-ARCH-003)
+
+        adapter-driven-no-driving:
+          files:
+            - '!**/*_test.go'
+            - '**/internal/adapter/driven/**'
+          deny:
+            - pkg: github.com/pt9912/u-boot/internal/adapter/driving
+              desc: driven adapter must not depend on driving adapter (LH-FA-ARCH-003)
