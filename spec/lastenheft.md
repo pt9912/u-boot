@@ -1676,7 +1676,9 @@ Pflichten:
 - Der Slice-Plan folgt der Dateiname-Konvention aus `LH-FA-PROJDOCS-003` (`slice-<phase>-<slug>.md`).
 - Der Plan benennt mindestens: Auslöser (was wurde wo bewusst weggelassen), Aufhebungsbedingung (was muss passieren), Akzeptanzkriterien.
 - Wo der Carveout in einer Spec-Anforderung dokumentiert ist (z. B. `LH-FA-BUILD-008` für Coverage-Bootstrap), referenziert der Spec-Text den Slice-Plan.
-- Ein Master-Inventar in [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md) listet alle aktuellen Carveouts mit Status (`temporär` + Plan-Verweis vs. `permanent` + Begründung). Diese Datei lebt analog zur `roadmap.md` dauerhaft in `in-progress/`.
+- **Doppelte Verankerung:** jeder temporäre Carveout ist sowohl in [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md) als auch in [`docs/plan/planning/in-progress/roadmap.md`](../docs/plan/planning/in-progress/roadmap.md) als Slice-Zeile sichtbar. Carveouts ohne Roadmap-Eintrag oder Slice-Pläne ohne Carveout-Inventar-Verweis sind Verstoß gegen diese Anforderung.
+- Auch Spec-Open-Punkte (`LH-OPEN-*`) und ADR-Folgepunkte gelten als temporäre Carveouts und brauchen einen Slice-Plan — kein „bleibt offen bis MVP-Closure" als Inventar-Eintrag.
+- Ein Master-Inventar in `carveouts.md` listet alle aktuellen Carveouts mit Status (`temporär` + Plan-Verweis vs. `permanent` + Begründung). Diese Datei lebt analog zur `roadmap.md` dauerhaft in `in-progress/`.
 
 Permanente Carveouts (z. B. `errcheck.exclude-functions` für CLI-Writes, `testpackage`/`gochecknoglobals` für die Wiring-Schicht `cmd/uboot/`) sind ebenfalls im Master-Inventar zu listen, brauchen aber keinen Aufhebungsplan; sie tragen den Status `permanent` mit kurzer Begründung.
 

@@ -25,10 +25,35 @@ in `in-progress/`.
 | V1 Logs / Dry-Run / Diff | Open | `LH-FA-UP-005`, `LH-FA-CLI-007/008` | offen |
 | Later Migration / Custom Templates | Open | `LH-FA-CONF-006`, `LH-FA-TPL-003`, `LH-DA-004` | offen |
 
+## Carveout-Auflösungs-Slices
+
+Slices, die ausschließlich offene Carveouts (`LH-FA-PROJDOCS-005`)
+auflösen. Verbindlich verankert hier *und* in [`carveouts.md`](carveouts.md);
+ein Carveout ohne Eintrag in beiden Quellen ist ein
+Disziplin-Verstoß.
+
+| Slice | Auslöser | Phase | Status |
+| ----- | -------- | ----- | ------ |
+| [`slice-m3-init-flow`](slice-m3-init-flow.md) | `LH-FA-INIT-*` initialer Flow + zwei M3-Carveouts (Coverage ✅, depguard offen) | M3 | In progress (T1/T2 ✅; T3/T4/T5 offen) |
+| [`slice-m3-depguard-aktivierung-verifizieren`](slice-m3-depguard-aktivierung-verifizieren.md) | `LH-FA-ARCH-003` depguard-Regeln matchen bisher nichts | M3-T5 | In progress |
+| [`slice-m3-cli-framework-adr`](../open/slice-m3-cli-framework-adr.md) | ADR-0001 Folgepunkt CLI-Framework Cobra | M3-T3 follow-up | Open |
+| [`slice-m4-soft-existing-detection`](../open/slice-m4-soft-existing-detection.md) | `LH-FA-INIT-004` Soft-Erkennung + `--assume-existing` | M4 | Open |
+| [`slice-v1-gomodguard-rules`](../open/slice-v1-gomodguard-rules.md) | `gomodguard_v2.blocked: {}` leer | V1 | Open |
+| [`slice-v1-logging-port`](../open/slice-v1-logging-port.md) | `forbidigo.msg` referenziert nicht-existenten Logging-Port | V1 | Open |
+| [`slice-v1-release-pipeline`](../open/slice-v1-release-pipeline.md) | ADR-0004 Folgepunkte Image-Publish + Trivy; `LH-OPEN-002` Paketierung (GHCR-Anteil) | V1 | Open |
+| [`slice-v1-branch-protection-checkliste`](../open/slice-v1-branch-protection-checkliste.md) | ADR-0004 Folgepunkt Branch-Protection nicht versioniert | V1 | Open |
+| [`slice-v1-docker-integrationstests`](../open/slice-v1-docker-integrationstests.md) | `//go:build docker`-Pfad nur dokumentiert, kein CI-Job | V1 | Open |
+| [`slice-v1-markdown-link-validator`](../open/slice-v1-markdown-link-validator.md) | Doku-/Link-Drift in `docs/`/`spec/` nicht maschinell geprüft | V1 | Open |
+| [`slice-v1-retroaktive-slice-plaene`](../open/slice-v1-retroaktive-slice-plaene.md) | Bootstrap-Slices (M1/M2/M2b/M2c/M2d) liegen nicht in `done/` | V1 | Open |
+| [`slice-v1-plugin-system-entscheidung`](../open/slice-v1-plugin-system-entscheidung.md) | `LH-OPEN-003` Plugin-System offen | V1 | Open |
+| [`slice-v1-template-format-entscheidung`](../open/slice-v1-template-format-entscheidung.md) | `LH-OPEN-004` Template-Format offen | V1 | Open |
+| [`slice-v2-revive-custom-rules`](../open/slice-v2-revive-custom-rules.md) | ADR-0003 Folgepunkt revive-Custom-Rules | V2 | Open |
+| [`slice-later-http-driving-adapter`](../open/slice-later-http-driving-adapter.md) | `spec/architecture.md` §7 HTTP-Driving-Adapter prospektiv | Later | Open |
+
 ## Nächste Schritte
 
-1. **M2** abschließen: Sektion 4.13 (Architektur) im Lastenheft + ADR-0002 (Hex-Pattern) + `spec/architecture.md` (Import-Graph, Layer-Regeln) + `internal/`-Skeleton (`hexagon/{domain,application,port/{driving,driven}}/` + `adapter/{driving,driven}/`).
-2. **M3** starten: erster fachlicher Slice, `slice-m3-init-flow.md` in `next/` anlegen, dann nach `in-progress/`.
+1. **M3** zu Ende führen: T3 (CLI mit Cobra) → T4 (`--backup`/`--force`/`--no-interactive`) → T5 (depguard-Verifikation + Carveout-Cleanup). Cobra-Einbau löst gleichzeitig `slice-m3-cli-framework-adr` aus.
+2. **M4** vorbereiten: `u-boot doctor` plus `slice-m4-soft-existing-detection`.
 
 ## Lifecycle-Hinweis
 
