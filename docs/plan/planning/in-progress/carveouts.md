@@ -19,9 +19,9 @@ Spalten:
 
 | Carveout | Status | Plan / Begründung |
 | -------- | ------ | ----------------- |
-| `COVERAGE_THRESHOLD=0` Bootstrap (`Dockerfile` coverage-Stage, `scripts/coverage-gate.sh`, `LH-FA-BUILD-008`) | temporär | [`open/slice-m3-coverage-threshold-aktivieren.md`](../open/slice-m3-coverage-threshold-aktivieren.md) |
+| `COVERAGE_THRESHOLD=0` Bootstrap (`Dockerfile` coverage-Stage, `scripts/coverage-gate.sh`, `LH-FA-BUILD-008`) | temporär | [`slice-m3-coverage-threshold-aktivieren.md`](slice-m3-coverage-threshold-aktivieren.md) (in `in-progress/`, Teil von M3) |
 | `gomodguard_v2.blocked: {}` leer (`.golangci.yml`) | temporär | [`open/slice-v1-gomodguard-rules.md`](../open/slice-v1-gomodguard-rules.md) |
-| `depguard`-Regeln aktiv, matchen nichts (alle 8 Schicht-Blöcke in `.golangci.yml`; `spec/architecture.md` §4) | temporär | [`open/slice-m3-depguard-aktivierung-verifizieren.md`](../open/slice-m3-depguard-aktivierung-verifizieren.md) |
+| `depguard`-Regeln aktiv, matchen nichts (alle 8 Schicht-Blöcke in `.golangci.yml`; `spec/architecture.md` §4) | temporär | [`slice-m3-depguard-aktivierung-verifizieren.md`](slice-m3-depguard-aktivierung-verifizieren.md) (in `in-progress/`, Teil von M3) |
 | `forbidigo.msg` referenziert nicht-existenten "configured logging port" (`.golangci.yml`) | temporär | [`open/slice-v1-logging-port.md`](../open/slice-v1-logging-port.md) |
 | ADR-0004 Folgepunkt: Image-Publish nach GHCR und Trivy-Image-Scan fehlen (`.github/workflows/ci.yml` enthält sie nicht) | temporär | [`open/slice-v1-release-pipeline.md`](../open/slice-v1-release-pipeline.md) |
 | ADR-0004 Folgepunkt: Branch-Protection im GitHub-UI ist nicht im Repo versioniert | temporär | [`open/slice-v1-branch-protection-checkliste.md`](../open/slice-v1-branch-protection-checkliste.md) |

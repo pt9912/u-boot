@@ -1,0 +1,121 @@
+# Slice M3: `u-boot init`-Flow
+
+## Auslöser
+
+Bis M2d ist u-boot ein Bootstrap-Skelett (Build-Infrastruktur, leere
+hexagonale Schichten, CLI mit `--help`/`--version`-Stub). M3 liefert
+den ersten fachlichen Use-Case: `u-boot init` erzeugt eine Projekt-
+struktur (`LH-FA-INIT-001..007`, `LH-FA-CONF-001..003`).
+
+Mit M3 entstehen die ersten produktiven Pakete unter `internal/`,
+wodurch zwei M2-Carveouts automatisch greifbar werden:
+
+- `slice-m3-coverage-threshold-aktivieren.md` (Schwellwert von 0 auf
+  80 heben).
+- `slice-m3-depguard-aktivierung-verifizieren.md` (alle 8
+  depguard-Regelblöcke real verifizieren).
+
+## Lieferumfang (MVP-Pflicht-Set)
+
+`u-boot init [<name>] [--devcontainer] [--no-git] [--backup] [--force]
+[--assume-existing]`
+
+Pflicht-Verhalten (Lastenheft-Verweis):
+
+- `LH-FA-INIT-001` Befehl `u-boot init`.
+- `LH-FA-INIT-002` Projektname: explizit oder aus Arbeitsverzeichnis
+  abgeleitet + normalisiert.
+- `LH-FA-INIT-003` Projektstruktur: `docker/`, `scripts/`, `docs/`,
+  `README.md`, `CHANGELOG.md`, `compose.yaml`, `.env.example`,
+  `u-boot.yaml`, `.gitignore`.
+- `LH-FA-INIT-004` Bestehendes Projekt erkennen.
+- `LH-FA-INIT-005` Überschreibschutz mit `--backup`/`--force`.
+- `LH-FA-INIT-006` Projektnamen-Validierung
+  (`^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`).
+- `LH-FA-INIT-007` Git-Repository-Initialisierung (Default an,
+  `--no-git`-Override).
+- `LH-FA-CLI-005A` Interaktivität (`--yes`, `--no-interactive`,
+  `--assume-existing`).
+- `LH-FA-CLI-006` Exit-Codes (`0`/`2`/`10`/`11`/`14`).
+- `LH-FA-CONF-001..003` u-boot.yaml mit `schemaVersion: 1`.
+
+Devcontainer-Erzeugung (`--devcontainer`-Flag) folgt in M4 als eigener
+Slice — M3 erzeugt die Devcontainer-Dateien **nicht**.
+
+## Tranchen-Schnitt
+
+Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
+
+1. **T1 — Domain + Driven Ports + minimale Driven Adapter.**
+   `internal/hexagon/domain/`: `Project`, `ProjectName` (mit Regex aus
+   `LH-FA-INIT-006`). `internal/hexagon/port/driven/`: `FileSystem`,
+   `YAMLCodec`, `Git`, `Clock`. `internal/adapter/driven/{fs,yaml,git,
+   clock}/`: konkrete Implementierungen. Tests pro Schicht (Domain mit
+   Property-Style, Driven-Adapter mit `t.TempDir`/`os/exec` echt).
+   Kein User-Wert noch — aber Bausteine kompiliert.
+
+2. **T2 — Application + Driving Port.**
+   `internal/hexagon/port/driving/InitProjectUseCase`.
+   `internal/hexagon/application/InitProjectService` orchestriert
+   die Driven-Ports; Tests mit Fakes für FileSystem/YAMLCodec/Git.
+
+3. **T3 — Driving Adapter CLI + Wiring → erster lauffähiger
+   `u-boot init`.**
+   `internal/adapter/driving/cli/`: Cobra-basiertes `init`-Command
+   (Cobra wird neue externe Dep; triggert `slice-v1-gomodguard-rules`).
+   `cmd/uboot/main.go`: Wiring aller Schichten. Templates für
+   `README.md`/`CHANGELOG.md`/`compose.yaml`/`.env.example`/
+   `.gitignore`/`u-boot.yaml` via `embed`.
+
+4. **T4 — Überschreibschutz + nicht-interaktive Modi.**
+   `--backup`-/`--force`-Logik nach `LH-FA-INIT-005`,
+   `--no-interactive`/`--yes`/`--assume-existing`-Logik nach
+   `LH-FA-CLI-005A`. Exit-Codes pro Pfad.
+
+5. **T5 — Cleanup: Carveout-Auflösung.**
+   Coverage-Schwelle anheben (siehe
+   [`slice-m3-coverage-threshold-aktivieren.md`](slice-m3-coverage-threshold-aktivieren.md)),
+   depguard-Verifikation pro Schicht (siehe
+   [`slice-m3-depguard-aktivierung-verifizieren.md`](slice-m3-depguard-aktivierung-verifizieren.md)),
+   `carveouts.md` aktualisieren, Roadmap M3 = Done.
+
+## Akzeptanzkriterien (Slice-Level)
+
+- `LH-AK-001` Minimaler Init-Flow läuft grün (`mkdir demo && cd demo
+  && u-boot init && u-boot doctor`). `doctor` ist noch nicht
+  implementiert; dieser AK wird mit M4 vollständig erfüllt. M3
+  liefert: `u-boot init` läuft und erzeugt die Pflichtstruktur.
+- `u-boot init my-service` und `u-boot init` (Name aus Verzeichnis)
+  funktionieren beide.
+- `u-boot init` zweimal hintereinander ohne Flag → Exit-Code `10`
+  (Überschreibschutz).
+- `u-boot init --force` ohne `--backup` und ohne managed block →
+  Exit-Code `10` mit Hinweis auf `--backup`.
+- `u-boot init --backup --force` → schreibt Backup, überschreibt,
+  Exit-Code `0`.
+- `u-boot init --no-git` → Repo wird nicht initialisiert.
+- `make gates` grün; alle 8 depguard-Regeln verifiziert (eine
+  Lint-grüne Variante pro Schicht).
+- `make coverage-gate THRESHOLD=80` grün auf den neuen Paketen.
+- `carveouts.md` Einträge für Coverage-Bootstrap und
+  depguard-leer-Match als gelöst markiert.
+
+## Out of Scope
+
+- Devcontainer-Erzeugung (`--devcontainer`-Flag): eigener Slice
+  M4 (`LH-FA-DEV-001..005`).
+- `u-boot doctor`: eigener Slice M4 (`LH-FA-DIAG-*`).
+- Service-Add-ons (`u-boot add postgres` etc.): eigener Slice M5+.
+- `--dry-run`/`--diff`-Flags (`LH-FA-CLI-007/008`, V1).
+- JSON-Output (`LH-NFA-USE-004`, V1).
+- Template-System (`LH-FA-TPL-*`, V1).
+
+## Bezug
+
+- Auslösende Spec: `LH-FA-INIT-001..007`, `LH-FA-CONF-001..003`,
+  `LH-FA-CLI-005A`, `LH-FA-CLI-006`.
+- Hängt von: M2d (Carveout-Disziplin etabliert).
+- Löst auf: zwei M3-Carveouts in
+  [`carveouts.md`](carveouts.md).
+- Wird ggf. auslösen: `slice-v1-gomodguard-rules.md` (sobald Cobra
+  und yaml.v3 in `go.mod` landen).
