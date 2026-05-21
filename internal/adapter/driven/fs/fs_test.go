@@ -1,0 +1,107 @@
+package fs_test
+
+import (
+	"errors"
+	iofs "io/fs"
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/pt9912/u-boot/internal/adapter/driven/fs"
+)
+
+func TestFS_Exists(t *testing.T) {
+	dir := t.TempDir()
+	existing := filepath.Join(dir, "present.txt")
+	if err := os.WriteFile(existing, []byte("hi"), 0o644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	adapter := fs.New()
+
+	got, err := adapter.Exists(existing)
+	if err != nil {
+		t.Fatalf("Exists(present): %v", err)
+	}
+	if !got {
+		t.Fatalf("Exists(present) = false, want true")
+	}
+
+	got, err = adapter.Exists(filepath.Join(dir, "missing.txt"))
+	if err != nil {
+		t.Fatalf("Exists(missing): unexpected error: %v", err)
+	}
+	if got {
+		t.Fatalf("Exists(missing) = true, want false")
+	}
+}
+
+func TestFS_WriteFile_CreatesParents(t *testing.T) {
+	dir := t.TempDir()
+	target := filepath.Join(dir, "deep", "nested", "file.txt")
+
+	if err := fs.New().WriteFile(target, []byte("payload"), 0o644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+
+	got, err := os.ReadFile(target)
+	if err != nil {
+		t.Fatalf("verify: %v", err)
+	}
+	if string(got) != "payload" {
+		t.Fatalf("WriteFile payload = %q, want %q", got, "payload")
+	}
+}
+
+func TestFS_MkdirAll_Idempotent(t *testing.T) {
+	dir := t.TempDir()
+	target := filepath.Join(dir, "a", "b", "c")
+	adapter := fs.New()
+
+	if err := adapter.MkdirAll(target, 0o755); err != nil {
+		t.Fatalf("MkdirAll first: %v", err)
+	}
+	if err := adapter.MkdirAll(target, 0o755); err != nil {
+		t.Fatalf("MkdirAll second (idempotent): %v", err)
+	}
+}
+
+func TestFS_Rename(t *testing.T) {
+	dir := t.TempDir()
+	src := filepath.Join(dir, "src.txt")
+	dst := filepath.Join(dir, "dst.txt")
+	if err := os.WriteFile(src, []byte("x"), 0o644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	if err := fs.New().Rename(src, dst); err != nil {
+		t.Fatalf("Rename: %v", err)
+	}
+
+	if _, err := os.Stat(src); !errors.Is(err, iofs.ErrNotExist) {
+		t.Fatalf("Rename: src still exists, err=%v", err)
+	}
+	if _, err := os.Stat(dst); err != nil {
+		t.Fatalf("Rename: dst missing, err=%v", err)
+	}
+}
+
+func TestFS_ReadDir(t *testing.T) {
+	dir := t.TempDir()
+	for _, name := range []string{"a.txt", "b.txt"} {
+		if err := os.WriteFile(filepath.Join(dir, name), nil, 0o644); err != nil {
+			t.Fatalf("setup: %v", err)
+		}
+	}
+
+	entries, err := fs.New().ReadDir(dir)
+	if err != nil {
+		t.Fatalf("ReadDir: %v", err)
+	}
+	if len(entries) != 2 {
+		t.Fatalf("ReadDir len = %d, want 2", len(entries))
+	}
+}
+
+// The static FS↔driven.FileSystem contract check lives in fs.go (see
+// `var _ driven.FileSystem = (*FS)(nil)`), not here.
