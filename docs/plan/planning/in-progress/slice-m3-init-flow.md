@@ -73,11 +73,14 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
    `LH-FA-CLI-005A`. Exit-Codes pro Pfad.
 
 5. **T5 — Cleanup: Carveout-Auflösung.**
-   Coverage-Schwelle anheben (siehe
-   [`slice-m3-coverage-threshold-aktivieren.md`](slice-m3-coverage-threshold-aktivieren.md)),
    depguard-Verifikation pro Schicht (siehe
    [`slice-m3-depguard-aktivierung-verifizieren.md`](slice-m3-depguard-aktivierung-verifizieren.md)),
    `carveouts.md` aktualisieren, Roadmap M3 = Done.
+
+   *Vorgezogen erledigt:* Coverage-Schwellwert ist nach M3-T1
+   direkt auf 90 % gehoben (siehe
+   [`../done/slice-m3-coverage-threshold-aktivieren.md`](../done/slice-m3-coverage-threshold-aktivieren.md));
+   bleibt aus dem Carveout-Inventar entfernt.
 
 ## Akzeptanzkriterien (Slice-Level)
 
@@ -96,9 +99,11 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
 - `u-boot init --no-git` → Repo wird nicht initialisiert.
 - `make gates` grün; alle 8 depguard-Regeln verifiziert (eine
   Lint-grüne Variante pro Schicht).
-- `make coverage-gate THRESHOLD=80` grün auf den neuen Paketen.
-- `carveouts.md` Einträge für Coverage-Bootstrap und
-  depguard-leer-Match als gelöst markiert.
+- `make coverage-gate` grün gegen den jetzt aktiven Default
+  `THRESHOLD=90`.
+- `carveouts.md` Eintrag für depguard-leer-Match als gelöst
+  markiert (der Coverage-Bootstrap-Eintrag ist bereits in
+  M3-T1-Review-Folgecommit aufgehoben).
 
 ## Out of Scope
 

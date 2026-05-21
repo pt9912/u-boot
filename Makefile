@@ -14,7 +14,7 @@
 IMAGE                   ?= u-boot
 GO_VERSION              ?= 1.26.3
 GOLANGCI_LINT_VERSION   ?= v2.12.1
-THRESHOLD               ?= 0
+THRESHOLD               ?= 90
 
 # `--no-cache-filter <stage>` forces BuildKit to re-evaluate the given
 # stage without invalidating the `deps` cache layer. Without this, a

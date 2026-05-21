@@ -167,12 +167,15 @@ Coverage-Messung über die `coverage`-Stage, bootstrap-aware
 make coverage-gate
 ```
 
-- Solange `./internal/...` keinen produktiven Code enthält, läuft der
-  Gate im Bootstrap-Modus mit Schwellwert `0`.
-- Mit dem ersten produktiven Paket wird der Schwellwert in einem
-  Folge-Commit angehoben (Empfehlung: 80 % als erster Wert, langfristig
-  90 % analog m-trace/k-deskflight).
-- Override pro Aufruf: `make coverage-gate THRESHOLD=80`.
+- Schwellwert: **90 %** (Makefile-Default `THRESHOLD ?= 90`,
+  Dockerfile-Build-Arg `ARG COVERAGE_THRESHOLD=90`). Aktiviert mit
+  M3-T1, sobald produktive Pakete unter `./internal/...` existieren.
+- Override pro Aufruf, z. B. zur lokalen Diagnose:
+  `make coverage-gate THRESHOLD=80`.
+- Bootstrap-Pfad in `scripts/coverage-gate.sh` bleibt erhalten für
+  den Fall, dass `./internal/...` jemals wieder leer wäre — wirkt
+  aber nicht mehr in der Produktion (`internal/` ist seit M3-T1
+  bestückt).
 
 ---
 
