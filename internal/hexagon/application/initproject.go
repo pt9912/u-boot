@@ -28,16 +28,28 @@ func projectMarkerFiles() []string {
 	return []string{"u-boot.yaml", "compose.yaml", ".env.example"}
 }
 
+// ubootYAMLProject is the `project:` sub-tree of u-boot.yaml
+// (LH-FA-CONF-002). It is its own type — not an anonymous nested
+// struct — so future additions (description, template reference,
+// etc.) stay readable and can be tested in isolation.
+type ubootYAMLProject struct {
+	Name string `yaml:"name"`
+}
+
 // ubootYAMLConfig is the YAML-marshalable shape of u-boot.yaml as
-// required by LH-FA-CONF-002 (schemaVersion + project.name). The
-// struct lives in the application layer because the YAML schema is
-// part of the application contract; the YAMLCodec port stays
-// schema-agnostic.
+// required by LH-FA-CONF-002 (schemaVersion + project + later
+// services + devcontainer + template). The struct lives in the
+// application layer because the YAML schema is part of the
+// application contract; the YAMLCodec port stays schema-agnostic.
+//
+// Future M3+/M5+ slices will add:
+//
+//   - Services    ubootYAMLServices    `yaml:"services,omitempty"`
+//   - Devcontainer ubootYAMLDevcontainer `yaml:"devcontainer,omitempty"`
+//   - Template    string               `yaml:"template,omitempty"`
 type ubootYAMLConfig struct {
-	SchemaVersion int `yaml:"schemaVersion"`
-	Project       struct {
-		Name string `yaml:"name"`
-	} `yaml:"project"`
+	SchemaVersion int              `yaml:"schemaVersion"`
+	Project       ubootYAMLProject `yaml:"project"`
 }
 
 // InitProjectService implements [driving.InitProjectUseCase]. It
@@ -58,13 +70,36 @@ func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driv
 	return &InitProjectService{fs: fs, yaml: yaml, git: git}
 }
 
+// ErrBaseDirMissing signals that req.BaseDir does not exist on the
+// filesystem. The acceptance flow LH-AK-001 has the user create the
+// directory (`mkdir demo && cd demo`); the service refuses to invent
+// it because a typoed BaseDir would otherwise quietly initialize an
+// unintended path under the typo.
+var ErrBaseDirMissing = errors.New("base directory does not exist")
+
 // Init runs the init flow per LH-FA-INIT-001..007 / LH-FA-CONF-001..003.
 // M3-T2 covers the happy path plus the default overwrite-rejection
-// branch (LH-FA-INIT-004); --backup / --force handling lands in
-// M3-T4.
+// branch (LH-FA-INIT-004 hard-marker variant); --backup / --force
+// handling lands in M3-T4, the LH-FA-INIT-004 soft-detection variant
+// lands in `slice-m4-soft-existing-detection.md`.
+//
+// TOCTOU note: between rejectIfExisting and the writeDirectories /
+// writeTemplatedFiles / writeUBootYAML / initGit steps, a concurrent
+// process could create the marker files. For a CLI one-shot the
+// race is benign — the worst case is that the write step trips its
+// own error. No locking is taken; the application contract assumes
+// no concurrent u-boot processes against the same BaseDir.
 func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRequest) (driving.InitProjectResponse, error) {
 	if req.BaseDir == "" {
 		return driving.InitProjectResponse{}, errors.New("BaseDir is required")
+	}
+
+	baseExists, err := s.fs.Exists(req.BaseDir)
+	if err != nil {
+		return driving.InitProjectResponse{}, fmt.Errorf("check BaseDir: %w", err)
+	}
+	if !baseExists {
+		return driving.InitProjectResponse{}, fmt.Errorf("%w: %s", ErrBaseDirMissing, req.BaseDir)
 	}
 
 	name, err := s.resolveProjectName(req)
@@ -175,8 +210,10 @@ func (s *InitProjectService) writeTemplatedFiles(baseDir string, project domain.
 
 // writeUBootYAML marshals and writes u-boot.yaml per LH-FA-CONF-002.
 func (s *InitProjectService) writeUBootYAML(baseDir string, project domain.Project) (string, error) {
-	cfg := ubootYAMLConfig{SchemaVersion: project.SchemaVersion}
-	cfg.Project.Name = project.Name.String()
+	cfg := ubootYAMLConfig{
+		SchemaVersion: project.SchemaVersion,
+		Project:       ubootYAMLProject{Name: project.Name.String()},
+	}
 
 	body, err := s.yaml.Marshal(cfg)
 	if err != nil {

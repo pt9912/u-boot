@@ -5,7 +5,6 @@ import (
 	"errors"
 	iofs "io/fs"
 	"path/filepath"
-	"sort"
 	"sync"
 
 	"gopkg.in/yaml.v3"
@@ -94,6 +93,16 @@ func (f *fakeFS) ReadDir(_ string) ([]iofs.DirEntry, error) {
 	return nil, nil
 }
 
+// markDirExists pre-registers a directory so Exists returns true.
+// Used by test setup to satisfy the BaseDir-existence check
+// without going through a real MkdirAll call (which the test
+// otherwise wants to count).
+func (f *fakeFS) markDirExists(path string) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.dirs[path] = true
+}
+
 // writtenPaths returns the recorded WriteFile paths in deterministic
 // order.
 func (f *fakeFS) writtenPaths() []string {
@@ -104,13 +113,14 @@ func (f *fakeFS) writtenPaths() []string {
 	return out
 }
 
-// mkdirPaths returns the recorded MkdirAll paths sorted.
+// mkdirPaths returns the recorded MkdirAll paths in the order the
+// service called them. Tests assert on the real call order so a
+// reorder in writeDirectories cannot pass silently.
 func (f *fakeFS) mkdirPaths() []string {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	out := make([]string, len(f.mkdirs))
 	copy(out, f.mkdirs)
-	sort.Strings(out)
 	return out
 }
 

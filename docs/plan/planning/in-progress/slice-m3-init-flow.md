@@ -46,18 +46,22 @@ Slice — M3 erzeugt die Devcontainer-Dateien **nicht**.
 
 Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
 
-1. **T1 — Domain + Driven Ports + minimale Driven Adapter.**
+1. **T1 — Domain + Driven Ports + minimale Driven Adapter.** ✅ Done
+   (Commit `132d1a1` + Review-Fixes `f5c784a`)
    `internal/hexagon/domain/`: `Project`, `ProjectName` (mit Regex aus
    `LH-FA-INIT-006`). `internal/hexagon/port/driven/`: `FileSystem`,
    `YAMLCodec`, `Git`, `Clock`. `internal/adapter/driven/{fs,yaml,git,
    clock}/`: konkrete Implementierungen. Tests pro Schicht (Domain mit
    Property-Style, Driven-Adapter mit `t.TempDir`/`os/exec` echt).
-   Kein User-Wert noch — aber Bausteine kompiliert.
 
-2. **T2 — Application + Driving Port.**
+2. **T2 — Application + Driving Port.** ✅ Done
+   (Commit `aaf4d8d` + Review-Fixes folgen)
    `internal/hexagon/port/driving/InitProjectUseCase`.
    `internal/hexagon/application/InitProjectService` orchestriert
    die Driven-Ports; Tests mit Fakes für FileSystem/YAMLCodec/Git.
+   *Bewusste Lücke:* `LH-FA-INIT-004` Soft-Existing-Detection
+   (≥3 Strukturelemente + `--assume-existing`) liegt in
+   [`open/slice-m4-soft-existing-detection.md`](../open/slice-m4-soft-existing-detection.md).
 
 3. **T3 — Driving Adapter CLI + Wiring → erster lauffähiger
    `u-boot init`.**

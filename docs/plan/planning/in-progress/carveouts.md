@@ -33,6 +33,7 @@ Spalten:
 | `LH-OPEN-003` Plugin-System ist offen (`spec/lastenheft.md` §14, auch `spec/architecture.md` §7 als „geplante Erweiterung") — keine Entscheidung zwischen fest-eingebauten Add-ons und nachladbaren Plugins | temporär | bleibt offen bis MVP-Closure; eigener ADR mit dem ersten Add-on-jenseits-PostgreSQL-Slice (vermutlich V1, z. B. Keycloak) |
 | `LH-OPEN-004` Template-Format ist offen (`spec/lastenheft.md` §14) — YAML+Dateien vs. Cookiecutter vs. eigenes Format vs. OCI-Pakete | temporär | bleibt offen bis Template-System-Slice (V1, `LH-FA-TPL-*`); eigener ADR mit dem ersten Template-Slice |
 | HTTP-Driving-Adapter ist als „geplante Erweiterung" in `spec/architecture.md` §7 erwähnt, aber nicht spezifiziert oder gefordert | temporär | aktuell unverbindliche Roadmap-Andeutung; sobald die Daemon-/HTTP-Variante real wird, eigener Slice + ADR (vermutlich Later) |
+| `LH-FA-INIT-004` Soft-Existing-Detection fehlt — M3-T2 prüft nur Hard-Marker, die „3+ Strukturelemente"-Erkennung plus `--assume-existing`-Logik sind nicht implementiert | temporär | [`open/slice-m4-soft-existing-detection.md`](../open/slice-m4-soft-existing-detection.md) |
 
 ## Permanente Carveouts (kein Plan, im Inventar dokumentiert)
 

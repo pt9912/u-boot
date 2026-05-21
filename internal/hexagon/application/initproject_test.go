@@ -5,7 +5,6 @@ import (
 	"errors"
 	"path/filepath"
 	"reflect"
-	"sort"
 	"strings"
 	"testing"
 
@@ -19,6 +18,10 @@ const testBaseDir = "/tmp/u-boot-test/demo"
 func newService(t *testing.T) (*application.InitProjectService, *fakeFS, *fakeYAML, *fakeGit) {
 	t.Helper()
 	fs := newFakeFS()
+	// The service refuses to initialize a non-existent BaseDir
+	// (LH-AK-001 has the user mkdir first); the fake treats a
+	// pre-registered directory as "exists".
+	fs.markDirExists(testBaseDir)
 	y := &fakeYAML{}
 	g := &fakeGit{}
 	return application.NewInitProjectService(fs, y, g), fs, y, g
@@ -43,11 +46,12 @@ func TestInit_HappyPath_CreatesStructureAndConfig(t *testing.T) {
 		t.Errorf("Project.SchemaVersion = %d, want %d", resp.Project.SchemaVersion, domain.SchemaVersionCurrent)
 	}
 
-	// Directories per LH-FA-INIT-003.
+	// Directories per LH-FA-INIT-003, in the deterministic call order
+	// asserted by projectStructureDirs().
 	wantDirs := []string{
 		filepath.Join(testBaseDir, "docker"),
-		filepath.Join(testBaseDir, "docs"),
 		filepath.Join(testBaseDir, "scripts"),
+		filepath.Join(testBaseDir, "docs"),
 	}
 	if got := fs.mkdirPaths(); !reflect.DeepEqual(got, wantDirs) {
 		t.Errorf("MkdirAll paths = %v, want %v", got, wantDirs)
@@ -86,10 +90,12 @@ func TestInit_HappyPath_CreatesStructureAndConfig(t *testing.T) {
 }
 
 func TestInit_NameDerivedFromBaseDir(t *testing.T) {
-	svc, _, _, _ := newService(t)
+	svc, fs, _, _ := newService(t)
+	customBase := "/tmp/u-boot-test/My_Project Name"
+	fs.markDirExists(customBase)
 
 	resp, err := svc.Init(context.Background(), driving.InitProjectRequest{
-		BaseDir: "/tmp/u-boot-test/My_Project Name/",
+		BaseDir: customBase,
 	})
 	if err != nil {
 		t.Fatalf("Init: %v", err)
@@ -98,6 +104,24 @@ func TestInit_NameDerivedFromBaseDir(t *testing.T) {
 	// "My_Project Name" → "my-project-name" via LH-FA-INIT-002.
 	if got := resp.Project.Name.String(); got != "my-project-name" {
 		t.Errorf("Project.Name = %q, want %q", got, "my-project-name")
+	}
+}
+
+func TestInit_MissingBaseDirRejects(t *testing.T) {
+	// Why: pins the LH-AK-001-driven contract — the user must mkdir
+	// before `u-boot init`. A typoed BaseDir must not silently
+	// initialize a fresh tree under the typo.
+	svc, _, _, _ := newService(t)
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: "/tmp/u-boot-test/this-path-does-not-exist",
+	})
+	if err == nil {
+		t.Fatalf("Init(missing BaseDir): expected error, got nil")
+	}
+	if !errors.Is(err, application.ErrBaseDirMissing) {
+		t.Errorf("Init(missing BaseDir): error %v does not wrap ErrBaseDirMissing", err)
 	}
 }
 
@@ -290,6 +314,19 @@ func TestInit_GitIsRepositoryErrorPropagates(t *testing.T) {
 	}
 }
 
+func TestRenderTemplate_UnknownNameReturnsError(t *testing.T) {
+	// Why: ParseFS-error path is the only renderTemplate failure
+	// reachable from outside; pins it so a future template-loader
+	// refactor cannot accidentally swallow it.
+	_, err := application.RenderTemplateForTest("does-not-exist.tmpl", "demo")
+	if err == nil {
+		t.Fatalf("RenderTemplate(unknown): expected error, got nil")
+	}
+	if !strings.Contains(err.Error(), "parse template") {
+		t.Errorf("RenderTemplate(unknown): error %v does not mention parse", err)
+	}
+}
+
 func TestTemplateNames_AreSorted(t *testing.T) {
 	// Why: pins that the embed.FS-glob picks up exactly the
 	// templates we expect; a missing template would break Init
@@ -305,7 +342,7 @@ func TestTemplateNames_AreSorted(t *testing.T) {
 	if err != nil {
 		t.Fatalf("TemplateNamesForTest: %v", err)
 	}
-	sort.Strings(got)
+	// templateNames() already sorts; assert the sorted contract.
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("template names =\n  %v\nwant:\n  %v", got, want)
 	}

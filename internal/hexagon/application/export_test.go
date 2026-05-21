@@ -7,3 +7,10 @@ package application
 func TemplateNamesForTest() ([]string, error) {
 	return templateNames()
 }
+
+// RenderTemplateForTest exposes the package-internal renderTemplate
+// helper to external _test packages so the error path
+// (template-not-found) is reachable.
+func RenderTemplateForTest(name, projectName string) ([]byte, error) {
+	return renderTemplate(name, templateData{Name: projectName})
+}
