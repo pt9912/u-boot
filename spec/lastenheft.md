@@ -1399,7 +1399,7 @@ Die Migration muss mit einem klaren Fehler auf unbekannte Zukunftsversionen reag
 
 ## 4.11 Build- und CI-Infrastruktur des u-boot-Projekts
 
-Diese Sektion definiert die Build- und CI-Infrastruktur für die **u-boot-Codebase selbst**. Sie ist nicht zu verwechseln mit den Anforderungen aus 4.4 (`LH-FA-DOC-*`), die das Verhalten des Generators in den per `u-boot init` erzeugten Zielprojekten beschreiben.
+Diese Sektion definiert die Build- und CI-Infrastruktur für die **u-boot-Codebase selbst**. Sie ist nicht zu verwechseln mit den Anforderungen aus 4.4 (`LH-FA-DOC-*`), die das Verhalten der Compose-/Dockerfile-Generatoren in den per `u-boot init` erzeugten Zielprojekten beschreiben.
 
 Bezug:
 
@@ -1422,7 +1422,7 @@ Mindestumfang:
   - `compile` – schnelles Compile-Feedback (`go build`) ohne Tests/Lint.
   - `test` – `go test ./...`.
   - `lint` – `golangci-lint run ./...`.
-  - `coverage` – `go test -coverprofile` + Coverage-Gate gegen `COVERAGE_THRESHOLD` (bootstrap-aware: Schwellwert 0 bis erste produktive Pakete in `./internal/...` existieren).
+  - `coverage` – `go test -coverprofile` + Coverage-Gate gegen `COVERAGE_THRESHOLD`; Bootstrap-Verhalten und Scope sind in `LH-FA-BUILD-008` und `LH-FA-BUILD-009` definiert.
   - `build` – statisch gelinktes Binary (`CGO_ENABLED=0`, `-ldflags="-s -w"`).
   - `runtime` – minimales Endimage (`LH-FA-BUILD-002`).
 - Jeder Stage ist ein eigenständiges Build-Ziel und wird per `docker build --target <stage>` einzeln baubar.
@@ -1437,7 +1437,7 @@ Der `runtime`-Stage des u-boot-Dockerfiles muss folgende Eigenschaften erfüllen
 
 - Base-Image: `gcr.io/distroless/static-debian12:nonroot` (oder gleichwertig minimal und ohne Shell).
 - Non-root-Benutzer (Distroless-`nonroot`-User, `USER 65532:65532`).
-- `ENTRYPOINT ["/usr/local/bin/u-boot"]`.
+- `ENTRYPOINT` zeigt auf das im `build`-Stage erzeugte Binary; der konkrete Pfad (Empfehlung: `/usr/local/bin/u-boot`) ist im Dockerfile dokumentiert.
 - OCI Image Labels gesetzt:
   - `org.opencontainers.image.source`
   - `org.opencontainers.image.description`
@@ -1453,7 +1453,7 @@ Priorität: MVP
 
 Das u-boot-Dockerfile muss versions- und schwellwertbezogene Build-Args bereitstellen:
 
-- `ARG GO_VERSION` – mit Default-Pin (z. B. `1.22.6`); Hebung ist Routine ohne separaten Spec-Eintrag.
+- `ARG GO_VERSION` – mit Default-Pin (z. B. `1.26.3`); Hebung ist Routine ohne separaten Spec-Eintrag.
 - `ARG GOLANGCI_LINT_VERSION` – mit Default-Pin; gleiche Pin-Politik.
 - `ARG COVERAGE_THRESHOLD` – mit Default `0` (bootstrap) und Override-Pfad `make coverage-gate THRESHOLD=…`.
 
@@ -1503,7 +1503,7 @@ MVP-Pflicht-Targets:
 | `coverage`      | Alias auf `coverage-gate`                                       |
 | `coverage-gate` | `docker build --target coverage --build-arg COVERAGE_THRESHOLD` |
 | `build`         | `docker build --target runtime`                                 |
-| `run`           | `docker run --rm <image> --help` (Smoketest)                    |
+| `run`           | `docker run --rm <image> --help` (Smoketest); Dependency: `build` |
 | `clean`         | lokale Artefakte und gebaute Images entfernen                   |
 
 ---
@@ -1515,7 +1515,7 @@ Priorität: V1
 Das Makefile soll Aggregator-Targets bereitstellen:
 
 - `gates` – Inner-Loop-Pflichtgates (`lint` + `test` + `coverage-gate`), PR-blockierend.
-- `ci` – `gates` plus erweiterte Prüfungen (z. B. `govulncheck`), wenn vorhanden.
+- `ci` – `gates` plus mindestens `govulncheck` (bei Go-Stack aus `LH-OPEN-001` zwingend); weitere Prüfungen (z. B. Trivy-Image-Scan, SBOM) sind optional.
 - `fullbuild` – `ci` plus `build`; vollständiger Closure-Lauf.
 
 Aggregator-Targets müssen bei Fehler eines untergeordneten Targets mit Non-Zero-Exit abbrechen und die Fehlerursache klar benennen.
@@ -1528,8 +1528,8 @@ Priorität: MVP
 
 Der Standard-Build-/Test-Workflow muss ohne hostseitige Sprach-Toolchain auskommen.
 
-- Alle MVP- und V1-Pflicht-Targets aus `LH-FA-BUILD-005`/`LH-FA-BUILD-006` müssen ausschließlich `docker build` bzw. `docker run` aufrufen.
-- Voraussetzung am Host: Docker Engine und `make`. Eine Go-Toolchain am Host darf für Standard-Targets nicht vorausgesetzt werden.
+- Alle MVP- und V1-Pflicht-Targets aus `LH-FA-BUILD-005`/`LH-FA-BUILD-006` müssen ausschließlich `docker build`, `docker run` oder die Aggregation anderer solcher Targets aufrufen.
+- Voraussetzung am Host: Docker Engine und `make`. `make` ist ein bewusster Carveout zu `LH-NFA-PORT-002` (weit verbreitet, einzige zusätzliche Host-Abhängigkeit neben Docker). Eine Go-Toolchain am Host darf für Standard-Targets nicht vorausgesetzt werden.
 - Carveouts (z. B. ein Bash-Skript, das nicht containerisiert wird) sind im `Makefile`-Header explizit zu dokumentieren.
 
 ---
@@ -1543,6 +1543,40 @@ Der `coverage`-Stage muss in der Bootstrap-Phase (noch keine produktiven Pakete 
 - Default-Schwellwert `0` (`ARG COVERAGE_THRESHOLD=0`).
 - Sobald `./internal/...` produktive Pakete enthält, wird die Schwelle in einem Folge-Schritt angehoben; der Override-Pfad `make coverage-gate THRESHOLD=…` muss funktionieren.
 - Leere Coverage darf in der Bootstrap-Phase nicht zu einem falschen Grün führen, das echte Test-Failures maskiert; der `go test`-Exit-Code wird über `set -o pipefail` o. ä. an die Gate-Logik durchgereicht.
+
+---
+
+### LH-FA-BUILD-009 – Repository-Layout
+
+Priorität: MVP
+
+Das u-boot-Repo muss folgendem Go-Layout folgen:
+
+- Modul-Pfad in `go.mod`: `github.com/pt9912/u-boot`.
+- Implementierungspakete leben unter `./internal/...`; öffentlich konsumierbare Pakete unter `./pkg/...` werden im MVP nicht erzeugt.
+- CLI-Entry-Points unter `./cmd/<binary>/`; das primäre Binary heißt `uboot` (Verzeichnis `./cmd/uboot/`, Go-konform ohne Bindestrich), wird beim Build aber als `u-boot` ausgeliefert (`-o /out/u-boot`).
+- Unit-Tests stehen als `*_test.go` neben dem produktiven Code im selben Paket.
+- Coverage-Messung (`LH-FA-BUILD-001`, `LH-FA-BUILD-008`) bezieht sich auf `./internal/...`; `./cmd/...` ist bewusst ausgeschlossen, weil dort nur dünne Wireup-Logik liegt.
+
+Mindestlayout:
+
+```text
+.
+├── cmd/
+│   └── uboot/
+│       └── main.go              # Entry point der CLI
+├── internal/                    # nicht-exportierbare Implementierung
+├── spec/                        # Lastenheft, weitere Spezifikationen
+├── docs/                        # Doku-Struktur (LH-FA-PROJDOCS-001)
+├── go.mod
+├── go.sum
+├── Dockerfile
+├── Makefile
+├── .dockerignore
+├── .gitignore
+├── LICENSE
+└── README.md
+```
 
 ---
 
@@ -1575,6 +1609,8 @@ docs/
 
 Jedes Unterverzeichnis muss mindestens eine `README.md` mit kurzer Zweckbeschreibung enthalten, damit Git die Struktur trackt und Newcomer den Verzeichnisstandard ohne externe Erklärung erfassen können. `.gitkeep` ist als Ersatz unzureichend, weil er den Zweck nicht kommuniziert.
 
+Abgrenzung zu Zielprojekten: Für per `u-boot init` erzeugte Zielprojekte ist nur `docs/` als Top-Level Pflicht (`LH-FA-INIT-003`). Ob diese Unterstruktur auch in Zielprojekten erzeugt wird, ist eine spätere Entscheidung (z. B. via Template oder Flag) und gehört nicht zum MVP-Umfang.
+
 ---
 
 ### LH-FA-PROJDOCS-002 – ADR-Format
@@ -1585,14 +1621,14 @@ Architecture Decision Records in `docs/plan/adr/` müssen folgenden Konventionen
 
 - Dateiname beginnt mit vierstelliger Nummer, beginnend bei `0001` und monoton steigend: `0001-<slug>.md`, `0002-<slug>.md`.
 - Slug nach der Nummer in Kebab-Case (z. B. `0001-implementierungssprache-go.md`).
-- Mindestabschnitte im Dokument:
-  - `# ADR <Nr>: <Titel>`
-  - **Status** – einer aus `Proposed`, `Accepted`, `Superseded by ADR-NNNN`, `Deprecated`.
-  - **Datum** – Entscheidungsdatum im Format `YYYY-MM-DD`.
-  - **Kontext** – warum die Entscheidung nötig wird.
-  - **Entscheidung** – was beschlossen wird.
-  - **Konsequenzen** – kurz- und langfristige Auswirkungen, inkl. Trade-offs.
-- ADR-Nummern werden nie wiederverwendet; abgelöste ADRs bleiben mit Status `Superseded` erhalten und verweisen auf den Nachfolger.
+- Mindestabschnitte im Dokument, in dieser Reihenfolge, jeweils als `##`-Überschrift:
+  1. Dokumenttitel als `#`-Überschrift: `# ADR <Nr>: <Titel>`.
+  2. `## Status` – einer aus `Proposed`, `Accepted`, `Superseded by <NNNN>-<slug>`, `Deprecated`.
+  3. `## Datum` – Entscheidungsdatum im Format `YYYY-MM-DD`.
+  4. `## Kontext` – warum die Entscheidung nötig wird.
+  5. `## Entscheidung` – was beschlossen wird.
+  6. `## Konsequenzen` – kurz- und langfristige Auswirkungen, inkl. Trade-offs.
+- ADR-Nummern werden nie wiederverwendet; abgelöste ADRs bleiben mit Status `Superseded by <NNNN>-<slug>` erhalten und verweisen auf den Nachfolger über den vollen Dateinamen-Stamm (ohne `.md`).
 
 ---
 
@@ -1605,7 +1641,10 @@ Planning-Artefakte (Slices, Tranchen, Tickets) durchlaufen die Verzeichnisse `op
 - Ein Artefakt darf nicht in mehreren Lifecycle-Verzeichnissen gleichzeitig liegen.
 - Übergänge zwischen Lifecycle-Stufen erfolgen per `git mv` (Move statt Kopie), damit die Datei-Historie erhalten bleibt.
 - Inhalte in `done/` dürfen nachträglich nur korrigierend (Tippfehler, Querverweise, Archiv-Hinweise) verändert werden; substanzielle inhaltliche Änderungen erzeugen ein neues Artefakt in `open/` oder `next/` mit Verweis auf den vorhergehenden Stand.
-- Dateinamen in `planning/` folgen einer einheitlichen Konvention (z. B. `slice-<phase>-<kurzbeschreibung>.md` oder `tranche-<nr>-<kurzbeschreibung>.md`), die im `README.md` von `docs/plan/planning/` dokumentiert ist.
+- Dateinamen in `planning/` folgen einem der zwei verbindlichen Formate, abhängig vom Artefakttyp:
+  - `slice-<phase>-<kebab-slug>.md` für Slice-Pläne (z. B. `slice-m1-repo-skeleton.md`).
+  - `tranche-<nr>-<kebab-slug>.md` für Tranchen-Pläne (z. B. `tranche-01-init-flow.md`).
+  Die Wahl zwischen Slice- und Tranchen-Format ist im `README.md` von `docs/plan/planning/` dokumentiert; ein Artefakt verwendet genau eines der beiden Formate.
 
 ---
 
@@ -2343,6 +2382,13 @@ Der MVP muss enthalten:
 - Erzeugung von `README.md`
 - Erzeugung von `CHANGELOG.md`
 - grundlegende Devcontainer-Unterstützung
+- Build-Infrastruktur der u-boot-Codebase selbst:
+  - Multi-Stage `Dockerfile` (`LH-FA-BUILD-001`)
+  - `Makefile` mit MVP-Pflicht-Targets (`LH-FA-BUILD-005`)
+  - `.dockerignore` (`LH-FA-BUILD-004`)
+  - Docker-only-Workflow (`LH-FA-BUILD-007`)
+  - Repository-Layout nach `LH-FA-BUILD-009`
+- Doku-Struktur der u-boot-Codebase nach `LH-FA-PROJDOCS-001`, inkl. ADR-Format (`LH-FA-PROJDOCS-002`) und Planning-Lifecycle (`LH-FA-PROJDOCS-003`)
 
 ---
 
@@ -2447,6 +2493,7 @@ Nach dem MVP können ergänzt werden:
 | LH-FA-BUILD-006    | Aggregator-Targets             | V1        | PH-BUILD-006                       | TC-BUILD-006    |
 | LH-FA-BUILD-007    | Docker-only-Workflow           | MVP       | PH-BUILD-007                       | TC-BUILD-007    |
 | LH-FA-BUILD-008    | Coverage-Bootstrap             | MVP       | PH-BUILD-008                       | TC-BUILD-008    |
+| LH-FA-BUILD-009    | Repository-Layout              | MVP       | PH-BUILD-009                       | TC-BUILD-009    |
 | LH-FA-PROJDOCS-001 | docs/-Mindeststruktur (u-boot-Repo) | MVP  | PH-PROJDOCS-001                    | TC-PROJDOCS-001 |
 | LH-FA-PROJDOCS-002 | ADR-Format                     | MVP       | PH-PROJDOCS-002                    | TC-PROJDOCS-002 |
 | LH-FA-PROJDOCS-003 | Planning-Lifecycle             | MVP       | PH-PROJDOCS-003                    | TC-PROJDOCS-003 |
@@ -2508,20 +2555,15 @@ Nach dem MVP können ergänzt werden:
 
 ---
 
-## 14. Offene Punkte
+## 14. Offene Punkte und Entscheidungen
 
 ### LH-OPEN-001 – Implementierungssprache (entschieden)
 
-Entscheidung (2026-05-21): **Go**.
+Status: entschieden am 2026-05-21.
+Sprache: **Go**.
+Begründung und Konsequenzen: siehe `docs/plan/adr/0001-implementierungssprache-go.md` (`LH-FA-PROJDOCS-002`).
 
-Begründung:
-
-- statisch gelinktes Single-Binary erleichtert die Paketierung (`LH-OPEN-002`) und passt zu einer distroless-Runtime ohne Sprach-Laufzeit.
-- erstklassige Unterstützung für CLI-Frameworks, Docker-/Compose-Interaktion, YAML-/JSON-Verarbeitung und Cross-Compilation.
-- konsistent mit dem Stack des Referenzprojekts `k-deskflight`, dessen Build-/CI-Pattern als Vorlage dient (`LH-FA-BUILD-001`/`LH-FA-BUILD-005`).
-- niedrige Laufzeitanforderungen am Zielsystem (keine Toolchain im Endbenutzer-Setup nötig).
-
-Mindest-Toolchain: Go 1.22 oder neuer; die konkrete Pin-Version wird im Dockerfile als `ARG GO_VERSION` geführt (Pin-Hebung ist Routine).
+Mindest-Toolchain: Go 1.25 oder neuer; Default-Pin im Dockerfile als `ARG GO_VERSION` (aktuell `1.26.3`, analog Referenzprojekt `k-deskflight`). Pin-Hebung ist Routine ohne separaten Spec-Eintrag.
 
 ---
 
