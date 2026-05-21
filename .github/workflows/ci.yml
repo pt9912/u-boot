@@ -1,0 +1,63 @@
+name: ci
+
+# CI-Pipeline gemäß LH-QA-003 / ADR-0004.
+#
+# Zwei parallele Jobs (analog k-deskflight ADR 0012 §2.11):
+#   - gates           : Inner-Loop-Pflichten (lint + test + coverage-gate) — `make gates`.
+#   - security-gates  : govulncheck — `make govulncheck`.
+#
+# Beide Jobs sind PR-blockierend. Required-Status-Checks werden im
+# GitHub-UI nach dem ersten grünen Lauf konfiguriert (Settings →
+# Branches → Branch protection rules → `main`).
+#
+# Docker-only-Pfad (LH-FA-BUILD-007): alle Werkzeuge laufen über
+# `docker build --target <stage>`, sodass der CI-Runner keine
+# Go-Toolchain installieren muss — er braucht nur das vorinstallierte
+# Docker + BuildKit auf `ubuntu-latest`.
+#
+# Action-Pinning (Supply-Chain-Härtung): alle `uses:`-Einträge sind
+# SHA-gepinnt mit Tag-Kommentar. Pin-Hebung ist Routine; neuen Commit-
+# SHA via `gh api repos/<owner>/<repo>/git/refs/tags/<tag>` auflösen
+# und Tag-Kommentar mitführen.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Top-level permissions: explizit alles entziehen. Jeder Job lockert
+# auf das, was er braucht (Defense-in-Depth gegen versehentlich neu
+# hinzukommende Steps, die schreibende Tokens nutzen würden).
+permissions: {}
+
+jobs:
+  gates:
+    name: gates (lint + test + coverage-gate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      DOCKER_BUILDKIT: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run make gates
+        run: make gates
+
+  security-gates:
+    name: security-gates (govulncheck)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      DOCKER_BUILDKIT: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run make govulncheck
+        run: make govulncheck

@@ -2208,11 +2208,24 @@ Jede funktionale Anforderung soll durch mindestens einen Akzeptanztest überprü
 
 ---
 
-### LH-QA-003 – CI-Fähigkeit
+### LH-QA-003 – CI-Fähigkeit (GitHub Actions)
 
 Priorität: MVP
 
-Das Projekt soll in einer CI-Umgebung testbar sein.
+Das u-boot-Repo muss eine CI-Pipeline auf GitHub Actions führen.
+
+Pflicht-Komposition:
+
+- Workflow-Datei: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
+- Trigger: `pull_request` und `push` auf den Branch `main`.
+- Zwei Jobs, parallel, beide PR-blockierend (Required-Status-Checks im GitHub-UI nach dem ersten grünen Lauf zu konfigurieren):
+  - `gates` — führt `make gates` aus (lint + test + coverage-gate, `LH-FA-BUILD-005`/`-006`).
+  - `security-gates` — führt `make govulncheck` aus (`LH-FA-BUILD-006`).
+- Runner: `ubuntu-latest`. Keine Host-Go-Toolchain (`LH-FA-BUILD-007`); der Runner braucht nur das vorinstallierte Docker + BuildKit.
+- Actions sind **SHA-gepinnt** mit Tag-Kommentar (Supply-Chain-Härtung gegen Tag-Move). Pin-Hebung ist Routine; neuer Commit-SHA via `gh api repos/<owner>/<repo>/git/refs/tags/<tag>`.
+- Top-Level `permissions: {}` (alle Tokens entzogen); jeder Job lockert auf das Minimum (Defense-in-Depth).
+- Jeder Job mit `timeout-minutes` versehen (Empfehlung: 20).
+- Begründung der konkreten Setzungen in [`docs/plan/adr/0004-ci-system.md`](../docs/plan/adr/0004-ci-system.md).
 
 ---
 
@@ -2477,6 +2490,7 @@ Der MVP muss enthalten:
 - Doku-Struktur der u-boot-Codebase nach `LH-FA-PROJDOCS-001`, inkl. ADR-Format (`LH-FA-PROJDOCS-002`) und Planning-Lifecycle (`LH-FA-PROJDOCS-003`)
 - Architektur-Pattern (hexagonal, driving/driven-Split) nach `LH-FA-ARCH-001..003`, mit Detail-Spezifikation in `spec/architecture.md` und Import-Enforcement via `golangci-lint depguard`
 - SOLID-nahes Lint-Profil nach `LH-QA-004` (5 Default-Linter + 24 SOLID-nahe Linter inkl. `depguard`, 29 Linter gesamt); Konfiguration in `.golangci.yml`, Doku in `docs/user/quality.md` §1.2 / §1.3, Begründung in ADR-0003
+- CI-Pipeline nach `LH-QA-003` (GitHub Actions, `.github/workflows/ci.yml`, Jobs `gates` + `security-gates`, beide PR-blockierend); Begründung in ADR-0004
 
 ---
 

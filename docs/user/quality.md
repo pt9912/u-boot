@@ -196,3 +196,36 @@ aus `LH-FA-ARCH-003`. Detail in [`spec/architecture.md`](../../spec/architecture
 Die `depguard`-Regelblöcke sind heute aktiv, matchen aber nichts,
 solange `./internal/...` keinen produktiven Code enthält. Mit dem
 ersten Paket pro Schicht greift die jeweilige Regel automatisch.
+
+---
+
+## 6. CI-Pipeline (GitHub Actions)
+
+CI läuft auf GitHub Actions; Konfiguration in
+[`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).
+Verbindliche Setzungen aus `LH-QA-003`, Begründung in
+[ADR-0004](../plan/adr/0004-ci-system.md).
+
+Pflichten:
+
+- **Trigger:** `pull_request` und `push` auf `main`.
+- **Jobs (beide PR-blockierend):**
+  - `gates` — `make gates` (lint + test + coverage-gate).
+  - `security-gates` — `make govulncheck`.
+- **Runner:** `ubuntu-latest` mit vorinstalliertem Docker + BuildKit.
+- **Keine Host-Toolchain:** Docker-only (`LH-FA-BUILD-007`); der
+  Workflow installiert weder Go noch `golangci-lint` am Runner.
+- **Actions SHA-gepinnt** mit Tag-Kommentar, z. B.
+  `uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2`.
+  Pin-Hebung ist Routine.
+- **Permissions:** Top-Level `permissions: {}`; jeder Job lockert auf
+  das Minimum (typisch `contents: read`).
+- **Timeout:** `timeout-minutes: 20` pro Job.
+
+Required-Status-Checks für `gates` und `security-gates` werden im
+GitHub-UI nach dem ersten grünen Lauf gesetzt (Repository → Settings →
+Branches → Branch protection rules → `main`).
+
+Bewusst noch nicht enthalten (Folge-Slices, ADR-0004 Folgepunkte):
+Image-Publish nach GHCR, Trivy-Image-Scan, Cluster-/Integrations-
+Smoke gegen die echte Docker-Engine.
