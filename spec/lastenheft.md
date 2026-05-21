@@ -209,7 +209,7 @@ Fehlermeldungen müssen enthalten:
 
 Priorität: MVP
 
-Das Produkt muss eine konfigurierbare Ausgabeverbosity unterstützen.
+Das Produkt muss ein konfigurierbares Ausgabeverbose-Level (Verbosity) unterstützen.
 
 Mindestens müssen folgende Stufen unterstützt werden:
 
@@ -242,7 +242,7 @@ Es muss mindestens folgende Optionen bieten:
   - Ohne `--assume-existing` und bei nicht-interaktivem Lauf ist die implizite Erkennung zwingend ablehnend und erzeugt einen fachlichen Fehler.
   - Der Fehlercode für diese Abweisung ist `10`.
 - Bei aktivierter Nicht-Interaktivität darf keine neue Rückfrage erzeugt werden:
-  - mit `--no-interactive` bricht der Aufruf bei jeder offenen Bestätigungsfrage mit Fehlercode ab,
+  - mit `--no-interactive` bricht der Aufruf bei jeder offenen Bestätigungsfrage mit Exit-Code `2` ab,
   - mit `--yes` wird die vorgesehene Standardentscheidung deterministisch ausgeführt.
 - Für bereits deterministische Ausführungspfade (keine relevante Rückfrage) ist das Verhalten in beiden Modi unverändert.
 
@@ -962,7 +962,7 @@ Das Produkt muss die Entwicklungsumgebung starten können.
 
 - Die Standard-Wartezeit beträgt 60 Sekunden; nach Ablauf erfolgt der Abbruch mit Fehler.
 - Die maximale Wartezeit kann über `--timeout <sekunden>` überschrieben werden.
-- `--timeout` akzeptiert nur nicht-negative Ganzzahlen (`>= 0`). Negative Werte führen zu `exit code 2` und klarer Validierungsfehlermeldung.
+- `--timeout` akzeptiert nur nicht-negative Ganzzahlen (`>= 0`). Negative Werte führen zu Exit-Code `2` und klarer Validierungsfehlermeldung.
 - Für Dienste mit Healthcheck ist `healthy` als Zielzustand erforderlich.
 - Für Dienste ohne Healthcheck ist `running` als Zielzustand ausreichend.
 - Bei definierten Ports wird auf Erreichbarkeit auf `localhost` geprüft, sofern es sich um TCP-basierten Zugriff handelt.
