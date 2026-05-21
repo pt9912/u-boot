@@ -1546,6 +1546,81 @@ Der `coverage`-Stage muss in der Bootstrap-Phase (noch keine produktiven Pakete 
 
 ---
 
+## 4.12 Doku-Struktur des u-boot-Projekts
+
+Diese Sektion definiert die Verzeichnisstruktur unter `docs/` für die **u-boot-Codebase selbst**. Sie ist nicht zu verwechseln mit der `docs/`-Erzeugung in Zielprojekten (siehe `LH-FA-INIT-003`, `LH-SA-FILE-001`), die nur das Top-Level-Verzeichnis anlegt.
+
+Vorlage: die Referenzprojekte `k-deskflight` und `grid-gym` (Basis-Pattern: archive + plan/adr + plan/planning-Lifecycle + user).
+
+---
+
+### LH-FA-PROJDOCS-001 – Mindeststruktur
+
+Priorität: MVP
+
+Das u-boot-Repo muss folgende `docs/`-Unterstruktur bereitstellen:
+
+```text
+docs/
+├── archive/                  # abgelöste oder ersetzte Inhalte
+├── plan/
+│   ├── adr/                  # Architecture Decision Records
+│   └── planning/
+│       ├── open/             # Backlog
+│       ├── next/             # priorisiert für nächsten Schritt
+│       ├── in-progress/      # aktiv bearbeitet
+│       └── done/             # abgeschlossen
+└── user/                     # User-facing Dokumentation
+```
+
+Jedes Unterverzeichnis muss mindestens eine `README.md` mit kurzer Zweckbeschreibung enthalten, damit Git die Struktur trackt und Newcomer den Verzeichnisstandard ohne externe Erklärung erfassen können. `.gitkeep` ist als Ersatz unzureichend, weil er den Zweck nicht kommuniziert.
+
+---
+
+### LH-FA-PROJDOCS-002 – ADR-Format
+
+Priorität: MVP
+
+Architecture Decision Records in `docs/plan/adr/` müssen folgenden Konventionen folgen:
+
+- Dateiname beginnt mit vierstelliger Nummer, beginnend bei `0001` und monoton steigend: `0001-<slug>.md`, `0002-<slug>.md`.
+- Slug nach der Nummer in Kebab-Case (z. B. `0001-implementierungssprache-go.md`).
+- Mindestabschnitte im Dokument:
+  - `# ADR <Nr>: <Titel>`
+  - **Status** – einer aus `Proposed`, `Accepted`, `Superseded by ADR-NNNN`, `Deprecated`.
+  - **Datum** – Entscheidungsdatum im Format `YYYY-MM-DD`.
+  - **Kontext** – warum die Entscheidung nötig wird.
+  - **Entscheidung** – was beschlossen wird.
+  - **Konsequenzen** – kurz- und langfristige Auswirkungen, inkl. Trade-offs.
+- ADR-Nummern werden nie wiederverwendet; abgelöste ADRs bleiben mit Status `Superseded` erhalten und verweisen auf den Nachfolger.
+
+---
+
+### LH-FA-PROJDOCS-003 – Planning-Lifecycle
+
+Priorität: MVP
+
+Planning-Artefakte (Slices, Tranchen, Tickets) durchlaufen die Verzeichnisse `open → next → in-progress → done` in dieser Reihenfolge.
+
+- Ein Artefakt darf nicht in mehreren Lifecycle-Verzeichnissen gleichzeitig liegen.
+- Übergänge zwischen Lifecycle-Stufen erfolgen per `git mv` (Move statt Kopie), damit die Datei-Historie erhalten bleibt.
+- Inhalte in `done/` dürfen nachträglich nur korrigierend (Tippfehler, Querverweise, Archiv-Hinweise) verändert werden; substanzielle inhaltliche Änderungen erzeugen ein neues Artefakt in `open/` oder `next/` mit Verweis auf den vorhergehenden Stand.
+- Dateinamen in `planning/` folgen einer einheitlichen Konvention (z. B. `slice-<phase>-<kurzbeschreibung>.md` oder `tranche-<nr>-<kurzbeschreibung>.md`), die im `README.md` von `docs/plan/planning/` dokumentiert ist.
+
+---
+
+### LH-FA-PROJDOCS-004 – Archivierung
+
+Priorität: V1
+
+Abgelöste oder veraltete Inhalte aus `user/`, `plan/` oder anderen `docs/`-Bereichen werden nach `docs/archive/` verschoben, statt sie zu löschen.
+
+- Beim Verschieben wird ein kurzer Hinweis am Anfang des Zielfiles ergänzt (z. B. `> Archiviert am YYYY-MM-DD; ersetzt durch [<Pfad>](<pfad>).`).
+- Querverweise in lebendiger Doku werden auf das neue Ziel umgebogen oder explizit als historisch markiert.
+- Das Verschieben erfolgt per `git mv`, damit die Historie erhalten bleibt.
+
+---
+
 ## 5. Nichtfunktionale Anforderungen
 
 ## 5.1 Benutzbarkeit
@@ -2372,6 +2447,10 @@ Nach dem MVP können ergänzt werden:
 | LH-FA-BUILD-006    | Aggregator-Targets             | V1        | PH-BUILD-006                       | TC-BUILD-006    |
 | LH-FA-BUILD-007    | Docker-only-Workflow           | MVP       | PH-BUILD-007                       | TC-BUILD-007    |
 | LH-FA-BUILD-008    | Coverage-Bootstrap             | MVP       | PH-BUILD-008                       | TC-BUILD-008    |
+| LH-FA-PROJDOCS-001 | docs/-Mindeststruktur (u-boot-Repo) | MVP  | PH-PROJDOCS-001                    | TC-PROJDOCS-001 |
+| LH-FA-PROJDOCS-002 | ADR-Format                     | MVP       | PH-PROJDOCS-002                    | TC-PROJDOCS-002 |
+| LH-FA-PROJDOCS-003 | Planning-Lifecycle             | MVP       | PH-PROJDOCS-003                    | TC-PROJDOCS-003 |
+| LH-FA-PROJDOCS-004 | Archivierung                   | V1        | PH-PROJDOCS-004                    | TC-PROJDOCS-004 |
 | LH-DA-003          | Schema-Version                 | MVP       | PH-DA-003                          | TC-DA-003       |
 | LH-DA-004          | Schema-Migration               | Later     | PH-DA-004                          | TC-DA-004       |
 | LH-SA-CLI-001      | Befehlsstruktur                | MVP       | PH-SA-CLI-001                      | TC-SA-CLI-001   |
