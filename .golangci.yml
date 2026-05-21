@@ -1,13 +1,16 @@
 # golangci-lint configuration for u-boot (v2 schema).
 #
-# MVP-Bootstrap profile: the 5 default linters, with one pragmatic
-# exception for fmt.Fprint* (CLI writes to stdout/stderr cannot
-# meaningfully fail in this codebase and would otherwise force
+# MVP-Bootstrap profile: the 5 default linters + depguard, with one
+# pragmatic exception for fmt.Fprint* (CLI writes to stdout/stderr
+# cannot meaningfully fail in this codebase and would otherwise force
 # `_, _ =`-prefixes on every Fprintln).
 #
-# Will be expanded in later slices once internal/hexagon/* and
-# internal/adapter/* have content (depguard layer rules, SOLID-style
-# linter set analog to k-deskflight ADR 0012).
+# depguard is enabled with an empty rules map during the bootstrap
+# phase (analog to k-deskflight Slice M1). The concrete layer-rule
+# blocks from spec/architecture.md §4 (LH-FA-ARCH-003) will be wired
+# in with the first productive package under ./internal/... (M3 init
+# slice). //nolint:depguard is forbidden; carveouts go here with a
+# `Why:` comment.
 
 version: "2"
 
@@ -19,6 +22,7 @@ linters:
     - ineffassign
     - staticcheck
     - unused
+    - depguard
 
   settings:
     errcheck:
@@ -26,3 +30,9 @@ linters:
         - fmt.Fprintln
         - fmt.Fprintf
         - fmt.Fprint
+
+    depguard:
+      # Layer rules will be filled in with the first productive package
+      # under ./internal/... (M3 slice). Schema reference:
+      # spec/architecture.md §4 (LH-FA-ARCH-003).
+      rules: {}

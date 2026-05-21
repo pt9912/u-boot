@@ -69,6 +69,8 @@ Full layout contract: [`LH-FA-BUILD-009` in
 
 - **Lastenheft** (verbindliche Spezifikation, Deutsch):
   [`spec/lastenheft.md`](spec/lastenheft.md).
+- **Architecture specification:** [`spec/architecture.md`](spec/architecture.md)
+  (hexagonal pattern, layer rules, depguard enforcement).
 - **Architecture Decision Records:**
   [`docs/plan/adr/`](docs/plan/adr/).
 - **Planning artefacts (slices, tranches):**

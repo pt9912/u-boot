@@ -1564,9 +1564,18 @@ Mindestlayout:
 .
 ├── cmd/
 │   └── uboot/
-│       └── main.go              # Entry point der CLI
+│       └── main.go              # Entry point der CLI (Wiring-Schicht)
 ├── internal/                    # nicht-exportierbare Implementierung
+│   ├── hexagon/                 # innere Schichten (LH-FA-ARCH-002)
+│   │   ├── domain/
+│   │   ├── application/
+│   │   └── port/{driving,driven}/
+│   └── adapter/                 # äußere Schichten (LH-FA-ARCH-002)
+│       ├── driving/
+│       └── driven/
 ├── spec/                        # Lastenheft, weitere Spezifikationen
+│   ├── lastenheft.md
+│   └── architecture.md          # Architektur-Detailspec (LH-FA-ARCH-*)
 ├── docs/                        # Doku-Struktur (LH-FA-PROJDOCS-001)
 ├── go.mod
 ├── go.sum
@@ -1658,6 +1667,77 @@ Abgelöste oder veraltete Inhalte aus `user/`, `plan/` oder anderen `docs/`-Bere
 - Beim Verschieben wird ein kurzer Hinweis am Anfang des Zielfiles ergänzt (z. B. `> Archiviert am YYYY-MM-DD; ersetzt durch [<Pfad>](<pfad>).`).
 - Querverweise in lebendiger Doku werden auf das neue Ziel umgebogen oder explizit als historisch markiert.
 - Das Verschieben erfolgt per `git mv`, damit die Historie erhalten bleibt.
+
+---
+
+## 4.13 Architektur des u-boot-Projekts
+
+Diese Sektion definiert das Architektur-Pattern für die **u-boot-Codebase selbst**. Detail-Spezifikation (Schichten, Import-Regeln, Beispiele, `depguard`-Konfiguration) liegt in [`spec/architecture.md`](architecture.md); diese Sektion definiert die Pflichten, die für jede Code-Änderung gelten.
+
+Vorlage: die Referenzprojekte `k-deskflight` (Go, flach), `m-trace` (TypeScript, driving/driven-Split) und `grid-gym` (Python, driving/driven-Split). Begründung der konkreten Variante siehe ADR-0002.
+
+---
+
+### LH-FA-ARCH-001 – Hexagonales Pattern
+
+Priorität: MVP
+
+Die u-boot-Codebase muss dem hexagonalen Architektur-Pattern (Ports & Adapters) folgen.
+
+Pflichten:
+
+- Trennung zwischen reiner Domäne, Anwendungslogik, Ports (Interfaces) und Adaptern (Implementierungen).
+- Keine direkten Abhängigkeiten von Anwendungslogik oder Domäne zu externen Bibliotheken (Docker-SDK, YAML-Parser, Dateisystem).
+- Externe Zugriffe laufen ausschließlich über Driven-Ports, die in Adapter-Paketen implementiert werden.
+
+Detail und Anti-Patterns: `spec/architecture.md`, ADR-0002.
+
+---
+
+### LH-FA-ARCH-002 – Schichten und Verzeichnislayout
+
+Priorität: MVP
+
+Das u-boot-Repo muss folgende Schichten unter `internal/` bereitstellen:
+
+```text
+internal/
+├── hexagon/
+│   ├── domain/         # reine Datentypen + invariantes Verhalten, keine I/O
+│   ├── application/    # Use-Cases; ruft ausschließlich Ports auf
+│   └── port/
+│       ├── driving/    # Interfaces, die von außen (CLI/HTTP) konsumiert werden
+│       └── driven/     # Interfaces, die das Application nach außen ruft
+└── adapter/
+    ├── driving/        # konkrete Driver (z. B. cli/ mit Cobra-Commands)
+    └── driven/         # konkrete Adapter (z. B. docker/, fs/, yaml/)
+```
+
+Die Wiring-Schicht (`cmd/uboot/`) ist die einzige Stelle, an der `application` und `adapter` zusammen importiert werden dürfen.
+
+---
+
+### LH-FA-ARCH-003 – Import-Regeln und Enforcement
+
+Priorität: MVP
+
+Folgende Import-Regeln gelten verbindlich (Detail-Tabelle in `spec/architecture.md`):
+
+| Schicht                  | darf importieren                       | darf nicht importieren                                                                          |
+| ------------------------ | -------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `hexagon/domain`         | nur Go-Standard-Library                | `hexagon/application`, `hexagon/port`, `adapter`, externe Libraries mit I/O                     |
+| `hexagon/application`    | `hexagon/domain`, `hexagon/port`       | `adapter`, externe I/O-Libraries direkt                                                         |
+| `hexagon/port/driving`   | `hexagon/domain`                       | `hexagon/application`, `hexagon/port/driven`, `adapter`                                         |
+| `hexagon/port/driven`    | `hexagon/domain`                       | `hexagon/application`, `hexagon/port/driving`, `adapter`                                        |
+| `adapter/driving`        | `hexagon/domain`, `hexagon/port/driving`, `hexagon/application` (nur zum Wiring innerhalb von `cmd/`) | direkte Imports von `adapter/driven`                                  |
+| `adapter/driven`         | `hexagon/domain`, `hexagon/port/driven` | `hexagon/application`, `adapter/driving`                                                       |
+| `cmd/uboot`              | alles aus `internal/`                  | (Wiring-Schicht, frei)                                                                          |
+
+Enforcement:
+
+- Die Regeln werden im `lint`-Stage (`LH-FA-BUILD-001`) per `golangci-lint` mit `depguard` durchgesetzt; Verstöße sind PR-blockierend.
+- `//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `Why:`-Kommentar dokumentiert.
+- Solange einzelne Schichten noch keine produktiven Pakete enthalten, dürfen `depguard`-Regelblöcke leer bleiben; die Schicht-Regel ist mit dem ersten Paket scharf zu schalten.
 
 ---
 
@@ -2390,6 +2470,7 @@ Der MVP muss enthalten:
   - Docker-only-Workflow (`LH-FA-BUILD-007`)
   - Repository-Layout nach `LH-FA-BUILD-009`
 - Doku-Struktur der u-boot-Codebase nach `LH-FA-PROJDOCS-001`, inkl. ADR-Format (`LH-FA-PROJDOCS-002`) und Planning-Lifecycle (`LH-FA-PROJDOCS-003`)
+- Architektur-Pattern (hexagonal, driving/driven-Split) nach `LH-FA-ARCH-001..003`, mit Detail-Spezifikation in `spec/architecture.md` und Import-Enforcement via `golangci-lint depguard`
 
 ---
 
@@ -2499,6 +2580,9 @@ Nach dem MVP können ergänzt werden:
 | LH-FA-PROJDOCS-002 | ADR-Format                     | MVP       | PH-PROJDOCS-002                    | TC-PROJDOCS-002 |
 | LH-FA-PROJDOCS-003 | Planning-Lifecycle             | MVP       | PH-PROJDOCS-003                    | TC-PROJDOCS-003 |
 | LH-FA-PROJDOCS-004 | Archivierung                   | V1        | PH-PROJDOCS-004                    | TC-PROJDOCS-004 |
+| LH-FA-ARCH-001     | Hexagonales Pattern            | MVP       | PH-ARCH-001                        | TC-ARCH-001     |
+| LH-FA-ARCH-002     | Schichten und Verzeichnislayout | MVP      | PH-ARCH-002                        | TC-ARCH-002     |
+| LH-FA-ARCH-003     | Import-Regeln und Enforcement  | MVP       | PH-ARCH-003                        | TC-ARCH-003     |
 | LH-DA-003          | Schema-Version                 | MVP       | PH-DA-003                          | TC-DA-003       |
 | LH-DA-004          | Schema-Migration               | Later     | PH-DA-004                          | TC-DA-004       |
 | LH-SA-CLI-001      | Befehlsstruktur                | MVP       | PH-SA-CLI-001                      | TC-SA-CLI-001   |

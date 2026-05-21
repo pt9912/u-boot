@@ -71,6 +71,8 @@ Vollständiger Layout-Kontrakt:
 
 - **Lastenheft** (verbindliche Spezifikation):
   [`spec/lastenheft.md`](spec/lastenheft.md).
+- **Architektur-Spezifikation:** [`spec/architecture.md`](spec/architecture.md)
+  (hexagonales Pattern, Schicht-Regeln, depguard-Enforcement).
 - **Architecture Decision Records:**
   [`docs/plan/adr/`](docs/plan/adr/).
 - **Planning-Artefakte (Slices, Tranchen):**
