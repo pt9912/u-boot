@@ -1,0 +1,11 @@
+# Compose stack for {{.Name}}. Service add-ons are appended by
+# `u-boot add <service>` (LH-FA-ADD-*); manual edits outside the
+# u-boot-managed blocks remain untouched (LH-SA-FILE-002).
+
+name: {{.Name}}
+
+services: {}
+
+networks:
+  default:
+    name: {{.Name}}-default

@@ -10,6 +10,27 @@ import (
 	"github.com/pt9912/u-boot/internal/adapter/driven/fs"
 )
 
+func TestFS_ReadFile(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "payload.txt")
+	if err := os.WriteFile(path, []byte("hello"), 0o644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	got, err := fs.New().ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	if string(got) != "hello" {
+		t.Fatalf("ReadFile = %q, want %q", got, "hello")
+	}
+
+	_, err = fs.New().ReadFile(filepath.Join(dir, "missing.txt"))
+	if err == nil {
+		t.Fatalf("ReadFile(missing): expected error, got nil")
+	}
+}
+
 func TestFS_Exists(t *testing.T) {
 	dir := t.TempDir()
 	existing := filepath.Join(dir, "present.txt")

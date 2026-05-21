@@ -1,0 +1,68 @@
+// Package driving holds the driving-port interfaces of u-boot — the
+// use cases that the outside world (CLI, future HTTP daemon) calls
+// into. Concrete implementations live in
+// `internal/hexagon/application`.
+//
+// Layer rules (LH-FA-ARCH-002, LH-FA-ARCH-003): driving ports may
+// only depend on `internal/hexagon/domain` and the Go standard
+// library.
+package driving
+
+import (
+	"context"
+	"errors"
+
+	"github.com/pt9912/u-boot/internal/hexagon/domain"
+)
+
+// InitProjectRequest is the input for [InitProjectUseCase.Init]. It is
+// the application-layer expression of `u-boot init` flags; the CLI
+// adapter (M3-T3) translates Cobra flags into this struct.
+type InitProjectRequest struct {
+	// Name is the explicit project name; when empty, the service
+	// derives it from BaseDir's basename via
+	// [domain.NormalizeProjectName] (LH-FA-INIT-002).
+	Name string
+
+	// BaseDir is the absolute path of the directory the project is
+	// initialized in. Mandatory; the CLI adapter defaults it to the
+	// current working directory.
+	BaseDir string
+
+	// SkipGit disables the git-init step (LH-FA-INIT-007). Default
+	// (false) keeps git init enabled; the CLI adapter sets this from
+	// the `--no-git` flag.
+	SkipGit bool
+}
+
+// InitProjectResponse is the output of [InitProjectUseCase.Init].
+type InitProjectResponse struct {
+	// Project is the validated, ready-to-persist domain aggregate.
+	Project domain.Project
+
+	// Created lists the paths (relative to BaseDir) that were
+	// created or written, in deterministic order, for the CLI
+	// adapter to report back to the user.
+	Created []string
+}
+
+// ErrProjectExists signals that BaseDir already looks like an
+// initialized u-boot project (`u-boot.yaml`, `compose.yaml`, or
+// `.env.example` present). LH-FA-INIT-004 forbids silent overwrite;
+// the M3-T4 slice adds `--backup`/`--force` handling.
+var ErrProjectExists = errors.New("project already initialized")
+
+// InitProjectUseCase is the driving-port for `u-boot init`. The CLI
+// adapter holds a reference and calls [Init] from the Cobra command
+// handler.
+type InitProjectUseCase interface {
+	// Init initializes a new u-boot project in req.BaseDir according
+	// to LH-FA-INIT-001..007 and LH-FA-CONF-001..003.
+	//
+	// Returns wrapped [ErrProjectExists] when BaseDir already
+	// contains a project steering file and SkipGit-aware handling is
+	// not enough to proceed (LH-FA-INIT-004). Returns wrapped
+	// [domain.ErrInvalidProjectName] when the name (explicit or
+	// derived) does not pass LH-FA-INIT-006.
+	Init(ctx context.Context, req InitProjectRequest) (InitProjectResponse, error)
+}
