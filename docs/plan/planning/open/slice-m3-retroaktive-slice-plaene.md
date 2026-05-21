@@ -1,4 +1,4 @@
-# Slice V1: Retroaktive Slice-Pläne für M1/M2/M2b/M2c/M2d
+# Slice M3: Retroaktive Slice-Pläne für M1/M2/M2b/M2c/M2d
 
 ## Auslöser
 
@@ -44,5 +44,7 @@ verlinkt jeweils auf den Slice-Plan statt nur auf den Commit-Hash.
 - Auslösende Spec: `LH-FA-PROJDOCS-003` Lifecycle.
 - Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
   Slice-Pläne fehlen.
-- Hängt von: nichts; kann jederzeit abgearbeitet werden, am besten
-  vor dem ersten externen Contributor.
+- Hängt von: nichts; kann jederzeit abgearbeitet werden.
+- Phase: M3-T5 (Carveout-Cleanup) — natürlicher Zeitpunkt, weil dann
+  alle Bootstrap-Slices (M1–M2d) stabil sind und mit M3 ein „done"
+  als Set entsteht. Bei externem Contributor noch früher.

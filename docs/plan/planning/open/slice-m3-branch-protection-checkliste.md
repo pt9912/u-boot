@@ -1,4 +1,4 @@
-# Slice V1: Branch-Protection-Checkliste
+# Slice M3: Branch-Protection-Checkliste
 
 ## Auslöser
 
@@ -44,4 +44,7 @@ GitHub-Repository-Ruleset-JSON-Export für reproduzierbares Setup.
 - Auslösende Spec: `LH-QA-003` „beide Jobs PR-blockierend".
 - Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
   Branch-Protection nicht versioniert.
-- Hängt von: erstem PR-Workflow (vermutlich M3-PR).
+- Hängt von: erstem PR-Workflow (M3-T3 ist ein guter Anlass, weil
+  ab dann der erste lauffähige `u-boot init` über einen PR landet).
+- Phase: M3 — soll **vor dem ersten externen PR** existieren, damit
+  Required-Status-Checks von Anfang an greifen.

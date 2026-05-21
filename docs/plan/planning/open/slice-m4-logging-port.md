@@ -1,4 +1,4 @@
-# Slice V1: Logging-Port einführen
+# Slice M4: Logging-Port einführen
 
 ## Auslöser
 
@@ -45,5 +45,8 @@ wird nur im Adapter importiert.
 - Auslösende Konfig: `.golangci.yml` `forbidigo.msg`.
 - Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
   `forbidigo.msg` referenziert nicht-existenten Port.
-- Hängt von: M3 oder erstem Adapter-Slice (sobald
-  `internal/adapter/driven/` ohnehin Inhalte bekommt).
+- Hängt von: M4 `u-boot doctor` — der erste Subbefehl, der nennens-
+  wertes strukturiertes Logging braucht (Diagnose-Ergebnisse,
+  `--verbose`/`--debug`, JSON-Modus). Vorher reichen die CLI-Writes
+  über `fmt.Fprintln`, die im Carveout abgedeckt sind.
+- Phase: M4 (mit dem `doctor`-Slice).

@@ -1,4 +1,4 @@
-# Slice V1: Docker-Integrationstests (Build-Tag-Pfad)
+# Slice M6: Docker-Integrationstests (Build-Tag-Pfad)
 
 ## Auslöser
 
@@ -53,4 +53,7 @@ Sobald `internal/adapter/driven/docker/` existiert und über
 - Auslösende Spec: `spec/architecture.md` §5 Build-Tag-Konvention.
 - Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
   Docker-Integrationstests fehlen.
-- Hängt von: M3+ Adapter-Slice (`internal/adapter/driven/docker/`).
+- Hängt von: M6 `u-boot up`/`down` — erst dort entsteht
+  `internal/adapter/driven/docker/`, gegen das die getaggten Tests
+  überhaupt laufen können.
+- Phase: M6 (zusammen mit dem Docker-Adapter).

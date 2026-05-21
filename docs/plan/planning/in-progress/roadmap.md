@@ -37,14 +37,14 @@ Disziplin-Verstoß.
 | [`slice-m3-init-flow`](slice-m3-init-flow.md) | `LH-FA-INIT-*` initialer Flow + zwei M3-Carveouts (Coverage ✅, depguard offen) | M3 | In progress (T1/T2 ✅; T3/T4/T5 offen) |
 | [`slice-m3-depguard-aktivierung-verifizieren`](slice-m3-depguard-aktivierung-verifizieren.md) | `LH-FA-ARCH-003` depguard-Regeln matchen bisher nichts | M3-T5 | In progress |
 | [`slice-m3-cli-framework-adr`](../open/slice-m3-cli-framework-adr.md) | ADR-0001 Folgepunkt CLI-Framework Cobra | M3-T3 follow-up | Open |
+| [`slice-m3-gomodguard-rules`](../open/slice-m3-gomodguard-rules.md) | `gomodguard_v2.blocked: {}` leer; yaml.v3 schon drin, Cobra kommt mit T3 | M3-T5 | Open |
+| [`slice-m3-branch-protection-checkliste`](../open/slice-m3-branch-protection-checkliste.md) | ADR-0004 Folgepunkt Branch-Protection nicht versioniert; soll vor erstem externen PR existieren | M3 | Open |
+| [`slice-m3-retroaktive-slice-plaene`](../open/slice-m3-retroaktive-slice-plaene.md) | Bootstrap-Slices (M1/M2/M2b/M2c/M2d) liegen nicht in `done/` | M3-T5 | Open |
 | [`slice-m4-soft-existing-detection`](../open/slice-m4-soft-existing-detection.md) | `LH-FA-INIT-004` Soft-Erkennung + `--assume-existing` | M4 | Open |
-| [`slice-v1-gomodguard-rules`](../open/slice-v1-gomodguard-rules.md) | `gomodguard_v2.blocked: {}` leer | V1 | Open |
-| [`slice-v1-logging-port`](../open/slice-v1-logging-port.md) | `forbidigo.msg` referenziert nicht-existenten Logging-Port | V1 | Open |
+| [`slice-m4-logging-port`](../open/slice-m4-logging-port.md) | `forbidigo.msg` referenziert nicht-existenten Logging-Port; `u-boot doctor` braucht strukturiertes Logging | M4 | Open |
+| [`slice-m6-docker-integrationstests`](../open/slice-m6-docker-integrationstests.md) | `//go:build docker`-Pfad nur dokumentiert, kein CI-Job; erst mit Docker-Adapter sinnvoll | M6 | Open |
 | [`slice-v1-release-pipeline`](../open/slice-v1-release-pipeline.md) | ADR-0004 Folgepunkte Image-Publish + Trivy; `LH-OPEN-002` Paketierung (GHCR-Anteil) | V1 | Open |
-| [`slice-v1-branch-protection-checkliste`](../open/slice-v1-branch-protection-checkliste.md) | ADR-0004 Folgepunkt Branch-Protection nicht versioniert | V1 | Open |
-| [`slice-v1-docker-integrationstests`](../open/slice-v1-docker-integrationstests.md) | `//go:build docker`-Pfad nur dokumentiert, kein CI-Job | V1 | Open |
 | [`slice-v1-markdown-link-validator`](../open/slice-v1-markdown-link-validator.md) | Doku-/Link-Drift in `docs/`/`spec/` nicht maschinell geprüft | V1 | Open |
-| [`slice-v1-retroaktive-slice-plaene`](../open/slice-v1-retroaktive-slice-plaene.md) | Bootstrap-Slices (M1/M2/M2b/M2c/M2d) liegen nicht in `done/` | V1 | Open |
 | [`slice-v1-plugin-system-entscheidung`](../open/slice-v1-plugin-system-entscheidung.md) | `LH-OPEN-003` Plugin-System offen | V1 | Open |
 | [`slice-v1-template-format-entscheidung`](../open/slice-v1-template-format-entscheidung.md) | `LH-OPEN-004` Template-Format offen | V1 | Open |
 | [`slice-v2-revive-custom-rules`](../open/slice-v2-revive-custom-rules.md) | ADR-0003 Folgepunkt revive-Custom-Rules | V2 | Open |
