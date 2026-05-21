@@ -13,7 +13,7 @@ in `in-progress/`.
 | M2b SOLID-Lint | Done | SOLID-nahes Lint-Profil (`LH-QA-004` auf MVP gehoben), 5 Default-Linter + 24 SOLID-nahe Linter (inkl. `depguard`), `docs/user/quality.md`, ADR-0003 | Commit `365e532` + Review-Fixes |
 | M2c CI | Done | GitHub-Actions-CI (`LH-QA-003` auf konkret gehoben), `.github/workflows/ci.yml` mit Jobs `gates` + `security-gates` (beide PR-blockierend), SHA-pinned Actions, Docker-only, ADR-0004 | Commit `9a74e35` |
 | M2d Carveouts | Done | Carveout-Disziplin (`LH-FA-PROJDOCS-005` MVP-Pflicht), Master-Inventar [`carveouts.md`](carveouts.md), 7 neue Slice-Pläne in [`open/`](../open/) für offene Carveouts; permanente Carveouts dokumentiert | dieser Commit |
-| M3 `u-boot init` | In progress | Projektstruktur erzeugen (`LH-FA-INIT-001..007`), `u-boot.yaml` schreiben, Git-Init; Coverage-Carveout bereits aufgelöst, depguard-Verifikation folgt mit T5. Detail: [`slice-m3-init-flow.md`](slice-m3-init-flow.md). **Stand:** T1 ✅ `132d1a1` + `f5c784a`; T2 ✅ `aaf4d8d` + Review-Fixes; T3/T4/T5 offen |
+| M3 `u-boot init` | In progress | Projektstruktur erzeugen (`LH-FA-INIT-001..007`), `u-boot.yaml` schreiben, Git-Init; Coverage-Carveout bereits aufgelöst, depguard-Verifikation folgt mit T5. Detail: [`slice-m3-init-flow.md`](slice-m3-init-flow.md). **Stand:** T1 ✅ `132d1a1` + `f5c784a`; T2 ✅ `aaf4d8d` + Review-Fixes; T3 ✅ (dieser Commit, mit Cobra, ADR-0005, End-to-End-Smoke); T4/T5 offen |
 | M4 `u-boot doctor` | Open | Lokale Voraussetzungen prüfen (`LH-FA-DIAG-001..004`), JSON-Output (`LH-NFA-USE-004`) | offen |
 | M5 `u-boot add postgres` | Open | PostgreSQL-Add-on (`LH-FA-ADD-001..005`), Compose-Block, `.env.example`-Block, Healthcheck | offen |
 | M6 `u-boot up` / `down` | Open | Compose-Wrapper (`LH-FA-UP-001..004`), Healthcheck-Polling, `--timeout`, `--volumes` | offen |
@@ -36,7 +36,6 @@ Disziplin-Verstoß.
 | ----- | -------- | ----- | ------ |
 | [`slice-m3-init-flow`](slice-m3-init-flow.md) | `LH-FA-INIT-*` initialer Flow + zwei M3-Carveouts (Coverage ✅, depguard offen) | M3 | In progress (T1/T2 ✅; T3/T4/T5 offen) |
 | [`slice-m3-depguard-aktivierung-verifizieren`](slice-m3-depguard-aktivierung-verifizieren.md) | `LH-FA-ARCH-003` depguard-Regeln matchen bisher nichts | M3-T5 | In progress |
-| [`slice-m3-cli-framework-adr`](../open/slice-m3-cli-framework-adr.md) | ADR-0001 Folgepunkt CLI-Framework Cobra | M3-T3 follow-up | Open |
 | [`slice-m3-gomodguard-rules`](../open/slice-m3-gomodguard-rules.md) | `gomodguard_v2.blocked: {}` leer; yaml.v3 schon drin, Cobra kommt mit T3 | M3-T5 | Open |
 | [`slice-m3-branch-protection-checkliste`](../open/slice-m3-branch-protection-checkliste.md) | ADR-0004 Folgepunkt Branch-Protection nicht versioniert; soll vor erstem externen PR existieren | M3 | Open |
 | [`slice-m3-retroaktive-slice-plaene`](../open/slice-m3-retroaktive-slice-plaene.md) | Bootstrap-Slices (M1/M2/M2b/M2c/M2d) liegen nicht in `done/` | M3-T5 | Open |

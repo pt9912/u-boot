@@ -64,12 +64,13 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
    [`open/slice-m4-soft-existing-detection.md`](../open/slice-m4-soft-existing-detection.md).
 
 3. **T3 — Driving Adapter CLI + Wiring → erster lauffähiger
-   `u-boot init`.**
+   `u-boot init`.** ✅ Done (dieser Commit)
    `internal/adapter/driving/cli/`: Cobra-basiertes `init`-Command
-   (Cobra wird neue externe Dep; triggert `slice-v1-gomodguard-rules`).
-   `cmd/uboot/main.go`: Wiring aller Schichten. Templates für
-   `README.md`/`CHANGELOG.md`/`compose.yaml`/`.env.example`/
-   `.gitignore`/`u-boot.yaml` via `embed`.
+   plus Exit-Code-Mapping; CLI-Framework-Wahl in ADR-0005
+   verankert (löst gleichzeitig `slice-m3-cli-framework-adr` auf).
+   `cmd/uboot/main.go`: Wiring aller Schichten. End-to-End-Smoke
+   verifiziert: `docker run … init demo-project --no-git` erzeugt
+   die LH-FA-INIT-003-Mindeststruktur + `u-boot.yaml` (LH-FA-CONF-002).
 
 4. **T4 — Überschreibschutz + nicht-interaktive Modi.**
    `--backup`-/`--force`-Logik nach `LH-FA-INIT-005`,

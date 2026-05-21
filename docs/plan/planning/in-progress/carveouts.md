@@ -27,7 +27,6 @@ Spalten:
 | Build-Tag-Pfad `//go:build docker` für Adapter-Integrationstests (`spec/architecture.md` §5) ist nur beschrieben, kein CI-Pfad und kein Adapter-Test existiert | temporär | [`open/slice-m6-docker-integrationstests.md`](../open/slice-m6-docker-integrationstests.md) |
 | Doku-/Link-Drift in `docs/`, `spec/`, READMEs ist heute nicht maschinell geprüft (M2-Review #11) | temporär | [`open/slice-v1-markdown-link-validator.md`](../open/slice-v1-markdown-link-validator.md) |
 | Slice-Pläne für M1, M2, M2b, M2c liegen nicht in `done/` (M2-Review #10); Roadmap referenziert nur Commit-Hashes | temporär | [`open/slice-m3-retroaktive-slice-plaene.md`](../open/slice-m3-retroaktive-slice-plaene.md) |
-| ADR-0001 Folgepunkt: CLI-Framework (`flag` vs. Cobra) — Cobra wird mit M3-T3 eingeführt, ADR-0005 muss nachgereicht werden | temporär | [`open/slice-m3-cli-framework-adr.md`](../open/slice-m3-cli-framework-adr.md) |
 | ADR-0003 Folgepunkt: `revive`-Custom-Rules sind nicht konfiguriert (Default-Profil) | temporär | [`open/slice-v2-revive-custom-rules.md`](../open/slice-v2-revive-custom-rules.md) |
 | `LH-OPEN-002` Paketierung ist offen (`spec/lastenheft.md` §14) — Distributionswege (Binary-Release, Homebrew, Debian/RPM, npm/pip) sind nicht festgelegt | temporär | [`open/slice-v1-release-pipeline.md`](../open/slice-v1-release-pipeline.md) (GHCR-Anteil); weitere Distributionswege bekommen eigene Slices beim ersten konkreten Bedarf |
 | `LH-OPEN-003` Plugin-System ist offen (`spec/lastenheft.md` §14, auch `spec/architecture.md` §7 als „geplante Erweiterung") — keine Entscheidung zwischen fest-eingebauten Add-ons und nachladbaren Plugins | temporär | [`open/slice-v1-plugin-system-entscheidung.md`](../open/slice-v1-plugin-system-entscheidung.md) |
@@ -45,6 +44,7 @@ Spalten:
 | Test-Carveouts in `_test.go` (`cyclop`, `gocognit`, `gocyclo`, `nestif`, `funlen`, `noctx`, `unparam`, `revive(unused-parameter)`) | permanent | Tabellengetriebene Tests und Fakes erzeugen legitim hohe Komplexität / fehlenden Context; Profil-Schwellen passen für Production-Code, nicht für Tests. |
 | `!**/*_test.go` als erste files-Pattern in jedem `depguard`-Regelblock (`.golangci.yml`, `spec/architecture.md` §4) | permanent | Tests müssen Fakes und Test-Libraries (`testify`, …) frei importieren können; Schicht-Regeln gelten production-only (`LH-FA-ARCH-003`). |
 | GNU `make` als Host-Voraussetzung neben Docker (`LH-FA-BUILD-007`, `LH-NFA-PORT-002`) | permanent | Carveout zu `LH-NFA-PORT-002` (möglichst wenige Host-Deps); `make` ist überall verfügbar und der pragmatischste Wrapper für Docker-only-Workflows. |
+| `contextcheck`-Ausnahme für `internal/adapter/driving/cli/` (`.golangci.yml`) | permanent | Cobras `RunE`-Signatur (`func(cmd, args) error`) kennt keinen Context-Parameter; der Closure muss `cmd.Context()` extrahieren und durchreichen. contextcheck sieht die Closure-Grenze nicht. Strikte Propagation passiert eine Ebene tiefer in `runInit` (Context als erster Parameter). |
 
 ## Disziplin
 

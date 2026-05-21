@@ -221,3 +221,14 @@ linters:
           - testpackage
           - gochecknoglobals
         path: cmd/uboot/
+
+      # Why: Cobra's RunE signature is `func(cmd *cobra.Command, args
+      # []string) error` — no context parameter. The driving CLI
+      # adapter must call `cmd.Context()` and pass that into the
+      # use-case; contextcheck cannot see through the closure boundary
+      # and flags it as missing propagation. Strict propagation
+      # happens one level down in runInit (LH-FA-ARCH-003); the closure
+      # itself is structurally required by Cobra.
+      - linters:
+          - contextcheck
+        path: internal/adapter/driving/cli/
