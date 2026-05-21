@@ -33,9 +33,12 @@ Ein Artefakt verwendet genau eines der beiden Formate. Slice-Pläne sind
 für phasenübergreifende Vorhaben; Tranchen-Pläne zerlegen einen Slice in
 inkrementell auslieferbare Stücke.
 
-## Ausnahme: Roadmap
+## Ausnahmen: Master-Dokumente
 
-`docs/plan/planning/in-progress/roadmap.md` ist ein übergreifendes
-Master-Dokument, das laufend gepflegt wird (`LH-FA-PROJDOCS-003`). Es
-folgt keinem der beiden Formate und fasst den Stand aller Slices und
-Tranchen zusammen.
+Zwei übergreifende Master-Dokumente folgen keinem der beiden Formate
+und liegen dauerhaft in `in-progress/`:
+
+- [`in-progress/roadmap.md`](in-progress/roadmap.md) — Stand aller
+  Slices und Tranchen (`LH-FA-PROJDOCS-003`).
+- [`in-progress/carveouts.md`](in-progress/carveouts.md) — Inventar
+  aller bewussten Carveouts mit Plan-Verweis (`LH-FA-PROJDOCS-005`).

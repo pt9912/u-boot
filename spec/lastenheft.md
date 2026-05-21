@@ -1658,6 +1658,30 @@ Planning-Artefakte (Slices, Tranchen, Tickets) durchlaufen die Verzeichnisse `op
 
 ---
 
+### LH-FA-PROJDOCS-005 – Carveout-Disziplin
+
+Priorität: MVP
+
+Jeder **temporäre Carveout** in der u-boot-Codebase muss parallel zu seiner Entstehung einen Slice-Plan in `docs/plan/planning/open/` (oder `next/`) bekommen, der die Aufhebungsbedingung benennt.
+
+Als temporärer Carveout zählt insbesondere:
+
+- Bootstrap-Schwellwerte (z. B. `COVERAGE_THRESHOLD=0` bis erste produktive Pakete existieren).
+- Bewusst leere Regelblöcke in Linter-/Tooling-Konfiguration (z. B. `gomodguard_v2.blocked: {}` bis externe Modul-Dependencies vorhanden sind, `depguard rules: {}` in Bootstrap-Phasen).
+- Prospektive Doku-Phrasen ("scharf zu schalten mit M3", "wird mit V1 ergänzt", "Logging-Port kommt später", "Folgepflicht im GitHub-UI").
+- Bewusst weggelassene Pflichten in einem CI-/Build-Setup, deren Aufhebung in einem ADR-Folgepunkt vermerkt ist (z. B. Image-Publish, Image-Scan, Branch-Protection).
+
+Pflichten:
+
+- Der Slice-Plan folgt der Dateiname-Konvention aus `LH-FA-PROJDOCS-003` (`slice-<phase>-<slug>.md`).
+- Der Plan benennt mindestens: Auslöser (was wurde wo bewusst weggelassen), Aufhebungsbedingung (was muss passieren), Akzeptanzkriterien.
+- Wo der Carveout in einer Spec-Anforderung dokumentiert ist (z. B. `LH-FA-BUILD-008` für Coverage-Bootstrap), referenziert der Spec-Text den Slice-Plan.
+- Ein Master-Inventar in [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md) listet alle aktuellen Carveouts mit Status (`temporär` + Plan-Verweis vs. `permanent` + Begründung). Diese Datei lebt analog zur `roadmap.md` dauerhaft in `in-progress/`.
+
+Permanente Carveouts (z. B. `errcheck.exclude-functions` für CLI-Writes, `testpackage`/`gochecknoglobals` für die Wiring-Schicht `cmd/uboot/`) sind ebenfalls im Master-Inventar zu listen, brauchen aber keinen Aufhebungsplan; sie tragen den Status `permanent` mit kurzer Begründung.
+
+---
+
 ### LH-FA-PROJDOCS-004 – Archivierung
 
 Priorität: V1
@@ -2487,7 +2511,7 @@ Der MVP muss enthalten:
   - `.dockerignore` (`LH-FA-BUILD-004`)
   - Docker-only-Workflow (`LH-FA-BUILD-007`)
   - Repository-Layout nach `LH-FA-BUILD-009`
-- Doku-Struktur der u-boot-Codebase nach `LH-FA-PROJDOCS-001`, inkl. ADR-Format (`LH-FA-PROJDOCS-002`) und Planning-Lifecycle (`LH-FA-PROJDOCS-003`)
+- Doku-Struktur der u-boot-Codebase nach `LH-FA-PROJDOCS-001`, inkl. ADR-Format (`LH-FA-PROJDOCS-002`), Planning-Lifecycle (`LH-FA-PROJDOCS-003`) und Carveout-Disziplin (`LH-FA-PROJDOCS-005`)
 - Architektur-Pattern (hexagonal, driving/driven-Split) nach `LH-FA-ARCH-001..003`, mit Detail-Spezifikation in `spec/architecture.md` und Import-Enforcement via `golangci-lint depguard`
 - SOLID-nahes Lint-Profil nach `LH-QA-004` (5 Default-Linter + 24 SOLID-nahe Linter inkl. `depguard`, 29 Linter gesamt); Konfiguration in `.golangci.yml`, Doku in `docs/user/quality.md` §1.2 / §1.3, Begründung in ADR-0003
 - CI-Pipeline nach `LH-QA-003` (GitHub Actions, `.github/workflows/ci.yml`, Jobs `gates` + `security-gates`, beide PR-blockierend); Begründung in ADR-0004
@@ -2600,6 +2624,7 @@ Nach dem MVP können ergänzt werden:
 | LH-FA-PROJDOCS-002 | ADR-Format                     | MVP       | PH-PROJDOCS-002                    | TC-PROJDOCS-002 |
 | LH-FA-PROJDOCS-003 | Planning-Lifecycle             | MVP       | PH-PROJDOCS-003                    | TC-PROJDOCS-003 |
 | LH-FA-PROJDOCS-004 | Archivierung                   | V1        | PH-PROJDOCS-004                    | TC-PROJDOCS-004 |
+| LH-FA-PROJDOCS-005 | Carveout-Disziplin             | MVP       | PH-PROJDOCS-005                    | TC-PROJDOCS-005 |
 | LH-FA-ARCH-001     | Hexagonales Pattern            | MVP       | PH-ARCH-001                        | TC-ARCH-001     |
 | LH-FA-ARCH-002     | Schichten und Verzeichnislayout | MVP      | PH-ARCH-002                        | TC-ARCH-002     |
 | LH-FA-ARCH-003     | Import-Regeln und Enforcement  | MVP       | PH-ARCH-003                        | TC-ARCH-003     |
