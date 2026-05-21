@@ -132,9 +132,13 @@ Begründung der Regeln:
 
 ## 4. Enforcement via `golangci-lint depguard`
 
-Die Regeln aus Abschnitt 3 werden im `lint`-Stage (`LH-FA-BUILD-001`) per `golangci-lint` mit dem `depguard`-Linter durchgesetzt. Konfiguration in [`.golangci.yml`](../.golangci.yml).
+Die Regeln aus Abschnitt 3 werden im `lint`-Stage (`LH-FA-BUILD-001`) per `golangci-lint` mit dem `depguard`-Linter durchgesetzt. Konfiguration aktiv in [`.golangci.yml`](../.golangci.yml); das untenstehende Schema ist deckungsgleich mit der dortigen Konfiguration. Bei Änderungen müssen beide Quellen synchron gehalten werden.
 
-Schema (Beispiel — wird mit dem ersten produktiven Paket scharf geschaltet):
+Konventionen für jeden Regelblock:
+
+- `list-mode: lax` — `deny`-only-Auswertung (Imports ohne `deny`-Treffer sind erlaubt, kein impliziter `allow`-Filter).
+- `files` enthält als erste Pattern `!**/*_test.go`, um Tests vom Enforcement auszunehmen (Tests dürfen Fakes und Test-Libraries frei importieren; `LH-FA-ARCH-003`).
+- `deny`-Einträge nennen den blockierten Modul-Pfad und in `desc` die LH-Kennung als Begründung.
 
 ```yaml
 linters:
@@ -145,6 +149,7 @@ linters:
     depguard:
       rules:
         domain-isoliert:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/hexagon/domain/**'
@@ -157,6 +162,7 @@ linters:
               desc: domain must not depend on adapter (LH-FA-ARCH-003)
 
         application-no-adapter:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/hexagon/application/**'
@@ -165,6 +171,7 @@ linters:
               desc: application must depend on ports, not on adapter implementations (LH-FA-ARCH-003)
 
         port-no-application:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/hexagon/port/**'
@@ -175,6 +182,7 @@ linters:
               desc: port must not depend on adapter (LH-FA-ARCH-003)
 
         port-driving-no-driven:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/hexagon/port/driving/**'
@@ -183,6 +191,7 @@ linters:
               desc: driving port must not depend on driven port (LH-FA-ARCH-003)
 
         port-driven-no-driving:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/hexagon/port/driven/**'
@@ -191,6 +200,7 @@ linters:
               desc: driven port must not depend on driving port (LH-FA-ARCH-003)
 
         adapter-no-application:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/adapter/**'
@@ -199,6 +209,7 @@ linters:
               desc: adapter must implement ports, not consume application (LH-FA-ARCH-003)
 
         adapter-driving-no-driven:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/adapter/driving/**'
@@ -207,6 +218,7 @@ linters:
               desc: driving adapter must not depend on driven adapter — wire via cmd/uboot (LH-FA-ARCH-003)
 
         adapter-driven-no-driving:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/adapter/driven/**'
@@ -215,7 +227,9 @@ linters:
               desc: driven adapter must not depend on driving adapter (LH-FA-ARCH-003)
 ```
 
-`//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `desc` dokumentiert.
+Die Regeln sind heute aktiv und matchen nichts, solange `./internal/...` keinen produktiven Code enthält. Mit dem ersten Paket pro Schicht greift die jeweilige Regel automatisch.
+
+`//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `desc` dokumentiert (`LH-FA-ARCH-003`).
 
 ---
 

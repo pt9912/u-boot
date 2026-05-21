@@ -63,7 +63,7 @@ linters:
     forbidigo:
       forbid:
         - pattern: ^fmt\.Print.*$
-          msg: use log/slog or the configured logging port (LH-QA-004)
+          msg: use log/slog (LH-QA-004); a project-specific logging port may replace this once it exists
 
     funlen:
       lines: 100
@@ -110,6 +110,7 @@ linters:
       # fakes and test libraries freely.
       rules:
         domain-isoliert:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/hexagon/domain/**'
@@ -122,6 +123,7 @@ linters:
               desc: domain must not depend on adapter (LH-FA-ARCH-003)
 
         application-no-adapter:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/hexagon/application/**'
@@ -130,6 +132,7 @@ linters:
               desc: application must depend on ports, not on adapter implementations (LH-FA-ARCH-003)
 
         port-no-application:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/hexagon/port/**'
@@ -140,6 +143,7 @@ linters:
               desc: port must not depend on adapter (LH-FA-ARCH-003)
 
         port-driving-no-driven:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/hexagon/port/driving/**'
@@ -148,6 +152,7 @@ linters:
               desc: driving port must not depend on driven port (LH-FA-ARCH-003)
 
         port-driven-no-driving:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/hexagon/port/driven/**'
@@ -156,6 +161,7 @@ linters:
               desc: driven port must not depend on driving port (LH-FA-ARCH-003)
 
         adapter-no-application:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/adapter/**'
@@ -164,6 +170,7 @@ linters:
               desc: adapter must implement ports, not consume application (LH-FA-ARCH-003)
 
         adapter-driving-no-driven:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/adapter/driving/**'
@@ -172,6 +179,7 @@ linters:
               desc: driving adapter must not depend on driven adapter — wire via cmd/uboot (LH-FA-ARCH-003)
 
         adapter-driven-no-driving:
+          list-mode: lax
           files:
             - '!**/*_test.go'
             - '**/internal/adapter/driven/**'

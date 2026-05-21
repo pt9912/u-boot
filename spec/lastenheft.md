@@ -2222,11 +2222,10 @@ Priorität: MVP
 
 Die u-boot-Codebase muss ein verschärftes Lint-Profil führen, das über die Default-Linter hinausgeht.
 
-Profil-Komposition:
+Profil-Komposition (29 Linter insgesamt):
 
 - 5 Default-Linter (`govet`, `errcheck`, `staticcheck`, `unused`, `ineffassign`).
-- 24 SOLID-nahe Zusatz-Linter (Komplexitäts-, Funktionslänge-, Interface-, Kopplungs- und Boundary-Signale; vollständige Liste in [`docs/user/quality.md`](../docs/user/quality.md) §1.2).
-- `depguard` zur Durchsetzung der Schicht-Regeln aus `LH-FA-ARCH-003`.
+- 24 SOLID-nahe Zusatz-Linter (Komplexitäts-, Funktionslänge-, Interface-, Kopplungs- und Boundary-Signale; vollständige Liste in [`docs/user/quality.md`](../docs/user/quality.md) §1.2). **`depguard`** für die Schicht-Regeln aus `LH-FA-ARCH-003` ist Teil dieser 24.
 
 Pflichten:
 
@@ -2477,7 +2476,7 @@ Der MVP muss enthalten:
   - Repository-Layout nach `LH-FA-BUILD-009`
 - Doku-Struktur der u-boot-Codebase nach `LH-FA-PROJDOCS-001`, inkl. ADR-Format (`LH-FA-PROJDOCS-002`) und Planning-Lifecycle (`LH-FA-PROJDOCS-003`)
 - Architektur-Pattern (hexagonal, driving/driven-Split) nach `LH-FA-ARCH-001..003`, mit Detail-Spezifikation in `spec/architecture.md` und Import-Enforcement via `golangci-lint depguard`
-- SOLID-nahes Lint-Profil nach `LH-QA-004` (5 Default-Linter + 24 SOLID-nahe + `depguard`); Konfiguration in `.golangci.yml`, Doku in `docs/user/quality.md` §1, Begründung in ADR-0003
+- SOLID-nahes Lint-Profil nach `LH-QA-004` (5 Default-Linter + 24 SOLID-nahe Linter inkl. `depguard`, 29 Linter gesamt); Konfiguration in `.golangci.yml`, Doku in `docs/user/quality.md` §1.2 / §1.3, Begründung in ADR-0003
 
 ---
 

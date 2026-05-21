@@ -39,8 +39,9 @@ Lastenheft-Bezug:
 ## Entscheidung
 
 u-boot übernimmt das **SOLID-nahe Lint-Profil aus m-trace**
-unverändert für den Go-Teil (24 Pflicht-Linter plus 5 Defaults plus
-`depguard`).
+unverändert für den Go-Teil: 5 Default-Linter plus 24 SOLID-nahe
+Linter (`depguard` ist als Schicht-Regel-Linter Teil dieser 24, siehe
+`LH-FA-ARCH-003`). Damit sind 29 Linter aktiv.
 
 Konkrete Setzungen:
 

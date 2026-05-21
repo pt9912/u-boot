@@ -41,8 +41,9 @@ SOLID-nahen Zusatzprofil aus:
 | `ineffassign` | unwirksame Zuweisungen                           |
 
 Die vollständige Konfiguration (5 Defaults + 24 SOLID-nahe Linter
-aus §1.2 + `depguard` aus `LH-FA-ARCH-003`) lebt in
-[`.golangci.yml`](../../.golangci.yml). `//nolint`-Suppressions bleiben
+aus §1.2; `depguard` ist als Schicht-Regel-Linter Teil dieser 24,
+siehe `LH-FA-ARCH-003`) lebt in
+[`.golangci.yml`](../../.golangci.yml). Damit sind 29 Linter aktiv. `//nolint`-Suppressions bleiben
 ausgeschlossen — falls ein Linter auf einem Pfad designseitig keinen
 Sinn ergibt (z. B. `testpackage` im `cmd/uboot`-Wiring), wird der Pfad
 per `issues.exclude-rules` mit `Why:`-Kommentar ausgenommen; dort
@@ -112,6 +113,11 @@ Schwellen (in `.golangci.yml` zentral; Vorlage m-trace `apps/api`):
 | `interfacebloat` | `max`                  | 10   |
 | `maintidx`       | `under`                | 20   |
 | `nestif`         | `min-complexity`       | 5    |
+
+Alle nicht in der Tabelle aufgeführten Linter (z. B. `containedctx`,
+`contextcheck`, `fatcontext`, `gochecknoglobals`, `gochecknoinits`,
+`iface`, `inamedparam`, `reassign`, `testpackage`, …) laufen mit ihren
+Default-Schwellen.
 
 Wert-Hebung ist Routine (Commit-Body begründet, kein eigener ADR
 nötig), solange das Profil insgesamt nicht aufweicht.
