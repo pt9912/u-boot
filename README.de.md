@@ -75,6 +75,9 @@ Vollständiger Layout-Kontrakt:
   [`spec/lastenheft.md`](spec/lastenheft.md).
 - **Architektur-Spezifikation:** [`spec/architecture.md`](spec/architecture.md)
   (hexagonales Pattern, Schicht-Regeln, depguard-Enforcement).
+- **Quality Gates:** [`docs/user/quality.md`](docs/user/quality.md)
+  (SOLID-nahes Lint-Profil §1.2, Carveouts §1.3, Tests §2,
+  Coverage §3, Security §4).
 - **Architecture Decision Records:**
   [`docs/plan/adr/`](docs/plan/adr/).
 - **Planning-Artefakte (Slices, Tranchen):**

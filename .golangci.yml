@@ -1,32 +1,51 @@
 # golangci-lint configuration for u-boot (v2 schema).
 #
-# MVP-Bootstrap profile: the 5 default linters + depguard with active
-# layer rules per LH-FA-ARCH-003 (single source of truth in
-# spec/architecture.md §3 + §4).
+# Profile: 5 Default-Linter + 24 SOLID-nahe Linter + depguard.
+# Source of truth for the linter list and thresholds:
+# docs/user/quality.md §1.2 / §1.3 (LH-QA-004); rationale in
+# docs/plan/adr/0003-solid-nahes-lint-profil.md.
 #
-# Pragmatic exception: fmt.Fprint* on stdout/stderr (CLI writes cannot
-# meaningfully fail and would otherwise force `_, _ =`-prefixes on
-# every Fprintln).
-#
-# depguard rules are deny-only and match production code only
-# (`*_test.go` excluded via leading negative pattern). Until ./internal/
-# contains productive packages the rules match nothing — they activate
-# automatically with the first package per layer (M3 init slice).
-#
-# //nolint:depguard is forbidden; carveouts go here with a `Why:`
-# comment.
+# Hard rule: //nolint pragmas are forbidden. Pro-path carveouts go
+# below under `issues.exclude-rules` with a `Why:` comment — those
+# are not suppressions, they are deliberate scope decisions.
 
 version: "2"
 
 linters:
   default: none
   enable:
+    # 5 Default-Linter (LH-QA-004)
     - errcheck
     - govet
     - ineffassign
     - staticcheck
     - unused
+
+    # 24 SOLID-nahe Linter (docs/user/quality.md §1.2)
+    - containedctx
+    - contextcheck
+    - cyclop
     - depguard
+    - dupl
+    - fatcontext
+    - forbidigo
+    - funlen
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - gocyclo
+    - gomodguard_v2
+    - iface
+    - inamedparam
+    - interfacebloat
+    - ireturn
+    - maintidx
+    - nestif
+    - noctx
+    - reassign
+    - revive
+    - testpackage
+    - unparam
 
   settings:
     errcheck:
@@ -35,7 +54,60 @@ linters:
         - fmt.Fprintf
         - fmt.Fprint
 
+    cyclop:
+      max-complexity: 15
+
+    dupl:
+      threshold: 150
+
+    forbidigo:
+      forbid:
+        - pattern: ^fmt\.Print.*$
+          msg: use log/slog or the configured logging port (LH-QA-004)
+
+    funlen:
+      lines: 100
+      statements: 60
+
+    gocognit:
+      min-complexity: 20
+
+    gocyclo:
+      min-complexity: 15
+
+    interfacebloat:
+      max: 10
+
+    ireturn:
+      # Allow returning interface types from the standard library, from
+      # generic functions, anonymous interfaces, and from u-boot ports
+      # (driving/driven). Concrete types are still preferred where the
+      # caller does not need an abstraction.
+      allow:
+        - error
+        - empty
+        - anon
+        - stdlib
+        - generic
+        - github.com/pt9912/u-boot/internal/hexagon/port/driving\..*
+        - github.com/pt9912/u-boot/internal/hexagon/port/driven\..*
+
+    maintidx:
+      under: 20
+
+    nestif:
+      min-complexity: 5
+
+    gomodguard_v2:
+      # No external module rules yet — bootstrap codebase has no
+      # third-party dependencies. Rules will be defined once
+      # spf13/cobra, gopkg.in/yaml.v3, etc. land in go.mod (ADR-0003).
+      blocked: {}
+
     depguard:
+      # Layer rules per LH-FA-ARCH-003 / spec/architecture.md §4.
+      # Match production code only (`!**/*_test.go`); tests can use
+      # fakes and test libraries freely.
       rules:
         domain-isoliert:
           files:
@@ -106,3 +178,38 @@ linters:
           deny:
             - pkg: github.com/pt9912/u-boot/internal/adapter/driving
               desc: driven adapter must not depend on driving adapter (LH-FA-ARCH-003)
+
+  exclusions:
+    generated: lax
+    rules:
+      # Why: table-driven tests legitimately have higher complexity
+      # without indicating design smell.
+      - linters:
+          - cyclop
+          - gocognit
+          - gocyclo
+          - nestif
+          - funlen
+        path: _test\.go$
+
+      # Why: tests against fakes/httptest.Server commonly miss ctx,
+      # unused params (`always receives ...`) and similar without
+      # design implications.
+      - linters:
+          - noctx
+          - unparam
+        path: _test\.go$
+
+      - linters:
+          - revive
+        path: _test\.go$
+        text: ^unused-parameter
+
+      # Why: cmd/uboot/ is the wiring layer — it must be `package main`
+      # (so testpackage cannot enforce external _test packages), and
+      # `var version` is the canonical pattern for `-ldflags`-overridden
+      # build metadata.
+      - linters:
+          - testpackage
+          - gochecknoglobals
+        path: cmd/uboot/

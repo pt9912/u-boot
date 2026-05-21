@@ -73,6 +73,9 @@ Full layout contract: [`LH-FA-BUILD-009` in
   [`spec/lastenheft.md`](spec/lastenheft.md).
 - **Architecture specification:** [`spec/architecture.md`](spec/architecture.md)
   (hexagonal pattern, layer rules, depguard enforcement).
+- **Quality gates:** [`docs/user/quality.md`](docs/user/quality.md)
+  (SOLID-near lint profile §1.2, carveouts §1.3, tests §2,
+  coverage §3, security §4).
 - **Architecture Decision Records:**
   [`docs/plan/adr/`](docs/plan/adr/).
 - **Planning artefacts (slices, tranches):**

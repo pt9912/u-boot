@@ -2216,11 +2216,25 @@ Das Projekt soll in einer CI-Umgebung testbar sein.
 
 ---
 
-### LH-QA-004 – Linting
+### LH-QA-004 – Linting (SOLID-nahes Lint-Profil)
 
-Priorität: V1
+Priorität: MVP
 
-Das Projekt soll Linting für Quellcode und Konfigurationsdateien unterstützen.
+Die u-boot-Codebase muss ein verschärftes Lint-Profil führen, das über die Default-Linter hinausgeht.
+
+Profil-Komposition:
+
+- 5 Default-Linter (`govet`, `errcheck`, `staticcheck`, `unused`, `ineffassign`).
+- 24 SOLID-nahe Zusatz-Linter (Komplexitäts-, Funktionslänge-, Interface-, Kopplungs- und Boundary-Signale; vollständige Liste in [`docs/user/quality.md`](../docs/user/quality.md) §1.2).
+- `depguard` zur Durchsetzung der Schicht-Regeln aus `LH-FA-ARCH-003`.
+
+Pflichten:
+
+- Die Konfiguration lebt in `.golangci.yml` (v2-Schema).
+- Schwellen und Linter-Settings sind in [`docs/user/quality.md`](../docs/user/quality.md) §1.2 dokumentiert; bei Drift zwischen Doku und Config gewinnt die Doku, Config ist anzupassen.
+- `//nolint`-Pragmas sind verboten. Pro-Pfad-Carveouts (z. B. Tests, `cmd/uboot`) werden zentral in `.golangci.yml` unter `issues.exclude-rules` mit `Why:`-Kommentar dokumentiert.
+- Verstöße brechen den `lint`-Stage (`LH-FA-BUILD-001`) und damit `make gates`/`make ci`/`make fullbuild`.
+- Begründung der konkreten Linter-Auswahl ist in [`docs/plan/adr/0003-solid-nahes-lint-profil.md`](../docs/plan/adr/0003-solid-nahes-lint-profil.md) festgehalten.
 
 ---
 
@@ -2463,6 +2477,7 @@ Der MVP muss enthalten:
   - Repository-Layout nach `LH-FA-BUILD-009`
 - Doku-Struktur der u-boot-Codebase nach `LH-FA-PROJDOCS-001`, inkl. ADR-Format (`LH-FA-PROJDOCS-002`) und Planning-Lifecycle (`LH-FA-PROJDOCS-003`)
 - Architektur-Pattern (hexagonal, driving/driven-Split) nach `LH-FA-ARCH-001..003`, mit Detail-Spezifikation in `spec/architecture.md` und Import-Enforcement via `golangci-lint depguard`
+- SOLID-nahes Lint-Profil nach `LH-QA-004` (5 Default-Linter + 24 SOLID-nahe + `depguard`); Konfiguration in `.golangci.yml`, Doku in `docs/user/quality.md` §1, Begründung in ADR-0003
 
 ---
 
@@ -2609,7 +2624,7 @@ Nach dem MVP können ergänzt werden:
 | LH-QA-001          | Automatisierte Tests           | MVP       | PH-QA-001                          | TC-QA-001       |
 | LH-QA-002          | Testbare Akzeptanzkriterien    | MVP       | PH-QA-002                          | TC-QA-002       |
 | LH-QA-003          | CI-Fähigkeit                  | MVP       | PH-QA-003                          | TC-QA-003       |
-| LH-QA-004          | Linting                       | V1        | PH-QA-004                          | TC-QA-004       |
+| LH-QA-004          | Linting (SOLID-nahes Profil)   | MVP       | PH-QA-004                          | TC-QA-004       |
 | LH-AK-001          | Minimaler Init-Flow            | MVP       | PH-AK-001                          | TC-AK-001       |
 | LH-AK-002          | PostgreSQL-Flow                | MVP       | PH-AK-002                          | TC-AK-002       |
 | LH-AK-003          | Keycloak-Flow                  | V1        | PH-AK-003                          | TC-AK-003       |

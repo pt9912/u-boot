@@ -1,12 +1,12 @@
 # Architektur — u-boot
 
-| Dokument         | Architektur-Spezifikation                                     |
-| ---------------- | -------------------------------------------------------------- |
-| Projektname      | `u-boot`                                                       |
-| Bezug            | `LH-FA-ARCH-001..003` in [`spec/lastenheft.md`](lastenheft.md) |
-| ADR              | [`docs/plan/adr/0002-hexagonale-architektur.md`](../docs/plan/adr/0002-hexagonale-architektur.md) |
-| Status           | Entwurf 0.1.0                                                  |
-| Datum            | 2026-05-21                                                     |
+| Dokument    | Architektur-Spezifikation                                                                         |
+| ----------- | ------------------------------------------------------------------------------------------------- |
+| Projektname | `u-boot`                                                                                          |
+| Bezug       | `LH-FA-ARCH-001..003` in [`spec/lastenheft.md`](lastenheft.md)                                    |
+| ADR         | [`docs/plan/adr/0002-hexagonale-architektur.md`](../docs/plan/adr/0002-hexagonale-architektur.md) |
+| Status      | Entwurf 0.1.0                                                                                     |
+| Datum       | 2026-05-21                                                                                        |
 
 ---
 
@@ -17,8 +17,8 @@ u-boot folgt dem **hexagonalen Architektur-Pattern** (auch: *Ports & Adapters*, 
 Sechs Schichten plus Wiring, klare Verantwortungen und einseitig gerichtete Abhängigkeiten:
 
 ```
-  ┌──────────────────────────────────────────────────┐
-  │                cmd/uboot (Wiring)                │
+            ┌──────────────────────────────────────────────────┐
+            │                cmd/uboot (Wiring)                │
             │   (instanziiert Application + Adapter; main.go)  │
             └────────────────────┬─────────────────────────────┘
                                  │
@@ -52,7 +52,7 @@ Pfeile zeigen die **Aufruf-/Datenfluss-Richtung** zur Laufzeit. Die **Import-Ric
 
 ### 2.1 `hexagon/domain`
 
-Reine Datentypen und invariantes Verhalten ohne I/O.
+Reine Datentypen und invariantenhaltige Verhaltensregeln ohne I/O.
 
 - **Beispielinhalte:** `Project`, `Service`, `ComposeFile`, `EnvVar`, Value-Objects (`ProjectName`, `Port`, `ImageRef`), Validierungs-Methoden.
 - **Erlaubte Imports:** ausschließlich Go-Standard-Library.
@@ -64,7 +64,7 @@ Reine Datentypen und invariantes Verhalten ohne I/O.
 Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält keine externe I/O.
 
 - **Beispielinhalte:** `InitProjectService`, `AddServiceService`, `RunDoctorService`, `RenderTemplateService`.
-- **Erlaubte Imports:** `hexagon/domain`, `hexagon/port` (zum Konsumieren von Driven-Ports und Implementieren von Driving-Ports).
+- **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driving`, `hexagon/port/driven` (zum Konsumieren von Driven-Ports und Implementieren von Driving-Ports).
 - **Verbotene Imports:** `adapter/*`, externe I/O-Libraries.
 - **Tests:** Unit-Tests mit Test-Doubles für Driven-Ports (Fakes oder Mocks in `_test.go`).
 
@@ -111,15 +111,15 @@ Einziger Ort, an dem `application` und `adapter` zusammen importiert werden.
 
 ## 3. Import-Regeln
 
-| Schicht                  | darf importieren                                                                          | darf nicht importieren                                                |
-| ------------------------ | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `hexagon/domain`         | Go-Standard-Library                                                                       | alle anderen `internal/`-Pakete, I/O-Libraries                        |
-| `hexagon/application`    | `hexagon/domain`, `hexagon/port`                                                          | `adapter/*`, externe I/O-Libraries                                    |
-| `hexagon/port/driving`   | `hexagon/domain`                                                                          | `hexagon/application`, `hexagon/port/driven`, `adapter/*`             |
-| `hexagon/port/driven`    | `hexagon/domain`                                                                          | `hexagon/application`, `hexagon/port/driving`, `adapter/*`            |
-| `adapter/driving`        | `hexagon/domain`, `hexagon/port/driving`, externe Libraries (z. B. Cobra)                | `hexagon/application`, `adapter/driven`                               |
-| `adapter/driven`         | `hexagon/domain`, `hexagon/port/driven`, externe Libraries (z. B. Docker-SDK)            | `hexagon/application`, `adapter/driving`                              |
-| `cmd/uboot`              | `internal/...`, Standardbibliothek, externe Libraries                                         | (frei — Wiring-Schicht)                                               |
+| Schicht                | darf importieren                                                              | darf nicht importieren                                     |
+| ---------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `hexagon/domain`       | Go-Standard-Library                                                           | alle anderen `internal/`-Pakete, I/O-Libraries             |
+| `hexagon/application`  | `hexagon/domain`, `hexagon/port/driving`, `hexagon/port/driven`               | `adapter/*`, externe I/O-Libraries                         |
+| `hexagon/port/driving` | `hexagon/domain`                                                              | `hexagon/application`, `hexagon/port/driven`, `adapter/*`  |
+| `hexagon/port/driven`  | `hexagon/domain`                                                              | `hexagon/application`, `hexagon/port/driving`, `adapter/*` |
+| `adapter/driving`      | `hexagon/domain`, `hexagon/port/driving`, externe Libraries (z. B. Cobra)     | `hexagon/application`, `adapter/driven`                    |
+| `adapter/driven`       | `hexagon/domain`, `hexagon/port/driven`, externe Libraries (z. B. Docker-SDK) | `hexagon/application`, `adapter/driving`                   |
+| `cmd/uboot`            | `internal/...`, Standardbibliothek, externe Libraries                         | (frei — Wiring-Schicht)                                    |
 
 Begründung der Regeln:
 
@@ -145,8 +145,8 @@ linters:
     depguard:
       rules:
         domain-isoliert:
-          list-mode: lax
           files:
+            - '!**/*_test.go'
             - '**/internal/hexagon/domain/**'
           deny:
             - pkg: github.com/pt9912/u-boot/internal/hexagon/application
@@ -158,6 +158,7 @@ linters:
 
         application-no-adapter:
           files:
+            - '!**/*_test.go'
             - '**/internal/hexagon/application/**'
           deny:
             - pkg: github.com/pt9912/u-boot/internal/adapter
@@ -165,6 +166,7 @@ linters:
 
         port-no-application:
           files:
+            - '!**/*_test.go'
             - '**/internal/hexagon/port/**'
           deny:
             - pkg: github.com/pt9912/u-boot/internal/hexagon/application
@@ -174,6 +176,7 @@ linters:
 
         port-driving-no-driven:
           files:
+            - '!**/*_test.go'
             - '**/internal/hexagon/port/driving/**'
           deny:
             - pkg: github.com/pt9912/u-boot/internal/hexagon/port/driven
@@ -181,6 +184,7 @@ linters:
 
         port-driven-no-driving:
           files:
+            - '!**/*_test.go'
             - '**/internal/hexagon/port/driven/**'
           deny:
             - pkg: github.com/pt9912/u-boot/internal/hexagon/port/driving
@@ -188,6 +192,7 @@ linters:
 
         adapter-no-application:
           files:
+            - '!**/*_test.go'
             - '**/internal/adapter/**'
           deny:
             - pkg: github.com/pt9912/u-boot/internal/hexagon/application
@@ -195,6 +200,7 @@ linters:
 
         adapter-driving-no-driven:
           files:
+            - '!**/*_test.go'
             - '**/internal/adapter/driving/**'
           deny:
             - pkg: github.com/pt9912/u-boot/internal/adapter/driven
@@ -202,13 +208,14 @@ linters:
 
         adapter-driven-no-driving:
           files:
+            - '!**/*_test.go'
             - '**/internal/adapter/driven/**'
           deny:
             - pkg: github.com/pt9912/u-boot/internal/adapter/driving
               desc: driven adapter must not depend on driving adapter (LH-FA-ARCH-003)
 ```
 
-`//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `Why:`-Kommentar dokumentiert.
+`//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `desc` dokumentiert.
 
 ---
 
