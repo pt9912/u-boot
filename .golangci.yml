@@ -1,0 +1,28 @@
+# golangci-lint configuration for u-boot (v2 schema).
+#
+# MVP-Bootstrap profile: the 5 default linters, with one pragmatic
+# exception for fmt.Fprint* (CLI writes to stdout/stderr cannot
+# meaningfully fail in this codebase and would otherwise force
+# `_, _ =`-prefixes on every Fprintln).
+#
+# Will be expanded in later slices once internal/hexagon/* and
+# internal/adapter/* have content (depguard layer rules, SOLID-style
+# linter set analog to k-deskflight ADR 0012).
+
+version: "2"
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+
+  settings:
+    errcheck:
+      exclude-functions:
+        - fmt.Fprintln
+        - fmt.Fprintf
+        - fmt.Fprint

@@ -1,0 +1,32 @@
+# Build artefacts
+/out/
+/dist/
+/coverage/
+*.test
+*.out
+
+# Stray Go binaries from local `go build` runs (the canonical build
+# path is `make build` into the runtime image; local binaries should
+# never be checked in).
+/uboot
+/u-boot
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Agent / tooling working dirs
+.claude/
+.codex/
+.agents/
+
+# Local env overrides (if ever added — never commit secrets)
+.env
+.env.local

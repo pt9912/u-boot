@@ -1645,6 +1645,7 @@ Planning-Artefakte (Slices, Tranchen, Tickets) durchlaufen die Verzeichnisse `op
   - `slice-<phase>-<kebab-slug>.md` für Slice-Pläne (z. B. `slice-m1-repo-skeleton.md`).
   - `tranche-<nr>-<kebab-slug>.md` für Tranchen-Pläne (z. B. `tranche-01-init-flow.md`).
   Die Wahl zwischen Slice- und Tranchen-Format ist im `README.md` von `docs/plan/planning/` dokumentiert; ein Artefakt verwendet genau eines der beiden Formate.
+- Ausnahme für übergreifende Master-Dokumente: eine `roadmap.md` darf direkt unter `docs/plan/planning/in-progress/` liegen und folgt keinem der beiden Formate. Sie fasst Slices und Tranchen lebendig zusammen und wird laufend gepflegt.
 
 ---
 
@@ -2563,7 +2564,7 @@ Status: entschieden am 2026-05-21.
 Sprache: **Go**.
 Begründung und Konsequenzen: siehe `docs/plan/adr/0001-implementierungssprache-go.md` (`LH-FA-PROJDOCS-002`).
 
-Mindest-Toolchain: Go 1.25 oder neuer; Default-Pin im Dockerfile als `ARG GO_VERSION` (aktuell `1.26.3`, analog Referenzprojekt `k-deskflight`). Pin-Hebung ist Routine ohne separaten Spec-Eintrag.
+Mindest-Toolchain: Go 1.26 oder neuer (`go 1.26.0` in `go.mod`, analog Referenzprojekt `k-deskflight`); Default-Pin im Dockerfile als `ARG GO_VERSION` (aktuell `1.26.3`, die aktuelle Stable-Version am Entscheidungsdatum). Pin-Hebung ist Routine ohne separaten Spec-Eintrag.
 
 ---
 

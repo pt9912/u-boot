@@ -1,0 +1,35 @@
+# Build context filter for u-boot. Keeps `docker build` deterministic
+# and small. See LH-FA-BUILD-004 in spec/lastenheft.md.
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI
+.github
+
+# Editor / IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Agent / tooling working dirs
+.claude
+.codex
+.agents
+
+# Local build / test artefacts (defense-in-depth — Docker-only workflow
+# means these should never exist locally, but if they do they must not
+# bleed into the build context)
+out
+dist
+coverage
+coverage*
+*.test
+*.out
+*.log
+
+# The .dockerignore itself is not needed inside the image.
+.dockerignore

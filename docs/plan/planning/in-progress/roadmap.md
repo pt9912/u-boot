@@ -1,0 +1,32 @@
+# u-boot Roadmap
+
+Übergreifendes Master-Dokument zum Stand aller Slices und Tranchen
+(`LH-FA-PROJDOCS-003`). Wird laufend gepflegt und liegt deshalb dauerhaft
+in `in-progress/`.
+
+| Phase | Status | Beschreibung | Artefakt |
+| ----- | ------ | ------------ | -------- |
+| M0 Spec | Done | Lastenheft v0.1.0 (Sektionen 1–14, inkl. 4.11 Build-/CI-Infrastruktur, 4.12 Doku-Struktur) | [`spec/lastenheft.md`](../../../../spec/lastenheft.md) |
+| M0 ADRs | Done | ADR-0001 Implementierungssprache Go | [`docs/plan/adr/0001-implementierungssprache-go.md`](../../adr/0001-implementierungssprache-go.md) |
+| M1 Repo-Skeleton | Done | Multi-Stage Dockerfile, Makefile, .dockerignore, Repo-Layout (`LH-FA-BUILD-001..009`), Doku-Struktur (`LH-FA-PROJDOCS-001..003`), `u-boot --help` / `--version`-Stub | dieser Commit |
+| M2 Architektur | In progress | Hexagonale Architektur (`LH-FA-ARCH-*`) + `spec/architecture.md` + ADR-0002 | folgt im nächsten Commit |
+| M3 `u-boot init` | Next | Projektstruktur erzeugen (`LH-FA-INIT-001..007`), `u-boot.yaml` schreiben, Git-Init | offen |
+| M4 `u-boot doctor` | Open | Lokale Voraussetzungen prüfen (`LH-FA-DIAG-001..004`), JSON-Output (`LH-NFA-USE-004`) | offen |
+| M5 `u-boot add postgres` | Open | PostgreSQL-Add-on (`LH-FA-ADD-001..005`), Compose-Block, `.env.example`-Block, Healthcheck | offen |
+| M6 `u-boot up` / `down` | Open | Compose-Wrapper (`LH-FA-UP-001..004`), Healthcheck-Polling, `--timeout`, `--volumes` | offen |
+| M7 `u-boot generate` | Open | `generate changelog`/`readme`/`env-example`/`devcontainer` (`LH-FA-GEN-001..005`) | offen |
+| M8 `u-boot config` | Open | `config get`/`set`/Anzeigen (`LH-FA-CONF-001..005`), Schema-Validierung | offen |
+| MVP-Closure | Open | Devcontainer-Mindestumfang (`LH-FA-DEV-001..005`), MVP-Acceptance-Flows (`LH-AK-001..002`, `LH-AK-005..007`) | offen |
+| V1 Keycloak / OTel | Open | `LH-FA-ADD-003`, `LH-FA-ADD-004`, `LH-AK-003`, `LH-AK-004` | offen |
+| V1 Templates | Open | `LH-FA-TPL-001..004` | offen |
+| V1 Logs / Dry-Run / Diff | Open | `LH-FA-UP-005`, `LH-FA-CLI-007/008` | offen |
+| Later Migration / Custom Templates | Open | `LH-FA-CONF-006`, `LH-FA-TPL-003`, `LH-DA-004` | offen |
+
+## Nächste Schritte
+
+1. **M2** abschließen: Sektion 4.13 (Architektur) im Lastenheft + ADR-0002 (Hex-Pattern) + `spec/architecture.md` (Import-Graph, Layer-Regeln) + `internal/`-Skeleton (`hexagon/{domain,application,port/{driving,driven}}/` + `adapter/{driving,driven}/`).
+2. **M3** starten: erster fachlicher Slice, `slice-m3-init-flow.md` in `next/` anlegen, dann nach `in-progress/`.
+
+## Lifecycle-Hinweis
+
+Diese Datei ist die einzige zulässige Ausnahme von der `slice-`/`tranche-`-Konvention für Dateinamen in `docs/plan/planning/` (siehe `LH-FA-PROJDOCS-003` und [`../README.md`](../README.md)).
