@@ -141,5 +141,61 @@ func TestFS_ReadDir(t *testing.T) {
 	}
 }
 
+func TestFS_IsDir(t *testing.T) {
+	dir := t.TempDir()
+	file := filepath.Join(dir, "f.txt")
+	if err := os.WriteFile(file, nil, 0o644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+	adapter := fs.New()
+
+	got, err := adapter.IsDir(dir)
+	if err != nil {
+		t.Fatalf("IsDir(dir): %v", err)
+	}
+	if !got {
+		t.Fatalf("IsDir(dir) = false, want true")
+	}
+
+	got, err = adapter.IsDir(file)
+	if err != nil {
+		t.Fatalf("IsDir(file): %v", err)
+	}
+	if got {
+		t.Fatalf("IsDir(file) = true, want false")
+	}
+
+	got, err = adapter.IsDir(filepath.Join(dir, "missing"))
+	if err != nil {
+		t.Fatalf("IsDir(missing): unexpected error: %v", err)
+	}
+	if got {
+		t.Fatalf("IsDir(missing) = true, want false")
+	}
+}
+
+func TestFS_RemoveAll(t *testing.T) {
+	dir := t.TempDir()
+	tree := filepath.Join(dir, "a", "b")
+	if err := os.MkdirAll(tree, 0o755); err != nil {
+		t.Fatalf("setup mkdir: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(tree, "c.txt"), []byte("x"), 0o644); err != nil {
+		t.Fatalf("setup write: %v", err)
+	}
+	adapter := fs.New()
+
+	if err := adapter.RemoveAll(filepath.Join(dir, "a")); err != nil {
+		t.Fatalf("RemoveAll: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "a")); !errors.Is(err, iofs.ErrNotExist) {
+		t.Fatalf("RemoveAll: tree still exists, err=%v", err)
+	}
+
+	if err := adapter.RemoveAll(filepath.Join(dir, "missing")); err != nil {
+		t.Fatalf("RemoveAll(missing): want nil (idempotent), got %v", err)
+	}
+}
+
 // The static FS↔driven.FileSystem contract check lives in fs.go (see
 // `var _ driven.FileSystem = (*FS)(nil)`), not here.

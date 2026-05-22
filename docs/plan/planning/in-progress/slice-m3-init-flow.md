@@ -76,9 +76,42 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
    die LH-FA-INIT-003-Mindeststruktur + `u-boot.yaml` (LH-FA-CONF-002).
 
 4. **T4 — Überschreibschutz + nicht-interaktive Modi.**
-   `--backup`-/`--force`-Logik nach `LH-FA-INIT-005`,
-   `--no-interactive`/`--yes`/`--assume-existing`-Logik nach
-   `LH-FA-CLI-005A`. Exit-Codes pro Pfad.
+   Wird in drei Sub-Tranchen geliefert, weil die Spec-Anforderungen
+   (`LH-FA-INIT-005` Backup-Konvention + Managed-Block-Logik nach
+   `LH-SA-FILE-002`, plus `LH-FA-CLI-005A` Modi-Flags) sonst einen
+   einzelnen Commit überfrachten:
+
+   - **T4a — Backup-Mechanik.** ✅ Done (dieser Commit, Hash folgt im EOD-Commit)
+     `FileSystem`-Driven-Port um `IsDir` / `RemoveAll` erweitert,
+     `application/backup.go` mit `BackupPath` — kleinster-freier-
+     Suffix-Algorithmus (`.bak`, `.bak.1`, …) nach `LH-FA-INIT-005`
+     §607/608, Files und Verzeichnisse (rekursiv), Rollback bei
+     Tree-Backup-Fehler. Sentinels `ErrBackupSourceMissing` und
+     `ErrBackupSuffixExhausted`. Fakes erweitert (`IsDir`/`RemoveAll`/
+     echtes `ReadDir`); FS-Adapter-Tests für die neuen Methoden.
+     Coverage `backup.go`: BackupPath/chooseBackupPath/copyFile 100 %,
+     copyTree 80 %.
+
+   - **T4b — Managed-Block-Parser + Force/Backup-Flow.** Offen.
+     `application/managedblock/` mit Marker-Parser pro Dateityp nach
+     `LH-SA-FILE-002` (YAML/.env `#`, Markdown `<!-- -->`, JSONC `//`).
+     `InitProjectRequest` um `Force`/`Backup` erweitern; Service-
+     Logik: vorhandener Marker → nur Block ersetzen; fehlt + `--backup`
+     → vollständiges Backup → überschreiben; fehlt + `--force` ohne
+     `--backup` → `ErrForceRequiresBackup` (Exit-Code 10 nach
+     `LH-FA-INIT-005` §619). Templates um Marker erweitern.
+     Zusammenfassungs-Ausgabe der betroffenen Pfade vor dem Schreiben
+     (`LH-FA-INIT-005` §609 / `LH-FA-CLI-005A` §262).
+
+   - **T4c — Modi-Flags + Exit-Codes.** Offen.
+     Cobra-Flags `--force`, `--backup`, `--yes`, `--no-interactive`,
+     `--assume-existing`. Konflikt-Check `--yes` + `--no-interactive`
+     → `ErrConflictingModeFlags` → Exit-Code 2 nach `LH-FA-CLI-005A`
+     §235. `--assume-existing` wird angenommen + validiert, bleibt
+     bis zur M4-Soft-Detection (`slice-m4-soft-existing-detection.md`)
+     ein NoOp; die Hard-Marker-Logik aus T2 schützt bereits gegen
+     vorhandene `u-boot.yaml`/`compose.yaml`/`.env.example`.
+     ExitCode-Erweiterung in `internal/adapter/driving/cli/cli.go`.
 
 5. **T5 — Cleanup: Carveout-Auflösung.**
    depguard-Verifikation pro Schicht (siehe

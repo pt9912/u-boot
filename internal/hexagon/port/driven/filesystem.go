@@ -38,4 +38,17 @@ type FileSystem interface {
 
 	// ReadDir lists the directory entries at path.
 	ReadDir(path string) ([]fs.DirEntry, error)
+
+	// IsDir reports whether path exists and is a directory. Returns
+	// `(false, nil)` for a non-existent path so callers can use it as a
+	// "kind probe" without a separate Exists call. Real I/O errors
+	// (permission denied on a parent, etc.) propagate. Added for the
+	// LH-FA-INIT-005 backup strategy, which copies file-vs-directory
+	// trees differently.
+	IsDir(path string) (bool, error)
+
+	// RemoveAll deletes path and any children, mirroring os.RemoveAll.
+	// Used by the LH-FA-INIT-005 backup strategy as the rollback action
+	// when a partial tree copy fails partway through.
+	RemoveAll(path string) error
 }

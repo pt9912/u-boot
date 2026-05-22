@@ -74,3 +74,22 @@ func (FS) Rename(src, dst string) error {
 func (FS) ReadDir(path string) ([]iofs.DirEntry, error) {
 	return os.ReadDir(path)
 }
+
+// IsDir reports whether path exists and is a directory. Mirrors the
+// Exists policy: a missing path returns `(false, nil)`, real I/O
+// errors propagate.
+func (FS) IsDir(path string) (bool, error) {
+	info, err := os.Stat(path)
+	if err == nil {
+		return info.IsDir(), nil
+	}
+	if errors.Is(err, iofs.ErrNotExist) {
+		return false, nil
+	}
+	return false, err
+}
+
+// RemoveAll mirrors os.RemoveAll.
+func (FS) RemoveAll(path string) error {
+	return os.RemoveAll(path)
+}
