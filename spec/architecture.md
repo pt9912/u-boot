@@ -6,7 +6,7 @@
 | Bezug       | `LH-FA-ARCH-001..003` in [`spec/lastenheft.md`](lastenheft.md)                                    |
 | ADR         | [`docs/plan/adr/0002-hexagonale-architektur.md`](../docs/plan/adr/0002-hexagonale-architektur.md) |
 | Status      | Entwurf 0.1.0                                                                                     |
-| Datum       | 2026-05-21                                                                                        |
+| Datum       | 2026-05-22                                                                                        |
 
 ---
 
@@ -64,7 +64,8 @@ Reine Datentypen und invariantenhaltige Verhaltensregeln ohne I/O.
 
 Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält keine externe I/O.
 
-- **Aktuelle Inhalte (M3-T2):** `InitProjectService` orchestriert `FileSystem`/`YAMLCodec`/`Git` zum LH-FA-INIT-001..007-Flow; Templates für die erzeugten Dateien via `embed.FS` + `text/template` (Templates leben unter `application/templates/*.tmpl`); `ubootYAMLConfig`-Struct als Schema-Repräsentation für `u-boot.yaml` (LH-FA-CONF-002).
+- **Aktuelle Inhalte (M3-T4):** `InitProjectService` orchestriert `FileSystem`/`YAMLCodec`/`Git`/`ProgressPort` zum LH-FA-INIT-001..007-Flow inklusive Re-Init-Pfaden nach LH-FA-INIT-005 (`--force`/`--backup`); Templates für die erzeugten Dateien via `embed.FS` + `text/template` (Templates leben unter `application/templates/*.tmpl`, die §611-strukturierten Configs wrappen ihren Inhalt in `BEGIN/END U-BOOT MANAGED BLOCK: init`-Marker); `ubootYAMLConfig`-Struct als Schema-Repräsentation für `u-boot.yaml` (LH-FA-CONF-002). Re-Init folgt einem strikten Plan-and-Execute-Split: `planFile` entscheidet pro Datei (`actionWrite`/`actionReplaceBlock`/`actionOverwriteFull`/Abort-Sentinel), Plan-Fehler verhindern jeden Side-Effect.
+- **Hilfs-Pakete:** `application/managedblock/` (LH-SA-FILE-002-Marker-Parser: `Find`/`Has`/`Replace`, drei Comment-Styles Hash/HTMLComment/DoubleSlash, Sentinel `ErrBlockNotFound`/`ErrBlockMalformed`); `application/backup.go` mit `BackupPath` (kleinster-freier-Suffix-Algorithmus für `<path>.bak[.N]`, File + rekursive Verzeichnisse, TOCTOU-sicher via `WriteFileExclusive`/`Mkdir`, Rollback bei partiellem Tree-Copy, Mode- und Symlink-Reject per Lstat).
 - **Geplante Erweiterungen:** `AddServiceService` (LH-FA-ADD-*), `RunDoctorService` (LH-FA-DIAG-*), `UpService`/`DownService` (LH-FA-UP-*), `GenerateService` (LH-FA-GEN-*).
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driving`, `hexagon/port/driven` (zum Konsumieren von Driven-Ports und Implementieren von Driving-Ports).
 - **Verbotene Imports:** `adapter/*`, externe I/O-Libraries.
@@ -74,7 +75,9 @@ Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält keine exte
 
 Interfaces, über die u-boot von außen angesprochen wird.
 
-- **Aktuelle Inhalte (M3-T2):** `InitProjectUseCase` mit `InitProjectRequest`/`Response`; Sentinels `ErrProjectExists` (LH-FA-INIT-004) und `ErrBaseDirMissing` (LH-AK-001) — beide LH-FA-CLI-006 Code 10, vom CLI-Adapter via `ExitCode` gemappt.
+- **Aktuelle Inhalte (M3-T4):** `InitProjectUseCase` mit `InitProjectRequest` (`Name`/`BaseDir`/`SkipGit` aus T1–T3 plus `Force`/`Backup`/`AssumeExisting` aus T4) und `InitProjectResponse` (`Project`/`Created`/`Backups []BackupAction`). Sentinels für Re-Init und LH-FA-CLI-006-Mapping:
+  - **Code 10 (Validierung):** `ErrProjectExists` (LH-FA-INIT-004 Marker u-boot.yaml/compose.yaml/.env.example), `ErrFileExists` (Non-Marker-Kollision), `ErrBaseDirMissing` (LH-AK-001), `ErrForceRequiresBackup` (LH-FA-INIT-005 §619), `ErrBackupUnsupportedKind` (Symlink-Reject).
+  - **Code 14 (Technischer FS-Fehler):** `ErrBackupSourceMissing` (Race zwischen Caller-Check und Backup), `ErrBackupSuffixExhausted` (.bak[.0..999] alle belegt), `ErrBackupTooLarge` (Datei > MVP-Cap 256 MiB).
 - **Geplante Erweiterungen:** `AddServiceUseCase`, `RemoveServiceUseCase`, `LifecycleUseCase`, `DoctorUseCase`, `GenerateUseCase`, `ConfigUseCase`.
 - **Implementiert von:** Strukturen in `hexagon/application`.
 - **Verwendet von:** `adapter/driving/*` (z. B. `cli/`).
@@ -83,7 +86,10 @@ Interfaces, über die u-boot von außen angesprochen wird.
 
 Interfaces, über die `hexagon/application` externe Systeme nutzt.
 
-- **Aktuelle Inhalte (M3-T1):** `FileSystem` (`Exists`/`ReadFile`/`WriteFile`/`MkdirAll`/`Rename`/`ReadDir`), `YAMLCodec` (`Marshal`/`Unmarshal`), `Git` (`IsRepository`/`Init`, jeweils mit `context.Context` als erstem Parameter), `Clock` (`Now`). Context-Konvention: nur Ports, deren Adapter blockieren können (Git via `os/exec`), nehmen Context; FS/YAML/Clock bleiben Context-frei (im Paket-Doc begründet).
+- **Aktuelle Inhalte (M3-T4):**
+  - `FileSystem` (`Exists`/`ReadFile`/`WriteFile`/`WriteFileExclusive`/`Mkdir`/`MkdirAll`/`Rename`/`ReadDir`/`Lstat`/`RemoveAll`). Die T4a-Erweiterungen folgen `os.*`-Konventionen: `Lstat` (no-follow für Symlink-Detection und Mode-Preservation), `WriteFileExclusive` (O_CREATE|O_EXCL für TOCTOU-sichere Backup-Slot-Reservierung), `Mkdir` (analog für Dir-Slots), `RemoveAll` (Rollback bei partiellem Tree-Copy).
+  - `YAMLCodec` (`Marshal`/`Unmarshal`), `Git` (`IsRepository`/`Init`, jeweils mit `context.Context` als erstem Parameter), `Clock` (`Now`). Context-Konvention: nur Ports, deren Adapter blockieren können (Git via `os/exec`), nehmen Context; FS/YAML/Clock bleiben Context-frei (im Paket-Doc begründet).
+  - `ProgressPort` (T4c-Review): `AffectedFiles(baseDir string, rows []AffectedFile)` zum strukturierten Reporting der LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 betroffenen Pfade vor jedem Re-Init-Write. `AffectedFile` trägt `Path`/`Action AffectedAction`/`Backup bool`; `AffectedAction` enumeriert `AffectedReplaceBlock`/`AffectedOverwriteFull`. Presentation lebt im Adapter; das Application-Paket bleibt I/O-Text-frei.
 - **Geplante Erweiterungen:** `DockerEngine` (`Up`/`Down`/`Ps`/`Logs`/`Exec`, M6), `Logger` (M4, siehe [`slice-m4-logging-port`](../docs/plan/planning/open/slice-m4-logging-port.md)).
 - **Implementiert von:** Strukturen in `adapter/driven/*`.
 - **Verwendet von:** `hexagon/application`.
@@ -92,7 +98,12 @@ Interfaces, über die `hexagon/application` externe Systeme nutzt.
 
 Konkrete Driver — Einstiegspunkte aus der Außenwelt.
 
-- **Aktuelle Inhalte (M3-T3):** `cli/` mit Cobra v1.10.2 (siehe [`ADR-0005`](../docs/plan/adr/0005-cli-framework-cobra.md)); `init`-Subkommando mit `[name]`-Positional + `--no-git`-Flag; `ExitCode(err)`-Funktion bündelt die LH-FA-CLI-006-Klassifikation (0 / 2 / 10 / 1); `cli.App` mit Functional-Options-Pattern (`WithGetwd` als Test-Seam).
+- **Aktuelle Inhalte (M3-T4):** `cli/` mit Cobra v1.10.2 (siehe [`ADR-0005`](../docs/plan/adr/0005-cli-framework-cobra.md)). `init`-Subkommando mit `[name]`-Positional plus den Flags:
+  - **Lokal:** `--no-git` (LH-FA-INIT-007), `--force` (LH-FA-INIT-005), `--backup` (LH-FA-INIT-005), `--assume-existing` (LH-FA-CLI-005A §238 — init-only).
+  - **Persistent (Root):** `--yes`, `--no-interactive` (LH-FA-CLI-005A — gelten für alle bestätigungs-relevanten Subbefehle, heute init, künftig add/remove/config-set/down).
+  Konflikt-Check `--yes` + `--no-interactive` → `ErrConflictingModeFlags` (CLI-internes Sentinel) → Exit-Code 2.
+- `ExitCode(err)` bündelt die LH-FA-CLI-006-Klassifikation (0 / 2 / 10 / 14 / 1); `isValidationError` und `isFilesystemError` mappen die in §2.3 gelisteten Driving-Sentinels.
+- `cli.App` mit Functional-Options-Pattern (`WithGetwd` als Test-Seam); `App.yes`/`noInteractive` halten die persistenten Flag-Werte, die `BoolVar` beim Re-Build der Root-Cobra pro `Execute` zurücksetzt — kein Flag-Leak zwischen Aufrufen.
 - **Geplante Erweiterungen:** weitere Subkommandos (`add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `template`) folgen pro Use-Case-Slice; perspektivisch HTTP-/Daemon-Adapter (siehe [`slice-later-http-driving-adapter`](../docs/plan/planning/open/slice-later-http-driving-adapter.md)).
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driving`, externe Libraries (z. B. Cobra).
 - **Verbotene Imports:** `hexagon/application` und `adapter/driven`. Die Instanziierung von Application-Services und Driven-Adaptern erfolgt ausschließlich im Wiring (`cmd/uboot/`), das beide Welten zusammenfügt; der Driving-Adapter erhält fertig konstruierte Driving-Port-Implementierungen per Konstruktor.
@@ -102,8 +113,8 @@ Konkrete Driver — Einstiegspunkte aus der Außenwelt.
 
 Konkrete externe Adapter — Implementierungen der Driven-Ports.
 
-- **Aktuelle Inhalte (M3-T1):** `fs/` (stdlib `os.*`), `yaml/` (`gopkg.in/yaml.v3`-Wrapper), `git/` (`os/exec git` mit `WithBinary`-Test-Override und Exit-Code-128-Klassifikation als „not a repo"), `clock/` (`time.Now()` in UTC). Jeder Adapter pinnt sein Port-Interface per `var _ driven.X = (*Adapter)(nil)` im Production-Code; Drift bricht den Package-Build.
-- **Geplante Erweiterungen:** `docker/` (Docker-Engine via `os/exec docker compose`, M6), `logger/` (M4, `log/slog`-basiert).
+- **Aktuelle Inhalte (M3-T4):** `fs/` (stdlib `os.*` — heute mit den T4a-Methoden `Lstat`/`WriteFileExclusive`/`Mkdir`/`RemoveAll` ergänzt; `WriteFileExclusive` nutzt `os.OpenFile` mit `O_CREATE|O_EXCL|O_WRONLY`), `yaml/` (`gopkg.in/yaml.v3`-Wrapper), `git/` (`os/exec git` mit `WithBinary`-Test-Override und Exit-Code-128-Klassifikation als „not a repo"), `clock/` (`time.Now()` in UTC), `progress/` (TextWriter rendert `driven.ProgressPort`-Events auf einen `io.Writer`; M3-T4c-Review). Jeder Adapter pinnt sein Port-Interface per `var _ driven.X = (*Adapter)(nil)` im Production-Code; Drift bricht den Package-Build.
+- **Geplante Erweiterungen:** `docker/` (Docker-Engine via `os/exec docker compose`, M6), `logger/` (M4, `log/slog`-basiert), `progress/json` (für `LH-NFA-USE-004 --json` in V1).
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driven`, externe Libraries.
 - **Verbotene Imports:** `hexagon/application`, `adapter/driving`.
 - **Test-Pfad:** `t.TempDir()` für FS, echte `git`-Binary via `os/exec.LookPath`-Skip (CI-Runner ohne git skippen sauber).
@@ -112,7 +123,7 @@ Konkrete externe Adapter — Implementierungen der Driven-Ports.
 
 Einziger Ort, an dem `application` und `adapter` zusammen importiert werden.
 
-- **Aktueller Inhalt (M3-T3):** `main.go` instantiiert `fs.New()`/`yaml.New()`/`git.New()`, baut den `InitProjectService` und übergibt ihn dem `cli.New(version, initSvc)`-Konstruktor. Plus signal-aware Context via `signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)` und Error→Exit-Code-Mapping über `cli.ExitCode(err)`. Aktuelle Größe: ~50 Zeilen.
+- **Aktueller Inhalt (M3-T4):** `main.go` instantiiert `fs.New()`/`yaml.New()`/`git.New()`/`progress.NewText(stdout)`, baut den `InitProjectService` mit dem ProgressPort und übergibt ihn dem `cli.New(version, initSvc)`-Konstruktor. Plus signal-aware Context via `signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)` und Error→Exit-Code-Mapping über `cli.ExitCode(err)`. Aktuelle Größe: ~60 Zeilen.
 - Hält keine Geschäftslogik. So klein wie sinnvoll möglich (Größenordnung 150–300 Zeilen `main.go` plus ein paar kleine Wiring-Helper); ab dieser Marke ist eine Aufteilung in mehrere Wiring-Pakete (`internal/wire/<feature>/`) zu erwägen.
 
 ---
@@ -235,7 +246,7 @@ linters:
               desc: driven adapter must not depend on driving adapter (LH-FA-ARCH-003)
 ```
 
-Die Regeln sind heute aktiv und matchen nichts, solange `./internal/...` keinen produktiven Code enthält. Mit dem ersten Paket pro Schicht greift die jeweilige Regel automatisch.
+Mit M3 (T1..T4c) ist produktiver Code in allen sieben Schichten gelandet — jede `depguard`-Regel matcht jetzt mindestens ein Paket. Die formale Pro-Schicht-Verifikation steht in [`slice-m3-depguard-aktivierung-verifizieren`](../docs/plan/planning/in-progress/slice-m3-depguard-aktivierung-verifizieren.md) (M3-T5) als Closure aus.
 
 `//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `desc` dokumentiert (`LH-FA-ARCH-003`).
 
@@ -271,7 +282,7 @@ Die folgenden Muster sind verboten und werden im Review abgelehnt:
 
 ## 7. Evolution
 
-Diese Architektur ist der Stand vom 2026-05-21. Änderungen erfolgen über neue ADRs, die das ADR-0002 superseden (`LH-FA-PROJDOCS-002`).
+Diese Architektur ist der Stand vom 2026-05-22. Änderungen erfolgen über neue ADRs, die das ADR-0002 superseden (`LH-FA-PROJDOCS-002`).
 
 Geplante Erweiterungen, die im aktuellen Dokument noch nicht abgebildet sind (beide auch im Carveout-Inventar [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md) gelistet, `LH-FA-PROJDOCS-005`):
 

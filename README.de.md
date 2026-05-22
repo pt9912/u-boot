@@ -14,11 +14,16 @@ und wiederkehrende Artefakte (README, CHANGELOG, `.env.example`).
 
 ## Status
 
-**MVP in Arbeit — `u-boot init` ist live.** Das erste fachliche
-Subkommando ist ausgeliefert (M3-T3): `u-boot init [name] [--no-git]`
-erzeugt die LH-FA-INIT-003-Projektstruktur plus `u-boot.yaml`
-(LH-FA-CONF-002) und initialisiert per Default ein Git-Repository
-(LH-FA-INIT-007). Die weiteren MVP-Subkommandos (`add`, `up`, `down`,
+**MVP in Arbeit — `u-boot init` ist vollständig verdrahtet inkl. Re-Init.**
+Das erste fachliche Subkommando ist end-to-end ausgeliefert (M3-T4c):
+`u-boot init [name]` erzeugt die LH-FA-INIT-003-Projektstruktur plus
+`u-boot.yaml` (LH-FA-CONF-002) und initialisiert per Default ein
+Git-Repository (LH-FA-INIT-007); ein zweiter Lauf auf bestehendem
+Projekt nutzt den LH-FA-INIT-005-Überschreibschutz (`--force` für
+Managed-Block-only-Edits, `--backup` für Vollüberschreibung mit
+`.bak[.N]`-Sicherung) plus die LH-FA-CLI-005A-Modi-Flags (`--yes` /
+`--no-interactive` exklusiv, `--assume-existing` durchgereicht für
+M4-Soft-Detection). Die weiteren MVP-Subkommandos (`add`, `up`, `down`,
 `doctor`, `generate`, `config`) folgen in M4+; Planung in
 [`docs/plan/planning/`](docs/plan/planning/).
 
@@ -26,8 +31,8 @@ erzeugt die LH-FA-INIT-003-Projektstruktur plus `u-boot.yaml`
 | ----- | ------ | ------ |
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
 | Architekturentscheidungen | 5 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
-| Implementierung | M1–M2d ✅, M3 in progress (T1/T2/T3 ✅) | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
-| Carveouts | 14 temporär (13 mit Slice-Plan, 1 Slice deckt 2), 7 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
+| Implementierung | M1–M2d ✅, M3 in progress (T1..T4c ✅, T5 offen) | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
+| Carveouts | 15 temporär (14 mit Slice-Plan, 1 Slice deckt 2), 7 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
 
@@ -55,6 +60,24 @@ mkdir /tmp/demo && \
 Ergebnis: `u-boot.yaml` (`schemaVersion: 1`), `compose.yaml`,
 `README.md`, `CHANGELOG.md`, `.env.example`, `.gitignore`, plus die
 Verzeichnisse `docker/`, `scripts/`, `docs/`.
+
+Re-Init auf bestehendem Projekt (LH-FA-INIT-005) verlangt eine
+explizite Strategie — kein stilles Überschreiben:
+
+```bash
+# Default: bestehende Dateien werden nicht angefasst
+docker run --rm --user "$(id -u):$(id -g)" -v /tmp/demo:/work -w /work \
+  u-boot:latest init demo --no-git
+# → Exit 10: "project already initialized"
+
+# nur die U-BOOT MANAGED BLOCK-Regionen refreshen, User-Inhalt bleibt
+docker run --rm --user "$(id -u):$(id -g)" -v /tmp/demo:/work -w /work \
+  u-boot:latest init demo --no-git --force
+
+# Vollüberschreibung mit Sicherheits-Backup nach <datei>.bak[.N]
+docker run --rm --user "$(id -u):$(id -g)" -v /tmp/demo:/work -w /work \
+  u-boot:latest init demo --no-git --force --backup
+```
 
 Inner-Loop-Quality-Gates (`LH-FA-BUILD-005` / `-006`):
 
