@@ -209,6 +209,7 @@ func TestExitCode_BaseMappings(t *testing.T) {
 		{"ErrBaseDirMissing (validation)", driving.ErrBaseDirMissing, 10},
 		{"ErrInvalidProjectName (validation)", domain.ErrInvalidProjectName, 10},
 		{"ErrBackupUnsupportedKind (validation)", driving.ErrBackupUnsupportedKind, 10},
+		{"ErrForceRequiresBackup (validation)", driving.ErrForceRequiresBackup, 10},
 		{"wrapped ErrProjectExists", fmt.Errorf("ctx: %w", driving.ErrProjectExists), 10},
 		{"ErrBackupSuffixExhausted (fs)", driving.ErrBackupSuffixExhausted, 14},
 		{"ErrBackupSourceMissing (fs)", driving.ErrBackupSourceMissing, 14},

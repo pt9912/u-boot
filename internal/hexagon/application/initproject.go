@@ -4,8 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"path/filepath"
+	"sort"
 
+	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
@@ -19,13 +22,6 @@ import (
 // on immutable list constants.
 func projectStructureDirs() []string {
 	return []string{"docker", "scripts", "docs"}
-}
-
-// projectMarkerFiles returns the steering files whose presence in
-// req.BaseDir marks the directory as "already an initialized
-// u-boot project" (LH-FA-INIT-004 — at least one of these is enough).
-func projectMarkerFiles() []string {
-	return []string{"u-boot.yaml", "compose.yaml", ".env.example"}
 }
 
 // ubootYAMLProject is the `project:` sub-tree of u-boot.yaml
@@ -56,32 +52,69 @@ type ubootYAMLConfig struct {
 // orchestrates the driven ports (FileSystem, YAMLCodec, Git) to
 // realize the LH-FA-INIT-001..007 flow.
 type InitProjectService struct {
-	fs   driven.FileSystem
-	yaml driven.YAMLCodec
-	git  driven.Git
+	fs       driven.FileSystem
+	yaml     driven.YAMLCodec
+	git      driven.Git
+	progress io.Writer
 }
 
 // Static check: InitProjectService satisfies the driving port.
 var _ driving.InitProjectUseCase = (*InitProjectService)(nil)
 
 // NewInitProjectService constructs the service with the driven
-// adapters injected by the wiring layer (cmd/uboot).
-func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driven.Git) *InitProjectService {
-	return &InitProjectService{fs: fs, yaml: yaml, git: git}
+// adapters and a progress writer injected by the wiring layer
+// (cmd/uboot). progress receives the LH-FA-INIT-005 §609 / LH-FA-
+// CLI-005A §262 "affected paths" summary before any write happens
+// on re-init. Pass [io.Discard] for tests that do not assert on
+// summary output; nil is treated as Discard for the same reason.
+func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driven.Git, progress io.Writer) *InitProjectService {
+	if progress == nil {
+		progress = io.Discard
+	}
+	return &InitProjectService{fs: fs, yaml: yaml, git: git, progress: progress}
 }
 
-// Init runs the init flow per LH-FA-INIT-001..007 / LH-FA-CONF-001..003.
-// M3-T2 covers the happy path plus the default overwrite-rejection
-// branch (LH-FA-INIT-004 hard-marker variant); --backup / --force
-// handling lands in M3-T4, the LH-FA-INIT-004 soft-detection variant
-// lands in `slice-m4-soft-existing-detection.md`.
+// fileAction classifies what the service should do with a single
+// templated file at execute time. The plan phase computes this for
+// every file before any write happens, so a summary can be emitted
+// and an abort can fire before partial side effects.
+type fileAction int
+
+const (
+	// actionWrite means the file does not exist yet — render and
+	// write fresh.
+	actionWrite fileAction = iota
+	// actionReplaceBlock means the file exists with a
+	// `U-BOOT MANAGED BLOCK: init` marker; splice in the new block
+	// (LH-FA-INIT-005 §613–§614).
+	actionReplaceBlock
+	// actionOverwriteFull means the file exists and gets fully
+	// rewritten. Always paired with backup=true in the plan
+	// (LH-FA-INIT-005 §617/§619 require backup before any full
+	// overwrite of an existing file).
+	actionOverwriteFull
+)
+
+// filePlan is the planned action for a single templated file plus
+// whether a backup is taken before the action runs. backup is
+// independent of action — it can be true for both ReplaceBlock and
+// OverwriteFull. The Style field is only meaningful for ReplaceBlock.
+type filePlan struct {
+	Template fileTemplate
+	Action   fileAction
+	Backup   bool
+}
+
+// Init runs the init flow per LH-FA-INIT-001..007 / LH-FA-CONF-001..003,
+// extended in M3-T4b with the LH-FA-INIT-005 re-init paths
+// (--force / --backup, managed-block-only edits).
 //
-// TOCTOU note: between rejectIfExisting and the writeDirectories /
-// writeTemplatedFiles / writeUBootYAML / initGit steps, a concurrent
-// process could create the marker files. For a CLI one-shot the
-// race is benign — the worst case is that the write step trips its
-// own error. No locking is taken; the application contract assumes
-// no concurrent u-boot processes against the same BaseDir.
+// TOCTOU note: between the plan phase (Lstat + ReadFile) and the
+// execute phase (WriteFile / BackupPath), a concurrent process
+// could change the file system. For a CLI one-shot the race is
+// benign — the worst case is that the execute step trips its own
+// error. BackupPath itself is TOCTOU-safe via WriteFileExclusive +
+// Mkdir (T4a-review).
 func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRequest) (driving.InitProjectResponse, error) {
 	if req.BaseDir == "" {
 		return driving.InitProjectResponse{}, errors.New("BaseDir is required")
@@ -99,15 +132,24 @@ func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRe
 	if err != nil {
 		return driving.InitProjectResponse{}, err
 	}
+	project := domain.NewProject(name)
 
-	if err := s.rejectIfExisting(req.BaseDir); err != nil {
+	// Plan: decide per-file action before writing anything.
+	plans, err := s.planTemplatedFiles(req)
+	if err != nil {
+		return driving.InitProjectResponse{}, err
+	}
+	yamlPlan, err := s.planUBootYAML(req)
+	if err != nil {
 		return driving.InitProjectResponse{}, err
 	}
 
-	project := domain.NewProject(name)
-	dirs := projectStructureDirs()
-	templates := fileTemplates()
-	created := make([]string, 0, len(dirs)+len(templates)+1)
+	// Summary: emit before any side effect (LH-FA-INIT-005 §609).
+	s.emitSummary(req.BaseDir, plans, yamlPlan)
+
+	// Execute.
+	created := make([]string, 0)
+	backups := make([]driving.BackupAction, 0)
 
 	dirEntries, err := s.writeDirectories(req.BaseDir)
 	if err != nil {
@@ -115,17 +157,21 @@ func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRe
 	}
 	created = append(created, dirEntries...)
 
-	fileEntries, err := s.writeTemplatedFiles(req.BaseDir, project)
+	fileEntries, fileBackups, err := s.executeTemplatedFiles(req.BaseDir, project, plans)
 	if err != nil {
 		return driving.InitProjectResponse{}, err
 	}
 	created = append(created, fileEntries...)
+	backups = append(backups, fileBackups...)
 
-	yamlEntry, err := s.writeUBootYAML(req.BaseDir, project)
+	yamlEntry, yamlBackup, err := s.executeUBootYAML(req.BaseDir, project, yamlPlan)
 	if err != nil {
 		return driving.InitProjectResponse{}, err
 	}
 	created = append(created, yamlEntry)
+	if yamlBackup != nil {
+		backups = append(backups, *yamlBackup)
+	}
 
 	if !req.SkipGit {
 		if err := s.initGit(ctx, req.BaseDir); err != nil {
@@ -133,7 +179,7 @@ func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRe
 		}
 	}
 
-	return driving.InitProjectResponse{Project: project, Created: created}, nil
+	return driving.InitProjectResponse{Project: project, Created: created, Backups: backups}, nil
 }
 
 // resolveProjectName derives and validates the project name per
@@ -150,23 +196,133 @@ func (s *InitProjectService) resolveProjectName(req driving.InitProjectRequest) 
 	return name, nil
 }
 
-// rejectIfExisting returns wrapped [driving.ErrProjectExists] when
-// any marker file from LH-FA-INIT-004 is present.
-func (s *InitProjectService) rejectIfExisting(baseDir string) error {
-	for _, marker := range projectMarkerFiles() {
-		path := filepath.Join(baseDir, marker)
-		exists, err := s.fs.Exists(path)
+// planTemplatedFiles computes the per-file plan for every templated
+// file (README, CHANGELOG, compose.yaml, .env.example, .gitignore).
+// Returns the first abort-error encountered, so no side effect runs.
+func (s *InitProjectService) planTemplatedFiles(req driving.InitProjectRequest) ([]filePlan, error) {
+	templates := fileTemplates()
+	plans := make([]filePlan, 0, len(templates))
+	for _, ft := range templates {
+		fp, err := s.planFile(req.BaseDir, ft, req.Force, req.Backup)
 		if err != nil {
-			return fmt.Errorf("check %s: %w", marker, err)
+			return nil, err
 		}
-		if exists {
-			return fmt.Errorf("%w: %s present", driving.ErrProjectExists, marker)
+		plans = append(plans, fp)
+	}
+	return plans, nil
+}
+
+// planUBootYAML computes the plan for u-boot.yaml. The file is
+// treated as fully managed (no managed-block marker support — per
+// LH-SA-FILE-002 §615 strict-YAML / steering file), so a re-init
+// without --backup always aborts.
+func (s *InitProjectService) planUBootYAML(req driving.InitProjectRequest) (filePlan, error) {
+	ft := fileTemplate{Path: "u-boot.yaml", TemplateName: "", Managed: false}
+	return s.planFile(req.BaseDir, ft, req.Force, req.Backup)
+}
+
+// planFile applies the LH-FA-INIT-005 decision tree to a single file:
+//
+//   - file does not exist                        → actionWrite
+//   - exists + (--force AND has managed block)   → actionReplaceBlock
+//   - exists + --backup                          → actionOverwriteFull (with backup)
+//   - exists + --force (no block, no --backup)   → ErrForceRequiresBackup
+//   - exists + (no --force, no --backup)         → ErrProjectExists
+//
+// The backup flag in the returned plan is true whenever --backup is
+// set AND the action mutates the file, so a managed-block-only edit
+// with --backup still gets a safety copy.
+func (s *InitProjectService) planFile(baseDir string, ft fileTemplate, force, backup bool) (filePlan, error) {
+	fp := filePlan{Template: ft}
+	fullPath := filepath.Join(baseDir, ft.Path)
+
+	exists, err := s.fs.Exists(fullPath)
+	if err != nil {
+		return fp, fmt.Errorf("check %s: %w", ft.Path, err)
+	}
+	if !exists {
+		fp.Action = actionWrite
+		return fp, nil
+	}
+
+	hasBlock, err := s.fileHasManagedBlock(fullPath, ft)
+	if err != nil {
+		return fp, err
+	}
+
+	switch {
+	case force && hasBlock:
+		fp.Action = actionReplaceBlock
+		fp.Backup = backup
+		return fp, nil
+	case backup:
+		fp.Action = actionOverwriteFull
+		fp.Backup = true
+		return fp, nil
+	case force:
+		return fp, fmt.Errorf("%w: %s exists without a managed block; add --backup to overwrite",
+			driving.ErrForceRequiresBackup, ft.Path)
+	default:
+		return fp, fmt.Errorf("%w: %s present", driving.ErrProjectExists, ft.Path)
+	}
+}
+
+// fileHasManagedBlock reports whether the existing file at fullPath
+// contains the `U-BOOT MANAGED BLOCK: init` marker for the template's
+// declared style. Returns (false, nil) for non-Managed templates
+// (e.g. .gitignore) — these never have inline block markers.
+func (s *InitProjectService) fileHasManagedBlock(fullPath string, ft fileTemplate) (bool, error) {
+	if !ft.Managed {
+		return false, nil
+	}
+	content, err := s.fs.ReadFile(fullPath)
+	if err != nil {
+		return false, fmt.Errorf("read %s: %w", ft.Path, err)
+	}
+	marker := managedblock.Marker{Style: ft.Style, Name: initBlockName}
+	return managedblock.Has(content, marker), nil
+}
+
+// emitSummary writes the LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262
+// affected-paths summary to the configured progress writer. Only
+// fires when at least one plan touches an existing file; a brand-
+// new init stays quiet.
+func (s *InitProjectService) emitSummary(baseDir string, plans []filePlan, yamlPlan filePlan) {
+	type affected struct {
+		Path   string
+		Action string
+		Backup bool
+	}
+	var rows []affected
+	collect := func(p filePlan) {
+		switch p.Action {
+		case actionReplaceBlock:
+			rows = append(rows, affected{Path: p.Template.Path, Action: "replace managed block", Backup: p.Backup})
+		case actionOverwriteFull:
+			rows = append(rows, affected{Path: p.Template.Path, Action: "full overwrite", Backup: p.Backup})
 		}
 	}
-	return nil
+	for _, p := range plans {
+		collect(p)
+	}
+	collect(yamlPlan)
+	if len(rows) == 0 {
+		return
+	}
+	sort.Slice(rows, func(i, j int) bool { return rows[i].Path < rows[j].Path })
+	fmt.Fprintf(s.progress, "Affected files in %s:\n", baseDir)
+	for _, r := range rows {
+		marker := ""
+		if r.Backup {
+			marker = " (with backup)"
+		}
+		fmt.Fprintf(s.progress, "  - %s — %s%s\n", r.Path, r.Action, marker)
+	}
 }
 
 // writeDirectories creates the LH-FA-INIT-003 mandatory subdirs.
+// MkdirAll is idempotent, so re-init on an existing project just
+// re-creates the dirs (no-op on disk).
 func (s *InitProjectService) writeDirectories(baseDir string) ([]string, error) {
 	dirs := projectStructureDirs()
 	created := make([]string, 0, len(dirs))
@@ -180,43 +336,116 @@ func (s *InitProjectService) writeDirectories(baseDir string) ([]string, error) 
 	return created, nil
 }
 
-// writeTemplatedFiles renders and writes the embedded templates from
-// templates.go (README, CHANGELOG, compose.yaml, .env.example,
-// .gitignore).
-func (s *InitProjectService) writeTemplatedFiles(baseDir string, project domain.Project) ([]string, error) {
+// executeTemplatedFiles runs the plan for every templated file:
+// render the template, then dispatch to the action-specific helper
+// ([writeNewFile], [replaceManagedBlock], [backupAndOverwrite]).
+func (s *InitProjectService) executeTemplatedFiles(baseDir string, project domain.Project, plans []filePlan) ([]string, []driving.BackupAction, error) {
 	data := templateData{Name: project.Name.String()}
-	templates := fileTemplates()
-	created := make([]string, 0, len(templates))
-	for _, ft := range templates {
-		body, err := renderTemplate(ft.TemplateName, data)
+	created := make([]string, 0, len(plans))
+	backups := make([]driving.BackupAction, 0)
+	for _, p := range plans {
+		body, err := renderTemplate(p.Template.TemplateName, data)
 		if err != nil {
-			return nil, fmt.Errorf("render %s: %w", ft.Path, err)
+			return nil, nil, fmt.Errorf("render %s: %w", p.Template.Path, err)
 		}
-		path := filepath.Join(baseDir, ft.Path)
-		if err := s.fs.WriteFile(path, body, 0o644); err != nil {
-			return nil, fmt.Errorf("write %s: %w", ft.Path, err)
+		entry, backup, err := s.executeFile(baseDir, p, body)
+		if err != nil {
+			return nil, nil, err
 		}
-		created = append(created, ft.Path)
+		created = append(created, entry)
+		if backup != nil {
+			backups = append(backups, *backup)
+		}
 	}
-	return created, nil
+	return created, backups, nil
 }
 
-// writeUBootYAML marshals and writes u-boot.yaml per LH-FA-CONF-002.
-func (s *InitProjectService) writeUBootYAML(baseDir string, project domain.Project) (string, error) {
+// executeFile applies one filePlan to disk and returns the written
+// path (relative) plus any backup action taken.
+func (s *InitProjectService) executeFile(baseDir string, plan filePlan, body []byte) (string, *driving.BackupAction, error) {
+	fullPath := filepath.Join(baseDir, plan.Template.Path)
+	switch plan.Action {
+	case actionWrite:
+		if err := s.fs.WriteFile(fullPath, body, 0o644); err != nil {
+			return "", nil, fmt.Errorf("write %s: %w", plan.Template.Path, err)
+		}
+		return plan.Template.Path, nil, nil
+	case actionReplaceBlock:
+		return s.executeReplaceBlock(baseDir, plan, body)
+	case actionOverwriteFull:
+		return s.executeOverwriteFull(baseDir, plan, body)
+	}
+	return "", nil, fmt.Errorf("unknown action %d for %s", plan.Action, plan.Template.Path)
+}
+
+// executeReplaceBlock reads the existing file, splices in the
+// rendered managed block, and writes the result. Optionally backs
+// up the original first when plan.Backup is true.
+func (s *InitProjectService) executeReplaceBlock(baseDir string, plan filePlan, body []byte) (string, *driving.BackupAction, error) {
+	fullPath := filepath.Join(baseDir, plan.Template.Path)
+	var backup *driving.BackupAction
+	if plan.Backup {
+		ba, err := s.runBackup(baseDir, plan.Template.Path)
+		if err != nil {
+			return "", nil, err
+		}
+		backup = ba
+	}
+	existing, err := s.fs.ReadFile(fullPath)
+	if err != nil {
+		return "", nil, fmt.Errorf("read %s: %w", plan.Template.Path, err)
+	}
+	marker := managedblock.Marker{Style: plan.Template.Style, Name: initBlockName}
+	updated, err := managedblock.Replace(existing, marker, body)
+	if err != nil {
+		return "", nil, fmt.Errorf("replace block in %s: %w", plan.Template.Path, err)
+	}
+	if err := s.fs.WriteFile(fullPath, updated, 0o644); err != nil {
+		return "", nil, fmt.Errorf("write %s: %w", plan.Template.Path, err)
+	}
+	return plan.Template.Path, backup, nil
+}
+
+// executeOverwriteFull backs up the existing file (Backup is always
+// true for this action) and then writes the freshly rendered body
+// over the whole file.
+func (s *InitProjectService) executeOverwriteFull(baseDir string, plan filePlan, body []byte) (string, *driving.BackupAction, error) {
+	fullPath := filepath.Join(baseDir, plan.Template.Path)
+	ba, err := s.runBackup(baseDir, plan.Template.Path)
+	if err != nil {
+		return "", nil, err
+	}
+	if err := s.fs.WriteFile(fullPath, body, 0o644); err != nil {
+		return "", nil, fmt.Errorf("write %s: %w", plan.Template.Path, err)
+	}
+	return plan.Template.Path, ba, nil
+}
+
+// runBackup wraps [BackupPath] and returns the resulting
+// [driving.BackupAction] record for the response.
+func (s *InitProjectService) runBackup(baseDir, relPath string) (*driving.BackupAction, error) {
+	fullPath := filepath.Join(baseDir, relPath)
+	backupPath, err := BackupPath(s.fs, fullPath)
+	if err != nil {
+		return nil, fmt.Errorf("backup %s: %w", relPath, err)
+	}
+	return &driving.BackupAction{Original: relPath, Backup: backupPath}, nil
+}
+
+// executeUBootYAML marshals and writes u-boot.yaml per
+// LH-FA-CONF-002 with the same plan dispatch as the templated files.
+// u-boot.yaml is whole-file managed (no inline block marker), so the
+// only re-init action is OverwriteFull (with backup).
+func (s *InitProjectService) executeUBootYAML(baseDir string, project domain.Project, plan filePlan) (string, *driving.BackupAction, error) {
 	cfg := ubootYAMLConfig{
 		SchemaVersion: project.SchemaVersion,
 		Project:       ubootYAMLProject{Name: project.Name.String()},
 	}
-
 	body, err := s.yaml.Marshal(cfg)
 	if err != nil {
-		return "", fmt.Errorf("marshal u-boot.yaml: %w", err)
+		return "", nil, fmt.Errorf("marshal u-boot.yaml: %w", err)
 	}
-	path := filepath.Join(baseDir, "u-boot.yaml")
-	if err := s.fs.WriteFile(path, body, 0o644); err != nil {
-		return "", fmt.Errorf("write u-boot.yaml: %w", err)
-	}
-	return "u-boot.yaml", nil
+	return s.executeFile(baseDir, plan, body)
 }
 
 // initGit runs the LH-FA-INIT-007 default path: when BaseDir is not

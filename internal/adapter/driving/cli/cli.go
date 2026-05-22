@@ -90,7 +90,8 @@ func (a *App) Execute(ctx context.Context, args []string, stdout, stderr io.Writ
 //          collisions (ErrProjectExists), LH-FA-INIT-006 invalid
 //          project name (ErrInvalidProjectName), LH-AK-001 missing
 //          BaseDir (ErrBaseDirMissing), LH-FA-INIT-005 unsupported
-//          backup-source kind (ErrBackupUnsupportedKind)
+//          backup-source kind (ErrBackupUnsupportedKind), LH-FA-INIT-005
+//          §619 force-without-backup (ErrForceRequiresBackup)
 //   - 14 — technischer Persistenz-/Dateisystemfehler: LH-FA-INIT-005
 //          backup-suffix exhausted (ErrBackupSuffixExhausted),
 //          backup source vanished mid-flight
@@ -131,6 +132,7 @@ func isValidationError(err error) bool {
 	return errors.Is(err, driving.ErrProjectExists) ||
 		errors.Is(err, driving.ErrBaseDirMissing) ||
 		errors.Is(err, driving.ErrBackupUnsupportedKind) ||
+		errors.Is(err, driving.ErrForceRequiresBackup) ||
 		errors.Is(err, domain.ErrInvalidProjectName)
 }
 

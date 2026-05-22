@@ -103,16 +103,29 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
      Ancestor-Recording bei `WriteFile`/`MkdirAll`). 24 Tests in
      `backup_test.go`. Coverage 92.9 %.
 
-   - **T4b — Managed-Block-Parser + Force/Backup-Flow.** Offen.
+   - **T4b — Managed-Block-Parser + Force/Backup-Flow.** ✅ Done (Commit folgt + Review-Fix-Commit)
      `application/managedblock/` mit Marker-Parser pro Dateityp nach
-     `LH-SA-FILE-002` (YAML/.env `#`, Markdown `<!-- -->`, JSONC `//`).
-     `InitProjectRequest` um `Force`/`Backup` erweitern; Service-
-     Logik: vorhandener Marker → nur Block ersetzen; fehlt + `--backup`
-     → vollständiges Backup → überschreiben; fehlt + `--force` ohne
-     `--backup` → `ErrForceRequiresBackup` (Exit-Code 10 nach
-     `LH-FA-INIT-005` §619). Templates um Marker erweitern.
-     Zusammenfassungs-Ausgabe der betroffenen Pfade vor dem Schreiben
-     (`LH-FA-INIT-005` §609 / `LH-FA-CLI-005A` §262).
+     `LH-SA-FILE-002` (YAML/.env `#`, Markdown `<!-- -->`, JSONC `//`):
+     `Find` / `Has` / `Replace` plus `ErrBlockNotFound` /
+     `ErrBlockMalformed`. Regex-basierter Matcher mit `(?m)`-Multiline,
+     leading-whitespace-Toleranz (für indentierte Blocks) und
+     CRLF-Toleranz.
+     `InitProjectRequest` um `Force`/`Backup` erweitert,
+     `driving.ErrForceRequiresBackup` (Code 10) neu. Service-Logik:
+     literale Spec-Lesart (LH-FA-INIT-005 §605/§609/§617/§619) — plan-
+     and-execute split, `planFile` entscheidet pro Datei
+     `Write`/`ReplaceBlock`/`OverwriteFull`/`Abort*`, Execute-Phase
+     dispatcht. Plan-Fehler verhindern jeden Side-Effect.
+     Templates README/CHANGELOG/compose/.env.example mit
+     `BEGIN/END U-BOOT MANAGED BLOCK: init`-Wrapper; .gitignore +
+     u-boot.yaml whole-file-managed (§611-Liste excl).
+     `Response.Backups []BackupAction` mit Original-/Backup-Pfad-
+     Tupel. Summary-Output via `io.Writer` am Service-Konstruktor
+     (`progress`), `nil` tolerant zu `io.Discard`, in `cmd/uboot`
+     auf `os.Stdout` verdrahtet. 19 Parser-Tests + 12 neue Service-
+     Tests, Coverage 91.6 %. End-to-End-Smoke: `docker run u-boot
+     init smoke-demo --no-git` schreibt managed-block-Marker
+     korrekt; Re-Init ohne Flags → Exit-Code 10.
 
    - **T4c — Modi-Flags + Exit-Codes.** Offen.
      Cobra-Flags `--force`, `--backup`, `--yes`, `--no-interactive`,

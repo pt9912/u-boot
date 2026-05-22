@@ -33,6 +33,34 @@ type InitProjectRequest struct {
 	// (false) keeps git init enabled; the CLI adapter sets this from
 	// the `--no-git` flag.
 	SkipGit bool
+
+	// Force enables the managed-block-only edit path for existing
+	// structured-config files per LH-FA-INIT-005 §611–§614: if a
+	// file already contains a `U-BOOT MANAGED BLOCK: init` marker,
+	// only that block is replaced; non-managed content survives.
+	// Without --backup, --force on a file lacking a managed block
+	// aborts with [ErrForceRequiresBackup] (§619).
+	Force bool
+
+	// Backup enables backup-then-full-overwrite for existing files
+	// per LH-FA-INIT-005 §605/§607: each affected file is copied to
+	// `<path>.bak[.N]` (smallest free numeric suffix) and then
+	// overwritten. Combined with --force on a managed-block file,
+	// the backup is still taken even though only the block is
+	// modified — the spec treats --backup as a safety modifier, not
+	// a strategy override.
+	Backup bool
+}
+
+// BackupAction records a single file/dir backup performed during
+// re-init. Emitted in [InitProjectResponse.Backups] so the CLI can
+// tell the user where their original content went.
+type BackupAction struct {
+	// Original is the path (relative to BaseDir) that was backed up.
+	Original string
+	// Backup is the absolute path that received the copy, as
+	// returned by `application.BackupPath`.
+	Backup string
 }
 
 // InitProjectResponse is the output of [InitProjectUseCase.Init].
@@ -44,6 +72,11 @@ type InitProjectResponse struct {
 	// created or written, in deterministic order, for the CLI
 	// adapter to report back to the user.
 	Created []string
+
+	// Backups lists, in deterministic order, the backup operations
+	// performed when re-initializing an existing project with
+	// --backup. Empty for a fresh init.
+	Backups []BackupAction
 }
 
 // ErrProjectExists signals that BaseDir already looks like an
@@ -95,6 +128,14 @@ var ErrBackupUnsupportedKind = errors.New("backup source kind unsupported")
 // `slice-v1-backup-streaming-copy.md` once a streaming copy
 // primitive lands. Maps to a technical filesystem exit code.
 var ErrBackupTooLarge = errors.New("backup source exceeds size cap")
+
+// ErrForceRequiresBackup signals that --force was used on a file
+// that has no `U-BOOT MANAGED BLOCK: init` marker (or whose template
+// is fully managed without block-only-edit support, e.g. .gitignore,
+// u-boot.yaml). LH-FA-INIT-005 §619 forbids full overwrite without
+// a backup; the user must add --backup to proceed. Maps to a
+// validation exit code (10) per LH-FA-CLI-006.
+var ErrForceRequiresBackup = errors.New("force requires backup")
 
 // InitProjectUseCase is the driving-port for `u-boot init`. The CLI
 // adapter holds a reference and calls [Init] from the Cobra command

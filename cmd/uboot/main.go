@@ -50,8 +50,9 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	yamlAdapter := yaml.New()
 	gitAdapter := git.New()
 
-	// Application services.
-	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter)
+	// Application services. stdout is wired as the progress writer
+	// for re-init summaries (LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262).
+	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, stdout)
 
 	// Driving adapter (CLI).
 	app := cli.New(version, initSvc)
