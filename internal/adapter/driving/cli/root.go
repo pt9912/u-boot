@@ -26,6 +26,16 @@ See spec/lastenheft.md for the full functional specification.`,
 		SilenceErrors:      true,
 	}
 
+	// LH-FA-CLI-005A persistent flags. They apply to every
+	// subcommand that takes confirmation decisions (init today; add,
+	// remove, config set, down --volumes in M5+). Living on the root
+	// command also means they appear in `u-boot --help` once instead
+	// of being duplicated per subcommand.
+	root.PersistentFlags().BoolVar(&a.yes, "yes", false,
+		"answer the default to every confirmation (LH-FA-CLI-005A); exclusive with --no-interactive")
+	root.PersistentFlags().BoolVar(&a.noInteractive, "no-interactive", false,
+		"abort with exit-code 2 on any required confirmation (LH-FA-CLI-005A); exclusive with --yes")
+
 	root.AddCommand(newInitCommand(a))
 	return root
 }

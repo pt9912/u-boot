@@ -192,6 +192,206 @@ func TestExecute_InitTooManyArgs(t *testing.T) {
 	}
 }
 
+// --- T4c: flag wiring + LH-FA-CLI-005A conflict detection ---
+
+func TestExecute_InitForceAndBackupFlags_PassThrough(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+
+	uc := &fakeInitUseCase{
+		resp: driving.InitProjectResponse{
+			Project: domain.NewProject(mustProjectName(t, "demo")),
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newApp(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(),
+		[]string{"init", "--force", "--backup"},
+		&stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !uc.lastReq.Force {
+		t.Errorf("Force = false, want true (--force was passed)")
+	}
+	if !uc.lastReq.Backup {
+		t.Errorf("Backup = false, want true (--backup was passed)")
+	}
+}
+
+func TestExecute_InitAssumeExistingFlag_PassThrough(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+
+	uc := &fakeInitUseCase{
+		resp: driving.InitProjectResponse{
+			Project: domain.NewProject(mustProjectName(t, "demo")),
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newApp(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(),
+		[]string{"init", "--assume-existing"},
+		&stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !uc.lastReq.AssumeExisting {
+		t.Errorf("AssumeExisting = false, want true")
+	}
+}
+
+func TestExecute_InitAssumeExistingFlag_NotGlobal(t *testing.T) {
+	// Why: LH-FA-CLI-005A §238 — --assume-existing is init-only.
+	// Putting it on the root command must fail with a usage error.
+	var stdout, stderr bytes.Buffer
+	err := newApp(&fakeInitUseCase{}).Execute(
+		context.Background(),
+		[]string{"--assume-existing"},
+		&stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("Execute --assume-existing on root: expected error")
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode(root --assume-existing) = %d, want 2", got)
+	}
+}
+
+func TestExecute_YesAndNoInteractive_Conflict(t *testing.T) {
+	// Why: LH-FA-CLI-005A §235 — `--yes` and `--no-interactive` are
+	// mutually exclusive. The conflict surfaces via the CLI sentinel
+	// (not the use-case) → exit code 2.
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+
+	uc := &fakeInitUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newApp(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(),
+		[]string{"--yes", "--no-interactive", "init"},
+		&stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("Execute --yes --no-interactive: expected error")
+	}
+	if !errors.Is(err, cli.ErrConflictingModeFlags) {
+		t.Errorf("Execute --yes --no-interactive: error %v does not wrap ErrConflictingModeFlags", err)
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode(ErrConflictingModeFlags) = %d, want 2", got)
+	}
+	if uc.called {
+		t.Errorf("conflict check must short-circuit before the use-case runs")
+	}
+}
+
+func TestExecute_YesAlone_OnDeterministicPath_NoEffect(t *testing.T) {
+	// Why: LH-FA-CLI-005A §247 — `--yes` on a deterministic path is
+	// a no-op. The use-case still runs with its plain request; no
+	// conflict check fires.
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+
+	uc := &fakeInitUseCase{
+		resp: driving.InitProjectResponse{
+			Project: domain.NewProject(mustProjectName(t, "demo")),
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newApp(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(),
+		[]string{"--yes", "init"},
+		&stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !uc.called {
+		t.Errorf("--yes on init must still invoke the use-case")
+	}
+}
+
+func TestExecute_NoInteractiveAlone_OnDeterministicPath_NoEffect(t *testing.T) {
+	// Mirror of TestExecute_YesAlone_OnDeterministicPath_NoEffect.
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+
+	uc := &fakeInitUseCase{
+		resp: driving.InitProjectResponse{
+			Project: domain.NewProject(mustProjectName(t, "demo")),
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newApp(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(),
+		[]string{"--no-interactive", "init"},
+		&stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !uc.called {
+		t.Errorf("--no-interactive on init must still invoke the use-case")
+	}
+}
+
+func TestExecute_InitBackupsAppearInSummary(t *testing.T) {
+	// Why: the LH-FA-INIT-005 §609 affected-paths line is emitted by
+	// the application layer via the progress writer; the CLI's
+	// printInitSummary additionally lists the resulting backup
+	// actions so the user can see where their originals went.
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+
+	uc := &fakeInitUseCase{
+		resp: driving.InitProjectResponse{
+			Project: domain.NewProject(mustProjectName(t, "demo")),
+			Created: []string{"u-boot.yaml"},
+			Backups: []driving.BackupAction{
+				{Original: ".env.example", Backup: "/tmp/x/demo/.env.example.bak"},
+			},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newApp(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(),
+		[]string{"init", "--backup"},
+		&stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	out := stdout.String()
+	if !strings.Contains(out, "Backups:") {
+		t.Errorf("output missing Backups section: %q", out)
+	}
+	if !strings.Contains(out, ".env.example -> /tmp/x/demo/.env.example.bak") {
+		t.Errorf("output missing backup-action line: %q", out)
+	}
+}
+
+func TestExecute_InitNoBackups_NoBackupsSection(t *testing.T) {
+	// Why: defensive — empty backups list must not render an empty
+	// "Backups:" header.
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+
+	uc := &fakeInitUseCase{
+		resp: driving.InitProjectResponse{
+			Project: domain.NewProject(mustProjectName(t, "demo")),
+			Created: []string{"u-boot.yaml"},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newApp(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(),
+		[]string{"init"},
+		&stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if strings.Contains(stdout.String(), "Backups:") {
+		t.Errorf("fresh init should not render a Backups section: %q", stdout.String())
+	}
+}
+
 func TestExitCode_BaseMappings(t *testing.T) {
 	// Tests against the LH-FA-CLI-006-sentinel mappings; the actual
 	// usage-error-string detection is covered by the integration
@@ -212,6 +412,8 @@ func TestExitCode_BaseMappings(t *testing.T) {
 		{"ErrForceRequiresBackup (validation)", driving.ErrForceRequiresBackup, 10},
 		{"ErrFileExists (validation)", driving.ErrFileExists, 10},
 		{"wrapped ErrProjectExists", fmt.Errorf("ctx: %w", driving.ErrProjectExists), 10},
+		{"ErrConflictingModeFlags (usage)", cli.ErrConflictingModeFlags, 2},
+		{"wrapped ErrConflictingModeFlags", fmt.Errorf("ctx: %w", cli.ErrConflictingModeFlags), 2},
 		{"ErrBackupSuffixExhausted (fs)", driving.ErrBackupSuffixExhausted, 14},
 		{"ErrBackupSourceMissing (fs)", driving.ErrBackupSourceMissing, 14},
 		{"ErrBackupTooLarge (fs)", driving.ErrBackupTooLarge, 14},

@@ -10,24 +10,40 @@ import (
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
+// initFlags bundles the per-invocation flag state of `u-boot init`
+// (local flags plus the read-through from the persistent --yes /
+// --no-interactive on the root command). Kept as a struct so
+// [runInit] has one parameter instead of six bool arguments.
+type initFlags struct {
+	SkipGit        bool
+	Force          bool
+	Backup         bool
+	AssumeExisting bool
+	Yes            bool
+	NoInteractive  bool
+}
+
 // newInitCommand builds the `u-boot init` Cobra subcommand.
 //
-// Flags supported in M3-T3:
+// Local flags (LH-FA-INIT-005 / LH-FA-CLI-005A):
 //
-//	[name]      positional, optional — explicit project name
-//	            (LH-FA-INIT-002); when omitted, derived from the
-//	            working directory's basename.
-//	--no-git    skip the `git init` step (LH-FA-INIT-007).
+//	[name]              positional, optional — explicit project name
+//	                    (LH-FA-INIT-002); when omitted, derived from
+//	                    the working directory's basename.
+//	--no-git            skip the `git init` step (LH-FA-INIT-007).
+//	--force             managed-block-only re-write of existing files
+//	                    (LH-FA-INIT-005 §609 / §613).
+//	--backup            backup-then-full-overwrite of existing files
+//	                    (LH-FA-INIT-005 §605 / §607).
+//	--assume-existing   accept implicit existing-project detection
+//	                    in non-interactive runs (LH-FA-CLI-005A §238);
+//	                    no-op until the M4 soft-detection slice lands.
 //
-// Flags planned for M3-T4 / `slice-m4-soft-existing-detection`:
-//
-//	--backup            LH-FA-INIT-005
-//	--force             LH-FA-INIT-005
-//	--no-interactive    LH-FA-CLI-005A
-//	--yes               LH-FA-CLI-005A
-//	--assume-existing   LH-FA-INIT-004 / LH-FA-CLI-005A
+// The persistent flags --yes / --no-interactive are bound at the
+// root command (LH-FA-CLI-005A); we read their parsed values via
+// the App struct.
 func newInitCommand(a *App) *cobra.Command {
-	var skipGit bool
+	flags := &initFlags{}
 
 	cmd := &cobra.Command{
 		Use:   "init [name]",
@@ -38,17 +54,35 @@ u-boot.yaml (LH-FA-CONF-002) and optionally a git repository
 the project name is derived from its basename (LH-FA-INIT-002) unless
 a [name] argument is given.
 
+Re-running init on an existing project requires --force (managed-block
+only edit) or --backup (full overwrite with safety copy), per
+LH-FA-INIT-005 §611–§619.
+
 Examples:
-  u-boot init               # name from current directory
-  u-boot init my-service    # explicit name
-  u-boot init --no-git      # do not initialize a git repository`,
+  u-boot init                            # name from current directory
+  u-boot init my-service                 # explicit name
+  u-boot init --no-git                   # skip git init
+  u-boot init --force                    # refresh u-boot blocks only
+  u-boot init --backup                   # full overwrite with .bak[*]
+  u-boot init --force --backup           # block edit + safety backup
+  u-boot init --no-interactive --force   # CI-safe re-init`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runInit(cmd.Context(), cmd.OutOrStdout(), args, skipGit, a.initUseCase, a.getwd)
+			// Read-through persistent flags from the App; Cobra has
+			// already parsed them by the time RunE fires.
+			flags.Yes = a.yes
+			flags.NoInteractive = a.noInteractive
+			return runInit(cmd.Context(), cmd.OutOrStdout(), args, *flags, a.initUseCase, a.getwd)
 		},
 	}
 
-	cmd.Flags().BoolVar(&skipGit, "no-git", false, "skip `git init` (LH-FA-INIT-007)")
+	cmd.Flags().BoolVar(&flags.SkipGit, "no-git", false, "skip `git init` (LH-FA-INIT-007)")
+	cmd.Flags().BoolVar(&flags.Force, "force", false,
+		"replace U-BOOT MANAGED BLOCK content in existing files (LH-FA-INIT-005)")
+	cmd.Flags().BoolVar(&flags.Backup, "backup", false,
+		"back up existing files to <name>.bak[.N] before overwriting (LH-FA-INIT-005)")
+	cmd.Flags().BoolVar(&flags.AssumeExisting, "assume-existing", false,
+		"accept implicit existing-project detection in non-interactive runs (LH-FA-CLI-005A; no-op until M4 soft-detection)")
 	return cmd
 }
 
@@ -62,18 +96,25 @@ func runInit(
 	ctx context.Context,
 	out io.Writer,
 	args []string,
-	skipGit bool,
+	flags initFlags,
 	uc driving.InitProjectUseCase,
 	getwd func() (string, error),
 ) error {
+	if flags.Yes && flags.NoInteractive {
+		return ErrConflictingModeFlags
+	}
+
 	cwd, err := getwd()
 	if err != nil {
 		return fmt.Errorf("determine working directory: %w", err)
 	}
 
 	req := driving.InitProjectRequest{
-		BaseDir: cwd,
-		SkipGit: skipGit,
+		BaseDir:        cwd,
+		SkipGit:        flags.SkipGit,
+		Force:          flags.Force,
+		Backup:         flags.Backup,
+		AssumeExisting: flags.AssumeExisting,
 	}
 	if len(args) == 1 {
 		req.Name = args[0]
@@ -89,11 +130,18 @@ func runInit(
 }
 
 // printInitSummary writes a deterministic, human-friendly summary
-// of what was created. Order follows resp.Created (which the
-// application service guarantees).
+// of what was created and what was backed up. Order follows
+// resp.Created and resp.Backups (which the application service
+// guarantees).
 func printInitSummary(out io.Writer, resp driving.InitProjectResponse) {
 	fmt.Fprintf(out, "Initialized u-boot project %q.\n\nCreated:\n", resp.Project.Name)
 	for _, entry := range resp.Created {
 		fmt.Fprintln(out, "  - "+entry)
+	}
+	if len(resp.Backups) > 0 {
+		fmt.Fprintln(out, "\nBackups:")
+		for _, b := range resp.Backups {
+			fmt.Fprintf(out, "  - %s -> %s\n", b.Original, b.Backup)
+		}
 	}
 }

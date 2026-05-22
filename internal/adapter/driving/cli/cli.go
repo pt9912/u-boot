@@ -25,7 +25,9 @@ import (
 //
 // The struct is intentionally small — one field per use-case port,
 // plus environment hooks (getwd) that tests substitute via
-// functional options.
+// functional options. The two LH-FA-CLI-005A persistent flags
+// (--yes / --no-interactive) live here too so subcommands can read
+// the parsed values without grovelling through cmd.Root().PersistentFlags().
 type App struct {
 	// version is the build-time version string, surfaced via
 	// `u-boot --version`. The wiring layer passes it in; the CLI
@@ -39,6 +41,15 @@ type App struct {
 	// Tests inject a fake via [WithGetwd] so they do not depend on
 	// the host pwd.
 	getwd func() (string, error)
+
+	// yes and noInteractive are bound to the root command's
+	// PersistentFlags by [buildRootCommand]. Subcommands read them
+	// in their RunE — for `u-boot init` (M3-T4c) the conflict check
+	// `--yes`+`--no-interactive` → [ErrConflictingModeFlags] is the
+	// only behavioural use today; LH-FA-CLI-005A §247 makes both
+	// flags no-ops on deterministic execution paths.
+	yes           bool
+	noInteractive bool
 }
 
 // Option mutates an [App] during [New]; the Go-idiomatic functional-
@@ -80,12 +91,20 @@ func (a *App) Execute(ctx context.Context, args []string, stdout, stderr io.Writ
 	return cmd.ExecuteContext(ctx)
 }
 
+// ErrConflictingModeFlags is returned by the init subcommand when
+// `--yes` and `--no-interactive` are both set — LH-FA-CLI-005A §235
+// declares them mutually exclusive. Lives in the cli package (not
+// in `driving`) because the application layer never sees these
+// flags; they are pure CLI-level mode switches.
+var ErrConflictingModeFlags = errors.New("--yes and --no-interactive are mutually exclusive")
+
 // ExitCode classifies a CLI error into the u-boot exit-code scheme
 // (LH-FA-CLI-006):
 //
 //   - 0  — no error
 //   - 2  — pure CLI / flag errors (unknown subcommand, unknown flag,
-//          missing required arg, too many positional args)
+//          missing required arg, too many positional args,
+//          ErrConflictingModeFlags)
 //   - 10 — fachlicher Validierungsfehler: LH-FA-INIT-004 marker
 //          collisions (ErrProjectExists), non-marker file collision
 //          (ErrFileExists), LH-FA-INIT-006 invalid project name
@@ -149,8 +168,10 @@ func isFilesystemError(err error) bool {
 }
 
 // isUsageError detects errors that Cobra raises for malformed CLI
-// input. Cobra does not export a sentinel; we look at the message
-// prefix because that is what reaches us.
+// input plus the u-boot-defined CLI-flag-conflict sentinel
+// [ErrConflictingModeFlags]. Cobra does not export a sentinel for
+// its own usage errors; we look at the message prefix because that
+// is what reaches us.
 //
 // Pinned against github.com/spf13/cobra v1.10.2 (see go.mod). A
 // major Cobra upgrade must verify these prefixes still match the
@@ -161,6 +182,9 @@ func isFilesystemError(err error) bool {
 func isUsageError(err error) bool {
 	if err == nil {
 		return false
+	}
+	if errors.Is(err, ErrConflictingModeFlags) {
+		return true
 	}
 	msg := err.Error()
 	prefixes := []string{

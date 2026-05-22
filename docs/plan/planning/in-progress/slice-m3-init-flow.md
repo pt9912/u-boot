@@ -1,7 +1,7 @@
 # Slice M3: `u-boot init`-Flow
 
 > **Status:** In progress
-> **DoD:** T1 ✅ `132d1a1` + `f5c784a` / T2 ✅ `aaf4d8d` + `39387b9` / T3 ✅ `937adb1` + `2b6582c` / T4 + T5 offen
+> **DoD:** T1 ✅ `132d1a1` + `f5c784a` / T2 ✅ `aaf4d8d` + `39387b9` / T3 ✅ `937adb1` + `2b6582c` / T4a ✅ `5296671` + `ecb8379` / T4b ✅ `077c3e5` + `4d07542` / T4c ✅ (Commit folgt) / T5 offen
 
 ## Auslöser
 
@@ -127,15 +127,28 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
      init smoke-demo --no-git` schreibt managed-block-Marker
      korrekt; Re-Init ohne Flags → Exit-Code 10.
 
-   - **T4c — Modi-Flags + Exit-Codes.** Offen.
-     Cobra-Flags `--force`, `--backup`, `--yes`, `--no-interactive`,
-     `--assume-existing`. Konflikt-Check `--yes` + `--no-interactive`
-     → `ErrConflictingModeFlags` → Exit-Code 2 nach `LH-FA-CLI-005A`
-     §235. `--assume-existing` wird angenommen + validiert, bleibt
-     bis zur M4-Soft-Detection (`slice-m4-soft-existing-detection.md`)
-     ein NoOp; die Hard-Marker-Logik aus T2 schützt bereits gegen
-     vorhandene `u-boot.yaml`/`compose.yaml`/`.env.example`.
-     ExitCode-Erweiterung in `internal/adapter/driving/cli/cli.go`.
+   - **T4c — Modi-Flags + Exit-Codes.** ✅ Done (Commit folgt + Review-Fix-Commit)
+     Cobra-Flags `--force` / `--backup` / `--assume-existing` lokal
+     am init-Command, `--yes` / `--no-interactive` als persistente
+     Root-Flags (LH-FA-CLI-005A — gelten auch für künftige Befehle
+     wie `add`/`remove`/`config set`). Konflikt-Check `--yes` +
+     `--no-interactive` → `cli.ErrConflictingModeFlags` →
+     `isUsageError`-Pfad → Exit-Code 2 nach `LH-FA-CLI-005A` §235.
+     `--assume-existing` wird angenommen + validiert (init-only,
+     spec §238), als `AssumeExisting bool` in
+     `driving.InitProjectRequest` durchgereicht; M3 hat keine
+     Soft-Detection (§247 — auf deterministischen Pfaden NoOp), die
+     Hard-Marker-Logik aus T2/T4b schützt bereits gegen vorhandene
+     u-boot.yaml/compose.yaml/.env.example. Sentinel
+     `ErrConflictingModeFlags` lebt in `cli` (nicht in `driving`),
+     weil die Modi-Flags die Application-Schicht nie erreichen.
+     `printInitSummary` ergänzt um Backups-Sektion. End-to-End-Smoke
+     verifiziert: fresh init / Konflikt-Check / `--force` ohne
+     `--backup` (Code 10) / `--force --backup` (full re-init mit
+     summary + 6 .bak-Dateien). 6 neue CLI-Tests (Flag-Pass-Through,
+     Konflikt, --yes/--no-interactive NoOp, Backup-Summary,
+     leerer Backup-Fall, init-only-Geltung von --assume-existing).
+     ExitCode-Tabellentest um ErrConflictingModeFlags erweitert.
 
 5. **T5 — Cleanup: Carveout-Auflösung.**
    depguard-Verifikation pro Schicht (siehe

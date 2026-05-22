@@ -50,6 +50,18 @@ type InitProjectRequest struct {
 	// modified — the spec treats --backup as a safety modifier, not
 	// a strategy override.
 	Backup bool
+
+	// AssumeExisting accepts the implicit "this is already a u-boot
+	// project" detection per LH-FA-CLI-005A §238–§242. Init-only
+	// flag (the spec calls it out explicitly as "nicht global, nur
+	// für diesen Befehl"). M3 ships without the LH-FA-INIT-004 soft-
+	// detection (≥3 structure elements) so AssumeExisting is
+	// accepted + validated at the CLI but has no behavioural effect
+	// yet — the hard-marker logic (u-boot.yaml / compose.yaml /
+	// .env.example) already covers the deterministic-abort path.
+	// The flag becomes load-bearing when
+	// `slice-m4-soft-existing-detection.md` lands.
+	AssumeExisting bool
 }
 
 // BackupAction records a single file/dir backup performed during
