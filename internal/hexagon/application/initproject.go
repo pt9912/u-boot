@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	iofs "io/fs"
 	"path/filepath"
 	"sort"
@@ -55,30 +54,43 @@ type ubootYAMLConfig struct {
 }
 
 // InitProjectService implements [driving.InitProjectUseCase]. It
-// orchestrates the driven ports (FileSystem, YAMLCodec, Git) to
-// realize the LH-FA-INIT-001..007 flow.
+// orchestrates the driven ports (FileSystem, YAMLCodec, Git,
+// ProgressPort) to realize the LH-FA-INIT-001..007 flow.
 type InitProjectService struct {
 	fs       driven.FileSystem
 	yaml     driven.YAMLCodec
 	git      driven.Git
-	progress io.Writer
+	progress driven.ProgressPort
 }
 
 // Static check: InitProjectService satisfies the driving port.
 var _ driving.InitProjectUseCase = (*InitProjectService)(nil)
 
 // NewInitProjectService constructs the service with the driven
-// adapters and a progress writer injected by the wiring layer
-// (cmd/uboot). progress receives the LH-FA-INIT-005 §609 / LH-FA-
-// CLI-005A §262 "affected paths" summary before any write happens
-// on re-init. Pass [io.Discard] for tests that do not assert on
-// summary output; nil is treated as Discard for the same reason.
-func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driven.Git, progress io.Writer) *InitProjectService {
+// adapters injected by the wiring layer (cmd/uboot). progress is
+// the [driven.ProgressPort] the service emits LH-FA-INIT-005 §609
+// / LH-FA-CLI-005A §262 "affected paths" events to before any
+// write happens on re-init. nil is accepted and routed to an
+// internal no-op implementation so callers (tests, scripts that
+// don't care about progress) need not wire a stub.
+//
+// The port-based design (T4c-review finding #8) replaces the prior
+// io.Writer parameter — application no longer formats user-visible
+// text; presentation lives in the adapter
+// (`internal/adapter/driven/progress`).
+func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driven.Git, progress driven.ProgressPort) *InitProjectService {
 	if progress == nil {
-		progress = io.Discard
+		progress = noopProgress{}
 	}
 	return &InitProjectService{fs: fs, yaml: yaml, git: git, progress: progress}
 }
+
+// noopProgress is the nil-tolerant default for
+// [InitProjectService.progress] — does nothing on every method, so
+// the call sites stay free of nil checks.
+type noopProgress struct{}
+
+func (noopProgress) AffectedFiles(_ string, _ []driven.AffectedFile) {}
 
 // fileAction classifies what the service should do with a single
 // templated file at execute time. The plan phase computes this for
@@ -342,26 +354,19 @@ func (s *InitProjectService) fileHasManagedBlock(fullPath string, ft fileTemplat
 	return managedblock.Has(content, marker), content, nil
 }
 
-// emitSummary writes the LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262
-// affected-paths summary to the configured progress writer. Only
-// fires when at least one plan would *replace a block* or *fully
-// overwrite* a file — purely additive runs (fresh init, all
-// actionWrite) stay quiet. If a future action ever mutates a file
-// without falling into ReplaceBlock/OverwriteFull, extend the
-// classifier in [shouldSummarize] below.
+// emitSummary collects the LH-FA-INIT-005 §609 / LH-FA-CLI-005A
+// §262 affected-paths events from the per-file plans and forwards
+// them to the [driven.ProgressPort]. Only ReplaceBlock and
+// OverwriteFull mutate existing files — fresh init (all
+// actionWrite) produces an empty list and the port is not called
+// at all, so a no-op adapter would not be observable.
+// If a future action ever mutates a file without falling into
+// ReplaceBlock/OverwriteFull, extend the switch in [planToEvent].
 func (s *InitProjectService) emitSummary(baseDir string, plans []filePlan, yamlPlan filePlan) {
-	type affected struct {
-		Path   string
-		Action string
-		Backup bool
-	}
-	var rows []affected
+	var rows []driven.AffectedFile
 	collect := func(p filePlan) {
-		switch p.Action {
-		case actionReplaceBlock:
-			rows = append(rows, affected{Path: p.Template.Path, Action: "replace managed block", Backup: p.Backup})
-		case actionOverwriteFull:
-			rows = append(rows, affected{Path: p.Template.Path, Action: "full overwrite", Backup: p.Backup})
+		if event, ok := planToEvent(p); ok {
+			rows = append(rows, event)
 		}
 	}
 	for _, p := range plans {
@@ -372,14 +377,21 @@ func (s *InitProjectService) emitSummary(baseDir string, plans []filePlan, yamlP
 		return
 	}
 	sort.Slice(rows, func(i, j int) bool { return rows[i].Path < rows[j].Path })
-	fmt.Fprintf(s.progress, "Affected files in %s:\n", baseDir)
-	for _, r := range rows {
-		marker := ""
-		if r.Backup {
-			marker = " (with backup)"
-		}
-		fmt.Fprintf(s.progress, "  - %s — %s%s\n", r.Path, r.Action, marker)
+	s.progress.AffectedFiles(baseDir, rows)
+}
+
+// planToEvent projects a filePlan into the [driven.AffectedFile]
+// shape the progress port consumes. Returns ok=false for plans
+// that do not constitute an "affected file" event (actionWrite —
+// fresh creation, nothing to warn about).
+func planToEvent(p filePlan) (driven.AffectedFile, bool) {
+	switch p.Action {
+	case actionReplaceBlock:
+		return driven.AffectedFile{Path: p.Template.Path, Action: driven.AffectedReplaceBlock, Backup: p.Backup}, true
+	case actionOverwriteFull:
+		return driven.AffectedFile{Path: p.Template.Path, Action: driven.AffectedOverwriteFull, Backup: p.Backup}, true
 	}
+	return driven.AffectedFile{}, false
 }
 
 // writeDirectories creates the LH-FA-INIT-003 mandatory subdirs.

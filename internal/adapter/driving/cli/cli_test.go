@@ -362,7 +362,7 @@ func TestExecute_InitBackupsAppearInSummary(t *testing.T) {
 	if !strings.Contains(out, "Backups:") {
 		t.Errorf("output missing Backups section: %q", out)
 	}
-	if !strings.Contains(out, ".env.example -> /tmp/x/demo/.env.example.bak") {
+	if !strings.Contains(out, ".env.example → /tmp/x/demo/.env.example.bak") {
 		t.Errorf("output missing backup-action line: %q", out)
 	}
 }
@@ -389,6 +389,157 @@ func TestExecute_InitNoBackups_NoBackupsSection(t *testing.T) {
 	}
 	if strings.Contains(stdout.String(), "Backups:") {
 		t.Errorf("fresh init should not render a Backups section: %q", stdout.String())
+	}
+}
+
+func TestExecute_FlagsDoNotLeakAcrossInvocations(t *testing.T) {
+	// Why: review finding #1 — App.yes / App.noInteractive are bound
+	// to PersistentFlags by pointer. Cobra rebuilds the root per
+	// Execute call, BoolVar(&a.yes, "yes", false, …) writes the
+	// default (false) into the bound variable on each registration.
+	// Pin that contract so a future migration to a long-lived cmd
+	// tree cannot silently leak state.
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeInitUseCase{
+		resp: driving.InitProjectResponse{
+			Project: domain.NewProject(mustProjectName(t, "demo")),
+		},
+	}
+	app := newApp(uc, cli.WithGetwd(getwd))
+
+	// First call: --yes init. Should not error.
+	var out1, err1 bytes.Buffer
+	if err := app.Execute(context.Background(), []string{"--yes", "init"}, &out1, &err1); err != nil {
+		t.Fatalf("Execute(--yes init): %v", err)
+	}
+
+	// Second call: --no-interactive init (no --yes). If the prior
+	// --yes leaked, the conflict check fires; with proper
+	// per-Execute defaulting it does not.
+	var out2, err2 bytes.Buffer
+	if err := app.Execute(context.Background(), []string{"--no-interactive", "init"}, &out2, &err2); err != nil {
+		t.Errorf("Execute(--no-interactive init): unexpected conflict — flags leaked from prior call: %v", err)
+	}
+}
+
+func TestExecute_YesAndNoInteractive_Conflict_SubcommandThenFlag(t *testing.T) {
+	// Why: review finding #2 — both flag orderings (root-then-sub
+	// and sub-then-flag) must trip the conflict check. Cobra
+	// inherits PersistentFlags into the subcommand FlagSet, but
+	// pin it executable so a flag-restructure can't slip past.
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeInitUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newApp(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(),
+		[]string{"init", "--yes", "--no-interactive"},
+		&stdout, &stderr,
+	)
+	if !errors.Is(err, cli.ErrConflictingModeFlags) {
+		t.Errorf("Execute init --yes --no-interactive: error %v does not wrap ErrConflictingModeFlags", err)
+	}
+}
+
+func TestExecute_NoInteractive_WithForceBackup_ReInit_Succeeds(t *testing.T) {
+	// Why: review finding #10 — production CI scenario. The
+	// deterministic re-init path (--no-interactive --force --backup
+	// on an existing project) must succeed and surface the backup
+	// list to the user. Mirrors the manual smoketest in the T4c
+	// commit message, executable now.
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeInitUseCase{
+		resp: driving.InitProjectResponse{
+			Project: domain.NewProject(mustProjectName(t, "demo")),
+			Created: []string{"u-boot.yaml", "compose.yaml"},
+			Backups: []driving.BackupAction{
+				{Original: "compose.yaml", Backup: "/tmp/x/demo/compose.yaml.bak"},
+			},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newApp(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(),
+		[]string{"--no-interactive", "init", "--force", "--backup"},
+		&stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !uc.lastReq.Force || !uc.lastReq.Backup {
+		t.Errorf("flags not propagated: Force=%v Backup=%v", uc.lastReq.Force, uc.lastReq.Backup)
+	}
+	if !strings.Contains(stdout.String(), "Backups:") {
+		t.Errorf("CI re-init output missing Backups section: %q", stdout.String())
+	}
+}
+
+func TestExecute_TooManyArgs_WithYesFlag_StillUsageError(t *testing.T) {
+	// Why: review finding #11 — mode flags must not change positional
+	// validation. `--yes init a b` must still trip the cobra
+	// MaximumNArgs guard with exit-code 2.
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	var stdout, stderr bytes.Buffer
+	err := newApp(&fakeInitUseCase{}, cli.WithGetwd(getwd)).Execute(
+		context.Background(),
+		[]string{"--yes", "init", "a", "b"},
+		&stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("init with two positional args: expected error")
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode(too many args with --yes) = %d, want 2", got)
+	}
+}
+
+func TestExecute_InitAssumeExisting_EmitsStderrNote(t *testing.T) {
+	// Why: review finding #5 — silent NoOp would mislead the user.
+	// In M3 the flag is accepted but has no behavioural effect; the
+	// CLI emits a one-line note on stderr so the inactivity is
+	// visible. Use case still runs (flag is forward-compatible).
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeInitUseCase{
+		resp: driving.InitProjectResponse{
+			Project: domain.NewProject(mustProjectName(t, "demo")),
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newApp(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(),
+		[]string{"init", "--assume-existing"},
+		&stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !strings.Contains(stderr.String(), "--assume-existing has no effect in M3") {
+		t.Errorf("stderr missing M3 NoOp note: %q", stderr.String())
+	}
+	if !uc.called {
+		t.Errorf("--assume-existing note must not block the use-case")
+	}
+}
+
+func TestExecute_NoAssumeExisting_NoStderrNote(t *testing.T) {
+	// Why: defensive — the M3-NoOp note must NOT fire when the flag
+	// is absent (would be obnoxious noise on every plain init).
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeInitUseCase{
+		resp: driving.InitProjectResponse{
+			Project: domain.NewProject(mustProjectName(t, "demo")),
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newApp(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(),
+		[]string{"init"},
+		&stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if stderr.Len() != 0 {
+		t.Errorf("unexpected stderr on plain init: %q", stderr.String())
 	}
 }
 

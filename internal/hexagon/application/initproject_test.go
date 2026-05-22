@@ -1,10 +1,8 @@
 package application_test
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	"io"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -13,6 +11,7 @@ import (
 
 	"github.com/pt9912/u-boot/internal/hexagon/application"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
+	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
@@ -27,19 +26,19 @@ func newService(t *testing.T) (*application.InitProjectService, *fakeFS, *fakeYA
 	fs.markDirExists(testBaseDir)
 	y := &fakeYAML{}
 	g := &fakeGit{}
-	return application.NewInitProjectService(fs, y, g, io.Discard), fs, y, g
+	return application.NewInitProjectService(fs, y, g, nil), fs, y, g
 }
 
-// newServiceWithProgress is newService plus a buffer for the
-// LH-FA-INIT-005 §609 affected-paths summary. Tests that assert on
-// summary text use this constructor.
-func newServiceWithProgress(t *testing.T) (*application.InitProjectService, *fakeFS, *fakeYAML, *fakeGit, *bytes.Buffer) {
+// newServiceWithProgress is newService plus a fakeProgress that
+// records every AffectedFiles call. Tests that assert on the
+// LH-FA-INIT-005 §609 affected-paths events use this constructor.
+func newServiceWithProgress(t *testing.T) (*application.InitProjectService, *fakeFS, *fakeYAML, *fakeGit, *fakeProgress) {
 	t.Helper()
 	fs := newFakeFS()
 	fs.markDirExists(testBaseDir)
 	y := &fakeYAML{}
 	g := &fakeGit{}
-	progress := &bytes.Buffer{}
+	progress := &fakeProgress{}
 	return application.NewInitProjectService(fs, y, g, progress), fs, y, g, progress
 }
 
@@ -590,9 +589,10 @@ func TestInit_UBootYAML_ForceWithoutBackup_RequiresBackup(t *testing.T) {
 }
 
 func TestInit_Summary_EmittedOnReInit(t *testing.T) {
-	// Why: LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 — affected paths
-	// must be reported BEFORE the write. We assert that the progress
-	// writer received the summary lines.
+	// Why: LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 — affected
+	// paths must be reported BEFORE the write. With T4c-review the
+	// reporting goes through a structured port (not a text writer);
+	// assert on the recorded event shape.
 	svc, fs, _, _, progress := newServiceWithProgress(t)
 	composePath := filepath.Join(testBaseDir, "compose.yaml")
 	seedManagedBlockFile(t, fs, composePath, "# BEGIN U-BOOT MANAGED BLOCK: init", "")
@@ -607,21 +607,28 @@ func TestInit_Summary_EmittedOnReInit(t *testing.T) {
 		t.Fatalf("Init: %v", err)
 	}
 
-	out := progress.String()
-	if !strings.Contains(out, "Affected files in") {
-		t.Errorf("summary header missing: %q", out)
+	if len(progress.calls) != 1 {
+		t.Fatalf("AffectedFiles calls = %d, want 1", len(progress.calls))
 	}
-	if !strings.Contains(out, "compose.yaml") {
-		t.Errorf("compose.yaml not mentioned: %q", out)
+	call := progress.calls[0]
+	if call.BaseDir != testBaseDir {
+		t.Errorf("baseDir = %q, want %q", call.BaseDir, testBaseDir)
 	}
-	if !strings.Contains(out, "replace managed block") {
-		t.Errorf("action label missing: %q", out)
+	found := false
+	for _, row := range call.Rows {
+		if row.Path == "compose.yaml" && row.Action == driven.AffectedReplaceBlock {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("compose.yaml/ReplaceBlock event missing: %v", call.Rows)
 	}
 }
 
 func TestInit_Summary_QuietOnFreshInit(t *testing.T) {
 	// Why: defensive — fresh init must not emit a summary; nothing
-	// is being overwritten.
+	// is being overwritten. Port not called at all (so a no-op
+	// adapter is unobservable).
 	svc, _, _, _, progress := newServiceWithProgress(t)
 
 	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
@@ -632,15 +639,14 @@ func TestInit_Summary_QuietOnFreshInit(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Init: %v", err)
 	}
-	if progress.Len() != 0 {
-		t.Errorf("expected empty progress on fresh init, got %q", progress.String())
+	if len(progress.calls) != 0 {
+		t.Errorf("expected 0 AffectedFiles calls on fresh init, got %d", len(progress.calls))
 	}
 }
 
 func TestInit_Summary_WithBackupMarker(t *testing.T) {
-	// Why: pin that the summary line for a --backup overwrite carries
-	// the "(with backup)" marker so the user knows their original is
-	// safe.
+	// Why: pin that the event for a --backup overwrite carries
+	// Backup=true so the adapter can render "(with backup)".
 	svc, fs, _, _, progress := newServiceWithProgress(t)
 	if err := fs.WriteFile(filepath.Join(testBaseDir, "compose.yaml"), []byte("services: {}\n"), 0o644); err != nil {
 		t.Fatalf("setup: %v", err)
@@ -655,14 +661,23 @@ func TestInit_Summary_WithBackupMarker(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Init: %v", err)
 	}
-	if !strings.Contains(progress.String(), "(with backup)") {
-		t.Errorf("backup marker missing in summary: %q", progress.String())
+	if len(progress.calls) != 1 {
+		t.Fatalf("AffectedFiles calls = %d, want 1", len(progress.calls))
+	}
+	hasBackupRow := false
+	for _, row := range progress.calls[0].Rows {
+		if row.Backup {
+			hasBackupRow = true
+		}
+	}
+	if !hasBackupRow {
+		t.Errorf("expected at least one row with Backup=true, got %v", progress.calls[0].Rows)
 	}
 }
 
-func TestInit_NilProgress_TolerantToDiscard(t *testing.T) {
+func TestInit_NilProgress_TolerantToNoop(t *testing.T) {
 	// Why: constructor must accept nil progress without panicking;
-	// it falls back to io.Discard.
+	// it falls back to an internal no-op ProgressPort.
 	fs := newFakeFS()
 	fs.markDirExists(testBaseDir)
 	svc := application.NewInitProjectService(fs, &fakeYAML{}, &fakeGit{}, nil)

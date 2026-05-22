@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 )
 
 // fakeFS is an in-memory FileSystem implementation for application-
@@ -407,6 +409,27 @@ func (f *fakeYAML) Marshal(v any) ([]byte, error) {
 
 func (f *fakeYAML) Unmarshal(data []byte, v any) error {
 	return yaml.Unmarshal(data, v)
+}
+
+// fakeProgress records every AffectedFiles call so tests can
+// assert on the structured events the application emits via the
+// driven.ProgressPort. A nil pointer is acceptable for tests that
+// do not care about progress (the service constructor swaps in a
+// no-op); fakeProgress is for tests that DO want to inspect.
+type fakeProgress struct {
+	calls []fakeProgressCall
+}
+
+type fakeProgressCall struct {
+	BaseDir string
+	Rows    []driven.AffectedFile
+}
+
+func (p *fakeProgress) AffectedFiles(baseDir string, rows []driven.AffectedFile) {
+	// Defensive copy so the test sees a stable snapshot.
+	rowsCopy := make([]driven.AffectedFile, len(rows))
+	copy(rowsCopy, rows)
+	p.calls = append(p.calls, fakeProgressCall{BaseDir: baseDir, Rows: rowsCopy})
 }
 
 // fakeGit records IsRepository / Init calls and lets each test

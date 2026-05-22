@@ -19,6 +19,7 @@ import (
 
 	"github.com/pt9912/u-boot/internal/adapter/driven/fs"
 	"github.com/pt9912/u-boot/internal/adapter/driven/git"
+	"github.com/pt9912/u-boot/internal/adapter/driven/progress"
 	"github.com/pt9912/u-boot/internal/adapter/driven/yaml"
 	"github.com/pt9912/u-boot/internal/adapter/driving/cli"
 	"github.com/pt9912/u-boot/internal/hexagon/application"
@@ -49,15 +50,16 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	fsAdapter := fs.New()
 	yamlAdapter := yaml.New()
 	gitAdapter := git.New()
+	progressAdapter := progress.NewText(stdout)
 
-	// Application services. stdout is wired as the progress writer
-	// for re-init summaries (LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262).
-	// Intentional ordering: summary lines land on stdout before any
-	// CLI-emitted post-success message; errors go to stderr via the
-	// `fmt.Fprintf` below so the streams stay distinct even when a
-	// caller pipes them together. Tests that wrap stdout in a buffer
-	// must not interpose a separate flush on it.
-	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, stdout)
+	// Application services. The text-progress adapter renders
+	// LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 affected-paths
+	// events on stdout before any write happens; CLI-emitted post-
+	// success messages land afterwards on the same stream; errors
+	// go to stderr via the `fmt.Fprintf` below so the streams stay
+	// distinct even when a caller pipes them together. Tests that
+	// wrap stdout in a buffer must not interpose a separate flush.
+	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, progressAdapter)
 
 	// Driving adapter (CLI).
 	app := cli.New(version, initSvc)

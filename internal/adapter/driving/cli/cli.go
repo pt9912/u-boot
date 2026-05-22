@@ -167,11 +167,20 @@ func isFilesystemError(err error) bool {
 		errors.Is(err, driving.ErrBackupTooLarge)
 }
 
-// isUsageError detects errors that Cobra raises for malformed CLI
-// input plus the u-boot-defined CLI-flag-conflict sentinel
-// [ErrConflictingModeFlags]. Cobra does not export a sentinel for
-// its own usage errors; we look at the message prefix because that
-// is what reaches us.
+// isUsageError detects two distinct classes of usage-level errors:
+//
+//   (a) u-boot-defined CLI sentinels — currently
+//       [ErrConflictingModeFlags]. New sentinels in this class
+//       belong in the errors.Is block at the top.
+//   (b) Cobra-raised errors for malformed CLI input. Cobra does
+//       not export sentinels for these; we string-match the
+//       message prefix because that is the only stable handle we
+//       have.
+//
+// The two classes coexist on purpose — splitting into two helpers
+// would obscure the shared "return code 2" intent. Add to the
+// right block based on whether the error has a Go sentinel or
+// only a message prefix.
 //
 // Pinned against github.com/spf13/cobra v1.10.2 (see go.mod). A
 // major Cobra upgrade must verify these prefixes still match the
@@ -183,9 +192,11 @@ func isUsageError(err error) bool {
 	if err == nil {
 		return false
 	}
+	// (a) u-boot CLI sentinels.
 	if errors.Is(err, ErrConflictingModeFlags) {
 		return true
 	}
+	// (b) Cobra usage-error string prefixes.
 	msg := err.Error()
 	prefixes := []string{
 		"unknown command",

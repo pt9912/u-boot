@@ -51,13 +51,19 @@ type InitProjectRequest struct {
 	// a strategy override.
 	Backup bool
 
-	// AssumeExisting accepts the implicit "this is already a u-boot
-	// project" detection per LH-FA-CLI-005A §238–§242. Init-only
-	// flag (the spec calls it out explicitly as "nicht global, nur
-	// für diesen Befehl"). M3 ships without the LH-FA-INIT-004 soft-
+	// AssumeExisting carries the user-asserted (NOT detected) intent
+	// to treat the project as already initialized when the implicit
+	// soft-detection (LH-FA-INIT-004, M4) signals a match. The
+	// distinction matters: this field is a user input from the
+	// `--assume-existing` CLI flag, never a flag the service sets
+	// internally based on probing the filesystem.
+	//
+	// Init-only flag per LH-FA-CLI-005A §238 ("nicht global, nur für
+	// diesen Befehl"). M3 ships without the LH-FA-INIT-004 soft-
 	// detection (≥3 structure elements) so AssumeExisting is
-	// accepted + validated at the CLI but has no behavioural effect
-	// yet — the hard-marker logic (u-boot.yaml / compose.yaml /
+	// accepted at the CLI but has no behavioural effect yet — the
+	// CLI emits a one-line stderr note when the flag is set, and
+	// the hard-marker logic (u-boot.yaml / compose.yaml /
 	// .env.example) already covers the deterministic-abort path.
 	// The flag becomes load-bearing when
 	// `slice-m4-soft-existing-detection.md` lands.
