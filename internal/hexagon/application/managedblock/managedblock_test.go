@@ -287,3 +287,69 @@ func TestReplace_BlockMalformed_PropagatesErr(t *testing.T) {
 		t.Errorf("Replace: want ErrBlockMalformed, got %v", err)
 	}
 }
+
+func TestFind_BeginNotAtEndOfLine_NotFound(t *testing.T) {
+	// Why: review finding #3 — spec §2099 shows markers on separate
+	// lines, and the BEGIN regex anchors to `$`. A single-line
+	// `BEGIN…--><…END…-->` has the END text appended after BEGIN, so
+	// the BEGIN regex never matches → ErrBlockNotFound (the stricter
+	// "no BEGIN here" answer rather than "malformed body").
+	content := []byte("<!-- BEGIN U-BOOT MANAGED BLOCK: init --><!-- END U-BOOT MANAGED BLOCK: init -->\n")
+	m := managedblock.Marker{Style: managedblock.StyleHTMLComment, Name: "init"}
+
+	_, _, err := managedblock.Find(content, m)
+	if !errors.Is(err, managedblock.ErrBlockNotFound) {
+		t.Errorf("Find: want ErrBlockNotFound for invalid single-line markers, got %v", err)
+	}
+}
+
+func TestFind_EndAppendedMidLine_Malformed(t *testing.T) {
+	// Why: complements the single-line case — BEGIN cleanly matches
+	// on its own line, but END is concatenated after body text on a
+	// later line. The END regex requires `$` so it never matches →
+	// BEGIN-without-END → ErrBlockMalformed (covers the
+	// skipLineEnding path explicitly).
+	content := []byte("# BEGIN U-BOOT MANAGED BLOCK: init\nbody # END U-BOOT MANAGED BLOCK: init trailing\n")
+	m := managedblock.Marker{Style: managedblock.StyleHash, Name: "init"}
+
+	_, _, err := managedblock.Find(content, m)
+	if !errors.Is(err, managedblock.ErrBlockMalformed) {
+		t.Errorf("Find: want ErrBlockMalformed for END mid-line, got %v", err)
+	}
+}
+
+func TestFind_DuplicatedBeginMarker_RejectedAsMalformed(t *testing.T) {
+	// Why: review finding #4 — a botched manual edit can leave two
+	// BEGIN markers before the END. Silent auto-repair would let
+	// Replace absorb both into the "managed body"; pin the rejection.
+	content := []byte("# BEGIN U-BOOT MANAGED BLOCK: init\nfirst body\n# BEGIN U-BOOT MANAGED BLOCK: init\nsecond body\n# END U-BOOT MANAGED BLOCK: init\n")
+	m := managedblock.Marker{Style: managedblock.StyleHash, Name: "init"}
+
+	_, _, err := managedblock.Find(content, m)
+	if !errors.Is(err, managedblock.ErrBlockMalformed) {
+		t.Errorf("Find: want ErrBlockMalformed for duplicated BEGIN, got %v", err)
+	}
+}
+
+func TestHas_MalformedBlock_ReturnsFalse(t *testing.T) {
+	// Why: pin the safe-direction behaviour — a half-edited block
+	// (BEGIN-only) makes Has return false, so re-init falls into the
+	// "no block" branch (ErrProjectExists / ErrForceRequiresBackup)
+	// instead of attempting a Replace that would itself error.
+	content := []byte("# BEGIN U-BOOT MANAGED BLOCK: init\nopen forever\n")
+	m := managedblock.Marker{Style: managedblock.StyleHash, Name: "init"}
+
+	if managedblock.Has(content, m) {
+		t.Errorf("Has(malformed) = true, want false")
+	}
+}
+
+func TestInitName_MatchesTemplateConvention(t *testing.T) {
+	// Why: lock the package-level constant to the literal "init"
+	// that every M3 template embeds in its BEGIN/END markers. A
+	// rename here without a template update would silently break
+	// re-init detection.
+	if managedblock.InitName != "init" {
+		t.Errorf("InitName = %q, want %q", managedblock.InitName, "init")
+	}
+}

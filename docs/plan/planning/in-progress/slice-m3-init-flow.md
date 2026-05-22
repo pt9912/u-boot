@@ -103,7 +103,7 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
      Ancestor-Recording bei `WriteFile`/`MkdirAll`). 24 Tests in
      `backup_test.go`. Coverage 92.9 %.
 
-   - **T4b — Managed-Block-Parser + Force/Backup-Flow.** ✅ Done (Commit folgt + Review-Fix-Commit)
+   - **T4b — Managed-Block-Parser + Force/Backup-Flow.** ✅ Done (`077c3e5` + Review-Fix-Commit folgt)
      `application/managedblock/` mit Marker-Parser pro Dateityp nach
      `LH-SA-FILE-002` (YAML/.env `#`, Markdown `<!-- -->`, JSONC `//`):
      `Find` / `Has` / `Replace` plus `ErrBlockNotFound` /

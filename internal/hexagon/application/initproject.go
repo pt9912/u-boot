@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	iofs "io/fs"
 	"path/filepath"
 	"sort"
 
@@ -13,6 +14,11 @@ import (
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
+
+// defaultFileMode is the canonical mode for freshly-created u-boot
+// project files (LH-FA-INIT-003) — used when the source has no mode
+// to preserve (i.e. the file does not yet exist).
+const defaultFileMode iofs.FileMode = 0o644
 
 // projectStructureDirs returns the directories from LH-FA-INIT-003
 // that every initialized project gets. The order is the deterministic
@@ -96,13 +102,23 @@ const (
 )
 
 // filePlan is the planned action for a single templated file plus
-// whether a backup is taken before the action runs. backup is
-// independent of action — it can be true for both ReplaceBlock and
-// OverwriteFull. The Style field is only meaningful for ReplaceBlock.
+// whether a backup is taken before the action runs. Backup is
+// independent of Action — it can be true for both ReplaceBlock and
+// OverwriteFull. Body and Mode capture the existing file's content
+// and mode at plan time; they are re-used by the execute phase to
+// (a) avoid a second Lstat+ReadFile round-trip (and the extra
+// TOCTOU window that would open with it), and (b) preserve the
+// original file mode across the write — fixing the T4b-review
+// mode-regression by mirroring T4a-review's backup-mode policy.
+// For actionWrite (file did not exist at plan time) Body is nil
+// and Mode is the zero value; executors fall back to
+// [defaultFileMode].
 type filePlan struct {
 	Template fileTemplate
 	Action   fileAction
 	Backup   bool
+	Body     []byte
+	Mode     iofs.FileMode
 }
 
 // Init runs the init flow per LH-FA-INIT-001..007 / LH-FA-CONF-001..003,
@@ -224,31 +240,53 @@ func (s *InitProjectService) planUBootYAML(req driving.InitProjectRequest) (file
 // planFile applies the LH-FA-INIT-005 decision tree to a single file:
 //
 //   - file does not exist                        → actionWrite
+//   - is symlink                                 → ErrBackupUnsupportedKind
 //   - exists + (--force AND has managed block)   → actionReplaceBlock
 //   - exists + --backup                          → actionOverwriteFull (with backup)
 //   - exists + --force (no block, no --backup)   → ErrForceRequiresBackup
-//   - exists + (no --force, no --backup)         → ErrProjectExists
+//   - exists + (no --force, no --backup)         → ErrProjectExists / ErrFileExists
 //
 // The backup flag in the returned plan is true whenever --backup is
 // set AND the action mutates the file, so a managed-block-only edit
-// with --backup still gets a safety copy.
+// with --backup still gets a safety copy. For an existing file
+// planFile captures Mode + (for Managed templates) Body in the
+// returned plan so the execute phase can preserve mode and avoid a
+// second read.
+//
+// Symlinks are rejected with [driving.ErrBackupUnsupportedKind] — the
+// same sentinel used by [BackupPath] in T4a, for the same reason:
+// silently following a `.env.example -> /etc/passwd` symlink would
+// have the re-init read and overwrite the link target instead of
+// the link itself.
+//
+// Collision errors split the spec-§604 marker files (u-boot.yaml,
+// compose.yaml, .env.example) from the rest: marker collisions
+// produce [driving.ErrProjectExists] (the directory really is an
+// existing u-boot project), non-marker collisions produce
+// [driving.ErrFileExists] (a stray README.md does not prove a
+// u-boot project).
 func (s *InitProjectService) planFile(baseDir string, ft fileTemplate, force, backup bool) (filePlan, error) {
 	fp := filePlan{Template: ft}
 	fullPath := filepath.Join(baseDir, ft.Path)
 
-	exists, err := s.fs.Exists(fullPath)
+	info, err := s.fs.Lstat(fullPath)
 	if err != nil {
-		return fp, fmt.Errorf("check %s: %w", ft.Path, err)
+		if errors.Is(err, iofs.ErrNotExist) {
+			fp.Action = actionWrite
+			return fp, nil
+		}
+		return fp, fmt.Errorf("lstat %s: %w", ft.Path, err)
 	}
-	if !exists {
-		fp.Action = actionWrite
-		return fp, nil
+	if info.Mode()&iofs.ModeSymlink != 0 {
+		return fp, fmt.Errorf("%w: %s is a symlink", driving.ErrBackupUnsupportedKind, ft.Path)
 	}
+	fp.Mode = info.Mode().Perm()
 
-	hasBlock, err := s.fileHasManagedBlock(fullPath, ft)
+	hasBlock, body, err := s.fileHasManagedBlock(fullPath, ft)
 	if err != nil {
 		return fp, err
 	}
+	fp.Body = body
 
 	switch {
 	case force && hasBlock:
@@ -263,30 +301,54 @@ func (s *InitProjectService) planFile(baseDir string, ft fileTemplate, force, ba
 		return fp, fmt.Errorf("%w: %s exists without a managed block; add --backup to overwrite",
 			driving.ErrForceRequiresBackup, ft.Path)
 	default:
-		return fp, fmt.Errorf("%w: %s present", driving.ErrProjectExists, ft.Path)
+		return fp, collisionError(ft.Path)
 	}
 }
 
+// collisionError picks the right sentinel for a re-init collision.
+// LH-FA-INIT-004 marker files (u-boot.yaml, compose.yaml,
+// .env.example) signal a genuine existing u-boot project →
+// [driving.ErrProjectExists]; anything else (a stray README.md in a
+// non-u-boot directory) signals only a name collision →
+// [driving.ErrFileExists]. Both map to exit code 10; splitting them
+// keeps the CLI message faithful to what the tool actually
+// observed.
+func collisionError(path string) error {
+	for _, marker := range []string{"u-boot.yaml", "compose.yaml", ".env.example"} {
+		if path == marker {
+			return fmt.Errorf("%w: %s present", driving.ErrProjectExists, path)
+		}
+	}
+	return fmt.Errorf("%w: %s present; pass --backup or --force to proceed", driving.ErrFileExists, path)
+}
+
 // fileHasManagedBlock reports whether the existing file at fullPath
-// contains the `U-BOOT MANAGED BLOCK: init` marker for the template's
-// declared style. Returns (false, nil) for non-Managed templates
-// (e.g. .gitignore) — these never have inline block markers.
-func (s *InitProjectService) fileHasManagedBlock(fullPath string, ft fileTemplate) (bool, error) {
+// contains the `U-BOOT MANAGED BLOCK: init` marker for the
+// template's declared style, and returns the file body so the
+// caller can cache it in [filePlan]. Returns (false, nil, nil) for
+// non-Managed templates (e.g. .gitignore) — these never have
+// inline block markers and the execute path will only need the
+// body if a full overwrite happens (whole-file backup via
+// [BackupPath] reads disk directly; no in-process body needed).
+func (s *InitProjectService) fileHasManagedBlock(fullPath string, ft fileTemplate) (bool, []byte, error) {
 	if !ft.Managed {
-		return false, nil
+		return false, nil, nil
 	}
 	content, err := s.fs.ReadFile(fullPath)
 	if err != nil {
-		return false, fmt.Errorf("read %s: %w", ft.Path, err)
+		return false, nil, fmt.Errorf("read %s: %w", ft.Path, err)
 	}
-	marker := managedblock.Marker{Style: ft.Style, Name: initBlockName}
-	return managedblock.Has(content, marker), nil
+	marker := managedblock.Marker{Style: ft.Style, Name: managedblock.InitName}
+	return managedblock.Has(content, marker), content, nil
 }
 
 // emitSummary writes the LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262
 // affected-paths summary to the configured progress writer. Only
-// fires when at least one plan touches an existing file; a brand-
-// new init stays quiet.
+// fires when at least one plan would *replace a block* or *fully
+// overwrite* a file — purely additive runs (fresh init, all
+// actionWrite) stay quiet. If a future action ever mutates a file
+// without falling into ReplaceBlock/OverwriteFull, extend the
+// classifier in [shouldSummarize] below.
 func (s *InitProjectService) emitSummary(baseDir string, plans []filePlan, yamlPlan filePlan) {
 	type affected struct {
 		Path   string
@@ -361,12 +423,16 @@ func (s *InitProjectService) executeTemplatedFiles(baseDir string, project domai
 }
 
 // executeFile applies one filePlan to disk and returns the written
-// path (relative) plus any backup action taken.
+// path (relative) plus any backup action taken. Mode preservation:
+// for re-init actions (ReplaceBlock / OverwriteFull) the existing
+// file's mode is captured in plan.Mode by planFile and used for
+// WriteFile, so a `chmod 600 .env.example` survives the round-trip.
+// actionWrite (new file) falls back to [defaultFileMode].
 func (s *InitProjectService) executeFile(baseDir string, plan filePlan, body []byte) (string, *driving.BackupAction, error) {
 	fullPath := filepath.Join(baseDir, plan.Template.Path)
 	switch plan.Action {
 	case actionWrite:
-		if err := s.fs.WriteFile(fullPath, body, 0o644); err != nil {
+		if err := s.fs.WriteFile(fullPath, body, defaultFileMode); err != nil {
 			return "", nil, fmt.Errorf("write %s: %w", plan.Template.Path, err)
 		}
 		return plan.Template.Path, nil, nil
@@ -378,9 +444,11 @@ func (s *InitProjectService) executeFile(baseDir string, plan filePlan, body []b
 	return "", nil, fmt.Errorf("unknown action %d for %s", plan.Action, plan.Template.Path)
 }
 
-// executeReplaceBlock reads the existing file, splices in the
-// rendered managed block, and writes the result. Optionally backs
-// up the original first when plan.Backup is true.
+// executeReplaceBlock splices the rendered managed block into the
+// existing file body (captured by planFile in plan.Body to avoid a
+// second read + extra TOCTOU window) and writes the result with the
+// preserved mode. Optionally backs up the original first when
+// plan.Backup is true.
 func (s *InitProjectService) executeReplaceBlock(baseDir string, plan filePlan, body []byte) (string, *driving.BackupAction, error) {
 	fullPath := filepath.Join(baseDir, plan.Template.Path)
 	var backup *driving.BackupAction
@@ -391,16 +459,12 @@ func (s *InitProjectService) executeReplaceBlock(baseDir string, plan filePlan, 
 		}
 		backup = ba
 	}
-	existing, err := s.fs.ReadFile(fullPath)
-	if err != nil {
-		return "", nil, fmt.Errorf("read %s: %w", plan.Template.Path, err)
-	}
-	marker := managedblock.Marker{Style: plan.Template.Style, Name: initBlockName}
-	updated, err := managedblock.Replace(existing, marker, body)
+	marker := managedblock.Marker{Style: plan.Template.Style, Name: managedblock.InitName}
+	updated, err := managedblock.Replace(plan.Body, marker, body)
 	if err != nil {
 		return "", nil, fmt.Errorf("replace block in %s: %w", plan.Template.Path, err)
 	}
-	if err := s.fs.WriteFile(fullPath, updated, 0o644); err != nil {
+	if err := s.fs.WriteFile(fullPath, updated, plan.Mode); err != nil {
 		return "", nil, fmt.Errorf("write %s: %w", plan.Template.Path, err)
 	}
 	return plan.Template.Path, backup, nil
@@ -408,14 +472,14 @@ func (s *InitProjectService) executeReplaceBlock(baseDir string, plan filePlan, 
 
 // executeOverwriteFull backs up the existing file (Backup is always
 // true for this action) and then writes the freshly rendered body
-// over the whole file.
+// over the whole file, preserving the captured mode.
 func (s *InitProjectService) executeOverwriteFull(baseDir string, plan filePlan, body []byte) (string, *driving.BackupAction, error) {
 	fullPath := filepath.Join(baseDir, plan.Template.Path)
 	ba, err := s.runBackup(baseDir, plan.Template.Path)
 	if err != nil {
 		return "", nil, err
 	}
-	if err := s.fs.WriteFile(fullPath, body, 0o644); err != nil {
+	if err := s.fs.WriteFile(fullPath, body, plan.Mode); err != nil {
 		return "", nil, fmt.Errorf("write %s: %w", plan.Template.Path, err)
 	}
 	return plan.Template.Path, ba, nil

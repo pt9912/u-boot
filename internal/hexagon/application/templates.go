@@ -26,13 +26,6 @@ type templateData struct {
 	Name string
 }
 
-// initBlockName is the name field used in every u-boot init
-// managed-block marker (e.g. `# BEGIN U-BOOT MANAGED BLOCK: init`).
-// Lifted to a constant so re-init detection (Has / Replace) and the
-// template content stay in sync; future per-service blocks
-// (`postgres`, `redis`, …) use their own names.
-const initBlockName = "init"
-
 // fileTemplate maps an embedded template to its destination path
 // (relative to [driving.InitProjectRequest.BaseDir]).
 //

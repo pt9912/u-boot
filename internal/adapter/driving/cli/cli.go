@@ -87,9 +87,10 @@ func (a *App) Execute(ctx context.Context, args []string, stdout, stderr io.Writ
 //   - 2  — pure CLI / flag errors (unknown subcommand, unknown flag,
 //          missing required arg, too many positional args)
 //   - 10 — fachlicher Validierungsfehler: LH-FA-INIT-004 marker
-//          collisions (ErrProjectExists), LH-FA-INIT-006 invalid
-//          project name (ErrInvalidProjectName), LH-AK-001 missing
-//          BaseDir (ErrBaseDirMissing), LH-FA-INIT-005 unsupported
+//          collisions (ErrProjectExists), non-marker file collision
+//          (ErrFileExists), LH-FA-INIT-006 invalid project name
+//          (ErrInvalidProjectName), LH-AK-001 missing BaseDir
+//          (ErrBaseDirMissing), LH-FA-INIT-005 unsupported
 //          backup-source kind (ErrBackupUnsupportedKind), LH-FA-INIT-005
 //          §619 force-without-backup (ErrForceRequiresBackup)
 //   - 14 — technischer Persistenz-/Dateisystemfehler: LH-FA-INIT-005
@@ -130,6 +131,7 @@ func ExitCode(err error) int {
 // authoritative list.
 func isValidationError(err error) bool {
 	return errors.Is(err, driving.ErrProjectExists) ||
+		errors.Is(err, driving.ErrFileExists) ||
 		errors.Is(err, driving.ErrBaseDirMissing) ||
 		errors.Is(err, driving.ErrBackupUnsupportedKind) ||
 		errors.Is(err, driving.ErrForceRequiresBackup) ||

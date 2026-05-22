@@ -7,6 +7,7 @@ import (
 	"io"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -697,9 +698,13 @@ func TestInit_Backup_RecordedInResponse(t *testing.T) {
 	if len(resp.Backups) == 0 {
 		t.Fatalf("Backups empty, want at least 1 entry")
 	}
+	// Match either .env.example.bak or .env.example.bak.<n> so a
+	// future setup that seeds a stale backup doesn't flip the test
+	// (review finding #7).
+	suffixRE := regexp.MustCompile(`\.env\.example\.bak(\.\d+)?$`)
 	found := false
 	for _, b := range resp.Backups {
-		if b.Original == ".env.example" && strings.HasSuffix(b.Backup, ".env.example.bak") {
+		if b.Original == ".env.example" && suffixRE.MatchString(b.Backup) {
 			found = true
 		}
 	}
@@ -775,5 +780,192 @@ func TestInit_RenderedTemplate_ContainsManagedBlockMarkers(t *testing.T) {
 	}
 	if strings.Contains(string(gitignore), "BEGIN U-BOOT MANAGED BLOCK") {
 		t.Errorf(".gitignore must not have managed-block markers (spec §611 list excludes it): %q", gitignore)
+	}
+}
+
+// --- T4b-Review-Fixes: Lstat / Mode-Preservation / Sentinel-Split ---
+
+func TestInit_Symlink_AtTemplatePath_Rejected(t *testing.T) {
+	// Why: review finding #2 — silently following a `.env.example ->
+	// /etc/passwd` symlink would let the re-init read and overwrite
+	// the link target. Reject with ErrBackupUnsupportedKind (same
+	// sentinel BackupPath uses in T4a for the same class of bug).
+	svc, fs, _, _ := newService(t)
+	fs.markSymlink(filepath.Join(testBaseDir, ".env.example"))
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		SkipGit: true,
+	})
+	if err == nil {
+		t.Fatalf("Init: expected error, got nil")
+	}
+	if !errors.Is(err, driving.ErrBackupUnsupportedKind) {
+		t.Errorf("Init: error %v does not wrap ErrBackupUnsupportedKind", err)
+	}
+}
+
+func TestInit_Mode_PreservedAcrossReplaceBlock(t *testing.T) {
+	// Why: review finding #1 — T4a-review enforced mode preservation
+	// for backups; T4b's write paths must do the same. Setup: existing
+	// compose.yaml with mode 0o600 (e.g. user chmod'd it). Re-init
+	// with --force should refresh the managed block but keep 0o600.
+	svc, fs, _, _ := newService(t)
+	composePath := filepath.Join(testBaseDir, "compose.yaml")
+	body := "# BEGIN U-BOOT MANAGED BLOCK: init\nold\n# END U-BOOT MANAGED BLOCK: init\n"
+	if err := fs.WriteFile(composePath, []byte(body), 0o600); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		Force:   true,
+		SkipGit: true,
+	})
+	if err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+
+	info, err := fs.Lstat(composePath)
+	if err != nil {
+		t.Fatalf("Lstat: %v", err)
+	}
+	if info.Mode().Perm() != 0o600 {
+		t.Errorf("mode = %o, want 0o600 (preserved across ReplaceBlock)", info.Mode().Perm())
+	}
+}
+
+func TestInit_Mode_PreservedAcrossOverwriteFull(t *testing.T) {
+	// Why: same as the ReplaceBlock test, but for the OverwriteFull
+	// path (no managed block in source, --backup forces full overwrite).
+	svc, fs, _, _ := newService(t)
+	envPath := filepath.Join(testBaseDir, ".env.example")
+	if err := fs.WriteFile(envPath, []byte("FOO=1\n"), 0o600); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		Backup:  true,
+		SkipGit: true,
+	})
+	if err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+
+	info, err := fs.Lstat(envPath)
+	if err != nil {
+		t.Fatalf("Lstat: %v", err)
+	}
+	if info.Mode().Perm() != 0o600 {
+		t.Errorf("mode = %o, want 0o600 (preserved across OverwriteFull)", info.Mode().Perm())
+	}
+}
+
+func TestInit_FreshFile_GetsDefaultMode(t *testing.T) {
+	// Why: pin the fallback — actionWrite (file didn't exist) uses
+	// 0o644 because there's no source mode to preserve.
+	svc, fs, _, _ := newService(t)
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		SkipGit: true,
+	})
+	if err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+
+	info, err := fs.Lstat(filepath.Join(testBaseDir, "README.md"))
+	if err != nil {
+		t.Fatalf("Lstat: %v", err)
+	}
+	if info.Mode().Perm() != 0o644 {
+		t.Errorf("fresh README.md mode = %o, want 0o644 (default)", info.Mode().Perm())
+	}
+}
+
+func TestInit_NonMarkerFile_Collision_ReturnsErrFileExists(t *testing.T) {
+	// Why: review finding #5 — a stray README.md is not proof of an
+	// existing u-boot project. Sentinel split keeps the message
+	// honest: ErrFileExists for non-markers, ErrProjectExists for
+	// real markers (separately tested in TestInit_ExistingProjectRejected).
+	svc, fs, _, _ := newService(t)
+	if err := fs.WriteFile(filepath.Join(testBaseDir, "README.md"), []byte("My personal README\n"), 0o644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		SkipGit: true,
+	})
+	if err == nil {
+		t.Fatalf("Init: expected error, got nil")
+	}
+	if !errors.Is(err, driving.ErrFileExists) {
+		t.Errorf("Init: error %v does not wrap ErrFileExists", err)
+	}
+	if errors.Is(err, driving.ErrProjectExists) {
+		t.Errorf("Init: stray README.md should NOT trip ErrProjectExists (markers only)")
+	}
+}
+
+func TestInit_MarkerFile_Collision_StillReturnsErrProjectExists(t *testing.T) {
+	// Why: cross-check of the split — u-boot.yaml IS a marker, so
+	// ErrProjectExists fires (not ErrFileExists). ErrProjectExists is
+	// also distinct enough that callers branching on it keep working.
+	svc, fs, _, _ := newService(t)
+	if err := fs.WriteFile(filepath.Join(testBaseDir, "u-boot.yaml"), []byte("x\n"), 0o644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		SkipGit: true,
+	})
+	if !errors.Is(err, driving.ErrProjectExists) {
+		t.Fatalf("Init: want ErrProjectExists for u-boot.yaml marker, got %v", err)
+	}
+	if errors.Is(err, driving.ErrFileExists) {
+		t.Errorf("Init: u-boot.yaml is a marker — must not double-trip ErrFileExists")
+	}
+}
+
+func TestInit_PlanCachesBody_NoDoubleRead(t *testing.T) {
+	// Why: review finding #8 — plan caches the body in filePlan.Body
+	// so execute does not re-read (closes one TOCTOU window and one
+	// I/O syscall). Asserted via the ReadFile call counter on fakeFS:
+	// after a --force re-init with managed-block-replace, the file
+	// must have been read exactly once.
+	svc, fs, _, _ := newService(t)
+	composePath := filepath.Join(testBaseDir, "compose.yaml")
+	originalBody := "# BEGIN U-BOOT MANAGED BLOCK: init\nold\n# END U-BOOT MANAGED BLOCK: init\nbelow-block-user-content\n"
+	if err := fs.WriteFile(composePath, []byte(originalBody), 0o644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		Force:   true,
+		SkipGit: true,
+	})
+	if err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+
+	if got := fs.readFileCallCount(composePath); got != 1 {
+		t.Errorf("ReadFile(compose.yaml) called %d times, want 1 (plan must cache body for execute)", got)
+	}
+	// And the user content outside the block survived — proves the
+	// cached body really was used for the splice.
+	final, _ := fs.ReadFile(composePath)
+	if !strings.Contains(string(final), "below-block-user-content") {
+		t.Errorf("user content not preserved: %q", final)
 	}
 }

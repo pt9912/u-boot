@@ -137,6 +137,15 @@ var ErrBackupTooLarge = errors.New("backup source exceeds size cap")
 // validation exit code (10) per LH-FA-CLI-006.
 var ErrForceRequiresBackup = errors.New("force requires backup")
 
+// ErrFileExists signals a re-init collision on a *non-marker*
+// template file (README.md, CHANGELOG.md, .gitignore). The
+// directory is not necessarily an existing u-boot project — the
+// user may just have a stray file by the same name. Kept as a
+// distinct sentinel from [ErrProjectExists] so the CLI can phrase
+// the message accurately ("file X exists" vs. "project already
+// initialized"). Both map to exit code 10.
+var ErrFileExists = errors.New("file exists")
+
 // InitProjectUseCase is the driving-port for `u-boot init`. The CLI
 // adapter holds a reference and calls [Init] from the Cobra command
 // handler.

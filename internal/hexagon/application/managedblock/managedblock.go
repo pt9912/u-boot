@@ -52,6 +52,14 @@ func (s Style) String() string {
 	return fmt.Sprintf("Style(%d)", int(s))
 }
 
+// InitName is the canonical block name for u-boot's init-scaffolding
+// content (every `BEGIN U-BOOT MANAGED BLOCK: init` in the M3
+// templates carries this label). Project-wide constant so the
+// template authors and the re-init detection share one source of
+// truth — future per-service blocks (`postgres`, `redis`, …) use
+// their own names.
+const InitName = "init"
+
 // Marker identifies a single managed block: comment style + block
 // name. The name is the user-visible label after the colon in the
 // marker line (e.g. `init` for the u-boot init-scaffolding block,
@@ -104,10 +112,18 @@ var ErrBlockMalformed = errors.New("managed block malformed")
 // if the END line is the last line). The returned offsets are
 // suitable for direct splice into content[:start] + … + content[end:].
 //
+// Marker pairs MUST sit on separate lines (LH-SA-FILE-002 §2099
+// shows the format that way); a single-line `BEGIN…><…END` is
+// rejected as [ErrBlockMalformed] because the matcher only searches
+// for END after the BEGIN line's terminating newline.
+//
 // Returns [ErrBlockNotFound] when no BEGIN marker is present;
-// [ErrBlockMalformed] when BEGIN is present but END is not (or END
-// appears before BEGIN). The regex matches markers regardless of
-// leading whitespace, so indented blocks (e.g. nested under
+// [ErrBlockMalformed] when BEGIN is present without END, when END
+// appears before any BEGIN, or when a *second* BEGIN appears
+// between the first BEGIN and the END (a botched hand-edit that
+// would otherwise let [Replace] silently absorb both BEGIN lines
+// into the "managed body"). The regex matches markers regardless
+// of leading whitespace, so indented blocks (e.g. nested under
 // `services:` in compose.yaml) are detected.
 func Find(content []byte, m Marker) (int, int, error) {
 	beginRE, endRE, err := compileMarkerRegexps(m)
@@ -118,13 +134,25 @@ func Find(content []byte, m Marker) (int, int, error) {
 	if beginLoc == nil {
 		return 0, 0, ErrBlockNotFound
 	}
-	endLoc := endRE.FindIndex(content[beginLoc[1]:])
+	// Step past the BEGIN line's terminating newline so END can only
+	// match on a *later* line — single-line BEGIN+END is invalid
+	// (see doc comment).
+	searchStart := skipLineEnding(content, beginLoc[1])
+	endLoc := endRE.FindIndex(content[searchStart:])
 	if endLoc == nil {
 		return 0, 0, fmt.Errorf("%w: %s present without %s",
 			ErrBlockMalformed, m.Begin(), m.End())
 	}
+	// Reject a duplicated BEGIN sitting between the first BEGIN and
+	// the END — silent auto-repair is explicitly out of scope.
+	bodyStart := searchStart
+	bodyEnd := searchStart + endLoc[0]
+	if dup := beginRE.FindIndex(content[bodyStart:bodyEnd]); dup != nil {
+		return 0, 0, fmt.Errorf("%w: duplicate %s before %s",
+			ErrBlockMalformed, m.Begin(), m.End())
+	}
 	start := beginLoc[0]
-	end := beginLoc[1] + endLoc[1]
+	end := searchStart + endLoc[1]
 	// Consume the END line's trailing newline (\r\n or \n) so the
 	// returned region is line-aligned and a splice does not leave
 	// a blank line behind.
@@ -135,6 +163,20 @@ func Find(content []byte, m Marker) (int, int, error) {
 		end++
 	}
 	return start, end, nil
+}
+
+// skipLineEnding advances past a `\r?\n` sequence starting at pos
+// (or just past `\r` alone for old-Mac line endings). If no line
+// ending is found at pos, returns pos unchanged. Used by [Find] to
+// position the END-marker search on the line *after* BEGIN.
+func skipLineEnding(content []byte, pos int) int {
+	if pos < len(content) && content[pos] == '\r' {
+		pos++
+	}
+	if pos < len(content) && content[pos] == '\n' {
+		pos++
+	}
+	return pos
 }
 
 // Has reports whether content contains the managed block named by m.

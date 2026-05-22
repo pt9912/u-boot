@@ -45,17 +45,19 @@ type fakeFS struct {
 	failMkdirErr  error
 	failReadDirOn string // when non-empty, ReadDir returns failReadDirErr for that path
 	failReadDirErr error
-	failRemoveAll error // when non-nil, RemoveAll returns this error
+	failRemoveAll  error          // when non-nil, RemoveAll returns this error
+	readFileCalls  map[string]int // per-path ReadFile call counter (tests assert no double-reads)
 }
 
 func newFakeFS() *fakeFS {
 	return &fakeFS{
-		files:        make(map[string][]byte),
-		fileModes:    make(map[string]iofs.FileMode),
-		dirs:         make(map[string]bool),
-		dirModes:     make(map[string]iofs.FileMode),
-		symlinks:     make(map[string]bool),
-		sizeOverride: make(map[string]int64),
+		files:         make(map[string][]byte),
+		fileModes:     make(map[string]iofs.FileMode),
+		dirs:          make(map[string]bool),
+		dirModes:      make(map[string]iofs.FileMode),
+		symlinks:      make(map[string]bool),
+		sizeOverride:  make(map[string]int64),
+		readFileCalls: make(map[string]int),
 	}
 }
 
@@ -73,6 +75,7 @@ func (f *fakeFS) Exists(path string) (bool, error) {
 func (f *fakeFS) ReadFile(path string) ([]byte, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	f.readFileCalls[path]++
 	if f.failReadOn != "" && path == f.failReadOn {
 		return nil, f.failReadErr
 	}
@@ -83,6 +86,15 @@ func (f *fakeFS) ReadFile(path string) ([]byte, error) {
 	out := make([]byte, len(data))
 	copy(out, data)
 	return out, nil
+}
+
+// readFileCallCount returns how many times ReadFile was invoked for
+// path. Tests use it to pin the "no double-read" invariant from the
+// T4b-review (plan caches the body, execute uses the cache).
+func (f *fakeFS) readFileCallCount(path string) int {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.readFileCalls[path]
 }
 
 func (f *fakeFS) WriteFile(path string, data []byte, mode iofs.FileMode) error {
