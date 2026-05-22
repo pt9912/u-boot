@@ -33,6 +33,7 @@ Spalten:
 | `LH-OPEN-004` Template-Format ist offen (`spec/lastenheft.md` §14) — YAML+Dateien vs. Cookiecutter vs. eigenes Format vs. OCI-Pakete | temporär | [`open/slice-v1-template-format-entscheidung.md`](../open/slice-v1-template-format-entscheidung.md) |
 | HTTP-Driving-Adapter ist als „geplante Erweiterung" in `spec/architecture.md` §7 erwähnt, aber nicht spezifiziert oder gefordert | temporär | [`open/slice-later-http-driving-adapter.md`](../open/slice-later-http-driving-adapter.md) |
 | `LH-FA-INIT-004` Soft-Existing-Detection fehlt — M3-T2 prüft nur Hard-Marker, die „3+ Strukturelemente"-Erkennung plus `--assume-existing`-Logik sind nicht implementiert | temporär | [`open/slice-m4-soft-existing-detection.md`](../open/slice-m4-soft-existing-detection.md) |
+| `maxBackupFileSize = 256 << 20` als harter Cap in `internal/hexagon/application/backup.go` (LH-FA-INIT-005) — Backup lädt heute via `ReadFile`+`WriteFile` ins RAM, multi-GB-Assets würden OOM erzeugen; Cap zieht `driving.ErrBackupTooLarge` (Exit-Code 14) | temporär | [`open/slice-v1-backup-streaming-copy.md`](../open/slice-v1-backup-streaming-copy.md) |
 
 ## Permanente Carveouts (kein Plan, im Inventar dokumentiert)
 

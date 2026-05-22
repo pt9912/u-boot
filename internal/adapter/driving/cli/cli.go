@@ -89,7 +89,13 @@ func (a *App) Execute(ctx context.Context, args []string, stdout, stderr io.Writ
 //   - 10 — fachlicher Validierungsfehler: LH-FA-INIT-004 marker
 //          collisions (ErrProjectExists), LH-FA-INIT-006 invalid
 //          project name (ErrInvalidProjectName), LH-AK-001 missing
-//          BaseDir (ErrBaseDirMissing)
+//          BaseDir (ErrBaseDirMissing), LH-FA-INIT-005 unsupported
+//          backup-source kind (ErrBackupUnsupportedKind)
+//   - 14 — technischer Persistenz-/Dateisystemfehler: LH-FA-INIT-005
+//          backup-suffix exhausted (ErrBackupSuffixExhausted),
+//          backup source vanished mid-flight
+//          (ErrBackupSourceMissing), backup target exceeds size cap
+//          (ErrBackupTooLarge)
 //   - 1  — everything else (generic error)
 //
 // The mapping lives in the driving adapter because exit-code
@@ -97,15 +103,19 @@ func (a *App) Execute(ctx context.Context, args []string, stdout, stderr io.Writ
 // the application use-cases — the application layer returns
 // sentinel errors and lets the adapter translate.
 //
-// Codes 11/12/13–15 (environment, runtime, technical errors) are
-// added by later slices that introduce the corresponding use-case
-// sentinels (`u-boot doctor` for 11, `u-boot up`/`down` for 12).
+// Codes 11/12/13/15 (environment, runtime, devcontainer, generic
+// technical errors) are added by later slices that introduce the
+// corresponding use-case sentinels (`u-boot doctor` for 11, `u-boot
+// up`/`down` for 12).
 func ExitCode(err error) int {
 	if err == nil {
 		return 0
 	}
 	if isValidationError(err) {
 		return 10
+	}
+	if isFilesystemError(err) {
+		return 14
 	}
 	if isUsageError(err) {
 		return 2
@@ -120,7 +130,18 @@ func ExitCode(err error) int {
 func isValidationError(err error) bool {
 	return errors.Is(err, driving.ErrProjectExists) ||
 		errors.Is(err, driving.ErrBaseDirMissing) ||
+		errors.Is(err, driving.ErrBackupUnsupportedKind) ||
 		errors.Is(err, domain.ErrInvalidProjectName)
+}
+
+// isFilesystemError returns true for the LH-FA-CLI-006 code-14
+// sentinels — technical persistence / filesystem failures the
+// application cannot recover from. The user must intervene
+// (clean up stale backups, free disk, etc.).
+func isFilesystemError(err error) bool {
+	return errors.Is(err, driving.ErrBackupSuffixExhausted) ||
+		errors.Is(err, driving.ErrBackupSourceMissing) ||
+		errors.Is(err, driving.ErrBackupTooLarge)
 }
 
 // isUsageError detects errors that Cobra raises for malformed CLI

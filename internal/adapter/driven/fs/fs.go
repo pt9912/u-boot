@@ -52,7 +52,7 @@ func (FS) ReadFile(path string) ([]byte, error) {
 // project-directory mode 0o755 (LH-FA-INIT-003 — directories are
 // shared with collaborators and CI runners, neither benefits from a
 // more restrictive default) and writes the file itself with the
-// caller-supplied mode. The write is non-atomic at this layer.
+// caller-supplied mode. Truncate-overwrites an existing file.
 func (FS) WriteFile(path string, data []byte, mode iofs.FileMode) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
@@ -60,7 +60,37 @@ func (FS) WriteFile(path string, data []byte, mode iofs.FileMode) error {
 	return os.WriteFile(path, data, mode)
 }
 
-// MkdirAll mirrors os.MkdirAll.
+// WriteFileExclusive uses O_CREATE|O_EXCL|O_WRONLY so the write fails
+// with a wrapped os.ErrExist (which is fs.ErrExist) when path already
+// exists. Parent directories are created with mode 0o755 like
+// [WriteFile]. The os.OpenFile + Write + Close path is the
+// canonical Go way to express atomic-create-then-write.
+func (FS) WriteFileExclusive(path string, data []byte, mode iofs.FileMode) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, mode)
+	if err != nil {
+		return err
+	}
+	if _, writeErr := f.Write(data); writeErr != nil {
+		closeErr := f.Close()
+		if closeErr != nil {
+			return errors.Join(writeErr, closeErr)
+		}
+		return writeErr
+	}
+	return f.Close()
+}
+
+// Mkdir mirrors os.Mkdir — single directory, no parents, fails with
+// fs.ErrExist when path is taken. Use [MkdirAll] when idempotent
+// semantics are wanted.
+func (FS) Mkdir(path string, mode iofs.FileMode) error {
+	return os.Mkdir(path, mode)
+}
+
+// MkdirAll mirrors os.MkdirAll. Idempotent.
 func (FS) MkdirAll(path string, mode iofs.FileMode) error {
 	return os.MkdirAll(path, mode)
 }
@@ -75,18 +105,11 @@ func (FS) ReadDir(path string) ([]iofs.DirEntry, error) {
 	return os.ReadDir(path)
 }
 
-// IsDir reports whether path exists and is a directory. Mirrors the
-// Exists policy: a missing path returns `(false, nil)`, real I/O
-// errors propagate.
-func (FS) IsDir(path string) (bool, error) {
-	info, err := os.Stat(path)
-	if err == nil {
-		return info.IsDir(), nil
-	}
-	if errors.Is(err, iofs.ErrNotExist) {
-		return false, nil
-	}
-	return false, err
+// Lstat mirrors os.Lstat — does not follow symlinks. The backup
+// strategy relies on this so symlinks are detectable via
+// `info.Mode()&fs.ModeSymlink != 0`.
+func (FS) Lstat(path string) (iofs.FileInfo, error) {
+	return os.Lstat(path)
 }
 
 // RemoveAll mirrors os.RemoveAll.

@@ -81,16 +81,27 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
    `LH-SA-FILE-002`, plus `LH-FA-CLI-005A` Modi-Flags) sonst einen
    einzelnen Commit überfrachten:
 
-   - **T4a — Backup-Mechanik.** ✅ Done (dieser Commit, Hash folgt im EOD-Commit)
-     `FileSystem`-Driven-Port um `IsDir` / `RemoveAll` erweitert,
+   - **T4a — Backup-Mechanik.** ✅ Done (`5296671` + Review-Fix-Commit folgt)
+     `FileSystem`-Driven-Port um `Lstat` / `Mkdir` /
+     `WriteFileExclusive` / `RemoveAll` erweitert (Review hat
+     `IsDir` durch das Lstat-basierte Trio ersetzt — Mode-Preservation
+     + Symlink-Detection + TOCTOU-Schutz in einem Schwung).
      `application/backup.go` mit `BackupPath` — kleinster-freier-
      Suffix-Algorithmus (`.bak`, `.bak.1`, …) nach `LH-FA-INIT-005`
      §607/608, Files und Verzeichnisse (rekursiv), Rollback bei
-     Tree-Backup-Fehler. Sentinels `ErrBackupSourceMissing` und
-     `ErrBackupSuffixExhausted`. Fakes erweitert (`IsDir`/`RemoveAll`/
-     echtes `ReadDir`); FS-Adapter-Tests für die neuen Methoden.
-     Coverage `backup.go`: BackupPath/chooseBackupPath/copyFile 100 %,
-     copyTree 80 %.
+     Tree-Backup-Fehler mit `errors.Join` für Sekundär-Fehler;
+     Symlink-Rejection (`ErrBackupUnsupportedKind`), 256 MiB-Size-Cap
+     (`ErrBackupTooLarge` — temporärer Carveout, Aufhebung in
+     [`slice-v1-backup-streaming-copy`](../open/slice-v1-backup-streaming-copy.md)).
+     TOCTOU-sichere Top-Level-Reservierung via
+     `Mkdir`/`WriteFileExclusive` + Race-Retry-Loop. Sentinels
+     `ErrBackupSourceMissing`/`ErrBackupSuffixExhausted`/
+     `ErrBackupUnsupportedKind`/`ErrBackupTooLarge` in der
+     Driving-Port verankert, `cli.ExitCode` mit Code 14
+     (Filesystem-technisch) erweitert. Fakes vollständig überarbeitet
+     (Lstat + Modus-Preservation + Symlink-Modellierung +
+     Ancestor-Recording bei `WriteFile`/`MkdirAll`). 24 Tests in
+     `backup_test.go`. Coverage 92.9 %.
 
    - **T4b — Managed-Block-Parser + Force/Backup-Flow.** Offen.
      `application/managedblock/` mit Marker-Parser pro Dateityp nach

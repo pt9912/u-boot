@@ -141,36 +141,132 @@ func TestFS_ReadDir(t *testing.T) {
 	}
 }
 
-func TestFS_IsDir(t *testing.T) {
+func TestFS_Lstat(t *testing.T) {
 	dir := t.TempDir()
 	file := filepath.Join(dir, "f.txt")
-	if err := os.WriteFile(file, nil, 0o644); err != nil {
+	if err := os.WriteFile(file, []byte("hi"), 0o600); err != nil {
 		t.Fatalf("setup: %v", err)
 	}
 	adapter := fs.New()
 
-	got, err := adapter.IsDir(dir)
+	info, err := adapter.Lstat(dir)
 	if err != nil {
-		t.Fatalf("IsDir(dir): %v", err)
+		t.Fatalf("Lstat(dir): %v", err)
 	}
-	if !got {
-		t.Fatalf("IsDir(dir) = false, want true")
+	if !info.IsDir() {
+		t.Fatalf("Lstat(dir).IsDir() = false, want true")
 	}
 
-	got, err = adapter.IsDir(file)
+	info, err = adapter.Lstat(file)
 	if err != nil {
-		t.Fatalf("IsDir(file): %v", err)
+		t.Fatalf("Lstat(file): %v", err)
 	}
-	if got {
-		t.Fatalf("IsDir(file) = true, want false")
+	if info.IsDir() {
+		t.Fatalf("Lstat(file).IsDir() = true, want false")
+	}
+	if info.Size() != 2 {
+		t.Errorf("Lstat(file).Size() = %d, want 2", info.Size())
+	}
+	if info.Mode().Perm() != 0o600 {
+		t.Errorf("Lstat(file).Mode().Perm() = %o, want 0o600", info.Mode().Perm())
 	}
 
-	got, err = adapter.IsDir(filepath.Join(dir, "missing"))
-	if err != nil {
-		t.Fatalf("IsDir(missing): unexpected error: %v", err)
+	_, err = adapter.Lstat(filepath.Join(dir, "missing"))
+	if !errors.Is(err, iofs.ErrNotExist) {
+		t.Fatalf("Lstat(missing): want ErrNotExist, got %v", err)
 	}
-	if got {
-		t.Fatalf("IsDir(missing) = true, want false")
+}
+
+func TestFS_Lstat_DoesNotFollowSymlink(t *testing.T) {
+	// Why: pins the no-follow semantics that the LH-FA-INIT-005
+	// backup strategy relies on for symlink detection. A naive
+	// os.Stat-based impl would silently report the link's target.
+	dir := t.TempDir()
+	target := filepath.Join(dir, "target.txt")
+	if err := os.WriteFile(target, []byte("hi"), 0o644); err != nil {
+		t.Fatalf("setup target: %v", err)
+	}
+	link := filepath.Join(dir, "link.txt")
+	if err := os.Symlink(target, link); err != nil {
+		t.Skipf("symlink unsupported on this platform: %v", err)
+	}
+
+	info, err := fs.New().Lstat(link)
+	if err != nil {
+		t.Fatalf("Lstat(link): %v", err)
+	}
+	if info.Mode()&iofs.ModeSymlink == 0 {
+		t.Errorf("Lstat(link).Mode() = %v, want ModeSymlink bit set", info.Mode())
+	}
+}
+
+func TestFS_WriteFileExclusive_FailsOnExisting(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "f.txt")
+	if err := os.WriteFile(path, []byte("first"), 0o644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	err := fs.New().WriteFileExclusive(path, []byte("second"), 0o644)
+	if !errors.Is(err, iofs.ErrExist) {
+		t.Fatalf("WriteFileExclusive(existing): want ErrExist, got %v", err)
+	}
+	// Original content untouched.
+	got, _ := os.ReadFile(path)
+	if string(got) != "first" {
+		t.Errorf("file content = %q, want %q (exclusive write must not clobber)", got, "first")
+	}
+}
+
+func TestFS_WriteFileExclusive_CreatesNew(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "deep", "f.txt")
+
+	if err := fs.New().WriteFileExclusive(path, []byte("payload"), 0o600); err != nil {
+		t.Fatalf("WriteFileExclusive: %v", err)
+	}
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("verify: %v", err)
+	}
+	if string(got) != "payload" {
+		t.Errorf("content = %q, want %q", got, "payload")
+	}
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatalf("stat: %v", err)
+	}
+	if info.Mode().Perm() != 0o600 {
+		t.Errorf("mode = %o, want 0o600", info.Mode().Perm())
+	}
+}
+
+func TestFS_Mkdir_FailsOnExisting(t *testing.T) {
+	dir := t.TempDir()
+	target := filepath.Join(dir, "sub")
+	if err := os.Mkdir(target, 0o755); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	err := fs.New().Mkdir(target, 0o755)
+	if !errors.Is(err, iofs.ErrExist) {
+		t.Fatalf("Mkdir(existing): want ErrExist, got %v", err)
+	}
+}
+
+func TestFS_Mkdir_CreatesNew(t *testing.T) {
+	dir := t.TempDir()
+	target := filepath.Join(dir, "sub")
+
+	if err := fs.New().Mkdir(target, 0o755); err != nil {
+		t.Fatalf("Mkdir: %v", err)
+	}
+	info, err := os.Stat(target)
+	if err != nil {
+		t.Fatalf("verify: %v", err)
+	}
+	if !info.IsDir() {
+		t.Errorf("not a directory")
 	}
 }
 

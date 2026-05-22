@@ -208,7 +208,12 @@ func TestExitCode_BaseMappings(t *testing.T) {
 		{"ErrProjectExists (validation)", driving.ErrProjectExists, 10},
 		{"ErrBaseDirMissing (validation)", driving.ErrBaseDirMissing, 10},
 		{"ErrInvalidProjectName (validation)", domain.ErrInvalidProjectName, 10},
+		{"ErrBackupUnsupportedKind (validation)", driving.ErrBackupUnsupportedKind, 10},
 		{"wrapped ErrProjectExists", fmt.Errorf("ctx: %w", driving.ErrProjectExists), 10},
+		{"ErrBackupSuffixExhausted (fs)", driving.ErrBackupSuffixExhausted, 14},
+		{"ErrBackupSourceMissing (fs)", driving.ErrBackupSourceMissing, 14},
+		{"ErrBackupTooLarge (fs)", driving.ErrBackupTooLarge, 14},
+		{"wrapped ErrBackupSuffixExhausted", fmt.Errorf("ctx: %w", driving.ErrBackupSuffixExhausted), 14},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

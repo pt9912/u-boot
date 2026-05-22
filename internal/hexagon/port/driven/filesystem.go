@@ -25,11 +25,30 @@ type FileSystem interface {
 	// WriteFile writes data to the file at path, creating parent
 	// directories with mode 0o755 as needed and the file itself with
 	// the given mode. It is non-atomic at this layer; atomic semantics
-	// are an adapter concern.
+	// are an adapter concern. Truncate-overwrites an existing file —
+	// see [WriteFileExclusive] for the race-safe variant.
 	WriteFile(path string, data []byte, mode fs.FileMode) error
 
+	// WriteFileExclusive writes data to path with O_CREATE|O_EXCL
+	// semantics — it succeeds only if path did not yet exist. Returns
+	// a wrapped fs.ErrExist when the slot is taken. The LH-FA-INIT-005
+	// backup strategy uses this to close the TOCTOU window between
+	// suffix selection (`<src>.bak.N` chosen via [Exists]) and the
+	// actual write, so concurrent runs cannot clobber each other's
+	// fresh backups (spec §607: "ohne vorhandene Backups zu
+	// überschreiben").
+	WriteFileExclusive(path string, data []byte, mode fs.FileMode) error
+
+	// Mkdir creates a single directory at path with O_EXCL semantics,
+	// mirroring os.Mkdir. Returns a wrapped fs.ErrExist when the path
+	// is taken. Companion to [WriteFileExclusive]; the LH-FA-INIT-005
+	// backup strategy uses it to reserve the top-level <src>.bak
+	// directory atomically.
+	Mkdir(path string, mode fs.FileMode) error
+
 	// MkdirAll creates the directory and all parents with the given
-	// mode, mirroring os.MkdirAll. Idempotent.
+	// mode, mirroring os.MkdirAll. Idempotent — use [Mkdir] when you
+	// need exclusive create semantics.
 	MkdirAll(path string, mode fs.FileMode) error
 
 	// Rename moves src to dst, mirroring os.Rename. Used by the backup
@@ -39,13 +58,15 @@ type FileSystem interface {
 	// ReadDir lists the directory entries at path.
 	ReadDir(path string) ([]fs.DirEntry, error)
 
-	// IsDir reports whether path exists and is a directory. Returns
-	// `(false, nil)` for a non-existent path so callers can use it as a
-	// "kind probe" without a separate Exists call. Real I/O errors
-	// (permission denied on a parent, etc.) propagate. Added for the
-	// LH-FA-INIT-005 backup strategy, which copies file-vs-directory
-	// trees differently.
-	IsDir(path string) (bool, error)
+	// Lstat returns file info for path without following symlinks
+	// (mirrors os.Lstat). Callers consume Mode() for the kind probe
+	// (regular file / directory / symlink) and for mode preservation;
+	// fs.ErrNotExist is returned wrapped for a missing path so callers
+	// can branch on errors.Is. The LH-FA-INIT-005 backup strategy
+	// uses Lstat (not Stat) so that symlinks are detectable and can
+	// be rejected with ErrBackupUnsupportedKind rather than silently
+	// followed.
+	Lstat(path string) (fs.FileInfo, error)
 
 	// RemoveAll deletes path and any children, mirroring os.RemoveAll.
 	// Used by the LH-FA-INIT-005 backup strategy as the rollback action

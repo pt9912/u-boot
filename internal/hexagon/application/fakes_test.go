@@ -8,37 +8,54 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
 
 // fakeFS is an in-memory FileSystem implementation for application-
 // layer tests. It records every WriteFile and MkdirAll call so tests
-// can assert on creation order; Exists/Read/Rename/ReadDir behave
-// consistently with WriteFile/MkdirAll history.
+// can assert on creation order; Exists/Read/Rename/ReadDir/Lstat
+// behave consistently with WriteFile/MkdirAll history. WriteFile
+// and MkdirAll register *every* path ancestor in `dirs` so the
+// fake's ReadDir matches the real adapter's behaviour for deeply
+// nested keys.
 //
-// The fake is intentionally tiny — application tests need
+// The fake is intentionally small — application tests need
 // deterministic in-memory behaviour, not a full ioutil emulator.
 type fakeFS struct {
 	mu            sync.Mutex
 	files         map[string][]byte
+	fileModes     map[string]iofs.FileMode
 	dirs          map[string]bool
-	writes        []string // ordered: every successful WriteFile path
-	mkdirs        []string // ordered: every MkdirAll path
-	failOn        string   // when non-empty, WriteFile returns failErr for that path
+	dirModes      map[string]iofs.FileMode
+	symlinks      map[string]bool  // path is a symlink for Lstat purposes
+	sizeOverride  map[string]int64 // bypass len(data) for size-cap tests
+	writes        []string         // ordered: every successful WriteFile path
+	mkdirs        []string         // ordered: every MkdirAll path
+	failOn        string           // when non-empty, WriteFile / WriteFileExclusive returns failErr for that path
 	failErr       error
 	failReadOn    string // when non-empty, ReadFile returns failReadErr for that path
 	failReadErr   error
 	failExistsOn  string // when non-empty, Exists returns failExistsErr for that path
 	failExistsErr error
-	failIsDirOn   string // when non-empty, IsDir returns failIsDirErr for that path
-	failIsDirErr  error
+	failLstatOn   string // when non-empty, Lstat returns failLstatErr for that path
+	failLstatErr  error
+	failMkdirOn   string // when non-empty, Mkdir / MkdirAll returns failMkdirErr for that path
+	failMkdirErr  error
+	failReadDirOn string // when non-empty, ReadDir returns failReadDirErr for that path
+	failReadDirErr error
+	failRemoveAll error // when non-nil, RemoveAll returns this error
 }
 
 func newFakeFS() *fakeFS {
 	return &fakeFS{
-		files: make(map[string][]byte),
-		dirs:  make(map[string]bool),
+		files:        make(map[string][]byte),
+		fileModes:    make(map[string]iofs.FileMode),
+		dirs:         make(map[string]bool),
+		dirModes:     make(map[string]iofs.FileMode),
+		symlinks:     make(map[string]bool),
+		sizeOverride: make(map[string]int64),
 	}
 }
 
@@ -68,26 +85,95 @@ func (f *fakeFS) ReadFile(path string) ([]byte, error) {
 	return out, nil
 }
 
-func (f *fakeFS) WriteFile(path string, data []byte, _ iofs.FileMode) error {
+func (f *fakeFS) WriteFile(path string, data []byte, mode iofs.FileMode) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	if f.failOn != "" && path == f.failOn {
 		return f.failErr
 	}
-	stored := make([]byte, len(data))
-	copy(stored, data)
-	f.files[path] = stored
-	f.dirs[filepath.Dir(path)] = true
-	f.writes = append(f.writes, path)
+	f.writeFileLocked(path, data, mode)
 	return nil
 }
 
-func (f *fakeFS) MkdirAll(path string, _ iofs.FileMode) error {
+func (f *fakeFS) WriteFileExclusive(path string, data []byte, mode iofs.FileMode) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	if f.failOn != "" && path == f.failOn {
+		return f.failErr
+	}
+	if _, ok := f.files[path]; ok {
+		return iofs.ErrExist
+	}
+	if f.dirs[path] {
+		return iofs.ErrExist
+	}
+	f.writeFileLocked(path, data, mode)
+	return nil
+}
+
+// writeFileLocked stores the file plus its mode and registers every
+// ancestor directory so ReadDir reflects the implicit tree (matches
+// os.WriteFile + os.MkdirAll behaviour). Caller must hold f.mu.
+func (f *fakeFS) writeFileLocked(path string, data []byte, mode iofs.FileMode) {
+	stored := make([]byte, len(data))
+	copy(stored, data)
+	f.files[path] = stored
+	f.fileModes[path] = mode
+	f.registerAncestorsLocked(filepath.Dir(path))
+	f.writes = append(f.writes, path)
+}
+
+func (f *fakeFS) Mkdir(path string, mode iofs.FileMode) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.failMkdirOn != "" && path == f.failMkdirOn {
+		return f.failMkdirErr
+	}
+	if _, ok := f.files[path]; ok {
+		return iofs.ErrExist
+	}
+	if f.dirs[path] {
+		return iofs.ErrExist
+	}
 	f.dirs[path] = true
+	f.dirModes[path] = mode
 	f.mkdirs = append(f.mkdirs, path)
 	return nil
+}
+
+func (f *fakeFS) MkdirAll(path string, mode iofs.FileMode) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.failMkdirOn != "" && path == f.failMkdirOn {
+		return f.failMkdirErr
+	}
+	if !f.dirs[path] {
+		f.dirs[path] = true
+		f.dirModes[path] = mode
+	}
+	f.registerAncestorsLocked(filepath.Dir(path))
+	f.mkdirs = append(f.mkdirs, path)
+	return nil
+}
+
+// registerAncestorsLocked walks up from `start` and marks every
+// directory ancestor as existing. Stops when filepath.Dir is a
+// fixed point ("/" on POSIX, "." on relative paths). Caller must
+// hold f.mu. Ancestor dirModes default to 0o755 so Lstat returns a
+// sensible mode for implicit intermediate directories.
+func (f *fakeFS) registerAncestorsLocked(start string) {
+	p := start
+	for p != "" && p != "." {
+		if !f.dirs[p] {
+			f.dirs[p] = true
+			f.dirModes[p] = 0o755
+		}
+		parent := filepath.Dir(p)
+		if parent == p {
+			break
+		}
+		p = parent
+	}
 }
 
 func (f *fakeFS) Rename(src, dst string) error {
@@ -102,15 +188,14 @@ func (f *fakeFS) Rename(src, dst string) error {
 	return nil
 }
 
-// ReadDir returns the direct children of path. The fake reconstructs
-// them from the recorded files/dirs maps so the BackupPath tests can
-// walk a directory tree without touching disk. A child is classified
-// as a directory when (a) it is itself a recorded dir, or (b) it is
-// not a recorded file but appears as a parent of some deeper key
-// (implicit intermediate directory).
+// ReadDir returns the direct children of path. Tests inject failures
+// via failReadDirOn / failReadDirErr.
 func (f *fakeFS) ReadDir(path string) ([]iofs.DirEntry, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	if f.failReadDirOn != "" && path == f.failReadDirOn {
+		return nil, f.failReadDirErr
+	}
 	if !f.dirs[path] {
 		return nil, iofs.ErrNotExist
 	}
@@ -127,88 +212,122 @@ func (f *fakeFS) ReadDir(path string) ([]iofs.DirEntry, error) {
 		}
 		seen[name] = true
 		direct := filepath.Join(path, name)
-		switch {
-		case f.dirs[direct]:
-			entries = append(entries, fakeDirEntry{name: name, isDir: true})
-		case fileExistsLocked(f.files, direct):
+		// Symlinks beat dir classification — Lstat-time semantics
+		// match os.ReadDir's: an entry is a symlink if the link
+		// itself exists, regardless of what it points at.
+		if f.symlinks[direct] {
 			entries = append(entries, fakeDirEntry{name: name, isDir: false})
-		default:
-			// Implicit intermediate directory — no explicit entry, but
-			// deeper keys live under it.
-			entries = append(entries, fakeDirEntry{name: name, isDir: true})
+			return
 		}
+		if f.dirs[direct] {
+			entries = append(entries, fakeDirEntry{name: name, isDir: true})
+			return
+		}
+		entries = append(entries, fakeDirEntry{name: name, isDir: false})
 	}
 	for k := range f.files {
 		addChild(k)
 	}
 	for k := range f.dirs {
+		addChild(k)
+	}
+	for k := range f.symlinks {
 		addChild(k)
 	}
 	sort.Slice(entries, func(i, j int) bool { return entries[i].Name() < entries[j].Name() })
 	return entries, nil
 }
 
-// fileExistsLocked is a tiny helper to keep the ReadDir switch
-// readable; the lookup is mutex-protected by the caller.
-func fileExistsLocked(files map[string][]byte, path string) bool {
-	_, ok := files[path]
-	return ok
-}
-
-// IsDir reports whether path is a recorded directory. Missing paths
-// return `(false, nil)` to match the real adapter's policy. Tests
-// inject a forced failure via failIsDirOn / failIsDirErr.
-func (f *fakeFS) IsDir(path string) (bool, error) {
+// Lstat returns FileInfo for path without following symlinks.
+// Behaviour matches os.Lstat: symlinks report ModeSymlink, regular
+// files report the recorded mode, directories report ModeDir | mode.
+// Missing paths return iofs.ErrNotExist.
+func (f *fakeFS) Lstat(path string) (iofs.FileInfo, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	if f.failIsDirOn != "" && path == f.failIsDirOn {
-		return false, f.failIsDirErr
+	if f.failLstatOn != "" && path == f.failLstatOn {
+		return nil, f.failLstatErr
 	}
-	return f.dirs[path], nil
+	if f.symlinks[path] {
+		return &fakeFileInfo{name: filepath.Base(path), mode: iofs.ModeSymlink}, nil
+	}
+	if data, ok := f.files[path]; ok {
+		size := int64(len(data))
+		if override, hasOverride := f.sizeOverride[path]; hasOverride {
+			size = override
+		}
+		return &fakeFileInfo{
+			name: filepath.Base(path),
+			size: size,
+			mode: f.fileModes[path],
+		}, nil
+	}
+	if f.dirs[path] {
+		return &fakeFileInfo{
+			name: filepath.Base(path),
+			mode: iofs.ModeDir | f.dirModes[path],
+		}, nil
+	}
+	return nil, iofs.ErrNotExist
 }
 
 // RemoveAll deletes path and any recorded children. Idempotent —
-// removing a missing path is a no-op, matching os.RemoveAll.
+// removing a missing path is a no-op, matching os.RemoveAll. Tests
+// inject a forced failure via failRemoveAll.
 func (f *fakeFS) RemoveAll(path string) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	if f.failRemoveAll != nil {
+		return f.failRemoveAll
+	}
 	delete(f.files, path)
+	delete(f.fileModes, path)
 	delete(f.dirs, path)
+	delete(f.dirModes, path)
+	delete(f.symlinks, path)
 	prefix := path + string(filepath.Separator)
 	for k := range f.files {
 		if strings.HasPrefix(k, prefix) {
 			delete(f.files, k)
+			delete(f.fileModes, k)
 		}
 	}
 	for k := range f.dirs {
 		if strings.HasPrefix(k, prefix) {
 			delete(f.dirs, k)
+			delete(f.dirModes, k)
+		}
+	}
+	for k := range f.symlinks {
+		if strings.HasPrefix(k, prefix) {
+			delete(f.symlinks, k)
 		}
 	}
 	return nil
 }
 
-// fakeDirEntry is the minimal iofs.DirEntry the BackupPath walker
-// needs: Name() and IsDir() only. Type()/Info() return the zero values
-// because the algorithm never consults them.
-type fakeDirEntry struct {
-	name  string
-	isDir bool
-}
-
-func (e fakeDirEntry) Name() string               { return e.name }
-func (e fakeDirEntry) IsDir() bool                { return e.isDir }
-func (e fakeDirEntry) Type() iofs.FileMode        { return 0 }
-func (e fakeDirEntry) Info() (iofs.FileInfo, error) { return nil, errors.New("fakeDirEntry.Info: not implemented") }
-
 // markDirExists pre-registers a directory so Exists returns true.
 // Used by test setup to satisfy the BaseDir-existence check
 // without going through a real MkdirAll call (which the test
-// otherwise wants to count).
+// otherwise wants to count). Mode defaults to 0o755.
 func (f *fakeFS) markDirExists(path string) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.dirs[path] = true
+	if _, ok := f.dirModes[path]; !ok {
+		f.dirModes[path] = 0o755
+	}
+}
+
+// markSymlink registers path as a symlink for Lstat purposes and
+// makes the entry appear in ReadDir of its parent — so the backup
+// walker can encounter and reject it. Ancestors are registered the
+// same way WriteFile does for files (review finding #7).
+func (f *fakeFS) markSymlink(path string) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.symlinks[path] = true
+	f.registerAncestorsLocked(filepath.Dir(path))
 }
 
 // writtenPaths returns the recorded WriteFile paths in deterministic
@@ -231,6 +350,34 @@ func (f *fakeFS) mkdirPaths() []string {
 	copy(out, f.mkdirs)
 	return out
 }
+
+// fakeDirEntry is the minimal iofs.DirEntry the BackupPath walker
+// needs: Name() and IsDir() only. Type()/Info() return the zero
+// values because the algorithm never consults them.
+type fakeDirEntry struct {
+	name  string
+	isDir bool
+}
+
+func (e fakeDirEntry) Name() string                 { return e.name }
+func (e fakeDirEntry) IsDir() bool                  { return e.isDir }
+func (e fakeDirEntry) Type() iofs.FileMode          { return 0 }
+func (e fakeDirEntry) Info() (iofs.FileInfo, error) { return nil, errors.New("fakeDirEntry.Info: not implemented") }
+
+// fakeFileInfo backs the Lstat return value with just the fields
+// the backup service consults: Name / Size / Mode / IsDir.
+type fakeFileInfo struct {
+	name string
+	size int64
+	mode iofs.FileMode
+}
+
+func (i *fakeFileInfo) Name() string       { return i.name }
+func (i *fakeFileInfo) Size() int64        { return i.size }
+func (i *fakeFileInfo) Mode() iofs.FileMode { return i.mode }
+func (i *fakeFileInfo) ModTime() time.Time { return time.Time{} }
+func (i *fakeFileInfo) IsDir() bool        { return i.mode.IsDir() }
+func (i *fakeFileInfo) Sys() any           { return nil }
 
 // fakeYAML uses gopkg.in/yaml.v3 directly. The application layer
 // imports the YAMLCodec port, the test imports the library — the

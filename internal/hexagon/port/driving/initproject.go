@@ -64,6 +64,38 @@ var ErrProjectExists = errors.New("project already initialized")
 // imports (LH-FA-ARCH-003).
 var ErrBaseDirMissing = errors.New("base directory does not exist")
 
+// ErrBackupSourceMissing signals that the path passed to the backup
+// strategy (LH-FA-INIT-005) no longer exists at the moment the
+// backup runs. This is a race condition: the caller observed the
+// file moments earlier, but the filesystem changed before the
+// backup could capture it. Surfaces to the CLI as a technical
+// filesystem error.
+var ErrBackupSourceMissing = errors.New("backup source does not exist")
+
+// ErrBackupSuffixExhausted signals that the LH-FA-INIT-005 §607
+// backup-suffix space (<src>.bak through <src>.bak.999) is fully
+// occupied, including after race-retries. A user hitting this has
+// accumulated unusually many stale backups and must clean up
+// manually. Maps to a technical filesystem exit code.
+var ErrBackupSuffixExhausted = errors.New("backup suffix exhausted")
+
+// ErrBackupUnsupportedKind signals that the backup target is neither
+// a regular file nor a regular directory (currently only symlinks
+// trip this). LH-FA-INIT-005 §608 does not specify symlink
+// semantics; rejecting is the safe default until a follow-up slice
+// decides between "copy-as-symlink" and "follow-then-copy". Maps to
+// a validation exit code because the user gave the tool an input it
+// cannot safely act on.
+var ErrBackupUnsupportedKind = errors.New("backup source kind unsupported")
+
+// ErrBackupTooLarge signals that a file in the backup scope exceeds
+// the MVP size cap. The cap exists because the current FileSystem
+// port loads files via ReadFile (full content into memory) and a
+// multi-GB asset would OOM the process. Lifted by
+// `slice-v1-backup-streaming-copy.md` once a streaming copy
+// primitive lands. Maps to a technical filesystem exit code.
+var ErrBackupTooLarge = errors.New("backup source exceeds size cap")
+
 // InitProjectUseCase is the driving-port for `u-boot init`. The CLI
 // adapter holds a reference and calls [Init] from the Cobra command
 // handler.
