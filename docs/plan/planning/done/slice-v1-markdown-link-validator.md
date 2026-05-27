@@ -1,7 +1,7 @@
 # Slice V1: Markdown-Link-Validator
 
 > **Status:** Done
-> **DoD:** Commit `<TBD>` (wird im Folge-Fixup konkretisiert)
+> **DoD:** Commit `2f8242c`
 
 ## Auslöser
 
