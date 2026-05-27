@@ -1,7 +1,7 @@
 # Slice M3: `u-boot init`-Flow
 
 > **Status:** Done
-> **DoD:** T1 ✅ `132d1a1` + `f5c784a` / T2 ✅ `aaf4d8d` + `39387b9` / T3 ✅ `937adb1` + `2b6582c` / T4a ✅ `5296671` + `ecb8379` / T4b ✅ `077c3e5` + `4d07542` / T4c ✅ `2925471` + `4b15181` / T5 ✅ M3-T5-Commit (siehe `git log --grep=m3-t5`)
+> **DoD:** T1 ✅ `132d1a1` + `f5c784a` / T2 ✅ `aaf4d8d` + `39387b9` / T3 ✅ `937adb1` + `2b6582c` / T4a ✅ `5296671` + `ecb8379` / T4b ✅ `077c3e5` + `4d07542` / T4c ✅ `2925471` + `4b15181` / T5 ✅ `82dca74` + Review-Fix-Commit
 
 ## Auslöser
 

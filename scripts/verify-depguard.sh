@@ -74,8 +74,8 @@ LOG_DIR="$(mktemp -d -t verify-depguard-XXXXXX)"
 echo "[verify-depguard] logs in $LOG_DIR"
 
 failures=0
-for case in "${CASES[@]}"; do
-  IFS='|' read -r rule dir bad_import desc <<< "$case"
+for entry in "${CASES[@]}"; do
+  IFS='|' read -r rule dir bad_import desc <<< "$entry"
 
   pkg_name="$(basename "$dir")"
   VIOLATION_FILE="$dir/verify_depguard_violation.go"
@@ -124,8 +124,8 @@ EOF
 done
 
 if [ $failures -ne 0 ]; then
-  echo "[verify-depguard] $failures rule(s) failed verification"
+  echo "[verify-depguard] $failures rule(s) failed verification — logs preserved in $LOG_DIR"
   exit 1
 fi
 
-echo "[verify-depguard] all 8 depguard rules verified"
+echo "[verify-depguard] all 8 depguard rules verified — logs in $LOG_DIR"

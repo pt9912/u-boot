@@ -1,7 +1,7 @@
 # Slice M3: depguard-Regelaktivierung verifizieren
 
 > **Status:** Done
-> **DoD:** M3-T5-Commit (siehe `git log --grep=m3-t5`)
+> **DoD:** Commit `82dca74` (M3-T5) + Review-Fix-Commit (siehe `git log --grep=m3-t5-review`)
 
 ## Auslöser
 
