@@ -1,7 +1,7 @@
 # Slice M4: `u-boot doctor`-Flow
 
 > **Status:** In progress
-> **DoD:** T1 offen / T2 offen / T3 offen / T4 offen / T5 offen / T6 offen / T7 offen
+> **DoD:** T1 ✅ `bcf684f` / T2 ✅ `<TBD>` / T3 offen / T4 offen / T5 offen / T6 offen / T7 offen
 
 ## Auslöser
 
