@@ -14,7 +14,15 @@
 IMAGE                   ?= u-boot
 GO_VERSION              ?= 1.26.3
 GOLANGCI_LINT_VERSION   ?= v2.12.1
+GOVULNCHECK_VERSION     ?= v1.1.4
 THRESHOLD               ?= 90
+
+# `--progress=plain` gives full, line-by-line BuildKit logs that survive
+# CI log truncation. Locally the default (`auto`) keeps the compact TUI.
+PROGRESS_FLAG :=
+ifeq ($(CI),1)
+PROGRESS_FLAG := --progress=plain
+endif
 
 # `--no-cache-filter <stage>` forces BuildKit to re-evaluate the given
 # stage without invalidating the `deps` cache layer. Without this, a
@@ -23,7 +31,7 @@ NO_CACHE_FILTER_TEST     := --no-cache-filter test
 NO_CACHE_FILTER_LINT     := --no-cache-filter lint
 NO_CACHE_FILTER_COVERAGE := --no-cache-filter coverage
 
-DOCKER_BUILD := docker build \
+DOCKER_BUILD := docker build $(PROGRESS_FLAG) \
     --build-arg GO_VERSION=$(GO_VERSION) \
     --build-arg GOLANGCI_LINT_VERSION=$(GOLANGCI_LINT_VERSION)
 
@@ -67,14 +75,14 @@ run: build ## Smoke test: run `u-boot --help` from the built image.
 # ---- security gates --------------------------------------------------------
 
 # govulncheck runs inside an ephemeral Go container with the project
-# mounted in. Pinning is implicit (latest release at run time); routine
-# upgrade.
+# mounted in. Pinned via GOVULNCHECK_VERSION (ADR-0004 pin policy);
+# routine upgrade documented in the commit body.
 govulncheck: ## Run govulncheck against the project (LH-FA-BUILD-006).
 	docker run --rm \
 	    -v "$(CURDIR)":/src -w /src \
 	    -e GOFLAGS=-buildvcs=false \
 	    golang:$(GO_VERSION) \
-	    sh -c "go install golang.org/x/vuln/cmd/govulncheck@latest && govulncheck ./..."
+	    sh -c "go install golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION) && govulncheck ./..."
 
 # verify-depguard proves each of the eight LH-FA-ARCH-003 layer rules
 # fires on a real forbidden import. Manual / on-demand: not part of

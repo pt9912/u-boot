@@ -52,7 +52,7 @@ Disziplin-Verstoß.
 
 ## Nächste Schritte
 
-1. **Bootstrap-Polish-Slice** (klein, eigener Commit): `GOVULNCHECK_VERSION`-Pin statt `@latest` (Reproduzierbarkeit, ADR-0004-Folgepunkt) und `PROGRESS_FLAG := --progress=plain` für `CI=1` (übernommen aus `c-hsm-doc`-Makefile). Beides reine Build-Infra, kein neuer Carveout.
+1. **Drei offene M3-Anker-Slices triagieren** — sind heute noch mit Phase „M3-T5" getaggt, obwohl M3 abgeschlossen ist: [`slice-m3-gomodguard-rules`](../open/slice-m3-gomodguard-rules.md) (gomodguard-Regeln definieren, jetzt wo Cobra+yaml.v3 in `go.mod` sind), [`slice-m3-branch-protection-checkliste`](../open/slice-m3-branch-protection-checkliste.md) (ADR-0004-Folgepunkt, vor erstem externen PR), [`slice-m3-retroaktive-slice-plaene`](../open/slice-m3-retroaktive-slice-plaene.md) (Bootstrap-Slices M1/M2/M2b/M2c/M2d retro-dokumentieren). Re-Phasierung oder einzeln abarbeiten.
 2. **M4 `u-boot doctor`** schneiden: `LH-FA-DIAG-*` plus die bereits offenen Slices [`slice-m4-soft-existing-detection`](../open/slice-m4-soft-existing-detection.md) (aktiviert das in M3-T4c durchgereichte `--assume-existing`) und [`slice-m4-logging-port`](../open/slice-m4-logging-port.md) (löst `forbidigo.msg`-Carveout, deckt strukturiertes Logging).
 
 ## Lifecycle-Hinweis
