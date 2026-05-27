@@ -36,6 +36,20 @@ See spec/lastenheft.md for the full functional specification.`,
 	root.PersistentFlags().BoolVar(&a.noInteractive, "no-interactive", false,
 		"abort with exit-code 2 on any required confirmation (LH-FA-CLI-005A); exclusive with --yes")
 
+	// LH-FA-CLI-005 verbosity flags. Persistent so subcommands read
+	// a single source of truth. Today `--quiet` is load-bearing for
+	// the doctor subcommand (filters SeverityOK items from the
+	// rendered report); `--verbose` / `--debug` are accepted per
+	// spec but currently emit no additional output (logger-level
+	// wiring is a follow-up).
+	root.PersistentFlags().BoolVar(&a.quiet, "quiet", false,
+		"reduce output to errors only (LH-FA-CLI-005)")
+	root.PersistentFlags().BoolVar(&a.verbose, "verbose", false,
+		"show additional detail (LH-FA-CLI-005)")
+	root.PersistentFlags().BoolVar(&a.debug, "debug", false,
+		"show internal diagnostic output (LH-FA-CLI-005)")
+
 	root.AddCommand(newInitCommand(a))
+	root.AddCommand(newDoctorCommand(a))
 	return root
 }

@@ -25,9 +25,11 @@ import (
 //
 // The struct is intentionally small — one field per use-case port,
 // plus environment hooks (getwd) that tests substitute via
-// functional options. The two LH-FA-CLI-005A persistent flags
-// (--yes / --no-interactive) live here too so subcommands can read
-// the parsed values without grovelling through cmd.Root().PersistentFlags().
+// functional options. The LH-FA-CLI-005 persistent verbosity flags
+// (--quiet / --verbose / --debug) and the LH-FA-CLI-005A interaction
+// flags (--yes / --no-interactive) live here too so subcommands can
+// read the parsed values without grovelling through
+// cmd.Root().PersistentFlags().
 type App struct {
 	// version is the build-time version string, surfaced via
 	// `u-boot --version`. The wiring layer passes it in; the CLI
@@ -37,19 +39,27 @@ type App struct {
 	// initUseCase implements `u-boot init` (LH-FA-INIT-001..007).
 	initUseCase driving.InitProjectUseCase
 
+	// doctorUseCase implements `u-boot doctor` (LH-FA-DIAG-001..004).
+	doctorUseCase driving.DoctorUseCase
+
 	// getwd is the working-directory probe; defaults to os.Getwd.
 	// Tests inject a fake via [WithGetwd] so they do not depend on
 	// the host pwd.
 	getwd func() (string, error)
 
 	// yes and noInteractive are bound to the root command's
-	// PersistentFlags by [buildRootCommand]. Subcommands read them
-	// in their RunE — for `u-boot init` (M3-T4c) the conflict check
-	// `--yes`+`--no-interactive` → [ErrConflictingModeFlags] is the
-	// only behavioural use today; LH-FA-CLI-005A §247 makes both
-	// flags no-ops on deterministic execution paths.
+	// PersistentFlags by [buildRootCommand].
 	yes           bool
 	noInteractive bool
+
+	// quiet, verbose, debug are bound to the LH-FA-CLI-005 root
+	// PersistentFlags. The doctor subcommand reads --quiet to filter
+	// SeverityOK items from the rendered report. --verbose / --debug
+	// are accepted per spec but currently do not change the doctor
+	// output (logger-level wiring is a follow-up).
+	quiet   bool
+	verbose bool
+	debug   bool
 }
 
 // Option mutates an [App] during [New]; the Go-idiomatic functional-
@@ -66,11 +76,12 @@ func WithGetwd(fn func() (string, error)) Option {
 // New constructs an App. The version string and every use-case
 // implementation must be non-nil at call time; the CLI package
 // trusts the wiring layer to honor that.
-func New(version string, initUC driving.InitProjectUseCase, opts ...Option) *App {
+func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, opts ...Option) *App {
 	a := &App{
-		version:     version,
-		initUseCase: initUC,
-		getwd:       os.Getwd,
+		version:       version,
+		initUseCase:   initUC,
+		doctorUseCase: doctorUC,
+		getwd:         os.Getwd,
 	}
 	for _, opt := range opts {
 		opt(a)
@@ -98,6 +109,16 @@ func (a *App) Execute(ctx context.Context, args []string, stdout, stderr io.Writ
 // flags; they are pure CLI-level mode switches.
 var ErrConflictingModeFlags = errors.New("--yes and --no-interactive are mutually exclusive")
 
+// ErrDoctorFailures signals that `u-boot doctor` ran successfully
+// (use-case returned no error) but the diagnostic report contained
+// at least one SeverityError item — or at least one SeverityWarn
+// when `--strict` was set (LH-FA-DIAG-003). Maps to exit code 11.
+//
+// Lives in the cli package because the LH-FA-CLI-006 exit-code
+// mapping is a CLI concern; the application's DoctorUseCase
+// faithfully returns a report and lets the adapter decide.
+var ErrDoctorFailures = errors.New("doctor report contains failures")
+
 // ExitCode classifies a CLI error into the u-boot exit-code scheme
 // (LH-FA-CLI-006):
 //
@@ -112,6 +133,9 @@ var ErrConflictingModeFlags = errors.New("--yes and --no-interactive are mutuall
 //          (ErrBaseDirMissing), LH-FA-INIT-005 unsupported
 //          backup-source kind (ErrBackupUnsupportedKind), LH-FA-INIT-005
 //          §619 force-without-backup (ErrForceRequiresBackup)
+//   - 11 — `u-boot doctor` reported at least one SeverityError, or
+//          at least one SeverityWarn with `--strict`
+//          (ErrDoctorFailures, LH-FA-DIAG-003).
 //   - 14 — technischer Persistenz-/Dateisystemfehler: LH-FA-INIT-005
 //          backup-suffix exhausted (ErrBackupSuffixExhausted),
 //          backup source vanished mid-flight
@@ -123,16 +147,18 @@ var ErrConflictingModeFlags = errors.New("--yes and --no-interactive are mutuall
 // the application use-cases — the application layer returns
 // sentinel errors and lets the adapter translate.
 //
-// Codes 11/12/13/15 (environment, runtime, devcontainer, generic
-// technical errors) are added by later slices that introduce the
-// corresponding use-case sentinels (`u-boot doctor` for 11, `u-boot
-// up`/`down` for 12).
+// Codes 12/13/15 (runtime, devcontainer, generic technical errors)
+// are added by later slices that introduce the corresponding
+// use-case sentinels (`u-boot up`/`down` for 12).
 func ExitCode(err error) int {
 	if err == nil {
 		return 0
 	}
 	if isValidationError(err) {
 		return 10
+	}
+	if errors.Is(err, ErrDoctorFailures) {
+		return 11
 	}
 	if isFilesystemError(err) {
 		return 14

@@ -77,14 +77,10 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// distinct even when a caller pipes them together. Tests that
 	// wrap stdout in a buffer must not interpose a separate flush.
 	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter)
-	// The doctor service is wired here even though no CLI subcommand
-	// consumes it yet (T7 will add `u-boot doctor`); building it now
-	// keeps the wiring graph consistent and the CLI integration
-	// trivial when T7 lands. _ assignment until then.
-	_ = application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, logAdapter)
+	doctorSvc := application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, logAdapter)
 
 	// Driving adapter (CLI).
-	app := cli.New(version, initSvc)
+	app := cli.New(version, initSvc, doctorSvc)
 
 	err := app.Execute(ctx, args, stdout, stderr)
 	if err != nil {

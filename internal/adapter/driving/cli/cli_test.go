@@ -30,8 +30,30 @@ func (f *fakeInitUseCase) Init(_ context.Context, req driving.InitProjectRequest
 	return f.resp, f.err
 }
 
+// fakeDoctorUseCase records the last DoctorRequest and returns the
+// configured response/error. Default zero-value yields an empty
+// report (no issues) — init-focused tests use it as a stub.
+type fakeDoctorUseCase struct {
+	called  bool
+	lastReq driving.DoctorRequest
+	resp    driving.DoctorResponse
+	err     error
+}
+
+func (f *fakeDoctorUseCase) Check(_ context.Context, req driving.DoctorRequest) (driving.DoctorResponse, error) {
+	f.called = true
+	f.lastReq = req
+	return f.resp, f.err
+}
+
 func newApp(uc driving.InitProjectUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", uc, opts...)
+	return cli.New("0.0.0-test", uc, &fakeDoctorUseCase{}, opts...)
+}
+
+// newAppWithDoctor is newApp's variant for doctor-focused tests; the
+// caller can wire a fake DoctorUseCase explicitly.
+func newAppWithDoctor(uc driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, opts ...cli.Option) *cli.App {
+	return cli.New("0.0.0-test", uc, doctorUC, opts...)
 }
 
 func mustProjectName(t *testing.T, raw string) domain.ProjectName {
@@ -596,6 +618,8 @@ func TestExitCode_BaseMappings(t *testing.T) {
 		{"ErrBackupSuffixExhausted (fs)", driving.ErrBackupSuffixExhausted, 14},
 		{"ErrBackupSourceMissing (fs)", driving.ErrBackupSourceMissing, 14},
 		{"wrapped ErrBackupSuffixExhausted", fmt.Errorf("ctx: %w", driving.ErrBackupSuffixExhausted), 14},
+		{"ErrDoctorFailures (doctor)", cli.ErrDoctorFailures, 11},
+		{"wrapped ErrDoctorFailures", fmt.Errorf("ctx: %w", cli.ErrDoctorFailures), 11},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -603,5 +627,179 @@ func TestExitCode_BaseMappings(t *testing.T) {
 				t.Errorf("ExitCode(%v) = %d, want %d", tc.err, got, tc.want)
 			}
 		})
+	}
+}
+
+// ----------------------------------------------------------------------------
+// `u-boot doctor` subcommand
+// ----------------------------------------------------------------------------
+
+func TestExecute_Doctor_NoIssues_ExitOK(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x", nil }
+	doctorUC := &fakeDoctorUseCase{
+		resp: driving.DoctorResponse{
+			Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
+				{ID: "fs.write-permissions", Severity: domain.SeverityOK, Message: "BaseDir is writable."},
+			}},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDoctor(&fakeInitUseCase{}, doctorUC, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"doctor"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if cli.ExitCode(err) != 0 {
+		t.Errorf("ExitCode(nil-error doctor) = %d, want 0", cli.ExitCode(err))
+	}
+	if !doctorUC.called {
+		t.Errorf("DoctorUseCase.Check not invoked")
+	}
+	if !strings.Contains(stdout.String(), "BaseDir is writable") {
+		t.Errorf("stdout missing diagnostic body: %q", stdout.String())
+	}
+}
+
+func TestExecute_Doctor_ErrorReport_Exit11(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x", nil }
+	doctorUC := &fakeDoctorUseCase{
+		resp: driving.DoctorResponse{
+			Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
+				{ID: "docker.reachable", Severity: domain.SeverityError, Message: "docker daemon is not reachable.", Hint: "Start Docker."},
+				{ID: "fs.write-permissions", Severity: domain.SeverityOK, Message: "BaseDir is writable."},
+			}},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDoctor(&fakeInitUseCase{}, doctorUC, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"doctor"}, &stdout, &stderr,
+	)
+	if !errors.Is(err, cli.ErrDoctorFailures) {
+		t.Fatalf("err = %v, want wrapped ErrDoctorFailures", err)
+	}
+	if got := cli.ExitCode(err); got != 11 {
+		t.Errorf("ExitCode = %d, want 11", got)
+	}
+	out := stdout.String()
+	if !strings.Contains(out, "docker daemon is not reachable") {
+		t.Errorf("stdout missing error item: %q", out)
+	}
+	if !strings.Contains(out, "Start Docker") {
+		t.Errorf("stdout missing error hint: %q", out)
+	}
+}
+
+func TestExecute_Doctor_WarnNonStrict_Exit0(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x", nil }
+	doctorUC := &fakeDoctorUseCase{
+		resp: driving.DoctorResponse{
+			Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
+				{ID: "uboot.yaml.valid", Severity: domain.SeverityWarn, Message: "u-boot.yaml not present."},
+			}},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDoctor(&fakeInitUseCase{}, doctorUC, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"doctor"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Errorf("err = %v, want nil (warn without --strict)", err)
+	}
+	if got := cli.ExitCode(err); got != 0 {
+		t.Errorf("ExitCode = %d, want 0", got)
+	}
+}
+
+func TestExecute_Doctor_WarnStrict_Exit11(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x", nil }
+	doctorUC := &fakeDoctorUseCase{
+		resp: driving.DoctorResponse{
+			Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
+				{ID: "uboot.yaml.valid", Severity: domain.SeverityWarn, Message: "u-boot.yaml not present."},
+			}},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDoctor(&fakeInitUseCase{}, doctorUC, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"doctor", "--strict"}, &stdout, &stderr,
+	)
+	if !errors.Is(err, cli.ErrDoctorFailures) {
+		t.Fatalf("err = %v, want wrapped ErrDoctorFailures with --strict", err)
+	}
+	if got := cli.ExitCode(err); got != 11 {
+		t.Errorf("ExitCode = %d, want 11", got)
+	}
+}
+
+func TestExecute_Doctor_Quiet_HidesOKItems(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x", nil }
+	doctorUC := &fakeDoctorUseCase{
+		resp: driving.DoctorResponse{
+			Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
+				{ID: "fs.write-permissions", Severity: domain.SeverityOK, Message: "BaseDir is writable."},
+				{ID: "uboot.yaml.valid", Severity: domain.SeverityWarn, Message: "u-boot.yaml not present."},
+			}},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDoctor(&fakeInitUseCase{}, doctorUC, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"--quiet", "doctor"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	out := stdout.String()
+	if strings.Contains(out, "BaseDir is writable") {
+		t.Errorf("--quiet did not hide OK item: %q", out)
+	}
+	if !strings.Contains(out, "u-boot.yaml not present") {
+		t.Errorf("--quiet hid the warn item it should keep: %q", out)
+	}
+	// Summary still includes all counts even in --quiet mode.
+	if !strings.Contains(out, "0 error, 1 warn, 1 ok") {
+		t.Errorf("summary line missing or wrong: %q", out)
+	}
+}
+
+func TestExecute_Doctor_SortedByIssuesFirst(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x", nil }
+	doctorUC := &fakeDoctorUseCase{
+		resp: driving.DoctorResponse{
+			Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
+				{ID: "a.ok", Severity: domain.SeverityOK, Message: "ok-msg"},
+				{ID: "b.error", Severity: domain.SeverityError, Message: "err-msg"},
+				{ID: "c.warn", Severity: domain.SeverityWarn, Message: "warn-msg"},
+			}},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDoctor(&fakeInitUseCase{}, doctorUC, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"doctor"}, &stdout, &stderr,
+	)
+	if !errors.Is(err, cli.ErrDoctorFailures) {
+		t.Fatalf("err = %v, want ErrDoctorFailures (the report has an error)", err)
+	}
+	out := stdout.String()
+	// Error (b.error) must come before warn (c.warn) must come before ok (a.ok).
+	bErr := strings.Index(out, "err-msg")
+	cWarn := strings.Index(out, "warn-msg")
+	aOK := strings.Index(out, "ok-msg")
+	if bErr >= cWarn || cWarn >= aOK {
+		t.Errorf("rendered order wrong (err=%d warn=%d ok=%d):\n%s", bErr, cWarn, aOK, out)
+	}
+}
+
+func TestExecute_Doctor_TooManyArgs_Exit2(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x", nil }
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDoctor(&fakeInitUseCase{}, &fakeDoctorUseCase{}, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"doctor", "extra-arg"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatal("expected usage error for doctor with positional arg")
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode = %d, want 2", got)
 	}
 }
