@@ -1,7 +1,7 @@
 # Slice M4: Soft-Existing-Detection für `u-boot init`
 
 > **Status:** Done
-> **DoD:** Commit `<TBD>` (wird im Folge-Fixup konkretisiert)
+> **DoD:** Commit `5415d9f`
 
 ## Auslöser
 
