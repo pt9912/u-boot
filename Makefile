@@ -30,7 +30,7 @@ DOCKER_BUILD := docker build \
 .DEFAULT_GOAL := help
 
 .PHONY: help deps compile lint test coverage coverage-gate build run clean \
-        gates ci fullbuild govulncheck
+        gates ci fullbuild govulncheck verify-depguard
 
 help: ## Show this help.
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ { printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
@@ -75,6 +75,14 @@ govulncheck: ## Run govulncheck against the project (LH-FA-BUILD-006).
 	    -e GOFLAGS=-buildvcs=false \
 	    golang:$(GO_VERSION) \
 	    sh -c "go install golang.org/x/vuln/cmd/govulncheck@latest && govulncheck ./..."
+
+# verify-depguard proves each of the eight LH-FA-ARCH-003 layer rules
+# fires on a real forbidden import. Manual / on-demand: not part of
+# `gates` because each iteration runs `make lint`, so a full pass takes
+# several minutes. Re-run whenever the hexagonal layer set or the
+# depguard config changes.
+verify-depguard: ## Verify all eight depguard layer rules fire (LH-FA-ARCH-003).
+	bash scripts/verify-depguard.sh
 
 # ---- aggregators -----------------------------------------------------------
 

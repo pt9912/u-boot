@@ -12,7 +12,7 @@ ADR-0001 (Implementierungssprache Go) hat als offenen Folgepunkt:
 > wahrscheinlich nötig)."*
 
 In der M3-Slice-Planung wurde Cobra per User-Entscheidung implizit
-festgelegt (siehe [`slice-m3-init-flow.md`](../in-progress/slice-m3-init-flow.md)
+festgelegt (siehe [`slice-m3-init-flow.md`](slice-m3-init-flow.md)
 „Tech-Stack-Entscheidungen für die Tranchen"), aber ohne eigenen
 ADR. Damit ist die Wahl im Repo nirgends formal dokumentiert —
 LH-FA-PROJDOCS-005 / -002 verlangt einen Slice-Plan plus ADR.

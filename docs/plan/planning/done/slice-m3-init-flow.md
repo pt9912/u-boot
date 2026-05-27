@@ -1,7 +1,7 @@
 # Slice M3: `u-boot init`-Flow
 
-> **Status:** In progress
-> **DoD:** T1 ✅ `132d1a1` + `f5c784a` / T2 ✅ `aaf4d8d` + `39387b9` / T3 ✅ `937adb1` + `2b6582c` / T4a ✅ `5296671` + `ecb8379` / T4b ✅ `077c3e5` + `4d07542` / T4c ✅ `2925471` + Review-Fix-Commit folgt / T5 offen
+> **Status:** Done
+> **DoD:** T1 ✅ `132d1a1` + `f5c784a` / T2 ✅ `aaf4d8d` + `39387b9` / T3 ✅ `937adb1` + `2b6582c` / T4a ✅ `5296671` + `ecb8379` / T4b ✅ `077c3e5` + `4d07542` / T4c ✅ `2925471` + `4b15181` / T5 ✅ M3-T5-Commit (siehe `git log --grep=m3-t5`)
 
 ## Auslöser
 
@@ -150,14 +150,17 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
      leerer Backup-Fall, init-only-Geltung von --assume-existing).
      ExitCode-Tabellentest um ErrConflictingModeFlags erweitert.
 
-5. **T5 — Cleanup: Carveout-Auflösung.**
-   depguard-Verifikation pro Schicht (siehe
-   [`slice-m3-depguard-aktivierung-verifizieren.md`](slice-m3-depguard-aktivierung-verifizieren.md)),
-   `carveouts.md` aktualisieren, Roadmap M3 = Done.
+5. **T5 — Cleanup: Carveout-Auflösung.** ✅ Done
+   `scripts/verify-depguard.sh` automatisiert die Negativ-Verifikation
+   aller 8 depguard-Regelblöcke (siehe
+   [`slice-m3-depguard-aktivierung-verifizieren.md`](slice-m3-depguard-aktivierung-verifizieren.md));
+   `make verify-depguard` als manueller / on-demand Aufruf in der
+   Makefile-Help. depguard-Eintrag aus `carveouts.md` entfernt,
+   Roadmap M3 auf Done gesetzt.
 
    *Vorgezogen erledigt:* Coverage-Schwellwert ist nach M3-T1
    direkt auf 90 % gehoben (siehe
-   [`../done/slice-m3-coverage-threshold-aktivieren.md`](../done/slice-m3-coverage-threshold-aktivieren.md));
+   [`slice-m3-coverage-threshold-aktivieren.md`](slice-m3-coverage-threshold-aktivieren.md));
    bleibt aus dem Carveout-Inventar entfernt.
 
 ## Akzeptanzkriterien (Slice-Level)
@@ -199,6 +202,6 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
   `LH-FA-CLI-005A`, `LH-FA-CLI-006`.
 - Hängt von: M2d (Carveout-Disziplin etabliert).
 - Löst auf: zwei M3-Carveouts in
-  [`carveouts.md`](carveouts.md).
+  [`carveouts.md`](../in-progress/carveouts.md).
 - Wird ggf. auslösen: `slice-v1-gomodguard-rules.md` (sobald Cobra
   und yaml.v3 in `go.mod` landen).

@@ -13,7 +13,7 @@ in `in-progress/`.
 | M2b SOLID-Lint | Done | SOLID-nahes Lint-Profil (`LH-QA-004` auf MVP gehoben), 5 Default-Linter + 24 SOLID-nahe Linter (inkl. `depguard`), `docs/user/quality.md`, ADR-0003 | Commit `365e532` + Review-Fixes |
 | M2c CI | Done | GitHub-Actions-CI (`LH-QA-003` auf konkret gehoben), `.github/workflows/ci.yml` mit Jobs `gates` + `security-gates` (beide PR-blockierend), SHA-pinned Actions, Docker-only, ADR-0004 | Commit `9a74e35` |
 | M2d Carveouts | Done | Carveout-Disziplin (`LH-FA-PROJDOCS-005` MVP-Pflicht), Master-Inventar [`carveouts.md`](carveouts.md), 7 neue Slice-Pläne in [`open/`](../open/) für offene Carveouts; permanente Carveouts dokumentiert | dieser Commit |
-| M3 `u-boot init` | In progress | Projektstruktur erzeugen (`LH-FA-INIT-001..007`), `u-boot.yaml` schreiben, Git-Init, Re-Init mit `--force`/`--backup` (LH-FA-INIT-005) + Modi-Flags (LH-FA-CLI-005A). Coverage-Carveout aufgelöst; depguard-Verifikation steht in T5 noch aus. Detail: [`slice-m3-init-flow.md`](slice-m3-init-flow.md). **Stand:** T1 ✅ `132d1a1` + `f5c784a`; T2 ✅ `aaf4d8d` + `39387b9`; T3 ✅ `937adb1` + `2b6582c`; T4a ✅ `5296671` + `ecb8379` (Backup-Mechanik + 10-Findings-Review-Fix); T4b ✅ `077c3e5` + `4d07542` (Managed-Block-Parser + Force/Backup-Flow + 10-Findings-Review-Fix); T4c ✅ `2925471` + `4b15181` (Modi-Flags + ProgressPort-Refactor + 13-Findings-Review-Fix); T5 offen |
+| M3 `u-boot init` | Done | Projektstruktur erzeugen (`LH-FA-INIT-001..007`), `u-boot.yaml` schreiben, Git-Init, Re-Init mit `--force`/`--backup` (LH-FA-INIT-005) + Modi-Flags (LH-FA-CLI-005A). Coverage- und depguard-Carveouts aufgelöst. Detail: [`slice-m3-init-flow.md`](../done/slice-m3-init-flow.md). **Stand:** T1..T4c ✅ (Commits siehe Slice-DoD); T5 ✅ `scripts/verify-depguard.sh` + `make verify-depguard`, depguard-Carveout aufgelöst |
 | M4 `u-boot doctor` | Open | Lokale Voraussetzungen prüfen (`LH-FA-DIAG-001..004`), JSON-Output (`LH-NFA-USE-004`) | offen |
 | M5 `u-boot add postgres` | Open | PostgreSQL-Add-on (`LH-FA-ADD-001..005`), Compose-Block, `.env.example`-Block, Healthcheck | offen |
 | M6 `u-boot up` / `down` | Open | Compose-Wrapper (`LH-FA-UP-001..004`), Healthcheck-Polling, `--timeout`, `--volumes` | offen |
@@ -34,8 +34,8 @@ Disziplin-Verstoß.
 
 | Slice | Auslöser | Phase | Status |
 | ----- | -------- | ----- | ------ |
-| [`slice-m3-init-flow`](slice-m3-init-flow.md) | `LH-FA-INIT-*` initialer Flow + zwei M3-Carveouts (Coverage ✅, depguard offen) | M3 | In progress (T1..T4c ✅; T5 offen) |
-| [`slice-m3-depguard-aktivierung-verifizieren`](slice-m3-depguard-aktivierung-verifizieren.md) | `LH-FA-ARCH-003` depguard-Regeln matchen bisher nichts | M3-T5 | In progress |
+| [`slice-m3-init-flow`](../done/slice-m3-init-flow.md) | `LH-FA-INIT-*` initialer Flow + zwei M3-Carveouts (Coverage ✅, depguard ✅) | M3 | Done |
+| [`slice-m3-depguard-aktivierung-verifizieren`](../done/slice-m3-depguard-aktivierung-verifizieren.md) | `LH-FA-ARCH-003` depguard-Regeln matchen bisher nichts | M3-T5 | Done |
 | [`slice-m3-gomodguard-rules`](../open/slice-m3-gomodguard-rules.md) | `gomodguard_v2.blocked: {}` leer; yaml.v3 schon drin, Cobra kommt mit T3 | M3-T5 | Open |
 | [`slice-m3-branch-protection-checkliste`](../open/slice-m3-branch-protection-checkliste.md) | ADR-0004 Folgepunkt Branch-Protection nicht versioniert; soll vor erstem externen PR existieren | M3 | Open |
 | [`slice-m3-retroaktive-slice-plaene`](../open/slice-m3-retroaktive-slice-plaene.md) | Bootstrap-Slices (M1/M2/M2b/M2c/M2d) liegen nicht in `done/` | M3-T5 | Open |
@@ -52,8 +52,8 @@ Disziplin-Verstoß.
 
 ## Nächste Schritte
 
-1. **M3-T5** als Closure: depguard-Pro-Schicht-Verifikation, `carveouts.md` und `roadmap.md` auf Done-Stand bringen, `slice-m3-init-flow` nach `done/` verschieben.
-2. **M4** vorbereiten: `u-boot doctor` (`LH-FA-DIAG-*`) plus `slice-m4-soft-existing-detection` (aktiviert das in M3-T4c bereits durchgereichte `--assume-existing`) plus `slice-m4-logging-port` (löst `forbidigo.msg`-Carveout auf, deckt strukturiertes Logging für Doctor).
+1. **Bootstrap-Polish-Slice** (klein, eigener Commit): `GOVULNCHECK_VERSION`-Pin statt `@latest` (Reproduzierbarkeit, ADR-0004-Folgepunkt) und `PROGRESS_FLAG := --progress=plain` für `CI=1` (übernommen aus `c-hsm-doc`-Makefile). Beides reine Build-Infra, kein neuer Carveout.
+2. **M4 `u-boot doctor`** schneiden: `LH-FA-DIAG-*` plus die bereits offenen Slices [`slice-m4-soft-existing-detection`](../open/slice-m4-soft-existing-detection.md) (aktiviert das in M3-T4c durchgereichte `--assume-existing`) und [`slice-m4-logging-port`](../open/slice-m4-logging-port.md) (löst `forbidigo.msg`-Carveout, deckt strukturiertes Logging).
 
 ## Lifecycle-Hinweis
 

@@ -246,7 +246,7 @@ linters:
               desc: driven adapter must not depend on driving adapter (LH-FA-ARCH-003)
 ```
 
-Mit M3 (T1..T4c) ist produktiver Code in allen sieben Schichten gelandet — jede `depguard`-Regel matcht jetzt mindestens ein Paket. Die formale Pro-Schicht-Verifikation steht in [`slice-m3-depguard-aktivierung-verifizieren`](../docs/plan/planning/in-progress/slice-m3-depguard-aktivierung-verifizieren.md) (M3-T5) als Closure aus.
+Mit M3 (T1..T4c) ist produktiver Code in allen sieben Schichten gelandet — jede `depguard`-Regel matcht jetzt mindestens ein Paket. Die Pro-Schicht-Verifikation ist mit M3-T5 abgeschlossen: `scripts/verify-depguard.sh` (Target `make verify-depguard`) injiziert pro Regel einen deklariert verbotenen Import, prüft `make lint` auf das erwartete `desc:` und revertiert. Slice-Plan: [`slice-m3-depguard-aktivierung-verifizieren`](../docs/plan/planning/done/slice-m3-depguard-aktivierung-verifizieren.md).
 
 `//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `desc` dokumentiert (`LH-FA-ARCH-003`).
 

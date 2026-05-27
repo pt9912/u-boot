@@ -15,7 +15,7 @@ recurring artefacts (README, CHANGELOG, `.env.example`).
 ## Status
 
 **MVP in progress — `u-boot init` is fully wired, including re-init.**
-The first functional subcommand is shipped end-to-end (M3-T4c):
+The first functional subcommand is shipped end-to-end (M3 ✅):
 `u-boot init [name]` creates the LH-FA-INIT-003 project structure plus
 `u-boot.yaml` (LH-FA-CONF-002) and runs `git init` by default
 (LH-FA-INIT-007); re-running on an existing project supports the
@@ -31,8 +31,8 @@ Subsequent MVP subcommands (`add`, `up`, `down`, `doctor`, `generate`,
 | ----- | ------ | ------ |
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
 | Architecture decisions | 5 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
-| Implementation | M1–M2d ✅, M3 in progress (T1..T4c ✅, T5 open) | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
-| Carveouts | 15 temporär (14 mit Slice-Plan, 1 Slice deckt 2), 7 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
+| Implementation | M1–M3 ✅, M4 next | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
+| Carveouts | 14 temporär (13 mit Slice-Plan, 1 Slice deckt 2), 7 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
 

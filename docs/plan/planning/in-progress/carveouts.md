@@ -20,7 +20,6 @@ Spalten:
 | Carveout | Status | Plan / Begründung |
 | -------- | ------ | ----------------- |
 | `gomodguard_v2.blocked: {}` leer (`.golangci.yml`) | temporär | [`open/slice-m3-gomodguard-rules.md`](../open/slice-m3-gomodguard-rules.md) |
-| `depguard`-Regeln aktiv, matchen nichts (alle 8 Schicht-Blöcke in `.golangci.yml`; `spec/architecture.md` §4) | temporär | [`slice-m3-depguard-aktivierung-verifizieren.md`](slice-m3-depguard-aktivierung-verifizieren.md) (in `in-progress/`, Teil von M3) |
 | `forbidigo.msg` referenziert nicht-existenten "configured logging port" (`.golangci.yml`) | temporär | [`open/slice-m4-logging-port.md`](../open/slice-m4-logging-port.md) |
 | ADR-0004 Folgepunkt: Image-Publish nach GHCR und Trivy-Image-Scan fehlen (`.github/workflows/ci.yml` enthält sie nicht) | temporär | [`open/slice-v1-release-pipeline.md`](../open/slice-v1-release-pipeline.md) |
 | ADR-0004 Folgepunkt: Branch-Protection im GitHub-UI ist nicht im Repo versioniert | temporär | [`open/slice-m3-branch-protection-checkliste.md`](../open/slice-m3-branch-protection-checkliste.md) |
