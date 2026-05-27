@@ -129,10 +129,15 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 //   - 10 — fachlicher Validierungsfehler: LH-FA-INIT-004 marker
 //          collisions (ErrProjectExists), non-marker file collision
 //          (ErrFileExists), LH-FA-INIT-006 invalid project name
-//          (ErrInvalidProjectName), LH-AK-001 missing BaseDir
+//          (ErrInvalidProjectName) or service name
+//          (ErrInvalidServiceName), LH-AK-001 missing BaseDir
 //          (ErrBaseDirMissing), LH-FA-INIT-005 unsupported
 //          backup-source kind (ErrBackupUnsupportedKind), LH-FA-INIT-005
-//          §619 force-without-backup (ErrForceRequiresBackup)
+//          §619 force-without-backup (ErrForceRequiresBackup),
+//          LH-FA-ADD-001 missing u-boot.yaml
+//          (ErrProjectNotInitialized), LH-FA-ADD-002 unknown
+//          service (ErrServiceUnsupported), LH-FA-ADD-005
+//          inconsistent service state (ErrServiceInconsistent)
 //   - 11 — `u-boot doctor` reported at least one SeverityError, or
 //          at least one SeverityWarn with `--strict`
 //          (ErrDoctorFailures, LH-FA-DIAG-003).
@@ -179,7 +184,11 @@ func isValidationError(err error) bool {
 		errors.Is(err, driving.ErrBaseDirMissing) ||
 		errors.Is(err, driving.ErrBackupUnsupportedKind) ||
 		errors.Is(err, driving.ErrForceRequiresBackup) ||
-		errors.Is(err, domain.ErrInvalidProjectName)
+		errors.Is(err, driving.ErrProjectNotInitialized) ||
+		errors.Is(err, driving.ErrServiceUnsupported) ||
+		errors.Is(err, driving.ErrServiceInconsistent) ||
+		errors.Is(err, domain.ErrInvalidProjectName) ||
+		errors.Is(err, domain.ErrInvalidServiceName)
 }
 
 // isFilesystemError returns true for the LH-FA-CLI-006 code-14

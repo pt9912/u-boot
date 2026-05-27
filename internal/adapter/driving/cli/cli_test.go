@@ -620,6 +620,11 @@ func TestExitCode_BaseMappings(t *testing.T) {
 		{"wrapped ErrBackupSuffixExhausted", fmt.Errorf("ctx: %w", driving.ErrBackupSuffixExhausted), 14},
 		{"ErrDoctorFailures (doctor)", cli.ErrDoctorFailures, 11},
 		{"wrapped ErrDoctorFailures", fmt.Errorf("ctx: %w", cli.ErrDoctorFailures), 11},
+		{"ErrProjectNotInitialized (add)", driving.ErrProjectNotInitialized, 10},
+		{"ErrServiceUnsupported (add)", driving.ErrServiceUnsupported, 10},
+		{"ErrServiceInconsistent (add)", driving.ErrServiceInconsistent, 10},
+		{"ErrInvalidServiceName (add)", domain.ErrInvalidServiceName, 10},
+		{"wrapped ErrServiceUnsupported", fmt.Errorf("ctx: %w", driving.ErrServiceUnsupported), 10},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
