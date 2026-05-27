@@ -60,10 +60,11 @@ func TestDoctor_WritePermissions_OKOnWritableDir(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Check: %v", err)
 	}
-	// 7 checks total after T5: write-permissions, git, docker,
-	// docker-reachable, compose-installed, uboot.yaml, compose.yaml.
-	if got := len(resp.Report.Items); got != 7 {
-		t.Fatalf("Report.Items = %d, want 7", got)
+	// 9 checks total after T6: write-permissions, git, docker,
+	// docker-reachable, compose-installed, uboot.yaml, compose.yaml,
+	// devcontainer.json, devcontainer.dockerfile.
+	if got := len(resp.Report.Items); got != 9 {
+		t.Fatalf("Report.Items = %d, want 9", got)
 	}
 	d := findDiagnostic(t, resp.Report.Items, "fs.write-permissions")
 	if d.Severity != domain.SeverityOK {
@@ -603,6 +604,217 @@ func TestDoctor_ComposeYaml_ErrorOnEmptyServices(t *testing.T) {
 	d := findDiagnostic(t, resp.Report.Items, "compose.yaml.valid")
 	if d.Severity != domain.SeverityError {
 		t.Errorf("Severity = %v, want Error on empty services mapping", d.Severity)
+	}
+}
+
+// ----------------------------------------------------------------------------
+// T6 — devcontainer validation
+// ----------------------------------------------------------------------------
+
+func seedDevcontainerJSON(t *testing.T, fs *fakeFS, baseDir, body string) {
+	t.Helper()
+	if err := fs.WriteFile(baseDir+"/.devcontainer/devcontainer.json", []byte(body), 0o644); err != nil {
+		t.Fatalf("seedDevcontainerJSON: %v", err)
+	}
+}
+
+func seedDevcontainerDockerfile(t *testing.T, fs *fakeFS, baseDir, body string) {
+	t.Helper()
+	if err := fs.WriteFile(baseDir+"/.devcontainer/Dockerfile", []byte(body), 0o644); err != nil {
+		t.Fatalf("seedDevcontainerDockerfile: %v", err)
+	}
+}
+
+func TestDoctor_DevcontainerJSON_OKWhenAbsent(t *testing.T) {
+	t.Parallel()
+	svc, _, _, _, _ := newDoctorService(t)
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.json.valid")
+	if d.Severity != domain.SeverityOK {
+		t.Errorf("Severity = %v, want OK (optional, not present)", d.Severity)
+	}
+}
+
+func TestDoctor_DevcontainerJSON_OKOnValidFile(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	seedDevcontainerJSON(t, fs, doctorBaseDir,
+		`{"name":"my-project","image":"ubuntu:22.04"}`)
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.json.valid")
+	if d.Severity != domain.SeverityOK {
+		t.Errorf("Severity = %v, want OK", d.Severity)
+	}
+	if !strings.Contains(d.Message, "my-project") {
+		t.Errorf("Message does not surface name: %q", d.Message)
+	}
+}
+
+func TestDoctor_DevcontainerJSON_OKOnJSONCWithComments(t *testing.T) {
+	t.Parallel()
+	// Verifies the stripJSONC integration: line + block comments +
+	// trailing commas in a realistic file shape.
+	svc, fs, _, _, _ := newDoctorService(t)
+	seedDevcontainerJSON(t, fs, doctorBaseDir, `{
+  // The container
+  "name": "demo",
+  /* base image */
+  "image": "ubuntu:22.04",
+  "forwardPorts": [3000, 8080,],
+}`)
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.json.valid")
+	if d.Severity != domain.SeverityOK {
+		t.Errorf("Severity = %v, want OK on JSONC with comments", d.Severity)
+	}
+}
+
+func TestDoctor_DevcontainerJSON_WarnOnInvalidJSON(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	seedDevcontainerJSON(t, fs, doctorBaseDir, `{"name": "demo", "image": [unclosed`)
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.json.valid")
+	if d.Severity != domain.SeverityWarn {
+		t.Errorf("Severity = %v, want Warn (u-boot.yaml has no devcontainer.enabled schema yet)", d.Severity)
+	}
+	if !strings.Contains(d.Message, "not valid JSON") {
+		t.Errorf("Message does not name JSON-syntax problem: %q", d.Message)
+	}
+}
+
+func TestDoctor_DevcontainerJSON_WarnOnMissingName(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	seedDevcontainerJSON(t, fs, doctorBaseDir, `{"image":"ubuntu:22.04"}`)
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.json.valid")
+	if d.Severity != domain.SeverityWarn {
+		t.Errorf("Severity = %v, want Warn", d.Severity)
+	}
+	if !strings.Contains(d.Message, "missing required `name`") {
+		t.Errorf("Message does not name the missing field: %q", d.Message)
+	}
+}
+
+func TestDoctor_DevcontainerJSON_WarnOnMissingImageAndBuild(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	// Name set but neither image nor build → fails VS Code Dev
+	// Container minimum compatibility.
+	seedDevcontainerJSON(t, fs, doctorBaseDir, `{"name":"demo"}`)
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.json.valid")
+	if d.Severity != domain.SeverityWarn {
+		t.Errorf("Severity = %v, want Warn", d.Severity)
+	}
+	if !strings.Contains(d.Message, "`image` or `build`") {
+		t.Errorf("Message does not name image/build requirement: %q", d.Message)
+	}
+}
+
+func TestDoctor_DevcontainerJSON_OKWithBuildAsObject(t *testing.T) {
+	t.Parallel()
+	// `build` can be an object (dockerfile-context tuple) instead of
+	// a string — both satisfy the minimum-compat check.
+	svc, fs, _, _, _ := newDoctorService(t)
+	seedDevcontainerJSON(t, fs, doctorBaseDir,
+		`{"name":"demo","build":{"dockerfile":"Dockerfile","context":"."}}`)
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.json.valid")
+	if d.Severity != domain.SeverityOK {
+		t.Errorf("Severity = %v, want OK with build-as-object", d.Severity)
+	}
+}
+
+func TestDoctor_DevcontainerDockerfile_OKWhenAbsent(t *testing.T) {
+	t.Parallel()
+	svc, _, _, _, _ := newDoctorService(t)
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.dockerfile.valid")
+	if d.Severity != domain.SeverityOK {
+		t.Errorf("Severity = %v, want OK (optional, not present)", d.Severity)
+	}
+}
+
+func TestDoctor_DevcontainerDockerfile_OKWithFromDirective(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	seedDevcontainerDockerfile(t, fs, doctorBaseDir,
+		"# Comment\n\nFROM ubuntu:22.04\nRUN apt-get update\n")
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.dockerfile.valid")
+	if d.Severity != domain.SeverityOK {
+		t.Errorf("Severity = %v, want OK", d.Severity)
+	}
+}
+
+func TestDoctor_DevcontainerDockerfile_WarnWithoutFrom(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	// Dockerfile with only comments — no FROM directive.
+	seedDevcontainerDockerfile(t, fs, doctorBaseDir, "# just a comment\n\n")
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.dockerfile.valid")
+	if d.Severity != domain.SeverityWarn {
+		t.Errorf("Severity = %v, want Warn", d.Severity)
+	}
+	if !strings.Contains(d.Message, "no `FROM` directive") {
+		t.Errorf("Message does not name the missing directive: %q", d.Message)
+	}
+}
+
+func TestDoctor_DevcontainerDockerfile_LowercaseFromAccepted(t *testing.T) {
+	t.Parallel()
+	// Docker's parser is case-insensitive; the doctor should be too.
+	svc, fs, _, _, _ := newDoctorService(t)
+	seedDevcontainerDockerfile(t, fs, doctorBaseDir, "from ubuntu:22.04\n")
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.dockerfile.valid")
+	if d.Severity != domain.SeverityOK {
+		t.Errorf("Severity = %v, want OK with lowercase `from`", d.Severity)
 	}
 }
 

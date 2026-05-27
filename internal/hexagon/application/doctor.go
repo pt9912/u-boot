@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	iofs "io/fs"
@@ -58,6 +59,8 @@ const (
 	checkIDComposeInstalled = "docker.compose.installed"
 	checkIDUbootYaml        = "uboot.yaml.valid"
 	checkIDComposeYaml      = "compose.yaml.valid"
+	checkIDDevcontainerJSON = "devcontainer.json.valid"
+	checkIDDevcontainerDockerfile = "devcontainer.dockerfile.valid"
 )
 
 // Minimum versions per LH-FA-DIAG-002. The thresholds are MAJOR.MINOR
@@ -95,6 +98,8 @@ func (s *DoctorService) Check(ctx context.Context, req driving.DoctorRequest) (d
 		s.checkComposeInstalled(ctx),
 		s.checkUbootYaml(ctx, req.BaseDir),
 		s.checkComposeYaml(ctx, req.BaseDir),
+		s.checkDevcontainerJSON(ctx, req.BaseDir),
+		s.checkDevcontainerDockerfile(ctx, req.BaseDir),
 	}
 	report := domain.DiagnosticReport{Items: items}
 	s.logger.Info("doctor: checks complete",
@@ -492,4 +497,186 @@ func (s *DoctorService) checkComposeYaml(_ context.Context, baseDir string) doma
 		Severity: domain.SeverityOK,
 		Message:  fmt.Sprintf("compose.yaml is valid (%d service(s)).", len(shape.Services)),
 	}
+}
+
+// devcontainerJSONShape captures the LH-FA-DIAG-002 minimum-compat
+// fields for `.devcontainer/devcontainer.json` per the VS Code Dev
+// Containers spec: `name` (required) plus at least one of `image`
+// or `build`. Build can be a string (build-context path) or an
+// object (`{dockerfile, context}`) — we accept either via `any`.
+//
+// Other devcontainer.json fields (`forwardPorts`, `customizations`,
+// `features`, ...) are not checked by this minimal validator;
+// `forwardPorts`-consistency vs. `u-boot.yaml.services` is deferred
+// until the M5 services-schema lands.
+type devcontainerJSONShape struct {
+	Name  string `json:"name"`
+	Image string `json:"image"`
+	Build any    `json:"build"`
+}
+
+// devcontainerSeverity returns the severity for the devcontainer
+// checks per LH-FA-DIAG-002:
+//
+//   - u-boot.yaml present + `devcontainer.enabled == true` → Error.
+//   - u-boot.yaml present + `devcontainer.enabled == false` → Warn.
+//   - u-boot.yaml absent → Warn (quality hints).
+//
+// The `devcontainer` block does not yet exist in `ubootYAMLConfig`
+// (lands with M5+). Today every devcontainer check defaults to Warn;
+// once the schema field is present, this function gains a branch
+// that returns Error when enabled — at which point it needs read-
+// access to the FileSystem port to load u-boot.yaml.
+//
+// Free function (no receiver) until the read-access is wired up.
+// The signature stays methodless to avoid the revive unused-receiver
+// finding; switching to a method on `*DoctorService` is a trivial
+// re-binding step when M5+ lands the schema field.
+func devcontainerSeverity() domain.Severity {
+	return domain.SeverityWarn
+}
+
+// checkDevcontainerJSON validates `.devcontainer/devcontainer.json`
+// when present. JSONC features (line comments, block comments,
+// trailing commas) are stripped via [stripJSONC] before
+// [encoding/json] parses the result.
+//
+//   - file absent          → OK ("optional, not present").
+//   - I/O error            → severityPolicy() (Warn).
+//   - invalid JSON syntax  → severityPolicy().
+//   - missing `name`       → severityPolicy().
+//   - missing `image` and `build` → severityPolicy().
+//   - all checks pass      → OK with the devcontainer name in the
+//                            message.
+//
+// The severity comes from [devcontainerSeverity], which encodes the
+// LH-FA-DIAG-002-mode-dependence on u-boot.yaml's
+// `devcontainer.enabled`.
+func (s *DoctorService) checkDevcontainerJSON(_ context.Context, baseDir string) domain.Diagnostic {
+	path := filepath.Join(baseDir, ".devcontainer", "devcontainer.json")
+	exists, err := s.fs.Exists(path)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerJSON,
+			Severity: devcontainerSeverity(),
+			Message:  "Cannot probe devcontainer.json: " + err.Error() + ".",
+			Hint:     "Check filesystem permissions on " + path + ".",
+		}
+	}
+	if !exists {
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerJSON,
+			Severity: domain.SeverityOK,
+			Message:  "devcontainer.json not present (optional).",
+		}
+	}
+	body, err := s.fs.ReadFile(path)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerJSON,
+			Severity: devcontainerSeverity(),
+			Message:  "Cannot read devcontainer.json: " + err.Error() + ".",
+			Hint:     "Check filesystem permissions on " + path + ".",
+		}
+	}
+	stripped := stripJSONC(body)
+	var cfg devcontainerJSONShape
+	if err := json.Unmarshal(stripped, &cfg); err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerJSON,
+			Severity: devcontainerSeverity(),
+			Message:  "devcontainer.json is not valid JSON(C): " + err.Error() + ".",
+			Hint:     "Fix JSON syntax (unbalanced braces, missing commas/quotes).",
+		}
+	}
+	if cfg.Name == "" {
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerJSON,
+			Severity: devcontainerSeverity(),
+			Message:  "devcontainer.json is missing required `name`.",
+			Hint:     "Set `name` per VS Code Dev Containers minimum compatibility.",
+		}
+	}
+	if cfg.Image == "" && cfg.Build == nil {
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerJSON,
+			Severity: devcontainerSeverity(),
+			Message:  "devcontainer.json must set either `image` or `build`.",
+			Hint:     "Add `image: <ref>` or `build: { dockerfile: ... }`.",
+		}
+	}
+	return domain.Diagnostic{
+		ID:       checkIDDevcontainerJSON,
+		Severity: domain.SeverityOK,
+		Message:  fmt.Sprintf("devcontainer.json is valid (name %q).", cfg.Name),
+	}
+}
+
+// checkDevcontainerDockerfile validates `.devcontainer/Dockerfile`
+// when present (LH-FA-DIAG-002: "Lesbarkeit und erkennbare Build-
+// Basisstruktur (`FROM` vorhanden)"). The "FROM"-line probe is
+// case-insensitive and ignores blank lines / `#`-comments before
+// the first directive.
+//
+//   - file absent          → OK ("optional, not present").
+//   - I/O error            → severityPolicy().
+//   - no `FROM` directive  → severityPolicy().
+//   - has `FROM`           → OK.
+func (s *DoctorService) checkDevcontainerDockerfile(_ context.Context, baseDir string) domain.Diagnostic {
+	path := filepath.Join(baseDir, ".devcontainer", "Dockerfile")
+	exists, err := s.fs.Exists(path)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerDockerfile,
+			Severity: devcontainerSeverity(),
+			Message:  "Cannot probe devcontainer Dockerfile: " + err.Error() + ".",
+			Hint:     "Check filesystem permissions on " + path + ".",
+		}
+	}
+	if !exists {
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerDockerfile,
+			Severity: domain.SeverityOK,
+			Message:  ".devcontainer/Dockerfile not present (optional).",
+		}
+	}
+	body, err := s.fs.ReadFile(path)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerDockerfile,
+			Severity: devcontainerSeverity(),
+			Message:  "Cannot read devcontainer Dockerfile: " + err.Error() + ".",
+			Hint:     "Check filesystem permissions on " + path + ".",
+		}
+	}
+	if !hasFromDirective(body) {
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerDockerfile,
+			Severity: devcontainerSeverity(),
+			Message:  ".devcontainer/Dockerfile has no `FROM` directive.",
+			Hint:     "Start the Dockerfile with `FROM <base-image>:<tag>`.",
+		}
+	}
+	return domain.Diagnostic{
+		ID:       checkIDDevcontainerDockerfile,
+		Severity: domain.SeverityOK,
+		Message:  ".devcontainer/Dockerfile has a FROM directive.",
+	}
+}
+
+// hasFromDirective reports whether body contains a Dockerfile-style
+// `FROM ...` directive on its own line, ignoring blank lines and
+// `#`-prefixed comments. Case-insensitive (`FROM`, `from`, `From`
+// all match Docker's parser).
+func hasFromDirective(body []byte) bool {
+	for _, raw := range strings.Split(string(body), "\n") {
+		line := strings.TrimSpace(raw)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		if len(line) >= 5 && strings.EqualFold(line[:5], "FROM ") {
+			return true
+		}
+	}
+	return false
 }
