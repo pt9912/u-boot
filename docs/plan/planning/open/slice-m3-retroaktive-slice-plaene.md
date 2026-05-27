@@ -45,6 +45,10 @@ verlinkt jeweils auf den Slice-Plan statt nur auf den Commit-Hash.
 - Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
   Slice-Pläne fehlen.
 - Hängt von: nichts; kann jederzeit abgearbeitet werden.
-- Phase: M3-T5 (Carveout-Cleanup) — natürlicher Zeitpunkt, weil dann
-  alle Bootstrap-Slices (M1–M2d) stabil sind und mit M3 ein „done"
-  als Set entsteht. Bei externem Contributor noch früher.
+- Phase: **Later / eigene Sitzung** (re-phasiert 2026-05-27). Ursprünglich
+  als M3-T5-Cleanup geplant, dort aber bewusst aus dem Scope gehalten
+  (User-Wahl „M3-T5 erst, dann Polish"). Nicht akut, weil rein
+  dokumentarische Disziplin; Risiko ist Memory-Drift je länger es
+  wartet. Vorgehen: Batch-Schreibarbeit für 5 retro-Slice-Pläne, gut
+  in einer einzelnen Sitzung delegierbar (z. B. an Subagent).
+  Vorzuziehen sobald externer Contributor erscheint.

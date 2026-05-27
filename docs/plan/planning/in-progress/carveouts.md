@@ -21,7 +21,7 @@ Spalten:
 | -------- | ------ | ----------------- |
 | `forbidigo.msg` referenziert nicht-existenten "configured logging port" (`.golangci.yml`) | temporär | [`open/slice-m4-logging-port.md`](../open/slice-m4-logging-port.md) |
 | ADR-0004 Folgepunkt: Image-Publish nach GHCR und Trivy-Image-Scan fehlen (`.github/workflows/ci.yml` enthält sie nicht) | temporär | [`open/slice-v1-release-pipeline.md`](../open/slice-v1-release-pipeline.md) |
-| ADR-0004 Folgepunkt: Branch-Protection im GitHub-UI ist nicht im Repo versioniert | temporär | [`open/slice-m3-branch-protection-checkliste.md`](../open/slice-m3-branch-protection-checkliste.md) |
+| ADR-0004 Folgepunkt: Branch-Protection im GitHub-UI ist nicht im Repo versioniert | temporär | [`open/slice-v1-release-pipeline.md`](../open/slice-v1-release-pipeline.md) (gebündelt 2026-05-27) |
 | Build-Tag-Pfad `//go:build docker` für Adapter-Integrationstests (`spec/architecture.md` §5) ist nur beschrieben, kein CI-Pfad und kein Adapter-Test existiert | temporär | [`open/slice-m6-docker-integrationstests.md`](../open/slice-m6-docker-integrationstests.md) |
 | Doku-/Link-Drift in `docs/`, `spec/`, READMEs ist heute nicht maschinell geprüft (M2-Review #11) | temporär | [`open/slice-v1-markdown-link-validator.md`](../open/slice-v1-markdown-link-validator.md) |
 | Slice-Pläne für M1, M2, M2b, M2c liegen nicht in `done/` (M2-Review #10); Roadmap referenziert nur Commit-Hashes | temporär | [`open/slice-m3-retroaktive-slice-plaene.md`](../open/slice-m3-retroaktive-slice-plaene.md) |

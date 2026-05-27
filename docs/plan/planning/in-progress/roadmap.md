@@ -37,8 +37,7 @@ Disziplin-Verstoß.
 | [`slice-m3-init-flow`](../done/slice-m3-init-flow.md) | `LH-FA-INIT-*` initialer Flow + zwei M3-Carveouts (Coverage ✅, depguard ✅) | M3 | Done |
 | [`slice-m3-depguard-aktivierung-verifizieren`](../done/slice-m3-depguard-aktivierung-verifizieren.md) | `LH-FA-ARCH-003` depguard-Regeln matchen bisher nichts | M3-T5 | Done |
 | [`slice-m3-gomodguard-rules`](../done/slice-m3-gomodguard-rules.md) | `gomodguard_v2.blocked: {}` leer; yaml.v3 schon drin, Cobra kommt mit T3 | M3-followup | Done |
-| [`slice-m3-branch-protection-checkliste`](../open/slice-m3-branch-protection-checkliste.md) | ADR-0004 Folgepunkt Branch-Protection nicht versioniert; soll vor erstem externen PR existieren | M3 | Open |
-| [`slice-m3-retroaktive-slice-plaene`](../open/slice-m3-retroaktive-slice-plaene.md) | Bootstrap-Slices (M1/M2/M2b/M2c/M2d) liegen nicht in `done/` | M3-T5 | Open |
+| [`slice-m3-retroaktive-slice-plaene`](../open/slice-m3-retroaktive-slice-plaene.md) | Bootstrap-Slices (M1/M2/M2b/M2c/M2d) liegen nicht in `done/` | Later | Open |
 | [`slice-m4-soft-existing-detection`](../open/slice-m4-soft-existing-detection.md) | `LH-FA-INIT-004` Soft-Erkennung + `--assume-existing` | M4 | Open |
 | [`slice-m4-logging-port`](../open/slice-m4-logging-port.md) | `forbidigo.msg` referenziert nicht-existenten Logging-Port; `u-boot doctor` braucht strukturiertes Logging | M4 | Open |
 | [`slice-m6-docker-integrationstests`](../open/slice-m6-docker-integrationstests.md) | `//go:build docker`-Pfad nur dokumentiert, kein CI-Job; erst mit Docker-Adapter sinnvoll | M6 | Open |
@@ -52,8 +51,8 @@ Disziplin-Verstoß.
 
 ## Nächste Schritte
 
-1. **Drei offene M3-Anker-Slices triagieren** — sind heute noch mit Phase „M3-T5" getaggt, obwohl M3 abgeschlossen ist: [`slice-m3-gomodguard-rules`](../open/slice-m3-gomodguard-rules.md) (gomodguard-Regeln definieren, jetzt wo Cobra+yaml.v3 in `go.mod` sind), [`slice-m3-branch-protection-checkliste`](../open/slice-m3-branch-protection-checkliste.md) (ADR-0004-Folgepunkt, vor erstem externen PR), [`slice-m3-retroaktive-slice-plaene`](../open/slice-m3-retroaktive-slice-plaene.md) (Bootstrap-Slices M1/M2/M2b/M2c/M2d retro-dokumentieren). Re-Phasierung oder einzeln abarbeiten.
-2. **M4 `u-boot doctor`** schneiden: `LH-FA-DIAG-*` plus die bereits offenen Slices [`slice-m4-soft-existing-detection`](../open/slice-m4-soft-existing-detection.md) (aktiviert das in M3-T4c durchgereichte `--assume-existing`) und [`slice-m4-logging-port`](../open/slice-m4-logging-port.md) (löst `forbidigo.msg`-Carveout, deckt strukturiertes Logging).
+1. **M4 `u-boot doctor`** schneiden: `LH-FA-DIAG-*` plus die bereits offenen Slices [`slice-m4-soft-existing-detection`](../open/slice-m4-soft-existing-detection.md) (aktiviert das in M3-T4c durchgereichte `--assume-existing`) und [`slice-m4-logging-port`](../open/slice-m4-logging-port.md) (löst `forbidigo.msg`-Carveout, deckt strukturiertes Logging).
+2. **`slice-m3-retroaktive-slice-plaene`** — eigene Sitzung, sobald externer Contributor naht oder Memory-Drift droht. Batch-Schreibarbeit für 5 retro-Pläne (M1, M2, M2b, M2c, M2d).
 
 ## Lifecycle-Hinweis
 
