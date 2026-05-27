@@ -1,7 +1,7 @@
 # Slice M4: Logging-Port einführen
 
 > **Status:** Done
-> **DoD:** Commit `<TBD>` (wird im Folge-Fixup konkretisiert)
+> **DoD:** Commit `b7f7f6c`
 
 ## Auslöser
 
