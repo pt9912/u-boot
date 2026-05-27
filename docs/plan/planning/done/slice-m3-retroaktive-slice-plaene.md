@@ -1,7 +1,7 @@
 # Slice M3: Retroaktive Slice-Pläne für M1/M2/M2b/M2c/M2d
 
 > **Status:** Done
-> **DoD:** Commit `<TBD>` (wird im Folge-Fixup konkretisiert)
+> **DoD:** Commit `afee7e9`
 
 ## Auslöser
 
