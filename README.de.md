@@ -14,25 +14,30 @@ und wiederkehrende Artefakte (README, CHANGELOG, `.env.example`).
 
 ## Status
 
-**MVP in Arbeit — `u-boot init` ist vollständig verdrahtet inkl. Re-Init.**
-Das erste fachliche Subkommando ist end-to-end ausgeliefert (M3 ✅):
-`u-boot init [name]` erzeugt die LH-FA-INIT-003-Projektstruktur plus
-`u-boot.yaml` (LH-FA-CONF-002) und initialisiert per Default ein
-Git-Repository (LH-FA-INIT-007); ein zweiter Lauf auf bestehendem
-Projekt nutzt den LH-FA-INIT-005-Überschreibschutz (`--force` für
-Managed-Block-only-Edits, `--backup` für Vollüberschreibung mit
-`.bak[.N]`-Sicherung) plus die LH-FA-CLI-005A-Modi-Flags (`--yes` /
-`--no-interactive` exklusiv, `--assume-existing` durchgereicht für
-M4-Soft-Detection). Die weiteren MVP-Subkommandos (`add`, `up`, `down`,
-`doctor`, `generate`, `config`) folgen in M4+; Planung in
+**MVP in Arbeit — zwei Subkommandos vollständig verdrahtet (`init` + `doctor`).**
+- `u-boot init [name]` erzeugt die LH-FA-INIT-003-Projektstruktur plus
+  `u-boot.yaml` (LH-FA-CONF-002) und initialisiert per Default ein
+  Git-Repository (LH-FA-INIT-007); Re-Init nutzt den
+  LH-FA-INIT-005-Überschreibschutz (`--force` für Managed-Block-Edits,
+  `--backup` für Vollüberschreibung mit `.bak[.N]`-Sicherung) plus die
+  LH-FA-CLI-005A-Modi-Flags (`--yes` / `--no-interactive` exklusiv;
+  `--assume-existing` treibt die LH-FA-INIT-004-Soft-Detection).
+- `u-boot doctor` führt 9 Diagnose-Checks gegen die lokale Umgebung
+  und das Projekt aus (LH-FA-DIAG-002), klassifiziert Befunde als
+  ok / warn / error (LH-FA-DIAG-003), gibt Reparaturhinweise
+  (LH-FA-DIAG-004) und exited mit 11 bei Errors (oder Warns mit
+  `--strict`).
+
+Die weiteren MVP-Subkommandos (`add`, `up`, `down`, `generate`,
+`config`) folgen in M5+; Planung in
 [`docs/plan/planning/`](docs/plan/planning/).
 
 | Phase | Status | Quelle |
 | ----- | ------ | ------ |
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
-| Architekturentscheidungen | 5 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
-| Implementierung | M1–M3 ✅, M4 als Nächstes | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
-| Carveouts | 6 temporär (5 mit Slice-Plan, 1 Slice deckt 2), 8 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
+| Architekturentscheidungen | 6 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
+| Implementierung | M1–M4 ✅, M5 als Nächstes | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
+| Carveouts | 7 temporär (6 mit Slice-Plan, 1 Slice deckt 2), 8 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
 

@@ -12,14 +12,23 @@ import (
 )
 
 // doctorFlags bundles the per-invocation flag state of
-// `u-boot doctor` (local --strict plus the read-through from the
-// persistent verbosity flags on the root command).
+// `u-boot doctor` that runDoctor actually consumes today: --strict
+// (LH-FA-DIAG-003) plus --quiet (LH-FA-CLI-005, filters OK items
+// from the rendered report). The persistent --verbose / --debug
+// flags exist on the root command per LH-FA-CLI-005 but currently
+// do not surface in the doctor flow — see
+// [`slice-followup-verbosity-wiring.md`] for the planned
+// logger-level wiring.
 type doctorFlags struct {
-	Strict  bool
-	Quiet   bool
-	Verbose bool
-	Debug   bool
+	Strict bool
+	Quiet  bool
 }
+
+// idColumnWidth is the padding used for the diagnostic-ID column in
+// the rendered report. Sized for the longest ID today
+// (`devcontainer.dockerfile.valid`, 29 chars) plus one space of
+// margin; bump when a future check introduces a longer ID.
+const idColumnWidth = 30
 
 // newDoctorCommand builds the `u-boot doctor` Cobra subcommand
 // (LH-FA-DIAG-001).
@@ -59,8 +68,6 @@ Examples:
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			flags.Quiet = a.quiet
-			flags.Verbose = a.verbose
-			flags.Debug = a.debug
 			return runDoctor(cmd.Context(), cmd.OutOrStdout(), *flags, a.doctorUseCase, a.getwd)
 		},
 	}
@@ -129,7 +136,7 @@ func writeDoctorReport(out io.Writer, baseDir string, report domain.DiagnosticRe
 		if quiet && item.Severity == domain.SeverityOK {
 			continue
 		}
-		fmt.Fprintf(out, "%s  %-30s %s\n", severityGlyph(item.Severity), item.ID, item.Message)
+		fmt.Fprintf(out, "%s  %-*s %s\n", severityGlyph(item.Severity), idColumnWidth, item.ID, item.Message)
 		if item.Hint != "" && item.Severity != domain.SeverityOK {
 			fmt.Fprintf(out, "   → %s\n", item.Hint)
 		}
