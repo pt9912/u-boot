@@ -1,7 +1,7 @@
 # Slice M5: `u-boot add postgres`-Flow
 
 > **Status:** In progress
-> **DoD:** T1 offen / T2 offen / T3 offen / T4 offen / T5 offen / T6 offen / T7 offen
+> **DoD:** T1 ✅ `<TBD>` / T2 offen / T3 offen / T4 offen / T5 offen / T6 offen / T7 offen
 
 ## Auslöser
 

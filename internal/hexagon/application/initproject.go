@@ -38,20 +38,41 @@ type ubootYAMLProject struct {
 	Name string `yaml:"name"`
 }
 
+// ubootYAMLService is one entry in the `services:` map of
+// u-boot.yaml (LH-FA-ADD-005). Each registered service has at least
+// an explicit `enabled:` key (`true` = active, `false` = registered
+// but disabled). The pointer type distinguishes "explicitly false"
+// (registered + disabled, idempotent re-activation possible) from
+// "key missing" (registered but no explicit decision — doctor warns
+// per §893).
+//
+// Future fields (M5+ for postgres-specific options, M5+/V1 for
+// keycloak.persistence, otel.exporter, etc.) will be added as
+// optional fields with `omitempty` so the YAML output stays minimal
+// for services that take their defaults.
+type ubootYAMLService struct {
+	Enabled *bool `yaml:"enabled,omitempty"`
+}
+
 // ubootYAMLConfig is the YAML-marshalable shape of u-boot.yaml as
-// required by LH-FA-CONF-002 (schemaVersion + project + later
-// services + devcontainer + template). The struct lives in the
+// required by LH-FA-CONF-002 (schemaVersion + project + services
+// + later devcontainer + template). The struct lives in the
 // application layer because the YAML schema is part of the
 // application contract; the YAMLCodec port stays schema-agnostic.
 //
-// Future M3+/M5+ slices will add:
+// Services is `omitempty` so a fresh `u-boot init` (which has no
+// services yet) writes a clean two-key file; `u-boot add` populates
+// the map on first add.
 //
-//   - Services    ubootYAMLServices    `yaml:"services,omitempty"`
+// Future fields:
+//
 //   - Devcontainer ubootYAMLDevcontainer `yaml:"devcontainer,omitempty"`
+//     (unblocks the M4-deferred severity-escalation in doctor)
 //   - Template    string               `yaml:"template,omitempty"`
 type ubootYAMLConfig struct {
-	SchemaVersion int              `yaml:"schemaVersion"`
-	Project       ubootYAMLProject `yaml:"project"`
+	SchemaVersion int                         `yaml:"schemaVersion"`
+	Project       ubootYAMLProject            `yaml:"project"`
+	Services      map[string]ubootYAMLService `yaml:"services,omitempty"`
 }
 
 // InitProjectService implements [driving.InitProjectUseCase]. It
