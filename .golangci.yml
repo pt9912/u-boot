@@ -98,6 +98,47 @@ linters:
     nestif:
       min-complexity: 5
 
+    revive:
+      # Explicit rule-block per ADR-0006 (revive Custom-Rules-Profil).
+      # golangci-lint's revive: if `rules:` is set, the listed rules
+      # are the ONLY rules — the default rule set is NOT layered
+      # underneath. So this block enumerates revive's default 24
+      # rules (the ones running before this slice landed) PLUS one
+      # project-specific extra (`unused-receiver`).
+      #
+      # Adding a rule here is a deliberate policy choice; the
+      # `Why:`-form of justification is the commit body for the ADR
+      # bump rather than per-rule comments — keeping the YAML
+      # readable without losing traceability.
+      rules:
+        # --- revive default rule set (preserved) ---
+        - name: blank-imports
+        - name: context-as-argument
+        - name: context-keys-type
+        - name: dot-imports
+        - name: empty-block
+        - name: error-naming
+        - name: error-return
+        - name: error-strings
+        - name: errorf
+        - name: exported
+        - name: if-return
+        - name: increment-decrement
+        - name: indent-error-flow
+        - name: package-comments
+        - name: range
+        - name: receiver-naming
+        - name: redefines-builtin-id
+        - name: superfluous-else
+        - name: time-naming
+        - name: unexported-return
+        - name: unreachable-code
+        - name: unused-parameter
+        - name: var-declaration
+        - name: var-naming
+        # --- project-specific extras (ADR-0006) ---
+        - name: unused-receiver
+
     gomodguard_v2:
       # Blocked modules per LH-QA-004 — keep the third-party surface
       # tight and aligned with the project's stdlib-first decisions.
@@ -231,6 +272,15 @@ linters:
           - revive
         path: _test\.go$
         text: ^unused-parameter
+
+      # Why: Test-Fakes haben oft stateless Methoden (Interface-
+      # Implementierungen, die nicht alle Methoden brauchen). Den
+      # `unused-receiver`-Check für Tests aufweichen, gleicher Grund
+      # wie bei `unused-parameter` oben.
+      - linters:
+          - revive
+        path: _test\.go$
+        text: ^unused-receiver
 
       # Why: cmd/uboot/ is the wiring layer — it must be `package main`
       # (so testpackage cannot enforce external _test packages), and

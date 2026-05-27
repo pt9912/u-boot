@@ -197,7 +197,7 @@ func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRe
 		return driving.InitProjectResponse{}, err
 	}
 
-	name, err := s.resolveProjectName(req)
+	name, err := resolveProjectName(req)
 	if err != nil {
 		return driving.InitProjectResponse{}, err
 	}
@@ -357,8 +357,12 @@ func softExistingAbort(indicators []string, trigger string) error {
 }
 
 // resolveProjectName derives and validates the project name per
-// LH-FA-INIT-002 / LH-FA-INIT-006.
-func (s *InitProjectService) resolveProjectName(req driving.InitProjectRequest) (domain.ProjectName, error) {
+// LH-FA-INIT-002 / LH-FA-INIT-006. Free function — the derivation
+// is stateless (no service-port dependency), so revive's
+// unused-receiver flagged the prior method form. Keeping the
+// stateless semantics in package scope keeps the call graph
+// obvious.
+func resolveProjectName(req driving.InitProjectRequest) (domain.ProjectName, error) {
 	raw := req.Name
 	if raw == "" {
 		raw = domain.NormalizeProjectName(filepath.Base(req.BaseDir))
