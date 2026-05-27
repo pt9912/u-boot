@@ -60,10 +60,10 @@ func TestDoctor_WritePermissions_OKOnWritableDir(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Check: %v", err)
 	}
-	// 6 checks total after T4: write-permissions, git, docker,
-	// docker-reachable, compose, uboot.yaml.
-	if got := len(resp.Report.Items); got != 6 {
-		t.Fatalf("Report.Items = %d, want 6", got)
+	// 7 checks total after T5: write-permissions, git, docker,
+	// docker-reachable, compose-installed, uboot.yaml, compose.yaml.
+	if got := len(resp.Report.Items); got != 7 {
+		t.Fatalf("Report.Items = %d, want 7", got)
 	}
 	d := findDiagnostic(t, resp.Report.Items, "fs.write-permissions")
 	if d.Severity != domain.SeverityOK {
@@ -505,6 +505,104 @@ func TestDoctor_UbootYaml_ErrorOnInvalidProjectName(t *testing.T) {
 	}
 	if !strings.Contains(d.Message, "DemoService") {
 		t.Errorf("Message does not surface offending name: %q", d.Message)
+	}
+}
+
+// ----------------------------------------------------------------------------
+// T5 — compose.yaml validation
+// ----------------------------------------------------------------------------
+
+func seedComposeYAML(t *testing.T, fs *fakeFS, baseDir, body string) {
+	t.Helper()
+	if err := fs.WriteFile(baseDir+"/compose.yaml", []byte(body), 0o644); err != nil {
+		t.Fatalf("seedComposeYAML: %v", err)
+	}
+}
+
+func TestDoctor_ComposeYaml_WarnWhenMissing(t *testing.T) {
+	t.Parallel()
+	svc, _, _, _, _ := newDoctorService(t)
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "compose.yaml.valid")
+	if d.Severity != domain.SeverityWarn {
+		t.Errorf("Severity = %v, want Warn (missing compose.yaml ≠ Error)", d.Severity)
+	}
+}
+
+func TestDoctor_ComposeYaml_OKOnValidFile(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	seedComposeYAML(t, fs, doctorBaseDir,
+		"services:\n  app:\n    image: nginx:latest\n  db:\n    image: postgres:16\n")
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "compose.yaml.valid")
+	if d.Severity != domain.SeverityOK {
+		t.Errorf("Severity = %v, want OK", d.Severity)
+	}
+	if !strings.Contains(d.Message, "2 service(s)") {
+		t.Errorf("Message does not surface service count: %q", d.Message)
+	}
+}
+
+func TestDoctor_ComposeYaml_ErrorOnInvalidSyntax(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	// Unclosed bracket → fails yaml.v3 parse.
+	seedComposeYAML(t, fs, doctorBaseDir, "services: [unclosed\n")
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "compose.yaml.valid")
+	if d.Severity != domain.SeverityError {
+		t.Errorf("Severity = %v, want Error", d.Severity)
+	}
+	if !strings.Contains(d.Message, "not valid YAML") {
+		t.Errorf("Message does not name the syntax problem: %q", d.Message)
+	}
+}
+
+func TestDoctor_ComposeYaml_ErrorOnMissingServices(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	// Valid YAML but no services key — Compose without services is
+	// not a meaningful Compose file.
+	seedComposeYAML(t, fs, doctorBaseDir, "version: \"3.9\"\n")
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "compose.yaml.valid")
+	if d.Severity != domain.SeverityError {
+		t.Errorf("Severity = %v, want Error", d.Severity)
+	}
+	if !strings.Contains(d.Message, "no `services:` entries") {
+		t.Errorf("Message does not name the missing services: %q", d.Message)
+	}
+}
+
+func TestDoctor_ComposeYaml_ErrorOnEmptyServices(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	// services-key present but empty mapping → still "no services".
+	seedComposeYAML(t, fs, doctorBaseDir, "services:\n")
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "compose.yaml.valid")
+	if d.Severity != domain.SeverityError {
+		t.Errorf("Severity = %v, want Error on empty services mapping", d.Severity)
 	}
 }
 

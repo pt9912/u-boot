@@ -57,6 +57,7 @@ const (
 	checkIDDockerReachable  = "docker.reachable"
 	checkIDComposeInstalled = "docker.compose.installed"
 	checkIDUbootYaml        = "uboot.yaml.valid"
+	checkIDComposeYaml      = "compose.yaml.valid"
 )
 
 // Minimum versions per LH-FA-DIAG-002. The thresholds are MAJOR.MINOR
@@ -93,6 +94,7 @@ func (s *DoctorService) Check(ctx context.Context, req driving.DoctorRequest) (d
 		s.checkDockerReachable(ctx),
 		s.checkComposeInstalled(ctx),
 		s.checkUbootYaml(ctx, req.BaseDir),
+		s.checkComposeYaml(ctx, req.BaseDir),
 	}
 	report := domain.DiagnosticReport{Items: items}
 	s.logger.Info("doctor: checks complete",
@@ -387,5 +389,83 @@ func (s *DoctorService) checkUbootYaml(_ context.Context, baseDir string) domain
 		Severity: domain.SeverityOK,
 		Message: fmt.Sprintf("u-boot.yaml is valid (project %q, schemaVersion %d).",
 			cfg.Project.Name, cfg.SchemaVersion),
+	}
+}
+
+// composeYAMLShape captures the minimum top-level Compose shape the
+// LH-FA-DIAG-002-compose-validation cares about: just the `services:`
+// key as a free-form map. Per spec ("minimal Top-Level-Shape"), no
+// deeper schema validation happens at this layer — that's a future
+// slice (e.g. `slice-v1-compose-schema-validator`).
+type composeYAMLShape struct {
+	Services map[string]any `yaml:"services"`
+}
+
+// checkComposeYaml validates the `compose.yaml` Docker Compose file
+// per LH-FA-DIAG-002 / spec/lastenheft.md §4.7:
+//
+//   - missing file        → Warn (LH-FA-INIT-003 names compose.yaml
+//                          as part of the mandatory project layout,
+//                          but doctor running before init or in a
+//                          partial directory is a soft signal).
+//   - I/O error on probe  → Error.
+//   - invalid YAML        → Error with parser message.
+//   - parsed but no `services:` → Error (a Compose file without
+//                          services is not a meaningful one).
+//   - parsed with services → OK with service count in message.
+//
+// Out of scope (V1 follow-up if needed): deeper Compose-Schema
+// validation (service-level `image`/`build`, port format, network
+// references). The check intentionally stops at "is this parseable
+// as a Compose-shaped document".
+func (s *DoctorService) checkComposeYaml(_ context.Context, baseDir string) domain.Diagnostic {
+	path := filepath.Join(baseDir, "compose.yaml")
+	exists, err := s.fs.Exists(path)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDComposeYaml,
+			Severity: domain.SeverityError,
+			Message:  "Cannot probe compose.yaml: " + err.Error() + ".",
+			Hint:     "Check filesystem permissions on " + path + ".",
+		}
+	}
+	if !exists {
+		return domain.Diagnostic{
+			ID:       checkIDComposeYaml,
+			Severity: domain.SeverityWarn,
+			Message:  "compose.yaml not present — directory has no Docker Compose configuration.",
+			Hint:     "Run `u-boot init` (LH-FA-INIT-003 ships a compose.yaml).",
+		}
+	}
+	body, err := s.fs.ReadFile(path)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDComposeYaml,
+			Severity: domain.SeverityError,
+			Message:  "Cannot read compose.yaml: " + err.Error() + ".",
+			Hint:     "Check filesystem permissions.",
+		}
+	}
+	var shape composeYAMLShape
+	if err := s.yaml.Unmarshal(body, &shape); err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDComposeYaml,
+			Severity: domain.SeverityError,
+			Message:  "compose.yaml is not valid YAML: " + err.Error() + ".",
+			Hint:     "Fix YAML syntax (indentation, missing colons, mismatched quotes).",
+		}
+	}
+	if len(shape.Services) == 0 {
+		return domain.Diagnostic{
+			ID:       checkIDComposeYaml,
+			Severity: domain.SeverityError,
+			Message:  "compose.yaml has no `services:` entries.",
+			Hint:     "Add at least one service block (e.g. `services: { app: { image: ... } }`).",
+		}
+	}
+	return domain.Diagnostic{
+		ID:       checkIDComposeYaml,
+		Severity: domain.SeverityOK,
+		Message:  fmt.Sprintf("compose.yaml is valid (%d service(s)).", len(shape.Services)),
 	}
 }
