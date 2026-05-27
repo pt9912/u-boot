@@ -435,6 +435,35 @@ func TestDoctor_UbootYaml_OKOnValidFile(t *testing.T) {
 	}
 }
 
+func TestDoctor_UbootYaml_OKWithServicesBlock(t *testing.T) {
+	t.Parallel()
+	// Why: M5-T1 added a `services:` field to ubootYAMLConfig. A
+	// u-boot.yaml that already carries the services-block (post-
+	// `u-boot add`) must still parse and pass the doctor's validity
+	// check. Roundtrip indicator for the schema extension — if
+	// yaml.v3 can't decode `enabled: true` into *bool, this test
+	// goes red before T2 lands.
+	svc, fs, _, _, _ := newDoctorService(t)
+	seedUbootYAML(t, fs, doctorBaseDir, `schemaVersion: 1
+project:
+  name: demo-service
+services:
+  postgres:
+    enabled: true
+  keycloak:
+    enabled: false
+`)
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "uboot.yaml.valid")
+	if d.Severity != domain.SeverityOK {
+		t.Errorf("Severity = %v, want OK (services-block must not break validation)", d.Severity)
+	}
+}
+
 func TestDoctor_UbootYaml_ErrorOnInvalidSyntax(t *testing.T) {
 	t.Parallel()
 	svc, fs, _, _, _ := newDoctorService(t)

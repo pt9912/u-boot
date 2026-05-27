@@ -268,6 +268,12 @@ func TestInit_UBootYAMLContainsSchemaAndName(t *testing.T) {
 			t.Errorf("u-boot.yaml missing %q; got:\n%s", want, got)
 		}
 	}
+	// Why: ubootYAMLConfig.Services has `omitempty`; fresh init must
+	// not emit an empty services-block. Regression-guard for the
+	// M5-T1 schema extension.
+	if strings.Contains(got, "services") {
+		t.Errorf("u-boot.yaml unexpectedly contains `services` on fresh init; got:\n%s", got)
+	}
 }
 
 func TestInit_RenderedTemplatesContainName(t *testing.T) {

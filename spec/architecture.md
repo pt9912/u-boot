@@ -54,7 +54,7 @@ Pfeile zeigen die **Aufruf-/Datenfluss-Richtung** zur Laufzeit. Die **Import-Ric
 
 Reine Datentypen und invariantenhaltige Verhaltensregeln ohne I/O.
 
-- **Inhalt:** `Project` (Aggregat mit `SchemaVersion`), `ProjectName` (Value-Object mit Regex aus `LH-FA-INIT-006`), `NormalizeProjectName` (deterministische Normalisierung nach `LH-FA-INIT-002`), `ErrInvalidProjectName`-Sentinel; `DiagnosticReport` mit `Severity`-Enum (`SeverityOK`/`SeverityWarn`/`SeverityError`) und `Diagnostic{ID, Severity, Message, Hint}` für die Doctor-Use-Cases (`LH-FA-DIAG-003`).
+- **Inhalt:** `Project` (Aggregat mit `SchemaVersion`), `ProjectName` (Value-Object mit Regex aus `LH-FA-INIT-006`), `NormalizeProjectName` (deterministische Normalisierung nach `LH-FA-INIT-002`), `ErrInvalidProjectName`-Sentinel; `ServiceName` (Value-Object für Add-on-Identifier mit eigener Regex, Sentinel `ErrInvalidServiceName`) und `ServiceState`-Enum (Active/Deactivated/EnabledUnset/Unregistered/InconsistentYAML/InconsistentBlock) für die LH-FA-ADD-005-State-Machine; `DiagnosticReport` mit `Severity`-Enum (`SeverityOK`/`SeverityWarn`/`SeverityError`) und `Diagnostic{ID, Severity, Message, Hint}` für die Doctor-Use-Cases (`LH-FA-DIAG-003`).
 - **Vorgesehene Erweiterungen:** `Service`, `Port`, `ImageRef`, `ComposeFile`, `EnvVar` für Add-on-Use-Cases.
 - **Erlaubte Imports:** ausschließlich Go-Standard-Library.
 - **Verbotene Imports:** alle anderen `internal/`-Pakete, externe Libraries mit I/O.
