@@ -54,8 +54,8 @@ Pfeile zeigen die **Aufruf-/Datenfluss-Richtung** zur Laufzeit. Die **Import-Ric
 
 Reine Datentypen und invariantenhaltige Verhaltensregeln ohne I/O.
 
-- **Aktuelle Inhalte (M3-T1):** `Project` (Aggregat mit `SchemaVersion`), `ProjectName` (Value-Object mit Regex aus `LH-FA-INIT-006`), `NormalizeProjectName` (deterministische Normalisierung nach `LH-FA-INIT-002`), `ErrInvalidProjectName`-Sentinel.
-- **Geplante Erweiterungen:** `Service`, `Port`, `ImageRef`, `ComposeFile`, `EnvVar` (folgen mit M4/M5 als Add-on-Slices).
+- **Inhalt:** `Project` (Aggregat mit `SchemaVersion`), `ProjectName` (Value-Object mit Regex aus `LH-FA-INIT-006`), `NormalizeProjectName` (deterministische Normalisierung nach `LH-FA-INIT-002`), `ErrInvalidProjectName`-Sentinel; `DiagnosticReport` mit `Severity`-Enum (`SeverityOK`/`SeverityWarn`/`SeverityError`) und `Diagnostic{ID, Severity, Message, Hint}` für die Doctor-Use-Cases (`LH-FA-DIAG-003`).
+- **Vorgesehene Erweiterungen:** `Service`, `Port`, `ImageRef`, `ComposeFile`, `EnvVar` für Add-on-Use-Cases.
 - **Erlaubte Imports:** ausschließlich Go-Standard-Library.
 - **Verbotene Imports:** alle anderen `internal/`-Pakete, externe Libraries mit I/O.
 - **Tests:** Unit-Tests mit `*_test.go` im selben Paket; pure Validierung ohne Mocks.
@@ -64,9 +64,11 @@ Reine Datentypen und invariantenhaltige Verhaltensregeln ohne I/O.
 
 Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält keine externe I/O.
 
-- **Aktuelle Inhalte (M3-T4):** `InitProjectService` orchestriert `FileSystem`/`YAMLCodec`/`Git`/`ProgressPort` zum LH-FA-INIT-001..007-Flow inklusive Re-Init-Pfaden nach LH-FA-INIT-005 (`--force`/`--backup`); Templates für die erzeugten Dateien via `embed.FS` + `text/template` (Templates leben unter `application/templates/*.tmpl`, die §611-strukturierten Configs wrappen ihren Inhalt in `BEGIN/END U-BOOT MANAGED BLOCK: init`-Marker); `ubootYAMLConfig`-Struct als Schema-Repräsentation für `u-boot.yaml` (LH-FA-CONF-002). Re-Init folgt einem strikten Plan-and-Execute-Split: `planFile` entscheidet pro Datei (`actionWrite`/`actionReplaceBlock`/`actionOverwriteFull`/Abort-Sentinel), Plan-Fehler verhindern jeden Side-Effect.
-- **Hilfs-Pakete:** `application/managedblock/` (LH-SA-FILE-002-Marker-Parser: `Find`/`Has`/`Replace`, drei Comment-Styles Hash/HTMLComment/DoubleSlash, Sentinel `ErrBlockNotFound`/`ErrBlockMalformed`); `application/backup.go` mit `BackupPath` (kleinster-freier-Suffix-Algorithmus für `<path>.bak[.N]`, File + rekursive Verzeichnisse, TOCTOU-sicher via `WriteFileExclusive`/`Mkdir`, Rollback bei partiellem Tree-Copy, Mode- und Symlink-Reject per Lstat).
-- **Geplante Erweiterungen:** `AddServiceService` (LH-FA-ADD-*), `RunDoctorService` (LH-FA-DIAG-*), `UpService`/`DownService` (LH-FA-UP-*), `GenerateService` (LH-FA-GEN-*).
+- **Inhalt:**
+  - `InitProjectService` orchestriert `FileSystem`/`YAMLCodec`/`Git`/`ProgressPort`/`Confirmer`/`Logger` zum LH-FA-INIT-001..007-Flow inklusive Re-Init-Pfaden nach LH-FA-INIT-005 (`--force`/`--backup`) und LH-FA-INIT-004 Soft-Existing-Detection. Templates für die erzeugten Dateien via `embed.FS` + `text/template` (Templates leben unter `application/templates/*.tmpl`; die §611-strukturierten Configs wrappen ihren Inhalt in `BEGIN/END U-BOOT MANAGED BLOCK: init`-Marker). `ubootYAMLConfig`-Struct als Schema-Repräsentation für `u-boot.yaml` (LH-FA-CONF-002). Re-Init folgt einem strikten Plan-and-Execute-Split: `planFile` entscheidet pro Datei (`actionWrite`/`actionReplaceBlock`/`actionOverwriteFull`/Abort-Sentinel), Plan-Fehler verhindern jeden Side-Effect.
+  - `DoctorService` orchestriert `FileSystem`/`Git`/`DockerProbe`/`Logger` zu den LH-FA-DIAG-002-Checks (write-permissions, git availability, docker installed/reachable, compose installed, später u-boot.yaml/compose.yaml-Validierung, Devcontainer-Konsistenz). Stdlib-Semver-Min-Check (`parseSemverMajorMinor` + `classifyVersionAtLeast`) für die Mindestversionen 24.0 (Docker) / 2.20 (Compose). Service ist severity-agnostisch — failures sind `SeverityError`-Diagnostics im Report, kein Go-error.
+- **Hilfs-Pakete:** `application/managedblock/` (LH-SA-FILE-002-Marker-Parser: `Find`/`Has`/`Replace`, drei Comment-Styles Hash/HTMLComment/DoubleSlash, Sentinel `ErrBlockNotFound`/`ErrBlockMalformed`); `application/backup.go` mit `BackupPath` (kleinster-freier-Suffix-Algorithmus für `<path>.bak[.N]`, File + rekursive Verzeichnisse, TOCTOU-sicher via `WriteFileExclusive`/`Mkdir`, Rollback bei partiellem Tree-Copy, Mode- und Symlink-Reject per Lstat, Streaming-Copy via `FileSystem.Copy`/`CopyExclusive`).
+- **Vorgesehene Erweiterungen:** `AddServiceService` (LH-FA-ADD-*), `UpService`/`DownService` (LH-FA-UP-*), `GenerateService` (LH-FA-GEN-*).
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driving`, `hexagon/port/driven` (zum Konsumieren von Driven-Ports und Implementieren von Driving-Ports).
 - **Verbotene Imports:** `adapter/*`, externe I/O-Libraries.
 - **Tests:** Unit-Tests mit Test-Doubles für Driven-Ports (Fakes oder Mocks in `_test.go`); Test-Library-Imports (z. B. `yaml.v3` für Fake-YAMLCodec) sind über den `*_test.go`-Carveout in `LH-FA-ARCH-003` erlaubt.
@@ -75,11 +77,13 @@ Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält keine exte
 
 Interfaces, über die u-boot von außen angesprochen wird.
 
-- **Aktuelle Inhalte (M3-T4):** `InitProjectUseCase` mit `InitProjectRequest` (`Name`/`BaseDir`/`SkipGit` aus T1–T3 plus `Force`/`Backup`/`AssumeExisting`/`NoInteractive` aus T4 + M4-soft-existing-detection) und `InitProjectResponse` (`Project`/`Created`/`Backups []BackupAction`). Sentinels für Re-Init und LH-FA-CLI-006-Mapping:
-  - **Code 10 (Validierung):** `ErrProjectExists` (LH-FA-INIT-004 Marker u-boot.yaml/compose.yaml/.env.example), `ErrFileExists` (Non-Marker-Kollision), `ErrBaseDirMissing` (LH-AK-001 oder leeres `BaseDir`-Feld; wird sowohl von init als auch von doctor verwendet), `ErrForceRequiresBackup` (LH-FA-INIT-005 §619), `ErrBackupUnsupportedKind` (Symlink-Reject).
-  - **Code 14 (Technischer FS-Fehler):** `ErrBackupSourceMissing` (Race zwischen Caller-Check und Backup), `ErrBackupSuffixExhausted` (.bak[.0..999] alle belegt). Den vormaligen `ErrBackupTooLarge` (Datei > MVP-Cap 256 MiB) hat der Streaming-Copy-Slice [`slice-v1-backup-streaming-copy`](../docs/plan/planning/done/slice-v1-backup-streaming-copy.md) entfernt.
-- **Aktuelle Inhalte (Forts., M4-doctor T1):** `DoctorUseCase` mit `DoctorRequest` (`BaseDir`) und `DoctorResponse` (`Report domain.DiagnosticReport`). Per Kontrakt liefert `Check` immer einen Report; check-failures sind `SeverityError`-Diagnostics, kein Go-error. Detail in [`slice-m4-doctor`](../docs/plan/planning/in-progress/slice-m4-doctor.md). Severity-Klassifikation + Exit-Code-Mapping (`--strict`) übernimmt der CLI-Adapter in T7.
-- **Geplante Erweiterungen:** `AddServiceUseCase`, `RemoveServiceUseCase`, `LifecycleUseCase`, `GenerateUseCase`, `ConfigUseCase`.
+- **Inhalt:**
+  - `InitProjectUseCase` mit `InitProjectRequest` (`Name`/`BaseDir`/`SkipGit`/`Force`/`Backup`/`AssumeExisting`/`NoInteractive`) und `InitProjectResponse` (`Project`/`Created`/`Backups []BackupAction`).
+  - `DoctorUseCase` mit `DoctorRequest` (`BaseDir`) und `DoctorResponse` (`Report domain.DiagnosticReport`). Per Kontrakt liefert `Check` immer einen Report; check-failures sind `SeverityError`-Diagnostics, kein Go-error. Severity-Klassifikation + Exit-Code-Mapping (`--strict`) übernimmt der CLI-Adapter.
+- **Sentinels** für die LH-FA-CLI-006-Exit-Code-Klassifikation:
+  - **Code 10 (Validierung):** `ErrProjectExists` (LH-FA-INIT-004 Marker u-boot.yaml/compose.yaml/.env.example), `ErrFileExists` (Non-Marker-Kollision), `ErrBaseDirMissing` (LH-AK-001 oder leeres `BaseDir`-Feld; geteilt zwischen `InitProjectUseCase` und `DoctorUseCase`), `ErrForceRequiresBackup` (LH-FA-INIT-005 §619), `ErrBackupUnsupportedKind` (Symlink-Reject).
+  - **Code 14 (Technischer FS-Fehler):** `ErrBackupSourceMissing` (Race zwischen Caller-Check und Backup), `ErrBackupSuffixExhausted` (.bak[.0..999] alle belegt).
+- **Vorgesehene Erweiterungen:** `AddServiceUseCase`, `RemoveServiceUseCase`, `LifecycleUseCase` (Up/Down), `GenerateUseCase`, `ConfigUseCase`.
 - **Implementiert von:** Strukturen in `hexagon/application`.
 - **Verwendet von:** `adapter/driving/*` (z. B. `cli/`).
 
@@ -87,13 +91,17 @@ Interfaces, über die u-boot von außen angesprochen wird.
 
 Interfaces, über die `hexagon/application` externe Systeme nutzt.
 
-- **Aktuelle Inhalte (M3-T4):**
-  - `FileSystem` (`Exists`/`ReadFile`/`WriteFile`/`WriteFileExclusive`/`Mkdir`/`MkdirAll`/`Rename`/`ReadDir`/`Lstat`/`RemoveAll`). Die T4a-Erweiterungen folgen `os.*`-Konventionen: `Lstat` (no-follow für Symlink-Detection und Mode-Preservation), `WriteFileExclusive` (O_CREATE|O_EXCL für TOCTOU-sichere Backup-Slot-Reservierung), `Mkdir` (analog für Dir-Slots), `RemoveAll` (Rollback bei partiellem Tree-Copy).
-  - `YAMLCodec` (`Marshal`/`Unmarshal`), `Git` (`IsRepository`/`Init`, jeweils mit `context.Context` als erstem Parameter), `Clock` (`Now`). Context-Konvention: nur Ports, deren Adapter blockieren können (Git via `os/exec`), nehmen Context; FS/YAML/Clock bleiben Context-frei (im Paket-Doc begründet).
-  - `ProgressPort` (T4c-Review): `AffectedFiles(baseDir string, rows []AffectedFile)` zum strukturierten Reporting der LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 betroffenen Pfade vor jedem Re-Init-Write. `AffectedFile` trägt `Path`/`Action AffectedAction`/`Backup bool`; `AffectedAction` enumeriert `AffectedReplaceBlock`/`AffectedOverwriteFull`. Presentation lebt im Adapter; das Application-Paket bleibt I/O-Text-frei.
-- **Aktuelle Inhalte (Forts., M4-Vorbereitung):** `Confirmer` (`ConfirmTreatAsExisting`, LH-FA-INIT-004 soft-existing-detection; siehe [`slice-m4-soft-existing-detection`](../docs/plan/planning/done/slice-m4-soft-existing-detection.md)) und `Logger` (LH-QA-004 Logging-Port mit `Debug`/`Info`/`Warn`/`Error`, slog-Adapter in `adapter/driven/logger`; siehe [`slice-m4-logging-port`](../docs/plan/planning/done/slice-m4-logging-port.md)). Mit M3-T4a/b zusätzlich: `FileSystem.Copy`/`CopyExclusive` (streaming-Backup, [`slice-v1-backup-streaming-copy`](../docs/plan/planning/done/slice-v1-backup-streaming-copy.md)) sowie `Git.Version` (M4-doctor-binär-probe).
-- **Aktuelle Inhalte (Forts., M4-doctor T3):** `DockerProbe` mit `Version`/`Info`/`ComposeVersion` für die read-only LH-FA-DIAG-002-Probes (`docker version --format`, `docker compose version --short`). Adapter in `adapter/driven/docker` shellt via `os/exec` zum docker-Binary. Bewusst getrennt vom geplanten `DockerEngine`-Port (M6), der state-mutierend ist.
-- **Geplante Erweiterungen:** `DockerEngine` (`Up`/`Down`/`Ps`/`Logs`/`Exec`, M6).
+- **Inhalt:**
+  - `FileSystem` (`Exists`/`ReadFile`/`WriteFile`/`WriteFileExclusive`/`Mkdir`/`MkdirAll`/`Rename`/`ReadDir`/`Lstat`/`RemoveAll`/`Copy`/`CopyExclusive`). Folgt `os.*`-Konventionen: `Lstat` (no-follow für Symlink-Detection und Mode-Preservation), `WriteFileExclusive` (O_CREATE|O_EXCL für TOCTOU-sichere Backup-Slot-Reservierung), `Mkdir` (analog für Dir-Slots), `RemoveAll` (Rollback bei partiellem Tree-Copy), `Copy`/`CopyExclusive` (Streaming-Backup via `io.Copy` ohne RAM-Cap).
+  - `YAMLCodec` (`Marshal`/`Unmarshal`).
+  - `Git` (`IsRepository`/`Init`/`Version`) — alle mit `context.Context` als erstem Parameter (Adapter shellt zum `git`-Binary, das blockieren kann). `Version` liefert die bare semver (Adapter strippt das `git version `-Prefix).
+  - `Clock` (`Now`) — ohne Context (Implementierung non-blocking).
+  - **Context-Konvention:** nur Ports, deren Adapter blockieren können (Git, Docker via `os/exec`), nehmen Context; FS/YAML/Clock bleiben Context-frei (im Paket-Doc begründet).
+  - `ProgressPort` (`AffectedFiles(baseDir, rows)`) zum strukturierten Reporting der LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 betroffenen Pfade vor jedem Re-Init-Write. `AffectedFile` trägt `Path`/`Action AffectedAction`/`Backup bool`; `AffectedAction` enumeriert `AffectedReplaceBlock`/`AffectedOverwriteFull`. Presentation lebt im Adapter.
+  - `Confirmer` (`ConfirmTreatAsExisting(ctx, baseDir, indicators)`) für die LH-FA-INIT-004 Soft-Existing-Detection-Prompts. Narrowly scoped per Confirm-Kontext.
+  - `Logger` (`Debug`/`Info`/`Warn`/`Error`, slog-konforme `...any`-Variadic) als LH-QA-004-Logging-Port.
+  - `DockerProbe` (`Version`/`Info`/`ComposeVersion`) für die read-only LH-FA-DIAG-002-Probes (`docker version --format`, `docker compose version --short`). Bewusst getrennt vom state-mutierenden `DockerEngine` (siehe Erweiterungen).
+- **Vorgesehene Erweiterungen:** `DockerEngine` (`Up`/`Down`/`Ps`/`Logs`/`Exec`) für die Compose-Lifecycle-Operationen — explizit getrennt von `DockerProbe`, weil state-mutierend.
 - **Implementiert von:** Strukturen in `adapter/driven/*`.
 - **Verwendet von:** `hexagon/application`.
 
@@ -101,13 +109,12 @@ Interfaces, über die `hexagon/application` externe Systeme nutzt.
 
 Konkrete Driver — Einstiegspunkte aus der Außenwelt.
 
-- **Aktuelle Inhalte (M3-T4):** `cli/` mit Cobra v1.10.2 (siehe [`ADR-0005`](../docs/plan/adr/0005-cli-framework-cobra.md)). `init`-Subkommando mit `[name]`-Positional plus den Flags:
-  - **Lokal:** `--no-git` (LH-FA-INIT-007), `--force` (LH-FA-INIT-005), `--backup` (LH-FA-INIT-005), `--assume-existing` (LH-FA-CLI-005A §238 — init-only).
-  - **Persistent (Root):** `--yes`, `--no-interactive` (LH-FA-CLI-005A — gelten für alle bestätigungs-relevanten Subbefehle, heute init, künftig add/remove/config-set/down).
-  Konflikt-Check `--yes` + `--no-interactive` → `ErrConflictingModeFlags` (CLI-internes Sentinel) → Exit-Code 2.
-- `ExitCode(err)` bündelt die LH-FA-CLI-006-Klassifikation (0 / 2 / 10 / 14 / 1); `isValidationError` und `isFilesystemError` mappen die in §2.3 gelisteten Driving-Sentinels.
-- `cli.App` mit Functional-Options-Pattern (`WithGetwd` als Test-Seam); `App.yes`/`noInteractive` halten die persistenten Flag-Werte, die `BoolVar` beim Re-Build der Root-Cobra pro `Execute` zurücksetzt — kein Flag-Leak zwischen Aufrufen.
-- **Geplante Erweiterungen:** weitere Subkommandos (`add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `template`) folgen pro Use-Case-Slice; perspektivisch HTTP-/Daemon-Adapter (siehe [`slice-later-http-driving-adapter`](../docs/plan/planning/open/slice-later-http-driving-adapter.md)).
+- **Inhalt:** `cli/` mit Cobra (siehe [`ADR-0005`](../docs/plan/adr/0005-cli-framework-cobra.md)). Pro Subkommando ein eigenes Cobra-Command in einer eigenen Datei.
+  - Lokale Flags pro Subkommando (z. B. `init`: `--no-git`/`--force`/`--backup`/`--assume-existing`).
+  - **Persistente Flags (Root):** `--yes`, `--no-interactive` (LH-FA-CLI-005A — gelten für alle bestätigungs-relevanten Subbefehle). Konflikt-Check `--yes` + `--no-interactive` → `ErrConflictingModeFlags` (CLI-internes Sentinel) → Exit-Code 2.
+  - `ExitCode(err)` bündelt die LH-FA-CLI-006-Klassifikation (0 / 2 / 10 / 14 / 1); `isValidationError` und `isFilesystemError` mappen die in §2.3 gelisteten Driving-Sentinels.
+  - `cli.App` mit Functional-Options-Pattern (`WithGetwd` als Test-Seam); persistente Flag-Werte werden beim Re-Build der Root-Cobra pro `Execute` zurückgesetzt — kein Flag-Leak zwischen Aufrufen.
+- **Vorgesehene Erweiterungen:** weitere Subkommandos (`add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `template`); perspektivisch ein HTTP-/Daemon-Adapter neben der CLI.
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driving`, externe Libraries (z. B. Cobra).
 - **Verbotene Imports:** `hexagon/application` und `adapter/driven`. Die Instanziierung von Application-Services und Driven-Adaptern erfolgt ausschließlich im Wiring (`cmd/uboot/`), das beide Welten zusammenfügt; der Driving-Adapter erhält fertig konstruierte Driving-Port-Implementierungen per Konstruktor.
 - **Permanenter Carveout:** `contextcheck`-Ausnahme in `.golangci.yml`, weil Cobras `RunE`-Signatur (`func(cmd, args) error`) keinen Context-Parameter kennt — die Closure muss `cmd.Context()` extrahieren und an `runInit` durchreichen. Strikte Propagation passiert eine Ebene tiefer.
@@ -116,8 +123,17 @@ Konkrete Driver — Einstiegspunkte aus der Außenwelt.
 
 Konkrete externe Adapter — Implementierungen der Driven-Ports.
 
-- **Aktuelle Inhalte (M3-T4):** `fs/` (stdlib `os.*` — heute mit den T4a-Methoden `Lstat`/`WriteFileExclusive`/`Mkdir`/`RemoveAll` ergänzt; `WriteFileExclusive` nutzt `os.OpenFile` mit `O_CREATE|O_EXCL|O_WRONLY`), `yaml/` (`gopkg.in/yaml.v3`-Wrapper), `git/` (`os/exec git` mit `WithBinary`-Test-Override und Exit-Code-128-Klassifikation als „not a repo"), `clock/` (`time.Now()` in UTC), `progress/` (TextWriter rendert `driven.ProgressPort`-Events auf einen `io.Writer`; M3-T4c-Review). Jeder Adapter pinnt sein Port-Interface per `var _ driven.X = (*Adapter)(nil)` im Production-Code; Drift bricht den Package-Build.
-- **Geplante Erweiterungen:** `docker/` (Docker-Engine via `os/exec docker compose`, M6), `logger/` (M4, `log/slog`-basiert), `progress/json` (für `LH-NFA-USE-004 --json` in V1).
+- **Inhalt:**
+  - `fs/` — `FileSystem`-Adapter via stdlib `os.*` (`os.ReadFile`/`WriteFile`/`MkdirAll`/`Rename`/`ReadDir`/`Lstat`/`RemoveAll`; `WriteFileExclusive` mit `O_CREATE|O_EXCL|O_WRONLY`; Streaming `Copy`/`CopyExclusive` über `os.Open` + `io.Copy`).
+  - `yaml/` — `YAMLCodec`-Adapter via `gopkg.in/yaml.v3`.
+  - `git/` — `Git`-Adapter via `os/exec git` mit `WithBinary`-Test-Override und Exit-Code-128-Klassifikation als „not a repo".
+  - `clock/` — `Clock`-Adapter via `time.Now()` in UTC.
+  - `progress/` — `ProgressPort`-Adapter (TextWriter rendert Events auf einen `io.Writer`).
+  - `confirm/` — `Confirmer`-Adapter (`bufio.Scanner` über stdin, Prompt auf stderr, Default `[y/N]`).
+  - `logger/` — `Logger`-Adapter via `log/slog` (Text + JSON-Format konfigurierbar).
+  - `docker/` — `DockerProbe`-Adapter via `os/exec docker` (read-only diagnostics für LH-FA-DIAG-002).
+  - Jeder Adapter pinnt sein Port-Interface per `var _ driven.X = (*Adapter)(nil)` im Production-Code; Drift bricht den Package-Build.
+- **Vorgesehene Erweiterungen:** `docker/`-Erweiterung um den `DockerEngine`-Adapter (`Up`/`Down`/`Ps`/`Logs`/`Exec` via `docker compose`); `progress/json` für `LH-NFA-USE-004 --json`.
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driven`, externe Libraries.
 - **Verbotene Imports:** `hexagon/application`, `adapter/driving`.
 - **Test-Pfad:** `t.TempDir()` für FS, echte `git`-Binary via `os/exec.LookPath`-Skip (CI-Runner ohne git skippen sauber).
@@ -126,7 +142,7 @@ Konkrete externe Adapter — Implementierungen der Driven-Ports.
 
 Einziger Ort, an dem `application` und `adapter` zusammen importiert werden.
 
-- **Aktueller Inhalt (M3-T4):** `main.go` instantiiert `fs.New()`/`yaml.New()`/`git.New()`/`progress.NewText(stdout)`, baut den `InitProjectService` mit dem ProgressPort und übergibt ihn dem `cli.New(version, initSvc)`-Konstruktor. Plus signal-aware Context via `signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)` und Error→Exit-Code-Mapping über `cli.ExitCode(err)`. Aktuelle Größe: ~60 Zeilen.
+- **Inhalt:** `main.go` instantiiert die Driven-Adapter (`fs.New()`, `yaml.New()`, `git.New()`, `progress.NewText(stdout)`, `confirm.New(os.Stdin, stderr)`, `logger.New(stderr, ...)`, `docker.New()`), konstruiert die Application-Services (`InitProjectService`, `DoctorService`) mit den nötigen Ports und übergibt sie dem `cli.New(version, ...)`-Konstruktor. Plus signal-aware Context via `signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)` und Error→Exit-Code-Mapping über `cli.ExitCode(err)`.
 - Hält keine Geschäftslogik. So klein wie sinnvoll möglich (Größenordnung 150–300 Zeilen `main.go` plus ein paar kleine Wiring-Helper); ab dieser Marke ist eine Aufteilung in mehrere Wiring-Pakete (`internal/wire/<feature>/`) zu erwägen.
 
 ---
@@ -249,7 +265,7 @@ linters:
               desc: driven adapter must not depend on driving adapter (LH-FA-ARCH-003)
 ```
 
-Mit M3 (T1..T4c) ist produktiver Code in allen sieben Schichten gelandet — jede `depguard`-Regel matcht jetzt mindestens ein Paket. Die Pro-Schicht-Verifikation ist mit M3-T5 abgeschlossen: `scripts/verify-depguard.sh` (Target `make verify-depguard`) injiziert pro Regel einen deklariert verbotenen Import, prüft `make lint` auf das erwartete `desc:` und revertiert. Slice-Plan: [`slice-m3-depguard-aktivierung-verifizieren`](../docs/plan/planning/done/slice-m3-depguard-aktivierung-verifizieren.md).
+Jede `depguard`-Regel matcht mindestens ein Paket im Produktiv-Code; die Pro-Schicht-Verifikation läuft per `scripts/verify-depguard.sh` (Target `make verify-depguard`), das pro Regel einen deklariert verbotenen Import injiziert, `make lint` auf das erwartete `desc:` prüft und die Stub-Datei revertiert.
 
 `//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `desc` dokumentiert (`LH-FA-ARCH-003`).
 
