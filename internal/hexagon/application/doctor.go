@@ -3,8 +3,11 @@ package application
 import (
 	"context"
 	"errors"
+	"fmt"
 	iofs "io/fs"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
@@ -21,6 +24,8 @@ import (
 // and just collects.
 type DoctorService struct {
 	fs     driven.FileSystem
+	git    driven.Git
+	docker driven.DockerProbe
 	logger driven.Logger
 }
 
@@ -28,16 +33,15 @@ type DoctorService struct {
 var _ driving.DoctorUseCase = (*DoctorService)(nil)
 
 // NewDoctorService constructs the service with the driven adapters
-// the M4-T2 checks need. logger accepts nil (routed to noopLogger)
-// so tests and dry-runs do not need a stub. Future tranches will add
-// more ports (Git, DockerProbe, YAMLCodec, Confirmer-free since
-// doctor is non-interactive); the constructor signature grows
-// accordingly.
-func NewDoctorService(fs driven.FileSystem, logger driven.Logger) *DoctorService {
+// the M4 checks need. logger accepts nil (routed to noopLogger) so
+// tests and dry-runs do not need a stub. Future tranches will add
+// more ports (YAMLCodec for T4/T5, devcontainer probe for T6); the
+// constructor signature grows accordingly.
+func NewDoctorService(fs driven.FileSystem, git driven.Git, docker driven.DockerProbe, logger driven.Logger) *DoctorService {
 	if logger == nil {
 		logger = noopLogger{}
 	}
-	return &DoctorService{fs: fs, logger: logger}
+	return &DoctorService{fs: fs, git: git, docker: docker, logger: logger}
 }
 
 // doctorCheckID enumerates the stable machine-readable IDs the
@@ -47,6 +51,19 @@ func NewDoctorService(fs driven.FileSystem, logger driven.Logger) *DoctorService
 // `fs.write-permissions`).
 const (
 	checkIDWritePermissions = "fs.write-permissions"
+	checkIDGitInstalled     = "git.installed"
+	checkIDDockerInstalled  = "docker.installed"
+	checkIDDockerReachable  = "docker.reachable"
+	checkIDComposeInstalled = "docker.compose.installed"
+)
+
+// Minimum versions per LH-FA-DIAG-002. The thresholds are MAJOR.MINOR
+// pairs; PATCH is informational only.
+const (
+	minDockerMajor  = 24
+	minDockerMinor  = 0
+	minComposeMajor = 2
+	minComposeMinor = 20
 )
 
 // Check runs every M4-T2 check against req.BaseDir and assembles
@@ -65,6 +82,10 @@ func (s *DoctorService) Check(ctx context.Context, req driving.DoctorRequest) (d
 	s.logger.Debug("doctor: starting checks", "baseDir", req.BaseDir)
 	items := []domain.Diagnostic{
 		s.checkWritePermissions(ctx, req.BaseDir),
+		s.checkGitInstalled(ctx),
+		s.checkDockerInstalled(ctx),
+		s.checkDockerReachable(ctx),
+		s.checkComposeInstalled(ctx),
 	}
 	report := domain.DiagnosticReport{Items: items}
 	s.logger.Info("doctor: checks complete",
@@ -120,4 +141,156 @@ func (s *DoctorService) checkWritePermissions(_ context.Context, baseDir string)
 		Severity: domain.SeverityOK,
 		Message:  "BaseDir is writable.",
 	}
+}
+
+// checkGitInstalled probes the git binary availability. Any error
+// from [driven.Git.Version] classifies as Error — the M3 init flow
+// relies on `git init`, so a missing git binary blocks the typical
+// LH-AK-001 use case.
+func (s *DoctorService) checkGitInstalled(ctx context.Context) domain.Diagnostic {
+	version, err := s.git.Version(ctx)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDGitInstalled,
+			Severity: domain.SeverityError,
+			Message:  "git binary not available: " + err.Error() + ".",
+			Hint:     "Install git (e.g. `apt install git`, `brew install git`).",
+		}
+	}
+	return domain.Diagnostic{
+		ID:       checkIDGitInstalled,
+		Severity: domain.SeverityOK,
+		Message:  "git " + version + " available.",
+	}
+}
+
+// checkDockerInstalled probes the docker client binary + version.
+// Missing binary → Error; present but below LH-FA-DIAG-002 minimum
+// (24.0) → Error; parseable but unrecognized semver → Warn (we
+// observed the binary but can't validate the version, so the user
+// should look). At-or-above the minimum → OK.
+func (s *DoctorService) checkDockerInstalled(ctx context.Context) domain.Diagnostic {
+	version, err := s.docker.Version(ctx)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDDockerInstalled,
+			Severity: domain.SeverityError,
+			Message:  "docker binary not available: " + err.Error() + ".",
+			Hint:     "Install Docker Desktop or Docker Engine (https://docs.docker.com/engine/install/).",
+		}
+	}
+	return classifyVersionAtLeast(checkIDDockerInstalled, "docker", version, minDockerMajor, minDockerMinor)
+}
+
+// checkDockerReachable probes the docker daemon socket. Reachability
+// failures classify as Error — every meaningful u-boot subcommand
+// (init, add, up, down, doctor itself for compose-validation) needs
+// the daemon eventually.
+func (s *DoctorService) checkDockerReachable(ctx context.Context) domain.Diagnostic {
+	if err := s.docker.Info(ctx); err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDDockerReachable,
+			Severity: domain.SeverityError,
+			Message:  "docker daemon is not reachable: " + err.Error() + ".",
+			Hint:     "Start Docker (or check /var/run/docker.sock permissions for the current user).",
+		}
+	}
+	return domain.Diagnostic{
+		ID:       checkIDDockerReachable,
+		Severity: domain.SeverityOK,
+		Message:  "docker daemon is reachable.",
+	}
+}
+
+// checkComposeInstalled probes the docker compose plugin + version.
+// Same classification logic as checkDockerInstalled, scoped to the
+// compose plugin (`docker compose version --short`).
+func (s *DoctorService) checkComposeInstalled(ctx context.Context) domain.Diagnostic {
+	version, err := s.docker.ComposeVersion(ctx)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDComposeInstalled,
+			Severity: domain.SeverityError,
+			Message:  "docker compose plugin not available: " + err.Error() + ".",
+			Hint:     "Install the Docker Compose v2 plugin (https://docs.docker.com/compose/install/linux/).",
+		}
+	}
+	return classifyVersionAtLeast(checkIDComposeInstalled, "docker compose", version, minComposeMajor, minComposeMinor)
+}
+
+// classifyVersionAtLeast builds the Diagnostic for a version-vs-
+// minimum comparison. Shared between `docker` and `docker compose`
+// (and reusable for any future semver-min check).
+//
+// Outcomes:
+//   - parse OK + at-or-above minimum → SeverityOK
+//   - parse OK + below minimum       → SeverityError with concrete versions in the message
+//   - parse fail                     → SeverityWarn (we saw the tool but can't validate)
+func classifyVersionAtLeast(id, label, version string, minMajor, minMinor int) domain.Diagnostic {
+	major, minor, ok := parseSemverMajorMinor(version)
+	if !ok {
+		return domain.Diagnostic{
+			ID:       id,
+			Severity: domain.SeverityWarn,
+			Message: fmt.Sprintf("%s reports unrecognized version %q (expected `<major>.<minor>.<patch>`).",
+				label, version),
+			Hint: fmt.Sprintf("Cannot validate against the LH-FA-DIAG-002 minimum %d.%d — verify manually.",
+				minMajor, minMinor),
+		}
+	}
+	if major < minMajor || (major == minMajor && minor < minMinor) {
+		return domain.Diagnostic{
+			ID:       id,
+			Severity: domain.SeverityError,
+			Message: fmt.Sprintf("%s %s is below the LH-FA-DIAG-002 minimum %d.%d.",
+				label, version, minMajor, minMinor),
+			Hint: fmt.Sprintf("Upgrade %s to %d.%d or newer.", label, minMajor, minMinor),
+		}
+	}
+	return domain.Diagnostic{
+		ID:       id,
+		Severity: domain.SeverityOK,
+		Message:  fmt.Sprintf("%s %s available (≥ %d.%d).", label, version, minMajor, minMinor),
+	}
+}
+
+// parseSemverMajorMinor extracts MAJOR + MINOR from a version string
+// like `"24.0.7"` or `"2.20.0-rc1"`. Returns ok=false when the input
+// has fewer than two dot-separated leading numeric components.
+//
+// MAJOR.MINOR is enough for the LH-FA-DIAG-002 thresholds (24.0 /
+// 2.20); PATCH and pre-release suffixes are informational only.
+//
+// The parser is stdlib-only (no semver library) — u-boot's needs are
+// narrow and pulling in `golang.org/x/mod/semver` (gomodguard-blocked
+// today) is not justified.
+func parseSemverMajorMinor(version string) (int, int, bool) {
+	parts := strings.SplitN(version, ".", 3)
+	if len(parts) < 2 {
+		return 0, 0, false
+	}
+	major, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return 0, 0, false
+	}
+	// MINOR can be followed by `-rcN`, `+build`, etc. Strip
+	// non-digit suffix at the first non-digit position.
+	minorRaw := trimNonDigitSuffix(parts[1])
+	minor, err := strconv.Atoi(minorRaw)
+	if err != nil {
+		return 0, 0, false
+	}
+	return major, minor, true
+}
+
+// trimNonDigitSuffix returns the prefix of s up to the first
+// non-digit character. `"20"` → `"20"`, `"20-rc1"` → `"20"`,
+// `"abc"` → `""`.
+func trimNonDigitSuffix(s string) string {
+	for i, r := range s {
+		if r < '0' || r > '9' {
+			return s[:i]
+		}
+	}
+	return s
 }

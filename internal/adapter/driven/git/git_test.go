@@ -68,3 +68,27 @@ func TestGit_IsRepository_MissingBinaryReturnsError(t *testing.T) {
 	}
 }
 
+func TestGit_Version_ParsesGitVersionPrefix(t *testing.T) {
+	gitAvailable(t)
+	got, err := git.New().Version(context.Background())
+	if err != nil {
+		t.Fatalf("Version: %v", err)
+	}
+	if got == "" {
+		t.Fatalf("Version returned empty string")
+	}
+	// The adapter strips the "git version " prefix; the result must
+	// start with a digit.
+	if got[0] < '0' || got[0] > '9' {
+		t.Errorf("Version prefix-strip broken: %q (expected leading digit)", got)
+	}
+}
+
+func TestGit_Version_MissingBinaryReturnsError(t *testing.T) {
+	g := git.WithBinary("/does/not/exist/git-binary")
+	_, err := g.Version(context.Background())
+	if err == nil {
+		t.Fatalf("Version with missing binary: expected error, got nil")
+	}
+}
+

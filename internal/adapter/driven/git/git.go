@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 )
@@ -65,4 +66,30 @@ func (g Git) Init(ctx context.Context, dir string) error {
 		return fmt.Errorf("git init failed: %w (output: %s)", err, string(out))
 	}
 	return nil
+}
+
+// Version runs `git --version` and returns the bare version string
+// (`"2.43.0"`). The raw `git --version` output is typically
+// `"git version 2.43.0\n"`; the adapter strips the `"git version "`
+// prefix and trims whitespace so the application layer can pass the
+// string straight into a semver comparator.
+//
+// A non-nil error signals that the git binary is unavailable or
+// failed to run — the application maps that to `git.installed: error`.
+func (g Git) Version(ctx context.Context) (string, error) {
+	cmd := exec.CommandContext(ctx, g.binary, "--version")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("git --version failed: %w (output: %s)", err, string(out))
+	}
+	raw := strings.TrimSpace(string(out))
+	// Typical output: "git version 2.43.0" — strip the prefix.
+	const prefix = "git version "
+	if strings.HasPrefix(raw, prefix) {
+		return strings.TrimSpace(raw[len(prefix):]), nil
+	}
+	// Unrecognized format: return the trimmed output verbatim so the
+	// service can still log it; the semver parser will simply mark it
+	// invalid downstream.
+	return raw, nil
 }

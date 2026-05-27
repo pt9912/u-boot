@@ -19,6 +19,7 @@ import (
 	"syscall"
 
 	"github.com/pt9912/u-boot/internal/adapter/driven/confirm"
+	"github.com/pt9912/u-boot/internal/adapter/driven/docker"
 	"github.com/pt9912/u-boot/internal/adapter/driven/fs"
 	"github.com/pt9912/u-boot/internal/adapter/driven/git"
 	"github.com/pt9912/u-boot/internal/adapter/driven/logger"
@@ -63,6 +64,10 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// arrives with the M4 doctor slice; for M3+M4-soft-detection
 	// runs the logger emits only when something goes wrong.
 	logAdapter := logger.New(stderr, logger.FormatText, slog.LevelInfo)
+	// The docker probe (LH-FA-DIAG-002) shells out to `docker` for
+	// read-only diagnostics (version + reachability + compose version).
+	// Used by the doctor service; M6's DockerEngine port stays separate.
+	dockerAdapter := docker.New()
 
 	// Application services. The text-progress adapter renders
 	// LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 affected-paths
@@ -72,6 +77,11 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// distinct even when a caller pipes them together. Tests that
 	// wrap stdout in a buffer must not interpose a separate flush.
 	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter)
+	// The doctor service is wired here even though no CLI subcommand
+	// consumes it yet (T7 will add `u-boot doctor`); building it now
+	// keeps the wiring graph consistent and the CLI integration
+	// trivial when T7 lands. _ assignment until then.
+	_ = application.NewDoctorService(fsAdapter, gitAdapter, dockerAdapter, logAdapter)
 
 	// Driving adapter (CLI).
 	app := cli.New(version, initSvc)

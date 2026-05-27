@@ -477,14 +477,17 @@ func (p *fakeProgress) AffectedFiles(baseDir string, rows []driven.AffectedFile)
 	p.calls = append(p.calls, fakeProgressCall{BaseDir: baseDir, Rows: rowsCopy})
 }
 
-// fakeGit records IsRepository / Init calls and lets each test
-// configure the IsRepository return values and Init error.
+// fakeGit records IsRepository / Init / Version calls and lets each
+// test configure the return values + errors.
 type fakeGit struct {
 	isRepoCalls []string
 	initCalls   []string
+	versionCalls int
 	isRepo      bool
 	isRepoErr   error
 	initErr     error
+	version     string
+	versionErr  error
 }
 
 func (f *fakeGit) IsRepository(_ context.Context, dir string) (bool, error) {
@@ -495,6 +498,41 @@ func (f *fakeGit) IsRepository(_ context.Context, dir string) (bool, error) {
 func (f *fakeGit) Init(_ context.Context, dir string) error {
 	f.initCalls = append(f.initCalls, dir)
 	return f.initErr
+}
+
+func (f *fakeGit) Version(_ context.Context) (string, error) {
+	f.versionCalls++
+	return f.version, f.versionErr
+}
+
+// fakeDockerProbe is the in-memory DockerProbe used by Doctor-service
+// tests. Each method has a separate value+error pair so tests can
+// dial in arbitrary combinations (e.g. binary present but daemon
+// unreachable: Version OK, Info errors).
+type fakeDockerProbe struct {
+	versionCalls        int
+	infoCalls           int
+	composeVersionCalls int
+	version             string
+	versionErr          error
+	infoErr             error
+	composeVersion      string
+	composeVersionErr   error
+}
+
+func (p *fakeDockerProbe) Version(_ context.Context) (string, error) {
+	p.versionCalls++
+	return p.version, p.versionErr
+}
+
+func (p *fakeDockerProbe) Info(_ context.Context) error {
+	p.infoCalls++
+	return p.infoErr
+}
+
+func (p *fakeDockerProbe) ComposeVersion(_ context.Context) (string, error) {
+	p.composeVersionCalls++
+	return p.composeVersion, p.composeVersionErr
 }
 
 // fakeConfirmer records every ConfirmTreatAsExisting call and returns

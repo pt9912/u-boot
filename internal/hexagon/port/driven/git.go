@@ -23,4 +23,13 @@ type Git interface {
 	// — the caller is responsible for the IsRepository pre-check
 	// (LH-FA-INIT-007).
 	Init(ctx context.Context, dir string) error
+
+	// Version returns the installed git version string (e.g.
+	// `"2.43.0"`). A non-nil error signals that the git binary is not
+	// available — used by the M4 doctor's `git.installed` check to
+	// distinguish "git missing" from "git present but with a quirk".
+	// The CLI-level format of the underlying `git --version` output
+	// (typically `"git version 2.43.0"`) is parsed by the adapter so
+	// the application layer sees only the bare version number.
+	Version(ctx context.Context) (string, error)
 }
