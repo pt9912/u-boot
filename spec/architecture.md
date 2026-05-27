@@ -80,10 +80,11 @@ Interfaces, über die u-boot von außen angesprochen wird.
 - **Inhalt:**
   - `InitProjectUseCase` mit `InitProjectRequest` (`Name`/`BaseDir`/`SkipGit`/`Force`/`Backup`/`AssumeExisting`/`NoInteractive`) und `InitProjectResponse` (`Project`/`Created`/`Backups []BackupAction`).
   - `DoctorUseCase` mit `DoctorRequest` (`BaseDir`) und `DoctorResponse` (`Report domain.DiagnosticReport`). Per Kontrakt liefert `Check` immer einen Report; check-failures sind `SeverityError`-Diagnostics, kein Go-error. Severity-Klassifikation + Exit-Code-Mapping (`--strict`) übernimmt der CLI-Adapter.
-- **Sentinels** für die LH-FA-CLI-006-Exit-Code-Klassifikation:
-  - **Code 10 (Validierung):** `ErrProjectExists` (LH-FA-INIT-004 Marker u-boot.yaml/compose.yaml/.env.example), `ErrFileExists` (Non-Marker-Kollision), `ErrBaseDirMissing` (LH-AK-001 oder leeres `BaseDir`-Feld; geteilt zwischen `InitProjectUseCase` und `DoctorUseCase`), `ErrForceRequiresBackup` (LH-FA-INIT-005 §619), `ErrBackupUnsupportedKind` (Symlink-Reject).
+  - `AddServiceUseCase` mit `AddServiceRequest` (`BaseDir`/`ServiceName`) und `AddServiceResponse` (`ServiceName`/`PriorState`/`State`/`Changed []string`). Idempotenz-garantiert: Zweit-Add mit gleichen Args ist no-op + nil-error (`PriorState=Active`, `Changed=nil`).
+- **Sentinels** für die LH-FA-CLI-006-Exit-Code-Klassifikation (liegen im `driving`-Paket statt im `application`-Paket, damit der CLI-Adapter via `errors.Is` auf sie verzweigt, ohne `application` zu importieren — LH-FA-ARCH-003):
+  - **Code 10 (Validierung):** `ErrProjectExists` (LH-FA-INIT-004 Marker u-boot.yaml/compose.yaml/.env.example), `ErrFileExists` (Non-Marker-Kollision), `ErrBaseDirMissing` (LH-AK-001 oder leeres `BaseDir`-Feld; geteilt zwischen `InitProjectUseCase` und `DoctorUseCase`), `ErrForceRequiresBackup` (LH-FA-INIT-005 §619), `ErrBackupUnsupportedKind` (Symlink-Reject), `ErrProjectNotInitialized` (LH-FA-ADD-001 — kein/unparsbares u-boot.yaml), `ErrServiceUnsupported` (LH-FA-ADD-002 — ServiceName syntaktisch valide aber nicht im built-in catalog), `ErrServiceInconsistent` (LH-FA-ADD-005 §896 — orphan compose-block ohne YAML-Anker). Plus die `domain`-Validierungs-Sentinels `ErrInvalidProjectName` und `ErrInvalidServiceName`.
   - **Code 14 (Technischer FS-Fehler):** `ErrBackupSourceMissing` (Race zwischen Caller-Check und Backup), `ErrBackupSuffixExhausted` (.bak[.0..999] alle belegt).
-- **Vorgesehene Erweiterungen:** `AddServiceUseCase`, `RemoveServiceUseCase`, `LifecycleUseCase` (Up/Down), `GenerateUseCase`, `ConfigUseCase`.
+- **Vorgesehene Erweiterungen:** `RemoveServiceUseCase`, `LifecycleUseCase` (Up/Down), `GenerateUseCase`, `ConfigUseCase`.
 - **Implementiert von:** Strukturen in `hexagon/application`.
 - **Verwendet von:** `adapter/driving/*` (z. B. `cli/`).
 

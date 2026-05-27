@@ -57,17 +57,22 @@ type AddServiceResponse struct {
 	State domain.ServiceState
 
 	// Changed lists the project-relative paths the use case mutated
-	// (`compose.yaml`, `.env.example`, `u-boot.yaml`). Empty when
-	// [PriorState] was [domain.ServiceStateActive] — that path runs
-	// no writes.
+	// (`compose.yaml`, `.env.example`, `u-boot.yaml`). Non-empty on
+	// every successful transition; empty exactly when [PriorState]
+	// was [domain.ServiceStateActive] (no-op idempotent path).
 	Changed []string
 }
+
+// All Add sentinels below live in the `driving` package (not in
+// `application`) so the CLI adapter can branch on them via
+// [errors.Is] without importing `application` — the LH-FA-ARCH-003
+// depguard rule forbids that cross-layer import. The CLI maps each
+// to LH-FA-CLI-006 exit code 10 (validation).
 
 // ErrServiceUnsupported signals that the requested service name is
 // valid syntactically (passes [domain.NewServiceName]) but is not
 // in the built-in catalogue the application service knows how to
-// add. MVP catalogue: only `postgres`. The CLI maps this to
-// LH-FA-CLI-006 exit code 10 (validation).
+// add. MVP catalogue: only `postgres`.
 var ErrServiceUnsupported = errors.New("service not supported")
 
 // ErrServiceInconsistent signals an LH-FA-ADD-005-§896 condition:
@@ -77,19 +82,15 @@ var ErrServiceUnsupported = errors.New("service not supported")
 // removed but the orphan compose-block survived (typically a
 // partial cleanup). The add use-case refuses to silently re-anchor
 // because doing so could be the wrong recovery for an
-// intentionally-different state. The CLI maps it to exit code 10
-// with a repair hint pointing at manual cleanup.
-//
-// Sentinel kept here (not in the application package) so the CLI
-// adapter can branch on [errors.Is] without an `application` import
-// (LH-FA-ARCH-003).
+// intentionally-different state. The CLI surfaces it with a repair
+// hint pointing at manual cleanup.
 var ErrServiceInconsistent = errors.New("service state inconsistent")
 
 // ErrProjectNotInitialized signals that BaseDir contains no
 // `u-boot.yaml` (or one that cannot be parsed into the expected
 // schema). LH-FA-ADD-001 requires an initialized project; the use
-// case refuses to invent a config. The CLI maps it to exit code 10
-// with a "run u-boot init" hint.
+// case refuses to invent a config. The CLI surfaces it with a
+// "run u-boot init" hint.
 var ErrProjectNotInitialized = errors.New("project not initialized")
 
 // AddServiceUseCase is the driving-port for `u-boot add <service>`.
@@ -98,9 +99,10 @@ var ErrProjectNotInitialized = errors.New("project not initialized")
 //
 // Contract:
 //
-//   - On success the response always has State =
-//     [domain.ServiceStateActive] and a non-empty Changed slice
-//     (unless PriorState was already Active).
+//   - On success State is [domain.ServiceStateActive]. Changed is
+//     non-empty on every state-transition (Unregistered/Deactivated/
+//     inconsistent-block → Active) and empty exactly when
+//     PriorState was already Active (no-op idempotent path).
 //   - On failure the response is the zero value and the error wraps
 //     one of the sentinels above (or [domain.ErrInvalidServiceName]
 //     for a syntactically invalid name).
