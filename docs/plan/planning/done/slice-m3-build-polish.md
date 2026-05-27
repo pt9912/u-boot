@@ -1,7 +1,7 @@
 # Slice M3: Build-Polish (govulncheck-Pin + PROGRESS_FLAG)
 
 > **Status:** Done
-> **DoD:** Polish-Commit (siehe `git log --grep=m3-build-polish`)
+> **DoD:** Commit `987c164` + Review-Fix-Commit
 
 ## Auslöser
 
