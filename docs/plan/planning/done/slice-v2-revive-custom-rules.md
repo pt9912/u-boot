@@ -1,7 +1,7 @@
 # Slice V2: revive Custom-Rules-Profil
 
 > **Status:** Done
-> **DoD:** Commit `<TBD>` (wird im Folge-Fixup konkretisiert)
+> **DoD:** Commit `98e5c9c`
 
 ## Auslöser
 
