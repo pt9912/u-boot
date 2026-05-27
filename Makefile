@@ -13,7 +13,7 @@
 
 IMAGE                   ?= u-boot
 GO_VERSION              ?= 1.26.3
-GOLANGCI_LINT_VERSION   ?= v2.12.1
+GOLANGCI_LINT_VERSION   ?= v2.12.2
 GOVULNCHECK_VERSION     ?= v1.1.4
 THRESHOLD               ?= 90
 

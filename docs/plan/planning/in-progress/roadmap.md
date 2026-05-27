@@ -36,7 +36,7 @@ Disziplin-Verstoß.
 | ----- | -------- | ----- | ------ |
 | [`slice-m3-init-flow`](../done/slice-m3-init-flow.md) | `LH-FA-INIT-*` initialer Flow + zwei M3-Carveouts (Coverage ✅, depguard ✅) | M3 | Done |
 | [`slice-m3-depguard-aktivierung-verifizieren`](../done/slice-m3-depguard-aktivierung-verifizieren.md) | `LH-FA-ARCH-003` depguard-Regeln matchen bisher nichts | M3-T5 | Done |
-| [`slice-m3-gomodguard-rules`](../open/slice-m3-gomodguard-rules.md) | `gomodguard_v2.blocked: {}` leer; yaml.v3 schon drin, Cobra kommt mit T3 | M3-T5 | Open |
+| [`slice-m3-gomodguard-rules`](../done/slice-m3-gomodguard-rules.md) | `gomodguard_v2.blocked: {}` leer; yaml.v3 schon drin, Cobra kommt mit T3 | M3-followup | Done |
 | [`slice-m3-branch-protection-checkliste`](../open/slice-m3-branch-protection-checkliste.md) | ADR-0004 Folgepunkt Branch-Protection nicht versioniert; soll vor erstem externen PR existieren | M3 | Open |
 | [`slice-m3-retroaktive-slice-plaene`](../open/slice-m3-retroaktive-slice-plaene.md) | Bootstrap-Slices (M1/M2/M2b/M2c/M2d) liegen nicht in `done/` | M3-T5 | Open |
 | [`slice-m4-soft-existing-detection`](../open/slice-m4-soft-existing-detection.md) | `LH-FA-INIT-004` Soft-Erkennung + `--assume-existing` | M4 | Open |

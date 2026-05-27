@@ -99,10 +99,29 @@ linters:
       min-complexity: 5
 
     gomodguard_v2:
-      # No external module rules yet — bootstrap codebase has no
-      # third-party dependencies. Rules will be defined once
-      # spf13/cobra, gopkg.in/yaml.v3, etc. land in go.mod (ADR-0003).
-      blocked: {}
+      # Blocked modules per LH-QA-004 — keep the third-party surface
+      # tight and aligned with the project's stdlib-first decisions.
+      # v2 schema: `blocked` is a flat list of {module, recommendations,
+      # reason} objects. Add a row whenever a new "anti-module" becomes
+      # plausible.
+      blocked:
+        - module: gopkg.in/yaml.v2
+          recommendations:
+            - gopkg.in/yaml.v3
+          reason: "v2 is feature-frozen; the project standardized on v3 with M3-T1 (driven YAML codec adapter)."
+        - module: github.com/pkg/errors
+          recommendations:
+            - errors
+            - fmt
+          reason: "stdlib (errors.Is/As/Unwrap + wrap-aware fmt.Errorf) covers all pkg/errors features since Go 1.13."
+        - module: github.com/sirupsen/logrus
+          recommendations:
+            - log/slog
+          reason: "Project standardizes on log/slog via the configured logging port (slice-m4-logging-port)."
+        - module: go.uber.org/zap
+          recommendations:
+            - log/slog
+          reason: "Same baseline as logrus — slog is the stdlib logging standard (slice-m4-logging-port)."
 
     depguard:
       # Layer rules per LH-FA-ARCH-003 / spec/architecture.md §4.
