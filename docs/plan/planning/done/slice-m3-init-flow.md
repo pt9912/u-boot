@@ -99,7 +99,10 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
      `Mkdir`/`WriteFileExclusive` + Race-Retry-Loop. Sentinels
      `ErrBackupSourceMissing`/`ErrBackupSuffixExhausted`/
      `ErrBackupUnsupportedKind`/`ErrBackupTooLarge` in der
-     Driving-Port verankert, `cli.ExitCode` mit Code 14
+     Driving-Port verankert (`ErrBackupTooLarge` ist seit
+     [`slice-v1-backup-streaming-copy`](slice-v1-backup-streaming-copy.md)
+     aus dem Sentinel-Set entfernt; der Cap und das Sentinel waren
+     temporäre M3-T4a-MVP-Konstrukte), `cli.ExitCode` mit Code 14
      (Filesystem-technisch) erweitert. Fakes vollständig überarbeitet
      (Lstat + Modus-Preservation + Symlink-Modellierung +
      Ancestor-Recording bei `WriteFile`/`MkdirAll`). 24 Tests in

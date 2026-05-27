@@ -82,6 +82,14 @@ Eintrag in dieser ADR-Folgesektion plus einen `Why:` im
   bleibt unser Profil unverändert.
 - **Maintenance:** jede revive-Rule-Hebung muss explizit gemacht
   werden; das ist gewollt — kein „silent default-bump".
+- **Verifikations-Pflicht beim Pin-Bump:** die Liste der 24 Defaults
+  in `.golangci.yml` wurde gegen revive's Default-Set zum Zeitpunkt
+  dieses ADR (golangci-lint v2.12.2, revive bundled) festgelegt. Bei
+  jedem Hebung des `GOLANGCI_LINT_VERSION`-Pins muss gegen
+  `revive --config <empty>` oder die golangci-lint-Release-Notes
+  geprüft werden, ob neue Default-Regeln dazugekommen sind, die wir
+  haben oder explizit verwerfen wollen. Sonst kann uns ein
+  Default-Set-Wachstum entgehen.
 
 ## Verworfen
 

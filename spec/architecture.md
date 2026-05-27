@@ -77,7 +77,7 @@ Interfaces, über die u-boot von außen angesprochen wird.
 
 - **Aktuelle Inhalte (M3-T4):** `InitProjectUseCase` mit `InitProjectRequest` (`Name`/`BaseDir`/`SkipGit` aus T1–T3 plus `Force`/`Backup`/`AssumeExisting` aus T4) und `InitProjectResponse` (`Project`/`Created`/`Backups []BackupAction`). Sentinels für Re-Init und LH-FA-CLI-006-Mapping:
   - **Code 10 (Validierung):** `ErrProjectExists` (LH-FA-INIT-004 Marker u-boot.yaml/compose.yaml/.env.example), `ErrFileExists` (Non-Marker-Kollision), `ErrBaseDirMissing` (LH-AK-001), `ErrForceRequiresBackup` (LH-FA-INIT-005 §619), `ErrBackupUnsupportedKind` (Symlink-Reject).
-  - **Code 14 (Technischer FS-Fehler):** `ErrBackupSourceMissing` (Race zwischen Caller-Check und Backup), `ErrBackupSuffixExhausted` (.bak[.0..999] alle belegt), `ErrBackupTooLarge` (Datei > MVP-Cap 256 MiB).
+  - **Code 14 (Technischer FS-Fehler):** `ErrBackupSourceMissing` (Race zwischen Caller-Check und Backup), `ErrBackupSuffixExhausted` (.bak[.0..999] alle belegt). Den vormaligen `ErrBackupTooLarge` (Datei > MVP-Cap 256 MiB) hat der Streaming-Copy-Slice [`slice-v1-backup-streaming-copy`](../docs/plan/planning/done/slice-v1-backup-streaming-copy.md) entfernt.
 - **Geplante Erweiterungen:** `AddServiceUseCase`, `RemoveServiceUseCase`, `LifecycleUseCase`, `DoctorUseCase`, `GenerateUseCase`, `ConfigUseCase`.
 - **Implementiert von:** Strukturen in `hexagon/application`.
 - **Verwendet von:** `adapter/driving/*` (z. B. `cli/`).

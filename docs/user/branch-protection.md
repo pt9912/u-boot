@@ -32,9 +32,10 @@ ausgeführt sein.
    Kommentare müssen aufgelöst sein, bevor gemerged werden darf).
 6. **Restrict who can push to matching branches:** für Solo-Projekt
    irrelevant; bei mehreren Contributors einschränken.
-7. **Rules applied to everyone including administrators:** **aktivieren** —
-   sonst kann der Repo-Owner die Schutzregeln umgehen, was den Zweck
-   aushebelt.
+7. **Do not allow bypassing the above settings:** **aktivieren** —
+   das ist der Toggle in der GitHub-UI; aktivieren bedeutet „Schutz-
+   regeln gelten auch für Admins / Repo-Owner". Ohne diesen Toggle
+   kann der Repo-Owner die Regeln umgehen, was den Zweck aushebelt.
 8. **Allow force pushes:** **deaktivieren** (Default).
 9. **Allow deletions:** **deaktivieren**.
 10. Optional: **Require linear history:** aktivieren, wenn das Projekt

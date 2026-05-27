@@ -5,6 +5,7 @@ import (
 	iofs "io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/pt9912/u-boot/internal/adapter/driven/fs"
@@ -340,16 +341,20 @@ func TestFS_CopyExclusive_FailsOnExisting(t *testing.T) {
 	}
 }
 
-func TestFS_Copy_LargeFile_DoesNotOverallocate(t *testing.T) {
-	// Why: streaming-copy means the in-process memory must not scale
-	// with file size. Uses a sparse 1-GiB file via os.Truncate (no
-	// 1 GiB of bytes actually written to disk; the kernel records
-	// the hole). io.Copy reads the sparse zeros at ~32 KiB chunks;
-	// the test fails fast if Copy were re-implemented to read the
-	// whole file into memory (allocations would be observable via
-	// runtime.MemStats, but the simpler proof is: the test runs at
-	// all without the host running out of address space — sparse
-	// allocation works the same way for the temp dir).
+func TestFS_Copy_LargeFile_BoundedMemoryFootprint(t *testing.T) {
+	// Why: streaming-copy must not scale in-process memory with file
+	// size. Sets up a sparse 1-GiB source via os.Truncate (the kernel
+	// records the hole; no 1 GiB of bytes actually written) and
+	// measures heap-alloc-delta around the Copy call via
+	// runtime.MemStats. A streaming implementation should stay well
+	// under 100 MiB of new allocation (io.Copy's internal buffer is
+	// 32 KiB per iteration, all reusable); a ReadFile+WriteFile
+	// re-regression would allocate ~1 GiB and trip the assert.
+	//
+	// The threshold (100 MiB) is generous to avoid flake from GC
+	// timing — the real ReadFile+WriteFile path would be off by an
+	// order of magnitude, so a one-order-of-magnitude check is
+	// reliable.
 	dir := t.TempDir()
 	src := filepath.Join(dir, "huge.bin")
 	f, err := os.Create(src)
@@ -366,9 +371,21 @@ func TestFS_Copy_LargeFile_DoesNotOverallocate(t *testing.T) {
 	dst := filepath.Join(dir, "huge.bak")
 	adapter := fs.New()
 
+	runtime.GC()
+	var before runtime.MemStats
+	runtime.ReadMemStats(&before)
+
 	if err := adapter.Copy(src, dst, 0o644); err != nil {
 		t.Fatalf("Copy huge: %v", err)
 	}
+
+	var after runtime.MemStats
+	runtime.ReadMemStats(&after)
+	const memBound = 100 << 20 // 100 MiB
+	if delta := after.TotalAlloc - before.TotalAlloc; delta > memBound {
+		t.Errorf("Copy(1 GiB) allocated %d bytes (cap %d) — streaming regression?", delta, memBound)
+	}
+
 	info, err := os.Stat(dst)
 	if err != nil {
 		t.Fatalf("stat dst: %v", err)
