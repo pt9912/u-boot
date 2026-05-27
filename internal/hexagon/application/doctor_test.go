@@ -47,6 +47,9 @@ func TestDoctor_RequiresBaseDir(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for empty BaseDir, got nil")
 	}
+	if !errors.Is(err, driving.ErrBaseDirMissing) {
+		t.Errorf("err = %v, want wrapped ErrBaseDirMissing (shared sentinel with init)", err)
+	}
 }
 
 func TestDoctor_WritePermissions_OKOnWritableDir(t *testing.T) {

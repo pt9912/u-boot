@@ -114,16 +114,18 @@ type InitProjectResponse struct {
 // the M3-T4 slice adds `--backup`/`--force` handling.
 var ErrProjectExists = errors.New("project already initialized")
 
-// ErrBaseDirMissing signals that req.BaseDir does not exist on the
-// filesystem. The acceptance flow LH-AK-001 has the user create the
-// directory (`mkdir demo && cd demo`); the use-case refuses to invent
-// it because a typoed BaseDir would otherwise quietly initialize an
-// unintended path under the typo.
+// ErrBaseDirMissing signals that req.BaseDir is empty or does not
+// exist on the filesystem. The acceptance flow LH-AK-001 has the user
+// create the directory (`mkdir demo && cd demo`); the use-case
+// refuses to invent it because a typoed BaseDir would otherwise
+// quietly initialize an unintended path under the typo.
 //
 // Sentinel lives in the driving port (not in the application package)
 // so the CLI adapter can map it to its LH-FA-CLI-006 exit code
 // without violating the depguard rule that forbids adapter→application
-// imports (LH-FA-ARCH-003).
+// imports (LH-FA-ARCH-003). Shared between [InitProjectUseCase] and
+// [DoctorUseCase] — both reject a missing BaseDir with the same code
+// (LH-FA-CLI-006 §10 validation).
 var ErrBaseDirMissing = errors.New("base directory does not exist")
 
 // ErrBackupSourceMissing signals that the path passed to the backup

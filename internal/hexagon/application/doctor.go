@@ -77,7 +77,11 @@ const (
 // report, not Go errors.
 func (s *DoctorService) Check(ctx context.Context, req driving.DoctorRequest) (driving.DoctorResponse, error) {
 	if req.BaseDir == "" {
-		return driving.DoctorResponse{}, errors.New("BaseDir is required")
+		// Use the shared ErrBaseDirMissing sentinel — same semantics
+		// as [InitProjectService] for the LH-FA-CLI-006 §10
+		// validation mapping. Doctor never invents a default BaseDir
+		// (would silently diagnose an unintended path).
+		return driving.DoctorResponse{}, fmt.Errorf("%w: doctor.BaseDir is empty", driving.ErrBaseDirMissing)
 	}
 	s.logger.Debug("doctor: starting checks", "baseDir", req.BaseDir)
 	items := []domain.Diagnostic{
