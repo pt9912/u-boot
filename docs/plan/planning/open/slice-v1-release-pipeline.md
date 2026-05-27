@@ -9,9 +9,11 @@ ADR-0004 schließt drei bewusst aus dem M2c-CI aus
    dem Release-Slice, gekoppelt an `LH-OPEN-002` (Paketierung).
 2. Trivy-Image-Scan — optionaler dritter Job, der das
    `runtime`-Image scannt und CRITICAL/HIGH-Findings blockiert.
-3. **Branch-Protection** im GitHub-UI — Required-Status-Checks für
-   `gates` und `security-gates` sind manuell zu aktivieren, sonst sind
-   beide Jobs zwar grün, aber nicht PR-blockierend (`LH-QA-003`).
+3. **Branch-Protection** im GitHub-UI — Required-Status-Checks für die
+   tatsächlichen GitHub-Check-Namen `gates (lint + test +
+   coverage-gate)` und `security-gates (govulncheck)` sind manuell zu
+   aktivieren, sonst sind beide Jobs zwar grün, aber nicht
+   PR-blockierend (`LH-QA-003`).
    Bei M3-Anker-Triage 2026-05-27 in diesen Slice gebündelt, weil die
    gleiche Sitzung (erster Release / erster externer PR) auch
    Image-Publish + Trivy aufsetzt; Standalone wäre Disziplin-Overhead.
@@ -40,11 +42,13 @@ Release-Teile bleiben als offene Restarbeit in diesem Slice.
 
 - `.github/workflows/publish.yml`:
   - Trigger: `push` von Tags `v*`.
-  - Früher Validierungsstep prüft SemVer-Tags (`vMAJOR.MINOR.PATCH`,
-    ggf. mit SemVer-Prerelease/Build-Metadaten) und bricht bei anderen
-    `v*`-Tags vor Login/Build/Push ab.
+  - Früher Validierungsstep prüft Publish-SemVer-Tags
+    (`vMAJOR.MINOR.PATCH`, ggf. mit SemVer-Prerelease, aber ohne
+    Build-Metadaten, weil `+` kein gültiges Docker/GHCR-Tag-Zeichen ist)
+    und bricht bei anderen `v*`-Tags vor Login/Build/Push ab.
   - Job baut das Runtime-Image über `make build`, pushed nach
-    `ghcr.io/pt9912/u-boot:<version>` und `:latest`.
+    `ghcr.io/pt9912/u-boot:<version>`; `:latest` wird nur für stabile
+    `vMAJOR.MINOR.PATCH`-Tags gesetzt, nicht für Prereleases.
   - `permissions: contents: read, packages: write` (Per-Job minimal).
   - SHA-pinned `docker/login-action`, `docker/build-push-action` o. ä.
   - OCI-Labels aus `LH-FA-BUILD-002` sind im gepushten Image gesetzt.
@@ -53,7 +57,10 @@ Release-Teile bleiben als offene Restarbeit in diesem Slice.
   build` `trivy image --severity HIGH,CRITICAL --exit-code 1`
   ausführt.
 - Branch-Protection nimmt alle aktivierten PR-Gates auf:
-  - Mindestmenge beim externen-PR-Pfad: `gates` und `security-gates`.
+  - Mindestmenge beim externen-PR-Pfad: `gates (lint + test +
+    coverage-gate)` und `security-gates (govulncheck)`; falls der
+    Workflow später auf kürzere Job-Namen umgestellt wird, muss die
+    Checkliste die dann tatsächlichen GitHub-Check-Namen verwenden.
   - Sobald `image-scan` existiert: zusätzlich `image-scan`.
 - `docs/user/quality.md` §4 und §6 werden um die neuen Workflows
   erweitert; die bisherige Aussage "Trivy/SBOM folgen mit dem
@@ -66,8 +73,8 @@ Release-Teile bleiben als offene Restarbeit in diesem Slice.
 - `docs/user/branch-protection.md` beschreibt Schritt-für-Schritt die
   einmalige UI-Aktivierung:
   - Settings → Branches → Add rule für `main`.
-  - Required status checks: `gates`, `security-gates` und, sobald
-    vorhanden, `image-scan`.
+  - Required status checks: `gates (lint + test + coverage-gate)`,
+    `security-gates (govulncheck)` und, sobald vorhanden, `image-scan`.
   - Require PR before merging (Solo-Projekt: 0 Approvals, dokumentiert).
   - Block force-pushes auf `main`, block branch deletion.
   - Optional: linear history erzwingen.

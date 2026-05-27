@@ -471,3 +471,25 @@ func (c *fakeConfirmer) ConfirmTreatAsExisting(_ context.Context, baseDir string
 	c.calls = append(c.calls, fakeConfirmerCall{BaseDir: baseDir, Indicators: append([]string{}, indicators...)})
 	return c.answer, c.err
 }
+
+// fakeLogger records every Debug/Info/Warn/Error call so tests can
+// assert on the LH-QA-004 driven.Logger port usage. args are
+// captured verbatim (slog's alternating key/value convention).
+type fakeLogger struct {
+	entries []fakeLogEntry
+}
+
+type fakeLogEntry struct {
+	Level string
+	Msg   string
+	Args  []any
+}
+
+func (l *fakeLogger) Debug(msg string, args ...any) { l.record("DEBUG", msg, args) }
+func (l *fakeLogger) Info(msg string, args ...any)  { l.record("INFO", msg, args) }
+func (l *fakeLogger) Warn(msg string, args ...any)  { l.record("WARN", msg, args) }
+func (l *fakeLogger) Error(msg string, args ...any) { l.record("ERROR", msg, args) }
+
+func (l *fakeLogger) record(level, msg string, args []any) {
+	l.entries = append(l.entries, fakeLogEntry{Level: level, Msg: msg, Args: append([]any{}, args...)})
+}

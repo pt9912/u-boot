@@ -13,6 +13,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -20,6 +21,7 @@ import (
 	"github.com/pt9912/u-boot/internal/adapter/driven/confirm"
 	"github.com/pt9912/u-boot/internal/adapter/driven/fs"
 	"github.com/pt9912/u-boot/internal/adapter/driven/git"
+	"github.com/pt9912/u-boot/internal/adapter/driven/logger"
 	"github.com/pt9912/u-boot/internal/adapter/driven/progress"
 	"github.com/pt9912/u-boot/internal/adapter/driven/yaml"
 	"github.com/pt9912/u-boot/internal/adapter/driving/cli"
@@ -56,6 +58,11 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// facing UI, not machine-readable output) and reads stdin for the
 	// answer — LH-FA-INIT-004 soft-existing-detection.
 	confirmAdapter := confirm.New(os.Stdin, stderr)
+	// The logger adapter (LH-QA-004) renders to stderr at Info level
+	// in text form by default. `--verbose` / `--json` flag wiring
+	// arrives with the M4 doctor slice; for M3+M4-soft-detection
+	// runs the logger emits only when something goes wrong.
+	logAdapter := logger.New(stderr, logger.FormatText, slog.LevelInfo)
 
 	// Application services. The text-progress adapter renders
 	// LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 affected-paths
@@ -64,7 +71,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// go to stderr via the `fmt.Fprintf` below so the streams stay
 	// distinct even when a caller pipes them together. Tests that
 	// wrap stdout in a buffer must not interpose a separate flush.
-	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter)
+	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter)
 
 	// Driving adapter (CLI).
 	app := cli.New(version, initSvc)

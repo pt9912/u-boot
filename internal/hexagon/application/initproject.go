@@ -56,13 +56,15 @@ type ubootYAMLConfig struct {
 
 // InitProjectService implements [driving.InitProjectUseCase]. It
 // orchestrates the driven ports (FileSystem, YAMLCodec, Git,
-// ProgressPort, Confirmer) to realize the LH-FA-INIT-001..007 flow.
+// ProgressPort, Confirmer, Logger) to realize the
+// LH-FA-INIT-001..007 flow.
 type InitProjectService struct {
 	fs        driven.FileSystem
 	yaml      driven.YAMLCodec
 	git       driven.Git
 	progress  driven.ProgressPort
 	confirmer driven.Confirmer
+	logger    driven.Logger
 }
 
 // Static check: InitProjectService satisfies the driving port.
@@ -75,23 +77,26 @@ var _ driving.InitProjectUseCase = (*InitProjectService)(nil)
 // write happens on re-init. confirmer is the [driven.Confirmer]
 // used by the M4 soft-existing-detection flow (LH-FA-INIT-004) to
 // ask the user whether a directory with ≥3 LH-FA-INIT-003 structure
-// elements should be treated as an existing project.
+// elements should be treated as an existing project. logger is the
+// [driven.Logger] (LH-QA-004) the service uses for diagnostic
+// events; production wiring uses a slog-backed adapter, tests use a
+// fake that records calls.
 //
-// Both progress and confirmer accept nil and are routed to internal
-// no-op implementations so callers (tests, scripts that don't care
-// about progress, deterministic non-interactive runs) need not wire
-// a stub. A nil Confirmer means the service refuses to prompt and
-// proceeds as if the user declined — useful for the default
-// non-interactive carve-out path even if the policy field is set
-// elsewhere.
-func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driven.Git, progress driven.ProgressPort, confirmer driven.Confirmer) *InitProjectService {
+// All optional ports (progress, confirmer, logger) accept nil and
+// are routed to internal no-op implementations so callers (tests,
+// scripts that don't care, deterministic non-interactive runs) need
+// not wire a stub.
+func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driven.Git, progress driven.ProgressPort, confirmer driven.Confirmer, logger driven.Logger) *InitProjectService {
 	if progress == nil {
 		progress = noopProgress{}
 	}
 	if confirmer == nil {
 		confirmer = noopConfirmer{}
 	}
-	return &InitProjectService{fs: fs, yaml: yaml, git: git, progress: progress, confirmer: confirmer}
+	if logger == nil {
+		logger = noopLogger{}
+	}
+	return &InitProjectService{fs: fs, yaml: yaml, git: git, progress: progress, confirmer: confirmer, logger: logger}
 }
 
 // noopProgress is the nil-tolerant default for
@@ -110,6 +115,16 @@ type noopConfirmer struct{}
 func (noopConfirmer) ConfirmTreatAsExisting(_ context.Context, _ string, _ []string) (bool, error) {
 	return false, nil
 }
+
+// noopLogger is the nil-tolerant default for [InitProjectService.logger]
+// — every level discards. Keeps the service's debug/info call sites
+// free of nil checks.
+type noopLogger struct{}
+
+func (noopLogger) Debug(_ string, _ ...any) {}
+func (noopLogger) Info(_ string, _ ...any)  {}
+func (noopLogger) Warn(_ string, _ ...any)  {}
+func (noopLogger) Error(_ string, _ ...any) {}
 
 // fileAction classifies what the service should do with a single
 // templated file at execute time. The plan phase computes this for
@@ -291,6 +306,11 @@ func (s *InitProjectService) checkSoftExisting(ctx context.Context, req driving.
 	if len(indicators) < softExistingThreshold {
 		return nil
 	}
+	s.logger.Debug("soft-existing-detection above threshold",
+		"baseDir", req.BaseDir,
+		"indicators", indicators,
+		"threshold", softExistingThreshold,
+	)
 	switch {
 	case req.AssumeExisting:
 		return softExistingAbort(indicators, "--assume-existing")

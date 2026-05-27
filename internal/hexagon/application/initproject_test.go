@@ -26,7 +26,7 @@ func newService(t *testing.T) (*application.InitProjectService, *fakeFS, *fakeYA
 	fs.markDirExists(testBaseDir)
 	y := &fakeYAML{}
 	g := &fakeGit{}
-	return application.NewInitProjectService(fs, y, g, nil, nil), fs, y, g
+	return application.NewInitProjectService(fs, y, g, nil, nil, nil), fs, y, g
 }
 
 // newServiceWithProgress is newService plus a fakeProgress that
@@ -39,7 +39,7 @@ func newServiceWithProgress(t *testing.T) (*application.InitProjectService, *fak
 	y := &fakeYAML{}
 	g := &fakeGit{}
 	progress := &fakeProgress{}
-	return application.NewInitProjectService(fs, y, g, progress, nil), fs, y, g, progress
+	return application.NewInitProjectService(fs, y, g, progress, nil, nil), fs, y, g, progress
 }
 
 // newServiceWithConfirmer is newService plus a fakeConfirmer for the
@@ -51,7 +51,19 @@ func newServiceWithConfirmer(t *testing.T, c driven.Confirmer) (*application.Ini
 	fs.markDirExists(testBaseDir)
 	y := &fakeYAML{}
 	g := &fakeGit{}
-	return application.NewInitProjectService(fs, y, g, nil, c), fs, y, g
+	return application.NewInitProjectService(fs, y, g, nil, c, nil), fs, y, g
+}
+
+// newServiceWithLogger is newService plus a fakeLogger that records
+// every Debug/Info/Warn/Error call. Tests that assert on the
+// LH-QA-004 logger port (slice-m4-logging-port) use this constructor.
+func newServiceWithLogger(t *testing.T, l driven.Logger) (*application.InitProjectService, *fakeFS, *fakeYAML, *fakeGit) {
+	t.Helper()
+	fs := newFakeFS()
+	fs.markDirExists(testBaseDir)
+	y := &fakeYAML{}
+	g := &fakeGit{}
+	return application.NewInitProjectService(fs, y, g, nil, nil, l), fs, y, g
 }
 
 func TestInit_HappyPath_CreatesStructureAndConfig(t *testing.T) {
@@ -692,7 +704,7 @@ func TestInit_NilProgress_TolerantToNoop(t *testing.T) {
 	// it falls back to an internal no-op ProgressPort.
 	fs := newFakeFS()
 	fs.markDirExists(testBaseDir)
-	svc := application.NewInitProjectService(fs, &fakeYAML{}, &fakeGit{}, nil, nil)
+	svc := application.NewInitProjectService(fs, &fakeYAML{}, &fakeGit{}, nil, nil, nil)
 
 	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
 		Name:    "demo",
@@ -1187,6 +1199,54 @@ func TestInit_SoftDetect_ForceBackup_SkipsDetection(t *testing.T) {
 	}
 	if len(confirmer.calls) != 0 {
 		t.Errorf("Confirmer called %d times, want 0 (--backup skips detection)", len(confirmer.calls))
+	}
+}
+
+func TestInit_SoftDetect_Logger_DebugFiresAboveThreshold(t *testing.T) {
+	// Why: LH-QA-004 driven.Logger port — verifies the soft-detection
+	// emits a Debug entry once the ≥3-indicator threshold is crossed.
+	// Below the threshold the logger must stay silent (test below).
+	logger := &fakeLogger{}
+	svc, fs, _, _ := newServiceWithLogger(t, logger)
+	seedSoftIndicators(t, fs, 4) // no per-file collision at n=4
+
+	_, _ = svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:           "demo",
+		BaseDir:        testBaseDir,
+		SkipGit:        true,
+		AssumeExisting: true, // aborts cleanly so test stays focused on the log call
+	})
+
+	var found bool
+	for _, e := range logger.entries {
+		if e.Level == "DEBUG" && strings.Contains(e.Msg, "soft-existing-detection") {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected DEBUG log entry for soft-existing-detection, got %+v", logger.entries)
+	}
+}
+
+func TestInit_SoftDetect_Logger_SilentBelowThreshold(t *testing.T) {
+	// Why: the soft-detection Debug must NOT fire when the indicator
+	// count is below the threshold — keeps the log volume meaningful.
+	logger := &fakeLogger{}
+	svc, fs, _, _ := newServiceWithLogger(t, logger)
+	seedSoftIndicators(t, fs, 2)
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		SkipGit: true,
+	})
+	if err != nil {
+		t.Fatalf("Init: %v (expected fresh-init success)", err)
+	}
+	for _, e := range logger.entries {
+		if strings.Contains(e.Msg, "soft-existing-detection") {
+			t.Errorf("soft-detection logged below threshold: %+v", e)
+		}
 	}
 }
 

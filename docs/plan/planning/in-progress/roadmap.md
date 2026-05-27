@@ -39,7 +39,7 @@ Disziplin-Verstoß.
 | [`slice-m3-gomodguard-rules`](../done/slice-m3-gomodguard-rules.md) | `gomodguard_v2.blocked: {}` leer; yaml.v3 schon drin, Cobra kommt mit T3 | M3-followup | Done |
 | [`slice-m3-retroaktive-slice-plaene`](../done/slice-m3-retroaktive-slice-plaene.md) | Bootstrap-Slices (M1/M2/M2b/M2c/M2d) liegen nicht in `done/` | Done | Done |
 | [`slice-m4-soft-existing-detection`](../done/slice-m4-soft-existing-detection.md) | `LH-FA-INIT-004` Soft-Erkennung + `--assume-existing` | M4-vorgezogen | Done |
-| [`slice-m4-logging-port`](../open/slice-m4-logging-port.md) | `forbidigo.msg` referenziert nicht-existenten Logging-Port; `u-boot doctor` braucht strukturiertes Logging | M4 | Open |
+| [`slice-m4-logging-port`](../done/slice-m4-logging-port.md) | `forbidigo.msg` referenziert nicht-existenten Logging-Port; `u-boot doctor` braucht strukturiertes Logging | M4-vorgezogen | Done |
 | [`slice-m6-docker-integrationstests`](../open/slice-m6-docker-integrationstests.md) | `//go:build docker`-Pfad nur dokumentiert, kein CI-Job; erst mit Docker-Adapter sinnvoll | M6 | Open |
 | [`slice-v1-release-pipeline`](../open/slice-v1-release-pipeline.md) | ADR-0004 Folgepunkte Image-Publish + Trivy; `LH-OPEN-002` Paketierung (GHCR-Anteil) | V1 | Open |
 | [`slice-v1-markdown-link-validator`](../done/slice-v1-markdown-link-validator.md) | Doku-/Link-Drift in `docs/`/`spec/` nicht maschinell geprüft | V1-vorgezogen | Done |
@@ -51,7 +51,7 @@ Disziplin-Verstoß.
 
 ## Nächste Schritte
 
-1. **M4 `u-boot doctor`** schneiden: `LH-FA-DIAG-*` plus den verbleibenden M4-Slice [`slice-m4-logging-port`](../open/slice-m4-logging-port.md) (löst `forbidigo.msg`-Carveout, deckt strukturiertes Logging). `slice-m4-soft-existing-detection` wurde in derselben Sitzung wie M3-Closure vorgezogen und ist abgeschlossen.
+1. **M4 `u-boot doctor`** schneiden: `LH-FA-DIAG-*` als eigenständiger Slice. Beide vorbereitenden Slices (`slice-m4-soft-existing-detection`, `slice-m4-logging-port`) wurden in derselben Sitzung wie M3-Closure vorgezogen und sind abgeschlossen.
 
 ## Lifecycle-Hinweis
 

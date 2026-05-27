@@ -63,7 +63,7 @@ linters:
     forbidigo:
       forbid:
         - pattern: ^fmt\.Print.*$
-          msg: use log/slog (LH-QA-004); a project-specific logging port may replace this once it exists
+          msg: use the logging port at internal/hexagon/port/driven (driven.Logger) (LH-QA-004)
 
     funlen:
       lines: 100
@@ -117,11 +117,11 @@ linters:
         - module: github.com/sirupsen/logrus
           recommendations:
             - log/slog
-          reason: "Project standardizes on log/slog via the configured logging port (slice-m4-logging-port)."
+          reason: "Project standardizes on log/slog via the driven.Logger port; production binary uses the slog adapter at internal/adapter/driven/logger."
         - module: go.uber.org/zap
           recommendations:
             - log/slog
-          reason: "Same baseline as logrus — slog is the stdlib logging standard (slice-m4-logging-port)."
+          reason: "Same baseline as logrus — slog is the stdlib logging standard, abstracted via driven.Logger."
 
     depguard:
       # Layer rules per LH-FA-ARCH-003 / spec/architecture.md §4.
