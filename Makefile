@@ -15,6 +15,7 @@ IMAGE                   ?= u-boot
 GO_VERSION              ?= 1.26.3
 GOLANGCI_LINT_VERSION   ?= v2.12.2
 GOVULNCHECK_VERSION     ?= v1.1.4
+PYTHON_VERSION          ?= 3.13-slim
 THRESHOLD               ?= 90
 
 # `--progress=plain` gives full, line-by-line BuildKit logs that survive
@@ -38,7 +39,7 @@ DOCKER_BUILD := docker build $(PROGRESS_FLAG) \
 .DEFAULT_GOAL := help
 
 .PHONY: help deps compile lint test coverage coverage-gate build run clean \
-        gates ci fullbuild govulncheck verify-depguard
+        gates ci fullbuild govulncheck verify-depguard docs-check
 
 help: ## Show this help.
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ { printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
@@ -92,10 +93,21 @@ govulncheck: ## Run govulncheck against the project (LH-FA-BUILD-006).
 verify-depguard: ## Verify all eight depguard layer rules fire (LH-FA-ARCH-003).
 	bash scripts/verify-depguard.sh
 
+# ---- docs gates ------------------------------------------------------------
+
+# docs-check validates relative markdown links across docs/, spec/, and
+# root *.md. Docker-encapsulated Python (stdlib-only) — no host Python
+# requirement. Adapted from c-hsm-doc.
+docs-check: ## Validate relative markdown links in docs/, spec/, README*.
+	docker run --rm \
+	    -v "$(CURDIR)":/src -w /src \
+	    python:$(PYTHON_VERSION) \
+	    python tools/check_refs.py
+
 # ---- aggregators -----------------------------------------------------------
 
-gates: lint test coverage-gate ## Inner-loop mandatory gates.
-	@echo "[gates] lint + test + coverage-gate green"
+gates: lint test coverage-gate docs-check ## Inner-loop mandatory gates.
+	@echo "[gates] lint + test + coverage-gate + docs-check green"
 
 ci: gates govulncheck ## Gates plus govulncheck.
 	@echo "[ci] gates + govulncheck green"

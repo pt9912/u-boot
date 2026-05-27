@@ -37,7 +37,7 @@ Schwellen-Absenken.
 ## Bezug
 
 - Auslösende Spec: `LH-FA-BUILD-008` Coverage-Bootstrap.
-- Aufhebung dokumentiert in: [`carveouts.md`](carveouts.md).
+- Aufhebung dokumentiert in: [`carveouts.md`](../in-progress/carveouts.md).
 - Hängt von: M3-T1 (erste produktive Pakete) — erfüllt mit Commit
   `132d1a1`.
 - Aktivierung erfolgt in: diesem Commit.

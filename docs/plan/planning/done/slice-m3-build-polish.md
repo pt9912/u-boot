@@ -44,8 +44,9 @@ Polish-Slice").
   brauchen den Pinning-Pfad gleichzeitig, einzeln eingeführt wäre er
   totes Gewicht).
 - **Markdown-Link-Validator (`docs-check`-Target + `tools/check_refs.py`)**:
-  Aufhebungsplan steht in [`slice-v1-markdown-link-validator`](../open/slice-v1-markdown-link-validator.md);
-  c-hsm-doc's Python-Tool kann dort als Vorlage dienen.
+  Aufhebungsplan steht in [`slice-v1-markdown-link-validator`](slice-v1-markdown-link-validator.md);
+  c-hsm-doc's Python-Tool kann dort als Vorlage dienen. (Mittlerweile
+  in derselben Sitzung 2026-05-27 vorgezogen + abgeschlossen.)
 - **`HEALTHCHECK`** im runtime-Image (aus c-hsm-doc): nicht anwendbar
   — `u-boot` ist ein One-Shot-CLI ohne langlebigen Prozess.
 

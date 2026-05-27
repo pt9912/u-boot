@@ -32,7 +32,7 @@ M4-Soft-Detection). Die weiteren MVP-Subkommandos (`add`, `up`, `down`,
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
 | Architekturentscheidungen | 5 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
 | Implementierung | M1–M3 ✅, M4 als Nächstes | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
-| Carveouts | 13 temporär (11 mit Slice-Plan, 1 Slice deckt 3), 7 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
+| Carveouts | 12 temporär (10 mit Slice-Plan, 1 Slice deckt 3), 7 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
 
