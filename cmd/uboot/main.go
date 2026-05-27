@@ -81,7 +81,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// consumes it yet (T7 will add `u-boot doctor`); building it now
 	// keeps the wiring graph consistent and the CLI integration
 	// trivial when T7 lands. _ assignment until then.
-	_ = application.NewDoctorService(fsAdapter, gitAdapter, dockerAdapter, logAdapter)
+	_ = application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, logAdapter)
 
 	// Driving adapter (CLI).
 	app := cli.New(version, initSvc)

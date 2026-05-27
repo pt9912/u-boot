@@ -37,12 +37,12 @@ func newDoctorService(t *testing.T) (*application.DoctorService, *fakeFS, *fakeG
 	git := goodGit()
 	docker := goodDockerProbe()
 	logger := &fakeLogger{}
-	return application.NewDoctorService(fs, git, docker, logger), fs, git, docker, logger
+	return application.NewDoctorService(fs, &fakeYAML{}, git, docker, logger), fs, git, docker, logger
 }
 
 func TestDoctor_RequiresBaseDir(t *testing.T) {
 	t.Parallel()
-	svc := application.NewDoctorService(newFakeFS(), goodGit(), goodDockerProbe(), nil)
+	svc := application.NewDoctorService(newFakeFS(), &fakeYAML{}, goodGit(), goodDockerProbe(), nil)
 	_, err := svc.Check(context.Background(), driving.DoctorRequest{})
 	if err == nil {
 		t.Fatal("expected error for empty BaseDir, got nil")
@@ -60,15 +60,18 @@ func TestDoctor_WritePermissions_OKOnWritableDir(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Check: %v", err)
 	}
-	// 5 checks total in T3: write-permissions, git, docker, docker-
-	// reachable, compose. Happy path → all OK.
-	if got := len(resp.Report.Items); got != 5 {
-		t.Fatalf("Report.Items = %d, want 5", got)
+	// 6 checks total after T4: write-permissions, git, docker,
+	// docker-reachable, compose, uboot.yaml.
+	if got := len(resp.Report.Items); got != 6 {
+		t.Fatalf("Report.Items = %d, want 6", got)
 	}
 	d := findDiagnostic(t, resp.Report.Items, "fs.write-permissions")
 	if d.Severity != domain.SeverityOK {
 		t.Errorf("write-permissions Severity = %v, want OK", d.Severity)
 	}
+	// Happy path's u-boot.yaml is the absent-warn case (newDoctorService
+	// does not seed one); the report is allowed to have warnings on
+	// the happy path, but no errors.
 	if resp.Report.HasErrors() {
 		t.Errorf("HasErrors() = true on happy path")
 	}
@@ -195,7 +198,7 @@ func TestDoctor_Git_ErrorWhenMissing(t *testing.T) {
 	fs := newFakeFS()
 	fs.markDirExists(doctorBaseDir)
 	git := &fakeGit{versionErr: errors.New("exec: \"git\": executable file not found")}
-	svc := application.NewDoctorService(fs, git, goodDockerProbe(), nil)
+	svc := application.NewDoctorService(fs, &fakeYAML{}, git, goodDockerProbe(), nil)
 
 	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 	if err != nil {
@@ -221,7 +224,7 @@ func TestDoctor_Docker_OKAtOrAboveMinimum(t *testing.T) {
 			fs.markDirExists(doctorBaseDir)
 			docker := goodDockerProbe()
 			docker.version = v
-			svc := application.NewDoctorService(fs, goodGit(), docker, nil)
+			svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
 			resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 			if err != nil {
 				t.Fatalf("Check: %v", err)
@@ -245,7 +248,7 @@ func TestDoctor_Docker_ErrorBelowMinimum(t *testing.T) {
 			fs.markDirExists(doctorBaseDir)
 			docker := goodDockerProbe()
 			docker.version = v
-			svc := application.NewDoctorService(fs, goodGit(), docker, nil)
+			svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
 			resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 			if err != nil {
 				t.Fatalf("Check: %v", err)
@@ -267,7 +270,7 @@ func TestDoctor_Docker_WarnOnUnparseableVersion(t *testing.T) {
 	fs.markDirExists(doctorBaseDir)
 	docker := goodDockerProbe()
 	docker.version = "garbage"
-	svc := application.NewDoctorService(fs, goodGit(), docker, nil)
+	svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
 	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 	if err != nil {
 		t.Fatalf("Check: %v", err)
@@ -284,7 +287,7 @@ func TestDoctor_Docker_ErrorWhenMissing(t *testing.T) {
 	fs.markDirExists(doctorBaseDir)
 	docker := goodDockerProbe()
 	docker.versionErr = errors.New("exec: \"docker\": executable file not found")
-	svc := application.NewDoctorService(fs, goodGit(), docker, nil)
+	svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
 	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 	if err != nil {
 		t.Fatalf("Check: %v", err)
@@ -304,7 +307,7 @@ func TestDoctor_DockerReachable_ErrorOnDaemonDown(t *testing.T) {
 	fs.markDirExists(doctorBaseDir)
 	docker := goodDockerProbe()
 	docker.infoErr = errors.New("Cannot connect to the Docker daemon at unix:///var/run/docker.sock")
-	svc := application.NewDoctorService(fs, goodGit(), docker, nil)
+	svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
 	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 	if err != nil {
 		t.Fatalf("Check: %v", err)
@@ -329,7 +332,7 @@ func TestDoctor_Compose_OKAtOrAboveMinimum(t *testing.T) {
 			fs.markDirExists(doctorBaseDir)
 			docker := goodDockerProbe()
 			docker.composeVersion = v
-			svc := application.NewDoctorService(fs, goodGit(), docker, nil)
+			svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
 			resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 			if err != nil {
 				t.Fatalf("Check: %v", err)
@@ -353,7 +356,7 @@ func TestDoctor_Compose_ErrorBelowMinimum(t *testing.T) {
 			fs.markDirExists(doctorBaseDir)
 			docker := goodDockerProbe()
 			docker.composeVersion = v
-			svc := application.NewDoctorService(fs, goodGit(), docker, nil)
+			svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
 			resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 			if err != nil {
 				t.Fatalf("Check: %v", err)
@@ -372,7 +375,7 @@ func TestDoctor_Compose_ErrorWhenMissing(t *testing.T) {
 	fs.markDirExists(doctorBaseDir)
 	docker := goodDockerProbe()
 	docker.composeVersionErr = errors.New("docker: 'compose' is not a docker command")
-	svc := application.NewDoctorService(fs, goodGit(), docker, nil)
+	svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
 	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 	if err != nil {
 		t.Fatalf("Check: %v", err)
@@ -383,6 +386,128 @@ func TestDoctor_Compose_ErrorWhenMissing(t *testing.T) {
 	}
 }
 
+// ----------------------------------------------------------------------------
+// T4 — u-boot.yaml validation
+// ----------------------------------------------------------------------------
+
+// seedUbootYAML writes a u-boot.yaml at baseDir with the given body.
+// Tests use this to dial in the validation paths (valid file,
+// malformed YAML, wrong schemaVersion, invalid project name, etc.).
+func seedUbootYAML(t *testing.T, fs *fakeFS, baseDir, body string) {
+	t.Helper()
+	if err := fs.WriteFile(baseDir+"/u-boot.yaml", []byte(body), 0o644); err != nil {
+		t.Fatalf("seedUbootYAML: %v", err)
+	}
+}
+
+func TestDoctor_UbootYaml_WarnWhenMissing(t *testing.T) {
+	t.Parallel()
+	svc, _, _, _, _ := newDoctorService(t)
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "uboot.yaml.valid")
+	if d.Severity != domain.SeverityWarn {
+		t.Errorf("Severity = %v, want Warn (missing u-boot.yaml ≠ Error)", d.Severity)
+	}
+	if !strings.Contains(d.Hint, "u-boot init") {
+		t.Errorf("Hint missing init suggestion: %q", d.Hint)
+	}
+}
+
+func TestDoctor_UbootYaml_OKOnValidFile(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	seedUbootYAML(t, fs, doctorBaseDir, "schemaVersion: 1\nproject:\n  name: demo-service\n")
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "uboot.yaml.valid")
+	if d.Severity != domain.SeverityOK {
+		t.Errorf("Severity = %v, want OK", d.Severity)
+	}
+	if !strings.Contains(d.Message, "demo-service") {
+		t.Errorf("Message does not surface project name: %q", d.Message)
+	}
+}
+
+func TestDoctor_UbootYaml_ErrorOnInvalidSyntax(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	// Unclosed bracket → fails yaml.v3 parse.
+	seedUbootYAML(t, fs, doctorBaseDir, "schemaVersion: 1\nproject: [unclosed\n")
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "uboot.yaml.valid")
+	if d.Severity != domain.SeverityError {
+		t.Errorf("Severity = %v, want Error", d.Severity)
+	}
+	if !strings.Contains(d.Message, "not valid YAML") {
+		t.Errorf("Message does not name the syntax problem: %q", d.Message)
+	}
+}
+
+func TestDoctor_UbootYaml_ErrorOnWrongSchemaVersion(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	seedUbootYAML(t, fs, doctorBaseDir, "schemaVersion: 2\nproject:\n  name: demo\n")
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "uboot.yaml.valid")
+	if d.Severity != domain.SeverityError {
+		t.Errorf("Severity = %v, want Error", d.Severity)
+	}
+	if !strings.Contains(d.Message, "schemaVersion is 2") {
+		t.Errorf("Message does not name the wrong version: %q", d.Message)
+	}
+}
+
+func TestDoctor_UbootYaml_ErrorOnMissingProjectName(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	seedUbootYAML(t, fs, doctorBaseDir, "schemaVersion: 1\nproject:\n  name: \"\"\n")
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "uboot.yaml.valid")
+	if d.Severity != domain.SeverityError {
+		t.Errorf("Severity = %v, want Error", d.Severity)
+	}
+	if !strings.Contains(d.Message, "missing required") {
+		t.Errorf("Message does not name the missing field: %q", d.Message)
+	}
+}
+
+func TestDoctor_UbootYaml_ErrorOnInvalidProjectName(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	// Uppercase violates LH-FA-INIT-006 (lowercase-only regex).
+	seedUbootYAML(t, fs, doctorBaseDir, "schemaVersion: 1\nproject:\n  name: DemoService\n")
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "uboot.yaml.valid")
+	if d.Severity != domain.SeverityError {
+		t.Errorf("Severity = %v, want Error", d.Severity)
+	}
+	if !strings.Contains(d.Message, "DemoService") {
+		t.Errorf("Message does not surface offending name: %q", d.Message)
+	}
+}
+
 func TestDoctor_SemverPreReleaseHandledAsMajorMinor(t *testing.T) {
 	t.Parallel()
 	// `2.20.0-rc1` must parse as 2.20 (≥ 2.20 minimum → OK).
@@ -390,7 +515,7 @@ func TestDoctor_SemverPreReleaseHandledAsMajorMinor(t *testing.T) {
 	fs.markDirExists(doctorBaseDir)
 	docker := goodDockerProbe()
 	docker.composeVersion = "2.20.0-rc1"
-	svc := application.NewDoctorService(fs, goodGit(), docker, nil)
+	svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
 	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 	if err != nil {
 		t.Fatalf("Check: %v", err)

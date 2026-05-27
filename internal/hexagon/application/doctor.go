@@ -24,6 +24,7 @@ import (
 // and just collects.
 type DoctorService struct {
 	fs     driven.FileSystem
+	yaml   driven.YAMLCodec
 	git    driven.Git
 	docker driven.DockerProbe
 	logger driven.Logger
@@ -34,14 +35,14 @@ var _ driving.DoctorUseCase = (*DoctorService)(nil)
 
 // NewDoctorService constructs the service with the driven adapters
 // the M4 checks need. logger accepts nil (routed to noopLogger) so
-// tests and dry-runs do not need a stub. Future tranches will add
-// more ports (YAMLCodec for T4/T5, devcontainer probe for T6); the
-// constructor signature grows accordingly.
-func NewDoctorService(fs driven.FileSystem, git driven.Git, docker driven.DockerProbe, logger driven.Logger) *DoctorService {
+// tests and dry-runs do not need a stub. Future tranches may add
+// more ports (devcontainer probe); the constructor signature grows
+// accordingly.
+func NewDoctorService(fs driven.FileSystem, yaml driven.YAMLCodec, git driven.Git, docker driven.DockerProbe, logger driven.Logger) *DoctorService {
 	if logger == nil {
 		logger = noopLogger{}
 	}
-	return &DoctorService{fs: fs, git: git, docker: docker, logger: logger}
+	return &DoctorService{fs: fs, yaml: yaml, git: git, docker: docker, logger: logger}
 }
 
 // doctorCheckID enumerates the stable machine-readable IDs the
@@ -55,6 +56,7 @@ const (
 	checkIDDockerInstalled  = "docker.installed"
 	checkIDDockerReachable  = "docker.reachable"
 	checkIDComposeInstalled = "docker.compose.installed"
+	checkIDUbootYaml        = "uboot.yaml.valid"
 )
 
 // Minimum versions per LH-FA-DIAG-002. The thresholds are MAJOR.MINOR
@@ -90,6 +92,7 @@ func (s *DoctorService) Check(ctx context.Context, req driving.DoctorRequest) (d
 		s.checkDockerInstalled(ctx),
 		s.checkDockerReachable(ctx),
 		s.checkComposeInstalled(ctx),
+		s.checkUbootYaml(ctx, req.BaseDir),
 	}
 	report := domain.DiagnosticReport{Items: items}
 	s.logger.Info("doctor: checks complete",
@@ -297,4 +300,92 @@ func trimNonDigitSuffix(s string) string {
 		}
 	}
 	return s
+}
+
+// checkUbootYaml validates the `u-boot.yaml` steering file against
+// LH-FA-CONF-001..003 / LH-FA-INIT-006:
+//
+//   - missing file       → Warn (directory is not a u-boot project;
+//                          might be intentional, e.g. running doctor
+//                          before init).
+//   - I/O error on probe → Error.
+//   - invalid YAML       → Error with parser message.
+//   - schemaVersion ≠ 1  → Error.
+//   - missing project.name → Error.
+//   - invalid project.name (per LH-FA-INIT-006 regex) → Error.
+//   - all checks pass    → OK with project name + schemaVersion in
+//                          the message.
+//
+// The check shares the `ubootYAMLConfig` struct with
+// [InitProjectService] (same package, unexported) and uses
+// [domain.NewProjectName] for the regex enforcement, so the two
+// use-cases stay in lock-step on what "valid u-boot.yaml" means.
+func (s *DoctorService) checkUbootYaml(_ context.Context, baseDir string) domain.Diagnostic {
+	path := filepath.Join(baseDir, "u-boot.yaml")
+	exists, err := s.fs.Exists(path)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDUbootYaml,
+			Severity: domain.SeverityError,
+			Message:  "Cannot probe u-boot.yaml: " + err.Error() + ".",
+			Hint:     "Check filesystem permissions on " + path + ".",
+		}
+	}
+	if !exists {
+		return domain.Diagnostic{
+			ID:       checkIDUbootYaml,
+			Severity: domain.SeverityWarn,
+			Message:  "u-boot.yaml not present — directory is not a u-boot project.",
+			Hint:     "Run `u-boot init` to create one (LH-FA-INIT-001).",
+		}
+	}
+	body, err := s.fs.ReadFile(path)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDUbootYaml,
+			Severity: domain.SeverityError,
+			Message:  "Cannot read u-boot.yaml: " + err.Error() + ".",
+			Hint:     "Check filesystem permissions.",
+		}
+	}
+	var cfg ubootYAMLConfig
+	if err := s.yaml.Unmarshal(body, &cfg); err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDUbootYaml,
+			Severity: domain.SeverityError,
+			Message:  "u-boot.yaml is not valid YAML: " + err.Error() + ".",
+			Hint:     "Fix YAML syntax (indentation, missing colons, mismatched quotes).",
+		}
+	}
+	if cfg.SchemaVersion != domain.SchemaVersionCurrent {
+		return domain.Diagnostic{
+			ID:       checkIDUbootYaml,
+			Severity: domain.SeverityError,
+			Message: fmt.Sprintf("u-boot.yaml schemaVersion is %d (expected %d).",
+				cfg.SchemaVersion, domain.SchemaVersionCurrent),
+			Hint: fmt.Sprintf("Set `schemaVersion: %d` at the top of the file.", domain.SchemaVersionCurrent),
+		}
+	}
+	if cfg.Project.Name == "" {
+		return domain.Diagnostic{
+			ID:       checkIDUbootYaml,
+			Severity: domain.SeverityError,
+			Message:  "u-boot.yaml is missing required `project.name`.",
+			Hint:     "Add `project: { name: <valid-name> }` per LH-FA-INIT-006.",
+		}
+	}
+	if _, err := domain.NewProjectName(cfg.Project.Name); err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDUbootYaml,
+			Severity: domain.SeverityError,
+			Message:  fmt.Sprintf("u-boot.yaml project.name %q is invalid: %s.", cfg.Project.Name, err.Error()),
+			Hint:     "Use a lowercase name like `my-service` (LH-FA-INIT-006 regex).",
+		}
+	}
+	return domain.Diagnostic{
+		ID:       checkIDUbootYaml,
+		Severity: domain.SeverityOK,
+		Message: fmt.Sprintf("u-boot.yaml is valid (project %q, schemaVersion %d).",
+			cfg.Project.Name, cfg.SchemaVersion),
+	}
 }
