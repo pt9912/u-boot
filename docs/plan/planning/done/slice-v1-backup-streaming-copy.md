@@ -1,7 +1,7 @@
 # Slice V1: Streaming Backup-Copy (256 MiB-Cap aufheben)
 
 > **Status:** Done
-> **DoD:** Commit `<TBD>` (wird im Folge-Fixup konkretisiert)
+> **DoD:** Commit `5715f4f`
 
 ## Auslöser
 
