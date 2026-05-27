@@ -1,7 +1,7 @@
 # Slice M3: gomodguard-Regeln definieren
 
 > **Status:** Done
-> **DoD:** M3-Anker-Triage-Commit (siehe `git log --grep=m3-gomodguard`)
+> **DoD:** Commit `201fb4b`
 
 ## Auslöser
 
