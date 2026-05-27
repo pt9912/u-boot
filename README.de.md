@@ -36,7 +36,7 @@ Die weiteren MVP-Subkommandos (`add`, `up`, `down`, `generate`,
 | ----- | ------ | ------ |
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
 | Architekturentscheidungen | 6 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
-| Implementierung | M1–M4 ✅, M5 als Nächstes | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
+| Implementierung | M1–M4 ✅, M5 in Arbeit (T1+T2 von 7) | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
 | Carveouts | 7 temporär (6 mit Slice-Plan, 1 Slice deckt 2), 8 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart

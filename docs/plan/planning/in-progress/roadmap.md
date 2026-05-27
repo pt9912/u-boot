@@ -51,7 +51,7 @@ Disziplin-Verstoß.
 
 ## Nächste Schritte
 
-1. **M5 add-postgres**: 7 Tranchen geplant (siehe [`slice-m5-add-postgres.md`](slice-m5-add-postgres.md)). Aktive Tranche: T1 (u-boot.yaml services-Schema + Domain-Types).
+1. **M5 add-postgres**: 7 Tranchen geplant (siehe [`slice-m5-add-postgres.md`](slice-m5-add-postgres.md)). T1 (Schema + Domain-Types) und T2 (AddServiceUseCase + Sentinels) abgeschlossen. Aktive Tranche: T3 (Application-Service mit State-Detection für die LH-FA-ADD-005-State-Machine).
 
 ## Lifecycle-Hinweis
 
