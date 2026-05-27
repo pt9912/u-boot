@@ -304,6 +304,78 @@ func trimNonDigitSuffix(s string) string {
 	return s
 }
 
+// projectFileProbe carries the per-call configuration for
+// [DoctorService.loadProjectYAML]. Bundling the args in a struct
+// (instead of 5 positional parameters) keeps the call sites readable
+// and the helper signature stable as more probes are added (e.g.
+// devcontainer.json in T6 will reuse the same scaffold).
+type projectFileProbe struct {
+	// ID is the diagnostic check ID for every Diagnostic the helper
+	// emits.
+	ID string
+	// BaseDir / RelPath compose the on-disk path (joined via filepath.Join).
+	BaseDir, RelPath string
+	// Label is the human-readable file name used in
+	// probe/read/parse-error messages (e.g. `"u-boot.yaml"`).
+	Label string
+	// MissingMsg / MissingHint are emitted when the file does not
+	// exist (Warn diagnostic). Other LH-FA-DIAG-002 scenarios
+	// (probe I/O error, read error, parse error) get standard wording
+	// to keep the operator-facing language consistent across files.
+	MissingMsg, MissingHint string
+}
+
+// loadProjectYAML is the shared scaffold for the file-based YAML
+// validations (checkUbootYaml, checkComposeYaml; T6 devcontainer
+// will follow the same pattern). Probes existence, reads the body,
+// unmarshals into the caller-supplied destination — emitting a
+// ready-to-return Diagnostic for the missing/probe-error/read-error/
+// parse-error branches. On success it returns (nil, true); the caller
+// then runs its file-specific post-parse validation.
+//
+// The helper centralizes the standard hint wording for the four
+// non-success branches so all file probes use identical language;
+// branch-specific texts (the success message + validation hints) stay
+// in the calling check.
+func (s *DoctorService) loadProjectYAML(p projectFileProbe, dst any) (*domain.Diagnostic, bool) {
+	path := filepath.Join(p.BaseDir, p.RelPath)
+	exists, err := s.fs.Exists(path)
+	if err != nil {
+		return &domain.Diagnostic{
+			ID:       p.ID,
+			Severity: domain.SeverityError,
+			Message:  "Cannot probe " + p.Label + ": " + err.Error() + ".",
+			Hint:     "Check filesystem permissions on " + path + ".",
+		}, false
+	}
+	if !exists {
+		return &domain.Diagnostic{
+			ID:       p.ID,
+			Severity: domain.SeverityWarn,
+			Message:  p.MissingMsg,
+			Hint:     p.MissingHint,
+		}, false
+	}
+	body, err := s.fs.ReadFile(path)
+	if err != nil {
+		return &domain.Diagnostic{
+			ID:       p.ID,
+			Severity: domain.SeverityError,
+			Message:  "Cannot read " + p.Label + ": " + err.Error() + ".",
+			Hint:     "Check filesystem permissions on " + path + ".",
+		}, false
+	}
+	if err := s.yaml.Unmarshal(body, dst); err != nil {
+		return &domain.Diagnostic{
+			ID:       p.ID,
+			Severity: domain.SeverityError,
+			Message:  p.Label + " is not valid YAML: " + err.Error() + ".",
+			Hint:     "Fix YAML syntax (indentation, missing colons, mismatched quotes).",
+		}, false
+	}
+	return nil, true
+}
+
 // checkUbootYaml validates the `u-boot.yaml` steering file against
 // LH-FA-CONF-001..003 / LH-FA-INIT-006:
 //
@@ -323,41 +395,17 @@ func trimNonDigitSuffix(s string) string {
 // [domain.NewProjectName] for the regex enforcement, so the two
 // use-cases stay in lock-step on what "valid u-boot.yaml" means.
 func (s *DoctorService) checkUbootYaml(_ context.Context, baseDir string) domain.Diagnostic {
-	path := filepath.Join(baseDir, "u-boot.yaml")
-	exists, err := s.fs.Exists(path)
-	if err != nil {
-		return domain.Diagnostic{
-			ID:       checkIDUbootYaml,
-			Severity: domain.SeverityError,
-			Message:  "Cannot probe u-boot.yaml: " + err.Error() + ".",
-			Hint:     "Check filesystem permissions on " + path + ".",
-		}
-	}
-	if !exists {
-		return domain.Diagnostic{
-			ID:       checkIDUbootYaml,
-			Severity: domain.SeverityWarn,
-			Message:  "u-boot.yaml not present — directory is not a u-boot project.",
-			Hint:     "Run `u-boot init` to create one (LH-FA-INIT-001).",
-		}
-	}
-	body, err := s.fs.ReadFile(path)
-	if err != nil {
-		return domain.Diagnostic{
-			ID:       checkIDUbootYaml,
-			Severity: domain.SeverityError,
-			Message:  "Cannot read u-boot.yaml: " + err.Error() + ".",
-			Hint:     "Check filesystem permissions.",
-		}
-	}
 	var cfg ubootYAMLConfig
-	if err := s.yaml.Unmarshal(body, &cfg); err != nil {
-		return domain.Diagnostic{
-			ID:       checkIDUbootYaml,
-			Severity: domain.SeverityError,
-			Message:  "u-boot.yaml is not valid YAML: " + err.Error() + ".",
-			Hint:     "Fix YAML syntax (indentation, missing colons, mismatched quotes).",
-		}
+	diag, ok := s.loadProjectYAML(projectFileProbe{
+		ID:          checkIDUbootYaml,
+		BaseDir:     baseDir,
+		RelPath:     "u-boot.yaml",
+		Label:       "u-boot.yaml",
+		MissingMsg:  "u-boot.yaml not present — directory is not a u-boot project.",
+		MissingHint: "Run `u-boot init` to create one (LH-FA-INIT-001).",
+	}, &cfg)
+	if !ok {
+		return *diag
 	}
 	if cfg.SchemaVersion != domain.SchemaVersionCurrent {
 		return domain.Diagnostic{
@@ -395,8 +443,9 @@ func (s *DoctorService) checkUbootYaml(_ context.Context, baseDir string) domain
 // composeYAMLShape captures the minimum top-level Compose shape the
 // LH-FA-DIAG-002-compose-validation cares about: just the `services:`
 // key as a free-form map. Per spec ("minimal Top-Level-Shape"), no
-// deeper schema validation happens at this layer — that's a future
-// slice (e.g. `slice-v1-compose-schema-validator`).
+// deeper schema validation happens at this layer — a deeper
+// validator (service-level `image`/`build`, port format, network
+// references) would be a follow-up slice.
 type composeYAMLShape struct {
 	Services map[string]any `yaml:"services"`
 }
@@ -414,46 +463,21 @@ type composeYAMLShape struct {
 //                          services is not a meaningful one).
 //   - parsed with services → OK with service count in message.
 //
-// Out of scope (V1 follow-up if needed): deeper Compose-Schema
-// validation (service-level `image`/`build`, port format, network
-// references). The check intentionally stops at "is this parseable
-// as a Compose-shaped document".
+// The exists/read/parse scaffold is shared with [checkUbootYaml] via
+// [DoctorService.loadProjectYAML]; the Compose-specific validation
+// (`services:`-key presence) lives below.
 func (s *DoctorService) checkComposeYaml(_ context.Context, baseDir string) domain.Diagnostic {
-	path := filepath.Join(baseDir, "compose.yaml")
-	exists, err := s.fs.Exists(path)
-	if err != nil {
-		return domain.Diagnostic{
-			ID:       checkIDComposeYaml,
-			Severity: domain.SeverityError,
-			Message:  "Cannot probe compose.yaml: " + err.Error() + ".",
-			Hint:     "Check filesystem permissions on " + path + ".",
-		}
-	}
-	if !exists {
-		return domain.Diagnostic{
-			ID:       checkIDComposeYaml,
-			Severity: domain.SeverityWarn,
-			Message:  "compose.yaml not present — directory has no Docker Compose configuration.",
-			Hint:     "Run `u-boot init` (LH-FA-INIT-003 ships a compose.yaml).",
-		}
-	}
-	body, err := s.fs.ReadFile(path)
-	if err != nil {
-		return domain.Diagnostic{
-			ID:       checkIDComposeYaml,
-			Severity: domain.SeverityError,
-			Message:  "Cannot read compose.yaml: " + err.Error() + ".",
-			Hint:     "Check filesystem permissions.",
-		}
-	}
 	var shape composeYAMLShape
-	if err := s.yaml.Unmarshal(body, &shape); err != nil {
-		return domain.Diagnostic{
-			ID:       checkIDComposeYaml,
-			Severity: domain.SeverityError,
-			Message:  "compose.yaml is not valid YAML: " + err.Error() + ".",
-			Hint:     "Fix YAML syntax (indentation, missing colons, mismatched quotes).",
-		}
+	diag, ok := s.loadProjectYAML(projectFileProbe{
+		ID:          checkIDComposeYaml,
+		BaseDir:     baseDir,
+		RelPath:     "compose.yaml",
+		Label:       "compose.yaml",
+		MissingMsg:  "compose.yaml not present — directory has no Docker Compose configuration.",
+		MissingHint: "Run `u-boot init` (LH-FA-INIT-003 ships a compose.yaml).",
+	}, &shape)
+	if !ok {
+		return *diag
 	}
 	if len(shape.Services) == 0 {
 		return domain.Diagnostic{
