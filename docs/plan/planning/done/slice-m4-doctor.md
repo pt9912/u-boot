@@ -1,7 +1,7 @@
 # Slice M4: `u-boot doctor`-Flow
 
 > **Status:** Done
-> **DoD:** T1 ✅ `bcf684f` / T2 ✅ `19423d9` / T3 ✅ `a447d76` / T4 ✅ `41de6b4` / T5 ✅ `41eccb5` / T6 ✅ `9182aba` / T7 ✅ `<TBD>`
+> **DoD:** T1 ✅ `bcf684f` / T2 ✅ `19423d9` / T3 ✅ `a447d76` / T4 ✅ `41de6b4` / T5 ✅ `41eccb5` / T6 ✅ `9182aba` / T7 ✅ `cd26998`
 
 ## Auslöser
 
