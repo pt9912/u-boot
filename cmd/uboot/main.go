@@ -17,6 +17,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/pt9912/u-boot/internal/adapter/driven/confirm"
 	"github.com/pt9912/u-boot/internal/adapter/driven/fs"
 	"github.com/pt9912/u-boot/internal/adapter/driven/git"
 	"github.com/pt9912/u-boot/internal/adapter/driven/progress"
@@ -51,6 +52,10 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	yamlAdapter := yaml.New()
 	gitAdapter := git.New()
 	progressAdapter := progress.NewText(stdout)
+	// The confirm adapter renders to stderr (the prompt is operator-
+	// facing UI, not machine-readable output) and reads stdin for the
+	// answer — LH-FA-INIT-004 soft-existing-detection.
+	confirmAdapter := confirm.New(os.Stdin, stderr)
 
 	// Application services. The text-progress adapter renders
 	// LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 affected-paths
@@ -59,7 +64,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// go to stderr via the `fmt.Fprintf` below so the streams stay
 	// distinct even when a caller pipes them together. Tests that
 	// wrap stdout in a buffer must not interpose a separate flush.
-	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, progressAdapter)
+	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter)
 
 	// Driving adapter (CLI).
 	app := cli.New(version, initSvc)

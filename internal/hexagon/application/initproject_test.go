@@ -26,7 +26,7 @@ func newService(t *testing.T) (*application.InitProjectService, *fakeFS, *fakeYA
 	fs.markDirExists(testBaseDir)
 	y := &fakeYAML{}
 	g := &fakeGit{}
-	return application.NewInitProjectService(fs, y, g, nil), fs, y, g
+	return application.NewInitProjectService(fs, y, g, nil, nil), fs, y, g
 }
 
 // newServiceWithProgress is newService plus a fakeProgress that
@@ -39,7 +39,19 @@ func newServiceWithProgress(t *testing.T) (*application.InitProjectService, *fak
 	y := &fakeYAML{}
 	g := &fakeGit{}
 	progress := &fakeProgress{}
-	return application.NewInitProjectService(fs, y, g, progress), fs, y, g, progress
+	return application.NewInitProjectService(fs, y, g, progress, nil), fs, y, g, progress
+}
+
+// newServiceWithConfirmer is newService plus a fakeConfirmer for the
+// LH-FA-INIT-004 soft-existing-detection prompt. Tests that exercise
+// the soft-detection paths use this constructor.
+func newServiceWithConfirmer(t *testing.T, c driven.Confirmer) (*application.InitProjectService, *fakeFS, *fakeYAML, *fakeGit) {
+	t.Helper()
+	fs := newFakeFS()
+	fs.markDirExists(testBaseDir)
+	y := &fakeYAML{}
+	g := &fakeGit{}
+	return application.NewInitProjectService(fs, y, g, nil, c), fs, y, g
 }
 
 func TestInit_HappyPath_CreatesStructureAndConfig(t *testing.T) {
@@ -680,7 +692,7 @@ func TestInit_NilProgress_TolerantToNoop(t *testing.T) {
 	// it falls back to an internal no-op ProgressPort.
 	fs := newFakeFS()
 	fs.markDirExists(testBaseDir)
-	svc := application.NewInitProjectService(fs, &fakeYAML{}, &fakeGit{}, nil)
+	svc := application.NewInitProjectService(fs, &fakeYAML{}, &fakeGit{}, nil, nil)
 
 	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
 		Name:    "demo",
@@ -982,5 +994,219 @@ func TestInit_PlanCachesBody_NoDoubleRead(t *testing.T) {
 	final, _ := fs.ReadFile(composePath)
 	if !strings.Contains(string(final), "below-block-user-content") {
 		t.Errorf("user content not preserved: %q", final)
+	}
+}
+
+// ----------------------------------------------------------------------------
+// LH-FA-INIT-004 — soft-existing-detection paths
+// ----------------------------------------------------------------------------
+
+// seedSoftIndicators primes the fake FS with N of the LH-FA-INIT-004
+// soft indicators so a test can choose how many are present.
+//
+// Collision-safe ordering: the directories `docs`, `scripts`, `docker`
+// are seeded first (init's MkdirAll is idempotent, so seeding does
+// not trip planFile's per-file collision) followed by
+// `.devcontainer/devcontainer.json` (not in planFile's template list,
+// also collision-free). `README.md` and `CHANGELOG.md` come last
+// because they ARE in the template list — seeding them additionally
+// causes planFile to abort with ErrFileExists, useful for tests that
+// want to observe the post-detection collision path.
+//
+// Pass n=2 to stay below the threshold; n=3..4 to cross the threshold
+// without per-file collisions; n=5..6 to cross the threshold AND
+// trigger per-file collisions.
+func seedSoftIndicators(t *testing.T, fs *fakeFS, n int) {
+	t.Helper()
+	candidates := []string{
+		"docs",                            // dir, collision-safe
+		"scripts",                         // dir, collision-safe
+		"docker",                          // dir, collision-safe
+		".devcontainer/devcontainer.json", // file, not in template list
+		"README.md",                       // file, IN template list (collides)
+		"CHANGELOG.md",                    // file, IN template list (collides)
+	}
+	if n > len(candidates) {
+		t.Fatalf("seedSoftIndicators: n=%d > %d candidates", n, len(candidates))
+	}
+	for _, rel := range candidates[:n] {
+		full := filepath.Join(testBaseDir, rel)
+		if rel == "docs" || rel == "scripts" || rel == "docker" {
+			fs.markDirExists(full)
+			continue
+		}
+		if err := fs.WriteFile(full, []byte("seed\n"), 0o644); err != nil {
+			t.Fatalf("seedSoftIndicators: write %s: %v", rel, err)
+		}
+	}
+}
+
+func TestInit_SoftDetect_Under3Indicators_Proceeds(t *testing.T) {
+	// Why: <3 soft indicators must NOT trigger the soft-detection
+	// abort — the init proceeds as fresh.
+	confirmer := &fakeConfirmer{}
+	svc, fs, _, _ := newServiceWithConfirmer(t, confirmer)
+	seedSoftIndicators(t, fs, 2)
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		SkipGit: true,
+	})
+	if err != nil {
+		t.Fatalf("Init: %v (expected fresh-init success)", err)
+	}
+	if len(confirmer.calls) != 0 {
+		t.Errorf("Confirmer called %d times, want 0 (below threshold)", len(confirmer.calls))
+	}
+}
+
+func TestInit_SoftDetect_AssumeExisting_AbortsWithoutPrompt(t *testing.T) {
+	// Why: --assume-existing turns soft-detection into a deterministic
+	// abort. Confirmer must not be called (no prompt in non-
+	// interactive runs that asserted existence).
+	confirmer := &fakeConfirmer{}
+	svc, fs, _, _ := newServiceWithConfirmer(t, confirmer)
+	seedSoftIndicators(t, fs, 4)
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:           "demo",
+		BaseDir:        testBaseDir,
+		SkipGit:        true,
+		AssumeExisting: true,
+	})
+	if !errors.Is(err, driving.ErrProjectExists) {
+		t.Fatalf("err = %v, want wrapped ErrProjectExists", err)
+	}
+	if !strings.Contains(err.Error(), "--assume-existing") {
+		t.Errorf("err message should name --assume-existing trigger: %v", err)
+	}
+	if len(confirmer.calls) != 0 {
+		t.Errorf("Confirmer called %d times, want 0 (AssumeExisting short-circuits)", len(confirmer.calls))
+	}
+}
+
+func TestInit_SoftDetect_NoInteractive_SkipsDetectionAndConfirmer(t *testing.T) {
+	// Why: LH-FA-INIT-004 §247 — in non-interactive mode without
+	// --assume-existing, the soft-detection does not fire. The
+	// service must proceed; the per-file collision logic in planFile
+	// will still trip on README.md → ErrFileExists, but that is the
+	// pre-existing behaviour, not the soft-detection abort.
+	// n=5 includes README.md so the post-detection collision path is
+	// observable in the same test.
+	confirmer := &fakeConfirmer{answer: true} // would abort if asked
+	svc, fs, _, _ := newServiceWithConfirmer(t, confirmer)
+	seedSoftIndicators(t, fs, 5)
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:          "demo",
+		BaseDir:       testBaseDir,
+		SkipGit:       true,
+		NoInteractive: true,
+	})
+	if len(confirmer.calls) != 0 {
+		t.Errorf("Confirmer called %d times, want 0 (NoInteractive skips prompt)", len(confirmer.calls))
+	}
+	// We do hit the planFile collision on README.md (ErrFileExists).
+	if !errors.Is(err, driving.ErrFileExists) {
+		t.Errorf("err = %v, want wrapped ErrFileExists (per-file collision)", err)
+	}
+}
+
+func TestInit_SoftDetect_Interactive_ConfirmerYesAborts(t *testing.T) {
+	// Why: interactive mode + Confirmer says yes → soft-detection
+	// abort fires with ErrProjectExists naming "user confirmation".
+	confirmer := &fakeConfirmer{answer: true}
+	svc, fs, _, _ := newServiceWithConfirmer(t, confirmer)
+	seedSoftIndicators(t, fs, 4)
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		SkipGit: true,
+	})
+	if !errors.Is(err, driving.ErrProjectExists) {
+		t.Fatalf("err = %v, want wrapped ErrProjectExists", err)
+	}
+	if !strings.Contains(err.Error(), "user confirmation") {
+		t.Errorf("err message should name user-confirmation trigger: %v", err)
+	}
+	if len(confirmer.calls) != 1 {
+		t.Fatalf("Confirmer called %d times, want 1", len(confirmer.calls))
+	}
+	if confirmer.calls[0].BaseDir != testBaseDir {
+		t.Errorf("BaseDir passed to Confirmer = %q, want %q", confirmer.calls[0].BaseDir, testBaseDir)
+	}
+	if len(confirmer.calls[0].Indicators) != 4 {
+		t.Errorf("Indicators passed = %v (want 4)", confirmer.calls[0].Indicators)
+	}
+}
+
+func TestInit_SoftDetect_Interactive_ConfirmerNoProceeds(t *testing.T) {
+	// Why: interactive mode + Confirmer says no → soft-detection does
+	// not abort; the service proceeds. planFile still trips on the
+	// per-file collision (README.md → ErrFileExists), which is the
+	// deterministic pre-existing behaviour. n=5 includes README.md so
+	// the collision is observable.
+	confirmer := &fakeConfirmer{answer: false}
+	svc, fs, _, _ := newServiceWithConfirmer(t, confirmer)
+	seedSoftIndicators(t, fs, 5)
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		SkipGit: true,
+	})
+	if len(confirmer.calls) != 1 {
+		t.Errorf("Confirmer called %d times, want 1", len(confirmer.calls))
+	}
+	if !errors.Is(err, driving.ErrFileExists) {
+		t.Errorf("err = %v, want wrapped ErrFileExists (Confirmer said no, planFile collides)", err)
+	}
+	if errors.Is(err, driving.ErrProjectExists) {
+		t.Errorf("err must not be ErrProjectExists when Confirmer said no: %v", err)
+	}
+}
+
+func TestInit_SoftDetect_ForceBackup_SkipsDetection(t *testing.T) {
+	// Why: --force / --backup already opt into re-init explicitly.
+	// Soft-detection must NOT call the Confirmer in that path, and
+	// must NOT abort — planFile owns the per-file action choice.
+	confirmer := &fakeConfirmer{answer: true} // would abort if asked
+	svc, fs, _, _ := newServiceWithConfirmer(t, confirmer)
+	seedSoftIndicators(t, fs, 4)
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		SkipGit: true,
+		Backup:  true, // explicit opt-in
+	})
+	if err != nil {
+		t.Fatalf("Init with --backup: %v", err)
+	}
+	if len(confirmer.calls) != 0 {
+		t.Errorf("Confirmer called %d times, want 0 (--backup skips detection)", len(confirmer.calls))
+	}
+}
+
+func TestInit_SoftDetect_ConfirmerError_Propagates(t *testing.T) {
+	// Why: Confirmer I/O failures must surface to the CLI as an
+	// abort, not be silently coerced to "no". The init does not
+	// proceed in that case.
+	confirmer := &fakeConfirmer{err: errors.New("simulated stdin failure")}
+	svc, fs, _, _ := newServiceWithConfirmer(t, confirmer)
+	seedSoftIndicators(t, fs, 4)
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		SkipGit: true,
+	})
+	if err == nil {
+		t.Fatal("expected propagated Confirmer error, got nil")
+	}
+	if !strings.Contains(err.Error(), "simulated stdin failure") {
+		t.Errorf("error did not wrap Confirmer error: %v", err)
 	}
 }

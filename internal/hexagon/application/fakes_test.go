@@ -451,3 +451,23 @@ func (f *fakeGit) Init(_ context.Context, dir string) error {
 	f.initCalls = append(f.initCalls, dir)
 	return f.initErr
 }
+
+// fakeConfirmer records every ConfirmTreatAsExisting call and returns
+// the configured answer/err. The default zero value answers false
+// (the "no" default of the soft-detection prompt) so a freshly
+// constructed instance models a deterministic "user declined".
+type fakeConfirmer struct {
+	calls  []fakeConfirmerCall
+	answer bool
+	err    error
+}
+
+type fakeConfirmerCall struct {
+	BaseDir    string
+	Indicators []string
+}
+
+func (c *fakeConfirmer) ConfirmTreatAsExisting(_ context.Context, baseDir string, indicators []string) (bool, error) {
+	c.calls = append(c.calls, fakeConfirmerCall{BaseDir: baseDir, Indicators: append([]string{}, indicators...)})
+	return c.answer, c.err
+}

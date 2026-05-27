@@ -492,11 +492,11 @@ func TestExecute_TooManyArgs_WithYesFlag_StillUsageError(t *testing.T) {
 	}
 }
 
-func TestExecute_InitAssumeExisting_EmitsStderrNote(t *testing.T) {
-	// Why: review finding #5 — silent NoOp would mislead the user.
-	// In M3 the flag is accepted but has no behavioural effect; the
-	// CLI emits a one-line note on stderr so the inactivity is
-	// visible. Use case still runs (flag is forward-compatible).
+func TestExecute_InitAssumeExisting_NoLongerEmitsM3Note(t *testing.T) {
+	// Why: the M3 stderr note ("--assume-existing has no effect in M3")
+	// was removed with the M4 soft-existing-detection slice — the flag
+	// is now load-bearing. Regression-guard against accidentally
+	// re-adding the note (which would be obnoxious on every M4+ run).
 	getwd := func() (string, error) { return "/tmp/x/demo", nil }
 	uc := &fakeInitUseCase{
 		resp: driving.InitProjectResponse{
@@ -512,17 +512,45 @@ func TestExecute_InitAssumeExisting_EmitsStderrNote(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Execute: %v", err)
 	}
-	if !strings.Contains(stderr.String(), "--assume-existing has no effect in M3") {
-		t.Errorf("stderr missing M3 NoOp note: %q", stderr.String())
+	if strings.Contains(stderr.String(), "no effect in M3") {
+		t.Errorf("stderr still contains the removed M3 NoOp note: %q", stderr.String())
 	}
 	if !uc.called {
-		t.Errorf("--assume-existing note must not block the use-case")
+		t.Errorf("--assume-existing must not block the use-case")
+	}
+	if !uc.lastReq.AssumeExisting {
+		t.Errorf("AssumeExisting = false, want true (flag must pass through)")
+	}
+}
+
+func TestExecute_NoInteractive_PassThrough(t *testing.T) {
+	// Why: M4 soft-detection — --no-interactive must propagate into
+	// req.NoInteractive so the service skips the prompt path
+	// (LH-FA-INIT-004 §247).
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeInitUseCase{
+		resp: driving.InitProjectResponse{
+			Project: domain.NewProject(mustProjectName(t, "demo")),
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newApp(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(),
+		[]string{"--no-interactive", "init"},
+		&stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !uc.lastReq.NoInteractive {
+		t.Errorf("NoInteractive = false in propagated request, want true")
 	}
 }
 
 func TestExecute_NoAssumeExisting_NoStderrNote(t *testing.T) {
-	// Why: defensive — the M3-NoOp note must NOT fire when the flag
-	// is absent (would be obnoxious noise on every plain init).
+	// Why: defensive — no stderr note should fire on a plain init
+	// (the old M3 NoOp note was the only producer; this test keeps
+	// the contract even if a future slice adds new emit paths).
 	getwd := func() (string, error) { return "/tmp/x/demo", nil }
 	uc := &fakeInitUseCase{
 		resp: driving.InitProjectResponse{

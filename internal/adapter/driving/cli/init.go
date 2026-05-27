@@ -63,15 +63,20 @@ Re-running init on an existing project requires --force (managed-block
 only edit) or --backup (full overwrite with safety copy), per
 LH-FA-INIT-005 §611–§619.
 
-Mode-flag scope in this milestone (M3):
-  --yes / --no-interactive are no-ops on init because there are no
-  interactive prompts yet (LH-FA-CLI-005A §247). The mutual-exclusion
-  check still fires (exit 2). Both flags become load-bearing once
-  later subcommands or the M4 soft-detection introduce a prompt.
+Soft-existing-detection (LH-FA-INIT-004): when BaseDir lacks the
+hard markers (u-boot.yaml / compose.yaml / .env.example) but already
+contains ≥3 LH-FA-INIT-003 structure elements (README.md, CHANGELOG.md,
+docs/, scripts/, docker/, .devcontainer/devcontainer.json), the
+init refuses to proceed without confirmation:
 
-  --assume-existing has no behavioural effect in M3 either (no soft-
-  detection); the CLI emits a one-line stderr note when the flag is
-  set so its inactivity is visible. Activates with the M4 slice.
+  - --assume-existing  asserts existence non-interactively (exit 10
+                       unless --backup / --force).
+  - --no-interactive   skips the detection entirely (deterministic
+                       fresh init; per-file collisions may still fail).
+  - interactive (default) prompts "[y/N]" and aborts on y.
+
+The mode-flag mutual-exclusion check (--yes + --no-interactive →
+exit 2) is unchanged.
 
 Examples:
   u-boot init                            # name from current directory
@@ -80,7 +85,8 @@ Examples:
   u-boot init --force                    # refresh u-boot blocks only
   u-boot init --backup                   # full overwrite with .bak[*]
   u-boot init --force --backup           # block edit + safety backup
-  u-boot init --no-interactive --force   # CI-safe re-init`,
+  u-boot init --no-interactive --force   # CI-safe re-init
+  u-boot init --assume-existing --backup # re-init a partial layout`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Read-through persistent flags from the App; Cobra has
@@ -97,7 +103,7 @@ Examples:
 	cmd.Flags().BoolVar(&flags.Backup, "backup", false,
 		"back up existing files to <name>.bak[.N] before overwriting (LH-FA-INIT-005)")
 	cmd.Flags().BoolVar(&flags.AssumeExisting, "assume-existing", false,
-		"accept implicit existing-project detection in non-interactive runs (LH-FA-CLI-005A; no-op until M4 soft-detection)")
+		"assert existing project in non-interactive runs; aborts unless --backup/--force (LH-FA-INIT-004, LH-FA-CLI-005A §238)")
 	return cmd
 }
 
@@ -106,21 +112,26 @@ Examples:
 // LH-FA-INIT-002). Context is taken as the first parameter
 // explicitly (instead of via cmd.Context()) so contextcheck can see
 // the propagation and so the function is straightforward to test
-// without a Cobra command. The `errOut` stream carries M3-scope
-// notes (e.g. the --assume-existing no-op warning); production
-// wiring passes cmd.ErrOrStderr(), tests pass a *bytes.Buffer.
+// without a Cobra command.
 //
-// Scope of the mode flags in M3 init (LH-FA-CLI-005A §247):
-//   - --yes / --no-interactive are no-ops on the init flow because
-//     M3 has no interactive prompts; the only behavioural use today
-//     is the mutual-exclusion check ([ErrConflictingModeFlags]).
-//   - --assume-existing has no effect until the M4 soft-detection
-//     slice lands; the CLI accepts it and emits a one-line note to
-//     errOut so the user is not silently misled.
+// Scope of the mode flags after the M4 soft-detection slice
+// (LH-FA-CLI-005A §238 / LH-FA-INIT-004 §247):
+//   - --yes / --no-interactive — mutual-exclusion check fires here
+//     (exit 2). --no-interactive propagates into the request to
+//     suppress the soft-detection prompt.
+//   - --assume-existing — propagates into the request; the service
+//     uses it together with the soft-detection result to decide
+//     between fresh init and a [driving.ErrProjectExists] abort.
+//
+// The `errOut` parameter is kept on the signature for forward
+// compatibility (future warnings, JSON-mode hints); it is unused on
+// the success path today but the closures in newInitCommand still
+// pass cmd.ErrOrStderr() so adding an emit later is a one-line
+// change.
 func runInit(
 	ctx context.Context,
 	out io.Writer,
-	errOut io.Writer,
+	_ io.Writer,
 	args []string,
 	flags initFlags,
 	uc driving.InitProjectUseCase,
@@ -128,9 +139,6 @@ func runInit(
 ) error {
 	if flags.Yes && flags.NoInteractive {
 		return ErrConflictingModeFlags
-	}
-	if flags.AssumeExisting {
-		fmt.Fprintln(errOut, "note: --assume-existing has no effect in M3 (soft-detection lands in M4)")
 	}
 
 	cwd, err := getwd()
@@ -144,6 +152,7 @@ func runInit(
 		Force:          flags.Force,
 		Backup:         flags.Backup,
 		AssumeExisting: flags.AssumeExisting,
+		NoInteractive:  flags.NoInteractive,
 	}
 	if len(args) == 1 {
 		req.Name = args[0]

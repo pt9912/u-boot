@@ -64,7 +64,8 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
    die Driven-Ports; Tests mit Fakes für FileSystem/YAMLCodec/Git.
    *Bewusste Lücke:* `LH-FA-INIT-004` Soft-Existing-Detection
    (≥3 Strukturelemente + `--assume-existing`) liegt in
-   [`open/slice-m4-soft-existing-detection.md`](../open/slice-m4-soft-existing-detection.md).
+   [`slice-m4-soft-existing-detection`](slice-m4-soft-existing-detection.md)
+   (in derselben Sitzung vorgezogen + abgeschlossen).
 
 3. **T3 — Driving Adapter CLI + Wiring → erster lauffähiger
    `u-boot init`.** ✅ Done (dieser Commit)

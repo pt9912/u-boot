@@ -7,6 +7,7 @@ import (
 	iofs "io/fs"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
@@ -55,12 +56,13 @@ type ubootYAMLConfig struct {
 
 // InitProjectService implements [driving.InitProjectUseCase]. It
 // orchestrates the driven ports (FileSystem, YAMLCodec, Git,
-// ProgressPort) to realize the LH-FA-INIT-001..007 flow.
+// ProgressPort, Confirmer) to realize the LH-FA-INIT-001..007 flow.
 type InitProjectService struct {
-	fs       driven.FileSystem
-	yaml     driven.YAMLCodec
-	git      driven.Git
-	progress driven.ProgressPort
+	fs        driven.FileSystem
+	yaml      driven.YAMLCodec
+	git       driven.Git
+	progress  driven.ProgressPort
+	confirmer driven.Confirmer
 }
 
 // Static check: InitProjectService satisfies the driving port.
@@ -70,19 +72,26 @@ var _ driving.InitProjectUseCase = (*InitProjectService)(nil)
 // adapters injected by the wiring layer (cmd/uboot). progress is
 // the [driven.ProgressPort] the service emits LH-FA-INIT-005 §609
 // / LH-FA-CLI-005A §262 "affected paths" events to before any
-// write happens on re-init. nil is accepted and routed to an
-// internal no-op implementation so callers (tests, scripts that
-// don't care about progress) need not wire a stub.
+// write happens on re-init. confirmer is the [driven.Confirmer]
+// used by the M4 soft-existing-detection flow (LH-FA-INIT-004) to
+// ask the user whether a directory with ≥3 LH-FA-INIT-003 structure
+// elements should be treated as an existing project.
 //
-// The port-based design (T4c-review finding #8) replaces the prior
-// io.Writer parameter — application no longer formats user-visible
-// text; presentation lives in the adapter
-// (`internal/adapter/driven/progress`).
-func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driven.Git, progress driven.ProgressPort) *InitProjectService {
+// Both progress and confirmer accept nil and are routed to internal
+// no-op implementations so callers (tests, scripts that don't care
+// about progress, deterministic non-interactive runs) need not wire
+// a stub. A nil Confirmer means the service refuses to prompt and
+// proceeds as if the user declined — useful for the default
+// non-interactive carve-out path even if the policy field is set
+// elsewhere.
+func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driven.Git, progress driven.ProgressPort, confirmer driven.Confirmer) *InitProjectService {
 	if progress == nil {
 		progress = noopProgress{}
 	}
-	return &InitProjectService{fs: fs, yaml: yaml, git: git, progress: progress}
+	if confirmer == nil {
+		confirmer = noopConfirmer{}
+	}
+	return &InitProjectService{fs: fs, yaml: yaml, git: git, progress: progress, confirmer: confirmer}
 }
 
 // noopProgress is the nil-tolerant default for
@@ -91,6 +100,16 @@ func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driv
 type noopProgress struct{}
 
 func (noopProgress) AffectedFiles(_ string, _ []driven.AffectedFile) {}
+
+// noopConfirmer is the nil-tolerant default for
+// [InitProjectService.confirmer] — always declines, so a service
+// constructed without a wired Confirmer behaves like a strict
+// non-interactive run.
+type noopConfirmer struct{}
+
+func (noopConfirmer) ConfirmTreatAsExisting(_ context.Context, _ string, _ []string) (bool, error) {
+	return false, nil
+}
 
 // fileAction classifies what the service should do with a single
 // templated file at execute time. The plan phase computes this for
@@ -156,6 +175,13 @@ func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRe
 		return driving.InitProjectResponse{}, fmt.Errorf("%w: %s", driving.ErrBaseDirMissing, req.BaseDir)
 	}
 
+	// LH-FA-INIT-004 soft-existing-detection — runs before the
+	// per-file plan so the user gets a single, project-level message
+	// instead of a per-file collision cascade.
+	if err := s.checkSoftExisting(ctx, req); err != nil {
+		return driving.InitProjectResponse{}, err
+	}
+
 	name, err := s.resolveProjectName(req)
 	if err != nil {
 		return driving.InitProjectResponse{}, err
@@ -208,6 +234,106 @@ func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRe
 	}
 
 	return driving.InitProjectResponse{Project: project, Created: created, Backups: backups}, nil
+}
+
+// softIndicators returns the LH-FA-INIT-003 mindestumfang elements
+// that the soft-detection counts toward the ≥3 threshold. Each path
+// is resolved relative to BaseDir; both files and directories count
+// the same (presence of the path is enough — the soft-detection
+// does not parse content).
+//
+// Implemented as a function (not a var) for the same gochecknoglobals
+// reason as [projectStructureDirs].
+func softIndicators() []string {
+	return []string{
+		"README.md",
+		"CHANGELOG.md",
+		"docs",
+		"scripts",
+		"docker",
+		".devcontainer/devcontainer.json",
+	}
+}
+
+// softExistingThreshold is the LH-FA-INIT-004 cutoff for declaring a
+// directory "probable existing project". ≥3 of the [softIndicators]
+// must be present; below the threshold the service proceeds as if no
+// detection were triggered.
+const softExistingThreshold = 3
+
+// checkSoftExisting runs the LH-FA-INIT-004 decision tree before any
+// other side effect of [Init]:
+//
+//  1. If the user is already opting into re-init (--force / --backup),
+//     no detection is needed — the per-file plan handles the existing
+//     files.
+//  2. Detect the LH-FA-INIT-003 soft indicators present in BaseDir.
+//  3. If fewer than [softExistingThreshold] are present, no soft
+//     match → proceed.
+//  4. If the user asserted existence via --assume-existing, treat as
+//     existing without prompting.
+//  5. If the run is non-interactive (--no-interactive), skip the
+//     prompt per the LH-FA-INIT-004 §247 carve-out — the deterministic
+//     fresh-init path then plays out (the per-file collision logic in
+//     [planFile] will still surface specific clashes).
+//  6. Otherwise prompt via [driven.Confirmer]. A confirmed "yes" or
+//     a Confirmer error short-circuits the use case with the project-
+//     level [driving.ErrProjectExists]; a "no" proceeds.
+//
+// The returned error from this method is the only soft-detection
+// outcome that aborts; everything else falls through to the existing
+// plan/execute flow.
+func (s *InitProjectService) checkSoftExisting(ctx context.Context, req driving.InitProjectRequest) error {
+	if req.Force || req.Backup {
+		return nil
+	}
+	indicators := s.detectSoftIndicators(req.BaseDir)
+	if len(indicators) < softExistingThreshold {
+		return nil
+	}
+	switch {
+	case req.AssumeExisting:
+		return softExistingAbort(indicators, "--assume-existing")
+	case req.NoInteractive:
+		// Spec §247: in non-interactive mode the soft-detection only
+		// fires through --assume-existing. Skip without prompting.
+		return nil
+	default:
+		confirmed, err := s.confirmer.ConfirmTreatAsExisting(ctx, req.BaseDir, indicators)
+		if err != nil {
+			return fmt.Errorf("confirm soft-existing detection: %w", err)
+		}
+		if confirmed {
+			return softExistingAbort(indicators, "user confirmation")
+		}
+		return nil
+	}
+}
+
+// detectSoftIndicators returns the subset of [softIndicators] that
+// actually exist in baseDir, in the deterministic order of the
+// indicator list. Filesystem errors are treated as "absent" — the
+// detection is best-effort and the per-file plan will surface any
+// real I/O problem.
+func (s *InitProjectService) detectSoftIndicators(baseDir string) []string {
+	candidates := softIndicators()
+	found := make([]string, 0, len(candidates))
+	for _, rel := range candidates {
+		path := filepath.Join(baseDir, rel)
+		if exists, err := s.fs.Exists(path); err == nil && exists {
+			found = append(found, rel)
+		}
+	}
+	return found
+}
+
+// softExistingAbort wraps [driving.ErrProjectExists] with a project-
+// level message naming the trigger (--assume-existing or interactive
+// user confirmation) and the indicators that crossed the threshold.
+// The CLI maps the sentinel to exit code 10.
+func softExistingAbort(indicators []string, trigger string) error {
+	return fmt.Errorf("%w: %d structure elements detected (%s) via %s; add --backup or --force to re-init",
+		driving.ErrProjectExists, len(indicators), strings.Join(indicators, ", "), trigger)
 }
 
 // resolveProjectName derives and validates the project name per
