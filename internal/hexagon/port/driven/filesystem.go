@@ -72,4 +72,22 @@ type FileSystem interface {
 	// Used by the LH-FA-INIT-005 backup strategy as the rollback action
 	// when a partial tree copy fails partway through.
 	RemoveAll(path string) error
+
+	// Copy streams src to dst, creating parent directories with mode
+	// 0o755 as needed and writing dst with the given mode. Truncate-
+	// overwrites an existing dst. Used by the LH-FA-INIT-005 backup
+	// strategy for nested file copies inside an already-reserved top-
+	// level backup dir. The streaming form replaces the prior
+	// ReadFile+WriteFile pair so the memory footprint stays bounded by
+	// io.Copy's internal buffer (typically 32 KiB) regardless of file
+	// size; the 256-MiB safety cap of the M3-T4a-MVP is gone.
+	Copy(src, dst string, mode fs.FileMode) error
+
+	// CopyExclusive streams src to dst with O_CREATE|O_EXCL semantics —
+	// it succeeds only if dst did not yet exist. Returns a wrapped
+	// fs.ErrExist when the slot is taken. The LH-FA-INIT-005 backup
+	// strategy uses this for the top-level <src>.bak file slot to
+	// close the TOCTOU window between suffix selection and the actual
+	// write.
+	CopyExclusive(src, dst string, mode fs.FileMode) error
 }

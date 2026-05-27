@@ -32,7 +32,7 @@ Subsequent MVP subcommands (`add`, `up`, `down`, `doctor`, `generate`,
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
 | Architecture decisions | 5 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
 | Implementation | M1–M3 ✅, M4 next | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
-| Carveouts | 7 temporär (6 mit Slice-Plan, 1 Slice deckt 2), 7 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
+| Carveouts | 6 temporär (5 mit Slice-Plan, 1 Slice deckt 2), 8 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
 

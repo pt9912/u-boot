@@ -150,14 +150,6 @@ var ErrBackupSuffixExhausted = errors.New("backup suffix exhausted")
 // cannot safely act on.
 var ErrBackupUnsupportedKind = errors.New("backup source kind unsupported")
 
-// ErrBackupTooLarge signals that a file in the backup scope exceeds
-// the MVP size cap. The cap exists because the current FileSystem
-// port loads files via ReadFile (full content into memory) and a
-// multi-GB asset would OOM the process. Lifted by
-// `slice-v1-backup-streaming-copy.md` once a streaming copy
-// primitive lands. Maps to a technical filesystem exit code.
-var ErrBackupTooLarge = errors.New("backup source exceeds size cap")
-
 // ErrForceRequiresBackup signals that --force was used on a file
 // that has no `U-BOOT MANAGED BLOCK: init` marker (or whose template
 // is fully managed without block-only-edit support, e.g. .gitignore,

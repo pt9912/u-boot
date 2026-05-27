@@ -595,7 +595,6 @@ func TestExitCode_BaseMappings(t *testing.T) {
 		{"wrapped ErrConflictingModeFlags", fmt.Errorf("ctx: %w", cli.ErrConflictingModeFlags), 2},
 		{"ErrBackupSuffixExhausted (fs)", driving.ErrBackupSuffixExhausted, 14},
 		{"ErrBackupSourceMissing (fs)", driving.ErrBackupSourceMissing, 14},
-		{"ErrBackupTooLarge (fs)", driving.ErrBackupTooLarge, 14},
 		{"wrapped ErrBackupSuffixExhausted", fmt.Errorf("ctx: %w", driving.ErrBackupSuffixExhausted), 14},
 	}
 	for _, tc := range cases {

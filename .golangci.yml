@@ -282,6 +282,18 @@ linters:
         path: _test\.go$
         text: ^unused-receiver
 
+      # Why: driven.FileSystem ist die zentrale FS-Abstraktion und
+      # bedient die LH-FA-INIT-005-Backup-Mechanik in ihrer ganzen
+      # Breite (Exists/Lstat/Read/Write/WriteExclusive/Mkdir/MkdirAll/
+      # ReadDir/RemoveAll/Rename/Copy/CopyExclusive). Eine künstliche
+      # Aufspaltung würde Test-Fakes verkomplizieren ohne semantischen
+      # Mehrwert; das interfacebloat-Limit (10) bewusst aufgeweicht
+      # für genau diese eine Schnittstelle. Andere Ports bleiben unter
+      # dem Limit.
+      - linters:
+          - interfacebloat
+        path: internal/hexagon/port/driven/filesystem\.go$
+
       # Why: cmd/uboot/ is the wiring layer — it must be `package main`
       # (so testpackage cannot enforce external _test packages), and
       # `var version` is the canonical pattern for `-ldflags`-overridden

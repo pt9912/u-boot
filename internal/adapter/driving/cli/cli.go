@@ -115,8 +115,7 @@ var ErrConflictingModeFlags = errors.New("--yes and --no-interactive are mutuall
 //   - 14 — technischer Persistenz-/Dateisystemfehler: LH-FA-INIT-005
 //          backup-suffix exhausted (ErrBackupSuffixExhausted),
 //          backup source vanished mid-flight
-//          (ErrBackupSourceMissing), backup target exceeds size cap
-//          (ErrBackupTooLarge)
+//          (ErrBackupSourceMissing)
 //   - 1  — everything else (generic error)
 //
 // The mapping lives in the driving adapter because exit-code
@@ -163,8 +162,7 @@ func isValidationError(err error) bool {
 // (clean up stale backups, free disk, etc.).
 func isFilesystemError(err error) bool {
 	return errors.Is(err, driving.ErrBackupSuffixExhausted) ||
-		errors.Is(err, driving.ErrBackupSourceMissing) ||
-		errors.Is(err, driving.ErrBackupTooLarge)
+		errors.Is(err, driving.ErrBackupSourceMissing)
 }
 
 // isUsageError detects two distinct classes of usage-level errors:

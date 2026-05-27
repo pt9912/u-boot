@@ -8,6 +8,7 @@ package fs
 
 import (
 	"errors"
+	"io"
 	iofs "io/fs"
 	"os"
 	"path/filepath"
@@ -115,4 +116,50 @@ func (FS) Lstat(path string) (iofs.FileInfo, error) {
 // RemoveAll mirrors os.RemoveAll.
 func (FS) RemoveAll(path string) error {
 	return os.RemoveAll(path)
+}
+
+// Copy streams src to dst (non-exclusive: truncate-overwrites
+// existing dst). Parent directories are created with mode 0o755 like
+// [WriteFile]. Memory footprint is bounded by io.Copy's internal
+// buffer (~32 KiB) regardless of file size.
+func (FS) Copy(src, dst string, mode iofs.FileMode) error {
+	return streamCopy(src, dst, mode, os.O_CREATE|os.O_WRONLY|os.O_TRUNC)
+}
+
+// CopyExclusive streams src to dst with O_CREATE|O_EXCL — fails
+// fast with a wrapped fs.ErrExist if dst already exists. Companion
+// to [WriteFileExclusive].
+func (FS) CopyExclusive(src, dst string, mode iofs.FileMode) error {
+	return streamCopy(src, dst, mode, os.O_CREATE|os.O_EXCL|os.O_WRONLY)
+}
+
+// streamCopy is the shared implementation of [Copy] and
+// [CopyExclusive]. The only difference is the open-flag for the
+// destination file; the rest (mkdir parents, open source, io.Copy,
+// close-with-error-join) is identical.
+//
+// Close-on-error: when io.Copy fails midway, the destination must
+// still be closed (otherwise the file handle leaks). errors.Join
+// surfaces both the copy error and any close error so the operator
+// can see both.
+func streamCopy(src, dst string, mode iofs.FileMode, flag int) error {
+	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+		return err
+	}
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = in.Close() }() // read-side close error is non-actionable
+	out, err := os.OpenFile(dst, flag, mode)
+	if err != nil {
+		return err
+	}
+	if _, copyErr := io.Copy(out, in); copyErr != nil {
+		if closeErr := out.Close(); closeErr != nil {
+			return errors.Join(copyErr, closeErr)
+		}
+		return copyErr
+	}
+	return out.Close()
 }

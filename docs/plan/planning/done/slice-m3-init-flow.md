@@ -93,7 +93,8 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
      Tree-Backup-Fehler mit `errors.Join` für Sekundär-Fehler;
      Symlink-Rejection (`ErrBackupUnsupportedKind`), 256 MiB-Size-Cap
      (`ErrBackupTooLarge` — temporärer Carveout, Aufhebung in
-     [`slice-v1-backup-streaming-copy`](../open/slice-v1-backup-streaming-copy.md)).
+     [`slice-v1-backup-streaming-copy`](slice-v1-backup-streaming-copy.md)
+     — mittlerweile in derselben Sitzung 2026-05-27 vorgezogen + abgeschlossen, der 256-MiB-Cap und `ErrBackupTooLarge` sind dort entfernt).
      TOCTOU-sichere Top-Level-Reservierung via
      `Mkdir`/`WriteFileExclusive` + Race-Retry-Loop. Sentinels
      `ErrBackupSourceMissing`/`ErrBackupSuffixExhausted`/

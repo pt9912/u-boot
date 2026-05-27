@@ -185,48 +185,6 @@ func TestBackupPath_Symlink_Nested_Rejected(t *testing.T) {
 	}
 }
 
-func TestBackupPath_FileTooLarge_Rejected(t *testing.T) {
-	// Why: review finding #6 — guard against OOM when a multi-GB
-	// asset is in the backup scope.
-	fs := newFakeFS()
-	src := "/proj/large.bin"
-	if err := fs.WriteFile(src, []byte("small"), 0o644); err != nil {
-		t.Fatalf("setup: %v", err)
-	}
-	// Size-override bypasses len(data) so the test doesn't allocate
-	// 256 MiB just to trip the cap.
-	fs.sizeOverride[src] = 257 << 20
-
-	_, err := application.BackupPath(fs, src)
-	if err == nil {
-		t.Fatalf("BackupPath(large): expected error, got nil")
-	}
-	if !errors.Is(err, driving.ErrBackupTooLarge) {
-		t.Errorf("BackupPath(large): error %v does not wrap ErrBackupTooLarge", err)
-	}
-}
-
-func TestBackupPath_NestedFileTooLarge_Rejected(t *testing.T) {
-	fs := newFakeFS()
-	src := "/proj/docs"
-	if err := fs.Mkdir(src, 0o755); err != nil {
-		t.Fatalf("setup: %v", err)
-	}
-	huge := filepath.Join(src, "big.bin")
-	if err := fs.WriteFile(huge, []byte("x"), 0o644); err != nil {
-		t.Fatalf("setup huge: %v", err)
-	}
-	fs.sizeOverride[huge] = 257 << 20
-
-	_, err := application.BackupPath(fs, src)
-	if err == nil {
-		t.Fatalf("BackupPath: expected error, got nil")
-	}
-	if !errors.Is(err, driving.ErrBackupTooLarge) {
-		t.Errorf("BackupPath: error %v does not wrap ErrBackupTooLarge", err)
-	}
-}
-
 func TestBackupPath_MissingSourceReturnsErr(t *testing.T) {
 	fs := newFakeFS()
 	_, err := application.BackupPath(fs, "/proj/does-not-exist")

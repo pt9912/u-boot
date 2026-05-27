@@ -19,15 +19,6 @@ import (
 // budget bounds the TOCTOU race-retry — see [BackupPath].
 const backupSuffixCap = 1000
 
-// maxBackupFileSize caps individual files at 256 MiB. The current
-// FileSystem port reads files via ReadFile (full content into
-// memory), so a multi-GB asset under `docs/` or `docker/` would OOM
-// the process. The cap is documented as a temporary MVP carveout in
-// `docs/plan/planning/in-progress/carveouts.md` and lifted by
-// `slice-v1-backup-streaming-copy.md` once a streaming copy
-// primitive lands on the FileSystem port.
-const maxBackupFileSize = 256 << 20
-
 // BackupPath copies src to a sibling backup path and returns the
 // chosen backup path. Suffix selection follows LH-FA-INIT-005 §607:
 // <src>.bak first, then <src>.bak.1, .bak.2, ... — smallest free
@@ -73,10 +64,6 @@ func BackupPath(fs driven.FileSystem, src string) (string, error) {
 	}
 	if info.Mode()&iofs.ModeSymlink != 0 {
 		return "", fmt.Errorf("%w: %s is a symlink", driving.ErrBackupUnsupportedKind, src)
-	}
-	if !info.IsDir() && info.Size() > maxBackupFileSize {
-		return "", fmt.Errorf("%w: %s is %d bytes (cap %d)",
-			driving.ErrBackupTooLarge, src, info.Size(), maxBackupFileSize)
 	}
 
 	for attempt := 0; attempt < backupSuffixCap; attempt++ {
@@ -145,15 +132,12 @@ func createBackup(fs driven.FileSystem, src, dst string, info iofs.FileInfo) err
 	return createBackupFile(fs, src, dst, info.Mode().Perm())
 }
 
-// createBackupFile copies src into dst with O_EXCL semantics — fails
-// fast with iofs.ErrExist on TOCTOU collisions.
+// createBackupFile streams src into dst with O_EXCL semantics —
+// fails fast with iofs.ErrExist on TOCTOU collisions. The streaming
+// form keeps the memory footprint bounded for multi-GB assets.
 func createBackupFile(fs driven.FileSystem, src, dst string, mode iofs.FileMode) error {
-	data, err := fs.ReadFile(src)
-	if err != nil {
-		return fmt.Errorf("read %s: %w", src, err)
-	}
-	if err := fs.WriteFileExclusive(dst, data, mode); err != nil {
-		return fmt.Errorf("write %s: %w", dst, err)
+	if err := fs.CopyExclusive(src, dst, mode); err != nil {
+		return fmt.Errorf("copy %s → %s: %w", src, dst, err)
 	}
 	return nil
 }
@@ -217,19 +201,13 @@ func copyTreeNestedDir(fs driven.FileSystem, src, dst string, mode iofs.FileMode
 	return copyTreeContents(fs, src, dst)
 }
 
-// copyTreeNestedFile copies a single file from src to dst preserving
-// the source mode and enforcing the maxBackupFileSize cap.
+// copyTreeNestedFile streams a single file from src to dst preserving
+// the source mode. Non-exclusive variant: the top-level dst tree was
+// already reserved atomically by [createBackupDir]'s Mkdir, so
+// truncate-overwrite semantics inside it are safe.
 func copyTreeNestedFile(fs driven.FileSystem, src, dst string, info iofs.FileInfo) error {
-	if info.Size() > maxBackupFileSize {
-		return fmt.Errorf("%w: %s is %d bytes (cap %d)",
-			driving.ErrBackupTooLarge, src, info.Size(), maxBackupFileSize)
-	}
-	data, err := fs.ReadFile(src)
-	if err != nil {
-		return fmt.Errorf("read %s: %w", src, err)
-	}
-	if err := fs.WriteFile(dst, data, info.Mode().Perm()); err != nil {
-		return fmt.Errorf("write %s: %w", dst, err)
+	if err := fs.Copy(src, dst, info.Mode().Perm()); err != nil {
+		return fmt.Errorf("copy %s → %s: %w", src, dst, err)
 	}
 	return nil
 }

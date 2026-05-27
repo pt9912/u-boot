@@ -3,6 +3,7 @@ package application_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	iofs "io/fs"
 	"path/filepath"
 	"sort"
@@ -31,9 +32,8 @@ type fakeFS struct {
 	fileModes     map[string]iofs.FileMode
 	dirs          map[string]bool
 	dirModes      map[string]iofs.FileMode
-	symlinks      map[string]bool  // path is a symlink for Lstat purposes
-	sizeOverride  map[string]int64 // bypass len(data) for size-cap tests
-	writes        []string         // ordered: every successful WriteFile path
+	symlinks      map[string]bool // path is a symlink for Lstat purposes
+	writes        []string        // ordered: every successful WriteFile path
 	mkdirs        []string         // ordered: every MkdirAll path
 	failOn        string           // when non-empty, WriteFile / WriteFileExclusive returns failErr for that path
 	failErr       error
@@ -58,7 +58,6 @@ func newFakeFS() *fakeFS {
 		dirs:          make(map[string]bool),
 		dirModes:      make(map[string]iofs.FileMode),
 		symlinks:      make(map[string]bool),
-		sizeOverride:  make(map[string]int64),
 		readFileCalls: make(map[string]int),
 	}
 }
@@ -266,13 +265,9 @@ func (f *fakeFS) Lstat(path string) (iofs.FileInfo, error) {
 		return &fakeFileInfo{name: filepath.Base(path), mode: iofs.ModeSymlink}, nil
 	}
 	if data, ok := f.files[path]; ok {
-		size := int64(len(data))
-		if override, hasOverride := f.sizeOverride[path]; hasOverride {
-			size = override
-		}
 		return &fakeFileInfo{
 			name: filepath.Base(path),
-			size: size,
+			size: int64(len(data)),
 			mode: f.fileModes[path],
 		}, nil
 	}
@@ -317,6 +312,56 @@ func (f *fakeFS) RemoveAll(path string) error {
 			delete(f.symlinks, k)
 		}
 	}
+	return nil
+}
+
+// Copy streams src to dst (truncate-overwrites). In the in-memory
+// fake, "streaming" is a no-op slot: we just clone the byte slice.
+// Honors failReadOn (for src) and failOn (for dst) so the existing
+// error-injection knobs work transparently across the
+// ReadFile+WriteFile → Copy refactor.
+func (f *fakeFS) Copy(src, dst string, mode iofs.FileMode) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.failReadOn != "" && src == f.failReadOn {
+		return f.failReadErr
+	}
+	if f.failOn != "" && dst == f.failOn {
+		return f.failErr
+	}
+	data, ok := f.files[src]
+	if !ok {
+		return fmt.Errorf("open %s: %w", src, iofs.ErrNotExist)
+	}
+	body := append([]byte(nil), data...)
+	f.writeFileLocked(dst, body, mode)
+	return nil
+}
+
+// CopyExclusive streams src to dst with O_EXCL — returns wrapped
+// iofs.ErrExist if dst is already present. Same error-injection
+// hooks as [Copy].
+func (f *fakeFS) CopyExclusive(src, dst string, mode iofs.FileMode) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.failReadOn != "" && src == f.failReadOn {
+		return f.failReadErr
+	}
+	if f.failOn != "" && dst == f.failOn {
+		return f.failErr
+	}
+	if _, ok := f.files[dst]; ok {
+		return fmt.Errorf("create %s: %w", dst, iofs.ErrExist)
+	}
+	if f.dirs[dst] {
+		return fmt.Errorf("create %s: %w", dst, iofs.ErrExist)
+	}
+	data, ok := f.files[src]
+	if !ok {
+		return fmt.Errorf("open %s: %w", src, iofs.ErrNotExist)
+	}
+	body := append([]byte(nil), data...)
+	f.writeFileLocked(dst, body, mode)
 	return nil
 }
 

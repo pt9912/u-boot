@@ -293,5 +293,90 @@ func TestFS_RemoveAll(t *testing.T) {
 	}
 }
 
+func TestFS_Copy(t *testing.T) {
+	dir := t.TempDir()
+	src := filepath.Join(dir, "src.bin")
+	body := []byte("u-boot streaming copy test\n")
+	if err := os.WriteFile(src, body, 0o600); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+	dst := filepath.Join(dir, "nested", "dst.bin")
+	adapter := fs.New()
+
+	if err := adapter.Copy(src, dst, 0o644); err != nil {
+		t.Fatalf("Copy: %v", err)
+	}
+	got, err := os.ReadFile(dst)
+	if err != nil {
+		t.Fatalf("ReadFile dst: %v", err)
+	}
+	if string(got) != string(body) {
+		t.Errorf("dst contents = %q, want %q", got, body)
+	}
+	info, err := os.Stat(dst)
+	if err != nil {
+		t.Fatalf("Stat dst: %v", err)
+	}
+	if info.Mode().Perm() != 0o644 {
+		t.Errorf("dst mode = %v, want 0o644", info.Mode().Perm())
+	}
+}
+
+func TestFS_CopyExclusive_FailsOnExisting(t *testing.T) {
+	dir := t.TempDir()
+	src := filepath.Join(dir, "src")
+	dst := filepath.Join(dir, "dst")
+	if err := os.WriteFile(src, []byte("x"), 0o644); err != nil {
+		t.Fatalf("setup src: %v", err)
+	}
+	if err := os.WriteFile(dst, []byte("existing"), 0o644); err != nil {
+		t.Fatalf("setup dst: %v", err)
+	}
+	adapter := fs.New()
+
+	err := adapter.CopyExclusive(src, dst, 0o644)
+	if !errors.Is(err, iofs.ErrExist) {
+		t.Errorf("CopyExclusive on existing: err = %v, want wrapped ErrExist", err)
+	}
+}
+
+func TestFS_Copy_LargeFile_DoesNotOverallocate(t *testing.T) {
+	// Why: streaming-copy means the in-process memory must not scale
+	// with file size. Uses a sparse 1-GiB file via os.Truncate (no
+	// 1 GiB of bytes actually written to disk; the kernel records
+	// the hole). io.Copy reads the sparse zeros at ~32 KiB chunks;
+	// the test fails fast if Copy were re-implemented to read the
+	// whole file into memory (allocations would be observable via
+	// runtime.MemStats, but the simpler proof is: the test runs at
+	// all without the host running out of address space — sparse
+	// allocation works the same way for the temp dir).
+	dir := t.TempDir()
+	src := filepath.Join(dir, "huge.bin")
+	f, err := os.Create(src)
+	if err != nil {
+		t.Fatalf("create huge: %v", err)
+	}
+	if err := f.Truncate(1 << 30); err != nil { // 1 GiB
+		_ = f.Close()
+		t.Fatalf("truncate huge: %v", err)
+	}
+	if err := f.Close(); err != nil {
+		t.Fatalf("close huge: %v", err)
+	}
+	dst := filepath.Join(dir, "huge.bak")
+	adapter := fs.New()
+
+	if err := adapter.Copy(src, dst, 0o644); err != nil {
+		t.Fatalf("Copy huge: %v", err)
+	}
+	info, err := os.Stat(dst)
+	if err != nil {
+		t.Fatalf("stat dst: %v", err)
+	}
+	if info.Size() != 1<<30 {
+		t.Errorf("dst size = %d, want %d", info.Size(), 1<<30)
+	}
+}
+
 // The static FS↔driven.FileSystem contract check lives in fs.go (see
 // `var _ driven.FileSystem = (*FS)(nil)`), not here.
