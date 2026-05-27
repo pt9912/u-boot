@@ -32,7 +32,7 @@ M4-Soft-Detection). Die weiteren MVP-Subkommandos (`add`, `up`, `down`,
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
 | Architekturentscheidungen | 5 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
 | Implementierung | M1–M3 ✅, M4 als Nächstes | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
-| Carveouts | 9 temporär (7 mit Slice-Plan, 1 Slice deckt 3), 7 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
+| Carveouts | 8 temporär (7 mit Slice-Plan, 1 Slice deckt 2), 7 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
 
@@ -119,12 +119,13 @@ Vollständiger Layout-Kontrakt:
 - **Quality Gates:** [`docs/user/quality.md`](docs/user/quality.md)
   (SOLID-nahes Lint-Profil §1.2, Carveouts §1.3, Tests §2,
   Coverage §3, Security §4).
+- **Branch Protection:** [`docs/user/branch-protection.md`](docs/user/branch-protection.md)
+  (LH-QA-003 PR-blockierende Checks, einmalige UI-Aktivierung).
 - **Architecture Decision Records:**
   [`docs/plan/adr/`](docs/plan/adr/).
 - **Planning-Artefakte (Slices, Tranchen):**
   [`docs/plan/planning/{open,next,in-progress,done}/`](docs/plan/planning/).
-- **User-Dokumentation:** [`docs/user/`](docs/user/) (während des
-  Bootstrap leer).
+- **User-Dokumentation:** [`docs/user/`](docs/user/).
 
 ## Voraussetzungen
 

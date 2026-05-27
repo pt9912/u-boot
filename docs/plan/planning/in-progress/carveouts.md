@@ -20,7 +20,6 @@ Spalten:
 | Carveout | Status | Plan / Begründung |
 | -------- | ------ | ----------------- |
 | ADR-0004 Folgepunkt: Image-Publish nach GHCR und Trivy-Image-Scan fehlen (`.github/workflows/ci.yml` enthält sie nicht) | temporär | [`open/slice-v1-release-pipeline.md`](../open/slice-v1-release-pipeline.md) |
-| ADR-0004 Folgepunkt: Branch-Protection im GitHub-UI ist nicht im Repo versioniert | temporär | [`open/slice-v1-release-pipeline.md`](../open/slice-v1-release-pipeline.md) (gebündelt 2026-05-27) |
 | Build-Tag-Pfad `//go:build docker` für Adapter-Integrationstests (`spec/architecture.md` §5) ist nur beschrieben, kein CI-Pfad und kein Adapter-Test existiert | temporär | [`open/slice-m6-docker-integrationstests.md`](../open/slice-m6-docker-integrationstests.md) |
 | ADR-0003 Folgepunkt: `revive`-Custom-Rules sind nicht konfiguriert (Default-Profil) | temporär | [`open/slice-v2-revive-custom-rules.md`](../open/slice-v2-revive-custom-rules.md) |
 | `LH-OPEN-002` Paketierung ist offen (`spec/lastenheft.md` §14) — Distributionswege (Binary-Release, Homebrew, Debian/RPM, npm/pip) sind nicht festgelegt | temporär | [`open/slice-v1-release-pipeline.md`](../open/slice-v1-release-pipeline.md) (GHCR-Anteil); weitere Distributionswege bekommen eigene Slices beim ersten konkreten Bedarf |

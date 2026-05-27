@@ -32,7 +32,7 @@ Subsequent MVP subcommands (`add`, `up`, `down`, `doctor`, `generate`,
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
 | Architecture decisions | 5 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
 | Implementation | M1–M3 ✅, M4 next | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
-| Carveouts | 9 temporär (7 mit Slice-Plan, 1 Slice deckt 3), 7 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
+| Carveouts | 8 temporär (7 mit Slice-Plan, 1 Slice deckt 2), 7 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
 
@@ -118,12 +118,13 @@ Full layout contract: [`LH-FA-BUILD-009` in
 - **Quality gates:** [`docs/user/quality.md`](docs/user/quality.md)
   (SOLID-near lint profile §1.2, carveouts §1.3, tests §2,
   coverage §3, security §4).
+- **Branch protection:** [`docs/user/branch-protection.md`](docs/user/branch-protection.md)
+  (LH-QA-003 PR-blocking-checks setup, one-time UI activation).
 - **Architecture Decision Records:**
   [`docs/plan/adr/`](docs/plan/adr/).
 - **Planning artefacts (slices, tranches):**
   [`docs/plan/planning/{open,next,in-progress,done}/`](docs/plan/planning/).
-- **User documentation:** [`docs/user/`](docs/user/) (empty during the
-  bootstrap phase).
+- **User documentation:** [`docs/user/`](docs/user/).
 
 ## Prerequisites
 

@@ -103,8 +103,13 @@ Release-Teile bleiben als offene Restarbeit in diesem Slice.
 - Auslösende ADR: `0004-ci-system.md` Folgepunkte (3 davon).
 - Auslösende Spec: `LH-OPEN-002` Paketierung, `LH-QA-003` PR-Blocking.
 - Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
-  Image-Publish + Trivy + Branch-Protection.
-- Hängt von: erstem Release-Wunsch oder erstem externen PR-Workflow
-  (Teilabschluss Branch-Protection erlaubt).
+  Image-Publish + Trivy (Branch-Protection ist mit dem
+  Teilabschluss-Commit 2026-05-27 aufgehoben, siehe
+  [`docs/user/branch-protection.md`](../../../user/branch-protection.md)).
+- Hängt von: erstem Release-Wunsch (GHCR/Trivy/`LH-OPEN-002`).
+- **Teilabschluss 2026-05-27:** Branch-Protection-Checkliste in
+  `docs/user/branch-protection.md` veröffentlicht. Restscope
+  (Image-Publish + Trivy + `LH-OPEN-002`) bleibt offen bis zum
+  ersten Release-Wunsch.
 - Absorbiert (2026-05-27): vormalig eigenständiges
   `slice-m3-branch-protection-checkliste.md`.

@@ -1,0 +1,69 @@
+# Branch Protection für `main`
+
+`LH-QA-003` verlangt, dass die CI-Jobs `gates` und `security-gates` für jeden
+Pull-Request **blockierend** sind. Der GitHub-Actions-Workflow allein reicht
+dafür nicht — er muss zusätzlich in den Repository-Settings als
+**Required Status Check** aktiviert werden. Diese Aktivierung lebt im
+GitHub-UI, nicht im Repo-Code; um sie reproduzierbar zu halten, dokumentiert
+diese Datei die Schritte.
+
+Der zugehörige Carveout (`ADR-0004` Folgepunkt „Branch-Protection nicht
+versioniert") wird mit dem Vorhandensein dieser Checkliste aufgelöst.
+Spätestens vor dem ersten externen PR müssen die Schritte einmalig im UI
+ausgeführt sein.
+
+## Einmalige UI-Aktivierung
+
+1. **GitHub → Settings → Branches → Add branch protection rule.**
+2. **Branch name pattern:** `main`.
+3. **Require a pull request before merging:** aktivieren.
+   - **Required approvals:** für ein Solo-Projekt bewusst `0`. Sobald ein
+     zweiter Contributor dazukommt, auf `1` anheben.
+   - **Dismiss stale pull request approvals when new commits are pushed:**
+     aktivieren (sinnvoll auch im Solo-Setup für die Zukunft).
+4. **Require status checks to pass before merging:** aktivieren.
+   - **Require branches to be up to date before merging:** aktivieren.
+   - **Status checks that are required:** mindestens
+     - `gates` (LH-QA-003)
+     - `security-gates` (LH-QA-003)
+     - sobald [`slice-v1-release-pipeline`](../plan/planning/open/slice-v1-release-pipeline.md)
+       den `image-scan`-Job liefert: zusätzlich `image-scan`.
+5. **Require conversation resolution before merging:** aktivieren (Review-
+   Kommentare müssen aufgelöst sein, bevor gemerged werden darf).
+6. **Restrict who can push to matching branches:** für Solo-Projekt
+   irrelevant; bei mehreren Contributors einschränken.
+7. **Rules applied to everyone including administrators:** **aktivieren** —
+   sonst kann der Repo-Owner die Schutzregeln umgehen, was den Zweck
+   aushebelt.
+8. **Allow force pushes:** **deaktivieren** (Default).
+9. **Allow deletions:** **deaktivieren**.
+10. Optional: **Require linear history:** aktivieren, wenn das Projekt
+    rebase- statt merge-orientiert arbeiten soll.
+
+## Verifikation
+
+Nach der Aktivierung:
+
+- Ein PR mit absichtlich fehlschlagendem `gates` muss als „Merge blocked"
+  angezeigt werden.
+- Ein direkter Push auf `main` (z. B. `git push origin main`) muss vom
+  Server abgewiesen werden, auch für den Repo-Owner.
+- `git push --force origin main` muss vom Server abgewiesen werden.
+- `git push origin :main` (Branch-Delete) muss abgewiesen werden.
+
+## Optional: Repository-Ruleset-Export
+
+GitHub bietet ab den Repository-Rulesets die Möglichkeit, die obigen
+Regeln als JSON zu exportieren und im UI wieder zu importieren. Sobald
+das Repo öffentlich oder team-geteilt wird, lohnt sich ein Export nach
+`docs/user/branch-protection-ruleset.json` als zusätzliche Quelle der
+Wahrheit. Für das Solo-Bootstrap reicht diese Markdown-Checkliste.
+
+## Bezug
+
+- Auslösende Spec: `LH-QA-003` „beide Jobs PR-blockierend",
+  `ADR-0004` Folgepunkt „Branch-Protection nicht versioniert".
+- Slice: [`slice-v1-release-pipeline`](../plan/planning/open/slice-v1-release-pipeline.md)
+  (Teilabschluss Branch-Protection 2026-05-27; GHCR/Trivy/LH-OPEN-002
+  bleiben offen für den ersten Release).
+- Carveout-Inventar: [`carveouts.md`](../plan/planning/in-progress/carveouts.md).
