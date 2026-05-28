@@ -36,6 +36,7 @@ type fakeFS struct {
 	dirs          map[string]bool
 	dirModes      map[string]iofs.FileMode
 	symlinks      map[string]bool // path is a symlink for Lstat purposes
+	irregular     map[string]bool // path is non-regular (e.g. device file) for Lstat purposes
 	writes        []string        // ordered: every successful WriteFile path
 	mkdirs        []string         // ordered: every MkdirAll path
 	failOn        string           // when non-empty, WriteFile / WriteFileExclusive returns failErr for that path
@@ -61,6 +62,7 @@ func newFakeFS() *fakeFS {
 		dirs:          make(map[string]bool),
 		dirModes:      make(map[string]iofs.FileMode),
 		symlinks:      make(map[string]bool),
+		irregular:     make(map[string]bool),
 		readFileCalls: make(map[string]int),
 	}
 }
@@ -256,7 +258,8 @@ func (f *fakeFS) ReadDir(path string) ([]iofs.DirEntry, error) {
 
 // Lstat returns FileInfo for path without following symlinks.
 // Behaviour matches os.Lstat: symlinks report ModeSymlink, regular
-// files report the recorded mode, directories report ModeDir | mode.
+// files report the recorded mode, directories report ModeDir | mode,
+// non-regular files (via [markIrregular]) report ModeDevice.
 // Missing paths return iofs.ErrNotExist.
 func (f *fakeFS) Lstat(path string) (iofs.FileInfo, error) {
 	f.mu.Lock()
@@ -266,6 +269,9 @@ func (f *fakeFS) Lstat(path string) (iofs.FileInfo, error) {
 	}
 	if f.symlinks[path] {
 		return &fakeFileInfo{name: filepath.Base(path), mode: iofs.ModeSymlink}, nil
+	}
+	if f.irregular[path] {
+		return &fakeFileInfo{name: filepath.Base(path), mode: iofs.ModeDevice}, nil
 	}
 	if data, ok := f.files[path]; ok {
 		return &fakeFileInfo{
@@ -389,6 +395,16 @@ func (f *fakeFS) markSymlink(path string) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.symlinks[path] = true
+	f.registerAncestorsLocked(filepath.Dir(path))
+}
+
+// markIrregular registers path as a non-regular non-symlink file
+// (e.g. device file or named pipe). Used by the M5-T4c loadForPatch
+// tests to verify the rejection path for non-regular kinds.
+func (f *fakeFS) markIrregular(path string) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.irregular[path] = true
 	f.registerAncestorsLocked(filepath.Dir(path))
 }
 

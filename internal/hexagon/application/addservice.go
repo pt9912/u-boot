@@ -100,14 +100,43 @@ func (a serviceAction) String() string {
 }
 
 // servicePlan is the planned mutation for a single `u-boot add`
-// invocation. T3 fills Service / PriorState / Action; T4 extends it
-// with the concrete file-level changes (compose-block body,
-// .env.example body, u-boot.yaml patch). Plan-and-execute-split is
-// preserved so a plan-time failure never produces a partial write.
+// invocation. T3 fills Service / PriorState / Action; T4c adds
+// RepairFlags so the executeAdd plan-phase knows which artefact
+// the classifier flagged when state==Active.
 type servicePlan struct {
-	Service    domain.ServiceName
-	PriorState domain.ServiceState
-	Action     serviceAction
+	Service     domain.ServiceName
+	PriorState  domain.ServiceState
+	Action      serviceAction
+	RepairFlags activeArtifactsStatus
+}
+
+// activeArtifactsStatus is the pure-classifier output of
+// [detectActiveArtifacts]. The four orthogonal flags say which
+// LH-FA-ADD-002 artefacts need repair when the LH-FA-ADD-005 core
+// state is Active. Abort-class conditions (malformed marker, wrong
+// anchor, user-manual entry) are not modelled here — the classifier
+// surfaces them as ErrServiceInconsistent before any flag is set.
+type activeArtifactsStatus struct {
+	// ServiceStale is true when the service.postgres managed
+	// compose-block exists but its content lacks a required field
+	// (image, environment.POSTGRES_USER/PASSWORD/DB, volumes
+	// reference to postgres-data, ports, healthcheck).
+	ServiceStale bool
+	// VolumeMissing is true when the volume.postgres managed
+	// compose-block does not exist.
+	VolumeMissing bool
+	// VolumeStale is reserved for future content checks on the
+	// volume block; currently false (MVP volume template is `{}`).
+	VolumeStale bool
+	// EnvMissingOrStale is true when .env.example is absent, has no
+	// service.postgres block, or the block lacks a POSTGRES_USER /
+	// POSTGRES_PASSWORD / POSTGRES_DB line.
+	EnvMissingOrStale bool
+}
+
+// needsRepair reports whether any artefact flag is set.
+func (s activeArtifactsStatus) needsRepair() bool {
+	return s.ServiceStale || s.VolumeMissing || s.VolumeStale || s.EnvMissingOrStale
 }
 
 // AddServiceService implements [driving.AddServiceUseCase]. It
@@ -179,16 +208,30 @@ func (s *AddServiceService) Add(ctx context.Context, req driving.AddServiceReque
 
 	switch state {
 	case domain.ServiceStateActive:
-		// LH-FA-ADD-005 idempotent no-op for the core state machine.
-		// T4 adds the postgres-specific artefact check before this
-		// returns — until then a present services.<name>.enabled:true
-		// + service.<name> compose-block pair counts as "done".
-		return driving.AddServiceResponse{
-			ServiceName: req.ServiceName,
+		// LH-FA-ADD-005 core state is Active, but LH-FA-ADD-002
+		// requires the full postgres artefact set. detectActiveArtifacts
+		// runs the per-artefact content check and either returns flags
+		// for repair or surfaces ErrServiceInconsistent for malformed
+		// / wrong-anchor / user-manual-entry states.
+		status, err := s.detectActiveArtifacts(req.BaseDir, req.ServiceName)
+		if err != nil {
+			return driving.AddServiceResponse{}, err
+		}
+		if !status.needsRepair() {
+			return driving.AddServiceResponse{
+				ServiceName: req.ServiceName,
+				PriorState:  domain.ServiceStateActive,
+				State:       domain.ServiceStateActive,
+				Changed:     nil,
+			}, nil
+		}
+		plan := servicePlan{
+			Service:     req.ServiceName,
 			PriorState:  domain.ServiceStateActive,
-			State:       domain.ServiceStateActive,
-			Changed:     nil,
-		}, nil
+			Action:      actionRepairArtifacts,
+			RepairFlags: status,
+		}
+		return s.executeAdd(ctx, req.BaseDir, plan)
 	case domain.ServiceStateInconsistentYAML:
 		return driving.AddServiceResponse{}, fmt.Errorf(
 			"%w: managed compose-block for service %q has no matching u-boot.yaml anchor; "+
@@ -202,7 +245,7 @@ func (s *AddServiceService) Add(ctx context.Context, req driving.AddServiceReque
 		if err != nil {
 			return driving.AddServiceResponse{}, err
 		}
-		return s.executeAdd(ctx, plan)
+		return s.executeAdd(ctx, req.BaseDir, plan)
 	default:
 		// Defensive: detectServiceState only returns the six values
 		// above. A new ServiceState added without a switch case
@@ -354,16 +397,5 @@ func (*AddServiceService) planAdd(svc domain.ServiceName, state domain.ServiceSt
 	return plan, nil
 }
 
-// executeAdd is the T3 stub. The real implementation lives in M5-T4
-// where the postgres templates land and the service starts touching
-// fs / yaml; until then the only reachable caller is the unit tests
-// because the CLI subcommand (T6) does not exist yet.
-//
-// The ctx parameter is already wired so the T4 implementation can
-// honour cancellation across the multi-file write phase without
-// touching the [Add] call site again.
-func (*AddServiceService) executeAdd(_ context.Context, plan servicePlan) (driving.AddServiceResponse, error) {
-	return driving.AddServiceResponse{}, fmt.Errorf(
-		"addservice execute: not yet implemented (M5-T4) for service %q action %s",
-		plan.Service.String(), plan.Action.String())
-}
+// executeAdd is implemented in addservice_execute.go (M5-T4c).
+// detectActiveArtifacts lives in addservice_detect.go (M5-T4c).

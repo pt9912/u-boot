@@ -8,13 +8,15 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
+	iofs "io/fs"
 	"sort"
+	"strings"
 	"text/template"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
 )
 
-//go:embed templates/*.tmpl
+//go:embed templates/*.tmpl templates/services/*.tmpl
 var templateFS embed.FS
 
 // templateData is the projection of [domain.Project] that the
@@ -79,15 +81,30 @@ func renderTemplate(name string, data templateData) ([]byte, error) {
 }
 
 // templateNames lists the embedded template filenames in sorted
-// order. Used by the integrity self-test in `templates_test.go`.
+// order. Walks the embedded tree so subdirectories
+// (e.g. templates/services/) are included; returned names are
+// relative to the templates/ root (e.g. "compose.yaml.tmpl",
+// "services/postgres.compose.tmpl"). Used by the integrity self-test
+// in `templates_test.go` and as the source for renderTemplate
+// lookups.
 func templateNames() ([]string, error) {
-	entries, err := templateFS.ReadDir("templates")
+	var names []string
+	err := iofs.WalkDir(templateFS, "templates", func(path string, d iofs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		if !strings.HasSuffix(d.Name(), ".tmpl") {
+			return nil
+		}
+		rel := strings.TrimPrefix(path, "templates/")
+		names = append(names, rel)
+		return nil
+	})
 	if err != nil {
 		return nil, err
-	}
-	names := make([]string, 0, len(entries))
-	for _, e := range entries {
-		names = append(names, e.Name())
 	}
 	sort.Strings(names)
 	return names, nil

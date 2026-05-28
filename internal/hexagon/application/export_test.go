@@ -23,6 +23,17 @@ func EnsureComposeScaffoldForTest(content []byte) []byte {
 	return ensureComposeScaffold(content)
 }
 
+// RenderEnvManagedBlockForTest exposes the package-internal
+// renderEnvManagedBlock helper (M5-T4c) to external _test packages
+// so the wrap-contract can be pinned without going through Add().
+func RenderEnvManagedBlockForTest(svcName string, varsBody []byte) []byte {
+	svc, err := domain.NewServiceName(svcName)
+	if err != nil {
+		panic(err) // test bridge only — invalid name = test bug
+	}
+	return renderEnvManagedBlock(svc, varsBody)
+}
+
 // TemplateNamesForTest exposes the package-internal templateNames
 // helper to external _test packages. The `_test.go` suffix means
 // the symbol only exists in the test binary; production callers

@@ -383,6 +383,9 @@ func TestTemplateNames_AreSorted(t *testing.T) {
 		"env.example.tmpl",
 		"gitignore.tmpl",
 		"readme.md.tmpl",
+		"services/postgres.compose.tmpl",
+		"services/postgres.env.tmpl",
+		"services/postgres.volume.tmpl",
 	}
 	got, err := application.TemplateNamesForTest()
 	if err != nil {

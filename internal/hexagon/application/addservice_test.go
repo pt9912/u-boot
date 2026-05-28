@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"path/filepath"
-	"strings"
+	"reflect"
 	"testing"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application"
@@ -56,15 +56,67 @@ func postgresName(t *testing.T) domain.ServiceName {
 	return n
 }
 
-// composeBlock returns a minimal managed compose-block body that
-// matches the production marker layout (`# BEGIN/END U-BOOT MANAGED
-// BLOCK: service.<svc>`).
+// composeBlock returns a minimal managed compose-block body — just
+// the structural marker plus a stub image. Used by the T3 state-
+// detection tests where only marker presence matters; T4c
+// content-checks would flag this body as stale (no environment /
+// ports / healthcheck), so completeness-sensitive tests use
+// composeBlockComplete instead.
 func composeBlock(svc string) string {
 	return "services:\n" +
 		"  # BEGIN U-BOOT MANAGED BLOCK: service." + svc + "\n" +
 		"  " + svc + ":\n" +
 		"    image: example\n" +
 		"  # END U-BOOT MANAGED BLOCK: service." + svc + "\n"
+}
+
+// composeBlockComplete returns a full LH-FA-ADD-002 / LH-AK-002
+// compose body for the given service: services.<svc> with all
+// required fields (image, environment with the three POSTGRES_*
+// keys, volumes referencing <svc>-data, ports, healthcheck) plus
+// the matching volumes.<svc>-data block. Used by every T4c test
+// that expects the Active state to be a true no-op.
+func composeBlockComplete(svc string) string {
+	return "services:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service." + svc + "\n" +
+		"  " + svc + ":\n" +
+		"    image: " + svc + ":16-alpine\n" +
+		"    environment:\n" +
+		"      POSTGRES_USER: " + svc + "\n" +
+		"      POSTGRES_PASSWORD: changeme\n" +
+		"      POSTGRES_DB: " + svc + "\n" +
+		"    volumes:\n" +
+		"      - " + svc + "-data:/var/lib/postgresql/data\n" +
+		"    ports:\n" +
+		"      - \"5432:5432\"\n" +
+		"    healthcheck:\n" +
+		"      test: [\"CMD\", \"pg_isready\"]\n" +
+		"  # END U-BOOT MANAGED BLOCK: service." + svc + "\n" +
+		"\n" +
+		"volumes:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: volume." + svc + "\n" +
+		"  " + svc + "-data: {}\n" +
+		"  # END U-BOOT MANAGED BLOCK: volume." + svc + "\n"
+}
+
+// envBlockComplete returns a .env.example body that contains a
+// well-formed managed env block with all three POSTGRES_* keys
+// present.
+func envBlockComplete(svc string) string {
+	return "# BEGIN U-BOOT MANAGED BLOCK: service." + svc + "\n" +
+		"POSTGRES_USER=" + svc + "\n" +
+		"POSTGRES_PASSWORD=changeme\n" +
+		"POSTGRES_DB=" + svc + "\n" +
+		"# END U-BOOT MANAGED BLOCK: service." + svc + "\n"
+}
+
+// seedEnv writes a .env.example under addTestBaseDir.
+func seedEnv(t *testing.T, fs *fakeFS, body string) {
+	t.Helper()
+	if err := fs.WriteFile(filepath.Join(addTestBaseDir, ".env.example"),
+		[]byte(body), 0o644); err != nil {
+		t.Fatalf("seed .env.example: %v", err)
+	}
 }
 
 // TestDetectServiceState_AllSixStates pins the LH-FA-ADD-005
@@ -182,19 +234,18 @@ func TestDetectServiceState_MalformedComposeBlock_Aborts(t *testing.T) {
 	}
 }
 
-// TestAdd_ActiveIsNilErrorNoOp pins the LH-FA-ADD-005 idempotent
-// core-state behaviour. T3 does not yet apply the T4 artefact
-// repair check, so a present enabled:true + compose-block pair is
-// the no-op end-state.
-func TestAdd_ActiveIsNilErrorNoOp(t *testing.T) {
+// TestAdd_ActiveWithAllArtifactsIsNoOp pins the T4c contract: an
+// Active state with all LH-FA-ADD-002 / LH-AK-002 artefacts present
+// (service block + volume block + .env.example block) returns nil-
+// error with Changed=nil and writes no files.
+func TestAdd_ActiveWithAllArtifactsIsNoOp(t *testing.T) {
 	svc, fs, _ := newAddService(t)
 	seedUBootYAML(t, fs,
 		"schemaVersion: 1\nproject:\n  name: demo\n"+
 			"services:\n  postgres:\n    enabled: true\n")
-	seedCompose(t, fs, composeBlock("postgres"))
+	seedCompose(t, fs, composeBlockComplete("postgres"))
+	seedEnv(t, fs, envBlockComplete("postgres"))
 
-	// Reset the writes log so any side-effect from this call is
-	// visible against an empty baseline.
 	writesBefore := len(fs.writtenPaths())
 
 	resp, err := svc.Add(context.Background(), driving.AddServiceRequest{
@@ -393,39 +444,54 @@ func TestAdd_ExistsFailure_IsTechnical(t *testing.T) {
 	}
 }
 
-// TestAdd_MutatingStates_HitExecuteStub pins the T3↔T4 contract: for
-// each of the four mutating LH-FA-ADD-005 states the dispatch
-// reaches planAdd → executeAdd, and the stub returns its
-// "not yet implemented (M5-T4)" message. No FS write happens before
-// the stub fires.
-func TestAdd_MutatingStates_HitExecuteStub(t *testing.T) {
+// TestAdd_MutatingStates_FullExecute pins the T4c happy-path for
+// every mutating LH-FA-ADD-005 state: the dispatch reaches
+// executeAdd, the slots are filled per the action's plan rule, and
+// the deterministic order u-boot.yaml → compose.yaml → .env.example
+// is observed in Changed.
+func TestAdd_MutatingStates_FullExecute(t *testing.T) {
 	cases := []struct {
-		name        string
-		ubootYAML   string
-		composeBody string
+		name         string
+		ubootYAML    string
+		wantUBoot    bool   // is u-boot.yaml written?
+		wantCompose  bool   // compose.yaml written?
+		wantEnv      bool   // .env.example written?
+		wantPrior    domain.ServiceState
 	}{
 		{
 			name:        "unregistered",
 			ubootYAML:   "schemaVersion: 1\nproject:\n  name: demo\n",
-			composeBody: "",
+			wantUBoot:   true,
+			wantCompose: true,
+			wantEnv:     true,
+			wantPrior:   domain.ServiceStateUnregistered,
 		},
 		{
 			name: "deactivated",
 			ubootYAML: "schemaVersion: 1\nproject:\n  name: demo\n" +
 				"services:\n  postgres:\n    enabled: false\n",
-			composeBody: "",
+			wantUBoot:   true,
+			wantCompose: true,
+			wantEnv:     true,
+			wantPrior:   domain.ServiceStateDeactivated,
 		},
 		{
 			name: "enabled-unset",
 			ubootYAML: "schemaVersion: 1\nproject:\n  name: demo\n" +
 				"services:\n  postgres: {}\n",
-			composeBody: "",
+			wantUBoot:   true,
+			wantCompose: true,
+			wantEnv:     true,
+			wantPrior:   domain.ServiceStateEnabledUnset,
 		},
 		{
 			name: "inconsistent-block",
 			ubootYAML: "schemaVersion: 1\nproject:\n  name: demo\n" +
 				"services:\n  postgres:\n    enabled: true\n",
-			composeBody: "",
+			wantUBoot:   false, // enabled already true
+			wantCompose: true,
+			wantEnv:     true,
+			wantPrior:   domain.ServiceStateInconsistentBlock,
 		},
 	}
 
@@ -433,39 +499,33 @@ func TestAdd_MutatingStates_HitExecuteStub(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			svc, fs, _ := newAddService(t)
 			seedUBootYAML(t, fs, tc.ubootYAML)
-			if tc.composeBody != "" {
-				seedCompose(t, fs, tc.composeBody)
-			}
-			writesBefore := len(fs.writtenPaths())
-			_, err := svc.Add(context.Background(), driving.AddServiceRequest{
+			resp, err := svc.Add(context.Background(), driving.AddServiceRequest{
 				BaseDir:     addTestBaseDir,
 				ServiceName: postgresName(t),
 			})
-			if err == nil {
-				t.Fatalf("err = nil, want execute-stub error")
+			if err != nil {
+				t.Fatalf("Add: %v", err)
 			}
-			// Stub message is the contract; tests intentionally
-			// pin the M5-T4 marker so accidentally implementing
-			// execute in T3 surfaces here.
-			if !strings.Contains(err.Error(), "not yet implemented (M5-T4)") {
-				t.Errorf("err = %v, want execute-stub marker", err)
+			if resp.PriorState != tc.wantPrior {
+				t.Errorf("PriorState = %s, want %s",
+					resp.PriorState.String(), tc.wantPrior.String())
 			}
-			// Sentinels reserved for fachliche Fehler must not
-			// leak through the stub path.
-			for _, sentinel := range []error{
-				driving.ErrProjectNotInitialized,
-				driving.ErrServiceInconsistent,
-				driving.ErrServiceUnsupported,
-			} {
-				if errors.Is(err, sentinel) {
-					t.Errorf("err = %v, must not wrap %v (stub is generic)",
-						err, sentinel)
-				}
+			if resp.State != domain.ServiceStateActive {
+				t.Errorf("State = %s, want active", resp.State.String())
 			}
-			// The stub returns before any write; pre-write
-			// validation hasn't side-effects either.
-			if got := len(fs.writtenPaths()) - writesBefore; got != 0 {
-				t.Errorf("WriteFile count delta = %d, want 0 (no write before T4)", got)
+			// Verify Changed order matches actual writes.
+			wantChanged := []string{}
+			if tc.wantUBoot {
+				wantChanged = append(wantChanged, "u-boot.yaml")
+			}
+			if tc.wantCompose {
+				wantChanged = append(wantChanged, "compose.yaml")
+			}
+			if tc.wantEnv {
+				wantChanged = append(wantChanged, ".env.example")
+			}
+			if !reflect.DeepEqual(resp.Changed, wantChanged) {
+				t.Errorf("Changed = %v, want %v", resp.Changed, wantChanged)
 			}
 		})
 	}
