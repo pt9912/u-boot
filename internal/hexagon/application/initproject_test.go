@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application"
+	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
@@ -1274,5 +1275,457 @@ func TestInit_SoftDetect_ConfirmerError_Propagates(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "simulated stdin failure") {
 		t.Errorf("error did not wrap Confirmer error: %v", err)
+	}
+}
+
+// --- M5-T4a: compose scaffold restructuring + renderManagedBlockOnly + Ensure-Scaffold ----
+
+// TestInit_T4a_FreshInit_ComposeSplitBlockForm pins the new T4a
+// scaffold shape: the init-block contains name + networks but NOT
+// services: {}, and services:/volumes: live as empty top-level maps
+// OUTSIDE the init block. Add-ons placed under those maps by `u-boot
+// add` survive a later `u-boot init --force`.
+func TestInit_T4a_FreshInit_ComposeSplitBlockForm(t *testing.T) {
+	svc, fs, _, _ := newService(t)
+	if _, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		SkipGit: true,
+	}); err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+	body, err := fs.ReadFile(filepath.Join(testBaseDir, "compose.yaml"))
+	if err != nil {
+		t.Fatalf("ReadFile compose.yaml: %v", err)
+	}
+	got := string(body)
+
+	// init block contains the name + networks block, not services.
+	beginIdx := strings.Index(got, "# BEGIN U-BOOT MANAGED BLOCK: init")
+	endIdx := strings.Index(got, "# END U-BOOT MANAGED BLOCK: init")
+	if beginIdx < 0 || endIdx < 0 || endIdx < beginIdx {
+		t.Fatalf("init block markers missing or reversed; got:\n%s", got)
+	}
+	initBlock := got[beginIdx:endIdx]
+	if !strings.Contains(initBlock, "name: demo") {
+		t.Errorf("init block missing name: demo; got:\n%s", initBlock)
+	}
+	if !strings.Contains(initBlock, "networks:") {
+		t.Errorf("init block missing networks; got:\n%s", initBlock)
+	}
+	if strings.Contains(initBlock, "services:") {
+		t.Errorf("init block must NOT contain services anymore (T4a); got:\n%s", initBlock)
+	}
+	if strings.Contains(initBlock, "volumes:") {
+		t.Errorf("init block must NOT contain volumes; got:\n%s", initBlock)
+	}
+
+	// services: and volumes: live OUTSIDE the init block.
+	afterBlock := got[endIdx:]
+	if !strings.Contains(afterBlock, "\nservices: {}") {
+		t.Errorf("top-level services: {} missing after init block; got:\n%s", afterBlock)
+	}
+	if !strings.Contains(afterBlock, "\nvolumes: {}") {
+		t.Errorf("top-level volumes: {} missing after init block; got:\n%s", afterBlock)
+	}
+}
+
+// TestInit_T4a_Force_PreservesAddonBlocks is the central T4a
+// regression: a re-init with --force on a compose.yaml that already
+// holds add-on managed blocks (service.postgres / volume.postgres)
+// MUST keep those blocks. T3's executeReplaceBlock used to splice
+// the entire rendered template into the init region; T4a splices
+// only the init-block byte range so the surrounding services:/
+// volumes: maps (with their add-on sub-markers) survive untouched.
+func TestInit_T4a_Force_PreservesAddonBlocks(t *testing.T) {
+	svc, fs, _, _ := newService(t)
+	composePath := filepath.Join(testBaseDir, "compose.yaml")
+	seeded := "# BEGIN U-BOOT MANAGED BLOCK: init\n" +
+		"# managed: old\n" +
+		"# END U-BOOT MANAGED BLOCK: init\n" +
+		"\n" +
+		"services:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  postgres:\n" +
+		"    image: postgres:16-alpine\n" +
+		"  # END U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"\n" +
+		"volumes:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: volume.postgres\n" +
+		"  postgres-data: {}\n" +
+		"  # END U-BOOT MANAGED BLOCK: volume.postgres\n"
+	if err := fs.WriteFile(composePath, []byte(seeded), 0o644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	if _, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		Force:   true,
+		SkipGit: true,
+	}); err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+
+	body, err := fs.ReadFile(composePath)
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	got := string(body)
+
+	// Old init body gone, new init body in.
+	if strings.Contains(got, "# managed: old") {
+		t.Errorf("old init block content not replaced; got:\n%s", got)
+	}
+	if !strings.Contains(got, "name: demo") {
+		t.Errorf("new init body missing name: demo; got:\n%s", got)
+	}
+
+	// Add-on markers survived.
+	for _, want := range []string{
+		"# BEGIN U-BOOT MANAGED BLOCK: service.postgres",
+		"# END U-BOOT MANAGED BLOCK: service.postgres",
+		"# BEGIN U-BOOT MANAGED BLOCK: volume.postgres",
+		"# END U-BOOT MANAGED BLOCK: volume.postgres",
+		"image: postgres:16-alpine",
+		"postgres-data: {}",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("add-on artefact %q missing after --force; got:\n%s", want, got)
+		}
+	}
+
+	// Exactly one top-level services: / volumes: (no duplication).
+	if c := strings.Count(got, "\nservices:"); c != 1 {
+		t.Errorf("expected exactly 1 top-level services:, got %d; full:\n%s", c, got)
+	}
+	if c := strings.Count(got, "\nvolumes:"); c != 1 {
+		t.Errorf("expected exactly 1 top-level volumes:, got %d; full:\n%s", c, got)
+	}
+
+	// Exactly one init block.
+	if c := strings.Count(got, "# BEGIN U-BOOT MANAGED BLOCK: init"); c != 1 {
+		t.Errorf("expected exactly 1 init BEGIN marker, got %d", c)
+	}
+}
+
+// TestInit_T4a_AltM3_Migration covers the most likely upgrade path:
+// an existing M3-form compose.yaml that holds `services: {}` and
+// `networks: default:` INSIDE the init block and no `volumes:` at
+// all. `u-boot init --force` must produce a clean split-block form
+// (services:/volumes: as top-level maps outside the block) without
+// dropping content the user might rely on.
+func TestInit_T4a_AltM3_Migration(t *testing.T) {
+	svc, fs, _, _ := newService(t)
+	composePath := filepath.Join(testBaseDir, "compose.yaml")
+	altM3 := "# BEGIN U-BOOT MANAGED BLOCK: init\n" +
+		"# Compose stack for demo.\n" +
+		"\n" +
+		"name: demo\n" +
+		"\n" +
+		"services: {}\n" +
+		"\n" +
+		"networks:\n" +
+		"  default:\n" +
+		"    name: demo-default\n" +
+		"# END U-BOOT MANAGED BLOCK: init\n"
+	if err := fs.WriteFile(composePath, []byte(altM3), 0o644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	if _, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		Force:   true,
+		SkipGit: true,
+	}); err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+
+	body, err := fs.ReadFile(composePath)
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	got := string(body)
+
+	// init block stays, name + networks still in it, services no longer in it.
+	beginIdx := strings.Index(got, "# BEGIN U-BOOT MANAGED BLOCK: init")
+	endIdx := strings.Index(got, "# END U-BOOT MANAGED BLOCK: init")
+	if beginIdx < 0 || endIdx < beginIdx {
+		t.Fatalf("init markers reversed/missing; got:\n%s", got)
+	}
+	initBlock := got[beginIdx:endIdx]
+	if strings.Contains(initBlock, "services:") {
+		t.Errorf("init block must NOT contain services after migration; got:\n%s", initBlock)
+	}
+	if !strings.Contains(initBlock, "networks:") {
+		t.Errorf("init block must retain networks after migration; got:\n%s", initBlock)
+	}
+
+	// New top-level services: and volumes: outside the block, both empty.
+	afterBlock := got[endIdx:]
+	if !strings.Contains(afterBlock, "\nservices: {}") {
+		t.Errorf("top-level services: {} missing after migration; got:\n%s", afterBlock)
+	}
+	if !strings.Contains(afterBlock, "\nvolumes: {}") {
+		t.Errorf("top-level volumes: {} missing after migration (Alt-M3 had no volumes); got:\n%s", afterBlock)
+	}
+}
+
+// TestInit_T4a_EnsureScaffold_UserCustomKey is the Ensure-Scaffold
+// safety check: a user-added top-level key (e.g. `x-user-config`)
+// outside any managed block must not be touched, duplicated, or
+// re-ordered by the ensure-pass.
+func TestInit_T4a_EnsureScaffold_UserCustomKey(t *testing.T) {
+	svc, fs, _, _ := newService(t)
+	composePath := filepath.Join(testBaseDir, "compose.yaml")
+	seeded := "# BEGIN U-BOOT MANAGED BLOCK: init\n" +
+		"name: demo\n" +
+		"# END U-BOOT MANAGED BLOCK: init\n" +
+		"\n" +
+		"x-user-config:\n" +
+		"  region: eu-central-1\n"
+	if err := fs.WriteFile(composePath, []byte(seeded), 0o644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	if _, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		Force:   true,
+		SkipGit: true,
+	}); err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+
+	body, _ := fs.ReadFile(composePath)
+	got := string(body)
+
+	// User block intact, exactly once.
+	if c := strings.Count(got, "x-user-config:"); c != 1 {
+		t.Errorf("x-user-config: expected exactly once, got %d; full:\n%s", c, got)
+	}
+	if !strings.Contains(got, "region: eu-central-1") {
+		t.Errorf("user value lost; got:\n%s", got)
+	}
+	// Ensure-Scaffold appended services and volumes too.
+	if !strings.Contains(got, "\nservices: {}") {
+		t.Errorf("services: {} missing; got:\n%s", got)
+	}
+	if !strings.Contains(got, "\nvolumes: {}") {
+		t.Errorf("volumes: {} missing; got:\n%s", got)
+	}
+}
+
+// TestInit_T4a_BackupOnly_FullOverwrite_DropsAddonsToBak pins the
+// documented-destructive behavior of `--backup` alone: live file is
+// the rendered template (add-on blocks gone from live), backup file
+// contains them. Users who want the add-on blocks preserved on
+// re-init must use `--force --backup`.
+func TestInit_T4a_BackupOnly_FullOverwrite_DropsAddonsToBak(t *testing.T) {
+	svc, fs, _, _ := newService(t)
+	composePath := filepath.Join(testBaseDir, "compose.yaml")
+	seeded := "# BEGIN U-BOOT MANAGED BLOCK: init\n" +
+		"name: demo\n" +
+		"# END U-BOOT MANAGED BLOCK: init\n" +
+		"\n" +
+		"services:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  postgres:\n" +
+		"    image: postgres:16-alpine\n" +
+		"  # END U-BOOT MANAGED BLOCK: service.postgres\n"
+	if err := fs.WriteFile(composePath, []byte(seeded), 0o644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	resp, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		Backup:  true,
+		SkipGit: true,
+	})
+	if err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+
+	live, _ := fs.ReadFile(composePath)
+	liveStr := string(live)
+	if strings.Contains(liveStr, "service.postgres") {
+		t.Errorf("live file still contains add-on block after --backup-only (expected destructive); got:\n%s", liveStr)
+	}
+	if !strings.Contains(liveStr, "services: {}") || !strings.Contains(liveStr, "volumes: {}") {
+		t.Errorf("live file missing fresh top-level scaffold; got:\n%s", liveStr)
+	}
+
+	// Backup retains the add-on block.
+	var bak *driving.BackupAction
+	for i := range resp.Backups {
+		if resp.Backups[i].Original == "compose.yaml" {
+			bak = &resp.Backups[i]
+		}
+	}
+	if bak == nil {
+		t.Fatalf("no backup recorded; resp.Backups=%v", resp.Backups)
+	}
+	bakBody, _ := fs.ReadFile(bak.Backup)
+	if !strings.Contains(string(bakBody), "service.postgres") {
+		t.Errorf("backup file missing add-on block; got:\n%s", bakBody)
+	}
+}
+
+// TestInit_T4a_ForceWithBackup_ManagedBlock_PreservesAddons mirrors
+// the --force-alone test but with --backup also set: the splice
+// mechanic is the same, plus a backup of the pre-state.
+func TestInit_T4a_ForceWithBackup_ManagedBlock_PreservesAddons(t *testing.T) {
+	svc, fs, _, _ := newService(t)
+	composePath := filepath.Join(testBaseDir, "compose.yaml")
+	seeded := "# BEGIN U-BOOT MANAGED BLOCK: init\n" +
+		"name: stale\n" +
+		"# END U-BOOT MANAGED BLOCK: init\n" +
+		"\n" +
+		"services:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  postgres:\n" +
+		"    image: postgres:16-alpine\n" +
+		"  # END U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"\n" +
+		"volumes:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: volume.postgres\n" +
+		"  postgres-data: {}\n" +
+		"  # END U-BOOT MANAGED BLOCK: volume.postgres\n"
+	if err := fs.WriteFile(composePath, []byte(seeded), 0o644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	resp, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:    "demo",
+		BaseDir: testBaseDir,
+		Force:   true,
+		Backup:  true,
+		SkipGit: true,
+	})
+	if err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+
+	live, _ := fs.ReadFile(composePath)
+	if !strings.Contains(string(live), "service.postgres") {
+		t.Errorf("--force --backup must preserve add-on blocks; got:\n%s", live)
+	}
+
+	// Backup recorded too.
+	hasBackup := false
+	for _, b := range resp.Backups {
+		if b.Original == "compose.yaml" {
+			hasBackup = true
+		}
+	}
+	if !hasBackup {
+		t.Errorf("--force --backup must record a backup; got Backups=%v", resp.Backups)
+	}
+}
+
+// TestRenderManagedBlockOnly_BlockNotFound covers the helper-direct
+// programmer-error path: a template body without the requested
+// marker.
+func TestRenderManagedBlockOnly_BlockNotFound(t *testing.T) {
+	_, err := application.RenderManagedBlockOnlyForTest(
+		[]byte("name: demo\n"),
+		"init",
+	)
+	if err == nil {
+		t.Fatalf("expected ErrBlockNotFound, got nil")
+	}
+	if !errors.Is(err, managedblock.ErrBlockNotFound) {
+		t.Errorf("error %v does not wrap ErrBlockNotFound", err)
+	}
+}
+
+// TestRenderManagedBlockOnly_BlockMalformed covers the
+// duplicate-BEGIN malformed path.
+func TestRenderManagedBlockOnly_BlockMalformed(t *testing.T) {
+	body := []byte(
+		"# BEGIN U-BOOT MANAGED BLOCK: init\n" +
+			"# BEGIN U-BOOT MANAGED BLOCK: init\n" +
+			"# END U-BOOT MANAGED BLOCK: init\n",
+	)
+	_, err := application.RenderManagedBlockOnlyForTest(body, "init")
+	if err == nil {
+		t.Fatalf("expected ErrBlockMalformed, got nil")
+	}
+	if !errors.Is(err, managedblock.ErrBlockMalformed) {
+		t.Errorf("error %v does not wrap ErrBlockMalformed", err)
+	}
+}
+
+// TestRenderManagedBlockOnly_HappyPath: extracts the BEGIN..END
+// region including marker lines, leaving surrounding template
+// content (which is the whole point of T4a) untouched.
+func TestRenderManagedBlockOnly_HappyPath(t *testing.T) {
+	body := []byte(
+		"# BEGIN U-BOOT MANAGED BLOCK: init\n" +
+			"name: demo\n" +
+			"# END U-BOOT MANAGED BLOCK: init\n" +
+			"\n" +
+			"services: {}\n",
+	)
+	got, err := application.RenderManagedBlockOnlyForTest(body, "init")
+	if err != nil {
+		t.Fatalf("RenderManagedBlockOnly: %v", err)
+	}
+	want := "# BEGIN U-BOOT MANAGED BLOCK: init\n" +
+		"name: demo\n" +
+		"# END U-BOOT MANAGED BLOCK: init\n"
+	if string(got) != want {
+		t.Errorf("got\n%q\nwant\n%q", got, want)
+	}
+}
+
+// TestEnsureComposeScaffold_AddsBothMissing pins the bare ensure-
+// pass: empty input gets both add-on host maps appended.
+func TestEnsureComposeScaffold_AddsBothMissing(t *testing.T) {
+	out := application.EnsureComposeScaffoldForTest([]byte("name: demo\n"))
+	got := string(out)
+	if !strings.Contains(got, "\nservices: {}") {
+		t.Errorf("missing services; got:\n%s", got)
+	}
+	if !strings.Contains(got, "\nvolumes: {}") {
+		t.Errorf("missing volumes; got:\n%s", got)
+	}
+}
+
+// TestEnsureComposeScaffold_NoOpWhenBothPresent: when both keys are
+// already top-level and outside any managed block, the body is
+// returned byte-identical.
+func TestEnsureComposeScaffold_NoOpWhenBothPresent(t *testing.T) {
+	in := []byte("name: demo\nservices: {}\nvolumes: {}\n")
+	out := application.EnsureComposeScaffoldForTest(in)
+	if !reflect.DeepEqual(out, in) {
+		t.Errorf("expected byte-identical no-op; got:\n%q\nwant:\n%q", out, in)
+	}
+}
+
+// TestEnsureComposeScaffold_IgnoresKeyInsideManagedBlock pins the
+// Alt-M3 motivation: a `services: {}` *inside* the init block does
+// NOT count as "top-level present" — ensure-pass still appends it
+// outside.
+func TestEnsureComposeScaffold_IgnoresKeyInsideManagedBlock(t *testing.T) {
+	in := []byte("# BEGIN U-BOOT MANAGED BLOCK: init\n" +
+		"services: {}\n" +
+		"# END U-BOOT MANAGED BLOCK: init\n")
+	out := application.EnsureComposeScaffoldForTest(in)
+	got := string(out)
+	// Original block left untouched (still contains `services: {}` inside)
+	if !strings.Contains(got, "# BEGIN U-BOOT MANAGED BLOCK: init") {
+		t.Errorf("init block missing; got:\n%s", got)
+	}
+	// New top-level keys appended after.
+	endIdx := strings.Index(got, "# END U-BOOT MANAGED BLOCK: init")
+	after := got[endIdx:]
+	if !strings.Contains(after, "\nservices: {}") {
+		t.Errorf("top-level services: missing outside block; got:\n%s", got)
+	}
+	if !strings.Contains(after, "\nvolumes: {}") {
+		t.Errorf("top-level volumes: missing; got:\n%s", got)
 	}
 }

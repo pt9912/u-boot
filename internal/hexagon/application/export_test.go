@@ -1,6 +1,27 @@
 package application
 
-import "github.com/pt9912/u-boot/internal/hexagon/domain"
+import (
+	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
+	"github.com/pt9912/u-boot/internal/hexagon/domain"
+)
+
+// RenderManagedBlockOnlyForTest exposes the package-internal
+// renderManagedBlockOnly helper (M5-T4a) to external _test packages
+// so the programmer-error paths (template-missing-marker, malformed)
+// and the happy-path byte-extract can be tested without going through
+// a full Init() run.
+func RenderManagedBlockOnlyForTest(rendered []byte, markerName string) ([]byte, error) {
+	return renderManagedBlockOnly(rendered, managedblock.Marker{
+		Style: managedblock.StyleHash,
+		Name:  markerName,
+	})
+}
+
+// EnsureComposeScaffoldForTest exposes the package-internal
+// ensureComposeScaffold helper (M5-T4a) to external _test packages.
+func EnsureComposeScaffoldForTest(content []byte) []byte {
+	return ensureComposeScaffold(content)
+}
 
 // TemplateNamesForTest exposes the package-internal templateNames
 // helper to external _test packages. The `_test.go` suffix means

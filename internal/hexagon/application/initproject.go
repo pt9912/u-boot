@@ -1,6 +1,7 @@
 package application
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -605,6 +606,14 @@ func (s *InitProjectService) executeFile(baseDir string, plan filePlan, body []b
 // second read + extra TOCTOU window) and writes the result with the
 // preserved mode. Optionally backs up the original first when
 // plan.Backup is true.
+//
+// Per M5-T4a the rendered template body may contain content outside
+// the BEGIN/END managed-block region (compose.yaml.tmpl carries
+// services:/volumes: as top-level maps outside the init block so
+// `u-boot init --force` does not destroy add-on entries). Only the
+// BEGIN..END region of the rendered template is spliced into the
+// existing file; for compose.yaml an Ensure-Scaffold pass adds any
+// missing add-on host maps as new top-level entries afterwards.
 func (s *InitProjectService) executeReplaceBlock(baseDir string, plan filePlan, body []byte) (string, *driving.BackupAction, error) {
 	fullPath := filepath.Join(baseDir, plan.Template.Path)
 	var backup *driving.BackupAction
@@ -616,14 +625,109 @@ func (s *InitProjectService) executeReplaceBlock(baseDir string, plan filePlan, 
 		backup = ba
 	}
 	marker := managedblock.Marker{Style: plan.Template.Style, Name: managedblock.InitName}
-	updated, err := managedblock.Replace(plan.Body, marker, body)
+	blockOnly, err := renderManagedBlockOnly(body, marker)
+	if err != nil {
+		return "", nil, fmt.Errorf("extract %s block from rendered %s: %w",
+			marker.Name, plan.Template.Path, err)
+	}
+	updated, err := managedblock.Replace(plan.Body, marker, blockOnly)
 	if err != nil {
 		return "", nil, fmt.Errorf("replace block in %s: %w", plan.Template.Path, err)
+	}
+	if plan.Template.Path == "compose.yaml" {
+		updated = ensureComposeScaffold(updated)
 	}
 	if err := s.fs.WriteFile(fullPath, updated, plan.Mode); err != nil {
 		return "", nil, fmt.Errorf("write %s: %w", plan.Template.Path, err)
 	}
 	return plan.Template.Path, backup, nil
+}
+
+// renderManagedBlockOnly extracts the BEGIN..END byte region of the
+// given marker from a freshly-rendered template body. Used by
+// [executeReplaceBlock] so a template that carries content outside
+// its init block (compose.yaml.tmpl since M5-T4a) does not splice
+// that content into the existing file's block region.
+//
+// Production templates are checked at startup ([renderTemplate])
+// and must contain the marker; an [ErrBlockNotFound] /
+// [ErrBlockMalformed] from this helper therefore indicates a
+// programmer error in the template, not a user-side problem.
+func renderManagedBlockOnly(rendered []byte, marker managedblock.Marker) ([]byte, error) {
+	start, end, err := managedblock.Find(rendered, marker)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]byte, end-start)
+	copy(out, rendered[start:end])
+	return out, nil
+}
+
+// ensureComposeScaffold appends the add-on host maps services:/volumes:
+// as empty top-level entries when they are missing outside every managed
+// block. Idempotent: when both keys already exist (as a top-level entry
+// outside the init block, regardless of content), content is returned
+// unchanged.
+//
+// Scoped to compose.yaml by the caller — other templated files have no
+// add-on host map convention. The pass runs after the init-block splice
+// so a re-init on an Alt-M3 project (which had `services: {}` *inside*
+// the init block and no `volumes:` at all) ends up with the new split-
+// block form without losing add-on hosts on later patches.
+func ensureComposeScaffold(content []byte) []byte {
+	hasServices := topLevelKeyPresent(content, "services")
+	hasVolumes := topLevelKeyPresent(content, "volumes")
+	if hasServices && hasVolumes {
+		return content
+	}
+	var b bytes.Buffer
+	b.Write(content)
+	if len(content) > 0 && content[len(content)-1] != '\n' {
+		b.WriteByte('\n')
+	}
+	if !hasServices {
+		b.WriteByte('\n')
+		b.WriteString("services: {}\n")
+	}
+	if !hasVolumes {
+		b.WriteByte('\n')
+		b.WriteString("volumes: {}\n")
+	}
+	return b.Bytes()
+}
+
+// topLevelKeyPresent reports whether content contains `<key>:` at the
+// start of a line that lies outside every `# BEGIN/END U-BOOT MANAGED
+// BLOCK: ...` region. Skips lines inside managed blocks so a stale
+// Alt-M3 `services: {}` inside the init block does not count.
+//
+// The detection is line-based — sufficient for the LH-SA-FILE-002
+// hash-marker convention; nested mapping keys never reach column 0
+// and are therefore invisible to this check.
+func topLevelKeyPresent(content []byte, key string) bool {
+	keyPrefix := []byte(key + ":")
+	beginMarker := []byte("# BEGIN U-BOOT MANAGED BLOCK:")
+	endMarker := []byte("# END U-BOOT MANAGED BLOCK:")
+	inManagedBlock := false
+	for _, line := range bytes.Split(content, []byte("\n")) {
+		trimmed := bytes.TrimRight(line, "\r")
+		switch {
+		case bytes.HasPrefix(trimmed, beginMarker):
+			inManagedBlock = true
+		case bytes.HasPrefix(trimmed, endMarker):
+			inManagedBlock = false
+		case inManagedBlock:
+			// inside managed block — does not count as top-level
+		case bytes.HasPrefix(trimmed, keyPrefix):
+			// require the next byte to be whitespace / EOL / flow-open
+			// so `servicesfoo:` does not get mis-matched as `services:`
+			rest := trimmed[len(keyPrefix):]
+			if len(rest) == 0 || rest[0] == ' ' || rest[0] == '\t' || rest[0] == '{' {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // executeOverwriteFull backs up the existing file (Backup is always
