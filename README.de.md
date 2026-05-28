@@ -14,7 +14,7 @@ und wiederkehrende Artefakte (README, CHANGELOG, `.env.example`).
 
 ## Status
 
-**MVP in Arbeit — zwei Subkommandos vollständig verdrahtet (`init` + `doctor`).**
+**MVP in Arbeit — drei Subkommandos vollständig verdrahtet (`init` + `doctor` + `add`).**
 - `u-boot init [name]` erzeugt die LH-FA-INIT-003-Projektstruktur plus
   `u-boot.yaml` (LH-FA-CONF-002) und initialisiert per Default ein
   Git-Repository (LH-FA-INIT-007); Re-Init nutzt den
@@ -22,21 +22,29 @@ und wiederkehrende Artefakte (README, CHANGELOG, `.env.example`).
   `--backup` für Vollüberschreibung mit `.bak[.N]`-Sicherung) plus die
   LH-FA-CLI-005A-Modi-Flags (`--yes` / `--no-interactive` exklusiv;
   `--assume-existing` treibt die LH-FA-INIT-004-Soft-Detection).
-- `u-boot doctor` führt 9 Diagnose-Checks gegen die lokale Umgebung
+- `u-boot doctor` führt 11 Diagnose-Checks gegen die lokale Umgebung
   und das Projekt aus (LH-FA-DIAG-002), klassifiziert Befunde als
   ok / warn / error (LH-FA-DIAG-003), gibt Reparaturhinweise
   (LH-FA-DIAG-004) und exited mit 11 bei Errors (oder Warns mit
-  `--strict`).
+  `--strict`). M5 ergänzt `services.enabled-key`,
+  `devcontainer.forwardPorts.consistency` und die Severity-Eskalation
+  über `devcontainer.enabled`.
+- `u-boot add <service>` fügt ein integriertes Service-Add-On in das
+  aktuelle Projekt ein (LH-FA-ADD-001..002, LH-FA-ADD-005). Heute nur
+  `postgres` im Katalog; Keycloak (LH-FA-ADD-003) und OpenTelemetry
+  (LH-FA-ADD-004) folgen in V1. Idempotent, mit voller State-Machine:
+  registrieren, reaktivieren, Block neu erzeugen, fehlende Artefakte
+  reparieren, Abbruch bei Inkonsistenzen.
 
-Die weiteren MVP-Subkommandos (`add`, `up`, `down`, `generate`,
-`config`) folgen in M5+; Planung in
+Die weiteren MVP-Subkommandos (`up`, `down`, `generate`, `config`)
+folgen in M6+; Planung in
 [`docs/plan/planning/`](docs/plan/planning/).
 
 | Phase | Status | Quelle |
 | ----- | ------ | ------ |
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
 | Architekturentscheidungen | 6 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
-| Implementierung | M1–M4 ✅, M5 in Arbeit (T1+T2 von 7) | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
+| Implementierung | M1–M5 ✅, M6 als Nächstes (`up` / `down`) | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
 | Carveouts | 7 temporär (6 mit Slice-Plan, 1 Slice deckt 2), 8 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
