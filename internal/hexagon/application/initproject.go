@@ -120,33 +120,6 @@ func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driv
 	return &InitProjectService{fs: fs, yaml: yaml, git: git, progress: progress, confirmer: confirmer, logger: logger}
 }
 
-// noopProgress is the nil-tolerant default for
-// [InitProjectService.progress] — does nothing on every method, so
-// the call sites stay free of nil checks.
-type noopProgress struct{}
-
-func (noopProgress) AffectedFiles(_ string, _ []driven.AffectedFile) {}
-
-// noopConfirmer is the nil-tolerant default for
-// [InitProjectService.confirmer] — always declines, so a service
-// constructed without a wired Confirmer behaves like a strict
-// non-interactive run.
-type noopConfirmer struct{}
-
-func (noopConfirmer) ConfirmTreatAsExisting(_ context.Context, _ string, _ []string) (bool, error) {
-	return false, nil
-}
-
-// noopLogger is the nil-tolerant default for [InitProjectService.logger]
-// — every level discards. Keeps the service's debug/info call sites
-// free of nil checks.
-type noopLogger struct{}
-
-func (noopLogger) Debug(_ string, _ ...any) {}
-func (noopLogger) Info(_ string, _ ...any)  {}
-func (noopLogger) Warn(_ string, _ ...any)  {}
-func (noopLogger) Error(_ string, _ ...any) {}
-
 // fileAction classifies what the service should do with a single
 // templated file at execute time. The plan phase computes this for
 // every file before any write happens, so a summary can be emitted

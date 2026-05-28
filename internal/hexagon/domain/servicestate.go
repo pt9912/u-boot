@@ -21,7 +21,7 @@ const (
 
 	// ServiceStateActive means `services.<name>.enabled: true` AND
 	// the managed compose-block is present. `u-boot add` is a no-op
-	// (idempotent); returns ErrServiceAlreadyActive.
+	// (idempotent); it returns a nil-error response with Changed=nil.
 	ServiceStateActive
 
 	// ServiceStateDeactivated means `services.<name>.enabled: false`

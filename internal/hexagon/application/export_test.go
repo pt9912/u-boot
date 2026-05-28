@@ -1,5 +1,7 @@
 package application
 
+import "github.com/pt9912/u-boot/internal/hexagon/domain"
+
 // TemplateNamesForTest exposes the package-internal templateNames
 // helper to external _test packages. The `_test.go` suffix means
 // the symbol only exists in the test binary; production callers
@@ -13,4 +15,37 @@ func TemplateNamesForTest() ([]string, error) {
 // (template-not-found) is reachable.
 func RenderTemplateForTest(name, projectName string) ([]byte, error) {
 	return renderTemplate(name, templateData{Name: projectName})
+}
+
+// AddServicePlanForTest is the test-only projection of the unexported
+// [servicePlan] returned by [AddServiceService.planAdd]. T3 tests use
+// it to assert plan shape for each mutating state without exposing
+// the production type to non-test callers.
+type AddServicePlanForTest struct {
+	Service    domain.ServiceName
+	PriorState domain.ServiceState
+	Action     string
+}
+
+// DetectServiceStateForTest exposes the unexported
+// [AddServiceService.detectServiceState] helper so T3 fixtures can
+// assert state classification directly, without going through
+// Add()'s dispatch.
+func (s *AddServiceService) DetectServiceStateForTest(baseDir string, svc domain.ServiceName) (domain.ServiceState, error) {
+	return s.detectServiceState(baseDir, svc)
+}
+
+// PlanAddForTest exposes the unexported [AddServiceService.planAdd]
+// helper. The returned struct is the test-only projection so the
+// production [servicePlan] stays unexported.
+func (s *AddServiceService) PlanAddForTest(svc domain.ServiceName, state domain.ServiceState) (AddServicePlanForTest, error) {
+	plan, err := s.planAdd(svc, state)
+	if err != nil {
+		return AddServicePlanForTest{}, err
+	}
+	return AddServicePlanForTest{
+		Service:    plan.Service,
+		PriorState: plan.PriorState,
+		Action:     plan.Action.String(),
+	}, nil
 }

@@ -30,9 +30,9 @@ type AddServiceRequest struct {
 }
 
 // AddServiceResponse is the output of [AddServiceUseCase.Add]. The
-// CLI adapter renders it as a short summary; consumers can also
-// branch on [PriorState] for idempotent-detected messages ("was
-// already active; no changes").
+// CLI adapter renders it as a short summary. Consumers should use
+// Changed, not PriorState alone, to detect a no-op: an already-active
+// service may still repair missing service artefacts.
 type AddServiceResponse struct {
 	// ServiceName echoes the name that was processed — useful for
 	// callers that batch invocations.
@@ -44,22 +44,26 @@ type AddServiceResponse struct {
 	//
 	//   - PriorState=Unregistered → State=Active: "Added X."
 	//   - PriorState=Deactivated  → State=Active: "Reactivated X."
-	//   - PriorState=Active       → State=Active: "X already active (no changes)."
+	//   - PriorState=Active → State=Active, Changed=nil:
+	//     "X already active (no changes)."
+	//   - PriorState=Active → State=Active, Changed!=nil:
+	//     "Repaired X artefacts."
 	//
 	// Inconsistent-state aborts never produce a response; they
 	// return [ErrServiceInconsistent] instead.
 	PriorState domain.ServiceState
 
-	// State is the resulting [domain.ServiceState] after the add.
-	// On a successful call this is always [domain.ServiceStateActive]
-	// (no-op when PriorState was already Active; flipped to Active
-	// otherwise).
+	// State is the resulting [domain.ServiceState] after the add. On a
+	// successful call this is always [domain.ServiceStateActive].
 	State domain.ServiceState
 
 	// Changed lists the project-relative paths the use case mutated
-	// (`compose.yaml`, `.env.example`, `u-boot.yaml`). Non-empty on
-	// every successful transition; empty exactly when [PriorState]
-	// was [domain.ServiceStateActive] (no-op idempotent path).
+	// (`compose.yaml`, `.env.example`, `u-boot.yaml`). Empty means a
+	// true no-op: the service was already active and all service
+	// artefacts were present. PriorState may still be
+	// [domain.ServiceStateActive] with non-empty Changed when Add
+	// repairs missing PostgreSQL artefacts such as the volume or env
+	// managed block.
 	Changed []string
 }
 
@@ -75,7 +79,7 @@ type AddServiceResponse struct {
 // add. MVP catalogue: only `postgres`.
 var ErrServiceUnsupported = errors.New("service not supported")
 
-// ErrServiceInconsistent signals an LH-FA-ADD-005-§896 condition:
+// ErrServiceInconsistent signals an LH-FA-ADD-005-§895 condition:
 // a managed `BEGIN/END U-BOOT MANAGED BLOCK: service.<name>` block
 // is present in `compose.yaml` but the matching `services.<name>`
 // entry is missing from `u-boot.yaml` — the YAML anchor has been
@@ -100,9 +104,9 @@ var ErrProjectNotInitialized = errors.New("project not initialized")
 // Contract:
 //
 //   - On success State is [domain.ServiceStateActive]. Changed is
-//     non-empty on every state-transition (Unregistered/Deactivated/
-//     inconsistent-block → Active) and empty exactly when
-//     PriorState was already Active (no-op idempotent path).
+//     empty only for a true no-op. It is non-empty for state
+//     transitions (Unregistered/Deactivated/inconsistent-block →
+//     Active) and for Active → Active artefact repairs.
 //   - On failure the response is the zero value and the error wraps
 //     one of the sentinels above (or [domain.ErrInvalidServiceName]
 //     for a syntactically invalid name).

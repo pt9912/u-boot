@@ -1,12 +1,14 @@
 package application_test
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	iofs "io/fs"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -443,6 +445,19 @@ func (i *fakeFileInfo) Sys() any           { return nil }
 // `*_test.go` Carveout (LH-FA-ARCH-003) covers that.
 type fakeYAML struct {
 	failMarshal bool
+	// failPatchOn forces PatchScalar to fail when the patched path's
+	// joined-by-"." representation equals this string. Tests assert
+	// no FS write happens on a patch failure.
+	failPatchOn  string
+	failPatchErr error
+	// patchCalls records every PatchScalar invocation so tests can
+	// assert call ordering / count.
+	patchCalls []fakePatchCall
+}
+
+type fakePatchCall struct {
+	Path  []string
+	Value any
 }
 
 func (f *fakeYAML) Marshal(v any) ([]byte, error) {
@@ -454,6 +469,112 @@ func (f *fakeYAML) Marshal(v any) ([]byte, error) {
 
 func (f *fakeYAML) Unmarshal(data []byte, v any) error {
 	return yaml.Unmarshal(data, v)
+}
+
+// PatchScalar mirrors the production yaml.Node-based adapter just
+// closely enough for tests: it parses content, walks path through
+// nested mappings (creating missing intermediates), and sets a
+// scalar leaf. Errors mirror the [driven.ErrYAMLPathInvalid]
+// contract so tests can assert on the sentinel without depending on
+// the production adapter.
+func (f *fakeYAML) PatchScalar(content []byte, path []string, value any) ([]byte, error) {
+	if f.failPatchOn != "" && strings.Join(path, ".") == f.failPatchOn {
+		return nil, f.failPatchErr
+	}
+	f.patchCalls = append(f.patchCalls, fakePatchCall{Path: append([]string(nil), path...), Value: value})
+	if len(path) == 0 {
+		return nil, fmt.Errorf("%w: empty path", driven.ErrYAMLPathInvalid)
+	}
+	scalar, err := fakeScalarNode(value)
+	if err != nil {
+		return nil, err
+	}
+	var doc yaml.Node
+	if len(bytes.TrimSpace(content)) > 0 {
+		if err := yaml.Unmarshal(content, &doc); err != nil {
+			return nil, fmt.Errorf("fakeYAML.PatchScalar parse: %w", err)
+		}
+	}
+	root := fakeDocumentRoot(&doc)
+	if root.Kind != yaml.MappingNode {
+		return nil, fmt.Errorf("%w: root is not a mapping", driven.ErrYAMLPathInvalid)
+	}
+	cur := root
+	for i, key := range path {
+		isLast := i == len(path)-1
+		child, found := fakeMappingChild(cur, key)
+		switch {
+		case isLast && found:
+			*child = *scalar
+		case isLast && !found:
+			fakeAppendMappingChild(cur, key, scalar)
+		case !isLast && found:
+			if child.Kind != yaml.MappingNode {
+				return nil, fmt.Errorf("%w: intermediate key %q is not a mapping",
+					driven.ErrYAMLPathInvalid, key)
+			}
+			cur = child
+		case !isLast && !found:
+			next := &yaml.Node{Kind: yaml.MappingNode, Tag: "!!map"}
+			fakeAppendMappingChild(cur, key, next)
+			cur = next
+		}
+	}
+	var buf bytes.Buffer
+	enc := yaml.NewEncoder(&buf)
+	enc.SetIndent(2)
+	if err := enc.Encode(&doc); err != nil {
+		return nil, fmt.Errorf("fakeYAML.PatchScalar encode: %w", err)
+	}
+	if err := enc.Close(); err != nil {
+		return nil, fmt.Errorf("fakeYAML.PatchScalar close: %w", err)
+	}
+	return buf.Bytes(), nil
+}
+
+func fakeDocumentRoot(doc *yaml.Node) *yaml.Node {
+	if doc.Kind == 0 {
+		doc.Kind = yaml.DocumentNode
+		doc.Content = []*yaml.Node{{Kind: yaml.MappingNode, Tag: "!!map"}}
+		return doc.Content[0]
+	}
+	if doc.Kind == yaml.DocumentNode {
+		if len(doc.Content) == 0 {
+			doc.Content = []*yaml.Node{{Kind: yaml.MappingNode, Tag: "!!map"}}
+		}
+		return doc.Content[0]
+	}
+	return doc
+}
+
+func fakeMappingChild(mapping *yaml.Node, key string) (*yaml.Node, bool) {
+	for i := 0; i+1 < len(mapping.Content); i += 2 {
+		k := mapping.Content[i]
+		if k.Kind == yaml.ScalarNode && k.Value == key {
+			return mapping.Content[i+1], true
+		}
+	}
+	return nil, false
+}
+
+func fakeAppendMappingChild(mapping *yaml.Node, key string, value *yaml.Node) {
+	mapping.Content = append(mapping.Content,
+		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: key},
+		value,
+	)
+}
+
+func fakeScalarNode(value any) (*yaml.Node, error) {
+	switch v := value.(type) {
+	case bool:
+		return &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!bool", Value: strconv.FormatBool(v)}, nil
+	case string:
+		return &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: v}, nil
+	case int:
+		return &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!int", Value: strconv.FormatInt(int64(v), 10)}, nil
+	default:
+		return nil, fmt.Errorf("%w: unsupported %T", driven.ErrYAMLPathInvalid, value)
+	}
 }
 
 // fakeProgress records every AffectedFiles call so tests can
