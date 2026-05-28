@@ -15,6 +15,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	yamladapter "github.com/pt9912/u-boot/internal/adapter/driven/yaml"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 )
 
@@ -453,11 +454,24 @@ type fakeYAML struct {
 	// patchCalls records every PatchScalar invocation so tests can
 	// assert call ordering / count.
 	patchCalls []fakePatchCall
+	// failPatchMappingOn / failPatchMappingErr fail
+	// PatchMappingEntryYAML for a specific parentKey.entryKey pair.
+	failPatchMappingOn  string
+	failPatchMappingErr error
+	// mappingPatchCalls records every PatchMappingEntryYAML call.
+	mappingPatchCalls []fakeMappingPatchCall
 }
 
 type fakePatchCall struct {
 	Path  []string
 	Value any
+}
+
+type fakeMappingPatchCall struct {
+	ParentKey  string
+	EntryKey   string
+	ValueYAML  []byte
+	MarkerName string
 }
 
 func (f *fakeYAML) Marshal(v any) ([]byte, error) {
@@ -575,6 +589,36 @@ func fakeScalarNode(value any) (*yaml.Node, error) {
 	default:
 		return nil, fmt.Errorf("%w: unsupported %T", driven.ErrYAMLPathInvalid, value)
 	}
+}
+
+// PatchMappingEntryYAML delegates to the production yaml adapter so
+// application-layer tests see the exact same byte-preservation,
+// anchor-validation and error-sentinel behaviour the real CLI sees.
+// Direct adapter imports are allowed inside `_test.go` files via the
+// `application-no-adapter` depguard carveout.
+//
+// The fake adds two failure hooks (failPatchMappingOn /
+// failPatchMappingErr) so tests can assert that no FS write happens
+// when PatchMappingEntryYAML fails mid-plan.
+func (f *fakeYAML) PatchMappingEntryYAML(content []byte, parentKey, entryKey string, valueYAML []byte, markerName string) ([]byte, error) {
+	if f.failPatchMappingOn != "" && f.failPatchMappingOn == parentKey+"."+entryKey {
+		return nil, f.failPatchMappingErr
+	}
+	f.mappingPatchCalls = append(f.mappingPatchCalls, fakeMappingPatchCall{
+		ParentKey:  parentKey,
+		EntryKey:   entryKey,
+		ValueYAML:  append([]byte(nil), valueYAML...),
+		MarkerName: markerName,
+	})
+	return yamladapter.New().PatchMappingEntryYAML(content, parentKey, entryKey, valueYAML, markerName)
+}
+
+// LocateMarkedEntry also delegates so the LocateResult flags the
+// fake produces are byte-identical to production. No failure hook —
+// LocateMarkedEntry is read-only and is exercised on the happy path
+// by the application-layer T4c tests.
+func (f *fakeYAML) LocateMarkedEntry(content []byte, parentKey, entryKey, markerName string) (driven.LocateResult, error) {
+	return yamladapter.New().LocateMarkedEntry(content, parentKey, entryKey, markerName)
 }
 
 // fakeProgress records every AffectedFiles call so tests can

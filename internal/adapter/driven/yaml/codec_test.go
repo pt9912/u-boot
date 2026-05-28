@@ -270,3 +270,487 @@ func TestCodec_PatchScalar_AliasIntermediateReturnsErr(t *testing.T) {
 		t.Errorf("error must mention alias to guide the caller; got: %v", err)
 	}
 }
+
+// --- M5-T4b: PatchMappingEntryYAML + LocateMarkedEntry --------------
+
+const samplePostgresFragment = "image: postgres:16-alpine\n" +
+	"environment:\n" +
+	"  POSTGRES_USER: postgres\n" +
+	"  POSTGRES_PASSWORD: CHANGEME_POSTGRES_PASSWORD\n" +
+	"  POSTGRES_DB: postgres\n" +
+	"ports:\n" +
+	"  - \"5432:5432\"\n" +
+	"healthcheck:\n" +
+	"  test: [\"CMD\", \"pg_isready\"]\n"
+
+func TestPatchMappingEntryYAML_InsertIntoEmptyInline(t *testing.T) {
+	// Why: M3 fresh-init compose has `services: {}` as inline empty.
+	// First `u-boot add postgres` must rewrite the parent header to
+	// block style and splice in the BEGIN/END-wrapped entry under it
+	// without touching the surrounding init block or top-level
+	// comments.
+	input := []byte("# Compose stack for demo.\n" +
+		"name: demo\n" +
+		"\n" +
+		"services: {}\n" +
+		"\n" +
+		"volumes: {}\n")
+	out, err := yaml.New().PatchMappingEntryYAML(input,
+		"services", "postgres", []byte(samplePostgresFragment),
+		"service.postgres")
+	if err != nil {
+		t.Fatalf("PatchMappingEntryYAML: %v", err)
+	}
+	got := string(out)
+	for _, want := range []string{
+		"# Compose stack for demo.",
+		"name: demo",
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres",
+		"  postgres:",
+		"    image: postgres:16-alpine",
+		"  # END U-BOOT MANAGED BLOCK: service.postgres",
+		"\nvolumes: {}",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("output missing %q; got:\n%s", want, got)
+		}
+	}
+	// `services: {}` must be rewritten to block-style `services:`.
+	if strings.Contains(got, "services: {}") {
+		t.Errorf("services inline-empty header was not rewritten to block style; got:\n%s", got)
+	}
+}
+
+func TestPatchMappingEntryYAML_ReplaceExisting(t *testing.T) {
+	// Why: idempotent re-add — the second `u-boot add postgres` on
+	// an already-managed compose.yaml must replace exactly the
+	// existing block byte range.
+	input := []byte("services:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  postgres:\n" +
+		"    image: stale:1\n" +
+		"  # END U-BOOT MANAGED BLOCK: service.postgres\n")
+	out, err := yaml.New().PatchMappingEntryYAML(input,
+		"services", "postgres", []byte(samplePostgresFragment),
+		"service.postgres")
+	if err != nil {
+		t.Fatalf("PatchMappingEntryYAML: %v", err)
+	}
+	got := string(out)
+	if strings.Contains(got, "stale:1") {
+		t.Errorf("old block contents not replaced; got:\n%s", got)
+	}
+	if !strings.Contains(got, "image: postgres:16-alpine") {
+		t.Errorf("new block contents missing; got:\n%s", got)
+	}
+	if strings.Count(got, "BEGIN U-BOOT MANAGED BLOCK: service.postgres") != 1 {
+		t.Errorf("expected exactly 1 BEGIN marker, got:\n%s", got)
+	}
+}
+
+func TestPatchMappingEntryYAML_MissingParentAppends(t *testing.T) {
+	// Why: a user-pflichtFiles compose.yaml may lack `services:` entirely.
+	// Patch must append a fresh top-level `services:` block at the
+	// end of the file separated by one blank line.
+	input := []byte("name: demo\n" +
+		"networks:\n" +
+		"  default: {}\n")
+	out, err := yaml.New().PatchMappingEntryYAML(input,
+		"services", "postgres", []byte(samplePostgresFragment),
+		"service.postgres")
+	if err != nil {
+		t.Fatalf("PatchMappingEntryYAML: %v", err)
+	}
+	got := string(out)
+	for _, want := range []string{
+		"name: demo",
+		"networks:",
+		"\nservices:",
+		"BEGIN U-BOOT MANAGED BLOCK: service.postgres",
+		"image: postgres:16-alpine",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("missing %q; got:\n%s", want, got)
+		}
+	}
+	// Existing top-level keys must remain byte-identical at the start.
+	if !strings.HasPrefix(got, "name: demo\nnetworks:\n  default: {}\n") {
+		t.Errorf("prefix mutated; got:\n%s", got)
+	}
+}
+
+func TestPatchMappingEntryYAML_IndentedMarkerRecognized(t *testing.T) {
+	// Why: production writes the marker indented under the parent
+	// (column 2 under `services:`). The scanner must locate it
+	// regardless of indent.
+	input := []byte("services:\n" +
+		"  mywebapp:\n" +
+		"    image: nginx\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  postgres:\n" +
+		"    image: stale\n" +
+		"  # END U-BOOT MANAGED BLOCK: service.postgres\n")
+	out, err := yaml.New().PatchMappingEntryYAML(input,
+		"services", "postgres", []byte(samplePostgresFragment),
+		"service.postgres")
+	if err != nil {
+		t.Fatalf("PatchMappingEntryYAML: %v", err)
+	}
+	got := string(out)
+	if !strings.Contains(got, "mywebapp:") {
+		t.Errorf("user-custom service was clobbered; got:\n%s", got)
+	}
+	if strings.Contains(got, "image: stale") {
+		t.Errorf("old block not replaced; got:\n%s", got)
+	}
+	if !strings.Contains(got, "image: postgres:16-alpine") {
+		t.Errorf("new block missing; got:\n%s", got)
+	}
+}
+
+func TestPatchMappingEntryYAML_MalformedMarkerReturnsErr(t *testing.T) {
+	input := []byte("services:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  postgres:\n" +
+		"    image: foo\n")
+	// no END
+	_, err := yaml.New().PatchMappingEntryYAML(input,
+		"services", "postgres", []byte(samplePostgresFragment),
+		"service.postgres")
+	if err == nil {
+		t.Fatalf("expected malformed-block error, got nil")
+	}
+	if !strings.Contains(err.Error(), "malformed") {
+		t.Errorf("err must mention malformed; got: %v", err)
+	}
+}
+
+func TestPatchMappingEntryYAML_DuplicateBeginReturnsErr(t *testing.T) {
+	input := []byte("services:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  postgres:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  # END U-BOOT MANAGED BLOCK: service.postgres\n")
+	_, err := yaml.New().PatchMappingEntryYAML(input,
+		"services", "postgres", []byte(samplePostgresFragment),
+		"service.postgres")
+	if err == nil {
+		t.Fatalf("expected malformed-block (duplicate BEGIN) error")
+	}
+	if !strings.Contains(err.Error(), "malformed") {
+		t.Errorf("err must mention malformed; got: %v", err)
+	}
+}
+
+func TestPatchMappingEntryYAML_TopLevelDuplicateReturnsErr(t *testing.T) {
+	input := []byte("name: a\n" +
+		"name: b\n" +
+		"services: {}\n")
+	_, err := yaml.New().PatchMappingEntryYAML(input,
+		"services", "postgres", []byte(samplePostgresFragment),
+		"service.postgres")
+	if !errors.Is(err, driven.ErrYAMLFragmentInvalid) {
+		t.Fatalf("err = %v, want ErrYAMLFragmentInvalid", err)
+	}
+}
+
+func TestPatchMappingEntryYAML_ScalarFragmentReturnsErr(t *testing.T) {
+	input := []byte("services: {}\n")
+	_, err := yaml.New().PatchMappingEntryYAML(input,
+		"services", "postgres", []byte("just-a-scalar\n"),
+		"service.postgres")
+	if !errors.Is(err, driven.ErrYAMLFragmentInvalid) {
+		t.Fatalf("err = %v, want ErrYAMLFragmentInvalid", err)
+	}
+}
+
+func TestPatchMappingEntryYAML_SequenceFragmentReturnsErr(t *testing.T) {
+	input := []byte("services: {}\n")
+	_, err := yaml.New().PatchMappingEntryYAML(input,
+		"services", "postgres", []byte("- a\n- b\n"),
+		"service.postgres")
+	if !errors.Is(err, driven.ErrYAMLFragmentInvalid) {
+		t.Fatalf("err = %v, want ErrYAMLFragmentInvalid", err)
+	}
+}
+
+func TestPatchMappingEntryYAML_NonEmptyFlowParentReturnsErr(t *testing.T) {
+	// Why: a non-empty flow-style parent cannot host a block-style
+	// managed entry without rewriting the whole flow, which would
+	// break byte preservation.
+	input := []byte("services: { mywebapp: { image: nginx } }\n")
+	_, err := yaml.New().PatchMappingEntryYAML(input,
+		"services", "postgres", []byte(samplePostgresFragment),
+		"service.postgres")
+	if !errors.Is(err, driven.ErrYAMLFragmentInvalid) {
+		t.Fatalf("err = %v, want ErrYAMLFragmentInvalid", err)
+	}
+}
+
+func TestPatchMappingEntryYAML_MarkerSomewhereElseRejected(t *testing.T) {
+	// Why: defensive — even though the application layer pre-checks
+	// via LocateMarkedEntry, the adapter must reject if a marker for
+	// the requested service lives outside the requested parent.
+	input := []byte("services: {}\n" +
+		"\n" +
+		"volumes:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  postgres: {}\n" +
+		"  # END U-BOOT MANAGED BLOCK: service.postgres\n")
+	_, err := yaml.New().PatchMappingEntryYAML(input,
+		"services", "postgres", []byte(samplePostgresFragment),
+		"service.postgres")
+	if !errors.Is(err, driven.ErrYAMLAnchorMismatch) {
+		t.Fatalf("err = %v, want ErrYAMLAnchorMismatch", err)
+	}
+}
+
+func TestPatchMappingEntryYAML_UserEntryWithoutMarkerRejected(t *testing.T) {
+	// Why: a user-pflichtFiles `services.postgres:` without our marker is
+	// a fachlicher conflict; the adapter must not overwrite it and
+	// must not insert a duplicate.
+	input := []byte("services:\n" +
+		"  postgres:\n" +
+		"    image: my-fork/postgres:custom\n")
+	_, err := yaml.New().PatchMappingEntryYAML(input,
+		"services", "postgres", []byte(samplePostgresFragment),
+		"service.postgres")
+	if !errors.Is(err, driven.ErrYAMLAnchorMismatch) {
+		t.Fatalf("err = %v, want ErrYAMLAnchorMismatch", err)
+	}
+}
+
+func TestPatchMappingEntryYAML_BytePreservation(t *testing.T) {
+	// Why: pins the precise byte-preservation contract — user-custom
+	// sibling entries under services: and top-level networks block
+	// outside services: must survive a fresh insert byte-identical.
+	input := []byte("# Top-level comment.\n" +
+		"name: demo\n" +
+		"\n" +
+		"services:\n" +
+		"  mywebapp:\n" +
+		"    image: nginx\n" +
+		"  # mywebapp belongs to me, do not touch.\n" +
+		"\n" +
+		"networks:\n" +
+		"  default:\n" +
+		"    name: demo-default\n")
+	out, err := yaml.New().PatchMappingEntryYAML(input,
+		"services", "postgres", []byte(samplePostgresFragment),
+		"service.postgres")
+	if err != nil {
+		t.Fatalf("PatchMappingEntryYAML: %v", err)
+	}
+	got := string(out)
+	for _, want := range []string{
+		"# Top-level comment.",
+		"name: demo",
+		"mywebapp:",
+		"image: nginx",
+		"# mywebapp belongs to me, do not touch.",
+		"networks:",
+		"name: demo-default",
+		"BEGIN U-BOOT MANAGED BLOCK: service.postgres",
+		"image: postgres:16-alpine",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("missing %q after patch; got:\n%s", want, got)
+		}
+	}
+}
+
+// ---- LocateMarkedEntry ---------------------------------------------
+
+func TestLocateMarkedEntry_CleanReturnsZero(t *testing.T) {
+	input := []byte("name: demo\n")
+	res, err := yaml.New().LocateMarkedEntry(input,
+		"services", "postgres", "service.postgres")
+	if err != nil {
+		t.Fatalf("LocateMarkedEntry: %v", err)
+	}
+	if res.EntryExists || res.MarkerInEntry || res.MarkerSomewhereElse {
+		t.Errorf("expected zero LocateResult, got %+v", res)
+	}
+}
+
+func TestLocateMarkedEntry_ManagedReturnsBlockBody(t *testing.T) {
+	input := []byte("services:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  postgres:\n" +
+		"    image: postgres:16-alpine\n" +
+		"  # END U-BOOT MANAGED BLOCK: service.postgres\n")
+	res, err := yaml.New().LocateMarkedEntry(input,
+		"services", "postgres", "service.postgres")
+	if err != nil {
+		t.Fatalf("LocateMarkedEntry: %v", err)
+	}
+	if !res.EntryExists || !res.MarkerInEntry || res.MarkerSomewhereElse {
+		t.Errorf("flags wrong: %+v", res)
+	}
+	if !strings.Contains(string(res.BlockBody), "image: postgres:16-alpine") {
+		t.Errorf("BlockBody missing entry; got %q", res.BlockBody)
+	}
+}
+
+func TestLocateMarkedEntry_UserManualEntryWithoutMarker(t *testing.T) {
+	input := []byte("services:\n" +
+		"  postgres:\n" +
+		"    image: my-fork/postgres:custom\n")
+	res, err := yaml.New().LocateMarkedEntry(input,
+		"services", "postgres", "service.postgres")
+	if err != nil {
+		t.Fatalf("LocateMarkedEntry: %v", err)
+	}
+	if !res.EntryExists {
+		t.Errorf("EntryExists should be true; got %+v", res)
+	}
+	if res.MarkerInEntry || res.MarkerSomewhereElse {
+		t.Errorf("no marker present, expected both marker flags false; got %+v", res)
+	}
+	if res.BlockBody != nil {
+		t.Errorf("BlockBody must be nil when MarkerInEntry false; got %q", res.BlockBody)
+	}
+}
+
+func TestLocateMarkedEntry_MarkerAtWrongAnchor(t *testing.T) {
+	input := []byte("services: {}\n" +
+		"\n" +
+		"volumes:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  something: {}\n" +
+		"  # END U-BOOT MANAGED BLOCK: service.postgres\n")
+	res, err := yaml.New().LocateMarkedEntry(input,
+		"services", "postgres", "service.postgres")
+	if err != nil {
+		t.Fatalf("LocateMarkedEntry: %v", err)
+	}
+	if res.EntryExists || res.MarkerInEntry || !res.MarkerSomewhereElse {
+		t.Errorf("expected MarkerSomewhereElse only; got %+v", res)
+	}
+}
+
+func TestLocateMarkedEntry_MalformedReturnsErr(t *testing.T) {
+	input := []byte("services:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  postgres: {}\n")
+	_, err := yaml.New().LocateMarkedEntry(input,
+		"services", "postgres", "service.postgres")
+	if err == nil {
+		t.Fatalf("expected malformed-block error, got nil")
+	}
+	if !strings.Contains(err.Error(), "malformed") {
+		t.Errorf("err must mention malformed; got: %v", err)
+	}
+}
+
+func TestLocateMarkedEntry_ParseErrorWrapped(t *testing.T) {
+	_, err := yaml.New().LocateMarkedEntry([]byte(":\n  bad yaml"),
+		"services", "postgres", "service.postgres")
+	if err == nil {
+		t.Fatalf("expected parse error, got nil")
+	}
+	// Must not be one of the structural sentinels.
+	for _, sentinel := range []error{driven.ErrYAMLAnchorMismatch, driven.ErrYAMLFragmentInvalid} {
+		if errors.Is(err, sentinel) {
+			t.Errorf("err %v must not wrap structural sentinel %v", err, sentinel)
+		}
+	}
+}
+
+func TestLocateMarkedEntry_FlowNonEmptyParentTreatedAsAbsent(t *testing.T) {
+	// Why: flow-style non-empty parents are rejected by Patch with
+	// ErrYAMLFragmentInvalid; Locate reports EntryExists=false so
+	// the application layer has a single source of truth and never
+	// silently overwrites a flow user-entry.
+	input := []byte("services: { mywebapp: { image: nginx } }\n")
+	res, err := yaml.New().LocateMarkedEntry(input,
+		"services", "postgres", "service.postgres")
+	if err != nil {
+		t.Fatalf("LocateMarkedEntry: %v", err)
+	}
+	if res.EntryExists || res.MarkerInEntry || res.MarkerSomewhereElse {
+		t.Errorf("expected zero LocateResult for flow-non-empty parent; got %+v", res)
+	}
+}
+
+func TestPatchMappingEntryYAML_EmptyValueRendersInlineMapping(t *testing.T) {
+	// Why: the volume template renders as an empty mapping (`{}`);
+	// the renderer must produce `<entryKey>: {}` not a bare colon.
+	input := []byte("volumes: {}\n")
+	out, err := yaml.New().PatchMappingEntryYAML(input,
+		"volumes", "postgres-data", []byte(""), "volume.postgres")
+	if err != nil {
+		t.Fatalf("Patch: %v", err)
+	}
+	got := string(out)
+	if !strings.Contains(got, "postgres-data: {}") {
+		t.Errorf("empty-fragment value not rendered as `entryKey: {}`; got:\n%s", got)
+	}
+}
+
+func TestPatchMappingEntryYAML_ParseErrorWrapped(t *testing.T) {
+	_, err := yaml.New().PatchMappingEntryYAML([]byte(":\n  bad yaml"),
+		"services", "postgres", []byte("image: x\n"), "service.postgres")
+	if err == nil {
+		t.Fatalf("expected parse error, got nil")
+	}
+}
+
+func TestPatchMappingEntryYAML_FragmentParseErrorWrapped(t *testing.T) {
+	_, err := yaml.New().PatchMappingEntryYAML([]byte("services: {}\n"),
+		"services", "postgres", []byte("- not\n  : yaml"), "service.postgres")
+	if !errors.Is(err, driven.ErrYAMLFragmentInvalid) {
+		t.Fatalf("err = %v, want ErrYAMLFragmentInvalid", err)
+	}
+}
+
+func TestPatchMappingEntryYAML_NullParentTreatedAsEmpty(t *testing.T) {
+	// Why: `services: null` and `services: ~` both encode an empty
+	// mapping value; the patch must convert to block-style and insert.
+	input := []byte("services: null\n")
+	out, err := yaml.New().PatchMappingEntryYAML(input,
+		"services", "postgres", []byte("image: x\n"), "service.postgres")
+	if err != nil {
+		t.Fatalf("Patch: %v", err)
+	}
+	got := string(out)
+	if strings.Contains(got, "services: null") {
+		t.Errorf("services: null should have been rewritten to block style; got:\n%s", got)
+	}
+	if !strings.Contains(got, "BEGIN U-BOOT MANAGED BLOCK: service.postgres") {
+		t.Errorf("marker missing; got:\n%s", got)
+	}
+}
+
+func TestLocateMarkedEntry_PatchConsistency(t *testing.T) {
+	// Why: shared scanner — Locate and Patch must classify the same
+	// content the same way. We test that for every well-formed input
+	// where Locate reports MarkerInEntry=true, Patch performs a
+	// replace (no error); when Locate reports both marker flags false
+	// AND EntryExists=false, Patch inserts (no error).
+	managed := []byte("services:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  postgres: {}\n" +
+		"  # END U-BOOT MANAGED BLOCK: service.postgres\n")
+	res, err := yaml.New().LocateMarkedEntry(managed, "services", "postgres", "service.postgres")
+	if err != nil || !res.MarkerInEntry {
+		t.Fatalf("setup: Locate must report MarkerInEntry, got %+v err=%v", res, err)
+	}
+	if _, err := yaml.New().PatchMappingEntryYAML(managed,
+		"services", "postgres", []byte("image: x\n"), "service.postgres"); err != nil {
+		t.Errorf("Patch on managed content failed: %v", err)
+	}
+
+	clean := []byte("services: {}\n")
+	res, err = yaml.New().LocateMarkedEntry(clean, "services", "postgres", "service.postgres")
+	if err != nil {
+		t.Fatalf("clean Locate: %v", err)
+	}
+	if res.EntryExists || res.MarkerInEntry || res.MarkerSomewhereElse {
+		t.Fatalf("clean Locate must be zero, got %+v", res)
+	}
+	if _, err := yaml.New().PatchMappingEntryYAML(clean,
+		"services", "postgres", []byte("image: x\n"), "service.postgres"); err != nil {
+		t.Errorf("Patch on clean content failed: %v", err)
+	}
+}
