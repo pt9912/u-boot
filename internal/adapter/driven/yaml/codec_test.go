@@ -222,3 +222,51 @@ func TestCodec_PatchScalar_NonMappingRootReturnsErr(t *testing.T) {
 		t.Fatalf("PatchScalar(sequence root): want ErrYAMLPathInvalid, got %v", err)
 	}
 }
+
+func TestCodec_PatchScalar_PreservesValueLineComment(t *testing.T) {
+	// Why: yaml.v3 attaches inline trailing comments
+	// (`enabled: false  # CHANGEME …`) to the VALUE node, not the
+	// key node. A naive `*valueNode = *scalar` copy silently drops
+	// them — review finding #1 (M5-T3). This test pins the
+	// preservation contract for the dominant LH-FA-CONF-002 idiom
+	// where every CHANGEME-style scalar carries a guidance comment.
+	input := []byte("schemaVersion: 1\n" +
+		"services:\n" +
+		"  postgres:\n" +
+		"    enabled: false   # CHANGEME after first deploy\n")
+
+	out, err := yaml.New().PatchScalar(input,
+		[]string{"services", "postgres", "enabled"}, true)
+	if err != nil {
+		t.Fatalf("PatchScalar: %v", err)
+	}
+
+	got := string(out)
+	if !strings.Contains(got, "enabled: true") {
+		t.Errorf("output missing patched value; got:\n%s", got)
+	}
+	if !strings.Contains(got, "CHANGEME after first deploy") {
+		t.Errorf("output lost the value-side LineComment; got:\n%s", got)
+	}
+}
+
+func TestCodec_PatchScalar_AliasIntermediateReturnsErr(t *testing.T) {
+	// Why: yaml anchors+aliases (`&base` / `*base`) are valid syntax;
+	// silently overwriting through an alias would mutate the anchor
+	// target instead of just the patched branch. Reject explicitly
+	// with a hint that the caller must inline the anchored target
+	// first (review finding #3, M5-T3).
+	input := []byte("base: &base\n" +
+		"  enabled: false\n" +
+		"services:\n" +
+		"  postgres: *base\n")
+
+	_, err := yaml.New().PatchScalar(input,
+		[]string{"services", "postgres", "enabled"}, true)
+	if !errors.Is(err, driven.ErrYAMLPathInvalid) {
+		t.Fatalf("PatchScalar(alias intermediate): want ErrYAMLPathInvalid, got %v", err)
+	}
+	if !strings.Contains(err.Error(), "alias") {
+		t.Errorf("error must mention alias to guide the caller; got: %v", err)
+	}
+}

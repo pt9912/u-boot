@@ -153,10 +153,10 @@ func NewAddServiceService(fs driven.FileSystem, yaml driven.YAMLCodec, logger dr
 //     - InconsistentYAML → ErrServiceInconsistent + repair hint.
 //     - all other states → planAdd → executeAdd (T3: stub).
 //
-// The ctx parameter is accepted to match the driving-port contract;
-// T3 has no cancellable I/O of its own (FileSystem reads are
-// synchronous), so it is currently unused.
-func (s *AddServiceService) Add(_ context.Context, req driving.AddServiceRequest) (driving.AddServiceResponse, error) {
+// ctx is threaded to executeAdd so the T4 implementation can honour
+// cancellation across its (multi-file) write phase without changing
+// the call site here.
+func (s *AddServiceService) Add(ctx context.Context, req driving.AddServiceRequest) (driving.AddServiceResponse, error) {
 	if req.BaseDir == "" {
 		return driving.AddServiceResponse{}, errors.New("BaseDir is required")
 	}
@@ -202,7 +202,7 @@ func (s *AddServiceService) Add(_ context.Context, req driving.AddServiceRequest
 		if err != nil {
 			return driving.AddServiceResponse{}, err
 		}
-		return s.executeAdd(plan)
+		return s.executeAdd(ctx, plan)
 	default:
 		// Defensive: detectServiceState only returns the six values
 		// above. A new ServiceState added without a switch case
@@ -241,9 +241,14 @@ func (s *AddServiceService) detectServiceState(baseDir string, svc domain.Servic
 	yamlBody, err := s.fs.ReadFile(yamlPath)
 	if err != nil {
 		if errors.Is(err, iofs.ErrNotExist) {
-			// TOCTOU between Exists and ReadFile — treat the same
-			// as the missing-file path so the sentinel stays
-			// consistent regardless of the race winner.
+			// TOCTOU between Exists and ReadFile — surface the same
+			// sentinel as the missing-file path so the result stays
+			// stable regardless of the race winner. This is
+			// deliberately asymmetric to the compose.yaml branch
+			// further down (which maps a vanished file to
+			// block-absent): u-boot.yaml's role is to *be* the
+			// project-initialization marker, while compose.yaml only
+			// hosts the per-service managed block.
 			return 0, fmt.Errorf("%w: %s vanished between Exists and ReadFile",
 				driving.ErrProjectNotInitialized, yamlPath)
 		}
@@ -288,7 +293,11 @@ func (s *AddServiceService) detectServiceState(baseDir string, svc domain.Servic
 		case errors.Is(err, iofs.ErrNotExist):
 			// TOCTOU: compose.yaml disappeared between Exists and
 			// ReadFile. Treat as block-absent — the file isn't
-			// there to host a block.
+			// there to host a block. This is deliberately
+			// asymmetric to the u-boot.yaml branch above (which
+			// maps a vanished file to ErrProjectNotInitialized),
+			// because compose.yaml is not the project-existence
+			// marker — only the per-service block container.
 			blockPresent = false
 		default:
 			return 0, fmt.Errorf("read compose.yaml: %w", err)
@@ -349,7 +358,11 @@ func (*AddServiceService) planAdd(svc domain.ServiceName, state domain.ServiceSt
 // where the postgres templates land and the service starts touching
 // fs / yaml; until then the only reachable caller is the unit tests
 // because the CLI subcommand (T6) does not exist yet.
-func (*AddServiceService) executeAdd(plan servicePlan) (driving.AddServiceResponse, error) {
+//
+// The ctx parameter is already wired so the T4 implementation can
+// honour cancellation across the multi-file write phase without
+// touching the [Add] call site again.
+func (*AddServiceService) executeAdd(_ context.Context, plan servicePlan) (driving.AddServiceResponse, error) {
 	return driving.AddServiceResponse{}, fmt.Errorf(
 		"addservice execute: not yet implemented (M5-T4) for service %q action %s",
 		plan.Service.String(), plan.Action.String())

@@ -119,15 +119,28 @@ func setMappingPath(root *yaml.Node, path []string, scalar *yaml.Node) error {
 		valueNode, found := mappingChild(cur, key)
 		switch {
 		case isLast && found:
-			// Replace the existing scalar in place; preserves any
-			// head/foot/line comments yaml.v3 attached to the key
-			// node since the key node itself is untouched.
-			*valueNode = *scalar
+			// In-place stamp of the new scalar onto the existing
+			// value node — assign only Kind/Tag/Value so the
+			// value-side metadata (LineComment, HeadComment,
+			// FootComment, Anchor, Style) survives the patch.
+			// yaml.v3 attaches inline trailing comments
+			// (`enabled: false  # CHANGEME`) to the VALUE node, so a
+			// full node copy (`*valueNode = *scalar`) would silently
+			// drop them; the key node carries head comments and is
+			// already untouched here.
+			valueNode.Kind = scalar.Kind
+			valueNode.Tag = scalar.Tag
+			valueNode.Value = scalar.Value
 			return nil
 		case isLast && !found:
 			appendMappingChild(cur, key, scalar)
 			return nil
 		case !isLast && found:
+			if valueNode.Kind == yaml.AliasNode {
+				return fmt.Errorf("%w: intermediate key %q is a YAML alias; "+
+					"PatchScalar cannot traverse aliases — inline the anchored target first",
+					driven.ErrYAMLPathInvalid, key)
+			}
 			if valueNode.Kind != yaml.MappingNode {
 				return fmt.Errorf("%w: intermediate key %q is %s, want mapping",
 					driven.ErrYAMLPathInvalid, key, kindName(valueNode.Kind))

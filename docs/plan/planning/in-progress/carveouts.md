@@ -26,6 +26,7 @@ Spalten:
 | `LH-OPEN-004` Template-Format ist offen (`spec/lastenheft.md` §14) — YAML+Dateien vs. Cookiecutter vs. eigenes Format vs. OCI-Pakete | temporär | [`open/slice-v1-template-format-entscheidung.md`](../open/slice-v1-template-format-entscheidung.md) |
 | HTTP-Driving-Adapter ist als „geplante Erweiterung" in `spec/architecture.md` §7 erwähnt, aber nicht spezifiziert oder gefordert | temporär | [`open/slice-later-http-driving-adapter.md`](../open/slice-later-http-driving-adapter.md) |
 | `--verbose` / `--debug` (LH-FA-CLI-005) sind als persistente Cobra-Flags akzeptiert, aber nicht zum Logger-Level verdrahtet (`internal/adapter/driving/cli/root.go`; `cmd/uboot/main.go` konstruiert den Logger fix auf `slog.LevelInfo`). M4-T7 hat den Spec-Pflicht-Flag-Layer eingebaut; die Effekt-Verkabelung ist eigener Slice. | temporär | [`open/slice-followup-verbosity-wiring.md`](../open/slice-followup-verbosity-wiring.md) |
+| M5-T3 `AddServiceService.executeAdd` ist ein Stub (`errors.New("addservice execute: not yet implemented (M5-T4)")`) und der `actionRepairArtifacts`-Enum-Wert (`internal/hexagon/application/addservice.go`) hat in T3 keinen Caller — beide warten auf den Write-Pfad mit PostgreSQL-Templates. Stub ist heute nur über Unit-Tests erreichbar, weil der CLI-Subcommand erst in M5-T6 verdrahtet wird. | temporär | [`in-progress/slice-m5-add-postgres.md`](slice-m5-add-postgres.md) §T4 |
 
 ## Permanente Carveouts (kein Plan, im Inventar dokumentiert)
 
