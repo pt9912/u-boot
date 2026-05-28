@@ -65,7 +65,7 @@ func (s *AddServiceService) executeAdd(_ context.Context, baseDir string, plan s
 
 	composeBody, composeBootstrapped := bootstrapComposeIfEmpty(composeBody, yamlConfig.Project.Name)
 
-	ep, err := s.buildExecutePlan(baseDir, plan, tmpls,
+	ep, err := s.buildExecutePlan(plan, tmpls,
 		yamlBody, yamlMode,
 		composeBody, composeMode, composeExists || composeBootstrapped,
 		envBody, envMode, envExists,
@@ -152,10 +152,16 @@ type renderedTemplates struct {
 	EnvVariables    []byte
 }
 
-// renderPostgresTemplates evaluates the three M5-T4c templates
-// against the service-name templateData and returns their bytes.
-func (*AddServiceService) renderPostgresTemplates(svc domain.ServiceName) (renderedTemplates, error) {
-	data := templateData{Name: svc.String()}
+// renderPostgresTemplates evaluates the three M5-T4c templates and
+// returns their bytes. The current MVP templates are static (every
+// postgres-specific name is hardcoded — see
+// templates/services/postgres.*.tmpl). templateData.Name is therefore
+// passed empty, even though the init-tier templates require it; a
+// future LH-FA-ADD-003 (keycloak) service can either inline its
+// service name the same way or migrate the templates to actually
+// reference {{ .Name }} together with a render-time round-trip test.
+func (*AddServiceService) renderPostgresTemplates(_ domain.ServiceName) (renderedTemplates, error) {
+	data := templateData{}
 	composeFrag, err := renderTemplate("services/postgres.compose.tmpl", data)
 	if err != nil {
 		return renderedTemplates{}, fmt.Errorf("plan: render postgres.compose.tmpl: %w", err)
@@ -209,7 +215,6 @@ func bootstrapComposeIfEmpty(composeBody []byte, projectName string) ([]byte, bo
 // three optional fileWrite slots, and asserts at least one slot was
 // set.
 func (s *AddServiceService) buildExecutePlan(
-	_ string,
 	plan servicePlan,
 	tmpls renderedTemplates,
 	yamlBody []byte, yamlMode iofs.FileMode,
@@ -348,8 +353,7 @@ func patchTargetsFor(plan servicePlan) (service, volume bool) {
 	case actionRegister, actionReactivate, actionRebuildBlock:
 		return true, true
 	case actionRepairArtifacts:
-		return plan.RepairFlags.ServiceStale,
-			plan.RepairFlags.VolumeMissing || plan.RepairFlags.VolumeStale
+		return plan.RepairFlags.ServiceStale, plan.RepairFlags.VolumeMissing
 	}
 	return false, false
 }
@@ -370,32 +374,45 @@ func translatePatchErr(err error, svc domain.ServiceName, where string) error {
 }
 
 // planEnvEdit prepares the .env.example slot per the create / append
-// / replace / malformed-abort strategy.
+// / replace / malformed-abort strategy. Calls managedblock.Find
+// exactly once per invocation so the malformed-detect path is
+// unambiguous.
+//
+// Existing well-formed blocks whose body already contains the three
+// required POSTGRES_* keys are left untouched (slot nil) so
+// user-customised values survive. The same content-completeness
+// rule the Active-Repair classifier uses (hasRequiredEnvKeys) is
+// reused here — RebuildBlock with a complete env therefore returns
+// Changed=["compose.yaml"] only, mirroring the slice-spec contract.
 func (*AddServiceService) planEnvEdit(plan servicePlan, envBody []byte, envExists bool, tmpls renderedTemplates) ([]byte, bool, error) {
 	if !envEditNeeded(plan) {
 		return envBody, false, nil
 	}
 	block := renderEnvManagedBlock(plan.Service, tmpls.EnvVariables)
-	marker := managedblock.Marker{Style: managedblock.StyleHash, Name: serviceMarkerName(plan.Service)}
 	if !envExists || len(bytes.TrimSpace(envBody)) == 0 {
 		return block, true, nil
 	}
-	if managedblock.Has(envBody, marker) {
+	marker := managedblock.Marker{Style: managedblock.StyleHash, Name: serviceMarkerName(plan.Service)}
+	start, end, fErr := managedblock.Find(envBody, marker)
+	switch {
+	case fErr == nil:
+		existing := extractEnvBlockBody(envBody, start, end)
+		if hasRequiredEnvKeys(existing) {
+			// User-customised values survive — slot stays nil.
+			return envBody, false, nil
+		}
 		updated, err := managedblock.Replace(envBody, marker, block)
 		if err != nil {
 			return nil, false, fmt.Errorf("%w: replace .env.example block for %q: %v",
 				driving.ErrServiceInconsistent, plan.Service.String(), err)
 		}
 		return updated, true, nil
-	}
-	// Detect malformed (BEGIN without END / duplicate BEGIN) so a
-	// silent append below does not create a second BEGIN line.
-	if _, _, fErr := managedblock.Find(envBody, marker); fErr != nil && !errors.Is(fErr, managedblock.ErrBlockNotFound) {
+	case errors.Is(fErr, managedblock.ErrBlockNotFound):
+		return appendEnvBlock(envBody, block), true, nil
+	default:
 		return nil, false, fmt.Errorf("%w: malformed .env.example block for %q: %v",
 			driving.ErrServiceInconsistent, plan.Service.String(), fErr)
 	}
-	out := appendEnvBlock(envBody, block)
-	return out, true, nil
 }
 
 // envEditNeeded reports whether the action touches .env.example.

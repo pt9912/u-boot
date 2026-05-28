@@ -111,11 +111,17 @@ type servicePlan struct {
 }
 
 // activeArtifactsStatus is the pure-classifier output of
-// [detectActiveArtifacts]. The four orthogonal flags say which
+// [detectActiveArtifacts]. The three orthogonal flags say which
 // LH-FA-ADD-002 artefacts need repair when the LH-FA-ADD-005 core
 // state is Active. Abort-class conditions (malformed marker, wrong
 // anchor, user-manual entry) are not modelled here — the classifier
 // surfaces them as ErrServiceInconsistent before any flag is set.
+//
+// The MVP volume template is an empty mapping (`{}`) and User-
+// customisation of the volume body (driver:, driver_opts:, etc.) is
+// explicitly allowed; there is therefore no `VolumeStale` flag. If a
+// later add-on needs a content-check on the volume body, it joins as
+// its own slice with the corresponding flag added back here.
 type activeArtifactsStatus struct {
 	// ServiceStale is true when the service.postgres managed
 	// compose-block exists but its content lacks a required field
@@ -125,9 +131,6 @@ type activeArtifactsStatus struct {
 	// VolumeMissing is true when the volume.postgres managed
 	// compose-block does not exist.
 	VolumeMissing bool
-	// VolumeStale is reserved for future content checks on the
-	// volume block; currently false (MVP volume template is `{}`).
-	VolumeStale bool
 	// EnvMissingOrStale is true when .env.example is absent, has no
 	// service.postgres block, or the block lacks a POSTGRES_USER /
 	// POSTGRES_PASSWORD / POSTGRES_DB line.
@@ -136,7 +139,7 @@ type activeArtifactsStatus struct {
 
 // needsRepair reports whether any artefact flag is set.
 func (s activeArtifactsStatus) needsRepair() bool {
-	return s.ServiceStale || s.VolumeMissing || s.VolumeStale || s.EnvMissingOrStale
+	return s.ServiceStale || s.VolumeMissing || s.EnvMissingOrStale
 }
 
 // AddServiceService implements [driving.AddServiceUseCase]. It

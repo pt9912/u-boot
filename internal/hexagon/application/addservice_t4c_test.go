@@ -340,6 +340,95 @@ func TestAdd_T4c_Active_PostgresUserUnderLabelsDoesNotCount(t *testing.T) {
 	}
 }
 
+func TestAdd_T4c_Active_ImageEmptyValueTriggersRepair(t *testing.T) {
+	// Why: `image:` with no value (or `image: ""`) is treated as no
+	// image at all — pins the trimmed-non-empty rule of the scanner.
+	svc, fs, _ := newAddService(t)
+	seedUBootYAML(t, fs,
+		"schemaVersion: 1\nproject:\n  name: demo\n"+
+			"services:\n  postgres:\n    enabled: true\n")
+	seedCompose(t, fs,
+		strings.Replace(composeBlockComplete("postgres"),
+			"image: postgres:16-alpine", "image: \"\"", 1))
+	seedEnv(t, fs, envBlockComplete("postgres"))
+
+	resp, err := svc.Add(context.Background(), driving.AddServiceRequest{
+		BaseDir:     addTestBaseDir,
+		ServiceName: postgresName(t),
+	})
+	if err != nil {
+		t.Fatalf("Add: %v", err)
+	}
+	composeRepair := false
+	for _, p := range resp.Changed {
+		if p == "compose.yaml" {
+			composeRepair = true
+		}
+	}
+	if !composeRepair {
+		t.Errorf("expected compose repair for empty image:, got Changed=%v", resp.Changed)
+	}
+}
+
+func TestAdd_T4c_Active_CommentedImageTriggersRepair(t *testing.T) {
+	// Why: a commented-out `# image: postgres:16` is no image —
+	// comment-stripping must drop the # POSTGRES_PASSWORD style
+	// matches.
+	svc, fs, _ := newAddService(t)
+	seedUBootYAML(t, fs,
+		"schemaVersion: 1\nproject:\n  name: demo\n"+
+			"services:\n  postgres:\n    enabled: true\n")
+	seedCompose(t, fs,
+		strings.Replace(composeBlockComplete("postgres"),
+			"image: postgres:16-alpine", "# image: postgres:16-alpine", 1))
+	seedEnv(t, fs, envBlockComplete("postgres"))
+
+	resp, err := svc.Add(context.Background(), driving.AddServiceRequest{
+		BaseDir:     addTestBaseDir,
+		ServiceName: postgresName(t),
+	})
+	if err != nil {
+		t.Fatalf("Add: %v", err)
+	}
+	composeRepair := false
+	for _, p := range resp.Changed {
+		if p == "compose.yaml" {
+			composeRepair = true
+		}
+	}
+	if !composeRepair {
+		t.Errorf("expected compose repair for commented image:, got Changed=%v", resp.Changed)
+	}
+}
+
+func TestAdd_T4c_RebuildBlock_WithCompleteEnv_OnlyComposeChanged(t *testing.T) {
+	// Why: InconsistentBlock + complete .env.example must yield
+	// Changed=[compose.yaml] only — the env block is byte-identical
+	// after Replace, so the slot must NOT be populated.
+	svc, fs, _ := newAddService(t)
+	seedUBootYAML(t, fs,
+		"schemaVersion: 1\nproject:\n  name: demo\n"+
+			"services:\n  postgres:\n    enabled: true\n")
+	// no compose.yaml ⇒ Bootstrap; but we also seed a complete env.
+	seedEnv(t, fs, envBlockComplete("postgres"))
+
+	resp, err := svc.Add(context.Background(), driving.AddServiceRequest{
+		BaseDir:     addTestBaseDir,
+		ServiceName: postgresName(t),
+	})
+	if err != nil {
+		t.Fatalf("Add: %v", err)
+	}
+	for _, p := range resp.Changed {
+		if p == ".env.example" {
+			t.Errorf(".env.example was rewritten despite being complete; Changed=%v", resp.Changed)
+		}
+	}
+	if len(resp.Changed) == 0 {
+		t.Errorf("expected at least compose.yaml in Changed; got %v", resp.Changed)
+	}
+}
+
 func TestAdd_T4c_Active_HealthcheckDisableTrueTriggersRepair(t *testing.T) {
 	svc, fs, _ := newAddService(t)
 	seedUBootYAML(t, fs,

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	iofs "io/fs"
 	"path/filepath"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
@@ -25,18 +24,23 @@ import (
 // data.
 func (s *AddServiceService) detectActiveArtifacts(baseDir string, svc domain.ServiceName) (activeArtifactsStatus, error) {
 	composePath := filepath.Join(baseDir, "compose.yaml")
-	composeBody, err := s.fs.ReadFile(composePath)
+	composeBody, _, exists, err := s.loadForPatch(composePath)
 	if err != nil {
+		// loadForPatch returns ErrBackupUnsupportedKind for symlinks
+		// and non-regular files. Propagating it here gives the
+		// classifier the same security contract as the patch-phase
+		// load (no foreign-target reads for the LH-FA-ADD-002
+		// content check).
+		return activeArtifactsStatus{}, err
+	}
+	if !exists {
 		// Active means the compose-block marker existed during
 		// state-detection. A vanished compose.yaml here is a TOCTOU
 		// race; treat as inconsistent so the user sees the repair
 		// hint instead of a silent rewrite.
-		if errors.Is(err, iofs.ErrNotExist) {
-			return activeArtifactsStatus{}, fmt.Errorf(
-				"%w: compose.yaml vanished between detectServiceState and detectActiveArtifacts",
-				driving.ErrServiceInconsistent)
-		}
-		return activeArtifactsStatus{}, fmt.Errorf("read compose.yaml: %w", err)
+		return activeArtifactsStatus{}, fmt.Errorf(
+			"%w: compose.yaml vanished between detectServiceState and detectActiveArtifacts",
+			driving.ErrServiceInconsistent)
 	}
 
 	serviceStale, err := s.inspectServiceArtefact(composeBody, svc)
@@ -115,19 +119,12 @@ func (s *AddServiceService) inspectVolumeArtefact(composeBody []byte, svc domain
 // translate to needs-repair; malformed is an abort.
 func (s *AddServiceService) inspectEnvArtefact(baseDir string, svc domain.ServiceName) (bool, error) {
 	envPath := filepath.Join(baseDir, ".env.example")
-	envExists, err := s.fs.Exists(envPath)
+	envBody, _, exists, err := s.loadForPatch(envPath)
 	if err != nil {
-		return false, fmt.Errorf("check .env.example: %w", err)
+		return false, err
 	}
-	if !envExists {
+	if !exists {
 		return true, nil
-	}
-	envBody, err := s.fs.ReadFile(envPath)
-	if err != nil {
-		if errors.Is(err, iofs.ErrNotExist) {
-			return true, nil
-		}
-		return false, fmt.Errorf("read .env.example: %w", err)
 	}
 	marker := managedblock.Marker{Style: managedblock.StyleHash, Name: serviceMarkerName(svc)}
 	start, end, fErr := managedblock.Find(envBody, marker)

@@ -8,6 +8,10 @@ volumes:
 ports:
   - "5432:5432"
 healthcheck:
+  # $$ escapes one $ at the Compose layer; the resulting
+  # ${POSTGRES_USER:-postgres} is expanded by the container shell at
+  # healthcheck runtime, which sees the env var set by the
+  # environment: block above (or its CHANGEME-style default).
   test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres}"]
   interval: 10s
   timeout: 5s
