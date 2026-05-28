@@ -42,6 +42,10 @@ type App struct {
 	// doctorUseCase implements `u-boot doctor` (LH-FA-DIAG-001..004).
 	doctorUseCase driving.DoctorUseCase
 
+	// addServiceUseCase implements `u-boot add <service>`
+	// (LH-FA-ADD-001..002, LH-FA-ADD-005).
+	addServiceUseCase driving.AddServiceUseCase
+
 	// getwd is the working-directory probe; defaults to os.Getwd.
 	// Tests inject a fake via [WithGetwd] so they do not depend on
 	// the host pwd.
@@ -76,12 +80,13 @@ func WithGetwd(fn func() (string, error)) Option {
 // New constructs an App. The version string and every use-case
 // implementation must be non-nil at call time; the CLI package
 // trusts the wiring layer to honor that.
-func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, opts ...Option) *App {
+func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, addUC driving.AddServiceUseCase, opts ...Option) *App {
 	a := &App{
-		version:       version,
-		initUseCase:   initUC,
-		doctorUseCase: doctorUC,
-		getwd:         os.Getwd,
+		version:           version,
+		initUseCase:       initUC,
+		doctorUseCase:     doctorUC,
+		addServiceUseCase: addUC,
+		getwd:             os.Getwd,
 	}
 	for _, opt := range opts {
 		opt(a)

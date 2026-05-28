@@ -78,9 +78,10 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// wrap stdout in a buffer must not interpose a separate flush.
 	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter)
 	doctorSvc := application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, logAdapter)
+	addSvc := application.NewAddServiceService(fsAdapter, yamlAdapter, logAdapter)
 
 	// Driving adapter (CLI).
-	app := cli.New(version, initSvc, doctorSvc)
+	app := cli.New(version, initSvc, doctorSvc, addSvc)
 
 	err := app.Execute(ctx, args, stdout, stderr)
 	if err != nil {

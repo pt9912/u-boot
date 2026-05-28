@@ -46,14 +46,35 @@ func (f *fakeDoctorUseCase) Check(_ context.Context, req driving.DoctorRequest) 
 	return f.resp, f.err
 }
 
+// fakeAddServiceUseCase records the last AddServiceRequest and
+// returns the configured response/error. Init/doctor-focused tests
+// use the zero value as a stub.
+type fakeAddServiceUseCase struct {
+	called  bool
+	lastReq driving.AddServiceRequest
+	resp    driving.AddServiceResponse
+	err     error
+}
+
+func (f *fakeAddServiceUseCase) Add(_ context.Context, req driving.AddServiceRequest) (driving.AddServiceResponse, error) {
+	f.called = true
+	f.lastReq = req
+	return f.resp, f.err
+}
+
 func newApp(uc driving.InitProjectUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", uc, &fakeDoctorUseCase{}, opts...)
+	return cli.New("0.0.0-test", uc, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, opts...)
 }
 
 // newAppWithDoctor is newApp's variant for doctor-focused tests; the
 // caller can wire a fake DoctorUseCase explicitly.
 func newAppWithDoctor(uc driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", uc, doctorUC, opts...)
+	return cli.New("0.0.0-test", uc, doctorUC, &fakeAddServiceUseCase{}, opts...)
+}
+
+// newAppWithAdd is newApp's variant for add-focused tests.
+func newAppWithAdd(uc driving.AddServiceUseCase, opts ...cli.Option) *cli.App {
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, uc, opts...)
 }
 
 func mustProjectName(t *testing.T, raw string) domain.ProjectName {
@@ -807,4 +828,240 @@ func TestExecute_Doctor_TooManyArgs_Exit2(t *testing.T) {
 	if got := cli.ExitCode(err); got != 2 {
 		t.Errorf("ExitCode = %d, want 2", got)
 	}
+}
+
+// --- M5-T6: `u-boot add <service>` ---------------------------------
+
+func TestExecute_Add_HappyPathRegister(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeAddServiceUseCase{
+		resp: driving.AddServiceResponse{
+			ServiceName: mustServiceName(t, "postgres"),
+			PriorState:  domain.ServiceStateUnregistered,
+			State:       domain.ServiceStateActive,
+			Changed:     []string{"u-boot.yaml", "compose.yaml", ".env.example"},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithAdd(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"add", "postgres"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !uc.called {
+		t.Fatalf("use-case not called")
+	}
+	if uc.lastReq.BaseDir != "/tmp/x/demo" {
+		t.Errorf("BaseDir = %q, want /tmp/x/demo", uc.lastReq.BaseDir)
+	}
+	if uc.lastReq.ServiceName.String() != "postgres" {
+		t.Errorf("ServiceName = %q, want postgres", uc.lastReq.ServiceName.String())
+	}
+	out := stdout.String()
+	for _, want := range []string{
+		`Added service "postgres".`,
+		"  - u-boot.yaml",
+		"  - compose.yaml",
+		"  - .env.example",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("stdout missing %q; got:\n%s", want, out)
+		}
+	}
+}
+
+func TestExecute_Add_AlreadyActiveNoOp(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeAddServiceUseCase{
+		resp: driving.AddServiceResponse{
+			ServiceName: mustServiceName(t, "postgres"),
+			PriorState:  domain.ServiceStateActive,
+			State:       domain.ServiceStateActive,
+			Changed:     nil,
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithAdd(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"add", "postgres"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	out := stdout.String()
+	if !strings.Contains(out, `Service "postgres" is already active; no changes.`) {
+		t.Errorf("missing no-op summary; got:\n%s", out)
+	}
+}
+
+func TestExecute_Add_RepairArtifactsSummary(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeAddServiceUseCase{
+		resp: driving.AddServiceResponse{
+			ServiceName: mustServiceName(t, "postgres"),
+			PriorState:  domain.ServiceStateActive,
+			State:       domain.ServiceStateActive,
+			Changed:     []string{".env.example"},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithAdd(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"add", "postgres"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	out := stdout.String()
+	for _, want := range []string{
+		`Repaired service "postgres" artefacts.`,
+		"  - .env.example",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("stdout missing %q; got:\n%s", want, out)
+		}
+	}
+}
+
+func TestExecute_Add_InvalidServiceName_Code10(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeAddServiceUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithAdd(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"add", "INVALID NAME"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatal("expected ErrInvalidServiceName, got nil")
+	}
+	if !errors.Is(err, domain.ErrInvalidServiceName) {
+		t.Errorf("err = %v, want ErrInvalidServiceName", err)
+	}
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10", got)
+	}
+	if uc.called {
+		t.Error("use-case must not run when service name fails validation")
+	}
+}
+
+func TestExecute_Add_UnsupportedService_Code10(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeAddServiceUseCase{
+		err: fmt.Errorf("%w: redis", driving.ErrServiceUnsupported),
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithAdd(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"add", "redis"}, &stdout, &stderr,
+	)
+	if !errors.Is(err, driving.ErrServiceUnsupported) {
+		t.Fatalf("err = %v, want ErrServiceUnsupported", err)
+	}
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10", got)
+	}
+}
+
+func TestExecute_Add_ProjectNotInitialized_Code10(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeAddServiceUseCase{
+		err: fmt.Errorf("%w: u-boot.yaml missing", driving.ErrProjectNotInitialized),
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithAdd(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"add", "postgres"}, &stdout, &stderr,
+	)
+	if !errors.Is(err, driving.ErrProjectNotInitialized) {
+		t.Fatalf("err = %v, want ErrProjectNotInitialized", err)
+	}
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10", got)
+	}
+}
+
+func TestExecute_Add_ServiceInconsistent_Code10(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeAddServiceUseCase{
+		err: fmt.Errorf("%w: orphan block", driving.ErrServiceInconsistent),
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithAdd(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"add", "postgres"}, &stdout, &stderr,
+	)
+	if !errors.Is(err, driving.ErrServiceInconsistent) {
+		t.Fatalf("err = %v, want ErrServiceInconsistent", err)
+	}
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10", got)
+	}
+}
+
+func TestExecute_Add_NoArgs_Code2(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	err := newAppWithAdd(&fakeAddServiceUseCase{}).Execute(
+		context.Background(), []string{"add"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatal("expected usage error for `add` without positional arg")
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode = %d, want 2", got)
+	}
+}
+
+func TestExecute_Add_TooManyArgs_Code2(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	err := newAppWithAdd(&fakeAddServiceUseCase{}).Execute(
+		context.Background(), []string{"add", "postgres", "extra"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatal("expected usage error for too many positional args")
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode = %d, want 2", got)
+	}
+}
+
+func TestExecute_Add_ConflictingModeFlags_Code2(t *testing.T) {
+	uc := &fakeAddServiceUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithAdd(uc, cli.WithGetwd(func() (string, error) { return "/tmp/x", nil })).Execute(
+		context.Background(), []string{"--yes", "--no-interactive", "add", "postgres"}, &stdout, &stderr,
+	)
+	if !errors.Is(err, cli.ErrConflictingModeFlags) {
+		t.Fatalf("err = %v, want ErrConflictingModeFlags", err)
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode = %d, want 2", got)
+	}
+	if uc.called {
+		t.Error("use-case must not run when mode-flag check fails")
+	}
+}
+
+func TestExecute_Add_GetwdFailure_Wrapped(t *testing.T) {
+	uc := &fakeAddServiceUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithAdd(uc, cli.WithGetwd(func() (string, error) {
+		return "", errors.New("getwd boom")
+	})).Execute(
+		context.Background(), []string{"add", "postgres"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatal("expected wrapped getwd error")
+	}
+	if !strings.Contains(err.Error(), "getwd boom") {
+		t.Errorf("err = %v, want it to wrap getwd boom", err)
+	}
+	if uc.called {
+		t.Error("use-case must not run when getwd fails")
+	}
+}
+
+// mustServiceName is the test helper analogue of mustProjectName.
+func mustServiceName(t *testing.T, raw string) domain.ServiceName {
+	t.Helper()
+	name, err := domain.NewServiceName(raw)
+	if err != nil {
+		t.Fatalf("NewServiceName(%q): %v", raw, err)
+	}
+	return name
 }
