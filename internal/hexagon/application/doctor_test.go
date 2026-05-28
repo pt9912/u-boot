@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	iofs "io/fs"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -60,11 +61,13 @@ func TestDoctor_WritePermissions_OKOnWritableDir(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Check: %v", err)
 	}
-	// 9 checks total after T6: write-permissions, git, docker,
-	// docker-reachable, compose-installed, uboot.yaml, compose.yaml,
-	// devcontainer.json, devcontainer.dockerfile.
-	if got := len(resp.Report.Items); got != 9 {
-		t.Fatalf("Report.Items = %d, want 9", got)
+	// 11 checks total after M5-T7: 9 from M4 (write-permissions, git,
+	// docker, docker-reachable, compose-installed, uboot.yaml,
+	// compose.yaml, devcontainer.json, devcontainer.dockerfile) plus
+	// the two new ones: services.enabled-key and
+	// devcontainer.forwardPorts.consistency.
+	if got := len(resp.Report.Items); got != 11 {
+		t.Fatalf("Report.Items = %d, want 11", got)
 	}
 	d := findDiagnostic(t, resp.Report.Items, "fs.write-permissions")
 	if d.Severity != domain.SeverityOK {
@@ -877,5 +880,203 @@ func TestDoctor_SentinelCleanedUpOnSuccess(t *testing.T) {
 	}
 	if exists {
 		t.Errorf("sentinel still exists after successful check — not cleaned up")
+	}
+}
+
+// --- M5-T7: devcontainer.enabled severity escalation ---------------
+
+func TestDoctor_T7_DevcontainerSeverity_EscalatesWhenEnabledTrue(t *testing.T) {
+	svc, fs, _, _, _ := newDoctorService(t)
+	// u-boot.yaml flips devcontainer.enabled=true → all devcontainer
+	// checks must now be Error per LH-FA-DIAG-002 §1073.
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, "u-boot.yaml"),
+		[]byte("schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n"), 0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	// Seed a devcontainer.json that fails the LH-FA-DIAG-002 minimum-
+	// compat check (missing both `image` and `build`) so the
+	// devcontainer-validation path returns the escalated severity.
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, ".devcontainer", "devcontainer.json"),
+		[]byte(`{"name":"demo"}`), 0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.json.valid")
+	if d.Severity != domain.SeverityError {
+		t.Errorf("devcontainer.json.valid Severity = %v, want Error when devcontainer.enabled=true",
+			d.Severity)
+	}
+}
+
+func TestDoctor_T7_DevcontainerSeverity_WarnWhenEnabledFalse(t *testing.T) {
+	svc, fs, _, _, _ := newDoctorService(t)
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, "u-boot.yaml"),
+		[]byte("schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: false\n"), 0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, ".devcontainer", "devcontainer.json"),
+		[]byte(`{"name":"demo"}`), 0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.json.valid")
+	if d.Severity != domain.SeverityWarn {
+		t.Errorf("devcontainer.json.valid Severity = %v, want Warn when devcontainer.enabled=false",
+			d.Severity)
+	}
+}
+
+// --- M5-T7: services.enabled-key ------------------------------------
+
+func TestDoctor_T7_ServicesEnabledKey_OKWhenAllExplicit(t *testing.T) {
+	svc, fs, _, _, _ := newDoctorService(t)
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, "u-boot.yaml"),
+		[]byte("schemaVersion: 1\nproject:\n  name: demo\nservices:\n  postgres:\n    enabled: true\n  keycloak:\n    enabled: false\n"),
+		0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "services.enabled-key")
+	if d.Severity != domain.SeverityOK {
+		t.Errorf("services.enabled-key Severity = %v, want OK", d.Severity)
+	}
+}
+
+func TestDoctor_T7_ServicesEnabledKey_WarnWhenMissing(t *testing.T) {
+	svc, fs, _, _, _ := newDoctorService(t)
+	// postgres has no enabled-key; keycloak does.
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, "u-boot.yaml"),
+		[]byte("schemaVersion: 1\nproject:\n  name: demo\nservices:\n  postgres: {}\n  keycloak:\n    enabled: true\n"),
+		0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "services.enabled-key")
+	if d.Severity != domain.SeverityWarn {
+		t.Errorf("services.enabled-key Severity = %v, want Warn", d.Severity)
+	}
+	if !strings.Contains(d.Message, "postgres") {
+		t.Errorf("warn message should list `postgres`; got %q", d.Message)
+	}
+}
+
+// --- M5-T7: devcontainer.forwardPorts.consistency -------------------
+
+func TestDoctor_T7_ForwardPorts_OKWhenComplete(t *testing.T) {
+	svc, fs, _, _, _ := newDoctorService(t)
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, "u-boot.yaml"),
+		[]byte("schemaVersion: 1\nproject:\n  name: demo\nservices:\n  postgres:\n    enabled: true\n"),
+		0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, "compose.yaml"),
+		[]byte("services:\n  postgres:\n    image: postgres\n    ports:\n      - \"5432:5432\"\n"),
+		0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, ".devcontainer", "devcontainer.json"),
+		[]byte("{\"name\":\"demo\",\"image\":\"x\",\"forwardPorts\":[5432]}"),
+		0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.forwardPorts.consistency")
+	if d.Severity != domain.SeverityOK {
+		t.Errorf("forwardPorts Severity = %v, want OK; msg=%q", d.Severity, d.Message)
+	}
+}
+
+func TestDoctor_T7_ForwardPorts_WarnWhenMissing(t *testing.T) {
+	svc, fs, _, _, _ := newDoctorService(t)
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, "u-boot.yaml"),
+		[]byte("schemaVersion: 1\nproject:\n  name: demo\nservices:\n  postgres:\n    enabled: true\n"),
+		0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, "compose.yaml"),
+		[]byte("services:\n  postgres:\n    image: postgres\n    ports:\n      - \"5432:5432\"\n"),
+		0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, ".devcontainer", "devcontainer.json"),
+		[]byte("{\"name\":\"demo\",\"image\":\"x\",\"forwardPorts\":[3000]}"),
+		0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.forwardPorts.consistency")
+	if d.Severity != domain.SeverityWarn {
+		t.Errorf("forwardPorts Severity = %v, want Warn; msg=%q", d.Severity, d.Message)
+	}
+	if !strings.Contains(d.Message, "5432") {
+		t.Errorf("warn message should mention 5432; got %q", d.Message)
+	}
+}
+
+func TestDoctor_T7_ForwardPorts_SkippedWhenDevcontainerMissing(t *testing.T) {
+	svc, fs, _, _, _ := newDoctorService(t)
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, "u-boot.yaml"),
+		[]byte("schemaVersion: 1\nproject:\n  name: demo\nservices:\n  postgres:\n    enabled: true\n"),
+		0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, "compose.yaml"),
+		[]byte("services:\n  postgres:\n    image: postgres\n    ports:\n      - \"5432:5432\"\n"),
+		0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.forwardPorts.consistency")
+	if d.Severity != domain.SeverityOK {
+		t.Errorf("forwardPorts Severity = %v, want OK (skipped); msg=%q", d.Severity, d.Message)
+	}
+}
+
+func TestDoctor_T7_ForwardPorts_HostContainerMappingExtractsContainerPort(t *testing.T) {
+	svc, fs, _, _, _ := newDoctorService(t)
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, "u-boot.yaml"),
+		[]byte("schemaVersion: 1\nproject:\n  name: demo\nservices:\n  api:\n    enabled: true\n"),
+		0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	// Compose host:container, devcontainer forwards the container port.
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, "compose.yaml"),
+		[]byte("services:\n  api:\n    image: foo\n    ports:\n      - \"8080:80\"\n"),
+		0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	if err := fs.WriteFile(filepath.Join(doctorBaseDir, ".devcontainer", "devcontainer.json"),
+		[]byte("{\"name\":\"demo\",\"image\":\"x\",\"forwardPorts\":[80]}"),
+		0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.forwardPorts.consistency")
+	if d.Severity != domain.SeverityOK {
+		t.Errorf("expected container-port extraction OK, got %v; msg=%q", d.Severity, d.Message)
 	}
 }

@@ -55,25 +55,41 @@ type ubootYAMLService struct {
 	Enabled *bool `yaml:"enabled,omitempty"`
 }
 
-// ubootYAMLConfig is the YAML-marshalable shape of u-boot.yaml as
-// required by LH-FA-CONF-002 (schemaVersion + project + services
-// + later devcontainer + template). The struct lives in the
-// application layer because the YAML schema is part of the
-// application contract; the YAMLCodec port stays schema-agnostic.
-//
-// Services is `omitempty` so a fresh `u-boot init` (which has no
-// services yet) writes a clean two-key file; `u-boot add` populates
-// the map on first add.
+// ubootYAMLDevcontainer is the `devcontainer:` sub-tree of u-boot.yaml
+// (LH-FA-CONF-002, LH-FA-DEV-001). Today only `enabled` matters: it
+// gates the LH-FA-DIAG-002 severity escalation for the devcontainer
+// checks (M5-T7 wires the read). The pointer type carries the same
+// three-valued semantics as [ubootYAMLService.Enabled] (nil = unset,
+// &false = disabled, &true = enabled) so a missing key surfaces as
+// a warn instead of being silently treated as false.
 //
 // Future fields:
 //
-//   - Devcontainer ubootYAMLDevcontainer `yaml:"devcontainer,omitempty"`
-//     (unblocks the M4-deferred severity-escalation in doctor)
+//   - FeatureSources ubootYAMLFeatureSources `yaml:"featureSources,omitempty"`
+//     (LH-FA-DEV-003 feature allowlist; V1)
+type ubootYAMLDevcontainer struct {
+	Enabled *bool `yaml:"enabled,omitempty"`
+}
+
+// ubootYAMLConfig is the YAML-marshalable shape of u-boot.yaml as
+// required by LH-FA-CONF-002 (schemaVersion + project + services +
+// devcontainer + later template). The struct lives in the application
+// layer because the YAML schema is part of the application contract;
+// the YAMLCodec port stays schema-agnostic.
+//
+// Services and Devcontainer are pointer-/`omitempty`-tagged so a fresh
+// `u-boot init` (which has neither yet) writes a clean two-key file;
+// `u-boot add` populates services on first add and `u-boot devcontainer
+// init` (V1) will populate devcontainer.
+//
+// Future fields:
+//
 //   - Template    string               `yaml:"template,omitempty"`
 type ubootYAMLConfig struct {
 	SchemaVersion int                         `yaml:"schemaVersion"`
 	Project       ubootYAMLProject            `yaml:"project"`
 	Services      map[string]ubootYAMLService `yaml:"services,omitempty"`
+	Devcontainer  *ubootYAMLDevcontainer      `yaml:"devcontainer,omitempty"`
 }
 
 // InitProjectService implements [driving.InitProjectUseCase]. It

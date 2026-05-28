@@ -7,6 +7,7 @@ import (
 	"fmt"
 	iofs "io/fs"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -61,6 +62,17 @@ const (
 	checkIDComposeYaml      = "compose.yaml.valid"
 	checkIDDevcontainerJSON = "devcontainer.json.valid"
 	checkIDDevcontainerDockerfile = "devcontainer.dockerfile.valid"
+	// checkIDServicesEnabledKey is the M5-T7 LH-FA-ADD-005 §893 check:
+	// warns when a services.<name> entry in u-boot.yaml omits the
+	// explicit `enabled:` key. Spec-required to distinguish "registered
+	// and disabled" from "registered without a decision".
+	checkIDServicesEnabledKey = "services.enabled-key"
+	// checkIDForwardPortsConsistency is the M5-T7 check that
+	// devcontainer.json.forwardPorts matches the active services'
+	// published container-ports. Warn-only — userland devcontainers may
+	// legitimately omit forward declarations when port forwarding is
+	// configured elsewhere.
+	checkIDForwardPortsConsistency = "devcontainer.forwardPorts.consistency"
 )
 
 // Minimum versions per LH-FA-DIAG-002. The thresholds are MAJOR.MINOR
@@ -100,6 +112,8 @@ func (s *DoctorService) Check(ctx context.Context, req driving.DoctorRequest) (d
 		s.checkComposeYaml(ctx, req.BaseDir),
 		s.checkDevcontainerJSON(ctx, req.BaseDir),
 		s.checkDevcontainerDockerfile(ctx, req.BaseDir),
+		s.checkServicesEnabledKey(ctx, req.BaseDir),
+		s.checkForwardPortsConsistency(ctx, req.BaseDir),
 	}
 	report := domain.DiagnosticReport{Items: items}
 	s.logger.Info("doctor: checks complete",
@@ -516,24 +530,48 @@ type devcontainerJSONShape struct {
 }
 
 // devcontainerSeverity returns the severity for the devcontainer
-// checks per LH-FA-DIAG-002:
+// checks per LH-FA-DIAG-002, wired in M5-T7 against the new
+// `ubootYAMLConfig.Devcontainer` block:
 //
-//   - u-boot.yaml present + `devcontainer.enabled == true` → Error.
-//   - u-boot.yaml present + `devcontainer.enabled == false` → Warn.
-//   - u-boot.yaml absent → Warn (quality hints).
+//   - u-boot.yaml present + `devcontainer.enabled == true` → Error
+//     (LH-FA-DIAG-002 §1073).
+//   - u-boot.yaml present + `devcontainer.enabled == false` → Warn
+//     (LH-FA-DIAG-002 §1077).
+//   - u-boot.yaml present + `devcontainer.enabled` unset / absent
+//     `devcontainer:` block → Warn (quality hint).
+//   - u-boot.yaml absent / unreadable / unparsable → Warn (§1078:
+//     supplementary quality diagnostic).
 //
-// The `devcontainer` block does not yet exist in `ubootYAMLConfig`
-// (lands with M5+). Today every devcontainer check defaults to Warn;
-// once the schema field is present, this function gains a branch
-// that returns Error when enabled — at which point it needs read-
-// access to the FileSystem port to load u-boot.yaml.
-//
-// Free function (no receiver) until the read-access is wired up.
-// The signature stays methodless to avoid the revive unused-receiver
-// finding; switching to a method on `*DoctorService` is a trivial
-// re-binding step when M5+ lands the schema field.
-func devcontainerSeverity() domain.Severity {
+// Best-effort read: any I/O or parse error degrades to Warn rather
+// than failing the call site, because devcontainerSeverity is a
+// classifier helper, not a primary check. The primary u-boot.yaml
+// validation lives in [checkUbootYaml] and surfaces real failures
+// to the user separately.
+func (s *DoctorService) devcontainerSeverity(baseDir string) domain.Severity {
+	cfg, err := s.loadUbootYAML(baseDir)
+	if err != nil {
+		return domain.SeverityWarn
+	}
+	if cfg.Devcontainer != nil && cfg.Devcontainer.Enabled != nil && *cfg.Devcontainer.Enabled {
+		return domain.SeverityError
+	}
 	return domain.SeverityWarn
+}
+
+// loadUbootYAML is the read-and-parse helper for doctor checks that
+// need to consult u-boot.yaml for context. Returns the parsed config
+// or a wrapped error; missing files surface as iofs.ErrNotExist via
+// the FileSystem adapter.
+func (s *DoctorService) loadUbootYAML(baseDir string) (ubootYAMLConfig, error) {
+	body, err := s.fs.ReadFile(filepath.Join(baseDir, "u-boot.yaml"))
+	if err != nil {
+		return ubootYAMLConfig{}, err
+	}
+	var cfg ubootYAMLConfig
+	if err := s.yaml.Unmarshal(body, &cfg); err != nil {
+		return ubootYAMLConfig{}, err
+	}
+	return cfg, nil
 }
 
 // checkDevcontainerJSON validates `.devcontainer/devcontainer.json`
@@ -558,7 +596,7 @@ func (s *DoctorService) checkDevcontainerJSON(_ context.Context, baseDir string)
 	if err != nil {
 		return domain.Diagnostic{
 			ID:       checkIDDevcontainerJSON,
-			Severity: devcontainerSeverity(),
+			Severity: s.devcontainerSeverity(baseDir),
 			Message:  "Cannot probe devcontainer.json: " + err.Error() + ".",
 			Hint:     "Check filesystem permissions on " + path + ".",
 		}
@@ -574,7 +612,7 @@ func (s *DoctorService) checkDevcontainerJSON(_ context.Context, baseDir string)
 	if err != nil {
 		return domain.Diagnostic{
 			ID:       checkIDDevcontainerJSON,
-			Severity: devcontainerSeverity(),
+			Severity: s.devcontainerSeverity(baseDir),
 			Message:  "Cannot read devcontainer.json: " + err.Error() + ".",
 			Hint:     "Check filesystem permissions on " + path + ".",
 		}
@@ -584,7 +622,7 @@ func (s *DoctorService) checkDevcontainerJSON(_ context.Context, baseDir string)
 	if err := json.Unmarshal(stripped, &cfg); err != nil {
 		return domain.Diagnostic{
 			ID:       checkIDDevcontainerJSON,
-			Severity: devcontainerSeverity(),
+			Severity: s.devcontainerSeverity(baseDir),
 			Message:  "devcontainer.json is not valid JSON(C): " + err.Error() + ".",
 			Hint:     "Fix JSON syntax (unbalanced braces, missing commas/quotes).",
 		}
@@ -592,7 +630,7 @@ func (s *DoctorService) checkDevcontainerJSON(_ context.Context, baseDir string)
 	if cfg.Name == "" {
 		return domain.Diagnostic{
 			ID:       checkIDDevcontainerJSON,
-			Severity: devcontainerSeverity(),
+			Severity: s.devcontainerSeverity(baseDir),
 			Message:  "devcontainer.json is missing required `name`.",
 			Hint:     "Set `name` per VS Code Dev Containers minimum compatibility.",
 		}
@@ -600,7 +638,7 @@ func (s *DoctorService) checkDevcontainerJSON(_ context.Context, baseDir string)
 	if cfg.Image == "" && cfg.Build == nil {
 		return domain.Diagnostic{
 			ID:       checkIDDevcontainerJSON,
-			Severity: devcontainerSeverity(),
+			Severity: s.devcontainerSeverity(baseDir),
 			Message:  "devcontainer.json must set either `image` or `build`.",
 			Hint:     "Add `image: <ref>` or `build: { dockerfile: ... }`.",
 		}
@@ -628,7 +666,7 @@ func (s *DoctorService) checkDevcontainerDockerfile(_ context.Context, baseDir s
 	if err != nil {
 		return domain.Diagnostic{
 			ID:       checkIDDevcontainerDockerfile,
-			Severity: devcontainerSeverity(),
+			Severity: s.devcontainerSeverity(baseDir),
 			Message:  "Cannot probe devcontainer Dockerfile: " + err.Error() + ".",
 			Hint:     "Check filesystem permissions on " + path + ".",
 		}
@@ -644,7 +682,7 @@ func (s *DoctorService) checkDevcontainerDockerfile(_ context.Context, baseDir s
 	if err != nil {
 		return domain.Diagnostic{
 			ID:       checkIDDevcontainerDockerfile,
-			Severity: devcontainerSeverity(),
+			Severity: s.devcontainerSeverity(baseDir),
 			Message:  "Cannot read devcontainer Dockerfile: " + err.Error() + ".",
 			Hint:     "Check filesystem permissions on " + path + ".",
 		}
@@ -652,7 +690,7 @@ func (s *DoctorService) checkDevcontainerDockerfile(_ context.Context, baseDir s
 	if !hasFromDirective(body) {
 		return domain.Diagnostic{
 			ID:       checkIDDevcontainerDockerfile,
-			Severity: devcontainerSeverity(),
+			Severity: s.devcontainerSeverity(baseDir),
 			Message:  ".devcontainer/Dockerfile has no `FROM` directive.",
 			Hint:     "Start the Dockerfile with `FROM <base-image>:<tag>`.",
 		}
@@ -679,4 +717,281 @@ func hasFromDirective(body []byte) bool {
 		}
 	}
 	return false
+}
+
+// checkServicesEnabledKey wires the LH-FA-ADD-005 §893 check: every
+// `services.<name>` entry in u-boot.yaml must carry an explicit
+// `enabled:` key (true or false). Missing keys surface as
+// SeverityWarn and Doctor groups them in a single diagnostic listing
+// each offending service.
+//
+// u-boot.yaml absent / unreadable / unparsable: SeverityOK no-op —
+// the primary checkUbootYaml diagnostic already covers those failure
+// modes; this helper is a structural rule that only applies once the
+// file parses.
+func (s *DoctorService) checkServicesEnabledKey(_ context.Context, baseDir string) domain.Diagnostic {
+	cfg, err := s.loadUbootYAML(baseDir)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDServicesEnabledKey,
+			Severity: domain.SeverityOK,
+			Message:  "u-boot.yaml not loadable; services.enabled-key check skipped.",
+		}
+	}
+	var missing []string
+	for name, entry := range cfg.Services {
+		if entry.Enabled == nil {
+			missing = append(missing, name)
+		}
+	}
+	if len(missing) == 0 {
+		return domain.Diagnostic{
+			ID:       checkIDServicesEnabledKey,
+			Severity: domain.SeverityOK,
+			Message:  "All services carry an explicit enabled: key.",
+		}
+	}
+	sort.Strings(missing)
+	return domain.Diagnostic{
+		ID:       checkIDServicesEnabledKey,
+		Severity: domain.SeverityWarn,
+		Message: fmt.Sprintf(
+			"services without an explicit enabled: key: %s. "+
+				"Add `enabled: true` or `enabled: false` per LH-FA-ADD-005 §893.",
+			strings.Join(missing, ", ")),
+	}
+}
+
+// checkForwardPortsConsistency wires the M4-deferred check that the
+// VS Code Dev Containers `forwardPorts` array in
+// .devcontainer/devcontainer.json covers every container-side port
+// the active services in u-boot.yaml publish via compose.yaml.
+//
+// Skipped (SeverityOK):
+//   - u-boot.yaml absent or unparsable
+//   - no active services (every services.<name>.enabled is false or
+//     unset)
+//   - .devcontainer/devcontainer.json absent (no consistency to check)
+//   - compose.yaml absent or unparsable
+//
+// Warn when at least one expected container port is missing from
+// forwardPorts. The check intentionally never escalates to Error:
+// users may legitimately route ports via Compose-managed proxies or
+// VS Code task config instead of forwardPorts.
+func (s *DoctorService) checkForwardPortsConsistency(_ context.Context, baseDir string) domain.Diagnostic {
+	cfg, err := s.loadUbootYAML(baseDir)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDForwardPortsConsistency,
+			Severity: domain.SeverityOK,
+			Message:  "u-boot.yaml not loadable; forwardPorts check skipped.",
+		}
+	}
+	activeServices := activeServiceNames(cfg)
+	if len(activeServices) == 0 {
+		return domain.Diagnostic{
+			ID:       checkIDForwardPortsConsistency,
+			Severity: domain.SeverityOK,
+			Message:  "No active services; forwardPorts check skipped.",
+		}
+	}
+	devcontainerPath := filepath.Join(baseDir, ".devcontainer", "devcontainer.json")
+	devcontainerExists, err := s.fs.Exists(devcontainerPath)
+	if err != nil || !devcontainerExists {
+		return domain.Diagnostic{
+			ID:       checkIDForwardPortsConsistency,
+			Severity: domain.SeverityOK,
+			Message:  "devcontainer.json not present; forwardPorts check skipped.",
+		}
+	}
+	forwardPorts, err := readDevcontainerForwardPorts(s.fs, devcontainerPath)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDForwardPortsConsistency,
+			Severity: domain.SeverityOK,
+			Message:  "devcontainer.json not parsable; forwardPorts check skipped.",
+		}
+	}
+	expectedPorts, err := collectActiveServicePorts(s.fs, s.yaml, baseDir, activeServices)
+	if err != nil || len(expectedPorts) == 0 {
+		return domain.Diagnostic{
+			ID:       checkIDForwardPortsConsistency,
+			Severity: domain.SeverityOK,
+			Message:  "No published service ports; forwardPorts check skipped.",
+		}
+	}
+	missing := portsNotForwarded(expectedPorts, forwardPorts)
+	if len(missing) == 0 {
+		return domain.Diagnostic{
+			ID:       checkIDForwardPortsConsistency,
+			Severity: domain.SeverityOK,
+			Message:  "devcontainer.forwardPorts covers all active service ports.",
+		}
+	}
+	return domain.Diagnostic{
+		ID:       checkIDForwardPortsConsistency,
+		Severity: domain.SeverityWarn,
+		Message: fmt.Sprintf(
+			"devcontainer.json forwardPorts misses container ports of active services: %s. "+
+				"Add the ports or route them via Compose-managed proxies.",
+			joinIntsAscending(missing)),
+	}
+}
+
+// activeServiceNames returns the sorted list of services.<name>
+// entries whose Enabled is explicitly true. Used by the forwardPorts
+// check to enumerate compose-services that publish ports.
+func activeServiceNames(cfg ubootYAMLConfig) []string {
+	var out []string
+	for name, entry := range cfg.Services {
+		if entry.Enabled != nil && *entry.Enabled {
+			out = append(out, name)
+		}
+	}
+	sort.Strings(out)
+	return out
+}
+
+// devcontainerForwardPortsShape is the JSONC-friendly projection of
+// devcontainer.json that exposes only forwardPorts. Spec allows
+// strings ("3000:3000") or ints (3000); we accept both as `any` and
+// normalise in [parseForwardPorts].
+type devcontainerForwardPortsShape struct {
+	ForwardPorts []any `json:"forwardPorts"`
+}
+
+// readDevcontainerForwardPorts loads devcontainer.json, strips JSONC
+// comments, and returns the normalised forwardPorts set.
+func readDevcontainerForwardPorts(fs driven.FileSystem, path string) (map[int]struct{}, error) {
+	raw, err := fs.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	stripped := stripJSONC(raw)
+	var dc devcontainerForwardPortsShape
+	if err := json.Unmarshal(stripped, &dc); err != nil {
+		return nil, err
+	}
+	return parseForwardPorts(dc.ForwardPorts), nil
+}
+
+// parseForwardPorts normalises the heterogenous forwardPorts entries
+// (int or "host:container" string) into the container-side port set.
+// Invalid entries are silently skipped — devcontainer.json is the
+// user's source of truth, not ours.
+func parseForwardPorts(items []any) map[int]struct{} {
+	out := map[int]struct{}{}
+	for _, item := range items {
+		switch v := item.(type) {
+		case float64:
+			out[int(v)] = struct{}{}
+		case string:
+			if p, ok := parseContainerPortFromMapping(v); ok {
+				out[p] = struct{}{}
+			}
+		}
+	}
+	return out
+}
+
+// collectActiveServicePorts opens compose.yaml and harvests the
+// container-side ports of every active service. Returns a sorted,
+// de-duplicated slice.
+func collectActiveServicePorts(fs driven.FileSystem, yamlCodec driven.YAMLCodec, baseDir string, services []string) ([]int, error) {
+	body, err := fs.ReadFile(filepath.Join(baseDir, "compose.yaml"))
+	if err != nil {
+		return nil, err
+	}
+	var shape composePortsShape
+	if err := yamlCodec.Unmarshal(body, &shape); err != nil {
+		return nil, err
+	}
+	seen := map[int]struct{}{}
+	for _, svc := range services {
+		def, ok := shape.Services[svc]
+		if !ok {
+			continue
+		}
+		for _, raw := range def.Ports {
+			if p, ok := normalisePortEntry(raw); ok {
+				seen[p] = struct{}{}
+			}
+		}
+	}
+	out := make([]int, 0, len(seen))
+	for p := range seen {
+		out = append(out, p)
+	}
+	sort.Ints(out)
+	return out, nil
+}
+
+// composePortsShape is the minimal projection of compose.yaml that
+// exposes the per-service ports list. Each entry may be a scalar
+// ("5432:5432" / 5432) or a short-form map; we accept all via `any`
+// and normalise in [normalisePortEntry].
+type composePortsShape struct {
+	Services map[string]struct {
+		Ports []any `yaml:"ports"`
+	} `yaml:"services"`
+}
+
+// normalisePortEntry extracts the container-side port from a Compose
+// `ports:` entry. Accepts:
+//   - int:    5432       → 5432
+//   - string: "5432"     → 5432
+//   - string: "8080:80"  → 80
+//   - string: "127.0.0.1:8080:80" → 80
+//
+// Returns ok=false for shapes the doctor cannot interpret (long-form
+// map, ranges); the consistency check skips those silently rather
+// than warning on un-checkable shapes.
+func normalisePortEntry(raw any) (int, bool) {
+	switch v := raw.(type) {
+	case int:
+		return v, true
+	case string:
+		return parseContainerPortFromMapping(v)
+	}
+	return 0, false
+}
+
+// parseContainerPortFromMapping resolves a Compose port specifier
+// string into the container-side integer port. Handles both bare
+// ports ("5432") and host:container mappings ("8080:80" /
+// "127.0.0.1:8080:80").
+func parseContainerPortFromMapping(spec string) (int, bool) {
+	parts := strings.Split(spec, ":")
+	last := parts[len(parts)-1]
+	// strip optional protocol suffix ("80/tcp")
+	if idx := strings.IndexByte(last, '/'); idx != -1 {
+		last = last[:idx]
+	}
+	p, err := strconv.Atoi(last)
+	if err != nil {
+		return 0, false
+	}
+	return p, true
+}
+
+// portsNotForwarded returns the container-side ports in `expected`
+// that are NOT present in `forwarded`. Result is in input order.
+func portsNotForwarded(expected []int, forwarded map[int]struct{}) []int {
+	var missing []int
+	for _, p := range expected {
+		if _, ok := forwarded[p]; !ok {
+			missing = append(missing, p)
+		}
+	}
+	return missing
+}
+
+// joinIntsAscending renders an int slice as a comma-joined string
+// for diagnostic messages.
+func joinIntsAscending(ports []int) string {
+	parts := make([]string, len(ports))
+	for i, p := range ports {
+		parts[i] = strconv.Itoa(p)
+	}
+	return strings.Join(parts, ", ")
 }
