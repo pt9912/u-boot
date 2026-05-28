@@ -1,7 +1,7 @@
 # Slice M5: `u-boot add postgres`-Flow
 
 > **Status:** In progress
-> **DoD:** T1 ✅ `995726a` / T2 ✅ `f054986` / T3 ✅ `4091ac9` / T4a ✅ `6052b71` / T4b ✅ `cca1254` / T4c ✅ `529be1c` / T5 ✅ `23209cd` / T6 offen / T7 offen
+> **DoD:** T1 ✅ `995726a` / T2 ✅ `f054986` / T3 ✅ `4091ac9` / T4a ✅ `6052b71` / T4b ✅ `cca1254` / T4c ✅ `529be1c` / T5 ✅ `23209cd` / T6 ✅ `7e7bbcd` / T7 offen
 
 ## Auslöser
 
