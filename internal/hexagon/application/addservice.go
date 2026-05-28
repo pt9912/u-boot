@@ -146,11 +146,11 @@ func (s activeArtifactsStatus) needsRepair() bool {
 // orchestrates the FileSystem, YAMLCodec and Logger driven ports to
 // realize the LH-FA-ADD-001 / -002 / -005 add-service flow.
 //
-// M5-T3 scope: AddServiceService implements detectServiceState +
-// top-level dispatch + plan construction. The execute step (actual
-// file writes) is a stub that returns a "not yet implemented (M5-T4)"
-// error; the M5-T6 CLI command does not exist yet, so the stub is
-// only reachable from unit tests.
+// Reachable from the CLI subcommand wired up in M5-T6
+// (`u-boot add <service>`); see [cli.newAddCommand]. The full plan-
+// and-execute pipeline (template rendering, anchor-checks, file
+// writes, Active-Repair) lives in addservice_execute.go and
+// addservice_detect.go.
 type AddServiceService struct {
 	fs     driven.FileSystem
 	yaml   driven.YAMLCodec

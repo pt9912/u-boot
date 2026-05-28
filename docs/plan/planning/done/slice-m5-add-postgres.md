@@ -1541,6 +1541,21 @@ wohlgeformt-vorhanden/fehlend-Fälle.
      postgres && u-boot doctor`) muss grün laufen.
    - slice-m5-add-postgres.md nach `done/`. Roadmap M5 → Done.
 
+> **Archiv-Hinweis zum Smoke-Punkt (M5-Done-Review):** Im distroless
+> Runtime-Image (`make build`, distroless/static-nonroot) fehlen
+> `git` und `docker` per Design (LH-NFA-PORT-002 — minimale
+> Host-Deps). `u-boot doctor` meldet diese Werkzeuge dann als
+> Error (`git.installed`, `docker.installed`). Die `u-boot init`-
+> und `u-boot add postgres`-Schritte des Smoke laufen im Runtime-
+> Image, ebenso jeder Projektcheck (`uboot.yaml.valid`,
+> `compose.yaml.valid`, `services.enabled-key`, …). Der Smoke gilt
+> als grün, wenn die Projektchecks grün sind; die Werkzeug-Checks
+> sind erwartet rot im distroless-Container und werden auf einem
+> Dev-System mit installiertem git+docker grün. Eine voll grüne
+> Smoke-Variante im Runtime-Image würde einen FAT-Container brauchen
+> (z. B. mit `docker:cli` Multi-Stage), was dem distroless-Ziel
+> widerspricht — daher bewusst out of scope.
+
 ## Akzeptanzkriterien (Slice-Level)
 
 - `LH-FA-ADD-001`, `LH-FA-ADD-002`, `LH-FA-ADD-005` abgehakt.

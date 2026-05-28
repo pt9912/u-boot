@@ -519,10 +519,12 @@ func (s *DoctorService) checkComposeYaml(_ context.Context, baseDir string) doma
 // or `build`. Build can be a string (build-context path) or an
 // object (`{dockerfile, context}`) — we accept either via `any`.
 //
-// Other devcontainer.json fields (`forwardPorts`, `customizations`,
-// `features`, ...) are not checked by this minimal validator;
-// `forwardPorts`-consistency vs. `u-boot.yaml.services` is deferred
-// until the M5 services-schema lands.
+// forwardPorts is no longer deferred: M5-T7 ships the consistency
+// check via [checkForwardPortsConsistency], which reads forwardPorts
+// through its own [devcontainerForwardPortsShape] projection so this
+// minimal validator stays focused on the LH-FA-DIAG-002 §1071 shape
+// fields. Other devcontainer.json fields (`customizations`,
+// `features`, ...) remain out of scope for the doctor today.
 type devcontainerJSONShape struct {
 	Name  string `json:"name"`
 	Image string `json:"image"`
