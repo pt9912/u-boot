@@ -43,7 +43,17 @@ Inventar:
   `docker/engine.go` + `netprobe/probe.go` + `Clock.Sleep` als
   M6-Zugänge.
 - `adapter/driving/cli/` — fünf Cobra-Subcommands plus
-  Status-Renderer.
+  Status-Renderer; persistente `--quiet`/`--verbose`/`--debug`-
+  Flags steuern seit [`slice-followup-verbosity-wiring`](../docs/plan/planning/done/slice-followup-verbosity-wiring.md)
+  den `slog.Level` zur Laufzeit (`PersistentPreRunE` mutiert ein
+  `*slog.LevelVar`, das mit dem Logger-Adapter geteilt wird).
+- `e2e/` — `//go:build docker`-Integrationstests, die mehrere
+  Application-Services in Sequenz gegen eine echte Compose-Engine
+  fahren (`LH-AK-002` PostgreSQL-Acceptance,
+  `LH-FA-UP-004` §1015 Volume-Removal). Laufen ausschließlich
+  über `make test-docker` — siehe
+  [`docs/user/quality.md`](../docs/user/quality.md) §2.2 und
+  [`slice-m6-docker-integrationstests`](../docs/plan/planning/in-progress/slice-m6-docker-integrationstests.md).
 
 ## CLI-Subcommands
 

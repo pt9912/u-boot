@@ -15,10 +15,12 @@ import (
 // `u-boot doctor` that runDoctor actually consumes today: --strict
 // (LH-FA-DIAG-003) plus --quiet (LH-FA-CLI-005, filters OK items
 // from the rendered report). The persistent --verbose / --debug
-// flags exist on the root command per LH-FA-CLI-005 but currently
-// do not surface in the doctor flow — see
-// [`slice-followup-verbosity-wiring.md`] for the planned
-// logger-level wiring.
+// flags exist on the root command per LH-FA-CLI-005 and are
+// load-bearing at the LOGGER level since
+// `slice-followup-verbosity-wiring` (`buildRootCommand`'s
+// PersistentPreRunE flips a shared *slog.LevelVar). The doctor
+// renderer itself does not consume them — service-level
+// logger.Debug/Info calls are the surface they govern.
 type doctorFlags struct {
 	Strict bool
 	Quiet  bool

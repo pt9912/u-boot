@@ -57,7 +57,7 @@ den Test-Build.
   (mountet `/var/run/docker.sock`). Stand M6-T2 existiert nur das
   Skeleton `docker/engine_docker_test.go`; die LH-AK-002-/
   LH-NFA-PERF-002-Verhaltens-Pins folgen mit dem Carveout-Slice
-  [`docs/plan/planning/open/slice-m6-docker-integrationstests.md`](../../../docs/plan/planning/open/slice-m6-docker-integrationstests.md).
+  [`docs/plan/planning/in-progress/slice-m6-docker-integrationstests.md`](../../../docs/plan/planning/in-progress/slice-m6-docker-integrationstests.md).
 
 ## Import-Regeln
 

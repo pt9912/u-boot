@@ -19,7 +19,12 @@ am Root verdrahtet. Wiring erfolgt zentral in `cmd/uboot/main.go`.
   - Persistente Root-Flags: `--yes`/`--no-interactive`
     (LH-FA-CLI-005A), `--quiet`/`--verbose`/`--debug`
     (LH-FA-CLI-005). `--yes` gilt explizit auch für
-    `down --volumes` (Spec §237).
+    `down --volumes` (Spec §237). Die Verbosity-Flags steuern
+    seit [`slice-followup-verbosity-wiring`](../../../docs/plan/planning/done/slice-followup-verbosity-wiring.md)
+    zusätzlich den `slog.Level` zur Laufzeit (`PersistentPreRunE`
+    flippt ein per `WithLogLevel` injiziertes `*slog.LevelVar`):
+    `--debug`/`--verbose` → `Debug`, `--quiet` → `Warn`, sonst
+    `Info`.
 - `cli/statusview.go` — tabwriter-basierter LH-FA-UP-003-Status-
   Renderer plus Down-Success-Renderer mit asymmetrischem
   `--quiet`-Vertrag (up suppress't Tabelle+Diagnostics, down
