@@ -20,29 +20,44 @@ den Test-Build.
   code 128 als "no repo"; alle anderen Fehler propagieren.
   `Version` parsed das `git version <X.Y.Z>`-Format und liefert
   die bare semver.
-- `clock/` — `Clock`-Adapter mit `time.Now()` in UTC
-  (projektweiter Default für deterministische Doku-Timestamps).
+- `clock/` — `Clock`-Adapter mit `time.Now()` in UTC und
+  `time.Sleep` (M6-T4-fund). Sleep ist seit M6 load-bearing für
+  den UpService-Polling-Loop; Tests ersetzen ihn durch einen
+  manual-advance Fake (slice-mandatorisch "kein real time.Sleep
+  in Tests").
 - `progress/` — `ProgressPort`-Adapter (Text-Output für
   `LH-FA-INIT-005`-§609-Reports).
 - `confirm/` — `Confirmer`-Adapter (`bufio.Scanner` über stdin,
-  Prompt auf stderr; Default `[y/N]`).
+  Prompt auf stderr; Default `[y/N]`). M6 fügt
+  `ConfirmRemoveVolumes` für den destruktiven `down --volumes`-
+  Pfad (LH-FA-CLI-005A §254).
 - `logger/` — `Logger`-Adapter via `log/slog` (Text- und
   JSON-Format).
-- `docker/` — `DockerProbe`-Adapter via `os/exec docker version`
-  und `docker compose version --short` (read-only diagnostics
-  für `LH-FA-DIAG-002`, M4-doctor). Bewusst NICHT der
-  DockerEngine-Adapter — der kommt mit M6.
+- `docker/` — zwei Adapter im selben Package:
+  - `Probe` (M4) implementiert `DockerProbe` via `os/exec docker
+    version` + `docker compose version --short` (read-only
+    diagnostics für `LH-FA-DIAG-002`).
+  - `Engine` (M6-T2) implementiert `DockerEngine` via `docker
+    compose -f compose.yaml up -d` / `down [-v]` / `ps --format
+    json`. Jeder Call durchläuft den `preflight`-Pfad (LookPath
+    + Probe.Info + Probe.ComposeVersion) zur deterministischen
+    `ErrDockerUnavailable`-vs-`ErrComposeRuntime`-Klassifikation
+    (CLI-Codes 11 vs. 12 per `LH-FA-CLI-006`).
+- `netprobe/` — `NetProbe`-Adapter (M6-T3) via
+  `net.Dialer.DialContext` mit `Dialer.Timeout`. Wraps mit
+  noctx-Lint-konformen `*net.OpError`, sodass `errors.Is`
+  context.Canceled / context.DeadlineExceeded durchläuft.
+  Directory bewusst `netprobe/` (statt `net/`), um stdlib-`net`-
+  Aliasing-Konflikte am Aufrufer zu vermeiden.
 
-## Geplante Erweiterungen
+## Test-Build-Tag-Pfad
 
-- `DockerEngine`-Adapter (`Up`/`Down`/`Ps`/`Logs`/`Exec`) via
-  `os/exec docker compose` für **M6** (`LH-SA-DOCKER-001`,
-  `LH-SA-DOCKER-002`). Wird im selben `docker/`-Verzeichnis
-  als zweiter Adapter-Typ landen oder ein eigenes Package
-  bekommen — Entscheidung mit dem M6-Slice.
-- Test-Strecke für `docker/` (Daemon-Tests, Compose-Smoke) mit
-  Build-Tag `//go:build docker` (siehe
-  [`docs/plan/planning/open/slice-m6-docker-integrationstests.md`](../../../docs/plan/planning/open/slice-m6-docker-integrationstests.md)).
+- Build-Tagged Adapter-Integrationstests (`//go:build docker`)
+  laufen via `make test-docker` gegen einen echten Docker-Daemon
+  (mountet `/var/run/docker.sock`). Stand M6-T2 existiert nur das
+  Skeleton `docker/engine_docker_test.go`; die LH-AK-002-/
+  LH-NFA-PERF-002-Verhaltens-Pins folgen mit dem Carveout-Slice
+  [`docs/plan/planning/open/slice-m6-docker-integrationstests.md`](../../../docs/plan/planning/open/slice-m6-docker-integrationstests.md).
 
 ## Import-Regeln
 

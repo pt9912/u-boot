@@ -19,20 +19,41 @@ internal/
     └── driven/              # konkrete Adapter (docker/, fs/, yaml/, …)
 ```
 
-## Status (M3-T1)
+## Status (M1–M6 Done)
 
-Mit M3-T1 ([`docs/plan/planning/in-progress/slice-m3-init-flow.md`](../docs/plan/planning/in-progress/slice-m3-init-flow.md))
-sind die ersten produktiven Pakete entstanden:
+Alle hexagonalen Schichten sind seit M6 produktiv besetzt. Die
+Package-READMEs pflegen ihren Detail-Stand jeweils selbst; Kurz-
+Inventar:
 
-- `hexagon/domain/`: `Project`, `ProjectName` (mit `NormalizeProjectName`).
-- `hexagon/port/driven/`: `FileSystem`, `YAMLCodec`, `Git`, `Clock`.
-- `adapter/driven/{fs,yaml,git,clock}/`: konkrete Implementierungen.
+- `hexagon/domain/` — Project + Service Value-Objects,
+  Diagnostic-Severities (4-stufig inkl. `SeverityInfo` aus M6),
+  ContainerState / StabilizationOutcome / UpResult für
+  `u-boot up` (M6).
+- `hexagon/application/` — fünf Use-Cases verdrahtet:
+  `InitProjectService` (M3), `DoctorService` (M4),
+  `AddServiceService` (M5), `UpService` + `DownService` (M6).
+- `hexagon/port/driving/` — fünf Use-Case-Interfaces mit narrow-
+  scoped Sentinels (`ErrProjectExists`, …,
+  `ErrStabilizationTimeout`, `ErrConfirmationRequired`).
+- `hexagon/port/driven/` — `FileSystem`, `YAMLCodec`, `Git`,
+  `Clock` (mit `Sleep` seit M6-T4-fund), `ProgressPort`,
+  `Confirmer` (2 Methoden), `Logger`, `DockerProbe` (read-only,
+  M4), `DockerEngine` (state-mutierend, M6) und `NetProbe` (M6).
+- `adapter/driven/` — konkrete Implementierungen, plus
+  `docker/engine.go` + `netprobe/probe.go` + `Clock.Sleep` als
+  M6-Zugänge.
+- `adapter/driving/cli/` — fünf Cobra-Subcommands plus
+  Status-Renderer.
 
-Noch leer und folgen mit M3-T2 / M3-T3:
+## CLI-Subcommands
 
-- `hexagon/application/` (M3-T2): `InitProjectService`.
-- `hexagon/port/driving/` (M3-T2): `InitProjectUseCase`.
-- `adapter/driving/` (M3-T3): CLI-Commands (Cobra).
+| Command | Slice | Spec |
+| ------- | ----- | ---- |
+| `u-boot init [name]` | M3 | `LH-FA-INIT-001..007` |
+| `u-boot doctor` | M4 | `LH-FA-DIAG-001..004` |
+| `u-boot add <service>` | M5 | `LH-FA-ADD-001..002`, `-005` |
+| `u-boot up` | M6 | `LH-FA-UP-001..003` |
+| `u-boot down` | M6 | `LH-FA-UP-004` |
 
 ## Coverage
 

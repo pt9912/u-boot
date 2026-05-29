@@ -14,7 +14,7 @@ und wiederkehrende Artefakte (README, CHANGELOG, `.env.example`).
 
 ## Status
 
-**MVP in Arbeit — drei Subkommandos vollständig verdrahtet (`init` + `doctor` + `add`).**
+**MVP in Arbeit — fünf Subkommandos vollständig verdrahtet (`init` + `doctor` + `add` + `up` + `down`).**
 - `u-boot init [name]` erzeugt die LH-FA-INIT-003-Projektstruktur plus
   `u-boot.yaml` (LH-FA-CONF-002) und initialisiert per Default ein
   Git-Repository (LH-FA-INIT-007); Re-Init nutzt den
@@ -35,16 +35,31 @@ und wiederkehrende Artefakte (README, CHANGELOG, `.env.example`).
   (LH-FA-ADD-004) folgen in V1. Idempotent, mit voller State-Machine:
   registrieren, reaktivieren, Block neu erzeugen, fehlende Artefakte
   reparieren, Abbruch bei Inkonsistenzen.
+- `u-boot up [--timeout <sek>]` startet die Compose-Umgebung via
+  `docker compose up -d` und pollt, bis jeder deklarierte Service
+  `healthy` (mit Healthcheck) bzw. `running` (ohne) erreicht
+  (LH-FA-UP-001..003). `--timeout 0` ist Fire-and-Forget (§970, kein
+  `compose ps`-Follow-up). In `compose.yaml` deklarierte TCP-Ports
+  werden auf `localhost` geprüft; mit Healthcheck emittiert ein
+  Probe-Fehler nur eine Warn-Diagnose ohne Veto, ohne Healthcheck
+  veto'd er die Stabilisierung (§968 + Slice §141). Exit-Codes per
+  LH-FA-CLI-006: 11 wenn Docker nicht verfügbar (Pre-Flight), 12 bei
+  Compose-Laufzeitfehler oder Stabilisierungs-Timeout, 10 bei
+  fehlendem `u-boot.yaml` / `compose.yaml`.
+- `u-boot down [--volumes]` stoppt die Compose-Umgebung
+  (LH-FA-UP-004). `--volumes` entfernt zusätzlich Named-Volumes
+  (§1015 destruktiv); der LH-FA-CLI-005A-§254-Bestätigungs-Gate
+  bricht nicht-interaktive destruktive Ops ohne `--yes` mit Exit 10
+  ab und prompt't sonst mit sicherem Default-`N`.
 
-Die weiteren MVP-Subkommandos (`up`, `down`, `generate`, `config`)
-folgen in M6+; Planung in
-[`docs/plan/planning/`](docs/plan/planning/).
+Die weiteren MVP-Subkommandos (`generate`, `config`) folgen in M7+;
+Planung in [`docs/plan/planning/`](docs/plan/planning/).
 
 | Phase | Status | Quelle |
 | ----- | ------ | ------ |
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
 | Architekturentscheidungen | 6 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
-| Implementierung | M1–M5 ✅, M6 als Nächstes (`up` / `down`) | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
+| Implementierung | M1–M6 ✅, M7 als Nächstes (`generate`) | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
 | Carveouts | 7 temporär (6 mit Slice-Plan, 1 Slice deckt 2), 8 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
