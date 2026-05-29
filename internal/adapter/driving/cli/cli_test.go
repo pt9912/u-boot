@@ -1190,6 +1190,35 @@ func TestExecute_Up_NegativeTimeout_ReturnsExitCode2(t *testing.T) {
 	}
 }
 
+func TestExecute_Up_Quiet_SuppressesStatusTableAndDiagnostics(t *testing.T) {
+	t.Parallel()
+	// Slice §T6 binding contract: `up --quiet` must suppress BOTH
+	// the status table AND the diagnostic section. T7-review (post-
+	// 6d9aa88) found that the initial implementation only
+	// suppressed diagnostics; this pin makes the regression
+	// impossible.
+	uc := &fakeUpUseCase{
+		resp: driving.UpResponse{Result: domain.UpResult{
+			Stabilized: true,
+			Services: []domain.ServiceStatus{
+				{Name: "postgres", ContainerStatus: domain.StateRunning, Port: "5432:5432", Healthcheck: "healthy"},
+			},
+			Diagnostics: []domain.Diagnostic{
+				{ID: "up.port.x.0", Severity: domain.SeverityWarn, Message: "would-show-without-quiet"},
+			},
+		}},
+	}
+	getwd := func() (string, error) { return "/tmp/proj", nil }
+	var stdout, stderr bytes.Buffer
+	err := newAppWithUp(uc, cli.WithGetwd(getwd)).Execute(context.Background(), []string{"--quiet", "up"}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("up --quiet: %v", err)
+	}
+	if stdout.Len() != 0 {
+		t.Errorf("--quiet should produce empty stdout (no table, no diagnostics), got: %q", stdout.String())
+	}
+}
+
 func TestExecute_Up_ProjectNotInitialized_ReturnsExitCode10(t *testing.T) {
 	t.Parallel()
 	uc := &fakeUpUseCase{err: driving.ErrProjectNotInitialized}

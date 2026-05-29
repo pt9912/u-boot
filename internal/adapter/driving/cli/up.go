@@ -94,6 +94,14 @@ func runUp(ctx context.Context, stdout, stderr io.Writer, flags upFlags, useCase
 	if err != nil {
 		return err
 	}
+	// LH-FA-CLI-005 + M6 slice §T6 binding contract: `up --quiet`
+	// must suppress BOTH the status table AND the diagnostic
+	// section so CI scripts can rely on empty stdout for success.
+	// The Compose progress stream on stderr is NOT affected
+	// (LH-NFA-PERF-002 requires phase visibility regardless).
+	if flags.Quiet {
+		return nil
+	}
 	if err := renderUpStatus(stdout, resp.Result.Services); err != nil {
 		return fmt.Errorf("render status: %w", err)
 	}
