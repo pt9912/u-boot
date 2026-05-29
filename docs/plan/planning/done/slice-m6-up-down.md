@@ -63,7 +63,7 @@ Out of Scope (V1):
   — `Confirmer`-Port liegt vor; `down --volumes` reuse't ihn.
 - [`slice-m4-logging-port`](../done/slice-m4-logging-port.md) —
   `Logger`-Port; `up`/`down` emittieren Debug-/Info-Events pro Phase.
-- [`slice-m6-docker-integrationstests`](../open/slice-m6-docker-integrationstests.md)
+- [`slice-m6-docker-integrationstests`](../in-progress/slice-m6-docker-integrationstests.md)
   — `//go:build docker`-CI-Pfad; M6 ist der erste Adapter, für den
   reale Compose-Calls existieren — dieser Carveout-Slice wird mit T7
   von M6 fachlich freigeschaltet, bleibt aber als separater Slice
@@ -885,7 +885,7 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
      vier LH-AK-002-Erwartungen (Service in compose.yaml,
      `.env.example`-Block, Healthcheck erreicht, Port erreichbar).
      Der echte Compose-Lauf (LH-AK-002 mit echter Docker-Engine)
-     bleibt im separaten [`slice-m6-docker-integrationstests`](../open/slice-m6-docker-integrationstests.md).
+     bleibt im separaten [`slice-m6-docker-integrationstests`](../in-progress/slice-m6-docker-integrationstests.md).
    - DoD T7: `make gates` grün; LH-AK-002-Acceptance-Test grün;
      Roadmap auf M6 = Done; M5-add-postgres-DoD-Link auf
      LH-AK-002-Erfüllung erweitern (separater Doku-Commit).
@@ -949,7 +949,7 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
 - Vorgänger: [`slice-m5-add-postgres`](../done/slice-m5-add-postgres.md)
   (liefert die Postgres-Templates und den `services`-Schema-Block,
   ohne den `up` keinen Service zu starten hätte).
-- Nachfolger: [`slice-m6-docker-integrationstests`](../open/slice-m6-docker-integrationstests.md)
+- Nachfolger: [`slice-m6-docker-integrationstests`](../in-progress/slice-m6-docker-integrationstests.md)
   (fachlich freigeschaltet durch T7); danach M7 (`u-boot generate`)
   oder MVP-Closure (`LH-FA-DEV-001..005` Devcontainer-Mindestumfang
   + `LH-AK-001/005..007`).

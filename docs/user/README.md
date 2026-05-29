@@ -14,7 +14,7 @@ Guides für die fünf verdrahteten Subcommands (`init`, `doctor`,
 `add`, `up`, `down`) folgen, sobald sich Quickstart-Beispiele
 gegen reale Compose-Workloads validieren lassen — siehe das
 parallel offene Carveout-Slice
-[`slice-m6-docker-integrationstests`](../plan/planning/open/slice-m6-docker-integrationstests.md)
+[`slice-m6-docker-integrationstests`](../plan/planning/in-progress/slice-m6-docker-integrationstests.md)
 für die End-to-End-Pins, die diesen Guides als Quelle dienen
 werden.
 
