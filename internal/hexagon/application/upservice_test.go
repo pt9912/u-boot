@@ -541,6 +541,70 @@ func TestUpService_TimeoutPending_RunningOnlyWithoutHealthcheckNotListed(t *test
 	}
 }
 
+func TestUpService_HealthcheckHealthy_PortUnreachable_StillStabilizedPlusWarn(t *testing.T) {
+	t.Parallel()
+	// M6-closure-review fix: LH-FA-UP-001 §968 requires TCP port
+	// probes for declared ports REGARDLESS of healthcheck presence;
+	// the slice plan §141 specifies that when healthcheck dominates
+	// (`healthy`), a probe failure emits a one-shot
+	// up.port.<service>.unreachable Warn diagnostic but MUST NOT
+	// veto stabilization.
+	f := newUpFixture(t, composePostgres)
+	f.engine.scriptUp(driven.ComposeUpResult{}, nil)
+	f.engine.scriptPsReply([]driven.ComposeService{
+		{Name: "postgres", State: "running", Health: "healthy"},
+	}, nil)
+	// Port 5432 is declared in compose.yaml; pretend it's not
+	// reachable on the host (e.g. firewall blocks the published
+	// port, or Compose dropped the binding).
+	f.probe.setResult("localhost", 5432, errors.New("connection refused"))
+
+	resp, err := f.svc.Up(context.Background(), driving.UpRequest{BaseDir: "/proj", Timeout: 60 * time.Second})
+	if err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	if !resp.Result.Stabilized {
+		t.Errorf("Stabilized = false, want true (healthcheck dominates per §141)")
+	}
+	foundWarn := false
+	for _, d := range resp.Result.Diagnostics {
+		if d.ID == "up.port.postgres.unreachable" && d.Severity == domain.SeverityWarn {
+			foundWarn = true
+		}
+	}
+	if !foundWarn {
+		t.Errorf("expected up.port.postgres.unreachable Warn diagnostic, got: %+v", resp.Result.Diagnostics)
+	}
+	// Probe should have been called.
+	if f.probe.callCount() == 0 {
+		t.Error("probe was not called for healthcheck-required service with declared port (§968 violation)")
+	}
+}
+
+func TestUpService_HealthcheckHealthy_PortReachable_StabilizedNoWarn(t *testing.T) {
+	t.Parallel()
+	// Companion pin: when the port IS reachable, no warn is emitted
+	// (idempotency + no false-positive warns).
+	f := newUpFixture(t, composePostgres)
+	f.engine.scriptUp(driven.ComposeUpResult{}, nil)
+	f.engine.scriptPsReply([]driven.ComposeService{
+		{Name: "postgres", State: "running", Health: "healthy"},
+	}, nil)
+
+	resp, err := f.svc.Up(context.Background(), driving.UpRequest{BaseDir: "/proj", Timeout: 60 * time.Second})
+	if err != nil {
+		t.Fatalf("Up: %v", err)
+	}
+	if !resp.Result.Stabilized {
+		t.Errorf("Stabilized = false, want true")
+	}
+	for _, d := range resp.Result.Diagnostics {
+		if d.ID == "up.port.postgres.unreachable" {
+			t.Errorf("unexpected unreachable warn on reachable port: %+v", d)
+		}
+	}
+}
+
 func TestUpService_HealthcheckDisableTrue_BehavesLikeNoHealthcheck(t *testing.T) {
 	t.Parallel()
 	composeDisabled := `services:

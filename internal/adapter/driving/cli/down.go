@@ -11,9 +11,13 @@ import (
 )
 
 // downFlags bundles the per-invocation flag state of `u-boot down`.
-// The local flags Volumes and Yes are CLI-only; NoInteractive and
-// Quiet are read through from the App's persistent root flags
-// (LH-FA-CLI-005 / LH-FA-CLI-005A).
+// The local flag Volumes is CLI-only; Yes / NoInteractive / Quiet
+// are read through from the App's persistent root flags
+// (LH-FA-CLI-005 / LH-FA-CLI-005A). The spec §237 explicitly names
+// `u-boot down --volumes` among the commands governed by the
+// persistent `--yes` / `--no-interactive` switches, so reusing the
+// root values keeps `u-boot --yes down --volumes` working
+// identically to `u-boot down --volumes --yes`.
 type downFlags struct {
 	Volumes        bool
 	Yes            bool
@@ -68,20 +72,20 @@ LH-NFA-PERF-002 progress: compose down phases stream to stderr live
 (unaffected by --quiet).`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
+			// LH-FA-CLI-005A §237: --yes / --no-interactive are
+			// persistent root flags that govern down --volumes
+			// (along with init, add, remove, config set). Read
+			// the parsed values into the per-invocation struct
+			// so runDown stays unit-testable without poking at
+			// global state.
+			flags.Yes = a.yes
 			flags.NoInteractive = a.noInteractive
 			flags.Quiet = a.quiet
-			// --yes is a local flag on this subcommand, NOT
-			// read-through from the root --yes flag. The root
-			// --yes/--no-interactive are general LH-FA-CLI-005A
-			// confirmation hooks; the down --yes is specific to
-			// the destructive volume-removal prompt.
 			return runDown(cmd.Context(), cmd.OutOrStdout(), cmd.ErrOrStderr(), *flags, a.downUseCase, a.getwd)
 		},
 	}
 	cmd.Flags().BoolVar(&flags.Volumes, "volumes", false,
 		"also remove named Compose volumes (data loss; LH-FA-UP-004 §1015)")
-	cmd.Flags().BoolVar(&flags.Yes, "yes", false,
-		"auto-confirm the destructive --volumes prompt (LH-FA-CLI-005A)")
 	return cmd
 }
 

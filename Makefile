@@ -38,7 +38,7 @@ DOCKER_BUILD := docker build $(PROGRESS_FLAG) \
 
 .DEFAULT_GOAL := help
 
-.PHONY: help deps compile lint test coverage coverage-gate build run clean \
+.PHONY: help deps compile lint test test-docker coverage coverage-gate build run clean \
         gates ci fullbuild govulncheck verify-depguard docs-check
 
 help: ## Show this help.
@@ -57,6 +57,17 @@ lint: ## golangci-lint with the project profile.
 
 test: ## Run `go test ./...` inside Docker.
 	$(DOCKER_BUILD) $(NO_CACHE_FILTER_TEST) --target test -t $(IMAGE):test .
+
+test-docker: ## Run docker-tagged integration tests against the host docker daemon.
+	@# The M6 docker-integrationstests carveout slice owns the CI
+	@# wiring of this target. Locally it mounts /var/run/docker.sock
+	@# so the build-tagged tests can reach the host engine; CI must
+	@# do the equivalent (DinD or shared sock) before invoking.
+	docker run --rm \
+	    -v "$(CURDIR)":/src -w /src \
+	    -v /var/run/docker.sock:/var/run/docker.sock \
+	    golang:$(GO_VERSION) \
+	    go test -tags docker ./...
 
 coverage-gate: ## Coverage threshold gate (bootstrap-aware, LH-FA-BUILD-008).
 	$(DOCKER_BUILD) $(NO_CACHE_FILTER_COVERAGE) \

@@ -100,17 +100,13 @@ type ComposeService struct {
 }
 
 // ComposeUpResult is the return value of [DockerEngine.ComposeUp].
-// It carries a snapshot of the service states taken *right after*
-// the `compose up` call returned — before the [UpService] polling
-// loop runs. The polling loop calls [DockerEngine.ComposePs]
-// directly for subsequent iterations.
-type ComposeUpResult struct {
-	// Services is the snapshot at t=0 of the polling loop. Order
-	// follows the `docker compose ps --format json` output order
-	// — the application sorts deterministically before assembling
-	// [domain.UpResult].
-	Services []ComposeService
-}
+// Carries no fields today — a post-T6 review (M6 closure) dropped
+// the original ComposeUp-internal `compose ps` snapshot to honor
+// the LH-FA-UP-001 §970 fire-and-forget contract (no `ps`
+// roundtrip after a successful `up`). The type stays so future
+// metadata (per-call timing, image-pull stats) can land without
+// another signature break; for M6 it is intentionally empty.
+type ComposeUpResult struct{}
 
 // DockerEngine is the state-mutating Compose port (M6+), separate
 // from the read-only [DockerProbe] used by M4 `doctor`. Splitting

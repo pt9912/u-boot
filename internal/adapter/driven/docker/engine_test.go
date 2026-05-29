@@ -121,20 +121,23 @@ func TestEngine_ComposeDown_AllProbesPass_Succeeds(t *testing.T) {
 	}
 }
 
-func TestEngine_ComposeUp_AllProbesPass_FailsAtPsParse(t *testing.T) {
+func TestEngine_ComposeUp_AllProbesPass_NoPostUpPsRoundtrip(t *testing.T) {
 	t.Parallel()
-	// Why: cover the post-preflight ComposeUp path including the
-	// follow-up composePs. `/bin/echo` returns 0 for `up`, then
-	// returns non-JSON for `ps`, so the parse error surfaces as
-	// ErrComposeRuntime — same classification as a stderr-only
-	// Compose failure.
+	// Why: pin the LH-FA-UP-001 §970 fire-and-forget contract at
+	// the adapter level. A successful `compose up` MUST NOT
+	// follow up with a `compose ps` roundtrip — if it did, the
+	// extra call could surface ErrComposeRuntime after the `up`
+	// itself already succeeded, leaking past the §970 guarantee.
+	//
+	// `/bin/echo` returns 0 for `up`; if the adapter had a
+	// follow-up ps it would receive non-JSON stdout and surface
+	// ErrComposeRuntime. The pin asserts the call returns nil.
 	shellBinaryAvailable(t, "/bin/echo")
 	e := docker.WithEngineBinary("/bin/echo")
 	_, err := e.ComposeUp(context.Background(), "/tmp/demo", driven.ComposeUpOptions{Detach: true})
-	if err == nil {
-		t.Fatal("expected error from non-JSON ps output after up")
+	if err != nil {
+		t.Errorf("ComposeUp must not perform a follow-up ps roundtrip; got: %v", err)
 	}
-	assertErrIs(t, err, driven.ErrComposeRuntime)
 }
 
 func TestParseComposePsOutput_Empty(t *testing.T) {

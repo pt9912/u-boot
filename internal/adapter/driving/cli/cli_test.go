@@ -1280,6 +1280,28 @@ func TestExecute_Down_VolumesConfirmRefused_ReturnsExitCode10(t *testing.T) {
 	}
 }
 
+func TestExecute_Down_RootYesBeforeSubcmd_BypassesConfirm(t *testing.T) {
+	t.Parallel()
+	// M6-closure-review fix #2: spec §237 lists `u-boot down
+	// --volumes` among the commands governed by the persistent
+	// --yes / --no-interactive root flags. Pin that `u-boot --yes
+	// down --volumes` (root flag BEFORE subcommand) behaves
+	// identically to `u-boot down --volumes --yes` (root flag
+	// AFTER subcommand) — Cobra propagates persistent flags either
+	// way, and the down subcommand must read a.yes, not a local
+	// --yes flag.
+	uc := &fakeDownUseCase{resp: driving.DownResponse{RemovedVolumes: true}}
+	getwd := func() (string, error) { return "/tmp/proj", nil }
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDown(uc, cli.WithGetwd(getwd)).Execute(context.Background(), []string{"--yes", "down", "--volumes"}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("--yes down --volumes: %v", err)
+	}
+	if !uc.lastReq.AssumeYes {
+		t.Errorf("AssumeYes = false; root --yes did not flow through to DownRequest")
+	}
+}
+
 func TestExecute_Down_YesAndNoInteractive_ReturnsExitCode2(t *testing.T) {
 	t.Parallel()
 	// §235 mutual exclusion fires before the use case.
