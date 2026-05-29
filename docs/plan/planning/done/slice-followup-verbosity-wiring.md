@@ -1,5 +1,7 @@
 # Slice Follow-up: `--verbose` / `--debug` zum Logger-Level verdrahten
 
+> **Status:** Done — verbosity-wiring landet im M6-Closure-Pflegezyklus.
+
 ## Auslöser
 
 `LH-FA-CLI-005` schreibt vier Verbosity-Stufen vor: `--quiet`,

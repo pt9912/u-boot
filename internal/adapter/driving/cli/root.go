@@ -1,6 +1,10 @@
 package cli
 
-import "github.com/spf13/cobra"
+import (
+	"log/slog"
+
+	"github.com/spf13/cobra"
+)
 
 // buildRootCommand assembles the root `u-boot` command with every
 // subcommand registered. Kept in its own file (separate from
@@ -37,17 +41,44 @@ See spec/lastenheft.md for the full functional specification.`,
 		"abort on any required confirmation: exit 2 for ordinary prompts, exit 10 for destructive ops like `down --volumes` (LH-FA-CLI-005A §245/§254); exclusive with --yes")
 
 	// LH-FA-CLI-005 verbosity flags. Persistent so subcommands read
-	// a single source of truth. Today `--quiet` is load-bearing for
-	// the doctor subcommand (filters SeverityOK items from the
-	// rendered report); `--verbose` / `--debug` are accepted per
-	// spec but currently emit no additional output (logger-level
-	// wiring is a follow-up).
+	// a single source of truth. --quiet is load-bearing for the
+	// doctor subcommand (filters SeverityOK items from the rendered
+	// report) and the up/down subcommands (suppress status table /
+	// success message). --quiet / --verbose / --debug also raise
+	// or lower the logger level via the PersistentPreRunE below.
 	root.PersistentFlags().BoolVar(&a.quiet, "quiet", false,
-		"reduce output to errors only (LH-FA-CLI-005)")
+		"reduce output to errors only; logger drops Info entries (LH-FA-CLI-005)")
 	root.PersistentFlags().BoolVar(&a.verbose, "verbose", false,
-		"show additional detail (LH-FA-CLI-005)")
+		"show additional detail; logger emits Debug entries (LH-FA-CLI-005)")
 	root.PersistentFlags().BoolVar(&a.debug, "debug", false,
-		"show internal diagnostic output (LH-FA-CLI-005)")
+		"show internal diagnostic output; logger emits Debug entries (LH-FA-CLI-005)")
+
+	// LH-FA-CLI-005 verbosity → slog level wiring. Runs after Cobra
+	// has parsed flags, before the subcommand's RunE. The LevelVar
+	// instance is shared with the logger adapter (wired in
+	// cmd/uboot/main.go), so the Set call here changes the level of
+	// every Logger.Debug/Info/... call that follows.
+	//
+	// Precedence: --debug > --verbose > --quiet > default(Info).
+	// --debug and --verbose both map to LevelDebug today; a future
+	// slice can introduce a Verbose-only level if a service-specific
+	// pegel between Info and Debug becomes useful.
+	root.PersistentPreRunE = func(*cobra.Command, []string) error {
+		if a.logLevel == nil {
+			return nil
+		}
+		switch {
+		case a.debug:
+			a.logLevel.Set(slog.LevelDebug)
+		case a.verbose:
+			a.logLevel.Set(slog.LevelDebug)
+		case a.quiet:
+			a.logLevel.Set(slog.LevelWarn)
+		default:
+			a.logLevel.Set(slog.LevelInfo)
+		}
+		return nil
+	}
 
 	root.AddCommand(newInitCommand(a))
 	root.AddCommand(newDoctorCommand(a))

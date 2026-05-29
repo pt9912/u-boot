@@ -25,7 +25,6 @@ Spalten:
 | `LH-OPEN-003` Plugin-System ist offen (`spec/lastenheft.md` §14, auch `spec/architecture.md` §7 als „geplante Erweiterung") — keine Entscheidung zwischen fest-eingebauten Add-ons und nachladbaren Plugins | temporär | [`open/slice-v1-plugin-system-entscheidung.md`](../open/slice-v1-plugin-system-entscheidung.md) |
 | `LH-OPEN-004` Template-Format ist offen (`spec/lastenheft.md` §14) — YAML+Dateien vs. Cookiecutter vs. eigenes Format vs. OCI-Pakete | temporär | [`open/slice-v1-template-format-entscheidung.md`](../open/slice-v1-template-format-entscheidung.md) |
 | HTTP-Driving-Adapter ist als „geplante Erweiterung" in `spec/architecture.md` §7 erwähnt, aber nicht spezifiziert oder gefordert | temporär | [`open/slice-later-http-driving-adapter.md`](../open/slice-later-http-driving-adapter.md) |
-| `--verbose` / `--debug` (LH-FA-CLI-005) sind als persistente Cobra-Flags akzeptiert, aber nicht zum Logger-Level verdrahtet (`internal/adapter/driving/cli/root.go`; `cmd/uboot/main.go` konstruiert den Logger fix auf `slog.LevelInfo`). M4-T7 hat den Spec-Pflicht-Flag-Layer eingebaut; die Effekt-Verkabelung ist eigener Slice. | temporär | [`open/slice-followup-verbosity-wiring.md`](../open/slice-followup-verbosity-wiring.md) |
 
 ## Permanente Carveouts (kein Plan, im Inventar dokumentiert)
 

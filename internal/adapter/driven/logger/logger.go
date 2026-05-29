@@ -42,7 +42,15 @@ var _ driven.Logger = (*slogLogger)(nil)
 // sink (typically `os.Stderr`); `format` selects text vs JSON;
 // `level` is the minimum slog level emitted — entries below it are
 // dropped at the handler level (no string formatting cost).
-func New(out io.Writer, format Format, level slog.Level) driven.Logger {
+//
+// `level` is a [slog.Leveler] so the wiring layer can pass a
+// `*slog.LevelVar` that mutates after construction. The
+// LH-FA-CLI-005 verbosity flags (`--quiet` / `--verbose` /
+// `--debug`) flip the LevelVar from `PersistentPreRunE` in the
+// driving adapter — see `slice-followup-verbosity-wiring`.
+// Passing a bare `slog.Level` (e.g. `slog.LevelInfo`) still works
+// because `Level` itself satisfies `Leveler`.
+func New(out io.Writer, format Format, level slog.Leveler) driven.Logger {
 	opts := &slog.HandlerOptions{Level: level}
 	var handler slog.Handler
 	switch format {

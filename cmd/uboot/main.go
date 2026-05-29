@@ -61,11 +61,14 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// facing UI, not machine-readable output) and reads stdin for the
 	// answer — LH-FA-INIT-004 soft-existing-detection.
 	confirmAdapter := confirm.New(os.Stdin, stderr)
-	// The logger adapter (LH-QA-004) renders to stderr at Info level
-	// in text form by default. `--verbose` / `--json` flag wiring
-	// arrives with the M4 doctor slice; for M3+M4-soft-detection
-	// runs the logger emits only when something goes wrong.
-	logAdapter := logger.New(stderr, logger.FormatText, slog.LevelInfo)
+	// The logger adapter (LH-QA-004) renders to stderr in text form
+	// by default, at a level mutable via *slog.LevelVar so the
+	// LH-FA-CLI-005 verbosity flags can flip it from
+	// PersistentPreRunE. Default Info; --debug / --verbose raise to
+	// Debug, --quiet lowers to Warn.
+	logLevel := new(slog.LevelVar)
+	logLevel.Set(slog.LevelInfo)
+	logAdapter := logger.New(stderr, logger.FormatText, logLevel)
 	// The docker probe (LH-FA-DIAG-002) shells out to `docker` for
 	// read-only diagnostics (version + reachability + compose version).
 	// Used by the doctor service; M6's DockerEngine port stays separate.
@@ -100,7 +103,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	downSvc := application.NewDownService(fsAdapter, dockerEngineAdapter, confirmAdapter, logAdapter)
 
 	// Driving adapter (CLI).
-	app := cli.New(version, initSvc, doctorSvc, addSvc, upSvc, downSvc)
+	app := cli.New(version, initSvc, doctorSvc, addSvc, upSvc, downSvc, cli.WithLogLevel(logLevel))
 
 	err := app.Execute(ctx, args, stdout, stderr)
 	if err != nil {

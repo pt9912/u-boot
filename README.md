@@ -62,7 +62,7 @@ planning is tracked under
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
 | Architecture decisions | 6 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
 | Implementation | M1–M6 ✅, M7 next (`generate`) | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
-| Carveouts | 7 temporär (6 mit Slice-Plan, 1 Slice deckt 2), 8 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
+| Carveouts | 6 temporär (5 Slice-Pläne, 1 Slice deckt 2), 8 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
 

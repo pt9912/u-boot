@@ -14,6 +14,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -64,13 +65,21 @@ type App struct {
 	noInteractive bool
 
 	// quiet, verbose, debug are bound to the LH-FA-CLI-005 root
-	// PersistentFlags. The doctor subcommand reads --quiet to filter
-	// SeverityOK items from the rendered report. --verbose / --debug
-	// are accepted per spec but currently do not change the doctor
-	// output (logger-level wiring is a follow-up).
+	// PersistentFlags. --quiet additionally filters SeverityOK
+	// items from the doctor render and suppresses the up status
+	// table / down success message. --verbose and --debug both
+	// raise the logger level to Debug via buildRootCommand's
+	// PersistentPreRunE; --quiet lowers it to Warn.
 	quiet   bool
 	verbose bool
 	debug   bool
+
+	// logLevel is the slog level handle the wiring layer also
+	// shares with the logger adapter. PersistentPreRunE flips it
+	// based on the verbosity flags. Optional — nil-tolerant so
+	// tests that do not need level-switching can omit
+	// [WithLogLevel].
+	logLevel *slog.LevelVar
 }
 
 // Option mutates an [App] during [New]; the Go-idiomatic functional-
@@ -82,6 +91,18 @@ type Option func(*App)
 // tests; production callers use [New] without options.
 func WithGetwd(fn func() (string, error)) Option {
 	return func(a *App) { a.getwd = fn }
+}
+
+// WithLogLevel hands the App a [*slog.LevelVar] that
+// [buildRootCommand]'s PersistentPreRunE mutates from the
+// LH-FA-CLI-005 verbosity flags. The wiring layer creates the
+// LevelVar at the same point it constructs the logger adapter and
+// passes the same instance to both — so the level change applies
+// across every Logger.Debug/Info/Warn call. nil is allowed (the
+// switching becomes a no-op); tests that do not exercise the level
+// path can omit this option.
+func WithLogLevel(level *slog.LevelVar) Option {
+	return func(a *App) { a.logLevel = level }
 }
 
 // New constructs an App. The version string and every use-case
