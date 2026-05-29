@@ -22,3 +22,9 @@ func New() *Clock { return &Clock{} }
 // generated artefacts (CHANGELOG date stamps, backup timestamps) are
 // not affected by the host's local timezone.
 func (Clock) Now() time.Time { return time.Now().UTC() }
+
+// Sleep delegates to time.Sleep. A non-positive duration is a no-op
+// per time.Sleep's contract, which is the right behaviour for the
+// M6 polling loop (a zero or negative interval just retries
+// immediately instead of panicking).
+func (Clock) Sleep(d time.Duration) { time.Sleep(d) }

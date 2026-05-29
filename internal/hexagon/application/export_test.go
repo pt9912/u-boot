@@ -5,6 +5,25 @@ import (
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 )
 
+// PortProbeTargetForTest is the test-package-visible view of the
+// internal portProbeTarget produced by [parseComposePort] (M6-T4-
+// fund). Same shape — only renamed because the internal type is
+// unexported and the bridge convention prefers a distinct exported
+// name over an alias.
+type PortProbeTargetForTest struct {
+	Host string
+	Port int
+}
+
+// ParseComposePortForTest exposes the package-internal
+// parseComposePort helper (M6-T4-fund) to external _test packages
+// so the eight Compose port-syntax cases can be table-tested
+// without going through a full Up() run.
+func ParseComposePortForTest(raw any) (PortProbeTargetForTest, bool) {
+	t, probable := parseComposePort(raw)
+	return PortProbeTargetForTest(t), probable
+}
+
 // RenderManagedBlockOnlyForTest exposes the package-internal
 // renderManagedBlockOnly helper (M5-T4a) to external _test packages
 // so the programmer-error paths (template-missing-marker, malformed)
