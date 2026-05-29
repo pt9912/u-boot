@@ -94,6 +94,32 @@ func TestProbe_DialTCP_CtxDeadlineAlreadyExceeded_ReturnsDeadlineErr(t *testing.
 	}
 }
 
+func TestProbe_DialTCP_CtxCancelledMidDial_UnwrapsToCtxError(t *testing.T) {
+	t.Parallel()
+	// Why: pin the mid-dial-cancel path explicitly. The
+	// "already-cancelled-before-dial" pin upstream covers the
+	// trivial case (DialContext short-circuits on ctx.Err() at
+	// entry). The harder case is: ctx is cancelled *while*
+	// DialContext is blocking on a slow connect. The error
+	// returned by DialContext is a *net.OpError wrapping
+	// ctx.Err(), and the M6-slice contract requires that
+	// errors.Is(err, context.Canceled) traverses that wrap.
+	//
+	// Setup: dial RFC-5737 TEST-NET-1 with a long Dialer.Timeout;
+	// the ctx is cancelled from a goroutine ~10ms later so the
+	// cancel happens mid-dial, not at entry.
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		cancel()
+	}()
+	p := netprobe.New()
+	err := p.DialTCP(ctx, "192.0.2.1", 80, 5*time.Second)
+	if !errors.Is(err, context.Canceled) {
+		t.Errorf("mid-dial cancel: expected errors.Is(err, context.Canceled), got: %v (type %T)", err, err)
+	}
+}
+
 func TestProbe_DialTCP_Timeout_ReturnsError(t *testing.T) {
 	t.Parallel()
 	// Why: pin the timeout path. RFC-5737 reserves 192.0.2.0/24 as

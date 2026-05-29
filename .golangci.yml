@@ -198,7 +198,7 @@ linters:
             - '**/internal/hexagon/application/**'
           deny:
             - pkg: net
-              desc: application must not depend on net stdlib — use port/driven.NetProbe (LH-FA-ARCH-003)
+              desc: application must not depend on net stdlib (the rule blocks the entire net/* family — net, net/http, net/url, net/textproto, …) — use port/driven.NetProbe for TCP-reachability and a future HTTP-driving-adapter slice for HTTP (LH-FA-ARCH-003)
 
         port-no-application:
           list-mode: lax
