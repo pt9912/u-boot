@@ -1,7 +1,7 @@
 # Slice M6: Docker-Integrationstests (Build-Tag-Pfad)
 
-> **Status:** In progress (Sub-Tranchen)
-> **DoD:** Sub-T1 ✅ `ab9ff4a` (+ review `d5ac2c3`) / Sub-T2 ✅ `bcd8486` (+ review `6416d68`) / Sub-T3 ⏳ / Sub-T4 ⏳ / Stabilisierung (3× grün, `continue-on-error: false`) ⏳
+> **Status:** Stabilisierung pending (Sub-T1..T4 implementiert)
+> **DoD:** Sub-T1 ✅ `ab9ff4a` (+ review `d5ac2c3`) / Sub-T2 ✅ `bcd8486` (+ review `6416d68`) / Sub-T3 ✅ `b537929` / Sub-T4 ✅ `b537929` (gemeinsamer Commit) / Stabilisierung (3× grün auf main, `continue-on-error: false`) ⏳
 
 ## Sub-Tranchen-Schnitt
 
