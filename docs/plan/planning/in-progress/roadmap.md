@@ -51,7 +51,7 @@ Disziplin-Verstoß.
 
 ## Nächste Schritte
 
-1. **M6 up/down**: **In progress** (siehe [`slice-m6-up-down.md`](slice-m6-up-down.md)). Slice-Plan in `in-progress/`, review-gehärtet (vier Review-Runden: Sentinel-Schichtung mit `errors.Is`-Durchleitung, `containerState`-Enum mit Dead-Allowlist + soft-unknown, `--timeout=0` fire-and-forget mit Triple-Pin, Restart-Loop-Counter, robustes Compose-Port-Parsing, §235-vs-§254-CLI-Pfade getrennt). Aktive Tranche: **T1** (Domain-Types + Driving-Ports + Sentinels).
+1. **M6 up/down**: **In progress** (siehe [`slice-m6-up-down.md`](slice-m6-up-down.md)). Slice-Plan in `in-progress/`, review-gehärtet (vier Review-Runden: Sentinel-Schichtung mit `errors.Is`-Durchleitung, `containerState`-Enum mit Dead-Allowlist + soft-unknown, `--timeout=0` fire-and-forget mit Triple-Pin, Restart-Loop-Counter, robustes Compose-Port-Parsing, §235-vs-§254-CLI-Pfade getrennt). Stand: T1 ✅ (`9f8badd`, Domain + Driving-Ports + Sentinels, Coverage 90.70%). Aktive Tranche: **T2** (DockerEngine Driven-Port + Adapter + Fake).
 
 ## Lifecycle-Hinweis
 
