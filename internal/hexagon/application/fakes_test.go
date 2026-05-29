@@ -721,9 +721,12 @@ func (p *fakeDockerProbe) ComposeVersion(_ context.Context) (string, error) {
 // (the "no" default of the soft-detection prompt) so a freshly
 // constructed instance models a deterministic "user declined".
 type fakeConfirmer struct {
-	calls  []fakeConfirmerCall
-	answer bool
-	err    error
+	calls               []fakeConfirmerCall
+	answer              bool
+	err                 error
+	removeVolumesCalls  []fakeConfirmerRemoveVolumesCall
+	removeVolumesAnswer bool
+	removeVolumesErr    error
 }
 
 type fakeConfirmerCall struct {
@@ -731,9 +734,18 @@ type fakeConfirmerCall struct {
 	Indicators []string
 }
 
+type fakeConfirmerRemoveVolumesCall struct {
+	BaseDir string
+}
+
 func (c *fakeConfirmer) ConfirmTreatAsExisting(_ context.Context, baseDir string, indicators []string) (bool, error) {
 	c.calls = append(c.calls, fakeConfirmerCall{BaseDir: baseDir, Indicators: append([]string{}, indicators...)})
 	return c.answer, c.err
+}
+
+func (c *fakeConfirmer) ConfirmRemoveVolumes(_ context.Context, baseDir string) (bool, error) {
+	c.removeVolumesCalls = append(c.removeVolumesCalls, fakeConfirmerRemoveVolumesCall{BaseDir: baseDir})
+	return c.removeVolumesAnswer, c.removeVolumesErr
 }
 
 // fakeLogger records every Debug/Info/Warn/Error call so tests can
@@ -851,6 +863,13 @@ func (e *fakeDockerEngine) scriptUp(result driven.ComposeUpResult, err error) {
 	defer e.mu.Unlock()
 	e.up = composeUpReply{result: result, err: err}
 	e.upSet = true
+}
+
+func (e *fakeDockerEngine) scriptDown(err error) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.down = err
+	e.downSet = true
 }
 
 // scriptPsReply queues one reply for an upcoming ComposePs call.

@@ -62,3 +62,28 @@ func (c *Confirmer) ConfirmTreatAsExisting(_ context.Context, baseDir string, in
 	answer := strings.TrimSpace(strings.ToLower(scanner.Text()))
 	return answer == "y" || answer == "yes", nil
 }
+
+// ConfirmRemoveVolumes renders the LH-FA-CLI-005A §254 destructive-
+// confirmation prompt for `u-boot down --volumes`. Defaults to `N`
+// because confirming "yes" deletes named Compose volumes (typically
+// persistent service data — Postgres tables, Redis snapshots).
+//
+// Mirrors [ConfirmTreatAsExisting]'s parsing rules: accepts `y` /
+// `yes` (case-insensitive) as confirmation; anything else
+// (including EOF, empty line, "no") is "no". A read error other
+// than EOF surfaces to the caller.
+func (c *Confirmer) ConfirmRemoveVolumes(_ context.Context, baseDir string) (bool, error) {
+	fmt.Fprintf(c.out, "About to remove all named Compose volumes in %s.\n", baseDir)
+	fmt.Fprint(c.out, "Data in these volumes will be PERMANENTLY DELETED. Proceed? [y/N] ")
+
+	scanner := bufio.NewScanner(c.in)
+	if !scanner.Scan() {
+		if err := scanner.Err(); err != nil {
+			return false, fmt.Errorf("read confirmation: %w", err)
+		}
+		// EOF without input → take the default (N).
+		return false, nil
+	}
+	answer := strings.TrimSpace(strings.ToLower(scanner.Text()))
+	return answer == "y" || answer == "yes", nil
+}
