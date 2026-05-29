@@ -129,4 +129,4 @@ if [ $failures -ne 0 ]; then
   exit 1
 fi
 
-echo "[verify-depguard] all 8 depguard rules verified — logs in $LOG_DIR"
+echo "[verify-depguard] all ${#CASES[@]} depguard rules verified — logs in $LOG_DIR"

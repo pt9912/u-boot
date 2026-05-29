@@ -51,7 +51,7 @@ Disziplin-Verstoß.
 
 ## Nächste Schritte
 
-1. **M6 up/down**: **In progress** (siehe [`slice-m6-up-down.md`](slice-m6-up-down.md)). Slice-Plan in `in-progress/`, review-gehärtet (vier Review-Runden: Sentinel-Schichtung mit `errors.Is`-Durchleitung, `containerState`-Enum mit Dead-Allowlist + soft-unknown, `--timeout=0` fire-and-forget mit Triple-Pin, Restart-Loop-Counter, robustes Compose-Port-Parsing, §235-vs-§254-CLI-Pfade getrennt). Stand: T1 ✅ (`9f8badd`, Domain + Driving-Ports + Sentinels), T2 ✅ (`84a676c`, DockerEngine driven-port + Adapter mit preflight-Klassifikation, Coverage 90.90%). Aktive Tranche: **T3** (NetProbe driven-port + Adapter + Fake).
+1. **M6 up/down**: **In progress** (siehe [`slice-m6-up-down.md`](slice-m6-up-down.md)). Slice-Plan in `in-progress/`, review-gehärtet (vier Review-Runden: Sentinel-Schichtung mit `errors.Is`-Durchleitung, `containerState`-Enum mit Dead-Allowlist + soft-unknown, `--timeout=0` fire-and-forget mit Triple-Pin, Restart-Loop-Counter, robustes Compose-Port-Parsing, §235-vs-§254-CLI-Pfade getrennt). Stand: T1 ✅ (`9f8badd`, Domain + Driving-Ports + Sentinels), T2 ✅ (`84a676c`, DockerEngine driven-port + Adapter mit preflight-Klassifikation), T3 ✅ (`1e5ef18`, NetProbe driven-port + Adapter + application-no-net depguard, alle 9 Regeln verifiziert). Aktive Tranche: **T4** (UpService + Stabilisierungs-Polling + fakeNetProbe).
 
 ## Lifecycle-Hinweis
 

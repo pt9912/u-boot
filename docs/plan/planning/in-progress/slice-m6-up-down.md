@@ -1,7 +1,7 @@
 # Slice M6: `u-boot up` / `u-boot down`-Flow
 
 > **Status:** In progress
-> **DoD:** T1 ✅ `9f8badd` / T2 ✅ `84a676c` / T3 ⏳ / T4 ⏳ / T5 ⏳ / T6 ⏳ / T7 ⏳
+> **DoD:** T1 ✅ `9f8badd` / T2 ✅ `84a676c` / T3 ✅ `1e5ef18` / T4 ⏳ / T5 ⏳ / T6 ⏳ / T7 ⏳
 
 ## Auslöser
 
