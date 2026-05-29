@@ -208,7 +208,7 @@ returnt direkt nach erfolgreichem `ComposeUp` mit
 `UpResult{Services: nil, Stabilized: false, Diagnostics:
 [{ID: "up.fire-and-forget", Severity: SeverityInfo}]}`. Die
 LH-FA-UP-003-Statusanzeige entfällt in diesem Modus per Spec
-(LH-FA-UP-001 §971 ist die explizite Ausnahme zu §988); CLI
+(LH-FA-UP-001 §970 ist die explizite Ausnahme zu §988); CLI
 rendert statt der Service-Tabelle nur die Info-Diagnose-Zeile.
 Dieser Pfad ist an **drei** Stellen test-gepinnt, damit
 zukünftige Implementierungen nicht versehentlich auf einen
@@ -501,7 +501,7 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
         Hint: "run `u-boot doctor` or `docker compose ps` for
         live status",
         }}}}, nil`.
-        - **Begründung (Spec-Treue):** `LH-FA-UP-001` §971 sagt
+        - **Begründung (Spec-Treue):** `LH-FA-UP-001` §970 sagt
           „Mit `--timeout=0` wird auf das Warten verzichtet; `up`
           beendet nach Initiierung der Compose-Aktionen." Ein
           zusätzlicher `engine.ComposePs`-Call wäre ein
@@ -517,7 +517,7 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
           nur als Konsequenz aus dem Default-Stabilisierungs-Pfad.
           Im `--timeout=0`-Modus ist Status per Definition nicht
           verfügbar (kein Polling) — die Spec-Forderung kollidiert
-          nicht logisch, weil §971 die explizite Ausnahme ist. Der
+          nicht logisch, weil §970 die explizite Ausnahme ist. Der
           `up.fire-and-forget`-Diagnose-Eintrag (`SeverityInfo`,
           neue Severity-Variante in M4-`domain.Diagnostic` —
           falls noch nicht vorhanden, in T1 ergänzen) macht den

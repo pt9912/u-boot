@@ -36,7 +36,7 @@ type UpRequest struct {
 	//   - Timeout == 0: fire-and-forget. The use case returns
 	//     immediately after a successful `ComposeUp`, with no
 	//     `ComposePs` roundtrip and no port/healthcheck probes
-	//     (LH-FA-UP-001 §971). The result carries a single
+	//     (LH-FA-UP-001 §970). The result carries a single
 	//     `up.fire-and-forget` [domain.SeverityInfo] diagnostic.
 	//   - Timeout < 0: validation error. The use case returns a
 	//     non-sentinel error before any Compose call; the CLI maps
