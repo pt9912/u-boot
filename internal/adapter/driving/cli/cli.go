@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
+	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
@@ -45,6 +46,12 @@ type App struct {
 	// addServiceUseCase implements `u-boot add <service>`
 	// (LH-FA-ADD-001..002, LH-FA-ADD-005).
 	addServiceUseCase driving.AddServiceUseCase
+
+	// upUseCase implements `u-boot up` (LH-FA-UP-001..003).
+	upUseCase driving.UpUseCase
+
+	// downUseCase implements `u-boot down` (LH-FA-UP-004).
+	downUseCase driving.DownUseCase
 
 	// getwd is the working-directory probe; defaults to os.Getwd.
 	// Tests inject a fake via [WithGetwd] so they do not depend on
@@ -80,12 +87,14 @@ func WithGetwd(fn func() (string, error)) Option {
 // New constructs an App. The version string and every use-case
 // implementation must be non-nil at call time; the CLI package
 // trusts the wiring layer to honor that.
-func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, addUC driving.AddServiceUseCase, opts ...Option) *App {
+func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, addUC driving.AddServiceUseCase, upUC driving.UpUseCase, downUC driving.DownUseCase, opts ...Option) *App {
 	a := &App{
 		version:           version,
 		initUseCase:       initUC,
 		doctorUseCase:     doctorUC,
 		addServiceUseCase: addUC,
+		upUseCase:         upUC,
+		downUseCase:       downUC,
 		getwd:             os.Getwd,
 	}
 	for _, opt := range opts {
@@ -114,6 +123,15 @@ func (a *App) Execute(ctx context.Context, args []string, stdout, stderr io.Writ
 // flags; they are pure CLI-level mode switches.
 var ErrConflictingModeFlags = errors.New("--yes and --no-interactive are mutually exclusive")
 
+// ErrInvalidTimeout is returned by the M6 up subcommand when
+// `--timeout` is a negative integer (LH-FA-UP-001 §965). The CLI
+// could not delegate that validation to the application service —
+// the application takes a `time.Duration` and could not distinguish
+// a deliberate negative value from a unit-mistake-mismatch — so the
+// rejection happens at the CLI before construction of the request.
+// Maps to LH-FA-CLI-006 exit code 2.
+var ErrInvalidTimeout = errors.New("--timeout must be >= 0")
+
 // ErrDoctorFailures signals that `u-boot doctor` ran successfully
 // (use-case returned no error) but the diagnostic report contained
 // at least one SeverityError item — or at least one SeverityWarn
@@ -130,7 +148,7 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 //   - 0  — no error
 //   - 2  — pure CLI / flag errors (unknown subcommand, unknown flag,
 //          missing required arg, too many positional args,
-//          ErrConflictingModeFlags)
+//          ErrConflictingModeFlags, M6 `--timeout=-1`)
 //   - 10 — fachlicher Validierungsfehler: LH-FA-INIT-004 marker
 //          collisions (ErrProjectExists), non-marker file collision
 //          (ErrFileExists), LH-FA-INIT-006 invalid project name
@@ -142,10 +160,17 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 //          LH-FA-ADD-001 missing u-boot.yaml
 //          (ErrProjectNotInitialized), LH-FA-ADD-002 unknown
 //          service (ErrServiceUnsupported), LH-FA-ADD-005
-//          inconsistent service state (ErrServiceInconsistent)
-//   - 11 — `u-boot doctor` reported at least one SeverityError, or
-//          at least one SeverityWarn with `--strict`
-//          (ErrDoctorFailures, LH-FA-DIAG-003).
+//          inconsistent service state (ErrServiceInconsistent),
+//          M6 missing compose.yaml (ErrComposeFileMissing) and
+//          destructive confirmation refused (ErrConfirmationRequired)
+//   - 11 — fachlicher Umgebungsfehler: `u-boot doctor` reported at
+//          least one SeverityError, or at least one SeverityWarn
+//          with `--strict` (ErrDoctorFailures, LH-FA-DIAG-003);
+//          M6 `u-boot up`/`down` saw a Docker-environment failure
+//          before the actual Compose call (driven.ErrDockerUnavailable)
+//   - 12 — fachlicher Ausführungsfehler (M6): Compose-runtime error
+//          after passing preflight (driven.ErrComposeRuntime) or
+//          stabilization timeout (driving.ErrStabilizationTimeout)
 //   - 14 — technischer Persistenz-/Dateisystemfehler: LH-FA-INIT-005
 //          backup-suffix exhausted (ErrBackupSuffixExhausted),
 //          backup source vanished mid-flight
@@ -157,13 +182,26 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 // the application use-cases — the application layer returns
 // sentinel errors and lets the adapter translate.
 //
-// Codes 12/13/15 (runtime, devcontainer, generic technical errors)
-// are added by later slices that introduce the corresponding
-// use-case sentinels (`u-boot up`/`down` for 12).
+// Sentinel-Reihenfolge in der Klassifikation (slice plan §T7
+// §Sentinel-Schichtung): Driven-Sentinels werden ZUERST geprüft
+// (driven.ErrDockerUnavailable / driven.ErrComposeRuntime), erst
+// danach die Driving-/Application-Sentinels. Sentinels überschneiden
+// sich nicht; die Reihenfolge folgt der Schicht-Hierarchie.
 func ExitCode(err error) int {
 	if err == nil {
 		return 0
 	}
+	// Driven-port sentinels first (M6 slice §Sentinel-Schichtung).
+	if errors.Is(err, driven.ErrDockerUnavailable) {
+		return 11
+	}
+	if errors.Is(err, driven.ErrComposeRuntime) {
+		return 12
+	}
+	if errors.Is(err, driving.ErrStabilizationTimeout) {
+		return 12
+	}
+	// Driving / application sentinels.
 	if isValidationError(err) {
 		return 10
 	}
@@ -192,6 +230,8 @@ func isValidationError(err error) bool {
 		errors.Is(err, driving.ErrProjectNotInitialized) ||
 		errors.Is(err, driving.ErrServiceUnsupported) ||
 		errors.Is(err, driving.ErrServiceInconsistent) ||
+		errors.Is(err, driving.ErrComposeFileMissing) ||
+		errors.Is(err, driving.ErrConfirmationRequired) ||
 		errors.Is(err, domain.ErrInvalidProjectName) ||
 		errors.Is(err, domain.ErrInvalidServiceName)
 }
@@ -231,7 +271,7 @@ func isUsageError(err error) bool {
 		return false
 	}
 	// (a) u-boot CLI sentinels.
-	if errors.Is(err, ErrConflictingModeFlags) {
+	if errors.Is(err, ErrConflictingModeFlags) || errors.Is(err, ErrInvalidTimeout) {
 		return true
 	}
 	// (b) Cobra usage-error string prefixes.

@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/pt9912/u-boot/internal/adapter/driving/cli"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
+	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
@@ -62,19 +64,60 @@ func (f *fakeAddServiceUseCase) Add(_ context.Context, req driving.AddServiceReq
 	return f.resp, f.err
 }
 
+// fakeUpUseCase records the last UpRequest and returns the
+// configured response/error. Zero-value yields a stabilized
+// empty-services response — a noop stub for unrelated tests.
+type fakeUpUseCase struct {
+	called  bool
+	lastReq driving.UpRequest
+	resp    driving.UpResponse
+	err     error
+}
+
+func (f *fakeUpUseCase) Up(_ context.Context, req driving.UpRequest) (driving.UpResponse, error) {
+	f.called = true
+	f.lastReq = req
+	return f.resp, f.err
+}
+
+// fakeDownUseCase records the last DownRequest and returns the
+// configured response/error.
+type fakeDownUseCase struct {
+	called  bool
+	lastReq driving.DownRequest
+	resp    driving.DownResponse
+	err     error
+}
+
+func (f *fakeDownUseCase) Down(_ context.Context, req driving.DownRequest) (driving.DownResponse, error) {
+	f.called = true
+	f.lastReq = req
+	return f.resp, f.err
+}
+
 func newApp(uc driving.InitProjectUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", uc, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, opts...)
+	return cli.New("0.0.0-test", uc, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, opts...)
 }
 
 // newAppWithDoctor is newApp's variant for doctor-focused tests; the
 // caller can wire a fake DoctorUseCase explicitly.
 func newAppWithDoctor(uc driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", uc, doctorUC, &fakeAddServiceUseCase{}, opts...)
+	return cli.New("0.0.0-test", uc, doctorUC, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, opts...)
 }
 
 // newAppWithAdd is newApp's variant for add-focused tests.
 func newAppWithAdd(uc driving.AddServiceUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, uc, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, uc, &fakeUpUseCase{}, &fakeDownUseCase{}, opts...)
+}
+
+// newAppWithUp is newApp's variant for `u-boot up`-focused tests.
+func newAppWithUp(uc driving.UpUseCase, opts ...cli.Option) *cli.App {
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, uc, &fakeDownUseCase{}, opts...)
+}
+
+// newAppWithDown is newApp's variant for `u-boot down`-focused tests.
+func newAppWithDown(uc driving.DownUseCase, opts ...cli.Option) *cli.App {
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, uc, opts...)
 }
 
 func mustProjectName(t *testing.T, raw string) domain.ProjectName {
@@ -1064,4 +1107,196 @@ func mustServiceName(t *testing.T, raw string) domain.ServiceName {
 		t.Fatalf("NewServiceName(%q): %v", raw, err)
 	}
 	return name
+}
+
+// --- M6-T7 up subcommand pin tests ---
+
+func TestExecute_Up_HappyPath_RendersStatusTable(t *testing.T) {
+	t.Parallel()
+	uc := &fakeUpUseCase{
+		resp: driving.UpResponse{Result: domain.UpResult{
+			Stabilized: true,
+			Services: []domain.ServiceStatus{
+				{Name: "postgres", ContainerStatus: domain.StateRunning, Port: "5432:5432", Healthcheck: "healthy"},
+			},
+		}},
+	}
+	getwd := func() (string, error) { return "/tmp/proj", nil }
+	var stdout, stderr bytes.Buffer
+	err := newAppWithUp(uc, cli.WithGetwd(getwd)).Execute(context.Background(), []string{"up"}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("up: %v", err)
+	}
+	if !uc.called {
+		t.Error("use-case not called")
+	}
+	// Default --timeout=60 → 60s.
+	if uc.lastReq.Timeout != 60*time.Second {
+		t.Errorf("Timeout = %v, want 60s (default)", uc.lastReq.Timeout)
+	}
+	out := stdout.String()
+	if !strings.Contains(out, "postgres") || !strings.Contains(out, "healthy") {
+		t.Errorf("expected status table to render service row, got: %q", out)
+	}
+}
+
+func TestExecute_Up_Timeout0_PassesFireAndForget(t *testing.T) {
+	t.Parallel()
+	uc := &fakeUpUseCase{
+		resp: driving.UpResponse{Result: domain.UpResult{
+			Stabilized: false,
+			Diagnostics: []domain.Diagnostic{
+				{ID: "up.fire-and-forget", Severity: domain.SeverityInfo, Message: "started"},
+			},
+		}},
+	}
+	getwd := func() (string, error) { return "/tmp/proj", nil }
+	var stdout, stderr bytes.Buffer
+	err := newAppWithUp(uc, cli.WithGetwd(getwd)).Execute(context.Background(), []string{"up", "--timeout=0"}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("up --timeout=0: %v", err)
+	}
+	if uc.lastReq.Timeout != 0 {
+		t.Errorf("Timeout = %v, want 0 (fire-and-forget)", uc.lastReq.Timeout)
+	}
+	out := stdout.String()
+	// Fire-and-forget: no status table.
+	if strings.Contains(out, "SERVICE") {
+		t.Errorf("status table leaked into --timeout=0 output: %q", out)
+	}
+	// But the info diagnostic should be shown.
+	if !strings.Contains(out, "started") {
+		t.Errorf("fire-and-forget info diagnostic missing: %q", out)
+	}
+}
+
+func TestExecute_Up_NegativeTimeout_ReturnsExitCode2(t *testing.T) {
+	t.Parallel()
+	uc := &fakeUpUseCase{}
+	getwd := func() (string, error) { return "/tmp/proj", nil }
+	var stdout, stderr bytes.Buffer
+	err := newAppWithUp(uc, cli.WithGetwd(getwd)).Execute(context.Background(), []string{"up", "--timeout=-1"}, &stdout, &stderr)
+	if err == nil {
+		t.Fatal("expected error for --timeout=-1")
+	}
+	if !errors.Is(err, cli.ErrInvalidTimeout) {
+		t.Errorf("expected ErrInvalidTimeout, got: %v", err)
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode = %d, want 2", got)
+	}
+	if uc.called {
+		t.Error("use-case must not run with invalid timeout")
+	}
+}
+
+func TestExecute_Up_ProjectNotInitialized_ReturnsExitCode10(t *testing.T) {
+	t.Parallel()
+	uc := &fakeUpUseCase{err: driving.ErrProjectNotInitialized}
+	getwd := func() (string, error) { return "/tmp/proj", nil }
+	var stdout, stderr bytes.Buffer
+	err := newAppWithUp(uc, cli.WithGetwd(getwd)).Execute(context.Background(), []string{"up"}, &stdout, &stderr)
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10 (got err: %v)", got, err)
+	}
+}
+
+// --- M6-T7 down subcommand pin tests ---
+
+func TestExecute_Down_NoVolumes_HappyPath(t *testing.T) {
+	t.Parallel()
+	uc := &fakeDownUseCase{resp: driving.DownResponse{RemovedVolumes: false}}
+	getwd := func() (string, error) { return "/tmp/proj", nil }
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDown(uc, cli.WithGetwd(getwd)).Execute(context.Background(), []string{"down"}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("down: %v", err)
+	}
+	if uc.lastReq.RemoveVolumes {
+		t.Errorf("RemoveVolumes = true, want false")
+	}
+	if !strings.Contains(stdout.String(), "environment stopped") {
+		t.Errorf("expected success message, got: %q", stdout.String())
+	}
+}
+
+func TestExecute_Down_VolumesYes_BypassesConfirm(t *testing.T) {
+	t.Parallel()
+	uc := &fakeDownUseCase{resp: driving.DownResponse{RemovedVolumes: true}}
+	getwd := func() (string, error) { return "/tmp/proj", nil }
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDown(uc, cli.WithGetwd(getwd)).Execute(context.Background(), []string{"down", "--volumes", "--yes"}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("down --volumes --yes: %v", err)
+	}
+	if !uc.lastReq.RemoveVolumes {
+		t.Errorf("RemoveVolumes = false, want true")
+	}
+	if !uc.lastReq.AssumeYes {
+		t.Errorf("AssumeYes = false, want true")
+	}
+	if !strings.Contains(stdout.String(), "volumes removed") {
+		t.Errorf("expected volumes-removed message, got: %q", stdout.String())
+	}
+}
+
+func TestExecute_Down_VolumesConfirmRefused_ReturnsExitCode10(t *testing.T) {
+	t.Parallel()
+	uc := &fakeDownUseCase{err: driving.ErrConfirmationRequired}
+	getwd := func() (string, error) { return "/tmp/proj", nil }
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDown(uc, cli.WithGetwd(getwd)).Execute(context.Background(), []string{"down", "--volumes"}, &stdout, &stderr)
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10 (got err: %v)", got, err)
+	}
+}
+
+func TestExecute_Down_YesAndNoInteractive_ReturnsExitCode2(t *testing.T) {
+	t.Parallel()
+	// §235 mutual exclusion fires before the use case.
+	uc := &fakeDownUseCase{}
+	getwd := func() (string, error) { return "/tmp/proj", nil }
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDown(uc, cli.WithGetwd(getwd)).Execute(context.Background(), []string{"down", "--volumes", "--yes", "--no-interactive"}, &stdout, &stderr)
+	if !errors.Is(err, cli.ErrConflictingModeFlags) {
+		t.Errorf("expected ErrConflictingModeFlags, got: %v", err)
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode = %d, want 2", got)
+	}
+	if uc.called {
+		t.Error("use-case must not run on flag-conflict")
+	}
+}
+
+// --- ExitCode pin tests for the new M6 sentinels ---
+
+func TestExitCode_M6Sentinels(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name string
+		err  error
+		want int
+	}{
+		{"driven.ErrDockerUnavailable", driven.ErrDockerUnavailable, 11},
+		{"driven.ErrComposeRuntime", driven.ErrComposeRuntime, 12},
+		{"driving.ErrStabilizationTimeout", driving.ErrStabilizationTimeout, 12},
+		{"driving.ErrComposeFileMissing", driving.ErrComposeFileMissing, 10},
+		{"driving.ErrConfirmationRequired", driving.ErrConfirmationRequired, 10},
+		{"cli.ErrInvalidTimeout", cli.ErrInvalidTimeout, 2},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			if got := cli.ExitCode(tc.err); got != tc.want {
+				t.Errorf("ExitCode(%v) = %d, want %d", tc.err, got, tc.want)
+			}
+			// Pin sentinel-chain survival: wrap and re-check.
+			wrapped := fmt.Errorf("cli: %w", tc.err)
+			if got := cli.ExitCode(wrapped); got != tc.want {
+				t.Errorf("ExitCode(wrap(%v)) = %d, want %d", tc.err, got, tc.want)
+			}
+		})
+	}
 }

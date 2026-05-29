@@ -18,11 +18,13 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/pt9912/u-boot/internal/adapter/driven/clock"
 	"github.com/pt9912/u-boot/internal/adapter/driven/confirm"
 	"github.com/pt9912/u-boot/internal/adapter/driven/docker"
 	"github.com/pt9912/u-boot/internal/adapter/driven/fs"
 	"github.com/pt9912/u-boot/internal/adapter/driven/git"
 	"github.com/pt9912/u-boot/internal/adapter/driven/logger"
+	"github.com/pt9912/u-boot/internal/adapter/driven/netprobe"
 	"github.com/pt9912/u-boot/internal/adapter/driven/progress"
 	"github.com/pt9912/u-boot/internal/adapter/driven/yaml"
 	"github.com/pt9912/u-boot/internal/adapter/driving/cli"
@@ -68,6 +70,21 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// read-only diagnostics (version + reachability + compose version).
 	// Used by the doctor service; M6's DockerEngine port stays separate.
 	dockerAdapter := docker.New()
+	// The docker engine (LH-FA-UP-002) shells out to `docker compose`
+	// for state-mutating operations: ComposeUp / ComposeDown /
+	// ComposePs. Used by up/down services. Distinct from the probe
+	// adapter — the slice plan §Sentinel-Schichtung pins separate
+	// pre-probe classification (ErrDockerUnavailable vs.
+	// ErrComposeRuntime) which the engine adapter enforces.
+	dockerEngineAdapter := docker.NewEngine()
+	// The netprobe adapter (M6-T3) provides TCP-reachability checks
+	// for the UpService polling loop. Stateless; depguard rule
+	// `application-no-net` enforces all net.* usage funnels through here.
+	netprobeAdapter := netprobe.New()
+	// The clock adapter (M6-T4-fund) wraps time.Now / time.Sleep
+	// so the UpService polling-loop iteration timing is injectable
+	// in tests.
+	clockAdapter := clock.New()
 
 	// Application services. The text-progress adapter renders
 	// LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 affected-paths
@@ -79,9 +96,11 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter)
 	doctorSvc := application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, logAdapter)
 	addSvc := application.NewAddServiceService(fsAdapter, yamlAdapter, logAdapter)
+	upSvc := application.NewUpService(fsAdapter, yamlAdapter, dockerEngineAdapter, netprobeAdapter, clockAdapter, logAdapter)
+	downSvc := application.NewDownService(fsAdapter, dockerEngineAdapter, confirmAdapter, logAdapter)
 
 	// Driving adapter (CLI).
-	app := cli.New(version, initSvc, doctorSvc, addSvc)
+	app := cli.New(version, initSvc, doctorSvc, addSvc, upSvc, downSvc)
 
 	err := app.Execute(ctx, args, stdout, stderr)
 	if err != nil {
