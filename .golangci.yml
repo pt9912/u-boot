@@ -191,6 +191,15 @@ linters:
             - pkg: github.com/pt9912/u-boot/internal/adapter
               desc: application must depend on ports, not on adapter implementations (LH-FA-ARCH-003)
 
+        application-no-net:
+          list-mode: lax
+          files:
+            - '!**/*_test.go'
+            - '**/internal/hexagon/application/**'
+          deny:
+            - pkg: net
+              desc: application must not depend on net stdlib — use port/driven.NetProbe (LH-FA-ARCH-003)
+
         port-no-application:
           list-mode: lax
           files:

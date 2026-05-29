@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# verify-depguard.sh — verify all eight depguard rules from .golangci.yml
+# verify-depguard.sh — verify all nine depguard rules from .golangci.yml
 # fire on a real forbidden import (LH-FA-ARCH-003, spec/architecture.md §4).
 #
 # Background:
@@ -15,7 +15,7 @@
 #   scripts/verify-depguard.sh
 #
 # Exit codes:
-#   0 — all eight rules fired with the expected desc
+#   0 — all nine rules fired with the expected desc
 #   1 — at least one rule did not fire as expected (see log files)
 #   2 — preconditions not met (dirty working tree, missing tools)
 #
@@ -62,6 +62,7 @@ trap cleanup EXIT INT TERM
 CASES=(
   "domain-isoliert|internal/hexagon/domain|github.com/pt9912/u-boot/internal/hexagon/port/driven|domain must not depend on port"
   "application-no-adapter|internal/hexagon/application|github.com/pt9912/u-boot/internal/adapter/driven/clock|application must depend on ports, not on adapter implementations"
+  "application-no-net|internal/hexagon/application|net|application must not depend on net stdlib"
   "port-no-application|internal/hexagon/port/driving|github.com/pt9912/u-boot/internal/adapter/driven/clock|port must not depend on adapter"
   "port-driving-no-driven|internal/hexagon/port/driving|github.com/pt9912/u-boot/internal/hexagon/port/driven|driving port must not depend on driven port"
   "port-driven-no-driving|internal/hexagon/port/driven|github.com/pt9912/u-boot/internal/hexagon/port/driving|driven port must not depend on driving port"

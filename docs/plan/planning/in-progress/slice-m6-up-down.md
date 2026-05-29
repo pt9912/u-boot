@@ -105,7 +105,7 @@ Out of Scope (V1):
     nicht aktiv, in T2 ergänzen).
 - **Neuer Driven-Port `NetProbe`** für TCP-Reachability:
   `DialTCP(ctx, host string, port int, timeout time.Duration) error`.
-  Adapter in `internal/adapter/driven/net/probe.go` mit
+  Adapter in `internal/adapter/driven/netprobe/probe.go` mit
   `net.DialTimeout`. Begründung für eigenen Port: hält den
   Application-Service frei von `net`-Importen (depguard-Regel
   `application-no-net`/`application-no-stdlib-io` — siehe carveouts);
@@ -450,14 +450,14 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
      `DialTCP(ctx context.Context, host string, port int, timeout time.Duration) error`.
      Nil-error = erreichbar; non-nil error = nicht erreichbar
      (timeout / refused / unresolved).
-   - `internal/adapter/driven/net/probe.go`: Adapter mit
+   - `internal/adapter/driven/netprobe/probe.go`: Adapter mit
      `net.DialTimeout("tcp", net.JoinHostPort(host, strconv.Itoa(port)), timeout)`.
      Bei `ctx.Err() != nil`: priorisiert ctx-Fehler vor net-Fehler.
    - Depguard: neue Regel `application-no-net` (Application darf
      `net` nicht importieren) wird in T3 aktiviert; das ist analog
      zur existierenden `application-no-yaml`/`application-no-os-exec`-
      Familie und kein eigener Carveout-Slice.
-   - `internal/adapter/driven/net/probe_test.go`: Unit-Tests mit
+   - `internal/adapter/driven/netprobe/probe_test.go`: Unit-Tests mit
      lokalem `net.Listen` + zufälligem Port (offen / refused) sowie
      `127.0.0.1:1` (refused-Path).
    - `fakeNetProbe` im Application-Test mit Map
