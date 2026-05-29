@@ -1,7 +1,7 @@
 # Slice M6: `u-boot up` / `u-boot down`-Flow
 
 > **Status:** Done
-> **DoD:** T1 ✅ `9f8badd` / T2 ✅ `84a676c` / T3 ✅ `1e5ef18` / T4 ✅ `1351cfb` (+ T4-fund `9101bdc`) / T5 ✅ `a46bec3` / T6 ✅ `4a7e60d` / T7 ✅ `6d9aa88`
+> **DoD:** T1 ✅ `9f8badd` / T2 ✅ `84a676c` / T3 ✅ `1e5ef18` / T4 ✅ `1351cfb` (+ T4-fund `9101bdc`, + review `d1deee5`) / T5 ✅ `a46bec3` / T6 ✅ `4a7e60d` / T7 ✅ `6d9aa88` (+ review `adeea13`)
 
 ## Auslöser
 
