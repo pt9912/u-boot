@@ -1,6 +1,6 @@
 # Slice M6: `u-boot up` / `u-boot down`-Flow
 
-> **Status:** Open
+> **Status:** In progress
 > **DoD:** T1 ⏳ / T2 ⏳ / T3 ⏳ / T4 ⏳ / T5 ⏳ / T6 ⏳ / T7 ⏳
 
 ## Auslöser

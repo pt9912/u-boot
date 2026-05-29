@@ -16,7 +16,7 @@ in `in-progress/`.
 | M3 `u-boot init` | Done | Projektstruktur erzeugen (`LH-FA-INIT-001..007`), `u-boot.yaml` schreiben, Git-Init, Re-Init mit `--force`/`--backup` (LH-FA-INIT-005) + Modi-Flags (LH-FA-CLI-005A). Coverage-, depguard- und gomodguard-Carveouts aufgelöst. Detail: [`slice-m3-init-flow.md`](../done/slice-m3-init-flow.md). **Stand:** T1..T4c ✅ (Commits siehe Slice-DoD); T5 ✅ `scripts/verify-depguard.sh` + `make verify-depguard`; M3-followup: [`slice-m3-build-polish`](../done/slice-m3-build-polish.md) (`987c164`, govulncheck-Pin + PROGRESS_FLAG) und [`slice-m3-gomodguard-rules`](../done/slice-m3-gomodguard-rules.md) (`201fb4b`, 4 Block-Regeln + golangci-lint v2.12.2) |
 | M4 `u-boot doctor` | Done | Lokale Voraussetzungen prüfen (`LH-FA-DIAG-001..004`), Severity-Klassifikation, Repair-Hints. 9 Checks: write-permissions, git, docker (+reachable+compose-plugin), u-boot.yaml, compose.yaml, devcontainer.json/Dockerfile. CLI `doctor`-Subkommando mit `--strict`. Exit-Code 11 bei Errors (oder Warns + --strict). | [`slice-m4-doctor`](../done/slice-m4-doctor.md) |
 | M5 `u-boot add postgres` | Done | PostgreSQL-Add-on (`LH-FA-ADD-001..002`, `LH-FA-ADD-005`), services-Schema in u-boot.yaml, Compose split-block scaffold, `.env.example`-Block, Healthcheck mit `$${POSTGRES_USER:-postgres}`-Defaults für LH-AK-002, State-Machine, Active-Repair, CLI-Subcommand, doctor-Integration (services.enabled-key + devcontainer.forwardPorts + devcontainer.enabled-Severity-Eskalation). 11 doctor-Checks gesamt. | [`slice-m5-add-postgres`](../done/slice-m5-add-postgres.md) |
-| M6 `u-boot up` / `down` | Open | Compose-Wrapper (`LH-FA-UP-001..004`), Healthcheck-Polling, `--timeout`, `--volumes` | offen |
+| M6 `u-boot up` / `down` | In progress | Compose-Wrapper (`LH-FA-UP-001..004`), Healthcheck-Polling, `--timeout`, `--volumes`. Slice mit T1..T7 + review-gehärteten Sentinel-/State-/`--timeout=0`-Verträgen. | [`slice-m6-up-down`](slice-m6-up-down.md) |
 | M7 `u-boot generate` | Open | `generate changelog`/`readme`/`env-example`/`devcontainer` (`LH-FA-GEN-001..005`) | offen |
 | M8 `u-boot config` | Open | `config get`/`set`/Anzeigen (`LH-FA-CONF-001..005`), Schema-Validierung | offen |
 | MVP-Closure | Open | Devcontainer-Mindestumfang (`LH-FA-DEV-001..005`), MVP-Acceptance-Flows (`LH-AK-001..002`, `LH-AK-005..007`) | offen |
@@ -51,7 +51,7 @@ Disziplin-Verstoß.
 
 ## Nächste Schritte
 
-1. **M5 add-postgres**: **Done** (siehe [`slice-m5-add-postgres.md`](../done/slice-m5-add-postgres.md)). Alle 7 Tranchen abgeschlossen (T1–T7), inkl. doctor-Integration für `services.enabled-key` + `forwardPorts`-Konsistenz + `devcontainer.enabled`-Severity-Eskalation. Aktive Tranche: M6 (`u-boot up` / `down` Compose-Wrapper).
+1. **M6 up/down**: **In progress** (siehe [`slice-m6-up-down.md`](slice-m6-up-down.md)). Slice-Plan in `in-progress/`, review-gehärtet (vier Review-Runden: Sentinel-Schichtung mit `errors.Is`-Durchleitung, `containerState`-Enum mit Dead-Allowlist + soft-unknown, `--timeout=0` fire-and-forget mit Triple-Pin, Restart-Loop-Counter, robustes Compose-Port-Parsing, §235-vs-§254-CLI-Pfade getrennt). Aktive Tranche: **T1** (Domain-Types + Driving-Ports + Sentinels).
 
 ## Lifecycle-Hinweis
 
