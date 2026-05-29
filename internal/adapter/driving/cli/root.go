@@ -34,7 +34,7 @@ See spec/lastenheft.md for the full functional specification.`,
 	root.PersistentFlags().BoolVar(&a.yes, "yes", false,
 		"answer the default to every confirmation (LH-FA-CLI-005A); exclusive with --no-interactive")
 	root.PersistentFlags().BoolVar(&a.noInteractive, "no-interactive", false,
-		"abort with exit-code 2 on any required confirmation (LH-FA-CLI-005A); exclusive with --yes")
+		"abort on any required confirmation: exit 2 for ordinary prompts, exit 10 for destructive ops like `down --volumes` (LH-FA-CLI-005A §245/§254); exclusive with --yes")
 
 	// LH-FA-CLI-005 verbosity flags. Persistent so subcommands read
 	// a single source of truth. Today `--quiet` is load-bearing for
