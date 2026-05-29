@@ -757,3 +757,192 @@ func (l *fakeLogger) Error(msg string, args ...any) { l.record("ERROR", msg, arg
 func (l *fakeLogger) record(level, msg string, args []any) {
 	l.entries = append(l.entries, fakeLogEntry{Level: level, Msg: msg, Args: append([]any{}, args...)})
 }
+
+// fakeClock is a manual-advance Clock for the M6-T4 polling-loop
+// tests. Sleep does NOT block — it advances the internal `now`
+// instead, recording the requested duration. The slice plan's
+// "no real time.Sleep in tests" mandate is enforced via this fake.
+type fakeClock struct {
+	mu     sync.Mutex
+	now    time.Time
+	sleeps []time.Duration
+}
+
+func newFakeClock(start time.Time) *fakeClock {
+	return &fakeClock{now: start}
+}
+
+func (c *fakeClock) Now() time.Time {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.now
+}
+
+func (c *fakeClock) Sleep(d time.Duration) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.sleeps = append(c.sleeps, d)
+	if d > 0 {
+		c.now = c.now.Add(d)
+	}
+}
+
+// Advance manually pushes the clock forward without going through
+// Sleep. Useful for tests that simulate elapsed time independent
+// of polling-loop iterations (e.g. timeout-already-exceeded paths).
+func (c *fakeClock) Advance(d time.Duration) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.now = c.now.Add(d)
+}
+
+// fakeDockerEngine implements driven.DockerEngine via a scripted
+// response queue. ComposeUp / ComposeDown each take a single reply;
+// ComposePs takes a queue (one entry per polling iteration). When
+// the test runs out of script entries the fake panics — surfacing
+// test bugs immediately rather than letting the loop silently
+// receive zero values.
+type fakeDockerEngine struct {
+	mu sync.Mutex
+
+	// up returns this ComposeUpResult / error pair when ComposeUp
+	// is called. The polling loop never calls ComposeUp more than
+	// once per Up() invocation, so a single reply suffices.
+	up    composeUpReply
+	upSet bool
+
+	// down returns this error pair when ComposeDown is called.
+	down    error
+	downSet bool
+
+	// psQueue: each ComposePs call pops the head. Tests can also
+	// set psPanicOnCall to make the fake panic the first call —
+	// the M6 slice's --timeout=0 fire-and-forget pin uses this to
+	// prove ComposePs is never reached.
+	psQueue       []composePsReply
+	psPanicOnCall bool
+
+	// Captured options for downstream assertions.
+	upOptions   driven.ComposeUpOptions
+	downOptions driven.ComposeDownOptions
+
+	// Call counters; used by the slice's "PsCalls == N" pins.
+	upCallCount   int
+	downCallCount int
+	psCallCount   int
+}
+
+type composeUpReply struct {
+	result driven.ComposeUpResult
+	err    error
+}
+
+type composePsReply struct {
+	services []driven.ComposeService
+	err      error
+}
+
+func newFakeDockerEngine() *fakeDockerEngine {
+	return &fakeDockerEngine{}
+}
+
+func (e *fakeDockerEngine) scriptUp(result driven.ComposeUpResult, err error) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.up = composeUpReply{result: result, err: err}
+	e.upSet = true
+}
+
+// scriptPsReply queues one reply for an upcoming ComposePs call.
+// Successive calls pop replies in FIFO order; running past the queue
+// panics so test gaps surface immediately.
+func (e *fakeDockerEngine) scriptPsReply(services []driven.ComposeService, err error) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.psQueue = append(e.psQueue, composePsReply{services: services, err: err})
+}
+
+func (e *fakeDockerEngine) ComposeUp(_ context.Context, _ string, opts driven.ComposeUpOptions) (driven.ComposeUpResult, error) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.upCallCount++
+	e.upOptions = opts
+	if !e.upSet {
+		panic("fakeDockerEngine.ComposeUp called without scriptUp; test bug")
+	}
+	return e.up.result, e.up.err
+}
+
+func (e *fakeDockerEngine) ComposeDown(_ context.Context, _ string, opts driven.ComposeDownOptions) error {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.downCallCount++
+	e.downOptions = opts
+	if !e.downSet {
+		panic("fakeDockerEngine.ComposeDown called without scriptDown; test bug")
+	}
+	return e.down
+}
+
+func (e *fakeDockerEngine) ComposePs(_ context.Context, _ string) ([]driven.ComposeService, error) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if e.psPanicOnCall {
+		panic("fakeDockerEngine.ComposePs called but test pinned --timeout=0 fire-and-forget; should never be called")
+	}
+	e.psCallCount++
+	if len(e.psQueue) == 0 {
+		panic("fakeDockerEngine.ComposePs called more times than scripted; test bug")
+	}
+	reply := e.psQueue[0]
+	e.psQueue = e.psQueue[1:]
+	return reply.services, reply.err
+}
+
+// fakeNetProbe implements driven.NetProbe via a `host:port → error`
+// lookup map. Missing keys default to "reachable" (nil) so tests
+// can express the negative case explicitly. The fake honours
+// ctx.Err() with precedence over the scripted result (matching the
+// adapter's own contract from M6-T3).
+type fakeNetProbe struct {
+	mu      sync.Mutex
+	results map[string]error
+	calls   []fakeNetProbeCall
+}
+
+type fakeNetProbeCall struct {
+	Host    string
+	Port    int
+	Timeout time.Duration
+}
+
+func newFakeNetProbe() *fakeNetProbe {
+	return &fakeNetProbe{results: make(map[string]error)}
+}
+
+// setResult registers the dial outcome for a `host:port` address.
+// Pass nil for "reachable"; an error for refused/timeout/etc.
+func (n *fakeNetProbe) setResult(host string, port int, err error) {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	n.results[fmt.Sprintf("%s:%d", host, port)] = err
+}
+
+func (n *fakeNetProbe) DialTCP(ctx context.Context, host string, port int, timeout time.Duration) error {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	n.calls = append(n.calls, fakeNetProbeCall{Host: host, Port: port, Timeout: timeout})
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if err, ok := n.results[fmt.Sprintf("%s:%d", host, port)]; ok {
+		return err
+	}
+	return nil
+}
+
+func (n *fakeNetProbe) callCount() int {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	return len(n.calls)
+}
