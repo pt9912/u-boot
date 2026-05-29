@@ -6,15 +6,25 @@ import "sort"
 // LH-FA-DIAG-003. The three levels are deliberately small — the
 // spec leaves no room for project-specific intermediate severities.
 //
-// Ordering: SeverityOK < SeverityWarn < SeverityError so that
-// [DiagnosticReport.MaxSeverity] reduces over a slice with a
-// straightforward max operation.
+// Ordering: SeverityOK < SeverityInfo < SeverityWarn < SeverityError
+// so that [DiagnosticReport.MaxSeverity] reduces over a slice with a
+// straightforward max operation. SeverityInfo sits between OK and
+// Warn — see its constant doc for the rationale.
 type Severity int
 
 const (
 	// SeverityOK means the diagnostic passed. Reports with only OK
 	// diagnostics map to exit code 0.
 	SeverityOK Severity = iota
+	// SeverityInfo means the diagnostic carries a non-judgmental hint
+	// — typically a mode acknowledgement (e.g. M6 `u-boot up
+	// --timeout=0` emits an `up.fire-and-forget` info entry to
+	// signal that status polling was skipped). Info is strictly
+	// between OK and Warn: it must not push the report into a
+	// non-zero exit code, but it is also not a clean OK that the
+	// CLI's `--quiet` filter should drop alongside OK entries.
+	// Added in M6-T1; existing M4 doctor checks never emit Info.
+	SeverityInfo
 	// SeverityWarn means the check found a concern that does not
 	// block proceeding. Without --strict, reports with only OK+Warn
 	// still map to exit code 0 (LH-FA-DIAG-003).
@@ -33,6 +43,8 @@ func (s Severity) String() string {
 	switch s {
 	case SeverityOK:
 		return "ok"
+	case SeverityInfo:
+		return "info"
 	case SeverityWarn:
 		return "warn"
 	case SeverityError:

@@ -14,6 +14,7 @@ func TestSeverity_String(t *testing.T) {
 		want string
 	}{
 		{domain.SeverityOK, "ok"},
+		{domain.SeverityInfo, "info"},
 		{domain.SeverityWarn, "warn"},
 		{domain.SeverityError, "error"},
 		{domain.Severity(99), "unknown"},
@@ -28,12 +29,16 @@ func TestSeverity_String(t *testing.T) {
 func TestSeverity_Ordering(t *testing.T) {
 	t.Parallel()
 	// Why: the LH-FA-DIAG-003 exit-code dispatch relies on the
-	// numerical ordering SeverityOK < SeverityWarn < SeverityError.
-	// Pin it so a future renumbering breaks the test instead of the
-	// CLI semantics.
-	if domain.SeverityOK >= domain.SeverityWarn || domain.SeverityWarn >= domain.SeverityError {
-		t.Errorf("severity ordering broken: OK=%d Warn=%d Error=%d",
-			domain.SeverityOK, domain.SeverityWarn, domain.SeverityError)
+	// numerical ordering SeverityOK < SeverityInfo < SeverityWarn <
+	// SeverityError. Pin it so a future renumbering breaks the test
+	// instead of the CLI semantics. SeverityInfo (M6-T1) must stay
+	// strictly between OK and Warn so MaxSeverity-reduces never
+	// elevate an Info-only report to non-zero exit code.
+	if domain.SeverityOK >= domain.SeverityInfo ||
+		domain.SeverityInfo >= domain.SeverityWarn ||
+		domain.SeverityWarn >= domain.SeverityError {
+		t.Errorf("severity ordering broken: OK=%d Info=%d Warn=%d Error=%d",
+			domain.SeverityOK, domain.SeverityInfo, domain.SeverityWarn, domain.SeverityError)
 	}
 }
 
@@ -74,6 +79,22 @@ func TestDiagnosticReport_MaxSeverity(t *testing.T) {
 			want: domain.SeverityError,
 		},
 		{
+			name: "ok+info",
+			in: domain.DiagnosticReport{Items: []domain.Diagnostic{
+				{ID: "a", Severity: domain.SeverityOK},
+				{ID: "b", Severity: domain.SeverityInfo},
+			}},
+			want: domain.SeverityInfo,
+		},
+		{
+			name: "info+warn",
+			in: domain.DiagnosticReport{Items: []domain.Diagnostic{
+				{ID: "a", Severity: domain.SeverityInfo},
+				{ID: "b", Severity: domain.SeverityWarn},
+			}},
+			want: domain.SeverityWarn,
+		},
+		{
 			name: "single error",
 			in: domain.DiagnosticReport{Items: []domain.Diagnostic{
 				{ID: "a", Severity: domain.SeverityError},
@@ -101,6 +122,7 @@ func TestDiagnosticReport_HasErrors(t *testing.T) {
 	}{
 		{"empty", domain.DiagnosticReport{}, false},
 		{"only-ok", domain.DiagnosticReport{Items: []domain.Diagnostic{{Severity: domain.SeverityOK}}}, false},
+		{"only-info", domain.DiagnosticReport{Items: []domain.Diagnostic{{Severity: domain.SeverityInfo}}}, false},
 		{"only-warn", domain.DiagnosticReport{Items: []domain.Diagnostic{{Severity: domain.SeverityWarn}}}, false},
 		{"with-error", domain.DiagnosticReport{Items: []domain.Diagnostic{{Severity: domain.SeverityError}}}, true},
 		{"warn+error", domain.DiagnosticReport{Items: []domain.Diagnostic{
@@ -127,6 +149,7 @@ func TestDiagnosticReport_HasWarnings(t *testing.T) {
 	}{
 		{"empty", domain.DiagnosticReport{}, false},
 		{"only-ok", domain.DiagnosticReport{Items: []domain.Diagnostic{{Severity: domain.SeverityOK}}}, false},
+		{"only-info", domain.DiagnosticReport{Items: []domain.Diagnostic{{Severity: domain.SeverityInfo}}}, false},
 		{"only-warn", domain.DiagnosticReport{Items: []domain.Diagnostic{{Severity: domain.SeverityWarn}}}, true},
 		{
 			// Warn shadowed by Error → HasWarnings is FALSE (the max
