@@ -1,5 +1,48 @@
 # Slice M6: Docker-Integrationstests (Build-Tag-Pfad)
 
+> **Status:** In progress (Sub-Tranchen)
+> **DoD:** Sub-T1 ⏳ / Sub-T2 ⏳ / Sub-T3 ⏳ / Sub-T4 ⏳ / Stabilisierung (3× grün, `continue-on-error: false`) ⏳
+
+## Sub-Tranchen-Schnitt
+
+Der Slice wird in vier Sub-Tranchen gegliedert, damit jede Schicht
+einzeln review- und merge-bar bleibt. Jeder Sub-Hash steht in der
+DoD-Zeile; die Reihenfolge ist hart (Sub-T4 setzt T1–T3 voraus).
+
+- **Sub-T1 — Adapter-Verhaltens-Pins.** Die zwei Pins, die direkt
+  am `internal/adapter/driven/docker/`-Adapter ansetzen:
+  `engine_progressstream_docker_test.go` (LH-NFA-PERF-002 via
+  `io.Pipe`-Event-Ordering) + `engine_psjsonschema_docker_test.go`
+  (LH-FA-DIAG-002 Compose-JSON-Schema-Snapshot). Beide nutzen ein
+  inline-deklariertes minimales `compose.yaml`-Fixture. ~250 LoC.
+- **Sub-T2 — Application-Verhaltens-Pins.** UpService-spezifische
+  Pins, die über das Adapter-Verhalten hinaus die polling-Loop-
+  Klassifikation in der Application-Schicht prüfen:
+  `internal/hexagon/application/upservice_healthcheck_docker_test.go`
+  (LH-FA-UP-001 §966) +
+  `internal/hexagon/application/upservice_portprobe_docker_test.go`
+  (LH-FA-UP-001 §968). Beide instanziieren `application.NewUpService`
+  mit den realen Adaptern (DockerEngine + NetProbe + Clock + FS +
+  YAML). ~200 LoC.
+- **Sub-T3 — End-to-end-Verhaltens-Pins.** Voller Stack via
+  `internal/e2e/` (neues Package):
+  `postgres_acceptance_docker_test.go` (LH-AK-002) +
+  `down_volumes_docker_test.go` (LH-FA-UP-004 §1015). Diese Tests
+  wickeln den kompletten `init → add postgres → up → down`-Flow
+  gegen die echte Engine ab. ~250 LoC.
+- **Sub-T4 — CI-Wiring + Doku.** GitHub-Actions-Workflow
+  (`integration-docker`-Job mit `continue-on-error: true` als
+  Stabilisierungs-Maßnahme) + `docs/user/quality.md` §2 Tests-
+  Update + DoD-Eintrag in dieser Datei. Carveout-Eintrag bleibt
+  offen bis 3× grün + erster Lauf ohne `continue-on-error`. ~100 LoC.
+
+Nach Sub-T4 wechselt der Slice-Status auf
+**"In progress — Stabilisierung pending"**. Die finale
+Carveout-Aufhebung folgt mit einer separaten PR, die das
+Stabilization-Evidence-Block-Audit erfüllt (siehe
+"Akzeptanzkriterien" unten); diese PR mergt
+`continue-on-error: false` und entfernt den `carveouts.md`-Eintrag.
+
 ## Auslöser
 
 `spec/architecture.md` §5 beschreibt eine Build-Tag-Konvention für
