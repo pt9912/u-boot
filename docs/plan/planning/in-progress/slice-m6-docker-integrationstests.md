@@ -85,6 +85,25 @@ Aufhebung des Carveouts fehlt:
 
 ### Strukturelle Bedingungen
 
+- **Netzwerk-Namespace-Voraussetzung für Tests mit TCP-Probe-
+  Assertions**: alle Pins, die `net.DialTCP` von der Test-Seite
+  gegen einen Compose-veröffentlichten Port machen — heute Sub-T2
+  §968 (`upservice_portprobe_docker_test.go`) plus Sub-T3 LH-AK-002
+  (`postgres_acceptance_docker_test.go`) — verlangen, dass die
+  Test-Prozess-Netzwerk-Namespace und die Docker-Daemon-Netzwerk-
+  Namespace identisch sind. Konkret: entweder das Test-Binary
+  läuft direkt auf dem Host (mit lokal installiertem `docker` und
+  `docker compose`), oder es läuft in einem Container mit
+  `--network=host`. Die einfache "Container mit gemountetem
+  `/var/run/docker.sock`"-Variante reicht **nicht**: Compose
+  veröffentlicht die Ports auf dem **Host**-Loopback, das
+  Test-Binary sieht aber den **Container**-Loopback — der Probe
+  schlägt mit `connection refused` fehl, obwohl der Service
+  korrekt läuft. **Sub-T4-Makefile-Verkabelung muss diese
+  Anforderung erfüllen** (Empfehlung: `docker run --network=host`
+  oder Host-natives `go test -tags docker`); andernfalls würde
+  der `integration-docker`-CI-Job §968 und LH-AK-002 falsch-rot
+  liefern.
 - `internal/adapter/driven/docker/engine_docker_test.go` (existiert
   seit T2) wird um zusätzliche Verhaltens-Tests aus der Tabelle
   unten ergänzt; optional weitere `*_docker_test.go`-Dateien.

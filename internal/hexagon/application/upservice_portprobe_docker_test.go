@@ -28,7 +28,9 @@ package application_test
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -47,12 +49,29 @@ import (
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
-const portProbeFixture = `services:
+// portProbeFixtureTemplate is rendered with a randomly chosen host
+// port at test time — fixing a literal port would collide with a
+// concurrent parallel test run, a left-over container from a hung
+// previous run, or any host-side service listening on the same
+// port. parseComposePort's makeProbe rejects port=0 (the "kernel
+// pick" sentinel) so we can't use that escape hatch.
+const portProbeFixtureTemplate = `services:
   web:
     image: nginx:alpine
     ports:
-      - "127.0.0.1:18080:80"
+      - "127.0.0.1:%d:80"
 `
+
+// pickHostPort returns a random TCP port in the ephemeral-but-not-
+// IANA-reserved range 30000-34999 (5000 candidates). With t.Helper
+// + the Go test runner's per-package randomization, two parallel
+// runs of this test colliding on the same port is roughly 1 in 5000
+// per attempted run — acceptable for an integration suite, and any
+// collision surfaces as a clear "port is already allocated" Compose
+// error rather than a silent stabilization.
+func pickHostPort() int {
+	return 30000 + rand.Intn(5000) //nolint:gosec // non-crypto random is correct here
+}
 
 // spyingNetProbe records every DialTCP call and forwards to a real
 // netprobe adapter. Used to assert that UpService actually probed
@@ -90,12 +109,15 @@ func TestUpService_RealDocker_PortProbeRunsForNoHealthcheckService(t *testing.T)
 	}
 
 	dir := t.TempDir()
+	hostPort := pickHostPort()
+	composeYAML := fmt.Sprintf(portProbeFixtureTemplate, hostPort)
 	if err := os.WriteFile(filepath.Join(dir, "u-boot.yaml"), []byte(minUbootYAML), 0o644); err != nil {
 		t.Fatalf("seed u-boot.yaml: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "compose.yaml"), []byte(portProbeFixture), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "compose.yaml"), []byte(composeYAML), 0o644); err != nil {
 		t.Fatalf("seed compose.yaml: %v", err)
 	}
+	t.Logf("test selected host port: %d", hostPort)
 
 	engine := dockeradapter.NewEngine()
 	t.Cleanup(func() {
@@ -147,15 +169,15 @@ func TestUpService_RealDocker_PortProbeRunsForNoHealthcheckService(t *testing.T)
 
 	// Sanity: at least one call hit the declared host port on
 	// loopback. The probe target is normalized by parseComposePort
-	// to `localhost:18080`.
+	// to `localhost:<hostPort>`.
 	foundExpected := false
 	for _, c := range calls {
-		if c.Port == 18080 && (c.Host == "localhost" || c.Host == "127.0.0.1") {
+		if c.Port == hostPort && (c.Host == "localhost" || c.Host == "127.0.0.1") {
 			foundExpected = true
 			break
 		}
 	}
 	if !foundExpected {
-		t.Errorf("expected NetProbe call against localhost:18080 (declared compose port); got %+v", calls)
+		t.Errorf("expected NetProbe call against localhost:%d (declared compose port); got %+v", hostPort, calls)
 	}
 }
