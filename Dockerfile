@@ -65,6 +65,35 @@ FROM deps AS test
 COPY . .
 RUN CGO_ENABLED=0 go test ./...
 
+# ---- test-docker-tools -----------------------------------------------------
+# Image für die `//go:build docker`-Adapter-Integrationstests. Baut auf
+# `deps` (golang + cached Go-Modul-Dependencies) und installiert
+# zusätzlich `docker-ce-cli` + `docker-compose-plugin` aus dem
+# offiziellen Docker-Repo. Source wird zur Laufzeit gemountet (kein
+# COPY hier), damit die `Makefile`-Target `test-docker` Source-Edits
+# ohne Rebuild aufpicken kann.
+#
+# Verwendet von `make test-docker` mit `--network=host` plus dem
+# gemounteten Docker-Socket (`/var/run/docker.sock`), sodass das
+# Test-Binary im selben Network-Namespace wie der Docker-Daemon
+# läuft (siehe slice-m6-docker-integrationstests §Strukturelle
+# Bedingungen: Netzwerk-Namespace-Voraussetzung).
+FROM deps AS test-docker-tools
+
+RUN apt-get update -qq && \
+    apt-get install -qq -y --no-install-recommends \
+        ca-certificates curl gnupg && \
+    install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg \
+        -o /etc/apt/keyrings/docker.asc && \
+    chmod a+r /etc/apt/keyrings/docker.asc && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo $VERSION_CODENAME) stable" \
+        > /etc/apt/sources.list.d/docker.list && \
+    apt-get update -qq && \
+    apt-get install -qq -y --no-install-recommends \
+        docker-ce-cli docker-compose-plugin && \
+    rm -rf /var/lib/apt/lists/*
+
 # ---- coverage --------------------------------------------------------------
 # Bootstrap-aware (LH-FA-BUILD-008): when ./internal/... is empty, the
 # stage sets COVERAGE_BOOTSTRAP=1 and coverage-gate.sh accepts an empty

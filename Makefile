@@ -58,15 +58,23 @@ lint: ## golangci-lint with the project profile.
 test: ## Run `go test ./...` inside Docker.
 	$(DOCKER_BUILD) $(NO_CACHE_FILTER_TEST) --target test -t $(IMAGE):test .
 
-test-docker: ## Run docker-tagged integration tests against the host docker daemon.
-	@# The M6 docker-integrationstests carveout slice owns the CI
-	@# wiring of this target. Locally it mounts /var/run/docker.sock
-	@# so the build-tagged tests can reach the host engine; CI must
-	@# do the equivalent (DinD or shared sock) before invoking.
-	docker run --rm \
+test-docker: ## Run //go:build docker integration tests against the host docker daemon.
+	@# Two-step target (slice-m6-docker-integrationstests Sub-T4):
+	@# 1) Build the `test-docker-tools` Dockerfile stage — golang +
+	@#    docker-ce-cli + docker-compose-plugin (from the official
+	@#    Docker repo). Cached after first build.
+	@# 2) Run the test binary in that image with `--network=host` so
+	@#    the test process and the Docker daemon share a network
+	@#    namespace (required for `NetProbe.DialTCP("localhost", ...)`
+	@#    to reach Compose-published ports — slice §Strukturelle
+	@#    Bedingungen, Netzwerk-Namespace-Voraussetzung). The
+	@#    Docker socket is also mounted so the test's Compose calls
+	@#    reach the host daemon.
+	$(DOCKER_BUILD) --target test-docker-tools -t $(IMAGE):test-docker-tools .
+	docker run --rm --network=host \
 	    -v "$(CURDIR)":/src -w /src \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
-	    golang:$(GO_VERSION) \
+	    $(IMAGE):test-docker-tools \
 	    go test -tags docker ./...
 
 coverage-gate: ## Coverage threshold gate (bootstrap-aware, LH-FA-BUILD-008).

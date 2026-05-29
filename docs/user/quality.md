@@ -139,22 +139,54 @@ Suppressions, sondern bewusste Profil-Entscheidungen:
 
 ## 2. Tests
 
+### 2.1 Inner-Loop: `make test`
+
 Tests laufen Docker-basiert über die `test`-Stage:
 
 ```bash
 make test
 ```
 
-Die Stage führt `go test ./...` aus. Im MVP-Bootstrap deckt der
-Stub-Code nur `cmd/uboot` ab (CLI-Flag-Parsing, Exit-Codes).
+Die Stage führt `go test ./...` aus. Build-Tags wie
+`//go:build docker` werden hier NICHT gesetzt — entsprechende
+Integrationstests bleiben aus dem Default-Pfad ausgeschlossen
+(`internal/adapter/driven/docker/engine_docker_test.go`,
+`internal/hexagon/application/upservice_*_docker_test.go`,
+`internal/e2e/*_docker_test.go`).
 
-Mit dem ersten produktiven Slice (M3) folgen:
+### 2.2 Integration-Loop: `make test-docker`
 
-- Unit-Tests in `internal/hexagon/{domain,application}` mit
-  Fake-Implementierungen der Driven-Ports (`spec/architecture.md` §5).
-- Integrationstests in `internal/adapter/driven/{docker,fs,yaml}` mit
-  Build-Tag-getriggerten Pfaden (`//go:build docker` etc., siehe
-  `spec/architecture.md` §5).
+Adapter- und e2e-Integrationstests gegen eine echte Docker-Engine
+laufen unter dem `docker`-Build-Tag (`spec/architecture.md` §5,
+slice `slice-m6-docker-integrationstests`):
+
+```bash
+make test-docker
+```
+
+Das Target baut zuerst die Dockerfile-Stage `test-docker-tools`
+(golang + `docker-ce-cli` + `docker-compose-plugin`) und startet
+dann den Test-Container mit `--network=host` plus gemountetem
+Docker-Socket. **Beide** Bedingungen sind nötig: das Test-Binary
+muss den Docker-Daemon erreichen UND im selben Network-Namespace
+wie der Daemon laufen, damit `NetProbe.DialTCP("localhost", ...)`-
+Pins gegen Compose-veröffentlichte Ports funktionieren.
+
+CI-Pfad: separater Workflow `.github/workflows/integration.yml`
+(siehe §6). Aktuell mit `continue-on-error: true` als
+Stabilisierungs-Maßnahme; Aufhebung nach drei aufeinanderfolgenden
+grünen Läufen auf `main` (`run_attempt=1, event=push`).
+
+Pin-Inventar (Stand M6-docker-int Sub-T3):
+
+| Spec-ID | Test-Datei |
+| ------- | ---------- |
+| LH-NFA-PERF-002 | `internal/adapter/driven/docker/engine_progressstream_docker_test.go` |
+| LH-FA-DIAG-002 | `internal/adapter/driven/docker/engine_psjsonschema_docker_test.go` |
+| LH-FA-UP-001 §966 | `internal/hexagon/application/upservice_healthcheck_docker_test.go` |
+| LH-FA-UP-001 §968 | `internal/hexagon/application/upservice_portprobe_docker_test.go` |
+| LH-AK-002 | `internal/e2e/postgres_acceptance_docker_test.go` |
+| LH-FA-UP-004 §1015 | `internal/e2e/down_volumes_docker_test.go` |
 
 ---
 

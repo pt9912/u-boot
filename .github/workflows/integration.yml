@@ -1,0 +1,50 @@
+name: integration-docker
+
+# Integration-Pipeline für die `//go:build docker`-Adapter-/
+# Application-/e2e-Pins aus `slice-m6-docker-integrationstests`.
+#
+# Schicht-Trennung:
+#   - `ci.yml::gates` — Inner-Loop-Pflichten (lint + test +
+#     coverage-gate), läuft NIE die docker-getaggten Tests aus.
+#   - dieses Workflow — `make test-docker` mit echtem Daemon, läuft
+#     parallel zu `gates`.
+#
+# Stabilisierungs-Disziplin (slice §Strukturelle Bedingungen):
+# `continue-on-error: true` ist eine zeitlich befristete Maßnahme.
+# Sobald drei aufeinanderfolgende grüne Läufe auf `main`
+# vorliegen (run_attempt=1, event=push, conclusion=success),
+# wird der Flag entfernt. Die PR, die das tut, muss den
+# Stabilization-Evidence-Block in ihrer Beschreibung tragen
+# (siehe Slice-Plan).
+#
+# Carveout-Aufhebung (carveouts.md-Eintrag): folgt mit einer
+# weiteren PR, die auf den ersten Lauf OHNE
+# `continue-on-error` verweist.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  integration-docker:
+    name: integration-docker (//go:build docker)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    # Stabilisierungs-Maßnahme — siehe Slice-Plan-Audit-Block für
+    # die Bedingungen zur Entfernung dieses Flags.
+    continue-on-error: true
+    env:
+      DOCKER_BUILDKIT: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run make test-docker
+        run: make test-docker
