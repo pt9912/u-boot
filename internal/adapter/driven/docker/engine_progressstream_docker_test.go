@@ -24,6 +24,7 @@ package docker_test
 
 import (
 	"context"
+	"errors"
 	"io"
 	"os"
 	"os/exec"
@@ -47,8 +48,13 @@ const composeProgressStreamFixture = `services:
 `
 
 func TestEngine_RealDocker_ProgressStream_LivePerHappensBefore(t *testing.T) {
+	// Hard-fail (not skip) on missing docker when -tags=docker is
+	// set: the build tag itself signals "we expect a real engine".
+	// Silent skip would let `make test-docker` return green while
+	// actually running zero behaviour pins — the slice plan calls
+	// this out explicitly as the green-greenwash failure mode.
 	if _, err := exec.LookPath("docker"); err != nil {
-		t.Skipf("docker not on PATH: %v", err)
+		t.Fatalf("docker CLI not on PATH but the test was built with -tags=docker; install docker (e.g. via Sub-T4 Makefile wiring): %v", err)
 	}
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "compose.yaml"), []byte(composeProgressStreamFixture), 0o644); err != nil {
@@ -87,7 +93,13 @@ func TestEngine_RealDocker_ProgressStream_LivePerHappensBefore(t *testing.T) {
 	}()
 
 	engine := docker.NewEngine()
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	// Tight timeout: the doomed fixture should fast-fail (~1-2 s
+	// observed). 15 s is comfortable for slow DNS, but anything
+	// hitting the deadline signals an environment problem (e.g.
+	// proxy DNS that intercepts `.invalid` and stalls) rather than
+	// a load-bearing assertion failure. We check for that
+	// distinction explicitly below.
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	_, upErr := engine.ComposeUp(ctx, dir, driven.ComposeUpOptions{
@@ -105,6 +117,13 @@ func TestEngine_RealDocker_ProgressStream_LivePerHappensBefore(t *testing.T) {
 	if upErr == nil {
 		t.Fatal("expected ComposeUp to fail on non-existent image; got nil error")
 	}
+	if errors.Is(upErr, context.DeadlineExceeded) {
+		t.Fatalf(
+			"ComposeUp hit the test-imposed deadline instead of fast-failing on the doomed image; "+
+				"this is an ENVIRONMENT problem (proxy DNS / slow registry retry), NOT a contract failure: %v",
+			upErr,
+		)
+	}
 
 	eventsMu.Lock()
 	defer eventsMu.Unlock()
@@ -118,6 +137,15 @@ func TestEngine_RealDocker_ProgressStream_LivePerHappensBefore(t *testing.T) {
 	// This is the load-bearing pin: a buffered implementation
 	// would emit all events at flush time, which is after the
 	// call has already returned.
+	//
+	// IMPORTANT: only events[0] is load-bearing here. Later events
+	// may legitimately carry recvAt > composeUpReturnedAt — between
+	// the time.Now() sample on line ~115 and `w.Close()` on the
+	// next line, the reader goroutine could still drain pipe-
+	// buffered bytes. A future widening of the assertion to a loop
+	// over all events would need to take composeUpReturnedAt
+	// AFTER <-done (using a separate `closePipeAt`) to stay
+	// race-free.
 	if !events[0].recvAt.Before(composeUpReturnedAt) {
 		t.Errorf(
 			"first chunk arrived at %v, after ComposeUp returned at %v (Δ = %v); "+

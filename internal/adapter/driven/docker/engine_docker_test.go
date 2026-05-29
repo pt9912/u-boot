@@ -29,8 +29,11 @@ func TestEngine_RealDocker_PreflightGreen(t *testing.T) {
 	// (LookPath + version + compose version all succeed) and then
 	// fail at the actual `compose ps` call — classified as
 	// ErrComposeRuntime (code 12), not ErrDockerUnavailable (code 11).
+	// Hard-fail (not skip) on missing docker when -tags=docker is
+	// set — the build tag signals expectation; silent skip would
+	// let `make test-docker` green-greenwash.
 	if _, err := exec.LookPath("docker"); err != nil {
-		t.Skipf("docker binary not on PATH: %v", err)
+		t.Fatalf("docker CLI not on PATH but the test was built with -tags=docker: %v", err)
 	}
 	e := docker.NewEngine()
 	_, err := e.ComposePs(context.Background(), "/tmp/u-boot-no-such-project")

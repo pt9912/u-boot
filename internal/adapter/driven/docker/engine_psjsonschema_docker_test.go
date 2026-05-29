@@ -32,44 +32,67 @@ import (
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 )
 
-// composePsFixture pins a tiny long-running image so the
-// `compose up -d` + `compose ps` sequence completes quickly and
-// the test environment isn't held by a heavy pull. busybox is
-// ~1 MiB compressed.
+// composePsFixture pins a tiny long-running image with both a port
+// mapping and a healthcheck so the LH-FA-DIAG-002 schema pin can
+// hard-assert that Publishers AND Health appear in the JSON output
+// — the two fields the T2 parser depends on for port-probe gating
+// and stabilization classification. A pure busybox+sleep fixture
+// would leave both as soft-log assertions and let a schema rename
+// of either field slip past CI.
+//
+// `127.0.0.1:0:1` binds container port 1 to a kernel-assigned host
+// port on the loopback interface (no collision risk between
+// parallel test runs). The healthcheck runs `true` — trivially
+// passes after the first 1 s interval so Compose can report
+// `healthy` quickly.
 const composePsFixture = `services:
   busy:
     image: busybox:1.36
     command: ["sleep", "60"]
+    ports:
+      - "127.0.0.1:0:1"
+    healthcheck:
+      test: ["CMD", "true"]
+      interval: 1s
+      timeout: 1s
+      retries: 1
 `
 
-func setupComposePsFixture(t *testing.T) (engine *docker.Engine, dir string, cleanup func()) {
+func setupComposePsFixture(t *testing.T) (engine *docker.Engine, dir string) {
 	t.Helper()
+	// Hard-fail (not skip) on missing docker — see the equivalent
+	// note in engine_progressstream_docker_test.go.
 	if _, err := exec.LookPath("docker"); err != nil {
-		t.Skipf("docker not on PATH: %v", err)
+		t.Fatalf("docker CLI not on PATH but the test was built with -tags=docker; install docker (e.g. via Sub-T4 Makefile wiring): %v", err)
 	}
 	dir = t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "compose.yaml"), []byte(composePsFixture), 0o644); err != nil {
 		t.Fatalf("write compose.yaml: %v", err)
 	}
 	engine = docker.NewEngine()
+
+	// Register cleanup BEFORE ComposeUp so even a partial pull /
+	// half-started network is torn down. ComposeDown on a not-yet-
+	// up'd project is mostly a no-op; the t.Cleanup hook fires on
+	// any test exit (success or t.Fatalf later in the test).
+	t.Cleanup(func() {
+		dctx, dcancel := context.WithTimeout(context.Background(), 60*time.Second)
+		defer dcancel()
+		if err := engine.ComposeDown(dctx, dir, driven.ComposeDownOptions{RemoveVolumes: true}); err != nil {
+			t.Logf("cleanup ComposeDown failed (may be expected if Up never completed): %v", err)
+		}
+	})
+
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	if _, err := engine.ComposeUp(ctx, dir, driven.ComposeUpOptions{Detach: true}); err != nil {
 		t.Fatalf("ComposeUp: %v", err)
 	}
-	cleanup = func() {
-		dctx, dcancel := context.WithTimeout(context.Background(), 60*time.Second)
-		defer dcancel()
-		if err := engine.ComposeDown(dctx, dir, driven.ComposeDownOptions{RemoveVolumes: true}); err != nil {
-			t.Logf("cleanup ComposeDown failed: %v", err)
-		}
-	}
-	return engine, dir, cleanup
+	return engine, dir
 }
 
 func TestEngine_RealDocker_ComposePs_PopulatesParserFields(t *testing.T) {
-	engine, dir, cleanup := setupComposePsFixture(t)
-	defer cleanup()
+	engine, dir := setupComposePsFixture(t)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -101,8 +124,7 @@ func TestEngine_RealDocker_ComposePs_PopulatesParserFields(t *testing.T) {
 }
 
 func TestEngine_RealDocker_ComposePs_RawJSONHasExpectedFieldNames(t *testing.T) {
-	_, dir, cleanup := setupComposePsFixture(t)
-	defer cleanup()
+	_, dir := setupComposePsFixture(t)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -146,19 +168,15 @@ func TestEngine_RealDocker_ComposePs_RawJSONHasExpectedFieldNames(t *testing.T) 
 	// Compose's JSON schema (rename, removal) makes this test fail
 	// fast — bringing the parser's drift-detection forward to CI
 	// rather than to a user-reported missing field at runtime.
-	requiredFields := []string{"Service", "State"}
+	//
+	// Publishers and Health are pinned hard (not soft-logged) since
+	// the fixture above declares both a port and a healthcheck —
+	// the most behavior-relevant fields for the polling-loop gating
+	// must drift-fail this test, not silently shape-shift.
+	requiredFields := []string{"Service", "State", "Health", "Publishers"}
 	for _, key := range requiredFields {
 		if _, ok := first[key]; !ok {
 			t.Errorf("docker compose ps JSON missing required field %q; row: %#v", key, first)
 		}
-	}
-
-	// `Health` and `Publishers` MAY be absent for fixtures without
-	// a healthcheck or exposed ports — log only.
-	if _, ok := first["Health"]; !ok {
-		t.Logf("Health field absent (acceptable for the no-healthcheck fixture)")
-	}
-	if _, ok := first["Publishers"]; !ok {
-		t.Logf("Publishers field absent (acceptable for the no-ports fixture)")
 	}
 }
