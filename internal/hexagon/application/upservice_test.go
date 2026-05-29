@@ -476,6 +476,71 @@ func TestUpService_ProgressSinkWiredToEngine(t *testing.T) {
 	}
 }
 
+func TestUpService_DeadServiceIsAlphabeticallyFirst_DeterministicReport(t *testing.T) {
+	t.Parallel()
+	// T4-review fix: classifyAllServices iterates compose.Services
+	// (Go map) in deterministic order so a multi-service failure
+	// always reports the alphabetically first name. Two services
+	// both dead → "alpha" must be reported (not "beta"), every
+	// run.
+	composeMulti := `services:
+  alpha:
+    image: x:1
+  beta:
+    image: y:1
+`
+	f := newUpFixture(t, composeMulti)
+	f.engine.scriptUp(driven.ComposeUpResult{}, nil)
+	f.engine.scriptPsReply([]driven.ComposeService{
+		{Name: "alpha", State: "exited"},
+		{Name: "beta", State: "exited"},
+	}, nil)
+
+	_, err := f.svc.Up(context.Background(), driving.UpRequest{BaseDir: "/proj", Timeout: 60 * time.Second})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "alpha") {
+		t.Errorf("expected the alphabetically first failed service in the error, got: %v", err)
+	}
+}
+
+func TestUpService_TimeoutPending_RunningOnlyWithoutHealthcheckNotListed(t *testing.T) {
+	t.Parallel()
+	// T4-review fix: pendingServiceNames must NOT list a running-
+	// only service without healthcheck (stabilized per §967) as
+	// pending. Setup: "stable" stabilizes immediately, "slow"
+	// stays starting → timeout fires → pending list contains
+	// "slow" but NOT "stable".
+	composeMix := `services:
+  slow:
+    image: x:1
+    healthcheck:
+      test: ["CMD", "true"]
+  stable:
+    image: y:1
+`
+	f := newUpFixture(t, composeMix)
+	f.engine.scriptUp(driven.ComposeUpResult{}, nil)
+	for i := 0; i < 10; i++ {
+		f.engine.scriptPsReply([]driven.ComposeService{
+			{Name: "slow", State: "running", Health: "starting"},
+			{Name: "stable", State: "running"},
+		}, nil)
+	}
+
+	_, err := f.svc.Up(context.Background(), driving.UpRequest{BaseDir: "/proj", Timeout: time.Second})
+	if !errors.Is(err, driving.ErrStabilizationTimeout) {
+		t.Fatalf("expected ErrStabilizationTimeout, got: %v", err)
+	}
+	if !strings.Contains(err.Error(), "slow") {
+		t.Errorf("timeout error should list 'slow' as pending: %v", err)
+	}
+	if strings.Contains(err.Error(), "stable") {
+		t.Errorf("timeout error should NOT list 'stable' as pending (stabilized per §967): %v", err)
+	}
+}
+
 func TestUpService_HealthcheckDisableTrue_BehavesLikeNoHealthcheck(t *testing.T) {
 	t.Parallel()
 	composeDisabled := `services:

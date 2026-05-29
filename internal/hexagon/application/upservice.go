@@ -260,7 +260,11 @@ func (s *UpService) classifyAllServices(ctx context.Context, ps []driven.Compose
 	}
 
 	allStabilized := true
-	for name := range compose.Services {
+	// Iterate in deterministic order so a multi-service failure
+	// in the same iteration always reports the alphabetically
+	// first name — keeps CLI error strings stable across runs and
+	// makes grep-based scripts reproducible.
+	for _, name := range sortedServiceNames(compose.Services) {
 		state := states[name]
 		live, ok := psByName[name]
 		if !ok {
@@ -271,7 +275,15 @@ func (s *UpService) classifyAllServices(ctx context.Context, ps []driven.Compose
 		}
 		cs := domain.ParseContainerState(live.State)
 
-		// Update restart-observation counter (resets when cs changes).
+		// Update restart-observation counter.
+		// MVP-Limitation (slice plan §176-178): the counter resets
+		// on ANY non-restarting observation, including a brief
+		// `running` between restart ticks. A pathological restart-
+		// loop that flashes through `running` (e.g. `restarting →
+		// running → exited → restarting → ...`) can mask itself in
+		// the no-healthcheck/no-port stabilization path. V1
+		// follow-up tracks multi-tick history; M6 accepts the
+		// trade-off for simpler counter semantics.
 		if cs == domain.StateRestarting {
 			state.restartObservations++
 		} else {
@@ -397,27 +409,62 @@ func buildResult(ps []driven.ComposeService, stabilized bool, diagnostics []doma
 // that did not reach [domain.OutcomeStabilized] in the final
 // iteration — surfaces in the timeout error so the CLI can render
 // "still waiting for X, Y".
-func pendingServiceNames(ps []driven.ComposeService, compose composeFileDecode, _ map[string]*servicePollState) []string {
+//
+// The function mirrors [UpService.classifyOne]'s logic per service
+// instead of the cruder "not running+healthy" heuristic that an
+// earlier T4-svc revision used: a running-only service without a
+// healthcheck (LH-FA-UP-001 §967 stabilization path) must NOT be
+// reported as pending. Re-running NetProbe.DialTCP here is
+// avoided — the network is async-unsafe from a no-context callsite,
+// and over-reporting "running + no healthcheck + has probable
+// ports" as pending is the conservative choice (matches the user-
+// facing wording: "still waiting for the port to answer").
+func pendingServiceNames(ps []driven.ComposeService, compose composeFileDecode, states map[string]*servicePollState) []string {
 	psByName := make(map[string]driven.ComposeService, len(ps))
 	for _, svc := range ps {
 		psByName[svc.Name] = svc
 	}
 	pending := make([]string, 0)
-	for name := range compose.Services {
+	for _, name := range sortedServiceNames(compose.Services) {
 		live, ok := psByName[name]
 		if !ok {
 			pending = append(pending, name)
 			continue
 		}
 		cs := domain.ParseContainerState(live.State)
-		if cs != domain.StateRunning || !strings.EqualFold(live.Health, "healthy") {
-			// Heuristic: list any service not in running+healthy
-			// as pending. CLI rendering only — does not affect
-			// classification semantics.
+		if cs != domain.StateRunning {
+			// Not running → not yet stabilized (StateStarting,
+			// StateRestarting under threshold, StateUnknown).
 			pending = append(pending, name)
+			continue
 		}
+		state := states[name]
+		if state == nil {
+			// Shouldn't happen — every declared service has a
+			// poll state — but treat missing state as pending to
+			// avoid false-positive stabilization.
+			pending = append(pending, name)
+			continue
+		}
+		if state.healthcheckRequired {
+			// Running with healthcheck required: only stabilized
+			// when health == healthy.
+			if !strings.EqualFold(live.Health, "healthy") {
+				pending = append(pending, name)
+			}
+			continue
+		}
+		if len(state.probeTargets) > 0 {
+			// Running, no healthcheck, but has probable ports:
+			// we can't re-probe from here without a ctx/NetProbe;
+			// conservatively list as pending (better to over-
+			// report than to hide a real port-down).
+			pending = append(pending, name)
+			continue
+		}
+		// Running, no healthcheck, no probable ports → stabilized
+		// per LH-FA-UP-001 §967, NOT pending.
 	}
-	sort.Strings(pending)
 	return pending
 }
 
