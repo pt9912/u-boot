@@ -1,7 +1,7 @@
 # Slice M7: `u-boot generate <artifact>`-Flow
 
-> **Status:** In progress (T1..T4 done)
-> **DoD:** T1 ✅ `67fc181` / T2 ✅ `3c5de48` / T3 ✅ `037ab00` / T4 ✅ `19c4110` / T5 ⬜ / T6 ⬜
+> **Status:** In progress (T1..T5 done — only T6 CLI-Wiring fehlt)
+> **DoD:** T1 ✅ `67fc181` / T2 ✅ `3c5de48` / T3 ✅ `037ab00` / T4 ✅ `19c4110` / T5 ✅ `294e492` / T6 ⬜
 
 ## Auslöser
 
