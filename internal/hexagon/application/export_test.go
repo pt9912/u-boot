@@ -87,6 +87,14 @@ func StripJSONCForTest(src []byte) []byte {
 	return stripJSONC(src)
 }
 
+// ErrStubConfigHandlerForTest exposes the package-internal
+// [errStubConfigHandler] sentinel so external `_test` packages
+// can pin `errors.Is(err, errStubConfigHandler)` for the M8-T2
+// stub handlers without leaking the sentinel into the driving-
+// port API surface. T3 removes the Get/Show stubs, T4 removes
+// the Set stub and the sentinel.
+var ErrStubConfigHandlerForTest = errStubConfigHandler
+
 // AddServicePlanForTest is the test-only projection of the unexported
 // [servicePlan] returned by [AddServiceService.planAdd]. T3 tests use
 // it to assert plan shape for each mutating state without exposing
