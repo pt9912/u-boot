@@ -1,7 +1,7 @@
 # Slice MVP-Closure: `init --devcontainer` + LH-AK-Pin-Vervollständigung
 
-> **Status:** In progress (T1 done)
-> **DoD:** T1 ✅ `bfe6416` / T2 ⬜ / T3 ⬜
+> **Status:** In progress (T1 + T2 done)
+> **DoD:** T1 ✅ `bfe6416` / T2 ✅ `8525c4c` (inkl. Doctor-Severity-Fix für `compose.yaml.valid` no-services: Error → Warn, LH-AK-001 §2299-Konformität) / T3 ⬜
 
 ## Auslöser
 
