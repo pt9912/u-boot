@@ -660,6 +660,14 @@ func TestGenerateDevcontainer_AntiDriftAgainstDoctorPortHelper(t *testing.T) {
 	if err != nil {
 		t.Fatalf("doctor port helper: %v", err)
 	}
+	// Fixture-sanity guard (review-followup N3): the fixture must
+	// produce a non-empty port list, otherwise a future regression
+	// that breaks port detection in both call sites — generator
+	// returning nil AND doctor returning nil — would silently
+	// DeepEqual-true and the anti-drift pin would lose its bite.
+	if len(doctorPorts) == 0 {
+		t.Fatalf("fixture sanity: expected non-empty doctor port list, got nil")
+	}
 
 	if _, err := generateDevcontainer(t, svc); err != nil {
 		t.Fatalf("generate devcontainer: %v", err)
@@ -1009,6 +1017,162 @@ func TestGenerateChangelog_UserEditedBlock_MissingUnreleased_RepairedManual(t *t
 	}
 	if delta := len(fs.writtenPaths()) - writesAfterRepair; delta != 0 {
 		t.Errorf("second run produced %d WriteFile call(s), want 0", delta)
+	}
+}
+
+// TestGenerateChangelog_UserEditedBlock_FencedReleaseOnly_NoOp pins
+// the review-followup S1 fix: a `## [1.2.3]` header that only
+// appears inside a ```` ```md ```` fenced code block must NOT count
+// as a real release section. Without the fix the handler would
+// splice the Unreleased stub *inside* the fence and corrupt the
+// user's Markdown.
+func TestGenerateChangelog_UserEditedBlock_FencedReleaseOnly_NoOp(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs)
+	seed := []byte(
+		"<!-- BEGIN U-BOOT MANAGED BLOCK: init -->\n" +
+			"# Changelog\n\nUser-curated intro.\n" +
+			"<!-- END U-BOOT MANAGED BLOCK: init -->\n\n" +
+			"Documentation example:\n\n" +
+			"```md\n## [1.2.3] - 2026-01-01\n\n### Added\n\n- example\n```\n",
+	)
+	seedChangelog(t, fs, seed)
+
+	writesBefore := len(fs.writtenPaths())
+	resp, err := generateChangelog(t, svc)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Action != driving.GenerateActionNoOp {
+		t.Errorf("Action = %v, want NoOp (the fenced [1.2.3] must not anchor a splice)", resp.Action)
+	}
+	if delta := len(fs.writtenPaths()) - writesBefore; delta != 0 {
+		t.Errorf("fenced-only path produced %d WriteFile call(s), want 0", delta)
+	}
+}
+
+// TestGenerateChangelog_UserEditedBlock_FencedReleaseBeforeReal_SpliceAtReal
+// pins the harder S1 case: a fenced `## [9.9.9]` example precedes a
+// real `## [0.1.0]` section. The Unreleased stub must be spliced
+// before the *real* one, not the fenced one — otherwise the fence
+// is broken.
+func TestGenerateChangelog_UserEditedBlock_FencedReleaseBeforeReal_SpliceAtReal(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs)
+	seed := []byte(
+		"<!-- BEGIN U-BOOT MANAGED BLOCK: init -->\n" +
+			"# Changelog\n\nUser-curated intro.\n" +
+			"<!-- END U-BOOT MANAGED BLOCK: init -->\n\n" +
+			"Example format:\n\n" +
+			"```md\n## [9.9.9]\n```\n\n" +
+			"## [0.1.0] - 2026-01-01\n\n### Added\n\n- initial release\n",
+	)
+	seedChangelog(t, fs, seed)
+
+	resp, err := generateChangelog(t, svc)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Action != driving.GenerateActionRepairedManual {
+		t.Errorf("Action = %v, want RepairedManual", resp.Action)
+	}
+
+	got, err := fs.ReadFile(changelogPath())
+	if err != nil {
+		t.Fatalf("read repaired CHANGELOG.md: %v", err)
+	}
+	// The fenced [9.9.9] must remain intact (still inside the fence).
+	if !bytes.Contains(got, []byte("```md\n## [9.9.9]\n```")) {
+		t.Errorf("fenced [9.9.9] example was corrupted; got:\n%s", got)
+	}
+	// The Unreleased stub must sit between the fence and [0.1.0].
+	fenceCloseIdx := bytes.Index(got, []byte("```md\n## [9.9.9]\n```"))
+	unreleasedIdx := bytes.Index(got, []byte("## [Unreleased]"))
+	realReleaseIdx := bytes.Index(got, []byte("## [0.1.0]"))
+	if fenceCloseIdx >= unreleasedIdx || unreleasedIdx >= realReleaseIdx {
+		t.Errorf("Unreleased stub at offset %d not between fence (%d) and real release (%d)",
+			unreleasedIdx, fenceCloseIdx, realReleaseIdx)
+	}
+}
+
+// TestGenerateChangelog_UserEditedBlock_FencedUnreleased_DoesNotCount
+// pins the symmetric S1 case for [hasChangelogUnreleased]: a fenced
+// `## [Unreleased]` example must NOT make the handler believe a real
+// Unreleased section exists. With a real release section also
+// present, the handler should hit the RepairedManual path.
+func TestGenerateChangelog_UserEditedBlock_FencedUnreleased_DoesNotCount(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs)
+	seed := []byte(
+		"<!-- BEGIN U-BOOT MANAGED BLOCK: init -->\n" +
+			"# Changelog\n\nUser-curated intro.\n" +
+			"<!-- END U-BOOT MANAGED BLOCK: init -->\n\n" +
+			"Convention reference:\n\n" +
+			"```md\n## [Unreleased]\n```\n\n" +
+			"## [0.1.0] - 2026-01-01\n",
+	)
+	seedChangelog(t, fs, seed)
+
+	resp, err := generateChangelog(t, svc)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Action != driving.GenerateActionRepairedManual {
+		t.Errorf("Action = %v, want RepairedManual (the fenced Unreleased must not count)", resp.Action)
+	}
+}
+
+// TestGenerateChangelog_CRLFFreshBlock_NoOp pins the review-followup
+// S2 fix: a CHANGELOG.md saved with CRLF line endings that otherwise
+// matches the rendered template byte-for-byte (LF) must still
+// register as fresh — the LF-normalised bytes.Equal must accept the
+// match instead of routing to the user-edited branch.
+func TestGenerateChangelog_CRLFFreshBlock_NoOp(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs)
+	rendered := renderedChangelog(t)
+	crlf := bytes.ReplaceAll(rendered, []byte{'\n'}, []byte{'\r', '\n'})
+	seedChangelog(t, fs, crlf)
+
+	writesBefore := len(fs.writtenPaths())
+	resp, err := generateChangelog(t, svc)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Action != driving.GenerateActionNoOp {
+		t.Errorf("Action = %v, want NoOp (CRLF-edited fresh block must register as fresh)", resp.Action)
+	}
+	if delta := len(fs.writtenPaths()) - writesBefore; delta != 0 {
+		t.Errorf("CRLF NoOp path produced %d WriteFile call(s), want 0", delta)
+	}
+}
+
+// TestGenerateEnvExample_CRLFFreshBlock_NoOp covers the same S2 fix
+// applied to the generateManagedFile path (T2/T3 helper) — a CRLF-
+// edited fresh env-example registers as NoOp instead of silently
+// rewriting CRLF→LF.
+func TestGenerateEnvExample_CRLFFreshBlock_NoOp(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs)
+	rendered := renderedEnvExample(t)
+	crlf := bytes.ReplaceAll(rendered, []byte{'\n'}, []byte{'\r', '\n'})
+	seedEnvExample(t, fs, crlf)
+
+	writesBefore := len(fs.writtenPaths())
+	resp, err := generateEnvExample(t, svc)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Action != driving.GenerateActionNoOp {
+		t.Errorf("Action = %v, want NoOp (CRLF-edited fresh block must register as fresh)", resp.Action)
+	}
+	if delta := len(fs.writtenPaths()) - writesBefore; delta != 0 {
+		t.Errorf("CRLF NoOp path produced %d WriteFile call(s), want 0", delta)
 	}
 }
 

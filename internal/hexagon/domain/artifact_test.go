@@ -80,8 +80,9 @@ func TestArtifact_String_Unknown(t *testing.T) {
 	t.Parallel()
 	// Out-of-range value (defensive default branch). The CLI never
 	// constructs Artifact values directly; this only protects against
-	// a misuse like Artifact(99) sneaking into a log line.
-	if got := domain.Artifact(99).String(); got != "unknown" {
-		t.Errorf("Artifact(99).String() = %q, want %q", got, "unknown")
+	// a misuse like Artifact(99) sneaking into a log line. The
+	// `Artifact(N)`-form makes the int visible (review-followup S4).
+	if got, want := domain.Artifact(99).String(), "Artifact(99)"; got != want {
+		t.Errorf("Artifact(99).String() = %q, want %q", got, want)
 	}
 }

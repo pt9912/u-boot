@@ -125,7 +125,11 @@ func printGenerateSummary(out io.Writer, resp driving.GenerateResponse) {
 	case driving.GenerateActionRepairedManual:
 		fmt.Fprintf(out, "Repaired %s structure (%s).\n", name, strings.Join(resp.Changed, ", "))
 	default:
-		fmt.Fprintf(out, "Generated %s.\n", name)
+		// Defensive: a future GenerateAction value renders both its
+		// String() form and the Changed list rather than silently
+		// truncating to "Generated <name>" (review-followup N5).
+		fmt.Fprintf(out, "%s action %s; changed: %s\n",
+			name, resp.Action, strings.Join(resp.Changed, ", "))
 	}
 }
 

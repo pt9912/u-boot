@@ -152,9 +152,59 @@ func (s *GenerateService) readProjectConfig(baseDir string) (ubootYAMLConfig, er
 // changelogHeaderRE matches a Keep-a-Changelog second-level header
 // line (`## [<name>]`), capturing the inner identifier so callers
 // can branch on whether it is `Unreleased` or a release version
-// (`[0.1.0]`, etc.). Pinned at line-start so a `## [Unreleased]`
-// fragment quoted inside a fenced code block does not register.
+// (`[0.1.0]`, etc.). Pinned at line-start so the regex itself
+// rejects inline mentions; fenced-code-block headers are filtered
+// by [isOffsetInsideFencedBlock] in the call sites — a quoted
+// `## [1.2.3]` example before any real release section would
+// otherwise trigger the RepairedManual splice path *inside* the
+// fence and corrupt the user's Markdown (review-followup S1).
 var changelogHeaderRE = regexp.MustCompile(`(?m)^##\s*\[([^\]]+)\]`)
+
+// fenceMarkerRE matches a Markdown fenced-code-block opener/closer
+// (3+ backticks at line start). Tilde-fenced blocks and indented
+// code blocks are not recognised — neither is common in Keep-a-
+// Changelog projects, and the heuristic stays cheap.
+var fenceMarkerRE = regexp.MustCompile("(?m)^`{3,}")
+
+// normaliseLF returns content with CRLF (\r\n) sequences replaced
+// by LF (\n). Used by the [bytes.Equal] freshness comparison in
+// [generateManagedFile] and [generateChangelog] so a file edited
+// on Windows (CRLF) does not falsely register as user-edited
+// against a template that ships with LF (review-followup S2).
+//
+// The returned slice is only used for the equality comparison —
+// the actual splice into the existing file uses the un-normalised
+// `existing` bytes, so the user's original line endings outside
+// the spliced block stay intact.
+func normaliseLF(content []byte) []byte {
+	if !bytes.Contains(content, []byte{'\r', '\n'}) {
+		return content
+	}
+	return bytes.ReplaceAll(content, []byte{'\r', '\n'}, []byte{'\n'})
+}
+
+// classifyExistingBlock wraps [managedblock.Find] for the three M7
+// handlers (generateManagedFile, generateChangelog, planDevcontainerFile)
+// so the BlockNotFound / BlockMalformed branches all surface the
+// same [driving.ErrGenerateManualConflict] with a deterministic
+// repair-hint message (review-followup N4). Other find errors get
+// a generic wrap; the byte range is unset on any error.
+func classifyExistingBlock(content []byte, marker managedblock.Marker, relPath string) (start, end int, err error) {
+	start, end, findErr := managedblock.Find(content, marker)
+	switch {
+	case errors.Is(findErr, managedblock.ErrBlockNotFound):
+		return 0, 0, fmt.Errorf(
+			"%w: %q exists without an `init` managed block; rename the file or insert the format-appropriate BEGIN/END markers from LH-SA-FILE-002 manually",
+			driving.ErrGenerateManualConflict, relPath)
+	case errors.Is(findErr, managedblock.ErrBlockMalformed):
+		return 0, 0, fmt.Errorf(
+			"%w: %q has a malformed `init` managed block (%v); rename the file or repair the BEGIN/END markers manually",
+			driving.ErrGenerateManualConflict, relPath, findErr)
+	case findErr != nil:
+		return 0, 0, fmt.Errorf("find init block in %q: %w", relPath, findErr)
+	}
+	return start, end, nil
+}
 
 // changelogUnreleasedStub is the bare scaffold inserted by the
 // RepairedManual path when the user removed the `## [Unreleased]`
@@ -192,6 +242,17 @@ const changelogUnreleasedStub = "## [Unreleased]\n\n### Added\n\n### Changed\n\n
 // the heuristic is `bytes.Equal(existing, rendered)` — there is no
 // template-version marker. M7 freezes the M3 templates; a future
 // `--migrate` flag or versioned marker (`init v2`) is V1.
+//
+// Same fragility on project rename (review-followup S3): when
+// `u-boot.yaml.project.name` changes, the block's rendered
+// `**<name>**` line no longer matches the existing one, so the
+// handler routes to the user-edited branch and leaves the old
+// name in place. T2 env-example and T3 readme rewrite the name
+// transparently (they call back into the splice path on diff);
+// changelog stays stuck on purpose to avoid clobbering user
+// entries. The expected workaround is a hand-edit of the existing
+// block. CRLF line-endings used to share the same flip — that
+// path is now defended in [normaliseLF] (review-followup S2).
 func (s *GenerateService) generateChangelog(_ context.Context, req driving.GenerateRequest) (driving.GenerateResponse, error) {
 	cfg, err := s.readProjectConfig(req.BaseDir)
 	if err != nil {
@@ -240,22 +301,15 @@ func (s *GenerateService) generateChangelog(_ context.Context, req driving.Gener
 			"extract init block from rendered changelog.md.tmpl: %w", err)
 	}
 
-	start, end, findErr := managedblock.Find(existing, marker)
-	switch {
-	case errors.Is(findErr, managedblock.ErrBlockNotFound):
-		return driving.GenerateResponse{}, fmt.Errorf(
-			"%w: %q exists without an `init` managed block; rename the file or insert the `<!-- BEGIN U-BOOT MANAGED BLOCK: init -->` marker manually",
-			driving.ErrGenerateManualConflict, relPath)
-	case errors.Is(findErr, managedblock.ErrBlockMalformed):
-		return driving.GenerateResponse{}, fmt.Errorf(
-			"%w: %q has a malformed `init` managed block (%v); rename the file or repair the BEGIN/END markers manually",
-			driving.ErrGenerateManualConflict, relPath, findErr)
-	case findErr != nil:
-		return driving.GenerateResponse{}, fmt.Errorf("find init block in %q: %w", relPath, findErr)
+	start, end, err := classifyExistingBlock(existing, marker, relPath)
+	if err != nil {
+		return driving.GenerateResponse{}, err
 	}
 
 	// State: present, block matches rendered → NoOp (fresh).
-	if bytes.Equal(existing[start:end], renderedBlock) {
+	// LF-normalise both sides so a CRLF-edited file does not flip
+	// into the user-edited branch (review-followup S2).
+	if bytes.Equal(normaliseLF(existing[start:end]), normaliseLF(renderedBlock)) {
 		s.logger.Debug("generate: no-op (fresh block)",
 			"artifact", req.Artifact.String(), "path", relPath)
 		return driving.GenerateResponse{
@@ -317,10 +371,15 @@ func changelogRepairUnreleased(existing []byte, blockEnd int) ([]byte, bool) {
 // hasChangelogUnreleased reports whether content contains a
 // Keep-a-Changelog `## [Unreleased]` header. Used by
 // [generateChangelog] to decide between the NoOp and RepairedManual
-// user-edited branches.
+// user-edited branches. Headers inside a backtick-fenced code block
+// are skipped so a documentation example does not falsely register.
 func hasChangelogUnreleased(content []byte) bool {
-	for _, m := range changelogHeaderRE.FindAllSubmatch(content, -1) {
-		if bytes.Equal(m[1], []byte("Unreleased")) {
+	for _, m := range changelogHeaderRE.FindAllSubmatchIndex(content, -1) {
+		if isOffsetInsideFencedBlock(content, m[0]) {
+			continue
+		}
+		name := content[m[2]:m[3]]
+		if bytes.Equal(name, []byte("Unreleased")) {
 			return true
 		}
 	}
@@ -331,9 +390,14 @@ func hasChangelogUnreleased(content []byte) bool {
 // `## [<release>]` header in content where `<release>` is not
 // `Unreleased`. Returns -1 when no such header is present. Used by
 // [generateChangelog] to position the Unreleased stub before the
-// existing release history.
+// existing release history. Headers inside a backtick-fenced code
+// block are skipped — splicing the Unreleased stub into a fence
+// would corrupt the user's Markdown (review-followup S1).
 func firstReleaseSectionOffset(content []byte) int {
 	for _, m := range changelogHeaderRE.FindAllSubmatchIndex(content, -1) {
+		if isOffsetInsideFencedBlock(content, m[0]) {
+			continue
+		}
 		// m[0]/m[1] cover the full header line offset; m[2]/m[3]
 		// cover the captured group (the inner identifier).
 		name := content[m[2]:m[3]]
@@ -342,6 +406,25 @@ func firstReleaseSectionOffset(content []byte) int {
 		}
 	}
 	return -1
+}
+
+// isOffsetInsideFencedBlock reports whether the byte at `offset`
+// falls inside an open Markdown fenced code block. Counts the
+// backtick-fence markers in content[:offset]; an odd count means
+// the offset is inside an unclosed fence. Cheap O(N) regex scan
+// over the prefix; for the typical sub-kilobyte CHANGELOG.md this
+// is negligible.
+//
+// Limitations (review-followup S1):
+//   - Tilde-fenced blocks (`~~~`) are not recognised.
+//   - Indented code blocks (4-space indent) are not recognised.
+//   - A closing fence with fewer backticks than the opener is
+//     counted as a separate fence, which can mis-pair on
+//     intentionally-mismatched fences. Both are rare in practice
+//     and a future migration to a CommonMark parser would close
+//     these gaps.
+func isOffsetInsideFencedBlock(content []byte, offset int) bool {
+	return len(fenceMarkerRE.FindAllIndex(content[:offset], -1))%2 == 1
 }
 
 // generateReadme is the thin T3 wrapper over generateManagedFile for
@@ -442,23 +525,17 @@ func (s *GenerateService) generateManagedFile(
 	}
 
 	// Classify the existing file's block.
-	start, end, findErr := managedblock.Find(existing, marker)
-	switch {
-	case errors.Is(findErr, managedblock.ErrBlockNotFound):
-		return driving.GenerateResponse{}, fmt.Errorf(
-			"%w: %q exists without an `init` managed block; rename the file or insert the format-appropriate BEGIN/END markers from LH-SA-FILE-002 manually",
-			driving.ErrGenerateManualConflict, relPath)
-	case errors.Is(findErr, managedblock.ErrBlockMalformed):
-		return driving.GenerateResponse{}, fmt.Errorf(
-			"%w: %q has a malformed `init` managed block (%v); rename the file or repair the BEGIN/END markers manually",
-			driving.ErrGenerateManualConflict, relPath, findErr)
-	case findErr != nil:
-		return driving.GenerateResponse{}, fmt.Errorf("find init block in %q: %w", relPath, findErr)
+	start, end, err := classifyExistingBlock(existing, marker, relPath)
+	if err != nil {
+		return driving.GenerateResponse{}, err
 	}
 
 	// State: present-with-block. NoOp if the existing block bytes are
 	// already equal to the rendered block bytes (idempotency).
-	if bytes.Equal(existing[start:end], renderedBlock) {
+	// LF-normalised so a CRLF-edited file does not flip into
+	// UpdatedBlock and silently rewrite line endings to LF
+	// (review-followup S2).
+	if bytes.Equal(normaliseLF(existing[start:end]), normaliseLF(renderedBlock)) {
 		s.logger.Debug("generate: no-op",
 			"artifact", req.Artifact.String(), "path", relPath)
 		return driving.GenerateResponse{
@@ -581,6 +658,19 @@ func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.Ge
 // so a project whose compose.yaml has not been generated yet still
 // gets a syntactically-valid devcontainer.json (LH-FA-DEV-005
 // allows omitting forwardPorts).
+//
+// Known classification gap (review-followup N2): a *parse* error
+// in compose.yaml (corrupt YAML) bubbles up through
+// `collectActiveServicePorts` as a generic error and is wrapped
+// here in [driving.ErrGenerateFileSystem] → exit code 14. The
+// doctor helper does not distinguish read-failure from parse-
+// failure, and the application layer cannot import the yaml-v3
+// adapter to do its own classification. A future slice that
+// introduces a `driven.ErrYAMLParse`-style sentinel could route
+// the parse path to [driving.ErrGenerateManualConflict] →
+// exit code 10 instead. Until then a corrupt compose.yaml under
+// `u-boot generate devcontainer` surfaces as a (technical)
+// filesystem error rather than a (fachlich) project-state error.
 func (s *GenerateService) collectDevcontainerForwardPorts(baseDir string, cfg ubootYAMLConfig) ([]int, error) {
 	services := activeServiceNames(cfg)
 	if len(services) == 0 {
@@ -663,20 +753,14 @@ func (s *GenerateService) planDevcontainerFile(
 		return devcontainerFilePlan{}, fmt.Errorf("%w: read %q: %v",
 			driving.ErrGenerateFileSystem, targetPath, err)
 	}
-	start, end, findErr := managedblock.Find(existing, marker)
-	switch {
-	case errors.Is(findErr, managedblock.ErrBlockNotFound):
-		return devcontainerFilePlan{}, fmt.Errorf(
-			"%w: %q exists without an `init` managed block; rename the file or insert the format-appropriate BEGIN/END markers from LH-SA-FILE-002 manually",
-			driving.ErrGenerateManualConflict, relPath)
-	case errors.Is(findErr, managedblock.ErrBlockMalformed):
-		return devcontainerFilePlan{}, fmt.Errorf(
-			"%w: %q has a malformed `init` managed block (%v); rename the file or repair the BEGIN/END markers manually",
-			driving.ErrGenerateManualConflict, relPath, findErr)
-	case findErr != nil:
-		return devcontainerFilePlan{}, fmt.Errorf("find init block in %q: %w", relPath, findErr)
+	start, end, err := classifyExistingBlock(existing, marker, relPath)
+	if err != nil {
+		return devcontainerFilePlan{}, err
 	}
-	if bytes.Equal(existing[start:end], renderedBlock) {
+	// LF-normalise both sides so CRLF-edited Dockerfiles /
+	// devcontainer.json files do not flip into UpdatedBlock
+	// (review-followup S2).
+	if bytes.Equal(normaliseLF(existing[start:end]), normaliseLF(renderedBlock)) {
 		plan.action = devcontainerActionNoOp
 		return plan, nil
 	}
@@ -706,6 +790,14 @@ func (s *GenerateService) executeDevcontainerPlans(plans []devcontainerFilePlan)
 			hasReplace = true
 		case devcontainerActionNoOp:
 			// nothing to do
+		default:
+			// Defensive: a future devcontainerFileAction value
+			// added without updating this switch surfaces as a
+			// loud programmer error instead of silently no-opping
+			// (review-followup N1).
+			return nil, false, false, fmt.Errorf(
+				"internal: unknown devcontainerFileAction %d for %q",
+				int(plan.action), plan.relPath)
 		}
 	}
 	return changed, hasWrite, hasReplace, nil

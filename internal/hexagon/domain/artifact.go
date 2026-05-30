@@ -43,6 +43,13 @@ const (
 // "readme", "env-example", "devcontainer"). Stable: the M7 spec
 // catalogue and the CLI's allowed-values message both pin these
 // exact strings.
+//
+// Out-of-range values render as `Artifact(N)` so debug logs and
+// error messages surface the actual integer instead of an opaque
+// `"unknown"` literal (review-followup S4) — the defensive branch
+// in [application.GenerateService.Generate] is reachable only via
+// a struct-literal `Artifact(99)` since the CLI always constructs
+// values through [NewArtifact].
 func (a Artifact) String() string {
 	switch a {
 	case ArtifactChangelog:
@@ -54,7 +61,7 @@ func (a Artifact) String() string {
 	case ArtifactDevcontainer:
 		return "devcontainer"
 	default:
-		return "unknown"
+		return fmt.Sprintf("Artifact(%d)", int(a))
 	}
 }
 
