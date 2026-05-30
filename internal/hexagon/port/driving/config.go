@@ -131,6 +131,26 @@ var ErrConfigSchemaInvalid = errors.New("config: schema validation failed")
 // same architectural decision as M7's ErrGenerateFileSystem.
 var ErrConfigFileSystem = errors.New("config: filesystem error")
 
+// ErrConfigValueNotSet signals that a Get call addressed an
+// optional path whose backing field has never been written. Two
+// concrete shapes today:
+//
+//   - `devcontainer.enabled` when the u-boot.yaml `devcontainer:`
+//     block is missing or has no `enabled:` key.
+//   - `services.<svc>.enabled` when the service is not registered
+//     in `services:` (or registered without an `enabled:` key).
+//
+// The CLI surfaces it with a per-path hint pointing at the
+// canonical write path (`u-boot init --devcontainer` /
+// `u-boot config set ...` for devcontainer; `u-boot add <svc>`
+// for services). Code 10 (LH-FA-CLI-006 validation —
+// "user must do something").
+//
+// `project.name` is required by LH-FA-CONF-002 §1308, so a
+// missing name surfaces as [ErrConfigSchemaInvalid] instead,
+// not this sentinel: the schema is corrupt, not just unset.
+var ErrConfigValueNotSet = errors.New("config: value not set")
+
 // ConfigUseCase is the driving-port for `u-boot config get/set/
 // show`. Three methods instead of one action-enum dispatcher
 // because the request shapes differ structurally (Show has no
