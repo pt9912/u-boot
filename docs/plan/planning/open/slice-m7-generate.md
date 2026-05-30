@@ -48,13 +48,16 @@ Plus aus angrenzenden Spec-Punkten, die `generate` einlöst:
     `ErrGenerateManualConflict` wenn Datei ohne managed-Block
     existiert).
   - `14` — technischer Persistenz-/Dateisystemfehler beim Lesen oder
-    Schreiben. **M7 führt die erste 14-Klassifikation in
-    `cli.ExitCode` ein** (siehe T6-DoD); FS-Fehler aus
-    `driven.FileSystem` werden via `errors.Is(err,
-    driven.ErrFileSystem*)` bzw. — falls die Driven-Layer keinen
-    dedizierten Sentinel exportiert — durch einen neuen
-    Use-Case-Sentinel `ErrGenerateFileSystem` gewrappt, der in T6
-    auf Code 14 mappt.
+    Schreiben. Code 14 existiert bereits in `cli.ExitCode`
+    (`isFilesystemError` in `cli.go:264-267` für
+    `ErrBackupSuffixExhausted` + `ErrBackupSourceMissing`,
+    `TestExitCode_BaseMappings` in `cli_test.go:682-684`); M7 ergänzt
+    in dieser Liste den **neuen** Sentinel `ErrGenerateFileSystem`,
+    der FS-Fehler aus `driven.FileSystem` wrappt. Falls die
+    Driven-Layer keinen dedizierten Sentinel exportiert
+    (`driven.ErrFileSystem*` — Scan ergab: existiert heute nicht),
+    bleibt der Wrap; sonst zeigt `errors.Is` direkt auf den
+    Driven-Sentinel.
 - **`LH-SA-FILE-002`** Managed-Block-Konvention pro Datei-Format:
   - `.env.example` ⇒ `StyleHash` (`# BEGIN ...`).
   - `README.md`, `CHANGELOG.md` ⇒ `StyleHTMLComment` (`<!-- BEGIN ... -->`).
@@ -132,11 +135,13 @@ Out of Scope (V1+):
     implementierten Flag aber bewusst nicht; siehe „Out of Scope".
   - `ErrGenerateFileSystem` — Wrapt unerwartete IO-/Permissions-
     Fehler aus `driven.FileSystem.ReadFile`/`WriteFile`/`Stat`;
-    Code 14. Wird in T6 erstmals in `cli.ExitCode` verdrahtet.
-    Falls die Driven-Layer bereits einen passenden Sentinel
-    exportiert (`driven.ErrFileSystem*`), kann der Wrap entfallen
-    und das `errors.Is`-Mapping zeigt direkt auf den Driven-Sentinel
-    — Entscheidung fällt in T1 nach kurzem Scan der Driven-Pakete.
+    Code 14. T6 reiht ihn in die existierende `isFilesystemError`-
+    Liste (`cli.go:264-267`) ein. Falls die Driven-Layer einen
+    passenden Sentinel exportiert (`driven.ErrFileSystem*` — der
+    Pre-T1-Scan ergab: existiert heute nicht), könnte der Wrap
+    entfallen und das `errors.Is`-Mapping zeigt direkt auf den
+    Driven-Sentinel — Entscheidung fällt in T1 nach erneutem
+    bestätigenden Scan der Driven-Pakete.
 
 - **Neuer Domain-Type `domain.Artifact`** in
   `internal/hexagon/domain/artifact.go` als enum-String mit
@@ -290,6 +295,10 @@ M3 existiert bereits) mit einem managed-Block in `StyleHash`-Form.
 **DoD T2:**
 - [ ] `generateEnvExample`-Handler implementiert; Stub aus T1 ersetzt.
 - [ ] 5 State-Tests grün, NoOp-Pin grün.
+- [ ] Stub-Pin-Test in `generate_test.go` auf **3** verbliebene
+  Stubs (`readme`, `changelog`, `devcontainer`) reduziert — damit
+  ein Auslassen einer Folgetranche laut auffällt, ohne dass der
+  Pin lautlos stale wird.
 - [ ] `make gates` grün.
 - [ ] DoD-Line: `T2 ✅ <commit-hash>`.
 
@@ -312,6 +321,8 @@ Template wird re-gerendered.
 **DoD T3:**
 - [ ] `generateReadme`-Handler implementiert.
 - [ ] State + User-Content-Tests grün.
+- [ ] Stub-Pin-Test auf **2** verbliebene Stubs (`changelog`,
+  `devcontainer`) reduziert.
 - [ ] `make gates` grün.
 - [ ] DoD-Line: `T3 ✅ <commit-hash>`.
 
@@ -332,7 +343,7 @@ Datei-Zustand:
 | ------- | -------------- | ------------ | -------------------------- | ------ |
 | **absent** | fehlt | — | — | `actionWrite`: Template rendern, neue Datei. `Created`. |
 | **present-with-block-no-edits** | vorhanden | vorhanden | unverändert vs. Template | `actionReplaceBlock`: Block re-rendern. `UpdatedBlock` (wenn diff != ∅) oder `NoOp`. |
-| **present-with-block-edited** | vorhanden | vorhanden | User hat Einträge ergänzt | **No-op-Pfad mit Diagnose**: kein Re-Render des init-Blocks; stattdessen prüfen, ob die `## [Unreleased]`-Sektion existiert und nicht-leer ist; falls **alle** Pflicht-Subsektionen (`### Added`, `### Changed`, `### Fixed`) fehlen, einen neuen Stub-`## [Unreleased]`-Header **außerhalb** des managed-Blocks vor der ersten Versions-Sektion einfügen (`RepairedManual`). Detection-Heuristik: Block-Body-Hash != Template-Body-Hash ⇒ user-edited; konservativ. |
+| **present-with-block-edited** | vorhanden | vorhanden | User hat Einträge ergänzt | **No-op-Pfad mit Diagnose**: kein Re-Render des init-Blocks; stattdessen prüfen, ob die `## [Unreleased]`-Sektion existiert und nicht-leer ist; falls **alle** Pflicht-Subsektionen (`### Added`, `### Changed`, `### Fixed`) fehlen, einen neuen Stub-`## [Unreleased]`-Header **außerhalb** des managed-Blocks vor der ersten Versions-Sektion einfügen (`RepairedManual`). Detection-Heuristik: Hash des Block-Bodys aus der existierenden Datei != Hash des Block-Bodys aus `renderTemplate("changelog.md.tmpl", {Name: cfg.Name})` ⇒ user-edited. Wichtig: gegen das *gerenderte* Template mit dem aktuellen Projektnamen vergleichen, nicht gegen die rohe Template-Quelle — sonst kippt jedes Projekt sofort in den user-edited-Pfad und der `NoOp`-Pin am Ende dieser Tranche schlägt fehl. |
 | **present-no-block** | vorhanden | fehlt | — | `ErrGenerateManualConflict`. |
 
 Die Wahl konservativ-no-op bei user-edited Blocks ist die
@@ -366,6 +377,8 @@ braucht. Siehe „Out of Scope".
 - [ ] LH-AK-007-Pin: ein End-to-end-Test, der genau dem Spec-Wortlaut
   folgt (`u-boot init && u-boot generate changelog`) — Datei existiert,
   Vor-Inhalt nicht zerstört, Sektion korrekt ergänzt.
+- [ ] Stub-Pin-Test auf **1** verbliebenen Stub (`devcontainer`)
+  reduziert.
 - [ ] `make gates` grün.
 - [ ] DoD-Line: `T4 ✅ <commit-hash>`.
 
@@ -434,11 +447,14 @@ nächste Lauf erneut als Konflikt sieht):
 | **fs-error**     | Read/Write-Fehler  | beliebig           | `ErrGenerateFileSystem`-Wrap; Aufruf endet mit Exit 14. Kein Teil-Write. |
 
 **Tests:**
-- LH-AK-005-Pin: `u-boot init && u-boot add postgres && u-boot generate
-  devcontainer` ⇒ beide Dateien existieren, JSON ist syntaktisch
-  gültig (JSONC mit Kommentaren ist OK; gegen `stripJSONC`+
-  `encoding/json.Valid` prüfen), Name korrekt, `build` vorhanden,
-  `forwardPorts: [5432]` enthält Postgres-Port.
+- Mindestfelder-Pin (LH-FA-DEV-001/004/005, **nicht** LH-AK-005 —
+  letzteres verlangt explizit `u-boot init --devcontainer` und
+  gehört in den MVP-Closure-Slice): `u-boot init && u-boot add
+  postgres && u-boot generate devcontainer` ⇒ beide Dateien
+  existieren, JSON ist syntaktisch gültig (JSONC mit Kommentaren ist
+  OK; gegen `stripJSONC`+ `encoding/json.Valid` prüfen), Name
+  korrekt, `build` vorhanden, `forwardPorts: [5432]` enthält
+  Postgres-Port.
 - Forward-Ports-Detection: drei Fixture-Variationen:
   (a) keine Services aktiv ⇒ `forwardPorts` fehlt;
   (b) Postgres aktiv ⇒ `[5432]`;
@@ -477,7 +493,8 @@ nächste Lauf erneut als Konflikt sieht):
   Dateien wird **keine** geschrieben (eigener Test pinnt das, indem
   `FileSystem.WriteFile`-Counter auf 0 prüft).
 - [ ] Anti-Drift-Pin gegen `doctor.collectActiveServicePorts` grün.
-- [ ] LH-AK-005-Pin grün (End-to-end mit Postgres).
+- [ ] Mindestfelder-Pin grün (End-to-end mit Postgres,
+  LH-FA-DEV-001/004/005).
 - [ ] Stub-Pin-Test aus T1 (`errStubHandler`) wird hier entfernt — alle
   vier Handler sind ab T5 implementiert.
 - [ ] `make gates` grün.
@@ -504,14 +521,30 @@ nächste Lauf erneut als Konflikt sieht):
   `generateUseCase driving.GenerateUseCase`-Field. **Breaking-Change
   in `cli.New`-Signatur** (`cli.go:111`): der Konstruktor erhält
   einen neuen positionalen Parameter `genUC
-  driving.GenerateUseCase`. Betroffen sind
-  - `cmd/uboot/main.go` (Wireup: `cli.New(version, initUC, doctorUC,
-    addUC, upUC, downUC, genUC, opts...)`),
-  - alle Test-Fakes in `internal/adapter/driving/cli/fakes_test.go`
-    und alle Aufrufer in `cli_test.go`, `verbosity_test.go`,
-    `statusview_test.go`.
-  Alle Aufrufstellen müssen in einem Commit mitgezogen werden, sonst
-  bricht `go build ./...`. — Wenn dieses Mitziehen disruptiv wirkt,
+  driving.GenerateUseCase`. Betroffen sind exakt:
+  - `cmd/uboot/main.go:106` (einziger Produktiv-Aufruf von
+    `cli.New`; neu: `cli.New(version, initSvc, doctorSvc, addSvc,
+    upSvc, downSvc, generateSvc, cli.WithLogLevel(...))`).
+  - `internal/adapter/driving/cli/cli_test.go` — die fünf
+    Helper-Funktionen `newApp` / `newAppWithDoctor` /
+    `newAppWithAdd` / `newAppWithUp` / `newAppWithDown` (Zeilen 99,
+    105, 110, 115, 120) sind die einzigen Test-Aufrufer von
+    `cli.New` und tragen jeweils alle anderen Use-Cases als
+    Fake-Defaults. Hier ergänzt T6 einen neuen Default-Fake
+    `fakeGenerateUseCase` (analog zu den fünf bestehenden
+    `fake*UseCase`-Typen ab `cli_test.go:22`) plus einen sechsten
+    Helper `newAppWithGenerate(genUC, opts...)`.
+  - `verbosity_test.go` und `statusview_test.go` rufen `cli.New`
+    **nicht** direkt auf — sie gehen ausschließlich über `newApp` —
+    und brauchen deshalb keine eigene Migration; sie kompilieren
+    weiter, sobald `newApp` den neuen Default-Fake mitführt.
+  - Es existiert **keine** `fakes_test.go` in diesem Paket; Fakes
+    leben in `cli_test.go`. M7 legt keine separate `fakes_test.go`
+    an (wäre eine Strukturänderung, die zu einer Codestil-
+    Entscheidung gehört, nicht zu diesem Slice).
+  Alle direkten `cli.New`-Aufrufstellen (`main.go` + die fünf
+  `cli_test.go`-Helper) müssen in **einem** Commit mitgezogen werden,
+  sonst bricht `go build ./...`. — Wenn dieses Mitziehen disruptiv wirkt,
   wäre die Alternative ein Functional-Option-Constructor
   (`cli.WithGenerateUseCase(genUC)`), aber das wäre eine
   Abweichung vom etablierten Muster der anderen fünf Use-Cases und
@@ -520,9 +553,12 @@ nächste Lauf erneut als Konflikt sieht):
   laufen im Standard-`make gates`-Pfad, kein neuer Build-Tag).
 - `docs/user/cli.md` (oder analog, falls existent — sonst README.md):
   `generate`-Subkommando dokumentieren.
-- **Carveouts:** Prüfen, ob in `carveouts.md` ein offener Eintrag zu
-  `LH-FA-GEN-*` oder „Devcontainer-Generator" existiert; falls ja,
-  mit M7-DoD-Hash als gelöst markieren.
+- **Carveouts:** `carveouts.md` enthält Stand Pre-T1 keinen
+  offenen Eintrag zu `LH-FA-GEN-*` oder „Devcontainer-Generator"
+  (gegen `docs/plan/planning/in-progress/carveouts.md` verifiziert);
+  dieser Schritt ist deshalb erwartungsgemäß ein No-op. Sollte vor
+  T6-Merge dennoch ein passender Eintrag entstanden sein, wird er
+  mit M7-DoD-Hash als gelöst markiert.
 
 **Tests:**
 - `cli_test.go` (Cobra-Smoke): `u-boot generate unknown-artifact` ⇒
@@ -537,14 +573,18 @@ nächste Lauf erneut als Konflikt sieht):
   Artefakte explizit.
 - [ ] Smoke-Tests im `cli_test.go` grün, inkl. ein Test
   `TestExitCode_GenerateFileSystemError_MapsTo14`, der den neu
-  eingeführten Code-14-Pfad in `cli.ExitCode` pinnt (erste
-  14-Klassifikation in der Codebase — bisher fielen IO-Fehler auf
-  `1`).
-- [ ] `cli.New`-Aufrufstellen in `cmd/uboot/main.go` und allen Tests
-  (`cli_test.go`, `fakes_test.go`, `verbosity_test.go`,
-  `statusview_test.go`) auf die neue Signatur mit
-  `genUC driving.GenerateUseCase` migriert; `go build ./...` und
-  `go test ./...` grün.
+  hinzugefügten Sentinel `ErrGenerateFileSystem` in die
+  bestehende `isFilesystemError`-Liste (`cli.go:264-267`,
+  bereits getestet via `TestExitCode_BaseMappings` für
+  `ErrBackupSuffixExhausted`/`ErrBackupSourceMissing`) einreiht
+  und sein Code-14-Mapping pinnt.
+- [ ] `cli.New`-Aufrufstellen migriert: `cmd/uboot/main.go:106`
+  plus die fünf Helper in `cli_test.go` (Zeilen 99, 105, 110, 115,
+  120). Neuer `fakeGenerateUseCase` in `cli_test.go` ergänzt;
+  `verbosity_test.go` und `statusview_test.go` brauchen keine
+  Änderung, weil sie nur über `newApp` gehen (keine
+  `cli.New`-Direktaufrufe). `go build ./...` und `go test ./...`
+  grün.
 - [ ] `u-boot generate readme` produziert ein README, dessen Markdown-
   Links im `docs-check` (Markdown-Link-Validator-Slice schon Done)
   sauber durchlaufen.
@@ -583,9 +623,13 @@ nächste Lauf erneut als Konflikt sieht):
 - **LH-FA-GEN-005 / LH-AK-006-analog**: doppelter Aufruf ist ein
   `NoOp` (Action-Field expliziter Beleg; CLI-Output „already up to
   date").
-- **LH-FA-DEV-001 / LH-AK-005**: `generate devcontainer` produziert
-  beide Pflichtdateien; JSON ist syntaktisch gültig (JSONC-Stripper
-  + `encoding/json.Valid`).
+- **LH-FA-DEV-001**: `generate devcontainer` produziert beide
+  Pflichtdateien; JSON ist syntaktisch gültig (JSONC-Stripper +
+  `encoding/json.Valid`). **Hinweis:** LH-AK-005 ist hiermit
+  **nicht** geschlossen — die Akzeptanz verlangt explizit
+  `u-boot init --devcontainer`; dieser Flag-Pfad gehört in den
+  MVP-Closure-Slice (siehe Out of Scope), nutzt aber die hier
+  eingeführten Templates wieder.
 - **LH-FA-DEV-005**: `forwardPorts` enthält die Container-Ports aller
   aktiven Services (Postgres ⇒ 5432); leer ⇒ Feld fehlt.
 
@@ -611,7 +655,16 @@ nächste Lauf erneut als Konflikt sieht):
   no-write, der Recovery-Pfad ist „Datei umbenennen, generate
   erneut laufen lassen".
 - **`init --devcontainer`-Flag** (LH-AK-005) — gehört zu
-  MVP-Closure; M7 liefert nur die Templates.
+  MVP-Closure; M7 liefert nur die Templates. **Risikohinweis für
+  den Closure-Slice:** weil M7 für die zwei Devcontainer-Dateien
+  denselben Block-Namen `init` verwendet wie alle M3-Templates
+  (siehe Architektur-Punkt „Block-Name in allen generierten
+  Dateien: `init`"), muss `init --devcontainer` zwingend einen
+  `actionReplaceBlock`-Pfad für eine bereits durch `generate
+  devcontainer` angelegte Datei anbieten — sonst kollidiert die
+  Flag-Variante mit dem Generator-Output und muss über
+  `--force/--backup` umgeleitet werden. Diese Anforderung wird im
+  Closure-Slice explizit als T0-Carveout-Bedingung übernommen.
 - **Auto-Setzen von `devcontainer.enabled=true`** beim `generate
   devcontainer` — analog wäre es zu `add postgres` ⇒
   `services.postgres.enabled=true`, aber Spec verlangt das nicht für
