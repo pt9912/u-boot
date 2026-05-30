@@ -47,7 +47,7 @@ Disziplin-Verstoß.
 | [`slice-v1-backup-streaming-copy`](../done/slice-v1-backup-streaming-copy.md) | `LH-FA-INIT-005` Backup heute mit `ReadFile`+`WriteFile`; harter 256-MiB-Cap als MVP-Workaround | V1-vorgezogen | Done |
 | [`slice-v1-plugin-system-entscheidung`](../open/slice-v1-plugin-system-entscheidung.md) | `LH-OPEN-003` Plugin-System offen | V1 | Open |
 | [`slice-v1-template-format-entscheidung`](../open/slice-v1-template-format-entscheidung.md) | `LH-OPEN-004` Template-Format offen | V1 | Open |
-| [`slice-v1-yaml-parse-error-sentinel`](../open/slice-v1-yaml-parse-error-sentinel.md) | M7-T5-Review-Followup N2: `YAMLCodec`-Port unterscheidet Parse- nicht von IO-Fehlern; Exit-Code-14-vs-10-Klassifikation reißt bei kaputter `compose.yaml` unter `u-boot generate devcontainer` | V1 | Open |
+| [`slice-v1-yaml-parse-error-sentinel`](../done/slice-v1-yaml-parse-error-sentinel.md) | M7-T5-Review-Followup N2: `YAMLCodec`-Port unterscheidet Parse- nicht von IO-Fehlern; Exit-Code-14-vs-10-Klassifikation reißt bei kaputter `compose.yaml` unter `u-boot generate devcontainer` | V1-vorgezogen | Done (`1008326`) |
 | [`slice-v2-revive-custom-rules`](../done/slice-v2-revive-custom-rules.md) | ADR-0003 Folgepunkt revive-Custom-Rules | V2-vorgezogen | Done |
 | [`slice-later-http-driving-adapter`](../open/slice-later-http-driving-adapter.md) | `spec/architecture.md` §7 HTTP-Driving-Adapter prospektiv | Later | Open |
 
@@ -110,9 +110,9 @@ Vier offene V1-Slices warten auf konkrete Trigger:
   Trigger erster externer Plugin-Vorschlag.
 - [`slice-v1-template-format-entscheidung`](../open/slice-v1-template-format-entscheidung.md):
   Trigger erster externer Template-Vorschlag.
-- [`slice-v1-yaml-parse-error-sentinel`](../open/slice-v1-yaml-parse-error-sentinel.md):
-  Trigger User-Bug zu Exit-14-vs-10 bei kaputter compose.yaml,
-  oder nächster YAMLCodec-Port-Touch.
+- ~~`slice-v1-yaml-parse-error-sentinel`~~: **Done** (`1008326`) —
+  V1-vorgezogen abgearbeitet als Review-Followup-Closure für
+  M7-T5-N2. Siehe [`done/slice-v1-yaml-parse-error-sentinel.md`](../done/slice-v1-yaml-parse-error-sentinel.md).
 
 Plus die V1-Add-ons (LH-AK-003 Keycloak, LH-AK-004 OTel) und
 V1-Generators (`u-boot logs`, `--json`-Output).
