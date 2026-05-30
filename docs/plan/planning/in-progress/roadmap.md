@@ -17,7 +17,7 @@ in `in-progress/`.
 | M4 `u-boot doctor` | Done | Lokale Voraussetzungen prüfen (`LH-FA-DIAG-001..004`), Severity-Klassifikation, Repair-Hints. 9 Checks: write-permissions, git, docker (+reachable+compose-plugin), u-boot.yaml, compose.yaml, devcontainer.json/Dockerfile. CLI `doctor`-Subkommando mit `--strict`. Exit-Code 11 bei Errors (oder Warns + --strict). | [`slice-m4-doctor`](../done/slice-m4-doctor.md) |
 | M5 `u-boot add postgres` | Done | PostgreSQL-Add-on (`LH-FA-ADD-001..002`, `LH-FA-ADD-005`), services-Schema in u-boot.yaml, Compose split-block scaffold, `.env.example`-Block, Healthcheck mit `$${POSTGRES_USER:-postgres}`-Defaults für LH-AK-002, State-Machine, Active-Repair, CLI-Subcommand, doctor-Integration (services.enabled-key + devcontainer.forwardPorts + devcontainer.enabled-Severity-Eskalation). 11 doctor-Checks gesamt. | [`slice-m5-add-postgres`](../done/slice-m5-add-postgres.md) |
 | M6 `u-boot up` / `down` | Done | Compose-Wrapper (`LH-FA-UP-001..004`), Healthcheck-Polling, `--timeout`, `--volumes`, CLI-Subcommands + Status-Tabelle. Alle 7 Tranchen in `done/`. Carveout-Slice [`slice-m6-docker-integrationstests`](../done/slice-m6-docker-integrationstests.md) **Done** (Sub-T1..T4 + Audit-Härtung `41cab1b` + Stabilisierung `43b42e4`/`8865ca1` + Carveout-Entfernung). | [`slice-m6-up-down`](../done/slice-m6-up-down.md) |
-| M7 `u-boot generate` | In progress | `generate changelog`/`readme`/`env-example`/`devcontainer` (`LH-FA-GEN-001..005`). T1..T4 ✅ (`67fc181`/`3c5de48`/`037ab00`/`19c4110`). T5 ✅ (`294e492`): `generate devcontainer` mit atomarem Two-File-Plan (devcontainer.json + Dockerfile), `forwardPorts`-Detection via doctor-helper-reuse (Anti-Drift-Pin), JSONC mit StyleDoubleSlash-Marker + Dockerfile mit StyleHash, `remoteUser: vscode` (LH-FA-DEV-004). Stub-Pin entfernt. T6 CLI+Doku offen. | [`slice-m7-generate`](slice-m7-generate.md) |
+| M7 `u-boot generate` | Done | `generate changelog`/`readme`/`env-example`/`devcontainer` (`LH-FA-GEN-001..005` + LH-FA-DEV-001/004/005 + LH-AK-007). Sechs Tranchen ✅ (`67fc181`/`3c5de48`/`037ab00`/`19c4110`/`294e492`/`d32a733`). Reuse von `managedblock` (3 Marker-Stile decken 4 Datei-Mappings), `generateManagedFile`-Helper für env-example/readme, atomarer Two-File-Plan für devcontainer, konservative User-Edit-Erkennung für changelog. CLI: `u-boot generate <artifact>`, Exit-Codes 0/2/10/14. | [`slice-m7-generate`](../done/slice-m7-generate.md) |
 | M8 `u-boot config` | Open | `config get`/`set`/Anzeigen (`LH-FA-CONF-001..005`), Schema-Validierung | offen |
 | MVP-Closure | Open | Devcontainer-Mindestumfang (`LH-FA-DEV-001..005`), MVP-Acceptance-Flows (`LH-AK-001..002`, `LH-AK-005..007`) | offen |
 | V1 Keycloak / OTel | Open | `LH-FA-ADD-003`, `LH-FA-ADD-004`, `LH-AK-003`, `LH-AK-004` | offen |
@@ -55,13 +55,18 @@ Disziplin-Verstoß.
 1. **M6 up/down**: **Done** (siehe [`slice-m6-up-down.md`](../done/slice-m6-up-down.md)). Alle 7 Tranchen abgeschlossen: T1 ✅ `9f8badd`, T2 ✅ `84a676c`, T3 ✅ `1e5ef18`, T4 ✅ `1351cfb` (+ fund `9101bdc`, + review `d1deee5`), T5 ✅ `a46bec3`, T6 ✅ `4a7e60d`, T7 ✅ `6d9aa88` (+ review `adeea13` für `up --quiet`-Vertrag). Coverage 91.20%.
 2. **Verbosity-Wiring**: **Done** (`7c6fbce`, siehe [`slice-followup-verbosity-wiring.md`](../done/slice-followup-verbosity-wiring.md)). `--quiet` → `slog.LevelWarn`, `--verbose`/`--debug` → `slog.LevelDebug` via `*slog.LevelVar` und Cobra-`PersistentPreRunE`. Carveouts-Eintrag entfernt; temporäre Carveouts jetzt 6 statt 7.
 3. **M6-docker-int**: **Done** (siehe [`slice-m6-docker-integrationstests.md`](../done/slice-m6-docker-integrationstests.md)). Iterations-Bilanz: PR #1 ohne Merge geschlossen 2026-05-30 wegen (a) deterministisch roten `TestE2E_LHAK002_PostgresAcceptanceFlow` (LH-FA-INIT-006-Regex-Reject bei `t.TempDir()`-Counter-Leaf, gefixt `aa3a45c`) und (b) Audit-Heuristik, die nur workflow-level `conclusion` prüfte (gehärtet `41cab1b` mit Job-level-Pflicht). PR #2 (`43b42e4` → Merge `8865ca1`) entfernte `continue-on-error: true` nach drei job-level-grünen Läufen auf `main` (`41cab1b`/`379fe21`/`2fa46fd`). Erster Lauf ohne `continue-on-error` grün auf `8865ca1` (https://github.com/pt9912/u-boot/actions/runs/26679225340). Carveout entfernt.
-4. **Aktive Phase: M7 generate** (`LH-FA-GEN-001..005`). Slice-Plan
-   in `in-progress/` ([`slice-m7-generate.md`](slice-m7-generate.md)):
-   6 Tranchen — T1..T4 ✅ (`67fc181`/`3c5de48`/`037ab00`/`19c4110`),
-   T5 ✅ (`294e492`) devcontainer (LH-FA-DEV-001/004/005) mit
-   atomarem Two-File-Plan + forwardPorts-Detection-Reuse aus
-   doctor.go (Anti-Drift-Pin), T6 ⬜ CLI+Doku. Stub-Pin in T5
-   komplett entfernt; alle vier Handler real.
+4. **M7 generate**: **Done** (siehe [`slice-m7-generate.md`](../done/slice-m7-generate.md)).
+   Alle 6 Tranchen abgeschlossen: T1 ✅ `67fc181` Port+Skeleton,
+   T2 ✅ `3c5de48` env-example, T3 ✅ `037ab00` readme,
+   T4 ✅ `19c4110` changelog (LH-AK-007), T5 ✅ `294e492`
+   devcontainer (LH-FA-DEV-001/004/005), T6 ✅ `d32a733`
+   CLI-Subcommand + ExitCode-Wiring (ErrArtifactUnknown→2,
+   ErrGenerateManualConflict→10, ErrGenerateFileSystem→14).
+   Coverage 90.10 %.
+5. **Aktive Phase: MVP-Closure** (LH-AK-001/002/005/006/007 +
+   Devcontainer-Mindestumfang). LH-AK-007 ist via M7-T4 bereits
+   gepinnt; LH-AK-005 verlangt `init --devcontainer` (Flag-Pfad
+   nutzt M7-T5 Templates).
 
 ## Lifecycle-Hinweis
 
