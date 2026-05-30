@@ -39,14 +39,6 @@ func NewConfigService(fs driven.FileSystem, yaml driven.YAMLCodec, logger driven
 	return &ConfigService{fs: fs, yaml: yaml, logger: logger}
 }
 
-// errStubConfigHandler is the package-internal pin that proves
-// `u-boot config <subcommand>` is reachable but the per-method
-// handler has not been wired yet. Unexported; exported via
-// [ErrStubConfigHandlerForTest] in export_test.go so external
-// `_test` packages can pin without leaking the sentinel into the
-// driving-port API surface. T3 removes the Get/Show stubs, T4
-// removes the Set stub and this sentinel along with it.
-var errStubConfigHandler = errors.New("config: handler not implemented")
 
 // Get implements [driving.ConfigUseCase.Get]. Reads u-boot.yaml,
 // unmarshals into [ubootYAMLConfig], and extracts the value at
@@ -83,17 +75,247 @@ func (s *ConfigService) Get(_ context.Context, req driving.ConfigGetRequest) (dr
 	return driving.ConfigGetResponse{Path: req.Path, Value: value}, nil
 }
 
-// Set implements [driving.ConfigUseCase.Set]. T2 ships only the
-// project-state gate + the stub handler; T4 fills the body with
-// the two-stage schema validation per slice-m8-config.md §D3.
+// Set implements [driving.ConfigUseCase.Set]. The pipeline
+// follows slice-m8-config.md §D3 strictly: every check below
+// runs **before** the disk-mutating WriteFile. If any check
+// fails, the file stays byte-identical
+// (`writesBefore == writesAfter`):
+//
+//  1. WriteAllowed gate (M1 review-fix): paths whose
+//     [domain.ConfigPath.WriteAllowed] is false (today:
+//     `services.<svc>.enabled`) reject the Set with
+//     [driving.ErrConfigValueInvalid] and a hint pointing at
+//     the canonical write path (`u-boot add <svc>`).
+//  2. Value coercion: per-path string→Go-scalar parse
+//     (`domain.NewProjectName` for project.name,
+//     `strconv.ParseBool` for *.enabled). Failure ⇒
+//     [driving.ErrConfigValueInvalid] with the raw value in
+//     the message.
+//  3. NoOp short-circuit: if the new canonical-stringified
+//     value equals the existing one, skip the patch + the
+//     WriteFile entirely. The response carries
+//     `OldValue == NewValue` so the CLI summary can render
+//     a "no change" line. Avoids touching the file when
+//     there is nothing to change (idempotency).
+//  4. PatchScalar in memory.
+//  5. Stage-2 schema roundtrip: re-unmarshal the patched
+//     bytes into [ubootYAMLConfig]. yaml.v3 parse failures
+//     surface via the V1-yaml-parse sentinel chain and route
+//     to [driving.ErrConfigSchemaInvalid].
+//  6. Stage-3 domain re-validation: per-path domain
+//     validators on the patched config (yaml.v3 Unmarshal is
+//     lenient — it accepts a garbage string into a string
+//     field without applying domain rules). Failure ⇒
+//     [driving.ErrConfigValueInvalid].
+//  7. WriteFile (only now).
 func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (driving.ConfigSetResponse, error) {
 	if req.BaseDir == "" {
 		return driving.ConfigSetResponse{}, errors.New("BaseDir is required")
 	}
-	if err := s.checkProjectInitialized(req.BaseDir); err != nil {
+	body, cfg, err := s.readUbootYAMLBody(req.BaseDir)
+	if err != nil {
 		return driving.ConfigSetResponse{}, err
 	}
-	return driving.ConfigSetResponse{}, fmt.Errorf("config set %s: %w", req.Path, errStubConfigHandler)
+
+	// Stage 0: WriteAllowed gate (M1).
+	if !req.Path.WriteAllowed {
+		return driving.ConfigSetResponse{}, fmt.Errorf(
+			"%w: %s is not writable via `u-boot config set` because the LH-FA-ADD-005 state machine owns the lifecycle; use `u-boot add %s` to register the service",
+			driving.ErrConfigValueInvalid, req.Path, req.Path.Service.String())
+	}
+
+	// Stage 1: value coercion (catches LH-FA-INIT-006 / bool-
+	// parse errors before any patch).
+	coerced, formatted, err := coerceConfigValue(req.Path, req.Value)
+	if err != nil {
+		return driving.ConfigSetResponse{}, err
+	}
+
+	// Stage 2: NoOp short-circuit. Compute OldValue from the
+	// current cfg; if it equals the canonical form of the new
+	// value, skip the write entirely.
+	oldValue := extractConfigValueLenient(cfg, req.Path)
+	if oldValue == formatted {
+		s.logger.Debug("config set: no-op",
+			"path", req.Path.String(), "value", formatted)
+		return driving.ConfigSetResponse{
+			Path: req.Path, OldValue: oldValue, NewValue: formatted,
+		}, nil
+	}
+
+	// Stage 3: PatchScalar in memory.
+	yamlPath := configPathToYAMLPath(req.Path)
+	patched, err := s.yaml.PatchScalar(body, yamlPath, coerced)
+	if err != nil {
+		if errors.Is(err, driven.ErrYAMLParse) {
+			return driving.ConfigSetResponse{}, fmt.Errorf(
+				"%w: PatchScalar parse failure on %s: %v",
+				driving.ErrConfigSchemaInvalid, req.Path, err)
+		}
+		return driving.ConfigSetResponse{}, fmt.Errorf(
+			"%w: PatchScalar(%s): %v",
+			driving.ErrConfigSchemaInvalid, req.Path, err)
+	}
+
+	// Stage 4: re-unmarshal into ubootYAMLConfig.
+	var patchedCfg ubootYAMLConfig
+	if err := s.yaml.Unmarshal(patched, &patchedCfg); err != nil {
+		return driving.ConfigSetResponse{}, fmt.Errorf(
+			"%w: post-patch re-unmarshal failed: %v",
+			driving.ErrConfigSchemaInvalid, err)
+	}
+
+	// Stage 5: per-path domain re-validation on the patched
+	// config (yaml.v3 Unmarshal is lenient).
+	if err := revalidateConfigDomain(patchedCfg, req.Path); err != nil {
+		return driving.ConfigSetResponse{}, err
+	}
+
+	// Stage 6: WriteFile (only now).
+	path := filepath.Join(req.BaseDir, "u-boot.yaml")
+	if err := s.fs.WriteFile(path, patched, defaultFileMode); err != nil {
+		return driving.ConfigSetResponse{}, fmt.Errorf("%w: write %q: %v",
+			driving.ErrConfigFileSystem, path, err)
+	}
+
+	newValue := extractConfigValueLenient(patchedCfg, req.Path)
+	s.logger.Info("config set: updated",
+		"path", req.Path.String(), "old", oldValue, "new", newValue)
+	return driving.ConfigSetResponse{
+		Path: req.Path, OldValue: oldValue, NewValue: newValue,
+	}, nil
+}
+
+// coerceConfigValue parses raw into the path's expected Go
+// scalar form and returns:
+//   - coerced: the typed value to hand to YAMLCodec.PatchScalar
+//     (e.g. string for project.name, bool for *.enabled).
+//   - formatted: the canonical stringified form used for the
+//     NoOp short-circuit comparison and for response.NewValue.
+//   - err: [driving.ErrConfigValueInvalid] on coerce failure.
+func coerceConfigValue(path domain.ConfigPath, raw string) (coerced any, formatted string, err error) {
+	switch path.Kind {
+	case domain.ConfigProjectName:
+		name, err := domain.NewProjectName(raw)
+		if err != nil {
+			return nil, "", fmt.Errorf("%w: project.name %q: %v",
+				driving.ErrConfigValueInvalid, raw, err)
+		}
+		return name.String(), name.String(), nil
+	case domain.ConfigDevcontainerEnabled, domain.ConfigServiceEnabled:
+		b, err := strconv.ParseBool(raw)
+		if err != nil {
+			return nil, "", fmt.Errorf("%w: %s expects a bool (true/false/1/0/T/F/…), got %q",
+				driving.ErrConfigValueInvalid, path, raw)
+		}
+		return b, strconv.FormatBool(b), nil
+	}
+	return nil, "", fmt.Errorf("%w: unknown ConfigPathKind %d",
+		driving.ErrConfigValueInvalid, int(path.Kind))
+}
+
+// configPathToYAMLPath translates a domain.ConfigPath into the
+// []string nested-key list YAMLCodec.PatchScalar expects.
+// Kept package-local because the YAML traversal convention is a
+// codec-protocol detail, not domain semantics.
+func configPathToYAMLPath(path domain.ConfigPath) []string {
+	switch path.Kind {
+	case domain.ConfigProjectName:
+		return []string{"project", "name"}
+	case domain.ConfigDevcontainerEnabled:
+		return []string{"devcontainer", "enabled"}
+	case domain.ConfigServiceEnabled:
+		return []string{"services", path.Service.String(), "enabled"}
+	}
+	// Unreachable: domain.NewConfigPath only produces the three
+	// kinds above. Returning a non-empty path so PatchScalar
+	// returns ErrYAMLPathInvalid loudly on a programmer-error
+	// future enum addition.
+	return []string{"__unknown_config_path_kind__"}
+}
+
+// revalidateConfigDomain runs the per-path domain validators on
+// the patched config (Stage 5 of the Set pipeline). yaml.v3
+// Unmarshal accepts strings without applying domain rules; this
+// closes that gap. Returns [driving.ErrConfigValueInvalid] on
+// failure.
+func revalidateConfigDomain(cfg ubootYAMLConfig, path domain.ConfigPath) error {
+	switch path.Kind {
+	case domain.ConfigProjectName:
+		if _, err := domain.NewProjectName(cfg.Project.Name); err != nil {
+			return fmt.Errorf(
+				"%w: post-patch project.name failed domain re-validation: %v",
+				driving.ErrConfigValueInvalid, err)
+		}
+		return nil
+	case domain.ConfigDevcontainerEnabled:
+		// Pointer-check + shape: the value must exist post-patch
+		// and have parsed as bool (PatchScalar writes the !!bool
+		// tag). The yaml-v3 round-trip already gave us a *bool;
+		// nil here means PatchScalar wrote something the unmarshal
+		// could not bind, which is structurally invalid.
+		if cfg.Devcontainer == nil || cfg.Devcontainer.Enabled == nil {
+			return fmt.Errorf(
+				"%w: post-patch devcontainer.enabled is absent or unbound",
+				driving.ErrConfigValueInvalid)
+		}
+		return nil
+	case domain.ConfigServiceEnabled:
+		// Same shape contract as devcontainer.enabled. Note this
+		// branch is unreachable today because the WriteAllowed gate
+		// blocks Set on services.<svc>.enabled, but the validator
+		// is included for completeness — a future relaxation
+		// (e.g. `config force-set`) would route through here.
+		entry, ok := cfg.Services[path.Service.String()]
+		if !ok || entry.Enabled == nil {
+			return fmt.Errorf(
+				"%w: post-patch %s is absent or unbound",
+				driving.ErrConfigValueInvalid, path)
+		}
+		return nil
+	}
+	return fmt.Errorf("%w: unknown ConfigPathKind %d",
+		driving.ErrConfigValueInvalid, int(path.Kind))
+}
+
+// extractConfigValueLenient is the Get-helper without the
+// NotSet/SchemaInvalid error mapping — it returns the empty
+// string for unset / corrupt values so Set can compute
+// OldValue/NewValue without breaking the pipeline on edge cases
+// (e.g. setting devcontainer.enabled for the first time, where
+// the OldValue is legitimately absent).
+func extractConfigValueLenient(cfg ubootYAMLConfig, path domain.ConfigPath) string {
+	v, err := extractConfigValue(cfg, path)
+	if err != nil {
+		return ""
+	}
+	return v
+}
+
+// readUbootYAMLBody is the Set-helper that returns both the raw
+// body (for PatchScalar) and the parsed cfg (for OldValue
+// extraction). Same sentinel mapping as [ConfigService.readUbootYAML].
+func (s *ConfigService) readUbootYAMLBody(baseDir string) ([]byte, ubootYAMLConfig, error) {
+	if err := s.checkProjectInitialized(baseDir); err != nil {
+		return nil, ubootYAMLConfig{}, err
+	}
+	path := filepath.Join(baseDir, "u-boot.yaml")
+	body, err := s.fs.ReadFile(path)
+	if err != nil {
+		if errors.Is(err, iofs.ErrNotExist) {
+			return nil, ubootYAMLConfig{}, fmt.Errorf(
+				"%w: %s vanished between Exists and ReadFile",
+				driving.ErrProjectNotInitialized, path)
+		}
+		return nil, ubootYAMLConfig{}, fmt.Errorf("%w: read %q: %v",
+			driving.ErrConfigFileSystem, path, err)
+	}
+	var cfg ubootYAMLConfig
+	if err := s.yaml.Unmarshal(body, &cfg); err != nil {
+		return nil, ubootYAMLConfig{}, fmt.Errorf("%w: parse u-boot.yaml: %v",
+			driving.ErrConfigSchemaInvalid, err)
+	}
+	return body, cfg, nil
 }
 
 // Show implements [driving.ConfigUseCase.Show]. Reads

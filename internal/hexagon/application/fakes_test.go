@@ -556,7 +556,16 @@ func (f *fakeYAML) PatchScalar(content []byte, path []string, value any) ([]byte
 		child, found := fakeMappingChild(cur, key)
 		switch {
 		case isLast && found:
-			*child = *scalar
+			// In-place stamp of Kind/Tag/Value so the value-node
+			// metadata (LineComment, HeadComment, FootComment,
+			// Anchor, Style) survives the patch — mirrors the
+			// production adapter (codec.go::setMappingPath). A
+			// full node copy (`*child = *scalar`) would silently
+			// drop trailing inline comments like
+			// `name: original  # display name` (M8-T4 review-fix).
+			child.Kind = scalar.Kind
+			child.Tag = scalar.Tag
+			child.Value = scalar.Value
 		case isLast && !found:
 			fakeAppendMappingChild(cur, key, scalar)
 		case !isLast && found:
