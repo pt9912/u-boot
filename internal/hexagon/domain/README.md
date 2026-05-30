@@ -40,12 +40,27 @@ Service-Lifecycle (M6):
   Anzeige (Name/ContainerStatus/Port/Healthcheck).
 - `UpResult` — `Services` + `Stabilized` + `Diagnostics`-Slice.
 
+Generate-Artefakte (M7-T1):
+- `Artifact` — 4-Element-Enum (`changelog`, `readme`,
+  `env-example`, `devcontainer`) für `LH-FA-GEN-001`.
+  Out-of-Range-`String()` rendert als `Artifact(N)` statt
+  `unknown` (M7-Review-S4).
+
+Config-Pfade (M8-T1):
+- `ConfigPath` — typed Value-Object mit `Kind`/`Service`/
+  `WriteAllowed` für die 3-Pfad-Whitelist von `u-boot config`
+  (`project.name`, `devcontainer.enabled`,
+  `services.<svc>.enabled`). `WriteAllowed=false` für
+  `services.<svc>.enabled` schützt vor LH-FA-ADD-005-Lifecycle-
+  Bypass (Toggling läuft über `u-boot add`/`remove`).
+
 ## Geplante Erweiterungen
 
 - `Port`, `ImageRef` — Value-Objects für Service-Konfiguration
   (V1, wenn weitere Add-ons kommen).
-- `ComposeFile`, `EnvVar` — strukturelle Modelle für erzeugte
-  Artefakte (M7-`generate`).
+- `ComposeFile`, `EnvVar` — strukturelle Modelle nur falls
+  künftige Generators sie über die heutige `text/template`-Stufe
+  hinaus brauchen (M7 reicht heute).
 
 ## Import-Regeln
 

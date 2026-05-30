@@ -14,55 +14,80 @@ recurring artefacts (README, CHANGELOG, `.env.example`).
 
 ## Status
 
-**MVP in progress — five subcommands fully wired (`init` + `doctor` + `add` + `up` + `down`).**
-- `u-boot init [name]` creates the LH-FA-INIT-003 project structure
-  plus `u-boot.yaml` (LH-FA-CONF-002) and runs `git init` by default
-  (LH-FA-INIT-007); re-running supports the LH-FA-INIT-005
-  overwrite-protection (`--force` for managed-block edits, `--backup`
-  for full overwrite with `.bak[.N]`) and the LH-FA-CLI-005A mode
-  flags (`--yes` / `--no-interactive` exclusive; `--assume-existing`
-  drives the LH-FA-INIT-004 soft-detection).
+**MVP vollständig — seven subcommands fully wired (`init` + `doctor` + `add` + `up` + `down` + `generate` + `config`).**
+
+Every MVP-priority `LH-AK-*`, `LH-FA-*` and `LH-SA-*` ID from
+[`spec/lastenheft.md`](spec/lastenheft.md) is now delivered; the
+first release cut is gated on the V1 release-pipeline slice
+(trigger: first GHCR tag). Audit trail in the
+[roadmap MVP-Bilanz block](docs/plan/planning/in-progress/roadmap.md).
+
+- `u-boot init [name] [--devcontainer]` creates the
+  LH-FA-INIT-003 project structure plus `u-boot.yaml`
+  (LH-FA-CONF-002) and runs `git init` by default
+  (LH-FA-INIT-007). `--force` / `--backup` drive the LH-FA-INIT-005
+  overwrite-protection (managed-block edits vs full overwrite with
+  `.bak[.N]`); `--yes` / `--no-interactive` / `--assume-existing`
+  are the LH-FA-CLI-005A mode flags (the latter drives the
+  LH-FA-INIT-004 soft-detection). `--devcontainer` (LH-AK-005) also
+  writes `.devcontainer/devcontainer.json` + `Dockerfile` and sets
+  `devcontainer.enabled: true` in `u-boot.yaml`.
 - `u-boot doctor` runs 11 diagnostic checks against the local
   environment + project (LH-FA-DIAG-002), classifies findings as
   ok / warn / error (LH-FA-DIAG-003), prints repair hints
   (LH-FA-DIAG-004) and exits 11 on any error (or any warn with
   `--strict`). M5 adds `services.enabled-key`,
   `devcontainer.forwardPorts.consistency`, and severity escalation
-  based on `devcontainer.enabled`.
-- `u-boot add <service>` adds an integrated service add-on to the
-  current project (LH-FA-ADD-001..002, LH-FA-ADD-005). Today only
-  `postgres` is in the catalogue; Keycloak (LH-FA-ADD-003) and
-  OpenTelemetry (LH-FA-ADD-004) land in V1. The command is
-  idempotent and runs the full state machine: register, reactivate,
-  rebuild block, repair stale artefacts, abort on inconsistencies.
+  based on `devcontainer.enabled`. MVP-Closure-T2 retargets
+  `compose.yaml.valid` no-services from Error → Warn so a fresh
+  `init` + `doctor` is clean per LH-AK-001 §2299.
+- `u-boot add <service>` adds an integrated service add-on
+  (LH-FA-ADD-001..002, LH-FA-ADD-005). Today only `postgres` is in
+  the catalogue; Keycloak (LH-FA-ADD-003) and OpenTelemetry
+  (LH-FA-ADD-004) land in V1. Idempotent state machine: register,
+  reactivate, rebuild block, repair stale artefacts, abort on
+  inconsistencies.
 - `u-boot up [--timeout <sec>]` starts the Compose environment via
   `docker compose up -d` and polls until every declared service
   reaches `healthy` (with healthcheck) or `running` (without)
-  (LH-FA-UP-001..003). `--timeout 0` short-circuits to fire-and-
-  forget (§970, no `compose ps` follow-up). TCP ports declared in
-  `compose.yaml` are probed on `localhost`; with a healthcheck a
-  failed probe emits a warn diagnostic but does not veto
-  stabilization, without one it gates stabilization (§968 +
-  slice §141). Exit codes per LH-FA-CLI-006: 11 if Docker is
-  unavailable (pre-flight), 12 on Compose runtime failure or
-  stabilization timeout, 10 on missing `u-boot.yaml` /
-  `compose.yaml`.
+  (LH-FA-UP-001..003). `--timeout 0` is fire-and-forget (§970, no
+  `compose ps` follow-up). TCP ports declared in `compose.yaml` are
+  probed on `localhost`; healthcheck-services treat a failed probe
+  as warn, healthcheck-less services as a stabilization veto
+  (§968 + slice §141). Exit codes per LH-FA-CLI-006: 11 Docker
+  unavailable (pre-flight), 12 Compose runtime failure or
+  stabilization timeout, 10 missing `u-boot.yaml` / `compose.yaml`.
 - `u-boot down [--volumes]` stops the Compose environment
   (LH-FA-UP-004). `--volumes` also removes named volumes (§1015
   destructive); the LH-FA-CLI-005A §254 confirmation gate refuses
   non-interactive destructive ops without `--yes` (exit 10) and
   prompts with safe default-`N` otherwise.
-
-Subsequent MVP subcommands (`generate`, `config`) follow in M7+;
-planning is tracked under
-[`docs/plan/planning/`](docs/plan/planning/).
+- `u-boot generate <artifact>` produces or refreshes one of four
+  artefacts (LH-FA-GEN-001..005): `changelog`, `readme`,
+  `env-example`, `devcontainer`. Idempotent block-replace via the
+  `U-BOOT MANAGED BLOCK: init` marker — user content outside the
+  block survives byte-identically. `changelog` carries the
+  LH-AK-007 pin (existing entries are never destroyed; a missing
+  `## [Unreleased]` header is added before the first release
+  section). Unknown artefacts exit 2 (spec-mandated); managed-block
+  conflicts exit 10; FS errors exit 14.
+- `u-boot config [get <path> | set <path> <value>]`
+  (LH-FA-CONF-001..005). Without arguments prints the full
+  `u-boot.yaml` byte-identically. `get` returns the bare scalar at
+  one of three whitelisted paths (`project.name`,
+  `devcontainer.enabled`, `services.<svc>.enabled`); `set` writes
+  to the first two, with a two-stage schema-roundtrip (struct
+  unmarshal + per-path domain re-validation) that aborts before
+  any WriteFile when validation fails. `services.<svc>.enabled` is
+  Get-only — toggling goes through `u-boot add` / `remove` to keep
+  the LH-FA-ADD-005 state machine atomic.
 
 | Phase | Status | Source |
 | ----- | ------ | ------ |
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
 | Architecture decisions | 6 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
-| Implementation | M1–M6 ✅, M7 next (`generate`) | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
-| Carveouts | 6 temporär (5 Slice-Pläne, 1 Slice deckt 2), 8 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
+| Implementation | M1–M8 ✅, MVP-Closure ✅ — **MVP vollständig** | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
+| Carveouts | 5 temporär (4 Slice-Pläne — Release-Pipeline-Slice deckt 2 Carveouts ab), 8 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
 
