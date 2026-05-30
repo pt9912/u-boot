@@ -105,13 +105,28 @@ type GenerateResponse struct {
 // because the spec calls it out explicitly (§LH-FA-GEN-001).
 var ErrArtifactUnknown = errors.New("unknown artifact")
 
-// ErrGenerateManualConflict signals that the target artefact exists
-// but has no `U-BOOT MANAGED BLOCK: init` marker (or the marker is
-// malformed: BEGIN without END / duplicate BEGIN). The handler
-// refuses to overwrite user content without an anchor; the CLI maps
-// the sentinel to LH-FA-CLI-006 exit code 10 with a repair hint
-// pointing at manual file rename / marker insertion (M7 has no
-// `--replace` flag, see slice plan §Out of Scope).
+// ErrGenerateManualConflict signals a fachlich-blocking state in
+// which an automated regeneration would clobber user content. Two
+// concrete sub-cases share the sentinel because both map to
+// LH-FA-CLI-006 exit code 10 with the same "user must intervene
+// manually" semantics:
+//
+//  1. The target artefact exists but has no
+//     `U-BOOT MANAGED BLOCK: init` marker (or the marker is malformed:
+//     BEGIN without END / duplicate BEGIN). M7 has no `--replace`
+//     flag (see slice-m7-generate.md §Out of Scope) so the handler
+//     refuses to overwrite user content without an anchor.
+//  2. A neighbouring project YAML file (`compose.yaml` under
+//     `u-boot generate devcontainer`) is unparseable
+//     (yaml.v3-reported parse error wrapped via
+//     [driven.ErrYAMLParse]). The handler routes the parse path
+//     through this sentinel instead of [ErrGenerateFileSystem] so
+//     the user sees the spec-correct code 10 (fachlich, "fix the
+//     YAML") instead of code 14 (technical). Introduced by the
+//     `slice-v1-yaml-parse-error-sentinel` follow-up — see that
+//     slice for the architectural rationale.
+//
+// The CLI maps the sentinel via `isValidationError` in cli.go.
 var ErrGenerateManualConflict = errors.New("generate: managed block missing or malformed")
 
 // ErrGenerateFileSystem wraps an unexpected I/O or permissions error

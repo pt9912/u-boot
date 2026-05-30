@@ -21,6 +21,36 @@ var ErrYAMLPathInvalid = errors.New("yaml path invalid")
 // PatchMappingEntryYAML.
 var ErrYAMLFragmentInvalid = errors.New("yaml fragment invalid")
 
+// ErrYAMLParse signals that YAML *content* failed to parse. It is
+// returned by every [YAMLCodec] method that parses content bytes:
+// [YAMLCodec.Unmarshal], [YAMLCodec.PatchScalar],
+// [YAMLCodec.PatchMappingEntryYAML] (content side), and
+// [YAMLCodec.LocateMarkedEntry]. Application callers branch on it
+// via [errors.Is] to surface a "user must fix the YAML" repair hint
+// — typically mapped to LH-FA-CLI-006 exit code 10 — without ever
+// importing a YAML library themselves (depguard
+// `application-no-yaml`).
+//
+// Scope and what is NOT covered:
+//
+//   - The sentinel covers parse failures of *content* the caller
+//     hands the codec. It does NOT cover parse failures of
+//     [YAMLCodec.PatchMappingEntryYAML]'s `valueYAML` argument —
+//     that path is structural fragment validation and stays on
+//     [ErrYAMLFragmentInvalid] because the caller controls the
+//     fragment, not the user.
+//   - The sentinel only signals "parse failed"; finer-grained
+//     classification (TypeError vs SyntaxError vs unknown-key) is
+//     intentionally out of scope; a future slice can layer it on
+//     top.
+//
+// Introduced by [`slice-v1-yaml-parse-error-sentinel.md`] to close
+// the M7-T5-N2 classification gap (`u-boot generate devcontainer`
+// on a corrupt `compose.yaml` would otherwise surface as
+// `ErrGenerateFileSystem` → exit 14 instead of the spec-mandated
+// exit 10).
+var ErrYAMLParse = errors.New("yaml parse error")
+
 // ErrYAMLAnchorMismatch signals that
 // [YAMLCodec.PatchMappingEntryYAML] would have inserted or replaced
 // a managed block at an anchor that disagrees with the surrounding

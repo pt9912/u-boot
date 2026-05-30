@@ -754,3 +754,82 @@ func TestLocateMarkedEntry_PatchConsistency(t *testing.T) {
 		t.Errorf("Patch on clean content failed: %v", err)
 	}
 }
+
+// --- V1 yaml-parse-error sentinel ----------------------------------
+
+// TestCodec_Unmarshal_WrapsParseError_AsErrYAMLParse pins the
+// contract introduced by slice-v1-yaml-parse-error-sentinel: every
+// content-parse failure surfaces as a [driven.ErrYAMLParse]-wrapped
+// error so application callers can branch via `errors.Is`. Anti-
+// drift pin against a future refactor that swaps the wrap for a
+// nakedly returned `yaml.Unmarshal` error.
+func TestCodec_Unmarshal_WrapsParseError_AsErrYAMLParse(t *testing.T) {
+	// Corrupt YAML — leading `:` without a key.
+	err := yaml.New().Unmarshal([]byte(":\n  bad\n"), new(map[string]any))
+	if err == nil {
+		t.Fatalf("expected parse error, got nil")
+	}
+	if !errors.Is(err, driven.ErrYAMLParse) {
+		t.Errorf("err = %v, want wrap of driven.ErrYAMLParse", err)
+	}
+}
+
+// TestCodec_PatchScalar_WrapsParseError_AsErrYAMLParse extends the
+// sentinel cover to the second content-parse site so a content
+// argument that fails to parse always routes through the sentinel.
+func TestCodec_PatchScalar_WrapsParseError_AsErrYAMLParse(t *testing.T) {
+	_, err := yaml.New().PatchScalar([]byte(":\n  bad\n"), []string{"a"}, "v")
+	if err == nil {
+		t.Fatalf("expected parse error, got nil")
+	}
+	if !errors.Is(err, driven.ErrYAMLParse) {
+		t.Errorf("err = %v, want wrap of driven.ErrYAMLParse", err)
+	}
+}
+
+// TestCodec_LocateMarkedEntry_WrapsParseError_AsErrYAMLParse covers
+// the LocateMarkedEntry content-parse site. Existing
+// TestLocateMarkedEntry_ParseErrorWrapped asserted only "an error";
+// this pin makes the sentinel explicit.
+func TestCodec_LocateMarkedEntry_WrapsParseError_AsErrYAMLParse(t *testing.T) {
+	_, err := yaml.New().LocateMarkedEntry([]byte(":\n  bad\n"),
+		"services", "postgres", "service.postgres")
+	if err == nil {
+		t.Fatalf("expected parse error, got nil")
+	}
+	if !errors.Is(err, driven.ErrYAMLParse) {
+		t.Errorf("err = %v, want wrap of driven.ErrYAMLParse", err)
+	}
+}
+
+// TestCodec_PatchMappingEntryYAML_WrapsParseError_AsErrYAMLParse
+// covers the PatchMappingEntryYAML content-parse site (via the
+// `assertNoTopLevelDuplicate` helper). Sibling to the existing
+// TestPatchMappingEntryYAML_ParseErrorWrapped, which only asserted
+// that an error was returned.
+func TestCodec_PatchMappingEntryYAML_WrapsParseError_AsErrYAMLParse(t *testing.T) {
+	_, err := yaml.New().PatchMappingEntryYAML([]byte(":\n  bad yaml\n"),
+		"services", "postgres", []byte("image: x\n"), "service.postgres")
+	if err == nil {
+		t.Fatalf("expected parse error, got nil")
+	}
+	if !errors.Is(err, driven.ErrYAMLParse) {
+		t.Errorf("err = %v, want wrap of driven.ErrYAMLParse", err)
+	}
+}
+
+// TestCodec_StripYAMLPrefix pins the M1-review-followup behaviour:
+// yaml.v3 messages frequently carry a leading `yaml: ` prefix that
+// would surface doubled (`yaml: yaml: ...`) once wrapped via
+// `%v`. The stripper removes it so user-facing messages stay clean.
+// Indirect test — we trigger a parse error and assert the resulting
+// message does NOT carry a doubled prefix.
+func TestCodec_StripYAMLPrefix_NoDoubledPrefix(t *testing.T) {
+	err := yaml.New().Unmarshal([]byte(":\n  bad\n"), new(map[string]any))
+	if err == nil {
+		t.Fatalf("expected parse error, got nil")
+	}
+	if strings.Contains(err.Error(), "yaml: yaml:") {
+		t.Errorf("error message has doubled `yaml: yaml:` prefix: %q", err.Error())
+	}
+}

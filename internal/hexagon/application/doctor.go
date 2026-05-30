@@ -914,6 +914,14 @@ func collectActiveServicePorts(fs driven.FileSystem, yamlCodec driven.YAMLCodec,
 		return nil, err
 	}
 	var shape composePortsShape
+	// Anti-drift pin (slice-v1-yaml-parse-error-sentinel.md
+	// §"Co-Touch"): the Unmarshal error is returned nakedly so its
+	// [driven.ErrYAMLParse] wrap reaches the application caller
+	// (`generate.go::collectDevcontainerForwardPorts`) via
+	// `errors.Is`. Whoever later adds a `read compose.yaml: %v`-
+	// style wrap here MUST use `%w` instead — otherwise the
+	// generate-devcontainer code-10 path silently regresses to
+	// code 14 on corrupt compose.yaml.
 	if err := yamlCodec.Unmarshal(body, &shape); err != nil {
 		return nil, err
 	}

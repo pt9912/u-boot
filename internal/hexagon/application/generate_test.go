@@ -1259,3 +1259,28 @@ func TestGenerateChangelog_LHAK007_FlowEndToEnd(t *testing.T) {
 		t.Errorf("CHANGELOG.md does not reference project name; got:\n%s", body)
 	}
 }
+
+// TestGenerateDevcontainer_CorruptComposeYAML_Code10 pins the V1
+// yaml-parse-error-sentinel slice: a syntactically corrupt
+// `compose.yaml` under `u-boot generate devcontainer` must surface
+// as [driving.ErrGenerateManualConflict] (LH-FA-CLI-006 exit code
+// 10, fachlich) — NOT [driving.ErrGenerateFileSystem] (code 14,
+// technical). Anti-drift pin against the M7-T5-N2 classification
+// gap.
+//
+// The fixture wires postgres as the single active service so the
+// generator path actually reads compose.yaml. The fakeYAML codec
+// mirrors the production [driven.ErrYAMLParse] wrap automatically,
+// so no per-test sentinel-inject is needed.
+func TestGenerateDevcontainer_CorruptComposeYAML_Code10(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLPostgres(t, fs)
+	// Syntactically broken YAML: a leading colon without a key.
+	seedGenerateComposeYAML(t, fs, ":\n  bad yaml")
+
+	_, err := generateDevcontainer(t, svc)
+	if !errors.Is(err, driving.ErrGenerateManualConflict) {
+		t.Fatalf("err = %v, want wrap of ErrGenerateManualConflict (Code 10)", err)
+	}
+}

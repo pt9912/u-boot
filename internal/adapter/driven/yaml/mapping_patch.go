@@ -203,7 +203,7 @@ func (Codec) LocateMarkedEntry(content []byte, parentKey, entryKey, markerName s
 	if len(bytes.TrimSpace(content)) > 0 {
 		var probe yaml.Node
 		if err := yaml.Unmarshal(content, &probe); err != nil {
-			return driven.LocateResult{}, fmt.Errorf("locate: parse yaml: %w", err)
+			return driven.LocateResult{}, wrapYAMLParse("locate", err)
 		}
 	}
 
@@ -462,7 +462,7 @@ func validateFragmentMappingRoot(valueYAML []byte) error {
 func assertNoTopLevelDuplicate(content []byte) error {
 	var node yaml.Node
 	if err := yaml.Unmarshal(content, &node); err != nil {
-		return fmt.Errorf("patch: parse content: %w", err)
+		return wrapYAMLParse("patch-mapping-entry", err)
 	}
 	root := &node
 	if root.Kind == yaml.DocumentNode {

@@ -32,9 +32,46 @@ func (Codec) Marshal(v any) ([]byte, error) {
 	return yaml.Marshal(v)
 }
 
-// Unmarshal delegates to yaml.v3.
+// Unmarshal delegates to yaml.v3 and wraps any parse failure with
+// [driven.ErrYAMLParse] so application callers can branch on
+// `errors.Is(err, driven.ErrYAMLParse)` without importing yaml.v3.
+// See [wrapYAMLParse] for the wrap convention.
 func (Codec) Unmarshal(data []byte, v any) error {
-	return yaml.Unmarshal(data, v)
+	if err := yaml.Unmarshal(data, v); err != nil {
+		return wrapYAMLParse("unmarshal", err)
+	}
+	return nil
+}
+
+// wrapYAMLParse converts a raw yaml.v3 error into a
+// [driven.ErrYAMLParse]-wrapped error with a `<context>: <yaml-msg>`
+// detail. The yaml.v3 error message often carries a leading
+// `yaml: ` prefix (e.g. `yaml: line 3: did not find expected key`);
+// [stripYAMLPrefix] removes it so a downstream `%v` does not
+// surface a doubled prefix in user-facing messages.
+//
+// This is the only place the production adapter classifies parse
+// failures; the four call sites (`Unmarshal`, `PatchScalar`,
+// `LocateMarkedEntry` content parse, `assertNoTopLevelDuplicate`
+// content parse) all route through here.
+func wrapYAMLParse(context string, err error) error {
+	return fmt.Errorf("%w: %s: %s", driven.ErrYAMLParse, context, stripYAMLPrefix(err))
+}
+
+// stripYAMLPrefix removes a leading `yaml: ` from a yaml.v3 error
+// message. yaml.v3 emits parse errors as plain `error` values with
+// the prefix baked into the message; the prefix is redundant after
+// the [driven.ErrYAMLParse] wrap so we strip it for readability.
+//
+// Pinned by `TestCodec_StripYAMLPrefix` in codec_test.go (M1
+// review-followup of the V1 sentinel slice).
+func stripYAMLPrefix(err error) string {
+	msg := err.Error()
+	const prefix = "yaml: "
+	if len(msg) >= len(prefix) && msg[:len(prefix)] == prefix {
+		return msg[len(prefix):]
+	}
+	return msg
 }
 
 // PatchScalar implements the [driven.YAMLCodec.PatchScalar] contract:
@@ -59,7 +96,7 @@ func (Codec) PatchScalar(content []byte, path []string, value any) ([]byte, erro
 	var doc yaml.Node
 	if len(bytes.TrimSpace(content)) > 0 {
 		if err := yaml.Unmarshal(content, &doc); err != nil {
-			return nil, fmt.Errorf("parse yaml: %w", err)
+			return nil, wrapYAMLParse("patch-scalar", err)
 		}
 	}
 

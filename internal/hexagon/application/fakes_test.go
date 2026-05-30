@@ -497,8 +497,29 @@ func (f *fakeYAML) Marshal(v any) ([]byte, error) {
 	return yaml.Marshal(v)
 }
 
+// Unmarshal mirrors the production adapter's [driven.ErrYAMLParse]
+// wrap so application-layer tests that seed a corrupt YAML byte-
+// stream automatically exercise the sentinel path
+// (slice-v1-yaml-parse-error-sentinel.md §Fake-Mirror; anti-
+// boilerplate — no per-test Sentinel-Inject required).
 func (f *fakeYAML) Unmarshal(data []byte, v any) error {
-	return yaml.Unmarshal(data, v)
+	if err := yaml.Unmarshal(data, v); err != nil {
+		return fmt.Errorf("%w: unmarshal: %s", driven.ErrYAMLParse, stripFakeYAMLPrefix(err))
+	}
+	return nil
+}
+
+// stripFakeYAMLPrefix mirrors the production codec's
+// stripYAMLPrefix helper. Kept as a tiny package-local copy because
+// the production helper is unexported and the test package cannot
+// reach into the yaml adapter for it.
+func stripFakeYAMLPrefix(err error) string {
+	msg := err.Error()
+	const prefix = "yaml: "
+	if len(msg) >= len(prefix) && msg[:len(prefix)] == prefix {
+		return msg[len(prefix):]
+	}
+	return msg
 }
 
 // PatchScalar mirrors the production yaml.Node-based adapter just
@@ -522,7 +543,7 @@ func (f *fakeYAML) PatchScalar(content []byte, path []string, value any) ([]byte
 	var doc yaml.Node
 	if len(bytes.TrimSpace(content)) > 0 {
 		if err := yaml.Unmarshal(content, &doc); err != nil {
-			return nil, fmt.Errorf("fakeYAML.PatchScalar parse: %w", err)
+			return nil, fmt.Errorf("%w: patch-scalar: %s", driven.ErrYAMLParse, stripFakeYAMLPrefix(err))
 		}
 	}
 	root := fakeDocumentRoot(&doc)
