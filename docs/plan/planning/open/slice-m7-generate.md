@@ -9,7 +9,7 @@ Nach M3 (`u-boot init`), M4 (`u-boot doctor`), M5 (`u-boot add
 postgres`) und M6 (`u-boot up`/`down`) fehlt das letzte MVP-Subkommando
 aus §4.8: **`u-boot generate <artifact>`**. Erst damit schließt sich
 `LH-AK-007` (Changelog-Generator) und der MVP-Akzeptanz-Pfad für
-artifaktive Wiederherstellung / -Aktualisierung.
+artefaktbasierte Wiederherstellung / -Aktualisierung.
 
 Spec-Pflicht für M7 (alle MVP-Priorität, `spec/lastenheft.md` §4.8):
 
@@ -38,14 +38,15 @@ Plus aus angrenzenden Spec-Punkten, die `generate` einlöst:
   (User wird in der Template-Defaultsektion verankert).
 - **`LH-FA-DEV-005`** Ports aus aktiven Services in
   `devcontainer.json`.`forwardPorts`. Quelle: u-boot.yaml-`services`-
-  Tree + (optional) `services.<name>.ports`-Override; MVP liest aus
-  `compose.yaml`-managed-Blocks (siehe T5).
+  Tree + `compose.yaml`-Ports; MVP liest die Container-Seite der
+  Compose-Port-Mappings aus `compose.yaml`-managed-Blocks (siehe T5).
 - **`LH-FA-CLI-006`** Exit-Code-Mapping:
   - `2` — CLI-Validierung (unbekanntes Artefakt, fehlende
     positional args).
   - `10` — fachlicher Validierungsfehler
     (`ErrProjectNotInitialized` weil kein `u-boot.yaml`).
-  - `13` — Datei-/IO-Fehler beim Schreiben.
+  - `14` — technischer Persistenz-/Dateisystemfehler beim Lesen oder
+    Schreiben.
 - **`LH-SA-FILE-002`** Managed-Block-Konvention pro Datei-Format:
   - `.env.example` ⇒ `StyleHash` (`# BEGIN ...`).
   - `README.md`, `CHANGELOG.md` ⇒ `StyleHTMLComment` (`<!-- BEGIN ... -->`).
@@ -80,10 +81,12 @@ Out of Scope (V1+):
   `PatchScalar` + `PatchMappingEntryYAML` im `YAMLCodec`-Port;
   `renderManagedBlockOnly`-Helper; `managedblock.StyleHash`-Block-
   Konvention für `.env.example` etabliert.
-- [`slice-m6-up-down`](../done/slice-m6-up-down.md) — Port-Probe-
-  Logik in `upservice_portparse.go`, die T5 (Devcontainer-
-  `forwardPorts`) als Datenquelle wiederverwenden kann (Compose-Block
-  → Port-Liste).
+- [`slice-m6-up-down`](../done/slice-m6-up-down.md) — grenzt die
+  Port-Semantik ab: `upservice_portparse.go` normalisiert
+  **Host-Ports** für TCP-Probes; T5 darf diesen Parser nicht direkt
+  für `forwardPorts` wiederverwenden. Referenz für T5 ist stattdessen
+  die bestehende Doctor-Logik `devcontainer.forwardPorts.consistency`,
+  die **Container-Ports** aus `compose.yaml` ableitet.
 
 ## Architektur-Punkte
 
@@ -109,11 +112,12 @@ Out of Scope (V1+):
   - `ErrProjectNotInitialized` — Wiederverwendet aus M5; Code 10.
   - `ErrGenerateManualConflict` — Datei existiert, hat aber **keinen**
     managed-Block und damit keinen Reset-Anker; Code 10 mit
-    Repair-Hint („Run `u-boot generate <artifact> --replace` oder
-    füge `# BEGIN U-BOOT MANAGED BLOCK: init`-Marker manuell ein"). MVP
-    schreibt nichts, V1-Folge-Slice könnte `--replace` ergänzen — der
-    Flag-Name steht in der Fehlermeldung, wird in M7 aber nicht
-    implementiert; siehe „Out of Scope".
+    Repair-Hint („Benenne die Datei um und führe `u-boot generate
+    <artifact>` erneut aus, oder füge den formatgerechten BEGIN/END-
+    Marker aus `LH-SA-FILE-002` manuell ein"). MVP schreibt nichts,
+    V1-Folge-Slice könnte `--replace` ergänzen — Runtime-
+    Fehlermeldungen in M7 erwähnen diesen nicht implementierten Flag
+    aber bewusst nicht; siehe „Out of Scope".
 
 - **Neuer Domain-Type `domain.Artifact`** in
   `internal/hexagon/domain/artifact.go` als enum-String mit
@@ -313,6 +317,9 @@ hartcodiert.
   — Multi-Stage-Dockerfile-Template mit `# BEGIN U-BOOT MANAGED BLOCK: init`-
   Marker. Basisimage z. B. `mcr.microsoft.com/devcontainers/base:debian`,
   `USER vscode`-Sektion am Ende.
+- `internal/hexagon/application/templates.go`-Embed erweitern:
+  `templates/devcontainer/*.tmpl` in `//go:embed` aufnehmen, damit
+  `renderTemplate("devcontainer/...")` die neuen Templates findet.
 
 **`forwardPorts`-Quelle (entscheidend für LH-FA-DEV-005):**
 
@@ -326,8 +333,11 @@ Drei Kandidaten:
 existierenden `YAMLCodec` (Read-only, kein neuer Port-Patch). Pro
 `services.<name>:`-Block, der einen managed-Marker (`service.<name>`)
 trägt **und** in `u-boot.yaml` als `enabled: true` markiert ist,
-werden die Host-Ports (`HOST:CONTAINER`-Split, Host-Seite vor `:`)
-gesammelt. Sortiert, dedupliziert. Bei `[]` ⇒ `forwardPorts` fehlt im
+werden die Container-Ports gesammelt (letztes Segment eines
+Compose-Port-Mappings; `8080:80` ⇒ `80`,
+`127.0.0.1:8080:80/tcp` ⇒ `80`). Das entspricht der bestehenden
+Doctor-Logik für `devcontainer.forwardPorts.consistency`. Sortiert,
+dedupliziert. Bei `[]` ⇒ `forwardPorts` fehlt im
 generierten JSON (LH-FA-DEV-005: „darf fehlen"). Kandidat (1) wäre
 ein zusätzlicher Spec-Tree (V1-Folgeslice), Kandidat (3) würde Add-on-
 Katalog-Pflege erzwingen.
@@ -353,7 +363,7 @@ gemeinsam erzeugt):
   (a) keine Services aktiv ⇒ `forwardPorts` fehlt;
   (b) Postgres aktiv ⇒ `[5432]`;
   (c) Postgres aktiv + zweiter Service mit `ports: ["8080:80"]` ⇒
-  `[5432, 8080]` (sortiert).
+  `[80, 5432]` (sortiert; Container-Ports).
 - Idempotenz: doppelter Lauf ohne Service-Änderung ⇒ `NoOp`.
 - `remoteUser: vscode`-Pin (LH-FA-DEV-004).
 - `doctor`-Integration (Bestätigungstest, kein neuer Code): nach
@@ -370,6 +380,8 @@ gemeinsam erzeugt):
 **DoD T5:**
 - Zwei neue Templates eingecheckt (`devcontainer.json.tmpl` +
   `Dockerfile.tmpl`).
+- `//go:embed` in `templates.go` deckt `templates/devcontainer/*.tmpl`
+  ab; Template-Integrity-Test listet die beiden Dateien.
 - `generateDevcontainer`-Handler implementiert, inkl. Port-Detection
   aus `compose.yaml`.
 - LH-AK-005-Pin grün (End-to-end mit Postgres).
@@ -415,8 +427,9 @@ gemeinsam erzeugt):
 - CLI-Subkommando verfügbar; `u-boot generate --help` listet die vier
   Artefakte explizit.
 - Smoke-Tests im `cli_test.go` grün.
-- `u-boot generate readme` produziert ein README, das `markdownlint`
-  (Markdown-Link-Validator-Slice schon Done) sauber durchläuft.
+- `u-boot generate readme` produziert ein README, dessen Markdown-
+  Links im `docs-check` (Markdown-Link-Validator-Slice schon Done)
+  sauber durchlaufen.
 - Eintrag in [`roadmap.md`](../in-progress/roadmap.md) auf
   „Done" gesetzt mit Slice-Link.
 - `make gates` grün.
@@ -454,7 +467,7 @@ gemeinsam erzeugt):
 - **LH-FA-DEV-001 / LH-AK-005**: `generate devcontainer` produziert
   beide Pflichtdateien; JSON ist syntaktisch gültig (JSONC-Stripper
   + `encoding/json.Valid`).
-- **LH-FA-DEV-005**: `forwardPorts` enthält die Host-Ports aller
+- **LH-FA-DEV-005**: `forwardPorts` enthält die Container-Ports aller
   aktiven Services (Postgres ⇒ 5432); leer ⇒ Feld fehlt.
 
 ### Negative
@@ -469,8 +482,8 @@ gemeinsam erzeugt):
 ## Out of Scope (M7-spezifisch)
 
 - **`--replace`-Flag** zum erzwungenen Überschreiben einer Datei
-  ohne managed-Block. Die Fehlermeldung erwähnt den Flag-Namen als
-  Repair-Hint, aber der Flag selbst kommt erst mit V1
+  ohne managed-Block. Runtime-Fehlermeldungen in M7 erwähnen den
+  Flag-Namen nicht als Repair-Hint, weil der Flag selbst erst mit V1
   ([`slice-v1-template-format-entscheidung`](slice-v1-template-format-entscheidung.md)
   oder eigener Folge-Slice). Begründung: MVP ist konservativ
   no-write, der Recovery-Pfad ist „Datei umbenennen, generate
@@ -495,8 +508,10 @@ gemeinsam erzeugt):
 - Auslösende Spec: `spec/lastenheft.md` §4.8 (`LH-FA-GEN-001..005`),
   §4.3 (`LH-FA-DEV-001/004/005`), §LH-AK-005, §LH-AK-007.
 - Hängt von: M3 (Template-Embed + `actionReplaceBlock`), M5
-  (`PatchScalar` reuse für u-boot.yaml-Reads bei T5), M6 (Port-
-  Detection-Heuristik aus `upservice_portparse.go`).
+  (`YAMLCodec`/`managedblock`-Konventionen und Doctor-Referenz für
+  `devcontainer.forwardPorts.consistency`), M6 (Abgrenzung:
+  Host-Port-Probing aus `upservice_portparse.go` ist nicht die
+  `forwardPorts`-Quelle).
 - Phase: M7 (MVP-Abschluss vor MVP-Closure).
 - Roadmap: ersetzt `Open` in `roadmap.md` durch
   `Open (Slice-Plan vorhanden)` mit Link auf diese Datei; nach T6
