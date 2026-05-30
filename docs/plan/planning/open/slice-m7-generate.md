@@ -44,16 +44,27 @@ Plus aus angrenzenden Spec-Punkten, die `generate` einlöst:
   - `2` — CLI-Validierung (unbekanntes Artefakt, fehlende
     positional args).
   - `10` — fachlicher Validierungsfehler
-    (`ErrProjectNotInitialized` weil kein `u-boot.yaml`).
+    (`ErrProjectNotInitialized` weil kein `u-boot.yaml`,
+    `ErrGenerateManualConflict` wenn Datei ohne managed-Block
+    existiert).
   - `14` — technischer Persistenz-/Dateisystemfehler beim Lesen oder
-    Schreiben.
+    Schreiben. **M7 führt die erste 14-Klassifikation in
+    `cli.ExitCode` ein** (siehe T6-DoD); FS-Fehler aus
+    `driven.FileSystem` werden via `errors.Is(err,
+    driven.ErrFileSystem*)` bzw. — falls die Driven-Layer keinen
+    dedizierten Sentinel exportiert — durch einen neuen
+    Use-Case-Sentinel `ErrGenerateFileSystem` gewrappt, der in T6
+    auf Code 14 mappt.
 - **`LH-SA-FILE-002`** Managed-Block-Konvention pro Datei-Format:
   - `.env.example` ⇒ `StyleHash` (`# BEGIN ...`).
   - `README.md`, `CHANGELOG.md` ⇒ `StyleHTMLComment` (`<!-- BEGIN ... -->`).
   - `.devcontainer/devcontainer.json` ⇒ `StyleDoubleSlash` (`// BEGIN ...`).
   - `.devcontainer/Dockerfile` ⇒ `StyleHash`.
-  Alle vier Stile sind im bestehenden `managedblock`-Paket implementiert
-  (siehe `internal/hexagon/application/managedblock/managedblock_test.go`).
+  Die vier Datei-Mappings nutzen die **drei** im `managedblock`-Paket
+  bereits implementierten Stile (`.env.example` und `Dockerfile` teilen
+  sich `StyleHash`) — siehe
+  `internal/hexagon/application/managedblock/managedblock_test.go` und
+  die Style-Enum-Definition in `managedblock.go:31-39`.
 
 Out of Scope (V1+):
 
@@ -111,13 +122,21 @@ Out of Scope (V1+):
     Aufruf in der CLI gefangen, parallel zu `ErrConflictingModeFlags`).
   - `ErrProjectNotInitialized` — Wiederverwendet aus M5; Code 10.
   - `ErrGenerateManualConflict` — Datei existiert, hat aber **keinen**
-    managed-Block und damit keinen Reset-Anker; Code 10 mit
-    Repair-Hint („Benenne die Datei um und führe `u-boot generate
-    <artifact>` erneut aus, oder füge den formatgerechten BEGIN/END-
-    Marker aus `LH-SA-FILE-002` manuell ein"). MVP schreibt nichts,
-    V1-Folge-Slice könnte `--replace` ergänzen — Runtime-
-    Fehlermeldungen in M7 erwähnen diesen nicht implementierten Flag
-    aber bewusst nicht; siehe „Out of Scope".
+    managed-Block und damit keinen Reset-Anker (oder
+    `managedblock.ErrBlockMalformed`-Fall mit BEGIN ohne END /
+    duplicate BEGIN); Code 10 mit Repair-Hint („Benenne die Datei um
+    und führe `u-boot generate <artifact>` erneut aus, oder füge den
+    formatgerechten BEGIN/END-Marker aus `LH-SA-FILE-002` manuell
+    ein"). MVP schreibt nichts, V1-Folge-Slice könnte `--replace`
+    ergänzen — Runtime-Fehlermeldungen in M7 erwähnen diesen nicht
+    implementierten Flag aber bewusst nicht; siehe „Out of Scope".
+  - `ErrGenerateFileSystem` — Wrapt unerwartete IO-/Permissions-
+    Fehler aus `driven.FileSystem.ReadFile`/`WriteFile`/`Stat`;
+    Code 14. Wird in T6 erstmals in `cli.ExitCode` verdrahtet.
+    Falls die Driven-Layer bereits einen passenden Sentinel
+    exportiert (`driven.ErrFileSystem*`), kann der Wrap entfallen
+    und das `errors.Is`-Mapping zeigt direkt auf den Driven-Sentinel
+    — Entscheidung fällt in T1 nach kurzem Scan der Driven-Pakete.
 
 - **Neuer Domain-Type `domain.Artifact`** in
   `internal/hexagon/domain/artifact.go` als enum-String mit
@@ -148,6 +167,31 @@ Out of Scope (V1+):
   nötig — `generate` baut seinen eigenen schmaleren Plan ohne
   `--backup`/`--force`-Verzweigung (siehe T1-Vertrag unten).
 
+- **Wiederverwendung der Compose-Port-Detektion** aus
+  `application/doctor.go`: T5 ruft die bereits vorhandenen
+  package-internen Helper
+  `activeServiceNames(cfg ubootYAMLConfig) []string`
+  (`doctor.go:846`) und
+  `collectActiveServicePorts(fs, yaml, baseDir, services) ([]int, error)`
+  (`doctor.go:902`) direkt auf — beide leben im selben Paket
+  (`application/`) wie der neue `GenerateService`, deshalb ist keine
+  Extraktion in ein Sub-Package nötig. Damit teilen `generate
+  devcontainer` und der Doctor-Check
+  `devcontainer.forwardPorts.consistency` exakt dieselbe
+  Ports-Quelle (sortiert, dedupliziert, Container-Seite, normiert für
+  Map-/Scalar-/`host:cnt/proto`-Einträge). DoD-Pin in T5: ein Test
+  ruft beide Pfade auf derselben Fixture auf und vergleicht die
+  Listen byte-/element-identisch — Drift zwischen Doctor und
+  Generator wird damit explizit verboten.
+
+- **Block-Name in allen generierten Dateien: `init`.** Alle vier
+  Artefakte verwenden denselben Block-Namen `init`, identisch zu den
+  M3-Templates (`# BEGIN U-BOOT MANAGED BLOCK: init`). M7 führt
+  bewusst **keinen** dedizierten `devcontainer`-Block-Namen ein,
+  damit das spätere `init --devcontainer`-Flag (LH-AK-005, MVP-
+  Closure) und das `generate devcontainer` denselben Block reaktivieren
+  — sonst entstünden zwei konkurrierende Marker in derselben Datei.
+
 - **`u-boot.yaml`-`generate:`-Tree (bewusst nicht eingeführt).**
   Spec §4.8 verlangt **keine** Konfigurierbarkeit der Generatoren in
   `u-boot.yaml` (im Gegensatz zu `services:` und `devcontainer:`).
@@ -170,30 +214,46 @@ ist CLI + Doku + Carveout-Beseitigung.
 - `internal/hexagon/port/driving/generate.go` mit `GenerateRequest`,
   `GenerateResponse`, `GenerateAction`-Enum (`Created`,
   `UpdatedBlock`, `NoOp`, `RepairedManual`), `GenerateUseCase`-
-  Interface, drei Sentinels (`ErrArtifactUnknown`,
-  `ErrProjectNotInitialized` reuse, `ErrGenerateManualConflict`).
+  Interface, Sentinels (`ErrArtifactUnknown`,
+  `ErrProjectNotInitialized` reuse, `ErrGenerateManualConflict`,
+  `ErrGenerateFileSystem`).
 - `internal/hexagon/application/generate.go` mit
   `GenerateService`-Skeleton:
   - DI-Constructor `NewGenerateService(fs, yaml, logger)`.
   - `Generate(ctx, req)` macht (a) Project-State-Check
     (`u-boot.yaml`-Exists wie M5), (b) Dispatch über
     `req.Artifact.String()`-Switch → vier Handler, die in T1 **alle**
-    `errors.New("generate <artifact>: not yet implemented (M7-T2..T5)")`
-    returnen.
+    `errors.New("generate <artifact>: handler not implemented")`
+    returnen. Bewusst **kein** Slice-Marker („M7-T2..T5") in der
+    Runtime-Message, weil solche Refs in Prod-Fehlern rotten. Der
+    Build-Fail-Switch ist stattdessen ein unexportierter Marker
+    `errStubHandler` in `generate.go`, auf den ein Paket-interner
+    Test in T1 pinnt; sobald ein Tranchen-Slice (T2..T5) seinen
+    Handler ersetzt, fällt der Pin auf weniger Stubs und in T5 schließlich
+    auf null (Test wird in T5 entfernt — siehe T5-DoD).
 - Tests in `_test`-Package (`generate_test.go`):
   - Project-not-initialized: kein `u-boot.yaml` ⇒
     `ErrProjectNotInitialized` (errors.Is).
   - Stub-Pfade: jeder der vier Artefaktwerte triggert seinen Handler-
-    Stub und gibt den „not yet implemented"-Fehler zurück (kein
-    Sentinel, damit ein versehentliches Mergen ohne T2–T5
-    laut auffällt).
+    Stub und gibt einen Fehler zurück, der `errors.Is(err,
+    errStubHandler)` erfüllt (Paket-interner Sentinel, **nicht**
+    Teil der Driving-Port-API — damit ein versehentliches Mergen
+    ohne T2–T5 laut auffällt, aber keine Slice-Refs in der Public
+    Error-Surface erscheinen).
   - `BaseDir == ""` ⇒ non-nil error (kein Sentinel; analog
     `AddServiceService`).
 
 **DoD T1:**
 - `domain.Artifact` + `NewArtifact` 100 % Coverage.
-- `GenerateUseCase`-Interface in `driving/generate.go` exportiert.
-- `GenerateService.Generate` dispatcht korrekt; Tests grün.
+- `GenerateUseCase`-Interface in `driving/generate.go` exportiert,
+  Sentinels (`ErrArtifactUnknown`, `ErrGenerateManualConflict`,
+  `ErrGenerateFileSystem`) deklariert. Driven-Sentinel-Scan für
+  `driven.ErrFileSystem*` durchgeführt; Entscheidung „Wrap vs.
+  Direct-Is" dokumentiert in `generate.go`-Top-Kommentar.
+- `GenerateService.Generate` dispatcht korrekt; alle vier Handler
+  geben einen Fehler zurück, der `errors.Is(err, errStubHandler)`
+  erfüllt (paket-interner Sentinel, **nicht** Teil der
+  Driving-Port-API).
 - Keine CLI-Verkabelung (das ist T6); Use-Case ist erreichbar nur
   über direkte Test-Aufrufe.
 - `make gates` grün.
@@ -221,7 +281,11 @@ M3 existiert bereits) mit einem managed-Block in `StyleHash`-Form.
   Block byte-identisch, init-Block content semantisch identisch
   (Render des aktuellen `env.example.tmpl`).
 - `NoOp`-Pin: zweimaliges `generate env-example` hintereinander →
-  zweiter Lauf returnt `NoOp`, `Changed=nil`.
+  zweiter Lauf returnt `NoOp`, `Changed=nil`, **und** der
+  `FileSystem`-Fake registriert **null** `WriteFile`-Aufrufe für den
+  zweiten Lauf (Counting-Fake, analog M5-T4c). Action-Field allein
+  reicht als Idempotenz-Beweis nicht; ohne den Schreib-Zähler könnte
+  ein Handler `NoOp` zurückgeben **und** trotzdem schreiben.
 
 **DoD T2:**
 - `generateEnvExample`-Handler implementiert; Stub aus T1 ersetzt.
@@ -276,6 +340,17 @@ Idempotenz-sichere Variante. Die alternative Strategie (managed-Block
 nur für *Struktur*, User-Einträge wandern in eine Sektion **außerhalb**
 des Blocks) würde eine Template-Migration für bestehende Projekte
 erzwingen und ist deshalb V1.
+
+**Bekannte Fragilität der Hash-Heuristik:** Sobald
+`changelog.md.tmpl` jemals geändert wird (Header-Wording, Datum,
+Sektions-Reihenfolge), kippt **jedes** existierende Projekt-Changelog
+schlagartig in den „user-edited"-Pfad und bekommt keine Block-
+Aktualisierung mehr — auch wenn der User die Datei nie angefasst
+hat. M7 akzeptiert das bewusst: das `init`-Template ist nach M3
+eingefroren und Template-Änderungen sind ein **Breaking-Migration-
+Event**, das einen eigenen Folge-Slice mit `--migrate`-Pfad oder
+versionierten Marker (`<!-- BEGIN U-BOOT MANAGED BLOCK: init v2 -->`)
+braucht. Siehe „Out of Scope".
 
 **Tests:**
 - Vier State-Fixtures.
@@ -343,15 +418,20 @@ ein zusätzlicher Spec-Tree (V1-Folgeslice), Kandidat (3) würde Add-on-
 Katalog-Pflege erzwingen.
 
 **State-Machine** (pro Datei `.devcontainer/devcontainer.json` und
-`.devcontainer/Dockerfile` separat — beide werden in einem Aufruf
-gemeinsam erzeugt):
+`.devcontainer/Dockerfile` separat ermittelt — beide werden in einem
+**atomaren Plan-and-Execute-Schritt** behandelt: erst Plan für
+**beide** Dateien aufstellen, alle Vorbedingungen prüfen, **dann**
+schreiben. Bricht die Validierung einer Datei ab, wird **keine** der
+beiden geschrieben — sonst entstehen halbe Schreibzustände, die der
+nächste Lauf erneut als Konflikt sieht):
 
-| Zustand | Beide Dateien | Aktion |
-| ------- | ------------- | ------ |
-| **absent** | beide fehlen | Beide neu schreiben. `Created`. |
-| **partial** | eine fehlt | Fehlende neu schreiben, vorhandene per Block-Replace. `Created` für die fehlende, `UpdatedBlock` für die vorhandene; `Action=UpdatedBlock` als Aggregat (häufigster Pfad bei Re-Run nach Service-Add). |
-| **both-present-with-block** | beide haben init-Block | Beide per Block-Replace. `UpdatedBlock` oder `NoOp`. |
-| **block-missing-in-one** | eine Datei ohne init-Block | `ErrGenerateManualConflict` mit Hinweis auf welche Datei. |
+| Zustand | Datei A (`devcontainer.json`) | Datei B (`Dockerfile`) | Aktion |
+| ------- | ----------------------------- | ---------------------- | ------ |
+| **absent**       | fehlt              | fehlt              | Beide schreiben. `Created`. |
+| **partial-clean**| fehlt **oder** vorhanden+Block | umgekehrt          | Fehlende neu schreiben, vorhandene per Block-Replace. Aggregat-Action: `UpdatedBlock` wenn mindestens eine geupdated wurde, sonst `Created`. Häufigster Re-Run-Pfad. |
+| **both-present-with-block** | vorhanden+Block | vorhanden+Block | Beide per Block-Replace. `UpdatedBlock` oder `NoOp` (NoOp nur wenn **beide** rendern-identisch). |
+| **block-missing-in-any**    | vorhanden, **kein** Block (oder malformed) | beliebig | `ErrGenerateManualConflict` mit Hinweis auf **alle** betroffenen Dateien (kann eine oder beide sein). **Kein** Write, auch nicht für die intakte Datei. |
+| **fs-error**     | Read/Write-Fehler  | beliebig           | `ErrGenerateFileSystem`-Wrap; Aufruf endet mit Exit 14. Kein Teil-Write. |
 
 **Tests:**
 - LH-AK-005-Pin: `u-boot init && u-boot add postgres && u-boot generate
@@ -366,16 +446,24 @@ gemeinsam erzeugt):
   `[80, 5432]` (sortiert; Container-Ports).
 - Idempotenz: doppelter Lauf ohne Service-Änderung ⇒ `NoOp`.
 - `remoteUser: vscode`-Pin (LH-FA-DEV-004).
-- `doctor`-Integration (Bestätigungstest, kein neuer Code): nach
-  `generate devcontainer` muss `u-boot doctor` (M4-Stand,
-  `devcontainer.enabled=true` falls gesetzt) keinen Error für die
-  Devcontainer-Datei-Existenz mehr liefern. M7 setzt
-  `devcontainer.enabled=true` in `u-boot.yaml` **nicht** automatisch
-  — `generate devcontainer` ist ein Datei-Schreiber, kein Konfig-
-  Mutator; ein V1-Folge-Slice könnte das per Flag ergänzen
-  (analog `add postgres` ⇒ `services.postgres.enabled=true`). Doctor
-  prüft mit `devcontainer.enabled=false` die Dateien als `warn` —
-  Test pinnt diesen warn-Pfad statt eines erzwungenen `error`-Pfads.
+- `doctor`-Integration (Bestätigungstest, kein neuer Code) — Test
+  benannt `TestDoctor_AfterGenerateDevcontainer_PinsWarnPath_WhenEnabledFalse`,
+  damit ein späterer Maintainer die Intention nicht versehentlich
+  kippt: nach `generate devcontainer` muss `u-boot doctor` (M4-Stand)
+  bei `devcontainer.enabled=false` die Dateien als `warn` (nicht
+  `error`) melden. M7 setzt `devcontainer.enabled=true` in
+  `u-boot.yaml` **nicht** automatisch — `generate devcontainer` ist
+  ein Datei-Schreiber, kein Konfig-Mutator; ein V1-Folge-Slice
+  könnte das per Flag ergänzen (analog `add postgres` ⇒
+  `services.postgres.enabled=true`).
+- **Anti-Drift-Pin gegen `doctor.collectActiveServicePorts`:** ein
+  Test legt eine Fixture mit `u-boot.yaml` (postgres + dummy-Service
+  mit `ports: ["8080:80"]`) und `compose.yaml` an, ruft den von T5
+  genutzten Pfad **und** den Doctor-Helper auf derselben Fixture auf
+  und vergleicht die zurückgegebene Port-Liste byte-identisch
+  (`reflect.DeepEqual`). Damit ist explizit verboten, dass `generate
+  devcontainer` und `devcontainer.forwardPorts.consistency`
+  jemals auseinanderdriften.
 
 **DoD T5:**
 - Zwei neue Templates eingecheckt (`devcontainer.json.tmpl` +
@@ -383,8 +471,15 @@ gemeinsam erzeugt):
 - `//go:embed` in `templates.go` deckt `templates/devcontainer/*.tmpl`
   ab; Template-Integrity-Test listet die beiden Dateien.
 - `generateDevcontainer`-Handler implementiert, inkl. Port-Detection
-  aus `compose.yaml`.
+  aus `compose.yaml` via Aufruf der bestehenden package-internen
+  Helper `activeServiceNames` + `collectActiveServicePorts`.
+- Atomarer Plan-and-Execute: bei Block-Konflikt in einer der beiden
+  Dateien wird **keine** geschrieben (eigener Test pinnt das, indem
+  `FileSystem.WriteFile`-Counter auf 0 prüft).
+- Anti-Drift-Pin gegen `doctor.collectActiveServicePorts` grün.
 - LH-AK-005-Pin grün (End-to-end mit Postgres).
+- Stub-Pin-Test aus T1 (`errStubHandler`) wird hier entfernt — alle
+  vier Handler sind ab T5 implementiert.
 - `make gates` grün.
 - DoD-Line: `T5 ✅ <commit-hash>`.
 
@@ -405,8 +500,22 @@ gemeinsam erzeugt):
     - `NoOp` → `"<artifact> already up to date; no changes."`
     - `RepairedManual` → `"Repaired <artifact> structure (<paths>)."`
 - `cli.go` `newRootCommand` ergänzen: `cmd.AddCommand(newGenerateCommand(a))`.
-- `App`-Struct in `cli.go` bekommt `generateUseCase
-  driving.GenerateUseCase`-Field; `main.go`-Wireup ergänzen.
+- `App`-Struct in `cli.go:35` bekommt
+  `generateUseCase driving.GenerateUseCase`-Field. **Breaking-Change
+  in `cli.New`-Signatur** (`cli.go:111`): der Konstruktor erhält
+  einen neuen positionalen Parameter `genUC
+  driving.GenerateUseCase`. Betroffen sind
+  - `cmd/uboot/main.go` (Wireup: `cli.New(version, initUC, doctorUC,
+    addUC, upUC, downUC, genUC, opts...)`),
+  - alle Test-Fakes in `internal/adapter/driving/cli/fakes_test.go`
+    und alle Aufrufer in `cli_test.go`, `verbosity_test.go`,
+    `statusview_test.go`.
+  Alle Aufrufstellen müssen in einem Commit mitgezogen werden, sonst
+  bricht `go build ./...`. — Wenn dieses Mitziehen disruptiv wirkt,
+  wäre die Alternative ein Functional-Option-Constructor
+  (`cli.WithGenerateUseCase(genUC)`), aber das wäre eine
+  Abweichung vom etablierten Muster der anderen fünf Use-Cases und
+  ist deshalb hier **nicht** der gewählte Weg.
 - `docs/user/quality.md` §2 Tests: kein Eintrag nötig (Generate-Tests
   laufen im Standard-`make gates`-Pfad, kein neuer Build-Tag).
 - `docs/user/cli.md` (oder analog, falls existent — sonst README.md):
@@ -426,7 +535,16 @@ gemeinsam erzeugt):
 **DoD T6:**
 - CLI-Subkommando verfügbar; `u-boot generate --help` listet die vier
   Artefakte explizit.
-- Smoke-Tests im `cli_test.go` grün.
+- Smoke-Tests im `cli_test.go` grün, inkl. ein Test
+  `TestExitCode_GenerateFileSystemError_MapsTo14`, der den neu
+  eingeführten Code-14-Pfad in `cli.ExitCode` pinnt (erste
+  14-Klassifikation in der Codebase — bisher fielen IO-Fehler auf
+  `1`).
+- `cli.New`-Aufrufstellen in `cmd/uboot/main.go` und allen Tests
+  (`cli_test.go`, `fakes_test.go`, `verbosity_test.go`,
+  `statusview_test.go`) auf die neue Signatur mit
+  `genUC driving.GenerateUseCase` migriert; `go build ./...` und
+  `go test ./...` grün.
 - `u-boot generate readme` produziert ein README, dessen Markdown-
   Links im `docs-check` (Markdown-Link-Validator-Slice schon Done)
   sauber durchlaufen.
@@ -445,8 +563,9 @@ gemeinsam erzeugt):
   only für T5-Port-Detection) und `Logger`. **Keine** Erweiterung
   von `YAMLCodec` nötig — der `Unmarshal`-Pfad reicht für die
   Compose-Ports-Auslese.
-- Vier Marker-Stile aus `managedblock` werden genutzt; alle bereits
-  implementiert und getestet.
+- Drei Marker-Stile aus `managedblock` (`StyleHash`,
+  `StyleHTMLComment`, `StyleDoubleSlash`) decken die vier Datei-
+  Mappings ab; alle bereits implementiert und getestet.
 
 ### Verhalten
 
@@ -478,6 +597,9 @@ gemeinsam erzeugt):
   `ErrGenerateManualConflict`; M7 schreibt nichts.
 - Malformed managed-Block (BEGIN ohne END, duplicate BEGIN) ⇒ Exit 10,
   gleiche Sentinel, andere Detail-Message.
+- Unerwarteter IO-/Permissions-Fehler beim Lesen oder Schreiben ⇒
+  Exit 14 (`ErrGenerateFileSystem`-Wrap, in T6 erstmals in
+  `cli.ExitCode` verdrahtet).
 
 ## Out of Scope (M7-spezifisch)
 
@@ -502,6 +624,12 @@ gemeinsam erzeugt):
   von `.devcontainer/` (LH-FA-DOC-002 V1) — eigener V1-Slice.
 - **`--json`-Output** für Generate-Summary — analog zur M4/M6-
   Entscheidung V1.
+- **Template-Migration für `init`-Blocks** (versionierte Marker
+  `init v2` oder `--migrate`-Flag) — sobald
+  `changelog.md.tmpl`/`readme.md.tmpl`/`env.example.tmpl` jemals
+  inhaltlich geändert werden, kippen alle existierenden Projekte in
+  den konservativen No-op-Pfad (siehe T4-Heuristik). M7 friert die
+  M3-Templates ein und überlässt die Migration einem V1-Folge-Slice.
 
 ## Bezug
 
