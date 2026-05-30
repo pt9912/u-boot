@@ -90,8 +90,13 @@ func TestE2E_LHAK002_PostgresAcceptanceFlow(t *testing.T) {
 	defer cancel()
 
 	// Step 1: u-boot init (SkipGit so the test env stays clean).
+	// Name is set explicitly because t.TempDir() returns a numeric
+	// counter as the leaf segment (`001`/`002`/…), which fails the
+	// LH-FA-INIT-006 regex `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$` when
+	// the service falls back to filepath.Base(dir).
 	if _, err := initSvc.Init(ctx, driving.InitProjectRequest{
 		BaseDir: dir,
+		Name:    "t-uboot-e2e-acc",
 		SkipGit: true,
 	}); err != nil {
 		t.Fatalf("init: %v", err)
