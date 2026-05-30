@@ -68,6 +68,14 @@ func RenderTemplateForTest(name, projectName string) ([]byte, error) {
 	return renderTemplate(name, templateData{Name: projectName})
 }
 
+// ErrStubHandlerForTest exposes the package-internal
+// [errStubHandler] sentinel so external `_test` packages can pin
+// `errors.Is(err, errStubHandler)` for the four M7-T1 stub handlers
+// without leaking the sentinel into the driving-port API surface.
+// T5 removes the test that uses this once the last stub is
+// replaced (slice-m7-generate.md T5 DoD).
+var ErrStubHandlerForTest = errStubHandler
+
 // AddServicePlanForTest is the test-only projection of the unexported
 // [servicePlan] returned by [AddServiceService.planAdd]. T3 tests use
 // it to assert plan shape for each mutating state without exposing
