@@ -244,20 +244,20 @@ ist CLI + Doku + Carveout-Beseitigung.
     `AddServiceService`).
 
 **DoD T1:**
-- `domain.Artifact` + `NewArtifact` 100 % Coverage.
-- `GenerateUseCase`-Interface in `driving/generate.go` exportiert,
+- [ ] `domain.Artifact` + `NewArtifact` 100 % Coverage.
+- [ ] `GenerateUseCase`-Interface in `driving/generate.go` exportiert,
   Sentinels (`ErrArtifactUnknown`, `ErrGenerateManualConflict`,
   `ErrGenerateFileSystem`) deklariert. Driven-Sentinel-Scan für
   `driven.ErrFileSystem*` durchgeführt; Entscheidung „Wrap vs.
   Direct-Is" dokumentiert in `generate.go`-Top-Kommentar.
-- `GenerateService.Generate` dispatcht korrekt; alle vier Handler
+- [ ] `GenerateService.Generate` dispatcht korrekt; alle vier Handler
   geben einen Fehler zurück, der `errors.Is(err, errStubHandler)`
   erfüllt (paket-interner Sentinel, **nicht** Teil der
   Driving-Port-API).
-- Keine CLI-Verkabelung (das ist T6); Use-Case ist erreichbar nur
+- [ ] Keine CLI-Verkabelung (das ist T6); Use-Case ist erreichbar nur
   über direkte Test-Aufrufe.
-- `make gates` grün.
-- DoD-Line: `T1 ✅ <commit-hash>`.
+- [ ] `make gates` grün.
+- [ ] DoD-Line: `T1 ✅ <commit-hash>`.
 
 ### T2 — `generate env-example`
 
@@ -288,10 +288,10 @@ M3 existiert bereits) mit einem managed-Block in `StyleHash`-Form.
   ein Handler `NoOp` zurückgeben **und** trotzdem schreiben.
 
 **DoD T2:**
-- `generateEnvExample`-Handler implementiert; Stub aus T1 ersetzt.
-- 5 State-Tests grün, NoOp-Pin grün.
-- `make gates` grün.
-- DoD-Line: `T2 ✅ <commit-hash>`.
+- [ ] `generateEnvExample`-Handler implementiert; Stub aus T1 ersetzt.
+- [ ] 5 State-Tests grün, NoOp-Pin grün.
+- [ ] `make gates` grün.
+- [ ] DoD-Line: `T2 ✅ <commit-hash>`.
 
 ### T3 — `generate readme`
 
@@ -310,10 +310,10 @@ Template wird re-gerendered.
   `generate readme` darf den User-Bereich nicht verändern.
 
 **DoD T3:**
-- `generateReadme`-Handler implementiert.
-- State + User-Content-Tests grün.
-- `make gates` grün.
-- DoD-Line: `T3 ✅ <commit-hash>`.
+- [ ] `generateReadme`-Handler implementiert.
+- [ ] State + User-Content-Tests grün.
+- [ ] `make gates` grün.
+- [ ] DoD-Line: `T3 ✅ <commit-hash>`.
 
 ### T4 — `generate changelog`
 
@@ -362,12 +362,12 @@ braucht. Siehe „Out of Scope".
   bereits vorhandenem Unreleased-Stub ⇒ zweiter Lauf `NoOp`.
 
 **DoD T4:**
-- `generateChangelog`-Handler implementiert.
-- LH-AK-007-Pin: ein End-to-end-Test, der genau dem Spec-Wortlaut
+- [ ] `generateChangelog`-Handler implementiert.
+- [ ] LH-AK-007-Pin: ein End-to-end-Test, der genau dem Spec-Wortlaut
   folgt (`u-boot init && u-boot generate changelog`) — Datei existiert,
   Vor-Inhalt nicht zerstört, Sektion korrekt ergänzt.
-- `make gates` grün.
-- DoD-Line: `T4 ✅ <commit-hash>`.
+- [ ] `make gates` grün.
+- [ ] DoD-Line: `T4 ✅ <commit-hash>`.
 
 ### T5 — `generate devcontainer`
 
@@ -466,22 +466,22 @@ nächste Lauf erneut als Konflikt sieht):
   jemals auseinanderdriften.
 
 **DoD T5:**
-- Zwei neue Templates eingecheckt (`devcontainer.json.tmpl` +
+- [ ] Zwei neue Templates eingecheckt (`devcontainer.json.tmpl` +
   `Dockerfile.tmpl`).
-- `//go:embed` in `templates.go` deckt `templates/devcontainer/*.tmpl`
+- [ ] `//go:embed` in `templates.go` deckt `templates/devcontainer/*.tmpl`
   ab; Template-Integrity-Test listet die beiden Dateien.
-- `generateDevcontainer`-Handler implementiert, inkl. Port-Detection
+- [ ] `generateDevcontainer`-Handler implementiert, inkl. Port-Detection
   aus `compose.yaml` via Aufruf der bestehenden package-internen
   Helper `activeServiceNames` + `collectActiveServicePorts`.
-- Atomarer Plan-and-Execute: bei Block-Konflikt in einer der beiden
+- [ ] Atomarer Plan-and-Execute: bei Block-Konflikt in einer der beiden
   Dateien wird **keine** geschrieben (eigener Test pinnt das, indem
   `FileSystem.WriteFile`-Counter auf 0 prüft).
-- Anti-Drift-Pin gegen `doctor.collectActiveServicePorts` grün.
-- LH-AK-005-Pin grün (End-to-end mit Postgres).
-- Stub-Pin-Test aus T1 (`errStubHandler`) wird hier entfernt — alle
+- [ ] Anti-Drift-Pin gegen `doctor.collectActiveServicePorts` grün.
+- [ ] LH-AK-005-Pin grün (End-to-end mit Postgres).
+- [ ] Stub-Pin-Test aus T1 (`errStubHandler`) wird hier entfernt — alle
   vier Handler sind ab T5 implementiert.
-- `make gates` grün.
-- DoD-Line: `T5 ✅ <commit-hash>`.
+- [ ] `make gates` grün.
+- [ ] DoD-Line: `T5 ✅ <commit-hash>`.
 
 ### T6 — CLI-Subcommand + Doku + Carveouts
 
@@ -533,25 +533,25 @@ nächste Lauf erneut als Konflikt sieht):
   Cobra-Usage-Message.
 
 **DoD T6:**
-- CLI-Subkommando verfügbar; `u-boot generate --help` listet die vier
+- [ ] CLI-Subkommando verfügbar; `u-boot generate --help` listet die vier
   Artefakte explizit.
-- Smoke-Tests im `cli_test.go` grün, inkl. ein Test
+- [ ] Smoke-Tests im `cli_test.go` grün, inkl. ein Test
   `TestExitCode_GenerateFileSystemError_MapsTo14`, der den neu
   eingeführten Code-14-Pfad in `cli.ExitCode` pinnt (erste
   14-Klassifikation in der Codebase — bisher fielen IO-Fehler auf
   `1`).
-- `cli.New`-Aufrufstellen in `cmd/uboot/main.go` und allen Tests
+- [ ] `cli.New`-Aufrufstellen in `cmd/uboot/main.go` und allen Tests
   (`cli_test.go`, `fakes_test.go`, `verbosity_test.go`,
   `statusview_test.go`) auf die neue Signatur mit
   `genUC driving.GenerateUseCase` migriert; `go build ./...` und
   `go test ./...` grün.
-- `u-boot generate readme` produziert ein README, dessen Markdown-
+- [ ] `u-boot generate readme` produziert ein README, dessen Markdown-
   Links im `docs-check` (Markdown-Link-Validator-Slice schon Done)
   sauber durchlaufen.
-- Eintrag in [`roadmap.md`](../in-progress/roadmap.md) auf
+- [ ] Eintrag in [`roadmap.md`](../in-progress/roadmap.md) auf
   „Done" gesetzt mit Slice-Link.
-- `make gates` grün.
-- DoD-Line: `T6 ✅ <commit-hash>`.
+- [ ] `make gates` grün.
+- [ ] DoD-Line: `T6 ✅ <commit-hash>`.
 
 ## Akzeptanzkriterien (Slice-übergreifend)
 
