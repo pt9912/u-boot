@@ -478,8 +478,17 @@ type composeYAMLShape struct {
 //                          partial directory is a soft signal).
 //   - I/O error on probe  → Error.
 //   - invalid YAML        → Error with parser message.
-//   - parsed but no `services:` → Error (a Compose file without
-//                          services is not a meaningful one).
+//   - parsed but no `services:` → Warn (a fresh `u-boot init`
+//                          produces exactly this state — empty
+//                          services scaffold the user fills via
+//                          `u-boot add <service>`. LH-AK-001
+//                          §2299 verlangt nach `init && doctor`
+//                          "keinen `error`-Eintrag", deshalb ist
+//                          ein leerer services-Block hier
+//                          Severity Warn, nicht Error. Die
+//                          Migration von Error → Warn ist als
+//                          MVP-Closure-T2 Spec-Conformance-Fix
+//                          dokumentiert).
 //   - parsed with services → OK with service count in message.
 //
 // The exists/read/parse scaffold is shared with [checkUbootYaml] via
@@ -501,9 +510,9 @@ func (s *DoctorService) checkComposeYaml(_ context.Context, baseDir string) doma
 	if len(shape.Services) == 0 {
 		return domain.Diagnostic{
 			ID:       checkIDComposeYaml,
-			Severity: domain.SeverityError,
+			Severity: domain.SeverityWarn,
 			Message:  "compose.yaml has no `services:` entries.",
-			Hint:     "Add at least one service block (e.g. `services: { app: { image: ... } }`).",
+			Hint:     "Add at least one service via `u-boot add <service>` (e.g. `u-boot add postgres`).",
 		}
 	}
 	return domain.Diagnostic{

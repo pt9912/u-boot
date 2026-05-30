@@ -603,11 +603,12 @@ func TestDoctor_ComposeYaml_ErrorOnInvalidSyntax(t *testing.T) {
 	}
 }
 
-func TestDoctor_ComposeYaml_ErrorOnMissingServices(t *testing.T) {
+func TestDoctor_ComposeYaml_WarnOnMissingServices(t *testing.T) {
 	t.Parallel()
 	svc, fs, _, _, _ := newDoctorService(t)
-	// Valid YAML but no services key — Compose without services is
-	// not a meaningful Compose file.
+	// Valid YAML but no services key. MVP-Closure-T2 spec fix: this
+	// is the LH-AK-001-post-init normal state (fresh project, no
+	// services added yet) → Warn, not Error.
 	seedComposeYAML(t, fs, doctorBaseDir, "version: \"3.9\"\n")
 
 	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
@@ -615,18 +616,20 @@ func TestDoctor_ComposeYaml_ErrorOnMissingServices(t *testing.T) {
 		t.Fatalf("Check: %v", err)
 	}
 	d := findDiagnostic(t, resp.Report.Items, "compose.yaml.valid")
-	if d.Severity != domain.SeverityError {
-		t.Errorf("Severity = %v, want Error", d.Severity)
+	if d.Severity != domain.SeverityWarn {
+		t.Errorf("Severity = %v, want Warn (LH-AK-001 §2299 forbids Error on fresh init)", d.Severity)
 	}
 	if !strings.Contains(d.Message, "no `services:` entries") {
 		t.Errorf("Message does not name the missing services: %q", d.Message)
 	}
 }
 
-func TestDoctor_ComposeYaml_ErrorOnEmptyServices(t *testing.T) {
+func TestDoctor_ComposeYaml_WarnOnEmptyServices(t *testing.T) {
 	t.Parallel()
 	svc, fs, _, _, _ := newDoctorService(t)
 	// services-key present but empty mapping → still "no services".
+	// Same LH-AK-001-conformance reasoning as the missing-services
+	// case above.
 	seedComposeYAML(t, fs, doctorBaseDir, "services:\n")
 
 	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
@@ -634,8 +637,8 @@ func TestDoctor_ComposeYaml_ErrorOnEmptyServices(t *testing.T) {
 		t.Fatalf("Check: %v", err)
 	}
 	d := findDiagnostic(t, resp.Report.Items, "compose.yaml.valid")
-	if d.Severity != domain.SeverityError {
-		t.Errorf("Severity = %v, want Error on empty services mapping", d.Severity)
+	if d.Severity != domain.SeverityWarn {
+		t.Errorf("Severity = %v, want Warn on empty services mapping", d.Severity)
 	}
 }
 
