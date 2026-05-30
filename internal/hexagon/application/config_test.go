@@ -488,36 +488,57 @@ func TestConfigSet_WriteFileFails_ReturnsFileSystem(t *testing.T) {
 	}
 }
 
-// TestConfigSet_PatchScalarFails_ReturnsSchemaInvalid covers the
-// PatchScalar-failure branch: when the YAML codec rejects the
-// patch (e.g. corrupt content the helper failed to detect
-// upfront), the Set surfaces as ErrConfigSchemaInvalid + no
-// WriteFile.
+// TestConfigSet_PatchScalarFails_ReturnsSchemaInvalid covers both
+// PatchScalar-failure branches: the parse-error path (which
+// triggers the dedicated `errors.Is(err, driven.ErrYAMLParse)`
+// branch in Set, with a different message) and the generic
+// non-parse path (which falls through to the catch-all wrap).
+// Both must surface as ErrConfigSchemaInvalid + zero WriteFile.
+// Table-driven so adding a future injection shape is a one-line
+// change (M8-T5-Review N3).
 func TestConfigSet_PatchScalarFails_ReturnsSchemaInvalid(t *testing.T) {
 	t.Parallel()
-	fs := newFakeFS()
-	fs.markDirExists(configTestBaseDir)
-	y := &fakeYAML{
-		failPatchOn:  "project.name",
-		failPatchErr: fmt.Errorf("PatchScalar mock failure: %w", driven.ErrYAMLParse),
+	cases := []struct {
+		name string
+		err  error
+	}{
+		{
+			name: "parse-error-branch",
+			err:  fmt.Errorf("PatchScalar mock failure: %w", driven.ErrYAMLParse),
+		},
+		{
+			name: "non-parse-error-branch",
+			err:  fmt.Errorf("PatchScalar bogus path: %w", driven.ErrYAMLPathInvalid),
+		},
 	}
-	svc := application.NewConfigService(fs, y, nil)
-	if err := fs.WriteFile(configTestBaseDir+"/u-boot.yaml",
-		[]byte("schemaVersion: 1\nproject:\n  name: t-uboot-config\n"), 0o644); err != nil {
-		t.Fatalf("seed: %v", err)
-	}
-
-	writesBefore := len(fs.writtenPaths())
-	_, err := svc.Set(context.Background(), driving.ConfigSetRequest{
-		BaseDir: configTestBaseDir,
-		Path:    mustConfigPath(t, "project.name"),
-		Value:   "new-name",
-	})
-	if !errors.Is(err, driving.ErrConfigSchemaInvalid) {
-		t.Errorf("err = %v, want wrap of ErrConfigSchemaInvalid", err)
-	}
-	if delta := len(fs.writtenPaths()) - writesBefore; delta != 0 {
-		t.Errorf("PatchScalar-fail produced %d WriteFile call(s), want 0", delta)
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			fs := newFakeFS()
+			fs.markDirExists(configTestBaseDir)
+			y := &fakeYAML{
+				failPatchOn:  "project.name",
+				failPatchErr: tc.err,
+			}
+			svc := application.NewConfigService(fs, y, nil)
+			if err := fs.WriteFile(configTestBaseDir+"/u-boot.yaml",
+				[]byte("schemaVersion: 1\nproject:\n  name: t-uboot-config\n"), 0o644); err != nil {
+				t.Fatalf("seed: %v", err)
+			}
+			writesBefore := len(fs.writtenPaths())
+			_, err := svc.Set(context.Background(), driving.ConfigSetRequest{
+				BaseDir: configTestBaseDir,
+				Path:    mustConfigPath(t, "project.name"),
+				Value:   "new-name",
+			})
+			if !errors.Is(err, driving.ErrConfigSchemaInvalid) {
+				t.Errorf("err = %v, want wrap of ErrConfigSchemaInvalid", err)
+			}
+			if delta := len(fs.writtenPaths()) - writesBefore; delta != 0 {
+				t.Errorf("PatchScalar-fail produced %d WriteFile call(s), want 0", delta)
+			}
+		})
 	}
 }
 
@@ -568,3 +589,99 @@ func TestConfigSet_LHFACONF005_RoundTripPin(t *testing.T) {
 		t.Errorf("Get #3 Value = %q, want %q (LH-FA-CONF-005 roundtrip)", resp3.Value, "foo")
 	}
 }
+
+// --- M8-T5 Review-Followups -----------------------------------------
+
+// TestConfigSet_S1_ServicesEnabled_RejectedBeforeRead pins the M1
+// review-fix at the right pipeline stage: a Set on
+// services.<svc>.enabled must surface the `u-boot add` hint even
+// when u-boot.yaml does NOT exist — the WriteAllowed gate runs
+// before any FS read (Review S1).
+func TestConfigSet_S1_ServicesEnabled_RejectedBeforeRead(t *testing.T) {
+	t.Parallel()
+	svc, _ := newConfigService(t) // no seedConfigUbootYAML — fresh BaseDir
+
+	_, err := svc.Set(context.Background(), driving.ConfigSetRequest{
+		BaseDir: configTestBaseDir,
+		Path:    mustConfigPath(t, "services.postgres.enabled"),
+		Value:   "true",
+	})
+	if !errors.Is(err, driving.ErrConfigValueInvalid) {
+		t.Fatalf("err = %v, want wrap of ErrConfigValueInvalid (not ErrProjectNotInitialized — gate runs first)", err)
+	}
+	if errors.Is(err, driving.ErrProjectNotInitialized) {
+		t.Errorf("err %v leaks ErrProjectNotInitialized; the gate must short-circuit before the FS read", err)
+	}
+	if !strings.Contains(err.Error(), "u-boot add postgres") {
+		t.Errorf("error message %q lacks `u-boot add postgres` hint", err.Error())
+	}
+}
+
+// TestConfigGet_S2_ServiceEntryWithoutEnabledKey_ReturnsNotSet
+// pins the Get path's coverage of the "service entry present, but
+// enabled key missing" edge case (Review S2).
+func TestConfigGet_S2_ServiceEntryWithoutEnabledKey_ReturnsNotSet(t *testing.T) {
+	t.Parallel()
+	svc, fs := newConfigService(t)
+	// services.postgres exists but has no `enabled:` key — a
+	// half-state that the EnabledUnset path from M5 also
+	// recognises (see slice-m5-add-postgres.md §State-Machine).
+	body := "schemaVersion: 1\nproject:\n  name: t-uboot-config\nservices:\n  postgres: {}\n"
+	if err := fs.WriteFile(configTestBaseDir+"/u-boot.yaml", []byte(body), 0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+
+	_, err := svc.Get(context.Background(), driving.ConfigGetRequest{
+		BaseDir: configTestBaseDir,
+		Path:    mustConfigPath(t, "services.postgres.enabled"),
+	})
+	if !errors.Is(err, driving.ErrConfigValueNotSet) {
+		t.Fatalf("err = %v, want wrap of ErrConfigValueNotSet", err)
+	}
+	if !strings.Contains(err.Error(), "u-boot add postgres") {
+		t.Errorf("error message %q lacks `u-boot add postgres` hint", err.Error())
+	}
+}
+
+// TestConfigGet_S3_DevcontainerNullValue_ReturnsNotSet pins the
+// Get path's coverage of the "devcontainer:" key with a null
+// value (Review S3, shape 1).
+func TestConfigGet_S3_DevcontainerNullValue_ReturnsNotSet(t *testing.T) {
+	t.Parallel()
+	svc, fs := newConfigService(t)
+	// `devcontainer:` with no value (YAML null) — yaml.v3 binds
+	// the *ubootYAMLDevcontainer pointer to nil.
+	body := "schemaVersion: 1\nproject:\n  name: t-uboot-config\ndevcontainer:\n"
+	if err := fs.WriteFile(configTestBaseDir+"/u-boot.yaml", []byte(body), 0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+
+	_, err := svc.Get(context.Background(), driving.ConfigGetRequest{
+		BaseDir: configTestBaseDir,
+		Path:    mustConfigPath(t, "devcontainer.enabled"),
+	})
+	if !errors.Is(err, driving.ErrConfigValueNotSet) {
+		t.Errorf("err = %v, want wrap of ErrConfigValueNotSet", err)
+	}
+}
+
+// TestConfigGet_S3_DevcontainerEmptyMap_ReturnsNotSet pins the
+// other shape: `devcontainer: {}` — non-nil pointer, but Enabled
+// is nil (Review S3, shape 2).
+func TestConfigGet_S3_DevcontainerEmptyMap_ReturnsNotSet(t *testing.T) {
+	t.Parallel()
+	svc, fs := newConfigService(t)
+	body := "schemaVersion: 1\nproject:\n  name: t-uboot-config\ndevcontainer: {}\n"
+	if err := fs.WriteFile(configTestBaseDir+"/u-boot.yaml", []byte(body), 0o644); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+
+	_, err := svc.Get(context.Background(), driving.ConfigGetRequest{
+		BaseDir: configTestBaseDir,
+		Path:    mustConfigPath(t, "devcontainer.enabled"),
+	})
+	if !errors.Is(err, driving.ErrConfigValueNotSet) {
+		t.Errorf("err = %v, want wrap of ErrConfigValueNotSet", err)
+	}
+}
+

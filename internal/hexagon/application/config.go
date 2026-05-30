@@ -112,16 +112,21 @@ func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (dr
 	if req.BaseDir == "" {
 		return driving.ConfigSetResponse{}, errors.New("BaseDir is required")
 	}
+
+	// Stage 0: WriteAllowed gate (M1 review-fix). Runs **before**
+	// any FS read so the user sees the kind-specific "use
+	// `u-boot add <svc>`" hint even in an uninitialized directory
+	// or against a corrupt u-boot.yaml. The pre-fix order
+	// (read first, then gate) made the rejection conditional on
+	// a successful read, which contradicted the slice plan's
+	// claim that Stage 0 is the first stage. M8-T5-Review S1.
+	if !req.Path.WriteAllowed {
+		return driving.ConfigSetResponse{}, writeRejectedError(req.Path)
+	}
+
 	body, cfg, err := s.readUbootYAMLBody(req.BaseDir)
 	if err != nil {
 		return driving.ConfigSetResponse{}, err
-	}
-
-	// Stage 0: WriteAllowed gate (M1).
-	if !req.Path.WriteAllowed {
-		return driving.ConfigSetResponse{}, fmt.Errorf(
-			"%w: %s is not writable via `u-boot config set` because the LH-FA-ADD-005 state machine owns the lifecycle; use `u-boot add %s` to register the service",
-			driving.ErrConfigValueInvalid, req.Path, req.Path.Service.String())
 	}
 
 	// Stage 1: value coercion (catches LH-FA-INIT-006 / bool-
@@ -184,6 +189,23 @@ func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (dr
 	return driving.ConfigSetResponse{
 		Path: req.Path, OldValue: oldValue, NewValue: newValue,
 	}, nil
+}
+
+// writeRejectedError builds the ErrConfigValueInvalid response for
+// a path whose [domain.ConfigPath.WriteAllowed] is false. The
+// message is kind-conditional so a future write-disallowed
+// non-service kind would not leak the "register the service"
+// phrasing through a wrong-shape interpolation (M8-T5-Review N1).
+func writeRejectedError(path domain.ConfigPath) error {
+	switch path.Kind {
+	case domain.ConfigServiceEnabled:
+		return fmt.Errorf(
+			"%w: %s is not writable via `u-boot config set` because the LH-FA-ADD-005 state machine owns the lifecycle; use `u-boot add %s` to register the service",
+			driving.ErrConfigValueInvalid, path, path.Service.String())
+	}
+	return fmt.Errorf(
+		"%w: %s is not writable via `u-boot config set`",
+		driving.ErrConfigValueInvalid, path)
 }
 
 // coerceConfigValue parses raw into the path's expected Go
@@ -253,6 +275,16 @@ func configPathToYAMLPath(path domain.ConfigPath) []string {
 func revalidateConfigDomain(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 	switch path.Kind {
 	case domain.ConfigProjectName:
+		// Stage 1 (coerceConfigValue) already runs NewProjectName
+		// on the raw user value, and PatchScalar writes the
+		// string verbatim with the !!str tag; this re-validation
+		// is therefore redundant for project.name in production
+		// today. Kept for symmetry with future kinds where
+		// Stage 1 cannot pre-validate (e.g. nested objects where
+		// the canonical form is only knowable after the patch
+		// re-marshal) — and as defense-in-depth against a
+		// YAML-codec bug that would silently corrupt the leaf
+		// value (M8-T5-Review N2 informational).
 		if _, err := domain.NewProjectName(cfg.Project.Name); err != nil {
 			return fmt.Errorf(
 				"%w: post-patch project.name failed domain re-validation: %v",
