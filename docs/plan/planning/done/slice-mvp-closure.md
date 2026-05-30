@@ -1,7 +1,7 @@
 # Slice MVP-Closure: `init --devcontainer` + LH-AK-Pin-Vervollständigung
 
-> **Status:** In progress (T1 + T2 done)
-> **DoD:** T1 ✅ `bfe6416` / T2 ✅ `8525c4c` (inkl. Doctor-Severity-Fix für `compose.yaml.valid` no-services: Error → Warn, LH-AK-001 §2299-Konformität) / T3 ⬜
+> **Status:** Done
+> **DoD:** T1 ✅ `bfe6416` / T2 ✅ `8525c4c` (inkl. Doctor-Severity-Fix für `compose.yaml.valid` no-services: Error → Warn, LH-AK-001 §2299-Konformität) / T3 ✅ (Slice-Move + MVP-Bilanz, **M8 `u-boot config` als verbleibender MVP-Item dokumentiert**)
 
 ## Auslöser
 
