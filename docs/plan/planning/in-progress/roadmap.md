@@ -19,7 +19,7 @@ in `in-progress/`.
 | M6 `u-boot up` / `down` | Done | Compose-Wrapper (`LH-FA-UP-001..004`), Healthcheck-Polling, `--timeout`, `--volumes`, CLI-Subcommands + Status-Tabelle. Alle 7 Tranchen in `done/`. Carveout-Slice [`slice-m6-docker-integrationstests`](../done/slice-m6-docker-integrationstests.md) **Done** (Sub-T1..T4 + Audit-Härtung `41cab1b` + Stabilisierung `43b42e4`/`8865ca1` + Carveout-Entfernung). | [`slice-m6-up-down`](../done/slice-m6-up-down.md) |
 | M7 `u-boot generate` | Done | `generate changelog`/`readme`/`env-example`/`devcontainer` (`LH-FA-GEN-001..005` + LH-FA-DEV-001/004/005 + LH-AK-007). Sechs Tranchen ✅ (`67fc181`/`3c5de48`/`037ab00`/`19c4110`/`294e492`/`d32a733`) + Review-Followup `27de9c5` (9 Findings S1..S4/N1..N5 adressiert, u. a. fenced-code-block-Schutz gegen Markdown-Korruption + CRLF-Normalisierung). Reuse von `managedblock` (3 Marker-Stile decken 4 Datei-Mappings), `generateManagedFile`-Helper für env-example/readme, atomarer Two-File-Plan für devcontainer, konservative User-Edit-Erkennung für changelog. CLI: `u-boot generate <artifact>`, Exit-Codes 0/2/10/14. | [`slice-m7-generate`](../done/slice-m7-generate.md) |
 | M8 `u-boot config` | Open | `config get`/`set`/Anzeigen (`LH-FA-CONF-001..005`), Schema-Validierung | offen |
-| MVP-Closure | Open | Devcontainer-Mindestumfang (`LH-FA-DEV-001..005`), MVP-Acceptance-Flows (`LH-AK-001..002`, `LH-AK-005..007`). M7-T5 lieferte Templates + `generate devcontainer`-Pfad; offen: `init --devcontainer`-Flag (LH-AK-005) + benannte e2e-Pins für LH-AK-001/-006. | [`slice-mvp-closure`](slice-mvp-closure.md) |
+| MVP-Closure | In progress | Devcontainer-Mindestumfang (`LH-FA-DEV-001..005`), MVP-Acceptance-Flows (`LH-AK-001..002`, `LH-AK-005..007`). T1 ✅ (`bfe6416`): `u-boot init --devcontainer` (LH-AK-005) verkabelt — reused M7-T5-Templates + M3-Pipeline; `devcontainer.enabled: true` in u-boot.yaml; --force/--backup-Disziplin gilt automatisch auch für die zwei Devcontainer-Files. Kollisions-Test mit `generate devcontainer`-Output gepinnt. Offen: T2 LH-AK-001/-006-e2e-Pins, T3 Closure. | [`slice-mvp-closure`](slice-mvp-closure.md) |
 | V1 Keycloak / OTel | Open | `LH-FA-ADD-003`, `LH-FA-ADD-004`, `LH-AK-003`, `LH-AK-004` | offen |
 | V1 Templates | Open | `LH-FA-TPL-001..004` | offen |
 | V1 Logs / Dry-Run / Diff | Open | `LH-FA-UP-005`, `LH-FA-CLI-007/008` | offen |
@@ -70,11 +70,11 @@ Disziplin-Verstoß.
    bytes.Equal-Heuristik (CRLF-Files registrieren als fresh statt
    silent CRLF→LF zu rewritern). Coverage 90.20 %.
 5. **Aktive Phase: MVP-Closure** (LH-AK-001/002/005/006/007 +
-   Devcontainer-Mindestumfang). Slice-Plan in `open/`
+   Devcontainer-Mindestumfang). Slice-Plan in `in-progress/`
    ([`slice-mvp-closure.md`](slice-mvp-closure.md)):
-   3 Tranchen — T1 `init --devcontainer`-Flag (LH-AK-005),
-   T2 benannte e2e-Pins für LH-AK-001 + LH-AK-006
-   (`acceptance_test.go`), T3 Slice-Closure + MVP-Bilanz-Block.
+   3 Tranchen — T1 ✅ (`bfe6416`) `init --devcontainer`-Flag
+   (LH-AK-005), T2 ⬜ benannte e2e-Pins für LH-AK-001 + LH-AK-006
+   (`acceptance_test.go`), T3 ⬜ Slice-Closure + MVP-Bilanz-Block.
    LH-AK-002 und LH-AK-007 sind seit M6 / M7-T4 bereits gepinnt.
    Reuse von M3-`actionReplaceBlock`/`--force`/`--backup` und
    M7-T5-Templates; keine neuen Driven-Ports oder Sentinels.

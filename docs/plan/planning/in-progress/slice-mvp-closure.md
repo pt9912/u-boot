@@ -1,7 +1,7 @@
 # Slice MVP-Closure: `init --devcontainer` + LH-AK-Pin-Vervollständigung
 
-> **Status:** Open
-> **DoD:** T1 ⬜ / T2 ⬜ / T3 ⬜
+> **Status:** In progress (T1 done)
+> **DoD:** T1 ✅ `bfe6416` / T2 ⬜ / T3 ⬜
 
 ## Auslöser
 
