@@ -1,7 +1,7 @@
 # Slice M7: `u-boot generate <artifact>`-Flow
 
-> **Status:** In progress (T1, T2 done)
-> **DoD:** T1 ✅ `67fc181` / T2 ✅ `3c5de48` / T3 ⬜ / T4 ⬜ / T5 ⬜ / T6 ⬜
+> **Status:** In progress (T1, T2, T3 done)
+> **DoD:** T1 ✅ `67fc181` / T2 ✅ `3c5de48` / T3 ✅ `037ab00` / T4 ⬜ / T5 ⬜ / T6 ⬜
 
 ## Auslöser
 
