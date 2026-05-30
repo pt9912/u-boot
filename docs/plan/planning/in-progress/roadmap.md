@@ -84,22 +84,40 @@ LH-AK-001 (Init+Doctor) `8525c4c`, LH-AK-002 (Postgres-Flow)
 LH-AK-006 (Doppel-Add-Idempotenz) `8525c4c`, LH-AK-007
 (Changelog) `19c4110`.
 
-**Alle MVP-`LH-FA-*` ausgeliefert** über M1..M8:
+**Alle MVP-`LH-FA-*` ausgeliefert** über M1..M8 (Audit-Trail aus
+M8-Review S4):
 
-| Bereich          | Slice               | Status |
-| ---------------- | ------------------- | ------ |
-| ARCH/BUILD/PROJDOCS | M1 + M2 + M2b..M2d  | ✅ |
-| INIT             | M3 + MVP-Closure-T1 | ✅ |
-| DIAG             | M4                  | ✅ |
-| ADD              | M5                  | ✅ |
-| UP / DOWN        | M6                  | ✅ |
-| GEN              | M7                  | ✅ |
-| DEV              | M7-T5 + MVP-Closure-T1 | ✅ |
-| CONF             | M8                  | ✅ (T5 `25cb123`) |
-| CLI              | durchgehend inkrementell | ✅ |
+| Bereich (Spec-IDs)                                            | Slice               | Status |
+| ------------------------------------------------------------- | ------------------- | ------ |
+| ARCH (`LH-FA-ARCH-001..003`) + BUILD (`LH-FA-BUILD-001..009`) + PROJDOCS (`LH-FA-PROJDOCS-001..005`) | M1 + M2 + M2b..M2d  | ✅ |
+| INIT (`LH-FA-INIT-001..007`)                                  | M3 + MVP-Closure-T1 | ✅ |
+| DIAG (`LH-FA-DIAG-001..004`)                                  | M4                  | ✅ |
+| ADD (`LH-FA-ADD-001/-002/-005` MVP)                           | M5                  | ✅ |
+| UP / DOWN (`LH-FA-UP-001..004`)                               | M6                  | ✅ |
+| DOC (`LH-FA-DOC-001/-003/-004` MVP — Compose / Network / Volumes) | M5 + M6 (Compose-Block-Output via `add` / `init`, Volumes via `add postgres`, Network via Compose-default-Netzwerk) | ✅ |
+| GEN (`LH-FA-GEN-001..005`)                                    | M7                  | ✅ |
+| DEV (`LH-FA-DEV-001/-002/-004/-005` MVP)                      | M7-T5 + MVP-Closure-T1 | ✅ |
+| CONF (`LH-FA-CONF-001..005`)                                  | M8                  | ✅ (T5 `25cb123`) |
+| CLI (`LH-FA-CLI-001..006` + `LH-FA-CLI-005A`)                 | M3..M8 inkrementell | ✅ |
 
-Damit ist **kein MVP-`LH-AK-*` und kein MVP-`LH-FA-*` mehr
-offen**. Der erste Release-Schnitt (`v0.1.0` o. ä.) wird durch
+**Software-Architecture-Schnittstellen** (`LH-SA-*`, alle MVP-
+Priorität — M8-Review S5): cross-cutting, ohne dediziertes
+Slice, abgedeckt durch die Implementierung:
+
+- `LH-SA-CLI-001` Befehlsstruktur — Cobra-Layout (M3..M8).
+- `LH-SA-CLI-002` Vorgesehene Befehle — alle MVP-Subkommandos
+  vorhanden (siehe CLI-Zeile oben).
+- `LH-SA-FILE-001` Erzeugte Dateien — M3 (init-Templates), M5
+  (compose-Blocks), M7 (generate-Pfade).
+- `LH-SA-FILE-002` Markierte verwaltete Bereiche — `managedblock`
+  + 3 Marker-Stile (StyleHash/StyleHTMLComment/StyleDoubleSlash).
+- `LH-SA-DOCKER-001` Docker Compose — DockerEngine + Probe Adapter (M6).
+- `LH-SA-DOCKER-002` Containerstatus — UpService-Healthcheck-Polling +
+  ComposePs-JSON-Parser (M6).
+
+Damit ist **kein MVP-`LH-AK-*`, kein MVP-`LH-FA-*` und kein
+MVP-`LH-SA-*` mehr offen**. Der erste Release-Schnitt
+(`v0.1.0` o. ä.) wird durch
 [`slice-v1-release-pipeline`](../open/slice-v1-release-pipeline.md)
 ausgelöst (Trigger: erster GHCR-Tag).
 
