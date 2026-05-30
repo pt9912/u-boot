@@ -37,9 +37,6 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
-    # Stabilisierungs-Maßnahme — siehe Slice-Plan-Audit-Block für
-    # die Bedingungen zur Entfernung dieses Flags.
-    continue-on-error: true
     env:
       DOCKER_BUILDKIT: '1'
     steps:
