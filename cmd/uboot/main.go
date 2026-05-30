@@ -101,9 +101,10 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	addSvc := application.NewAddServiceService(fsAdapter, yamlAdapter, logAdapter)
 	upSvc := application.NewUpService(fsAdapter, yamlAdapter, dockerEngineAdapter, netprobeAdapter, clockAdapter, logAdapter)
 	downSvc := application.NewDownService(fsAdapter, dockerEngineAdapter, confirmAdapter, logAdapter)
+	generateSvc := application.NewGenerateService(fsAdapter, yamlAdapter, logAdapter)
 
 	// Driving adapter (CLI).
-	app := cli.New(version, initSvc, doctorSvc, addSvc, upSvc, downSvc, cli.WithLogLevel(logLevel))
+	app := cli.New(version, initSvc, doctorSvc, addSvc, upSvc, downSvc, generateSvc, cli.WithLogLevel(logLevel))
 
 	err := app.Execute(ctx, args, stdout, stderr)
 	if err != nil {

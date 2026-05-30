@@ -54,6 +54,10 @@ type App struct {
 	// downUseCase implements `u-boot down` (LH-FA-UP-004).
 	downUseCase driving.DownUseCase
 
+	// generateUseCase implements `u-boot generate <artifact>`
+	// (LH-FA-GEN-001..005).
+	generateUseCase driving.GenerateUseCase
+
 	// getwd is the working-directory probe; defaults to os.Getwd.
 	// Tests inject a fake via [WithGetwd] so they do not depend on
 	// the host pwd.
@@ -108,7 +112,7 @@ func WithLogLevel(level *slog.LevelVar) Option {
 // New constructs an App. The version string and every use-case
 // implementation must be non-nil at call time; the CLI package
 // trusts the wiring layer to honor that.
-func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, addUC driving.AddServiceUseCase, upUC driving.UpUseCase, downUC driving.DownUseCase, opts ...Option) *App {
+func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, addUC driving.AddServiceUseCase, upUC driving.UpUseCase, downUC driving.DownUseCase, genUC driving.GenerateUseCase, opts ...Option) *App {
 	a := &App{
 		version:           version,
 		initUseCase:       initUC,
@@ -116,6 +120,7 @@ func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.Doc
 		addServiceUseCase: addUC,
 		upUseCase:         upUC,
 		downUseCase:       downUC,
+		generateUseCase:   genUC,
 		getwd:             os.Getwd,
 	}
 	for _, opt := range opts {
@@ -253,6 +258,7 @@ func isValidationError(err error) bool {
 		errors.Is(err, driving.ErrServiceInconsistent) ||
 		errors.Is(err, driving.ErrComposeFileMissing) ||
 		errors.Is(err, driving.ErrConfirmationRequired) ||
+		errors.Is(err, driving.ErrGenerateManualConflict) ||
 		errors.Is(err, domain.ErrInvalidProjectName) ||
 		errors.Is(err, domain.ErrInvalidServiceName)
 }
@@ -263,7 +269,8 @@ func isValidationError(err error) bool {
 // (clean up stale backups, free disk, etc.).
 func isFilesystemError(err error) bool {
 	return errors.Is(err, driving.ErrBackupSuffixExhausted) ||
-		errors.Is(err, driving.ErrBackupSourceMissing)
+		errors.Is(err, driving.ErrBackupSourceMissing) ||
+		errors.Is(err, driving.ErrGenerateFileSystem)
 }
 
 // isUsageError detects two distinct classes of usage-level errors:
@@ -291,8 +298,13 @@ func isUsageError(err error) bool {
 	if err == nil {
 		return false
 	}
-	// (a) u-boot CLI sentinels.
-	if errors.Is(err, ErrConflictingModeFlags) || errors.Is(err, ErrInvalidTimeout) {
+	// (a) u-boot CLI sentinels. ErrArtifactUnknown is in this
+	// category by spec mandate (§LH-FA-GEN-001): "Bei unbekanntem
+	// Artefakt muss der Befehl mit Exit Code 2 abbrechen" — distinct
+	// from `add <unknown-service>` which maps to code 10 via
+	// [isValidationError].
+	if errors.Is(err, ErrConflictingModeFlags) || errors.Is(err, ErrInvalidTimeout) ||
+		errors.Is(err, driving.ErrArtifactUnknown) {
 		return true
 	}
 	// (b) Cobra usage-error string prefixes.

@@ -95,29 +95,50 @@ func (f *fakeDownUseCase) Down(_ context.Context, req driving.DownRequest) (driv
 	return f.resp, f.err
 }
 
+// fakeGenerateUseCase records the last GenerateRequest and returns
+// the configured response/error.
+type fakeGenerateUseCase struct {
+	called  bool
+	lastReq driving.GenerateRequest
+	resp    driving.GenerateResponse
+	err     error
+}
+
+func (f *fakeGenerateUseCase) Generate(_ context.Context, req driving.GenerateRequest) (driving.GenerateResponse, error) {
+	f.called = true
+	f.lastReq = req
+	return f.resp, f.err
+}
+
 func newApp(uc driving.InitProjectUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", uc, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, opts...)
+	return cli.New("0.0.0-test", uc, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, opts...)
 }
 
 // newAppWithDoctor is newApp's variant for doctor-focused tests; the
 // caller can wire a fake DoctorUseCase explicitly.
 func newAppWithDoctor(uc driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", uc, doctorUC, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, opts...)
+	return cli.New("0.0.0-test", uc, doctorUC, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, opts...)
 }
 
 // newAppWithAdd is newApp's variant for add-focused tests.
 func newAppWithAdd(uc driving.AddServiceUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, uc, &fakeUpUseCase{}, &fakeDownUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, uc, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, opts...)
 }
 
 // newAppWithUp is newApp's variant for `u-boot up`-focused tests.
 func newAppWithUp(uc driving.UpUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, uc, &fakeDownUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, uc, &fakeDownUseCase{}, &fakeGenerateUseCase{}, opts...)
 }
 
 // newAppWithDown is newApp's variant for `u-boot down`-focused tests.
 func newAppWithDown(uc driving.DownUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, uc, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, uc, &fakeGenerateUseCase{}, opts...)
+}
+
+// newAppWithGenerate is newApp's variant for `u-boot generate`-focused
+// tests.
+func newAppWithGenerate(uc driving.GenerateUseCase, opts ...cli.Option) *cli.App {
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, uc, opts...)
 }
 
 func mustProjectName(t *testing.T, raw string) domain.ProjectName {
@@ -689,6 +710,18 @@ func TestExitCode_BaseMappings(t *testing.T) {
 		{"ErrServiceInconsistent (add)", driving.ErrServiceInconsistent, 10},
 		{"ErrInvalidServiceName (add)", domain.ErrInvalidServiceName, 10},
 		{"wrapped ErrServiceUnsupported", fmt.Errorf("ctx: %w", driving.ErrServiceUnsupported), 10},
+		// M7-T6: generate sentinels. ErrArtifactUnknown lives in
+		// isUsageError (code 2) by spec mandate (§LH-FA-GEN-001) —
+		// distinct from `add <unknown-service>` which maps to 10.
+		// ErrGenerateManualConflict joins the code-10 cohort;
+		// ErrGenerateFileSystem joins the code-14 isFilesystemError
+		// list (slice plan T6 DoD pin).
+		{"ErrArtifactUnknown (usage)", driving.ErrArtifactUnknown, 2},
+		{"wrapped ErrArtifactUnknown", fmt.Errorf("ctx: %w", driving.ErrArtifactUnknown), 2},
+		{"ErrGenerateManualConflict (validation)", driving.ErrGenerateManualConflict, 10},
+		{"wrapped ErrGenerateManualConflict", fmt.Errorf("ctx: %w", driving.ErrGenerateManualConflict), 10},
+		{"ErrGenerateFileSystem (fs)", driving.ErrGenerateFileSystem, 14},
+		{"wrapped ErrGenerateFileSystem", fmt.Errorf("ctx: %w", driving.ErrGenerateFileSystem), 14},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1349,5 +1382,205 @@ func TestExitCode_M6Sentinels(t *testing.T) {
 				t.Errorf("ExitCode(wrap(%v)) = %d, want %d", tc.err, got, tc.want)
 			}
 		})
+	}
+}
+
+// ----------------------------------------------------------------------------
+// `u-boot generate` subcommand (M7-T6)
+// ----------------------------------------------------------------------------
+
+// TestExitCode_GenerateFileSystemError_MapsTo14 is the explicit pin
+// the slice plan T6 DoD asks for: ErrGenerateFileSystem joins the
+// isFilesystemError list and surfaces as exit code 14. The shared
+// TestExitCode_BaseMappings table already covers this case, but a
+// stand-alone test keeps the spec-anchored intent visible by name
+// so future refactors do not silently drop the mapping.
+func TestExitCode_GenerateFileSystemError_MapsTo14(t *testing.T) {
+	t.Parallel()
+	if got := cli.ExitCode(driving.ErrGenerateFileSystem); got != 14 {
+		t.Errorf("ExitCode(ErrGenerateFileSystem) = %d, want 14", got)
+	}
+	wrapped := fmt.Errorf("write %q: %w", ".env.example", driving.ErrGenerateFileSystem)
+	if got := cli.ExitCode(wrapped); got != 14 {
+		t.Errorf("ExitCode(wrap(ErrGenerateFileSystem)) = %d, want 14", got)
+	}
+}
+
+func TestExecute_Generate_HappyPathCreated(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeGenerateUseCase{
+		resp: driving.GenerateResponse{
+			Artifact: domain.ArtifactEnvExample,
+			Action:   driving.GenerateActionCreated,
+			Changed:  []string{".env.example"},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithGenerate(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"generate", "env-example"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !uc.called {
+		t.Fatalf("use-case not called")
+	}
+	if uc.lastReq.BaseDir != "/tmp/x/demo" {
+		t.Errorf("BaseDir = %q, want /tmp/x/demo", uc.lastReq.BaseDir)
+	}
+	if uc.lastReq.Artifact != domain.ArtifactEnvExample {
+		t.Errorf("Artifact = %v, want ArtifactEnvExample", uc.lastReq.Artifact)
+	}
+	out := stdout.String()
+	if !strings.Contains(out, "Generated env-example (.env.example).") {
+		t.Errorf("missing Created summary; got:\n%s", out)
+	}
+}
+
+func TestExecute_Generate_UpdatedBlockSummary(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeGenerateUseCase{
+		resp: driving.GenerateResponse{
+			Artifact: domain.ArtifactReadme,
+			Action:   driving.GenerateActionUpdatedBlock,
+			Changed:  []string{"README.md"},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithGenerate(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"generate", "readme"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !strings.Contains(stdout.String(), "Updated readme managed block (README.md).") {
+		t.Errorf("missing UpdatedBlock summary; got:\n%s", stdout.String())
+	}
+}
+
+func TestExecute_Generate_NoOpSummary(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeGenerateUseCase{
+		resp: driving.GenerateResponse{
+			Artifact: domain.ArtifactChangelog,
+			Action:   driving.GenerateActionNoOp,
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithGenerate(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"generate", "changelog"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !strings.Contains(stdout.String(), "changelog already up to date; no changes.") {
+		t.Errorf("missing NoOp summary; got:\n%s", stdout.String())
+	}
+}
+
+func TestExecute_Generate_RepairedManualSummary(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeGenerateUseCase{
+		resp: driving.GenerateResponse{
+			Artifact: domain.ArtifactChangelog,
+			Action:   driving.GenerateActionRepairedManual,
+			Changed:  []string{"CHANGELOG.md"},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithGenerate(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"generate", "changelog"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !strings.Contains(stdout.String(), "Repaired changelog structure (CHANGELOG.md).") {
+		t.Errorf("missing RepairedManual summary; got:\n%s", stdout.String())
+	}
+}
+
+func TestExecute_Generate_UnknownArtifact_Code2(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeGenerateUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithGenerate(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"generate", "dockerfile"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("expected error for unknown artifact")
+	}
+	if !errors.Is(err, driving.ErrArtifactUnknown) {
+		t.Errorf("err does not wrap ErrArtifactUnknown: %v", err)
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode = %d, want 2 (LH-FA-GEN-001 mandates code 2 for unknown artefact)", got)
+	}
+	if uc.called {
+		t.Errorf("use-case should not have been called on validation failure")
+	}
+}
+
+func TestExecute_Generate_NoArgs_Code2(t *testing.T) {
+	uc := &fakeGenerateUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithGenerate(uc).Execute(
+		context.Background(), []string{"generate"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("expected error for missing positional argument")
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode = %d, want 2 (Cobra ExactArgs(1) miss)", got)
+	}
+}
+
+func TestExecute_Generate_ProjectNotInitialized_Code10(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeGenerateUseCase{
+		err: fmt.Errorf("u-boot.yaml missing: %w", driving.ErrProjectNotInitialized),
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithGenerate(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"generate", "env-example"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("expected error from use-case")
+	}
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10", got)
+	}
+}
+
+func TestExecute_Generate_ManualConflict_Code10(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeGenerateUseCase{
+		err: fmt.Errorf("no init block: %w", driving.ErrGenerateManualConflict),
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithGenerate(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"generate", "readme"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("expected error from use-case")
+	}
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10", got)
+	}
+}
+
+func TestExecute_Generate_HelpListsFourArtifacts(t *testing.T) {
+	uc := &fakeGenerateUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithGenerate(uc).Execute(
+		context.Background(), []string{"generate", "--help"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute --help: %v", err)
+	}
+	out := stdout.String()
+	for _, want := range []string{"changelog", "readme", "env-example", "devcontainer"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("--help missing artefact %q; got:\n%s", want, out)
+		}
 	}
 }
