@@ -1,7 +1,7 @@
 # Slice M8: `u-boot config`-Flow
 
-> **Status:** In progress (T1 done)
-> **DoD:** T1 ✅ `f531e7e` / T2 ⬜ / T3 ⬜ / T4 ⬜ / T5 ⬜
+> **Status:** In progress (T1, T2 done)
+> **DoD:** T1 ✅ `f531e7e` / T2 ✅ `d3fa294` / T3 ⬜ / T4 ⬜ / T5 ⬜
 
 ## Auslöser
 
