@@ -1,7 +1,7 @@
 # Slice M8: `u-boot config`-Flow
 
-> **Status:** In progress (T1..T4 done, nur CLI-Wiring T5 fehlt)
-> **DoD:** T1 ✅ `f531e7e` / T2 ✅ `d3fa294` / T3 ✅ `23952b2` (inkl. neuer `ErrConfigValueNotSet`-Sentinel) / T4 ✅ `fbf3778` (inkl. fakeYAML-LineComment-Fix als Nebenwirkung) / T5 ⬜
+> **Status:** Done — letzter MVP-Slice
+> **DoD:** T1 ✅ `f531e7e` / T2 ✅ `d3fa294` / T3 ✅ `23952b2` (inkl. neuer `ErrConfigValueNotSet`-Sentinel) / T4 ✅ `fbf3778` (inkl. fakeYAML-LineComment-Fix als Nebenwirkung) / T5 ✅ `25cb123` (CLI-Subcommand + ExitCode-Wiring + Doku-Update; `cli.New` 7-Parameter-Erweiterung + 6 Helper-Migration)
 
 ## Auslöser
 

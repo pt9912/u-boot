@@ -18,8 +18,8 @@ in `in-progress/`.
 | M5 `u-boot add postgres` | Done | PostgreSQL-Add-on (`LH-FA-ADD-001..002`, `LH-FA-ADD-005`), services-Schema in u-boot.yaml, Compose split-block scaffold, `.env.example`-Block, Healthcheck mit `$${POSTGRES_USER:-postgres}`-Defaults für LH-AK-002, State-Machine, Active-Repair, CLI-Subcommand, doctor-Integration (services.enabled-key + devcontainer.forwardPorts + devcontainer.enabled-Severity-Eskalation). 11 doctor-Checks gesamt. | [`slice-m5-add-postgres`](../done/slice-m5-add-postgres.md) |
 | M6 `u-boot up` / `down` | Done | Compose-Wrapper (`LH-FA-UP-001..004`), Healthcheck-Polling, `--timeout`, `--volumes`, CLI-Subcommands + Status-Tabelle. Alle 7 Tranchen in `done/`. Carveout-Slice [`slice-m6-docker-integrationstests`](../done/slice-m6-docker-integrationstests.md) **Done** (Sub-T1..T4 + Audit-Härtung `41cab1b` + Stabilisierung `43b42e4`/`8865ca1` + Carveout-Entfernung). | [`slice-m6-up-down`](../done/slice-m6-up-down.md) |
 | M7 `u-boot generate` | Done | `generate changelog`/`readme`/`env-example`/`devcontainer` (`LH-FA-GEN-001..005` + LH-FA-DEV-001/004/005 + LH-AK-007). Sechs Tranchen ✅ (`67fc181`/`3c5de48`/`037ab00`/`19c4110`/`294e492`/`d32a733`) + Review-Followup `27de9c5` (9 Findings S1..S4/N1..N5 adressiert, u. a. fenced-code-block-Schutz gegen Markdown-Korruption + CRLF-Normalisierung). Reuse von `managedblock` (3 Marker-Stile decken 4 Datei-Mappings), `generateManagedFile`-Helper für env-example/readme, atomarer Two-File-Plan für devcontainer, konservative User-Edit-Erkennung für changelog. CLI: `u-boot generate <artifact>`, Exit-Codes 0/2/10/14. | [`slice-m7-generate`](../done/slice-m7-generate.md) |
-| M8 `u-boot config` | In progress | `config get`/`set`/Anzeigen (`LH-FA-CONF-001..005`), Schema-Validierung. Letzter MVP-blockierender Slice. T1..T4 ✅ (`f531e7e`/`d3fa294`/`23952b2`/`fbf3778`): Whitelist, Port + Skeleton, Get + Show + `ErrConfigValueNotSet`, Set mit zweistufiger Schema-Validation. T5 (CLI-Wiring) noch offen. | [`slice-m8-config`](slice-m8-config.md) |
-| MVP-Closure | Done | Devcontainer-Mindestumfang (`LH-FA-DEV-001..005`), MVP-Acceptance-Flows (`LH-AK-001..002`, `LH-AK-005..007`). Drei Tranchen — T1 ✅ `bfe6416` `u-boot init --devcontainer` (LH-AK-005), T2 ✅ `8525c4c` LH-AK-001/-006-Pins in `acceptance_test.go` inkl. Doctor-Severity-Fix `compose.yaml.valid` (Error → Warn), T3 ✅ Slice-Closure + MVP-Bilanz. Alle 5 MVP-`LH-AK-*` gepinnt; alle MVP-`LH-FA-DEV-*` ausgeliefert. **Verbleibender MVP-Item: `LH-FA-CONF-001..005` (M8 `u-boot config`)**. | [`slice-mvp-closure`](../done/slice-mvp-closure.md) |
+| M8 `u-boot config` | Done | `config get`/`set`/Anzeigen (`LH-FA-CONF-001..005`), Schema-Validierung. Fünf Tranchen ✅ (`f531e7e`/`d3fa294`/`23952b2`/`fbf3778`/`25cb123`): Whitelist, Port + Skeleton, Get + Show, Set mit Two-Stage-Validation, CLI-Subcommand. **Letzter MVP-blockierender Slice → MVP vollständig.** | [`slice-m8-config`](../done/slice-m8-config.md) |
+| MVP-Closure | Done | Devcontainer-Mindestumfang (`LH-FA-DEV-001..005`), MVP-Acceptance-Flows (`LH-AK-001..002`, `LH-AK-005..007`). Drei Tranchen — T1 ✅ `bfe6416` `u-boot init --devcontainer` (LH-AK-005), T2 ✅ `8525c4c` LH-AK-001/-006-Pins in `acceptance_test.go` inkl. Doctor-Severity-Fix `compose.yaml.valid` (Error → Warn), T3 ✅ Slice-Closure + MVP-Bilanz. Alle 5 MVP-`LH-AK-*` gepinnt; alle MVP-`LH-FA-DEV-*` ausgeliefert. (M8 `u-boot config` ist die zweite MVP-Schließung, siehe nächste Zeile.) | [`slice-mvp-closure`](../done/slice-mvp-closure.md) |
 | V1 Keycloak / OTel | Open | `LH-FA-ADD-003`, `LH-FA-ADD-004`, `LH-AK-003`, `LH-AK-004` | offen |
 | V1 Templates | Open | `LH-FA-TPL-001..004` | offen |
 | V1 Logs / Dry-Run / Diff | Open | `LH-FA-UP-005`, `LH-FA-CLI-007/008` | offen |
@@ -76,29 +76,32 @@ Disziplin-Verstoß.
    `compose.yaml.valid` no-services (Error → Warn,
    LH-AK-001-§2299-Konformität), T3 ✅ Closure + MVP-Bilanz.
 
-### MVP-Bilanz (Stand `c1fcd58`/`8525c4c`)
+### MVP-Bilanz — **MVP vollständig** (Stand `25cb123`)
 
-**Was MVP-komplett ist:**
+**Alle 5 MVP-`LH-AK-*` gepinnt** mit benannten e2e-Tests:
+LH-AK-001 (Init+Doctor) `8525c4c`, LH-AK-002 (Postgres-Flow)
+`b537929`+`aa3a45c`, LH-AK-005 (Devcontainer-Init) `bfe6416`,
+LH-AK-006 (Doppel-Add-Idempotenz) `8525c4c`, LH-AK-007
+(Changelog) `19c4110`.
 
-- **Alle 5 MVP-`LH-AK-*` gepinnt** mit benannten e2e-Tests:
-  LH-AK-001 (Init+Doctor) `8525c4c`, LH-AK-002 (Postgres-Flow)
-  `b537929`+`aa3a45c`, LH-AK-005 (Devcontainer-Init) `bfe6416`,
-  LH-AK-006 (Doppel-Add-Idempotenz) `8525c4c`, LH-AK-007
-  (Changelog) `19c4110`.
-- **Alle MVP-`LH-FA-*` aus M1..M7 + MVP-Closure ausgeliefert**:
-  ARCH/BUILD/PROJDOCS (M1/M2), INIT (M3), DIAG (M4), ADD (M5),
-  UP (M6), GEN + DEV (M7 + MVP-T1), CLI durchgehend
-  inkrementell. CONF-002 (YAML-Schema) ist seit M3
-  ausgeliefert.
+**Alle MVP-`LH-FA-*` ausgeliefert** über M1..M8:
 
-**Was MVP noch fehlt:**
+| Bereich          | Slice               | Status |
+| ---------------- | ------------------- | ------ |
+| ARCH/BUILD/PROJDOCS | M1 + M2 + M2b..M2d  | ✅ |
+| INIT             | M3 + MVP-Closure-T1 | ✅ |
+| DIAG             | M4                  | ✅ |
+| ADD              | M5                  | ✅ |
+| UP / DOWN        | M6                  | ✅ |
+| GEN              | M7                  | ✅ |
+| DEV              | M7-T5 + MVP-Closure-T1 | ✅ |
+| CONF             | M8                  | ✅ (T5 `25cb123`) |
+| CLI              | durchgehend inkrementell | ✅ |
 
-- **`M8 u-boot config`**: `LH-FA-CONF-001/-003/-004/-005`
-  verlangen `u-boot config get/set/list`-Kommandos. Heute
-  existiert kein Subcommand; der User muss `u-boot.yaml`
-  manuell editieren. Das ist ein eigener Slice (siehe Roadmap-
-  Tabelle, Phase M8), kein MVP-Closure-Scope. **MVP ist erst
-  vollständig nach M8.**
+Damit ist **kein MVP-`LH-AK-*` und kein MVP-`LH-FA-*` mehr
+offen**. Der erste Release-Schnitt (`v0.1.0` o. ä.) wird durch
+[`slice-v1-release-pipeline`](../open/slice-v1-release-pipeline.md)
+ausgelöst (Trigger: erster GHCR-Tag).
 
 ### V1-Phase: nicht release-blockierend, Trigger-getrieben
 
