@@ -7,6 +7,7 @@ import (
 	"fmt"
 	iofs "io/fs"
 	"path/filepath"
+	"regexp"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
@@ -154,13 +155,203 @@ func (s *GenerateService) readProjectConfig(baseDir string) (ubootYAMLConfig, er
 	return cfg, nil
 }
 
-// The remaining handler stubs use `_` as the receiver because T1
-// does not touch s.fs / s.yaml / s.logger yet. Each of T3..T5
-// renames `_` back to `s` when it wires the real handler, which the
-// revive unused-receiver rule then accepts.
+// The remaining handler stub uses `_` as the receiver because T1
+// does not touch s.fs / s.yaml / s.logger yet. T5 renames `_` back
+// to `s` when it wires the real devcontainer handler.
 
-func (*GenerateService) generateChangelog(_ context.Context, _ driving.GenerateRequest) (driving.GenerateResponse, error) {
-	return driving.GenerateResponse{}, fmt.Errorf("generate changelog: %w", errStubHandler)
+// changelogHeaderRE matches a Keep-a-Changelog second-level header
+// line (`## [<name>]`), capturing the inner identifier so callers
+// can branch on whether it is `Unreleased` or a release version
+// (`[0.1.0]`, etc.). Pinned at line-start so a `## [Unreleased]`
+// fragment quoted inside a fenced code block does not register.
+var changelogHeaderRE = regexp.MustCompile(`(?m)^##\s*\[([^\]]+)\]`)
+
+// changelogUnreleasedStub is the bare scaffold inserted by the
+// RepairedManual path when the user removed the `## [Unreleased]`
+// section while cutting a release. Empty Added/Changed/Fixed
+// subsections so the user can pick up immediately without manual
+// formatting.
+const changelogUnreleasedStub = "## [Unreleased]\n\n### Added\n\n### Changed\n\n### Fixed\n\n"
+
+// generateChangelog implements the M7-T4 state machine for
+// `CHANGELOG.md` (LH-FA-GEN-002 / LH-AK-007 / LH-FA-GEN-005). The
+// template's `init` managed block carries the initial scaffold
+// **and** the `## [Unreleased]` section, which the user typically
+// edits (adds entries, moves to a release). A blind block-replace
+// would destroy those edits and violate LH-AK-007 ("vorhandene
+// Inhalte werden nicht zerstört"). The handler is therefore the
+// only M7 generator that does not call [generateManagedFile]; its
+// state machine has a different shape:
+//
+//	absent                          → render full template, write file → Created
+//	present-no-block                → ErrGenerateManualConflict (Code 10)
+//	present-malformed               → ErrGenerateManualConflict (Code 10)
+//	present, block == rendered      → NoOp (idempotent re-run on a fresh file)
+//	present, block ≠ rendered       → user-edited; do NOT touch the block.
+//	  └─ has `## [Unreleased]` anywhere → NoOp
+//	  └─ no `## [Unreleased]`,
+//	     has a release section outside the block → insert an
+//	     Unreleased stub before the first release section
+//	     → RepairedManual
+//	  └─ no Unreleased and no release section either → NoOp (the
+//	     user has a non-Keep-a-Changelog layout; leave it alone)
+//
+// Known fragility (slice plan §"Bekannte Fragilität der Hash-
+// Heuristik"): any future change to changelog.md.tmpl flips every
+// existing project's changelog into the user-edited branch because
+// the heuristic is `bytes.Equal(existing, rendered)` — there is no
+// template-version marker. M7 freezes the M3 templates; a future
+// `--migrate` flag or versioned marker (`init v2`) is V1.
+func (s *GenerateService) generateChangelog(_ context.Context, req driving.GenerateRequest) (driving.GenerateResponse, error) {
+	cfg, err := s.readProjectConfig(req.BaseDir)
+	if err != nil {
+		return driving.GenerateResponse{}, err
+	}
+
+	const relPath = "CHANGELOG.md"
+	targetPath := filepath.Join(req.BaseDir, relPath)
+	marker := managedblock.Marker{Style: managedblock.StyleHTMLComment, Name: managedblock.InitName}
+
+	rendered, err := renderTemplate("changelog.md.tmpl", templateData{Name: cfg.Project.Name})
+	if err != nil {
+		return driving.GenerateResponse{}, err
+	}
+
+	exists, err := s.fs.Exists(targetPath)
+	if err != nil {
+		return driving.GenerateResponse{}, fmt.Errorf("%w: Exists(%q): %v",
+			driving.ErrGenerateFileSystem, targetPath, err)
+	}
+
+	// State: absent — write the whole rendered template.
+	if !exists {
+		if err := s.fs.WriteFile(targetPath, rendered, defaultFileMode); err != nil {
+			return driving.GenerateResponse{}, fmt.Errorf("%w: write %q: %v",
+				driving.ErrGenerateFileSystem, targetPath, err)
+		}
+		s.logger.Info("generate: created",
+			"artifact", req.Artifact.String(), "path", relPath, "project", cfg.Project.Name)
+		return driving.GenerateResponse{
+			Artifact: req.Artifact,
+			Action:   driving.GenerateActionCreated,
+			Changed:  []string{relPath},
+		}, nil
+	}
+
+	existing, err := s.fs.ReadFile(targetPath)
+	if err != nil {
+		return driving.GenerateResponse{}, fmt.Errorf("%w: read %q: %v",
+			driving.ErrGenerateFileSystem, targetPath, err)
+	}
+
+	renderedBlock, err := renderManagedBlockOnly(rendered, marker)
+	if err != nil {
+		return driving.GenerateResponse{}, fmt.Errorf(
+			"extract init block from rendered changelog.md.tmpl: %w", err)
+	}
+
+	start, end, findErr := managedblock.Find(existing, marker)
+	switch {
+	case errors.Is(findErr, managedblock.ErrBlockNotFound):
+		return driving.GenerateResponse{}, fmt.Errorf(
+			"%w: %q exists without an `init` managed block; rename the file or insert the `<!-- BEGIN U-BOOT MANAGED BLOCK: init -->` marker manually",
+			driving.ErrGenerateManualConflict, relPath)
+	case errors.Is(findErr, managedblock.ErrBlockMalformed):
+		return driving.GenerateResponse{}, fmt.Errorf(
+			"%w: %q has a malformed `init` managed block (%v); rename the file or repair the BEGIN/END markers manually",
+			driving.ErrGenerateManualConflict, relPath, findErr)
+	case findErr != nil:
+		return driving.GenerateResponse{}, fmt.Errorf("find init block in %q: %w", relPath, findErr)
+	}
+
+	// State: present, block matches rendered → NoOp (fresh).
+	if bytes.Equal(existing[start:end], renderedBlock) {
+		s.logger.Debug("generate: no-op (fresh block)",
+			"artifact", req.Artifact.String(), "path", relPath)
+		return driving.GenerateResponse{
+			Artifact: req.Artifact,
+			Action:   driving.GenerateActionNoOp,
+			Changed:  nil,
+		}, nil
+	}
+
+	// State: user-edited block. Never re-render — only consider an
+	// Unreleased-stub repair outside the block.
+	repaired, doRepair := changelogRepairUnreleased(existing, end)
+	if !doRepair {
+		s.logger.Debug("generate: no-op (user-edited)",
+			"artifact", req.Artifact.String(), "path", relPath)
+		return driving.GenerateResponse{
+			Artifact: req.Artifact,
+			Action:   driving.GenerateActionNoOp,
+			Changed:  nil,
+		}, nil
+	}
+	if err := s.fs.WriteFile(targetPath, repaired, defaultFileMode); err != nil {
+		return driving.GenerateResponse{}, fmt.Errorf("%w: write %q: %v",
+			driving.ErrGenerateFileSystem, targetPath, err)
+	}
+	s.logger.Info("generate: repaired Unreleased header",
+		"artifact", req.Artifact.String(), "path", relPath, "project", cfg.Project.Name)
+	return driving.GenerateResponse{
+		Artifact: req.Artifact,
+		Action:   driving.GenerateActionRepairedManual,
+		Changed:  []string{relPath},
+	}, nil
+}
+
+// changelogRepairUnreleased considers whether to insert a fresh
+// `## [Unreleased]` stub before the first release section in the
+// user-edited branch of [generateChangelog]. Returns the repaired
+// bytes and `true` when a stub was inserted; returns `(nil, false)`
+// when no repair is appropriate (Unreleased already present, or no
+// release section after the init-block END marker to anchor at).
+// blockEnd is the byte offset just past the END-marker line so the
+// release-section scan ignores anything inside the managed block.
+func changelogRepairUnreleased(existing []byte, blockEnd int) ([]byte, bool) {
+	if hasChangelogUnreleased(existing) {
+		return nil, false
+	}
+	tailOffset := firstReleaseSectionOffset(existing[blockEnd:])
+	if tailOffset < 0 {
+		return nil, false
+	}
+	insertAt := blockEnd + tailOffset
+	repaired := make([]byte, 0, len(existing)+len(changelogUnreleasedStub))
+	repaired = append(repaired, existing[:insertAt]...)
+	repaired = append(repaired, []byte(changelogUnreleasedStub)...)
+	repaired = append(repaired, existing[insertAt:]...)
+	return repaired, true
+}
+
+// hasChangelogUnreleased reports whether content contains a
+// Keep-a-Changelog `## [Unreleased]` header. Used by
+// [generateChangelog] to decide between the NoOp and RepairedManual
+// user-edited branches.
+func hasChangelogUnreleased(content []byte) bool {
+	for _, m := range changelogHeaderRE.FindAllSubmatch(content, -1) {
+		if bytes.Equal(m[1], []byte("Unreleased")) {
+			return true
+		}
+	}
+	return false
+}
+
+// firstReleaseSectionOffset returns the byte offset of the first
+// `## [<release>]` header in content where `<release>` is not
+// `Unreleased`. Returns -1 when no such header is present. Used by
+// [generateChangelog] to position the Unreleased stub before the
+// existing release history.
+func firstReleaseSectionOffset(content []byte) int {
+	for _, m := range changelogHeaderRE.FindAllSubmatchIndex(content, -1) {
+		// m[0]/m[1] cover the full header line offset; m[2]/m[3]
+		// cover the captured group (the inner identifier).
+		name := content[m[2]:m[3]]
+		if !bytes.Equal(name, []byte("Unreleased")) {
+			return m[0]
+		}
+	}
+	return -1
 }
 
 // generateReadme is the thin T3 wrapper over generateManagedFile for

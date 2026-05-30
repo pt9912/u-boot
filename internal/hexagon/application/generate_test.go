@@ -82,29 +82,22 @@ func TestGenerate_NoUbootYAML_ReturnsErrProjectNotInitialized(t *testing.T) {
 // (slice-m7-generate.md T5 DoD).
 //
 // Pin tracks remaining stubs: 4 in T1 → 3 in T2 → 2 in T3 → 1 in T4 →
-// 0 in T5 (test deleted). Updated for T3: readme is now real, so the
-// catalogue covers only changelog and devcontainer.
-func TestGenerate_StubHandlers_RemainingTwoReturnErrStubHandler(t *testing.T) {
+// 0 in T5 (test deleted). Updated for T4: changelog is now real, so
+// the catalogue covers only devcontainer.
+func TestGenerate_StubHandler_OnlyDevcontainerReturnsErrStubHandler(t *testing.T) {
 	t.Parallel()
 	svc, fs := newGenerateService(t)
 	seedGenerateUbootYAML(t, fs)
 
-	cases := []domain.Artifact{
-		domain.ArtifactChangelog,
-		domain.ArtifactDevcontainer,
+	_, err := svc.Generate(context.Background(), driving.GenerateRequest{
+		BaseDir:  generateTestBaseDir,
+		Artifact: domain.ArtifactDevcontainer,
+	})
+	if err == nil {
+		t.Fatal("expected stub-handler error, got nil")
 	}
-	for _, art := range cases {
-		_, err := svc.Generate(context.Background(), driving.GenerateRequest{
-			BaseDir:  generateTestBaseDir,
-			Artifact: art,
-		})
-		if err == nil {
-			t.Errorf("artifact=%s: expected stub-handler error, got nil", art)
-			continue
-		}
-		if !errors.Is(err, application.ErrStubHandlerForTest) {
-			t.Errorf("artifact=%s: err = %v, want wrap of errStubHandler", art, err)
-		}
+	if !errors.Is(err, application.ErrStubHandlerForTest) {
+		t.Errorf("err = %v, want wrap of errStubHandler", err)
 	}
 }
 
@@ -478,4 +471,303 @@ func lastN(data []byte, n int) []byte {
 		return data
 	}
 	return data[len(data)-n:]
+}
+
+// --- T4: generate changelog ------------------------------------------
+
+func changelogPath() string {
+	return filepath.Join(generateTestBaseDir, "CHANGELOG.md")
+}
+
+func renderedChangelog(t *testing.T) []byte {
+	t.Helper()
+	body, err := application.RenderTemplateForTest("changelog.md.tmpl", envExampleProjectName)
+	if err != nil {
+		t.Fatalf("render changelog template: %v", err)
+	}
+	return body
+}
+
+func seedChangelog(t *testing.T, fs *fakeFS, body []byte) {
+	t.Helper()
+	if err := fs.WriteFile(changelogPath(), body, 0o644); err != nil {
+		t.Fatalf("seed CHANGELOG.md: %v", err)
+	}
+}
+
+func generateChangelog(t *testing.T, svc *application.GenerateService) (driving.GenerateResponse, error) {
+	t.Helper()
+	return svc.Generate(context.Background(), driving.GenerateRequest{
+		BaseDir:  generateTestBaseDir,
+		Artifact: domain.ArtifactChangelog,
+	})
+}
+
+func TestGenerateChangelog_Absent_ReturnsCreated(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs)
+
+	resp, err := generateChangelog(t, svc)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Action != driving.GenerateActionCreated {
+		t.Errorf("Action = %v, want Created", resp.Action)
+	}
+	if got, want := resp.Changed, []string{"CHANGELOG.md"}; !equalStrings(got, want) {
+		t.Errorf("Changed = %v, want %v", got, want)
+	}
+
+	got, err := fs.ReadFile(changelogPath())
+	if err != nil {
+		t.Fatalf("read written CHANGELOG.md: %v", err)
+	}
+	if want := renderedChangelog(t); !bytes.Equal(got, want) {
+		t.Errorf("written body differs from rendered template:\n got=%q\nwant=%q", got, want)
+	}
+}
+
+func TestGenerateChangelog_DoubleRun_SecondCallNoOp(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs)
+
+	if _, err := generateChangelog(t, svc); err != nil {
+		t.Fatalf("first run: %v", err)
+	}
+	writesAfterFirst := len(fs.writtenPaths())
+
+	resp, err := generateChangelog(t, svc)
+	if err != nil {
+		t.Fatalf("second run: %v", err)
+	}
+	if resp.Action != driving.GenerateActionNoOp {
+		t.Errorf("second run Action = %v, want NoOp", resp.Action)
+	}
+	if delta := len(fs.writtenPaths()) - writesAfterFirst; delta != 0 {
+		t.Errorf("second run produced %d WriteFile call(s), want 0; writes = %v",
+			delta, fs.writtenPaths())
+	}
+}
+
+func TestGenerateChangelog_PresentNoBlock_ReturnsErrManualConflict(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs)
+	seedChangelog(t, fs, []byte("# Custom changelog\n\nNo init block here.\n"))
+
+	writesBefore := len(fs.writtenPaths())
+	_, err := generateChangelog(t, svc)
+	if !errors.Is(err, driving.ErrGenerateManualConflict) {
+		t.Fatalf("err = %v, want wrap of ErrGenerateManualConflict", err)
+	}
+	if delta := len(fs.writtenPaths()) - writesBefore; delta != 0 {
+		t.Errorf("manual-conflict path produced %d WriteFile call(s), want 0", delta)
+	}
+}
+
+func TestGenerateChangelog_PresentMalformedBlock_ReturnsErrManualConflict(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs)
+	seedChangelog(t, fs, []byte("<!-- BEGIN U-BOOT MANAGED BLOCK: init -->\n# orphan body\n"))
+
+	writesBefore := len(fs.writtenPaths())
+	_, err := generateChangelog(t, svc)
+	if !errors.Is(err, driving.ErrGenerateManualConflict) {
+		t.Fatalf("err = %v, want wrap of ErrGenerateManualConflict", err)
+	}
+	if msg := err.Error(); !strings.Contains(strings.ToLower(msg), "malformed") {
+		t.Errorf("error message %q lacks 'malformed' detail", msg)
+	}
+	if delta := len(fs.writtenPaths()) - writesBefore; delta != 0 {
+		t.Errorf("malformed-block path produced %d WriteFile call(s), want 0", delta)
+	}
+}
+
+// TestGenerateChangelog_UserEditedBlock_WithUnreleased_NoOp pins the
+// idempotency contract for a user-curated file where the init block
+// has been touched (so bytes.Equal(existing, rendered) is false) but
+// a `## [Unreleased]` section is still present. The handler must not
+// re-render the block (LH-AK-007 "vorhandene Inhalte werden nicht
+// zerstört") and must not insert a redundant Unreleased header.
+func TestGenerateChangelog_UserEditedBlock_WithUnreleased_NoOp(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs)
+	// Stale init block (different from the freshly-rendered template),
+	// but the user added their own Unreleased entries below — so the
+	// `## [Unreleased]` header is preserved.
+	seed := []byte("<!-- BEGIN U-BOOT MANAGED BLOCK: init -->\n# Changelog\n\nUser-curated intro.\n\n## [Unreleased]\n\n### Added\n\n- user entry\n<!-- END U-BOOT MANAGED BLOCK: init -->\n")
+	seedChangelog(t, fs, seed)
+
+	writesBefore := len(fs.writtenPaths())
+	resp, err := generateChangelog(t, svc)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Action != driving.GenerateActionNoOp {
+		t.Errorf("Action = %v, want NoOp", resp.Action)
+	}
+	if len(resp.Changed) != 0 {
+		t.Errorf("Changed = %v, want empty", resp.Changed)
+	}
+	if delta := len(fs.writtenPaths()) - writesBefore; delta != 0 {
+		t.Errorf("NoOp path produced %d WriteFile call(s), want 0", delta)
+	}
+}
+
+// TestGenerateChangelog_UserEditedBlock_MissingUnreleased_RepairedManual
+// pins the RepairedManual path from the slice plan §T4-table: the
+// user has cut a release (moved Unreleased entries to `## [0.1.0]`)
+// and forgot to seed a fresh Unreleased. The handler inserts an
+// Unreleased stub before the first release section, outside the
+// init block.
+func TestGenerateChangelog_UserEditedBlock_MissingUnreleased_RepairedManual(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs)
+	// User-edited block (no Unreleased inside) + a release section
+	// after the END marker. This matches the slice plan's
+	// RepairedManual fixture description.
+	seed := []byte(
+		"<!-- BEGIN U-BOOT MANAGED BLOCK: init -->\n" +
+			"# Changelog\n\nUser-curated intro.\n" +
+			"<!-- END U-BOOT MANAGED BLOCK: init -->\n\n" +
+			"## [0.1.0] - 2026-01-01\n\n" +
+			"### Added\n\n- initial release\n",
+	)
+	seedChangelog(t, fs, seed)
+
+	resp, err := generateChangelog(t, svc)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Action != driving.GenerateActionRepairedManual {
+		t.Errorf("Action = %v, want RepairedManual", resp.Action)
+	}
+	if got, want := resp.Changed, []string{"CHANGELOG.md"}; !equalStrings(got, want) {
+		t.Errorf("Changed = %v, want %v", got, want)
+	}
+
+	got, err := fs.ReadFile(changelogPath())
+	if err != nil {
+		t.Fatalf("read repaired CHANGELOG.md: %v", err)
+	}
+	// The Unreleased stub must appear before the release section and
+	// after the END marker. Find both anchors and assert the order.
+	unreleasedIdx := bytes.Index(got, []byte("## [Unreleased]"))
+	releaseIdx := bytes.Index(got, []byte("## [0.1.0]"))
+	endMarkerIdx := bytes.Index(got, []byte("<!-- END U-BOOT MANAGED BLOCK: init -->"))
+	if unreleasedIdx < 0 {
+		t.Fatal("repaired body missing ## [Unreleased] header")
+	}
+	if releaseIdx < 0 {
+		t.Fatal("repaired body lost ## [0.1.0] header")
+	}
+	if endMarkerIdx < 0 || unreleasedIdx < endMarkerIdx {
+		t.Errorf("Unreleased stub was inserted inside or before the init block (END idx=%d, Unreleased idx=%d); want outside the block",
+			endMarkerIdx, unreleasedIdx)
+	}
+	if unreleasedIdx >= releaseIdx {
+		t.Errorf("Unreleased stub at offset %d is not before release section at offset %d", unreleasedIdx, releaseIdx)
+	}
+	// Idempotency: a second invocation now sees Unreleased present
+	// and must NoOp.
+	writesAfterRepair := len(fs.writtenPaths())
+	resp2, err := generateChangelog(t, svc)
+	if err != nil {
+		t.Fatalf("second run after repair: %v", err)
+	}
+	if resp2.Action != driving.GenerateActionNoOp {
+		t.Errorf("second run Action = %v, want NoOp", resp2.Action)
+	}
+	if delta := len(fs.writtenPaths()) - writesAfterRepair; delta != 0 {
+		t.Errorf("second run produced %d WriteFile call(s), want 0", delta)
+	}
+}
+
+// TestGenerateChangelog_UserEditedBlock_NoUnreleased_NoVersion_NoOp
+// covers the conservative branch where the user has neither an
+// Unreleased section nor a recognisable release section — the
+// handler refuses to invent structure and leaves the file alone.
+func TestGenerateChangelog_UserEditedBlock_NoUnreleased_NoVersion_NoOp(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs)
+	seed := []byte(
+		"<!-- BEGIN U-BOOT MANAGED BLOCK: init -->\n" +
+			"# Changelog\n\nFree-form notes.\n" +
+			"<!-- END U-BOOT MANAGED BLOCK: init -->\n\n" +
+			"Just a paragraph, no Keep-a-Changelog headers.\n",
+	)
+	seedChangelog(t, fs, seed)
+
+	writesBefore := len(fs.writtenPaths())
+	resp, err := generateChangelog(t, svc)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Action != driving.GenerateActionNoOp {
+		t.Errorf("Action = %v, want NoOp", resp.Action)
+	}
+	if delta := len(fs.writtenPaths()) - writesBefore; delta != 0 {
+		t.Errorf("conservative NoOp produced %d WriteFile call(s), want 0", delta)
+	}
+}
+
+// TestGenerateChangelog_LHAK007_FlowEndToEnd pins LH-AK-007 verbatim:
+// `u-boot init && u-boot generate changelog` produces a CHANGELOG.md
+// that exists, has not destroyed any pre-existing content (vacuously
+// true for the fresh-init path), and contains the expected
+// `## [Unreleased]` section. The test exercises both application
+// services side-by-side rather than going through the CLI adapter.
+func TestGenerateChangelog_LHAK007_FlowEndToEnd(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	fs := newFakeFS()
+	fs.markDirExists(dir)
+	y := &fakeYAML{}
+	git := &fakeGit{}
+	prog := &fakeProgress{}
+	conf := &fakeConfirmer{}
+
+	initSvc := application.NewInitProjectService(fs, y, git, prog, conf, nil)
+	genSvc := application.NewGenerateService(fs, y, nil)
+
+	if _, err := initSvc.Init(context.Background(), driving.InitProjectRequest{
+		BaseDir: dir,
+		Name:    "ak007demo",
+		SkipGit: true,
+	}); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+
+	resp, err := genSvc.Generate(context.Background(), driving.GenerateRequest{
+		BaseDir:  dir,
+		Artifact: domain.ArtifactChangelog,
+	})
+	if err != nil {
+		t.Fatalf("generate changelog: %v", err)
+	}
+	// Init already writes CHANGELOG.md, so generate sees a present
+	// fresh file and returns NoOp. That still satisfies LH-AK-007 —
+	// the file exists, pre-existing content is preserved, the
+	// Unreleased section is present.
+	if resp.Action != driving.GenerateActionNoOp {
+		t.Errorf("Action = %v, want NoOp (init already wrote a fresh CHANGELOG.md)", resp.Action)
+	}
+
+	body, err := fs.ReadFile(filepath.Join(dir, "CHANGELOG.md"))
+	if err != nil {
+		t.Fatalf("read CHANGELOG.md: %v", err)
+	}
+	if !bytes.Contains(body, []byte("## [Unreleased]")) {
+		t.Errorf("CHANGELOG.md missing ## [Unreleased] section; got:\n%s", body)
+	}
+	if !bytes.Contains(body, []byte("ak007demo")) {
+		t.Errorf("CHANGELOG.md does not reference project name; got:\n%s", body)
+	}
 }
