@@ -147,27 +147,48 @@ Aufhebung des Carveouts fehlt:
   ```
   ## Stabilization Evidence (slice-m6-docker-integrationstests)
   Three consecutive green `integration-docker` runs on `main`,
-  each a first attempt (no re-runs, no workflow_dispatch):
-  1. <commit-sha>  <workflow-run-url>  run_attempt=1  conclusion=success  event=push
-  2. <commit-sha>  <workflow-run-url>  run_attempt=1  conclusion=success  event=push
-  3. <commit-sha>  <workflow-run-url>  run_attempt=1  conclusion=success  event=push
+  each a first attempt (no re-runs, no workflow_dispatch),
+  job-conclusion verified:
+  1. <commit-sha>  <workflow-run-url>  run_attempt=1  event=push  job_conclusion=success
+  2. <commit-sha>  <workflow-run-url>  run_attempt=1  event=push  job_conclusion=success
+  3. <commit-sha>  <workflow-run-url>  run_attempt=1  event=push  job_conclusion=success
   ```
 
+  `job_conclusion` stammt aus dem `/jobs`-API-Endpunkt
+  (siehe Reviewer-Pflicht Punkt 1) und ist **nicht** identisch zum
+  Workflow-Run-Top-Level-Feld `conclusion` — letzteres ist unter
+  `continue-on-error: true` immer `success`, selbst bei rotem Job.
+
   Reviewer-Pflicht (mechanisch, nicht „Vertrauen"):
-  1. Jede URL öffnen und auf der GitHub-Run-Seite verifizieren,
+  1. **Job-Conclusion verifizieren** (Pflicht, nicht optional —
+     siehe Begründung unten): per
+     `gh api repos/{repo}/actions/runs/{run-id}/jobs --jq '.jobs[] | {name, conclusion}'`
+     muss die Zeile mit `name: "integration-docker (//go:build docker)"`
+     **`conclusion: "success"`** zeigen. Das Workflow-Run-Feld
+     `conclusion` ist **nicht ausreichend**: solange
+     `continue-on-error: true` aktiv ist, mappt GitHub einen
+     job-internen Failure auf workflow-`conclusion: success`. Eine
+     Heuristik, die nur das Workflow-Feld prüft, übersieht jeden
+     Real-Failure — diese Lücke hat die erste Stabilisierungs-PR
+     (PR #1, am 2026-05-30 ohne Merge geschlossen) auf einer
+     dreifach falsch-grünen Evidence laufen lassen. Job-Conclusion
+     ist deshalb hier vorgezogen — sie ist die einzige
+     Audit-Bedingung, die Stabilisierungs-Wirklichkeit auf
+     Sub-Job-Ebene messen kann.
+  2. Jede URL öffnen und auf der GitHub-Run-Seite verifizieren,
      dass **`run_attempt`** = `1` ist — sichtbar im URL-Pfad
      (`/attempts/1`) oder am UI-Element „Run #N · Attempt #1".
      Re-Runs zeigen `/attempts/2+` und sind disqualifiziert,
      selbst wenn der Trigger ursprünglich `push` war.
-  2. **`event`** = `push` bestätigen (nicht
+  3. **`event`** = `push` bestätigen (nicht
      `workflow_dispatch`/`schedule`/`repository_dispatch`).
-  3. **Commit-SHA** auf `main` verifizieren (nicht auf einem
+  4. **Commit-SHA** auf `main` verifizieren (nicht auf einem
      temporär gepushten Branch, der später force-gelöscht wurde
      — GitHub würde den Run trotzdem zeigen).
-  4. Optional, aber empfohlen: per `gh api repos/{repo}/actions/runs/{run-id}`
-     die drei Felder `run_attempt`, `event` und `head_branch`
-     gegenprüfen; ein Mismatch zwischen UI und API-Antwort wäre
-     ein Manipulations-Signal.
+  5. Optional, aber empfohlen: per `gh api repos/{repo}/actions/runs/{run-id}`
+     die drei Felder `run_attempt`, `event` und `head_branch` des
+     Workflow-Runs gegenprüfen; ein Mismatch zwischen UI und
+     API-Antwort wäre ein Manipulations-Signal.
 
   Die PR, die später den `carveouts.md`-Eintrag entfernt, **muss**
   zusätzlich auf die URL des **ersten** Laufs **ohne**
