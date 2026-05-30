@@ -24,6 +24,7 @@ type initFlags struct {
 	Force          bool
 	Backup         bool
 	AssumeExisting bool
+	Devcontainer   bool
 	Yes            bool
 	NoInteractive  bool
 }
@@ -43,6 +44,16 @@ type initFlags struct {
 //	--assume-existing   accept implicit existing-project detection
 //	                    in non-interactive runs (LH-FA-CLI-005A §238);
 //	                    no-op until the M4 soft-detection slice lands.
+//	--devcontainer      also write the LH-FA-DEV-001 devcontainer
+//	                    files (`.devcontainer/devcontainer.json`
+//	                    + `Dockerfile`) and set
+//	                    `devcontainer.enabled: true` in u-boot.yaml
+//	                    (LH-AK-005). Same --force/--backup discipline
+//	                    as M3-templated files: existing devcontainer
+//	                    files with an `init` block (e.g. from a prior
+//	                    `u-boot generate devcontainer`) re-splice;
+//	                    without the marker the call aborts with
+//	                    ErrFileExists unless --force --backup is set.
 //
 // The persistent flags --yes / --no-interactive are bound at the
 // root command (LH-FA-CLI-005A); we read their parsed values via
@@ -86,7 +97,9 @@ Examples:
   u-boot init --backup                   # full overwrite with .bak[*]
   u-boot init --force --backup           # block edit + safety backup
   u-boot init --no-interactive --force   # CI-safe re-init
-  u-boot init --assume-existing --backup # re-init a partial layout`,
+  u-boot init --assume-existing --backup # re-init a partial layout
+  u-boot init --devcontainer             # LH-AK-005 devcontainer flow
+  u-boot init --devcontainer --force --backup  # re-splice over generate output`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Read-through persistent flags from the App; Cobra has
@@ -104,6 +117,8 @@ Examples:
 		"back up existing files to <name>.bak[.N] before overwriting (LH-FA-INIT-005)")
 	cmd.Flags().BoolVar(&flags.AssumeExisting, "assume-existing", false,
 		"assert existing project in non-interactive runs; aborts unless --backup/--force (LH-FA-INIT-004, LH-FA-CLI-005A §238)")
+	cmd.Flags().BoolVar(&flags.Devcontainer, "devcontainer", false,
+		"also generate `.devcontainer/devcontainer.json` + `Dockerfile` and set devcontainer.enabled=true in u-boot.yaml (LH-AK-005)")
 	return cmd
 }
 
@@ -153,6 +168,7 @@ func runInit(
 		Backup:         flags.Backup,
 		AssumeExisting: flags.AssumeExisting,
 		NoInteractive:  flags.NoInteractive,
+		Devcontainer:   flags.Devcontainer,
 	}
 	if len(args) == 1 {
 		req.Name = args[0]

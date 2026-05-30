@@ -49,7 +49,7 @@ Out of Scope (V1+):
 - **`LH-FA-DEV-003`** Externe Feature-Quellen (V1, eigener Flow
   mit `--allow-external-feature-sources`).
 - **MVP-Release-Pipeline** — kein MVP-Scope; eigener V1-Slice
-  ([`slice-v1-release-pipeline`](slice-v1-release-pipeline.md)).
+  ([`slice-v1-release-pipeline`](../open/slice-v1-release-pipeline.md)).
 - **Volle MVP-`LH-FA-*`-Audit** — Spec listet 60+ MVP-IDs; ein
   Eintrag-für-Eintrag-Pin-Check ist eine eigene Disziplin-Übung,
   nicht hier. Dieser Slice fokussiert auf die fünf

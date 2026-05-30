@@ -231,7 +231,7 @@ func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRe
 	created := make([]string, 0)
 	backups := make([]driving.BackupAction, 0)
 
-	dirEntries, err := s.writeDirectories(req.BaseDir)
+	dirEntries, err := s.writeDirectories(req.BaseDir, req)
 	if err != nil {
 		return driving.InitProjectResponse{}, err
 	}
@@ -244,7 +244,7 @@ func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRe
 	created = append(created, fileEntries...)
 	backups = append(backups, fileBackups...)
 
-	yamlEntry, yamlBackup, err := s.executeUBootYAML(req.BaseDir, project, yamlPlan)
+	yamlEntry, yamlBackup, err := s.executeUBootYAML(req.BaseDir, project, yamlPlan, req.Devcontainer)
 	if err != nil {
 		return driving.InitProjectResponse{}, err
 	}
@@ -388,8 +388,19 @@ func resolveProjectName(req driving.InitProjectRequest) (domain.ProjectName, err
 // planTemplatedFiles computes the per-file plan for every templated
 // file (README, CHANGELOG, compose.yaml, .env.example, .gitignore).
 // Returns the first abort-error encountered, so no side effect runs.
+//
+// When req.Devcontainer is true, the two M7-T5 devcontainer
+// templates (`.devcontainer/devcontainer.json` and
+// `.devcontainer/Dockerfile`) are appended to the plan list with
+// the same `init`-block marker style they use under
+// `generate devcontainer` — that keeps `init --devcontainer` and
+// `generate devcontainer` interchangeable for the block-replace
+// path (slice-m7-generate.md §Block-Name).
 func (s *InitProjectService) planTemplatedFiles(req driving.InitProjectRequest) ([]filePlan, error) {
 	templates := fileTemplates()
+	if req.Devcontainer {
+		templates = append(templates, devcontainerFileTemplates()...)
+	}
 	plans := make([]filePlan, 0, len(templates))
 	for _, ft := range templates {
 		fp, err := s.planFile(req.BaseDir, ft, req.Force, req.Backup)
@@ -399,6 +410,30 @@ func (s *InitProjectService) planTemplatedFiles(req driving.InitProjectRequest) 
 		plans = append(plans, fp)
 	}
 	return plans, nil
+}
+
+// devcontainerFileTemplates returns the two LH-FA-DEV-001 file
+// templates that `u-boot init --devcontainer` (LH-AK-005) appends
+// to the M3 fileTemplates() list. Path / Style / Managed-flag
+// match exactly what M7-T5 `generate devcontainer` writes, so the
+// same `init`-block marker survives between the two entry points.
+// MVP-Closure §T1; kept separate from fileTemplates() because the
+// list is condition-gated on req.Devcontainer.
+func devcontainerFileTemplates() []fileTemplate {
+	return []fileTemplate{
+		{
+			Path:         ".devcontainer/devcontainer.json",
+			TemplateName: "devcontainer/devcontainer.json.tmpl",
+			Managed:      true,
+			Style:        managedblock.StyleDoubleSlash,
+		},
+		{
+			Path:         ".devcontainer/Dockerfile",
+			TemplateName: "devcontainer/Dockerfile.tmpl",
+			Managed:      true,
+			Style:        managedblock.StyleHash,
+		},
+	}
 }
 
 // planUBootYAML computes the plan for u-boot.yaml. The file is
@@ -558,8 +593,17 @@ func planToEvent(p filePlan) (driven.AffectedFile, bool) {
 // writeDirectories creates the LH-FA-INIT-003 mandatory subdirs.
 // MkdirAll is idempotent, so re-init on an existing project just
 // re-creates the dirs (no-op on disk).
-func (s *InitProjectService) writeDirectories(baseDir string) ([]string, error) {
+//
+// When req.Devcontainer is true, `.devcontainer/` is appended so
+// the subsequent file writes for devcontainer.json / Dockerfile
+// land in an existing directory. The dir entry shows up in
+// [driving.InitProjectResponse.Created] for the same reason
+// `docker/`/`scripts/`/`docs/` do (user-visible scaffold trail).
+func (s *InitProjectService) writeDirectories(baseDir string, req driving.InitProjectRequest) ([]string, error) {
 	dirs := projectStructureDirs()
+	if req.Devcontainer {
+		dirs = append(dirs, ".devcontainer")
+	}
 	created := make([]string, 0, len(dirs))
 	for _, dir := range dirs {
 		path := filepath.Join(baseDir, dir)
@@ -776,10 +820,20 @@ func (s *InitProjectService) runBackup(baseDir, relPath string) (*driving.Backup
 // LH-FA-CONF-002 with the same plan dispatch as the templated files.
 // u-boot.yaml is whole-file managed (no inline block marker), so the
 // only re-init action is OverwriteFull (with backup).
-func (s *InitProjectService) executeUBootYAML(baseDir string, project domain.Project, plan filePlan) (string, *driving.BackupAction, error) {
+//
+// When devcontainer is true, the marshaled config carries
+// `devcontainer.enabled: true` so the M5-T7 doctor severity-
+// escalation gate (`LH-FA-DIAG-002` §1073: `error` for missing or
+// invalid `.devcontainer/devcontainer.json` when
+// `devcontainer.enabled == true`) fires after the init.
+func (s *InitProjectService) executeUBootYAML(baseDir string, project domain.Project, plan filePlan, devcontainer bool) (string, *driving.BackupAction, error) {
 	cfg := ubootYAMLConfig{
 		SchemaVersion: project.SchemaVersion,
 		Project:       ubootYAMLProject{Name: project.Name.String()},
+	}
+	if devcontainer {
+		enabled := true
+		cfg.Devcontainer = &ubootYAMLDevcontainer{Enabled: &enabled}
 	}
 	body, err := s.yaml.Marshal(cfg)
 	if err != nil {

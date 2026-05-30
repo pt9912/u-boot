@@ -79,6 +79,21 @@ type InitProjectRequest struct {
 	// combined describe "non-interactive, but the user asserts the
 	// directory IS an existing project".
 	NoInteractive bool
+
+	// Devcontainer enables the LH-AK-005 / LH-FA-DEV-001 init flow:
+	// when true, the use case additionally writes
+	// `.devcontainer/devcontainer.json` and `.devcontainer/Dockerfile`
+	// from the M7-T5 templates and sets `devcontainer.enabled: true`
+	// in u-boot.yaml. Default false preserves the M3 init behaviour;
+	// the CLI adapter sets this from the `--devcontainer` flag.
+	//
+	// The same `--force`/`--backup` discipline applies as for the
+	// M3-templated files: an existing devcontainer file with an
+	// `init` managed block (e.g. left over from
+	// `u-boot generate devcontainer`) is reset via the standard
+	// block-replace path; an existing file without the marker
+	// aborts with [ErrFileExists] unless `--force --backup` is set.
+	Devcontainer bool
 }
 
 // BackupAction records a single file/dir backup performed during

@@ -270,6 +270,29 @@ func TestExecute_InitNoGitFlag(t *testing.T) {
 	}
 }
 
+// TestExecute_Init_DevcontainerFlag_Propagates pins the MVP-Closure
+// T1 flag wiring: `u-boot init --devcontainer` sets the
+// InitProjectRequest.Devcontainer field that the application
+// service branches on. Mirrors the --no-git propagation test.
+func TestExecute_Init_DevcontainerFlag_Propagates(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeInitUseCase{
+		resp: driving.InitProjectResponse{
+			Project: domain.NewProject(mustProjectName(t, "demo")),
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newApp(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"init", "--devcontainer"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute init --devcontainer: %v", err)
+	}
+	if !uc.lastReq.Devcontainer {
+		t.Errorf("init Devcontainer = false, want true (--devcontainer was passed)")
+	}
+}
+
 func TestExecute_InitUseCaseErrorPropagates(t *testing.T) {
 	getwd := func() (string, error) { return "/tmp/x/demo", nil }
 

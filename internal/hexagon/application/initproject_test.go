@@ -1,7 +1,9 @@
 package application_test
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"path/filepath"
 	"reflect"
@@ -1732,5 +1734,215 @@ func TestEnsureComposeScaffold_IgnoresKeyInsideManagedBlock(t *testing.T) {
 	}
 	if !strings.Contains(after, "\nvolumes: {}") {
 		t.Errorf("top-level volumes: missing; got:\n%s", got)
+	}
+}
+
+// --- MVP-Closure T1: `init --devcontainer` (LH-AK-005) --------------
+
+// TestInit_LHAK005_DevcontainerFlow_FreshProject pins the LH-AK-005
+// happy path: `u-boot init --devcontainer` on a fresh BaseDir writes
+// `.devcontainer/devcontainer.json` + `Dockerfile`, sets
+// `devcontainer.enabled: true` in u-boot.yaml, and the produced
+// JSONC parses cleanly into the LH-AK-005 mandatory fields.
+func TestInit_LHAK005_DevcontainerFlow_FreshProject(t *testing.T) {
+	svc, fs, _, _ := newService(t)
+
+	resp, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:         "demo",
+		BaseDir:      testBaseDir,
+		SkipGit:      true,
+		Devcontainer: true,
+	})
+	if err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+
+	// Both LH-FA-DEV-001 files present, listed in Created.
+	wantInCreated := []string{".devcontainer/", ".devcontainer/devcontainer.json", ".devcontainer/Dockerfile"}
+	for _, want := range wantInCreated {
+		if !sliceContains(resp.Created, want) {
+			t.Errorf("Created missing %q; got %v", want, resp.Created)
+		}
+	}
+
+	// devcontainer.json: stripJSONC + json.Valid, fields per LH-AK-005.
+	jsonBody, err := fs.ReadFile(filepath.Join(testBaseDir, ".devcontainer/devcontainer.json"))
+	if err != nil {
+		t.Fatalf("read devcontainer.json: %v", err)
+	}
+	stripped := application.StripJSONCForTest(jsonBody)
+	if !json.Valid(stripped) {
+		t.Fatalf("devcontainer.json not valid JSON after stripJSONC:\n%s", stripped)
+	}
+	var dc struct {
+		Name       string `json:"name"`
+		Build      struct {
+			Dockerfile string `json:"dockerfile"`
+			Context    string `json:"context"`
+		} `json:"build"`
+		RemoteUser string `json:"remoteUser"`
+	}
+	if err := json.Unmarshal(stripped, &dc); err != nil {
+		t.Fatalf("unmarshal devcontainer.json: %v", err)
+	}
+	if dc.Name != "demo" {
+		t.Errorf("name = %q, want %q", dc.Name, "demo")
+	}
+	if dc.Build.Dockerfile == "" {
+		t.Errorf("build.dockerfile is empty (LH-AK-005 §2381: build OR image required)")
+	}
+	if dc.RemoteUser != "vscode" {
+		t.Errorf("remoteUser = %q, want %q (LH-FA-DEV-004)", dc.RemoteUser, "vscode")
+	}
+
+	// Dockerfile contains the non-root user clause.
+	dockerBody, err := fs.ReadFile(filepath.Join(testBaseDir, ".devcontainer/Dockerfile"))
+	if err != nil {
+		t.Fatalf("read Dockerfile: %v", err)
+	}
+	if !bytes.Contains(dockerBody, []byte("USER vscode")) {
+		t.Errorf("Dockerfile missing USER vscode (LH-FA-DEV-004):\n%s", dockerBody)
+	}
+
+	// u-boot.yaml carries devcontainer.enabled: true (M5-T7 doctor
+	// gate). We re-read instead of trusting the marshal call to
+	// pin the round-trip.
+	ubootBody, err := fs.ReadFile(filepath.Join(testBaseDir, "u-boot.yaml"))
+	if err != nil {
+		t.Fatalf("read u-boot.yaml: %v", err)
+	}
+	if !bytes.Contains(ubootBody, []byte("devcontainer:")) ||
+		!bytes.Contains(ubootBody, []byte("enabled: true")) {
+		t.Errorf("u-boot.yaml missing devcontainer.enabled: true block; got:\n%s", ubootBody)
+	}
+}
+
+// TestInit_LHAK005_DevcontainerFlow_AfterGenerate_ReinitWithForceBackup
+// pins the M7-T5-OOO-risk path: a previous `u-boot generate
+// devcontainer` left both files in place with the `init` block
+// marker. `u-boot init --devcontainer --force --backup` must
+// re-splice the block via actionReplaceBlock (not via overwrite-
+// full), preserve content outside the block byte-identically, and
+// emit `.bak` files for both targets.
+func TestInit_LHAK005_DevcontainerFlow_AfterGenerate_ReinitWithForceBackup(t *testing.T) {
+	svc, fs, _, _ := newService(t)
+	// Seed both files with an init-block-marked body that mimics
+	// `generate devcontainer` output, plus a user-curated comment
+	// outside the block (Dockerfile) and inside a separate config
+	// region (devcontainer.json comment block).
+	jsonSeed := "// BEGIN U-BOOT MANAGED BLOCK: init\n" +
+		"{\n  \"name\": \"stale\",\n  \"build\": {\"dockerfile\": \"./Dockerfile\", \"context\": \".\"},\n  \"remoteUser\": \"vscode\"\n}\n" +
+		"// END U-BOOT MANAGED BLOCK: init\n" +
+		"// user-curated trailer comment\n"
+	dockerSeed := "# BEGIN U-BOOT MANAGED BLOCK: init\n" +
+		"# stale devcontainer body\nFROM scratch\n" +
+		"# END U-BOOT MANAGED BLOCK: init\n" +
+		"# user-curated trailer comment\n"
+	if err := fs.WriteFile(filepath.Join(testBaseDir, ".devcontainer/devcontainer.json"), []byte(jsonSeed), 0o644); err != nil {
+		t.Fatalf("seed devcontainer.json: %v", err)
+	}
+	if err := fs.WriteFile(filepath.Join(testBaseDir, ".devcontainer/Dockerfile"), []byte(dockerSeed), 0o644); err != nil {
+		t.Fatalf("seed Dockerfile: %v", err)
+	}
+	// Also seed u-boot.yaml so the project counts as initialized for
+	// the soft-detection / hard-collision path; --force --backup
+	// then takes the managed-block route for every templated file.
+	if err := fs.WriteFile(filepath.Join(testBaseDir, "u-boot.yaml"), []byte("schemaVersion: 1\nproject:\n  name: demo\n"), 0o644); err != nil {
+		t.Fatalf("seed u-boot.yaml: %v", err)
+	}
+	// All M3-managed files need to exist with init-marker so the
+	// force-backup-pass doesn't trip on README/compose/etc.
+	seedM3InitFiles(t, fs, testBaseDir)
+
+	resp, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:         "demo",
+		BaseDir:      testBaseDir,
+		SkipGit:      true,
+		Devcontainer: true,
+		Force:        true,
+		Backup:       true,
+	})
+	if err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+
+	// User-curated trailer comments must survive the block-replace.
+	jsonAfter, err := fs.ReadFile(filepath.Join(testBaseDir, ".devcontainer/devcontainer.json"))
+	if err != nil {
+		t.Fatalf("read updated devcontainer.json: %v", err)
+	}
+	if !bytes.Contains(jsonAfter, []byte("// user-curated trailer comment")) {
+		t.Errorf("devcontainer.json trailer comment lost; got:\n%s", jsonAfter)
+	}
+	dockerAfter, err := fs.ReadFile(filepath.Join(testBaseDir, ".devcontainer/Dockerfile"))
+	if err != nil {
+		t.Fatalf("read updated Dockerfile: %v", err)
+	}
+	if !bytes.Contains(dockerAfter, []byte("# user-curated trailer comment")) {
+		t.Errorf("Dockerfile trailer comment lost; got:\n%s", dockerAfter)
+	}
+	// Backups recorded for both devcontainer files.
+	var devcontainerBackups int
+	for _, b := range resp.Backups {
+		if strings.Contains(b.Original, ".devcontainer/") {
+			devcontainerBackups++
+		}
+	}
+	if devcontainerBackups != 2 {
+		t.Errorf("Backups for .devcontainer/* = %d, want 2; backups=%v", devcontainerBackups, resp.Backups)
+	}
+}
+
+// TestInit_LHAK005_DevcontainerFlow_ConflictWithoutForce pins the
+// negative path: a devcontainer file pre-exists WITHOUT the init
+// block marker (e.g. user-handcrafted layout). `u-boot init
+// --devcontainer` without `--force --backup` must abort with
+// [driving.ErrFileExists] so the user does not silently lose
+// custom content.
+func TestInit_LHAK005_DevcontainerFlow_ConflictWithoutForce(t *testing.T) {
+	svc, fs, _, _ := newService(t)
+	if err := fs.WriteFile(filepath.Join(testBaseDir, ".devcontainer/devcontainer.json"),
+		[]byte(`{"name": "user-managed"}`), 0o644); err != nil {
+		t.Fatalf("seed devcontainer.json: %v", err)
+	}
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name:         "demo",
+		BaseDir:      testBaseDir,
+		SkipGit:      true,
+		Devcontainer: true,
+	})
+	if !errors.Is(err, driving.ErrFileExists) {
+		t.Errorf("err = %v, want wrap of ErrFileExists", err)
+	}
+}
+
+// sliceContains is a small helper to keep the Created-list
+// assertions readable.
+func sliceContains(haystack []string, needle string) bool {
+	for _, h := range haystack {
+		if h == needle {
+			return true
+		}
+	}
+	return false
+}
+
+// seedM3InitFiles writes the five M3-templated files with their
+// init-block marker so the --force --backup test path does not
+// trip on collisions for the unrelated files.
+func seedM3InitFiles(t *testing.T, fs *fakeFS, baseDir string) {
+	t.Helper()
+	fixtures := map[string]string{
+		"README.md":     "<!-- BEGIN U-BOOT MANAGED BLOCK: init -->\n# stale readme\n<!-- END U-BOOT MANAGED BLOCK: init -->\n",
+		"CHANGELOG.md":  "<!-- BEGIN U-BOOT MANAGED BLOCK: init -->\n# stale changelog\n<!-- END U-BOOT MANAGED BLOCK: init -->\n",
+		"compose.yaml":  "# BEGIN U-BOOT MANAGED BLOCK: init\nname: stale\n# END U-BOOT MANAGED BLOCK: init\nservices: {}\nvolumes: {}\n",
+		".env.example":  "# BEGIN U-BOOT MANAGED BLOCK: init\n# stale env\n# END U-BOOT MANAGED BLOCK: init\n",
+		".gitignore":    "stale\n",
+	}
+	for name, body := range fixtures {
+		if err := fs.WriteFile(filepath.Join(baseDir, name), []byte(body), 0o644); err != nil {
+			t.Fatalf("seed %s: %v", name, err)
+		}
 	}
 }
