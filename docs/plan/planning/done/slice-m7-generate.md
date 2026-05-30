@@ -1,7 +1,7 @@
 # Slice M7: `u-boot generate <artifact>`-Flow
 
 > **Status:** Done
-> **DoD:** T1 ✅ `67fc181` / T2 ✅ `3c5de48` / T3 ✅ `037ab00` / T4 ✅ `19c4110` / T5 ✅ `294e492` / T6 ✅ `d32a733`
+> **DoD:** T1 ✅ `67fc181` / T2 ✅ `3c5de48` / T3 ✅ `037ab00` / T4 ✅ `19c4110` / T5 ✅ `294e492` / T6 ✅ `d32a733` / Review-Followup ✅ `27de9c5` (9 Findings S1..S4 + N1..N5 aus dem Post-Merge-Review adressiert; siehe `## Review-Followup` unten)
 
 ## Auslöser
 
@@ -697,3 +697,70 @@ nächste Lauf erneut als Konflikt sieht):
 - Roadmap: ersetzt `Open` in `roadmap.md` durch
   `Open (Slice-Plan vorhanden)` mit Link auf diese Datei; nach T6
   wird der Eintrag auf `Done` gesetzt.
+
+## Review-Followup (`27de9c5`)
+
+Nach dem Merge von T6 lief ein Code-Review über T1..T6 (Agent
+`code-documentation:code-reviewer`); ergab **keine Blocker** und
+9 Findings, alle in einem Followup-Commit adressiert:
+
+### Should-fix
+
+- **S1 — fenced-code-block-Heuristik (echter Datenverlust-Pfad).**
+  `firstReleaseSectionOffset` und `hasChangelogUnreleased` matchen
+  jetzt nur `## [...]`-Header außerhalb von Backtick-Fences. Ohne
+  diesen Fix hätte ein User-Changelog mit einem dokumentierten
+  Keep-a-Changelog-Beispiel den RepairedManual-Splice mitten in den
+  Fence gerouted und das Markdown korrumpiert. Helper
+  `isOffsetInsideFencedBlock` (Parity-Count über die Prefix-Bytes).
+  Tilde-Fences und indented Code-Blöcke sind bewusst nicht erkannt.
+- **S2 — CRLF-Normalisierung im `bytes.Equal`-Vergleich.** Neuer
+  `normaliseLF`-Helper, verdrahtet in allen drei Vergleichsstellen
+  (`generateChangelog`, `generateManagedFile`, `planDevcontainerFile`).
+  Ein auf Windows mit CRLF gespeichertes File registriert jetzt als
+  fresh statt fälschlich in den user-edited-Pfad zu kippen. Der
+  Splice selbst nutzt weiter Originalbytes; User-Line-Endings
+  außerhalb des Blocks bleiben.
+- **S3 — Doku-Hinweis zu Projekt-Rename.** Top-Kommentar von
+  `generateChangelog` dokumentiert: bei Rename in
+  `u-boot.yaml.project.name` flippt der Block in den user-edited-
+  Pfad und bleibt auf dem alten Namen stuck (T2/T3 schreiben den
+  Namen transparent um, T4 lässt ihn bewusst stehen).
+- **S4 — `Artifact.String()` Out-of-Range.** Default-Branch zeigt
+  jetzt `Artifact(N)` statt `unknown`, sodass Debug-Logs und
+  Fehler-Messages den tatsächlichen Int sehen. Test aktualisiert.
+
+### Nice-to-have
+
+- **N1 — `executeDevcontainerPlans` default case.** Schaltet auf
+  Programmer-Error um, wenn ein künftiges `devcontainerFileAction`-
+  Enum-Value ohne Switch-Update landet.
+- **N2 — `compose.yaml`-Parse-Error-Klassifikation dokumentiert.**
+  Top-Kommentar von `collectDevcontainerForwardPorts` erklärt, dass
+  ein YAML-Parse-Fehler als `ErrGenerateFileSystem` (Code 14)
+  durchgereicht wird, weil der Doctor-Helper Read- und Parse-
+  Failure nicht unterscheidet. Ein künftiger `driven.ErrYAMLParse`-
+  Sentinel könnte den Pfad auf Code 10 verschieben — bekannte
+  Klassifikations-Lücke, kein Bug.
+- **N3 — Anti-Drift-Test-Sanity-Guard.** Vor der `reflect.DeepEqual`
+  steht jetzt eine `len(doctorPorts) > 0`-Pflicht, damit ein
+  künftiger doppelter Regression (Generator + Doctor liefern beide
+  nil) nicht silent durchgeht.
+- **N4 — `classifyExistingBlock`-Helper extrahiert.** Drei
+  duplizierte Switch-Blöcke (~13 Zeilen je) zusammengezogen; alle
+  drei Callsites routen jetzt `ErrBlockNotFound`/`ErrBlockMalformed`
+  durch dieselbe `ErrGenerateManualConflict`-Message (format-
+  agnostic, referenziert LH-SA-FILE-002).
+- **N5 — `printGenerateSummary` default-Branch.** Zeigt jetzt
+  `resp.Action` und `resp.Changed` statt silent auf
+  `"Generated <name>"` zu truncaten.
+
+### Neue Tests
+
+`TestGenerateChangelog_UserEditedBlock_FencedReleaseOnly_NoOp` /
+`_FencedReleaseBeforeReal_SpliceAtReal` /
+`_FencedUnreleased_DoesNotCount` /
+`TestGenerateChangelog_CRLFFreshBlock_NoOp` /
+`TestGenerateEnvExample_CRLFFreshBlock_NoOp`.
+
+Coverage steigt minimal von 90.10 % auf 90.20 %.
