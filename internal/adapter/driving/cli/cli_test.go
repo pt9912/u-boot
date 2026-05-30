@@ -110,35 +110,78 @@ func (f *fakeGenerateUseCase) Generate(_ context.Context, req driving.GenerateRe
 	return f.resp, f.err
 }
 
+// fakeConfigUseCase records every Get / Set / Show invocation and
+// returns the configured response/error. Three independent fields
+// per method so a single test can wire (e.g.) a happy Get + an
+// error Set without one path interfering with the other.
+type fakeConfigUseCase struct {
+	getCalled  bool
+	getReq     driving.ConfigGetRequest
+	getResp    driving.ConfigGetResponse
+	getErr     error
+	setCalled  bool
+	setReq     driving.ConfigSetRequest
+	setResp    driving.ConfigSetResponse
+	setErr     error
+	showCalled bool
+	showReq    driving.ConfigShowRequest
+	showResp   driving.ConfigShowResponse
+	showErr    error
+}
+
+func (f *fakeConfigUseCase) Get(_ context.Context, req driving.ConfigGetRequest) (driving.ConfigGetResponse, error) {
+	f.getCalled = true
+	f.getReq = req
+	return f.getResp, f.getErr
+}
+
+func (f *fakeConfigUseCase) Set(_ context.Context, req driving.ConfigSetRequest) (driving.ConfigSetResponse, error) {
+	f.setCalled = true
+	f.setReq = req
+	return f.setResp, f.setErr
+}
+
+func (f *fakeConfigUseCase) Show(_ context.Context, req driving.ConfigShowRequest) (driving.ConfigShowResponse, error) {
+	f.showCalled = true
+	f.showReq = req
+	return f.showResp, f.showErr
+}
+
 func newApp(uc driving.InitProjectUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", uc, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, opts...)
+	return cli.New("0.0.0-test", uc, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, opts...)
 }
 
 // newAppWithDoctor is newApp's variant for doctor-focused tests; the
 // caller can wire a fake DoctorUseCase explicitly.
 func newAppWithDoctor(uc driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", uc, doctorUC, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, opts...)
+	return cli.New("0.0.0-test", uc, doctorUC, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, opts...)
 }
 
 // newAppWithAdd is newApp's variant for add-focused tests.
 func newAppWithAdd(uc driving.AddServiceUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, uc, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, uc, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, opts...)
 }
 
 // newAppWithUp is newApp's variant for `u-boot up`-focused tests.
 func newAppWithUp(uc driving.UpUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, uc, &fakeDownUseCase{}, &fakeGenerateUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, uc, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, opts...)
 }
 
 // newAppWithDown is newApp's variant for `u-boot down`-focused tests.
 func newAppWithDown(uc driving.DownUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, uc, &fakeGenerateUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, uc, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, opts...)
 }
 
 // newAppWithGenerate is newApp's variant for `u-boot generate`-focused
 // tests.
 func newAppWithGenerate(uc driving.GenerateUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, uc, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, uc, &fakeConfigUseCase{}, opts...)
+}
+
+// newAppWithConfig is newApp's variant for `u-boot config`-focused
+// tests.
+func newAppWithConfig(uc driving.ConfigUseCase, opts ...cli.Option) *cli.App {
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, uc, opts...)
 }
 
 func mustProjectName(t *testing.T, raw string) domain.ProjectName {
@@ -745,6 +788,14 @@ func TestExitCode_BaseMappings(t *testing.T) {
 		{"wrapped ErrGenerateManualConflict", fmt.Errorf("ctx: %w", driving.ErrGenerateManualConflict), 10},
 		{"ErrGenerateFileSystem (fs)", driving.ErrGenerateFileSystem, 14},
 		{"wrapped ErrGenerateFileSystem", fmt.Errorf("ctx: %w", driving.ErrGenerateFileSystem), 14},
+		// M8-T5: config sentinels.
+		{"ErrConfigPathUnknown (validation)", driving.ErrConfigPathUnknown, 10},
+		{"ErrConfigValueInvalid (validation)", driving.ErrConfigValueInvalid, 10},
+		{"ErrConfigSchemaInvalid (validation)", driving.ErrConfigSchemaInvalid, 10},
+		{"ErrConfigValueNotSet (validation)", driving.ErrConfigValueNotSet, 10},
+		{"wrapped ErrConfigPathUnknown", fmt.Errorf("ctx: %w", driving.ErrConfigPathUnknown), 10},
+		{"ErrConfigFileSystem (fs)", driving.ErrConfigFileSystem, 14},
+		{"wrapped ErrConfigFileSystem", fmt.Errorf("ctx: %w", driving.ErrConfigFileSystem), 14},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1606,4 +1657,198 @@ func TestExecute_Generate_HelpListsFourArtifacts(t *testing.T) {
 			t.Errorf("--help missing artefact %q; got:\n%s", want, out)
 		}
 	}
+}
+
+// ----------------------------------------------------------------------------
+// `u-boot config` subcommand (M8-T5)
+// ----------------------------------------------------------------------------
+
+// TestExecute_Config_Show_PrintsBodyByteIdentical pins the §D5
+// contract: Show writes the use-case Body to stdout without
+// re-formatting.
+func TestExecute_Config_Show_PrintsBodyByteIdentical(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	body := []byte("# u-boot project config\nschemaVersion: 1\nproject:\n  name: demo  # display\n")
+	uc := &fakeConfigUseCase{showResp: driving.ConfigShowResponse{Body: body}}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithConfig(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"config"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !uc.showCalled {
+		t.Fatal("Show was not invoked")
+	}
+	if uc.showReq.BaseDir != "/tmp/x/demo" {
+		t.Errorf("BaseDir = %q, want /tmp/x/demo", uc.showReq.BaseDir)
+	}
+	if !bytes.Equal(stdout.Bytes(), body) {
+		t.Errorf("stdout differs from Body:\n got:%q\nwant:%q", stdout.Bytes(), body)
+	}
+}
+
+// TestExecute_Config_Get_PrintsScalarWithTrailingNewline pins §D4:
+// bare scalar + exactly one trailing newline.
+func TestExecute_Config_Get_PrintsScalarWithTrailingNewline(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeConfigUseCase{getResp: driving.ConfigGetResponse{Value: "demo"}}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithConfig(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"config", "get", "project.name"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if got, want := stdout.String(), "demo\n"; got != want {
+		t.Errorf("stdout = %q, want %q", got, want)
+	}
+	if uc.getReq.Path.String() != "project.name" {
+		t.Errorf("Path = %v, want project.name", uc.getReq.Path)
+	}
+}
+
+func TestExecute_Config_Set_ChangedSummary(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeConfigUseCase{
+		setResp: driving.ConfigSetResponse{
+			Path:     mustConfigPathInTest(t, "project.name"),
+			OldValue: "demo",
+			NewValue: "renamed",
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithConfig(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"config", "set", "project.name", "renamed"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !strings.Contains(stdout.String(), "config: project.name demo → renamed.") {
+		t.Errorf("changed-summary missing; got:\n%s", stdout.String())
+	}
+}
+
+func TestExecute_Config_Set_NoOpSummary(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeConfigUseCase{
+		setResp: driving.ConfigSetResponse{
+			Path:     mustConfigPathInTest(t, "project.name"),
+			OldValue: "demo",
+			NewValue: "demo",
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithConfig(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"config", "set", "project.name", "demo"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !strings.Contains(stdout.String(), "already demo; no changes.") {
+		t.Errorf("noop-summary missing; got:\n%s", stdout.String())
+	}
+}
+
+// TestExecute_Config_Set_UnsetOld_RendersUnsetMarker pins the
+// summary-line edge case: first-time write of an optional field
+// where the empty OldValue would otherwise render as a bare
+// arrow with no left side.
+func TestExecute_Config_Set_UnsetOld_RendersUnsetMarker(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeConfigUseCase{
+		setResp: driving.ConfigSetResponse{
+			Path:     mustConfigPathInTest(t, "devcontainer.enabled"),
+			OldValue: "",
+			NewValue: "true",
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithConfig(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"config", "set", "devcontainer.enabled", "true"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !strings.Contains(stdout.String(), "config: devcontainer.enabled (unset) → true.") {
+		t.Errorf("unset-marker missing; got:\n%s", stdout.String())
+	}
+}
+
+func TestExecute_Config_Get_UnknownPath_Code10(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeConfigUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithConfig(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"config", "get", "totally.unknown"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("expected error")
+	}
+	if !errors.Is(err, driving.ErrConfigPathUnknown) {
+		t.Errorf("err = %v, want wrap of ErrConfigPathUnknown", err)
+	}
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10", got)
+	}
+	if uc.getCalled {
+		t.Errorf("use case should not have been called on path-validation failure")
+	}
+}
+
+func TestExecute_Config_Set_TooFewArgs_Code2(t *testing.T) {
+	uc := &fakeConfigUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithConfig(uc).Execute(
+		context.Background(), []string{"config", "set", "project.name"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("expected error for missing value arg")
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode = %d, want 2 (Cobra ExactArgs(2) miss)", got)
+	}
+}
+
+func TestExecute_Config_Get_NoArgs_Code2(t *testing.T) {
+	uc := &fakeConfigUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithConfig(uc).Execute(
+		context.Background(), []string{"config", "get"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("expected error for missing path arg")
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode = %d, want 2 (Cobra ExactArgs(1) miss)", got)
+	}
+}
+
+func TestExecute_Config_UseCaseError_Code10(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeConfigUseCase{
+		getErr: fmt.Errorf("u-boot.yaml missing: %w", driving.ErrProjectNotInitialized),
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithConfig(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"config", "get", "project.name"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("expected error from use case")
+	}
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10", got)
+	}
+}
+
+// mustConfigPathInTest mirrors the application-test-package helper
+// of the same name (lives in config_test.go there). The CLI tests
+// can not reach that package's helper, so this is a local copy.
+func mustConfigPathInTest(t *testing.T, raw string) domain.ConfigPath {
+	t.Helper()
+	p, err := domain.NewConfigPath(raw)
+	if err != nil {
+		t.Fatalf("NewConfigPath(%q): %v", raw, err)
+	}
+	return p
 }

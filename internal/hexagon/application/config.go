@@ -218,19 +218,25 @@ func coerceConfigValue(path domain.ConfigPath, raw string) (coerced any, formatt
 // []string nested-key list YAMLCodec.PatchScalar expects.
 // Kept package-local because the YAML traversal convention is a
 // codec-protocol detail, not domain semantics.
+//
+// Only the two write-allowed ConfigPath kinds are handled —
+// ConfigServiceEnabled is intentionally absent because Set
+// rejects it at the WriteAllowed gate before reaching this
+// helper. A future `config force-set`-style relaxation would
+// add the case and the corresponding revalidator branch in one
+// PR; until then, dead-branch coverage churn is avoided.
 func configPathToYAMLPath(path domain.ConfigPath) []string {
 	switch path.Kind {
 	case domain.ConfigProjectName:
 		return []string{"project", "name"}
 	case domain.ConfigDevcontainerEnabled:
 		return []string{"devcontainer", "enabled"}
-	case domain.ConfigServiceEnabled:
-		return []string{"services", path.Service.String(), "enabled"}
 	}
-	// Unreachable: domain.NewConfigPath only produces the three
-	// kinds above. Returning a non-empty path so PatchScalar
-	// returns ErrYAMLPathInvalid loudly on a programmer-error
-	// future enum addition.
+	// Unreachable: Set only reaches this helper after the
+	// WriteAllowed gate has filtered to the two kinds above.
+	// Returning a non-empty path so PatchScalar would surface a
+	// loud ErrYAMLPathInvalid on a programmer-error future enum
+	// addition without dispatch-switch update.
 	return []string{"__unknown_config_path_kind__"}
 }
 
@@ -239,6 +245,11 @@ func configPathToYAMLPath(path domain.ConfigPath) []string {
 // Unmarshal accepts strings without applying domain rules; this
 // closes that gap. Returns [driving.ErrConfigValueInvalid] on
 // failure.
+//
+// Symmetric to [configPathToYAMLPath]: only the two write-allowed
+// kinds are handled because Set rejects ConfigServiceEnabled at
+// the WriteAllowed gate before reaching here. A future relaxation
+// would extend both helpers in lock-step.
 func revalidateConfigDomain(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 	switch path.Kind {
 	case domain.ConfigProjectName:
@@ -258,19 +269,6 @@ func revalidateConfigDomain(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 			return fmt.Errorf(
 				"%w: post-patch devcontainer.enabled is absent or unbound",
 				driving.ErrConfigValueInvalid)
-		}
-		return nil
-	case domain.ConfigServiceEnabled:
-		// Same shape contract as devcontainer.enabled. Note this
-		// branch is unreachable today because the WriteAllowed gate
-		// blocks Set on services.<svc>.enabled, but the validator
-		// is included for completeness — a future relaxation
-		// (e.g. `config force-set`) would route through here.
-		entry, ok := cfg.Services[path.Service.String()]
-		if !ok || entry.Enabled == nil {
-			return fmt.Errorf(
-				"%w: post-patch %s is absent or unbound",
-				driving.ErrConfigValueInvalid, path)
 		}
 		return nil
 	}

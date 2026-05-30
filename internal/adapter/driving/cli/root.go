@@ -86,5 +86,6 @@ See spec/lastenheft.md for the full functional specification.`,
 	root.AddCommand(newUpCommand(a))
 	root.AddCommand(newDownCommand(a))
 	root.AddCommand(newGenerateCommand(a))
+	root.AddCommand(newConfigCommand(a))
 	return root
 }

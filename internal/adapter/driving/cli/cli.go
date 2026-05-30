@@ -58,6 +58,10 @@ type App struct {
 	// (LH-FA-GEN-001..005).
 	generateUseCase driving.GenerateUseCase
 
+	// configUseCase implements `u-boot config get|set|show`
+	// (LH-FA-CONF-001..005).
+	configUseCase driving.ConfigUseCase
+
 	// getwd is the working-directory probe; defaults to os.Getwd.
 	// Tests inject a fake via [WithGetwd] so they do not depend on
 	// the host pwd.
@@ -112,7 +116,7 @@ func WithLogLevel(level *slog.LevelVar) Option {
 // New constructs an App. The version string and every use-case
 // implementation must be non-nil at call time; the CLI package
 // trusts the wiring layer to honor that.
-func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, addUC driving.AddServiceUseCase, upUC driving.UpUseCase, downUC driving.DownUseCase, genUC driving.GenerateUseCase, opts ...Option) *App {
+func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, addUC driving.AddServiceUseCase, upUC driving.UpUseCase, downUC driving.DownUseCase, genUC driving.GenerateUseCase, cfgUC driving.ConfigUseCase, opts ...Option) *App {
 	a := &App{
 		version:           version,
 		initUseCase:       initUC,
@@ -121,6 +125,7 @@ func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.Doc
 		upUseCase:         upUC,
 		downUseCase:       downUC,
 		generateUseCase:   genUC,
+		configUseCase:     cfgUC,
 		getwd:             os.Getwd,
 	}
 	for _, opt := range opts {
@@ -259,8 +264,22 @@ func isValidationError(err error) bool {
 		errors.Is(err, driving.ErrComposeFileMissing) ||
 		errors.Is(err, driving.ErrConfirmationRequired) ||
 		errors.Is(err, driving.ErrGenerateManualConflict) ||
+		isConfigValidationError(err) ||
 		errors.Is(err, domain.ErrInvalidProjectName) ||
 		errors.Is(err, domain.ErrInvalidServiceName)
+}
+
+// isConfigValidationError is the M8-T5 carve-out from
+// [isValidationError] so the latter stays under the gocyclo
+// threshold. The four config sentinels share the LH-FA-CLI-006
+// code-10 mapping but are conceptually one cluster ("user must
+// fix the config call"); keeping them in their own helper makes
+// the partition obvious.
+func isConfigValidationError(err error) bool {
+	return errors.Is(err, driving.ErrConfigPathUnknown) ||
+		errors.Is(err, driving.ErrConfigValueInvalid) ||
+		errors.Is(err, driving.ErrConfigSchemaInvalid) ||
+		errors.Is(err, driving.ErrConfigValueNotSet)
 }
 
 // isFilesystemError returns true for the LH-FA-CLI-006 code-14
@@ -270,7 +289,8 @@ func isValidationError(err error) bool {
 func isFilesystemError(err error) bool {
 	return errors.Is(err, driving.ErrBackupSuffixExhausted) ||
 		errors.Is(err, driving.ErrBackupSourceMissing) ||
-		errors.Is(err, driving.ErrGenerateFileSystem)
+		errors.Is(err, driving.ErrGenerateFileSystem) ||
+		errors.Is(err, driving.ErrConfigFileSystem)
 }
 
 // isUsageError detects two distinct classes of usage-level errors:

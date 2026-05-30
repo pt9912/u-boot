@@ -7,15 +7,15 @@ User-facing Dokumentation für u-boot:
 - Troubleshooting
 - Beispiel-Workflows
 
-Stand M7: nur zwei meta-Themen sind aktuell hier publiziert
+Stand M8: nur zwei meta-Themen sind aktuell hier publiziert
 ([`quality.md`](quality.md) und
 [`branch-protection.md`](branch-protection.md)); pro-Command-
-Guides für die sechs verdrahteten Subcommands (`init`, `doctor`,
-`add`, `up`, `down`, `generate`) folgen, sobald sich Quickstart-
-Beispiele gegen reale Compose-Workloads validieren lassen — siehe
-das Carveout-Slice
+Guides für die sieben verdrahteten Subcommands (`init`, `doctor`,
+`add`, `up`, `down`, `generate`, `config`) folgen, sobald sich
+Quickstart-Beispiele gegen reale Compose-Workloads validieren
+lassen — siehe das Carveout-Slice
 [`slice-m6-docker-integrationstests`](../plan/planning/done/slice-m6-docker-integrationstests.md)
-(jetzt Done) für die End-to-End-Pins, die diesen Guides als
+(Done) für die End-to-End-Pins, die diesen Guides als
 Quelle dienen werden.
 
 Bis dahin ist die kanonische User-Dokumentation `u-boot --help`
