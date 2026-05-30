@@ -24,6 +24,7 @@ Spalten:
 | `LH-OPEN-003` Plugin-System ist offen (`spec/lastenheft.md` §14, auch `spec/architecture.md` §7 als „geplante Erweiterung") — keine Entscheidung zwischen fest-eingebauten Add-ons und nachladbaren Plugins | temporär | [`open/slice-v1-plugin-system-entscheidung.md`](../open/slice-v1-plugin-system-entscheidung.md) |
 | `LH-OPEN-004` Template-Format ist offen (`spec/lastenheft.md` §14) — YAML+Dateien vs. Cookiecutter vs. eigenes Format vs. OCI-Pakete | temporär | [`open/slice-v1-template-format-entscheidung.md`](../open/slice-v1-template-format-entscheidung.md) |
 | HTTP-Driving-Adapter ist als „geplante Erweiterung" in `spec/architecture.md` §7 erwähnt, aber nicht spezifiziert oder gefordert | temporär | [`open/slice-later-http-driving-adapter.md`](../open/slice-later-http-driving-adapter.md) |
+| `YAMLCodec`-Port unterscheidet Parse- nicht von IO-Fehlern; `collectDevcontainerForwardPorts` (M7-T5) mappt kaputte `compose.yaml` deshalb auf Exit 14 statt Exit 10 (`LH-FA-CLI-006`-Klassifikations-Lücke). depguard verbietet inline-Klassifikation in der Application-Schicht | temporär | [`open/slice-v1-yaml-parse-error-sentinel.md`](../open/slice-v1-yaml-parse-error-sentinel.md) |
 
 ## Permanente Carveouts (kein Plan, im Inventar dokumentiert)
 

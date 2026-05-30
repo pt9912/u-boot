@@ -659,17 +659,19 @@ func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.Ge
 // gets a syntactically-valid devcontainer.json (LH-FA-DEV-005
 // allows omitting forwardPorts).
 //
-// Known classification gap (review-followup N2): a *parse* error
-// in compose.yaml (corrupt YAML) bubbles up through
-// `collectActiveServicePorts` as a generic error and is wrapped
-// here in [driving.ErrGenerateFileSystem] → exit code 14. The
-// doctor helper does not distinguish read-failure from parse-
-// failure, and the application layer cannot import the yaml-v3
-// adapter to do its own classification. A future slice that
-// introduces a `driven.ErrYAMLParse`-style sentinel could route
-// the parse path to [driving.ErrGenerateManualConflict] →
-// exit code 10 instead. Until then a corrupt compose.yaml under
-// `u-boot generate devcontainer` surfaces as a (technical)
+// Known classification gap (review-followup N2; tracked by
+// docs/plan/planning/open/slice-v1-yaml-parse-error-sentinel.md
+// and carveouts.md): a *parse* error in compose.yaml (corrupt
+// YAML) bubbles up through `collectActiveServicePorts` as a
+// generic error and is wrapped here in
+// [driving.ErrGenerateFileSystem] → exit code 14. The doctor
+// helper does not distinguish read-failure from parse-failure,
+// and the application layer cannot import the yaml-v3 adapter to
+// do its own classification (depguard.application-no-yaml). The
+// V1 slice introduces a `driven.ErrYAMLParse` sentinel so the
+// parse path can be routed to [driving.ErrGenerateManualConflict]
+// → exit code 10 instead. Until then a corrupt compose.yaml
+// under `u-boot generate devcontainer` surfaces as a (technical)
 // filesystem error rather than a (fachlich) project-state error.
 func (s *GenerateService) collectDevcontainerForwardPorts(baseDir string, cfg ubootYAMLConfig) ([]int, error) {
 	services := activeServiceNames(cfg)
