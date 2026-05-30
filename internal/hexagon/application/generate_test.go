@@ -3,8 +3,10 @@ package application_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -76,30 +78,9 @@ func TestGenerate_NoUbootYAML_ReturnsErrProjectNotInitialized(t *testing.T) {
 	}
 }
 
-// TestGenerate_StubHandlers pins the remaining unimplemented handlers.
-// The pin reduces by one with each of T3..T5 as those tranches replace
-// handlers; T5 removes the test when the last stub is gone
-// (slice-m7-generate.md T5 DoD).
-//
-// Pin tracks remaining stubs: 4 in T1 → 3 in T2 → 2 in T3 → 1 in T4 →
-// 0 in T5 (test deleted). Updated for T4: changelog is now real, so
-// the catalogue covers only devcontainer.
-func TestGenerate_StubHandler_OnlyDevcontainerReturnsErrStubHandler(t *testing.T) {
-	t.Parallel()
-	svc, fs := newGenerateService(t)
-	seedGenerateUbootYAML(t, fs)
-
-	_, err := svc.Generate(context.Background(), driving.GenerateRequest{
-		BaseDir:  generateTestBaseDir,
-		Artifact: domain.ArtifactDevcontainer,
-	})
-	if err == nil {
-		t.Fatal("expected stub-handler error, got nil")
-	}
-	if !errors.Is(err, application.ErrStubHandlerForTest) {
-		t.Errorf("err = %v, want wrap of errStubHandler", err)
-	}
-}
+// T1's stub-pin test is removed in T5 — all four handlers are real
+// now. errStubHandler and ErrStubHandlerForTest are removed along
+// with this test (slice-m7-generate.md T5 DoD).
 
 // TestGenerate_UnknownArtifactValue_DefensiveBranch pins the
 // out-of-enum-range guard. The CLI validates via [domain.NewArtifact]
@@ -471,6 +452,349 @@ func lastN(data []byte, n int) []byte {
 		return data
 	}
 	return data[len(data)-n:]
+}
+
+// --- T5: generate devcontainer ---------------------------------------
+
+const (
+	devcontainerJSONRel = ".devcontainer/devcontainer.json"
+	dockerfileRel       = ".devcontainer/Dockerfile"
+)
+
+func devcontainerJSONPath() string { return filepath.Join(generateTestBaseDir, devcontainerJSONRel) }
+func dockerfilePath() string       { return filepath.Join(generateTestBaseDir, dockerfileRel) }
+
+func seedGenerateComposeYAML(t *testing.T, fs *fakeFS, body string) {
+	t.Helper()
+	if err := fs.WriteFile(filepath.Join(generateTestBaseDir, "compose.yaml"),
+		[]byte(body), 0o644); err != nil {
+		t.Fatalf("seed compose.yaml: %v", err)
+	}
+}
+
+func seedUBootYAMLPostgres(t *testing.T, fs *fakeFS) {
+	t.Helper()
+	body := "schemaVersion: 1\nproject:\n  name: t-uboot-gen\nservices:\n  postgres:\n    enabled: true\n"
+	if err := fs.WriteFile(filepath.Join(generateTestBaseDir, "u-boot.yaml"),
+		[]byte(body), 0o644); err != nil {
+		t.Fatalf("seed u-boot.yaml: %v", err)
+	}
+}
+
+func seedUBootYAMLPostgresAndDummy(t *testing.T, fs *fakeFS) {
+	t.Helper()
+	body := "schemaVersion: 1\nproject:\n  name: t-uboot-gen\nservices:\n  postgres:\n    enabled: true\n  dummy:\n    enabled: true\n"
+	if err := fs.WriteFile(filepath.Join(generateTestBaseDir, "u-boot.yaml"),
+		[]byte(body), 0o644); err != nil {
+		t.Fatalf("seed u-boot.yaml: %v", err)
+	}
+}
+
+const composeYAMLPostgres = `services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+`
+
+const composeYAMLPostgresAndDummy = `services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+  dummy:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+`
+
+func generateDevcontainer(t *testing.T, svc *application.GenerateService) (driving.GenerateResponse, error) {
+	t.Helper()
+	return svc.Generate(context.Background(), driving.GenerateRequest{
+		BaseDir:  generateTestBaseDir,
+		Artifact: domain.ArtifactDevcontainer,
+	})
+}
+
+// parseDevcontainerForwardPorts extracts the forwardPorts integer
+// list from a rendered devcontainer.json (after stripping JSONC
+// comments). Returns nil when the key is absent — matching the
+// LH-FA-DEV-005 "darf fehlen" contract.
+func parseDevcontainerForwardPorts(t *testing.T, body []byte) []int {
+	t.Helper()
+	stripped := application.StripJSONCForTest(body)
+	if !json.Valid(stripped) {
+		t.Fatalf("rendered devcontainer.json is not valid JSON after stripJSONC:\n%s",
+			stripped)
+	}
+	var shape struct {
+		ForwardPorts []int `json:"forwardPorts"`
+	}
+	if err := json.Unmarshal(stripped, &shape); err != nil {
+		t.Fatalf("unmarshal devcontainer.json: %v", err)
+	}
+	return shape.ForwardPorts
+}
+
+func TestGenerateDevcontainer_Absent_BothFilesCreated_MinimumFields(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLPostgres(t, fs)
+	seedGenerateComposeYAML(t, fs, composeYAMLPostgres)
+
+	resp, err := generateDevcontainer(t, svc)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Action != driving.GenerateActionCreated {
+		t.Errorf("Action = %v, want Created", resp.Action)
+	}
+	wantChanged := []string{devcontainerJSONRel, dockerfileRel}
+	if !equalStrings(resp.Changed, wantChanged) {
+		t.Errorf("Changed = %v, want %v", resp.Changed, wantChanged)
+	}
+
+	// devcontainer.json: valid JSONC, name + build + remoteUser + forwardPorts.
+	jsonBody, err := fs.ReadFile(devcontainerJSONPath())
+	if err != nil {
+		t.Fatalf("read devcontainer.json: %v", err)
+	}
+	stripped := application.StripJSONCForTest(jsonBody)
+	if !json.Valid(stripped) {
+		t.Fatalf("devcontainer.json not valid after stripJSONC:\n%s", stripped)
+	}
+	var dc struct {
+		Name         string `json:"name"`
+		Build        struct {
+			Dockerfile string `json:"dockerfile"`
+			Context    string `json:"context"`
+		} `json:"build"`
+		ForwardPorts []int  `json:"forwardPorts"`
+		RemoteUser   string `json:"remoteUser"`
+	}
+	if err := json.Unmarshal(stripped, &dc); err != nil {
+		t.Fatalf("unmarshal devcontainer.json: %v", err)
+	}
+	if dc.Name != envExampleProjectName {
+		t.Errorf("name = %q, want %q", dc.Name, envExampleProjectName)
+	}
+	if dc.Build.Dockerfile != "./Dockerfile" || dc.Build.Context != "." {
+		t.Errorf("build = %+v, want dockerfile=./Dockerfile, context=.", dc.Build)
+	}
+	if dc.RemoteUser != "vscode" {
+		t.Errorf("remoteUser = %q, want %q (LH-FA-DEV-004)", dc.RemoteUser, "vscode")
+	}
+	if !reflect.DeepEqual(dc.ForwardPorts, []int{5432}) {
+		t.Errorf("forwardPorts = %v, want [5432]", dc.ForwardPorts)
+	}
+
+	// Dockerfile: present, USER vscode line.
+	dockerBody, err := fs.ReadFile(dockerfilePath())
+	if err != nil {
+		t.Fatalf("read Dockerfile: %v", err)
+	}
+	if !bytes.Contains(dockerBody, []byte("USER vscode")) {
+		t.Errorf("Dockerfile missing `USER vscode` line (LH-FA-DEV-004):\n%s", dockerBody)
+	}
+}
+
+func TestGenerateDevcontainer_NoActiveServices_ForwardPortsAbsent(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs) // u-boot.yaml without services
+
+	if _, err := generateDevcontainer(t, svc); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	body, err := fs.ReadFile(devcontainerJSONPath())
+	if err != nil {
+		t.Fatalf("read devcontainer.json: %v", err)
+	}
+	stripped := application.StripJSONCForTest(body)
+	// LH-FA-DEV-005: forwardPorts "darf fehlen" — assert the key is
+	// not even present in the rendered JSON (not just an empty array).
+	if bytes.Contains(stripped, []byte("forwardPorts")) {
+		t.Errorf("forwardPorts key emitted when no active services; body:\n%s", stripped)
+	}
+}
+
+func TestGenerateDevcontainer_MultipleServices_SortedContainerPorts(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLPostgresAndDummy(t, fs)
+	seedGenerateComposeYAML(t, fs, composeYAMLPostgresAndDummy)
+
+	if _, err := generateDevcontainer(t, svc); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	body, err := fs.ReadFile(devcontainerJSONPath())
+	if err != nil {
+		t.Fatalf("read devcontainer.json: %v", err)
+	}
+	got := parseDevcontainerForwardPorts(t, body)
+	// Container-side ports, sorted, deduplicated.
+	want := []int{80, 5432}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("forwardPorts = %v, want %v (container-side, sorted)", got, want)
+	}
+}
+
+// TestGenerateDevcontainer_AntiDriftAgainstDoctorPortHelper pins the
+// invariant that the generator and the doctor
+// `devcontainer.forwardPorts.consistency` check share a single
+// source of truth (slice plan §"Wiederverwendung der Compose-Port-
+// Detektion"): both must read from collectActiveServicePorts. A
+// refactor that points the generator at a different port source
+// (e.g. a u-boot.yaml-based tree) would silently flip this test.
+func TestGenerateDevcontainer_AntiDriftAgainstDoctorPortHelper(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLPostgresAndDummy(t, fs)
+	seedGenerateComposeYAML(t, fs, composeYAMLPostgresAndDummy)
+
+	// Expected: what the doctor helper would compute on the same
+	// fixture. Service names must be sorted ascending to match the
+	// activeServiceNames() contract.
+	doctorPorts, err := application.CollectActiveServicePortsForTest(
+		fs, &fakeYAML{}, generateTestBaseDir, []string{"dummy", "postgres"})
+	if err != nil {
+		t.Fatalf("doctor port helper: %v", err)
+	}
+
+	if _, err := generateDevcontainer(t, svc); err != nil {
+		t.Fatalf("generate devcontainer: %v", err)
+	}
+	body, err := fs.ReadFile(devcontainerJSONPath())
+	if err != nil {
+		t.Fatalf("read devcontainer.json: %v", err)
+	}
+	generatorPorts := parseDevcontainerForwardPorts(t, body)
+
+	if !reflect.DeepEqual(generatorPorts, doctorPorts) {
+		t.Errorf("generator/doctor forwardPorts drift:\n  generator = %v\n  doctor    = %v",
+			generatorPorts, doctorPorts)
+	}
+}
+
+func TestGenerateDevcontainer_DoubleRun_SecondCallNoOp(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLPostgres(t, fs)
+	seedGenerateComposeYAML(t, fs, composeYAMLPostgres)
+
+	if _, err := generateDevcontainer(t, svc); err != nil {
+		t.Fatalf("first run: %v", err)
+	}
+	writesAfterFirst := len(fs.writtenPaths())
+
+	resp, err := generateDevcontainer(t, svc)
+	if err != nil {
+		t.Fatalf("second run: %v", err)
+	}
+	if resp.Action != driving.GenerateActionNoOp {
+		t.Errorf("second run Action = %v, want NoOp", resp.Action)
+	}
+	if len(resp.Changed) != 0 {
+		t.Errorf("second run Changed = %v, want empty", resp.Changed)
+	}
+	if delta := len(fs.writtenPaths()) - writesAfterFirst; delta != 0 {
+		t.Errorf("second run produced %d WriteFile call(s), want 0; writes = %v",
+			delta, fs.writtenPaths())
+	}
+}
+
+// TestGenerateDevcontainer_AtomicConflict_NoPartialWrite pins the
+// atomic plan-and-execute contract: if one file is present with a
+// missing init block, the call must fail with
+// ErrGenerateManualConflict and write **nothing** — including not
+// touching the absent counterpart. Otherwise the next call would
+// see a half-written state and re-classify it as a conflict on a
+// freshly-written file.
+func TestGenerateDevcontainer_AtomicConflict_NoPartialWrite(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLPostgres(t, fs)
+	seedGenerateComposeYAML(t, fs, composeYAMLPostgres)
+	// Seed devcontainer.json with content but no init block.
+	if err := fs.WriteFile(devcontainerJSONPath(),
+		[]byte(`{"name": "user-managed"}`), 0o644); err != nil {
+		t.Fatalf("seed devcontainer.json: %v", err)
+	}
+
+	writesBefore := len(fs.writtenPaths())
+	_, err := generateDevcontainer(t, svc)
+	if !errors.Is(err, driving.ErrGenerateManualConflict) {
+		t.Fatalf("err = %v, want wrap of ErrGenerateManualConflict", err)
+	}
+	if delta := len(fs.writtenPaths()) - writesBefore; delta != 0 {
+		t.Errorf("conflict produced %d WriteFile call(s), want 0; writes = %v",
+			delta, fs.writtenPaths())
+	}
+	// The Dockerfile must not have been created.
+	exists, err := fs.Exists(dockerfilePath())
+	if err != nil {
+		t.Fatalf("Exists(Dockerfile): %v", err)
+	}
+	if exists {
+		t.Errorf("Dockerfile was created despite atomic conflict on devcontainer.json")
+	}
+}
+
+// TestGenerateDevcontainer_MalformedBlock_AtomicNoWrite is the
+// sibling of the conflict test for the malformed-block branch.
+func TestGenerateDevcontainer_MalformedBlock_AtomicNoWrite(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLPostgres(t, fs)
+	seedGenerateComposeYAML(t, fs, composeYAMLPostgres)
+	// Seed Dockerfile with BEGIN-without-END.
+	if err := fs.WriteFile(dockerfilePath(),
+		[]byte("# BEGIN U-BOOT MANAGED BLOCK: init\nFROM scratch\n"), 0o644); err != nil {
+		t.Fatalf("seed Dockerfile: %v", err)
+	}
+
+	writesBefore := len(fs.writtenPaths())
+	_, err := generateDevcontainer(t, svc)
+	if !errors.Is(err, driving.ErrGenerateManualConflict) {
+		t.Fatalf("err = %v, want wrap of ErrGenerateManualConflict", err)
+	}
+	if msg := err.Error(); !strings.Contains(strings.ToLower(msg), "malformed") {
+		t.Errorf("error %q lacks 'malformed' detail", msg)
+	}
+	if delta := len(fs.writtenPaths()) - writesBefore; delta != 0 {
+		t.Errorf("malformed-block path produced %d WriteFile call(s), want 0", delta)
+	}
+}
+
+// TestGenerateDevcontainer_PartialClean_FreshDockerfileAbsent pins
+// the slice plan §"partial-clean" row: devcontainer.json present
+// with a fresh block, Dockerfile absent. Aggregate action is
+// Created (no UpdatedBlock because the present file is already
+// fresh; the absent file is newly written).
+func TestGenerateDevcontainer_PartialClean_FreshDockerfileAbsent_ReturnsCreated(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLPostgres(t, fs)
+	seedGenerateComposeYAML(t, fs, composeYAMLPostgres)
+
+	// First run creates both files. We then delete the Dockerfile
+	// to simulate the partial-clean state.
+	if _, err := generateDevcontainer(t, svc); err != nil {
+		t.Fatalf("first run: %v", err)
+	}
+	delete(fs.files, dockerfilePath())
+
+	resp, err := generateDevcontainer(t, svc)
+	if err != nil {
+		t.Fatalf("second run: %v", err)
+	}
+	if resp.Action != driving.GenerateActionCreated {
+		t.Errorf("Action = %v, want Created (only Dockerfile was newly written; devcontainer.json was fresh)",
+			resp.Action)
+	}
+	if !equalStrings(resp.Changed, []string{dockerfileRel}) {
+		t.Errorf("Changed = %v, want [%q]", resp.Changed, dockerfileRel)
+	}
 }
 
 // --- T4: generate changelog ------------------------------------------

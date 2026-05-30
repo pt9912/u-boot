@@ -3,6 +3,7 @@ package application
 import (
 	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
+	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 )
 
 // PortProbeTargetForTest is the test-package-visible view of the
@@ -68,13 +69,23 @@ func RenderTemplateForTest(name, projectName string) ([]byte, error) {
 	return renderTemplate(name, templateData{Name: projectName})
 }
 
-// ErrStubHandlerForTest exposes the package-internal
-// [errStubHandler] sentinel so external `_test` packages can pin
-// `errors.Is(err, errStubHandler)` for the four M7-T1 stub handlers
-// without leaking the sentinel into the driving-port API surface.
-// T5 removes the test that uses this once the last stub is
-// replaced (slice-m7-generate.md T5 DoD).
-var ErrStubHandlerForTest = errStubHandler
+// CollectActiveServicePortsForTest exposes the package-internal
+// `collectActiveServicePorts` helper so the T5 anti-drift test can
+// pin that the generator and the doctor `devcontainer.forwardPorts.
+// consistency` check share the same forwardPorts source.
+func CollectActiveServicePortsForTest(
+	fs driven.FileSystem, yamlCodec driven.YAMLCodec, baseDir string, services []string,
+) ([]int, error) {
+	return collectActiveServicePorts(fs, yamlCodec, baseDir, services)
+}
+
+// StripJSONCForTest exposes the package-internal `stripJSONC` helper
+// so the T5 devcontainer.json validity tests can pre-process the
+// rendered JSONC into plain JSON before passing it to
+// `encoding/json.Valid` / `Unmarshal`.
+func StripJSONCForTest(src []byte) []byte {
+	return stripJSONC(src)
+}
 
 // AddServicePlanForTest is the test-only projection of the unexported
 // [servicePlan] returned by [AddServiceService.planAdd]. T3 tests use

@@ -51,16 +51,6 @@ func NewGenerateService(fs driven.FileSystem, yaml driven.YAMLCodec, logger driv
 	return &GenerateService{fs: fs, yaml: yaml, logger: logger}
 }
 
-// errStubHandler is the package-internal pin that proves
-// `u-boot generate <artifact>` is reachable at runtime but the
-// per-artefact handler has not been wired yet. Unexported on purpose:
-// the driving-port API does not surface it, so future callers cannot
-// accidentally branch on it. The T1 test pins
-// `errors.Is(err, errStubHandler)` for all four artefacts; each of
-// T2..T5 reduces the pinned count by one, and T5 removes the test
-// when the last stub is replaced (see slice-m7-generate.md DoD).
-var errStubHandler = errors.New("generate: handler not implemented")
-
 // Generate implements [driving.GenerateUseCase.Generate]. The
 // dispatch order mirrors `AddServiceService.Add`:
 //
@@ -503,6 +493,260 @@ func (s *GenerateService) generateEnvExample(_ context.Context, req driving.Gene
 	return s.generateManagedFile(req, ".env.example", "env.example.tmpl", managedblock.StyleHash)
 }
 
-func (*GenerateService) generateDevcontainer(_ context.Context, _ driving.GenerateRequest) (driving.GenerateResponse, error) {
-	return driving.GenerateResponse{}, fmt.Errorf("generate devcontainer: %w", errStubHandler)
+// devcontainerFileAction classifies what generateDevcontainer must do
+// for one of the two devcontainer files during its two-phase plan-
+// and-execute. Computed during the plan phase; consumed by the
+// execute phase. NoOp files are skipped during execute.
+type devcontainerFileAction int
+
+const (
+	devcontainerActionNoOp devcontainerFileAction = iota
+	devcontainerActionWrite        // file absent → write the full rendered template
+	devcontainerActionReplaceBlock // file present, block stale → splice
+)
+
+// devcontainerFilePlan is the per-file plan computed in phase 1 of
+// generateDevcontainer. Phase 2 reads only the fields it needs for
+// the chosen action and never re-classifies.
+type devcontainerFilePlan struct {
+	relPath       string
+	targetPath    string
+	rendered      []byte
+	renderedBlock []byte
+	marker        managedblock.Marker
+	action        devcontainerFileAction
+	existing      []byte // populated only when action == devcontainerActionReplaceBlock
+}
+
+// generateDevcontainer implements the M7-T5 two-file state machine
+// for `.devcontainer/devcontainer.json` + `.devcontainer/Dockerfile`
+// (LH-FA-DEV-001 / LH-FA-DEV-004 / LH-FA-DEV-005 / LH-FA-GEN-005).
+// `forwardPorts` is derived from the active services' compose-side
+// container ports via the shared `activeServiceNames` +
+// `collectActiveServicePorts` helpers — the same source of truth as
+// the doctor `devcontainer.forwardPorts.consistency` check. Pinned
+// by the T5 anti-drift test in generate_test.go.
+//
+// Atomic plan-and-execute: phase 1 classifies both files (absent /
+// present-with-block-fresh / present-with-block-stale / present-no-
+// block / present-malformed) without writing anything. Phase 2
+// executes only after phase 1 has confirmed every file is either
+// writable or a clean NoOp. If any file is present-no-block or
+// malformed, the call returns [driving.ErrGenerateManualConflict]
+// with **no** WriteFile invocations — half-written state would be
+// re-classified as a conflict on the next call.
+func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.GenerateRequest) (driving.GenerateResponse, error) {
+	cfg, err := s.readProjectConfig(req.BaseDir)
+	if err != nil {
+		return driving.GenerateResponse{}, err
+	}
+
+	ports, err := s.collectDevcontainerForwardPorts(req.BaseDir, cfg)
+	if err != nil {
+		return driving.GenerateResponse{}, err
+	}
+
+	data := templateData{Name: cfg.Project.Name, ForwardPorts: ports}
+	plans, err := s.planDevcontainerFiles(req.BaseDir, data)
+	if err != nil {
+		return driving.GenerateResponse{}, err
+	}
+
+	changed, hasWrite, hasReplace, err := s.executeDevcontainerPlans(plans)
+	if err != nil {
+		return driving.GenerateResponse{}, err
+	}
+
+	action := devcontainerAggregateAction(hasWrite, hasReplace)
+	if action == driving.GenerateActionNoOp {
+		s.logger.Debug("generate devcontainer: no-op",
+			"project", cfg.Project.Name, "forwardPorts", ports)
+		return driving.GenerateResponse{Artifact: req.Artifact, Action: action}, nil
+	}
+	s.logger.Info("generate devcontainer: "+action.String(),
+		"project", cfg.Project.Name, "forwardPorts", ports, "changed", changed)
+	return driving.GenerateResponse{
+		Artifact: req.Artifact,
+		Action:   action,
+		Changed:  changed,
+	}, nil
+}
+
+// collectDevcontainerForwardPorts derives the container-side ports
+// of every active service. Reuses the doctor helpers
+// activeServiceNames + collectActiveServicePorts so the generator
+// and the `devcontainer.forwardPorts.consistency` doctor check
+// share a single source of truth (anti-drift pin in the T5 tests).
+// Treats a missing compose.yaml as "no ports" rather than an error
+// so a project whose compose.yaml has not been generated yet still
+// gets a syntactically-valid devcontainer.json (LH-FA-DEV-005
+// allows omitting forwardPorts).
+func (s *GenerateService) collectDevcontainerForwardPorts(baseDir string, cfg ubootYAMLConfig) ([]int, error) {
+	services := activeServiceNames(cfg)
+	if len(services) == 0 {
+		return nil, nil
+	}
+	composeExists, err := s.fs.Exists(filepath.Join(baseDir, "compose.yaml"))
+	if err != nil {
+		return nil, fmt.Errorf("%w: Exists(compose.yaml): %v",
+			driving.ErrGenerateFileSystem, err)
+	}
+	if !composeExists {
+		return nil, nil
+	}
+	ports, err := collectActiveServicePorts(s.fs, s.yaml, baseDir, services)
+	if err != nil {
+		return nil, fmt.Errorf("%w: collectActiveServicePorts: %v",
+			driving.ErrGenerateFileSystem, err)
+	}
+	return ports, nil
+}
+
+// planDevcontainerFiles classifies every devcontainer file and
+// returns the per-file plan. Fails with ErrGenerateManualConflict on
+// the first file whose existing content lacks an init block or has
+// a malformed one. No file writes happen here.
+func (s *GenerateService) planDevcontainerFiles(baseDir string, data templateData) ([]devcontainerFilePlan, error) {
+	specs := []struct {
+		relPath  string
+		template string
+		style    managedblock.Style
+	}{
+		{".devcontainer/devcontainer.json", "devcontainer/devcontainer.json.tmpl", managedblock.StyleDoubleSlash},
+		{".devcontainer/Dockerfile", "devcontainer/Dockerfile.tmpl", managedblock.StyleHash},
+	}
+	plans := make([]devcontainerFilePlan, 0, len(specs))
+	for _, spec := range specs {
+		plan, err := s.planDevcontainerFile(baseDir, data, spec.relPath, spec.template, spec.style)
+		if err != nil {
+			return nil, err
+		}
+		plans = append(plans, plan)
+	}
+	return plans, nil
+}
+
+// planDevcontainerFile classifies a single devcontainer file.
+func (s *GenerateService) planDevcontainerFile(
+	baseDir string, data templateData,
+	relPath, templateName string, style managedblock.Style,
+) (devcontainerFilePlan, error) {
+	targetPath := filepath.Join(baseDir, relPath)
+	marker := managedblock.Marker{Style: style, Name: managedblock.InitName}
+	rendered, err := renderTemplate(templateName, data)
+	if err != nil {
+		return devcontainerFilePlan{}, err
+	}
+	renderedBlock, err := renderManagedBlockOnly(rendered, marker)
+	if err != nil {
+		return devcontainerFilePlan{}, fmt.Errorf(
+			"extract init block from rendered %s: %w", templateName, err)
+	}
+	plan := devcontainerFilePlan{
+		relPath:       relPath,
+		targetPath:    targetPath,
+		rendered:      rendered,
+		renderedBlock: renderedBlock,
+		marker:        marker,
+	}
+	exists, err := s.fs.Exists(targetPath)
+	if err != nil {
+		return devcontainerFilePlan{}, fmt.Errorf("%w: Exists(%q): %v",
+			driving.ErrGenerateFileSystem, targetPath, err)
+	}
+	if !exists {
+		plan.action = devcontainerActionWrite
+		return plan, nil
+	}
+	existing, err := s.fs.ReadFile(targetPath)
+	if err != nil {
+		return devcontainerFilePlan{}, fmt.Errorf("%w: read %q: %v",
+			driving.ErrGenerateFileSystem, targetPath, err)
+	}
+	start, end, findErr := managedblock.Find(existing, marker)
+	switch {
+	case errors.Is(findErr, managedblock.ErrBlockNotFound):
+		return devcontainerFilePlan{}, fmt.Errorf(
+			"%w: %q exists without an `init` managed block; rename the file or insert the format-appropriate BEGIN/END markers from LH-SA-FILE-002 manually",
+			driving.ErrGenerateManualConflict, relPath)
+	case errors.Is(findErr, managedblock.ErrBlockMalformed):
+		return devcontainerFilePlan{}, fmt.Errorf(
+			"%w: %q has a malformed `init` managed block (%v); rename the file or repair the BEGIN/END markers manually",
+			driving.ErrGenerateManualConflict, relPath, findErr)
+	case findErr != nil:
+		return devcontainerFilePlan{}, fmt.Errorf("find init block in %q: %w", relPath, findErr)
+	}
+	if bytes.Equal(existing[start:end], renderedBlock) {
+		plan.action = devcontainerActionNoOp
+		return plan, nil
+	}
+	plan.action = devcontainerActionReplaceBlock
+	plan.existing = existing
+	return plan, nil
+}
+
+// executeDevcontainerPlans runs phase 2 of the two-phase plan-and-
+// execute: writes new files, splices existing blocks, skips NoOps.
+// Returns the sorted list of changed relative paths plus boolean
+// flags driving the aggregate action decision.
+func (s *GenerateService) executeDevcontainerPlans(plans []devcontainerFilePlan) (changed []string, hasWrite, hasReplace bool, err error) {
+	for _, plan := range plans {
+		switch plan.action {
+		case devcontainerActionWrite:
+			if err := s.writeDevcontainerNewFile(plan); err != nil {
+				return nil, false, false, err
+			}
+			changed = append(changed, plan.relPath)
+			hasWrite = true
+		case devcontainerActionReplaceBlock:
+			if err := s.writeDevcontainerBlockReplace(plan); err != nil {
+				return nil, false, false, err
+			}
+			changed = append(changed, plan.relPath)
+			hasReplace = true
+		case devcontainerActionNoOp:
+			// nothing to do
+		}
+	}
+	return changed, hasWrite, hasReplace, nil
+}
+
+func (s *GenerateService) writeDevcontainerNewFile(plan devcontainerFilePlan) error {
+	dir := filepath.Dir(plan.targetPath)
+	if err := s.fs.MkdirAll(dir, 0o755); err != nil {
+		return fmt.Errorf("%w: MkdirAll(%q): %v",
+			driving.ErrGenerateFileSystem, dir, err)
+	}
+	if err := s.fs.WriteFile(plan.targetPath, plan.rendered, defaultFileMode); err != nil {
+		return fmt.Errorf("%w: write %q: %v",
+			driving.ErrGenerateFileSystem, plan.targetPath, err)
+	}
+	return nil
+}
+
+func (s *GenerateService) writeDevcontainerBlockReplace(plan devcontainerFilePlan) error {
+	updated, err := managedblock.Replace(plan.existing, plan.marker, plan.renderedBlock)
+	if err != nil {
+		return fmt.Errorf("replace init block in %q: %w", plan.relPath, err)
+	}
+	if err := s.fs.WriteFile(plan.targetPath, updated, defaultFileMode); err != nil {
+		return fmt.Errorf("%w: write %q: %v",
+			driving.ErrGenerateFileSystem, plan.targetPath, err)
+	}
+	return nil
+}
+
+// devcontainerAggregateAction maps the per-file action flags to a
+// single response action. UpdatedBlock dominates Created when both
+// are present (the slice plan §"partial-clean" row: "Aggregat-Action:
+// UpdatedBlock wenn mindestens eine geupdated wurde, sonst Created").
+func devcontainerAggregateAction(hasWrite, hasReplace bool) driving.GenerateAction {
+	switch {
+	case hasReplace:
+		return driving.GenerateActionUpdatedBlock
+	case hasWrite:
+		return driving.GenerateActionCreated
+	default:
+		return driving.GenerateActionNoOp
+	}
 }

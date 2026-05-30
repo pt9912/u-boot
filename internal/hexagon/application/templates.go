@@ -16,7 +16,7 @@ import (
 	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
 )
 
-//go:embed templates/*.tmpl templates/services/*.tmpl
+//go:embed templates/*.tmpl templates/services/*.tmpl templates/devcontainer/*.tmpl
 var templateFS embed.FS
 
 // templateData is the projection of [domain.Project] that the
@@ -26,6 +26,13 @@ var templateFS embed.FS
 // inadvertently leaking new fields into the rendered output.
 type templateData struct {
 	Name string
+
+	// ForwardPorts is the M7-T5 devcontainer-only field. Other
+	// templates ignore it (text/template silently drops unreferenced
+	// fields); only `templates/devcontainer/devcontainer.json.tmpl`
+	// renders it, conditionally — empty/nil omits the JSON
+	// `forwardPorts` key entirely per LH-FA-DEV-005 ("darf fehlen").
+	ForwardPorts []int
 }
 
 // fileTemplate maps an embedded template to its destination path

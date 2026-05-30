@@ -380,6 +380,8 @@ func TestTemplateNames_AreSorted(t *testing.T) {
 	want := []string{
 		"changelog.md.tmpl",
 		"compose.yaml.tmpl",
+		"devcontainer/Dockerfile.tmpl",
+		"devcontainer/devcontainer.json.tmpl",
 		"env.example.tmpl",
 		"gitignore.tmpl",
 		"readme.md.tmpl",

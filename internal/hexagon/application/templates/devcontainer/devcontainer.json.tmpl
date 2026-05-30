@@ -1,0 +1,13 @@
+// BEGIN U-BOOT MANAGED BLOCK: init
+{
+  "name": "{{.Name}}",
+  "build": {
+    "dockerfile": "./Dockerfile",
+    "context": "."
+  },
+{{- if .ForwardPorts}}
+  "forwardPorts": [{{range $i, $p := .ForwardPorts}}{{if $i}}, {{end}}{{$p}}{{end}}],
+{{- end}}
+  "remoteUser": "vscode"
+}
+// END U-BOOT MANAGED BLOCK: init
