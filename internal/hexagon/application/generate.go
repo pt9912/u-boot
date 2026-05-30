@@ -163,13 +163,24 @@ func (*GenerateService) generateChangelog(_ context.Context, _ driving.GenerateR
 	return driving.GenerateResponse{}, fmt.Errorf("generate changelog: %w", errStubHandler)
 }
 
-func (*GenerateService) generateReadme(_ context.Context, _ driving.GenerateRequest) (driving.GenerateResponse, error) {
-	return driving.GenerateResponse{}, fmt.Errorf("generate readme: %w", errStubHandler)
+// generateReadme is the thin T3 wrapper over generateManagedFile for
+// the `README.md` artefact (LH-FA-GEN-003): StyleHTMLComment marker
+// and the M3 readme.md.tmpl template. User content after the init
+// block (Markdown sections the user adds for project-specific
+// documentation) is preserved byte-identically per the
+// managedblock.Replace contract.
+func (s *GenerateService) generateReadme(_ context.Context, req driving.GenerateRequest) (driving.GenerateResponse, error) {
+	return s.generateManagedFile(req, "README.md", "readme.md.tmpl", managedblock.StyleHTMLComment)
 }
 
-// generateEnvExample implements the M7-T2 state machine for
-// `.env.example` (LH-FA-GEN-004 / LH-FA-GEN-005). The slice plan's
-// four-state table:
+// generateManagedFile is the M7-T2/T3 shared state machine for any
+// single-file artefact whose template ships with one `init` managed
+// block. Used by `generateEnvExample` (StyleHash, .env.example) and
+// `generateReadme` (StyleHTMLComment, README.md). T4 changelog and
+// T5 devcontainer have additional concerns (Unreleased-Repair pfad
+// and atomic two-file plan respectively) and stay separate.
+//
+// State table (LH-FA-GEN-001/004/005):
 //
 //	absent              → render full template, write file → Created
 //	present-with-block  → splice re-rendered block → UpdatedBlock or NoOp
@@ -179,22 +190,31 @@ func (*GenerateService) generateReadme(_ context.Context, _ driving.GenerateRequ
 // Idempotency contract (LH-FA-GEN-005): a second invocation against
 // an artefact that already matches the rendered block must return
 // [driving.GenerateActionNoOp] with `Changed = nil` and zero
-// WriteFile calls — the T2 NoOp-pin test asserts both. Content
-// outside the BEGIN/END region (service add-on blocks, free-form
-// user variables) survives any UpdatedBlock splice byte-identically;
-// that is the [managedblock.Replace] contract, asserted by the
-// T2 add-on-preservation test.
-func (s *GenerateService) generateEnvExample(_ context.Context, req driving.GenerateRequest) (driving.GenerateResponse, error) {
+// WriteFile calls — the per-tranche NoOp-pin tests assert both.
+// Content outside the BEGIN/END region survives any UpdatedBlock
+// splice byte-identically; that is the [managedblock.Replace]
+// contract, asserted by the per-tranche content-preservation tests
+// (T2: add-on block, T3: user Markdown after init block).
+//
+// The marker name is fixed to [managedblock.InitName] — all four M7
+// artefacts share the `init` block name so that future
+// `init --devcontainer` (LH-AK-005, MVP-Closure) can reactivate the
+// same block without a parallel marker (see slice-m7-generate.md
+// §Architektur-Punkt "Block-Name in allen generierten Dateien").
+func (s *GenerateService) generateManagedFile(
+	req driving.GenerateRequest,
+	relPath, templateName string,
+	style managedblock.Style,
+) (driving.GenerateResponse, error) {
 	cfg, err := s.readProjectConfig(req.BaseDir)
 	if err != nil {
 		return driving.GenerateResponse{}, err
 	}
 
-	const relPath = ".env.example"
 	targetPath := filepath.Join(req.BaseDir, relPath)
-	marker := managedblock.Marker{Style: managedblock.StyleHash, Name: managedblock.InitName}
+	marker := managedblock.Marker{Style: style, Name: managedblock.InitName}
 
-	rendered, err := renderTemplate("env.example.tmpl", templateData{Name: cfg.Project.Name})
+	rendered, err := renderTemplate(templateName, templateData{Name: cfg.Project.Name})
 	if err != nil {
 		return driving.GenerateResponse{}, err
 	}
@@ -211,8 +231,8 @@ func (s *GenerateService) generateEnvExample(_ context.Context, req driving.Gene
 			return driving.GenerateResponse{}, fmt.Errorf("%w: write %q: %v",
 				driving.ErrGenerateFileSystem, targetPath, err)
 		}
-		s.logger.Info("generate env-example: created",
-			"path", relPath, "project", cfg.Project.Name)
+		s.logger.Info("generate: created",
+			"artifact", req.Artifact.String(), "path", relPath, "project", cfg.Project.Name)
 		return driving.GenerateResponse{
 			Artifact: req.Artifact,
 			Action:   driving.GenerateActionCreated,
@@ -237,7 +257,7 @@ func (s *GenerateService) generateEnvExample(_ context.Context, req driving.Gene
 	renderedBlock, err := renderManagedBlockOnly(rendered, marker)
 	if err != nil {
 		return driving.GenerateResponse{}, fmt.Errorf(
-			"extract init block from rendered env.example.tmpl: %w", err)
+			"extract init block from rendered %s: %w", templateName, err)
 	}
 
 	// Classify the existing file's block.
@@ -245,7 +265,7 @@ func (s *GenerateService) generateEnvExample(_ context.Context, req driving.Gene
 	switch {
 	case errors.Is(findErr, managedblock.ErrBlockNotFound):
 		return driving.GenerateResponse{}, fmt.Errorf(
-			"%w: %q exists without an `init` managed block; rename the file or insert a `# BEGIN U-BOOT MANAGED BLOCK: init` marker manually",
+			"%w: %q exists without an `init` managed block; rename the file or insert the format-appropriate BEGIN/END markers from LH-SA-FILE-002 manually",
 			driving.ErrGenerateManualConflict, relPath)
 	case errors.Is(findErr, managedblock.ErrBlockMalformed):
 		return driving.GenerateResponse{}, fmt.Errorf(
@@ -258,7 +278,8 @@ func (s *GenerateService) generateEnvExample(_ context.Context, req driving.Gene
 	// State: present-with-block. NoOp if the existing block bytes are
 	// already equal to the rendered block bytes (idempotency).
 	if bytes.Equal(existing[start:end], renderedBlock) {
-		s.logger.Debug("generate env-example: no-op", "path", relPath)
+		s.logger.Debug("generate: no-op",
+			"artifact", req.Artifact.String(), "path", relPath)
 		return driving.GenerateResponse{
 			Artifact: req.Artifact,
 			Action:   driving.GenerateActionNoOp,
@@ -275,13 +296,20 @@ func (s *GenerateService) generateEnvExample(_ context.Context, req driving.Gene
 		return driving.GenerateResponse{}, fmt.Errorf("%w: write %q: %v",
 			driving.ErrGenerateFileSystem, targetPath, err)
 	}
-	s.logger.Info("generate env-example: updated block",
-		"path", relPath, "project", cfg.Project.Name)
+	s.logger.Info("generate: updated block",
+		"artifact", req.Artifact.String(), "path", relPath, "project", cfg.Project.Name)
 	return driving.GenerateResponse{
 		Artifact: req.Artifact,
 		Action:   driving.GenerateActionUpdatedBlock,
 		Changed:  []string{relPath},
 	}, nil
+}
+
+// generateEnvExample is the thin T2 wrapper over generateManagedFile
+// for the `.env.example` artefact (LH-FA-GEN-004): StyleHash marker
+// and the M3 env.example.tmpl template.
+func (s *GenerateService) generateEnvExample(_ context.Context, req driving.GenerateRequest) (driving.GenerateResponse, error) {
+	return s.generateManagedFile(req, ".env.example", "env.example.tmpl", managedblock.StyleHash)
 }
 
 func (*GenerateService) generateDevcontainer(_ context.Context, _ driving.GenerateRequest) (driving.GenerateResponse, error) {

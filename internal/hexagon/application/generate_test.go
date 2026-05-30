@@ -82,16 +82,15 @@ func TestGenerate_NoUbootYAML_ReturnsErrProjectNotInitialized(t *testing.T) {
 // (slice-m7-generate.md T5 DoD).
 //
 // Pin tracks remaining stubs: 4 in T1 → 3 in T2 → 2 in T3 → 1 in T4 →
-// 0 in T5 (test deleted). Updated for T2: env-example is now real,
-// so the catalogue covers only the three remaining artefacts.
-func TestGenerate_StubHandlers_RemainingThreeReturnErrStubHandler(t *testing.T) {
+// 0 in T5 (test deleted). Updated for T3: readme is now real, so the
+// catalogue covers only changelog and devcontainer.
+func TestGenerate_StubHandlers_RemainingTwoReturnErrStubHandler(t *testing.T) {
 	t.Parallel()
 	svc, fs := newGenerateService(t)
 	seedGenerateUbootYAML(t, fs)
 
 	cases := []domain.Artifact{
 		domain.ArtifactChangelog,
-		domain.ArtifactReadme,
 		domain.ArtifactDevcontainer,
 	}
 	for _, art := range cases {
@@ -350,4 +349,133 @@ func equalStrings(a, b []string) bool {
 		}
 	}
 	return true
+}
+
+// --- T3: generate readme ---------------------------------------------
+//
+// The full state-machine is exercised by the T2 env-example tests
+// against the shared generateManagedFile helper. T3 only adds the
+// readme-specific shape pins:
+//
+//   * Absent → Created writes README.md (not .env.example), proving
+//     the wrapper routes the correct relPath/template/style.
+//   * User-content-after-block survives the splice, the Markdown
+//     variant of the T2 add-on-preservation test.
+//   * NoOp idempotency on the readme path, since the wrapper indirects
+//     through the helper.
+
+func readmePath() string {
+	return filepath.Join(generateTestBaseDir, "README.md")
+}
+
+func renderedReadme(t *testing.T) []byte {
+	t.Helper()
+	body, err := application.RenderTemplateForTest("readme.md.tmpl", envExampleProjectName)
+	if err != nil {
+		t.Fatalf("render readme template: %v", err)
+	}
+	return body
+}
+
+func generateReadme(t *testing.T, svc *application.GenerateService) (driving.GenerateResponse, error) {
+	t.Helper()
+	return svc.Generate(context.Background(), driving.GenerateRequest{
+		BaseDir:  generateTestBaseDir,
+		Artifact: domain.ArtifactReadme,
+	})
+}
+
+func TestGenerateReadme_Absent_ReturnsCreated(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs)
+
+	resp, err := generateReadme(t, svc)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Action != driving.GenerateActionCreated {
+		t.Errorf("Action = %v, want Created", resp.Action)
+	}
+	if got, want := resp.Changed, []string{"README.md"}; !equalStrings(got, want) {
+		t.Errorf("Changed = %v, want %v", got, want)
+	}
+
+	got, err := fs.ReadFile(readmePath())
+	if err != nil {
+		t.Fatalf("read written README.md: %v", err)
+	}
+	if want := renderedReadme(t); !bytes.Equal(got, want) {
+		t.Errorf("written body differs from rendered template:\n got=%q\nwant=%q", got, want)
+	}
+}
+
+// TestGenerateReadme_UserContentAfterBlock_Preserved pins the
+// Markdown variant of the T2 add-on-preservation test: a user-curated
+// `## Custom section` after the `<!-- END U-BOOT MANAGED BLOCK: init -->`
+// marker must survive an UpdatedBlock splice byte-identically. This is
+// the realistic shape of a user-maintained README (init block is the
+// scaffold, custom sections live below).
+func TestGenerateReadme_UserContentAfterBlock_Preserved(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs)
+	userTail := "\n## Custom section\n\nUser-curated Markdown that must survive the splice.\n"
+	// Stale init block + the user-curated tail.
+	staleBlock := "<!-- BEGIN U-BOOT MANAGED BLOCK: init -->\n# stale heading — superseded by template\n<!-- END U-BOOT MANAGED BLOCK: init -->\n"
+	if err := fs.WriteFile(readmePath(), []byte(staleBlock+userTail), 0o644); err != nil {
+		t.Fatalf("seed README.md: %v", err)
+	}
+
+	resp, err := generateReadme(t, svc)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.Action != driving.GenerateActionUpdatedBlock {
+		t.Errorf("Action = %v, want UpdatedBlock", resp.Action)
+	}
+
+	got, err := fs.ReadFile(readmePath())
+	if err != nil {
+		t.Fatalf("read updated README.md: %v", err)
+	}
+	if !strings.HasSuffix(string(got), userTail) {
+		t.Errorf("user tail not preserved after splice; got tail = %q, want suffix = %q",
+			lastN(got, len(userTail)+50), userTail)
+	}
+}
+
+func TestGenerateReadme_DoubleRun_SecondCallNoOp(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateUbootYAML(t, fs)
+
+	if _, err := generateReadme(t, svc); err != nil {
+		t.Fatalf("first run: %v", err)
+	}
+	writesAfterFirst := len(fs.writtenPaths())
+
+	resp, err := generateReadme(t, svc)
+	if err != nil {
+		t.Fatalf("second run: %v", err)
+	}
+	if resp.Action != driving.GenerateActionNoOp {
+		t.Errorf("second run Action = %v, want NoOp", resp.Action)
+	}
+	if len(resp.Changed) != 0 {
+		t.Errorf("second run Changed = %v, want empty", resp.Changed)
+	}
+	if delta := len(fs.writtenPaths()) - writesAfterFirst; delta != 0 {
+		t.Errorf("second run produced %d WriteFile call(s), want 0; writes = %v",
+			delta, fs.writtenPaths())
+	}
+}
+
+// lastN returns the last n bytes of data (or all if len(data) <= n);
+// used to truncate diff-noise in test error messages.
+func lastN(data []byte, n int) []byte {
+	if len(data) <= n {
+		return data
+	}
+	return data[len(data)-n:]
 }
