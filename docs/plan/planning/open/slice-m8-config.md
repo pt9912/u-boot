@@ -35,21 +35,36 @@ unterschrieben)
 Ein freier YAML-Pfad würde User-Schreiben überall hin erlauben
 (`set foo.bar.baz xxx`), aber die LH-FA-CONF-002-Schema-Pflicht
 verlangt, dass nur die dort definierten Felder existieren. **Set
-akzeptiert ausschließlich Pfade aus einer Whitelist**:
+akzeptiert ausschließlich Pfade aus einer engen Whitelist**:
 
-| Pfad                              | Typ     | Domain-Validierung                                     |
-| --------------------------------- | ------- | ------------------------------------------------------ |
-| `project.name`                    | string  | `domain.NewProjectName` (LH-FA-INIT-006 regex)         |
-| `services.<svc>.enabled`          | bool    | `domain.NewServiceName(svc)` + bool-Parse              |
-| `devcontainer.enabled`            | bool    | bool-Parse                                             |
+| Pfad                              | Get | Set | Domain-Validierung                                     |
+| --------------------------------- | --- | --- | ------------------------------------------------------ |
+| `project.name`                    | ✅  | ✅  | `domain.NewProjectName` (LH-FA-INIT-006 regex)         |
+| `devcontainer.enabled`            | ✅  | ✅  | `strconv.ParseBool` pre-write                          |
+| `services.<svc>.enabled`          | ✅  | ❌  | für Set: Fehler mit Hint „use `u-boot add <svc>`"      |
 
-Unbekannte Pfade ⇒ `ErrConfigPathUnknown` → Exit-Code 10. Die
-Liste ist eng absichtlich: V1-Felder (`services.keycloak.persistence`,
+Unbekannte Pfade ⇒ `ErrConfigPathUnknown` → Exit-Code 10.
+
+**Warum `services.<svc>.enabled` aus dem Set-Whitelist ausgeschlossen
+ist** (Review-Followup M1): das Boolean ist im M5-State-Machine-
+Modell nur die *Sichtbarkeits-Spitze* der Service-Aktivierung; ein
+echter Aktivierungs-Schritt schreibt zusätzlich den compose-Block,
+den volume-Block und den `.env.example`-Block (`LH-FA-ADD-002` /
+slice-m5-add-postgres §State-Machine). Würde `config set
+services.postgres.enabled true` nur den Boolean flippen, entstünde
+ein Halbzustand mit `enabled: true` aber fehlenden Artefakten —
+und der nächste `u-boot up` würde gegen einen nicht-existenten
+Compose-Service laufen. `u-boot add <svc>` ist der einzige
+kanonische Pfad; Get reicht zum Inspizieren, Set wird verweigert
+(`ErrConfigValueInvalid` mit Hint).
+
+V1-Felder (`services.keycloak.persistence`,
 `devcontainer.featureSources.allow`) kommen erst mit den
-entsprechenden Add-on-Slices in die Whitelist; `schemaVersion`
-ist read-only (Migration ist Later).
+entsprechenden V1-Add-on-Slices in die Whitelist; `schemaVersion`
+ist permanent read-only (Migration ist Later).
 
-`<svc>` ist ein variabler Wildcard-Segment; der Domain-Validator
+`<svc>` ist ein variabler Wildcard-Segment für Get; der
+Domain-Validator
 ([`domain.NewServiceName`](../../../../internal/hexagon/domain/servicename.go))
 prüft Format und Catalogue-Mitgliedschaft.
 
@@ -60,16 +75,36 @@ ihn 1:1. Mehrwertige Sets (`set services.postgres '{enabled:
 true, version: 16}'`) sind out-of-scope; jedes Setting ist
 genau ein Skalar.
 
-### D3 — Schema-Validierung post-write via Roundtrip
+### D3 — Schema-Validierung pre-write via Roundtrip
 
-Nach jedem `set` wird die geschriebene `u-boot.yaml` re-gelesen
-und in das `ubootYAMLConfig`-Struct unmarshalled. Bricht die
-Unmarshal ab, gilt das als Schema-Verletzung ⇒ `ErrConfigSchemaInvalid`
-→ Exit-Code 10 mit Hint („restore manually or run `u-boot
-config get <path>` to inspect"). Der Patch selbst wird als
-Plan-vor-Write klassifiziert: erst Plan-and-Validate auf einer
-In-Memory-Kopie, dann commit. Bei Schema-Verletzung wird die
-existierende Datei **nicht** überschrieben (atomar).
+Vor jedem `set`-WriteFile wird der gepatchte Bytestream
+in-memory re-unmarshalled in das `ubootYAMLConfig`-Struct +
+durch die per-Pfad-Domain-Re-Validatoren geschickt (siehe D1
+Spalte „Domain-Validierung"). Erst danach committet
+WriteFile.
+
+**Zweistufige Schema-Validation** (Review-Followup M2):
+
+1. **Struktur-Roundtrip**: `yaml.Unmarshal(patchedBytes,
+   &ubootYAMLConfig{})`. Wenn der Patch einen YAML-Struktur-Schaden
+   produziert hat (z. B. weil PatchScalar einen Tag verlor),
+   bricht Unmarshal ab → `ErrConfigSchemaInvalid` mit dem
+   `driven.ErrYAMLParse`-wrapped Detail (V1-Sentinel-Reuse).
+2. **Domain-Re-Validation**: jeder Whitelist-Pfad ruft seinen
+   Domain-Validator auf der gepatchten Config erneut auf. yaml.v3
+   Unmarshal ist lenient — es akzeptiert string-fähigen Müll für
+   `project.name` ohne LH-FA-INIT-006-Regex zu prüfen. Der
+   Re-Validator schließt die Lücke: nach Unmarshal läuft
+   `domain.NewProjectName(cfg.Project.Name)` (und analoge
+   Validatoren für andere Whitelist-Pfade); jeder Domain-Fehler
+   ⇒ `ErrConfigValueInvalid`.
+
+**Transaktionalität auf Datei-Ebene** (Review-Followup M3): bei
+*irgendeinem* Validate-Fehler wird `fs.WriteFile` gar nicht
+aufgerufen, die existierende `u-boot.yaml` bleibt byte-identisch.
+Kein OS-fsync-Garantie-Anspruch, sondern reine
+„write-only-on-validate-success"-Semantik. Test pinnt das durch
+`writesBefore == writesAfter` analog M7-NoOp-Pattern.
 
 ### D4 — `config get` returnt YAML-formatierten Skalar
 
@@ -83,6 +118,22 @@ JSON-Quoting. Trailing Newline genau einer (analog `echo`).
 byte-identisch auf stdout. Das ist deutlich einfacher als ein
 Reformat-Pfad und User-erwartbar (`cat u-boot.yaml`-Ersatz).
 Keine Schema-Filterung; Kommentare bleiben sichtbar.
+
+### D5b — Get-Whitelist ist (heute) symmetrisch zu Set
+
+Get prüft die D1-Whitelist auch dann, wenn der Pfad strukturell
+existiert (`services.<svc>.enabled` wird gelesen → Pfad ist in
+der Whitelist mit Get-Erlaubnis ✅). **`get` ist read-only und
+strukturell ungefährlich**, deshalb wäre es technisch möglich,
+beliebige YAML-Pfade zu lesen (Klarstellung N1). Die symmetrische
+Whitelist-Prüfung wird trotzdem beibehalten:
+
+- weniger Code-Pfade, eine einzige Path-Validation-Logik;
+- klare Erwartung: „config get/set spricht über die kanonisch
+  dokumentierten Felder";
+- ein V1-Folge-Slice kann Get auf alle gültigen YAML-Pfade
+  öffnen (`config get foo.bar` darf dann `nil` zurückgeben),
+  ohne das Schreib-Whitelist aufzuweichen.
 
 ### D6 — Exit-Code-Mapping
 
@@ -166,16 +217,20 @@ Fünf Tranchen, in Reihenfolge implementierbar.
 ### T1 — Domain `ConfigPath` + Whitelist-Parser
 
 - `internal/hexagon/domain/configpath.go`:
-  - `ConfigPath` als typed-string mit `Kind ConfigPathKind`
+  - `ConfigPath` mit `Kind ConfigPathKind`
     (`ConfigProjectName` / `ConfigServiceEnabled` /
-    `ConfigDevcontainerEnabled`) und `Service domain.ServiceName`
-    (nur für `ConfigServiceEnabled` populated).
+    `ConfigDevcontainerEnabled`), `Service domain.ServiceName`
+    (nur für `ConfigServiceEnabled` populated), und einem
+    `WriteAllowed bool` (D1: `services.<svc>.enabled` ist
+    `false`, die anderen zwei `true`).
   - `NewConfigPath(raw string) (ConfigPath, error)`-Konstruktor
-    mit der D1-Whitelist.
+    mit der D1-Whitelist; Get-vs-Set-Differenzierung läuft über
+    `WriteAllowed`, **nicht** über zwei separate Whitelists —
+    das hält den Validator-Pfad einheitlich.
   - `ErrInvalidConfigPath` als domain-sentinel.
-- Tests: jede erlaubte Pfad-Form roundtrip, alle bekannten
-  Fehlpfade (`unknown.path`, `services..enabled`,
-  `services.invalid-service-name.enabled`).
+- Tests: jede erlaubte Pfad-Form roundtrip; `WriteAllowed`-Flag
+  pro Kind pinnt; alle bekannten Fehlpfade (`unknown.path`,
+  `services..enabled`, `services.invalid-service-name.enabled`).
 
 **DoD T1:**
 - [ ] `domain.ConfigPath` + Whitelist + 100 % Coverage.
@@ -227,39 +282,57 @@ Fünf Tranchen, in Reihenfolge implementierbar.
 
 ### T4 — `Set` mit Schema-Roundtrip-Validierung
 
-- Wert-Coercion: für `project.name` über `domain.NewProjectName`;
-  für `*.enabled` über `strconv.ParseBool` (akzeptiert
-  `true/false/0/1/T/F/...` gemäß Go-Standard) und Re-Marshal
-  als `true`/`false`-String.
-- Pre-Patch: Read → Patch in Memory → Re-Unmarshal in
-  `ubootYAMLConfig` → bei Fehler `ErrConfigSchemaInvalid`,
-  keine Datei-Mutation. Bei Erfolg WriteFile.
+- Wert-Coercion (pre-PatchScalar): für `project.name` über
+  `domain.NewProjectName`; für `devcontainer.enabled` über
+  `strconv.ParseBool` (akzeptiert `true/false/0/1/T/F/...` gemäß
+  Go-Standard) und Re-Marshal als `true`/`false`-String.
+- Pre-Write-Pipeline (D3):
+  1. PatchScalar in Memory mit dem coerced Value.
+  2. **Struktur-Roundtrip**: Re-Unmarshal in `ubootYAMLConfig`.
+     Fehler ⇒ `ErrConfigSchemaInvalid`. Wenn der Fehler über
+     `driven.ErrYAMLParse` wrappt (V1-Sentinel-Reuse), den
+     Wrap-Detail in die User-Message übernehmen.
+  3. **Domain-Re-Validation**: pfadabhängig nach Unmarshal
+     erneut den Domain-Validator auf der gepatchten Config
+     aufrufen (`project.name` ⇒ `domain.NewProjectName(cfg.Project.Name)`;
+     `devcontainer.enabled` ⇒ pointer-checked + bool-shape).
+     Domain-Fehler ⇒ `ErrConfigValueInvalid`. yaml.v3 Unmarshal
+     ist lenient, deshalb deckt Stufe 2 nicht alle Spec-
+     Verletzungen; Stufe 3 schließt die Lücke explizit.
+  4. Erst nach Erfolg von 1+2+3: `fs.WriteFile` der gepatchten
+     Bytes.
 - `OldValue`/`NewValue` in der Response werden aus dem Pre-/
   Post-Snapshot extrahiert (für CLI-Summary).
-- Schema-Validation-Implementation: das Unmarshal in
-  `ubootYAMLConfig` ist die Schema-Pflicht. Wenn der V1-yaml-
-  parse-Sentinel sich gewrappt wird (driven.ErrYAMLParse), wird
-  er hier auf `ErrConfigSchemaInvalid` umgemappt — gleicher
-  Exit-Code, klarere User-Message.
 - Tests:
-  - Set project.name happy + invalid name (z. B. "Demo-Project").
-  - Set services.postgres.enabled = false (roundtrip).
-  - Set unbekannter Pfad ⇒ ErrConfigPathUnknown.
-  - Set value falsche Form (z. B. `bool` mit `"vielleicht"`) ⇒
-    ErrConfigValueInvalid.
-  - Set führt zu einem ungültigen YAML-Schema (über
-    Patch-Test-Hook?) ⇒ ErrConfigSchemaInvalid + keine
-    Datei-Mutation (writesBefore == writesAfter).
-- LH-FA-CONF-005-Pin: das End-to-End-Test reproduziert exakt
+  - Set `project.name` happy + invalid name (z. B. "Demo-Project")
+    ⇒ ErrConfigValueInvalid bei Stufe-3-Re-Validator.
+  - Set unbekannter Pfad (z. B. `foo.bar`) ⇒ ErrConfigPathUnknown.
+  - Set `services.postgres.enabled = false` ⇒
+    ErrConfigValueInvalid mit Hint auf `u-boot add` /
+    `u-boot remove` (M1-Whitelist-Ausschluss).
+  - Set `devcontainer.enabled = vielleicht` ⇒
+    ErrConfigValueInvalid (ParseBool-Fehler pre-Patch).
+  - Set führt zu Schema-Verletzung post-PatchScalar (über
+    Test-Hook in fakeYAML, der PatchScalar einen
+    Struktur-Schaden zurückgeben lässt) ⇒
+    ErrConfigSchemaInvalid + null `WriteFile`-Calls.
+  - Set `project.name = "valid-name"` ⇒ Erfolg + Datei
+    enthält neuen Wert + Pre-Existing-Comments survived.
+- LH-FA-CONF-005-Pin: ein End-to-End-Test reproduziert exakt
   `u-boot config get project.name → u-boot config set
   project.name foo → u-boot config get project.name` und
-  asserted dass der gesetzte Wert beim nächsten Get sichtbar
+  assertet dass der gesetzte Wert beim nächsten Get sichtbar
   ist.
 
 **DoD T4:**
-- [ ] Set-Handler vollständig + Schema-Roundtrip.
+- [ ] Set-Handler implementiert; alle drei D3-Validate-Stufen
+  greifen, fehlt eine ⇒ kein WriteFile.
 - [ ] Stub-Pin entfernt (alle drei Handler real).
-- [ ] LH-FA-CONF-005-Pin im acceptance_test.go ergänzt.
+- [ ] LH-FA-CONF-005-Roundtrip-Pin im acceptance_test.go ergänzt.
+- [ ] Test pinnt: `set project.name "Invalid Name"` ⇒
+  ErrConfigValueInvalid **vor write** (writesBefore == writesAfter).
+- [ ] Test pinnt: `set services.postgres.enabled true` ⇒
+  ErrConfigValueInvalid mit Hint-Text auf `u-boot add`-Pfad.
 - [ ] `make gates` grün.
 - [ ] DoD-Line: `T4 ✅ <commit-hash>`.
 
@@ -353,7 +426,14 @@ Fünf Tranchen, in Reihenfolge implementierbar.
 - **JSON-Output** für `show` / `get` — analog M4/M6/M7-
   Entscheidung; Text-Output zuerst.
 - **`config validate`** als eigener Subkommando — heute
-  unnötig, weil `set` post-write validiert.
+  unnötig, weil `set` pre-write validiert (D3).
+- **Secret-Redaction in `show`** (Klarstellung N2): heute hat
+  `u-boot.yaml` keine Secret-Felder (`.env.example` ist der
+  kanonische Secret-Träger, LH-SA-FILE-002). Sobald V1-Felder
+  wie `devcontainer.featureSources.allow` private Registry-
+  Tokens enthalten könnten, müsste `show` redacten — ein
+  Folge-Slice. M8 reicht die Datei byte-identisch durch
+  (siehe D5).
 
 ## Bezug
 
