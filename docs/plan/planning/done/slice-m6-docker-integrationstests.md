@@ -1,7 +1,7 @@
 # Slice M6: Docker-Integrationstests (Build-Tag-Pfad)
 
-> **Status:** Carveout-Aufhebung pending (Workflow ist PR-blockierend)
-> **DoD:** Sub-T1 ✅ `ab9ff4a` (+ review `d5ac2c3`) / Sub-T2 ✅ `bcd8486` (+ review `6416d68`) / Sub-T3 ✅ `b537929` (+ e2e-fix `aa3a45c`) / Sub-T4 ✅ `b537929` (gemeinsamer Commit) / Audit-Block-Härtung ✅ `41cab1b` (Job-level-Pflicht) / Stabilisierung ✅ `43b42e4` (3× grün job-level auf main: `41cab1b`/`379fe21`/`2fa46fd`, jeweils `run_attempt=1`+`event=push`+`job_conclusion=success`) / Carveout-Entfernung ⏳ (separate PR nach erstem grünem Lauf ohne `continue-on-error`)
+> **Status:** Done
+> **DoD:** Sub-T1 ✅ `ab9ff4a` (+ review `d5ac2c3`) / Sub-T2 ✅ `bcd8486` (+ review `6416d68`) / Sub-T3 ✅ `b537929` (+ e2e-fix `aa3a45c`) / Sub-T4 ✅ `b537929` (gemeinsamer Commit) / Audit-Block-Härtung ✅ `41cab1b` (Job-level-Pflicht) / Stabilisierung ✅ `43b42e4` (Squash-Merge `8865ca1`; 3× grün job-level auf main: `41cab1b`/`379fe21`/`2fa46fd`, jeweils `run_attempt=1`+`event=push`+`job_conclusion=success`) / Carveout-Entfernung ✅ (erste post-merge-Lauf ohne `continue-on-error` grün auf `8865ca1`: https://github.com/pt9912/u-boot/actions/runs/26679225340, `run_attempt=1`+`event=push`+`job_conclusion=success`)
 
 ## Sub-Tranchen-Schnitt
 

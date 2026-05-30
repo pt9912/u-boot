@@ -68,7 +68,7 @@ Bewusst **noch nicht** in diesem Slice:
   `k-deskflight` (Kubernetes-Smoke gegen `kind`) passt für u-boot
   nicht, weil u-boot Compose-Stacks orchestriert, nicht Kubernetes;
   der u-boot-Pendant ist die Integrationsstrecke aus
-  [`slice-m6-docker-integrationstests.md`](../planning/in-progress/slice-m6-docker-integrationstests.md).
+  [`slice-m6-docker-integrationstests.md`](../planning/done/slice-m6-docker-integrationstests.md).
 - DCO-Bot / Branch Protection — Folgepflicht im GitHub-UI.
 
 ## Konsequenzen
