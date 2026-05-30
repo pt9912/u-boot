@@ -17,7 +17,7 @@ in `in-progress/`.
 | M4 `u-boot doctor` | Done | Lokale Voraussetzungen prüfen (`LH-FA-DIAG-001..004`), Severity-Klassifikation, Repair-Hints. 9 Checks: write-permissions, git, docker (+reachable+compose-plugin), u-boot.yaml, compose.yaml, devcontainer.json/Dockerfile. CLI `doctor`-Subkommando mit `--strict`. Exit-Code 11 bei Errors (oder Warns + --strict). | [`slice-m4-doctor`](../done/slice-m4-doctor.md) |
 | M5 `u-boot add postgres` | Done | PostgreSQL-Add-on (`LH-FA-ADD-001..002`, `LH-FA-ADD-005`), services-Schema in u-boot.yaml, Compose split-block scaffold, `.env.example`-Block, Healthcheck mit `$${POSTGRES_USER:-postgres}`-Defaults für LH-AK-002, State-Machine, Active-Repair, CLI-Subcommand, doctor-Integration (services.enabled-key + devcontainer.forwardPorts + devcontainer.enabled-Severity-Eskalation). 11 doctor-Checks gesamt. | [`slice-m5-add-postgres`](../done/slice-m5-add-postgres.md) |
 | M6 `u-boot up` / `down` | Done | Compose-Wrapper (`LH-FA-UP-001..004`), Healthcheck-Polling, `--timeout`, `--volumes`, CLI-Subcommands + Status-Tabelle. Alle 7 Tranchen in `done/`. Carveout-Slice [`slice-m6-docker-integrationstests`](../in-progress/slice-m6-docker-integrationstests.md) Sub-T1..T4 implementiert (6 Verhaltens-Pins, `make test-docker`, `integration-docker`-Workflow), Stabilisierung pending. | [`slice-m6-up-down`](../done/slice-m6-up-down.md) |
-| M7 `u-boot generate` | In progress | `generate changelog`/`readme`/`env-example`/`devcontainer` (`LH-FA-GEN-001..005`). T1 ✅ (`67fc181`): GenerateUseCase-Port + GenerateService-Skeleton mit 4-Wege-Dispatch zu Stub-Handlers, `domain.Artifact`-Enum, drei neue Sentinels (`ErrArtifactUnknown`/`ErrGenerateManualConflict`/`ErrGenerateFileSystem`). | [`slice-m7-generate`](slice-m7-generate.md) |
+| M7 `u-boot generate` | In progress | `generate changelog`/`readme`/`env-example`/`devcontainer` (`LH-FA-GEN-001..005`). T1 ✅ (`67fc181`): GenerateUseCase-Port + GenerateService-Skeleton mit 4-Wege-Dispatch zu Stub-Handlers, `domain.Artifact`-Enum, drei neue Sentinels. T2 ✅ (`3c5de48`): `generate env-example`-Handler — 4-State-Maschine (absent/present-with-block/present-no-block/malformed), Idempotenz-Pin (NoOp + Zero-Write-Counter), Add-on-Block-Erhaltung via `managedblock.Replace`. Stub-Pin reduziert auf 3. | [`slice-m7-generate`](slice-m7-generate.md) |
 | M8 `u-boot config` | Open | `config get`/`set`/Anzeigen (`LH-FA-CONF-001..005`), Schema-Validierung | offen |
 | MVP-Closure | Open | Devcontainer-Mindestumfang (`LH-FA-DEV-001..005`), MVP-Acceptance-Flows (`LH-AK-001..002`, `LH-AK-005..007`) | offen |
 | V1 Keycloak / OTel | Open | `LH-FA-ADD-003`, `LH-FA-ADD-004`, `LH-AK-003`, `LH-AK-004` | offen |
@@ -57,11 +57,13 @@ Disziplin-Verstoß.
 3. **M6-docker-int**: **Sub-T1..T4 ✅** + **erste Stabilisierungs-PR (#1) ohne Merge geschlossen 2026-05-30** wegen zweier Befunde: (a) `TestE2E_LHAK002_PostgresAcceptanceFlow` war deterministisch rot (LH-FA-INIT-006-Regex-Reject bei `t.TempDir()`-Counter-Leaf) — gefixt in `aa3a45c`; (b) Audit-Heuristik prüfte nur workflow-level `conclusion`, das `continue-on-error: true` immer auf `success` mappt — gehärtet in `41cab1b` (Job-level-Pflicht in Audit-Block + Evidence-Template auf `job_conclusion=success`). Neuer 3-Lauf-Zyklus läuft: **Lauf #1/3 ✅** (`41cab1b`, job_conclusion=success). Lauf #2/3 und #3/3 folgen mit den nächsten Pushes auf `main`.
 4. **Aktive Phase: M7 generate** (`LH-FA-GEN-001..005`). Slice-Plan
    in `in-progress/` ([`slice-m7-generate.md`](slice-m7-generate.md)):
-   6 Tranchen — T1 ✅ (`67fc181`) Port+Skeleton, T2 ⬜ env-example,
-   T3 ⬜ readme, T4 ⬜ changelog (LH-AK-007), T5 ⬜ devcontainer
-   (LH-FA-DEV-001/004/005 + LH-AK-005), T6 ⬜ CLI+Doku. Reuse von
-   `managedblock` (3 Marker-Stile decken 4 Datei-Mappings) und
-   `actionReplaceBlock` aus M3/M5; keine neuen Driven-Ports nötig.
+   6 Tranchen — T1 ✅ (`67fc181`) Port+Skeleton, T2 ✅ (`3c5de48`)
+   env-example mit 4-State-Maschine und Idempotenz-Pin (NoOp +
+   Zero-Write-Counter), T3 ⬜ readme, T4 ⬜ changelog (LH-AK-007),
+   T5 ⬜ devcontainer (LH-FA-DEV-001/004/005 + LH-AK-005), T6 ⬜
+   CLI+Doku. Reuse von `managedblock` (3 Marker-Stile decken 4
+   Datei-Mappings) und `actionReplaceBlock` aus M3/M5; keine neuen
+   Driven-Ports nötig.
 
 ## Lifecycle-Hinweis
 
