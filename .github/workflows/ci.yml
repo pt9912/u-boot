@@ -61,3 +61,37 @@ jobs:
 
       - name: Run make govulncheck
         run: make govulncheck
+
+  image-scan:
+    name: image-scan (trivy HIGH+CRITICAL)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      DOCKER_BUILDKIT: '1'
+    # Dritter PR-blockierender Job (slice-v1-release-pipeline T3):
+    # baut das Runtime-Image und scannt es mit Trivy. Lebenszyklus
+    # bewusst identisch zu `gates`/`security-gates` — gleicher
+    # Trigger, gleiche Branch-Protection-Aufnahme. Eigener Workflow
+    # wäre ein zweiter Lebenszyklus für ein Defense-in-Depth-Tool,
+    # das ohnehin auf dem `make build`-Artefakt aufsetzt.
+    #
+    # Default-Severity-Schwelle gemäß slice-AC: HIGH und CRITICAL
+    # brechen den Build. Findings ohne verfügbaren Fix werden
+    # bewusst nicht ignoriert; Auswertung pro Finding statt
+    # Sammel-Carveout.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Build runtime image
+        run: make build
+
+      - name: Trivy scan (image)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: 'u-boot:latest'
+          severity: 'HIGH,CRITICAL'
+          exit-code: '1'
+          format: 'table'
