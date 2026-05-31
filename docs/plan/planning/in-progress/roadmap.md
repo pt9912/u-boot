@@ -174,7 +174,7 @@ Erledigt im V1-vorgezogenen Pfad:
   verbindlich aufgeführt.
   Siehe [`done/slice-later-http-driving-adapter.md`](../done/slice-later-http-driving-adapter.md).
 - ~~`slice-v1-release-cut-v0.1.0`~~: **Done** (T1 `056e4c6`,
-  T2 `f176e95`, T3 dieser Commit) — Version-Verankerung im
+  T2 `f176e95`, T3 `4fc93a9`) — Version-Verankerung im
   Build-Pfad (Dockerfile + Makefile + publish.yml) plus
   `CHANGELOG.md`-Bootstrap. T4 Tag-Push bleibt Nutzer-Aktion.
   Siehe [`done/slice-v1-release-cut-v0.1.0.md`](../done/slice-v1-release-cut-v0.1.0.md).

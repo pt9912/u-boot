@@ -1,6 +1,6 @@
 # Slice V1: Release-Cut `v0.1.0`
 
-> **Status:** Done (T1 `056e4c6`, T2 `f176e95`, T3 dieser Commit;
+> **Status:** Done (T1 `056e4c6`, T2 `f176e95`, T3 `4fc93a9`;
 > T4 Tag-Push bleibt Nutzer-Aktion).
 
 ## Auslöser
@@ -63,8 +63,8 @@ nicht Auto-Trigger.
 | - | ------ | ------ |
 | T1 | `056e4c6` | Dockerfile `ARG UBOOT_VERSION` (build + runtime stage), `-X main.version=...` in go build, `org.opencontainers.image.version`-Label; Makefile `VERSION ?= 0.1.0-dev` + `--build-arg UBOOT_VERSION=$(VERSION)`; publish.yml reicht `VERSION` an `make build` durch und pinnt das image.version-Label + live `--version`-Smoke gegen die Tag-VERSION. |
 | T2 | `f176e95` | `CHANGELOG.md` im Repo-Root angelegt, vier Sektionen für `0.1.0` (Added Subcommands / Added CI+release infra / Added Architecture & docs / Known limitations + Setup). |
-| T3 | dieser Commit | Slice-Plan + carveouts/roadmap + READMEs-Sync. |
-| T4 | — | **Nutzer-Aktion:** (a) 33+ lokale Commits auf `origin/main` pushen, (b) Branch-Protection-Required-Status-Checks im GitHub-UI aktivieren gemäß `docs/user/branch-protection.md` (drei verbose `name:`-Felder), (c) ersten grünen CI-Lauf auf `main` abwarten, (d) `git tag v0.1.0 && git push origin v0.1.0` → `publish.yml` triggert GHCR-Image-Push. |
+| T3 | `4fc93a9` | Slice-Plan (diese Datei) + Roadmap-Sync (`Nächste Schritte` Punkt 1 + V1-Phase-Erledigt-Liste). Bewusst keine carveouts.md- und keine READMEs-Änderung (Release-Cut ist keine Carveout-Auflösung, Status-Tabellen-Counts ändern sich nicht). |
+| T4 | — | **Nutzer-Aktion:** (a) Wenn der Tag-Push an einem anderen Tag als 2026-05-31 erfolgt, `## [0.1.0] - <Datum>` in `CHANGELOG.md` Z14 vor dem Push aktualisieren. (b) 33+ lokale Commits auf `origin/main` pushen. (c) Branch-Protection-Required-Status-Checks im GitHub-UI aktivieren gemäß `docs/user/branch-protection.md` (drei verbose `name:`-Felder). (d) Ersten grünen CI-Lauf auf `main` abwarten. (e) `git tag v0.1.0 && git push origin v0.1.0` → `publish.yml` triggert GHCR-Image-Push mit OCI-Label- und Live-`--version`-Verify gegen die Tag-VERSION. |
 
 ## Out of Scope
 
