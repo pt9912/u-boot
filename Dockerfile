@@ -61,7 +61,13 @@ COPY . .
 RUN CGO_ENABLED=0 go build -o /tmp/u-boot ./cmd/uboot
 
 # ---- lint ------------------------------------------------------------------
-FROM golangci/golangci-lint:${GOLANGCI_LINT_VERSION}-alpine AS lint
+# Use the Debian-based golangci-lint image (no `-alpine` suffix). u-boot
+# itself ships with CGO_ENABLED=0 / static linking so musl-libc never
+# touches the runtime; the lint tool also runs CGO=0, so the threading
+# characteristic is moot — but standardising on a non-musl image
+# defense-in-depth keeps the entire build-toolchain consistent (no
+# musl-mmap-contention caveats to explain to contributors).
+FROM golangci/golangci-lint:${GOLANGCI_LINT_VERSION} AS lint
 
 WORKDIR /src
 COPY --from=deps /go/pkg/mod /go/pkg/mod
