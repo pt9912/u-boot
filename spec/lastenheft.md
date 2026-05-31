@@ -2683,7 +2683,7 @@ Nach dem MVP können ergänzt werden:
 | LH-MVP-002         | Kann nach dem MVP folgen       | -                                  | -                                  | -               |
 | LH-OPEN-001        | Implementierungssprache (Go, entschieden 2026-05-21) | - | -                          | -               |
 | LH-OPEN-002        | Paketierung (GHCR entschieden 2026-05-31 via ADR-0007; Restwege vertagt/verworfen) | -                                  | -                                  | -               |
-| LH-OPEN-003        | Plugin-System                  | -                                  | -                                  | -               |
+| LH-OPEN-003        | Plugin-System (statisch entschieden 2026-05-31 via ADR-0008; kein Plugin-Loader) | -                                  | -                                  | -               |
 | LH-OPEN-004        | Template-Format                | -                                  | -                                  | -               |
 
 ---
@@ -2716,9 +2716,13 @@ vertagt/verworfen. Formell offen, bis alle Restwege entschieden sind.
 
 ---
 
-### LH-OPEN-003 – Plugin-System
+### LH-OPEN-003 – Plugin-System (entschieden)
 
-Es ist zu klären, ob Add-ons langfristig fest eingebaut oder als Plugins nachladbar sein sollen.
+Status: entschieden am 2026-05-31.
+Entscheidung: **statisch eingebaute Add-ons** (kein Plugin-Loader).
+Begründung und Konsequenzen: siehe [ADR-0008](../docs/plan/adr/0008-plugin-system-statisch.md) (`LH-FA-PROJDOCS-002`).
+
+Re-Evaluation-Trigger (vier konkrete Auslöser, bei denen ein neuer `slice-v2-plugin-system-implementation`-Plan eröffnet wird) sind in ADR-0008 §Folgepunkte verbindlich aufgeführt.
 
 ---
 
