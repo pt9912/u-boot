@@ -13,8 +13,10 @@ Accepted
 u-boot ist ein CLI-Tool, das eine wachsende Zahl externer Systeme
 orchestriert: Docker Engine (`docker`/`docker compose`), Dateisystem
 (Projektstruktur, Templates, Backups), YAML-/JSON-Codecs, Git und
-perspektivisch externe Devcontainer-Feature-Quellen, Template-Registries
-und Plugins (`LH-OPEN-003`).
+perspektivisch externe Devcontainer-Feature-Quellen sowie
+Template-Registries. (Ein Plugin-System wurde mit
+[ADR-0008](0008-plugin-system-statisch.md) am 2026-05-31
+ausgeschlossen — Add-on-System bleibt statisch.)
 
 Ohne klare Schichten droht der Standard-Drift einer CLI:
 
@@ -93,8 +95,14 @@ Positiv:
   (CLI) und wen das Application nach außen ruft (Docker, FS, YAML).
 - **CI-blockierte Architektur-Regeln** verhindern Drift ab Tag 1, ohne
   manuelle Review-Disziplin zu erzwingen.
-- **Plugin-System** (`LH-OPEN-003`) lässt sich später als zusätzlicher
-  `driven`-Port (`PluginRegistry`) sauber integrieren.
+- ~~**Plugin-System** (`LH-OPEN-003`) lässt sich später als zusätzlicher
+  `driven`-Port (`PluginRegistry`) sauber integrieren.~~
+  **Überholt:** mit [ADR-0008](0008-plugin-system-statisch.md) am
+  2026-05-31 entschieden, dass das Add-on-System statisch bleibt
+  und kein `PluginRegistry`-Driven-Port eingeführt wird; die
+  Re-Evaluation-Trigger sind in ADR-0008 §Folgepunkte
+  dokumentiert. ADR-0002 wird durch ADR-0008 in diesem Punkt
+  überschrieben (`LH-FA-PROJDOCS-002`).
 
 Negativ / Trade-offs:
 

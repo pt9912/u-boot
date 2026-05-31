@@ -76,7 +76,7 @@ Konkrete Setzungen:
   Eine Engine im Projekt, kein zweiter Stack zum Lernen.
 - **Metadaten-Schema (`template.yaml` v1):**
   ```yaml
-  apiVersion: u-boot.dev/template/v1
+  apiVersion: github.com/pt9912/u-boot/template/v1
   name: micronaut
   description: "Micronaut starter project (Java, Gradle)."
   version: 1.0.0
@@ -101,8 +101,12 @@ Konkrete Setzungen:
   ./mein-template` löst gegen das Dateisystem statt `embed.FS`
   auf. Same Schema, same Engine.
 - **Pfad-Eskalation verhindert:** beim Rendern werden absolute
-  Pfade und `..`-Sequenzen in Template-Datei-Listings über den
-  bestehenden `domain.UserPath`-Validator abgewiesen.
+  Pfade und `..`-Sequenzen in Template-Datei-Listings strikt
+  abgewiesen. Der konkrete Validator wird im
+  `slice-v1-template-init` als `domain.TemplatePath` (analog zum
+  bestehenden `domain.ConfigPath`-Pattern aus M8) neu eingeführt,
+  weil es heute keinen passenden Domain-Path-Validator gibt; die
+  ADR-Setzung ist der Vertrag, dass der Slice ihn liefert.
 - **Keine Pre-/Post-Hooks im Template** — kein Code-Eval-Pfad,
   also kein `LH-NFA-SEC-004`-Risiko. Falls später Setup-Skripte
   gewünscht werden, wären sie ein expliziter Slice mit eigenem

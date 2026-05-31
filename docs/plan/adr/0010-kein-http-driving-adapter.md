@@ -30,14 +30,18 @@ Schicht — der HTTP-Adapter wäre eine reine Adapter-Ergänzung
 unter `internal/adapter/driving/http/`. Trotzdem gilt: jeder
 Adapter erhöht die Code-/Test-Surface dauerhaft.
 
-`LH-NFA-USE-004` (Maschinen-lesbare Ausgabe) deckt bereits den
-naheliegenden Maschinen-Schnittstellen-Bedarf ab: jeder relevante
-Subkommando-Output ist via `--json`/`--dry-run`-Flags
-maschinenlesbar (siehe `LH-FA-CLI-007/008` und das
-`status`-Schema in §3.6). Für die heute absehbaren Use-Cases —
-CI/CD-Pipelines, Editor-Integrationen, Skript-Orchestrierung —
-ist die JSON-CLI-Schnittstelle ausreichend; ein HTTP-Server
-würde keine zusätzlichen Fähigkeiten bringen.
+`LH-NFA-USE-004` (Maschinen-lesbare Ausgabe, Priorität V1) deckt
+den naheliegenden Maschinen-Schnittstellen-Bedarf bereits *auf
+Spec-Ebene* ab: jeder relevante Subkommando-Output ist via
+`--json`/`--dry-run`-Flags maschinenlesbar vorgesehen (Pflicht-
+Schema in `LH-FA-CLI-007` / `LH-FA-CLI-008` und im
+`status`-Feld-Vertrag aus `LH-NFA-USE-004` selbst,
+`spec/lastenheft.md` §1799ff). Die Implementierung ist V1, noch
+nicht ausgeliefert; dieses ADR baut darauf auf, dass die
+JSON-CLI-Spur V1-pünktlich landet. Für die heute absehbaren
+Use-Cases — CI/CD-Pipelines, Editor-Integrationen, Skript-
+Orchestrierung — ist die JSON-CLI-Schnittstelle ausreichend; ein
+HTTP-Server würde keine zusätzlichen Fähigkeiten bringen.
 
 Vergleichbare Tools:
 
@@ -73,10 +77,13 @@ Konkrete Setzungen:
   Adapter geplant" umgeschrieben (analog ADR-0008-Pattern); der
   prospektive Bullet wird durch einen Verweis auf dieses ADR
   ersetzt, nicht stumm gelöscht.
-- **JSON-CLI als kanonische Maschinen-Schnittstelle.** Wer
-  u-boot programmatisch ansprechen möchte, nutzt `subprocess.run`
-  / `os/exec`-Aufrufe mit `--json`-Flag und parst die
-  strukturierte Ausgabe nach dem `LH-FA-CLI-007`-Schema.
+- **JSON-CLI als kanonische Maschinen-Schnittstelle** (sobald
+  V1 ausgeliefert). Wer u-boot programmatisch ansprechen
+  möchte, nutzt `subprocess.run` / `os/exec`-Aufrufe mit
+  `--json`-Flag und parst die strukturierte Ausgabe nach dem
+  `LH-FA-CLI-007`-Schema. Bis dahin steht die CLI nur mit ihrer
+  human-lesbaren Ausgabe; siehe Folgepunkt 2 für den Eskalations-
+  Trigger, falls die V1-Spur slipt.
 - **Re-Evaluation-Trigger explizit dokumentiert** (siehe
   §Folgepunkte). Sobald einer der genannten Trigger eintritt,
   wird ein neuer `slice-v2-http-driving-adapter`-Plan in `open/`
