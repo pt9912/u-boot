@@ -45,7 +45,7 @@ Disziplin-Verstoß.
 | [`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md) | ADR-0004 Folgepunkte Image-Publish + Trivy; `LH-OPEN-002` Paketierung (GHCR-Anteil) | V1 | Done (T1 `0f64938`, T2 `93b703e`, T3 `8212889`, T4 `066917a`, T5 `bc487fc` — Branch-Protection-Teilabschluss 2026-05-27) |
 | [`slice-v1-markdown-link-validator`](../done/slice-v1-markdown-link-validator.md) | Doku-/Link-Drift in `docs/`/`spec/` nicht maschinell geprüft | V1-vorgezogen | Done |
 | [`slice-v1-backup-streaming-copy`](../done/slice-v1-backup-streaming-copy.md) | `LH-FA-INIT-005` Backup heute mit `ReadFile`+`WriteFile`; harter 256-MiB-Cap als MVP-Workaround | V1-vorgezogen | Done |
-| [`slice-v1-plugin-system-entscheidung`](../open/slice-v1-plugin-system-entscheidung.md) | `LH-OPEN-003` Plugin-System offen | V1 | Open |
+| [`slice-v1-plugin-system-entscheidung`](../done/slice-v1-plugin-system-entscheidung.md) | `LH-OPEN-003` Plugin-System offen | V1 | Done (Entscheidung in [ADR-0008](../../adr/0008-plugin-system-statisch.md): statisch) |
 | [`slice-v1-template-format-entscheidung`](../open/slice-v1-template-format-entscheidung.md) | `LH-OPEN-004` Template-Format offen | V1 | Open |
 | [`slice-v1-yaml-parse-error-sentinel`](../done/slice-v1-yaml-parse-error-sentinel.md) | M7-T5-Review-Followup N2: `YAMLCodec`-Port unterscheidet Parse- nicht von IO-Fehlern; Exit-Code-14-vs-10-Klassifikation reißt bei kaputter `compose.yaml` unter `u-boot generate devcontainer` | V1-vorgezogen | Done (`1008326`) |
 | [`slice-v2-revive-custom-rules`](../done/slice-v2-revive-custom-rules.md) | ADR-0003 Folgepunkt revive-Custom-Rules | V2-vorgezogen | Done |
@@ -125,10 +125,8 @@ primären Distributionsweg. Der Tag-Push selbst bleibt Nutzer-Trigger.
 
 ### V1-Phase: nicht release-blockierend, Trigger-getrieben
 
-Zwei offene V1-Slices warten auf konkrete Trigger:
+Ein offener V1-Slice wartet auf konkreten Trigger:
 
-- [`slice-v1-plugin-system-entscheidung`](../open/slice-v1-plugin-system-entscheidung.md):
-  Trigger erster externer Plugin-Vorschlag.
 - [`slice-v1-template-format-entscheidung`](../open/slice-v1-template-format-entscheidung.md):
   Trigger erster externer Template-Vorschlag.
 
@@ -141,6 +139,11 @@ Erledigt im V1-vorgezogenen Pfad:
   `93b703e`, T3 `8212889`, T4 `066917a`, T5 `bc487fc` — siehe
   [`done/slice-v1-release-pipeline.md`](../done/slice-v1-release-pipeline.md)
   und [ADR-0007](../../adr/0007-distributionswege-ghcr.md)).
+- ~~`slice-v1-plugin-system-entscheidung`~~: **Done** — Entscheidung
+  in [ADR-0008](../../adr/0008-plugin-system-statisch.md): Add-on-
+  System bleibt statisch (keine Plugins). Vier Re-Eval-Trigger in
+  ADR-0008 §Folgepunkte verbindlich aufgeführt.
+  Siehe [`done/slice-v1-plugin-system-entscheidung.md`](../done/slice-v1-plugin-system-entscheidung.md).
 
 Plus die V1-Add-ons (LH-AK-003 Keycloak, LH-AK-004 OTel),
 V1-Generators (`u-boot logs`, `--json`-Output) und die vertagten

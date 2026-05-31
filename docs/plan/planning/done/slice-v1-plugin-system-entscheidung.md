@@ -40,7 +40,13 @@ zwischen mindestens diesen Optionen:
 
 - Auslösende Spec: `LH-OPEN-003`, `spec/architecture.md` §7.
 - Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
-  `LH-OPEN-003`.
+  `LH-OPEN-003` (mit Slice-Closure entfernt).
 - Hängt von: erster Wunsch nach drittem Add-on oder externem Service,
   der nicht zum Kern gehört (vermutlich nach MVP-Closure).
 - Phase: V1, weil das Add-on-System bis MVP-Closure statisch bleibt.
+- **Schließung 2026-05-31:** Entscheidung in
+  [ADR-0008](../../adr/0008-plugin-system-statisch.md) — Option 1
+  (statisch). LH-OPEN-003 in `spec/lastenheft.md` §14 als
+  entschieden markiert; `spec/architecture.md` §7 prospektiver
+  Plugin-Bullet durch Verweis auf ADR-0008 ersetzt. Re-Evaluation-
+  Trigger sind in ADR-0008 §Folgepunkte verbindlich aufgeführt.

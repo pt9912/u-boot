@@ -45,7 +45,7 @@ Mindestens einer von zwei Triggern feuert:
    Exit 14 statt 10 endet und die Diagnose-Erwartung damit reißt.
 2. **Nächste Stelle, die den `YAMLCodec`-Port aus anderem Grund
    anfasst** — z. B. der V1-Plugin-Slice
-   ([`slice-v1-plugin-system-entscheidung.md`](../open/slice-v1-plugin-system-entscheidung.md)),
+   ([`slice-v1-plugin-system-entscheidung.md`](../done/slice-v1-plugin-system-entscheidung.md)),
    wenn er Plugin-Manifeste als YAML lädt und dort eigene
    Klassifikation braucht. Dieser Slice trägt den Sentinel dann
    als Side-Effekt mit und migriert die M7-T5-Stelle im selben PR.

@@ -23,7 +23,7 @@ Accepted
 für V1 statisch geplant. Es gibt heute keinen externen Wunsch nach
 einem vierten, nicht-Kern-Add-on.
 
-Die [`slice-v1-plugin-system-entscheidung`](../planning/open/slice-v1-plugin-system-entscheidung.md)
+Die [`slice-v1-plugin-system-entscheidung`](../planning/done/slice-v1-plugin-system-entscheidung.md)
 nennt drei Optionen:
 
 1. **Statisch eingebaute Add-ons** — neue Services im u-boot-Binary;
@@ -170,5 +170,5 @@ Solange keiner dieser Trigger eintritt, bleibt das Add-on-System
 statisch.
 
 Der carveouts-Eintrag `LH-OPEN-003` wird mit der
-[`slice-v1-plugin-system-entscheidung`](../planning/open/slice-v1-plugin-system-entscheidung.md)-
+[`slice-v1-plugin-system-entscheidung`](../planning/done/slice-v1-plugin-system-entscheidung.md)-
 Closure entfernt.
