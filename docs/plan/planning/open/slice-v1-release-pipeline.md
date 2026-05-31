@@ -159,11 +159,15 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
   importierbarer Repository-Ruleset-Export.
 
 **DoD T4:**
-- [ ] `quality.md` §4 + §6 sind ohne offene Carveout-Sätze.
-- [ ] `branch-protection.md` listet `image-scan`.
-- [ ] READMEs verlinken Branch-Protection.
-- [ ] `make gates` grün.
-- [ ] DoD-Line: `T4 ✅ <commit-hash>`.
+- [x] `quality.md` §4 + §6 sind ohne offene Carveout-Sätze
+  (Trivy-Folgepunkt-Satz und Image-Publish-Folgepunkt-Block durch
+  konkrete Verweise auf publish.yml + image-scan + ADR-0007 ersetzt).
+- [x] `branch-protection.md` listet `image-scan` (Header +
+  Required-Status-Checks + Bezug-Block).
+- [x] READMEs verlinken Branch-Protection (bereits seit
+  MVP-Closure-T1; READMEs-Status-Sektion wird in T5 aktualisiert).
+- [x] `make gates` grün.
+- [x] T4 ✅ `066917a`.
 
 ### T5 — Slice-Closure
 
