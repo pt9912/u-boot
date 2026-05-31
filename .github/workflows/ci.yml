@@ -109,4 +109,9 @@ jobs:
           # `TRIVY_VERSION ?= 0.70.0` muss dem hier matchen,
           # damit `make image-scan` lokal denselben Detector-Code-
           # Pfad nimmt wie der CI-Job (Inner-/Outer-Loop-Parität).
+          #
+          # ACHTUNG Format-Spaltung: hier GitHub-Release-Tag MIT
+          # `v`-Prefix (`v0.70.0`), im Makefile Docker-Hub-Tag OHNE
+          # `v`-Prefix (`0.70.0`). Beim Pin-Bump beide synchron auf
+          # die gleiche Version in der jeweils richtigen Schreibweise.
           trivy-version: 'v0.70.0'

@@ -16,6 +16,14 @@ GO_VERSION              ?= 1.26.3
 GOLANGCI_LINT_VERSION   ?= v2.12.2
 GOVULNCHECK_VERSION     ?= v1.1.4
 PYTHON_VERSION          ?= 3.13-slim
+# Trivy pin policy — TWO formats in play, both must be bumped together:
+#   - Makefile (here):  Docker-Hub-Tag-Konvention OHNE `v`-Prefix
+#                        → `aquasec/trivy:0.70.0`
+#   - ci.yml::image-scan: GitHub-Release-Tag-Konvention MIT `v`-Prefix
+#                        → `trivy-version: 'v0.70.0'` für trivy-action
+# Bei jeder Pin-Hebung beide Stellen synchron heben (gleiche Trivy-
+# Version, unterschiedliche Schreibweisen). Detector-/DB-Parität
+# ist sonst gebrochen (Mini-Review F1 / N2).
 TRIVY_VERSION           ?= 0.70.0
 THRESHOLD               ?= 90
 
