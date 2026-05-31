@@ -2244,9 +2244,10 @@ Pflicht-Komposition:
 
 - Workflow-Datei: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
 - Trigger: `pull_request` und `push` auf den Branch `main`.
-- Zwei Jobs, parallel, beide PR-blockierend (Required-Status-Checks im GitHub-UI nach dem ersten grünen Lauf zu konfigurieren):
-  - `gates` — führt `make gates` aus (lint + test + coverage-gate, `LH-FA-BUILD-005`/`-006`).
-  - `security-gates` — führt `make govulncheck` aus (`LH-FA-BUILD-006`).
+- Drei Jobs, parallel, alle PR-blockierend (Required-Status-Checks im GitHub-UI nach dem ersten grünen Lauf zu konfigurieren — Schritt-für-Schritt in [`docs/user/branch-protection.md`](../docs/user/branch-protection.md); die Required-Status-Check-Liste muss die tatsächlichen Workflow-`name:`-Felder verwenden, nicht die Kurz-Keys):
+  - `gates (lint + test + coverage-gate)` — führt `make gates` aus (lint + test + coverage-gate, `LH-FA-BUILD-005`/`-006`).
+  - `security-gates (govulncheck)` — führt `make govulncheck` aus (`LH-FA-BUILD-006`).
+  - `image-scan (trivy HIGH+CRITICAL)` — führt `make image-scan` aus (Trivy gegen das Runtime-Image, severity `HIGH,CRITICAL`, exit-code `1`); geliefert mit [`slice-v1-release-pipeline`](../docs/plan/planning/done/slice-v1-release-pipeline.md) T3 (`8212889`), Distributionsentscheidung in [ADR-0007](../docs/plan/adr/0007-distributionswege-ghcr.md).
 - Runner: `ubuntu-latest`. Keine Host-Go-Toolchain (`LH-FA-BUILD-007`); der Runner braucht nur das vorinstallierte Docker + BuildKit.
 - Actions sind **SHA-gepinnt** mit Tag-Kommentar (Supply-Chain-Härtung gegen Tag-Move). Pin-Hebung ist Routine; neuer Commit-SHA via `gh api repos/<owner>/<repo>/git/refs/tags/<tag>`.
 - Top-Level `permissions: {}` (alle Tokens entzogen); jeder Job lockert auf das Minimum (Defense-in-Depth).
@@ -2516,7 +2517,7 @@ Der MVP muss enthalten:
 - Doku-Struktur der u-boot-Codebase nach `LH-FA-PROJDOCS-001`, inkl. ADR-Format (`LH-FA-PROJDOCS-002`), Planning-Lifecycle (`LH-FA-PROJDOCS-003`) und Carveout-Disziplin (`LH-FA-PROJDOCS-005`)
 - Architektur-Pattern (hexagonal, driving/driven-Split) nach `LH-FA-ARCH-001..003`, mit Detail-Spezifikation in `spec/architecture.md` und Import-Enforcement via `golangci-lint depguard`
 - SOLID-nahes Lint-Profil nach `LH-QA-004` (5 Default-Linter + 24 SOLID-nahe Linter inkl. `depguard`, 29 Linter gesamt); Konfiguration in `.golangci.yml`, Doku in `docs/user/quality.md` §1.2 / §1.3, Begründung in ADR-0003
-- CI-Pipeline nach `LH-QA-003` (GitHub Actions, `.github/workflows/ci.yml`, Jobs `gates` + `security-gates`, beide PR-blockierend); Begründung in ADR-0004
+- CI-Pipeline nach `LH-QA-003` (GitHub Actions, `.github/workflows/ci.yml`, Jobs `gates` + `security-gates` + `image-scan`, alle drei PR-blockierend); Begründung in ADR-0004 + ADR-0007 (Image-Scan)
 
 ---
 

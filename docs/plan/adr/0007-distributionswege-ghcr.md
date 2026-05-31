@@ -109,8 +109,8 @@ Negativ / Trade-offs:
   ein Breaking Change ansteht.
 - **`LH-OPEN-002` bleibt formal offen,** weil Binary / Homebrew /
   Distro-Pakete weiter aussehen — aber jeweils mit Slice-Plan und
-  Trigger, statt als Plan-Loch. Carveouts-Eintrag wird in T5 des
-  Release-Pipeline-Slice entsprechend reduziert.
+  Trigger, statt als Plan-Loch. Carveouts-Eintrag mit T5 des
+  Release-Pipeline-Slice (`bc487fc`) entsprechend reduziert.
 
 Alternativen (verworfen):
 
@@ -125,14 +125,14 @@ Alternativen (verworfen):
 ## Folgepunkte
 
 - [`slice-v1-release-pipeline`](../planning/done/slice-v1-release-pipeline.md)
-  T2 setzt das hier festgelegte Tag-Schema und die GHCR-Settings im
-  `publish.yml`-Workflow um.
-- `spec/lastenheft.md` §14 `LH-OPEN-002`-Abschnitt wird mit T1
-  dieses Slices auf den Stand „GHCR entschieden, Restwege vertagt"
-  aktualisiert (analog `LH-OPEN-001`-Pattern nach ADR-0001).
+  T2 (`93b703e`) hat das hier festgelegte Tag-Schema und die
+  GHCR-Settings im `publish.yml`-Workflow umgesetzt.
+- `spec/lastenheft.md` §14 `LH-OPEN-002`-Abschnitt mit T1 dieses
+  Slices (`0f64938`) auf den Stand „GHCR entschieden, Restwege
+  vertagt" aktualisiert (analog `LH-OPEN-001`-Pattern nach ADR-0001).
 - `docs/plan/planning/in-progress/carveouts.md` Zeile für
-  `LH-OPEN-002` wird in T5 des Release-Pipeline-Slice auf die
-  verbleibenden Wege (Binary / Homebrew / Distro-Pakete) reduziert.
+  `LH-OPEN-002` mit T5 (`bc487fc`) auf die verbleibenden Wege
+  (Binary / Homebrew / Distro-Pakete) reduziert.
 - Wenn ein vertagter Distributionsweg ausgelöst wird, wird der
   jeweilige `slice-v2-*`-Plan in `open/` neu angelegt und mit dem
   konkreten Trigger versehen.

@@ -57,26 +57,37 @@ Muster:
 - `DOCKER_BUILDKIT=1` als Job-Env (BuildKit-Cache + Multi-Stage-Cache-
   Filter aus `LH-FA-BUILD-005`).
 
-Bewusst **noch nicht** in diesem Slice:
+Bewusst **noch nicht** in diesem Slice (Stand 2026-05-31 mit
+Verweisen auf die Nachfolge-Slices ergänzt):
 
-- Image-Publish-Workflow (`publish.yml` / GHCR) — kommt mit dem
-  Release-Slice (`LH-OPEN-002` Paketierung).
-- Trivy-Image-Scan — Folge-Slice analog `LH-FA-BUILD-006`-Erweiterung.
+- Image-Publish-Workflow (`publish.yml` / GHCR) — geliefert mit
+  [`slice-v1-release-pipeline`](../planning/done/slice-v1-release-pipeline.md)
+  T2 (`93b703e`), Distributionsentscheidung in
+  [ADR-0007](0007-distributionswege-ghcr.md).
+- Trivy-Image-Scan — geliefert mit `slice-v1-release-pipeline` T3
+  (`8212889`) als dritter PR-blockierender CI-Job
+  (`ci.yml::image-scan`).
 - Compose-Stack-Smoke und Adapter-Integrationstests gegen die externe
-  Docker-Engine — separater Slice mit Build-Tag-getriggerten Pfaden
-  (`spec/architecture.md` §5). Der Begriff „Cluster-Smoke" aus
-  `k-deskflight` (Kubernetes-Smoke gegen `kind`) passt für u-boot
-  nicht, weil u-boot Compose-Stacks orchestriert, nicht Kubernetes;
-  der u-boot-Pendant ist die Integrationsstrecke aus
-  [`slice-m6-docker-integrationstests.md`](../planning/done/slice-m6-docker-integrationstests.md).
-- DCO-Bot / Branch Protection — Folgepflicht im GitHub-UI.
+  Docker-Engine — geliefert mit
+  [`slice-m6-docker-integrationstests`](../planning/done/slice-m6-docker-integrationstests.md)
+  als eigenständiger Workflow `.github/workflows/integration.yml`.
+  Der Begriff „Cluster-Smoke" aus `k-deskflight` (Kubernetes-Smoke
+  gegen `kind`) passt für u-boot nicht, weil u-boot Compose-Stacks
+  orchestriert, nicht Kubernetes.
+- DCO-Bot / Branch Protection — Branch-Protection-Checkliste in
+  [`docs/user/branch-protection.md`](../../user/branch-protection.md)
+  publiziert (`slice-v1-release-pipeline` Teilabschluss 2026-05-27);
+  DCO-Bot bleibt Out of Scope ohne eigenen Trigger.
 
 ## Konsequenzen
 
 Positiv:
 
-- **Pflicht-Gates ab Tag 1 enforced**: PRs ohne grünes `gates`/
-  `security-gates` werden nicht gemerged.
+- **Pflicht-Gates ab Tag 1 enforced**: PRs ohne grünes `gates` /
+  `security-gates` / `image-scan` (letzteres seit
+  `slice-v1-release-pipeline` T3) werden nicht gemerged, sobald die
+  Branch-Protection-Required-Status-Checks aktiviert sind
+  (siehe [`docs/user/branch-protection.md`](../../user/branch-protection.md)).
 - **Low maintenance**: zwei Jobs, beide rufen Make-Targets — wenn sich
   die Build-Pipeline ändert (neuer Stage, neuer Aggregator), läuft der
   Workflow weiter ohne YAML-Edit.
@@ -97,8 +108,10 @@ Negativ / Trade-offs:
   (deps-Cache, dann lint/test/coverage). Akzeptabel für den
   Bootstrap-Stand; mit wachsender Codebase ggf. Cache-Strategien
   (BuildKit Remote Cache, GHA Cache Action) ergänzen.
-- **Branch-Protection im UI** ist nicht im Repo versioniert. Wird im
-  README-Setup-Abschnitt einer späteren Iteration dokumentiert.
+- **Branch-Protection im UI** ist nicht im Repo versioniert. Schritt-
+  für-Schritt-Aktivierung dokumentiert in
+  [`docs/user/branch-protection.md`](../../user/branch-protection.md)
+  (`slice-v1-release-pipeline` Teilabschluss 2026-05-27).
 
 Alternativen (verworfen):
 
@@ -116,8 +129,12 @@ Alternativen (verworfen):
   `./internal/...` liegen: Coverage-Schwellwert per
   `make coverage-gate THRESHOLD=…` im Workflow setzen
   (`LH-FA-BUILD-008`).
-- Image-Publish-Workflow in einem eigenen Slice (`LH-OPEN-002`).
-- Trivy-Image-Scan als optionaler dritter Job, sobald das
-  Runtime-Image regelmäßig gebaut wird.
-- Branch-Protection-Konfiguration im README dokumentieren
-  (Folge-Slice oder direkt mit dem ersten PR).
+- ~~Image-Publish-Workflow in einem eigenen Slice (`LH-OPEN-002`)~~
+  — geliefert mit `slice-v1-release-pipeline` T2 (`93b703e`,
+  Distributionsentscheidung in ADR-0007).
+- ~~Trivy-Image-Scan als optionaler dritter Job~~ — geliefert mit
+  `slice-v1-release-pipeline` T3 (`8212889`) als PR-blockierender
+  dritter CI-Job.
+- ~~Branch-Protection-Konfiguration im README dokumentieren~~ —
+  veröffentlicht in `docs/user/branch-protection.md`
+  (`slice-v1-release-pipeline` Teilabschluss 2026-05-27).
