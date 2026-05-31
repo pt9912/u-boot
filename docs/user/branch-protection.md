@@ -23,10 +23,13 @@ ausgeführt sein.
      aktivieren (sinnvoll auch im Solo-Setup für die Zukunft).
 4. **Require status checks to pass before merging:** aktivieren.
    - **Require branches to be up to date before merging:** aktivieren.
-   - **Status checks that are required:** mindestens
-     - `gates` (LH-QA-003)
-     - `security-gates` (LH-QA-003)
-     - `image-scan` (LH-QA-003, geliefert mit
+   - **Status checks that are required:** mindestens — die exakten
+     Display-Namen sind die `name:`-Felder aus `.github/workflows/ci.yml`,
+     nicht die kürzeren `jobs.<key>`-Identifier. Bei einer Hebung der
+     `name:`-Werte muss diese Checkliste mitgezogen werden.
+     - `gates (lint + test + coverage-gate)` (LH-QA-003)
+     - `security-gates (govulncheck)` (LH-QA-003)
+     - `image-scan (trivy HIGH+CRITICAL)` (LH-QA-003, geliefert mit
        [`slice-v1-release-pipeline`](../plan/planning/done/slice-v1-release-pipeline.md)
        T3, siehe
        [ADR-0007](../plan/adr/0007-distributionswege-ghcr.md))
@@ -64,7 +67,9 @@ Wahrheit. Für das Solo-Bootstrap reicht diese Markdown-Checkliste.
 
 ## Bezug
 
-- Auslösende Spec: `LH-QA-003` „alle drei Jobs PR-blockierend",
+- Auslösende Spec: `LH-QA-003` (drei Jobs `gates` / `security-gates` /
+  `image-scan`, alle PR-blockierend; image-scan via
+  `slice-v1-release-pipeline` T3 in den Spec-Pflicht-Block geschrieben);
   `ADR-0004` Folgepunkt „Branch-Protection nicht versioniert".
 - Slice: [`slice-v1-release-pipeline`](../plan/planning/done/slice-v1-release-pipeline.md)
   (Teilabschluss Branch-Protection 2026-05-27; T2 `publish.yml` +

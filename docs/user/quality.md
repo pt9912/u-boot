@@ -262,11 +262,14 @@ CI läuft auf GitHub Actions; drei Workflows in
 Pflichten `ci.yml`:
 
 - **Trigger:** `pull_request` und `push` auf `main`.
-- **Jobs (alle drei PR-blockierend):**
-  - `gates` — `make gates` (lint + test + coverage-gate).
-  - `security-gates` — `make govulncheck`.
-  - `image-scan` — `make build` + `aquasecurity/trivy-action`
-    (`severity: HIGH,CRITICAL`, `exit-code: 1`).
+- **Jobs (alle drei PR-blockierend; Display-Name = Workflow-`name:`-Feld,
+  unten in Klammern, ist die Match-Quelle für Branch-Protection-
+  Required-Status-Checks — nicht der Kurz-Key):**
+  - `gates` (`gates (lint + test + coverage-gate)`) — `make gates`.
+  - `security-gates` (`security-gates (govulncheck)`) — `make govulncheck`.
+  - `image-scan` (`image-scan (trivy HIGH+CRITICAL)`) — `make build`
+    + `aquasecurity/trivy-action` (`severity: HIGH,CRITICAL`,
+    `exit-code: 1`).
 - **Runner:** `ubuntu-latest` mit vorinstalliertem Docker + BuildKit.
 - **Keine Host-Toolchain:** Docker-only (`LH-FA-BUILD-007`); der
   Workflow installiert weder Go noch `golangci-lint` am Runner.
@@ -278,8 +281,10 @@ Pflichten `ci.yml`:
   `packages: write`).
 - **Timeout:** `timeout-minutes: 20` pro Job.
 
-Required-Status-Checks für `gates`, `security-gates` und
-`image-scan` werden im GitHub-UI nach dem ersten grünen Lauf gesetzt
+Required-Status-Checks für die drei verbose `name:`-Felder
+(`gates (lint + test + coverage-gate)`, `security-gates (govulncheck)`,
+`image-scan (trivy HIGH+CRITICAL)`) werden im GitHub-UI nach dem
+ersten grünen Lauf gesetzt
 (Repository → Settings → Branches → Branch protection rules →
 `main`). Schritt-für-Schritt-Anleitung in
 [`docs/user/branch-protection.md`](branch-protection.md).
