@@ -233,16 +233,60 @@ Full layout contract: [`LH-FA-BUILD-009` in
 
 For consumers of `u-boot` (`LH-FA-DIAG-002`):
 
-- Docker Engine ≥ 24.0.0
-- Docker Compose ≥ 2.20.0
+- Docker Engine ≥ 24.0.0 **or** Podman ≥ 5.0 (drop-in via
+  `DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock` and a
+  `docker → podman` symlink — see *Podman drop-in* below).
+- Docker Compose ≥ 2.20.0 **or** `podman compose` (the
+  containers/podman-compose plugin shipped with Podman 5.x).
 - Git
 - optional: VS Code with the Dev Containers extension
 
 For building from source (`LH-FA-BUILD-007`):
 
-- Docker Engine
+- Docker Engine (Podman works as a drop-in but is not exercised
+  in CI today — see ”Podman drop-in“ for the caveats)
 - GNU `make` (the single carveout to `LH-NFA-PORT-002` —
   see [`spec/lastenheft.md`](spec/lastenheft.md) for the rationale)
+
+### Podman drop-in
+
+u-boot is not Podman-aware at the code level — `DockerProbe`
+shells out to a `docker` binary and parses Docker version
+strings. Podman works as a drop-in because:
+
+1. `podman` exposes the same CLI surface u-boot needs
+   (`info`, `version`, `compose up/down/ps`, `build`, `push/pull`).
+2. The v0.1.1 container-detection (`slice-v0.1.1-doctor-container-
+   awareness`) already probes `/run/.containerenv` for Podman in
+   addition to `/.dockerenv` for Docker.
+3. Podman ≥ 4.0 ships a Docker-API-compatible socket; pointing
+   `DOCKER_HOST` at it lets every `docker`-CLI consumer talk to
+   Podman.
+
+Setup (typical Linux user):
+
+```bash
+# Start the rootless Podman API socket.
+systemctl --user enable --now podman.socket
+export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
+
+# Optional: docker→podman symlink for tools that exec("docker").
+sudo ln -sf "$(command -v podman)" /usr/local/bin/docker
+```
+
+Known caveats:
+
+- `doctor` checks `docker version` against the
+  `LH-FA-DIAG-002` minimums (24.0 / 2.20). Podman's version
+  string is parseable but is **its own** version (e.g.
+  `5.3.1`), which today classifies as
+  `Severity: warn — unrecognized version` rather than `ok`.
+  Functionally `up`/`down`/`add` still work.
+- No CI matrix exercises the Podman path; bug reports against
+  Podman are welcome but blocking-priority is Docker. A formal
+  Podman-support slice will land when there is a concrete
+  request — see also the v0.1.1 + ADR-0007 §Folgepunkte
+  trigger pattern.
 
 ## License
 

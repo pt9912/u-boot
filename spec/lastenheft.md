@@ -1062,7 +1062,17 @@ Priorität: MVP
 
 Die Diagnosefunktion muss mindestens prüfen:
 
-- Docker installiert (Mindestversion: 24.0.0 oder neuer)
+- Docker installiert (Mindestversion: 24.0.0 oder neuer) **oder**
+  ein Docker-API-kompatibler Drop-in (z. B. Podman ≥ 4.0 mit
+  aktivem `podman.socket` und `DOCKER_HOST` darauf gezeigt). Die
+  Checks `docker.installed` / `docker.reachable` /
+  `docker.compose.installed` shellen aus zum `docker`-Binary;
+  Drop-ins, die nicht den Docker-Version-Format-Pin
+  (`<major>.<minor>.<patch>`-Bereich 24.0 / 2.20) treffen,
+  werden als `Severity: warn` („unrecognized version") emittiert,
+  ohne den Exit-Code zu eskalieren. Eine formal getestete
+  Podman-Variante folgt in einem eigenen Slice bei konkretem
+  Bedarf — die heutige MVP-Pflicht ist Docker.
 - Docker erreichbar
 - Docker Compose verfügbar (Mindestversion: 2.20.0 oder neuer)
 - Git verfügbar
