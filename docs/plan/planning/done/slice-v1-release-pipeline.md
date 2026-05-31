@@ -189,7 +189,7 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
   und MVP-Bilanz V1-Liste aktualisiert.
 - [x] READMEs (de/en) Status-Section auf neuen Stand.
 - [x] `make gates` grün.
-- [x] T5 ✅ `<wird in mark-T5-done-Commit gefüllt>`.
+- [x] T5 ✅ `bc487fc`.
 
 ## Out of Scope
 
