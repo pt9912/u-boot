@@ -19,18 +19,24 @@ Trigger-Auflösung.
 ## Aufhebungsbedingung
 
 u-boot wird zusätzlich zum GHCR-Image als statisch-gelinktes
-Binary für Linux/macOS (mind. amd64 + arm64) distribuiert. Der
-Distributionsweg ist konkret entschieden — entweder GitHub-
-Releases-Asset (am einfachsten, ohne weitere Infrastruktur) oder
-ein dedizierter Apt-/Yum-Mirror (falls T2 aus
+Binary für Linux, macOS und Windows (jeweils amd64 + arm64,
+sechs Plattformen gesamt) distribuiert. Der Distributionsweg ist
+konkret entschieden — entweder GitHub-Releases-Asset (am
+einfachsten, ohne weitere Infrastruktur) oder ein dedizierter
+Apt-/Yum-Mirror (falls T2 aus
 `slice-v0.1.1-doctor-container-awareness` weitere Trigger zieht).
+Windows ist mit dabei, weil das u-boot-Binary nur `os.Exec` und
+Filesystem-IO macht (kein Linux-Syscall); die
+LH-NFA-PORT-002-Permanent-Carveout-Zeile betrifft den Build auf
+Windows (`make` fehlt), nicht das Ausführen einer fertigen `.exe`.
 
 ## Akzeptanzkriterien
 
 - `.github/workflows/publish.yml` (oder Schwester-Workflow)
   bildet pro Tag `v*` zusätzlich zur GHCR-Image-Pipeline auch
-  Linux-amd64-, Linux-arm64- und macOS-amd64-/arm64-Binaries
-  und hängt sie als Release-Assets an den GitHub-Release.
+  Binaries für sechs Plattformen (Linux/macOS/Windows ×
+  amd64/arm64) und hängt sie als Release-Assets an den
+  GitHub-Release.
 - README.{md,de.md} Quickstart bekommt einen „Install" -Block
   mit `curl … | sh`-/`wget`-Beispiel pro Plattform vor dem
   `docker run`-Block.

@@ -120,13 +120,14 @@ run: build ## Smoke test: run `u-boot --help` from the built image.
 # build (LH-FA-BUILD-007): everything runs inside the pinned
 # golang:$(GO_VERSION) container, no host Go toolchain required.
 BIN_DIR    ?= bin
-PLATFORMS  := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64
+PLATFORMS  := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64
 
 build-binaries: ## Cross-compile u-boot binaries for all release platforms.
 	@mkdir -p $(BIN_DIR)
 	@for p in $(PLATFORMS); do \
 	    os=$${p%/*}; arch=$${p#*/}; \
-	    out=$(BIN_DIR)/u-boot-$$os-$$arch; \
+	    ext=""; [ "$$os" = "windows" ] && ext=".exe"; \
+	    out=$(BIN_DIR)/u-boot-$$os-$$arch$$ext; \
 	    echo "==> $$out (UBOOT_VERSION=$(VERSION))"; \
 	    docker run --rm \
 	        -v "$(CURDIR)":/src -w /src \
