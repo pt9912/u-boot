@@ -55,7 +55,7 @@ Verbindliche Make-Targets (`LH-FA-BUILD-005`/`-006`):
 ```bash
 make lint            # nur statische Analyse
 make gates           # lint + test + coverage-gate
-make ci              # gates + govulncheck
+make ci              # gates + govulncheck + image-scan
 ```
 
 ### 1.1 (reserviert)
@@ -215,7 +215,8 @@ make coverage-gate
 
 ```bash
 make govulncheck     # Go-Modul-CVEs gegen die installierten Versionen
-make ci              # gates + govulncheck
+make image-scan      # Trivy gegen das Runtime-Image (HIGH/CRITICAL fail)
+make ci              # gates + govulncheck + image-scan
 ```
 
 Trivy-Image-Scan ist seit
@@ -223,7 +224,10 @@ Trivy-Image-Scan ist seit
 T3 als dritter PR-blockierender CI-Job aktiv
 (`.github/workflows/ci.yml` Job `image-scan`,
 `aquasecurity/trivy-action` mit `severity: HIGH,CRITICAL`,
-`exit-code: 1`). SBOM-Erzeugung (`LH-FA-BUILD-006` optional) folgt
+`exit-code: 1`). Lokale Reproduktion: `make image-scan`
+(baut das Runtime-Image und scannt es mit dem offiziellen
+`aquasec/trivy`-Container; gleiches Severity-Profil wie der
+CI-Job). SBOM-Erzeugung (`LH-FA-BUILD-006` optional) folgt
 bei konkretem Bedarf in einem eigenen Slice.
 
 ---

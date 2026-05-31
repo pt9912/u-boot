@@ -143,7 +143,7 @@ make lint            # golangci-lint
 make test            # go test ./...
 make coverage-gate   # coverage gate (bootstrap-aware, LH-FA-BUILD-008)
 make gates           # lint + test + coverage-gate
-make ci              # gates + govulncheck
+make ci              # gates + govulncheck + image-scan
 make fullbuild       # ci + build (full closure)
 ```
 

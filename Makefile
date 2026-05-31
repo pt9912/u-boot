@@ -8,7 +8,7 @@
 #
 # Quality gates (LH-FA-BUILD-006):
 #   make gates       — inner-loop mandatory gates (lint + test + coverage-gate).
-#   make ci          — gates plus govulncheck.
+#   make ci          — gates plus govulncheck plus image-scan (mirrors ci.yml).
 #   make fullbuild   — ci plus build (runtime image).
 
 IMAGE                   ?= u-boot
@@ -16,6 +16,7 @@ GO_VERSION              ?= 1.26.3
 GOLANGCI_LINT_VERSION   ?= v2.12.2
 GOVULNCHECK_VERSION     ?= v1.1.4
 PYTHON_VERSION          ?= 3.13-slim
+TRIVY_VERSION           ?= 0.58.1
 THRESHOLD               ?= 90
 
 # `--progress=plain` gives full, line-by-line BuildKit logs that survive
@@ -104,6 +105,19 @@ govulncheck: ## Run govulncheck against the project (LH-FA-BUILD-006).
 	    golang:$(GO_VERSION) \
 	    sh -c "go install golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION) && govulncheck ./..."
 
+# image-scan reproduces the third PR-blocking ci.yml job locally.
+# Builds the runtime image, then runs Trivy against it inside an
+# ephemeral container; HIGH/CRITICAL findings fail the build
+# (slice-v1-release-pipeline T3 / ADR-0007). Mounts the host Docker
+# socket so Trivy can resolve the just-built local tag.
+image-scan: build ## Trivy scan of the runtime image (LH-QA-003 third gate).
+	docker run --rm \
+	    -v /var/run/docker.sock:/var/run/docker.sock \
+	    aquasec/trivy:$(TRIVY_VERSION) image \
+	    --severity HIGH,CRITICAL --exit-code 1 \
+	    --no-progress \
+	    $(IMAGE):latest
+
 # verify-depguard proves each of the eight LH-FA-ARCH-003 layer rules
 # fires on a real forbidden import. Manual / on-demand: not part of
 # `gates` because each iteration runs `make lint`, so a full pass takes
@@ -128,8 +142,8 @@ docs-check: ## Validate relative markdown links in docs/, spec/, README*.
 gates: lint test coverage-gate docs-check ## Inner-loop mandatory gates.
 	@echo "[gates] lint + test + coverage-gate + docs-check green"
 
-ci: gates govulncheck ## Gates plus govulncheck.
-	@echo "[ci] gates + govulncheck green"
+ci: gates govulncheck image-scan ## Gates plus govulncheck plus image-scan (mirrors ci.yml).
+	@echo "[ci] gates + govulncheck + image-scan green"
 
 fullbuild: ci build ## CI plus runtime image (full closure).
 	@echo "[fullbuild] ci + runtime image green"
