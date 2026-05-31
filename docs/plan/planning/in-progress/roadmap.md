@@ -60,11 +60,16 @@ trigger- oder nutzer-getriebene V1- und Later-Folgen:
 
 1. **Erster Release-Tag `v0.1.0`** — Pipeline liegt bereit
    ([`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md)
-   + [ADR-0007](../../adr/0007-distributionswege-ghcr.md)); der
-   Tag-Push selbst bleibt Nutzer-Trigger. Vor dem Tag muss die
-   Branch-Protection-Required-Status-Check-Liste im GitHub-UI
-   aktiviert sein (siehe
-   [`docs/user/branch-protection.md`](../../../user/branch-protection.md)).
+   + [ADR-0007](../../adr/0007-distributionswege-ghcr.md));
+   Release-Cut-Slice
+   [`slice-v1-release-cut-v0.1.0`](../done/slice-v1-release-cut-v0.1.0.md)
+   hat T1 Version-Verankerung (`056e4c6`) + T2 CHANGELOG.md
+   (`f176e95`) geliefert. T4 bleibt **Nutzer-Aktion**: Push der
+   lokalen Commits, einmalige Branch-Protection-UI-Aktivierung
+   nach
+   [`docs/user/branch-protection.md`](../../../user/branch-protection.md),
+   erster grüner CI-Lauf auf `main`, dann
+   `git tag v0.1.0 && git push origin v0.1.0`.
 2. **V1-Add-ons** — Keycloak (`LH-FA-ADD-003` / `LH-AK-003`) und
    OpenTelemetry (`LH-FA-ADD-004` / `LH-AK-004`); jeweils
    eigener Slice-Plan bei Auslösung.
@@ -168,6 +173,11 @@ Erledigt im V1-vorgezogenen Pfad:
   `--dry-run`-Flags). Zwei Re-Eval-Trigger in ADR-0010 §Folgepunkte
   verbindlich aufgeführt.
   Siehe [`done/slice-later-http-driving-adapter.md`](../done/slice-later-http-driving-adapter.md).
+- ~~`slice-v1-release-cut-v0.1.0`~~: **Done** (T1 `056e4c6`,
+  T2 `f176e95`, T3 dieser Commit) — Version-Verankerung im
+  Build-Pfad (Dockerfile + Makefile + publish.yml) plus
+  `CHANGELOG.md`-Bootstrap. T4 Tag-Push bleibt Nutzer-Aktion.
+  Siehe [`done/slice-v1-release-cut-v0.1.0.md`](../done/slice-v1-release-cut-v0.1.0.md).
 
 Die noch offenen V1- und Later-Folgen (Add-ons, Templates-
 Implementation, Generators, Distributions-Restwege, Migration,
