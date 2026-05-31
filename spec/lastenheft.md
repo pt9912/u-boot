@@ -2681,7 +2681,7 @@ Nach dem MVP können ergänzt werden:
 | LH-MVP-001         | Muss im MVP enthalten sein     | MVP                               | -                                  | -               |
 | LH-MVP-002         | Kann nach dem MVP folgen       | -                                  | -                                  | -               |
 | LH-OPEN-001        | Implementierungssprache (Go, entschieden 2026-05-21) | - | -                          | -               |
-| LH-OPEN-002        | Paketierung                   | -                                  | -                                  | -               |
+| LH-OPEN-002        | Paketierung (GHCR entschieden 2026-05-31 via ADR-0007; Restwege vertagt/verworfen) | -                                  | -                                  | -               |
 | LH-OPEN-003        | Plugin-System                  | -                                  | -                                  | -               |
 | LH-OPEN-004        | Template-Format                | -                                  | -                                  | -               |
 
@@ -2701,16 +2701,17 @@ Mindest-Toolchain: Go 1.26 oder neuer (`go 1.26.0` in `go.mod`, analog Referenzp
 
 ### LH-OPEN-002 – Paketierung
 
-Die spätere Verteilung ist noch festzulegen.
+Status: **GHCR entschieden** am 2026-05-31 (ADR-0007), Restwege
+vertagt/verworfen. Formell offen, bis alle Restwege entschieden sind.
 
-Mögliche Optionen:
-
-- einzelnes Binary
-- Container Image
-- npm package
-- pip package
-- Homebrew
-- Debian/RPM-Paket
+| Option | Status | Verweis |
+| ------ | ------ | ------- |
+| Container Image (GHCR `ghcr.io/pt9912/u-boot`) | **Gewählt** | [ADR-0007](../docs/plan/adr/0007-distributionswege-ghcr.md), Umsetzung in [`slice-v1-release-pipeline`](../docs/plan/planning/open/slice-v1-release-pipeline.md) T2/T3 |
+| Einzelnes Binary | Vertagt mit Trigger | `slice-v2-binary-distribution.md` (bei Auslösung) |
+| Homebrew | Vertagt mit Trigger | `slice-v2-homebrew-formula.md` (bei Auslösung) |
+| Debian/RPM | Vertagt mit Trigger | `slice-v2-distro-pakete.md` (bei Auslösung) |
+| npm package | Verworfen | ADR-0007 §Entscheidung — Sprach-Ökosystem-Mismatch |
+| pip package | Verworfen | ADR-0007 §Entscheidung — Sprach-Ökosystem-Mismatch |
 
 ---
 

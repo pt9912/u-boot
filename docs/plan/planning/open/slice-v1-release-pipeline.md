@@ -92,6 +92,93 @@ Release-Teile bleiben als offene Restarbeit in diesem Slice.
     Distributionswege entschieden sind; andernfalls den Carveout auf
     die verbleibenden Wege reduzieren.
 
+## Tranchen-Schnitt
+
+Fünf Tranchen, in Reihenfolge implementierbar. Stand 2026-05-31
+ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
+
+### T1 — ADR-0007 Distributionswege + `LH-OPEN-002`-Update
+
+- `docs/plan/adr/0007-distributionswege-ghcr.md` neu: GHCR primär;
+  Binary / Homebrew / Distro-Pakete vertagt mit Trigger-Slices;
+  npm / pip verworfen.
+- `spec/lastenheft.md` §14 `LH-OPEN-002`-Abschnitt + Übersichts-
+  tabellen-Zeile auf den Stand „GHCR entschieden, Restwege
+  vertagt/verworfen" gehoben.
+
+**DoD T1:**
+- [ ] ADR-0007 angelegt; Mindest-Abschnitte erfüllt (`adr/README.md`).
+- [ ] `LH-OPEN-002` §14 enthält Entscheidungs-Tabelle + ADR-Verweis.
+- [ ] `make gates` grün.
+- [ ] DoD-Line: `T1 ✅ <commit-hash>`.
+
+### T2 — `.github/workflows/publish.yml` (GHCR Image-Publish)
+
+- Trigger `push` von Tags `v*`; früher SemVer-Validate-Step lehnt
+  alles ab, was nicht `vMAJOR.MINOR.PATCH(-prerelease)?` ist
+  (Build-Metadaten mit `+` rejecten).
+- Job baut Runtime-Image via `make build`, pushed nach
+  `ghcr.io/pt9912/u-boot:<version>`; `:latest` nur für stable Tags.
+- SHA-pinned `docker/login-action` + `docker/build-push-action`;
+  `permissions: contents: read, packages: write` per-Job.
+- OCI-Labels aus `LH-FA-BUILD-002` im gepushten Image verifizieren.
+
+**DoD T2:**
+- [ ] Workflow-File angelegt; Validate-Step + Push-Step getrennt.
+- [ ] Probe-Lauf (Dry-Run oder Test-Tag) dokumentiert.
+- [ ] `make gates` grün.
+- [ ] DoD-Line: `T2 ✅ <commit-hash>`.
+
+### T3 — Trivy-Image-Scan
+
+- Eigener Workflow `.github/workflows/image-scan.yml` ODER dritter
+  CI-Job in `ci.yml`. Entscheidung in der Tranche begründen.
+- Nach `make build`: `trivy image --severity HIGH,CRITICAL --exit-code 1`.
+- SHA-pinned Action.
+
+**DoD T3:**
+- [ ] Workflow / Job angelegt; Probe-Lauf grün auf `main`.
+- [ ] `make gates` grün.
+- [ ] DoD-Line: `T3 ✅ <commit-hash>`.
+
+### T4 — Doku-Sync
+
+- `docs/user/quality.md` §4 (Trivy-Folgepunkt-Satz aktualisiert) und
+  §6 (Image-Publish-Folgepunkt-Satz aktualisiert, neue Workflows
+  verlinkt).
+- `docs/user/branch-protection.md` Required-Status-Checks um
+  `image-scan` ergänzen.
+- `README.md` + `README.de.md` Setup-Section um Branch-Protection-
+  Verweis prüfen/ergänzen.
+- Optional: `docs/user/branch-protection-ruleset.json` als
+  importierbarer Repository-Ruleset-Export.
+
+**DoD T4:**
+- [ ] `quality.md` §4 + §6 sind ohne offene Carveout-Sätze.
+- [ ] `branch-protection.md` listet `image-scan`.
+- [ ] READMEs verlinken Branch-Protection.
+- [ ] `make gates` grün.
+- [ ] DoD-Line: `T4 ✅ <commit-hash>`.
+
+### T5 — Slice-Closure
+
+- `docs/plan/planning/in-progress/carveouts.md`:
+  - Image-Publish/Trivy-Zeile entfernen.
+  - `LH-OPEN-002`-Zeile auf verbleibende Wege (Binary / Homebrew /
+    Distro-Pakete) reduzieren, mit Verweis auf ADR-0007.
+- Slice-Plan von `open/` nach `done/` verschieben; DoD-Lines auf
+  Commit-Hashes auflösen.
+- `docs/plan/planning/in-progress/roadmap.md`: V1-Liste der Trigger-
+  getriebenen Slices auf den neuen Stand; MVP-Bilanz V1-Phase
+  aktualisieren.
+
+**DoD T5:**
+- [ ] `carveouts.md` entsprechend bereinigt.
+- [ ] Slice-Plan in `done/` mit allen T1..T5 DoD-Lines.
+- [ ] Roadmap-Zeile auf Done; MVP-Bilanz aktualisiert.
+- [ ] `make gates` grün.
+- [ ] DoD-Line: `T5 ✅ <commit-hash>`.
+
 ## Out of Scope
 
 - DCO-Bot-Aktivierung (separater ADR-0004-Folgepunkt; lebt im
