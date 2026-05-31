@@ -2684,7 +2684,7 @@ Nach dem MVP können ergänzt werden:
 | LH-OPEN-001        | Implementierungssprache (Go, entschieden 2026-05-21) | - | -                          | -               |
 | LH-OPEN-002        | Paketierung (GHCR entschieden 2026-05-31 via ADR-0007; Restwege vertagt/verworfen) | -                                  | -                                  | -               |
 | LH-OPEN-003        | Plugin-System (statisch entschieden 2026-05-31 via ADR-0008; kein Plugin-Loader) | -                                  | -                                  | -               |
-| LH-OPEN-004        | Template-Format                | -                                  | -                                  | -               |
+| LH-OPEN-004        | Template-Format (YAML+`text/template` entschieden 2026-05-31 via ADR-0009) | -                                  | -                                  | -               |
 
 ---
 
@@ -2726,16 +2726,26 @@ Re-Evaluation-Trigger (vier konkrete Auslöser, bei denen ein neuer `slice-v2-pl
 
 ---
 
-### LH-OPEN-004 – Template-Format
+### LH-OPEN-004 – Template-Format (entschieden)
 
-Das genaue Format für Templates ist noch festzulegen.
+Status: entschieden am 2026-05-31.
+Entscheidung: **YAML-Metadaten + `text/template`-Files**
+(Option „YAML-Metadaten plus Dateivorlagen" aus der ursprünglichen
+Optionsliste).
+Begründung und Konsequenzen: siehe
+[ADR-0009](../docs/plan/adr/0009-template-format-yaml-files.md)
+(`LH-FA-PROJDOCS-002`).
 
-Mögliche Optionen:
+Konkretisierung der `LH-FA-TPL-*`-Einträge folgt mit den im ADR
+genannten Implementierungs-Slices (`slice-v1-template-list`,
+`slice-v1-template-init`, `slice-later-local-templates`).
 
-- YAML-Metadaten plus Dateivorlagen
-- Cookiecutter-kompatible Templates
-- eigenes Template-System
-- OCI-basierte Template-Pakete
+Vergleich der vier Optionen mit Trade-offs in ADR-0009 §Entscheidung:
+
+- **YAML-Metadaten plus Dateivorlagen** — gewählt.
+- Cookiecutter-kompatible Templates — verworfen (Python-Toolchain + Jinja2-Code-Eval).
+- Eigenes Template-System — verworfen (Pflegeaufwand ohne Mehrwert).
+- OCI-basierte Template-Pakete — verworfen (prospektive Architektur ohne Use-Case-Trigger).
 
 ---
 
