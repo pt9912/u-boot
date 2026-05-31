@@ -1,11 +1,11 @@
 # Branch Protection für `main`
 
-`LH-QA-003` verlangt, dass die CI-Jobs `gates` und `security-gates` für jeden
-Pull-Request **blockierend** sind. Der GitHub-Actions-Workflow allein reicht
-dafür nicht — er muss zusätzlich in den Repository-Settings als
-**Required Status Check** aktiviert werden. Diese Aktivierung lebt im
-GitHub-UI, nicht im Repo-Code; um sie reproduzierbar zu halten, dokumentiert
-diese Datei die Schritte.
+`LH-QA-003` verlangt, dass die CI-Jobs `gates`, `security-gates` und
+`image-scan` für jeden Pull-Request **blockierend** sind. Der
+GitHub-Actions-Workflow allein reicht dafür nicht — er muss zusätzlich
+in den Repository-Settings als **Required Status Check** aktiviert
+werden. Diese Aktivierung lebt im GitHub-UI, nicht im Repo-Code; um
+sie reproduzierbar zu halten, dokumentiert diese Datei die Schritte.
 
 Der zugehörige Carveout (`ADR-0004` Folgepunkt „Branch-Protection nicht
 versioniert") wird mit dem Vorhandensein dieser Checkliste aufgelöst.
@@ -26,8 +26,10 @@ ausgeführt sein.
    - **Status checks that are required:** mindestens
      - `gates` (LH-QA-003)
      - `security-gates` (LH-QA-003)
-     - sobald [`slice-v1-release-pipeline`](../plan/planning/open/slice-v1-release-pipeline.md)
-       den `image-scan`-Job liefert: zusätzlich `image-scan`.
+     - `image-scan` (LH-QA-003, geliefert mit
+       [`slice-v1-release-pipeline`](../plan/planning/open/slice-v1-release-pipeline.md)
+       T3, siehe
+       [ADR-0007](../plan/adr/0007-distributionswege-ghcr.md))
 5. **Require conversation resolution before merging:** aktivieren (Review-
    Kommentare müssen aufgelöst sein, bevor gemerged werden darf).
 6. **Restrict who can push to matching branches:** für Solo-Projekt
@@ -62,9 +64,11 @@ Wahrheit. Für das Solo-Bootstrap reicht diese Markdown-Checkliste.
 
 ## Bezug
 
-- Auslösende Spec: `LH-QA-003` „beide Jobs PR-blockierend",
+- Auslösende Spec: `LH-QA-003` „alle drei Jobs PR-blockierend",
   `ADR-0004` Folgepunkt „Branch-Protection nicht versioniert".
 - Slice: [`slice-v1-release-pipeline`](../plan/planning/open/slice-v1-release-pipeline.md)
-  (Teilabschluss Branch-Protection 2026-05-27; GHCR/Trivy/LH-OPEN-002
-  bleiben offen für den ersten Release).
+  (Teilabschluss Branch-Protection 2026-05-27; T2 `publish.yml` +
+  T3 `image-scan` 2026-05-31; LH-OPEN-002-Restwege bleiben mit
+  Trigger-Slices vertagt — siehe
+  [ADR-0007](../plan/adr/0007-distributionswege-ghcr.md)).
 - Carveout-Inventar: [`carveouts.md`](../plan/planning/in-progress/carveouts.md).

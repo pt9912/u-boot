@@ -218,8 +218,13 @@ make govulncheck     # Go-Modul-CVEs gegen die installierten Versionen
 make ci              # gates + govulncheck
 ```
 
-Trivy-Image-Scan und SBOM-Erzeugung sind nach `LH-FA-BUILD-006` als
-optionale Erweiterungen vorgesehen und folgen mit dem Release-Slice.
+Trivy-Image-Scan ist seit
+[`slice-v1-release-pipeline`](../plan/planning/open/slice-v1-release-pipeline.md)
+T3 als dritter PR-blockierender CI-Job aktiv
+(`.github/workflows/ci.yml` Job `image-scan`,
+`aquasecurity/trivy-action` mit `severity: HIGH,CRITICAL`,
+`exit-code: 1`). SBOM-Erzeugung (`LH-FA-BUILD-006` optional) folgt
+bei konkretem Bedarf in einem eigenen Slice.
 
 ---
 
@@ -236,17 +241,28 @@ ersten Paket pro Schicht greift die jeweilige Regel automatisch.
 
 ## 6. CI-Pipeline (GitHub Actions)
 
-CI läuft auf GitHub Actions; Konfiguration in
-[`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).
-Verbindliche Setzungen aus `LH-QA-003`, Begründung in
-[ADR-0004](../plan/adr/0004-ci-system.md).
+CI läuft auf GitHub Actions; drei Workflows in
+[`.github/workflows/`](../../.github/workflows/):
 
-Pflichten:
+- [`ci.yml`](../../.github/workflows/ci.yml) — Inner-Loop-Gates
+  (`gates`, `security-gates`, `image-scan`), verbindlich aus
+  `LH-QA-003`, Begründung in
+  [ADR-0004](../plan/adr/0004-ci-system.md).
+- [`integration.yml`](../../.github/workflows/integration.yml) —
+  `make test-docker` gegen echten Daemon (slice-m6-docker-
+  integrationstests).
+- [`publish.yml`](../../.github/workflows/publish.yml) — GHCR-
+  Image-Publish auf Tag `v*`, Begründung in
+  [ADR-0007](../plan/adr/0007-distributionswege-ghcr.md).
+
+Pflichten `ci.yml`:
 
 - **Trigger:** `pull_request` und `push` auf `main`.
-- **Jobs (beide PR-blockierend):**
+- **Jobs (alle drei PR-blockierend):**
   - `gates` — `make gates` (lint + test + coverage-gate).
   - `security-gates` — `make govulncheck`.
+  - `image-scan` — `make build` + `aquasecurity/trivy-action`
+    (`severity: HIGH,CRITICAL`, `exit-code: 1`).
 - **Runner:** `ubuntu-latest` mit vorinstalliertem Docker + BuildKit.
 - **Keine Host-Toolchain:** Docker-only (`LH-FA-BUILD-007`); der
   Workflow installiert weder Go noch `golangci-lint` am Runner.
@@ -254,13 +270,12 @@ Pflichten:
   `uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2`.
   Pin-Hebung ist Routine.
 - **Permissions:** Top-Level `permissions: {}`; jeder Job lockert auf
-  das Minimum (typisch `contents: read`).
+  das Minimum (typisch `contents: read`; `publish.yml` zusätzlich
+  `packages: write`).
 - **Timeout:** `timeout-minutes: 20` pro Job.
 
-Required-Status-Checks für `gates` und `security-gates` werden im
-GitHub-UI nach dem ersten grünen Lauf gesetzt (Repository → Settings →
-Branches → Branch protection rules → `main`).
-
-Bewusst noch nicht enthalten (Folge-Slices, ADR-0004 Folgepunkte):
-Image-Publish nach GHCR, Trivy-Image-Scan, Cluster-/Integrations-
-Smoke gegen die echte Docker-Engine.
+Required-Status-Checks für `gates`, `security-gates` und
+`image-scan` werden im GitHub-UI nach dem ersten grünen Lauf gesetzt
+(Repository → Settings → Branches → Branch protection rules →
+`main`). Schritt-für-Schritt-Anleitung in
+[`docs/user/branch-protection.md`](branch-protection.md).
