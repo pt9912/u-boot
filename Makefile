@@ -16,7 +16,7 @@ GO_VERSION              ?= 1.26.3
 GOLANGCI_LINT_VERSION   ?= v2.12.2
 GOVULNCHECK_VERSION     ?= v1.1.4
 PYTHON_VERSION          ?= 3.13-slim
-TRIVY_VERSION           ?= 0.58.1
+TRIVY_VERSION           ?= 0.70.0
 THRESHOLD               ?= 90
 
 # `--progress=plain` gives full, line-by-line BuildKit logs that survive
@@ -40,7 +40,7 @@ DOCKER_BUILD := docker build $(PROGRESS_FLAG) \
 .DEFAULT_GOAL := help
 
 .PHONY: help deps compile lint test test-docker coverage coverage-gate build run clean \
-        gates ci fullbuild govulncheck verify-depguard docs-check
+        gates ci fullbuild govulncheck image-scan verify-depguard docs-check
 
 help: ## Show this help.
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ { printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)

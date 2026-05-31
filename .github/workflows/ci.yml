@@ -1,14 +1,18 @@
 name: ci
 
-# CI-Pipeline gemäß LH-QA-003 / ADR-0004.
+# CI-Pipeline gemäß LH-QA-003 / ADR-0004 / ADR-0007 (image-scan via
+# slice-v1-release-pipeline T3).
 #
-# Zwei parallele Jobs (analog k-deskflight ADR 0012 §2.11):
+# Drei parallele Jobs (analog k-deskflight ADR 0012 §2.11, erweitert):
 #   - gates           : Inner-Loop-Pflichten (lint + test + coverage-gate) — `make gates`.
 #   - security-gates  : govulncheck — `make govulncheck`.
+#   - image-scan      : Trivy HIGH+CRITICAL gegen das Runtime-Image — `make image-scan` lokal.
 #
-# Beide Jobs sind PR-blockierend. Required-Status-Checks werden im
+# Alle drei Jobs sind PR-blockierend. Required-Status-Checks werden im
 # GitHub-UI nach dem ersten grünen Lauf konfiguriert (Settings →
-# Branches → Branch protection rules → `main`).
+# Branches → Branch protection rules → `main`); die exakten Display-
+# Namen sind die verbose `name:`-Felder der Jobs, nicht die kurzen
+# `jobs.<key>`-Identifier (siehe `docs/user/branch-protection.md`).
 #
 # Docker-only-Pfad (LH-FA-BUILD-007): alle Werkzeuge laufen über
 # `docker build --target <stage>`, sodass der CI-Runner keine
@@ -100,3 +104,9 @@ jobs:
           severity: 'HIGH,CRITICAL'
           exit-code: '1'
           format: 'table'
+          # Trivy-Version explizit pinnen statt sich auf den
+          # Action-Default zu verlassen — Makefile-Default
+          # `TRIVY_VERSION ?= 0.70.0` muss dem hier matchen,
+          # damit `make image-scan` lokal denselben Detector-Code-
+          # Pfad nimmt wie der CI-Job (Inner-/Outer-Loop-Parität).
+          trivy-version: 'v0.70.0'
