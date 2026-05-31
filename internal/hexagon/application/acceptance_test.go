@@ -47,7 +47,7 @@ func TestLHAK001_InitFlow_DoctorClean(t *testing.T) {
 	}
 
 	initSvc := application.NewInitProjectService(fs, y, git, nil, nil, nil)
-	doctorSvc := application.NewDoctorService(fs, y, git, docker, nil)
+	doctorSvc := application.NewDoctorService(fs, y, git, docker, nil, nil)
 
 	if _, err := initSvc.Init(context.Background(), driving.InitProjectRequest{
 		BaseDir: testBaseDir,

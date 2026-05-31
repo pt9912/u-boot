@@ -38,12 +38,12 @@ func newDoctorService(t *testing.T) (*application.DoctorService, *fakeFS, *fakeG
 	git := goodGit()
 	docker := goodDockerProbe()
 	logger := &fakeLogger{}
-	return application.NewDoctorService(fs, &fakeYAML{}, git, docker, logger), fs, git, docker, logger
+	return application.NewDoctorService(fs, &fakeYAML{}, git, docker, nil, logger), fs, git, docker, logger
 }
 
 func TestDoctor_RequiresBaseDir(t *testing.T) {
 	t.Parallel()
-	svc := application.NewDoctorService(newFakeFS(), &fakeYAML{}, goodGit(), goodDockerProbe(), nil)
+	svc := application.NewDoctorService(newFakeFS(), &fakeYAML{}, goodGit(), goodDockerProbe(), nil, nil)
 	_, err := svc.Check(context.Background(), driving.DoctorRequest{})
 	if err == nil {
 		t.Fatal("expected error for empty BaseDir, got nil")
@@ -202,7 +202,7 @@ func TestDoctor_Git_ErrorWhenMissing(t *testing.T) {
 	fs := newFakeFS()
 	fs.markDirExists(doctorBaseDir)
 	git := &fakeGit{versionErr: errors.New("exec: \"git\": executable file not found")}
-	svc := application.NewDoctorService(fs, &fakeYAML{}, git, goodDockerProbe(), nil)
+	svc := application.NewDoctorService(fs, &fakeYAML{}, git, goodDockerProbe(), nil, nil)
 
 	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 	if err != nil {
@@ -228,7 +228,7 @@ func TestDoctor_Docker_OKAtOrAboveMinimum(t *testing.T) {
 			fs.markDirExists(doctorBaseDir)
 			docker := goodDockerProbe()
 			docker.version = v
-			svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
+			svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil, nil)
 			resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 			if err != nil {
 				t.Fatalf("Check: %v", err)
@@ -252,7 +252,7 @@ func TestDoctor_Docker_ErrorBelowMinimum(t *testing.T) {
 			fs.markDirExists(doctorBaseDir)
 			docker := goodDockerProbe()
 			docker.version = v
-			svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
+			svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil, nil)
 			resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 			if err != nil {
 				t.Fatalf("Check: %v", err)
@@ -274,7 +274,7 @@ func TestDoctor_Docker_WarnOnUnparseableVersion(t *testing.T) {
 	fs.markDirExists(doctorBaseDir)
 	docker := goodDockerProbe()
 	docker.version = "garbage"
-	svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
+	svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil, nil)
 	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 	if err != nil {
 		t.Fatalf("Check: %v", err)
@@ -291,7 +291,7 @@ func TestDoctor_Docker_ErrorWhenMissing(t *testing.T) {
 	fs.markDirExists(doctorBaseDir)
 	docker := goodDockerProbe()
 	docker.versionErr = errors.New("exec: \"docker\": executable file not found")
-	svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
+	svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil, nil)
 	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 	if err != nil {
 		t.Fatalf("Check: %v", err)
@@ -311,7 +311,7 @@ func TestDoctor_DockerReachable_ErrorOnDaemonDown(t *testing.T) {
 	fs.markDirExists(doctorBaseDir)
 	docker := goodDockerProbe()
 	docker.infoErr = errors.New("Cannot connect to the Docker daemon at unix:///var/run/docker.sock")
-	svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
+	svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil, nil)
 	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 	if err != nil {
 		t.Fatalf("Check: %v", err)
@@ -336,7 +336,7 @@ func TestDoctor_Compose_OKAtOrAboveMinimum(t *testing.T) {
 			fs.markDirExists(doctorBaseDir)
 			docker := goodDockerProbe()
 			docker.composeVersion = v
-			svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
+			svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil, nil)
 			resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 			if err != nil {
 				t.Fatalf("Check: %v", err)
@@ -360,7 +360,7 @@ func TestDoctor_Compose_ErrorBelowMinimum(t *testing.T) {
 			fs.markDirExists(doctorBaseDir)
 			docker := goodDockerProbe()
 			docker.composeVersion = v
-			svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
+			svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil, nil)
 			resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 			if err != nil {
 				t.Fatalf("Check: %v", err)
@@ -373,13 +373,108 @@ func TestDoctor_Compose_ErrorBelowMinimum(t *testing.T) {
 	}
 }
 
+// TestDoctor_HostChecksSkipped_WhenInContainer pins the
+// slice-v0.1.1-doctor-container-awareness T2 behaviour: when the
+// runtime adapter reports InContainer() == true, the four host-
+// prerequisite checks (git.installed, docker.installed,
+// docker.reachable, docker.compose.installed) emit SeverityInfo
+// with a "skipped" message instead of running their normal probe
+// and potentially classifying as SeverityError. The docker /
+// git fakes are configured to FAIL (would emit SeverityError
+// on the host path) — the assertion is that those errors never
+// surface because the check is short-circuited before the probe.
+func TestDoctor_HostChecksSkipped_WhenInContainer(t *testing.T) {
+	t.Parallel()
+	fs := newFakeFS()
+	fs.markDirExists(doctorBaseDir)
+
+	// Both probes configured to fail — would be SeverityError on
+	// the host path. They must not even be invoked when in container.
+	failingGit := &fakeGit{versionErr: errors.New("exec: 'git' not found")}
+	failingDocker := &fakeDockerProbe{
+		versionErr:        errors.New("exec: 'docker' not found"),
+		infoErr:           errors.New("daemon unreachable"),
+		composeVersionErr: errors.New("compose plugin missing"),
+	}
+	runtime := &fakeRuntimeEnv{inContainer: true}
+	svc := application.NewDoctorService(fs, &fakeYAML{}, failingGit, failingDocker, runtime, nil)
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+
+	skipIDs := []string{
+		"git.installed",
+		"docker.installed",
+		"docker.reachable",
+		"docker.compose.installed",
+	}
+	for _, id := range skipIDs {
+		d := findDiagnostic(t, resp.Report.Items, id)
+		if d.Severity != domain.SeverityInfo {
+			t.Errorf("%s: Severity = %v, want SeverityInfo", id, d.Severity)
+		}
+		if !strings.Contains(d.Message, "skipped") {
+			t.Errorf("%s: Message %q does not mention 'skipped'", id, d.Message)
+		}
+		if !strings.Contains(d.Hint, "host check skipped") {
+			t.Errorf("%s: Hint %q does not point to host-check rationale", id, d.Hint)
+		}
+	}
+
+	// No host-prerequisite check should have produced SeverityError
+	// despite the probe fakes being set up to fail.
+	for _, item := range resp.Report.Items {
+		if item.Severity != domain.SeverityError {
+			continue
+		}
+		for _, id := range skipIDs {
+			if item.ID == id {
+				t.Errorf("%s emitted SeverityError despite container skip", id)
+			}
+		}
+	}
+
+	// The probes should not have been called at all — assert via the
+	// fake call counters where available.
+	if failingGit.versionCalls != 0 {
+		t.Errorf("git.Version called %d times, want 0 (skipped path)", failingGit.versionCalls)
+	}
+}
+
+// TestDoctor_HostChecksRunNormally_WhenRuntimeNil pins the
+// backward-compatibility contract: a nil runtime parameter
+// preserves the pre-v0.1.1 behaviour (no skip semantics). This
+// matters because every existing test in this file passes nil
+// for runtime and relies on the host-path code running normally.
+func TestDoctor_HostChecksRunNormally_WhenRuntimeNil(t *testing.T) {
+	t.Parallel()
+	fs := newFakeFS()
+	fs.markDirExists(doctorBaseDir)
+	failingGit := &fakeGit{versionErr: errors.New("exec: 'git' not found")}
+	svc := application.NewDoctorService(fs, &fakeYAML{}, failingGit, goodDockerProbe(), nil, nil)
+
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "git.installed")
+	if d.Severity != domain.SeverityError {
+		t.Errorf("git.installed Severity = %v, want SeverityError (nil runtime preserves host path)", d.Severity)
+	}
+	if failingGit.versionCalls == 0 {
+		t.Error("git.Version was not called — nil runtime must not short-circuit the host path")
+	}
+}
+
 func TestDoctor_Compose_ErrorWhenMissing(t *testing.T) {
 	t.Parallel()
 	fs := newFakeFS()
 	fs.markDirExists(doctorBaseDir)
 	docker := goodDockerProbe()
 	docker.composeVersionErr = errors.New("docker: 'compose' is not a docker command")
-	svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
+	svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil, nil)
 	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 	if err != nil {
 		t.Fatalf("Check: %v", err)
@@ -860,7 +955,7 @@ func TestDoctor_SemverPreReleaseHandledAsMajorMinor(t *testing.T) {
 	fs.markDirExists(doctorBaseDir)
 	docker := goodDockerProbe()
 	docker.composeVersion = "2.20.0-rc1"
-	svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil)
+	svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), docker, nil, nil)
 	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 	if err != nil {
 		t.Fatalf("Check: %v", err)

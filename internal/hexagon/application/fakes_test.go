@@ -690,6 +690,21 @@ func (p *fakeProgress) AffectedFiles(baseDir string, rows []driven.AffectedFile)
 
 // fakeGit records IsRepository / Init / Version calls and lets each
 // test configure the return values + errors.
+// fakeRuntimeEnv satisfies the driven.RuntimeEnvironment port for
+// doctor-tests that exercise the slice-v0.1.1-doctor-container-
+// awareness skip semantics. The zero value reports false
+// (not in container), matching the pre-v0.1.1 path so tests that
+// pass an explicit *fakeRuntimeEnv with default fields are still
+// indistinguishable from passing nil.
+type fakeRuntimeEnv struct {
+	inContainer bool
+}
+
+func (f *fakeRuntimeEnv) InContainer() bool { return f.inContainer }
+
+// Static check: fakeRuntimeEnv satisfies the RuntimeEnvironment port.
+var _ driven.RuntimeEnvironment = (*fakeRuntimeEnv)(nil)
+
 type fakeGit struct {
 	isRepoCalls []string
 	initCalls   []string

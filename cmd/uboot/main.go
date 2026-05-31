@@ -26,6 +26,7 @@ import (
 	"github.com/pt9912/u-boot/internal/adapter/driven/logger"
 	"github.com/pt9912/u-boot/internal/adapter/driven/netprobe"
 	"github.com/pt9912/u-boot/internal/adapter/driven/progress"
+	"github.com/pt9912/u-boot/internal/adapter/driven/runtime"
 	"github.com/pt9912/u-boot/internal/adapter/driven/yaml"
 	"github.com/pt9912/u-boot/internal/adapter/driving/cli"
 	"github.com/pt9912/u-boot/internal/hexagon/application"
@@ -88,6 +89,12 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// so the UpService polling-loop iteration timing is injectable
 	// in tests.
 	clockAdapter := clock.New()
+	// The runtime adapter (slice-v0.1.1-doctor-container-awareness T1)
+	// detects whether u-boot is running inside a container. Doctor
+	// uses the answer to skip host-prerequisite checks
+	// (docker/git/compose) that the distroless v0.1.0 GHCR image
+	// cannot satisfy by design.
+	runtimeAdapter := runtime.New()
 
 	// Application services. The text-progress adapter renders
 	// LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 affected-paths
@@ -97,7 +104,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// distinct even when a caller pipes them together. Tests that
 	// wrap stdout in a buffer must not interpose a separate flush.
 	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter)
-	doctorSvc := application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, logAdapter)
+	doctorSvc := application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, runtimeAdapter, logAdapter)
 	addSvc := application.NewAddServiceService(fsAdapter, yamlAdapter, logAdapter)
 	upSvc := application.NewUpService(fsAdapter, yamlAdapter, dockerEngineAdapter, netprobeAdapter, clockAdapter, logAdapter)
 	downSvc := application.NewDownService(fsAdapter, dockerEngineAdapter, confirmAdapter, logAdapter)

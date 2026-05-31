@@ -25,11 +25,12 @@ import (
 // fail logic, not from the service. The service is severity-agnostic
 // and just collects.
 type DoctorService struct {
-	fs     driven.FileSystem
-	yaml   driven.YAMLCodec
-	git    driven.Git
-	docker driven.DockerProbe
-	logger driven.Logger
+	fs      driven.FileSystem
+	yaml    driven.YAMLCodec
+	git     driven.Git
+	docker  driven.DockerProbe
+	runtime driven.RuntimeEnvironment
+	logger  driven.Logger
 }
 
 // Static check: DoctorService satisfies the driving port.
@@ -37,14 +38,32 @@ var _ driving.DoctorUseCase = (*DoctorService)(nil)
 
 // NewDoctorService constructs the service with the driven adapters
 // the M4 checks need. logger accepts nil (routed to noopLogger) so
-// tests and dry-runs do not need a stub. Future tranches may add
-// more ports (devcontainer probe); the constructor signature grows
-// accordingly.
-func NewDoctorService(fs driven.FileSystem, yaml driven.YAMLCodec, git driven.Git, docker driven.DockerProbe, logger driven.Logger) *DoctorService {
+// tests and dry-runs do not need a stub. runtime accepts nil too —
+// in that case host-prerequisite checks always run (the pre-v0.1.1
+// behaviour). Production wiring in cmd/uboot passes the
+// runtime.FileEnv adapter so container-detection enables the
+// `slice-v0.1.1-doctor-container-awareness` skip semantics.
+// Future tranches may add more ports (devcontainer probe); the
+// constructor signature grows accordingly.
+func NewDoctorService(
+	fs driven.FileSystem,
+	yaml driven.YAMLCodec,
+	git driven.Git,
+	docker driven.DockerProbe,
+	runtime driven.RuntimeEnvironment,
+	logger driven.Logger,
+) *DoctorService {
 	if logger == nil {
 		logger = noopLogger{}
 	}
-	return &DoctorService{fs: fs, yaml: yaml, git: git, docker: docker, logger: logger}
+	return &DoctorService{
+		fs:      fs,
+		yaml:    yaml,
+		git:     git,
+		docker:  docker,
+		runtime: runtime,
+		logger:  logger,
+	}
 }
 
 // doctorCheckID enumerates the stable machine-readable IDs the
@@ -171,11 +190,42 @@ func (s *DoctorService) checkWritePermissions(_ context.Context, baseDir string)
 	}
 }
 
+// hostHintSkippedInContainer is the LH-FA-DIAG-004 repair hint
+// emitted by every host-prerequisite check that the runtime
+// adapter has identified as running inside a container. The text
+// is shared so the four affected checks read consistently.
+const hostHintSkippedInContainer = "host check skipped: u-boot is running inside a container, " +
+	"so PATH probes here cannot see the host's tooling. " +
+	"Run doctor from a host install instead — see " +
+	"slice-v0.1.1-doctor-container-awareness for the full rationale."
+
+// inContainer is the runtime gate the four host-prerequisite
+// checks use to short-circuit. It returns false when the
+// RuntimeEnvironment port is nil (pre-v0.1.1 wiring stays
+// unchanged), preserving the pre-skip behaviour for legacy
+// constructors and tests that pass nil.
+func (s *DoctorService) inContainer() bool {
+	if s.runtime == nil {
+		return false
+	}
+	return s.runtime.InContainer()
+}
+
 // checkGitInstalled probes the git binary availability. Any error
 // from [driven.Git.Version] classifies as Error — the M3 init flow
 // relies on `git init`, so a missing git binary blocks the typical
-// LH-AK-001 use case.
+// LH-AK-001 use case. When the runtime adapter reports we're inside
+// a container, the check is skipped with SeverityInfo (so the
+// report still records the intent without driving the exit code).
 func (s *DoctorService) checkGitInstalled(ctx context.Context) domain.Diagnostic {
+	if s.inContainer() {
+		return domain.Diagnostic{
+			ID:       checkIDGitInstalled,
+			Severity: domain.SeverityInfo,
+			Message:  "git check skipped — u-boot is running inside a container.",
+			Hint:     hostHintSkippedInContainer,
+		}
+	}
 	version, err := s.git.Version(ctx)
 	if err != nil {
 		return domain.Diagnostic{
@@ -196,8 +246,18 @@ func (s *DoctorService) checkGitInstalled(ctx context.Context) domain.Diagnostic
 // Missing binary → Error; present but below LH-FA-DIAG-002 minimum
 // (24.0) → Error; parseable but unrecognized semver → Warn (we
 // observed the binary but can't validate the version, so the user
-// should look). At-or-above the minimum → OK.
+// should look). At-or-above the minimum → OK. When the runtime
+// adapter reports we're inside a container, the check is skipped
+// with SeverityInfo.
 func (s *DoctorService) checkDockerInstalled(ctx context.Context) domain.Diagnostic {
+	if s.inContainer() {
+		return domain.Diagnostic{
+			ID:       checkIDDockerInstalled,
+			Severity: domain.SeverityInfo,
+			Message:  "docker check skipped — u-boot is running inside a container.",
+			Hint:     hostHintSkippedInContainer,
+		}
+	}
 	version, err := s.docker.Version(ctx)
 	if err != nil {
 		return domain.Diagnostic{
@@ -213,8 +273,17 @@ func (s *DoctorService) checkDockerInstalled(ctx context.Context) domain.Diagnos
 // checkDockerReachable probes the docker daemon socket. Reachability
 // failures classify as Error — every meaningful u-boot subcommand
 // (init, add, up, down, doctor itself for compose-validation) needs
-// the daemon eventually.
+// the daemon eventually. Container-skip semantics mirror
+// checkDockerInstalled.
 func (s *DoctorService) checkDockerReachable(ctx context.Context) domain.Diagnostic {
+	if s.inContainer() {
+		return domain.Diagnostic{
+			ID:       checkIDDockerReachable,
+			Severity: domain.SeverityInfo,
+			Message:  "docker daemon-reachability check skipped — u-boot is running inside a container.",
+			Hint:     hostHintSkippedInContainer,
+		}
+	}
 	if err := s.docker.Info(ctx); err != nil {
 		return domain.Diagnostic{
 			ID:       checkIDDockerReachable,
@@ -232,8 +301,17 @@ func (s *DoctorService) checkDockerReachable(ctx context.Context) domain.Diagnos
 
 // checkComposeInstalled probes the docker compose plugin + version.
 // Same classification logic as checkDockerInstalled, scoped to the
-// compose plugin (`docker compose version --short`).
+// compose plugin (`docker compose version --short`). Container-skip
+// semantics mirror checkDockerInstalled.
 func (s *DoctorService) checkComposeInstalled(ctx context.Context) domain.Diagnostic {
+	if s.inContainer() {
+		return domain.Diagnostic{
+			ID:       checkIDComposeInstalled,
+			Severity: domain.SeverityInfo,
+			Message:  "docker compose plugin check skipped — u-boot is running inside a container.",
+			Hint:     hostHintSkippedInContainer,
+		}
+	}
 	version, err := s.docker.ComposeVersion(ctx)
 	if err != nil {
 		return domain.Diagnostic{
