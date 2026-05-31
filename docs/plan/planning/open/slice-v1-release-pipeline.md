@@ -124,10 +124,11 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
 - OCI-Labels aus `LH-FA-BUILD-002` im gepushten Image verifizieren.
 
 **DoD T2:**
-- [ ] Workflow-File angelegt; Validate-Step + Push-Step getrennt.
-- [ ] Probe-Lauf (Dry-Run oder Test-Tag) dokumentiert.
-- [ ] `make gates` grün.
-- [ ] DoD-Line: `T2 ✅ <commit-hash>`.
+- [x] Workflow-File angelegt; Validate-Step + Push-Step getrennt.
+- [x] Probe-Lauf lokal: `make build` + `docker tag` + Label-Inspect
+  gegen die 5 LH-FA-BUILD-002 Labels grün.
+- [x] `make gates` grün.
+- [x] T2 ✅ `93b703e`.
 
 ### T3 — Trivy-Image-Scan
 
