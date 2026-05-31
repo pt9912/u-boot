@@ -28,6 +28,15 @@
 ARG GO_VERSION=1.26.3
 ARG GOLANGCI_LINT_VERSION=v2.12.2
 
+# UBOOT_VERSION is injected at build time and re-published as the
+# u-boot --version output (via -ldflags -X main.version) and as the
+# org.opencontainers.image.version OCI label. Default matches the
+# in-source fallback `var version = "0.1.0-dev"` in cmd/uboot/main.go
+# so that local `docker build` without --build-arg produces a coherent
+# `0.1.0-dev` binary. Tagged releases pass UBOOT_VERSION=<version> via
+# `make build VERSION=<version>` from the publish.yml workflow.
+ARG UBOOT_VERSION=0.1.0-dev
+
 # ---- deps ------------------------------------------------------------------
 FROM golang:${GO_VERSION} AS deps
 
@@ -132,20 +141,28 @@ RUN mkdir -p /out && \
 # ---- build -----------------------------------------------------------------
 FROM deps AS build
 
+# Re-declare the global ARG inside the stage so `${UBOOT_VERSION}` is
+# usable in this stage's RUN. Without the re-declaration, the build
+# stage sees an empty string.
+ARG UBOOT_VERSION
+
 COPY . .
 RUN CGO_ENABLED=0 go build \
-    -ldflags="-s -w" \
+    -ldflags="-s -w -X main.version=${UBOOT_VERSION}" \
     -o /out/u-boot \
     ./cmd/uboot
 
 # ---- runtime ---------------------------------------------------------------
 FROM gcr.io/distroless/static-debian12:nonroot AS runtime
 
+ARG UBOOT_VERSION
+
 LABEL org.opencontainers.image.source="https://github.com/pt9912/u-boot" \
       org.opencontainers.image.description="u-boot — a developer environment bootloader for Docker-based projects." \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.title="u-boot" \
-      org.opencontainers.image.vendor="pt9912"
+      org.opencontainers.image.vendor="pt9912" \
+      org.opencontainers.image.version="${UBOOT_VERSION}"
 
 COPY --from=build /out/u-boot /usr/local/bin/u-boot
 

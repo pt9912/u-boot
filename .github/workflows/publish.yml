@@ -87,7 +87,9 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build runtime image
-        run: make build
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: make build VERSION="$VERSION"
 
       - name: Tag image for GHCR
         env:
@@ -122,6 +124,27 @@ jobs:
             fi
             echo "$LABEL=$VALUE"
           done
+
+          # Pin org.opencontainers.image.version against the tag-derived
+          # VERSION so a mis-built image (build-arg drift) cannot ship
+          # a label that disagrees with the GHCR tag it carries.
+          IMAGE_VERSION=$(docker image inspect --format \
+            '{{ index .Config.Labels "org.opencontainers.image.version" }}' "$REF")
+          if [[ "$IMAGE_VERSION" != "$VERSION" ]]; then
+            echo "::error::OCI label org.opencontainers.image.version=[$IMAGE_VERSION] does not match tag VERSION=[$VERSION]."
+            exit 1
+          fi
+          echo "org.opencontainers.image.version=$IMAGE_VERSION (matches tag)"
+
+          # Pin u-boot --version output against the tag-derived VERSION
+          # so a build that forgot UBOOT_VERSION (regressing to 0.1.0-dev)
+          # cannot ship under a vMAJOR.MINOR.PATCH tag.
+          BINARY_VERSION=$(docker run --rm "$REF" --version | awk '{print $NF}')
+          if [[ "$BINARY_VERSION" != "$VERSION" ]]; then
+            echo "::error::u-boot --version reports [$BINARY_VERSION], expected [$VERSION]."
+            exit 1
+          fi
+          echo "u-boot --version=$BINARY_VERSION (matches tag)"
 
       - name: Push to GHCR
         env:

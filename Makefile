@@ -16,6 +16,15 @@ GO_VERSION              ?= 1.26.3
 GOLANGCI_LINT_VERSION   ?= v2.12.2
 GOVULNCHECK_VERSION     ?= v1.1.4
 PYTHON_VERSION          ?= 3.13-slim
+
+# VERSION is injected at build time and becomes both `u-boot --version`
+# output (via -X main.version) and the org.opencontainers.image.version
+# OCI label on the runtime image. Default matches the in-source fallback
+# in cmd/uboot/main.go (`var version = "0.1.0-dev"`); the publish.yml
+# workflow passes VERSION=<tag-without-v> for tagged releases. CI gates
+# (lint/test/coverage/govulncheck/image-scan) and local `make build`
+# without override produce a coherent "0.1.0-dev" binary.
+VERSION                 ?= 0.1.0-dev
 # Trivy pin policy — TWO formats in play, both must be bumped together:
 #   - Makefile (here):  Docker-Hub-Tag-Konvention OHNE `v`-Prefix
 #                        → `aquasec/trivy:0.70.0`
@@ -43,7 +52,8 @@ NO_CACHE_FILTER_COVERAGE := --no-cache-filter coverage
 
 DOCKER_BUILD := docker build $(PROGRESS_FLAG) \
     --build-arg GO_VERSION=$(GO_VERSION) \
-    --build-arg GOLANGCI_LINT_VERSION=$(GOLANGCI_LINT_VERSION)
+    --build-arg GOLANGCI_LINT_VERSION=$(GOLANGCI_LINT_VERSION) \
+    --build-arg UBOOT_VERSION=$(VERSION)
 
 .DEFAULT_GOAL := help
 
