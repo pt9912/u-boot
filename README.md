@@ -28,6 +28,17 @@ trail in the
 and the
 [release-cut slice](docs/plan/planning/done/slice-v1-release-cut-v0.1.0.md).
 
+**`v0.1.1` in preparation** — adds container-aware `doctor`
+([`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/done/slice-v0.1.1-doctor-container-awareness.md))
+and a host-native binary distribution
+([`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md),
+T1 + T2 shipped: `make build-binaries` for six platforms
+(Linux/macOS/Windows × amd64/arm64) and `publish.yml` uploading
+the binaries to the GitHub Release on every `v*` tag). Tag push
+remains a user action — see
+[`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md)
+§Nächste Schritte.
+
 - `u-boot init [name] [--devcontainer]` creates the
   LH-FA-INIT-003 project structure plus `u-boot.yaml`
   (LH-FA-CONF-002) and runs `git init` by default

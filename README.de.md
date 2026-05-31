@@ -28,6 +28,18 @@ Trail im
 und im
 [Release-Cut-Slice](docs/plan/planning/done/slice-v1-release-cut-v0.1.0.md).
 
+**`v0.1.1` in Vorbereitung** — ergänzt einen container-aware
+`doctor`
+([`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/done/slice-v0.1.1-doctor-container-awareness.md))
+und eine host-native Binary-Distribution
+([`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md),
+T1 + T2 geliefert: `make build-binaries` für sechs Plattformen
+(Linux/macOS/Windows × amd64/arm64) und `publish.yml` lädt die
+Binaries bei jedem `v*`-Tag an den GitHub-Release hoch). Der
+Tag-Push bleibt Nutzer-Aktion — siehe
+[`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md)
+§Nächste Schritte.
+
 - `u-boot init [name] [--devcontainer]` erzeugt die
   LH-FA-INIT-003-Projektstruktur plus `u-boot.yaml`
   (LH-FA-CONF-002) und initialisiert per Default ein Git-Repository

@@ -51,7 +51,7 @@ Disziplin-Verstoß.
 | [`slice-v2-revive-custom-rules`](../done/slice-v2-revive-custom-rules.md) | ADR-0003 Folgepunkt revive-Custom-Rules | V2-vorgezogen | Done |
 | [`slice-later-http-driving-adapter`](../done/slice-later-http-driving-adapter.md) | `spec/architecture.md` §7 HTTP-Driving-Adapter prospektiv | Later | Done (Entscheidung in [ADR-0010](../../adr/0010-kein-http-driving-adapter.md): wird nicht gebaut) |
 | [`slice-v0.1.1-doctor-container-awareness`](../done/slice-v0.1.1-doctor-container-awareness.md) | `doctor` im distroless-Container findet docker/git nicht (Real-world-Befund 2026-05-31 post-v0.1.0) | v0.1.1-Followup | Done (T1 `9a99bbf`, T2 `c35360f`, T3 `111e725`, T4 schließt; Tag-Push bleibt Nutzer-Aktion analog v0.1.0-T4) |
-| [`slice-v2-binary-distribution`](../open/slice-v2-binary-distribution.md) | ADR-0007 §Folgepunkte 1 Trigger (erste konkrete Cross-Plattform-Distributionsanfrage) durch `doctor`-Befund ausgelöst | V2 | Open |
+| [`slice-v2-binary-distribution`](../open/slice-v2-binary-distribution.md) | ADR-0007 §Folgepunkte 1 Trigger (erste konkrete Cross-Plattform-Distributionsanfrage) durch `doctor`-Befund ausgelöst | V2 | Open — T1 ✅ `dc9a336` + `f3f1731` (`make build-binaries` für 6 Plattformen Linux/macOS/Windows × amd64/arm64), T2 ✅ `5e5166b` (`publish.yml` build + GitHub-Release-Upload); T3 (READMEs Install-Block + CHANGELOG `## [Unreleased]`) und T4 (ADR-0007-Update + carveouts-Reduktion + Closure) offen |
 
 ## Nächste Schritte
 
@@ -106,11 +106,22 @@ Later-Folgen:
 5. **`LH-OPEN-002`-Distributionsweg-Restwege** — Homebrew und
    Debian/RPM bleiben vertagt mit Trigger-Slices aus
    [ADR-0007](../../adr/0007-distributionswege-ghcr.md)
-   §Entscheidung; Binary-Distribution ist mit
+   §Entscheidung. Binary-Distribution ist in
    [`open/slice-v2-binary-distribution.md`](../open/slice-v2-binary-distribution.md)
-   ausgelöst (siehe Punkt 1).
+   T1+T2 geliefert: `make build-binaries` (`dc9a336`/`f3f1731`)
+   und `publish.yml` baut + uploadet sechs Plattform-Binaries
+   pro Tag (`5e5166b`). T3 (Install-Block in den READMEs +
+   CHANGELOG-Eintrag) und T4 (ADR-0007-Update +
+   carveouts-Restwege-Reduktion + Slice-Closure) folgen.
 6. **Later** — Migration (`LH-FA-CONF-006`), Custom-Data-Sources
    (`LH-DA-004`).
+7. **Podman-Drop-in als Container-Engine** — heute funktional
+   per Symlink + `DOCKER_HOST=…/podman.sock`; v0.1.1-Container-
+   Detection probes `/run/.containerenv` neben `/.dockerenv`,
+   `LH-FA-DIAG-002` und `spec/architecture.md` §2.4 dokumentieren
+   den Drop-in offiziell (`a504a36`). Formal getestete Variante
+   (eigener `PodmanProbe`-Adapter + CI-Matrix) wird zum Slice,
+   sobald ein konkreter Bedarf gemeldet wird.
 
 ### MVP-Bilanz — **MVP vollständig** (Stand `bc487fc`; M8-T5 `25cb123`)
 
