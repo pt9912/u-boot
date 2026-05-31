@@ -227,8 +227,16 @@ T3 als dritter PR-blockierender CI-Job aktiv
 `exit-code: 1`). Lokale Reproduktion: `make image-scan`
 (baut das Runtime-Image und scannt es mit dem offiziellen
 `aquasec/trivy`-Container; gleiches Severity-Profil wie der
-CI-Job). SBOM-Erzeugung (`LH-FA-BUILD-006` optional) folgt
-bei konkretem Bedarf in einem eigenen Slice.
+CI-Job).
+
+> **Trivy-Pin-Hebung berührt ZWEI Stellen:**
+> `Makefile::TRIVY_VERSION` (Docker-Hub-Tag, ohne `v`-Prefix) **und**
+> `ci.yml::image-scan::trivy-version` (GitHub-Release-Tag, mit
+> `v`-Prefix). Detail-Kommentar am jeweiligen Pin. Wer nur eine
+> der zwei Stellen hebt, bricht die Inner-/Outer-Loop-Parität.
+
+SBOM-Erzeugung (`LH-FA-BUILD-006` optional) folgt bei konkretem
+Bedarf in einem eigenen Slice.
 
 ---
 

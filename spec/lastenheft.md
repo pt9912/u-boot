@@ -2244,10 +2244,10 @@ Pflicht-Komposition:
 
 - Workflow-Datei: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
 - Trigger: `pull_request` und `push` auf den Branch `main`.
-- Drei Jobs, parallel, alle PR-blockierend (Required-Status-Checks im GitHub-UI nach dem ersten grünen Lauf zu konfigurieren — Schritt-für-Schritt in [`docs/user/branch-protection.md`](../docs/user/branch-protection.md); die Required-Status-Check-Liste muss die tatsächlichen Workflow-`name:`-Felder verwenden, nicht die Kurz-Keys):
+- Drei Jobs, parallel, alle PR-blockierend (Required-Status-Checks im GitHub-UI nach dem ersten grünen Lauf zu konfigurieren — Schritt-für-Schritt in [`docs/user/branch-protection.md`](../docs/user/branch-protection.md); die Required-Status-Check-Liste muss die tatsächlichen Workflow-`name:`-Felder verwenden, nicht die Kurz-Keys). Die drei delegierten Make-Targets sind in `LH-FA-BUILD-005` (MVP) und `LH-FA-BUILD-006` (V1) definiert; die PR-Blocking-**Pflicht** für alle drei kommt aus diesem `LH-QA-003`-Eintrag (MVP). Damit ist `make govulncheck` und `make image-scan` über `LH-QA-003` MVP-bindend, auch wenn die jeweiligen Make-Target-Definitionen unter `LH-FA-BUILD-006` (V1) liegen:
   - `gates (lint + test + coverage-gate)` — führt `make gates` aus (lint + test + coverage-gate, `LH-FA-BUILD-005`/`-006`).
-  - `security-gates (govulncheck)` — führt `make govulncheck` aus (`LH-FA-BUILD-006`).
-  - `image-scan (trivy HIGH+CRITICAL)` — führt `make image-scan` aus (Trivy gegen das Runtime-Image, severity `HIGH,CRITICAL`, exit-code `1`); geliefert mit [`slice-v1-release-pipeline`](../docs/plan/planning/done/slice-v1-release-pipeline.md) T3 (`8212889`), Distributionsentscheidung in [ADR-0007](../docs/plan/adr/0007-distributionswege-ghcr.md).
+  - `security-gates (govulncheck)` — führt `make govulncheck` aus (`LH-FA-BUILD-006`, MVP-Pflicht via diesem `LH-QA-003`).
+  - `image-scan (trivy HIGH+CRITICAL)` — führt `make image-scan` aus (Trivy gegen das Runtime-Image, severity `HIGH,CRITICAL`, exit-code `1`; `LH-FA-BUILD-006`, MVP-Pflicht via diesem `LH-QA-003`); geliefert mit [`slice-v1-release-pipeline`](../docs/plan/planning/done/slice-v1-release-pipeline.md) T3 (`8212889`), Distributionsentscheidung in [ADR-0007](../docs/plan/adr/0007-distributionswege-ghcr.md).
 - Runner: `ubuntu-latest`. Keine Host-Go-Toolchain (`LH-FA-BUILD-007`); der Runner braucht nur das vorinstallierte Docker + BuildKit.
 - Actions sind **SHA-gepinnt** mit Tag-Kommentar (Supply-Chain-Härtung gegen Tag-Move). Pin-Hebung ist Routine; neuer Commit-SHA via `gh api repos/<owner>/<repo>/git/refs/tags/<tag>`.
 - Top-Level `permissions: {}` (alle Tokens entzogen); jeder Job lockert auf das Minimum (Defense-in-Depth).
