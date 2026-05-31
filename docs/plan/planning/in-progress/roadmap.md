@@ -49,7 +49,7 @@ Disziplin-Verstoß.
 | [`slice-v1-template-format-entscheidung`](../done/slice-v1-template-format-entscheidung.md) | `LH-OPEN-004` Template-Format offen | V1 | Done (Entscheidung in [ADR-0009](../../adr/0009-template-format-yaml-files.md): YAML+`text/template`) |
 | [`slice-v1-yaml-parse-error-sentinel`](../done/slice-v1-yaml-parse-error-sentinel.md) | M7-T5-Review-Followup N2: `YAMLCodec`-Port unterscheidet Parse- nicht von IO-Fehlern; Exit-Code-14-vs-10-Klassifikation reißt bei kaputter `compose.yaml` unter `u-boot generate devcontainer` | V1-vorgezogen | Done (`1008326`) |
 | [`slice-v2-revive-custom-rules`](../done/slice-v2-revive-custom-rules.md) | ADR-0003 Folgepunkt revive-Custom-Rules | V2-vorgezogen | Done |
-| [`slice-later-http-driving-adapter`](../open/slice-later-http-driving-adapter.md) | `spec/architecture.md` §7 HTTP-Driving-Adapter prospektiv | Later | Open |
+| [`slice-later-http-driving-adapter`](../done/slice-later-http-driving-adapter.md) | `spec/architecture.md` §7 HTTP-Driving-Adapter prospektiv | Later | Done (Entscheidung in [ADR-0010](../../adr/0010-kein-http-driving-adapter.md): wird nicht gebaut) |
 
 ## Nächste Schritte
 
@@ -150,6 +150,13 @@ Erledigt im V1-vorgezogenen Pfad:
   Slices in ADR-0009 §Folgepunkte aufgelistet (template-list,
   template-init, local-templates).
   Siehe [`done/slice-v1-template-format-entscheidung.md`](../done/slice-v1-template-format-entscheidung.md).
+- ~~`slice-later-http-driving-adapter`~~: **Done** — Entscheidung
+  in [ADR-0010](../../adr/0010-kein-http-driving-adapter.md):
+  HTTP-Driving-Adapter wird nicht gebaut. u-boot bleibt CLI-only;
+  Maschinen-Schnittstellen über `LH-NFA-USE-004` (`--json`/
+  `--dry-run`-Flags). Zwei Re-Eval-Trigger in ADR-0010 §Folgepunkte
+  verbindlich aufgeführt.
+  Siehe [`done/slice-later-http-driving-adapter.md`](../done/slice-later-http-driving-adapter.md).
 
 Plus die V1-Add-ons (LH-AK-003 Keycloak, LH-AK-004 OTel),
 V1-Generators (`u-boot logs`, `--json`-Output) und die vertagten

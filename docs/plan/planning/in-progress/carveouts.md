@@ -20,7 +20,6 @@ Spalten:
 | Carveout | Status | Plan / Begründung |
 | -------- | ------ | ----------------- |
 | `LH-OPEN-002` Paketierung-Restwege offen (`spec/lastenheft.md` §14): Binary-Release / Homebrew / Debian/RPM — npm/pip durch ADR-0007 verworfen, GHCR durch ADR-0007 + [`done/slice-v1-release-pipeline.md`](../done/slice-v1-release-pipeline.md) entschieden und ausgeliefert | temporär | Restwege haben jeweils einen benannten Trigger-Slice-Plan (`slice-v2-binary-distribution.md`, `slice-v2-homebrew-formula.md`, `slice-v2-distro-pakete.md`), der bei Auslösung in `open/` angelegt wird; benannte Restwege + Trigger sind verbindlich dokumentiert in [ADR-0007](../../adr/0007-distributionswege-ghcr.md) §Entscheidung (Tabelle pro Option) und §Folgepunkte. |
-| HTTP-Driving-Adapter ist als „geplante Erweiterung" in `spec/architecture.md` §7 erwähnt, aber nicht spezifiziert oder gefordert | temporär | [`open/slice-later-http-driving-adapter.md`](../open/slice-later-http-driving-adapter.md) |
 
 ## Permanente Carveouts (kein Plan, im Inventar dokumentiert)
 

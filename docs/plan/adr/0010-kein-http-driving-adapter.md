@@ -19,7 +19,7 @@ Accepted
 Keine Spec-Anforderung (`LH-FA-*`, `LH-AK-*`, `LH-SA-*`) fordert
 einen HTTP-Adapter; auch `LH-OPEN-001..004` listen ihn nicht.
 Der Slice-Plan
-[`slice-later-http-driving-adapter`](../planning/open/slice-later-http-driving-adapter.md)
+[`slice-later-http-driving-adapter`](../planning/done/slice-later-http-driving-adapter.md)
 verankert diesen prospektiven Architektur-Hinweis als temporären
 Carveout (`LH-FA-PROJDOCS-005`), ohne einen konkreten Use-Case
 heute.
@@ -156,5 +156,5 @@ angelegt, der diesen ADR superseded.
 Solange keiner dieser Trigger eintritt, bleibt u-boot CLI-only.
 
 Der carveouts-Eintrag „HTTP-Driving-Adapter" wird mit der
-[`slice-later-http-driving-adapter`](../planning/open/slice-later-http-driving-adapter.md)-
+[`slice-later-http-driving-adapter`](../planning/done/slice-later-http-driving-adapter.md)-
 Closure entfernt.

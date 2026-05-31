@@ -41,7 +41,13 @@ erweitern — er fällt unter die bestehende `adapter/driving`-Kategorie.
 
 - Auslösende Doku: `spec/architecture.md` §7.
 - Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
-  HTTP-Driving-Adapter.
+  HTTP-Driving-Adapter (mit Slice-Closure entfernt).
 - Hängt von: konkretem externen Trigger (heute keiner).
 - Phase: Later — bewusst niedrigste Priorität, keine MVP- oder
   V1-Pflicht.
+- **Schließung 2026-05-31:** Entscheidung in
+  [ADR-0010](../../adr/0010-kein-http-driving-adapter.md) —
+  HTTP-Driving-Adapter wird nicht gebaut. u-boot bleibt CLI-only;
+  Maschinen-Schnittstellen ausschließlich über `LH-NFA-USE-004`
+  (`--json`/`--dry-run`-Flags). Zwei Re-Evaluation-Trigger in
+  ADR-0010 §Folgepunkte verbindlich aufgeführt.
