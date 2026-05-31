@@ -158,7 +158,7 @@ Starting with **`v0.1.1`**, `doctor` detects container runtime via
 "skipped — running inside container" diagnostic for the four
 host-prerequisite checks instead of mis-reporting them as errors.
 Exit code on an otherwise-clean project is `0` (not `11`). See
-[`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/open/slice-v0.1.1-doctor-container-awareness.md)
+[`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/done/slice-v0.1.1-doctor-container-awareness.md)
 for the design rationale.
 
 For real host-side diagnostics, run `doctor` from a host install

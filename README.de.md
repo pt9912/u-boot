@@ -168,7 +168,7 @@ Host-Prerequisite-Checks eine `SeverityInfo`-Diagnostik
 „skipped — running inside container" statt sie als Errors
 fehlzudeuten. Exit-Code bei ansonsten gesundem Projekt ist `0`
 (statt `11`). Designhintergrund:
-[`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/open/slice-v0.1.1-doctor-container-awareness.md).
+[`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/done/slice-v0.1.1-doctor-container-awareness.md).
 
 Für echte host-seitige Diagnostik `doctor` aus einer Host-
 Installation laufen lassen, sobald die Binary-Distribution

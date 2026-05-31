@@ -50,7 +50,7 @@ Disziplin-Verstoß.
 | [`slice-v1-yaml-parse-error-sentinel`](../done/slice-v1-yaml-parse-error-sentinel.md) | M7-T5-Review-Followup N2: `YAMLCodec`-Port unterscheidet Parse- nicht von IO-Fehlern; Exit-Code-14-vs-10-Klassifikation reißt bei kaputter `compose.yaml` unter `u-boot generate devcontainer` | V1-vorgezogen | Done (`1008326`) |
 | [`slice-v2-revive-custom-rules`](../done/slice-v2-revive-custom-rules.md) | ADR-0003 Folgepunkt revive-Custom-Rules | V2-vorgezogen | Done |
 | [`slice-later-http-driving-adapter`](../done/slice-later-http-driving-adapter.md) | `spec/architecture.md` §7 HTTP-Driving-Adapter prospektiv | Later | Done (Entscheidung in [ADR-0010](../../adr/0010-kein-http-driving-adapter.md): wird nicht gebaut) |
-| [`slice-v0.1.1-doctor-container-awareness`](../open/slice-v0.1.1-doctor-container-awareness.md) | `doctor` im distroless-Container findet docker/git nicht (Real-world-Befund 2026-05-31 post-v0.1.0) | v0.1.1-Followup | Open |
+| [`slice-v0.1.1-doctor-container-awareness`](../done/slice-v0.1.1-doctor-container-awareness.md) | `doctor` im distroless-Container findet docker/git nicht (Real-world-Befund 2026-05-31 post-v0.1.0) | v0.1.1-Followup | Done (T1 `9a99bbf`, T2 `c35360f`, T3 `111e725`, T4 schließt; Tag-Push bleibt Nutzer-Aktion analog v0.1.0-T4) |
 | [`slice-v2-binary-distribution`](../open/slice-v2-binary-distribution.md) | ADR-0007 §Folgepunkte 1 Trigger (erste konkrete Cross-Plattform-Distributionsanfrage) durch `doctor`-Befund ausgelöst | V2 | Open |
 
 ## Nächste Schritte
@@ -76,14 +76,18 @@ Workflow-`name:`-Felder).
 Aktuell offen sind nur trigger- oder nutzer-getriebene V1- und
 Later-Folgen:
 
-1. **Doctor-Container-Awareness** (v0.1.1-Followup) — `doctor`
-   sieht im distroless-Container-Run keine Host-Binaries
-   (`docker`/`git`), meldet 4 errors auf einem ansonsten gesunden
-   Host. Real-world-Befund nach v0.1.0-Pull am 2026-05-31. Slice
-   in
-   [`open/slice-v0.1.1-doctor-container-awareness.md`](../open/slice-v0.1.1-doctor-container-awareness.md);
-   zieht den ersten ADR-0007-Re-Eval-Trigger (Binary-
-   Distribution) mit, siehe
+1. **~~Doctor-Container-Awareness~~ — v0.1.1-Tag-Push offen.**
+   Slice
+   [`done/slice-v0.1.1-doctor-container-awareness.md`](../done/slice-v0.1.1-doctor-container-awareness.md)
+   T1 `9a99bbf` + T2 `c35360f` + T3 `111e725` + T4 dieser Commit
+   geliefert: `doctor` skipped die vier Host-Prerequisite-Checks
+   im Container-Modus (`SeverityInfo` statt `SeverityError`,
+   Exit 0 statt 11 bei sonst gesundem Projekt). v0.1.1-Tag-Push
+   bleibt **Nutzer-Aktion** analog v0.1.0-T4: (a) CHANGELOG-Datum
+   auf Push-Datum aktualisieren, (b) push, (c) ersten CI-Lauf
+   abwarten, (d) `git tag v0.1.1 && git push origin v0.1.1`.
+   Zog den ersten ADR-0007-Re-Eval-Trigger (Binary-Distribution)
+   mit, siehe
    [`open/slice-v2-binary-distribution.md`](../open/slice-v2-binary-distribution.md).
 2. **V1-Add-ons** — Keycloak (`LH-FA-ADD-003` / `LH-AK-003`) und
    OpenTelemetry (`LH-FA-ADD-004` / `LH-AK-004`); jeweils

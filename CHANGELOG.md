@@ -32,7 +32,7 @@ to probe.
   (`git.installed`, `docker.installed`, `docker.reachable`,
   `docker.compose.installed`) when running inside a container, with
   a `SeverityInfo` diagnostic and a hint that points at
-  [`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/open/slice-v0.1.1-doctor-container-awareness.md)
+  [`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/done/slice-v0.1.1-doctor-container-awareness.md)
   for the rationale. Effect: `docker run --rm
   ghcr.io/pt9912/u-boot:0.1.1 doctor` no longer mis-reports a
   healthy host as 4 errors; exit code on an otherwise-clean project
