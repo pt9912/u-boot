@@ -97,7 +97,7 @@ erste Tag-Push selbst bleibt Nutzer-Trigger. Audit-Trail im
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
 | Architekturentscheidungen | 6 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
 | Implementierung | M1–M8 ✅, MVP-Closure ✅ — **MVP vollständig** | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
-| Carveouts | 5 temporär (4 Slice-Pläne — Release-Pipeline-Slice deckt 2 Carveouts ab), 8 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
+| Carveouts | 4 temporär (3 Slice-Pläne in `open/`; LH-OPEN-002-Restwege mit benannten Trigger-Slices in ADR-0007), 8 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
 

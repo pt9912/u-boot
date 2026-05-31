@@ -76,7 +76,7 @@ Disziplin-Verstoß.
    `compose.yaml.valid` no-services (Error → Warn,
    LH-AK-001-§2299-Konformität), T3 ✅ Closure + MVP-Bilanz.
 
-### MVP-Bilanz — **MVP vollständig** (Stand `25cb123`)
+### MVP-Bilanz — **MVP vollständig** (Stand `bc487fc`; M8-T5 `25cb123`)
 
 **Alle 5 MVP-`LH-AK-*` gepinnt** mit benannten e2e-Tests:
 LH-AK-001 (Init+Doctor) `8525c4c`, LH-AK-002 (Postgres-Flow)

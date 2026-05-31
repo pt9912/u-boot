@@ -57,11 +57,11 @@ Release-Teile bleiben als offene Restarbeit in diesem Slice.
   build` `trivy image --severity HIGH,CRITICAL --exit-code 1`
   ausführt.
 - Branch-Protection nimmt alle aktivierten PR-Gates auf:
-  - Mindestmenge beim externen-PR-Pfad: `gates (lint + test +
-    coverage-gate)` und `security-gates (govulncheck)`; falls der
-    Workflow später auf kürzere Job-Namen umgestellt wird, muss die
-    Checkliste die dann tatsächlichen GitHub-Check-Namen verwenden.
-  - Sobald `image-scan` existiert: zusätzlich `image-scan`.
+  - Drei verbose `name:`-Felder, alle PR-blockierend: `gates (lint +
+    test + coverage-gate)`, `security-gates (govulncheck)`,
+    `image-scan (trivy HIGH+CRITICAL)`. Bei späterer Hebung der
+    `name:`-Werte muss die Branch-Protection-Checkliste mitgezogen
+    werden.
 - `docs/user/quality.md` §4 und §6 werden um die neuen Workflows
   erweitert; die bisherige Aussage "Trivy/SBOM folgen mit dem
   Release-Slice" wird aktualisiert oder entfernt.
@@ -74,7 +74,8 @@ Release-Teile bleiben als offene Restarbeit in diesem Slice.
   einmalige UI-Aktivierung:
   - Settings → Branches → Add rule für `main`.
   - Required status checks: `gates (lint + test + coverage-gate)`,
-    `security-gates (govulncheck)` und, sobald vorhanden, `image-scan`.
+    `security-gates (govulncheck)` und
+    `image-scan (trivy HIGH+CRITICAL)`.
   - Require PR before merging (Solo-Projekt: 0 Approvals, dokumentiert).
   - Block force-pushes auf `main`, block branch deletion.
   - Optional: linear history erzwingen.
