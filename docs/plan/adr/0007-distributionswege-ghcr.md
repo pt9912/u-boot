@@ -96,6 +96,15 @@ Positiv:
 - **`LH-OPEN-002` ist für den GHCR-Anteil entschieden;** die anderen
   Wege haben jeweils ein konkretes Trigger-Slice, sind also nicht
   mehr „offen ohne Plan", sondern „vertagt mit Trigger".
+- **Versions-Pin verifiziert vor dem Push.** Mit
+  `slice-v1-release-cut-v0.1.0` T1 (`056e4c6`) wird die Tag-`VERSION`
+  konsistent durch alle drei Layer geführt: `-X main.version`
+  im Go-Binary (`cmd/uboot/main.go:36`-Pattern), Build-Arg
+  `UBOOT_VERSION` im Dockerfile, und der OCI-Label
+  `org.opencontainers.image.version`. `publish.yml` pinnt vor dem
+  GHCR-Push (1) Label gegen Tag-VERSION und (2) Live-`--version`-
+  Smoke gegen Tag-VERSION; ein vergessener Build-Arg (Regression
+  zu `0.1.0-dev`) bricht den Workflow vor dem Push.
 
 Negativ / Trade-offs:
 

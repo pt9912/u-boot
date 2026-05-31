@@ -265,7 +265,16 @@ CI läuft auf GitHub Actions; drei Workflows in
   integrationstests).
 - [`publish.yml`](../../.github/workflows/publish.yml) — GHCR-
   Image-Publish auf Tag `v*`, Begründung in
-  [ADR-0007](../plan/adr/0007-distributionswege-ghcr.md).
+  [ADR-0007](../plan/adr/0007-distributionswege-ghcr.md). Der
+  Workflow injiziert die Tag-`VERSION` via
+  `make build VERSION=$VERSION` (`-X main.version` und
+  `org.opencontainers.image.version`-Label) und pinnt vor dem
+  Push zwei Drift-Schutz-Steps: (1) Label-Vergleich
+  `org.opencontainers.image.version == $VERSION`, (2) Live-
+  Smoke `docker run --rm $REF --version` muss `$VERSION`
+  zurückgeben. Damit kann ein vergessener `UBOOT_VERSION`-
+  Build-Arg (Regression zu `0.1.0-dev`) nicht unter einem
+  `vMAJOR.MINOR.PATCH`-Tag gepusht werden.
 
 Pflichten `ci.yml`:
 
