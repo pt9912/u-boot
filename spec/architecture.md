@@ -115,7 +115,7 @@ Konkrete Driver — Einstiegspunkte aus der Außenwelt.
   - **Persistente Flags (Root):** `--yes`, `--no-interactive` (LH-FA-CLI-005A — gelten für alle bestätigungs-relevanten Subbefehle). Konflikt-Check `--yes` + `--no-interactive` → `ErrConflictingModeFlags` (CLI-internes Sentinel) → Exit-Code 2.
   - `ExitCode(err)` bündelt die LH-FA-CLI-006-Klassifikation (0 / 2 / 10 / 14 / 1); `isValidationError` und `isFilesystemError` mappen die in §2.3 gelisteten Driving-Sentinels.
   - `cli.App` mit Functional-Options-Pattern (`WithGetwd` als Test-Seam); persistente Flag-Werte werden beim Re-Build der Root-Cobra pro `Execute` zurückgesetzt — kein Flag-Leak zwischen Aufrufen.
-- **Vorgesehene Erweiterungen:** weitere Subkommandos (`add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `template`); perspektivisch ein HTTP-/Daemon-Adapter neben der CLI.
+- **Vorgesehene Erweiterungen:** weitere Subkommandos (`add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `template`). Ein HTTP-/Daemon-Adapter ist mit [ADR-0010](../docs/plan/adr/0010-kein-http-driving-adapter.md) ausgeschlossen (siehe §7).
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driving`, externe Libraries (z. B. Cobra).
 - **Verbotene Imports:** `hexagon/application` und `adapter/driven`. Die Instanziierung von Application-Services und Driven-Adaptern erfolgt ausschließlich im Wiring (`cmd/uboot/`), das beide Welten zusammenfügt; der Driving-Adapter erhält fertig konstruierte Driving-Port-Implementierungen per Konstruktor.
 - **Permanenter Carveout:** `contextcheck`-Ausnahme in `.golangci.yml`, weil Cobras `RunE`-Signatur (`func(cmd, args) error`) keinen Context-Parameter kennt — die Closure muss `cmd.Context()` extrahieren und an `runInit` durchreichen. Strikte Propagation passiert eine Ebene tiefer.
@@ -304,10 +304,9 @@ Die folgenden Muster sind verboten und werden im Review abgelehnt:
 
 Diese Architektur ist der Stand vom 2026-05-22. Änderungen erfolgen über neue ADRs, die das ADR-0002 superseden (`LH-FA-PROJDOCS-002`).
 
-Geplante Erweiterungen, die im aktuellen Dokument noch nicht abgebildet sind (im Carveout-Inventar [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md) gelistet, `LH-FA-PROJDOCS-005`):
+Geplante Erweiterungen, die im aktuellen Dokument noch nicht abgebildet sind: keine.
 
-- HTTP-Driving-Adapter, falls u-boot perspektivisch eine Daemon-Variante bekommen soll.
+**Nicht** geplant (per ADR entschieden, jeweils mit Re-Evaluation-Triggern):
 
-**Nicht** geplant:
-
+- HTTP-Driving-Adapter (Daemon-Variante): am 2026-05-31 via [ADR-0010](../docs/plan/adr/0010-kein-http-driving-adapter.md) entschieden — u-boot bleibt CLI-only, Maschinen-Schnittstellen über `--json`/`--dry-run`-Flags (`LH-NFA-USE-004`). Re-Evaluation-Trigger sind in ADR-0010 §Folgepunkte verbindlich aufgeführt.
 - Plugin-System (`LH-OPEN-003`): am 2026-05-31 via [ADR-0008](../docs/plan/adr/0008-plugin-system-statisch.md) entschieden — Add-on-System bleibt statisch, kein `PluginRegistry`-Driven-Port. Re-Evaluation-Trigger sind in ADR-0008 §Folgepunkte verbindlich aufgeführt.
