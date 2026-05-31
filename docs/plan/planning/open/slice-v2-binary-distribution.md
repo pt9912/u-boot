@@ -4,7 +4,7 @@
 
 **ADR-0007 §Folgepunkte 1 hat am 2026-05-31 seinen ersten konkreten
 Trigger gefunden:** der Doctor-Container-Awareness-Befund (siehe
-[`slice-v0.1.1-doctor-container-awareness`](slice-v0.1.1-doctor-container-awareness.md))
+[`slice-v0.1.1-doctor-container-awareness`](../done/slice-v0.1.1-doctor-container-awareness.md))
 zeigt, dass GHCR-Container-only für ein Subkommando-Set, das
 Host-Diagnostik macht (`doctor`), praktisch nicht reicht. Bis
 v0.1.1 wird `doctor` per Container-Skip entschärft; mittelfristig
@@ -66,7 +66,7 @@ ein dedizierter Apt-/Yum-Mirror (falls T2 aus
 ## Bezug
 
 - Auslöser:
-  [`slice-v0.1.1-doctor-container-awareness`](slice-v0.1.1-doctor-container-awareness.md)
+  [`slice-v0.1.1-doctor-container-awareness`](../done/slice-v0.1.1-doctor-container-awareness.md)
   hat den ersten konkreten Bedarf gezeigt
   (`doctor` für Host-Diagnostik braucht eine Binary).
 - ADR: [ADR-0007](../../adr/0007-distributionswege-ghcr.md)

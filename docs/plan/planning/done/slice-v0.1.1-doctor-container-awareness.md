@@ -85,5 +85,5 @@ Pfad. Mindestens eine der folgenden Strategien ist umgesetzt:
   („erste konkrete Nachfrage nach Cross-Plattform-Distribution")
   als Trigger für `slice-v2-binary-distribution`.
 - Plan-Anker: dieser Slice plus
-  [`slice-v2-binary-distribution`](slice-v2-binary-distribution.md).
+  [`slice-v2-binary-distribution`](../open/slice-v2-binary-distribution.md).
 - Phase: V1-Followup (post-v0.1.0, Pre-v0.1.1).
