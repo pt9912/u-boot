@@ -107,10 +107,10 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
   vertagt/verworfen" gehoben.
 
 **DoD T1:**
-- [ ] ADR-0007 angelegt; Mindest-Abschnitte erfüllt (`adr/README.md`).
-- [ ] `LH-OPEN-002` §14 enthält Entscheidungs-Tabelle + ADR-Verweis.
-- [ ] `make gates` grün.
-- [ ] DoD-Line: `T1 ✅ <commit-hash>`.
+- [x] ADR-0007 angelegt; Mindest-Abschnitte erfüllt (`adr/README.md`).
+- [x] `LH-OPEN-002` §14 enthält Entscheidungs-Tabelle + ADR-Verweis.
+- [x] `make gates` grün.
+- [x] T1 ✅ `0f64938`.
 
 ### T2 — `.github/workflows/publish.yml` (GHCR Image-Publish)
 
