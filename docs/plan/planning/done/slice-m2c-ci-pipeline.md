@@ -3,6 +3,14 @@
 > **Status:** Done
 > **DoD:** Commit `9a74e35`
 > **Retro-Plan:** Retroaktiv geschrieben 2026-05-27 (siehe [`slice-m3-retroaktive-slice-plaene`](slice-m3-retroaktive-slice-plaene.md))
+>
+> **Folge-Stand (post-Lieferung):** Der dritte PR-blockierende Job
+> `image-scan (trivy HIGH+CRITICAL)` wurde mit
+> [`slice-v1-release-pipeline`](slice-v1-release-pipeline.md) T3
+> (`8212889`) ergänzt; `LH-QA-003` ist seither auf drei Jobs gehoben.
+> Dieser Slice-Plan beschreibt absichtlich den ursprünglichen
+> M2c-Lieferstand (zwei Jobs) und wird nicht rückwirkend
+> aktualisiert.
 
 ## Auslöser
 

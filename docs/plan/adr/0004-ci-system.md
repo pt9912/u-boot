@@ -103,8 +103,9 @@ Positiv:
   Build-Pipeline-Änderungen lassen den YAML-Workflow weitgehend
   unberührt; Trivy-Versions-Bumps berühren ZWEI Pin-Stellen
   (`Makefile::TRIVY_VERSION` + `ci.yml::trivy-version`, beide auf
-  derselben Trivy-Version in unterschiedlicher Schreibweise — Doku
-  am Pin selbst).
+  derselben Trivy-Version in unterschiedlicher Schreibweise —
+  Detail-Kommentare an beiden Pin-Stellen sowie in
+  [`docs/user/quality.md`](../../user/quality.md) §4).
 - **Supply-Chain-Härtung**: SHA-pinned Actions verhindern den
   klassischen Tag-Move-Angriff; explizite `permissions: {}` blockt
   versehentlich neu hinzukommende Steps mit schreibendem Token.

@@ -23,7 +23,7 @@ PYTHON_VERSION          ?= 3.13-slim
 #                        → `trivy-version: 'v0.70.0'` für trivy-action
 # Bei jeder Pin-Hebung beide Stellen synchron heben (gleiche Trivy-
 # Version, unterschiedliche Schreibweisen). Detector-/DB-Parität
-# ist sonst gebrochen (Mini-Review F1 / N2).
+# ist sonst gebrochen.
 TRIVY_VERSION           ?= 0.70.0
 THRESHOLD               ?= 90
 
