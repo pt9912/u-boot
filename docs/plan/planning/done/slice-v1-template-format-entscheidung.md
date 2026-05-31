@@ -45,9 +45,17 @@ zwischen mindestens diesen Optionen:
 
 - Auslösende Spec: `LH-OPEN-004`, `LH-FA-TPL-001..004`.
 - Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
-  `LH-OPEN-004`.
+  `LH-OPEN-004` (mit Slice-Closure entfernt).
 - Hängt von: erstem konkreten Template-Bedarf (vermutlich nach
   MVP-Closure, weil MVP nur das `basic`-Template per Default
   liefert).
 - Phase: V1, weil das Template-System bis MVP-Closure nicht
   ausgerollt wird.
+- **Schließung 2026-05-31:** Entscheidung in
+  [ADR-0009](../../adr/0009-template-format-yaml-files.md) —
+  YAML-Metadaten + `text/template`-Files (Option 1). LH-OPEN-004
+  in `spec/lastenheft.md` §14 als entschieden markiert; vier
+  Implementierungs-Slices (template-list / template-init /
+  local-templates plus mindestens ein Built-in-Template) sind
+  in ADR-0009 §Folgepunkte verbindlich genannt und werden bei
+  konkretem Bedarf in `open/` angelegt.

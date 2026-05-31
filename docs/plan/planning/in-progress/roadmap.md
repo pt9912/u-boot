@@ -46,7 +46,7 @@ Disziplin-Verstoß.
 | [`slice-v1-markdown-link-validator`](../done/slice-v1-markdown-link-validator.md) | Doku-/Link-Drift in `docs/`/`spec/` nicht maschinell geprüft | V1-vorgezogen | Done |
 | [`slice-v1-backup-streaming-copy`](../done/slice-v1-backup-streaming-copy.md) | `LH-FA-INIT-005` Backup heute mit `ReadFile`+`WriteFile`; harter 256-MiB-Cap als MVP-Workaround | V1-vorgezogen | Done |
 | [`slice-v1-plugin-system-entscheidung`](../done/slice-v1-plugin-system-entscheidung.md) | `LH-OPEN-003` Plugin-System offen | V1 | Done (Entscheidung in [ADR-0008](../../adr/0008-plugin-system-statisch.md): statisch) |
-| [`slice-v1-template-format-entscheidung`](../open/slice-v1-template-format-entscheidung.md) | `LH-OPEN-004` Template-Format offen | V1 | Open |
+| [`slice-v1-template-format-entscheidung`](../done/slice-v1-template-format-entscheidung.md) | `LH-OPEN-004` Template-Format offen | V1 | Done (Entscheidung in [ADR-0009](../../adr/0009-template-format-yaml-files.md): YAML+`text/template`) |
 | [`slice-v1-yaml-parse-error-sentinel`](../done/slice-v1-yaml-parse-error-sentinel.md) | M7-T5-Review-Followup N2: `YAMLCodec`-Port unterscheidet Parse- nicht von IO-Fehlern; Exit-Code-14-vs-10-Klassifikation reißt bei kaputter `compose.yaml` unter `u-boot generate devcontainer` | V1-vorgezogen | Done (`1008326`) |
 | [`slice-v2-revive-custom-rules`](../done/slice-v2-revive-custom-rules.md) | ADR-0003 Folgepunkt revive-Custom-Rules | V2-vorgezogen | Done |
 | [`slice-later-http-driving-adapter`](../open/slice-later-http-driving-adapter.md) | `spec/architecture.md` §7 HTTP-Driving-Adapter prospektiv | Later | Open |
@@ -125,10 +125,10 @@ primären Distributionsweg. Der Tag-Push selbst bleibt Nutzer-Trigger.
 
 ### V1-Phase: nicht release-blockierend, Trigger-getrieben
 
-Ein offener V1-Slice wartet auf konkreten Trigger:
-
-- [`slice-v1-template-format-entscheidung`](../open/slice-v1-template-format-entscheidung.md):
-  Trigger erster externer Template-Vorschlag.
+Alle drei ADR-getriebenen V1-Slices (release-pipeline, plugin-system,
+template-format) sind entschieden und in `done/`. Die offenen
+V1-Phase-Folgen (Add-ons, Generators, Logs/Dry-Run/Diff,
+Distributions-Restwege) hängen jeweils an konkretem Bedarf.
 
 Erledigt im V1-vorgezogenen Pfad:
 
@@ -144,6 +144,12 @@ Erledigt im V1-vorgezogenen Pfad:
   System bleibt statisch (keine Plugins). Vier Re-Eval-Trigger in
   ADR-0008 §Folgepunkte verbindlich aufgeführt.
   Siehe [`done/slice-v1-plugin-system-entscheidung.md`](../done/slice-v1-plugin-system-entscheidung.md).
+- ~~`slice-v1-template-format-entscheidung`~~: **Done** — Entscheidung
+  in [ADR-0009](../../adr/0009-template-format-yaml-files.md):
+  YAML-Metadaten + `text/template`-Files. Drei Implementierungs-
+  Slices in ADR-0009 §Folgepunkte aufgelistet (template-list,
+  template-init, local-templates).
+  Siehe [`done/slice-v1-template-format-entscheidung.md`](../done/slice-v1-template-format-entscheidung.md).
 
 Plus die V1-Add-ons (LH-AK-003 Keycloak, LH-AK-004 OTel),
 V1-Generators (`u-boot logs`, `--json`-Output) und die vertagten

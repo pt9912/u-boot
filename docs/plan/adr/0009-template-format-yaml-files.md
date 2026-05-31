@@ -194,5 +194,5 @@ wird ein neuer Slice eröffnet, der dieses ADR ersetzt oder
 ergänzt.
 
 Der carveouts-Eintrag `LH-OPEN-004` wird mit der
-[`slice-v1-template-format-entscheidung`](../planning/open/slice-v1-template-format-entscheidung.md)-
+[`slice-v1-template-format-entscheidung`](../planning/done/slice-v1-template-format-entscheidung.md)-
 Closure entfernt.

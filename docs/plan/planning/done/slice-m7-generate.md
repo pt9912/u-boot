@@ -73,7 +73,7 @@ Out of Scope (V1+):
 
 - **`LH-FA-TPL-001..004`** Template-System mit benutzerdefinierten
   Projektvorlagen — eigener V1-Slice
-  ([`slice-v1-template-format-entscheidung`](../open/slice-v1-template-format-entscheidung.md)).
+  ([`slice-v1-template-format-entscheidung`](../done/slice-v1-template-format-entscheidung.md)).
 - **`LH-FA-DOC-005`** Compose-Validierung — M7 generiert keinen
   Compose-Output, nur die vier oben genannten Artefakte.
 - **`LH-FA-DEV-003`** Externe Devcontainer-Feature-Quellen
@@ -650,7 +650,7 @@ nächste Lauf erneut als Konflikt sieht):
 - **`--replace`-Flag** zum erzwungenen Überschreiben einer Datei
   ohne managed-Block. Runtime-Fehlermeldungen in M7 erwähnen den
   Flag-Namen nicht als Repair-Hint, weil der Flag selbst erst mit V1
-  ([`slice-v1-template-format-entscheidung`](../open/slice-v1-template-format-entscheidung.md)
+  ([`slice-v1-template-format-entscheidung`](../done/slice-v1-template-format-entscheidung.md)
   oder eigener Folge-Slice). Begründung: MVP ist konservativ
   no-write, der Recovery-Pfad ist „Datei umbenennen, generate
   erneut laufen lassen".
