@@ -57,7 +57,7 @@ DOCKER_BUILD := docker build $(PROGRESS_FLAG) \
 
 .DEFAULT_GOAL := help
 
-.PHONY: help deps compile lint test test-docker coverage coverage-gate build run clean \
+.PHONY: help deps compile lint test test-docker coverage coverage-gate build build-binaries run clean \
         gates ci fullbuild govulncheck image-scan verify-depguard docs-check
 
 help: ## Show this help.
@@ -110,6 +110,33 @@ build: ## Build the runtime image (distroless static, nonroot).
 
 run: build ## Smoke test: run `u-boot --help` from the built image.
 	docker run --rm $(IMAGE):latest --help
+
+# Cross-compiled binaries for the slice-v2-binary-distribution path.
+# Output naming convention: bin/u-boot-<os>-<arch> (no ".tar.gz" — the
+# release workflow handles packaging). Static linking + CGO=0 so the
+# binaries run on minimal hosts. -ldflags `-X main.version=$(VERSION)`
+# mirrors the runtime-image VERSION-Pin from the Dockerfile so the
+# binary's `--version` matches the surrounding release. Docker-only
+# build (LH-FA-BUILD-007): everything runs inside the pinned
+# golang:$(GO_VERSION) container, no host Go toolchain required.
+BIN_DIR    ?= bin
+PLATFORMS  := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64
+
+build-binaries: ## Cross-compile u-boot binaries for all release platforms.
+	@mkdir -p $(BIN_DIR)
+	@for p in $(PLATFORMS); do \
+	    os=$${p%/*}; arch=$${p#*/}; \
+	    out=$(BIN_DIR)/u-boot-$$os-$$arch; \
+	    echo "==> $$out (UBOOT_VERSION=$(VERSION))"; \
+	    docker run --rm \
+	        -v "$(CURDIR)":/src -w /src \
+	        -e GOOS=$$os -e GOARCH=$$arch -e CGO_ENABLED=0 \
+	        -e GOFLAGS=-buildvcs=false \
+	        golang:$(GO_VERSION) \
+	        go build -ldflags="-s -w -X main.version=$(VERSION)" -o $$out ./cmd/uboot \
+	        || exit 1; \
+	done
+	@echo "[build-binaries] $(words $(PLATFORMS)) binaries built in $(BIN_DIR)/"
 
 # ---- security gates --------------------------------------------------------
 
@@ -169,7 +196,7 @@ fullbuild: ci build ## CI plus runtime image (full closure).
 # ---- maintenance -----------------------------------------------------------
 
 clean: ## Remove local build artefacts and built images.
-	@rm -rf out coverage *.out *.test
+	@rm -rf out coverage $(BIN_DIR) *.out *.test
 	@-docker image rm \
 	    $(IMAGE):latest $(IMAGE):deps $(IMAGE):compile \
 	    $(IMAGE):lint $(IMAGE):test $(IMAGE):coverage 2>/dev/null || true

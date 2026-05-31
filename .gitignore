@@ -2,6 +2,7 @@
 /out/
 /dist/
 /coverage/
+/bin/
 *.test
 *.out
 
