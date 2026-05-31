@@ -21,9 +21,9 @@ in `in-progress/`.
 | M8 `u-boot config` | Done | `config get`/`set`/Anzeigen (`LH-FA-CONF-001..005`), Schema-Validierung. Fünf Tranchen ✅ (`f531e7e`/`d3fa294`/`23952b2`/`fbf3778`/`25cb123`): Whitelist, Port + Skeleton, Get + Show, Set mit Two-Stage-Validation, CLI-Subcommand. **Letzter MVP-blockierender Slice → MVP vollständig.** | [`slice-m8-config`](../done/slice-m8-config.md) |
 | MVP-Closure | Done | Devcontainer-Mindestumfang (`LH-FA-DEV-001..005`), MVP-Acceptance-Flows (`LH-AK-001..002`, `LH-AK-005..007`). Drei Tranchen — T1 ✅ `bfe6416` `u-boot init --devcontainer` (LH-AK-005), T2 ✅ `8525c4c` LH-AK-001/-006-Pins in `acceptance_test.go` inkl. Doctor-Severity-Fix `compose.yaml.valid` (Error → Warn), T3 ✅ Slice-Closure + MVP-Bilanz. Alle 5 MVP-`LH-AK-*` gepinnt; alle MVP-`LH-FA-DEV-*` ausgeliefert. (M8 `u-boot config` ist die zweite MVP-Schließung, siehe nächste Zeile.) | [`slice-mvp-closure`](../done/slice-mvp-closure.md) |
 | V1 Keycloak / OTel | Open | `LH-FA-ADD-003`, `LH-FA-ADD-004`, `LH-AK-003`, `LH-AK-004` | offen |
-| V1 Templates | Open | `LH-FA-TPL-001..004` | offen |
+| V1 Templates | Open (Format entschieden) | `LH-FA-TPL-001..004` — Format via [ADR-0009](../../adr/0009-template-format-yaml-files.md) (YAML+`text/template`); Implementation offen in drei Slices aus ADR-0009 §Folgepunkte (`slice-v1-template-list`, `slice-v1-template-init`, `slice-later-local-templates`) | offen |
 | V1 Logs / Dry-Run / Diff | Open | `LH-FA-UP-005`, `LH-FA-CLI-007/008` | offen |
-| Later Migration / Custom Templates | Open | `LH-FA-CONF-006`, `LH-FA-TPL-003`, `LH-DA-004` | offen |
+| Later Migration / Custom Templates | Open | `LH-FA-CONF-006`, `LH-FA-TPL-003` (in ADR-0009 §Folgepunkte als `slice-later-local-templates` benannt), `LH-DA-004` | offen |
 
 ## Carveout-Auflösungs-Slices
 
@@ -53,28 +53,38 @@ Disziplin-Verstoß.
 
 ## Nächste Schritte
 
-1. **M6 up/down**: **Done** (siehe [`slice-m6-up-down.md`](../done/slice-m6-up-down.md)). Alle 7 Tranchen abgeschlossen: T1 ✅ `9f8badd`, T2 ✅ `84a676c`, T3 ✅ `1e5ef18`, T4 ✅ `1351cfb` (+ fund `9101bdc`, + review `d1deee5`), T5 ✅ `a46bec3`, T6 ✅ `4a7e60d`, T7 ✅ `6d9aa88` (+ review `adeea13` für `up --quiet`-Vertrag). Coverage 91.20%.
-2. **Verbosity-Wiring**: **Done** (`7c6fbce`, siehe [`slice-followup-verbosity-wiring.md`](../done/slice-followup-verbosity-wiring.md)). `--quiet` → `slog.LevelWarn`, `--verbose`/`--debug` → `slog.LevelDebug` via `*slog.LevelVar` und Cobra-`PersistentPreRunE`. Carveouts-Eintrag entfernt; temporäre Carveouts jetzt 6 statt 7.
-3. **M6-docker-int**: **Done** (siehe [`slice-m6-docker-integrationstests.md`](../done/slice-m6-docker-integrationstests.md)). Iterations-Bilanz: PR #1 ohne Merge geschlossen 2026-05-30 wegen (a) deterministisch roten `TestE2E_LHAK002_PostgresAcceptanceFlow` (LH-FA-INIT-006-Regex-Reject bei `t.TempDir()`-Counter-Leaf, gefixt `aa3a45c`) und (b) Audit-Heuristik, die nur workflow-level `conclusion` prüfte (gehärtet `41cab1b` mit Job-level-Pflicht). PR #2 (`43b42e4` → Merge `8865ca1`) entfernte `continue-on-error: true` nach drei job-level-grünen Läufen auf `main` (`41cab1b`/`379fe21`/`2fa46fd`). Erster Lauf ohne `continue-on-error` grün auf `8865ca1` (https://github.com/pt9912/u-boot/actions/runs/26679225340). Carveout entfernt.
-4. **M7 generate**: **Done** (siehe [`slice-m7-generate.md`](../done/slice-m7-generate.md)).
-   Alle 6 Tranchen abgeschlossen: T1 ✅ `67fc181` Port+Skeleton,
-   T2 ✅ `3c5de48` env-example, T3 ✅ `037ab00` readme,
-   T4 ✅ `19c4110` changelog (LH-AK-007), T5 ✅ `294e492`
-   devcontainer (LH-FA-DEV-001/004/005), T6 ✅ `d32a733`
-   CLI-Subcommand + ExitCode-Wiring (ErrArtifactUnknown→2,
-   ErrGenerateManualConflict→10, ErrGenerateFileSystem→14).
-   Review-Followup `27de9c5`: 9 Findings (S1..S4 + N1..N5) aus
-   Post-Merge-Code-Review adressiert, u. a. fenced-code-block-
-   Schutz im Changelog-Handler (verhindert Markdown-Korruption bei
-   dokumentierten Versions-Beispielen) und CRLF-Normalisierung im
-   bytes.Equal-Heuristik (CRLF-Files registrieren als fresh statt
-   silent CRLF→LF zu rewritern). Coverage 90.20 %.
-5. **MVP-Closure**: **Done** (siehe [`slice-mvp-closure.md`](../done/slice-mvp-closure.md)).
-   Drei Tranchen abgeschlossen: T1 ✅ `bfe6416` `init
-   --devcontainer` (LH-AK-005), T2 ✅ `8525c4c` LH-AK-001/-006
-   benannte e2e-Pins + Doctor-Severity-Fix für
-   `compose.yaml.valid` no-services (Error → Warn,
-   LH-AK-001-§2299-Konformität), T3 ✅ Closure + MVP-Bilanz.
+MVP-Status: **vollständig** (Audit-Trail in der MVP-Bilanz unten).
+Keine MVP-blockierenden Slices mehr offen; alle ADR-getriebenen
+V1/Later-Trigger-Slices sind in `done/`. Aktuell offen sind nur
+trigger- oder nutzer-getriebene V1- und Later-Folgen:
+
+1. **Erster Release-Tag `v0.1.0`** — Pipeline liegt bereit
+   ([`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md)
+   + [ADR-0007](../../adr/0007-distributionswege-ghcr.md)); der
+   Tag-Push selbst bleibt Nutzer-Trigger. Vor dem Tag muss die
+   Branch-Protection-Required-Status-Check-Liste im GitHub-UI
+   aktiviert sein (siehe
+   [`docs/user/branch-protection.md`](../../../user/branch-protection.md)).
+2. **V1-Add-ons** — Keycloak (`LH-FA-ADD-003` / `LH-AK-003`) und
+   OpenTelemetry (`LH-FA-ADD-004` / `LH-AK-004`); jeweils
+   eigener Slice-Plan bei Auslösung.
+3. **V1-Templates-Implementation** — drei Slices aus
+   [ADR-0009](../../adr/0009-template-format-yaml-files.md)
+   §Folgepunkte (`slice-v1-template-list`,
+   `slice-v1-template-init`, `slice-later-local-templates`).
+   Format ist entschieden (YAML + `text/template`), Implementation
+   noch offen.
+4. **V1-Generators** — `u-boot logs` (`LH-FA-UP-005`),
+   `--json`-/`--dry-run`-Output (`LH-FA-CLI-007/008`,
+   `LH-NFA-USE-004`). Maschinen-Schnittstelle, auf die
+   [ADR-0010](../../adr/0010-kein-http-driving-adapter.md) das
+   "kein HTTP-Adapter"-Argument stützt.
+5. **`LH-OPEN-002`-Distributionsweg-Restwege** — Binary, Homebrew,
+   Debian/RPM mit Trigger-Slices aus
+   [ADR-0007](../../adr/0007-distributionswege-ghcr.md)
+   §Entscheidung (npm/pip dort verworfen, GHCR ausgeliefert).
+6. **Later** — Migration (`LH-FA-CONF-006`), Custom-Data-Sources
+   (`LH-DA-004`).
 
 ### MVP-Bilanz — **MVP vollständig** (Stand `bc487fc`; M8-T5 `25cb123`)
 
@@ -159,10 +169,9 @@ Erledigt im V1-vorgezogenen Pfad:
   verbindlich aufgeführt.
   Siehe [`done/slice-later-http-driving-adapter.md`](../done/slice-later-http-driving-adapter.md).
 
-Plus die V1-Add-ons (LH-AK-003 Keycloak, LH-AK-004 OTel),
-V1-Generators (`u-boot logs`, `--json`-Output) und die vertagten
-Distributions-Restwege (Binary, Homebrew, Distro-Pakete) mit
-`slice-v2-*`-Triggern aus ADR-0007.
+Die noch offenen V1- und Later-Folgen (Add-ons, Templates-
+Implementation, Generators, Distributions-Restwege, Migration,
+Custom-Data-Sources) sind oben in §Nächste Schritte aufgeführt.
 
 ## Lifecycle-Hinweis
 
