@@ -33,7 +33,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
-      contents: read
+      contents: write    # write needed so the release-upload step can
+                         # create the release (when not pre-existing)
+                         # and attach the cross-compiled binary assets.
       packages: write
     env:
       DOCKER_BUILDKIT: '1'
@@ -156,3 +158,53 @@ jobs:
           if [[ "$IS_STABLE" == "true" ]]; then
             docker push "$REGISTRY/$IMAGE_NAME:latest"
           fi
+
+      # slice-v2-binary-distribution T2 — after the GHCR push has
+      # verified the version chain end-to-end, build the six cross-
+      # compiled binaries via the same VERSION pin and attach them
+      # as release assets. Build + upload run AFTER GHCR push so a
+      # broken VERSION chain can never produce binaries that ship.
+      - name: Build release binaries (6 platforms)
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          set -euo pipefail
+          make build-binaries VERSION="$VERSION"
+          ls -la bin/
+
+      - name: Upload binaries to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.tag.outputs.version }}
+          IS_STABLE: ${{ steps.tag.outputs.is_stable }}
+        run: |
+          set -euo pipefail
+          TAG="v$VERSION"
+
+          # Ensure the GitHub Release exists at this tag. Two cases:
+          # (1) operator pre-created the release (e.g. `gh release create`
+          #     with hand-written notes) → reuse it.
+          # (2) workflow created it from scratch → minimal auto-notes
+          #     that point operators to CHANGELOG.md §[VERSION].
+          PRERELEASE_FLAG=""
+          if [[ "$IS_STABLE" != "true" ]]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+
+          if gh release view "$TAG" --json tagName --jq '.tagName' >/dev/null 2>&1; then
+            echo "Reusing existing GitHub Release $TAG."
+          else
+            echo "Creating GitHub Release $TAG (auto-notes; operator can edit afterwards)."
+            gh release create "$TAG" \
+              --title "u-boot $TAG" \
+              --notes "Auto-generated release. See [CHANGELOG.md §[$VERSION]](https://github.com/${GITHUB_REPOSITORY}/blob/main/CHANGELOG.md) for the human-curated release notes." \
+              --target "$GITHUB_SHA" \
+              $PRERELEASE_FLAG
+          fi
+
+          # --clobber lets re-runs of the workflow replace existing
+          # assets cleanly (useful for `act` debugging and for the
+          # rare workflow-retry case after a transient upload failure).
+          gh release upload "$TAG" bin/u-boot-* --clobber
+
+          echo "Uploaded $(ls bin/u-boot-* | wc -l) binaries to release $TAG."
