@@ -11,6 +11,43 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.1.1] - TBD
+
+Targeted patch addressing the real-world feedback from the first
+`v0.1.0` GHCR pull (2026-05-31): `docker run ghcr.io/pt9912/u-boot:0.1.0
+doctor` reported four false-positive errors against a healthy host
+because the distroless image bundles no `docker` / `git` binaries
+to probe.
+
+### Added
+
+- `internal/hexagon/port/driven.RuntimeEnvironment` port plus
+  `internal/adapter/driven/runtime.FileEnv` adapter:
+  best-effort container detection via `/.dockerenv` (Docker Engine /
+  Desktop) and `/run/.containerenv` (Podman / CRI-O / buildah).
+
+### Changed
+
+- `u-boot doctor` now skips the four host-prerequisite checks
+  (`git.installed`, `docker.installed`, `docker.reachable`,
+  `docker.compose.installed`) when running inside a container, with
+  a `SeverityInfo` diagnostic and a hint that points at
+  [`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/open/slice-v0.1.1-doctor-container-awareness.md)
+  for the rationale. Effect: `docker run --rm
+  ghcr.io/pt9912/u-boot:0.1.1 doctor` no longer mis-reports a
+  healthy host as 4 errors; exit code on an otherwise-clean project
+  goes from 11 to 0.
+- Host installations are unaffected — `runtime.FileEnv` returns
+  `false` outside containers, so the existing
+  `LH-FA-DIAG-002`-classified errors / warnings remain.
+
+### Notes
+
+The medium-term fix is a host-native binary distribution
+([`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md),
+ADR-0007 §Folgepunkte 1 trigger now active); the v0.1.1 skip is the
+short-term ergonomic patch.
+
 ## [0.1.0] - 2026-05-31
 
 First public release. Closes the MVP scope from

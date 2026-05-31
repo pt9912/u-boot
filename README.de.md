@@ -156,21 +156,27 @@ docker run --rm --user "$(id -u):$(id -g)" -v /tmp/demo:/work -w /work \
 
 `doctor` ist für die **host-installierte** Form von u-boot
 ausgelegt — es prüft `docker`, `docker compose` und `git` im
-`$PATH`. Der `v0.1.0`-Distroless-Container bringt keines dieser
-Binaries mit (laut
+`$PATH`. Das Distroless-Image (`v0.1.0` und später) bringt keines
+dieser Binaries mit (laut
 [ADR-0007](docs/plan/adr/0007-distributionswege-ghcr.md)),
-deswegen meldet
-`docker run … ghcr.io/pt9912/u-boot:0.1.0 doctor` die Host-Tools
-fälschlicherweise als fehlend. Ein v0.1.1-Followup
-([`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/open/slice-v0.1.1-doctor-container-awareness.md))
-ergänzt Container-Detection + Skip-Semantik; mittelfristig liefert
-eine Binary-Distribution
+also können die Host-Probes aus einem `docker run …` heraus nicht
+laufen.
+
+Ab **`v0.1.1`** erkennt `doctor` die Container-Laufzeit via
+`/.dockerenv` oder `/run/.containerenv` und emittiert für die vier
+Host-Prerequisite-Checks eine `SeverityInfo`-Diagnostik
+„skipped — running inside container" statt sie als Errors
+fehlzudeuten. Exit-Code bei ansonsten gesundem Projekt ist `0`
+(statt `11`). Designhintergrund:
+[`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/open/slice-v0.1.1-doctor-container-awareness.md).
+
+Für echte host-seitige Diagnostik `doctor` aus einer Host-
+Installation laufen lassen, sobald die Binary-Distribution
+gelandet ist
 ([`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md),
-ADR-0007 §Folgepunkte 1 Trigger jetzt aktiv) einen host-nativen
-Installationsweg. Bis dahin: `doctor` aus einer Host-Installation
-heraus laufen lassen oder die Subkommandos
-`init`/`add`/`up`/`down`/`generate`/`config` nutzen — die
-funktionieren via Volume-Mount im Container.
+ADR-0007 §Folgepunkte 1 Trigger jetzt aktiv). Die anderen
+Subkommandos (`init`/`add`/`up`/`down`/`generate`/`config`)
+funktionieren heute schon via Volume-Mount im Container.
 
 ### Build aus Quellen (Entwickler-Pfad)
 

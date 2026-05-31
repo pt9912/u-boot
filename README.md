@@ -149,18 +149,24 @@ docker run --rm --user "$(id -u):$(id -g)" -v /tmp/demo:/work -w /work \
 
 `doctor` is designed for the **host-installed** form of u-boot — it
 checks `docker`, `docker compose` and `git` on `$PATH`. The
-`v0.1.0` distroless container ships none of these binaries (per
-[ADR-0007](docs/plan/adr/0007-distributionswege-ghcr.md)), so
-`docker run … ghcr.io/pt9912/u-boot:0.1.0 doctor` will mis-report
-the host's tooling as missing. A v0.1.1-follow-up
-([`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/open/slice-v0.1.1-doctor-container-awareness.md))
-adds container-detection + skip semantics; medium-term a binary
-distribution
+distroless image (`v0.1.0` and later) ships none of these binaries
+(per [ADR-0007](docs/plan/adr/0007-distributionswege-ghcr.md)), so
+those host probes cannot run from a `docker run …` invocation.
+
+Starting with **`v0.1.1`**, `doctor` detects container runtime via
+`/.dockerenv` or `/run/.containerenv` and emits a `SeverityInfo`
+"skipped — running inside container" diagnostic for the four
+host-prerequisite checks instead of mis-reporting them as errors.
+Exit code on an otherwise-clean project is `0` (not `11`). See
+[`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/open/slice-v0.1.1-doctor-container-awareness.md)
+for the design rationale.
+
+For real host-side diagnostics, run `doctor` from a host install
+once the binary distribution lands
 ([`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md),
-ADR-0007 §Folgepunkte 1 trigger now active) provides a host-native
-install path. Until then, run `doctor` from a host install, or use
-the `init`/`add`/`up`/`down`/`generate`/`config` subcommands —
-those work via volume-mount in the container.
+ADR-0007 §Folgepunkte 1 trigger now active). The other subcommands
+(`init`/`add`/`up`/`down`/`generate`/`config`) work fine via
+volume-mount in the container today.
 
 ### Build from source (developer path)
 
