@@ -68,7 +68,7 @@ Offene Folgepunkte (eigene ADRs bei Bedarf):
 
 - Paketierung im Detail (`LH-OPEN-002`): GHCR-Image, GitHub Release mit
   Binary-Artefakten, später ggf. Homebrew/Debian. GHCR-Pfad wird in
-  [`slice-v1-release-pipeline.md`](../planning/open/slice-v1-release-pipeline.md)
+  [`slice-v1-release-pipeline.md`](../planning/done/slice-v1-release-pipeline.md)
   geplant; weitere Distributionswege bleiben offen.
 
 Geschlossene Folgepunkte:

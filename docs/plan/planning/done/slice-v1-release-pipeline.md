@@ -182,11 +182,14 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
   aktualisieren.
 
 **DoD T5:**
-- [ ] `carveouts.md` entsprechend bereinigt.
-- [ ] Slice-Plan in `done/` mit allen T1..T5 DoD-Lines.
-- [ ] Roadmap-Zeile auf Done; MVP-Bilanz aktualisiert.
-- [ ] `make gates` grün.
-- [ ] DoD-Line: `T5 ✅ <commit-hash>`.
+- [x] `carveouts.md` Image-Publish/Trivy-Zeile entfernt;
+  `LH-OPEN-002`-Zeile auf Restwege reduziert.
+- [x] Slice-Plan in `done/` mit allen T1..T5 DoD-Lines.
+- [x] Roadmap-Carveout-Tabellen-Zeile auf Done; "Nächste Schritte"
+  und MVP-Bilanz V1-Liste aktualisiert.
+- [x] READMEs (de/en) Status-Section auf neuen Stand.
+- [x] `make gates` grün.
+- [x] T5 ✅ `<wird in mark-T5-done-Commit gefüllt>`.
 
 ## Out of Scope
 
@@ -196,16 +199,23 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
 
 ## Bezug
 
-- Auslösende ADR: `0004-ci-system.md` Folgepunkte (3 davon).
+- Auslösende ADR: `0004-ci-system.md` Folgepunkte (3 davon),
+  `0007-distributionswege-ghcr.md` (mit T1 aus diesem Slice angelegt).
 - Auslösende Spec: `LH-OPEN-002` Paketierung, `LH-QA-003` PR-Blocking.
 - Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
-  Image-Publish + Trivy (Branch-Protection ist mit dem
-  Teilabschluss-Commit 2026-05-27 aufgehoben, siehe
-  [`docs/user/branch-protection.md`](../../../user/branch-protection.md)).
-- Hängt von: erstem Release-Wunsch (GHCR/Trivy/`LH-OPEN-002`).
+  Image-Publish + Trivy mit Slice-Closure entfernt;
+  `LH-OPEN-002`-Zeile auf Restwege (Binary / Homebrew /
+  Distro-Pakete) reduziert (siehe
+  [ADR-0007](../../adr/0007-distributionswege-ghcr.md)).
+- Branch-Protection-Checkliste:
+  [`docs/user/branch-protection.md`](../../../user/branch-protection.md).
 - **Teilabschluss 2026-05-27:** Branch-Protection-Checkliste in
-  `docs/user/branch-protection.md` veröffentlicht. Restscope
-  (Image-Publish + Trivy + `LH-OPEN-002`) bleibt offen bis zum
-  ersten Release-Wunsch.
+  `docs/user/branch-protection.md` veröffentlicht.
+- **Schließung 2026-05-31:** T1..T5 abgeschlossen. ADR-0007 setzt
+  GHCR als primären Weg; `publish.yml` liefert Tag-getriebenen
+  Image-Push; `ci.yml::image-scan` liefert Trivy als dritten
+  PR-blockierenden Job; `quality.md` und `branch-protection.md`
+  spiegeln den neuen Stand. `LH-OPEN-002`-Restwege bleiben mit
+  Trigger-Slices vertagt (per ADR-0007).
 - Absorbiert (2026-05-27): vormalig eigenständiges
   `slice-m3-branch-protection-checkliste.md`.

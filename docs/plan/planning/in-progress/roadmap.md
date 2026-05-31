@@ -42,7 +42,7 @@ Disziplin-Verstoß.
 | [`slice-m4-logging-port`](../done/slice-m4-logging-port.md) | `forbidigo.msg` referenziert nicht-existenten Logging-Port; `u-boot doctor` braucht strukturiertes Logging | M4-vorgezogen | Done |
 | [`slice-m6-docker-integrationstests`](../done/slice-m6-docker-integrationstests.md) | `//go:build docker`-Pfad nur dokumentiert, kein CI-Job; erst mit Docker-Adapter sinnvoll | M6 | Done |
 | [`slice-followup-verbosity-wiring`](../done/slice-followup-verbosity-wiring.md) | `--verbose`/`--debug` (LH-FA-CLI-005) waren persistent Cobra-Flags ohne Logger-Effekt | M4-followup | Done (`7c6fbce`) |
-| [`slice-v1-release-pipeline`](../open/slice-v1-release-pipeline.md) | ADR-0004 Folgepunkte Image-Publish + Trivy; `LH-OPEN-002` Paketierung (GHCR-Anteil) | V1 | Open |
+| [`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md) | ADR-0004 Folgepunkte Image-Publish + Trivy; `LH-OPEN-002` Paketierung (GHCR-Anteil) | V1 | Done (T1 `0f64938`, T2 `93b703e`, T3 `8212889`, T4 `066917a`, T5 schließt — Branch-Protection-Teilabschluss 2026-05-27) |
 | [`slice-v1-markdown-link-validator`](../done/slice-v1-markdown-link-validator.md) | Doku-/Link-Drift in `docs/`/`spec/` nicht maschinell geprüft | V1-vorgezogen | Done |
 | [`slice-v1-backup-streaming-copy`](../done/slice-v1-backup-streaming-copy.md) | `LH-FA-INIT-005` Backup heute mit `ReadFile`+`WriteFile`; harter 256-MiB-Cap als MVP-Workaround | V1-vorgezogen | Done |
 | [`slice-v1-plugin-system-entscheidung`](../open/slice-v1-plugin-system-entscheidung.md) | `LH-OPEN-003` Plugin-System offen | V1 | Open |
@@ -116,27 +116,36 @@ Slice, abgedeckt durch die Implementierung:
   ComposePs-JSON-Parser (M6).
 
 Damit ist **kein MVP-`LH-AK-*`, kein MVP-`LH-FA-*` und kein
-MVP-`LH-SA-*` mehr offen**. Der erste Release-Schnitt
-(`v0.1.0` o. ä.) wird durch
-[`slice-v1-release-pipeline`](../open/slice-v1-release-pipeline.md)
-ausgelöst (Trigger: erster GHCR-Tag).
+MVP-`LH-SA-*` mehr offen**. Die Release-Maschinerie für den ersten
+Schnitt (`v0.1.0` o. ä.) liegt seit
+[`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md)
+**bereit**: GHCR-Push via `.github/workflows/publish.yml` auf Tag `v*`,
+Trivy als dritter PR-blockierender CI-Job, ADR-0007 setzt GHCR als
+primären Distributionsweg. Der Tag-Push selbst bleibt Nutzer-Trigger.
 
 ### V1-Phase: nicht release-blockierend, Trigger-getrieben
 
-Vier offene V1-Slices warten auf konkrete Trigger:
+Zwei offene V1-Slices warten auf konkrete Trigger:
 
-- [`slice-v1-release-pipeline`](../open/slice-v1-release-pipeline.md):
-  Trigger erster GHCR-Tag oder erster externer PR.
 - [`slice-v1-plugin-system-entscheidung`](../open/slice-v1-plugin-system-entscheidung.md):
   Trigger erster externer Plugin-Vorschlag.
 - [`slice-v1-template-format-entscheidung`](../open/slice-v1-template-format-entscheidung.md):
   Trigger erster externer Template-Vorschlag.
-- ~~`slice-v1-yaml-parse-error-sentinel`~~: **Done** (`1008326`) —
-  V1-vorgezogen abgearbeitet als Review-Followup-Closure für
-  M7-T5-N2. Siehe [`done/slice-v1-yaml-parse-error-sentinel.md`](../done/slice-v1-yaml-parse-error-sentinel.md).
 
-Plus die V1-Add-ons (LH-AK-003 Keycloak, LH-AK-004 OTel) und
-V1-Generators (`u-boot logs`, `--json`-Output).
+Erledigt im V1-vorgezogenen Pfad:
+
+- ~~`slice-v1-yaml-parse-error-sentinel`~~: **Done** (`1008326`) —
+  V1-vorgezogen als Review-Followup-Closure für M7-T5-N2.
+  Siehe [`done/slice-v1-yaml-parse-error-sentinel.md`](../done/slice-v1-yaml-parse-error-sentinel.md).
+- ~~`slice-v1-release-pipeline`~~: **Done** (T1 `0f64938`, T2
+  `93b703e`, T3 `8212889`, T4 `066917a`, T5 schließt — siehe
+  [`done/slice-v1-release-pipeline.md`](../done/slice-v1-release-pipeline.md)
+  und [ADR-0007](../../adr/0007-distributionswege-ghcr.md)).
+
+Plus die V1-Add-ons (LH-AK-003 Keycloak, LH-AK-004 OTel),
+V1-Generators (`u-boot logs`, `--json`-Output) und die vertagten
+Distributions-Restwege (Binary, Homebrew, Distro-Pakete) mit
+`slice-v2-*`-Triggern aus ADR-0007.
 
 ## Lifecycle-Hinweis
 

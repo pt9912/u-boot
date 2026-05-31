@@ -19,8 +19,7 @@ Spalten:
 
 | Carveout | Status | Plan / Begründung |
 | -------- | ------ | ----------------- |
-| ADR-0004 Folgepunkt: Image-Publish nach GHCR und Trivy-Image-Scan fehlen (`.github/workflows/ci.yml` enthält sie nicht) | temporär | [`open/slice-v1-release-pipeline.md`](../open/slice-v1-release-pipeline.md) |
-| `LH-OPEN-002` Paketierung ist offen (`spec/lastenheft.md` §14) — Distributionswege (Binary-Release, Homebrew, Debian/RPM, npm/pip) sind nicht festgelegt | temporär | [`open/slice-v1-release-pipeline.md`](../open/slice-v1-release-pipeline.md) (GHCR-Anteil); weitere Distributionswege bekommen eigene Slices beim ersten konkreten Bedarf |
+| `LH-OPEN-002` Paketierung-Restwege offen (`spec/lastenheft.md` §14): Binary-Release / Homebrew / Debian/RPM — npm/pip durch ADR-0007 verworfen, GHCR durch ADR-0007 + [`done/slice-v1-release-pipeline.md`](../done/slice-v1-release-pipeline.md) entschieden und ausgeliefert | temporär | Restwege bekommen eigene `slice-v2-*`-Pläne in `open/` beim ersten konkreten Trigger (siehe [ADR-0007](../../adr/0007-distributionswege-ghcr.md) §Folgepunkte) |
 | `LH-OPEN-003` Plugin-System ist offen (`spec/lastenheft.md` §14, auch `spec/architecture.md` §7 als „geplante Erweiterung") — keine Entscheidung zwischen fest-eingebauten Add-ons und nachladbaren Plugins | temporär | [`open/slice-v1-plugin-system-entscheidung.md`](../open/slice-v1-plugin-system-entscheidung.md) |
 | `LH-OPEN-004` Template-Format ist offen (`spec/lastenheft.md` §14) — YAML+Dateien vs. Cookiecutter vs. eigenes Format vs. OCI-Pakete | temporär | [`open/slice-v1-template-format-entscheidung.md`](../open/slice-v1-template-format-entscheidung.md) |
 | HTTP-Driving-Adapter ist als „geplante Erweiterung" in `spec/architecture.md` §7 erwähnt, aber nicht spezifiziert oder gefordert | temporär | [`open/slice-later-http-driving-adapter.md`](../open/slice-later-http-driving-adapter.md) |

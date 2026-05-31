@@ -219,7 +219,7 @@ make ci              # gates + govulncheck
 ```
 
 Trivy-Image-Scan ist seit
-[`slice-v1-release-pipeline`](../plan/planning/open/slice-v1-release-pipeline.md)
+[`slice-v1-release-pipeline`](../plan/planning/done/slice-v1-release-pipeline.md)
 T3 als dritter PR-blockierender CI-Job aktiv
 (`.github/workflows/ci.yml` Job `image-scan`,
 `aquasecurity/trivy-action` mit `severity: HIGH,CRITICAL`,

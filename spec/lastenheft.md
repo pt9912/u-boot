@@ -2706,7 +2706,7 @@ vertagt/verworfen. Formell offen, bis alle Restwege entschieden sind.
 
 | Option | Status | Verweis |
 | ------ | ------ | ------- |
-| Container Image (GHCR `ghcr.io/pt9912/u-boot`) | **Gewählt** | [ADR-0007](../docs/plan/adr/0007-distributionswege-ghcr.md), Umsetzung in [`slice-v1-release-pipeline`](../docs/plan/planning/open/slice-v1-release-pipeline.md) T2/T3 |
+| Container Image (GHCR `ghcr.io/pt9912/u-boot`) | **Gewählt** | [ADR-0007](../docs/plan/adr/0007-distributionswege-ghcr.md), Umsetzung in [`slice-v1-release-pipeline`](../docs/plan/planning/done/slice-v1-release-pipeline.md) T2/T3 |
 | Einzelnes Binary | Vertagt mit Trigger | `slice-v2-binary-distribution.md` (bei Auslösung) |
 | Homebrew | Vertagt mit Trigger | `slice-v2-homebrew-formula.md` (bei Auslösung) |
 | Debian/RPM | Vertagt mit Trigger | `slice-v2-distro-pakete.md` (bei Auslösung) |

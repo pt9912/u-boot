@@ -39,7 +39,7 @@ Polish-Slice").
 ## Out of Scope
 
 - **Digest-Pinning per `*_BASE_IMAGE`-ARGs** aus dem c-hsm-doc-Dockerfile:
-  passt thematisch in [`slice-v1-release-pipeline`](../open/slice-v1-release-pipeline.md)
+  passt thematisch in [`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md)
   zusammen mit GHCR-Publish + Trivy-Scan (alle Release-Bauformen
   brauchen den Pinning-Pfad gleichzeitig, einzeln eingeführt wäre er
   totes Gewicht).

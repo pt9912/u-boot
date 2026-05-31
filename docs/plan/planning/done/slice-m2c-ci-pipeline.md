@@ -23,7 +23,7 @@ CI-fertig"-Drift erst gar nicht entsteht.
   GitHub-Actions-Vendor-Bindung kompensiert durch Make-Targets als SSOT;
   Folgepunkte explizit aufgelistet (Image-Publish, Trivy,
   Branch-Protection — alle drei sind in
-  [`slice-v1-release-pipeline`](../open/slice-v1-release-pipeline.md)
+  [`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md)
   gebündelt).
 - **Workflow** `.github/workflows/ci.yml`:
   - Zwei parallele Jobs: `gates` (`make gates`) und `security-gates`
@@ -49,5 +49,5 @@ CI-fertig"-Drift erst gar nicht entsteht.
 - Vorgänger: [`slice-m2b-solid-lint-profil`](slice-m2b-solid-lint-profil.md).
 - Nachfolger: M2d (Carveout-Disziplin sammelt alle bewussten Lücken
   inkl. ADR-0004-Folgepunkte ein).
-- Aufhebt mit: [`slice-v1-release-pipeline`](../open/slice-v1-release-pipeline.md)
+- Aufhebt mit: [`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md)
   (Image-Publish + Trivy + Branch-Protection — 3 Folgepunkte gebündelt).

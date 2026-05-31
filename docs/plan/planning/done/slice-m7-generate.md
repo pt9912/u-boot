@@ -672,7 +672,7 @@ nächste Lauf erneut als Konflikt sieht):
   ergänzen.
 - **`generate changelog --release <version>`**-Workflow (User-
   initiierter Release-Schnitt) — V1-Folge-Slice, ggf. gekoppelt an
-  [`slice-v1-release-pipeline`](../open/slice-v1-release-pipeline.md).
+  [`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md).
 - **`generate dockerfile`** für ein Anwendungs-Dockerfile außerhalb
   von `.devcontainer/` (LH-FA-DOC-002 V1) — eigener V1-Slice.
 - **`--json`-Output** für Generate-Summary — analog zur M4/M6-

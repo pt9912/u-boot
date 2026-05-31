@@ -13,7 +13,7 @@ Accepted
 `LH-OPEN-002` Paketierung (siehe `spec/lastenheft.md` §14) ist seit
 M0 offen. Mit dem Abschluss des MVP (Stand `e0d6c87`) und dem
 bevorstehenden ersten Release-Schnitt (`v0.1.0` über
-[`slice-v1-release-pipeline`](../planning/open/slice-v1-release-pipeline.md))
+[`slice-v1-release-pipeline`](../planning/done/slice-v1-release-pipeline.md))
 muss die Frage konkret beantwortet werden, bevor
 `.github/workflows/publish.yml` geschrieben wird.
 
@@ -53,7 +53,7 @@ Vorlagen:
 
 **Container Image über GHCR** (`ghcr.io/pt9912/u-boot`) ist der
 primäre und für `v0.1.0` einzige Distributionsweg. Die
-[`slice-v1-release-pipeline`](../planning/open/slice-v1-release-pipeline.md)-Tranche
+[`slice-v1-release-pipeline`](../planning/done/slice-v1-release-pipeline.md)-Tranche
 T2 liefert die Workflow-Mechanik, T3 den Trivy-Scan.
 
 Über die sechs Optionen aus §14:
@@ -124,7 +124,7 @@ Alternativen (verworfen):
 
 ## Folgepunkte
 
-- [`slice-v1-release-pipeline`](../planning/open/slice-v1-release-pipeline.md)
+- [`slice-v1-release-pipeline`](../planning/done/slice-v1-release-pipeline.md)
   T2 setzt das hier festgelegte Tag-Schema und die GHCR-Settings im
   `publish.yml`-Workflow um.
 - `spec/lastenheft.md` §14 `LH-OPEN-002`-Abschnitt wird mit T1

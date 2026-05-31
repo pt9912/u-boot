@@ -17,9 +17,12 @@ recurring artefacts (README, CHANGELOG, `.env.example`).
 **MVP vollständig — seven subcommands fully wired (`init` + `doctor` + `add` + `up` + `down` + `generate` + `config`).**
 
 Every MVP-priority `LH-AK-*`, `LH-FA-*` and `LH-SA-*` ID from
-[`spec/lastenheft.md`](spec/lastenheft.md) is now delivered; the
-first release cut is gated on the V1 release-pipeline slice
-(trigger: first GHCR tag). Audit trail in the
+[`spec/lastenheft.md`](spec/lastenheft.md) is now delivered. The
+release pipeline is in place — GHCR image push on `v*` tags via
+[`.github/workflows/publish.yml`](.github/workflows/publish.yml),
+Trivy as a third PR-blocking job, distribution policy in
+[ADR-0007](docs/plan/adr/0007-distributionswege-ghcr.md). The first
+tag push itself stays a user trigger. Audit trail in the
 [roadmap MVP-Bilanz block](docs/plan/planning/in-progress/roadmap.md).
 
 - `u-boot init [name] [--devcontainer]` creates the

@@ -27,7 +27,7 @@ ausgeführt sein.
      - `gates` (LH-QA-003)
      - `security-gates` (LH-QA-003)
      - `image-scan` (LH-QA-003, geliefert mit
-       [`slice-v1-release-pipeline`](../plan/planning/open/slice-v1-release-pipeline.md)
+       [`slice-v1-release-pipeline`](../plan/planning/done/slice-v1-release-pipeline.md)
        T3, siehe
        [ADR-0007](../plan/adr/0007-distributionswege-ghcr.md))
 5. **Require conversation resolution before merging:** aktivieren (Review-
@@ -66,7 +66,7 @@ Wahrheit. Für das Solo-Bootstrap reicht diese Markdown-Checkliste.
 
 - Auslösende Spec: `LH-QA-003` „alle drei Jobs PR-blockierend",
   `ADR-0004` Folgepunkt „Branch-Protection nicht versioniert".
-- Slice: [`slice-v1-release-pipeline`](../plan/planning/open/slice-v1-release-pipeline.md)
+- Slice: [`slice-v1-release-pipeline`](../plan/planning/done/slice-v1-release-pipeline.md)
   (Teilabschluss Branch-Protection 2026-05-27; T2 `publish.yml` +
   T3 `image-scan` 2026-05-31; LH-OPEN-002-Restwege bleiben mit
   Trigger-Slices vertagt — siehe
