@@ -5,7 +5,8 @@ für jeden Pull-Request **blockierend** sind. Die exakten Required-
 Status-Check-Namen sind die Workflow-`name:`-Felder
 (`gates (lint + test + coverage-gate)`, `security-gates (govulncheck)`,
 `image-scan (trivy HIGH+CRITICAL)`), nicht die kürzeren
-`jobs.<key>`-Identifier — siehe Required-Status-Checks-Schritt unten.
+`jobs.<key>`-Identifier — siehe Schritt 4 „Require status checks to
+pass before merging" → Bullet „Status checks that are required" unten.
 Der GitHub-Actions-Workflow allein reicht für die Aktivierung nicht —
 er muss zusätzlich in den Repository-Settings als **Required Status
 Check** eingetragen werden. Diese Aktivierung lebt im GitHub-UI, nicht

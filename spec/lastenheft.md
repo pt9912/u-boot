@@ -1515,7 +1515,7 @@ Priorität: V1
 Das Makefile soll Aggregator-Targets bereitstellen:
 
 - `gates` – Inner-Loop-Pflichtgates (`lint` + `test` + `coverage-gate`), PR-blockierend.
-- `ci` – `gates` plus `govulncheck` (bei Go-Stack aus `LH-OPEN-001` zwingend) plus `image-scan` (Trivy-Image-Scan gegen das Runtime-Image, durch LH-QA-003 als dritter PR-blockierender Job verbindlich); SBOM-Erzeugung bleibt optional.
+- `ci` – `gates` plus `govulncheck` (bei Go-Stack aus `LH-OPEN-001` zwingend) plus `image-scan` (Trivy-Image-Scan gegen das Runtime-Image, durch `LH-QA-003` als dritter PR-blockierender Job verbindlich — der `make ci`-Aggregator selbst ist V1, sein `image-scan`-Bestandteil ist über `LH-QA-003` MVP-Pflicht); SBOM-Erzeugung bleibt optional.
 - `fullbuild` – `ci` plus `build`; vollständiger Closure-Lauf.
 
 Aggregator-Targets müssen bei Fehler eines untergeordneten Targets mit Non-Zero-Exit abbrechen und die Fehlerursache klar benennen.

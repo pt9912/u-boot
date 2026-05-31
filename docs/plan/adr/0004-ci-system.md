@@ -96,9 +96,15 @@ Positiv:
   `slice-v1-release-pipeline` T3) werden nicht gemerged, sobald die
   Branch-Protection-Required-Status-Checks aktiviert sind
   (siehe [`docs/user/branch-protection.md`](../../user/branch-protection.md)).
-- **Low maintenance**: drei Jobs, alle rufen Make-Targets — wenn sich
-  die Build-Pipeline ändert (neuer Stage, neuer Aggregator), läuft der
-  Workflow weiter ohne YAML-Edit.
+- **Low maintenance**: drei Jobs, alle starten von Make-Targets aus —
+  `gates`/`security-gates` delegieren komplett (`make gates`,
+  `make govulncheck`), `image-scan` läuft `make build` plus die
+  `aquasecurity/trivy-action` mit eigenständigem `trivy-version`-Pin.
+  Build-Pipeline-Änderungen lassen den YAML-Workflow weitgehend
+  unberührt; Trivy-Versions-Bumps berühren ZWEI Pin-Stellen
+  (`Makefile::TRIVY_VERSION` + `ci.yml::trivy-version`, beide auf
+  derselben Trivy-Version in unterschiedlicher Schreibweise — Doku
+  am Pin selbst).
 - **Supply-Chain-Härtung**: SHA-pinned Actions verhindern den
   klassischen Tag-Move-Angriff; explizite `permissions: {}` blockt
   versehentlich neu hinzukommende Steps mit schreibendem Token.
@@ -112,9 +118,11 @@ Negativ / Trade-offs:
   eigentliche Logik in `Makefile`/`Dockerfile` lebt; ein Wechsel
   (GitLab CI, Forgejo, …) bedeutet nur den Workflow-Wrapper neu zu
   schreiben.
-- **CI-Runtime**: zwei sequentielle Docker-Builds pro `gates`/
-  `security-gates`-Job (deps-Cache, dann lint/test/coverage); der
-  zusätzliche `image-scan`-Job baut das Runtime-Image und scannt es
+- **CI-Runtime**: `gates` läuft zwei sequentielle Docker-Builds
+  (deps-Cache, dann lint/test/coverage). `security-gates` läuft
+  einen einzelnen ephemeren `docker run golang:$(GO_VERSION) ...`
+  mit `go install` + `govulncheck` (kein `docker build`).
+  `image-scan` baut das Runtime-Image (`make build`) und scannt es
   mit Trivy. Akzeptabel für den Bootstrap-Stand; mit wachsender
   Codebase ggf. Cache-Strategien (BuildKit Remote Cache, GHA Cache
   Action) ergänzen.
