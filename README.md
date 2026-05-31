@@ -17,13 +17,16 @@ recurring artefacts (README, CHANGELOG, `.env.example`).
 **MVP vollständig — seven subcommands fully wired (`init` + `doctor` + `add` + `up` + `down` + `generate` + `config`).**
 
 Every MVP-priority `LH-AK-*`, `LH-FA-*` and `LH-SA-*` ID from
-[`spec/lastenheft.md`](spec/lastenheft.md) is now delivered. The
-release pipeline is in place — GHCR image push on `v*` tags via
-[`.github/workflows/publish.yml`](.github/workflows/publish.yml),
-Trivy as a third PR-blocking job, distribution policy in
-[ADR-0007](docs/plan/adr/0007-distributionswege-ghcr.md). The first
-tag push itself stays a user trigger. Audit trail in the
-[roadmap MVP-Bilanz block](docs/plan/planning/in-progress/roadmap.md).
+[`spec/lastenheft.md`](spec/lastenheft.md) is delivered. **`v0.1.0`
+is released (2026-05-31)** — see
+[GitHub Release](https://github.com/pt9912/u-boot/releases/tag/v0.1.0)
+and the GHCR image at `ghcr.io/pt9912/u-boot:0.1.0` (plus the
+stable-floating `:latest`). Distribution policy in
+[ADR-0007](docs/plan/adr/0007-distributionswege-ghcr.md). Audit
+trail in the
+[roadmap MVP-Bilanz block](docs/plan/planning/in-progress/roadmap.md)
+and the
+[release-cut slice](docs/plan/planning/done/slice-v1-release-cut-v0.1.0.md).
 
 - `u-boot init [name] [--devcontainer]` creates the
   LH-FA-INIT-003 project structure plus `u-boot.yaml`
@@ -89,21 +92,27 @@ tag push itself stays a user trigger. Audit trail in the
 | ----- | ------ | ------ |
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
 | Architecture decisions | 10 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
-| Implementation | M1–M8 ✅, MVP-Closure ✅ — **MVP vollständig** | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
+| Implementation | M1–M8 ✅, MVP-Closure ✅ — **MVP vollständig; v0.1.0 released 2026-05-31** | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
 | Carveouts | 1 temporär (LH-OPEN-002-Restwege mit benannten Trigger-Slices in ADR-0007), 8 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
 
-The build is **Docker-only** (`LH-FA-BUILD-007`): no Go toolchain on the
-host is required. Only Docker and `make` need to be installed.
+### Pull from GHCR (recommended)
 
 ```bash
-make help            # list all targets
-make build           # build the runtime image (distroless static, nonroot)
-make run             # smoke test: docker run u-boot --help
+docker pull ghcr.io/pt9912/u-boot:0.1.0    # pinned tag, recommended
+# or
+docker pull ghcr.io/pt9912/u-boot:latest   # stable-floating
 ```
 
-Real `u-boot init` against a host directory (distroless runs as
+Verify:
+
+```bash
+docker run --rm ghcr.io/pt9912/u-boot:0.1.0 --version
+# → u-boot version 0.1.0
+```
+
+`u-boot init` against a host directory (the distroless image runs as
 non-root UID 65532; `--user` matches the host UID so written files
 are owned by you):
 
@@ -111,7 +120,7 @@ are owned by you):
 mkdir /tmp/demo && \
   docker run --rm --user "$(id -u):$(id -g)" \
     -v /tmp/demo:/work -w /work \
-    u-boot:latest init demo --no-git
+    ghcr.io/pt9912/u-boot:0.1.0 init demo --no-git
 ```
 
 Result: `u-boot.yaml` (`schemaVersion: 1`), `compose.yaml`, `README.md`,
@@ -124,16 +133,46 @@ strategy — no silent overwrites:
 ```bash
 # default: refuse to touch existing files
 docker run --rm --user "$(id -u):$(id -g)" -v /tmp/demo:/work -w /work \
-  u-boot:latest init demo --no-git
+  ghcr.io/pt9912/u-boot:0.1.0 init demo --no-git
 # → exit 10: "project already initialized"
 
 # refresh only the U-BOOT MANAGED BLOCK regions, keep user content
 docker run --rm --user "$(id -u):$(id -g)" -v /tmp/demo:/work -w /work \
-  u-boot:latest init demo --no-git --force
+  ghcr.io/pt9912/u-boot:0.1.0 init demo --no-git --force
 
 # full overwrite with safety backup to <file>.bak[.N]
 docker run --rm --user "$(id -u):$(id -g)" -v /tmp/demo:/work -w /work \
-  u-boot:latest init demo --no-git --force --backup
+  ghcr.io/pt9912/u-boot:0.1.0 init demo --no-git --force --backup
+```
+
+### `u-boot doctor` and the container caveat
+
+`doctor` is designed for the **host-installed** form of u-boot — it
+checks `docker`, `docker compose` and `git` on `$PATH`. The
+`v0.1.0` distroless container ships none of these binaries (per
+[ADR-0007](docs/plan/adr/0007-distributionswege-ghcr.md)), so
+`docker run … ghcr.io/pt9912/u-boot:0.1.0 doctor` will mis-report
+the host's tooling as missing. A v0.1.1-follow-up
+([`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/open/slice-v0.1.1-doctor-container-awareness.md))
+adds container-detection + skip semantics; medium-term a binary
+distribution
+([`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md),
+ADR-0007 §Folgepunkte 1 trigger now active) provides a host-native
+install path. Until then, run `doctor` from a host install, or use
+the `init`/`add`/`up`/`down`/`generate`/`config` subcommands —
+those work via volume-mount in the container.
+
+### Build from source (developer path)
+
+The build is **Docker-only** (`LH-FA-BUILD-007`): no Go toolchain on the
+host is required. Only Docker and `make` need to be installed.
+
+```bash
+make help                       # list all targets
+make build                      # build runtime image (distroless), default VERSION=0.1.0-dev
+make build VERSION=0.1.0        # build with a pinned version label
+make run                        # smoke test: docker run u-boot --help
+make image-scan                 # local Trivy scan (parity with CI image-scan job)
 ```
 
 Inner-loop quality gates (`LH-FA-BUILD-005` / `-006`):

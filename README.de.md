@@ -17,13 +17,16 @@ und wiederkehrende Artefakte (README, CHANGELOG, `.env.example`).
 **MVP vollständig — sieben Subkommandos verdrahtet (`init` + `doctor` + `add` + `up` + `down` + `generate` + `config`).**
 
 Jeder MVP-priorisierte `LH-AK-*`-, `LH-FA-*`- und `LH-SA-*`-Eintrag
-aus [`spec/lastenheft.md`](spec/lastenheft.md) ist geliefert. Die
-Release-Pipeline liegt bereit — GHCR-Image-Push auf `v*`-Tags via
-[`.github/workflows/publish.yml`](.github/workflows/publish.yml),
-Trivy als dritter PR-blockierender Job, Distributionsentscheidung
-in [ADR-0007](docs/plan/adr/0007-distributionswege-ghcr.md). Der
-erste Tag-Push selbst bleibt Nutzer-Trigger. Audit-Trail im
-[MVP-Bilanz-Block der Roadmap](docs/plan/planning/in-progress/roadmap.md).
+aus [`spec/lastenheft.md`](spec/lastenheft.md) ist geliefert.
+**`v0.1.0` ist released (2026-05-31)** — siehe
+[GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.1.0)
+und das GHCR-Image `ghcr.io/pt9912/u-boot:0.1.0` (plus den stabilen
+Floating-Tag `:latest`). Distributionsentscheidung in
+[ADR-0007](docs/plan/adr/0007-distributionswege-ghcr.md). Audit-
+Trail im
+[MVP-Bilanz-Block der Roadmap](docs/plan/planning/in-progress/roadmap.md)
+und im
+[Release-Cut-Slice](docs/plan/planning/done/slice-v1-release-cut-v0.1.0.md).
 
 - `u-boot init [name] [--devcontainer]` erzeugt die
   LH-FA-INIT-003-Projektstruktur plus `u-boot.yaml`
@@ -96,30 +99,35 @@ erste Tag-Push selbst bleibt Nutzer-Trigger. Audit-Trail im
 | ----- | ------ | ------ |
 | Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
 | Architekturentscheidungen | 10 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
-| Implementierung | M1–M8 ✅, MVP-Closure ✅ — **MVP vollständig** | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
+| Implementierung | M1–M8 ✅, MVP-Closure ✅ — **MVP vollständig; v0.1.0 released 2026-05-31** | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
 | Carveouts | 1 temporär (LH-OPEN-002-Restwege mit benannten Trigger-Slices in ADR-0007), 8 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
 
 ## Quickstart
 
-Der Build ist **Docker-only** (`LH-FA-BUILD-007`): es wird keine
-Go-Toolchain am Host benötigt. Nur Docker und `make` müssen installiert
-sein.
+### Pull von GHCR (empfohlen)
 
 ```bash
-make help            # alle Targets auflisten
-make build           # Runtime-Image bauen (Distroless static, nonroot)
-make run             # Smoketest: docker run u-boot --help
+docker pull ghcr.io/pt9912/u-boot:0.1.0    # gepinntes Tag, empfohlen
+# oder
+docker pull ghcr.io/pt9912/u-boot:latest   # stabiler Floating-Tag
 ```
 
-Echtes `u-boot init` gegen ein Host-Verzeichnis (Distroless läuft als
-non-root UID 65532; `--user` matched die Host-UID, damit erzeugte
-Dateien dir gehören):
+Verifikation:
+
+```bash
+docker run --rm ghcr.io/pt9912/u-boot:0.1.0 --version
+# → u-boot version 0.1.0
+```
+
+`u-boot init` gegen ein Host-Verzeichnis (Distroless läuft als non-
+root UID 65532; `--user` matched die Host-UID, damit erzeugte Dateien
+dir gehören):
 
 ```bash
 mkdir /tmp/demo && \
   docker run --rm --user "$(id -u):$(id -g)" \
     -v /tmp/demo:/work -w /work \
-    u-boot:latest init demo --no-git
+    ghcr.io/pt9912/u-boot:0.1.0 init demo --no-git
 ```
 
 Ergebnis: `u-boot.yaml` (`schemaVersion: 1`), `compose.yaml`,
@@ -132,16 +140,50 @@ explizite Strategie — kein stilles Überschreiben:
 ```bash
 # Default: bestehende Dateien werden nicht angefasst
 docker run --rm --user "$(id -u):$(id -g)" -v /tmp/demo:/work -w /work \
-  u-boot:latest init demo --no-git
+  ghcr.io/pt9912/u-boot:0.1.0 init demo --no-git
 # → Exit 10: "project already initialized"
 
 # nur die U-BOOT MANAGED BLOCK-Regionen refreshen, User-Inhalt bleibt
 docker run --rm --user "$(id -u):$(id -g)" -v /tmp/demo:/work -w /work \
-  u-boot:latest init demo --no-git --force
+  ghcr.io/pt9912/u-boot:0.1.0 init demo --no-git --force
 
 # Vollüberschreibung mit Sicherheits-Backup nach <datei>.bak[.N]
 docker run --rm --user "$(id -u):$(id -g)" -v /tmp/demo:/work -w /work \
-  u-boot:latest init demo --no-git --force --backup
+  ghcr.io/pt9912/u-boot:0.1.0 init demo --no-git --force --backup
+```
+
+### `u-boot doctor` und die Container-Einschränkung
+
+`doctor` ist für die **host-installierte** Form von u-boot
+ausgelegt — es prüft `docker`, `docker compose` und `git` im
+`$PATH`. Der `v0.1.0`-Distroless-Container bringt keines dieser
+Binaries mit (laut
+[ADR-0007](docs/plan/adr/0007-distributionswege-ghcr.md)),
+deswegen meldet
+`docker run … ghcr.io/pt9912/u-boot:0.1.0 doctor` die Host-Tools
+fälschlicherweise als fehlend. Ein v0.1.1-Followup
+([`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/open/slice-v0.1.1-doctor-container-awareness.md))
+ergänzt Container-Detection + Skip-Semantik; mittelfristig liefert
+eine Binary-Distribution
+([`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md),
+ADR-0007 §Folgepunkte 1 Trigger jetzt aktiv) einen host-nativen
+Installationsweg. Bis dahin: `doctor` aus einer Host-Installation
+heraus laufen lassen oder die Subkommandos
+`init`/`add`/`up`/`down`/`generate`/`config` nutzen — die
+funktionieren via Volume-Mount im Container.
+
+### Build aus Quellen (Entwickler-Pfad)
+
+Der Build ist **Docker-only** (`LH-FA-BUILD-007`): es wird keine
+Go-Toolchain am Host benötigt. Nur Docker und `make` müssen
+installiert sein.
+
+```bash
+make help                       # alle Targets auflisten
+make build                      # Runtime-Image bauen (Distroless), Default VERSION=0.1.0-dev
+make build VERSION=0.1.0        # Build mit gepinntem Version-Label
+make run                        # Smoketest: docker run u-boot --help
+make image-scan                 # lokaler Trivy-Scan (Parität mit CI image-scan-Job)
 ```
 
 Inner-Loop-Quality-Gates (`LH-FA-BUILD-005` / `-006`):
