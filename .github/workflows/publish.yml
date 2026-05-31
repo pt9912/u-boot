@@ -1,0 +1,125 @@
+name: publish
+
+# Image-Publish nach GHCR gemäß ADR-0007 (Distributionswege).
+#
+# Trigger: `push` von Tags `v*`. Der Validate-Step verwirft alles,
+# was nicht `vMAJOR.MINOR.PATCH(-prerelease)?` ist, BEVOR
+# eingeloggt / gebaut / gepusht wird. Build-Metadaten (`+...`) sind
+# rejected, weil `+` kein gültiges OCI-/Docker-Tag-Zeichen ist.
+#
+# `:latest` wird ausschließlich für stable Tags (kein Prerelease)
+# gesetzt — Konsistenz mit ADR-0007 §Entscheidung.
+#
+# Docker-only-Pfad (LH-FA-BUILD-007): das Runtime-Image wird über
+# `make build` gebaut (lokales Tag `u-boot:latest`) und anschließend
+# für GHCR umgetaggt + gepusht. Damit braucht der Workflow keinen
+# zusätzlichen BuildKit-Setup-Step.
+#
+# Action-Pinning (Supply-Chain-Härtung, identisch zu ci.yml):
+# alle `uses:`-Einträge sind SHA-gepinnt mit Tag-Kommentar.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Top-level permissions: explizit alles entziehen. Jeder Job lockert
+# auf das, was er braucht.
+permissions: {}
+
+jobs:
+  publish:
+    name: publish (ghcr.io image push)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    env:
+      DOCKER_BUILDKIT: '1'
+      REGISTRY: ghcr.io
+      IMAGE_NAME: pt9912/u-boot
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # SemVer-Validate FIRST. Fail-fast vor Login/Build/Push, damit
+      # versehentlich angelegte `v*`-Tags (z. B. `vNext`, `v1.2`,
+      # `v1.2.3+meta`) das Image nicht überschreiben oder Tokens
+      # beanspruchen.
+      - name: Validate SemVer tag
+        id: tag
+        run: |
+          set -euo pipefail
+          TAG_REF="${GITHUB_REF#refs/tags/}"
+          # vMAJOR.MINOR.PATCH(-PRERELEASE)?
+          # PRERELEASE: dot-separated identifiers; alphanumerics + hyphen.
+          # Build-Metadata mit '+' wird bewusst NICHT gematcht.
+          if ! [[ "$TAG_REF" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
+            echo "::error::Tag '$TAG_REF' is not a valid publish tag (expected vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-PRERELEASE, build-metadata with '+' rejected)."
+            exit 1
+          fi
+          VERSION="${TAG_REF#v}"
+          if [[ "$VERSION" == *-* ]]; then
+            IS_STABLE="false"
+          else
+            IS_STABLE="true"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "is_stable=$IS_STABLE" >> "$GITHUB_OUTPUT"
+          echo "Resolved version=$VERSION, is_stable=$IS_STABLE"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build runtime image
+        run: make build
+
+      - name: Tag image for GHCR
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+          IS_STABLE: ${{ steps.tag.outputs.is_stable }}
+        run: |
+          set -euo pipefail
+          docker tag "u-boot:latest" "$REGISTRY/$IMAGE_NAME:$VERSION"
+          if [[ "$IS_STABLE" == "true" ]]; then
+            docker tag "u-boot:latest" "$REGISTRY/$IMAGE_NAME:latest"
+          fi
+
+      - name: Verify OCI labels (LH-FA-BUILD-002)
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          set -euo pipefail
+          REF="$REGISTRY/$IMAGE_NAME:$VERSION"
+          # Pin the five LH-FA-BUILD-002 labels that the Dockerfile sets
+          # on the runtime stage. Drift here is a build-system bug.
+          for LABEL in \
+            org.opencontainers.image.source \
+            org.opencontainers.image.description \
+            org.opencontainers.image.licenses \
+            org.opencontainers.image.title \
+            org.opencontainers.image.vendor
+          do
+            VALUE=$(docker image inspect --format "{{ index .Config.Labels \"$LABEL\" }}" "$REF")
+            if [[ -z "$VALUE" ]]; then
+              echo "::error::OCI label $LABEL is empty on $REF (LH-FA-BUILD-002)."
+              exit 1
+            fi
+            echo "$LABEL=$VALUE"
+          done
+
+      - name: Push to GHCR
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+          IS_STABLE: ${{ steps.tag.outputs.is_stable }}
+        run: |
+          set -euo pipefail
+          docker push "$REGISTRY/$IMAGE_NAME:$VERSION"
+          if [[ "$IS_STABLE" == "true" ]]; then
+            docker push "$REGISTRY/$IMAGE_NAME:latest"
+          fi
