@@ -132,15 +132,19 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
 
 ### T3 — Trivy-Image-Scan
 
-- Eigener Workflow `.github/workflows/image-scan.yml` ODER dritter
-  CI-Job in `ci.yml`. Entscheidung in der Tranche begründen.
-- Nach `make build`: `trivy image --severity HIGH,CRITICAL --exit-code 1`.
-- SHA-pinned Action.
+- Dritter Job `image-scan` in `.github/workflows/ci.yml` (Entscheidung
+  begründet im Commit: gleicher Lebenszyklus + Branch-Protection-
+  Aufnahme wie `gates`/`security-gates`).
+- Nach `make build`: `aquasecurity/trivy-action@v0.36.0` (SHA-pinned)
+  mit `severity: HIGH,CRITICAL`, `exit-code: 1`.
+- `ignore-unfixed` bewusst nicht gesetzt — jedes Finding wird einzeln
+  triagiert, nicht per Sammel-Carveout.
 
 **DoD T3:**
-- [ ] Workflow / Job angelegt; Probe-Lauf grün auf `main`.
-- [ ] `make gates` grün.
-- [ ] DoD-Line: `T3 ✅ <commit-hash>`.
+- [x] Job `image-scan` angelegt; Probe-Lauf lokal grün
+  (0 HIGH/CRITICAL auf `u-boot:latest`).
+- [x] `make gates` grün.
+- [x] T3 ✅ `8212889`.
 
 ### T4 — Doku-Sync
 
