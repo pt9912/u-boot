@@ -2739,6 +2739,9 @@ Begründung und Konsequenzen: siehe
 Konkretisierung der `LH-FA-TPL-*`-Einträge folgt mit den im ADR
 genannten Implementierungs-Slices (`slice-v1-template-list`,
 `slice-v1-template-init`, `slice-later-local-templates`).
+Re-Evaluation-Trigger für eine spätere Format-Hebung (z. B. auf
+Cookiecutter-Kompatibilität oder OCI-Distribution) sind in
+ADR-0009 §Folgepunkte verbindlich aufgeführt.
 
 Vergleich der vier Optionen mit Trade-offs in ADR-0009 §Entscheidung:
 

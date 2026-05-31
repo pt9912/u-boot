@@ -11,8 +11,12 @@ Spalten:
 - **Carveout** — wo (Datei/Sektion) und was (kurze Beschreibung).
 - **Status** — `temporär` (mit Aufhebungsplan) oder `permanent`
   (begründet, kein Plan).
-- **Plan / Begründung** — bei `temporär`: Verweis auf den Slice-Plan in
-  `docs/plan/planning/{open,next,in-progress}/`. Bei `permanent`: kurze
+- **Plan / Begründung** — bei `temporär`: entweder Verweis auf einen
+  Slice-Plan in `docs/plan/planning/{open,next,in-progress}/` **oder**
+  Verweis auf ein ADR mit benannten Trigger-Slices in §Folgepunkte
+  (gleichwertig — das ADR ist hier das Plan-Artefakt, die
+  Trigger-Slice-Namen sind die zugesagten künftigen `open/`-Pläne;
+  vgl. ADR-0007 Distributions-Restwege). Bei `permanent`: kurze
   Begründung.
 
 ## Temporäre Carveouts (Plan-Pflicht)
@@ -37,9 +41,13 @@ Spalten:
 ## Disziplin
 
 `LH-FA-PROJDOCS-005` verlangt: jeder neue temporäre Carveout bekommt
-**parallel** zu seiner Entstehung einen Slice-Plan in `open/` und einen
-Eintrag in der oberen Tabelle. Permanente Carveouts kommen ohne Plan,
-aber mit Begründung in die zweite Tabelle.
+**parallel** zu seiner Entstehung einen Plan-Anker und einen Eintrag
+in der oberen Tabelle. Plan-Anker ist entweder ein Slice-Plan in
+`open/` (Standardform) **oder** ein ADR mit benannten
+Trigger-Slices in §Folgepunkte (für ADR-getriebene Vertagungen
+mit konkretem Trigger statt offener Implementierung). Permanente
+Carveouts kommen ohne Plan, aber mit Begründung in die zweite
+Tabelle.
 
 Neben [`roadmap.md`](roadmap.md) ist diese Datei die zweite zulässige
 Ausnahme von der `slice-`/`tranche-`-Konvention für Dateinamen in

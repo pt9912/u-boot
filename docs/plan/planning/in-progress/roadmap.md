@@ -123,12 +123,13 @@ Schnitt (`v0.1.0` o. ä.) liegt seit
 Trivy als dritter PR-blockierender CI-Job, ADR-0007 setzt GHCR als
 primären Distributionsweg. Der Tag-Push selbst bleibt Nutzer-Trigger.
 
-### V1-Phase: nicht release-blockierend, Trigger-getrieben
+### V1-Phase und Later-Phase: nicht release-blockierend, Trigger-getrieben
 
-Alle drei ADR-getriebenen V1-Slices (release-pipeline, plugin-system,
-template-format) sind entschieden und in `done/`. Die offenen
-V1-Phase-Folgen (Add-ons, Generators, Logs/Dry-Run/Diff,
-Distributions-Restwege) hängen jeweils an konkretem Bedarf.
+Alle vier ADR-getriebenen Trigger-Slices sind entschieden und in
+`done/` — drei V1 (release-pipeline, plugin-system, template-format)
+plus ein Later (http-driving-adapter). Die offenen V1-Phase-Folgen
+(Add-ons, Generators, Logs/Dry-Run/Diff, Distributions-Restwege)
+hängen jeweils an konkretem Bedarf.
 
 Erledigt im V1-vorgezogenen Pfad:
 
