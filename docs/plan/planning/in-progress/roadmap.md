@@ -50,26 +50,41 @@ Disziplin-Verstoß.
 | [`slice-v1-yaml-parse-error-sentinel`](../done/slice-v1-yaml-parse-error-sentinel.md) | M7-T5-Review-Followup N2: `YAMLCodec`-Port unterscheidet Parse- nicht von IO-Fehlern; Exit-Code-14-vs-10-Klassifikation reißt bei kaputter `compose.yaml` unter `u-boot generate devcontainer` | V1-vorgezogen | Done (`1008326`) |
 | [`slice-v2-revive-custom-rules`](../done/slice-v2-revive-custom-rules.md) | ADR-0003 Folgepunkt revive-Custom-Rules | V2-vorgezogen | Done |
 | [`slice-later-http-driving-adapter`](../done/slice-later-http-driving-adapter.md) | `spec/architecture.md` §7 HTTP-Driving-Adapter prospektiv | Later | Done (Entscheidung in [ADR-0010](../../adr/0010-kein-http-driving-adapter.md): wird nicht gebaut) |
+| [`slice-v0.1.1-doctor-container-awareness`](../open/slice-v0.1.1-doctor-container-awareness.md) | `doctor` im distroless-Container findet docker/git nicht (Real-world-Befund 2026-05-31 post-v0.1.0) | v0.1.1-Followup | Open |
+| [`slice-v2-binary-distribution`](../open/slice-v2-binary-distribution.md) | ADR-0007 §Folgepunkte 1 Trigger (erste konkrete Cross-Plattform-Distributionsanfrage) durch `doctor`-Befund ausgelöst | V2 | Open |
 
 ## Nächste Schritte
 
-MVP-Status: **vollständig** (Audit-Trail in der MVP-Bilanz unten).
+**MVP-Status: vollständig** (Audit-Trail in der MVP-Bilanz unten).
 Keine MVP-blockierenden Slices mehr offen; alle ADR-getriebenen
-V1/Later-Trigger-Slices sind in `done/`. Aktuell offen sind nur
-trigger- oder nutzer-getriebene V1- und Later-Folgen:
+V1/Later-Trigger-Slices sind in `done/`.
 
-1. **Erster Release-Tag `v0.1.0`** — Pipeline liegt bereit
-   ([`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md)
-   + [ADR-0007](../../adr/0007-distributionswege-ghcr.md));
-   Release-Cut-Slice
-   [`slice-v1-release-cut-v0.1.0`](../done/slice-v1-release-cut-v0.1.0.md)
-   hat T1 Version-Verankerung (`056e4c6`) + T2 CHANGELOG.md
-   (`f176e95`) geliefert. T4 bleibt **Nutzer-Aktion**: Push der
-   lokalen Commits, einmalige Branch-Protection-UI-Aktivierung
-   nach
-   [`docs/user/branch-protection.md`](../../../user/branch-protection.md),
-   erster grüner CI-Lauf auf `main`, dann
-   `git tag v0.1.0 && git push origin v0.1.0`.
+**v0.1.0 released — 2026-05-31.** Tag `v0.1.0` auf Commit `49ec464`,
+`publish.yml`-Run `26717376068` grün (SemVer-Validate, GHCR-Login,
+`make build VERSION=0.1.0`, OCI-Label-Verify, Live-`--version`-Smoke).
+Images: `ghcr.io/pt9912/u-boot:0.1.0` und `:latest`. GitHub-Release
+mit CHANGELOG-Auszug:
+<https://github.com/pt9912/u-boot/releases/tag/v0.1.0>.
+Audit-Trail im Release-Cut-Slice
+[`done/slice-v1-release-cut-v0.1.0.md`](../done/slice-v1-release-cut-v0.1.0.md).
+**Eine Nutzer-Aktion offen:** Branch-Protection-UI für `main`
+spätestens vor erstem externem PR nach
+[`docs/user/branch-protection.md`](../../../user/branch-protection.md)
+aktivieren (Required-Status-Check-Liste: die drei verbose
+Workflow-`name:`-Felder).
+
+Aktuell offen sind nur trigger- oder nutzer-getriebene V1- und
+Later-Folgen:
+
+1. **Doctor-Container-Awareness** (v0.1.1-Followup) — `doctor`
+   sieht im distroless-Container-Run keine Host-Binaries
+   (`docker`/`git`), meldet 4 errors auf einem ansonsten gesunden
+   Host. Real-world-Befund nach v0.1.0-Pull am 2026-05-31. Slice
+   in
+   [`open/slice-v0.1.1-doctor-container-awareness.md`](../open/slice-v0.1.1-doctor-container-awareness.md);
+   zieht den ersten ADR-0007-Re-Eval-Trigger (Binary-
+   Distribution) mit, siehe
+   [`open/slice-v2-binary-distribution.md`](../open/slice-v2-binary-distribution.md).
 2. **V1-Add-ons** — Keycloak (`LH-FA-ADD-003` / `LH-AK-003`) und
    OpenTelemetry (`LH-FA-ADD-004` / `LH-AK-004`); jeweils
    eigener Slice-Plan bei Auslösung.
@@ -84,10 +99,12 @@ trigger- oder nutzer-getriebene V1- und Later-Folgen:
    `LH-NFA-USE-004`). Maschinen-Schnittstelle, auf die
    [ADR-0010](../../adr/0010-kein-http-driving-adapter.md) das
    "kein HTTP-Adapter"-Argument stützt.
-5. **`LH-OPEN-002`-Distributionsweg-Restwege** — Binary, Homebrew,
-   Debian/RPM mit Trigger-Slices aus
+5. **`LH-OPEN-002`-Distributionsweg-Restwege** — Homebrew und
+   Debian/RPM bleiben vertagt mit Trigger-Slices aus
    [ADR-0007](../../adr/0007-distributionswege-ghcr.md)
-   §Entscheidung (npm/pip dort verworfen, GHCR ausgeliefert).
+   §Entscheidung; Binary-Distribution ist mit
+   [`open/slice-v2-binary-distribution.md`](../open/slice-v2-binary-distribution.md)
+   ausgelöst (siehe Punkt 1).
 6. **Later** — Migration (`LH-FA-CONF-006`), Custom-Data-Sources
    (`LH-DA-004`).
 
