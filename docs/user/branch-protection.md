@@ -1,11 +1,16 @@
 # Branch Protection für `main`
 
-`LH-QA-003` verlangt, dass die CI-Jobs `gates`, `security-gates` und
-`image-scan` für jeden Pull-Request **blockierend** sind. Der
-GitHub-Actions-Workflow allein reicht dafür nicht — er muss zusätzlich
-in den Repository-Settings als **Required Status Check** aktiviert
-werden. Diese Aktivierung lebt im GitHub-UI, nicht im Repo-Code; um
-sie reproduzierbar zu halten, dokumentiert diese Datei die Schritte.
+`LH-QA-003` verlangt, dass die drei CI-Jobs aus `.github/workflows/ci.yml`
+für jeden Pull-Request **blockierend** sind. Die exakten Required-
+Status-Check-Namen sind die Workflow-`name:`-Felder
+(`gates (lint + test + coverage-gate)`, `security-gates (govulncheck)`,
+`image-scan (trivy HIGH+CRITICAL)`), nicht die kürzeren
+`jobs.<key>`-Identifier — siehe Required-Status-Checks-Schritt unten.
+Der GitHub-Actions-Workflow allein reicht für die Aktivierung nicht —
+er muss zusätzlich in den Repository-Settings als **Required Status
+Check** eingetragen werden. Diese Aktivierung lebt im GitHub-UI, nicht
+im Repo-Code; um sie reproduzierbar zu halten, dokumentiert diese
+Datei die Schritte.
 
 Der zugehörige Carveout (`ADR-0004` Folgepunkt „Branch-Protection nicht
 versioniert") wird mit dem Vorhandensein dieser Checkliste aufgelöst.

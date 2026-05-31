@@ -40,12 +40,20 @@ Lastenheft-Bezug:
 Muster:
 
 - Eine Workflow-Datei: `.github/workflows/ci.yml`.
-- Zwei parallele Jobs:
-  - `gates` — `make gates` (lint + test + coverage-gate).
-  - `security-gates` — `make govulncheck`.
-- Beide PR-blockierend; Required-Status-Checks-Konfiguration erfolgt im
-  GitHub-UI nach dem ersten grünen Lauf (kann nicht vom Workflow-File
-  selbst gesetzt werden).
+- Drei parallele Jobs (image-scan via `slice-v1-release-pipeline`
+  T3 ergänzt, Distributionsentscheidung in
+  [ADR-0007](0007-distributionswege-ghcr.md)):
+  - `gates (lint + test + coverage-gate)` — `make gates`.
+  - `security-gates (govulncheck)` — `make govulncheck`.
+  - `image-scan (trivy HIGH+CRITICAL)` — `make image-scan` (lokale
+    Reproduktion); CI nutzt `aquasecurity/trivy-action` mit
+    identischem Severity-Profil.
+- Alle drei PR-blockierend; Required-Status-Checks-Konfiguration
+  erfolgt im GitHub-UI nach dem ersten grünen Lauf (kann nicht vom
+  Workflow-File selbst gesetzt werden); die Required-Status-Check-
+  Liste muss die verbose `name:`-Felder verwenden, nicht die kurzen
+  `jobs.<key>`-Identifier — siehe
+  [`docs/user/branch-protection.md`](../../user/branch-protection.md).
 - Trigger: `pull_request` und `push` auf `main`.
 - Runner: `ubuntu-latest` mit vorinstalliertem Docker + BuildKit.
 - Actions **SHA-gepinnt** mit Tag-Kommentar
@@ -88,7 +96,7 @@ Positiv:
   `slice-v1-release-pipeline` T3) werden nicht gemerged, sobald die
   Branch-Protection-Required-Status-Checks aktiviert sind
   (siehe [`docs/user/branch-protection.md`](../../user/branch-protection.md)).
-- **Low maintenance**: zwei Jobs, beide rufen Make-Targets — wenn sich
+- **Low maintenance**: drei Jobs, alle rufen Make-Targets — wenn sich
   die Build-Pipeline ändert (neuer Stage, neuer Aggregator), läuft der
   Workflow weiter ohne YAML-Edit.
 - **Supply-Chain-Härtung**: SHA-pinned Actions verhindern den
@@ -104,10 +112,12 @@ Negativ / Trade-offs:
   eigentliche Logik in `Makefile`/`Dockerfile` lebt; ein Wechsel
   (GitLab CI, Forgejo, …) bedeutet nur den Workflow-Wrapper neu zu
   schreiben.
-- **CI-Runtime**: zwei sequentielle Docker-Builds pro Job
-  (deps-Cache, dann lint/test/coverage). Akzeptabel für den
-  Bootstrap-Stand; mit wachsender Codebase ggf. Cache-Strategien
-  (BuildKit Remote Cache, GHA Cache Action) ergänzen.
+- **CI-Runtime**: zwei sequentielle Docker-Builds pro `gates`/
+  `security-gates`-Job (deps-Cache, dann lint/test/coverage); der
+  zusätzliche `image-scan`-Job baut das Runtime-Image und scannt es
+  mit Trivy. Akzeptabel für den Bootstrap-Stand; mit wachsender
+  Codebase ggf. Cache-Strategien (BuildKit Remote Cache, GHA Cache
+  Action) ergänzen.
 - **Branch-Protection im UI** ist nicht im Repo versioniert. Schritt-
   für-Schritt-Aktivierung dokumentiert in
   [`docs/user/branch-protection.md`](../../user/branch-protection.md)
