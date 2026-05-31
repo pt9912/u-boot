@@ -70,6 +70,10 @@ jobs:
       contents: read
     env:
       DOCKER_BUILDKIT: '1'
+      # LOCAL_IMAGE muss zum Makefile-Default `IMAGE ?= u-boot`
+      # passen — `make build` taggt `$(IMAGE):latest` lokal, und
+      # der Trivy-Scan löst das Tag über den Host-Docker-Daemon auf.
+      LOCAL_IMAGE: u-boot
     # Dritter PR-blockierender Job (slice-v1-release-pipeline T3):
     # baut das Runtime-Image und scannt es mit Trivy. Lebenszyklus
     # bewusst identisch zu `gates`/`security-gates` — gleicher
@@ -91,7 +95,8 @@ jobs:
       - name: Trivy scan (image)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: 'u-boot:latest'
+          scan-type: 'image'
+          image-ref: '${{ env.LOCAL_IMAGE }}:latest'
           severity: 'HIGH,CRITICAL'
           exit-code: '1'
           format: 'table'

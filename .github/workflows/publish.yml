@@ -39,6 +39,11 @@ jobs:
       DOCKER_BUILDKIT: '1'
       REGISTRY: ghcr.io
       IMAGE_NAME: pt9912/u-boot
+      # LOCAL_IMAGE muss zum Makefile-Default `IMAGE ?= u-boot`
+      # passen — `make build` taggt `$(IMAGE):latest` lokal, der
+      # Workflow re-taggt das Resultat für GHCR. Falls IMAGE im
+      # Makefile gehoben wird, hier nachziehen.
+      LOCAL_IMAGE: u-boot
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -55,7 +60,12 @@ jobs:
           # vMAJOR.MINOR.PATCH(-PRERELEASE)?
           # PRERELEASE: dot-separated identifiers; alphanumerics + hyphen.
           # Build-Metadata mit '+' wird bewusst NICHT gematcht.
-          if ! [[ "$TAG_REF" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
+          # Strict SemVer 2.0: prerelease-Identifier sind entweder
+          # numerisch (ohne leading zero) oder alphanumeric (enthalten
+          # mindestens ein non-digit). Damit wird `v1.0.0-rc.01`
+          # abgelehnt (numerisch + leading zero), `v1.0.0-rc.0a`
+          # akzeptiert (alphanumeric).
+          if ! [[ "$TAG_REF" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-((0|[1-9][0-9]*)|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(\.((0|[1-9][0-9]*)|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?$ ]]; then
             echo "::error::Tag '$TAG_REF' is not a valid publish tag (expected vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-PRERELEASE, build-metadata with '+' rejected)."
             exit 1
           fi
@@ -85,9 +95,9 @@ jobs:
           IS_STABLE: ${{ steps.tag.outputs.is_stable }}
         run: |
           set -euo pipefail
-          docker tag "u-boot:latest" "$REGISTRY/$IMAGE_NAME:$VERSION"
+          docker tag "$LOCAL_IMAGE:latest" "$REGISTRY/$IMAGE_NAME:$VERSION"
           if [[ "$IS_STABLE" == "true" ]]; then
-            docker tag "u-boot:latest" "$REGISTRY/$IMAGE_NAME:latest"
+            docker tag "$LOCAL_IMAGE:latest" "$REGISTRY/$IMAGE_NAME:latest"
           fi
 
       - name: Verify OCI labels (LH-FA-BUILD-002)
