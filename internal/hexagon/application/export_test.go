@@ -102,7 +102,7 @@ type AddServicePlanForTest struct {
 // assert state classification directly, without going through
 // Add()'s dispatch.
 func (s *AddServiceService) DetectServiceStateForTest(baseDir string, svc domain.ServiceName) (domain.ServiceState, error) {
-	return s.detectServiceState(baseDir, svc)
+	return detectServiceState(s.fs, s.yaml, baseDir, svc)
 }
 
 // PlanAddForTest exposes the unexported [AddServiceService.planAdd]

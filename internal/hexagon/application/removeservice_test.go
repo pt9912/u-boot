@@ -2,6 +2,8 @@ package application_test
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"testing"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application"
@@ -9,12 +11,10 @@ import (
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
+// --- T1-skeleton-pin -------------------------------------------------------
+
 func TestRemoveServiceService_New(t *testing.T) {
 	t.Parallel()
-	// fs + yaml mandatory but not nil-checked at construction
-	// (matches NewAddServiceService / NewConfigService pattern); the
-	// wiring layer is trusted to provide them. confirmer and logger
-	// are nil-tolerant.
 	svc := application.NewRemoveServiceService(newFakeFS(), &fakeYAML{}, nil, nil)
 	if svc == nil {
 		t.Fatal("NewRemoveServiceService returned nil")
@@ -24,36 +24,377 @@ func TestRemoveServiceService_New(t *testing.T) {
 func TestRemoveServiceService_Remove_EmptyBaseDirRejected(t *testing.T) {
 	t.Parallel()
 	svc := application.NewRemoveServiceService(newFakeFS(), &fakeYAML{}, nil, nil)
-	name := mustServiceName(t, "postgres")
-
 	_, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
 		BaseDir:     "",
-		ServiceName: name,
+		ServiceName: mustServiceName(t, "postgres"),
 	})
 	if err == nil {
 		t.Fatal("Remove: want error for empty BaseDir, got nil")
 	}
 }
 
-func TestRemoveServiceService_Remove_StubReturnsNotYetImplemented(t *testing.T) {
-	t.Parallel()
-	// T1-skeleton pin: the stub path returns a non-nil error so the
-	// CLI wiring slice (T4) sees a clear failure if it lands before
-	// T2 fills in the state machine. The exact error wording is not
-	// part of the contract — pinning only the non-nil property.
-	svc := application.NewRemoveServiceService(newFakeFS(), &fakeYAML{}, nil, nil)
-	name := mustServiceName(t, "postgres")
+// --- T2: state-machine paths ----------------------------------------------
 
-	resp, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+func TestRemoveServiceService_Remove_ProjectNotInitialized(t *testing.T) {
+	t.Parallel()
+	// u-boot.yaml missing → detect returns ErrProjectNotInitialized.
+	fs := newFakeFS()
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, nil, nil)
+	_, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
 		BaseDir:     "/proj",
-		ServiceName: name,
+		ServiceName: mustServiceName(t, "postgres"),
 	})
 	if err == nil {
-		t.Fatal("Remove: T1-skeleton must return an error until T2 lands")
+		t.Fatal("Remove: want ErrProjectNotInitialized, got nil")
 	}
-	if len(resp.Changed) != 0 || resp.VolumesPurged {
-		t.Errorf("Remove: response carries side-effect state on error: %+v", resp)
+	if !errors.Is(err, driving.ErrProjectNotInitialized) {
+		t.Errorf("err = %v, want wrap of driving.ErrProjectNotInitialized", err)
 	}
+}
+
+func TestRemoveServiceService_Remove_UnsupportedService(t *testing.T) {
+	t.Parallel()
+	fs := seedProjectWithoutService(t)
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, nil, nil)
+	_, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:     "/proj",
+		ServiceName: mustServiceName(t, "keycloak"), // not in catalogue yet
+	})
+	if err == nil {
+		t.Fatal("Remove: want ErrServiceUnsupported, got nil")
+	}
+	if !errors.Is(err, driving.ErrServiceUnsupported) {
+		t.Errorf("err = %v, want wrap of driving.ErrServiceUnsupported", err)
+	}
+}
+
+func TestRemoveServiceService_Remove_UnregisteredService(t *testing.T) {
+	t.Parallel()
+	// u-boot.yaml present, no services.postgres entry, no compose block.
+	fs := seedProjectWithoutService(t)
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, nil, nil)
+	_, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:     "/proj",
+		ServiceName: mustServiceName(t, "postgres"),
+	})
+	if err == nil {
+		t.Fatal("Remove: want ErrServiceUnregistered, got nil")
+	}
+	if !errors.Is(err, driving.ErrServiceUnregistered) {
+		t.Errorf("err = %v, want wrap of driving.ErrServiceUnregistered", err)
+	}
+}
+
+func TestRemoveServiceService_Remove_DeactivatedIsIdempotentNoOp(t *testing.T) {
+	t.Parallel()
+	// services.postgres.enabled: false in u-boot.yaml, no compose block.
+	fs := seedProjectWithDeactivatedService(t)
+	preWrites := len(fs.writes) // snapshot seed-step writes
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, nil, nil)
+	resp, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:     "/proj",
+		ServiceName: mustServiceName(t, "postgres"),
+	})
+	if err != nil {
+		t.Fatalf("Remove: %v", err)
+	}
+	if resp.PriorState != domain.ServiceStateDeactivated {
+		t.Errorf("PriorState = %v, want Deactivated", resp.PriorState)
+	}
+	if resp.State != domain.ServiceStateDeactivated {
+		t.Errorf("State = %v, want Deactivated", resp.State)
+	}
+	if len(resp.Changed) != 0 {
+		t.Errorf("Changed = %v, want nil (idempotent no-op must not write)", resp.Changed)
+	}
+	if newWrites := len(fs.writes) - preWrites; newWrites != 0 {
+		t.Errorf("Remove emitted %d writes; want 0 (no-op path):\n%v", newWrites, fs.writes[preWrites:])
+	}
+}
+
+func TestRemoveServiceService_Remove_ActiveTransitionsToDeactivated(t *testing.T) {
+	t.Parallel()
+	fs := seedProjectWithActiveService(t)
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, nil, nil)
+	resp, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:     "/proj",
+		ServiceName: mustServiceName(t, "postgres"),
+	})
+	if err != nil {
+		t.Fatalf("Remove: %v", err)
+	}
+	if resp.PriorState != domain.ServiceStateActive {
+		t.Errorf("PriorState = %v, want Active", resp.PriorState)
+	}
+	if resp.State != domain.ServiceStateDeactivated {
+		t.Errorf("State = %v, want Deactivated", resp.State)
+	}
+	wantChanged := []string{"compose.yaml", ".env.example", "u-boot.yaml"}
+	if !equalStringsTest(resp.Changed, wantChanged) {
+		t.Errorf("Changed = %v, want %v", resp.Changed, wantChanged)
+	}
+	// Compose-block should be removed (no BEGIN/END for service.postgres).
+	body := string(fs.files["/proj/compose.yaml"])
+	if strings.Contains(body, "service.postgres") {
+		t.Errorf("compose.yaml still contains service.postgres marker:\n%s", body)
+	}
+	// u-boot.yaml should now carry enabled: false.
+	yamlBody := string(fs.files["/proj/u-boot.yaml"])
+	if !strings.Contains(yamlBody, "enabled: false") {
+		t.Errorf("u-boot.yaml does not carry enabled: false:\n%s", yamlBody)
+	}
+}
+
+func TestRemoveServiceService_Remove_ActiveWithoutEnvBlockSkipsEnv(t *testing.T) {
+	t.Parallel()
+	// Compose block present + u-boot.yaml entry enabled=true, but no
+	// .env.example file. Remove still succeeds — env-block-remove is
+	// idempotent per-file.
+	fs := seedProjectWithActiveService(t)
+	delete(fs.files, "/proj/.env.example")
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, nil, nil)
+	resp, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:     "/proj",
+		ServiceName: mustServiceName(t, "postgres"),
+	})
+	if err != nil {
+		t.Fatalf("Remove: %v", err)
+	}
+	// Changed should be just compose.yaml + u-boot.yaml (env was absent).
+	wantChanged := []string{"compose.yaml", "u-boot.yaml"}
+	if !equalStringsTest(resp.Changed, wantChanged) {
+		t.Errorf("Changed = %v, want %v (env should be skipped silently)", resp.Changed, wantChanged)
+	}
+}
+
+func TestRemoveServiceService_Remove_ComposeBlockMalformedSurfacesInconsistent(t *testing.T) {
+	t.Parallel()
+	// compose.yaml has a BEGIN marker but no matching END.
+	// removeBlock should surface ErrServiceInconsistent (review-
+	// followup path symmetric to detectServiceState's malformed-
+	// block branch).
+	fs := newFakeFS()
+	if err := fs.WriteFile("/proj/u-boot.yaml",
+		[]byte("schemaVersion: 1\nproject:\n  name: demo\nservices:\n  postgres:\n    enabled: true\n"), 0o644); err != nil {
+		t.Fatalf("seed u-boot.yaml: %v", err)
+	}
+	// BEGIN-only block — Find returns ErrBlockMalformed, but the
+	// state classifier in detectServiceState surfaces it first.
+	composeBody := "name: demo\n" +
+		"services:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  postgres:\n" +
+		"    image: postgres:16\n"
+	if err := fs.WriteFile("/proj/compose.yaml", []byte(composeBody), 0o644); err != nil {
+		t.Fatalf("seed compose.yaml: %v", err)
+	}
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, nil, nil)
+	_, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:     "/proj",
+		ServiceName: mustServiceName(t, "postgres"),
+	})
+	if err == nil {
+		t.Fatal("Remove: want ErrServiceInconsistent, got nil")
+	}
+	if !errors.Is(err, driving.ErrServiceInconsistent) {
+		t.Errorf("err = %v, want wrap of driving.ErrServiceInconsistent", err)
+	}
+}
+
+func TestRemoveServiceService_Remove_FileSystemErrorsPropagate(t *testing.T) {
+	t.Parallel()
+	// fs.Exists fails on .env.example during the per-file remove
+	// loop — surfaces as a wrapped "check .env.example" error,
+	// not a fachlicher sentinel. Pin via substring so the path
+	// remains debuggable in CI logs.
+	fs := seedProjectWithActiveService(t)
+	fs.failExistsOn = "/proj/.env.example"
+	fs.failExistsErr = errors.New("stat: permission denied")
+
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, nil, nil)
+	_, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:     "/proj",
+		ServiceName: mustServiceName(t, "postgres"),
+	})
+	if err == nil {
+		t.Fatal("Remove: want fs.Exists error, got nil")
+	}
+	if !strings.Contains(err.Error(), ".env.example") {
+		t.Errorf("err = %v, want filename in wrap", err)
+	}
+}
+
+func TestRemoveServiceService_Remove_WriteFailurePropagates(t *testing.T) {
+	t.Parallel()
+	// Simulate a disk-full / permission error on the final
+	// u-boot.yaml write. The compose- and env-block-remove already
+	// landed; the YAML write fails and surfaces as a plain error
+	// (not a fachlicher sentinel) so the CLI maps it to exit 1.
+	fs := seedProjectWithActiveService(t)
+	fs.failOn = "/proj/u-boot.yaml"
+	fs.failErr = errors.New("write u-boot.yaml: disk full")
+
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, nil, nil)
+	_, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:     "/proj",
+		ServiceName: mustServiceName(t, "postgres"),
+	})
+	if err == nil {
+		t.Fatal("Remove: want write-failure error, got nil")
+	}
+	if !strings.Contains(err.Error(), "write u-boot.yaml") {
+		t.Errorf("err = %v, want write-failure wrap", err)
+	}
+}
+
+func TestRemoveServiceService_Remove_InconsistentBlockState(t *testing.T) {
+	t.Parallel()
+	// services.postgres.enabled: true but compose has NO managed
+	// block → InconsistentBlock state → ErrServiceInconsistent.
+	fs := newFakeFS()
+	if err := fs.WriteFile("/proj/u-boot.yaml",
+		[]byte("schemaVersion: 1\nproject:\n  name: demo\nservices:\n  postgres:\n    enabled: true\n"), 0o644); err != nil {
+		t.Fatalf("seed u-boot.yaml: %v", err)
+	}
+	if err := fs.WriteFile("/proj/compose.yaml",
+		[]byte("name: demo\nservices: {}\n"), 0o644); err != nil {
+		t.Fatalf("seed compose.yaml: %v", err)
+	}
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, nil, nil)
+	_, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:     "/proj",
+		ServiceName: mustServiceName(t, "postgres"),
+	})
+	if err == nil {
+		t.Fatal("Remove: want ErrServiceInconsistent, got nil")
+	}
+	if !errors.Is(err, driving.ErrServiceInconsistent) {
+		t.Errorf("err = %v, want wrap of driving.ErrServiceInconsistent", err)
+	}
+}
+
+func TestRemoveServiceService_Remove_EnabledUnsetIsTreatedLikeActive(t *testing.T) {
+	t.Parallel()
+	// services.postgres entry exists but enabled-key is missing.
+	// Compose block present. EnabledUnset → Deactivated transition.
+	fs := seedProjectWithEnabledUnset(t)
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, nil, nil)
+	resp, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:     "/proj",
+		ServiceName: mustServiceName(t, "postgres"),
+	})
+	if err != nil {
+		t.Fatalf("Remove: %v", err)
+	}
+	if resp.PriorState != domain.ServiceStateEnabledUnset {
+		t.Errorf("PriorState = %v, want EnabledUnset", resp.PriorState)
+	}
+	if resp.State != domain.ServiceStateDeactivated {
+		t.Errorf("State = %v, want Deactivated", resp.State)
+	}
+}
+
+// --- fixture helpers ------------------------------------------------------
+
+// seedProjectWithoutService builds a fakeFS containing an
+// initialised u-boot project (u-boot.yaml + compose.yaml) without
+// any registered service. Used to exercise the "Unregistered"
+// state-machine branch.
+func seedProjectWithoutService(t *testing.T) *fakeFS {
+	t.Helper()
+	fs := newFakeFS()
+	if err := fs.WriteFile("/proj/u-boot.yaml",
+		[]byte("schemaVersion: 1\nproject:\n  name: demo\n"), 0o644); err != nil {
+		t.Fatalf("seed u-boot.yaml: %v", err)
+	}
+	if err := fs.WriteFile("/proj/compose.yaml",
+		[]byte("name: demo\nservices: {}\n"), 0o644); err != nil {
+		t.Fatalf("seed compose.yaml: %v", err)
+	}
+	return fs
+}
+
+// seedProjectWithDeactivatedService builds a fakeFS with
+// services.postgres.enabled: false in u-boot.yaml and no compose
+// block. State machine should classify as Deactivated.
+func seedProjectWithDeactivatedService(t *testing.T) *fakeFS {
+	t.Helper()
+	fs := newFakeFS()
+	if err := fs.WriteFile("/proj/u-boot.yaml",
+		[]byte("schemaVersion: 1\nproject:\n  name: demo\nservices:\n  postgres:\n    enabled: false\n"), 0o644); err != nil {
+		t.Fatalf("seed u-boot.yaml: %v", err)
+	}
+	if err := fs.WriteFile("/proj/compose.yaml",
+		[]byte("name: demo\nservices: {}\n"), 0o644); err != nil {
+		t.Fatalf("seed compose.yaml: %v", err)
+	}
+	return fs
+}
+
+// seedProjectWithActiveService builds a fakeFS with
+// services.postgres.enabled: true, the matching managed block in
+// compose.yaml, and a .env.example managed block. Active state.
+func seedProjectWithActiveService(t *testing.T) *fakeFS {
+	t.Helper()
+	fs := newFakeFS()
+	if err := fs.WriteFile("/proj/u-boot.yaml",
+		[]byte("schemaVersion: 1\nproject:\n  name: demo\nservices:\n  postgres:\n    enabled: true\n"), 0o644); err != nil {
+		t.Fatalf("seed u-boot.yaml: %v", err)
+	}
+	composeBody := "name: demo\n" +
+		"services:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  postgres:\n" +
+		"    image: postgres:16\n" +
+		"  # END U-BOOT MANAGED BLOCK: service.postgres\n"
+	if err := fs.WriteFile("/proj/compose.yaml", []byte(composeBody), 0o644); err != nil {
+		t.Fatalf("seed compose.yaml: %v", err)
+	}
+	envBody := "# fixed user content\n" +
+		"# BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"POSTGRES_USER=demo\n" +
+		"# END U-BOOT MANAGED BLOCK: service.postgres\n"
+	if err := fs.WriteFile("/proj/.env.example", []byte(envBody), 0o644); err != nil {
+		t.Fatalf("seed .env.example: %v", err)
+	}
+	return fs
+}
+
+// seedProjectWithEnabledUnset builds a fakeFS with services.postgres
+// present but without the enabled key, and a matching compose block.
+// State machine should classify as EnabledUnset.
+func seedProjectWithEnabledUnset(t *testing.T) *fakeFS {
+	t.Helper()
+	fs := newFakeFS()
+	// `services.postgres: {}` parses with Enabled-pointer = nil.
+	if err := fs.WriteFile("/proj/u-boot.yaml",
+		[]byte("schemaVersion: 1\nproject:\n  name: demo\nservices:\n  postgres: {}\n"), 0o644); err != nil {
+		t.Fatalf("seed u-boot.yaml: %v", err)
+	}
+	composeBody := "name: demo\n" +
+		"services:\n" +
+		"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +
+		"  postgres:\n" +
+		"    image: postgres:16\n" +
+		"  # END U-BOOT MANAGED BLOCK: service.postgres\n"
+	if err := fs.WriteFile("/proj/compose.yaml", []byte(composeBody), 0o644); err != nil {
+		t.Fatalf("seed compose.yaml: %v", err)
+	}
+	return fs
+}
+
+// equalStringsTest is a small helper to compare slices ignoring slice-
+// equality nuances (nil vs empty).
+func equalStringsTest(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func mustServiceName(t *testing.T, raw string) domain.ServiceName {

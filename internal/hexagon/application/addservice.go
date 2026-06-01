@@ -198,7 +198,7 @@ func (s *AddServiceService) Add(ctx context.Context, req driving.AddServiceReque
 			driving.ErrServiceUnsupported, req.ServiceName.String(), supportedServices())
 	}
 
-	state, err := s.detectServiceState(req.BaseDir, req.ServiceName)
+	state, err := detectServiceState(s.fs, s.yaml, req.BaseDir, req.ServiceName)
 	if err != nil {
 		return driving.AddServiceResponse{}, err
 	}
@@ -263,6 +263,11 @@ func (s *AddServiceService) Add(ctx context.Context, req driving.AddServiceReque
 // the project rooted at baseDir. The classification reads at most two
 // files (u-boot.yaml + compose.yaml) and never writes.
 //
+// Package-level free function (extracted from the original
+// [AddServiceService].detectServiceState method in slice-v1-add-
+// remove T2) so both add and remove flows share the same state-
+// detection without inheriting one service's struct.
+//
 // Error model: technical I/O / permission failures bubble up as
 // non-sentinel wrapped errors — they must not be mistaken for a
 // fachlicher "project not initialized" or "service inconsistent"
@@ -274,9 +279,9 @@ func (s *AddServiceService) Add(ctx context.Context, req driving.AddServiceReque
 //     Spec §895 repair-hint path applied to the malformed case;
 //     LH-FA-ADD-005 only describes six wohlgeformte states, so
 //     malformed lives outside the state machine.
-func (s *AddServiceService) detectServiceState(baseDir string, svc domain.ServiceName) (domain.ServiceState, error) {
+func detectServiceState(fs driven.FileSystem, yaml driven.YAMLCodec, baseDir string, svc domain.ServiceName) (domain.ServiceState, error) {
 	yamlPath := filepath.Join(baseDir, "u-boot.yaml")
-	yamlExists, err := s.fs.Exists(yamlPath)
+	yamlExists, err := fs.Exists(yamlPath)
 	if err != nil {
 		return 0, fmt.Errorf("check u-boot.yaml: %w", err)
 	}
@@ -284,7 +289,7 @@ func (s *AddServiceService) detectServiceState(baseDir string, svc domain.Servic
 		return 0, fmt.Errorf("%w: %s missing", driving.ErrProjectNotInitialized, yamlPath)
 	}
 
-	yamlBody, err := s.fs.ReadFile(yamlPath)
+	yamlBody, err := fs.ReadFile(yamlPath)
 	if err != nil {
 		if errors.Is(err, iofs.ErrNotExist) {
 			// TOCTOU between Exists and ReadFile — surface the same
@@ -302,21 +307,21 @@ func (s *AddServiceService) detectServiceState(baseDir string, svc domain.Servic
 	}
 
 	var cfg ubootYAMLConfig
-	if err := s.yaml.Unmarshal(yamlBody, &cfg); err != nil {
+	if err := yaml.Unmarshal(yamlBody, &cfg); err != nil {
 		return 0, fmt.Errorf("%w: parse u-boot.yaml: %v", driving.ErrProjectNotInitialized, err)
 	}
 
 	entry, entryFound := cfg.Services[svc.String()]
 
 	composePath := filepath.Join(baseDir, "compose.yaml")
-	composeExists, err := s.fs.Exists(composePath)
+	composeExists, err := fs.Exists(composePath)
 	if err != nil {
 		return 0, fmt.Errorf("check compose.yaml: %w", err)
 	}
 
 	blockPresent := false
 	if composeExists {
-		composeBody, err := s.fs.ReadFile(composePath)
+		composeBody, err := fs.ReadFile(composePath)
 		switch {
 		case err == nil:
 			marker := managedblock.Marker{
