@@ -102,15 +102,15 @@ Invoke-WebRequest `
 ```
 
 Eine bestimmte Version pinnst du mit
-`releases/download/v0.2.0/u-boot-<os>-<arch>[.exe]` statt
+`releases/download/v0.3.0/u-boot-<os>-<arch>[.exe]` statt
 `latest/download/`.
 
 ### Pull von GHCR (alternativ für Container-/CI-Workflows)
 
 ```bash
-docker pull ghcr.io/pt9912/u-boot:0.2.0    # gepinntes Tag
+docker pull ghcr.io/pt9912/u-boot:0.3.0    # gepinntes Tag
 docker pull ghcr.io/pt9912/u-boot:latest   # stabiler Floating-Tag
-docker run --rm ghcr.io/pt9912/u-boot:0.2.0 --version
+docker run --rm ghcr.io/pt9912/u-boot:0.3.0 --version
 ```
 
 Das Distroless-Image läuft als non-root UID 65532; mountet euer

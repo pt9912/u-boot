@@ -96,15 +96,15 @@ Invoke-WebRequest `
 ```
 
 Pin a specific version with
-`releases/download/v0.2.0/u-boot-<os>-<arch>[.exe]` instead of
+`releases/download/v0.3.0/u-boot-<os>-<arch>[.exe]` instead of
 `latest/download/`.
 
 ### Pull from GHCR (alternative for container/CI workflows)
 
 ```bash
-docker pull ghcr.io/pt9912/u-boot:0.2.0    # pinned tag
+docker pull ghcr.io/pt9912/u-boot:0.3.0    # pinned tag
 docker pull ghcr.io/pt9912/u-boot:latest   # stable-floating
-docker run --rm ghcr.io/pt9912/u-boot:0.2.0 --version
+docker run --rm ghcr.io/pt9912/u-boot:0.3.0 --version
 ```
 
 The distroless image runs as non-root UID 65532; mount your project
