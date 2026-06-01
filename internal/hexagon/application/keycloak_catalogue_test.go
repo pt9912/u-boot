@@ -148,18 +148,19 @@ func TestKeycloakT1_RenderKeycloak_ProducesContentWithoutVolume(t *testing.T) {
 	}
 }
 
-func TestKeycloakT1_IsSupportedService_StillFalse(t *testing.T) {
+func TestKeycloakT2_IsSupportedService_BothTrue(t *testing.T) {
 	t.Parallel()
-	// T2-Voraussetzungs-Pin: nach T1 ist Keycloak in der Render-
-	// Catalogue, aber NOCH NICHT als supported deklariert, damit
-	// `u-boot add keycloak` nicht in den postgres-only Detect-
-	// Pfad läuft (F1-Befund aus slice-v1-keycloak-Review).
-	if application.IsSupportedServiceForTest(mustNewServiceName(t,"keycloak")) {
-		t.Error("isSupportedService(keycloak) ist nach T1 noch false — T2 erweitert die Catalogue erst nach der Detect-Generalisierung")
+	// T2 erweitert die Catalogue nach der Detect-Generalisierung —
+	// jetzt sind Postgres UND Keycloak supported.
+	if !application.IsSupportedServiceForTest(mustNewServiceName(t, "keycloak")) {
+		t.Error("isSupportedService(keycloak) muss nach T2 true sein")
 	}
-	// Postgres bleibt selbstverständlich supported.
-	if !application.IsSupportedServiceForTest(mustNewServiceName(t,"postgres")) {
-		t.Error("isSupportedService(postgres) regressed — T1 darf das nicht brechen")
+	if !application.IsSupportedServiceForTest(mustNewServiceName(t, "postgres")) {
+		t.Error("isSupportedService(postgres) regressed — T2 darf das nicht brechen")
+	}
+	// Eine nicht-katalogisierte Service-Name bleibt strikt rejected.
+	if application.IsSupportedServiceForTest(mustNewServiceName(t, "ghost-service")) {
+		t.Error("isSupportedService(ghost-service) muss false sein — Catalogue ist whitelist")
 	}
 }
 

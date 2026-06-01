@@ -152,40 +152,72 @@ type renderedTemplates struct {
 	EnvVariables    []byte
 }
 
-// serviceCatalogueEntry is the per-service render configuration: the
-// three template paths used by [AddServiceService.renderServiceTemplates].
-// volumeTmpl is the empty string for services that do not need a
-// `volumes.<svc>-data`-managed block (Keycloak's flüchtige H2-In-
-// Container-Persistenz, …). slice-v1-keycloak T2 extends this struct
-// with `requiredEnvKeys []string`, `volumeRefLiteral string`, and
-// `volumeOptional bool` for the Detect-Pfad-Generalisierung
-// (`hasRequiredEnvKeys`, `contentScanState`, `inspectVolumeArtefact`)
-// so any post-T2 service add-on plugs in declaratively.
+// serviceCatalogueEntry is the per-service configuration shared by
+// the render pipeline (slice-v1-keycloak T1: composeTmpl, envTmpl,
+// volumeTmpl) and the detect/probe pipeline (slice-v1-keycloak T2:
+// requiredEnvKeys, volumeRefLiteral, volumeOptional). Adding a new
+// add-on means: drop a new entry here, drop the three templates into
+// templates/services/, done — the rest of addservice_detect.go +
+// removeservice.go consumes the entry declaratively.
 type serviceCatalogueEntry struct {
 	composeTmpl string
 	envTmpl     string
-	volumeTmpl  string // empty = no volume managed block
+	// volumeTmpl is the embedded volume-template path. Empty string
+	// means: no volume managed block; volumeOptional must be true.
+	volumeTmpl string
+	// requiredEnvKeys are the .env.example keys the active-repair
+	// detection looks for (LH-FA-ADD-002 / spec-equivalent for the
+	// add-on). The service block's `environment:` sub-block scan
+	// reuses the same list (lowercase / colon-suffixed variant).
+	// Order is insignificant.
+	requiredEnvKeys []string
+	// volumeRefLiteral is the canonical compose volumes-map ref the
+	// service block carries (e.g. "postgres-data" → `- postgres-
+	// data:/var/lib/postgresql/data`). Empty when volumeOptional is
+	// true.
+	volumeRefLiteral string
+	// volumeOptional disables the volume-artefact probe and the
+	// volume-managed-block patch for services that do not need a
+	// persistent named volume. Keycloak's default H2-In-Container-
+	// Persistenz is the prototype.
+	volumeOptional bool
 }
 
-// serviceCatalogue lists the per-service render configuration. The
-// Keycloak entry is pre-staged here for slice-v1-keycloak T1; the
-// Catalogue-Erweiterung in `isSupportedService` / `supportedServices`
-// follows in T2 once `inspectVolumeArtefact` and `hasRequiredEnvKeys`
-// are per-service-aware (see slice-v1-keycloak.md §T2 — without it,
-// `add keycloak` would run into the postgres-only Detect hardcoding).
+// serviceCatalogue lists the per-service render + detect/probe
+// configuration. Every service in `supportedServices()` must have
+// an entry; the inverse direction (entry without supported-flag) is
+// the slice-v1-keycloak T1-only-state preserved here for reference
+// purposes (Keycloak landed in the catalogue with T1 to let
+// renderServiceTemplates be reachable from tests, but
+// `isSupportedService("keycloak")` only flipped to true with T2 once
+// the detect pipeline became service-aware).
 func serviceCatalogue() map[string]serviceCatalogueEntry {
 	return map[string]serviceCatalogueEntry{
 		"postgres": {
-			composeTmpl: "services/postgres.compose.tmpl",
-			envTmpl:     "services/postgres.env.tmpl",
-			volumeTmpl:  "services/postgres.volume.tmpl",
+			composeTmpl:      "services/postgres.compose.tmpl",
+			envTmpl:          "services/postgres.env.tmpl",
+			volumeTmpl:       "services/postgres.volume.tmpl",
+			requiredEnvKeys:  []string{"POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB"},
+			volumeRefLiteral: "postgres-data",
+			volumeOptional:   false,
 		},
 		"keycloak": {
-			composeTmpl: "services/keycloak.compose.tmpl",
-			envTmpl:     "services/keycloak.env.tmpl",
-			volumeTmpl:  "", // flüchtige H2-In-Container-Persistenz, kein Volume
+			composeTmpl:      "services/keycloak.compose.tmpl",
+			envTmpl:          "services/keycloak.env.tmpl",
+			volumeTmpl:       "",
+			requiredEnvKeys:  []string{"KEYCLOAK_ADMIN", "KEYCLOAK_ADMIN_PASSWORD"},
+			volumeRefLiteral: "",
+			volumeOptional:   true,
 		},
 	}
+}
+
+// catalogueFor returns the entry for the given service name. The
+// boolean second return mirrors map-lookup convention so callers can
+// branch on „unknown service" without panicking.
+func catalogueFor(svc domain.ServiceName) (serviceCatalogueEntry, bool) {
+	entry, ok := serviceCatalogue()[svc.String()]
+	return entry, ok
 }
 
 // renderServiceTemplates evaluates the per-service templates via the
@@ -397,13 +429,19 @@ func (s *AddServiceService) planComposePatches(plan servicePlan, composeBody []b
 }
 
 // patchTargetsFor returns whether the action needs to (re)write the
-// service block and/or the volume block.
+// service block and/or the volume block. Services whose catalogue
+// entry declares `volumeOptional: true` (slice-v1-keycloak T2) never
+// touch the volume slot — `renderServiceTemplates` returns a nil
+// VolumeFragment for them anyway and a volume patch would either no-op
+// or assert against nil.
 func patchTargetsFor(plan servicePlan) (service, volume bool) {
+	entry, ok := catalogueFor(plan.Service)
+	volumeSkipped := ok && entry.volumeOptional
 	switch plan.Action {
 	case actionRegister, actionReactivate, actionRebuildBlock:
-		return true, true
+		return true, !volumeSkipped
 	case actionRepairArtifacts:
-		return plan.RepairFlags.ServiceStale, plan.RepairFlags.VolumeMissing
+		return plan.RepairFlags.ServiceStale, plan.RepairFlags.VolumeMissing && !volumeSkipped
 	}
 	return false, false
 }
@@ -447,7 +485,7 @@ func (*AddServiceService) planEnvEdit(plan servicePlan, envBody []byte, envExist
 	switch {
 	case fErr == nil:
 		existing := extractEnvBlockBody(envBody, start, end)
-		if hasRequiredEnvKeys(existing) {
+		if hasRequiredEnvKeysFor(plan.Service, existing) {
 			// User-customised values survive — slot stays nil.
 			return envBody, false, nil
 		}

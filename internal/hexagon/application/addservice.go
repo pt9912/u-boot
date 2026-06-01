@@ -20,16 +20,17 @@ import (
 // managed-block comment lines.
 const serviceMarkerNamePrefix = "service."
 
-// supportedServices returns the MVP catalogue of services
-// [AddServiceService] knows how to add (LH-FA-ADD-002). M5 ships
-// only `postgres`; LH-FA-ADD-003 / LH-FA-ADD-004 (keycloak, otel)
-// are V1.
+// supportedServices returns the catalogue of services
+// [AddServiceService] knows how to add. M5 shipped only `postgres`
+// (LH-FA-ADD-002); slice-v1-keycloak T2 adds `keycloak`
+// (LH-FA-ADD-003). LH-FA-ADD-004 (otel) lands with the parallel
+// slice-v1-otel slice.
 //
 // Function instead of package var to avoid the gochecknoglobals
 // false-positive on immutable list constants (same pattern as
 // [projectStructureDirs] in initproject.go).
 func supportedServices() []string {
-	return []string{"postgres"}
+	return []string{"postgres", "keycloak"}
 }
 
 // isSupportedService reports whether name is in [supportedServices].

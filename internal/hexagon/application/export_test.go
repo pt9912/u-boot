@@ -113,11 +113,25 @@ func RenderServiceTemplatesForTest(svc domain.ServiceName) (composeFrag, volumeF
 }
 
 // IsSupportedServiceForTest exposes the unexported
-// [isSupportedService] catalogue check so T1 tests can pin the
-// T2-Voraussetzung („Keycloak ist nach T1 noch NICHT in der
-// Catalogue").
+// [isSupportedService] catalogue check so slice-v1-keycloak tests
+// can pin the T1-vs-T2 Catalogue-Erweiterung.
 func IsSupportedServiceForTest(svc domain.ServiceName) bool {
 	return isSupportedService(svc)
+}
+
+// HasRequiredEnvKeysForTest exposes the unexported
+// [hasRequiredEnvKeysFor] env-block completeness check so slice-v1-
+// keycloak T2 tests can pin the per-service required-keys lookup.
+func HasRequiredEnvKeysForTest(svc domain.ServiceName, blockBody []byte) bool {
+	return hasRequiredEnvKeysFor(svc, blockBody)
+}
+
+// HasRequiredServiceFieldsForTest exposes the unexported
+// [hasRequiredServiceFieldsFor] service-block completeness check so
+// slice-v1-keycloak T2 tests can pin the per-service scan rules
+// (env-keys + volume-ref + volumeOptional skip).
+func HasRequiredServiceFieldsForTest(svc domain.ServiceName, blockBody []byte) bool {
+	return hasRequiredServiceFieldsFor(svc, blockBody)
 }
 
 // CollectActiveServicePortsForTest exposes the package-internal

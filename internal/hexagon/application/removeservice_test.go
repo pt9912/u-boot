@@ -58,7 +58,7 @@ func TestRemoveServiceService_Remove_UnsupportedService(t *testing.T) {
 	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, nil, nil)
 	_, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
 		BaseDir:     "/proj",
-		ServiceName: mustServiceName(t, "keycloak"), // not in catalogue yet
+		ServiceName: mustServiceName(t, "ghost-service"), // not in catalogue
 	})
 	if err == nil {
 		t.Fatal("Remove: want ErrServiceUnsupported, got nil")

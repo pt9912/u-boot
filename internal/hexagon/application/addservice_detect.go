@@ -89,13 +89,23 @@ func (s *AddServiceService) inspectServiceArtefact(composeBody []byte, svc domai
 		return false, fmt.Errorf("%w: service.%s marker disappeared between phases",
 			driving.ErrServiceInconsistent, svc.String())
 	}
-	return !hasRequiredServiceFields(res.BlockBody), nil
+	return !hasRequiredServiceFieldsFor(svc, res.BlockBody), nil
 }
 
 // inspectVolumeArtefact checks that the volume.<svc> marker hangs
 // under volumes.<svc>-data. Missing is a repair flag; wrong anchor
 // / user-manual / malformed is an abort.
+//
+// Services whose catalogue entry declares `volumeOptional: true`
+// (slice-v1-keycloak T2 — Keycloak's flüchtige H2-In-Container-
+// Persistenz) skip the probe entirely and report no-repair. Without
+// this skip the post-T1 add-flow would loop in
+// `actionRepairArtifacts` forever, since `volumes.keycloak-data` is
+// by design never written.
 func (s *AddServiceService) inspectVolumeArtefact(composeBody []byte, svc domain.ServiceName) (bool, error) {
+	if entry, ok := catalogueFor(svc); ok && entry.volumeOptional {
+		return false, nil
+	}
 	res, err := s.yaml.LocateMarkedEntry(composeBody, "volumes", volumeEntryKey(svc),
 		volumeMarkerName(svc))
 	if err != nil {
@@ -114,9 +124,11 @@ func (s *AddServiceService) inspectVolumeArtefact(composeBody []byte, svc domain
 }
 
 // inspectEnvArtefact opens .env.example (if any) and reports whether
-// the service block exists and contains the required POSTGRES_*
-// keys. Missing file / missing block / missing required key all
-// translate to needs-repair; malformed is an abort.
+// the service block exists and contains the required env keys for
+// the service (slice-v1-keycloak T2: per-service required-keys list
+// looked up via [catalogueFor] instead of POSTGRES_* hardcoding).
+// Missing file / missing block / missing required key all translate
+// to needs-repair; malformed is an abort.
 func (s *AddServiceService) inspectEnvArtefact(baseDir string, svc domain.ServiceName) (bool, error) {
 	envPath := filepath.Join(baseDir, ".env.example")
 	envBody, _, exists, err := s.loadForPatch(envPath)
@@ -138,7 +150,7 @@ func (s *AddServiceService) inspectEnvArtefact(baseDir string, svc domain.Servic
 	// Strip the BEGIN line (we already know start = BEGIN line start)
 	// — scan only the body between the markers for the required keys.
 	blockBody := extractEnvBlockBody(envBody, start, end)
-	return !hasRequiredEnvKeys(blockBody), nil
+	return !hasRequiredEnvKeysFor(svc, blockBody), nil
 }
 
 // extractEnvBlockBody returns the bytes between BEGIN and END marker
@@ -163,40 +175,56 @@ func extractEnvBlockBody(envBody []byte, start, end int) []byte {
 	return envBody[bodyStart:bodyEnd]
 }
 
-// hasRequiredServiceFields runs the M5-T4c content-presence check on
-// a postgres service block body. Implements the scan rules from the
-// slice plan: comment stripping, indent-stack block context,
-// healthcheck.disable: true exception, trimmed-non-empty values.
-func hasRequiredServiceFields(blockBody []byte) bool {
-	lines := bytes.Split(blockBody, []byte("\n"))
-	state := newContentScanState()
-	for _, raw := range lines {
+// hasRequiredServiceFieldsFor runs the M5-T4c content-presence check
+// on a service block body. The scan rules are unchanged (comment
+// stripping, indent-stack block context, healthcheck.disable: true
+// exception, trimmed-non-empty values); the required env-keys and
+// volume-ref-literal come from the service's catalogue entry
+// (slice-v1-keycloak T2). Unknown services collapse to „not
+// complete", which on the Add path is dominated by isSupportedService.
+func hasRequiredServiceFieldsFor(svc domain.ServiceName, blockBody []byte) bool {
+	entry, ok := catalogueFor(svc)
+	if !ok {
+		return false
+	}
+	state := newContentScanState(entry)
+	for _, raw := range bytes.Split(blockBody, []byte("\n")) {
 		state.feedServiceLine(raw)
 	}
 	return state.serviceComplete()
 }
 
-// hasRequiredEnvKeys checks that the env block body contains
-// non-commented POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
-// assignments. Values may be anything.
-func hasRequiredEnvKeys(blockBody []byte) bool {
-	seenUser, seenPass, seenDB := false, false, false
+// hasRequiredEnvKeysFor checks that the env block body contains
+// non-commented `<KEY>=...` assignments for every key the service's
+// catalogue entry declares as required (slice-v1-keycloak T2).
+// Values may be anything. An unknown service (no catalogue entry)
+// returns false — caller treats that as needs-repair, which on the
+// Add path is dominated by the earlier `isSupportedService` reject;
+// on remove the env probe is unused.
+func hasRequiredEnvKeysFor(svc domain.ServiceName, blockBody []byte) bool {
+	entry, ok := catalogueFor(svc)
+	if !ok {
+		return false
+	}
+	seen := make(map[string]bool, len(entry.requiredEnvKeys))
 	for _, raw := range bytes.Split(blockBody, []byte("\n")) {
 		trimmed := bytes.TrimSpace(raw)
 		if len(trimmed) == 0 || trimmed[0] == '#' {
 			continue
 		}
 		cleaned := stripInlineComment(trimmed)
-		switch {
-		case bytes.HasPrefix(cleaned, []byte("POSTGRES_USER=")):
-			seenUser = true
-		case bytes.HasPrefix(cleaned, []byte("POSTGRES_PASSWORD=")):
-			seenPass = true
-		case bytes.HasPrefix(cleaned, []byte("POSTGRES_DB=")):
-			seenDB = true
+		for _, key := range entry.requiredEnvKeys {
+			if bytes.HasPrefix(cleaned, append([]byte(key), '=')) {
+				seen[key] = true
+			}
 		}
 	}
-	return seenUser && seenPass && seenDB
+	for _, key := range entry.requiredEnvKeys {
+		if !seen[key] {
+			return false
+		}
+	}
+	return true
 }
 
 // stripInlineComment removes any `# ...` tail starting at an
@@ -213,24 +241,31 @@ func stripInlineComment(line []byte) []byte {
 
 // contentScanState tracks the active sub-block (`environment`,
 // `volumes`, `ports`, `healthcheck`) and per-field hits while walking
-// a postgres service block line by line.
+// a service block line by line. Parametrised by the service's
+// catalogue entry (slice-v1-keycloak T2) — `requiredEnvKeys` drives
+// the env-completeness check, `volumeRefLiteral` + `volumeOptional`
+// drive the volume sub-block check.
 type contentScanState struct {
-	hasImage          bool
-	hasUser           bool
-	hasPassword       bool
-	hasDB             bool
-	hasVolumeRef      bool
-	hasPortEntry      bool
-	hasHealthcheckSub bool
+	entry serviceCatalogueEntry
+
+	hasImage            bool
+	envSeen             map[string]bool
+	hasVolumeRef        bool
+	hasPortEntry        bool
+	hasHealthcheckSub   bool
 	healthcheckDisabled bool
 
-	subBlock           string // "environment", "volumes", "ports", "healthcheck", or ""
-	subBlockIndent     int
+	subBlock            string // "environment", "volumes", "ports", "healthcheck", or ""
+	subBlockIndent      int
 	subBlockEntryIndent int
 }
 
-func newContentScanState() *contentScanState {
-	return &contentScanState{subBlockEntryIndent: -1}
+func newContentScanState(entry serviceCatalogueEntry) *contentScanState {
+	return &contentScanState{
+		entry:               entry,
+		envSeen:             make(map[string]bool, len(entry.requiredEnvKeys)),
+		subBlockEntryIndent: -1,
+	}
 }
 
 // feedServiceLine processes one line of the service block body and
@@ -292,7 +327,7 @@ func (s *contentScanState) feedSubBlockEntry(cleaned []byte, indent int) {
 	case "environment":
 		s.feedEnvironmentEntry(cleaned)
 	case "volumes":
-		if bytes.Contains(cleaned, []byte("postgres-data")) {
+		if s.entry.volumeRefLiteral != "" && bytes.Contains(cleaned, []byte(s.entry.volumeRefLiteral)) {
 			s.hasVolumeRef = true
 		}
 	case "ports":
@@ -304,18 +339,16 @@ func (s *contentScanState) feedSubBlockEntry(cleaned []byte, indent int) {
 	}
 }
 
-// feedEnvironmentEntry recognises `POSTGRES_USER:` /
-// `POSTGRES_PASSWORD:` / `POSTGRES_DB:` lines and marks the matching
-// flag. The value is irrelevant — User-customization of values is
+// feedEnvironmentEntry recognises any `<KEY>:` line where KEY is in
+// the service's catalogue `requiredEnvKeys` and marks the matching
+// flag. The value is irrelevant — user customisation of values is
 // explicitly allowed.
 func (s *contentScanState) feedEnvironmentEntry(cleaned []byte) {
-	switch {
-	case bytes.HasPrefix(cleaned, []byte("POSTGRES_USER:")):
-		s.hasUser = true
-	case bytes.HasPrefix(cleaned, []byte("POSTGRES_PASSWORD:")):
-		s.hasPassword = true
-	case bytes.HasPrefix(cleaned, []byte("POSTGRES_DB:")):
-		s.hasDB = true
+	for _, key := range s.entry.requiredEnvKeys {
+		if bytes.HasPrefix(cleaned, append([]byte(key), ':')) {
+			s.envSeen[key] = true
+			return
+		}
 	}
 }
 
@@ -334,12 +367,23 @@ func (s *contentScanState) feedHealthcheckEntry(cleaned []byte) {
 }
 
 // serviceComplete returns whether every LH-FA-ADD-002 / LH-AK-002
-// required field is present.
+// required field is present. Env-key requirement is the catalogue
+// `requiredEnvKeys` list (slice-v1-keycloak T2); the volume-ref
+// requirement is skipped when the service is `volumeOptional`
+// (Keycloak's flüchtige H2-In-Container-Persistenz).
 func (s *contentScanState) serviceComplete() bool {
-	if !s.hasImage || !s.hasUser || !s.hasPassword || !s.hasDB {
+	if !s.hasImage {
 		return false
 	}
-	if !s.hasVolumeRef || !s.hasPortEntry {
+	for _, key := range s.entry.requiredEnvKeys {
+		if !s.envSeen[key] {
+			return false
+		}
+	}
+	if !s.entry.volumeOptional && !s.hasVolumeRef {
+		return false
+	}
+	if !s.hasPortEntry {
 		return false
 	}
 	if !s.hasHealthcheckSub || s.healthcheckDisabled {
