@@ -222,50 +222,38 @@ Schnitt (`v0.1.0` o. ä.) liegt seit
 Trivy als dritter PR-blockierender CI-Job, ADR-0007 setzt GHCR als
 primären Distributionsweg. Der Tag-Push selbst bleibt Nutzer-Trigger.
 
-### V1-Phase und Later-Phase: nicht release-blockierend, Trigger-getrieben
+### v0.1.0 / v0.2.0 — Audit-Trail ausgelieferter Slices + offene Trigger-Restwege
 
-Alle vier ADR-getriebenen Trigger-Slices sind entschieden und in
-`done/` — drei V1 (release-pipeline, plugin-system, template-format)
-plus ein Later (http-driving-adapter). Die offenen V1-Phase-Folgen
-(Add-ons, Generators, Logs/Dry-Run/Diff, Distributions-Restwege)
-hängen jeweils an konkretem Bedarf.
+Audit-Trail der nicht-MVP-Slices die zwischen v0.1.0 und v0.2.0
+ausgeliefert wurden — ADR-getriebene Entscheidungs-Trigger,
+vorgezogene Review-Followups, Release-Cuts, und ADR-§Folgepunkte-
+Implementierungen — plus die drei noch unausgelösten Trigger-
+Restwege (Homebrew, Debian/RPM, local-templates). Die Tabelle
+zeigt den Stand mit Checkbox je Slice; noch nicht implementierte
+V1-Folgen (Add-ons, Generators, Logs/Dry-Run/Diff) und der
+laufende v0.3.0-Milestone stehen in §Nächste Schritte oben.
 
-Erledigt im V1-vorgezogenen Pfad:
+| Done | Slice | Kategorie | Audit-Trail / Bezug |
+| ---- | ----- | --------- | ------------------- |
+| [x] | [`slice-v1-plugin-system-entscheidung`](../done/slice-v1-plugin-system-entscheidung.md) | ADR-Entscheidung (V1) | [ADR-0008](../../adr/0008-plugin-system-statisch.md): Add-on-System statisch (keine Plugins); vier Re-Eval-Trigger in §Folgepunkte. |
+| [x] | [`slice-v1-template-format-entscheidung`](../done/slice-v1-template-format-entscheidung.md) | ADR-Entscheidung (V1) | [ADR-0009](../../adr/0009-template-format-yaml-files.md): YAML-Metadaten + `text/template`-Files. Drei Implementierungs-Slices in §Folgepunkte. |
+| [x] | [`slice-later-http-driving-adapter`](../done/slice-later-http-driving-adapter.md) | ADR-Entscheidung (Later) | [ADR-0010](../../adr/0010-kein-http-driving-adapter.md): kein HTTP-Adapter; CLI-only + `LH-NFA-USE-004`. Zwei Re-Eval-Trigger. |
+| [x] | [`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md) | ADR-Mechanik (V1) | [ADR-0004](../../adr/0004-ci-system.md) + [ADR-0007](../../adr/0007-distributionswege-ghcr.md). T1 `0f64938`, T2 `93b703e`, T3 `8212889`, T4 `066917a`, T5 `bc487fc`. |
+| [x] | [`slice-v1-yaml-parse-error-sentinel`](../done/slice-v1-yaml-parse-error-sentinel.md) | V1-vorgezogen | M7-T5-N2 Review-Followup-Closure. `1008326`. |
+| [x] | [`slice-v1-release-cut-v0.1.0`](../done/slice-v1-release-cut-v0.1.0.md) | Release-Cut | Version-Pin im Build + CHANGELOG-Bootstrap. T1 `056e4c6`, T2 `f176e95`, T3 `4fc93a9`. v0.1.0 released 2026-05-31. |
+| [x] | [`slice-v0.1.1-doctor-container-awareness`](../done/slice-v0.1.1-doctor-container-awareness.md) | v0.1.0-Real-World-Feedback | T1 `9a99bbf`, T2 `c35360f`, T3 `111e725`, T4 `f3f1731` — `doctor` skipped Host-Prerequisite-Checks im Container-Modus. |
+| [x] | [`slice-v2-binary-distribution`](../done/slice-v2-binary-distribution.md) | ADR-0007 §Folgepunkte 1 Trigger | T1 `dc9a336`/`f3f1731`, T2 `5e5166b`, T3 `866f6fd`, T4 `2f39511` — sechs Plattformen als GitHub-Release-Asset. |
+| [x] | [`slice-v1-template-list`](../done/slice-v1-template-list.md) | ADR-0009 §Folgepunkte 1 | T1 `65795b5`, T2 `a099d63`, T3 `23bd91b`, T4 `a7e0d7b` + Review-Followup `c807cdb` (N1..N5). `LH-FA-TPL-004`. |
+| [x] | [`slice-v1-template-init`](../done/slice-v1-template-init.md) | ADR-0009 §Folgepunkte 2 | T1 `9e81b02`, T2 `65a1ce8`, T3 `ed6d9a0`, T4 `daaaa9a`, T5 `133622f` + Review-Followup `7fe26e0` (F1..F5). `LH-FA-TPL-001`. |
+| [x] | [`slice-v1-release-cut-v0.2.0`](../done/slice-v1-release-cut-v0.2.0.md) | Release-Cut | CHANGELOG-Konsolidierung + Dev-Version-Bump + Status-Sync. T1 `be139cb`, T2 `1823598`, T3 `6b9cc6c`. v0.2.0 released 2026-06-01. |
+| [ ] | `slice-later-local-templates` | ADR-0009 §Folgepunkte 3 | `LH-FA-TPL-003` (Later). `--template ./pfad`-Auflösung; eigener Slice bei konkretem Bedarf. |
+| [ ] | `slice-v2-homebrew-formula` | ADR-0007 Restwege | Trigger: erste macOS-Nutzer-Nachfrage. Plan-Anker in ADR-0007 §Entscheidung. |
+| [ ] | `slice-v2-distro-pakete` | ADR-0007 Restwege | Trigger: konkrete Distro-Anfrage (`debhelper`/`rpmbuild`-Overhead). Plan-Anker in ADR-0007 §Entscheidung. |
 
-- ~~`slice-v1-yaml-parse-error-sentinel`~~: **Done** (`1008326`) —
-  V1-vorgezogen als Review-Followup-Closure für M7-T5-N2.
-  Siehe [`done/slice-v1-yaml-parse-error-sentinel.md`](../done/slice-v1-yaml-parse-error-sentinel.md).
-- ~~`slice-v1-release-pipeline`~~: **Done** (T1 `0f64938`, T2
-  `93b703e`, T3 `8212889`, T4 `066917a`, T5 `bc487fc` — siehe
-  [`done/slice-v1-release-pipeline.md`](../done/slice-v1-release-pipeline.md)
-  und [ADR-0007](../../adr/0007-distributionswege-ghcr.md)).
-- ~~`slice-v1-plugin-system-entscheidung`~~: **Done** — Entscheidung
-  in [ADR-0008](../../adr/0008-plugin-system-statisch.md): Add-on-
-  System bleibt statisch (keine Plugins). Vier Re-Eval-Trigger in
-  ADR-0008 §Folgepunkte verbindlich aufgeführt.
-  Siehe [`done/slice-v1-plugin-system-entscheidung.md`](../done/slice-v1-plugin-system-entscheidung.md).
-- ~~`slice-v1-template-format-entscheidung`~~: **Done** — Entscheidung
-  in [ADR-0009](../../adr/0009-template-format-yaml-files.md):
-  YAML-Metadaten + `text/template`-Files. Drei Implementierungs-
-  Slices in ADR-0009 §Folgepunkte aufgelistet (template-list,
-  template-init, local-templates).
-  Siehe [`done/slice-v1-template-format-entscheidung.md`](../done/slice-v1-template-format-entscheidung.md).
-- ~~`slice-later-http-driving-adapter`~~: **Done** — Entscheidung
-  in [ADR-0010](../../adr/0010-kein-http-driving-adapter.md):
-  HTTP-Driving-Adapter wird nicht gebaut. u-boot bleibt CLI-only;
-  Maschinen-Schnittstellen über `LH-NFA-USE-004` (`--json`/
-  `--dry-run`-Flags). Zwei Re-Eval-Trigger in ADR-0010 §Folgepunkte
-  verbindlich aufgeführt.
-  Siehe [`done/slice-later-http-driving-adapter.md`](../done/slice-later-http-driving-adapter.md).
-- ~~`slice-v1-release-cut-v0.1.0`~~: **Done** (T1 `056e4c6`,
-  T2 `f176e95`, T3 `4fc93a9`) — Version-Verankerung im
-  Build-Pfad (Dockerfile + Makefile + publish.yml) plus
-  `CHANGELOG.md`-Bootstrap. T4 Tag-Push bleibt Nutzer-Aktion.
-  Siehe [`done/slice-v1-release-cut-v0.1.0.md`](../done/slice-v1-release-cut-v0.1.0.md).
-
-Die noch offenen V1- und Later-Folgen (Add-ons, Templates-
-Implementation, Generators, Distributions-Restwege, Migration,
-Custom-Data-Sources) sind oben in §Nächste Schritte aufgeführt.
+Die noch offenen V1- und Later-Folgen ohne benannten Slice
+(Add-ons-Implementation außerhalb des aktuellen v0.3.0-Milestones,
+Generators, Logs/Dry-Run/Diff, Migration, Custom-Data-Sources)
+sind oben in §Nächste Schritte aufgeführt.
 
 ## Lifecycle-Hinweis
 
