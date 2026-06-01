@@ -43,16 +43,10 @@ Slice-Tabellen leben unten als jeweils eigene Sektion.
 
 | Version | Status | Tag-Commit | Datum | Highlights | Detail |
 | ------- | ------ | ---------- | ----- | ---------- | ------ |
-| v0.1.0  | ✅ released | `49ec464` | 2026-05-31 | MVP-Core (M1..M8 + MVP-Closure) + Release-Pipeline + GHCR-Distribution | §[v0.1.0 / v0.2.0 — Audit-Trail](#v010--v020--audit-trail-ausgelieferter-slices--offene-trigger-restwege) |
-| v0.2.0  | ✅ released | `595acdf` | 2026-06-01 | Container-aware doctor, Binary-Distribution (6 Plattformen), Template-Katalog (`template list` + `init --template`) | §[v0.1.0 / v0.2.0 — Audit-Trail](#v010--v020--audit-trail-ausgelieferter-slices--offene-trigger-restwege) |
+| v0.1.0  | ✅ released | `49ec464` | 2026-05-31 | MVP-Core (M1..M8 + MVP-Closure) + Release-Pipeline + GHCR-Distribution | §[v0.1.0 / v0.2.0 — Audit-Trail](#v010--v020--audit-trail-ausgelieferter-slices) |
+| v0.2.0  | ✅ released | `595acdf` | 2026-06-01 | Container-aware doctor, Binary-Distribution (6 Plattformen), Template-Katalog (`template list` + `init --template`) | §[v0.1.0 / v0.2.0 — Audit-Trail](#v010--v020--audit-trail-ausgelieferter-slices) |
 | v0.3.0  | 🛠 in progress (3/5) | — | — | Add-on Catalogue Expansion: `add-remove`, `addons-deps`, `keycloak`, `otel` + V1-Audit | §[v0.3.0 — Milestone-Tabelle](#v030--milestone-tabelle-add-on-catalogue-expansion) |
-| v0.4.0+ | 📋 Backlog | — | — | V1-Generators (logs, `--json`/`--dry-run`), Later (Migration, Custom-Data-Sources), Templates-local, Podman-formal, Distributions-Restwege | §[v0.4.0+ — Backlog / Trigger-Slices](#v040--backlog--trigger-slices) |
-
-**Offene Nutzer-Aktion aus v0.1.0-Era:** Branch-Protection-UI für
-`main` spätestens vor erstem externem PR aktivieren — siehe
-[`docs/user/branch-protection.md`](../../../user/branch-protection.md)
-(Required-Status-Check-Liste: die drei verbose Workflow-`name:`-Felder).
-Nicht release-blockierend; nach v0.2.0 weiterhin offen.
+| v0.4.0+ | 📋 Backlog | — | — | V1-Generators (logs, `--json`/`--dry-run`), Later (Migration, Custom-Data-Sources), Templates-local, Podman-formal, Distributions-Restwege, Branch-Protection-UI | §[v0.4.0+ — Backlog / Trigger-Slices](#v040--backlog--trigger-slices) |
 
 ## MVP-Bilanz — **MVP vollständig** (Stand `bc487fc`; M8-T5 `25cb123`)
 
@@ -146,6 +140,7 @@ Later-Punkte können auch in spätere Cuts rutschen.
 | [ ] | `slice-v2-homebrew-formula` | `LH-OPEN-002`-Restweg Homebrew | [ADR-0007](../../adr/0007-distributionswege-ghcr.md) §Entscheidung. Trigger: erste macOS-Nutzer-Nachfrage. |
 | [ ] | `slice-v2-distro-pakete` | `LH-OPEN-002`-Restweg Debian/RPM | [ADR-0007](../../adr/0007-distributionswege-ghcr.md) §Entscheidung. Trigger: konkrete Distro-Anfrage (`debhelper`/`rpmbuild`-Overhead). |
 | [ ] | `slice-vN-podman-formal` | `LH-FA-DIAG-002`-Erweiterung Podman-First | Heute funktional per Symlink + `DOCKER_HOST=…/podman.sock`; v0.1.1-Container-Detection probes `/run/.containerenv` (`a504a36`), `spec/architecture.md` §2.4 dokumentiert Drop-in. Trigger: Nutzer-Bedarf nach `PodmanProbe`-Adapter + CI-Matrix. |
+| [ ] | User-Aktion: Branch-Protection-UI (kein Code-Slice) | `LH-QA-003` + [ADR-0004](../../adr/0004-ci-system.md) §Folgepunkte Carveout „Branch-Protection nicht versioniert" | Repo-Owner-Klickstrecke im GitHub-UI (Settings → Branches → Add branch protection rule). Acht Schritte vollständig in [`docs/user/branch-protection.md`](../../../user/branch-protection.md) dokumentiert; drei Required-Status-Check-Namen (`gates (lint + test + coverage-gate)`, `security-gates (govulncheck)`, `image-scan (trivy HIGH+CRITICAL)`) sind die langen Workflow-`name:`-Felder aus `.github/workflows/ci.yml`. Trigger: spätestens vor erstem externem PR; nicht release-blockierend für v0.x.0-Solo-Cuts. |
 
 ## v0.1.0 / v0.2.0 — Audit-Trail ausgelieferter Slices
 
