@@ -36,7 +36,7 @@ import (
 // version is overridable at build time via -ldflags.
 //
 //	go build -ldflags="-X main.version=v0.2.0" ./cmd/uboot
-var version = "0.2.0-dev"
+var version = "0.3.0-dev"
 
 func main() {
 	// Signal-aware context: Ctrl-C / SIGTERM cancel the use-case
