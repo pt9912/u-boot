@@ -28,6 +28,36 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- **`u-boot add otel`** — LH-FA-ADD-004 / LH-AK-004. Third and
+  final add-on of the v0.3.0 milestone catalogue. Compose-Service
+  mit Image-Pin `otel/opentelemetry-collector:0.108.0` (Stable),
+  Port-Mappings `4317:4317` (OTLP/gRPC) + `4318:4318` (OTLP/HTTP),
+  `command: --config=/etc/otel-collector-config.yaml`, Bind-Mount
+  der gerenderten Config-Datei. Kein Healthcheck im Mindest-
+  Setup (LH-AK-004 §2374 toleriert `running` ODER `healthy`).
+  Mindest-Collector-Config in `otel-collector-config.yaml`:
+  Receivers `otlp/grpc+http`, Processors `batch`, Exporters
+  `debug` (stdout), Pipelines `logs`/`metrics`/`traces` — alle
+  drei Signal-Typen aus LH-FA-ADD-004 §880.
+  
+  Internal: Catalogue-Pattern wächst um drei Felder pro Service —
+  `extraFiles []extraFileEntry` für whole-file artefacts abseits
+  von compose+env+volume (für OTel die Collector-Config-Datei),
+  plus `envOptional` (implizit via leerem `envTmpl`) und
+  `healthcheckOptional` für Services, die das Standard-Pattern
+  legitim nicht brauchen. `executeAdd` schreibt extraFiles als
+  vierten Slot nach yaml/compose/env; `executeRemove` löscht sie
+  symmetrisch. `serviceComplete` skipt healthcheck-presence für
+  `healthcheckOptional`; explicit `healthcheck.disable: true`
+  bleibt hart abgelehnt. Acceptance-Helper-Reuse aus
+  `slice-v1-keycloak` T3 (`acceptance_helpers.go`) — OTel-E2E
+  bleibt ~30 Zeilen. **Makefile-Patch**: `test-docker`-Target
+  mountet jetzt `/tmp` host-shared, damit Compose-Bind-Mount-
+  Pfade vom Daemon (Host) aufgelöst werden können — sonst sieht
+  der Daemon nur den Container-Pfad `t.TempDir()` nicht und
+  erstellt einen leeren Verzeichnis-Mount, der den Collector
+  beim Config-Read crasht. See
+  [`slice-v1-otel`](docs/plan/planning/done/slice-v1-otel.md).
 - **`u-boot add keycloak`** — LH-FA-ADD-003 / LH-AK-003. Second
   add-on in the catalogue after Postgres. Compose-Service mit
   Image-Pin `quay.io/keycloak/keycloak:26.0` (LTS), Port-Mapping
