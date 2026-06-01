@@ -95,65 +95,20 @@ Later-Folgen:
    bleibt als Nutzer-One-Shot offen aus v0.1.0-Era (nicht
    release-blockierend).
 2. **v0.3.0-Milestone — Add-on Catalogue Expansion (in progress, 3/5).**
-   Fünf Slices als nächstes Release-Cluster, geordnet von klein
-   nach groß:
-   - ✅ [`slice-v1-audit-done`](../done/slice-v1-audit-done.md)
-     — drei V1-IDs (`LH-FA-BUILD-006` Aggregator-Targets,
-     `LH-NFA-MAINT-004` Dokumentierte Schnittstellen,
-     `LH-NFA-PORT-003` Containerfreundlichkeit) gegen den
-     aktuellen Code-Stand verifiziert; Evidence im done/-Slice.
-   - ✅ [`slice-v1-add-remove`](../done/slice-v1-add-remove.md)
-     (`LH-FA-ADD-007`) — `u-boot remove <service>` geliefert
-     2026-06-01 (T1 `ca1267f` Driving-Port + Skeleton, T2
-     `e26cb42` State-Machine + `detectServiceState`-Extract,
-     T3 `c508b4f` `--purge`-Confirmation-Gate, T4 `3cc2646`
-     CLI + Wiring + E2E, T5 `764e737` Slice-Closure, Review-
-     Followup `78ddcc6` F1..F6 — Two-Phase Plan-then-Write +
-     InconsistentBlock-Convergence + Mode-Preservation +
-     stderr-WARNING + Deactivated-Gate-Skip). E2E gegen das
-     gebaute Image: `add postgres` → `enabled: true`;
-     `remove postgres` → `enabled: false` + Changed-Liste;
-     zweiter `remove` → idempotent No-Op. **T3-Decision**:
-     actual Volume-Removal bleibt deferred (CLI surface'd
-     `docker volume rm <name>`-Cleanup-Hinweis); eigener Folge-
-     Slice, wenn der Docker-Engine-Port-Erweiterung gerechtfertigt
-     ist.
-   - ✅ [`slice-v1-addons-deps`](../done/slice-v1-addons-deps.md)
-     (`LH-FA-ADD-006`) — Add-on-Dependency-Resolution geliefert
-     2026-06-01 (T1 `23abd2b` `domain.AddOnDependency` +
-     `dependenciesFor`-Side-Table, T2 `cd4f88c`
-     `resolveAddDependencies` + `ErrDependenciesRequired` +
-     `Add()`-Integration, T3 `41b51ed` `--with-deps` +
-     Vier-Modi-Dispatch + `ConfirmAddDependency`-Port-Extension).
-     Postgres-Pfad bleibt verhaltensidentisch (no-deps short-
-     circuit); erste echte Dep-Row landet mit
-     `slice-v1-keycloak`.
-   - **`slice-v1-keycloak`** (`LH-FA-ADD-003` + `LH-AK-003`) —
-     Keycloak-Add-on analog M5-Postgres-Pattern, mit Postgres-
-     Dependency aus addons-deps.
-   - **`slice-v1-otel`** (`LH-FA-ADD-004` + `LH-AK-004`) —
-     OpenTelemetry-Add-on parallel zu Keycloak.
+   Fünf Slices als nächstes Release-Cluster (audit-done →
+   add-remove → addons-deps → Keycloak + OTel parallel). Detail-
+   Tabelle mit Spec-IDs, Done-Checkboxen und T-Hashes pro Slice:
+   §[v0.3.0 — Milestone-Tabelle](#v030--milestone-tabelle-add-on-catalogue-expansion) unten.
 3. **V1-Templates-Implementation** — drei Slices aus
    [ADR-0009](../../adr/0009-template-format-yaml-files.md)
-   §Folgepunkte.
-   [`slice-v1-template-list`](../done/slice-v1-template-list.md)
-   ✅ geliefert (T1 `65795b5` Domain+Driven-Port+embed.FS-Adapter
-   inkl. `basic`-Bootstrap-Template, T2 `a099d63` Driving-Port +
-   Application-Service, T3 `23bd91b` CLI `u-boot template list
-   [--json]` + Wiring, T4 Slice-Closure mit ADR-0009-Pfad-
-   Konsolidierung `external-templates/` → `externaltemplates/`).
-   [`slice-v1-template-init`](../done/slice-v1-template-init.md)
-   ✅ geliefert (T1 `9e81b02` `domain.TemplatePath` +
-   `driven.TemplateFiles` + `Catalog.Open()`, T2 `65a1ce8`
-   `TemplateInitUseCase` + Render-Loop, T3 `ed6d9a0`
-   `basic`-Bootstrap-Content für die sechs `*.tmpl`-Files +
-   Byte-Identity-Pin gegen Default-Init, T4 `daaaa9a` CLI-Flag
-   `--template <name>` + `InitProjectService`-Delegation via
-   `WithTemplateInit`-Option + E2E `diff -r`-Byte-Identity-Smoke,
-   T5 Slice-Closure). Variable-Resolution für `--var key=value`
-   bleibt out-of-scope, bis ein Built-in (z. B. `micronaut`)
-   tatsächlich Variablen einführt. Offen: `slice-later-local-
-   templates` (`--template ./pfad`-Auflösung, `LH-FA-TPL-003`).
+   §Folgepunkte. `slice-v1-template-list` ✅ + `slice-v1-template-init`
+   ✅ in v0.2.0 ausgeliefert; T-Hashes und Bezug pro Slice in
+   §[v0.1.0 / v0.2.0 — Audit-Trail](#v010--v020--audit-trail-ausgelieferter-slices--offene-trigger-restwege)
+   unten. Variable-Resolution für `--var key=value` bleibt
+   out-of-scope, bis ein Built-in (z. B. `micronaut`) tatsächlich
+   Variablen einführt. Offen: `slice-later-local-templates`
+   (`--template ./pfad`-Auflösung, `LH-FA-TPL-003`) — Trigger-Slice
+   bei konkretem Bedarf.
 4. **V1-Generators** — `u-boot logs` (`LH-FA-UP-005`),
    `--json`-/`--dry-run`-Output (`LH-FA-CLI-007/008`,
    `LH-NFA-USE-004`). Maschinen-Schnittstelle, auf die
@@ -248,7 +203,7 @@ Milestone-Schluss).
 | [ ] | `slice-v1-keycloak` | `LH-FA-ADD-003` Keycloak hinzufügen, `LH-AK-003` Keycloak-Flow | Keycloak-Add-on analog M5-Postgres-Pattern; Postgres-Dependency über addons-deps deklariert. Acceptance-Test analog `LH-AK-002`. |
 | [ ] | `slice-v1-otel` | `LH-FA-ADD-004` OpenTelemetry hinzufügen, `LH-AK-004` OpenTelemetry-Flow | OpenTelemetry-Add-on parallel zu Keycloak — kann gleichzeitig mit Keycloak entwickelt werden, weil keine Dependency zwischen den beiden. |
 
-Stand: 2/5 ✅, 3/5 offen. Beim Schließen des Milestones folgt der
+Stand: 3/5 ✅, 2/5 offen. Beim Schließen des Milestones folgt der
 v0.3.0-Release-Cut-Slice mit CHANGELOG-Konsolidierung, Dev-Version-
 Bump auf `0.3.0-dev`, READMEs-Sync und Tag-Push-Nutzer-Aktion
 (Pattern aus `slice-v1-release-cut-v0.2.0`).
