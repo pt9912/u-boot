@@ -72,7 +72,9 @@ Pfad. Mindestens eine der folgenden Strategien ist umgesetzt:
 ## Out of Scope
 
 - Volle Binary-Distribution (eigener Slice
-  `slice-v2-binary-distribution`, in `open/` als Trigger-Ziel).
+  [`slice-v2-binary-distribution`](slice-v2-binary-distribution.md);
+  zum Zeitpunkt dieser Slice-Closure als Trigger-Ziel in `open/`,
+  mittlerweile selbst in `done/` ausgeliefert).
 - Devcontainer-Mount-Variante (z. B. Host-PATH ins Container
   durchreichen via `-v`); zu hässlich für die README, lässt sich
   aber nach Bedarf in der Doku als Workaround erwähnen.
@@ -85,5 +87,5 @@ Pfad. Mindestens eine der folgenden Strategien ist umgesetzt:
   („erste konkrete Nachfrage nach Cross-Plattform-Distribution")
   als Trigger für `slice-v2-binary-distribution`.
 - Plan-Anker: dieser Slice plus
-  [`slice-v2-binary-distribution`](../open/slice-v2-binary-distribution.md).
+  [`slice-v2-binary-distribution`](slice-v2-binary-distribution.md).
 - Phase: V1-Followup (post-v0.1.0, Pre-v0.1.1).

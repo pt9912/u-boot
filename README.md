@@ -31,7 +31,7 @@ and the
 **`v0.1.1` in preparation** — adds container-aware `doctor`
 ([`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/done/slice-v0.1.1-doctor-container-awareness.md))
 and a host-native binary distribution
-([`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md),
+([`slice-v2-binary-distribution`](docs/plan/planning/done/slice-v2-binary-distribution.md),
 T1 + T2 + T3 shipped: `make build-binaries` for six platforms
 (Linux/macOS/Windows × amd64/arm64), `publish.yml` uploading the
 binaries to the GitHub Release on every `v*` tag, and the
@@ -119,7 +119,7 @@ host-native form intended for `doctor`, `init`, and the other host-
 side subcommands (per
 [ADR-0007 §Folgepunkte 1](docs/plan/adr/0007-distributionswege-ghcr.md),
 trigger active via
-[`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md)).
+[`slice-v2-binary-distribution`](docs/plan/planning/done/slice-v2-binary-distribution.md)).
 
 **Linux / macOS** (`<os>-<arch>` auto-detected from `uname`):
 
@@ -213,7 +213,7 @@ for the design rationale.
 
 For real host-side diagnostics, run `doctor` from a host install
 once the binary distribution lands
-([`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md),
+([`slice-v2-binary-distribution`](docs/plan/planning/done/slice-v2-binary-distribution.md),
 ADR-0007 §Folgepunkte 1 trigger now active). The other subcommands
 (`init`/`add`/`up`/`down`/`generate`/`config`) work fine via
 volume-mount in the container today.

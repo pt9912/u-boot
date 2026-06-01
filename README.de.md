@@ -32,7 +32,7 @@ und im
 `doctor`
 ([`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/done/slice-v0.1.1-doctor-container-awareness.md))
 und eine host-native Binary-Distribution
-([`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md),
+([`slice-v2-binary-distribution`](docs/plan/planning/done/slice-v2-binary-distribution.md),
 T1 + T2 + T3 geliefert: `make build-binaries` für sechs Plattformen
 (Linux/macOS/Windows × amd64/arm64), `publish.yml` lädt die Binaries
 bei jedem `v*`-Tag an den GitHub-Release hoch, und der Binary-First-
@@ -127,7 +127,7 @@ host-native Form für `doctor`, `init` und die anderen host-seitigen
 Subkommandos (gemäß
 [ADR-0007 §Folgepunkte 1](docs/plan/adr/0007-distributionswege-ghcr.md),
 Trigger aktiv via
-[`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md)).
+[`slice-v2-binary-distribution`](docs/plan/planning/done/slice-v2-binary-distribution.md)).
 
 **Linux / macOS** (`<os>-<arch>` werden aus `uname` ermittelt):
 
@@ -225,7 +225,7 @@ fehlzudeuten. Exit-Code bei ansonsten gesundem Projekt ist `0`
 Für echte host-seitige Diagnostik `doctor` aus einer Host-
 Installation laufen lassen, sobald die Binary-Distribution
 gelandet ist
-([`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md),
+([`slice-v2-binary-distribution`](docs/plan/planning/done/slice-v2-binary-distribution.md),
 ADR-0007 §Folgepunkte 1 Trigger jetzt aktiv). Die anderen
 Subkommandos (`init`/`add`/`up`/`down`/`generate`/`config`)
 funktionieren heute schon via Volume-Mount im Container.

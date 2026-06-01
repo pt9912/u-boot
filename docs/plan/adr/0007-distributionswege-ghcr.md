@@ -61,7 +61,7 @@ T2 liefert die Workflow-Mechanik, T3 den Trivy-Scan.
 | Option | Entscheidung | Begründung |
 | ------ | ------------ | ---------- |
 | Container Image (GHCR) | **Gewählt** | Geringster Reibungspunkt, passt zu Docker-only-Build und Docker-Laufzeit-Voraussetzung; OCI-Labels schon da; SHA-pinbare Standard-Actions. |
-| Einzelnes Binary | **Vertagt** mit eigenem Slice-Trigger | u-boot orchestriert Docker — eine reine Binary ohne Docker hat keinen Use-Case. Trigger: erste konkrete Nachfrage nach Cross-Plattform-Distribution oder CI-Anbindung ohne Container-Pull. Trigger-Slice: `slice-v2-binary-distribution.md` (zu erstellen bei Auslösung). |
+| Einzelnes Binary | **Gewählt** (zusätzlich zu GHCR, ab v0.1.1) | Trigger ist am 2026-05-31 materialisiert: der v0.1.1-doctor-container-Befund (siehe §Folgepunkte) zeigte, dass `doctor` als Host-Diagnostik-Subkommando eine host-native Form braucht — das distroless-Image bringt keine `docker`/`git`-Binaries für die LH-FA-DIAG-002-Probes mit. Geliefert via [`slice-v2-binary-distribution`](../planning/done/slice-v2-binary-distribution.md): sechs Plattformen (Linux/macOS/Windows × amd64/arm64), `make build-binaries` cross-kompiliert im pinned `golang:$(GO_VERSION)`-Container, `publish.yml` hängt sie als GitHub-Release-Asset an jeden `v*`-Tag. |
 | npm package | **Verworfen** | Sprach-Ökosystem-Mismatch (Go-Binary ist kein Node-Modul). npm/yarn-Distribution hätte nur Mehrwert bei Frontend-/JS-Team-Targets; u-boot ist Tooling für beliebige Stacks. |
 | pip package | **Verworfen** | Analog npm: u-boot ist Go, kein Python-Modul. `pipx`-Wrapper für Go-Binaries hat keinen erkennbaren Mehrwert über GHCR. |
 | Homebrew | **Vertagt** mit eigenem Slice-Trigger | Natürlicher Folgeweg nach Binary; ohne Binary keine Homebrew-Formula. Trigger: macOS-Nutzer-Nachfrage. Trigger-Slice: `slice-v2-homebrew-formula.md` (zu erstellen). |
@@ -145,3 +145,12 @@ Alternativen (verworfen):
 - Wenn ein vertagter Distributionsweg ausgelöst wird, wird der
   jeweilige `slice-v2-*`-Plan in `open/` neu angelegt und mit dem
   konkreten Trigger versehen.
+- [`slice-v2-binary-distribution`](../planning/done/slice-v2-binary-distribution.md)
+  hat den Trigger am 2026-05-31 materialisiert (via v0.1.1-
+  doctor-container-Befund) und am 2026-06-01 vollständig
+  geliefert (T1 `dc9a336` + `f3f1731` Cross-Compile-Makefile,
+  T2 `5e5166b` `publish.yml`-Asset-Upload, T3 `866f6fd` README-
+  Install-Block + CHANGELOG `## [Unreleased]`, T4 Slice-Closure).
+  Binary-Zeile in §Entscheidung-Tabelle entsprechend von
+  „Vertagt" auf „Gewählt (zusätzlich zu GHCR)" gehoben; weitere
+  Tranche-Hashes in der DoD-Tabelle des done-Slice.

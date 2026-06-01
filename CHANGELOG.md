@@ -22,7 +22,7 @@ this file is the same format applied to u-boot itself.
   builds the same set after the GHCR push on every `v*` tag and
   attaches them as GitHub-Release assets via `gh release upload`.
   See
-  [`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md)
+  [`slice-v2-binary-distribution`](docs/plan/planning/done/slice-v2-binary-distribution.md)
   — ADR-0007 §Folgepunkte 1 trigger pulled forward by the v0.1.1
   doctor-container-awareness feedback.
 - Quickstart in `README.md` / `README.de.md` gets a host-native
@@ -71,7 +71,7 @@ to probe.
 ### Notes
 
 The medium-term fix is a host-native binary distribution
-([`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md),
+([`slice-v2-binary-distribution`](docs/plan/planning/done/slice-v2-binary-distribution.md),
 ADR-0007 §Folgepunkte 1 trigger now active); the v0.1.1 skip is the
 short-term ergonomic patch.
 

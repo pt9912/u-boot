@@ -51,7 +51,7 @@ Disziplin-Verstoß.
 | [`slice-v2-revive-custom-rules`](../done/slice-v2-revive-custom-rules.md) | ADR-0003 Folgepunkt revive-Custom-Rules | V2-vorgezogen | Done |
 | [`slice-later-http-driving-adapter`](../done/slice-later-http-driving-adapter.md) | `spec/architecture.md` §7 HTTP-Driving-Adapter prospektiv | Later | Done (Entscheidung in [ADR-0010](../../adr/0010-kein-http-driving-adapter.md): wird nicht gebaut) |
 | [`slice-v0.1.1-doctor-container-awareness`](../done/slice-v0.1.1-doctor-container-awareness.md) | `doctor` im distroless-Container findet docker/git nicht (Real-world-Befund 2026-05-31 post-v0.1.0) | v0.1.1-Followup | Done (T1 `9a99bbf`, T2 `c35360f`, T3 `111e725`, T4 schließt; Tag-Push bleibt Nutzer-Aktion analog v0.1.0-T4) |
-| [`slice-v2-binary-distribution`](../open/slice-v2-binary-distribution.md) | ADR-0007 §Folgepunkte 1 Trigger (erste konkrete Cross-Plattform-Distributionsanfrage) durch `doctor`-Befund ausgelöst | V2 | Open — T1 ✅ `dc9a336` + `f3f1731` (`make build-binaries` für 6 Plattformen Linux/macOS/Windows × amd64/arm64), T2 ✅ `5e5166b` (`publish.yml` build + GitHub-Release-Upload); T3 (READMEs Install-Block + CHANGELOG `## [Unreleased]`) und T4 (ADR-0007-Update + carveouts-Reduktion + Closure) offen |
+| [`slice-v2-binary-distribution`](../done/slice-v2-binary-distribution.md) | ADR-0007 §Folgepunkte 1 Trigger (erste konkrete Cross-Plattform-Distributionsanfrage) durch `doctor`-Befund ausgelöst | V2 | Done — T1 ✅ `dc9a336` + `f3f1731` (`make build-binaries` für 6 Plattformen Linux/macOS/Windows × amd64/arm64), T2 ✅ `5e5166b` (`publish.yml` build + GitHub-Release-Upload), T3 ✅ `866f6fd` (READMEs Install-Block Binary-first + CHANGELOG `## [Unreleased]`), T4 schließt mit ADR-0007 §Entscheidung-Update (Binary „Vertagt → Gewählt") + carveouts.md `LH-OPEN-002`-Reduktion auf Homebrew+Debian/RPM + open→done. |
 
 ## Nächste Schritte
 
@@ -88,7 +88,8 @@ Later-Folgen:
    abwarten, (d) `git tag v0.1.1 && git push origin v0.1.1`.
    Zog den ersten ADR-0007-Re-Eval-Trigger (Binary-Distribution)
    mit, siehe
-   [`open/slice-v2-binary-distribution.md`](../open/slice-v2-binary-distribution.md).
+   [`done/slice-v2-binary-distribution.md`](../done/slice-v2-binary-distribution.md)
+   (mittlerweile vollständig geliefert — siehe Punkt 5).
 2. **V1-Add-ons** — Keycloak (`LH-FA-ADD-003` / `LH-AK-003`) und
    OpenTelemetry (`LH-FA-ADD-004` / `LH-AK-004`); jeweils
    eigener Slice-Plan bei Auslösung.
@@ -107,12 +108,14 @@ Later-Folgen:
    Debian/RPM bleiben vertagt mit Trigger-Slices aus
    [ADR-0007](../../adr/0007-distributionswege-ghcr.md)
    §Entscheidung. Binary-Distribution ist in
-   [`open/slice-v2-binary-distribution.md`](../open/slice-v2-binary-distribution.md)
-   T1+T2 geliefert: `make build-binaries` (`dc9a336`/`f3f1731`)
-   und `publish.yml` baut + uploadet sechs Plattform-Binaries
-   pro Tag (`5e5166b`). T3 (Install-Block in den READMEs +
-   CHANGELOG-Eintrag) und T4 (ADR-0007-Update +
-   carveouts-Restwege-Reduktion + Slice-Closure) folgen.
+   [`done/slice-v2-binary-distribution.md`](../done/slice-v2-binary-distribution.md)
+   vollständig geliefert: T1 `make build-binaries` für sechs
+   Plattformen (`dc9a336`/`f3f1731`), T2 `publish.yml` baut +
+   uploadet die Binaries pro Tag (`5e5166b`), T3 READMEs
+   Install-Block Binary-first + CHANGELOG `## [Unreleased]`
+   (`866f6fd`), T4 Slice-Closure mit ADR-0007 §Entscheidung
+   „Vertagt → Gewählt". Greift ab v0.1.1 (v0.1.0 hatte noch
+   keine Binary-Assets).
 6. **Later** — Migration (`LH-FA-CONF-006`), Custom-Data-Sources
    (`LH-DA-004`).
 7. **Podman-Drop-in als Container-Engine** — heute funktional
