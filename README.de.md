@@ -23,9 +23,9 @@ Entwickler, Teams und Berater, die ein reproduzierbares Docker-
 basiertes Projekt-Skelett brauchen, ohne pro Projekt Compose-Stacks
 von Hand zu schreiben. `u-boot` erzeugt die Boilerplate
 (`u-boot.yaml`, `compose.yaml`, Devcontainer-Files, …), bedient
-den Add-on-Katalog (PostgreSQL heute; Keycloak und OpenTelemetry
-folgen in v0.3.0) und liefert idempotente State-Machine-Operationen
-für Re-Init, Add, Remove und Managed-Block-Edits.
+den Add-on-Katalog (PostgreSQL, Keycloak, OpenTelemetry) und
+liefert idempotente State-Machine-Operationen für Re-Init, Add,
+Remove und Managed-Block-Edits.
 
 ## Was kann ich heute tun?
 

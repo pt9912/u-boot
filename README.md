@@ -20,10 +20,9 @@ are written in German; CLI output and generated files are English
 Developers, teams, and consultants who need a reproducible Docker-based
 project skeleton without hand-rolling Compose stacks per project.
 `u-boot` generates the boilerplate (`u-boot.yaml`, `compose.yaml`,
-devcontainer files, …), wires the add-on catalogue (PostgreSQL today;
-Keycloak and OpenTelemetry land in v0.3.0), and provides idempotent
-state-machine operations for re-init, add, remove, and managed-block
-edits.
+devcontainer files, …), wires the add-on catalogue (PostgreSQL,
+Keycloak, OpenTelemetry), and provides idempotent state-machine
+operations for re-init, add, remove, and managed-block edits.
 
 ## What can I do today?
 
