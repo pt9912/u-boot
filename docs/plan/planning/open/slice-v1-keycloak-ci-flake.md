@@ -56,6 +56,33 @@ GitHub-Actions `integration-docker` läuft mit dem Keycloak-Test
 - ✅ `make test-docker` lokal grün; drei aufeinanderfolgende
   `integration-docker`-Runs auf GitHub-Actions grün.
 
+## Vorgehens-Hinweis
+
+**Diagnose ZUERST, Carveout NUR als Fall-Back.** Der `acceptance_
+extended`-build-tag in `9d0be1c` war eine pragmatische CI-
+Unblockierung am Vortag — der Default-Reflex auf einen roten
+CI-Lauf soll aber sein:
+
+1. **Lokal mit CI-Setup reproduzieren** (`docker run --rm
+   --network=host -v /tmp:/tmp -v /var/run/docker.sock:/var/run/
+   docker.sock ... docker compose up`). Das dauert meist <10 min
+   und zeigt direkt ob's Compose-Validate, Bind-Mount-Pfad-
+   Mismatch, Image-Pull-Timing oder Network-Block ist.
+2. **Container-Logs ziehen** (`docker compose logs <service>` aus
+   dem Test-Container). Im Keycloak-Fall könnte das die Compose-
+   Runtime-Error-Cause aufklären, die im T3-Lauf nur als
+   „compose runtime error" sichtbar war.
+3. **Erst danach** den Carveout aktivieren — und auch das nur
+   wenn (a) die Diagnose ergebnislos bleibt oder (b) der Fix
+   bewusst ausgegrenzt wird (eigener Folge-Slice mit benanntem
+   Trigger).
+
+slice-v1-otel T3 hat die Methodik live demonstriert: zwei rote
+CI-Runs → lokale Reproduktion → Diagnose (Daemon-Pfad-Mismatch) →
+10-Zeilen-Makefile-Fix (`-v /tmp:/tmp` in test-docker, commit
+`b0604df`) — kein Carveout nötig. Slice-v1-keycloak-ci-flake soll
+denselben Pfad gehen.
+
 ## Tranchen (vorgeschlagen)
 
 | T | Inhalt |
