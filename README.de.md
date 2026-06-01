@@ -8,11 +8,10 @@ Devcontainer-Konfiguration, Service-Add-Ons (PostgreSQL, Keycloak,
 OpenTelemetry, …) und wiederkehrende Artefakte (README, CHANGELOG,
 `.env.example`).
 
-> **Stand:** `v0.3.0`-Milestone „Add-on Catalogue Expansion"
-> feature-complete (5/5 Slices); ready to tag. Ergänzt
-> `add keycloak` + `add otel` + `remove <service>` + `--with-deps`
-> in der Add-on-Catalogue. Letztes getaggtes Release: `v0.2.0`
-> (2026-06-01). Vollständige Release-Tabelle unten.
+> **Stand:** `v0.3.0` released 2026-06-01 (GHCR + sechs Plattform-
+> Binaries). Ergänzt `add keycloak` + `add otel` +
+> `remove <service>` + `--with-deps` in der Add-on-Catalogue.
+> Vollständige Release-Tabelle unten.
 
 Das verbindliche Lastenheft
 ([`spec/lastenheft.md`](spec/lastenheft.md)) ist auf Deutsch verfasst;
@@ -149,7 +148,7 @@ Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien). Siehe den
 | ------- | ----- | ---------- |
 | `v0.1.0` | 2026-05-31 | MVP vollständig — sieben Subkommandos (`init`, `doctor`, `add`, `up`, `down`, `generate`, `config`), alle MVP-prioritären Lastenheft-IDs geliefert. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.1.0). |
 | `v0.2.0` | 2026-06-01 | Container-aware `doctor`, Six-Plattform-Binary-Distribution, `template list` + `init --template basic`. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.2.0). |
-| `v0.3.0` | ready to tag (5/5 ✅) | Milestone „Add-on Catalogue Expansion" feature-complete — `u-boot add keycloak` (LH-FA-ADD-003), `add otel` (LH-FA-ADD-004), `add <service> --with-deps` (LH-FA-ADD-006), `remove <service> [--purge]` (LH-FA-ADD-007) plus Doku-Audit-Closure für drei V1-Spec-IDs. Milestone-Tabelle in [`roadmap.md §v0.3.0`](docs/plan/planning/in-progress/roadmap.md). |
+| `v0.3.0` | 2026-06-01 | Milestone „Add-on Catalogue Expansion" — `u-boot add keycloak` (LH-FA-ADD-003), `add otel` (LH-FA-ADD-004), `add <service> --with-deps` (LH-FA-ADD-006), `remove <service> [--purge]` (LH-FA-ADD-007) plus Doku-Audit-Closure für drei V1-Spec-IDs. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.3.0). |
 
 Die Roadmap
 ([`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md))

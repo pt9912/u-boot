@@ -12,7 +12,7 @@ Roadmap ist release-orientiert:
 | ------- | ------------------- | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | v0.1.0  | ✅ released          | `49ec464`  | 2026-05-31 | MVP-Core (M1..M8 + MVP-Closure) + Release-Pipeline + GHCR-Distribution                                                                                           |
 | v0.2.0  | ✅ released          | `595acdf`  | 2026-06-01 | Container-aware doctor, Binary-Distribution (6 Plattformen), Template-Katalog (`template list` + `init --template`)                                              |
-| v0.3.0  | 🔖 ready to tag (5/5 ✅; Release-Cut [`slice-v1-release-cut-v0.3.0`](../done/slice-v1-release-cut-v0.3.0.md) T1..T3 ✅) | —          | —          | Add-on Catalogue Expansion: `add-remove`, `addons-deps`, `keycloak`, `otel` + V1-Audit                                                                           |
+| v0.3.0  | ✅ released          | `54bc384`  | 2026-06-01 | Add-on Catalogue Expansion: `add-remove`, `addons-deps`, `keycloak`, `otel` + V1-Audit                                                                           |
 | v0.4.0  | 📋 planned/open       | —          | —          | V1-Generators (logs, `--json`/`--dry-run`), Later (Migration, Custom-Data-Sources), Templates-local, Podman-formal, Distributions-Restwege, Branch-Protection-UI |
 
 
@@ -66,6 +66,17 @@ v0.1.1-Planung verlangten SemVer-MINOR-Bump).
 
 ## v0.3.0
 
+**Released 2026-06-01** — Tag-Commit `54bc384`,
+`publish.yml`-Run `26770478833` (SemVer-Validate + GHCR-Login +
+`make build VERSION=0.3.0` + OCI-Label-Verify + Live-`--version`-
+Smoke + Cross-Compile + Upload für sechs Binary-Plattformen).
+Images: `ghcr.io/pt9912/u-boot:0.3.0` und `:latest`. GitHub-
+Release mit sechs Binary-Assets:
+<https://github.com/pt9912/u-boot/releases/tag/v0.3.0>.
+Release-Cut-Audit-Trail:
+[`slice-v1-release-cut-v0.3.0`](../done/slice-v1-release-cut-v0.3.0.md)
+(T1 `ab479e7`, T2 `3af9e4b`, T3 `29905f4` + Link-Fix `ce872b4`,
+T4 `54bc384` Datum + Tag-Push).
 
 | Done | Slice                                                     | Spec-IDs (Lastenheft)                                                                                                            | Status                                                                                                                                                                                                                                                                                                                                                     |
 | ---- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -75,10 +86,8 @@ v0.1.1-Planung verlangten SemVer-MINOR-Bump).
 | [x]  | [`slice-v1-keycloak`](../done/slice-v1-keycloak.md)        | `LH-FA-ADD-003` Keycloak hinzufügen, `LH-AK-003` Keycloak-Flow                                                                   | Geliefert 2026-06-01 — T1 `2708606` Templates + Service-Catalogue + renderServiceTemplates, T2 `861f231` per-Service Probe-Mechanismus (hasRequiredEnvKeys / contentScanState / inspectVolumeArtefact / patchTargetsFor) + Catalogue-Erweiterung, T3 `beb222b` E2E LH-AK-003 + acceptance_helpers.go-Extraktion. Default-Persistenz flüchtige H2-In-Container; externe Postgres-Anbindung als Folge-Slice (slice-v1-keycloak-external-postgres).                                                                                                                                                                                                                           |
 | [x]  | [`slice-v1-otel`](../done/slice-v1-otel.md)                | `LH-FA-ADD-004` OpenTelemetry hinzufügen, `LH-AK-004` OpenTelemetry-Flow                                                         | Geliefert 2026-06-01 — T1 `4a20bd7` Templates + extraFiles-Catalogue-Erweiterung, T2 `3d9d83e` executeAdd/Remove extraFiles-aware + Catalogue-Aktivierung + healthcheckOptional, T3 `efd75e9` E2E LH-AK-004 (+ CI-Fix `b0604df` Makefile `-v /tmp:/tmp` für Compose-Bind-Mount-Auflösung). Drittes und letztes Add-on des Milestones — v0.3.0 ist feature-complete. |
 
-Stand: **5/5 ✅, Milestone feature-complete**. Beim Schließen folgt der
-v0.3.0-Release-Cut-Slice mit CHANGELOG-Konsolidierung, Dev-Version-
-Bump auf `0.3.0-dev`, READMEs-Sync und Tag-Push-Nutzer-Aktion
-(Pattern aus `slice-v1-release-cut-v0.2.0`).
+Stand: **5/5 ✅, Milestone released** (Tag-Push 2026-06-01, siehe
+Vorspann oben).
 
 ## v0.4.0
 
