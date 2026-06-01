@@ -225,7 +225,7 @@ func TestCheckAddDependencies_NoMissing_ReturnsNil(t *testing.T) {
 	if err := fs.WriteFile("/proj/u-boot.yaml", []byte(yamlPostgresRegistered), 0o644); err != nil {
 		t.Fatalf("seed u-boot.yaml: %v", err)
 	}
-	svc := application.NewAddServiceService(fs, &fakeYAML{}, nil)
+	svc := application.NewAddServiceService(fs, &fakeYAML{}, nil, nil)
 
 	// Synthetic dep whose trigger condition does NOT match
 	// (devcontainer.enabled is unset in the fixture).
@@ -247,7 +247,7 @@ func TestCheckAddDependencies_MissingWrapsSentinel(t *testing.T) {
 	if err := fs.WriteFile("/proj/u-boot.yaml", []byte(yamlDevcontainerEnabled), 0o644); err != nil {
 		t.Fatalf("seed u-boot.yaml: %v", err)
 	}
-	svc := application.NewAddServiceService(fs, &fakeYAML{}, nil)
+	svc := application.NewAddServiceService(fs, &fakeYAML{}, nil, nil)
 
 	// Trigger matches AND required service (postgres) is NOT registered
 	// → the integration returns ErrDependenciesRequired with the

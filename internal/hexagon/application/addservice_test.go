@@ -23,7 +23,7 @@ func newAddService(t *testing.T) (*application.AddServiceService, *fakeFS, *fake
 	fs := newFakeFS()
 	fs.markDirExists(addTestBaseDir)
 	y := &fakeYAML{}
-	svc := application.NewAddServiceService(fs, y, nil)
+	svc := application.NewAddServiceService(fs, y, nil, nil)
 	return svc, fs, y
 }
 

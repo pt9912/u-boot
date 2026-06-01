@@ -87,3 +87,27 @@ func (c *Confirmer) ConfirmRemoveVolumes(_ context.Context, baseDir string) (boo
 	answer := strings.TrimSpace(strings.ToLower(scanner.Text()))
 	return answer == "y" || answer == "yes", nil
 }
+
+// ConfirmAddDependency renders the LH-FA-ADD-006 interactive prompt
+// when `u-boot add <svc>` would auto-install missing add-on
+// dependencies. Defaults to `N` — pulling in extra services is a
+// non-trivial side effect, so the safer-default is "no, abort".
+//
+// Mirrors [ConfirmTreatAsExisting]'s parsing rules: accepts `y` /
+// `yes` (case-insensitive) as confirmation; anything else
+// (including EOF, empty line, "no") is "no". A read error other
+// than EOF surfaces to the caller.
+func (c *Confirmer) ConfirmAddDependency(_ context.Context, svc string, missing []string) (bool, error) {
+	fmt.Fprintf(c.out, "Service %q requires the following missing add-ons: %s.\n", svc, strings.Join(missing, ", "))
+	fmt.Fprint(c.out, "Install them now? [y/N] ")
+
+	scanner := bufio.NewScanner(c.in)
+	if !scanner.Scan() {
+		if err := scanner.Err(); err != nil {
+			return false, fmt.Errorf("read confirmation: %w", err)
+		}
+		return false, nil
+	}
+	answer := strings.TrimSpace(strings.ToLower(scanner.Text()))
+	return answer == "y" || answer == "yes", nil
+}

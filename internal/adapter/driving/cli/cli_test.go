@@ -1235,6 +1235,107 @@ func TestExecute_Add_ConflictingModeFlags_Code2(t *testing.T) {
 	}
 }
 
+func TestExecute_Add_WithDepsFlag_PlumbedToRequest(t *testing.T) {
+	// LH-FA-ADD-006: pin that --with-deps reaches AddServiceRequest.
+	// The use case sees req.WithDeps == true; --yes / --no-interactive
+	// stay false in this scenario.
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeAddServiceUseCase{
+		resp: driving.AddServiceResponse{
+			ServiceName: mustServiceName(t, "postgres"),
+			PriorState:  domain.ServiceStateUnregistered,
+			State:       domain.ServiceStateActive,
+			Changed:     []string{"u-boot.yaml"},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithAdd(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"add", "--with-deps", "postgres"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !uc.lastReq.WithDeps {
+		t.Errorf("req.WithDeps = false, want true (--with-deps plumbed through)")
+	}
+	if uc.lastReq.Yes {
+		t.Errorf("req.Yes = true, want false (no --yes given)")
+	}
+	if uc.lastReq.NoInteractive {
+		t.Errorf("req.NoInteractive = true, want false (no --no-interactive given)")
+	}
+}
+
+func TestExecute_Add_YesFlag_PlumbedToRequest(t *testing.T) {
+	// Pin that the root --yes flag reaches AddServiceRequest.Yes so
+	// the application layer's four-mode dispatch can promote it to
+	// autoInstall (LH-FA-ADD-006).
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeAddServiceUseCase{
+		resp: driving.AddServiceResponse{
+			ServiceName: mustServiceName(t, "postgres"),
+			PriorState:  domain.ServiceStateUnregistered,
+			State:       domain.ServiceStateActive,
+			Changed:     []string{"u-boot.yaml"},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithAdd(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"--yes", "add", "postgres"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !uc.lastReq.Yes {
+		t.Errorf("req.Yes = false, want true (--yes plumbed)")
+	}
+	if uc.lastReq.WithDeps {
+		t.Errorf("req.WithDeps = true, want false")
+	}
+}
+
+func TestExecute_Add_NoInteractiveFlag_PlumbedToRequest(t *testing.T) {
+	// Pin that --no-interactive reaches AddServiceRequest so the
+	// dispatch can take the fail-fast arm when deps are missing.
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeAddServiceUseCase{
+		resp: driving.AddServiceResponse{
+			ServiceName: mustServiceName(t, "postgres"),
+			PriorState:  domain.ServiceStateUnregistered,
+			State:       domain.ServiceStateActive,
+			Changed:     []string{"u-boot.yaml"},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithAdd(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"--no-interactive", "add", "postgres"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if !uc.lastReq.NoInteractive {
+		t.Errorf("req.NoInteractive = false, want true")
+	}
+}
+
+func TestExecute_Add_DependenciesRequired_Code10(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeAddServiceUseCase{
+		err: fmt.Errorf("%w: %q requires [postgres] which is/are not registered — add them first or rerun with --with-deps",
+			driving.ErrDependenciesRequired, "keycloak"),
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithAdd(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"add", "keycloak"}, &stdout, &stderr,
+	)
+	if !errors.Is(err, driving.ErrDependenciesRequired) {
+		t.Fatalf("err = %v, want wrap of ErrDependenciesRequired", err)
+	}
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10", got)
+	}
+}
+
 func TestExecute_Add_GetwdFailure_Wrapped(t *testing.T) {
 	uc := &fakeAddServiceUseCase{}
 	var stdout, stderr bytes.Buffer

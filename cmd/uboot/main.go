@@ -117,7 +117,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	templateInitSvc := application.NewTemplateInitService(templateCatalogAdapter, fsAdapter, logAdapter)
 	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter, application.WithTemplateInit(templateInitSvc))
 	doctorSvc := application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, runtimeAdapter, logAdapter)
-	addSvc := application.NewAddServiceService(fsAdapter, yamlAdapter, logAdapter)
+	addSvc := application.NewAddServiceService(fsAdapter, yamlAdapter, confirmAdapter, logAdapter)
 	removeSvc := application.NewRemoveServiceService(fsAdapter, yamlAdapter, confirmAdapter, logAdapter)
 	upSvc := application.NewUpService(fsAdapter, yamlAdapter, dockerEngineAdapter, netprobeAdapter, clockAdapter, logAdapter)
 	downSvc := application.NewDownService(fsAdapter, dockerEngineAdapter, confirmAdapter, logAdapter)

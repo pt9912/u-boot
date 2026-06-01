@@ -27,7 +27,7 @@ func newInitAndAddServices(t *testing.T) (*application.InitProjectService, *appl
 	y := &fakeYAML{}
 	g := &fakeGit{}
 	initSvc := application.NewInitProjectService(fs, y, g, nil, nil, nil)
-	addSvc := application.NewAddServiceService(fs, y, nil)
+	addSvc := application.NewAddServiceService(fs, y, nil, nil)
 	return initSvc, addSvc, fs, y
 }
 

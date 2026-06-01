@@ -179,25 +179,33 @@ func (s activeArtifactsStatus) needsRepair() bool {
 // writes, Active-Repair) lives in addservice_execute.go and
 // addservice_detect.go.
 type AddServiceService struct {
-	fs     driven.FileSystem
-	yaml   driven.YAMLCodec
-	logger driven.Logger
+	fs        driven.FileSystem
+	yaml      driven.YAMLCodec
+	confirmer driven.Confirmer
+	logger    driven.Logger
 }
 
 // Static check: AddServiceService satisfies the driving port.
 var _ driving.AddServiceUseCase = (*AddServiceService)(nil)
 
 // NewAddServiceService constructs the service with the driven
-// adapters injected by the wiring layer. logger accepts nil and is
-// routed to the package-local [noopLogger] so tests / scripts that
-// do not wire a logger need no stub. fs and yaml are mandatory —
-// the service does not invent fallbacks for missing infrastructure
-// ports.
-func NewAddServiceService(fs driven.FileSystem, yaml driven.YAMLCodec, logger driven.Logger) *AddServiceService {
+// adapters injected by the wiring layer. logger and confirmer
+// accept nil — both are routed to the package-local noopLogger /
+// noopConfirmer so tests / scripts that do not wire them need no
+// stub. fs and yaml are mandatory — the service does not invent
+// fallbacks for missing infrastructure ports.
+//
+// confirmer is consulted only on the LH-FA-ADD-006 interactive path
+// (missing dependencies, neither --with-deps nor --yes nor
+// --no-interactive passed). All other Add flows skip the prompt.
+func NewAddServiceService(fs driven.FileSystem, yaml driven.YAMLCodec, confirmer driven.Confirmer, logger driven.Logger) *AddServiceService {
 	if logger == nil {
 		logger = noopLogger{}
 	}
-	return &AddServiceService{fs: fs, yaml: yaml, logger: logger}
+	if confirmer == nil {
+		confirmer = noopConfirmer{}
+	}
+	return &AddServiceService{fs: fs, yaml: yaml, confirmer: confirmer, logger: logger}
 }
 
 // Add implements [driving.AddServiceUseCase.Add]. The dispatch order
@@ -230,13 +238,16 @@ func (s *AddServiceService) Add(ctx context.Context, req driving.AddServiceReque
 		return driving.AddServiceResponse{}, err
 	}
 
-	// slice-v1-addons-deps T2: dependency-check between detection and
-	// state-machine dispatch. Postgres has no declared deps today, so
-	// the `len(deps) > 0` guard short-circuits the cfg-load for the
-	// MVP catalogue. Future Keycloak/OTel slices populate
-	// `dependenciesFor` and reach this branch.
+	// slice-v1-addons-deps T2/T3: dependency-check between detection
+	// and state-machine dispatch. Postgres has no declared deps
+	// today, so the `len(deps) > 0` guard short-circuits the cfg-
+	// load for the MVP catalogue. Future Keycloak/OTel slices
+	// populate `dependenciesFor` and reach this branch, where the
+	// four-mode dispatch (--with-deps / --yes / --no-interactive /
+	// interactive prompt) decides whether to auto-install,
+	// fail-fast, or recursively Add each missing service.
 	if deps := dependenciesFor(req.ServiceName); len(deps) > 0 {
-		if depErr := s.checkAddDependencies(req.BaseDir, req.ServiceName, deps); depErr != nil {
+		if depErr := s.checkAddDependencies(ctx, req, deps); depErr != nil {
 			return driving.AddServiceResponse{}, depErr
 		}
 	}
@@ -297,35 +308,89 @@ func (s *AddServiceService) Add(ctx context.Context, req driving.AddServiceReque
 	}
 }
 
-// checkAddDependencies loads u-boot.yaml again, runs the pure
-// [resolveAddDependencies] resolver against the declared deps, and
-// returns [driving.ErrDependenciesRequired] when at least one
-// required service is missing from the registered catalogue
-// (slice-v1-addons-deps T2).
+// checkAddDependencies is the slice-v1-addons-deps T3 orchestrator
+// for LH-FA-ADD-006. It loads u-boot.yaml, resolves which declared
+// deps are missing, and — if any — hands off to
+// [handleMissingDependencies] for the four-mode dispatch.
+//
+// Postgres has no declared deps so this path is only reached once
+// a future add-on (Keycloak, OTel) populates [dependenciesFor].
+// Tests drive it directly via the [CheckAddDependenciesForTest]
+// export seam with synthetic [domain.AddOnDependency] inputs.
 //
 // The redundant cfg-load (detectServiceState already parsed
 // u-boot.yaml) is the price for keeping detectServiceState's
 // signature unchanged and shared with [RemoveServiceService].
-// Postgres has no declared deps so the function is only reached
-// once a future add-on (Keycloak, OTel) populates
-// [dependenciesFor].
-//
-// T3 layers the four-mode CLI dispatch (`--with-deps` / `--yes` /
-// `--no-interactive` / interactive prompt) on top — the
-// fail-fast / exit-10 path returned here is the no-flag,
-// non-interactive default. Tests calling Add() directly hit this
-// path until T3 lands.
-func (s *AddServiceService) checkAddDependencies(baseDir string, svc domain.ServiceName, deps []domain.AddOnDependency) error {
-	_, _, cfg, err := s.loadAndParseUBootYAML(baseDir)
+func (s *AddServiceService) checkAddDependencies(ctx context.Context, req driving.AddServiceRequest, deps []domain.AddOnDependency) error {
+	missing, err := s.findMissingDependencies(req.BaseDir, deps)
 	if err != nil {
-		return fmt.Errorf("dependency check: %w", err)
+		return err
 	}
-	missing := resolveAddDependencies(cfg, deps)
 	if len(missing) == 0 {
 		return nil
 	}
-	return fmt.Errorf("%w: %q requires %v which is/are not registered — add them first or rerun with --with-deps",
-		driving.ErrDependenciesRequired, svc.String(), missingServiceNamesAsStrings(missing))
+	return s.handleMissingDependencies(ctx, req, missing)
+}
+
+// findMissingDependencies loads + parses u-boot.yaml and runs the
+// pure [resolveAddDependencies] resolver against deps. Returned
+// list is in deterministic order of first encounter (see resolver
+// godoc).
+func (s *AddServiceService) findMissingDependencies(baseDir string, deps []domain.AddOnDependency) ([]domain.ServiceName, error) {
+	_, _, cfg, err := s.loadAndParseUBootYAML(baseDir)
+	if err != nil {
+		return nil, fmt.Errorf("dependency check: %w", err)
+	}
+	return resolveAddDependencies(cfg, deps), nil
+}
+
+// handleMissingDependencies applies the LH-FA-ADD-006 four-mode
+// dispatch when at least one required service is missing:
+//
+//   - --with-deps OR --yes: auto-install. Recursively Add each
+//     missing service, propagating the same flags so transitive
+//     deps inherit the auto-confirm decision.
+//   - --no-interactive (without --with-deps / --yes): fail-fast
+//     with [driving.ErrDependenciesRequired] (exit code 10).
+//   - default (no flags): prompt via [driven.Confirmer.
+//     ConfirmAddDependency]. "yes" promotes to auto-install; "no"
+//     or I/O error → [driving.ErrDependenciesRequired].
+//
+// The recursive Add carries the parent's BaseDir so transitive
+// deps land in the same project, and inherits the flag set so a
+// single top-level `--with-deps` installs the whole chain
+// non-interactively. The recursion terminates because each Add
+// either registers a dep (shrinking the missing set on subsequent
+// runs) or fails-fast.
+func (s *AddServiceService) handleMissingDependencies(ctx context.Context, req driving.AddServiceRequest, missing []domain.ServiceName) error {
+	missingStrings := missingServiceNamesAsStrings(missing)
+	if !req.WithDeps && !req.Yes {
+		if req.NoInteractive {
+			return fmt.Errorf("%w: %q requires %v which is/are not registered — add them first or rerun with --with-deps",
+				driving.ErrDependenciesRequired, req.ServiceName.String(), missingStrings)
+		}
+		confirmed, err := s.confirmer.ConfirmAddDependency(ctx, req.ServiceName.String(), missingStrings)
+		if err != nil {
+			return fmt.Errorf("confirm add dependencies for %q: %w", req.ServiceName.String(), err)
+		}
+		if !confirmed {
+			return fmt.Errorf("%w: %q requires %v which is/are not registered — add them first or rerun with --with-deps",
+				driving.ErrDependenciesRequired, req.ServiceName.String(), missingStrings)
+		}
+	}
+	for _, dep := range missing {
+		subReq := driving.AddServiceRequest{
+			BaseDir:       req.BaseDir,
+			ServiceName:   dep,
+			WithDeps:      req.WithDeps,
+			Yes:           req.Yes,
+			NoInteractive: req.NoInteractive,
+		}
+		if _, err := s.Add(ctx, subReq); err != nil {
+			return fmt.Errorf("install dependency %q: %w", dep.String(), err)
+		}
+	}
+	return nil
 }
 
 // detectServiceState classifies the LH-FA-ADD-005 state of svc inside

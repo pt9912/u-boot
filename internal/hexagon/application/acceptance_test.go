@@ -102,7 +102,7 @@ func TestLHAK006_DoubleAddPostgres_NoDuplicate(t *testing.T) {
 	git := &fakeGit{}
 
 	initSvc := application.NewInitProjectService(fs, y, git, nil, nil, nil)
-	addSvc := application.NewAddServiceService(fs, y, nil)
+	addSvc := application.NewAddServiceService(fs, y, nil, nil)
 
 	if _, err := initSvc.Init(context.Background(), driving.InitProjectRequest{
 		BaseDir: testBaseDir,

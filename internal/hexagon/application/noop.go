@@ -28,6 +28,10 @@ func (noopConfirmer) ConfirmRemoveVolumes(_ context.Context, _ string) (bool, er
 	return false, nil
 }
 
+func (noopConfirmer) ConfirmAddDependency(_ context.Context, _ string, _ []string) (bool, error) {
+	return false, nil
+}
+
 // noopLogger is the nil-tolerant default for the [driven.Logger]
 // dependency — every level discards. Keeps the application services'
 // debug/info call sites free of nil checks.

@@ -27,6 +27,32 @@ type AddServiceRequest struct {
 	// are not in its built-in catalogue with
 	// [ErrServiceUnsupported]).
 	ServiceName domain.ServiceName
+
+	// WithDeps, Yes, NoInteractive drive the LH-FA-ADD-006 four-mode
+	// dispatch when the requested add-on declares dependencies that
+	// are not yet registered in u-boot.yaml:
+	//
+	//   --with-deps (WithDeps=true): auto-install missing deps
+	//   without prompting. Propagates recursively so transitive deps
+	//   inherit the flag.
+	//
+	//   --yes (Yes=true): pre-confirm any interactive prompt. Same
+	//   effect as --with-deps for missing deps; also auto-confirms
+	//   future destructive prompts.
+	//
+	//   --no-interactive (NoInteractive=true) without --yes /
+	//   --with-deps: refuse to prompt and return
+	//   [ErrDependenciesRequired] (LH-FA-CLI-006 exit code 10).
+	//
+	//   default (all zero): prompt via [driven.Confirmer.
+	//   ConfirmAddDependency]; user "no" or EOF also returns
+	//   [ErrDependenciesRequired].
+	//
+	// Add() carries these flags through the recursive sub-call so a
+	// single `--with-deps` at the top level installs the whole chain.
+	WithDeps      bool
+	Yes           bool
+	NoInteractive bool
 }
 
 // AddServiceResponse is the output of [AddServiceUseCase.Add]. The

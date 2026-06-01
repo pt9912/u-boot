@@ -772,6 +772,9 @@ type fakeConfirmer struct {
 	removeVolumesCalls  []fakeConfirmerRemoveVolumesCall
 	removeVolumesAnswer bool
 	removeVolumesErr    error
+	addDepCalls         []fakeConfirmerAddDepCall
+	addDepAnswer        bool
+	addDepErr           error
 }
 
 type fakeConfirmerCall struct {
@@ -783,6 +786,11 @@ type fakeConfirmerRemoveVolumesCall struct {
 	BaseDir string
 }
 
+type fakeConfirmerAddDepCall struct {
+	Service string
+	Missing []string
+}
+
 func (c *fakeConfirmer) ConfirmTreatAsExisting(_ context.Context, baseDir string, indicators []string) (bool, error) {
 	c.calls = append(c.calls, fakeConfirmerCall{BaseDir: baseDir, Indicators: append([]string{}, indicators...)})
 	return c.answer, c.err
@@ -791,6 +799,11 @@ func (c *fakeConfirmer) ConfirmTreatAsExisting(_ context.Context, baseDir string
 func (c *fakeConfirmer) ConfirmRemoveVolumes(_ context.Context, baseDir string) (bool, error) {
 	c.removeVolumesCalls = append(c.removeVolumesCalls, fakeConfirmerRemoveVolumesCall{BaseDir: baseDir})
 	return c.removeVolumesAnswer, c.removeVolumesErr
+}
+
+func (c *fakeConfirmer) ConfirmAddDependency(_ context.Context, svc string, missing []string) (bool, error) {
+	c.addDepCalls = append(c.addDepCalls, fakeConfirmerAddDepCall{Service: svc, Missing: append([]string{}, missing...)})
+	return c.addDepAnswer, c.addDepErr
 }
 
 // fakeLogger records every Debug/Info/Warn/Error call so tests can

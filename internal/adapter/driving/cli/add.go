@@ -12,14 +12,16 @@ import (
 )
 
 // addFlags bundles the per-invocation flag state of
-// `u-boot add <service>` (today only the read-through from the
-// persistent --yes / --no-interactive on the root command). Kept as
-// a struct so [runAdd] stays consistent with [runInit] and so new
-// per-service flags (`--persistence`, `--exporter`, … for V1 keycloak
-// / otel) plug in without a signature churn.
+// `u-boot add <service>` (--yes / --no-interactive read through
+// from the root command, plus the add-specific --with-deps from
+// LH-FA-ADD-006). Kept as a struct so [runAdd] stays consistent
+// with [runInit] and so new per-service flags (`--persistence`,
+// `--exporter`, … for V1 keycloak / otel) plug in without a
+// signature churn.
 type addFlags struct {
 	Yes           bool
 	NoInteractive bool
+	WithDeps      bool
 }
 
 // newAddCommand builds the `u-boot add <service>` Cobra subcommand.
@@ -63,7 +65,8 @@ beyond the leading "already active" line.
 Examples:
   u-boot add postgres                 # first add: register + write
   u-boot add postgres                 # idempotent re-run: no-op
-  u-boot add redis                    # exit 10 — not in catalogue`,
+  u-boot add redis                    # exit 10 — not in catalogue
+  u-boot add keycloak --with-deps     # auto-install missing deps`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			flags.Yes = a.yes
@@ -71,6 +74,9 @@ Examples:
 			return runAdd(cmd.Context(), cmd.OutOrStdout(), args, *flags, a.addServiceUseCase, a.getwd)
 		},
 	}
+
+	cmd.Flags().BoolVar(&flags.WithDeps, "with-deps", false,
+		"auto-install missing add-on dependencies (LH-FA-ADD-006) without prompting")
 
 	return cmd
 }
@@ -108,8 +114,11 @@ func runAdd(
 	}
 
 	resp, err := uc.Add(ctx, driving.AddServiceRequest{
-		BaseDir:     cwd,
-		ServiceName: svcName,
+		BaseDir:       cwd,
+		ServiceName:   svcName,
+		WithDeps:      flags.WithDeps,
+		Yes:           flags.Yes,
+		NoInteractive: flags.NoInteractive,
 	})
 	if err != nil {
 		return err

@@ -83,7 +83,7 @@ func TestE2E_LHAK002_PostgresAcceptanceFlow(t *testing.T) {
 	})
 
 	initSvc := application.NewInitProjectService(fs, yaml, git, prog, conf, logger)
-	addSvc := application.NewAddServiceService(fs, yaml, logger)
+	addSvc := application.NewAddServiceService(fs, yaml, conf, logger)
 	upSvc := application.NewUpService(fs, yaml, engine, netprobe, clock, logger)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)

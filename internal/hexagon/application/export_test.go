@@ -1,12 +1,14 @@
 package application
 
 import (
+	"context"
 	"testing"
 
 	yamladapter "github.com/pt9912/u-boot/internal/adapter/driven/yaml"
 	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
+	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
 // PortProbeTargetForTest is the test-package-visible view of the
@@ -131,14 +133,30 @@ func ResolveScalarPathForTest(t *testing.T, yamlBody []byte, path string) string
 }
 
 // CheckAddDependenciesForTest exposes the unexported
-// [AddServiceService.checkAddDependencies] method so slice-v1-
-// addons-deps T2 tests can drive the integration path (load + run
-// resolver + wrap missing into ErrDependenciesRequired) with
-// synthetic dependency declarations — Postgres has no production
-// deps so this path is otherwise unreachable until slice-v1-
-// keycloak lands.
+// [AddServiceService.checkAddDependencies] orchestrator so slice-
+// v1-addons-deps tests can drive the full integration path (load
+// + resolve + four-mode dispatch) with synthetic dependency
+// declarations. The wrapped req carries the four-mode flags so the
+// caller selects the dispatch arm under test.
 func (s *AddServiceService) CheckAddDependenciesForTest(baseDir string, svc domain.ServiceName, deps []domain.AddOnDependency) error {
-	return s.checkAddDependencies(baseDir, svc, deps)
+	return s.checkAddDependencies(context.Background(), driving.AddServiceRequest{BaseDir: baseDir, ServiceName: svc}, deps)
+}
+
+// HandleMissingDependenciesForTest exposes the unexported four-
+// mode dispatch directly so slice-v1-addons-deps T3 tests can pin
+// each arm (--with-deps, --yes, --no-interactive, interactive
+// prompt) without seeding a fixture u-boot.yaml that triggers the
+// missing-deps condition. The full Add() recursion is exercised
+// because the dispatch calls back into [AddServiceService.Add].
+func (s *AddServiceService) HandleMissingDependenciesForTest(ctx context.Context, req driving.AddServiceRequest, missing []domain.ServiceName) error {
+	return s.handleMissingDependencies(ctx, req, missing)
+}
+
+// FindMissingDependenciesForTest exposes the unexported load +
+// resolve helper so tests can pin the resolver wiring against a
+// fixture u-boot.yaml without going through the dispatch.
+func (s *AddServiceService) FindMissingDependenciesForTest(baseDir string, deps []domain.AddOnDependency) ([]domain.ServiceName, error) {
+	return s.findMissingDependencies(baseDir, deps)
 }
 
 // mustParseUBootYAML deserialises a u-boot.yaml fixture into the

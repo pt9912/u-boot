@@ -63,4 +63,30 @@ type Confirmer interface {
 	// `driving.ErrConfirmationRequired` directly — the adapter is
 	// NOT expected to surface that case.
 	ConfirmRemoveVolumes(ctx context.Context, baseDir string) (bool, error)
+
+	// ConfirmAddDependency asks the user whether `u-boot add <svc>`
+	// should auto-install missing add-on dependencies declared via
+	// [domain.AddOnDependency] (LH-FA-ADD-006). The prompt is the
+	// interactive default path; `--with-deps` / `--yes` /
+	// `--no-interactive` short-circuit it at the application layer.
+	//
+	// svc is the add-on the user invoked; missing is the ordered list
+	// of service names that must be registered first. Both are passed
+	// as strings to keep the port domain-free (same convention as
+	// [ConfirmTreatAsExisting]).
+	//
+	// Returns (true, nil) when the user confirms (the adapter MUST
+	// default-show `N` capitalized — installing an extra service is
+	// non-trivial, so the safer-default is "no, abort"); (false, nil)
+	// when the user declines or sends EOF without input.
+	//
+	// Returns a non-nil error only for I/O failures on the input
+	// channel that the adapter cannot interpret as "user said no".
+	//
+	// Caller responsibility (slice-v1-addons-deps T3 four-mode
+	// dispatch): the application service decides *whether* to
+	// invoke this method. `--no-interactive` without `--yes` /
+	// `--with-deps` skips the call entirely and returns
+	// [driving.ErrDependenciesRequired] directly.
+	ConfirmAddDependency(ctx context.Context, svc string, missing []string) (bool, error)
 }
