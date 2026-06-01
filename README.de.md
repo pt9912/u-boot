@@ -1,179 +1,87 @@
 # u-boot
 
-**Ein Bootloader für Entwicklungsumgebungen auf Docker-Basis.**
+[English](README.md) | **Deutsch**
 
-`u-boot` ist ein CLI-Tool, das reproduzierbare Entwicklungsumgebungen
-aufsetzt: Projektstruktur, Docker-Compose-Stack, Devcontainer-
-Konfiguration, Service-Add-ons (PostgreSQL, Keycloak, OpenTelemetry, …)
-und wiederkehrende Artefakte (README, CHANGELOG, `.env.example`).
+`u-boot` ist ein CLI-Tool, das reproduzierbare Docker-basierte
+Entwicklungsumgebungen aufsetzt — Projektstruktur, Docker-Compose-Stack,
+Devcontainer-Konfiguration, Service-Add-Ons (PostgreSQL, Keycloak,
+OpenTelemetry, …) und wiederkehrende Artefakte (README, CHANGELOG,
+`.env.example`).
 
-> **Language:** The English version of this README is at
-> [`README.md`](README.md). The Lastenheft
-> ([`spec/lastenheft.md`](spec/lastenheft.md)) is written in German;
-> CLI-Ausgaben und erzeugte Dateien sind auf Englisch (`LH-LESE-002`).
+> **Stand:** `v0.2.0` released 2026-06-01 (GHCR + sechs Plattform-
+> Binaries); `v0.3.0`-Milestone „Add-on Catalogue Expansion" in
+> Bearbeitung (1/5 Slices). Vollständige Release-Tabelle unten.
 
-## Status
+Das verbindliche Lastenheft
+([`spec/lastenheft.md`](spec/lastenheft.md)) ist auf Deutsch verfasst;
+CLI-Ausgaben und erzeugte Dateien sind auf Englisch (`LH-LESE-002`).
 
-**MVP vollständig — sieben Subkommandos verdrahtet (`init` + `doctor` + `add` + `up` + `down` + `generate` + `config`).**
+## Für wen ist es?
 
-Jeder MVP-priorisierte `LH-AK-*`-, `LH-FA-*`- und `LH-SA-*`-Eintrag
-aus [`spec/lastenheft.md`](spec/lastenheft.md) ist geliefert.
-**`v0.1.0` ist released (2026-05-31)** — siehe
-[GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.1.0)
-und das GHCR-Image `ghcr.io/pt9912/u-boot:0.1.0` (plus den stabilen
-Floating-Tag `:latest`). Distributionsentscheidung in
-[ADR-0007](docs/plan/adr/0007-distributionswege-ghcr.md). Audit-
-Trail im
-[MVP-Bilanz-Block der Roadmap](docs/plan/planning/in-progress/roadmap.md)
-und im
-[Release-Cut-Slice](docs/plan/planning/done/slice-v1-release-cut-v0.1.0.md).
+Entwickler, Teams und Berater, die ein reproduzierbares Docker-
+basiertes Projekt-Skelett brauchen, ohne pro Projekt Compose-Stacks
+von Hand zu schreiben. `u-boot` erzeugt die Boilerplate
+(`u-boot.yaml`, `compose.yaml`, Devcontainer-Files, …), bedient
+den Add-on-Katalog (PostgreSQL heute; Keycloak und OpenTelemetry
+folgen in v0.3.0) und liefert idempotente State-Machine-Operationen
+für Re-Init, Add, Remove und Managed-Block-Edits.
 
-**`v0.2.0` bereit zum Taggen** — drei V1-Features plus ein
-Real-World-Bugfix sind seit `v0.1.0` gelandet. Der ursprünglich
-geplante `v0.1.1`-Patch-Tag wird übersprungen, weil strikte SemVer
-für die hinzugekommenen Features einen MINOR-Bump verlangt:
+## Was kann ich heute tun?
 
-- **Container-aware `doctor`**
-  ([`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/done/slice-v0.1.1-doctor-container-awareness.md))
-  — die vier Host-Prerequisite-Checks (`git.installed`,
-  `docker.installed`, `docker.reachable`,
-  `docker.compose.installed`) werden im Container mit
-  `SeverityInfo` skipped; `docker run ghcr.io/pt9912/u-boot:0.2.0 doctor`
-  meldet einen gesunden Host nicht mehr als 4 Errors fehl.
-- **Cross-Platform-Binary-Distribution**
-  ([`slice-v2-binary-distribution`](docs/plan/planning/done/slice-v2-binary-distribution.md))
-  — `make build-binaries` + `publish.yml`-Upload für sechs
-  Plattformen (Linux/macOS/Windows × amd64/arm64) als GitHub-
-  Release-Asset. Die Quickstart unten wurde auf Binary-first
-  umgestellt.
-- **`u-boot template list [--json]`**
-  ([`slice-v1-template-list`](docs/plan/planning/done/slice-v1-template-list.md))
-  — erstes V1-Template-Subkommando (LH-FA-TPL-004) gestützt auf
-  das `basic`-Bootstrap-Built-in.
-- **`u-boot init --template <name>`**
-  ([`slice-v1-template-init`](docs/plan/planning/done/slice-v1-template-init.md))
-  — zweites V1-Template-Feature (LH-FA-TPL-001), byte-identisch
-  zum Default-Init-Flow für das `basic`-Template; Variable-
-  Resolution defer-pflichtig in einem Folge-Slice.
+Nach Installation des Binarys (siehe *Installation* unten):
 
-Die Release-Cut-Arbeit liegt in
-[`slice-v1-release-cut-v0.2.0`](docs/plan/planning/done/slice-v1-release-cut-v0.2.0.md);
-der Tag-Push (`git tag v0.2.0 && git push origin v0.2.0`) bleibt
-Nutzer-Aktion und triggert `publish.yml` für das GHCR-Image und
-die sechs Binary-Assets.
+```bash
+u-boot init my-service                  # Projekt-Skelett + git init
+u-boot add postgres                     # Postgres registrieren + Compose-Block
+u-boot up                               # docker compose up + Healthcheck-Poll
+u-boot doctor                           # 11 Diagnose-Checks gegen Host + Projekt
+u-boot down --volumes                   # Stop + Named-Volume-Cleanup (bestätigt)
+u-boot remove postgres                  # Spiegel von add — disable + Blocks raus
+u-boot generate readme                  # Managed-Block-Artefakt aktualisieren
+u-boot config set project.name renamed-service
+u-boot template list                    # Eingebauten Template-Katalog browsen
+u-boot init demo --template basic       # Projekt aus einem Template rendern
+```
 
-- `u-boot init [name] [--devcontainer] [--template <name>]` erzeugt
-  die LH-FA-INIT-003-Projektstruktur plus `u-boot.yaml`
-  (LH-FA-CONF-002) und initialisiert per Default ein Git-Repository
-  (LH-FA-INIT-007). `--force` / `--backup` treiben den
-  LH-FA-INIT-005-Überschreibschutz (Managed-Block-Edits vs
-  Vollüberschreibung mit `.bak[.N]`-Sicherung); `--yes` /
-  `--no-interactive` / `--assume-existing` sind die
-  LH-FA-CLI-005A-Modi-Flags (letzteres treibt die
-  LH-FA-INIT-004-Soft-Detection). `--devcontainer` (LH-AK-005)
-  schreibt zusätzlich `.devcontainer/devcontainer.json` +
-  `Dockerfile` und setzt `devcontainer.enabled: true` in
-  `u-boot.yaml`. `--template <name>` (LH-FA-TPL-001) rendert das
-  Projekt aus einer externen Vorlage aus dem `u-boot template
-  list`-Katalog; das `basic`-Bootstrap-Template liefert
-  byte-identische Outputs zum Default-Flow (Mutex mit
-  `--devcontainer`/`--force`/`--backup` in v1).
-- `u-boot doctor` führt 11 Diagnose-Checks gegen die lokale
-  Umgebung und das Projekt aus (LH-FA-DIAG-002), klassifiziert
-  Befunde als ok / warn / error (LH-FA-DIAG-003), gibt
-  Reparaturhinweise (LH-FA-DIAG-004) und exited mit 11 bei Errors
-  (oder Warns mit `--strict`). M5 ergänzt `services.enabled-key`,
-  `devcontainer.forwardPorts.consistency` und die Severity-
-  Eskalation über `devcontainer.enabled`. MVP-Closure-T2 ändert
-  `compose.yaml.valid` no-services von Error auf Warn, damit ein
-  frisches `init` + `doctor` LH-AK-001 §2299 erfüllt.
-- `u-boot add <service>` fügt ein integriertes Service-Add-On in
-  das aktuelle Projekt ein (LH-FA-ADD-001..002, LH-FA-ADD-005).
-  Heute nur `postgres` im Katalog; Keycloak (LH-FA-ADD-003) und
-  OpenTelemetry (LH-FA-ADD-004) folgen in V1. Idempotent, mit
-  voller State-Machine: registrieren, reaktivieren, Block neu
-  erzeugen, fehlende Artefakte reparieren, Abbruch bei
-  Inkonsistenzen.
-- `u-boot remove <service> [--purge]` — Spiegel von `add`
-  (LH-FA-ADD-007, ab v0.3.0). Entfernt den `service.<name>`-
-  Managed-Block aus `compose.yaml` und `.env.example` und setzt
-  `services.<name>.enabled: false` in `u-boot.yaml`. Idempotent:
-  ein bereits-disabled Service produziert eine No-Op-Meldung.
-  `--purge` ist der explizite destruktive Opt-in und triggert
-  das LH-FA-CLI-005A-§254-Confirmation-Gate (analog zu
-  `down --volumes`); v0.3.0 surface'd den Cleanup-Hinweis
-  (`docker volume rm <name>`) — die automatische Volume-Löschung
-  landet in einem Folge-Slice.
-- `u-boot up [--timeout <sek>]` startet die Compose-Umgebung via
-  `docker compose up -d` und pollt, bis jeder deklarierte Service
-  `healthy` (mit Healthcheck) bzw. `running` (ohne) erreicht
-  (LH-FA-UP-001..003). `--timeout 0` ist Fire-and-Forget (§970,
-  kein `compose ps`-Follow-up). In `compose.yaml` deklarierte
-  TCP-Ports werden auf `localhost` geprüft; mit Healthcheck
-  emittiert ein Probe-Fehler nur eine Warn-Diagnose ohne Veto,
-  ohne Healthcheck veto'd er die Stabilisierung (§968 +
-  Slice §141). Exit-Codes per LH-FA-CLI-006: 11 wenn Docker nicht
-  verfügbar (Pre-Flight), 12 bei Compose-Laufzeitfehler oder
-  Stabilisierungs-Timeout, 10 bei fehlendem `u-boot.yaml` /
-  `compose.yaml`.
-- `u-boot down [--volumes]` stoppt die Compose-Umgebung
-  (LH-FA-UP-004). `--volumes` entfernt zusätzlich Named-Volumes
-  (§1015 destruktiv); der LH-FA-CLI-005A-§254-Bestätigungs-Gate
-  bricht nicht-interaktive destruktive Ops ohne `--yes` mit
-  Exit 10 ab und prompt't sonst mit sicherem Default-`N`.
-- `u-boot generate <artifact>` erzeugt oder aktualisiert eines
-  von vier Artefakten (LH-FA-GEN-001..005): `changelog`,
-  `readme`, `env-example`, `devcontainer`. Idempotenter
-  Block-Replace via den `U-BOOT MANAGED BLOCK: init`-Marker —
-  User-Inhalt außerhalb des Blocks bleibt byte-identisch.
-  `changelog` trägt den LH-AK-007-Pin (existierende Einträge
-  werden nie zerstört; fehlender `## [Unreleased]`-Header wird
-  vor der ersten Versions-Sektion ergänzt). Unbekannte Artefakte
-  exiten mit 2 (Spec-Pflicht); managed-Block-Konflikte mit 10;
-  FS-Fehler mit 14.
-- `u-boot config [get <pfad> | set <pfad> <wert>]`
-  (LH-FA-CONF-001..005). Ohne Argumente zeigt es die
-  `u-boot.yaml` byte-identisch. `get` liefert den nackten Skalar
-  an einem von drei whitelist-Pfaden (`project.name`,
-  `devcontainer.enabled`, `services.<svc>.enabled`); `set`
-  schreibt auf die ersten zwei, mit zweistufiger Schema-
-  Roundtrip-Validation (Struct-Unmarshal + per-Pfad-Domain-
-  Re-Validation), die vor jedem WriteFile bei
-  Validierungsfehler abbricht. `services.<svc>.enabled` ist
-  Get-only — das Toggeln geht über `u-boot add` / `remove`,
-  damit die LH-FA-ADD-005-State-Machine atomar bleibt.
-- `u-boot template list [--json]` (LH-FA-TPL-004, erstes V1-
-  Template-Subkommando). Listet den eingebauten Projekt-Template-
-  Katalog mit Name, Beschreibung und Version in tabellarischer
-  Form; `--json` gibt ein strukturiertes Array mit der vollen
-  LH-FA-TPL-002-Metadaten-Oberfläche (`supportedAddOns`,
-  `generatedFiles`, `requiredTools`, `variables`) aus. Bootstrap-
-  Katalog liefert ein Built-in: `basic`. Weitere Built-ins
-  (`micronaut`, `sveltekit`, …) und der `u-boot init --template
-  <name>`-Render-Pfad landen in eigenen ADR-0009-verankerten
-  Slices (`slice-v1-template-init`, `slice-later-local-templates`).
+Alle Subkommandos respektieren die LH-FA-CLI-006-Exit-Codes
+(`0` / `2` / `10` / `11` / `12` / `14`). Die *Subkommando-Referenz*
+unten mappt jedes Subkommando auf seine Lastenheft-IDs.
 
-| Phase | Status | Quelle |
-| ----- | ------ | ------ |
-| Lastenheft | Entwurf 0.1.0 | [`spec/lastenheft.md`](spec/lastenheft.md) |
-| Architekturentscheidungen | 10 ADRs | [`docs/plan/adr/`](docs/plan/adr/) |
-| Implementierung | M1–M8 ✅, MVP-Closure ✅ — **MVP vollständig; v0.1.0 released 2026-05-31** | [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) |
-| Carveouts | 1 temporär (LH-OPEN-002-Restwege mit benannten Trigger-Slices in ADR-0007), 8 permanent | [`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md) |
+## Was macht es vertrauenswürdig?
 
-## Quickstart
+- **MVP mit v0.1.0 geschlossen.** Jede MVP-prioritäre `LH-AK-*`-,
+  `LH-FA-*`- und `LH-SA-*`-ID aus
+  [`spec/lastenheft.md`](spec/lastenheft.md) ist ausgeliefert —
+  Audit-Trail in der
+  [roadmap §MVP-Bilanz](docs/plan/planning/in-progress/roadmap.md).
+- **Hexagonale Architektur.** Schicht-Regeln werden bei jedem
+  `make gates` durch `depguard` enforced; Port/Adapter-Trennung
+  formalisiert in
+  [`ADR-0002`](docs/plan/adr/0002-hexagonale-architektur.md).
+- **ADR-getriebene Entscheidungen.** 10 Architecture Decision
+  Records decken Sprache (Go), Build (Docker-only), CI, CLI-
+  Framework (Cobra), Distribution (GHCR + Binary), Template-Format
+  (YAML + `text/template`), Plugin-Policy (statisch) und die
+  „kein HTTP-Adapter"-Entscheidung ab.
+- **PR-blockierende CI.** Drei PR-blockierende GitHub-Actions-Jobs
+  (`gates (lint + test + coverage-gate)`,
+  `security-gates (govulncheck)`,
+  `image-scan (trivy HIGH+CRITICAL)`) plus ein Markdown-Link-
+  Validator bei jedem Push.
+- **Docker-only Inner-Loop.** `make build` baut das Runtime-Image
+  ohne Go-Toolchain am Host; `make gates` läuft Lint + Test +
+  Coverage im selben pinned Image-Stack den CI verwendet.
 
-### Vorgefertigte Binary installieren (empfohlen)
+## Installation
 
-Statisch gelinkte Single-File-Binaries werden ab **v0.1.1** mit jedem
+### Vorgefertigtes Binary (empfohlen)
+
+Statisch gelinkte Single-File-Binaries werden ab `v0.2.0` mit jedem
 `v*`-GitHub-Release für sechs Plattformen (Linux/macOS/Windows ×
 amd64/arm64) ausgeliefert. Kein Docker-Daemon nötig — das ist die
-host-native Form für `doctor`, `init` und die anderen host-seitigen
-Subkommandos (gemäß
-[ADR-0007 §Folgepunkte 1](docs/plan/adr/0007-distributionswege-ghcr.md),
-Trigger aktiv via
-[`slice-v2-binary-distribution`](docs/plan/planning/done/slice-v2-binary-distribution.md)).
+host-native Form für `doctor`, `init` und alle anderen Subkommandos.
 
-**Linux / macOS** (`<os>-<arch>` werden aus `uname` ermittelt):
+**Linux / macOS:**
 
 ```bash
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
@@ -184,7 +92,7 @@ chmod +x u-boot && sudo mv u-boot /usr/local/bin/
 u-boot --version
 ```
 
-**Windows** (PowerShell — `amd64` oder `arm64` wählen):
+**Windows (PowerShell):**
 
 ```powershell
 Invoke-WebRequest `
@@ -194,125 +102,101 @@ Invoke-WebRequest `
 ```
 
 Eine bestimmte Version pinnst du mit
-`https://github.com/pt9912/u-boot/releases/download/v0.1.1/u-boot-<os>-<arch>[.exe]`
-statt `latest/download/`. `releases/latest/download/…` zeigt immer
-auf den höchsten stabilen Tag — `v0.1.0` hatte noch keine Binary-
-Assets, also funktioniert `latest` erst, sobald `v0.1.1` (oder ein
-späterer Tag) gepusht ist.
+`releases/download/v0.2.0/u-boot-<os>-<arch>[.exe]` statt
+`latest/download/`.
 
-### Pull von GHCR (alternativ — Container-/CI-Workflows)
+### Pull von GHCR (alternativ für Container-/CI-Workflows)
 
 ```bash
-docker pull ghcr.io/pt9912/u-boot:0.1.0    # gepinntes Tag
-# oder
+docker pull ghcr.io/pt9912/u-boot:0.2.0    # gepinntes Tag
 docker pull ghcr.io/pt9912/u-boot:latest   # stabiler Floating-Tag
+docker run --rm ghcr.io/pt9912/u-boot:0.2.0 --version
 ```
 
-Verifikation:
+Das Distroless-Image läuft als non-root UID 65532; mountet euer
+Projekt mit `--user "$(id -u):$(id -g)"`, damit erzeugte Dateien
+euch gehören. `doctor` läuft ab v0.2.0 im container-aware Modus:
+die vier Host-Prerequisite-Checks werden mit `SeverityInfo`
+geskipped statt als False-Positives zu feuern.
+
+## Quickstart
 
 ```bash
-docker run --rm ghcr.io/pt9912/u-boot:0.1.0 --version
-# → u-boot version 0.1.0
+mkdir my-service && cd my-service
+u-boot init my-service --no-git    # --no-git in einem bestehenden Repo
+u-boot add postgres
+u-boot up
 ```
 
-`u-boot init` gegen ein Host-Verzeichnis (Distroless läuft als non-
-root UID 65532; `--user` matched die Host-UID, damit erzeugte Dateien
-dir gehören):
+Ergebnis: `u-boot.yaml`, `compose.yaml`, `README.md`, `CHANGELOG.md`,
+`.env.example`, `.gitignore` sowie die Verzeichnisse `docker/`,
+`scripts/`, `docs/` — plus ein gesunder Postgres-Container auf dem
+deklarierten Port.
 
-```bash
-mkdir /tmp/demo && \
-  docker run --rm --user "$(id -u):$(id -g)" \
-    -v /tmp/demo:/work -w /work \
-    ghcr.io/pt9912/u-boot:0.1.0 init demo --no-git
-```
+Re-Init auf einem bestehenden Projekt verlangt eine explizite
+Strategie (`--force` für Managed-Block-Edits, `--backup` für
+Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien). Siehe den
+[init-Slice](docs/plan/planning/done/slice-m3-init-flow.md) für die
+`LH-FA-INIT-005`-State-Machine.
 
-Ergebnis: `u-boot.yaml` (`schemaVersion: 1`), `compose.yaml`,
-`README.md`, `CHANGELOG.md`, `.env.example`, `.gitignore`, plus die
-Verzeichnisse `docker/`, `scripts/`, `docs/`.
+---
 
-Re-Init auf bestehendem Projekt (LH-FA-INIT-005) verlangt eine
-explizite Strategie — kein stilles Überschreiben:
+## Status
 
-```bash
-# Default: bestehende Dateien werden nicht angefasst
-docker run --rm --user "$(id -u):$(id -g)" -v /tmp/demo:/work -w /work \
-  ghcr.io/pt9912/u-boot:0.1.0 init demo --no-git
-# → Exit 10: "project already initialized"
+| Release | Datum | Highlights |
+| ------- | ----- | ---------- |
+| `v0.1.0` | 2026-05-31 | MVP vollständig — sieben Subkommandos (`init`, `doctor`, `add`, `up`, `down`, `generate`, `config`), alle MVP-prioritären Lastenheft-IDs geliefert. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.1.0). |
+| `v0.2.0` | 2026-06-01 | Container-aware `doctor`, Six-Plattform-Binary-Distribution, `template list` + `init --template basic`. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.2.0). |
+| `v0.3.0` | in Bearbeitung (1/5) | Milestone „Add-on Catalogue Expansion" — Keycloak + OpenTelemetry + Add-on-Dependency-Resolution + `remove <service>` (geliefert). Milestone-Tabelle in [`roadmap.md §v0.3.0`](docs/plan/planning/in-progress/roadmap.md). |
 
-# nur die U-BOOT MANAGED BLOCK-Regionen refreshen, User-Inhalt bleibt
-docker run --rm --user "$(id -u):$(id -g)" -v /tmp/demo:/work -w /work \
-  ghcr.io/pt9912/u-boot:0.1.0 init demo --no-git --force
+Die Roadmap
+([`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md))
+hat den vollständigen Audit-Trail: Phase-Tabelle (M1..M8 +
+Closure + V1-Cluster), per-Release-Milestone-Tabellen, Carveout-
+Auflösungs-Slices und §Nächste Schritte für das laufende Backlog.
 
-# Vollüberschreibung mit Sicherheits-Backup nach <datei>.bak[.N]
-docker run --rm --user "$(id -u):$(id -g)" -v /tmp/demo:/work -w /work \
-  ghcr.io/pt9912/u-boot:0.1.0 init demo --no-git --force --backup
-```
+## Subkommando-Referenz
 
-### `u-boot doctor` und die Container-Einschränkung
+| Subkommando | Spec-IDs | Kurz |
+| ----------- | -------- | ---- |
+| `init [name] [--devcontainer] [--template <name>]` | `LH-FA-INIT-001..007`, `LH-FA-TPL-001` | Projekt-Skelett + `git init`. |
+| `doctor [--strict]` | `LH-FA-DIAG-001..004` | 11 Diagnose-Checks; container-aware Skip für Host-Probes. |
+| `add <service>` | `LH-FA-ADD-001..002`, `LH-FA-ADD-005` | Idempotente State-Machine für Service-Add-Ons. |
+| `remove <service> [--purge]` | `LH-FA-ADD-007` | Spiegel von `add` — disable + Managed-Blocks raus. |
+| `up [--timeout <s>]` | `LH-FA-UP-001..003` | Compose up + Healthcheck-Poll + TCP-Probe. |
+| `down [--volumes]` | `LH-FA-UP-004` | Compose down mit destruktiver Bestätigungs-Gate. |
+| `generate <artifact>` | `LH-FA-GEN-001..005` | Idempotente Block-Ersetzung via `U-BOOT MANAGED BLOCK`-Marker. |
+| `config [get\|set] [<pfad> [<wert>]]` | `LH-FA-CONF-001..005` | Whitelist-skopierte Reads/Writes mit zweistufiger Schema-Validierung. |
+| `template list [--json]` | `LH-FA-TPL-004` | Eingebauten Template-Katalog browsen. |
 
-`doctor` ist für die **host-installierte** Form von u-boot
-ausgelegt — es prüft `docker`, `docker compose` und `git` im
-`$PATH`. Das Distroless-Image (`v0.1.0` und später) bringt keines
-dieser Binaries mit (laut
-[ADR-0007](docs/plan/adr/0007-distributionswege-ghcr.md)),
-also können die Host-Probes aus einem `docker run …` heraus nicht
-laufen.
+## Voraussetzungen
 
-Ab **`v0.1.1`** erkennt `doctor` die Container-Laufzeit via
-`/.dockerenv` oder `/run/.containerenv` und emittiert für die vier
-Host-Prerequisite-Checks eine `SeverityInfo`-Diagnostik
-„skipped — running inside container" statt sie als Errors
-fehlzudeuten. Exit-Code bei ansonsten gesundem Projekt ist `0`
-(statt `11`). Designhintergrund:
-[`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/done/slice-v0.1.1-doctor-container-awareness.md).
+Für Konsumenten von `u-boot` (`LH-FA-DIAG-002`):
 
-Für echte host-seitige Diagnostik `doctor` aus einer Host-
-Installation laufen lassen, sobald die Binary-Distribution
-gelandet ist
-([`slice-v2-binary-distribution`](docs/plan/planning/done/slice-v2-binary-distribution.md),
-ADR-0007 §Folgepunkte 1 Trigger jetzt aktiv). Die anderen
-Subkommandos (`init`/`add`/`up`/`down`/`generate`/`config`)
-funktionieren heute schon via Volume-Mount im Container.
+- Docker Engine ≥ 24.0.0 oder Podman ≥ 5.0 (Drop-in unterstützt;
+  siehe [`spec/architecture.md §2.4`](spec/architecture.md))
+- Docker Compose ≥ 2.20.0 oder `podman compose`
+- Git
+- Optional: VS Code mit der Dev-Containers-Extension
 
-### Build aus Quellen (Entwickler-Pfad)
+Für den Bau aus den Quellen (`LH-FA-BUILD-007`):
 
-Der Build ist **Docker-only** (`LH-FA-BUILD-007`): es wird keine
-Go-Toolchain am Host benötigt. Nur Docker und `make` müssen
-installiert sein.
-
-```bash
-make help                       # alle Targets auflisten
-make build                      # Runtime-Image bauen (Distroless), Default VERSION=0.1.0-dev
-make build VERSION=0.1.0        # Build mit gepinntem Version-Label
-make run                        # Smoketest: docker run u-boot --help
-make image-scan                 # lokaler Trivy-Scan (Parität mit CI image-scan-Job)
-```
-
-Inner-Loop-Quality-Gates (`LH-FA-BUILD-005` / `-006`):
-
-```bash
-make lint            # golangci-lint
-make test            # go test ./...
-make coverage-gate   # Coverage-Gate (bootstrap-aware, LH-FA-BUILD-008)
-make gates           # lint + test + coverage-gate
-make ci              # gates + govulncheck + image-scan
-make fullbuild       # ci + build (vollständiger Closure-Lauf)
-```
+- Docker Engine
+- GNU `make` (der einzige permanente Carveout zu
+  `LH-NFA-PORT-002`)
 
 ## Repository-Layout
 
 ```text
 .
-├── cmd/uboot/          # CLI-Entry-Point (`main.go`) — Wiring-Schicht
+├── cmd/uboot/          # CLI-Entry-Point (main.go) — Wiring-Schicht
 ├── internal/           # hexagonales Layout (siehe spec/architecture.md)
 │   ├── hexagon/{domain,application,port/{driving,driven}}/
 │   └── adapter/{driving,driven}/
 ├── spec/               # Lastenheft + Architektur-Spezifikation
 ├── docs/               # ADRs, Planning, User-Doku (LH-FA-PROJDOCS-001)
-├── scripts/            # Build-Helfer (coverage-gate.sh)
 ├── Dockerfile          # Multi-Stage-Build (LH-FA-BUILD-001)
 ├── Makefile            # Docker-only-Workflow (LH-FA-BUILD-005)
-├── .dockerignore       # Build-Kontext-Filter (LH-FA-BUILD-004)
 └── go.mod
 ```
 
@@ -322,78 +206,33 @@ Vollständiger Layout-Kontrakt:
 ## Dokumentation
 
 - **Lastenheft** (verbindliche Spezifikation):
-  [`spec/lastenheft.md`](spec/lastenheft.md).
-- **Architektur-Spezifikation:** [`spec/architecture.md`](spec/architecture.md)
-  (hexagonales Pattern, Schicht-Regeln, depguard-Enforcement).
-- **Quality Gates:** [`docs/user/quality.md`](docs/user/quality.md)
-  (SOLID-nahes Lint-Profil §1.2, Carveouts §1.3, Tests §2,
-  Coverage §3, Security §4).
-- **Branch Protection:** [`docs/user/branch-protection.md`](docs/user/branch-protection.md)
-  (LH-QA-003 PR-blockierende Checks, einmalige UI-Aktivierung).
+  [`spec/lastenheft.md`](spec/lastenheft.md)
+- **Architektur-Spezifikation:**
+  [`spec/architecture.md`](spec/architecture.md) (hexagonales
+  Pattern, Schicht-Regeln, Podman-Drop-in §2.4)
 - **Architecture Decision Records:**
-  [`docs/plan/adr/`](docs/plan/adr/).
-- **Planning-Artefakte (Slices, Tranchen):**
-  [`docs/plan/planning/{open,next,in-progress,done}/`](docs/plan/planning/).
-- **User-Dokumentation:** [`docs/user/`](docs/user/).
+  [`docs/plan/adr/`](docs/plan/adr/)
+- **Roadmap, Slices, Carveouts:**
+  [`docs/plan/planning/`](docs/plan/planning/)
+- **Quality Gates:**
+  [`docs/user/quality.md`](docs/user/quality.md)
+- **Branch Protection:**
+  [`docs/user/branch-protection.md`](docs/user/branch-protection.md)
+- **User-Dokumentation:** [`docs/user/`](docs/user/)
 
-## Voraussetzungen
+## Build, Test, Lint
 
-Für Konsumenten von `u-boot` (`LH-FA-DIAG-002`):
-
-- Docker Engine ≥ 24.0.0 **oder** Podman ≥ 5.0 (Drop-in über
-  `DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock` und einen
-  `docker → podman`-Symlink — siehe *Podman-Drop-in* unten).
-- Docker Compose ≥ 2.20.0 **oder** `podman compose` (das
-  containers/podman-compose-Plugin aus Podman 5.x).
-- Git
-- optional: VS Code mit der Dev-Containers-Extension
-
-Für den Bau aus den Quellen (`LH-FA-BUILD-007`):
-
-- Docker Engine (Podman funktioniert als Drop-in, ist aber heute
-  nicht im CI abgedeckt — siehe „Podman-Drop-in" für die Caveats)
-- GNU `make` (der einzige Carveout zu `LH-NFA-PORT-002`; Begründung
-  siehe [`spec/lastenheft.md`](spec/lastenheft.md))
-
-### Podman-Drop-in
-
-u-boot ist auf Code-Ebene nicht Podman-aware — `DockerProbe`
-shellt zu einer `docker`-Binary aus und parst Docker-Version-
-Strings. Podman funktioniert als Drop-in, weil:
-
-1. `podman` exposiert die gleiche CLI-Oberfläche, die u-boot
-   braucht (`info`, `version`, `compose up/down/ps`, `build`,
-   `push/pull`).
-2. Die v0.1.1-Container-Detection (`slice-v0.1.1-doctor-container-
-   awareness`) prüft bereits `/run/.containerenv` für Podman
-   neben `/.dockerenv` für Docker.
-3. Podman ≥ 4.0 liefert einen Docker-API-kompatiblen Socket;
-   `DOCKER_HOST` darauf zeigen lassen, und jeder `docker`-CLI-
-   Konsument spricht mit Podman.
-
-Setup (typischer Linux-User):
+Der Build ist Docker-only (`LH-FA-BUILD-007`); es wird keine
+Go-Toolchain am Host benötigt. Nur Docker und `make` müssen
+installiert sein.
 
 ```bash
-# Rootless Podman-API-Socket starten.
-systemctl --user enable --now podman.socket
-export DOCKER_HOST=unix:///run/user/$(id -u)/podman/podman.sock
-
-# Optional: docker→podman-Symlink für Tools, die exec("docker") machen.
-sudo ln -sf "$(command -v podman)" /usr/local/bin/docker
+make help                       # alle Targets auflisten
+make build                      # Runtime-Image bauen (Distroless)
+make gates                      # lint + test + coverage-gate + docs-check
+make ci                         # gates + govulncheck + image-scan
+make fullbuild                  # ci + build (vollständiger Closure-Lauf)
 ```
-
-Bekannte Caveats:
-
-- `doctor` prüft `docker version` gegen die `LH-FA-DIAG-002`-
-  Mindestwerte (24.0 / 2.20). Podmans Version-String ist
-  parsbar, aber **eigene** Version (z. B. `5.3.1`), was heute
-  als `Severity: warn — unrecognized version` klassifiziert
-  wird statt `ok`. Funktional läuft `up`/`down`/`add` trotzdem.
-- Keine CI-Matrix übt den Podman-Pfad aus; Bug-Reports gegen
-  Podman sind willkommen, aber Blocking-Priorität ist Docker.
-  Ein formaler Podman-Support-Slice landet bei konkretem
-  Bedarf — siehe auch das v0.1.1 + ADR-0007 §Folgepunkte
-  Trigger-Pattern.
 
 ## Lizenz
 
