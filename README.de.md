@@ -28,19 +28,39 @@ Trail im
 und im
 [Release-Cut-Slice](docs/plan/planning/done/slice-v1-release-cut-v0.1.0.md).
 
-**`v0.1.1` in Vorbereitung** — ergänzt einen container-aware
-`doctor`
-([`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/done/slice-v0.1.1-doctor-container-awareness.md))
-und eine host-native Binary-Distribution
-([`slice-v2-binary-distribution`](docs/plan/planning/done/slice-v2-binary-distribution.md),
-T1 + T2 + T3 geliefert: `make build-binaries` für sechs Plattformen
-(Linux/macOS/Windows × amd64/arm64), `publish.yml` lädt die Binaries
-bei jedem `v*`-Tag an den GitHub-Release hoch, und der Binary-First-
-Install-Block in der Quickstart unten). T4 (ADR-0007-Update +
-carveouts-Reduktion + Slice-Closure) bleibt offen; der Tag-Push
-bleibt Nutzer-Aktion — siehe
-[`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md)
-§Nächste Schritte.
+**`v0.2.0` bereit zum Taggen** — drei V1-Features plus ein
+Real-World-Bugfix sind seit `v0.1.0` gelandet. Der ursprünglich
+geplante `v0.1.1`-Patch-Tag wird übersprungen, weil strikte SemVer
+für die hinzugekommenen Features einen MINOR-Bump verlangt:
+
+- **Container-aware `doctor`**
+  ([`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/done/slice-v0.1.1-doctor-container-awareness.md))
+  — die vier Host-Prerequisite-Checks (`git.installed`,
+  `docker.installed`, `docker.reachable`,
+  `docker.compose.installed`) werden im Container mit
+  `SeverityInfo` skipped; `docker run ghcr.io/pt9912/u-boot:0.2.0 doctor`
+  meldet einen gesunden Host nicht mehr als 4 Errors fehl.
+- **Cross-Platform-Binary-Distribution**
+  ([`slice-v2-binary-distribution`](docs/plan/planning/done/slice-v2-binary-distribution.md))
+  — `make build-binaries` + `publish.yml`-Upload für sechs
+  Plattformen (Linux/macOS/Windows × amd64/arm64) als GitHub-
+  Release-Asset. Die Quickstart unten wurde auf Binary-first
+  umgestellt.
+- **`u-boot template list [--json]`**
+  ([`slice-v1-template-list`](docs/plan/planning/done/slice-v1-template-list.md))
+  — erstes V1-Template-Subkommando (LH-FA-TPL-004) gestützt auf
+  das `basic`-Bootstrap-Built-in.
+- **`u-boot init --template <name>`**
+  ([`slice-v1-template-init`](docs/plan/planning/done/slice-v1-template-init.md))
+  — zweites V1-Template-Feature (LH-FA-TPL-001), byte-identisch
+  zum Default-Init-Flow für das `basic`-Template; Variable-
+  Resolution defer-pflichtig in einem Folge-Slice.
+
+Die Release-Cut-Arbeit liegt in
+[`slice-v1-release-cut-v0.2.0`](docs/plan/planning/done/slice-v1-release-cut-v0.2.0.md);
+der Tag-Push (`git tag v0.2.0 && git push origin v0.2.0`) bleibt
+Nutzer-Aktion und triggert `publish.yml` für das GHCR-Image und
+die sechs Binary-Assets.
 
 - `u-boot init [name] [--devcontainer] [--template <name>]` erzeugt
   die LH-FA-INIT-003-Projektstruktur plus `u-boot.yaml`

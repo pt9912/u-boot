@@ -59,12 +59,12 @@ Nutzer-Aktion (CHANGELOG-Datum + Tag-Push).
 
 ## Tranchen
 
-| T | Inhalt |
-| - | ------ |
-| T1 | `CHANGELOG.md` konsolidieren: `## [Unreleased]`-Block (binary-distribution, template-list, template-init) und `## [0.1.1] - TBD`-Block (doctor-container-awareness) in eine neue `## [0.2.0] - TBD`-Sektion mergen. Reihenfolge: Added → Changed → Notes. Compare-Links am Ende um `[0.2.0]` ergänzen, `[Unreleased]` aktualisieren auf `v0.2.0...HEAD`. `## [0.1.1] - TBD`-Sektion entfernt (wird übersprungen). |
-| T2 | Dev-Default-Versionsstrings auf `0.2.0-dev` bumpen: `cmd/uboot/main.go` `var version`, `Makefile` `VERSION ?=`, `Dockerfile` `ARG UBOOT_VERSION=`. Plus die Doc-Comments in allen drei Files, die `0.1.0-dev` explizit erwähnen. Kosmetisch (publish.yml überschreibt bei Tag-Push); aber konsistent zum v0.1.0-Cut-Pattern (T1 `056e4c6` ebenfalls Dev-Default-Bump). |
-| T3 | README.{md,de.md} Status-Block (Zeile ~31) auf v0.2.0 + Feature-Liste umgemünzt; `roadmap.md` §Nächste Schritte 1 von „v0.1.1-Tag-Push offen" auf „v0.2.0-Tag-Push offen" mit dem neuen Scope und Verweis auf den eigenen Slice. Slice-Move `open/` → `done/` mit Tranchen-Tabelle inkl. Commit-Spalte (T4 als „Nutzer-Aktion"). `make docs-check` grün. |
-| T4 | **Nutzer-Aktion** (analog v0.1.0-T4): (a) Wenn der Tag-Push an einem anderen Tag als heute erfolgt, `## [0.2.0] - <Datum>` in `CHANGELOG.md` vor dem Push aktualisieren. (b) Lokale Commits auf `origin/main` pushen, falls nicht schon geschehen. (c) Ersten grünen CI-Lauf auf `main` abwarten. (d) `git tag v0.2.0 && git push origin v0.2.0` → `publish.yml` triggert GHCR-Push (Image `ghcr.io/pt9912/u-boot:0.2.0` + `:latest`) + Binary-Upload (sechs Plattformen als GitHub-Release-Asset). |
+| T | Commit | Inhalt |
+| - | ------ | ------ |
+| T1 | `be139cb` | `CHANGELOG.md` konsolidiert: alter `## [Unreleased]`-Block (binary-distribution, template-list, template-init, Quickstart-Install) und `## [0.1.1] - TBD`-Block (RuntimeEnvironment-port, doctor-container-skip) in eine einzige `## [0.2.0] - TBD`-Sektion gemergt. Reihenfolge: Added (5 Einträge) → Changed (2) → Notes (1, latest/download-Caveat auf v0.2.0 angepasst). Lead-Paragraph erklärt warum v0.1.1 übersprungen wird. Compare-Links: `[Unreleased]: v0.2.0...HEAD`, neue Zeile `[0.2.0]: v0.1.0...v0.2.0`, `[0.1.0]` unverändert. |
+| T2 | `1823598` | Dev-Default-Versionsstrings `0.1.0-dev` → `0.2.0-dev` in drei Files: `cmd/uboot/main.go` `var version`, `Makefile` `VERSION ?=`, `Dockerfile` `ARG UBOOT_VERSION=` (jeweils plus Doc-Comments). Bei tagged Releases überschreibt `publish.yml` ohnehin via `make build VERSION=<tag>`; betrifft nur lokale Outer-Loop-Aufrufe und untagged CI-Runs. Smoketest: `make build && docker run --rm u-boot --version` meldet `0.2.0-dev`. |
+| T3 | dieser Commit | README.{md,de.md} Status-Block (Zeile ~31) von „`v0.1.1` in preparation" auf „`v0.2.0` ready to tag" mit Feature-Bullet-Liste (4 Slices) umgemünzt; `roadmap.md` §Nächste Schritte 1 von „v0.1.1-Tag-Push offen" auf „v0.2.0-Tag-Push offen" mit dem expandierten Scope und Verweis auf den eigenen Release-Cut-Slice. Slice-Move `open/` → `done/`. `make docs-check` grün. |
+| T4 | — | **Nutzer-Aktion** (analog v0.1.0-T4): (a) Wenn der Tag-Push an einem anderen Tag als heute erfolgt, `## [0.2.0] - <Datum>` in `CHANGELOG.md` vor dem Push aktualisieren. (b) Lokale Commits auf `origin/main` pushen, falls nicht schon geschehen. (c) Ersten grünen CI-Lauf auf `main` abwarten. (d) `git tag v0.2.0 && git push origin v0.2.0` → `publish.yml` triggert GHCR-Push (Image `ghcr.io/pt9912/u-boot:0.2.0` + `:latest`) + Binary-Upload (sechs Plattformen als GitHub-Release-Asset). |
 
 ## Out of Scope
 

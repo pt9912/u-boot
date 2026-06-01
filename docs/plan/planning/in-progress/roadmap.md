@@ -76,20 +76,29 @@ Workflow-`name:`-Felder).
 Aktuell offen sind nur trigger- oder nutzer-getriebene V1- und
 Later-Folgen:
 
-1. **~~Doctor-Container-Awareness~~ — v0.1.1-Tag-Push offen.**
-   Slice
+1. **v0.2.0-Tag-Push offen.** Vier Slices sind seit `v0.1.0`
+   gelandet — drei Features plus ein Patch, daher wird das
+   ursprünglich geplante `v0.1.1` zugunsten von `v0.2.0`
+   (MINOR-Bump) übersprungen. Release-Cut-Slice:
+   [`done/slice-v1-release-cut-v0.2.0.md`](../done/slice-v1-release-cut-v0.2.0.md)
+   (T1 CHANGELOG-Konsolidierung, T2 Dev-Default-Version-Bump,
+   T3 READMEs + roadmap + slice-Move, T4 Nutzer-Aktion).
+   Enthaltene Slices:
    [`done/slice-v0.1.1-doctor-container-awareness.md`](../done/slice-v0.1.1-doctor-container-awareness.md)
-   T1 `9a99bbf` + T2 `c35360f` + T3 `111e725` + T4 dieser Commit
-   geliefert: `doctor` skipped die vier Host-Prerequisite-Checks
-   im Container-Modus (`SeverityInfo` statt `SeverityError`,
-   Exit 0 statt 11 bei sonst gesundem Projekt). v0.1.1-Tag-Push
-   bleibt **Nutzer-Aktion** analog v0.1.0-T4: (a) CHANGELOG-Datum
-   auf Push-Datum aktualisieren, (b) push, (c) ersten CI-Lauf
-   abwarten, (d) `git tag v0.1.1 && git push origin v0.1.1`.
-   Zog den ersten ADR-0007-Re-Eval-Trigger (Binary-Distribution)
-   mit, siehe
+   (T1 `9a99bbf` + T2 `c35360f` + T3 `111e725` + T4 `f3f1731`),
    [`done/slice-v2-binary-distribution.md`](../done/slice-v2-binary-distribution.md)
-   (mittlerweile vollständig geliefert — siehe Punkt 5).
+   (T1..T4 mit Hashes in der Slice-Datei),
+   [`done/slice-v1-template-list.md`](../done/slice-v1-template-list.md)
+   (T1..T4 + Review-Followup `c807cdb`),
+   [`done/slice-v1-template-init.md`](../done/slice-v1-template-init.md)
+   (T1..T5 + Review-Followup `7fe26e0`). v0.2.0-Tag-Push bleibt
+   **Nutzer-Aktion** analog v0.1.0-T4: (a) `## [0.2.0] - <Datum>`
+   in `CHANGELOG.md` auf das Push-Datum aktualisieren,
+   (b) push auf `origin/main` falls noch nicht geschehen,
+   (c) ersten CI-Lauf abwarten,
+   (d) `git tag v0.2.0 && git push origin v0.2.0` →
+   `publish.yml` triggert GHCR-Push (`ghcr.io/pt9912/u-boot:0.2.0`
+   + `:latest`) und Binary-Upload (sechs Plattformen).
 2. **V1-Add-ons** — Keycloak (`LH-FA-ADD-003` / `LH-AK-003`) und
    OpenTelemetry (`LH-FA-ADD-004` / `LH-AK-004`); jeweils
    eigener Slice-Plan bei Auslösung.
