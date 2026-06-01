@@ -94,6 +94,16 @@ die sechs Binary-Assets.
   voller State-Machine: registrieren, reaktivieren, Block neu
   erzeugen, fehlende Artefakte reparieren, Abbruch bei
   Inkonsistenzen.
+- `u-boot remove <service> [--purge]` — Spiegel von `add`
+  (LH-FA-ADD-007, ab v0.3.0). Entfernt den `service.<name>`-
+  Managed-Block aus `compose.yaml` und `.env.example` und setzt
+  `services.<name>.enabled: false` in `u-boot.yaml`. Idempotent:
+  ein bereits-disabled Service produziert eine No-Op-Meldung.
+  `--purge` ist der explizite destruktive Opt-in und triggert
+  das LH-FA-CLI-005A-§254-Confirmation-Gate (analog zu
+  `down --volumes`); v0.3.0 surface'd den Cleanup-Hinweis
+  (`docker volume rm <name>`) — die automatische Volume-Löschung
+  landet in einem Folge-Slice.
 - `u-boot up [--timeout <sek>]` startet die Compose-Umgebung via
   `docker compose up -d` und pollt, bis jeder deklarierte Service
   `healthy` (mit Healthcheck) bzw. `running` (ohne) erreicht

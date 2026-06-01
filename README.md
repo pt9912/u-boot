@@ -91,6 +91,15 @@ six binary assets.
   (LH-FA-ADD-004) land in V1. Idempotent state machine: register,
   reactivate, rebuild block, repair stale artefacts, abort on
   inconsistencies.
+- `u-boot remove <service> [--purge]` — mirror of `add`
+  (LH-FA-ADD-007, since v0.3.0). Strips the `service.<name>`
+  managed block from `compose.yaml` and `.env.example`, then sets
+  `services.<name>.enabled: false` in `u-boot.yaml`. Idempotent:
+  removing an already-disabled service is a no-op. `--purge` opts
+  in destructively and triggers the LH-FA-CLI-005A §254
+  confirmation gate (analogous to `down --volumes`); v0.3.0
+  surfaces the cleanup hint (`docker volume rm <name>`) — auto-
+  volume-removal lands in a follow-up slice.
 - `u-boot up [--timeout <sec>]` starts the Compose environment via
   `docker compose up -d` and polls until every declared service
   reaches `healthy` (with healthcheck) or `running` (without)

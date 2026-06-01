@@ -102,12 +102,19 @@ Later-Folgen:
      `LH-NFA-MAINT-004` Dokumentierte Schnittstellen,
      `LH-NFA-PORT-003` Containerfreundlichkeit) verifizieren und
      in Phase-Table / MVP-Bilanz als ✅ markieren.
-   - **`slice-v1-add-remove`** (`LH-FA-ADD-007`) — `u-boot remove
-     <service>` als Spiegel von M5 `u-boot add`. Setzt
-     `services.<svc>.enabled: false`, entfernt Compose- und
-     env-Blocks; `--purge`-Flag (destruktiv, LH-FA-CLI-005A-
-     Confirmation-Gate analog `down --volumes`) für Volume-
-     Löschung. Idempotent: bereits-disabled = No-Op.
+   - ✅ [`slice-v1-add-remove`](../done/slice-v1-add-remove.md)
+     (`LH-FA-ADD-007`) — `u-boot remove <service>` geliefert
+     2026-06-01 (T1 `ca1267f` Driving-Port + Skeleton, T2
+     `e26cb42` State-Machine + `detectServiceState`-Extract,
+     T3 `c508b4f` `--purge`-Confirmation-Gate, T4 `3cc2646`
+     CLI + Wiring + E2E, T5 Slice-Closure). E2E gegen das
+     gebaute Image: `add postgres` → `enabled: true`;
+     `remove postgres` → `enabled: false` + Changed-Liste;
+     zweiter `remove` → idempotent No-Op. **T3-Decision**:
+     actual Volume-Removal bleibt deferred (CLI surface'd
+     `docker volume rm <name>`-Cleanup-Hinweis); eigener Folge-
+     Slice, wenn der Docker-Engine-Port-Erweiterung gerechtfertigt
+     ist.
    - **`slice-v1-addons-deps`** (`LH-FA-ADD-006`) — Add-on-
      Dependency-Resolution; Voraussetzung für Keycloak
      (`requires: [postgres]`). Domain-Modell für `requires`-Block

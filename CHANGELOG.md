@@ -11,6 +11,30 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- **`u-boot remove <service> [--purge]`** — first slice of the
+  v0.3.0 milestone ("Add-on Catalogue Expansion"). Mirror of
+  `u-boot add`: detects the LH-FA-ADD-005 service state, strips
+  the `service.<name>` managed block from `compose.yaml` and
+  `.env.example`, then sets `services.<name>.enabled: false` in
+  `u-boot.yaml`. Idempotent: removing an already-disabled service
+  is a no-op with a clear message. Inconsistent project state
+  (orphan block, missing entry) surfaces as `ErrServiceInconsistent`
+  with a manual-cleanup hint. New driving sentinel
+  `ErrServiceUnregistered` (exit 10) distinguishes "service was
+  never added" from "service name not in the catalogue"
+  (`ErrServiceUnsupported`). LH-FA-ADD-007 §"Volumes nur auf
+  explizite Anforderung": `--purge` opts in destructively and
+  triggers the LH-FA-CLI-005A §254 confirmation gate (mirror of
+  `u-boot down --volumes`); auto-removal of volumes is deferred
+  to a follow-up slice — v0.3.0's `--purge` summary points at
+  `docker volume rm <name>` for the manual cleanup. Internal:
+  `detectServiceState` extracted from the M5 add path to a
+  package-level function so both add and remove share it without
+  duplication. See
+  [`slice-v1-add-remove`](docs/plan/planning/done/slice-v1-add-remove.md).
+
 ## [0.2.0] - 2026-06-01
 
 Second release. Adds the first two V1 template features
