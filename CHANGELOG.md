@@ -11,7 +11,7 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
-## [0.3.0] - TBD
+## [0.3.0] - 2026-06-01
 
 Third release. Completes the V1 „Add-on Catalogue Expansion"
 milestone (5/5): the catalogue now ships three integrated
