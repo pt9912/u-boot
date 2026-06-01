@@ -1,0 +1,28 @@
+<!-- BEGIN U-BOOT MANAGED BLOCK: init -->
+# {{.Name}}
+
+A Docker-based development environment scaffolded by [u-boot](https://github.com/pt9912/u-boot).
+
+## Quickstart
+
+```bash
+u-boot up         # start the development stack
+u-boot doctor     # check local prerequisites
+u-boot down       # stop the stack
+```
+
+## Project layout
+
+- `compose.yaml` — Docker Compose stack.
+- `docker/` — Dockerfile(s) and container-related assets.
+- `scripts/` — project-local helper scripts.
+- `docs/` — project documentation.
+- `u-boot.yaml` — u-boot project configuration.
+- `.env.example` — copy to `.env` and adapt before `u-boot up`.
+
+## Prerequisites
+
+- Docker Engine ≥ 24.0.0
+- Docker Compose ≥ 2.20.0
+- Git
+<!-- END U-BOOT MANAGED BLOCK: init -->

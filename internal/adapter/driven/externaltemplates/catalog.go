@@ -33,11 +33,13 @@ import (
 )
 
 // templatesFS holds every built-in template's metadata file plus
-// (eventually) every datafile. The embed pattern is `templates/*`
-// recursive so slice-v1-template-init's per-template file-tree
-// can use the same FS without a second embed declaration.
+// every per-template datafile. The pattern uses the `all:` prefix
+// so dotfile templates like `.gitignore.tmpl` and `.env.example.tmpl`
+// (slice-v1-template-init T3) are embedded — Go's default
+// `templates/*` would silently drop them per the `embed` package
+// dotfile-exclusion rule.
 //
-//go:embed templates/*
+//go:embed all:templates/*
 var templatesFS embed.FS
 
 // catalogRoot is the directory inside [templatesFS] that holds the
