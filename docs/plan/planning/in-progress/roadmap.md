@@ -222,6 +222,31 @@ Schnitt (`v0.1.0` o. ä.) liegt seit
 Trivy als dritter PR-blockierender CI-Job, ADR-0007 setzt GHCR als
 primären Distributionsweg. Der Tag-Push selbst bleibt Nutzer-Trigger.
 
+### v0.3.0 — Milestone-Tabelle „Add-on Catalogue Expansion"
+
+Aktiver Release-Scope. Fünf Slices, geordnet von klein nach groß
+(audit-done → add-remove → addons-deps → Keycloak + OTel parallel).
+Die Spec-ID-Spalte mappt jeden Slice auf die `LH-FA-*` / `LH-AK-*`-
+Arbeitspunkte aus dem [Lastenheft](../../../spec/lastenheft.md), die
+er ausliefert; mehr V1-Arbeitspunkte (Generators, `--json`/
+`--dry-run`, Logs) bleiben in §Nächste Schritte 4 als Post-v0.3.0-
+Backlog. v0.3.0-Tag-Push wird wie v0.1.0/v0.2.0 Nutzer-Aktion sein
+(Release-Cut-Slice analog `slice-v1-release-cut-v0.2.0` bei
+Milestone-Schluss).
+
+| Done | Slice | Spec-IDs (Lastenheft) | Status / Bezug |
+| ---- | ----- | --------------------- | -------------- |
+| [ ] | `slice-v1-audit-done` | `LH-FA-BUILD-006` Aggregator-Targets, `LH-NFA-MAINT-004` Dokumentierte Schnittstellen, `LH-NFA-PORT-003` Containerfreundlichkeit | Reiner Doku-Audit — drei vermutlich-erfüllte V1-IDs gegen den aktuellen Code-Stand verifizieren und in Phase-Tabelle / MVP-Bilanz als ✅ markieren. Bringt keine Code-Änderung; gute Aufwärm-Tranche vor den drei Implementations-Slices. |
+| [x] | [`slice-v1-add-remove`](../done/slice-v1-add-remove.md) | `LH-FA-ADD-007` Service entfernen | Geliefert 2026-06-01 — T1 `ca1267f`, T2 `e26cb42`, T3 `c508b4f`, T4 `3cc2646`, T5 `764e737` + Review-Followup `78ddcc6` (F1..F6: Two-Phase + Mode-Preservation + stderr-WARNING + Deactivated-Gate-Skip). Dependency-Check und Volume-Removal defer-pflichtig auf `slice-v1-addons-deps` bzw. eigenen Folge-Slice. |
+| [ ] | `slice-v1-addons-deps` | `LH-FA-ADD-006` Add-on-Abhängigkeiten | Voraussetzung für Keycloak (`requires: [postgres]`). Domain-Modell für `requires`-Block im Add-on-Katalog + Validierung beim `add`/`remove`-Flow. Liefert die fehlende „Dependency-Check"-Hälfte aus `LH-FA-ADD-007`. |
+| [ ] | `slice-v1-keycloak` | `LH-FA-ADD-003` Keycloak hinzufügen, `LH-AK-003` Keycloak-Flow | Keycloak-Add-on analog M5-Postgres-Pattern; Postgres-Dependency über addons-deps deklariert. Acceptance-Test analog `LH-AK-002`. |
+| [ ] | `slice-v1-otel` | `LH-FA-ADD-004` OpenTelemetry hinzufügen, `LH-AK-004` OpenTelemetry-Flow | OpenTelemetry-Add-on parallel zu Keycloak — kann gleichzeitig mit Keycloak entwickelt werden, weil keine Dependency zwischen den beiden. |
+
+Stand: 1/5 ✅, 4/5 offen. Beim Schließen des Milestones folgt der
+v0.3.0-Release-Cut-Slice mit CHANGELOG-Konsolidierung, Dev-Version-
+Bump auf `0.3.0-dev`, READMEs-Sync und Tag-Push-Nutzer-Aktion
+(Pattern aus `slice-v1-release-cut-v0.2.0`).
+
 ### v0.1.0 / v0.2.0 — Audit-Trail ausgelieferter Slices + offene Trigger-Restwege
 
 Audit-Trail der nicht-MVP-Slices die zwischen v0.1.0 und v0.2.0
