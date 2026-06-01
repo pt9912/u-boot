@@ -20,7 +20,7 @@ in `in-progress/`.
 | M7 `u-boot generate` | Done | `generate changelog`/`readme`/`env-example`/`devcontainer` (`LH-FA-GEN-001..005` + LH-FA-DEV-001/004/005 + LH-AK-007). Sechs Tranchen ✅ (`67fc181`/`3c5de48`/`037ab00`/`19c4110`/`294e492`/`d32a733`) + Review-Followup `27de9c5` (9 Findings S1..S4/N1..N5 adressiert, u. a. fenced-code-block-Schutz gegen Markdown-Korruption + CRLF-Normalisierung). Reuse von `managedblock` (3 Marker-Stile decken 4 Datei-Mappings), `generateManagedFile`-Helper für env-example/readme, atomarer Two-File-Plan für devcontainer, konservative User-Edit-Erkennung für changelog. CLI: `u-boot generate <artifact>`, Exit-Codes 0/2/10/14. | [`slice-m7-generate`](../done/slice-m7-generate.md) |
 | M8 `u-boot config` | Done | `config get`/`set`/Anzeigen (`LH-FA-CONF-001..005`), Schema-Validierung. Fünf Tranchen ✅ (`f531e7e`/`d3fa294`/`23952b2`/`fbf3778`/`25cb123`): Whitelist, Port + Skeleton, Get + Show, Set mit Two-Stage-Validation, CLI-Subcommand. **Letzter MVP-blockierender Slice → MVP vollständig.** | [`slice-m8-config`](../done/slice-m8-config.md) |
 | MVP-Closure | Done | Devcontainer-Mindestumfang (`LH-FA-DEV-001..005`), MVP-Acceptance-Flows (`LH-AK-001..002`, `LH-AK-005..007`). Drei Tranchen — T1 ✅ `bfe6416` `u-boot init --devcontainer` (LH-AK-005), T2 ✅ `8525c4c` LH-AK-001/-006-Pins in `acceptance_test.go` inkl. Doctor-Severity-Fix `compose.yaml.valid` (Error → Warn), T3 ✅ Slice-Closure + MVP-Bilanz. Alle 5 MVP-`LH-AK-*` gepinnt; alle MVP-`LH-FA-DEV-*` ausgeliefert. (M8 `u-boot config` ist die zweite MVP-Schließung, siehe nächste Zeile.) | [`slice-mvp-closure`](../done/slice-mvp-closure.md) |
-| V1 Add-on Expansion (v0.3.0-Milestone) | In Progress (1/5) | Fünf Slices als v0.3.0-Scope: `slice-v1-audit-done` (Doku-Audit `LH-FA-BUILD-006`/`LH-NFA-MAINT-004`/`LH-NFA-PORT-003`), ✅ [`slice-v1-add-remove`](../done/slice-v1-add-remove.md) (`LH-FA-ADD-007`) geliefert 2026-06-01, `slice-v1-addons-deps` (`LH-FA-ADD-006`), `slice-v1-keycloak` (`LH-FA-ADD-003` + `LH-AK-003`), `slice-v1-otel` (`LH-FA-ADD-004` + `LH-AK-004`). Reihenfolge: audit-done → add-remove → addons-deps → Keycloak + OTel (parallel). | partial — siehe done/ |
+| V1 Add-on Expansion (v0.3.0-Milestone) | In Progress (2/5) | Fünf Slices als v0.3.0-Scope: ✅ [`slice-v1-audit-done`](../done/slice-v1-audit-done.md) (Doku-Audit für `LH-FA-BUILD-006`/`LH-NFA-MAINT-004`/`LH-NFA-PORT-003`), ✅ [`slice-v1-add-remove`](../done/slice-v1-add-remove.md) (`LH-FA-ADD-007`), `slice-v1-addons-deps` (`LH-FA-ADD-006`), `slice-v1-keycloak` (`LH-FA-ADD-003` + `LH-AK-003`), `slice-v1-otel` (`LH-FA-ADD-004` + `LH-AK-004`). | partial — siehe done/ |
 | V1 Templates | Partial Done | `LH-FA-TPL-001..004` — Format via [ADR-0009](../../adr/0009-template-format-yaml-files.md) (YAML+`text/template`). `slice-v1-template-list` ✅ + `slice-v1-template-init` ✅ (für `basic`; Variable-Resolution defer-pflichtig); `slice-later-local-templates` (`LH-FA-TPL-003`) bleibt Later-Phase. | [`slice-v1-template-list`](../done/slice-v1-template-list.md) + [`slice-v1-template-init`](../done/slice-v1-template-init.md) |
 | V1 Logs / Dry-Run / Diff | Open | `LH-FA-UP-005`, `LH-FA-CLI-007/008` | offen |
 | Later Migration / Custom Templates | Open | `LH-FA-CONF-006`, `LH-FA-TPL-003` (in ADR-0009 §Folgepunkte als `slice-later-local-templates` benannt), `LH-DA-004` | offen |
@@ -94,14 +94,14 @@ Later-Folgen:
    v0.1.1-Planung verlangten SemVer-MINOR-Bump). Branch-Protection-UI
    bleibt als Nutzer-One-Shot offen aus v0.1.0-Era (nicht
    release-blockierend).
-2. **v0.3.0-Milestone — Add-on Catalogue Expansion (in progress, 1/5).**
+2. **v0.3.0-Milestone — Add-on Catalogue Expansion (in progress, 2/5).**
    Fünf Slices als nächstes Release-Cluster, geordnet von klein
    nach groß:
-   - **`slice-v1-audit-done`** — reiner Doku-Audit: drei vermutlich-
-     erfüllte V1-IDs (`LH-FA-BUILD-006` Aggregator-Targets,
+   - ✅ [`slice-v1-audit-done`](../done/slice-v1-audit-done.md)
+     — drei V1-IDs (`LH-FA-BUILD-006` Aggregator-Targets,
      `LH-NFA-MAINT-004` Dokumentierte Schnittstellen,
-     `LH-NFA-PORT-003` Containerfreundlichkeit) verifizieren und
-     in Phase-Table / MVP-Bilanz als ✅ markieren.
+     `LH-NFA-PORT-003` Containerfreundlichkeit) gegen den
+     aktuellen Code-Stand verifiziert; Evidence im done/-Slice.
    - ✅ [`slice-v1-add-remove`](../done/slice-v1-add-remove.md)
      (`LH-FA-ADD-007`) — `u-boot remove <service>` geliefert
      2026-06-01 (T1 `ca1267f` Driving-Port + Skeleton, T2
@@ -236,13 +236,13 @@ Milestone-Schluss).
 
 | Done | Slice | Spec-IDs (Lastenheft) | Status / Bezug |
 | ---- | ----- | --------------------- | -------------- |
-| [ ] | `slice-v1-audit-done` | `LH-FA-BUILD-006` Aggregator-Targets, `LH-NFA-MAINT-004` Dokumentierte Schnittstellen, `LH-NFA-PORT-003` Containerfreundlichkeit | Reiner Doku-Audit — drei vermutlich-erfüllte V1-IDs gegen den aktuellen Code-Stand verifizieren und in Phase-Tabelle / MVP-Bilanz als ✅ markieren. Bringt keine Code-Änderung; gute Aufwärm-Tranche vor den drei Implementations-Slices. |
+| [x] | [`slice-v1-audit-done`](../done/slice-v1-audit-done.md) | `LH-FA-BUILD-006` Aggregator-Targets, `LH-NFA-MAINT-004` Dokumentierte Schnittstellen, `LH-NFA-PORT-003` Containerfreundlichkeit | Geliefert — drei V1-IDs gegen den aktuellen Code-Stand verifiziert: Makefile-Aggregator-Targets vollständig; Add-on/Template-Schnittstellen via ADR-0008/-0009 + Port-Doc-Comments + Slice-Dokus belegt; Container/Devcontainer-Pfad via GHCR-Image + container-aware doctor + Binary-Distribution + `init --devcontainer`. Audit-Evidence im done/-Slice. |
 | [x] | [`slice-v1-add-remove`](../done/slice-v1-add-remove.md) | `LH-FA-ADD-007` Service entfernen | Geliefert 2026-06-01 — T1 `ca1267f`, T2 `e26cb42`, T3 `c508b4f`, T4 `3cc2646`, T5 `764e737` + Review-Followup `78ddcc6` (F1..F6: Two-Phase + Mode-Preservation + stderr-WARNING + Deactivated-Gate-Skip). Dependency-Check und Volume-Removal defer-pflichtig auf `slice-v1-addons-deps` bzw. eigenen Folge-Slice. |
 | [ ] | `slice-v1-addons-deps` | `LH-FA-ADD-006` Add-on-Abhängigkeiten | Voraussetzung für Keycloak (`requires: [postgres]`). Domain-Modell für `requires`-Block im Add-on-Katalog + Validierung beim `add`/`remove`-Flow. Liefert die fehlende „Dependency-Check"-Hälfte aus `LH-FA-ADD-007`. |
 | [ ] | `slice-v1-keycloak` | `LH-FA-ADD-003` Keycloak hinzufügen, `LH-AK-003` Keycloak-Flow | Keycloak-Add-on analog M5-Postgres-Pattern; Postgres-Dependency über addons-deps deklariert. Acceptance-Test analog `LH-AK-002`. |
 | [ ] | `slice-v1-otel` | `LH-FA-ADD-004` OpenTelemetry hinzufügen, `LH-AK-004` OpenTelemetry-Flow | OpenTelemetry-Add-on parallel zu Keycloak — kann gleichzeitig mit Keycloak entwickelt werden, weil keine Dependency zwischen den beiden. |
 
-Stand: 1/5 ✅, 4/5 offen. Beim Schließen des Milestones folgt der
+Stand: 2/5 ✅, 3/5 offen. Beim Schließen des Milestones folgt der
 v0.3.0-Release-Cut-Slice mit CHANGELOG-Konsolidierung, Dev-Version-
 Bump auf `0.3.0-dev`, READMEs-Sync und Tag-Push-Nutzer-Aktion
 (Pattern aus `slice-v1-release-cut-v0.2.0`).

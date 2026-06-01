@@ -11,6 +11,21 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Verified
+
+- **Three V1 spec-IDs audit-closed** by
+  [`slice-v1-audit-done`](docs/plan/planning/done/slice-v1-audit-done.md)
+  — Doku-only verification that the existing code/doc state
+  already satisfies the requirements:
+  `LH-FA-BUILD-006` (Aggregator-Targets `gates`/`ci`/`fullbuild` in
+  the Makefile),
+  `LH-NFA-MAINT-004` (Add-on and template interfaces documented via
+  ADR-0008/-0009 + driving/driven port doc-comments + slice docs),
+  `LH-NFA-PORT-003` (u-boot itself runs in container / devcontainer:
+  GHCR distroless image + container-aware `doctor` since v0.2.0 +
+  six-platform binary distribution + `init --devcontainer`-generated
+  files).
+
 ### Added
 
 - **`u-boot remove <service> [--purge]`** — first slice of the
