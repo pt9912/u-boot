@@ -31,11 +31,11 @@ ARG GOLANGCI_LINT_VERSION=v2.12.2
 # UBOOT_VERSION is injected at build time and re-published as the
 # u-boot --version output (via -ldflags -X main.version) and as the
 # org.opencontainers.image.version OCI label. Default matches the
-# in-source fallback `var version = "0.1.0-dev"` in cmd/uboot/main.go
+# in-source fallback `var version = "0.2.0-dev"` in cmd/uboot/main.go
 # so that local `docker build` without --build-arg produces a coherent
-# `0.1.0-dev` binary. Tagged releases pass UBOOT_VERSION=<version> via
+# `0.2.0-dev` binary. Tagged releases pass UBOOT_VERSION=<version> via
 # `make build VERSION=<version>` from the publish.yml workflow.
-ARG UBOOT_VERSION=0.1.0-dev
+ARG UBOOT_VERSION=0.2.0-dev
 
 # ---- deps ------------------------------------------------------------------
 FROM golang:${GO_VERSION} AS deps

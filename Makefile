@@ -20,11 +20,11 @@ PYTHON_VERSION          ?= 3.13-slim
 # VERSION is injected at build time and becomes both `u-boot --version`
 # output (via -X main.version) and the org.opencontainers.image.version
 # OCI label on the runtime image. Default matches the in-source fallback
-# in cmd/uboot/main.go (`var version = "0.1.0-dev"`); the publish.yml
+# in cmd/uboot/main.go (`var version = "0.2.0-dev"`); the publish.yml
 # workflow passes VERSION=<tag-without-v> for tagged releases. CI gates
 # (lint/test/coverage/govulncheck/image-scan) and local `make build`
-# without override produce a coherent "0.1.0-dev" binary.
-VERSION                 ?= 0.1.0-dev
+# without override produce a coherent "0.2.0-dev" binary.
+VERSION                 ?= 0.2.0-dev
 # Trivy pin policy — TWO formats in play, both must be bumped together:
 #   - Makefile (here):  Docker-Hub-Tag-Konvention OHNE `v`-Prefix
 #                        → `aquasec/trivy:0.70.0`
