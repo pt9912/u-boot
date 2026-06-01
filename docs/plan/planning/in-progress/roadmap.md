@@ -227,7 +227,7 @@ primären Distributionsweg. Der Tag-Push selbst bleibt Nutzer-Trigger.
 Aktiver Release-Scope. Fünf Slices, geordnet von klein nach groß
 (audit-done → add-remove → addons-deps → Keycloak + OTel parallel).
 Die Spec-ID-Spalte mappt jeden Slice auf die `LH-FA-*` / `LH-AK-*`-
-Arbeitspunkte aus dem [Lastenheft](../../../spec/lastenheft.md), die
+Arbeitspunkte aus dem [Lastenheft](../../../../spec/lastenheft.md), die
 er ausliefert; mehr V1-Arbeitspunkte (Generators, `--json`/
 `--dry-run`, Logs) bleiben in §Nächste Schritte 4 als Post-v0.3.0-
 Backlog. v0.3.0-Tag-Push wird wie v0.1.0/v0.2.0 Nutzer-Aktion sein
