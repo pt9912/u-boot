@@ -114,6 +114,16 @@ auf einem Docker-fähigen System bringt Keycloak-Endpoint
   LH-FA-ADD-003 Mindestumfang. Nutzer kann nach `add keycloak`
   manuell zusätzliche Volumes / Env-Vars im managed-block-freien
   Bereich der compose.yaml ergänzen.
+- **CI-Stabilisierung des Keycloak-Acceptance-Tests**: in GitHub-
+  Actions failt `docker compose up` für Keycloak reproduzierbar
+  nach <1 s mit „compose runtime error" — vermutlich Quay.io-
+  Manifest-Lookup (Outage heute 2026-06-01 den ganzen Tag; lokal
+  ebenfalls 502/504 gesehen). T3-Carveout: der Test ist mit
+  zusätzlichem build-tag `acceptance_extended` opt-in, default
+  `make test-docker` umgeht ihn. Folge-Slice
+  `slice-v1-keycloak-ci-flake` (Trigger: Compose-Verbose-Logs aus
+  CI ziehen, dann entweder Pull-Retry-Wrapper im UpService oder
+  Quay-Mirror via Docker-Hub-Pull-Through-Cache).
 - **OpenTelemetry-Add-on**: eigener Slice `slice-v1-otel`
   (LH-FA-ADD-004 + LH-AK-004), parallel-entwickelbar weil keine
   Dep zwischen Keycloak und OTel.
