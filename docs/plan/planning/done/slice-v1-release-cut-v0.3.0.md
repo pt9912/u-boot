@@ -36,11 +36,11 @@ Dependency-Mechanik.
 Plus zwei begleitende Slice-Pläne in `open/`, die als Folge-Slices
 ohne aktive Tranchen liegen:
 
-- [`slice-v1-keycloak-ci-flake`](slice-v1-keycloak-ci-flake.md) —
+- [`slice-v1-keycloak-ci-flake`](../open/slice-v1-keycloak-ci-flake.md) —
   offener Trigger-Slice für die `acceptance_extended`-Carveout-
   Auflösung des Keycloak-Acceptance-Tests. Nicht v0.3.0-blocking.
-- [`slice-v2-homebrew-formula.md`](slice-v2-homebrew-formula.md)
-  + [`slice-v2-distro-pakete.md`](slice-v2-distro-pakete.md) —
+- [`slice-v2-homebrew-formula.md`](../open/slice-v2-homebrew-formula.md)
+  + [`slice-v2-distro-pakete.md`](../open/slice-v2-distro-pakete.md) —
   proaktive Trigger-Stubs für `LH-OPEN-002`-Restwege. Bewusst
   ohne v0.3.0-Bezug.
 
