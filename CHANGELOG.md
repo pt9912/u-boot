@@ -11,7 +11,7 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
-## [0.2.0] - TBD
+## [0.2.0] - 2026-06-01
 
 Second release. Adds the first two V1 template features
 (`template list` + `init --template`), a cross-platform binary
