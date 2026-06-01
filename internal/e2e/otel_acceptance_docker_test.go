@@ -18,12 +18,16 @@
 //   - OTLP/gRPC ist auf `localhost:4317` erreichbar;
 //   - OTLP/HTTP ist auf `localhost:4318` erreichbar.
 //
-// UpService-Timeout 60 s reicht (Collector-Boot < 5 s, kein
-// JVM-Init wie bei Keycloak). Falls die CI das docker.io-Pull
-// des Collector-Image als flaky erlebt (analog Quay/Keycloak),
-// eskaliert dieser Test auf `//go:build docker && acceptance_
-// extended` und der Folge-Slice `slice-v1-keycloak-ci-flake`
-// schließt beide gleichzeitig.
+// UpService-Timeout 2 min — Collector-Boot selbst ist < 5 s, aber
+// in CI muss der Cold-Image-Pull des
+// `otel/opentelemetry-collector:0.108.0` (≈ 35 MB komprimiert) in
+// das Default-Timeout passen. Erster T3-CI-Run mit 60 s lief in
+// die stabilization timeout; 2 min sind die nächst-konservative
+// Stufe und liegen weit unter den 4 min, die Keycloak braucht.
+// Falls die CI das docker.io-Pull weiter als flaky erlebt (analog
+// Quay/Keycloak), eskaliert dieser Test auf `//go:build docker &&
+// acceptance_extended` und der Folge-Slice
+// `slice-v1-keycloak-ci-flake` schließt beide gleichzeitig.
 
 package e2e_test
 
@@ -38,8 +42,8 @@ func TestE2E_LHAK004_OtelAcceptanceFlow(t *testing.T) {
 		projectName: "t-uboot-e2e-otel",
 		serviceName: "otel",
 		envKeys:     nil, // OTel default-Setup hat keine .env-Keys.
-		upTimeout:   60 * time.Second,
-		ctxTimeout:  3 * time.Minute,
+		upTimeout:   2 * time.Minute,
+		ctxTimeout:  5 * time.Minute,
 	})
 
 	// LH-AK-004 §2374 tolerates `running` OR `healthy`. The
