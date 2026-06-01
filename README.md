@@ -155,7 +155,7 @@ and §Nächste Schritte for the in-progress backlog.
 | ---------- | -------- | ----- |
 | `init [name] [--devcontainer] [--template <name>]` | `LH-FA-INIT-001..007`, `LH-FA-TPL-001` | Scaffold project + `git init`. |
 | `doctor [--strict]` | `LH-FA-DIAG-001..004` | 11 diagnostic checks; container-aware skip for host probes. |
-| `add <service>` | `LH-FA-ADD-001..002`, `LH-FA-ADD-005` | Idempotent state-machine for service add-ons. |
+| `add <service> [--with-deps]` | `LH-FA-ADD-001..002`, `LH-FA-ADD-005`, `LH-FA-ADD-006` | Idempotent state-machine for service add-ons; `--with-deps` auto-installs missing dependencies. |
 | `remove <service> [--purge]` | `LH-FA-ADD-007` | Mirror of `add` — disable + cut managed blocks. |
 | `up [--timeout <s>]` | `LH-FA-UP-001..003` | Compose up + healthcheck-poll + TCP probe. |
 | `down [--volumes]` | `LH-FA-UP-004` | Compose down with destructive-confirmation gate. |

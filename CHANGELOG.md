@@ -28,6 +28,26 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- **`u-boot add <service> --with-deps`** — LH-FA-ADD-006 add-on
+  dependency mechanism. New domain type `AddOnDependency` (path-
+  conditional service dependency declaration) + per-service
+  catalogue side-table `dependenciesFor(svc)` (Postgres has none
+  today; first non-nil row lands with `slice-v1-keycloak`). When
+  the requested add-on declares a dep that is not yet registered
+  in `u-boot.yaml`, the four-mode dispatch decides what happens:
+  `--with-deps` auto-installs the chain (recursive `Add` calls,
+  flag inherited so transitive deps follow); `--yes` has the same
+  effect; `--no-interactive` (without `--yes`/`--with-deps`)
+  fails fast with the new `ErrDependenciesRequired` sentinel
+  (exit 10); default-interactive prompts via the new
+  `Confirmer.ConfirmAddDependency(ctx, svc, missing)` driven-port
+  method (mirror of `ConfirmRemoveVolumes` from M6). Postgres-
+  only flows are unchanged — the no-deps short-circuit keeps the
+  load+resolve cost out of the MVP catalogue path. Breaking
+  refactor in the application layer: `NewAddServiceService`
+  now takes a `Confirmer` between `yaml` and `logger`; all eight
+  callsites updated in lock-step. See
+  [`slice-v1-addons-deps`](docs/plan/planning/done/slice-v1-addons-deps.md).
 - **`u-boot remove <service> [--purge]`** — first slice of the
   v0.3.0 milestone ("Add-on Catalogue Expansion"). Mirror of
   `u-boot add`: detects the LH-FA-ADD-005 service state, strips
