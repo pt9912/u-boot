@@ -11,6 +11,33 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- **Cross-platform binary distribution** for six platforms
+  (Linux/macOS/Windows × amd64/arm64). `make build-binaries`
+  cross-compiles every supported `GOOS`/`GOARCH` combination via
+  the pinned `golang:$(GO_VERSION)` builder image (CGO disabled,
+  `-ldflags "-s -w -X main.version=$(VERSION)"`, output to
+  `bin/u-boot-<os>-<arch>[.exe]`). `.github/workflows/publish.yml`
+  builds the same set after the GHCR push on every `v*` tag and
+  attaches them as GitHub-Release assets via `gh release upload`.
+  See
+  [`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md)
+  — ADR-0007 §Folgepunkte 1 trigger pulled forward by the v0.1.1
+  doctor-container-awareness feedback.
+- Quickstart in `README.md` / `README.de.md` gets a host-native
+  install block (`curl -sSL … | chmod +x` for Linux/macOS,
+  `Invoke-WebRequest` for Windows) as the primary recommended path;
+  the GHCR `docker run …` block is demoted to "alternative for
+  container/CI workflows".
+
+### Notes
+
+`releases/latest/download/u-boot-<os>-<arch>[.exe]` resolves to the
+highest stable tag — since `v0.1.0` predates binary assets, the
+`latest`-shortcut starts working once `v0.1.1` (or any later tag)
+has been pushed.
+
 ## [0.1.1] - TBD
 
 Targeted patch addressing the real-world feedback from the first

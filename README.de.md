@@ -33,10 +33,12 @@ und im
 ([`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/done/slice-v0.1.1-doctor-container-awareness.md))
 und eine host-native Binary-Distribution
 ([`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md),
-T1 + T2 geliefert: `make build-binaries` für sechs Plattformen
-(Linux/macOS/Windows × amd64/arm64) und `publish.yml` lädt die
-Binaries bei jedem `v*`-Tag an den GitHub-Release hoch). Der
-Tag-Push bleibt Nutzer-Aktion — siehe
+T1 + T2 + T3 geliefert: `make build-binaries` für sechs Plattformen
+(Linux/macOS/Windows × amd64/arm64), `publish.yml` lädt die Binaries
+bei jedem `v*`-Tag an den GitHub-Release hoch, und der Binary-First-
+Install-Block in der Quickstart unten). T4 (ADR-0007-Update +
+carveouts-Reduktion + Slice-Closure) bleibt offen; der Tag-Push
+bleibt Nutzer-Aktion — siehe
 [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md)
 §Nächste Schritte.
 
@@ -116,10 +118,48 @@ Tag-Push bleibt Nutzer-Aktion — siehe
 
 ## Quickstart
 
-### Pull von GHCR (empfohlen)
+### Vorgefertigte Binary installieren (empfohlen)
+
+Statisch gelinkte Single-File-Binaries werden ab **v0.1.1** mit jedem
+`v*`-GitHub-Release für sechs Plattformen (Linux/macOS/Windows ×
+amd64/arm64) ausgeliefert. Kein Docker-Daemon nötig — das ist die
+host-native Form für `doctor`, `init` und die anderen host-seitigen
+Subkommandos (gemäß
+[ADR-0007 §Folgepunkte 1](docs/plan/adr/0007-distributionswege-ghcr.md),
+Trigger aktiv via
+[`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md)).
+
+**Linux / macOS** (`<os>-<arch>` werden aus `uname` ermittelt):
 
 ```bash
-docker pull ghcr.io/pt9912/u-boot:0.1.0    # gepinntes Tag, empfohlen
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+curl -sSL -o u-boot \
+  "https://github.com/pt9912/u-boot/releases/latest/download/u-boot-${OS}-${ARCH}"
+chmod +x u-boot && sudo mv u-boot /usr/local/bin/
+u-boot --version
+```
+
+**Windows** (PowerShell — `amd64` oder `arm64` wählen):
+
+```powershell
+Invoke-WebRequest `
+  -Uri https://github.com/pt9912/u-boot/releases/latest/download/u-boot-windows-amd64.exe `
+  -OutFile u-boot.exe
+.\u-boot.exe --version
+```
+
+Eine bestimmte Version pinnst du mit
+`https://github.com/pt9912/u-boot/releases/download/v0.1.1/u-boot-<os>-<arch>[.exe]`
+statt `latest/download/`. `releases/latest/download/…` zeigt immer
+auf den höchsten stabilen Tag — `v0.1.0` hatte noch keine Binary-
+Assets, also funktioniert `latest` erst, sobald `v0.1.1` (oder ein
+späterer Tag) gepusht ist.
+
+### Pull von GHCR (alternativ — Container-/CI-Workflows)
+
+```bash
+docker pull ghcr.io/pt9912/u-boot:0.1.0    # gepinntes Tag
 # oder
 docker pull ghcr.io/pt9912/u-boot:latest   # stabiler Floating-Tag
 ```

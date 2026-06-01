@@ -32,9 +32,11 @@ and the
 ([`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/done/slice-v0.1.1-doctor-container-awareness.md))
 and a host-native binary distribution
 ([`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md),
-T1 + T2 shipped: `make build-binaries` for six platforms
-(Linux/macOS/Windows × amd64/arm64) and `publish.yml` uploading
-the binaries to the GitHub Release on every `v*` tag). Tag push
+T1 + T2 + T3 shipped: `make build-binaries` for six platforms
+(Linux/macOS/Windows × amd64/arm64), `publish.yml` uploading the
+binaries to the GitHub Release on every `v*` tag, and the
+binary-first install block in the Quickstart below). T4 (ADR-0007
+update + carveouts reduction + slice closure) remains; tag push
 remains a user action — see
 [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md)
 §Nächste Schritte.
@@ -108,10 +110,47 @@ remains a user action — see
 
 ## Quickstart
 
-### Pull from GHCR (recommended)
+### Install pre-built binary (recommended)
+
+Statically linked single-file binaries are attached to every `v*`
+GitHub Release for six platforms (Linux/macOS/Windows × amd64/arm64)
+starting with **v0.1.1**. No Docker daemon required — this is the
+host-native form intended for `doctor`, `init`, and the other host-
+side subcommands (per
+[ADR-0007 §Folgepunkte 1](docs/plan/adr/0007-distributionswege-ghcr.md),
+trigger active via
+[`slice-v2-binary-distribution`](docs/plan/planning/open/slice-v2-binary-distribution.md)).
+
+**Linux / macOS** (`<os>-<arch>` auto-detected from `uname`):
 
 ```bash
-docker pull ghcr.io/pt9912/u-boot:0.1.0    # pinned tag, recommended
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+curl -sSL -o u-boot \
+  "https://github.com/pt9912/u-boot/releases/latest/download/u-boot-${OS}-${ARCH}"
+chmod +x u-boot && sudo mv u-boot /usr/local/bin/
+u-boot --version
+```
+
+**Windows** (PowerShell — pick `amd64` or `arm64`):
+
+```powershell
+Invoke-WebRequest `
+  -Uri https://github.com/pt9912/u-boot/releases/latest/download/u-boot-windows-amd64.exe `
+  -OutFile u-boot.exe
+.\u-boot.exe --version
+```
+
+Pin a specific version with
+`https://github.com/pt9912/u-boot/releases/download/v0.1.1/u-boot-<os>-<arch>[.exe]`
+instead of `latest/download/`. `releases/latest/download/…` resolves
+to the highest stable tag — `v0.1.0` predates binary assets, so
+`latest` works only once `v0.1.1` (or any later tag) has been pushed.
+
+### Pull from GHCR (alternative — container/CI workflows)
+
+```bash
+docker pull ghcr.io/pt9912/u-boot:0.1.0    # pinned tag
 # or
 docker pull ghcr.io/pt9912/u-boot:latest   # stable-floating
 ```
