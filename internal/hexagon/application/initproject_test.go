@@ -389,6 +389,8 @@ func TestTemplateNames_AreSorted(t *testing.T) {
 		"readme.md.tmpl",
 		"services/keycloak.compose.tmpl",
 		"services/keycloak.env.tmpl",
+		"services/otel.compose.tmpl",
+		"services/otel.config.tmpl",
 		"services/postgres.compose.tmpl",
 		"services/postgres.env.tmpl",
 		"services/postgres.volume.tmpl",

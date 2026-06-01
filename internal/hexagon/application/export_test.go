@@ -75,41 +75,66 @@ func RenderTemplateForTest(name, projectName string) ([]byte, error) {
 }
 
 // ServiceCatalogueEntryForTest is the test-package projection of the
-// unexported [serviceCatalogueEntry] (slice-v1-keycloak T1). Same
-// fields — only renamed because the internal type is unexported and
-// the test bridge prefers an explicit exported name.
+// unexported [serviceCatalogueEntry]. Same fields — only renamed
+// because the internal type is unexported. slice-v1-otel T1 added
+// `ExtraFiles` so tests can pin the per-service whole-file artefact
+// declarations (`otel-collector-config.yaml` for OTel).
 type ServiceCatalogueEntryForTest struct {
 	ComposeTmpl string
 	EnvTmpl     string
 	VolumeTmpl  string
+	ExtraFiles  []ExtraFileEntryForTest
+}
+
+// ExtraFileEntryForTest mirrors the unexported [extraFileEntry] so
+// slice-v1-otel T1 tests can assert the (path, tmpl) tuples per
+// service without depending on package internals.
+type ExtraFileEntryForTest struct {
+	Path string
+	Tmpl string
 }
 
 // ServiceCatalogueForTest exposes the unexported [serviceCatalogue]
-// lookup so slice-v1-keycloak T1 tests can pin the per-service
-// template paths (Postgres + Keycloak entries).
+// lookup so slice-v1-keycloak / slice-v1-otel tests can pin the
+// per-service template paths.
 func ServiceCatalogueForTest() map[string]ServiceCatalogueEntryForTest {
 	out := map[string]ServiceCatalogueEntryForTest{}
 	for k, v := range serviceCatalogue() {
-		out[k] = ServiceCatalogueEntryForTest{
+		entry := ServiceCatalogueEntryForTest{
 			ComposeTmpl: v.composeTmpl,
 			EnvTmpl:     v.envTmpl,
 			VolumeTmpl:  v.volumeTmpl,
 		}
+		for _, xf := range v.extraFiles {
+			entry.ExtraFiles = append(entry.ExtraFiles, ExtraFileEntryForTest(xf))
+		}
+		out[k] = entry
 	}
 	return out
 }
 
+// RenderedExtraFileForTest is the test-package view of a single
+// rendered ExtraFiles entry from [renderServiceTemplates] (slice-v1-
+// otel T1).
+type RenderedExtraFileForTest struct {
+	Path    string
+	Content []byte
+}
+
 // RenderServiceTemplatesForTest exposes the per-service render
-// pipeline so T1 tests can pin Postgres Byte-Identity (no behaviour
-// change vs. the M5 renderPostgresTemplates output) and Keycloak's
-// nil-VolumeFragment for the volume-less catalogue path.
-func RenderServiceTemplatesForTest(svc domain.ServiceName) (composeFrag, volumeFrag, envVars []byte, err error) {
+// pipeline so T1 tests can pin Postgres Byte-Identity, Keycloak's
+// nil-VolumeFragment for volume-less services, and slice-v1-otel
+// T1's ExtraFiles for whole-file artefacts.
+func RenderServiceTemplatesForTest(svc domain.ServiceName) (composeFrag, volumeFrag, envVars []byte, extraFiles []RenderedExtraFileForTest, err error) {
 	s := &AddServiceService{}
 	tmpls, err := s.renderServiceTemplates(svc)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
-	return tmpls.ServiceFragment, tmpls.VolumeFragment, tmpls.EnvVariables, nil
+	for _, xf := range tmpls.ExtraFiles {
+		extraFiles = append(extraFiles, RenderedExtraFileForTest(xf))
+	}
+	return tmpls.ServiceFragment, tmpls.VolumeFragment, tmpls.EnvVariables, extraFiles, nil
 }
 
 // IsSupportedServiceForTest exposes the unexported

@@ -10,7 +10,7 @@ Metrics und Traces in ein initialisiertes Projekt einbaut.
 otel` + `up` + TCP-Probe auf 4317 + 4318).
 
 Fünfter und letzter Slice des v0.3.0-Milestones, parallel-
-entwickelbar zu [`slice-v1-keycloak`](./slice-v1-keycloak.md):
+entwickelbar zu [`slice-v1-keycloak`](../done/slice-v1-keycloak.md):
 keine Dependency zwischen Keycloak und OTel, beide nutzen das
 M5-Postgres-Pattern + die mit `slice-v1-keycloak` T2 gebauten
 Per-Service-Probe-Mechanismen.

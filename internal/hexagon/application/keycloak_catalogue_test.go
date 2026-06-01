@@ -92,7 +92,7 @@ func TestKeycloakT1_RenderPostgres_ByteIdentity(t *testing.T) {
 	// Render-Refaktor darf das Postgres-Output Byte-Identity nicht
 	// brechen. Vergleich gegen direktes renderTemplate für jedes
 	// der drei Postgres-Files.
-	composeFrag, volumeFrag, envVars, err := application.RenderServiceTemplatesForTest(mustNewServiceName(t,"postgres"))
+	composeFrag, volumeFrag, envVars, _, err := application.RenderServiceTemplatesForTest(mustNewServiceName(t,"postgres"))
 	if err != nil {
 		t.Fatalf("RenderServiceTemplates(postgres): %v", err)
 	}
@@ -121,7 +121,7 @@ func TestKeycloakT1_RenderPostgres_ByteIdentity(t *testing.T) {
 
 func TestKeycloakT1_RenderKeycloak_ProducesContentWithoutVolume(t *testing.T) {
 	t.Parallel()
-	composeFrag, volumeFrag, envVars, err := application.RenderServiceTemplatesForTest(mustNewServiceName(t,"keycloak"))
+	composeFrag, volumeFrag, envVars, _, err := application.RenderServiceTemplatesForTest(mustNewServiceName(t,"keycloak"))
 	if err != nil {
 		t.Fatalf("RenderServiceTemplates(keycloak): %v", err)
 	}
@@ -168,7 +168,7 @@ func TestKeycloakT1_RenderServiceTemplates_UnknownService(t *testing.T) {
 	t.Parallel()
 	// Ein Service-Name, der nicht in der Catalogue steht, muss
 	// einen klaren Fehler liefern statt zu crashen.
-	_, _, _, err := application.RenderServiceTemplatesForTest(mustNewServiceName(t,"ghost-service"))
+	_, _, _, _, err := application.RenderServiceTemplatesForTest(mustNewServiceName(t,"ghost-service"))
 	if err == nil {
 		t.Fatal("RenderServiceTemplates(ghost-service): expected error, got nil")
 	}

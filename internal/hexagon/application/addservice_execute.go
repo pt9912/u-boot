@@ -145,11 +145,36 @@ func (s *AddServiceService) loadForPatch(path string) ([]byte, iofs.FileMode, bo
 // renderedTemplates is the rendered template bytes used across the
 // plan phase. Volume template is also a fragment; the env template is
 // the raw variable body (the wrap helper adds the BEGIN/END markers
-// during the env-edit step).
+// during the env-edit step). ExtraFiles (slice-v1-otel T1) carries
+// additional whole-file artefacts (e.g. `otel-collector-config.yaml`)
+// that the add-on emits alongside the compose patch — Path is
+// project-relative, Content is the rendered byte body.
 type renderedTemplates struct {
 	ServiceFragment []byte
 	VolumeFragment  []byte
 	EnvVariables    []byte
+	ExtraFiles      []renderedExtraFile
+}
+
+// renderedExtraFile pairs a project-relative path with its rendered
+// content for the per-service whole-file artefacts introduced by
+// slice-v1-otel T1.
+type renderedExtraFile struct {
+	Path    string
+	Content []byte
+}
+
+// extraFileEntry declares a per-service whole-file artefact in the
+// catalogue. Path is the project-relative destination (e.g.
+// `otel-collector-config.yaml`); Tmpl is the embedded template
+// `services/<name>.config.tmpl`. The slice-v1-otel T2 plan keeps
+// these files unmanaged (no marker block) because the whole file
+// is owned by the generator — user edits would be overwritten on
+// re-add. A future Add-on may grow a `managedBlock: true` slot if
+// partial user customisation is in scope.
+type extraFileEntry struct {
+	Path string
+	Tmpl string
 }
 
 // serviceCatalogueEntry is the per-service configuration shared by
@@ -181,6 +206,12 @@ type serviceCatalogueEntry struct {
 	// persistent named volume. Keycloak's default H2-In-Container-
 	// Persistenz is the prototype.
 	volumeOptional bool
+	// extraFiles are whole-file artefacts the add-on emits beyond
+	// the compose patch (slice-v1-otel T1 — the OpenTelemetry
+	// Collector ships a separate `otel-collector-config.yaml`). T2
+	// teaches executeAdd / executeRemove to write / delete each
+	// entry as part of the standard flow.
+	extraFiles []extraFileEntry
 }
 
 // serviceCatalogue lists the per-service render + detect/probe
@@ -209,6 +240,17 @@ func serviceCatalogue() map[string]serviceCatalogueEntry {
 			volumeRefLiteral: "",
 			volumeOptional:   true,
 		},
+		"otel": {
+			composeTmpl:      "services/otel.compose.tmpl",
+			envTmpl:          "", // OTel default-Setup hat keinen .env-Block
+			volumeTmpl:       "",
+			requiredEnvKeys:  nil,
+			volumeRefLiteral: "",
+			volumeOptional:   true,
+			extraFiles: []extraFileEntry{
+				{Path: "otel-collector-config.yaml", Tmpl: "services/otel.config.tmpl"},
+			},
+		},
 	}
 }
 
@@ -231,10 +273,18 @@ func catalogueFor(svc domain.ServiceName) (serviceCatalogueEntry, bool) {
 // follow-up slice.
 //
 // VolumeFragment is left nil when the service's catalogue entry has
-// an empty `volumeTmpl`; callers must respect a nil VolumeFragment
-// in the volume-patch step (slice-v1-keycloak T2 extends
-// `patchTargetsFor` to skip the volume slot for volume-less
-// services).
+// an empty `volumeTmpl` (slice-v1-keycloak T2 — patchTargetsFor
+// skips the volume slot for volume-less services).
+//
+// EnvVariables is left nil when the catalogue entry has an empty
+// `envTmpl` (slice-v1-otel T1 — OTel default-Setup has no
+// .env.example block; T2 makes planEnvEdit skip the env slot
+// for env-less services).
+//
+// ExtraFiles is the list of whole-file artefacts the add-on emits
+// alongside the compose patch (slice-v1-otel T1 — the OpenTelemetry
+// Collector ships a separate `otel-collector-config.yaml`). Empty
+// for Postgres + Keycloak today.
 func (*AddServiceService) renderServiceTemplates(svc domain.ServiceName) (renderedTemplates, error) {
 	entry, ok := serviceCatalogue()[svc.String()]
 	if !ok {
@@ -252,14 +302,26 @@ func (*AddServiceService) renderServiceTemplates(svc domain.ServiceName) (render
 			return renderedTemplates{}, fmt.Errorf("plan: render %s: %w", entry.volumeTmpl, err)
 		}
 	}
-	envVars, err := renderTemplate(entry.envTmpl, data)
-	if err != nil {
-		return renderedTemplates{}, fmt.Errorf("plan: render %s: %w", entry.envTmpl, err)
+	var envVars []byte
+	if entry.envTmpl != "" {
+		envVars, err = renderTemplate(entry.envTmpl, data)
+		if err != nil {
+			return renderedTemplates{}, fmt.Errorf("plan: render %s: %w", entry.envTmpl, err)
+		}
+	}
+	var extraFiles []renderedExtraFile
+	for _, xf := range entry.extraFiles {
+		body, err := renderTemplate(xf.Tmpl, data)
+		if err != nil {
+			return renderedTemplates{}, fmt.Errorf("plan: render %s: %w", xf.Tmpl, err)
+		}
+		extraFiles = append(extraFiles, renderedExtraFile{Path: xf.Path, Content: body})
 	}
 	return renderedTemplates{
 		ServiceFragment: composeFrag,
 		VolumeFragment:  volumeFrag,
 		EnvVariables:    envVars,
+		ExtraFiles:      extraFiles,
 	}, nil
 }
 
