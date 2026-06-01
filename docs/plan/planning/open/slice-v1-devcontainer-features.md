@@ -28,9 +28,10 @@ nicht implementiert:
 - **ADR-0008** §78 nennt die Allowlist ausdrücklich als einzigen
   ausnahme-pflichtigen externer-Code-Pfad ausserhalb des
   Compose-Stacks.
-- **Code-Anker:** `internal/hexagon/application/initproject.go:69`
+- **Code-Anker:** `internal/hexagon/application/initproject.go:66-69`
   markiert die Future-Field-Stelle im YAML-Schema
-  (`FeatureSources ubootYAMLFeatureSources`).
+  (`Future fields:`-Kommentarblock mit
+  `FeatureSources ubootYAMLFeatureSources`).
 - **Schema-Skizze:** `spec/lastenheft.md:1340-1343` zeigt die
   YAML-Form (`devcontainer.featureSources.allow: [URL, …]`).
 
@@ -46,10 +47,10 @@ Stabilität analog zu M7).
 ## Akzeptanzkriterien
 
 - ✅ **Schema:** `ubootYAMLDevcontainer.FeatureSources` ist
-  implementiert (heute auskommentiert in `initproject.go:69`).
-  `devcontainer.featureSources.allow` ist Liste von URL-Strings,
-  dedupliziert, mit Validation gegen leere/ungültige Quellen
-  (`spec/lastenheft.md:1350-1353`).
+  implementiert (heute als Future-Field-Kommentar in
+  `initproject.go:66-69`). `devcontainer.featureSources.allow` ist
+  Liste von URL-Strings, dedupliziert, mit Validation gegen
+  leere/ungültige Quellen (`spec/lastenheft.md:1350-1353`).
 - ✅ **Feature-Auswahl in u-boot.yaml:** Ein neuer Schema-Pfad
   hält die *aktivierten* Features (nicht nur die *erlaubten
   Quellen*). Design-Entscheidung in T0: Subkey
@@ -65,22 +66,36 @@ Stabilität analog zu M7).
 - ✅ **Allowlist-Enforcement:** Ohne explizit erlaubte Quelle
   bricht der Versuch, eine externe Feature-Quelle zu aktivieren,
   mit `code LH-FA-DEV-003` / Exit-Code `10` ab. `--yes` reicht
-  nicht (`LH-NFA-SEC-004`).
+  nicht (`LH-NFA-SEC-004`). `--allow-external-feature-sources`-
+  Flag-Argumente werden in `u-boot.yaml`
+  (`devcontainer.featureSources.allow`) persistiert — Flag ist
+  Erweiterung der Liste, nicht Ein-Aufruf-Override
+  (`spec/lastenheft.md:719`: „als explizit freigegebene Liste in
+  der Projektkonfiguration gespeichert").
 - ✅ **Devcontainer-Template:** Der bestehende Managed-Block in
   `internal/hexagon/application/templates/devcontainer/devcontainer.json.tmpl`
   wird um eine `features:`-Section erweitert (oder ein zweiter
   Managed-Block); JSON-Stabilität (sortierte Keys, deterministische
   Ausgabe) ist gewahrt.
-- ✅ **Doctor-Integration:** `u-boot doctor` validiert: (a)
-  `devcontainer.features` referenziert nur Quellen aus
-  `devcontainer.featureSources.allow` *oder* aus dem eingebauten
-  Katalog; (b) `devcontainer.json` enthält die aktivierten
-  Features tatsächlich (Drift-Erkennung).
+- ✅ **Doctor-Integration:** `u-boot doctor` validiert (a)
+  Allowlist-Konformität: `devcontainer.features` referenziert nur
+  Quellen aus `devcontainer.featureSources.allow` *oder* aus dem
+  eingebauten Katalog (Spec-mandatiert via `LH-FA-DEV-003` +
+  Doctor-Pin [`spec/lastenheft.md:2394`](../../../../spec/lastenheft.md)).
+  (b) Drift-Erkennung: `devcontainer.json` enthält die aktivierten
+  Features tatsächlich — **über Spec hinaus, in Anlehnung an M5/M7
+  Managed-Block-Disziplin** (kann zur v0.4.0-Last-Reduktion in
+  Folge-Slice verschoben werden, wenn Tranchen-Budget knapp wird).
 - ✅ **Statischer Katalog** (ADR-0008-konform): u-boot bringt
   einen kuratierten Default-Satz Features mit (mindestens die
   Spec-Beispiele: Git, Docker CLI, Node, Java/SDKMAN, Go, C++,
   K8s-Tools), die ohne Allowlist-Eintrag aktivierbar sind. Externe
-  Quellen jenseits davon brauchen die Allowlist.
+  Quellen jenseits davon brauchen die Allowlist. **Lesart des
+  Spec-Begriffs „lokal hinterlegt"** (`spec/lastenheft.md:711`):
+  hier verstanden als *in u-boot eingebauter Katalog* (statisches
+  Go-Mapping). Die Alternativ-Lesart „Features im Repo-Pfad" ist
+  bewusst ausgeschlossen und Trigger für ein eigenes Folge-Slice
+  (siehe Out of Scope).
 - ✅ **Spec-Pin:** `acceptance_test.go` deckt `LH-FA-DEV-003` ab
   (Test-Skelett `TC-DEV-003`); Allowlist-Verstoß-Pfad gepinnt.
 - ✅ **Doku:** README (EN + DE) erweitert um Feature-Beispiel;
@@ -91,9 +106,9 @@ Stabilität analog zu M7).
 
 | T   | Inhalt (Skizze) |
 | --- | --------------- |
-| T0  | **Discovery / Design.** Drei Design-Entscheidungen festzurren: (a) CLI-Pfad (`add feature` vs. `devcontainer feature add` vs. nur `config set`); (b) u-boot.yaml-Schema für aktivierte Features; (c) Katalog-Format (Go-Struct analog `service_catalogue.go`?). Ergebnis: kurzer Design-Memo oder Mini-ADR. |
-| T1  | **Schema-Erweiterung.** `ubootYAMLDevcontainer.FeatureSources` aus dem `Future fields`-Kommentar in `initproject.go:69` ziehen; YAML-Codec + Schema-Validierung; Edge-Cases (leere Liste, ungültige URLs). Tests in `application/*_test.go`. |
-| T2  | **Feature-Katalog.** Statischer Go-Katalog (analog `service_catalogue.go`) mit Spec-Beispielen (Git, Docker CLI, Node, Java/SDKMAN, Go, C++, K8s-Tools). Quell-URLs gepinnt (`ghcr.io/devcontainers/features/<name>:<version>`). |
+| T0  | **Discovery / Design.** Drei Design-Entscheidungen festzurren: (a) CLI-Pfad (`add feature` vs. `devcontainer feature add` vs. nur `config set`); (b) u-boot.yaml-Schema für aktivierte Features; (c) Katalog-Format (Go-Struct analog `addservice_execute.go:serviceCatalogue()` + `serviceCatalogueEntry`-Typ?). Ergebnis: kurzer Design-Memo oder Mini-ADR. |
+| T1  | **Schema-Erweiterung.** `ubootYAMLDevcontainer.FeatureSources` aus dem `Future fields`-Kommentar in `initproject.go:66-69` ziehen; YAML-Codec + Schema-Validierung; Edge-Cases (leere Liste, ungültige URLs). Tests in `application/*_test.go`. |
+| T2  | **Feature-Katalog.** Statischer Go-Katalog (analog `addservice_execute.go:serviceCatalogue()`) mit Spec-Beispielen (Git, Docker CLI, Node, Java/SDKMAN, Go, C++, K8s-Tools). Quell-URLs gepinnt (`ghcr.io/devcontainers/features/<name>:<version>`). |
 | T3  | **Generator-Patch.** `devcontainer.json.tmpl` um `features:`-Section erweitern (oder zweiter Managed-Block); JSON-Determinismus (sortierte Keys, stabile Reihenfolge); `generate devcontainer` idempotent. |
 | T4  | **CLI-Subkommando** gemäß T0-Entscheidung. Allowlist-Enforcement-Pfad (Exit-Code 10, Spec-konforme Fehlermeldung). `--allow-external-feature-sources <quelle>[,<quelle>...]` parsen. |
 | T5  | **Doctor-Checks.** Mindestens zwei: `devcontainer.features.in-allowlist` + `devcontainer.json.features-drift`. Severity-Klassifikation analog M5. |
@@ -128,8 +143,8 @@ v0.3.0-Add-on-Slice-Stil).
   + Doctor-Pin [`spec/lastenheft.md:2394`](../../../../spec/lastenheft.md).
 - ADR: [ADR-0008 §78](../../adr/0008-plugin-system-statisch.md)
   — Allowlist als einziger ausnahme-pflichtiger externer-Code-Pfad.
-- Code-Anker: `internal/hexagon/application/initproject.go:69`
-  (`Future fields: FeatureSources …`).
+- Code-Anker: `internal/hexagon/application/initproject.go:66-69`
+  (`Future fields:`-Kommentarblock mit `FeatureSources …`).
 - Generator-Pfad: `internal/hexagon/application/generate.go:705`
   (devcontainer.json-Mapping) +
   `internal/hexagon/application/templates/devcontainer/devcontainer.json.tmpl`
@@ -142,5 +157,7 @@ v0.3.0-Add-on-Slice-Stil).
   (Managed-Block-Disziplin in `devcontainer.json`).
 - Roadmap:
   [`roadmap.md`](../in-progress/roadmap.md) §v0.4.0.
-- Phase: V1, geplant für v0.4.0-Bündelung mit
-  `slice-v1-logs` + `slice-v1-cli-json-dry-run`.
+- Phase: V1, geplant für v0.4.0-Bündelung mit weiteren
+  V1-Generators (`u-boot logs`, `--json`/`--dry-run`); deren
+  Slice-Pläne existieren noch nicht (Roadmap-Stichworte) und
+  folgen separat.
