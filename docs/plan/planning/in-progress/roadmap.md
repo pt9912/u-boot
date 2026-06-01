@@ -27,116 +27,34 @@ in `in-progress/`.
 
 ## Carveout-Auflösungs-Slices
 
-Slices, die ausschließlich offene Carveouts (`LH-FA-PROJDOCS-005`)
-auflösen. Verbindlich verankert hier *und* in [`carveouts.md`](carveouts.md);
-ein Carveout ohne Eintrag in beiden Quellen ist ein
-Disziplin-Verstoß.
+Audit-Trail der Slices, die offene Carveouts (`LH-FA-PROJDOCS-005`)
+geschlossen haben, ist nach [`carveouts.md`](carveouts.md)
+§Carveout-Auflösungs-Slices (historisch) ausgelagert. Quelle der
+Wahrheit für das aktuelle Carveout-Inventar (temporär + permanent)
+ist ebenfalls [`carveouts.md`](carveouts.md).
 
-| Slice | Auslöser | Phase | Status |
-| ----- | -------- | ----- | ------ |
-| [`slice-m3-init-flow`](../done/slice-m3-init-flow.md) | `LH-FA-INIT-*` initialer Flow + zwei M3-Carveouts (Coverage ✅, depguard ✅) | M3 | Done |
-| [`slice-m3-depguard-aktivierung-verifizieren`](../done/slice-m3-depguard-aktivierung-verifizieren.md) | `LH-FA-ARCH-003` depguard-Regeln matchen bisher nichts | M3-T5 | Done |
-| [`slice-m3-gomodguard-rules`](../done/slice-m3-gomodguard-rules.md) | `gomodguard_v2.blocked: {}` leer; yaml.v3 schon drin, Cobra kommt mit T3 | M3-followup | Done |
-| [`slice-m3-retroaktive-slice-plaene`](../done/slice-m3-retroaktive-slice-plaene.md) | Bootstrap-Slices (M1/M2/M2b/M2c/M2d) liegen nicht in `done/` | Done | Done |
-| [`slice-m4-soft-existing-detection`](../done/slice-m4-soft-existing-detection.md) | `LH-FA-INIT-004` Soft-Erkennung + `--assume-existing` | M4-vorgezogen | Done |
-| [`slice-m4-logging-port`](../done/slice-m4-logging-port.md) | `forbidigo.msg` referenziert nicht-existenten Logging-Port; `u-boot doctor` braucht strukturiertes Logging | M4-vorgezogen | Done |
-| [`slice-m6-docker-integrationstests`](../done/slice-m6-docker-integrationstests.md) | `//go:build docker`-Pfad nur dokumentiert, kein CI-Job; erst mit Docker-Adapter sinnvoll | M6 | Done |
-| [`slice-followup-verbosity-wiring`](../done/slice-followup-verbosity-wiring.md) | `--verbose`/`--debug` (LH-FA-CLI-005) waren persistent Cobra-Flags ohne Logger-Effekt | M4-followup | Done (`7c6fbce`) |
-| [`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md) | ADR-0004 Folgepunkte Image-Publish + Trivy; `LH-OPEN-002` Paketierung (GHCR-Anteil) | V1 | Done (T1 `0f64938`, T2 `93b703e`, T3 `8212889`, T4 `066917a`, T5 `bc487fc` — Branch-Protection-Teilabschluss 2026-05-27) |
-| [`slice-v1-markdown-link-validator`](../done/slice-v1-markdown-link-validator.md) | Doku-/Link-Drift in `docs/`/`spec/` nicht maschinell geprüft | V1-vorgezogen | Done |
-| [`slice-v1-backup-streaming-copy`](../done/slice-v1-backup-streaming-copy.md) | `LH-FA-INIT-005` Backup heute mit `ReadFile`+`WriteFile`; harter 256-MiB-Cap als MVP-Workaround | V1-vorgezogen | Done |
-| [`slice-v1-plugin-system-entscheidung`](../done/slice-v1-plugin-system-entscheidung.md) | `LH-OPEN-003` Plugin-System offen | V1 | Done (Entscheidung in [ADR-0008](../../adr/0008-plugin-system-statisch.md): statisch) |
-| [`slice-v1-template-format-entscheidung`](../done/slice-v1-template-format-entscheidung.md) | `LH-OPEN-004` Template-Format offen | V1 | Done (Entscheidung in [ADR-0009](../../adr/0009-template-format-yaml-files.md): YAML+`text/template`) |
-| [`slice-v1-yaml-parse-error-sentinel`](../done/slice-v1-yaml-parse-error-sentinel.md) | M7-T5-Review-Followup N2: `YAMLCodec`-Port unterscheidet Parse- nicht von IO-Fehlern; Exit-Code-14-vs-10-Klassifikation reißt bei kaputter `compose.yaml` unter `u-boot generate devcontainer` | V1-vorgezogen | Done (`1008326`) |
-| [`slice-v2-revive-custom-rules`](../done/slice-v2-revive-custom-rules.md) | ADR-0003 Folgepunkt revive-Custom-Rules | V2-vorgezogen | Done |
-| [`slice-later-http-driving-adapter`](../done/slice-later-http-driving-adapter.md) | `spec/architecture.md` §7 HTTP-Driving-Adapter prospektiv | Later | Done (Entscheidung in [ADR-0010](../../adr/0010-kein-http-driving-adapter.md): wird nicht gebaut) |
-| [`slice-v0.1.1-doctor-container-awareness`](../done/slice-v0.1.1-doctor-container-awareness.md) | `doctor` im distroless-Container findet docker/git nicht (Real-world-Befund 2026-05-31 post-v0.1.0) | v0.1.1-Followup | Done (T1 `9a99bbf`, T2 `c35360f`, T3 `111e725`, T4 schließt; Tag-Push bleibt Nutzer-Aktion analog v0.1.0-T4) |
-| [`slice-v2-binary-distribution`](../done/slice-v2-binary-distribution.md) | ADR-0007 §Folgepunkte 1 Trigger (erste konkrete Cross-Plattform-Distributionsanfrage) durch `doctor`-Befund ausgelöst | V2 | Done — T1 ✅ `dc9a336` + `f3f1731` (`make build-binaries` für 6 Plattformen Linux/macOS/Windows × amd64/arm64), T2 ✅ `5e5166b` (`publish.yml` build + GitHub-Release-Upload), T3 ✅ `866f6fd` (READMEs Install-Block Binary-first + CHANGELOG `## [Unreleased]`), T4 schließt mit ADR-0007 §Entscheidung-Update (Binary „Vertagt → Gewählt") + carveouts.md `LH-OPEN-002`-Reduktion auf Homebrew+Debian/RPM + open→done. |
+## Releases
 
-## Nächste Schritte
+Roadmap ist release-orientiert: jeder Eintrag in der Releases-
+Tabelle verlinkt entweder den fertigen Audit-Trail (released) oder
+die aktuelle Milestone-Tabelle (in progress) oder den
+Trigger-Backlog (geplant). MVP-Status, MVP-Bilanz und die einzelnen
+Slice-Tabellen leben unten als jeweils eigene Sektion.
 
-**MVP-Status: vollständig** (Audit-Trail in der MVP-Bilanz unten).
-Keine MVP-blockierenden Slices mehr offen; alle ADR-getriebenen
-V1/Later-Trigger-Slices sind in `done/`.
+| Version | Status | Tag-Commit | Datum | Highlights | Detail |
+| ------- | ------ | ---------- | ----- | ---------- | ------ |
+| v0.1.0  | ✅ released | `49ec464` | 2026-05-31 | MVP-Core (M1..M8 + MVP-Closure) + Release-Pipeline + GHCR-Distribution | §[v0.1.0 / v0.2.0 — Audit-Trail](#v010--v020--audit-trail-ausgelieferter-slices--offene-trigger-restwege) |
+| v0.2.0  | ✅ released | `595acdf` | 2026-06-01 | Container-aware doctor, Binary-Distribution (6 Plattformen), Template-Katalog (`template list` + `init --template`) | §[v0.1.0 / v0.2.0 — Audit-Trail](#v010--v020--audit-trail-ausgelieferter-slices--offene-trigger-restwege) |
+| v0.3.0  | 🛠 in progress (3/5) | — | — | Add-on Catalogue Expansion: `add-remove`, `addons-deps`, `keycloak`, `otel` + V1-Audit | §[v0.3.0 — Milestone-Tabelle](#v030--milestone-tabelle-add-on-catalogue-expansion) |
+| v0.4.0+ | 📋 Backlog | — | — | V1-Generators (logs, `--json`/`--dry-run`), Later (Migration, Custom-Data-Sources), Templates-local, Podman-formal, Distributions-Restwege | §[v0.4.0+ — Backlog / Trigger-Slices](#v040--backlog--trigger-slices) |
 
-**v0.1.0 released — 2026-05-31.** Tag `v0.1.0` auf Commit `49ec464`,
-`publish.yml`-Run `26717376068` grün (SemVer-Validate, GHCR-Login,
-`make build VERSION=0.1.0`, OCI-Label-Verify, Live-`--version`-Smoke).
-Images: `ghcr.io/pt9912/u-boot:0.1.0` und `:latest`. GitHub-Release
-mit CHANGELOG-Auszug:
-<https://github.com/pt9912/u-boot/releases/tag/v0.1.0>.
-Audit-Trail im Release-Cut-Slice
-[`done/slice-v1-release-cut-v0.1.0.md`](../done/slice-v1-release-cut-v0.1.0.md).
-**Eine Nutzer-Aktion offen:** Branch-Protection-UI für `main`
-spätestens vor erstem externem PR nach
+**Offene Nutzer-Aktion aus v0.1.0-Era:** Branch-Protection-UI für
+`main` spätestens vor erstem externem PR aktivieren — siehe
 [`docs/user/branch-protection.md`](../../../user/branch-protection.md)
-aktivieren (Required-Status-Check-Liste: die drei verbose
-Workflow-`name:`-Felder).
+(Required-Status-Check-Liste: die drei verbose Workflow-`name:`-Felder).
+Nicht release-blockierend; nach v0.2.0 weiterhin offen.
 
-Aktuell offen sind nur trigger- oder nutzer-getriebene V1- und
-Later-Folgen:
-
-1. **~~v0.2.0-Tag-Push~~ — released 2026-06-01.** Tag `v0.2.0`
-   auf Commit `595acdf`, publish.yml-Run `26740508466` grün
-   (SemVer-Validate, GHCR-Login, GHCR-Push für `:0.2.0` + `:latest`,
-   OCI-Label + Live-`--version`-Smoke, Cross-Compile + Upload
-   für sechs Binary-Plattformen). Images: `ghcr.io/pt9912/u-boot:0.2.0`
-   und `:latest`. GitHub-Release mit CHANGELOG-Auszug und
-   sechs Binary-Assets: <https://github.com/pt9912/u-boot/releases/tag/v0.2.0>.
-   Audit-Trail im Release-Cut-Slice
-   [`done/slice-v1-release-cut-v0.2.0.md`](../done/slice-v1-release-cut-v0.2.0.md);
-   enthaltene Slices:
-   [`done/slice-v0.1.1-doctor-container-awareness.md`](../done/slice-v0.1.1-doctor-container-awareness.md),
-   [`done/slice-v2-binary-distribution.md`](../done/slice-v2-binary-distribution.md),
-   [`done/slice-v1-template-list.md`](../done/slice-v1-template-list.md),
-   [`done/slice-v1-template-init.md`](../done/slice-v1-template-init.md).
-   v0.1.1 wurde übersprungen (drei Features seit der ursprünglichen
-   v0.1.1-Planung verlangten SemVer-MINOR-Bump). Branch-Protection-UI
-   bleibt als Nutzer-One-Shot offen aus v0.1.0-Era (nicht
-   release-blockierend).
-2. **v0.3.0-Milestone — Add-on Catalogue Expansion (in progress, 3/5).**
-   Fünf Slices als nächstes Release-Cluster (audit-done →
-   add-remove → addons-deps → Keycloak + OTel parallel). Detail-
-   Tabelle mit Spec-IDs, Done-Checkboxen und T-Hashes pro Slice:
-   §[v0.3.0 — Milestone-Tabelle](#v030--milestone-tabelle-add-on-catalogue-expansion) unten.
-3. **V1-Templates-Implementation** — drei Slices aus
-   [ADR-0009](../../adr/0009-template-format-yaml-files.md)
-   §Folgepunkte. `slice-v1-template-list` ✅ + `slice-v1-template-init`
-   ✅ in v0.2.0 ausgeliefert; T-Hashes und Bezug pro Slice in
-   §[v0.1.0 / v0.2.0 — Audit-Trail](#v010--v020--audit-trail-ausgelieferter-slices--offene-trigger-restwege)
-   unten. Variable-Resolution für `--var key=value` bleibt
-   out-of-scope, bis ein Built-in (z. B. `micronaut`) tatsächlich
-   Variablen einführt. Offen: `slice-later-local-templates`
-   (`--template ./pfad`-Auflösung, `LH-FA-TPL-003`) — Trigger-Slice
-   bei konkretem Bedarf.
-4. **V1-Generators** — `u-boot logs` (`LH-FA-UP-005`),
-   `--json`-/`--dry-run`-Output (`LH-FA-CLI-007/008`,
-   `LH-NFA-USE-004`). Maschinen-Schnittstelle, auf die
-   [ADR-0010](../../adr/0010-kein-http-driving-adapter.md) das
-   "kein HTTP-Adapter"-Argument stützt.
-5. **`LH-OPEN-002`-Distributionsweg-Restwege** — Homebrew und
-   Debian/RPM bleiben vertagt mit Trigger-Slices aus
-   [ADR-0007](../../adr/0007-distributionswege-ghcr.md)
-   §Entscheidung. Binary-Distribution ist in
-   [`done/slice-v2-binary-distribution.md`](../done/slice-v2-binary-distribution.md)
-   vollständig geliefert: T1 `make build-binaries` für sechs
-   Plattformen (`dc9a336`/`f3f1731`), T2 `publish.yml` baut +
-   uploadet die Binaries pro Tag (`5e5166b`), T3 READMEs
-   Install-Block Binary-first + CHANGELOG `## [Unreleased]`
-   (`866f6fd`), T4 Slice-Closure mit ADR-0007 §Entscheidung
-   „Vertagt → Gewählt". Greift ab v0.1.1 (v0.1.0 hatte noch
-   keine Binary-Assets).
-6. **Later** — Migration (`LH-FA-CONF-006`), Custom-Data-Sources
-   (`LH-DA-004`).
-7. **Podman-Drop-in als Container-Engine** — heute funktional
-   per Symlink + `DOCKER_HOST=…/podman.sock`; v0.1.1-Container-
-   Detection probes `/run/.containerenv` neben `/.dockerenv`,
-   `LH-FA-DIAG-002` und `spec/architecture.md` §2.4 dokumentieren
-   den Drop-in offiziell (`a504a36`). Formal getestete Variante
-   (eigener `PodmanProbe`-Adapter + CI-Matrix) wird zum Slice,
-   sobald ein konkreter Bedarf gemeldet wird.
-
-### MVP-Bilanz — **MVP vollständig** (Stand `bc487fc`; M8-T5 `25cb123`)
+## MVP-Bilanz — **MVP vollständig** (Stand `bc487fc`; M8-T5 `25cb123`)
 
 **Alle 5 MVP-`LH-AK-*` gepinnt** mit benannten e2e-Tests:
 LH-AK-001 (Init+Doctor) `8525c4c`, LH-AK-002 (Postgres-Flow)
@@ -183,15 +101,15 @@ Schnitt (`v0.1.0` o. ä.) liegt seit
 Trivy als dritter PR-blockierender CI-Job, ADR-0007 setzt GHCR als
 primären Distributionsweg. Der Tag-Push selbst bleibt Nutzer-Trigger.
 
-### v0.3.0 — Milestone-Tabelle „Add-on Catalogue Expansion"
+## v0.3.0 — Milestone-Tabelle „Add-on Catalogue Expansion"
 
 Aktiver Release-Scope. Fünf Slices, geordnet von klein nach groß
 (audit-done → add-remove → addons-deps → Keycloak + OTel parallel).
 Die Spec-ID-Spalte mappt jeden Slice auf die `LH-FA-*` / `LH-AK-*`-
 Arbeitspunkte aus dem [Lastenheft](../../../../spec/lastenheft.md), die
-er ausliefert; mehr V1-Arbeitspunkte (Generators, `--json`/
-`--dry-run`, Logs) bleiben in §Nächste Schritte 4 als Post-v0.3.0-
-Backlog. v0.3.0-Tag-Push wird wie v0.1.0/v0.2.0 Nutzer-Aktion sein
+er ausliefert; weitere V1-/Later-Arbeitspunkte (Generators, `--json`/
+`--dry-run`, Logs, Migration, …) liegen in §[v0.4.0+ — Backlog](#v040--backlog--trigger-slices)
+unten. v0.3.0-Tag-Push wird wie v0.1.0/v0.2.0 Nutzer-Aktion sein
 (Release-Cut-Slice analog `slice-v1-release-cut-v0.2.0` bei
 Milestone-Schluss).
 
@@ -208,16 +126,54 @@ v0.3.0-Release-Cut-Slice mit CHANGELOG-Konsolidierung, Dev-Version-
 Bump auf `0.3.0-dev`, READMEs-Sync und Tag-Push-Nutzer-Aktion
 (Pattern aus `slice-v1-release-cut-v0.2.0`).
 
-### v0.1.0 / v0.2.0 — Audit-Trail ausgelieferter Slices + offene Trigger-Restwege
+## v0.4.0+ — Backlog / Trigger-Slices
+
+Post-v0.3.0-Material: V1- und Later-Arbeitspunkte ohne fixe
+Release-Zuordnung. Jeder Eintrag ist ein konkreter Slice-Plan-Anker
+mit Trigger; ein Eintrag landet erst dann in `open/`, wenn der
+Trigger feuert (Nutzer-Anfrage, neuer Add-on-Bedarf, …).
+Release-Schnitt ist offen — wahrscheinlich Bündelung in v0.4.0
+sobald Generators + Logs zusammen reif sind; Restwege und
+Later-Punkte können auch in spätere Cuts rutschen.
+
+| Done | Slice | Spec-IDs (Lastenheft) | Status / Trigger |
+| ---- | ----- | --------------------- | ---------------- |
+| [ ] | `slice-v1-logs` | `LH-FA-UP-005` `u-boot logs` | V1-Generator. Kein eigener Trigger, gehört in v0.4.0 zusammen mit dem Dry-Run-/JSON-Slice. |
+| [ ] | `slice-v1-cli-json-dry-run` | `LH-FA-CLI-007/008`, `LH-NFA-USE-004` Maschinen-Schnittstelle | V1-Generator. [ADR-0010](../../adr/0010-kein-http-driving-adapter.md) stützt das „kein HTTP-Adapter"-Argument auf diesen Output-Modus. |
+| [ ] | `slice-later-local-templates` | `LH-FA-TPL-003` `--template ./pfad` | [ADR-0009](../../adr/0009-template-format-yaml-files.md) §Folgepunkte 3 (Later). Trigger: konkreter lokaler-Template-Bedarf. |
+| [ ] | `slice-later-migration` | `LH-FA-CONF-006` Konfigurations-Migration | Later. Trigger: Schema-Migration-Bedarf zwischen Major-Versionen. |
+| [ ] | `slice-later-custom-data-sources` | `LH-DA-004` Custom Data Sources | Later. Trigger: konkrete Daten-Quellen-Erweiterung jenseits YAML. |
+| [ ] | `slice-v2-homebrew-formula` | `LH-OPEN-002`-Restweg Homebrew | [ADR-0007](../../adr/0007-distributionswege-ghcr.md) §Entscheidung. Trigger: erste macOS-Nutzer-Nachfrage. |
+| [ ] | `slice-v2-distro-pakete` | `LH-OPEN-002`-Restweg Debian/RPM | [ADR-0007](../../adr/0007-distributionswege-ghcr.md) §Entscheidung. Trigger: konkrete Distro-Anfrage (`debhelper`/`rpmbuild`-Overhead). |
+| [ ] | `slice-vN-podman-formal` | `LH-FA-DIAG-002`-Erweiterung Podman-First | Heute funktional per Symlink + `DOCKER_HOST=…/podman.sock`; v0.1.1-Container-Detection probes `/run/.containerenv` (`a504a36`), `spec/architecture.md` §2.4 dokumentiert Drop-in. Trigger: Nutzer-Bedarf nach `PodmanProbe`-Adapter + CI-Matrix. |
+
+## v0.1.0 / v0.2.0 — Audit-Trail ausgelieferter Slices
 
 Audit-Trail der nicht-MVP-Slices die zwischen v0.1.0 und v0.2.0
 ausgeliefert wurden — ADR-getriebene Entscheidungs-Trigger,
 vorgezogene Review-Followups, Release-Cuts, und ADR-§Folgepunkte-
-Implementierungen — plus die drei noch unausgelösten Trigger-
-Restwege (Homebrew, Debian/RPM, local-templates). Die Tabelle
-zeigt den Stand mit Checkbox je Slice; noch nicht implementierte
-V1-Folgen (Add-ons, Generators, Logs/Dry-Run/Diff) und der
-laufende v0.3.0-Milestone stehen in §Nächste Schritte oben.
+Implementierungen.
+
+**v0.1.0 released 2026-05-31** — Tag-Commit `49ec464`,
+`publish.yml`-Run `26717376068` (SemVer-Validate + GHCR-Login +
+`make build VERSION=0.1.0` + OCI-Label-Verify + Live-`--version`-
+Smoke). Images: `ghcr.io/pt9912/u-boot:0.1.0` und `:latest`.
+GitHub-Release mit CHANGELOG-Auszug:
+<https://github.com/pt9912/u-boot/releases/tag/v0.1.0>.
+
+**v0.2.0 released 2026-06-01** — Tag-Commit `595acdf`,
+`publish.yml`-Run `26740508466` (zusätzlich Cross-Compile + Upload
+für sechs Binary-Plattformen). Images: `ghcr.io/pt9912/u-boot:0.2.0`
+und `:latest`. GitHub-Release mit CHANGELOG-Auszug und sechs
+Binary-Assets:
+<https://github.com/pt9912/u-boot/releases/tag/v0.2.0>.
+Enthaltene Slices:
+[`slice-v0.1.1-doctor-container-awareness`](../done/slice-v0.1.1-doctor-container-awareness.md),
+[`slice-v2-binary-distribution`](../done/slice-v2-binary-distribution.md),
+[`slice-v1-template-list`](../done/slice-v1-template-list.md),
+[`slice-v1-template-init`](../done/slice-v1-template-init.md).
+v0.1.1 wurde übersprungen (drei Features seit der ursprünglichen
+v0.1.1-Planung verlangten SemVer-MINOR-Bump).
 
 | Done | Slice | Kategorie | Audit-Trail / Bezug |
 | ---- | ----- | --------- | ------------------- |
@@ -232,14 +188,12 @@ laufende v0.3.0-Milestone stehen in §Nächste Schritte oben.
 | [x] | [`slice-v1-template-list`](../done/slice-v1-template-list.md) | ADR-0009 §Folgepunkte 1 | T1 `65795b5`, T2 `a099d63`, T3 `23bd91b`, T4 `a7e0d7b` + Review-Followup `c807cdb` (N1..N5). `LH-FA-TPL-004`. |
 | [x] | [`slice-v1-template-init`](../done/slice-v1-template-init.md) | ADR-0009 §Folgepunkte 2 | T1 `9e81b02`, T2 `65a1ce8`, T3 `ed6d9a0`, T4 `daaaa9a`, T5 `133622f` + Review-Followup `7fe26e0` (F1..F5). `LH-FA-TPL-001`. |
 | [x] | [`slice-v1-release-cut-v0.2.0`](../done/slice-v1-release-cut-v0.2.0.md) | Release-Cut | CHANGELOG-Konsolidierung + Dev-Version-Bump + Status-Sync. T1 `be139cb`, T2 `1823598`, T3 `6b9cc6c`. v0.2.0 released 2026-06-01. |
-| [ ] | `slice-later-local-templates` | ADR-0009 §Folgepunkte 3 | `LH-FA-TPL-003` (Later). `--template ./pfad`-Auflösung; eigener Slice bei konkretem Bedarf. |
-| [ ] | `slice-v2-homebrew-formula` | ADR-0007 Restwege | Trigger: erste macOS-Nutzer-Nachfrage. Plan-Anker in ADR-0007 §Entscheidung. |
-| [ ] | `slice-v2-distro-pakete` | ADR-0007 Restwege | Trigger: konkrete Distro-Anfrage (`debhelper`/`rpmbuild`-Overhead). Plan-Anker in ADR-0007 §Entscheidung. |
 
-Die noch offenen V1- und Later-Folgen ohne benannten Slice
-(Add-ons-Implementation außerhalb des aktuellen v0.3.0-Milestones,
-Generators, Logs/Dry-Run/Diff, Migration, Custom-Data-Sources)
-sind oben in §Nächste Schritte aufgeführt.
+Offene Trigger-Slices (Homebrew, Debian/RPM, local-templates,
+Podman-formal, Logs, JSON/Dry-Run, Migration, Custom-Data-Sources)
+sind in §[v0.4.0+ — Backlog](#v040--backlog--trigger-slices) oben
+gelistet; der laufende v0.3.0-Milestone in
+§[v0.3.0 — Milestone-Tabelle](#v030--milestone-tabelle-add-on-catalogue-expansion).
 
 ## Lifecycle-Hinweis
 
