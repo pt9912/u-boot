@@ -11,6 +11,21 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.3.0] - TBD
+
+Third release. Completes the V1 „Add-on Catalogue Expansion"
+milestone (5/5): the catalogue now ships three integrated
+service add-ons — Postgres (since MVP), Keycloak (LH-FA-ADD-003
+/ LH-AK-003) and OpenTelemetry (LH-FA-ADD-004 / LH-AK-004) —
+plus the matching `u-boot remove <service>` mirror, the
+LH-FA-ADD-006 `--with-deps` dependency-resolution mechanism, and
+a doku-only audit closure for three V1 spec-IDs. Architectural
+side-effect: the per-service catalogue pattern grew from a flat
+`(compose, env, volume)`-tuple in M5 to a declarative entry with
+`requiredEnvKeys` / `volumeRefLiteral` / `volumeOptional` /
+`healthcheckOptional` / `extraFiles` — any new add-on plugs in
+by adding one catalogue row and three templates.
+
 ### Verified
 
 - **Three V1 spec-IDs audit-closed** by
@@ -350,6 +365,7 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/pt9912/u-boot/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/pt9912/u-boot/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/pt9912/u-boot/releases/tag/v0.1.0
