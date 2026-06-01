@@ -220,6 +220,11 @@ func (s *RemoveServiceService) executeRemove(baseDir string, svc domain.ServiceN
 		return driving.RemoveServiceResponse{}, err
 	}
 
+	extraDeletes, err := s.planExtraFileDeletes(baseDir, svc)
+	if err != nil {
+		return driving.RemoveServiceResponse{}, err
+	}
+
 	plan := []plannedRemoveFile{composePlan, envPlan, yamlPlan}
 	var changed []string
 	for _, f := range plan {
@@ -228,6 +233,12 @@ func (s *RemoveServiceService) executeRemove(baseDir string, svc domain.ServiceN
 		}
 		if err := s.fs.WriteFile(f.path, f.content, f.mode); err != nil {
 			return driving.RemoveServiceResponse{}, fmt.Errorf("write %s: %w", f.path, err)
+		}
+		changed = append(changed, f.relPath)
+	}
+	for _, f := range extraDeletes {
+		if err := s.fs.RemoveAll(f.path); err != nil {
+			return driving.RemoveServiceResponse{}, fmt.Errorf("remove %s: %w", f.relPath, err)
 		}
 		changed = append(changed, f.relPath)
 	}
@@ -324,6 +335,34 @@ func (s *RemoveServiceService) planYAMLDisable(baseDir string, svc domain.Servic
 		content: patched,
 		mode:    mode,
 	}, nil
+}
+
+// planExtraFileDeletes is the planning step for slice-v1-otel T2:
+// catalogue entries with extraFiles get their whole-file artefacts
+// deleted by [executeRemove] after the standard managed-block
+// removals. Returns only the entries whose files exist on disk —
+// non-existent extraFiles are skipped silently (idempotency
+// guarantee: removing an already-removed service must not error,
+// and a missing extraFile is the same shape as a missing managed
+// block in compose.yaml).
+func (s *RemoveServiceService) planExtraFileDeletes(baseDir string, svc domain.ServiceName) ([]plannedRemoveFile, error) {
+	entry, ok := catalogueFor(svc)
+	if !ok || len(entry.extraFiles) == 0 {
+		return nil, nil
+	}
+	var out []plannedRemoveFile
+	for _, xf := range entry.extraFiles {
+		path := filepath.Join(baseDir, xf.Path)
+		exists, err := s.fs.Exists(path)
+		if err != nil {
+			return nil, fmt.Errorf("check %s: %w", xf.Path, err)
+		}
+		if !exists {
+			continue
+		}
+		out = append(out, plannedRemoveFile{path: path, relPath: xf.Path})
+	}
+	return out, nil
 }
 
 // fileMode captures the existing file's permission bits via Lstat

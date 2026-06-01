@@ -129,7 +129,15 @@ func (s *AddServiceService) inspectVolumeArtefact(composeBody []byte, svc domain
 // looked up via [catalogueFor] instead of POSTGRES_* hardcoding).
 // Missing file / missing block / missing required key all translate
 // to needs-repair; malformed is an abort.
+//
+// Services whose catalogue entry has an empty `envTmpl` (slice-v1-
+// otel T2 — OTel default-Setup has no .env.example block) skip the
+// probe entirely and report no-repair. Mirrors the volumeOptional
+// short-circuit in [inspectVolumeArtefact].
 func (s *AddServiceService) inspectEnvArtefact(baseDir string, svc domain.ServiceName) (bool, error) {
+	if entry, ok := catalogueFor(svc); ok && entry.envTmpl == "" {
+		return false, nil
+	}
 	envPath := filepath.Join(baseDir, ".env.example")
 	envBody, _, exists, err := s.loadForPatch(envPath)
 	if err != nil {
@@ -370,7 +378,13 @@ func (s *contentScanState) feedHealthcheckEntry(cleaned []byte) {
 // required field is present. Env-key requirement is the catalogue
 // `requiredEnvKeys` list (slice-v1-keycloak T2); the volume-ref
 // requirement is skipped when the service is `volumeOptional`
-// (Keycloak's flüchtige H2-In-Container-Persistenz).
+// (Keycloak's flüchtige H2-In-Container-Persistenz); the
+// healthcheck-presence requirement is skipped when the service is
+// `healthcheckOptional` (slice-v1-otel T2 — Collector default-Setup
+// has no healthcheck per LH-AK-004's "running ODER healthy"-
+// Toleranz). `healthcheckDisabled` (explicit `disable: true`)
+// remains a hard fail in either case because it is an active
+// negation, not a missing field.
 func (s *contentScanState) serviceComplete() bool {
 	if !s.hasImage {
 		return false
@@ -386,7 +400,10 @@ func (s *contentScanState) serviceComplete() bool {
 	if !s.hasPortEntry {
 		return false
 	}
-	if !s.hasHealthcheckSub || s.healthcheckDisabled {
+	if s.healthcheckDisabled {
+		return false
+	}
+	if !s.entry.healthcheckOptional && !s.hasHealthcheckSub {
 		return false
 	}
 	return true

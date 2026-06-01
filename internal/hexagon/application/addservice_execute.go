@@ -17,10 +17,13 @@ import (
 // executePlan is the internal plan-phase output. Slots are nil when
 // the corresponding file does not need to be written. baseDir lives
 // outside the struct so the plan-data stays request-shape-free.
+// ExtraFiles (slice-v1-otel T2) holds whole-file artefacts declared
+// in the service's catalogue entry (e.g. otel-collector-config.yaml).
 type executePlan struct {
 	UBootYAML  *fileWrite
 	Compose    *fileWrite
 	EnvExample *fileWrite
+	ExtraFiles []fileWrite
 }
 
 // fileWrite is one pending write: the relative path, the
@@ -206,6 +209,12 @@ type serviceCatalogueEntry struct {
 	// persistent named volume. Keycloak's default H2-In-Container-
 	// Persistenz is the prototype.
 	volumeOptional bool
+	// healthcheckOptional disables the healthcheck-presence check
+	// in [contentScanState.serviceComplete] for services where the
+	// add-on legitimately ships without one (slice-v1-otel T2 — the
+	// OTel Collector's mindest-setup has no healthcheck per
+	// LH-AK-004's "running ODER healthy"-Toleranz).
+	healthcheckOptional bool
 	// extraFiles are whole-file artefacts the add-on emits beyond
 	// the compose patch (slice-v1-otel T1 — the OpenTelemetry
 	// Collector ships a separate `otel-collector-config.yaml`). T2
@@ -241,12 +250,13 @@ func serviceCatalogue() map[string]serviceCatalogueEntry {
 			volumeOptional:   true,
 		},
 		"otel": {
-			composeTmpl:      "services/otel.compose.tmpl",
-			envTmpl:          "", // OTel default-Setup hat keinen .env-Block
-			volumeTmpl:       "",
-			requiredEnvKeys:  nil,
-			volumeRefLiteral: "",
-			volumeOptional:   true,
+			composeTmpl:         "services/otel.compose.tmpl",
+			envTmpl:             "", // OTel default-Setup hat keinen .env-Block
+			volumeTmpl:          "",
+			requiredEnvKeys:     nil,
+			volumeRefLiteral:    "",
+			volumeOptional:      true,
+			healthcheckOptional: true,
 			extraFiles: []extraFileEntry{
 				{Path: "otel-collector-config.yaml", Tmpl: "services/otel.config.tmpl"},
 			},
@@ -396,12 +406,32 @@ func (s *AddServiceService) buildExecutePlan(
 		ep.EnvExample = &fileWrite{Path: ".env.example", Body: envOut, Mode: envMode}
 	}
 
-	if ep.UBootYAML == nil && ep.Compose == nil && ep.EnvExample == nil {
+	if extraFilesNeeded(plan) {
+		for _, xf := range tmpls.ExtraFiles {
+			ep.ExtraFiles = append(ep.ExtraFiles, fileWrite{Path: xf.Path, Body: xf.Content, Mode: defaultFileMode})
+		}
+	}
+
+	if ep.UBootYAML == nil && ep.Compose == nil && ep.EnvExample == nil && len(ep.ExtraFiles) == 0 {
 		return executePlan{}, fmt.Errorf(
 			"plan: no slot populated for action %s on %s — programmer error",
 			plan.Action.String(), plan.Service.String())
 	}
 	return ep, nil
+}
+
+// extraFilesNeeded reports whether the action emits the catalogue's
+// extraFiles entries. slice-v1-otel T2-Decision: only the structural
+// transitions (Register / Reactivate / RebuildBlock) write the
+// whole-file artefacts. RepairArtifacts does NOT — partial corruption
+// of an extraFile is treated as a full re-add scenario rather than a
+// per-file repair flag.
+func extraFilesNeeded(plan servicePlan) bool {
+	switch plan.Action {
+	case actionRegister, actionReactivate, actionRebuildBlock:
+		return true
+	}
+	return false
 }
 
 // preCheckComposeAnchors runs the Pre-Patch-Anker-Check via
@@ -567,8 +597,13 @@ func (*AddServiceService) planEnvEdit(plan servicePlan, envBody []byte, envExist
 
 // envEditNeeded reports whether the action touches .env.example.
 // RepairArtifacts only touches it when the env flag is set; the
-// others always do.
+// others always do. Services whose catalogue entry has an empty
+// `envTmpl` (slice-v1-otel T2 — OTel default-Setup has no
+// .env.example block) skip the env edit entirely.
 func envEditNeeded(plan servicePlan) bool {
+	if entry, ok := catalogueFor(plan.Service); ok && entry.envTmpl == "" {
+		return false
+	}
 	switch plan.Action {
 	case actionRegister, actionReactivate, actionRebuildBlock:
 		return true
@@ -612,13 +647,26 @@ func renderEnvManagedBlock(svc domain.ServiceName, varsBody []byte) []byte {
 }
 
 // runExecutePlan writes the populated slots in the deterministic
-// order u-boot.yaml → compose.yaml → .env.example.
+// order u-boot.yaml → compose.yaml → .env.example → extraFiles
+// (slice-v1-otel T2 appends the whole-file artefacts last; the
+// upstream slots register the service first so a partial-write retry
+// can resume the extra-file writes idempotently).
 func (s *AddServiceService) runExecutePlan(baseDir string, plan servicePlan, ep executePlan) (driving.AddServiceResponse, error) {
 	var changed []string
 	for _, w := range []*fileWrite{ep.UBootYAML, ep.Compose, ep.EnvExample} {
 		if w == nil {
 			continue
 		}
+		mode := w.Mode
+		if mode == 0 {
+			mode = defaultFileMode
+		}
+		if err := s.fs.WriteFile(filepath.Join(baseDir, w.Path), w.Body, mode); err != nil {
+			return driving.AddServiceResponse{}, fmt.Errorf("write %s: %w", w.Path, err)
+		}
+		changed = append(changed, w.Path)
+	}
+	for _, w := range ep.ExtraFiles {
 		mode := w.Mode
 		if mode == 0 {
 			mode = defaultFileMode

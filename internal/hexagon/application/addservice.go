@@ -22,15 +22,15 @@ const serviceMarkerNamePrefix = "service."
 
 // supportedServices returns the catalogue of services
 // [AddServiceService] knows how to add. M5 shipped only `postgres`
-// (LH-FA-ADD-002); slice-v1-keycloak T2 adds `keycloak`
-// (LH-FA-ADD-003). LH-FA-ADD-004 (otel) lands with the parallel
-// slice-v1-otel slice.
+// (LH-FA-ADD-002); slice-v1-keycloak T2 added `keycloak`
+// (LH-FA-ADD-003); slice-v1-otel T2 added `otel` (LH-FA-ADD-004)
+// — last of the v0.3.0 add-on catalogue.
 //
 // Function instead of package var to avoid the gochecknoglobals
 // false-positive on immutable list constants (same pattern as
 // [projectStructureDirs] in initproject.go).
 func supportedServices() []string {
-	return []string{"postgres", "keycloak"}
+	return []string{"postgres", "keycloak", "otel"}
 }
 
 // isSupportedService reports whether name is in [supportedServices].

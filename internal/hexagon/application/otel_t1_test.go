@@ -134,19 +134,16 @@ func TestOtelT1_RenderPostgresAndKeycloak_NoExtraFiles(t *testing.T) {
 	}
 }
 
-func TestOtelT1_IsSupportedService_StillFalse(t *testing.T) {
+func TestOtelT2_IsSupportedService_AllThreeTrue(t *testing.T) {
 	t.Parallel()
-	// T2-Voraussetzungs-Pin: OTel ist nach T1 in der Render-Catalogue,
-	// aber `isSupportedService("otel")` bleibt false bis T2
-	// executeAdd / executeRemove extraFiles-aware sind.
-	if application.IsSupportedServiceForTest(mustNewServiceName(t, "otel")) {
-		t.Error("isSupportedService(otel) muss nach T1 noch false sein — T2 erweitert die Catalogue erst nach executeAdd/Remove-Erweiterung")
+	// T2 hat die Catalogue erweitert: Postgres + Keycloak + OTel
+	// sind jetzt alle supported.
+	for _, svc := range []string{"postgres", "keycloak", "otel"} {
+		if !application.IsSupportedServiceForTest(mustNewServiceName(t, svc)) {
+			t.Errorf("isSupportedService(%s) muss nach T2 true sein", svc)
+		}
 	}
-	// Postgres + Keycloak bleiben supported.
-	if !application.IsSupportedServiceForTest(mustNewServiceName(t, "postgres")) {
-		t.Error("isSupportedService(postgres) regressed — T1 darf das nicht brechen")
-	}
-	if !application.IsSupportedServiceForTest(mustNewServiceName(t, "keycloak")) {
-		t.Error("isSupportedService(keycloak) regressed — T1 darf das nicht brechen")
+	if application.IsSupportedServiceForTest(mustNewServiceName(t, "ghost-service")) {
+		t.Error("isSupportedService(ghost-service) muss false sein — Catalogue ist whitelist")
 	}
 }
