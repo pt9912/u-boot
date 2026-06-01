@@ -43,6 +43,33 @@ func isSupportedService(name domain.ServiceName) bool {
 	return false
 }
 
+// dependenciesFor returns the static [domain.AddOnDependency]
+// declarations the catalogue knows about for svc — the source-of-
+// truth side-table for the LH-FA-ADD-006 resolver
+// (`resolveAddDependencies`, slice-v1-addons-deps T2).
+//
+// Today's catalogue (postgres only) declares no dependencies, so
+// this function returns nil for every supported name; nil for
+// unknown names too (the catalogue check fires earlier with
+// [driving.ErrServiceUnsupported]). slice-v1-keycloak will add the
+// keycloak case with the persistence:external-postgres → postgres
+// declaration; slice-v1-otel may add OTel-specific entries.
+//
+// Function instead of package var to avoid the gochecknoglobals
+// false-positive on immutable list constants (same pattern as
+// [supportedServices] above).
+//
+//nolint:unparam // result is always nil today (postgres-only catalogue);
+// slice-v1-keycloak adds the first non-nil row (Keycloak → Postgres),
+// at which point the lint exemption can be removed.
+func dependenciesFor(svc domain.ServiceName) []domain.AddOnDependency {
+	switch svc.String() {
+	case "postgres":
+		return nil
+	}
+	return nil
+}
+
 // serviceMarkerName returns the canonical managed-block name for svc.
 // Lives in addservice.go (not in [managedblock]) because managedblock
 // must not import domain (architecture-layer hygiene).

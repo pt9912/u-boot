@@ -97,6 +97,15 @@ type AddServicePlanForTest struct {
 	Action     string
 }
 
+// DependenciesForTest exposes the unexported [dependenciesFor]
+// catalogue side-table so the slice-v1-addons-deps tests can pin
+// the per-service dependency declarations without depending on
+// the package internals. Returns nil for every service today
+// (postgres has no deps; keycloak / otel land in their own slices).
+func DependenciesForTest(svc domain.ServiceName) []domain.AddOnDependency {
+	return dependenciesFor(svc)
+}
+
 // DetectServiceStateForTest exposes the unexported
 // [AddServiceService.detectServiceState] helper so T3 fixtures can
 // assert state classification directly, without going through
