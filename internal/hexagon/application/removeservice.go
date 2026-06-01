@@ -55,7 +55,7 @@ func NewRemoveServiceService(fs driven.FileSystem, yaml driven.YAMLCodec, confir
 
 // Remove implements [driving.RemoveServiceUseCase.Remove].
 //
-// State-machine flow (T2):
+// State-machine flow:
 //
 //   - Unregistered                       → [driving.ErrServiceUnregistered]
 //   - InconsistentYAML / InconsistentBlock → [driving.ErrServiceInconsistent]
@@ -65,9 +65,16 @@ func NewRemoveServiceService(fs driven.FileSystem, yaml driven.YAMLCodec, confir
 //   - EnabledUnset                       → execute the same 3 actions
 //     (normalises a service that lacks the explicit enabled key)
 //
-// `--purge` is T3-scope; T2 ignores the flag and never touches
-// volumes.
-func (s *RemoveServiceService) Remove(_ context.Context, req driving.RemoveServiceRequest) (driving.RemoveServiceResponse, error) {
+// `--purge` (T3): the LH-FA-CLI-005A §254 confirmation gate fires
+// AFTER the state-machine has rejected the obvious error states
+// (Unregistered / Inconsistent), so users get the most informative
+// failure rather than being prompted to confirm cleanup of nothing.
+// On the proceeding paths (Active / EnabledUnset / Deactivated)
+// the gate's outcome decides whether to continue. Volume removal
+// itself is NOT performed in this slice — `VolumesPurged` stays
+// false even on a passed gate; the CLI summary (T4) flags the
+// deferred work for the user.
+func (s *RemoveServiceService) Remove(ctx context.Context, req driving.RemoveServiceRequest) (driving.RemoveServiceResponse, error) {
 	if req.BaseDir == "" {
 		return driving.RemoveServiceResponse{}, errors.New("BaseDir is required")
 	}
@@ -82,33 +89,80 @@ func (s *RemoveServiceService) Remove(_ context.Context, req driving.RemoveServi
 		return driving.RemoveServiceResponse{}, err
 	}
 
+	// Reject the unrecoverable / clarity-first states BEFORE the gate
+	// so users don't get a confirmation prompt for cleanup of nothing.
 	switch state {
 	case domain.ServiceStateUnregistered:
 		return driving.RemoveServiceResponse{}, fmt.Errorf("%w: %q was never added; nothing to remove",
 			driving.ErrServiceUnregistered, req.ServiceName.String())
-
 	case domain.ServiceStateInconsistentYAML, domain.ServiceStateInconsistentBlock:
 		return driving.RemoveServiceResponse{}, fmt.Errorf("%w: %q has a mismatched u-boot.yaml / compose.yaml state; clean up manually before removing",
 			driving.ErrServiceInconsistent, req.ServiceName.String())
+	}
 
+	// Confirmation gate fires for any `--purge` request that reaches
+	// the proceeding states. Volume removal itself remains deferred
+	// (T3-Decision in the slice plan), but the gate is spec-mandated
+	// regardless of whether the actual removal lands today.
+	if err := s.runPurgeGate(ctx, req); err != nil {
+		return driving.RemoveServiceResponse{}, err
+	}
+
+	switch state {
 	case domain.ServiceStateDeactivated:
-		s.logger.Debug("remove: idempotent no-op", "service", req.ServiceName.String())
+		s.logger.Debug("remove: idempotent no-op", "service", req.ServiceName.String(), "purge", req.Purge)
 		return driving.RemoveServiceResponse{
 			ServiceName: req.ServiceName,
 			PriorState:  state,
 			State:       state,
 		}, nil
-
 	case domain.ServiceStateActive, domain.ServiceStateEnabledUnset:
 		return s.executeRemove(req.BaseDir, req.ServiceName, state)
-
 	default:
-		// Defensive: detectServiceState covers the six LH-FA-ADD-005
-		// states; an unknown value here is a code bug, not a user
-		// error.
+		// Defensive: only the six LH-FA-ADD-005 states are reachable;
+		// the error-states are returned earlier. An unknown value
+		// here is a code bug, not a user error.
 		return driving.RemoveServiceResponse{}, fmt.Errorf("remove: unexpected state %s for %q",
 			state.String(), req.ServiceName.String())
 	}
+}
+
+// runPurgeGate implements the LH-FA-CLI-005A §254 confirmation truth
+// table for `u-boot remove --purge`. Mirrors
+// [DownService.runConfirmationGate]; the two flows share the
+// destructive-op confirmation semantics and reuse the same
+// [driven.Confirmer.ConfirmRemoveVolumes] adapter method.
+//
+// Returns nil when the caller should proceed; returns a wrapped
+// [driving.ErrConfirmationRequired] (CLI code 10) when the
+// destructive op is refused or skipped per the spec table:
+//
+//	--purge | --yes | --no-interactive | result
+//	-------+-------+------------------+----------------------
+//	  no    |  any  |       any        | proceed (no gate)
+//	  yes   |  yes  |       any        | proceed (auto-yes)
+//	  yes   |  no   |       yes        | refuse  (ErrConfirmationRequired)
+//	  yes   |  no   |       no         | ask     (Confirmer.ConfirmRemoveVolumes)
+func (s *RemoveServiceService) runPurgeGate(ctx context.Context, req driving.RemoveServiceRequest) error {
+	if !req.Purge {
+		return nil
+	}
+	if req.Yes {
+		return nil
+	}
+	if req.NoInteractive {
+		return fmt.Errorf("remove service: --purge refused in --no-interactive without --yes: %w",
+			driving.ErrConfirmationRequired)
+	}
+	confirmed, err := s.confirmer.ConfirmRemoveVolumes(ctx, req.BaseDir)
+	if err != nil {
+		return fmt.Errorf("remove service: confirmer error: %w", err)
+	}
+	if !confirmed {
+		return fmt.Errorf("remove service: --purge declined by user: %w",
+			driving.ErrConfirmationRequired)
+	}
+	return nil
 }
 
 // executeRemove performs the three filesystem mutations for an

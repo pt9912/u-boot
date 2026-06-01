@@ -294,6 +294,174 @@ func TestRemoveServiceService_Remove_EnabledUnsetIsTreatedLikeActive(t *testing.
 	}
 }
 
+// --- T3: --purge confirmation gate ----------------------------------------
+
+func TestRemoveServiceService_Remove_PurgeYesAutoApproves(t *testing.T) {
+	t.Parallel()
+	// --purge + --yes: gate auto-passes, no confirmer call, normal
+	// executeRemove path runs. VolumesPurged stays false (T3 defers
+	// the actual volume removal; T4 CLI surfaces the gap).
+	fs := seedProjectWithActiveService(t)
+	conf := &fakeConfirmer{}
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, conf, nil)
+
+	resp, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:     "/proj",
+		ServiceName: mustServiceName(t, "postgres"),
+		Purge:       true,
+		Yes:         true,
+	})
+	if err != nil {
+		t.Fatalf("Remove: %v", err)
+	}
+	if resp.State != domain.ServiceStateDeactivated {
+		t.Errorf("State = %v, want Deactivated", resp.State)
+	}
+	if resp.VolumesPurged {
+		t.Errorf("VolumesPurged = true; T3 defers volume removal — must stay false")
+	}
+	if len(conf.removeVolumesCalls) != 0 {
+		t.Errorf("Confirmer was called %d times; --yes must short-circuit the prompt", len(conf.removeVolumesCalls))
+	}
+}
+
+func TestRemoveServiceService_Remove_PurgeNonInteractiveRefuses(t *testing.T) {
+	t.Parallel()
+	// --purge + --no-interactive without --yes: ErrConfirmationRequired,
+	// no FS writes.
+	fs := seedProjectWithActiveService(t)
+	preWrites := len(fs.writes)
+	conf := &fakeConfirmer{}
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, conf, nil)
+
+	_, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:       "/proj",
+		ServiceName:   mustServiceName(t, "postgres"),
+		Purge:         true,
+		NoInteractive: true,
+	})
+	if err == nil {
+		t.Fatal("Remove: want ErrConfirmationRequired, got nil")
+	}
+	if !errors.Is(err, driving.ErrConfirmationRequired) {
+		t.Errorf("err = %v, want wrap of driving.ErrConfirmationRequired", err)
+	}
+	if newWrites := len(fs.writes) - preWrites; newWrites != 0 {
+		t.Errorf("Remove emitted %d writes; refuse path must not touch FS", newWrites)
+	}
+	if len(conf.removeVolumesCalls) != 0 {
+		t.Errorf("Confirmer was called %d times; --no-interactive must short-circuit before prompt", len(conf.removeVolumesCalls))
+	}
+}
+
+func TestRemoveServiceService_Remove_PurgeInteractiveAccepted(t *testing.T) {
+	t.Parallel()
+	// --purge + interactive, confirmer says yes → proceed.
+	fs := seedProjectWithActiveService(t)
+	conf := &fakeConfirmer{removeVolumesAnswer: true}
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, conf, nil)
+
+	resp, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:     "/proj",
+		ServiceName: mustServiceName(t, "postgres"),
+		Purge:       true,
+	})
+	if err != nil {
+		t.Fatalf("Remove: %v", err)
+	}
+	if resp.State != domain.ServiceStateDeactivated {
+		t.Errorf("State = %v, want Deactivated", resp.State)
+	}
+	if len(conf.removeVolumesCalls) != 1 {
+		t.Fatalf("Confirmer was called %d times; want 1", len(conf.removeVolumesCalls))
+	}
+	if conf.removeVolumesCalls[0].BaseDir != "/proj" {
+		t.Errorf("Confirmer.BaseDir = %q, want /proj", conf.removeVolumesCalls[0].BaseDir)
+	}
+}
+
+func TestRemoveServiceService_Remove_PurgeInteractiveDeclined(t *testing.T) {
+	t.Parallel()
+	// --purge + interactive, confirmer says no → ErrConfirmationRequired.
+	fs := seedProjectWithActiveService(t)
+	preWrites := len(fs.writes)
+	conf := &fakeConfirmer{removeVolumesAnswer: false}
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, conf, nil)
+
+	_, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:     "/proj",
+		ServiceName: mustServiceName(t, "postgres"),
+		Purge:       true,
+	})
+	if err == nil {
+		t.Fatal("Remove: want ErrConfirmationRequired, got nil")
+	}
+	if !errors.Is(err, driving.ErrConfirmationRequired) {
+		t.Errorf("err = %v, want wrap of driving.ErrConfirmationRequired", err)
+	}
+	if newWrites := len(fs.writes) - preWrites; newWrites != 0 {
+		t.Errorf("Remove emitted %d writes; declined path must not touch FS", newWrites)
+	}
+}
+
+func TestRemoveServiceService_Remove_PurgeOnDeactivatedStateRequiresGate(t *testing.T) {
+	t.Parallel()
+	// --purge on already-deactivated service: gate still fires (user
+	// explicitly opted into destructive op). On approval, idempotent
+	// no-op response (Changed=nil) — but the gate had to pass.
+	fs := seedProjectWithDeactivatedService(t)
+	preWrites := len(fs.writes)
+	conf := &fakeConfirmer{removeVolumesAnswer: true}
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, conf, nil)
+
+	resp, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:     "/proj",
+		ServiceName: mustServiceName(t, "postgres"),
+		Purge:       true,
+	})
+	if err != nil {
+		t.Fatalf("Remove: %v", err)
+	}
+	if resp.State != domain.ServiceStateDeactivated {
+		t.Errorf("State = %v, want Deactivated", resp.State)
+	}
+	if len(resp.Changed) != 0 {
+		t.Errorf("Changed = %v, want nil (Deactivated path is still idempotent)", resp.Changed)
+	}
+	if len(conf.removeVolumesCalls) != 1 {
+		t.Errorf("Confirmer was called %d times; want 1 (gate must fire even for Deactivated)", len(conf.removeVolumesCalls))
+	}
+	if newWrites := len(fs.writes) - preWrites; newWrites != 0 {
+		t.Errorf("Remove emitted %d writes; Deactivated+Purge must not write", newWrites)
+	}
+}
+
+func TestRemoveServiceService_Remove_PurgeOnUnregisteredSkipsGate(t *testing.T) {
+	t.Parallel()
+	// --purge on a service that was never added: ErrServiceUnregistered
+	// fires BEFORE the gate so the user gets the most informative
+	// error rather than being prompted to confirm cleanup of nothing.
+	fs := seedProjectWithoutService(t)
+	conf := &fakeConfirmer{}
+	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, conf, nil)
+
+	_, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+		BaseDir:       "/proj",
+		ServiceName:   mustServiceName(t, "postgres"),
+		Purge:         true,
+		NoInteractive: true,
+	})
+	if err == nil {
+		t.Fatal("Remove: want ErrServiceUnregistered, got nil")
+	}
+	if !errors.Is(err, driving.ErrServiceUnregistered) {
+		t.Errorf("err = %v, want ErrServiceUnregistered (not ErrConfirmationRequired)", err)
+	}
+	if len(conf.removeVolumesCalls) != 0 {
+		t.Errorf("Confirmer was called %d times; gate must not fire for Unregistered", len(conf.removeVolumesCalls))
+	}
+}
+
 // --- fixture helpers ------------------------------------------------------
 
 // seedProjectWithoutService builds a fakeFS containing an
