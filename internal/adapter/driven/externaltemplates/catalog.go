@@ -75,6 +75,12 @@ type Catalog struct {
 // Static check: Catalog satisfies the TemplateCatalog port.
 var _ driven.TemplateCatalog = (*Catalog)(nil)
 
+// Static check: the same Catalog satisfies the TemplateFiles port
+// (slice-v1-template-init T1). Same struct, two roles — listing
+// (List) and per-template file-tree access (Open). The wiring layer
+// passes the same instance to both consumer services.
+var _ driven.TemplateFiles = (*Catalog)(nil)
+
 // New returns a production Catalog backed by the embedded
 // `templates/` bundle. The bundle currently contains the `basic`
 // bootstrap template per ADR-0009 §Folgepunkte 4; further built-ins
@@ -129,6 +135,42 @@ func (c *Catalog) List(ctx context.Context) ([]domain.TemplateMetadata, error) {
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out, nil
+}
+
+// Open returns an [iofs.FS] rooted at the per-template directory
+// (slice-v1-template-init T1). The application render-loop walks
+// the result to discover `.tmpl` files (rendered) and plain files
+// (copied 1:1) per ADR-0009 §Entscheidung. Existence is checked via
+// `iofs.ReadDir` before `iofs.Sub`; a missing or empty name maps to
+// [driven.ErrTemplateNotFound] so the application service can wrap
+// it for LH-FA-CLI-006 code-10 mapping.
+//
+// Returned FS includes `template.yaml`; callers that only want
+// renderable files filter it out themselves (the rendering pipeline
+// doesn't need the metadata, since [List] already validated it).
+func (c *Catalog) Open(ctx context.Context, name string) (iofs.FS, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if name == "" {
+		return nil, fmt.Errorf("%w: empty template name", driven.ErrTemplateNotFound)
+	}
+	subDir := path.Join(catalogRoot, name)
+	entries, err := iofs.ReadDir(c.fs, subDir)
+	if err != nil {
+		// Both "directory does not exist" and "name points at a
+		// non-directory" collapse to template-not-found. The user
+		// cares that "the name is invalid", not why iofs failed.
+		return nil, fmt.Errorf("%w: %q", driven.ErrTemplateNotFound, name)
+	}
+	if len(entries) == 0 {
+		return nil, fmt.Errorf("%w: %q (directory is empty)", driven.ErrTemplateNotFound, name)
+	}
+	sub, err := iofs.Sub(c.fs, subDir)
+	if err != nil {
+		return nil, fmt.Errorf("template subfs %q: %w", name, err)
+	}
+	return sub, nil
 }
 
 // readTemplate parses a single `template.yaml` into a domain
