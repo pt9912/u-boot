@@ -41,7 +41,7 @@ remains a user action — see
 [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md)
 §Nächste Schritte.
 
-- `u-boot init [name] [--devcontainer]` creates the
+- `u-boot init [name] [--devcontainer] [--template <name>]` creates the
   LH-FA-INIT-003 project structure plus `u-boot.yaml`
   (LH-FA-CONF-002) and runs `git init` by default
   (LH-FA-INIT-007). `--force` / `--backup` drive the LH-FA-INIT-005
@@ -50,7 +50,12 @@ remains a user action — see
   are the LH-FA-CLI-005A mode flags (the latter drives the
   LH-FA-INIT-004 soft-detection). `--devcontainer` (LH-AK-005) also
   writes `.devcontainer/devcontainer.json` + `Dockerfile` and sets
-  `devcontainer.enabled: true` in `u-boot.yaml`.
+  `devcontainer.enabled: true` in `u-boot.yaml`. `--template
+  <name>` (LH-FA-TPL-001) renders the project from an external
+  template catalogued by `u-boot template list`; the `basic`
+  bootstrap template ships byte-identical content to the
+  no-flag default flow (mutex with `--devcontainer`/`--force`/
+  `--backup` in v1).
 - `u-boot doctor` runs 11 diagnostic checks against the local
   environment + project (LH-FA-DIAG-002), classifies findings as
   ok / warn / error (LH-FA-DIAG-003), prints repair hints

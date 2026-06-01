@@ -42,8 +42,8 @@ bleibt Nutzer-Aktion — siehe
 [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md)
 §Nächste Schritte.
 
-- `u-boot init [name] [--devcontainer]` erzeugt die
-  LH-FA-INIT-003-Projektstruktur plus `u-boot.yaml`
+- `u-boot init [name] [--devcontainer] [--template <name>]` erzeugt
+  die LH-FA-INIT-003-Projektstruktur plus `u-boot.yaml`
   (LH-FA-CONF-002) und initialisiert per Default ein Git-Repository
   (LH-FA-INIT-007). `--force` / `--backup` treiben den
   LH-FA-INIT-005-Überschreibschutz (Managed-Block-Edits vs
@@ -53,7 +53,11 @@ bleibt Nutzer-Aktion — siehe
   LH-FA-INIT-004-Soft-Detection). `--devcontainer` (LH-AK-005)
   schreibt zusätzlich `.devcontainer/devcontainer.json` +
   `Dockerfile` und setzt `devcontainer.enabled: true` in
-  `u-boot.yaml`.
+  `u-boot.yaml`. `--template <name>` (LH-FA-TPL-001) rendert das
+  Projekt aus einer externen Vorlage aus dem `u-boot template
+  list`-Katalog; das `basic`-Bootstrap-Template liefert
+  byte-identische Outputs zum Default-Flow (Mutex mit
+  `--devcontainer`/`--force`/`--backup` in v1).
 - `u-boot doctor` führt 11 Diagnose-Checks gegen die lokale
   Umgebung und das Projekt aus (LH-FA-DIAG-002), klassifiziert
   Befunde als ok / warn / error (LH-FA-DIAG-003), gibt

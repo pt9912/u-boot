@@ -102,11 +102,18 @@ Later-Folgen:
    Application-Service, T3 `23bd91b` CLI `u-boot template list
    [--json]` + Wiring, T4 Slice-Closure mit ADR-0009-Pfad-
    Konsolidierung `external-templates/` → `externaltemplates/`).
-   Offen: `slice-v1-template-init`
-   (`u-boot init --template <name>` Render-Pfad,
-   `LH-FA-TPL-001`/`LH-FA-TPL-002`) und
-   `slice-later-local-templates`
-   (`--template ./pfad`-Auflösung, `LH-FA-TPL-003`).
+   [`slice-v1-template-init`](../done/slice-v1-template-init.md)
+   ✅ geliefert (T1 `9e81b02` `domain.TemplatePath` +
+   `driven.TemplateFiles` + `Catalog.Open()`, T2 `65a1ce8`
+   `TemplateInitUseCase` + Render-Loop, T3 `ed6d9a0`
+   `basic`-Bootstrap-Content für die sechs `*.tmpl`-Files +
+   Byte-Identity-Pin gegen Default-Init, T4 `daaaa9a` CLI-Flag
+   `--template <name>` + `InitProjectService`-Delegation via
+   `WithTemplateInit`-Option + E2E `diff -r`-Byte-Identity-Smoke,
+   T5 Slice-Closure). Variable-Resolution für `--var key=value`
+   bleibt out-of-scope, bis ein Built-in (z. B. `micronaut`)
+   tatsächlich Variablen einführt. Offen: `slice-later-local-
+   templates` (`--template ./pfad`-Auflösung, `LH-FA-TPL-003`).
 4. **V1-Generators** — `u-boot logs` (`LH-FA-UP-005`),
    `--json`-/`--dry-run`-Output (`LH-FA-CLI-007/008`,
    `LH-NFA-USE-004`). Maschinen-Schnittstelle, auf die

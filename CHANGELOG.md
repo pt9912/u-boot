@@ -13,6 +13,27 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- **`u-boot init <name> --template <name>`** — second V1 template
+  feature, the render path of LH-FA-TPL-001 / LH-FA-TPL-002. The
+  init service delegates file rendering to the new
+  `TemplateInitService` when `--template` is set; project structure
+  directories, soft-existing-detection, and `git init` stay with
+  the InitProjectService so the user-observable flow is one
+  command. Byte-identity guarantee: `u-boot init demo --template
+  basic` produces a project byte-identical to `u-boot init demo`
+  for the six default files (`u-boot.yaml`, `compose.yaml`,
+  `README.md`, `CHANGELOG.md`, `.env.example`, `.gitignore`) —
+  pinned by an E2E `diff -r` test against the production catalog.
+  Render engine: Go `text/template` for `*.tmpl` files, 1:1 copy
+  for non-`.tmpl` files (per ADR-0009 §Entscheidung); `template.yaml`
+  metadata is skipped. New `domain.TemplatePath` validator rejects
+  `..` segments, absolute paths, Windows drive letters, and empty
+  strings (LH-FA-CLI-006 exit 10 via `ErrInvalidTemplatePath`).
+  Mutex with `--devcontainer`/`--force`/`--backup`: surfaces as
+  `ErrTemplateConflictsWithFlag` (exit 2) — v1 is fresh-init-only.
+  Variable resolution + `--var key=value` deferred to a future
+  slice (basic has no variables). See
+  [`slice-v1-template-init`](docs/plan/planning/done/slice-v1-template-init.md).
 - **`u-boot template list [--json]`** — first V1 template
   subcommand (LH-FA-TPL-004). Enumerates the built-in project-
   template catalog with name, description, and version in a

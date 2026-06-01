@@ -193,12 +193,17 @@ braucht eigene Slices:
   Katalog-Scan (`LH-FA-TPL-004`). Geliefert 2026-06-01 (T1
   `65795b5` Domain+Port+Adapter, T2 `a099d63` Use-Case+Service,
   T3 `23bd91b` CLI+Wiring, T4 Slice-Closure).
-- `slice-v1-template-init` — `u-boot init --template <name>` mit
-  Variable-Resolution + Render-Loop (`LH-FA-TPL-001`,
-  `LH-FA-TPL-002`). Wiederverwendet den von
-  `slice-v1-template-list` ausgelieferten `driven.TemplateCatalog`-
-  Port; ergänzt einen zweiten Driven-Port für den per-Template-
-  File-Tree-Render-Pfad.
+- ✅ [`slice-v1-template-init`](../planning/done/slice-v1-template-init.md)
+  — `u-boot init --template <name>` mit Render-Loop
+  (`LH-FA-TPL-001`, `LH-FA-TPL-002` Metadaten-Surface).
+  Geliefert 2026-06-01 (T1 `9e81b02` Domain `TemplatePath` +
+  Driven-Port `TemplateFiles` + Adapter `Open`, T2 `65a1ce8`
+  Driving-Port + `TemplateInitService` mit Walk-Render-Skip-Loop,
+  T3 `ed6d9a0` `basic`-Bootstrap-Content + Byte-Identity-Pin,
+  T4 `daaaa9a` CLI-Flag + `InitProjectService`-Delegation + E2E,
+  T5 Slice-Closure). Variable-Resolution + Prompt-Pfad bewusst
+  out-of-scope — `basic` hat `variables: []`; eigene Folge-Slice
+  bei erstem variable-bedürftigem Built-in.
 - `slice-later-local-templates` — `--template ./pfad`-Auflösung
   gegen das Dateisystem (`LH-FA-TPL-003`).
 - ✅ Built-in `basic` als Bootstrap-Stand wurde mit
