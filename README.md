@@ -100,6 +100,16 @@ remains a user action — see
   any WriteFile when validation fails. `services.<svc>.enabled` is
   Get-only — toggling goes through `u-boot add` / `remove` to keep
   the LH-FA-ADD-005 state machine atomic.
+- `u-boot template list [--json]` (LH-FA-TPL-004, first V1
+  template subcommand). Enumerates the built-in project-template
+  catalog with name, description, and version in a tabular
+  layout; `--json` emits a structured array with the full
+  LH-FA-TPL-002 metadata surface (`supportedAddOns`,
+  `generatedFiles`, `requiredTools`, `variables`). Bootstrap
+  catalog ships one built-in, `basic`. Further built-ins
+  (`micronaut`, `sveltekit`, …) and the `u-boot init --template
+  <name>` render path land in their own ADR-0009-anchored slices
+  (`slice-v1-template-init`, `slice-later-local-templates`).
 
 | Phase | Status | Source |
 | ----- | ------ | ------ |

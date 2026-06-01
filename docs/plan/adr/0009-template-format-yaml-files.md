@@ -93,10 +93,17 @@ Konkrete Setzungen:
       required: true
   ```
 - **Built-in-Templates:** liegen unter
-  `internal/adapter/driven/external-templates/` als `embed.FS`-
+  `internal/adapter/driven/externaltemplates/` als `embed.FS`-
   Verzeichnisse (eines pro Template). Listing via
   `template list` enumeriert die `embed.FS`-Wurzel; `init
-  --template <name>` löst über den Namen auf.
+  --template <name>` löst über den Namen auf. Hinweis: dieses ADR
+  hatte ursprünglich `external-templates/` mit Hyphen vorgesehen;
+  [`slice-v1-template-list`](../planning/done/slice-v1-template-list.md)
+  T1 hat auf `externaltemplates/` ohne Hyphen konsolidiert, weil
+  alle bestehenden `driven/`-Adapter-Verzeichnisse (clock,
+  confirm, docker, fs, git, logger, netprobe, progress, runtime,
+  yaml) hyphen-frei sind und Go-Package-Namen ohnehin keine
+  Hyphen erlauben.
 - **Lokale User-Templates (`LH-FA-TPL-003`, Later):** `--template
   ./mein-template` löst gegen das Dateisystem statt `embed.FS`
   auf. Same Schema, same Engine.
@@ -181,16 +188,23 @@ Alternativen (verworfen):
 Dieses ADR liefert nur die Format-Entscheidung. Die Implementierung
 braucht eigene Slices:
 
-- `slice-v1-template-list` — `u-boot template list [--json]`-
-  Subkommando + `embed.FS`-Katalog-Scan (`LH-FA-TPL-004`).
+- ✅ [`slice-v1-template-list`](../planning/done/slice-v1-template-list.md)
+  — `u-boot template list [--json]`-Subkommando + `embed.FS`-
+  Katalog-Scan (`LH-FA-TPL-004`). Geliefert 2026-06-01 (T1
+  `65795b5` Domain+Port+Adapter, T2 `a099d63` Use-Case+Service,
+  T3 `23bd91b` CLI+Wiring, T4 Slice-Closure).
 - `slice-v1-template-init` — `u-boot init --template <name>` mit
   Variable-Resolution + Render-Loop (`LH-FA-TPL-001`,
-  `LH-FA-TPL-002`).
+  `LH-FA-TPL-002`). Wiederverwendet den von
+  `slice-v1-template-list` ausgelieferten `driven.TemplateCatalog`-
+  Port; ergänzt einen zweiten Driven-Port für den per-Template-
+  File-Tree-Render-Pfad.
 - `slice-later-local-templates` — `--template ./pfad`-Auflösung
   gegen das Dateisystem (`LH-FA-TPL-003`).
-- Mindestens ein Built-in-Template (`basic`) als Bootstrap-
-  Stand; weitere Templates (Micronaut, SvelteKit, …) je nach
-  konkretem Bedarf in eigenen Slices.
+- ✅ Built-in `basic` als Bootstrap-Stand wurde mit
+  `slice-v1-template-list` T1 ausgeliefert
+  (`templates/basic/template.yaml`); weitere Templates (Micronaut,
+  SvelteKit, …) je nach konkretem Bedarf in eigenen Slices.
 
 Re-Evaluation-Trigger (analog ADR-0008): wenn externer Bedarf an
 Cookiecutter-Kompatibilität oder OCI-Verteilung konkret entsteht,

@@ -95,10 +95,18 @@ Later-Folgen:
    eigener Slice-Plan bei Auslösung.
 3. **V1-Templates-Implementation** — drei Slices aus
    [ADR-0009](../../adr/0009-template-format-yaml-files.md)
-   §Folgepunkte (`slice-v1-template-list`,
-   `slice-v1-template-init`, `slice-later-local-templates`).
-   Format ist entschieden (YAML + `text/template`), Implementation
-   noch offen.
+   §Folgepunkte.
+   [`slice-v1-template-list`](../done/slice-v1-template-list.md)
+   ✅ geliefert (T1 `65795b5` Domain+Driven-Port+embed.FS-Adapter
+   inkl. `basic`-Bootstrap-Template, T2 `a099d63` Driving-Port +
+   Application-Service, T3 `23bd91b` CLI `u-boot template list
+   [--json]` + Wiring, T4 Slice-Closure mit ADR-0009-Pfad-
+   Konsolidierung `external-templates/` → `externaltemplates/`).
+   Offen: `slice-v1-template-init`
+   (`u-boot init --template <name>` Render-Pfad,
+   `LH-FA-TPL-001`/`LH-FA-TPL-002`) und
+   `slice-later-local-templates`
+   (`--template ./pfad`-Auflösung, `LH-FA-TPL-003`).
 4. **V1-Generators** — `u-boot logs` (`LH-FA-UP-005`),
    `--json`-/`--dry-run`-Output (`LH-FA-CLI-007/008`,
    `LH-NFA-USE-004`). Maschinen-Schnittstelle, auf die

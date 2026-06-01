@@ -13,6 +13,24 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- **`u-boot template list [--json]`** — first V1 template
+  subcommand (LH-FA-TPL-004). Enumerates the built-in project-
+  template catalog with name, description, and version in a
+  tabwriter-aligned table; `--json` emits a structured array
+  with the full LH-FA-TPL-002 metadata surface (`supportedAddOns`,
+  `generatedFiles`, `requiredTools`, `variables`). Bootstrap
+  built-in: `basic` (one template; further built-ins follow on
+  demand per ADR-0009 §Folgepunkte 4). Fully hexagonal:
+  `domain.TemplateMetadata` + `Validate()` (kebab-case-name
+  regex, `ErrInvalidTemplate` sentinel), driven port
+  `TemplateCatalog`, embed.FS-backed `externaltemplates` adapter,
+  application `TemplateListService` (multi-`%w` so the original
+  `domain.ErrInvalidTemplate` chain survives), CLI
+  `template list` rendering. Adapter directory consolidated to
+  `internal/adapter/driven/externaltemplates/` (no hyphen) for
+  consistency with the existing `driven/`-adapter naming; ADR-0009
+  §Entscheidung updated to match. See
+  [`slice-v1-template-list`](docs/plan/planning/done/slice-v1-template-list.md).
 - **Cross-platform binary distribution** for six platforms
   (Linux/macOS/Windows × amd64/arm64). `make build-binaries`
   cross-compiles every supported `GOOS`/`GOARCH` combination via

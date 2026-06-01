@@ -108,6 +108,16 @@ bleibt Nutzer-Aktion — siehe
   Validierungsfehler abbricht. `services.<svc>.enabled` ist
   Get-only — das Toggeln geht über `u-boot add` / `remove`,
   damit die LH-FA-ADD-005-State-Machine atomar bleibt.
+- `u-boot template list [--json]` (LH-FA-TPL-004, erstes V1-
+  Template-Subkommando). Listet den eingebauten Projekt-Template-
+  Katalog mit Name, Beschreibung und Version in tabellarischer
+  Form; `--json` gibt ein strukturiertes Array mit der vollen
+  LH-FA-TPL-002-Metadaten-Oberfläche (`supportedAddOns`,
+  `generatedFiles`, `requiredTools`, `variables`) aus. Bootstrap-
+  Katalog liefert ein Built-in: `basic`. Weitere Built-ins
+  (`micronaut`, `sveltekit`, …) und der `u-boot init --template
+  <name>`-Render-Pfad landen in eigenen ADR-0009-verankerten
+  Slices (`slice-v1-template-init`, `slice-later-local-templates`).
 
 | Phase | Status | Quelle |
 | ----- | ------ | ------ |
