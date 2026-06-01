@@ -48,10 +48,10 @@ table below maps each subcommand to its Lastenheft IDs.
 
 ## What makes it trustworthy?
 
-- **MVP closed in v0.1.0.** Every MVP-priority `LH-AK-*`, `LH-FA-*` and
-  `LH-SA-*` ID from [`spec/lastenheft.md`](spec/lastenheft.md) is
-  delivered — audit trail in the
-  [roadmap §MVP-Bilanz](docs/plan/planning/in-progress/roadmap.md).
+- **Spec-driven releases.** Three tagged releases (`v0.1.0`, `v0.2.0`,
+  `v0.3.0`) deliver every MVP and v0.3.0 V1-add-on Spec-ID listed in
+  [`spec/lastenheft.md`](spec/lastenheft.md); the release table below
+  maps each slice to its `LH-FA-*` / `LH-AK-*` anchor.
 - **Hexagonal architecture.** Layer rules enforced by `depguard` at
   every `make gates`; ports/adapters split formalised in
   [`ADR-0002`](docs/plan/adr/0002-hexagonale-architektur.md).

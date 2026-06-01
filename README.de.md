@@ -50,11 +50,10 @@ unten mappt jedes Subkommando auf seine Lastenheft-IDs.
 
 ## Was macht es vertrauenswürdig?
 
-- **MVP mit v0.1.0 geschlossen.** Jede MVP-prioritäre `LH-AK-*`-,
-  `LH-FA-*`- und `LH-SA-*`-ID aus
-  [`spec/lastenheft.md`](spec/lastenheft.md) ist ausgeliefert —
-  Audit-Trail in der
-  [roadmap §MVP-Bilanz](docs/plan/planning/in-progress/roadmap.md).
+- **Spec-getriebene Releases.** Drei getaggte Releases (`v0.1.0`,
+  `v0.2.0`, `v0.3.0`) liefern jede MVP- und v0.3.0-V1-Add-on-Spec-ID
+  aus [`spec/lastenheft.md`](spec/lastenheft.md); die Release-Tabelle
+  unten mappt jeden Slice auf seinen `LH-FA-*`- / `LH-AK-*`-Anker.
 - **Hexagonale Architektur.** Schicht-Regeln werden bei jedem
   `make gates` durch `depguard` enforced; Port/Adapter-Trennung
   formalisiert in
