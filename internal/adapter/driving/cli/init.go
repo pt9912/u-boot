@@ -27,6 +27,13 @@ type initFlags struct {
 	Devcontainer   bool
 	Yes            bool
 	NoInteractive  bool
+
+	// Template is the external project template name selected via
+	// `--template <name>` (LH-FA-TPL-001 / slice-v1-template-init T4).
+	// Empty keeps the M3 default-init render path; non-empty
+	// dispatches to the TemplateInitUseCase via the
+	// InitProjectService delegation introduced in T4.
+	Template string
 }
 
 // newInitCommand builds the `u-boot init` Cobra subcommand.
@@ -119,6 +126,8 @@ Examples:
 		"assert existing project in non-interactive runs; aborts unless --backup/--force (LH-FA-INIT-004, LH-FA-CLI-005A §238)")
 	cmd.Flags().BoolVar(&flags.Devcontainer, "devcontainer", false,
 		"also generate `.devcontainer/devcontainer.json` + `Dockerfile` and set devcontainer.enabled=true in u-boot.yaml (LH-AK-005)")
+	cmd.Flags().StringVar(&flags.Template, "template", "",
+		"render the project from an external template instead of the default flow (`u-boot template list` for the catalog; LH-FA-TPL-001 / slice-v1-template-init T4 — fresh-init only, mutex with --devcontainer/--force/--backup)")
 	return cmd
 }
 
@@ -169,6 +178,7 @@ func runInit(
 		AssumeExisting: flags.AssumeExisting,
 		NoInteractive:  flags.NoInteractive,
 		Devcontainer:   flags.Devcontainer,
+		Template:       flags.Template,
 	}
 	if len(args) == 1 {
 		req.Name = args[0]

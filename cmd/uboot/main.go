@@ -109,7 +109,13 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// go to stderr via the `fmt.Fprintf` below so the streams stay
 	// distinct even when a caller pipes them together. Tests that
 	// wrap stdout in a buffer must not interpose a separate flush.
-	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter)
+	// Template-init service is constructed first so InitProjectService
+	// can receive it via WithTemplateInit option (slice-v1-template-
+	// init T4 delegation: --template <name> dispatches file rendering
+	// to TemplateInitService while git init / soft-existing-detection
+	// / project-structure-dirs stay in InitProjectService).
+	templateInitSvc := application.NewTemplateInitService(templateCatalogAdapter, fsAdapter, logAdapter)
+	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter, application.WithTemplateInit(templateInitSvc))
 	doctorSvc := application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, runtimeAdapter, logAdapter)
 	addSvc := application.NewAddServiceService(fsAdapter, yamlAdapter, logAdapter)
 	upSvc := application.NewUpService(fsAdapter, yamlAdapter, dockerEngineAdapter, netprobeAdapter, clockAdapter, logAdapter)

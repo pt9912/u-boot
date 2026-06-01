@@ -94,6 +94,23 @@ type InitProjectRequest struct {
 	// block-replace path; an existing file without the marker
 	// aborts with [ErrFileExists] unless `--force --backup` is set.
 	Devcontainer bool
+
+	// Template selects an external project template
+	// (LH-FA-TPL-001 / slice-v1-template-init). Empty (default)
+	// preserves the M3 default-init render path; when set, the
+	// service delegates file rendering to a wired
+	// [TemplateInitUseCase] (the basic bootstrap template ships
+	// identical content to the default init flow via
+	// slice-v1-template-init T3's byte-identity pin).
+	//
+	// Mutually exclusive with [Devcontainer] today: the basic
+	// template does not include devcontainer-specific files, and
+	// a future variable-aware template-init slice will add that
+	// integration. Also mutually exclusive with [Force]/[Backup]
+	// in T4 — `--template` is fresh-init-only. A re-init slice
+	// can layer managed-block semantics on top once a concrete
+	// trigger exists.
+	Template string
 }
 
 // BackupAction records a single file/dir backup performed during
@@ -183,6 +200,16 @@ var ErrForceRequiresBackup = errors.New("force requires backup")
 // the message accurately ("file X exists" vs. "project already
 // initialized"). Both map to exit code 10.
 var ErrFileExists = errors.New("file exists")
+
+// ErrTemplateConflictsWithFlag signals that `--template <name>`
+// was combined with a flag the v1 template-init path does not yet
+// support (`--devcontainer`, `--force`, or `--backup`).
+// slice-v1-template-init T4 keeps `--template` fresh-init-only;
+// a future variable-aware template-init slice can relax this.
+//
+// Maps to LH-FA-CLI-006 exit code 2 (CLI usage error — the user
+// can fix by dropping the conflicting flag) via [isUsageError].
+var ErrTemplateConflictsWithFlag = errors.New("init: --template conflicts with another flag")
 
 // InitProjectUseCase is the driving-port for `u-boot init`. The CLI
 // adapter holds a reference and calls [Init] from the Cobra command

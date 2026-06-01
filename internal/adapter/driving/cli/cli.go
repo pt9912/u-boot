@@ -212,7 +212,9 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 //          backup source vanished mid-flight
 //          (ErrBackupSourceMissing); LH-FA-TPL-004 catalog adapter
 //          failure (ErrTemplateCatalog — filesystem IO / malformed
-//          embedded template.yaml)
+//          embedded template.yaml); LH-FA-TPL-001 render-loop
+//          failure (ErrTemplateRender — text/template parse/exec
+//          or IO during the per-file render copy)
 //   - 1  — everything else (generic error)
 //
 // The mapping lives in the driving adapter because exit-code
@@ -272,8 +274,20 @@ func isValidationError(err error) bool {
 		errors.Is(err, driving.ErrConfirmationRequired) ||
 		errors.Is(err, driving.ErrGenerateManualConflict) ||
 		isConfigValidationError(err) ||
+		isTemplateInitValidationError(err) ||
 		errors.Is(err, domain.ErrInvalidProjectName) ||
 		errors.Is(err, domain.ErrInvalidServiceName)
+}
+
+// isTemplateInitValidationError carves the slice-v1-template-init
+// validation sentinels out of [isValidationError] so the parent
+// helper stays under the gocyclo threshold. The two sentinels share
+// the LH-FA-CLI-006 code-10 mapping but are conceptually one cluster
+// ("the user must fix the --template invocation or the template
+// content").
+func isTemplateInitValidationError(err error) bool {
+	return errors.Is(err, driving.ErrTemplateNotFound) ||
+		errors.Is(err, driving.ErrInvalidTemplatePath)
 }
 
 // isConfigValidationError is the M8-T5 carve-out from
@@ -298,7 +312,8 @@ func isFilesystemError(err error) bool {
 		errors.Is(err, driving.ErrBackupSourceMissing) ||
 		errors.Is(err, driving.ErrGenerateFileSystem) ||
 		errors.Is(err, driving.ErrConfigFileSystem) ||
-		errors.Is(err, driving.ErrTemplateCatalog)
+		errors.Is(err, driving.ErrTemplateCatalog) ||
+		errors.Is(err, driving.ErrTemplateRender)
 }
 
 // isUsageError detects two distinct classes of usage-level errors:
@@ -332,7 +347,8 @@ func isUsageError(err error) bool {
 	// from `add <unknown-service>` which maps to code 10 via
 	// [isValidationError].
 	if errors.Is(err, ErrConflictingModeFlags) || errors.Is(err, ErrInvalidTimeout) ||
-		errors.Is(err, driving.ErrArtifactUnknown) {
+		errors.Is(err, driving.ErrArtifactUnknown) ||
+		errors.Is(err, driving.ErrTemplateConflictsWithFlag) {
 		return true
 	}
 	// (b) Cobra usage-error string prefixes.

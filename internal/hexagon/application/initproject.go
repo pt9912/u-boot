@@ -96,13 +96,37 @@ type ubootYAMLConfig struct {
 // orchestrates the driven ports (FileSystem, YAMLCodec, Git,
 // ProgressPort, Confirmer, Logger) to realize the
 // LH-FA-INIT-001..007 flow.
+//
+// As of slice-v1-template-init T4 the service can ALSO delegate
+// file rendering to a [driving.TemplateInitUseCase] when the
+// request carries [driving.InitProjectRequest.Template]. The
+// delegate is wired via [WithTemplateInit]; when nil and the
+// request carries Template, Init returns an "unwired" error
+// (production wiring always sets it).
 type InitProjectService struct {
-	fs        driven.FileSystem
-	yaml      driven.YAMLCodec
-	git       driven.Git
-	progress  driven.ProgressPort
-	confirmer driven.Confirmer
-	logger    driven.Logger
+	fs           driven.FileSystem
+	yaml         driven.YAMLCodec
+	git          driven.Git
+	progress     driven.ProgressPort
+	confirmer    driven.Confirmer
+	logger       driven.Logger
+	templateInit driving.TemplateInitUseCase
+}
+
+// InitProjectOption mutates an [InitProjectService] during
+// [NewInitProjectService]. The functional-options pattern is used
+// for slice-v1-template-init T4's [WithTemplateInit] so existing
+// callers (7 internal test sites + 1 production wiring) do not
+// need a signature update.
+type InitProjectOption func(*InitProjectService)
+
+// WithTemplateInit wires the [driving.TemplateInitUseCase] the
+// service delegates to when the init request carries
+// [driving.InitProjectRequest.Template]. Production wiring
+// (`cmd/uboot/main.go`) always supplies it; test sites that do not
+// exercise the `--template` path can omit the option.
+func WithTemplateInit(uc driving.TemplateInitUseCase) InitProjectOption {
+	return func(s *InitProjectService) { s.templateInit = uc }
 }
 
 // Static check: InitProjectService satisfies the driving port.
@@ -124,7 +148,7 @@ var _ driving.InitProjectUseCase = (*InitProjectService)(nil)
 // are routed to internal no-op implementations so callers (tests,
 // scripts that don't care, deterministic non-interactive runs) need
 // not wire a stub.
-func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driven.Git, progress driven.ProgressPort, confirmer driven.Confirmer, logger driven.Logger) *InitProjectService {
+func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driven.Git, progress driven.ProgressPort, confirmer driven.Confirmer, logger driven.Logger, opts ...InitProjectOption) *InitProjectService {
 	if progress == nil {
 		progress = noopProgress{}
 	}
@@ -134,7 +158,11 @@ func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driv
 	if logger == nil {
 		logger = noopLogger{}
 	}
-	return &InitProjectService{fs: fs, yaml: yaml, git: git, progress: progress, confirmer: confirmer, logger: logger}
+	s := &InitProjectService{fs: fs, yaml: yaml, git: git, progress: progress, confirmer: confirmer, logger: logger}
+	for _, opt := range opts {
+		opt(s)
+	}
+	return s
 }
 
 // fileAction classifies what the service should do with a single
@@ -191,6 +219,15 @@ type filePlan struct {
 func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRequest) (driving.InitProjectResponse, error) {
 	if req.BaseDir == "" {
 		return driving.InitProjectResponse{}, errors.New("BaseDir is required")
+	}
+
+	// slice-v1-template-init T4: dispatch to the external-template
+	// render path before any other side effect; the path keeps the
+	// shared LH-FA-INIT-003 / -004 / -007 concerns (dirs, soft-
+	// existing-detection, git init) and delegates only file
+	// rendering to the wired TemplateInitUseCase.
+	if req.Template != "" {
+		return s.initFromTemplate(ctx, req)
 	}
 
 	baseExists, err := s.fs.Exists(req.BaseDir)
@@ -260,6 +297,107 @@ func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRe
 	}
 
 	return driving.InitProjectResponse{Project: project, Created: created, Backups: backups}, nil
+}
+
+// initFromTemplate handles the `--template <name>` branch of init
+// (slice-v1-template-init T4). The render of project files is
+// delegated to the wired [driving.TemplateInitUseCase]; the shared
+// init responsibilities — soft-existing-detection, project-
+// structure directories (LH-FA-INIT-003), and git init
+// (LH-FA-INIT-007) — stay here so the user-observable flow does
+// not split into two parallel commands.
+//
+// T4 contract / out-of-scope:
+//
+//   - `--template` is fresh-init-only. If `u-boot.yaml` already
+//     exists, the call fails with [driving.ErrProjectExists] (no
+//     `--force`/`--backup` managed-block re-init for templates in
+//     this slice — a future slice can layer it).
+//   - Mutex with `--devcontainer`, `--force`, and `--backup`:
+//     surfaces as [driving.ErrTemplateConflictsWithFlag] so the
+//     CLI exit-code mapping treats it as a usage error (2).
+//   - `--no-git` / `--assume-existing` / `--no-interactive` /
+//     `--yes` continue to apply — soft-existing-detection and the
+//     git step honor them identically to the default path.
+func (s *InitProjectService) initFromTemplate(ctx context.Context, req driving.InitProjectRequest) (driving.InitProjectResponse, error) {
+	if s.templateInit == nil {
+		// Wiring invariant — production main.go always supplies
+		// WithTemplateInit. The CLI parser cannot reach this branch
+		// without `--template`, and the help text documents the
+		// flag, so a user-facing trigger requires both a broken
+		// build and a user invocation; plain error is enough.
+		return driving.InitProjectResponse{}, errors.New("init: --template requires template-init wiring")
+	}
+	if req.Devcontainer {
+		return driving.InitProjectResponse{}, fmt.Errorf("%w: --template is mutually exclusive with --devcontainer (basic template ships no devcontainer files; a variable-aware template-init slice will revisit)",
+			driving.ErrTemplateConflictsWithFlag)
+	}
+	if req.Force || req.Backup {
+		return driving.InitProjectResponse{}, fmt.Errorf("%w: --template does not support --force / --backup (fresh-init only in v1)",
+			driving.ErrTemplateConflictsWithFlag)
+	}
+
+	baseExists, err := s.fs.Exists(req.BaseDir)
+	if err != nil {
+		return driving.InitProjectResponse{}, fmt.Errorf("check BaseDir: %w", err)
+	}
+	if !baseExists {
+		return driving.InitProjectResponse{}, fmt.Errorf("%w: %s", driving.ErrBaseDirMissing, req.BaseDir)
+	}
+
+	if err := s.checkSoftExisting(ctx, req); err != nil {
+		return driving.InitProjectResponse{}, err
+	}
+
+	// Hard-existing check: refuse if u-boot.yaml is already there.
+	// The default-flow has per-file existence handling (planTemplatedFiles
+	// → actionWrite vs actionReplaceBlock vs Err), but the template
+	// path here is fresh-init only.
+	ubootPath := filepath.Join(req.BaseDir, "u-boot.yaml")
+	ubootExists, err := s.fs.Exists(ubootPath)
+	if err != nil {
+		return driving.InitProjectResponse{}, fmt.Errorf("check existing u-boot.yaml: %w", err)
+	}
+	if ubootExists {
+		return driving.InitProjectResponse{}, fmt.Errorf("%w: %s already exists; --template is fresh-init only",
+			driving.ErrProjectExists, ubootPath)
+	}
+
+	name, err := resolveProjectName(req)
+	if err != nil {
+		return driving.InitProjectResponse{}, err
+	}
+	project := domain.NewProject(name)
+
+	// LH-FA-INIT-003 project structure dirs first (docker/, scripts/,
+	// docs/). The template render does NOT cover them — they are an
+	// init-flow concern, not a template concern.
+	dirEntries, err := s.writeDirectories(req.BaseDir, req)
+	if err != nil {
+		return driving.InitProjectResponse{}, err
+	}
+
+	// Delegate file rendering.
+	tmplResp, err := s.templateInit.Init(ctx, driving.TemplateInitRequest{
+		BaseDir:      req.BaseDir,
+		ProjectName:  name,
+		TemplateName: req.Template,
+	})
+	if err != nil {
+		return driving.InitProjectResponse{}, err
+	}
+
+	// Git init (LH-FA-INIT-007) — same path as the default flow.
+	if !req.SkipGit {
+		if err := s.initGit(ctx, req.BaseDir); err != nil {
+			return driving.InitProjectResponse{}, err
+		}
+	}
+
+	created := make([]string, 0, len(dirEntries)+len(tmplResp.Created))
+	created = append(created, dirEntries...)
+	created = append(created, tmplResp.Created...)
+	return driving.InitProjectResponse{Project: project, Created: created}, nil
 }
 
 // softIndicators returns the LH-FA-INIT-003 mindestumfang elements
