@@ -20,8 +20,8 @@ in `in-progress/`.
 | M7 `u-boot generate` | Done | `generate changelog`/`readme`/`env-example`/`devcontainer` (`LH-FA-GEN-001..005` + LH-FA-DEV-001/004/005 + LH-AK-007). Sechs Tranchen ✅ (`67fc181`/`3c5de48`/`037ab00`/`19c4110`/`294e492`/`d32a733`) + Review-Followup `27de9c5` (9 Findings S1..S4/N1..N5 adressiert, u. a. fenced-code-block-Schutz gegen Markdown-Korruption + CRLF-Normalisierung). Reuse von `managedblock` (3 Marker-Stile decken 4 Datei-Mappings), `generateManagedFile`-Helper für env-example/readme, atomarer Two-File-Plan für devcontainer, konservative User-Edit-Erkennung für changelog. CLI: `u-boot generate <artifact>`, Exit-Codes 0/2/10/14. | [`slice-m7-generate`](../done/slice-m7-generate.md) |
 | M8 `u-boot config` | Done | `config get`/`set`/Anzeigen (`LH-FA-CONF-001..005`), Schema-Validierung. Fünf Tranchen ✅ (`f531e7e`/`d3fa294`/`23952b2`/`fbf3778`/`25cb123`): Whitelist, Port + Skeleton, Get + Show, Set mit Two-Stage-Validation, CLI-Subcommand. **Letzter MVP-blockierender Slice → MVP vollständig.** | [`slice-m8-config`](../done/slice-m8-config.md) |
 | MVP-Closure | Done | Devcontainer-Mindestumfang (`LH-FA-DEV-001..005`), MVP-Acceptance-Flows (`LH-AK-001..002`, `LH-AK-005..007`). Drei Tranchen — T1 ✅ `bfe6416` `u-boot init --devcontainer` (LH-AK-005), T2 ✅ `8525c4c` LH-AK-001/-006-Pins in `acceptance_test.go` inkl. Doctor-Severity-Fix `compose.yaml.valid` (Error → Warn), T3 ✅ Slice-Closure + MVP-Bilanz. Alle 5 MVP-`LH-AK-*` gepinnt; alle MVP-`LH-FA-DEV-*` ausgeliefert. (M8 `u-boot config` ist die zweite MVP-Schließung, siehe nächste Zeile.) | [`slice-mvp-closure`](../done/slice-mvp-closure.md) |
-| V1 Keycloak / OTel | Open | `LH-FA-ADD-003`, `LH-FA-ADD-004`, `LH-AK-003`, `LH-AK-004` | offen |
-| V1 Templates | Open (Format entschieden) | `LH-FA-TPL-001..004` — Format via [ADR-0009](../../adr/0009-template-format-yaml-files.md) (YAML+`text/template`); Implementation offen in drei Slices aus ADR-0009 §Folgepunkte (`slice-v1-template-list`, `slice-v1-template-init`, `slice-later-local-templates`) | offen |
+| V1 Add-on Expansion (v0.3.0-Milestone) | Open | Fünf Slices als v0.3.0-Scope: `slice-v1-audit-done` (Doku-Audit `LH-FA-BUILD-006`/`LH-NFA-MAINT-004`/`LH-NFA-PORT-003`), `slice-v1-add-remove` (`LH-FA-ADD-007`), `slice-v1-addons-deps` (`LH-FA-ADD-006`), `slice-v1-keycloak` (`LH-FA-ADD-003` + `LH-AK-003`), `slice-v1-otel` (`LH-FA-ADD-004` + `LH-AK-004`). Reihenfolge: audit-done → add-remove → addons-deps → Keycloak + OTel (parallel). | offen |
+| V1 Templates | Partial Done | `LH-FA-TPL-001..004` — Format via [ADR-0009](../../adr/0009-template-format-yaml-files.md) (YAML+`text/template`). `slice-v1-template-list` ✅ + `slice-v1-template-init` ✅ (für `basic`; Variable-Resolution defer-pflichtig); `slice-later-local-templates` (`LH-FA-TPL-003`) bleibt Later-Phase. | [`slice-v1-template-list`](../done/slice-v1-template-list.md) + [`slice-v1-template-init`](../done/slice-v1-template-init.md) |
 | V1 Logs / Dry-Run / Diff | Open | `LH-FA-UP-005`, `LH-FA-CLI-007/008` | offen |
 | Later Migration / Custom Templates | Open | `LH-FA-CONF-006`, `LH-FA-TPL-003` (in ADR-0009 §Folgepunkte als `slice-later-local-templates` benannt), `LH-DA-004` | offen |
 
@@ -76,32 +76,47 @@ Workflow-`name:`-Felder).
 Aktuell offen sind nur trigger- oder nutzer-getriebene V1- und
 Later-Folgen:
 
-1. **v0.2.0-Tag-Push offen.** Vier Slices sind seit `v0.1.0`
-   gelandet — drei Features plus ein Patch, daher wird das
-   ursprünglich geplante `v0.1.1` zugunsten von `v0.2.0`
-   (MINOR-Bump) übersprungen. Release-Cut-Slice:
-   [`done/slice-v1-release-cut-v0.2.0.md`](../done/slice-v1-release-cut-v0.2.0.md)
-   (T1 CHANGELOG-Konsolidierung, T2 Dev-Default-Version-Bump,
-   T3 READMEs + roadmap + slice-Move, T4 Nutzer-Aktion).
-   Enthaltene Slices:
-   [`done/slice-v0.1.1-doctor-container-awareness.md`](../done/slice-v0.1.1-doctor-container-awareness.md)
-   (T1 `9a99bbf` + T2 `c35360f` + T3 `111e725` + T4 `f3f1731`),
-   [`done/slice-v2-binary-distribution.md`](../done/slice-v2-binary-distribution.md)
-   (T1..T4 mit Hashes in der Slice-Datei),
-   [`done/slice-v1-template-list.md`](../done/slice-v1-template-list.md)
-   (T1..T4 + Review-Followup `c807cdb`),
-   [`done/slice-v1-template-init.md`](../done/slice-v1-template-init.md)
-   (T1..T5 + Review-Followup `7fe26e0`). v0.2.0-Tag-Push bleibt
-   **Nutzer-Aktion** analog v0.1.0-T4: (a) `## [0.2.0] - <Datum>`
-   in `CHANGELOG.md` auf das Push-Datum aktualisieren,
-   (b) push auf `origin/main` falls noch nicht geschehen,
-   (c) ersten CI-Lauf abwarten,
-   (d) `git tag v0.2.0 && git push origin v0.2.0` →
-   `publish.yml` triggert GHCR-Push (`ghcr.io/pt9912/u-boot:0.2.0`
-   + `:latest`) und Binary-Upload (sechs Plattformen).
-2. **V1-Add-ons** — Keycloak (`LH-FA-ADD-003` / `LH-AK-003`) und
-   OpenTelemetry (`LH-FA-ADD-004` / `LH-AK-004`); jeweils
-   eigener Slice-Plan bei Auslösung.
+1. **~~v0.2.0-Tag-Push~~ — released 2026-06-01.** Tag `v0.2.0`
+   auf Commit `595acdf`, publish.yml-Run `26740508466` grün
+   (SemVer-Validate, GHCR-Login, GHCR-Push für `:0.2.0` + `:latest`,
+   OCI-Label + Live-`--version`-Smoke, Cross-Compile + Upload
+   für sechs Binary-Plattformen). Images: `ghcr.io/pt9912/u-boot:0.2.0`
+   und `:latest`. GitHub-Release mit CHANGELOG-Auszug und
+   sechs Binary-Assets: <https://github.com/pt9912/u-boot/releases/tag/v0.2.0>.
+   Audit-Trail im Release-Cut-Slice
+   [`done/slice-v1-release-cut-v0.2.0.md`](../done/slice-v1-release-cut-v0.2.0.md);
+   enthaltene Slices:
+   [`done/slice-v0.1.1-doctor-container-awareness.md`](../done/slice-v0.1.1-doctor-container-awareness.md),
+   [`done/slice-v2-binary-distribution.md`](../done/slice-v2-binary-distribution.md),
+   [`done/slice-v1-template-list.md`](../done/slice-v1-template-list.md),
+   [`done/slice-v1-template-init.md`](../done/slice-v1-template-init.md).
+   v0.1.1 wurde übersprungen (drei Features seit der ursprünglichen
+   v0.1.1-Planung verlangten SemVer-MINOR-Bump). Branch-Protection-UI
+   bleibt als Nutzer-One-Shot offen aus v0.1.0-Era (nicht
+   release-blockierend).
+2. **v0.3.0-Milestone — Add-on Catalogue Expansion (geplant).**
+   Fünf Slices als nächstes Release-Cluster, geordnet von klein
+   nach groß:
+   - **`slice-v1-audit-done`** — reiner Doku-Audit: drei vermutlich-
+     erfüllte V1-IDs (`LH-FA-BUILD-006` Aggregator-Targets,
+     `LH-NFA-MAINT-004` Dokumentierte Schnittstellen,
+     `LH-NFA-PORT-003` Containerfreundlichkeit) verifizieren und
+     in Phase-Table / MVP-Bilanz als ✅ markieren.
+   - **`slice-v1-add-remove`** (`LH-FA-ADD-007`) — `u-boot remove
+     <service>` als Spiegel von M5 `u-boot add`. Setzt
+     `services.<svc>.enabled: false`, entfernt Compose- und
+     env-Blocks; `--purge`-Flag (destruktiv, LH-FA-CLI-005A-
+     Confirmation-Gate analog `down --volumes`) für Volume-
+     Löschung. Idempotent: bereits-disabled = No-Op.
+   - **`slice-v1-addons-deps`** (`LH-FA-ADD-006`) — Add-on-
+     Dependency-Resolution; Voraussetzung für Keycloak
+     (`requires: [postgres]`). Domain-Modell für `requires`-Block
+     im Add-on-Katalog + Validierung beim `add`/`remove`-Flow.
+   - **`slice-v1-keycloak`** (`LH-FA-ADD-003` + `LH-AK-003`) —
+     Keycloak-Add-on analog M5-Postgres-Pattern, mit Postgres-
+     Dependency aus addons-deps.
+   - **`slice-v1-otel`** (`LH-FA-ADD-004` + `LH-AK-004`) —
+     OpenTelemetry-Add-on parallel zu Keycloak.
 3. **V1-Templates-Implementation** — drei Slices aus
    [ADR-0009](../../adr/0009-template-format-yaml-files.md)
    §Folgepunkte.
