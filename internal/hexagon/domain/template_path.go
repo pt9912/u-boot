@@ -37,14 +37,34 @@ type TemplatePath struct {
 
 // NewTemplatePath parses raw and returns the validated path.
 // See [TemplatePath] for the rejection rules.
+//
+// Review-followup F2 + F4 strengthen the rejection list:
+//   - NUL bytes anywhere in raw — OS-level filesystems reject them
+//     deterministically; surfacing the rejection at the domain
+//     boundary gives the template author a clearer error message
+//     than EINVAL from the eventual fs.WriteFile call.
+//   - Backslash anywhere in raw — POSIX filesystems accept `\` as
+//     a literal filename character but Windows / future filesystem
+//     adapters interpret it as a path separator. `docker\..\..\etc\
+//     passwd` would slip past the `/`-splitting `..`-detector and
+//     escape the project tree on a Windows build. Reject up front
+//     to keep the validator cross-platform-safe.
 func NewTemplatePath(raw string) (TemplatePath, error) {
 	if raw == "" {
 		return TemplatePath{}, fmt.Errorf("%w: empty path", ErrInvalidTemplatePath)
 	}
-	if strings.HasPrefix(raw, "/") || strings.HasPrefix(raw, `\`) {
+	if strings.ContainsRune(raw, 0) {
+		return TemplatePath{}, fmt.Errorf("%w: contains NUL byte", ErrInvalidTemplatePath)
+	}
+	if strings.ContainsRune(raw, '\\') {
+		return TemplatePath{}, fmt.Errorf("%w: %q contains backslash; use forward slashes only", ErrInvalidTemplatePath, raw)
+	}
+	if strings.HasPrefix(raw, "/") {
 		return TemplatePath{}, fmt.Errorf("%w: %q is absolute", ErrInvalidTemplatePath, raw)
 	}
 	// Windows drive letter (`C:foo`, `D:\bar`). Two-char lookahead.
+	// The `\\` prefix is no longer reachable (rejected above by the
+	// backslash check) but a colon at position 1 still triggers.
 	if len(raw) >= 2 && raw[1] == ':' {
 		return TemplatePath{}, fmt.Errorf("%w: %q has a drive letter", ErrInvalidTemplatePath, raw)
 	}

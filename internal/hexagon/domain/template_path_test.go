@@ -37,15 +37,23 @@ func TestNewTemplatePath(t *testing.T) {
 		},
 		{
 			name: "absolute windows backslash", raw: `\etc\passwd`,
-			wantErr: true, wantFrag: "absolute",
+			wantErr: true, wantFrag: "backslash",
+		},
+		{
+			name: "backslash + parent-dir bypass (review-followup F2)", raw: `docker\..\..\etc\passwd`,
+			wantErr: true, wantFrag: "backslash",
+		},
+		{
+			name: "NUL byte rejected (review-followup F4)", raw: "foo\x00bar",
+			wantErr: true, wantFrag: "NUL",
 		},
 		{
 			name: "windows drive letter", raw: "C:foo",
 			wantErr: true, wantFrag: "drive letter",
 		},
 		{
-			name: "windows drive letter with slash", raw: `D:\bar`,
-			wantErr: true, wantFrag: "drive letter",
+			name: "windows drive letter with backslash (review-followup F2 catches backslash first)", raw: `D:\bar`,
+			wantErr: true, wantFrag: "backslash",
 		},
 		{
 			name: "leading parent dir", raw: "../escape",

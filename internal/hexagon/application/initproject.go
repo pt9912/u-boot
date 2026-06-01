@@ -316,9 +316,20 @@ func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRe
 //   - Mutex with `--devcontainer`, `--force`, and `--backup`:
 //     surfaces as [driving.ErrTemplateConflictsWithFlag] so the
 //     CLI exit-code mapping treats it as a usage error (2).
-//   - `--no-git` / `--assume-existing` / `--no-interactive` /
-//     `--yes` continue to apply — soft-existing-detection and the
-//     git step honor them identically to the default path.
+//   - `--no-git` continues to apply identically to the default
+//     path.
+//
+// Review-followup F3 — soft-existing-detection is SKIPPED for the
+// template path. The default-init path uses LH-FA-INIT-004 to
+// surface a prompt when ≥3 LH-FA-INIT-003 indicators (docker/,
+// scripts/, docs/, README.md, …) are present without an explicit
+// u-boot.yaml — it covers ambiguity about "is this an existing
+// project?". `--template` removes that ambiguity: the user has
+// stated fresh-init explicitly. The hard-existing check (u-boot.yaml
+// presence → ErrProjectExists) remains the single safety net.
+// `--assume-existing`, `--no-interactive`, and `--yes` therefore
+// have no effect on the template path's existing-detection
+// branching.
 func (s *InitProjectService) initFromTemplate(ctx context.Context, req driving.InitProjectRequest) (driving.InitProjectResponse, error) {
 	if s.templateInit == nil {
 		// Wiring invariant — production main.go always supplies
@@ -345,9 +356,8 @@ func (s *InitProjectService) initFromTemplate(ctx context.Context, req driving.I
 		return driving.InitProjectResponse{}, fmt.Errorf("%w: %s", driving.ErrBaseDirMissing, req.BaseDir)
 	}
 
-	if err := s.checkSoftExisting(ctx, req); err != nil {
-		return driving.InitProjectResponse{}, err
-	}
+	// Soft-existing-detection deliberately skipped here — see the
+	// review-followup F3 note in the method doc-comment.
 
 	// Hard-existing check: refuse if u-boot.yaml is already there.
 	// The default-flow has per-file existence handling (planTemplatedFiles

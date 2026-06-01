@@ -144,6 +144,40 @@ func TestTemplateInitService_UnknownTemplateWrapsSentinel(t *testing.T) {
 	}
 }
 
+func TestTemplateInitService_RenderFailureMidWalkNoPartialWrite(t *testing.T) {
+	t.Parallel()
+	// Review-followup F1: render of file A succeeds, render of file
+	// B fails. With the two-phase Init the fakeFS must NOT contain
+	// A — phase-1 renders to memory, phase-2 only fires if all
+	// renders succeeded.
+	files := &fakeTemplateFiles{
+		name: "basic",
+		fs: fstest.MapFS{
+			"a.txt.tmpl":      &fstest.MapFile{Data: []byte("hello {{ .Name }}\n")},
+			"b.broken.tmpl":   &fstest.MapFile{Data: []byte("{{ .Name")}, // unclosed
+		},
+	}
+	fs := newFakeFS()
+	svc := application.NewTemplateInitService(files, fs, nil)
+
+	_, err := svc.Init(context.Background(), driving.TemplateInitRequest{
+		BaseDir:      "/proj",
+		ProjectName:  mustProjectNameForTest(t, "x"),
+		TemplateName: "basic",
+	})
+	if err == nil {
+		t.Fatal("Init: want render error, got nil")
+	}
+	if !errors.Is(err, driving.ErrTemplateRender) {
+		t.Errorf("err = %v, want wrap of driving.ErrTemplateRender", err)
+	}
+	// Phase-1 short-circuit pin: no writes at all, neither for a
+	// successfully-rendered file A nor for the failing file B.
+	if len(fs.writes) != 0 {
+		t.Errorf("fs.writes = %v, want empty (two-phase render must short-circuit before any disk write)", fs.writes)
+	}
+}
+
 func TestTemplateInitService_RenderFailureWrapsErrTemplateRender(t *testing.T) {
 	t.Parallel()
 	files := &fakeTemplateFiles{

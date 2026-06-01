@@ -178,6 +178,36 @@ func TestInitProjectService_FromTemplate_RequiresWiredTemplateInit(t *testing.T)
 	}
 }
 
+func TestInitProjectService_FromTemplate_LeftoverStructureDirsDoNotBlock(t *testing.T) {
+	t.Parallel()
+	// Review-followup F3: a directory with ≥3 LH-FA-INIT-003
+	// indicators (docker/, scripts/, docs/) from a previous failed
+	// init must NOT trigger soft-existing-detection on the template
+	// path — the user explicitly chose fresh-init via --template.
+	// The hard-existing check (u-boot.yaml) is the only safety net.
+	fs := newFakeFS()
+	fs.dirs["/proj"] = true
+	fs.dirs["/proj/docker"] = true
+	fs.dirs["/proj/scripts"] = true
+	fs.dirs["/proj/docs"] = true
+	tmplInit := application.NewTemplateInitService(externaltemplates.New(), fs, nil)
+	svc := application.NewInitProjectService(fs, &fakeYAML{}, &fakeGit{}, nil, nil, nil, application.WithTemplateInit(tmplInit))
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		BaseDir:  "/proj",
+		Name:     "demo",
+		SkipGit:  true,
+		Template: "basic",
+	})
+	if err != nil {
+		t.Fatalf("Init with leftover dirs + --template basic: %v (want success — soft-detection must be skipped on template path)", err)
+	}
+	// Verify the basic-rendered u-boot.yaml landed.
+	if _, ok := fs.files["/proj/u-boot.yaml"]; !ok {
+		t.Error("u-boot.yaml not rendered")
+	}
+}
+
 func TestInitProjectService_FromTemplate_UnknownTemplateWrapsSentinel(t *testing.T) {
 	t.Parallel()
 	fs := newFakeFS()

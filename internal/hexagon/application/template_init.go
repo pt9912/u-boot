@@ -72,10 +72,17 @@ func NewTemplateInitService(files driven.TemplateFiles, fs driven.FileSystem, lo
 //   - Path-escape attempt → [driving.ErrInvalidTemplatePath] (10)
 //   - Render / IO failure → [driving.ErrTemplateRender] (14)
 //
-//nolint:gocyclo,cyclop // The walk-and-classify body is naturally branchy; splitting
-// the per-entry handler into a helper hides the order constraint
-// (skip-then-validate-then-render-then-write) without reducing
-// effective cognitive load.
+// Two-phase render (review-followup F1): the walk-loop first
+// renders every file into memory; only after every render
+// succeeds does the second loop write to disk. Bad templates
+// (parse errors, path-escape) thus no longer leave half-populated
+// project directories — the typical author-error class
+// short-circuits before any side effect. Genuine IO failures
+// during the write phase (disk full, permissions) still produce
+// partial state, but at that point the user has to clean up
+// anyway. WalkDir-layer errors (review-followup F5) get the
+// ErrTemplateRender wrap so the CLI maps them to exit code 14
+// instead of falling through to 1.
 func (s *TemplateInitService) Init(ctx context.Context, req driving.TemplateInitRequest) (driving.TemplateInitResponse, error) {
 	if req.BaseDir == "" {
 		return driving.TemplateInitResponse{}, errors.New("BaseDir is required")
@@ -89,27 +96,24 @@ func (s *TemplateInitService) Init(ctx context.Context, req driving.TemplateInit
 	}
 
 	data := templateData{Name: req.ProjectName.String()}
-	var created []string
 
-	walkErr := iofs.WalkDir(sub, ".", func(p string, d iofs.DirEntry, walkErr error) error {
-		if walkErr != nil {
-			return walkErr
+	// Phase 1: walk + render to memory. No disk writes here.
+	planned, err := s.planRender(sub, data)
+	if err != nil {
+		return driving.TemplateInitResponse{}, err
+	}
+
+	// Phase 2: apply. Every render succeeded; now persist.
+	created := make([]string, 0, len(planned))
+	for _, f := range planned {
+		outAbs := filepath.Join(req.BaseDir, f.path)
+		if err := s.fs.MkdirAll(filepath.Dir(outAbs), renderedDirMode); err != nil {
+			return driving.TemplateInitResponse{}, fmt.Errorf("%w: mkdir %s: %w", driving.ErrTemplateRender, filepath.Dir(outAbs), err)
 		}
-		if p == "." || d.IsDir() {
-			return nil
+		if err := s.fs.WriteFile(outAbs, f.content, renderedFileMode); err != nil {
+			return driving.TemplateInitResponse{}, fmt.Errorf("%w: write %s: %w", driving.ErrTemplateRender, outAbs, err)
 		}
-		if p == templateMetadataFilename {
-			return nil
-		}
-		written, err := s.renderOne(p, sub, req.BaseDir, data)
-		if err != nil {
-			return err
-		}
-		created = append(created, written)
-		return nil
-	})
-	if walkErr != nil {
-		return driving.TemplateInitResponse{}, walkErr
+		created = append(created, f.path)
 	}
 
 	sort.Strings(created)
@@ -117,40 +121,73 @@ func (s *TemplateInitService) Init(ctx context.Context, req driving.TemplateInit
 	return driving.TemplateInitResponse{Created: created}, nil
 }
 
+// renderedFile is one entry in the in-memory render plan: the
+// project-relative output path (canonicalised by [domain.NewTemplatePath])
+// and the bytes to write at it. The Init pipeline produces a slice
+// of these during phase 1 and consumes it during phase 2.
+type renderedFile struct {
+	path    string
+	content []byte
+}
+
+// planRender walks the template tree and produces an in-memory
+// render plan without touching the destination filesystem. Every
+// per-file failure short-circuits the walk; on success returns
+// the full list ready for phase-2 writes.
+func (s *TemplateInitService) planRender(sub iofs.FS, data templateData) ([]renderedFile, error) {
+	var planned []renderedFile
+	walkErr := iofs.WalkDir(sub, ".", func(p string, d iofs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			// review-followup F5: classify walk-layer errors so the
+			// CLI exit-code mapping fires correctly.
+			return fmt.Errorf("%w: walk %s: %w", driving.ErrTemplateRender, p, walkErr)
+		}
+		if p == "." || d.IsDir() {
+			return nil
+		}
+		if p == templateMetadataFilename {
+			return nil
+		}
+		f, err := s.renderOne(p, sub, data)
+		if err != nil {
+			return err
+		}
+		planned = append(planned, f)
+		return nil
+	})
+	if walkErr != nil {
+		return nil, walkErr
+	}
+	return planned, nil
+}
+
 // renderOne handles a single non-directory, non-metadata entry from
 // the template's file tree: validate path, read source, render or
-// copy, ensure parent dir, write. Returns the project-relative
-// output path that the caller appends to the Created list.
-func (s *TemplateInitService) renderOne(p string, sub iofs.FS, baseDir string, data templateData) (string, error) {
+// copy. Returns the rendered file (path + bytes) for the phase-2
+// write loop; no disk side effect.
+func (*TemplateInitService) renderOne(p string, sub iofs.FS, data templateData) (renderedFile, error) {
 	outRel := strings.TrimSuffix(p, templateSuffix)
 	tp, err := domain.NewTemplatePath(outRel)
 	if err != nil {
-		return "", fmt.Errorf("%w: %w", driving.ErrInvalidTemplatePath, err)
+		return renderedFile{}, fmt.Errorf("%w: %w", driving.ErrInvalidTemplatePath, err)
 	}
 
 	src, err := iofs.ReadFile(sub, p)
 	if err != nil {
-		return "", fmt.Errorf("%w: read %s: %w", driving.ErrTemplateRender, p, err)
+		return renderedFile{}, fmt.Errorf("%w: read %s: %w", driving.ErrTemplateRender, p, err)
 	}
 
 	var content []byte
 	if strings.HasSuffix(p, templateSuffix) {
 		content, err = renderTemplateBytes(p, src, data)
 		if err != nil {
-			return "", fmt.Errorf("%w: %s: %w", driving.ErrTemplateRender, p, err)
+			return renderedFile{}, fmt.Errorf("%w: %s: %w", driving.ErrTemplateRender, p, err)
 		}
 	} else {
 		content = src
 	}
 
-	outAbs := filepath.Join(baseDir, tp.String())
-	if err := s.fs.MkdirAll(filepath.Dir(outAbs), renderedDirMode); err != nil {
-		return "", fmt.Errorf("%w: mkdir %s: %w", driving.ErrTemplateRender, filepath.Dir(outAbs), err)
-	}
-	if err := s.fs.WriteFile(outAbs, content, renderedFileMode); err != nil {
-		return "", fmt.Errorf("%w: write %s: %w", driving.ErrTemplateRender, outAbs, err)
-	}
-	return tp.String(), nil
+	return renderedFile{path: tp.String(), content: content}, nil
 }
 
 // renderTemplateBytes runs a single `text/template` execution
