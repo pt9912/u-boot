@@ -18,6 +18,7 @@
 package externaltemplates
 
 import (
+	"bytes"
 	"context"
 	"embed"
 	"fmt"
@@ -51,6 +52,16 @@ const catalogRoot = "templates"
 // so a packaging mistake fails fast in CI).
 const metadataFile = "template.yaml"
 
+// supportedAPIVersion is the only `apiVersion` value the adapter
+// accepts. ADR-0009 §Entscheidung pins the v1 schema; future
+// schema evolution must land in a new slice that bumps this
+// constant (and either rejects or migrates v1-shaped files). The
+// gate runs at load time so a packaging mistake — or a future
+// template author copying a v2 example — fails fast with
+// `domain.ErrInvalidTemplate` rather than silently rendering
+// under wrong assumptions (review-followup N4).
+const supportedAPIVersion = "github.com/pt9912/u-boot/template/v1"
+
 // Catalog is the production TemplateCatalog adapter. The zero value
 // is NOT usable — production callers go through [New] (or [NewWithFS]
 // for tests) so the embedded FS handle is set.
@@ -83,6 +94,12 @@ func NewWithFS(fs iofs.FS) *Catalog { return &Catalog{fs: fs} }
 //
 // Errors:
 //
+//   - ctx cancelled before any IO happens → returns ctx.Err() so
+//     callers wiring a short deadline observe cancellation even
+//     though embed.FS itself runs in microseconds (review-followup
+//     N5 — the port contract claims `ctx is honored` and the
+//     adapter now does, instead of relying on the documented
+//     special case).
 //   - The catalog root must exist; a missing root surfaces as a
 //     wrapped [iofs.PathError] (production embed guarantees it
 //     exists, so a runtime miss is a packaging bug).
@@ -90,7 +107,10 @@ func NewWithFS(fs iofs.FS) *Catalog { return &Catalog{fs: fs} }
 //     `template.yaml`, fails the call — partial enumeration would
 //     hide build problems. The per-template prefix in the wrap
 //     ("template %q: …") lets the caller pinpoint the offender.
-func (c *Catalog) List(_ context.Context) ([]domain.TemplateMetadata, error) {
+func (c *Catalog) List(ctx context.Context) ([]domain.TemplateMetadata, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	entries, err := iofs.ReadDir(c.fs, catalogRoot)
 	if err != nil {
 		return nil, fmt.Errorf("read catalog root %q: %w", catalogRoot, err)
@@ -116,6 +136,17 @@ func (c *Catalog) List(_ context.Context) ([]domain.TemplateMetadata, error) {
 // [rawTemplateYAML] struct keeps yaml.v3 tag knowledge inside the
 // adapter; the domain type stays free of YAML-library imports per
 // the depguard `domain-isoliert` rule.
+//
+// Strict decoding (review-followup N1): the decoder is run with
+// KnownFields(true) so a typo like `requiredTool:` (singular) or
+// `addOns:` (instead of `supportedAddOns:`) fails at load time
+// instead of silently dropping the author's intent. Same protection
+// covers stray vendor extensions ahead of any schema-v2 work.
+//
+// apiVersion gate (review-followup N4): rawTemplateYAML.APIVersion
+// must equal [supportedAPIVersion]; a template carrying a future
+// version (e.g. v2) is rejected with a `domain.ErrInvalidTemplate`
+// wrap so the message is uniform with the other validation paths.
 func readTemplate(fs iofs.FS, dir string) (domain.TemplateMetadata, error) {
 	metaPath := path.Join(dir, metadataFile)
 	data, err := iofs.ReadFile(fs, metaPath)
@@ -123,8 +154,14 @@ func readTemplate(fs iofs.FS, dir string) (domain.TemplateMetadata, error) {
 		return domain.TemplateMetadata{}, fmt.Errorf("read %s: %w", metaPath, err)
 	}
 	var raw rawTemplateYAML
-	if err := yaml.Unmarshal(data, &raw); err != nil {
+	dec := yaml.NewDecoder(bytes.NewReader(data))
+	dec.KnownFields(true)
+	if err := dec.Decode(&raw); err != nil {
 		return domain.TemplateMetadata{}, fmt.Errorf("parse %s: %w", metaPath, err)
+	}
+	if raw.APIVersion != supportedAPIVersion {
+		return domain.TemplateMetadata{}, fmt.Errorf("%s: %w: apiVersion %q is not supported (want %q)",
+			metaPath, domain.ErrInvalidTemplate, raw.APIVersion, supportedAPIVersion)
 	}
 	meta := raw.toDomain()
 	if err := meta.Validate(); err != nil {

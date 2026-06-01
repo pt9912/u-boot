@@ -61,7 +61,28 @@ wiederverwendbar.
 | T1 | `65795b5` | Domain-Value-Struct `domain.TemplateMetadata` + Driven-Port `port/driven.TemplateCatalog` + Driven-Adapter `internal/adapter/driven/externaltemplates/` mit `embed.FS`-Scan (`templates/*/template.yaml`), deterministische Sortierung, YAML-Parse via `gopkg.in/yaml.v3` über privater `rawTemplateYAML`-Projektion. `domain.ErrInvalidTemplate`-Sentinel + `Validate()`-Methode (kebab-case-Name, Description, Version pflicht). Bootstrap-Built-in: `templates/basic/template.yaml` mit den `LH-FA-TPL-002`-Pflichtfeldern + `supportedAddOns: [postgres]` + `generatedFiles` analog dem heutigen u-boot init-Ausstoß. 8 Adapter-Tests + Domain-Validate-Coverage 100%. |
 | T2 | `a099d63` | Driving-Port `port/driving.TemplateListUseCase` (`List(ctx, TemplateListRequest) (TemplateListResponse, error)`) + `ErrTemplateCatalog`-Sentinel (Exit-Code 14). Application-Service `application.TemplateListService` — thin Pass-through über den Catalog mit Multi-`%w`-Wrap, damit `errors.Is(err, domain.ErrInvalidTemplate)` durch die Service-Schicht überlebt. Nil-Logger-Fallback auf `noopLogger`. 6 Application-Unit-Tests (Delegate, Leerer Katalog, Sentinel-Wrap, Cause-Preservation, Context-Propagation, Nil-Logger-Construction). |
 | T3 | `23bd91b` | CLI-Subkommando `u-boot template list [--json]` in `internal/adapter/driving/cli/template.go` (`newTemplateCommand` parent + `newTemplateListCommand` leaf analog `config`-Subbaum). Human-Output via `text/tabwriter` (NAME/DESCRIPTION/VERSION-Header, padding=2); JSON-Output via `encoding/json.MarshalIndent` auf eine CLI-lokale DTO (`templateJSON`), damit die Domain-Schicht presentation-agnostic bleibt (ADR-0002 / LH-FA-ARCH-002). Nil-Slices auf `[]` normalisiert. Wiring in `cmd/uboot/main.go` (`externaltemplates.New()` → `NewTemplateListService` → 9. Positional in `cli.New`). `cli.New`-Signatur um `tmplUC` erweitert; alle 7 bestehenden `newApp*`-Test-Helper + `fakeTemplateListUseCase` aktualisiert. `ErrTemplateCatalog` zu `isFilesystemError` und ExitCode-Doc-Comment hinzugefügt. 6 CLI-Tests (Human, Leerer Katalog, JSON-Roundtrip, JSON-Leer-Array, Error-→-Exit-14, Help-Listet-list). Smoketest gegen das gebaute Image: `u-boot template list` → tabellarisch, `u-boot template list --json` → JSON-Array mit den `basic`-Metadaten. |
-| T4 | dieser Commit | Slice-Plan nach `done/`; README.{md,de.md} bekommen einen neuen Bullet für `u-boot template list`; `CHANGELOG.md ## [Unreleased]` Added-Eintrag; `roadmap.md` §Nächste Schritte 3 mit T1-T3-Hashes aktualisiert + slice-v1-template-list ✅-Häkchen; ADR-0009 §Folgepunkte `slice-v1-template-list` ✅-Häkchen + §Entscheidung-Pfad-Korrektur (`external-templates/` → `externaltemplates/`, mit kurzer Begründung). `make docs-check` grün. |
+| T4 | `a7e0d7b` | Slice-Plan nach `done/`; README.{md,de.md} bekommen einen neuen Bullet für `u-boot template list`; `CHANGELOG.md ## [Unreleased]` Added-Eintrag; `roadmap.md` §Nächste Schritte 3 mit T1-T3-Hashes aktualisiert + slice-v1-template-list ✅-Häkchen; ADR-0009 §Folgepunkte `slice-v1-template-list` ✅-Häkchen + §Entscheidung-Pfad-Korrektur (`external-templates/` → `externaltemplates/`, mit kurzer Begründung). `make docs-check` grün. |
+| Review | dieser Commit | Code-Review-Followup: fünf Findings (N1..N5) direkt am Slice gepatcht — yaml `KnownFields(true)` gegen Tippfehler, Regex-Verschärfung gegen konsekutive Bindestriche, `default,omitempty` entfernt, apiVersion-Gate, embed.FS-Adapter ehrt jetzt ctx. Siehe Review-Followup-Tabelle unten. |
+
+## Review-Followup (post-T4)
+
+Code-Review (xhigh-effort, 5 Angles + Sweep) hat fünf
+Inkonsistenzen zwischen Doku-Anspruch und Implementierung
+gefunden. Im Followup-Commit gefixt (gleicher Branch, kein
+eigener Slice — `make gates` grün nach den Patches):
+
+| N | Datei | Befund | Fix |
+| - | ----- | ------ | --- |
+| N1 | `externaltemplates/catalog.go` | `yaml.Unmarshal` schluckte unbekannte Felder: `requiredTool:` (singular) wäre stillschweigend verschwunden. | `yaml.NewDecoder(...).KnownFields(true).Decode(...)` — Typos failen jetzt am Load. Neuer Test `TestCatalog_List_UnknownYAMLFieldRejected`. |
+| N2 | `domain/template_metadata.go` | Regex `^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$` erlaubte konsekutive Bindestriche (`my--bad`). | Regex auf `^[a-z0-9]+(?:-[a-z0-9]+)*$` verschärft — Einzel-Bindestrich-Segmente erzwungen. Neuer Test-Case (`consecutive dashes rejected (review-followup N2)`) + Leading-dash-Test. |
+| N3 | `cli/template.go` | `json:"default,omitempty"` zerstörte gerade die Missing-vs-Empty-Unterscheidung, die der Kommentar zu bewahren versprach. | `,omitempty` entfernt; Kommentar umgekehrt. Bestehende Tests passieren unverändert (Fixtures benutzen non-empty Defaults). |
+| N4 | `externaltemplates/catalog.go` | `rawTemplateYAML.APIVersion` wurde geparst aber nie validiert; ein Template mit `apiVersion: …/v999` wäre durchgerutscht. | Konstante `supportedAPIVersion` + Gate in `readTemplate` mit `domain.ErrInvalidTemplate`-Wrap. Neuer Test `TestCatalog_List_UnsupportedAPIVersionRejected`. |
+| N5 | `externaltemplates/catalog.go` + `port/driven/template_catalog.go` | Port-Doc versprach `ctx is honored`, der embed.FS-Adapter ignorierte ihn aber explizit (siehe „ignores it"-Sonderfall). | Adapter macht jetzt `ctx.Err()`-Check am Entry; Port-Doc gleicht den Sonderfall aus. Neuer Test `TestCatalog_List_HonorsCancelledContext`. |
+
+Gates nach Followup grün: lint + test + coverage-gate 90.30%
+(>= 90%) + docs-check. Smoke-Test gegen `docker run --rm u-boot
+template list` und `... --json` zeigt unverändertes Output für
+das `basic`-Bootstrap-Template (keine Wire-Shape-Regression).
 
 ## Out of Scope
 

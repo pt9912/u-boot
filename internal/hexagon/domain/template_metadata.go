@@ -9,11 +9,17 @@ import (
 
 // templateNameRE pins the kebab-case identifier shape from
 // ADR-0009 §Entscheidung (`name: micronaut`, `name: sveltekit`,
-// `name: micronaut-sveltekit`). The same shape lets the future
-// `u-boot init --template <name>` resolver round-trip the catalog
-// listing without ambiguity. Single-character names are allowed
-// (no trailing-char constraint when len == 1).
-var templateNameRE = regexp.MustCompile(`^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$`)
+// `name: micronaut-sveltekit`). The pattern enforces single-dash
+// segment separators: an alphanumeric segment, optionally followed
+// by `-segment` repetitions. Single-character names are allowed
+// (a single `[a-z0-9]+` segment with no separators).
+//
+// Rejected by design:
+//   - empty string (no segment)
+//   - leading or trailing dash (`-foo`, `foo-`)
+//   - consecutive dashes (`my--bad`) — would violate the
+//     kebab-case intent ADR-0009 examples imply.
+var templateNameRE = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
 
 // ErrInvalidTemplate signals that a TemplateMetadata value failed
 // the LH-FA-TPL-002 / ADR-0009 §Entscheidung minimum (Name +

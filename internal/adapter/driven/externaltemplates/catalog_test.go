@@ -133,6 +133,68 @@ func TestCatalog_List_InvalidMetadataWrapsErrInvalidTemplate(t *testing.T) {
 	}
 }
 
+func TestCatalog_List_UnknownYAMLFieldRejected(t *testing.T) {
+	t.Parallel()
+	// Review-followup N1: yaml.v3's default mode silently drops
+	// unknown fields. The strict decoder must reject a typo like
+	// `requiredTool:` (singular) so the author hears about it.
+	fs := fstest.MapFS{
+		"templates/typo/template.yaml": &fstest.MapFile{Data: []byte(
+			"apiVersion: github.com/pt9912/u-boot/template/v1\n" +
+				"name: typo\n" +
+				"description: \"singular typo for requiredTools\"\n" +
+				"version: 1.0.0\n" +
+				"requiredTool: [jdk]\n", // singular — would silently vanish without KnownFields(true)
+		)},
+	}
+	_, err := externaltemplates.NewWithFS(fs).List(context.Background())
+	if err == nil {
+		t.Fatal("List: want error for unknown YAML field, got nil (typos must not silently parse)")
+	}
+}
+
+func TestCatalog_List_UnsupportedAPIVersionRejected(t *testing.T) {
+	t.Parallel()
+	// Review-followup N4: a template carrying a future apiVersion
+	// must fail at load time rather than silently render under
+	// wrong assumptions.
+	fs := fstest.MapFS{
+		"templates/future/template.yaml": &fstest.MapFile{Data: []byte(
+			"apiVersion: github.com/pt9912/u-boot/template/v999\n" +
+				"name: future\n" +
+				"description: \"hypothetical v999\"\n" +
+				"version: 1.0.0\n",
+		)},
+	}
+	_, err := externaltemplates.NewWithFS(fs).List(context.Background())
+	if err == nil {
+		t.Fatal("List: want error for unsupported apiVersion, got nil")
+	}
+	if !errors.Is(err, domain.ErrInvalidTemplate) {
+		t.Errorf("err = %v, want wrap of domain.ErrInvalidTemplate", err)
+	}
+}
+
+func TestCatalog_List_HonorsCancelledContext(t *testing.T) {
+	t.Parallel()
+	// Review-followup N5: the port doc claims every adapter MUST
+	// observe ctx cancellation; the production embed.FS adapter
+	// satisfies it via an entry-time ctx.Err() check.
+	fs := fstest.MapFS{
+		"templates/basic/template.yaml": &fstest.MapFile{Data: []byte(yamlBlob("basic", "b", "1.0.0"))},
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // cancel before the call so List sees the cancellation at entry.
+
+	_, err := externaltemplates.NewWithFS(fs).List(ctx)
+	if err == nil {
+		t.Fatal("List: want ctx-cancel error, got nil")
+	}
+	if !errors.Is(err, context.Canceled) {
+		t.Errorf("err = %v, want context.Canceled", err)
+	}
+}
+
 func TestCatalog_List_MissingCatalogRootReturnsError(t *testing.T) {
 	t.Parallel()
 	// Empty FS — no `templates/` directory exists. Production embed

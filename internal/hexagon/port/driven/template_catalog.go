@@ -28,9 +28,11 @@ import (
 //   - Errors propagate raw; the application layer wraps them with
 //     a driving-port sentinel before they leave the hexagon.
 //
-// ctx is honored so a slow future adapter (network-backed catalog,
-// large local tree) can be cancelled; the production embed.FS
-// adapter ignores it.
+// ctx is honored: every adapter MUST observe cancellation. The
+// production embed.FS adapter does an entry-time `ctx.Err()` check
+// (cheap, microsecond enumeration); future adapters with longer
+// IO surface (network-backed catalog, large local tree) check
+// between iterations as well.
 type TemplateCatalog interface {
 	List(ctx context.Context) ([]domain.TemplateMetadata, error)
 }

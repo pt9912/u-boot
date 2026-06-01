@@ -171,13 +171,17 @@ type templateJSON struct {
 }
 
 // templateVariableJSON mirrors [domain.TemplateVariable] for JSON
-// output. Default uses `omitempty` because a missing-default has a
-// real semantic difference from `default: ""` once
-// slice-v1-template-init lands the prompt path.
+// output. Default is emitted unconditionally (no `omitempty`) so
+// template authors who declare `default: ""` are not silently
+// stripped — preserving the missing-vs-empty distinction the
+// future slice-v1-template-init prompt path will need
+// (review-followup N3 — earlier version had `omitempty`, which
+// destroyed the very distinction the comment justifying it
+// claimed to preserve).
 type templateVariableJSON struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Default     string `json:"default,omitempty"`
+	Default     string `json:"default"`
 	Required    bool   `json:"required"`
 }
 

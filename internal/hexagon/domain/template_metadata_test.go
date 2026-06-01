@@ -58,6 +58,18 @@ func TestTemplateMetadata_Validate(t *testing.T) {
 			wantProbs: []string{`name "basic-" must be kebab-case`},
 		},
 		{
+			name:      "consecutive dashes rejected (review-followup N2)",
+			meta:      domain.TemplateMetadata{Name: "my--bad", Description: "x", Version: "1"},
+			wantErr:   true,
+			wantProbs: []string{`name "my--bad" must be kebab-case`},
+		},
+		{
+			name:      "leading dash rejected",
+			meta:      domain.TemplateMetadata{Name: "-foo", Description: "x", Version: "1"},
+			wantErr:   true,
+			wantProbs: []string{`name "-foo" must be kebab-case`},
+		},
+		{
 			name:      "missing description",
 			meta:      domain.TemplateMetadata{Name: "basic", Version: "1"},
 			wantErr:   true,
