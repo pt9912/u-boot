@@ -230,6 +230,17 @@ func (s *AddServiceService) Add(ctx context.Context, req driving.AddServiceReque
 		return driving.AddServiceResponse{}, err
 	}
 
+	// slice-v1-addons-deps T2: dependency-check between detection and
+	// state-machine dispatch. Postgres has no declared deps today, so
+	// the `len(deps) > 0` guard short-circuits the cfg-load for the
+	// MVP catalogue. Future Keycloak/OTel slices populate
+	// `dependenciesFor` and reach this branch.
+	if deps := dependenciesFor(req.ServiceName); len(deps) > 0 {
+		if depErr := s.checkAddDependencies(req.BaseDir, req.ServiceName, deps); depErr != nil {
+			return driving.AddServiceResponse{}, depErr
+		}
+	}
+
 	s.logger.Debug("detected service state",
 		"baseDir", req.BaseDir,
 		"service", req.ServiceName.String(),
@@ -284,6 +295,37 @@ func (s *AddServiceService) Add(ctx context.Context, req driving.AddServiceReque
 			"unhandled service state %s for %q",
 			state.String(), req.ServiceName.String())
 	}
+}
+
+// checkAddDependencies loads u-boot.yaml again, runs the pure
+// [resolveAddDependencies] resolver against the declared deps, and
+// returns [driving.ErrDependenciesRequired] when at least one
+// required service is missing from the registered catalogue
+// (slice-v1-addons-deps T2).
+//
+// The redundant cfg-load (detectServiceState already parsed
+// u-boot.yaml) is the price for keeping detectServiceState's
+// signature unchanged and shared with [RemoveServiceService].
+// Postgres has no declared deps so the function is only reached
+// once a future add-on (Keycloak, OTel) populates
+// [dependenciesFor].
+//
+// T3 layers the four-mode CLI dispatch (`--with-deps` / `--yes` /
+// `--no-interactive` / interactive prompt) on top — the
+// fail-fast / exit-10 path returned here is the no-flag,
+// non-interactive default. Tests calling Add() directly hit this
+// path until T3 lands.
+func (s *AddServiceService) checkAddDependencies(baseDir string, svc domain.ServiceName, deps []domain.AddOnDependency) error {
+	_, _, cfg, err := s.loadAndParseUBootYAML(baseDir)
+	if err != nil {
+		return fmt.Errorf("dependency check: %w", err)
+	}
+	missing := resolveAddDependencies(cfg, deps)
+	if len(missing) == 0 {
+		return nil
+	}
+	return fmt.Errorf("%w: %q requires %v which is/are not registered — add them first or rerun with --with-deps",
+		driving.ErrDependenciesRequired, svc.String(), missingServiceNamesAsStrings(missing))
 }
 
 // detectServiceState classifies the LH-FA-ADD-005 state of svc inside

@@ -1,6 +1,9 @@
 package application
 
 import (
+	"testing"
+
+	yamladapter "github.com/pt9912/u-boot/internal/adapter/driven/yaml"
 	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
@@ -104,6 +107,51 @@ type AddServicePlanForTest struct {
 // (postgres has no deps; keycloak / otel land in their own slices).
 func DependenciesForTest(svc domain.ServiceName) []domain.AddOnDependency {
 	return dependenciesFor(svc)
+}
+
+// ResolveAddDependenciesForTest exposes the unexported
+// [resolveAddDependencies] resolver so slice-v1-addons-deps T2
+// tests can drive it with synthetic [domain.AddOnDependency]
+// inputs against a fixture u-boot.yaml without going through the
+// AddServiceUseCase wiring. Returns the list of services that
+// must be registered before the add request can proceed.
+func ResolveAddDependenciesForTest(t *testing.T, yamlBody []byte, deps []domain.AddOnDependency) []domain.ServiceName {
+	t.Helper()
+	cfg := mustParseUBootYAML(t, yamlBody)
+	return resolveAddDependencies(cfg, deps)
+}
+
+// ResolveScalarPathForTest exposes the unexported
+// [resolveScalarPath] helper so slice-v1-addons-deps T2 tests can
+// pin the path → canonical-string mapping per known path.
+func ResolveScalarPathForTest(t *testing.T, yamlBody []byte, path string) string {
+	t.Helper()
+	cfg := mustParseUBootYAML(t, yamlBody)
+	return resolveScalarPath(cfg, path)
+}
+
+// CheckAddDependenciesForTest exposes the unexported
+// [AddServiceService.checkAddDependencies] method so slice-v1-
+// addons-deps T2 tests can drive the integration path (load + run
+// resolver + wrap missing into ErrDependenciesRequired) with
+// synthetic dependency declarations — Postgres has no production
+// deps so this path is otherwise unreachable until slice-v1-
+// keycloak lands.
+func (s *AddServiceService) CheckAddDependenciesForTest(baseDir string, svc domain.ServiceName, deps []domain.AddOnDependency) error {
+	return s.checkAddDependencies(baseDir, svc, deps)
+}
+
+// mustParseUBootYAML deserialises a u-boot.yaml fixture into the
+// in-memory config struct via the production yaml.v3 adapter,
+// failing the test if the fixture is malformed.
+func mustParseUBootYAML(t *testing.T, body []byte) ubootYAMLConfig {
+	t.Helper()
+	var cfg ubootYAMLConfig
+	codec := yamladapter.New()
+	if err := codec.Unmarshal(body, &cfg); err != nil {
+		t.Fatalf("parse u-boot.yaml fixture: %v", err)
+	}
+	return cfg
 }
 
 // DetectServiceStateForTest exposes the unexported

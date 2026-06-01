@@ -90,6 +90,20 @@ var ErrServiceUnsupported = errors.New("service not supported")
 // hint pointing at manual cleanup.
 var ErrServiceInconsistent = errors.New("service state inconsistent")
 
+// ErrDependenciesRequired signals that the add request would
+// activate an add-on whose declared dependencies
+// (`domain.AddOnDependency`) are not satisfied in the current
+// u-boot.yaml — at least one required service is not registered.
+// Maps to LH-FA-CLI-006 exit code 10.
+//
+// The fail-fast path returns this sentinel; slice-v1-addons-deps
+// T3 adds the four-mode CLI dispatch (`--with-deps` / `--yes` /
+// `--no-interactive` / interactive prompt) on top so the error
+// is reachable only when the user explicitly opted into fail-fast
+// (no flag + non-interactive shell), or for tests bypassing the
+// CLI.
+var ErrDependenciesRequired = errors.New("service add-on requires missing dependencies")
+
 // ErrProjectNotInitialized signals that BaseDir contains no
 // `u-boot.yaml` (or one that cannot be parsed into the expected
 // schema). LH-FA-ADD-001 requires an initialized project; the use

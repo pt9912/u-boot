@@ -203,6 +203,7 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 //          service (ErrServiceUnsupported), LH-FA-ADD-005
 //          inconsistent service state (ErrServiceInconsistent),
 //          LH-FA-ADD-007 service-not-registered (ErrServiceUnregistered),
+//          LH-FA-ADD-006 add-on dependencies missing (ErrDependenciesRequired),
 //          M6 missing compose.yaml (ErrComposeFileMissing) and
 //          destructive confirmation refused (ErrConfirmationRequired)
 //   - 11 — fachlicher Umgebungsfehler: `u-boot doctor` reported at
@@ -292,7 +293,8 @@ func isValidationError(err error) bool {
 func isServiceValidationError(err error) bool {
 	return errors.Is(err, driving.ErrServiceUnsupported) ||
 		errors.Is(err, driving.ErrServiceInconsistent) ||
-		errors.Is(err, driving.ErrServiceUnregistered)
+		errors.Is(err, driving.ErrServiceUnregistered) ||
+		errors.Is(err, driving.ErrDependenciesRequired)
 }
 
 // isTemplateInitValidationError carves the slice-v1-template-init
