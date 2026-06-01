@@ -25,14 +25,6 @@ in `in-progress/`.
 | V1 Logs / Dry-Run / Diff | Open | `LH-FA-UP-005`, `LH-FA-CLI-007/008` | offen |
 | Later Migration / Custom Templates | Open | `LH-FA-CONF-006`, `LH-FA-TPL-003` (in ADR-0009 §Folgepunkte als `slice-later-local-templates` benannt), `LH-DA-004` | offen |
 
-## Carveout-Auflösungs-Slices
-
-Audit-Trail der Slices, die offene Carveouts (`LH-FA-PROJDOCS-005`)
-geschlossen haben, ist nach [`carveouts.md`](carveouts.md)
-§Carveout-Auflösungs-Slices (historisch) ausgelagert. Quelle der
-Wahrheit für das aktuelle Carveout-Inventar (temporär + permanent)
-ist ebenfalls [`carveouts.md`](carveouts.md).
-
 ## Releases
 
 Roadmap ist release-orientiert: jeder Eintrag in der Releases-
@@ -48,7 +40,9 @@ Slice-Tabellen leben unten als jeweils eigene Sektion.
 | v0.3.0  | 🛠 in progress (3/5) | — | — | Add-on Catalogue Expansion: `add-remove`, `addons-deps`, `keycloak`, `otel` + V1-Audit | §[v0.3.0 — Milestone-Tabelle](#v030--milestone-tabelle-add-on-catalogue-expansion) |
 | v0.4.0+ | 📋 Backlog | — | — | V1-Generators (logs, `--json`/`--dry-run`), Later (Migration, Custom-Data-Sources), Templates-local, Podman-formal, Distributions-Restwege, Branch-Protection-UI | §[v0.4.0+ — Backlog / Trigger-Slices](#v040--backlog--trigger-slices) |
 
-## MVP-Bilanz — **MVP vollständig** (Stand `bc487fc`; M8-T5 `25cb123`)
+## MVP-Bilanz
+
+**MVP vollständig** — Stand `bc487fc`; M8-T5 `25cb123`.
 
 **Alle 5 MVP-`LH-AK-*` gepinnt** mit benannten e2e-Tests:
 LH-AK-001 (Init+Doctor) `8525c4c`, LH-AK-002 (Postgres-Flow)
@@ -189,6 +183,14 @@ Podman-formal, Logs, JSON/Dry-Run, Migration, Custom-Data-Sources)
 sind in §[v0.4.0+ — Backlog](#v040--backlog--trigger-slices) oben
 gelistet; der laufende v0.3.0-Milestone in
 §[v0.3.0 — Milestone-Tabelle](#v030--milestone-tabelle-add-on-catalogue-expansion).
+
+## Verwandte Dokumente
+
+- [`carveouts.md`](carveouts.md) — Master-Inventar aller temporären und
+  permanenten Carveouts (`LH-FA-PROJDOCS-005`), plus historischer
+  Audit-Trail der Slices, die offene Carveouts geschlossen haben.
+- [`README.md`](../README.md) — Slice-/Tranche-Konventionen für
+  Dateinamen in `docs/plan/planning/` (`LH-FA-PROJDOCS-003`).
 
 ## Lifecycle-Hinweis
 
