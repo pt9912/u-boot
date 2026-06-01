@@ -66,6 +66,10 @@ type App struct {
 	// (LH-FA-TPL-004; slice-v1-template-list).
 	templateListUseCase driving.TemplateListUseCase
 
+	// removeServiceUseCase implements `u-boot remove <service>`
+	// (LH-FA-ADD-007; slice-v1-add-remove).
+	removeServiceUseCase driving.RemoveServiceUseCase
+
 	// getwd is the working-directory probe; defaults to os.Getwd.
 	// Tests inject a fake via [WithGetwd] so they do not depend on
 	// the host pwd.
@@ -120,18 +124,19 @@ func WithLogLevel(level *slog.LevelVar) Option {
 // New constructs an App. The version string and every use-case
 // implementation must be non-nil at call time; the CLI package
 // trusts the wiring layer to honor that.
-func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, addUC driving.AddServiceUseCase, upUC driving.UpUseCase, downUC driving.DownUseCase, genUC driving.GenerateUseCase, cfgUC driving.ConfigUseCase, tmplUC driving.TemplateListUseCase, opts ...Option) *App {
+func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, addUC driving.AddServiceUseCase, upUC driving.UpUseCase, downUC driving.DownUseCase, genUC driving.GenerateUseCase, cfgUC driving.ConfigUseCase, tmplUC driving.TemplateListUseCase, removeUC driving.RemoveServiceUseCase, opts ...Option) *App {
 	a := &App{
-		version:             version,
-		initUseCase:         initUC,
-		doctorUseCase:       doctorUC,
-		addServiceUseCase:   addUC,
-		upUseCase:           upUC,
-		downUseCase:         downUC,
-		generateUseCase:     genUC,
-		configUseCase:       cfgUC,
-		templateListUseCase: tmplUC,
-		getwd:               os.Getwd,
+		version:              version,
+		initUseCase:          initUC,
+		doctorUseCase:        doctorUC,
+		addServiceUseCase:    addUC,
+		upUseCase:            upUC,
+		downUseCase:          downUC,
+		generateUseCase:      genUC,
+		configUseCase:        cfgUC,
+		templateListUseCase:  tmplUC,
+		removeServiceUseCase: removeUC,
+		getwd:                os.Getwd,
 	}
 	for _, opt := range opts {
 		opt(a)
@@ -197,6 +202,7 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 //          (ErrProjectNotInitialized), LH-FA-ADD-002 unknown
 //          service (ErrServiceUnsupported), LH-FA-ADD-005
 //          inconsistent service state (ErrServiceInconsistent),
+//          LH-FA-ADD-007 service-not-registered (ErrServiceUnregistered),
 //          M6 missing compose.yaml (ErrComposeFileMissing) and
 //          destructive confirmation refused (ErrConfirmationRequired)
 //   - 11 — fachlicher Umgebungsfehler: `u-boot doctor` reported at
@@ -268,15 +274,25 @@ func isValidationError(err error) bool {
 		errors.Is(err, driving.ErrBackupUnsupportedKind) ||
 		errors.Is(err, driving.ErrForceRequiresBackup) ||
 		errors.Is(err, driving.ErrProjectNotInitialized) ||
-		errors.Is(err, driving.ErrServiceUnsupported) ||
-		errors.Is(err, driving.ErrServiceInconsistent) ||
 		errors.Is(err, driving.ErrComposeFileMissing) ||
 		errors.Is(err, driving.ErrConfirmationRequired) ||
 		errors.Is(err, driving.ErrGenerateManualConflict) ||
+		isServiceValidationError(err) ||
 		isConfigValidationError(err) ||
 		isTemplateInitValidationError(err) ||
 		errors.Is(err, domain.ErrInvalidProjectName) ||
 		errors.Is(err, domain.ErrInvalidServiceName)
+}
+
+// isServiceValidationError bundles the add-on lifecycle sentinels
+// (LH-FA-ADD-002/-005/-007) into one helper so [isValidationError]
+// stays under the gocyclo threshold. All three share the LH-FA-
+// CLI-006 code-10 mapping ("user must fix the add / remove
+// invocation"); they are conceptually one cluster.
+func isServiceValidationError(err error) bool {
+	return errors.Is(err, driving.ErrServiceUnsupported) ||
+		errors.Is(err, driving.ErrServiceInconsistent) ||
+		errors.Is(err, driving.ErrServiceUnregistered)
 }
 
 // isTemplateInitValidationError carves the slice-v1-template-init

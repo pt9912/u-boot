@@ -165,47 +165,71 @@ func (f *fakeTemplateListUseCase) List(_ context.Context, req driving.TemplateLi
 	return f.resp, f.err
 }
 
+// fakeRemoveServiceUseCase records every Remove invocation and
+// returns the configured response/error. Zero value answers a
+// generic ErrServiceUnsupported (slice-v1-add-remove T4): a freshly
+// constructed instance signals "use case wired but no expectations
+// set", which is the default test-helper shape.
+type fakeRemoveServiceUseCase struct {
+	called  bool
+	lastReq driving.RemoveServiceRequest
+	resp    driving.RemoveServiceResponse
+	err     error
+}
+
+func (f *fakeRemoveServiceUseCase) Remove(_ context.Context, req driving.RemoveServiceRequest) (driving.RemoveServiceResponse, error) {
+	f.called = true
+	f.lastReq = req
+	return f.resp, f.err
+}
+
 func newApp(uc driving.InitProjectUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", uc, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, opts...)
+	return cli.New("0.0.0-test", uc, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, opts...)
 }
 
 // newAppWithDoctor is newApp's variant for doctor-focused tests; the
 // caller can wire a fake DoctorUseCase explicitly.
 func newAppWithDoctor(uc driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", uc, doctorUC, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, opts...)
+	return cli.New("0.0.0-test", uc, doctorUC, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, opts...)
 }
 
 // newAppWithAdd is newApp's variant for add-focused tests.
 func newAppWithAdd(uc driving.AddServiceUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, uc, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, uc, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, opts...)
 }
 
 // newAppWithUp is newApp's variant for `u-boot up`-focused tests.
 func newAppWithUp(uc driving.UpUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, uc, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, uc, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, opts...)
 }
 
 // newAppWithDown is newApp's variant for `u-boot down`-focused tests.
 func newAppWithDown(uc driving.DownUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, uc, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, uc, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, opts...)
 }
 
 // newAppWithGenerate is newApp's variant for `u-boot generate`-focused
 // tests.
 func newAppWithGenerate(uc driving.GenerateUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, uc, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, uc, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, opts...)
 }
 
 // newAppWithConfig is newApp's variant for `u-boot config`-focused
 // tests.
 func newAppWithConfig(uc driving.ConfigUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, uc, &fakeTemplateListUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, uc, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, opts...)
 }
 
 // newAppWithTemplateList is newApp's variant for
 // `u-boot template list`-focused tests (slice-v1-template-list T3).
 func newAppWithTemplateList(uc driving.TemplateListUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, uc, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, uc, &fakeRemoveServiceUseCase{}, opts...)
+}
+
+// newAppWithRemove is newApp's variant for `u-boot remove`-focused
+// tests (slice-v1-add-remove T4).
+func newAppWithRemove(uc driving.RemoveServiceUseCase, opts ...cli.Option) *cli.App {
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, uc, opts...)
 }
 
 func mustProjectName(t *testing.T, raw string) domain.ProjectName {
