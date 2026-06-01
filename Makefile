@@ -89,10 +89,20 @@ test-docker: ## Run //go:build docker integration tests against the host docker 
 	@#    Bedingungen, Netzwerk-Namespace-Voraussetzung). The
 	@#    Docker socket is also mounted so the test's Compose calls
 	@#    reach the host daemon.
+	@#
+	@#    `/tmp` wird host-shared zum Test-Container gemountet:
+	@#    `t.TempDir()` schreibt unter `/tmp/...`, und Compose-Bind-
+	@#    Mount-Pfade (z. B. die `otel-collector-config.yaml` aus
+	@#    slice-v1-otel) werden vom Daemon (Host) aufgelöst, nicht
+	@#    vom Test-Container. Ohne den Share sieht der Daemon nur
+	@#    leere Verzeichnisse statt der vom Test geschriebenen
+	@#    Dateien (slice-v1-otel T3 CI-Diagnose: Collector
+	@#    `failed to get config: ... is a directory`).
 	$(DOCKER_BUILD) --target test-docker-tools -t $(IMAGE):test-docker-tools .
 	docker run --rm --network=host \
 	    -v "$(CURDIR)":/src -w /src \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
+	    -v /tmp:/tmp \
 	    $(IMAGE):test-docker-tools \
 	    go test -tags docker ./...
 
