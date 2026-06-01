@@ -59,10 +59,10 @@ table below maps each subcommand to its Lastenheft IDs.
   language (Go), build (Docker-only), CI, CLI framework (Cobra),
   distribution (GHCR + binary), template format (YAML + `text/template`),
   plugin policy (static), and the no-HTTP-adapter stance.
-- **PR-blocking CI.** Three required GitHub-Actions jobs
-  (`gates (lint + test + coverage-gate)`, `security-gates (govulncheck)`,
-  `image-scan (trivy HIGH+CRITICAL)`) plus a Markdown-link validator on
-  every push.
+- **PR-blocking CI.** Three required GitHub-Actions jobs on every
+  push: `gates (lint + test + coverage-gate)` (which also runs the
+  Markdown-link validator `docs-check`), `security-gates (govulncheck)`,
+  and `image-scan (trivy HIGH+CRITICAL)`.
 - **Docker-only inner-loop.** `make build` builds the runtime image
   without any Go toolchain on the host; `make gates` runs lint + test
   + coverage in the same pinned image stack CI uses.

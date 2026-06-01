@@ -64,10 +64,10 @@ unten mappt jedes Subkommando auf seine Lastenheft-IDs.
   (YAML + `text/template`), Plugin-Policy (statisch) und die
   „kein HTTP-Adapter"-Entscheidung ab.
 - **PR-blockierende CI.** Drei PR-blockierende GitHub-Actions-Jobs
-  (`gates (lint + test + coverage-gate)`,
-  `security-gates (govulncheck)`,
-  `image-scan (trivy HIGH+CRITICAL)`) plus ein Markdown-Link-
-  Validator bei jedem Push.
+  bei jedem Push: `gates (lint + test + coverage-gate)` (läuft auch
+  den Markdown-Link-Validator `docs-check`),
+  `security-gates (govulncheck)` und
+  `image-scan (trivy HIGH+CRITICAL)`.
 - **Docker-only Inner-Loop.** `make build` baut das Runtime-Image
   ohne Go-Toolchain am Host; `make gates` läuft Lint + Test +
   Coverage im selben pinned Image-Stack den CI verwendet.
