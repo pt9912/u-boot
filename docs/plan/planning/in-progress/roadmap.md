@@ -12,7 +12,7 @@ Roadmap ist release-orientiert:
 | ------- | ------------------- | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | v0.1.0  | ✅ released          | `49ec464`  | 2026-05-31 | MVP-Core (M1..M8 + MVP-Closure) + Release-Pipeline + GHCR-Distribution                                                                                           |
 | v0.2.0  | ✅ released          | `595acdf`  | 2026-06-01 | Container-aware doctor, Binary-Distribution (6 Plattformen), Template-Katalog (`template list` + `init --template`)                                              |
-| v0.3.0  | ✅ feature-complete (5/5; awaits release-cut) | —          | —          | Add-on Catalogue Expansion: `add-remove`, `addons-deps`, `keycloak`, `otel` + V1-Audit                                                                           |
+| v0.3.0  | 🔖 ready to tag (5/5 ✅; Release-Cut [`slice-v1-release-cut-v0.3.0`](../done/slice-v1-release-cut-v0.3.0.md) T1..T3 ✅) | —          | —          | Add-on Catalogue Expansion: `add-remove`, `addons-deps`, `keycloak`, `otel` + V1-Audit                                                                           |
 | v0.4.0  | 📋 planned/open       | —          | —          | V1-Generators (logs, `--json`/`--dry-run`), Later (Migration, Custom-Data-Sources), Templates-local, Podman-formal, Distributions-Restwege, Branch-Protection-UI |
 
 

@@ -7,9 +7,10 @@ environments — project structure, Docker Compose stack, devcontainer
 configuration, service add-ons (PostgreSQL, Keycloak, OpenTelemetry, …),
 and the usual recurring artefacts (README, CHANGELOG, `.env.example`).
 
-> **Status:** `v0.2.0` released 2026-06-01 (GHCR + six-platform binaries);
-> `v0.3.0` "Add-on Catalogue Expansion" milestone in progress (1/5 slices).
-> Full release table below.
+> **Status:** `v0.3.0` "Add-on Catalogue Expansion" milestone
+> feature-complete (5/5 slices); ready to tag. Adds `add keycloak` +
+> `add otel` + `remove <service>` + `--with-deps` to the catalogue.
+> Last tagged release: `v0.2.0` (2026-06-01). Full release table below.
 
 The normative requirements ([`spec/lastenheft.md`](spec/lastenheft.md))
 are written in German; CLI output and generated files are English
@@ -142,7 +143,7 @@ Re-init on an existing project requires an explicit strategy
 | ------- | ---- | ---------- |
 | `v0.1.0` | 2026-05-31 | MVP complete — seven subcommands (`init`, `doctor`, `add`, `up`, `down`, `generate`, `config`), all MVP-priority Lastenheft IDs delivered. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.1.0). |
 | `v0.2.0` | 2026-06-01 | Container-aware `doctor`, six-platform binary distribution, `template list` + `init --template basic`. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.2.0). |
-| `v0.3.0` | in progress (1/5) | "Add-on Catalogue Expansion" milestone — Keycloak + OpenTelemetry + add-on dependency resolution + `remove <service>` (delivered). Milestone table in [`roadmap.md §v0.3.0`](docs/plan/planning/in-progress/roadmap.md). |
+| `v0.3.0` | ready to tag (5/5 ✅) | "Add-on Catalogue Expansion" milestone feature-complete — `u-boot add keycloak` (LH-FA-ADD-003), `add otel` (LH-FA-ADD-004), `add <service> --with-deps` (LH-FA-ADD-006), `remove <service> [--purge]` (LH-FA-ADD-007), plus a doku-audit closure for three V1 spec-IDs. Milestone table in [`roadmap.md §v0.3.0`](docs/plan/planning/in-progress/roadmap.md). |
 
 The roadmap ([`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md))
 has the full audit trail: Phase table (M1..M8 + Closure + V1
