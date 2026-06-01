@@ -247,10 +247,15 @@ func TestRemoveServiceService_Remove_WriteFailurePropagates(t *testing.T) {
 	}
 }
 
-func TestRemoveServiceService_Remove_InconsistentBlockState(t *testing.T) {
+func TestRemoveServiceService_Remove_InconsistentBlockConverges(t *testing.T) {
 	t.Parallel()
-	// services.postgres.enabled: true but compose has NO managed
-	// block → InconsistentBlock state → ErrServiceInconsistent.
+	// Review-followup F1: InconsistentBlock state (services.postgres.
+	// enabled: true + no compose block) is now allowed to converge
+	// forwards via Remove. The dispatch sends it into executeRemove
+	// instead of rejecting with ErrServiceInconsistent. Use case:
+	// a previous Remove crashed mid-flight (compose-write OK, env-
+	// write failed) — re-running Remove should complete the unfinished
+	// work, not block on a manual-cleanup error.
 	fs := newFakeFS()
 	if err := fs.WriteFile("/proj/u-boot.yaml",
 		[]byte("schemaVersion: 1\nproject:\n  name: demo\nservices:\n  postgres:\n    enabled: true\n"), 0o644); err != nil {
@@ -261,15 +266,26 @@ func TestRemoveServiceService_Remove_InconsistentBlockState(t *testing.T) {
 		t.Fatalf("seed compose.yaml: %v", err)
 	}
 	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, nil, nil)
-	_, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
+	resp, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
 		BaseDir:     "/proj",
 		ServiceName: mustServiceName(t, "postgres"),
 	})
-	if err == nil {
-		t.Fatal("Remove: want ErrServiceInconsistent, got nil")
+	if err != nil {
+		t.Fatalf("Remove: %v (want convergence, not error)", err)
 	}
-	if !errors.Is(err, driving.ErrServiceInconsistent) {
-		t.Errorf("err = %v, want wrap of driving.ErrServiceInconsistent", err)
+	if resp.State != domain.ServiceStateDeactivated {
+		t.Errorf("State = %v, want Deactivated", resp.State)
+	}
+	// u-boot.yaml should now have enabled: false; compose.yaml's
+	// no-block case is a skip (planBlockRemoval returns skip=true);
+	// .env.example didn't exist → skip. So Changed should be just
+	// u-boot.yaml.
+	wantChanged := []string{"u-boot.yaml"}
+	if !equalStringsTest(resp.Changed, wantChanged) {
+		t.Errorf("Changed = %v, want %v", resp.Changed, wantChanged)
+	}
+	if !strings.Contains(string(fs.files["/proj/u-boot.yaml"]), "enabled: false") {
+		t.Errorf("u-boot.yaml not patched to enabled: false:\n%s", string(fs.files["/proj/u-boot.yaml"]))
 	}
 }
 
@@ -404,14 +420,17 @@ func TestRemoveServiceService_Remove_PurgeInteractiveDeclined(t *testing.T) {
 	}
 }
 
-func TestRemoveServiceService_Remove_PurgeOnDeactivatedStateRequiresGate(t *testing.T) {
+func TestRemoveServiceService_Remove_PurgeOnDeactivatedSkipsGate(t *testing.T) {
 	t.Parallel()
-	// --purge on already-deactivated service: gate still fires (user
-	// explicitly opted into destructive op). On approval, idempotent
-	// no-op response (Changed=nil) — but the gate had to pass.
+	// Review-followup F6: --purge on already-deactivated service.
+	// Prior behaviour fired the confirmation gate even though no
+	// destructive op would happen — the user's YES to the prompt
+	// was theatre. Fixed: gate only fires when state will actually
+	// transition, so Deactivated returns the idempotent no-op
+	// directly without bothering the confirmer.
 	fs := seedProjectWithDeactivatedService(t)
 	preWrites := len(fs.writes)
-	conf := &fakeConfirmer{removeVolumesAnswer: true}
+	conf := &fakeConfirmer{removeVolumesAnswer: false} // would refuse if asked
 	svc := application.NewRemoveServiceService(fs, &fakeYAML{}, conf, nil)
 
 	resp, err := svc.Remove(context.Background(), driving.RemoveServiceRequest{
@@ -426,10 +445,10 @@ func TestRemoveServiceService_Remove_PurgeOnDeactivatedStateRequiresGate(t *test
 		t.Errorf("State = %v, want Deactivated", resp.State)
 	}
 	if len(resp.Changed) != 0 {
-		t.Errorf("Changed = %v, want nil (Deactivated path is still idempotent)", resp.Changed)
+		t.Errorf("Changed = %v, want nil (Deactivated path is idempotent)", resp.Changed)
 	}
-	if len(conf.removeVolumesCalls) != 1 {
-		t.Errorf("Confirmer was called %d times; want 1 (gate must fire even for Deactivated)", len(conf.removeVolumesCalls))
+	if len(conf.removeVolumesCalls) != 0 {
+		t.Errorf("Confirmer was called %d times; want 0 (gate must NOT fire for Deactivated)", len(conf.removeVolumesCalls))
 	}
 	if newWrites := len(fs.writes) - preWrites; newWrites != 0 {
 		t.Errorf("Remove emitted %d writes; Deactivated+Purge must not write", newWrites)

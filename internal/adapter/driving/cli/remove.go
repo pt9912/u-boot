@@ -78,7 +78,7 @@ Examples:
 		RunE: func(cmd *cobra.Command, args []string) error {
 			flags.Yes = a.yes
 			flags.NoInteractive = a.noInteractive
-			return runRemove(cmd.Context(), cmd.OutOrStdout(), args, *flags, a.removeServiceUseCase, a.getwd)
+			return runRemove(cmd.Context(), cmd.OutOrStdout(), cmd.ErrOrStderr(), args, *flags, a.removeServiceUseCase, a.getwd)
 		},
 	}
 
@@ -91,9 +91,15 @@ Examples:
 // (no Cobra construction needed). Mirrors [runAdd]'s shape; the
 // mutual-exclusion check on --yes / --no-interactive lives here for
 // the same reason (CLI-level usage error, not a use case concern).
+//
+// out / errOut are separate streams: the success summary goes to
+// stdout so scripted consumers can capture it; the --purge cleanup
+// WARNING goes to stderr so future `--json` consumers
+// (LH-FA-CLI-007 / LH-NFA-USE-004) aren't polluted with prose
+// (review-followup F4).
 func runRemove(
 	ctx context.Context,
-	out io.Writer,
+	out, errOut io.Writer,
 	args []string,
 	flags removeFlags,
 	uc driving.RemoveServiceUseCase,
@@ -124,26 +130,25 @@ func runRemove(
 		return err
 	}
 
-	printRemoveSummary(out, resp, flags.Purge)
+	printRemoveSummary(out, errOut, resp, flags.Purge)
 	return nil
 }
 
 // printRemoveSummary writes a short, deterministic summary of the
-// remove outcome. Three shapes:
+// remove outcome. Two shapes for the stdout summary:
 //
-//   - Idempotent no-op (PriorState == State == Deactivated,
-//     Changed=nil):
+//   - Idempotent no-op (Changed=nil):
 //     "Service <name> is already disabled; no changes."
-//   - State transition (PriorState=Active|EnabledUnset,
-//     State=Deactivated):
+//   - State transition (Changed!=nil):
 //     "Removed service <name>." + list of changed paths.
 //
-// When `--purge` was requested AND the gate let us through (a
-// successful response, not [driving.ErrConfirmationRequired]), the
-// summary appends the v0.3.0 manual-cleanup hint so the user knows
-// the volume cleanup is still on them. T3-Decision: the application
-// service handles the gate but does not auto-remove volumes yet.
-func printRemoveSummary(out io.Writer, resp driving.RemoveServiceResponse, purge bool) {
+// When `--purge` was requested AND the response shows VolumesPurged=
+// false (always true in v0.3.0 — actual volume removal is deferred),
+// a WARNING block is appended to errOut (review-followup F4: stderr
+// keeps stdout clean for future --json consumers). The wording
+// (review-followup F5) is explicit about what was NOT done so users
+// don't trust the prior NOTE-as-aside framing.
+func printRemoveSummary(out, errOut io.Writer, resp driving.RemoveServiceResponse, purge bool) {
 	name := resp.ServiceName.String()
 
 	if len(resp.Changed) == 0 {
@@ -156,10 +161,12 @@ func printRemoveSummary(out io.Writer, resp driving.RemoveServiceResponse, purge
 	}
 
 	if purge && !resp.VolumesPurged {
-		fmt.Fprintf(out,
-			"\nNOTE: --purge was requested; volume removal is not auto-handled in v0.3.0.\n"+
-				"      Remove the %s volumes manually with `docker volume rm <name>` once you have\n"+
-				"      confirmed the data is no longer needed (`docker volume ls` to list candidates).\n",
+		fmt.Fprintf(errOut,
+			"\nWARNING: --purge was requested but volume removal is NOT yet automated in v0.3.0.\n"+
+				"         The %s service's named volumes are still on disk and untouched.\n"+
+				"         Remove them manually after confirming the data is no longer needed:\n"+
+				"           docker volume ls --filter label=com.docker.compose.project=<your-project>\n"+
+				"           docker volume rm <name>\n",
 			name)
 	}
 }

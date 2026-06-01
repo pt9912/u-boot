@@ -88,12 +88,22 @@ func TestRemove_PurgeSurfacesManualCleanupHint(t *testing.T) {
 	if !uc.lastReq.Yes {
 		t.Error("Request.Yes = false; --yes persistent flag did not propagate")
 	}
-	out := stdout.String()
-	if !strings.Contains(out, "--purge was requested") {
-		t.Errorf("stdout missing --purge NOTE; got:\n%s", out)
+	// Review-followup F4 + F5: the WARNING block lives on STDERR (not
+	// stdout) and starts with "WARNING:" (not "NOTE:") to reflect
+	// that --purge promised something the v0.3.0 code does not yet
+	// perform.
+	if strings.Contains(stdout.String(), "WARNING:") {
+		t.Errorf("WARNING ended up on stdout; F4 expects stderr; got:\n%s", stdout.String())
 	}
-	if !strings.Contains(out, "docker volume rm") {
-		t.Errorf("stdout missing manual-cleanup hint; got:\n%s", out)
+	errs := stderr.String()
+	if !strings.Contains(errs, "WARNING: --purge was requested but volume removal is NOT yet automated") {
+		t.Errorf("stderr missing WARNING-prefixed cleanup notice; got:\n%s", errs)
+	}
+	if !strings.Contains(errs, "docker volume rm") {
+		t.Errorf("stderr missing docker volume rm hint; got:\n%s", errs)
+	}
+	if !strings.Contains(errs, "docker volume ls --filter") {
+		t.Errorf("stderr missing project-filtered docker volume ls hint; got:\n%s", errs)
 	}
 }
 

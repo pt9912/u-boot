@@ -58,22 +58,30 @@ func NewRemoveServiceService(fs driven.FileSystem, yaml driven.YAMLCodec, confir
 // State-machine flow:
 //
 //   - Unregistered                       → [driving.ErrServiceUnregistered]
-//   - InconsistentYAML / InconsistentBlock → [driving.ErrServiceInconsistent]
-//   - Deactivated                        → idempotent no-op (Changed=nil)
-//   - Active                             → execute 3 actions (compose-block-
-//     remove, env-block-remove, yaml-patch enabled=false)
-//   - EnabledUnset                       → execute the same 3 actions
-//     (normalises a service that lacks the explicit enabled key)
+//   - InconsistentYAML                   → [driving.ErrServiceInconsistent]
+//     (orphan compose block without YAML entry — requires manual
+//     cleanup; remove cannot infer the intended YAML state)
+//   - Deactivated                        → idempotent no-op (Changed=nil);
+//     NO `--purge` confirmation gate fires (no destructive op happens)
+//   - Active                             → 3-action transition via
+//     two-phase plan-then-write (review-followup F1+F2)
+//   - EnabledUnset                       → same 3 actions (normalises
+//     a service that lacks the explicit enabled key)
+//   - InconsistentBlock                  → forwards-only convergence
+//     (review-followup F1): YAML says enabled=true but no compose
+//     block. Remove sets enabled=false + idempotent block-removes —
+//     `removeBlock` is no-op-on-absent, so a partial-write retry
+//     completes the unfinished work. Asymmetric to
+//     [AddServiceService] which rejects InconsistentBlock — add
+//     cannot auto-converge to "active" without knowing the original
+//     state; remove can converge to "disabled" unambiguously.
 //
-// `--purge` (T3): the LH-FA-CLI-005A §254 confirmation gate fires
-// AFTER the state-machine has rejected the obvious error states
-// (Unregistered / Inconsistent), so users get the most informative
-// failure rather than being prompted to confirm cleanup of nothing.
-// On the proceeding paths (Active / EnabledUnset / Deactivated)
-// the gate's outcome decides whether to continue. Volume removal
-// itself is NOT performed in this slice — `VolumesPurged` stays
-// false even on a passed gate; the CLI summary (T4) flags the
-// deferred work for the user.
+// `--purge` (T3 + review-followup F6): the LH-FA-CLI-005A §254
+// confirmation gate fires only when the call WILL transition state
+// (Active / EnabledUnset / InconsistentBlock). On Deactivated the
+// gate is a no-op for a no-op — we skip it. Volume removal itself
+// remains deferred — `VolumesPurged` stays false even on a passed
+// gate; the CLI summary (T4) flags the deferred work for the user.
 func (s *RemoveServiceService) Remove(ctx context.Context, req driving.RemoveServiceRequest) (driving.RemoveServiceResponse, error) {
 	if req.BaseDir == "" {
 		return driving.RemoveServiceResponse{}, errors.New("BaseDir is required")
@@ -89,39 +97,43 @@ func (s *RemoveServiceService) Remove(ctx context.Context, req driving.RemoveSer
 		return driving.RemoveServiceResponse{}, err
 	}
 
-	// Reject the unrecoverable / clarity-first states BEFORE the gate
-	// so users don't get a confirmation prompt for cleanup of nothing.
+	// Reject the truly-unrecoverable states BEFORE any gate or write.
+	// InconsistentBlock is INTENTIONALLY not in this list (F1):
+	// remove can converge it forwards.
 	switch state {
 	case domain.ServiceStateUnregistered:
 		return driving.RemoveServiceResponse{}, fmt.Errorf("%w: %q was never added; nothing to remove",
 			driving.ErrServiceUnregistered, req.ServiceName.String())
-	case domain.ServiceStateInconsistentYAML, domain.ServiceStateInconsistentBlock:
-		return driving.RemoveServiceResponse{}, fmt.Errorf("%w: %q has a mismatched u-boot.yaml / compose.yaml state; clean up manually before removing",
+	case domain.ServiceStateInconsistentYAML:
+		return driving.RemoveServiceResponse{}, fmt.Errorf("%w: %q has an orphan compose block without a YAML entry; clean up manually before removing",
 			driving.ErrServiceInconsistent, req.ServiceName.String())
-	}
-
-	// Confirmation gate fires for any `--purge` request that reaches
-	// the proceeding states. Volume removal itself remains deferred
-	// (T3-Decision in the slice plan), but the gate is spec-mandated
-	// regardless of whether the actual removal lands today.
-	if err := s.runPurgeGate(ctx, req); err != nil {
-		return driving.RemoveServiceResponse{}, err
 	}
 
 	switch state {
 	case domain.ServiceStateDeactivated:
+		// No-op + no destructive op → no gate (F6).
 		s.logger.Debug("remove: idempotent no-op", "service", req.ServiceName.String(), "purge", req.Purge)
 		return driving.RemoveServiceResponse{
 			ServiceName: req.ServiceName,
 			PriorState:  state,
 			State:       state,
 		}, nil
-	case domain.ServiceStateActive, domain.ServiceStateEnabledUnset:
+
+	case domain.ServiceStateActive,
+		domain.ServiceStateEnabledUnset,
+		domain.ServiceStateInconsistentBlock:
+		// Gate fires here — a state transition (or convergence) IS
+		// happening. Spec LH-FA-CLI-005A §254 confirmation lives
+		// adjacent to the actual destructive intent.
+		if err := s.runPurgeGate(ctx, req); err != nil {
+			return driving.RemoveServiceResponse{}, err
+		}
 		return s.executeRemove(req.BaseDir, req.ServiceName, state)
+
 	default:
-		// Defensive: only the six LH-FA-ADD-005 states are reachable;
-		// the error-states are returned earlier. An unknown value
-		// here is a code bug, not a user error.
+		// Defensive: detectServiceState's six wohlgeformte LH-FA-ADD-
+		// 005 states are all listed above. An unknown value here is a
+		// code bug, not a user error.
 		return driving.RemoveServiceResponse{}, fmt.Errorf("remove: unexpected state %s for %q",
 			state.String(), req.ServiceName.String())
 	}
@@ -165,55 +177,60 @@ func (s *RemoveServiceService) runPurgeGate(ctx context.Context, req driving.Rem
 	return nil
 }
 
-// executeRemove performs the three filesystem mutations for an
-// Active / EnabledUnset → Deactivated transition:
+// plannedRemoveFile is one entry in the in-memory execute plan: the
+// project-relative path, the new content, the file mode to preserve,
+// and a skip flag for "no change needed" (file absent or block not
+// present). The executeRemove apply-loop iterates over the plan
+// after every per-file render succeeds.
+type plannedRemoveFile struct {
+	path    string
+	relPath string
+	content []byte
+	mode    iofs.FileMode
+	skip    bool
+}
+
+// executeRemove drives the Active / EnabledUnset / InconsistentBlock
+// → Deactivated transition via TWO PHASES (review-followup F1):
 //
-//  1. Strip the `service.<name>` managed block from compose.yaml.
-//  2. Strip the same-named block from .env.example.
-//  3. Patch `services.<name>.enabled: false` in u-boot.yaml.
+//  1. Plan: read every input file, compute its new bytes, capture
+//     its existing mode. No disk writes. A render error
+//     (managedblock-malformed, yaml-patch-failure) aborts here
+//     before ANY file is touched.
+//  2. Apply: write the planned files in order. Per-file write
+//     failures still leave partial state on disk, but a retry now
+//     converges because [Remove] dispatches InconsistentBlock back
+//     into this method instead of rejecting it (F1).
 //
-// Order is u-boot.yaml-last so a mid-flight failure on compose or
-// env leaves u-boot.yaml's enabled flag unchanged — the project
-// stays self-consistent for a retry. Files that don't exist or
-// don't contain the block are silently skipped (idempotent
-// per-file cleanup; the spec says compose-block-remove and env-
-// block-remove are best-effort).
-//
-// Volumes are NOT touched here — T3 will layer the `--purge` flag
-// + confirmation gate on top of this method.
+// File mode (review-followup F3): each plan entry captures the
+// original file's mode via [driven.FileSystem.Lstat], so a chmod-
+// hardened compose.yaml (e.g. 0o600) stays at 0o600 after the
+// rewrite. Symmetric to addservice's loadForPatch helper.
 func (s *RemoveServiceService) executeRemove(baseDir string, svc domain.ServiceName, priorState domain.ServiceState) (driving.RemoveServiceResponse, error) {
+	composePlan, err := s.planBlockRemoval(baseDir, "compose.yaml", svc)
+	if err != nil {
+		return driving.RemoveServiceResponse{}, err
+	}
+	envPlan, err := s.planBlockRemoval(baseDir, ".env.example", svc)
+	if err != nil {
+		return driving.RemoveServiceResponse{}, err
+	}
+	yamlPlan, err := s.planYAMLDisable(baseDir, svc)
+	if err != nil {
+		return driving.RemoveServiceResponse{}, err
+	}
+
+	plan := []plannedRemoveFile{composePlan, envPlan, yamlPlan}
 	var changed []string
-
-	composeChanged, err := s.removeBlock(baseDir, "compose.yaml", svc)
-	if err != nil {
-		return driving.RemoveServiceResponse{}, err
+	for _, f := range plan {
+		if f.skip {
+			continue
+		}
+		if err := s.fs.WriteFile(f.path, f.content, f.mode); err != nil {
+			return driving.RemoveServiceResponse{}, fmt.Errorf("write %s: %w", f.path, err)
+		}
+		changed = append(changed, f.relPath)
 	}
-	if composeChanged {
-		changed = append(changed, "compose.yaml")
-	}
-
-	envChanged, err := s.removeBlock(baseDir, ".env.example", svc)
-	if err != nil {
-		return driving.RemoveServiceResponse{}, err
-	}
-	if envChanged {
-		changed = append(changed, ".env.example")
-	}
-
-	yamlPath := filepath.Join(baseDir, "u-boot.yaml")
-	yamlBody, err := s.fs.ReadFile(yamlPath)
-	if err != nil {
-		return driving.RemoveServiceResponse{}, fmt.Errorf("read u-boot.yaml: %w", err)
-	}
-	patched, err := s.yaml.PatchScalar(yamlBody,
-		[]string{"services", svc.String(), "enabled"}, false)
-	if err != nil {
-		return driving.RemoveServiceResponse{}, fmt.Errorf("patch u-boot.yaml: %w", err)
-	}
-	if err := s.fs.WriteFile(yamlPath, patched, defaultFileMode); err != nil {
-		return driving.RemoveServiceResponse{}, fmt.Errorf("write u-boot.yaml: %w", err)
-	}
-	changed = append(changed, "u-boot.yaml")
 
 	s.logger.Debug("remove: state transition",
 		"service", svc.String(),
@@ -228,30 +245,34 @@ func (s *RemoveServiceService) executeRemove(baseDir string, svc domain.ServiceN
 	}, nil
 }
 
-// removeBlock strips the `service.<name>` managed block from a
-// host file. Returns true when the host file existed AND contained
-// the block (and was therefore rewritten); false when either the
-// file was absent or did not contain the block — both are no-op
-// outcomes the caller skips silently.
+// planBlockRemoval is the planning step for one managed-block host
+// file (compose.yaml or .env.example). Reads the file, captures its
+// mode, computes the new bytes after `managedblock.Replace(... nil)`
+// removes the service block. A file that doesn't exist or doesn't
+// carry the block produces skip=true — the apply-loop omits it.
 //
-// Block-malformed surfaces as [driving.ErrServiceInconsistent] for
-// consistency with [detectServiceState]'s pre-classification (a
+// Block-malformed surfaces as [driving.ErrServiceInconsistent]
+// (symmetric to [detectServiceState]'s pre-classification: a
 // malformed block stops the operation rather than auto-repairing).
-func (s *RemoveServiceService) removeBlock(baseDir, filename string, svc domain.ServiceName) (bool, error) {
+func (s *RemoveServiceService) planBlockRemoval(baseDir, filename string, svc domain.ServiceName) (plannedRemoveFile, error) {
 	path := filepath.Join(baseDir, filename)
 	exists, err := s.fs.Exists(path)
 	if err != nil {
-		return false, fmt.Errorf("check %s: %w", filename, err)
+		return plannedRemoveFile{}, fmt.Errorf("check %s: %w", filename, err)
 	}
 	if !exists {
-		return false, nil
+		return plannedRemoveFile{skip: true}, nil
 	}
 	body, err := s.fs.ReadFile(path)
 	if err != nil {
 		if errors.Is(err, iofs.ErrNotExist) {
-			return false, nil
+			return plannedRemoveFile{skip: true}, nil
 		}
-		return false, fmt.Errorf("read %s: %w", filename, err)
+		return plannedRemoveFile{}, fmt.Errorf("read %s: %w", filename, err)
+	}
+	mode, err := s.fileMode(path, defaultFileMode)
+	if err != nil {
+		return plannedRemoveFile{}, fmt.Errorf("stat %s: %w", filename, err)
 	}
 	marker := managedblock.Marker{
 		Style: managedblock.StyleHash,
@@ -260,19 +281,65 @@ func (s *RemoveServiceService) removeBlock(baseDir, filename string, svc domain.
 	out, err := managedblock.Replace(body, marker, nil)
 	switch {
 	case err == nil:
-		// Block was present and has been cut out (empty replacement).
+		return plannedRemoveFile{
+			path:    path,
+			relPath: filename,
+			content: out,
+			mode:    mode,
+		}, nil
 	case errors.Is(err, managedblock.ErrBlockNotFound):
-		// File doesn't carry the block — no-op, no rewrite needed.
-		return false, nil
+		return plannedRemoveFile{skip: true}, nil
 	case errors.Is(err, managedblock.ErrBlockMalformed):
-		return false, fmt.Errorf("%w: malformed managed block for %q in %s: %v",
+		return plannedRemoveFile{}, fmt.Errorf("%w: malformed managed block for %q in %s: %v",
 			driving.ErrServiceInconsistent, svc.String(), filename, err)
 	default:
-		return false, fmt.Errorf("scan %s for %q block: %w",
+		return plannedRemoveFile{}, fmt.Errorf("scan %s for %q block: %w",
 			filename, serviceMarkerName(svc), err)
 	}
-	if err := s.fs.WriteFile(path, out, defaultFileMode); err != nil {
-		return false, fmt.Errorf("write %s: %w", filename, err)
+}
+
+// planYAMLDisable is the planning step for u-boot.yaml. Reads the
+// file, captures its mode, and patches the enabled flag to false.
+// The file is mandatory at this point — [detectServiceState] only
+// classifies states above [domain.ServiceStateUnregistered] when
+// u-boot.yaml is present and parseable.
+func (s *RemoveServiceService) planYAMLDisable(baseDir string, svc domain.ServiceName) (plannedRemoveFile, error) {
+	path := filepath.Join(baseDir, "u-boot.yaml")
+	body, err := s.fs.ReadFile(path)
+	if err != nil {
+		return plannedRemoveFile{}, fmt.Errorf("read u-boot.yaml: %w", err)
 	}
-	return true, nil
+	mode, err := s.fileMode(path, defaultFileMode)
+	if err != nil {
+		return plannedRemoveFile{}, fmt.Errorf("stat u-boot.yaml: %w", err)
+	}
+	patched, err := s.yaml.PatchScalar(body,
+		[]string{"services", svc.String(), "enabled"}, false)
+	if err != nil {
+		return plannedRemoveFile{}, fmt.Errorf("patch u-boot.yaml: %w", err)
+	}
+	return plannedRemoveFile{
+		path:    path,
+		relPath: "u-boot.yaml",
+		content: patched,
+		mode:    mode,
+	}, nil
+}
+
+// fileMode captures the existing file's permission bits via Lstat
+// so a rewrite preserves them (review-followup F3 — addservice
+// already preserves via loadForPatch; remove was asymmetrically
+// downgrading to 0o644). Falls back to fallbackMode when Lstat
+// fails on a non-existence path (TOCTOU race; the apply-loop
+// would error on the write anyway, but a sane mode keeps the
+// error sentinel-classifiable).
+func (s *RemoveServiceService) fileMode(path string, fallbackMode iofs.FileMode) (iofs.FileMode, error) {
+	info, err := s.fs.Lstat(path)
+	if err != nil {
+		if errors.Is(err, iofs.ErrNotExist) {
+			return fallbackMode, nil
+		}
+		return 0, err
+	}
+	return info.Mode().Perm(), nil
 }
