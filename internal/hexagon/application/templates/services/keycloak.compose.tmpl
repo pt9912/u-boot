@@ -1,0 +1,18 @@
+image: quay.io/keycloak/keycloak:26.0
+environment:
+  KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-CHANGEME_KEYCLOAK_ADMIN}
+  KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-CHANGEME_KEYCLOAK_ADMIN_PASSWORD}
+  KC_HEALTH_ENABLED: "true"
+command: ["start-dev"]
+ports:
+  - "8080:8080"
+healthcheck:
+  # Management port 9000 exposes /health/ready when
+  # KC_HEALTH_ENABLED=true. The container image does not ship curl;
+  # the Java-side `jboss-cli` is also absent in `start-dev`. Use the
+  # raw /bin/bash + /dev/tcp probe — it is a bash builtin, present
+  # in the distroless-style image, and avoids adding a dependency.
+  test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && head -n1 <&3 | grep -q '200 OK'"]
+  interval: 10s
+  timeout: 5s
+  retries: 30

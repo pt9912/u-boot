@@ -44,7 +44,7 @@ type fileWrite struct {
 //     deterministic order (u-boot.yaml → compose.yaml →
 //     .env.example) keeps the failure mode debuggable.
 func (s *AddServiceService) executeAdd(_ context.Context, baseDir string, plan servicePlan) (driving.AddServiceResponse, error) {
-	tmpls, err := s.renderPostgresTemplates(plan.Service)
+	tmpls, err := s.renderServiceTemplates(plan.Service)
 	if err != nil {
 		return driving.AddServiceResponse{}, err
 	}
@@ -152,27 +152,77 @@ type renderedTemplates struct {
 	EnvVariables    []byte
 }
 
-// renderPostgresTemplates evaluates the three M5-T4c templates and
-// returns their bytes. The current MVP templates are static (every
-// postgres-specific name is hardcoded — see
-// templates/services/postgres.*.tmpl). templateData.Name is therefore
-// passed empty, even though the init-tier templates require it; a
-// future LH-FA-ADD-003 (keycloak) service can either inline its
-// service name the same way or migrate the templates to actually
-// reference {{ .Name }} together with a render-time round-trip test.
-func (*AddServiceService) renderPostgresTemplates(_ domain.ServiceName) (renderedTemplates, error) {
+// serviceCatalogueEntry is the per-service render configuration: the
+// three template paths used by [AddServiceService.renderServiceTemplates].
+// volumeTmpl is the empty string for services that do not need a
+// `volumes.<svc>-data`-managed block (Keycloak's flüchtige H2-In-
+// Container-Persistenz, …). slice-v1-keycloak T2 extends this struct
+// with `requiredEnvKeys []string`, `volumeRefLiteral string`, and
+// `volumeOptional bool` for the Detect-Pfad-Generalisierung
+// (`hasRequiredEnvKeys`, `contentScanState`, `inspectVolumeArtefact`)
+// so any post-T2 service add-on plugs in declaratively.
+type serviceCatalogueEntry struct {
+	composeTmpl string
+	envTmpl     string
+	volumeTmpl  string // empty = no volume managed block
+}
+
+// serviceCatalogue lists the per-service render configuration. The
+// Keycloak entry is pre-staged here for slice-v1-keycloak T1; the
+// Catalogue-Erweiterung in `isSupportedService` / `supportedServices`
+// follows in T2 once `inspectVolumeArtefact` and `hasRequiredEnvKeys`
+// are per-service-aware (see slice-v1-keycloak.md §T2 — without it,
+// `add keycloak` would run into the postgres-only Detect hardcoding).
+func serviceCatalogue() map[string]serviceCatalogueEntry {
+	return map[string]serviceCatalogueEntry{
+		"postgres": {
+			composeTmpl: "services/postgres.compose.tmpl",
+			envTmpl:     "services/postgres.env.tmpl",
+			volumeTmpl:  "services/postgres.volume.tmpl",
+		},
+		"keycloak": {
+			composeTmpl: "services/keycloak.compose.tmpl",
+			envTmpl:     "services/keycloak.env.tmpl",
+			volumeTmpl:  "", // flüchtige H2-In-Container-Persistenz, kein Volume
+		},
+	}
+}
+
+// renderServiceTemplates evaluates the per-service templates via the
+// [serviceCatalogue] lookup. The current templates are static (every
+// service-specific name is hardcoded — see
+// templates/services/<svc>.*.tmpl). templateData.Name is therefore
+// passed empty, even though the init-tier templates require it; the
+// T1-Sub-Decision in slice-v1-keycloak is to keep templates inline-
+// hardcoded for now and defer `{{ .Name }}`-Parametrisierung +
+// image-tag-overrides (e.g. `services.keycloak.imageTag`) to a
+// follow-up slice.
+//
+// VolumeFragment is left nil when the service's catalogue entry has
+// an empty `volumeTmpl`; callers must respect a nil VolumeFragment
+// in the volume-patch step (slice-v1-keycloak T2 extends
+// `patchTargetsFor` to skip the volume slot for volume-less
+// services).
+func (*AddServiceService) renderServiceTemplates(svc domain.ServiceName) (renderedTemplates, error) {
+	entry, ok := serviceCatalogue()[svc.String()]
+	if !ok {
+		return renderedTemplates{}, fmt.Errorf("service catalogue: unknown service %q", svc.String())
+	}
 	data := templateData{}
-	composeFrag, err := renderTemplate("services/postgres.compose.tmpl", data)
+	composeFrag, err := renderTemplate(entry.composeTmpl, data)
 	if err != nil {
-		return renderedTemplates{}, fmt.Errorf("plan: render postgres.compose.tmpl: %w", err)
+		return renderedTemplates{}, fmt.Errorf("plan: render %s: %w", entry.composeTmpl, err)
 	}
-	volumeFrag, err := renderTemplate("services/postgres.volume.tmpl", data)
-	if err != nil {
-		return renderedTemplates{}, fmt.Errorf("plan: render postgres.volume.tmpl: %w", err)
+	var volumeFrag []byte
+	if entry.volumeTmpl != "" {
+		volumeFrag, err = renderTemplate(entry.volumeTmpl, data)
+		if err != nil {
+			return renderedTemplates{}, fmt.Errorf("plan: render %s: %w", entry.volumeTmpl, err)
+		}
 	}
-	envVars, err := renderTemplate("services/postgres.env.tmpl", data)
+	envVars, err := renderTemplate(entry.envTmpl, data)
 	if err != nil {
-		return renderedTemplates{}, fmt.Errorf("plan: render postgres.env.tmpl: %w", err)
+		return renderedTemplates{}, fmt.Errorf("plan: render %s: %w", entry.envTmpl, err)
 	}
 	return renderedTemplates{
 		ServiceFragment: composeFrag,

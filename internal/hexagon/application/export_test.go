@@ -74,6 +74,52 @@ func RenderTemplateForTest(name, projectName string) ([]byte, error) {
 	return renderTemplate(name, templateData{Name: projectName})
 }
 
+// ServiceCatalogueEntryForTest is the test-package projection of the
+// unexported [serviceCatalogueEntry] (slice-v1-keycloak T1). Same
+// fields — only renamed because the internal type is unexported and
+// the test bridge prefers an explicit exported name.
+type ServiceCatalogueEntryForTest struct {
+	ComposeTmpl string
+	EnvTmpl     string
+	VolumeTmpl  string
+}
+
+// ServiceCatalogueForTest exposes the unexported [serviceCatalogue]
+// lookup so slice-v1-keycloak T1 tests can pin the per-service
+// template paths (Postgres + Keycloak entries).
+func ServiceCatalogueForTest() map[string]ServiceCatalogueEntryForTest {
+	out := map[string]ServiceCatalogueEntryForTest{}
+	for k, v := range serviceCatalogue() {
+		out[k] = ServiceCatalogueEntryForTest{
+			ComposeTmpl: v.composeTmpl,
+			EnvTmpl:     v.envTmpl,
+			VolumeTmpl:  v.volumeTmpl,
+		}
+	}
+	return out
+}
+
+// RenderServiceTemplatesForTest exposes the per-service render
+// pipeline so T1 tests can pin Postgres Byte-Identity (no behaviour
+// change vs. the M5 renderPostgresTemplates output) and Keycloak's
+// nil-VolumeFragment for the volume-less catalogue path.
+func RenderServiceTemplatesForTest(svc domain.ServiceName) (composeFrag, volumeFrag, envVars []byte, err error) {
+	s := &AddServiceService{}
+	tmpls, err := s.renderServiceTemplates(svc)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return tmpls.ServiceFragment, tmpls.VolumeFragment, tmpls.EnvVariables, nil
+}
+
+// IsSupportedServiceForTest exposes the unexported
+// [isSupportedService] catalogue check so T1 tests can pin the
+// T2-Voraussetzung („Keycloak ist nach T1 noch NICHT in der
+// Catalogue").
+func IsSupportedServiceForTest(svc domain.ServiceName) bool {
+	return isSupportedService(svc)
+}
+
 // CollectActiveServicePortsForTest exposes the package-internal
 // `collectActiveServicePorts` helper so the T5 anti-drift test can
 // pin that the generator and the doctor `devcontainer.forwardPorts.

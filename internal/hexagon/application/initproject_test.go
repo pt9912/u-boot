@@ -387,6 +387,8 @@ func TestTemplateNames_AreSorted(t *testing.T) {
 		"env.example.tmpl",
 		"gitignore.tmpl",
 		"readme.md.tmpl",
+		"services/keycloak.compose.tmpl",
+		"services/keycloak.env.tmpl",
 		"services/postgres.compose.tmpl",
 		"services/postgres.env.tmpl",
 		"services/postgres.volume.tmpl",
