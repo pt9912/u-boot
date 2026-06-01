@@ -62,6 +62,10 @@ type App struct {
 	// (LH-FA-CONF-001..005).
 	configUseCase driving.ConfigUseCase
 
+	// templateListUseCase implements `u-boot template list`
+	// (LH-FA-TPL-004; slice-v1-template-list).
+	templateListUseCase driving.TemplateListUseCase
+
 	// getwd is the working-directory probe; defaults to os.Getwd.
 	// Tests inject a fake via [WithGetwd] so they do not depend on
 	// the host pwd.
@@ -116,17 +120,18 @@ func WithLogLevel(level *slog.LevelVar) Option {
 // New constructs an App. The version string and every use-case
 // implementation must be non-nil at call time; the CLI package
 // trusts the wiring layer to honor that.
-func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, addUC driving.AddServiceUseCase, upUC driving.UpUseCase, downUC driving.DownUseCase, genUC driving.GenerateUseCase, cfgUC driving.ConfigUseCase, opts ...Option) *App {
+func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, addUC driving.AddServiceUseCase, upUC driving.UpUseCase, downUC driving.DownUseCase, genUC driving.GenerateUseCase, cfgUC driving.ConfigUseCase, tmplUC driving.TemplateListUseCase, opts ...Option) *App {
 	a := &App{
-		version:           version,
-		initUseCase:       initUC,
-		doctorUseCase:     doctorUC,
-		addServiceUseCase: addUC,
-		upUseCase:         upUC,
-		downUseCase:       downUC,
-		generateUseCase:   genUC,
-		configUseCase:     cfgUC,
-		getwd:             os.Getwd,
+		version:             version,
+		initUseCase:         initUC,
+		doctorUseCase:       doctorUC,
+		addServiceUseCase:   addUC,
+		upUseCase:           upUC,
+		downUseCase:         downUC,
+		generateUseCase:     genUC,
+		configUseCase:       cfgUC,
+		templateListUseCase: tmplUC,
+		getwd:               os.Getwd,
 	}
 	for _, opt := range opts {
 		opt(a)
@@ -205,7 +210,9 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 //   - 14 — technischer Persistenz-/Dateisystemfehler: LH-FA-INIT-005
 //          backup-suffix exhausted (ErrBackupSuffixExhausted),
 //          backup source vanished mid-flight
-//          (ErrBackupSourceMissing)
+//          (ErrBackupSourceMissing); LH-FA-TPL-004 catalog adapter
+//          failure (ErrTemplateCatalog — filesystem IO / malformed
+//          embedded template.yaml)
 //   - 1  — everything else (generic error)
 //
 // The mapping lives in the driving adapter because exit-code
@@ -290,7 +297,8 @@ func isFilesystemError(err error) bool {
 	return errors.Is(err, driving.ErrBackupSuffixExhausted) ||
 		errors.Is(err, driving.ErrBackupSourceMissing) ||
 		errors.Is(err, driving.ErrGenerateFileSystem) ||
-		errors.Is(err, driving.ErrConfigFileSystem)
+		errors.Is(err, driving.ErrConfigFileSystem) ||
+		errors.Is(err, driving.ErrTemplateCatalog)
 }
 
 // isUsageError detects two distinct classes of usage-level errors:

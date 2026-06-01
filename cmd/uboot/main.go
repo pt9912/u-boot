@@ -21,6 +21,7 @@ import (
 	"github.com/pt9912/u-boot/internal/adapter/driven/clock"
 	"github.com/pt9912/u-boot/internal/adapter/driven/confirm"
 	"github.com/pt9912/u-boot/internal/adapter/driven/docker"
+	"github.com/pt9912/u-boot/internal/adapter/driven/externaltemplates"
 	"github.com/pt9912/u-boot/internal/adapter/driven/fs"
 	"github.com/pt9912/u-boot/internal/adapter/driven/git"
 	"github.com/pt9912/u-boot/internal/adapter/driven/logger"
@@ -95,6 +96,11 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// (docker/git/compose) that the distroless v0.1.0 GHCR image
 	// cannot satisfy by design.
 	runtimeAdapter := runtime.New()
+	// The external-templates adapter (slice-v1-template-list T1)
+	// enumerates the embed.FS-bundled project templates
+	// (LH-FA-TPL-004). Backs the TemplateCatalog driven port; the
+	// `basic` bootstrap template ships with v0.1.1.
+	templateCatalogAdapter := externaltemplates.New()
 
 	// Application services. The text-progress adapter renders
 	// LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 affected-paths
@@ -110,9 +116,10 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	downSvc := application.NewDownService(fsAdapter, dockerEngineAdapter, confirmAdapter, logAdapter)
 	generateSvc := application.NewGenerateService(fsAdapter, yamlAdapter, logAdapter)
 	configSvc := application.NewConfigService(fsAdapter, yamlAdapter, logAdapter)
+	templateListSvc := application.NewTemplateListService(templateCatalogAdapter, logAdapter)
 
 	// Driving adapter (CLI).
-	app := cli.New(version, initSvc, doctorSvc, addSvc, upSvc, downSvc, generateSvc, configSvc, cli.WithLogLevel(logLevel))
+	app := cli.New(version, initSvc, doctorSvc, addSvc, upSvc, downSvc, generateSvc, configSvc, templateListSvc, cli.WithLogLevel(logLevel))
 
 	err := app.Execute(ctx, args, stdout, stderr)
 	if err != nil {
