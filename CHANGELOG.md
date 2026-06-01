@@ -11,29 +11,19 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.2.0] - TBD
+
+Second release. Adds the first two V1 template features
+(`template list` + `init --template`), a cross-platform binary
+distribution (six platforms as GitHub-Release assets), and a
+container-aware `doctor` that no longer mis-reports a healthy host
+as 4 errors when run from inside the distroless image. v0.1.1 was
+originally planned as a patch-only tag for the doctor fix but is
+skipped in favour of this minor bump — three features landed before
+the tag-push and strict SemVer wants a MINOR bump for them.
+
 ### Added
 
-- **`u-boot init <name> --template <name>`** — second V1 template
-  feature, the render path of LH-FA-TPL-001 / LH-FA-TPL-002. The
-  init service delegates file rendering to the new
-  `TemplateInitService` when `--template` is set; project structure
-  directories, soft-existing-detection, and `git init` stay with
-  the InitProjectService so the user-observable flow is one
-  command. Byte-identity guarantee: `u-boot init demo --template
-  basic` produces a project byte-identical to `u-boot init demo`
-  for the six default files (`u-boot.yaml`, `compose.yaml`,
-  `README.md`, `CHANGELOG.md`, `.env.example`, `.gitignore`) —
-  pinned by an E2E `diff -r` test against the production catalog.
-  Render engine: Go `text/template` for `*.tmpl` files, 1:1 copy
-  for non-`.tmpl` files (per ADR-0009 §Entscheidung); `template.yaml`
-  metadata is skipped. New `domain.TemplatePath` validator rejects
-  `..` segments, absolute paths, Windows drive letters, and empty
-  strings (LH-FA-CLI-006 exit 10 via `ErrInvalidTemplatePath`).
-  Mutex with `--devcontainer`/`--force`/`--backup`: surfaces as
-  `ErrTemplateConflictsWithFlag` (exit 2) — v1 is fresh-init-only.
-  Variable resolution + `--var key=value` deferred to a future
-  slice (basic has no variables). See
-  [`slice-v1-template-init`](docs/plan/planning/done/slice-v1-template-init.md).
 - **`u-boot template list [--json]`** — first V1 template
   subcommand (LH-FA-TPL-004). Enumerates the built-in project-
   template catalog with name, description, and version in a
@@ -52,6 +42,34 @@ this file is the same format applied to u-boot itself.
   consistency with the existing `driven/`-adapter naming; ADR-0009
   §Entscheidung updated to match. See
   [`slice-v1-template-list`](docs/plan/planning/done/slice-v1-template-list.md).
+- **`u-boot init <name> --template <name>`** — second V1 template
+  feature, the render path of LH-FA-TPL-001 / LH-FA-TPL-002. The
+  init service delegates file rendering to the new
+  `TemplateInitService` when `--template` is set; project structure
+  directories and `git init` stay with the InitProjectService so
+  the user-observable flow is one command. Byte-identity
+  guarantee: `u-boot init demo --template basic` produces a
+  project byte-identical to `u-boot init demo` for the six default
+  files (`u-boot.yaml`, `compose.yaml`, `README.md`,
+  `CHANGELOG.md`, `.env.example`, `.gitignore`) — pinned by an
+  E2E `diff -r` test against the production catalog. Render engine:
+  Go `text/template` for `*.tmpl` files, 1:1 copy for non-`.tmpl`
+  files (per ADR-0009 §Entscheidung); `template.yaml` metadata is
+  skipped. Two-phase render-then-write: a render error in any file
+  short-circuits before the first disk write, so a buggy template
+  no longer leaves a half-populated project. New
+  `domain.TemplatePath` validator rejects `..` segments, absolute
+  paths, Windows drive letters, backslashes, NUL bytes, and empty
+  strings (LH-FA-CLI-006 exit 10 via `ErrInvalidTemplatePath`).
+  Mutex with `--devcontainer`/`--force`/`--backup`: surfaces as
+  `ErrTemplateConflictsWithFlag` (exit 2) — v1 is fresh-init-only.
+  Soft-existing-detection is skipped on the template path because
+  `--template` resolves the "is this an existing project?"
+  ambiguity by intent; the hard-existing check
+  (`u-boot.yaml` present → `ErrProjectExists`) remains the
+  safety net. Variable resolution + `--var key=value` deferred to
+  a future slice (basic has no variables). See
+  [`slice-v1-template-init`](docs/plan/planning/done/slice-v1-template-init.md).
 - **Cross-platform binary distribution** for six platforms
   (Linux/macOS/Windows × amd64/arm64). `make build-binaries`
   cross-compiles every supported `GOOS`/`GOARCH` combination via
@@ -62,35 +80,18 @@ this file is the same format applied to u-boot itself.
   attaches them as GitHub-Release assets via `gh release upload`.
   See
   [`slice-v2-binary-distribution`](docs/plan/planning/done/slice-v2-binary-distribution.md)
-  — ADR-0007 §Folgepunkte 1 trigger pulled forward by the v0.1.1
+  — ADR-0007 §Folgepunkte 1 trigger pulled forward by the
   doctor-container-awareness feedback.
 - Quickstart in `README.md` / `README.de.md` gets a host-native
   install block (`curl -sSL … | chmod +x` for Linux/macOS,
   `Invoke-WebRequest` for Windows) as the primary recommended path;
   the GHCR `docker run …` block is demoted to "alternative for
   container/CI workflows".
-
-### Notes
-
-`releases/latest/download/u-boot-<os>-<arch>[.exe]` resolves to the
-highest stable tag — since `v0.1.0` predates binary assets, the
-`latest`-shortcut starts working once `v0.1.1` (or any later tag)
-has been pushed.
-
-## [0.1.1] - TBD
-
-Targeted patch addressing the real-world feedback from the first
-`v0.1.0` GHCR pull (2026-05-31): `docker run ghcr.io/pt9912/u-boot:0.1.0
-doctor` reported four false-positive errors against a healthy host
-because the distroless image bundles no `docker` / `git` binaries
-to probe.
-
-### Added
-
 - `internal/hexagon/port/driven.RuntimeEnvironment` port plus
-  `internal/adapter/driven/runtime.FileEnv` adapter:
-  best-effort container detection via `/.dockerenv` (Docker Engine /
-  Desktop) and `/run/.containerenv` (Podman / CRI-O / buildah).
+  `internal/adapter/driven/runtime.FileEnv` adapter: best-effort
+  container detection via `/.dockerenv` (Docker Engine / Desktop)
+  and `/run/.containerenv` (Podman / CRI-O / buildah). Drives the
+  doctor-container-awareness change below.
 
 ### Changed
 
@@ -100,19 +101,21 @@ to probe.
   a `SeverityInfo` diagnostic and a hint that points at
   [`slice-v0.1.1-doctor-container-awareness`](docs/plan/planning/done/slice-v0.1.1-doctor-container-awareness.md)
   for the rationale. Effect: `docker run --rm
-  ghcr.io/pt9912/u-boot:0.1.1 doctor` no longer mis-reports a
+  ghcr.io/pt9912/u-boot:0.2.0 doctor` no longer mis-reports a
   healthy host as 4 errors; exit code on an otherwise-clean project
-  goes from 11 to 0.
+  goes from 11 to 0. This addresses real-world feedback from the
+  first `v0.1.0` GHCR pull (2026-05-31) where the distroless image's
+  lack of bundled `docker` / `git` binaries surfaced as false-
+  positive errors.
 - Host installations are unaffected — `runtime.FileEnv` returns
   `false` outside containers, so the existing
   `LH-FA-DIAG-002`-classified errors / warnings remain.
 
 ### Notes
 
-The medium-term fix is a host-native binary distribution
-([`slice-v2-binary-distribution`](docs/plan/planning/done/slice-v2-binary-distribution.md),
-ADR-0007 §Folgepunkte 1 trigger now active); the v0.1.1 skip is the
-short-term ergonomic patch.
+`releases/latest/download/u-boot-<os>-<arch>[.exe]` resolves to the
+highest stable tag — since `v0.1.0` predates binary assets, the
+`latest`-shortcut starts working with `v0.2.0` (or any later tag).
 
 ## [0.1.0] - 2026-05-31
 
@@ -234,5 +237,6 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/pt9912/u-boot/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/pt9912/u-boot/releases/tag/v0.1.0
