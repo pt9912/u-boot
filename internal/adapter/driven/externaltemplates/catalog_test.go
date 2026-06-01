@@ -1,0 +1,209 @@
+package externaltemplates_test
+
+import (
+	"context"
+	"errors"
+	"testing"
+	"testing/fstest"
+
+	"github.com/pt9912/u-boot/internal/adapter/driven/externaltemplates"
+	"github.com/pt9912/u-boot/internal/hexagon/domain"
+)
+
+func TestCatalog_List_ProductionBundle_ContainsBasic(t *testing.T) {
+	t.Parallel()
+	cat := externaltemplates.New()
+	metas, err := cat.List(context.Background())
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(metas) == 0 {
+		t.Fatal("production catalog is empty; want at least the `basic` bootstrap (ADR-0009 §Folgepunkte 4)")
+	}
+
+	var basic *domain.TemplateMetadata
+	for i, m := range metas {
+		if m.Name == "basic" {
+			basic = &metas[i]
+			break
+		}
+	}
+	if basic == nil {
+		names := make([]string, 0, len(metas))
+		for _, m := range metas {
+			names = append(names, m.Name)
+		}
+		t.Fatalf("production catalog missing `basic` bootstrap template; have %v", names)
+	}
+
+	// LH-FA-TPL-002 / LH-FA-TPL-004 minimum surface: name +
+	// description + version must be non-empty in the listing.
+	if basic.Description == "" {
+		t.Error("basic.description is empty")
+	}
+	if basic.Version == "" {
+		t.Error("basic.version is empty")
+	}
+}
+
+func TestCatalog_List_SortsByName(t *testing.T) {
+	t.Parallel()
+	fs := fstest.MapFS{
+		"templates/zebra/template.yaml":  &fstest.MapFile{Data: []byte(yamlBlob("zebra", "z desc", "1.0.0"))},
+		"templates/alpha/template.yaml":  &fstest.MapFile{Data: []byte(yamlBlob("alpha", "a desc", "1.0.0"))},
+		"templates/middle/template.yaml": &fstest.MapFile{Data: []byte(yamlBlob("middle", "m desc", "1.0.0"))},
+	}
+	cat := externaltemplates.NewWithFS(fs)
+	metas, err := cat.List(context.Background())
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(metas) != 3 {
+		t.Fatalf("len(metas) = %d, want 3", len(metas))
+	}
+	want := []string{"alpha", "middle", "zebra"}
+	for i, name := range want {
+		if metas[i].Name != name {
+			t.Errorf("metas[%d].Name = %q, want %q (alphabetical)", i, metas[i].Name, name)
+		}
+	}
+}
+
+func TestCatalog_List_SkipsNonDirEntries(t *testing.T) {
+	t.Parallel()
+	// A stray README at the catalog root must not be misclassified as
+	// a template — only subdirectories are templates.
+	fs := fstest.MapFS{
+		"templates/basic/template.yaml": &fstest.MapFile{Data: []byte(yamlBlob("basic", "b", "1.0.0"))},
+		"templates/README.md":           &fstest.MapFile{Data: []byte("# notes")},
+	}
+	cat := externaltemplates.NewWithFS(fs)
+	metas, err := cat.List(context.Background())
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(metas) != 1 {
+		t.Fatalf("len(metas) = %d, want 1 (README at catalog root must be skipped)", len(metas))
+	}
+}
+
+func TestCatalog_List_InvalidYAMLReturnsError(t *testing.T) {
+	t.Parallel()
+	fs := fstest.MapFS{
+		"templates/broken/template.yaml": &fstest.MapFile{Data: []byte("not: valid: yaml: here")},
+	}
+	cat := externaltemplates.NewWithFS(fs)
+	_, err := cat.List(context.Background())
+	if err == nil {
+		t.Fatal("List: want error for broken yaml, got nil")
+	}
+}
+
+func TestCatalog_List_MissingMetadataFileReturnsError(t *testing.T) {
+	t.Parallel()
+	// Directory exists but no template.yaml — packaging mistake the
+	// adapter must surface, not silently skip.
+	fs := fstest.MapFS{
+		"templates/empty/.keep": &fstest.MapFile{Data: []byte("placeholder")},
+	}
+	cat := externaltemplates.NewWithFS(fs)
+	_, err := cat.List(context.Background())
+	if err == nil {
+		t.Fatal("List: want error for template dir without template.yaml, got nil")
+	}
+}
+
+func TestCatalog_List_InvalidMetadataWrapsErrInvalidTemplate(t *testing.T) {
+	t.Parallel()
+	// Valid YAML, but missing the LH-FA-TPL-002 required `name` field.
+	fs := fstest.MapFS{
+		"templates/nameless/template.yaml": &fstest.MapFile{
+			Data: []byte("apiVersion: github.com/pt9912/u-boot/template/v1\n" +
+				"description: \"desc\"\n" +
+				"version: 1.0.0\n"),
+		},
+	}
+	cat := externaltemplates.NewWithFS(fs)
+	_, err := cat.List(context.Background())
+	if err == nil {
+		t.Fatal("List: want validation error, got nil")
+	}
+	if !errors.Is(err, domain.ErrInvalidTemplate) {
+		t.Errorf("err = %v, want wrap of domain.ErrInvalidTemplate", err)
+	}
+}
+
+func TestCatalog_List_MissingCatalogRootReturnsError(t *testing.T) {
+	t.Parallel()
+	// Empty FS — no `templates/` directory exists. Production embed
+	// guarantees the root; this exercise the error path for callers
+	// that wire a wrong FS.
+	cat := externaltemplates.NewWithFS(fstest.MapFS{})
+	_, err := cat.List(context.Background())
+	if err == nil {
+		t.Fatal("List: want error for missing catalog root, got nil")
+	}
+}
+
+func TestCatalog_List_ParsesVariablesAndFiles(t *testing.T) {
+	t.Parallel()
+	fs := fstest.MapFS{
+		"templates/full/template.yaml": &fstest.MapFile{Data: []byte(
+			"apiVersion: github.com/pt9912/u-boot/template/v1\n" +
+				"name: full\n" +
+				"description: \"all-fields-populated fixture\"\n" +
+				"version: 2.3.4\n" +
+				"supportedAddOns: [postgres, keycloak]\n" +
+				"generatedFiles:\n  - build.gradle\n  - src/Main.java\n" +
+				"requiredTools:\n  - jdk:>=21\n" +
+				"variables:\n" +
+				"  - name: groupId\n    description: \"Maven group ID\"\n    default: \"com.example\"\n    required: true\n",
+		)},
+	}
+	metas, err := externaltemplates.NewWithFS(fs).List(context.Background())
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(metas) != 1 {
+		t.Fatalf("len(metas) = %d, want 1", len(metas))
+	}
+	m := metas[0]
+	if m.Version != "2.3.4" {
+		t.Errorf("Version = %q, want 2.3.4", m.Version)
+	}
+	if !equalStrings(m.SupportedAddOns, []string{"postgres", "keycloak"}) {
+		t.Errorf("SupportedAddOns = %v, want [postgres keycloak]", m.SupportedAddOns)
+	}
+	if !equalStrings(m.GeneratedFiles, []string{"build.gradle", "src/Main.java"}) {
+		t.Errorf("GeneratedFiles = %v, want [build.gradle src/Main.java]", m.GeneratedFiles)
+	}
+	if !equalStrings(m.RequiredTools, []string{"jdk:>=21"}) {
+		t.Errorf("RequiredTools = %v, want [jdk:>=21]", m.RequiredTools)
+	}
+	if len(m.Variables) != 1 {
+		t.Fatalf("len(Variables) = %d, want 1", len(m.Variables))
+	}
+	v := m.Variables[0]
+	if v.Name != "groupId" || v.Description != "Maven group ID" || v.Default != "com.example" || !v.Required {
+		t.Errorf("Variables[0] = %#v, want groupId/Maven/com.example/required=true", v)
+	}
+}
+
+func yamlBlob(name, desc, version string) string {
+	return "apiVersion: github.com/pt9912/u-boot/template/v1\n" +
+		"name: " + name + "\n" +
+		"description: \"" + desc + "\"\n" +
+		"version: " + version + "\n"
+}
+
+func equalStrings(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}

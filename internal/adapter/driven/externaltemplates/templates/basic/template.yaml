@@ -1,0 +1,15 @@
+apiVersion: github.com/pt9912/u-boot/template/v1
+name: basic
+description: "Minimal u-boot project skeleton — same files u-boot init writes today, no add-ons preconfigured."
+version: 0.1.0
+supportedAddOns:
+  - postgres
+generatedFiles:
+  - u-boot.yaml
+  - compose.yaml
+  - README.md
+  - CHANGELOG.md
+  - .env.example
+  - .gitignore
+requiredTools: []
+variables: []
