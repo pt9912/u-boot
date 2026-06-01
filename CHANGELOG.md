@@ -28,6 +28,30 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- **`u-boot add keycloak`** — LH-FA-ADD-003 / LH-AK-003. Second
+  add-on in the catalogue after Postgres. Compose-Service mit
+  Image-Pin `quay.io/keycloak/keycloak:26.0` (LTS), Port-Mapping
+  `8080:8080`, `command: start-dev` für LH-AK-003-Boot, Healthcheck
+  via `/dev/tcp/localhost/9000` (bash-builtin, kein curl im
+  Image) gegen `/health/ready`. Admin-Credentials via Placeholder-
+  Env-Block (`KEYCLOAK_ADMIN=CHANGEME_KEYCLOAK_ADMIN` +
+  `KEYCLOAK_ADMIN_PASSWORD=CHANGEME_KEYCLOAK_ADMIN_PASSWORD`).
+  **Persistenz: flüchtige H2-In-Container-Datenbank** — kein
+  Volume, nach `docker compose down` weg; LH-AK-003 verlangt nur
+  Endpoint-200/302. Persistente externe Postgres-Anbindung
+  (LH-FA-ADD-003 §857) bleibt als eigener Folge-Slice
+  (`slice-v1-keycloak-external-postgres`, Trigger: Nutzer-Bedarf).
+  Internal refactor: `renderPostgresTemplates` → generischer
+  `renderServiceTemplates(svc)` über neue Service-Catalogue-
+  Tabelle; `hasRequiredEnvKeys` / `contentScanState` /
+  `inspectVolumeArtefact` / `patchTargetsFor` werden per-Service
+  über `requiredEnvKeys` / `volumeRefLiteral` / `volumeOptional`
+  parametrisiert, damit Keycloak's volume-loser Pfad nicht in
+  den Postgres-Repair-Loop läuft. Test-Helper-Extraktion:
+  `internal/e2e/acceptance_helpers.go` teilt die init+add+up-
+  Pipeline mit dem LH-AK-002-Postgres-Test (Boot-Zeit-Carveout
+  für Keycloak: 4 min UpService-Timeout vs. 90 s Postgres). See
+  [`slice-v1-keycloak`](docs/plan/planning/done/slice-v1-keycloak.md).
 - **`u-boot add <service> --with-deps`** — LH-FA-ADD-006 add-on
   dependency mechanism. New domain type `AddOnDependency` (path-
   conditional service dependency declaration) + per-service
