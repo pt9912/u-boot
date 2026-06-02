@@ -14,6 +14,7 @@
 package application_test
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"strings"
@@ -305,6 +306,133 @@ func TestLHFADEV003_AllowlistEnforcement(t *testing.T) {
 		Value:   externalURL,
 	}); err != nil {
 		t.Errorf("source override after Allowlist seed: %v", err)
+	}
+}
+
+// TestLHFAUP005_LogsHappyPath pins `LH-FA-UP-005` (spec §1023-1040):
+//
+//	u-boot init
+//	u-boot add postgres
+//	u-boot logs postgres --tail ""    (CLI default; empty → "all")
+//
+// must reach the driven adapter with the contract slice-v1-logs §T0
+// nailed down:
+//
+//   - T0-(a)/T0-(b): Service-Filter forwarded verbatim — single
+//     element `["postgres"]`, no `activeServiceNames(cfg)` pre-filter.
+//   - T0-(c): empty Tail normalises to Compose's `"all"` constant
+//     before the adapter sees it. The CLI never emits `"all"` itself —
+//     it is purely an application-layer normalisation.
+//   - Sink-Pass-Through: the OutputSink the caller provides is the
+//     exact same pointer the adapter receives in
+//     `ComposeLogsOptions.Sink` (Review-Followup F4 pinned this on
+//     both the CLI- and service-side).
+//
+// Companion test for the Docker-tagged e2e
+// (`TestE2E_LHFAUP005_LogsTail` / `…_LogsFollow`); that one exercises
+// the real Compose-adapter against postgres, this one captures the
+// LogsService-internal contract deterministically with the
+// fakeDockerEngine.
+func TestLHFAUP005_LogsHappyPath(t *testing.T) {
+	fs := newFakeFS()
+	fs.markDirExists(testBaseDir)
+	y := &fakeYAML{}
+	git := &fakeGit{}
+	engine := newFakeDockerEngine()
+
+	initSvc := application.NewInitProjectService(fs, y, git, nil, nil, nil)
+	addSvc := application.NewAddServiceService(fs, y, nil, nil)
+	logsSvc := application.NewLogsService(fs, engine, nil)
+
+	if _, err := initSvc.Init(context.Background(), driving.InitProjectRequest{
+		BaseDir: testBaseDir,
+		Name:    "lhfaup005demo",
+		SkipGit: true,
+	}); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+	postgres, err := domain.NewServiceName("postgres")
+	if err != nil {
+		t.Fatalf("NewServiceName: %v", err)
+	}
+	if _, err := addSvc.Add(context.Background(), driving.AddServiceRequest{
+		BaseDir:     testBaseDir,
+		ServiceName: postgres,
+	}); err != nil {
+		t.Fatalf("add postgres: %v", err)
+	}
+
+	var sink bytes.Buffer
+	engine.scriptLogs(nil)
+	if _, err := logsSvc.Logs(context.Background(), driving.LogsRequest{
+		BaseDir:    testBaseDir,
+		Service:    "postgres",
+		Tail:       "", // CLI-Default; LogsService.normaliseTail → "all"
+		OutputSink: &sink,
+	}); err != nil {
+		t.Fatalf("Logs: %v", err)
+	}
+
+	if engine.logsCallCount != 1 {
+		t.Errorf("ComposeLogs called %d times, want 1", engine.logsCallCount)
+	}
+	if got := engine.logsOptions.Tail; got != "all" {
+		t.Errorf("ComposeLogsOptions.Tail = %q, want %q (T0-(c) empty → \"all\")", got, "all")
+	}
+	if got := engine.logsOptions.Services; len(got) != 1 || got[0] != "postgres" {
+		t.Errorf("ComposeLogsOptions.Services = %v, want [postgres] (T0-(a) single-service filter)", got)
+	}
+	if engine.logsOptions.Sink != &sink {
+		t.Errorf("Sink-Pointer-Identity broken: ComposeLogsOptions.Sink = %p, want %p (F4 pin)",
+			engine.logsOptions.Sink, &sink)
+	}
+}
+
+// TestLHFAUP005_LogsSIGINTReturnsNil pins the LH-FA-UP-005 SIGINT-
+// Vertrag Schicht 2 at the spec-symbol level: a cancelled context
+// from the driven adapter surfaces as `(LogsResponse{}, nil)` so the
+// CLI exits 0 (tail-konform). The CLI exit-code mapping itself is
+// pinned in `cli_test.go`; this test names LH-FA-UP-005 so a future
+// `grep LHFAUP005` reaches the SIGINT contract directly.
+func TestLHFAUP005_LogsSIGINTReturnsNil(t *testing.T) {
+	fs := newFakeFS()
+	fs.markDirExists(testBaseDir)
+	y := &fakeYAML{}
+	git := &fakeGit{}
+	engine := newFakeDockerEngine()
+
+	initSvc := application.NewInitProjectService(fs, y, git, nil, nil, nil)
+	addSvc := application.NewAddServiceService(fs, y, nil, nil)
+	logsSvc := application.NewLogsService(fs, engine, nil)
+
+	if _, err := initSvc.Init(context.Background(), driving.InitProjectRequest{
+		BaseDir: testBaseDir,
+		Name:    "lhfaup005sigint",
+		SkipGit: true,
+	}); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+	postgres, err := domain.NewServiceName("postgres")
+	if err != nil {
+		t.Fatalf("NewServiceName: %v", err)
+	}
+	if _, err := addSvc.Add(context.Background(), driving.AddServiceRequest{
+		BaseDir:     testBaseDir,
+		ServiceName: postgres,
+	}); err != nil {
+		t.Fatalf("add postgres: %v", err)
+	}
+
+	engine.scriptLogs(context.Canceled)
+	resp, err := logsSvc.Logs(context.Background(), driving.LogsRequest{
+		BaseDir: testBaseDir,
+		Tail:    "all",
+	})
+	if err != nil {
+		t.Fatalf("Logs returned %v; SIGINT-Vertrag requires nil for context.Canceled", err)
+	}
+	if resp != (driving.LogsResponse{}) {
+		t.Errorf("Logs returned %+v, want zero LogsResponse", resp)
 	}
 }
 

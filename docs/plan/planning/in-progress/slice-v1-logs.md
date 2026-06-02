@@ -8,7 +8,9 @@
 > Erweiterungen" listet `Logs`/`Exec`-Verb auf `DockerEngine`),
 > Plan-Followup P1..P5 ✅ (Review-Findings adressiert),
 > T0-Discovery ✅ (siehe §T0-Outcomes). In `in-progress/`: T1
-> (Driven-Port + Adapter) läuft, T2..T5 ausstehend.
+> (Driven-Port + Adapter) ✅, T2 (Use-Case) ✅, T3 (CLI-Subcommand
+> inkl. F1..F8-Followup) ✅, T4 (Docker-E2E + Spec-Pin) ✅; T5
+> (Doku + Closure) ausstehend.
 
 ## Auslöser
 
@@ -180,11 +182,17 @@ Compose-/Docker-Failures klassifizieren strikt analog M6
 | T1  | **Driven-Port + Adapter.** ✅ Done. `ComposeLogsOptions{Services, Follow, Tail, Sink}` + `ComposeLogs(ctx, dir, opts)` in `port/driven/docker_engine.go`. Adapter in `adapter/driven/docker/engine.go` mit `exec.CommandContext`; **zweistufiger SIGINT-Pass-Through (P3-Vertrag):** (1) `ctx.Err()`-Pre-Preflight-Check, (2) `ctx.Err()`-Post-`cmd.Run()`-Check. Beide returnen `ctx.Err()` unverdeckt, damit Ctrl-C nicht in ErrComposeRuntime/ErrDockerUnavailable maskiert. 3 Adapter-Tests (missing-binary→ErrDockerUnavailable, happy-path-stream-to-sink, ctx-canceled-pre-call→context.Canceled). `fakeDockerEngine` um `ComposeLogs`-Stub erweitert (T2 ergänzt die scripting-Helper). | ~120 geschätzt / **~102 real** (−15 %, unter Budget) |
 | T2  | **Use-Case.** ✅ Done. `LogsRequest{BaseDir, Service, Follow, Tail, OutputSink}` + `LogsResponse{}` + `LogsUseCase` in `port/driving/logs.go` (mit ausführlichen T0-Outcomes-Referenzen im Doc-Kommentar). `LogsService` in `application/logsservice.go`: BaseDir-Check → Project-State-Check (u-boot.yaml + compose.yaml) → Tail-Normalisierung (T0-(c): leer → `"all"`) → ComposeLogs-Aufruf → SIGINT-Pass-Through (`context.Canceled` und `context.DeadlineExceeded` → `(LogsResponse{}, nil)`). Service-Name-Validation NICHT im Use-Case (T0-(b): nur Regex auf CLI-Ebene, Compose macht Existenz-Check). 8 Tests (BaseDir-empty, ohne u-boot.yaml, ohne compose.yaml, Happy-Path-Tail-Normalisierung, Happy-Path-Service-Filter, SIGINT-Canceled, SIGINT-Deadline, ErrComposeRuntime-Propagation, ErrDockerUnavailable-Propagation). | ~120 geschätzt / **~245 real** (+104 %; getrieben durch ausführliche Doc-Kommentare mit T0/P3-Referenzen — analog Parent-Slice T4-Verlauf) |
 | T3  | **CLI-Subcommand.** ✅ Done. `internal/adapter/driving/cli/logs.go` mit Cobra `logs [service]` (`MaximumNArgs(1)`), `--follow` (BoolVar), `--tail` (StringVar). `validateLogsTailFlag` für Stage-1-Validation (T0-(c)). Service-Name-Validation via `domain.NewServiceName` (Format-Regex → Exit-10). SIGINT-Wiring von `main.go:signal.NotifyContext`. App-Wiring: neues `logsUseCase`-Feld + alle 9 `cli.New`-Call-Sites + main.go. `ErrInvalidLogsTail` in `isUsageError` → Exit-2. 10 CLI-Tests pinnen alle Exit-Code-Pfade. **Review-Followup F1..F8** (post-Konsolidierten-Review der T1+T2+T3-Schichten): F1 `--tail "all"`-Wording-Hint, F2 Sink-Doc-vs-Code aufgelöst (sagt jetzt "BOTH stdout+stderr"), F3 Cancel-mid-flight via `wrapComposeRunError`-Helper-Extraktion + 4 hermetische Sub-Tests, F4 Sink-Pointer-Identity-Pin (Service- und CLI-seitig), F5 `normaliseTail` Doc-Begründung, F6 Tail=""-Skip-Flag-Pin im Adapter, F7 `LogsService`-Doku trusts-CLI-Validation explizit, F8 `strconv.ParseUint` statt `Atoi` (rejected `+5`/whitespace). | ~80 geschätzt / **~174 real** + **~70 LOC Followup** = ~244 (+205 %; getrieben durch App-Wiring + 13 Test-Pin-Funktionen + Review-Followup-Härtung) |
-| T4  | **Docker-Tag E2E + Spec-Pin.** `internal/e2e/logs_acceptance_docker_test.go`: postgres up + logs --tail + logs --follow (mit Test-Timeout-Cancellation). Plus Application-Layer-Acceptance-Test `TestLHFAUP005_Logs*`. | ~150 |
+| T4  | **Docker-Tag E2E + Spec-Pin.** ✅ Done. `internal/e2e/logs_acceptance_docker_test.go` (`//go:build docker`, 119 LOC): zwei Tests gegen echten postgres-Compose-Stack via `runAcceptanceFlow`-Helper (Variante A — kein Helper-Refactor). `TestE2E_LHFAUP005_LogsTail` (`--tail 20`, Buffer enthält die kanonische postgres-Boot-Phrase `database system is ready`), `TestE2E_LHFAUP005_LogsFollow` (`--follow` mit 8 s `ctx.Deadline`, Pin auf SIGINT-Vertrag Schicht 2 — DeadlineExceeded → nil-error + Sink-Buffer-Flush-Content). Plus Application-Layer-Spec-Pin in `internal/hexagon/application/acceptance_test.go` (+128 LOC): `TestLHFAUP005_LogsHappyPath` (init+add+Logs gegen `fakeDockerEngine`; Pin Tail-Normalisierung T0-(c), Service-Filter T0-(a)/(b), Sink-Pointer-Identity F4) und `TestLHFAUP005_LogsSIGINTReturnsNil` (`context.Canceled`-Sentinel → `(LogsResponse{}, nil)`). Lokal grün: `make test` 6.8s, `make test-docker` 31s für die zwei LH-FA-UP-005-Tests. | ~150 geschätzt / **~247 real** (+65 %; Doc-Kommentare mit T0/F4/SIGINT-Vertrag-Referenzen analog T2-Verlauf) |
 | T5  | **Doku + Closure.** README EN+DE Subcommand-Tabelle, CHANGELOG `## [Unreleased]`-Eintrag. Slice `open/` → `done/` mit DoD-Hash-Line. Roadmap-Status. | — (Doku) |
 
-LOC-Summe T1-T4 ≈ **470 LOC** (Schätzung); unter 800-LOC-Carveout-
-Schwelle. Re-Check vor T4-Start.
+LOC-Summe T1-T4: Plan-Schätzung **~470 LOC**, Real **~838 LOC**
+(T1 ~102 + T2 ~245 + T3 ~244 inkl. F1..F8-Followup + T4 ~247).
+Leicht **über** der 800-LOC-Carveout-Schwelle (5 %). Re-Check
+nach T4-Closure: T5 ist reine Doku (README EN+DE, CHANGELOG,
+Slice-Move, Roadmap-Status) — kein Code-Carveout-Trigger,
+deshalb kein Split nötig. Die Überschreitung kommt aus den
+Plan-Followup-Härtungen (P3 in T1, T2-Doc-Kommentare, F1..F8
+in T3) — alle inhaltlich werthaltig, nicht Scope-Creep.
 
 ## T0-Outcomes
 
