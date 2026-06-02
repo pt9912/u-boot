@@ -22,6 +22,41 @@ func seedDoctorUbootYAMLFeatures(t *testing.T, fs *fakeFS, body string) {
 	}
 }
 
+// TestDoctor_UbootYaml_ErrorOnBadFeatureSource is the Audit-
+// Followup A1 wiring pin: a hand-edited u-boot.yaml with an
+// invalid `featureSources.allow` entry (ftp:// — unsupported
+// scheme) surfaces as Error severity on the
+// `uboot.yaml.valid` check (LH-FA-DEV-003 / Spec §1353 → Exit-10
+// when the user surface goes through the CLI; in-Doctor we just
+// classify it as Error so the user sees the consolidated
+// u-boot.yaml-validity report).
+func TestDoctor_UbootYaml_ErrorOnBadFeatureSource(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	seedDoctorUbootYAMLFeatures(t, fs, `schemaVersion: 1
+project:
+  name: demo
+devcontainer:
+  featureSources:
+    allow:
+      - ftp://bad.test/feature
+`)
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "uboot.yaml.valid")
+	if d.Severity != domain.SeverityError {
+		t.Errorf("Severity = %v, want Error (LH-FA-DEV-003 schema)", d.Severity)
+	}
+	if !strings.Contains(d.Message, "devcontainer schema invalid") {
+		t.Errorf("Message lacks devcontainer-schema indicator: %q", d.Message)
+	}
+	if !strings.Contains(d.Hint, "LH-FA-DEV-003") {
+		t.Errorf("Hint lacks LH-FA-DEV-003 reference: %q", d.Hint)
+	}
+}
+
 // TestDoctor_FeaturesAllowlist_OKWhenNoUbootYaml pins the
 // skip-on-missing-config branch: without u-boot.yaml the check
 // keeps quiet (primary file-presence diagnostics live in

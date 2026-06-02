@@ -32,7 +32,7 @@ After installing the binary (see *Install* below):
 u-boot init my-service                  # scaffold project + git init
 u-boot add postgres                     # register Postgres + write compose block
 u-boot up                               # docker compose up + healthcheck poll
-u-boot doctor                           # 11 diagnostic checks against host + project
+u-boot doctor                           # 13 diagnostic checks against host + project
 u-boot down --volumes                   # stop + named-volume cleanup (confirmed)
 u-boot remove postgres                  # mirror of add — disable + cut blocks
 u-boot generate readme                  # refresh a managed-block artefact
@@ -170,7 +170,7 @@ and §Nächste Schritte for the in-progress backlog.
 | Subcommand | Spec IDs | Brief |
 | ---------- | -------- | ----- |
 | `init [name] [--devcontainer] [--template <name>]` | `LH-FA-INIT-001..007`, `LH-FA-TPL-001` | Scaffold project + `git init`. |
-| `doctor [--strict]` | `LH-FA-DIAG-001..004`, `LH-FA-DEV-003` | 12 diagnostic checks (the 12th is `devcontainer.features.allowlist` from v0.4.0); container-aware skip for host probes. |
+| `doctor [--strict]` | `LH-FA-DIAG-001..004`, `LH-FA-DEV-003` | 13 diagnostic checks; v0.4.0 adds `devcontainer.features.allowlist` (Error on LH-FA-DEV-003 violations) and `devcontainer.features.drift` (Warn when u-boot.yaml's feature map and the rendered `devcontainer.json` features differ; repair via `u-boot generate devcontainer`). Container-aware skip for host probes. |
 | `add <service> [--with-deps]` | `LH-FA-ADD-001..006` | Idempotent state-machine for service add-ons (`postgres`, `keycloak`, `otel`); `--with-deps` auto-installs missing dependencies. |
 | `remove <service> [--purge]` | `LH-FA-ADD-007` | Mirror of `add` — disable + cut managed blocks. |
 | `up [--timeout <s>]` | `LH-FA-UP-001..003` | Compose up + healthcheck-poll + TCP probe. |

@@ -528,6 +528,14 @@ func (s *ConfigService) readUbootYAMLBody(baseDir string) ([]byte, ubootYAMLConf
 		return nil, ubootYAMLConfig{}, fmt.Errorf("%w: parse u-boot.yaml: %v",
 			driving.ErrConfigSchemaInvalid, err)
 	}
+	// Audit-Followup A1: LH-FA-DEV-003 schema-validation of the
+	// devcontainer subtree on load. Spec §1353 mandates Exit-Code
+	// 10 for invalid sources / names; ErrConfigSchemaInvalid maps
+	// there via `isConfigValidationError`.
+	if err := validateDevcontainerFeatures(cfg.Devcontainer); err != nil {
+		return nil, ubootYAMLConfig{}, fmt.Errorf("%w: u-boot.yaml devcontainer schema invalid: %v",
+			driving.ErrConfigSchemaInvalid, err)
+	}
 	return body, cfg, nil
 }
 
@@ -586,6 +594,13 @@ func (s *ConfigService) readUbootYAML(baseDir string) (ubootYAMLConfig, error) {
 	var cfg ubootYAMLConfig
 	if err := s.yaml.Unmarshal(body, &cfg); err != nil {
 		return ubootYAMLConfig{}, fmt.Errorf("%w: parse u-boot.yaml: %v",
+			driving.ErrConfigSchemaInvalid, err)
+	}
+	// Audit-Followup A1: LH-FA-DEV-003 schema-validation on load
+	// for the Get-path too. Same error-classification as the
+	// readUbootYAMLBody helper.
+	if err := validateDevcontainerFeatures(cfg.Devcontainer); err != nil {
+		return ubootYAMLConfig{}, fmt.Errorf("%w: u-boot.yaml devcontainer schema invalid: %v",
 			driving.ErrConfigSchemaInvalid, err)
 	}
 	return cfg, nil

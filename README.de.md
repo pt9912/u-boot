@@ -35,7 +35,7 @@ Nach Installation des Binarys (siehe *Installation* unten):
 u-boot init my-service                  # Projekt-Skelett + git init
 u-boot add postgres                     # Postgres registrieren + Compose-Block
 u-boot up                               # docker compose up + Healthcheck-Poll
-u-boot doctor                           # 11 Diagnose-Checks gegen Host + Projekt
+u-boot doctor                           # 13 Diagnose-Checks gegen Host + Projekt
 u-boot down --volumes                   # Stop + Named-Volume-Cleanup (bestätigt)
 u-boot remove postgres                  # Spiegel von add — disable + Blocks raus
 u-boot generate readme                  # Managed-Block-Artefakt aktualisieren
@@ -178,7 +178,7 @@ Auflösungs-Slices und §Nächste Schritte für das laufende Backlog.
 | Subkommando | Spec-IDs | Kurz |
 | ----------- | -------- | ---- |
 | `init [name] [--devcontainer] [--template <name>]` | `LH-FA-INIT-001..007`, `LH-FA-TPL-001` | Projekt-Skelett + `git init`. |
-| `doctor [--strict]` | `LH-FA-DIAG-001..004`, `LH-FA-DEV-003` | 12 Diagnose-Checks (der 12. ist `devcontainer.features.allowlist` ab v0.4.0); container-aware Skip für Host-Probes. |
+| `doctor [--strict]` | `LH-FA-DIAG-001..004`, `LH-FA-DEV-003` | 13 Diagnose-Checks; v0.4.0 ergänzt `devcontainer.features.allowlist` (Error bei LH-FA-DEV-003-Verstößen) und `devcontainer.features.drift` (Warn, wenn u-boot.yaml's Features-Map und das gerenderte `devcontainer.json` divergieren; Repair via `u-boot generate devcontainer`). Container-aware Skip für Host-Probes. |
 | `add <service> [--with-deps]` | `LH-FA-ADD-001..006` | Idempotente State-Machine für Service-Add-Ons (`postgres`, `keycloak`, `otel`); `--with-deps` installiert fehlende Abhängigkeiten automatisch. |
 | `remove <service> [--purge]` | `LH-FA-ADD-007` | Spiegel von `add` — disable + Managed-Blocks raus. |
 | `up [--timeout <s>]` | `LH-FA-UP-001..003` | Compose up + Healthcheck-Poll + TCP-Probe. |

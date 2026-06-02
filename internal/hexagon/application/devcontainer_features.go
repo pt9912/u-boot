@@ -270,8 +270,17 @@ func collectDevcontainerFeatures(cfg ubootYAMLConfig) []devcontainerFeatureData 
 		}
 		out = append(out, data)
 	}
+	// Audit-Followup A2: sort by the full render-key (Source ":" Version)
+	// rather than Source alone. Two enabled features with the same
+	// Source but different Versions otherwise inherit Go's
+	// map-iteration randomness and break the LH-FA-DEV-005 idempotency
+	// contract (`generate devcontainer` flipped UpdatedBlock vs NoOp
+	// across runs).
 	sort.Slice(out, func(i, j int) bool {
-		return out[i].Source < out[j].Source
+		if out[i].Source != out[j].Source {
+			return out[i].Source < out[j].Source
+		}
+		return out[i].Version < out[j].Version
 	})
 	return out
 }

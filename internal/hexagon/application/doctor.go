@@ -551,6 +551,20 @@ func (s *DoctorService) checkUbootYaml(_ context.Context, baseDir string) domain
 			Hint:     "Use a lowercase name like `my-service` (LH-FA-INIT-006 regex).",
 		}
 	}
+	// Audit-Followup A1: LH-FA-DEV-003 schema validation of the
+	// devcontainer subtree (featureSources.allow entries + features
+	// map-key + features.<name>.source URL-format). Spec §1353
+	// mandates Exit-Code 10 for invalid sources / names; `checkUbootYaml`
+	// is the canonical place to surface that as an Error severity
+	// so the user sees one consolidated u-boot.yaml-validity report.
+	if err := validateDevcontainerFeatures(cfg.Devcontainer); err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDUbootYaml,
+			Severity: domain.SeverityError,
+			Message:  fmt.Sprintf("u-boot.yaml devcontainer schema invalid: %s.", err.Error()),
+			Hint:     "Fix the offending entry (URL scheme, host, or feature name); see LH-FA-DEV-003 / spec/lastenheft.md §1340-1353.",
+		}
+	}
 	return domain.Diagnostic{
 		ID:       checkIDUbootYaml,
 		Severity: domain.SeverityOK,
@@ -1328,17 +1342,39 @@ func (s *DoctorService) checkDevcontainerFeaturesDrift(_ context.Context, baseDi
 		}
 	}
 
+	// Audit-Followup A3 / slice-followup §AK „Skip-Disziplin
+	// (präzise)": distinguish three cfg-side states:
+	//   - `cfg.Devcontainer` or `.Features` nil → User has never
+	//     opted into devcontainer features at all → skip if JSON
+	//     is also empty (the check has nothing to be 'zuständig'
+	//     for).
+	//   - `cfg.Devcontainer.Features` explicitly `{}` (empty map
+	//     after the user removed everything) → check IS zuständig:
+	//     classify as OK in-sync when JSON has no features, OR
+	//     run the full drift detection when JSON does (Case 2b
+	//     can still fire).
+	cfgFeaturesNil := cfg.Devcontainer == nil || cfg.Devcontainer.Features == nil
 	cfgFeaturesMap := map[string]ubootYAMLDevcontainerFeature{}
-	if cfg.Devcontainer != nil && cfg.Devcontainer.Features != nil {
+	if !cfgFeaturesNil {
 		cfgFeaturesMap = cfg.Devcontainer.Features
 	}
-	cfgEmpty := len(cfgFeaturesMap) == 0
 	jsonEmpty := !jsonPresent || len(jsonKeys) == 0
-	if cfgEmpty && jsonEmpty {
+	if cfgFeaturesNil && jsonEmpty {
 		return domain.Diagnostic{
 			ID:       checkIDDevcontainerFeaturesDrift,
 			Severity: domain.SeverityOK,
 			Message:  "no devcontainer features configured anywhere; drift check skipped.",
+		}
+	}
+	if len(cfgFeaturesMap) == 0 && jsonEmpty {
+		// Explicit empty map + JSON without features: the check
+		// is „zuständig" because the user did opt into features
+		// (and removed them); the in-sync state is the success
+		// case, not a skip.
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerFeaturesDrift,
+			Severity: domain.SeverityOK,
+			Message:  "devcontainer.features is explicitly empty and devcontainer.json carries no features; in sync.",
 		}
 	}
 

@@ -468,17 +468,18 @@ devcontainer:
 }
 
 // TestDoctor_FeaturesDrift_NilVsEmptyFeaturesMap pins the
-// nil-vs-explicitly-empty distinction. Both fixtures result in a
-// cfg without enabled features; the Skip-Disziplin keeps both
-// at OK because the JSON has no features-section either.
-// The distinction matters because the Skip-Bedingung must not
-// confuse `nil` (no devcontainer key at all) with `features: {}`
-// (explicit empty map after user removed everything).
+// nil-vs-explicitly-empty distinction. Both fixtures result in
+// Severity OK, but the message differs — Audit-Followup A3 made
+// the distinction observable: `nil` cfg + empty JSON skips with
+// "configured anywhere", `features: {}` + empty JSON surfaces
+// "explicitly empty … in sync". The check must not confuse the
+// two states (slice-followup §AK „Skip-Disziplin (präzise)").
 func TestDoctor_FeaturesDrift_NilVsEmptyFeaturesMap(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
-		name string
-		yaml string
+		name        string
+		yaml        string
+		wantMessage string
 	}{
 		{
 			name: "nil features (no devcontainer key)",
@@ -486,6 +487,7 @@ func TestDoctor_FeaturesDrift_NilVsEmptyFeaturesMap(t *testing.T) {
 project:
   name: demo
 `,
+			wantMessage: "no devcontainer features configured anywhere",
 		},
 		{
 			name: "nil features (devcontainer enabled, no features key)",
@@ -495,15 +497,17 @@ project:
 devcontainer:
   enabled: true
 `,
+			wantMessage: "no devcontainer features configured anywhere",
 		},
 		{
-			name: "explicit empty map",
+			name: "explicit empty map (Audit-Followup A3: in-sync, not skip)",
 			yaml: `schemaVersion: 1
 project:
   name: demo
 devcontainer:
   features: {}
 `,
+			wantMessage: "explicitly empty",
 		},
 	}
 	for _, tc := range cases {
@@ -519,6 +523,10 @@ devcontainer:
 			d := findDiagnostic(t, resp.Report.Items, "devcontainer.features.drift")
 			if d.Severity != domain.SeverityOK {
 				t.Errorf("Severity = %v, want OK", d.Severity)
+			}
+			if !strings.Contains(d.Message, tc.wantMessage) {
+				t.Errorf("Message = %q, want substring %q (Audit-Followup A3 distinction)",
+					d.Message, tc.wantMessage)
 			}
 		})
 	}

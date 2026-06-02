@@ -142,6 +142,16 @@ func (s *GenerateService) readProjectConfig(baseDir string) (ubootYAMLConfig, er
 		return ubootYAMLConfig{}, fmt.Errorf("%w: parse u-boot.yaml: %v",
 			driving.ErrProjectNotInitialized, err)
 	}
+	// Audit-Followup A1: enforce LH-FA-DEV-003 schema-validation
+	// (devcontainer.featureSources.allow URL format + features
+	// map-key + features.<name>.source URL format). Without this,
+	// hand-edited bad URLs propagate into devcontainer.json as
+	// feature-keys. Spec §1353 mandates Exit-Code 10 →
+	// ErrGenerateManualConflict carries that mapping.
+	if err := validateDevcontainerFeatures(cfg.Devcontainer); err != nil {
+		return ubootYAMLConfig{}, fmt.Errorf("%w: u-boot.yaml devcontainer schema invalid: %v",
+			driving.ErrGenerateManualConflict, err)
+	}
 	return cfg, nil
 }
 

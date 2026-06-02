@@ -288,6 +288,127 @@ func TestGenerateDevcontainer_FeaturesRendered_KeysSortedAndShape(t *testing.T) 
 	}
 }
 
+// TestGenerateDevcontainer_SchemaValidation_RejectsBadAllowEntry is
+// the Audit-Followup A1 wiring pin for the Generate-use-case:
+// a hand-edited u-boot.yaml with an invalid `featureSources.allow`
+// entry (e.g. `ftp://`) must fail the generate with
+// ErrGenerateManualConflict (LH-FA-CLI-006 Exit-Code 10) — before
+// the fix, the bad URL silently propagated into devcontainer.json.
+func TestGenerateDevcontainer_SchemaValidation_RejectsBadAllowEntry(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateComposeYAML(t, fs, composeYAMLPostgres)
+	if err := fs.WriteFile(filepath.Join(generateTestBaseDir, "u-boot.yaml"),
+		[]byte(`schemaVersion: 1
+project:
+  name: t-uboot-gen
+devcontainer:
+  featureSources:
+    allow:
+      - ftp://bad.test/feature
+`), 0o644); err != nil {
+		t.Fatalf("seed u-boot.yaml: %v", err)
+	}
+	_, err := svc.Generate(context.Background(), driving.GenerateRequest{
+		BaseDir:  generateTestBaseDir,
+		Artifact: domain.ArtifactDevcontainer,
+	})
+	if err == nil {
+		t.Fatalf("expected error for bad allowlist entry, got nil")
+	}
+	if !errors.Is(err, driving.ErrGenerateManualConflict) {
+		t.Errorf("err = %v, want wrap of ErrGenerateManualConflict (Exit-Code 10)", err)
+	}
+}
+
+// TestGenerateDevcontainer_SchemaValidation_RejectsBadFeatureSource
+// pins the same wiring for the `features.<name>.source`-override
+// path.
+func TestGenerateDevcontainer_SchemaValidation_RejectsBadFeatureSource(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateComposeYAML(t, fs, composeYAMLPostgres)
+	if err := fs.WriteFile(filepath.Join(generateTestBaseDir, "u-boot.yaml"),
+		[]byte(`schemaVersion: 1
+project:
+  name: t-uboot-gen
+devcontainer:
+  features:
+    custom:
+      enabled: true
+      source: ftp://bad.test/feature
+`), 0o644); err != nil {
+		t.Fatalf("seed u-boot.yaml: %v", err)
+	}
+	_, err := svc.Generate(context.Background(), driving.GenerateRequest{
+		BaseDir:  generateTestBaseDir,
+		Artifact: domain.ArtifactDevcontainer,
+	})
+	if err == nil {
+		t.Fatalf("expected error for bad features.<name>.source, got nil")
+	}
+	if !errors.Is(err, driving.ErrGenerateManualConflict) {
+		t.Errorf("err = %v, want wrap of ErrGenerateManualConflict", err)
+	}
+}
+
+// TestGenerateDevcontainer_FeaturesIdempotent_SameSourceTwoVersions
+// is the Audit-Followup A2 anti-regression pin: two enabled
+// feature entries that share a Source but carry different
+// Versions must produce a deterministic alphabetical render across
+// 30 repeated runs. Before the fix, `collectDevcontainerFeatures`
+// sorted by Source alone — Go's map-iteration randomness flipped
+// the relative order of same-Source/different-Version entries and
+// turned every other `generate devcontainer` into a spurious
+// UpdatedBlock action, breaking LH-FA-DEV-005 idempotency.
+//
+// The fixture uses a `source:`-override (the only realistic way
+// to get two map entries with identical Source: catalogue-only
+// activation is one entry per source by construction).
+func TestGenerateDevcontainer_FeaturesIdempotent_SameSourceTwoVersions(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateComposeYAML(t, fs, composeYAMLPostgres)
+	seedUBootYAMLWithFeatures(t, fs, `devcontainer:
+  enabled: true
+  featureSources:
+    allow:
+      - https://example.test/feat
+  features:
+    primary:
+      enabled: true
+      source: https://example.test/feat
+      version: "1"
+    secondary:
+      enabled: true
+      source: https://example.test/feat
+      version: "2"
+`)
+
+	// First Generate writes the file.
+	if _, err := generateDevcontainer(t, svc); err != nil {
+		t.Fatalf("first run: %v", err)
+	}
+	writesAfterFirst := len(fs.writtenPaths())
+
+	// 30 follow-up generates must all be NoOp regardless of the
+	// underlying map-iteration order.
+	for i := 0; i < 30; i++ {
+		resp, err := generateDevcontainer(t, svc)
+		if err != nil {
+			t.Fatalf("run %d: %v", i+2, err)
+		}
+		if resp.Action != driving.GenerateActionNoOp {
+			t.Errorf("run %d Action = %v, want NoOp (sort instability flips block content)",
+				i+2, resp.Action)
+		}
+	}
+	if delta := len(fs.writtenPaths()) - writesAfterFirst; delta != 0 {
+		t.Errorf("30 follow-up generates produced %d extra WriteFile call(s), want 0",
+			delta)
+	}
+}
+
 // TestGenerateDevcontainer_AllowExternalFeatureSources_Append pins
 // the LH-FA-DEV-003 / Spec §715 flag-wiring on `generate
 // devcontainer`: invoking the use case with a non-empty
