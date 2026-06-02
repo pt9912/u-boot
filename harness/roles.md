@@ -81,6 +81,10 @@ Verifier prueft "built the thing right": DoD gegen Diff, Tests gegen
 Spec-ID, Make-Targets gegen Handoff, Docs gegen Links, Carveouts gegen
 Inventar.
 
+Verification-Evidence folgt [`harness/verification.md`](verification.md).
+Sie ist ein eigenes Closure-Artefakt im Slice oder ein verlinktes
+Evidence-Dokument, nicht nur eine Liste ausgefuehrter Gates.
+
 Verifier darf nicht behaupten, ein Gate sei gruen, wenn es nicht
 ausgefuehrt wurde. Nicht ausgefuehrte Sensoren werden mit Grund
 gelistet.

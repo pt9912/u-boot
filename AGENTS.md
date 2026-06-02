@@ -83,6 +83,13 @@ mindestens einen Spec- oder ADR-Anker und einen Test- oder Gate-Nachweis.
 CLI-Ausgaben, Fehlermeldungen und generierte Dateien bleiben Englisch
 (`LH-LESE-002`), auch wenn Plan- und Spec-Dokumente deutsch sind.
 
+### Verification Evidence
+
+Slice-Closure braucht Verification-Evidence nach
+[`harness/verification.md`](harness/verification.md). Gates allein
+reichen nicht: Die Evidence muss DoD, Spec-/ADR-IDs, ausgefuehrte
+Sensors, nicht ausgefuehrte Sensors und Carveouts sichtbar verbinden.
+
 ### Exit-Code-Vertraege
 
 Die `LH-FA-CLI-006`-Klassifikation ist ein Produktvertrag. Neue
@@ -160,7 +167,11 @@ Umgebung Docker zulaesst.
 5. Kleinste sinnvolle Aenderung umsetzen.
 6. Engsten passenden Sensor laufen lassen; bei Codeaenderungen nach
    Moeglichkeit `make gates`.
-7. Oeffentliche Vertraege in README, `docs/user/`, ADR-Index, Roadmap,
+7. Verification-Evidence nach
+   [`harness/verification.md`](harness/verification.md) festhalten,
+   wenn ein Slice geschlossen oder ein oeffentlicher Vertrag beruehrt
+   wird.
+8. Oeffentliche Vertraege in README, `docs/user/`, ADR-Index, Roadmap,
    Slice oder CHANGELOG nachziehen.
-8. Im Handoff ausgefuehrte Sensoren, nicht ausgefuehrte Sensoren und
+9. Im Handoff ausgefuehrte Sensoren, nicht ausgefuehrte Sensoren und
    verbleibende Risiken klar nennen.

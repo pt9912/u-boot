@@ -19,6 +19,10 @@ open/ → next/ → in-progress/ → done/
   Querverweise, Archiv-Hinweise) geändert werden. Substanzielle
   inhaltliche Änderungen erzeugen ein neues Artefakt in `open/` oder
   `next/` mit Verweis auf den vorhergehenden Stand.
+- Vor dem Übergang nach `done/` muss der Slice eine
+  Verification-Evidence nach
+  [`../../../harness/verification.md`](../../../harness/verification.md)
+  tragen oder auf ein eigenes Evidence-Artefakt verweisen.
 
 ## Dateiname-Konvention
 

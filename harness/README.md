@@ -35,6 +35,7 @@ Feedforward-Quellen, die Arbeit vor der Umsetzung lenken:
 | [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md) | Temporaere und permanente Carveouts |
 | [`docs/user/quality.md`](../docs/user/quality.md) | Quality-Gates, Linter-Profil, Coverage, Security |
 | [`harness/roles.md`](roles.md) | Rollen, Uebergaben und Konfliktpfade |
+| [`harness/verification.md`](verification.md) | Verification-Evidence und Slice-Closure-Schema |
 | [`AGENTS.md`](../AGENTS.md) | Hard Rules, Source Precedence, Minimal Workflow |
 
 ## Sensors
@@ -65,6 +66,8 @@ nicht ausgefuehrt wurde.
   oder Slice-Anker.
 - Neue oder geaenderte Anforderungen brauchen einen Nachweis: Test,
   Gate, Demo, ADR oder dokumentierte Closure.
+- Slice-Closure braucht Verification-Evidence nach
+  [`harness/verification.md`](verification.md).
 - Neue ADRs muessen den ADR-Index aktualisieren.
 - Planning-Dokumente folgen `open/ -> next/ -> in-progress/ -> done/`.
 - Temporaere Carveouts brauchen parallel Inventar-Eintrag und
@@ -109,6 +112,9 @@ stillschweigend ersetzen.
 5. Kleinste sinnvolle Aenderung ausfuehren.
 6. Engsten nuetzlichen Sensor laufen lassen.
 7. Bei Codeaenderungen nach Moeglichkeit `make gates` ausfuehren.
-8. Oeffentliche Doku, Planning-Artefakte und CHANGELOG aktualisieren,
+8. Verification-Evidence nach [`harness/verification.md`](verification.md)
+   festhalten, wenn ein Slice geschlossen oder ein oeffentlicher Vertrag
+   beruehrt wurde.
+9. Oeffentliche Doku, Planning-Artefakte und CHANGELOG aktualisieren,
    wenn ein oeffentlicher Vertrag beruehrt wurde.
-9. Handoff mit Rolle, ausgefuehrten Sensors, offenen Sensors und Risiken.
+10. Handoff mit Rolle, ausgefuehrten Sensors, offenen Sensors und Risiken.
