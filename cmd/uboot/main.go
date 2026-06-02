@@ -124,9 +124,10 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	generateSvc := application.NewGenerateService(fsAdapter, yamlAdapter, logAdapter)
 	configSvc := application.NewConfigService(fsAdapter, yamlAdapter, logAdapter)
 	templateListSvc := application.NewTemplateListService(templateCatalogAdapter, logAdapter)
+	logsSvc := application.NewLogsService(fsAdapter, dockerEngineAdapter, logAdapter)
 
 	// Driving adapter (CLI).
-	app := cli.New(version, initSvc, doctorSvc, addSvc, upSvc, downSvc, generateSvc, configSvc, templateListSvc, removeSvc, cli.WithLogLevel(logLevel))
+	app := cli.New(version, initSvc, doctorSvc, addSvc, upSvc, downSvc, generateSvc, configSvc, templateListSvc, removeSvc, logsSvc, cli.WithLogLevel(logLevel))
 
 	err := app.Execute(ctx, args, stdout, stderr)
 	if err != nil {

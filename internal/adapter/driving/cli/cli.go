@@ -70,6 +70,10 @@ type App struct {
 	// (LH-FA-ADD-007; slice-v1-add-remove).
 	removeServiceUseCase driving.RemoveServiceUseCase
 
+	// logsUseCase implements `u-boot logs [service]`
+	// (LH-FA-UP-005; slice-v1-logs).
+	logsUseCase driving.LogsUseCase
+
 	// getwd is the working-directory probe; defaults to os.Getwd.
 	// Tests inject a fake via [WithGetwd] so they do not depend on
 	// the host pwd.
@@ -124,7 +128,7 @@ func WithLogLevel(level *slog.LevelVar) Option {
 // New constructs an App. The version string and every use-case
 // implementation must be non-nil at call time; the CLI package
 // trusts the wiring layer to honor that.
-func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, addUC driving.AddServiceUseCase, upUC driving.UpUseCase, downUC driving.DownUseCase, genUC driving.GenerateUseCase, cfgUC driving.ConfigUseCase, tmplUC driving.TemplateListUseCase, removeUC driving.RemoveServiceUseCase, opts ...Option) *App {
+func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, addUC driving.AddServiceUseCase, upUC driving.UpUseCase, downUC driving.DownUseCase, genUC driving.GenerateUseCase, cfgUC driving.ConfigUseCase, tmplUC driving.TemplateListUseCase, removeUC driving.RemoveServiceUseCase, logsUC driving.LogsUseCase, opts ...Option) *App {
 	a := &App{
 		version:              version,
 		initUseCase:          initUC,
@@ -136,6 +140,7 @@ func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.Doc
 		configUseCase:        cfgUC,
 		templateListUseCase:  tmplUC,
 		removeServiceUseCase: removeUC,
+		logsUseCase:          logsUC,
 		getwd:                os.Getwd,
 	}
 	for _, opt := range opts {
@@ -375,6 +380,7 @@ func isUsageError(err error) bool {
 	// from `add <unknown-service>` which maps to code 10 via
 	// [isValidationError].
 	if errors.Is(err, ErrConflictingModeFlags) || errors.Is(err, ErrInvalidTimeout) ||
+		errors.Is(err, ErrInvalidLogsTail) ||
 		errors.Is(err, driving.ErrArtifactUnknown) ||
 		errors.Is(err, driving.ErrTemplateConflictsWithFlag) {
 		return true

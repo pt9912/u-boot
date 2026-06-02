@@ -86,6 +86,7 @@ See spec/lastenheft.md for the full functional specification.`,
 	root.AddCommand(newRemoveCommand(a))
 	root.AddCommand(newUpCommand(a))
 	root.AddCommand(newDownCommand(a))
+	root.AddCommand(newLogsCommand(a))
 	root.AddCommand(newGenerateCommand(a))
 	root.AddCommand(newConfigCommand(a))
 	root.AddCommand(newTemplateCommand(a))

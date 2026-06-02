@@ -183,53 +183,76 @@ func (f *fakeRemoveServiceUseCase) Remove(_ context.Context, req driving.RemoveS
 	return f.resp, f.err
 }
 
+// fakeLogsUseCase records the last LogsRequest and returns the
+// configured response/error. Mirrors the shape of the other
+// fake use cases (slice-v1-logs T3).
+type fakeLogsUseCase struct {
+	called  bool
+	lastReq driving.LogsRequest
+	resp    driving.LogsResponse
+	err     error
+}
+
+func (f *fakeLogsUseCase) Logs(_ context.Context, req driving.LogsRequest) (driving.LogsResponse, error) {
+	f.called = true
+	f.lastReq = req
+	return f.resp, f.err
+}
+
 func newApp(uc driving.InitProjectUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", uc, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, opts...)
+	return cli.New("0.0.0-test", uc, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, &fakeLogsUseCase{}, opts...)
 }
 
 // newAppWithDoctor is newApp's variant for doctor-focused tests; the
 // caller can wire a fake DoctorUseCase explicitly.
 func newAppWithDoctor(uc driving.InitProjectUseCase, doctorUC driving.DoctorUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", uc, doctorUC, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, opts...)
+	return cli.New("0.0.0-test", uc, doctorUC, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, &fakeLogsUseCase{}, opts...)
 }
 
 // newAppWithAdd is newApp's variant for add-focused tests.
 func newAppWithAdd(uc driving.AddServiceUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, uc, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, uc, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, &fakeLogsUseCase{}, opts...)
 }
 
 // newAppWithUp is newApp's variant for `u-boot up`-focused tests.
 func newAppWithUp(uc driving.UpUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, uc, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, uc, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, &fakeLogsUseCase{}, opts...)
 }
 
 // newAppWithDown is newApp's variant for `u-boot down`-focused tests.
 func newAppWithDown(uc driving.DownUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, uc, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, uc, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, &fakeLogsUseCase{}, opts...)
 }
 
 // newAppWithGenerate is newApp's variant for `u-boot generate`-focused
 // tests.
 func newAppWithGenerate(uc driving.GenerateUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, uc, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, uc, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, &fakeLogsUseCase{}, opts...)
 }
 
 // newAppWithConfig is newApp's variant for `u-boot config`-focused
 // tests.
 func newAppWithConfig(uc driving.ConfigUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, uc, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, uc, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, &fakeLogsUseCase{}, opts...)
 }
 
 // newAppWithTemplateList is newApp's variant for
 // `u-boot template list`-focused tests (slice-v1-template-list T3).
 func newAppWithTemplateList(uc driving.TemplateListUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, uc, &fakeRemoveServiceUseCase{}, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, uc, &fakeRemoveServiceUseCase{}, &fakeLogsUseCase{}, opts...)
 }
 
 // newAppWithRemove is newApp's variant for `u-boot remove`-focused
 // tests (slice-v1-add-remove T4).
 func newAppWithRemove(uc driving.RemoveServiceUseCase, opts ...cli.Option) *cli.App {
-	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, uc, opts...)
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, uc, &fakeLogsUseCase{}, opts...)
+}
+
+// newAppWithLogs is newApp's variant for `u-boot logs`-focused
+// tests (slice-v1-logs T3). Mirrors the shape of the other
+// "with"-helpers.
+func newAppWithLogs(uc driving.LogsUseCase, opts ...cli.Option) *cli.App {
+	return cli.New("0.0.0-test", &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, uc, opts...)
 }
 
 func mustProjectName(t *testing.T, raw string) domain.ProjectName {
@@ -2053,5 +2076,220 @@ func TestExecute_Generate_InvalidAllowFlagURL_Code10(t *testing.T) {
 	}
 	if got := cli.ExitCode(err); got != 10 {
 		t.Errorf("ExitCode = %d, want 10 (Spec §1353)", got)
+	}
+}
+
+// --- slice-v1-logs T3: CLI Logs-Subkommando -----------------------
+
+func TestExecute_Logs_NoArgs_PropagatesEmptyService(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeLogsUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute logs: %v", err)
+	}
+	if !uc.called {
+		t.Fatal("LogsUseCase.Logs not called")
+	}
+	if uc.lastReq.Service != "" {
+		t.Errorf("Service = %q, want empty (T0-(a) Compose-Default)", uc.lastReq.Service)
+	}
+	if uc.lastReq.Follow {
+		t.Errorf("Follow = true, want false (default)")
+	}
+	if uc.lastReq.Tail != "" {
+		t.Errorf("Tail = %q, want empty (default → Use-Case normalises to \"all\")", uc.lastReq.Tail)
+	}
+	if uc.lastReq.OutputSink == nil {
+		t.Errorf("OutputSink is nil; want cmd.OutOrStdout() forwarded")
+	}
+}
+
+func TestExecute_Logs_ServiceArg_PropagatesService(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeLogsUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs", "postgres"}, &stdout, &stderr,
+	)
+	if err != nil {
+		t.Fatalf("Execute logs postgres: %v", err)
+	}
+	if uc.lastReq.Service != "postgres" {
+		t.Errorf("Service = %q, want \"postgres\"", uc.lastReq.Service)
+	}
+}
+
+func TestExecute_Logs_FollowFlag_PropagatesTrue(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeLogsUseCase{}
+	var stdout, stderr bytes.Buffer
+	if err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs", "--follow"}, &stdout, &stderr,
+	); err != nil {
+		t.Fatalf("Execute logs --follow: %v", err)
+	}
+	if !uc.lastReq.Follow {
+		t.Errorf("Follow = false, want true")
+	}
+}
+
+func TestExecute_Logs_TailFlag_PropagatesValue(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeLogsUseCase{}
+	var stdout, stderr bytes.Buffer
+	if err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs", "--tail", "100"}, &stdout, &stderr,
+	); err != nil {
+		t.Fatalf("Execute logs --tail 100: %v", err)
+	}
+	if uc.lastReq.Tail != "100" {
+		t.Errorf("Tail = %q, want \"100\"", uc.lastReq.Tail)
+	}
+}
+
+// TestExecute_Logs_InvalidTail_Negative_Code2 pins T0-(c) + §AK:
+// negative integers map to Exit-Code 2 via ErrInvalidLogsTail —
+// the Use-Case is never called.
+func TestExecute_Logs_InvalidTail_Negative_Code2(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeLogsUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs", "--tail", "-1"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("expected error for negative --tail, got nil")
+	}
+	if !errors.Is(err, cli.ErrInvalidLogsTail) {
+		t.Errorf("err = %v, want wrap of ErrInvalidLogsTail", err)
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode = %d, want 2 (Stage-1-Validation)", got)
+	}
+	if uc.called {
+		t.Error("LogsUseCase.Logs called despite invalid --tail; Stage-1 should reject before dispatch")
+	}
+}
+
+func TestExecute_Logs_InvalidTail_NonNumeric_Code2(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeLogsUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs", "--tail", "all"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("expected error for non-numeric --tail (\"all\" is internal, not user-input)")
+	}
+	if !errors.Is(err, cli.ErrInvalidLogsTail) {
+		t.Errorf("err = %v, want wrap of ErrInvalidLogsTail", err)
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode = %d, want 2", got)
+	}
+}
+
+// TestExecute_Logs_InvalidServiceName_Code10 pins T0-(b):
+// regex-only validation in the CLI; format failure → Exit-10
+// via isServiceValidationError. The "all" reserved-word would
+// pass the regex (lowercase, valid characters), so we use an
+// uppercase name instead which definitely violates the regex.
+func TestExecute_Logs_InvalidServiceName_Code10(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeLogsUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs", "Postgres"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("expected error for invalid service-name format")
+	}
+	if !errors.Is(err, domain.ErrInvalidServiceName) {
+		t.Errorf("err = %v, want wrap of domain.ErrInvalidServiceName", err)
+	}
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10", got)
+	}
+	if uc.called {
+		t.Error("LogsUseCase.Logs called despite invalid service-name; Stage-1 should reject")
+	}
+}
+
+// TestExecute_Logs_TooManyArgs_Code2 pins MaximumNArgs(1) — Cobra
+// rejects 2+ positional arguments with a usage-error → Exit-2.
+func TestExecute_Logs_TooManyArgs_Code2(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeLogsUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs", "postgres", "keycloak"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("expected error for two positional args")
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode = %d, want 2 (Cobra usage error)", got)
+	}
+}
+
+// TestExecute_Logs_UseCaseError_ComposeRuntime_Code12 pins the
+// 12-exit-code path from the application service through the
+// CLI mapping.
+func TestExecute_Logs_UseCaseError_ComposeRuntime_Code12(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeLogsUseCase{
+		err: fmt.Errorf("logs service: ComposeLogs: %w", driven.ErrComposeRuntime),
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatal("expected error from use case")
+	}
+	if got := cli.ExitCode(err); got != 12 {
+		t.Errorf("ExitCode = %d, want 12 (ErrComposeRuntime)", got)
+	}
+}
+
+// TestExecute_Logs_UseCaseError_DockerUnavailable_Code11 pins the
+// 11-exit-code path.
+func TestExecute_Logs_UseCaseError_DockerUnavailable_Code11(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeLogsUseCase{
+		err: fmt.Errorf("logs service: ComposeLogs: %w", driven.ErrDockerUnavailable),
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatal("expected error from use case")
+	}
+	if got := cli.ExitCode(err); got != 11 {
+		t.Errorf("ExitCode = %d, want 11 (ErrDockerUnavailable)", got)
+	}
+}
+
+// TestExecute_Logs_UseCaseError_ProjectNotInitialized_Code10 pins
+// the 10-exit-code path for missing u-boot.yaml.
+func TestExecute_Logs_UseCaseError_ProjectNotInitialized_Code10(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeLogsUseCase{
+		err: fmt.Errorf("logs service: u-boot.yaml absent: %w", driving.ErrProjectNotInitialized),
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatal("expected error from use case")
+	}
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10 (ErrProjectNotInitialized)", got)
 	}
 }
