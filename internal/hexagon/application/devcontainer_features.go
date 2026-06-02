@@ -204,6 +204,94 @@ func featureFor(name domain.FeatureName) (featureCatalogueEntry, bool) {
 	return entry, ok
 }
 
+// devcontainerFeatureData is the per-feature projection that
+// [templateData.Features] carries into the devcontainer.json
+// renderer. Source + Version compose the JSONC feature key as
+// `"<Source>:<Version>": {}`. Slice-v1-devcontainer-features T3.
+type devcontainerFeatureData struct {
+	Source  string
+	Version string
+}
+
+// collectDevcontainerFeatures projects the enabled entries from
+// `cfg.Devcontainer.Features` into the renderer's sorted feature
+// list. Per slice-v1-devcontainer-features T3:
+//
+//   - Skip entries with `Enabled == nil` (T5-doctor-Warn, not a
+//     load-time reject) or `*Enabled == false` (registered but
+//     deactivated).
+//   - When an entry's `Source` override is non-empty, render it
+//     verbatim (T4 enforces allowlist membership — T3 trusts the
+//     value here). When `Source` is empty, look up the canonical
+//     OCI ref via [featureFor]; unknown names without a source
+//     override are silently skipped here so T4 can surface them
+//     with the proper Exit-Code-10 path.
+//   - When an entry's `Version` override is non-empty, use it;
+//     otherwise fall back to the catalogue's `defaultVersion`. For
+//     a Source-override without Version override, default to "1"
+//     (the upstream devcontainers/features convention) so external
+//     features render as `"<source>:1": {}` rather than dangling
+//     on a missing colon.
+//   - Sort the result alphabetically by Source so the rendered
+//     JSON is deterministic across map-iteration shuffles.
+//
+// Returns nil when no features are enabled — the template skips
+// the `"features": { … }` key entirely in that case (preserves
+// byte-equality with pre-T3 devcontainer.json files).
+func collectDevcontainerFeatures(cfg ubootYAMLConfig) []devcontainerFeatureData {
+	if cfg.Devcontainer == nil || len(cfg.Devcontainer.Features) == 0 {
+		return nil
+	}
+	out := make([]devcontainerFeatureData, 0, len(cfg.Devcontainer.Features))
+	for name, entry := range cfg.Devcontainer.Features {
+		if entry.Enabled == nil || !*entry.Enabled {
+			continue
+		}
+		data, ok := projectFeatureEntry(name, entry)
+		if !ok {
+			continue
+		}
+		out = append(out, data)
+	}
+	sort.Slice(out, func(i, j int) bool {
+		return out[i].Source < out[j].Source
+	})
+	return out
+}
+
+// projectFeatureEntry resolves one enabled feature entry into the
+// renderer's projection. Returns ok=false when the entry has no
+// `Source:` override AND the name is not a built-in catalogue key —
+// the silent-skip behaviour T3 needs so T4 can surface the failure
+// with the proper Exit-Code-10 path. The name parameter is the raw
+// map key from u-boot.yaml; T1's validateDevcontainerFeatures has
+// already pinned that it parses as a domain.FeatureName by the time
+// the renderer runs, so a fresh NewFeatureName call here is
+// belt-and-suspenders only — keep it to short-circuit any caller
+// that bypasses the validator.
+func projectFeatureEntry(name string, entry ubootYAMLDevcontainerFeature) (devcontainerFeatureData, bool) {
+	if entry.Source != "" {
+		version := entry.Version
+		if version == "" {
+			version = "1"
+		}
+		return devcontainerFeatureData{Source: entry.Source, Version: version}, true
+	}
+	featureName, err := domain.NewFeatureName(name)
+	if err != nil {
+		return devcontainerFeatureData{}, false
+	}
+	cat, ok := featureFor(featureName)
+	if !ok {
+		return devcontainerFeatureData{}, false
+	}
+	version := entry.Version
+	if version == "" {
+		version = cat.defaultVersion
+	}
+	return devcontainerFeatureData{Source: cat.source, Version: version}, true
+}
+
 // validateDevcontainerFeatures runs the LH-FA-DEV-003 schema checks
 // on the `devcontainer:` sub-tree that T1 owns:
 //

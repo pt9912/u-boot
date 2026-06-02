@@ -623,7 +623,13 @@ func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.Ge
 		return driving.GenerateResponse{}, err
 	}
 
-	data := templateData{Name: cfg.Project.Name, ForwardPorts: ports}
+	features := collectDevcontainerFeatures(cfg)
+
+	data := templateData{
+		Name:         cfg.Project.Name,
+		ForwardPorts: ports,
+		Features:     features,
+	}
 	plans, err := s.planDevcontainerFiles(req.BaseDir, data)
 	if err != nil {
 		return driving.GenerateResponse{}, err
@@ -637,11 +643,14 @@ func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.Ge
 	action := devcontainerAggregateAction(hasWrite, hasReplace)
 	if action == driving.GenerateActionNoOp {
 		s.logger.Debug("generate devcontainer: no-op",
-			"project", cfg.Project.Name, "forwardPorts", ports)
+			"project", cfg.Project.Name,
+			"forwardPorts", ports, "features", len(features))
 		return driving.GenerateResponse{Artifact: req.Artifact, Action: action}, nil
 	}
 	s.logger.Info("generate devcontainer: "+action.String(),
-		"project", cfg.Project.Name, "forwardPorts", ports, "changed", changed)
+		"project", cfg.Project.Name,
+		"forwardPorts", ports, "features", len(features),
+		"changed", changed)
 	return driving.GenerateResponse{
 		Artifact: req.Artifact,
 		Action:   action,

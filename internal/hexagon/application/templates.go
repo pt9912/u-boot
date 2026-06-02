@@ -33,6 +33,13 @@ type templateData struct {
 	// renders it, conditionally — empty/nil omits the JSON
 	// `forwardPorts` key entirely per LH-FA-DEV-005 ("darf fehlen").
 	ForwardPorts []int
+
+	// Features is the slice-v1-devcontainer-features T3 devcontainer-
+	// only field (LH-FA-DEV-003). Pre-sorted alphabetically by Source
+	// in [collectDevcontainerFeatures] so the rendered JSONC is
+	// byte-deterministic across runs; empty/nil omits the JSON
+	// `features` key entirely.
+	Features []devcontainerFeatureData
 }
 
 // fileTemplate maps an embedded template to its destination path

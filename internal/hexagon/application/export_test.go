@@ -337,6 +337,30 @@ func FeatureForTest(name domain.FeatureName) (FeatureCatalogueEntryForTest, bool
 	}, true
 }
 
+// DevcontainerFeatureDataForTest is the test-package projection of
+// the unexported [devcontainerFeatureData] (T3). Same fields —
+// only renamed because the internal type is unexported.
+type DevcontainerFeatureDataForTest struct {
+	Source  string
+	Version string
+}
+
+// CollectDevcontainerFeaturesForTest parses a u-boot.yaml fixture
+// and runs collectDevcontainerFeatures on the result. The bridge
+// lets external tests pin enable-filter / catalogue-lookup /
+// source-override / sort-order without going through a full
+// Generate() flow.
+func CollectDevcontainerFeaturesForTest(t *testing.T, yamlBody []byte) []DevcontainerFeatureDataForTest {
+	t.Helper()
+	cfg := mustParseUBootYAML(t, yamlBody)
+	got := collectDevcontainerFeatures(cfg)
+	out := make([]DevcontainerFeatureDataForTest, len(got))
+	for i, f := range got {
+		out[i] = DevcontainerFeatureDataForTest(f)
+	}
+	return out
+}
+
 // PlanAddForTest exposes the unexported [AddServiceService.planAdd]
 // helper. The returned struct is the test-only projection so the
 // production [servicePlan] stays unexported.

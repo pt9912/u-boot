@@ -8,6 +8,14 @@
 {{- if .ForwardPorts}}
   "forwardPorts": [{{range $i, $p := .ForwardPorts}}{{if $i}}, {{end}}{{$p}}{{end}}],
 {{- end}}
+{{- if .Features}}
+  "features": {
+{{- range $i, $f := .Features}}
+{{- if $i}},{{end}}
+    "{{$f.Source}}:{{$f.Version}}": {}
+{{- end}}
+  },
+{{- end}}
   "remoteUser": "vscode"
 }
 // END U-BOOT MANAGED BLOCK: init
