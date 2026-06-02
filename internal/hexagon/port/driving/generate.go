@@ -21,6 +21,16 @@ type GenerateRequest struct {
 	// env-example, devcontainer). Constructed via [domain.NewArtifact]
 	// in the CLI adapter; the application service trusts the value.
 	Artifact domain.Artifact
+
+	// AllowExternalFeatureSources lists LH-FA-DEV-003 source URLs
+	// that should be appended to `devcontainer.featureSources.allow`
+	// before the devcontainer artefact is rendered (Spec §715). Only
+	// applied when Artifact == ArtifactDevcontainer; ignored for the
+	// other artefacts (changelog / readme / env-example) — the CLI
+	// adapter restricts the flag to the devcontainer subcommand,
+	// but the use case re-checks for safety. Empty leaves the
+	// allowlist untouched. Slice-v1-devcontainer-features T4.
+	AllowExternalFeatureSources []string
 }
 
 // GenerateAction classifies what `u-boot generate` did with the

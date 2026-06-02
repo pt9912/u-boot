@@ -34,6 +34,13 @@ type initFlags struct {
 	// dispatches to the TemplateInitUseCase via the
 	// InitProjectService delegation introduced in T4.
 	Template string
+
+	// AllowExternalFeatureSources is the LH-FA-DEV-003 allowlist seed
+	// from `--allow-external-feature-sources <quelle>[,<quelle>...]`
+	// (Spec §714). Multi-flag occurrences cumulate, comma-separated
+	// values split per Cobra StringSlice. Only meaningful when
+	// `--devcontainer` is also set. Slice-v1-devcontainer-features T4.
+	AllowExternalFeatureSources []string
 }
 
 // newInitCommand builds the `u-boot init` Cobra subcommand.
@@ -128,6 +135,8 @@ Examples:
 		"also generate `.devcontainer/devcontainer.json` + `Dockerfile` and set devcontainer.enabled=true in u-boot.yaml (LH-AK-005)")
 	cmd.Flags().StringVar(&flags.Template, "template", "",
 		"render the project from an external template instead of the default flow (`u-boot template list` for the catalog; LH-FA-TPL-001 / slice-v1-template-init T4 — fresh-init only, mutex with --devcontainer/--force/--backup)")
+	cmd.Flags().StringSliceVar(&flags.AllowExternalFeatureSources, "allow-external-feature-sources", nil,
+		"seed devcontainer.featureSources.allow with the given URLs (LH-FA-DEV-003; comma-separated, repeatable). Requires --devcontainer; `--yes` does not substitute (LH-NFA-SEC-004).")
 	return cmd
 }
 
@@ -171,14 +180,15 @@ func runInit(
 	}
 
 	req := driving.InitProjectRequest{
-		BaseDir:        cwd,
-		SkipGit:        flags.SkipGit,
-		Force:          flags.Force,
-		Backup:         flags.Backup,
-		AssumeExisting: flags.AssumeExisting,
-		NoInteractive:  flags.NoInteractive,
-		Devcontainer:   flags.Devcontainer,
-		Template:       flags.Template,
+		BaseDir:                     cwd,
+		SkipGit:                     flags.SkipGit,
+		Force:                       flags.Force,
+		Backup:                      flags.Backup,
+		AssumeExisting:              flags.AssumeExisting,
+		NoInteractive:               flags.NoInteractive,
+		Devcontainer:                flags.Devcontainer,
+		Template:                    flags.Template,
+		AllowExternalFeatureSources: flags.AllowExternalFeatureSources,
 	}
 	if len(args) == 1 {
 		req.Name = args[0]

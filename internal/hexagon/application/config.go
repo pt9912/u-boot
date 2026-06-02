@@ -7,6 +7,7 @@ import (
 	iofs "io/fs"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
@@ -129,6 +130,18 @@ func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (dr
 		return driving.ConfigSetResponse{}, err
 	}
 
+	// LH-FA-DEV-003 list-path branch: `featureSources.allow` is a
+	// LIST, not a scalar — PatchScalar cannot represent it. The
+	// list-append/dedupe + marshal-rewrite code-route lives in
+	// [setFeatureSourcesAllow]. Trade-off: marshal-rewrite loses
+	// comments in u-boot.yaml; the Spec (§711-721) does not require
+	// comment preservation for this list. The scalar feature paths
+	// (.enabled, .source, .version) take the standard PatchScalar
+	// path below.
+	if req.Path.Kind == domain.ConfigDevcontainerFeatureSourcesAllow {
+		return s.setFeatureSourcesAllow(req, cfg)
+	}
+
 	// Stage 1: value coercion (catches LH-FA-INIT-006 / bool-
 	// parse errors before any patch).
 	coerced, formatted, err := coerceConfigValue(req.Path, req.Value)
@@ -215,6 +228,12 @@ func writeRejectedError(path domain.ConfigPath) error {
 //   - formatted: the canonical stringified form used for the
 //     NoOp short-circuit comparison and for response.NewValue.
 //   - err: [driving.ErrConfigValueInvalid] on coerce failure.
+//
+// ConfigDevcontainerFeatureSourcesAllow takes a different route in
+// [ConfigService.Set] (list-append marshal-rewrite, not PatchScalar)
+// and therefore short-circuits before this function — it is not
+// listed in the switch and a defensive panic-safe fallthrough surfaces
+// as the unknown-kind error if the caller bypasses Set().
 func coerceConfigValue(path domain.ConfigPath, raw string) (coerced any, formatted string, err error) {
 	switch path.Kind {
 	case domain.ConfigProjectName:
@@ -224,13 +243,36 @@ func coerceConfigValue(path domain.ConfigPath, raw string) (coerced any, formatt
 				driving.ErrConfigValueInvalid, raw, err)
 		}
 		return name.String(), name.String(), nil
-	case domain.ConfigDevcontainerEnabled, domain.ConfigServiceEnabled:
+	case domain.ConfigDevcontainerEnabled,
+		domain.ConfigServiceEnabled,
+		domain.ConfigDevcontainerFeatureEnabled:
 		b, err := strconv.ParseBool(raw)
 		if err != nil {
 			return nil, "", fmt.Errorf("%w: %s expects a bool (true/false/1/0/T/F/…), got %q",
 				driving.ErrConfigValueInvalid, path, raw)
 		}
 		return b, strconv.FormatBool(b), nil
+	case domain.ConfigDevcontainerFeatureSource:
+		// LH-FA-DEV-003 Stage-1 format check (empty / scheme /
+		// host). Allowlist-membership runs in
+		// revalidateConfigDomain after the patch is in place.
+		if err := validateFeatureSource(raw); err != nil {
+			return nil, "", fmt.Errorf("%w: %s: %v",
+				driving.ErrConfigValueInvalid, path, err)
+		}
+		trimmed := strings.TrimSpace(raw)
+		return trimmed, trimmed, nil
+	case domain.ConfigDevcontainerFeatureVersion:
+		// Version pins are free-form strings ("1", "1.2.0", "21"
+		// for Java, …); reject empty so a deliberate omission
+		// stays expressed as a missing key, not a sentinel-empty
+		// override.
+		trimmed := strings.TrimSpace(raw)
+		if trimmed == "" {
+			return nil, "", fmt.Errorf("%w: %s expects a non-empty version pin",
+				driving.ErrConfigValueInvalid, path)
+		}
+		return trimmed, trimmed, nil
 	}
 	return nil, "", fmt.Errorf("%w: unknown ConfigPathKind %d",
 		driving.ErrConfigValueInvalid, int(path.Kind))
@@ -253,12 +295,20 @@ func configPathToYAMLPath(path domain.ConfigPath) []string {
 		return []string{"project", "name"}
 	case domain.ConfigDevcontainerEnabled:
 		return []string{"devcontainer", "enabled"}
+	case domain.ConfigDevcontainerFeatureEnabled:
+		return []string{"devcontainer", "features", path.Feature.String(), "enabled"}
+	case domain.ConfigDevcontainerFeatureSource:
+		return []string{"devcontainer", "features", path.Feature.String(), "source"}
+	case domain.ConfigDevcontainerFeatureVersion:
+		return []string{"devcontainer", "features", path.Feature.String(), "version"}
 	}
-	// Unreachable: Set only reaches this helper after the
-	// WriteAllowed gate has filtered to the two kinds above.
-	// Returning a non-empty path so PatchScalar would surface a
-	// loud ErrYAMLPathInvalid on a programmer-error future enum
-	// addition without dispatch-switch update.
+	// Unreachable for scalar kinds: Set only reaches this helper
+	// after the WriteAllowed gate, and the list-path
+	// (ConfigDevcontainerFeatureSourcesAllow) bypasses this helper
+	// in favour of a marshal-rewrite branch. Returning a non-empty
+	// sentinel so PatchScalar would surface a loud
+	// ErrYAMLPathInvalid on a programmer-error future enum addition
+	// without dispatch-switch update.
 	return []string{"__unknown_config_path_kind__"}
 }
 
@@ -303,9 +353,91 @@ func revalidateConfigDomain(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 				driving.ErrConfigValueInvalid)
 		}
 		return nil
+	case domain.ConfigDevcontainerFeatureEnabled,
+		domain.ConfigDevcontainerFeatureSource,
+		domain.ConfigDevcontainerFeatureVersion:
+		return revalidateFeatureEntry(cfg, path)
 	}
 	return fmt.Errorf("%w: unknown ConfigPathKind %d",
 		driving.ErrConfigValueInvalid, int(path.Kind))
+}
+
+// revalidateFeatureEntry is the post-patch sanity check for the
+// three scalar `devcontainer.features.<name>.*` kinds. Extracted
+// from [revalidateConfigDomain] to keep the latter under the
+// gocyclo threshold.
+//
+// For .source it additionally enforces the LH-FA-DEV-003 /
+// LH-NFA-SEC-004 allowlist rule: the newly written URL must appear
+// verbatim in `devcontainer.featureSources.allow`. `--yes` does not
+// suffice — the user must have populated the allowlist first via
+// `config set devcontainer.featureSources.allow <url>` or
+// `--allow-external-feature-sources <url>`.
+func revalidateFeatureEntry(cfg ubootYAMLConfig, path domain.ConfigPath) error {
+	entry, ok := lookupFeatureEntry(cfg, path.Feature)
+	if !ok {
+		return fmt.Errorf("%w: post-patch %s is absent",
+			driving.ErrConfigValueInvalid, path)
+	}
+	switch path.Kind {
+	case domain.ConfigDevcontainerFeatureEnabled:
+		if entry.Enabled == nil {
+			return fmt.Errorf("%w: post-patch %s is unbound",
+				driving.ErrConfigValueInvalid, path)
+		}
+		return nil
+	case domain.ConfigDevcontainerFeatureSource:
+		if entry.Source == "" {
+			return fmt.Errorf("%w: post-patch %s is empty",
+				driving.ErrConfigValueInvalid, path)
+		}
+		if !featureSourceInAllow(cfg, entry.Source) {
+			return fmt.Errorf(
+				"%w: %s: external source %q is not in devcontainer.featureSources.allow; add it via `u-boot config set devcontainer.featureSources.allow %s` (LH-FA-DEV-003 / LH-NFA-SEC-004 — --yes is not sufficient)",
+				driving.ErrConfigValueInvalid, path, entry.Source, entry.Source)
+		}
+		return nil
+	case domain.ConfigDevcontainerFeatureVersion:
+		if entry.Version == "" {
+			return fmt.Errorf("%w: post-patch %s is empty",
+				driving.ErrConfigValueInvalid, path)
+		}
+		return nil
+	}
+	return fmt.Errorf("%w: unknown ConfigPathKind %d",
+		driving.ErrConfigValueInvalid, int(path.Kind))
+}
+
+// lookupFeatureEntry returns the ubootYAMLDevcontainerFeature entry
+// for the given name, or zero+false on miss. Used by
+// [revalidateConfigDomain] and [extractConfigValue] for the
+// devcontainer.features.<feature>.* kinds — shared helper avoids
+// repeating the nil-walk on every branch.
+func lookupFeatureEntry(cfg ubootYAMLConfig, name domain.FeatureName) (ubootYAMLDevcontainerFeature, bool) {
+	if cfg.Devcontainer == nil {
+		return ubootYAMLDevcontainerFeature{}, false
+	}
+	entry, ok := cfg.Devcontainer.Features[name.String()]
+	return entry, ok
+}
+
+// featureSourceInAllow reports whether src appears verbatim in
+// `cfg.Devcontainer.FeatureSources.Allow`. Comparison is
+// case-sensitive, byte-equal — the user's source override must
+// match the allowlist entry literally. The trimmed-whitespace
+// convention from [normaliseFeatureSources] is the canonical form
+// of both sides, so leading/trailing whitespace is not a
+// confounding factor in practice.
+func featureSourceInAllow(cfg ubootYAMLConfig, src string) bool {
+	if cfg.Devcontainer == nil || cfg.Devcontainer.FeatureSources == nil {
+		return false
+	}
+	for _, allowed := range cfg.Devcontainer.FeatureSources.Allow {
+		if allowed == src {
+			return true
+		}
+	}
+	return false
 }
 
 // extractConfigValueLenient is the Get-helper without the
@@ -438,10 +570,62 @@ func extractConfigValue(cfg ubootYAMLConfig, path domain.ConfigPath) (string, er
 				driving.ErrConfigValueNotSet, path, path.Service.String())
 		}
 		return strconv.FormatBool(*entry.Enabled), nil
+
+	case domain.ConfigDevcontainerFeatureSourcesAllow,
+		domain.ConfigDevcontainerFeatureEnabled,
+		domain.ConfigDevcontainerFeatureSource,
+		domain.ConfigDevcontainerFeatureVersion:
+		return extractDevcontainerFeatureValue(cfg, path)
 	}
-	// Unreachable: domain.NewConfigPath only constructs the three
-	// kinds above. Defensive branch surfaces the int so a future
-	// enum addition without dispatch-switch update is loud.
+	// Unreachable: domain.NewConfigPath only constructs the kinds
+	// above. Defensive branch surfaces the int so a future enum
+	// addition without dispatch-switch update is loud.
+	return "", fmt.Errorf("%w: unknown ConfigPathKind %d",
+		driving.ErrConfigPathUnknown, int(path.Kind))
+}
+
+// extractDevcontainerFeatureValue handles the four LH-FA-DEV-003
+// devcontainer.* kinds. Extracted from [extractConfigValue] to keep
+// the latter under the gocognit threshold.
+func extractDevcontainerFeatureValue(cfg ubootYAMLConfig, path domain.ConfigPath) (string, error) {
+	if path.Kind == domain.ConfigDevcontainerFeatureSourcesAllow {
+		if cfg.Devcontainer == nil || cfg.Devcontainer.FeatureSources == nil ||
+			len(cfg.Devcontainer.FeatureSources.Allow) == 0 {
+			return "", fmt.Errorf(
+				"%w: %s — populate via `u-boot config set %s <url>` or `--allow-external-feature-sources <url>`",
+				driving.ErrConfigValueNotSet, path, path)
+		}
+		// Comma-joined view mirrors the input format the user
+		// passes on the way in. Get/Set keeps the input/output
+		// formats symmetric so a `get | set` round-trip is a
+		// NoOp.
+		return strings.Join(cfg.Devcontainer.FeatureSources.Allow, ","), nil
+	}
+	entry, ok := lookupFeatureEntry(cfg, path.Feature)
+	if !ok {
+		return "", fmt.Errorf("%w: %s — set it via `u-boot config set %s <value>`",
+			driving.ErrConfigValueNotSet, path, path)
+	}
+	switch path.Kind {
+	case domain.ConfigDevcontainerFeatureEnabled:
+		if entry.Enabled == nil {
+			return "", fmt.Errorf("%w: %s — set it via `u-boot config set %s true`",
+				driving.ErrConfigValueNotSet, path, path)
+		}
+		return strconv.FormatBool(*entry.Enabled), nil
+	case domain.ConfigDevcontainerFeatureSource:
+		if entry.Source == "" {
+			return "", fmt.Errorf("%w: %s — set it via `u-boot config set %s <url>` after adding the URL to devcontainer.featureSources.allow",
+				driving.ErrConfigValueNotSet, path, path)
+		}
+		return entry.Source, nil
+	case domain.ConfigDevcontainerFeatureVersion:
+		if entry.Version == "" {
+			return "", fmt.Errorf("%w: %s — set it via `u-boot config set %s <version>`",
+				driving.ErrConfigValueNotSet, path, path)
+		}
+		return entry.Version, nil
+	}
 	return "", fmt.Errorf("%w: unknown ConfigPathKind %d",
 		driving.ErrConfigPathUnknown, int(path.Kind))
 }
@@ -460,4 +644,125 @@ func (s *ConfigService) checkProjectInitialized(baseDir string) error {
 		return fmt.Errorf("config service: %q absent: %w", path, driving.ErrProjectNotInitialized)
 	}
 	return nil
+}
+
+// setFeatureSourcesAllow handles the LH-FA-DEV-003 list-path:
+// `devcontainer.featureSources.allow`. The value is parsed as a
+// comma-separated list of URLs, each entry runs through
+// [validateFeatureSource], the resulting set is appended to the
+// existing list with silent-dedupe per spec/lastenheft.md:1352, and
+// the whole config is marshal-rewritten back to u-boot.yaml.
+//
+// Unlike the scalar PatchScalar path, this branch loses comment
+// preservation for the rewritten file — documented in the Set
+// dispatch comment.
+//
+// Idempotency: NoOp short-circuit when the comma-joined
+// before/after lists are byte-equal (i.e., the user added entries
+// that were already present).
+func (s *ConfigService) setFeatureSourcesAllow(
+	req driving.ConfigSetRequest, cfg ubootYAMLConfig,
+) (driving.ConfigSetResponse, error) {
+	// Stage 1: parse the user-provided inputs (positional value +
+	// `--allow-external-feature-sources` flag cumulation per Spec
+	// §714-718) and validate them as user input. Failures here
+	// map to ErrConfigValueInvalid (Code 10) because the user can
+	// fix them by passing a different URL.
+	incoming, err := parseFeatureSourcesArgument(req.Value)
+	if err != nil {
+		return driving.ConfigSetResponse{}, fmt.Errorf("%w: %s: %v",
+			driving.ErrConfigValueInvalid, req.Path, err)
+	}
+	incoming = append(incoming, req.AllowExternalFeatureSources...)
+	if _, err := normaliseFeatureSources(incoming); err != nil {
+		return driving.ConfigSetResponse{}, fmt.Errorf("%w: %s: %v",
+			driving.ErrConfigValueInvalid, req.Path, err)
+	}
+
+	// Stage 2: read existing list, merge, validate the merged
+	// result. The second normaliseFeatureSources call runs against
+	// (existing + incoming) — if it fails here while the incoming-
+	// only check passed, the existing list is corrupt
+	// (impossible in practice because T1 validates on every read,
+	// but defensive). Map that case to ErrConfigSchemaInvalid.
+	var existing []string
+	if cfg.Devcontainer != nil && cfg.Devcontainer.FeatureSources != nil {
+		existing = cfg.Devcontainer.FeatureSources.Allow
+	}
+	oldValue := strings.Join(existing, ",")
+	mergedRaw := make([]string, 0, len(existing)+len(incoming))
+	mergedRaw = append(mergedRaw, existing...)
+	mergedRaw = append(mergedRaw, incoming...)
+	merged, err := normaliseFeatureSources(mergedRaw)
+	if err != nil {
+		return driving.ConfigSetResponse{}, fmt.Errorf("%w: %s: existing u-boot.yaml allow list contains invalid entry: %v",
+			driving.ErrConfigSchemaInvalid, req.Path, err)
+	}
+	newValue := strings.Join(merged, ",")
+
+	if oldValue == newValue {
+		s.logger.Debug("config set: no-op",
+			"path", req.Path.String(), "value", newValue)
+		return driving.ConfigSetResponse{
+			Path: req.Path, OldValue: oldValue, NewValue: newValue,
+		}, nil
+	}
+
+	// Stage 3: in-memory mutation (no PatchScalar — list path).
+	if cfg.Devcontainer == nil {
+		cfg.Devcontainer = &ubootYAMLDevcontainer{}
+	}
+	if cfg.Devcontainer.FeatureSources == nil {
+		cfg.Devcontainer.FeatureSources = &ubootYAMLFeatureSources{}
+	}
+	cfg.Devcontainer.FeatureSources.Allow = merged
+
+	// Stage 4: marshal-rewrite (loses comments; acceptable per
+	// Spec §711-721 which has no comment-preservation requirement
+	// for this list).
+	rewritten, err := s.yaml.Marshal(cfg)
+	if err != nil {
+		return driving.ConfigSetResponse{}, fmt.Errorf("%w: marshal u-boot.yaml: %v",
+			driving.ErrConfigSchemaInvalid, err)
+	}
+
+	// Stage 5: WriteFile.
+	path := filepath.Join(req.BaseDir, "u-boot.yaml")
+	if err := s.fs.WriteFile(path, rewritten, defaultFileMode); err != nil {
+		return driving.ConfigSetResponse{}, fmt.Errorf("%w: write %q: %v",
+			driving.ErrConfigFileSystem, path, err)
+	}
+
+	s.logger.Info("config set: updated",
+		"path", req.Path.String(), "old", oldValue, "new", newValue)
+	return driving.ConfigSetResponse{
+		Path: req.Path, OldValue: oldValue, NewValue: newValue,
+	}, nil
+}
+
+// parseFeatureSourcesArgument splits a comma-separated user
+// argument (positional value of `config set devcontainer.
+// featureSources.allow <value>` or the value of
+// `--allow-external-feature-sources`) into individual entries with
+// per-element whitespace trim and empty-entry rejection. The
+// resulting slice is the raw user input — validation + dedupe
+// happen at the next pipeline stage.
+//
+// Spec §718: comma-separation is mandatory. An empty argument
+// (no entries after split) returns nil so callers can NoOp-check
+// against an empty list.
+func parseFeatureSourcesArgument(raw string) ([]string, error) {
+	if strings.TrimSpace(raw) == "" {
+		return nil, nil
+	}
+	parts := strings.Split(raw, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		trimmed := strings.TrimSpace(p)
+		if trimmed == "" {
+			return nil, fmt.Errorf("comma-separated list contains an empty entry near %q", raw)
+		}
+		out = append(out, trimmed)
+	}
+	return out, nil
 }

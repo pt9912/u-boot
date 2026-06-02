@@ -46,6 +46,15 @@ type ConfigSetRequest struct {
 	// before patching the YAML; coercion failure produces
 	// [ErrConfigValueInvalid].
 	Value string
+
+	// AllowExternalFeatureSources carries additional LH-FA-DEV-003
+	// source URLs from the `--allow-external-feature-sources` flag
+	// (Spec §714). Only meaningful when
+	// Path.Kind == domain.ConfigDevcontainerFeatureSourcesAllow; the
+	// use case merges these entries with the comma-separated
+	// positional [Value] before validation + dedupe. Slice-v1-
+	// devcontainer-features T4.
+	AllowExternalFeatureSources []string
 }
 
 // ConfigSetResponse is the output of [ConfigUseCase.Set]. The CLI

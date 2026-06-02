@@ -2,12 +2,16 @@ package application_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application"
+	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
@@ -281,6 +285,128 @@ func TestGenerateDevcontainer_FeaturesRendered_KeysSortedAndShape(t *testing.T) 
 		if _, ok := features[wk]; !ok {
 			t.Errorf("feature key %q missing from rendered map %v", wk, gotKeys)
 		}
+	}
+}
+
+// TestGenerateDevcontainer_AllowExternalFeatureSources_Append pins
+// the LH-FA-DEV-003 / Spec §715 flag-wiring on `generate
+// devcontainer`: invoking the use case with a non-empty
+// AllowExternalFeatureSources list appends the URLs to
+// `devcontainer.featureSources.allow` (with silent-dedupe and
+// format validation) before the actual generate runs.
+func TestGenerateDevcontainer_AllowExternalFeatureSources_Append(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateComposeYAML(t, fs, composeYAMLPostgres)
+	// u-boot.yaml starts with an existing allowlist entry.
+	body := `schemaVersion: 1
+project:
+  name: t-uboot-gen
+services:
+  postgres:
+    enabled: true
+devcontainer:
+  enabled: true
+  featureSources:
+    allow:
+      - https://a.test/x
+`
+	if err := fs.WriteFile(filepath.Join(generateTestBaseDir, "u-boot.yaml"),
+		[]byte(body), 0o644); err != nil {
+		t.Fatalf("seed u-boot.yaml: %v", err)
+	}
+
+	resp, err := svc.Generate(context.Background(), driving.GenerateRequest{
+		BaseDir:                     generateTestBaseDir,
+		Artifact:                    domain.ArtifactDevcontainer,
+		AllowExternalFeatureSources: []string{"https://b.test/y", "https://a.test/x"},
+	})
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	if resp.Action == driving.GenerateActionNoOp {
+		t.Errorf("Action = NoOp; want a write because the allowlist was extended")
+	}
+
+	// Verify u-boot.yaml carries the merged + deduped list.
+	updated, err := fs.ReadFile(filepath.Join(generateTestBaseDir, "u-boot.yaml"))
+	if err != nil {
+		t.Fatalf("read u-boot.yaml: %v", err)
+	}
+	for _, want := range []string{"https://a.test/x", "https://b.test/y"} {
+		if !strings.Contains(string(updated), want) {
+			t.Errorf("u-boot.yaml does not contain %q after generate with flag\nbody:\n%s",
+				want, updated)
+		}
+	}
+	// `a.test/x` must appear exactly once (silent-dedupe).
+	if c := strings.Count(string(updated), "https://a.test/x"); c != 1 {
+		t.Errorf("a.test/x count = %d, want 1 (silent-dedupe)", c)
+	}
+}
+
+// TestGenerateDevcontainer_AllowExternalFeatureSources_NoOp pins
+// that a re-run with the same flag values does not rewrite
+// u-boot.yaml — equalAllowLists short-circuits the merge step.
+func TestGenerateDevcontainer_AllowExternalFeatureSources_NoOp(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedGenerateComposeYAML(t, fs, composeYAMLPostgres)
+	body := `schemaVersion: 1
+project:
+  name: t-uboot-gen
+services:
+  postgres:
+    enabled: true
+devcontainer:
+  enabled: true
+  featureSources:
+    allow:
+      - https://a.test/x
+`
+	if err := fs.WriteFile(filepath.Join(generateTestBaseDir, "u-boot.yaml"),
+		[]byte(body), 0o644); err != nil {
+		t.Fatalf("seed u-boot.yaml: %v", err)
+	}
+
+	if _, err := svc.Generate(context.Background(), driving.GenerateRequest{
+		BaseDir:                     generateTestBaseDir,
+		Artifact:                    domain.ArtifactDevcontainer,
+		AllowExternalFeatureSources: []string{"https://a.test/x"}, // already present
+	}); err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	// u-boot.yaml should not have been rewritten; the original
+	// body (with its YAML formatting) should be byte-equal.
+	after, err := fs.ReadFile(filepath.Join(generateTestBaseDir, "u-boot.yaml"))
+	if err != nil {
+		t.Fatalf("read u-boot.yaml: %v", err)
+	}
+	if string(after) != body {
+		t.Errorf("u-boot.yaml rewritten on NoOp allowlist update\nbefore:\n%s\nafter:\n%s",
+			body, after)
+	}
+}
+
+// TestGenerateDevcontainer_AllowExternalFeatureSources_InvalidURL
+// pins that bad flag input fails the generate (before any artefact
+// write) and surfaces the LH-FA-DEV-003 invalid-source sentinel.
+func TestGenerateDevcontainer_AllowExternalFeatureSources_InvalidURL(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLPostgres(t, fs)
+	seedGenerateComposeYAML(t, fs, composeYAMLPostgres)
+
+	_, err := svc.Generate(context.Background(), driving.GenerateRequest{
+		BaseDir:                     generateTestBaseDir,
+		Artifact:                    domain.ArtifactDevcontainer,
+		AllowExternalFeatureSources: []string{"not-a-url"},
+	})
+	if err == nil {
+		t.Fatalf("expected error, got nil")
+	}
+	if !errors.Is(err, application.ErrInvalidFeatureSource) {
+		t.Errorf("err = %v, want wrap of ErrInvalidFeatureSource", err)
 	}
 }
 

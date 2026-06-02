@@ -85,15 +85,28 @@ func newConfigGetCommand(a *App) *cobra.Command {
 	}
 }
 
+// configSetFlags bundles the per-invocation flag state of
+// `u-boot config set`. The LH-FA-DEV-003 allowlist seed flag is
+// only meaningful when the positional path is
+// `devcontainer.featureSources.allow` (Spec §717); the use case
+// re-checks before applying.
+type configSetFlags struct {
+	AllowExternalFeatureSources []string
+}
+
 func newConfigSetCommand(a *App) *cobra.Command {
-	return &cobra.Command{
+	flags := &configSetFlags{}
+	cmd := &cobra.Command{
 		Use:   "set <path> <value>",
 		Short: "Set a single configuration value (schema-validated)",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runConfigSet(cmd.Context(), cmd.OutOrStdout(), args, a.configUseCase, a.getwd)
+			return runConfigSet(cmd.Context(), cmd.OutOrStdout(), args, *flags, a.configUseCase, a.getwd)
 		},
 	}
+	cmd.Flags().StringSliceVar(&flags.AllowExternalFeatureSources, "allow-external-feature-sources", nil,
+		"additional URLs to append to devcontainer.featureSources.allow (LH-FA-DEV-003; only valid when <path> is devcontainer.featureSources.allow; cumulative with the positional value).")
+	return cmd
 }
 
 // runConfigShow streams the full u-boot.yaml body to stdout
@@ -154,6 +167,7 @@ func runConfigSet(
 	ctx context.Context,
 	out io.Writer,
 	args []string,
+	flags configSetFlags,
 	uc driving.ConfigUseCase,
 	getwd func() (string, error),
 ) error {
@@ -161,12 +175,26 @@ func runConfigSet(
 	if err != nil {
 		return fmt.Errorf("%w: %v", driving.ErrConfigPathUnknown, err)
 	}
+
+	// Spec §714-717: --allow-external-feature-sources is only
+	// valid on the three listed paths. For `config set`, the
+	// only valid host is devcontainer.featureSources.allow.
+	if len(flags.AllowExternalFeatureSources) > 0 &&
+		path.Kind != domain.ConfigDevcontainerFeatureSourcesAllow {
+		return fmt.Errorf(
+			"%w: --allow-external-feature-sources is only valid for `config set devcontainer.featureSources.allow` (Spec §714-717); got path %s",
+			driving.ErrConfigPathUnknown, path)
+	}
+
 	cwd, err := getwd()
 	if err != nil {
 		return fmt.Errorf("determine working directory: %w", err)
 	}
 	resp, err := uc.Set(ctx, driving.ConfigSetRequest{
-		BaseDir: cwd, Path: path, Value: args[1],
+		BaseDir:                     cwd,
+		Path:                        path,
+		Value:                       args[1],
+		AllowExternalFeatureSources: flags.AllowExternalFeatureSources,
 	})
 	if err != nil {
 		return err

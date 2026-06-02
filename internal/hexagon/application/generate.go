@@ -613,6 +613,15 @@ type devcontainerFilePlan struct {
 // with **no** WriteFile invocations — half-written state would be
 // re-classified as a conflict on the next call.
 func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.GenerateRequest) (driving.GenerateResponse, error) {
+	// LH-FA-DEV-003 / Spec §715 — apply
+	// `--allow-external-feature-sources` BEFORE reading the config
+	// so the rest of the flow (config read + allowlist enforcement
+	// against features.<name>.source) sees the merged list. The
+	// helper is a no-op when the flag list is empty.
+	if err := s.applyAllowExternalFeatureSources(req.BaseDir, req.AllowExternalFeatureSources); err != nil {
+		return driving.GenerateResponse{}, err
+	}
+
 	cfg, err := s.readProjectConfig(req.BaseDir)
 	if err != nil {
 		return driving.GenerateResponse{}, err
@@ -850,4 +859,77 @@ func devcontainerAggregateAction(hasWrite, hasReplace bool) driving.GenerateActi
 	default:
 		return driving.GenerateActionNoOp
 	}
+}
+
+// applyAllowExternalFeatureSources implements the Spec §715 wiring
+// of `--allow-external-feature-sources` for `generate devcontainer`:
+// before the generator reads u-boot.yaml, append the flag URLs to
+// `devcontainer.featureSources.allow`, marshal-rewrite the file.
+// No-op when the flag slice is empty.
+//
+// Failure modes mirror the [ConfigService.setFeatureSourcesAllow]
+// list-path: invalid URL → [driving.ErrConfigValueInvalid] (Code 10);
+// FS error → [driving.ErrGenerateFileSystem] (Code 14).
+func (s *GenerateService) applyAllowExternalFeatureSources(baseDir string, sources []string) error {
+	if len(sources) == 0 {
+		return nil
+	}
+	yamlPath := filepath.Join(baseDir, "u-boot.yaml")
+	body, err := s.fs.ReadFile(yamlPath)
+	if err != nil {
+		return fmt.Errorf("%w: read %q: %v",
+			driving.ErrGenerateFileSystem, yamlPath, err)
+	}
+	var cfg ubootYAMLConfig
+	if err := s.yaml.Unmarshal(body, &cfg); err != nil {
+		return fmt.Errorf("%w: parse %q: %v",
+			driving.ErrProjectNotInitialized, yamlPath, err)
+	}
+	var existing []string
+	if cfg.Devcontainer != nil && cfg.Devcontainer.FeatureSources != nil {
+		existing = cfg.Devcontainer.FeatureSources.Allow
+	}
+	merged, err := normaliseFeatureSources(append(append([]string{}, existing...), sources...))
+	if err != nil {
+		return fmt.Errorf("generate devcontainer: --allow-external-feature-sources: %w", err)
+	}
+	// NoOp short-circuit — every flag URL already in the list.
+	if equalAllowLists(existing, merged) {
+		return nil
+	}
+	if cfg.Devcontainer == nil {
+		cfg.Devcontainer = &ubootYAMLDevcontainer{}
+	}
+	if cfg.Devcontainer.FeatureSources == nil {
+		cfg.Devcontainer.FeatureSources = &ubootYAMLFeatureSources{}
+	}
+	cfg.Devcontainer.FeatureSources.Allow = merged
+	rewritten, err := s.yaml.Marshal(cfg)
+	if err != nil {
+		return fmt.Errorf("%w: marshal u-boot.yaml: %v",
+			driving.ErrGenerateFileSystem, err)
+	}
+	if err := s.fs.WriteFile(yamlPath, rewritten, defaultFileMode); err != nil {
+		return fmt.Errorf("%w: write %q: %v",
+			driving.ErrGenerateFileSystem, yamlPath, err)
+	}
+	s.logger.Info("generate devcontainer: allowlist updated",
+		"added", len(merged)-len(existing), "total", len(merged))
+	return nil
+}
+
+// equalAllowLists reports whether a and b contain the same entries
+// in the same order (byte-equal slice comparison). Used by the
+// generate-devcontainer allowlist-append branch to skip the rewrite
+// when the flag URLs were already present.
+func equalAllowLists(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }

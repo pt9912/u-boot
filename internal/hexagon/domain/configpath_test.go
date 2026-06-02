@@ -11,16 +11,21 @@ import (
 func TestNewConfigPath_KnownPaths(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
-		raw          string
-		wantKind     domain.ConfigPathKind
-		wantWrite    bool
-		wantService  string // empty unless kind == ConfigServiceEnabled
+		raw         string
+		wantKind    domain.ConfigPathKind
+		wantWrite   bool
+		wantService string // empty unless kind == ConfigServiceEnabled
+		wantFeature string // empty unless kind is one of ConfigDevcontainerFeature*
 	}{
-		{"project.name", domain.ConfigProjectName, true, ""},
-		{"devcontainer.enabled", domain.ConfigDevcontainerEnabled, true, ""},
-		{"services.postgres.enabled", domain.ConfigServiceEnabled, false, "postgres"},
-		{"services.keycloak.enabled", domain.ConfigServiceEnabled, false, "keycloak"},
-		{"services.otel.enabled", domain.ConfigServiceEnabled, false, "otel"},
+		{"project.name", domain.ConfigProjectName, true, "", ""},
+		{"devcontainer.enabled", domain.ConfigDevcontainerEnabled, true, "", ""},
+		{"services.postgres.enabled", domain.ConfigServiceEnabled, false, "postgres", ""},
+		{"services.keycloak.enabled", domain.ConfigServiceEnabled, false, "keycloak", ""},
+		{"services.otel.enabled", domain.ConfigServiceEnabled, false, "otel", ""},
+		{"devcontainer.featureSources.allow", domain.ConfigDevcontainerFeatureSourcesAllow, true, "", ""},
+		{"devcontainer.features.node.enabled", domain.ConfigDevcontainerFeatureEnabled, true, "", "node"},
+		{"devcontainer.features.java.source", domain.ConfigDevcontainerFeatureSource, true, "", "java"},
+		{"devcontainer.features.go.version", domain.ConfigDevcontainerFeatureVersion, true, "", "go"},
 	}
 	for _, tc := range cases {
 		got, err := domain.NewConfigPath(tc.raw)
@@ -36,6 +41,31 @@ func TestNewConfigPath_KnownPaths(t *testing.T) {
 		}
 		if got.Service.String() != tc.wantService {
 			t.Errorf("NewConfigPath(%q).Service = %q, want %q", tc.raw, got.Service.String(), tc.wantService)
+		}
+		if got.Feature.String() != tc.wantFeature {
+			t.Errorf("NewConfigPath(%q).Feature = %q, want %q", tc.raw, got.Feature.String(), tc.wantFeature)
+		}
+	}
+}
+
+func TestNewConfigPath_InvalidFeatureName_WrapsBothSentinels(t *testing.T) {
+	t.Parallel()
+	cases := []string{
+		"devcontainer.features..enabled",
+		"devcontainer.features.UPPERCASE.enabled",
+		"devcontainer.features.bad_name.source",
+	}
+	for _, raw := range cases {
+		_, err := domain.NewConfigPath(raw)
+		if err == nil {
+			t.Errorf("NewConfigPath(%q): expected error, got nil", raw)
+			continue
+		}
+		if !errors.Is(err, domain.ErrInvalidConfigPath) {
+			t.Errorf("NewConfigPath(%q): err %v does not wrap ErrInvalidConfigPath", raw, err)
+		}
+		if !errors.Is(err, domain.ErrInvalidFeatureName) {
+			t.Errorf("NewConfigPath(%q): err %v does not chain ErrInvalidFeatureName", raw, err)
 		}
 	}
 }
@@ -123,6 +153,10 @@ func TestConfigPath_String_RoundTrip(t *testing.T) {
 		"devcontainer.enabled",
 		"services.postgres.enabled",
 		"services.keycloak.enabled",
+		"devcontainer.featureSources.allow",
+		"devcontainer.features.node.enabled",
+		"devcontainer.features.java.source",
+		"devcontainer.features.go.version",
 	} {
 		p, err := domain.NewConfigPath(raw)
 		if err != nil {

@@ -20,7 +20,16 @@ import (
 // to code 10. The distinction is spec-mandated (§LH-FA-GEN-001):
 // "Bei unbekanntem Artefakt muss der Befehl mit Exit Code 2
 // abbrechen und die erlaubten Werte explizit zurückgeben."
+// generateFlags bundles the per-invocation flag state of
+// `u-boot generate`. The LH-FA-DEV-003 allowlist seed flag is only
+// meaningful for `generate devcontainer`; the use case re-checks
+// the artefact kind before applying.
+type generateFlags struct {
+	AllowExternalFeatureSources []string
+}
+
 func newGenerateCommand(a *App) *cobra.Command {
+	flags := &generateFlags{}
 	cmd := &cobra.Command{
 		Use:   "generate <artifact>",
 		Short: "Generate or update a u-boot-managed artefact (changelog/readme/env-example/devcontainer)",
@@ -57,9 +66,11 @@ Examples:
   u-boot generate devcontainer     # both .devcontainer/ files`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runGenerate(cmd.Context(), cmd.OutOrStdout(), args, a.generateUseCase, a.getwd)
+			return runGenerate(cmd.Context(), cmd.OutOrStdout(), args, *flags, a.generateUseCase, a.getwd)
 		},
 	}
+	cmd.Flags().StringSliceVar(&flags.AllowExternalFeatureSources, "allow-external-feature-sources", nil,
+		"append the given URLs to devcontainer.featureSources.allow before generating (LH-FA-DEV-003; only valid for `generate devcontainer`; comma-separated, repeatable). `--yes` does not substitute (LH-NFA-SEC-004).")
 	return cmd
 }
 
@@ -76,6 +87,7 @@ func runGenerate(
 	ctx context.Context,
 	out io.Writer,
 	args []string,
+	flags generateFlags,
 	uc driving.GenerateUseCase,
 	getwd func() (string, error),
 ) error {
@@ -84,14 +96,25 @@ func runGenerate(
 		return fmt.Errorf("%w: %v", driving.ErrArtifactUnknown, err)
 	}
 
+	// Spec §714-717: --allow-external-feature-sources is only
+	// valid for `generate devcontainer`. Reject early on other
+	// artefacts so the user gets a clear "wrong command" message
+	// rather than a silent no-op.
+	if len(flags.AllowExternalFeatureSources) > 0 && artifact != domain.ArtifactDevcontainer {
+		return fmt.Errorf(
+			"%w: --allow-external-feature-sources is only valid for `generate devcontainer` (Spec §714-717); got `generate %s`",
+			driving.ErrArtifactUnknown, artifact)
+	}
+
 	cwd, err := getwd()
 	if err != nil {
 		return fmt.Errorf("determine working directory: %w", err)
 	}
 
 	resp, err := uc.Generate(ctx, driving.GenerateRequest{
-		BaseDir:  cwd,
-		Artifact: artifact,
+		BaseDir:                     cwd,
+		Artifact:                    artifact,
+		AllowExternalFeatureSources: flags.AllowExternalFeatureSources,
 	})
 	if err != nil {
 		return err

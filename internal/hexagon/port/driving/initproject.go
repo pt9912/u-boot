@@ -111,6 +111,14 @@ type InitProjectRequest struct {
 	// can layer managed-block semantics on top once a concrete
 	// trigger exists.
 	Template string
+
+	// AllowExternalFeatureSources lists LH-FA-DEV-003 source URLs
+	// that should be appended to `devcontainer.featureSources.allow`
+	// during init (Spec §714). Empty (default) leaves the allowlist
+	// unset. Only valid when [Devcontainer] is true — using the
+	// flag without `--devcontainer` returns [ErrInvalidFeatureSource]
+	// before any write. Slice-v1-devcontainer-features T4.
+	AllowExternalFeatureSources []string
 }
 
 // BackupAction records a single file/dir backup performed during

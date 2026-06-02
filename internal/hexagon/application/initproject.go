@@ -243,8 +243,8 @@ type filePlan struct {
 // error. BackupPath itself is TOCTOU-safe via WriteFileExclusive +
 // Mkdir (T4a-review).
 func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRequest) (driving.InitProjectResponse, error) {
-	if req.BaseDir == "" {
-		return driving.InitProjectResponse{}, errors.New("BaseDir is required")
+	if err := s.validateInitPreconditions(req); err != nil {
+		return driving.InitProjectResponse{}, err
 	}
 
 	// slice-v1-template-init T4: dispatch to the external-template
@@ -254,14 +254,6 @@ func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRe
 	// rendering to the wired TemplateInitUseCase.
 	if req.Template != "" {
 		return s.initFromTemplate(ctx, req)
-	}
-
-	baseExists, err := s.fs.Exists(req.BaseDir)
-	if err != nil {
-		return driving.InitProjectResponse{}, fmt.Errorf("check BaseDir: %w", err)
-	}
-	if !baseExists {
-		return driving.InitProjectResponse{}, fmt.Errorf("%w: %s", driving.ErrBaseDirMissing, req.BaseDir)
 	}
 
 	// LH-FA-INIT-004 soft-existing-detection — runs before the
@@ -307,7 +299,7 @@ func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRe
 	created = append(created, fileEntries...)
 	backups = append(backups, fileBackups...)
 
-	yamlEntry, yamlBackup, err := s.executeUBootYAML(req.BaseDir, project, yamlPlan, req.Devcontainer)
+	yamlEntry, yamlBackup, err := s.executeUBootYAML(req.BaseDir, project, yamlPlan, req.Devcontainer, req.AllowExternalFeatureSources)
 	if err != nil {
 		return driving.InitProjectResponse{}, err
 	}
@@ -1000,7 +992,41 @@ func (s *InitProjectService) runBackup(baseDir, relPath string) (*driving.Backup
 // escalation gate (`LH-FA-DIAG-002` §1073: `error` for missing or
 // invalid `.devcontainer/devcontainer.json` when
 // `devcontainer.enabled == true`) fires after the init.
-func (s *InitProjectService) executeUBootYAML(baseDir string, project domain.Project, plan filePlan, devcontainer bool) (string, *driving.BackupAction, error) {
+// validateInitPreconditions runs the request-level guards that fire
+// before any FS side effect: empty BaseDir (programmer error from
+// the CLI adapter) and the Spec §714 / LH-FA-DEV-003 constraint
+// that `--allow-external-feature-sources` requires `--devcontainer`.
+// For `--template <name>` the BaseDir-exists check is the
+// initFromTemplate branch's responsibility; for the default flow
+// the [Init] dispatcher runs the existence check after this gate.
+// Extracted from [Init] to keep the latter under the gocyclo
+// threshold while preserving the "reject early" UX.
+func (s *InitProjectService) validateInitPreconditions(req driving.InitProjectRequest) error {
+	if req.BaseDir == "" {
+		return errors.New("BaseDir is required")
+	}
+	if len(req.AllowExternalFeatureSources) > 0 && !req.Devcontainer {
+		return fmt.Errorf(
+			"%w: --allow-external-feature-sources requires --devcontainer (Spec §714); --yes is not sufficient (LH-NFA-SEC-004)",
+			ErrInvalidFeatureSource)
+	}
+	// BaseDir-exists check intentionally NOT here; the template
+	// branch handles it separately (initFromTemplate) so the
+	// path-specific error wrapping stays accurate.
+	if req.Template != "" {
+		return nil
+	}
+	exists, err := s.fs.Exists(req.BaseDir)
+	if err != nil {
+		return fmt.Errorf("check BaseDir: %w", err)
+	}
+	if !exists {
+		return fmt.Errorf("%w: %s", driving.ErrBaseDirMissing, req.BaseDir)
+	}
+	return nil
+}
+
+func (s *InitProjectService) executeUBootYAML(baseDir string, project domain.Project, plan filePlan, devcontainer bool, allowExternalFeatureSources []string) (string, *driving.BackupAction, error) {
 	cfg := ubootYAMLConfig{
 		SchemaVersion: project.SchemaVersion,
 		Project:       ubootYAMLProject{Name: project.Name.String()},
@@ -1008,6 +1034,17 @@ func (s *InitProjectService) executeUBootYAML(baseDir string, project domain.Pro
 	if devcontainer {
 		enabled := true
 		cfg.Devcontainer = &ubootYAMLDevcontainer{Enabled: &enabled}
+		// LH-FA-DEV-003 allowlist seed from
+		// `--allow-external-feature-sources` (Spec §714). The flag-
+		// without-devcontainer case is rejected at the entry to
+		// [Init]; reaching here implies devcontainer == true.
+		if len(allowExternalFeatureSources) > 0 {
+			validated, err := normaliseFeatureSources(allowExternalFeatureSources)
+			if err != nil {
+				return "", nil, fmt.Errorf("init: --allow-external-feature-sources: %w", err)
+			}
+			cfg.Devcontainer.FeatureSources = &ubootYAMLFeatureSources{Allow: validated}
+		}
 	}
 	body, err := s.yaml.Marshal(cfg)
 	if err != nil {
