@@ -224,7 +224,7 @@ Doctor schweigt (OK) wenn:
 Ein zweiter Check für Drift-Erkennung
 (`devcontainer.features.drift` — vergleicht cfg gegen
 gerendertes JSON) lebt in einem Folge-Slice
-[`slice-followup-devcontainer-features-drift-doctor`](../plan/planning/open/slice-followup-devcontainer-features-drift-doctor.md)
+[`slice-followup-devcontainer-features-drift-doctor`](../plan/planning/in-progress/slice-followup-devcontainer-features-drift-doctor.md)
 und ist in v0.4.0 noch nicht ausgeliefert.
 
 ---
