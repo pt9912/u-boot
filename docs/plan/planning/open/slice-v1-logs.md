@@ -42,64 +42,116 @@ drauf.
 `u-boot logs [service] [--follow] [--tail <n>]` in einem
 initialisierten Projekt:
 
-- Ohne `service`-Argument streamt es Logs aller in
-  `cfg.Services` mit `enabled: true` registrierten Services
-  (Compose-Default ist „alle"; der Use-Case nutzt
-  `activeServiceNames(cfg)` als Filter falls nötig — siehe
-  T0-Decision unten).
+- Ohne `service`-Argument streamt es Logs der in u-boot.yaml
+  registrierten Services. **Welche genau** (alle Services aus
+  compose.yaml vs. nur `cfg.Services` mit `enabled: true` via
+  `activeServiceNames(cfg)`) ist **T0-Sub-Decision (a)** — der
+  Default wird vor T1-Start festgezurrt und im §T0-Outcomes-
+  Block ergänzt (Plan-Followup-P4-Konsistenz: dieser Slice
+  spricht heute an zwei Stellen widersprüchlich darüber).
 - Mit `service`-Argument streamt nur diesen einen.
 - `--follow` blockiert bis Ctrl-C; SIGINT beendet sauber mit
   Exit-Code 0 (analog `tail -f`-Konvention).
-- `--tail <n>` mit `n ≥ 0` zeigt nur die letzten n Zeilen pro
-  Service.
+- `--tail <n>` akzeptiert `n ≥ 0` (Ganzzahl als String) **oder**
+  die Compose-Konstante `"all"`. Default ohne Flag: Compose-
+  Default (effektiv „all"). Negative oder nicht-numerische Werte
+  außer `"all"` → CLI-Usage-Error, Exit-Code 2 (Cobra-/Stage-1-
+  Validation in `runLogs`, vor Use-Case-Aufruf — analog der
+  bestehenden `--timeout`/`--tail`-Parse-Konventionen aus M6).
 
-Compose-CLI-Failures (Service unbekannt, Project nicht gestartet,
-Docker nicht erreichbar) klassifizieren wie M6 `up`/`down`:
-Exit-Codes 10 (User-Fehler) bzw. 14 (technisch).
+Compose-/Docker-Failures klassifizieren strikt analog M6
+`up`/`down` (vgl. `internal/adapter/driving/cli/cli.go:237 ff.`
+`ExitCode`-Mapping):
+
+- **Exit-Code 11** — Docker-Environment-Fehler (Docker nicht
+  erreichbar / nicht installiert); `driven.ErrDockerUnavailable`
+  aus dem Compose-Adapter.
+- **Exit-Code 12** — Compose-Runtime-Fehler (Compose-Stack nicht
+  gestartet, unbekannter Service zur Laufzeit, Compose-Exit ≠ 0);
+  `driven.ErrComposeRuntime` aus dem Adapter.
+- **Exit-Code 10** — User-Validation: ungültiger Service-Name
+  (Format), fehlendes u-boot.yaml/compose.yaml (Project-State-
+  Check, via `ErrProjectNotInitialized` /
+  `ErrComposeFileMissing`).
+- **Exit-Code 14** — technischer Persistenz-/FS-Fehler (z. B.
+  Lesefehler auf compose.yaml während des Project-State-Checks);
+  selten erreichbar bei `logs`, aber für Symmetrie mit
+  `up`/`down` erhalten.
+- **Exit-Code 0** — `--follow` durch SIGINT (siehe SIGINT-Vertrag
+  unten).
 
 ## Akzeptanzkriterien
 
 - ✅ **Driven-Port-Erweiterung:**
   `driven.DockerEngine.ComposeLogs(ctx, dir, opts)` ergänzt;
-  `opts` trägt Sink (`io.Writer` für stdout-Streaming, analog
+  `opts` trägt `Sink io.Writer` für stdout-Streaming (analog
   `ProgressSink` aus `ComposeUpOptions`), `Services []string`
-  (leer = alle), `Follow bool`, `Tail string` (Compose-Konvention:
-  „all" oder Dezimalzahl-String). Adapter shellt zu
-  `docker compose -f <dir>/compose.yaml logs ...` aus. Context-
-  Cancellation propagiert via `exec.CommandContext` — `--follow`
-  bleibt unterbrechbar.
-- ✅ **Driving-Port:** Neuer `LogsUseCase` mit
-  `LogsRequest{BaseDir, Service, Follow, Tail}` und
-  `LogsResponse` (vermutlich leer — Output ist Stream auf Writer).
-  Application-Service `LogsService` orchestriert Project-State-
-  Check (u-boot.yaml + compose.yaml vorhanden, analog
-  `UpService` §M6-T1) plus Service-Name-Validation (siehe T0
-  unten).
+  (leer = Default gemäß T0-(a)), `Follow bool`, `Tail string`
+  (Compose-Konvention: `"all"` oder Ganzzahl-String).
+  Adapter shellt zu `docker compose -f <dir>/compose.yaml
+  logs ...` aus. **Adapter-Kontrakt für SIGINT
+  (Plan-Followup-P3):** wenn `ctx.Err() != nil` nach
+  `cmd.Run()`, gibt der Adapter `ctx.Err()` (also
+  `context.Canceled` bzw. `context.DeadlineExceeded`)
+  **unverdeckt** zurück — **nicht** in
+  `driven.ErrComposeRuntime` wrappen. Sonst wird Ctrl-C zu
+  Exit-Code 12 statt 0. `exec.CommandContext` killt den
+  Compose-Prozess; der Wrap-Filter sitzt im Adapter direkt am
+  `cmd.Run()`-Returnpunkt.
+- ✅ **Driving-Port (Plan-Followup-P2):** Neuer `LogsUseCase`
+  mit `LogsRequest{BaseDir, Service, Follow, Tail, OutputSink io.Writer}`
+  (Sink im Request analog `UpRequest.ProgressSink` /
+  `DownRequest.ProgressSink` aus M6 — die CLI gibt `cmd.OutOrStdout()`
+  rein, der Use-Case reicht weiter an `ComposeLogsOptions.Sink`).
+  `LogsResponse` leer (Output ist Stream, keine strukturierte
+  Rückgabe). Application-Service `LogsService` orchestriert
+  Project-State-Check (u-boot.yaml + compose.yaml vorhanden,
+  analog `UpService` §M6-T1) plus Service-Name-Validation
+  (siehe T0-Sub-Decision (b)).
 - ✅ **CLI:** `u-boot logs [service]` mit optionalem Positional-
   Arg (Cobra-`MaximumNArgs(1)`). Flags `--follow` / `--tail
   <n>`. Service-Name-Validation via `domain.NewServiceName`
   (Exit-Code 10 bei Format-Fehler, mappt durch
-  `isServiceValidationError` analog `add`/`remove`).
+  `isServiceValidationError` analog `add`/`remove`). `--tail`-
+  Parse: Strings `"all"`, `"0"`, `"1"`, …, `"100"` akzeptiert;
+  negative oder andere non-numerische Werte → Exit-Code 2 via
+  CLI-Stage-1-Parse-Fehler (vor Use-Case-Aufruf).
 - ✅ **Streaming-Disziplin:** Adapter line-buffert auf den Sink,
   damit `--follow` real-time ankommt (Compose-Default kann
   block-buffern bei pipe-stdout). Tradeoff dokumentiert; ggf.
   via `docker compose logs --no-log-prefix` / `--timestamps`
-  Subentscheidung in T0.
+  Subentscheidung in T0-(d).
 - ✅ **SIGINT-Vertrag:** Ctrl-C im `--follow`-Pfad beendet mit
-  Exit-Code 0 (tail-konform); innerhalb der Use-Case-Schicht
-  als `context.Canceled` erkannt und nicht als Fehler propagiert.
+  Exit-Code 0 (tail-konform). Der Vertrag besteht aus drei
+  Schichten:
+  1. **Adapter:** gibt `ctx.Err()` unverdeckt zurück (siehe
+     Driven-Port-Erweiterung oben).
+  2. **Use-Case:** prüft `errors.Is(err, context.Canceled)` und
+     `errors.Is(err, context.DeadlineExceeded)`; in beiden
+     Fällen Rückgabe `(LogsResponse{}, nil)` — kein Fehler.
+  3. **CLI:** `cmd.Context()` mit `signal.NotifyContext(ctx,
+     os.Interrupt)` wired (analog vermutlich `up --follow`
+     falls schon vorhanden — siehe `internal/adapter/driving/cli/up.go`,
+     ansonsten neu in `logs.go`).
 - ✅ **Tests:**
   - Application-Unit-Tests (fakeDockerEngine, mock-ComposeLogs)
-    pinnen: Request→Adapter-Call-Mapping, Service-Validation-
-    Fehlerpfad, Project-State-Check (kein u-boot.yaml → Exit-
-    Code 10), SIGINT-Pass-Through.
-  - Adapter-Unit-Test für die Cobra-CLI-Wiring (analog
-    `cli_test.go`-Pattern).
+    pinnen: Request→Adapter-Call-Mapping (OutputSink wird
+    durchgereicht), Service-Validation-Fehlerpfad,
+    Project-State-Check (kein u-boot.yaml → Exit-Code 10),
+    SIGINT-Pass-Through (`context.Canceled` aus Adapter →
+    Use-Case-`nil`-Return).
+  - Adapter-Unit-Test mit fake-cmd-runner: Konstruktion von
+    `docker compose logs`-Argumenten je nach Flag-Kombination,
+    Sink-Streaming, `ctx.Err()`-Pass-Through am `cmd.Run()`-
+    Returnpunkt.
+  - CLI-Test analog `cli_test.go`-Pattern: Flag-Parsing,
+    `--tail`-Validierungs-Failures (Exit-2-Pin), Mapping aller
+    vier Use-Case-Sentinels auf Exit-Codes 10/11/12/14.
   - **Docker-tag E2E** in `internal/e2e/` (analog
     `up_acceptance_docker_test.go`): postgres hochfahren, `u-boot
     logs postgres --tail 5` zeigt mindestens eine Log-Zeile;
-    `u-boot logs --follow` startet und wird via Test-Timeout
-    beendet.
+    `u-boot logs --follow` startet und wird via Test-Timeout +
+    Context-Cancellation beendet (Exit 0).
 - ✅ **Spec-Pin:** `internal/hexagon/application/acceptance_test.go`
   oder Docker-e2e-Test deckt `LH-FA-UP-005` ab; Test-Naming
   `TestLHFAUP005_Logs<…>` analog `TestLHFADEV003_*`.
@@ -112,7 +164,7 @@ Exit-Codes 10 (User-Fehler) bzw. 14 (technisch).
 
 | T   | Inhalt (Skizze) | LOC (Schätzung) |
 | --- | --------------- | --------------- |
-| T0  | **Discovery / Design.** Vier Sub-Decisions: (a) leerer Service-Filter → Compose-Default vs. `activeServiceNames`-Filter (M6-Konvention; macht keinen Unterschied für `logs`, aber Konsistenz); (b) Service-Name-Validation-Tiefe (`domain.NewServiceName` + Katalog-Membership-Check wie `add`, oder nur Regex + Pass-Through zu Compose?); (c) `--tail`-Default ohne Flag (Compose-Default ist „all"; übernehmen oder `tail=100`?); (d) Output-Format-Sub-Entscheidung (`--no-log-prefix` per Default, `--timestamps` opt-in?). Ergebnis als §T0-Outcomes im Plan analog `slice-v1-devcontainer-features`. | — (Plan-Arbeit) |
+| T0  | **Discovery / Design.** Vier Sub-Decisions (Plan-Followup-P4: (a) ist **blockierend** für die §Aufhebungsbedingung — der Plan-Text widerspricht sich heute zwischen „nur enabled" und „leer = alle"; vor T1-Start eindeutig auflösen): (a) leerer Service-Filter → Compose-Default vs. `activeServiceNames`-Filter (entscheidet, ob deaktivierte/manuell-Compose-Services Logs leaken können — Source-of-Truth-Frage); (b) Service-Name-Validation-Tiefe (`domain.NewServiceName` + Katalog-Membership-Check wie `add`, oder nur Regex + Pass-Through zu Compose?); (c) `--tail`-Default ohne Flag (Compose-Default ist „all"; übernehmen oder `tail=100`?); (d) Output-Format-Sub-Entscheidung (`--no-log-prefix` per Default, `--timestamps` opt-in?). Ergebnis als §T0-Outcomes im Plan analog `slice-v1-devcontainer-features`. | — (Plan-Arbeit) |
 | T1  | **Driven-Port + Adapter.** `ComposeLogs`-Methode + `ComposeLogsOptions`-Struct in `port/driven/docker_engine.go`. Adapter-Implementation in `adapter/driven/docker/engine.go` mit `exec.CommandContext` (Context-Cancellation für SIGINT). Unit-Tests für Adapter (mock-out via fake-cmd-runner). | ~120 |
 | T2  | **Use-Case.** `LogsRequest`/`LogsResponse`/`LogsUseCase` in `port/driving/logsservice.go`; `LogsService` in `application/logsservice.go`. Project-State-Check (analog `UpService`); Service-Name-Validation gemäß T0-(b). | ~120 |
 | T3  | **CLI-Subcommand.** `internal/adapter/driving/cli/logs.go`; Cobra-Command `logs [service]` mit `--follow`/`--tail`-Flags; SIGINT-Handler oder Context-Cancellation via `cmd.Context()`. App-Wiring in `cli.go:New`. | ~80 |
