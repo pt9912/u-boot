@@ -71,10 +71,14 @@ Alle zehn Spec-Enum-Subcommands tragen einen `--json`-Pfad
 gemäß `LH-NFA-USE-004`-Minimalkontrakt:
 
 ```bash
-u-boot doctor --json           # alle read-only-Befehle
-u-boot logs --json             # (existierend: stream-orientiert,
-                               # Output-Format ist Sub-Decision)
-u-boot template list --json    # bereits ✅, Schema-Audit nötig
+u-boot doctor --json                # alle read-only-Befehle
+u-boot logs --json                  # (existierend: stream-orientiert,
+                                    # Output-Format ist Sub-Decision)
+u-boot template list --json         # bereits ✅, Schema-Audit nötig
+u-boot config --json                # bare config — Listing/Default-View
+u-boot config get <path> --json     # read-only Pfad-Lookup
+u-boot up --json                    # Compose-Up-Status-Report
+u-boot down --json                  # Compose-Down-Status-Report
 ```
 
 Alle dateiverändernden Subcommands (`init`, `add`, `remove`,
@@ -85,7 +89,21 @@ Alle dateiverändernden Subcommands (`init`, `add`, `remove`,
 u-boot add postgres --dry-run --json
 u-boot add postgres --diff
 u-boot add postgres --dry-run --diff --json
+u-boot config set <path> <value> --dry-run --diff --json
 ```
+
+**`config`-Cluster-Pflicht (Review-Finding MEDIUM):**
+`u-boot config`, `u-boot config get <path>`, `u-boot config
+set <path> <value>` sind drei separate Subcommand-Formen
+unter dem `config`-Hauptkommando. Alle drei brauchen
+`--json` (`LH-NFA-USE-004` gilt für alle
+Spec-Enum-Subcommands, nicht nur Schreibpfade). LH-FA-CLI-007
+fordert für `command == "config"` zusätzlich
+`subcommand`-Pflicht — der Wert für **bare** `u-boot config`
+(ohne weiteren Pfad) ist Sub-Decision im Folge-Slice
+`slice-v1-cli-json-dry-run-config` (Kandidaten: `"list"`,
+`"show"`, oder explizit `""` falls Spec leeren Subcommand
+erlaubt — Aufklärung gegen `LH-FA-CONF-005` im Folge-Slice).
 
 Jede `--json`-Ausgabe validiert gegen das
 `LH-FA-CLI-007`-Pflicht-Schema (oder den
@@ -102,10 +120,31 @@ in Tests pinnt:
 
 Die einzelnen Subcommand-Implementierungen leben in
 **Per-Command-Folge-Slices** (siehe §Per-Command-Folge-Slices).
-Dieser Cluster-Slice schließt, sobald entweder alle
-Folge-Slices in `done/` sind **oder** ein Verteilungs-Audit
-(z. B. zum v1.0.0-Release-Cut) den verbliebenen Restweg in
-Carveouts überführt mit benannten Re-Trigger-Slices.
+
+**Closure-Hard-Rule (Review-Finding HIGH):** Dieser
+Cluster-Slice schließt **ausschließlich**, sobald **alle**
+Per-Command-Folge-Slices in `done/` sind. Es gibt **kein**
+MVP-Quorum, **kein** Verteilungs-Audit-Bypass, **keinen**
+Restweg-Carveout als Closure-Alternative — das wäre eine
+direkte Aufweichung des V1-Pflicht-Surfaces aus `LH-NFA-USE-
+004` und würde ADR-0010 §Folgepunkte Re-Eval-Trigger 2
+unterminieren (HTTP-Adapter wurde mit dem Argument verworfen,
+dass diese Spur V1-pünktlich kommt).
+
+Wenn ein Folge-Slice tatsächlich slipt (z. B. weil die
+Sub-Decision in `next/` blockiert): **vor** dem Cluster-Move
+nach `done/` muss
+(1) ein expliziter Carveout-Eintrag in
+[`carveouts.md`](../in-progress/carveouts.md) §Temporäre
+Carveouts erscheinen, der den fehlenden Subcommand benennt
+und mit einem benannten Re-Trigger-Slice-Plan-Stub in `open/`
+verlinkt (`LH-FA-PROJDOCS-005` Carveout-Plan-Anker-Pflicht);
+(2) das ADR-0010-Konsequenzen-Update darf **nicht** „JSON-CLI
+als Maschinen-Schnittstelle ausgeliefert" sagen, sondern
+muss den Carveout zitieren und Re-Trigger-Pfad nennen.
+
+Default-Erwartung: keine Slips, alle 9 Folge-Slices schließen.
+Die Hard-Rule ist Notfall-Pfad, nicht Standard.
 
 ## Akzeptanzkriterien (Cluster-Ebene)
 
@@ -166,21 +205,54 @@ auf `template list` ist lokal definiert.
 Drei Architektur-Varianten:
 
 1. **Application-Layer-Flag im Request** (`Request.DryRun bool`):
-   Use-Case entscheidet, ob `FileSystem.WriteFile` aufgerufen
-   wird. Pro: Adapter bleibt symmetrisch; Contra: jeder
-   Use-Case trägt Dry-Run-If-Verzweigungen.
+   Use-Case entscheidet, ob mutierende FileSystem-Methoden
+   aufgerufen werden. Pro: Adapter bleibt symmetrisch; Contra:
+   jeder Use-Case trägt Dry-Run-If-Verzweigungen an jeder
+   FS-Mutation.
 2. **Recording-FileSystem-Wrapper** (driven-Adapter-Variante):
    `RecordingFileSystem` implementiert `driven.FileSystem`,
-   capturet WriteFile-Calls statt sie auszuführen. Use-Case
-   weiß nichts vom Dry-Run-Modus. Pro: Use-Case sauber; Contra:
-   FileSystem-Adapter braucht zwei Implementierungen.
+   capturet **alle 8 mutierenden Methoden** statt sie
+   auszuführen (Review-Finding MEDIUM: vollständige Liste —
+   `WriteFile`, `WriteFileExclusive`, `Mkdir`, `MkdirAll`,
+   `Rename`, `RemoveAll`, `Copy`, `CopyExclusive`; vgl.
+   [`driven.FileSystem`](../../../../internal/hexagon/port/driven/filesystem.go),
+   permanent-Carveout interfacebloat). Use-Case weiß nichts
+   vom Dry-Run-Modus. Pro: Use-Case sauber; Contra: ALLE acht
+   Mutations-Methoden müssen geschlossen capturet werden,
+   sonst lückt der Plan; `Rename`/`RemoveAll` müssen pro
+   Folge-Slice in `plannedFiles[].action` als `delete`/`modify`
+   gemappt werden (Spec-Enum nur `create|modify|delete`, nicht
+   `rename`).
 3. **ChangeSet-Pattern** (separates Apply-Step): Use-Case
-   berechnet `ChangeSet`, ein separater `Apply`-Step schreibt.
-   Pro: Dry-Run = Apply weglassen; Contra: alle Use-Cases
-   müssen auf ChangeSet-Pattern refactoren — größter Eingriff.
+   berechnet `ChangeSet`, ein separater `Apply`-Step führt
+   alle 8 Mutationen aus. Pro: Dry-Run = Apply weglassen;
+   Contra: alle Use-Cases müssen auf ChangeSet-Pattern
+   refactoren — größter Eingriff.
 
 T0-Decision sollte den Eingriffs-Radius pro Variante gegen die
 Folge-Slice-LOC-Schätzungen abwägen.
+
+**Mutations-Matrix-Pflicht (Review-Finding MEDIUM):**
+unabhängig davon welche Variante T0-(b) wählt, muss der erste
+Folge-Slice eine **vollständige Mutations-Matrix** liefern:
+pro modifying Subcommand (`init`, `add`, `remove`, `generate`,
+`config set`) wird aufgelistet, **welche FS-Mutations-Methoden
+er heute aufruft**. Diese Matrix ist die Pin-Grundlage für
+zwei Test-Disziplinen, die jeder Folge-Slice tragen muss:
+
+- **Positive Pin:** für jeden modifying Subcommand existiert
+  ein `--dry-run`-Test, der die laut Matrix erwartete
+  `plannedFiles`-Action je Datei pinnt.
+- **Negative Pin** („kein FS-Write"): für jeden modifying
+  Subcommand existiert ein `--dry-run`-Test, der nach dem
+  Run prüft, dass **null** der 8 FS-Mutations-Methoden
+  ausgeführt wurde (Spy/Fake auf Production-FileSystem-Port,
+  Call-Count == 0). Das schließt das Risiko aus, dass eine
+  vergessene Methode am Dry-Run-Filter vorbeiläuft.
+
+Die Matrix wandert in den Schema-Vertrag-Doc-Block aus T1,
+damit Folge-Slices sie referenzieren und beim FS-Port-
+Erweiterungen einen Drift-Trigger haben.
 
 ### T0-(c) DTO-Lokalisation: gemeinsam oder per Subcommand?
 
@@ -225,10 +297,20 @@ Use-Case-Druck (geschätzt):
 6. `up --json` / `down --json` — read-only-Output von
    Compose-Zustand.
 7. `logs --json` — stream-orientiert, Output-Modell-Frage
-   (siehe T0-(b) des logs-Pfads — JSON-Lines oder Single-
-   Envelope?).
-8. `config set --dry-run --diff --json` — kleine LOC, hoher
-   Schema-Konformitäts-Wert.
+   (JSON-Lines pro Compose-Log-Zeile vs. Single-Envelope nach
+   Stream-Ende). Diese Sub-Decision ist im Folge-Slice
+   `slice-v1-cli-json-dry-run-logs` zu treffen — der
+   ausgelieferte [`slice-v1-logs`](../done/slice-v1-logs.md)
+   hat den `--json`-Pfad bewusst hierher ausgelagert und keine
+   Vorab-Entscheidung getroffen (Review-Finding LOW: vorherige
+   Stub-Version verwies fälschlich auf logs T0-(b), das aber
+   Service-Name-Validation regelt).
+8. `config` (alle drei Formen — bare `config`, `config get
+   <path>`, `config set <path> <value>`) — `config` und
+   `config get` sind read-only-`--json`, `config set` ist
+   modifying-`--dry-run --diff --json`. Drei-Form-Bündel,
+   damit `subcommand`-Pflicht aus `LH-FA-CLI-007` einmal
+   geschlossen wird.
 9. `template list --json` — Audit + Schema-Migration
    (existierender Pfad spec-konform machen).
 
@@ -277,12 +359,16 @@ Subcommand (T0-(b)-Architektur-Decision dominant).
 
 ## Out of Scope
 
-- **Cluster-Closure-Quorum**: was zählt als „kritisches
-  Quorum" für die Cluster-Slice-Closure? Default-Vorschlag:
-  ALLE 9 Folge-Slices in `done/`. Alternative: Read-only-
-  Subset (`doctor`, `up`, `down`, `logs`, `template list`)
-  + erstes modifying-Beispiel (`add`) als „MVP-Quorum" — die
-  Restlichen als V1-Folge-Slice-Trail. Festzurren in T0.
+- **Reihenfolge der Folge-Slice-Implementierung als
+  „MVP-First-Strategie"**: in T0-(e) wird zwar eine
+  Reihenfolge nach Use-Case-Druck festgezurrt, aber
+  **kein** Read-only-only- oder „MVP-Quorum"-Closure-Pfad
+  für den Cluster — die Closure-Hard-Rule in der
+  Aufhebungsbedingung schließt das aus (alle 9
+  Folge-Slices done/, sonst Carveout-Inventar-Pflicht
+  vor Cluster-Move). T0-(e) entscheidet nur, **in welcher
+  Reihenfolge** die Folge-Slices angefasst werden, nicht
+  welche „erstmal reichen".
 - **JSON-Output für nicht-Spec-Enum-Subcommands** (z. B.
   zukünftige `u-boot exec`-Spec-Erweiterung): außerhalb dieses
   Cluster-Slices. Wenn neue Subcommands dazukommen, bekommen
