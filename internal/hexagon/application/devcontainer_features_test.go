@@ -3,6 +3,7 @@ package application_test
 import (
 	"errors"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 
@@ -296,6 +297,119 @@ devcontainer:
 			if !strings.Contains(err.Error(), "Aaa_bad") {
 				t.Errorf("iter %d: err = %v, want first-by-sort-order key Aaa_bad", i, err)
 			}
+		}
+	})
+}
+
+// TestFeatureCatalogue_KeysCoverSpecExamples pins that the built-in
+// catalogue lists at minimum the Spec-Beispiele from
+// spec/lastenheft.md:698-707. A breaking change to this list is a
+// breaking change to the AK "Statischer Katalog" — review intent
+// before relaxing.
+func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
+	t.Parallel()
+	// Pinned as a sorted slice so the assertion surfaces additions,
+	// removals, or renames as a visible diff and forces a deliberate
+	// update of this list when the catalogue changes.
+	want := []string{
+		"cpp",
+		"docker-cli",
+		"git",
+		"go",
+		"java",
+		"kubectl-helm",
+		"node",
+		"postgres-client",
+	}
+	catalogue := application.FeatureCatalogueForTest()
+	got := make([]string, 0, len(catalogue))
+	for k := range catalogue {
+		got = append(got, k)
+	}
+	sort.Strings(got)
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("featureCatalogue keys = %v\n  want %v", got, want)
+	}
+}
+
+// TestFeatureCatalogue_EntriesAreValid pins per-entry invariants:
+//
+//   - The key parses as a [domain.FeatureName] (slice T0-(c)).
+//   - The source is non-empty and starts with the canonical
+//     `ghcr.io/devcontainers/features/` prefix (Spec-§711 — built-
+//     in catalogue mirrors the upstream devcontainers/features
+//     repository). Custom prefixes are reserved for external
+//     features (via the Allowlist + features.<name>.source override
+//     path), not for built-in entries.
+//   - The default version slug is non-empty so the T3 renderer can
+//     emit `<source>:<version>` unconditionally.
+//   - The short description is non-empty so the future
+//     `feature list` UX and doctor hints have a label to surface.
+func TestFeatureCatalogue_EntriesAreValid(t *testing.T) {
+	t.Parallel()
+	const sourcePrefix = "ghcr.io/devcontainers/features/"
+	for key, entry := range application.FeatureCatalogueForTest() {
+		key, entry := key, entry
+		t.Run(key, func(t *testing.T) {
+			t.Parallel()
+			if _, err := domain.NewFeatureName(key); err != nil {
+				t.Errorf("key %q is not a valid FeatureName: %v", key, err)
+			}
+			if entry.Source == "" {
+				t.Errorf("entry.Source for key %q is empty", key)
+			}
+			if !strings.HasPrefix(entry.Source, sourcePrefix) {
+				t.Errorf("entry.Source for key %q = %q, want prefix %q",
+					key, entry.Source, sourcePrefix)
+			}
+			if entry.DefaultVersion == "" {
+				t.Errorf("entry.DefaultVersion for key %q is empty", key)
+			}
+			if entry.ShortDesc == "" {
+				t.Errorf("entry.ShortDesc for key %q is empty", key)
+			}
+		})
+	}
+}
+
+// TestFeatureFor_LookupContract pins the (name → entry, ok) contract
+// of featureFor: known keys return the entry with ok=true; unknown
+// names return the zero-valued entry with ok=false so callers can
+// branch on the "catalogue miss → allowlist enforcement" path
+// without inspecting struct fields.
+func TestFeatureFor_LookupContract(t *testing.T) {
+	t.Parallel()
+
+	t.Run("known feature", func(t *testing.T) {
+		t.Parallel()
+		name, err := domain.NewFeatureName("node")
+		if err != nil {
+			t.Fatalf("NewFeatureName(node): %v", err)
+		}
+		entry, ok := application.FeatureForTest(name)
+		if !ok {
+			t.Fatalf("featureFor(node): ok = false, want true")
+		}
+		if entry.Source != "ghcr.io/devcontainers/features/node" {
+			t.Errorf("source = %q, want canonical OCI ref", entry.Source)
+		}
+		if entry.DefaultVersion == "" {
+			t.Error("defaultVersion is empty")
+		}
+	})
+
+	t.Run("unknown feature", func(t *testing.T) {
+		t.Parallel()
+		name, err := domain.NewFeatureName("unknown-feature")
+		if err != nil {
+			t.Fatalf("NewFeatureName: %v", err)
+		}
+		entry, ok := application.FeatureForTest(name)
+		if ok {
+			t.Errorf("featureFor(unknown-feature): ok = true, want false (entry = %+v)", entry)
+		}
+		if entry != (application.FeatureCatalogueEntryForTest{}) {
+			t.Errorf("entry on miss = %+v, want zero value", entry)
 		}
 	})
 }

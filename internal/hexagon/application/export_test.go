@@ -298,6 +298,45 @@ func ValidateDevcontainerFeaturesForTest(t *testing.T, yamlBody []byte) error {
 	return validateDevcontainerFeatures(cfg.Devcontainer)
 }
 
+// FeatureCatalogueEntryForTest is the test-package projection of the
+// unexported [featureCatalogueEntry]. Same fields — only renamed
+// because the internal type is unexported. Slice-v1-devcontainer-
+// features T2 added the catalogue.
+type FeatureCatalogueEntryForTest struct {
+	Source         string
+	DefaultVersion string
+	ShortDesc      string
+}
+
+// FeatureCatalogueForTest exposes the unexported [featureCatalogue]
+// lookup so T2 tests can pin the per-feature source/version triples
+// without depending on package internals.
+func FeatureCatalogueForTest() map[string]FeatureCatalogueEntryForTest {
+	out := map[string]FeatureCatalogueEntryForTest{}
+	for k, v := range featureCatalogue() {
+		out[k] = FeatureCatalogueEntryForTest{
+			Source:         v.source,
+			DefaultVersion: v.defaultVersion,
+			ShortDesc:      v.shortDesc,
+		}
+	}
+	return out
+}
+
+// FeatureForTest exposes the unexported [featureFor] catalogue
+// lookup so T2 tests can pin the (name → entry, ok) contract.
+func FeatureForTest(name domain.FeatureName) (FeatureCatalogueEntryForTest, bool) {
+	entry, ok := featureFor(name)
+	if !ok {
+		return FeatureCatalogueEntryForTest{}, false
+	}
+	return FeatureCatalogueEntryForTest{
+		Source:         entry.source,
+		DefaultVersion: entry.defaultVersion,
+		ShortDesc:      entry.shortDesc,
+	}, true
+}
+
 // PlanAddForTest exposes the unexported [AddServiceService.planAdd]
 // helper. The returned struct is the test-only projection so the
 // production [servicePlan] stays unexported.

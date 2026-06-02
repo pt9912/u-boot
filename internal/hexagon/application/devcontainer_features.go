@@ -120,6 +120,90 @@ func normaliseFeatureSources(in []string) ([]string, error) {
 	return dedupeFeatureSources(in), nil
 }
 
+// featureCatalogueEntry is the per-feature configuration shared by
+// the render pipeline (T3: source + defaultVersion → JSON key form
+// `<source>:<version>`) and the catalogue lookup (T2: name →
+// source/version resolution when [ubootYAMLDevcontainerFeature.Source]
+// is empty). Slice-v1-devcontainer-features T0-(c) defines the
+// shape; adding a new built-in feature means: drop a new entry into
+// [featureCatalogue], done — no other code change.
+//
+// `source` is the canonical OCI ref **without** URL scheme (e.g.
+// `ghcr.io/devcontainers/features/node`) because devcontainer.json
+// `features:` keys use the OCI-ref form, not the URL form. The
+// Allowlist (user-provided) carries URL-form entries with scheme;
+// the T4 enforcement reconciles the two when a user supplies a
+// `source:` override.
+type featureCatalogueEntry struct {
+	source         string
+	defaultVersion string
+	shortDesc      string
+}
+
+// featureCatalogue lists the built-in devcontainer-feature catalogue
+// per spec/lastenheft.md:692-707 + T0-Outcomes (c). Built-in entries
+// are aktivierbar without an Allowlist entry — slice-v1-devcontainer-
+// features §AK "Statischer Katalog". External features that don't
+// match any catalogue key must declare a `source:` override and have
+// that source in [ubootYAMLFeatureSources.Allow] (T4 enforcement).
+//
+// The default-version slug is `1` across the board today; once
+// upstream tags drift apart the per-entry pin can be adjusted
+// without changing call sites.
+func featureCatalogue() map[string]featureCatalogueEntry {
+	return map[string]featureCatalogueEntry{
+		"git": {
+			source:         "ghcr.io/devcontainers/features/git",
+			defaultVersion: "1",
+			shortDesc:      "Git CLI",
+		},
+		"docker-cli": {
+			source:         "ghcr.io/devcontainers/features/docker-outside-of-docker",
+			defaultVersion: "1",
+			shortDesc:      "Docker CLI (outside-of-docker)",
+		},
+		"node": {
+			source:         "ghcr.io/devcontainers/features/node",
+			defaultVersion: "1",
+			shortDesc:      "Node.js",
+		},
+		"java": {
+			source:         "ghcr.io/devcontainers/features/java",
+			defaultVersion: "1",
+			shortDesc:      "Java + SDKMAN",
+		},
+		"go": {
+			source:         "ghcr.io/devcontainers/features/go",
+			defaultVersion: "1",
+			shortDesc:      "Go toolchain",
+		},
+		"cpp": {
+			source:         "ghcr.io/devcontainers/features/cpp",
+			defaultVersion: "1",
+			shortDesc:      "C++ toolchain",
+		},
+		"kubectl-helm": {
+			source:         "ghcr.io/devcontainers/features/kubectl-helm-minikube",
+			defaultVersion: "1",
+			shortDesc:      "kubectl + helm + minikube",
+		},
+		"postgres-client": {
+			source:         "ghcr.io/devcontainers/features/postgresql-client",
+			defaultVersion: "1",
+			shortDesc:      "PostgreSQL client",
+		},
+	}
+}
+
+// featureFor returns the catalogue entry for the given feature name.
+// The boolean second return mirrors map-lookup convention so callers
+// can branch on "unknown feature" without panicking — used by T3's
+// renderer to decide between catalogue-lookup and source-override.
+func featureFor(name domain.FeatureName) (featureCatalogueEntry, bool) {
+	entry, ok := featureCatalogue()[name.String()]
+	return entry, ok
+}
+
 // validateDevcontainerFeatures runs the LH-FA-DEV-003 schema checks
 // on the `devcontainer:` sub-tree that T1 owns:
 //
