@@ -361,6 +361,16 @@ func CollectDevcontainerFeaturesForTest(t *testing.T, yamlBody []byte) []Devcont
 	return out
 }
 
+// FormatDriftMessageForTest exposes the unexported
+// `formatDriftMessage` helper so the slice-followup-devcontainer-
+// features-drift-doctor Review-Followup S5 unit-test can pin the
+// message structure locally — the broader drift tests use
+// `strings.Contains` for resilience, but the format itself is
+// pinned here with constant expectations.
+func FormatDriftMessageForTest(case1, case2a, case2b []string, jsonPresent bool) string {
+	return formatDriftMessage(case1, case2a, case2b, jsonPresent)
+}
+
 // PlanAddForTest exposes the unexported [AddServiceService.planAdd]
 // helper. The returned struct is the test-only projection so the
 // production [servicePlan] stays unexported.

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/pt9912/u-boot/internal/hexagon/application"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
@@ -240,6 +241,229 @@ devcontainer:
 	}
 	if !strings.Contains(d.Message, "unparseable devcontainer.json") {
 		t.Errorf("Message lacks parse-error explanation: %q", d.Message)
+	}
+}
+
+// TestFormatDriftMessage_S5 pins the message-structure contract
+// of `formatDriftMessage` (Review-Followup S5). The broader drift
+// tests assert message content with `strings.Contains` for
+// resilience; this table-driven unit-test pins the exact format
+// so a refactor of the message-builder cannot silently change the
+// broader test surface without one local failure here.
+func TestFormatDriftMessage_S5(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name        string
+		case1       []string
+		case2a      []string
+		case2b      []string
+		jsonPresent bool
+		want        string
+	}{
+		{
+			name:        "case1 only, json present",
+			case1:       []string{"k1:1"},
+			jsonPresent: true,
+			want:        "enabled feature(s) missing in devcontainer.json: k1:1. Run `u-boot generate devcontainer` to resync.",
+		},
+		{
+			name:        "case1 only, json absent",
+			case1:       []string{"k1:1", "k2:2"},
+			jsonPresent: false,
+			want:        "enabled feature(s) missing in devcontainer.json (file absent): k1:1, k2:2. Run `u-boot generate devcontainer` to resync.",
+		},
+		{
+			name:        "case2a only",
+			case2a:      []string{"old:1"},
+			jsonPresent: true,
+			want:        "disabled/unset feature(s) still present in devcontainer.json: old:1. Run `u-boot generate devcontainer` to resync.",
+		},
+		{
+			name:        "case2b only (triggers hand-edit hint)",
+			case2b:      []string{"foreign:7"},
+			jsonPresent: true,
+			want:        "devcontainer.json key(s) without a u-boot.yaml pendant (hand-edit or stale render): foreign:7. Run `u-boot generate devcontainer` to resync; reconcile hand-edited keys in u-boot.yaml or remove them from devcontainer.json.",
+		},
+		{
+			name:        "case1 + case2a + case2b (all three)",
+			case1:       []string{"new:1"},
+			case2a:      []string{"old:1"},
+			case2b:      []string{"foreign:7"},
+			jsonPresent: true,
+			want:        "enabled feature(s) missing in devcontainer.json: new:1; disabled/unset feature(s) still present in devcontainer.json: old:1; devcontainer.json key(s) without a u-boot.yaml pendant (hand-edit or stale render): foreign:7. Run `u-boot generate devcontainer` to resync; reconcile hand-edited keys in u-boot.yaml or remove them from devcontainer.json.",
+		},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got := application.FormatDriftMessageForTest(tc.case1, tc.case2a, tc.case2b, tc.jsonPresent)
+			if got != tc.want {
+				t.Errorf("formatDriftMessage mismatch\n  got:  %q\n  want: %q", got, tc.want)
+			}
+		})
+	}
+}
+
+// TestDoctor_FeaturesDrift_DisabledPreservesCase2a is the
+// Review-Followup S1 anti-regression pin: even if `projectFeatureEntry`
+// (renderer-side) gains an `enabled`-filter in the future, the
+// drift detector must continue to project disabled entries via
+// the shared `projectFeatureSourceVersion`-core so that disabled
+// + still-in-JSON keeps surfacing as Case 2a (NOT Case 2b).
+// Belongs together with the Refactor in `c2ff32f`+S1.
+func TestDoctor_FeaturesDrift_DisabledPreservesCase2a(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	driftSeed(t, fs, `schemaVersion: 1
+project:
+  name: demo
+devcontainer:
+  features:
+    node:
+      enabled: false
+`, `{
+  "name": "demo",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {}
+  }
+}`)
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.features.drift")
+	if d.Severity != domain.SeverityWarn {
+		t.Fatalf("Severity = %v, want Warn", d.Severity)
+	}
+	// Must be Case 2a (disabled/unset), NOT Case 2b (hand-edit).
+	if !strings.Contains(d.Message, "disabled/unset") {
+		t.Errorf("Message lacks Case-2a indicator (disabled/unset): %q", d.Message)
+	}
+	if strings.Contains(d.Message, "hand-edit") {
+		t.Errorf("Message has Case-2b indicator (hand-edit) — Review-Followup S1 anti-regression: disabled entry must stay projected: %q", d.Message)
+	}
+}
+
+// TestDoctor_FeaturesDrift_S2_OrphanWithMatchingJSONKey pins the
+// Review-Followup S2 case: an orphan-activation (enabled=true, no
+// source override, name not in catalogue) plus a JSON-key that
+// matches no projected entry results in two parallel diagnostics
+// — Parent-T5 allowlist surfaces "orphan", Drift surfaces Case 2b
+// "hand-edit". Both classifications are correct and intentional;
+// they describe different concerns.
+func TestDoctor_FeaturesDrift_S2_OrphanWithMatchingJSONKey(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	driftSeed(t, fs, `schemaVersion: 1
+project:
+  name: demo
+devcontainer:
+  features:
+    not-a-real-feature:
+      enabled: true
+`, `{
+  "name": "demo",
+  "features": {
+    "not-a-real-feature:1": {}
+  }
+}`)
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	// Drift: Case 2b (orphan name → not in knownProjectableKeys
+	// → JSON key is "hand-edit" from drift detector's view).
+	drift := findDiagnostic(t, resp.Report.Items, "devcontainer.features.drift")
+	if drift.Severity != domain.SeverityWarn {
+		t.Errorf("drift Severity = %v, want Warn (Case 2b)", drift.Severity)
+	}
+	if !strings.Contains(drift.Message, "hand-edit") {
+		t.Errorf("drift Message lacks Case-2b indicator: %q", drift.Message)
+	}
+	// Allowlist (Parent-T5 Teil A): orphan-activation warn.
+	allow := findDiagnostic(t, resp.Report.Items, "devcontainer.features.allowlist")
+	if allow.Severity != domain.SeverityWarn {
+		t.Errorf("allowlist Severity = %v, want Warn (orphan-activation)", allow.Severity)
+	}
+	if !strings.Contains(allow.Message, "not-a-real-feature") {
+		t.Errorf("allowlist Message does not name the orphan: %q", allow.Message)
+	}
+}
+
+// TestDoctor_FeaturesDrift_S3_AllowlistViolationKeepsDriftOK pins
+// the Review-Followup S3 cross-check: when a feature has
+// `enabled=true` + `source=<not-in-allow>` AND the JSON contains
+// the matching render-key, the drift check stays OK (the key IS
+// in expectedKeys, no Case 1) while Parent-T5-Teil-A surfaces an
+// Error. Pins the orthogonal classification between the two
+// devcontainer.features.* checks.
+func TestDoctor_FeaturesDrift_S3_AllowlistViolationKeepsDriftOK(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	driftSeed(t, fs, `schemaVersion: 1
+project:
+  name: demo
+devcontainer:
+  features:
+    rogue:
+      enabled: true
+      source: https://uninvited.test/feature
+`, `{
+  "name": "demo",
+  "features": {
+    "https://uninvited.test/feature:1": {}
+  }
+}`)
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	// Drift: OK — render-key is in expectedKeys + JSON.
+	drift := findDiagnostic(t, resp.Report.Items, "devcontainer.features.drift")
+	if drift.Severity != domain.SeverityOK {
+		t.Errorf("drift Severity = %v, want OK (key present in both expectedKeys and JSON); message = %q",
+			drift.Severity, drift.Message)
+	}
+	// Allowlist: Error — source URL is not in allowlist.
+	allow := findDiagnostic(t, resp.Report.Items, "devcontainer.features.allowlist")
+	if allow.Severity != domain.SeverityError {
+		t.Errorf("allowlist Severity = %v, want Error (LH-FA-DEV-003 violation); message = %q",
+			allow.Severity, allow.Message)
+	}
+}
+
+// TestDoctor_FeaturesDrift_S6_ExplicitEmptyMapWithJSONKeys pins
+// the Review-Followup S6 case (slice-plan §AK "kein Skip; Case 2b
+// kann feuern"): cfg has `features: {}` (explicit empty map, not
+// nil) and JSON carries feature keys — the drift detector must
+// fire Case 2b, not skip. Distinguishes "user removed all
+// features but never regenerated" from "user never opted into
+// features at all".
+func TestDoctor_FeaturesDrift_S6_ExplicitEmptyMapWithJSONKeys(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	driftSeed(t, fs, `schemaVersion: 1
+project:
+  name: demo
+devcontainer:
+  features: {}
+`, `{
+  "name": "demo",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {}
+  }
+}`)
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.features.drift")
+	if d.Severity != domain.SeverityWarn {
+		t.Errorf("Severity = %v, want Warn (Case 2b on explicit-empty-cfg + JSON-keys)", d.Severity)
+	}
+	if !strings.Contains(d.Message, "ghcr.io/devcontainers/features/node:1") {
+		t.Errorf("Message lacks the stray JSON key: %q", d.Message)
 	}
 }
 

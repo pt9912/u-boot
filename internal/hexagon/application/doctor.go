@@ -1364,7 +1364,7 @@ func (s *DoctorService) checkDevcontainerFeaturesDrift(_ context.Context, baseDi
 // `expectedKeys \ jsonKeys` — render-keys whose feature is
 // activated in u-boot.yaml but missing in the rendered JSON.
 func classifyDriftCase1(expectedKeys map[string]struct{}, jsonKeys []string) []string {
-	jsonSet := keysAsSet(jsonKeys)
+	jsonSet := stringSet(jsonKeys)
 	var out []string
 	for k := range expectedKeys {
 		if _, ok := jsonSet[k]; !ok {
@@ -1395,16 +1395,6 @@ func classifyDriftCase2(knownProjectableKeys, expectedKeys map[string]struct{}, 
 	return case2a, case2b
 }
 
-// keysAsSet converts a sorted-or-unsorted key slice into a lookup
-// set. Lives next to the drift-detector because the doctor file
-// otherwise has no string-set utility.
-func keysAsSet(keys []string) map[string]struct{} {
-	out := make(map[string]struct{}, len(keys))
-	for _, k := range keys {
-		out[k] = struct{}{}
-	}
-	return out
-}
 
 // formatDriftMessage composes the user-facing drift warn message
 // from the three case-buckets. Each non-empty bucket renders into

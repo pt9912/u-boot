@@ -83,6 +83,19 @@ func validateFeatureSource(raw string) error {
 	return nil
 }
 
+// stringSet converts a key slice into a lookup-only set. Used in
+// this package by the drift detector ([classifyDriftCase1]) and by
+// other set-membership-style comparisons. Slice-followup-
+// devcontainer-features-drift-doctor Review-Followup S4 unified
+// this with the previous `keysAsSet` doctor-local helper.
+func stringSet(keys []string) map[string]struct{} {
+	out := make(map[string]struct{}, len(keys))
+	for _, k := range keys {
+		out[k] = struct{}{}
+	}
+	return out
+}
+
 // dedupeFeatureSources returns a copy of in with duplicate entries
 // removed, preserving the first-occurrence order. Whitespace around
 // entries is trimmed before comparison; per
@@ -263,37 +276,69 @@ func collectDevcontainerFeatures(cfg ubootYAMLConfig) []devcontainerFeatureData 
 	return out
 }
 
-// projectFeatureEntry resolves one enabled feature entry into the
+// projectFeatureEntry resolves one feature entry into the
 // renderer's projection. Returns ok=false when the entry has no
 // `Source:` override AND the name is not a built-in catalogue key —
 // the silent-skip behaviour T3 needs so T4 can surface the failure
-// with the proper Exit-Code-10 path. The name parameter is the raw
-// map key from u-boot.yaml; T1's validateDevcontainerFeatures has
-// already pinned that it parses as a domain.FeatureName by the time
-// the renderer runs, so a fresh NewFeatureName call here is
-// belt-and-suspenders only — keep it to short-circuit any caller
-// that bypasses the validator.
+// with the proper Exit-Code-10 path.
+//
+// Important: this helper does NOT inspect `entry.Enabled` — the
+// caller is responsible for the enabled-filter.
+// [collectDevcontainerFeatures] filters before calling;
+// [projectAllFeatureEntries] (drift-detector) deliberately keeps
+// disabled entries projected. Both rely on the shared
+// [projectFeatureSourceVersion] core so a future "skip-on-disabled"
+// addition would have to be made there explicitly — not by accident
+// in this wrapper.
 func projectFeatureEntry(name string, entry ubootYAMLDevcontainerFeature) (devcontainerFeatureData, bool) {
-	if entry.Source != "" {
-		version := entry.Version
-		if version == "" {
-			version = "1"
-		}
-		return devcontainerFeatureData{Source: entry.Source, Version: version}, true
-	}
-	featureName, err := domain.NewFeatureName(name)
-	if err != nil {
-		return devcontainerFeatureData{}, false
-	}
-	cat, ok := featureFor(featureName)
+	source, version, ok := projectFeatureSourceVersion(name, entry.Source, entry.Version)
 	if !ok {
 		return devcontainerFeatureData{}, false
 	}
-	version := entry.Version
-	if version == "" {
-		version = cat.defaultVersion
+	return devcontainerFeatureData{Source: source, Version: version}, true
+}
+
+// projectFeatureSourceVersion is the core source-/version-projection
+// shared by [projectFeatureEntry] (renderer-side) and
+// [projectAllFeatureEntries] (drift-detector-side). It deliberately
+// takes scalar source/version inputs instead of a
+// ubootYAMLDevcontainerFeature, so callers cannot accidentally drag
+// in an Enabled-dependent branch.
+//
+// Returns the resolved (source, version, ok=true) when either:
+//
+//   - the caller supplied a non-empty Source override (Allowlist-
+//     conformance is enforced elsewhere — this helper just resolves);
+//     defaultVersion "1" applies when Version is empty.
+//   - the name matches a built-in catalogue entry; the catalogue's
+//     defaultVersion applies when Version is empty.
+//
+// Returns ("", "", false) for the orphan case (no Source override
+// and the name is not in the catalogue) — caller skips silently.
+// Slice-followup-devcontainer-features-drift-doctor Review-Followup
+// S1 extracted this helper to remove the synthetic-`Enabled=&true`-
+// probe in [projectAllFeatureEntries].
+func projectFeatureSourceVersion(name, source, version string) (resolvedSource, resolvedVersion string, ok bool) {
+	if source != "" {
+		v := version
+		if v == "" {
+			v = "1"
+		}
+		return source, v, true
 	}
-	return devcontainerFeatureData{Source: cat.source, Version: version}, true
+	featureName, err := domain.NewFeatureName(name)
+	if err != nil {
+		return "", "", false
+	}
+	cat, found := featureFor(featureName)
+	if !found {
+		return "", "", false
+	}
+	v := version
+	if v == "" {
+		v = cat.defaultVersion
+	}
+	return cat.source, v, true
 }
 
 // validateDevcontainerFeatures runs the LH-FA-DEV-003 schema checks
@@ -453,24 +498,21 @@ func projectAllFeatureEntries(cfg ubootYAMLConfig) featureDriftProjection {
 		return out
 	}
 	for name, entry := range cfg.Devcontainer.Features {
-		// Build a synthetic entry with Enabled=&true so
-		// projectFeatureEntry yields the render-key even for
-		// disabled features (we drop the actual enabled-bit and
-		// classify via expectedKeys below). The renderer-skip
-		// case (orphan: no catalogue + no source override) still
-		// returns ok=false, so we don't pollute knownProjectableKeys
-		// with names the renderer would silently drop.
-		trueVal := true
-		probe := ubootYAMLDevcontainerFeature{
-			Enabled: &trueVal,
-			Source:  entry.Source,
-			Version: entry.Version,
-		}
-		data, ok := projectFeatureEntry(name, probe)
+		// Review-Followup S1: direct call to
+		// [projectFeatureSourceVersion] (Enabled-agnostic core)
+		// instead of the previous synthetic `Enabled=&true`-probe
+		// against [projectFeatureEntry]. Both pathways share one
+		// definition of "projectable", so a future change to
+		// Enabled-handling cannot accidentally regress this
+		// detector. The renderer-skip case (orphan: no catalogue
+		// + no source override) still returns ok=false, so
+		// knownProjectableKeys is never polluted with names the
+		// renderer would silently drop.
+		source, version, ok := projectFeatureSourceVersion(name, entry.Source, entry.Version)
 		if !ok {
 			continue
 		}
-		renderKey := data.Source + ":" + data.Version
+		renderKey := source + ":" + version
 		out.knownProjectableKeys[renderKey] = struct{}{}
 		if entry.Enabled != nil && *entry.Enabled {
 			out.expectedKeys[renderKey] = struct{}{}
