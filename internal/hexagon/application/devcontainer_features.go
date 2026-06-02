@@ -1,7 +1,6 @@
 package application
 
 import (
-	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -9,13 +8,14 @@ import (
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 )
 
-// ErrInvalidFeatureSource signals that a string in the
-// `devcontainer.featureSources.allow` list does not satisfy the
-// LH-FA-DEV-003 source-format rules. Sentinel-comparable via
-// [errors.Is]; wrapped with details (which rule failed) at the call
-// site. Maps to exit-code 10 (LH-FA-DEV-003) via the use-case-error-
-// to-exit-code wiring.
-var ErrInvalidFeatureSource = errors.New("invalid feature source")
+// ErrInvalidFeatureSource is the domain sentinel for LH-FA-DEV-003
+// source-format violations, re-exported here so existing call sites
+// in this package keep working after the slice-v1-devcontainer-
+// features review-followup R1 moved the sentinel to the domain
+// layer. New code should reference [domain.ErrInvalidFeatureSource]
+// directly; this alias stays for backward compatibility with the
+// T1-T4 test surface and existing wrap-sites.
+var ErrInvalidFeatureSource = domain.ErrInvalidFeatureSource
 
 // isAllowedFeatureSourceScheme reports whether the given lowercased
 // scheme is one of the LH-FA-DEV-003 supported schemes:

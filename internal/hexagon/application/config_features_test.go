@@ -369,6 +369,102 @@ func TestConfigGet_FeatureEntry_NotSet(t *testing.T) {
 	}
 }
 
+// TestConfigSet_FeatureEnabled_OrphanWarning pins the slice-v1-
+// devcontainer-features Review-Followup R3 fix: activating a
+// feature that is neither in the catalogue nor carries a `source:`
+// override surfaces an Info-log line. The check is non-fatal — the
+// write still succeeds — but the user sees a clear hint that
+// `generate devcontainer` will skip the entry until T5 doctor
+// flags it.
+func TestConfigSet_FeatureEnabled_OrphanWarning(t *testing.T) {
+	t.Parallel()
+	fs := newFakeFS()
+	fs.markDirExists(configTestBaseDir)
+	y := &fakeYAML{}
+	logger := &fakeLogger{}
+	svc := application.NewConfigService(fs, y, logger)
+	seedConfigUbootYAML(t, fs)
+
+	_, err := svc.Set(context.Background(), driving.ConfigSetRequest{
+		BaseDir: configTestBaseDir,
+		Path:    mustConfigPath(t, "devcontainer.features.unknown-thing.enabled"),
+		Value:   "true",
+	})
+	if err != nil {
+		t.Fatalf("Set: %v", err)
+	}
+	found := false
+	for _, entry := range logger.entries {
+		if entry.Level == "INFO" && strings.Contains(entry.Msg, "orphan feature activation") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("expected orphan-feature INFO log; got entries: %+v", logger.entries)
+	}
+}
+
+// TestConfigSet_FeatureEnabled_DeactivationNoWarning pins that
+// `config set <orphan>.enabled false` does NOT trigger the orphan
+// warning. The Info-line is reserved for the "user activates an
+// unknown feature" case; deactivations are routine cleanups.
+func TestConfigSet_FeatureEnabled_DeactivationNoWarning(t *testing.T) {
+	t.Parallel()
+	fs := newFakeFS()
+	fs.markDirExists(configTestBaseDir)
+	y := &fakeYAML{}
+	logger := &fakeLogger{}
+	svc := application.NewConfigService(fs, y, logger)
+	// Fixture already has an orphan with enabled=true so the
+	// deactivation has something to flip without auto-creating.
+	seedConfigUbootYAMLWithDevcontainer(t, fs, `schemaVersion: 1
+project:
+  name: t-uboot-config
+devcontainer:
+  features:
+    unknown-thing:
+      enabled: true
+`)
+	if _, err := svc.Set(context.Background(), driving.ConfigSetRequest{
+		BaseDir: configTestBaseDir,
+		Path:    mustConfigPath(t, "devcontainer.features.unknown-thing.enabled"),
+		Value:   "false",
+	}); err != nil {
+		t.Fatalf("Set: %v", err)
+	}
+	for _, entry := range logger.entries {
+		if entry.Level == "INFO" && strings.Contains(entry.Msg, "orphan feature activation") {
+			t.Errorf("did not expect orphan warning on deactivation; entry: %+v", entry)
+		}
+	}
+}
+
+// TestConfigSet_FeatureEnabled_CataloguedNoWarning pins that a
+// catalogued name does NOT trigger the orphan warning.
+func TestConfigSet_FeatureEnabled_CataloguedNoWarning(t *testing.T) {
+	t.Parallel()
+	fs := newFakeFS()
+	fs.markDirExists(configTestBaseDir)
+	y := &fakeYAML{}
+	logger := &fakeLogger{}
+	svc := application.NewConfigService(fs, y, logger)
+	seedConfigUbootYAML(t, fs)
+
+	if _, err := svc.Set(context.Background(), driving.ConfigSetRequest{
+		BaseDir: configTestBaseDir,
+		Path:    mustConfigPath(t, "devcontainer.features.node.enabled"),
+		Value:   "true",
+	}); err != nil {
+		t.Fatalf("Set: %v", err)
+	}
+	for _, entry := range logger.entries {
+		if entry.Level == "INFO" && strings.Contains(entry.Msg, "orphan feature activation") {
+			t.Errorf("did not expect orphan warning for catalogued `node`; entry: %+v", entry)
+		}
+	}
+}
+
 // TestConfigSet_FeatureSourcesAllow_EmptyElement pins the
 // comma-list parser rejects an empty entry between commas
 // ("https://a,,https://b"). Without this, a typo would silently

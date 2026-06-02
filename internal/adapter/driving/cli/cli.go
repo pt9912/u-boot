@@ -318,7 +318,17 @@ func isConfigValidationError(err error) bool {
 	return errors.Is(err, driving.ErrConfigPathUnknown) ||
 		errors.Is(err, driving.ErrConfigValueInvalid) ||
 		errors.Is(err, driving.ErrConfigSchemaInvalid) ||
-		errors.Is(err, driving.ErrConfigValueNotSet)
+		errors.Is(err, driving.ErrConfigValueNotSet) ||
+		// slice-v1-devcontainer-features Review-Followup R1:
+		// LH-FA-DEV-003 source-format failures (raised by
+		// `init --allow-external-feature-sources` without
+		// `--devcontainer`, and by `generate devcontainer`'s
+		// pre-write allowlist append) must map to exit-code 10
+		// per Spec §720/§1353. The sentinel lives in
+		// `internal/hexagon/domain` so this adapter file can
+		// reference it without violating the
+		// `adapter-no-application` depguard rule.
+		errors.Is(err, domain.ErrInvalidFeatureSource)
 }
 
 // isFilesystemError returns true for the LH-FA-CLI-006 code-14

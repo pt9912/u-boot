@@ -1006,8 +1006,16 @@ func (s *InitProjectService) validateInitPreconditions(req driving.InitProjectRe
 		return errors.New("BaseDir is required")
 	}
 	if len(req.AllowExternalFeatureSources) > 0 && !req.Devcontainer {
+		// Review-Followup R6 (N1): the LH-NFA-SEC-004 `--yes is
+		// not sufficient` clause applies to the allowlist
+		// enforcement in `revalidateFeatureEntry`, not to this
+		// flag-pair-constraint. The user error here is "I passed
+		// --allow-external-feature-sources but forgot
+		// --devcontainer"; --yes wouldn't change anything in
+		// either direction, so mentioning it confuses the
+		// diagnosis.
 		return fmt.Errorf(
-			"%w: --allow-external-feature-sources requires --devcontainer (Spec §714); --yes is not sufficient (LH-NFA-SEC-004)",
+			"%w: --allow-external-feature-sources requires --devcontainer (Spec §714)",
 			ErrInvalidFeatureSource)
 	}
 	// BaseDir-exists check intentionally NOT here; the template

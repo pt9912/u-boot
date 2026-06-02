@@ -199,9 +199,44 @@ func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (dr
 	newValue := extractConfigValueLenient(patchedCfg, req.Path)
 	s.logger.Info("config set: updated",
 		"path", req.Path.String(), "old", oldValue, "new", newValue)
+	s.maybeWarnOrphanFeatureActivation(patchedCfg, req.Path)
 	return driving.ConfigSetResponse{
 		Path: req.Path, OldValue: oldValue, NewValue: newValue,
 	}, nil
+}
+
+// maybeWarnOrphanFeatureActivation emits a [Logger.Info] hint when
+// the user activates a feature name that is neither in the built-in
+// catalogue nor carries a `source:` override (Review-Followup R3 /
+// reviewer-finding I1). Such an "orphan" activation is not an error
+// (PatchScalar wrote a valid YAML scalar; T3's renderer silently
+// skips the entry; T5-doctor will surface it as a warn). The Info-
+// line gives the user a chance to spot a typo (e.g. `nde` instead
+// of `node`) before they wonder why `generate devcontainer` does
+// nothing.
+//
+// Only fires for [domain.ConfigDevcontainerFeatureEnabled] paths
+// where the user set the value to `true`; deactivations and the
+// .source / .version leafs do not trigger the warning.
+func (s *ConfigService) maybeWarnOrphanFeatureActivation(cfg ubootYAMLConfig, path domain.ConfigPath) {
+	if path.Kind != domain.ConfigDevcontainerFeatureEnabled {
+		return
+	}
+	entry, ok := lookupFeatureEntry(cfg, path.Feature)
+	if !ok || entry.Enabled == nil || !*entry.Enabled {
+		return
+	}
+	// Source override present → not an orphan.
+	if entry.Source != "" {
+		return
+	}
+	// Catalogue lookup hit → not an orphan.
+	if _, hit := featureFor(path.Feature); hit {
+		return
+	}
+	s.logger.Info(
+		"config set: orphan feature activation — name not in catalogue and no source override; `generate devcontainer` will skip it; `doctor` will flag it",
+		"path", path.String(), "feature", path.Feature.String())
 }
 
 // writeRejectedError builds the ErrConfigValueInvalid response for
@@ -393,7 +428,7 @@ func revalidateFeatureEntry(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 		}
 		if !featureSourceInAllow(cfg, entry.Source) {
 			return fmt.Errorf(
-				"%w: %s: external source %q is not in devcontainer.featureSources.allow; add it via `u-boot config set devcontainer.featureSources.allow %s` (LH-FA-DEV-003 / LH-NFA-SEC-004 — --yes is not sufficient)",
+				"%w: %s: external source %q is not in devcontainer.featureSources.allow; add it via `u-boot config set devcontainer.featureSources.allow %s` (LH-FA-DEV-003 / LH-NFA-SEC-004 — --yes is not sufficient). Comparison is byte-equal; trailing slashes and host case must match",
 				driving.ErrConfigValueInvalid, path, entry.Source, entry.Source)
 		}
 		return nil
@@ -427,7 +462,23 @@ func lookupFeatureEntry(cfg ubootYAMLConfig, name domain.FeatureName) (ubootYAML
 // match the allowlist entry literally. The trimmed-whitespace
 // convention from [normaliseFeatureSources] is the canonical form
 // of both sides, so leading/trailing whitespace is not a
-// confounding factor in practice.
+// confounding factor in practice. Other variations DO matter
+// (Review-Followup R4):
+//
+//   - Trailing slashes: "https://x/y" and "https://x/y/" are
+//     different entries; the user must pick one form and use it
+//     consistently across the allowlist and the features.<name>.source
+//     override. The OCI ref convention is *without* trailing slash.
+//   - Host case: "https://X.io/y" and "https://x.io/y" are different.
+//     URL specs treat the host as case-insensitive, but this match
+//     is case-sensitive by design — surfaced in the
+//     enforcement-failure error message so the user can fix the
+//     source override.
+//
+// A future normalisation pass (e.g. TrimRight `/`, ToLower(host))
+// would be a separate slice — for now the byte-equal contract is
+// the simplest spec-conformant implementation (Spec §1351 only
+// requires "valid non-empty source strings").
 func featureSourceInAllow(cfg ubootYAMLConfig, src string) bool {
 	if cfg.Devcontainer == nil || cfg.Devcontainer.FeatureSources == nil {
 		return false
@@ -681,10 +732,21 @@ func (s *ConfigService) setFeatureSourcesAllow(
 
 	// Stage 2: read existing list, merge, validate the merged
 	// result. The second normaliseFeatureSources call runs against
-	// (existing + incoming) — if it fails here while the incoming-
-	// only check passed, the existing list is corrupt
-	// (impossible in practice because T1 validates on every read,
-	// but defensive). Map that case to ErrConfigSchemaInvalid.
+	// (existing + incoming); a fresh failure here (when the
+	// incoming-only check at Stage 1 passed) means the existing
+	// `featureSources.allow` entries themselves are malformed.
+	// This is theoretically impossible because:
+	//   (a) T1's validateDevcontainerFeatures runs on every
+	//       application-layer load that goes through the
+	//       application-layer Set path, AND
+	//   (b) the application's own writers always normalise before
+	//       persisting.
+	// The realistic trigger is a user hand-editing u-boot.yaml
+	// outside of u-boot (introducing e.g. an empty allowlist
+	// entry). Map to ErrConfigSchemaInvalid so the LH-FA-CLI-006
+	// exit-10 path fires and the user is directed at the
+	// existing list, not at their own input
+	// (Review-Followup R5 doc-clarification).
 	var existing []string
 	if cfg.Devcontainer != nil && cfg.Devcontainer.FeatureSources != nil {
 		existing = cfg.Devcontainer.FeatureSources.Allow

@@ -388,6 +388,62 @@ devcontainer:
 	}
 }
 
+// TestGenerateDevcontainer_AllowExternalFeatureSources_AtomicOnConflict
+// pins the slice-v1-devcontainer-features Review-Followup R2 fix:
+// when the devcontainer plan-and-execute aborts with
+// ErrGenerateManualConflict (e.g. user-managed devcontainer.json
+// without an init block), the `--allow-external-feature-sources`
+// flag values must NOT be persisted to u-boot.yaml — otherwise the
+// flag-fed allowlist extension survives a failed run and the marshal-
+// rewrite also strips u-boot.yaml comments unrecoverably. This test
+// pins that u-boot.yaml stays byte-identical when the generate
+// aborts.
+func TestGenerateDevcontainer_AllowExternalFeatureSources_AtomicOnConflict(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	originalYAML := `schemaVersion: 1
+project:
+  name: t-uboot-gen
+# user comment that must survive across failed runs
+services:
+  postgres:
+    enabled: true
+devcontainer:
+  enabled: true
+`
+	if err := fs.WriteFile(filepath.Join(generateTestBaseDir, "u-boot.yaml"),
+		[]byte(originalYAML), 0o644); err != nil {
+		t.Fatalf("seed u-boot.yaml: %v", err)
+	}
+	seedGenerateComposeYAML(t, fs, composeYAMLPostgres)
+	// Seed devcontainer.json with content but no init block →
+	// plan classifies as Manual-Conflict.
+	if err := fs.WriteFile(devcontainerJSONPath(),
+		[]byte(`{"name": "user-managed"}`), 0o644); err != nil {
+		t.Fatalf("seed devcontainer.json: %v", err)
+	}
+
+	_, err := svc.Generate(context.Background(), driving.GenerateRequest{
+		BaseDir:                     generateTestBaseDir,
+		Artifact:                    domain.ArtifactDevcontainer,
+		AllowExternalFeatureSources: []string{"https://example.test/never-applied"},
+	})
+	if !errors.Is(err, driving.ErrGenerateManualConflict) {
+		t.Fatalf("err = %v, want wrap of ErrGenerateManualConflict", err)
+	}
+
+	// u-boot.yaml must be byte-identical: neither the allowlist
+	// entry nor the comment loss should have happened.
+	after, readErr := fs.ReadFile(filepath.Join(generateTestBaseDir, "u-boot.yaml"))
+	if readErr != nil {
+		t.Fatalf("read u-boot.yaml: %v", readErr)
+	}
+	if string(after) != originalYAML {
+		t.Errorf("u-boot.yaml mutated despite generate conflict\nbefore:\n%s\nafter:\n%s",
+			originalYAML, after)
+	}
+}
+
 // TestGenerateDevcontainer_AllowExternalFeatureSources_InvalidURL
 // pins that bad flag input fails the generate (before any artefact
 // write) and surfaces the LH-FA-DEV-003 invalid-source sentinel.

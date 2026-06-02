@@ -613,12 +613,17 @@ type devcontainerFilePlan struct {
 // with **no** WriteFile invocations — half-written state would be
 // re-classified as a conflict on the next call.
 func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.GenerateRequest) (driving.GenerateResponse, error) {
-	// LH-FA-DEV-003 / Spec §715 — apply
-	// `--allow-external-feature-sources` BEFORE reading the config
-	// so the rest of the flow (config read + allowlist enforcement
-	// against features.<name>.source) sees the merged list. The
-	// helper is a no-op when the flag list is empty.
-	if err := s.applyAllowExternalFeatureSources(req.BaseDir, req.AllowExternalFeatureSources); err != nil {
+	// LH-FA-DEV-003 / Spec §715 — validate the
+	// `--allow-external-feature-sources` flag entries early (so a
+	// bad URL fails the generate before any FS side effect), but
+	// **defer the u-boot.yaml mutation** until after the
+	// devcontainer plan-and-execute succeeds. Review-Followup R2:
+	// the prior order wrote u-boot.yaml first and produced a
+	// mutation leak (allowlist extended + comments lost) when the
+	// later plan-and-execute aborted with ErrGenerateManualConflict.
+	// T3's renderer does not enforce the allowlist, so the rest of
+	// the flow reading an unmodified u-boot.yaml is safe.
+	if err := validateAllowExternalFeatureSourcesEntries(req.AllowExternalFeatureSources); err != nil {
 		return driving.GenerateResponse{}, err
 	}
 
@@ -646,6 +651,13 @@ func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.Ge
 
 	changed, hasWrite, hasReplace, err := s.executeDevcontainerPlans(plans)
 	if err != nil {
+		return driving.GenerateResponse{}, err
+	}
+
+	// Allowlist write LAST — only after every other write
+	// succeeded. Any failure above this point leaves u-boot.yaml
+	// byte-identical (no comment loss, no half-mutated state).
+	if err := s.applyAllowExternalFeatureSources(req.BaseDir, req.AllowExternalFeatureSources); err != nil {
 		return driving.GenerateResponse{}, err
 	}
 
@@ -861,11 +873,28 @@ func devcontainerAggregateAction(hasWrite, hasReplace bool) driving.GenerateActi
 	}
 }
 
+// validateAllowExternalFeatureSourcesEntries is the early-reject
+// validation pass that runs BEFORE any FS read or write in
+// generateDevcontainer (Review-Followup R2). Pure function over the
+// flag slice so it can fail fast without leaving u-boot.yaml in a
+// half-mutated state. The full merge + write happens later via
+// [GenerateService.applyAllowExternalFeatureSources] after the
+// devcontainer plan-and-execute has succeeded.
+func validateAllowExternalFeatureSourcesEntries(sources []string) error {
+	if len(sources) == 0 {
+		return nil
+	}
+	if _, err := normaliseFeatureSources(sources); err != nil {
+		return fmt.Errorf("generate devcontainer: --allow-external-feature-sources: %w", err)
+	}
+	return nil
+}
+
 // applyAllowExternalFeatureSources implements the Spec §715 wiring
 // of `--allow-external-feature-sources` for `generate devcontainer`:
-// before the generator reads u-boot.yaml, append the flag URLs to
-// `devcontainer.featureSources.allow`, marshal-rewrite the file.
-// No-op when the flag slice is empty.
+// after the devcontainer plan-and-execute succeeded, append the
+// flag URLs to `devcontainer.featureSources.allow` and marshal-
+// rewrite u-boot.yaml. No-op when the flag slice is empty.
 //
 // Failure modes mirror the [ConfigService.setFeatureSourcesAllow]
 // list-path: invalid URL → [driving.ErrConfigValueInvalid] (Code 10);

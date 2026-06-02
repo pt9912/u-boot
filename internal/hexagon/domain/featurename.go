@@ -34,6 +34,20 @@ var featureNamePattern = regexp.MustCompile(`^[a-z]([a-z0-9-]{0,30}[a-z0-9])?$`)
 // [errors.Is].
 var ErrInvalidFeatureName = errors.New("invalid feature name")
 
+// ErrInvalidFeatureSource signals that a string in the
+// `devcontainer.featureSources.allow` list (or a
+// `devcontainer.features.<name>.source` override) does not satisfy
+// the LH-FA-DEV-003 source-format rules (non-empty, scheme in
+// http/https/oci, non-empty host). Lives in the domain layer so the
+// CLI adapter can include it in the exit-code-10 mapping
+// ([cli.isValidationError]) without depending on the application
+// layer (depguard `adapter-no-application`). The format-checking
+// helper itself (`application.validateFeatureSource`) lives in the
+// application layer because the parser intentionally avoids
+// `net/url` per the `application-no-net` depguard rule
+// (LH-FA-ARCH-003).
+var ErrInvalidFeatureSource = errors.New("invalid feature source")
+
 // NewFeatureName validates the given string and returns a
 // [FeatureName] on success or [ErrInvalidFeatureName]-wrapped error
 // on failure.

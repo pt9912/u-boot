@@ -2001,3 +2001,57 @@ func mustConfigPathInTest(t *testing.T, raw string) domain.ConfigPath {
 	}
 	return p
 }
+
+// TestExecute_Init_AllowExternalWithoutDevcontainer_Code10 pins the
+// slice-v1-devcontainer-features Review-Followup R1 fix: the
+// LH-FA-DEV-003 `--allow-external-feature-sources requires
+// --devcontainer` rejection must map to exit-code 10 per Spec §720,
+// not the default-1 fallback. The sentinel was moved from
+// `application` to `domain` so this adapter could include it in
+// [cli.isValidationError]; the test pins the wiring.
+func TestExecute_Init_AllowExternalWithoutDevcontainer_Code10(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeInitUseCase{
+		err: fmt.Errorf("--allow-external-feature-sources requires --devcontainer (Spec §714): %w", domain.ErrInvalidFeatureSource),
+	}
+	var stdout, stderr bytes.Buffer
+	err := newApp(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(),
+		[]string{"init", "--allow-external-feature-sources", "https://example.test/x"},
+		&stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("expected error, got nil")
+	}
+	if !errors.Is(err, domain.ErrInvalidFeatureSource) {
+		t.Errorf("err = %v, want wrap of domain.ErrInvalidFeatureSource", err)
+	}
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10 (Spec §720)", got)
+	}
+}
+
+// TestExecute_Generate_InvalidAllowFlagURL_Code10 pins that a
+// malformed URL on `generate devcontainer --allow-external-feature-
+// sources <bad>` rejects with exit-code 10 (Spec §1353).
+func TestExecute_Generate_InvalidAllowFlagURL_Code10(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeGenerateUseCase{
+		err: fmt.Errorf("generate devcontainer: --allow-external-feature-sources: %w", domain.ErrInvalidFeatureSource),
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithGenerate(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(),
+		[]string{"generate", "devcontainer", "--allow-external-feature-sources", "not-a-url"},
+		&stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("expected error, got nil")
+	}
+	if !errors.Is(err, domain.ErrInvalidFeatureSource) {
+		t.Errorf("err = %v, want wrap of domain.ErrInvalidFeatureSource", err)
+	}
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10 (Spec §1353)", got)
+	}
+}
