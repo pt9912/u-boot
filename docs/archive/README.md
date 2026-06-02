@@ -15,3 +15,9 @@ Konventionen:
   ```
 
 - Querverweise in lebendiger Doku auf das neue Ziel umbiegen.
+
+## Archivierte Dokumente
+
+| Datei | Inhalt |
+| --- | --- |
+| [`roadmap-history-v0.1-v0.3.md`](roadmap-history-v0.1-v0.3.md) | Ausgelagerte Release- und Roadmap-Historie fuer v0.1.0 bis v0.3.0. |
