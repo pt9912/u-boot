@@ -9,7 +9,10 @@
 > Closure (slice in-progress→done, carveout aufgelöst)
 > `2995524`, Code-Review-Followup S1..S6 (renderKeyOf-Refactor,
 > 4 Cross-Check-Tests, formatDriftMessage-Pin, stringSet-
-> Konsolidierung) `91f3fb2`.
+> Konsolidierung) `91f3fb2`, Audit-Followup A3 (Skip-Disziplin
+> für `features: {}` präzisiert: explizit-leere-Map + JSON-leer
+> → „in sync" statt skip; Test-Assertion-Verschärfung)
+> `f69c14b`.
 
 ## Auslöser
 

@@ -8,11 +8,15 @@
 > `a8d10bd` + Review-Followup R1..R6 `420e19f`,
 > T5 Doctor Teil A (`devcontainer.features.allowlist`) `35a5bae`,
 > T6 LHFADEV003 Acceptance-Pins `e9f7282`,
-> T7 Doku-Closure (folgt nach diesem Move).
+> T7 Doku-Closure `268141f`. Audit-Followup A1..A4
+> (Schema-Validation-Wiring in 3 Production-Load-Pfade +
+> Idempotenz-Fix bei Doppel-Source-Versionen + README-Update)
+> `f69c14b` + README-Detail-Entlastung `d47ffa1`.
 > Doctor Teil B (`devcontainer.features.drift`) ausgelagert in
 > [`slice-followup-devcontainer-features-drift-doctor`](slice-followup-devcontainer-features-drift-doctor.md)
-> (`37300c5` + S1/S2-Followup `0c34f0c`) nach 800-LOC-Carveout-
-> Trigger.
+> (`37300c5` + S1/S2-Plan-Followup `0c34f0c` + T1+T2 `c2ff32f` +
+> T3 Closure `2995524` + S1..S6 Code-Review-Followup `91f3fb2`)
+> nach 800-LOC-Carveout-Trigger.
 
 ## Auslöser
 
