@@ -35,6 +35,7 @@ Feedforward-Quellen, die Arbeit vor der Umsetzung lenken:
 | [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md) | Temporaere und permanente Carveouts |
 | [`docs/user/quality.md`](../docs/user/quality.md) | Quality-Gates, Linter-Profil, Coverage, Security |
 | [`harness/roles.md`](roles.md) | Rollen, Uebergaben und Konfliktpfade |
+| [`harness/review.md`](review.md) | Review-Kategorien, Prueflinsen und Output-Schema |
 | [`harness/verification.md`](verification.md) | Verification-Evidence und Slice-Closure-Schema |
 | [`AGENTS.md`](../AGENTS.md) | Hard Rules, Source Precedence, Minimal Workflow |
 
@@ -88,6 +89,10 @@ Jeder Rollenwechsel braucht ein Uebergabe-Artefakt. Eine Rolle darf in
 eine fruehere Rolle zurueckgeben, aber nicht deren Entscheidung
 stillschweigend ersetzen.
 
+Review-Findings folgen [`harness/review.md`](review.md); Verification-
+Evidence folgt [`harness/verification.md`](verification.md). Das sind
+getrennte Artefakte.
+
 ## Scope Boundaries
 
 - `u-boot` ist ein CLI zum Bootstrapping reproduzierbarer Docker-
@@ -108,13 +113,14 @@ stillschweigend ersetzen.
 1. Diese Datei und [`AGENTS.md`](../AGENTS.md) lesen.
 2. Rolle aus [`harness/roles.md`](roles.md) bestimmen.
 3. Relevante Spec, Architektur, ADR und aktiven Slice lesen.
-4. Betroffene IDs und Produktvertraege benennen.
-5. Kleinste sinnvolle Aenderung ausfuehren.
-6. Engsten nuetzlichen Sensor laufen lassen.
-7. Bei Codeaenderungen nach Moeglichkeit `make gates` ausfuehren.
-8. Verification-Evidence nach [`harness/verification.md`](verification.md)
+4. Bei Review-Rolle [`harness/review.md`](review.md) anwenden.
+5. Betroffene IDs und Produktvertraege benennen.
+6. Kleinste sinnvolle Aenderung ausfuehren.
+7. Engsten nuetzlichen Sensor laufen lassen.
+8. Bei Codeaenderungen nach Moeglichkeit `make gates` ausfuehren.
+9. Verification-Evidence nach [`harness/verification.md`](verification.md)
    festhalten, wenn ein Slice geschlossen oder ein oeffentlicher Vertrag
    beruehrt wurde.
-9. Oeffentliche Doku, Planning-Artefakte und CHANGELOG aktualisieren,
+10. Oeffentliche Doku, Planning-Artefakte und CHANGELOG aktualisieren,
    wenn ein oeffentlicher Vertrag beruehrt wurde.
-10. Handoff mit Rolle, ausgefuehrten Sensors, offenen Sensors und Risiken.
+11. Handoff mit Rolle, ausgefuehrten Sensors, offenen Sensors und Risiken.

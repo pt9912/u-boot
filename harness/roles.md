@@ -63,14 +63,9 @@ Reviewer priorisiert Bugs, Vertragsbrueche, Architekturdrift,
 Exit-Code-Fehler, managed-block-Sicherheitsrisiken, fehlende Tests und
 Carveout-Verstoesse.
 
-Finding-Kategorien:
-
-| Kategorie | Bedeutung |
-| --- | --- |
-| HIGH | Kann Produktvertrag, Sicherheit, Datenintegritaet, Architekturgrenze oder CI-Gate brechen |
-| MEDIUM | Wahrscheinliche Regression, fehlender Test, unklare Fehlerklassifikation oder Drift-Risiko |
-| LOW | Wartbarkeit, Doku-Praezision, kleine Konsistenzluecke |
-| INFO | Beobachtung ohne Aenderungspflicht |
+Findings folgen [`harness/review.md`](review.md). Dort sind
+HIGH/MEDIUM/LOW/INFO, Review-Linsen und Output-Schema verbindlich
+definiert.
 
 Reviewer verifiziert nicht die komplette DoD-Closure. Das ist Aufgabe
 des Verifier.

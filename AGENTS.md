@@ -42,6 +42,13 @@ demselben Eingabe-Kontext. Jeder Rollenwechsel braucht ein
 Uebergabe-Artefakt: Plan, ADR-Bezug, Diff, Findings,
 Verification-Evidence, Validation-Evidence oder Closure-Notiz.
 
+### Review Harness
+
+Reviews folgen [`harness/review.md`](harness/review.md). Findings werden
+als HIGH/MEDIUM/LOW/INFO klassifiziert und mit Quelle, Risiko und
+Verifizierbarkeit dokumentiert. Reviewer implementieren nicht und
+ersetzen keine Verification.
+
 ### Docker-only Workflow
 
 `u-boot` hat keinen Host-Go-Toolchain-Vertrag. Build, Lint, Tests,
@@ -163,15 +170,16 @@ Umgebung Docker zulaesst.
 2. Rolle aus [`harness/roles.md`](harness/roles.md) bestimmen.
 3. Source Precedence anwenden und die relevante Spec/ADR/Slice-Doku
    lesen.
-4. Betroffene `LH-*`, `ADR-*` und Slice-IDs benennen.
-5. Kleinste sinnvolle Aenderung umsetzen.
-6. Engsten passenden Sensor laufen lassen; bei Codeaenderungen nach
+4. Bei Review-Rolle [`harness/review.md`](harness/review.md) anwenden.
+5. Betroffene `LH-*`, `ADR-*` und Slice-IDs benennen.
+6. Kleinste sinnvolle Aenderung umsetzen.
+7. Engsten passenden Sensor laufen lassen; bei Codeaenderungen nach
    Moeglichkeit `make gates`.
-7. Verification-Evidence nach
+8. Verification-Evidence nach
    [`harness/verification.md`](harness/verification.md) festhalten,
    wenn ein Slice geschlossen oder ein oeffentlicher Vertrag beruehrt
    wird.
-8. Oeffentliche Vertraege in README, `docs/user/`, ADR-Index, Roadmap,
+9. Oeffentliche Vertraege in README, `docs/user/`, ADR-Index, Roadmap,
    Slice oder CHANGELOG nachziehen.
-9. Im Handoff ausgefuehrte Sensoren, nicht ausgefuehrte Sensoren und
+10. Im Handoff ausgefuehrte Sensoren, nicht ausgefuehrte Sensoren und
    verbleibende Risiken klar nennen.
