@@ -34,6 +34,7 @@ Feedforward-Quellen, die Arbeit vor der Umsetzung lenken:
 | [`docs/plan/planning/in-progress/roadmap.md`](../docs/plan/planning/in-progress/roadmap.md) | Release- und Slice-Status |
 | [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md) | Temporaere und permanente Carveouts |
 | [`docs/user/quality.md`](../docs/user/quality.md) | Quality-Gates, Linter-Profil, Coverage, Security |
+| [`harness/roles.md`](roles.md) | Rollen, Uebergaben und Konfliktpfade |
 | [`AGENTS.md`](../AGENTS.md) | Hard Rules, Source Precedence, Minimal Workflow |
 
 ## Sensors
@@ -69,6 +70,21 @@ nicht ausgefuehrt wurde.
 - Temporaere Carveouts brauchen parallel Inventar-Eintrag und
   Plan-Anker.
 
+## Role Separation
+
+Rollen sind Kontextgrenzen, keine Personen. Die verbindliche
+Rollenreferenz liegt in [`harness/roles.md`](roles.md).
+
+Standardsequenz fuer Slice-Arbeit:
+
+```text
+Planner -> Architect -> Implementation -> Reviewer -> Verifier -> Validator -> Planner
+```
+
+Jeder Rollenwechsel braucht ein Uebergabe-Artefakt. Eine Rolle darf in
+eine fruehere Rolle zurueckgeben, aber nicht deren Entscheidung
+stillschweigend ersetzen.
+
 ## Scope Boundaries
 
 - `u-boot` ist ein CLI zum Bootstrapping reproduzierbarer Docker-
@@ -87,11 +103,12 @@ nicht ausgefuehrt wurde.
 ## Minimal Agent Workflow
 
 1. Diese Datei und [`AGENTS.md`](../AGENTS.md) lesen.
-2. Relevante Spec, Architektur, ADR und aktiven Slice lesen.
-3. Betroffene IDs und Produktvertraege benennen.
-4. Kleinste sinnvolle Aenderung ausfuehren.
-5. Engsten nuetzlichen Sensor laufen lassen.
-6. Bei Codeaenderungen nach Moeglichkeit `make gates` ausfuehren.
-7. Oeffentliche Doku, Planning-Artefakte und CHANGELOG aktualisieren,
+2. Rolle aus [`harness/roles.md`](roles.md) bestimmen.
+3. Relevante Spec, Architektur, ADR und aktiven Slice lesen.
+4. Betroffene IDs und Produktvertraege benennen.
+5. Kleinste sinnvolle Aenderung ausfuehren.
+6. Engsten nuetzlichen Sensor laufen lassen.
+7. Bei Codeaenderungen nach Moeglichkeit `make gates` ausfuehren.
+8. Oeffentliche Doku, Planning-Artefakte und CHANGELOG aktualisieren,
    wenn ein oeffentlicher Vertrag beruehrt wurde.
-8. Handoff mit ausgefuehrten Sensors, offenen Sensors und Risiken.
+9. Handoff mit Rolle, ausgefuehrten Sensors, offenen Sensors und Risiken.

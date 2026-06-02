@@ -31,6 +31,17 @@ In dieser Reihenfolge lesen und aufloesen:
 
 ## Hard Rules
 
+### Role Separation
+
+Rollen sind Kontextgrenzen. Nutze
+[`harness/roles.md`](harness/roles.md) fuer Planner-, Architect-,
+Implementation-, Reviewer-, Verifier- und Validator-Vertraege.
+
+Wer geplant oder implementiert hat, reviewt oder verifiziert nicht mit
+demselben Eingabe-Kontext. Jeder Rollenwechsel braucht ein
+Uebergabe-Artefakt: Plan, ADR-Bezug, Diff, Findings,
+Verification-Evidence, Validation-Evidence oder Closure-Notiz.
+
 ### Docker-only Workflow
 
 `u-boot` hat keinen Host-Go-Toolchain-Vertrag. Build, Lint, Tests,
@@ -142,13 +153,14 @@ Umgebung Docker zulaesst.
 ## Minimal Agent Workflow
 
 1. [`harness/README.md`](harness/README.md) lesen.
-2. Source Precedence anwenden und die relevante Spec/ADR/Slice-Doku
+2. Rolle aus [`harness/roles.md`](harness/roles.md) bestimmen.
+3. Source Precedence anwenden und die relevante Spec/ADR/Slice-Doku
    lesen.
-3. Betroffene `LH-*`, `ADR-*` und Slice-IDs benennen.
-4. Kleinste sinnvolle Aenderung umsetzen.
-5. Engsten passenden Sensor laufen lassen; bei Codeaenderungen nach
+4. Betroffene `LH-*`, `ADR-*` und Slice-IDs benennen.
+5. Kleinste sinnvolle Aenderung umsetzen.
+6. Engsten passenden Sensor laufen lassen; bei Codeaenderungen nach
    Moeglichkeit `make gates`.
-6. Oeffentliche Vertraege in README, `docs/user/`, ADR-Index, Roadmap,
+7. Oeffentliche Vertraege in README, `docs/user/`, ADR-Index, Roadmap,
    Slice oder CHANGELOG nachziehen.
-7. Im Handoff ausgefuehrte Sensoren, nicht ausgefuehrte Sensoren und
+8. Im Handoff ausgefuehrte Sensoren, nicht ausgefuehrte Sensoren und
    verbleibende Risiken klar nennen.
