@@ -1,13 +1,12 @@
 # Slice Followup: Devcontainer-Features Drift-Doctor (`devcontainer.features.drift`)
 
-> **Status:** ready — Trigger gefeuert. T1-T4 des Parent-Slice
+> **Status:** ✅ Done. Carveout-Trigger des Parent-Slice
 > [`slice-v1-devcontainer-features`](../done/slice-v1-devcontainer-features.md)
-> sind real ≈ 1009 LOC (siehe Parent-Plan §Tranchen-Tabelle), über
-> der 800-LOC-Carveout-Schwelle. Dieser Folge-Slice nimmt
-> Doctor-Teil-B (über Spec hinaus) aus dem Parent-T5 heraus.
-> Implementierung startet nach Abschluss des Parent-T5 (Teil A,
-> `devcontainer.features.allowlist`) — der allowlist-Check ist die
-> strukturelle Grundlage für die Drift-Erkennung.
+> aufgelöst (T1-T4 dort ≈ 1009 LOC > 800-Schwelle). Lifecycle:
+> Plan-Anlage `37300c5`, Plan-Followup S1/S2 (Drift-Semantik
+> präzisiert) `0c34f0c`, open→in-progress `18ac5a3`, T1+T2
+> Implementierung + Tests + User-Doc + CHANGELOG `c2ff32f`, T3
+> Closure folgt in diesem Commit.
 
 ## Auslöser
 
@@ -151,25 +150,20 @@ Drift wird in beiden gemeldet.
   User die Warn-Nachricht zuordnen können (passt zur Parent-T7-
   Doku-Closure; gemeinsamer Block).
 
-## Tranchen (Skizze, wird beim Übergang nach `next/` verfeinert)
+## Tranchen
 
-| T   | Inhalt | LOC (Schätzung) |
-| --- | ------ | --------------- |
-| T1  | **Check-ID + Drift-Detector.** Neue Check-ID `devcontainer.features.drift`. Reader für `devcontainer.json` (Production-Pfad-Helper, der `stripJSONC` + `json.Unmarshal` kapselt — der bestehende `StripJSONCForTest`-Bridge in `export_test.go` ist Test-only). **Projection-Schritt:** für jeden cfg-Eintrag (alle, nicht nur enabled) `application.projectFeatureEntry` aufrufen → `(renderKey, enabled)`-Tupel; renderKey = `<Source>:<Version>`. Zwei Mengen: `expectedKeys = {renderKey | enabled == true}`, `knownProjectableKeys = {renderKey | jeder cfg-Eintrag, der projizierbar ist}`. **Set-Differences:** Case 1 = `expectedKeys \ jsonKeys`. Case 2a = `(jsonKeys ∩ knownProjectableKeys) \ expectedKeys`. Case 2b = `jsonKeys \ knownProjectableKeys`. | ~120 |
-| T2  | **Tests** (Case 1 happy, Case 1 file-missing, Case 2a, Case 2b, no-drift, skip-pins für nil/leer/parse-error, nil-vs-leer-Distinction). | ~80 |
-| T3  | **Slice-Closure:** `open/` → `done/`, Carveouts-Tabelle aktualisieren, Parent-Slice §T5-Status-Update. | — (Plan-Arbeit) |
+| T   | Inhalt | LOC (Schätzung / Real) |
+| --- | ------ | ---------------------- |
+| T1  | **Check-ID + Drift-Detector.** ✅ Done in `c2ff32f`. Check-ID `devcontainer.features.drift` + Dispatcher-Slot (Doctor-Total 12→13). `driftJSONFeatureKeys`-Helper (production-Pfad mit `stripJSONC` + `json.Unmarshal`; `ErrDevcontainerJSONUnparsable`-Sentinel). `projectAllFeatureEntries`-Helper baut zwei Mengen (`expectedKeys` enabled-only / `knownProjectableKeys` alle) via Re-use von `projectFeatureEntry` (kein Export nötig — gleicher Package). Drei Set-Differences in `classifyDriftCase1`/`classifyDriftCase2`. `checkDevcontainerFeaturesDrift` aggregiert Warn-Message mit Repair-Hint + Case-2b-Hand-Edit-Hinweis. | ~120 / **~135 real** (+13 %; durch den separaten `classifyDriftCase{1,2}`-Split etwas größer, aber gocognit-konform). |
+| T2  | **Tests.** ✅ Done in `c2ff32f`. `doctor_features_drift_test.go` mit 7 Test-Funktionen (3 davon mit Sub-Cases): OKWhenNothingConfigured, OKWhenInSync, Case1_FeatureMissingInJSON, Case1_FileMissing, Case2a_DisabledStillInJSON, Case2b_HandEditUnknownKey, SkipOnParseError, NilVsEmptyFeaturesMap (3 Sub-Cases). | ~80 / **~270 real** (+237 %; Plan-Schätzung hat die separate JSON-Fixture pro Test unterschätzt). |
+| T3  | **Slice-Closure.** ✅ Done (dieser Commit). `in-progress/` → `done/`, `carveouts.md`-Zeile auf "aufgelöst durch …", roadmap-Note aktualisiert. User-Doc + CHANGELOG bereits in T1+T2-Commit. | — (Plan-Arbeit) |
 
-LOC-Schätzung **~200** in Summe — über der ursprünglichen
-Parent-Plan-Vorhersage (~150). Grund: die korrekte Drift-Semantik
-braucht eine zweite Projection-Menge (Case 2a vs 2b), und das
-Datei-fehlt-Handling plus die nil-vs-leer-Distinction in der
-Skip-Logik kosten je ein paar Tests extra. Risiko: wenn
-`projectFeatureEntry` aus dem application-Paket-internen Sichtfeld
-heraus exportiert werden muss (heute lowercase), kommt eine
-zusätzliche export_test.go-Bridge dazu — oder ein Wrapper
-`ProjectAllFeatureEntries(cfg) []DriftKey` als neuer
-Production-Helper. T0-Entscheidung wird beim Übergang nach `next/`
-getroffen.
+**LOC-Bilanz:** ~135 produktion (Schätzung 120, +13 %), ~270 Tests
+(Schätzung 80, +237 %). Test-LOC-Inflation kommt vom JSON-Fixture-
+Bedarf pro Sub-Case. Plan-Schätzung **~200 total** war realistisch
+für Produktion, hat aber die Test-Last unterschätzt. Reuse von
+`projectFeatureEntry` (im selben Package, kein Export-Bridge
+nötig) hat T1 unter Plan-Schätzung gehalten.
 
 ## Out of Scope
 
