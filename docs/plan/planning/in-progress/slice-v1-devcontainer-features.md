@@ -397,7 +397,7 @@ Tabelle oben aktualisiert. Quelle: Upstream-Tags der
   (Managed-Block-Disziplin in `devcontainer.json`; T0-(d) hat
   Single-Block-Erweiterung gewählt).
 - Roadmap:
-  [`roadmap.md`](../in-progress/roadmap.md) §v0.4.0.
+  [`roadmap.md`](roadmap.md) §v0.4.0.
 - Phase: V1, geplant für v0.4.0-Bündelung mit weiteren
   V1-Generators (`u-boot logs`, `--json`/`--dry-run`); deren
   Slice-Pläne existieren noch nicht (Roadmap-Stichworte) und
