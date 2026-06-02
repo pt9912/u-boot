@@ -11,6 +11,22 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- `feat(devcontainer): Devcontainer-Features-Allowlist und Katalog
+  (LH-FA-DEV-003)` — 8 Built-in-Features (`git`, `docker-cli`,
+  `node`, `java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`)
+  plus External-Source-Allowlist via
+  `devcontainer.featureSources.allow`. CLI:
+  `u-boot config set devcontainer.features.<name>.{enabled,source,version}`
+  plus `--allow-external-feature-sources <url>[,<url>...]` auf
+  den drei Spec-§714-717-Pfaden (`init --devcontainer`,
+  `generate devcontainer`, `config set devcontainer.featureSources.allow`).
+  Doctor-Check `devcontainer.features.allowlist` (Error bei
+  Allowlist-Violation, Warn bei Orphan-Activation oder fehlendem
+  `enabled:`-Key). User-Doku in
+  [`docs/user/devcontainer-features.md`](docs/user/devcontainer-features.md).
+
 ## [0.3.0] - 2026-06-01
 
 Third release. Completes the V1 „Add-on Catalogue Expansion"

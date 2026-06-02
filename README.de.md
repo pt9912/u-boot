@@ -133,6 +133,24 @@ Ergebnis: `u-boot.yaml`, `compose.yaml`, `README.md`, `CHANGELOG.md`,
 `scripts/`, `docs/` — plus ein gesunder Postgres-Container auf dem
 deklarierten Port.
 
+Eine Dev-Toolchain wird über den Devcontainer-Features-Katalog
+ergänzt (`LH-FA-DEV-003`, 8 Built-in-Features: `git`, `docker-cli`,
+`node`, `java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`):
+
+```bash
+u-boot init my-service --devcontainer
+u-boot config set devcontainer.features.node.enabled true
+u-boot generate devcontainer
+# → .devcontainer/devcontainer.json enthält
+#   "ghcr.io/devcontainers/features/node:1": {}
+```
+
+Externe Feature-Quellen brauchen einen expliziten Allowlist-
+Eintrag; siehe
+[`docs/user/devcontainer-features.md`](docs/user/devcontainer-features.md)
+für den `--allow-external-feature-sources`-Fluss und die
+`LH-NFA-SEC-004`-Disziplin (`--yes` reicht nicht).
+
 Re-Init auf einem bestehenden Projekt verlangt eine explizite
 Strategie (`--force` für Managed-Block-Edits, `--backup` für
 Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien). Siehe den
@@ -160,7 +178,7 @@ Auflösungs-Slices und §Nächste Schritte für das laufende Backlog.
 | Subkommando | Spec-IDs | Kurz |
 | ----------- | -------- | ---- |
 | `init [name] [--devcontainer] [--template <name>]` | `LH-FA-INIT-001..007`, `LH-FA-TPL-001` | Projekt-Skelett + `git init`. |
-| `doctor [--strict]` | `LH-FA-DIAG-001..004` | 11 Diagnose-Checks; container-aware Skip für Host-Probes. |
+| `doctor [--strict]` | `LH-FA-DIAG-001..004`, `LH-FA-DEV-003` | 12 Diagnose-Checks (der 12. ist `devcontainer.features.allowlist` ab v0.4.0); container-aware Skip für Host-Probes. |
 | `add <service> [--with-deps]` | `LH-FA-ADD-001..006` | Idempotente State-Machine für Service-Add-Ons (`postgres`, `keycloak`, `otel`); `--with-deps` installiert fehlende Abhängigkeiten automatisch. |
 | `remove <service> [--purge]` | `LH-FA-ADD-007` | Spiegel von `add` — disable + Managed-Blocks raus. |
 | `up [--timeout <s>]` | `LH-FA-UP-001..003` | Compose up + Healthcheck-Poll + TCP-Probe. |
@@ -218,6 +236,8 @@ Vollständiger Layout-Kontrakt:
   [`docs/user/quality.md`](docs/user/quality.md)
 - **Branch Protection:**
   [`docs/user/branch-protection.md`](docs/user/branch-protection.md)
+- **Devcontainer-Features:**
+  [`docs/user/devcontainer-features.md`](docs/user/devcontainer-features.md)
 - **User-Dokumentation:** [`docs/user/`](docs/user/)
 
 ## Build, Test, Lint

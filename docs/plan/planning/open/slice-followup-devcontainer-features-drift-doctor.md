@@ -1,7 +1,7 @@
 # Slice Followup: Devcontainer-Features Drift-Doctor (`devcontainer.features.drift`)
 
 > **Status:** ready — Trigger gefeuert. T1-T4 des Parent-Slice
-> [`slice-v1-devcontainer-features`](../in-progress/slice-v1-devcontainer-features.md)
+> [`slice-v1-devcontainer-features`](../done/slice-v1-devcontainer-features.md)
 > sind real ≈ 1009 LOC (siehe Parent-Plan §Tranchen-Tabelle), über
 > der 800-LOC-Carveout-Schwelle. Dieser Folge-Slice nimmt
 > Doctor-Teil-B (über Spec hinaus) aus dem Parent-T5 heraus.
@@ -197,7 +197,7 @@ getroffen.
 ## Bezug
 
 - Parent-Slice:
-  [`slice-v1-devcontainer-features`](../in-progress/slice-v1-devcontainer-features.md)
+  [`slice-v1-devcontainer-features`](../done/slice-v1-devcontainer-features.md)
   §T0-Outcomes (Doctor-Integration Teil B) + Tranchen-Tabelle T5
   (LOC-Carveout-Trigger).
 - Spec: `LH-FA-DEV-003`
@@ -211,7 +211,7 @@ getroffen.
   (Doctor-Service-Block-Drift-Pattern als Vorlage),
   [`slice-m7-generate`](../done/slice-m7-generate.md)
   (Managed-Block-Disziplin in `devcontainer.json`),
-  [`slice-v1-devcontainer-features`](../in-progress/slice-v1-devcontainer-features.md)
+  [`slice-v1-devcontainer-features`](../done/slice-v1-devcontainer-features.md)
   Parent-T5 Teil A (`devcontainer.features.allowlist`) — die
   zwei Checks teilen sich Render-Helper.
 - Code-Anker:

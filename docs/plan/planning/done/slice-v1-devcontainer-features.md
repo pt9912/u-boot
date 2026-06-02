@@ -1,9 +1,18 @@
 # Slice V1: Devcontainer-Features / Toolchains (`LH-FA-DEV-003`)
 
-> **Status:** scheduled für v0.4.0 — Spec ✅, ADR-Hook ✅,
-> Code-Anker ✅, T0-Discovery ✅ (§T0-Outcomes), Implementation
-> ausstehend (T1..T7). Plan-Refinement für `next/` kann jetzt
-> ausschließlich auf den T0-Outcomes aufsetzen.
+> **Status:** ✅ Done (v0.4.0-Material). T0 Discovery `7a8b8ad`,
+> T1 Schema + `domain.FeatureName` `a97337a`,
+> T2 Catalogue (8 Spec-Beispiele) `6de1464`,
+> T3 Generator-Patch `e1646f1`,
+> T4 CLI (`--allow-external-feature-sources` + 4 ConfigPath-Kinds)
+> `a8d10bd` + Review-Followup R1..R6 `420e19f`,
+> T5 Doctor Teil A (`devcontainer.features.allowlist`) `35a5bae`,
+> T6 LHFADEV003 Acceptance-Pins `e9f7282`,
+> T7 Doku-Closure (folgt nach diesem Move).
+> Doctor Teil B (`devcontainer.features.drift`) ausgelagert in
+> [`slice-followup-devcontainer-features-drift-doctor`](../open/slice-followup-devcontainer-features-drift-doctor.md)
+> (`37300c5` + S1/S2-Followup `0c34f0c`) nach 800-LOC-Carveout-
+> Trigger.
 
 ## Auslöser
 
@@ -397,7 +406,7 @@ Tabelle oben aktualisiert. Quelle: Upstream-Tags der
   (Managed-Block-Disziplin in `devcontainer.json`; T0-(d) hat
   Single-Block-Erweiterung gewählt).
 - Roadmap:
-  [`roadmap.md`](roadmap.md) §v0.4.0.
+  [`roadmap.md`](../in-progress/roadmap.md) §v0.4.0.
 - Phase: V1, geplant für v0.4.0-Bündelung mit weiteren
   V1-Generators (`u-boot logs`, `--json`/`--dry-run`); deren
   Slice-Pläne existieren noch nicht (Roadmap-Stichworte) und
