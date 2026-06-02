@@ -2189,6 +2189,21 @@ func TestExecute_Logs_TailFlag_PropagatesValue(t *testing.T) {
 	}
 }
 
+func TestExecute_Logs_TailFlag_LargeValue_NoUpperBound(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeLogsUseCase{}
+	var stdout, stderr bytes.Buffer
+	const largeTail = "4294967296"
+	if err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs", "--tail", largeTail}, &stdout, &stderr,
+	); err != nil {
+		t.Fatalf("Execute logs --tail %s: %v", largeTail, err)
+	}
+	if uc.lastReq.Tail != largeTail {
+		t.Errorf("Tail = %q, want %q", uc.lastReq.Tail, largeTail)
+	}
+}
+
 // TestExecute_Logs_InvalidTail_Negative_Code2 pins T0-(c) + §AK:
 // negative integers map to Exit-Code 2 via ErrInvalidLogsTail —
 // the Use-Case is never called.
@@ -2243,7 +2258,7 @@ func TestExecute_Logs_InvalidTail_AllReserved_Code2(t *testing.T) {
 // TestExecute_Logs_InvalidTail_PlusSign_Code2 pins the Review-
 // Followup F8 stricter parser: `strconv.Atoi("+5")` returned
 // `(5, nil)` and would have let `--tail +5` slip past Stage-1;
-// `strconv.ParseUint` rejects the sign deterministically.
+// the decimal-digit check rejects the sign deterministically.
 func TestExecute_Logs_InvalidTail_PlusSign_Code2(t *testing.T) {
 	getwd := func() (string, error) { return "/tmp/x/demo", nil }
 	uc := &fakeLogsUseCase{}
@@ -2252,13 +2267,33 @@ func TestExecute_Logs_InvalidTail_PlusSign_Code2(t *testing.T) {
 		context.Background(), []string{"logs", "--tail", "+5"}, &stdout, &stderr,
 	)
 	if err == nil {
-		t.Fatalf("expected error for `--tail +5` (F8: ParseUint rejects sign)")
+		t.Fatalf("expected error for `--tail +5` (F8: decimal-digit check rejects sign)")
 	}
 	if !errors.Is(err, cli.ErrInvalidLogsTail) {
 		t.Errorf("err = %v, want wrap of ErrInvalidLogsTail", err)
 	}
 	if got := cli.ExitCode(err); got != 2 {
 		t.Errorf("ExitCode = %d, want 2", got)
+	}
+}
+
+func TestExecute_Logs_HelpExitCodesConsistent(t *testing.T) {
+	uc := &fakeLogsUseCase{}
+	var stdout, stderr bytes.Buffer
+	if err := newAppWithLogs(uc).Execute(context.Background(), []string{"logs", "--help"}, &stdout, &stderr); err != nil {
+		t.Fatalf("Execute logs --help: %v", err)
+	}
+	out := stdout.String()
+	if strings.Contains(out, "- 2   --tail with invalid value, or invalid service-name format") {
+		t.Errorf("logs --help still maps invalid service-name format to exit 2:\n%s", out)
+	}
+	for _, want := range []string{
+		"- 2   --tail with invalid value, or malformed CLI usage",
+		"- 10  no u-boot.yaml / compose.yaml; or invalid service name",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("logs --help missing %q; got:\n%s", want, out)
+		}
 	}
 }
 

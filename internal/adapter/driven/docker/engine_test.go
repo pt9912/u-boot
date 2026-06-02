@@ -5,7 +5,10 @@ import (
 	"context"
 	"errors"
 	"io"
+	"os"
 	"os/exec"
+	"path/filepath"
+	"sort"
 	"testing"
 
 	"github.com/pt9912/u-boot/internal/adapter/driven/docker"
@@ -456,6 +459,41 @@ func TestEngine_ComposeLogs_TailEmpty_SkipsFlag_F6(t *testing.T) {
 	}
 }
 
+func TestEngine_ComposeLogs_LineBufferedStdoutAndStderr(t *testing.T) {
+	t.Parallel()
+	binary := dockerScript(t, `#!/bin/sh
+if [ "$1" = "version" ]; then
+  echo "24.0.0"
+  exit 0
+fi
+if [ "$1" = "compose" ] && [ "$2" = "version" ]; then
+  echo "v2.20.0"
+  exit 0
+fi
+if [ "$1" = "compose" ]; then
+  printf 'stdout one\nstdout partial'
+  printf 'stderr one\nstderr partial' >&2
+  exit 0
+fi
+exit 1
+`)
+	e := docker.WithEngineBinary(binary)
+	sink := &recordingWriter{}
+	if err := e.ComposeLogs(context.Background(), "/tmp/demo", driven.ComposeLogsOptions{
+		Tail: "all",
+		Sink: sink,
+	}); err != nil {
+		t.Fatalf("ComposeLogs: %v", err)
+	}
+
+	got := sink.chunks()
+	sort.Strings(got)
+	want := []string{"stderr one\n", "stderr partial", "stdout one\n", "stdout partial"}
+	if !equalStringSlices(got, want) {
+		t.Errorf("line-buffered chunks = %#v, want %#v", got, want)
+	}
+}
+
 // TestWrapComposeRunError_F3 is the Review-Followup F3 anti-
 // regression pin for the SIGINT-Pass-Through Schicht 1 (post-
 // cmd.Run). The wrap-helper was extracted from
@@ -516,4 +554,40 @@ func TestWrapComposeRunError_F3(t *testing.T) {
 			t.Errorf("mid-flight cancel leaked into ErrComposeRuntime — Exit-12 statt Exit-0: %v", err)
 		}
 	})
+}
+
+func dockerScript(t *testing.T, body string) string {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "docker")
+	if err := os.WriteFile(path, []byte(body), 0o755); err != nil {
+		t.Fatalf("write fake docker script: %v", err)
+	}
+	return path
+}
+
+type recordingWriter struct {
+	chunk []string
+}
+
+func (w *recordingWriter) Write(p []byte) (int, error) {
+	w.chunk = append(w.chunk, string(p))
+	return len(p), nil
+}
+
+func (w *recordingWriter) chunks() []string {
+	out := make([]string, len(w.chunk))
+	copy(out, w.chunk)
+	return out
+}
+
+func equalStringSlices(got, want []string) bool {
+	if len(got) != len(want) {
+		return false
+	}
+	for i := range got {
+		if got[i] != want[i] {
+			return false
+		}
+	}
+	return true
 }

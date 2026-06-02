@@ -197,8 +197,9 @@ type DockerEngine interface {
 
 	// ComposeLogs shells out to `docker compose -f <dir>/compose.yaml
 	// logs [--follow] [--tail <value>] [<service>…]` (LH-FA-UP-005).
-	// Streams the compose stdout to `opts.Sink` line-buffered so
-	// `--follow` arrives real-time even when stdout is piped.
+	// Streams the compose stdout and stderr to `opts.Sink` line-
+	// buffered so `--follow` arrives real-time once the subprocess
+	// pipe yields complete log records.
 	//
 	// **SIGINT contract (slice-v1-logs §AK + Plan-Followup P3):**
 	// When the call returns and `ctx.Err() != nil`

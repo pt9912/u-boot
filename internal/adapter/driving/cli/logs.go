@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"strconv"
 
 	"github.com/spf13/cobra"
 
@@ -80,7 +79,7 @@ Flags:
 
 LH-FA-CLI-006 exit codes:
   - 0   success (incl. --follow terminated by SIGINT)
-  - 2   --tail with invalid value, or invalid service-name format
+  - 2   --tail with invalid value, or malformed CLI usage
   - 10  no u-boot.yaml / compose.yaml; or invalid service name
         (regex-only, per T0-(b))
   - 11  Docker daemon unreachable / compose plugin missing
@@ -153,11 +152,10 @@ func runLogs(
 // implicit default already streams all lines, so the user can drop
 // the flag entirely.
 //
-// Review-Followup F8: parsing uses `strconv.ParseUint(raw, 10, 32)`
-// rather than `strconv.Atoi`. `Atoi("+5") == 5, nil` would accept
-// an unsigned-integer-shaped string with a leading sign, leaking
-// past the T0-(c) "non-negative integer" contract. ParseUint
-// rejects both signs and whitespace deterministically.
+// Review-Followup F8: validation rejects signs and whitespace
+// deterministically. Slice-v1-logs T0-(c) deliberately sets no upper
+// bound; Compose receives very large decimal strings and decides
+// whether it can handle them.
 func validateLogsTailFlag(raw string) error {
 	if raw == "" {
 		return nil
@@ -167,8 +165,17 @@ func validateLogsTailFlag(raw string) error {
 			"%w: `--tail \"all\"` is the implicit default; omit the flag to stream all lines",
 			ErrInvalidLogsTail)
 	}
-	if _, err := strconv.ParseUint(raw, 10, 32); err != nil {
+	if !isDecimalDigits(raw) {
 		return fmt.Errorf("%w: got %q", ErrInvalidLogsTail, raw)
 	}
 	return nil
+}
+
+func isDecimalDigits(raw string) bool {
+	for _, ch := range raw {
+		if ch < '0' || ch > '9' {
+			return false
+		}
+	}
+	return true
 }

@@ -9,6 +9,7 @@ import (
 	"io"
 	"os/exec"
 	"path/filepath"
+	"sync"
 
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 )
@@ -127,7 +128,9 @@ func (e *Engine) ComposePs(ctx context.Context, dir string) ([]driven.ComposeSer
 }
 
 // ComposeLogs implements [driven.DockerEngine] (LH-FA-UP-005).
-// Streams `docker compose logs` stdout to opts.Sink.
+// Streams `docker compose logs` stdout and stderr to opts.Sink,
+// line-by-line, so `--follow` callers receive complete log records
+// as soon as the subprocess pipe yields them.
 //
 // SIGINT contract (slice-v1-logs §AK + Plan-Followup P3): when
 // the underlying `cmd.Run()` returns and `ctx.Err() != nil`, the
@@ -157,9 +160,76 @@ func (e *Engine) ComposeLogs(ctx context.Context, dir string, opts driven.Compos
 	}
 	args = append(args, opts.Services...)
 	cmd := exec.CommandContext(ctx, e.binary, args...)
-	cmd.Stdout = progressSinkOrDiscard(opts.Sink)
-	cmd.Stderr = progressSinkOrDiscard(opts.Sink)
-	return wrapComposeRunError(ctx, cmd.Run(), "logs")
+	return wrapComposeRunError(ctx, runLineBuffered(cmd, progressSinkOrDiscard(opts.Sink)), "logs")
+}
+
+func runLineBuffered(cmd *exec.Cmd, sink io.Writer) error {
+	var mu sync.Mutex
+	stdout := newLineBufferingWriter(lockedWriter{sink: sink, mu: &mu})
+	stderr := newLineBufferingWriter(lockedWriter{sink: sink, mu: &mu})
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+
+	runErr := cmd.Run()
+	stdoutErr := stdout.Flush()
+	stderrErr := stderr.Flush()
+	if runErr != nil {
+		return runErr
+	}
+	if stdoutErr != nil {
+		return stdoutErr
+	}
+	return stderrErr
+}
+
+type lockedWriter struct {
+	sink io.Writer
+	mu   *sync.Mutex
+}
+
+func (w lockedWriter) Write(p []byte) (int, error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.sink.Write(p)
+}
+
+type lineBufferingWriter struct {
+	dst     io.Writer
+	pending []byte
+}
+
+func newLineBufferingWriter(dst io.Writer) *lineBufferingWriter {
+	return &lineBufferingWriter{dst: dst}
+}
+
+func (w *lineBufferingWriter) Write(p []byte) (int, error) {
+	written := 0
+	for len(p) > 0 {
+		idx := bytes.IndexByte(p, '\n')
+		if idx == -1 {
+			w.pending = append(w.pending, p...)
+			written += len(p)
+			return written, nil
+		}
+		segment := p[:idx+1]
+		w.pending = append(w.pending, segment...)
+		written += len(segment)
+		if _, err := w.dst.Write(w.pending); err != nil {
+			return written, err
+		}
+		w.pending = w.pending[:0]
+		p = p[idx+1:]
+	}
+	return written, nil
+}
+
+func (w *lineBufferingWriter) Flush() error {
+	if len(w.pending) == 0 {
+		return nil
+	}
+	_, err := w.dst.Write(w.pending)
+	w.pending = w.pending[:0]
+	return err
 }
 
 // wrapComposeRunError implements the SIGINT-Pass-Through Schicht 1
