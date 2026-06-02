@@ -92,6 +92,17 @@ const (
 	// legitimately omit forward declarations when port forwarding is
 	// configured elsewhere.
 	checkIDForwardPortsConsistency = "devcontainer.forwardPorts.consistency"
+
+	// checkIDDevcontainerFeaturesAllowlist is the slice-v1-
+	// devcontainer-features T5 Teil A check (LH-FA-DEV-003 §711-721
+	// + §1340-1353). Validates that every entry in
+	// `cfg.Devcontainer.Features` is either catalogue-aktivierbar
+	// or carries a `source:` override whose value appears in
+	// `cfg.Devcontainer.FeatureSources.Allow`. Drift detection (the
+	// over-Spec Teil B) lives in slice-followup-devcontainer-
+	// features-drift-doctor — this check is the allowlist-conformance
+	// gate, not the drift-detector.
+	checkIDDevcontainerFeaturesAllowlist = "devcontainer.features.allowlist"
 )
 
 // Minimum versions per LH-FA-DIAG-002. The thresholds are MAJOR.MINOR
@@ -133,6 +144,7 @@ func (s *DoctorService) Check(ctx context.Context, req driving.DoctorRequest) (d
 		s.checkDevcontainerDockerfile(ctx, req.BaseDir),
 		s.checkServicesEnabledKey(ctx, req.BaseDir),
 		s.checkForwardPortsConsistency(ctx, req.BaseDir),
+		s.checkDevcontainerFeaturesAllowlist(ctx, req.BaseDir),
 	}
 	report := domain.DiagnosticReport{Items: items}
 	s.logger.Info("doctor: checks complete",
@@ -1091,4 +1103,155 @@ func joinIntsAscending(ports []int) string {
 		parts[i] = strconv.Itoa(p)
 	}
 	return strings.Join(parts, ", ")
+}
+
+// checkDevcontainerFeaturesAllowlist is the slice-v1-devcontainer-
+// features T5 Teil A check (LH-FA-DEV-003). It walks
+// `cfg.Devcontainer.Features` and classifies each entry into one of
+// three diagnostic shapes; the worst-severity classification wins
+// per check call.
+//
+// Classifications (per feature entry):
+//
+//   - **Allowlist violation (Error, LH-FA-DEV-003):** Source override
+//     is set and the value is not in
+//     `cfg.Devcontainer.FeatureSources.Allow`. The repair hint
+//     points the user at `config set devcontainer.featureSources.allow
+//     <url>` (or `--allow-external-feature-sources <url>`); `--yes`
+//     does not substitute (LH-NFA-SEC-004).
+//   - **Orphan activation (Warn):** Source override is empty and the
+//     feature name is not in the built-in catalogue. The renderer
+//     silently skips this entry (T3 contract); the doctor surfaces
+//     it so the user can fix a typo or set a source override.
+//   - **Enabled key missing (Warn):** The entry exists but
+//     `Enabled == nil`. Analog to `services.enabled-key`
+//     (LH-FA-ADD-005 §893): an explicit decision (`true`/`false`)
+//     belongs in u-boot.yaml.
+//
+// Skip conditions (SeverityOK with a message, no work done):
+//
+//   - u-boot.yaml absent or unparsable — primary file-presence
+//     diagnostics live in [checkUbootYaml].
+//   - `cfg.Devcontainer == nil` or `cfg.Devcontainer.Features` is
+//     empty — Spec §2394 negative pin: doctor must not raise errors
+//     against devcontainer config when the user has not opted in.
+//
+// Spec-§711 catalogue-vs-Allowlist split: built-in features (in
+// [featureCatalogue]) are activatable without an Allowlist entry;
+// every other source needs the Allowlist (§713-720).
+func (s *DoctorService) checkDevcontainerFeaturesAllowlist(_ context.Context, baseDir string) domain.Diagnostic {
+	cfg, err := s.loadUbootYAML(baseDir)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerFeaturesAllowlist,
+			Severity: domain.SeverityOK,
+			Message:  "u-boot.yaml not loadable; devcontainer.features.allowlist check skipped.",
+		}
+	}
+	if cfg.Devcontainer == nil || len(cfg.Devcontainer.Features) == 0 {
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerFeaturesAllowlist,
+			Severity: domain.SeverityOK,
+			Message:  "No devcontainer features configured; allowlist check skipped.",
+		}
+	}
+	allowlistViolations, orphanActivations, enabledKeyMissing := classifyFeatureEntries(cfg)
+
+	// Worst-severity wins: allowlist violation (Error) > orphan /
+	// enabled-missing (Warn) > OK. Combine multiple findings into
+	// one message so the user sees the full picture at once.
+	if len(allowlistViolations) > 0 {
+		msg := fmt.Sprintf(
+			"feature(s) with `source:` override not in devcontainer.featureSources.allow: %s. "+
+				"Add the URL via `u-boot config set devcontainer.featureSources.allow <url>` or "+
+				"`--allow-external-feature-sources <url>` (LH-FA-DEV-003; `--yes` is not sufficient, LH-NFA-SEC-004).",
+			strings.Join(allowlistViolations, ", "))
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerFeaturesAllowlist,
+			Severity: domain.SeverityError,
+			Message:  msg,
+		}
+	}
+	if len(orphanActivations) > 0 || len(enabledKeyMissing) > 0 {
+		var parts []string
+		if len(orphanActivations) > 0 {
+			parts = append(parts, fmt.Sprintf(
+				"feature(s) not in catalogue and without `source:` override (renderer skips them): %s",
+				strings.Join(orphanActivations, ", ")))
+		}
+		if len(enabledKeyMissing) > 0 {
+			parts = append(parts, fmt.Sprintf(
+				"feature(s) without explicit enabled: key: %s. "+
+					"Add `enabled: true` or `enabled: false` per LH-FA-ADD-005 §893 (same convention applies to devcontainer.features.<name>)",
+				strings.Join(enabledKeyMissing, ", ")))
+		}
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerFeaturesAllowlist,
+			Severity: domain.SeverityWarn,
+			Message:  strings.Join(parts, "; "),
+		}
+	}
+	return domain.Diagnostic{
+		ID:       checkIDDevcontainerFeaturesAllowlist,
+		Severity: domain.SeverityOK,
+		Message:  "All devcontainer features are catalogue-activatable or allowlist-conformant.",
+	}
+}
+
+// sortedFeatureNames returns the keys of the features-map in
+// alphabetical order. Used by [DoctorService.checkDevcontainerFeaturesAllowlist]
+// so multi-finding messages have a deterministic shape across
+// Go map-iteration shuffles.
+func sortedFeatureNames(m map[string]ubootYAMLDevcontainerFeature) []string {
+	out := make([]string, 0, len(m))
+	for k := range m {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
+}
+
+// classifyFeatureEntries walks cfg.Devcontainer.Features in sorted
+// order and bucket-sorts each entry into one of the three
+// diagnostic categories used by
+// [DoctorService.checkDevcontainerFeaturesAllowlist]:
+//
+//   - allowlistViolations: entries with `source:` override whose
+//     value is absent from `featureSources.allow` (each formatted
+//     as `<name> (source "<url>")`).
+//   - orphanActivations: entries with no `source:` override and a
+//     name that is not a built-in catalogue key (each just the
+//     `<name>`, or `<name> (invalid name)` for the defensive branch
+//     when T1's validateDevcontainerFeatures has been bypassed).
+//   - enabledKeyMissing: entries where `Enabled == nil` (LH-FA-
+//     ADD-005 §893 extended to features).
+//
+// Extracted from [DoctorService.checkDevcontainerFeaturesAllowlist]
+// to keep the latter under the gocognit threshold.
+func classifyFeatureEntries(cfg ubootYAMLConfig) (allowlistViolations, orphanActivations, enabledKeyMissing []string) {
+	for _, name := range sortedFeatureNames(cfg.Devcontainer.Features) {
+		entry := cfg.Devcontainer.Features[name]
+		if entry.Enabled == nil {
+			enabledKeyMissing = append(enabledKeyMissing, name)
+			continue
+		}
+		if entry.Source != "" {
+			if !featureSourceInAllow(cfg, entry.Source) {
+				allowlistViolations = append(allowlistViolations,
+					fmt.Sprintf("%s (source %q)", name, entry.Source))
+			}
+			continue
+		}
+		// Source empty → must be a catalogue key.
+		featureName, ferr := domain.NewFeatureName(name)
+		if ferr != nil {
+			orphanActivations = append(orphanActivations,
+				fmt.Sprintf("%s (invalid name)", name))
+			continue
+		}
+		if _, ok := featureFor(featureName); !ok {
+			orphanActivations = append(orphanActivations, name)
+		}
+	}
+	return allowlistViolations, orphanActivations, enabledKeyMissing
 }
