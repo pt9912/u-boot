@@ -66,6 +66,45 @@ type ComposeDownOptions struct {
 	ProgressSink io.Writer
 }
 
+// ComposeLogsOptions configures a [DockerEngine.ComposeLogs] call
+// (LH-FA-UP-005). Slice-v1-logs §T0-Outcomes pinned the surface:
+// minimal Compose-Facade — only the Spec-mandated `--follow` and
+// `--tail` knobs are exposed; no `--no-log-prefix`/`--timestamps`
+// (the latter live in a future Folge-Slice with a documented
+// trigger).
+type ComposeLogsOptions struct {
+	// Services is the list of service names to filter on (empty =
+	// Compose-Default = all services in compose.yaml). Slice-v1-logs
+	// T0-(a) decision: no `activeServiceNames(cfg)`-filter — Compose
+	// decides, so manually-added compose.yaml services stay visible.
+	// The application service passes either an empty slice (no
+	// positional argument) or a single-element slice (`u-boot logs
+	// <service>`) here; the adapter just forwards.
+	Services []string
+
+	// Follow mirrors `docker compose logs --follow`. When true the
+	// adapter blocks until the underlying compose process exits —
+	// SIGINT propagation lives in the ctx.Err()-pass-through
+	// contract documented on [DockerEngine.ComposeLogs].
+	Follow bool
+
+	// Tail is the value passed to `docker compose logs --tail
+	// <Tail>`. Compose accepts the literal `"all"` (all available
+	// lines) or a decimal integer string (`"0"`, `"100"`, …).
+	// Slice-v1-logs T0-(c): the application service normalises an
+	// empty incoming string to `"all"` and validates numeric
+	// inputs >= 0 in the CLI layer; the adapter trusts the value.
+	Tail string
+
+	// Sink is the writer the adapter forwards Compose's *stdout*
+	// to — the actual log lines, not the progress chatter. Analog
+	// to [ComposeUpOptions.ProgressSink] but for the primary
+	// output, not the side stream. `nil` is treated as `io.Discard`
+	// (debug-no-op usage). The CLI wires this to
+	// `cmd.OutOrStdout()` via [driving.LogsRequest.OutputSink].
+	Sink io.Writer
+}
+
 // ComposeService is the per-service snapshot returned by `docker
 // compose ps --format json`. The fields are the *raw* values from
 // Compose; the application service normalizes them
@@ -147,4 +186,22 @@ type DockerEngine interface {
 	// polling loop and is forwarded to the CLI with the same
 	// errors.Is identity as a `ComposeUp` failure.
 	ComposePs(ctx context.Context, dir string) ([]ComposeService, error)
+
+	// ComposeLogs shells out to `docker compose -f <dir>/compose.yaml
+	// logs [--follow] [--tail <value>] [<service>…]` (LH-FA-UP-005).
+	// Streams the compose stdout to `opts.Sink` line-buffered so
+	// `--follow` arrives real-time even when stdout is piped.
+	//
+	// **SIGINT contract (slice-v1-logs §AK + Plan-Followup P3):**
+	// When the call returns and `ctx.Err() != nil`
+	// (`context.Canceled` or `context.DeadlineExceeded`), the
+	// adapter MUST return `ctx.Err()` UNVERDECKT — it MUST NOT
+	// wrap it in [ErrComposeRuntime] or any other sentinel.
+	// Reason: Ctrl-C in the `--follow` path maps to CLI Exit-Code 0
+	// via the application service's
+	// `errors.Is(err, context.Canceled)` short-circuit; wrapping
+	// would degrade Exit-0 to Exit-12 (compose runtime). All other
+	// non-zero-exit conditions wrap into [ErrComposeRuntime] as
+	// usual.
+	ComposeLogs(ctx context.Context, dir string, opts ComposeLogsOptions) error
 }

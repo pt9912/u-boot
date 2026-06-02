@@ -885,6 +885,12 @@ type fakeDockerEngine struct {
 	down    error
 	downSet bool
 
+	// logs returns this error when ComposeLogs is called. Slice-v1-
+	// logs T1; tests that exercise the LogsService use
+	// scriptLogs() to wire the desired adapter outcome.
+	logs    error
+	logsSet bool
+
 	// psQueue: each ComposePs call pops the head. Tests can also
 	// set psPanicOnCall to make the fake panic the first call —
 	// the M6 slice's --timeout=0 fire-and-forget pin uses this to
@@ -895,10 +901,12 @@ type fakeDockerEngine struct {
 	// Captured options for downstream assertions.
 	upOptions   driven.ComposeUpOptions
 	downOptions driven.ComposeDownOptions
+	logsOptions driven.ComposeLogsOptions
 
 	// Call counters; used by the slice's "PsCalls == N" pins.
 	upCallCount   int
 	downCallCount int
+	logsCallCount int
 	psCallCount   int
 }
 
@@ -959,6 +967,21 @@ func (e *fakeDockerEngine) ComposeDown(_ context.Context, _ string, opts driven.
 		panic("fakeDockerEngine.ComposeDown called without scriptDown; test bug")
 	}
 	return e.down
+}
+
+// ComposeLogs implements [driven.DockerEngine] for the slice-v1-
+// logs T1 surface. T1 only needs the method to exist (the
+// LogsService that calls it lands in T2); a test reaching here
+// before T2 wires the script is a test bug.
+func (e *fakeDockerEngine) ComposeLogs(_ context.Context, _ string, opts driven.ComposeLogsOptions) error {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.logsCallCount++
+	e.logsOptions = opts
+	if !e.logsSet {
+		panic("fakeDockerEngine.ComposeLogs called before scriptLogs (T2) — test bug")
+	}
+	return e.logs
 }
 
 func (e *fakeDockerEngine) ComposePs(_ context.Context, _ string) ([]driven.ComposeService, error) {

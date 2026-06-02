@@ -126,6 +126,51 @@ func (e *Engine) ComposePs(ctx context.Context, dir string) ([]driven.ComposeSer
 	return e.composePs(ctx, dir)
 }
 
+// ComposeLogs implements [driven.DockerEngine] (LH-FA-UP-005).
+// Streams `docker compose logs` stdout to opts.Sink.
+//
+// SIGINT contract (slice-v1-logs §AK + Plan-Followup P3): when
+// the underlying `cmd.Run()` returns and `ctx.Err() != nil`, the
+// adapter returns `ctx.Err()` unverdeckt — NOT wrapped in
+// `driven.ErrComposeRuntime`. Reason: the application layer
+// short-circuits on `errors.Is(err, context.Canceled)` and the
+// CLI maps that path to Exit-Code 0 (tail-konform). Wrapping
+// would degrade Exit-0 to Exit-12 (compose runtime).
+func (e *Engine) ComposeLogs(ctx context.Context, dir string, opts driven.ComposeLogsOptions) error {
+	// SIGINT-Pass-Through (1/2): early return for an already-
+	// cancelled context. The preflight below would otherwise
+	// surface ErrDockerUnavailable (the daemon probe fails on
+	// a cancelled ctx), masking the user's Ctrl-C with a 12-vs-0
+	// exit-code drift.
+	if ctxErr := ctx.Err(); ctxErr != nil {
+		return ctxErr
+	}
+	if err := e.preflight(ctx); err != nil {
+		return err
+	}
+	args := []string{"compose", "-f", filepath.Join(dir, "compose.yaml"), "logs"}
+	if opts.Follow {
+		args = append(args, "--follow")
+	}
+	if opts.Tail != "" {
+		args = append(args, "--tail", opts.Tail)
+	}
+	args = append(args, opts.Services...)
+	cmd := exec.CommandContext(ctx, e.binary, args...)
+	cmd.Stdout = progressSinkOrDiscard(opts.Sink)
+	cmd.Stderr = progressSinkOrDiscard(opts.Sink)
+	err := cmd.Run()
+	// SIGINT-Pass-Through: ctx.Err() vor ComposeRuntime — siehe
+	// Doc-Kommentar oben.
+	if ctxErr := ctx.Err(); ctxErr != nil {
+		return ctxErr
+	}
+	if err != nil {
+		return fmt.Errorf("docker compose logs failed (%s): %w", err.Error(), driven.ErrComposeRuntime)
+	}
+	return nil
+}
+
 // composePs is the preflight-less internal helper; called by both
 // the public ComposePs (which preflights first) and ComposeUp
 // (which already preflighted at the start).
