@@ -1,11 +1,15 @@
 package application
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
+	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 )
 
 // ErrInvalidFeatureSource is the domain sentinel for LH-FA-DEV-003
@@ -343,4 +347,134 @@ func validateDevcontainerFeatures(dc *ubootYAMLDevcontainer) error {
 		}
 	}
 	return nil
+}
+
+// ErrDevcontainerJSONUnparsable signals that the devcontainer.json
+// (after stripJSONC) is not valid JSON. The drift check returns
+// it so the caller can skip with a clear repair-hint while the
+// primary file-validity diagnostic (`devcontainer.json.valid`,
+// from M5-T7's checkDevcontainerJSON) handles the severity side.
+// Slice-followup-devcontainer-features-drift-doctor T1.
+var ErrDevcontainerJSONUnparsable = errors.New("devcontainer.json unparsable after stripJSONC")
+
+// driftJSONFeatureKeys reads `.devcontainer/devcontainer.json` and
+// returns the keys of its `features:` map. The three outcomes:
+//
+//   - File absent → (nil, nil, nil): drift detector treats this
+//     as "no JSON keys"; Case 1 still fires when cfg has enabled
+//     entries.
+//   - File present + valid JSONC → (keys, present=true, nil) where
+//     `keys` may be empty if the JSON has no `features:` section
+//     (also a legitimate "no JSON keys" state for Case 1).
+//   - File present + unparsable → (nil, true,
+//     ErrDevcontainerJSONUnparsable): caller short-circuits to
+//     skip; the validity diagnostic
+//     (`devcontainer.json.valid`) reports the parse failure
+//     separately.
+//
+// fs is the driven port (no direct os.* calls in the application
+// layer). baseDir is the project root.
+func driftJSONFeatureKeys(fs driven.FileSystem, baseDir string) (keys []string, present bool, err error) {
+	path := filepath.Join(baseDir, ".devcontainer", "devcontainer.json")
+	exists, ferr := fs.Exists(path)
+	if ferr != nil {
+		// FS errors are caller-classified — bubble up so the
+		// dispatcher decides between skip and a doctor-level
+		// error.
+		return nil, false, ferr
+	}
+	if !exists {
+		return nil, false, nil
+	}
+	body, ferr := fs.ReadFile(path)
+	if ferr != nil {
+		return nil, true, ferr
+	}
+	stripped := stripJSONC(body)
+	var shape struct {
+		Features map[string]json.RawMessage `json:"features"`
+	}
+	if jerr := json.Unmarshal(stripped, &shape); jerr != nil {
+		return nil, true, fmt.Errorf("%w: %v", ErrDevcontainerJSONUnparsable, jerr)
+	}
+	keys = make([]string, 0, len(shape.Features))
+	for k := range shape.Features {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys, true, nil
+}
+
+// featureDriftProjection holds the two sets the drift detector
+// builds from `cfg.Devcontainer.Features`:
+//
+//   - expectedKeys: render-keys of all entries with Enabled = &true.
+//     These are the keys that MUST appear in the JSON `features:`
+//     map for the project to be drift-free (Case 1 = expected \
+//     jsonKeys).
+//   - knownProjectableKeys: render-keys of ALL projectable entries
+//     (enabled, disabled, or unset). Lets the detector distinguish
+//     Case 2a (disabled feature still in JSON — render-key is
+//     in known but not in expected) from Case 2b (JSON key
+//     completely foreign — not in known at all).
+//
+// "Projectable" excludes entries that projectFeatureEntry would
+// silently skip: orphan activations without a `source:` override.
+// Those land in [DoctorService.checkDevcontainerFeaturesAllowlist]
+// (Teil A), not in the drift check.
+type featureDriftProjection struct {
+	expectedKeys         map[string]struct{}
+	knownProjectableKeys map[string]struct{}
+}
+
+// projectAllFeatureEntries builds the [featureDriftProjection] from
+// every entry in `cfg.Devcontainer.Features` — regardless of
+// `Enabled`. Reuses the same [projectFeatureEntry] helper that the
+// T3 generator uses, so the cfg-side render-key is byte-identical
+// to whatever the generator would emit (S2 finding from the
+// slice-plan review).
+//
+// The detector then performs three set-differences:
+//
+//   - Case 1: expectedKeys \ jsonKeys
+//   - Case 2a: (jsonKeys ∩ knownProjectableKeys) \ expectedKeys
+//   - Case 2b: jsonKeys \ knownProjectableKeys
+//
+// Caller responsibility: nil-cfg / nil-Devcontainer handling lives
+// at the doctor-check call site so the skip-disziplin (precise
+// nil-vs-empty-vs-populated decision) stays observable from one
+// place.
+func projectAllFeatureEntries(cfg ubootYAMLConfig) featureDriftProjection {
+	out := featureDriftProjection{
+		expectedKeys:         map[string]struct{}{},
+		knownProjectableKeys: map[string]struct{}{},
+	}
+	if cfg.Devcontainer == nil {
+		return out
+	}
+	for name, entry := range cfg.Devcontainer.Features {
+		// Build a synthetic entry with Enabled=&true so
+		// projectFeatureEntry yields the render-key even for
+		// disabled features (we drop the actual enabled-bit and
+		// classify via expectedKeys below). The renderer-skip
+		// case (orphan: no catalogue + no source override) still
+		// returns ok=false, so we don't pollute knownProjectableKeys
+		// with names the renderer would silently drop.
+		trueVal := true
+		probe := ubootYAMLDevcontainerFeature{
+			Enabled: &trueVal,
+			Source:  entry.Source,
+			Version: entry.Version,
+		}
+		data, ok := projectFeatureEntry(name, probe)
+		if !ok {
+			continue
+		}
+		renderKey := data.Source + ":" + data.Version
+		out.knownProjectableKeys[renderKey] = struct{}{}
+		if entry.Enabled != nil && *entry.Enabled {
+			out.expectedKeys[renderKey] = struct{}{}
+		}
+	}
+	return out
 }

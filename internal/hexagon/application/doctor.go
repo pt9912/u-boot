@@ -99,10 +99,19 @@ const (
 	// `cfg.Devcontainer.Features` is either catalogue-aktivierbar
 	// or carries a `source:` override whose value appears in
 	// `cfg.Devcontainer.FeatureSources.Allow`. Drift detection (the
-	// over-Spec Teil B) lives in slice-followup-devcontainer-
-	// features-drift-doctor — this check is the allowlist-conformance
-	// gate, not the drift-detector.
+	// over-Spec Teil B) lives in
+	// [checkIDDevcontainerFeaturesDrift].
 	checkIDDevcontainerFeaturesAllowlist = "devcontainer.features.allowlist"
+
+	// checkIDDevcontainerFeaturesDrift is the slice-followup-
+	// devcontainer-features-drift-doctor check (über-Spec, analog
+	// M5 service-block-drift): cfg.Devcontainer.Features and the
+	// rendered `.devcontainer/devcontainer.json` features-map must
+	// agree. Three Drift-Cases: feature-aktiv-im-JSON-fehlend,
+	// feature-deaktiviert-aber-im-JSON-noch-da, JSON-Key-ohne-cfg-
+	// Pendant. Severity warn (repair-hint: `u-boot generate
+	// devcontainer`).
+	checkIDDevcontainerFeaturesDrift = "devcontainer.features.drift"
 )
 
 // Minimum versions per LH-FA-DIAG-002. The thresholds are MAJOR.MINOR
@@ -145,6 +154,7 @@ func (s *DoctorService) Check(ctx context.Context, req driving.DoctorRequest) (d
 		s.checkServicesEnabledKey(ctx, req.BaseDir),
 		s.checkForwardPortsConsistency(ctx, req.BaseDir),
 		s.checkDevcontainerFeaturesAllowlist(ctx, req.BaseDir),
+		s.checkDevcontainerFeaturesDrift(ctx, req.BaseDir),
 	}
 	report := domain.DiagnosticReport{Items: items}
 	s.logger.Info("doctor: checks complete",
@@ -1254,4 +1264,181 @@ func classifyFeatureEntries(cfg ubootYAMLConfig) (allowlistViolations, orphanAct
 		}
 	}
 	return allowlistViolations, orphanActivations, enabledKeyMissing
+}
+
+// checkDevcontainerFeaturesDrift is the slice-followup-devcontainer-
+// features-drift-doctor check (über-Spec, analog M5 service-block-
+// drift): it compares the activated feature set in u-boot.yaml
+// against the keys actually present in `.devcontainer/devcontainer.json`'s
+// `features:` map.
+//
+// Three Drift-Cases (all Severity warn — repair-hint
+// `u-boot generate devcontainer`):
+//
+//   - Case 1 — aktiviertes Feature fehlt im JSON: a cfg entry has
+//     `Enabled = &true` but the resulting `<source>:<version>`
+//     render-key is absent from the JSON. Special sub-case: if
+//     devcontainer.json is missing entirely, EVERY enabled entry
+//     is Case 1 (file-fehlt-Disziplin).
+//   - Case 2a — JSON-Key matches a disabled/unset cfg entry: the
+//     user toggled `enabled: false` but never re-ran `generate`.
+//     Repair: re-run generate.
+//   - Case 2b — JSON-Key has no cfg pendant at all: hand-edit or
+//     drift from an earlier u-boot version. Repair: same, but the
+//     hint also flags the manual-edit possibility.
+//
+// Skip-Disziplin (SeverityOK with a message):
+//
+//   - u-boot.yaml absent / unparsable — primary file diagnostic
+//     lives in [checkUbootYaml].
+//   - Neither cfg.Devcontainer.Features nor JSON-features-map
+//     populated (nichts konfiguriert).
+//   - devcontainer.json present but JSON-parse-fail —
+//     [checkDevcontainerJSON] reports the validity-severity.
+//
+// `nil` vs explicitly empty `features: {}` in cfg are distinguished:
+// the latter does NOT skip (Case 2b can still fire if the JSON has
+// keys; the user might have removed every feature in u-boot.yaml
+// and forgotten to regenerate).
+func (s *DoctorService) checkDevcontainerFeaturesDrift(_ context.Context, baseDir string) domain.Diagnostic {
+	cfg, err := s.loadUbootYAML(baseDir)
+	if err != nil {
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerFeaturesDrift,
+			Severity: domain.SeverityOK,
+			Message:  "u-boot.yaml not loadable; devcontainer.features.drift check skipped.",
+		}
+	}
+	jsonKeys, jsonPresent, jerr := driftJSONFeatureKeys(s.fs, baseDir)
+	if jerr != nil {
+		if errors.Is(jerr, ErrDevcontainerJSONUnparsable) {
+			return domain.Diagnostic{
+				ID:       checkIDDevcontainerFeaturesDrift,
+				Severity: domain.SeverityOK,
+				Message:  "cannot classify drift against unparseable devcontainer.json; fix the file or run `u-boot generate devcontainer` (devcontainer.json.valid surfaces the parse error separately).",
+			}
+		}
+		// FS-side errors: skip with the underlying-error message
+		// so the FS-Check downstream (write-permissions, …)
+		// drives the diagnosis.
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerFeaturesDrift,
+			Severity: domain.SeverityOK,
+			Message:  "cannot read devcontainer.json: " + jerr.Error() + "; drift check skipped.",
+		}
+	}
+
+	cfgFeaturesMap := map[string]ubootYAMLDevcontainerFeature{}
+	if cfg.Devcontainer != nil && cfg.Devcontainer.Features != nil {
+		cfgFeaturesMap = cfg.Devcontainer.Features
+	}
+	cfgEmpty := len(cfgFeaturesMap) == 0
+	jsonEmpty := !jsonPresent || len(jsonKeys) == 0
+	if cfgEmpty && jsonEmpty {
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerFeaturesDrift,
+			Severity: domain.SeverityOK,
+			Message:  "no devcontainer features configured anywhere; drift check skipped.",
+		}
+	}
+
+	proj := projectAllFeatureEntries(cfg)
+	case1 := classifyDriftCase1(proj.expectedKeys, jsonKeys)
+	case2a, case2b := classifyDriftCase2(proj.knownProjectableKeys, proj.expectedKeys, jsonKeys)
+
+	if len(case1) == 0 && len(case2a) == 0 && len(case2b) == 0 {
+		return domain.Diagnostic{
+			ID:       checkIDDevcontainerFeaturesDrift,
+			Severity: domain.SeverityOK,
+			Message:  "devcontainer.features in u-boot.yaml and devcontainer.json are in sync.",
+		}
+	}
+	return domain.Diagnostic{
+		ID:       checkIDDevcontainerFeaturesDrift,
+		Severity: domain.SeverityWarn,
+		Message:  formatDriftMessage(case1, case2a, case2b, jsonPresent),
+	}
+}
+
+// classifyDriftCase1 returns the sorted set-difference
+// `expectedKeys \ jsonKeys` — render-keys whose feature is
+// activated in u-boot.yaml but missing in the rendered JSON.
+func classifyDriftCase1(expectedKeys map[string]struct{}, jsonKeys []string) []string {
+	jsonSet := keysAsSet(jsonKeys)
+	var out []string
+	for k := range expectedKeys {
+		if _, ok := jsonSet[k]; !ok {
+			out = append(out, k)
+		}
+	}
+	sort.Strings(out)
+	return out
+}
+
+// classifyDriftCase2 returns the two sub-sets of `jsonKeys \
+// expectedKeys`: Case 2a (key is in the cfg's full projectable
+// set, but not enabled — disabled-drift) and Case 2b (key is
+// entirely unknown to the cfg — hand-edit or stale rendering).
+func classifyDriftCase2(knownProjectableKeys, expectedKeys map[string]struct{}, jsonKeys []string) (case2a, case2b []string) {
+	for _, k := range jsonKeys {
+		if _, expected := expectedKeys[k]; expected {
+			continue
+		}
+		if _, known := knownProjectableKeys[k]; known {
+			case2a = append(case2a, k)
+			continue
+		}
+		case2b = append(case2b, k)
+	}
+	sort.Strings(case2a)
+	sort.Strings(case2b)
+	return case2a, case2b
+}
+
+// keysAsSet converts a sorted-or-unsorted key slice into a lookup
+// set. Lives next to the drift-detector because the doctor file
+// otherwise has no string-set utility.
+func keysAsSet(keys []string) map[string]struct{} {
+	out := make(map[string]struct{}, len(keys))
+	for _, k := range keys {
+		out[k] = struct{}{}
+	}
+	return out
+}
+
+// formatDriftMessage composes the user-facing drift warn message
+// from the three case-buckets. Each non-empty bucket renders into
+// a semicolon-separated segment so the user sees the full
+// classification picture in one line. The repair-hint at the end
+// names `u-boot generate devcontainer`; Case 2b adds a manual-edit
+// caveat because the JSON-key may have been hand-introduced.
+func formatDriftMessage(case1, case2a, case2b []string, jsonPresent bool) string {
+	var parts []string
+	if len(case1) > 0 {
+		if !jsonPresent {
+			parts = append(parts, fmt.Sprintf(
+				"enabled feature(s) missing in devcontainer.json (file absent): %s",
+				strings.Join(case1, ", ")))
+		} else {
+			parts = append(parts, fmt.Sprintf(
+				"enabled feature(s) missing in devcontainer.json: %s",
+				strings.Join(case1, ", ")))
+		}
+	}
+	if len(case2a) > 0 {
+		parts = append(parts, fmt.Sprintf(
+			"disabled/unset feature(s) still present in devcontainer.json: %s",
+			strings.Join(case2a, ", ")))
+	}
+	if len(case2b) > 0 {
+		parts = append(parts, fmt.Sprintf(
+			"devcontainer.json key(s) without a u-boot.yaml pendant (hand-edit or stale render): %s",
+			strings.Join(case2b, ", ")))
+	}
+	hint := "Run `u-boot generate devcontainer` to resync"
+	if len(case2b) > 0 {
+		hint += "; reconcile hand-edited keys in u-boot.yaml or remove them from devcontainer.json"
+	}
+	hint += "."
+	return strings.Join(parts, "; ") + ". " + hint
 }

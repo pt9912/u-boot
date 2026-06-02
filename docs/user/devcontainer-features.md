@@ -221,11 +221,26 @@ Doctor schweigt (OK) wenn:
 - `cfg.Devcontainer` fehlt oder `features:`-Map leer (Spec §2394
   negative pin: kein Error ohne legitimen Anlass).
 
-Ein zweiter Check für Drift-Erkennung
-(`devcontainer.features.drift` — vergleicht cfg gegen
-gerendertes JSON) lebt in einem Folge-Slice
-[`slice-followup-devcontainer-features-drift-doctor`](../plan/planning/in-progress/slice-followup-devcontainer-features-drift-doctor.md)
-und ist in v0.4.0 noch nicht ausgeliefert.
+### Drift-Check `devcontainer.features.drift`
+
+Der zweite, ergänzende Check vergleicht `u-boot.yaml` gegen die
+Keys in `.devcontainer/devcontainer.json`'s `features:`-Map und
+erkennt drei Drift-Situationen (jeweils Severity **Warn** mit
+Repair-Hint „`u-boot generate devcontainer`"):
+
+| Case | Trigger | Repair |
+| ---- | ------- | ------ |
+| **1** | Feature ist `enabled: true` in u-boot.yaml, fehlt aber im JSON (oder JSON-Datei fehlt ganz). | `generate devcontainer` ausführen. |
+| **2a** | User hat `enabled: false` (oder unset) gesetzt, der JSON-Key steht aber noch drin. | `generate devcontainer` ausführen. |
+| **2b** | JSON enthält einen Feature-Key, für den u-boot.yaml *keinen* Eintrag hat (Hand-Edit oder Drift aus früherem u-boot-Stand). | Eintrag in u-boot.yaml ergänzen oder Key aus JSON entfernen. |
+
+Der Drift-Check skippt (OK), wenn weder u-boot.yaml-Features noch
+JSON-Features konfiguriert sind, oder wenn das JSON nicht parsbar
+ist (dafür ist `devcontainer.json.valid` zuständig).
+
+`nil` (kein `devcontainer.features:`-Block) und explizit leere
+Map (`features: {}`) werden unterschieden: bei expliziter leerer
+Map feuert Case 2b weiterhin, wenn das JSON Keys enthält.
 
 ---
 

@@ -61,14 +61,15 @@ func TestDoctor_WritePermissions_OKOnWritableDir(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Check: %v", err)
 	}
-	// 12 checks total after slice-v1-devcontainer-features T5: 9 from
-	// M4 (write-permissions, git, docker, docker-reachable,
-	// compose-installed, uboot.yaml, compose.yaml, devcontainer.json,
-	// devcontainer.dockerfile), plus services.enabled-key and
+	// 13 checks total after slice-followup-devcontainer-features-
+	// drift-doctor: 9 from M4, plus services.enabled-key and
 	// devcontainer.forwardPorts.consistency from M5-T7, plus
-	// devcontainer.features.allowlist from T5 (LH-FA-DEV-003).
-	if got := len(resp.Report.Items); got != 12 {
-		t.Fatalf("Report.Items = %d, want 12", got)
+	// devcontainer.features.allowlist from slice-v1-devcontainer-
+	// features T5 (LH-FA-DEV-003), plus devcontainer.features.drift
+	// from this follow-up slice (über-Spec, analog M5 service-
+	// block-drift).
+	if got := len(resp.Report.Items); got != 13 {
+		t.Fatalf("Report.Items = %d, want 13", got)
 	}
 	d := findDiagnostic(t, resp.Report.Items, "fs.write-permissions")
 	if d.Severity != domain.SeverityOK {

@@ -26,6 +26,14 @@ this file is the same format applied to u-boot itself.
   Allowlist-Violation, Warn bei Orphan-Activation oder fehlendem
   `enabled:`-Key). User-Doku in
   [`docs/user/devcontainer-features.md`](docs/user/devcontainer-features.md).
+- `feat(doctor): devcontainer.features.drift Check` — über-Spec
+  Drift-Erkennung zwischen `u-boot.yaml`'s Features-Map und den
+  Keys im gerenderten `.devcontainer/devcontainer.json`. Drei
+  Warn-Cases: aktiviertes Feature fehlt im JSON (Case 1, inkl.
+  Datei-fehlt-Disziplin), deaktiviertes Feature noch im JSON
+  (Case 2a), JSON-Key ohne cfg-Pendant (Case 2b, Hand-Edit-Hint).
+  Repair-Hint `u-boot generate devcontainer`. Doctor-Total
+  steigt 12→13.
 
 ## [0.3.0] - 2026-06-01
 
