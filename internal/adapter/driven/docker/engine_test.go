@@ -429,3 +429,91 @@ func TestEngine_ComposeLogs_ContextCanceled_ReturnsCtxErrUnverdeckt(t *testing.T
 		t.Errorf("ctx.Canceled leaked into ErrComposeRuntime — SIGINT-Vertrag verletzt: %v", err)
 	}
 }
+
+// TestEngine_ComposeLogs_TailEmpty_SkipsFlag_F6 is the Review-
+// Followup F6 anti-regression pin: the adapter's `if opts.Tail
+// != ""` branch (`engine.go:155`) skips the `--tail`-flag when
+// the caller passes an empty string. The LogsService normalises
+// empty→"all" before calling, so this branch is never reached
+// in production; but a hypothetical direct adapter caller (T4
+// E2E, future RPC) must see Compose's own default-all behaviour
+// rather than a `--tail <empty>` argv error. Pinned via the
+// /bin/echo-arg-inspection pattern.
+func TestEngine_ComposeLogs_TailEmpty_SkipsFlag_F6(t *testing.T) {
+	t.Parallel()
+	shellBinaryAvailable(t, "/bin/echo")
+	e := docker.WithEngineBinary("/bin/echo")
+	var sink bytes.Buffer
+	if err := e.ComposeLogs(context.Background(), "/tmp/demo", driven.ComposeLogsOptions{
+		Tail: "", // empty — adapter must skip the flag entirely
+		Sink: &sink,
+	}); err != nil {
+		t.Fatalf("ComposeLogs: %v", err)
+	}
+	got := sink.String()
+	if bytes.Contains([]byte(got), []byte("--tail")) {
+		t.Errorf("argv contains `--tail` despite Tail==\"\"; want flag skipped\n  argv echo: %s", got)
+	}
+}
+
+// TestWrapComposeRunError_F3 is the Review-Followup F3 anti-
+// regression pin for the SIGINT-Pass-Through Schicht 1 (post-
+// cmd.Run). The wrap-helper was extracted from
+// [Engine.ComposeLogs] so it can be unit-tested without a real
+// subprocess — the real `exec.CommandContext`-mid-flight-kill
+// path is the responsibility of T4's Docker-Tag E2E test.
+//
+// Four cases pin the contract: (a) nil context + nil run-error
+// → nil; (b) nil context + run-error → ErrComposeRuntime; (c)
+// canceled context + nil run-error → context.Canceled (the
+// "cancel raced with successful exit" edge); (d) canceled
+// context + run-error like "signal: killed" → context.Canceled
+// unverdeckt, NOT ErrComposeRuntime (the load-bearing mid-flight-
+// SIGINT path).
+func TestWrapComposeRunError_F3(t *testing.T) {
+	t.Parallel()
+
+	t.Run("nil ctx + nil run-error → nil", func(t *testing.T) {
+		t.Parallel()
+		err := docker.WrapComposeRunErrorForTest(context.Background(), nil, "logs")
+		if err != nil {
+			t.Errorf("err = %v, want nil", err)
+		}
+	})
+
+	t.Run("nil ctx + run-error → ErrComposeRuntime", func(t *testing.T) {
+		t.Parallel()
+		runErr := errors.New("exit status 1")
+		err := docker.WrapComposeRunErrorForTest(context.Background(), runErr, "logs")
+		if !errors.Is(err, driven.ErrComposeRuntime) {
+			t.Errorf("err = %v, want wrap of ErrComposeRuntime", err)
+		}
+	})
+
+	t.Run("canceled ctx + nil run-error → context.Canceled", func(t *testing.T) {
+		t.Parallel()
+		ctx, cancel := context.WithCancel(context.Background())
+		cancel()
+		err := docker.WrapComposeRunErrorForTest(ctx, nil, "logs")
+		if !errors.Is(err, context.Canceled) {
+			t.Errorf("err = %v, want context.Canceled", err)
+		}
+	})
+
+	t.Run("canceled ctx + run-error → context.Canceled UNVERDECKT", func(t *testing.T) {
+		t.Parallel()
+		ctx, cancel := context.WithCancel(context.Background())
+		cancel()
+		// Mid-flight SIGINT: exec.CommandContext kills subprocess,
+		// cmd.Run() returns "signal: killed". The wrap MUST return
+		// ctx.Err() instead of wrapping into ErrComposeRuntime.
+		runErr := errors.New("signal: killed")
+		err := docker.WrapComposeRunErrorForTest(ctx, runErr, "logs")
+		if !errors.Is(err, context.Canceled) {
+			t.Errorf("err = %v, want context.Canceled (Schicht-1 post-cmd.Run guard)", err)
+		}
+		if errors.Is(err, driven.ErrComposeRuntime) {
+			t.Errorf("mid-flight cancel leaked into ErrComposeRuntime — Exit-12 statt Exit-0: %v", err)
+		}
+	})
+}

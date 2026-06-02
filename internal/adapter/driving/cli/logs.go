@@ -147,16 +147,28 @@ func runLogs(
 // a non-negative integer. The internal `"all"` constant is NOT a
 // valid user-supplied value — only the application service
 // produces it via normaliseTail.
+//
+// Review-Followup F1: Compose-CLI users tend to type `--tail all`
+// out of muscle memory; the special-case explains that the
+// implicit default already streams all lines, so the user can drop
+// the flag entirely.
+//
+// Review-Followup F8: parsing uses `strconv.ParseUint(raw, 10, 32)`
+// rather than `strconv.Atoi`. `Atoi("+5") == 5, nil` would accept
+// an unsigned-integer-shaped string with a leading sign, leaking
+// past the T0-(c) "non-negative integer" contract. ParseUint
+// rejects both signs and whitespace deterministically.
 func validateLogsTailFlag(raw string) error {
 	if raw == "" {
 		return nil
 	}
-	n, err := strconv.Atoi(raw)
-	if err != nil {
-		return fmt.Errorf("%w: got %q", ErrInvalidLogsTail, raw)
+	if raw == "all" {
+		return fmt.Errorf(
+			"%w: `--tail \"all\"` is the implicit default; omit the flag to stream all lines",
+			ErrInvalidLogsTail)
 	}
-	if n < 0 {
-		return fmt.Errorf("%w: got %d", ErrInvalidLogsTail, n)
+	if _, err := strconv.ParseUint(raw, 10, 32); err != nil {
+		return fmt.Errorf("%w: got %q", ErrInvalidLogsTail, raw)
 	}
 	return nil
 }

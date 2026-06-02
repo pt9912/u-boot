@@ -115,8 +115,13 @@ func TestLogsService_HappyPath_TailNormalised(t *testing.T) {
 	if len(fix.engine.logsOptions.Services) != 0 {
 		t.Errorf("Services = %v, want empty (T0-(a) Compose-Default)", fix.engine.logsOptions.Services)
 	}
-	if fix.engine.logsOptions.Sink == nil {
-		t.Errorf("Sink is nil; want OutputSink to be forwarded")
+	// Review-Followup F4: pointer-identity, not just nil-vs-nicht-
+	// nil. A buggy implementation that forwards `cmd.ErrOrStderr()`
+	// instead of `cmd.OutOrStdout()` would have passed the previous
+	// nil-only check; this pin catches the swap.
+	if fix.engine.logsOptions.Sink != &sink {
+		t.Errorf("Sink pointer mismatch — want the test buffer pointer-equal, got %p (test buffer = %p)",
+			fix.engine.logsOptions.Sink, &sink)
 	}
 	if fix.engine.logsOptions.Follow {
 		t.Errorf("Follow = true, want false")

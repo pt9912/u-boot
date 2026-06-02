@@ -24,6 +24,13 @@ import (
 //     adapter (`domain.NewServiceName`). The application layer
 //     trusts the value (no double-validation here). Unknown
 //     services at runtime → `driven.ErrComposeRuntime` (Exit 12).
+//     **Non-CLI callers** (future RPC, direct tests, other
+//     adapters) MUST validate `req.Service` via
+//     `domain.NewServiceName` themselves before calling
+//     `LogsService.Logs`, OR accept that an invalid name is
+//     forwarded verbatim to Compose and surfaces as Exit-12
+//     instead of Exit-10. Review-Followup F7 made the validation-
+//     distribution explicit.
 //   - T0-(c): Empty Tail normalises to Compose's `"all"` constant
 //     before reaching the adapter. Numeric values pass through
 //     verbatim.
@@ -142,6 +149,13 @@ func (s *LogsService) checkComposeFile(baseDir string) error {
 // rejecting negative / non-numeric inputs before reaching the
 // service, and for parsing the format-validated service name via
 // `domain.NewServiceName` (T0-(b)).
+//
+// Review-Followup F5: free function rather than `*LogsService`-
+// method on purpose — pure function over its input, no service-
+// state needed. Keeping it free makes the T0-(c) contract
+// trivially unit-testable and signals "this is the only place
+// that produces the `\"all\"` constant" (Plan-Followup N2
+// invariant).
 func normaliseTail(in string) string {
 	if in == "" {
 		return "all"

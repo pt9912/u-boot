@@ -96,11 +96,19 @@ type ComposeLogsOptions struct {
 	// inputs >= 0 in the CLI layer; the adapter trusts the value.
 	Tail string
 
-	// Sink is the writer the adapter forwards Compose's *stdout*
-	// to — the actual log lines, not the progress chatter. Analog
-	// to [ComposeUpOptions.ProgressSink] but for the primary
-	// output, not the side stream. `nil` is treated as `io.Discard`
-	// (debug-no-op usage). The CLI wires this to
+	// Sink is the writer the adapter forwards BOTH of Compose's
+	// streams to — stdout (log lines) AND stderr (compose status
+	// like `Attaching to …`, service-exit notices). Review-Followup
+	// F2: the previous Doc-Kommentar promised "stdout only", but
+	// `cmd.Stderr` is also routed here to keep T0-(d) intact (Spec-
+	// treu: Compose-Output unverändert). Splitting the streams to
+	// distinct writers would either require a `--no-log-prefix`-
+	// style discriminator the slice deliberately omits, or a
+	// second sink field which would re-introduce the API surface
+	// that T0-(d) closed. So: one Sink for both, documented.
+	//
+	// `nil` is treated as `io.Discard` by the adapter
+	// (`progressSinkOrDiscard`). The CLI wires this to
 	// `cmd.OutOrStdout()` via [driving.LogsRequest.OutputSink].
 	Sink io.Writer
 }

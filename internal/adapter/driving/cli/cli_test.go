@@ -185,17 +185,26 @@ func (f *fakeRemoveServiceUseCase) Remove(_ context.Context, req driving.RemoveS
 
 // fakeLogsUseCase records the last LogsRequest and returns the
 // configured response/error. Mirrors the shape of the other
-// fake use cases (slice-v1-logs T3).
+// fake use cases (slice-v1-logs T3). The optional onLogs hook
+// (Review-Followup F4) lets tests run a callback with the
+// captured request — e.g. to write a sentinel into the
+// OutputSink so the CLI-stdout-wiring can be end-to-end pinned.
 type fakeLogsUseCase struct {
 	called  bool
 	lastReq driving.LogsRequest
 	resp    driving.LogsResponse
 	err     error
+	onLogs  func(req driving.LogsRequest) error
 }
 
 func (f *fakeLogsUseCase) Logs(_ context.Context, req driving.LogsRequest) (driving.LogsResponse, error) {
 	f.called = true
 	f.lastReq = req
+	if f.onLogs != nil {
+		if err := f.onLogs(req); err != nil {
+			return f.resp, err
+		}
+	}
 	return f.resp, f.err
 }
 
@@ -2108,6 +2117,35 @@ func TestExecute_Logs_NoArgs_PropagatesEmptyService(t *testing.T) {
 	}
 }
 
+// TestExecute_Logs_OutputSinkIdentity_F4 is the Review-Followup
+// F4 pin: a sentinel string written to the durch-gereichten
+// OutputSink from a fake-UseCase MUST land in the Cobra-CLI's
+// stdout buffer. Catches the buggy variant where the CLI forwards
+// `cmd.ErrOrStderr()` (or any other writer) by mistake.
+func TestExecute_Logs_OutputSinkIdentity_F4(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	const sentinel = "F4-sink-identity-marker\n"
+	uc := &fakeLogsUseCase{}
+	// Capture the request inside fake.Logs and write to its
+	// OutputSink so the test can verify the wiring end-to-end.
+	uc.onLogs = func(req driving.LogsRequest) error {
+		if req.OutputSink != nil {
+			_, _ = req.OutputSink.Write([]byte(sentinel))
+		}
+		return nil
+	}
+	var stdout, stderr bytes.Buffer
+	if err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs"}, &stdout, &stderr,
+	); err != nil {
+		t.Fatalf("Execute logs: %v", err)
+	}
+	if !strings.Contains(stdout.String(), sentinel) {
+		t.Errorf("stdout = %q does not contain sentinel %q — CLI may forward the wrong writer",
+			stdout.String(), sentinel)
+	}
+}
+
 func TestExecute_Logs_ServiceArg_PropagatesService(t *testing.T) {
 	getwd := func() (string, error) { return "/tmp/x/demo", nil }
 	uc := &fakeLogsUseCase{}
@@ -2175,7 +2213,13 @@ func TestExecute_Logs_InvalidTail_Negative_Code2(t *testing.T) {
 	}
 }
 
-func TestExecute_Logs_InvalidTail_NonNumeric_Code2(t *testing.T) {
+// TestExecute_Logs_InvalidTail_AllReserved_Code2 pins the
+// Review-Followup F1 wording-hint: `--tail all` is the Compose-
+// CLI default that u-boot's CLI rejects (T0-(c) says "all" is
+// internal-only). The error message must explain WHY — Compose-
+// reflex users would otherwise wonder why their habitual flag
+// failed.
+func TestExecute_Logs_InvalidTail_AllReserved_Code2(t *testing.T) {
 	getwd := func() (string, error) { return "/tmp/x/demo", nil }
 	uc := &fakeLogsUseCase{}
 	var stdout, stderr bytes.Buffer
@@ -2183,7 +2227,32 @@ func TestExecute_Logs_InvalidTail_NonNumeric_Code2(t *testing.T) {
 		context.Background(), []string{"logs", "--tail", "all"}, &stdout, &stderr,
 	)
 	if err == nil {
-		t.Fatalf("expected error for non-numeric --tail (\"all\" is internal, not user-input)")
+		t.Fatalf("expected error for `--tail all`")
+	}
+	if !errors.Is(err, cli.ErrInvalidLogsTail) {
+		t.Errorf("err = %v, want wrap of ErrInvalidLogsTail", err)
+	}
+	if got := cli.ExitCode(err); got != 2 {
+		t.Errorf("ExitCode = %d, want 2", got)
+	}
+	if !strings.Contains(err.Error(), "implicit default") {
+		t.Errorf("err message %q lacks Compose-reflex wording-hint", err.Error())
+	}
+}
+
+// TestExecute_Logs_InvalidTail_PlusSign_Code2 pins the Review-
+// Followup F8 stricter parser: `strconv.Atoi("+5")` returned
+// `(5, nil)` and would have let `--tail +5` slip past Stage-1;
+// `strconv.ParseUint` rejects the sign deterministically.
+func TestExecute_Logs_InvalidTail_PlusSign_Code2(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeLogsUseCase{}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs", "--tail", "+5"}, &stdout, &stderr,
+	)
+	if err == nil {
+		t.Fatalf("expected error for `--tail +5` (F8: ParseUint rejects sign)")
 	}
 	if !errors.Is(err, cli.ErrInvalidLogsTail) {
 		t.Errorf("err = %v, want wrap of ErrInvalidLogsTail", err)

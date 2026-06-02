@@ -159,14 +159,27 @@ func (e *Engine) ComposeLogs(ctx context.Context, dir string, opts driven.Compos
 	cmd := exec.CommandContext(ctx, e.binary, args...)
 	cmd.Stdout = progressSinkOrDiscard(opts.Sink)
 	cmd.Stderr = progressSinkOrDiscard(opts.Sink)
-	err := cmd.Run()
-	// SIGINT-Pass-Through: ctx.Err() vor ComposeRuntime — siehe
-	// Doc-Kommentar oben.
+	return wrapComposeRunError(ctx, cmd.Run(), "logs")
+}
+
+// wrapComposeRunError implements the SIGINT-Pass-Through Schicht 1
+// (post-cmd.Run): if `ctx.Err() != nil` the context cancellation
+// is returned unverdeckt — `exec.CommandContext` killed the
+// subprocess, so `runErr` would otherwise be `signal: killed` and
+// get wrapped into ErrComposeRuntime, flipping Exit-0 (tail-
+// konform Ctrl-C) into Exit-12 (compose runtime). Extracted from
+// [Engine.ComposeLogs] for Review-Followup F3: the helper is
+// unit-testable without a real subprocess.
+//
+// kind is the compose verb name used in the error message
+// (`"logs"`, future `"exec"`, …). Returns nil when runErr is nil
+// and ctx is healthy.
+func wrapComposeRunError(ctx context.Context, runErr error, kind string) error {
 	if ctxErr := ctx.Err(); ctxErr != nil {
 		return ctxErr
 	}
-	if err != nil {
-		return fmt.Errorf("docker compose logs failed (%s): %w", err.Error(), driven.ErrComposeRuntime)
+	if runErr != nil {
+		return fmt.Errorf("docker compose %s failed (%s): %w", kind, runErr.Error(), driven.ErrComposeRuntime)
 	}
 	return nil
 }
