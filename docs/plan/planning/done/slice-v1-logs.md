@@ -13,8 +13,7 @@
 > T3 CLI-Subcommand `d51f1c6` + F1..F8 Review-Followup `b50a270`,
 > T4 Docker-E2E + Application-Spec-Pin `e9a5392`,
 > T5 Doku-Closure (README EN+DE Subcommand-Tabelle + CHANGELOG
-> `[Unreleased]` + Slice → `done/` + Roadmap-Status) ▶ T5-DoD-Hash
-> wird im Followup-Commit ergänzt.
+> `[Unreleased]` + Slice → `done/` + Roadmap-Status) `357e40a`.
 
 ## Auslöser
 
