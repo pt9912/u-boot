@@ -6,7 +6,10 @@
 > Plan-Anlage `37300c5`, Plan-Followup S1/S2 (Drift-Semantik
 > präzisiert) `0c34f0c`, open→in-progress `18ac5a3`, T1+T2
 > Implementierung + Tests + User-Doc + CHANGELOG `c2ff32f`, T3
-> Closure folgt in diesem Commit.
+> Closure (slice in-progress→done, carveout aufgelöst)
+> `2995524`, Code-Review-Followup S1..S6 (renderKeyOf-Refactor,
+> 4 Cross-Check-Tests, formatDriftMessage-Pin, stringSet-
+> Konsolidierung) `91f3fb2`.
 
 ## Auslöser
 
