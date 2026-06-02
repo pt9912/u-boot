@@ -13,6 +13,24 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- `feat(logs): u-boot logs [service] [--follow] [--tail <n>]
+  (LH-FA-UP-005)` — neuer Subcommand streamt Compose-Logs als
+  V1-Erweiterung der `up`/`down`-Familie. Ohne Service-Argument
+  läuft `docker compose logs` über alle Services aus
+  `compose.yaml` (T0-(a) Compose-Facade-Semantik, kein
+  u-boot.yaml-Filter); mit Service-Argument nur diesen einen
+  (Format-Validation via `domain.NewServiceName`, Existenz-Check
+  delegiert an Compose). `--follow` blockt bis Ctrl-C und
+  beendet via SIGINT-Vertrag-Schicht-1+2+3 (Adapter gibt
+  `ctx.Err()` unverdeckt zurück, Use-Case übersetzt zu
+  `(LogsResponse{}, nil)`, CLI exit-code 0). `--tail <n>` mit
+  Stage-1-Validation auf nicht-negative Ganzzahlen (Default
+  leer → Use-Case-Normalisierung zu Compose-`"all"`). Exit-
+  Code-Mapping analog `up`/`down`: 10 (User/Project-State),
+  11 (`ErrDockerUnavailable`), 12 (`ErrComposeRuntime`),
+  14 (FS), 2 (CLI-Usage). Docker-tag E2E-Tests gegen echten
+  postgres-Stack pinnen `--tail`-Buffer-Content und
+  `--follow`-SIGINT-Vertrag.
 - `feat(devcontainer): Devcontainer-Features-Allowlist und Katalog
   (LH-FA-DEV-003)` — 8 Built-in-Features (`git`, `docker-cli`,
   `node`, `java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`)

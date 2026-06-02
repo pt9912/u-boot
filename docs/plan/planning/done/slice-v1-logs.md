@@ -1,16 +1,20 @@
 # Slice V1: `u-boot logs` (`LH-FA-UP-005`)
 
-> **Status:** geplant für v0.4.0 — Spec ✅
+> **Status:** ✅ Done (v0.4.0-Material). Spec ✅
 > ([`spec/lastenheft.md:1023-1040`](../../../../spec/lastenheft.md)),
 > Port-Anker ✅
 > ([`internal/hexagon/port/driving/README.md:39`](../../../../internal/hexagon/port/driving/README.md)
 > nennt `LogsUseCase` als V1-Erweiterung, driven/README §"Geplante
 > Erweiterungen" listet `Logs`/`Exec`-Verb auf `DockerEngine`),
-> Plan-Followup P1..P5 ✅ (Review-Findings adressiert),
-> T0-Discovery ✅ (siehe §T0-Outcomes). In `in-progress/`: T1
-> (Driven-Port + Adapter) ✅, T2 (Use-Case) ✅, T3 (CLI-Subcommand
-> inkl. F1..F8-Followup) ✅, T4 (Docker-E2E + Spec-Pin) ✅; T5
-> (Doku + Closure) ausstehend.
+> Plan-Followup P1..P5 ✅, T0-Discovery ✅
+> (siehe §T0-Outcomes).
+> **DoD:** T1 Driven-Port + Adapter `69a43d9`,
+> T2 LogsService `ed59789`,
+> T3 CLI-Subcommand `d51f1c6` + F1..F8 Review-Followup `b50a270`,
+> T4 Docker-E2E + Application-Spec-Pin `e9a5392`,
+> T5 Doku-Closure (README EN+DE Subcommand-Tabelle + CHANGELOG
+> `[Unreleased]` + Slice → `done/` + Roadmap-Status) ▶ T5-DoD-Hash
+> wird im Followup-Commit ergänzt.
 
 ## Auslöser
 
@@ -33,7 +37,7 @@ Pflicht-Flags: `--follow` (fortlaufend), `--tail <n>` (letzte n
 Zeilen). Keine weiteren AKs im Spec-Text.
 
 Roadmap-Notiz: „Gehört zusammen mit dem Dry-Run-/JSON-Slice"
-([`roadmap.md`](roadmap.md) §v0.4.0). Bedeutet:
+([`roadmap.md`](../in-progress/roadmap.md) §v0.4.0). Bedeutet:
 beide V1-CLI-Erweiterungen werden in v0.4.0 gebündelt; harte
 Code-Abhängigkeit besteht nicht — `--json`-Mode kommt im
 Folge-Slice `slice-v1-cli-json-dry-run` nachträglich auf `logs`
@@ -183,7 +187,7 @@ Compose-/Docker-Failures klassifizieren strikt analog M6
 | T2  | **Use-Case.** ✅ Done. `LogsRequest{BaseDir, Service, Follow, Tail, OutputSink}` + `LogsResponse{}` + `LogsUseCase` in `port/driving/logs.go` (mit ausführlichen T0-Outcomes-Referenzen im Doc-Kommentar). `LogsService` in `application/logsservice.go`: BaseDir-Check → Project-State-Check (u-boot.yaml + compose.yaml) → Tail-Normalisierung (T0-(c): leer → `"all"`) → ComposeLogs-Aufruf → SIGINT-Pass-Through (`context.Canceled` und `context.DeadlineExceeded` → `(LogsResponse{}, nil)`). Service-Name-Validation NICHT im Use-Case (T0-(b): nur Regex auf CLI-Ebene, Compose macht Existenz-Check). 8 Tests (BaseDir-empty, ohne u-boot.yaml, ohne compose.yaml, Happy-Path-Tail-Normalisierung, Happy-Path-Service-Filter, SIGINT-Canceled, SIGINT-Deadline, ErrComposeRuntime-Propagation, ErrDockerUnavailable-Propagation). | ~120 geschätzt / **~245 real** (+104 %; getrieben durch ausführliche Doc-Kommentare mit T0/P3-Referenzen — analog Parent-Slice T4-Verlauf) |
 | T3  | **CLI-Subcommand.** ✅ Done. `internal/adapter/driving/cli/logs.go` mit Cobra `logs [service]` (`MaximumNArgs(1)`), `--follow` (BoolVar), `--tail` (StringVar). `validateLogsTailFlag` für Stage-1-Validation (T0-(c)). Service-Name-Validation via `domain.NewServiceName` (Format-Regex → Exit-10). SIGINT-Wiring von `main.go:signal.NotifyContext`. App-Wiring: neues `logsUseCase`-Feld + alle 9 `cli.New`-Call-Sites + main.go. `ErrInvalidLogsTail` in `isUsageError` → Exit-2. 10 CLI-Tests pinnen alle Exit-Code-Pfade. **Review-Followup F1..F8** (post-Konsolidierten-Review der T1+T2+T3-Schichten): F1 `--tail "all"`-Wording-Hint, F2 Sink-Doc-vs-Code aufgelöst (sagt jetzt "BOTH stdout+stderr"), F3 Cancel-mid-flight via `wrapComposeRunError`-Helper-Extraktion + 4 hermetische Sub-Tests, F4 Sink-Pointer-Identity-Pin (Service- und CLI-seitig), F5 `normaliseTail` Doc-Begründung, F6 Tail=""-Skip-Flag-Pin im Adapter, F7 `LogsService`-Doku trusts-CLI-Validation explizit, F8 `strconv.ParseUint` statt `Atoi` (rejected `+5`/whitespace). | ~80 geschätzt / **~174 real** + **~70 LOC Followup** = ~244 (+205 %; getrieben durch App-Wiring + 13 Test-Pin-Funktionen + Review-Followup-Härtung) |
 | T4  | **Docker-Tag E2E + Spec-Pin.** ✅ Done. `internal/e2e/logs_acceptance_docker_test.go` (`//go:build docker`, 119 LOC): zwei Tests gegen echten postgres-Compose-Stack via `runAcceptanceFlow`-Helper (Variante A — kein Helper-Refactor). `TestE2E_LHFAUP005_LogsTail` (`--tail 20`, Buffer enthält die kanonische postgres-Boot-Phrase `database system is ready`), `TestE2E_LHFAUP005_LogsFollow` (`--follow` mit 8 s `ctx.Deadline`, Pin auf SIGINT-Vertrag Schicht 2 — DeadlineExceeded → nil-error + Sink-Buffer-Flush-Content). Plus Application-Layer-Spec-Pin in `internal/hexagon/application/acceptance_test.go` (+128 LOC): `TestLHFAUP005_LogsHappyPath` (init+add+Logs gegen `fakeDockerEngine`; Pin Tail-Normalisierung T0-(c), Service-Filter T0-(a)/(b), Sink-Pointer-Identity F4) und `TestLHFAUP005_LogsSIGINTReturnsNil` (`context.Canceled`-Sentinel → `(LogsResponse{}, nil)`). Lokal grün: `make test` 6.8s, `make test-docker` 31s für die zwei LH-FA-UP-005-Tests. | ~150 geschätzt / **~247 real** (+65 %; Doc-Kommentare mit T0/F4/SIGINT-Vertrag-Referenzen analog T2-Verlauf) |
-| T5  | **Doku + Closure.** README EN+DE Subcommand-Tabelle, CHANGELOG `## [Unreleased]`-Eintrag. Slice `open/` → `done/` mit DoD-Hash-Line. Roadmap-Status. | — (Doku) |
+| T5  | **Doku + Closure.** ✅ Done. README.md + README.de.md Subcommand-Referenz-Tabelle um `logs [service] [--follow] [--tail <n>]` (LH-FA-UP-005) ergänzt. CHANGELOG.md `## [Unreleased]`-Block: `feat(logs)`-Eintrag mit Compose-Facade-Semantik, SIGINT-Vertrag und Exit-Code-Mapping. Slice von `in-progress/` nach `done/` verschoben mit Status-Header-DoD-Line (T1-T4-Hashes inline; T5-Hash via Followup-Commit). roadmap.md v0.4.0-Arbeitspakete-Tabelle: slice-v1-logs-Zeile von „in-progress" auf „Done". | — (Doku) |
 
 LOC-Summe T1-T4: Plan-Schätzung **~470 LOC**, Real **~838 LOC**
 (T1 ~102 + T2 ~245 + T3 ~244 inkl. F1..F8-Followup + T4 ~247).
@@ -305,10 +309,10 @@ sieht das gleiche Layout wie bei `docker compose logs`.
   [`internal/hexagon/port/driven/README.md:60`](../../../../internal/hexagon/port/driven/README.md)
   (`Logs` als Geplante DockerEngine-Erweiterung).
 - Vorbild-Slices:
-  [`slice-m6-up-down`](../done/slice-m6-up-down.md)
+  [`slice-m6-up-down`](slice-m6-up-down.md)
   (Compose-Adapter-Pattern + Project-State-Check + Cobra-
   Subcommand-Wiring),
-  [`slice-v1-devcontainer-features`](../done/slice-v1-devcontainer-features.md)
+  [`slice-v1-devcontainer-features`](slice-v1-devcontainer-features.md)
   T0-Outcomes-Layout als Doku-Template für die T0-Sub-Decisions.
 - Code-Anker:
   `internal/adapter/driven/docker/engine.go:81` (ComposeUp-
@@ -317,6 +321,6 @@ sieht das gleiche Layout wie bei `docker compose logs`.
   Skelett mit Project-State-Check),
   `internal/adapter/driving/cli/down.go` (Cobra-Subcommand-
   Pattern mit Context-Propagation).
-- Roadmap: [`roadmap.md`](roadmap.md) §v0.4.0 —
+- Roadmap: [`roadmap.md`](../in-progress/roadmap.md) §v0.4.0 —
   Bündelung mit `slice-v1-cli-json-dry-run`.
 - Phase: V1, geplant für v0.4.0-Release.

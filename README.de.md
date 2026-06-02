@@ -190,6 +190,7 @@ Auflösungs-Slices und §Nächste Schritte für das laufende Backlog.
 | `remove <service> [--purge]` | `LH-FA-ADD-007` | Spiegel von `add` — disable + Managed-Blocks raus. |
 | `up [--timeout <s>]` | `LH-FA-UP-001..003` | Compose up + Healthcheck-Poll + TCP-Probe. |
 | `down [--volumes]` | `LH-FA-UP-004` | Compose down mit destruktiver Bestätigungs-Gate. |
+| `logs [service] [--follow] [--tail <n>]` | `LH-FA-UP-005` | Compose-Logs streamen (alle Services oder einen); `--follow` beendet sauber mit Exit 0 bei Ctrl-C. |
 | `generate <artifact>` | `LH-FA-GEN-001..005` | Idempotente Block-Ersetzung via `U-BOOT MANAGED BLOCK`-Marker. |
 | `config [get\|set] [<pfad> [<wert>]]` | `LH-FA-CONF-001..005` | Whitelist-skopierte Reads/Writes mit zweistufiger Schema-Validierung. |
 | `template list [--json]` | `LH-FA-TPL-004` | Eingebauten Template-Katalog browsen. |

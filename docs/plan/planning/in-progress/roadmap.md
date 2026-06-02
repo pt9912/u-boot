@@ -23,7 +23,7 @@ benannte APs in dieser Roadmap.
 
 | AP | Status | Entscheidung / nächster Schritt |
 | --- | --- | --- |
-| [`slice-v1-logs`](slice-v1-logs.md) | `in-progress/`; T0 Discovery sowie T1 bis T3 im Slice dokumentiert | T4 Docker-E2E/Spec-Pin und T5 Doku/Closure abschließen, dann nach `done/` bewegen. |
+| [`slice-v1-logs`](../done/slice-v1-logs.md) | ✅ Done (T1 `69a43d9`, T2 `ed59789`, T3 `d51f1c6` + F1..F8 `b50a270`, T4 `e9a5392`, T5 Doku-Closure mit Slice nach `done/` + README EN+DE + CHANGELOG + dieser Roadmap-Eintrag) | — |
 | `slice-v1-cli-json-dry-run` | noch kein Slice-Plan | Maschinenlesbare CLI (`LH-FA-CLI-007/008`, `LH-NFA-USE-004`); stützt ADR-0010 als Alternative zu einem HTTP-Adapter. |
 | [`slice-v1-keycloak-ci-flake`](../open/slice-v1-keycloak-ci-flake.md) | `open/`, on hold | Keycloak-Acceptance-Flake analysieren, sobald CI-Logs/Quay- oder Mirror-Befund belastbar sind. |
 | [`slice-v2-homebrew-formula`](../open/slice-v2-homebrew-formula.md) | `open/`, on hold | Erste konkrete macOS-/Homebrew-Nutzeranfrage. |

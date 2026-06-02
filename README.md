@@ -182,6 +182,7 @@ and §Nächste Schritte for the in-progress backlog.
 | `remove <service> [--purge]` | `LH-FA-ADD-007` | Mirror of `add` — disable + cut managed blocks. |
 | `up [--timeout <s>]` | `LH-FA-UP-001..003` | Compose up + healthcheck-poll + TCP probe. |
 | `down [--volumes]` | `LH-FA-UP-004` | Compose down with destructive-confirmation gate. |
+| `logs [service] [--follow] [--tail <n>]` | `LH-FA-UP-005` | Stream Compose logs (all services or one); `--follow` exits 0 on Ctrl-C. |
 | `generate <artifact>` | `LH-FA-GEN-001..005` | Idempotent block-replace via `U-BOOT MANAGED BLOCK` marker. |
 | `config [get\|set] [<path> [<value>]]` | `LH-FA-CONF-001..005` | Whitelist-scoped reads/writes with two-stage schema validation. |
 | `template list [--json]` | `LH-FA-TPL-004` | Browse the built-in template catalogue. |
