@@ -7,9 +7,8 @@
 > nennt `LogsUseCase` als V1-Erweiterung, driven/README §"Geplante
 > Erweiterungen" listet `Logs`/`Exec`-Verb auf `DockerEngine`),
 > Plan-Followup P1..P5 ✅ (Review-Findings adressiert),
-> T0-Discovery ✅ (siehe §T0-Outcomes), Implementation
-> ausstehend (T1..T5). Bereit für Lifecycle-Übergang `open/` →
-> `next/`.
+> T0-Discovery ✅ (siehe §T0-Outcomes). In `in-progress/`: T1
+> (Driven-Port + Adapter) läuft, T2..T5 ausstehend.
 
 ## Auslöser
 
@@ -32,7 +31,7 @@ Pflicht-Flags: `--follow` (fortlaufend), `--tail <n>` (letzte n
 Zeilen). Keine weiteren AKs im Spec-Text.
 
 Roadmap-Notiz: „Gehört zusammen mit dem Dry-Run-/JSON-Slice"
-([`roadmap.md`](../in-progress/roadmap.md) §v0.4.0). Bedeutet:
+([`roadmap.md`](roadmap.md) §v0.4.0). Bedeutet:
 beide V1-CLI-Erweiterungen werden in v0.4.0 gebündelt; harte
 Code-Abhängigkeit besteht nicht — `--json`-Mode kommt im
 Folge-Slice `slice-v1-cli-json-dry-run` nachträglich auf `logs`
@@ -310,6 +309,6 @@ sieht das gleiche Layout wie bei `docker compose logs`.
   Skelett mit Project-State-Check),
   `internal/adapter/driving/cli/down.go` (Cobra-Subcommand-
   Pattern mit Context-Propagation).
-- Roadmap: [`roadmap.md`](../in-progress/roadmap.md) §v0.4.0 —
+- Roadmap: [`roadmap.md`](roadmap.md) §v0.4.0 —
   Bündelung mit `slice-v1-cli-json-dry-run`.
 - Phase: V1, geplant für v0.4.0-Release.
