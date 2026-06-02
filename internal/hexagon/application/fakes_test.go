@@ -969,17 +969,29 @@ func (e *fakeDockerEngine) ComposeDown(_ context.Context, _ string, opts driven.
 	return e.down
 }
 
-// ComposeLogs implements [driven.DockerEngine] for the slice-v1-
-// logs T1 surface. T1 only needs the method to exist (the
-// LogsService that calls it lands in T2); a test reaching here
-// before T2 wires the script is a test bug.
+// scriptLogs queues the error the next ComposeLogs call returns
+// (slice-v1-logs T2). nil → success; non-nil is returned verbatim
+// (LogsService is responsible for SIGINT-Pass-Through, which means
+// `context.Canceled` / `context.DeadlineExceeded` returned here
+// surface as a nil-error from the Use-Case layer).
+func (e *fakeDockerEngine) scriptLogs(err error) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.logs = err
+	e.logsSet = true
+}
+
+// ComposeLogs implements [driven.DockerEngine] (slice-v1-logs T1
+// surface + T2 scripting). A test reaching here before scriptLogs
+// is a test bug — the panic mirrors the ComposeUp / ComposeDown
+// pattern.
 func (e *fakeDockerEngine) ComposeLogs(_ context.Context, _ string, opts driven.ComposeLogsOptions) error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	e.logsCallCount++
 	e.logsOptions = opts
 	if !e.logsSet {
-		panic("fakeDockerEngine.ComposeLogs called before scriptLogs (T2) — test bug")
+		panic("fakeDockerEngine.ComposeLogs called without scriptLogs; test bug")
 	}
 	return e.logs
 }
