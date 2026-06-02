@@ -24,7 +24,7 @@ benannte APs in dieser Roadmap.
 | AP | Status | Entscheidung / nächster Schritt |
 | --- | --- | --- |
 | [`slice-v1-logs`](../done/slice-v1-logs.md) | ✅ Done (T1 `69a43d9`, T2 `ed59789`, T3 `d51f1c6` + F1..F8 `b50a270`, T4 `e9a5392`, T5 Doku-Closure mit Slice nach `done/` + README EN+DE + CHANGELOG + dieser Roadmap-Eintrag) | — |
-| [`slice-v1-cli-json-dry-run`](../open/slice-v1-cli-json-dry-run.md) | `open/` (initialer Stub) | Cluster-Slice für maschinenlesbare CLI (`LH-FA-CLI-007/008`, `LH-NFA-USE-004`); Per-Command-Inkrementell-Strategie mit 9 Folge-Slices, V1-pünktlich wegen ADR-0010 Re-Eval-Trigger 2. T0 (5 Sub-Decisions) vor `next/`-Übergang festzulegen. |
+| [`slice-v1-cli-json-dry-run`](../open/slice-v1-cli-json-dry-run.md) | `open/` (Stub `1d3f652` + Review-Findings H1+M1+M2+L1 `5d651bf`) | Cluster-Slice für maschinenlesbare CLI (`LH-FA-CLI-007/008`, `LH-NFA-USE-004`); Per-Command-Inkrementell-Strategie mit 9 Folge-Slices, V1-pünktlich wegen ADR-0010 Re-Eval-Trigger 2. **Closure-Hard-Rule:** alle 9 Folge-Slices `done/`, sonst Carveout-Eintrag mit Re-Trigger-Stub Pflicht. T0 (5 Sub-Decisions inkl. FS-Mutations-Matrix-Pflicht) vor `next/`-Übergang festzulegen. |
 | [`slice-v1-keycloak-ci-flake`](../open/slice-v1-keycloak-ci-flake.md) | `open/`, on hold | Keycloak-Acceptance-Flake analysieren, sobald CI-Logs/Quay- oder Mirror-Befund belastbar sind. |
 | [`slice-v2-homebrew-formula`](../open/slice-v2-homebrew-formula.md) | `open/`, on hold | Erste konkrete macOS-/Homebrew-Nutzeranfrage. |
 | [`slice-v2-distro-pakete`](../open/slice-v2-distro-pakete.md) | `open/`, on hold | Konkrete Debian-/RPM-Anfrage mit Bereitschaft für Packaging-Overhead. |
