@@ -15,6 +15,7 @@ package application_test
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 
@@ -164,3 +165,146 @@ func TestLHAK006_DoubleAddPostgres_NoDuplicate(t *testing.T) {
 			got, body)
 	}
 }
+
+// TestLHFADEV003_CatalogueActivation pins `LH-FA-DEV-003` happy
+// path (spec/lastenheft.md:692-721 + slice-v1-devcontainer-features
+// AK „Spec-Pin"):
+//
+//	u-boot init --devcontainer
+//	u-boot config set devcontainer.features.node.enabled true
+//	u-boot generate devcontainer
+//
+// must produce a `.devcontainer/devcontainer.json` whose
+// `features:` block contains the key
+// `ghcr.io/devcontainers/features/node:1` (catalogue lookup + T3
+// renderer projection). No Allowlist needed because `node` is a
+// built-in catalogue feature (Spec §711).
+func TestLHFADEV003_CatalogueActivation(t *testing.T) {
+	fs := newFakeFS()
+	fs.markDirExists(testBaseDir)
+	y := &fakeYAML{}
+	git := &fakeGit{}
+
+	initSvc := application.NewInitProjectService(fs, y, git, nil, nil, nil)
+	configSvc := application.NewConfigService(fs, y, nil)
+	generateSvc := application.NewGenerateService(fs, y, nil)
+
+	// init --devcontainer
+	if _, err := initSvc.Init(context.Background(), driving.InitProjectRequest{
+		BaseDir:      testBaseDir,
+		Name:         "demo",
+		SkipGit:      true,
+		Devcontainer: true,
+	}); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+
+	// config set devcontainer.features.node.enabled true
+	path, err := domain.NewConfigPath("devcontainer.features.node.enabled")
+	if err != nil {
+		t.Fatalf("NewConfigPath: %v", err)
+	}
+	if _, err := configSvc.Set(context.Background(), driving.ConfigSetRequest{
+		BaseDir: testBaseDir,
+		Path:    path,
+		Value:   "true",
+	}); err != nil {
+		t.Fatalf("config set: %v", err)
+	}
+
+	// generate devcontainer
+	if _, err := generateSvc.Generate(context.Background(), driving.GenerateRequest{
+		BaseDir:  testBaseDir,
+		Artifact: domain.ArtifactDevcontainer,
+	}); err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+
+	// devcontainer.json carries the canonical OCI-ref key.
+	body, err := fs.ReadFile(testBaseDir + "/.devcontainer/devcontainer.json")
+	if err != nil {
+		t.Fatalf("read devcontainer.json: %v", err)
+	}
+	wantKey := `"ghcr.io/devcontainers/features/node:1": {}`
+	if !strings.Contains(string(body), wantKey) {
+		t.Errorf("devcontainer.json missing feature key %q; body:\n%s",
+			wantKey, body)
+	}
+}
+
+// TestLHFADEV003_AllowlistEnforcement pins `LH-FA-DEV-003` negative
+// path (spec/lastenheft.md:720, LH-NFA-SEC-004): an attempt to
+// register a `features.<name>.source` URL that is not in
+// `featureSources.allow` fails with [driving.ErrConfigValueInvalid]
+// (LH-FA-CLI-006 exit-code 10). The seed via
+// `--allow-external-feature-sources` at init time then unblocks the
+// same call. `--yes` is not exercised (it doesn't apply to the
+// non-interactive Set path) but the sentinel-chain contract is the
+// LH-NFA-SEC-004 surface.
+func TestLHFADEV003_AllowlistEnforcement(t *testing.T) {
+	fs := newFakeFS()
+	fs.markDirExists(testBaseDir)
+	y := &fakeYAML{}
+	git := &fakeGit{}
+
+	initSvc := application.NewInitProjectService(fs, y, git, nil, nil, nil)
+	configSvc := application.NewConfigService(fs, y, nil)
+
+	// init --devcontainer (no Allowlist seed yet).
+	if _, err := initSvc.Init(context.Background(), driving.InitProjectRequest{
+		BaseDir:      testBaseDir,
+		Name:         "demo",
+		SkipGit:      true,
+		Devcontainer: true,
+	}); err != nil {
+		t.Fatalf("init: %v", err)
+	}
+
+	// Negative path: source override without Allowlist entry → error.
+	sourcePath, err := domain.NewConfigPath("devcontainer.features.custom.source")
+	if err != nil {
+		t.Fatalf("NewConfigPath: %v", err)
+	}
+	externalURL := "https://ghcr.io/orgX/features/custom-rust"
+	_, err = configSvc.Set(context.Background(), driving.ConfigSetRequest{
+		BaseDir: testBaseDir,
+		Path:    sourcePath,
+		Value:   externalURL,
+	})
+	if err == nil {
+		t.Fatalf("Set: expected error for source not in allowlist, got nil")
+	}
+	if !errors.Is(err, driving.ErrConfigValueInvalid) {
+		t.Errorf("err = %v, want wrap of ErrConfigValueInvalid (LH-FA-CLI-006 exit-10)", err)
+	}
+	if !strings.Contains(err.Error(), "LH-FA-DEV-003") {
+		t.Errorf("err message %q does not name LH-FA-DEV-003", err.Error())
+	}
+	if !strings.Contains(err.Error(), "LH-NFA-SEC-004") {
+		t.Errorf("err message %q does not name LH-NFA-SEC-004", err.Error())
+	}
+
+	// Positive path after seeding the Allowlist via the Spec §717-
+	// `config set devcontainer.featureSources.allow` route — same
+	// shape the CLI flag uses internally.
+	allowPath, err := domain.NewConfigPath("devcontainer.featureSources.allow")
+	if err != nil {
+		t.Fatalf("NewConfigPath(allow): %v", err)
+	}
+	if _, err := configSvc.Set(context.Background(), driving.ConfigSetRequest{
+		BaseDir: testBaseDir,
+		Path:    allowPath,
+		Value:   externalURL,
+	}); err != nil {
+		t.Fatalf("seed allowlist: %v", err)
+	}
+	// Now the same source override succeeds.
+	if _, err := configSvc.Set(context.Background(), driving.ConfigSetRequest{
+		BaseDir: testBaseDir,
+		Path:    sourcePath,
+		Value:   externalURL,
+	}); err != nil {
+		t.Errorf("source override after Allowlist seed: %v", err)
+	}
+}
+
