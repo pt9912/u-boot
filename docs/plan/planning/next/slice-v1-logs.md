@@ -6,9 +6,10 @@
 > ([`internal/hexagon/port/driving/README.md:39`](../../../../internal/hexagon/port/driving/README.md)
 > nennt `LogsUseCase` als V1-Erweiterung, driven/README §"Geplante
 > Erweiterungen" listet `Logs`/`Exec`-Verb auf `DockerEngine`),
-> Implementation ausstehend. T0 (Discovery + Design) festgehalten
-> beim Übergang nach `next/`; Tranchen-Schnitt wird dort
-> verfeinert.
+> Plan-Followup P1..P5 ✅ (Review-Findings adressiert),
+> T0-Discovery ✅ (siehe §T0-Outcomes), Implementation
+> ausstehend (T1..T5). Bereit für Lifecycle-Übergang `open/` →
+> `next/`.
 
 ## Auslöser
 
@@ -42,22 +43,26 @@ drauf.
 `u-boot logs [service] [--follow] [--tail <n>]` in einem
 initialisierten Projekt:
 
-- Ohne `service`-Argument streamt es Logs der in u-boot.yaml
-  registrierten Services. **Welche genau** (alle Services aus
-  compose.yaml vs. nur `cfg.Services` mit `enabled: true` via
-  `activeServiceNames(cfg)`) ist **T0-Sub-Decision (a)** — der
-  Default wird vor T1-Start festgezurrt und im §T0-Outcomes-
-  Block ergänzt (Plan-Followup-P4-Konsistenz: dieser Slice
-  spricht heute an zwei Stellen widersprüchlich darüber).
+- Ohne `service`-Argument streamt es Logs **aller Services aus
+  dem Compose-Projekt** (`compose.yaml`) gemäß Compose-Default
+  — kein u-boot.yaml-Filter, kein `activeServiceNames(cfg)`-
+  Filter. Konkret: `ComposeLogsOptions.Services` bleibt leer,
+  Compose entscheidet. Begründung in §T0-Outcomes (a):
+  `u-boot logs` ist Compose-Facade, kein State-Machine-Tool;
+  manuell ergänzte Compose-Services bleiben sichtbar.
 - Mit `service`-Argument streamt nur diesen einen.
 - `--follow` blockiert bis Ctrl-C; SIGINT beendet sauber mit
   Exit-Code 0 (analog `tail -f`-Konvention).
-- `--tail <n>` akzeptiert `n ≥ 0` (Ganzzahl als String) **oder**
-  die Compose-Konstante `"all"`. Default ohne Flag: Compose-
-  Default (effektiv „all"). Negative oder nicht-numerische Werte
-  außer `"all"` → CLI-Usage-Error, Exit-Code 2 (Cobra-/Stage-1-
-  Validation in `runLogs`, vor Use-Case-Aufruf — analog der
-  bestehenden `--timeout`/`--tail`-Parse-Konventionen aus M6).
+- `--tail <n>` akzeptiert ausschließlich Ganzzahlen `n ≥ 0`
+  (Compose-Konvention für Numeric-Tail). Default ohne Flag: CLI
+  setzt leeren String, Use-Case normalisiert zu `"all"`; Adapter
+  übersetzt das in `docker compose logs --tail all`.
+  Negative Werte oder nicht-numerische Strings → CLI-Usage-
+  Error, **Exit-Code 2** (Cobra-/Stage-1-Validation in `runLogs`,
+  vor Use-Case-Aufruf). Der String `"all"` selbst ist **nicht**
+  CLI-User-Input — er entsteht nur durch die Use-Case-
+  Normalisierung; Tests pinnen alle drei Pfade (kein Flag,
+  `--tail 0`, negativ/non-numerisch).
 
 Compose-/Docker-Failures klassifizieren strikt analog M6
 `up`/`down` (vgl. `internal/adapter/driving/cli/cli.go:237 ff.`
@@ -110,12 +115,20 @@ Compose-/Docker-Failures klassifizieren strikt analog M6
   (siehe T0-Sub-Decision (b)).
 - ✅ **CLI:** `u-boot logs [service]` mit optionalem Positional-
   Arg (Cobra-`MaximumNArgs(1)`). Flags `--follow` / `--tail
-  <n>`. Service-Name-Validation via `domain.NewServiceName`
-  (Exit-Code 10 bei Format-Fehler, mappt durch
-  `isServiceValidationError` analog `add`/`remove`). `--tail`-
-  Parse: Strings `"all"`, `"0"`, `"1"`, …, `"100"` akzeptiert;
-  negative oder andere non-numerische Werte → Exit-Code 2 via
-  CLI-Stage-1-Parse-Fehler (vor Use-Case-Aufruf).
+  <n>`. Service-Name-Validation **ausschließlich** via
+  `domain.NewServiceName` (Format-Regex; Exit-Code 10 bei
+  Format-Fehler, mappt durch `isServiceValidationError`
+  analog `add`/`remove`) — **keine** `cfg.Services`- oder
+  Katalog-Membership-Prüfung (Compose-Delegation, T0-(b)).
+  Unbekannter Service zur Laufzeit landet via
+  `driven.ErrComposeRuntime` bei **Exit-Code 12**; das ist
+  Plan-Akzeptanz (T0-(b)-Folge), nicht ein Fehler — der User
+  sieht eine Compose-Runtime-Meldung wie bei `up`/`down`.
+  `--tail`-Parse: Ganzzahlen `n ≥ 0` akzeptiert (`"0"`, `"1"`,
+  …, `"100"`); negative oder non-numerische Werte → Exit-Code
+  2 via CLI-Stage-1-Parse-Fehler (vor Use-Case-Aufruf). Der
+  String `"all"` selbst ist intern (Use-Case-Normalisierung),
+  nicht User-Input.
 - ✅ **Streaming-Disziplin:** Adapter line-buffert auf den Sink,
   damit `--follow` real-time ankommt (Compose-Default kann
   block-buffern bei pipe-stdout). Tradeoff dokumentiert; ggf.
@@ -164,7 +177,7 @@ Compose-/Docker-Failures klassifizieren strikt analog M6
 
 | T   | Inhalt (Skizze) | LOC (Schätzung) |
 | --- | --------------- | --------------- |
-| T0  | **Discovery / Design.** Vier Sub-Decisions (Plan-Followup-P4: (a) ist **blockierend** für die §Aufhebungsbedingung — der Plan-Text widerspricht sich heute zwischen „nur enabled" und „leer = alle"; vor T1-Start eindeutig auflösen): (a) leerer Service-Filter → Compose-Default vs. `activeServiceNames`-Filter (entscheidet, ob deaktivierte/manuell-Compose-Services Logs leaken können — Source-of-Truth-Frage); (b) Service-Name-Validation-Tiefe (`domain.NewServiceName` + Katalog-Membership-Check wie `add`, oder nur Regex + Pass-Through zu Compose?); (c) `--tail`-Default ohne Flag (Compose-Default ist „all"; übernehmen oder `tail=100`?); (d) Output-Format-Sub-Entscheidung (`--no-log-prefix` per Default, `--timestamps` opt-in?). Ergebnis als §T0-Outcomes im Plan analog `slice-v1-devcontainer-features`. | — (Plan-Arbeit) |
+| T0  | **Discovery / Design.** ✅ Vier Sub-Decisions festgezurrt — siehe [§T0-Outcomes](#t0-outcomes). (a) Compose-Default ohne `activeServiceNames`-Filter; (b) nur Regex-Validation, Compose macht Existenz-Check (unbekannter Service → Exit-12); (c) `--tail`-Default leerer String → Use-Case-Normalisierung zu `"all"`; (d) Spec-treu — nur `--follow`+`--tail`, keine Output-Format-Flags. | — (Plan-Arbeit) |
 | T1  | **Driven-Port + Adapter.** `ComposeLogs`-Methode + `ComposeLogsOptions`-Struct in `port/driven/docker_engine.go`. Adapter-Implementation in `adapter/driven/docker/engine.go` mit `exec.CommandContext` (Context-Cancellation für SIGINT). Unit-Tests für Adapter (mock-out via fake-cmd-runner). | ~120 |
 | T2  | **Use-Case.** `LogsRequest`/`LogsResponse`/`LogsUseCase` in `port/driving/logsservice.go`; `LogsService` in `application/logsservice.go`. Project-State-Check (analog `UpService`); Service-Name-Validation gemäß T0-(b). | ~120 |
 | T3  | **CLI-Subcommand.** `internal/adapter/driving/cli/logs.go`; Cobra-Command `logs [service]` mit `--follow`/`--tail`-Flags; SIGINT-Handler oder Context-Cancellation via `cmd.Context()`. App-Wiring in `cli.go:New`. | ~80 |
@@ -174,8 +187,91 @@ Compose-/Docker-Failures klassifizieren strikt analog M6
 LOC-Summe T1-T4 ≈ **470 LOC** (Schätzung); unter 800-LOC-Carveout-
 Schwelle. Re-Check vor T4-Start.
 
+## T0-Outcomes
+
+Vier Sub-Decisions vor T1-Start festgezurrt. Plan-Followup-P4
+hatte (a) als blockierend markiert; alle vier sind hier
+verbindlich.
+
+### T0-(a) Service-Filter: Compose-Default (alle)
+
+**Entscheidung:** `u-boot logs` ohne Argument lässt
+`ComposeLogsOptions.Services` leer; Compose entscheidet, welche
+Services geloggt werden (= alle in `compose.yaml`, unabhängig
+von `cfg.Services.<name>.enabled`).
+
+**Begründung:** `u-boot logs` ist operativ Compose-Facade, kein
+State-Machine-Tool. `up`/`down` lesen u-boot.yaml nur als
+Projektmarker und führen Compose gegen `compose.yaml` aus; ein
+`activeServiceNames(cfg)`-Filter ausgerechnet beim Inspect-
+Befehl würde eine andere Runtime-Sicht einführen. Manuell
+ergänzte Compose-Services bleiben für `logs` sichtbar — das
+ist konsistent mit der Compose-Delegations-Linie aus M6.
+
+### T0-(b) Service-Name-Validation: nur Regex, Compose macht Existenz
+
+**Entscheidung:** Service-Name-Validation ausschließlich via
+`domain.NewServiceName` (Format-Regex). Keine
+`cfg.Services`-Membership-Prüfung, keine Katalog-Prüfung.
+Unbekannte Services zur Laufzeit landen via
+`driven.ErrComposeRuntime` bei Exit-Code 12.
+
+**Begründung:** Konsistent mit T0-(a). Eine cfg- oder Katalog-
+Prüfung würde `u-boot logs` enger als `docker compose logs`
+machen und manuell ergänzte Services ausschließen — Bruch der
+Compose-Facade-Semantik. **Akzeptierte Folge:** Ein Tippfehler
+(`u-boot logs psotgres`) wird nicht früh durch eine Validation
+gefangen, sondern landet bei Exit-Code 12 mit Compose-Runtime-
+Meldung. Das ist Plan-Akzeptanz, kein Bug. Format-Fehler (z. B.
+`u-boot logs Postgres` mit Großbuchstaben) bleiben bei
+Exit-Code 10 via `domain.ErrInvalidServiceName`.
+
+### T0-(c) `--tail`-Default: Compose-Default `"all"`
+
+**Entscheidung:** CLI defaultet `--tail` auf leeren String;
+Use-Case normalisiert leer → `"all"`. Adapter setzt
+`--tail all` an die Compose-CLI weiter. Akzeptierter
+User-Input-Range: Ganzzahl-Strings `"0"`, `"1"`, …
+(keine Obergrenze; Compose mapped sehr große Werte selbst).
+Negative oder non-numerische Werte (außer dem internen `"all"`)
+→ Exit-Code 2 in der CLI-Stage-1-Validation.
+
+**Begründung:** `u-boot logs` ist Compose-Facade; principle-of-
+least-surprise. Defensive Defaults wie `tail=100` (kubectl-
+Konvention) wären nur sinnvoll, wenn die Spec Performance gegen
+lange Historien priorisierte — tut sie nicht. Performance-
+Probleme bei langlaufenden Containern löst der User mit
+explizitem `--tail 100`.
+
+### T0-(d) Output-Format: Spec-treu, keine zusätzlichen Flags
+
+**Entscheidung:** CLI exponiert nur die zwei Spec-Pflicht-
+Flags `--follow` und `--tail`. Adapter gibt Compose-Output
+unverändert an stdout. Kein `--no-log-prefix`, kein
+`--timestamps`. Format-Flag-Wünsche sind explizit Out of Scope
+mit benanntem Trigger (siehe §Out of Scope).
+
+**Begründung:** Hält den Surface klein und vermeidet, dass der
+spätere `slice-v1-cli-json-dry-run`-Slice direkt noch
+Format-Sonderfälle mitziehen muss. Spec-treu (LH-FA-UP-005
+fordert genau zwei Flags). Compose-Output-Default (mit
+Service-Prefix, ohne Timestamps) bleibt erhalten — der User
+sieht das gleiche Layout wie bei `docker compose logs`.
+
+---
+
 ## Out of Scope
 
+- **`--no-log-prefix` / `--timestamps`-Flags (Output-Format,
+  T0-(d)):** Spec-Pflicht sind nur `--follow` und `--tail`;
+  dieser Slice exponiert genau diese. Compose-Defaults bleiben
+  (Service-Prefix sichtbar, keine Timestamps). Trigger für
+  einen Folge-Slice: konkrete Debugging-/Logformat-Nachfrage
+  (z. B. „Timestamps für Incident-Forensik fehlen"). Bewusst
+  *vor* dem `slice-v1-cli-json-dry-run`-Slice, weil
+  `--json` einen eigenen Output-Modus mitbringt — Format-
+  Flags hier würden den später kommenden Maschinen-Format-
+  Slice unnötig verschachteln.
 - **`--since <timestamp>` / `--until <timestamp>`-Flags:** Spec
   verlangt nur `--follow` und `--tail`. Compose-CLI hat beides,
   aber bis Trigger-Nachfrage YAGNI.
