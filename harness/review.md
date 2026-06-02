@@ -78,6 +78,7 @@ Negativbefunde fuer relevante Linsen.
 | Docker-only / Gates | Bleibt der reproduzierbare `make`-/Docker-Harness intakt? |
 | File Safety | Sind managed blocks, Backups, Two-Phase-Planung und Confirmers respektiert? |
 | Tests | Gibt es Happy-, Boundary- und Negative-Pins fuer neue Vertraege? |
+| Replay / Golden Sets | Sind Generator-Goldens fuer Fresh-State, Idempotenz und Safety-Pfade vorhanden? |
 | Carveouts | Sind temporaere Ausnahmen dokumentiert und mit Plan-Anker versehen? |
 | Docs / Release | Sind README, `docs/user/`, ADR-Index, Roadmap und CHANGELOG konsistent? |
 

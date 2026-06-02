@@ -97,6 +97,13 @@ Slice-Closure braucht Verification-Evidence nach
 reichen nicht: Die Evidence muss DoD, Spec-/ADR-IDs, ausgefuehrte
 Sensors, nicht ausgefuehrte Sensors und Carveouts sichtbar verbinden.
 
+### Replay / Golden Sets
+
+Generator-Aenderungen folgen [`harness/replay.md`](harness/replay.md).
+Neue oder geaenderte CLI-Generatoren brauchen Golden Cases fuer
+Fresh-State, Idempotenz und relevante Safety-Pfade. Intentional
+geaenderter Output muss in Slice, Test oder Commit begruendet werden.
+
 ### Exit-Code-Vertraege
 
 Die `LH-FA-CLI-006`-Klassifikation ist ein Produktvertrag. Neue

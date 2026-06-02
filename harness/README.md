@@ -36,6 +36,7 @@ Feedforward-Quellen, die Arbeit vor der Umsetzung lenken:
 | [`docs/user/quality.md`](../docs/user/quality.md) | Quality-Gates, Linter-Profil, Coverage, Security |
 | [`harness/roles.md`](roles.md) | Rollen, Uebergaben und Konfliktpfade |
 | [`harness/review.md`](review.md) | Review-Kategorien, Prueflinsen und Output-Schema |
+| [`harness/replay.md`](replay.md) | Replay-/Golden-Set-Regeln fuer CLI-Generatoren |
 | [`harness/verification.md`](verification.md) | Verification-Evidence und Slice-Closure-Schema |
 | [`AGENTS.md`](../AGENTS.md) | Hard Rules, Source Precedence, Minimal Workflow |
 
@@ -69,6 +70,8 @@ nicht ausgefuehrt wurde.
   Gate, Demo, ADR oder dokumentierte Closure.
 - Slice-Closure braucht Verification-Evidence nach
   [`harness/verification.md`](verification.md).
+- Generator-Aenderungen brauchen Replay-/Golden-Evidence nach
+  [`harness/replay.md`](replay.md).
 - Neue ADRs muessen den ADR-Index aktualisieren.
 - Planning-Dokumente folgen `open/ -> next/ -> in-progress/ -> done/`.
 - Temporaere Carveouts brauchen parallel Inventar-Eintrag und
@@ -118,9 +121,11 @@ getrennte Artefakte.
 6. Kleinste sinnvolle Aenderung ausfuehren.
 7. Engsten nuetzlichen Sensor laufen lassen.
 8. Bei Codeaenderungen nach Moeglichkeit `make gates` ausfuehren.
-9. Verification-Evidence nach [`harness/verification.md`](verification.md)
+9. Bei Generator-Aenderungen Replay-/Golden-Evidence nach
+   [`harness/replay.md`](replay.md) festhalten.
+10. Verification-Evidence nach [`harness/verification.md`](verification.md)
    festhalten, wenn ein Slice geschlossen oder ein oeffentlicher Vertrag
    beruehrt wurde.
-10. Oeffentliche Doku, Planning-Artefakte und CHANGELOG aktualisieren,
+11. Oeffentliche Doku, Planning-Artefakte und CHANGELOG aktualisieren,
    wenn ein oeffentlicher Vertrag beruehrt wurde.
-11. Handoff mit Rolle, ausgefuehrten Sensors, offenen Sensors und Risiken.
+12. Handoff mit Rolle, ausgefuehrten Sensors, offenen Sensors und Risiken.

@@ -79,6 +79,7 @@ wenn ein naheliegender Sensor nicht gelaufen ist.
 | Architektur-/Importregeln | `make lint` | `make gates`; bei depguard-Aenderung zusaetzlich `make verify-depguard` |
 | Coverage-relevanter Code | `make coverage-gate` | `make gates` |
 | Docker-/Compose-/E2E-Verhalten | engster Docker-Test oder `make test-docker` | `make test-docker` plus `make gates` |
+| Generator-/Template-Output | relevanter Golden-/Replay-Test | `make test` plus Replay-Evidence nach [`harness/replay.md`](replay.md) |
 | Security-/Release-Pfad | `make govulncheck` oder `make image-scan` | `make ci` oder `make fullbuild` |
 
 ## Harte Regeln
@@ -86,6 +87,8 @@ wenn ein naheliegender Sensor nicht gelaufen ist.
 - Ein gruenes `make gates` ersetzt nicht den DoD-Abgleich.
 - Ein einzelner Unit-Test ersetzt nicht den Link auf die betroffene
   `LH-*`- oder `ADR-*`-ID.
+- Generator-Aenderungen brauchen Replay-/Golden-Evidence nach
+  [`harness/replay.md`](replay.md).
 - Nicht ausgefuehrte Sensors sind erlaubt, aber nur mit Grund.
 - Neue temporaere Carveouts brauchen parallel einen Eintrag in
   [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md)
