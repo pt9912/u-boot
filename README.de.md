@@ -151,6 +151,13 @@ Eintrag; siehe
 für den `--allow-external-feature-sources`-Fluss und die
 `LH-NFA-SEC-004`-Disziplin (`--yes` reicht nicht).
 
+`u-boot doctor` bringt zwei LH-FA-DEV-003-Checks zur Feature-
+Konfiguration mit: `devcontainer.features.allowlist` (Error,
+wenn ein `source:`-Override nicht in der Allowlist steht) und
+`devcontainer.features.drift` (Warn, wenn `u-boot.yaml` und die
+gerenderte `devcontainer.json`-Features-Map auseinanderlaufen —
+Repair via `u-boot generate devcontainer`).
+
 Re-Init auf einem bestehenden Projekt verlangt eine explizite
 Strategie (`--force` für Managed-Block-Edits, `--backup` für
 Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien). Siehe den
@@ -178,7 +185,7 @@ Auflösungs-Slices und §Nächste Schritte für das laufende Backlog.
 | Subkommando | Spec-IDs | Kurz |
 | ----------- | -------- | ---- |
 | `init [name] [--devcontainer] [--template <name>]` | `LH-FA-INIT-001..007`, `LH-FA-TPL-001` | Projekt-Skelett + `git init`. |
-| `doctor [--strict]` | `LH-FA-DIAG-001..004`, `LH-FA-DEV-003` | 13 Diagnose-Checks; v0.4.0 ergänzt `devcontainer.features.allowlist` (Error bei LH-FA-DEV-003-Verstößen) und `devcontainer.features.drift` (Warn, wenn u-boot.yaml's Features-Map und das gerenderte `devcontainer.json` divergieren; Repair via `u-boot generate devcontainer`). Container-aware Skip für Host-Probes. |
+| `doctor [--strict]` | `LH-FA-DIAG-001..004`, `LH-FA-DEV-003` | 13 Diagnose-Checks; container-aware Skip für Host-Probes. |
 | `add <service> [--with-deps]` | `LH-FA-ADD-001..006` | Idempotente State-Machine für Service-Add-Ons (`postgres`, `keycloak`, `otel`); `--with-deps` installiert fehlende Abhängigkeiten automatisch. |
 | `remove <service> [--purge]` | `LH-FA-ADD-007` | Spiegel von `add` — disable + Managed-Blocks raus. |
 | `up [--timeout <s>]` | `LH-FA-UP-001..003` | Compose up + Healthcheck-Poll + TCP-Probe. |

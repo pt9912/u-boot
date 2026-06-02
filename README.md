@@ -144,6 +144,13 @@ External feature sources need an explicit allowlist entry; see
 for the `--allow-external-feature-sources` flow and the
 `LH-NFA-SEC-004` discipline (`--yes` is not sufficient).
 
+`u-boot doctor` adds two LH-FA-DEV-003 checks against the feature
+configuration: `devcontainer.features.allowlist` (Error when a
+`source:` override is not in the allowlist) and
+`devcontainer.features.drift` (Warn when `u-boot.yaml` and the
+rendered `devcontainer.json` features map disagree — repair via
+`u-boot generate devcontainer`).
+
 Re-init on an existing project requires an explicit strategy
 (`--force` for managed-block edits, `--backup` for full overwrite with
 `.bak[.N]` safety copies). See the
@@ -170,7 +177,7 @@ and §Nächste Schritte for the in-progress backlog.
 | Subcommand | Spec IDs | Brief |
 | ---------- | -------- | ----- |
 | `init [name] [--devcontainer] [--template <name>]` | `LH-FA-INIT-001..007`, `LH-FA-TPL-001` | Scaffold project + `git init`. |
-| `doctor [--strict]` | `LH-FA-DIAG-001..004`, `LH-FA-DEV-003` | 13 diagnostic checks; v0.4.0 adds `devcontainer.features.allowlist` (Error on LH-FA-DEV-003 violations) and `devcontainer.features.drift` (Warn when u-boot.yaml's feature map and the rendered `devcontainer.json` features differ; repair via `u-boot generate devcontainer`). Container-aware skip for host probes. |
+| `doctor [--strict]` | `LH-FA-DIAG-001..004`, `LH-FA-DEV-003` | 13 diagnostic checks; container-aware skip for host probes. |
 | `add <service> [--with-deps]` | `LH-FA-ADD-001..006` | Idempotent state-machine for service add-ons (`postgres`, `keycloak`, `otel`); `--with-deps` auto-installs missing dependencies. |
 | `remove <service> [--purge]` | `LH-FA-ADD-007` | Mirror of `add` — disable + cut managed blocks. |
 | `up [--timeout <s>]` | `LH-FA-UP-001..003` | Compose up + healthcheck-poll + TCP probe. |
