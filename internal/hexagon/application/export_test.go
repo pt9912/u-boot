@@ -265,6 +265,39 @@ func (s *AddServiceService) DetectServiceStateForTest(baseDir string, svc domain
 	return detectServiceState(s.fs, s.yaml, baseDir, svc)
 }
 
+// ValidateFeatureSourceForTest exposes the slice-v1-devcontainer-
+// features T1 validator for a single allowlist entry. External tests
+// drive the failure-table (empty / no-scheme / bad-scheme / no-host)
+// without depending on the unexported function.
+func ValidateFeatureSourceForTest(raw string) error {
+	return validateFeatureSource(raw)
+}
+
+// DedupeFeatureSourcesForTest exposes the T1 silent-dedupe helper so
+// tests can pin `spec/lastenheft.md:1352` (silent dedupe, first-
+// occurrence-order preserved).
+func DedupeFeatureSourcesForTest(in []string) []string {
+	return dedupeFeatureSources(in)
+}
+
+// NormaliseFeatureSourcesForTest exposes the T1 validate-then-dedupe
+// pipeline so external tests can pin both the validation-error path
+// and the canonical-shape success path.
+func NormaliseFeatureSourcesForTest(in []string) ([]string, error) {
+	return normaliseFeatureSources(in)
+}
+
+// ValidateDevcontainerFeaturesForTest parses a u-boot.yaml fixture
+// and runs validateDevcontainerFeatures on the resulting
+// devcontainer subtree. The bridge lets external tests pin the full
+// load → validate flow for the T1 schema additions without exposing
+// the unexported config struct.
+func ValidateDevcontainerFeaturesForTest(t *testing.T, yamlBody []byte) error {
+	t.Helper()
+	cfg := mustParseUBootYAML(t, yamlBody)
+	return validateDevcontainerFeatures(cfg.Devcontainer)
+}
+
 // PlanAddForTest exposes the unexported [AddServiceService.planAdd]
 // helper. The returned struct is the test-only projection so the
 // production [servicePlan] stays unexported.

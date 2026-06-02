@@ -56,19 +56,45 @@ type ubootYAMLService struct {
 }
 
 // ubootYAMLDevcontainer is the `devcontainer:` sub-tree of u-boot.yaml
-// (LH-FA-CONF-002, LH-FA-DEV-001). Today only `enabled` matters: it
-// gates the LH-FA-DIAG-002 severity escalation for the devcontainer
-// checks (M5-T7 wires the read). The pointer type carries the same
-// three-valued semantics as [ubootYAMLService.Enabled] (nil = unset,
-// &false = disabled, &true = enabled) so a missing key surfaces as
-// a warn instead of being silently treated as false.
-//
-// Future fields:
-//
-//   - FeatureSources ubootYAMLFeatureSources `yaml:"featureSources,omitempty"`
-//     (LH-FA-DEV-003 feature allowlist; V1)
+// (LH-FA-CONF-002, LH-FA-DEV-001, LH-FA-DEV-003). `Enabled` gates the
+// LH-FA-DIAG-002 severity escalation for the devcontainer checks
+// (M5-T7 wires the read). `FeatureSources` is the LH-FA-DEV-003
+// allowlist for external feature sources (spec/lastenheft.md:1340-1353).
+// `Features` is the slice-v1-devcontainer-features T0-(b) activation
+// map (Plan-eigene Erweiterung über die Spec hinaus). The pointer
+// types carry three-valued semantics (nil = unset, &false = disabled,
+// &true = enabled) so a missing key surfaces as a warn instead of
+// being silently treated as false.
 type ubootYAMLDevcontainer struct {
-	Enabled *bool `yaml:"enabled,omitempty"`
+	Enabled        *bool                                    `yaml:"enabled,omitempty"`
+	FeatureSources *ubootYAMLFeatureSources                 `yaml:"featureSources,omitempty"`
+	Features       map[string]ubootYAMLDevcontainerFeature  `yaml:"features,omitempty"`
+}
+
+// ubootYAMLFeatureSources is the `devcontainer.featureSources:`
+// sub-tree (LH-FA-DEV-003, spec/lastenheft.md:1341-1343). Today only
+// `Allow` is defined — additional sub-keys (e.g. future deny-lists)
+// would be added here with `omitempty`.
+type ubootYAMLFeatureSources struct {
+	Allow []string `yaml:"allow,omitempty"`
+}
+
+// ubootYAMLDevcontainerFeature is one entry in the `devcontainer.features:`
+// map. The activation map is a Plan-eigene Erweiterung (slice-v1-
+// devcontainer-features T0-(b)); only the catalogue-key-as-map-key
+// pattern is mandated, the per-entry fields below are the plan's
+// design choice:
+//
+//   - Enabled: three-valued *bool analog to [ubootYAMLService.Enabled].
+//   - Source: optional external-source-URL override. If set, the
+//     value must appear in [ubootYAMLFeatureSources.Allow] (enforced
+//     in T4). If empty, the catalogue lookup provides the source.
+//   - Version: optional per-feature version-pin override. If empty,
+//     the catalogue's `defaultVersion` is used.
+type ubootYAMLDevcontainerFeature struct {
+	Enabled *bool  `yaml:"enabled,omitempty"`
+	Source  string `yaml:"source,omitempty"`
+	Version string `yaml:"version,omitempty"`
 }
 
 // ubootYAMLConfig is the YAML-marshalable shape of u-boot.yaml as
