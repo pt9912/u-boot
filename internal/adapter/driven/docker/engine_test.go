@@ -460,7 +460,13 @@ func TestEngine_ComposeLogs_TailEmpty_SkipsFlag_F6(t *testing.T) {
 }
 
 func TestEngine_ComposeLogs_LineBufferedStdoutAndStderr(t *testing.T) {
-	t.Parallel()
+	// No t.Parallel: this test is the only one in the file that writes
+	// a fresh executable via dockerScript and then forks+execs it. With
+	// sibling parallel tests forking concurrently, a child can briefly
+	// inherit the just-closed write-fd to the stub binary before its
+	// own exec() (O_CLOEXEC only fires on exec, not on fork), and an
+	// unrelated subsequent exec of the stub returns ETXTBSY. Running
+	// serial removes the race; suite cost is <1s.
 	binary := dockerScript(t, `#!/bin/sh
 if [ "$1" = "version" ]; then
   echo "24.0.0"
