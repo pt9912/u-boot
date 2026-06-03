@@ -9,9 +9,9 @@
 > — JSON-CLI ist *die* Maschinen-Schnittstelle, HTTP-Adapter
 > verworfen). **Cluster-Slice, kein Code-Implementation-Slice:**
 > definiert Reihenfolge + geteilte Konventionen für die
-> Per-Command-Folge-Slice-Serie. T0 (Discovery + Sub-Decisions)
-> festzuhalten beim Übergang nach `next/`; danach Spawn der
-> ersten Per-Command-Slices.
+> Per-Command-Folge-Slice-Serie. T0 ✅ festgezurrt
+> (§T0-Outcomes — 5 Sub-Decisions plus Mutations-Matrix-Pre-Scan);
+> `next/`-Übergang frei, danach Spawn der ersten Per-Command-Slices.
 
 ## Auslöser
 
@@ -139,39 +139,58 @@ nach `done/` muss
 Carveouts erscheinen, der den fehlenden Subcommand benennt
 und mit einem benannten Re-Trigger-Slice-Plan-Stub in `open/`
 verlinkt (`LH-FA-PROJDOCS-005` Carveout-Plan-Anker-Pflicht);
-(2) das ADR-0010-Konsequenzen-Update darf **nicht** „JSON-CLI
-als Maschinen-Schnittstelle ausgeliefert" sagen, sondern
-muss den Carveout zitieren und Re-Trigger-Pfad nennen.
+(2) der **done/-Eintrag dieses Cluster-Slices** und der
+**Roadmap-Liefer-Vermerk** dürfen **nicht** „JSON-CLI als
+Maschinen-Schnittstelle ausgeliefert" sagen, sondern müssen
+den Carveout zitieren und den Re-Trigger-Pfad nennen.
+ADR-0010 selbst bleibt **unverändert** (AGENTS.md
+§ADR-Disziplin: accepted ADRs werden nicht umgeschrieben);
+eine neue Folge-ADR mit abgeschwächter Aussage ist möglich,
+aber nicht erzwungen — Sub-Decision von T_close (siehe §AK
+„ADR-0010-Liefer-Anker").
 
 Default-Erwartung: keine Slips, alle 9 Folge-Slices schließen.
-Die Hard-Rule ist Notfall-Pfad, nicht Standard.
+Der Slip-Pfad ist Notfall-Restlauf, **kein wählbarer**
+Closure-Pfad.
 
 ## Akzeptanzkriterien (Cluster-Ebene)
 
 - ✅ **Schema-Vertrag dokumentiert**: zentraler
   Reference-Block (vermutlich `docs/user/cli-json-output.md`
   oder Sektion im Architecture-Doc) zitiert das `LH-FA-CLI-
-  007`-Schema verbatim und benennt die DTO-Lokalisation-
-  Konvention (Per-Subcommand-DTO im Driving-Adapter,
-  Common-Fields-Helper z. B. `cliJSONEnvelope`).
+  007`-Schema verbatim und benennt die DTO-Lokalisation
+  gemäß T0-(c) (**Common-Envelope `cliJSONEnvelope`** im
+  CLI-Adapter mit Subcommand-spezifischem `Data`-Feld).
 - ✅ **Per-Command-Folge-Slices angelegt** für alle zehn
-  Subcommands, jeder mit eigenem T0-Discovery und LOC-
-  Schätzung. Reihenfolge nach Use-Case-Druck festgezurrt
-  (siehe §T0-Discovery (e) unten).
-- ✅ **Erster Folge-Slice abgeschlossen** als belastbares
-  Pattern-Vorbild für die restlichen (z. B. `add --dry-run
-  --diff --json` als modifying-Pilot oder `doctor --json` als
-  read-only-Pilot — T0-(e) entscheidet).
+  Spec-Enum-Subcommands — verteilt auf **9 Folge-Slices**
+  (`up`/`down` gebündelt, weil beide read-only-JSON sind
+  und denselben Compose-Status-Reader brauchen; siehe
+  §Per-Command-Folge-Slices). Jeder Stub mit eigenem
+  T0-Discovery und LOC-Schätzung. Reihenfolge gemäß T0-(e)
+  festgezurrt.
+- ✅ **Erster Folge-Slice abgeschlossen**
+  (`slice-v1-cli-json-dry-run-doctor`, gemäß T0-(e)) als
+  belastbares Pattern-Vorbild für read-only-Envelope +
+  Schema-Helper. Der zweite Folge-Slice
+  (`slice-v1-cli-json-dry-run-add`) trägt das modifying-
+  Surface-Vorbild (Recorder + Dry-Run + Diff).
 - ✅ **Schema-Konformitäts-Helper** im CLI-Adapter (oder als
   Test-Helper in `internal/adapter/driving/cli/jsontestutil/`):
   parst die `--json`-Ausgabe und prüft Pflichtfelder. Jeder
   Folge-Slice verwendet ihn in seinen Tests, damit Schema-
   Drift einheitlich kracht.
-- ✅ **ADR-0010-Kreuzverweis** in §Konsequenzen aktualisiert:
-  „JSON-CLI als kanonische Maschinen-Schnittstelle (sobald V1
-  ausgeliefert)" wandert von „prospektiv" auf „ausgeliefert per
-  `slice-v1-cli-json-dry-run`" sobald alle Folge-Slices in
-  `done/` sind.
+- ✅ **ADR-0010-Liefer-Anker** dokumentiert — **ohne**
+  inhaltlichen Rewrite der accepted ADR (AGENTS.md
+  §ADR-Disziplin). Auslieferungs-Anker ist primär der
+  `done/`-Eintrag dieses Cluster-Slices (DoD-Hash-Line +
+  Folge-Slice-Verweise); ADR-0010 selbst wird **nicht**
+  in §Konsequenzen umgeschrieben. Sub-Decision für T_close:
+  ob zusätzlich eine neue **Folge-ADR** angelegt wird, die
+  ADR-0010 als Vorgänger referenziert und „JSON-CLI
+  ausgeliefert" als eigenständigen Entscheid trägt, **oder**
+  ob der Roadmap-Liefer-Vermerk plus done/-Slice
+  ausreichen. ADR-Disziplin entscheidet T_close, nicht
+  jetzt.
 - ✅ **Roadmap-Status** zeigt den Cluster-Fortschritt: jede
   Folge-Slice-Closure aktualisiert die v0.4.0-Tabelle in
   `roadmap.md`.
@@ -179,10 +198,11 @@ Die Hard-Rule ist Notfall-Pfad, nicht Standard.
 ## T0-Discovery (vor `next/`-Übergang festzulegen)
 
 Sub-Decisions, die der Cluster-Slice klären muss, bevor die
-ersten Per-Command-Folge-Slices spawnen. Jede Sub-Decision wird
-beim `open/ → next/`-Lifecycle in ein `T0-Outcomes`-Layout
-(analog [`slice-v1-logs`](../done/slice-v1-logs.md) §T0-Outcomes)
-gegossen.
+ersten Per-Command-Folge-Slices spawnen. **Status:** alle fünf
+Sub-Decisions plus Mutations-Matrix-Pre-Scan ✅ festgezurrt —
+siehe [§T0-Outcomes](#t0-outcomes) für die Entscheidungen mit
+Begründung. Layout analog [`slice-v1-logs`](../done/slice-v1-logs.md)
+§T0-Outcomes.
 
 ### T0-(a) Globale Flag oder per Subcommand?
 
@@ -348,14 +368,316 @@ Logik trägt.
 
 | T | Inhalt | LOC (Schätzung) |
 | - | ------ | --------------- |
-| T0 | **Discovery + Sub-Decisions.** Fünf T0-Fragen aus §T0-Discovery klären (Flag-Scope, Dry-Run-Architektur, DTO-Lokalisation, Diff-Renderer, Reihenfolge). Entscheidung pro Frage mit Begründung in einem `T0-Outcomes`-Block dokumentieren. ADR-0010-Kreuzverweis aktualisieren. | — (Plan-Arbeit) |
+| T0 | **Discovery + Sub-Decisions.** Fünf T0-Fragen aus §T0-Discovery klären (Flag-Scope, Dry-Run-Architektur, DTO-Lokalisation, Diff-Renderer, Reihenfolge). Entscheidung pro Frage mit Begründung in einem `T0-Outcomes`-Block dokumentieren. ADR-0010 bleibt unangetastet (§AK ADR-Disziplin). | — (Plan-Arbeit) |
 | T1 | **Schema-Vertrag-Doku.** `docs/user/cli-json-output.md` (neu) zitiert `LH-FA-CLI-007`-Schema verbatim, dokumentiert DTO-Konvention, listet Per-Command-Folge-Slice-Reihenfolge. README EN+DE bekommt Verweis-Zeile. | ~80 (reine Doku) |
 | T2..Tn | **Spawn Folge-Slice-Stubs** in `open/` für alle 9 Per-Command-Slices. Pro Stub: Auslöser + grobe AKs + LOC-Schätzung + Verweis auf gemeinsamen Schema-Vertrag. Reihenfolge nach T0-(e). | ~30 LOC pro Stub × 9 = ~270 |
-| T_close | **Cluster-Closure.** Sobald ein „kritisches Quorum" der Folge-Slices in `done/` ist (siehe §Out of Scope für Definition), Cluster-Slice mit DoD-Hash-Line aller Folge-Slices nach `done/` mit Roadmap-Update + ADR-0010-Konsequenzen-Update. | — (Doku) |
+| T_close | **Cluster-Closure.** Pflicht-Bedingung gemäß §Aufhebungsbedingung Closure-Hard-Rule (§124-148): **alle 9** Folge-Slices in `done/`. Punkt. Cluster-Slice mit DoD-Hash-Line aller Folge-Slices nach `done/` plus Roadmap-Update. ADR-0010 bleibt **unverändert**; optionale Folge-ADR ist Sub-Decision (siehe AK „ADR-0010-Liefer-Anker"). **Kein** „kritisches Quorum", **kein** MVP-Bypass, **kein** Restweg-Carveout als Closure-Alternative. Der **Notfall-Slip-Pfad** aus §Aufhebungsbedingung §137-148 (Carveout-Eintrag + abgeschwächte Liefer-Aussage) ist explizit **kein wählbarer** T_close-Pfad — er ist Restlauf-Disziplin für einen unvermeidbaren Slip und tritt nur in Kraft, **nachdem** ein Slip bereits passiert ist (Default-Erwartung bleibt „keine Slips"). | — (Doku) |
 
 LOC-Schätzung Cluster-Slice: ~350 LOC, deutlich unter
 800-LOC-Schwelle. Folge-Slice-LOC-Bandbreite: 200..600 je
 Subcommand (T0-(b)-Architektur-Decision dominant).
+
+## T0-Outcomes
+
+Fünf Sub-Decisions vor `next/`-Übergang festgezurrt — die fünf
+Fragen aus [§T0-Discovery](#t0-discovery-vor-next-übergang-festzulegen)
+mit Begründung. Die Mutations-Matrix-Pflicht (Review-Finding
+M2) wandert per Outcome (b) als Pre-Scan ins T0 vorgezogen,
+die vollständige Pro-Subcommand-Matrix bleibt Lieferung des
+ersten modifying Folge-Slices.
+
+### T0-(a) Flag-Scope: `--json` Root-persistent, `--dry-run`/`--diff` per Subcommand
+
+**Entscheidung:** `--json` lebt als PersistentFlag am Root-Cobra-
+Command (`u-boot --json …`); jeder der 10 Spec-Enum-Subcommands
+erbt es. `--dry-run` und `--diff` werden ausschließlich auf den
+5 modifying Subcommands (`init`, `add`, `remove`, `generate`,
+`config set`) per `cmd.Flags()` lokal registriert.
+
+**Begründung:** `LH-NFA-USE-004` fordert `--json` für **alle**
+zehn Subcommands — Root-Persistent ist die natürliche Heimat
+(sonst 10× lokales Wiring + Drift-Risiko, vgl. heutiges Vorbild
+`--verbose/--debug/--quiet/--yes/--no-interactive` aus
+[`cli/root.go:38-54`](../../../../internal/adapter/driving/cli/root.go),
+slice-followup-verbosity-wiring §`7c6fbce`). `--dry-run`/`--diff`
+sind nur für die 5 modifying-Subcommands spec-pflichtig
+(`LH-FA-CLI-007`/`LH-FA-CLI-008`); persistent würde die 5
+read-only-Subcommands zwingen, sie aktiv abzulehnen — 5× extra
+Reject-Wiring ohne Gegenwert.
+
+### T0-(b) Dry-Run-Architektur: `RecordingFileSystem`-Wrapper mit Passthrough-Modus (Variante 2)
+
+**Entscheidung:** Ein neuer driven-Adapter
+`RecordingFileSystem` implementiert
+[`driven.FileSystem`](../../../../internal/hexagon/port/driven/filesystem.go)
+und delegiert die **4 Read-Methoden** (`Exists`, `ReadFile`,
+`ReadDir`, `Lstat`) an die underlying Production-`fs.FileSystem`.
+Für die **8 Mutations-Methoden** (`WriteFile`,
+`WriteFileExclusive`, `Mkdir`, `MkdirAll`, `Rename`,
+`RemoveAll`, `Copy`, `CopyExclusive`) gilt ein **Passthrough-
+Schalter** (Konstruktor-Option / config-Field):
+
+- `Passthrough=false` (Dry-Run-Modus, `--dry-run` aktiv):
+  capturen als `plannedFiles`/`changes`-Einträge, **ohne**
+  Production-FS aufzurufen.
+- `Passthrough=true` (Preview-and-Apply, `--diff` ohne
+  `--dry-run`): capturen **und** an Production-FS weiterreichen
+  — die Aufruf-Reihenfolge ist „erst aufzeichnen, dann
+  durchführen", damit der Preview-Renderer auch im
+  Mid-Failure-Fall den geplanten Zustand sehen kann
+  (Sub-Decision exakte Semantik im ersten modifying Folge-Slice).
+
+Use-Case-Code bleibt unverändert. Das **Wiring lebt
+ausschließlich im Composition-Root**
+[`cmd/uboot/main.go`](../../../../cmd/uboot/main.go) — der
+**einzige Ort**, an dem `RecordingFileSystem` und die
+Production-FS koexistieren. Hard Rule Hexagonale Architektur
+([`spec/architecture.md:154`](../../../../spec/architecture.md)
+plus depguard `LH-FA-ARCH-002`/`LH-FA-ARCH-003`): der CLI-Adapter
+unter `internal/adapter/driving/cli/` darf **keine**
+`hexagon/port/driven`-Abhängigkeit tragen.
+
+**Konkretes Wiring-Pattern (Sub-Decision exakter Field-Name
+im ersten modifying Folge-Slice):** Für jeden der 5 modifying
+Subcommands konstruiert das Composition-Root **zwei
+driving-Port-Instanzen** statt einer:
+
+- `addServiceUseCase` (Production-FS, Normal-Mode), und
+- `addServicePreviewUseCase` (RecordingFS-wrapped, beide
+  Passthrough-Schalter-Stellungen aus T0-(b)).
+
+Beide Instanzen werden in die App-Struktur **als
+`driving`-Port-Interface-Typen** injiziert (z. B.
+`driving.AddServiceUseCase`). Die CLI-RunE-Funktion wählt
+zwischen den **driving-Port-Instanzen** anhand der parsed
+`--dry-run`/`--diff`-Flag-Kombination — der CLI-Adapter
+**sieht den `driven.FileSystem`-Typ nirgends** und importiert
+ihn auch nicht. depguard bleibt sauber.
+
+Für die read-only-Pfade (`doctor`, `logs`, `up`, `down`,
+`template list`, bare `config`, `config get`) gibt es nur
+**eine** driving-Port-Instanz pro Use-Case; sie tragen weder
+`--dry-run` noch `--diff`, also keine Variante.
+
+**Begründung:** Variante (1) (`Request.DryRun bool` mit
+If-Branches an jeder Mutation-Site) würde ~25 If-Branches
+über 5 Use-Cases ziehen — eine vergessene → stiller Write im
+Dry-Run, Negative-Pin-Test catcht erst post-hoc, der Write ist
+bereits passiert. Variante (3) (ChangeSet-Pattern) refactort
+alle 5 Use-Cases — YAGNI für V1. Variante (2) hält Use-Cases
+sauber, das Negative-Pin-Test-Design wird trivial (Recorder
+mit `Passthrough=false` zählt Mutations-Aufrufe — Production-FS
+sieht null Calls), und der Recorder ist der einzige Ort, an dem
+die FS-Mutations-Liste vollständig getragen werden muss → ein
+Drift-Anker. Der **Passthrough-Modus** löst gleichzeitig
+`LH-FA-CLI-008` `--diff` ohne `--dry-run` (Preview-and-Apply):
+derselbe Adapter capturet den Preview-Plan **und** führt die
+Writes aus — keine doppelte Use-Case-Ausführung nötig,
+Preview-vs-Apply-Drift ausgeschlossen.
+
+**Pre-Scan-Matrix (T0-Investigation, vor `next/`):**
+Mutations-Aufrufe in der Production-Code-Pfaden — direkter
+Aufruf plus indirekter via [`BackupPath`](../../../../internal/hexagon/application/backup.go):
+
+| Use-Case | Direkt | Indirekt via `BackupPath` |
+| --- | --- | --- |
+| `init` ([`initproject.go`](../../../../internal/hexagon/application/initproject.go)) | `MkdirAll`, `WriteFile` | `CopyExclusive`, `Mkdir`, `MkdirAll`, `Copy`, `RemoveAll` |
+| `add` ([`addservice_execute.go`](../../../../internal/hexagon/application/addservice_execute.go)) | `WriteFile` | — |
+| `remove` ([`removeservice.go`](../../../../internal/hexagon/application/removeservice.go)) | `WriteFile`, `RemoveAll` | — |
+| `generate` ([`generate.go`](../../../../internal/hexagon/application/generate.go)) | `MkdirAll`, `WriteFile` | — |
+| `config set` ([`config.go`](../../../../internal/hexagon/application/config.go)) | `WriteFile` | — |
+
+Heute direkt aufgerufen: `WriteFile`, `MkdirAll`, `RemoveAll`
+(plus über Backup-Helper: `CopyExclusive`, `Mkdir`, `Copy`).
+Heute **nicht** aus Use-Case-Pfaden: `WriteFileExclusive` (nur
+[`doctor.go:183`](../../../../internal/hexagon/application/doctor.go)
+für Sentinel-Write-Probe — kein Mutator-Artefakt) und
+`Rename`. Der Recorder muss trotzdem alle 8 abdecken, damit
+zukünftige Use-Cases keinen Lukentest am Dry-Run-Filter
+vorbeischmuggeln.
+
+**Reservation (Lieferpflicht des ersten modifying Folge-Slice
+`slice-v1-cli-json-dry-run-add`):**
+
+- `RecordingFileSystem` deckt **alle 8** `driven.FileSystem`-
+  Mutations-Methoden ab; `WriteFileExclusive` und `Rename`
+  sind im Recorder ebenfalls implementiert, auch wenn heute
+  keine Use-Case sie aufruft (Drift-Schutz).
+- **Passthrough-Modus-Verträge gepinnt:** Der erste modifying
+  Folge-Slice fixiert die exakte Aufruf-Reihenfolge im
+  Passthrough=`true`-Pfad (Vorschlag: erst Plan-Eintrag
+  capturen, dann Production-Mutation aufrufen — bei
+  Mutation-Fehler bleibt der Plan-Eintrag bestehen, das
+  Diagnostic-Item trägt den Fehler) und beweist über
+  Acceptance-Tests sowohl den `--dry-run`-Pfad (Passthrough=
+  false, null FS-Mutationen) als auch den `--diff`-ohne-
+  `--dry-run`-Pfad (Passthrough=true, Preview-Output + echte
+  Writes in einem Lauf, `LH-FA-CLI-008`).
+- **Wiring-Kontrolle:** Das Composition-Root in
+  `cmd/uboot/main.go` ist die **einzige** Stelle, an der
+  konkrete `driven.FileSystem`-Adapter (Production-FS und
+  `RecordingFileSystem`) instanziiert und verkabelt werden.
+  Der CLI-Adapter empfängt **driving-Port-Instanzen** (je
+  modifying Subcommand zwei — Normal-Mode und Preview-Mode)
+  über die App-Struktur und wählt zwischen ihnen anhand der
+  Flag-Kombination. Der CLI-Adapter importiert weder
+  `driven.FileSystem` noch den `RecordingFileSystem`-Konkret-
+  Typ — depguard/Hexagonal-Architektur-Hard-Rule
+  (`LH-FA-ARCH-002`/`003`) bleibt grün, prüfbar via
+  `make lint`.
+- **Read-after-Write-Audit pro Use-Case:** Der erste modifying
+  Folge-Slice prüft explizit, ob ein Use-Case in derselben
+  Sequenz erst `WriteFile(p, …)` und anschließend `Exists(p)`
+  / `ReadFile(p)` / `Lstat(p)` auf demselben Pfad aufruft.
+  Stichprobe T0-Investigation zeigt Read-then-Write-Muster
+  (config liest u-boot.yaml → schreibt patched; add liest
+  catalog → schreibt service-Files), kein Write-then-Read —
+  Pflicht-Re-Validation im Folge-Slice mit dokumentiertem
+  Ergebnis pro Use-Case.
+- **Overlay-Fallback:** Wenn die Re-Validation ein Write-then-
+  Read in einem Use-Case findet, erweitert der Recorder seine
+  Read-Methoden um eine kleine In-Memory-Overlay-Map
+  (geplante Writes überlagern die delegierte Read-Antwort).
+  Geschätzter LOC-Aufwand: ~30 LOC; bewusst als Fallback
+  und nicht als Default, damit der Recorder bei nicht-
+  benötigtem Overlay sauber bleibt. Im Passthrough=true-Modus
+  ist Overlay nicht nötig — der echte Write findet statt, der
+  reale FS-Zustand stimmt.
+
+### T0-(c) DTO-Lokalisation: Common-Envelope `cliJSONEnvelope` mit Subcommand-Payload-Feld
+
+**Entscheidung:** Ein gemeinsamer Envelope-Type
+`cliJSONEnvelope` im CLI-Adapter (Lokation: vermutlich
+`internal/adapter/driving/cli/jsonenvelope.go` — Sub-Decision
+im ersten Folge-Slice) trägt die `LH-FA-CLI-007`-Pflichtfelder
+**einmal**: `Status`, `Command`, `Subcommand` (omitempty,
+gesetzt für `template`/`config`), `DryRun`, `Diff`,
+`PlannedFiles`, `Changes`, `Diagnostics`, `ExitCode`, plus
+ein Subcommand-spezifisches `Data` (`json.RawMessage` oder
+`any`) für Read-only-Payloads (z. B. `template list`-Array,
+`doctor`-Report).
+
+**Begründung:** Pro-Subcommand-DTOs würden die 8 Pflichtfeld-
+Tags 10× duplizieren → Schema-Drift garantiert (eine Slice
+schreibt `"exit_code"` statt `"exitCode"` und das Schema-
+Conformance-Test der anderen 9 fängt es nicht). Common-
+Envelope ist gleichzeitig die natürliche Verankerungsstelle
+für den `jsontestutil.AssertSchemaConform`-Helper aus den
+Cluster-AKs (ein Validator, der den Envelope parst und gegen
+das `LH-FA-CLI-007`-Schema prüft — jeder Folge-Slice ruft
+ihn auf). Vorbild `templateJSON` aus
+[`cli/template.go:163-186`](../../../../internal/adapter/driving/cli/template.go)
+ist subcommand-spezifisch, trägt aber **null** der
+Spec-Pflichtfelder — wird im Folge-Slice
+`slice-v1-cli-json-dry-run-template` ohnehin auf den Envelope
+migriert (Schema-Audit).
+
+### T0-(d) Diff-Renderer: Beides — Unified-String im Human-Mode, strukturierte Hunks per `plannedFiles[]` im JSON-Mode
+
+**Entscheidung:** `LH-FA-CLI-008` lässt das Format offen, daher
+zweigleisig.
+
+- **Human-Mode** (`--diff` ohne `--json`): klassischer
+  Unified-Diff als String an stdout (`+`/`-`-Prefix,
+  Hunk-Header `@@ -oldStart,oldLines +newStart,newLines @@`).
+- **JSON-Mode** (`--diff --json`): das Envelope-Feld `diff`
+  bleibt **Boolean** und auf `true` gesetzt, wie
+  `LH-FA-CLI-007` es als Pflichtfeld definiert. Die
+  strukturierten Hunks landen **nicht** in `diff`, sondern
+  als **omitempty-Hunk-Array per `plannedFiles[]`-Eintrag**
+  (Vorschlag-Field-Name: `plannedFiles[].hunks` mit
+  `[{oldStart, oldLines, newStart, newLines, content}]`).
+  Begründung: `plannedFiles[]` trägt bereits Pfad und
+  `action` pro betroffener Datei — die Hunks gehören
+  semantisch dorthin, ein zusätzliches Top-Level-Array
+  würde Pfad-Korrelation verdoppeln. Der **exakte
+  Field-Name** und ob `hunks` direkt unter `plannedFiles[]`
+  oder unter einem `plannedFiles[].diff`-Sub-Objekt sitzt,
+  ist Sub-Decision des ersten modifying Folge-Slices —
+  Verankerung gegen den `LH-FA-CLI-007`-Schema-Wortlaut
+  passiert in T1 (Schema-Vertrag-Doku) und der erste
+  Folge-Slice referenziert das.
+
+Beide Modi berechnen denselben LCS-Hunk-Datentyp; der
+Unified-String ist ein zweiter Renderer auf demselben Datum.
+
+**Begründung:** Embedded Unified-String im JSON ist tooling-
+unfreundlich (Konsumenten müssten den String selbst parsen).
+Reine strukturierte Form wäre human nicht direkt lesbar.
+Beide Renderer aus einer gemeinsamen Hunk-Repräsentation
+spart LOC und schließt Format-Drift zwischen den Modi aus.
+**Dep-Policy-Hinweis:** `go.mod` ist diszipliniert minimal
+(4 Deps total). Pure-Go LCS+Unified-Diff intern (~150-200
+LOC) hält die Linie; ob stattdessen `pmezard/go-difflib`
+(0-Dep, tiny, MIT) zulässig ist, ist Sub-Decision des
+ersten modifying Folge-Slice.
+
+### T0-(e) Folge-Slice-Reihenfolge: `doctor` zuerst, `add` direkt danach
+
+**Entscheidung:**
+
+1. `slice-v1-cli-json-dry-run-doctor` — **Pattern-Vorbild für
+   read-only-Envelope + Schema-Helper.**
+2. `slice-v1-cli-json-dry-run-add` — **Pattern-Vorbild für
+   modifying-Surface (Recorder, Dry-Run, Diff).**
+3. `slice-v1-cli-json-dry-run-init`
+4. `slice-v1-cli-json-dry-run-generate`
+5. `slice-v1-cli-json-dry-run-remove`
+6. `slice-v1-cli-json-dry-run-up-down`
+7. `slice-v1-cli-json-dry-run-logs`
+8. `slice-v1-cli-json-dry-run-config`
+9. `slice-v1-cli-json-dry-run-template`
+
+**Begründung:** Die Stub-Vorschlag-Reihenfolge (`add` zuerst
+nach Use-Case-Druck) bündelt im ersten Folge-Slice
+gleichzeitig **drei** neue Etablierungen (Envelope, Schema-
+Helper, RecordingFileSystem) plus Diff-Renderer — zu viel
+Risiko an einer Stelle. `doctor` zuerst etabliert Envelope +
+Schema-Helper auf Read-only-Boden mit **null** Architektur-
+Last; `add` direkt danach validiert dann die schwerere
+RecordingFileSystem-Decision auf bereits stabilem Envelope.
+Der Use-Case-Druck "add zuerst" löst sich, sobald der
+Cluster mit doctor anläuft — `add` ist der unmittelbar
+nächste Slice, kein Slip. Plätze 3..9 unverändert nach
+Use-Case-Druck aus dem Stub.
+
+**Übergangs-Disziplin Root---json vs. existierendes
+`template list --json`-Flag (Review-Round-2-Finding M3):**
+Der erste Folge-Slice (`doctor`) führt das Root-PersistentFlag
+`--json` aus T0-(a) ein. Sobald das Root-Flag landet, würde
+das **lokale** `--json`-Flag auf `template list`
+([`cli/template.go:83`](../../../../internal/adapter/driving/cli/template.go))
+mit dem Root-PersistentFlag kollidieren (Cobra: Duplicate-
+Flag-Registration oder Shadow-State). `template list` ist
+laut Reihenfolge aber erst Platz 9 — der Output-Migration
+auf den Envelope passiert dort, nicht früher. **Pflicht-
+Schnitt im doctor-Slice (Platz 1):** das lokale `--json`-Flag
+in `template list` wird **gleichzeitig mit der Root-Flag-
+Einführung entfernt**, und der `runTemplateList`-Pfad liest
+den `--json`-Flag-State von der Root-Persistent-Stelle (über
+die App-Struktur oder `cmd.Root().PersistentFlags().GetBool(…)`).
+**Output-Format bleibt unverändert** (heutige `templateJSON`-
+Array-Struktur), nur das Flag-Wiring wandert. CLI-Pin-Tests
+für `u-boot template list --json` **und** `u-boot --json
+template list` müssen beide grün bleiben — gleicher Output,
+gleicher Exit-Code. Die spätere Envelope-Migration auf Platz 9
+(`slice-v1-cli-json-dry-run-template`) ersetzt dann den
+`templateJSON`-Array-Output durch die Envelope-Form.
+
+---
+
+**ADR-0010-Liefer-Anker (post-T0):** ADR-0010 selbst bleibt
+inhaltlich **unangetastet** (AGENTS.md §ADR-Disziplin: accepted
+ADRs werden nicht umgeschrieben). Der Liefer-Anker für die
+JSON-CLI-Spur ist dieser Slice (T0-Outcomes hier, T1-Schema-
+Vertrag-Doku als nächster Tranchen-Schritt, Folge-Slices in
+`open/`/`next/`/`done/`). Vor Cluster-Closure entscheidet
+T_close, ob zusätzlich eine **neue Folge-ADR** (Nummer:
+nächste freie nach ADR-Index-Stand) angelegt wird, die
+ADR-0010 als Vorgänger referenziert und „JSON-CLI
+ausgeliefert" als eigenständigen Entscheid trägt — oder ob
+der Roadmap-Liefer-Vermerk und der done/-Slice ausreichen.
+Diese Entscheidung gehört nicht ins T0.
 
 ## Out of Scope
 
@@ -364,11 +686,14 @@ Subcommand (T0-(b)-Architektur-Decision dominant).
   Reihenfolge nach Use-Case-Druck festgezurrt, aber
   **kein** Read-only-only- oder „MVP-Quorum"-Closure-Pfad
   für den Cluster — die Closure-Hard-Rule in der
-  Aufhebungsbedingung schließt das aus (alle 9
-  Folge-Slices done/, sonst Carveout-Inventar-Pflicht
-  vor Cluster-Move). T0-(e) entscheidet nur, **in welcher
-  Reihenfolge** die Folge-Slices angefasst werden, nicht
-  welche „erstmal reichen".
+  Aufhebungsbedingung schließt das strict aus: Cluster-
+  Closure verlangt **alle 9 Folge-Slices in `done/`**.
+  Der Slip-Notfall-Pfad (Carveout-Inventar + abgeschwächter
+  Liefer-Vermerk im done/-Slice und in der Roadmap) ist
+  **kein wählbarer** Closure-Pfad, sondern Restlauf-Disziplin
+  nach einem bereits eingetretenen Slip. T0-(e) entscheidet
+  nur, **in welcher Reihenfolge** die Folge-Slices angefasst
+  werden, nicht welche „erstmal reichen".
 - **JSON-Output für nicht-Spec-Enum-Subcommands** (z. B.
   zukünftige `u-boot exec`-Spec-Erweiterung): außerhalb dieses
   Cluster-Slices. Wenn neue Subcommands dazukommen, bekommen
