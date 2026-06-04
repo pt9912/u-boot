@@ -11,7 +11,8 @@
 > JSON), **Composition-Root-Wiring** der driving-Port-
 > Instanzen via `fsSelector`-Closure (T0-(e) Option 4) und
 > **`AssertFullEnvelope`-Erstnutzung** (im Doctor-Slice T2 nur
-> als Stub angelegt). Stub liegt in `open/`; Review-Findings
+> als Stub angelegt). Stub liegt in `next/` (nach fünf Review-
+> Runden für die Iteration übernommen); Review-Findings
 > aus drei Runden adressiert: Runde 1 H1-L4 (3× HIGH, 6× MEDIUM,
 > 4× LOW), Runde 2 H1-M2 (3× HIGH, 2× MEDIUM — fsSelector-Drei-
 > Modi, Exit-Code 14 statt 11, Spec-konformer Binary-Fallback,
@@ -27,8 +28,11 @@
 > `driving.PlannedFile` mit `NewContent`/`OldContent` (`json:"-"`)
 > als Content-Träger zwischen Layern, `ErrAddFileSystem`-LH-Code
 > auf `LH-NFA-REL-003` korrigiert, T0-(e)-Skizze auf `fsFactory`-
-> Tuple-Vertrag synchronisiert). T0-Discovery noch offen (12
-> Sub-Decisions finalisieren).
+> Tuple-Vertrag synchronisiert). Sub-Decisions als Vorschläge
+> mit Begründung in §T0-Discovery konkretisiert; verbindlicher
+> T0-Outcomes-Block (analog Doctor-Slice `dd2ea98`-Pattern) ist
+> der nächste Plan-Schritt, danach `in-progress/`-Übergang und
+> T1-Implementierung.
 
 ## Auslöser
 
@@ -1127,7 +1131,7 @@ denkbar. **Verworfen**, weil:
 
 - **Envelope-Migration für `template list`**: bleibt
   `slice-v1-cli-json-dry-run-template`
-  ([`open/slice-v1-cli-json-dry-run-template.md`](slice-v1-cli-json-dry-run-template.md))
+  ([`open/slice-v1-cli-json-dry-run-template.md`](../open/slice-v1-cli-json-dry-run-template.md))
   vorbehalten (Platz 9).
 - **`cliJSONEnvelope.Data`-Feld**: im Doctor-Slice entfernt (Review
   H1); kommt mit `template`-Slice wieder, weil `template list` ein

@@ -14,10 +14,10 @@
 > in `in-progress/`, Folge-Slice 1/9
 > [`slice-v1-cli-json-dry-run-doctor`](../done/slice-v1-cli-json-dry-run-doctor.md)
 > **done** ✅, Folge-Slice 2/9
-> [`slice-v1-cli-json-dry-run-add`](../open/slice-v1-cli-json-dry-run-add.md)
-> in `open/` (Stub gespawnt). Nächster Schritt: T0-Discovery
-> des Add-Stubs (8 Sub-Decisions, inkl. Mutations-Matrix und
-> Read-after-Write-Stichprobe).
+> [`slice-v1-cli-json-dry-run-add`](../next/slice-v1-cli-json-dry-run-add.md)
+> in `next/` (nach fünf Review-Runden für die Iteration
+> übernommen). Nächster Schritt: verbindlicher T0-Outcomes-Block
+> + Übergang nach `in-progress/`.
 
 ## Auslöser
 
