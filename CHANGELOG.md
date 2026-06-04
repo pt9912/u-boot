@@ -13,6 +13,47 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- `feat(cli): u-boot doctor --json plus Root-PersistentFlag
+  --json (LH-NFA-USE-004 / LH-FA-CLI-007)` — Pattern-Vorbild für
+  die maschinen-lesbare CLI-Surface (Cluster-Slice
+  `slice-v1-cli-json-dry-run`, Folge-Slice 1/9). **Doctor**
+  emittiert mit `--json` einen Spec-§1841-Minimalkontrakt-
+  Envelope (`status`/`command`/`diagnostics`/`exitCode`);
+  All-OK-Fall ergibt `diagnostics: []` gemäß Lastenheft-Beispiel
+  §1846-1852. `SeverityOK` und `SeverityInfo` werden gefiltert
+  (Spec §1834 erlaubt `level` nur `warn|error`). `--quiet --json`
+  ist semantisch identisch zu reinem `--json`; `--strict --json`
+  upgraded Warn auf Exit-Code 11 ohne `status`-Drift (Spec §1837
+  koppelt `status` an höchsten `level`, nicht an `--strict`).
+  Broken-Pipe-Resistenz: fachlicher Exit-Code 11 hat Vorrang vor
+  Write-Fehlern. **Root-PersistentFlag `--json`** für alle 10
+  Spec-Enum-Subcommands; nicht-migrierte Forms rejecten mit
+  `ErrJSONNotImplemented` (Exit-Code 2, `LH-FA-CLI-006`-Klasse)
+  plus Folge-Slice-Verweis. Zentrale Allowlist in
+  `cli/root.go` via `PersistentPreRunE`; `--help` als
+  read-only Escape-Hatch durchgelassen. **`u-boot template list
+  --json`** wandert vom lokalen Flag aufs Root-Flag (beide
+  Schreibweisen `template list --json` und `--json template list`
+  identisches Output); Envelope-Migration folgt mit
+  `slice-v1-cli-json-dry-run-template`, dokumentiert im
+  `carveouts.md`-Temporär-Eintrag. **Common-Envelope
+  `cliJSONEnvelope`** (`internal/adapter/driving/cli/jsonenvelope.go`)
+  trägt Minimalkontrakt- und Voll-Schema-Felder über zwei
+  Konstruktoren (`newMinimalEnvelope`/`newFullEnvelope`); Voll-
+  Schema-Felder via Pointer-Wrapping (`*bool`/`*[]T`) als
+  Anti-Drift gegen `omitempty`-Semantik-Refactor. **Schema-
+  Helper-Sub-Package** `internal/adapter/driving/cli/jsontestutil/`
+  mit zwei Modi `AssertMinimalEnvelope`/`AssertFullEnvelope`
+  (Options-Pattern, kein neuer Dep) plus `DefaultAllowedCodes`-
+  Registry für die 13 Doctor-Check-Codes. **Drei aktive Drift-
+  Gates** schützen die Code-Registry: (1) `application.DoctorCheckIDs()`
+  ↔ Map-Vollständigkeit, (2) Map ↔ Markdown-Roundtrip-Parser
+  auf `docs/user/cli-json-output.md` §5.1 mit HTML-Marker-
+  Sektion-Begrenzung, (3) Helper-Reject im Acceptance-Pfad
+  für undokumentierte Codes. **Schema-Vertrag-Doku**
+  ([`docs/user/cli-json-output.md`](docs/user/cli-json-output.md))
+  zitiert Minimalkontrakt und Voll-Schema verbatim, dokumentiert
+  Code-Registry und Per-Command-Migrations-Reihenfolge.
 - `feat(logs): u-boot logs [service] [--follow] [--tail <n>]
   (LH-FA-UP-005)` — neuer Subcommand streamt Compose-Logs als
   V1-Erweiterung der `up`/`down`-Familie. Ohne Service-Argument

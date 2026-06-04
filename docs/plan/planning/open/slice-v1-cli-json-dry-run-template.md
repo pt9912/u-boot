@@ -11,7 +11,7 @@
 
 Cluster-Slice §T0-(e)-Reihenfolge stellt diesen Slice auf
 **Platz 9** (letzter). Vorgänger
-[`slice-v1-cli-json-dry-run-doctor`](../in-progress/slice-v1-cli-json-dry-run-doctor.md)
+[`slice-v1-cli-json-dry-run-doctor`](../done/slice-v1-cli-json-dry-run-doctor.md)
 T3+T4 hat das lokale `--json`-Flag auf `template list` entfernt
 und das Output-Format **bewusst unverändert** gelassen: heutige
 `templateJSON`-Array-Struktur ohne Spec-§1841-Minimalkontrakt-
@@ -122,7 +122,7 @@ LOC-Bandbreite.
   [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
   §T0-(e) Platz 9.
 - Vorgänger-Slice:
-  [`slice-v1-cli-json-dry-run-doctor`](../in-progress/slice-v1-cli-json-dry-run-doctor.md)
+  [`slice-v1-cli-json-dry-run-doctor`](../done/slice-v1-cli-json-dry-run-doctor.md)
   T3+T4 (Flag-Schnitt + Carveouts-Eintrag).
 - Carveouts:
   [`carveouts.md`](../in-progress/carveouts.md) §Temporäre

@@ -2,17 +2,19 @@
 
 > **Status:** geplant für v0.4.0 — erster Folge-Slice des
 > Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Platz 1). Liefert die gemeinsame Infrastruktur für die
 > 9er-Folge-Slice-Serie: Root-PersistentFlag `--json` (T0-(a)),
 > Common-Envelope `cliJSONEnvelope` (T0-(c)) und Schema-Helper
 > `jsontestutil.AssertMinimalEnvelope` /
 > `jsontestutil.AssertFullEnvelope`. Trägt zusätzlich den
 > Übergangs-Schnitt für das existierende `template list --json`
-> (Review-Round-2-Finding M3). T0 ✅ festgezurrt (§T0-Outcomes
-> — acht Sub-Decisions plus Review-Findings H1-L2). In
-> `in-progress/`, T1 in Arbeit (`docs/user/cli-json-output.md`
-> — Cluster-T1 via L1-Delegation).
+> (Review-Round-2-Finding M3). **Status: done** ✅ — alle sechs
+> Tranchen geliefert (T0-T5), DoD-Hashes in §Tranchen unten.
+> Cluster-T1-Doku via L1-Delegation in dieser Slice geliefert
+> (`docs/user/cli-json-output.md`); Cluster-Slice-Tabelle in
+> [`slice-v1-cli-json-dry-run.md`](../in-progress/slice-v1-cli-json-dry-run.md)
+> §Tranchen T1-Zelle nachgezogen.
 
 ## Auslöser
 
@@ -270,7 +272,7 @@ JSON-Modus darum semantisch ein No-op.
   Minimal-konforme Form folgt mit Cluster-Platz 9
   `slice-v1-cli-json-dry-run-template`. **Carveouts-Eintrag-
   Pflicht**: dieser Slice trägt einen Carveout-Eintrag in
-  [`carveouts.md`](carveouts.md) §Temporäre
+  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
   Carveouts mit dem Re-Trigger-Verweis auf
   `slice-v1-cli-json-dry-run-template`.
 - ✅ **Schema-Konformität via Helper**: drei Acceptance-Tests
@@ -838,7 +840,32 @@ Check-IDs landen in der Map **und** in der Doku, im selben
 Slice-Closure-Commit — sonst bricht Gate 2 (Markdown-Roundtrip)
 oder Gate 3 (Helper-Reject) im selben PR-Lauf.
 
-## Tranchen (vorgeschlagen)
+## Tranchen (geliefert)
+
+DoD-Hashes pro Tranche; T1+T4 sind im selben Commit gebündelt
+geliefert, weil T4 wegen Cobra-Flag-Shadow-Trap mit T3 zusammen-
+laufen musste. Die ursprünglich getrennte T4-Doku ist mit T4+T5
+zusammen committet (`cc153ed`).
+
+| T | DoD-Hash | Inhalt | LOC |
+| - | -------- | ------ | --- |
+| T0 | `6a2cd9d` Stub + `263fb10` Review-F1-F7 + `dd2ea98` T0-Outcomes + Review-H1-L2 | Plan-Discovery + 8 Sub-Decisions festgezurrt | — |
+| T1 | `299e792` | `docs/user/cli-json-output.md` neu + README EN+DE Verweise (Cluster-T1 via L1-Delegation) | ~410 |
+| T2 | `5155286` + `0676e3e` Review-Fix | `cliJSONEnvelope`, `jsontestutil`-Helper, drei Drift-Gates, Code-Registry | ~1226 → ~1100 (Review-Cleanup) |
+| T3+T4-Code | `77b28d2` | Root-PersistentFlag `--json` + Reject-Allowlist + `template list`-Flag-Schnitt + 11 Reject-Pins + Tree-Walk-Pin | ~376 |
+| T4-Doku | `cc153ed` | Carveouts-Eintrag für `template list --json`-Array-Output | ~5 |
+| T5 | `cc153ed` + `0676e3e` Review-Fix | `runDoctor`-JSON-Pfad, `writeDoctorJSON`, sechs Acceptance-Tests, Write-Failure-Pin | ~330 |
+| T6 | dieser Commit | CHANGELOG, Roadmap, Cluster-T1-Delegations-Notiz, `in-progress/` → `done/` | — |
+
+Code-Review-Findings nach T5 (16 Findings, `0676e3e`): 5× HIGH
+(Dead `Data`-Feld, toter RunE-Code, echter Tree-Walk, Allowlist↔
+Tree-Match, Plan-Doku-Drift), 6× MEDIUM (HTML-Sektion-Marker,
+Broken-Pipe-Exit-Code-Vorrang, `application.DoctorCheckIDs`-
+Public-Helper, Cobra-Version-Pin, `--help`-Durchlass), 5× LOW
+(severity-Switch-Defensive, message-Pin, `unknown`-Fallback,
+Template-Stub, Daten-Asymmetrie). Alle adressiert vor T6.
+
+## Tranchen (ursprünglich vorgeschlagen, Plan-Form vor Lieferung)
 
 | T | Inhalt | LOC (Schätzung) |
 | - | ------ | --------------- |
@@ -906,7 +933,7 @@ Bandbreiten-Überschreitung ist begründet (Pattern-Vorbild-Last für
 ## Bezug
 
 - Cluster-Slice:
-  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
   — §T0-Outcomes (a, c, e) sind die Vorgaben dieses Slices,
   §Aufhebungsbedingung Closure-Hard-Rule ist verbindlich für die
   Cluster-Schließung.

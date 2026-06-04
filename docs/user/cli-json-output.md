@@ -5,7 +5,7 @@
 | Projektname      | `u-boot`                                                      |
 | Bezug            | `LH-NFA-USE-004`, `LH-FA-CLI-007`, `LH-FA-CLI-008`, `LH-FA-CLI-006` in [`spec/lastenheft.md`](../../spec/lastenheft.md) |
 | ADR              | [`docs/plan/adr/0010-kein-http-driving-adapter.md`](../plan/adr/0010-kein-http-driving-adapter.md) |
-| Slice-Anker      | [`docs/plan/planning/in-progress/slice-v1-cli-json-dry-run.md`](../plan/planning/in-progress/slice-v1-cli-json-dry-run.md) (Cluster) + [`docs/plan/planning/in-progress/slice-v1-cli-json-dry-run-doctor.md`](../plan/planning/in-progress/slice-v1-cli-json-dry-run-doctor.md) (Doctor-Folge-Slice, T1) |
+| Slice-Anker      | [`docs/plan/planning/in-progress/slice-v1-cli-json-dry-run.md`](../plan/planning/in-progress/slice-v1-cli-json-dry-run.md) (Cluster) + [`docs/plan/planning/done/slice-v1-cli-json-dry-run-doctor.md`](../plan/planning/done/slice-v1-cli-json-dry-run-doctor.md) (Doctor-Folge-Slice, done) |
 | Status           | Entwurf 0.4.0                                                 |
 | Datum            | 2026-06-04                                                    |
 
