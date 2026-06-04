@@ -19,7 +19,11 @@
 > Konsistenz), Runde 3 H1-M1 (2× HIGH, 1× MEDIUM —
 > T3-Tranche-Drift gegen T0-(e)-Enum, `driven.RecorderPort`-
 > Interface als sauberer Datenpfad, Trailing-Newline-robuste
-> count-Formel). T0-Discovery noch offen (12 Sub-Decisions
+> count-Formel), Runde 4 H1-M1 (2× HIGH, 1× MEDIUM —
+> `FileMutationRecord` mit OldContent/NewContent als Diff-Basis,
+> `ErrAddFileSystem`-Sentinel + non-empty Response on Error-Pfad
+> + `cli.ExitCode`-Erweiterung, AK auf `fsFactory`-Form
+> synchronisiert). T0-Discovery noch offen (12 Sub-Decisions
 > finalisieren).
 
 ## Auslöser
@@ -222,15 +226,21 @@ mit einem Spy auf alle 8 Mutations-Methoden und assertet `Calls
   `PlannedFile`/`ChangeEntry`/`Hunk`; `AddServiceResponse`
   bekommt zwei neue Felder. `make lint` depguard grün; weder CLI-
   noch driven-Adapter importiert den jeweils anderen.
-- ✅ **Composition-Root-Doppel-Wiring**: das App-Struct in
+- ✅ **Composition-Root-Wiring mit `fsFactory`-Closure**
+  (T0-(e) Option 4 + T0-(i) `RecorderPort`; Review-Round-4-
+  Finding M1 adressiert — vorheriger Wortlaut „zwei App-Struct-
+  Felder bzw. zwei driving-Port-Instanzen" war Stub-Annahme aus
+  Round 1, durch T0-(e) verworfen):
+  [`cmd/uboot/main.go`](../../../../cmd/uboot/main.go) konstruiert
+  einen `fsFactory func(driving.AddPreviewMode) (driven.FileSystem,
+  driven.RecorderPort)`-Closure und injiziert ihn in den
+  `AddServiceService`-Konstruktor. App-Struct in
   [`cli/cli.go`](../../../../internal/adapter/driving/cli/cli.go)
-  trägt **zwei** Felder pro modifying Use-Case (Normal + Preview)
-  oder eine `addServiceUseCase`-Variante mit selector-Funktion
-  (Sub-Decision T0-(e)). [`cmd/uboot/main.go`](../../../../cmd/uboot/main.go)
-  konstruiert in der Composition-Root beide driving-Port-Instanzen
-  und injiziert sie. Der **CLI-Adapter** importiert weder
-  `driven.FileSystem` noch `recordingfs` direkt (Hard-Rule
-  `LH-FA-ARCH-002`/`-003`, geprüft via `make lint` depguard).
+  und `cli.New(...)`-Signatur **bleiben unverändert**; CLI-RunE
+  setzt `req.PreviewMode` gemäß T0-(b)-Wahrheitstabelle. Der
+  CLI-Adapter importiert weder `driven.FileSystem` noch
+  `recordingfs` direkt (Hard-Rule `LH-FA-ARCH-002`/`-003`,
+  geprüft via `make lint` depguard).
 - ✅ **Diff-Renderer zweigleisig** (Cluster T0-(d)): Pure-Go
   LCS-Hunk-Algorithmus (~150-200 LOC) oder
   `github.com/pmezard/go-difflib` (0-Dep, MIT) — Dep-Sub-Decision
@@ -677,14 +687,43 @@ type RecorderPort interface {
     Captured() []FileMutationRecord
 }
 
+// FileMutationRecord trägt sowohl die Mutations-Klassifikation
+// (Path/Action) als auch die rohen Inhalts-Snapshots, die der
+// CLI-Adapter für Diff-Rendering und Lines-Count braucht
+// (Review-Round-4-Finding H1 adressiert).
+//
+// NewContent: der bei WriteFile/WriteFileExclusive übergebene
+// Body — KANN auch bei delete-Actions leer sein (= nil).
+// OldContent: vom Recorder VOR der Mutation per ReadFile
+// (delegiert an Production-FS bzw. Production-Snapshot)
+// erfasst. Bei create-Action (Datei existierte vorher nicht)
+// = nil; bei modify/delete = der bisherige Datei-Inhalt.
+//
+// Beide Felder werden vom CLI-Adapter (T2 Diff-Renderer) für
+// LCS-Hunk-Generierung und Lines-Count konsumiert. Use-Case
+// selbst sieht sie nicht — er ruft nur Captured() ab und reicht
+// die Records (ohne weitere Verarbeitung) in
+// AddServiceResponse.PlannedFiles weiter; CLI-Adapter macht das
+// Rendering. (Mapping-Aufgabe T4.)
 type FileMutationRecord struct {
-    Path   string
-    Action string // "create" | "modify" | "delete"
-    // Hunks und Diff-Daten werden vom Diff-Renderer in T2
-    // separat pro Path erzeugt — Recorder selbst kennt nur die
-    // Mutations-Methode + Pfad.
+    Path       string
+    Action     string // "create" | "modify" | "delete"
+    NewContent []byte
+    OldContent []byte
 }
 ```
+
+**Capture-Mechanik im `recordingfs`-Adapter** (T1-Aufgabe): bei
+jedem `WriteFile(path, body, mode)`-Call ruft der Recorder VOR
+dem Capture einmal `underlying.ReadFile(path)` (für OldContent;
+bei Not-Found = `Action: "create"`, OldContent = nil; sonst
+`Action: "modify"`, OldContent = read-Result). NewContent =
+übergebener `body`. Bei `RemoveAll(path)`: OldContent = letzter
+ReadFile-Stand (für leere Verzeichnisse = nil), NewContent = nil,
+`Action: "delete"`. Bei `Copy(src, dst, ...)`: NewContent =
+`ReadFile(src)`-Snapshot, OldContent = `ReadFile(dst)` falls
+existent, sonst nil — Action je nach dst-Existenz `"create"`
+oder `"modify"`.
 
 ```go
 // internal/hexagon/application/addservice.go (Erweiterung)
@@ -795,6 +834,60 @@ der Mutations-Matrix-Doku aus T0-(f)):
 | `ErrInvalidServiceName` | `LH-FA-INIT-006` | error | 10 |
 | `ErrFileExists` | `LH-FA-INIT-004` | error | 10 |
 | `ErrBackupSuffixExhausted` | `LH-FA-INIT-005` | error | 14 |
+| **`ErrAddFileSystem` (neu)** | **`LH-FA-ADD-002`** | **error** | **14** |
+
+**Neuer Sentinel `ErrAddFileSystem`** (Review-Round-4-Finding H2
+adressiert): heutige Add-Writes wrappen rohe FS-Fehler ohne
+spec-konformen Sentinel; `cli.ExitCode` `isFilesystemError`-
+Helper mappt nur die bekannten Sentinels auf 14, rohe `os.WriteFile`-
+Errors landen im `default: return 1`-Zweig. Der Mid-Write-Failure-
+Scenario aus T0-(b) (`exitCode: 14`) ist damit ohne Sentinel
+nicht spec-konform erreichbar. T1 ergänzt:
+
+```go
+// internal/hexagon/port/driving/addservice.go
+var ErrAddFileSystem = errors.New("add: filesystem mutation failed")
+```
+
+Application-Layer wrapt rohe FS-Errors: `fmt.Errorf("add: write
+%s: %w: %w", path, ErrAddFileSystem, rawErr)` (Go 1.20+ Multi-
+`%w`). `cli.ExitCode` `isFilesystemError`-Helper bekommt
+`ErrAddFileSystem` ergänzt — `errors.Is(err, ErrAddFileSystem)
+→ 14`.
+
+**Non-empty Response on Error-Pfad** (Review-Round-4-Finding H2):
+heutige `runExecutePlan`-Form returnt `(AddServiceResponse{},
+wrappedErr)` bei FS-Failure. Für Spec-§326-Voll-Schema-Output mit
+`plannedFiles[]` aus dem Recorder MUSS der Add-Use-Case bei
+Mid-Write-Failure eine **non-empty Response** zurückgeben:
+
+```go
+// internal/hexagon/application/addservice.go (T1-Skizze)
+func (s *AddServiceService) Add(ctx context.Context, req AddServiceRequest) (AddServiceResponse, error) {
+    fs, recorder := s.fsFactory(req.PreviewMode)
+    s.fs = fs
+    // ... bestehende Add-Logik mit FS-Writes ...
+    resp := AddServiceResponse{ /* bestehende Felder */ }
+    if recorder != nil {
+        resp.PlannedFiles = mapCapture(recorder.Captured())
+    }
+    if writeErr != nil {
+        // Non-empty Response: User soll plannedFiles[] (Calls
+        // bis Failure) UND den fachlichen Sentinel sehen.
+        return resp, fmt.Errorf("add: write %s: %w: %w", failedPath, ErrAddFileSystem, writeErr)
+    }
+    return resp, nil
+}
+```
+
+CLI-RunE: bei Error-Return baut der RunE-Pfad den Voll-Schema-
+Envelope aus der Response (`PlannedFiles` ist befüllt) und ergänzt
+`diagnostics[]`-Eintrag mit `level: "error"`, `code: "LH-FA-ADD-002"`,
+`file: failedPath`, `message`. Exit-Code via `cli.ExitCode(err)
+→ 14`. Pin-Test in T5 verifiziert den kompletten Pfad:
+FS-Fake-Failure bei zweitem WriteFile → JSON mit File 1 + File 2,
+`diagnostics[0].file: "compose.yaml"`, `status: "error"`,
+`exitCode: 14`.
 
 **Success-Pfade** (`AddServiceResponse.Changed != nil`):
 `status: "ok"`, `diagnostics: []`. Idempotent-no-op-Form
@@ -944,16 +1037,19 @@ Templates hinzufügt, prüft UTF-8-Validity beim Render-Test.
 | T | Inhalt | LOC (Schätzung) |
 | - | ------ | --------------- |
 | T0 | **Discovery + Sub-Decisions** aus §T0-Discovery klären (zwölf Sub-Decisions: (a) Recorder-Lokation, (b) Passthrough-Schalter + 3 Failure-Scenarios, (c) Hunk-Field-Name, (d) Diff-Library, (e) Composition-Root-Wiring-Form, (f) Mutations-Matrix-Dokumentations-Ort, (g) `count`-Semantik, (h) Read-after-Write-Stichprobe, (i) Recorder-Carrier-Typ über Schicht-Grenze, (j) Diagnostic-Code-Quelle, (k) Minimal-Output für `add --json` ohne Dry-Run/Diff, (l) Hunks-Schema-Pin + Binary-Detection). Entscheidungen mit Begründung in einem `T0-Outcomes`-Block dokumentieren. | — (Plan-Arbeit) |
-| T1 | **`recordingfs`-driven-Adapter** + **Carrier-Types in `port/driving/addservice.go`** (T0-(i)). RecordingFileSystem-Struct + Konstruktor + 4 Read-Delegationen + 8 Mutations-Methoden (alle 8, auch ungenutzte) + impliziter `MkdirAll`-Capture-Modell (T0-(b)). `driving.PlannedFile`/`ChangeEntry`/`Hunk` Public-Types in `addservice.go` plus `AddServiceResponse`-Felder. Unit-Tests pro Methode: Dry-Run-Mode (kein Production-Call), Passthrough-Mode (capture + delegate), Mutation-Failure-Pfad, drei Failure-Scenarios aus T0-(b). depguard-Konformität geprüft. | ~340 |
+| T1 | **`recordingfs`-driven-Adapter** + **`driven.RecorderPort`-Interface** + **Carrier-Types in `port/driving/addservice.go`** (T0-(i)). `RecordingFileSystem`-Struct implementiert `driven.FileSystem` + `driven.RecorderPort`; Konstruktor + 4 Read-Delegationen + 8 Mutations-Methoden (alle 8, auch ungenutzte) + impliziter `MkdirAll`-Capture-Modell (T0-(b)) + **Pre-Write-ReadFile-Capture für `OldContent`** (Review-Round-4 H1). `driving.PlannedFile`/`ChangeEntry`/`Hunk` Public-Types in `addservice.go` plus `AddServiceResponse`-Felder. Unit-Tests pro Methode: Dry-Run-Mode (kein Production-Call, OldContent-Capture trotzdem korrekt), Passthrough-Mode (capture + delegate), Mutation-Failure-Pfad, drei Failure-Scenarios aus T0-(b). depguard-Konformität geprüft. | ~400 |
 | T2 | **Diff-Renderer** + **`AssertFullEnvelope`-Hunks-Helper-Erweiterung** (Review-Finding M5). Pure-Go LCS-Hunk + Unified-String-Renderer + UTF-8-Validity-Check vor LCS (T0-(l), Binary-Detection-Fallback). Hunk-Datentyp gemeinsam für beide Modi. **`checkHunks`-Helper** im `jsontestutil`-Package (Struktur-Pflicht-Felder, Field-Names, Zahl-Ranges). **Golden-File-Tests** gegen Spec-Beispiel-Fixtures (`testdata/add-postgres-compose-fresh.golden` und `-existing.golden`, Review-Finding L3). Unit-Tests gegen klassische LCS-Edge-Cases (leere Inputs, identische Inputs, einseitiger Append, Mitten-Modify, Binary-Detection). | ~310 |
 | T3 | **Composition-Root-Wiring mit Selector-Closure** (T0-(e) Option 4). `cmd/uboot/main.go` konstruiert einen `fsFactory(mode driving.AddPreviewMode) (driven.FileSystem, driven.RecorderPort)`-Closure (zwei Werte: FS-Interface + optionales Recorder-Port-Interface gemäß T0-(i)-Outcome), übergibt ihn an die Application-Layer-Service-Konstruktoren. `driving.AddPreviewMode`-Enum + `driving.AddServiceRequest.PreviewMode`-Field-Erweiterung (KEIN Boolean). CLI-RunE setzt `Request.PreviewMode = previewModeFromFlags(a.dryRun, a.diff)` gemäß T0-(b)-Wahrheitstabelle: vier Flag-Kombinationen → drei Modi. Pin-Tests pinnen alle vier Kombinationen: `--dry-run` (mit oder ohne `--diff`) → kein Production-Write; `--diff` ohne `--dry-run` → Production-Write **plus** Capture (Spec §465-470 Preview-and-Apply); kein Flag → Production-Write ohne Capture. App-Struct + `cli.New(...)`-Signatur **unverändert**; keine Test-Helper-Mass-Edits. | ~80 |
-| T4 | **`u-boot add` JSON-RunE-Pfad**: drei Code-Pfade je nach Flag-Kombination — (a) `--json` ohne Dry-Run/Diff → `newMinimalEnvelope` (T0-(k), Spec-streng Minimal); (b) `--dry-run --json` → `newFullEnvelope` mit Recorder-Capture, `dryRun=true`/`diff=false`; (c) `--diff --json` (mit oder ohne Dry-Run) → `newFullEnvelope` mit Hunks, `diff=true`. Diagnostic-Code-Mapping aus T0-(j). Allowlist-Migration: `u-boot add` raus aus Reject, rein in Migrate. Reject-Pin-Test schrumpft (11 → 10). | ~200 |
+| T4 | **`u-boot add` JSON-RunE-Pfad**: drei Code-Pfade je nach Flag-Kombination — (a) `--json` ohne Dry-Run/Diff → `newMinimalEnvelope` (T0-(k), Spec-streng Minimal); (b) `--dry-run --json` → `newFullEnvelope` mit Recorder-Capture, `dryRun=true`/`diff=false`; (c) `--diff --json` (mit oder ohne Dry-Run) → `newFullEnvelope` mit Hunks (gerendert aus `FileMutationRecord.OldContent`/`NewContent`), `diff=true`. **Error-Response-Pfad** (T0-(j) Round-4 H2): bei `ErrAddFileSystem`-Return baut der RunE den Voll-Schema-Envelope aus der **non-empty Response** plus `diagnostics[]`-Eintrag mit `file:` und LH-Code; Exit-Code 14 via bestehendem `cli.ExitCode`-Pfad (mit ergänztem `isFilesystemError`-Sentinel-Check). Diagnostic-Code-Mapping aus T0-(j). Allowlist-Migration: `u-boot add` raus aus Reject, rein in Migrate. Reject-Pin-Test schrumpft (11 → 10). | ~230 |
 | T5 | **Acceptance-Tests** für alle vier Flag-Kombinationen + drei Failure-Scenarios (T0-(b)) + Negative-Pin (Null-FS-Mutationen im Dry-Run) + Diff-Output-Pin (Unified-Struktur stimmt) + Pin-Test für `count`-Semantik gegen Test-Fixture (T0-(g) `newLines`-Pin). Erstnutzung von `jsontestutil.AssertFullEnvelope` mit `checkHunks`-Erweiterung aus T2. Two-Pin-Form (Variante A frisch-init / Variante B existing). | ~360 |
 | T6 | **Closure.** CHANGELOG `## [Unreleased]` Added-Eintrag, roadmap.md Cluster-Slice-Zelle aktualisiert (Add done, nächster Schritt `init`), cli-json-output.md §6.1-Tabelle auf done plus Add-Sektion-Erweiterung mit Minimal-vs-Voll-Output-Hinweis (T0-(k)) und Mid-Failure-UX-Hint (T0-(b)). Slice-File `in-progress/` → `done/` mit DoD-Hash-Tranchen-Tabelle. `make docs-check` grün. | — (Doku) |
 
-LOC-Schätzung Folge-Slice: ~1290 LOC nach Review-Fixes (Carrier-
-Types in port/driving, MkdirAll-Capture-Modell, Hunks-Helper-
-Erweiterung, Golden-File-Tests, drei Failure-Scenarios) — von
+LOC-Schätzung Folge-Slice: ~1380 LOC nach vier Review-Runden
+(Carrier-Types in port/driving, MkdirAll-Capture-Modell, Hunks-
+Helper-Erweiterung, Golden-File-Tests, drei Failure-Scenarios,
+`driven.RecorderPort`-Interface, Pre-Write-ReadFile-Capture für
+OldContent/NewContent, `ErrAddFileSystem`-Sentinel + non-empty
+Response on Error-Pfad + cli.ExitCode-Erweiterung) — von
 ursprünglich ~1120; weiterhin **deutlich** über der vom Cluster-
 Slice gesetzten 200..600-Bandbreite. Begründung: dieser Slice
 etabliert die schwerere Cluster-Infrastruktur (Recorder + Carrier-
