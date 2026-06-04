@@ -2,7 +2,7 @@
 
 > **Status:** geplant für v0.4.0 — erster Folge-Slice des
 > Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](../next/slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Platz 1). Liefert die gemeinsame Infrastruktur für die
 > 9er-Folge-Slice-Serie: Root-PersistentFlag `--json` (T0-(a)),
 > Common-Envelope `cliJSONEnvelope` (T0-(c)) und Schema-Helper
@@ -508,7 +508,7 @@ Doku etabliert (Pattern-Vorbild-Last).
 ## Bezug
 
 - Cluster-Slice:
-  [`slice-v1-cli-json-dry-run`](../next/slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
   — §T0-Outcomes (a, c, e) sind die Vorgaben dieses Slices,
   §Aufhebungsbedingung Closure-Hard-Rule ist verbindlich für die
   Cluster-Schließung.

@@ -11,8 +11,10 @@
 > definiert Reihenfolge + geteilte Konventionen für die
 > Per-Command-Folge-Slice-Serie. T0 ✅ festgezurrt
 > (§T0-Outcomes — 5 Sub-Decisions plus Mutations-Matrix-Pre-Scan);
-> in `next/`, nächster Schritt ist Spawn der ersten
-> Per-Command-Slices und Übergang nach `in-progress/`.
+> in `in-progress/`, Folge-Slice 1/9
+> [`slice-v1-cli-json-dry-run-doctor`](../open/slice-v1-cli-json-dry-run-doctor.md)
+> in `open/`. Nächster Schritt: T0-Discovery des Doctor-Slices
+> (8 Sub-Decisions), danach `next/`-Übergang dort.
 
 ## Auslöser
 
