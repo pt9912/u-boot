@@ -12,8 +12,11 @@
 > Instanzen via `fsSelector`-Closure (T0-(e) Option 4) und
 > **`AssertFullEnvelope`-Erstnutzung** (im Doctor-Slice T2 nur
 > als Stub angelegt). Stub liegt in `open/`; Review-Findings
-> H1-L4 (3× HIGH, 6× MEDIUM, 4× LOW) sind direkt in den Stub
-> eingearbeitet; T0-Discovery noch offen (12 Sub-Decisions
+> aus zwei Runden adressiert: Runde 1 H1-L4 (3× HIGH, 6× MEDIUM,
+> 4× LOW), Runde 2 H1-M2 (3× HIGH, 2× MEDIUM — fsSelector-Drei-
+> Modi, Exit-Code 14 statt 11, Spec-konformer Binary-Fallback,
+> Recorder-Capture-Realität bei Mid-Failure, count-Semantik-
+> Konsistenz). T0-Discovery noch offen (12 Sub-Decisions
 > finalisieren).
 
 ## Auslöser
@@ -271,10 +274,13 @@ mit einem Spy auf alle 8 Mutations-Methoden und assertet `Calls
   (catalog → service-Files), kein Write-then-Read → kein Overlay
   nötig (Verifikation in T0).
 - ✅ **Diff-Renderer-`changes[].count`-Semantik**: gleiches Hunk-
-  Datum für Human- und JSON-Modus; `changes[i].count` zählt
-  geänderte Zeilen (`oldLines + newLines` Summe pro Hunk, dann
-  pro Datei aggregiert). Sub-Decision T0-(g) finalisiert die
-  Counter-Form.
+  Datum für Human- und JSON-Modus; `changes[i].count` gemäß T0-(g)
+  **`newLines`-Form** (Spec §430+§477 konsistent): bei
+  `action: "create"` = total lines der neuen Datei; bei
+  `action: "modify"` = Summe der neuen Zeilen über alle Hunks;
+  bei `action: "delete"` = `0`. (Vorheriger AK-Wortlaut
+  „`oldLines + newLines`" war Stub-Annahme; Review-Round-2-
+  Finding M2 korrigiert.)
 - ✅ **Allowlist-Migration**: `u-boot add` raus aus dem
   Reject-Pfad in `jsonAllowlist`, rein in den Migrate-Pfad.
   Bestehender Pin-Test
@@ -332,26 +338,51 @@ Vorschlag (T0-Festlegung):
   gescheitert ist; ein Roll-back des Plan-Eintrags würde die
   Drift-Info verschlucken.
 
-**Drei Failure-Scenarios explizit gepinnt** (Review-Finding L2
-adressiert — Mid-Failure-UX-Klärung):
+**Drei Failure-Scenarios explizit gepinnt** (Review-Findings L2 +
+Round 2 H2 + M1 adressiert — Mid-Failure-UX, Exit-Code-Klasse
+und Recorder-Capture-Realität):
 
 | Scenario | `plannedFiles[]` | `diagnostics[]` | `status` | `exitCode` |
 | --- | --- | --- | --- | --- |
 | **Success-Sequenz** (alle 3 Files OK) | alle 3 Files mit korrekter Action | `[]` | `"ok"` | `0` |
-| **Mid-Write-Failure** (File 1 OK, File 2 failt) | alle 3 Files (auch ungeschriebene) mit Plan-Action | 1× `level:"error"` mit Fehler-Code für File 2 | `"error"` | `11` |
+| **Mid-Write-Failure** (File 1 OK, File 2 failt) | nur die bis zum Failure tatsächlich gecaptureten Aufrufe (File 1 + File 2) | 1× `level:"error"` mit `LH-FA-CLI-006`-konformem FS-Code, `file:` für File 2 | `"error"` | `14` |
 | **Pre-Write-Validation-Failure** (z. B. ungültiger Service-Name vor erstem Write) | `[]` (keine Files geplant) | 1× `level:"error"` mit `LH-FA-INIT-006` | `"error"` | `10` |
 
-UX-Hinweis: Bei Mid-Write-Failure (Scenario 2) sind die in `plannedFiles[]`
-nach dem Fehler-Eintrag aufgeführten Files **nicht** geschrieben
-worden — User-Disambiguation passiert über das
-`diagnostics[].file`-Optional-Feld (Spec §382), das den exakten
-Failure-Point markiert. Doku-Hint in `cli-json-output.md` §6.1
-(Add-Sektion): „On mid-write failure, files listed AFTER the
-`level:"error"` diagnostic entry have NOT been written; the
-diagnostic's `file` field identifies the failure point." Roll-
-back-aware Capture (alle bereits geschriebenen Files reverten) ist
-**Out-of-Scope** für V1 (würde Cluster-T0-(b) Variante 3
-ChangeSet-Pattern erfordern, das explizit verworfen wurde).
+**Round-2-H2-Korrektur (Exit-Code-Klasse)**: FS-Write-Failure
+(Mid-Write-Failure-Scenario) klassifiziert nach `LH-FA-CLI-006`
+als **technischer Persistenz-/Dateisystem-Fehler** → Exit-Code
+**14**, **nicht** 11. Code 11 ist für fachliche
+Umgebungs-/Prüfungsfehler (`ErrDoctorFailures`,
+`ErrDockerUnavailable`). Vorheriger Tabellen-Wert „11" war
+Stub-Annahme.
+
+**Round-2-M1-Korrektur (Recorder-Capture-Realität)**: Im Preview-
+and-Apply-Modus (`--diff` ohne `--dry-run`) läuft der Recorder
+**production-parallel** —
+[`addservice_execute.go`](../../../../internal/hexagon/application/addservice_execute.go)
+returnt beim zweiten WriteFile-Fehler aus der Schleife und ruft
+File 3 nie auf. Der Recorder sieht damit nur die Aufrufe bis zur
+Failure-Stelle. Vorheriger Tabellen-Wortlaut „alle 3 Files (auch
+ungeschriebene)" war Wunschdenken; der gewählte Capture-
+Mechanismus liefert das nicht ohne Pre-Plan-Extractor oder
+Wrapper-Use-Case (beides Out-of-Scope für V1).
+
+**Dry-Run-Modus** ist davon **unberührt**: bei `--dry-run` (mit
+oder ohne `--diff`) läuft der Recorder mit `Passthrough=false`
+und capturet **alle** geplanten Mutations ohne Production-Call.
+Hier sieht der User die vollständige Liste.
+
+UX-Hinweis Mid-Write-Failure: das `diagnostics[].file`-Optional-
+Feld (Spec §382) markiert die Failure-Stelle. Doku-Hint in
+`cli-json-output.md` §6.1 (Add-Sektion): „On mid-write failure
+during `--diff` (preview-and-apply), `plannedFiles[]` contains
+only the files captured before and at the failure point. The
+diagnostic's `file` field identifies the failure point; later
+files that the use-case would have written are **not** listed."
+Roll-back-aware Capture (alle bereits geschriebenen Files
+reverten) ist **Out-of-Scope** für V1 (würde Cluster-T0-(b)
+Variante 3 ChangeSet-Pattern erfordern, das explizit verworfen
+wurde).
 
 ### T0-(c) Diff-Hunk-Field-Name im JSON
 
@@ -412,27 +443,58 @@ mal 5 modifying Use-Cases, was eine Wartungs-Last über die
 gesamte Cluster-Serie hinweg trägt. Option 4 verschiebt die
 Wahl in den Application-Layer (`Request`-Feld); die
 Composition-Root in `cmd/uboot/main.go` konstruiert den Use-Case
-einmal mit einem **Constructor-Closure** als FS-Selector:
+einmal mit einem **Constructor-Closure** als FS-Selector.
+
+**Drei Modi statt zwei** (Review-Round-2-Finding H1 adressiert):
+der Selector muss `--dry-run` von `--diff`-ohne-`--dry-run`
+unterscheiden — sonst kollabiert Spec §465-468 Preview-and-Apply
+zu einem No-Write-Preview. `Request.PreviewMode` ist deshalb
+**kein** Boolean, sondern eine Enum:
 
 ```go
+// internal/hexagon/port/driving/addservice.go (Skizze)
+type AddPreviewMode int
+const (
+    PreviewNone        AddPreviewMode = iota // Normal-Mode: Production-FS direkt
+    PreviewDryRun                            // --dry-run: kein Write, vollständiger Plan
+    PreviewAndApply                          // --diff ohne --dry-run: Plan capturen + schreiben
+)
+type AddServiceRequest struct {
+    // ...
+    PreviewMode AddPreviewMode
+}
+
 // cmd/uboot/main.go (Skizze)
 prodFS := fs.New(...)
-selector := func(preview bool) driven.FileSystem {
-    if preview {
+selector := func(mode driving.AddPreviewMode) driven.FileSystem {
+    switch mode {
+    case driving.PreviewDryRun:
         return recordingfs.New(prodFS, recordingfs.WithPassthrough(false))
+    case driving.PreviewAndApply:
+        return recordingfs.New(prodFS, recordingfs.WithPassthrough(true))
+    default:
+        return prodFS
     }
-    return prodFS
 }
 addService := application.NewAddServiceServiceWithSelector(selector, ...)
 ```
 
-Composition-Root wählt **bei jedem Request-Eintreffen** zwischen
-beiden FS-Adaptern; Use-Case-Methode bleibt
-`Add(ctx, req)`-Signatur (`req.PreviewMode` wird intern an
-`selector(preview)` weitergereicht). depguard bleibt sauber, da
-weder CLI noch Use-Case `recordingfs` importieren — nur
-`cmd/uboot/main.go` (Wiring-Layer, exempt von
-`adapter-driving-no-driven` per `.golangci.yml`-Allowlist).
+CLI-RunE-Mapping: `Request.PreviewMode = previewModeFromFlags(a.dryRun, a.diff)`
+mit der Wahrheitstabelle aus T0-(b):
+
+| `--dry-run` | `--diff` | `PreviewMode` | Production-Write? |
+| --- | --- | --- | --- |
+| nein | nein | `PreviewNone` | ja (Normal-Mode) |
+| ja | nein | `PreviewDryRun` | nein (Plan only) |
+| nein | ja | `PreviewAndApply` | ja (Plan + Write) |
+| ja | ja | `PreviewDryRun` | nein (Diff-Vorschau, kein Write) |
+
+Use-Case-Methode bleibt `Add(ctx, req)`-Signatur
+(`req.PreviewMode` wird intern an `selector(mode)`
+weitergereicht). depguard bleibt sauber, da weder CLI noch
+Use-Case `recordingfs` importieren — nur `cmd/uboot/main.go`
+(Wiring-Layer, exempt von `adapter-driving-no-driven` per
+`.golangci.yml`-Allowlist).
 
 Verworfene Form-Variante: Option 1 (App-Struct-Doppel-Felder) — der
 ursprüngliche Stub-Vorschlag. Trade-off neu bewertet: Wartungs-Last
@@ -727,18 +789,37 @@ Array von Objekten mit Pflichtfeldern `oldStart`/`oldLines`/
 bei Lines > 0 (sonst irrelevant). Negative-Pin: ungültiges
 Field-Name (`offset` statt `oldStart`) bricht den Test.
 
-**Binary-Content-Detection** (Review-Finding L4 adressiert):
+**Binary-Content-Detection** (Review-Findings L4 + Round 2 H3
+adressiert — Spec §354 erlaubt nur `create|modify|delete`):
 `add`-Templates sind **heute** reine Text-Files
 ([`addservice_execute.go:252-261`](../../../../internal/hexagon/application/addservice_execute.go)
 Catalog-Map; `embed.FS`-Templates mit `.compose.tmpl`/`.env.tmpl`-
 Suffix). Der Diff-Renderer in T2 muss trotzdem einen UTF-8-
-Validity-Check vor LCS-Diff-Rendering durchführen — bei Binary-
-Content (alle non-UTF-8-Bytes) Fallback auf `plannedFiles[].action:
-"binary"`-Marker mit `count: 0` und `hunks: []` (Spec §354
-listet nur `create|modify|delete`; „binary" wäre Spec-Erweiterung
-und ist out-of-scope für V1 — pragmatischer Fallback: Diff-Rendering
-ueberspringen, `plannedFiles[].hunks` bleibt nil, `count` zählt
-nur Bytes/Lines wo möglich).
+Validity-Check vor LCS-Diff-Rendering durchführen.
+
+**Bei Binary-Content** (`!utf8.Valid(newContent)` oder gleicher
+Check auf alte Datei) gilt **Spec-konformes Fallback**:
+
+- `plannedFiles[].action` bleibt im Spec-Enum
+  (`create`/`modify`/`delete`) — **kein** „binary"-Wert
+  (Round-2-Finding H3-Korrektur: der ursprüngliche Stub-Vorschlag
+  `action: "binary"` war Spec-widrig und hätte
+  `AssertFullEnvelope` und JSON-Konsumenten korrekt zum Scheitern
+  gebracht).
+- `plannedFiles[].hunks` wird **nicht gesetzt** (Field via
+  `omitempty` weggelassen — Diff-Rendering einfach übersprungen).
+- `changes[].count` zählt Byte-Längen-Differenz statt Zeilen
+  (`abs(len(newContent) - len(oldContent))` bei modify;
+  `len(newContent)` bei create; `0` bei delete) — Spec §365-371
+  lässt `count` als Integer ≥ 0 offen, Byte-Diff ist eine valide
+  Form.
+- Optional: `diagnostics[]`-Eintrag mit `level: "warn"` und Code
+  `LH-FA-CLI-008` (Binary-Diff-Skip-Hinweis) als User-Hint —
+  Sub-Decision T0-(l) Variante: notwendig oder out-of-scope?
+  Vorschlag: ohne diagnostics-Eintrag, weil das Information-Level
+  ist (Spec §1834 verbietet `level: "info"`), und Warn würde den
+  `status` auf `warn` upgraden, was bei einer reinen Binary-
+  Detektion semantisch nicht passt.
 
 **Drift-Anker für Folge-Slices**: zukünftige Add-on-Catalog-Erweiterungen
 müssen entweder Text-Templates anbieten oder die Binary-Detection
