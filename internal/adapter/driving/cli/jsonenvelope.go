@@ -35,7 +35,13 @@ type cliJSONEnvelope struct {
 	Changes      *[]changeEntry   `json:"changes,omitempty"`
 	Diagnostics  []diagnosticItem `json:"diagnostics"`
 	ExitCode     int              `json:"exitCode"`
-	Data         any              `json:"data,omitempty"`
+	// Data: bewusst weggelassen. Spec §1839 erlaubt zusätzliche
+	// Felder im Minimal-Mode; T0-(c) hatte ein optionales `Data any`
+	// vorgesehen. Im Doctor-Slice gibt es aber keinen Konsumenten;
+	// ein totes Feld ohne Konstruktor-Pfad würde die Disziplin
+	// "Konstruktor pinnt die Stufe" brechen. Der Folge-Slice
+	// `slice-v1-cli-json-dry-run-template` (Platz 9) ergänzt Data
+	// inkl. dediziertem `newDataEnvelope`-Konstruktor + Pin-Test.
 }
 
 // diagnosticItem ist ein Eintrag im `diagnostics[]`-Array. Spec

@@ -1,9 +1,6 @@
 package jsontestutil_test
 
 import (
-	"go/ast"
-	"go/parser"
-	"go/token"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -12,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/pt9912/u-boot/internal/adapter/driving/cli/jsontestutil"
+	"github.com/pt9912/u-boot/internal/hexagon/application"
 )
 
 // repoRoot returns the repository root by walking up from this test
@@ -36,75 +34,35 @@ func repoRoot(t *testing.T) string {
 }
 
 // TestDriftGate1_MapVsDoctorCheckIDs is the T0-(h) Gate 1: every
-// checkID* constant declared in internal/hexagon/application/doctor.go
-// must have an entry in DefaultAllowedCodes. If a future doctor
-// check lands without a registry entry, this test breaks.
+// check ID returned by application.DoctorCheckIDs() must have an
+// entry in DefaultAllowedCodes.
 //
-// Parses doctor.go via go/parser (stdlib, no new dep). We look for
-// any const declaration whose name starts with "checkID" and reads
-// the assigned string literal.
+// Previously this test source-parsed application/doctor.go with
+// go/parser (depguard-loophole). The application package now ships
+// an explicit DoctorCheckIDs() public helper — the gate is a clean
+// import (Review M3-Findings adressiert).
 func TestDriftGate1_MapVsDoctorCheckIDs(t *testing.T) {
-	doctorPath := filepath.Join(repoRoot(t), "internal", "hexagon", "application", "doctor.go")
-	fset := token.NewFileSet()
-	file, err := parser.ParseFile(fset, doctorPath, nil, parser.ParseComments)
-	if err != nil {
-		t.Fatalf("parse doctor.go: %v", err)
-	}
-
-	checkIDs := extractCheckIDs(file)
+	checkIDs := application.DoctorCheckIDs()
 	if len(checkIDs) == 0 {
-		t.Fatal("found zero checkID* constants in doctor.go — extractor broken or file moved")
+		t.Fatal("application.DoctorCheckIDs() returned empty — helper broken or doctor.go moved")
 	}
 
 	registry := jsontestutil.DefaultAllowedCodes()
 	for _, code := range checkIDs {
 		if _, ok := registry[code]; !ok {
-			t.Errorf("checkID %q from doctor.go missing in DefaultAllowedCodes (T0-(h) Gate 1)", code)
+			t.Errorf("check ID %q from application.DoctorCheckIDs() missing in DefaultAllowedCodes (T0-(h) Gate 1)", code)
 		}
 	}
-}
-
-// extractCheckIDs walks the AST for `const checkID... = "literal"`
-// declarations and returns the literal values.
-func extractCheckIDs(file *ast.File) []string {
-	var ids []string
-	for _, decl := range file.Decls {
-		gen, ok := decl.(*ast.GenDecl)
-		if !ok || gen.Tok != token.CONST {
-			continue
-		}
-		for _, spec := range gen.Specs {
-			vs, ok := spec.(*ast.ValueSpec)
-			if !ok {
-				continue
-			}
-			for i, name := range vs.Names {
-				if !strings.HasPrefix(name.Name, "checkID") {
-					continue
-				}
-				if i >= len(vs.Values) {
-					continue
-				}
-				lit, ok := vs.Values[i].(*ast.BasicLit)
-				if !ok || lit.Kind != token.STRING {
-					continue
-				}
-				unquoted := strings.Trim(lit.Value, `"`)
-				ids = append(ids, unquoted)
-			}
-		}
-	}
-	return ids
 }
 
 // TestDriftGate2_MapVsMarkdownDoc is the T0-(h) Gate 2: every Map
-// entry must have a Markdown table row in docs/user/cli-json-output.md,
-// and vice versa. Bricht in both drift directions.
+// entry must have a Markdown table row in docs/user/cli-json-output.md
+// §5 Code-Registry, and vice versa. Both drift directions are checked.
 //
-// Markdown row format expected (from docs/user/cli-json-output.md §5.1):
-//   | `code.name` | description text |
-//
-// Code-Spalte ist immer Backtick-Quoted, Description folgt nach `|`.
+// Sektion-Begrenzung via HTML-Markers `<!-- code-registry:start -->`
+// und `<!-- code-registry:end -->` in der Doku — robust gegen
+// Doku-Erweiterungen um weitere Tabellen in anderen Sektionen
+// (Review M1-Findings adressiert).
 func TestDriftGate2_MapVsMarkdownDoc(t *testing.T) {
 	docPath := filepath.Join(repoRoot(t), "docs", "user", "cli-json-output.md")
 	bytes, err := os.ReadFile(docPath)
@@ -112,16 +70,21 @@ func TestDriftGate2_MapVsMarkdownDoc(t *testing.T) {
 		t.Fatalf("read cli-json-output.md: %v", err)
 	}
 
-	docCodes := extractMarkdownCodes(string(bytes))
+	section := extractRegistrySection(string(bytes))
+	if section == "" {
+		t.Fatal("code-registry markers not found in cli-json-output.md — Doku-Anker entfernt?")
+	}
+
+	docCodes := extractMarkdownCodes(section)
 	if len(docCodes) == 0 {
-		t.Fatal("found zero Markdown table rows — extractor broken or doc moved")
+		t.Fatal("found zero Markdown table rows in code-registry section — extractor broken")
 	}
 
 	registry := jsontestutil.DefaultAllowedCodes()
 
 	for code := range registry {
 		if _, ok := docCodes[code]; !ok {
-			t.Errorf("registry code %q missing from Markdown doc §5 (T0-(h) Gate 2, map → doc)", code)
+			t.Errorf("registry code %q missing from Markdown doc code-registry section (T0-(h) Gate 2, map → doc)", code)
 		}
 	}
 
@@ -130,6 +93,23 @@ func TestDriftGate2_MapVsMarkdownDoc(t *testing.T) {
 			t.Errorf("Markdown doc lists code %q absent from registry (T0-(h) Gate 2, doc → map)", code)
 		}
 	}
+}
+
+// extractRegistrySection isolates the registry block between the
+// `<!-- code-registry:start -->` and `<!-- code-registry:end -->`
+// markers. Returns "" if either marker is missing.
+func extractRegistrySection(content string) string {
+	const startMarker = "<!-- code-registry:start -->"
+	const endMarker = "<!-- code-registry:end -->"
+	start := strings.Index(content, startMarker)
+	if start < 0 {
+		return ""
+	}
+	end := strings.Index(content, endMarker)
+	if end < 0 || end < start {
+		return ""
+	}
+	return content[start+len(startMarker) : end]
 }
 
 // extractMarkdownCodes scans the Markdown for table rows shaped like
@@ -145,9 +125,6 @@ func extractMarkdownCodes(content string) map[string]bool {
 			continue
 		}
 		code := strings.TrimSpace(m[1])
-		// Skip non-code rows: schema/spec markers, table separators,
-		// description-headers. Real codes follow dotted-identifier or
-		// LH-prefix shape; everything else gets filtered.
 		if !isCodeLike(code) {
 			continue
 		}
@@ -156,15 +133,13 @@ func extractMarkdownCodes(content string) map[string]bool {
 	return codes
 }
 
-// isCodeLike accepts entries that look like dotted-identifier
-// codes (e.g. `docker.installed`) or LH-IDs. Rejects code-blocks,
-// inline-spans of regular prose, paths, file-names.
+// isCodeLike accepts entries that look like dotted-identifier codes
+// (e.g. `docker.installed`). LH-IDs are NOT accepted here because
+// the code-registry section documents Tool-internal codes only;
+// LH-IDs are handled at runtime by the helper, not in the doc.
 func isCodeLike(s string) bool {
 	if s == "" {
 		return false
-	}
-	if strings.HasPrefix(s, "LH-") {
-		return true
 	}
 	if !strings.Contains(s, ".") {
 		return false

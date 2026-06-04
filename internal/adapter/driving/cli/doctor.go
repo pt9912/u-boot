@@ -110,10 +110,9 @@ func runDoctor(
 		return err
 	}
 
+	var writeErr error
 	if flags.JSON {
-		if err := writeDoctorJSON(out, resp.Report, flags.Strict); err != nil {
-			return err
-		}
+		writeErr = writeDoctorJSON(out, resp.Report, flags.Strict)
 	} else {
 		writeDoctorReport(out, cwd, resp.Report, flags.Quiet)
 	}
@@ -122,13 +121,16 @@ func runDoctor(
 	//   - any Error              → ErrDoctorFailures
 	//   - --strict + any Warn    → ErrDoctorFailures
 	//   - otherwise              → nil (exit 0)
-	if resp.Report.HasErrors() {
+	//
+	// Write-Fehler (z. B. broken pipe via `u-boot doctor --json |
+	// head`) WERDEN NICHT als Exit 1 verschluckt, wenn der Report
+	// fachlich fail-grade ist. Spec-konformer Exit-Code 11 hat
+	// Vorrang — User-Pipe-Konsumenten sehen das fachliche Ergebnis,
+	// nicht den Pipe-Status (Review M2-Findings adressiert).
+	if resp.Report.HasErrors() || (flags.Strict && resp.Report.HasWarnings()) {
 		return ErrDoctorFailures
 	}
-	if flags.Strict && resp.Report.HasWarnings() {
-		return ErrDoctorFailures
-	}
-	return nil
+	return writeErr
 }
 
 // writeDoctorJSON renders the doctor result as a LH-NFA-USE-004
@@ -176,8 +178,15 @@ func mapDiagnosticsToJSON(items []domain.Diagnostic) []diagnosticItem {
 
 // severityToJSONLevel maps domain.Severity to the Spec §1834 level
 // vocabulary (only warn / error). Returns "" for SeverityOK and
-// SeverityInfo to signal "filter out". A future spec extension that
-// adds new severity values would land here.
+// SeverityInfo to signal "filter out".
+//
+// IMPORTANT: a future Spec-Erweiterung that adds new severity
+// values to domain.Severity MUST extend this switch. The default
+// branch panics (fail-fast) instead of silently filtering — a new
+// SeverityHint would otherwise vanish from the JSON output without
+// any test or runtime signal. The panic surfaces in the first
+// affected doctor invocation; the slice that introduces the new
+// severity has to land the mapping in the same PR.
 func severityToJSONLevel(s domain.Severity) string {
 	switch s {
 	case domain.SeverityError:
@@ -186,8 +195,9 @@ func severityToJSONLevel(s domain.Severity) string {
 		return "warn"
 	case domain.SeverityOK, domain.SeverityInfo:
 		return ""
+	default:
+		panic(fmt.Sprintf("severityToJSONLevel: unknown domain.Severity %v — extend switch and DefaultAllowedCodes", s))
 	}
-	return ""
 }
 
 // doctorExitCode mirrors the runDoctor exit-code policy at envelope-

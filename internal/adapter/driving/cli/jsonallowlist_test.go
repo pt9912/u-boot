@@ -117,56 +117,55 @@ func TestRootJSON_AcceptsTemplateList_FlagBeforeSubcommand(t *testing.T) {
 }
 
 // TestRootJSON_TreeWalkAllowlistCompleteness is the M2 anti-drift
-// pin from slice-doctor §T0-(g): rekursiver Walk durch alle Cobra-
-// Subcommands prüft, dass jede Subcommand-Form bekannt ist (entweder
-// in der Allowlist ODER als Reject mit ErrJSONNotImplemented).
+// pin from slice-doctor §T0-(g): echter Tree-Walk durch alle
+// registrierten Cobra-Subcommand-Pfade. Für jeden Pfad gilt:
+// entweder Allowlist-Hit (--json akzeptiert) ODER Reject mit
+// ErrJSONNotImplemented. Eine Form, die NEITHER ist, ist ein
+// Missing-Allowlist-Entry und bricht den Test.
 //
-// Bricht, sobald jemand einen neuen Subcommand registriert oder
-// `Use` umbenennt, ohne den Map-Key mitzuziehen.
+// Code-Realität ist die Quelle: ein neuer Subcommand, der per
+// root.AddCommand(...) hinzukommt, taucht automatisch im Walk auf —
+// statische Erwartungs-Listen entfallen (Review H3-Findings:
+// "TreeWalk-Test deckt KEINEN Tree-Walk ab" adressiert).
 func TestRootJSON_TreeWalkAllowlistCompleteness(t *testing.T) {
-	expectedForms := []string{
-		"u-boot init",
-		"u-boot doctor",
-		"u-boot add",
-		"u-boot remove",
-		"u-boot up",
-		"u-boot down",
-		"u-boot logs",
-		"u-boot generate",
-		"u-boot config",
-		"u-boot config get",
-		"u-boot config set",
-		"u-boot config show",
-		"u-boot template",
-		"u-boot template list",
+	app := newApp(&fakeInitUseCase{})
+	paths := app.WalkRootCommandPathsForTest()
+	if len(paths) == 0 {
+		t.Fatal("Cobra tree walk returned zero paths — walker broken")
 	}
 
-	// Drive every form via Execute --json and confirm: either it
-	// succeeds/runs-and-fails-downstream (Allowlist Migrate) OR it
-	// returns ErrJSONNotImplemented (Reject). A spec-enum form that
-	// returns NEITHER is a missing Allowlist entry.
-	for _, path := range expectedForms {
+	for _, path := range paths {
 		t.Run(path, func(t *testing.T) {
 			args := append([]string{"--json"}, strings.Split(strings.TrimPrefix(path, "u-boot "), " ")...)
-			// "config show" is not a real subcommand; skip — kept in
-			// expectedForms only as a reminder that the config-Slice
-			// will resolve it. (Spec §96-107 leaves the bare form open.)
-			if strings.HasSuffix(path, "show") {
-				t.Skip("config show is not registered today; placeholder for the config-Slice T0 sub-decision")
-			}
-			// Most non-migrated forms need additional arguments; add
-			// stub args so Cobra parses them. The test only cares
-			// whether the gate fires, not whether the use case succeeds.
 			args = appendStubArgs(args, path)
 			err := newApp(&fakeInitUseCase{}).Execute(context.Background(), args, &bytes.Buffer{}, &bytes.Buffer{})
 			if errors.Is(err, cli.ErrJSONNotImplemented) {
-				// Reject path — fine, the form is in the not-yet-migrated set.
-				return
+				return // Reject path — non-migrated form, gate fires correctly.
 			}
-			// Otherwise: the form must be migrated (Allowlist hit).
-			// Downstream failures (use-case errors) are acceptable;
-			// what matters is no ErrJSONNotImplemented.
+			// Otherwise: form must be migrated (Allowlist hit). Downstream
+			// failures (use-case errors, broken fixtures) are acceptable —
+			// what matters is "no ErrJSONNotImplemented" for an
+			// allowlist-registered path.
 		})
+	}
+}
+
+// TestRootJSON_AllowlistAndTreeMatch is the second half of the M2-
+// Drift-Gate: every Allowlist-key MUST correspond to a real Cobra
+// command path. If someone adds a stale Allowlist entry pointing to
+// a Use-renamed or removed subcommand, this test catches it.
+func TestRootJSON_AllowlistAndTreeMatch(t *testing.T) {
+	app := newApp(&fakeInitUseCase{})
+	allowlist := cli.JSONAllowlistPathsForTest()
+	treePaths := app.WalkRootCommandPathsForTest()
+	treeSet := make(map[string]bool, len(treePaths))
+	for _, p := range treePaths {
+		treeSet[p] = true
+	}
+	for _, key := range allowlist {
+		if !treeSet[key] {
+			t.Errorf("allowlist key %q has no corresponding Cobra command (stale Use-rename?)", key)
+		}
 	}
 }
 
@@ -193,6 +192,8 @@ func appendStubArgs(args []string, path string) []string {
 
 // TestJSONSliceSuffix_StableMapping pins the path → slice-suffix
 // resolution used in jsonRejectError. Catches accidental renames.
+// Includes the defensive "unknown" fallback for empty/garbled paths
+// (Review L3-Findings adressiert).
 func TestJSONSliceSuffix_StableMapping(t *testing.T) {
 	cases := []struct {
 		path string
@@ -209,12 +210,36 @@ func TestJSONSliceSuffix_StableMapping(t *testing.T) {
 		{"u-boot config get", "config"},
 		{"u-boot config set", "config"},
 		{"u-boot template", "template"},
+		{"", "unknown"},
+		{"u-boot", "unknown"},
+		{"u-boot ", "unknown"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.path, func(t *testing.T) {
 			got := cli.JSONSliceSuffixForTest(tc.path)
 			if got != tc.want {
 				t.Errorf("path %q: want suffix %q, got %q", tc.path, tc.want, got)
+			}
+		})
+	}
+}
+
+// TestRootJSON_AcceptsHelpFlag is the M6-Anti-Drift-Pin:
+// --json combined with --help on any non-migrated subcommand must
+// print help (no reject). Cobra's --help is a read-only escape hatch.
+func TestRootJSON_AcceptsHelpFlag(t *testing.T) {
+	cases := [][]string{
+		{"--json", "init", "--help"},
+		{"--json", "add", "--help"},
+		{"--json", "config", "--help"},
+		{"--json", "template", "--help"},
+	}
+	for _, args := range cases {
+		t.Run(strings.Join(args, " "), func(t *testing.T) {
+			app := newApp(&fakeInitUseCase{})
+			err := app.Execute(context.Background(), args, &bytes.Buffer{}, &bytes.Buffer{})
+			if err != nil {
+				t.Errorf("--json + --help must not reject; got %v", err)
 			}
 		})
 	}

@@ -98,11 +98,15 @@ einige sind gruppiert):
   `up`, `down`, `logs`, `generate`, `config` (bare), `config get`,
   `config set`, `template` (bare). `config`/`template` als
   gruppierte Befehle (Spec §338 + §420) tragen jeweils mehrere
-  Forms; bare `config --json` und bare `template --json` sind
-  Help-Parents (`Args: cobra.NoArgs`, kein eigenes JSON-vorge-
-  sehenes Output) und rejecten bis zum jeweiligen Folge-Slice
-  (`slice-v1-cli-json-dry-run-config`/`-template`), der für
-  bare die `subcommand`-Pflicht aus `LH-FA-CLI-007` §420 löst.
+  Forms. **bare `template`** ist Help-Parent (`Args: cobra.NoArgs`,
+  RunE = `cmd.Help()`); **bare `config`** dagegen hat einen
+  funktionalen RunE (`runConfigShow`, druckt heutigen YAML-Inhalt)
+  — aber **ohne** Spec-vorgesehenen `subcommand`-Wert (§1838
+  fordert `subcommand`-Pflicht bei `command == "config"`). Beide
+  Bare-Forms rejecten daher `--json` bis zum jeweiligen Folge-Slice
+  (`slice-v1-cli-json-dry-run-config`/`-template`), der für bare
+  die `subcommand`-Sub-Decision trifft (Kandidaten gemäß Cluster
+  §96-107: `"list"`, `"show"`, explizit `""`).
 
 Reject-Form heute (alle 11): Exit-Code `2`
 (`LH-FA-CLI-006`-Klasse) und Verweis auf den jeweiligen

@@ -324,6 +324,13 @@ rejected `diagnostics[].code`-Werte außerhalb. Drift-Schutz
 
 ### 5.1 Doctor-Checks
 
+Die folgenden Codes sind die kanonische Quelle für Gate 2 (Map ↔
+Markdown). Die Markdown-Tabelle ist zwischen den HTML-Markern
+eingegrenzt — Folge-Slices fügen weitere Tabellen für ihre eigenen
+Subcommand-Codes an, ohne den Doctor-Block zu berühren.
+
+<!-- code-registry:start -->
+
 | Code | Bedeutung |
 | --- | --- |
 | `fs.write-permissions` | Schreib-Permission im Working Directory |
@@ -339,6 +346,8 @@ rejected `diagnostics[].code`-Werte außerhalb. Drift-Schutz
 | `devcontainer.forwardPorts.consistency` | `devcontainer.json` `forwardPorts` konsistent |
 | `devcontainer.features.allowlist` | `devcontainer` Features auf Allowlist |
 | `devcontainer.features.drift` | `devcontainer` Features ohne Drift |
+
+<!-- code-registry:end -->
 
 Weitere Subcommand-Sektionen kommen mit den jeweiligen Folge-Slices
 (siehe §6).

@@ -114,6 +114,32 @@ const (
 	checkIDDevcontainerFeaturesDrift = "devcontainer.features.drift"
 )
 
+// DoctorCheckIDs returns every diagnostic check ID the doctor
+// use case may emit. The driving-adapter JSON-CLI test helper
+// consumes this list to keep its `DefaultAllowedCodes` registry
+// in sync (slice-v1-cli-json-dry-run-doctor T0-(h) Gate 1).
+//
+// Adding a new check: append its `checkID*` constant here AND in
+// jsontestutil.DefaultAllowedCodes AND in docs/user/cli-json-
+// output.md §5.1 — the drift test breaks otherwise.
+func DoctorCheckIDs() []string {
+	return []string{
+		checkIDWritePermissions,
+		checkIDGitInstalled,
+		checkIDDockerInstalled,
+		checkIDDockerReachable,
+		checkIDComposeInstalled,
+		checkIDUbootYaml,
+		checkIDComposeYaml,
+		checkIDDevcontainerJSON,
+		checkIDDevcontainerDockerfile,
+		checkIDServicesEnabledKey,
+		checkIDForwardPortsConsistency,
+		checkIDDevcontainerFeaturesAllowlist,
+		checkIDDevcontainerFeaturesDrift,
+	}
+}
+
 // Minimum versions per LH-FA-DIAG-002. The thresholds are MAJOR.MINOR
 // pairs; PATCH is informational only.
 const (

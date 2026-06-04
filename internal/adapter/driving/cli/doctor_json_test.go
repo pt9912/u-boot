@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"strings"
 	"testing"
 
@@ -167,6 +168,11 @@ func TestDoctorJSON_QuietIsSemanticNoOp(t *testing.T) {
 	if strings.Join(d1, "|") != strings.Join(d2, "|") {
 		t.Errorf("diagnostics sequence mismatch:\n  --json:        %v\n  --quiet --json: %v", d1, d2)
 	}
+	m1 := diagnosticMessages(env1["diagnostics"])
+	m2 := diagnosticMessages(env2["diagnostics"])
+	if strings.Join(m1, "|") != strings.Join(m2, "|") {
+		t.Errorf("diagnostics messages differ — --quiet must not truncate or rewrite messages in JSON mode:\n  --json:        %v\n  --quiet --json: %v", m1, m2)
+	}
 }
 
 // TestDoctorJSON_StrictWarnExits11 pins that --strict --json with
@@ -209,6 +215,30 @@ func TestDoctorJSON_NoIndent(t *testing.T) {
 	}
 }
 
+// TestDoctorJSON_BrokenPipePreservesExitCode is the M2-Anti-Drift-
+// Pin: when the stdout writer fails (e.g. broken pipe via
+// `u-boot doctor --json | head`), the fachliche Exit-Code-Policy
+// MUST take priority. A failing pipe must not downgrade an
+// ErrDoctorFailures exit (11) to a generic write-error exit (1).
+func TestDoctorJSON_BrokenPipePreservesExitCode(t *testing.T) {
+	stdout := &failingWriter{err: io.ErrClosedPipe}
+	app := newAppWithDoctor(&fakeInitUseCase{}, &fakeDoctorUseCase{resp: errorReport()},
+		cli.WithGetwd(func() (string, error) { return "/tmp/proj", nil }))
+	err := app.Execute(context.Background(), []string{"--json", "doctor"}, stdout, &bytes.Buffer{})
+	if !errors.Is(err, cli.ErrDoctorFailures) {
+		t.Errorf("broken pipe on error-report must still return ErrDoctorFailures; got %v", err)
+	}
+	if cli.ExitCode(err) != 11 {
+		t.Errorf("broken pipe on error-report must keep exit code 11; got %d", cli.ExitCode(err))
+	}
+}
+
+// failingWriter returns its preset error on every Write. Used to
+// simulate broken pipes / closed stdout for the M2 pin above.
+type failingWriter struct{ err error }
+
+func (w *failingWriter) Write(_ []byte) (int, error) { return 0, w.err }
+
 func parseEnv(t *testing.T, raw []byte) map[string]any {
 	t.Helper()
 	var env map[string]any
@@ -226,6 +256,17 @@ func codesAndLevels(diags any) []string {
 		level, _ := item["level"].(string)
 		code, _ := item["code"].(string)
 		out = append(out, level+":"+code)
+	}
+	return out
+}
+
+func diagnosticMessages(diags any) []string {
+	arr, _ := diags.([]any)
+	out := make([]string, 0, len(arr))
+	for _, raw := range arr {
+		item, _ := raw.(map[string]any)
+		msg, _ := item["message"].(string)
+		out = append(out, msg)
 	}
 	return out
 }

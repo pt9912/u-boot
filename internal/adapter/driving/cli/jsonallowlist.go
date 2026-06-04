@@ -47,11 +47,19 @@ func jsonRejectError(cmdPath string) error {
 
 // jsonSliceSuffix maps a CommandPath to its follow-up-slice suffix
 // per Cluster-T0-(e)-Reihenfolge. Compound subcommands (config get/
-// set, template list) all share the parent's slice suffix.
+// set, template list) all share the parent's slice suffix. Defaults
+// to "unknown" on empty / unrecognised input so the rendered error
+// message never carries a malformed slice reference.
 func jsonSliceSuffix(cmdPath string) string {
 	const root = "u-boot "
+	if !strings.HasPrefix(cmdPath, root) {
+		return "unknown"
+	}
 	rest := strings.TrimPrefix(cmdPath, root)
 	first := strings.SplitN(rest, " ", 2)[0]
+	if first == "" {
+		return "unknown"
+	}
 	switch first {
 	case "up", "down":
 		return "up-down"
@@ -61,9 +69,23 @@ func jsonSliceSuffix(cmdPath string) string {
 
 // applyJSONRejectGate runs at PersistentPreRunE time: if --json is
 // set and the running cmd's path is not in the allowlist, return
-// the reject error. Otherwise no-op. Help and version commands are
-// always allowed through (the user is asking Cobra, not the
-// subcommand, for output).
+// the reject error. Otherwise no-op.
+//
+// Three escape hatches let read-only / introspection paths through
+// unmodified:
+//
+//  1. cmd.Name() == "help" — the builtin Cobra help subcommand.
+//  2. cmd.Name() == "__complete" — Cobra-internal shell-completion
+//     dispatcher (Bash/Zsh/Fish). Undocumented but stable in
+//     cobra v1.10.2 (see go.mod). A Cobra major upgrade must
+//     re-verify this internal command name; the
+//     TestRootJSON_AcceptsHelpFlag pin in jsonallowlist_test.go
+//     catches the regression.
+//  3. The --help flag is set on the running command. Cobra parses
+//     --help into the same persistent flag inherited from the root;
+//     the help path is read-only by definition, so --json on a
+//     non-migrated subcommand combined with --help should print
+//     help instead of rejecting (Review M6-Findings adressiert).
 func applyJSONRejectGate(cmd *cobra.Command, jsonFlag bool) error {
 	if !jsonFlag {
 		return nil
@@ -71,12 +93,10 @@ func applyJSONRejectGate(cmd *cobra.Command, jsonFlag bool) error {
 	if cmd == nil {
 		return nil
 	}
-	// Cobra invokes PersistentPreRunE on the leaf command. The
-	// builtin "help" command (and Cobra's internal __complete) live
-	// under the root but are user-facing escape hatches — letting
-	// them through avoids breaking `u-boot doctor --help --json`-
-	// style invocations.
 	if cmd.Name() == "help" || cmd.Name() == "__complete" {
+		return nil
+	}
+	if helpRequested(cmd) {
 		return nil
 	}
 	path := cmd.CommandPath()
@@ -84,4 +104,15 @@ func applyJSONRejectGate(cmd *cobra.Command, jsonFlag bool) error {
 		return nil
 	}
 	return jsonRejectError(path)
+}
+
+// helpRequested checks whether Cobra parsed --help on the running
+// command. Cobra registers --help as a persistent flag on every
+// subcommand; the value is accessible via cmd.Flag("help").
+func helpRequested(cmd *cobra.Command) bool {
+	flag := cmd.Flag("help")
+	if flag == nil {
+		return false
+	}
+	return flag.Value.String() == "true"
 }

@@ -44,15 +44,16 @@ Coming in later slices:
   u-boot init --template ./path   use a local template directory
                                   (slice-later-local-templates)`,
 		Args: cobra.NoArgs,
+		// Help-Parent: druckt Help-Text via cmd.Help(). Im --json-
+		// Modus läuft der LH-NFA-USE-004-Reject-Gate aus
+		// buildRootCommand's PersistentPreRunE (siehe
+		// jsonallowlist.go:applyJSONRejectGate) ZUERST und rejected
+		// mit ErrJSONNotImplemented — der Help-Pfad hier wird
+		// im --json-Fall nie erreicht. Spec §1838 fordert subcommand-
+		// Pflicht bei command="template"; bare template hat keinen
+		// Spec-vorgesehenen Subcommand-Default, daher Reject bis
+		// slice-v1-cli-json-dry-run-template die Sub-Decision trifft.
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			// Help-Parent: ohne --json druckt Cobra die Help-Text-
-			// Standardausgabe. Mit --json greift der LH-NFA-USE-004-
-			// Reject-Gate (slice-v1-cli-json-dry-run-doctor §T0-(g)),
-			// weil bare `u-boot template --json` kein Spec-vorgesehenes
-			// JSON-Output hat — `subcommand`-Pflicht aus Spec §1838.
-			if a.json {
-				return jsonRejectError(cmd.CommandPath())
-			}
 			return cmd.Help()
 		},
 	}

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io"
 
+	"github.com/spf13/cobra"
+
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 )
 
@@ -101,4 +103,40 @@ func marshalEnvelopeForTest(env cliJSONEnvelope) ([]byte, error) {
 // pin the path → slice-suffix mapping used in error messages.
 func JSONSliceSuffixForTest(cmdPath string) string {
 	return jsonSliceSuffix(cmdPath)
+}
+
+// JSONAllowlistPathsForTest returns the keys of the runtime allowlist
+// (slice-v1-cli-json-dry-run-doctor T3 §M2-Drift). Used by the Cobra-
+// Tree-Walk-Test to compare the registered Cobra paths against the
+// migrated set.
+func JSONAllowlistPathsForTest() []string {
+	m := jsonAllowlist()
+	out := make([]string, 0, len(m))
+	for path := range m {
+		out = append(out, path)
+	}
+	return out
+}
+
+// WalkRootCommandPathsForTest enumerates every command path under the
+// constructed root: all runnable leaves PLUS every help-parent
+// (cobra.NoArgs without RunE → prints help; cobra.NoArgs with
+// RunE=cmd.Help() also counts as a user-facing form, e.g. bare
+// `template`). The walk powers the Cobra-Tree-Walk-Anti-Drift-Pin
+// in jsonallowlist_test.go.
+func (a *App) WalkRootCommandPathsForTest() []string {
+	root := buildRootCommand(a)
+	var paths []string
+	walkCommandPaths(root, &paths)
+	return paths
+}
+
+func walkCommandPaths(cmd *cobra.Command, out *[]string) {
+	for _, child := range cmd.Commands() {
+		if child.Hidden || child.Name() == "help" || child.Name() == "completion" {
+			continue
+		}
+		*out = append(*out, child.CommandPath())
+		walkCommandPaths(child, out)
+	}
 }
