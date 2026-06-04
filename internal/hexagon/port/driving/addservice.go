@@ -22,6 +22,22 @@ type AddServiceRequest struct {
 	// to the current working directory (mirroring `u-boot init`).
 	BaseDir string
 
+	// PreviewMode selects the FS-mutation regime per slice-v1-cli-json-
+	// dry-run-add T0-(e) Option 4. The CLI maps --dry-run/--diff flag
+	// combinations to one of three modes; the Composition-Root's
+	// fsFactory routes FS calls through the recording adapter
+	// accordingly:
+	//
+	//   PreviewNone       -- direct production FS (no capture)
+	//   PreviewDryRun     -- capture only; production FS untouched
+	//   PreviewAndApply   -- capture AND write through (LH-FA-CLI-008
+	//                        Preview-and-Apply mode)
+	//
+	// Default zero value PreviewNone preserves backward compatibility
+	// with the existing non-JSON code path; callers that don't set it
+	// see today's production-write behaviour.
+	PreviewMode AddPreviewMode
+
 	// ServiceName is the validated identifier of the service to add
 	// (`postgres` in MVP; the application service rejects names that
 	// are not in its built-in catalogue with
@@ -91,6 +107,98 @@ type AddServiceResponse struct {
 	// repairs missing PostgreSQL artefacts such as the volume or env
 	// managed block.
 	Changed []string
+
+	// PlannedFiles is the FS-plan emitted when [AddServiceRequest.
+	// PreviewMode] is non-zero (slice-v1-cli-json-dry-run-add T0-(i)).
+	// One entry per mutated path captured by the recorder, in the
+	// order the use case attempted them. Empty for PreviewNone (no
+	// recorder wired) and for true no-ops. Carries NewContent and
+	// OldContent for the CLI-adapter diff renderer; these two fields
+	// stay out of the JSON wire-format via `json:"-"` (Spec §326 has
+	// no place for raw bytes).
+	PlannedFiles []PlannedFile
+
+	// Changes mirrors PlannedFiles' paths with their line-count
+	// summaries (LH-FA-CLI-007 §365-371). Filled only in preview
+	// modes; nil for PreviewNone. Count semantics follow T0-(g):
+	// newLines/totalLines.
+	Changes []ChangeEntry
+}
+
+// AddPreviewMode encodes the four flag combinations for
+// `u-boot add <service>` (--dry-run × --diff) per slice-v1-cli-json-
+// dry-run-add T0-(b) truth table:
+//
+//	flags                    | PreviewMode      | production write?
+//	-------------------------+------------------+------------------
+//	(neither)                | PreviewNone      | yes
+//	--dry-run                | PreviewDryRun    | no
+//	--diff                   | PreviewAndApply  | yes
+//	--dry-run --diff         | PreviewDryRun    | no
+//
+// The CLI adapter computes the mode from the parsed flags and writes
+// it into [AddServiceRequest.PreviewMode] before calling
+// [AddServiceUseCase.Add]. Composition-Root reads the mode in its
+// fsFactory closure to pick between production FS and the
+// RecordingFileSystem variants.
+type AddPreviewMode int
+
+const (
+	// PreviewNone selects the direct production FS path. Default zero
+	// value; today's non-JSON code path keeps emitting this and stays
+	// unchanged.
+	PreviewNone AddPreviewMode = iota
+
+	// PreviewDryRun captures every mutation in the recorder without
+	// touching the production FS. Used for `--dry-run` (with or
+	// without `--diff`).
+	PreviewDryRun
+
+	// PreviewAndApply captures every mutation AND writes it through
+	// to the production FS. Used for `--diff` without `--dry-run`
+	// (LH-FA-CLI-008 §465-470 Preview-and-Apply).
+	PreviewAndApply
+)
+
+// PlannedFile is the wire-shape of one FS mutation in the LH-FA-CLI-007
+// §326 voll-schema response. The CLI adapter consumes it for both the
+// JSON envelope's `plannedFiles[]` and the human/JSON unified diff.
+//
+// NewContent and OldContent carry the raw file bytes the recorder
+// captured for the CLI-adapter diff renderer. They are excluded from
+// the JSON wire-form via `json:"-"` — Spec §326 has no field for
+// raw bytes and embedding them would be base64-drift. Diff hunks
+// rendered from these bytes land in Hunks below.
+type PlannedFile struct {
+	Path       string `json:"path"`
+	Action     string `json:"action"` // "create" | "modify" | "delete"
+	NewContent []byte `json:"-"`
+	OldContent []byte `json:"-"`
+	Hunks      []Hunk `json:"hunks,omitempty"`
+}
+
+// ChangeEntry is the wire-shape of one line-count summary entry. Spec
+// §365-371 requires count ≥ 0. Semantics (slice-v1-cli-json-dry-run-add
+// T0-(g)):
+//
+//   - action "create" → total lines in the new file
+//   - action "modify" → sum of hunk.NewLines across all hunks
+//   - action "delete" → 0
+type ChangeEntry struct {
+	Path  string `json:"path"`
+	Count int    `json:"count"`
+}
+
+// Hunk is the wire-shape of one diff hunk in
+// [PlannedFile.Hunks] (LH-FA-CLI-008 §477-482). Coordinates are
+// 1-based (oldStart/newStart ≥ 1 when the respective Lines > 0).
+// Content holds the raw hunk body with `+`/`-`/space line prefixes.
+type Hunk struct {
+	OldStart int    `json:"oldStart"`
+	OldLines int    `json:"oldLines"`
+	NewStart int    `json:"newStart"`
+	NewLines int    `json:"newLines"`
+	Content  string `json:"content"`
 }
 
 // All Add sentinels below live in the `driving` package (not in
@@ -136,6 +244,20 @@ var ErrDependenciesRequired = errors.New("service add-on requires missing depend
 // case refuses to invent a config. The CLI surfaces it with a
 // "run u-boot init" hint.
 var ErrProjectNotInitialized = errors.New("project not initialized")
+
+// ErrAddFileSystem signals an FS-write failure during `u-boot add`
+// (LH-NFA-REL-003 "Abbruch bei kritischen Fehlern"). The use case
+// wraps the raw FS error with this sentinel so the CLI's
+// [ExitCode] mapper can route it to exit code 14 (technical
+// persistence/filesystem-class), not the generic catch-all 1.
+//
+// On this error path the response is **non-empty**: it carries
+// PlannedFiles[] (the calls captured up to the failure point) so the
+// JSON envelope can show the partial progress. Per slice-v1-cli-json-
+// dry-run-add T0-(b)'s Mid-Write-Failure scenario the user sees the
+// captured calls plus a diagnostics[] entry pointing at the failed
+// path.
+var ErrAddFileSystem = errors.New("add: filesystem mutation failed")
 
 // AddServiceUseCase is the driving-port for `u-boot add <service>`.
 // The CLI adapter holds a reference and calls [Add] from the Cobra
