@@ -28,11 +28,12 @@
 > `driving.PlannedFile` mit `NewContent`/`OldContent` (`json:"-"`)
 > als Content-Träger zwischen Layern, `ErrAddFileSystem`-LH-Code
 > auf `LH-NFA-REL-003` korrigiert, T0-(e)-Skizze auf `fsFactory`-
-> Tuple-Vertrag synchronisiert). Sub-Decisions als Vorschläge
-> mit Begründung in §T0-Discovery konkretisiert; verbindlicher
-> T0-Outcomes-Block (analog Doctor-Slice `dd2ea98`-Pattern) ist
-> der nächste Plan-Schritt, danach `in-progress/`-Übergang und
-> T1-Implementierung.
+> Tuple-Vertrag synchronisiert). **T0 ✅ festgezurrt**
+> (§T0-Outcomes — Tabellen-Form mit 12 Sub-Decisions plus
+> Verweisen auf §T0-Discovery für die Begründung).
+> Nächster Schritt: `in-progress/`-Übergang plus T1-Start
+> (`recordingfs`-Adapter + `RecorderPort` + Carrier-Types in
+> `port/driving/addservice.go` + `ErrAddFileSystem`-Sentinel).
 
 ## Auslöser
 
@@ -1083,6 +1084,42 @@ müssen entweder Text-Templates anbieten oder die Binary-Detection
 nachziehen (`embed.FS` erlaubt grundsätzlich Binary). T0-Outcomes-
 Doku ergänzt ein Pflicht-Pin: jeder Folge-Slice, der `embed.FS`-
 Templates hinzufügt, prüft UTF-8-Validity beim Render-Test.
+
+## T0-Outcomes
+
+Verbindliche Festzurrung der 12 Sub-Decisions aus §T0-Discovery
+nach fünf Review-Runden (24 Findings adressiert). Tabellen-Form
+kondensiert; Begründungen verbleiben in den jeweiligen §T0-
+Discovery-Sub-Sektionen (verlinkt). Implementations-Pflicht-Spalte
+nennt die Tranche, die das Outcome materialisiert.
+
+| Sub-Decision | Outcome | Implementations-Pflicht |
+| --- | --- | --- |
+| [T0-(a)](#t0-a-recordingfilesystem-lokation) RecordingFileSystem-Lokation | Sub-Package `internal/adapter/driven/recordingfs/` analog `driven/fs/`/`driven/git/`-Repo-Konvention | T1 |
+| [T0-(b)](#t0-b-passthrough-schalter-form) Passthrough + Failure-Scenarios | Konstruktor-Option `WithPassthrough(bool)`; Aufruf-Reihenfolge im Passthrough=true-Pfad: (1) capturen → (2) Production-Mutation → (3) bei Fehler Plan-Eintrag bestehen lassen + `diagnostics[]`-Item mit `LH-NFA-REL-003`. **Drei Failure-Scenarios** spec-konform gepinnt: Success (`status:"ok"`/`exitCode:0`), Mid-Write-Failure (Capture bis Failure-Stelle, `status:"error"`/`exitCode:14`), Pre-Write-Validation-Failure (`plannedFiles:[]`, `LH-FA-INIT-006`/`exitCode:10`). Dry-Run-Modus liefert vollständige Liste, Preview-and-Apply nur Calls bis Failure. | T1 (Recorder-Mechanik) + T4 (CLI-RunE-Error-Pfad) + T5 (Acceptance-Pins) |
+| [T0-(c)](#t0-c-diff-hunk-field-name-im-json) Diff-Hunk-Field-Name | `plannedFiles[].hunks` als flaches Top-Level-Array pro Datei (kein `plannedFiles[].diff`-Sub-Objekt) | T2 (Renderer) + T4 (Envelope-Befüllung) |
+| [T0-(d)](#t0-d-diff-library-pure-go-intern-vs-pmezardgo-difflib) Diff-Library | **Pure-Go intern** (~150-200 LOC LCS+Unified-Diff); kein neuer Dep (`go.mod`-4-Dep-Disziplin); Sub-Decision-Revert auf `pmezard/go-difflib` möglich, falls Pure-Go-Implementation in T2 unerwartete Komplexität zeigt | T2 |
+| [T0-(e)](#t0-e-composition-root-doppel-wiring-form) Composition-Root-Wiring | **Option 4**: `Request.PreviewMode` als Enum `AddPreviewMode {PreviewNone, PreviewDryRun, PreviewAndApply}`; Composition-Root-Closure `fsFactory(mode) (driven.FileSystem, driven.RecorderPort)`-Tuple; App-Struct + `cli.New(...)`-Signatur unverändert | T3 |
+| [T0-(f)](#t0-f-mutations-matrix-pre-scan-dokumentation) Mutations-Matrix | Pro-Subcommand-Matrix wandert in `docs/user/cli-json-output.md` §7 (neu); Recorder-Doc-Comment verweist auf §7; jeder Folge-Slice ergänzt seine Use-Case-Mutations-Spalte | T6 (Doc-Update) + Recorder-Doc-Comment in T1 |
+| [T0-(g)](#t0-g-changesicount-semantik) `changes[].count`-Semantik | **`newLines`-Form** (Spec §430+§477 konsistent): `create` = total lines neue Datei (trailing-newline-robust via `bytes.Count + HasSuffix`); `modify` = `sum(hunk.newLines)`; `delete` = `0`. Vier Edge-Case-Pin-Tests in T5 (`"a\n"→1`, `"a"→1`, `""→0`, `"a\nb\n"→2`). | T2 (Counter im Renderer) + T5 (Pin-Tests) |
+| [T0-(h)](#t0-h-pre-scan-read-after-write-stichprobe-für-add) Read-after-Write-Stichprobe | `add` ist Read-then-Write (catalog → service-Files), **kein** Write-then-Read → kein Overlay-Map-Fallback nötig. T0-Outcomes-Tabelle pro `addservice_*.go`-Datei mit Pre-Scan-Ergebnis in T1-Doc-Comment. | T1 (Doc-Comment) |
+| [T0-(i)](#t0-i-recorder-carrier-typ-über-die-schicht-grenze) Recorder-Carrier-Typ | **Option 1**: Carrier-Types in `internal/hexagon/port/driving/addservice.go` als Public-Types (`PlannedFile{Path, Action, NewContent json:"-", OldContent json:"-"}`, `ChangeEntry`, `Hunk`). `AddServiceResponse` bekommt `PlannedFiles []PlannedFile` + `Changes []ChangeEntry`. **`driven.RecorderPort`-Interface** (neu, `port/driven/recordingport.go`) mit `Captured() []FileMutationRecord`-Methode (`FileMutationRecord` trägt `Path`/`Action`/`NewContent`/`OldContent`). `recordingfs.RecordingFileSystem` implementiert beide Ports. depguard `adapter-no-application`/`application-no-adapter` bleiben grün. | T1 (Carrier-Types + RecorderPort + Recorder-Implementation + Capture-Mechanik) + T4 (Mapping recorder.Captured → Response in Use-Case) |
+| [T0-(j)](#t0-j-diagnostic-code-quelle-für-add) Diagnostic-Code-Quelle | **LH-Kennungen** (keine erfundenen `add.*`-Codes). Mapping-Tabelle pinnt acht Sentinels auf `LH-FA-ADD-{001,002,005,006}`/`LH-FA-INIT-{004,005,006}`/`LH-NFA-REL-003`. Success-Pfad: `status:"ok"`/`diagnostics:[]`. Idempotent-no-op: leere `plannedFiles[]`/`changes[]`. **Neuer Sentinel `ErrAddFileSystem`** (in `port/driving/addservice.go`, gemappt auf `LH-NFA-REL-003`, Exit-Code 14). `cli.ExitCode.isFilesystemError` ergänzt um `ErrAddFileSystem`. **Non-empty Response on Error-Pfad**: Use-Case returnt `(Response{PlannedFiles: ...}, wrappedErr)` bei FS-Failure. Keine `DefaultAllowedCodes`-Erweiterung (LH-Prefix-Pfad). | T1 (Sentinel + Wrap) + `cli.ExitCode`-Erweiterung in T4 + Mapping in T4 |
+| [T0-(k)](#t0-k-add---json-minimalkontrakt-ohne---dry-run--diff-output-form) `add --json` (Minimal) Output | **Spec-streng Minimalkontrakt**: ohne `--dry-run`/`--diff` keine FS-Plan-Information im JSON; nur `status`/`command`/`diagnostics`/`exitCode`. Doku-Hint in `cli-json-output.md` §6.1 (Add-Sektion): „use `--dry-run --json` to preview, `--diff --json` to preview-and-apply with FS-Plan". | T4 (Code-Pfad-Verzweigung) + T6 (Doku-Hint) |
+| [T0-(l)](#t0-l-hunks-schema-pin--binary-content-detection) Hunks-Schema + Binary-Detection | Hunks-Schema: `{OldStart, OldLines, NewStart, NewLines int, Content string}` mit `json:"oldStart"`/etc. Field-Name-Tags und Range-Constraints (`Start ≥ 1` bei `Lines > 0`, sonst egal). **`AssertFullEnvelope`-Erweiterung** in `jsontestutil.checkPlannedFiles` mit `checkHunks`-Helper (positive + negative Pin gegen Field-Name-Drift `offset` statt `oldStart`). **Binary-Content-Detection** (`!utf8.Valid(...)`): `action` bleibt Spec-Enum, `hunks` weggelassen via `omitempty`, `count` = Byte-Diff statt Lines, **kein** Diagnostic-Eintrag. | T1 (Hunk-Type-Definition) + T2 (UTF-8-Check + checkHunks-Helper) |
+
+**Status nach Outcomes**: T0 ✅ festgezurrt. Sub-Decisions sind
+verbindlich; jede T1-T6-Tranche referenziert die zugehörigen
+Outcomes via Sub-Decision-Anker. Abweichung von einem Outcome
+während T1-T6 erfordert Plan-Update (separater Commit), nicht
+nur Code-Anpassung — der Plan ist die Schicht-Spec, T1-T6 sind
+deren Realisierung.
+
+**`next/`-Übergang erfolgt** (siehe Status-Header oben); nächster
+Plan-Schritt ist `in-progress/`-Übergang plus T1-Start
+(`recordingfs`-Adapter + `RecorderPort` + Carrier-Types in
+`port/driving/addservice.go` + `ErrAddFileSystem`-Sentinel +
+Mutations-Matrix-Doc-Comment).
 
 ## Tranchen (vorgeschlagen)
 

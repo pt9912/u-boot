@@ -15,9 +15,9 @@
 > [`slice-v1-cli-json-dry-run-doctor`](../done/slice-v1-cli-json-dry-run-doctor.md)
 > **done** ✅, Folge-Slice 2/9
 > [`slice-v1-cli-json-dry-run-add`](../next/slice-v1-cli-json-dry-run-add.md)
-> in `next/` (nach fünf Review-Runden für die Iteration
-> übernommen). Nächster Schritt: verbindlicher T0-Outcomes-Block
-> + Übergang nach `in-progress/`.
+> in `next/`, T0 ✅ festgezurrt (12 Sub-Decisions in §T0-Outcomes).
+> Nächster Schritt: `in-progress/`-Übergang plus T1-Start
+> (`recordingfs`-Adapter + Carrier-Types).
 
 ## Auslöser
 
