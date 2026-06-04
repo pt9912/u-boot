@@ -53,6 +53,15 @@ See spec/lastenheft.md for the full functional specification.`,
 	root.PersistentFlags().BoolVar(&a.debug, "debug", false,
 		"show internal diagnostic output; logger emits Debug entries (LH-FA-CLI-005)")
 
+	// LH-NFA-USE-004 machine-readable output (slice-v1-cli-json-dry-
+	// run-doctor T3). Persistent flag, inherited by every subcommand.
+	// Migrated subcommands read a.json from their RunE; non-migrated
+	// subcommand forms are rejected by the PersistentPreRunE below
+	// via ErrJSONNotImplemented (exit code 2). See
+	// docs/user/cli-json-output.md §6 for the migration roadmap.
+	root.PersistentFlags().BoolVar(&a.json, "json", false,
+		"emit machine-readable JSON output per LH-NFA-USE-004 (see docs/user/cli-json-output.md)")
+
 	// LH-FA-CLI-005 verbosity → slog level wiring. Runs after Cobra
 	// has parsed flags, before the subcommand's RunE. The LevelVar
 	// instance is shared with the logger adapter (wired in
@@ -63,7 +72,15 @@ See spec/lastenheft.md for the full functional specification.`,
 	// --debug and --verbose both map to LevelDebug today; a future
 	// slice can introduce a Verbose-only level if a service-specific
 	// pegel between Info and Debug becomes useful.
-	root.PersistentPreRunE = func(*cobra.Command, []string) error {
+	root.PersistentPreRunE = func(cmd *cobra.Command, _ []string) error {
+		// LH-NFA-USE-004 reject gate first: a non-migrated subcommand
+		// form receiving --json must fail with exit code 2 BEFORE
+		// any side effects (logger level switching, RunE invocation).
+		// See slice-v1-cli-json-dry-run-doctor §T0-(g).
+		if err := applyJSONRejectGate(cmd, a.json); err != nil {
+			return err
+		}
+
 		if a.logLevel == nil {
 			return nil
 		}

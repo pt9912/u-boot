@@ -94,6 +94,13 @@ type App struct {
 	verbose bool
 	debug   bool
 
+	// json is bound to the LH-NFA-USE-004 root --json PersistentFlag
+	// (slice-v1-cli-json-dry-run-doctor T3). Subcommands that
+	// implement the JSON envelope read this state; non-migrated
+	// subcommands are rejected by the root PersistentPreRunE with
+	// ErrJSONNotImplemented (exit code 2).
+	json bool
+
 	// logLevel is the slog level handle the wiring layer also
 	// shares with the logger adapter. PersistentPreRunE flips it
 	// based on the verbosity flags. Optional — nil-tolerant so
@@ -177,6 +184,18 @@ var ErrConflictingModeFlags = errors.New("--yes and --no-interactive are mutuall
 // rejection happens at the CLI before construction of the request.
 // Maps to LH-FA-CLI-006 exit code 2.
 var ErrInvalidTimeout = errors.New("--timeout must be >= 0")
+
+// ErrJSONNotImplemented is returned by the root PersistentPreRunE
+// when --json is passed to a subcommand form that has not yet been
+// migrated to the LH-NFA-USE-004 envelope (slice-v1-cli-json-dry-run
+// cluster T0-(g)). Maps to LH-FA-CLI-006 exit code 2. The error
+// message itself is built by [jsonRejectError] and includes the
+// concrete CommandPath + follow-up slice reference.
+//
+// Cluster-T_close-Pflicht-Check: every spec-enum subcommand form
+// must end up in the allowlist (or the allowlist mechanic is removed
+// completely). See docs/user/cli-json-output.md §6.1.
+var ErrJSONNotImplemented = errors.New("json output not implemented for this subcommand")
 
 // ErrDoctorFailures signals that `u-boot doctor` ran successfully
 // (use-case returned no error) but the diagnostic report contained
@@ -381,6 +400,7 @@ func isUsageError(err error) bool {
 	// [isValidationError].
 	if errors.Is(err, ErrConflictingModeFlags) || errors.Is(err, ErrInvalidTimeout) ||
 		errors.Is(err, ErrInvalidLogsTail) ||
+		errors.Is(err, ErrJSONNotImplemented) ||
 		errors.Is(err, driving.ErrArtifactUnknown) ||
 		errors.Is(err, driving.ErrTemplateConflictsWithFlag) {
 		return true

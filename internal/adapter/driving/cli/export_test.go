@@ -95,3 +95,10 @@ type ChangeEntryForTest struct {
 func marshalEnvelopeForTest(env cliJSONEnvelope) ([]byte, error) {
 	return json.Marshal(env)
 }
+
+// JSONSliceSuffixForTest exposes [jsonSliceSuffix] (slice-v1-cli-
+// json-dry-run-doctor T3). External _test packages call this to
+// pin the path → slice-suffix mapping used in error messages.
+func JSONSliceSuffixForTest(cmdPath string) string {
+	return jsonSliceSuffix(cmdPath)
+}

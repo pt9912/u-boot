@@ -44,6 +44,17 @@ Coming in later slices:
   u-boot init --template ./path   use a local template directory
                                   (slice-later-local-templates)`,
 		Args: cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			// Help-Parent: ohne --json druckt Cobra die Help-Text-
+			// Standardausgabe. Mit --json greift der LH-NFA-USE-004-
+			// Reject-Gate (slice-v1-cli-json-dry-run-doctor §T0-(g)),
+			// weil bare `u-boot template --json` kein Spec-vorgesehenes
+			// JSON-Output hat — `subcommand`-Pflicht aus Spec §1838.
+			if a.json {
+				return jsonRejectError(cmd.CommandPath())
+			}
+			return cmd.Help()
+		},
 	}
 	cmd.AddCommand(newTemplateListCommand(a))
 	return cmd
@@ -54,15 +65,15 @@ Coming in later slices:
 // driven catalog enumerates; --json flips the renderer between the
 // human tabular form (default) and a structured JSON array.
 func newTemplateListCommand(a *App) *cobra.Command {
-	flags := &templateFlags{}
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List available project templates (LH-FA-TPL-004)",
 		Long: `Print every built-in template with its name, description, and version.
 
-The default render is a tabwriter-aligned table for humans; --json
-emits a structured array (one object per template, all LH-FA-TPL-002
-fields) suitable for downstream tooling.
+The default render is a tabwriter-aligned table for humans; the
+root --json flag (LH-NFA-USE-004) switches to a structured array
+(one object per template, all LH-FA-TPL-002 fields) suitable for
+downstream tooling.
 
 Exit codes (LH-FA-CLI-006):
   0   success
@@ -74,14 +85,18 @@ Exit codes (LH-FA-CLI-006):
 
 Examples:
   u-boot template list           # tabular layout
-  u-boot template list --json    # JSON array for tooling`,
+  u-boot template list --json    # JSON array for tooling (root --json flag)`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			return runTemplateList(cmd.Context(), cmd.OutOrStdout(), *flags, a.templateListUseCase)
+			// slice-v1-cli-json-dry-run-doctor T3/T4: lokales --json-
+			// Flag wurde entfernt; --json wandert auf den Root-
+			// PersistentFlag (a.json). Output-Format bleibt heutige
+			// templateJSON-Array-Struktur — Envelope-Migration folgt
+			// mit slice-v1-cli-json-dry-run-template (Carveouts-
+			// Eintrag).
+			return runTemplateList(cmd.Context(), cmd.OutOrStdout(), templateFlags{JSON: a.json}, a.templateListUseCase)
 		},
 	}
-	cmd.Flags().BoolVar(&flags.JSON, "json", false,
-		"emit a JSON array instead of the human-readable table (LH-FA-TPL-004 machine-readable form)")
 	return cmd
 }
 
