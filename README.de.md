@@ -246,6 +246,8 @@ Vollständiger Layout-Kontrakt:
   [`docs/user/branch-protection.md`](docs/user/branch-protection.md)
 - **Devcontainer-Features:**
   [`docs/user/devcontainer-features.md`](docs/user/devcontainer-features.md)
+- **Maschinen-lesbarer CLI-Vertrag (`--json`, `--dry-run`, `--diff`):**
+  [`docs/user/cli-json-output.md`](docs/user/cli-json-output.md)
 - **User-Dokumentation:** [`docs/user/`](docs/user/)
 
 ## Build, Test, Lint

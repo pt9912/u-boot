@@ -232,6 +232,8 @@ Full layout contract: [`LH-FA-BUILD-009` in `spec/lastenheft.md`](spec/lastenhef
   [`docs/user/branch-protection.md`](docs/user/branch-protection.md)
 - **Devcontainer features:**
   [`docs/user/devcontainer-features.md`](docs/user/devcontainer-features.md)
+- **Machine-readable CLI contract (`--json`, `--dry-run`, `--diff`):**
+  [`docs/user/cli-json-output.md`](docs/user/cli-json-output.md)
 - **User documentation:** [`docs/user/`](docs/user/)
 
 ## Build, Test, Lint

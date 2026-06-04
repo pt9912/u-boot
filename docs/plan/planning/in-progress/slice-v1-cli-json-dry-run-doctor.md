@@ -2,7 +2,7 @@
 
 > **Status:** geplant für v0.4.0 — erster Folge-Slice des
 > Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
 > (T0-(e) Platz 1). Liefert die gemeinsame Infrastruktur für die
 > 9er-Folge-Slice-Serie: Root-PersistentFlag `--json` (T0-(a)),
 > Common-Envelope `cliJSONEnvelope` (T0-(c)) und Schema-Helper
@@ -11,9 +11,8 @@
 > Übergangs-Schnitt für das existierende `template list --json`
 > (Review-Round-2-Finding M3). T0 ✅ festgezurrt (§T0-Outcomes
 > — acht Sub-Decisions plus Review-Findings H1-L2). In
-> `next/`, nächster Schritt: `in-progress/`-Übergang und
-> T1-Schema-Vertrag-Doku (`docs/user/cli-json-output.md` —
-> Cluster-T1 via L1-Delegation).
+> `in-progress/`, T1 in Arbeit (`docs/user/cli-json-output.md`
+> — Cluster-T1 via L1-Delegation).
 
 ## Auslöser
 
@@ -267,7 +266,7 @@ JSON-Modus darum semantisch ein No-op.
   Minimal-konforme Form folgt mit Cluster-Platz 9
   `slice-v1-cli-json-dry-run-template`. **Carveouts-Eintrag-
   Pflicht**: dieser Slice trägt einen Carveout-Eintrag in
-  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
+  [`carveouts.md`](carveouts.md) §Temporäre
   Carveouts mit dem Re-Trigger-Verweis auf
   `slice-v1-cli-json-dry-run-template`.
 - ✅ **Schema-Konformität via Helper**: drei Acceptance-Tests
@@ -903,7 +902,7 @@ Bandbreiten-Überschreitung ist begründet (Pattern-Vorbild-Last für
 ## Bezug
 
 - Cluster-Slice:
-  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
   — §T0-Outcomes (a, c, e) sind die Vorgaben dieses Slices,
   §Aufhebungsbedingung Closure-Hard-Rule ist verbindlich für die
   Cluster-Schließung.
