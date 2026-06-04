@@ -23,8 +23,12 @@
 > `FileMutationRecord` mit OldContent/NewContent als Diff-Basis,
 > `ErrAddFileSystem`-Sentinel + non-empty Response on Error-Pfad
 > + `cli.ExitCode`-Erweiterung, AK auf `fsFactory`-Form
-> synchronisiert). T0-Discovery noch offen (12 Sub-Decisions
-> finalisieren).
+> synchronisiert), Runde 5 H1-M2 (1× HIGH, 2× MEDIUM —
+> `driving.PlannedFile` mit `NewContent`/`OldContent` (`json:"-"`)
+> als Content-Träger zwischen Layern, `ErrAddFileSystem`-LH-Code
+> auf `LH-NFA-REL-003` korrigiert, T0-(e)-Skizze auf `fsFactory`-
+> Tuple-Vertrag synchronisiert). T0-Discovery noch offen (12
+> Sub-Decisions finalisieren).
 
 ## Auslöser
 
@@ -477,19 +481,26 @@ type AddServiceRequest struct {
     PreviewMode AddPreviewMode
 }
 
-// cmd/uboot/main.go (Skizze)
-prodFS := fs.New(...)
-selector := func(mode driving.AddPreviewMode) driven.FileSystem {
+// cmd/uboot/main.go (Skizze, vollständig in T0-(i) — siehe dort
+// für den fsFactory-Vertrag mit Tuple-Return inkl. RecorderPort.
+// Diese Skizze hier ist nur die Mode-Switch-Logik; vorheriger
+// Stub-Wortlaut mit `selector` und `NewAddServiceServiceWithSelector`
+// war Drift gegen T0-(i)/AK/T3 — Review-Round-5-Finding M2
+// adressiert: fsFactory ist der einzige Vertrag, der OldContent/
+// NewContent-Capture korrekt zurückreicht).
+fsFactory := func(mode driving.AddPreviewMode) (driven.FileSystem, driven.RecorderPort) {
     switch mode {
     case driving.PreviewDryRun:
-        return recordingfs.New(prodFS, recordingfs.WithPassthrough(false))
+        rec := recordingfs.New(prodFS, recordingfs.WithPassthrough(false))
+        return rec, rec
     case driving.PreviewAndApply:
-        return recordingfs.New(prodFS, recordingfs.WithPassthrough(true))
+        rec := recordingfs.New(prodFS, recordingfs.WithPassthrough(true))
+        return rec, rec
     default:
-        return prodFS
+        return prodFS, nil
     }
 }
-addService := application.NewAddServiceServiceWithSelector(selector, ...)
+addService := application.NewAddServiceService(fsFactory, ...)
 ```
 
 CLI-RunE-Mapping: `Request.PreviewMode = previewModeFromFlags(a.dryRun, a.diff)`
@@ -667,9 +678,37 @@ Drei Optionen:
   driving-Layer-Types auf eigene Wire-Types — heute schon das
   Pattern für `templateJSON`).
 - Carrier-Type-Definition liegt in `internal/hexagon/port/driving/addservice.go`
-  als neue Public-Types (`PlannedFile{Path, Action string}`,
-  `ChangeEntry{Path string, Count int}`, `Hunk{OldStart, OldLines,
-  NewStart, NewLines int, Content string}`).
+  als neue Public-Types:
+  ```go
+  type PlannedFile struct {
+      Path       string `json:"path"`
+      Action     string `json:"action"`
+      // NewContent/OldContent: CLI-Renderer-internal — JSON-Tag
+      // "-" hält die Rohinhalte aus dem Wire-Output (sonst
+      // Base64-Drift und Spec-§326-Verletzung). Diff-Renderer
+      // im CLI-Adapter (T2) konsumiert sie für LCS-Hunks und
+      // changes[].count (Review-Round-5-Finding H1 adressiert).
+      NewContent []byte `json:"-"`
+      OldContent []byte `json:"-"`
+  }
+  type ChangeEntry struct {
+      Path  string `json:"path"`
+      Count int    `json:"count"`
+  }
+  type Hunk struct {
+      OldStart int    `json:"oldStart"`
+      OldLines int    `json:"oldLines"`
+      NewStart int    `json:"newStart"`
+      NewLines int    `json:"newLines"`
+      Content  string `json:"content"`
+  }
+  ```
+  Application-Layer mappt `recorder.Captured()` 1:1 in
+  `[]PlannedFile` (Field-Rename `Content → NewContent`/`OldContent`,
+  keine Content-Verlust). Beim JSON-Marshal werden die zwei
+  `json:"-"`-Felder weggelassen — Wire-Form trägt nur die
+  Spec-§326-konformen `path`/`action`/`hunks` (plus optional
+  weitere Voll-Schema-Felder).
 
 **Datenpfad Recorder → Response — `driven.RecorderPort`-Interface**
 (Review-Round-3-Finding H2 adressiert):
@@ -834,15 +873,24 @@ der Mutations-Matrix-Doku aus T0-(f)):
 | `ErrInvalidServiceName` | `LH-FA-INIT-006` | error | 10 |
 | `ErrFileExists` | `LH-FA-INIT-004` | error | 10 |
 | `ErrBackupSuffixExhausted` | `LH-FA-INIT-005` | error | 14 |
-| **`ErrAddFileSystem` (neu)** | **`LH-FA-ADD-002`** | **error** | **14** |
+| **`ErrAddFileSystem` (neu)** | **`LH-NFA-REL-003`** | **error** | **14** |
 
 **Neuer Sentinel `ErrAddFileSystem`** (Review-Round-4-Finding H2
-adressiert): heutige Add-Writes wrappen rohe FS-Fehler ohne
-spec-konformen Sentinel; `cli.ExitCode` `isFilesystemError`-
-Helper mappt nur die bekannten Sentinels auf 14, rohe `os.WriteFile`-
-Errors landen im `default: return 1`-Zweig. Der Mid-Write-Failure-
-Scenario aus T0-(b) (`exitCode: 14`) ist damit ohne Sentinel
-nicht spec-konform erreichbar. T1 ergänzt:
+adressiert; Round-5-Finding M1 LH-Code-Korrektur): heutige
+Add-Writes wrappen rohe FS-Fehler ohne spec-konformen Sentinel;
+`cli.ExitCode` `isFilesystemError`-Helper mappt nur die bekannten
+Sentinels auf 14, rohe `os.WriteFile`-Errors landen im `default:
+return 1`-Zweig. Der Mid-Write-Failure-Scenario aus T0-(b)
+(`exitCode: 14`) ist damit ohne Sentinel nicht spec-konform
+erreichbar.
+
+**LH-Code-Wahl** (Round-5-M1-Korrektur): `LH-NFA-REL-003`
+([`spec/lastenheft.md`](../../../../spec/lastenheft.md) §1875-1879
+„Abbruch bei kritischen Fehlern: bei kritischen Fehlern muss das
+Produkt abbrechen und eine klare Fehlermeldung ausgeben") matched
+die FS-Write-Failure-Semantik exakt. Der vorherige Round-4-Vorschlag
+`LH-FA-ADD-002` war Drift — der Code beschreibt unbekannte
+Services, nicht FS-/Persistenzfehler. T1 ergänzt:
 
 ```go
 // internal/hexagon/port/driving/addservice.go
@@ -882,12 +930,12 @@ func (s *AddServiceService) Add(ctx context.Context, req AddServiceRequest) (Add
 
 CLI-RunE: bei Error-Return baut der RunE-Pfad den Voll-Schema-
 Envelope aus der Response (`PlannedFiles` ist befüllt) und ergänzt
-`diagnostics[]`-Eintrag mit `level: "error"`, `code: "LH-FA-ADD-002"`,
+`diagnostics[]`-Eintrag mit `level: "error"`, `code: "LH-NFA-REL-003"`,
 `file: failedPath`, `message`. Exit-Code via `cli.ExitCode(err)
 → 14`. Pin-Test in T5 verifiziert den kompletten Pfad:
 FS-Fake-Failure bei zweitem WriteFile → JSON mit File 1 + File 2,
-`diagnostics[0].file: "compose.yaml"`, `status: "error"`,
-`exitCode: 14`.
+`diagnostics[0].code: "LH-NFA-REL-003"`, `diagnostics[0].file:
+"compose.yaml"`, `status: "error"`, `exitCode: 14`.
 
 **Success-Pfade** (`AddServiceResponse.Changed != nil`):
 `status: "ok"`, `diagnostics: []`. Idempotent-no-op-Form
