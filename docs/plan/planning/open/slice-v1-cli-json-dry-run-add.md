@@ -8,9 +8,13 @@
 > **`RecordingFileSystem`-driven-Adapter** (Cluster-T0-(b)
 > Variante 2 mit Passthrough-Modus), **Diff-Renderer** (Cluster-
 > T0-(d) zweigleisig: Unified-Human + strukturierte Hunks im
-> JSON), **Composition-Root-Doppel-Wiring** der driving-Port-
-> Instanzen und **`AssertFullEnvelope`-Erstnutzung** (im
-> Doctor-Slice T2 nur als Stub angelegt).
+> JSON), **Composition-Root-Wiring** der driving-Port-
+> Instanzen via `fsSelector`-Closure (T0-(e) Option 4) und
+> **`AssertFullEnvelope`-Erstnutzung** (im Doctor-Slice T2 nur
+> als Stub angelegt). Stub liegt in `open/`; Review-Findings
+> H1-L4 (3× HIGH, 6× MEDIUM, 4× LOW) sind direkt in den Stub
+> eingearbeitet; T0-Discovery noch offen (12 Sub-Decisions
+> finalisieren).
 
 ## Auslöser
 
@@ -55,16 +59,38 @@ Spec-Bezug:
   (§1841) — auch `add` muss diese Form tragen, weil `--json` für
   alle 10 Spec-Enum-Subcommands Pflicht ist.
 
-Heute-Stand-Pre-Scan (Cluster-T0-(b) §483-498-Matrix bestätigt):
+Heute-Stand-Pre-Scan (Cluster-T0-(b) §483-498-Matrix bestätigt;
+Review-Finding H1 adressiert — Schleifen-Anzahl und impliziter
+MkdirAll explizit dokumentiert):
 
 - [`addservice_execute.go`](../../../../internal/hexagon/application/addservice_execute.go)
-  ruft **direkt** `WriteFile` an zwei Stellen (Z. 664 + Z. 674),
-  **indirekt** via `BackupPath` keine — `add` ist im Pre-Scan
-  schlanker als `init` (`init` hat sowohl direkte `MkdirAll`/
-  `WriteFile` als auch `BackupPath`-CopyExclusive/Mkdir/MkdirAll/
-  Copy/RemoveAll-Indirektion).
-- Der `RecordingFileSystem` deckt trotzdem alle 8 ab — der Drift-
-  Schutz ist Cluster-Pflicht.
+  ruft **direkt** `WriteFile` an **zwei Schleifen-Sites**:
+  - **Z. 664** (`for _, w := range []*fileWrite{ep.UBootYAML,
+    ep.Compose, ep.EnvExample}`): bis zu **3 Slots** pro Add-Run
+    (`u-boot.yaml`, `compose.yaml`, `.env.example`).
+  - **Z. 674** (`for _, w := range plan.ExtraFiles`): N
+    Extra-Files je nach Catalog-Eintrag (z. B. OTel-Service
+    bringt `otel-collector-config.yaml`); Anzahl wächst mit
+    jedem zukünftigen Add-on und kann **Sub-Dir-Pfade**
+    enthalten (heute flach, künftig denkbar `otel/collector.yaml`).
+- **Impliziter `MkdirAll`-Effekt** des
+  [`driven.FileSystem.WriteFile`-Vertrags](../../../../internal/hexagon/port/driven/filesystem.go)
+  (§25-30: „creating parent directories with mode 0o755 as needed");
+  Production-Adapter
+  [`driven/fs/fs.go`](../../../../internal/adapter/driven/fs/) Z. 57-61
+  ruft `os.MkdirAll(filepath.Dir(path), 0o755)` vor `os.WriteFile`.
+  Der `RecordingFileSystem` muss diesen impliziten Parent-Dir-
+  Anlage-Effekt im Capture **modellieren** — Sub-Decision T0-(b)
+  finalisiert die Form (eigene capturete `MkdirAll`-Plan-Einträge
+  vor jedem `WriteFile` mit Sub-Dir-Pfad, oder bewusste
+  YAGNI-Auslassung mit Doku-Pin).
+- **`BackupPath`-Indirektion**: keine. `add` ist im Pre-Scan
+  schlanker als `init` (das sowohl direkte `MkdirAll`/`WriteFile`
+  als auch `BackupPath`-CopyExclusive/Mkdir/MkdirAll/Copy/
+  RemoveAll-Indirektion hat).
+- **Der `RecordingFileSystem` deckt trotzdem alle 8 Mutations-
+  Methoden ab** — der Drift-Schutz ist Cluster-Pflicht, auch
+  wenn `add` heute nur `WriteFile` (+ implizit `MkdirAll`) ruft.
 
 Vorgänger-Slice (Doctor-Platz-1) hat etabliert:
 
@@ -101,7 +127,12 @@ für `u-boot add` in
 [`jsonallowlist.go`](../../../../internal/adapter/driving/cli/jsonallowlist.go)
 entfernt**; statt dessen Allowlist-Eintrag `"u-boot add": true`.
 
-Konkrete Pin-Form für `add --dry-run --json` (Spec §326-Voll-Schema):
+Konkrete Pin-Form für `add --dry-run --json` (Spec §326-Voll-Schema;
+Review-Finding H2 adressiert: `add` mutiert immer **mindestens 3
+Files**, Action-Werte projekt-state-abhängig). Zwei Pin-Varianten:
+
+**Variante A — frisch-init Projekt** (`compose.yaml` existiert nicht
+oder ist leer):
 
 ```json
 {
@@ -110,10 +141,12 @@ Konkrete Pin-Form für `add --dry-run --json` (Spec §326-Voll-Schema):
   "dryRun": true,
   "diff": false,
   "plannedFiles": [
-    {"path": "compose.yaml", "action": "modify"},
+    {"path": "u-boot.yaml", "action": "modify"},
+    {"path": "compose.yaml", "action": "create"},
     {"path": ".env.example", "action": "create"}
   ],
   "changes": [
+    {"path": "u-boot.yaml", "count": 2},
     {"path": "compose.yaml", "count": 12},
     {"path": ".env.example", "count": 4}
   ],
@@ -121,6 +154,39 @@ Konkrete Pin-Form für `add --dry-run --json` (Spec §326-Voll-Schema):
   "exitCode": 0
 }
 ```
+
+**Variante B — existierendes Setup** (`compose.yaml` hat bereits
+andere Services):
+
+```json
+{
+  "status": "ok",
+  "command": "add",
+  "dryRun": true,
+  "diff": false,
+  "plannedFiles": [
+    {"path": "u-boot.yaml", "action": "modify"},
+    {"path": "compose.yaml", "action": "modify"},
+    {"path": ".env.example", "action": "modify"}
+  ],
+  "changes": [
+    {"path": "u-boot.yaml", "count": 2},
+    {"path": "compose.yaml", "count": 6},
+    {"path": ".env.example", "count": 2}
+  ],
+  "diagnostics": [],
+  "exitCode": 0
+}
+```
+
+Reihenfolge der `plannedFiles[]` spiegelt
+[`addservice.go:140-143`](../../../../internal/hexagon/port/driving/addservice.go)
+(`Changed`-Reihenfolge: `u-boot.yaml` → `compose.yaml` →
+`.env.example`). Wenn der Catalog-Eintrag zusätzliche `ExtraFiles`
+trägt (z. B. OTel `otel-collector-config.yaml`), erscheinen sie
+nach `.env.example` in der `ExtraFiles`-Reihenfolge der
+Catalog-Definition. `count`-Semantik: gemäß T0-(g) (Spec §430+§477
+konsistent — siehe T0-Discovery).
 
 Negative-Pin (Cluster-T0-(b) Pflicht): bei `--dry-run` darf der
 RecordingFileSystem **null** Production-FS-Mutations-Aufrufe
@@ -142,6 +208,14 @@ mit einem Spy auf alle 8 Mutations-Methoden und assertet `Calls
   Field-Name = Sub-Decision T0-(b)). **Alle 8** Methoden müssen
   capturet werden, auch die heute aus `add` ungenutzten — der
   Recorder ist der Drift-Anker für zukünftige Folge-Slices.
+  **Impliziter `MkdirAll`-Effekt** (Review-Finding H1) ist gemäß
+  T0-(b)-Outcome modelliert.
+- ✅ **Recorder-Carrier-Typ über die Schicht-Grenze** (Review-
+  Finding H3): gemäß T0-(i) liegt der Carrier-Type-Definition in
+  `internal/hexagon/port/driving/addservice.go` als Public-Types
+  `PlannedFile`/`ChangeEntry`/`Hunk`; `AddServiceResponse`
+  bekommt zwei neue Felder. `make lint` depguard grün; weder CLI-
+  noch driven-Adapter importiert den jeweils anderen.
 - ✅ **Composition-Root-Doppel-Wiring**: das App-Struct in
   [`cli/cli.go`](../../../../internal/adapter/driving/cli/cli.go)
   trägt **zwei** Felder pro modifying Use-Case (Normal + Preview)
@@ -171,12 +245,18 @@ mit einem Spy auf alle 8 Mutations-Methoden und assertet `Calls
     Recorder, `changes[]` per Diff-Hunk-Counter, optional
     `hunks` bei `--diff`.
   - Human-Mode unverändert (existierende Plaintext-Logik bleibt).
-- ✅ **`AssertFullEnvelope`-Erstnutzung**: Acceptance-Tests
+- ✅ **`AssertFullEnvelope`-Erstnutzung + Hunks-Helper-
+  Erweiterung** (Review-Finding M5 adressiert): Acceptance-Tests
   rufen
   [`jsontestutil.AssertFullEnvelope`](../../../../internal/adapter/driving/cli/jsontestutil/jsontestutil.go)
   mit `WithCommand("add")` plus `WithExpectedCodes(...)` und
   pinnen den Voll-Schema-Required-Set. **Erste Verwendung** des
   Voll-Helpers (Doctor-Slice trug ihn nur als Stub mit Tests).
+  `checkPlannedFiles` wird in T2 um `checkHunks` erweitert
+  (Hunks-Struktur-Validierung gemäß T0-(l)-Schema-Pin: Pflicht-
+  Felder, Zahl-Ranges, Field-Names) — positive Pin (drei valide
+  Hunks) und negative Pin (falscher Field-Name `offset` statt
+  `oldStart`).
 - ✅ **Negative-Pin "null FS-Mutationen im Dry-Run"** (Cluster
   T0-(b) §256-272 Mutations-Matrix-Pflicht): pro `--dry-run`-Pfad
   ein Acceptance-Test, der die Production-FS mit einem Counting-
@@ -200,15 +280,14 @@ mit einem Spy auf alle 8 Mutations-Methoden und assertet `Calls
   Bestehender Pin-Test
   `TestRootJSON_RejectsAllNonMigratedForms` schrumpft entsprechend
   (10 statt 11 Reject-Cases).
-- ✅ **Code-Registry-Erweiterung**: falls `add` neue Diagnostic-
-  Codes emittiert (z. B. `add.service-conflict`,
-  `add.template-render`), landen sie in
-  [`jsontestutil.DefaultAllowedCodes`](../../../../internal/adapter/driving/cli/jsontestutil/coderegistry.go)
-  **plus** in der Markdown-Sektion-§5 von
-  [`docs/user/cli-json-output.md`](../../../user/cli-json-output.md)
-  zwischen den `<!-- code-registry:start/end -->`-Markern. Beide
-  Drift-Gates aus dem Doctor-Slice T2 erzwingen die Doppel-
-  Pflege automatisch.
+- ✅ **Diagnostic-Codes per LH-Kennung** (Review-Finding M1
+  adressiert, T0-(j)): `add`-Diagnostics mappen die sieben
+  Sentinels auf `LH-FA-ADD-{001,002,005,006}`/`LH-FA-INIT-{004,
+  005,006}` (Tabelle in T0-(j)). **Keine** Erfindung tool-interner
+  `add.*`-Codes; `jsontestutil.codeAllowed` lässt LH-Codes via
+  `strings.HasPrefix("LH-")` ohne Registry-Pflege durch. Keine
+  `DefaultAllowedCodes`-Erweiterung nötig; keine Markdown-
+  Sektion-Edit.
 - ✅ **Schema-Vertrag-Doku**: `docs/user/cli-json-output.md` §6.1
   (Migrations-Reihenfolge-Tabelle) auf Status "T0 in Arbeit" für
   Platz 2 nachgezogen. Bei T_close auf "done" + Commit-Hash.
@@ -253,6 +332,27 @@ Vorschlag (T0-Festlegung):
   gescheitert ist; ein Roll-back des Plan-Eintrags würde die
   Drift-Info verschlucken.
 
+**Drei Failure-Scenarios explizit gepinnt** (Review-Finding L2
+adressiert — Mid-Failure-UX-Klärung):
+
+| Scenario | `plannedFiles[]` | `diagnostics[]` | `status` | `exitCode` |
+| --- | --- | --- | --- | --- |
+| **Success-Sequenz** (alle 3 Files OK) | alle 3 Files mit korrekter Action | `[]` | `"ok"` | `0` |
+| **Mid-Write-Failure** (File 1 OK, File 2 failt) | alle 3 Files (auch ungeschriebene) mit Plan-Action | 1× `level:"error"` mit Fehler-Code für File 2 | `"error"` | `11` |
+| **Pre-Write-Validation-Failure** (z. B. ungültiger Service-Name vor erstem Write) | `[]` (keine Files geplant) | 1× `level:"error"` mit `LH-FA-INIT-006` | `"error"` | `10` |
+
+UX-Hinweis: Bei Mid-Write-Failure (Scenario 2) sind die in `plannedFiles[]`
+nach dem Fehler-Eintrag aufgeführten Files **nicht** geschrieben
+worden — User-Disambiguation passiert über das
+`diagnostics[].file`-Optional-Feld (Spec §382), das den exakten
+Failure-Point markiert. Doku-Hint in `cli-json-output.md` §6.1
+(Add-Sektion): „On mid-write failure, files listed AFTER the
+`level:"error"` diagnostic entry have NOT been written; the
+diagnostic's `file` field identifies the failure point." Roll-
+back-aware Capture (alle bereits geschriebenen Files reverten) ist
+**Out-of-Scope** für V1 (würde Cluster-T0-(b) Variante 3
+ChangeSet-Pattern erfordern, das explizit verworfen wurde).
+
 ### T0-(c) Diff-Hunk-Field-Name im JSON
 
 Cluster-T0-(d)-Vorschlag: `plannedFiles[].hunks` als Top-Level-
@@ -286,18 +386,58 @@ modifying Subcommand (Normal-Mode + Preview-Mode). Sub-Decision:
 
 Optionen:
 
-1. **Zwei separate Felder**: `addServiceUseCase` (Normal) und
-   `addServicePreviewUseCase` (Preview); CLI-RunE selektiert.
+1. **Zwei separate App-Struct-Felder**: `addServiceUseCase`
+   (Normal) und `addServicePreviewUseCase` (Preview); CLI-RunE
+   selektiert. App-Struct wächst um 2 Felder × 5 modifying
+   Use-Cases = **10 zusätzliche Felder** im Cluster-Endzustand.
+   `cli.New(...)` Signatur wächst von 11 auf 16+ Parameter.
 2. **Ein Selector-Field**: `addServiceUseCase func(preview bool)
    driving.AddServiceUseCase`; CLI-RunE ruft `app.addServiceUseCase(preview)`.
 3. **Wrapping in App**: ein UseCase-Field plus eine Methode
    `(a *App) addServiceFor(preview bool)`, die intern zwischen
    zwei vorkonstruierten Instanzen auswählt.
+4. **`PreviewMode bool` im Request-Type** (Review-Finding M3
+   adressiert): `driving.AddServiceRequest{..., PreviewMode bool}`;
+   Composition-Root wiret den Use-Case **einmal** mit einem
+   FS-Selektor (`fsSelector(preview bool) driven.FileSystem`),
+   der intern zwischen Production-FS und RecordingFileSystem
+   wählt. CLI-RunE setzt `Request.PreviewMode = a.dryRun || a.diff`.
+   **App-Struct unverändert**; `cli.New(...)`-Signatur unverändert.
 
-Vorschlag (T0-Festlegung): Option 1 (zwei Felder). Einfachster
-Composition-Root, kein neues Pattern, leicht testbar. App-Struct
-wird größer; aber das ist Pattern-Vorbild-Last (vier modifying
-Folge-Slices machen dasselbe).
+Vorschlag (T0-Festlegung): **Option 4**. Begründung: die ersten
+drei Optionen erzwingen Field-/Symbol-Duplikation in
+[`cli.go`](../../../../internal/adapter/driving/cli/cli.go) und
+in den 8 Test-Helpers (`newApp`/`newAppWithDoctor`/`newAppWithAdd`/…)
+mal 5 modifying Use-Cases, was eine Wartungs-Last über die
+gesamte Cluster-Serie hinweg trägt. Option 4 verschiebt die
+Wahl in den Application-Layer (`Request`-Feld); die
+Composition-Root in `cmd/uboot/main.go` konstruiert den Use-Case
+einmal mit einem **Constructor-Closure** als FS-Selector:
+
+```go
+// cmd/uboot/main.go (Skizze)
+prodFS := fs.New(...)
+selector := func(preview bool) driven.FileSystem {
+    if preview {
+        return recordingfs.New(prodFS, recordingfs.WithPassthrough(false))
+    }
+    return prodFS
+}
+addService := application.NewAddServiceServiceWithSelector(selector, ...)
+```
+
+Composition-Root wählt **bei jedem Request-Eintreffen** zwischen
+beiden FS-Adaptern; Use-Case-Methode bleibt
+`Add(ctx, req)`-Signatur (`req.PreviewMode` wird intern an
+`selector(preview)` weitergereicht). depguard bleibt sauber, da
+weder CLI noch Use-Case `recordingfs` importieren — nur
+`cmd/uboot/main.go` (Wiring-Layer, exempt von
+`adapter-driving-no-driven` per `.golangci.yml`-Allowlist).
+
+Verworfene Form-Variante: Option 1 (App-Struct-Doppel-Felder) — der
+ursprüngliche Stub-Vorschlag. Trade-off neu bewertet: Wartungs-Last
+über 5 Folge-Slices und 8 Test-Helpers wiegt schwerer als die
+zusätzliche Sub-Decision für den Application-Layer-Request-Type.
 
 ### T0-(f) Mutations-Matrix-Pre-Scan-Dokumentation
 
@@ -314,21 +454,54 @@ die Matrix erweitern (Pflicht-Eintrag im jeweiligen Slice-AK).
 ### T0-(g) `changes[i].count`-Semantik
 
 Spec §365-371 fordert `count ≥ 0` als Integer pro `plannedFiles[]`-
-Eintrag. Vager Wortlaut. Sub-Decision: **was wird gezählt**?
+Eintrag; der Wortlaut ist semantisch offen. Spec liefert **zwei**
+Beispiele für dieselbe `add postgres`-Operation:
 
-Optionen:
+- §430-435 (`--dry-run --json`, `action: "create"`): `count: 12`
+- §477-482 (`--diff --json` ohne `--dry-run`, `action: "modify"`):
+  `count: 6`
 
-1. **Diff-Lines-Sum**: `oldLines + newLines` pro Hunk, dann pro
-   Datei aggregiert. Repräsentiert "Größe des Eingriffs".
-2. **Geänderte Zeilen netto**: `max(oldLines, newLines)` pro
-   Hunk. Repräsentiert "Anzahl gewordener Zeilen".
-3. **Anzahl Hunks**: `len(hunks)` pro Datei. Repräsentiert
-   "Anzahl unabhängiger Änderungs-Blöcke".
+Beide Beispiele sind nur konsistent erklärbar, wenn `count =
+newLines` interpretiert wird (Review-Finding M2 adressiert —
+der vorherige Stub-Vorschlag „`oldLines + newLines`" passt
+**nicht** zu beiden Spec-Beispielen, sondern nur zum einen
+oder anderen):
 
-Vorschlag (T0-Festlegung): Option 1 (Lines-Sum). Lastenheft-
-Beispiel §430-435 zeigt `{"path": "compose.yaml", "count": 12}`
-für eine `add postgres`-modify mit 12 hinzugefügten Zeilen —
-das passt zu Option 1 (Δ-Lines).
+- **Bei `action: "create"`**: ganze Datei ist neu, `newLines` =
+  totalLines der neuen Datei (Postgres-compose-Service-Block ~12
+  Zeilen → Spec §430 `count: 12` ✅).
+- **Bei `action: "modify"`**: nur die hinzugefügten Zeilen,
+  `newLines` = sum-over-hunks(neue Zeilen) (Postgres-Block fügt
+  6 Zeilen zu existierender compose.yaml hinzu → Spec §477
+  `count: 6` ✅).
+
+**Entscheidung (T0-Festlegung)**: `count = newLines`
+(hinzugefügte/totale Zeilen in der neuen Datei-Version). Konkrete
+Formel: bei `action: "create"` = `len(strings.Split(newContent,
+"\n"))`; bei `action: "modify"` = `sum(hunk.newLines for hunk in
+diffHunks)`; bei `action: "delete"` = `0` (keine neuen Zeilen).
+
+Verworfene Optionen:
+
+- **Lines-Sum** (`oldLines + newLines`): scheitert an Spec-Beispiel
+  §477 (modify-Postgres-Block hätte oldLines=0, newLines=6 →
+  Sum=6, passt zufällig; aber §430 Create-Postgres hätte oldLines=0,
+  newLines=12 → Sum=12, passt — Sum-Variante würde sich nur bei
+  modify-Fällen mit oldLines>0 von newLines unterscheiden, ist
+  also nicht verifizierbar gegen die Spec-Beispiele). Verworfen
+  zugunsten der eindeutigeren `newLines`-Form.
+- **`max(oldLines, newLines)`**: passt zu beiden Spec-Beispielen
+  ebenfalls (max(0,12)=12; max(0,6)=6) — aber semantisch
+  unklarer („betroffene Zeilen"). `newLines` ist UX-näher
+  („gewachsene Zeilen").
+- **Anzahl Hunks**: `len(hunks)` pro Datei. Passt zu **keinem**
+  Spec-Beispiel (Postgres-Add wäre wohl 1 Hunk → count=1, nicht
+  6 oder 12).
+
+Pin-Test in T5 verifiziert die `newLines`-Form gegen einen
+deterministischen Test-Fixture (`testdata/add-postgres-compose-
+yaml-fresh.yaml`-Setup → `count` muss 12 sein; `testdata/add-
+postgres-compose-yaml-existing.yaml`-Setup → `count` muss 6 sein).
 
 ### T0-(h) Pre-Scan-Read-after-Write-Stichprobe für `add`
 
@@ -346,26 +519,272 @@ Vorschlag (T0-Festlegung): Stichprobe ist verbindlich
 Pro-File-Tabelle. Wenn ein Write-then-Read gefunden wird, T2
 ergänzt die Overlay-Map; sonst T2-LOC bleibt schlanker.
 
+### T0-(i) Recorder-Carrier-Typ über die Schicht-Grenze
+
+**(Review-Finding H3 adressiert)**
+
+`plannedFile`/`changeEntry` sind heute CLI-Adapter-private Typen
+([`jsonenvelope.go:61-71`](../../../../internal/adapter/driving/cli/jsonenvelope.go)).
+Der `RecordingFileSystem` lebt im **driven-Adapter** (T0-(a)
+Vorschlag `internal/adapter/driven/recordingfs/`). depguard-Regeln
+[`.golangci.yml:241-257`](../../../../.golangci.yml)
+verbieten beide Direct-Import-Richtungen
+(`adapter-driving-no-driven` und `adapter-driven-no-driving`).
+Carrier-Typ-Sub-Decision ist deshalb **Pflicht-T0-Schritt**, nicht
+T2-Implementierungs-Detail.
+
+Drei Optionen:
+
+1. **`driving.AddServiceResponse`-Erweiterung**: bestehender
+   Response-Type bekommt zwei neue Felder `PlannedFiles
+   []driving.PlannedFile` und `Changes []driving.ChangeEntry`
+   (neutrale Domain-Wire-Types im `port/driving`-Sub-Package).
+   Use-Case befüllt sie aus dem Recorder; CLI-Adapter mapped sie
+   1:1 in `cliJSONEnvelope.PlannedFiles`/`Changes`. depguard-
+   konform: CLI importiert `port/driving` (heute schon), Use-Case
+   importiert `port/driven` (heute schon), `recordingfs` gibt
+   konkrete Capture-Datenstruktur an Use-Case, Use-Case mapped
+   auf `driving.PlannedFile`.
+2. **Domain-Wire-Types in `internal/hexagon/domain/`**: neuer
+   Sub-Package `domain/fsplan/` mit `PlannedFile`/`ChangeEntry`/
+   `Hunk`. Beide Adapter-Schichten dürfen das Domain importieren
+   (depguard erlaubt das explizit). Mehr Ceremony als Option 1.
+3. **Decorator-Pattern im CLI-Layer**: ein `cli`-interner
+   Wrapper um `driving.AddServiceUseCase` kapselt den Recorder.
+   Verletzt das depguard-Verbot dennoch nicht, weil der CLI-Wrapper
+   den `RecordingFileSystem` über die Composition-Root als
+   `driven.FileSystem`-Interface erhält (kein Concrete-Import).
+   Aber: Use-Case sieht weder Plan noch Hunks; das widerspricht
+   T0-(b) §441-456 ("Use-Case-Code bleibt unverändert").
+   Verworfen.
+
+**Entscheidung (T0-Festlegung): Option 1**. Begründung:
+- Kleinster Eingriff (zwei neue Felder im bestehenden Response-Type
+  statt neues Sub-Package).
+- Hält die Schicht-Disziplin sauber (CLI-Adapter mappt
+  driving-Layer-Types auf eigene Wire-Types — heute schon das
+  Pattern für `templateJSON`).
+- Carrier-Type-Definition liegt in `internal/hexagon/port/driving/addservice.go`
+  als neue Public-Types (`PlannedFile{Path, Action string}`,
+  `ChangeEntry{Path string, Count int}`, `Hunk{OldStart, OldLines,
+  NewStart, NewLines int, Content string}`).
+- T1 (`recordingfs`) gibt einen schlankes Capture-DTO
+  (`recordingfs.Capture{Writes []WriteRecord, ...}`); T3
+  Composition-Root-Wiring konstruiert pro Request einen Recorder
+  und liest danach den Capture aus; T4 mappt Capture → driving-
+  Layer-Types in `AddServiceResponse`.
+
+### T0-(j) Diagnostic-Code-Quelle für `add`
+
+**(Review-Finding M1 adressiert)**
+
+`internal/hexagon/port/driving/addservice.go:106-138` definiert
+**vier** Spec-konforme Sentinels:
+
+- `ErrServiceUnsupported` (`LH-FA-ADD-002` — unbekannter Service)
+- `ErrServiceInconsistent` (`LH-FA-ADD-005` — Catalog-State-Mismatch)
+- `ErrDependenciesRequired` (`LH-FA-ADD-006` — fehlende Add-On-Deps)
+- `ErrProjectNotInitialized` (`LH-FA-ADD-001` — kein u-boot.yaml)
+
+Plus drei Application-Sentinels, die heute beim Add aufkommen
+können (siehe [`cli.go`](../../../../internal/adapter/driving/cli/cli.go)
+`ExitCode`-Mapping):
+
+- `ErrInvalidServiceName` (`LH-FA-INIT-006` — Service-Name-
+  Validation, geteilt mit init)
+- `ErrFileExists`/`ErrProjectExists` (`LH-FA-INIT-004` —
+  Marker-Kollision, fachlich auch bei add möglich)
+- `ErrBackupSuffixExhausted` / `ErrBackupSourceMissing`
+  (`LH-FA-INIT-005` — Backup-Pfad-Failures)
+
+**Entscheidung (T0-Festlegung): LH-Codes**. Begründung:
+
+- Spec §445 erlaubt **LH-Kennung der verursachenden Anforderung**
+  als kanonische Code-Form ("z. B. `LH-FA-DEV-003`").
+- `jsontestutil.codeAllowed`
+  ([`jsontestutil.go:280-291`](../../../../internal/adapter/driving/cli/jsontestutil/jsontestutil.go))
+  akzeptiert LH-Codes (`strings.HasPrefix("LH-")`) **ohne**
+  Registry-Pflege — keine Doppel-Doku-Last in
+  `DefaultAllowedCodes` plus Markdown-Sektion.
+- Keine Erfindung tool-interner `add.*`-Codes nötig; die Drift-
+  Risiken aus Doctor-Slice T0-(h) Option 3 entfallen.
+
+Mapping-Tabelle (im T0-Outcomes finalisiert, fester Bestandteil
+der Mutations-Matrix-Doku aus T0-(f)):
+
+| Sentinel | LH-Code | Level | Exit-Code |
+| --- | --- | --- | --- |
+| `ErrProjectNotInitialized` | `LH-FA-ADD-001` | error | 10 |
+| `ErrServiceUnsupported` | `LH-FA-ADD-002` | error | 10 |
+| `ErrServiceInconsistent` | `LH-FA-ADD-005` | error | 10 |
+| `ErrDependenciesRequired` | `LH-FA-ADD-006` | error | 10 |
+| `ErrInvalidServiceName` | `LH-FA-INIT-006` | error | 10 |
+| `ErrFileExists` | `LH-FA-INIT-004` | error | 10 |
+| `ErrBackupSuffixExhausted` | `LH-FA-INIT-005` | error | 14 |
+
+**Success-Pfade** (`AddServiceResponse.Changed != nil`):
+`status: "ok"`, `diagnostics: []`. Idempotent-no-op-Form
+(`Changed == nil`): `status: "ok"`, `diagnostics: []`,
+`plannedFiles: []`, `changes: []` (keine Mutation geplant). Keine
+`Info`-Diagnostics zur State-Action (User hat
+`AddServiceResponse.State`-Field zur Aufklärung; tool-internes
+Echo wäre Drift-Pfad ohne UX-Wert).
+
+**`DefaultAllowedCodes`-Erweiterung**: KEINE nötig (alle Codes
+sind LH-Prefix, gehen über `codeAllowed`'s `strings.HasPrefix`-
+Pfad ohne Registry-Eintrag).
+
+### T0-(k) `add --json` (Minimalkontrakt) ohne `--dry-run`/`--diff`: Output-Form
+
+**(Review-Finding M4 adressiert)**
+
+Spec §1841 ist bindend: `--json` **ohne** `--dry-run`/`--diff`
+trägt **nur** den Minimalkontrakt
+(`status`/`command`/`subcommand?`/`diagnostics`/`exitCode`). Spec
+§1842 sagt: das Voll-Schema (`plannedFiles`/`changes`/`dryRun`/
+`diff`) gilt **nur** für `--dry-run --json` und `--diff --json`.
+
+Heißt für `u-boot add postgres --json` (ohne Dry-Run/Diff): die
+Add-Operation schreibt das FS **um**, das JSON-Output trägt aber
+**keine** Plan- oder Change-Information. UX-Spannung (User
+skripten `--json` für Automation und wollen wissen, welche Files
+verändert wurden), aber Spec verbietet die Felder im
+Minimalkontrakt.
+
+Drei Optionen:
+
+1. **Spec-streng Minimal**: `add postgres --json` ohne Dry-Run/Diff
+   gibt **nur** den Minimalkontrakt aus (`status: "ok"`,
+   `diagnostics: []`, `exitCode: 0`). User-Hint im
+   `cli-json-output.md`-Doku-Block: „use `--dry-run --json` to
+   preview, `--diff --json` to preview-and-apply with FS-Plan".
+2. **Tool-internes `mutated`-Feld**: Spec §1839 erlaubt
+   zusätzliche Felder (sind nicht aktiv verboten). Envelope-
+   Erweiterung um `mutated: ["u-boot.yaml", "compose.yaml",
+   ".env.example"]`-Array (nur Pfade, keine Action/Count — das
+   wäre Voll-Schema-Aufweichung). `AssertMinimalEnvelope`
+   müsste angepasst werden, um `mutated` zuzulassen (Helper-
+   Erweiterung).
+3. **Bare-`--json` weiter rejecten**: `u-boot add --json` ohne
+   Dry-Run/Diff bleibt in der Reject-Liste, bis eine bessere
+   UX-Sub-Decision die richtige Form gefunden hat. Pin-Test
+   schrumpft Reject-Liste **nicht** auf 10, sondern bleibt bei
+   11 für die `add`-Form (mit Aufhebung nur für `--dry-run`/
+   `--diff`-Aufrufe).
+
+**Entscheidung (T0-Festlegung): Option 1 (Spec-streng Minimal)**.
+Begründung:
+
+- Spec-Konformität ist die V1-Hard-Rule. Spec §1841 sagt klar:
+  Voll-Schema-Felder sind im normalen `--json` **nicht** zulässig.
+  `AssertMinimalEnvelope` rejected sie aktiv.
+- Tool-internes `mutated`-Feld würde Doctor-Slice's
+  Single-Source-of-Truth-Disziplin brechen
+  (`checkNoFullFields` müsste eine Whitelist neuer Felder
+  bekommen — Drift-Anfangspunkt).
+- Reject (Option 3) wäre eine User-feindliche Krücke; spec-
+  konformes Minimal ist konsistent und der Hint im Doku-Block
+  ist leicht zu pflegen.
+
+Doku-Hint in `cli-json-output.md` §6.1 (Add-Sektion-Erweiterung
+in T6): „For a list of files that would change, use `--dry-run
+--json` (preview) or `--diff --json` (preview-and-apply)."
+
+### T0-(l) Hunks-Schema-Pin + Binary-Content-Detection
+
+**(Review-Findings M5 + L4 adressiert)**
+
+`plannedFile`-Struct
+([`jsonenvelope.go:61-64`](../../../../internal/adapter/driving/cli/jsonenvelope.go))
+hat heute nur `Path` und `Action`. Add-Slice erweitert um
+`Hunks []hunk`. `AssertFullEnvelope`/`checkPlannedFiles`
+([`jsontestutil.go:306-329`](../../../../internal/adapter/driving/cli/jsontestutil/jsontestutil.go))
+validiert heute nur `path`+`action` — die `hunks`-Struktur
+bleibt ungeprüft.
+
+**Hunks-Schema-Pin** (T0-Festlegung, finalisiert in T1):
+
+```go
+type hunk struct {
+    OldStart int    `json:"oldStart"` // 1-basiert, ≥ 1
+    OldLines int    `json:"oldLines"` // ≥ 0
+    NewStart int    `json:"newStart"` // 1-basiert, ≥ 1
+    NewLines int    `json:"newLines"` // ≥ 0
+    Content  string `json:"content"`  // Multi-Line, mit +/-/space-Prefix
+}
+```
+
+Field-Name-Wahl (Cluster-T0-(c)-Festlegung war `plannedFiles[].hunks`):
+**flach unter `plannedFiles[]`**, kein `plannedFiles[].diff`-Sub-
+Objekt (Cluster-Plan §552-595). Spec verlangt das nicht; flache
+Form spart eine Schicht.
+
+**`AssertFullEnvelope`-Erweiterung** (T2-Pflicht):
+`checkPlannedFiles` bekommt einen zusätzlichen Pfad, der
+`plannedFiles[i].hunks` (optional) prüft: wenn vorhanden, dann
+Array von Objekten mit Pflichtfeldern `oldStart`/`oldLines`/
+`newStart`/`newLines`/`content`, Zahlen ≥ 0, `start`-Werte ≥ 1
+bei Lines > 0 (sonst irrelevant). Negative-Pin: ungültiges
+Field-Name (`offset` statt `oldStart`) bricht den Test.
+
+**Binary-Content-Detection** (Review-Finding L4 adressiert):
+`add`-Templates sind **heute** reine Text-Files
+([`addservice_execute.go:252-261`](../../../../internal/hexagon/application/addservice_execute.go)
+Catalog-Map; `embed.FS`-Templates mit `.compose.tmpl`/`.env.tmpl`-
+Suffix). Der Diff-Renderer in T2 muss trotzdem einen UTF-8-
+Validity-Check vor LCS-Diff-Rendering durchführen — bei Binary-
+Content (alle non-UTF-8-Bytes) Fallback auf `plannedFiles[].action:
+"binary"`-Marker mit `count: 0` und `hunks: []` (Spec §354
+listet nur `create|modify|delete`; „binary" wäre Spec-Erweiterung
+und ist out-of-scope für V1 — pragmatischer Fallback: Diff-Rendering
+ueberspringen, `plannedFiles[].hunks` bleibt nil, `count` zählt
+nur Bytes/Lines wo möglich).
+
+**Drift-Anker für Folge-Slices**: zukünftige Add-on-Catalog-Erweiterungen
+müssen entweder Text-Templates anbieten oder die Binary-Detection
+nachziehen (`embed.FS` erlaubt grundsätzlich Binary). T0-Outcomes-
+Doku ergänzt ein Pflicht-Pin: jeder Folge-Slice, der `embed.FS`-
+Templates hinzufügt, prüft UTF-8-Validity beim Render-Test.
+
 ## Tranchen (vorgeschlagen)
 
 | T | Inhalt | LOC (Schätzung) |
 | - | ------ | --------------- |
-| T0 | **Discovery + Sub-Decisions** aus §T0-Discovery klären (acht Sub-Decisions, inkl. Mutations-Matrix und Read-after-Write-Stichprobe). Entscheidungen mit Begründung in einem `T0-Outcomes`-Block dokumentieren. | — (Plan-Arbeit) |
-| T1 | **`recordingfs`-driven-Adapter** anlegen. `RecordingFileSystem`-Struct + Konstruktor + 4 Read-Delegationen + 8 Mutations-Methoden (alle 8, auch ungenutzte). Unit-Tests pro Methode: Dry-Run-Mode (kein Production-Call), Passthrough-Mode (capture + delegate), Mutation-Failure-Pfad. depguard-Konformität geprüft (driven-Layer-Disziplin). | ~280 |
-| T2 | **Diff-Renderer** (Pure-Go LCS-Hunk + Unified-String-Renderer). Hunk-Datentyp gemeinsam für beide Modi. Unit-Tests gegen klassische LCS-Edge-Cases (leere Inputs, identische Inputs, einseitiger Append, Mitten-Modify, …). | ~220 |
-| T3 | **Composition-Root-Doppel-Wiring**: App-Struct um zwei `addService*`-Felder (Normal + Preview), `cmd/uboot/main.go` konstruiert beide. `cli.New(...)` Signatur erweitert (mit Test-Helper-Anpassung). Test, der den Doppel-Pfad pinnt: `--dry-run` ruft Preview-Instanz, ohne Flag Normal-Instanz. | ~140 |
-| T4 | **`u-boot add` JSON-RunE-Pfad**: drei Code-Pfade je nach Flag-Kombination (Minimal, Voll-Schema mit Dry-Run, Voll-Schema mit Diff). Allowlist-Migration: `u-boot add` raus aus Reject, rein in Migrate. Reject-Pin-Test schrumpft (11 → 10). | ~180 |
-| T5 | **Acceptance-Tests** für alle vier Flag-Kombinationen plus Negative-Pin (Null-FS-Mutationen im Dry-Run) plus Diff-Output-Pin (Unified-Struktur stimmt). Erstnutzung von `jsontestutil.AssertFullEnvelope`. Carveouts-Eintrag (falls neue Diagnostics-Codes auftreten und Code-Registry-Edits nötig sind). | ~300 |
-| T6 | **Closure.** CHANGELOG `## [Unreleased]` Added-Eintrag, roadmap.md Cluster-Slice-Zelle aktualisiert (Add done, nächster Schritt `init`), Cluster-Slice §Per-Command-Folge-Slices §6.1-Tabelle in cli-json-output.md auf done. Slice-File `in-progress/` → `done/` mit DoD-Hash-Tranchen-Tabelle. `make docs-check` grün. | — (Doku) |
+| T0 | **Discovery + Sub-Decisions** aus §T0-Discovery klären (zwölf Sub-Decisions: (a) Recorder-Lokation, (b) Passthrough-Schalter + 3 Failure-Scenarios, (c) Hunk-Field-Name, (d) Diff-Library, (e) Composition-Root-Wiring-Form, (f) Mutations-Matrix-Dokumentations-Ort, (g) `count`-Semantik, (h) Read-after-Write-Stichprobe, (i) Recorder-Carrier-Typ über Schicht-Grenze, (j) Diagnostic-Code-Quelle, (k) Minimal-Output für `add --json` ohne Dry-Run/Diff, (l) Hunks-Schema-Pin + Binary-Detection). Entscheidungen mit Begründung in einem `T0-Outcomes`-Block dokumentieren. | — (Plan-Arbeit) |
+| T1 | **`recordingfs`-driven-Adapter** + **Carrier-Types in `port/driving/addservice.go`** (T0-(i)). RecordingFileSystem-Struct + Konstruktor + 4 Read-Delegationen + 8 Mutations-Methoden (alle 8, auch ungenutzte) + impliziter `MkdirAll`-Capture-Modell (T0-(b)). `driving.PlannedFile`/`ChangeEntry`/`Hunk` Public-Types in `addservice.go` plus `AddServiceResponse`-Felder. Unit-Tests pro Methode: Dry-Run-Mode (kein Production-Call), Passthrough-Mode (capture + delegate), Mutation-Failure-Pfad, drei Failure-Scenarios aus T0-(b). depguard-Konformität geprüft. | ~340 |
+| T2 | **Diff-Renderer** + **`AssertFullEnvelope`-Hunks-Helper-Erweiterung** (Review-Finding M5). Pure-Go LCS-Hunk + Unified-String-Renderer + UTF-8-Validity-Check vor LCS (T0-(l), Binary-Detection-Fallback). Hunk-Datentyp gemeinsam für beide Modi. **`checkHunks`-Helper** im `jsontestutil`-Package (Struktur-Pflicht-Felder, Field-Names, Zahl-Ranges). **Golden-File-Tests** gegen Spec-Beispiel-Fixtures (`testdata/add-postgres-compose-fresh.golden` und `-existing.golden`, Review-Finding L3). Unit-Tests gegen klassische LCS-Edge-Cases (leere Inputs, identische Inputs, einseitiger Append, Mitten-Modify, Binary-Detection). | ~310 |
+| T3 | **Composition-Root-Wiring mit Selector-Closure** (T0-(e) Option 4). `cmd/uboot/main.go` konstruiert einen `fsSelector(preview bool) driven.FileSystem`-Closure, übergibt ihn an die Application-Layer-Service-Konstruktoren. `driving.AddServiceRequest.PreviewMode bool`-Field-Erweiterung. CLI-RunE setzt `Request.PreviewMode = a.dryRun \|\| a.diff`. Pin-Test: `--dry-run` löst Recorder-Capture aus, ohne Flag direkter Production-Write. App-Struct + `cli.New(...)`-Signatur **unverändert**; keine Test-Helper-Mass-Edits. | ~80 |
+| T4 | **`u-boot add` JSON-RunE-Pfad**: drei Code-Pfade je nach Flag-Kombination — (a) `--json` ohne Dry-Run/Diff → `newMinimalEnvelope` (T0-(k), Spec-streng Minimal); (b) `--dry-run --json` → `newFullEnvelope` mit Recorder-Capture, `dryRun=true`/`diff=false`; (c) `--diff --json` (mit oder ohne Dry-Run) → `newFullEnvelope` mit Hunks, `diff=true`. Diagnostic-Code-Mapping aus T0-(j). Allowlist-Migration: `u-boot add` raus aus Reject, rein in Migrate. Reject-Pin-Test schrumpft (11 → 10). | ~200 |
+| T5 | **Acceptance-Tests** für alle vier Flag-Kombinationen + drei Failure-Scenarios (T0-(b)) + Negative-Pin (Null-FS-Mutationen im Dry-Run) + Diff-Output-Pin (Unified-Struktur stimmt) + Pin-Test für `count`-Semantik gegen Test-Fixture (T0-(g) `newLines`-Pin). Erstnutzung von `jsontestutil.AssertFullEnvelope` mit `checkHunks`-Erweiterung aus T2. Two-Pin-Form (Variante A frisch-init / Variante B existing). | ~360 |
+| T6 | **Closure.** CHANGELOG `## [Unreleased]` Added-Eintrag, roadmap.md Cluster-Slice-Zelle aktualisiert (Add done, nächster Schritt `init`), cli-json-output.md §6.1-Tabelle auf done plus Add-Sektion-Erweiterung mit Minimal-vs-Voll-Output-Hinweis (T0-(k)) und Mid-Failure-UX-Hint (T0-(b)). Slice-File `in-progress/` → `done/` mit DoD-Hash-Tranchen-Tabelle. `make docs-check` grün. | — (Doku) |
 
-LOC-Schätzung Folge-Slice: ~1120 LOC — **deutlich** über der vom
-Cluster-Slice gesetzten 200..600-Bandbreite. Begründung: dieser
-Slice etabliert die schwerere Cluster-Infrastruktur (Recorder +
-Diff-Renderer + Composition-Root-Doppel-Wiring), die die vier
-nachfolgenden modifying-Slices (`init`, `generate`, `remove`,
-`config set`) als geschlossenen Outcome-Block erben. LOC-
-Bandbreite ist deshalb für diesen Pattern-Vorbild-Slice **keine**
-Hard-Rule (analog Doctor-Slice ~630).
+LOC-Schätzung Folge-Slice: ~1290 LOC nach Review-Fixes (Carrier-
+Types in port/driving, MkdirAll-Capture-Modell, Hunks-Helper-
+Erweiterung, Golden-File-Tests, drei Failure-Scenarios) — von
+ursprünglich ~1120; weiterhin **deutlich** über der vom Cluster-
+Slice gesetzten 200..600-Bandbreite. Begründung: dieser Slice
+etabliert die schwerere Cluster-Infrastruktur (Recorder + Carrier-
+Types + Diff-Renderer + Composition-Root-Selector-Wiring + Hunks-
+Helper), die die vier nachfolgenden modifying-Slices (`init`,
+`generate`, `remove`, `config set`) als geschlossenen Outcome-Block
+erben. LOC-Bandbreite ist deshalb für diesen Pattern-Vorbild-Slice
+**keine** Hard-Rule (analog Doctor-Slice ~630).
+
+**Aufteilungs-Erwägung** (Review-Finding L1 adressiert): ein
+separater `slice-v1-cli-json-dry-run-recordingfs`-Sub-Slice (T1
++ Composition-Root-Skeleton, ~420 LOC) wäre architekturell
+denkbar. **Verworfen**, weil:
+
+- Der Carrier-Typ-Schicht-Grenze-Vertrag (T0-(i)) verbindet
+  Recorder und CLI-Adapter so eng, dass ein dazwischenliegender
+  Sub-Slice nur einen "ungenutzten Recorder ohne Konsumenten"
+  liefern würde — Test-Inhalte wären synthetisch.
+- Composition-Root-Eingriff (`fsSelector`-Closure aus T0-(e)
+  Option 4) ist ein Single-Point-of-Change in `cmd/uboot/main.go`;
+  ein Split würde denselben Punkt zweimal modifizieren.
+- Pattern-Vorbild-Last: die vier Folge-Slices erben das
+  geschlossene `add`-Pattern; ein Split würde die Vorbild-Form
+  verteilen.
 
 ## Out of Scope
 
