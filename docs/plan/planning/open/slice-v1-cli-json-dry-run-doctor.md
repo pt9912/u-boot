@@ -6,9 +6,12 @@
 > (T0-(e) Platz 1). Liefert die gemeinsame Infrastruktur für die
 > 9er-Folge-Slice-Serie: Root-PersistentFlag `--json` (T0-(a)),
 > Common-Envelope `cliJSONEnvelope` (T0-(c)) und Schema-Helper
-> `jsontestutil.AssertSchemaConform`. Trägt zusätzlich den
+> `jsontestutil.AssertMinimalEnvelope` /
+> `jsontestutil.AssertFullEnvelope`. Trägt zusätzlich den
 > Übergangs-Schnitt für das existierende `template list --json`
-> (Review-Round-2-Finding M3).
+> (Review-Round-2-Finding M3). T0 ✅ festgezurrt (§T0-Outcomes
+> — acht Sub-Decisions); `next/`-Übergang frei, danach
+> T1-Schema-Vertrag-Doku.
 
 ## Auslöser
 
@@ -83,15 +86,30 @@ Envelope (`LH-NFA-USE-004` §1841) und `make test` + `make lint` +
 lokale `template list --json`-Flag entfernt und beide CLI-Pin-
 Tests (`u-boot template list --json` **und** `u-boot --json
 template list`) sind grün — gleicher Output, gleicher Exit-Code
-wie heute. Alle 10 noch nicht migrierten Subcommand-Formen (`init`,
-`add`, `remove`, `up`, `down`, `logs`, `generate`, `config`,
-`config get`, `config set` — Spec-Enum-Item `config` zählt
-als 3 Formen) rejecten `--json` mit Exit-Code `2`
+wie heute.
+
+Subcommand-Form-Inventar (Spec-Enum §338 zählt 10 Subcommands,
+einige sind gruppiert):
+
+- **Migrate in diesem Slice (2 Formen):** `doctor`, `template list`
+  (Flag-Schnitt ohne Output-Migration — Carveouts-Eintrag).
+- **Reject in diesem Slice (11 Formen):** `init`, `add`, `remove`,
+  `up`, `down`, `logs`, `generate`, `config` (bare), `config get`,
+  `config set`, `template` (bare). `config`/`template` als
+  gruppierte Befehle (Spec §338 + §420) tragen jeweils mehrere
+  Forms; bare `config --json` und bare `template --json` sind
+  Help-Parents (`Args: cobra.NoArgs`, kein eigenes JSON-vorge-
+  sehenes Output) und rejecten bis zum jeweiligen Folge-Slice
+  (`slice-v1-cli-json-dry-run-config`/`-template`), der für
+  bare die `subcommand`-Pflicht aus `LH-FA-CLI-007` §420 löst.
+
+Reject-Form heute (alle 11): Exit-Code `2`
 (`LH-FA-CLI-006`-Klasse) und Verweis auf den jeweiligen
 Folge-Slice — kein Subcommand „akzeptiert `--json` still und
 liefert Human-Output" (sonst untergrabener V1-Maschinenvertrag).
-`template list` ist Sonderfall (Flag-Schnitt, kein Reject —
-siehe AK §`template list --json`-Schnitt).
+Cluster-T_close-Pflicht-Check: alle 13 Formen (2 Migrate +
+11 Reject) sind in der Allowlist **oder** die Allowlist-
+Mechanik komplett entfernt.
 
 Konkrete Output-Pins für `doctor --json`:
 
@@ -123,7 +141,7 @@ u-boot doctor --json
 #   "status": "error",
 #   "command": "doctor",
 #   "diagnostics": [
-#     {"level":"error","code":"docker.available","message":"…"}
+#     {"level":"error","code":"docker.installed","message":"…"}
 #   ],
 #   "exitCode": 11
 # }
@@ -157,20 +175,25 @@ JSON-Modus darum semantisch ein No-op.
   Cobra-Root registriert, persistent für alle 10 Subcommands,
   Wiring analog
   [`--verbose`/`--debug`/`--quiet`](../../../../internal/adapter/driving/cli/root.go).
-- ✅ **Reject-Pfad für nicht-migrierte Subcommands**: alle
-  10 noch nicht migrierten Subcommand-Formen (`init`, `add`,
-  `remove`, `up`, `down`, `logs`, `generate`, `config`,
-  `config get`, `config set` — Spec-Enum-Item `config` zählt
-  als 3 Formen; `template list` siehe Sonderregel unten,
-  **kein** Reject) rejecten `--json` mit Exit-Code `2`
-  (`LH-FA-CLI-006`-Klasse) und Fehlermeldung
+- ✅ **Reject-Pfad für nicht-migrierte Subcommand-Formen**:
+  alle **11** noch nicht migrierten Subcommand-Formen (`init`,
+  `add`, `remove`, `up`, `down`, `logs`, `generate`, `config`,
+  `config get`, `config set`, `template` (bare) — `config`
+  zählt als 3 Formen, `template` als 1 bare-Form plus
+  Sonderregel `template list` unten) rejecten `--json` mit
+  Exit-Code `2` (`LH-FA-CLI-006`-Klasse) und Fehlermeldung
   `JSON-Ausgabe für 'u-boot <sub>' ist noch nicht implementiert
   (siehe slice-v1-cli-json-dry-run-<sub>).` Mechanik T0-(g).
-  Pflicht-Pin-Test je nicht-migrierter Subcommand-Form (10
+  Pflicht-Pin-Test je nicht-migrierter Subcommand-Form (11
   Pin-Tests insgesamt). Pro Folge-Slice-Merge fallen **genau**
   die Reject-Pfade der migrierten Subcommand-Formen
-  (`config`-Slice schließt drei auf einmal); **Cluster-T_close-
-  Pflicht-Check:** null offene Reject-Pfade.
+  (`config`-Slice schließt drei auf einmal, `template`-Slice
+  schließt bare-`template` und führt die Envelope-Migration
+  für `template list`); **Cluster-T_close-Pflicht-Check:**
+  alle 13 Formen (2 in diesem Slice migriert + 11 sukzessive
+  via Folge-Slices) sind in der Allowlist enthalten **oder**
+  Allowlist-Mechanik komplett entfernt — null offene
+  Reject-Pfade.
 - ✅ **Common-Envelope `cliJSONEnvelope` (Cluster T0-(c))**: neuer
   Typ im CLI-Adapter (Lokation-Sub-Decision T0-(a) dieses Slices,
   Vorschlag `internal/adapter/driving/cli/jsonenvelope.go`),
@@ -443,23 +466,393 @@ Codes außerhalb).
 Spec-konsistente Folgepflicht: jeder Folge-Slice trägt **seine**
 Checks in der Registry nach, der Helper rejected sonst.
 
+## T0-Outcomes
+
+Acht Sub-Decisions vor `next/`-Übergang festgezurrt — die acht
+Fragen aus [§T0-Discovery](#t0-discovery-vor-next-übergang) mit
+Begründung. Layout analog Cluster-Slice §T0-Outcomes.
+
+### T0-(a) Envelope-Lokation: Single-File `cli/jsonenvelope.go`
+
+**Entscheidung:** Neuer Wire-Type `cliJSONEnvelope` lebt als
+**Single-File** in
+`internal/adapter/driving/cli/jsonenvelope.go`. Kein eigenes
+Sub-Package.
+
+**Begründung:** Der Envelope-Type ist kompakt (Minimal-Felder
+`Status`/`Command`/`Subcommand`/`Diagnostics`/`ExitCode` +
+Voll-Felder `DryRun`/`Diff`/`PlannedFiles`/`Changes` +
+`Data` — ~10 Felder mit `json`-Tags). Ein Sub-Package würde
+einen leeren `package`-Wrapper kosten ohne Symbol-Reuse-Gewinn.
+Test-Helper-Reuse lebt architektur-sauber im **parallelen**
+Sub-Package `jsontestutil/` aus T0-(b) — Wire-Type-Heimat und
+Test-Helper-Heimat sind bewusst getrennt, ohne dass der
+Envelope-Type selbst ein eigenes Package braucht. Repo-Vorbild:
+[`cli/template.go`](../../../../internal/adapter/driving/cli/template.go)
+trägt `templateJSON` lokal — analoge Disziplin.
+
+### T0-(b) Test-Helper-Form: Sub-Package `jsontestutil/` mit Go-Code-Regeln und Options-Pattern
+
+**Entscheidung:** Neues Sub-Package
+`internal/adapter/driving/cli/jsontestutil/` mit zwei Public-
+API-Funktionen:
+
+```go
+func AssertMinimalEnvelope(t testing.TB, raw []byte, opts ...AssertOption)
+func AssertFullEnvelope(t testing.TB, raw []byte, opts ...AssertOption)
+```
+
+`AssertOption`-Funktionen:
+
+- `WithCommand(string)` — pinnt den erwarteten `command`-Wert
+  (z. B. `"doctor"`); rejected `command`-Mismatch.
+- `WithSubcommand(string)` — pinnt `subcommand`-Pflichtwert für
+  `command ∈ {template, config}`.
+- `WithExpectedCodes(...string)` — pinnt, **welche** Codes der
+  konkrete Test-Output enthalten muss (Subset-Pin gegen den
+  Helper-Default-Set aus T0-(h) `DefaultAllowedCodes`). **Keine**
+  Allowlist-Erweiterung — die globale Code-Allowlist bleibt
+  exklusiv `DefaultAllowedCodes`, und neue Subcommand-Codes
+  müssen dort **plus** in der Markdown-Doku eingetragen werden
+  (siehe T0-(h) Single-Source-of-Truth-Disziplin). Diese Option
+  ist nur Pin-Hilfe für konkrete Test-Fälle, kein Schema-Bypass.
+- `WithExitCode(int)` — pinnt erwarteten `exitCode`-Wert
+  (häufiger Pin-Wunsch).
+
+Schema-Regeln werden als **Go-Code** geprüft, **kein** embedded
+JSON-Schema, **kein** zusätzlicher Dep.
+
+**Begründung:** Die heutige `go.mod`-Disziplin (4 Deps total)
+verbietet leichtfertige Dep-Additionen. Ein JSON-Schema-Validator
+(`github.com/santhosh-tekuri/jsonschema/v6` o. ä.) würde die
+Dep-Liste auf 5 anheben — der Drift-Schutz, den der Validator
+bringt, wandert pragmatisch in den Helper-Code (`AssertMinimalEnvelope`
+prüft die Lastenheft-§1841-Regeln direkt mit `t.Errorf`-Calls).
+Falls die Code-Regeln später wirklich driften, ist der Wechsel
+auf embedded Schema ein lokaler Refactor — keine Architektur-
+Berührung in den Folge-Slices.
+
+Options-Pattern statt Konstruktor-Vielfalt: jeder Folge-Slice
+trägt unterschiedliche Pins (`add` braucht `WithCommand("add")`,
+`config get` braucht `WithSubcommand("get")`), die Variadik
+hält die Helper-API klein. **Bewusster Verzicht** auf eine
+`WithAllowedCodes`-Option, die das globale `DefaultAllowedCodes`
+erweitern würde — die globale Map ist exklusive Source-of-Truth
+gemäß T0-(h), Folge-Slice-Erweiterungen passieren nur dort
+(Single-Source-Disziplin).
+
+### T0-(c) `Data`-Inhalt für `doctor --json`: kein `Data`-Field (Option 3)
+
+**Entscheidung:** `doctor --json` setzt **kein** `Data`-Field
+im Envelope. Alle Doctor-Informationen liegen im Pflicht-
+`diagnostics[]`-Array.
+
+**Begründung:** `diagnostics[]` trägt nach dem Mapping aus T5
+bereits `level`/`code`/`message`/`file`/`hint` pro Check —
+zusätzliche `Data`-Felder wären Duplikation. Das Envelope-
+Struct trägt `Data any` mit `omitempty`-Tag (Voll-Schema-Field
+für andere read-only-Subcommands wie `up`/`down`-Compose-Status,
+`template list`-Array nach Platz-9-Migration). Bei `doctor`
+bleibt es nil → nicht im JSON.
+
+**Pattern-Disziplin für die 8 weiteren Folge-Slices (Review-Finding L2):**
+`Data any` als Wire-Type-Field verliert jede Compile-Time-
+Garantie. Pattern-Vorbild-Last dieses Slices: jeder Folge-Slice,
+der `Data` setzt, definiert dafür einen **subcommand-spezifischen
+Wire-Type** mit dedizierten `json`-Tags (z. B. `type
+upStatusData struct { Services []serviceStatus \`json:"services"\` }`
+für `slice-v1-cli-json-dry-run-up-down`) und übergibt eine
+**typisierte Instanz** (`Data: upStatusData{...}`) — **kein**
+`map[string]any`, **keine** Inline-Anonym-Structs. Acceptance-
+Helper kann den Sub-Type via `json.RawMessage`-Re-Marshal pinnen,
+falls strikter Schema-Pin gewünscht.
+
+### T0-(d) Envelope-Struktur: ein Typ mit Pointer-Wrapping auf Voll-Boolean-Feldern (Option 1)
+
+**Entscheidung:** Ein Typ `cliJSONEnvelope`, Modus-Unterscheidung
+über Pointer/Slice-Nullbarkeit plus zwei Konstruktoren:
+
+```go
+type cliJSONEnvelope struct {
+    Status       string           `json:"status"`
+    Command      string           `json:"command"`
+    Subcommand   string           `json:"subcommand,omitempty"`
+    DryRun       *bool            `json:"dryRun,omitempty"`
+    Diff         *bool            `json:"diff,omitempty"`
+    PlannedFiles []plannedFile    `json:"plannedFiles,omitempty"`
+    Changes      []changeEntry    `json:"changes,omitempty"`
+    Diagnostics  []diagnosticItem `json:"diagnostics"`
+    ExitCode     int              `json:"exitCode"`
+    Data         any              `json:"data,omitempty"`
+}
+
+func newMinimalEnvelope(command, subcommand string, diags []diagnosticItem, exitCode int) cliJSONEnvelope
+func newFullEnvelope(command, subcommand string, dryRun, diff bool, planned []plannedFile, changes []changeEntry, diags []diagnosticItem, exitCode int) cliJSONEnvelope
+```
+
+`Diagnostics` trägt **kein** `omitempty` — leeres Array muss
+laut Spec §1833 als `[]` serialisiert werden, nicht weggelassen.
+Im Read-only-Pfad wird `newMinimalEnvelope` verwendet → `DryRun`/
+`Diff`-Pointer bleiben nil, `PlannedFiles`/`Changes`-Slices
+bleiben nil → alle vier Felder fallen via `omitempty` aus dem
+JSON. Im Modifying-Pfad setzt `newFullEnvelope` `*bool`-Pointer
+auf `&dryRun`/`&diff` und Slices auf `[]plannedFile{...}` /
+`[]changeEntry{...}` (auch leere als `make([]X, 0)`, damit der
+JSON-Marshaller `[]` schreibt statt das Feld wegzulassen).
+
+**Begründung:** Option 2 (zwei separate Wire-Typen) würde Symbol-
+und Test-Helper-Duplikation erzeugen, ohne semantischen Gewinn
+— der Spec-Schnitt aus §1841/§1842 ist klar genug, dass ein
+Typ mit zwei Konstruktoren die Disziplin trägt. Die Pointer-Wahl
+auf `*bool` ist Go-typisch (gleicher Trick wie z. B. `json.RawMessage`
+für optionale Boolean-Felder) und macht die `omitempty`-Semantik
+trivial. Der Helper-Split aus T0-(b) pinnt: `AssertMinimalEnvelope`
+rejected `dryRun`/`diff`/`plannedFiles`/`changes` im JSON-Output
+(durch reines String-Suchen oder `gjson`-freies Parsing als
+`map[string]any` und Key-Check), `AssertFullEnvelope` verlangt
+alle vier.
+
+**Anti-Drift-Pin gegen `*bool → bool`-Refactor (Review-Finding M1):**
+Ein späterer Folge-Slice könnte versucht sein, `*bool` durch
+`bool` mit `omitempty` zu ersetzen ("sieht harmloser aus") —
+das würde `dryRun:false`/`diff:false` aus dem JSON werfen und
+Spec §326 Required-Set verletzen (`["status", "command",
+"dryRun", "diff", "plannedFiles", "changes", "diagnostics",
+"exitCode"]` — alle acht pflicht im modifying-Pfad, auch wenn
+Wert `false`). Drei Schutz-Maßnahmen in T2:
+
+1. **Struct-Kommentar am Envelope-Type:** `// IMPORTANT: *bool
+   (not bool) — Spec §326 requires dryRun/diff in modifying-mode
+   even when value is false. Plain bool + omitempty would drop
+   false from JSON.`
+2. **Positive-Marshal-Pin:** Unit-Test pinnt, dass
+   `newFullEnvelope(..., dryRun=false, diff=false, ...)`
+   die JSON-Repräsentation `"dryRun":false,"diff":false`
+   produziert (nicht weggelassen).
+3. **`AssertFullEnvelope`-Required-Check:** der Voll-Helper
+   prüft beim ersten Acceptance-Lauf (im `add`-Folge-Slice)
+   das Spec §326 Required-Set komplett — bricht, wenn eines
+   der acht Felder im JSON fehlt.
+
+### T0-(e) `--json` × `--quiet` × `--strict`: `--quiet` ist No-op, `--strict` bleibt Exit-Code-Modifier
+
+**Entscheidung:** Im JSON-Modus ignoriert die Logik den
+`--quiet`-Flag-State semantisch. `--strict` bleibt unverändert
+ein Exit-Code-Modifier (Warn-Fund unter `--strict` → Exit-Code 11),
+JSON-Body identisch zu `--json` ohne `--strict`.
+
+**Begründung:** `--quiet` filtert heute OK-Items aus dem
+Plaintext-Output. Im JSON-Modus sind OK-/Info-Items bereits
+durch den Spec-§1834-Filter (`level ∈ {warn, error}`)
+ausgeschlossen — `--quiet` hätte keinen zusätzlichen Filter-
+Effekt mehr. Die Pin-Test-Disziplin in T5 erzwingt das:
+`u-boot doctor --quiet --json` produziert einen **semantisch
+identischen** Envelope wie `u-boot doctor --json` —
+gleicher `status`, gleiche `diagnostics`-Reihenfolge mit
+gleichen `code`/`level`-Paaren, gleicher `exitCode`. Die
+Pin-Form ist bewusst **nicht** byte-identisch (Review-Finding
+M4): sobald ein zukünftiger Doctor-Check zeitabhängige
+Information in `message` einbettet (Daemon-Version, Plugin-
+Version), wäre der byte-identische Vergleich brüchig und
+würde zur Aufweichung verleiten. Die semantische Form trägt
+den intendierten Drift-Schutz robuster und bleibt scharf
+gegen versehentliche Quiet-Filter-Einführung.
+
+`--strict` bleibt orthogonal: die Severity-→-Exit-Code-Logik in
+[`doctor.go`](../../../../internal/adapter/driving/cli/doctor.go)
+bleibt unverändert, T5 setzt nur das Pin: `u-boot doctor
+--strict --json` mit Warn-Fund liefert `status: "warn"`,
+`exitCode: 11` (statt `0` im non-strict-Pfad).
+
+### T0-(f) Schema-Vertrag-Doku in T1 dieses Slices mitliefern
+
+**Entscheidung:** Cluster-T1 (`docs/user/cli-json-output.md`)
+wird als T1-Tranche dieses Slices mitgeliefert, nicht als
+eigener Cluster-Vor-Schritt.
+
+**Begründung:** Der Test-Helper aus T2 muss gegen den verbatim
+zitierten Schema-Wortlaut entwickelt werden — ein vorgelagerter
+eigener Cluster-T1-Schritt würde nur die Kosten einer separaten
+Tranche-Plan-Pflege bringen, ohne Reihenfolge-Vorteil. T1 in
+diesem Slice baut Minimal-Schema (§1823-1842) und Voll-Schema
+(§322-417) als zwei klar getrennte Sektionen auf; spätere
+Folge-Slices erweitern die Code-Registry-Sektion, lassen die
+Schema-Sektionen unverändert.
+
+**Cluster-T1-Doppelzählung vermeiden (Review-Finding L1):**
+Der Cluster-Slice führt T1 noch in seiner eigenen Lieferpflicht-
+Tabelle (`docs/plan/planning/in-progress/slice-v1-cli-json-dry-run.md`
+§Tranchen T1). Pflicht-Nachzug **in diesem Slice-Closure (T6)**:
+Cluster-Slice-T1-Zelle muss eine „geliefert via Doctor-Slice
+(`slice-v1-cli-json-dry-run-doctor`)"-Notiz tragen, damit
+Cluster-T_close-Reviewer den T1-Schritt nicht doppelt zählt
+oder vergeblich nach einem separaten Cluster-T1-Commit sucht.
+
+### T0-(g) Reject-Mechanik: zentrale Allowlist mit `PersistentPreRunE` (Option 2)
+
+**Entscheidung:** Reject-Pfad lebt in `cli/root.go` als
+`PersistentPreRunE` am Root-Command. Eine Allowlist-Map listet
+die migrierten Subcommand-Formen per Cobra-`cmd.CommandPath()`:
+
+```go
+var jsonAllowlist = map[string]bool{
+    "u-boot doctor":             true,  // dieser Slice
+    "u-boot template list":      true,  // dieser Slice (Flag-Schnitt, Carveout)
+    // weitere Einträge pro Folge-Slice-Merge
+}
+```
+
+`PersistentPreRunE` prüft: wenn Root-Flag `--json` gesetzt und
+`cmd.CommandPath()` nicht in `jsonAllowlist` → Reject mit
+Exit-Code 2 und Fehlermeldung
+`JSON-Ausgabe für '<cmd.CommandPath()>' ist noch nicht
+implementiert (siehe slice-v1-cli-json-dry-run-<sub>).`
+
+**Subcommand-Form-Inventar (13 Formen):**
+
+| Spec-Enum (§338) | Forms | Heute |
+| --- | --- | --- |
+| `init` | 1 | Reject |
+| `add` | 1 | Reject |
+| `remove` | 1 | Reject |
+| `up` | 1 | Reject |
+| `down` | 1 | Reject |
+| `doctor` | 1 | **Migrate** (dieser Slice) |
+| `logs` | 1 | Reject |
+| `generate` | 1 | Reject |
+| `config` | 3 (bare, `get`, `set`) | Reject (alle 3) |
+| `template` | 2 (bare, `list`) | bare: Reject; `list`: **Migrate** (Flag-Schnitt, Carveout) |
+
+Heute (nach diesem Slice): 2 Migrate + 11 Reject = 13 Formen
+in der Allowlist. **Cluster-T_close-Pflicht-Check:** Allowlist
+enthält **alle 13** Formen (alle Reject-Pfade durch Folge-Slices
+abgebaut), **dann** wird die Allowlist-Mechanik komplett
+entfernt (`PersistentPreRunE` raus, `jsonAllowlist`-Map raus).
+Pflicht-Pin im Cluster-Close-Slice.
+
+**Bare-`template`-/bare-`config`-Klärung:** beide sind in
+Cobra heute `Args: cobra.NoArgs` ohne `RunE` — sie drucken
+Help, wenn ohne Subcommand aufgerufen. `u-boot config --json`
+und `u-boot template --json` haben **kein** Spec-vorgesehenes
+Output-Format (Spec §420 fordert `subcommand`-Pflicht bei
+`command ∈ {template, config}`); sie rejecten daher bis zum
+jeweiligen Folge-Slice (`slice-v1-cli-json-dry-run-config`/
+`-template`), der die `subcommand`-Pflicht-Auflösung für
+bare-Form trifft (Kandidaten gemäß Cluster-Plan §96-107:
+`"list"`, `"show"`, explizit `""`).
+
+**Anti-Drift-Pin gegen `cmd.Use`-Umbenennungen (Review M2):**
+T2 trägt einen Cobra-Tree-Walk-Test, der über `rootCmd.Commands()`
+rekursiv läuft und für jeden Leaf-Command (plus Help-Parent-
+Commands wie bare `template`/`config`) den `cmd.CommandPath()`
+gegen den erwarteten Map-Key-String matched. Bricht, wenn ein
+späterer Slice `cmd.Use` ändert (z. B. Synonym oder Spec-Drift),
+ohne den Map-Key mitzuziehen — der Test zeigt sofort, welcher
+Pfad-String aus der Allowlist gelaufen ist.
+
+**Begründung:** Option 1 (PreRunE pro Subcommand) würde 11
+separate Wirings bedeuten — vergessens-anfällig, und der
+Reviewer für jeden Folge-Slice müsste die korrekte Entfernung
+des PreRunE-Hooks prüfen. Option 3 (Reject im Envelope-Builder)
+ist implizit/leise und schwer testbar. Option 2 ist der zentrale
+Drift-Anker: ein einziger Map-Eintrag pro Folge-Slice, ein
+einziger Test-Code-Pfad. Map-Key = `cmd.CommandPath()` ist
+Cobra-idiomatisch (vgl.
+[`cmd.CommandPath()`](https://pkg.go.dev/github.com/spf13/cobra#Command.CommandPath))
+und liefert für `config get` den vollen Pfad `u-boot config get`
+— die drei `config`-Formen sind damit individuell adressierbar
+und werden vom `config`-Folge-Slice in einem Merge zu drei
+Allowlist-Einträgen. Der Cobra-Tree-Walk-Anti-Drift-Pin schließt
+das Drift-Restrisiko gegen `Use`-Renames.
+
+### T0-(h) `diagnostics[].code`-Quelle: Tool-interne Codes + Registry (Option 3)
+
+**Entscheidung:** `diagnostics[].code` trägt für Doctor die
+heutigen tool-internen `Diagnostic.ID`-Werte (z. B.
+`"docker.installed"`, `"docker.reachable"`,
+`"uboot.yaml.valid"`) unverändert durch. Eine Code-Registry
+in `docs/user/cli-json-output.md` §Code-Registry dokumentiert
+die Bedeutung jedes Codes. Eine Go-Map in
+`internal/adapter/driving/cli/jsontestutil/coderegistry.go` ist
+die Source-of-Truth für den Helper:
+
+```go
+var DefaultAllowedCodes = map[string]string{
+    "fs.write-permissions":            "doctor: Schreib-Permission im Working Directory",
+    "git.installed":                   "doctor: Git-Binary verfügbar",
+    "docker.installed":                "doctor: Docker-Binary verfügbar",
+    "docker.reachable":                "doctor: Docker-Daemon erreichbar",
+    "docker.compose.installed":        "doctor: Compose-Plugin verfügbar",
+    "uboot.yaml.valid":                "doctor: u-boot.yaml syntaktisch valide",
+    "compose.yaml.valid":              "doctor: compose.yaml syntaktisch valide",
+    "devcontainer.json.valid":         "doctor: devcontainer.json syntaktisch valide",
+    "devcontainer.dockerfile.valid":   "doctor: devcontainer/Dockerfile parsebar",
+    "services.enabled-key":            "doctor: u-boot.yaml services-Block konsistent",
+    "devcontainer.forwardPorts.consistency": "doctor: devcontainer.json forwardPorts konsistent",
+    "devcontainer.features.allowlist": "doctor: devcontainer features auf Allowlist",
+    "devcontainer.features.drift":     "doctor: devcontainer features ohne Drift",
+}
+```
+
+`AssertMinimalEnvelope` lädt diese Map plus optionale
+`WithAllowedCodes(...)`-Erweiterungen aus T0-(b) und rejected
+`diagnostics[].code`-Werte außerhalb.
+
+**Drift-Disziplin (drei aktive Drift-Gates, Review-Finding H2):**
+Die Go-Map ist die Source-of-Truth; die Markdown-Sektion ist
+spec-pflichtige Doku (§1835). Drei automatische Gates in T2:
+
+1. **Map ↔ Code-Realität-Pin:** Unit-Test prüft, dass jede
+   `checkID*`-Konstante aus
+   [`doctor.go:74-114`](../../../../internal/hexagon/application/doctor.go)
+   einen Map-Eintrag hat. Bricht, sobald ein neuer Doctor-Check
+   im Code ohne Map-Eintrag landet.
+
+2. **Map ↔ Markdown-Roundtrip-Pin:** Unit-Test parst die
+   Code-Registry-Sektion in `docs/user/cli-json-output.md` mit
+   einem schlanken Markdown-Tabellen-Regex
+   (`^\|\s*\` ``…`` `\s*\|\s*(.+?)\s*\|$` o. ä., ~20 LOC, keine
+   neue Dep) und vergleicht die Code-Set-Symmetrie gegen die
+   Go-Map: jeder Map-Key hat eine Markdown-Zeile mit identischer
+   Beschreibung; jede Markdown-Zeile hat einen Map-Eintrag.
+   Bricht in **beide** Drift-Richtungen.
+
+3. **Helper-Reject im Acceptance-Pfad:** `AssertMinimalEnvelope`
+   rejected jeden `diagnostics[].code`, der nicht in
+   `DefaultAllowedCodes` steht (Folge-Slice-Acceptance-Test
+   schlägt sofort fehl, **nicht** erst im Cluster-T_close).
+
+Gate 1+2 laufen in `make test`; Gate 3 läuft per Subcommand-
+Acceptance-Test. **Kein** `//go:generate`-Pfad — der Roundtrip-
+Test ist kürzer als ein Generator (~20 LOC vs. ~30 LOC plus
+`make lint`-Wiring) und gibt sofort einen Failure mit Zeile statt
+einem `git diff`-Stub im CI.
+
+Spec-konsistente Folgepflicht für jeden Folge-Slice: seine
+Check-IDs landen in der Map **und** in der Doku, im selben
+Slice-Closure-Commit — sonst bricht Gate 2 (Markdown-Roundtrip)
+oder Gate 3 (Helper-Reject) im selben PR-Lauf.
+
 ## Tranchen (vorgeschlagen)
 
 | T | Inhalt | LOC (Schätzung) |
 | - | ------ | --------------- |
 | T0 | **Discovery + Sub-Decisions** aus §T0-Discovery klären (acht Sub-Decisions, inkl. T0-(g) Reject-Mechanik und T0-(h) `diagnostics[].code`-Quelle). Entscheidungen mit Begründung in einem `T0-Outcomes`-Block dokumentieren. | — (Plan-Arbeit) |
 | T1 | **Schema-Vertrag-Doku.** `docs/user/cli-json-output.md` anlegen: Minimalkontrakt (`LH-NFA-USE-004` §1823-1842) und Voll-Schema (`LH-FA-CLI-007` §322-417) verbatim getrennt zitiert; **Code-Registry-Sektion** für Doctor-Checks (gemäß T0-(h)); Envelope-Lokation benennen; Minimal-vs.-Voll-Diff klargestellt. README EN+DE bekommt einen Verweis-Eintrag. (Cluster-T1; per T0-(f) hier mitgeliefert.) | ~120 |
-| T2 | **Envelope + Helper-Split.** `cliJSONEnvelope`-Typ (Minimal-Felder Pflicht, Voll-Felder `omitempty` — gemäß T0-(d)) plus zwei Helper `AssertMinimalEnvelope` und `AssertFullEnvelope`. Unit-Tests beider Helper (positive + negative Cases — fehlende Pflichtfelder, ungültiges `status`, `level: "ok"`-Reject, Voll-Schema-Feld im Minimal-Pfad-Reject, undokumentierter Code-Reject). | ~180 |
-| T3 | **Root-PersistentFlag `--json` + Reject-Allowlist** am Cobra-Root registrieren plus `PersistentPreRunE`-Reject für nicht-migrierte Subcommands (Mechanik gemäß T0-(g)). 10 Reject-Pin-Tests, je einer pro nicht-migrierter Subcommand-Form (`init`, `add`, `remove`, `up`, `down`, `logs`, `generate`, `config`, `config get`, `config set`; `template list` siehe T4 — kein Reject). App-Struktur-Field für den Flag-State. | ~80 |
+| T2 | **Envelope + Helper-Split + Drift-Gates.** `cliJSONEnvelope`-Typ (Minimal-Felder Pflicht, Voll-Felder `omitempty` via `*bool`/nil-Slices — gemäß T0-(d), inkl. Anti-Drift-Struct-Kommentar gegen `*bool → bool`-Refactor) plus zwei Helper `AssertMinimalEnvelope` und `AssertFullEnvelope` mit Options (`WithCommand`, `WithSubcommand`, `WithExpectedCodes`, `WithExitCode`). **Pin-Tests:** (i) Helper positive/negative (fehlende Pflichtfelder, ungültiges `status`, `level: "ok"`/`level: "info"`-Reject, Voll-Schema-Feld im Minimal-Pfad-Reject, undokumentierter Code-Reject); (ii) Marshal-Pin `newFullEnvelope(..., dryRun=false, diff=false, ...)` produziert `"dryRun":false,"diff":false` (nicht weggelassen — M1-Schutz); (iii) **Drift-Gate 1** Map ↔ `doctor.go:74-114`-Vollständigkeit; (iv) **Drift-Gate 2** Map ↔ Markdown-Roundtrip-Parser. | ~220 |
+| T3 | **Root-PersistentFlag `--json` + Reject-Allowlist + Cobra-Tree-Walk-Pin** am Cobra-Root registrieren plus `PersistentPreRunE`-Reject für nicht-migrierte Subcommand-Formen (Mechanik gemäß T0-(g)). **11 Reject-Pin-Tests**, je einer pro nicht-migrierter Form (`init`, `add`, `remove`, `up`, `down`, `logs`, `generate`, `config`, `config get`, `config set`, `template` (bare); `template list` siehe T4 — kein Reject). **Anti-Drift-Pin** Cobra-Tree-Walk: rekursiver `rootCmd.Commands()`-Traversal vergleicht jeden Leaf-Path mit erwartetem Map-Key (M2-Schutz gegen `cmd.Use`-Renames). App-Struktur-Field für den Flag-State. | ~110 |
 | T4 | **`template list`-Schnitt + Carveouts-Eintrag.** Lokales Flag entfernen, `runTemplateList` liest Root-Flag. Zwei Pin-Tests grün (`u-boot template list --json` + `u-boot --json template list` → gleicher Output). Carveouts-Eintrag in `carveouts.md` §Temporäre Carveouts: `template list --json` heute nicht Minimalkontrakt-konform, Re-Trigger `slice-v1-cli-json-dry-run-template`. | ~40 |
-| T5 | **`doctor --json`-Pfad.** Envelope-Befüllung aus `domain.DiagnosticReport` mit `SeverityOK`- + `SeverityInfo`-Filter (kein `level: "ok"`/`level: "info"`-Eintrag), `status`-Mapping (höchstes vorhandenes Severity-Level), `exitCode` konsistent mit `ErrDoctorFailures`. Drei Acceptance-Tests (All-OK mit `diagnostics: []`, Warn-Fall, Error-Fall) via `jsontestutil.AssertMinimalEnvelope`. `--quiet`/`--strict`-Interaktion gemäß T0-(e), **inkl. Pin-Test `u-boot doctor --quiet --json` liefert byte-identischen Envelope wie `u-boot doctor --json`** (No-op-Beleg — sonst rutscht eine vergessene Quiet-Filterung durch, weil der Schema-Helper nur `level`-Werte rejected, nicht ein ungewollt gekürztes `diagnostics[]`). Doctor-Check-Codes in Code-Registry aus T1 ergänzt. | ~140 |
-| T6 | **Closure.** CHANGELOG `## [Unreleased]` Added-Eintrag (Envelope + Helper-Split + Root-Flag + Reject-Allowlist + `doctor --json` + `template list`-Flag-Schnitt + Carveout). roadmap.md v0.4.0-Tabelle: Cluster-Slice-Zelle aktualisiert (Doctor done, nächster Schritt `add`). Slice-File `open/` → `done/` mit Tranchen+Commit-Tabelle. `make docs-check` grün. | — (Doku) |
+| T5 | **`doctor --json`-Pfad.** Envelope-Befüllung aus `domain.DiagnosticReport` mit `SeverityOK`- + `SeverityInfo`-Filter (kein `level: "ok"`/`level: "info"`-Eintrag), `status`-Mapping (höchstes vorhandenes Severity-Level), `exitCode` konsistent mit `ErrDoctorFailures`. Drei Acceptance-Tests (All-OK mit `diagnostics: []`, Warn-Fall, Error-Fall) via `jsontestutil.AssertMinimalEnvelope`. `--quiet`/`--strict`-Interaktion gemäß T0-(e), **inkl. Pin-Test `u-boot doctor --quiet --json` liefert semantisch identischen Envelope wie `u-boot doctor --json`** (gleiche `status`/`exitCode`, gleiche `diagnostics`-Reihenfolge mit gleichen `code`/`level`-Paaren — bewusst nicht byte-identisch, M4-Schutz gegen brüchige Pins bei zeitabhängigen Messages). Doctor-Check-Codes in Code-Registry aus T1 ergänzt. | ~140 |
+| T6 | **Closure.** CHANGELOG `## [Unreleased]` Added-Eintrag (Envelope + Helper-Split + Drift-Gates + Root-Flag + Reject-Allowlist + Cobra-Tree-Walk-Pin + `doctor --json` + `template list`-Flag-Schnitt + Carveout). **roadmap.md v0.4.0-Tabelle:** Cluster-Slice-Zelle aktualisiert (Doctor done, nächster Schritt `add`). **Cluster-Slice-T1-Zelle** in `docs/plan/planning/in-progress/slice-v1-cli-json-dry-run.md` mit „geliefert via `slice-v1-cli-json-dry-run-doctor`"-Notiz versehen (L1-Konsistenz). Slice-File `open/` → `done/` mit Tranchen+Commit-Tabelle. `make docs-check` grün. | — (Doku) |
 
-LOC-Schätzung Folge-Slice: ~560 LOC — am oberen Ende der vom
-Cluster-Slice gesetzten 200..600-Bandbreite, weil dieser Slice
-neben dem Doctor-Pfad gleichzeitig den Minimal-Helper, den
-Voll-Helper-Stub, die Reject-Allowlist und die Code-Registry-
-Doku etabliert (Pattern-Vorbild-Last).
+LOC-Schätzung Folge-Slice: ~630 LOC — leicht über der vom
+Cluster-Slice gesetzten 200..600-Bandbreite. Treiber des Anstiegs
+gegenüber dem ursprünglichen Stub (~560): die nach dem T0-Review
+ergänzten Drift-Gates (Map↔Markdown-Roundtrip-Parser, Cobra-Tree-
+Walk-Pin, Marshal-Pin) plus 11 statt 10 Reject-Pin-Tests. Die
+Bandbreiten-Überschreitung ist begründet (Pattern-Vorbild-Last für
+8 weitere Folge-Slices); Cluster-Plan §LOC-Bandbreite ist deshalb
+**keine** Hard-Rule.
 
 ## Out of Scope
 
