@@ -13,11 +13,11 @@
 > (§T0-Outcomes — 5 Sub-Decisions plus Mutations-Matrix-Pre-Scan);
 > in `in-progress/`, Folge-Slice 1/9
 > [`slice-v1-cli-json-dry-run-doctor`](../done/slice-v1-cli-json-dry-run-doctor.md)
-> **done** ✅ (T0-T5 geliefert, DoD-Hashes im Slice-File).
-> Nächster Schritt: Spawn Folge-Slice 2/9
-> `slice-v1-cli-json-dry-run-add` (T0-(e) Platz 2; etabliert das
-> modifying-Surface-Vorbild mit `RecordingFileSystem` und
-> `AssertFullEnvelope`-Erstnutzung).
+> **done** ✅, Folge-Slice 2/9
+> [`slice-v1-cli-json-dry-run-add`](../open/slice-v1-cli-json-dry-run-add.md)
+> in `open/` (Stub gespawnt). Nächster Schritt: T0-Discovery
+> des Add-Stubs (8 Sub-Decisions, inkl. Mutations-Matrix und
+> Read-after-Write-Stichprobe).
 
 ## Auslöser
 
