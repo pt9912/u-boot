@@ -11,7 +11,8 @@
 > definiert Reihenfolge + geteilte Konventionen für die
 > Per-Command-Folge-Slice-Serie. T0 ✅ festgezurrt
 > (§T0-Outcomes — 5 Sub-Decisions plus Mutations-Matrix-Pre-Scan);
-> `next/`-Übergang frei, danach Spawn der ersten Per-Command-Slices.
+> in `next/`, nächster Schritt ist Spawn der ersten
+> Per-Command-Slices und Übergang nach `in-progress/`.
 
 ## Auslöser
 
