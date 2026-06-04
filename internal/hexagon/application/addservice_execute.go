@@ -662,7 +662,14 @@ func (s *AddServiceService) runExecutePlan(baseDir string, plan servicePlan, ep 
 			mode = defaultFileMode
 		}
 		if err := s.fs.WriteFile(filepath.Join(baseDir, w.Path), w.Body, mode); err != nil {
-			return driving.AddServiceResponse{}, fmt.Errorf("write %s: %w", w.Path, err)
+			// slice-v1-cli-json-dry-run-add T0-(j): wrap the raw FS
+			// error so cli.ExitCode maps it to 14 (LH-FA-CLI-006
+			// technical persistence) via [driving.ErrAddFileSystem].
+			// The Add() wrapper still maps recorder.Captured() into
+			// the response on this error path, so the CLI envelope
+			// shows the calls captured up to the failure point.
+			return driving.AddServiceResponse{},
+				fmt.Errorf("write %s: %w: %w", w.Path, driving.ErrAddFileSystem, err)
 		}
 		changed = append(changed, w.Path)
 	}
@@ -672,7 +679,14 @@ func (s *AddServiceService) runExecutePlan(baseDir string, plan servicePlan, ep 
 			mode = defaultFileMode
 		}
 		if err := s.fs.WriteFile(filepath.Join(baseDir, w.Path), w.Body, mode); err != nil {
-			return driving.AddServiceResponse{}, fmt.Errorf("write %s: %w", w.Path, err)
+			// slice-v1-cli-json-dry-run-add T0-(j): wrap the raw FS
+			// error so cli.ExitCode maps it to 14 (LH-FA-CLI-006
+			// technical persistence) via [driving.ErrAddFileSystem].
+			// The Add() wrapper still maps recorder.Captured() into
+			// the response on this error path, so the CLI envelope
+			// shows the calls captured up to the failure point.
+			return driving.AddServiceResponse{},
+				fmt.Errorf("write %s: %w: %w", w.Path, driving.ErrAddFileSystem, err)
 		}
 		changed = append(changed, w.Path)
 	}

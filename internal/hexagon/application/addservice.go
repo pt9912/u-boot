@@ -181,6 +181,7 @@ func (s activeArtifactsStatus) needsRepair() bool {
 // addservice_detect.go.
 type AddServiceService struct {
 	fs        driven.FileSystem
+	fsFactory func(driving.AddPreviewMode) (driven.FileSystem, driven.RecorderPort)
 	yaml      driven.YAMLCodec
 	confirmer driven.Confirmer
 	logger    driven.Logger
@@ -209,6 +210,87 @@ func NewAddServiceService(fs driven.FileSystem, yaml driven.YAMLCodec, confirmer
 	return &AddServiceService{fs: fs, yaml: yaml, confirmer: confirmer, logger: logger}
 }
 
+// NewAddServiceServiceWithFactory is the slice-v1-cli-json-dry-run-add
+// T0-(e) Option 4 constructor: instead of a fixed [driven.FileSystem],
+// the service receives a factory that picks the FS per
+// [driving.AddPreviewMode]. The Composition-Root in `cmd/uboot/main.go`
+// wires PreviewNone → production FS, PreviewDryRun/PreviewAndApply →
+// recording FS (with the matching passthrough switch).
+//
+// [Add] reads the mode from [driving.AddServiceRequest.PreviewMode],
+// asks the factory for a fresh (fs, recorder) tuple, swaps the
+// service-level [fs] field for the request's duration (defer-restored
+// so legacy code paths still find the bootstrap FS), and — if the
+// recorder is non-nil — maps its [driven.RecorderPort.Captured]
+// output into [driving.AddServiceResponse.PlannedFiles] on the way
+// out.
+//
+// Legacy callers (`NewAddServiceService(fs, ...)`) keep working
+// unchanged: the factory stays nil and [Add] falls back to the
+// stored [fs] field, ignoring PreviewMode (the recorder is nil so
+// PlannedFiles stays empty as well).
+func NewAddServiceServiceWithFactory(
+	fsFactory func(driving.AddPreviewMode) (driven.FileSystem, driven.RecorderPort),
+	yaml driven.YAMLCodec,
+	confirmer driven.Confirmer,
+	logger driven.Logger,
+) *AddServiceService {
+	if logger == nil {
+		logger = noopLogger{}
+	}
+	if confirmer == nil {
+		confirmer = noopConfirmer{}
+	}
+	// Bootstrap fs from the PreviewNone branch so methods that read
+	// s.fs outside of an Add() call (today: none, but slice-followup
+	// scope might add some) see a valid adapter even before any
+	// request lands.
+	bootstrapFS, _ := fsFactory(driving.PreviewNone)
+	return &AddServiceService{
+		fs:        bootstrapFS,
+		fsFactory: fsFactory,
+		yaml:      yaml,
+		confirmer: confirmer,
+		logger:    logger,
+	}
+}
+
+// selectFS picks the per-request FS pair: if the factory is wired
+// (Composition-Root path) it returns the mode-specific tuple;
+// otherwise the legacy [fs] field with a nil recorder (PreviewMode
+// is ignored — the use case keeps writing to production).
+func (s *AddServiceService) selectFS(mode driving.AddPreviewMode) (driven.FileSystem, driven.RecorderPort) {
+	if s.fsFactory == nil {
+		return s.fs, nil
+	}
+	return s.fsFactory(mode)
+}
+
+// mapCaptureToPlannedFiles converts the driven recorder's mutation
+// log into the driving-port wire-shape consumed by the CLI adapter.
+// Returns nil for an empty capture so the JSON envelope renders
+// `plannedFiles` omitted (slice T0-(d) — Voll-Schema needs the field
+// present, but the CLI adapter explicitly populates it; an empty
+// capture maps to nil here and the adapter chooses its own form).
+//
+// Hunks stay nil — the CLI-side diff renderer (T2) fills them from
+// NewContent/OldContent.
+func mapCaptureToPlannedFiles(records []driven.FileMutationRecord) []driving.PlannedFile {
+	if len(records) == 0 {
+		return nil
+	}
+	out := make([]driving.PlannedFile, len(records))
+	for i, r := range records {
+		out[i] = driving.PlannedFile{
+			Path:       r.Path,
+			Action:     r.Action,
+			NewContent: r.NewContent,
+			OldContent: r.OldContent,
+		}
+	}
+	return out
+}
+
 // Add implements [driving.AddServiceUseCase.Add]. The dispatch order
 // is documented in slice-m5-add-postgres.md §T3:
 //
@@ -229,6 +311,33 @@ func (s *AddServiceService) Add(ctx context.Context, req driving.AddServiceReque
 		return driving.AddServiceResponse{}, errors.New("BaseDir is required")
 	}
 
+	// slice-v1-cli-json-dry-run-add T1-C: route every FS access of
+	// this Add() invocation through the mode-specific adapter. The
+	// defer restores the bootstrap [fs] field so tests or scripts
+	// that reuse the service instance across requests start each call
+	// from the same baseline.
+	fs, recorder := s.selectFS(req.PreviewMode)
+	prevFS := s.fs
+	s.fs = fs
+	defer func() { s.fs = prevFS }()
+
+	resp, addErr := s.runAdd(ctx, req)
+
+	// The recorder is non-nil only on preview/dry-run paths. Map its
+	// log even on the error path — T0-(b) Mid-Write-Failure scenario
+	// shows the user the captured calls up to the failure point.
+	if recorder != nil {
+		resp.PlannedFiles = mapCaptureToPlannedFiles(recorder.Captured())
+	}
+	return resp, addErr
+}
+
+// runAdd is the original Add() body unchanged from M5+: the dispatch
+// chain (BaseDir guard → catalogue check → state detection →
+// dependency check → state-machine branching). T1-C pulled it out so
+// [Add] can wrap it with the PreviewMode-aware FS swap and the
+// recorder-capture mapping without duplicating the dispatch logic.
+func (s *AddServiceService) runAdd(ctx context.Context, req driving.AddServiceRequest) (driving.AddServiceResponse, error) {
 	if !isSupportedService(req.ServiceName) {
 		return driving.AddServiceResponse{}, fmt.Errorf("%w: %q is not in the built-in catalogue %v",
 			driving.ErrServiceUnsupported, req.ServiceName.String(), supportedServices())
