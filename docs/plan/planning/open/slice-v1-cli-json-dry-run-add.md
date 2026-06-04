@@ -12,11 +12,14 @@
 > Instanzen via `fsSelector`-Closure (T0-(e) Option 4) und
 > **`AssertFullEnvelope`-Erstnutzung** (im Doctor-Slice T2 nur
 > als Stub angelegt). Stub liegt in `open/`; Review-Findings
-> aus zwei Runden adressiert: Runde 1 H1-L4 (3× HIGH, 6× MEDIUM,
+> aus drei Runden adressiert: Runde 1 H1-L4 (3× HIGH, 6× MEDIUM,
 > 4× LOW), Runde 2 H1-M2 (3× HIGH, 2× MEDIUM — fsSelector-Drei-
 > Modi, Exit-Code 14 statt 11, Spec-konformer Binary-Fallback,
 > Recorder-Capture-Realität bei Mid-Failure, count-Semantik-
-> Konsistenz). T0-Discovery noch offen (12 Sub-Decisions
+> Konsistenz), Runde 3 H1-M1 (2× HIGH, 1× MEDIUM —
+> T3-Tranche-Drift gegen T0-(e)-Enum, `driven.RecorderPort`-
+> Interface als sauberer Datenpfad, Trailing-Newline-robuste
+> count-Formel). T0-Discovery noch offen (12 Sub-Decisions
 > finalisieren).
 
 ## Auslöser
@@ -539,9 +542,36 @@ oder anderen):
 
 **Entscheidung (T0-Festlegung)**: `count = newLines`
 (hinzugefügte/totale Zeilen in der neuen Datei-Version). Konkrete
-Formel: bei `action: "create"` = `len(strings.Split(newContent,
-"\n"))`; bei `action: "modify"` = `sum(hunk.newLines for hunk in
-diffHunks)`; bei `action: "delete"` = `0` (keine neuen Zeilen).
+Formel mit **Trailing-Newline-Robustheit** (Review-Round-3-Finding
+MEDIUM 1 adressiert — die naive `strings.Split(content, "\n")`-
+Form zählt `"a\n"` als 2 Elemente statt 1):
+
+- **`action: "create"`**:
+  `count = bytes.Count(newContent, []byte("\n"))` falls
+  `newContent` mit `"\n"` endet; sonst `+1` für die letzte unter-
+  minated Zeile. Go-Idiom:
+  ```go
+  func countLines(content []byte) int {
+      n := bytes.Count(content, []byte("\n"))
+      if len(content) > 0 && !bytes.HasSuffix(content, []byte("\n")) {
+          n++
+      }
+      return n
+  }
+  ```
+  Generierte YAML/`.env.example`-Templates enden konventionell mit
+  einem trailing newline; `countLines("a\nb\n") == 2`,
+  `countLines("a\nb") == 2`, `countLines("") == 0`. Spec §430
+  `count: 12` für eine 12-Zeilen-Postgres-Block-Datei → der
+  Renderer liefert das korrekt unabhängig von der Trailing-Newline-
+  Konvention.
+- **`action: "modify"`**: `sum(hunk.newLines for hunk in diffHunks)`.
+  `hunk.newLines` zählt bereits über Hunk-Inhalte ohne Trailing-
+  Newline-Sonderfall (LCS-Output ist line-by-line).
+- **`action: "delete"`**: `0` (keine neuen Zeilen).
+
+Pin-Tests in T5 müssen vier Trailing-Newline-Edge-Cases pinnen:
+(1) `"a\n"` → 1, (2) `"a"` → 1, (3) `""` → 0, (4) `"a\nb\n"` → 2.
 
 Verworfene Optionen:
 
@@ -630,11 +660,93 @@ Drei Optionen:
   als neue Public-Types (`PlannedFile{Path, Action string}`,
   `ChangeEntry{Path string, Count int}`, `Hunk{OldStart, OldLines,
   NewStart, NewLines int, Content string}`).
-- T1 (`recordingfs`) gibt einen schlankes Capture-DTO
-  (`recordingfs.Capture{Writes []WriteRecord, ...}`); T3
-  Composition-Root-Wiring konstruiert pro Request einen Recorder
-  und liest danach den Capture aus; T4 mappt Capture → driving-
-  Layer-Types in `AddServiceResponse`.
+
+**Datenpfad Recorder → Response — `driven.RecorderPort`-Interface**
+(Review-Round-3-Finding H2 adressiert):
+
+`fsFactory` aus T0-(e) gibt **zwei** Interface-Werte zurück, nicht
+nur einen FS:
+
+```go
+// internal/hexagon/port/driven/recordingport.go (NEU)
+type RecorderPort interface {
+    // Captured liefert die seit Konstruktor-Zeit gecaptureten
+    // Mutations-Aufrufe in Aufruf-Reihenfolge. Production-FS-
+    // Adapter implementieren das nicht; nur RecordingFileSystem
+    // erfüllt das Interface.
+    Captured() []FileMutationRecord
+}
+
+type FileMutationRecord struct {
+    Path   string
+    Action string // "create" | "modify" | "delete"
+    // Hunks und Diff-Daten werden vom Diff-Renderer in T2
+    // separat pro Path erzeugt — Recorder selbst kennt nur die
+    // Mutations-Methode + Pfad.
+}
+```
+
+```go
+// internal/hexagon/application/addservice.go (Erweiterung)
+type AddServiceService struct {
+    fsFactory func(driving.AddPreviewMode) (driven.FileSystem, driven.RecorderPort)
+    // ... bestehende Felder ...
+}
+
+func (s *AddServiceService) Add(ctx context.Context, req AddServiceRequest) (AddServiceResponse, error) {
+    fs, recorder := s.fsFactory(req.PreviewMode)
+    s.fs = fs  // Use-Case-internal swap
+    // ... bestehende Add-Logik unverändert ...
+    resp := buildResponse(...)
+    if recorder != nil {
+        resp.PlannedFiles = mapCapture(recorder.Captured())
+        // Diff-Hunks und Changes-Count kommen vom Diff-Renderer
+        // (T2) im CLI-Adapter NACH Use-Case-Return; Use-Case
+        // selbst füllt nur PlannedFiles aus dem Recorder.
+    }
+    return resp, nil
+}
+```
+
+```go
+// cmd/uboot/main.go (Composition-Root)
+prodFS := fs.New(...)
+factory := func(mode driving.AddPreviewMode) (driven.FileSystem, driven.RecorderPort) {
+    switch mode {
+    case driving.PreviewDryRun:
+        rec := recordingfs.New(prodFS, recordingfs.WithPassthrough(false))
+        return rec, rec // recordingfs.RecordingFileSystem implementiert beide
+    case driving.PreviewAndApply:
+        rec := recordingfs.New(prodFS, recordingfs.WithPassthrough(true))
+        return rec, rec
+    default:
+        return prodFS, nil // PreviewNone: kein Recorder
+    }
+}
+addService := application.NewAddServiceService(factory, ...)
+```
+
+**Schicht-Disziplin sauber**: Application sieht nur Interfaces
+(`driven.FileSystem` + `driven.RecorderPort`); CLI sieht nur
+driving-Types (`AddServiceResponse.PlannedFiles`); `recordingfs`
+(driven-Adapter) ist die **einzige** Implementation, die beide
+Ports erfüllt; nur `cmd/uboot/main.go` (Wiring-Layer, depguard-
+exempt) kennt den konkreten Typ. depguard `adapter-no-application`
++ `application-no-adapter` bleiben grün.
+
+**Aufgaben-Verteilung der Tranchen**:
+
+- T1 (`recordingfs`) liefert: `RecordingFileSystem`-Struct
+  implementiert `driven.FileSystem` + `driven.RecorderPort`;
+  `Captured()`-Methode returnt internen Mutations-Log.
+- T1 (Application): `AddServiceService.fsFactory`-Feld + Verkabelung;
+  `AddServiceResponse.PlannedFiles` aus `recorder.Captured()` befüllt.
+- T2 (Diff-Renderer im CLI-Adapter): pro `PlannedFile.Path` Diff
+  rendern, `Hunks[]` und `count` befüllen — getrennt von
+  Use-Case-Return-Pfad, weil Diff-Rendering CLI-Concern ist.
+- T3 (`fsFactory` in `cmd/uboot/main.go`): das oben skizzierte Wiring.
+- T4 (CLI-RunE): konsumiert `AddServiceResponse.PlannedFiles`,
+  ruft Diff-Renderer, baut `cliJSONEnvelope`.
 
 ### T0-(j) Diagnostic-Code-Quelle für `add`
 
@@ -834,7 +946,7 @@ Templates hinzufügt, prüft UTF-8-Validity beim Render-Test.
 | T0 | **Discovery + Sub-Decisions** aus §T0-Discovery klären (zwölf Sub-Decisions: (a) Recorder-Lokation, (b) Passthrough-Schalter + 3 Failure-Scenarios, (c) Hunk-Field-Name, (d) Diff-Library, (e) Composition-Root-Wiring-Form, (f) Mutations-Matrix-Dokumentations-Ort, (g) `count`-Semantik, (h) Read-after-Write-Stichprobe, (i) Recorder-Carrier-Typ über Schicht-Grenze, (j) Diagnostic-Code-Quelle, (k) Minimal-Output für `add --json` ohne Dry-Run/Diff, (l) Hunks-Schema-Pin + Binary-Detection). Entscheidungen mit Begründung in einem `T0-Outcomes`-Block dokumentieren. | — (Plan-Arbeit) |
 | T1 | **`recordingfs`-driven-Adapter** + **Carrier-Types in `port/driving/addservice.go`** (T0-(i)). RecordingFileSystem-Struct + Konstruktor + 4 Read-Delegationen + 8 Mutations-Methoden (alle 8, auch ungenutzte) + impliziter `MkdirAll`-Capture-Modell (T0-(b)). `driving.PlannedFile`/`ChangeEntry`/`Hunk` Public-Types in `addservice.go` plus `AddServiceResponse`-Felder. Unit-Tests pro Methode: Dry-Run-Mode (kein Production-Call), Passthrough-Mode (capture + delegate), Mutation-Failure-Pfad, drei Failure-Scenarios aus T0-(b). depguard-Konformität geprüft. | ~340 |
 | T2 | **Diff-Renderer** + **`AssertFullEnvelope`-Hunks-Helper-Erweiterung** (Review-Finding M5). Pure-Go LCS-Hunk + Unified-String-Renderer + UTF-8-Validity-Check vor LCS (T0-(l), Binary-Detection-Fallback). Hunk-Datentyp gemeinsam für beide Modi. **`checkHunks`-Helper** im `jsontestutil`-Package (Struktur-Pflicht-Felder, Field-Names, Zahl-Ranges). **Golden-File-Tests** gegen Spec-Beispiel-Fixtures (`testdata/add-postgres-compose-fresh.golden` und `-existing.golden`, Review-Finding L3). Unit-Tests gegen klassische LCS-Edge-Cases (leere Inputs, identische Inputs, einseitiger Append, Mitten-Modify, Binary-Detection). | ~310 |
-| T3 | **Composition-Root-Wiring mit Selector-Closure** (T0-(e) Option 4). `cmd/uboot/main.go` konstruiert einen `fsSelector(preview bool) driven.FileSystem`-Closure, übergibt ihn an die Application-Layer-Service-Konstruktoren. `driving.AddServiceRequest.PreviewMode bool`-Field-Erweiterung. CLI-RunE setzt `Request.PreviewMode = a.dryRun \|\| a.diff`. Pin-Test: `--dry-run` löst Recorder-Capture aus, ohne Flag direkter Production-Write. App-Struct + `cli.New(...)`-Signatur **unverändert**; keine Test-Helper-Mass-Edits. | ~80 |
+| T3 | **Composition-Root-Wiring mit Selector-Closure** (T0-(e) Option 4). `cmd/uboot/main.go` konstruiert einen `fsFactory(mode driving.AddPreviewMode) (driven.FileSystem, driven.RecorderPort)`-Closure (zwei Werte: FS-Interface + optionales Recorder-Port-Interface gemäß T0-(i)-Outcome), übergibt ihn an die Application-Layer-Service-Konstruktoren. `driving.AddPreviewMode`-Enum + `driving.AddServiceRequest.PreviewMode`-Field-Erweiterung (KEIN Boolean). CLI-RunE setzt `Request.PreviewMode = previewModeFromFlags(a.dryRun, a.diff)` gemäß T0-(b)-Wahrheitstabelle: vier Flag-Kombinationen → drei Modi. Pin-Tests pinnen alle vier Kombinationen: `--dry-run` (mit oder ohne `--diff`) → kein Production-Write; `--diff` ohne `--dry-run` → Production-Write **plus** Capture (Spec §465-470 Preview-and-Apply); kein Flag → Production-Write ohne Capture. App-Struct + `cli.New(...)`-Signatur **unverändert**; keine Test-Helper-Mass-Edits. | ~80 |
 | T4 | **`u-boot add` JSON-RunE-Pfad**: drei Code-Pfade je nach Flag-Kombination — (a) `--json` ohne Dry-Run/Diff → `newMinimalEnvelope` (T0-(k), Spec-streng Minimal); (b) `--dry-run --json` → `newFullEnvelope` mit Recorder-Capture, `dryRun=true`/`diff=false`; (c) `--diff --json` (mit oder ohne Dry-Run) → `newFullEnvelope` mit Hunks, `diff=true`. Diagnostic-Code-Mapping aus T0-(j). Allowlist-Migration: `u-boot add` raus aus Reject, rein in Migrate. Reject-Pin-Test schrumpft (11 → 10). | ~200 |
 | T5 | **Acceptance-Tests** für alle vier Flag-Kombinationen + drei Failure-Scenarios (T0-(b)) + Negative-Pin (Null-FS-Mutationen im Dry-Run) + Diff-Output-Pin (Unified-Struktur stimmt) + Pin-Test für `count`-Semantik gegen Test-Fixture (T0-(g) `newLines`-Pin). Erstnutzung von `jsontestutil.AssertFullEnvelope` mit `checkHunks`-Erweiterung aus T2. Two-Pin-Form (Variante A frisch-init / Variante B existing). | ~360 |
 | T6 | **Closure.** CHANGELOG `## [Unreleased]` Added-Eintrag, roadmap.md Cluster-Slice-Zelle aktualisiert (Add done, nächster Schritt `init`), cli-json-output.md §6.1-Tabelle auf done plus Add-Sektion-Erweiterung mit Minimal-vs-Voll-Output-Hinweis (T0-(k)) und Mid-Failure-UX-Hint (T0-(b)). Slice-File `in-progress/` → `done/` mit DoD-Hash-Tranchen-Tabelle. `make docs-check` grün. | — (Doku) |
