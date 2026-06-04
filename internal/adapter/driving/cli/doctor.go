@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 
@@ -14,16 +15,25 @@ import (
 // doctorFlags bundles the per-invocation flag state of
 // `u-boot doctor` that runDoctor actually consumes today: --strict
 // (LH-FA-DIAG-003) plus --quiet (LH-FA-CLI-005, filters OK items
-// from the rendered report). The persistent --verbose / --debug
-// flags exist on the root command per LH-FA-CLI-005 and are
-// load-bearing at the LOGGER level since
+// from the rendered report) plus --json (LH-NFA-USE-004, switches
+// the renderer to the cliJSONEnvelope shape). The persistent
+// --verbose / --debug flags exist on the root command per
+// LH-FA-CLI-005 and are load-bearing at the LOGGER level since
 // `slice-followup-verbosity-wiring` (`buildRootCommand`'s
 // PersistentPreRunE flips a shared *slog.LevelVar). The doctor
 // renderer itself does not consume them — service-level
 // logger.Debug/Info calls are the surface they govern.
+//
+// JSON-Mode-Interaktion (slice-v1-cli-json-dry-run-doctor §T0-(e)):
+//   - --quiet --json: --quiet is a no-op in JSON mode (Spec §1834
+//     already filters Ok/Info items out of diagnostics[]).
+//   - --strict --json: still upgrades Warn→exitCode 11; status
+//     remains "warn" because Spec §1837 couples status to the
+//     highest diagnostics-level, not to --strict.
 type doctorFlags struct {
 	Strict bool
 	Quiet  bool
+	JSON   bool
 }
 
 // idColumnWidth is the padding used for the diagnostic-ID column in
@@ -70,6 +80,7 @@ Examples:
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			flags.Quiet = a.quiet
+			flags.JSON = a.json
 			return runDoctor(cmd.Context(), cmd.OutOrStdout(), *flags, a.doctorUseCase, a.getwd)
 		},
 	}
@@ -99,7 +110,13 @@ func runDoctor(
 		return err
 	}
 
-	writeDoctorReport(out, cwd, resp.Report, flags.Quiet)
+	if flags.JSON {
+		if err := writeDoctorJSON(out, resp.Report, flags.Strict); err != nil {
+			return err
+		}
+	} else {
+		writeDoctorReport(out, cwd, resp.Report, flags.Quiet)
+	}
 
 	// Exit-code policy (LH-FA-DIAG-003):
 	//   - any Error              → ErrDoctorFailures
@@ -112,6 +129,79 @@ func runDoctor(
 		return ErrDoctorFailures
 	}
 	return nil
+}
+
+// writeDoctorJSON renders the doctor result as a LH-NFA-USE-004
+// minimal envelope (slice-v1-cli-json-dry-run-doctor T5). SeverityOK
+// and SeverityInfo items are filtered out (Spec §1834: level must be
+// warn or error); the All-OK case ships diagnostics: [].
+//
+// exitCode mirrors the Cobra return-value mapping: 0 for ok/warn
+// without --strict, 11 for error or --strict-with-warn (LH-FA-CLI-
+// 006 / LH-FA-DIAG-003).
+func writeDoctorJSON(out io.Writer, report domain.DiagnosticReport, strict bool) error {
+	diags := mapDiagnosticsToJSON(report.SortedByIssuesFirst())
+	exitCode := doctorExitCode(report, strict)
+	env := newMinimalEnvelope("doctor", "", diags, exitCode)
+	raw, err := json.Marshal(env)
+	if err != nil {
+		return fmt.Errorf("marshal doctor envelope: %w", err)
+	}
+	if _, err := fmt.Fprintln(out, string(raw)); err != nil {
+		return fmt.Errorf("write doctor envelope: %w", err)
+	}
+	return nil
+}
+
+// mapDiagnosticsToJSON translates domain.Diagnostic items into the
+// wire-format diagnosticItem slice, filtering out SeverityOK and
+// SeverityInfo per Spec §1834 (level must be warn or error). Returns
+// an empty (non-nil) slice if no warns/errors remain so the envelope
+// renders `"diagnostics":[]` rather than `"diagnostics":null`.
+func mapDiagnosticsToJSON(items []domain.Diagnostic) []diagnosticItem {
+	out := make([]diagnosticItem, 0, len(items))
+	for _, item := range items {
+		level := severityToJSONLevel(item.Severity)
+		if level == "" {
+			continue // OK / Info items are filtered (Spec §1834)
+		}
+		out = append(out, diagnosticItem{
+			Level:   level,
+			Code:    item.ID,
+			Message: item.Message,
+		})
+	}
+	return out
+}
+
+// severityToJSONLevel maps domain.Severity to the Spec §1834 level
+// vocabulary (only warn / error). Returns "" for SeverityOK and
+// SeverityInfo to signal "filter out". A future spec extension that
+// adds new severity values would land here.
+func severityToJSONLevel(s domain.Severity) string {
+	switch s {
+	case domain.SeverityError:
+		return "error"
+	case domain.SeverityWarn:
+		return "warn"
+	case domain.SeverityOK, domain.SeverityInfo:
+		return ""
+	}
+	return ""
+}
+
+// doctorExitCode mirrors the runDoctor exit-code policy at envelope-
+// emission time so the JSON output ships an exitCode value
+// consistent with the eventual process exit. Keeps the two paths in
+// sync without coupling writeDoctorJSON to ErrDoctorFailures.
+func doctorExitCode(report domain.DiagnosticReport, strict bool) int {
+	if report.HasErrors() {
+		return 11
+	}
+	if strict && report.HasWarnings() {
+		return 11
+	}
+	return 0
 }
 
 // writeDoctorReport renders the diagnostic report on out. Items are
