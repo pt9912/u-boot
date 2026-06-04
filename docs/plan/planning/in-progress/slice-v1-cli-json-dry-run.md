@@ -14,10 +14,11 @@
 > in `in-progress/`, Folge-Slice 1/9
 > [`slice-v1-cli-json-dry-run-doctor`](../done/slice-v1-cli-json-dry-run-doctor.md)
 > **done** ✅, Folge-Slice 2/9
-> [`slice-v1-cli-json-dry-run-add`](../next/slice-v1-cli-json-dry-run-add.md)
-> in `next/`, T0 ✅ festgezurrt (12 Sub-Decisions in §T0-Outcomes).
-> Nächster Schritt: `in-progress/`-Übergang plus T1-Start
-> (`recordingfs`-Adapter + Carrier-Types).
+> [`slice-v1-cli-json-dry-run-add`](slice-v1-cli-json-dry-run-add.md)
+> ebenfalls in `in-progress/`, T0 ✅ festgezurrt (12 Sub-Decisions
+> in §T0-Outcomes), T1-Arbeit beginnt: `recordingfs`-Adapter +
+> Carrier-Types in `port/driving/addservice.go` +
+> `driven.RecorderPort`-Interface + `ErrAddFileSystem`-Sentinel.
 
 ## Auslöser
 
