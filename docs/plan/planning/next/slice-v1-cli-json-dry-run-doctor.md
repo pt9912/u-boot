@@ -10,8 +10,10 @@
 > `jsontestutil.AssertFullEnvelope`. Trägt zusätzlich den
 > Übergangs-Schnitt für das existierende `template list --json`
 > (Review-Round-2-Finding M3). T0 ✅ festgezurrt (§T0-Outcomes
-> — acht Sub-Decisions); `next/`-Übergang frei, danach
-> T1-Schema-Vertrag-Doku.
+> — acht Sub-Decisions plus Review-Findings H1-L2). In
+> `next/`, nächster Schritt: `in-progress/`-Übergang und
+> T1-Schema-Vertrag-Doku (`docs/user/cli-json-output.md` —
+> Cluster-T1 via L1-Delegation).
 
 ## Auslöser
 

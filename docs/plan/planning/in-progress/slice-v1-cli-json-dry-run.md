@@ -12,9 +12,10 @@
 > Per-Command-Folge-Slice-Serie. T0 ✅ festgezurrt
 > (§T0-Outcomes — 5 Sub-Decisions plus Mutations-Matrix-Pre-Scan);
 > in `in-progress/`, Folge-Slice 1/9
-> [`slice-v1-cli-json-dry-run-doctor`](../open/slice-v1-cli-json-dry-run-doctor.md)
-> in `open/`. Nächster Schritt: T0-Discovery des Doctor-Slices
-> (8 Sub-Decisions), danach `next/`-Übergang dort.
+> [`slice-v1-cli-json-dry-run-doctor`](../next/slice-v1-cli-json-dry-run-doctor.md)
+> in `next/` (T0 ✅, 8 Sub-Decisions festgezurrt). Nächster
+> Schritt: Doctor-Slice nach `in-progress/` übernehmen und
+> T1 (Cluster-T1-Schema-Vertrag-Doku via Delegation) starten.
 
 ## Auslöser
 
@@ -372,7 +373,7 @@ Logik trägt.
 | T | Inhalt | LOC (Schätzung) |
 | - | ------ | --------------- |
 | T0 | **Discovery + Sub-Decisions.** Fünf T0-Fragen aus §T0-Discovery klären (Flag-Scope, Dry-Run-Architektur, DTO-Lokalisation, Diff-Renderer, Reihenfolge). Entscheidung pro Frage mit Begründung in einem `T0-Outcomes`-Block dokumentieren. ADR-0010 bleibt unangetastet (§AK ADR-Disziplin). | — (Plan-Arbeit) |
-| T1 | **Schema-Vertrag-Doku.** `docs/user/cli-json-output.md` (neu) zitiert `LH-FA-CLI-007`-Schema verbatim, dokumentiert DTO-Konvention, listet Per-Command-Folge-Slice-Reihenfolge. README EN+DE bekommt Verweis-Zeile. **Delegation:** Doctor-Slice T0-(f) übernimmt diese Tranche (Lieferung als T1 in [`slice-v1-cli-json-dry-run-doctor`](../open/slice-v1-cli-json-dry-run-doctor.md)) — Cluster-T_close-Reviewer sucht **keinen** separaten Cluster-T1-Commit, sondern verweist auf den Doctor-Slice-T1-Commit. | ~80 (reine Doku, via Doctor-Slice) |
+| T1 | **Schema-Vertrag-Doku.** `docs/user/cli-json-output.md` (neu) zitiert `LH-FA-CLI-007`-Schema verbatim, dokumentiert DTO-Konvention, listet Per-Command-Folge-Slice-Reihenfolge. README EN+DE bekommt Verweis-Zeile. **Delegation:** Doctor-Slice T0-(f) übernimmt diese Tranche (Lieferung als T1 in [`slice-v1-cli-json-dry-run-doctor`](../next/slice-v1-cli-json-dry-run-doctor.md)) — Cluster-T_close-Reviewer sucht **keinen** separaten Cluster-T1-Commit, sondern verweist auf den Doctor-Slice-T1-Commit. | ~80 (reine Doku, via Doctor-Slice) |
 | T2..Tn | **Spawn Folge-Slice-Stubs** in `open/` für alle 9 Per-Command-Slices. Pro Stub: Auslöser + grobe AKs + LOC-Schätzung + Verweis auf gemeinsamen Schema-Vertrag. Reihenfolge nach T0-(e). | ~30 LOC pro Stub × 9 = ~270 |
 | T_close | **Cluster-Closure.** Pflicht-Bedingung gemäß §Aufhebungsbedingung Closure-Hard-Rule (§124-148): **alle 9** Folge-Slices in `done/`. Punkt. Cluster-Slice mit DoD-Hash-Line aller Folge-Slices nach `done/` plus Roadmap-Update. ADR-0010 bleibt **unverändert**; optionale Folge-ADR ist Sub-Decision (siehe AK „ADR-0010-Liefer-Anker"). **Kein** „kritisches Quorum", **kein** MVP-Bypass, **kein** Restweg-Carveout als Closure-Alternative. Der **Notfall-Slip-Pfad** aus §Aufhebungsbedingung §137-148 (Carveout-Eintrag + abgeschwächte Liefer-Aussage) ist explizit **kein wählbarer** T_close-Pfad — er ist Restlauf-Disziplin für einen unvermeidbaren Slip und tritt nur in Kraft, **nachdem** ein Slip bereits passiert ist (Default-Erwartung bleibt „keine Slips"). | — (Doku) |
 
