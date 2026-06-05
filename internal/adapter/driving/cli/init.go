@@ -2,11 +2,13 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 
 	"github.com/spf13/cobra"
 
+	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
@@ -28,11 +30,30 @@ type initFlags struct {
 	Yes            bool
 	NoInteractive  bool
 
+	// DryRun / Diff (slice-v1-cli-json-dry-run-init T5):
+	// LH-FA-CLI-007/008 flags that route Init() through the
+	// RecordingFileSystem via the per-request fsFactory; together
+	// with JSON they form the three voll-schema output paths
+	// analog to add.
+	DryRun bool
+	Diff   bool
+
+	// JSON is read through from the root persistent --json
+	// (LH-NFA-USE-004). Sets req.SilenceProgress so the
+	// ProgressPort doesn't corrupt the envelope on stdout.
+	JSON bool
+
 	// Template is the external project template name selected via
 	// `--template <name>` (LH-FA-TPL-001 / slice-v1-template-init T4).
 	// Empty keeps the M3 default-init render path; non-empty
 	// dispatches to the TemplateInitUseCase via the
 	// InitProjectService delegation introduced in T4.
+	//
+	// Mutex with --dry-run/--diff (slice-v1-cli-json-dry-run-init
+	// T0-(i) Out-of-Scope-Carveout): the template-init service runs
+	// on its own fsAdapter outside the recordingfs wrapping, so
+	// preview-mode + template would silently write to production
+	// disk. CLI-level mutex-check raises ErrTemplateConflictsWithFlag.
 	Template string
 
 	// AllowExternalFeatureSources is the LH-FA-DEV-003 allowlist seed
@@ -120,6 +141,7 @@ Examples:
 			// already parsed them by the time RunE fires.
 			flags.Yes = a.yes
 			flags.NoInteractive = a.noInteractive
+			flags.JSON = a.json
 			return runInit(cmd.Context(), cmd.OutOrStdout(), cmd.ErrOrStderr(), args, *flags, a.initUseCase, a.getwd)
 		},
 	}
@@ -133,8 +155,12 @@ Examples:
 		"assert existing project in non-interactive runs; aborts unless --backup/--force (LH-FA-INIT-004, LH-FA-CLI-005A §238)")
 	cmd.Flags().BoolVar(&flags.Devcontainer, "devcontainer", false,
 		"also generate `.devcontainer/devcontainer.json` + `Dockerfile` and set devcontainer.enabled=true in u-boot.yaml (LH-AK-005)")
+	cmd.Flags().BoolVar(&flags.DryRun, "dry-run", false,
+		"preview the planned changes without writing files (LH-FA-CLI-007)")
+	cmd.Flags().BoolVar(&flags.Diff, "diff", false,
+		"render a unified diff of the planned changes (LH-FA-CLI-008)")
 	cmd.Flags().StringVar(&flags.Template, "template", "",
-		"render the project from an external template instead of the default flow (`u-boot template list` for the catalog; LH-FA-TPL-001 / slice-v1-template-init T4 — fresh-init only, mutex with --devcontainer/--force/--backup)")
+		"render the project from an external template instead of the default flow (`u-boot template list` for the catalog; LH-FA-TPL-001 / slice-v1-template-init T4 — fresh-init only, mutex with --devcontainer/--force/--backup/--dry-run/--diff)")
 	cmd.Flags().StringSliceVar(&flags.AllowExternalFeatureSources, "allow-external-feature-sources", nil,
 		"seed devcontainer.featureSources.allow with the given URLs (LH-FA-DEV-003; comma-separated, repeatable). Requires --devcontainer; `--yes` does not substitute (LH-NFA-SEC-004).")
 	return cmd
@@ -170,15 +196,32 @@ func runInit(
 	uc driving.InitProjectUseCase,
 	getwd func() (string, error),
 ) error {
+	// mapErr-Source-Pflicht (slice-v1-cli-json-dry-run-init T0-(e)):
+	// init RunE defines its own mapErr and reaches it to reportError.
+	// Symmetrie zu add's mapAddErrorToDiagnostic.
+	mapErr := mapInitErrorToDiagnostic
+
 	if flags.Yes && flags.NoInteractive {
-		return ErrConflictingModeFlags
+		return reportError(out, ErrConflictingModeFlags, nil, flags.DryRun, flags.Diff, flags.JSON, "init", mapErr)
+	}
+
+	// Template-Mutex-Check (slice-v1-cli-json-dry-run-init T0-(i)
+	// Out-of-Scope-Carveout): `--template + --dry-run|--diff` rejects
+	// am CLI-Level mit ErrTemplateConflictsWithFlag. Begründung: der
+	// TemplateInitService läuft auf seinem eigenen fsAdapter
+	// (außerhalb der initFSFactory), das Preview-Mode-Versprechen
+	// (kein Production-Write im Dry-Run) wäre für Template-Pfade
+	// nicht haltbar.
+	if flags.Template != "" && (flags.DryRun || flags.Diff) {
+		return reportError(out, driving.ErrTemplateConflictsWithFlag, nil, flags.DryRun, flags.Diff, flags.JSON, "init", mapErr)
 	}
 
 	cwd, err := getwd()
 	if err != nil {
-		return fmt.Errorf("determine working directory: %w", err)
+		return reportError(out, fmt.Errorf("determine working directory: %w", err), nil, flags.DryRun, flags.Diff, flags.JSON, "init", mapErr)
 	}
 
+	mode := previewModeFromFlags(flags.DryRun, flags.Diff)
 	req := driving.InitProjectRequest{
 		BaseDir:                     cwd,
 		SkipGit:                     flags.SkipGit,
@@ -189,18 +232,80 @@ func runInit(
 		Devcontainer:                flags.Devcontainer,
 		Template:                    flags.Template,
 		AllowExternalFeatureSources: flags.AllowExternalFeatureSources,
+		PreviewMode:                 mode,
+		// SilenceProgress in JSON-Mode (T0-(o)): emitSummary's
+		// AffectedFiles-Events würden sonst stdout VOR dem JSON-
+		// Envelope landen und den Parser-Konsumenten brechen.
+		SilenceProgress: flags.JSON,
 	}
 	if len(args) == 1 {
 		req.Name = args[0]
 	}
 
-	resp, err := uc.Init(ctx, req)
-	if err != nil {
-		return err
+	resp, initErr := uc.Init(ctx, req)
+	if initErr != nil {
+		return reportError(out, initErr, resp.PlannedFiles, flags.DryRun, flags.Diff, flags.JSON, "init", mapErr)
 	}
 
-	printInitSummary(out, resp)
-	return nil
+	if flags.JSON {
+		return writeInitJSON(out, resp, flags.DryRun, flags.Diff)
+	}
+
+	if flags.Diff {
+		if err := writeDiff(out, resp.PlannedFiles); err != nil {
+			return err
+		}
+	}
+	return printInitSummary(out, resp, flags.DryRun)
+}
+
+// writeInitJSON renders the success-path JSON envelope. Three shapes
+// per T0-(k) (analog add writeAddJSON):
+//
+//   - dryRun=false && diff=false → minimal envelope (Spec §1841).
+//   - dryRun=true                → voll-schema, plannedFiles from
+//     recorder, optional hunks if diff=true.
+//   - diff=true                  → voll-schema preview-and-apply,
+//     plannedFiles + hunks.
+func writeInitJSON(out io.Writer, resp driving.InitProjectResponse, dryRun, diffFlag bool) error {
+	if !dryRun && !diffFlag {
+		env := newMinimalEnvelope("init", "", nil, 0)
+		return writeEnvelope(out, env)
+	}
+	pfs, chs := mapPlannedFilesToWire(resp.PlannedFiles, diffFlag)
+	env := newFullEnvelope("init", "", dryRun, diffFlag, pfs, chs, nil, 0)
+	return writeEnvelope(out, env)
+}
+
+// mapInitErrorToDiagnostic maps an init-path error to a diagnosticItem
+// with the spec-konforme LH-Kennung per T0-(f) Switch-Order-Pflicht.
+//
+// Order matters (Multi-`%w`-wraps): T3 wraps FS-Failures as
+// `fmt.Errorf("init: write %s: %w: %w", path, ErrInitFileSystem,
+// rawErr)`. ErrInitFileSystem MUST be checked FIRST so chains that
+// happen to include both ErrInitFileSystem and a fachlich sentinel
+// route to the FS-class (LH-NFA-REL-003 / exit 14), not the fachlich
+// class (LH-FA-INIT-{004,005,006} / exit 10) — slice-v1-cli-json-
+// dry-run-init T0-(f) erblich aus add review #11.
+func mapInitErrorToDiagnostic(err error) diagnosticItem {
+	switch {
+	case errors.Is(err, driving.ErrInitFileSystem):
+		return diagnosticItem{Level: "error", Code: "LH-NFA-REL-003", Message: err.Error()}
+	case errors.Is(err, driving.ErrBackupSuffixExhausted), errors.Is(err, driving.ErrBackupSourceMissing):
+		return diagnosticItem{Level: "error", Code: "LH-NFA-REL-003", Message: err.Error()}
+	case errors.Is(err, driving.ErrTemplateConflictsWithFlag):
+		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
+	case errors.Is(err, driving.ErrConfirmationRequired),
+		errors.Is(err, driving.ErrForceRequiresBackup),
+		errors.Is(err, driving.ErrBackupUnsupportedKind):
+		return diagnosticItem{Level: "error", Code: "LH-FA-INIT-005", Message: err.Error()}
+	case errors.Is(err, driving.ErrProjectExists), errors.Is(err, driving.ErrFileExists):
+		return diagnosticItem{Level: "error", Code: "LH-FA-INIT-004", Message: err.Error()}
+	case errors.Is(err, domain.ErrInvalidProjectName), errors.Is(err, domain.ErrInvalidServiceName):
+		return diagnosticItem{Level: "error", Code: "LH-FA-INIT-006", Message: err.Error()}
+	default:
+		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
+	}
 }
 
 // printInitSummary writes a deterministic, human-friendly summary
@@ -222,15 +327,38 @@ func runInit(
 // The Unicode arrow (→) in the Backups section matches the broader
 // project glyph convention (Unicode dashes/arrows over ASCII fall-
 // backs) — closes T4c-review finding #6.
-func printInitSummary(out io.Writer, resp driving.InitProjectResponse) {
-	fmt.Fprintf(out, "Initialized u-boot project %q.\n\nCreated:\n", resp.Project.Name)
-	for _, entry := range resp.Created {
-		fmt.Fprintln(out, "  - "+entry)
+//
+// Returns error on broken-pipe so the CLI exits with a non-zero
+// status when stdout is closed mid-print (add review #3 erblich
+// via T5-a writeDiff-Pattern).
+//
+// dryRun switches the lead-in from "Initialized" to "Would
+// initialize" — analog add's "Would add"-Prefix für human-mode
+// --dry-run-Feedback.
+func printInitSummary(out io.Writer, resp driving.InitProjectResponse, dryRun bool) error {
+	verb := "Initialized"
+	createdLabel := "Created:"
+	if dryRun {
+		verb = "Would initialize"
+		createdLabel = "Would create:"
 	}
-	if len(resp.Backups) > 0 {
-		fmt.Fprintln(out, "\nBackups:")
-		for _, b := range resp.Backups {
-			fmt.Fprintf(out, "  - %s → %s\n", b.Original, b.Backup)
+	if _, err := fmt.Fprintf(out, "%s u-boot project %q.\n\n%s\n", verb, resp.Project.Name, createdLabel); err != nil {
+		return err
+	}
+	for _, entry := range resp.Created {
+		if _, err := fmt.Fprintln(out, "  - "+entry); err != nil {
+			return err
 		}
 	}
+	if len(resp.Backups) > 0 {
+		if _, err := fmt.Fprintln(out, "\nBackups:"); err != nil {
+			return err
+		}
+		for _, b := range resp.Backups {
+			if _, err := fmt.Fprintf(out, "  - %s → %s\n", b.Original, b.Backup); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
