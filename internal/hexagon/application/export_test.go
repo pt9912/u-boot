@@ -385,3 +385,69 @@ func (s *AddServiceService) PlanAddForTest(svc domain.ServiceName, state domain.
 		Action:     plan.Action.String(),
 	}, nil
 }
+
+// CallNoopDefaultsForTest exercises the package-local nil-tolerant
+// defaults (noopProgress / noopConfirmer / noopLogger) so coverage
+// observes them. The defaults are normally invoked only when a
+// constructor caller passes nil for the optional dependency — most
+// tests wire a real stub instead, leaving these methods at 0%.
+func CallNoopDefaultsForTest(ctx context.Context) {
+	var p noopProgress
+	p.AffectedFiles("scope", nil)
+	p.AffectedFiles("scope", []driven.AffectedFile{{Path: "x", Action: driven.AffectedReplaceBlock}})
+
+	var c noopConfirmer
+	_, _ = c.ConfirmTreatAsExisting(ctx, "svc", []string{"a", "b"})
+	_, _ = c.ConfirmRemoveVolumes(ctx, "svc")
+	_, _ = c.ConfirmAddDependency(ctx, "svc", []string{"redis"})
+
+	var l noopLogger
+	l.Debug("debug %s", "msg")
+	l.Info("info %s", "msg")
+	l.Warn("warn %s", "msg")
+	l.Error("error %s", "msg")
+}
+
+// TranslatePatchErrForTest exposes the unexported translatePatchErr
+// helper so the three switch-cases (ErrYAMLAnchorMismatch /
+// ErrYAMLFragmentInvalid / default) can be table-tested without
+// going through a full Add() patch run.
+func TranslatePatchErrForTest(err error, svc domain.ServiceName, where string) error {
+	return translatePatchErr(err, svc, where)
+}
+
+// NormalisePortEntryForTest exposes the unexported
+// normalisePortEntry helper so the three switch-cases (int /
+// string / unsupported) can be table-tested without a full doctor()
+// run.
+func NormalisePortEntryForTest(raw any) (int, bool) {
+	return normalisePortEntry(raw)
+}
+
+// RelativizePathForTest exposes the unexported relativizePath helper
+// so its three branches (empty baseDir / non-prefix fallback /
+// successful Rel) can be unit-tested.
+func RelativizePathForTest(p, baseDir string) string {
+	return relativizePath(p, baseDir)
+}
+
+// ServiceActionStringForTest exposes the unexported serviceAction.
+// String mapping so all five enum values can be pinned by a single
+// table-test.
+func ServiceActionStringForTest(action int) string {
+	return serviceAction(action).String()
+}
+
+// ParseForwardPortsForTest exposes the unexported parseForwardPorts
+// helper so the float64 / string-mapping / invalid-skip branches can
+// be unit-tested directly without going through a full doctor run.
+func ParseForwardPortsForTest(items []any) map[int]struct{} {
+	return parseForwardPorts(items)
+}
+
+// ConfigPathToYAMLPathForTest exposes the unexported
+// configPathToYAMLPath helper so the dotted-path canonicalisation
+// (project.name → ["project", "name"], etc.) can be table-tested.
+func ConfigPathToYAMLPathForTest(path domain.ConfigPath) []string {
+	return configPathToYAMLPath(path)
+}

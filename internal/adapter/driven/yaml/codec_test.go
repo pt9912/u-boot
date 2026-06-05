@@ -2,6 +2,7 @@ package yaml_test
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -831,5 +832,39 @@ func TestCodec_StripYAMLPrefix_NoDoubledPrefix(t *testing.T) {
 	}
 	if strings.Contains(err.Error(), "yaml: yaml:") {
 		t.Errorf("error message has doubled `yaml: yaml:` prefix: %q", err.Error())
+	}
+}
+
+// TestCodec_PatchScalar_AllScalarKinds exercises every scalarNode
+// switch case (string, int, int64, float64) so the codec's internal
+// type-dispatch is fully covered. PatchScalar already pins bool via
+// TestCodec_PatchScalar_UpdatesExistingScalar; the slice case is in
+// TestCodec_PatchScalar_UnsupportedScalarTypeReturnsErr.
+func TestCodec_PatchScalar_AllScalarKinds(t *testing.T) {
+	cases := []struct {
+		name  string
+		value any
+	}{
+		{"string", "demo"},
+		{"int", int(42)},
+		{"int64", int64(123)},
+		{"float64", float64(1.5)},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			input := []byte("k: old\n")
+			out, err := yaml.New().PatchScalar(input, []string{"k"}, tc.value)
+			if err != nil {
+				t.Fatalf("PatchScalar(%v): %v", tc.value, err)
+			}
+			// The output uses the patched key "k", not "name"/"port"/etc.,
+			// but the rendered scalar must equal the input value's string
+			// form. We just assert no error + the value appears.
+			got := string(out)
+			want := fmt.Sprintf("%v", tc.value)
+			if !strings.Contains(got, want) {
+				t.Errorf("output missing %q (value %v): %s", want, tc.value, got)
+			}
+		})
 	}
 }
