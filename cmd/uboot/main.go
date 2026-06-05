@@ -27,10 +27,13 @@ import (
 	"github.com/pt9912/u-boot/internal/adapter/driven/logger"
 	"github.com/pt9912/u-boot/internal/adapter/driven/netprobe"
 	"github.com/pt9912/u-boot/internal/adapter/driven/progress"
+	"github.com/pt9912/u-boot/internal/adapter/driven/recordingfs"
 	"github.com/pt9912/u-boot/internal/adapter/driven/runtime"
 	"github.com/pt9912/u-boot/internal/adapter/driven/yaml"
 	"github.com/pt9912/u-boot/internal/adapter/driving/cli"
 	"github.com/pt9912/u-boot/internal/hexagon/application"
+	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
+	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
 // version is overridable at build time via -ldflags.
@@ -117,7 +120,25 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	templateInitSvc := application.NewTemplateInitService(templateCatalogAdapter, fsAdapter, logAdapter)
 	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter, application.WithTemplateInit(templateInitSvc))
 	doctorSvc := application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, runtimeAdapter, logAdapter)
-	addSvc := application.NewAddServiceService(fsAdapter, yamlAdapter, confirmAdapter, logAdapter)
+	// AddServiceService runs through the T0-(e) Option 4 factory:
+	// PreviewNone uses the production FS directly; PreviewDryRun and
+	// PreviewAndApply each wrap it in a fresh RecordingFileSystem
+	// (different passthrough switch). A fresh recorder per request
+	// keeps captures scoped to a single Add() call — concurrent or
+	// sequential requests never share mutation logs.
+	addFSFactory := func(mode driving.AddPreviewMode) (driven.FileSystem, driven.RecorderPort) {
+		switch mode {
+		case driving.PreviewDryRun:
+			rec := recordingfs.New(fsAdapter, recordingfs.WithPassthrough(false))
+			return rec, rec
+		case driving.PreviewAndApply:
+			rec := recordingfs.New(fsAdapter, recordingfs.WithPassthrough(true))
+			return rec, rec
+		default:
+			return fsAdapter, nil
+		}
+	}
+	addSvc := application.NewAddServiceServiceWithFactory(addFSFactory, yamlAdapter, confirmAdapter, logAdapter)
 	removeSvc := application.NewRemoveServiceService(fsAdapter, yamlAdapter, confirmAdapter, logAdapter)
 	upSvc := application.NewUpService(fsAdapter, yamlAdapter, dockerEngineAdapter, netprobeAdapter, clockAdapter, logAdapter)
 	downSvc := application.NewDownService(fsAdapter, dockerEngineAdapter, confirmAdapter, logAdapter)
