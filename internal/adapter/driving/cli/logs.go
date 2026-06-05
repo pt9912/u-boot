@@ -62,7 +62,7 @@ func newLogsCommand(a *App) *cobra.Command {
 	flags := &logsFlags{}
 	cmd := &cobra.Command{
 		Use:   "logs [service]",
-		Short: "Stream Compose logs of every (or a single) service (LH-FA-UP-005)",
+		Short: "Stream Compose logs of every service or one selected service",
 		Long: `Stream Docker Compose logs for the project's services.
 
 Without a positional argument, all services declared in compose.yaml

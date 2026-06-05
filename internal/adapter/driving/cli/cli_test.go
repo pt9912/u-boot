@@ -299,6 +299,34 @@ func TestExecute_HelpListsInit(t *testing.T) {
 	}
 }
 
+func TestExecute_RootHelpPointsToUserDocs(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	err := newApp(&fakeInitUseCase{}).Execute(context.Background(), []string{"--help"}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("Execute --help: %v", err)
+	}
+	out := stdout.String()
+	for _, want := range []string{
+		"u-boot <command> --help",
+		"https://github.com/pt9912/u-boot#readme",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("--help missing %q; got:\n%s", want, out)
+		}
+	}
+	if strings.Contains(out, "See spec/lastenheft.md for the full functional specification.") {
+		t.Errorf("--help still points users to the internal functional specification:\n%s", out)
+	}
+	if strings.Contains(out, "LH-") {
+		t.Errorf("--help exposes internal spec IDs:\n%s", out)
+	}
+	for _, unwanted := range []string{"PostgreSQL", "Keycloak", "OpenTelemetry"} {
+		if strings.Contains(out, unwanted) {
+			t.Errorf("--help exposes add-on catalogue detail %q:\n%s", unwanted, out)
+		}
+	}
+}
+
 func TestExecute_UnknownCommand(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	err := newApp(&fakeInitUseCase{}).Execute(context.Background(), []string{"frobnicate"}, &stdout, &stderr)

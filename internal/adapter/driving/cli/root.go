@@ -16,10 +16,11 @@ func buildRootCommand(a *App) *cobra.Command {
 		Short: "Developer environment bootloader for Docker-based projects",
 		Long: `u-boot bootstraps reproducible development environments:
 project structure, Docker Compose stack, devcontainer configuration,
-service add-ons (PostgreSQL, Keycloak, OpenTelemetry, …), and the
-usual recurring artefacts (README, CHANGELOG, .env.example).
+service add-ons, and the usual recurring artefacts (README, CHANGELOG,
+.env.example).
 
-See spec/lastenheft.md for the full functional specification.`,
+For command details, run u-boot <command> --help.
+Quickstart and user docs: https://github.com/pt9912/u-boot#readme`,
 		Version: a.version,
 		// Disable Cobra's auto-suggest on unknown commands so the
 		// error message is plain (`unknown command "frobnicate"`)
@@ -36,9 +37,9 @@ See spec/lastenheft.md for the full functional specification.`,
 	// command also means they appear in `u-boot --help` once instead
 	// of being duplicated per subcommand.
 	root.PersistentFlags().BoolVar(&a.yes, "yes", false,
-		"answer the default to every confirmation (LH-FA-CLI-005A); exclusive with --no-interactive")
+		"answer confirmation prompts automatically; exclusive with --no-interactive")
 	root.PersistentFlags().BoolVar(&a.noInteractive, "no-interactive", false,
-		"abort on any required confirmation: exit 2 for ordinary prompts, exit 10 for destructive ops like `down --volumes` (LH-FA-CLI-005A §245/§254); exclusive with --yes")
+		"do not prompt; fail when a required confirmation cannot be resolved; exclusive with --yes")
 
 	// LH-FA-CLI-005 verbosity flags. Persistent so subcommands read
 	// a single source of truth. --quiet is load-bearing for the
@@ -47,11 +48,11 @@ See spec/lastenheft.md for the full functional specification.`,
 	// success message). --quiet / --verbose / --debug also raise
 	// or lower the logger level via the PersistentPreRunE below.
 	root.PersistentFlags().BoolVar(&a.quiet, "quiet", false,
-		"reduce output to errors only; logger drops Info entries (LH-FA-CLI-005)")
+		"reduce normal output; keep warnings and errors where applicable")
 	root.PersistentFlags().BoolVar(&a.verbose, "verbose", false,
-		"show additional detail; logger emits Debug entries (LH-FA-CLI-005)")
+		"show additional detail")
 	root.PersistentFlags().BoolVar(&a.debug, "debug", false,
-		"show internal diagnostic output; logger emits Debug entries (LH-FA-CLI-005)")
+		"show internal diagnostic output")
 
 	// LH-NFA-USE-004 machine-readable output (slice-v1-cli-json-dry-
 	// run-doctor T3). Persistent flag, inherited by every subcommand.
@@ -60,7 +61,7 @@ See spec/lastenheft.md for the full functional specification.`,
 	// via ErrJSONNotImplemented (exit code 2). See
 	// docs/user/cli-json-output.md §6 for the migration roadmap.
 	root.PersistentFlags().BoolVar(&a.json, "json", false,
-		"emit machine-readable JSON output per LH-NFA-USE-004 (see docs/user/cli-json-output.md)")
+		"emit machine-readable JSON output where supported")
 
 	// LH-FA-CLI-005 verbosity → slog level wiring. Runs after Cobra
 	// has parsed flags, before the subcommand's RunE. The LevelVar
