@@ -1053,6 +1053,27 @@ Slice's DoD-Hash-Tabelle:
   Slice's done-Datei: „T1 migriert add-Slice-Files, post-T1-
   Revisionen siehe T1-Commit-Hash".
 
+## Review-Round-9 (T7)
+
+Eine Review-Runde via Code-Reviewer-Agent gegen den Diff-Range
+`ad56550..bab6b13` (T1-A bis T6 + Coverage-Bump). Ergebnis:
+sechs Findings, von denen vier echte Bugs im init-Slice waren,
+einer eine Cross-Slice-Divergenz aus add (Folge-Slice ausgelagert)
+und einer trivialer Dead-Code-Cleanup.
+
+| # | Sev  | Finding                                                  | Adressierung                                                       |
+| - | ---  | -------------------------------------------------------- | ------------------------------------------------------------------ |
+| 1 | med  | `mapInitErrorToDiagnostic` fehlt `ErrInvalidFeatureSource`-Case → Code/Exit-Klassen-Drift (LH-FA-CLI-006 + Exit 10) | R1: Case auf `LH-FA-DEV-003`; Test im `AllCases`-Table — `6e5ad01` |
+| 2 | med  | `initFromTemplate` ohne `PreviewMode`-Guard im Application-Layer (CLI fängt es, UC asymmetrisch) | R2: `PreviewMode != PreviewNone → ErrTemplateConflictsWithFlag` am UC-Eintritt; Acceptance-Pin — `e897fa7` |
+| 3 | low  | `runBackup` Wrap-Strategie (raw FS ↔ typed Sentinel) ohne direkten Application-Test | R3: Zwei Tests via `RunBackupForTest`-Bridge — `e10b57d`            |
+| 4 | low  | T0-(k) Path-Anchor für positional `<name>` ungetestet (trailing-slash, dot-slash, abs-path) | R4: Vier-Cases Acceptance-Table mit `validatingInitUseCaseStub` — `ee30c3c` |
+| 5 | low  | Add↔Init divergieren bei `ErrBackupSuffixExhausted`-Code (Add: `LH-FA-INIT-005` + Exit 14 → inkonsistent; Init: `LH-NFA-REL-003` + Exit 14 → konsistent) | Folge-Slice: [`slice-v1-cli-cleanup-add-backup-error-class`](../open/slice-v1-cli-cleanup-add-backup-error-class.md) |
+| 6 | info | Init's mapErr-Switch hat `ErrInvalidServiceName`-Case — dead-code (Init hat keinen Service-Arg) | R1: Case entfernt im selben Commit — `6e5ad01`                     |
+
+T7-LOC-Bilanz: 4 R-Commits (~90 LOC) + 1 Folge-Slice-Stub
+(~70 LOC Plan-Markdown). Coverage-Gate bleibt grün (91.10% nach R3,
+unchanged nach R4).
+
 ## Out of Scope
 
 - **Backup-Konsistenz-Re-Validation** (Read-after-Write): falls
