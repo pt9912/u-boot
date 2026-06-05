@@ -451,3 +451,13 @@ func ParseForwardPortsForTest(items []any) map[int]struct{} {
 func ConfigPathToYAMLPathForTest(path domain.ConfigPath) []string {
 	return configPathToYAMLPath(path)
 }
+
+// RunBackupForTest exposes the unexported InitProjectService.runBackup
+// helper so the dual-branch wrap-strategy (Review-Round-9 #3) can be
+// table-tested without staging a full re-init scenario: the typed-
+// sentinel passthrough (ErrBackupSourceMissing /
+// ErrBackupSuffixExhausted / ErrBackupUnsupportedKind) vs the
+// raw-FS-Error → ErrInitFileSystem-Wrap.
+func (s *InitProjectService) RunBackupForTest(baseDir, relPath string) (*driving.BackupAction, error) {
+	return s.runBackup(baseDir, relPath)
+}
