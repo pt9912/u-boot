@@ -12,11 +12,16 @@
 > via `BackupPath` — sechs der acht `driven.FileSystem`-Mutations-
 > Methoden; `WriteFileExclusive` und `Rename` werden NICHT aus
 > init-Pfaden gerufen, Recorder deckt sie als Drift-Schutz
-> trotzdem ab), sieben init-spezifische LH-Codes
-> (`LH-FA-INIT-001`..`-007`), die Soft-Existing-Detection
-> (`LH-FA-INIT-004` für Marker-Kollision; `LH-FA-INIT-005` für
-> Backup-/Force-Failures) und der Template-Modus
-> (`init --template <name>`, Catalog-Read im Dry-Run).
+> trotzdem ab), sieben init-spezifische LH-Codes als Spec-Anker
+> (`LH-FA-INIT-001`..`-007`) — davon drei mit dedizierten
+> Sentinels in der `mapErrorToDiagnostic`-Map (INIT-004 für
+> Marker-Kollision; INIT-005 für `--force`/`--backup`-Usage-
+> Failures; INIT-006 für Name-Validierung), die anderen vier
+> rein als Phasen-Anker. **`LH-NFA-REL-003` für Backup-FS-
+> Failures** (Suffix-Exhaustion, Source-Missing) und Mid-Write-
+> FS-Failures. Template-Modus (`init --template <name>`) ist in
+> V1 mutex zu `--dry-run`/`--diff` (siehe T0-(i) Out-of-Scope-
+> Carveout).
 >
 > Init ist der erste Folge-Slice, der vom Add-Pattern erbt — die
 > Erbschafts-Disziplin (was 1:1, was init-spezifisch) ist Sub-
@@ -161,6 +166,46 @@ normalisiert ggf. via `mapErrorToDiagnostic` — Sub-Decision T0-(f):
 }
 ```
 
+**Template-Reject-Pin** (`LH-FA-CLI-006`, T0-(i) Out-of-Scope-
+Carveout für V1): `u-boot init myproj --template basic --dry-run
+--json` rejects am CLI-RunE-Level (T5 mutex-check vor uc.Init-
+Call):
+
+```json
+{
+  "status": "error",
+  "command": "init",
+  "diagnostics": [
+    {"level": "error", "code": "LH-FA-CLI-006", "message": "--template is mutually exclusive with --dry-run/--diff (V1 carveout — see slice-v1-cli-json-dry-run-template-preview)"}
+  ],
+  "exitCode": 2
+}
+```
+
+Minimal-Envelope (kein plannedFiles/changes), weil die Validation
+VOR jedem Recorder-Setup fired.
+
+**Planning-Phase-Force-Failure-Pin** (`LH-FA-INIT-005`, T0-(q)):
+`u-boot init myproj --force --dry-run --json` auf CWD mit
+existierender `.gitignore` (kein managed-Block, kein `--backup`)
+failed im planFile bevor irgendein Write das Capture erreicht.
+`plannedFiles[]` bleibt leer:
+
+```json
+{
+  "status": "error",
+  "command": "init",
+  "dryRun": true,
+  "diff": false,
+  "plannedFiles": [],
+  "changes": [],
+  "diagnostics": [
+    {"level": "error", "code": "LH-FA-INIT-005", "message": "<ErrForceRequiresBackup message>"}
+  ],
+  "exitCode": 10
+}
+```
+
 **Mid-Write-Failure-Pin** (`LH-NFA-REL-003`, T0-(f) Switch-Order
 + T0-(k) writeInitDiff-Verträge):
 `u-boot init myproj --dry-run --diff --json` mit FS-Failure bei
@@ -249,7 +294,9 @@ Argument wie add-T0-(b)).
     via `isFilesystemError`)
   - LH-FA-INIT-001/-002/-003/-007 sind heute ohne dedizierten
     Sentinel — Spec-Anker für Use-Case-Phasen, kein Error-Pfad.
-- ✅ **Composition-Root-Wiring** (T0-(g)): `initFSFactory` analog
+- ✅ **Composition-Root-Wiring** (T4-Tranche, kein eigener T0-
+  Sub-Decision-Slot weil Pattern-Erbe von add-T1-D 1:1):
+  `initFSFactory` analog
   `addFSFactory` in `cmd/uboot/main.go`; gleiches Closure-Pattern.
   Pflicht-Erweiterung: `initSvc` migriert auf
   `NewInitProjectServiceWithFactory`. App-Struct + `cli.New(...)`
@@ -331,15 +378,28 @@ Defined Type, der die Factory-Signatur `func(driving.AddPreviewMode)
 (driven.FileSystem, driven.RecorderPort)` NICHT mehr assignment-
 kompatibel zu `func(driving.PreviewMode) ...` macht und damit
 addservice_factory_test.go bricht). Die Konstanten-Deklarationen
-in `addservice.go` Z. 150 (`PreviewNone AddPreviewMode = iota`)
-werden auf den kanonischen Type umgestellt
-(`PreviewNone PreviewMode = iota`). Pin-Test in T1:
-`var _ driving.AddPreviewMode = driving.PreviewMode(0)` plus
-Factory-Signature-Identity-Check.
+in `port/driving/addservice.go` Z. 150
+(`PreviewNone AddPreviewMode = iota`) werden auf den kanonischen
+Type umgestellt (`PreviewNone PreviewMode = iota`). Pin-Test
+in T1: `var _ driving.AddPreviewMode = driving.PreviewMode(0)`
+plus Factory-Signature-Identity-Check.
 
-**Carveout**: der Alias überlebt bis Cluster-T_close.
-**Alias-Lebensdauer-Pflicht**: `AddPreviewMode` ist die
-EINZIGE Service-Prefix-Alias. Folge-Slices (remove/generate/
+**Carveout-Plan-Pflicht** (MEMORY.md
+[[feedback_carveouts_need_plans]]): die Alias-Lebensdauer „bis
+Cluster-T_close" braucht einen eigenen Slice-Plan-Stub im
+`open/`-Verzeichnis (`slice-v1-cli-cleanup-add-preview-mode-
+alias`, T8 dieses Slices legt ihn an). Ohne Plan wäre der
+Carveout ein loser Hänger ohne Cleanup-Owner. Alternative:
+**Alias als permanente Backward-Compat-Garantie** deklarieren
+und das Cluster-T_close-Removal-Versprechen ganz fallen lassen.
+
+**Vorschlag (T0-Festlegung)**: Cleanup-Plan-Stub-Variante —
+init-T8 erzeugt `open/slice-v1-cli-cleanup-add-preview-mode-
+alias.md` mit Auslöser („Carveout aus init-Slice T0-(c)"),
+einer AK („Alias-Decl raus, Verifikation via
+addservice_factory_test.go") und LOC-Schätzung (~10 LOC, ein
+git rm + ein paar Test-Aliases). **Alias-Lebensdauer-Pflicht**:
+`AddPreviewMode` ist die EINZIGE Service-Prefix-Alias. Folge-Slices (remove/generate/
 config-set) referenzieren `driving.PreviewMode` direkt — keine
 weiteren `XxxPreviewMode`-Aliases. Carveout-Liste in Cluster-
 T_close enthält damit nur eine Alias-Zeile (statt 5+).
@@ -412,9 +472,34 @@ Review-Round-2 Findings:
 - **`mapErr`-Source-Pflicht**: jeder Subcommand-RunE definiert
   `mapErr := mapXxxErrorToDiagnostic` als erste Zeile im
   Funktions-Body und reicht den Function-Value an reportError
-  weiter. Keine App-Struct-Erweiterung. Add-Migration: runAdd
-  setzt `mapErr := mapAddErrorToDiagnostic` und passt vier
-  reportError-Call-Sites an.
+  weiter. Keine App-Struct-Erweiterung. **Add-Migration mit
+  Rename**: T1 benennt heutiges `add.go::mapErrorToDiagnostic`
+  in `mapAddErrorToDiagnostic` um (eine Decl + eine Call-Site
+  bei add.go:246, ~5 LOC); init definiert `mapInitErrorToDiagnostic`
+  parallel. Symmetrie über Subcommand-Prefix vermeidet Cross-Package-
+  Name-Konflikte und macht das `mapErr := mapXxxErrorToDiagnostic`-
+  Pattern in jedem RunE konkret nachvollziehbar.
+
+- **Alternative-Form `errorEnvelopeReq`-Struct erwogen, abgelehnt**:
+  Round-3 Reviewer vorschlug ein Config-Struct
+  (`type errorEnvelopeReq struct { Out, Err, Planned, Changes,
+  DryRun, Diff, Command, MapErr }`) gegen die 8-Param-Signatur.
+  T0-Entscheidung: bei der decomposed-Form bleiben — Add-Pattern
+  hat keine Config-Structs für andere Helper, einführen würde
+  inkonsistent gegen das etablierte Pattern. Falls Cluster-T_close
+  einen einheitlichen Helper-Stil etabliert, wandert die
+  Migration in einen eigenen Cleanup-Slice.
+
+- **`mapResponseToWire`-Migration-Pflicht**:
+  `add.go::mapResponseToWire(resp, withHunks)` und das interne
+  `computeChangeCountAndHunks(pf)` sind heute add-private.
+  Decomposed-Helper-Signatur erfordert auch deren Migration:
+  T1 benennt um auf `mapPlannedFilesToWire(pfs, withHunks)`
+  und verschiebt nach `cli/wireshapes.go` (oder direkt in den
+  `previewmode.go`-Block als allgemeiner cli-Helper).
+  `computeChangeCountAndHunks` zieht mit. Zwei add-Call-Sites
+  (add.go writeAddJSON Z. 227, writeAddErrorEnvelope Z. 264)
+  aktualisieren. LOC-Delta ~15.
 
 - **writeDiff-Header-Format (Option a, command-agnostisch)**:
   `writeDiff(out, plannedFiles)` emittiert `--- <path> (<action>)`-
@@ -471,7 +556,7 @@ gegenüber dem ursprünglichen Stub gemäß
 | `driving.ErrProjectExists`, `driving.ErrFileExists` | `port/driving/initproject.go` | `LH-FA-INIT-004` | 10 |
 | `driving.ErrConfirmationRequired` (shared) | `port/driving/down.go` | `LH-FA-INIT-005` | 10 |
 | `driving.ErrForceRequiresBackup`, `driving.ErrBackupUnsupportedKind` | `port/driving/initproject.go` | `LH-FA-INIT-005` | 10 |
-| `driving.ErrBackupSuffixExhausted`, `driving.ErrBackupSourceMissing` | `port/driving/initproject.go` | `LH-NFA-REL-003` | 14 |
+| `driving.ErrBackupSuffixExhausted`, `driving.ErrBackupSourceMissing` | `port/driving/initproject.go` | `LH-NFA-REL-003` | 14 (heute schon via `cli.go::isFilesystemError` Z. 369-370 — siehe Doku-Korrektur unten) |
 | `domain.ErrInvalidServiceName` (geteilt mit add) | `domain/servicename.go` | `LH-FA-INIT-006` | 10 |
 | `driving.ErrTemplateConflictsWithFlag` | `port/driving/initproject.go` | `LH-FA-CLI-006` | 2 |
 | **`driving.ErrInitFileSystem` (neu)** | `port/driving/initproject.go` (T2) | **`LH-NFA-REL-003`** | **14** |
@@ -483,15 +568,30 @@ Service-Name-Validierung. Init übernimmt diese Konvention; ein
 dedizierter LH-Code für Service-Name-Validation bleibt
 Cluster-T_close-Sub-Decision.
 
+**Footnote — Backup-Sentinel-Doku-Korrektur (T8-Pflicht)**:
+heutiges `cli.go::ExitCode`-Godoc Z. 241-244 labelt
+`ErrBackupSuffixExhausted` + `ErrBackupSourceMissing` als
+`LH-FA-INIT-005`-Klasse, obwohl `isFilesystemError` (Z. 369-370)
+sie schon auf Exit 14 routet. Spec §595-619 (INIT-005 „Über-
+schreibschutz") spricht NICHT von „filesystem-failure-class";
+die Slice-Engineering-Entscheidung shiftet die LH-Code-Klassifi-
+kation auf `LH-NFA-REL-003` (technical-FS-failure), um Envelope-
+Code und Exit-Code-Klasse zu synchronisieren. T8-Doku-Edit:
+`cli.go` Z. 241-244 Godoc-Comment auf neue Klassifikation
+nachziehen.
+
 **Switch-Order-Pflicht (Add R6 #11 erblich)**:
 `mapErrorToDiagnostic` für init MUSS `ErrInitFileSystem` als
 ERSTEN `errors.Is`-case prüfen. Multi-`%w`-Wraps (Go 1.20+) machen
 `errors.Is(err, sentinel)` für BEIDE gewrappte Sentinels in der
-gleichen Chain true; `executeWriteFiles`/`backup.go` wrappen
-FS-Errors als `fmt.Errorf("...: %w: %w", path, ErrInitFileSystem,
-rawErr)`. Ohne FS-first-Order würde ein künftiger fachlicher
-Sentinel im Multi-Wrap die FS-Klassifikation (`LH-NFA-REL-003` /
-Exit-Code 14) auf einen Exit-Code-10-Fachfehler downgraden.
+gleichen Chain true; **T3 wrappt** FS-Errors als
+`fmt.Errorf("%s: %w: %w", path, ErrInitFileSystem, rawErr)` —
+heutiger Stand ist Single-`%w` (`initproject.go` Z. 819/867/969:
+`fmt.Errorf("write %s: %w", plan.Template.Path, err)`), T3
+erweitert auf Multi-`%w` analog `addservice_execute.go`. Ohne
+FS-first-Order würde ein künftiger fachlicher Sentinel im Multi-
+Wrap die FS-Klassifikation (`LH-NFA-REL-003` / Exit-Code 14) auf
+einen Exit-Code-10-Fachfehler downgraden.
 
 **Switch-Order verbindlich** (T6-Pin verifiziert die Reihenfolge):
 
@@ -511,7 +611,13 @@ case errors.Is(err, driving.ErrProjectExists), errors.Is(err, driving.ErrFileExi
 case errors.Is(err, domain.ErrInvalidProjectName),
      errors.Is(err, domain.ErrInvalidServiceName):
                                                   // 6. INIT-006 Name-Validation (10)
-default:                                          // 7. LH-FA-CLI-006 fallback
+default:
+    // 7. Default → LH-FA-CLI-006 als Envelope-Code, Exit-Code
+    //    via cli.ExitCode(err) (NICHT automatisch 2 — isUsageError
+    //    matched nur ErrTemplateConflictsWithFlag + Cobra-Usage-
+    //    Errors). Unbekannte Sentinels landen damit als
+    //    LH-FA-CLI-006 / Exit 1, was die korrekte Fallback-
+    //    Klassifikation ist.
 }
 ```
 
@@ -547,11 +653,23 @@ liest init im Dry-Run-Pfad auch über `s.fs.Exists`/`Lstat`/
 
 Der `RecordingFileSystem` delegiert Reads grundsätzlich an den
 underlying-FS und captured sie nicht (siehe `recordingfs.go`
-Read-Methods Z. 90-120 plus Test
-`TestRecordingFS_ReadsAlwaysDelegate`). T6-Spy-Check muss
+Read-Methods Z. 103-122 — Exists/ReadFile/ReadDir/Lstat — plus
+Test `TestRecordingFS_ReadsAlwaysDelegate`). T6-Spy-Check muss
 zwischen **Writes** (verboten im Dry-Run, Counter MUSS 0 sein)
 und **Reads** (erlaubt, Counter irrelevant) unterscheiden. Pin-
 Doku in T6-Test-Kommentar explizit ausweisen.
+
+**Soft-Existing × `--devcontainer`-Kollision**: `.devcontainer/
+devcontainer.json` ist der 6. softIndicator (initproject.go
+Z. 446). `init myproj --devcontainer --dry-run --json` auf
+existierender CWD mit dem File trifft `checkSoftExisting` BEVOR
+die `--devcontainer`-aware planning läuft. T0-Outcome: das
+`--devcontainer`-Flag ändert die Soft-Detection NICHT;
+nur `--force`/`--backup`/`--no-interactive` (T0-Disambigua-
+toren) hebeln Detection auf. T6 ergänzt einen Pin-Test für
+diese Interaktion (Existing-Project-Fixture mit `.devcontainer/
+devcontainer.json` + `--devcontainer --dry-run --json` →
+ErrProjectExists wie ohne `--devcontainer`).
 
 ### T0-(h) `count`-Semantik bei BackupPath-Indirektion
 
@@ -588,6 +706,16 @@ machen; sichtbar-mit-count-0 ist UX-transparent
 T0-(k)). T6 pinnt die Form via Re-init-Pin-Test gegen ein
 existierendes Projekt mit identischem managed-Block.
 
+**`actionOverwriteFull`-Content-identical-Subform** (
+`--backup`-Pfad mit byte-identischem Body, z. B. Re-init nach
+manuellem Restore): Recorder capturet (a) den Backup-PlannedFile
+als `{action: "create", count: Lines(Original)}` — Backup ist
+immer real, identisch oder nicht; (b) den File-PlannedFile als
+`{action: "modify", count: 0, hunks: omitted}`; (c)
+`writeInitDiff` rendert das `(no changes)`-Hint analog zum
+actionReplaceBlock-identical-Fall. T6-Pin via Re-init mit hand-
+restoriertem identischen `.gitignore` o.ä.
+
 ### T0-(i) Template-Mode-Preview als V1-Out-of-Scope-Carveout
 
 **Round-2 Finding B-4 strukturelle Lücke**: `--template <name>`
@@ -620,13 +748,21 @@ nichts, der Dry-Run schreibt trotzdem.
    eigene Tranche.
 
 **Vorschlag (T0-Festlegung)**: **Option 3** — Out-of-Scope für
-diesen Slice. Init-T5 RunE rejects `--template + --dry-run|--diff`
-via existierender `ErrTemplateConflictsWithFlag` (heute schon für
-`--template + --devcontainer/--force/--backup` aktiv —
-`initproject.go` Z. 360-367). Doku-Hint in `cli-json-output.md`
-§6.4: „`--template` ist in V1 mutex zu `--dry-run`/`--diff`; siehe
-Folge-Slice `slice-v1-cli-json-dry-run-template-preview` (geplant)
-für die Composition-Root-Refactor-Variante."
+diesen Slice. **NEUER CLI-Level-Mutex-Check** in `init.go` RunE
+(T5): `if flags.Template != "" && (flags.DryRun || flags.Diff)
+{ return ErrTemplateConflictsWithFlag }` — gibt den existierenden
+Sentinel mit einem zweckmäßigen Message-Wrap zurück. Die
+`initproject.go` Z. 360-367-Raises decken nur
+`--template + --devcontainer/--force/--backup` ab und sind
+unverändert; die NEUE `--template + --dry-run|--diff`-Mutex ist
+ein CLI-Layer-Check, weil die Use-Case-Request heute keine
+PreviewMode/DryRun-Felder hat (T2 fügt sie hinzu, aber die
+Mutex bleibt CLI-seitig für klare Fehler-Lokalisation). Pin-
+Form siehe §Aufhebungsbedingung Template-Reject-Pin oben. Doku-
+Hint in `cli-json-output.md` §6.4: „`--template` ist in V1 mutex
+zu `--dry-run`/`--diff`; siehe Folge-Slice
+`slice-v1-cli-json-dry-run-template-preview` (geplant) für die
+Composition-Root-Refactor-Variante."
 
 Template-Failures (`ErrTemplateNotFound`/`ErrTemplateRender`/
 `ErrTemplateCatalog`) bleiben mit ihrer heutigen LH-Klassifikation
@@ -733,14 +869,114 @@ um einen Dedup-Check ergänzen: skip wenn das Dir bereits in
 einen kleinen In-Memory-Dir-Existence-Overlay-Set führen, der
 auf MkdirAll/Mkdir/recordImplicitMkdir-Calls updated wird).
 Bonus: dieser Fix gilt auch für add — Add-Code-Mutation in T1
-zieht das gleichzeitig mit.
+zieht das gleichzeitig mit. **Dedup-Datenstruktur** (T1-Pin):
+`map[string]bool` als private `r.knownDirs`-Field der
+`RecordingFileSystem`-Struct, initialisiert in `New()` und
+gefüllt aus `recordDir` (Mkdir/MkdirAll) und
+`recordImplicitMkdir` selbst. `RemoveAll` löscht den Eintrag;
+`Rename` schiebt um. T1 ergänzt `TestRecordingFS_ImplicitMkdir
+Deduplicates` als Pin.
+
+### T0-(n) `initGit`-Skip im Dry-Run (per-request-FS-Swap reicht nicht aus)
+
+**Round-3 Adversarial-Finding C-1**: `InitProjectService.Init()`
+ruft `s.initGit(ctx, ...)` (initproject.go Z. 311-315), das den
+separaten `driven.GitClient`-Port nutzt — NICHT den per-request-
+swappable `s.fs`. Konsequenz: `u-boot init myproj --dry-run
+--json` shells out `git init` auf die echte Festplatte und legt
+`.git/` an, obwohl `--dry-run` Null-FS-Mutationen verspricht.
+Der Negative-Pin aus §Aufhebungsbedingung (Spy auf fs.*-Calls)
+sieht das nicht — git-Operationen laufen am Recorder vorbei.
+
+**Drei Optionen**:
+
+1. **Direct-Skip in Init()**: `if req.PreviewMode == PreviewDryRun
+   { skip s.initGit }`. Einfach; PreviewAndApply (`--diff` ohne
+   `--dry-run`) lässt `git init` laufen.
+2. **noopGit-Adapter im fsFactory**: Composition-Root liefert
+   pro PreviewMode auch einen Git-Adapter (production oder noop).
+   Symmetrisch zu fsFactory, aber Factory-Signatur wird 3-Tuple.
+3. **gitFactory analog fsFactory**: separate Factory für git.
+   Cleaner aber 2 Factories statt einer.
+
+**Vorschlag (T0-Festlegung)**: **Option 1** — Direct-Skip mit
+Wahrheitstabelle `PreviewDryRun → skip; PreviewAndApply → run;
+PreviewNone → run`. Kein Architektur-Side-Effect, minimaler
+Code-Eingriff in T3. T6 ergänzt einen `--dry-run --json`-Test
+in non-git CWD und verifiziert via `os.Stat(".git/")` dass KEIN
+.git/-Dir entstanden ist plus via Spy auf `s.git` dass
+`Init`-Calls-Counter == 0 ist.
+
+### T0-(o) JSON-Mode-ProgressPort-Silencing
+
+**Round-3 Adversarial-Finding C-2**: init schreibt im
+`emitSummary`-Pfad (initproject.go Z. 283)
+`progress.AffectedFiles`-Events DURING der Use-Case-Call auf
+stdout — über den `driven.Progress`-Port, der im Composition-Root
+mit `progress.NewText(stdout)` verdrahtet ist (main.go Z. 64).
+In `--json`-Mode landet das auf stdout VOR dem JSON-Envelope und
+JSON-Parser-Konsumenten brechen (zwei JSON-Objects, oder Text-
+Prefix vor JSON). add hat KEINEN Progress-Port — init ist der
+erste modifying-Service mit stdout-bound Port aus dem Use-Case.
+
+**Vorschlag (T0-Festlegung)**: **Composition-Root-Swap analog
+fsFactory**: das CLI-RunE detected `flags.JSON` und konstruiert
+einen `progress.Noop`-Adapter. Aktivierung über
+`req.SilenceProgress bool`-Field auf `InitProjectRequest` (T2)
+oder über einen Setter (`s.SetProgress(noop)`) im Init()-
+Wrapper. Pin-Form (T6): `init myproj --json` und `init myproj
+--dry-run --json` produzieren stdout das exakt EINE JSON-Object
+enthält (`json.Decode → io.EOF` nach einem Decode). Doku-Hint
+in `cli-json-output.md` §7: „Modifying-Subcommands mit stdout-
+bound ProgressPorts MÜSSEN den Port in JSON-Mode silencen — der
+Recorder schützt nur die FS-Layer, nicht stdout."
+
+### T0-(p) Context-Cancellation-Handling (Status-quo-Carveout)
+
+**Round-3 Adversarial-Finding C-5**: Init und Add haben heute
+keine `ctx.Err()`/`select-on-Done`-Checks. Eine
+`context.Canceled` mid-init produziert keinen Spec-konformen
+Envelope — sie fällt durch zur default-Klausel
+(`LH-FA-CLI-006` / Exit 2).
+
+**Vorschlag (T0-Festlegung)**: **Status-quo Out-of-Scope** für
+V1. Context-Cancellation ist Cross-Cutting-Concern für ALLE
+modifying-Subcommands; ein konsistenter Exit-Code-130-Convention-
+Slice wäre eigener Cluster-T_close-Block. Init-Slice ändert
+heutigen Pfad NICHT — Doku-Hint in `cli-json-output.md` §7:
+„Ctrl-C / context-cancellation während eines modifying-Sub-
+commands fällt heute auf `LH-FA-CLI-006` / Exit 2; eine
+Interrupt-aware Exit-130-Convention bleibt eigener Folge-Slice."
+
+### T0-(q) Planning-Phase-Failures (Force/Validation vor Recorder)
+
+**Round-3 Adversarial-Finding C-3**: Init's `planTemplatedFiles`
+(Z. 273) durchläuft `planFile` (Z. 642+) PRO Skeleton-File und
+kann ErrForceRequiresBackup / ErrBackupUnsupportedKind / Template-
+Read-Failures werfen BEVOR irgendein Recorder-Capture stattfindet.
+Mid-Write-Failure-Pin aus §Aufhebungsbedingung deckt nur
+Execute-Phase-Failures ab. Planning-Phase-Failures haben
+`plannedFiles[] == []` aber `status: error` mit fachlichem Code.
+
+**Vorschlag (T0-Festlegung)**: explizite Pin-Form in
+§Aufhebungsbedingung (Planning-Phase-Force-Failure-Pin oben
+ergänzt). T6-Acceptance ergänzt einen dedizierten Test für
+`init --force --dry-run --json` auf CWD mit unmanaged
+`.gitignore` — Pin: `plannedFiles: [], diagnostics:
+[LH-FA-INIT-005], exitCode: 10`. Die Unterscheidung zu Mid-
+Write-Failure (`exitCode: 14`) ist load-bearing — Planning-
+Errors sind User-Action-Klasse (Exit 10), Write-Errors sind
+FS-Klasse (Exit 14).
 
 ## T0-Outcomes
 
 Verbindliche Festzurrung wandert nach `next/`-Übergang in diesen
-Block — analog add-Slice. Erwartete Form: Tabelle mit den **13
-Sub-Decisions (a)-(m)** plus Implementations-Pflicht-Spalte
-(T1-T7; T8 ist reine Doku-Schließung).
+Block — analog add-Slice. Erwartete Form: Tabelle mit den **17
+Sub-Decisions (a)-(q)** plus Implementations-Pflicht-Spalte
+(T1-T7; T8 ist reine Doku-Schließung). Nach Review-Round-3 vier
+neue Sub-Decisions ergänzt: T0-(n) initGit-Skip, T0-(o)
+ProgressPort-Silencing, T0-(p) Context-Cancellation-Carveout,
+T0-(q) Planning-Phase-Failures.
 
 ## Tranchen (vorgeschlagen)
 
@@ -751,43 +987,56 @@ die Acceptance-Test-Matrix größer.
 | T | Inhalt | LOC | Voraussetzung |
 | - | ------ | --- | --- |
 | T0 | Discovery + 13 Sub-Decisions klären; Pattern-Erbe-Tabelle pinnen | — (Plan) | — |
-| T1 | **Refactor-Tranche**: `previewModeFromFlags` extrahieren nach `cli/previewmode.go` (T0-(b); folgt etabliertem Pattern aus `jsonenvelope.go`/`statusview.go`/`jsonallowlist.go`); `driving.PreviewMode` umbenennen + `type AddPreviewMode = PreviewMode`-Alias (T0-(c)); `reportError`/`writeErrorEnvelope`/`writeDiff`-Helper generalisieren mit decomposed-Slices-Signatur (T0-(e)); Add-Migration auf gemeinsame Helper; Add-Godoc-Wahrheitstabellen in 5 Files (addservice.go, recordingfs.go, recordingport.go, main.go, add.go) mitgezogen (~40-50 LOC Comment-Edits); **recordImplicitMkdir-Dedup-Fix** (Round-2 Finding B-4 — gilt auch für add). Add-Tests bleiben grün durch Type-Alias-`=`-Syntax. | ~150 | T0 |
-| T2 | **Port-Types + Sentinel**: `driving.InitProjectRequest.PreviewMode`-Field, `driving.InitProjectResponse.PlannedFiles`/`Changes`-Felder (analog `AddServiceResponse`), `driving.ErrInitFileSystem`-Sentinel, `cli.isFilesystemError`-Erweiterung. Unit-Test für Sentinel-Identity + ExitCode-Routing. | ~60 | T0 |
-| T3 | **Application-Layer**: `InitProjectService.fsFactory`-Feld + `initMu sync.Mutex` + `NewInitProjectServiceWithFactory`-Konstruktor + `Init()`-Wrapper mit Mutex/Swap analog `AddServiceService.Add()`; `mapCaptureToPlannedFiles(captured, req.BaseDir)`. **Neun FS-Wrap-Stellen** (initproject.go Z. 776 MkdirAll-Loop / Z. 818 WriteFile actionWrite / Z. 866 WriteFile actionReplaceBlock (re-init only) / Z. 968 WriteFile actionOverwriteFull (re-init only); backup.go Z. 88 RemoveAll / Z. 139 CopyExclusive / Z. 149 Mkdir / Z. 198 MkdirAll / Z. 209 Copy) mit `%w: ErrInitFileSystem` umhüllt — Code-Sites ≠ Runtime-Call-Count, weil Z. 776 in einer Loop läuft. Factory-Tests analog `addservice_factory_test.go` (~200 LOC Test-Datei). | ~280 | T2 |
+| T1 | **Refactor-Tranche**: (a) `previewModeFromFlags` extrahieren nach `cli/previewmode.go` (T0-(b); folgt etabliertem Pattern aus `jsonenvelope.go`/`statusview.go`/`jsonallowlist.go`) + Test-File-Move `add_internal_test.go → previewmode_internal_test.go`; (b) `driving.PreviewMode` umbenennen + `type AddPreviewMode = PreviewMode`-Alias (T0-(c)); (c) `reportError`/`writeErrorEnvelope`/`writeDiff`-Helper generalisieren mit decomposed-Slices-Signatur (T0-(e)); (d) `mapResponseToWire`/`computeChangeCountAndHunks` → `mapPlannedFilesToWire` umbenennen + nach `cli/wireshapes.go` verschieben (T0-(e)); (e) Add-Migration auf gemeinsame Helper (4 Call-Sites in runAdd umstellen); (f) `add.go::mapErrorToDiagnostic → mapAddErrorToDiagnostic` Rename (Decl + Call-Site); (g) Add-Godoc-Wahrheitstabellen in 5 Files (`port/driving/addservice.go`, `recordingfs.go`, `recordingport.go`, `cmd/uboot/main.go`, `add.go`) mitgezogen; (h) **recordImplicitMkdir-Dedup-Fix** mit `r.knownDirs map[string]bool` (Round-2 Finding B-4 — gilt auch für add). Add-Tests bleiben grün durch Type-Alias-`=`-Syntax. LOC-Sub-Breakdown: previewmode.go ~30; Rename+Alias ~15; Helper-Generalisierung ~90; mapResponseToWire-Migration ~15; Add-Migration ~30; mapErrorToDiagnostic-Rename ~5; Godoc ~50; recordImplicitMkdir-Dedup ~15 = ~250. | ~250 | T0 |
+| T2 | **Port-Types + Sentinel**: `driving.InitProjectRequest.PreviewMode`-Field + `driving.InitProjectRequest.SilenceProgress`-Field (T0-(o)), `driving.InitProjectResponse.PlannedFiles`/`Changes`-Felder (analog `AddServiceResponse`), `driving.ErrInitFileSystem`-Sentinel, `cli.isFilesystemError`-Erweiterung. Unit-Test für Sentinel-Identity + ExitCode-Routing. | ~70 | T0 |
+| T3 | **Application-Layer**: `InitProjectService.fsFactory`-Feld + `initMu sync.Mutex` + `NewInitProjectServiceWithFactory`-Konstruktor + `Init()`-Wrapper mit Mutex/Swap analog `AddServiceService.Add()`; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; **initGit-Skip-Logic** (T0-(n): `if req.PreviewMode == PreviewDryRun { skip s.initGit }`); **ProgressPort-Swap** (T0-(o): `if req.SilenceProgress { s.progress = noopProgress }` via Setter oder request-time-swap analog s.fs). **Neun FS-Wrap-Stellen** (initproject.go Z. 776 MkdirAll-Loop / Z. 818 WriteFile actionWrite / Z. 866 WriteFile actionReplaceBlock (re-init only) / Z. 968 WriteFile actionOverwriteFull (re-init only); backup.go Z. 88 RemoveAll / Z. 139 CopyExclusive / Z. 149 Mkdir / Z. 198 MkdirAll / Z. 209 Copy) mit `%w: ErrInitFileSystem` umhüllt — Wrap-Form ist Multi-`%w` analog addservice_execute.go (heute Single-`%w`, T3 erweitert). Code-Sites ≠ Runtime-Call-Count, weil Z. 776 in einer Loop läuft. Factory-Tests analog `addservice_factory_test.go` (~200 LOC Test-Datei). | ~320 | T2 |
 | T4 | **Composition-Root-Wiring** in `cmd/uboot/main.go`: `initFSFactory`-Closure analog `addFSFactory`. | ~30 | T3 |
-| T5 | **CLI-RunE**: `init`-RunE auf den gemeinsamen Error-Envelope-Helper aus T1, drei JSON-Pfade analog add, Template-Modus-Reject (`ErrTemplateConflictsWithFlag` für `--template + --dry-run|--diff`, T0-(i)), Allowlist-Migration (`"u-boot init": true`), Reject-Pin-Test `TestRootJSON_RejectsAllNonMigratedForms` (cases-Slice 10→9). | ~150 | T1 + T2 (T4 für Run-time-Smoke aber Code-parallelisierbar) |
-| T6 | **Acceptance-Tests** (T0-(m)-Matrix): ~13 Top-Level-Tests (siehe T0-(m) T6-Math-Aufschlüsselung); Soft-Existing-Pin (3 Disambiguatoren); Mid-Write-Failure-Pin (zwei Positionen: früh + spät, T0-(f) Switch-Order-Pin mit Multi-`%w`-Konstrukt); 3-Flag-Combo `--dry-run --diff --json`; Concurrent-Init-Mutex-Pin; Path-Anchor-Pin (`PlannedFile.Path` ist project-relativ, kein `/`-Prefix). Table-driven wo möglich. | ~400 | T5 |
+| T5 | **CLI-RunE**: `init`-RunE auf den gemeinsamen Error-Envelope-Helper aus T1; **NEUER CLI-Mutex-Check** `--template + --dry-run|--diff → ErrTemplateConflictsWithFlag` (T0-(i)); drei JSON-Pfade analog add; `req.SilenceProgress = flags.JSON` setzen (T0-(o)); Allowlist-Migration (`"u-boot init": true`); Reject-Pin-Test `TestRootJSON_RejectsAllNonMigratedForms` in `internal/adapter/driving/cli/jsonallowlist_test.go` (T0-Outcome verifiziert pre-T5-Count durch lokales `make test` und schreibt sie hier ins T0; post-T5 = pre-T5 − 1). | ~160 | T1 + T2 (T4 für Run-time-Smoke aber Code-parallelisierbar) |
+| T6 | **Acceptance-Tests**: ~13 Flag-Matrix-Tests (T0-(m)); plus Soft-Existing-Pin (3 Disambiguatoren) + Soft-Existing × `--devcontainer` (T0-(g)); Planning-Phase-Force-Failure-Pin (T0-(q), exitCode 10); Mid-Write-Failure-Pin (zwei Positionen, T0-(f) Switch-Order-Pin mit Multi-`%w`-Konstrukt, exitCode 14); Template-Reject-Pin (T0-(i), exitCode 2); 3-Flag-Combo `--dry-run --diff --json`; Concurrent-Init-Mutex-Pin (zwei Goroutinen auf ein InitProjectService-Instance, unterschiedliche TempDirs); Path-Anchor-Pin (`PlannedFile.Path` ist project-relativ); **initGit-Skip-Pin** (T0-(n): `--dry-run --json` in non-git CWD → kein .git/-Dir + Spy-Counter 0); **JSON-stdout-Cleanliness-Pin** (T0-(o): `json.Decode → io.EOF`). Test-Fixture-Helper `initFixture(t, opts)` für TempDir + ExistingProject-Setup (shared, ~50 LOC) — per-Test-Body ~25 LOC. ~17 Tests + Mid-Failure-Helper-Cluster + Helper-File = ~600 LOC realistisch. | ~600 | T5 |
 | T7 | **Review-Fix-Rounds** (~1-2 Runden bei Pattern-Erbe; add hatte R6/R7/R8): Diff aus Reviewer-Findings konsolidieren, Fixes als eigene Sub-Commits, DoD-Hash-Tabelle ergänzen. | ~80 | T6 |
-| T8 | **Closure**: CHANGELOG-Eintrag, `cli-json-output.md` §6-Tabelle (init→done) + §6.1-Reject-Liste (init raus) + §6.4 neue init-Sektion + §7 Mutations-Matrix (init-Zeile), roadmap-Update (3/9 done), Slice nach `done/` mit DoD-Hash-Tabelle (inkl. Hashes der in T1 mutierten Add-Slice-Files; siehe „DoD-Hash-Snapshot-Policy" unten). | — (Doku) | T7 |
+| T8 | **Closure**: CHANGELOG-Eintrag, `cli-json-output.md` §6-Tabelle (init→done) + §6.1-Reject-Liste (init raus) + §6.4 neue init-Sektion (inkl. Context-Cancellation-Carveout T0-(p) und ProgressPort-Silencing-Hint T0-(o)) + §7 Mutations-Matrix (init-Zeile); `cli.go` Z. 241-244 Godoc-Korrektur (Backup-Sentinels auf LH-NFA-REL-003 nachziehen, T0-(f) Footnote); roadmap-Update (3/9 done); **`slice-v1-cli-cleanup-add-preview-mode-alias` als open/-Stub anlegen** (Carveout-Plan-Pflicht T0-(c)); Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
 
-LOC-Bilanz: ~1150 LOC (war ~1110 vor Round-2-Korrekturen) —
-Pattern-Erbe spart ~17 % gegenüber add (~1380). Init ist
-umfangreicher als ursprünglich geschätzt, weil die Mutations-
-Matrix breiter (9 wrap-sites), die Test-Matrix größer (~17
-Tests inkl. Path-Anchor + Mutex + Mid-Write), und der T1-
-Refactor sowohl init-Vorbereitung als auch Add-Code-Migration
-plus recordImplicitMkdir-Dedup-Fix umfasst.
+LOC-Bilanz: ~1480 LOC (war ~1150 vor Round-3-Korrekturen) —
+Pattern-Erbe deckt nur noch ~7 % gegenüber add (~1380), weil
+init's Adversarial-Findings (T0-(n)/(o)/(p)/(q)) plus T1's
+realistischere Helper-Generalisierung den Pattern-Spar-Effekt
+weitgehend aufzehren. Slice ist damit deutlich größer als
+ursprünglich geschätzt — Pattern-Vorbild-These ist nach
+Round-3 abgeschwächt, weil init mehr init-spezifische
+Eigenheiten hat (initGit-Port, ProgressPort, Planning-Phase-
+Failures, Soft-Existing-Detection), als das Add-Pattern
+abdeckt.
 
 **Reihenfolge-Pflicht**: T1 und T2 sind code-parallel
 (unterschiedliche Files); T3 wartet auf T2 (braucht
-InitProjectRequest.PreviewMode + InitProjectResponse-Felder +
-ErrInitFileSystem); T4 wartet auf T3; T5 wartet auf T1 + T2
-(braucht den gemeinsamen Helper + Sentinel-Mapping; kann
-parallel zu T4 entwickelt werden, weil T5's Interface bereits
-via T3 fixiert ist); T6 wartet auf T5; T7 wartet auf T6;
-T8 wartet auf T7.
+InitProjectRequest.PreviewMode + SilenceProgress +
+InitProjectResponse-Felder + ErrInitFileSystem); T4 wartet auf
+T3; T5 wartet auf T1 + T2 (braucht gemeinsamen Helper +
+Sentinel-Mapping; kann parallel zu T4 entwickelt werden, weil
+T5's Interface bereits via T3 fixiert ist); T6 wartet auf T5;
+T7 wartet auf T6; T8 wartet auf T7.
 
 **DoD-Hash-Snapshot-Policy** (MEMORY.md feedback
-[[feedback_done_slice_dod_hash]]): T1-Commits mutieren 5 Files
-aus dem add-Slice's done-Snapshot (addservice.go, recordingfs.go,
-recordingport.go, main.go, add.go). Diese Mutationen sind
-**additiv** auf der add-Slice's DoD-Hash-Tabelle — der init-
-Slice's DoD-Hash-Tabelle in T8 listet die post-T1-Hashes
-für diese 5 Files separat aus. Die add-Slice's done/-Datei
-bekommt KEIN Update (accepted Slices werden nicht
-umgeschrieben); statt dessen ein Footnote-Pointer im
-init-Slice's DoD-Tabelle: „T1 migriert add-Slice-Files,
-post-T1-Revisionen siehe Tranchen-Hash T1".
+[[feedback_done_slice_dod_hash]]): die DoD-Hash-Tabelle nutzt
+**Commit-Hashes pro Tranche** (nicht File-Content-Hashes —
+entspricht etablierter Praxis in `done/slice-v1-cli-json-dry-
+run-add.md` und anderen done-Slices). T1-Commits mutieren bis
+zu **8 Files** aus dem add-Slice's done-Snapshot
+(`port/driving/addservice.go`, `application/addservice.go`,
+`recordingfs.go`, `recordingport.go`, `cmd/uboot/main.go`,
+`adapter/driving/cli/add.go`, `adapter/driving/cli/add_internal_test.go`,
+plus `adapter/driving/cli/recordingfs.go` falls Dedup-Test-
+Datei mutiert). Diese Mutationen sind **additiv** auf der add-
+Slice's DoD-Hash-Tabelle:
+
+- Init-Slice's T8-Tranchen-Tabelle bekommt für T1 einen
+  Commit-Hash plus eine Footnote mit der vollständigen
+  Liste der mutierten add-Slice-Files.
+- Add-Slice's done/-Datei bleibt unverändert (accepted Slices
+  werden nicht umgeschrieben — AGENTS.md §Slice-Disziplin).
+- Forward-Pointer: ein neuer Status-Header-Eintrag in init-
+  Slice's done-Datei: „T1 migriert add-Slice-Files, post-T1-
+  Revisionen siehe T1-Commit-Hash".
 
 ## Out of Scope
 
