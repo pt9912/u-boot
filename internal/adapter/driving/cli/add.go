@@ -96,31 +96,6 @@ Examples:
 	return cmd
 }
 
-// previewModeFromFlags maps the --dry-run / --diff flag combination
-// to the [driving.AddPreviewMode] enum per slice-v1-cli-json-dry-run-
-// add T0-(b) Wahrheitstabelle:
-//
-//	--dry-run | --diff | mode              | production write?
-//	-----------+--------+-------------------+------------------
-//	no        | no    | PreviewNone       | yes (Normal-Mode)
-//	yes       | no    | PreviewDryRun     | no  (Plan only)
-//	no        | yes   | PreviewAndApply   | yes (Plan + Write)
-//	yes       | yes   | PreviewDryRun     | no  (Diff preview)
-//
-// The --dry-run-wins rule on the (yes, yes) cell matches LH-FA-CLI-
-// 007 (dry-run is a hard "no write") combined with LH-FA-CLI-008
-// (--diff alone is preview-and-apply). With both flags set the user
-// asked for a diff preview WITHOUT writing — that's PreviewDryRun.
-func previewModeFromFlags(dryRun, diffFlag bool) driving.AddPreviewMode {
-	if dryRun {
-		return driving.PreviewDryRun
-	}
-	if diffFlag {
-		return driving.PreviewAndApply
-	}
-	return driving.PreviewNone
-}
-
 // runAdd is split from the Cobra closure for direct unit-testing
 // (no Cobra command construction needed). ctx is taken as the first
 // parameter explicitly so contextcheck can see the propagation.
