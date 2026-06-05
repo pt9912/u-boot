@@ -287,7 +287,6 @@ func TestCompute_PostgresComposeExisting(t *testing.T) {
     restart: unless-stopped
   postgres:
     image: postgres:16
-    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
@@ -300,8 +299,32 @@ func TestCompute_PostgresComposeExisting(t *testing.T) {
 	if got := diff.CountFromHunks(hunks); got <= 6 {
 		t.Errorf("postgres existing: CountFromHunks = %d, want > 6 (NewLines = inserts + context)", got)
 	}
-	additions := strings.Count(hunks[0].Content, "\n+")
-	if additions < 6 {
-		t.Errorf("postgres existing: counted %d '+' lines, want ≥ 6", additions)
+	if got := diff.CountAdditions(hunks); got != 6 {
+		t.Errorf("postgres existing: CountAdditions = %d, want exactly 6 (Spec §477)", got)
+	}
+}
+
+// TestCountAdditions_EdgeCases pins the exact additive-line count
+// against simple cases — keeps drift between Spec §477 and the
+// modify-action `count` semantics visible.
+func TestCountAdditions_EdgeCases(t *testing.T) {
+	cases := []struct {
+		name  string
+		hunks []driving.Hunk
+		want  int
+	}{
+		{name: "nil", hunks: nil, want: 0},
+		{name: "single +line", hunks: []driving.Hunk{{Content: "+a\n"}}, want: 1},
+		{name: "with context", hunks: []driving.Hunk{{Content: " ctx\n+a\n+b\n ctx\n"}}, want: 2},
+		{name: "+ at start", hunks: []driving.Hunk{{Content: "+a\n b\n+c\n"}}, want: 2},
+		{name: "no +lines (pure delete)", hunks: []driving.Hunk{{Content: "-a\n-b\n"}}, want: 0},
+		{name: "multi-hunk", hunks: []driving.Hunk{{Content: "+a\n"}, {Content: "+b\n+c\n"}}, want: 3},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := diff.CountAdditions(tc.hunks); got != tc.want {
+				t.Errorf("CountAdditions = %d, want %d", got, tc.want)
+			}
+		})
 	}
 }

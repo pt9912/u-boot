@@ -61,12 +61,36 @@ func CountLines(content []byte) int {
 	return n
 }
 
-// CountFromHunks sums the NewLines field across all hunks — the
-// `changes[].count` value for action "modify" per T0-(g).
+// CountFromHunks sums the NewLines field across all hunks — counts
+// additions + context lines on the new side. Kept exported for any
+// caller that wants the new-side line-count (e.g. a richer rendering
+// of the diff). For Spec §477 `changes[].count` use [CountAdditions]
+// instead — that variant counts only the true `+` lines and matches
+// the slice §Aufhebungsbedingung Variante B `count: 6`.
 func CountFromHunks(hunks []driving.Hunk) int {
 	total := 0
 	for _, h := range hunks {
 		total += h.NewLines
+	}
+	return total
+}
+
+// CountAdditions counts the `+` lines across all hunks — the true
+// additive-lines count, excluding the context lines that LCS pads
+// around each change cluster. This is the `changes[].count` value
+// for action "modify" per Spec §477 example (`count: 6` for an
+// existing-file modify that appends 6 lines). The T0-(g) Stub
+// initially used [CountFromHunks] (which counts context too), but
+// the numbers diverged from the §477 example by the context-tax;
+// CountAdditions resolves that drift.
+func CountAdditions(hunks []driving.Hunk) int {
+	total := 0
+	for _, h := range hunks {
+		for _, line := range strings.Split(h.Content, "\n") {
+			if strings.HasPrefix(line, "+") {
+				total++
+			}
+		}
 	}
 	return total
 }

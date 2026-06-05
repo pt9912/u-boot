@@ -245,6 +245,64 @@ func TestRecordingFS_CapturedReturnsDefensiveCopy(t *testing.T) {
 	}
 }
 
+// TestRecordingFS_WriteFile_SynthesisesParentMkdirAll pins the
+// slice-v1-cli-json-dry-run-add T0-(b) requirement that the recorder
+// mirrors the production-FS implicit MkdirAll on the parent dir.
+// Without this, --dry-run would silently drop the directory-creation
+// hint that a sub-path write (e.g. `otel/collector-config.yaml`)
+// implies in production.
+func TestRecordingFS_WriteFile_SynthesisesParentMkdirAll(t *testing.T) {
+	prod := newFakeFS(nil)
+	rec := recordingfs.New(prod)
+	if err := rec.WriteFile("otel/collector.yaml", []byte("body\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile sub-path: %v", err)
+	}
+	captured := rec.Captured()
+	if len(captured) != 2 {
+		t.Fatalf("expected 2 records (mkdir + write), got %d: %+v", len(captured), captured)
+	}
+	if captured[0].Path != "otel" || captured[0].Action != "create" {
+		t.Errorf("first record: want {otel, create}, got {%s, %s}", captured[0].Path, captured[0].Action)
+	}
+	if captured[1].Path != "otel/collector.yaml" || captured[1].Action != "create" {
+		t.Errorf("second record: want {otel/collector.yaml, create}, got {%s, %s}", captured[1].Path, captured[1].Action)
+	}
+}
+
+// TestRecordingFS_WriteFile_NoMkdirForExistingDir pins the idempotent
+// no-op branch: when the parent dir already exists, no synthetic
+// MkdirAll record is emitted — matches production MkdirAll's idempotent
+// behaviour and keeps the plannedFiles[] view free of noise.
+func TestRecordingFS_WriteFile_NoMkdirForExistingDir(t *testing.T) {
+	prod := newFakeFS(map[string]string{"otel/.keep": ""})
+	rec := recordingfs.New(prod)
+	if err := rec.WriteFile("otel/collector.yaml", []byte("body\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile sub-path: %v", err)
+	}
+	captured := rec.Captured()
+	if len(captured) != 1 {
+		t.Fatalf("expected 1 record (no mkdir for existing dir), got %d: %+v", len(captured), captured)
+	}
+	if captured[0].Path != "otel/collector.yaml" {
+		t.Errorf("only record: want otel/collector.yaml, got %s", captured[0].Path)
+	}
+}
+
+// TestRecordingFS_WriteFile_NoMkdirForFlatPath pins the flat-path
+// case: writing `compose.yaml` (filepath.Dir = ".") must NOT emit a
+// synthetic mkdir — the dir-anchor is the CWD which always exists.
+func TestRecordingFS_WriteFile_NoMkdirForFlatPath(t *testing.T) {
+	prod := newFakeFS(nil)
+	rec := recordingfs.New(prod)
+	if err := rec.WriteFile("compose.yaml", []byte("body\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile flat: %v", err)
+	}
+	captured := rec.Captured()
+	if len(captured) != 1 {
+		t.Fatalf("expected 1 record (no mkdir for flat path), got %d: %+v", len(captured), captured)
+	}
+}
+
 // Compile-time check (mirrors the production fs adapter): drift would
 // surface as a build error here, not only a test-time error.
 var _ driven.FileSystem = (*recordingfs.RecordingFileSystem)(nil)

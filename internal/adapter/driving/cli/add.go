@@ -345,7 +345,12 @@ func computeChangeCountAndHunks(pf driving.PlannedFile) (int, []driving.Hunk) {
 	case "create":
 		return diff.CountLines(pf.NewContent), hunks
 	case "modify":
-		return diff.CountFromHunks(hunks), hunks
+		// CountAdditions (not CountFromHunks): Spec §477 example
+		// pins `count: 6` for the 6-line postgres-block append, NOT
+		// 6+context. Slice T0-(g)'s original sum(hunk.NewLines) form
+		// included context lines, drift against §477 (review-round-7
+		// finding B).
+		return diff.CountAdditions(hunks), hunks
 	default:
 		// Unknown action — keep parity with the create branch as the
 		// safe fallback; the spec restricts action to {create, modify,

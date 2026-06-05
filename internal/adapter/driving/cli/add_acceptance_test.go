@@ -41,14 +41,16 @@ const composeExistingOld = `services:
 `
 
 // composeExistingNew appends a six-line postgres block (Spec §477
-// `count: 6` — the added lines, not context).
+// `count: 6` — the added lines, not context). The block intentionally
+// totals SIX additive lines (matching the Spec example exactly), not
+// seven — including a fourth attribute would push count to 7 and
+// drift against the §477 canonical example.
 const composeExistingNew = `services:
   redis:
     image: redis:7
     restart: unless-stopped
   postgres:
     image: postgres:16
-    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
@@ -172,15 +174,16 @@ func TestAddAcceptance_VarianteB_Existing_PinsModifyAndAddedLines(t *testing.T) 
 	hunk0, _ := hunks[0].(map[string]any)
 	content, _ := hunk0["content"].(string)
 	additions := strings.Count(content, "\n+") + boolToInt(strings.HasPrefix(content, "+"))
-	if additions < 6 {
-		t.Errorf("Variante B: want ≥ 6 '+' lines (Spec §477), got %d in content=%q", additions, content)
+	if additions != 6 {
+		t.Errorf("Variante B: want exactly 6 '+' lines (Spec §477), got %d in content=%q", additions, content)
 	}
-	// CountFromHunks-formal: changes[0].count must equal sum(hunk.newLines)
-	// across all hunks. With context lines that's ≥ 6.
+	// changes[].count = CountAdditions (review-round-7 B): true
+	// additive lines, NOT additions + context. Spec §477 example
+	// pins this to 6 exactly.
 	changes, _ := env["changes"].([]any)
 	first, _ := changes[0].(map[string]any)
-	if got, _ := first["count"].(float64); int(got) < 6 {
-		t.Errorf("Variante B count: want ≥ 6 (T0-(g) sum), got %v", first["count"])
+	if got, _ := first["count"].(float64); int(got) != 6 {
+		t.Errorf("Variante B count: want exactly 6 (Spec §477), got %v", first["count"])
 	}
 }
 
@@ -220,9 +223,11 @@ func TestAddAcceptance_DiffJSON_HunkStructurePin(t *testing.T) {
 	hunk0, _ := hunks[0].(map[string]any)
 
 	// OldStart must be ≥ 1 when OldLines > 0 — Variante B has the
-	// redis block as 4 context lines before the addition, so
-	// OldStart=1 and OldLines=4 (or similar, depending on context-
-	// padding). NewLines = oldLines + 6 additions.
+	// redis block as 4 context lines before the addition. With the
+	// default 3-line context, the hunk starts at op-index 1 (after
+	// the first Equal "services:" line gets clipped off), so
+	// oldStart=newStart=2 ("  redis:"). The invariant pinned here is
+	// 1-based-coordinates, not a specific value.
 	oldStart, _ := hunk0["oldStart"].(float64)
 	oldLines, _ := hunk0["oldLines"].(float64)
 	newStart, _ := hunk0["newStart"].(float64)
@@ -230,8 +235,8 @@ func TestAddAcceptance_DiffJSON_HunkStructurePin(t *testing.T) {
 	if oldLines <= 0 {
 		t.Errorf("Variante B: oldLines must be > 0 (context lines present), got %v", oldLines)
 	}
-	if oldStart != 1 || newStart != 1 {
-		t.Errorf("Variante B: hunk should start at line 1, got oldStart=%v newStart=%v", oldStart, newStart)
+	if oldStart < 1 || newStart < 1 {
+		t.Errorf("Variante B: hunk 1-based coordinates must be ≥ 1 (T0-(l)), got oldStart=%v newStart=%v", oldStart, newStart)
 	}
 	if newLines <= oldLines {
 		t.Errorf("Variante B: newLines (%v) must be > oldLines (%v) for an additive modify", newLines, oldLines)

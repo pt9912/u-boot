@@ -25,6 +25,7 @@ package recordingfs
 import (
 	"errors"
 	"io/fs"
+	"path"
 
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 )
@@ -211,18 +212,51 @@ func (r *RecordingFileSystem) CopyExclusive(src, dst string, mode fs.FileMode) e
 // ----- Internal capture helpers -----------------------------------
 
 // recordWrite is the shared body for WriteFile/WriteFileExclusive.
-// Fetches the pre-state to classify create vs. modify.
-func (r *RecordingFileSystem) recordWrite(path string, data []byte) {
-	old := r.snapshot(path)
+// Fetches the pre-state to classify create vs. modify, and — per
+// slice T0-(b) — synthesises an implicit MkdirAll-record for the
+// parent directory if it does not exist yet. The production
+// driven/fs/fs.go adapter calls os.MkdirAll(filepath.Dir(path),
+// 0o755) before WriteFile (per the driven.FileSystem contract:
+// "creating parent directories with mode 0o755 as needed"); the
+// recorder mirrors that effect so --dry-run consumers see the
+// planned directory creation in plannedFiles[].
+//
+// Skipped when the parent dir is `.` / `/` (no real dir to create)
+// or already exists in the underlying FS (idempotent — production
+// MkdirAll is a no-op for existing dirs, recorder shouldn't emit
+// noise either).
+func (r *RecordingFileSystem) recordWrite(filePath string, data []byte) {
+	r.recordImplicitMkdir(filePath)
+	old := r.snapshot(filePath)
 	action := actionCreate
 	if old != nil {
 		action = actionModify
 	}
 	r.records = append(r.records, driven.FileMutationRecord{
-		Path:       path,
+		Path:       filePath,
 		Action:     action,
 		NewContent: append([]byte(nil), data...),
 		OldContent: old,
+	})
+}
+
+// recordImplicitMkdir emits the synthetic MkdirAll record for the
+// parent dir of filePath when it would actually be created by the
+// production WriteFile call. Uses path.Dir (forward-slash semantics)
+// because driven.FileSystem paths are always cleaned UNIX-style
+// (see driven/fs/fs.go).
+func (r *RecordingFileSystem) recordImplicitMkdir(filePath string) {
+	dir := path.Dir(filePath)
+	if dir == "." || dir == "/" || dir == "" {
+		return
+	}
+	exists, _ := r.underlying.Exists(dir)
+	if exists {
+		return
+	}
+	r.records = append(r.records, driven.FileMutationRecord{
+		Path:   dir,
+		Action: actionCreate,
 	})
 }
 
