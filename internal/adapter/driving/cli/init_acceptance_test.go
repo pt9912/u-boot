@@ -415,6 +415,72 @@ func TestInitJSON_PreviewModeFromFlags(t *testing.T) {
 // Human-Mode Tests
 // =====================================================================
 
+// TestInitJSON_PositionalNameWithSlashRejectsAsLHInit006 pinnt
+// T0-(k) Path-Anchor (Review-Round-9 #4): wenn der User
+// `u-boot init myproj/` (Trailing-Slash) oder `u-boot init ./myproj`
+// eingibt, MUSS das Verhalten deterministisch sein — der Name wird
+// vom CLI-RunE roh an req.Name gereicht, die Application validiert
+// via domain.NewProjectName (Regex `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`),
+// und der Mapper klassifiziert als LH-FA-INIT-006 (Exit-Code 10).
+// Ohne diesen Pin könnte eine zukünftige Normalisierungs-Phase
+// silently 'myproj/' → 'myproj' machen und den User-Intent (Trailing-
+// Slash falsch dahin interpretieren, dass eine Sub-Directory gemeint
+// war) verschleiern.
+func TestInitJSON_PositionalNameWithSlashRejectsAsLHInit006(t *testing.T) {
+	// Stub gibt den raw Name an domain.NewProjectName weiter und
+	// returnt den resulting error — emuliert das echte
+	// resolveProjectName-Verhalten ohne den ganzen Application-
+	// Initialisierungs-Path zu staging.
+	cases := []struct {
+		name string
+		arg  string
+	}{
+		{"trailing slash", "myproj/"},
+		{"leading dot-slash", "./myproj"},
+		{"trailing dot", "myproj."},
+		{"absolute path", "/abs/myproj"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			stub := &validatingInitUseCaseStub{}
+			app := newAppWithInitStub(stub)
+
+			var stdout, stderr bytes.Buffer
+			execErr := app.Execute(context.Background(),
+				[]string{"--json", "init", tc.arg}, &stdout, &stderr)
+
+			if !errors.Is(execErr, domain.ErrInvalidProjectName) {
+				t.Fatalf("execute %q: want ErrInvalidProjectName, got %v", tc.arg, execErr)
+			}
+			if got := cli.ExitCode(execErr); got != 10 {
+				t.Errorf("exit code: want 10 (LH-FA-INIT-006), got %d", got)
+			}
+			jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
+				jsontestutil.WithCommand("init"),
+				jsontestutil.WithExpectedCodes("LH-FA-INIT-006"),
+				jsontestutil.WithExitCode(10),
+			)
+		})
+	}
+}
+
+// validatingInitUseCaseStub emuliert das resolveProjectName-Verhalten
+// der Application-Schicht: der raw req.Name wird durch
+// domain.NewProjectName validiert und ein Reject wird als Sentinel
+// returned. So bleibt der T0-(k)-Path-Anchor-Test CLI-acceptance-
+// orientiert (Execute durch RunE), ohne die kompletten Init-
+// Application-Wiring zu staging.
+type validatingInitUseCaseStub struct{}
+
+func (validatingInitUseCaseStub) Init(_ context.Context, req driving.InitProjectRequest) (driving.InitProjectResponse, error) {
+	if _, err := domain.NewProjectName(req.Name); err != nil {
+		return driving.InitProjectResponse{}, err
+	}
+	return driving.InitProjectResponse{
+		Project: domain.NewProject(domain.ProjectName(req.Name)),
+	}, nil
+}
+
 // TestInitHumanDryRun_ShowsWouldInitiate pins the human-mode `--dry-run`
 // output: "Would initialize" / "Would create:" statt "Initialized"
 // — analog add's "Would add"-Prefix (T5 printInitSummary dryRun-aware).
