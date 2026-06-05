@@ -36,7 +36,7 @@ type AddServiceRequest struct {
 	// Default zero value PreviewNone preserves backward compatibility
 	// with the existing non-JSON code path; callers that don't set it
 	// see today's production-write behaviour.
-	PreviewMode AddPreviewMode
+	PreviewMode PreviewMode
 
 	// ServiceName is the validated identifier of the service to add
 	// (`postgres` in MVP; the application service rejects names that

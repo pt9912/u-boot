@@ -183,7 +183,7 @@ func (s activeArtifactsStatus) needsRepair() bool {
 // addservice_detect.go.
 type AddServiceService struct {
 	fs        driven.FileSystem
-	fsFactory func(driving.AddPreviewMode) (driven.FileSystem, driven.RecorderPort)
+	fsFactory func(driving.PreviewMode) (driven.FileSystem, driven.RecorderPort)
 	yaml      driven.YAMLCodec
 	confirmer driven.Confirmer
 	logger    driven.Logger
@@ -223,7 +223,7 @@ func NewAddServiceService(fs driven.FileSystem, yaml driven.YAMLCodec, confirmer
 // NewAddServiceServiceWithFactory is the slice-v1-cli-json-dry-run-add
 // T0-(e) Option 4 constructor: instead of a fixed [driven.FileSystem],
 // the service receives a factory that picks the FS per
-// [driving.AddPreviewMode]. The Composition-Root in `cmd/uboot/main.go`
+// [driving.PreviewMode]. The Composition-Root in `cmd/uboot/main.go`
 // wires PreviewNone → production FS, PreviewDryRun/PreviewAndApply →
 // recording FS (with the matching passthrough switch).
 //
@@ -240,7 +240,7 @@ func NewAddServiceService(fs driven.FileSystem, yaml driven.YAMLCodec, confirmer
 // stored [fs] field, ignoring PreviewMode (the recorder is nil so
 // PlannedFiles stays empty as well).
 func NewAddServiceServiceWithFactory(
-	fsFactory func(driving.AddPreviewMode) (driven.FileSystem, driven.RecorderPort),
+	fsFactory func(driving.PreviewMode) (driven.FileSystem, driven.RecorderPort),
 	yaml driven.YAMLCodec,
 	confirmer driven.Confirmer,
 	logger driven.Logger,
@@ -269,7 +269,7 @@ func NewAddServiceServiceWithFactory(
 // (Composition-Root path) it returns the mode-specific tuple;
 // otherwise the legacy [fs] field with a nil recorder (PreviewMode
 // is ignored — the use case keeps writing to production).
-func (s *AddServiceService) selectFS(mode driving.AddPreviewMode) (driven.FileSystem, driven.RecorderPort) {
+func (s *AddServiceService) selectFS(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
 	if s.fsFactory == nil {
 		return s.fs, nil
 	}

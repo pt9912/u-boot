@@ -7,7 +7,7 @@ package driven
 // Production FS adapters (`internal/adapter/driven/fs/`) do NOT
 // implement this interface; only `internal/adapter/driven/recordingfs/`'s
 // [RecordingFileSystem] does. The Composition-Root in `cmd/uboot/main.go`
-// constructs the recorder per [driving.AddPreviewMode] and hands the
+// constructs the recorder per [driving.PreviewMode] and hands the
 // same instance to the use case both as [FileSystem] and as
 // RecorderPort — the use case takes a nil RecorderPort when no
 // recording is wanted ([driving.PreviewNone]) and a non-nil one

@@ -14,7 +14,7 @@
 // The CLI adapter never imports this package directly — depguard
 // `adapter-driving-no-driven` forbids it. The Composition-Root
 // (`cmd/uboot/main.go`) constructs an instance per
-// [driving.AddPreviewMode] and hands it to the application service
+// [driving.PreviewMode] and hands it to the application service
 // as both ports. See the slice's T0-(i) Outcome for the layer rules.
 //
 // Layer rule: adapters may import their driven-port interface plus

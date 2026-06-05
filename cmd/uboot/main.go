@@ -126,7 +126,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// (different passthrough switch). A fresh recorder per request
 	// keeps captures scoped to a single Add() call — concurrent or
 	// sequential requests never share mutation logs.
-	addFSFactory := func(mode driving.AddPreviewMode) (driven.FileSystem, driven.RecorderPort) {
+	addFSFactory := func(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
 		switch mode {
 		case driving.PreviewDryRun:
 			rec := recordingfs.New(fsAdapter, recordingfs.WithPassthrough(false))
