@@ -51,12 +51,12 @@ Init-spezifische Sentinels und Spec-Stellen:
 Heute-Stand-Pre-Scan
 (`internal/hexagon/application/initproject.go`, 1079 LOC):
 
-| Phase | Methode | Pfade (Default, ohne `--template`/`--devcontainer`) | Indirekt? |
+| Phase | Methode | Pfade (Default, ohne `--template`/`--devcontainer`) | Code-Anker |
 | --- | --- | --- | --- |
-| Skeleton-Dirs (Z. 776, `writeDirectories` → `projectStructureDirs`) | `MkdirAll` | `docker/`, `scripts/`, `docs/` (immer); `.devcontainer/` (nur bei `--devcontainer`) | direkt |
-| Skeleton-Files (Z. 818/866/968, `executeTemplatedFiles` → `fileTemplates`) | `WriteFile` | `README.md`, `CHANGELOG.md`, `compose.yaml`, `.env.example`, `.gitignore` (in dieser Aufruf-Reihenfolge); devcontainer-Files (nur bei `--devcontainer`) | direkt |
-| u-boot.yaml (Z. 302/865, `executeUBootYAML`) | `WriteFile` | `u-boot.yaml` (ZULETZT — nach Dirs und Skeleton-Files; LH-FA-INIT-002 anchor) | direkt |
-| Backup (Z. 978, [`backup.go`](../../../../internal/hexagon/application/backup.go)) | `CopyExclusive` (Z. 139), `Mkdir` (Z. 149), `MkdirAll` (Z. 198), `Copy` (Z. 209), `RemoveAll` (Z. 88) | `<file>.bak.<n>` plus Backup-Verzeichnis | indirekt via `BackupPath` |
+| Skeleton-Dirs (`writeDirectories` Z. 768 → `projectStructureDirs` Z. 30) | `MkdirAll` (Call Z. 776) | `docker/`, `scripts/`, `docs/` (immer); `.devcontainer/` (nur bei `--devcontainer`) | direkt |
+| Skeleton-Files (`executeTemplatedFiles` → `fileTemplates()` in [`templates.go`](../../../../internal/hexagon/application/templates.go) Z. 73-81) | `WriteFile` (Calls Z. 818 actionWrite, Z. 866 actionReplaceBlock, Z. 968 actionOverwriteFull) | `README.md`, `CHANGELOG.md`, `compose.yaml`, `.env.example`, `.gitignore` (in dieser Aufruf-Reihenfolge aus `fileTemplates()`); devcontainer-Files (nur bei `--devcontainer`) | direkt |
+| u-boot.yaml (`Init()` Z. 302 ruft `executeUBootYAML` Z. 1037 → `executeFile` Z. 814 → `WriteFile` Z. 818/866/968) | `WriteFile` | `u-boot.yaml` (ZULETZT — nach Dirs und Skeleton-Files; LH-FA-INIT-002 anchor) | direkt |
+| Backup (Aufrufer: `initproject.go` Z. 978 `runBackup` → [`backup.go`](../../../../internal/hexagon/application/backup.go) `BackupPath` Z. 57) | `RemoveAll` (Z. 88), `CopyExclusive` (Z. 139), `Mkdir` (Z. 149), `MkdirAll` (Z. 198), `Copy` (Z. 209) | `<file>.bak.<n>` plus Backup-Verzeichnis | indirekt via `BackupPath` |
 
 Damit nutzt init **sechs der acht** `driven.FileSystem`-Mutations-
 Methoden in der Praxis (`WriteFile`, `MkdirAll` direkt;
@@ -122,11 +122,12 @@ Konkrete Pin-Form für `init myproj --dry-run --json` (frisch-CWD,
 ```
 
 Reihenfolge folgt der tatsächlichen Aufruf-Sequenz in
-`InitProjectService.Init()` (Z. 289-309): (1) `writeDirectories`
-→ `docker`, `scripts`, `docs`; (2) `executeTemplatedFiles` →
-`README.md`, `CHANGELOG.md`, `compose.yaml`, `.env.example`,
-`.gitignore` (Reihenfolge aus `fileTemplates()` Z. 566+);
-(3) `executeUBootYAML` → `u-boot.yaml` (ZULETZT). Bei
+`InitProjectService.Init()` (Z. 245-318), Execute-Phase Z.
+289-309: (1) `writeDirectories` → `docker`, `scripts`, `docs`;
+(2) `executeTemplatedFiles` → `README.md`, `CHANGELOG.md`,
+`compose.yaml`, `.env.example`, `.gitignore` (Reihenfolge aus
+`fileTemplates()` in `templates.go` Z. 73-81); (3)
+`executeUBootYAML` Z. 1037 → `u-boot.yaml` (ZULETZT). Bei
 `--devcontainer` wird `.devcontainer/` als vierter Dir-Eintrag
 plus devcontainer-Files ergänzt — siehe T0-(m) Flag-Matrix-
 Coverage.
@@ -139,9 +140,10 @@ Soft-Existing-Detection-Pin (`LH-FA-INIT-004`):
 `u-boot init myproj --dry-run --json` auf eine **existierende**
 Projekt-CWD ohne `--backup`/`--force`/`--no-interactive` liefert
 einen Error-Envelope (drei Disambiguatoren, nicht zwei; siehe
-`checkSoftExisting` in initproject.go Z. 478-507). Error-Message
-folgt `softExistingAbort` (Z. 531-534) Format
-`"%d structure elements detected (...) via ..."`; der CLI-Adapter
+`checkSoftExisting` in initproject.go Z. 478-508). Error-Message
+folgt `softExistingAbort` (Z. 531-534) Format exakt:
+`"%w: %d structure elements detected (%s) via %s; add --backup or --force to re-init"`
+(wraps `driving.ErrProjectExists` als ersten `%w`); der CLI-Adapter
 normalisiert ggf. via `mapErrorToDiagnostic` — Sub-Decision T0-(f):
 
 ```json
@@ -159,7 +161,8 @@ normalisiert ggf. via `mapErrorToDiagnostic` — Sub-Decision T0-(f):
 }
 ```
 
-**Mid-Write-Failure-Pin** (`LH-NFA-REL-003`, T0-(o)):
+**Mid-Write-Failure-Pin** (`LH-NFA-REL-003`, T0-(f) Switch-Order
++ T0-(k) writeInitDiff-Verträge):
 `u-boot init myproj --dry-run --diff --json` mit FS-Failure bei
 File-Index N im Use-Case-Pfad — Recorder hat die ersten N
 Mutationen captured, Use-Case wrapt `os.WriteFile`-Error als
@@ -226,9 +229,14 @@ Argument wie add-T0-(b)).
     Projekt erkennen" §567)
   - `LH-FA-INIT-005`: `driving.ErrConfirmationRequired`,
     `driving.ErrForceRequiresBackup`,
-    `driving.ErrBackupUnsupportedKind`,
-    `driving.ErrBackupSuffixExhausted`,
-    `driving.ErrBackupSourceMissing` (Überschreibschutz §595-619)
+    `driving.ErrBackupUnsupportedKind` (Überschreibschutz §595-619
+    Usage-Klasse → Exit 10)
+  - `LH-NFA-REL-003`: `driving.ErrBackupSuffixExhausted`,
+    `driving.ErrBackupSourceMissing` (FS-Klasse: Suffix-Exhaustion
+    und Source-Missing sind technische Filesystem-Failures, kein
+    User-Action; Exit 14 via `isFilesystemError` — präzisere
+    Klassifikation als Spec §605/§619 dem User die richtige Klasse
+    signalisiert)
   - `LH-FA-INIT-006`: `domain.ErrInvalidProjectName` UND
     `domain.ErrInvalidServiceName` (Name-Validierung §625;
     Konvention aus `add.go:410` weitergeführt — Carveout-Pin
@@ -247,8 +255,11 @@ Argument wie add-T0-(b)).
   `NewInitProjectServiceWithFactory`. App-Struct + `cli.New(...)`
   bleiben unverändert.
 - ✅ **Mutations-Matrix `cli-json-output.md` §7**: init-Zeile
-  ergänzt (alle 8 Methoden möglich via BackupPath; siehe Pre-Scan
-  oben).
+  ergänzt — 6 von 8 Methoden via init-Pfaden (direkt: `WriteFile`,
+  `MkdirAll`; indirekt via `BackupPath`: `RemoveAll`,
+  `CopyExclusive`, `Mkdir`, `MkdirAll`, `Copy`);
+  `WriteFileExclusive` + `Rename` ungenutzt aber Recorder-
+  abgedeckt — siehe Pre-Scan-Tabelle oben.
 - ✅ **count-Semantik für BackupPath-CopyExclusive** (T0-(h)):
   Backup-Files sind content-identisch zu Original. T0-(h) finalisiert
   die `changes[].count`-Form: 0 (identische Bytes) oder
@@ -313,9 +324,21 @@ Bedeutung.
    Semantisch-Drift (init-Code referenziert „Add"-Type).
 
 **Vorschlag (T0-Festlegung)**: **Option 1** — Rename + type-Alias.
-Slice-T1-Tranche macht den Rename plus `type AddPreviewMode =
-PreviewMode`-Alias als Carveout, der nach Cluster-T_close entfernt
-wird. **Alias-Lebensdauer-Pflicht**: `AddPreviewMode` ist die
+Slice-T1-Tranche macht den Rename plus expliziter Type-Alias-
+Syntax `type AddPreviewMode = PreviewMode` (**Gleichheits-Zeichen
+ist Pflicht** — `type AddPreviewMode PreviewMode` wäre ein NEUER
+Defined Type, der die Factory-Signatur `func(driving.AddPreviewMode)
+(driven.FileSystem, driven.RecorderPort)` NICHT mehr assignment-
+kompatibel zu `func(driving.PreviewMode) ...` macht und damit
+addservice_factory_test.go bricht). Die Konstanten-Deklarationen
+in `addservice.go` Z. 150 (`PreviewNone AddPreviewMode = iota`)
+werden auf den kanonischen Type umgestellt
+(`PreviewNone PreviewMode = iota`). Pin-Test in T1:
+`var _ driving.AddPreviewMode = driving.PreviewMode(0)` plus
+Factory-Signature-Identity-Check.
+
+**Carveout**: der Alias überlebt bis Cluster-T_close.
+**Alias-Lebensdauer-Pflicht**: `AddPreviewMode` ist die
 EINZIGE Service-Prefix-Alias. Folge-Slices (remove/generate/
 config-set) referenzieren `driving.PreviewMode` direkt — keine
 weiteren `XxxPreviewMode`-Aliases. Carveout-Liste in Cluster-
@@ -370,7 +393,37 @@ Wartungs-Stellen.
    bei zukünftigen Erweiterungen.
 
 **Vorschlag (T0-Festlegung)**: **Option 2** — pragmatischer Mittel-
-weg. Init-T1 macht den Refactor; add migriert in derselben Tranche
+weg, ergänzt um drei konkret gepinnte Sub-Entscheidungen aus
+Review-Round-2 Findings:
+
+- **Helper-Signatur (Decomposed-Slices statt Response-Pointer)**:
+  `reportError(out, err, plannedFiles, changes, dryRun, diff,
+  command, mapErr)` und
+  `writeErrorEnvelope(out, err, plannedFiles, changes, dryRun,
+  diff, command, mapErr)` — nehmen `[]driving.PlannedFile` und
+  `[]driving.ChangeEntry` als separate Parameter STATT eines
+  `resp driving.AddServiceResponse`-Pointers. Begründung: init's
+  `driving.InitProjectResponse` hat heute KEINE
+  `PlannedFiles`/`Changes`-Felder; T2 ergänzt sie zwar, aber die
+  decomposed-Form lässt T1 und T2 trotzdem parallel laufen und
+  vermeidet die response-shape-Kopplung. CLI-Caller extrahiert
+  `resp.PlannedFiles`/`resp.Changes` selbst beim Aufruf.
+
+- **`mapErr`-Source-Pflicht**: jeder Subcommand-RunE definiert
+  `mapErr := mapXxxErrorToDiagnostic` als erste Zeile im
+  Funktions-Body und reicht den Function-Value an reportError
+  weiter. Keine App-Struct-Erweiterung. Add-Migration: runAdd
+  setzt `mapErr := mapAddErrorToDiagnostic` und passt vier
+  reportError-Call-Sites an.
+
+- **writeDiff-Header-Format (Option a, command-agnostisch)**:
+  `writeDiff(out, plannedFiles)` emittiert `--- <path> (<action>)`-
+  Header identisch für alle Subcommands. Per-command-Header-
+  Overrides sind Out-of-Scope V1. Falls ein zukünftiger Subcommand
+  (z.B. generate) eine andere Header-Form will, kann er writeDiff
+  per Helper-Override umgehen.
+
+Init-T1 macht den Refactor; add migriert in derselben Tranche
 auf den gemeinsamen Helper. Acceptance-Tests aus add bleiben grün
 (reine Refactor-Tranche).
 
@@ -418,7 +471,7 @@ gegenüber dem ursprünglichen Stub gemäß
 | `driving.ErrProjectExists`, `driving.ErrFileExists` | `port/driving/initproject.go` | `LH-FA-INIT-004` | 10 |
 | `driving.ErrConfirmationRequired` (shared) | `port/driving/down.go` | `LH-FA-INIT-005` | 10 |
 | `driving.ErrForceRequiresBackup`, `driving.ErrBackupUnsupportedKind` | `port/driving/initproject.go` | `LH-FA-INIT-005` | 10 |
-| `driving.ErrBackupSuffixExhausted`, `driving.ErrBackupSourceMissing` | `port/driving/initproject.go` | `LH-FA-INIT-005` | 14 |
+| `driving.ErrBackupSuffixExhausted`, `driving.ErrBackupSourceMissing` | `port/driving/initproject.go` | `LH-NFA-REL-003` | 14 |
 | `domain.ErrInvalidServiceName` (geteilt mit add) | `domain/servicename.go` | `LH-FA-INIT-006` | 10 |
 | `driving.ErrTemplateConflictsWithFlag` | `port/driving/initproject.go` | `LH-FA-CLI-006` | 2 |
 | **`driving.ErrInitFileSystem` (neu)** | `port/driving/initproject.go` (T2) | **`LH-NFA-REL-003`** | **14** |
@@ -432,12 +485,39 @@ Cluster-T_close-Sub-Decision.
 
 **Switch-Order-Pflicht (Add R6 #11 erblich)**:
 `mapErrorToDiagnostic` für init MUSS `ErrInitFileSystem` als
-ERSTEN `errors.Is`-case prüfen — `executeWriteFiles`/`backup.go`
-wrappen FS-Errors als `fmt.Errorf("...: %w: %w", path,
-ErrInitFileSystem, rawErr)` (Multi-`%w`). Falls künftiger Code
-einen fachlichen Sentinel in die gleiche Chain wrapt, würde
-fachlich-zuerst-Order die FS-Klassifikation (`LH-NFA-REL-003` /
+ERSTEN `errors.Is`-case prüfen. Multi-`%w`-Wraps (Go 1.20+) machen
+`errors.Is(err, sentinel)` für BEIDE gewrappte Sentinels in der
+gleichen Chain true; `executeWriteFiles`/`backup.go` wrappen
+FS-Errors als `fmt.Errorf("...: %w: %w", path, ErrInitFileSystem,
+rawErr)`. Ohne FS-first-Order würde ein künftiger fachlicher
+Sentinel im Multi-Wrap die FS-Klassifikation (`LH-NFA-REL-003` /
 Exit-Code 14) auf einen Exit-Code-10-Fachfehler downgraden.
+
+**Switch-Order verbindlich** (T6-Pin verifiziert die Reihenfolge):
+
+```go
+switch {
+case errors.Is(err, driving.ErrInitFileSystem):  // 1. FS-first (LH-NFA-REL-003 / 14)
+case errors.Is(err, driving.ErrBackupSuffixExhausted), errors.Is(err, driving.ErrBackupSourceMissing):
+                                                  // 2. FS-Klasse (LH-NFA-REL-003 / 14)
+case errors.Is(err, driving.ErrTemplateConflictsWithFlag):
+                                                  // 3. Usage (LH-FA-CLI-006 / 2)
+case errors.Is(err, driving.ErrConfirmationRequired),
+     errors.Is(err, driving.ErrForceRequiresBackup),
+     errors.Is(err, driving.ErrBackupUnsupportedKind):
+                                                  // 4. INIT-005 Usage-Klasse (10)
+case errors.Is(err, driving.ErrProjectExists), errors.Is(err, driving.ErrFileExists):
+                                                  // 5. INIT-004 Marker-Kollision (10)
+case errors.Is(err, domain.ErrInvalidProjectName),
+     errors.Is(err, domain.ErrInvalidServiceName):
+                                                  // 6. INIT-006 Name-Validation (10)
+default:                                          // 7. LH-FA-CLI-006 fallback
+}
+```
+
+T6-Pin-Test mit künstlich konstruiertem
+`fmt.Errorf("%w: %w", ErrInitFileSystem, ErrProjectExists)` MUSS
+LH-NFA-REL-003 / Exit-14 erzeugen — NICHT LH-FA-INIT-004 / Exit-10.
 
 ### T0-(g) `plannedFiles[]`-Reihenfolge + Catalog-Read-Phase
 
@@ -494,19 +574,64 @@ ganze File. Recorder sieht: `WriteFile(compose.yaml, blockBody)`
 — NewContent ist der Block, OldContent ist der bisherige Block
 (VOR `WriteFile` via `s.snapshot`). Action: `modify`. count =
 `CountAdditions(diffHunks(OldContent, NewContent))` — gleiche
-Form wie add-modify (T0-(g) gilt unverändert). Edge-Case:
-Content-identischer Block-Replace ergibt `CountAdditions = 0` und
-keine Hunks (Idempotenz-Signalisierung im Envelope).
+Form wie add-modify (T0-(g) gilt unverändert).
 
-### T0-(i) Template-Mode-Failure-Pfade
+**Content-identical Edge-Case (Idempotenz-Signalisierung)**:
+content-identischer Block-Replace ergibt `CountAdditions = 0` und
+`diff.Compute(...)==nil` (keine Hunks). Sub-Decision:
+PlannedFile-Eintrag bleibt **sichtbar** im Envelope mit
+`{action: "modify", count: 0, hunks: omitted}` — NICHT
+suppressed. Begründung: Suppression würde den Mid-Write-Failure-
+Trace verkleinern und die Recorder-Capture-Liste lückenhaft
+machen; sichtbar-mit-count-0 ist UX-transparent
+(`writeInitDiff` rendert dazu das `(no changes)`-Hint aus
+T0-(k)). T6 pinnt die Form via Re-init-Pin-Test gegen ein
+existierendes Projekt mit identischem managed-Block.
 
-`--template <name>` mit unbekanntem Name → `ErrTemplateNotFound`
-(`LH-FA-CLI-006` heute, bleibt). `--template`-Render-Failure →
-`ErrTemplateRender` (`LH-NFA-REL-003`? oder `LH-FA-CLI-006`?).
+### T0-(i) Template-Mode-Preview als V1-Out-of-Scope-Carveout
 
-**Vorschlag (T0-Festlegung)**: Template-Failures bleiben mit ihrer
-heutigen LH-Klassifikation (keine Erweiterung in diesem Slice —
-Out-of-Scope, weil Template-Catalog ein eigener Komplex ist).
+**Round-2 Finding B-4 strukturelle Lücke**: `--template <name>`
+ruft im heutigen Wiring `InitProjectService.Init()` →
+`initFromTemplate` Z. 409 → `s.templateInit.Init(ctx, ...)` auf
+einer **separaten** `TemplateInitService`-Instanz (siehe
+`cmd/uboot/main.go` Z. 120). Die separate Instanz hält ihren
+eigenen `fsAdapter` und ist **NICHT** an die per-request fsFactory
+des InitProjectService gebunden. Konsequenz: bei
+`init --template basic --dry-run --json` würde der TemplateInit
+direkt auf die Production-FS schreiben — der Recorder sieht
+nichts, der Dry-Run schreibt trotzdem.
+
+**Drei Lösungs-Optionen**:
+
+1. **Composition-Root-Refactor**: TemplateInitService bekommt
+   auch eine fsFactory; main.go-Wiring shared eine Factory zwischen
+   beiden Services oder lokal pro Init-Request synchronisiert.
+   Großer Side-Quest, berührt M3-Slice-Code (templateInit).
+2. **TemplateInitRequest.PreviewMode**: TemplateInit-API um
+   PreviewMode-Override erweitern; InitProjectService ruft mit
+   eigenem PreviewMode weiter. Mittlerer Impact, ändert die
+   TemplateInit-Port-Signatur.
+3. **V1-Out-of-Scope-Carveout**: `init --template <name>` lehnt
+   `--dry-run`/`--diff` ab; CLI emittiert eine
+   `ErrTemplateConflictsWithFlag`-Diagnostic (LH-FA-CLI-006,
+   Exit 2). Folge-Slice
+   `slice-v1-cli-json-dry-run-template-preview` (neu in open/
+   anzulegen) löst die Composition-Root-Refactor sauber als
+   eigene Tranche.
+
+**Vorschlag (T0-Festlegung)**: **Option 3** — Out-of-Scope für
+diesen Slice. Init-T5 RunE rejects `--template + --dry-run|--diff`
+via existierender `ErrTemplateConflictsWithFlag` (heute schon für
+`--template + --devcontainer/--force/--backup` aktiv —
+`initproject.go` Z. 360-367). Doku-Hint in `cli-json-output.md`
+§6.4: „`--template` ist in V1 mutex zu `--dry-run`/`--diff`; siehe
+Folge-Slice `slice-v1-cli-json-dry-run-template-preview` (geplant)
+für die Composition-Root-Refactor-Variante."
+
+Template-Failures (`ErrTemplateNotFound`/`ErrTemplateRender`/
+`ErrTemplateCatalog`) bleiben mit ihrer heutigen LH-Klassifikation
+(`LH-FA-CLI-006`, Exit 2 für Conflicts; `LH-NFA-REL-003` Exit 14
+für Catalog/Render via existierender `isFilesystemError`).
 
 ### T0-(j) `init --json` (Minimalkontrakt) ohne `--dry-run`/`--diff`
 
@@ -553,10 +678,16 @@ init --dry-run --json` produziert ein Envelope mit project=`foo`
 in `u-boot.yaml`.
 
 **Sub-Decision**: Acceptance-Test ergänzt einen Pin für die
-fallback-Form mit deterministischem cwd-basename (testfaker via
-WithGetwd). plannedFiles[]-Output ist identisch zur
-positional-Form (Path-Anchor T0-(k) Option 1), nur das geschriebene
-`u-boot.yaml` enthält den anderen Project-Name. Doku-Hint in
+fallback-Form mit deterministischem cwd-basename. CLI-Adapter
+(`init.go` Z. 117 nutzt `cobra.MaximumNArgs(1)` — positional ist
+OPTIONAL, fallback ist reachable). Test-Setup: `WithGetwd` stellt
+einen festen Pfad (`/tmp/test-deterministic-projname`) ein;
+`resolveProjectName` (initproject.go Z. 542) leitet daraus
+`filepath.Base(req.BaseDir)` ab. T6-Pin verifiziert (a) in
+`u-boot.yaml.NewContent` den String `project:\n  name:
+test-deterministic-projname` UND (b) dass plannedFiles[].Path
+KEINEN Pfad-Prefix `test-deterministic-projname/` trägt (=
+Path-Anchor-Konsistenz mit T0-(k) Option 1). Doku-Hint in
 `cli-json-output.md` §6.4.
 
 ### T0-(m) Flag-Matrix-Coverage im Aufhebungsbedingung-Pin
@@ -570,23 +701,46 @@ sources`. Jede ändert den plannedFiles[]-Shape unterschiedlich.
 
 | Flag-Set | Default-Pin | Pflicht in T6? |
 | --- | --- | --- |
-| Default (kein Flag) | §Aufhebungsbedingung-JSON oben | ja |
-| `--devcontainer` | + `.devcontainer/` Dir + 2 Files | ja (`+3` Einträge) |
-| `--template basic` | identisch zu Default (basic template = default file-set) | ja |
-| `--no-git` | identisch zu Default (`--no-git` wirkt POST-write, nicht im Recorder) | ja (Doku-Hint) |
-| `--force` (Re-init) | `action: "modify"` für `compose.yaml`/`u-boot.yaml` + `actionReplaceBlock` Pfad | ja (T0-(h)) |
-| `--backup` (Re-init) | + Backup-Files als `action: "create"` | ja (Backup-Pfad-Pin) |
-| `--allow-external-feature-sources X` | u-boot.yaml content-Variation; plannedFiles[]-Liste identisch zu Default | optional (T6 deckt es als Acceptance-Cluster) |
+| Default (kein Flag) | §Aufhebungsbedingung-JSON oben | ja (4 JSON-Kombos × default = 4 Tests) |
+| `--devcontainer` | + `.devcontainer/` Dir + 2 Files (devcontainer.json, Dockerfile) | ja (~2 Tests, default + diff-Pfad) |
+| `--template basic` | **Out-of-Scope V1** — rejects mit `ErrTemplateConflictsWithFlag` (siehe T0-(i)) | ja (1 negativer Test) |
+| `--no-git` | im Recorder-Output identisch zu Default (initGit läuft POST-Capture); im Apply-Pfad suppresst `git init`-Side-Effect, unsichtbar im Envelope | ja (1 Doku-Hint-Test) |
+| `--force` (Re-init) | `action: "modify"` für `compose.yaml`/`u-boot.yaml` + `actionReplaceBlock` Pfad | ja (~2 Tests, T0-(h) Pin) |
+| `--backup` (Re-init) | + Backup-Files als `action: "create"` (Original-Lines als count) | ja (~2 Tests, Backup-Pfad-Pin) |
+| `--allow-external-feature-sources X` | u-boot.yaml content-Variation; plannedFiles[]-Liste identisch zu Default | optional (1 Test als Acceptance-Cluster) |
 
-Pflicht-Pins in T6 sind die ersten sechs (default + 5
-Variationen); `--allow-external-feature-sources` ist optional
-weil reine Content-Variation des u-boot.yaml-Write.
+**T6-Math erklärt**: ~4 (Default × 4 JSON-Kombos) +
+~2 (--devcontainer) + 1 (--template-Reject) + 1 (--no-git-Doku-
+Pin) + 2 (--force) + 2 (--backup) + 1 (Soft-Existing-Pin) =
+**~13 Top-Level-Tests** (statt naiv 6 × 4 = 24). Begründung:
+nicht jede Flag-Variation braucht die volle 4-Kombo-Matrix —
+Variationen wie `--no-git` (Recorder-irrelevant) und
+`--template` (Out-of-Scope-Reject) brauchen nur einen Pin;
+`--devcontainer`/`--force`/`--backup` brauchen Default- plus
+Diff-Pfad. Plus Mid-Write-Failure-Pin (2 Positionen) +
+Concurrent-Init-Mutex-Pin + 3-Flag-Combo +
+Path-Anchor-Pin = **~17 Tests total** im T6-Block.
+
+**recordImplicitMkdir-Duplikations-Hazard für `--devcontainer`**:
+Round-2 Finding B-4 zeigt: ein expliziter `MkdirAll('.devcontainer')`
+wird vom Recorder als `actionCreate` capturet, aber das Dir
+existiert danach NICHT auf der underlying-FS (Passthrough=false
+im Dry-Run). Wenn dann `WriteFile('.devcontainer/devcontainer.json')`
+folgt, triggert `recordImplicitMkdir` einen ZWEITEN synthetischen
+`.devcontainer/`-Record. T1-Refactor MUSS `recordImplicitMkdir`
+um einen Dedup-Check ergänzen: skip wenn das Dir bereits in
+`r.records` als `actionCreate` mit demselben Path steht (oder
+einen kleinen In-Memory-Dir-Existence-Overlay-Set führen, der
+auf MkdirAll/Mkdir/recordImplicitMkdir-Calls updated wird).
+Bonus: dieser Fix gilt auch für add — Add-Code-Mutation in T1
+zieht das gleichzeitig mit.
 
 ## T0-Outcomes
 
 Verbindliche Festzurrung wandert nach `next/`-Übergang in diesen
-Block — analog add-Slice. Erwartete Form: Tabelle mit den 9 Sub-
-Decisions plus Implementations-Pflicht-Spalte (T1-T6).
+Block — analog add-Slice. Erwartete Form: Tabelle mit den **13
+Sub-Decisions (a)-(m)** plus Implementations-Pflicht-Spalte
+(T1-T7; T8 ist reine Doku-Schließung).
 
 ## Tranchen (vorgeschlagen)
 
@@ -596,27 +750,44 @@ die Acceptance-Test-Matrix größer.
 
 | T | Inhalt | LOC | Voraussetzung |
 | - | ------ | --- | --- |
-| T0 | Discovery + Sub-Decisions klären; Pattern-Erbe-Tabelle pinnen | — (Plan) | — |
-| T1 | **Refactor-Tranche**: `previewModeFromFlags` extrahieren (T0-(b)), `driving.PreviewMode` umbenennen + `AddPreviewMode`-Alias (T0-(c)), `reportError`/`writeErrorEnvelope`/`writeDiff`-Helper generalisieren (T0-(e)). Add-Tests + Add-Godoc-Wahrheitstabellen (5 Files, ~30 LOC Comment-Edits) mitgezogen. | ~130 | T0 |
-| T2 | **Port-Types + Sentinel**: `driving.InitProjectRequest.PreviewMode`-Field, `driving.ErrInitFileSystem`-Sentinel, `cli.isFilesystemError`-Erweiterung. Unit-Test für Sentinel-Identity + ExitCode-Routing. | ~50 | T0 |
-| T3 | **Application-Layer**: `InitProjectService.fsFactory`-Feld + `initMu sync.Mutex` + `NewInitProjectServiceWithFactory`-Konstruktor + `Init()`-Wrapper mit Mutex/Swap analog `AddServiceService.Add()`; `mapCaptureToPlannedFiles(captured, req.BaseDir)`. **Neun FS-Wrap-Stellen** (initproject.go Z. 776/818/866/968 plus backup.go Z. 88/139/149/198/209) mit `%w: ErrInitFileSystem` umhüllt. Factory-Tests analog `addservice_factory_test.go` (~200 LOC Test-Datei). | ~280 | T2 |
+| T0 | Discovery + 13 Sub-Decisions klären; Pattern-Erbe-Tabelle pinnen | — (Plan) | — |
+| T1 | **Refactor-Tranche**: `previewModeFromFlags` extrahieren nach `cli/previewmode.go` (T0-(b); folgt etabliertem Pattern aus `jsonenvelope.go`/`statusview.go`/`jsonallowlist.go`); `driving.PreviewMode` umbenennen + `type AddPreviewMode = PreviewMode`-Alias (T0-(c)); `reportError`/`writeErrorEnvelope`/`writeDiff`-Helper generalisieren mit decomposed-Slices-Signatur (T0-(e)); Add-Migration auf gemeinsame Helper; Add-Godoc-Wahrheitstabellen in 5 Files (addservice.go, recordingfs.go, recordingport.go, main.go, add.go) mitgezogen (~40-50 LOC Comment-Edits); **recordImplicitMkdir-Dedup-Fix** (Round-2 Finding B-4 — gilt auch für add). Add-Tests bleiben grün durch Type-Alias-`=`-Syntax. | ~150 | T0 |
+| T2 | **Port-Types + Sentinel**: `driving.InitProjectRequest.PreviewMode`-Field, `driving.InitProjectResponse.PlannedFiles`/`Changes`-Felder (analog `AddServiceResponse`), `driving.ErrInitFileSystem`-Sentinel, `cli.isFilesystemError`-Erweiterung. Unit-Test für Sentinel-Identity + ExitCode-Routing. | ~60 | T0 |
+| T3 | **Application-Layer**: `InitProjectService.fsFactory`-Feld + `initMu sync.Mutex` + `NewInitProjectServiceWithFactory`-Konstruktor + `Init()`-Wrapper mit Mutex/Swap analog `AddServiceService.Add()`; `mapCaptureToPlannedFiles(captured, req.BaseDir)`. **Neun FS-Wrap-Stellen** (initproject.go Z. 776 MkdirAll-Loop / Z. 818 WriteFile actionWrite / Z. 866 WriteFile actionReplaceBlock (re-init only) / Z. 968 WriteFile actionOverwriteFull (re-init only); backup.go Z. 88 RemoveAll / Z. 139 CopyExclusive / Z. 149 Mkdir / Z. 198 MkdirAll / Z. 209 Copy) mit `%w: ErrInitFileSystem` umhüllt — Code-Sites ≠ Runtime-Call-Count, weil Z. 776 in einer Loop läuft. Factory-Tests analog `addservice_factory_test.go` (~200 LOC Test-Datei). | ~280 | T2 |
 | T4 | **Composition-Root-Wiring** in `cmd/uboot/main.go`: `initFSFactory`-Closure analog `addFSFactory`. | ~30 | T3 |
-| T5 | **CLI-RunE**: `init`-RunE auf den gemeinsamen Error-Envelope-Helper aus T1, drei JSON-Pfade analog add, Allowlist-Migration (`"u-boot init": true`), Reject-Pin-Test `TestRootJSON_RejectsAllNonMigratedForms` (cases-Slice 10→9). | ~140 | T1 + T2 |
-| T6 | **Acceptance-Tests** (T0-(m)-Matrix): 6 Pflicht-Flag-Sets (default + `--devcontainer`/`--template basic`/`--no-git`/`--force`/`--backup`) × 4 JSON-Flag-Kombos = ~13 Top-Level-Tests; Soft-Existing-Pin (3 Disambiguatoren); Mid-Write-Failure-Pin (zwei Positionen: früh + spät); 3-Flag-Combo `--dry-run --diff --json`; Concurrent-Init-Mutex-Pin; Path-Anchor-Pin (`PlannedFile.Path` ist project-relativ, kein `/`-Prefix). Table-driven wo möglich, sonst individuell. | ~400 | T5 |
+| T5 | **CLI-RunE**: `init`-RunE auf den gemeinsamen Error-Envelope-Helper aus T1, drei JSON-Pfade analog add, Template-Modus-Reject (`ErrTemplateConflictsWithFlag` für `--template + --dry-run|--diff`, T0-(i)), Allowlist-Migration (`"u-boot init": true`), Reject-Pin-Test `TestRootJSON_RejectsAllNonMigratedForms` (cases-Slice 10→9). | ~150 | T1 + T2 (T4 für Run-time-Smoke aber Code-parallelisierbar) |
+| T6 | **Acceptance-Tests** (T0-(m)-Matrix): ~13 Top-Level-Tests (siehe T0-(m) T6-Math-Aufschlüsselung); Soft-Existing-Pin (3 Disambiguatoren); Mid-Write-Failure-Pin (zwei Positionen: früh + spät, T0-(f) Switch-Order-Pin mit Multi-`%w`-Konstrukt); 3-Flag-Combo `--dry-run --diff --json`; Concurrent-Init-Mutex-Pin; Path-Anchor-Pin (`PlannedFile.Path` ist project-relativ, kein `/`-Prefix). Table-driven wo möglich. | ~400 | T5 |
 | T7 | **Review-Fix-Rounds** (~1-2 Runden bei Pattern-Erbe; add hatte R6/R7/R8): Diff aus Reviewer-Findings konsolidieren, Fixes als eigene Sub-Commits, DoD-Hash-Tabelle ergänzen. | ~80 | T6 |
-| T8 | **Closure**: CHANGELOG-Eintrag, `cli-json-output.md` §6-Tabelle (init→done) + §6.1-Reject-Liste (init raus) + §6.4 neue init-Sektion + §7 Mutations-Matrix (init-Zeile), roadmap-Update (3/9 done), Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
+| T8 | **Closure**: CHANGELOG-Eintrag, `cli-json-output.md` §6-Tabelle (init→done) + §6.1-Reject-Liste (init raus) + §6.4 neue init-Sektion + §7 Mutations-Matrix (init-Zeile), roadmap-Update (3/9 done), Slice nach `done/` mit DoD-Hash-Tabelle (inkl. Hashes der in T1 mutierten Add-Slice-Files; siehe „DoD-Hash-Snapshot-Policy" unten). | — (Doku) | T7 |
 
-LOC-Bilanz: ~1110 LOC — Pattern-Erbe spart ~20 % gegenüber add
-(war ~1380 LOC inkl. Renderer-Erfindung). Init ist umfangreicher
-als ursprünglich geschätzt, weil die Mutations-Matrix breiter
-(9 statt 2 wrap-sites), die Test-Matrix größer (13 statt 7
-Szenarien), und der T1-Refactor sowohl init-Vorbereitung als
-auch Add-Code-Migration umfasst.
+LOC-Bilanz: ~1150 LOC (war ~1110 vor Round-2-Korrekturen) —
+Pattern-Erbe spart ~17 % gegenüber add (~1380). Init ist
+umfangreicher als ursprünglich geschätzt, weil die Mutations-
+Matrix breiter (9 wrap-sites), die Test-Matrix größer (~17
+Tests inkl. Path-Anchor + Mutex + Mid-Write), und der T1-
+Refactor sowohl init-Vorbereitung als auch Add-Code-Migration
+plus recordImplicitMkdir-Dedup-Fix umfasst.
 
-**Reihenfolge-Pflicht**: T1 und T2 sind parallel; T3 wartet auf
-T2 (braucht InitProjectRequest.PreviewMode + ErrInitFileSystem);
-T5 wartet auf T1 + T2 (braucht den gemeinsamen Helper + Sentinel-
-Mapping); T6 wartet auf T5; T7 wartet auf T6; T8 wartet auf T7.
+**Reihenfolge-Pflicht**: T1 und T2 sind code-parallel
+(unterschiedliche Files); T3 wartet auf T2 (braucht
+InitProjectRequest.PreviewMode + InitProjectResponse-Felder +
+ErrInitFileSystem); T4 wartet auf T3; T5 wartet auf T1 + T2
+(braucht den gemeinsamen Helper + Sentinel-Mapping; kann
+parallel zu T4 entwickelt werden, weil T5's Interface bereits
+via T3 fixiert ist); T6 wartet auf T5; T7 wartet auf T6;
+T8 wartet auf T7.
+
+**DoD-Hash-Snapshot-Policy** (MEMORY.md feedback
+[[feedback_done_slice_dod_hash]]): T1-Commits mutieren 5 Files
+aus dem add-Slice's done-Snapshot (addservice.go, recordingfs.go,
+recordingport.go, main.go, add.go). Diese Mutationen sind
+**additiv** auf der add-Slice's DoD-Hash-Tabelle — der init-
+Slice's DoD-Hash-Tabelle in T8 listet die post-T1-Hashes
+für diese 5 Files separat aus. Die add-Slice's done/-Datei
+bekommt KEIN Update (accepted Slices werden nicht
+umgeschrieben); statt dessen ein Footnote-Pointer im
+init-Slice's DoD-Tabelle: „T1 migriert add-Slice-Files,
+post-T1-Revisionen siehe Tranchen-Hash T1".
 
 ## Out of Scope
 
