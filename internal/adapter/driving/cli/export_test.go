@@ -55,7 +55,10 @@ func FullEnvelopeForTest(
 ) ([]byte, error) {
 	pfs := make([]plannedFile, len(planned))
 	for i, p := range planned {
-		pfs[i] = plannedFile(p)
+		// Field-by-field: PlannedFileForTest predates the Hunks field
+		// (slice-v1-cli-json-dry-run-add T4 / T0-(l)); test code that
+		// doesn't set Hunks gets the omitempty path.
+		pfs[i] = plannedFile{Path: p.Path, Action: p.Action}
 	}
 	chs := make([]changeEntry, len(changes))
 	for i, c := range changes {

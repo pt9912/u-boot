@@ -18,16 +18,19 @@ import (
 // vgl. jsontestutil.DefaultAllowedCodes).
 //
 // Subcommand-Form-Inventar (13 Forms, slice-doctor §T0-(g)):
-//   - 2 Migrate: "u-boot doctor", "u-boot template list"
-//     (Flag-Schnitt ohne Envelope-Migration — Carveout).
-//   - 11 Reject (heute): init, add, remove, up, down, logs, generate,
+//   - 3 Migrate: "u-boot doctor", "u-boot template list", "u-boot add"
+//     (template list: Flag-Schnitt ohne Envelope-Migration — Carveout;
+//     add: voll-schema mit plannedFiles/hunks via slice-v1-cli-json-
+//     dry-run-add T4).
+//   - 10 Reject (heute): init, remove, up, down, logs, generate,
 //     config (bare), config get, config set, template (bare).
 //
 // Cluster-T_close: alle 13 in Allowlist ODER Mechanik komplett raus.
 func jsonAllowlist() map[string]bool {
 	return map[string]bool{
-		"u-boot doctor":        true, // slice-v1-cli-json-dry-run-doctor (this slice)
+		"u-boot doctor":        true, // slice-v1-cli-json-dry-run-doctor
 		"u-boot template list": true, // slice-v1-cli-json-dry-run-doctor (Flag-Schnitt, Carveout)
+		"u-boot add":           true, // slice-v1-cli-json-dry-run-add T4
 	}
 }
 

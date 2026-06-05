@@ -359,13 +359,20 @@ func isConfigValidationError(err error) bool {
 // sentinels — technical persistence / filesystem failures the
 // application cannot recover from. The user must intervene
 // (clean up stale backups, free disk, etc.).
+//
+// ErrAddFileSystem (slice-v1-cli-json-dry-run-add T0-(j)/T1-C) wraps
+// raw os.WriteFile errors from addservice_execute.go so add-mid-write
+// failures map to LH-NFA-REL-003 / exit-code 14, not the default
+// "1" — without this entry the recorder would surface plannedFiles[]
+// to the user but the process would exit with the wrong code class.
 func isFilesystemError(err error) bool {
 	return errors.Is(err, driving.ErrBackupSuffixExhausted) ||
 		errors.Is(err, driving.ErrBackupSourceMissing) ||
 		errors.Is(err, driving.ErrGenerateFileSystem) ||
 		errors.Is(err, driving.ErrConfigFileSystem) ||
 		errors.Is(err, driving.ErrTemplateCatalog) ||
-		errors.Is(err, driving.ErrTemplateRender)
+		errors.Is(err, driving.ErrTemplateRender) ||
+		errors.Is(err, driving.ErrAddFileSystem)
 }
 
 // isUsageError detects two distinct classes of usage-level errors:

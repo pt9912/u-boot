@@ -57,10 +57,28 @@ type diagnosticItem struct {
 }
 
 // plannedFile ist ein Eintrag im Voll-Schema-`plannedFiles[]`. Spec
-// §354 erlaubt `action` nur create/modify/delete.
+// §354 erlaubt `action` nur create/modify/delete. Hunks sind optional
+// (LH-FA-CLI-008 §477-482 macht sie Pflicht nur im `--diff --json`-
+// Pfad; ohne `--diff` bleibt das Feld via omitempty weg —
+// slice-v1-cli-json-dry-run-add T0-(l)).
 type plannedFile struct {
 	Path   string `json:"path"`
 	Action string `json:"action"`
+	Hunks  []hunk `json:"hunks,omitempty"`
+}
+
+// hunk ist die Wire-Form eines Diff-Hunks in
+// `plannedFiles[].hunks` (LH-FA-CLI-008 §477-482; slice-v1-cli-json-
+// dry-run-add T0-(l)). Coordinates sind 1-basiert wenn die jeweilige
+// *Lines-Zahl > 0; pure-add/-delete-Hunks setzen die Off-Seite auf 0
+// per Unified-Diff-Konvention. Field-Tag-Drift (`offset` statt
+// `oldStart`) wird vom jsontestutil.checkHunks-Helper gepinnt.
+type hunk struct {
+	OldStart int    `json:"oldStart"`
+	OldLines int    `json:"oldLines"`
+	NewStart int    `json:"newStart"`
+	NewLines int    `json:"newLines"`
+	Content  string `json:"content"`
 }
 
 // changeEntry ist ein Eintrag im Voll-Schema-`changes[]`. Spec §368
