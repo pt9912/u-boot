@@ -2,7 +2,7 @@
 
 > **Status:** geplant für v0.4.0 — zweiter Folge-Slice des
 > Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Platz 2). Etabliert die schwerere Cluster-Infrastruktur,
 > die der Doctor-Slice (Platz 1) bewusst ausgelassen hat:
 > **`RecordingFileSystem`-driven-Adapter** (Cluster-T0-(b)
@@ -28,20 +28,30 @@
 > `driving.PlannedFile` mit `NewContent`/`OldContent` (`json:"-"`)
 > als Content-Träger zwischen Layern, `ErrAddFileSystem`-LH-Code
 > auf `LH-NFA-REL-003` korrigiert, T0-(e)-Skizze auf `fsFactory`-
-> Tuple-Vertrag synchronisiert). **T0 ✅ festgezurrt**
-> (§T0-Outcomes — Tabellen-Form mit 12 Sub-Decisions plus
-> Verweisen auf §T0-Discovery für die Begründung). Slice liegt
-> **in `in-progress/`**, T1 wurde während der Realisierung in vier
-> Sub-Tranchen aufgeteilt; **T1-A** (Port-Types — Carrier + Sentinel +
-> `RecorderPort`, Commit `fbcbce8`), **T1-B** (`recordingfs`-Adapter
-> mit Passthrough-Schalter, Commit `e9ed7d8`) und **T1-C**
-> (`AddServiceService.fsFactory` + Recorder-Capture + `ErrAddFileSystem`-
-> Wrap, Commit `195f146`) ✅ committed. **T1-D** läuft: Composition-
-> Root-Wiring in `cmd/uboot/main.go` — `fsFactory`-Closure pro
-> `AddPreviewMode`, der ursprünglich als T3 geplante Schritt wurde
-> in die T1-Klammer eingegliedert, weil das Wiring den Carrier-
-> Type-Vertrag und den `RecorderPort` direkt verdrahtet (Plan-Drift
-> in §Tranchen + T0-(e)-Outcome-Spalte spiegelnd nachgezogen).
+> Tuple-Vertrag synchronisiert). **Slice ✅ done** — Cluster-
+> Folge-Slice 2/9 (Add) komplett abgeschlossen, alle Tranchen
+> und zwei Code-Review-Runden (R6: 15 Findings, R7: 3 Findings)
+> adressiert. DoD-Tabelle siehe unten. Slice-Datei wandert nach
+> `done/`. Nächster Cluster-Schritt: Folge-Slice 3/9 (init).
+>
+> **DoD-Tranchen-Hashes** (alle T0-T6 + R6/R7-Findings):
+>
+> | Tranche / Round | Inhalt | Commit |
+> | --- | --- | --- |
+> | T0 | T0-Outcomes festgezurrt (12 Sub-Decisions) | `424b3ec` |
+> | T1-A | Port-Types (Carrier + Sentinel + RecorderPort) | `fbcbce8` |
+> | T1-B | recordingfs-Adapter mit Passthrough-Schalter | `e9ed7d8` |
+> | T1-C | AddServiceService.fsFactory + Recorder-Capture + ErrAddFileSystem-Wrap | `195f146` |
+> | T1-D | Composition-Root-Wiring (fsFactory-Closure in main.go) | `505f974` |
+> | T2 | Pure-Go Diff-Renderer + checkHunks-Helper | `551da9f` |
+> | T4 | u-boot add JSON-RunE-Pfad (3 Modi + Allowlist-Migration) | `93babcb` |
+> | T5 | Acceptance-Pins Variante A/B + Idempotent + Diff-Struktur | `d300bfb` |
+> | R6-Application | s.fs-Race + dep-PreviewMode + Response.ServiceName | `9ac4fd2` |
+> | R6-CLI | JSON-Envelope-Vollständigkeit + Renderer-Verträge (Findings #1-#6, #8, #15) | `55ac6ed` |
+> | R6-Defense | Diagnostic-Order + splitLines-Compliance (#11, #14) | `c666a4b` |
+> | R6-Tests | WithGetwd + 3-Flag-Combo + Exit-Code-Pins (#12, #13, #2) | `a22db99` |
+> | R7 | Impliziter MkdirAll im Recorder + count exakt Spec §477 | `4507a53` |
+> | T6 | Closure (DoD-Hashes, user-docs, roadmap, CHANGELOG, done/-Move) | dieser Commit |
 
 ## Auslöser
 
@@ -1222,7 +1232,7 @@ denkbar. **Verworfen**, weil:
 ## Bezug
 
 - Cluster-Slice:
-  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
   §T0-Outcomes (b)+(d)+(e) sind die Vorgaben dieses Slices.
 - Vorgänger-Slice:
   [`slice-v1-cli-json-dry-run-doctor`](../done/slice-v1-cli-json-dry-run-doctor.md)

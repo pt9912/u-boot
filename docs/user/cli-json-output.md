@@ -364,9 +364,9 @@ Reihenfolge gemäß Cluster-T0-(e):
 
 | # | Folge-Slice | Subcommand-Form(en) | Status |
 | --- | --- | --- | --- |
-| 1 | `slice-v1-cli-json-dry-run-doctor` | `doctor` + `template list`-Flag-Schnitt | T1 in Arbeit (dieses Doku) |
-| 2 | `slice-v1-cli-json-dry-run-add` | `add` (modifying, etabliert Full-Modus + RecordingFileSystem) | offen |
-| 3 | `slice-v1-cli-json-dry-run-init` | `init` | offen |
+| 1 | `slice-v1-cli-json-dry-run-doctor` | `doctor` + `template list`-Flag-Schnitt | done |
+| 2 | `slice-v1-cli-json-dry-run-add` | `add` (modifying, etabliert Full-Modus + RecordingFileSystem) | done (DoD-Hash-Tabelle im Slice-File) |
+| 3 | `slice-v1-cli-json-dry-run-init` | `init` | offen — **nächster Schritt** |
 | 4 | `slice-v1-cli-json-dry-run-generate` | `generate` | offen |
 | 5 | `slice-v1-cli-json-dry-run-remove` | `remove` | offen |
 | 6 | `slice-v1-cli-json-dry-run-up-down` | `up`, `down` (gebündelt, read-only Compose-Status) | offen |
@@ -405,9 +405,73 @@ konform. Carveouts-Eintrag in
 §Temporäre Carveouts mit Re-Trigger
 `slice-v1-cli-json-dry-run-template` (Platz 9 — Envelope-Migration).
 
+### 6.3 `u-boot add --json` (slice-v1-cli-json-dry-run-add, done)
+
+`u-boot add` ist der erste modifying-Subcommand mit JSON-
+Envelope-Migration. Drei Flag-Kombinationen, drei Output-Formen
+(`LH-FA-CLI-007/008`):
+
+- **`--json` ohne `--dry-run`/`--diff`** → Minimalkontrakt
+  (Spec §1841). Die Operation schreibt das FS um, das JSON-Output
+  trägt aber **keine** Plan- oder Change-Information. Für die
+  Liste der veränderten Files den Preview-Pfad nutzen:
+  `--dry-run --json` (Vorschau ohne Schreiben) oder
+  `--diff --json` (Vorschau plus Schreiben, mit Hunks).
+- **`--dry-run --json`** → Voll-Schema mit
+  `plannedFiles[]`/`changes[]`, `dryRun: true`, `diff: false`. Es
+  wird **nichts** auf die Disk geschrieben — der
+  `RecordingFileSystem` capturet alle geplanten Mutations.
+- **`--diff --json`** → Voll-Schema mit
+  `plannedFiles[].hunks[]`, `dryRun: false`, `diff: true`. Es wird
+  geschrieben **und** capturet (Preview-and-Apply, Spec §465-470).
+- **`--dry-run --diff --json`** → wie `--dry-run --json`, aber mit
+  Hunks und `diff: true`. Kein Write.
+
+**Mid-Write-Failure-UX** (`LH-NFA-REL-003`): wenn im
+`--diff --json`-Preview-and-Apply-Pfad ein Write mid-stream failt,
+trägt `plannedFiles[]` nur die Aufrufe bis zur Failure-Stelle. Der
+Diagnostic-Eintrag (`diagnostics[].code: "LH-NFA-REL-003"`) trägt
+`file:` mit der Failure-Stelle; `exitCode: 14`. Die später nicht
+mehr geschriebenen Files erscheinen **nicht** in `plannedFiles[]`
+— ein Roll-back-aware Capture ist V1-Out-of-Scope (Cluster-T0-(b)
+Variante 3 ChangeSet-Pattern explizit verworfen).
+
+**Sub-Decisions**: der Slice etabliert `RecordingFileSystem` als
+driven-Adapter (`internal/adapter/driven/recordingfs/`), `Hunks`-
+Schema (`plannedFiles[].hunks: [{oldStart, oldLines, newStart,
+newLines, content}]`, T0-(l)), Pure-Go LCS-Diff-Renderer
+(`internal/adapter/driving/cli/diff/`, T0-(d)), Composition-Root-
+`fsFactory(driving.AddPreviewMode)`-Closure in `cmd/uboot/main.go`
+(T0-(e)) und `changes[].count`-Semantik gemäß Spec §477
+(`CountAdditions` über die `+`-Lines der Hunks, T0-(g)).
+Diagnostic-Codes sind LH-Kennungen
+(`LH-FA-ADD-{001,002,005,006}`/`LH-FA-INIT-{004,005,006}`/
+`LH-NFA-REL-003`); keine erfundenen `add.*`-Codes (T0-(j)).
+
 ---
 
-## 7. ADR-Bezug
+## 7. Mutations-Matrix pro Subcommand
+
+Drift-Anker für den Cluster-Folge-Slice-Block (T0-(f)): jeder
+modifying-Subcommand listet, welche `driven.FileSystem`-Mutations-
+Methoden sein Use-Case heute aufruft. Der `RecordingFileSystem`
+implementiert alle 8 Mutations-Methoden (Drift-Schutz für künftige
+Use-Cases); die Matrix dokumentiert die heutige Konsumenten-
+Realität. Wenn ein zukünftiger Slice einen Use-Case erweitert
+(z. B. neuer Add-on im Catalog ruft `Copy`), muss er die Matrix
+in derselben PR ergänzen.
+
+| Subcommand | WriteFile | WriteFileExclusive | Mkdir | MkdirAll | Rename | RemoveAll | Copy | CopyExclusive |
+| --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `add` (slice-v1-cli-json-dry-run-add) | ✓ (3 Slots + N ExtraFiles) | — | — | ✓ (implizit, Recorder synthetisiert) | — | — | — | — |
+
+Andere modifying-Subcommands (`init`, `generate`, `remove`,
+`config set`) ergänzen ihre Zeile im jeweiligen Slice — heute nur
+`add` migriert.
+
+---
+
+## 8. ADR-Bezug
 
 [`ADR-0010 — kein HTTP-Driving-Adapter`](../plan/adr/0010-kein-http-driving-adapter.md)
 §Folgepunkte Re-Eval-Trigger 2 macht JSON-CLI verbindlich zur

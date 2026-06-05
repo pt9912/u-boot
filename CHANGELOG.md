@@ -13,6 +13,37 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- `feat(cli): u-boot add --json / --dry-run / --diff
+  (LH-FA-CLI-007/008 / LH-NFA-USE-004)` — erster modifying-Sub-
+  command mit JSON-Envelope-Migration (Cluster-Slice
+  `slice-v1-cli-json-dry-run`, Folge-Slice 2/9). Vier neue
+  Flag-Kombinationen: `--json` (Minimalkontrakt-Envelope ohne
+  Plan), `--dry-run --json` (Voll-Schema mit `plannedFiles[]`/
+  `changes[]`, kein FS-Write), `--diff --json` (Voll-Schema
+  Preview-and-Apply mit `plannedFiles[].hunks[]`),
+  `--dry-run --diff --json` (Vorschau plus Hunks, kein Write).
+  Human-Mode-`--diff` rendert Unified-Diff-String an stdout
+  (`+`/`-`/space-Prefix plus `@@`-Header). Cluster-Infrastruktur
+  als Pattern-Vorbild: neuer `RecordingFileSystem`-driven-Adapter
+  (`internal/adapter/driven/recordingfs/`) implementiert alle 8
+  Mutations-Methoden mit Passthrough-Schalter, modelliert den
+  impliziten `MkdirAll`-Effekt auf Parent-Dirs; Pure-Go LCS-Diff-
+  Renderer (`internal/adapter/driving/cli/diff/`); Composition-
+  Root-`fsFactory(driving.AddPreviewMode)`-Closure in
+  `cmd/uboot/main.go`. Diagnostic-Codes sind LH-Kennungen
+  (`LH-FA-ADD-{001,002,005,006}`/`LH-FA-INIT-{004,005,006}`/
+  `LH-NFA-REL-003`). Mid-Write-Failure-UX: Voll-Schema-Envelope
+  zeigt `plannedFiles[]` bis zur Failure-Stelle, `diagnostics[].file`
+  markiert die Failure-Position, `exitCode: 14` (LH-NFA-REL-003).
+  `changes[].count`-Semantik: für `create` total Lines der neuen
+  Datei, für `modify` `+`-Lines aus den Hunks (Spec §477 exakt),
+  für `delete` `0`, für binary `CountBytesDiff`. Service-Race-
+  Safe via `sync.Mutex` auf `AddServiceService`; recursive
+  Dep-Installs (für künftige Catalogue-Erweiterungen) erben den
+  Outer-`PreviewMode`. AssertFullEnvelope erweitert um
+  `checkHunks`-Helper mit Field-Name-Drift-Pin
+  (`offset` statt `oldStart` failt sofort).
+
 - `feat(cli): u-boot doctor --json plus Root-PersistentFlag
   --json (LH-NFA-USE-004 / LH-FA-CLI-007)` — Pattern-Vorbild für
   die maschinen-lesbare CLI-Surface (Cluster-Slice
