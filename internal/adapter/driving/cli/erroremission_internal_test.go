@@ -88,7 +88,13 @@ func TestMapInitErrorToDiagnostic_AllCases(t *testing.T) {
 		{"ErrProjectExists", driving.ErrProjectExists, "LH-FA-INIT-004"},
 		{"ErrFileExists", driving.ErrFileExists, "LH-FA-INIT-004"},
 		{"ErrInvalidProjectName", domain.ErrInvalidProjectName, "LH-FA-INIT-006"},
-		{"ErrInvalidServiceName", domain.ErrInvalidServiceName, "LH-FA-INIT-006"},
+		// Review-Round-9 #1: ErrInvalidFeatureSource (LH-FA-DEV-003)
+		// stammt aus `init --allow-external-feature-sources` ohne
+		// `--devcontainer`. Vorher fiel der Wert zur default-CLI-006-
+		// Klasse während der Exit-Code via isConfigValidationError
+		// bereits Code-10 lieferte — Envelope-Code/Exit-Klassen
+		// drifteten auseinander.
+		{"ErrInvalidFeatureSource", domain.ErrInvalidFeatureSource, "LH-FA-DEV-003"},
 		{"unknown → default LH-FA-CLI-006", errors.New("unknown"), "LH-FA-CLI-006"},
 		// Multi-`%w` Switch-Order-Pin (analog Add-Test): FS-first
 		// klassifiziert auch wenn der wrap ein fachlich Sentinel

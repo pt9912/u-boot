@@ -301,8 +301,16 @@ func mapInitErrorToDiagnostic(err error) diagnosticItem {
 		return diagnosticItem{Level: "error", Code: "LH-FA-INIT-005", Message: err.Error()}
 	case errors.Is(err, driving.ErrProjectExists), errors.Is(err, driving.ErrFileExists):
 		return diagnosticItem{Level: "error", Code: "LH-FA-INIT-004", Message: err.Error()}
-	case errors.Is(err, domain.ErrInvalidProjectName), errors.Is(err, domain.ErrInvalidServiceName):
+	case errors.Is(err, domain.ErrInvalidProjectName):
 		return diagnosticItem{Level: "error", Code: "LH-FA-INIT-006", Message: err.Error()}
+	case errors.Is(err, domain.ErrInvalidFeatureSource):
+		// LH-FA-DEV-003 (`init --allow-external-feature-sources` ohne
+		// `--devcontainer`) — Spec §714. Exit-Code 10 wird via
+		// cli.isConfigValidationError schon erkannt, der Mapper muss
+		// hier symmetrisch dazu klassifizieren, sonst kommt der
+		// Envelope-Code 'LH-FA-CLI-006' bei Exit-Code 10 raus (Code-
+		// Class ≠ Exit-Class — Review-Round-9 #1).
+		return diagnosticItem{Level: "error", Code: "LH-FA-DEV-003", Message: err.Error()}
 	default:
 		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
 	}
