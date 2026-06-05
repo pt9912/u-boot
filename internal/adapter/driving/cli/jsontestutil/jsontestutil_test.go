@@ -213,6 +213,99 @@ func TestAssertFullEnvelope_RejectsNegativeCount(t *testing.T) {
 	}
 }
 
+// TestAssertFullEnvelope_AcceptsValidHunks pins the positive
+// hunk-shape case from slice-v1-cli-json-dry-run-add T0-(l): three
+// valid hunks (one pure addition with OldStart=0/OldLines=0, one
+// middle-modify, one pure deletion with NewStart=0/NewLines=0) all
+// pass without errors.
+func TestAssertFullEnvelope_AcceptsValidHunks(t *testing.T) {
+	r := newRecorder(t)
+	raw := []byte(`{
+		"status":"ok","command":"add",
+		"dryRun":true,"diff":true,
+		"plannedFiles":[{
+			"path":"compose.yaml","action":"create",
+			"hunks":[
+				{"oldStart":0,"oldLines":0,"newStart":1,"newLines":3,"content":"+a\n+b\n+c\n"},
+				{"oldStart":10,"oldLines":1,"newStart":13,"newLines":1,"content":"-x\n+X\n"},
+				{"oldStart":20,"oldLines":2,"newStart":0,"newLines":0,"content":"-y\n-z\n"}
+			]
+		}],
+		"changes":[{"path":"compose.yaml","count":4}],
+		"diagnostics":[],"exitCode":0
+	}`)
+	jsontestutil.AssertFullEnvelope(r, raw,
+		jsontestutil.WithCommand("add"),
+	)
+	if len(r.errors) != 0 {
+		t.Errorf("expected no errors for valid hunks, got %d: %v", len(r.errors), r.errors)
+	}
+}
+
+// TestAssertFullEnvelope_RejectsHunkFieldNameDrift is the negative
+// Pin from T0-(l): a renamed field (`offset` instead of `oldStart`)
+// must fail the hunk-shape check. This Drift-Anker catches future
+// refactors that accidentally rename a hunk field.
+func TestAssertFullEnvelope_RejectsHunkFieldNameDrift(t *testing.T) {
+	r := newRecorder(t)
+	raw := []byte(`{
+		"status":"ok","command":"add",
+		"dryRun":true,"diff":true,
+		"plannedFiles":[{
+			"path":"compose.yaml","action":"create",
+			"hunks":[{"offset":1,"oldLines":0,"newStart":1,"newLines":3,"content":"+a\n+b\n+c\n"}]
+		}],
+		"changes":[{"path":"compose.yaml","count":3}],
+		"diagnostics":[],"exitCode":0
+	}`)
+	jsontestutil.AssertFullEnvelope(r, raw)
+	if !containsSubstring(r.errors, `"oldStart"`) {
+		t.Errorf("expected oldStart-field-drift reject, errors=%v", r.errors)
+	}
+}
+
+// TestAssertFullEnvelope_RejectsHunkStartZeroWithLinesPositive pins
+// the 1-based-coordinate invariant: when *Lines > 0 the
+// corresponding *Start MUST be ≥ 1 (T0-(l) Hunk-Schema).
+func TestAssertFullEnvelope_RejectsHunkStartZeroWithLinesPositive(t *testing.T) {
+	r := newRecorder(t)
+	raw := []byte(`{
+		"status":"ok","command":"add",
+		"dryRun":true,"diff":true,
+		"plannedFiles":[{
+			"path":"compose.yaml","action":"modify",
+			"hunks":[{"oldStart":0,"oldLines":2,"newStart":1,"newLines":2,"content":"-a\n-b\n+A\n+B\n"}]
+		}],
+		"changes":[{"path":"compose.yaml","count":2}],
+		"diagnostics":[],"exitCode":0
+	}`)
+	jsontestutil.AssertFullEnvelope(r, raw)
+	if !containsSubstring(r.errors, "≥ 1") {
+		t.Errorf("expected start-must-be-≥1 reject when lines>0, errors=%v", r.errors)
+	}
+}
+
+// TestAssertFullEnvelope_HunkAbsenceIsOK pins that the hunks field
+// is optional on plannedFile entries — Spec §326 lists it as part of
+// the --diff --json subset only, and omitempty omission must not
+// trigger checkHunks at all.
+func TestAssertFullEnvelope_HunkAbsenceIsOK(t *testing.T) {
+	r := newRecorder(t)
+	raw := []byte(`{
+		"status":"ok","command":"add",
+		"dryRun":true,"diff":false,
+		"plannedFiles":[{"path":"compose.yaml","action":"create"}],
+		"changes":[{"path":"compose.yaml","count":12}],
+		"diagnostics":[],"exitCode":0
+	}`)
+	jsontestutil.AssertFullEnvelope(r, raw,
+		jsontestutil.WithCommand("add"),
+	)
+	if len(r.errors) != 0 {
+		t.Errorf("hunks-absence is allowed; got errors: %v", r.errors)
+	}
+}
+
 func TestDefaultAllowedCodes_NotEmpty(t *testing.T) {
 	codes := jsontestutil.DefaultAllowedCodes()
 	if len(codes) == 0 {

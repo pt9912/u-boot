@@ -325,6 +325,59 @@ func checkPlannedFiles(t testing.TB, env map[string]any) {
 		if !slices.Contains([]string{"create", "modify", "delete"}, action) {
 			t.Errorf("plannedFiles[%d].action %q not in {create, modify, delete} (Spec §354)", i, action)
 		}
+		// Hunks ist optional auf plannedFile-Ebene (LH-FA-CLI-008
+		// §477-482 macht es Pflicht nur im --diff --json-Pfad; ohne
+		// --diff bleibt das Feld via omitempty weg). Bei Anwesenheit
+		// gilt das Struktur-Pin aus slice-v1-cli-json-dry-run-add
+		// T0-(l).
+		if _, present := item["hunks"]; present {
+			checkHunks(t, item["hunks"], i)
+		}
+	}
+}
+
+// checkHunks validates the shape of one plannedFiles[i].hunks array
+// per slice-v1-cli-json-dry-run-add T0-(l). Each hunk MUST be an
+// object with the five fields oldStart/oldLines/newStart/newLines
+// (integers ≥ 0) and content (string). Drift-Pin: a renamed field
+// (e.g. `offset` instead of `oldStart`) fails this check immediately.
+// When a hunk's *Lines field is > 0 the corresponding *Start MUST
+// be ≥ 1 (1-based line numbers); pure additions/deletions report
+// the off-side as 0 per unified-diff convention.
+func checkHunks(t testing.TB, raw any, plannedFileIdx int) {
+	t.Helper()
+	arr, ok := raw.([]any)
+	if !ok {
+		t.Errorf("plannedFiles[%d].hunks must be an array when present", plannedFileIdx)
+		return
+	}
+	for j, hraw := range arr {
+		h, ok := hraw.(map[string]any)
+		if !ok {
+			t.Errorf("plannedFiles[%d].hunks[%d] must be an object", plannedFileIdx, j)
+			continue
+		}
+		for _, k := range []string{"oldStart", "oldLines", "newStart", "newLines", "content"} {
+			if _, present := h[k]; !present {
+				t.Errorf("plannedFiles[%d].hunks[%d] missing required key %q (T0-(l))", plannedFileIdx, j, k)
+			}
+		}
+		oldStart, _ := h["oldStart"].(float64)
+		oldLines, _ := h["oldLines"].(float64)
+		newStart, _ := h["newStart"].(float64)
+		newLines, _ := h["newLines"].(float64)
+		if oldStart < 0 || oldLines < 0 || newStart < 0 || newLines < 0 {
+			t.Errorf("plannedFiles[%d].hunks[%d] has negative coordinate (T0-(l)): %+v", plannedFileIdx, j, h)
+		}
+		if oldLines > 0 && oldStart < 1 {
+			t.Errorf("plannedFiles[%d].hunks[%d] oldStart=%v must be ≥ 1 when oldLines=%v > 0", plannedFileIdx, j, oldStart, oldLines)
+		}
+		if newLines > 0 && newStart < 1 {
+			t.Errorf("plannedFiles[%d].hunks[%d] newStart=%v must be ≥ 1 when newLines=%v > 0", plannedFileIdx, j, newStart, newLines)
+		}
+		if _, ok := h["content"].(string); !ok {
+			t.Errorf("plannedFiles[%d].hunks[%d].content must be a string", plannedFileIdx, j)
+		}
 	}
 }
 
