@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
@@ -131,12 +132,21 @@ type ubootYAMLConfig struct {
 // (production wiring always sets it).
 type InitProjectService struct {
 	fs           driven.FileSystem
+	fsFactory    func(driving.PreviewMode) (driven.FileSystem, driven.RecorderPort)
 	yaml         driven.YAMLCodec
 	git          driven.Git
 	progress     driven.ProgressPort
 	confirmer    driven.Confirmer
 	logger       driven.Logger
 	templateInit driving.TemplateInitUseCase
+	// initMu serialises Init() invocations on a single service
+	// instance. The PreviewMode-aware fs/progress-swaps in Init()
+	// mutate shared s.fs/s.progress fields; concurrent Init calls
+	// would race on the swap/restore pairs and one caller's writes
+	// would route through the other caller's recorder
+	// (slice-v1-cli-json-dry-run-init T0-(d); inherited from
+	// add review #10).
+	initMu sync.Mutex
 }
 
 // InitProjectOption mutates an [InitProjectService] during
@@ -191,6 +201,73 @@ func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driv
 	return s
 }
 
+// NewInitProjectServiceWithFactory is the slice-v1-cli-json-dry-run-
+// init T3 Composition-Root constructor: instead of a fixed
+// [driven.FileSystem], the service receives a factory that picks the
+// FS per [driving.PreviewMode]. Composition-Root wires
+// PreviewNone → production FS, PreviewDryRun/PreviewAndApply →
+// recording FS (analog to AddServiceServiceWithFactory).
+//
+// [Init] reads the mode from [driving.InitProjectRequest.PreviewMode],
+// asks the factory for a fresh (fs, recorder) tuple, swaps the
+// service-level [fs] field for the request's duration (defer-restored)
+// and — if the recorder is non-nil — maps its
+// [driven.RecorderPort.Captured] output into
+// [driving.InitProjectResponse.PlannedFiles] on the way out.
+//
+// Legacy callers (`NewInitProjectService(fs, …)`) keep working
+// unchanged: the factory stays nil and [Init] falls back to the
+// stored [fs] field, ignoring PreviewMode (the recorder is nil so
+// PlannedFiles stays empty as well).
+func NewInitProjectServiceWithFactory(
+	fsFactory func(driving.PreviewMode) (driven.FileSystem, driven.RecorderPort),
+	yaml driven.YAMLCodec,
+	git driven.Git,
+	progress driven.ProgressPort,
+	confirmer driven.Confirmer,
+	logger driven.Logger,
+	opts ...InitProjectOption,
+) *InitProjectService {
+	if progress == nil {
+		progress = noopProgress{}
+	}
+	if confirmer == nil {
+		confirmer = noopConfirmer{}
+	}
+	if logger == nil {
+		logger = noopLogger{}
+	}
+	// Bootstrap fs from the PreviewNone branch so methods that read
+	// s.fs outside of an Init() call see a valid adapter even before
+	// any request lands (mirrors AddServiceServiceWithFactory).
+	bootstrapFS, _ := fsFactory(driving.PreviewNone)
+	s := &InitProjectService{
+		fs:        bootstrapFS,
+		fsFactory: fsFactory,
+		yaml:      yaml,
+		git:       git,
+		progress:  progress,
+		confirmer: confirmer,
+		logger:    logger,
+	}
+	for _, opt := range opts {
+		opt(s)
+	}
+	return s
+}
+
+// selectFS picks the per-request FS pair (slice-v1-cli-json-dry-
+// run-init T0-(d)): if the factory is wired (Composition-Root path)
+// it returns the mode-specific tuple; otherwise the legacy [fs]
+// field with a nil recorder (PreviewMode is ignored — the use case
+// keeps writing to production).
+func (s *InitProjectService) selectFS(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
+	if s.fsFactory == nil {
+		return s.fs, nil
+	}
+	return s.fsFactory(mode)
+}
+
 // fileAction classifies what the service should do with a single
 // templated file at execute time. The plan phase computes this for
 // every file before any write happens, so a summary can be emitted
@@ -243,6 +320,52 @@ type filePlan struct {
 // error. BackupPath itself is TOCTOU-safe via WriteFileExclusive +
 // Mkdir (T4a-review).
 func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRequest) (driving.InitProjectResponse, error) {
+	// Serialise per-request fs/progress-swap (slice-v1-cli-json-
+	// dry-run-init T0-(d), inherited from add review #10): concurrent
+	// Init() calls on the same instance would otherwise race on the
+	// mutable s.fs/s.progress fields. The mutex covers the whole
+	// Init body so swap + use-case + restore stays atomic.
+	s.initMu.Lock()
+	defer s.initMu.Unlock()
+
+	// PreviewMode-aware FS-swap (T0-(d)/(e)): route every FS access
+	// of this Init() invocation through the mode-specific adapter
+	// (production FS for PreviewNone, RecordingFileSystem with the
+	// matching passthrough switch for PreviewDryRun/PreviewAndApply).
+	// Defer restores the bootstrap [fs] field for subsequent calls.
+	fs, recorder := s.selectFS(req.PreviewMode)
+	prevFS := s.fs
+	s.fs = fs
+	defer func() { s.fs = prevFS }()
+
+	// SilenceProgress-Swap (T0-(o)): in JSON-mode the CLI sets
+	// req.SilenceProgress=true so emitSummary's ProgressPort-writes
+	// don't corrupt the JSON envelope on stdout. Swap to noopProgress
+	// for the request's duration; defer restores.
+	if req.SilenceProgress {
+		prevProgress := s.progress
+		s.progress = noopProgress{}
+		defer func() { s.progress = prevProgress }()
+	}
+
+	resp, initErr := s.runInit(ctx, req)
+
+	// Map the recorder's capture into resp.PlannedFiles — also on
+	// the error path (T0-(b) Mid-Write-Failure: user sees captured
+	// calls up to the failure point). Empty capture (PreviewNone or
+	// true no-op) leaves resp.PlannedFiles nil.
+	if recorder != nil {
+		resp.PlannedFiles = mapCaptureToPlannedFiles(recorder.Captured(), req.BaseDir)
+	}
+	return resp, initErr
+}
+
+// runInit is the original Init() body unchanged from M3/M4/M7-merge:
+// validation → template-dispatch → soft-existing-detection → plan →
+// execute → git init. T3 pulled it out so [Init] can wrap it with
+// the PreviewMode-aware FS/Progress-swap and the recorder-capture
+// mapping without duplicating the dispatch logic.
+func (s *InitProjectService) runInit(ctx context.Context, req driving.InitProjectRequest) (driving.InitProjectResponse, error) {
 	if err := s.validateInitPreconditions(req); err != nil {
 		return driving.InitProjectResponse{}, err
 	}
@@ -308,7 +431,13 @@ func (s *InitProjectService) Init(ctx context.Context, req driving.InitProjectRe
 		backups = append(backups, *yamlBackup)
 	}
 
-	if !req.SkipGit {
+	// initGit-Skip-Logic (T0-(n)): in Dry-Run mode skip git init
+	// — `s.git` is a separate driven port, not routed through the
+	// recordingfs swap, so without this skip a `--dry-run` call
+	// would create a real `.git/` on disk (Adversarial R3 C-1).
+	// PreviewAndApply still runs git init (Preview-and-Apply contract
+	// = capture + write).
+	if !req.SkipGit && req.PreviewMode != driving.PreviewDryRun {
 		if err := s.initGit(ctx, req.BaseDir); err != nil {
 			return driving.InitProjectResponse{}, err
 		}
@@ -774,7 +903,12 @@ func (s *InitProjectService) writeDirectories(baseDir string, req driving.InitPr
 	for _, dir := range dirs {
 		path := filepath.Join(baseDir, dir)
 		if err := s.fs.MkdirAll(path, 0o755); err != nil {
-			return nil, fmt.Errorf("mkdir %s: %w", dir, err)
+			// slice-v1-cli-json-dry-run-init T3: multi-`%w` wrap so
+			// cli.ExitCode (via isFilesystemError) maps to LH-NFA-
+			// REL-003 / exit-code 14 (T0-(f) Switch-Order: init's
+			// mapInitErrorToDiagnostic checks ErrInitFileSystem
+			// FIRST so this wrap classifies as FS-class).
+			return nil, fmt.Errorf("init: mkdir %s: %w: %w", dir, driving.ErrInitFileSystem, err)
 		}
 		created = append(created, dir+"/")
 	}
@@ -816,7 +950,7 @@ func (s *InitProjectService) executeFile(baseDir string, plan filePlan, body []b
 	switch plan.Action {
 	case actionWrite:
 		if err := s.fs.WriteFile(fullPath, body, defaultFileMode); err != nil {
-			return "", nil, fmt.Errorf("write %s: %w", plan.Template.Path, err)
+			return "", nil, fmt.Errorf("init: write %s: %w: %w", plan.Template.Path, driving.ErrInitFileSystem, err)
 		}
 		return plan.Template.Path, nil, nil
 	case actionReplaceBlock:
@@ -864,7 +998,7 @@ func (s *InitProjectService) executeReplaceBlock(baseDir string, plan filePlan, 
 		updated = ensureComposeScaffold(updated)
 	}
 	if err := s.fs.WriteFile(fullPath, updated, plan.Mode); err != nil {
-		return "", nil, fmt.Errorf("write %s: %w", plan.Template.Path, err)
+		return "", nil, fmt.Errorf("init: write %s: %w: %w", plan.Template.Path, driving.ErrInitFileSystem, err)
 	}
 	return plan.Template.Path, backup, nil
 }
@@ -966,18 +1100,33 @@ func (s *InitProjectService) executeOverwriteFull(baseDir string, plan filePlan,
 		return "", nil, err
 	}
 	if err := s.fs.WriteFile(fullPath, body, plan.Mode); err != nil {
-		return "", nil, fmt.Errorf("write %s: %w", plan.Template.Path, err)
+		return "", nil, fmt.Errorf("init: write %s: %w: %w", plan.Template.Path, driving.ErrInitFileSystem, err)
 	}
 	return plan.Template.Path, ba, nil
 }
 
 // runBackup wraps [BackupPath] and returns the resulting
 // [driving.BackupAction] record for the response.
+//
+// Wrap-Strategie (T3): BackupPath returnt entweder einen typed
+// Sentinel (ErrBackupSuffixExhausted/ErrBackupSourceMissing —
+// schon in isFilesystemError → Exit 14) ODER einen rohen
+// Filesystem-Error aus den inneren Copy/Mkdir/etc.-Calls. Für
+// raw errors wrappen wir mit ErrInitFileSystem; typed Sentinels
+// reichen wir DURCH, weil ihre eigene LH-Code-Klassifikation
+// (LH-NFA-REL-003) im CLI bereits sauber gemappt wird.
 func (s *InitProjectService) runBackup(baseDir, relPath string) (*driving.BackupAction, error) {
 	fullPath := filepath.Join(baseDir, relPath)
 	backupPath, err := BackupPath(s.fs, fullPath)
 	if err != nil {
-		return nil, fmt.Errorf("backup %s: %w", relPath, err)
+		// Pass typed init-Sentinels through; wrap raw filesystem
+		// errors with ErrInitFileSystem for FS-class classification.
+		if errors.Is(err, driving.ErrBackupSuffixExhausted) ||
+			errors.Is(err, driving.ErrBackupSourceMissing) ||
+			errors.Is(err, driving.ErrBackupUnsupportedKind) {
+			return nil, fmt.Errorf("backup %s: %w", relPath, err)
+		}
+		return nil, fmt.Errorf("init: backup %s: %w: %w", relPath, driving.ErrInitFileSystem, err)
 	}
 	return &driving.BackupAction{Original: relPath, Backup: backupPath}, nil
 }
