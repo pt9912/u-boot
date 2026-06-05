@@ -379,8 +379,20 @@ func toCLIHunks(src []driving.Hunk) []hunk {
 // back to a generic LH-FA-CLI-006 wrapper (default error path); the
 // invariants Spec §1834 (level ∈ {warn, error}) and §1837 (status
 // coupling) carry the rest.
+//
+// Order matters: addservice_execute.go wraps FS-Write-Failures as
+// `fmt.Errorf("write %s: %w: %w", path, ErrAddFileSystem, rawErr)` —
+// a multi-%w wrap (Go 1.20+). If a future code path adds a fachlich
+// sentinel to the same chain (e.g. atomicity rollback also wrapping
+// ErrServiceInconsistent), errors.Is would match BOTH this case and
+// ErrAddFileSystem. ErrAddFileSystem checks first (review #11) so
+// the user sees the technical-persistence diagnostic and exit-14
+// classification rather than a misleading fachlich code (LH-FA-ADD-005
+// → exit 10) that the wrap accidentally included.
 func mapErrorToDiagnostic(err error) diagnosticItem {
 	switch {
+	case errors.Is(err, driving.ErrAddFileSystem):
+		return diagnosticItem{Level: "error", Code: "LH-NFA-REL-003", Message: err.Error()}
 	case errors.Is(err, driving.ErrProjectNotInitialized):
 		return diagnosticItem{Level: "error", Code: "LH-FA-ADD-001", Message: err.Error()}
 	case errors.Is(err, driving.ErrServiceUnsupported):
@@ -395,8 +407,6 @@ func mapErrorToDiagnostic(err error) diagnosticItem {
 		return diagnosticItem{Level: "error", Code: "LH-FA-INIT-004", Message: err.Error()}
 	case errors.Is(err, driving.ErrBackupSuffixExhausted), errors.Is(err, driving.ErrBackupSourceMissing):
 		return diagnosticItem{Level: "error", Code: "LH-FA-INIT-005", Message: err.Error()}
-	case errors.Is(err, driving.ErrAddFileSystem):
-		return diagnosticItem{Level: "error", Code: "LH-NFA-REL-003", Message: err.Error()}
 	default:
 		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
 	}

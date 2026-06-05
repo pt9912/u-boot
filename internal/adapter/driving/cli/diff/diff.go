@@ -125,17 +125,26 @@ func Render(hunks []driving.Hunk) string {
 // splitLines turns content into a line slice with stable round-trip
 // semantics for trailing newlines: a final `\n` is treated as a line
 // terminator (not a separator), so `"a\nb\n"` and `"a\nb"` both yield
-// `["a", "b"]`. Empty input yields nil (not a one-element slice with
-// the empty string). The trailing-newline difference is invisible to
-// LCS; for V1 add templates (UNIX-style trailing newline by
-// convention) that lossy form is acceptable, and slice-v1-cli-json-
-// dry-run-add T0-(g) anchors `changes[].count` against the line-
-// counted form so the loss doesn't bleed into observable output.
+// `["a", "b"]`. Empty input (length 0 OR a single trailing `\n` only)
+// yields nil — NOT a one-element slice with the empty string. The
+// trailing-newline difference is invisible to LCS; for V1 add
+// templates (UNIX-style trailing newline by convention) that lossy
+// form is acceptable, and slice-v1-cli-json-dry-run-add T0-(g)
+// anchors `changes[].count` against the line-counted form so the
+// loss doesn't bleed into observable output.
+//
+// Review #14: the previous implementation skipped the `len(b)==0`
+// guard for input `[]byte("\n")` and returned `[""]` (one phantom
+// empty line), contradicting the docstring. Post-trim emptiness now
+// triggers the same nil-return.
 func splitLines(b []byte) []string {
 	if len(b) == 0 {
 		return nil
 	}
 	s := strings.TrimSuffix(string(b), "\n")
+	if s == "" {
+		return nil
+	}
 	return strings.Split(s, "\n")
 }
 
