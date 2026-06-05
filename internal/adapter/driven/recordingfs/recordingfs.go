@@ -60,6 +60,17 @@ type RecordingFileSystem struct {
 	underlying  driven.FileSystem
 	passthrough bool
 	records     []driven.FileMutationRecord
+	// knownDirs tracks dirs the recorder has either explicitly
+	// created (via Mkdir/MkdirAll) or implicitly created (via
+	// recordImplicitMkdir from a sub-path WriteFile). In
+	// passthrough=false mode the underlying FS never sees these
+	// Mkdir calls, so `underlying.Exists(dir)` stays false —
+	// without this dedup-map, a subsequent WriteFile to the same
+	// sub-tree would emit a duplicate synthetic record
+	// (slice-v1-cli-json-dry-run-init T0-(m) recordImplicitMkdir-
+	// Duplikations-Hazard; review-Round-2 Finding B-4 — gilt auch
+	// für add).
+	knownDirs map[string]bool
 }
 
 // Static checks: RecordingFileSystem satisfies both ports.
@@ -79,7 +90,10 @@ func WithPassthrough(on bool) Option {
 // New wraps underlying in a recorder. underlying must be non-nil; the
 // Composition-Root is responsible for that contract.
 func New(underlying driven.FileSystem, opts ...Option) *RecordingFileSystem {
-	r := &RecordingFileSystem{underlying: underlying}
+	r := &RecordingFileSystem{
+		underlying: underlying,
+		knownDirs:  make(map[string]bool),
+	}
 	for _, opt := range opts {
 		opt(r)
 	}
@@ -177,10 +191,14 @@ func (r *RecordingFileSystem) Rename(src, dst string) error {
 }
 
 // RemoveAll records the call; delegates only when passthrough is on.
+// Also clears the path from knownDirs so a subsequent Mkdir/Write to
+// the same path emits a fresh synthetic record (dedup-map mirrors the
+// underlying dir-existence; RemoveAll undoes that state).
 func (r *RecordingFileSystem) RemoveAll(path string) error {
 	r.records = append(r.records, driven.FileMutationRecord{
 		Path: path, Action: actionDelete, OldContent: r.snapshot(path),
 	})
+	delete(r.knownDirs, path)
 	if r.passthrough {
 		return r.underlying.RemoveAll(path)
 	}
@@ -247,31 +265,50 @@ func (r *RecordingFileSystem) recordWrite(filePath string, data []byte) {
 // — driven.FileSystem paths are constructed via filepath.Join in the
 // application layer, so on Windows the separator is `\` and `path.Dir`
 // would mis-parse the parent (review-round-8 finding B).
+//
+// Dedup-Pflicht (slice-v1-cli-json-dry-run-init T0-(m)): consults
+// r.knownDirs FIRST. In passthrough=false mode a prior explicit
+// `MkdirAll('.devcontainer')` records the dir but does NOT create it
+// on the underlying FS, so `underlying.Exists` stays false — without
+// the knownDirs-check a subsequent WriteFile to `.devcontainer/x.json`
+// would emit a duplicate synthetic record. The map fills both from
+// explicit recordDir (Mkdir/MkdirAll) and from this synthetic path,
+// so dedup works for any mix of explicit + implicit creates.
 func (r *RecordingFileSystem) recordImplicitMkdir(filePath string) {
 	dir := filepath.Dir(filePath)
 	if dir == "." || dir == string(filepath.Separator) || dir == "" {
 		return
 	}
+	if r.knownDirs[dir] {
+		return
+	}
 	exists, _ := r.underlying.Exists(dir)
 	if exists {
+		// Track even pre-existing dirs so subsequent calls hit the
+		// dedup map instead of re-querying the underlying FS.
+		r.knownDirs[dir] = true
 		return
 	}
 	r.records = append(r.records, driven.FileMutationRecord{
 		Path:   dir,
 		Action: actionCreate,
 	})
+	r.knownDirs[dir] = true
 }
 
 // recordDir is the shared body for Mkdir/MkdirAll. Directories carry
 // empty NewContent — they are markers, not regular files. Action is
 // always "create" (MkdirAll on an existing dir is a no-op and
 // recording it as such has no UX value; the LCS diff would render
-// nothing).
+// nothing). Also marks the dir as known so subsequent
+// recordImplicitMkdir-calls for sub-paths skip the synthetic record
+// (slice-v1-cli-json-dry-run-init T0-(m) Dedup-Pflicht).
 func (r *RecordingFileSystem) recordDir(path string) {
 	r.records = append(r.records, driven.FileMutationRecord{
 		Path:   path,
 		Action: actionCreate,
 	})
+	r.knownDirs[path] = true
 }
 
 // recordCopyOrMove classifies the dst side of a Copy/Rename: if dst

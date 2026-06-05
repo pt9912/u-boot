@@ -303,6 +303,104 @@ func TestRecordingFS_WriteFile_NoMkdirForFlatPath(t *testing.T) {
 	}
 }
 
+// TestRecordingFS_ImplicitMkdirDeduplicates pins the slice-v1-cli-
+// json-dry-run-init T0-(m) Dedup-Pflicht: an explicit MkdirAll
+// followed by a WriteFile to a sub-path must NOT emit a duplicate
+// synthetic Mkdir-record. In dry-run mode (passthrough=false) the
+// underlying FS never sees the Mkdir, so without the knownDirs-
+// dedup the implicit Mkdir would fire again on every WriteFile.
+//
+// Concrete scenario: `init --devcontainer --dry-run` writes
+// `.devcontainer/devcontainer.json` after MkdirAll('.devcontainer').
+// Without the fix the envelope would list `.devcontainer/` TWICE.
+func TestRecordingFS_ImplicitMkdirDeduplicates(t *testing.T) {
+	prod := newFakeFS(nil) // empty — .devcontainer does not pre-exist
+	rec := recordingfs.New(prod)
+
+	if err := rec.MkdirAll(".devcontainer", 0o755); err != nil {
+		t.Fatalf("MkdirAll: %v", err)
+	}
+	if err := rec.WriteFile(".devcontainer/devcontainer.json", []byte("{}"), 0o644); err != nil {
+		t.Fatalf("WriteFile sub-path: %v", err)
+	}
+	if err := rec.WriteFile(".devcontainer/Dockerfile", []byte("FROM x"), 0o644); err != nil {
+		t.Fatalf("WriteFile second sub-path: %v", err)
+	}
+
+	captured := rec.Captured()
+	// Expected: 3 records exactly — Mkdir('.devcontainer'),
+	// Write('.devcontainer/devcontainer.json'),
+	// Write('.devcontainer/Dockerfile'). NO duplicate Mkdir-records.
+	if len(captured) != 3 {
+		t.Fatalf("expected 3 records (1 mkdir + 2 writes), got %d: %+v", len(captured), pathsAndActions(captured))
+	}
+	mkdirCount := 0
+	for _, r := range captured {
+		if r.Path == ".devcontainer" && r.Action == "create" {
+			mkdirCount++
+		}
+	}
+	if mkdirCount != 1 {
+		t.Errorf("expected exactly 1 .devcontainer/ create-record (dedup), got %d", mkdirCount)
+	}
+}
+
+// TestRecordingFS_ImplicitMkdir_FromMultipleSubWrites pins that two
+// WriteFiles into the same not-yet-existing dir emit ONE synthetic
+// Mkdir, not two — the dedup-map also fills from the first implicit
+// Mkdir-record.
+func TestRecordingFS_ImplicitMkdir_FromMultipleSubWrites(t *testing.T) {
+	prod := newFakeFS(nil)
+	rec := recordingfs.New(prod)
+
+	_ = rec.WriteFile("otel/collector.yaml", []byte("a"), 0o644)
+	_ = rec.WriteFile("otel/config.toml", []byte("b"), 0o644)
+
+	captured := rec.Captured()
+	if len(captured) != 3 {
+		t.Fatalf("expected 3 records (1 synthetic mkdir + 2 writes), got %d: %+v", len(captured), pathsAndActions(captured))
+	}
+	if captured[0].Path != "otel" || captured[0].Action != "create" {
+		t.Errorf("first record should be the synthetic mkdir for otel, got %+v", captured[0])
+	}
+}
+
+// TestRecordingFS_RemoveAllClearsKnownDirs pins that RemoveAll on a
+// previously-recorded dir clears it from knownDirs, so a subsequent
+// WriteFile to the same sub-tree emits a FRESH synthetic Mkdir.
+// Mirrors the actual filesystem state — RemoveAll undoes the dir.
+func TestRecordingFS_RemoveAllClearsKnownDirs(t *testing.T) {
+	prod := newFakeFS(nil)
+	rec := recordingfs.New(prod)
+
+	_ = rec.MkdirAll(".cache", 0o755)
+	_ = rec.RemoveAll(".cache")
+	_ = rec.WriteFile(".cache/x", []byte("y"), 0o644)
+
+	captured := rec.Captured()
+	// Expected: Mkdir('.cache'), Delete('.cache'), Mkdir('.cache') (re-create), Write('.cache/x') = 4 records.
+	if len(captured) != 4 {
+		t.Fatalf("expected 4 records (mkdir + delete + re-mkdir + write), got %d: %+v", len(captured), pathsAndActions(captured))
+	}
+	mkdirCount := 0
+	for _, r := range captured {
+		if r.Path == ".cache" && r.Action == "create" {
+			mkdirCount++
+		}
+	}
+	if mkdirCount != 2 {
+		t.Errorf("expected 2 .cache/ create-records (one explicit + one synthetic after RemoveAll), got %d", mkdirCount)
+	}
+}
+
+func pathsAndActions(records []driven.FileMutationRecord) []string {
+	out := make([]string, len(records))
+	for i, r := range records {
+		out[i] = r.Path + "(" + r.Action + ")"
+	}
+	return out
+}
+
 // Compile-time check (mirrors the production fs adapter): drift would
 // surface as a build error here, not only a test-time error.
 var _ driven.FileSystem = (*recordingfs.RecordingFileSystem)(nil)
