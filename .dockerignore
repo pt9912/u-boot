@@ -25,6 +25,7 @@
 # bleed into the build context)
 out
 dist
+bin
 coverage
 coverage*
 *.test

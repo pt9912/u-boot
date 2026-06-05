@@ -126,27 +126,19 @@ run: build ## Smoke test: run `u-boot --help` from the built image.
 # release workflow handles packaging). Static linking + CGO=0 so the
 # binaries run on minimal hosts. -ldflags `-X main.version=$(VERSION)`
 # mirrors the runtime-image VERSION-Pin from the Dockerfile so the
-# binary's `--version` matches the surrounding release. Docker-only
-# build (LH-FA-BUILD-007): everything runs inside the pinned
-# golang:$(GO_VERSION) container, no host Go toolchain required.
+# binary's `--version` matches the surrounding release. The container
+# emits a tar stream and the host tar process extracts it into $(BIN_DIR),
+# so mounted worktrees do not receive root-owned output files.
 BIN_DIR    ?= bin
 PLATFORMS  := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64
 
 build-binaries: ## Cross-compile u-boot binaries for all release platforms.
 	@mkdir -p $(BIN_DIR)
-	@for p in $(PLATFORMS); do \
-	    os=$${p%/*}; arch=$${p#*/}; \
-	    ext=""; [ "$$os" = "windows" ] && ext=".exe"; \
-	    out=$(BIN_DIR)/u-boot-$$os-$$arch$$ext; \
-	    echo "==> $$out (UBOOT_VERSION=$(VERSION))"; \
-	    docker run --rm \
-	        -v "$(CURDIR)":/src -w /src \
-	        -e GOOS=$$os -e GOARCH=$$arch -e CGO_ENABLED=0 \
-	        -e GOFLAGS=-buildvcs=false \
-	        golang:$(GO_VERSION) \
-	        go build -ldflags="-s -w -X main.version=$(VERSION)" -o $$out ./cmd/uboot \
-	        || exit 1; \
-	done
+	$(DOCKER_BUILD) --target binary-archive -t $(IMAGE):binary-archive .
+	@docker run --rm \
+	    -e PLATFORMS="$(PLATFORMS)" \
+	    $(IMAGE):binary-archive \
+	    | tar --no-same-owner -xf - -C $(BIN_DIR)
 	@echo "[build-binaries] $(words $(PLATFORMS)) binaries built in $(BIN_DIR)/"
 
 # ---- security gates --------------------------------------------------------

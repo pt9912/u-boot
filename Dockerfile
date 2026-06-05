@@ -16,6 +16,7 @@
 #   coverage  — `go test -coverprofile` + coverage-gate.sh
 #               (bootstrap-aware, LH-FA-BUILD-008).
 #   build     — Statically linked binary (CGO=0, -ldflags="-s -w").
+#   binary-archive — Cross-compiled release binaries as a tar stream.
 #   runtime   — distroless/static:nonroot (LH-FA-BUILD-002).
 #
 # Pin policy (LH-FA-BUILD-003): GO_VERSION and GOLANGCI_LINT_VERSION are
@@ -157,6 +158,19 @@ RUN CGO_ENABLED=0 go build \
     -ldflags="-s -w -X main.version=${UBOOT_VERSION}" \
     -o /out/u-boot \
     ./cmd/uboot
+
+# ---- binary-archive --------------------------------------------------------
+FROM deps AS binary-archive
+
+# Re-declare and publish the release version so the entrypoint can
+# inject the same version string used by the runtime-image build.
+ARG UBOOT_VERSION
+ENV UBOOT_VERSION=${UBOOT_VERSION}
+
+COPY . .
+RUN install -m 0755 scripts/build-binary-archive.sh /usr/local/bin/build-binary-archive
+
+ENTRYPOINT ["/usr/local/bin/build-binary-archive"]
 
 # ---- runtime ---------------------------------------------------------------
 FROM gcr.io/distroless/static-debian12:nonroot AS runtime
