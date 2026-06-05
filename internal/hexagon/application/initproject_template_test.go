@@ -135,6 +135,34 @@ func TestInitProjectService_FromTemplate_RejectsForceMutex(t *testing.T) {
 	}
 }
 
+// TestInitProjectService_FromTemplate_RejectsPreviewModeDryRun pinnt
+// den Defense-in-Depth-Guard aus Review-Round-9 #2: das Application-
+// Layer-Pendant zur CLI-Mutex-Prüfung (init.go:215-217) verhindert,
+// dass direkt-aufrufende Use-Case-Klienten den Template-Renderer in
+// PreviewDryRun aktivieren (der Renderer ist preview-blind und würde
+// Files trotz `dry-run` reell schreiben).
+func TestInitProjectService_FromTemplate_RejectsPreviewModeDryRun(t *testing.T) {
+	t.Parallel()
+	fs := newFakeFS()
+	fs.dirs["/proj"] = true
+	tmplInit := application.NewTemplateInitService(externaltemplates.New(), fs, nil)
+	svc := application.NewInitProjectService(fs, &fakeYAML{}, &fakeGit{}, nil, nil, nil, application.WithTemplateInit(tmplInit))
+
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		BaseDir:     "/proj",
+		Name:        "demo",
+		SkipGit:     true,
+		Template:    "basic",
+		PreviewMode: driving.PreviewDryRun,
+	})
+	if err == nil {
+		t.Fatal("Init: want ErrTemplateConflictsWithFlag, got nil")
+	}
+	if !errors.Is(err, driving.ErrTemplateConflictsWithFlag) {
+		t.Errorf("err = %v, want wrap of driving.ErrTemplateConflictsWithFlag", err)
+	}
+}
+
 func TestInitProjectService_FromTemplate_RejectsExistingProject(t *testing.T) {
 	t.Parallel()
 	fs := newFakeFS()

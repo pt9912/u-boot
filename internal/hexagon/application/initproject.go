@@ -494,6 +494,20 @@ func (s *InitProjectService) initFromTemplate(ctx context.Context, req driving.I
 		return driving.InitProjectResponse{}, fmt.Errorf("%w: --template does not support --force / --backup (fresh-init only in v1)",
 			driving.ErrTemplateConflictsWithFlag)
 	}
+	// Defense-in-Depth (Review-Round-9 #2): die CLI lehnt
+	// `--template + --dry-run|--diff` bereits am Flag-Parse ab
+	// (init.go:215-217). Das Application-Layer-Pendant verhindert,
+	// dass ein direkt-aufrufender Use-Case-Klient (Tests,
+	// zukünftige HTTP-Daemon, Recursion) den CLI-Guard umgeht und
+	// reale Schreiboperationen + git.Init in PreviewDryRun ausführt.
+	// Der Template-Renderer (s.templateInit) ist preview-blind und
+	// würde Files trotzdem reell schreiben — der Application-Layer
+	// muss die Invariante 'PreviewDryRun = keine Side-Effects'
+	// symmetrisch durchsetzen.
+	if req.PreviewMode != driving.PreviewNone {
+		return driving.InitProjectResponse{}, fmt.Errorf("%w: --template ist nicht mit --dry-run/--diff kombinierbar (Template-Renderer ohne Preview-Support)",
+			driving.ErrTemplateConflictsWithFlag)
+	}
 
 	baseExists, err := s.fs.Exists(req.BaseDir)
 	if err != nil {
