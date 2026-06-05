@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/pt9912/u-boot/internal/adapter/driving/cli"
 	"github.com/pt9912/u-boot/internal/adapter/driving/cli/jsontestutil"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
@@ -24,6 +25,15 @@ type addUseCaseStub struct {
 
 func (s *addUseCaseStub) Add(_ context.Context, _ driving.AddServiceRequest) (driving.AddServiceResponse, error) {
 	return s.resp, s.err
+}
+
+// newAppWithAddStub wires the add use-case stub plus a deterministic
+// getwd stub so the tests do not depend on the runner's CWD (review
+// #13). cli_test.go's newApp helpers don't isolate getwd by default;
+// this wrapper closes that gap for every test in this file and
+// add_acceptance_test.go.
+func newAppWithAddStub(stub driving.AddServiceUseCase) *cli.App {
+	return newAppWithAdd(stub, cli.WithGetwd(func() (string, error) { return "/tmp/u-boot-add-test/demo", nil }))
 }
 
 func newAddSvcName(t *testing.T, raw string) domain.ServiceName {
@@ -45,7 +55,7 @@ func TestAddJSON_BareUsesMinimalEnvelope(t *testing.T) {
 			Changed:     []string{"u-boot.yaml", "compose.yaml", ".env.example"},
 		},
 	}
-	app := newAppWithAdd(stub)
+	app := newAppWithAddStub(stub)
 
 	var stdout, stderr bytes.Buffer
 	err := app.Execute(context.Background(), []string{"--json", "add", "postgres"}, &stdout, &stderr)
@@ -72,7 +82,7 @@ func TestAddJSON_DryRunUsesFullEnvelope(t *testing.T) {
 			},
 		},
 	}
-	app := newAppWithAdd(stub)
+	app := newAppWithAddStub(stub)
 
 	var stdout, stderr bytes.Buffer
 	err := app.Execute(context.Background(), []string{"add", "postgres", "--dry-run", "--json"}, &stdout, &stderr)
@@ -112,7 +122,7 @@ func TestAddJSON_DiffWithoutDryRunRendersHunks(t *testing.T) {
 			},
 		},
 	}
-	app := newAppWithAdd(stub)
+	app := newAppWithAddStub(stub)
 
 	var stdout, stderr bytes.Buffer
 	err := app.Execute(context.Background(), []string{"add", "postgres", "--diff", "--json"}, &stdout, &stderr)
@@ -150,14 +160,19 @@ func TestAddJSON_DiffWithoutDryRunRendersHunks(t *testing.T) {
 // envelope ships the minimal shape with exitCode 10 / LH-FA-INIT-006.
 func TestAddJSON_ValidationErrorShipsMinimalEnvelope(t *testing.T) {
 	stub := &addUseCaseStub{} // unused — domain.NewServiceName fails first
-	app := newAppWithAdd(stub)
+	app := newAppWithAddStub(stub)
 
 	var stdout, stderr bytes.Buffer
 	err := app.Execute(context.Background(), []string{"--json", "add", "INVALID NAME WITH SPACES"}, &stdout, &stderr)
-	// CLI returns the envelope-write error of nil on success; the
-	// validation error becomes a diagnostic with exitCode 10. Either
-	// way the JSON body must carry the diagnostic.
-	_ = err
+	// Review #2: validation errors propagate so cli.ExitCode maps to
+	// 10 (LH-FA-INIT-006). The envelope on stdout carries the same
+	// LH-Code; shell exit and envelope MUST agree.
+	if err == nil {
+		t.Fatal("expected error to propagate (review #2)")
+	}
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("cli.ExitCode: want 10 (LH-FA-INIT-006), got %d (err=%v)", got, err)
+	}
 	if stdout.Len() == 0 {
 		t.Fatalf("expected JSON envelope on stdout, got empty (err=%v)", err)
 	}
@@ -166,6 +181,56 @@ func TestAddJSON_ValidationErrorShipsMinimalEnvelope(t *testing.T) {
 		jsontestutil.WithExpectedCodes("LH-FA-INIT-006"),
 		jsontestutil.WithExitCode(10),
 	)
+}
+
+// TestAddJSON_DryRunDiffCombo pins the canonical Plan §Aufhebungsbedingung
+// `--dry-run --diff --json` 3-flag combo (review #12): voll-schema with
+// BOTH dryRun=true AND diff=true, plannedFiles[].hunks populated, no
+// production write. Anti-Drift: a refactor that flipped the (true,true)
+// cell of previewModeFromFlags to PreviewAndApply would slip past the
+// other JSON tests.
+func TestAddJSON_DryRunDiffCombo(t *testing.T) {
+	stub := &addUseCaseStub{
+		resp: driving.AddServiceResponse{
+			ServiceName: newAddSvcName(t, "postgres"),
+			PriorState:  domain.ServiceStateUnregistered,
+			State:       domain.ServiceStateActive,
+			PlannedFiles: []driving.PlannedFile{
+				{Path: "compose.yaml", Action: "modify", OldContent: []byte("services:\n  redis: {}\n"), NewContent: []byte("services:\n  redis: {}\n  postgres:\n    image: postgres:16\n")},
+			},
+		},
+	}
+	app := newAppWithAddStub(stub)
+
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(), []string{"add", "postgres", "--dry-run", "--diff", "--json"}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("execute: %v (stderr=%s)", err, stderr.String())
+	}
+	raw := bytes.TrimSpace(stdout.Bytes())
+	jsontestutil.AssertFullEnvelope(t, raw,
+		jsontestutil.WithCommand("add"),
+		jsontestutil.WithExitCode(0),
+	)
+	var env map[string]any
+	if err := json.Unmarshal(raw, &env); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if got, _ := env["dryRun"].(bool); !got {
+		t.Errorf("dryRun: want true (3-flag combo), envelope=%s", raw)
+	}
+	if got, _ := env["diff"].(bool); !got {
+		t.Errorf("diff: want true (3-flag combo), envelope=%s", raw)
+	}
+	pfs, _ := env["plannedFiles"].([]any)
+	if len(pfs) != 1 {
+		t.Fatalf("plannedFiles: want 1, got %d", len(pfs))
+	}
+	pf, _ := pfs[0].(map[string]any)
+	hunks, _ := pf["hunks"].([]any)
+	if len(hunks) == 0 {
+		t.Errorf("--dry-run --diff --json: hunks must be present, got %v", pf["hunks"])
+	}
 }
 
 // TestAddJSON_FilesystemErrorShipsFullEnvelope pins the mid-write
@@ -184,12 +249,17 @@ func TestAddJSON_FilesystemErrorShipsFullEnvelope(t *testing.T) {
 		},
 		err: driving.ErrAddFileSystem,
 	}
-	app := newAppWithAdd(stub)
+	app := newAppWithAddStub(stub)
 
 	var stdout, stderr bytes.Buffer
 	err := app.Execute(context.Background(), []string{"--json", "add", "postgres", "--diff"}, &stdout, &stderr)
+	// Review #2: the error MUST propagate so cli.ExitCode picks up
+	// 14 (envelope body and shell exit must agree).
 	if !errors.Is(err, driving.ErrAddFileSystem) {
-		t.Logf("returned error (expected ErrAddFileSystem): %v", err)
+		t.Fatalf("expected ErrAddFileSystem to propagate so ExitCode maps to 14; got err=%v", err)
+	}
+	if got := cli.ExitCode(err); got != 14 {
+		t.Errorf("cli.ExitCode: want 14 (LH-NFA-REL-003), got %d", got)
 	}
 	if stdout.Len() == 0 {
 		t.Fatalf("expected JSON envelope on stdout, got empty (err=%v)", err)
@@ -221,7 +291,7 @@ func TestAddHumanDryRun_NoChangeLine(t *testing.T) {
 			Changed:     []string{"u-boot.yaml", "compose.yaml"},
 		},
 	}
-	app := newAppWithAdd(stub)
+	app := newAppWithAddStub(stub)
 
 	var stdout, stderr bytes.Buffer
 	err := app.Execute(context.Background(), []string{"add", "postgres", "--dry-run"}, &stdout, &stderr)
@@ -248,7 +318,7 @@ func TestAddHumanDiff_RendersHunksOnStdout(t *testing.T) {
 			},
 		},
 	}
-	app := newAppWithAdd(stub)
+	app := newAppWithAddStub(stub)
 
 	var stdout, stderr bytes.Buffer
 	err := app.Execute(context.Background(), []string{"add", "postgres", "--diff"}, &stdout, &stderr)

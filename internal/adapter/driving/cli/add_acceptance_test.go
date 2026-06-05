@@ -91,7 +91,7 @@ func TestAddAcceptance_VarianteA_FreshInit_PinsCreateCount12(t *testing.T) {
 			},
 		},
 	}
-	app := newAppWithAdd(stub)
+	app := newAppWithAddStub(stub)
 
 	var stdout, stderr bytes.Buffer
 	err := app.Execute(context.Background(), []string{"add", "postgres", "--dry-run", "--json"}, &stdout, &stderr)
@@ -143,7 +143,7 @@ func TestAddAcceptance_VarianteB_Existing_PinsModifyAndAddedLines(t *testing.T) 
 			},
 		},
 	}
-	app := newAppWithAdd(stub)
+	app := newAppWithAddStub(stub)
 
 	var stdout, stderr bytes.Buffer
 	err := app.Execute(context.Background(), []string{"add", "postgres", "--diff", "--json"}, &stdout, &stderr)
@@ -206,7 +206,7 @@ func TestAddAcceptance_DiffJSON_HunkStructurePin(t *testing.T) {
 			},
 		},
 	}
-	app := newAppWithAdd(stub)
+	app := newAppWithAddStub(stub)
 
 	var stdout, stderr bytes.Buffer
 	err := app.Execute(context.Background(), []string{"add", "postgres", "--diff", "--json"}, &stdout, &stderr)
@@ -254,7 +254,7 @@ func TestAddAcceptance_IdempotentNoOp_EmptyPlanAndChanges(t *testing.T) {
 			PlannedFiles: nil, // recorder captured no mutations
 		},
 	}
-	app := newAppWithAdd(stub)
+	app := newAppWithAddStub(stub)
 
 	var stdout, stderr bytes.Buffer
 	err := app.Execute(context.Background(), []string{"add", "postgres", "--dry-run", "--json"}, &stdout, &stderr)
@@ -299,7 +299,7 @@ func TestAddAcceptance_SuccessScenario_AllThreeFilesCaptured(t *testing.T) {
 			},
 		},
 	}
-	app := newAppWithAdd(stub)
+	app := newAppWithAddStub(stub)
 
 	var stdout, stderr bytes.Buffer
 	err := app.Execute(context.Background(), []string{"add", "postgres", "--dry-run", "--json"}, &stdout, &stderr)
@@ -352,7 +352,7 @@ func TestAddAcceptance_HumanDiff_RendersPostgresBlock(t *testing.T) {
 			},
 		},
 	}
-	app := newAppWithAdd(stub)
+	app := newAppWithAddStub(stub)
 
 	var stdout, stderr bytes.Buffer
 	err := app.Execute(context.Background(), []string{"add", "postgres", "--diff"}, &stdout, &stderr)
