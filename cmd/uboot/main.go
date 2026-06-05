@@ -118,7 +118,26 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// to TemplateInitService while git init / soft-existing-detection
 	// / project-structure-dirs stay in InitProjectService).
 	templateInitSvc := application.NewTemplateInitService(templateCatalogAdapter, fsAdapter, logAdapter)
-	initSvc := application.NewInitProjectService(fsAdapter, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter, application.WithTemplateInit(templateInitSvc))
+	// InitProjectService runs through the T0-(d) Option 4 factory
+	// (slice-v1-cli-json-dry-run-init T4 — analog to addFSFactory
+	// below): PreviewNone uses the production FS directly;
+	// PreviewDryRun and PreviewAndApply each wrap it in a fresh
+	// RecordingFileSystem with the matching passthrough switch.
+	// A fresh recorder per request keeps captures scoped to a single
+	// Init() call.
+	initFSFactory := func(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
+		switch mode {
+		case driving.PreviewDryRun:
+			rec := recordingfs.New(fsAdapter, recordingfs.WithPassthrough(false))
+			return rec, rec
+		case driving.PreviewAndApply:
+			rec := recordingfs.New(fsAdapter, recordingfs.WithPassthrough(true))
+			return rec, rec
+		default:
+			return fsAdapter, nil
+		}
+	}
+	initSvc := application.NewInitProjectServiceWithFactory(initFSFactory, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter, application.WithTemplateInit(templateInitSvc))
 	doctorSvc := application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, runtimeAdapter, logAdapter)
 	// AddServiceService runs through the T0-(e) Option 4 factory:
 	// PreviewNone uses the production FS directly; PreviewDryRun and
