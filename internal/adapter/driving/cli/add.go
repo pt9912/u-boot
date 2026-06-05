@@ -199,7 +199,7 @@ func writeAddJSON(out io.Writer, resp driving.AddServiceResponse, dryRun, diffFl
 		env := newMinimalEnvelope("add", "", nil, 0)
 		return writeEnvelope(out, env)
 	}
-	pfs, chs := mapResponseToWire(resp, diffFlag)
+	pfs, chs := mapPlannedFilesToWire(resp.PlannedFiles, diffFlag)
 	env := newFullEnvelope("add", "", dryRun, diffFlag, pfs, chs, nil, 0)
 	return writeEnvelope(out, env)
 }
@@ -236,7 +236,7 @@ func writeAddErrorEnvelope(out io.Writer, addErr error, resp driving.AddServiceR
 		env := newMinimalEnvelope("add", "", []diagnosticItem{diag}, exitCode)
 		return writeEnvelope(out, env)
 	}
-	pfs, chs := mapResponseToWire(resp, diffFlag)
+	pfs, chs := mapPlannedFilesToWire(resp.PlannedFiles, diffFlag)
 	env := newFullEnvelope("add", "", dryRun, diffFlag, pfs, chs, []diagnosticItem{diag}, exitCode)
 	return writeEnvelope(out, env)
 }
@@ -264,95 +264,10 @@ func writeEnvelope(out io.Writer, env cliJSONEnvelope) error {
 	return nil
 }
 
-// mapResponseToWire converts the driving-layer recorder capture into
-// the CLI wire-types. The Hunks-field is populated only when
-// withHunks is true (--diff / preview-and-apply); `changes[].count`
-// always follows the T0-(g) semantics regardless of flag state —
-// for modify-actions that means we compute hunks even without --diff
-// just to sum their NewLines, since the alternative (CountLines on
-// the whole new file) overstated the count by orders of magnitude
-// for any add-on-into-existing-file case (review #1).
-func mapResponseToWire(resp driving.AddServiceResponse, withHunks bool) ([]plannedFile, []changeEntry) {
-	pfs := make([]plannedFile, 0, len(resp.PlannedFiles))
-	chs := make([]changeEntry, 0, len(resp.PlannedFiles))
-	for _, pf := range resp.PlannedFiles {
-		wirePF := plannedFile{Path: pf.Path, Action: pf.Action}
-		count, hunks := computeChangeCountAndHunks(pf)
-		if withHunks && len(hunks) > 0 {
-			wirePF.Hunks = toCLIHunks(hunks)
-		}
-		pfs = append(pfs, wirePF)
-		chs = append(chs, changeEntry{Path: pf.Path, Count: count})
-	}
-	return pfs, chs
-}
-
-// computeChangeCountAndHunks applies the T0-(g) `changes[].count`
-// semantics AND returns the hunks (or nil for binary/no-change paths)
-// so the caller can re-use them for the wire-Hunks field when --diff
-// is set. The double-return keeps the diff invocation single per
-// PlannedFile regardless of flag combination — the previous form
-// computed hunks twice (once in computeChangeCount via CountLines as
-// a wrong fallback, once again in mapResponseToWire via CountFromHunks)
-// and the modify-no-diff path returned the whole-new-file line count,
-// violating the T0-(g) contract.
-//
-// Action-rules:
-//   - "create": count = CountLines(NewContent), hunks computed for
-//     full-file insertion shape.
-//   - "modify": count = sum(hunk.NewLines) over computed hunks.
-//   - "delete": count = 0 (review #8: even for binary deletes, where
-//     a naive CountBytesDiff would return len(OldContent)).
-//   - binary content (non-delete): count = CountBytesDiff, hunks=nil
-//     so wirePF.Hunks remains omitted (T0-(l) Spec-konformes Fallback).
-func computeChangeCountAndHunks(pf driving.PlannedFile) (int, []driving.Hunk) {
-	// Delete always returns 0 (T0-(g)) — short-circuit BEFORE the
-	// binary-check so the CountBytesDiff trap doesn't fire for
-	// binary deletes (review #8).
-	if pf.Action == "delete" {
-		return 0, nil
-	}
-	if diff.IsBinary(pf.OldContent, pf.NewContent) {
-		return diff.CountBytesDiff(pf.OldContent, pf.NewContent), nil
-	}
-	hunks := diff.Compute(pf.OldContent, pf.NewContent)
-	switch pf.Action {
-	case "create":
-		return diff.CountLines(pf.NewContent), hunks
-	case "modify":
-		// CountAdditions (not CountFromHunks): Spec §477 example
-		// pins `count: 6` for the 6-line postgres-block append, NOT
-		// 6+context. Slice T0-(g)'s original sum(hunk.NewLines) form
-		// included context lines, drift against §477 (review-round-7
-		// finding B).
-		return diff.CountAdditions(hunks), hunks
-	default:
-		// Unknown action — keep parity with the create branch as the
-		// safe fallback; the spec restricts action to {create, modify,
-		// delete} (Spec §354) so this branch is unreachable today.
-		return diff.CountLines(pf.NewContent), hunks
-	}
-}
-
-// toCLIHunks copies driving.Hunk values into the CLI hunk wire-type.
-// The field-level JSON tags are identical (T0-(l)); the copy is a
-// schicht-separation guarantee, not a re-shape.
-func toCLIHunks(src []driving.Hunk) []hunk {
-	if len(src) == 0 {
-		return nil
-	}
-	out := make([]hunk, len(src))
-	for i, h := range src {
-		out[i] = hunk{
-			OldStart: h.OldStart,
-			OldLines: h.OldLines,
-			NewStart: h.NewStart,
-			NewLines: h.NewLines,
-			Content:  h.Content,
-		}
-	}
-	return out
-}
+// mapResponseToWire/computeChangeCountAndHunks/toCLIHunks wurden in
+// slice-v1-cli-json-dry-run-init T1-D nach
+// `internal/adapter/driving/cli/wireshapes.go` extrahiert. add ruft
+// jetzt mapPlannedFilesToWire(resp.PlannedFiles, diffFlag).
 
 // mapErrorToDiagnostic maps an add-path error to a diagnosticItem
 // with the spec-konforme LH-Kennung per T0-(j). Unknown errors fall
