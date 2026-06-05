@@ -6,6 +6,7 @@ import (
 	"fmt"
 	iofs "io/fs"
 	"path/filepath"
+	"sync"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
@@ -185,6 +186,14 @@ type AddServiceService struct {
 	yaml      driven.YAMLCodec
 	confirmer driven.Confirmer
 	logger    driven.Logger
+	// addMu serialises Add() invocations on a single service
+	// instance. The PreviewMode-aware fs-swap (line 320-322) mutates
+	// the shared s.fs field; concurrent Add calls would race on the
+	// swap/restore pair and one caller's writes would route through
+	// the other caller's recorder (slice-v1-cli-json-dry-run-add
+	// review #10). Holding the mutex around the whole Add body keeps
+	// the per-request FS scoping load-bearing.
+	addMu sync.Mutex
 }
 
 // Static check: AddServiceService satisfies the driving port.
@@ -311,6 +320,16 @@ func (s *AddServiceService) Add(ctx context.Context, req driving.AddServiceReque
 		return driving.AddServiceResponse{}, errors.New("BaseDir is required")
 	}
 
+	// Serialise the per-request fs-swap (slice-v1-cli-json-dry-run-add
+	// review #10): concurrent Add() calls on the same instance would
+	// otherwise race on the mutable s.fs field. handleMissingDependencies'
+	// recursive dep-install bypasses Add() (calls runAdd directly) so
+	// the mutex doesn't self-deadlock; the inner runAdd reuses the
+	// outer call's fs/recorder swap, which is exactly the right
+	// semantics for dep installs sharing the parent's PreviewMode.
+	s.addMu.Lock()
+	defer s.addMu.Unlock()
+
 	// slice-v1-cli-json-dry-run-add T1-C: route every FS access of
 	// this Add() invocation through the mode-specific adapter. The
 	// defer restores the bootstrap [fs] field so tests or scripts
@@ -322,6 +341,18 @@ func (s *AddServiceService) Add(ctx context.Context, req driving.AddServiceReque
 	defer func() { s.fs = prevFS }()
 
 	resp, addErr := s.runAdd(ctx, req)
+
+	// Ensure resp.ServiceName is populated on the error path so the
+	// CLI envelope's plannedFiles[] view doesn't ship with an unset
+	// ServiceName (review #7): runExecutePlan returns zero-value
+	// Response{} on mid-write FS-failure, and the recorder mapping
+	// below populates PlannedFiles independently — without this
+	// fallback the response carries ServiceName="" while PlannedFiles
+	// is non-empty, violating the port contract that
+	// `ServiceName echoes the name that was processed`.
+	if addErr != nil && resp.ServiceName.String() == "" {
+		resp.ServiceName = req.ServiceName
+	}
 
 	// The recorder is non-nil only on preview/dry-run paths. Map its
 	// log even on the error path — T0-(b) Mid-Write-Failure scenario
@@ -495,8 +526,21 @@ func (s *AddServiceService) handleMissingDependencies(ctx context.Context, req d
 			WithDeps:      req.WithDeps,
 			Yes:           req.Yes,
 			NoInteractive: req.NoInteractive,
+			// Inherit PreviewMode from the outer request (review #9):
+			// without this, `u-boot add keycloak --with-deps --dry-run`
+			// would write the dep install (postgres) to the production
+			// FS — the outer recorder wouldn't see it and the user's
+			// dry-run promise would be silently violated. Setting it on
+			// subReq is defensive (runAdd doesn't consume PreviewMode
+			// today, only Add() does), but pins the contract for any
+			// future helper that reaches for req.PreviewMode.
+			PreviewMode: req.PreviewMode,
 		}
-		if _, err := s.Add(ctx, subReq); err != nil {
+		// Bypass s.Add() so the outer call's mutex/fs-swap stay active
+		// across the dep install — runAdd reuses the parent's swapped
+		// s.fs (the recorder if PreviewMode != PreviewNone), so dep
+		// writes land in the same recorder log as the parent's writes.
+		if _, err := s.runAdd(ctx, subReq); err != nil {
 			return fmt.Errorf("install dependency %q: %w", dep.String(), err)
 		}
 	}
