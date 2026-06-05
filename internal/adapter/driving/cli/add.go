@@ -9,7 +9,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/pt9912/u-boot/internal/adapter/driving/cli/diff"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
@@ -125,22 +124,24 @@ func runAdd(
 	uc driving.AddServiceUseCase,
 	getwd func() (string, error),
 ) error {
+	// mapErr-Source-Pflicht (slice-v1-cli-json-dry-run-init T0-(e)):
+	// jeder RunE definiert seine eigene mapErr-Funktion und reicht
+	// sie an reportError weiter. Vermeidet Cross-Package-Naming-
+	// Konflikt mit init's mapInitErrorToDiagnostic.
+	mapErr := mapAddErrorToDiagnostic
+
 	if flags.Yes && flags.NoInteractive {
-		// Review #5: --json contract requires every error to produce a
-		// JSON envelope. The early-return path used to bypass JSON-mode
-		// and ship the raw error to stderr.
-		return reportAddError(out, ErrConflictingModeFlags, driving.AddServiceResponse{}, flags)
+		return reportError(out, ErrConflictingModeFlags, nil, flags.DryRun, flags.Diff, flags.JSON, "add", mapErr)
 	}
 
 	svcName, err := domain.NewServiceName(args[0])
 	if err != nil {
-		return reportAddError(out, err, driving.AddServiceResponse{}, flags)
+		return reportError(out, err, nil, flags.DryRun, flags.Diff, flags.JSON, "add", mapErr)
 	}
 
 	cwd, err := getwd()
 	if err != nil {
-		// Review #6: getwd failure used to skip the JSON envelope.
-		return reportAddError(out, fmt.Errorf("determine working directory: %w", err), driving.AddServiceResponse{}, flags)
+		return reportError(out, fmt.Errorf("determine working directory: %w", err), nil, flags.DryRun, flags.Diff, flags.JSON, "add", mapErr)
 	}
 
 	mode := previewModeFromFlags(flags.DryRun, flags.Diff)
@@ -154,7 +155,7 @@ func runAdd(
 	})
 
 	if addErr != nil {
-		return reportAddError(out, addErr, resp, flags)
+		return reportError(out, addErr, resp.PlannedFiles, flags.DryRun, flags.Diff, flags.JSON, "add", mapErr)
 	}
 
 	if flags.JSON {
@@ -162,28 +163,11 @@ func runAdd(
 	}
 
 	if flags.Diff {
-		if err := writeAddDiff(out, resp); err != nil {
+		if err := writeDiff(out, resp.PlannedFiles); err != nil {
 			return err
 		}
 	}
 	return printAddSummary(out, resp, flags.DryRun)
-}
-
-// reportAddError is the single error-emission gate of runAdd: in
-// human mode it surfaces the raw error to Cobra (which lets main.go
-// render it to stderr and compute the exit code); in JSON mode it
-// writes the envelope to stdout AND still returns the original error
-// so cli.ExitCode picks up the right exit code (review #2 — without
-// the propagation the shell would see 0 while the envelope claims
-// e.g. 14).
-func reportAddError(out io.Writer, addErr error, resp driving.AddServiceResponse, flags addFlags) error {
-	if !flags.JSON {
-		return addErr
-	}
-	if err := writeAddErrorEnvelope(out, addErr, resp, flags.DryRun, flags.Diff); err != nil {
-		return err
-	}
-	return addErr
 }
 
 // writeAddJSON renders the success-path JSON envelope. Three shapes
@@ -204,55 +188,12 @@ func writeAddJSON(out io.Writer, resp driving.AddServiceResponse, dryRun, diffFl
 	return writeEnvelope(out, env)
 }
 
-// writeAddErrorEnvelope renders the JSON envelope on the error path.
-// The use case returns a non-empty Response (PlannedFiles populated
-// up to the failure point — T0-(b) Mid-Write-Failure / T0-(j)
-// Round-4 H2), so the envelope still ships a voll-schema view when
-// --dry-run / --diff was requested. Validation errors (Pre-Write,
-// e.g. invalid service name) ship the minimal envelope shape since
-// no plan was made.
-//
-// dryRun and diffFlag are forwarded from the user's flag state
-// (review #4): the previous form hardcoded `dryRun=false, diff=true`
-// which misrepresented `--dry-run --diff --json` invocations as
-// preview-and-apply, contradicting Spec §326 voll-schema fields.
-// The envelope now always reports the actual user-requested mode.
-func writeAddErrorEnvelope(out io.Writer, addErr error, resp driving.AddServiceResponse, dryRun, diffFlag bool) error {
-	diag := mapErrorToDiagnostic(addErr)
-	exitCode := ExitCode(addErr)
-	// Annotate the diagnostic with the failure path when the
-	// application layer carries one (Mid-Write-Failure surfaces the
-	// failing path via the resp.PlannedFiles tail entry); not all
-	// error classes know a path, in which case `file` stays empty.
-	if path := lastPlannedPath(resp); path != "" {
-		diag.File = path
-	}
-	// Voll-schema applies whenever the recorder captured anything OR
-	// the user explicitly asked for it via --dry-run/--diff. Without
-	// a recorder capture and without a preview flag the envelope
-	// shape is the minimal contract (Spec §1841).
-	wantsFullSchema := len(resp.PlannedFiles) > 0 || dryRun || diffFlag
-	if !wantsFullSchema {
-		env := newMinimalEnvelope("add", "", []diagnosticItem{diag}, exitCode)
-		return writeEnvelope(out, env)
-	}
-	pfs, chs := mapPlannedFilesToWire(resp.PlannedFiles, diffFlag)
-	env := newFullEnvelope("add", "", dryRun, diffFlag, pfs, chs, []diagnosticItem{diag}, exitCode)
-	return writeEnvelope(out, env)
-}
-
-// lastPlannedPath returns the path of the last PlannedFile in the
-// response — convenient for Mid-Write-Failure-Diagnostics where the
-// recorder's tail entry is the failing path.
-func lastPlannedPath(resp driving.AddServiceResponse) string {
-	if len(resp.PlannedFiles) == 0 {
-		return ""
-	}
-	return resp.PlannedFiles[len(resp.PlannedFiles)-1].Path
-}
-
 // writeEnvelope marshals env and writes it with a trailing newline.
-// Centralised so all three add JSON paths share the same I/O shape.
+// Centralised so all add JSON paths share the same I/O shape.
+//
+// Stayed in add.go (statt nach erroremission.go) weil es nicht
+// von add-spezifischen Types abhängt aber heute nur von add.go
+// genutzt wird; init wird es ggf. mit-konsumieren ohne Migration.
 func writeEnvelope(out io.Writer, env cliJSONEnvelope) error {
 	raw, err := json.Marshal(env)
 	if err != nil {
@@ -266,10 +207,15 @@ func writeEnvelope(out io.Writer, env cliJSONEnvelope) error {
 
 // mapResponseToWire/computeChangeCountAndHunks/toCLIHunks wurden in
 // slice-v1-cli-json-dry-run-init T1-D nach
-// `internal/adapter/driving/cli/wireshapes.go` extrahiert. add ruft
-// jetzt mapPlannedFilesToWire(resp.PlannedFiles, diffFlag).
+// `internal/adapter/driving/cli/wireshapes.go` extrahiert.
+//
+// reportAddError/writeAddErrorEnvelope/writeAddDiff/lastPlannedPath
+// wurden in T1-E nach `internal/adapter/driving/cli/erroremission.go`
+// generalisiert (reportError/writeErrorEnvelope/writeDiff/
+// lastPlannedPath); add ruft sie mit `mapAddErrorToDiagnostic` als
+// mapErr-Funktion und `"add"` als command-Parameter.
 
-// mapErrorToDiagnostic maps an add-path error to a diagnosticItem
+// mapAddErrorToDiagnostic maps an add-path error to a diagnosticItem
 // with the spec-konforme LH-Kennung per T0-(j). Unknown errors fall
 // back to a generic LH-FA-CLI-006 wrapper (default error path); the
 // invariants Spec §1834 (level ∈ {warn, error}) and §1837 (status
@@ -284,7 +230,12 @@ func writeEnvelope(out io.Writer, env cliJSONEnvelope) error {
 // the user sees the technical-persistence diagnostic and exit-14
 // classification rather than a misleading fachlich code (LH-FA-ADD-005
 // → exit 10) that the wrap accidentally included.
-func mapErrorToDiagnostic(err error) diagnosticItem {
+//
+// Renamed from mapErrorToDiagnostic in slice-v1-cli-json-dry-run-
+// init T1-E (T0-(e) mapErr-Source-Pflicht) — init parallel definiert
+// mapInitErrorToDiagnostic, beide werden per Function-Value an
+// reportError gereicht.
+func mapAddErrorToDiagnostic(err error) diagnosticItem {
 	switch {
 	case errors.Is(err, driving.ErrAddFileSystem):
 		return diagnosticItem{Level: "error", Code: "LH-NFA-REL-003", Message: err.Error()}
@@ -305,47 +256,6 @@ func mapErrorToDiagnostic(err error) diagnosticItem {
 	default:
 		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
 	}
-}
-
-// writeAddDiff renders the human-mode unified-diff string for each
-// planned file (LH-FA-CLI-008). One file header per planned file
-// followed by the hunks; binary files render only a header note.
-// A blank line between file blocks keeps multi-file diffs visually
-// separated; content-identical modifies render a "(no changes)"
-// hint so the user does not interpret the empty body as a missed
-// diff (review #15).
-//
-// Returns the first write error (broken pipe via `… | head -1`)
-// instead of silently swallowing it (review #3) — the previous form
-// dropped errors and the CLI exited 0 even after truncated output.
-func writeAddDiff(out io.Writer, resp driving.AddServiceResponse) error {
-	for i, pf := range resp.PlannedFiles {
-		if i > 0 {
-			if _, err := fmt.Fprintln(out); err != nil {
-				return err
-			}
-		}
-		if _, err := fmt.Fprintf(out, "--- %s (%s)\n", pf.Path, pf.Action); err != nil {
-			return err
-		}
-		if diff.IsBinary(pf.OldContent, pf.NewContent) {
-			if _, err := fmt.Fprintln(out, "(binary content — diff suppressed)"); err != nil {
-				return err
-			}
-			continue
-		}
-		hunks := diff.Compute(pf.OldContent, pf.NewContent)
-		if len(hunks) == 0 {
-			if _, err := fmt.Fprintln(out, "(no changes)"); err != nil {
-				return err
-			}
-			continue
-		}
-		if _, err := fmt.Fprint(out, diff.Render(hunks)); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // printAddSummary writes a short, deterministic summary of the add
