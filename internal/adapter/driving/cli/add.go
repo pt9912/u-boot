@@ -151,20 +151,21 @@ func runAdd(
 	getwd func() (string, error),
 ) error {
 	if flags.Yes && flags.NoInteractive {
-		return ErrConflictingModeFlags
+		// Review #5: --json contract requires every error to produce a
+		// JSON envelope. The early-return path used to bypass JSON-mode
+		// and ship the raw error to stderr.
+		return reportAddError(out, ErrConflictingModeFlags, driving.AddServiceResponse{}, flags)
 	}
 
 	svcName, err := domain.NewServiceName(args[0])
 	if err != nil {
-		if flags.JSON {
-			return writeAddErrorEnvelope(out, err, driving.AddServiceResponse{})
-		}
-		return err
+		return reportAddError(out, err, driving.AddServiceResponse{}, flags)
 	}
 
 	cwd, err := getwd()
 	if err != nil {
-		return fmt.Errorf("determine working directory: %w", err)
+		// Review #6: getwd failure used to skip the JSON envelope.
+		return reportAddError(out, fmt.Errorf("determine working directory: %w", err), driving.AddServiceResponse{}, flags)
 	}
 
 	mode := previewModeFromFlags(flags.DryRun, flags.Diff)
@@ -178,10 +179,7 @@ func runAdd(
 	})
 
 	if addErr != nil {
-		if flags.JSON {
-			return writeAddErrorEnvelope(out, addErr, resp)
-		}
-		return addErr
+		return reportAddError(out, addErr, resp, flags)
 	}
 
 	if flags.JSON {
@@ -189,10 +187,28 @@ func runAdd(
 	}
 
 	if flags.Diff {
-		writeAddDiff(out, resp)
+		if err := writeAddDiff(out, resp); err != nil {
+			return err
+		}
 	}
-	printAddSummary(out, resp, flags.DryRun)
-	return nil
+	return printAddSummary(out, resp, flags.DryRun)
+}
+
+// reportAddError is the single error-emission gate of runAdd: in
+// human mode it surfaces the raw error to Cobra (which lets main.go
+// render it to stderr and compute the exit code); in JSON mode it
+// writes the envelope to stdout AND still returns the original error
+// so cli.ExitCode picks up the right exit code (review #2 — without
+// the propagation the shell would see 0 while the envelope claims
+// e.g. 14).
+func reportAddError(out io.Writer, addErr error, resp driving.AddServiceResponse, flags addFlags) error {
+	if !flags.JSON {
+		return addErr
+	}
+	if err := writeAddErrorEnvelope(out, addErr, resp, flags.DryRun, flags.Diff); err != nil {
+		return err
+	}
+	return addErr
 }
 
 // writeAddJSON renders the success-path JSON envelope. Three shapes
@@ -220,19 +236,44 @@ func writeAddJSON(out io.Writer, resp driving.AddServiceResponse, dryRun, diffFl
 // --dry-run / --diff was requested. Validation errors (Pre-Write,
 // e.g. invalid service name) ship the minimal envelope shape since
 // no plan was made.
-func writeAddErrorEnvelope(out io.Writer, addErr error, resp driving.AddServiceResponse) error {
+//
+// dryRun and diffFlag are forwarded from the user's flag state
+// (review #4): the previous form hardcoded `dryRun=false, diff=true`
+// which misrepresented `--dry-run --diff --json` invocations as
+// preview-and-apply, contradicting Spec §326 voll-schema fields.
+// The envelope now always reports the actual user-requested mode.
+func writeAddErrorEnvelope(out io.Writer, addErr error, resp driving.AddServiceResponse, dryRun, diffFlag bool) error {
 	diag := mapErrorToDiagnostic(addErr)
 	exitCode := ExitCode(addErr)
-	if len(resp.PlannedFiles) == 0 {
+	// Annotate the diagnostic with the failure path when the
+	// application layer carries one (Mid-Write-Failure surfaces the
+	// failing path via the resp.PlannedFiles tail entry); not all
+	// error classes know a path, in which case `file` stays empty.
+	if path := lastPlannedPath(resp); path != "" {
+		diag.File = path
+	}
+	// Voll-schema applies whenever the recorder captured anything OR
+	// the user explicitly asked for it via --dry-run/--diff. Without
+	// a recorder capture and without a preview flag the envelope
+	// shape is the minimal contract (Spec §1841).
+	wantsFullSchema := len(resp.PlannedFiles) > 0 || dryRun || diffFlag
+	if !wantsFullSchema {
 		env := newMinimalEnvelope("add", "", []diagnosticItem{diag}, exitCode)
 		return writeEnvelope(out, env)
 	}
-	// Voll-schema on Mid-Write-Failure: plannedFiles from recorder,
-	// diff=true so the consumer sees the planned-vs-actual mismatch
-	// in hunks.
-	pfs, chs := mapResponseToWire(resp, true)
-	env := newFullEnvelope("add", "", false, true, pfs, chs, []diagnosticItem{diag}, exitCode)
+	pfs, chs := mapResponseToWire(resp, diffFlag)
+	env := newFullEnvelope("add", "", dryRun, diffFlag, pfs, chs, []diagnosticItem{diag}, exitCode)
 	return writeEnvelope(out, env)
+}
+
+// lastPlannedPath returns the path of the last PlannedFile in the
+// response — convenient for Mid-Write-Failure-Diagnostics where the
+// recorder's tail entry is the failing path.
+func lastPlannedPath(resp driving.AddServiceResponse) string {
+	if len(resp.PlannedFiles) == 0 {
+		return ""
+	}
+	return resp.PlannedFiles[len(resp.PlannedFiles)-1].Path
 }
 
 // writeEnvelope marshals env and writes it with a trailing newline.
@@ -249,25 +290,21 @@ func writeEnvelope(out io.Writer, env cliJSONEnvelope) error {
 }
 
 // mapResponseToWire converts the driving-layer recorder capture into
-// the CLI wire-types. When withHunks is true (the --diff or
-// preview-and-apply path) each planned file gets its diff hunks
-// computed via [diff.Compute] and `changes[].count` derives from
-// CountFromHunks (modify) or CountLines (create). When withHunks is
-// false (--dry-run alone), counts still use the line-oriented
-// semantics — Spec §326 fields plannedFiles/changes are Pflicht in
-// voll-schema even without --diff (T0-(g)).
+// the CLI wire-types. The Hunks-field is populated only when
+// withHunks is true (--diff / preview-and-apply); `changes[].count`
+// always follows the T0-(g) semantics regardless of flag state —
+// for modify-actions that means we compute hunks even without --diff
+// just to sum their NewLines, since the alternative (CountLines on
+// the whole new file) overstated the count by orders of magnitude
+// for any add-on-into-existing-file case (review #1).
 func mapResponseToWire(resp driving.AddServiceResponse, withHunks bool) ([]plannedFile, []changeEntry) {
 	pfs := make([]plannedFile, 0, len(resp.PlannedFiles))
 	chs := make([]changeEntry, 0, len(resp.PlannedFiles))
 	for _, pf := range resp.PlannedFiles {
 		wirePF := plannedFile{Path: pf.Path, Action: pf.Action}
-		count := computeChangeCount(pf)
-		if withHunks && !diff.IsBinary(pf.OldContent, pf.NewContent) {
-			hunks := diff.Compute(pf.OldContent, pf.NewContent)
+		count, hunks := computeChangeCountAndHunks(pf)
+		if withHunks && len(hunks) > 0 {
 			wirePF.Hunks = toCLIHunks(hunks)
-			if pf.Action == "modify" {
-				count = diff.CountFromHunks(hunks)
-			}
 		}
 		pfs = append(pfs, wirePF)
 		chs = append(chs, changeEntry{Path: pf.Path, Count: count})
@@ -275,25 +312,45 @@ func mapResponseToWire(resp driving.AddServiceResponse, withHunks bool) ([]plann
 	return pfs, chs
 }
 
-// computeChangeCount applies the T0-(g) `changes[].count` semantics:
-// create → CountLines(NewContent); modify → sum(hunk.NewLines) which
-// the caller fills in; delete → 0. Binary content uses
-// CountBytesDiff as the spec-konformes fallback (T0-(l)).
-func computeChangeCount(pf driving.PlannedFile) int {
-	if diff.IsBinary(pf.OldContent, pf.NewContent) {
-		return diff.CountBytesDiff(pf.OldContent, pf.NewContent)
+// computeChangeCountAndHunks applies the T0-(g) `changes[].count`
+// semantics AND returns the hunks (or nil for binary/no-change paths)
+// so the caller can re-use them for the wire-Hunks field when --diff
+// is set. The double-return keeps the diff invocation single per
+// PlannedFile regardless of flag combination — the previous form
+// computed hunks twice (once in computeChangeCount via CountLines as
+// a wrong fallback, once again in mapResponseToWire via CountFromHunks)
+// and the modify-no-diff path returned the whole-new-file line count,
+// violating the T0-(g) contract.
+//
+// Action-rules:
+//   - "create": count = CountLines(NewContent), hunks computed for
+//     full-file insertion shape.
+//   - "modify": count = sum(hunk.NewLines) over computed hunks.
+//   - "delete": count = 0 (review #8: even for binary deletes, where
+//     a naive CountBytesDiff would return len(OldContent)).
+//   - binary content (non-delete): count = CountBytesDiff, hunks=nil
+//     so wirePF.Hunks remains omitted (T0-(l) Spec-konformes Fallback).
+func computeChangeCountAndHunks(pf driving.PlannedFile) (int, []driving.Hunk) {
+	// Delete always returns 0 (T0-(g)) — short-circuit BEFORE the
+	// binary-check so the CountBytesDiff trap doesn't fire for
+	// binary deletes (review #8).
+	if pf.Action == "delete" {
+		return 0, nil
 	}
+	if diff.IsBinary(pf.OldContent, pf.NewContent) {
+		return diff.CountBytesDiff(pf.OldContent, pf.NewContent), nil
+	}
+	hunks := diff.Compute(pf.OldContent, pf.NewContent)
 	switch pf.Action {
 	case "create":
-		return diff.CountLines(pf.NewContent)
-	case "delete":
-		return 0
+		return diff.CountLines(pf.NewContent), hunks
+	case "modify":
+		return diff.CountFromHunks(hunks), hunks
 	default:
-		// modify: the caller in mapResponseToWire overrides this with
-		// sum(hunk.NewLines) when hunks are available. For the
-		// no-hunks path (--dry-run --json without --diff), fall back
-		// to CountLines on NewContent (Spec §477 example consistent).
-		return diff.CountLines(pf.NewContent)
+		// Unknown action — keep parity with the create branch as the
+		// safe fallback; the spec restricts action to {create, modify,
+		// delete} (Spec §354) so this branch is unreachable today.
+		return diff.CountLines(pf.NewContent), hunks
 	}
 }
 
@@ -348,16 +405,42 @@ func mapErrorToDiagnostic(err error) diagnosticItem {
 // writeAddDiff renders the human-mode unified-diff string for each
 // planned file (LH-FA-CLI-008). One file header per planned file
 // followed by the hunks; binary files render only a header note.
-func writeAddDiff(out io.Writer, resp driving.AddServiceResponse) {
-	for _, pf := range resp.PlannedFiles {
-		fmt.Fprintf(out, "--- %s (%s)\n", pf.Path, pf.Action)
+// A blank line between file blocks keeps multi-file diffs visually
+// separated; content-identical modifies render a "(no changes)"
+// hint so the user does not interpret the empty body as a missed
+// diff (review #15).
+//
+// Returns the first write error (broken pipe via `… | head -1`)
+// instead of silently swallowing it (review #3) — the previous form
+// dropped errors and the CLI exited 0 even after truncated output.
+func writeAddDiff(out io.Writer, resp driving.AddServiceResponse) error {
+	for i, pf := range resp.PlannedFiles {
+		if i > 0 {
+			if _, err := fmt.Fprintln(out); err != nil {
+				return err
+			}
+		}
+		if _, err := fmt.Fprintf(out, "--- %s (%s)\n", pf.Path, pf.Action); err != nil {
+			return err
+		}
 		if diff.IsBinary(pf.OldContent, pf.NewContent) {
-			fmt.Fprintln(out, "(binary content — diff suppressed)")
+			if _, err := fmt.Fprintln(out, "(binary content — diff suppressed)"); err != nil {
+				return err
+			}
 			continue
 		}
 		hunks := diff.Compute(pf.OldContent, pf.NewContent)
-		fmt.Fprint(out, diff.Render(hunks))
+		if len(hunks) == 0 {
+			if _, err := fmt.Fprintln(out, "(no changes)"); err != nil {
+				return err
+			}
+			continue
+		}
+		if _, err := fmt.Fprint(out, diff.Render(hunks)); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 // printAddSummary writes a short, deterministic summary of the add
@@ -374,26 +457,40 @@ func writeAddDiff(out io.Writer, resp driving.AddServiceResponse) {
 // Order of Changed follows the AddServiceUseCase contract
 // (u-boot.yaml → compose.yaml → .env.example), so the user sees a
 // stable rollback hint without re-sorting.
-func printAddSummary(out io.Writer, resp driving.AddServiceResponse, dryRun bool) {
+func printAddSummary(out io.Writer, resp driving.AddServiceResponse, dryRun bool) error {
+	header := addSummaryHeader(resp, dryRun)
+	if _, err := fmt.Fprint(out, header); err != nil {
+		return err
+	}
+	if resp.PriorState == resp.State && len(resp.Changed) == 0 {
+		// Header already carries the full "already active" line.
+		return nil
+	}
+	for _, p := range resp.Changed {
+		if _, err := fmt.Fprintln(out, "  - "+p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// addSummaryHeader picks the lead-in text for printAddSummary. The
+// three-state switch lives here so the printer stays linear (the
+// linter's cognitive-complexity budget caps the printer at ≤ 20).
+func addSummaryHeader(resp driving.AddServiceResponse, dryRun bool) string {
 	name := resp.ServiceName.String()
 	switch {
 	case resp.PriorState == resp.State && len(resp.Changed) == 0:
-		fmt.Fprintf(out, "Service %q is already active; no changes.\n", name)
-		return
+		return fmt.Sprintf("Service %q is already active; no changes.\n", name)
 	case resp.PriorState == resp.State && len(resp.Changed) > 0:
 		if dryRun {
-			fmt.Fprintf(out, "Would repair service %q artefacts.\n\nWould change:\n", name)
-		} else {
-			fmt.Fprintf(out, "Repaired service %q artefacts.\n\nChanged:\n", name)
+			return fmt.Sprintf("Would repair service %q artefacts.\n\nWould change:\n", name)
 		}
+		return fmt.Sprintf("Repaired service %q artefacts.\n\nChanged:\n", name)
 	default:
 		if dryRun {
-			fmt.Fprintf(out, "Would add service %q.\n\nWould change:\n", name)
-		} else {
-			fmt.Fprintf(out, "Added service %q.\n\nChanged:\n", name)
+			return fmt.Sprintf("Would add service %q.\n\nWould change:\n", name)
 		}
-	}
-	for _, p := range resp.Changed {
-		fmt.Fprintln(out, "  - "+p)
+		return fmt.Sprintf("Added service %q.\n\nChanged:\n", name)
 	}
 }
