@@ -25,7 +25,15 @@
 >
 > Init ist der erste Folge-Slice, der vom Add-Pattern erbt — die
 > Erbschafts-Disziplin (was 1:1, was init-spezifisch) ist Sub-
-> Decision in §T0-Discovery. Slice liegt in `open/`.
+> Decision in §T0-Discovery. Slice liegt **in `next/`** nach
+> drei Pre-`next/`-Review-Runden (R1: 31 Findings konsolidiert
+> im Plan-Refresh; R2: weitere 31 Findings; R3: 31 Findings +
+> 4 neue Sub-Decisions T0-(n)/(o)/(p)/(q) für die Adversarial-
+> Funde initGit-Skip / ProgressPort-Silencing / Context-
+> Cancellation / Planning-Phase-Failures). T0 verbindlich
+> festgezurrt (17 Sub-Decisions (a)-(q)); T1 startet mit der
+> Refactor-Tranche. Weitere Review-Runden (R4+) sind im
+> `in-progress/`-Status erwartet (Add hatte R6/R7/R8 zusätzlich).
 
 ## Auslöser
 

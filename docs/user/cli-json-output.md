@@ -366,7 +366,7 @@ Reihenfolge gemäß Cluster-T0-(e):
 | --- | --- | --- | --- |
 | 1 | `slice-v1-cli-json-dry-run-doctor` | `doctor` + `template list`-Flag-Schnitt | done |
 | 2 | `slice-v1-cli-json-dry-run-add` | `add` (modifying, etabliert Full-Modus + RecordingFileSystem) | done (DoD-Hash-Tabelle im Slice-File) |
-| 3 | `slice-v1-cli-json-dry-run-init` | `init` | offen — **nächster Schritt** |
+| 3 | `slice-v1-cli-json-dry-run-init` | `init` | in `next/` (3 Pre-`next/`-Review-Runden; T0 mit 17 Sub-Decisions festgezurrt) |
 | 4 | `slice-v1-cli-json-dry-run-generate` | `generate` | offen |
 | 5 | `slice-v1-cli-json-dry-run-remove` | `remove` | offen |
 | 6 | `slice-v1-cli-json-dry-run-up-down` | `up`, `down` (gebündelt, read-only Compose-Status) | offen |
