@@ -579,10 +579,12 @@ oder anderen):
 - **Bei `action: "create"`**: ganze Datei ist neu, `newLines` =
   totalLines der neuen Datei (Postgres-compose-Service-Block ~12
   Zeilen → Spec §430 `count: 12` ✅).
-- **Bei `action: "modify"`**: nur die hinzugefügten Zeilen,
-  `newLines` = sum-over-hunks(neue Zeilen) (Postgres-Block fügt
-  6 Zeilen zu existierender compose.yaml hinzu → Spec §477
-  `count: 6` ✅).
+- **Bei `action: "modify"`**: nur die echten `+`-Zeilen aus den
+  Hunks (Implementation `diff.CountAdditions`). Die ursprünglich
+  diskutierte „`sum-over-hunks(hunk.newLines)`"-Form schloss auch
+  die Context-Lines mit ein und drifted gegen Spec §477 — Round-7
+  Finding B-Korrektur (Postgres-Block fügt 6 Zeilen zu existierender
+  compose.yaml hinzu → Spec §477 `count: 6` ✅).
 
 **Entscheidung (T0-Festlegung)**: `count = newLines`
 (hinzugefügte/totale Zeilen in der neuen Datei-Version). Konkrete
@@ -609,10 +611,21 @@ Form zählt `"a\n"` als 2 Elemente statt 1):
   `count: 12` für eine 12-Zeilen-Postgres-Block-Datei → der
   Renderer liefert das korrekt unabhängig von der Trailing-Newline-
   Konvention.
-- **`action: "modify"`**: `sum(hunk.newLines for hunk in diffHunks)`.
-  `hunk.newLines` zählt bereits über Hunk-Inhalte ohne Trailing-
-  Newline-Sonderfall (LCS-Output ist line-by-line).
-- **`action: "delete"`**: `0` (keine neuen Zeilen).
+- **`action: "modify"`**: `sum(+-Zeilen über alle Hunks)` —
+  Implementation `diff.CountAdditions(hunks)`. **Review-Round-7
+  Finding B-Korrektur**: die ursprüngliche Stub-Form
+  `sum(hunk.newLines)` zählte auch die Kontextzeilen, was die
+  Spec §477 Beispiel-Zahl `count: 6` für das 6-Zeilen-Postgres-
+  Block-Append systematisch überschritt (Beispiel: existierende
+  4-Zeilen-redis-compose + 6-Zeilen-postgres-Append → ein Hunk
+  mit hunk.NewLines=10, davon 6 echte `+`-Zeilen und 4 Context-
+  Zeilen; nur die 6 echten Additions sind Spec-§477-konform).
+  `diff.CountFromHunks` (Roh-NewLines-Sum) bleibt als exported
+  Helper erhalten für Diff-Rendering-Anwendungen, die die volle
+  hunk-side-line-count brauchen.
+- **`action: "delete"`**: `0` (keine neuen Zeilen) — Implementation
+  short-circuit VOR dem `IsBinary`-Check, damit auch Binary-Deletes
+  korrekt `0` zurückgeben (Review-Round-6 Finding #8).
 
 Pin-Tests in T5 müssen vier Trailing-Newline-Edge-Cases pinnen:
 (1) `"a\n"` → 1, (2) `"a"` → 1, (3) `""` → 0, (4) `"a\nb\n"` → 2.
@@ -1127,7 +1140,7 @@ nennt die Tranche, die das Outcome materialisiert.
 | [T0-(d)](#t0-d-diff-library-pure-go-intern-vs-pmezardgo-difflib) Diff-Library | **Pure-Go intern** (~150-200 LOC LCS+Unified-Diff); kein neuer Dep (`go.mod`-4-Dep-Disziplin); Sub-Decision-Revert auf `pmezard/go-difflib` möglich, falls Pure-Go-Implementation in T2 unerwartete Komplexität zeigt | T2 |
 | [T0-(e)](#t0-e-composition-root-doppel-wiring-form) Composition-Root-Wiring | **Option 4**: `Request.PreviewMode` als Enum `AddPreviewMode {PreviewNone, PreviewDryRun, PreviewAndApply}`; Composition-Root-Closure `fsFactory(mode) (driven.FileSystem, driven.RecorderPort)`-Tuple; App-Struct + `cli.New(...)`-Signatur unverändert | T1-D (ursprünglich T3) |
 | [T0-(f)](#t0-f-mutations-matrix-pre-scan-dokumentation) Mutations-Matrix | Pro-Subcommand-Matrix wandert in `docs/user/cli-json-output.md` §7 (neu); Recorder-Doc-Comment verweist auf §7; jeder Folge-Slice ergänzt seine Use-Case-Mutations-Spalte | T6 (Doc-Update) + Recorder-Doc-Comment in T1 |
-| [T0-(g)](#t0-g-changesicount-semantik) `changes[].count`-Semantik | **`newLines`-Form** (Spec §430+§477 konsistent): `create` = total lines neue Datei (trailing-newline-robust via `bytes.Count + HasSuffix`); `modify` = `sum(hunk.newLines)`; `delete` = `0`. Vier Edge-Case-Pin-Tests in T5 (`"a\n"→1`, `"a"→1`, `""→0`, `"a\nb\n"→2`). | T2 (Counter im Renderer) + T5 (Pin-Tests) |
+| [T0-(g)](#t0-g-changesicount-semantik) `changes[].count`-Semantik | **`newLines`-Form** (Spec §430+§477 konsistent): `create` = total lines neue Datei (trailing-newline-robust via `bytes.Count + HasSuffix`); `modify` = `sum(+-Zeilen über alle Hunks)` via `diff.CountAdditions` (Round-7-B-Korrektur: Stub-Form `sum(hunk.newLines)` zählte Context mit, drifted gegen Spec §477 `count: 6`); `delete` = `0` (short-circuit vor IsBinary, Round-6 #8). Vier Edge-Case-Pin-Tests in T5 (`"a\n"→1`, `"a"→1`, `""→0`, `"a\nb\n"→2`). | T2 (Counter im Renderer) + T5 (Pin-Tests) |
 | [T0-(h)](#t0-h-pre-scan-read-after-write-stichprobe-für-add) Read-after-Write-Stichprobe | `add` ist Read-then-Write (catalog → service-Files), **kein** Write-then-Read → kein Overlay-Map-Fallback nötig. T0-Outcomes-Tabelle pro `addservice_*.go`-Datei mit Pre-Scan-Ergebnis in T1-Doc-Comment. | T1 (Doc-Comment) |
 | [T0-(i)](#t0-i-recorder-carrier-typ-über-die-schicht-grenze) Recorder-Carrier-Typ | **Option 1**: Carrier-Types in `internal/hexagon/port/driving/addservice.go` als Public-Types (`PlannedFile{Path, Action, NewContent json:"-", OldContent json:"-"}`, `ChangeEntry`, `Hunk`). `AddServiceResponse` bekommt `PlannedFiles []PlannedFile` + `Changes []ChangeEntry`. **`driven.RecorderPort`-Interface** (neu, `port/driven/recordingport.go`) mit `Captured() []FileMutationRecord`-Methode (`FileMutationRecord` trägt `Path`/`Action`/`NewContent`/`OldContent`). `recordingfs.RecordingFileSystem` implementiert beide Ports. depguard `adapter-no-application`/`application-no-adapter` bleiben grün. | T1 (Carrier-Types + RecorderPort + Recorder-Implementation + Capture-Mechanik) + T4 (Mapping recorder.Captured → Response in Use-Case) |
 | [T0-(j)](#t0-j-diagnostic-code-quelle-für-add) Diagnostic-Code-Quelle | **LH-Kennungen** (keine erfundenen `add.*`-Codes). Mapping-Tabelle pinnt acht Sentinels auf `LH-FA-ADD-{001,002,005,006}`/`LH-FA-INIT-{004,005,006}`/`LH-NFA-REL-003`. Success-Pfad: `status:"ok"`/`diagnostics:[]`. Idempotent-no-op: leere `plannedFiles[]`/`changes[]`. **Neuer Sentinel `ErrAddFileSystem`** (in `port/driving/addservice.go`, gemappt auf `LH-NFA-REL-003`, Exit-Code 14). `cli.ExitCode.isFilesystemError` ergänzt um `ErrAddFileSystem`. **Non-empty Response on Error-Pfad**: Use-Case returnt `(Response{PlannedFiles: ...}, wrappedErr)` bei FS-Failure. Keine `DefaultAllowedCodes`-Erweiterung (LH-Prefix-Pfad). | T1 (Sentinel + Wrap) + `cli.ExitCode`-Erweiterung in T4 + Mapping in T4 |

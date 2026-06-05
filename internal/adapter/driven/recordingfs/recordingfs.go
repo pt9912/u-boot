@@ -25,7 +25,7 @@ package recordingfs
 import (
 	"errors"
 	"io/fs"
-	"path"
+	"path/filepath"
 
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 )
@@ -242,12 +242,14 @@ func (r *RecordingFileSystem) recordWrite(filePath string, data []byte) {
 
 // recordImplicitMkdir emits the synthetic MkdirAll record for the
 // parent dir of filePath when it would actually be created by the
-// production WriteFile call. Uses path.Dir (forward-slash semantics)
-// because driven.FileSystem paths are always cleaned UNIX-style
-// (see driven/fs/fs.go).
+// production WriteFile call. Uses filepath.Dir so the parsing matches
+// the production driven/fs/fs.go adapter exactly on every platform
+// — driven.FileSystem paths are constructed via filepath.Join in the
+// application layer, so on Windows the separator is `\` and `path.Dir`
+// would mis-parse the parent (review-round-8 finding B).
 func (r *RecordingFileSystem) recordImplicitMkdir(filePath string) {
-	dir := path.Dir(filePath)
-	if dir == "." || dir == "/" || dir == "" {
+	dir := filepath.Dir(filePath)
+	if dir == "." || dir == string(filepath.Separator) || dir == "" {
 		return
 	}
 	exists, _ := r.underlying.Exists(dir)

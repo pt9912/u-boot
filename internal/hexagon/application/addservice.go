@@ -6,6 +6,7 @@ import (
 	"fmt"
 	iofs "io/fs"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
@@ -284,20 +285,45 @@ func (s *AddServiceService) selectFS(mode driving.AddPreviewMode) (driven.FileSy
 //
 // Hunks stay nil — the CLI-side diff renderer (T2) fills them from
 // NewContent/OldContent.
-func mapCaptureToPlannedFiles(records []driven.FileMutationRecord) []driving.PlannedFile {
+//
+// baseDir is stripped from each recorded path so the JSON envelope
+// ships PROJECT-relative paths (Spec §430 / Slice §Aufhebungsbedingung
+// pin `compose.yaml`, `u-boot.yaml`, `.env.example` — bare basenames,
+// no absolute cwd-prefix). addservice_execute.go calls
+// `filepath.Join(baseDir, w.Path)` before WriteFile so the recorder
+// sees absolute paths; the strip-step is the inverse to keep the
+// driving-port contract honest (review-round-8 finding A).
+func mapCaptureToPlannedFiles(records []driven.FileMutationRecord, baseDir string) []driving.PlannedFile {
 	if len(records) == 0 {
 		return nil
 	}
 	out := make([]driving.PlannedFile, len(records))
 	for i, r := range records {
 		out[i] = driving.PlannedFile{
-			Path:       r.Path,
+			Path:       relativizePath(r.Path, baseDir),
 			Action:     r.Action,
 			NewContent: r.NewContent,
 			OldContent: r.OldContent,
 		}
 	}
 	return out
+}
+
+// relativizePath strips a trailing baseDir prefix from path so the
+// envelope wire-shape ships project-relative paths. Falls back to the
+// original path if the prefix doesn't match (defensive — a recorder
+// path that wasn't constructed via filepath.Join(baseDir, …) is
+// already relative, e.g. for a future use-case that captures cwd-
+// relative paths directly).
+func relativizePath(p, baseDir string) string {
+	if baseDir == "" {
+		return p
+	}
+	rel, err := filepath.Rel(baseDir, p)
+	if err != nil || strings.HasPrefix(rel, "..") {
+		return p
+	}
+	return rel
 }
 
 // Add implements [driving.AddServiceUseCase.Add]. The dispatch order
@@ -358,7 +384,7 @@ func (s *AddServiceService) Add(ctx context.Context, req driving.AddServiceReque
 	// log even on the error path — T0-(b) Mid-Write-Failure scenario
 	// shows the user the captured calls up to the failure point.
 	if recorder != nil {
-		resp.PlannedFiles = mapCaptureToPlannedFiles(recorder.Captured())
+		resp.PlannedFiles = mapCaptureToPlannedFiles(recorder.Captured(), req.BaseDir)
 	}
 	return resp, addErr
 }
