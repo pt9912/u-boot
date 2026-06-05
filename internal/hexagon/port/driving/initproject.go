@@ -119,6 +119,24 @@ type InitProjectRequest struct {
 	// flag without `--devcontainer` returns [ErrInvalidFeatureSource]
 	// before any write. Slice-v1-devcontainer-features T4.
 	AllowExternalFeatureSources []string
+
+	// PreviewMode encodes the --dry-run × --diff flag combination per
+	// slice-v1-cli-json-dry-run-init T0-(b) (inherited from add T0-(b)
+	// truth table). Default zero value [PreviewNone] preserves the
+	// existing production-write behaviour; non-zero values route every
+	// FS access of this Init() invocation through the recordingfs
+	// adapter (Composition-Root fsFactory closure).
+	PreviewMode PreviewMode
+
+	// SilenceProgress disables the ProgressPort-writes during the
+	// Init() call (slice-v1-cli-json-dry-run-init T0-(o)). The CLI
+	// adapter sets this to true when --json is set so the JSON
+	// envelope on stdout isn't corrupted by interleaved progress
+	// events. Init's emitSummary writes "Affected files in <baseDir>:"
+	// lines via the ProgressPort; without silencing those lines
+	// would land on stdout BEFORE the JSON envelope. Default false
+	// keeps today's progress behaviour for human-mode runs.
+	SilenceProgress bool
 }
 
 // BackupAction records a single file/dir backup performed during
@@ -146,6 +164,26 @@ type InitProjectResponse struct {
 	// performed when re-initializing an existing project with
 	// --backup. Empty for a fresh init.
 	Backups []BackupAction
+
+	// PlannedFiles is the FS-plan emitted when [InitProjectRequest.
+	// PreviewMode] is non-zero (slice-v1-cli-json-dry-run-init T2 /
+	// inherited from add T0-(i)). One entry per mutated path captured
+	// by the recorder, in the order the use case attempted them.
+	// Empty for PreviewNone (no recorder wired) and for true no-ops.
+	// Carries NewContent and OldContent for the CLI-adapter diff
+	// renderer; these two fields stay out of the JSON wire-format via
+	// `json:"-"` (Spec §326 has no place for raw bytes).
+	PlannedFiles []PlannedFile
+
+	// Changes mirrors PlannedFiles' paths with their line-count
+	// summaries (LH-FA-CLI-007 §365-371). Filled only in preview
+	// modes; nil for PreviewNone. Count semantics follow T0-(g):
+	// create = CountLines(NewContent); modify = sum of `+`-lines via
+	// diff.CountAdditions; delete = 0. Today populated by the CLI-
+	// adapter's mapPlannedFilesToWire helper, not directly by the
+	// application service (matches add-pattern; the use case fills
+	// PlannedFiles, the CLI computes Changes from them).
+	Changes []ChangeEntry
 }
 
 // ErrProjectExists signals that BaseDir already looks like an
@@ -217,7 +255,28 @@ var ErrFileExists = errors.New("file exists")
 //
 // Maps to LH-FA-CLI-006 exit code 2 (CLI usage error — the user
 // can fix by dropping the conflicting flag) via [isUsageError].
+//
+// slice-v1-cli-json-dry-run-init T5 reuses this sentinel as the
+// new CLI-level mutex-check for `--template + --dry-run|--diff`
+// (Out-of-Scope-Carveout T0-(i)) — the CLI RunE raises it at flag-
+// parse time before calling [InitProjectUseCase.Init].
 var ErrTemplateConflictsWithFlag = errors.New("init: --template conflicts with another flag")
+
+// ErrInitFileSystem signals that the init use case hit a raw
+// filesystem error during one of its WriteFile / MkdirAll /
+// BackupPath calls — slice-v1-cli-json-dry-run-init T2 (analog
+// driving.ErrAddFileSystem). Application-Layer (T3) wraps raw
+// os.WriteFile/os.MkdirAll-Errors as
+// `fmt.Errorf("init: write %s: %w: %w", path, ErrInitFileSystem,
+// rawErr)` (multi-`%w`) so the CLI's `cli.ExitCode` maps it to
+// LH-NFA-REL-003 / exit-code 14 via [isFilesystemError].
+//
+// Switch-Order-Pflicht (T0-(f), inherited from add review #11):
+// init's mapInitErrorToDiagnostic checks this sentinel FIRST so
+// multi-`%w` chains that include both ErrInitFileSystem AND a
+// fachlich sentinel route to the FS-class (LH-NFA-REL-003, exit
+// 14), not to the fachlich class (LH-FA-INIT-005, exit 10).
+var ErrInitFileSystem = errors.New("init: filesystem mutation failed")
 
 // InitProjectUseCase is the driving-port for `u-boot init`. The CLI
 // adapter holds a reference and calls [Init] from the Cobra command

@@ -365,6 +365,8 @@ func isConfigValidationError(err error) bool {
 // failures map to LH-NFA-REL-003 / exit-code 14, not the default
 // "1" — without this entry the recorder would surface plannedFiles[]
 // to the user but the process would exit with the wrong code class.
+// ErrInitFileSystem (slice-v1-cli-json-dry-run-init T2) plays the
+// same role for init's WriteFile/MkdirAll/BackupPath sites.
 func isFilesystemError(err error) bool {
 	return errors.Is(err, driving.ErrBackupSuffixExhausted) ||
 		errors.Is(err, driving.ErrBackupSourceMissing) ||
@@ -372,7 +374,8 @@ func isFilesystemError(err error) bool {
 		errors.Is(err, driving.ErrConfigFileSystem) ||
 		errors.Is(err, driving.ErrTemplateCatalog) ||
 		errors.Is(err, driving.ErrTemplateRender) ||
-		errors.Is(err, driving.ErrAddFileSystem)
+		errors.Is(err, driving.ErrAddFileSystem) ||
+		errors.Is(err, driving.ErrInitFileSystem)
 }
 
 // isUsageError detects two distinct classes of usage-level errors:
