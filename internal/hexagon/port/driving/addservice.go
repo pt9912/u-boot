@@ -125,9 +125,9 @@ type AddServiceResponse struct {
 	Changes []ChangeEntry
 }
 
-// AddPreviewMode encodes the four flag combinations for
-// `u-boot add <service>` (--dry-run × --diff) per slice-v1-cli-json-
-// dry-run-add T0-(b) truth table:
+// PreviewMode encodes the four flag combinations for
+// `u-boot <modifying-subcommand>` (--dry-run × --diff) per
+// slice-v1-cli-json-dry-run-add T0-(b) truth table:
 //
 //	flags                    | PreviewMode      | production write?
 //	-------------------------+------------------+------------------
@@ -137,17 +137,32 @@ type AddServiceResponse struct {
 //	--dry-run --diff         | PreviewDryRun    | no
 //
 // The CLI adapter computes the mode from the parsed flags and writes
-// it into [AddServiceRequest.PreviewMode] before calling
-// [AddServiceUseCase.Add]. Composition-Root reads the mode in its
-// fsFactory closure to pick between production FS and the
-// RecordingFileSystem variants.
-type AddPreviewMode int
+// it into [AddServiceRequest.PreviewMode] (or [InitProjectRequest.
+// PreviewMode] in the init slice) before calling the use case.
+// Composition-Root reads the mode in its fsFactory closure to pick
+// between production FS and the RecordingFileSystem variants.
+//
+// Originally named AddPreviewMode; slice-v1-cli-json-dry-run-init
+// T0-(c) renamed to PreviewMode because the type is consumed by
+// every modifying subcommand (add, init, generate, remove,
+// config set). AddPreviewMode remains as a type-alias for backward
+// compatibility — see below.
+type PreviewMode int
+
+// AddPreviewMode is a backward-compat type-alias for [PreviewMode]
+// (slice-v1-cli-json-dry-run-init T0-(c) Carveout). The `=` syntax
+// makes them the IDENTICAL type, so existing call-sites that say
+// `driving.AddPreviewMode` (and the matching function-types) stay
+// assignable to the renamed canonical form without source edits.
+// Carveout removal owner: slice-v1-cli-cleanup-add-preview-mode-
+// alias (T8 of init-slice creates the open/-stub).
+type AddPreviewMode = PreviewMode
 
 const (
 	// PreviewNone selects the direct production FS path. Default zero
 	// value; today's non-JSON code path keeps emitting this and stays
 	// unchanged.
-	PreviewNone AddPreviewMode = iota
+	PreviewNone PreviewMode = iota
 
 	// PreviewDryRun captures every mutation in the recorder without
 	// touching the production FS. Used for `--dry-run` (with or
