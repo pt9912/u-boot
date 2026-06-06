@@ -1,6 +1,6 @@
 # Slice V1: `generate --json` / `--dry-run` / `--diff` — Vier-Artefakt-Surface
 
-> **Status:** T0-Discovery + R1 adressiert, `open/`. Vierter Folge-Slice (4/9) des
+> **Status:** T0-Discovery + R1/R2 adressiert, `open/`. Vierter Folge-Slice (4/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 4/9). Konsumiert das Pattern-Vorbild aus
@@ -17,11 +17,13 @@
 > Action-Semantiken (`Created` / `UpdatedBlock` / `NoOp` /
 > `RepairedManual`), eine **schmale FS-Surface** (2 von 8
 > Recorder-Mutations-Methoden im Default-Pfad: `WriteFile` + bei
-> devcontainer `MkdirAll`), die **Devcontainer-Atomicity-Pflicht**
-> (zwei Files atomar oder gar nicht, bestehender Code-Kommentar
-> `generate.go:623-625`) und der **`--allow-external-feature-sources`-
-> Side-Effect** (mutiert `u-boot.yaml` als zusätzlichen Schreib-
-> Vorgang außerhalb des Artefakt-Targets).
+> devcontainer `MkdirAll`), die **Devcontainer-Atomicity-Asymmetrie**
+> (Phase 1 `planDevcontainerFiles` ist Pre-Write-Validation-atomar,
+> Phase 2 `executeDevcontainerPlans` ist **nicht** Roll-back-atomar
+> — bewusster Carveout mit `carveouts.md`-Eintrag, siehe T0-(i))
+> und der **`--allow-external-feature-sources`-Side-Effect**
+> (mutiert `u-boot.yaml` als zusätzlichen Schreib-Vorgang außerhalb
+> des Artefakt-Targets).
 >
 > **Voraussetzungen aus dem Init-Slice**: das Pattern-Vorbild
 > (Closure-Form `fsFactory(driving.PreviewMode)`, Multi-`%w`-Wraps
@@ -117,13 +119,17 @@ nicht auf reduziertem `make test + lint + docs-check`.
 - ✅ **Vier-Artefakt-Symmetrie**: identische Envelope-Shape unabhängig
   vom Artefakt, mit `subcommand="<artifact>"` (oder `command="generate"`
   + Artefakt im `data.artifact` — Sub-Decision (m)).
-- ✅ **Action-Klassifikation** im Voll-Schema-Envelope: `changes[]`
-  trägt die `GenerateAction`-String-Form (`created` / `updated-block`
-  / `no-op` / `repaired-manual`) im `kind`-Feld (oder eigenem
-  `action`-Feld — Sub-Decision (f)).
+- ✅ **Action-Klassifikation aus Envelope-Inhalt ableitbar** (T0-(f)
+  festgezurrt): Created/UpdatedBlock/RepairedManual produzieren
+  nicht-leere `plannedFiles[]` + `changes[]`-Arrays; NoOp
+  produziert beide Arrays leer. **Keine** Action-Marker-Schema-
+  Erweiterung (kein neues Top-Level-Feld, kein `kind` in
+  `changes[]`-Einträgen) — `jsontestutil.AssertFullEnvelope`
+  enforced `path`/`count` als Pflicht pro `changes[]`-Eintrag,
+  Action-Marker ohne `path` wäre schema-illegal.
 - ✅ **NoOp-Pin**: `--dry-run --json` bei bereits idempotenter
-  Datei liefert `plannedFiles: []` (kein WriteFile-Capture) plus
-  `status: ok` und eine `action: no-op`-Marker — Sub-Decision (f).
+  Datei liefert `plannedFiles: []` UND `changes: []` (kein
+  WriteFile-Capture, beide Arrays leer), `status: ok`, Exit 0.
 - ✅ **UpdatedBlock-Hunks**: `--diff --json` bei `UpdatedBlock`
   rendert Hunks **nur** für den managed-block-Bereich (Sub-Decision
   (g): block-only vs. full-file-LCS).
@@ -158,10 +164,11 @@ nicht auf reduziertem `make test + lint + docs-check`.
   bereits in port/driving/generate.go:154, aber Application-Code
   wrappt FS-Writes heute mit Single-`%w`. T3 erweitert auf Multi-
   `%w` (Switch-Order-Sicherheit) — Sub-Decision (d).
-- ✅ **Allowlist-Erweiterung**: `"u-boot generate"` in
-  `jsonallowlist.go` (mit Sub-Decision: einer pro Artefakt
-  `"u-boot generate changelog"` etc. oder nur die parent-Form? —
-  Sub-Decision (l)).
+- ✅ **Allowlist-Erweiterung**: `"u-boot generate"` (parent-only)
+  in `jsonallowlist.go`. Per-Artefakt-Form ist technisch
+  unmöglich, weil `<artifact>` Positional-Arg ist und
+  `cmd.CommandPath()` immer `"u-boot generate"` returnt
+  (T0-(l) festgezurrt).
 - ✅ **CLI-Pin-Tests**: 4 Artefakte × 8 Flag-Kombinationen
   (deckt die Aufhebungsbedingung 1:1 ab — die vier Human-Mode-
   Pfade ohne JSON sind öffentlicher CLI-Vertrag und müssen
@@ -190,9 +197,20 @@ nicht auf reduziertem `make test + lint + docs-check`.
 - **T0-(e)** **Switch-Order-Pflicht** im neuen
   `mapGenerateErrorToDiagnostic`: ErrGenerateFileSystem FIRST,
   weil Multi-`%w` sonst Exit-14 auf Exit-10 downgraded.
-- **T0-(f)** **NoOp-Envelope-Form**: `plannedFiles: []` plus
-  Action-Marker (`changes: []` mit `action: no-op`? Oder
-  `data.action: "no-op"` als Voll-Schema-Top-Level-Feld?).
+- **T0-(f)** **NoOp-Envelope-Form festgezurrt**: NoOp produziert
+  `plannedFiles: []` UND `changes: []` (beide Arrays leer). Ein
+  `changes`-Eintrag mit „nur `action`" ist **schema-illegal** —
+  der Acceptance-Helper (`jsontestutil.AssertFullEnvelope` →
+  `checkChanges` Z. 384-400) enforced `path` und `count` als
+  Pflichtfelder pro `changes[]`-Eintrag (Spec §365/§368). Action-
+  Klassifikation wird im JSON-Mode **nicht** über ein separates
+  Top-Level-Feld geführt — Konsumenten leiten NoOp aus
+  `len(plannedFiles)==0 && len(changes)==0` ab; Created/Updated-
+  Block/RepairedManual sind durch nicht-leere Arrays
+  identifizierbar. Begründung: keine Schema-Erweiterung über den
+  add/init-Stand hinaus, kein Drift gegen den existierenden
+  Helper. Human-Mode bleibt unverändert
+  (`printGenerateSummary`-Branches).
 - **T0-(g)** **UpdatedBlock-Diff-Granularität**: managed-block-
   only Hunks vs. full-file-LCS. Block-only ist semantisch sauber
   (User sieht NUR die u-boot-managed Änderung), aber existing
@@ -258,7 +276,7 @@ nicht auf reduziertem `make test + lint + docs-check`.
 | T3 | Application-Layer: `GenerateService.fsFactory` + `generateMu sync.Mutex` + `NewGenerateServiceWithFactory` + `Generate()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; Multi-`%w`-Wrap an den 8 FS-Wrap-Stellen. | ~200 | T2 |
 | T4 | Composition-Root-Wiring `generateFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
 | T5 | CLI-RunE: `runGenerate` ruft generische Helper mit `command="generate"`, `mapErr=mapGenerateErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapGenerateErrorToDiagnostic` neu. | ~180 | T1 + T2 (T4 für Run-time-Smoke, Code-parallelisierbar) |
-| T6 | Acceptance-Tests: 4 Artefakte × 4 Flag-Kombos + NoOp/UpdatedBlock/RepairedManual/Devcontainer-Atomicity/Allow-External-Side-Effect-Pins. | ~500 | T5 |
+| T6 | Acceptance-Tests: 4 Artefakte × 8 Flag-Kombos (4 Human-Mode + 4 JSON, deckt Aufhebungsbedingung 1:1) + NoOp/UpdatedBlock/RepairedManual/Devcontainer-Phase-1-Validation/Devcontainer-Phase-2-Half-Write/Allow-External-Side-Effect-Pins; Helper `generateFixture(t, opts)` shared (~80 LOC). | ~640 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden). | ~80 | T6 |
 | T8 | Closure: CHANGELOG, cli-json-output.md §6/§6.5/§7, roadmap, slice nach done/ mit DoD-Hash-Tabelle. | — (Doku) | T7 |
 
@@ -285,6 +303,24 @@ R1-Reviewer-Note: Markdown-Link-Sensor (`make docs-check`)
 und Spec-Anker-Bezüge sind grün; Pattern-Verweise auf
 PreviewMode/Recorder/Diff-Helper/Error-Emission existieren im
 aktuellen Code + done-Slices.
+
+## Review-Round-2 (Pre-`next/`)
+
+Zweite adversarial-orientierte Runde gegen den R1-gepflegten Stub
+(`f3134bd`), Fokus auf Plan-Drift, Carveout-Inventarisierung und
+Schema-Kompatibilität. Fünf Findings (1 HIGH, 3 MEDIUM, 1 LOW),
+alle adressiert im selben Commit:
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| 1 | HIGH | Phase-2-Half-Write-Carveout war im Slice angekündigt, aber NICHT in `carveouts.md` inventarisiert und ohne Plan-Stub (verletzt `LH-FA-PROJDOCS-005` und MEMORY-Rule [[feedback_carveouts_need_plans]]) | Neuer Eintrag in `carveouts.md` §Temporäre Carveouts mit Re-Trigger; neuer open/-Plan-Stub `slice-v2-generate-devcontainer-rollback-aware-write` (Status `on hold pending trigger`, drei Lösungs-Skizzen) |
+| 2 | MEDIUM | Header-Vertrag „zwei Files atomar oder gar nicht" widersprach T0-(i)-Ergebnis (Phase 1 atomar, Phase 2 nicht) | Header-Text auf „Devcontainer-Atomicity-**Asymmetrie**" umgestellt mit expliziter Phase-1/Phase-2-Trennung |
+| 3 | MEDIUM | T6-Tranchen-Zelle plante 4×4-Matrix; Aufhebungsbedingung + AK fordern 4×8 | T6-Zelle auf 4×8 + Special-Pins erweitert, LOC-Schätzung ~640 (vorher ~500) |
+| 4 | MEDIUM | T0-(f) NoOp-Action-Marker war schema-unklar — `changes: []` mit `action: no-op` wäre schema-illegal (Helper enforced `path`/`count` pro `changes[]`-Eintrag) | T0-(f) festgezurrt: NoOp = `plannedFiles: []` UND `changes: []`, keine Action-Marker-Schema-Erweiterung; Konsumenten leiten NoOp aus Leerheit beider Arrays ab. AK-Block entsprechend nachgezogen |
+| 5 | LOW | AK „Allowlist-Erweiterung" referenzierte Sub-Decision (l) als offen, obwohl T0-(l) parent-only bereits festzurrt | AK-Zeile auf festgezurrte parent-only-Form umgestellt, Sub-Decision-Verweis raus |
+
+R2-Reviewer-Note: docs-check grün, Pattern-Verweise weiterhin
+tragfähig.
 
 ## Out of Scope
 

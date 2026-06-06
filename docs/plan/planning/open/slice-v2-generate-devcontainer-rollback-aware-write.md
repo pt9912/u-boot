@@ -1,0 +1,101 @@
+# Slice V2: `generate devcontainer` Rollback-aware Multi-File-Write
+
+> **Status:** `open/`, on hold pending trigger. Cleanup-/Hardening-
+> Slice zum Devcontainer-Phase-2-Half-Write-Carveout aus
+> [`slice-v1-cli-json-dry-run-generate`](slice-v1-cli-json-dry-run-generate.md)
+> T0-(i). Carveout-Plan-Anker
+> ([[feedback_carveouts_need_plans]]); verlinkt aus
+> [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
+> §Temporäre Carveouts.
+
+## Auslöser
+
+`generate devcontainer` schreibt zwei Files (`.devcontainer/
+devcontainer.json` + `.devcontainer/Dockerfile`) in einer **Two-
+Phase-Architektur**:
+
+- **Phase 1** (`planDevcontainerFiles`, `generate.go:618-624`):
+  klassifiziert beide Files ohne FS-Mutation. Wenn auch nur ein
+  File `present-no-block` oder `malformed` ist, returnt der
+  Use-Case `ErrGenerateManualConflict` **ohne ein einziges
+  WriteFile**. Phase 1 ist Pre-Write-Validation-atomar.
+- **Phase 2** (`executeDevcontainerPlans`): schreibt nacheinander.
+  Wenn File 2 mid-stream failt (Disk-Full, Permission, Race),
+  ist File 1 bereits committed; das `.devcontainer/`-Verzeichnis
+  bleibt in **halbgeschriebenem Zustand** auf Disk.
+
+Plus: `applyAllowExternalFeatureSources` (`generate.go:670`) als
+LAST-Schreib-Operation mutiert `u-boot.yaml` nach den
+devcontainer-Files. Auch hier kann ein Mid-Failure einen
+halbgeschriebenen Zustand zwischen drei Artefakten produzieren.
+
+V1-Closure des generate-Slice akzeptiert diesen Half-State als
+**bewussten Carveout** — der V1-Recorder ist nicht Roll-back-
+aware (Cluster-T0-(b) Variante 3 ChangeSet-Pattern verworfen
+für V1, weil Add/Init keinen Roll-back-Bedarf haben und ein
+Cluster-übergreifender Pattern-Bruch nicht V1-würdig war).
+
+## Trigger
+
+Plan-Stub bleibt `on hold` bis einer der folgenden Trigger feuert:
+
+- **Real-World-Beschwerde** über halbgeschriebenen
+  `.devcontainer/`-Zustand (z. B. CI bricht, User berichtet
+  „File 1 ist neu, File 2 fehlt komplett, wie repariere ich das").
+- **Devcontainer-Schema-Erweiterung**: ein zukünftiger Slice
+  fügt einen dritten oder vierten devcontainer-File (z. B.
+  Dockerfile.dev, post-create-script) hinzu — Half-State-Risk
+  skaliert mit File-Anzahl.
+- **Cluster-T_close-Cleanup-Audit**: bei systematischem
+  Carveout-Inventur kann die Half-State-Akzeptanz als
+  Vertrags-Schuld neu bewertet werden.
+
+## Lösungs-Skizze (vorläufig)
+
+Drei Optionen mit unterschiedlicher Tiefe:
+
+1. **Pre-Phase-2-Snapshot + Rollback-on-Failure**:
+   `executeDevcontainerPlans` liest File 1 vor dem Write in einen
+   Buffer (falls existing), schreibt File 1, schreibt File 2;
+   bei Failure → File 1 aus dem Buffer zurückschreiben (oder
+   löschen, wenn vorher nicht existiert hatte). Lokaler Fix
+   ohne Recorder-Architektur-Eingriff. Risiko: zweiter Failure
+   beim Rollback-Write hinterlässt dann erst recht inkonsistenten
+   State.
+2. **Per-Use-Case Roll-back-aware Recorder**: ChangeSet-Pattern
+   (Cluster-T0-(b) Variante 3) speziell für `generate devcontainer`.
+   Schmaler als Cluster-weit, weil Init/Add weiterhin
+   capture-only sind.
+3. **Atomare Rename-Strategie**: Files erst in
+   `<file>.tmp.<n>` schreiben, dann atomic `os.Rename` zum
+   final-Pfad. Disk-Full während des tmp-Writes ist
+   unkritisch; Rename ist auf POSIX atomar (gleiche Disk).
+   Nimmt Windows-Disk-Boundary-Edge-Case in Kauf.
+
+**Bevorzugte Skizze**: Option 3 (atomare Rename-Strategie) —
+minimaler Eingriff, semantisch sauber, kein Architektur-
+Bruch. Trigger-Slice klärt Windows-Edge-Cases im Detail.
+
+## Out of Scope (V1)
+
+- **Cluster-weiter ChangeSet-Pattern-Recorder** — bewusst V1-
+  out-of-scope, weil Add/Init kein Roll-back-Bedarf haben und
+  ein gemeinsamer Pattern-Bruch unnötig wäre.
+- **Backup/Snapshot-Persistierung über Use-Case-Grenzen
+  hinaus** — Crash-Recovery zwischen `generate`-Aufrufen ist
+  V3-Scope.
+
+## Bezug
+
+- Carveouts-Tracking:
+  [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
+  §Temporäre Carveouts — Eintrag verweist hierher.
+- Generate-Slice T0-(i):
+  [`slice-v1-cli-json-dry-run-generate`](slice-v1-cli-json-dry-run-generate.md)
+  §Sub-Decisions T0-(i) Devcontainer-Atomicity-Klärung.
+- Code-Anker:
+  [`generate.go:618-690`](../../../../internal/hexagon/application/generate.go)
+  (Phase-1-Comment + Phase-2-Implementation).
+- Spec: `LH-FA-DEV-001` (Devcontainer-Render),
+  `LH-NFA-REL-003` (technische Persistenz-Klasse).
+- Phase: V2 (Hardening, post-V1-Cluster-Closure).
