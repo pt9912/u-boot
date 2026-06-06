@@ -1,6 +1,6 @@
 # Slice V1: `remove --json` / `--dry-run` / `--diff` — Add-Inverse mit Purge-Gate
 
-> **Status:** T0-Discovery + R1-R10 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
+> **Status:** T0-Discovery + R1-R11 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 5/9). Konsumiert das Pattern-Vorbild aus
@@ -135,6 +135,25 @@ docs-check).
   `diagnostics[0].level == "warn"` AND `data.volumesPurged ==
   false`. Im JSON-Mode darf stderr nicht durch die
   WARNING-Prosa polluten.
+- ✅ **Cobra-Args-Missing-Pfad-Pin** (R11-HIGH-F1-Fix für
+  Spec-LH-NFA-USE-004-§1841-Konformität): `u-boot remove --json`
+  ohne positional arg läuft via `cobra.ExactArgs(1)`-Guard
+  (`cli/remove.go:77`) **vor** RunE — der JSON-Helper aus T5
+  wird NIE aufgerufen, Konsument bekommt KEINEN Envelope und
+  Exit 2. Symmetrie-Bruch zu `remove "bad name" --json` (voller
+  Envelope mit `LH-FA-INIT-006`/Exit 10). **T5-Pflicht**:
+  Custom-`Args`-Validator statt `cobra.ExactArgs(1)`, der bei
+  `len(args)==0` einen `driving.ErrServiceNameMissing`-Sentinel
+  emittiert, den das `RunE` über den **vorgezogenen** Pre-UC-
+  Sentinel-Kanal via `reportError` in den Envelope kanalisiert
+  (`code: "LH-FA-CLI-006"` / `exitCode: 2`). Alternative:
+  PreRunE für Args-Check der den Sentinel emittiert. T6-Pin:
+  `TestRemove_NoPositionalArg_JSON_EmitsCLI006Envelope` mit
+  empty `args[]` + `--json` → voller Envelope mit `command:
+  "remove"`, `data: nil` (kein Service-Kontext), `code:
+  "LH-FA-CLI-006"`, exit 2. Pattern-Erbe-Vorlauf für künftige
+  Folge-Slices (up/down haben `cobra.ExactArgs(1)` für
+  `<service>`-Subform — denselben Args-Guard-Pfad).
 - ✅ **`ErrServiceUnregistered` ERROR-Pfad-Pin** (R6-MED-F3-Fix,
   Symmetrie zum WARN-Pfad-Pin oben): `LH-FA-ADD-007` wird auch
   als Error-Code für `ErrServiceUnregistered` genutzt (R5-F2
@@ -343,6 +362,7 @@ docs-check).
   | `ErrProjectNotInitialized` | `LH-FA-ADD-001` | 10 |
   | `domain.ErrInvalidServiceName` | `LH-FA-INIT-006` | 10 |
   | `ErrConflictingModeFlags` (`--yes ⊕ --no-interactive`) | `LH-FA-CLI-005A` | 2 |
+  | `ErrServiceNameMissing` (NEU T2, R11-HIGH-F1; ersetzt Cobra-Default für `cobra.ExactArgs(1)`-Miss) | `LH-FA-CLI-006` | 2 |
   | Default (unknown) | `LH-FA-CLI-006` | 1 |
 
   **Tabellen-Reihenfolge = Switch-Reihenfolge** (R3-MED-F3-Fix):
@@ -629,7 +649,7 @@ docs-check).
 | T3 | Application-Layer: `RemoveServiceService.fsFactory` + `removeMu sync.Mutex` + `NewRemoveServiceServiceWithFactory` + `Remove()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; **Multi-`%w`-Wrap an den 8 FS-Wrap-Stellen** (R4-HIGH-F1-Klassifikations-Fix gegen R3-Initial-10, T0-(d) Inventar Z. 264-285); Z. 307 + Z. 330 separat mit `ErrServiceInconsistent`-Wrap (KEIN ErrRemoveFileSystem, fachlich-Klasse, T0-(d)); `ErrConfirmerUnavailable`-Sentinel-Wrap in `runPurgeGate` Z. 171; Confirmer-Swap auf existierenden `noopConfirmer` im JSON-Mode. | ~240 | T2 |
 | T4 | Composition-Root-Wiring `removeFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
 | T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`); **Pre-UC-Sentinel-Kanal** (R4-LOW-F6-Klarstellung: Codepfade existieren bereits in `cli/remove.go:108-120`, NEU ist nur die Kanalisierung via `reportError` analog `init.go:205, 216, 221`) für `domain.ErrInvalidServiceName`, `ErrConflictingModeFlags` UND `getwd`-Failure (`fmt.Errorf("determine working directory: %w", err)`, R3-LOW-F6-Fix). Der `getwd`-Wrap trägt KEIN typed Sentinel und fällt in den Default-Branch `LH-FA-CLI-006` / Exit 1 (Pattern-Erbe von init T0-(o)); Mapper-Tabelle T0-(e) NICHT ergänzt. **Human-Mode-Diff-Renderer** (R2-LOW-F6-Fix): bei `--purge --diff` ohne `--json` bleibt die deferred-Volumes-Prosa auf `errOut`, NICHT im Diff-Body. T6-Pin: `TestRemove_PurgeHumanDiff_StderrSeparation` mit getrennten Buffer-Assertions. | ~250 | T1 + T2 |
-| T6 | Acceptance-Tests: ~20-25 Tests (drei JSON-Modi + NoOp Single+Repeat + Mid-Write-Failure + ConfirmationRequired-Pfade × 3 Varianten + Service-Sentinels × 4 + WARNING-Migration-Pin + `--purge`-on/off × Dry-Run-Kombos (T0-(h)) + `--purge --yes --json` WarnOnly-Pin (T0-(j) R1-MED-5) + `ErrConflictingModeFlags`-Pin). R1-MED-6-Kalibrierung: ~600-700 LOC realistisch (Confirmer-Pattern-Neumuster zieht Test-Surface). **Pin-Namen-Mapping** (R6-LOW-F4) — kanonische Tags pro Finding-Anker: `TestRemove_ConcurrentInvocationsSerializeSwaps` (R5-F1+R6-F2 Race+Recorder-Scope), `TestRemove_DryRun_DetectStateUsesCaptureFS` + `TestRemove_DryRunPurgeYes_NoConfirmerCall` (R4-F2 Control-Flow), `TestRemove_PurgeOnVolumelessService_NoWarn` (R3-F1 Volume-Presence), `TestRemove_PurgeYesJSON_WarnOnly` (R1-MED-5 + R5-F2 WARN-Pfad), `TestRemove_PurgeYesJSON_MidWriteFailure_ErrorOnly` (R4-F3 Variante A), `TestRemove_OtelExtraFileDelete_DiffHasDeleteHunk` (R4-F4 delete-Action), `TestRemove_PurgeHumanDiff_StderrSeparation` (R2-F6 stderr-Trennung), `TestRemove_ServiceUnregisteredJSON_ErrorLevelCodePin` (R6-F3 ERROR-Pfad-Symmetrie). Weitere ~12 Pins (Idempotenz-Repeat, EnabledUnset-Normalisierung, ManualConflict × 3 (R5-F3 Triple-Use), Service-Sentinels × 4, ConfirmerUnavailable-allein-Pfad (R2-F1), Multi-`%w`-Switch-Order-Defense (R3-F3), Read-Pfad-FS-Failure (R2-F3), `ErrConflictingModeFlags` (R1-F4)) lassen sich aus AK-Block + Sub-Decision-Pins direkt ableiten. | ~650 | T5 |
+| T6 | Acceptance-Tests: ~20-25 Tests (drei JSON-Modi + NoOp Single+Repeat + Mid-Write-Failure + ConfirmationRequired-Pfade × 3 Varianten + Service-Sentinels × 4 + WARNING-Migration-Pin + `--purge`-on/off × Dry-Run-Kombos (T0-(h)) + `--purge --yes --json` WarnOnly-Pin (T0-(j) R1-MED-5) + `ErrConflictingModeFlags`-Pin). R1-MED-6-Kalibrierung: ~600-700 LOC realistisch (Confirmer-Pattern-Neumuster zieht Test-Surface). **Pin-Namen-Mapping** (R6-LOW-F4) — kanonische Tags pro Finding-Anker: `TestRemove_ConcurrentInvocationsSerializeSwaps` (R5-F1+R6-F2 Race+Recorder-Scope), `TestRemove_DryRun_DetectStateUsesCaptureFS` + `TestRemove_DryRunPurgeYes_NoConfirmerCall` (R4-F2 Control-Flow), `TestRemove_PurgeOnVolumelessService_NoWarn` (R3-F1 Volume-Presence), `TestRemove_PurgeYesJSON_WarnOnly` (R1-MED-5 + R5-F2 WARN-Pfad), `TestRemove_PurgeYesJSON_MidWriteFailure_ErrorOnly` (R4-F3 Variante A), `TestRemove_OtelExtraFileDelete_DiffHasDeleteHunk` (R4-F4 delete-Action), `TestRemove_PurgeHumanDiff_StderrSeparation` (R2-F6 stderr-Trennung), `TestRemove_ServiceUnregisteredJSON_ErrorLevelCodePin` (R6-F3 ERROR-Pfad-Symmetrie). Weitere ~12 Pins (Idempotenz-Repeat, EnabledUnset-Normalisierung, ManualConflict × 3 (R5-F3 Triple-Use), Service-Sentinels × 4, ConfirmerUnavailable-allein-Pfad (R2-F1), Multi-`%w`-Switch-Order-Defense (R3-F3), Read-Pfad-FS-Failure (R2-F3), `ErrConflictingModeFlags` (R1-F4), `TestRemove_NoPositionalArg_JSON_EmitsCLI006Envelope` (R11-F1)) lassen sich aus AK-Block + Sub-Decision-Pins direkt ableiten. **Failure-Mode-Coverage-Summary** (R11-LOW-F3): FMEA-Walk identifizierte 20 Failure-Szenarien; nach R11-Adressierung sind 18/20 explizit gepinnt + 2/20 als bewusste Out-of-Scope-Carveouts (Context-Cancellation als Status-quo-Erbe, fsFactory-NPE als Composition-Root-Defekt-Klasse). | ~650 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe). | ~80 | T6 |
 | T8 | Closure (R9 präzisierte Liste): **CHANGELOG** Unreleased-Eintrag analog generate T8. **`cli-json-output.md`**: §6-Tabelle (remove→done), neue §6.6-Sektion (`u-boot remove --json` mit drei Flag-Kombos + `data`-Carrier `{service, priorState, state, volumesPurged}` + `--purge`-Mutex + WARN-Migration + EnabledUnset-Normalisierungs-Pin), §7 Mutations-Matrix-Zeile (`remove (slice-v1-cli-json-dry-run-remove): WriteFile + RemoveAll` — KEINE neue `action`-Spalte, R9-HIGH-F1: §7 ist die `driven.FileSystem`-Methoden-Tabelle, `action: "delete"` ist Spec-§354-enum-Wert der bereits dokumentiert ist; §6.6 ergänzt nur ein worked example mit `data.changes[].action: "delete"` für otel-extraFile). **`roadmap.md`**: zwei explizite Edits — (i) done-Zähler 4→5 + `remove` aus der Offen-Liste der Cluster-AP-Zelle streichen, (ii) `Nächster Schritt`-Klausel auf Folge-Slice 6/9 `up-down` umstellen (R9-LOW-F4). **Carveouts.md**: **neuer Eintrag** (kein bestehender Volume-Removal-Eintrag — Verifikation `carveouts.md` Z. 22-29 zeigt nur Paketierung/Keycloak-CI/template-list/generate-devcontainer-Half-Write); Pattern-Vorbild `slice-v2-generate-devcontainer-rollback-aware-write` mit Status `open/, on hold pending trigger`; Spec-Anker `LH-FA-ADD-007 §"Volumes nur auf explizite Anforderung"` (R3-MED-F5 + R9-LOW-F3). **`open/`-Plan-Stub**: `slice-v1-volume-auto-removal.md` mit Auslöser (real-world Volume-Reclamation-Anfrage), Out-of-Scope-V1-Bestätigung, Spec-Anker. **Slice nach `done/`** mit DoD-Hash-Tabelle analog generate T8. **Plan-Verdichtung beim Übergang nach `done/`** (R10-MED-F2-Pflicht, Plan-Länge ist mit ~900 Zeilen über generate-done ~700 + remove-Initial ~280): (i) Review-Round-Tabellen R1-R10 Adressierungs-Spalte auf einen Satz pro Finding kürzen (Aufzeichnung *was* eingearbeitet wurde, nicht *wie*); (ii) Sub-Decision T0-(c) Skeleton-Block (~80 Zeilen Inline-Code) in dedizierte H3-Sektion verschieben analog init-done Pattern; (iii) AK-Block 17 Bullets auf zentrale-Anforderungs + Adressierungs-Pin-Trennung gliedern. Pattern-Vorbild generate-done T8 verdichtet ähnlich. | — (Doku) | T7 |
 
@@ -890,8 +910,46 @@ nach R10-Adressierung in `next/` migrieren — weitere Runden
 würden vermutlich nur ähnliche Outdated-Reference- oder
 Plan-Hygiene-Befunde produzieren.
 
+## Review-Round-11 (Pre-`next/`) — Failure-Mode-Enumeration
+
+Systematischer FMEA-Walk durch 20 Failure-Szenarien gegen den
+R10-konsolidierten Stub (`37013bb`). Drei Findings (1 HIGH,
+1 MEDIUM, 1 LOW). **Siebte Runde in Folge** mit konstanter
+HIGH-Frequenz 1 (R5-R11) — Asymptote endgültig bestätigt.
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| F1 | HIGH | Failure-Mode #2 (`u-boot remove --json` ohne positional arg) hatte KEINEN Plan-Vertrag — `cobra.ExactArgs(1)`-Guard feuert VOR RunE, JSON-Helper läuft nie, Konsument bekommt Exit 2 ohne Envelope. Symmetrie-Bruch zu `remove "bad name" --json` (voller Envelope). Spec-LH-NFA-USE-004-§1841-Verletzung | AK-Pin `Cobra-Args-Missing-Pfad` ergänzt: T5-Pflicht Custom-`Args`-Validator (oder PreRunE) der `ErrServiceNameMissing`-Sentinel emittiert; via Pre-UC-Kanal in Envelope mit `LH-FA-CLI-006`/Exit 2. T0-(e)-Tabelle erweitert. T6-Pin `TestRemove_NoPositionalArg_JSON_EmitsCLI006Envelope` |
+| F2 | MEDIUM | Failure-Modes #16 (fsFactory-NPE) und #17 (Context-Cancellation) hatten keinen Carveout-Verweis. Init's done-T0-(p) carved Context-Cancellation explizit Out-of-Scope; remove-Plan erwähnte das nicht. Tag-1-Implementer könnte plausibel ctx.Err()-Check einbauen | Out-of-Scope-Block erweitert: **Context-Cancellation-Carveout** (Pattern-Erbe init's done-T0-(p), Cluster-T_close-Block für Exit-130-Convention); **fsFactory-NPE-Schutz** als Composition-Root-Defekt-Klasse markiert |
+| F3 | LOW | T6-Pin-Inventar war nur 9 von 20 Failure-Modes explizit benannt. R6-F4 etablierte Pin-Namen-Mapping aber FMEA-Coverage-Summary fehlte | T6-Cell um **Failure-Mode-Coverage-Summary** erweitert: nach R11 sind 18/20 explizit gepinnt + 2/20 als bewusste Out-of-Scope-Carveouts |
+
+R11-Reviewer-Note: docs-check grün. F1 ist Coverage-Lücke die
+R1-R10 textuell übersehen haben (Cobra-Default-Pfad vor RunE
+nicht systematisch enumeriert). F2 ist Carveout-Erbe-Hygiene
+für Pattern-Vorlauf. F3 ist FMEA-Inventarisierungs-Klarheit.
+
+**Konvergenz-Bewertung:** R11-Total = 3 Findings (niedrigste
+im Review-Verlauf). FMEA-Score 18/20 expliziter Plan-Pin + 2/20
+bewusste Carveouts = **20/20 Coverage**. Asymptote bestätigt
+über sieben Runden. Reviewer-Empfehlung wie R8/R9/R10: nach
+R11-Adressierung in `next/` migrieren.
+
 ## Out of Scope
 
+- **Context-Cancellation-Handling** (R11-MED-F2-Carveout, Pattern-
+  Erbe init's done-T0-(p)): `ctx.Err() == context.Canceled` mid-
+  Remove() bleibt Status-quo — fällt auf Default-Branch
+  `LH-FA-CLI-006` / Exit 2. Eine konsistente Exit-130-Convention
+  für ALLE modifying-Subcommands ist Cross-Cutting-Concern,
+  eigener Cluster-T_close-Block. Remove ändert den heutigen Pfad
+  NICHT — `cli-json-output.md` §6.6 nimmt den Doku-Hint von
+  init's §6.4 als Vorbild auf.
+- **`fsFactory`-NPE-Schutz** (R11-MED-F2-Carveout): wenn ein
+  Composition-Root-Bug eine `nil`-FS aus `s.selectFS(mode)`
+  liefert, NPE beim ersten `s.fs.*`-Call. Heute kein Test-Pin
+  (init/add/generate auch nicht); Pattern bleibt "Composition-
+  Root-Bug = Defekt, kein User-Pfad". Out-of-Scope-Verbleib
+  konsistent mit Cluster-Pattern.
 - **Volume-Auto-Removal**: heute `--purge` deferred mit WARNING.
   Auto-Removal bleibt eigener Slice (LH-FA-ADD-007 §"Volumes
   nur auf explizite Anforderung" implementiert den Gate, aber
