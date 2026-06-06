@@ -161,7 +161,25 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	removeSvc := application.NewRemoveServiceService(fsAdapter, yamlAdapter, confirmAdapter, logAdapter)
 	upSvc := application.NewUpService(fsAdapter, yamlAdapter, dockerEngineAdapter, netprobeAdapter, clockAdapter, logAdapter)
 	downSvc := application.NewDownService(fsAdapter, dockerEngineAdapter, confirmAdapter, logAdapter)
-	generateSvc := application.NewGenerateService(fsAdapter, yamlAdapter, logAdapter)
+	// GenerateService runs through the slice-v1-cli-json-dry-run-
+	// generate T4 factory (analog to initFSFactory/addFSFactory above):
+	// PreviewNone uses the production FS directly; PreviewDryRun and
+	// PreviewAndApply each wrap it in a fresh RecordingFileSystem with
+	// the matching passthrough switch. A fresh recorder per request
+	// keeps captures scoped to a single Generate() call.
+	generateFSFactory := func(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
+		switch mode {
+		case driving.PreviewDryRun:
+			rec := recordingfs.New(fsAdapter, recordingfs.WithPassthrough(false))
+			return rec, rec
+		case driving.PreviewAndApply:
+			rec := recordingfs.New(fsAdapter, recordingfs.WithPassthrough(true))
+			return rec, rec
+		default:
+			return fsAdapter, nil
+		}
+	}
+	generateSvc := application.NewGenerateServiceWithFactory(generateFSFactory, yamlAdapter, logAdapter)
 	configSvc := application.NewConfigService(fsAdapter, yamlAdapter, logAdapter)
 	templateListSvc := application.NewTemplateListService(templateCatalogAdapter, logAdapter)
 	logsSvc := application.NewLogsService(fsAdapter, dockerEngineAdapter, logAdapter)
