@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -150,11 +152,12 @@ Examples:
 
 // validateRemoveArgs is the custom [cobra.PositionalArgs]-Validator
 // for `u-boot remove <service>` (slice-v1-cli-json-dry-run-remove
-// T5, R11-HIGH-F1 + R12-HIGH-F1 + R12-MED-F2). It captures `*App`
-// via closure so the JSON-mode envelope-emission can run BEFORE
-// the sentinel is returned to Cobra — `cobra.ExactArgs(1)` would
-// otherwise feuer den `accepts 1 arg(s)`-Error VOR RunE und der
-// Konsument bekäme im --json-Pfad keinen Envelope (Spec §1841
+// T5, R11-HIGH-F1 + R12-HIGH-F1 + R12-MED-F2; T7 R13-HIGH-1 +
+// R13-MED-1 für Flag-Bewusstsein und too-many-args-Symmetrie). It
+// captures `*App` via closure so the JSON-mode envelope-emission can
+// run BEFORE the sentinel is returned to Cobra — `cobra.ExactArgs(1)`
+// would otherwise feuer den `accepts 1 arg(s)`-Error VOR RunE und der
+// Konsument bekäme im --json-Pfad keinen Envelope (Spec §1841/§1842
 // verletzt).
 //
 // Three cases:
@@ -163,26 +166,49 @@ Examples:
 //     on stdout if `--json` is set, then return the sentinel raw.
 //     ExitCode-Mapping: 2 (LH-FA-CLI-006 / usage-error class).
 //   - `len(args) == 1` → ok.
-//   - `len(args) > 1` → delegate to [cobra.ExactArgs](1) for the
-//     "accepts 1 arg(s), received N" form Cobra produces today.
-//     Symmetry preserved with `cobra.ExactArgs(1)`-call-sites
-//     elsewhere; the message-prefix is matched by
-//     [isUsageError]'s `"accepts "`-prefix entry → exit code 2.
+//   - `len(args) > 1` → emit the Cobra "accepts 1 arg(s), received N"
+//     error in the same Envelope-Form (T7 R13-MED-1 Symmetrie-Fix:
+//     too-many-args muss denselben --json-Vertrag halten wie
+//     missing-arg). Cobra produziert nur den Roh-Error für stderr;
+//     der Validator hängt VOR dem Cobra-Return den Envelope auf
+//     stdout dran. ExitCode-Mapping: 2 via isUsageError's
+//     `"accepts "`-Prefix-Match in `cli/cli.go`.
 //
-// `data` is `nil` on the missing-arg envelope because no service
-// context exists yet (the positional has not been parsed). The
-// resulting envelope is the minimal contract (Spec §1841) with
-// `command="remove"`, `diagnostics[0].code="LH-FA-CLI-006"`,
-// `exitCode: 2`.
+// Flag-Awareness (T7 R13-HIGH-1 Fix): die `--dry-run`/`--diff`-Flags
+// werden zum Validator-Zeitpunkt aus `cmd.Flags()` gelesen und an
+// `writeErrorEnvelope` durchgereicht. Spec §1842 verlangt das
+// Voll-Schema sobald einer der beiden Preview-Flags gesetzt ist —
+// ohne das Lesen würde `u-boot --dry-run --json remove` ohne arg
+// einen Minimal-Envelope produzieren (Spec-Bruch).
+// `cmd.Flags().GetBool` returnt `(false, error)` wenn das Flag nicht
+// existiert; in unserer Cobra-Tree-Struktur sind `--dry-run`/`--diff`
+// als Subcommand-Local-Flags registriert (siehe `cmd.Flags().
+// BoolVar(&flags.DryRun, "dry-run", …)` weiter unten in
+// newRemoveCommand) → der Validator sieht sie zuverlässig.
+//
+// `data` is `nil` on both error envelopes because no service context
+// exists yet (the positional has not been parsed). The minimal/voll-
+// Form-Wahl folgt T0-(c) → R13-HIGH-1: voll-schema bei dry-run ODER
+// diff, sonst minimal.
 func validateRemoveArgs(a *App) cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
+		if len(args) == 1 {
+			return nil
+		}
+		dryRun, _ := cmd.Flags().GetBool("dry-run")
+		diffFlag, _ := cmd.Flags().GetBool("diff")
 		if len(args) == 0 {
 			if a.json {
-				_ = writeErrorEnvelope(cmd.OutOrStdout(), ErrServiceNameMissing, nil, false, false, "remove", mapRemoveErrorToDiagnostic, nil)
+				_ = writeErrorEnvelope(cmd.OutOrStdout(), ErrServiceNameMissing, nil, dryRun, diffFlag, "remove", mapRemoveErrorToDiagnostic, nil)
 			}
 			return ErrServiceNameMissing
 		}
-		return cobra.ExactArgs(1)(cmd, args)
+		// len(args) > 1
+		cobraErr := cobra.ExactArgs(1)(cmd, args)
+		if a.json {
+			_ = writeErrorEnvelope(cmd.OutOrStdout(), cobraErr, nil, dryRun, diffFlag, "remove", mapRemoveErrorToDiagnostic, nil)
+		}
+		return cobraErr
 	}
 }
 
@@ -262,7 +288,15 @@ func runRemove(
 	})
 
 	if removeErr != nil {
-		return reportError(out, removeErr, resp.PlannedFiles, flags.DryRun, flags.Diff, flags.JSON, "remove", mapErr, data)
+		// T7 R14-MED-1 path-leak fix: FS-Wraps in der Use-Case
+		// (`fmt.Errorf("remove write %s: %w: %w", absPath, …)`) tragen
+		// absolute Pfade die `err.Error()` 1:1 in `diagnostic.message`
+		// laufen lässt. Pre-sanitize gegen `cwd` damit der User-facing
+		// Output project-relative Pfade zeigt (analog
+		// `mapCaptureToPlannedFiles` für `plannedFiles[].path`).
+		// errors.Is-Matching bleibt intakt via Unwrap-Chain — der
+		// Sanitizer wraps, replaced nicht.
+		return reportError(out, sanitizeBaseDir(removeErr, cwd), resp.PlannedFiles, flags.DryRun, flags.Diff, flags.JSON, "remove", mapErr, data)
 	}
 
 	if flags.JSON {
@@ -274,7 +308,7 @@ func runRemove(
 			return err
 		}
 	}
-	printRemoveSummary(out, errOut, resp, flags.Purge)
+	printRemoveSummary(out, errOut, resp, flags.Purge, mode)
 	return nil
 }
 
@@ -409,6 +443,53 @@ func mapRemoveErrorToDiagnostic(err error) diagnosticItem {
 	}
 }
 
+// baseDirSanitizedError wraps an error such that Error() returns the
+// inner-error's message with occurrences of `baseDir` rewritten as
+// project-relative paths (slice-v1-cli-json-dry-run-remove T7 R14-
+// MED-1 fix für Pfad-Leak in `diagnostic.message`).
+//
+// Use-Case-Wraps der Form
+// `fmt.Errorf("remove write %s: %w: %w", absPath, sentinel, raw)`
+// tunneln den absoluten Pfad in `err.Error()`. Ohne Sanitisierung
+// würde die User-facing Diagnostic den Filesystem-Layout des Users
+// preisgeben (im JSON-Mode auch maschinen-lesbar abgreifbar).
+//
+// Sanitisierung-Regeln:
+//   - `<baseDir>/foo` → `foo` (path-Separator project-relative)
+//   - bare `<baseDir>` → `.` (project-root reference)
+//   - leerer baseDir → unverändert (defensive identity)
+//
+// errors.Is/As bleiben intakt via Unwrap — der Wrapper ersetzt nur
+// die Error()-Text-Form, nicht die Identity der Sentinels in der
+// Chain.
+type baseDirSanitizedError struct {
+	inner   error
+	baseDir string
+}
+
+func (e *baseDirSanitizedError) Error() string {
+	msg := e.inner.Error()
+	if e.baseDir == "" {
+		return msg
+	}
+	sep := string(filepath.Separator)
+	msg = strings.ReplaceAll(msg, e.baseDir+sep, "")
+	msg = strings.ReplaceAll(msg, e.baseDir, ".")
+	return msg
+}
+
+func (e *baseDirSanitizedError) Unwrap() error { return e.inner }
+
+// sanitizeBaseDir wraps err with a baseDirSanitizedError, or returns
+// err unchanged when err is nil. Convenience-Wrapper damit der
+// Call-Site keinen Nil-Check braucht.
+func sanitizeBaseDir(err error, baseDir string) error {
+	if err == nil {
+		return nil
+	}
+	return &baseDirSanitizedError{inner: err, baseDir: baseDir}
+}
+
 // printRemoveSummary writes a short, deterministic summary of the
 // remove outcome. Two shapes for the stdout summary:
 //
@@ -418,11 +499,23 @@ func mapRemoveErrorToDiagnostic(err error) diagnosticItem {
 //     "Removed service <name>." + list of changed paths.
 //
 // When `--purge` was requested AND the response shows VolumesPurged=
-// false (always true in v0.3.0 — actual volume removal is deferred),
-// a WARNING block is appended to errOut (review-followup F4: stderr
-// keeps stdout clean for future --json consumers). The wording
-// (review-followup F5) is explicit about what was NOT done so users
-// don't trust the prior NOTE-as-aside framing.
+// false (always true in v0.3.0 — actual volume removal is deferred)
+// AND we are NOT in dry-run preview, a WARNING block is appended to
+// errOut (review-followup F4: stderr keeps stdout clean for future
+// --json consumers). The wording (review-followup F5) is explicit
+// about what was NOT done so users don't trust the prior NOTE-as-
+// aside framing.
+//
+// Dry-Run-Suppression (slice-v1-cli-json-dry-run-remove T7 R14-
+// HIGH-2 Fix): in `PreviewDryRun` läuft die Use-Case ohne Gate-Aufruf
+// und ohne tatsächliche Mutation (Plan T0-(h)(a) Gate-Skip). Ohne
+// Suppression würde die WARNING-Prosa suggerieren "deferred work" —
+// aber im Dry-Run wurde gar nichts versucht. Die Prosa wäre damit
+// semantisch falsch ("würde-deferred" wäre korrekt, "ist-deferred"
+// ist es nicht). Fix: WARN-Block überspringen wenn
+// `previewMode == PreviewDryRun`. PreviewAndApply behält die WARN,
+// weil der Gate dann läuft und die Mutation wirklich stattfindet —
+// hier ist `VolumesPurged: false` der bewusst-deferred Status.
 //
 // JSON-mode bypasses this helper entirely (runRemove returns
 // directly from `writeRemoveJSON`); the WARNING migrates into the
@@ -430,7 +523,7 @@ func mapRemoveErrorToDiagnostic(err error) diagnosticItem {
 // `resp.Warnings` + [mapWarningsToDiagnostics] (T0-(g) WARN-
 // Migration). Human-mode keeps the legacy stderr prose intact —
 // existing tooling that grep'd `WARNING:` on stderr keeps working.
-func printRemoveSummary(out, errOut io.Writer, resp driving.RemoveServiceResponse, purge bool) {
+func printRemoveSummary(out, errOut io.Writer, resp driving.RemoveServiceResponse, purge bool, previewMode driving.PreviewMode) {
 	name := resp.ServiceName.String()
 
 	if len(resp.Changed) == 0 {
@@ -442,7 +535,7 @@ func printRemoveSummary(out, errOut io.Writer, resp driving.RemoveServiceRespons
 		}
 	}
 
-	if purge && !resp.VolumesPurged {
+	if purge && !resp.VolumesPurged && previewMode != driving.PreviewDryRun {
 		fmt.Fprintf(errOut,
 			"\nWARNING: --purge was requested but volume removal is NOT yet automated in v0.3.0.\n"+
 				"         The %s service's named volumes are still on disk and untouched.\n"+

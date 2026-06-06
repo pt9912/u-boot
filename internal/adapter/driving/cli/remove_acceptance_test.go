@@ -916,6 +916,194 @@ func TestRemove_DryRun_PropagatesPreviewDryRunFlag(t *testing.T) {
 	}
 }
 
+// ----------------------------------------------------------------------
+// T7 Pre-T8-Review-Fixes (R13-HIGH-1 + R13-MED-1 + R14-HIGH-2 + R14-MED-1)
+// ----------------------------------------------------------------------
+
+// TestRemove_NoPositionalArg_DryRunJSON_EmitsFullSchemaEnvelope
+// (R13-HIGH-1): `--dry-run --json remove` ohne positional arg MUSS
+// das Voll-Schema-Envelope emittieren (Spec §1842), NICHT das
+// Minimal-Schema. Pre-T7 hatte der Args-Validator hardcoded
+// `dryRun=false, diff=false` und produzierte einen Minimal-Envelope
+// trotz `--dry-run` → Spec §1842 Verletzung. Fix in T7: Validator
+// liest `cmd.Flags().GetBool("dry-run"/"diff")` und reicht den
+// User-Flag-State an `writeErrorEnvelope` durch.
+func TestRemove_NoPositionalArg_DryRunJSON_EmitsFullSchemaEnvelope(t *testing.T) {
+	stub := &removeUseCaseStub{}
+	app := newAppWithRemoveStub(stub)
+
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(),
+		[]string{"--dry-run", "--json", "remove"}, &stdout, &stderr)
+	if !errors.Is(err, cli.ErrServiceNameMissing) {
+		t.Fatalf("expected ErrServiceNameMissing; got %v", err)
+	}
+	if code := cli.ExitCode(err); code != 2 {
+		t.Errorf("exit code: want 2, got %d", code)
+	}
+	// Voll-Schema MUSS dryRun/diff/plannedFiles/changes haben.
+	jsontestutil.AssertFullEnvelope(t, stdout.Bytes(),
+		jsontestutil.WithCommand("remove"),
+		jsontestutil.WithExitCode(2),
+		jsontestutil.WithExpectedCodes("LH-FA-CLI-006"),
+	)
+	env := unmarshalRemoveEnv(t, stdout.Bytes())
+	if got, _ := env["dryRun"].(bool); !got {
+		t.Errorf("dryRun: want true (--dry-run flag was set), got false; envelope=%s", stdout.String())
+	}
+}
+
+// TestRemove_TooManyArgs_JSON_EmitsCLI006Envelope (R13-MED-1):
+// `--json remove a b c` (zwei extra positional args) MUSS ebenfalls
+// einen Envelope auf stdout produzieren — Symmetrie zum missing-arg-
+// Pfad. Pre-T7 ist der `len(args)>1`-Pfad nur durch `cobra.ExactArgs(1)`
+// abgefangen worden ohne stdout-Envelope (Spec §1841 Verletzung).
+// Fix in T7: Validator emittiert Envelope vor dem Cobra-Error-Return.
+func TestRemove_TooManyArgs_JSON_EmitsCLI006Envelope(t *testing.T) {
+	stub := &removeUseCaseStub{}
+	app := newAppWithRemoveStub(stub)
+
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(),
+		[]string{"--json", "remove", "postgres", "extra-arg"}, &stdout, &stderr)
+	if err == nil {
+		t.Fatal("expected error (too many positional args)")
+	}
+	if code := cli.ExitCode(err); code != 2 {
+		t.Errorf("exit code: want 2 (LH-FA-CLI-006 usage class), got %d", code)
+	}
+	if stdout.Len() == 0 {
+		t.Fatalf("expected JSON envelope on stdout (Spec §1841 too-many-args symmetry to missing-arg); got empty")
+	}
+	jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
+		jsontestutil.WithCommand("remove"),
+		jsontestutil.WithExitCode(2),
+		jsontestutil.WithExpectedCodes("LH-FA-CLI-006"),
+	)
+	if stub.called {
+		t.Errorf("use case called despite too-many-args validation failure")
+	}
+}
+
+// TestRemove_PurgeDryRun_HumanMode_NoVolumeWarningPollution (R14-
+// HIGH-2): bei `--purge --dry-run` ohne `--json` skipped die Use-Case
+// den Confirmer-Gate (Plan T0-(h)(a)) und führt keine Mutation
+// aus → `VolumesPurged: false`, aber semantisch "nichts versucht",
+// nicht "deferred work". Pre-T7 zeigte `printRemoveSummary` die
+// WARNING-Prosa trotzdem (Logic `--purge && !VolumesPurged`) und
+// suggestierte fälschlich, dass Volume-Cleanup deferred wurde. Fix
+// in T7: WARNING wird in `PreviewDryRun` unterdrückt; nur das
+// Summary-Headline und die "Would change"-Liste landen auf stdout
+// (Headline-Wording bleibt heute "Removed service" — separate
+// "Would remove"-Wording-Drift wäre eigene Sub-Decision).
+func TestRemove_PurgeDryRun_HumanMode_NoVolumeWarningPollution(t *testing.T) {
+	stub := &removeUseCaseStub{
+		resp: driving.RemoveServiceResponse{
+			ServiceName:   pgRemoveName(t),
+			PriorState:    domain.ServiceStateActive,
+			State:         domain.ServiceStateDeactivated,
+			Changed:       []string{"compose.yaml", ".env.example", "u-boot.yaml"},
+			VolumesPurged: false,
+		},
+	}
+	app := newAppWithRemoveStub(stub)
+
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(),
+		[]string{"--yes", "remove", "postgres", "--purge", "--dry-run"}, &stdout, &stderr)
+	if err != nil {
+		t.Fatalf("execute: %v (stderr=%s)", err, stderr.String())
+	}
+	// WARNING-Prosa darf in Dry-Run NICHT auf stderr landen — der
+	// Use-Case-Gate ist geskippt und nichts wurde versucht.
+	errs := stderr.String()
+	if strings.Contains(errs, "WARNING:") {
+		t.Errorf("Dry-Run-Pollution: WARNING-Prosa darf in PreviewDryRun NICHT auf stderr landen; got:\n%s", errs)
+	}
+	if strings.Contains(errs, "docker volume rm") {
+		t.Errorf("Dry-Run-Pollution: manual-cleanup-Hint darf in PreviewDryRun NICHT erscheinen; got:\n%s", errs)
+	}
+	// PreviewMode korrekt durchgereicht.
+	if stub.lastReq.PreviewMode != driving.PreviewDryRun {
+		t.Errorf("PreviewMode: want PreviewDryRun, got %v", stub.lastReq.PreviewMode)
+	}
+	// PreviewAndApply-Konstrast-Pin: bei `--purge` OHNE `--dry-run`
+	// muss die WARNING wieder erscheinen (sonst hätten wir einen
+	// falschen Suppression-Fix).
+	var stdout2, stderr2 bytes.Buffer
+	stub2 := &removeUseCaseStub{
+		resp: driving.RemoveServiceResponse{
+			ServiceName:   pgRemoveName(t),
+			PriorState:    domain.ServiceStateActive,
+			State:         domain.ServiceStateDeactivated,
+			Changed:       []string{"compose.yaml"},
+			VolumesPurged: false,
+		},
+	}
+	app2 := newAppWithRemoveStub(stub2)
+	if err := app2.Execute(context.Background(),
+		[]string{"--yes", "remove", "postgres", "--purge"}, &stdout2, &stderr2); err != nil {
+		t.Fatalf("execute (PreviewAndApply contrast): %v", err)
+	}
+	if !strings.Contains(stderr2.String(), "WARNING:") {
+		t.Errorf("PreviewAndApply contrast: WARNING MUST appear when actually-applied; got stderr:\n%s", stderr2.String())
+	}
+}
+
+// TestRemove_FSErrorWithAbsolutePath_SanitizesMessage (R14-MED-1):
+// FS-Wraps der Form `fmt.Errorf("remove write %s: %w: %w", absPath,
+// ErrRemoveFileSystem, raw)` enthalten den absoluten Filesystem-
+// Pfad. Pre-T7 wäre dieser Pfad 1:1 in `diagnostic.message` gelandet
+// (Info-Leak des Filesystem-Layouts an JSON-Konsumenten). Fix in T7:
+// `runRemove` wrappt `removeErr` mit `sanitizeBaseDir(removeErr, cwd)`
+// vor dem `reportError`-Call. Der Sanitizer ersetzt `<baseDir>/foo`
+// durch `foo` und bare `<baseDir>` durch `.`. errors.Is bleibt intakt
+// via Unwrap-Chain.
+//
+// Test-Fixture: `newAppWithRemoveStub` setzt cwd auf
+// `/tmp/u-boot-remove-test/demo`. Der konstruierte Fehler enthält
+// `/tmp/u-boot-remove-test/demo/compose.yaml` — der Sanitizer MUSS
+// das auf `compose.yaml` reduzieren.
+func TestRemove_FSErrorWithAbsolutePath_SanitizesMessage(t *testing.T) {
+	stub := &removeUseCaseStub{
+		err: fmt.Errorf("remove write /tmp/u-boot-remove-test/demo/compose.yaml: %w: %w",
+			driving.ErrRemoveFileSystem, errors.New("disk full")),
+	}
+	app := newAppWithRemoveStub(stub)
+
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(),
+		[]string{"--json", "remove", "postgres"}, &stdout, &stderr)
+	// errors.Is MUSS trotz Sanitizer-Wrap funktionieren — Unwrap-
+	// Chain bleibt intakt.
+	if !errors.Is(err, driving.ErrRemoveFileSystem) {
+		t.Fatalf("errors.Is(ErrRemoveFileSystem) broken by sanitizer; got %v", err)
+	}
+	if code := cli.ExitCode(err); code != 14 {
+		t.Errorf("exit code: want 14, got %d", code)
+	}
+	jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
+		jsontestutil.WithCommand("remove"),
+		jsontestutil.WithExitCode(14),
+		jsontestutil.WithExpectedCodes("LH-NFA-REL-003"),
+	)
+	env := unmarshalRemoveEnv(t, stdout.Bytes())
+	diags, _ := env["diagnostics"].([]any)
+	if len(diags) != 1 {
+		t.Fatalf("want 1 diagnostic, got %d", len(diags))
+	}
+	diag, _ := diags[0].(map[string]any)
+	msg, _ := diag["message"].(string)
+	// Sanitisierte Form: Pfad ist project-relative.
+	if !strings.Contains(msg, "compose.yaml") {
+		t.Errorf("sanitized message MUST contain project-relative path \"compose.yaml\"; got: %q", msg)
+	}
+	// Path-Leak-Defense: absoluter BaseDir-Prefix MUSS weg sein.
+	if strings.Contains(msg, "/tmp/u-boot-remove-test/demo") {
+		t.Errorf("R14-MED-1 path-leak: absolute BaseDir MUST NOT appear in diagnostic.message; got: %q", msg)
+	}
+}
+
 // TestRemove_DryRunDiffJSONCombo pins the 3-flag combo: `--dry-run
 // --diff --json` produces voll-schema with BOTH dryRun=true AND
 // diff=true, hunks populated, no production write (previewModeFromFlags
