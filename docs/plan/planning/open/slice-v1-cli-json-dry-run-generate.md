@@ -1,6 +1,6 @@
 # Slice V1: `generate --json` / `--dry-run` / `--diff` — Vier-Artefakt-Surface
 
-> **Status:** T0-Discovery + R1/R2/R3/R4 adressiert, `open/`. Vierter Folge-Slice (4/9) des
+> **Status:** T0-Discovery + R1/R2/R3/R4/R5 adressiert, `open/`. Vierter Folge-Slice (4/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 4/9). Konsumiert das Pattern-Vorbild aus
@@ -278,13 +278,21 @@ nicht auf reduziertem `make test + lint + docs-check`.
   Sub-Decision: Generate-Slice **zieht die Migration vor** —
   neue T1-Sub-Tranche oder T2-Erweiterung ergänzt
   `Data any \`json:"data,omitempty"\`` plus
-  `newDataEnvelope(command, data, diags, exitCode)`-Konstruktor
-  mit Marshal-Pin-Test (analog Template-Slice-Plan §Akzeptanz-
-  kriterien H1-Finding). T8-Closure aktualisiert den
-  Template-Slice-Plan: Data-Feld wird dort nur noch genutzt,
-  nicht eingeführt; die ursprüngliche T1-Sub-Decision-Ownership
-  wandert hierher. Begründung: ohne diese Vorziehung kann
-  generate die T0-(f)/(m)-Verträge nicht umsetzen.
+  `newDataEnvelope(command, subcommand string, data any, diags
+  []diagnosticItem, exitCode int)`-Konstruktor mit Marshal-Pin-
+  Test (analog Template-Slice-Plan §Akzeptanzkriterien H1-Finding).
+  **Signatur mit `subcommand string`-Param** (R5-Finding):
+  Generate ruft mit `subcommand=""` (T0-(m) — kein Subcommand);
+  Template-Slice 9/9 ruft mit `subcommand="list"`. Der Konstruktor
+  serialisiert `subcommand` mit `omitempty`, so dass die Generate-
+  Envelope das Feld nicht trägt und die Template-Envelope schon.
+  Damit muss Template-Slice den Konstruktor nicht erneut ändern —
+  Ownership-Verschiebung ist hier abgeschlossen. T8-Closure
+  aktualisiert den Template-Slice-Plan: Data-Feld + Konstruktor
+  werden dort nur noch genutzt, nicht eingeführt. Begründung
+  insgesamt: ohne diese Vorziehung kann generate die T0-(f)/(m)-
+  Verträge nicht umsetzen, und der Konstruktor wäre ohne den
+  subcommand-Param für Template unzureichend.
 - **T0-(g)** **UpdatedBlock-Diff-Granularität**: managed-block-
   only Hunks vs. full-file-LCS. Block-only ist semantisch sauber
   (User sieht NUR die u-boot-managed Änderung), aber existing
@@ -299,9 +307,15 @@ nicht auf reduziertem `make test + lint + docs-check`.
   (a) Phase-1-Failure (manuell editierter devcontainer-File ohne
       Marker) → `plannedFiles: []`, kein FS-Touch, Exit 10
       (`LH-FA-DEV-001`).
-  (b) Phase-2-Mid-Write-Failure → File 1 committed, File 2 fehlt;
-      `plannedFiles[]` zeigt File 1, `diagnostics[].file` markiert
-      File 2, Exit 14 (`LH-NFA-REL-003`).
+  (b) Phase-2-Mid-Write-Failure → File 1 committed auf Disk,
+      File 2 underlying-Write fehlgeschlagen. Envelope-Form
+      (R4-Recorder-Realität): `plannedFiles[]` enthält **beide**
+      Captures (File 1 mit success-Content, File 2 mit
+      attempt-Content — Recorder zeichnet vor Delegieren auf,
+      `recordingfs.go:139`), `lastPlannedPath` liefert File 2
+      als `diagnostics[].file`, `diagnostics[].code:
+      "LH-NFA-REL-003"`, Exit 14. Konsistent mit init T6
+      Mid-Write-Pattern.
   Der **Phase-2-Half-State** ist ein bewusster Carveout
   ([[feedback_carveouts_need_plans]]); `carveouts.md`-Eintrag
   mit Re-Trigger auf einen Devcontainer-Rollback-aware-Slice
@@ -442,6 +456,21 @@ R4-Reviewer-Note: docs-check grün; Pattern-Verweise konsistent
 nach Plan-Konsolidierung; Recorder-Code-Realität war der
 load-bearing Befund (Plan hatte init's eigenes Pattern nicht
 übernommen).
+
+## Review-Round-5 (Pre-`next/`)
+
+Fünfte Runde gegen den R4-gepflegten Stub (`0b3e1ad`), Fokus auf
+intra-Plan-Konsistenz nach den Konsolidierungen und Acceptance-
+Pin-Vollständigkeit. Drei MEDIUM-Findings, alle adressiert:
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| 1 | MEDIUM | T0-(i) widersprach der R4-korrigierten Recorder-Realität (sagte noch „plannedFiles[] zeigt File 1") | T0-(i) auf R4-Form gezogen: „plannedFiles[] enthält beide Captures" mit Recorder-Verweis und init-T6-Konsistenz-Notiz |
+| 2 | MEDIUM | T0-(p) skizzierte `newDataEnvelope(command, data, diags, exitCode)` ohne `subcommand`-Param — Template-Slice 9/9 braucht `subcommand="list"` und müsste den Konstruktor erneut ändern | Konstruktor-Signatur auf `newDataEnvelope(command, subcommand string, data any, diags, exitCode)` erweitert mit `omitempty`-Serialisierung (Generate ruft mit `subcommand=""`, Template mit `subcommand="list"`); Ownership-Verschiebung damit final |
+| 3 | MEDIUM | V2-Acceptance-Pin ließ File 2 failen, das passiert VOR der u-boot.yaml-Mutation — YAML-Rollback-Pfad wurde nie geprüft | V2-Stub auf **zwei separate Failure-Injection-Pins** umgestellt: Pin A (File-2-Failure, Devcontainer-Rollback + Dir-Cleanup) und Pin B (u-boot.yaml-Write-Failure NACH Devcontainer-Success, voller Three-Side-Effect-Rollback) |
+
+R5-Reviewer-Note: docs-check grün; Stub konsolidiert ohne neue
+HIGH-Befunde; weitere Runden sind diminishing returns.
 
 ## Out of Scope
 

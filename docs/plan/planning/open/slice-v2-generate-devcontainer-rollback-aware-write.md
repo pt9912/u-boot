@@ -111,17 +111,43 @@ schreibt mindestens drei Side-Effects mit Cleanup-Pflicht:
    die `.bak.<n>`-Files am Ende der Erfolgs-Sequenz löschen,
    sonst bleiben sie als Scratch-Artefakte.
 
-**Echter Acceptance-Pin (Trigger-Slice T6)**: Failure-Injection
-auf einem **frischen Projekt ohne `.devcontainer/`-Dir** und
-ohne `feature-sources`-Block in `u-boot.yaml`. Pin:
-- vor dem Aufruf: `tree` zeigt nur die u-boot.yaml + restliche
-  Projekt-Files
-- generate devcontainer mit `--allow-external-feature-sources
+**Echte Acceptance-Pins (Trigger-Slice T6)**: zwei separate
+Failure-Injection-Tests, jeder deckt einen anderen
+Rollback-Pfad ab.
+
+**Pin A — Devcontainer-Mid-Write-Failure** (deckt
+`.devcontainer/`-Dir-Cleanup + Snapshot-Restore von File 1):
+- frisches Projekt OHNE `.devcontainer/`-Dir und OHNE
+  `feature-sources`-Block in `u-boot.yaml`
+- `tree`-Snapshot vor dem Aufruf
+- `generate devcontainer --allow-external-feature-sources
   https://...` (triggert alle drei Side-Effects)
-- WriteFile-Injection-Spy lässt File 2 (`Dockerfile`) failen
-- nach dem Aufruf: `tree` IDENTISCH zum Pre-State (kein leeres
-  `.devcontainer/`-Dir, keine `.bak.<n>`-Files, u-boot.yaml
-  byte-identisch zum Pre-State).
+- WriteFile-Spy lässt File 2 (`Dockerfile`) failen
+- `tree`-Vergleich nach dem Aufruf: IDENTISCH zum Pre-State
+  (kein leeres `.devcontainer/`-Dir, keine `.bak.<n>`-Files,
+  `u-boot.yaml` byte-identisch — die YAML-Mutation wurde nie
+  ausgeführt, weil File 2 vor `applyAllowExternalFeatureSources`
+  failte).
+
+**Pin B — u-boot.yaml-Write-Failure** (deckt YAML-Rollback-Pfad
+explizit, weil Pin A diesen NICHT ausübt — File-2-Failure
+passiert VOR der YAML-Mutation):
+- frisches Projekt OHNE `.devcontainer/`-Dir und OHNE
+  `feature-sources`-Block in `u-boot.yaml`
+- `tree`-Snapshot vor dem Aufruf
+- `generate devcontainer --allow-external-feature-sources
+  https://...`
+- WriteFile-Spy lässt **beide** devcontainer-Files erfolgreich
+  durch, aber **der u-boot.yaml-Write failt**
+- `tree`-Vergleich nach dem Aufruf: IDENTISCH zum Pre-State
+  (kein `.devcontainer/`-Dir, keine devcontainer-Files,
+  `u-boot.yaml` byte-identisch — Rollback rollt beide
+  devcontainer-Files plus die Dir-Anlage zurück, weil der
+  spätere YAML-Write fail-stoppt).
+
+Beide Pins gemeinsam decken alle drei Side-Effects ab: Pin A
+zeigt File-2-Rollback + Dir-Cleanup, Pin B zeigt
+File-1+2-Rollback + Dir-Cleanup + YAML-No-Touch.
 
 ## Out of Scope (V1)
 
