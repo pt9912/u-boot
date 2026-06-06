@@ -238,14 +238,20 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 //   - 12 — fachlicher Ausführungsfehler (M6): Compose-runtime error
 //          after passing preflight (driven.ErrComposeRuntime) or
 //          stabilization timeout (driving.ErrStabilizationTimeout)
-//   - 14 — technischer Persistenz-/Dateisystemfehler: LH-FA-INIT-005
+//   - 14 — technischer Persistenz-/Dateisystemfehler: LH-NFA-REL-003
 //          backup-suffix exhausted (ErrBackupSuffixExhausted),
 //          backup source vanished mid-flight
 //          (ErrBackupSourceMissing); LH-FA-TPL-004 catalog adapter
 //          failure (ErrTemplateCatalog — filesystem IO / malformed
 //          embedded template.yaml); LH-FA-TPL-001 render-loop
 //          failure (ErrTemplateRender — text/template parse/exec
-//          or IO during the per-file render copy)
+//          or IO during the per-file render copy).
+//          Footnote (slice-v1-cli-json-dry-run-init T0-(f)): die
+//          Backup-Sentinels werden hier auf LH-NFA-REL-003 gezogen,
+//          obwohl Spec §595-619 (INIT-005 "Überschreibschutz") sie
+//          ursprünglich der INIT-005-Klasse zuordnete — Engineering-
+//          Entscheidung im init-Slice, um Envelope-Code und
+//          Exit-Code-Klasse (technische Persistenz) zu synchronisieren.
 //   - 1  — everything else (generic error)
 //
 // The mapping lives in the driving adapter because exit-code

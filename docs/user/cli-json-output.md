@@ -366,7 +366,7 @@ Reihenfolge gemäß Cluster-T0-(e):
 | --- | --- | --- | --- |
 | 1 | `slice-v1-cli-json-dry-run-doctor` | `doctor` + `template list`-Flag-Schnitt | done |
 | 2 | `slice-v1-cli-json-dry-run-add` | `add` (modifying, etabliert Full-Modus + RecordingFileSystem) | done (DoD-Hash-Tabelle im Slice-File) |
-| 3 | `slice-v1-cli-json-dry-run-init` | `init` | in `in-progress/` (T1-Refactor läuft; T0 mit 17 Sub-Decisions festgezurrt) |
+| 3 | `slice-v1-cli-json-dry-run-init` | `init` | done (DoD-Hash-Tabelle im Slice-File) |
 | 4 | `slice-v1-cli-json-dry-run-generate` | `generate` | offen |
 | 5 | `slice-v1-cli-json-dry-run-remove` | `remove` | offen |
 | 6 | `slice-v1-cli-json-dry-run-up-down` | `up`, `down` (gebündelt, read-only Compose-Status) | offen |
@@ -448,6 +448,86 @@ Diagnostic-Codes sind LH-Kennungen
 (`LH-FA-ADD-{001,002,005,006}`/`LH-FA-INIT-{004,005,006}`/
 `LH-NFA-REL-003`); keine erfundenen `add.*`-Codes (T0-(j)).
 
+### 6.4 `u-boot init --json` (slice-v1-cli-json-dry-run-init, done)
+
+`u-boot init <name>` ist der zweite modifying-Subcommand und der
+wichtigste Onboarding-Use-Case. Vier Flag-Kombinationen mit
+exakter Symmetrie zu `add` (T0-(a) Pattern-Erbe-Disziplin):
+
+- **`--json` ohne `--dry-run`/`--diff`** → Minimalkontrakt-
+  Envelope. Operation schreibt das FS um (Skeleton-Dirs +
+  Skeleton-Files + `u-boot.yaml`), das JSON-Output trägt aber
+  **keine** Plan- oder Change-Information. Preview-Information
+  liefert der Preview-Pfad: `--dry-run --json` oder
+  `--diff --json`.
+- **`--dry-run --json`** → Voll-Schema mit `plannedFiles[]`/
+  `changes[]`, `dryRun: true`, `diff: false`. Es wird **nichts**
+  auf die Disk geschrieben — der `RecordingFileSystem` capturet
+  alle geplanten Mutations. Auch der separate
+  `driven.GitClient`-Port wird in diesem Modus **geskippt**
+  (`PreviewMode == PreviewDryRun` umgeht `s.initGit`, weil git am
+  Recorder vorbei auf die echte Disk schreiben würde — T0-(n)).
+- **`--diff --json`** → Voll-Schema mit
+  `plannedFiles[].hunks[]`, `dryRun: false`, `diff: true`. Es
+  wird geschrieben **und** capturet (Preview-and-Apply); `git
+  init` läuft regulär.
+- **`--dry-run --diff --json`** → wie `--dry-run --json`, aber
+  mit Hunks und `diff: true`. Kein Write.
+
+**Mid-Write-Failure-UX** (`LH-NFA-REL-003`): identisch zu `add`
+— Voll-Schema-Envelope trägt `plannedFiles[]` bis zur Failure-
+Stelle, `diagnostics[].file` markiert die Position,
+`exitCode: 14`. Backup-Sentinels
+(`ErrBackupSuffixExhausted`/`ErrBackupSourceMissing`) und der neue
+`ErrInitFileSystem`-Sentinel klassifizieren als `LH-NFA-REL-003`
+(technische Persistenz, T0-(f)). **Switch-Order-Pflicht**: das
+init-CLI prüft `ErrInitFileSystem` als ersten `errors.Is`-Case,
+weil Multi-`%w`-Wraps (Go 1.20+) einen FS-Fehler sonst auf einen
+Exit-10-Fachfehler downgraden könnten.
+
+**Planning-Phase-Failures** (T0-(q)): Fehler vor dem
+Recorder-Capture (Force-without-Backup, ungültige Service-Namen,
+Template-Read-Failures) produzieren `plannedFiles: []` mit
+fachlichem Diagnostic-Code (z. B. `LH-FA-INIT-005` / Exit 10) —
+**nicht** Exit 14. Die Unterscheidung zu Mid-Write-Failure ist
+load-bearing: Planning-Errors sind User-Action-Klasse,
+Write-Errors sind FS-Klasse.
+
+**Template-Modus-Mutex** (T0-(i)): `init --template <name>`
+kombiniert mit `--dry-run` oder `--diff` wird mit
+`ErrTemplateConflictsWithFlag` (Exit-Code 2, `LH-FA-CLI-006`)
+rejected. V1 liefert keine Template-Preview; die Migration läuft
+über einen eigenen Folge-Slice (Cluster-Roadmap).
+
+**ProgressPort-Silencing-Hint** (T0-(o)): Modifying-Subcommands
+mit stdout-bound ProgressPorts MÜSSEN den Port im JSON-Mode
+silencen — der Recorder schützt nur die FS-Layer, nicht stdout.
+`init` setzt `req.SilenceProgress = flags.JSON` und swappt im
+Use-Case auf einen Noop-Adapter; sonst landen
+`progress.AffectedFiles`-Events vor dem JSON-Envelope und brechen
+JSON-Parser-Konsumenten. Add hat diesen Port nicht; bei künftigen
+modifying-Subcommands mit Progress-Events ist das Silencing
+verbindlich.
+
+**Context-Cancellation-Carveout** (T0-(p)): Ctrl-C oder
+`context.Canceled` während eines modifying-Subcommands fällt
+heute auf die `LH-FA-CLI-006`-Default-Klausel und Exit 2. Eine
+Interrupt-aware Exit-130-Convention bleibt eigener
+Cross-Cutting-Folge-Slice für **alle** modifying-Subcommands —
+init ändert den Status-quo nicht.
+
+**Path-Anchor-Vertrag** (T0-(k)): `plannedFiles[].path` ist
+**project-relativ** (anchor = `<name>`/), unabhängig davon, wie
+der positional `<name>` geschrieben wurde (trailing-slash,
+dot-slash, absoluter Pfad). Acceptance-Pins decken alle vier
+Varianten.
+
+**Concurrency**: `InitProjectService` trägt einen eigenen
+`initMu sync.Mutex` — der `s.fs`-Swap pro Request ist nicht
+race-frei ohne Lock. Zwei Goroutinen, die parallel `init` auf
+denselben Service mit unterschiedlichen TempDirs aufrufen, werden
+serialisiert (Acceptance-Pin).
+
 ---
 
 ## 7. Mutations-Matrix pro Subcommand
@@ -464,10 +544,11 @@ in derselben PR ergänzen.
 | Subcommand | WriteFile | WriteFileExclusive | Mkdir | MkdirAll | Rename | RemoveAll | Copy | CopyExclusive |
 | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `add` (slice-v1-cli-json-dry-run-add) | ✓ (3 Slots + N ExtraFiles) | — | — | ✓ (implizit, Recorder synthetisiert) | — | — | — | — |
+| `init` (slice-v1-cli-json-dry-run-init) | ✓ (Skeleton-Files + `u-boot.yaml`) | — | ✓ (Backup-Verz.) | ✓ (Skeleton-Dirs direkt; Backup indirekt) | — | ✓ (Backup) | ✓ (Backup) | ✓ (Backup) |
 
-Andere modifying-Subcommands (`init`, `generate`, `remove`,
-`config set`) ergänzen ihre Zeile im jeweiligen Slice — heute nur
-`add` migriert.
+Andere modifying-Subcommands (`generate`, `remove`,
+`config set`) ergänzen ihre Zeile im jeweiligen Slice — heute
+`doctor`, `add` und `init` migriert.
 
 ---
 

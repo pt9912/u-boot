@@ -1,9 +1,10 @@
 # Slice V1: `init --json` / `--dry-run` / `--diff` — modifying-Surface erbt von Add
 
-> **Status:** geplant für v0.4.0 — dritter Folge-Slice des Cluster-
-> Slice [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+> **Status:** ✅ **done** — dritter Folge-Slice (3/9) des
+> Cluster-Slice
+> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 3/9). Konsumiert das Pattern-Vorbild aus
-> [`slice-v1-cli-json-dry-run-add`](../done/slice-v1-cli-json-dry-run-add.md)
+> [`slice-v1-cli-json-dry-run-add`](slice-v1-cli-json-dry-run-add.md)
 > 1:1 für die Carrier-Types, den `RecordingFileSystem`-driven-
 > Adapter, den Pure-Go Diff-Renderer, das `previewModeFromFlags`-
 > Mapping und die Error-Envelope-Pipeline; init-spezifisch sind
@@ -23,18 +24,44 @@
 > V1 mutex zu `--dry-run`/`--diff` (siehe T0-(i) Out-of-Scope-
 > Carveout).
 >
-> Init ist der erste Folge-Slice, der vom Add-Pattern erbt — die
-> Erbschafts-Disziplin (was 1:1, was init-spezifisch) ist Sub-
-> Decision in §T0-Discovery. Slice liegt **in `in-progress/`**
-> nach drei Pre-`next/`-Review-Runden (R1/R2/R3 ≈ 93 Findings
-> insgesamt; 17 Sub-Decisions (a)-(q) verbindlich festgezurrt
-> inkl. der vier R3-Adversarial-Funde T0-(n)/(o)/(p)/(q)
-> initGit-Skip / ProgressPort-Silencing / Context-Cancellation /
-> Planning-Phase-Failures). **T1-Refactor-Tranche läuft** —
-> `previewModeFromFlags`-Extract, `PreviewMode`-Rename + Alias,
-> Helper-Generalisierung, Add-Migration, `recordImplicitMkdir`-
-> Dedup-Fix. Weitere Review-Runden (R4+) sind im
-> `in-progress/`-Status erwartet (Add hatte R6/R7/R8 zusätzlich).
+> Init war der erste Folge-Slice, der vom Add-Pattern erbt — die
+> Erbschafts-Disziplin (was 1:1, was init-spezifisch) ist in
+> §T0-Discovery festgezurrt. Slice wanderte über drei Pre-`next/`-
+> Review-Runden (R1/R2/R3 ≈ 93 Findings insgesamt; 17 Sub-
+> Decisions (a)-(q) verbindlich festgezurrt inkl. der vier R3-
+> Adversarial-Funde T0-(n)/(o)/(p)/(q) initGit-Skip /
+> ProgressPort-Silencing / Context-Cancellation / Planning-Phase-
+> Failures) und Review-Round-9 nach T6 (6 Findings, 4 R-Commits
+> R1-R4, 1 Folge-Slice ausgelagert, 1 trivialer Dead-Code-
+> Cleanup). Cluster-Stand nach init-Closure: **3/9 done**.
+>
+> **DoD-Tranchen-Hashes** (alle T0-T8 + R-Runden):
+>
+> | Tranche / Round | Inhalt | Commit |
+> | --- | --- | --- |
+> | T0 — Stub | `open/`-Stub Cluster-Folge-Slice 3/9 | `c79c4d2` |
+> | T0 — R2-Findings | Pre-`next/` Review-Round-2 (31 Findings, 4 Angles) | `e45d30f` |
+> | T0 — `open/→next/` | Lifecycle-Übergang | `bac9463` |
+> | T0 — `next/→in-progress/` | Lifecycle-Übergang | `6ceb2a9` |
+> | T0 — T1-E Re-Sequenz | Helper-Generalisierung nach T5 verschoben (Variante B) | `8c933d7` |
+> | T1-A | `driving.AddPreviewMode → PreviewMode` + Type-Alias | `ad56550` |
+> | T1-B | `previewModeFromFlags` nach `cli/previewmode.go` + Test-File-Move | `8ea5359` |
+> | T1-C | `recordImplicitMkdir`-Dedup via `knownDirs` (R2-Finding B-4) | `8ba0250` |
+> | T1-D | `mapResponseToWire → mapPlannedFilesToWire` nach `wireshapes.go` | `b058fb9` |
+> | T1-E | Helper-Generalisierung (revertiert, wandert nach T5) | `8b858eb` / Revert `94dd78a` |
+> | T1-F | Interne Refs auf kanonischen `driving.PreviewMode` | `9ed3e34` |
+> | T2 | Port-Types `InitProject.PreviewMode`/`SilenceProgress`/`PlannedFiles` + `ErrInitFileSystem`-Sentinel | `a883870` |
+> | T3 | Application-Layer: `fsFactory` + `initMu` + `initGit`-Skip + ProgressPort-Swap + 9 FS-Wrap-Stellen | `22d8402` |
+> | T4 | Composition-Root-Wiring `initFSFactory`-Closure in `cmd/uboot/main.go` | `ab67de3` |
+> | T5 | Helper-Generalisierung (`reportError`/`writeErrorEnvelope`/`writeDiff`/`lastPlannedPath`) + init-RunE für JSON/Dry-Run/Diff | `0689b32` |
+> | T6 | Acceptance-Pins — Flag-Matrix + Error-Scenarios + T0-Pflicht-Pins | `80d5624` |
+> | T6+ | Coverage-Bump auf 91.00 % (+1.0 % Sicherheitsabstand) | `bab6b13` |
+> | R1 | `mapInitErrorToDiagnostic` erfasst `ErrInvalidFeatureSource` (+ R5 Dead-Code-Cleanup) | `6e5ad01` |
+> | R2 | `initFromTemplate` Defense-in-Depth-Guard für `PreviewMode` | `e897fa7` |
+> | R3 | `runBackup` Wrap-Strategie pinnen — raw FS vs typed Sentinel | `e10b57d` |
+> | R4 | T0-(k) Path-Anchor Acceptance-Pin für positional `<name>` | `ee30c3c` |
+> | T7 — Doku-Closure | Review-Round-9-Tabelle + Folge-Slice-Stub `slice-v1-cli-cleanup-add-backup-error-class` | `d7f9e65` |
+> | T8 — Closure | CHANGELOG, `cli-json-output.md` §6/§6.4/§7, `cli.go`-Godoc-Backup-Sentinels-Korrektur, roadmap-Update, `open/slice-v1-cli-cleanup-add-preview-mode-alias`-Stub, Slice in `done/` | dieser Commit |
 
 ## Auslöser
 
@@ -1097,7 +1124,7 @@ unchanged nach R4).
   [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
   §T0-Outcomes — Vorgaben für den Folge-Slice-Block.
 - Pattern-Vorbild:
-  [`slice-v1-cli-json-dry-run-add`](../done/slice-v1-cli-json-dry-run-add.md)
+  [`slice-v1-cli-json-dry-run-add`](slice-v1-cli-json-dry-run-add.md)
   — T0-T6 + Review-Rounds 6-8 voll abgeschlossen. Erbschafts-
   Disziplin in §T0-(a) dieses Slices.
 - Spec: `LH-FA-CLI-007/008`, `LH-NFA-USE-004`,

@@ -13,6 +13,58 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- `feat(cli): u-boot init --json / --dry-run / --diff
+  (LH-FA-CLI-007/008 / LH-NFA-USE-004)` — zweiter modifying-Sub-
+  command mit JSON-Envelope-Migration und wichtigster Onboarding-
+  Use-Case (Cluster-Slice `slice-v1-cli-json-dry-run`, Folge-Slice
+  3/9). Vier neue Flag-Kombinationen mit derselben Symmetrie wie
+  `add`: `--json` (Minimalkontrakt-Envelope), `--dry-run --json`
+  (Voll-Schema mit `plannedFiles[]`/`changes[]`, kein FS-Write),
+  `--diff --json` (Voll-Schema mit `plannedFiles[].hunks[]`,
+  Preview-and-Apply), `--dry-run --diff --json` (Vorschau plus
+  Hunks, kein Write). Human-Mode `init --diff` rendert Unified-
+  Diff am stdout. Pattern-Erbe von add 1:1: gemeinsame
+  `PreviewMode`-Carrier-Types (`AddPreviewMode` als Alias auf
+  kanonischen `driving.PreviewMode`), `RecordingFileSystem`-
+  driven-Adapter, Pure-Go LCS-Diff-Renderer,
+  `previewModeFromFlags`-Mapping, generalisierte Error-Emission-
+  Helper (`reportError`/`writeErrorEnvelope`/`writeDiff`/
+  `lastPlannedPath`) in `cli/erroremission.go`. Init-spezifische
+  Erweiterungen: **sechs der acht** `driven.FileSystem`-
+  Mutations-Methoden im Capture-Set (`MkdirAll`, `WriteFile`
+  direkt plus `CopyExclusive`/`Mkdir`/`MkdirAll`/`Copy`/
+  `RemoveAll` indirekt via `BackupPath`); **`initGit`-Skip im
+  Dry-Run** (Composition-Root-`initFSFactory`-Closure liefert
+  Recorder; `Init()` skippt den separaten `driven.GitClient`-Port
+  bei `PreviewMode == PreviewDryRun`, weil git am Recorder vorbei
+  auf die echte Disk schreibt); **ProgressPort-Silencing im
+  JSON-Mode** (`req.SilenceProgress = flags.JSON` swappt
+  `s.progress` auf Noop, weil add keinen stdout-bound Port hat
+  und init der erste mit Progress-Events während des Use-Case-
+  Laufs ist); **Service-Race-Safe via `sync.Mutex`** auf
+  `InitProjectService.initMu` (analog `AddServiceService`).
+  Sieben init-spezifische LH-Codes als Spec-Anker (`LH-FA-INIT-
+  001..-007`), drei mit dedizierten Sentinels in
+  `mapInitErrorToDiagnostic` (`LH-FA-INIT-004` Marker-Kollision,
+  `LH-FA-INIT-005` Force/Backup-Usage, `LH-FA-INIT-006` Name-
+  Validierung); **neuer `driving.ErrInitFileSystem`-Sentinel**
+  als Multi-`%w`-Wrap auf neun FS-Wrap-Stellen (Switch-Order-
+  Pflicht: FS-first, weil Multi-`%w` sonst Exit-14 auf Exit-10
+  downgraded). Template-Modus (`init --template <name>`) ist in
+  V1 **mutex** zu `--dry-run`/`--diff` —
+  `driving.ErrTemplateConflictsWithFlag` rejected die Kombination
+  (Exit-Code 2, `LH-FA-CLI-006`); Template-Preview wandert in
+  eigenen Folge-Slice. Context-Cancellation bleibt
+  Status-quo-Carveout (Cross-Cutting Exit-130-Convention für alle
+  modifying-Subcommands ist eigener Block). Acceptance-Coverage:
+  ~17 Flag-Matrix-Tests inkl. Soft-Existing × `--devcontainer`,
+  Planning-Phase-Force-Failure (Exit 10), Mid-Write-Failure mit
+  Switch-Order-Pin (Exit 14), Concurrent-Init-Mutex-Pin auf zwei
+  Goroutinen, Path-Anchor-Pin für positional `<name>` mit
+  trailing-slash/dot-slash/abs-path, initGit-Skip-Pin (`.git/`
+  fehlt + Spy-Counter 0), JSON-stdout-Cleanliness-Pin
+  (`json.Decode → io.EOF`). Coverage-Gate ≥ 91 %.
+
 - `feat(cli): u-boot add --json / --dry-run / --diff
   (LH-FA-CLI-007/008 / LH-NFA-USE-004)` — erster modifying-Sub-
   command mit JSON-Envelope-Migration (Cluster-Slice
