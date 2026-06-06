@@ -1,6 +1,6 @@
 # Slice V1: `remove --json` / `--dry-run` / `--diff` — Add-Inverse mit Purge-Gate
 
-> **Status:** T0-Discovery + R1 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
+> **Status:** T0-Discovery + R1/R2 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 5/9). Konsumiert das Pattern-Vorbild aus
@@ -106,7 +106,17 @@ docs-check).
 - ✅ **Idempotenz-NoOp-Pin**: Single-Call und Repeat-Call gegen
   bereits disabled Service liefern `plannedFiles: []` UND
   `changes: []`, `data.priorState: "deactivated"`, `data.state:
-  "deactivated"`, `status: ok`, Exit 0.
+  "deactivated"`, `status: ok`, Exit 0. **NUR `PriorState=Deactivated`
+  qualifiziert als NoOp** (R2-MED-F2-Fix). `EnabledUnset` und
+  `InconsistentBlock` sind state-transitioning (`Changed!=nil`,
+  `plannedFiles!=[]`) — separater Pin nötig.
+- ✅ **EnabledUnset-Normalisierungs-Pin** (R2-MED-F2-Fix):
+  Service mit fehlendem `enabled`-Key in `services.<name>`
+  liefert `plannedFiles: [u-boot.yaml, compose.yaml, .env.example]`,
+  `data.priorState: "enabled-unset"`, `data.state: "deactivated"`,
+  `changes[]` non-leer, `status: ok`, Exit 0. T6-Fixture muss
+  beide Varianten (mit/ohne `enabled: false`) explizit setzen
+  um Test-Drift zu vermeiden.
 - ✅ **Mid-Write-Failure-Pin**: analog init/generate — `plannedFiles[]`
   enthält Captures bis zur Failure-Stelle (Recorder zeichnet vor
   Delegieren auf, `recordingfs.go:139`), `diagnostics[].file` =
@@ -117,11 +127,14 @@ docs-check).
   request-time-swap. Bei `--purge --no-interactive --json` OHNE
   `--yes` → `ErrConfirmationRequired` Envelope mit
   `LH-FA-INIT-005` / Exit 10.
-- ✅ **stderr-WARNING-Migration**: die heutige `printRemoveSummary`-
-  WARNING auf errOut bei `--purge`-Status FALSE muss in den
-  Envelope wandern (`diagnostics[]` mit `level: "warn"`-Eintrag
-  oder `data.warnings[]`-Array — Sub-Decision T0-(g)). Im
-  JSON-Mode darf stderr nicht durch die WARNING-Prosa polluten.
+- ✅ **stderr-WARNING-Migration** (T0-(g) festgezurrt): die
+  heutige `printRemoveSummary`-WARNING auf errOut bei
+  `--purge`-Status FALSE muss in den Envelope wandern als
+  `diagnostics[]`-Eintrag. **AK-Pin explizit** (R2-LOW-F7-Fix):
+  `diagnostics[0].code == "LH-FA-ADD-007"` AND
+  `diagnostics[0].level == "warn"` AND `data.volumesPurged ==
+  false`. Im JSON-Mode darf stderr nicht durch die
+  WARNING-Prosa polluten.
 - ✅ **Volumes-Purge-Status im Envelope**: `data.volumesPurged: false`
   in v0.3.0 (deferred), mit Hint-Diagnostic-Eintrag wenn `--purge`
   requested aber nicht ausgeführt (T0-(h)).
@@ -155,9 +168,26 @@ docs-check).
 - **T0-(c)** `RemoveServiceService.fsFactory`-Form analog
   `InitProjectService.fsFactory`.
 - **T0-(d)** `ErrRemoveFileSystem`-Sentinel-Einführung +
-  Wrap-Audit: heute Single-`%w` an den ~6 FS-Stellen
-  (WriteFile/RemoveAll/Exists/ReadFile/Stat). T3 erweitert
-  auf Multi-`%w` analog init/generate.
+  Wrap-Audit (R2-MED-F3-Kalibrierung): heute Single-`%w` an
+  **10 FS-Stellen** in `removeservice.go` (NICHT ~6 wie initialer
+  Stub):
+  - **Write/Remove**: Z. 235 (WriteFile), Z. 241 (RemoveAll
+    extraFiles) — 2 Stellen.
+  - **Read/Exists/Stat**: Z. 272 (Exists compose/env), Z. 282
+    (ReadFile compose/env), Z. 286 (Lstat compose/env), Z. 321
+    (ReadFile u-boot.yaml), Z. 325 (Lstat u-boot.yaml), Z. 358
+    (Exists extraFiles) — 6 Stellen.
+  - **YAML-Codec**: Z. 330 (yaml.PatchScalar) — 1 Stelle.
+  - **Managedblock-Scanner**: Z. 307 (scan compose/env for block)
+    — 1 Stelle.
+  - **AUSGESCHLOSSEN**: Z. 304 (managedblock-malformed wrappt
+    `ErrServiceInconsistent`, KEIN FS-Wrap) — bleibt fachlich-
+    Klasse.
+
+  T3 migriert alle 10 auf Multi-`%w` analog init's
+  `initproject.go:925/967/1015/1117/1143`-Pattern. T6 ergänzt
+  Read-Pfad-FS-Failure-Pin (mindestens einer) damit die Switch-
+  Order-Garantie nicht löchrig wird.
 - **T0-(e)** **Switch-Order-Pflicht** im neuen
   `mapRemoveErrorToDiagnostic`. Diagnostic-Code-Tabelle (T6-Pin-
   Pflicht pro Zeile):
@@ -170,6 +200,7 @@ docs-check).
   | `ErrServiceInconsistent` | `LH-FA-ADD-005` | 10 |
   | `ErrProjectNotInitialized` | `LH-FA-ADD-001` | 10 |
   | `ErrConfirmationRequired` | `LH-FA-INIT-005` | 10 |
+  | `ErrConfirmerUnavailable` (NEU, T2; wrappt heutigen string-Error in `removeservice.go:171`) | `LH-FA-CLI-005A` | 10 |
   | `domain.ErrInvalidServiceName` | `LH-FA-INIT-006` | 10 |
   | `ErrConflictingModeFlags` (`--yes ⊕ --no-interactive`) | `LH-FA-CLI-005A` | 2 |
   | Default (unknown) | `LH-FA-CLI-006` | 1 |
@@ -180,10 +211,10 @@ docs-check).
   `data: {"service": "<…>"}` ohne `priorState`/`state`/
   `volumesPurged` (Zero-Response auf Error-Pfad — analog
   generate T0-(q)).
-- **T0-(g)** **WARNING-Migration festgezurrt** (R1-HIGH-1-Fix):
-  heutige `printRemoveSummary`-stderr-WARNING (Z. 163-171) bei
-  `--purge && !VolumesPurged` wandert im JSON-Mode in
-  `diagnostics[]` mit `level: "warn"` und Code
+- **T0-(g)** **WARNING-Migration festgezurrt** (R1-HIGH-1-Fix +
+  R2-MED-F5-Erweiterung): heutige `printRemoveSummary`-stderr-
+  WARNING (Z. 163-171) bei `--purge && !VolumesPurged` wandert
+  im JSON-Mode in `diagnostics[]` mit `level: "warn"` und Code
   **`LH-FA-ADD-007`** (Spec §924 / §2602 — die Anforderung selbst
   beschreibt das deferred-Volumes-Verhalten). KEIN Suffix-Schema
   wie `-VOLUMES-DEFERRED` — Spec §1834 erlaubt nur die feste
@@ -193,6 +224,17 @@ docs-check).
   den `level: "warn"`-vs-`"error"`-Vertrag plus den
   `message`-Text plus `data.volumesPurged`-Status. Pinnbar via
   `jsontestutil.AssertFullEnvelope`.
+
+  **Volume-Presence-Pflicht** (R2-MED-F5-Fix): WARN-Diagnostic
+  wird NUR emittiert wenn der Catalog-Entry tatsächlich Volumes
+  deklariert (`catalogueFor(svc).Volumes != nil`, analog
+  `planExtraFileDeletes` Z. 349). Bei einem zukünftigen Catalog-
+  Entry ohne Volumes (z. B. Config-only Add-on) wäre eine WARN
+  semantisch falsch ("Purge deferred" obwohl es nichts zu purgen
+  gibt). T6-Pin: `TestRemove_PurgeOnVolumelessService_NoWarn` —
+  Mock-Catalog mit `Volumes: nil`, `--purge --json` →
+  `diagnostics: []`, kein WARN-Eintrag, `data.volumesPurged:
+  false`. Pattern-Vorlauf für Keycloak/OTel-Catalog-Erweiterungen.
 - **T0-(h)** **`--purge`-in-Dry-Run-Verhalten festgezurrt** (R1-
   HIGH-3-Fix): Dry-Run impliziert Null-Mutationen. Drei
   Vertragsränder gepinnt:
@@ -217,6 +259,22 @@ docs-check).
   T6-Pflicht: 1 Test pro `--purge`-on-Variante in jedem der
   vier Dry-Run-Kombos (Dry-Run, Dry-Run+Diff, Dry-Run+JSON,
   Dry-Run+Diff+JSON).
+
+  **PreviewAndApply-Branch festgezurrt** (R2-MED-F4-Fix): bei
+  `--purge --diff` ohne `--dry-run` (PreviewMode=PreviewAndApply)
+  läuft der Confirmer-Gate REGULAR — Diff-Mode schreibt echt auf
+  Disk. T6-Pins für PreviewAndApply + `--purge`:
+  (a) `--purge --diff --json` ohne `--yes` → defensiveNoopConfirmer
+      (T0-(j)) → `ErrConfirmationRequired` Envelope, Exit 10,
+      kein `changes[]` (Plan-Phase failt vor Execute).
+  (b) `--purge --diff --json --yes` → Gate skipped, Execute läuft,
+      Voll-Envelope mit `changes[]` der FS-Captures + WARN-
+      Diagnostic (T0-(g)) für `data.volumesPurged: false`,
+      `status: warn`, Exit 0.
+  (c) `--purge --diff --no-interactive` ohne `--json` ohne `--yes`
+      → `ErrConfirmationRequired`-Pfad (heutiges Verhalten,
+      stderr-Print). T5 muss diesen Pfad NICHT in JSON-Helper
+      kanalisieren (kein `--json`-Flag) — bleibt Cobra-Default.
 - **T0-(i)** **`--purge`-Mutex mit `--dry-run`/`--diff`?** Analog
   init's `--template`-Mutex (T0-(i))? Vorschlag: **NEIN** — Purge
   ist eine Side-Effect-Dimension, kein Renderer-Pfad. Dry-Run +
@@ -263,10 +321,10 @@ docs-check).
 | - | ------ | --------------- | --- |
 | T0 | Discovery + Sub-Decisions (a)-(o) klären; Review-Runden | — (Plan) | — |
 | T1 | Refactor-Tranche (wenn überhaupt nötig — generate-Pattern ist etabliert; möglicher T1-Scope: noopConfirmer-Helper im application package, analog noopProgress) | ~30-60 | T0 |
-| T2 | Port-Types: `RemoveServiceRequest.PreviewMode` + `SilenceConfirmer`-Feld, `RemoveServiceResponse.PlannedFiles`/`Changes`-Felder, neuer `ErrRemoveFileSystem`-Sentinel. | ~70 | T0 |
+| T2 | Port-Types: `RemoveServiceRequest.PreviewMode` + `SilenceConfirmer`-Feld, `RemoveServiceResponse.PlannedFiles`/`Changes`-Felder, **zwei neue Sentinels**: `ErrRemoveFileSystem` (FS-Klasse, T0-(d)) UND `ErrConfirmerUnavailable` (Confirmer-I/O-Error-Klasse, R2-HIGH-F1-Fix für T0-(e)-Tabelle). | ~90 | T0 |
 | T3 | Application-Layer: `RemoveServiceService.fsFactory` + `removeMu sync.Mutex` + `NewRemoveServiceServiceWithFactory` + `Remove()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; Multi-`%w`-Wrap an den ~6 FS-Wrap-Stellen; Confirmer-Swap auf noopConfirmer im JSON-Mode. | ~200 | T2 |
 | T4 | Composition-Root-Wiring `removeFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
-| T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`); **Pre-UC-Sentinel-Kanal** für `domain.ErrInvalidServiceName` und `ErrConflictingModeFlags`: müssen via `reportError`-Helper emittiert werden, NICHT durch Cobra-Default-Print (R1-LOW-7-Fix), damit der JSON-stdout-Cleanliness-Pin aus init T0-(o) hält. | ~240 | T1 + T2 |
+| T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`); **Pre-UC-Sentinel-Kanal** für `domain.ErrInvalidServiceName` und `ErrConflictingModeFlags`: müssen via `reportError`-Helper emittiert werden, NICHT durch Cobra-Default-Print (R1-LOW-7-Fix), damit der JSON-stdout-Cleanliness-Pin aus init T0-(o) hält. **Human-Mode-Diff-Renderer** (R2-LOW-F6-Fix): bei `--purge --diff` ohne `--json` bleibt die deferred-Volumes-Prosa auf `errOut`, NICHT im Diff-Body. T6-Pin: `TestRemove_PurgeHumanDiff_StderrSeparation` mit getrennten Buffer-Assertions. | ~250 | T1 + T2 |
 | T6 | Acceptance-Tests: ~20-25 Tests (drei JSON-Modi + NoOp Single+Repeat + Mid-Write-Failure + ConfirmationRequired-Pfade × 3 Varianten + Service-Sentinels × 4 + WARNING-Migration-Pin + `--purge`-on/off × Dry-Run-Kombos (T0-(h)) + `--purge --yes --json` WarnOnly-Pin (T0-(j) R1-MED-5) + `ErrConflictingModeFlags`-Pin). R1-MED-6-Kalibrierung: ~600-700 LOC realistisch (Confirmer-Pattern-Neumuster zieht Test-Surface). | ~650 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe). | ~80 | T6 |
 | T8 | Closure: CHANGELOG, cli-json-output.md §6/§6.6/§7, roadmap, slice nach done/ mit DoD-Hash-Tabelle. | — (Doku) | T7 |
@@ -300,6 +358,30 @@ deterministische Reihenfolge, `ServiceState.String()`-Strings,
 Code-LOC-Anker) bestätigt. Sub-Decisions a-o sind nach R1
 konsolidiert; Confirmer-Pattern bleibt der substanziellste
 Eigenleistungs-Anteil.
+
+## Review-Round-2 (Pre-`next/`)
+
+Adversarial-Edge-Cases + Test-Harness-Qualität gegen den
+R1-gepflegten Stub (`91e4dd1`). Sieben Findings (1 HIGH,
+4 MEDIUM, 2 LOW), alle adressiert im selben Commit:
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| F1 | HIGH | Confirmer-I/O-Error-Pfad (`removeservice.go:171`) fällt in Default-Mapper-Branch `LH-FA-CLI-006 / Exit 1` — semantisch falsch für I/O-Failures (`os.Stdin`-EOF, Pipe-Bruch). Spec `LH-FA-CLI-005A` §254 koppelt Confirmation-Gate-Failures an Exit 10 | Neuer Sentinel `ErrConfirmerUnavailable` in T2 ergänzt; T0-(e)-Mapper-Tabelle erweitert (→ `LH-FA-CLI-005A` / Exit 10) |
+| F2 | MEDIUM | NoOp-Pin AK kollidiert mit `EnabledUnset`-State — der wäre state-transitioning (`Changed!=nil`), nicht NoOp | AK explizit: NUR `PriorState=Deactivated` qualifiziert als NoOp; **neuer EnabledUnset-Normalisierungs-Pin** als separater Test mit `priorState: "enabled-unset"`, `changes[]` non-leer |
+| F3 | MEDIUM | T0-(d) Wrap-Audit nannte ~6 FS-Stellen — real sind es **10** (Z. 235, 241, 272, 282, 286, 307, 321, 325, 330, 358) | T0-(d) auf 10 Stellen kalibriert mit Code-Anker-Inventar (Write/Remove + Read/Exists/Stat + YAML-Codec + Managedblock-Scanner); Z. 304 als Nicht-FS-Wrap explizit ausgeschlossen; T6 ergänzt Read-Pfad-FS-Failure-Pin |
+| F4 | MEDIUM | `--purge --diff` ohne `--dry-run` (PreviewAndApply) Gate-Vertrag offen — T0-(h) pinnte nur PreviewDryRun-Branch | T0-(h) erweitert um PreviewAndApply-Branch mit drei expliziten Pins: (a) ohne `--yes` → ErrConfirmationRequired-Envelope; (b) mit `--yes` → Execute + WARN-Diagnostic + Exit 0; (c) Non-JSON-Non-Yes-Pfad bleibt Cobra-Default |
+| F5 | MEDIUM | WARN-Diagnostic-Bedingung pinnt nicht Volume-Presence-Check — bei zukünftigen Volumeless-Catalog-Entries würde WARN fälschlich emittieren | T0-(g) erweitert: WARN NUR wenn `catalogueFor(svc).Volumes != nil`; T6-Pin `TestRemove_PurgeOnVolumelessService_NoWarn` für Pattern-Vorlauf |
+| F6 | LOW | Human-Mode-Diff + `--purge`-deferred-Volume-Prosa-Trennung offen — soll inline im Diff oder auf errOut? | T5-Zelle ergänzt: Human-Mode-Diff-Renderer hält die Prosa auf `errOut`, NICHT im Diff-Body; T6-Pin `TestRemove_PurgeHumanDiff_StderrSeparation` |
+| F7 | LOW | T6-Code-Pin für `LH-FA-ADD-007` nicht explizit im AK — laxer Implementer pinnt nur `level: "warn"` ohne Code-Assertion | AK-WARNING-Migration-Zeile ergänzt um expliziten Code+Level+volumesPurged-Triple-Pin |
+
+R2-Reviewer-Note: docs-check grün; weitere geprüfte Edge-Cases
+ohne Befund: `Changed: nil` vs. `[]` (jsonenvelope.go:139-143
+normalisiert), `--no-interactive --json` ohne `--purge`
+(irrelevanter Pfad), Recorder-vs-Real-FS-Trigger-Vertrag,
+WarnOnly-Statuskopplung. Confirmer-Pattern und `--purge`-
+Dimension bleiben die substanziellsten Eigenleistungs-Anteile;
+weitere Runden könnten Implementation-Reality (T3-T5) prüfen.
 
 ## Out of Scope
 
