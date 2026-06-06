@@ -1,6 +1,6 @@
 # Slice V1: `remove --json` / `--dry-run` / `--diff` — Add-Inverse mit Purge-Gate
 
-> **Status:** T0-Discovery + R1-R8 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
+> **Status:** T0-Discovery + R1-R9 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 5/9). Konsumiert das Pattern-Vorbild aus
@@ -567,9 +567,21 @@ docs-check).
 - **T0-(o)** Pre-`next/`-Review-Runden-Erwartung: ≥ 2 (Discovery
   + Adversarial). Steht aktuell bei R1-R4.
 - **T0-(p)** **`delete`-Action-Vertrag (NEU, R4-HIGH-F4 +
-  R5-LOW-F4-Erweiterung)**:
-  remove ist der **erste** Use-Case, der `PlannedFile.Action ==
-  "delete"` produziert — `RemoveAll` (Z. 241) für extraFiles wird
+  R5-LOW-F4-Erweiterung + R9-HIGH-F1-Klarstellung)**:
+  remove ist der **erste end-to-end-sichtbare** `PlannedFile.
+  Action == "delete"`-Produzent (Capture wandert via
+  `mapCaptureToPlannedFiles` in den Wire-Envelope). **Layer-
+  Klarstellung**: der `delete`-enum-Wert existiert auf Spec-
+  Layer bereits (`cli-json-output.md` §164-166:
+  `enum: ["create", "modify", "delete"]`); der Recorder-Layer
+  hat `actionDelete` seit Rename/RemoveAll-Support
+  (`recordingfs.go:35-37`). NEU ist nur, dass ein Use-Case den
+  `delete`-Capture in `mapCaptureToPlannedFiles` durchreicht
+  und damit in `data.changes[].action: "delete"` end-to-end
+  sichtbar wird. Init/add/generate produzieren `actionDelete`-
+  Recorder-Captures NICHT (kein RemoveAll/Rename in deren
+  Use-Case-Pfaden); remove tut es via `RemoveAll` Z. 241 für
+  extraFiles. — `RemoveAll` (Z. 241) für extraFiles wird
   von `recordingfs.RemoveAll` (`recordingfs.go:197-206`) mit
   `Action: actionDelete` capturet, `mapCaptureToPlannedFiles`
   mapped das auf den Spec-§354-Wert `"delete"`. Init/add/generate
@@ -606,13 +618,13 @@ docs-check).
 | - | ------ | --------------- | --- |
 | T0 | Discovery + Sub-Decisions (a)-(o) klären; Review-Runden | — (Plan) | — |
 | T1 | **Entfällt** (R3-HIGH-F2-Fix): `noopConfirmer` existiert bereits seit M4 Confirmer-Port-Slice in `application/noop.go:17-33` und tut exakt was T0-(j) braucht (`ConfirmRemoveVolumes → false, nil`). `RemoveServiceService`-Konstruktor (`removeservice.go:48`) nutzt ihn schon als nil-Fallback. T3 swappt den existierenden Helper request-time, kein neuer Helper nötig. | — (entfällt) | T0 |
-| T2 | Port-Types: `RemoveServiceRequest.PreviewMode` + `SilenceConfirmer`-Feld, `RemoveServiceResponse.PlannedFiles`/`Changes`-Felder, **`RemoveServiceResponse.Warnings []driving.WarningEntry`-Feld** (R7-MED-F2-Fix + R8-MED-F2-Type-Klärung: neuer Port-Type `driving.WarningEntry struct { Code string; Level string; Message string }` analog `diagnosticItem`-Wire-Form — Layer-sauber (KEIN `domain.Diagnostic`-Wiederverwendung, weil dessen Severity-Enum + ID-Field semantisch mismatch zum Wire-Type ist). Use-Case ist Source-of-Truth für WARN (Catalog-Lookup für `volumeOptional`), CLI mapped via `mapWarningsToDiagnostics(resp.Warnings) []diagnosticItem`. Triviales Field-Mapping, kein Severity-Enum-zu-String-Cast nötig.), **zwei neue Sentinels**: `ErrRemoveFileSystem` (FS-Klasse, T0-(d)) UND `ErrConfirmerUnavailable` (Confirmer-I/O-Error-Klasse, R2-HIGH-F1-Fix für T0-(e)-Tabelle). | ~120 | T0 |
+| T2 | Port-Types: `RemoveServiceRequest.PreviewMode` + `SilenceConfirmer`-Feld, `RemoveServiceResponse.PlannedFiles`/`Changes`-Felder, **`RemoveServiceResponse.Warnings []driving.WarningEntry`-Feld** (R7-MED-F2-Fix + R8-MED-F2-Type-Klärung: neuer Port-Type `driving.WarningEntry struct { Code string; Level string; Message string }` analog `diagnosticItem`-Wire-Form — Layer-sauber (KEIN `domain.Diagnostic`-Wiederverwendung, weil dessen Severity-Enum + ID-Field semantisch mismatch zum Wire-Type ist). **Cluster-Vorlauf-Disziplin** (R9-MED-F2-Fix): Type ist bewusst generisch `driving.WarningEntry` benannt, NICHT `RemoveWarningEntry`, weil up/down's recreate-Warnings und config-set's value-warnings denselben Type erben werden (Cluster-Folge-Slices 6/9 + 8/9). Erste-Slice-Pattern-Last analog `PreviewMode`-Rename in init T0-(c). Use-Case ist Source-of-Truth für WARN (Catalog-Lookup für `volumeOptional`), CLI mapped via `mapWarningsToDiagnostics(resp.Warnings) []diagnosticItem`. Triviales Field-Mapping, kein Severity-Enum-zu-String-Cast nötig.), **zwei neue Sentinels**: `ErrRemoveFileSystem` (FS-Klasse, T0-(d)) UND `ErrConfirmerUnavailable` (Confirmer-I/O-Error-Klasse, R2-HIGH-F1-Fix für T0-(e)-Tabelle). | ~120 | T0 |
 | T3 | Application-Layer: `RemoveServiceService.fsFactory` + `removeMu sync.Mutex` + `NewRemoveServiceServiceWithFactory` + `Remove()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; **Multi-`%w`-Wrap an den 10 FS-Wrap-Stellen** (R3-MED-F4-Kalibrierung, T0-(d) Inventar); `ErrConfirmerUnavailable`-Sentinel-Wrap in `runPurgeGate` Z. 171; Confirmer-Swap auf existierenden `noopConfirmer` im JSON-Mode. | ~240 | T2 |
 | T4 | Composition-Root-Wiring `removeFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
 | T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`); **Pre-UC-Sentinel-Kanal** (R4-LOW-F6-Klarstellung: Codepfade existieren bereits in `cli/remove.go:108-120`, NEU ist nur die Kanalisierung via `reportError` analog `init.go:205, 216, 221`) für `domain.ErrInvalidServiceName`, `ErrConflictingModeFlags` UND `getwd`-Failure (`fmt.Errorf("determine working directory: %w", err)`, R3-LOW-F6-Fix). Der `getwd`-Wrap trägt KEIN typed Sentinel und fällt in den Default-Branch `LH-FA-CLI-006` / Exit 1 (Pattern-Erbe von init T0-(o)); Mapper-Tabelle T0-(e) NICHT ergänzt. **Human-Mode-Diff-Renderer** (R2-LOW-F6-Fix): bei `--purge --diff` ohne `--json` bleibt die deferred-Volumes-Prosa auf `errOut`, NICHT im Diff-Body. T6-Pin: `TestRemove_PurgeHumanDiff_StderrSeparation` mit getrennten Buffer-Assertions. | ~250 | T1 + T2 |
 | T6 | Acceptance-Tests: ~20-25 Tests (drei JSON-Modi + NoOp Single+Repeat + Mid-Write-Failure + ConfirmationRequired-Pfade × 3 Varianten + Service-Sentinels × 4 + WARNING-Migration-Pin + `--purge`-on/off × Dry-Run-Kombos (T0-(h)) + `--purge --yes --json` WarnOnly-Pin (T0-(j) R1-MED-5) + `ErrConflictingModeFlags`-Pin). R1-MED-6-Kalibrierung: ~600-700 LOC realistisch (Confirmer-Pattern-Neumuster zieht Test-Surface). **Pin-Namen-Mapping** (R6-LOW-F4) — kanonische Tags pro Finding-Anker: `TestRemove_ConcurrentInvocationsSerializeSwaps` (R5-F1+R6-F2 Race+Recorder-Scope), `TestRemove_DryRun_DetectStateUsesCaptureFS` + `TestRemove_DryRunPurgeYes_NoConfirmerCall` (R4-F2 Control-Flow), `TestRemove_PurgeOnVolumelessService_NoWarn` (R3-F1 Volume-Presence), `TestRemove_PurgeYesJSON_WarnOnly` (R1-MED-5 + R5-F2 WARN-Pfad), `TestRemove_PurgeYesJSON_MidWriteFailure_ErrorOnly` (R4-F3 Variante A), `TestRemove_OtelExtraFileDelete_DiffHasDeleteHunk` (R4-F4 delete-Action), `TestRemove_PurgeHumanDiff_StderrSeparation` (R2-F6 stderr-Trennung), `TestRemove_ServiceUnregisteredJSON_ErrorLevelCodePin` (R6-F3 ERROR-Pfad-Symmetrie). Weitere ~12 Pins (Idempotenz-Repeat, EnabledUnset-Normalisierung, ManualConflict × 3 (R5-F3 Triple-Use), Service-Sentinels × 4, ConfirmerUnavailable-allein-Pfad (R2-F1), Multi-`%w`-Switch-Order-Defense (R3-F3), Read-Pfad-FS-Failure (R2-F3), `ErrConflictingModeFlags` (R1-F4)) lassen sich aus AK-Block + Sub-Decision-Pins direkt ableiten. | ~650 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe). | ~80 | T6 |
-| T8 | Closure: CHANGELOG, cli-json-output.md §6/§6.6/§7, roadmap, slice nach done/ mit DoD-Hash-Tabelle; **Carveout-Eintrag in `carveouts.md`** für deferred-Volume-Auto-Removal + WARN-on-Success-Semantik mit Trigger auf einen Volume-Auto-Removal-Folge-Slice (R3-MED-F5-Fix, Pattern-Vorbild `slice-v2-generate-devcontainer-rollback-aware-write`); ggf. **`open/`-Plan-Stub für den Trigger-Slice** anlegen analog generate's V2-Rollback-Stub. | — (Doku) | T7 |
+| T8 | Closure (R9 präzisierte Liste): **CHANGELOG** Unreleased-Eintrag analog generate T8. **`cli-json-output.md`**: §6-Tabelle (remove→done), neue §6.6-Sektion (`u-boot remove --json` mit drei Flag-Kombos + `data`-Carrier `{service, priorState, state, volumesPurged}` + `--purge`-Mutex + WARN-Migration + EnabledUnset-Normalisierungs-Pin), §7 Mutations-Matrix-Zeile (`remove (slice-v1-cli-json-dry-run-remove): WriteFile + RemoveAll` — KEINE neue `action`-Spalte, R9-HIGH-F1: §7 ist die `driven.FileSystem`-Methoden-Tabelle, `action: "delete"` ist Spec-§354-enum-Wert der bereits dokumentiert ist; §6.6 ergänzt nur ein worked example mit `data.changes[].action: "delete"` für otel-extraFile). **`roadmap.md`**: zwei explizite Edits — (i) done-Zähler 4→5 + `remove` aus der Offen-Liste der Cluster-AP-Zelle streichen, (ii) `Nächster Schritt`-Klausel auf Folge-Slice 6/9 `up-down` umstellen (R9-LOW-F4). **Carveouts.md**: **neuer Eintrag** (kein bestehender Volume-Removal-Eintrag — Verifikation `carveouts.md` Z. 22-29 zeigt nur Paketierung/Keycloak-CI/template-list/generate-devcontainer-Half-Write); Pattern-Vorbild `slice-v2-generate-devcontainer-rollback-aware-write` mit Status `open/, on hold pending trigger`; Spec-Anker `LH-FA-ADD-007 §"Volumes nur auf explizite Anforderung"` (R3-MED-F5 + R9-LOW-F3). **`open/`-Plan-Stub**: `slice-v1-volume-auto-removal.md` mit Auslöser (real-world Volume-Reclamation-Anfrage), Out-of-Scope-V1-Bestätigung, Spec-Anker. **Slice nach `done/`** mit DoD-Hash-Tabelle analog generate T8. | — (Doku) | T7 |
 
 LOC-Bilanz vorläufig: ~1200-1400 (R1-MED-6-Kalibrierung —
 Confirmer-Swap-Pattern ist neu und nicht von init geerbt, zieht
@@ -816,6 +828,30 @@ vier Runden (R5-R8). Reviewer-Empfehlung: nach R8 in `next/`
 migrieren — weitere Runden würden vermutlich Implementation-
 Stress-Test-Befunde liefern die erst in T2/T3 auftauchen, oder
 F1-ähnliche Helper-Gap-Variationen produzieren.
+
+## Review-Round-9 (Pre-`next/`)
+
+Cluster-Cross-Slice-Konsistenz + Carveouts/Roadmap-Impact gegen
+den R8-konsolidierten Stub (`899af45`). Vier Findings (1 HIGH,
+1 MEDIUM, 2 LOW). HIGH-Frequenz weiterhin konstant 1/Runde
+**fünfte Runde in Folge** (R5-R9) — Asymptote bestätigt.
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| F1 | HIGH | T0-(p) verschmolz zwei Layer ("`delete` erster Use-Case"): Wire-Spec hat `delete` bereits als enum-Wert; Recorder hat `actionDelete` seit Rename/RemoveAll-Support. NEU ist nur die end-to-end-Sichtbarkeit. T8-Cell `§7 Mutations-Matrix` Wortlaut führt Closure-Implementer in die Irre (versucht neue action-Spalte zu bauen statt FS-Methoden-Zeile zu ergänzen) | T0-(p) Layer-Klarstellung: "erster end-to-end-sichtbare delete-Capture, der via mapCaptureToPlannedFiles in den Wire-Envelope wandert". T8-Cell präzisiert: §7-Zeile ergänzt `remove: WriteFile + RemoveAll`, KEINE neue action-Spalte; §6.6 worked example mit `data.changes[].action: "delete"` für otel-extraFile |
+| F2 | MEDIUM | `driving.WarningEntry` ist erster Multi-Diagnostic-Port-Type im Cluster — Plan begründete die Layer-Wahl nicht als bewussten Cluster-Vorlauf. T2-Implementer könnte ihn als isolierte remove-Lösung lesen und z.B. `RemoveWarningEntry` umbenennen | T2-Cell um Cluster-Vorlauf-Disziplin ergänzt: Type bewusst generisch `driving.WarningEntry` für up/down recreate-Warnings (6/9) + config-set value-warnings (8/9); Erste-Slice-Pattern-Last analog `PreviewMode`-Rename in init T0-(c) |
+| F3 | LOW | T8-Cell sagte generisch "Carveout-Eintrag" — Closure-Implementer könnte bestehenden Eintrag suchen. carveouts.md hat keinen Volume-Removal-Eintrag (verifiziert) | T8-Cell präzisiert: "**neuer Eintrag**" + Pattern-Vorbild generate-V2-Stub-Form + Spec-Anker `LH-FA-ADD-007 §"Volumes nur auf explizite Anforderung"` |
+| F4 | LOW | T8-Cell sagte generisch "roadmap" — zwei konkrete Edits nötig (done-Zähler + Nächster-Schritt-Klausel) | T8-Cell präzisiert: zwei explizite Edits — done-Zähler 4→5 + remove aus Offen-Liste; Nächster-Schritt-Klausel auf Folge-Slice 6/9 up-down |
+
+R9-Reviewer-Note: docs-check grün. F1 ist Cluster-Pattern-
+Bruch-Klasse (Layer-Verschmelzung); F2 schließt Cluster-Vorlauf-
+Lücke; F3+F4 sind Closure-Disziplin-Hygiene für T8.
+
+**Konvergenz-Bewertung:** fünfte Runde 1-HIGH-Frequenz. Asymptote
+über fünf Runden stabil. Reviewer-Empfehlung weiterhin: nach
+R9-Adressierung in `next/` migrieren — weitere Runden würden
+vermutlich nur ähnliche Closure-Präzisierungen + Cluster-Vorlauf-
+Disziplin-Befunde produzieren.
 
 ## Out of Scope
 
