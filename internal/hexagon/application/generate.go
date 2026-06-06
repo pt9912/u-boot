@@ -8,6 +8,7 @@ import (
 	iofs "io/fs"
 	"path/filepath"
 	"regexp"
+	"sync"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
@@ -31,9 +32,17 @@ import (
 // introduces a driven filesystem sentinel, the wrap can collapse to
 // a direct `errors.Is` without touching the CLI exit-code mapping.
 type GenerateService struct {
-	fs     driven.FileSystem
-	yaml   driven.YAMLCodec
-	logger driven.Logger
+	fs        driven.FileSystem
+	fsFactory func(driving.PreviewMode) (driven.FileSystem, driven.RecorderPort)
+	yaml      driven.YAMLCodec
+	logger    driven.Logger
+	// generateMu serialises Generate() invocations on a single service
+	// instance. The PreviewMode-aware s.fs-swap mutates a shared field;
+	// concurrent Generate calls would race on swap/restore pairs and
+	// one caller's writes would route through the other caller's
+	// recorder (slice-v1-cli-json-dry-run-generate T3, inherited from
+	// init T0-(d) / add review #10).
+	generateMu sync.Mutex
 }
 
 // Static check: GenerateService satisfies the driving port.
@@ -44,6 +53,12 @@ var _ driving.GenerateUseCase = (*GenerateService)(nil)
 // the package-local [noopLogger] (same nil-tolerance contract as
 // [NewAddServiceService] and [NewUpService]). fs and yaml are
 // mandatory.
+//
+// Legacy constructor: the resulting service has no fsFactory wired,
+// so PreviewMode is ignored at Generate() time (PlannedFiles stays
+// nil, recorder is nil). Production wiring uses
+// [NewGenerateServiceWithFactory] instead — this constructor remains
+// for test sites that don't exercise preview paths.
 func NewGenerateService(fs driven.FileSystem, yaml driven.YAMLCodec, logger driven.Logger) *GenerateService {
 	if logger == nil {
 		logger = noopLogger{}
@@ -51,19 +66,106 @@ func NewGenerateService(fs driven.FileSystem, yaml driven.YAMLCodec, logger driv
 	return &GenerateService{fs: fs, yaml: yaml, logger: logger}
 }
 
-// Generate implements [driving.GenerateUseCase.Generate]. The
-// dispatch order mirrors `AddServiceService.Add`:
+// NewGenerateServiceWithFactory is the slice-v1-cli-json-dry-run-
+// generate T3 Composition-Root constructor (analog to
+// [NewInitProjectServiceWithFactory] / [NewAddServiceServiceWithFactory]):
+// instead of a fixed [driven.FileSystem], the service receives a
+// factory that picks the FS per [driving.PreviewMode]. Composition-
+// Root wires PreviewNone → production FS, PreviewDryRun/
+// PreviewAndApply → recording FS.
 //
-//  1. validate BaseDir is non-empty (non-sentinel error).
-//  2. check that `<BaseDir>/u-boot.yaml` exists; otherwise return
-//     [driving.ErrProjectNotInitialized] (LH-FA-INIT-001 precondition,
-//     reused from M5/M6).
-//  3. dispatch on req.Artifact to the per-artefact handler. T1 stubs
-//     all four; T2..T5 replace them with real implementations.
+// [Generate] reads the mode from [driving.GenerateRequest.PreviewMode],
+// asks the factory for a fresh (fs, recorder) tuple, swaps the
+// service-level [fs] field for the request's duration (defer-restored)
+// and — if the recorder is non-nil — maps its
+// [driven.RecorderPort.Captured] output into
+// [driving.GenerateResponse.PlannedFiles] on the way out.
+func NewGenerateServiceWithFactory(
+	fsFactory func(driving.PreviewMode) (driven.FileSystem, driven.RecorderPort),
+	yaml driven.YAMLCodec,
+	logger driven.Logger,
+) *GenerateService {
+	if logger == nil {
+		logger = noopLogger{}
+	}
+	// Bootstrap fs from PreviewNone so methods that read s.fs outside
+	// of a Generate() call see a valid adapter (mirrors
+	// AddServiceServiceWithFactory / InitProjectServiceWithFactory).
+	bootstrapFS, _ := fsFactory(driving.PreviewNone)
+	return &GenerateService{
+		fs:        bootstrapFS,
+		fsFactory: fsFactory,
+		yaml:      yaml,
+		logger:    logger,
+	}
+}
+
+// selectFS picks the per-request FS pair (slice-v1-cli-json-dry-run-
+// generate T3, inherited from init T0-(d)): if the factory is wired
+// (Composition-Root path) it returns the mode-specific tuple;
+// otherwise the legacy [fs] field with a nil recorder (PreviewMode is
+// ignored — the use case keeps writing to production).
+func (s *GenerateService) selectFS(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
+	if s.fsFactory == nil {
+		return s.fs, nil
+	}
+	return s.fsFactory(mode)
+}
+
+// Generate implements [driving.GenerateUseCase.Generate]. T3 wraps
+// the original dispatch in a PreviewMode-aware FS-swap plus mutex
+// guard:
 //
-// ctx is threaded to the handlers so the T2..T5 implementations can
-// honour cancellation without changing the call site here.
+//  1. serialise concurrent calls on this service (s.generateMu) so
+//     the per-request fs-swap stays atomic with respect to the
+//     dispatched handler's lifetime;
+//  2. ask the factory for a mode-specific (fs, recorder) tuple
+//     and swap s.fs for the request's duration (defer-restored);
+//  3. call [runGenerate] (the original dispatch body);
+//  4. map the recorder's capture to resp.PlannedFiles — also on the
+//     error path (R4-Recorder-Realität: the failing WriteFile's
+//     attempt-content lands in PlannedFiles too, see Mid-Write-
+//     Failure-AK in slice T0-(i)).
+//
+// ctx is threaded to runGenerate (and onwards to the per-artefact
+// handlers) so future cancellation can honour the existing call
+// sites without changing the dispatcher.
 func (s *GenerateService) Generate(ctx context.Context, req driving.GenerateRequest) (driving.GenerateResponse, error) {
+	// Serialise per-request fs-swap (slice-v1-cli-json-dry-run-generate
+	// T3, inherited from init T0-(d) / add review #10).
+	s.generateMu.Lock()
+	defer s.generateMu.Unlock()
+
+	// PreviewMode-aware FS-swap: route every FS access of this
+	// Generate() invocation through the mode-specific adapter
+	// (production FS for PreviewNone, RecordingFileSystem for
+	// PreviewDryRun/PreviewAndApply). Defer restores the bootstrap
+	// [fs] field for subsequent calls.
+	fs, recorder := s.selectFS(req.PreviewMode)
+	prevFS := s.fs
+	s.fs = fs
+	defer func() { s.fs = prevFS }()
+
+	resp, genErr := s.runGenerate(ctx, req)
+
+	// Map the recorder's capture into resp.PlannedFiles — also on
+	// the error path (T0-(i) Mid-Write-Failure-AK: user sees captured
+	// calls up to the failure point inclusive of the failing
+	// underlying.WriteFile attempt; recordingfs.go:139 zeichnet vor
+	// Delegieren auf). Empty capture (PreviewNone or true no-op)
+	// leaves resp.PlannedFiles nil.
+	if recorder != nil {
+		resp.PlannedFiles = mapCaptureToPlannedFiles(recorder.Captured(), req.BaseDir)
+	}
+	return resp, genErr
+}
+
+// runGenerate is the original Generate() body unchanged from M7-T1:
+// validation → project-initialised check → per-artefact dispatch.
+// T3 split it out so [Generate] can wrap it with the PreviewMode-
+// aware FS-swap + mutex + recorder-capture mapping without
+// duplicating the dispatch logic (analog to init's runInit).
+func (s *GenerateService) runGenerate(ctx context.Context, req driving.GenerateRequest) (driving.GenerateResponse, error) {
 	if req.BaseDir == "" {
 		return driving.GenerateResponse{}, errors.New("BaseDir is required")
 	}
@@ -101,7 +203,11 @@ func (s *GenerateService) checkProjectInitialized(baseDir string) error {
 	path := filepath.Join(baseDir, "u-boot.yaml")
 	exists, err := s.fs.Exists(path)
 	if err != nil {
-		return fmt.Errorf("generate service: Exists(%q): %w", path, err)
+		// Multi-`%w` (T3): zwei Sentinels gewrappt — ErrGenerateFileSystem
+		// für die Exit-14-Klassifikation und der raw err für errors.Is-
+		// Matches gegen Driven-Errors. Switch-Order in
+		// mapGenerateErrorToDiagnostic prüft ErrGenerateFileSystem FIRST.
+		return fmt.Errorf("generate service: Exists(%q): %w: %w", path, driving.ErrGenerateFileSystem, err)
 	}
 	if !exists {
 		return fmt.Errorf("generate service: %q absent: %w", path, driving.ErrProjectNotInitialized)
@@ -134,7 +240,7 @@ func (s *GenerateService) readProjectConfig(baseDir string) (ubootYAMLConfig, er
 			return ubootYAMLConfig{}, fmt.Errorf("%w: %s vanished between Exists and ReadFile",
 				driving.ErrProjectNotInitialized, yamlPath)
 		}
-		return ubootYAMLConfig{}, fmt.Errorf("%w: read u-boot.yaml: %v",
+		return ubootYAMLConfig{}, fmt.Errorf("generate: read u-boot.yaml: %w: %w",
 			driving.ErrGenerateFileSystem, err)
 	}
 	var cfg ubootYAMLConfig
@@ -280,15 +386,15 @@ func (s *GenerateService) generateChangelog(_ context.Context, req driving.Gener
 
 	exists, err := s.fs.Exists(targetPath)
 	if err != nil {
-		return driving.GenerateResponse{}, fmt.Errorf("%w: Exists(%q): %v",
-			driving.ErrGenerateFileSystem, targetPath, err)
+		return driving.GenerateResponse{}, fmt.Errorf("generate: Exists(%q): %w: %w",
+			targetPath, driving.ErrGenerateFileSystem, err)
 	}
 
 	// State: absent — write the whole rendered template.
 	if !exists {
 		if err := s.fs.WriteFile(targetPath, rendered, defaultFileMode); err != nil {
-			return driving.GenerateResponse{}, fmt.Errorf("%w: write %q: %v",
-				driving.ErrGenerateFileSystem, targetPath, err)
+			return driving.GenerateResponse{}, fmt.Errorf("generate: write %q: %w: %w",
+				targetPath, driving.ErrGenerateFileSystem, err)
 		}
 		s.logger.Info("generate: created",
 			"artifact", req.Artifact.String(), "path", relPath, "project", cfg.Project.Name)
@@ -301,8 +407,8 @@ func (s *GenerateService) generateChangelog(_ context.Context, req driving.Gener
 
 	existing, err := s.fs.ReadFile(targetPath)
 	if err != nil {
-		return driving.GenerateResponse{}, fmt.Errorf("%w: read %q: %v",
-			driving.ErrGenerateFileSystem, targetPath, err)
+		return driving.GenerateResponse{}, fmt.Errorf("generate: read %q: %w: %w",
+			targetPath, driving.ErrGenerateFileSystem, err)
 	}
 
 	renderedBlock, err := renderManagedBlockOnly(rendered, marker)
@@ -342,8 +448,8 @@ func (s *GenerateService) generateChangelog(_ context.Context, req driving.Gener
 		}, nil
 	}
 	if err := s.fs.WriteFile(targetPath, repaired, defaultFileMode); err != nil {
-		return driving.GenerateResponse{}, fmt.Errorf("%w: write %q: %v",
-			driving.ErrGenerateFileSystem, targetPath, err)
+		return driving.GenerateResponse{}, fmt.Errorf("generate: write %q: %w: %w",
+			targetPath, driving.ErrGenerateFileSystem, err)
 	}
 	s.logger.Info("generate: repaired Unreleased header",
 		"artifact", req.Artifact.String(), "path", relPath, "project", cfg.Project.Name)
@@ -495,15 +601,15 @@ func (s *GenerateService) generateManagedFile(
 
 	exists, err := s.fs.Exists(targetPath)
 	if err != nil {
-		return driving.GenerateResponse{}, fmt.Errorf("%w: Exists(%q): %v",
-			driving.ErrGenerateFileSystem, targetPath, err)
+		return driving.GenerateResponse{}, fmt.Errorf("generate: Exists(%q): %w: %w",
+			targetPath, driving.ErrGenerateFileSystem, err)
 	}
 
 	// State: absent — write the whole rendered template.
 	if !exists {
 		if err := s.fs.WriteFile(targetPath, rendered, defaultFileMode); err != nil {
-			return driving.GenerateResponse{}, fmt.Errorf("%w: write %q: %v",
-				driving.ErrGenerateFileSystem, targetPath, err)
+			return driving.GenerateResponse{}, fmt.Errorf("generate: write %q: %w: %w",
+				targetPath, driving.ErrGenerateFileSystem, err)
 		}
 		s.logger.Info("generate: created",
 			"artifact", req.Artifact.String(), "path", relPath, "project", cfg.Project.Name)
@@ -520,8 +626,8 @@ func (s *GenerateService) generateManagedFile(
 		// as a filesystem error rather than re-classify as absent —
 		// the user-visible message is more useful, and an immediate
 		// retry will hit the absent branch cleanly.
-		return driving.GenerateResponse{}, fmt.Errorf("%w: read %q: %v",
-			driving.ErrGenerateFileSystem, targetPath, err)
+		return driving.GenerateResponse{}, fmt.Errorf("generate: read %q: %w: %w",
+			targetPath, driving.ErrGenerateFileSystem, err)
 	}
 
 	// Extract the BEGIN..END region from the freshly-rendered template.
@@ -561,8 +667,8 @@ func (s *GenerateService) generateManagedFile(
 		return driving.GenerateResponse{}, fmt.Errorf("replace init block in %q: %w", relPath, err)
 	}
 	if err := s.fs.WriteFile(targetPath, updated, defaultFileMode); err != nil {
-		return driving.GenerateResponse{}, fmt.Errorf("%w: write %q: %v",
-			driving.ErrGenerateFileSystem, targetPath, err)
+		return driving.GenerateResponse{}, fmt.Errorf("generate: write %q: %w: %w",
+			targetPath, driving.ErrGenerateFileSystem, err)
 	}
 	s.logger.Info("generate: updated block",
 		"artifact", req.Artifact.String(), "path", relPath, "project", cfg.Project.Name)
@@ -713,7 +819,7 @@ func (s *GenerateService) collectDevcontainerForwardPorts(baseDir string, cfg ub
 	}
 	composeExists, err := s.fs.Exists(filepath.Join(baseDir, "compose.yaml"))
 	if err != nil {
-		return nil, fmt.Errorf("%w: Exists(compose.yaml): %v",
+		return nil, fmt.Errorf("generate devcontainer: Exists(compose.yaml): %w: %w",
 			driving.ErrGenerateFileSystem, err)
 	}
 	if !composeExists {
@@ -726,7 +832,7 @@ func (s *GenerateService) collectDevcontainerForwardPorts(baseDir string, cfg ub
 				"%w: compose.yaml is unparseable (%v); repair the YAML manually",
 				driving.ErrGenerateManualConflict, err)
 		}
-		return nil, fmt.Errorf("%w: collectActiveServicePorts: %v",
+		return nil, fmt.Errorf("generate devcontainer: collectActiveServicePorts: %w: %w",
 			driving.ErrGenerateFileSystem, err)
 	}
 	return ports, nil
@@ -781,8 +887,8 @@ func (s *GenerateService) planDevcontainerFile(
 	}
 	exists, err := s.fs.Exists(targetPath)
 	if err != nil {
-		return devcontainerFilePlan{}, fmt.Errorf("%w: Exists(%q): %v",
-			driving.ErrGenerateFileSystem, targetPath, err)
+		return devcontainerFilePlan{}, fmt.Errorf("generate: Exists(%q): %w: %w",
+			targetPath, driving.ErrGenerateFileSystem, err)
 	}
 	if !exists {
 		plan.action = devcontainerActionWrite
@@ -790,8 +896,8 @@ func (s *GenerateService) planDevcontainerFile(
 	}
 	existing, err := s.fs.ReadFile(targetPath)
 	if err != nil {
-		return devcontainerFilePlan{}, fmt.Errorf("%w: read %q: %v",
-			driving.ErrGenerateFileSystem, targetPath, err)
+		return devcontainerFilePlan{}, fmt.Errorf("generate: read %q: %w: %w",
+			targetPath, driving.ErrGenerateFileSystem, err)
 	}
 	start, end, err := classifyExistingBlock(existing, marker, relPath)
 	if err != nil {
@@ -846,12 +952,12 @@ func (s *GenerateService) executeDevcontainerPlans(plans []devcontainerFilePlan)
 func (s *GenerateService) writeDevcontainerNewFile(plan devcontainerFilePlan) error {
 	dir := filepath.Dir(plan.targetPath)
 	if err := s.fs.MkdirAll(dir, 0o755); err != nil {
-		return fmt.Errorf("%w: MkdirAll(%q): %v",
-			driving.ErrGenerateFileSystem, dir, err)
+		return fmt.Errorf("generate devcontainer: MkdirAll(%q): %w: %w",
+			dir, driving.ErrGenerateFileSystem, err)
 	}
 	if err := s.fs.WriteFile(plan.targetPath, plan.rendered, defaultFileMode); err != nil {
-		return fmt.Errorf("%w: write %q: %v",
-			driving.ErrGenerateFileSystem, plan.targetPath, err)
+		return fmt.Errorf("generate devcontainer: write %q: %w: %w",
+			plan.targetPath, driving.ErrGenerateFileSystem, err)
 	}
 	return nil
 }
@@ -862,8 +968,8 @@ func (s *GenerateService) writeDevcontainerBlockReplace(plan devcontainerFilePla
 		return fmt.Errorf("replace init block in %q: %w", plan.relPath, err)
 	}
 	if err := s.fs.WriteFile(plan.targetPath, updated, defaultFileMode); err != nil {
-		return fmt.Errorf("%w: write %q: %v",
-			driving.ErrGenerateFileSystem, plan.targetPath, err)
+		return fmt.Errorf("generate devcontainer: write %q: %w: %w",
+			plan.targetPath, driving.ErrGenerateFileSystem, err)
 	}
 	return nil
 }
@@ -895,7 +1001,15 @@ func validateAllowExternalFeatureSourcesEntries(sources []string) error {
 		return nil
 	}
 	if _, err := normaliseFeatureSources(sources); err != nil {
-		return fmt.Errorf("generate devcontainer: --allow-external-feature-sources: %w", err)
+		// Multi-`%w` (T3 R6-Festzurrung, T0-(e) Diagnostic-Code-Tabelle):
+		// ErrConfigValueInvalid für LH-FA-DEV-003-Klassifikation (Exit 10
+		// per cli.ExitCode) plus der raw err für errors.Is gegen normalise-
+		// interne Sentinels. Spec §720 fordert exakt LH-FA-DEV-003 / Exit 10
+		// für ungültige `--allow-external-feature-sources`-URLs; ohne den
+		// Sentinel-Wrap würde der CLI-Mapper auf Default-Branch
+		// LH-FA-CLI-006 / Exit 1 fallen.
+		return fmt.Errorf("generate devcontainer: --allow-external-feature-sources: %w: %w",
+			driving.ErrConfigValueInvalid, err)
 	}
 	return nil
 }
@@ -916,8 +1030,8 @@ func (s *GenerateService) applyAllowExternalFeatureSources(baseDir string, sourc
 	yamlPath := filepath.Join(baseDir, "u-boot.yaml")
 	body, err := s.fs.ReadFile(yamlPath)
 	if err != nil {
-		return fmt.Errorf("%w: read %q: %v",
-			driving.ErrGenerateFileSystem, yamlPath, err)
+		return fmt.Errorf("generate devcontainer: read %q: %w: %w",
+			yamlPath, driving.ErrGenerateFileSystem, err)
 	}
 	var cfg ubootYAMLConfig
 	if err := s.yaml.Unmarshal(body, &cfg); err != nil {
@@ -930,7 +1044,12 @@ func (s *GenerateService) applyAllowExternalFeatureSources(baseDir string, sourc
 	}
 	merged, err := normaliseFeatureSources(append(append([]string{}, existing...), sources...))
 	if err != nil {
-		return fmt.Errorf("generate devcontainer: --allow-external-feature-sources: %w", err)
+		// Multi-`%w` für LH-FA-DEV-003 (siehe validateAllowExternal-
+		// FeatureSourcesEntries-Kommentar). Hier seltener — die Vorab-
+		// Validierung im T3-Generate-Wrapper hat dieselbe Liste schon
+		// einmal geprüft, bevor irgendein FS-Side-Effect lief.
+		return fmt.Errorf("generate devcontainer: --allow-external-feature-sources: %w: %w",
+			driving.ErrConfigValueInvalid, err)
 	}
 	// NoOp short-circuit — every flag URL already in the list.
 	if equalAllowLists(existing, merged) {
@@ -945,12 +1064,12 @@ func (s *GenerateService) applyAllowExternalFeatureSources(baseDir string, sourc
 	cfg.Devcontainer.FeatureSources.Allow = merged
 	rewritten, err := s.yaml.Marshal(cfg)
 	if err != nil {
-		return fmt.Errorf("%w: marshal u-boot.yaml: %v",
+		return fmt.Errorf("generate devcontainer: marshal u-boot.yaml: %w: %w",
 			driving.ErrGenerateFileSystem, err)
 	}
 	if err := s.fs.WriteFile(yamlPath, rewritten, defaultFileMode); err != nil {
-		return fmt.Errorf("%w: write %q: %v",
-			driving.ErrGenerateFileSystem, yamlPath, err)
+		return fmt.Errorf("generate devcontainer: write %q: %w: %w",
+			yamlPath, driving.ErrGenerateFileSystem, err)
 	}
 	s.logger.Info("generate devcontainer: allowlist updated",
 		"added", len(merged)-len(existing), "total", len(merged))
