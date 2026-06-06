@@ -1,6 +1,6 @@
 # Slice V1: `generate --json` / `--dry-run` / `--diff` — Vier-Artefakt-Surface
 
-> **Status:** T0-Discovery + R1-R7 adressiert, `next/` (Lifecycle-Übergang aus `open/` nach fünf Pre-`next/`-Review-Runden; R6/R7 im `next/`-Status mit Implementation-Reality + Spec-Coverage + Test-Härte/Plan-Drift; 28 Findings gesamt: 7 HIGH, 17 MED, 4 LOW). Vierter Folge-Slice (4/9) des
+> **Status:** T0-Discovery + R1-R7 adressiert, `in-progress/` (Lifecycle-Übergänge: `open/` nach fünf Pre-`next/`-Runden, `next/` nach R6/R7; 28 Findings gesamt: 7 HIGH, 17 MED, 4 LOW). T1-Refactor läuft. Vierter Folge-Slice (4/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 4/9). Konsumiert das Pattern-Vorbild aus
