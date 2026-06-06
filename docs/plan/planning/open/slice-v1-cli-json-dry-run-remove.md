@@ -1,6 +1,6 @@
 # Slice V1: `remove --json` / `--dry-run` / `--diff` — Add-Inverse mit Purge-Gate
 
-> **Status:** T0-Discovery + R1/R2 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
+> **Status:** T0-Discovery + R1/R2/R3 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 5/9). Konsumiert das Pattern-Vorbild aus
@@ -195,15 +195,25 @@ docs-check).
   | Sentinel | LH-Code | Exit |
   | --- | --- | --- |
   | `ErrRemoveFileSystem` | `LH-NFA-REL-003` | 14 |
+  | `ErrConfirmerUnavailable` (NEU, T2; wrappt heutigen string-Error in `removeservice.go:171`) | `LH-FA-CLI-005A` | 10 |
+  | `ErrConfirmationRequired` | `LH-FA-INIT-005` | 10 |
   | `ErrServiceUnsupported` | `LH-FA-ADD-002` | 10 |
   | `ErrServiceUnregistered` | `LH-FA-ADD-007` | 10 |
   | `ErrServiceInconsistent` | `LH-FA-ADD-005` | 10 |
   | `ErrProjectNotInitialized` | `LH-FA-ADD-001` | 10 |
-  | `ErrConfirmationRequired` | `LH-FA-INIT-005` | 10 |
-  | `ErrConfirmerUnavailable` (NEU, T2; wrappt heutigen string-Error in `removeservice.go:171`) | `LH-FA-CLI-005A` | 10 |
   | `domain.ErrInvalidServiceName` | `LH-FA-INIT-006` | 10 |
   | `ErrConflictingModeFlags` (`--yes ⊕ --no-interactive`) | `LH-FA-CLI-005A` | 2 |
   | Default (unknown) | `LH-FA-CLI-006` | 1 |
+
+  **Tabellen-Reihenfolge = Switch-Reihenfolge** (R3-MED-F3-Fix):
+  Infrastruktur-Sentinels (`ErrRemoveFileSystem`,
+  `ErrConfirmerUnavailable`) stehen VOR `ErrConfirmationRequired`
+  und fachlichen Service-Sentinels, damit Multi-`%w`-Wraps (Go
+  1.20+) nicht versehentlich auf einen fachlich-Branch matchen.
+  T6-Pin verifiziert: ein konstruierter
+  `fmt.Errorf("%w: %w", ErrConfirmerUnavailable,
+  ErrConfirmationRequired)` MUSS `LH-FA-CLI-005A` / Exit 10
+  (I/O-Klasse), NICHT `LH-FA-INIT-005`.
 
 - **T0-(f)** **Envelope-`data`-Form festgezurrt**: Success-Envelope
   trägt `data: {"service": "<…>", "priorState": "<…>", "state":
@@ -225,16 +235,23 @@ docs-check).
   `message`-Text plus `data.volumesPurged`-Status. Pinnbar via
   `jsontestutil.AssertFullEnvelope`.
 
-  **Volume-Presence-Pflicht** (R2-MED-F5-Fix): WARN-Diagnostic
-  wird NUR emittiert wenn der Catalog-Entry tatsächlich Volumes
-  deklariert (`catalogueFor(svc).Volumes != nil`, analog
-  `planExtraFileDeletes` Z. 349). Bei einem zukünftigen Catalog-
-  Entry ohne Volumes (z. B. Config-only Add-on) wäre eine WARN
-  semantisch falsch ("Purge deferred" obwohl es nichts zu purgen
-  gibt). T6-Pin: `TestRemove_PurgeOnVolumelessService_NoWarn` —
-  Mock-Catalog mit `Volumes: nil`, `--purge --json` →
-  `diagnostics: []`, kein WARN-Eintrag, `data.volumesPurged:
-  false`. Pattern-Vorlauf für Keycloak/OTel-Catalog-Erweiterungen.
+  **Volume-Presence-Pflicht** (R2-MED-F5 + R3-HIGH-F1-Korrektur):
+  WARN-Diagnostic wird NUR emittiert wenn der Catalog-Entry
+  tatsächlich ein named volume deklariert. Echter Field-Name auf
+  der `serviceCatalogueEntry`-Struct
+  (`addservice_execute.go:190-224`): **`volumeOptional bool`**
+  — `false` heißt "Service hat ein named volume" (heute nur
+  postgres mit `volumeOptional: false`, `volumeRefLiteral:
+  "postgres-data"`). Keycloak und OTel sind `volumeOptional:
+  true` → kein named volume → keine WARN. KEIN erfundenes
+  `Volumes`-Feld; T3-Implementierung nutzt
+  `catalogueFor(svc).volumeOptional == false` als Check.
+  Pattern-Vorlauf bleibt für künftige `volumeOptional: true`-
+  Catalog-Entries (Keycloak/OTel sind heute Volumeless-Beispiele,
+  Mock nicht nötig). T6-Pin:
+  `TestRemove_PurgeOnVolumelessService_NoWarn` mit keycloak oder
+  otel als realistische Volumeless-Fixture → `diagnostics: []`,
+  kein WARN-Eintrag, `data.volumesPurged: false`.
 - **T0-(h)** **`--purge`-in-Dry-Run-Verhalten festgezurrt** (R1-
   HIGH-3-Fix): Dry-Run impliziert Null-Mutationen. Drei
   Vertragsränder gepinnt:
@@ -264,7 +281,7 @@ docs-check).
   `--purge --diff` ohne `--dry-run` (PreviewMode=PreviewAndApply)
   läuft der Confirmer-Gate REGULAR — Diff-Mode schreibt echt auf
   Disk. T6-Pins für PreviewAndApply + `--purge`:
-  (a) `--purge --diff --json` ohne `--yes` → defensiveNoopConfirmer
+  (a) `--purge --diff --json` ohne `--yes` → noopConfirmer
       (T0-(j)) → `ErrConfirmationRequired` Envelope, Exit 10,
       kein `changes[]` (Plan-Phase failt vor Execute).
   (b) `--purge --diff --json --yes` → Gate skipped, Execute läuft,
@@ -280,19 +297,24 @@ docs-check).
   ist eine Side-Effect-Dimension, kein Renderer-Pfad. Dry-Run +
   Purge ist semantisch konsistent: "zeige was Remove + Purge
   ändern WÜRDE", auch wenn der Gate-Run skipped wird.
-- **T0-(j)** **Confirmer-Swap-Pattern (NEU, R1-HIGH-2-Fix)**:
-  remove etabliert das Pattern; es ist NICHT geerbt von init
-  (init swappt nur ProgressPort, nicht Confirmer). Form:
+- **T0-(j)** **Confirmer-Swap-Mechanismus (NEU, R1-HIGH-2-Fix +
+  R3-HIGH-F2-Korrektur)**: NEU ist nur der **Swap-Mechanismus**
+  (request-time statt construction-time) — der `noopConfirmer`-
+  Helper selbst existiert bereits in `application/noop.go:17-33`
+  (M4 Confirmer-Port-Slice; `RemoveServiceService.NewRemove…`
+  `removeservice.go:48` nutzt ihn schon als nil-Fallback). Init
+  swappt nur ProgressPort, nicht Confirmer — der Swap-Mechanismus
+  ist hier neu, der Helper ist geerbt. Form:
   `req.SilenceConfirmer = flags.JSON`. Bei `--purge --json` ohne
-  `--yes`: ConfirmerPort wird auf einen `defensiveNoopConfirmer`
-  umgeswapt der `false, nil` returnt — `runPurgeGate`
-  (removeservice.go:173-176) wandelt das in
+  `--yes`: ConfirmerPort wird auf den existierenden
+  `noopConfirmer` umgeswapt der `false, nil` returnt —
+  `runPurgeGate` (removeservice.go:173-176) wandelt das in
   `ErrConfirmationRequired`. **Semantik-Klarstellung**: das ist
   KEIN Silencing (keine UX-Information-Verlust-Symmetrie zu
   noopProgress), sondern eine **bewusste Behaviour-Change** im
   JSON-Mode — User muss explizit `--yes` setzen um im
   JSON-Mode zu purgen. Pattern-Erbe-Disziplin T0-(a) Spalte
-  führt das als remove-spezifisch.
+  führt nur den Swap-Mechanismus als remove-spezifisch.
 
   **`--purge --yes --json`-Pfad** (R1-MED-5-Fix): bei
   `req.Yes==true` skipped runPurgeGate (Z. 162-164) ohne
@@ -320,14 +342,14 @@ docs-check).
 | T | Inhalt | LOC (Schätzung) | Voraussetzung |
 | - | ------ | --------------- | --- |
 | T0 | Discovery + Sub-Decisions (a)-(o) klären; Review-Runden | — (Plan) | — |
-| T1 | Refactor-Tranche (wenn überhaupt nötig — generate-Pattern ist etabliert; möglicher T1-Scope: noopConfirmer-Helper im application package, analog noopProgress) | ~30-60 | T0 |
+| T1 | **Entfällt** (R3-HIGH-F2-Fix): `noopConfirmer` existiert bereits seit M4 Confirmer-Port-Slice in `application/noop.go:17-33` und tut exakt was T0-(j) braucht (`ConfirmRemoveVolumes → false, nil`). `RemoveServiceService`-Konstruktor (`removeservice.go:48`) nutzt ihn schon als nil-Fallback. T3 swappt den existierenden Helper request-time, kein neuer Helper nötig. | — (entfällt) | T0 |
 | T2 | Port-Types: `RemoveServiceRequest.PreviewMode` + `SilenceConfirmer`-Feld, `RemoveServiceResponse.PlannedFiles`/`Changes`-Felder, **zwei neue Sentinels**: `ErrRemoveFileSystem` (FS-Klasse, T0-(d)) UND `ErrConfirmerUnavailable` (Confirmer-I/O-Error-Klasse, R2-HIGH-F1-Fix für T0-(e)-Tabelle). | ~90 | T0 |
-| T3 | Application-Layer: `RemoveServiceService.fsFactory` + `removeMu sync.Mutex` + `NewRemoveServiceServiceWithFactory` + `Remove()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; Multi-`%w`-Wrap an den ~6 FS-Wrap-Stellen; Confirmer-Swap auf noopConfirmer im JSON-Mode. | ~200 | T2 |
+| T3 | Application-Layer: `RemoveServiceService.fsFactory` + `removeMu sync.Mutex` + `NewRemoveServiceServiceWithFactory` + `Remove()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; **Multi-`%w`-Wrap an den 10 FS-Wrap-Stellen** (R3-MED-F4-Kalibrierung, T0-(d) Inventar); `ErrConfirmerUnavailable`-Sentinel-Wrap in `runPurgeGate` Z. 171; Confirmer-Swap auf existierenden `noopConfirmer` im JSON-Mode. | ~240 | T2 |
 | T4 | Composition-Root-Wiring `removeFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
-| T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`); **Pre-UC-Sentinel-Kanal** für `domain.ErrInvalidServiceName` und `ErrConflictingModeFlags`: müssen via `reportError`-Helper emittiert werden, NICHT durch Cobra-Default-Print (R1-LOW-7-Fix), damit der JSON-stdout-Cleanliness-Pin aus init T0-(o) hält. **Human-Mode-Diff-Renderer** (R2-LOW-F6-Fix): bei `--purge --diff` ohne `--json` bleibt die deferred-Volumes-Prosa auf `errOut`, NICHT im Diff-Body. T6-Pin: `TestRemove_PurgeHumanDiff_StderrSeparation` mit getrennten Buffer-Assertions. | ~250 | T1 + T2 |
+| T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`); **Pre-UC-Sentinel-Kanal** für `domain.ErrInvalidServiceName`, `ErrConflictingModeFlags` UND `getwd`-Failure (`fmt.Errorf("determine working directory: %w", err)`, R3-LOW-F6-Fix analog `init.go:221`): müssen via `reportError`-Helper emittiert werden, NICHT durch Cobra-Default-Print (R1-LOW-7-Fix), damit der JSON-stdout-Cleanliness-Pin aus init T0-(o) hält. **Human-Mode-Diff-Renderer** (R2-LOW-F6-Fix): bei `--purge --diff` ohne `--json` bleibt die deferred-Volumes-Prosa auf `errOut`, NICHT im Diff-Body. T6-Pin: `TestRemove_PurgeHumanDiff_StderrSeparation` mit getrennten Buffer-Assertions. | ~250 | T1 + T2 |
 | T6 | Acceptance-Tests: ~20-25 Tests (drei JSON-Modi + NoOp Single+Repeat + Mid-Write-Failure + ConfirmationRequired-Pfade × 3 Varianten + Service-Sentinels × 4 + WARNING-Migration-Pin + `--purge`-on/off × Dry-Run-Kombos (T0-(h)) + `--purge --yes --json` WarnOnly-Pin (T0-(j) R1-MED-5) + `ErrConflictingModeFlags`-Pin). R1-MED-6-Kalibrierung: ~600-700 LOC realistisch (Confirmer-Pattern-Neumuster zieht Test-Surface). | ~650 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe). | ~80 | T6 |
-| T8 | Closure: CHANGELOG, cli-json-output.md §6/§6.6/§7, roadmap, slice nach done/ mit DoD-Hash-Tabelle. | — (Doku) | T7 |
+| T8 | Closure: CHANGELOG, cli-json-output.md §6/§6.6/§7, roadmap, slice nach done/ mit DoD-Hash-Tabelle; **Carveout-Eintrag in `carveouts.md`** für deferred-Volume-Auto-Removal + WARN-on-Success-Semantik mit Trigger auf einen Volume-Auto-Removal-Folge-Slice (R3-MED-F5-Fix, Pattern-Vorbild `slice-v2-generate-devcontainer-rollback-aware-write`); ggf. **`open/`-Plan-Stub für den Trigger-Slice** anlegen analog generate's V2-Rollback-Stub. | — (Doku) | T7 |
 
 LOC-Bilanz vorläufig: ~1200-1400 (R1-MED-6-Kalibrierung —
 Confirmer-Swap-Pattern ist neu und nicht von init geerbt, zieht
@@ -382,6 +404,34 @@ normalisiert), `--no-interactive --json` ohne `--purge`
 WarnOnly-Statuskopplung. Confirmer-Pattern und `--purge`-
 Dimension bleiben die substanziellsten Eigenleistungs-Anteile;
 weitere Runden könnten Implementation-Reality (T3-T5) prüfen.
+
+## Review-Round-3 (Pre-`next/`)
+
+Implementation-Reality + Cross-Plan-Drift gegen den
+R2-konsolidierten Stub (`e921522`). Sechs Findings (2 HIGH,
+3 MEDIUM, 1 LOW), alle adressiert im selben Commit. Die zwei
+HIGH-Befunde sind echte API-Realitäts-Lücken die R1/R2 textuell
+übersehen haben.
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| F1 | HIGH | `catalogueFor(svc).Volumes != nil` ist erfundene API — `serviceCatalogueEntry` (`addservice_execute.go:190-224`) hat KEIN `Volumes`-Feld. Echte Felder: `volumeOptional bool`, `volumeRefLiteral string`. Plan-T6-Pin mit "Mock-Catalog `Volumes: nil`" nicht implementierbar | T0-(g) auf `catalogueFor(svc).volumeOptional == false` umgestellt; T6-Pin nutzt keycloak/otel als realistische Volumeless-Fixtures (heute existierende Catalog-Entries mit `volumeOptional: true`); kein Mock nötig |
+| F2 | HIGH | Confirmer-Helper-Triple-Drift: T0-(j)/(h) sprachen `defensiveNoopConfirmer`, T3 sprach `noopConfirmer`, T1 plante "noopConfirmer-Helper analog noopProgress bauen". Realität: `noopConfirmer` existiert seit M4 in `application/noop.go:17-33` und tut genau was T0-(j) braucht | Alle Plan-Stellen auf `noopConfirmer` vereinheitlicht; T1-Tranche entfällt komplett ("kein neuer Helper, nur Swap-Mechanismus request-time"); T0-(j) klargestellt: NEU ist nur der Swap-Mechanismus, der Helper ist M4-Erbe |
+| F3 | MEDIUM | T0-(e) Switch-Order-Tabelle hatte `ErrConfirmerUnavailable` NACH `ErrConfirmationRequired` — ein Multi-`%w`-Wrap mit beiden Sentinels würde falsch auf `LH-FA-INIT-005` matchen | Tabelle umsortiert: Infrastruktur-Sentinels (`ErrRemoveFileSystem`, `ErrConfirmerUnavailable`) VOR den fachlichen; expliziter "Tabellen-Reihenfolge = Switch-Reihenfolge"-Hinweis + T6-Multi-`%w`-Pin |
+| F4 | MEDIUM | T3-Cell sagte noch "~6 FS-Wrap-Stellen" — T0-(d) R2-F3 hatte schon auf 10 kalibriert | T3-Cell auf 10 Stellen nachgezogen; LOC 200→240; ErrConfirmerUnavailable-Wrap explizit ergänzt |
+| F5 | MEDIUM | Carveout-Inventarisierungs-Pflicht für WARN-on-Success-Pfad fehlt — generate hatte das Half-Write-State-Vorbild korrekt in `carveouts.md`+`open/`-Stub eingetragen, remove macht das nicht | T8-Cell um Carveout-Eintrag-Pflicht + ggf. open/-Trigger-Slice-Stub ergänzt (Pattern-Vorbild `slice-v2-generate-devcontainer-rollback-aware-write`) |
+| F6 | LOW | Pre-UC-Sentinel-Kanal-Liste in T5 unvollständig — `getwd`-Failure (`cli/remove.go:117-120`) fehlte, init's Pattern (`init.go:221`) zeigt es explizit | T5-Cell-Pre-UC-Liste um `getwd`-Failure-Pfad ergänzt |
+
+R3-Reviewer-Note: docs-check grün; Implementation-Reality-Pass
+deckte zwei HIGH-Findings auf die R1+R2 nicht erwischt haben —
+beide entstanden weil die Reviewer in R1/R2 Sub-Decisions
+textuell konsolidiert haben ohne Code-Lookup. Geprüfte Code-
+Realitäten ohne Befund: `ErrConfirmerUnavailable`-Wrap-Pfad an
+einer Stelle sauber etablierbar, `EnabledUnset`-Pfad-Reihenfolge
+konsistent mit `executeRemove`-Sequenz, AK Idempotenz-vs-
+EnabledUnset-Trennung lesbar, T0-(j) Selbstkonsistenz Recon vs
+AK, LOC-Bilanz T6 defensibel. Confirmer-Pattern nach F2-Fix
+deutlich kleiner (nur Swap-Mechanismus statt neuer Helper).
 
 ## Out of Scope
 
