@@ -1,6 +1,6 @@
 # Slice V1: `remove --json` / `--dry-run` / `--diff` — Add-Inverse mit Purge-Gate
 
-> **Status:** T0-Discovery + R1/R2/R3/R4/R5 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
+> **Status:** T0-Discovery + R1/R2/R3/R4/R5/R6 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 5/9). Konsumiert das Pattern-Vorbild aus
@@ -135,6 +135,15 @@ docs-check).
   `diagnostics[0].level == "warn"` AND `data.volumesPurged ==
   false`. Im JSON-Mode darf stderr nicht durch die
   WARNING-Prosa polluten.
+- ✅ **`ErrServiceUnregistered` ERROR-Pfad-Pin** (R6-MED-F3-Fix,
+  Symmetrie zum WARN-Pfad-Pin oben): `LH-FA-ADD-007` wird auch
+  als Error-Code für `ErrServiceUnregistered` genutzt (R5-F2
+  Multi-Use-Klarstellung). AK-Pin: `diagnostics[0].code ==
+  "LH-FA-ADD-007"` AND `diagnostics[0].level == "error"` AND
+  `status == "error"` AND `exitCode == 10`. Konsumenten
+  disambiguieren WARN-Pfad und ERROR-Pfad ausschließlich über
+  `(code, level)`-Tupel, nicht über Code allein. T6-Pin
+  `TestRemove_ServiceUnregisteredJSON_ErrorLevelCodePin`.
 - ✅ **Volumes-Purge-Status im Envelope**: `data.volumesPurged: false`
   in v0.3.0 (deferred), mit Hint-Diagnostic-Eintrag wenn `--purge`
   requested aber nicht ausgeführt (T0-(h)).
@@ -175,7 +184,8 @@ docs-check).
   Remove(req):
     LOCK removeMu                            # generateMu/initMu-Pattern
     confirmerSwap(req.SilenceConfirmer)     # NEUER Swap-Mechanismus T0-(j), INNERHALB Lock
-    fsSwap(req.PreviewMode != PreviewNone)   # init's Swap-Pattern
+    fs, recorder := s.selectFS(req.PreviewMode)  # recorder ist CALL-SCOPED, lokale Variable
+    fsSwap(fs)                               # init's Swap-Pattern
     state := detectServiceState(s.fs, s.yaml, ...)
     if state == Unregistered:    return early (ErrServiceUnregistered)
     if state == InconsistentYAML: return early (ErrServiceInconsistent)
@@ -184,11 +194,24 @@ docs-check).
     if req.PreviewMode != PreviewDryRun:     # T0-(h)(a) Skip-Logik
         runPurgeGate(req)
     executeRemove(...)
-    captures := recorder.Drain()             # vor Unswaps drainen
+    captures := recorder.Captured()             # vor Unswaps drainen
     fsUnswap; confirmerUnswap; UNLOCK         # Defer-Restore-Pattern analog init
     resp.PlannedFiles = mapCaptureToPlannedFiles(captures, req.BaseDir)
     return response
   ```
+
+  **Recorder-Lebensdauer-Invariante (R6-MED-F2-Fix)**: `recorder`
+  ist eine **lokale Variable im Wrapper**, NICHT ein Service-Feld
+  (analog `initproject.go:336` + `addservice.go:364`). Pattern:
+  pro Aufruf liefert die `fsFactory`-Closure (`cmd/uboot/main.go:
+  130-180`) eine **frische** `recordingfs.New(...)`-Instanz —
+  call-scoped. `recordingfs.Captured()` (`recordingfs.go:105-112`)
+  ist NICHT thread-safe; bei Service-Feld + parallelen Goroutinen
+  würden Captures der einen Goroutine in die Response der anderen
+  leaken. Plan-Vertrag: T6-Pin
+  `TestRemove_ConcurrentInvocationsSerializeSwaps` assertion
+  ergänzt, dass `resp1.PlannedFiles` und `resp2.PlannedFiles`
+  **disjunkte Capture-Sets** sind.
 
   **Race-Sicherheit (R5-HIGH-F1-Fix)**: ALLE Swaps (`confirmerSwap`,
   `fsSwap`) laufen **INNERHALB** der `removeMu`-Lock-Region. Außerhalb
@@ -499,7 +522,7 @@ docs-check).
 | T3 | Application-Layer: `RemoveServiceService.fsFactory` + `removeMu sync.Mutex` + `NewRemoveServiceServiceWithFactory` + `Remove()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; **Multi-`%w`-Wrap an den 10 FS-Wrap-Stellen** (R3-MED-F4-Kalibrierung, T0-(d) Inventar); `ErrConfirmerUnavailable`-Sentinel-Wrap in `runPurgeGate` Z. 171; Confirmer-Swap auf existierenden `noopConfirmer` im JSON-Mode. | ~240 | T2 |
 | T4 | Composition-Root-Wiring `removeFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
 | T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`); **Pre-UC-Sentinel-Kanal** (R4-LOW-F6-Klarstellung: Codepfade existieren bereits in `cli/remove.go:108-120`, NEU ist nur die Kanalisierung via `reportError` analog `init.go:205, 216, 221`) für `domain.ErrInvalidServiceName`, `ErrConflictingModeFlags` UND `getwd`-Failure (`fmt.Errorf("determine working directory: %w", err)`, R3-LOW-F6-Fix). Der `getwd`-Wrap trägt KEIN typed Sentinel und fällt in den Default-Branch `LH-FA-CLI-006` / Exit 1 (Pattern-Erbe von init T0-(o)); Mapper-Tabelle T0-(e) NICHT ergänzt. **Human-Mode-Diff-Renderer** (R2-LOW-F6-Fix): bei `--purge --diff` ohne `--json` bleibt die deferred-Volumes-Prosa auf `errOut`, NICHT im Diff-Body. T6-Pin: `TestRemove_PurgeHumanDiff_StderrSeparation` mit getrennten Buffer-Assertions. | ~250 | T1 + T2 |
-| T6 | Acceptance-Tests: ~20-25 Tests (drei JSON-Modi + NoOp Single+Repeat + Mid-Write-Failure + ConfirmationRequired-Pfade × 3 Varianten + Service-Sentinels × 4 + WARNING-Migration-Pin + `--purge`-on/off × Dry-Run-Kombos (T0-(h)) + `--purge --yes --json` WarnOnly-Pin (T0-(j) R1-MED-5) + `ErrConflictingModeFlags`-Pin). R1-MED-6-Kalibrierung: ~600-700 LOC realistisch (Confirmer-Pattern-Neumuster zieht Test-Surface). | ~650 | T5 |
+| T6 | Acceptance-Tests: ~20-25 Tests (drei JSON-Modi + NoOp Single+Repeat + Mid-Write-Failure + ConfirmationRequired-Pfade × 3 Varianten + Service-Sentinels × 4 + WARNING-Migration-Pin + `--purge`-on/off × Dry-Run-Kombos (T0-(h)) + `--purge --yes --json` WarnOnly-Pin (T0-(j) R1-MED-5) + `ErrConflictingModeFlags`-Pin). R1-MED-6-Kalibrierung: ~600-700 LOC realistisch (Confirmer-Pattern-Neumuster zieht Test-Surface). **Pin-Namen-Mapping** (R6-LOW-F4) — kanonische Tags pro Finding-Anker: `TestRemove_ConcurrentInvocationsSerializeSwaps` (R5-F1+R6-F2 Race+Recorder-Scope), `TestRemove_DryRun_DetectStateUsesCaptureFS` + `TestRemove_DryRunPurgeYes_NoConfirmerCall` (R4-F2 Control-Flow), `TestRemove_PurgeOnVolumelessService_NoWarn` (R3-F1 Volume-Presence), `TestRemove_PurgeYesJSON_WarnOnly` (R1-MED-5 + R5-F2 WARN-Pfad), `TestRemove_PurgeYesJSON_MidWriteFailure_ErrorOnly` (R4-F3 Variante A), `TestRemove_OtelExtraFileDelete_DiffHasDeleteHunk` (R4-F4 delete-Action), `TestRemove_PurgeHumanDiff_StderrSeparation` (R2-F6 stderr-Trennung), `TestRemove_ServiceUnregisteredJSON_ErrorLevelCodePin` (R6-F3 ERROR-Pfad-Symmetrie). Weitere ~12 Pins (Idempotenz-Repeat, EnabledUnset-Normalisierung, ManualConflict × 3 (R5-F3 Triple-Use), Service-Sentinels × 4, ConfirmerUnavailable-allein-Pfad (R2-F1), Multi-`%w`-Switch-Order-Defense (R3-F3), Read-Pfad-FS-Failure (R2-F3), `ErrConflictingModeFlags` (R1-F4)) lassen sich aus AK-Block + Sub-Decision-Pins direkt ableiten. | ~650 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe). | ~80 | T6 |
 | T8 | Closure: CHANGELOG, cli-json-output.md §6/§6.6/§7, roadmap, slice nach done/ mit DoD-Hash-Tabelle; **Carveout-Eintrag in `carveouts.md`** für deferred-Volume-Auto-Removal + WARN-on-Success-Semantik mit Trigger auf einen Volume-Auto-Removal-Folge-Slice (R3-MED-F5-Fix, Pattern-Vorbild `slice-v2-generate-devcontainer-rollback-aware-write`); ggf. **`open/`-Plan-Stub für den Trigger-Slice** anlegen analog generate's V2-Rollback-Stub. | — (Doku) | T7 |
 
@@ -633,6 +656,30 @@ sind alle in der Spec verankert und korrekt gemappt. F1 ist der
 substanziellste R5-Befund — Race-Bedingung wäre erst in
 Concurrent-Production-Tests aufgefallen. Plan-Konsistenz nach 5
 Runden weiterhin tragfähig.
+
+## Review-Round-6 (Pre-`next/`)
+
+Concurrency-Deep-Dive + T6-Test-Strategy-Vollständigkeit gegen
+den R5-konsolidierten Stub (`eb20830`). User-getriebene Runde
+nach dem R5-F1-Race-Befund. Vier Findings (1 HIGH, 2 MEDIUM,
+1 LOW):
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| F1 | HIGH | T0-(c) Skeleton verwendete `recorder.Drain()` — Real-API ist `recorder.Captured()` (`recordingfs.go:105`). Auch R5-F1-Adressierungs-Zelle hatte den Drift doppelt. Pattern-Erbe init (`initproject.go:358`) ruft `recorder.Captured()`. T3-Implementer würde Compile-Error sehen | Beide Stellen auf `recorder.Captured()` umgestellt (replace_all) |
+| F2 | MEDIUM | T0-(c) Skeleton ließ Recorder-Lebensdauer-Invariante offen — Plan-Vertrag dokumentierte nicht, dass `recorder` lokale Variable (call-scoped) ist. Service-Feld-Interpretation würde bei parallelen Goroutinen Captures leaken (recordingfs.Captured() NICHT thread-safe) | Skeleton expanded: `fs, recorder := s.selectFS(req.PreviewMode)` als lokale Variable explizit; neue Sub-Block "Recorder-Lebensdauer-Invariante" mit Pattern-Erbe-Verweis; T6-Pin-Erweiterung um disjunkte-Capture-Sets-Assertion |
+| F3 | MEDIUM | `LH-FA-ADD-007` ERROR-Pfad-Pin-Asymmetrie: AK-WARN-Migration hat expliziten `(code, level, volumesPurged)`-Triple-Pin, aber ERROR-Pfad (ErrServiceUnregistered) hat keinen symmetrischen `(code, level)`-Pin — laxer Implementer könnte WARN-Drift im ERROR-Pfad nicht erkennen | Neue AK-Zeile für ErrServiceUnregistered ERROR-Pfad-Pin: `code == "LH-FA-ADD-007"` AND `level == "error"` AND `exitCode == 10`; T6-Pin `TestRemove_ServiceUnregisteredJSON_ErrorLevelCodePin` |
+| F4 | LOW | Pin-Namen-Inventar nur 8 explizit; T6 zählt 20-25 — restliche ~12 Pins (Idempotenz, Sentinels, Switch-Order-Defense) ohne kanonische Tags | T6-Cell um Pin-Namen-Mapping erweitert mit kanonischen Tags für die 9 explizit benannten Pins plus Hinweis dass die weiteren ~12 aus AK-Block + Sub-Decision-Pins direkt ableitbar sind |
+
+R6-Reviewer-Note: docs-check grün. HIGH-Frequenz weiter
+fallend: R1=3, R2=1, R3=2, R4=2, R5=1, **R6=1**. F1
+ist ein 1-Char-Fix der zweimal im Plan vorkam — leicht zu
+übersehen ohne API-Lookup, lehrreich für Pattern-Erbe-
+Behauptungen. F2 ergänzt die Recorder-Scope-Invariante die R5-F1
+implizit gelassen hatte. F3 schließt eine Pin-Asymmetrie zwischen
+WARN- und ERROR-Pfad für denselben Code. F4 ist
+Inventarisierungs-Hygiene. Plan-Konsistenz nach 6 Runden ist
+stabil; weitere Runden bringen vermutlich nur LOW-Befunde.
 
 ## Out of Scope
 
