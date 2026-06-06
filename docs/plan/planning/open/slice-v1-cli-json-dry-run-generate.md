@@ -1,6 +1,6 @@
 # Slice V1: `generate --json` / `--dry-run` / `--diff` — Vier-Artefakt-Surface
 
-> **Status:** T0-Discovery, `open/`. Vierter Folge-Slice (4/9) des
+> **Status:** T0-Discovery + R1 adressiert, `open/`. Vierter Folge-Slice (4/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 4/9). Konsumiert das Pattern-Vorbild aus
@@ -72,7 +72,7 @@ Heute-Stand-Pre-Scan
 | --- | --- | --- | --- |
 | changelog Create/Update | `WriteFile` (Z. 289/344) | `CHANGELOG.md` | direkt |
 | readme/env-example (`generateManagedFile`) | `WriteFile` (Z. 504/563) | `README.md` / `.env.example` | direkt |
-| devcontainer Multi-File (`writeDevcontainerPlan`) | `MkdirAll` (Z. 848) + `WriteFile` × 2 (Z. 852/864) | `.devcontainer/devcontainer.json` + `.devcontainer/Dockerfile` | direkt; atomar-pflichtig |
+| devcontainer Multi-File (`writeDevcontainerPlan`) | `MkdirAll` (Z. 848) + `WriteFile` × 2 (Z. 852/864) | `.devcontainer/devcontainer.json` + `.devcontainer/Dockerfile` | direkt; **Phase-1-Pre-Write-Validation atomar** (Plan-Phase capturet keine Schreiboperation; `ErrGenerateManualConflict` returnt vor jedem Write), **Phase-2-Execute-Phase NICHT atomar** (Mid-Write zweiter File → Half-State auf Disk, T0-(i) Carveout) |
 | `--allow-external-feature-sources` u-boot.yaml-Mutation | `WriteFile` (Z. 951) | `u-boot.yaml` | direkt — Side-Effect aus Flag |
 
 Damit nutzt generate **2 von 8** Recorder-Mutations-Methoden
@@ -106,7 +106,9 @@ u-boot generate <artifact> --dry-run --diff --json
 
 Für `<artifact>` ∈ {changelog, readme, env-example, devcontainer}.
 
-`make test` + `make lint` + `make docs-check` grün.
+`make gates` grün (lint + test + coverage-gate ≥ 90 % + docs-check) —
+modifying-CLI-Slice schließt auf Hard-Gates-Form analog init/add,
+nicht auf reduziertem `make test + lint + docs-check`.
 
 ## Akzeptanzkriterien (vorläufig — T0-Review präzisiert)
 
@@ -128,12 +130,23 @@ Für `<artifact>` ∈ {changelog, readme, env-example, devcontainer}.
 - ✅ **RepairedManual-Diff**: changelog-only Sonderfall mit Single-
   Line-Insert (`## [Unreleased]`-Header) — Diff-Pin testet, dass
   Hunks korrekt rendern (Sub-Decision (h)).
-- ✅ **Devcontainer-Atomicity-Pin**: Mid-Write-Failure beim
-  zweiten der zwei Files → `plannedFiles[]` enthält **nur** die
-  Capture bis zur Failure-Stelle, `exitCode: 14`. Atomar-or-nothing
-  ist Application-Layer-Vertrag (existierender Code-Kommentar
-  `generate.go:623-625`), Sub-Decision (i) entscheidet, ob der
-  Recorder Roll-back-aware ist (Cluster-Out-of-Scope: nein).
+- ✅ **Devcontainer-Pre-Write-Validation-Pin**: Phase 1
+  (`planDevcontainerFiles`) ist atomar — wenn auch nur ein File
+  als present-no-block / malformed klassifiziert wird, returnt
+  der Use-Case `ErrGenerateManualConflict` (Exit 10) **ohne ein
+  einziges WriteFile**. Acceptance-Pin: `--dry-run --json` mit
+  einem manuell editierten `.devcontainer/devcontainer.json`
+  ohne Marker → `plannedFiles: []`, `diagnostics: [LH-FA-CLI-006
+  oder LH-FA-DEV-001]`, kein FS-Touch.
+- ✅ **Devcontainer-Phase-2-Half-Write-Carveout** (T0-(i)):
+  Mid-Write zweiter File in Phase 2 (`executeDevcontainerPlans`)
+  hinterlässt **halbgeschriebenen Zustand** auf Disk — File 1
+  ist committed, File 2 fehlt/teilweise. Carveout-Eintrag in
+  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
+  Carveouts mit Re-Trigger auf einen Devcontainer-Rollback-aware-
+  Slice (offen, V2-Scope; Cluster-Out-of-Scope per T0-(b) Variante 3).
+  Envelope-Form: `plannedFiles[]` zeigt File-1-Capture, `diagnostics[].file`
+  markiert File 2 als Failure-Position, `exitCode: 14`.
 - ✅ **`--allow-external-feature-sources`-Side-Effect-Capture**:
   die Mutation auf `u-boot.yaml` (Z. 951) wird im Recorder erfasst
   und erscheint als zusätzlicher `plannedFiles[]`-Eintrag mit
@@ -149,9 +162,14 @@ Für `<artifact>` ∈ {changelog, readme, env-example, devcontainer}.
   `jsonallowlist.go` (mit Sub-Decision: einer pro Artefakt
   `"u-boot generate changelog"` etc. oder nur die parent-Form? —
   Sub-Decision (l)).
-- ✅ **CLI-Pin-Tests**: ~16+ Acceptance-Tests (4 Artefakte × 4
-  Flag-Kombos plus NoOp/UpdatedBlock/RepairedManual/Devcontainer-
-  Atomicity-Special-Pins).
+- ✅ **CLI-Pin-Tests**: 4 Artefakte × 8 Flag-Kombinationen
+  (deckt die Aufhebungsbedingung 1:1 ab — die vier Human-Mode-
+  Pfade ohne JSON sind öffentlicher CLI-Vertrag und müssen
+  geprüft werden) plus NoOp/UpdatedBlock/RepairedManual/
+  Devcontainer-Phase-1-Validation/Devcontainer-Phase-2-Half-Write/
+  Allow-External-Side-Effect-Special-Pins. Total: ~36-40 Tests.
+  Helper-Pattern analog `initFixture(t, opts)` für TempDir +
+  u-boot.yaml-Setup (shared, ~80 LOC).
 - ✅ **`cli-json-output.md`-Update**: §6-Tabelle (generate→done),
   §6.5 neue Sektion, §7 Mutations-Matrix (generate-Zeile).
 - ✅ **CHANGELOG `### Added`-Eintrag** analog init mit Pattern-
@@ -181,12 +199,22 @@ Für `<artifact>` ∈ {changelog, readme, env-example, devcontainer}.
   Renderer macht full-file — Migration nötig?
 - **T0-(h)** **RepairedManual-Diff-Pin**: changelog-Header-Insert
   als minimaler Hunk.
-- **T0-(i)** **Devcontainer-Atomicity-Carveout**: Recorder ist
-  NICHT Roll-back-aware (Cluster-T0-(b) Variante 3 verworfen).
-  Mid-Write zweiter File → halbgeschriebener Zustand auf Disk;
-  `plannedFiles[]` zeigt nur File 1 + diag-Marker auf File 2.
-  Application-Code-Kommentar `generate.go:623-625` dokumentiert
-  die Pflicht — Sub-Decision pinnt das Acceptance-Verhalten.
+- **T0-(i)** **Devcontainer-Atomicity-Klärung**: das Application-
+  Code-Kommentar (`generate.go:618-624`) beschreibt **Pre-Write-
+  Validation-Atomicity** (Phase 1 ist atomar — kein WriteFile bei
+  Validation-Conflict), NICHT Roll-back-Atomicity in Phase 2.
+  Sub-Decision pinnt zwei Acceptance-Verhalten:
+  (a) Phase-1-Failure (manuell editierter devcontainer-File ohne
+      Marker) → `plannedFiles: []`, kein FS-Touch, Exit 10
+      (`LH-FA-DEV-001`).
+  (b) Phase-2-Mid-Write-Failure → File 1 committed, File 2 fehlt;
+      `plannedFiles[]` zeigt File 1, `diagnostics[].file` markiert
+      File 2, Exit 14 (`LH-NFA-REL-003`).
+  Der **Phase-2-Half-State** ist ein bewusster Carveout
+  ([[feedback_carveouts_need_plans]]); `carveouts.md`-Eintrag
+  mit Re-Trigger auf einen Devcontainer-Rollback-aware-Slice
+  (V2-Scope, Cluster-T0-(b) Variante 3 verworfen). Pre-Write-
+  Validation-Atomicity bleibt der ehrliche Vertrag.
 - **T0-(j)** **`--allow-external-feature-sources`-Side-Effect**:
   Mutation auf `u-boot.yaml` als zusätzlicher `plannedFiles[]`-
   Eintrag im Envelope. Diff zeigt YAML-Hunks. Acceptance-Pin
@@ -194,16 +222,28 @@ Für `<artifact>` ∈ {changelog, readme, env-example, devcontainer}.
 - **T0-(k)** Path-Anchor: `plannedFiles[].path` ist project-
   relativ (analog init T0-(k)) — `mapCaptureToPlannedFiles(records,
   baseDir)`-Erbe.
-- **T0-(l)** **Allowlist-Form**: parent `"u-boot generate"` oder
-  per-Artefakt? Init/add nutzen parent-only — Konsistenz-
-  Empfehlung.
+- **T0-(l)** **Allowlist-Form festgezurrt: parent-only**
+  `"u-boot generate"`. Per-Artefakt-Form (`"u-boot generate
+  changelog"` etc.) ist **nicht möglich** — `<artifact>` ist
+  ein Cobra-Positional-Argument, kein Subcommand, und
+  `cmd.CommandPath()` returnt für jedes Artefakt nur
+  `"u-boot generate"`. Per-Artefakt-Einträge würden die Reject-
+  Gate-Mechanik (`applyJSONRejectGate` in `jsonallowlist.go`)
+  niemals matchen — `--json` würde dauerhaft rejected bleiben.
+  Konsistenz zu init/add ist nebensächlich; der eigentliche
+  Grund ist die CommandPath-Semantik.
 - **T0-(m)** **Envelope-Shape**: `command="generate"` mit
   `subcommand="<artifact>"` (analog `template list`-Form), oder
   `command="generate"` ohne subcommand und Artefakt im `data`-
   Block?
-- **T0-(n)** **`Codes`-Map-Ergänzung**: generate-eigene Codes
-  (heute `LH-FA-GEN-001..005` im CLI, `LH-FA-DEV-001/003`, plus
-  geerbte `LH-NFA-REL-003`/`LH-FA-CLI-006`).
+- **T0-(n)** **`Codes`-Registry-Ergänzung NICHT nötig**: die
+  Codes-Map in `jsontestutil.DefaultAllowedCodes` (cli-json-output.md
+  §5) ist für tool-interne **dotted** Codes (`add.*`, `init.*`-
+  Style) gedacht — LH-Codes werden vom Acceptance-Helper bereits
+  generisch erlaubt (`LH-FA-GEN-001..005`/`LH-FA-DEV-001/003`/
+  `LH-NFA-REL-003`/`LH-FA-CLI-006` sind alle LH-präfixiert). T6
+  ergänzt keine Registry-Einträge; Doku-Update für §6.5
+  (Per-Command-Sektion) genügt.
 - **T0-(o)** Pre-`next/`-Review-Runden-Erwartung: init hatte
   3 vor `next/`, add hatte 5. Generate: ≥ 2 (Discovery-Tiefe +
   Adversarial).
@@ -227,13 +267,32 @@ keine `initGit`/`Progress`-Carveouts und schmalere FS-Surface,
 aber breiter als add (~1380? — add war Pattern-Founder mit viel
 Infrastruktur).
 
+## Review-Round-1 (Pre-`next/`)
+
+Eine adversarial-orientierte Review-Runde gegen den initialen
+Stub (`fbef9b5`). Fünf Findings (2 HIGH, 2 MEDIUM, 1 LOW), alle
+adressiert im selben Commit wie dieser R1-Block:
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| 1 | HIGH | Coverage-Gate fehlt im Slice-Abschluss (Aufhebungsbedingung nannte nur `test + lint + docs-check` — Code-ändernder modifying-CLI-Slice braucht `make gates`-Hard-Form mit coverage-gate ≥ 90 %) | Aufhebungsbedingung auf `make gates` umgestellt (inkl. expliziter Coverage-Gate-Pflicht) |
+| 2 | HIGH | Devcontainer-Atomicity-Widerspruch (Stub sagte „zwei Files atomar oder gar nicht", pinnte gleichzeitig Half-Write-State + Roll-back-aware Out-of-Scope) | Atomicity-Klärung in Pre-Scan-Tabelle und T0-(i): Phase 1 (`planDevcontainerFiles`) ist atomar (Pre-Write-Validation), Phase 2 (`executeDevcontainerPlans`) NICHT — Half-State ist bewusster Carveout mit `carveouts.md`-Eintrag und Re-Trigger auf späteren Rollback-Slice |
+| 3 | MEDIUM | Testmatrix deckt Aufhebungsbedingung nicht ab (8 Flag-Kombos pro Artefakt vs. AK-Plan 4×4 — Human-Mode-Pfade ohne JSON fehlten) | AK auf 4 Artefakte × 8 Flag-Kombos + Special-Pins erweitert, Total ~36-40 Tests |
+| 4 | MEDIUM | Per-Artefakt-Allowlist ist kein gültiger CommandPath (Cobra `cmd.CommandPath()` für `u-boot generate <artifact>` ist nur `"u-boot generate"`, weil `<artifact>` Positional-Arg ist; per-Artefakt-Einträge würden Reject-Gate nie matchen) | T0-(l) auf **parent-only** festgezurrt mit CommandPath-Semantik-Begründung |
+| 5 | LOW | Codes-Map-Ergänzung driftet gegen Registry-Konvention (LH-Codes sind im Test-Helper bereits generisch erlaubt; Registry ist für tool-interne dotted Codes) | T0-(n) auf „NICHT nötig" umgestellt — nur §6.5-Per-Command-Doku, keine Registry-Einträge |
+
+R1-Reviewer-Note: Markdown-Link-Sensor (`make docs-check`)
+und Spec-Anker-Bezüge sind grün; Pattern-Verweise auf
+PreviewMode/Recorder/Diff-Helper/Error-Emission existieren im
+aktuellen Code + done-Slices.
+
 ## Out of Scope
 
-- **Roll-back-aware Recorder** für Devcontainer-Atomicity:
-  Cluster-T0-(b) Variante 3 (ChangeSet-Pattern) ist V1-out-of-
-  scope. Mid-Write zweiter devcontainer-File hinterlässt
-  halbgeschriebenes File 1 auf Disk; `plannedFiles[]` zeigt
-  Position bis zur Failure-Stelle.
+- **Roll-back-aware Recorder** für Devcontainer-Phase-2-Atomicity
+  (Cluster-T0-(b) Variante 3 verworfen, V2-Scope). Phase 2-Mid-
+  Write hinterlässt halbgeschriebenes File 1 auf Disk; Carveout-
+  Eintrag in `carveouts.md` mit Re-Trigger auf einen späteren
+  Devcontainer-Rollback-Slice.
 - **HTTP- oder gRPC-Schnittstellen**: ADR-0010 schließt
   explizit aus.
 - **Schema-Versionierung** (`schemaVersion: 1`): siehe
