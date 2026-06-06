@@ -176,6 +176,24 @@ func (a *App) Execute(ctx context.Context, args []string, stdout, stderr io.Writ
 // flags; they are pure CLI-level mode switches.
 var ErrConflictingModeFlags = errors.New("--yes and --no-interactive are mutually exclusive")
 
+// ErrServiceNameMissing is returned by the `u-boot remove`
+// custom-Args-validator when the positional `<service>` argument is
+// absent (slice-v1-cli-json-dry-run-remove T0-(e) + R11-HIGH-F1 +
+// R12-HIGH-F1). Lives in the cli package (not in `driving`)
+// because the application service never sees this state — the
+// missing-arg condition is a pure CLI form-validation concern
+// (analog [ErrConflictingModeFlags]).
+//
+// Symmetrie-Bruch-Fix vs. `cobra.ExactArgs(1)`-Vorzustand: das
+// vorherige `cobra.ExactArgs(1)`-Guard feuerte VOR RunE und ließ
+// im --json-Pfad einen Konsumenten ohne Envelope auf stdout
+// zurück (Spec §1841 verletzt — eine JSON-Mode-Invocation MUSS
+// einen Envelope produzieren). Der neue Custom-`Args`-Validator
+// (`validateRemoveArgs`) emittiert den Envelope BEVOR er den
+// Sentinel an Cobra returnt; ExitCode-Mapping bleibt 2
+// (LH-FA-CLI-006).
+var ErrServiceNameMissing = errors.New("service name is required")
+
 // ErrInvalidTimeout is returned by the M6 up subcommand when
 // `--timeout` is a negative integer (LH-FA-UP-001 §965). The CLI
 // could not delegate that validation to the application service —
@@ -417,6 +435,7 @@ func isUsageError(err error) bool {
 	if errors.Is(err, ErrConflictingModeFlags) || errors.Is(err, ErrInvalidTimeout) ||
 		errors.Is(err, ErrInvalidLogsTail) ||
 		errors.Is(err, ErrJSONNotImplemented) ||
+		errors.Is(err, ErrServiceNameMissing) ||
 		errors.Is(err, driving.ErrArtifactUnknown) ||
 		errors.Is(err, driving.ErrTemplateConflictsWithFlag) {
 		return true

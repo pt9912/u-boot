@@ -18,12 +18,15 @@ import (
 // vgl. jsontestutil.DefaultAllowedCodes).
 //
 // Subcommand-Form-Inventar (13 Forms, slice-doctor §T0-(g)):
-//   - 4 Migrate: "u-boot doctor", "u-boot template list", "u-boot add",
-//     "u-boot init" (template list: Flag-Schnitt ohne Envelope-
-//     Migration — Carveout; add: voll-schema via slice-v1-cli-json-
-//     dry-run-add T4; init: voll-schema via slice-v1-cli-json-dry-
-//     run-init T5).
-//   - 8 Reject (heute): remove, up, down, logs, config (bare),
+//   - 6 Migrate: "u-boot doctor", "u-boot template list", "u-boot add",
+//     "u-boot init", "u-boot generate", "u-boot remove"
+//     (template list: Flag-Schnitt ohne Envelope-Migration —
+//     Carveout; add: voll-schema via slice-v1-cli-json-dry-run-add
+//     T4; init: voll-schema via slice-v1-cli-json-dry-run-init T5;
+//     generate: voll-schema via slice-v1-cli-json-dry-run-generate
+//     T5; remove: voll-schema via slice-v1-cli-json-dry-run-remove
+//     T5).
+//   - 7 Reject (heute): up, down, logs, config (bare),
 //     config get, config set, template (bare).
 //
 // Cluster-T_close: alle 13 in Allowlist ODER Mechanik komplett raus.
@@ -34,6 +37,7 @@ func jsonAllowlist() map[string]bool {
 		"u-boot add":           true, // slice-v1-cli-json-dry-run-add T4
 		"u-boot init":          true, // slice-v1-cli-json-dry-run-init T5
 		"u-boot generate":      true, // slice-v1-cli-json-dry-run-generate T5
+		"u-boot remove":        true, // slice-v1-cli-json-dry-run-remove T5
 	}
 }
 
