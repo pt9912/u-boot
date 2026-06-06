@@ -48,9 +48,14 @@ this file is the same format applied to u-boot itself.
   `mapInitErrorToDiagnostic` (`LH-FA-INIT-004` Marker-Kollision,
   `LH-FA-INIT-005` Force/Backup-Usage, `LH-FA-INIT-006` Name-
   Validierung); **neuer `driving.ErrInitFileSystem`-Sentinel**
-  als Multi-`%w`-Wrap auf neun FS-Wrap-Stellen (Switch-Order-
-  Pflicht: FS-first, weil Multi-`%w` sonst Exit-14 auf Exit-10
-  downgraded). Template-Modus (`init --template <name>`) ist in
+  als Multi-`%w`-Wrap auf fünf FS-Wrap-Stellen (vier direkte in
+  `initproject.go` — `MkdirAll` + drei `WriteFile`-Actions — plus
+  ein Caller-side Wrap auf das `runBackup`-Ergebnis, der typed
+  Backup-Sentinels durchreicht und nur rohe FS-Errors wrappt;
+  R3-Wrap-Strategie konsolidiert die ursprünglich pro
+  `backup.go`-Site geplanten Wraps auf den Aufruferand).
+  Switch-Order-Pflicht: FS-first, weil Multi-`%w` sonst Exit-14
+  auf Exit-10 downgraded. Template-Modus (`init --template <name>`) ist in
   V1 **mutex** zu `--dry-run`/`--diff` —
   `driving.ErrTemplateConflictsWithFlag` rejected die Kombination
   (Exit-Code 2, `LH-FA-CLI-006`); Template-Preview wandert in
