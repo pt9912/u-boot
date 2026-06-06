@@ -111,6 +111,22 @@ schreibt mindestens drei Side-Effects mit Cleanup-Pflicht:
    die `.bak.<n>`-Files am Ende der Erfolgs-Sequenz löschen,
    sonst bleiben sie als Scratch-Artefakte.
 
+**Heutige Sequenz-Reihenfolge** (`generate.go:636-672`):
+`validate → readConfig → collectPorts → planDevcontainerFiles →
+executeDevcontainerPlans → applyAllowExternalFeatureSources`. Die
+ersten vier sind read-only (Phase 1 ist Pre-Write-Validation
+atomar — keine Side-Effects); `MkdirAll('.devcontainer/')` läuft
+ERST in `executeDevcontainerPlans` (Z. 848). Damit ist die
+Three-Side-Effect-Liste oben für den aktuellen Code vollständig.
+
+**Trigger-Zukunftsfestigkeit**: falls eine Schema-Erweiterung
+(z. B. Dockerfile.dev, post-create-script) den Pre-Mkdir-Read-
+Sequenz verändert (Phase 1 schreibt vorab eine Markierungsdatei,
+oder Pre-Phase-2-Mkdir wandert vor `collectPorts`), wäre die
+Side-Effect-Liste neu zu skizzieren. Trigger-Slice prüft die
+Sequenz-Reihenfolge gegen den damals aktuellen Code; heutige
+Liste deckt heutige Realität ab.
+
 **Echte Acceptance-Pins (Trigger-Slice T6)**: zwei separate
 Failure-Injection-Tests, jeder deckt einen anderen
 Rollback-Pfad ab.

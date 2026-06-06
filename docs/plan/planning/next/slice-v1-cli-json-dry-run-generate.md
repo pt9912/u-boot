@@ -1,6 +1,6 @@
 # Slice V1: `generate --json` / `--dry-run` / `--diff` — Vier-Artefakt-Surface
 
-> **Status:** T0-Discovery + R1/R2/R3/R4/R5 adressiert, `next/` (Lifecycle-Übergang aus `open/` nach fünf Pre-`next/`-Review-Runden; 21 Findings gesamt: 4 HIGH, 14 MED, 3 LOW). Vierter Folge-Slice (4/9) des
+> **Status:** T0-Discovery + R1/R2/R3/R4/R5/R6 adressiert, `next/` (Lifecycle-Übergang aus `open/` nach fünf Pre-`next/`-Review-Runden; R6 im `next/`-Status mit Implementation-Reality + Spec-Coverage-Angle; 26 Findings gesamt: 6 HIGH, 16 MED, 4 LOW). Vierter Folge-Slice (4/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 4/9). Konsumiert das Pattern-Vorbild aus
@@ -77,6 +77,14 @@ Heute-Stand-Pre-Scan
 | devcontainer Multi-File (`writeDevcontainerPlan`) | `MkdirAll` (Z. 848) + `WriteFile` × 2 (Z. 852/864) | `.devcontainer/devcontainer.json` + `.devcontainer/Dockerfile` | direkt; **Phase-1-Pre-Write-Validation atomar** (Plan-Phase capturet keine Schreiboperation; `ErrGenerateManualConflict` returnt vor jedem Write), **Phase-2-Execute-Phase NICHT atomar** (Mid-Write zweiter File → Half-State auf Disk, T0-(i) Carveout) |
 | `--allow-external-feature-sources` u-boot.yaml-Mutation | `WriteFile` (Z. 951) | `u-boot.yaml` | direkt — Side-Effect aus Flag |
 
+Tabelle listet **Write/Mkdir**-Pfade (Recorder-relevant). Zusätzlich
+existieren ~10 **Read/Exists/Marshal**-Stellen mit
+`ErrGenerateFileSystem`-Wrap (Z. 138, 283-284, 304-305, 498-499,
+523-524, 716-717, 729-731, 784-785, 791-794, 918-921, 947-949 —
+R6-Audit). Recorder zeichnet Reads NICHT auf (immutable Operation),
+aber T3 muss ALLE FS-Wrap-Stellen auf Multi-`%w` migrieren — sonst
+ist die Switch-Order-Garantie löchrig (T0-(d)).
+
 Damit nutzt generate **2 von 8** Recorder-Mutations-Methoden
 direkt (`WriteFile`, `MkdirAll`) plus `--allow-external-feature-
 sources` als Side-Effect auf `u-boot.yaml` (auch `WriteFile`).
@@ -137,9 +145,21 @@ nicht auf reduziertem `make test + lint + docs-check`.
   eindeutig, ohne in das `changes[]`/`plannedFiles[]`-Schema
   einzugreifen (`jsontestutil.AssertFullEnvelope` bleibt
   unverändert anwendbar).
-- ✅ **NoOp-Pin**: `--dry-run --json` bei bereits idempotenter
-  Datei liefert `plannedFiles: []` UND `changes: []` (beide
-  Arrays leer), `data.action: "no-op"`, `status: ok`, Exit 0.
+- ✅ **NoOp-Pin (Single-Call)**: `--dry-run --json` bei bereits
+  idempotenter Datei liefert `plannedFiles: []` UND `changes:
+  []` (beide Arrays leer), `data.action: "no-op"`, `status: ok`,
+  Exit 0.
+- ✅ **Repeat-Idempotency-Pin** (`LH-FA-GEN-005` §1203-1213
+  Wiederholungs-Eigenschaft, Port-Vertrag generate.go:171-174
+  „calling `Generate` twice with the same request is safe"):
+  mindestens für **changelog** (wegen Hash-Heuristik-Fragilität
+  in `generate.go:249-265`) und **devcontainer** (wegen
+  Two-Phase): zweimaliger Aufruf hintereinander; zweiter Lauf
+  liefert `Action: NoOp`, `changes: []`, **0** Recorder-
+  Mutations-Records (Spy verifiziert), `data.action: "no-op"`
+  im JSON-Envelope. Single-Call-NoOp prüft nur Pre-existing-
+  Idempotenz; Repeat-Call prüft echte Wiederholungs-Sicherheit
+  über den vollen Use-Case-Pfad.
 - ✅ **UpdatedBlock-Hunks**: `--diff --json` bei `UpdatedBlock`
   rendert Hunks **nur** für den managed-block-Bereich (Sub-Decision
   (g): block-only vs. full-file-LCS). Envelope-Pin: `data.action:
@@ -187,6 +207,19 @@ nicht auf reduziertem `make test + lint + docs-check`.
   `diagnostics[].file: "<File 2-Pfad>"`, `exitCode: 14`.
   Konsistent mit init's Mid-Write-Failure-Pattern (init T6
   pinnt das genauso).
+  **Error-Envelope `data`-Form** (R6-Festzurrung, T0-(q) Sub-
+  Decision): der Error-Envelope trägt `data: {"artifact":
+  "<changelog|readme|env-example|devcontainer>"}` (ableitbar aus
+  `req.Artifact`), aber **kein `data.action`**-Feld (Use-Case-
+  Response auf Error-Pfad ist Zero-`GenerateResponse`, keine
+  Action existiert). T5-Pflicht: `writeErrorEnvelope`/
+  `reportError` werden für generate auf den neuen
+  `newDataEnvelope`-Konstruktor umgestellt und tragen das
+  Artefakt-`data` durch — entweder via neuer Signatur (`data
+  any`-Param) oder via generate-spezifischem Helper-Wrapper, der
+  vor dem Aufruf das Artefakt-`data` setzt. Sub-Decision (e) im
+  T5-Entwurf konkretisiert die Variante (Signatur-Erweiterung
+  vs. lokaler Wrapper).
 - ✅ **`--allow-external-feature-sources`-Side-Effect-Capture**:
   die Mutation auf `u-boot.yaml` (Z. 951) wird im Recorder erfasst
   und erscheint als zusätzlicher `plannedFiles[]`-Eintrag mit
@@ -225,9 +258,31 @@ nicht auf reduziertem `make test + lint + docs-check`.
   Lebensdauer-Pflicht erzwungen.
 - **T0-(c)** `GenerateService.fsFactory`-Form analog
   `InitProjectService.fsFactory`.
-- **T0-(d)** `ErrGenerateFileSystem`-Wrap-Audit: heute Single-`%w`
-  in den 7 WriteFile-Stellen + 1 MkdirAll-Stelle. T3 erweitert
-  auf Multi-`%w` analog init's Z. 925/967/1015/1117/1143-Stellen.
+- **T0-(d)** `ErrGenerateFileSystem`-Wrap-Audit (R6-Korrektur):
+  heute Single-`%w` an **~17 FS-Stellen** in `generate.go`,
+  nicht 8 — der ursprüngliche Stub zählte nur die Write/Mkdir-
+  Pfade. Realer Wrap-Inventar:
+  - **Write/Mkdir**: Z. 289/344 (changelog), Z. 504/563
+    (managedFile), Z. 852/864 (devcontainer), Z. 951 (yaml-
+    allowlist), Z. 848 (MkdirAll devcontainer-Dir) — 8 Stellen.
+  - **Read/Exists**: Z. 138 (readProjectConfig), Z. 283-284 +
+    Z. 304-305 (changelog Exists/Read), Z. 498-499 +
+    Z. 523-524 (managedFile), Z. 716-717 + Z. 729-731
+    (collectPorts compose), Z. 784-785 + Z. 791-794
+    (devcontainer), Z. 918-921 (yaml-allowlist Read),
+    Z. 947-949 (yaml Marshal) — ~10 Stellen.
+  - **Wrap-Form heute**: `fmt.Errorf("%w: <op>: %v",
+    driving.ErrGenerateFileSystem, err)` — Sentinel-`%w` plus
+    raw-`%v` (kein Multi-`%w`), `errors.Is(err, raw)` würde
+    NICHT matchen. T3 zieht auf Multi-`%w` nach (analog init's
+    `initproject.go:925/967/1015/1117/1143`-Stellen mit zwei
+    `%w`-Verbs).
+
+  T3 muss alle ~17 Stellen migrieren, nicht nur die 8 Write/
+  Mkdir. T6 erweitert die Switch-Order-Pflicht-Pin-Tests um
+  **mindestens einen Read-Pfad-FS-Failure-Test** (z. B. `ReadFile`-
+  Permission-Denied bei `applyAllowExternalFeatureSources`),
+  sonst ist die FS-first-Garantie löchrig.
 - **T0-(e)** **Switch-Order-Pflicht und Artefakt-Kontext** im
   neuen `mapGenerateErrorToDiagnostic`:
   (a) **Switch-Order**: ErrGenerateFileSystem FIRST (Multi-`%w`-
@@ -246,12 +301,25 @@ nicht auf reduziertem `make test + lint + docs-check`.
   | `ErrGenerateManualConflict` | readme | `LH-FA-GEN-003` | 10 |
   | `ErrGenerateManualConflict` | env-example | `LH-FA-GEN-004` | 10 |
   | `ErrGenerateManualConflict` | devcontainer | `LH-FA-DEV-001` | 10 |
+  | `ErrConfigValueInvalid` (`--allow-external-feature-sources` URL) | devcontainer | `LH-FA-DEV-003` | 10 |
   | `ErrArtifactUnknown` | * (alle) | `LH-FA-CLI-006` | 2 |
   | Default (unknown) | * (alle) | `LH-FA-CLI-006` | 1 |
 
   Switch-Order verbindlich: FS-first, dann ManualConflict
   (artefakt-spezifischer Code via `artifact`-Param), dann
-  ArtifactUnknown, dann Default.
+  ConfigValueInvalid (devcontainer-only, `--allow-external-
+  feature-sources`-URL-Reject — Spec §720 fordert exakt
+  `LH-FA-DEV-003`/Exit 10), dann ArtifactUnknown, dann Default.
+  **T3-Pflicht**: `validateAllowExternalFeatureSourcesEntries`
+  (`generate.go:893-901`) und `applyAllowExternalFeatureSources`
+  (`generate.go:912-934`) wrappen heute mit
+  `fmt.Errorf("generate devcontainer: …: %w", err)` ohne typed
+  Sentinel — Code-Kommentar in Z. 908-911 verspricht
+  `ErrConfigValueInvalid` aber wrappt ihn nicht. T3 zieht den
+  Sentinel-Wrap nach (Multi-`%w` analog FS-Wraps).
+  **T6-Pflicht**: Reject-Pin-Test für `--allow-external-feature-
+  sources <invalid-url> --json` → `code: "LH-FA-DEV-003"`,
+  `exitCode: 10`.
 - **T0-(f)** **Action-Klassifikation via `data.action` festgezurrt**
   (R3-Festzurrung, R2-Variante „kein Marker" verworfen, weil sie
   UpdatedBlock vs. RepairedManual nicht unterscheidbar machte):
@@ -361,8 +429,27 @@ nicht auf reduziertem `make test + lint + docs-check`.
   ergänzt keine Registry-Einträge; Doku-Update für §6.5
   (Per-Command-Sektion) genügt.
 - **T0-(o)** Pre-`next/`-Review-Runden-Erwartung: init hatte
-  3 vor `next/`, add hatte 5. Generate: ≥ 2 (Discovery-Tiefe +
-  Adversarial).
+  3 vor `next/`, add hatte 5. Generate steht nach R6 bei sechs
+  (R1-R6, 26 Findings); Konvergenz erreicht.
+- **T0-(q)** **Error-Envelope-`data`-Vertrag festgezurrt** (R6-
+  Finding 2): Success-Envelope trägt `data: {"artifact":
+  "<…>", "action": "<…>"}` (Top-Level-`data`-Feld, R3-
+  Festzurrung). Error-Envelope (Mid-Write-Failure, Validation-
+  Conflict, URL-Reject) trägt `data: {"artifact": "<…>"}`
+  **ohne `action`** — Use-Case-Response auf Error-Pfad ist
+  Zero-`GenerateResponse`, Action existiert nicht. Konsumenten
+  können daher Generate-Action im Erfolgsfall lesen
+  (`data.action`), im Fehlerfall nur das Artefakt
+  (`data.artifact`). Symmetrie zu init/add: dort trägt der
+  Error-Envelope kein `data` (init/add haben kein `data`-Feld);
+  generate ist hier abweichend, weil `data.artifact` für
+  multi-artifact-Kontext load-bearing ist (sonst wüssten
+  Konsumenten nicht, welches der vier Artefakte gefailt hat).
+  T5-Sub-Decision: entweder `writeErrorEnvelope`-Signatur um
+  `data any`-Param erweitern (zieht init/add mit hoch, gleicher
+  Constructor-Pfad), oder generate-lokaler Wrapper. Vorschlag:
+  Signatur-Erweiterung — niedriges Drift-Risiko, weil init/add
+  schlicht `nil` durchreichen.
 
 ## Tranchen (vorgeschlagen — präzisiert in T0-Outcomes)
 
@@ -371,10 +458,10 @@ nicht auf reduziertem `make test + lint + docs-check`.
 | T0 | Discovery + Sub-Decisions (a)-(o) klären; Review-Runden | — (Plan) | — |
 | T1 | Refactor-Tranche (wenn überhaupt nötig — generate hat schmalere FS-Surface; ggf. nur ErrGenerateFileSystem-Multi-`%w`-Audit oder gar kein T1) | ~30-80 | T0 |
 | T2 | Port-Types: `GenerateRequest.PreviewMode`, `GenerateResponse.PlannedFiles`/`Changes`-Felder. **`data.action`-Klassifikation** liegt im Envelope-Layer (T5), nicht im Port — die existierende `GenerateResponse.Action` (`GenerateAction`-Enum) wird in T5 zum `data.action`-String gerendert; keine neuen Port-Felder dafür (T0-(f) Festzurrung). `ErrGenerateFileSystem` ist schon da. | ~50 | T0 |
-| T3 | Application-Layer: `GenerateService.fsFactory` + `generateMu sync.Mutex` + `NewGenerateServiceWithFactory` + `Generate()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; Multi-`%w`-Wrap an den 8 FS-Wrap-Stellen. | ~200 | T2 |
+| T3 | Application-Layer: `GenerateService.fsFactory` + `generateMu sync.Mutex` + `NewGenerateServiceWithFactory` + `Generate()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; Multi-`%w`-Wrap an den **~17 FS-Wrap-Stellen** (T0-(d) Audit, R6-Kalibrierung — Write/Mkdir + Read/Exists/Marshal); `ErrConfigValueInvalid`-Sentinel-Wrap für `--allow-external-feature-sources`-URL-Reject (T0-(e) `LH-FA-DEV-003`-Pfad). | ~280 | T2 |
 | T4 | Composition-Root-Wiring `generateFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
 | T5 | CLI-RunE: `runGenerate` ruft generische Helper mit `command="generate"` (kein subcommand, T0-(m)), `mapErr=mapGenerateErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; **`mapGenerateErrorToDiagnostic(err, artifact)` neu mit Artefakt-Parameter** (T0-(e); per-Artefakt LH-Code für ErrGenerateManualConflict). `data.action` aus `resp.Action.String()` gerendert; `data.artifact` aus `req.Artifact.String()`. Helper-Generalisierung (`reportError`/`writeErrorEnvelope`) bleibt unverändert (Signatur trägt heute kein subcommand, T0-(m)). | ~200 | T1 + T2 (T4 für Run-time-Smoke, Code-parallelisierbar) |
-| T6 | Acceptance-Tests: 4 Artefakte × 8 Flag-Kombos (4 Human-Mode + 4 JSON, deckt Aufhebungsbedingung 1:1) + NoOp/UpdatedBlock/RepairedManual/Devcontainer-Phase-1-Validation/Devcontainer-Phase-2-Half-Write/Allow-External-Side-Effect-Pins; Helper `generateFixture(t, opts)` shared (~80 LOC). | ~640 | T5 |
+| T6 | Acceptance-Tests: 4 Artefakte × 8 Flag-Kombos (4 Human-Mode + 4 JSON, deckt Aufhebungsbedingung 1:1) + Single-Call-NoOp/Repeat-Idempotency-NoOp (changelog + devcontainer)/UpdatedBlock/RepairedManual/Devcontainer-Phase-1-Validation/Devcontainer-Phase-2-Half-Write/Allow-External-Side-Effect/**`--allow-external-feature-sources`-URL-Reject (LH-FA-DEV-003)**/Read-Pfad-FS-Failure (mindestens ein Pfad, T0-(d))-Pins; Helper `generateFixture(t, opts)` shared (~80 LOC). Total ~40-42 Tests. | ~680 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden). | ~80 | T6 |
 | T8 | Closure: CHANGELOG, cli-json-output.md §6/§6.5/§7, roadmap, slice nach done/ mit DoD-Hash-Tabelle. | — (Doku) | T7 |
 
@@ -471,6 +558,33 @@ Pin-Vollständigkeit. Drei MEDIUM-Findings, alle adressiert:
 
 R5-Reviewer-Note: docs-check grün; Stub konsolidiert ohne neue
 HIGH-Befunde; weitere Runden sind diminishing returns.
+
+## Review-Round-6 (`next/`, Implementation-Reality + Spec-Coverage)
+
+Sechste Runde gegen den nach `next/`-Übergang konsolidierten Stub
+(`2e3d577`), Angle: **Implementation-Reality-Audit** (jeder
+proposierte T1-T8-Inhalt gegen existierende Codebase belegt) +
+**Spec-Coverage-Audit** (jeder LH-Anker gegen `lastenheft.md`)
++ **Geerbte-Pattern-Check** (init-Vergleiche gegen done-File).
+Fünf Findings (2 HIGH, 2 MEDIUM, 1 LOW gegen V2-Stub):
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| 1 | HIGH | `LH-FA-DEV-003`-URL-Reject-Pfad nicht im Diagnostic-Code-Mapping abgebildet — Spec §720 fordert exakt `LH-FA-DEV-003`/Exit 10 bei ungültiger `--allow-external-feature-sources`-URL; heutiger Code (generate.go:898-933) wrappt ohne typed Sentinel; T0-(e)-Tabelle hatte keinen Eintrag → Acceptance-Test würde auf Default-Branch (`LH-FA-CLI-006`/Exit 1) fallen | T0-(e)-Tabelle um Zeile `ErrConfigValueInvalid | devcontainer | LH-FA-DEV-003 | 10` erweitert; Switch-Order-Block erweitert; T3-Pflicht für `ErrConfigValueInvalid`-Sentinel-Wrap nachgezogen; T6 um Reject-Pin-Test ergänzt; T3-LOC angehoben |
+| 2 | HIGH | `data.action` im Error-Envelope undefiniert — AK pinnte `data.action` für Success, Phase-2-Half-Write-AK schwieg; `writeErrorEnvelope` setzt heute `subcommand=""` hardcoded und hat keinen Daten-Slot → Vertragsambiguität | Phase-2-Half-Write-AK um Error-Envelope-`data`-Klärung ergänzt (`data.artifact` JA, `data.action` NEIN — Zero-Response auf Error-Pfad); **neue T0-(q)** Sub-Decision für volle Symmetrie-Klärung; T5-Pflicht: `writeErrorEnvelope`-Signatur um `data any`-Param erweitern (zieht init/add mit hoch — `nil` durchreichen) |
+| 3 | MEDIUM | `LH-FA-GEN-005`-Idempotenz nur Single-Call gepinnt; Spec §1203-1213 + Port-Vertrag generate.go:171-174 fordern Wiederholungs-Eigenschaft | Repeat-Idempotency-Pin in AK ergänzt (mindestens changelog wegen Hash-Heuristik + devcontainer wegen Two-Phase); zweiter Aufruf → `NoOp`, 0 Recorder-Mutations-Records (Spy), `data.action: "no-op"`. T6-Zelle um den Pin erweitert; Test-Total ~40-42 |
+| 4 | MEDIUM | T0-(d)-Wrap-Audit zählte 8 Stellen, real ~17 (Read-Pfade fehlten); Wrap-Form ist `%w: …: %v` (Single-`%w`) — kein Multi-`%w`-Pattern | T0-(d) auf ~17 Stellen kalibriert mit Code-Anker-Inventar (Write/Mkdir + Read/Exists/Marshal); Pre-Scan-Tabelle um Read-Pfad-Notiz; T3-LOC von ~200 auf ~280 angehoben; T6 um Read-Pfad-FS-Failure-Pin (mindestens einer) |
+| 5 | LOW (V2) | V2-Side-Effect-Liste übersah `collectDevcontainerForwardPorts`-Pre-Read-Sequenz; heutiger Flow ist konsistent (Reads laufen vor MkdirAll), aber V2-Stub nicht zukunftsfest gegen Schema-Erweiterung | V2-Stub um Sequenz-Reihenfolge-Notiz (heutige `generate.go:636-672`-Sequenz) + Trigger-Zukunftsfestigkeit-Hinweis ergänzt |
+
+R6-Reviewer-Note: docs-check grün. Implementation-Reality-Audit
+hat die Helper-Pattern (`mapCaptureToPlannedFiles`,
+`previewModeFromFlags`, Recorder-vor-Delegieren, init's Multi-`%w`)
+alle als real existierend bestätigt — Pattern-Erbe-Behauptungen
+tragen. Die Lücken lagen an den **Vertrags-Rändern** (neuer
+Spec-Anker nicht in Mapping; Error-Envelope-Symmetrie nicht
+durchspezifiziert) und an einer **Audit-Untererfassung** (Read-
+Pfade in Wrap-Inventar fehlten). Keine fundamentalen Plan-
+Reorganisationen nötig.
 
 ## Out of Scope
 
