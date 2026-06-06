@@ -92,6 +92,37 @@ zweite Rename/YAML-Write failt → Restore aktiviert, Disk-Zustand
 nach Aufruf == Disk-Zustand vor Aufruf (oder explizite Roll-back-
 Failure-Diagnostic)."
 
+**Rollback-Scope (R4-Finding 4)**: „Disk-Zustand vor Aufruf"
+umfasst MEHR als nur die zwei Devcontainer-Files. Phase 2
+schreibt mindestens drei Side-Effects mit Cleanup-Pflicht:
+
+1. **`.devcontainer/`-Verzeichnis selbst**: wird im Pre-Phase-2-
+   Schritt via `MkdirAll` erzeugt (`generate.go:848`). Existierte
+   das Verzeichnis vor dem Aufruf NICHT (Fresh-Project) und der
+   gesamte Aufruf failt → Rollback muss das leere
+   `.devcontainer/`-Dir wieder entfernen, sonst bleibt ein
+   Scratch-Artefakt zurück (Tree-Diff zeigt extra Dir).
+2. **`u-boot.yaml`-Allowlist-Mutation** (`generate.go:951`,
+   `applyAllowExternalFeatureSources`): wird LAST geschrieben.
+   Bei Failure NACH den zwei devcontainer-Files +
+   YAML-Mutation müssen ALLE drei zurückgesetzt werden.
+3. **Snapshot-Persistierung**: bei In-Memory-Buffer-Variante
+   harmlos; bei `.bak.<n>`-File-Variante muss der Cleanup-Pfad
+   die `.bak.<n>`-Files am Ende der Erfolgs-Sequenz löschen,
+   sonst bleiben sie als Scratch-Artefakte.
+
+**Echter Acceptance-Pin (Trigger-Slice T6)**: Failure-Injection
+auf einem **frischen Projekt ohne `.devcontainer/`-Dir** und
+ohne `feature-sources`-Block in `u-boot.yaml`. Pin:
+- vor dem Aufruf: `tree` zeigt nur die u-boot.yaml + restliche
+  Projekt-Files
+- generate devcontainer mit `--allow-external-feature-sources
+  https://...` (triggert alle drei Side-Effects)
+- WriteFile-Injection-Spy lässt File 2 (`Dockerfile`) failen
+- nach dem Aufruf: `tree` IDENTISCH zum Pre-State (kein leeres
+  `.devcontainer/`-Dir, keine `.bak.<n>`-Files, u-boot.yaml
+  byte-identisch zum Pre-State).
+
 ## Out of Scope (V1)
 
 - **Cluster-weiter ChangeSet-Pattern-Recorder** — bewusst V1-

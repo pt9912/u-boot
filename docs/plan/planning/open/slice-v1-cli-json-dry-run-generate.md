@@ -1,6 +1,6 @@
 # Slice V1: `generate --json` / `--dry-run` / `--diff` — Vier-Artefakt-Surface
 
-> **Status:** T0-Discovery + R1/R2/R3 adressiert, `open/`. Vierter Folge-Slice (4/9) des
+> **Status:** T0-Discovery + R1/R2/R3/R4 adressiert, `open/`. Vierter Folge-Slice (4/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 4/9). Konsumiert das Pattern-Vorbild aus
@@ -174,8 +174,19 @@ nicht auf reduziertem `make test + lint + docs-check`.
   [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
   Carveouts mit Re-Trigger auf einen Devcontainer-Rollback-aware-
   Slice (offen, V2-Scope; Cluster-Out-of-Scope per T0-(b) Variante 3).
-  Envelope-Form: `plannedFiles[]` zeigt File-1-Capture, `diagnostics[].file`
-  markiert File 2 als Failure-Position, `exitCode: 14`.
+  **Envelope-Form (Recorder-Realität, R4-Korrektur)**: der
+  `RecordingFileSystem.WriteFile`
+  (`recordingfs.go:139`) zeichnet den Aufruf **vor** dem
+  Delegieren auf — der fehlgeschlagene File-2-Write steht
+  deshalb in `plannedFiles[]` mit drin (planned[] = [File 1,
+  File 2]). `lastPlannedPath` (`erroremission.go:73, 86-90`)
+  liefert den letzten Eintrag, also File 2, als
+  `diagnostics[].file`. Korrekte Pin-Form: `plannedFiles[]`
+  enthält **beide** Captures (File 1 mit success-Content, File 2
+  mit attempt-Content); `diagnostics[].code: "LH-NFA-REL-003"`,
+  `diagnostics[].file: "<File 2-Pfad>"`, `exitCode: 14`.
+  Konsistent mit init's Mid-Write-Failure-Pattern (init T6
+  pinnt das genauso).
 - ✅ **`--allow-external-feature-sources`-Side-Effect-Capture**:
   die Mutation auf `u-boot.yaml` (Z. 951) wird im Recorder erfasst
   und erscheint als zusätzlicher `plannedFiles[]`-Eintrag mit
@@ -241,20 +252,39 @@ nicht auf reduziertem `make test + lint + docs-check`.
   Switch-Order verbindlich: FS-first, dann ManualConflict
   (artefakt-spezifischer Code via `artifact`-Param), dann
   ArtifactUnknown, dann Default.
-- **T0-(f)** **NoOp-Envelope-Form festgezurrt**: NoOp produziert
-  `plannedFiles: []` UND `changes: []` (beide Arrays leer). Ein
-  `changes`-Eintrag mit „nur `action`" ist **schema-illegal** —
-  der Acceptance-Helper (`jsontestutil.AssertFullEnvelope` →
-  `checkChanges` Z. 384-400) enforced `path` und `count` als
-  Pflichtfelder pro `changes[]`-Eintrag (Spec §365/§368). Action-
-  Klassifikation wird im JSON-Mode **nicht** über ein separates
-  Top-Level-Feld geführt — Konsumenten leiten NoOp aus
-  `len(plannedFiles)==0 && len(changes)==0` ab; Created/Updated-
-  Block/RepairedManual sind durch nicht-leere Arrays
-  identifizierbar. Begründung: keine Schema-Erweiterung über den
-  add/init-Stand hinaus, kein Drift gegen den existierenden
-  Helper. Human-Mode bleibt unverändert
+- **T0-(f)** **Action-Klassifikation via `data.action` festgezurrt**
+  (R3-Festzurrung, R2-Variante „kein Marker" verworfen, weil sie
+  UpdatedBlock vs. RepairedManual nicht unterscheidbar machte):
+  Generate-Action wird im Voll-Schema-Envelope als
+  `data.action: "<created|updated-block|no-op|repaired-manual>"`
+  getragen. NoOp produziert zusätzlich `plannedFiles: []` UND
+  `changes: []` (beide leer; ein `changes`-Eintrag mit „nur
+  `action`" wäre schema-illegal — `jsontestutil.AssertFullEnvelope`/
+  `checkChanges` Z. 384-400 enforced `path`/`count` Pflicht pro
+  `changes[]`-Eintrag, Spec §365/§368). Created/UpdatedBlock/
+  RepairedManual produzieren nicht-leere Arrays; `data.action`
+  ist der eindeutige Discriminator zwischen UpdatedBlock und
+  RepairedManual (beide haben `plannedFiles[i].action: "modify"`,
+  FS-semantisch identisch). Human-Mode bleibt unverändert
   (`printGenerateSummary`-Branches).
+- **T0-(p)** **`cliJSONEnvelope.Data`-Feld-Migration vorgezogen**
+  (R4-Finding 2): heutige `cliJSONEnvelope`
+  (`internal/adapter/driving/cli/jsonenvelope.go:38-44`) hat
+  **kein** `Data`-Feld — der Doctor-Slice-T0-(c)-Kommentar
+  reserviert es für den Template-Slice 9/9
+  (`newDataEnvelope`-Konstruktor + Pin-Test). Generate ist 4/9
+  und der **erste** Voll-Schema-Konsument mit Data-Feld-Bedarf
+  (`data.artifact` aus T0-(m) + `data.action` aus T0-(f)).
+  Sub-Decision: Generate-Slice **zieht die Migration vor** —
+  neue T1-Sub-Tranche oder T2-Erweiterung ergänzt
+  `Data any \`json:"data,omitempty"\`` plus
+  `newDataEnvelope(command, data, diags, exitCode)`-Konstruktor
+  mit Marshal-Pin-Test (analog Template-Slice-Plan §Akzeptanz-
+  kriterien H1-Finding). T8-Closure aktualisiert den
+  Template-Slice-Plan: Data-Feld wird dort nur noch genutzt,
+  nicht eingeführt; die ursprüngliche T1-Sub-Decision-Ownership
+  wandert hierher. Begründung: ohne diese Vorziehung kann
+  generate die T0-(f)/(m)-Verträge nicht umsetzen.
 - **T0-(g)** **UpdatedBlock-Diff-Granularität**: managed-block-
   only Hunks vs. full-file-LCS. Block-only ist semantisch sauber
   (User sieht NUR die u-boot-managed Änderung), aber existing
@@ -393,6 +423,25 @@ adressiert im selben Commit:
 R3-Reviewer-Note: docs-check grün, V2-Stub-Korrektur ist die
 wichtigste Erkenntnis (Stub hätte sonst eine falsche Lösung
 empfohlen, die den Carveout nicht schließt).
+
+## Review-Round-4 (Pre-`next/`)
+
+Vierte Runde gegen den R3-gepflegten Stub (`0edcf25`), Fokus
+Plan-Drift, Carveout-Inventarisierung-Sichtbarkeit und Recorder-
+Realität. Vier Findings (1 HIGH gegen V2-Stub/Roadmap, 3 MEDIUM
+gegen V1-Stub), alle adressiert im selben Commit:
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| 1 | HIGH | V2-Slice fehlte als Roadmap-Slice-Zeile (LH-FA-PROJDOCS-005 fordert Doppel-Sichtbarkeit in `carveouts.md` UND `roadmap.md`) | Neuer Roadmap-Eintrag in `roadmap.md` §AP-Tabelle für `slice-v2-generate-devcontainer-rollback-aware-write` mit Status `on hold pending trigger` und Carveout-Anker-Verweis |
+| 2 | MEDIUM | `data.action`/`data.artifact`-Vertrag widersprüchlich: AK forderte beide Felder, T0-(f) sagte aber gleichzeitig „nicht über separates Top-Level-Feld geführt" (R2-Drift). Zusätzlich: heutige `cliJSONEnvelope` hat **kein** `Data`-Feld (Doctor-Slice T0-(c) reserviert es für Template-Slice 9/9 mit `newDataEnvelope`-Konstruktor). | T0-(f)-Text konsolidiert auf R3-Festzurrung (`data.action` als eindeutiger Discriminator); R2-Drift-Sätze entfernt. **Neuer T0-(p)**: `cliJSONEnvelope.Data`-Feld-Migration aus Template-Slice 9/9 in den generate-Slice vorgezogen — Generate ist erster Data-Konsument, ergänzt `Data any \`json:"data,omitempty"\`` plus `newDataEnvelope`-Konstruktor in T1/T2-Sub-Tranche; T8-Closure pflegt den Template-Slice-Plan nach |
+| 3 | MEDIUM | Mid-Write-Envelope passt nicht zur Recorder-Semantik: Plan sagte `plannedFiles[]` zeigt File 1, `diagnostics[].file` markiert File 2 — aber `RecordingFileSystem.WriteFile` (`recordingfs.go:139`) zeichnet VOR dem Delegieren auf, der fehlgeschlagene Write steht also in `plannedFiles[]` mit drin | Devcontainer-Phase-2-Pin auf Recorder-Realität korrigiert: `plannedFiles[]` enthält BEIDE Captures (File 1 success-Content, File 2 attempt-Content), `lastPlannedPath` liefert File 2 als `diagnostics[].file` — konsistent mit init's Mid-Write-Failure-Pattern (init T6) |
+| 4 | MEDIUM | V2-Rollback-Skizze deckt Verzeichnis-/Scratch-State nicht ab: `MkdirAll` erstellt `.devcontainer/` vor Write-Sequenz; `.bak.<n>`-Snapshots wären Scratch-Artefakte. „Disk-Zustand nach Aufruf == vor Aufruf" muss diese explizit fordern. | V2-Stub um **Rollback-Scope-Erklärung** erweitert: drei Side-Effects (Dir-Anlage, YAML-Mutation, Snapshot-Persistierung); Acceptance-Pin auf frischem Projekt ohne `.devcontainer/`-Dir mit `tree`-Vergleich Pre-State == Post-State |
+
+R4-Reviewer-Note: docs-check grün; Pattern-Verweise konsistent
+nach Plan-Konsolidierung; Recorder-Code-Realität war der
+load-bearing Befund (Plan hatte init's eigenes Pattern nicht
+übernommen).
 
 ## Out of Scope
 
