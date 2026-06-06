@@ -1,6 +1,6 @@
 # Slice V1: `remove --json` / `--dry-run` / `--diff` — Add-Inverse mit Purge-Gate
 
-> **Status:** T0-Discovery + R1-R11 adressiert, `next/` (Lifecycle-Übergang aus `open/` nach elf Pre-`next/`-Review-Runden mit Asymptote-Bestätigung; 52 Findings gesamt: 15 HIGH, 23 MED, 14 LOW; HIGH-Frequenz konstant 1/Runde über R5-R11). Fünfter Folge-Slice (5/9) des
+> **Status:** T0-Discovery + R1-R12 adressiert, `next/` (Lifecycle-Übergang aus `open/` nach elf Pre-`next/`-Runden + 1 next/-Runde (R12) mit Implementation-Pre-Flight-Validation; 56 Findings gesamt: 16 HIGH, 25 MED, 15 LOW; HIGH-Frequenz konstant 1/Runde über R5-R12 (acht Runden Asymptote)). Fünfter Folge-Slice (5/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 5/9). Konsumiert das Pattern-Vorbild aus
@@ -141,13 +141,24 @@ docs-check).
   (`cli/remove.go:77`) **vor** RunE — der JSON-Helper aus T5
   wird NIE aufgerufen, Konsument bekommt KEINEN Envelope und
   Exit 2. Symmetrie-Bruch zu `remove "bad name" --json` (voller
-  Envelope mit `LH-FA-INIT-006`/Exit 10). **T5-Pflicht**:
-  Custom-`Args`-Validator statt `cobra.ExactArgs(1)`, der bei
-  `len(args)==0` einen `driving.ErrServiceNameMissing`-Sentinel
-  emittiert, den das `RunE` über den **vorgezogenen** Pre-UC-
-  Sentinel-Kanal via `reportError` in den Envelope kanalisiert
-  (`code: "LH-FA-CLI-006"` / `exitCode: 2`). Alternative:
-  PreRunE für Args-Check der den Sentinel emittiert. T6-Pin:
+  Envelope mit `LH-FA-INIT-006`/Exit 10). **T5-Pflicht
+  festgezurrt** (R12-MED-F2-Mechanismus): **Custom-`Args`-
+  Validator** als Closure die `*App` per Konstruktor-Closure-
+  Capture einfängt (analog `newRemoveCommand`-Form
+  `cli/remove.go:36-37` mit `a *App` im Outer-Scope); bei
+  `len(args)==0` returnt der Validator
+  `cli.ErrServiceNameMissing` (Layer-Heim CLI, R12-HIGH-F1).
+  **Pflicht-Begleit-Edit**: `Args: cobra.ExactArgs(1)` Z. 77
+  durch `Args: validateRemoveArgs(a)` ersetzen — `cobra.
+  ExactArgs(1)` würde sonst FRÜHER feuern und die Custom-Form
+  überstimmen. **PreRunE-Alternative verworfen**: Layer-Mismatch
+  (PreRunE feuert nach Args-Default, müsste `len(cmd.Args)`
+  re-checken — redundant) plus `cobra.ExactArgs(1)` müsste
+  trotzdem auf `cobra.ArbitraryArgs` umgestellt werden. Custom-
+  `Args`-Closure ist die schlankere Form. `RunE`-Pfad:
+  `reportError` mit dem Sentinel (`code: "LH-FA-CLI-006"` /
+  `exitCode: 2`); `data` ist `nil` weil kein Service-Kontext
+  vorhanden. T6-Pin:
   `TestRemove_NoPositionalArg_JSON_EmitsCLI006Envelope` mit
   empty `args[]` + `--json` → voller Envelope mit `command:
   "remove"`, `data: nil` (kein Service-Kontext), `code:
@@ -216,7 +227,7 @@ docs-check).
   ```
   Remove(req):
     LOCK removeMu                            # generateMu/initMu-Pattern
-    if req.SilenceConfirmer { confirmerSwap() }  # konditional analog init's SilenceProgress (R7-LOW-F4); INNERHALB Lock
+    if req.SilenceConfirmer { confirmerSwap() }  # konditional analog init's SilenceProgress (R7-LOW-F4); INNERHALB Lock; Mechanismus R12-F3 unten
     fs, recorder := s.selectFS(req.PreviewMode)  # recorder ist CALL-SCOPED, lokale Variable
     fsSwap(fs)                               # init's Swap-Pattern
     state := detectServiceState(s.fs, s.yaml, ...)
@@ -250,6 +261,25 @@ docs-check).
   `--purge --yes --json` Mid-Write-Failure — beide zeigen ohne
   WARN-Diagnostic im Envelope, aber aus unterschiedlichen
   Gründen.
+
+  **`confirmerSwap()`-Mechanismus festgezurrt** (R12-MED-F3-Fix):
+  Service-Field-Mutation mit defer-Restore analog init's
+  `s.progress`-Swap (`initproject.go:345-349`):
+
+  ```go
+  if req.SilenceConfirmer {
+      prevConfirmer := s.confirmer
+      s.confirmer = noopConfirmer{}
+      defer func() { s.confirmer = prevConfirmer }()
+  }
+  ```
+
+  Plan-Vertrag: `s.confirmer` wird MUTIERT (KEIN lokales
+  `effective`-Var), so dass `runPurgeGate` (Z. 158-178) ohne
+  Signature-Change die geswappte Form sieht. Lokale-Variable-
+  Variante (lokales `effective := noopConfirmer{}` + Signature-
+  Change auf runPurgeGate) ist **verworfen** — bräuchte
+  `runPurgeGate`-Refactor und bricht Pattern-Erbe init.
 
   **Recorder-Lebensdauer-Invariante (R6-MED-F2-Fix)**: `recorder`
   ist eine **lokale Variable im Wrapper**, NICHT ein Service-Feld
@@ -362,7 +392,7 @@ docs-check).
   | `ErrProjectNotInitialized` | `LH-FA-ADD-001` | 10 |
   | `domain.ErrInvalidServiceName` | `LH-FA-INIT-006` | 10 |
   | `ErrConflictingModeFlags` (`--yes ⊕ --no-interactive`) | `LH-FA-CLI-005A` | 2 |
-  | `ErrServiceNameMissing` (NEU T2, R11-HIGH-F1; ersetzt Cobra-Default für `cobra.ExactArgs(1)`-Miss) | `LH-FA-CLI-006` | 2 |
+  | `cli.ErrServiceNameMissing` (NEU **T5**, R11-HIGH-F1 + R12-HIGH-F1: Layer-Heim CLI-Adapter analog `cli.ErrConflictingModeFlags` `cli/cli.go:177`; KEIN driving-Sentinel weil Form-Validierungs-Sentinel vom CLI-Adapter emittiert, vom Use-Case nie gesehen) | `LH-FA-CLI-006` | 2 |
   | Default (unknown) | `LH-FA-CLI-006` | 1 |
 
   **Tabellen-Reihenfolge = Switch-Reihenfolge** (R3-MED-F3-Fix):
@@ -645,7 +675,7 @@ docs-check).
 | - | ------ | --------------- | --- |
 | T0 | Discovery + Sub-Decisions (a)-(o) klären; Review-Runden | — (Plan) | — |
 | T1 | **Entfällt** (R3-HIGH-F2-Fix): `noopConfirmer` existiert bereits seit M4 Confirmer-Port-Slice in `application/noop.go:17-33` und tut exakt was T0-(j) braucht (`ConfirmRemoveVolumes → false, nil`). `RemoveServiceService`-Konstruktor (`removeservice.go:48`) nutzt ihn schon als nil-Fallback. T3 swappt den existierenden Helper request-time, kein neuer Helper nötig. | — (entfällt) | T0 |
-| T2 | Port-Types: `RemoveServiceRequest.PreviewMode` + `SilenceConfirmer`-Feld, `RemoveServiceResponse.PlannedFiles`/`Changes`-Felder, **`RemoveServiceResponse.Warnings []driving.WarningEntry`-Feld** (R7-MED-F2-Fix + R8-MED-F2-Type-Klärung: neuer Port-Type `driving.WarningEntry struct { Code string; Level string; Message string }` analog `diagnosticItem`-Wire-Form — Layer-sauber (KEIN `domain.Diagnostic`-Wiederverwendung, weil dessen Severity-Enum + ID-Field semantisch mismatch zum Wire-Type ist). **Cluster-Vorlauf-Disziplin** (R9-MED-F2-Fix): Type ist bewusst generisch `driving.WarningEntry` benannt, NICHT `RemoveWarningEntry`, weil up/down's recreate-Warnings und config-set's value-warnings denselben Type erben werden (Cluster-Folge-Slices 6/9 + 8/9). Erste-Slice-Pattern-Last analog `PreviewMode`-Rename in init T0-(c). Use-Case ist Source-of-Truth für WARN (Catalog-Lookup für `volumeOptional`), CLI mapped via `mapWarningsToDiagnostics(resp.Warnings) []diagnosticItem`. Triviales Field-Mapping, kein Severity-Enum-zu-String-Cast nötig.), **zwei neue Sentinels**: `ErrRemoveFileSystem` (FS-Klasse, T0-(d)) UND `ErrConfirmerUnavailable` (Confirmer-I/O-Error-Klasse, R2-HIGH-F1-Fix für T0-(e)-Tabelle). | ~120 | T0 |
+| T2 | Port-Types: `RemoveServiceRequest.PreviewMode` + `SilenceConfirmer`-Feld, `RemoveServiceResponse.PlannedFiles`/`Changes`-Felder, **`RemoveServiceResponse.Warnings []driving.WarningEntry`-Feld** (R7-MED-F2-Fix + R8-MED-F2-Type-Klärung: neuer Port-Type `driving.WarningEntry struct { Code string; Level string; Message string; Subject string \`json:",omitempty"\` }` analog `diagnosticItem`-Wire-Form — Layer-sauber (KEIN `domain.Diagnostic`-Wiederverwendung, weil dessen Severity-Enum + ID-Field semantisch mismatch zum Wire-Type ist). **`Subject`-Feld** (R12-LOW-F4-Vorlauf): proaktiv eingeführt für up/down Multi-Service-WARN ("container 'postgres' will be replaced") + config-set Multi-Key-WARN; remove nutzt das Feld NICHT (`""`, omitempty), aber Pattern-Erbe für 6/9 + 8/9 ist proaktiv abgedeckt — kein breaking Type-Change im Cluster. **Cluster-Vorlauf-Disziplin** (R9-MED-F2-Fix): Type ist bewusst generisch `driving.WarningEntry` benannt, NICHT `RemoveWarningEntry`, weil up/down's recreate-Warnings und config-set's value-warnings denselben Type erben werden (Cluster-Folge-Slices 6/9 + 8/9). Erste-Slice-Pattern-Last analog `PreviewMode`-Rename in init T0-(c). Use-Case ist Source-of-Truth für WARN (Catalog-Lookup für `volumeOptional`), CLI mapped via `mapWarningsToDiagnostics(resp.Warnings) []diagnosticItem`. Triviales Field-Mapping, kein Severity-Enum-zu-String-Cast nötig.), **zwei neue Port-Sentinels** (R12-HIGH-F1-Layer-Korrektur, der dritte Sentinel `cli.ErrServiceNameMissing` lebt im CLI-Layer und wird in T5 etabliert): `ErrRemoveFileSystem` (FS-Klasse, T0-(d)) UND `ErrConfirmerUnavailable` (Confirmer-I/O-Error-Klasse, R2-HIGH-F1-Fix für T0-(e)-Tabelle). | ~120 | T0 |
 | T3 | Application-Layer: `RemoveServiceService.fsFactory` + `removeMu sync.Mutex` + `NewRemoveServiceServiceWithFactory` + `Remove()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; **Multi-`%w`-Wrap an den 8 FS-Wrap-Stellen** (R4-HIGH-F1-Klassifikations-Fix gegen R3-Initial-10, T0-(d) Inventar Z. 264-285); Z. 307 + Z. 330 separat mit `ErrServiceInconsistent`-Wrap (KEIN ErrRemoveFileSystem, fachlich-Klasse, T0-(d)); `ErrConfirmerUnavailable`-Sentinel-Wrap in `runPurgeGate` Z. 171; Confirmer-Swap auf existierenden `noopConfirmer` im JSON-Mode. | ~240 | T2 |
 | T4 | Composition-Root-Wiring `removeFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
 | T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`); **Pre-UC-Sentinel-Kanal** (R4-LOW-F6-Klarstellung: Codepfade existieren bereits in `cli/remove.go:108-120`, NEU ist nur die Kanalisierung via `reportError` analog `init.go:205, 216, 221`) für `domain.ErrInvalidServiceName`, `ErrConflictingModeFlags` UND `getwd`-Failure (`fmt.Errorf("determine working directory: %w", err)`, R3-LOW-F6-Fix). Der `getwd`-Wrap trägt KEIN typed Sentinel und fällt in den Default-Branch `LH-FA-CLI-006` / Exit 1 (Pattern-Erbe von init T0-(o)); Mapper-Tabelle T0-(e) NICHT ergänzt. **Human-Mode-Diff-Renderer** (R2-LOW-F6-Fix): bei `--purge --diff` ohne `--json` bleibt die deferred-Volumes-Prosa auf `errOut`, NICHT im Diff-Body. T6-Pin: `TestRemove_PurgeHumanDiff_StderrSeparation` mit getrennten Buffer-Assertions. | ~250 | T1 + T2 |
@@ -933,6 +963,30 @@ im Review-Verlauf). FMEA-Score 18/20 expliziter Plan-Pin + 2/20
 bewusste Carveouts = **20/20 Coverage**. Asymptote bestätigt
 über sieben Runden. Reviewer-Empfehlung wie R8/R9/R10: nach
 R11-Adressierung in `next/` migrieren.
+
+## Review-Round-12 (`next/`)
+
+R11-Fix-Validation + Implementation-Pre-Flight-Walk gegen den
+Post-Lifecycle-Stand (`0419747`). Vier Findings (1 HIGH, 2
+MEDIUM, 1 LOW). Achte Runde in Folge mit konstanter HIGH-
+Frequenz 1 (R5-R12) — Asymptote sehr stabil.
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| F1 | HIGH | `ErrServiceNameMissing` (R11-F1) wurde im `driving`-Package geplant — sollte aber CLI-Layer analog `cli.ErrConflictingModeFlags` (`cli/cli.go:177`). Form-Validierungs-Sentinel vom CLI-Adapter emittiert, UC sieht ihn nie. `isUsageError`-Klassifikator-Block-Layout würde brechen | T0-(e)-Tabelle: `cli.ErrServiceNameMissing` mit Begründung; T2-Cell stellt klar dass T2 nur zwei port/driving-Sentinels (FS + ConfirmerUnavailable) ergänzt; AK-Pin nennt CLI-Layer-Heim |
+| F2 | MEDIUM | T5-Pflicht offen zwischen Custom-`Args`-Validator und PreRunE — drei plausible Mechanismen, plus `cobra.ExactArgs(1)`-Wechsel ungenannt | T5-Pflicht festgezurrt: Custom-`Args`-Validator mit Konstruktor-Closure-Capture analog `newRemoveCommand`-Form; Pflicht-Begleit-Edit: `cobra.ExactArgs(1)` durch `validateRemoveArgs(a)` ersetzen. PreRunE-Alternative verworfen (Layer-Mismatch) |
+| F3 | MEDIUM | `confirmerSwap()`-Skeleton-Pseudo-Code zeigte nur Aufrufstelle, nicht Mechanismus — drei plausible Varianten (Service-Field-Mutation, lokale Variable, Wrapper-Func mit Signature-Change) | T0-(c) ergänzt um Go-Code-Block für die Festzurrung: Service-Field-Mutation mit defer-Restore analog init's `s.progress`-Swap (`initproject.go:345-349`); lokale-Variable-Variante verworfen weil runPurgeGate-Refactor nötig |
+| F4 | LOW | `driving.WarningEntry` ohne `Subject`-Feld — Cluster-Vorlauf-Gap für up/down Multi-Service-WARN | T2-Cell um `Subject string \`json:",omitempty"\``-Feld erweitert; remove nutzt es nicht (`""`-omitempty), aber up/down 6/9 + config-set 8/9 erben es ohne breaking Type-Change |
+
+R12-Reviewer-Note: docs-check grün. F1 ist Layer-Idiom-
+Konsistenz (Tag-1-Implementer-Showstopper für Cluster-Pattern-
+Erbe). F2 schließt R11-F1-Mechanismus-Lücke. F3 ist Skeleton-
+Mechanik-Präzision. F4 ist proaktive Cluster-Vorlauf-Disziplin.
+
+**Konvergenz-Bewertung:** achte Runde mit 1 HIGH-Frequenz seit
+R5. Reviewer-Empfehlung: nach R12 implementations-bereit;
+weitere Pre-Implementation-Runden brächten nur Hygiene-
+Variations.
 
 ## Out of Scope
 

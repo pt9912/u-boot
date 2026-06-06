@@ -368,7 +368,7 @@ Reihenfolge gemäß Cluster-T0-(e):
 | 2 | `slice-v1-cli-json-dry-run-add` | `add` (modifying, etabliert Full-Modus + RecordingFileSystem) | done (DoD-Hash-Tabelle im Slice-File) |
 | 3 | `slice-v1-cli-json-dry-run-init` | `init` | done (DoD-Hash-Tabelle im Slice-File) |
 | 4 | `slice-v1-cli-json-dry-run-generate` | `generate` | done (DoD-Hash-Tabelle im Slice-File) |
-| 5 | `slice-v1-cli-json-dry-run-remove` | `remove` | T0-Discovery + R1-R11 adressiert, `next/` |
+| 5 | `slice-v1-cli-json-dry-run-remove` | `remove` | T0-Discovery + R1-R12 adressiert, `next/` |
 | 6 | `slice-v1-cli-json-dry-run-up-down` | `up`, `down` (gebündelt, read-only Compose-Status) | offen |
 | 7 | `slice-v1-cli-json-dry-run-logs` | `logs` (Sub-Decision: JSON-Lines vs. Single-Envelope) | offen |
 | 8 | `slice-v1-cli-json-dry-run-config` | `config`, `config get`, `config set` (gebündelt, drei Formen) | offen |
