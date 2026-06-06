@@ -1,6 +1,6 @@
 # Slice V1: `remove --json` / `--dry-run` / `--diff` — Add-Inverse mit Purge-Gate
 
-> **Status:** T0-Discovery + R1-R7 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
+> **Status:** T0-Discovery + R1-R8 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 5/9). Konsumiert das Pattern-Vorbild aus
@@ -205,6 +205,8 @@ docs-check).
     if state == InconsistentYAML: return early (ErrServiceInconsistent)
     if state == Deactivated:     return no-op (KEIN runPurgeGate)
     # Active / EnabledUnset / InconsistentBlock:
+    if req.Purge && catalogueFor(svc).volumeOptional == false:
+        warnings = append(warnings, deferredVolumesWarning(svc))   # WARN VOR Gate/Execute (R8-MED-F3-Fix)
     if req.PreviewMode != PreviewDryRun:     # T0-(h)(a) Skip-Logik
         runPurgeGate(req)
     executeRemove(...)
@@ -213,6 +215,22 @@ docs-check).
     resp.PlannedFiles = mapCaptureToPlannedFiles(captures, req.BaseDir)
     return response
   ```
+
+  **WARN-Emission-Ort festgezurrt** (R8-MED-F3-Fix): die WARN-
+  Diagnostic für `--purge`-mit-Volume-Service wird **VOR**
+  `runPurgeGate` und **VOR** `executeRemove` an `warnings`
+  angehängt (lokale Variable im Wrapper). Das pinnt zwei
+  Eigenschaften: (1) der WARN-Eintrag ist auch im
+  `ErrConfirmationRequired`-Pfad sichtbar (User weiß: dein
+  `--purge` wäre eh deferred geworden), (2) der WARN-Eintrag ist
+  auch im Mid-Write-Failure-Pfad vorhanden, aber Variante A
+  (R4-F3) unterdrückt ihn dann zugunsten des Error-Diagnostics —
+  T5 mapped resp.Warnings ins Envelope NUR wenn kein
+  Error-Diagnostic existiert. Pattern-Pin im T6: zwei separate
+  Tests für `--purge --no-interactive --json` (kein `--yes`) und
+  `--purge --yes --json` Mid-Write-Failure — beide zeigen ohne
+  WARN-Diagnostic im Envelope, aber aus unterschiedlichen
+  Gründen.
 
   **Recorder-Lebensdauer-Invariante (R6-MED-F2-Fix)**: `recorder`
   ist eine **lokale Variable im Wrapper**, NICHT ein Service-Feld
@@ -370,9 +388,41 @@ docs-check).
   identisch droppen (Spec §1841 fordert Key-Presence-vs-Absence-
   Disambiguierung). Pattern-Erbe `cliJSONEnvelope.DryRun` /
   `Diff` (`jsonenvelope.go:34-37`) nutzt `*bool` aus genau diesem
-  Grund. T6-Pin verwendet `jsontestutil.AssertFullEnvelope`-Key-
-  Presence-Assertion (statt `false`-Vergleich) für Error-Envelope:
-  `volumesPurged`-Key MUSS abwesend sein, NICHT `false`.
+  Grund. **Konsistenz-Begründung vs. generate's
+  `Action string`-Pattern** (R8-LOW-F4): generate kommt mit
+  `string`-`omitempty` aus, weil `Action` einen klaren Empty-
+  Marker hat (Action ist `""` nur im Error-Pfad, Success-Strings
+  sind alle non-empty). Für `PriorState`/`State` gilt das auch
+  (Strings `"active"`/`"deactivated"`/`"enabled-unset"`), aber
+  `*string` ist defensiver gegen Default-`""`-Drift in
+  künftigen Domain-Erweiterungen. **`VolumesPurged` MUSS
+  `*bool`** weil `false` ein valider Success-Wert ist. Pattern-
+  Wahl konsistent: alle drei Felder Pointer, weil Symmetrie-
+  Pflicht gegen `VolumesPurged`-Vorgabe.
+
+  **T6 Helper-Gap-Notiz** (R8-HIGH-F1-Fix): Plan-AK pinnt Key-
+  Absence für Error-Envelope (`volumesPurged` MUSS abwesend sein,
+  NICHT `false`). `jsontestutil.AssertFullEnvelope` hat heute
+  KEINE `WithDataKeyAbsent`/`WithDataShape`-Option
+  (`jsontestutil.go:22-27` dokumentiert die kleine Helper-API
+  explizit als „vier Options decken alle Pin-Wünsche der Folge-
+  Slices ab"). Init/generate-Acceptance-Tests inspizieren `data`
+  per manuellem `env["data"].(map[string]any)["..."]`-Cast
+  (`init_acceptance_test.go:98, 134, 171, 226, 263`). **T6-
+  Implementer-Wahl**:
+  (a) **Helper-Erweiterung** in `jsontestutil` (eigene Sub-Tranche
+      T6-A: `WithDataKeyAbsent("volumesPurged")` /
+      `WithDataKeyPresent("volumesPurged", false)`) — saubere
+      Acceptance-API, Pattern-Vorlauf für künftige Slices die
+      `data`-Sub-Keys pinnen.
+  (b) **Manuelle Cast-Form** analog init/generate-Pattern —
+      kein Helper-Refactor, aber AK-Wortlaut "T6-Pin verwendet
+      `AssertFullEnvelope`-Key-Presence-Assertion" muss auf
+      "T6-Pin inspiziert `env["data"]`-map manuell" umformuliert.
+  Plan-Vorschlag: **Variante (a)** — Helper-Erweiterung in
+  T6-A-Sub-Tranche (+~50 LOC für 2 Options + Tests). Pattern-
+  Symmetrie zu `WithCommand`/`WithExpectedCodes` ist sauber, und
+  Folge-Slices (down, doctor-update) könnten den Helper erben.
 - **T0-(g)** **WARNING-Migration festgezurrt** (R1-HIGH-1-Fix +
   R2-MED-F5-Erweiterung): heutige `printRemoveSummary`-stderr-
   WARNING (Z. 163-171) bei `--purge && !VolumesPurged` wandert
@@ -556,7 +606,7 @@ docs-check).
 | - | ------ | --------------- | --- |
 | T0 | Discovery + Sub-Decisions (a)-(o) klären; Review-Runden | — (Plan) | — |
 | T1 | **Entfällt** (R3-HIGH-F2-Fix): `noopConfirmer` existiert bereits seit M4 Confirmer-Port-Slice in `application/noop.go:17-33` und tut exakt was T0-(j) braucht (`ConfirmRemoveVolumes → false, nil`). `RemoveServiceService`-Konstruktor (`removeservice.go:48`) nutzt ihn schon als nil-Fallback. T3 swappt den existierenden Helper request-time, kein neuer Helper nötig. | — (entfällt) | T0 |
-| T2 | Port-Types: `RemoveServiceRequest.PreviewMode` + `SilenceConfirmer`-Feld, `RemoveServiceResponse.PlannedFiles`/`Changes`-Felder, **`RemoveServiceResponse.Warnings []DiagnosticEntry`-Feld** (R7-MED-F2-Fix für WARN-Emission-Ort: Use-Case ist Source-of-Truth für WARN, weil er den Catalog-Lookup für `volumeOptional` kennt — CLI mapped via `mapWarningsToDiagnostics`-Helper auf `diagnosticItem`; Layer-Trennung sauber), **zwei neue Sentinels**: `ErrRemoveFileSystem` (FS-Klasse, T0-(d)) UND `ErrConfirmerUnavailable` (Confirmer-I/O-Error-Klasse, R2-HIGH-F1-Fix für T0-(e)-Tabelle). | ~110 | T0 |
+| T2 | Port-Types: `RemoveServiceRequest.PreviewMode` + `SilenceConfirmer`-Feld, `RemoveServiceResponse.PlannedFiles`/`Changes`-Felder, **`RemoveServiceResponse.Warnings []driving.WarningEntry`-Feld** (R7-MED-F2-Fix + R8-MED-F2-Type-Klärung: neuer Port-Type `driving.WarningEntry struct { Code string; Level string; Message string }` analog `diagnosticItem`-Wire-Form — Layer-sauber (KEIN `domain.Diagnostic`-Wiederverwendung, weil dessen Severity-Enum + ID-Field semantisch mismatch zum Wire-Type ist). Use-Case ist Source-of-Truth für WARN (Catalog-Lookup für `volumeOptional`), CLI mapped via `mapWarningsToDiagnostics(resp.Warnings) []diagnosticItem`. Triviales Field-Mapping, kein Severity-Enum-zu-String-Cast nötig.), **zwei neue Sentinels**: `ErrRemoveFileSystem` (FS-Klasse, T0-(d)) UND `ErrConfirmerUnavailable` (Confirmer-I/O-Error-Klasse, R2-HIGH-F1-Fix für T0-(e)-Tabelle). | ~120 | T0 |
 | T3 | Application-Layer: `RemoveServiceService.fsFactory` + `removeMu sync.Mutex` + `NewRemoveServiceServiceWithFactory` + `Remove()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; **Multi-`%w`-Wrap an den 10 FS-Wrap-Stellen** (R3-MED-F4-Kalibrierung, T0-(d) Inventar); `ErrConfirmerUnavailable`-Sentinel-Wrap in `runPurgeGate` Z. 171; Confirmer-Swap auf existierenden `noopConfirmer` im JSON-Mode. | ~240 | T2 |
 | T4 | Composition-Root-Wiring `removeFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
 | T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`); **Pre-UC-Sentinel-Kanal** (R4-LOW-F6-Klarstellung: Codepfade existieren bereits in `cli/remove.go:108-120`, NEU ist nur die Kanalisierung via `reportError` analog `init.go:205, 216, 221`) für `domain.ErrInvalidServiceName`, `ErrConflictingModeFlags` UND `getwd`-Failure (`fmt.Errorf("determine working directory: %w", err)`, R3-LOW-F6-Fix). Der `getwd`-Wrap trägt KEIN typed Sentinel und fällt in den Default-Branch `LH-FA-CLI-006` / Exit 1 (Pattern-Erbe von init T0-(o)); Mapper-Tabelle T0-(e) NICHT ergänzt. **Human-Mode-Diff-Renderer** (R2-LOW-F6-Fix): bei `--purge --diff` ohne `--json` bleibt die deferred-Volumes-Prosa auf `errOut`, NICHT im Diff-Body. T6-Pin: `TestRemove_PurgeHumanDiff_StderrSeparation` mit getrennten Buffer-Assertions. | ~250 | T1 + T2 |
@@ -739,6 +789,33 @@ T6-Acceptance-Pin-Form (Key-Presence-Assertion vs Zero-Value-
 Vergleich). F2 schließt eine Layer-Trennung sauber durch
 Response-Type-Erweiterung. F3 löst eine 6-Runden-überfällige
 TODO-Auflösung. F4 ist Pattern-Konsistenz mit init.
+
+## Review-Round-8 (Pre-`next/`)
+
+Stress-Test der R7-Festzurrungen + Test-Helper-Infrastruktur-
+Audit gegen den R7-konsolidierten Stub (`a6e01e7`). Vier
+Findings (1 HIGH, 2 MEDIUM, 1 LOW). HIGH-Frequenz weiterhin
+konstant 1/Runde seit R5 — Konvergenz-Asymptote.
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| F1 | HIGH | Plan T0-(f) verspricht `jsontestutil.AssertFullEnvelope`-Key-Presence-Assertion für `volumesPurged`-Absence-Pin — Helper hat das nicht (`jsontestutil.go:22-27` dokumentiert nur vier Options). init/generate-Tests inspizieren `data` per manuellem Cast. Plan-Vertrag vs. Helper-Realität klafft auseinander | T6-Helper-Gap-Notiz mit zwei Implementer-Wahlen: (a) Helper-Erweiterung als T6-A-Sub-Tranche (+~50 LOC für `WithDataKeyAbsent`/`WithDataKeyPresent`) oder (b) Manuelle Cast-Form analog init/generate. Plan-Vorschlag Variante (a) als Pattern-Vorlauf für Folge-Slices |
+| F2 | MEDIUM | T2 versprach `Response.Warnings []DiagnosticEntry` ohne Type-Definition — `DiagnosticEntry` existiert nicht; `domain.Diagnostic` hat Severity-Enum + ID-Field (semantischer Mismatch zur Wire-Form) | T2 erweitert um konkrete Type-Definition: neuer Port-Type `driving.WarningEntry struct { Code string; Level string; Message string }` analog `diagnosticItem`-Wire-Form; CLI mapped via `mapWarningsToDiagnostics`-Helper trivial. LOC ~110→~120 |
+| F3 | MEDIUM | WARN-Emission-Ort im Use-Case-Body offen — drei plausible Stellen (vor Gate, nach Execute, in Execute) ohne Pin in T0-(c)-Skeleton | Skeleton ergänzt: `if req.Purge && catalogueFor(svc).volumeOptional == false { warnings = append(...) }` VOR `runPurgeGate`. Begründung: WARN auch im ErrConfirmationRequired-Pfad sichtbar (semantisch korrekt — User weiß, dass Purge eh deferred wäre); T5 unterdrückt WARN bei Error-Diagnostic (R4-F3-Variante-A). Zwei separate T6-Tests pinnen die Unterdrückung |
+| F4 | LOW | `*bool` für VolumesPurged vs. `string`-omitempty für generate's Action — Pattern-Inkonsistenz ohne Begründung | T0-(f) Klarstellung: `VolumesPurged` MUSS `*bool` (false ist valider Success-Wert); `PriorState`/`State` Pointer für Symmetrie + Default-`""`-Drift-Schutz; generate's `string`-Pattern reicht weil Action-`""` klar Error-Marker ist |
+
+R8-Reviewer-Note: docs-check grün. F1 ist Plan-vs-Test-Helper-
+Realitäts-Lücke (spiegelbildlich zu R3-HIGH-F2 — dort Helper
+existierte, Plan plante Neubau; hier Plan plante Helper-Use,
+Helper-Surface fehlt). F2+F3 ist R7-F2-Cascade (Response.
+Warnings-Festzurrung zog Folge-Fragen nach sich). F4 ist
+Pattern-Konsistenz-Begründung.
+
+**Konvergenz-Bewertung:** HIGH-Frequenz konstant 1/Runde über
+vier Runden (R5-R8). Reviewer-Empfehlung: nach R8 in `next/`
+migrieren — weitere Runden würden vermutlich Implementation-
+Stress-Test-Befunde liefern die erst in T2/T3 auftauchen, oder
+F1-ähnliche Helper-Gap-Variationen produzieren.
 
 ## Out of Scope
 
