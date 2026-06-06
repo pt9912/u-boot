@@ -55,26 +55,42 @@ Plan-Stub bleibt `on hold` bis einer der folgenden Trigger feuert:
 Drei Optionen mit unterschiedlicher Tiefe:
 
 1. **Pre-Phase-2-Snapshot + Rollback-on-Failure**:
-   `executeDevcontainerPlans` liest File 1 vor dem Write in einen
-   Buffer (falls existing), schreibt File 1, schreibt File 2;
-   bei Failure → File 1 aus dem Buffer zurückschreiben (oder
-   löschen, wenn vorher nicht existiert hatte). Lokaler Fix
-   ohne Recorder-Architektur-Eingriff. Risiko: zweiter Failure
-   beim Rollback-Write hinterlässt dann erst recht inkonsistenten
-   State.
+   `executeDevcontainerPlans` snapshotted alle existing Files
+   in Buffer (oder als `.bak.<n>`), schreibt File 1, schreibt
+   File 2 (+ ggf. `u-boot.yaml`-Mutation); bei Failure → ALLE
+   commiteten Files aus Snapshot zurückschreiben oder löschen.
+   Lokaler Fix ohne Recorder-Architektur-Eingriff. **Echte
+   Multi-File-Atomicity** (alle-oder-keiner). Risiko:
+   zweiter Failure beim Rollback-Write hinterlässt
+   inkonsistenten State — Best-Effort-Rollback mit
+   ErrGenerateFileSystem-Wrap, der den Rollback-Failure-State
+   explizit signalisiert.
 2. **Per-Use-Case Roll-back-aware Recorder**: ChangeSet-Pattern
    (Cluster-T0-(b) Variante 3) speziell für `generate devcontainer`.
    Schmaler als Cluster-weit, weil Init/Add weiterhin
-   capture-only sind.
-3. **Atomare Rename-Strategie**: Files erst in
-   `<file>.tmp.<n>` schreiben, dann atomic `os.Rename` zum
-   final-Pfad. Disk-Full während des tmp-Writes ist
-   unkritisch; Rename ist auf POSIX atomar (gleiche Disk).
-   Nimmt Windows-Disk-Boundary-Edge-Case in Kauf.
+   capture-only sind. Semantisch sauberste Lösung, aber Architektur-
+   Eingriff (RecorderPort-Interface erweitern).
+3. **~~Per-File Temp+Rename~~ — verworfen**: Files in
+   `<file>.tmp.<n>` schreiben, dann je `os.Rename`. **Löst das
+   Multi-File-Problem NICHT**: wenn Rename 1 succeeds und
+   Rename 2 failt, bleibt File 1 committed, File 2 in tmp-
+   Zustand — exakt der Half-State, den V2 vermeiden will.
+   Per-File-Atomicity ≠ Multi-File-Atomicity. (R3-Finding
+   gegen die ursprüngliche Stub-Empfehlung.)
 
-**Bevorzugte Skizze**: Option 3 (atomare Rename-Strategie) —
-minimaler Eingriff, semantisch sauber, kein Architektur-
-Bruch. Trigger-Slice klärt Windows-Edge-Cases im Detail.
+**Bevorzugte Skizze**: **Option 1 (Snapshot + Rollback-on-
+Failure)** — minimaler Architektur-Eingriff bei echter Multi-
+File-Atomicity. Best-Effort-Rollback ist ehrlicher als
+falsche per-File-Atomicity-Versprechen. Trigger-Slice
+klärt: Snapshot-Form (In-Memory-Buffer vs. `.bak.<n>`-Files),
+Rollback-Sequenz (LIFO über commit-Liste), Rollback-Failure-
+Signalisierung (eigener Sentinel oder gewrappter
+ErrGenerateFileSystem mit Hinweis-Message).
+
+Failure-Injection-Pin im Trigger-Slice: „erste Datei committed,
+zweite Rename/YAML-Write failt → Restore aktiviert, Disk-Zustand
+nach Aufruf == Disk-Zustand vor Aufruf (oder explizite Roll-back-
+Failure-Diagnostic)."
 
 ## Out of Scope (V1)
 

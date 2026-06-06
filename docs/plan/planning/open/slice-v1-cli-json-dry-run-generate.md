@@ -1,6 +1,6 @@
 # Slice V1: `generate --json` / `--dry-run` / `--diff` — Vier-Artefakt-Surface
 
-> **Status:** T0-Discovery + R1/R2 adressiert, `open/`. Vierter Folge-Slice (4/9) des
+> **Status:** T0-Discovery + R1/R2/R3 adressiert, `open/`. Vierter Folge-Slice (4/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 4/9). Konsumiert das Pattern-Vorbild aus
@@ -116,34 +116,57 @@ nicht auf reduziertem `make test + lint + docs-check`.
 
 - ✅ Drei JSON-Pfade analog init (`runGenerate` ruft generische
   Helper mit `command="generate"` + `mapErr=mapGenerateErrorToDiagnostic`).
-- ✅ **Vier-Artefakt-Symmetrie**: identische Envelope-Shape unabhängig
-  vom Artefakt, mit `subcommand="<artifact>"` (oder `command="generate"`
-  + Artefakt im `data.artifact` — Sub-Decision (m)).
-- ✅ **Action-Klassifikation aus Envelope-Inhalt ableitbar** (T0-(f)
-  festgezurrt): Created/UpdatedBlock/RepairedManual produzieren
-  nicht-leere `plannedFiles[]` + `changes[]`-Arrays; NoOp
-  produziert beide Arrays leer. **Keine** Action-Marker-Schema-
-  Erweiterung (kein neues Top-Level-Feld, kein `kind` in
-  `changes[]`-Einträgen) — `jsontestutil.AssertFullEnvelope`
-  enforced `path`/`count` als Pflicht pro `changes[]`-Eintrag,
-  Action-Marker ohne `path` wäre schema-illegal.
+- ✅ **Vier-Artefakt-Symmetrie** (T0-(m) festgezurrt): identische
+  Envelope-Shape unabhängig vom Artefakt. **`command="generate"`,
+  kein `subcommand`-Feld** (Cobra-`<artifact>` ist Positional-Arg,
+  nicht Subcommand — analog T0-(l)-Allowlist). Artefakt wird in
+  `data.artifact: "<changelog|readme|env-example|devcontainer>"`
+  geführt. Helper-Signatur (`reportError`/`writeErrorEnvelope`/
+  `writeDiff`) bleibt unverändert — generate setzt nur `command`,
+  kein `subcommand`.
+- ✅ **Action-Klassifikation via `data.action`** (T0-(f)
+  festgezurrt): Generate-Action wird im Voll-Schema-Envelope
+  als Top-Level-Feld `data.action:
+  "<created|updated-block|no-op|repaired-manual>"` getragen
+  (schema-konform — `data` ist im Voll-Schema freies Feld).
+  Begründung: `plannedFiles[i].action` (`create|modify|delete`)
+  unterscheidet **nicht** zwischen `UpdatedBlock` (managed-block-
+  rewrite) und `RepairedManual` (Single-Line-Header-Insert) —
+  beide sind FS-semantisch `modify` mit nicht-leeren Arrays. Das
+  zusätzliche `data.action`-Feld macht die Generate-Semantik
+  eindeutig, ohne in das `changes[]`/`plannedFiles[]`-Schema
+  einzugreifen (`jsontestutil.AssertFullEnvelope` bleibt
+  unverändert anwendbar).
 - ✅ **NoOp-Pin**: `--dry-run --json` bei bereits idempotenter
-  Datei liefert `plannedFiles: []` UND `changes: []` (kein
-  WriteFile-Capture, beide Arrays leer), `status: ok`, Exit 0.
+  Datei liefert `plannedFiles: []` UND `changes: []` (beide
+  Arrays leer), `data.action: "no-op"`, `status: ok`, Exit 0.
 - ✅ **UpdatedBlock-Hunks**: `--diff --json` bei `UpdatedBlock`
   rendert Hunks **nur** für den managed-block-Bereich (Sub-Decision
-  (g): block-only vs. full-file-LCS).
+  (g): block-only vs. full-file-LCS). Envelope-Pin: `data.action:
+  "updated-block"`, `plannedFiles[i].action: "modify"`,
+  `plannedFiles[i].hunks[]` nicht-leer.
 - ✅ **RepairedManual-Diff**: changelog-only Sonderfall mit Single-
   Line-Insert (`## [Unreleased]`-Header) — Diff-Pin testet, dass
-  Hunks korrekt rendern (Sub-Decision (h)).
+  Hunks korrekt rendern (Sub-Decision (h)). Envelope-Pin:
+  `data.action: "repaired-manual"`, `plannedFiles[i].action:
+  "modify"` (FS-semantisch identisch zu UpdatedBlock — die
+  Unterscheidung lebt **nur** in `data.action`).
+- ✅ **Action-Diskriminations-Pin**: ein Acceptance-Test für
+  changelog setzt zwei Szenarien gegenüber — (a) managed-block-
+  ist-stale → `data.action: "updated-block"`, (b) `## [Unreleased]`-
+  Header fehlt → `data.action: "repaired-manual"`. Beide
+  produzieren identische `plannedFiles[i].action: "modify"`-
+  Form; `data.action` ist die einzige Discriminator-Quelle.
 - ✅ **Devcontainer-Pre-Write-Validation-Pin**: Phase 1
   (`planDevcontainerFiles`) ist atomar — wenn auch nur ein File
   als present-no-block / malformed klassifiziert wird, returnt
   der Use-Case `ErrGenerateManualConflict` (Exit 10) **ohne ein
   einziges WriteFile**. Acceptance-Pin: `--dry-run --json` mit
   einem manuell editierten `.devcontainer/devcontainer.json`
-  ohne Marker → `plannedFiles: []`, `diagnostics: [LH-FA-CLI-006
-  oder LH-FA-DEV-001]`, kein FS-Touch.
+  ohne Marker → `plannedFiles: []`, **`diagnostics[].code:
+  "LH-FA-DEV-001"`** (Devcontainer-Render-Spec, NICHT
+  `LH-FA-CLI-006` — der ist Default-Fallback und würde Drift
+  signalisieren), `exitCode: 10`, kein FS-Touch.
 - ✅ **Devcontainer-Phase-2-Half-Write-Carveout** (T0-(i)):
   Mid-Write zweiter File in Phase 2 (`executeDevcontainerPlans`)
   hinterlässt **halbgeschriebenen Zustand** auf Disk — File 1
@@ -194,9 +217,30 @@ nicht auf reduziertem `make test + lint + docs-check`.
 - **T0-(d)** `ErrGenerateFileSystem`-Wrap-Audit: heute Single-`%w`
   in den 7 WriteFile-Stellen + 1 MkdirAll-Stelle. T3 erweitert
   auf Multi-`%w` analog init's Z. 925/967/1015/1117/1143-Stellen.
-- **T0-(e)** **Switch-Order-Pflicht** im neuen
-  `mapGenerateErrorToDiagnostic`: ErrGenerateFileSystem FIRST,
-  weil Multi-`%w` sonst Exit-14 auf Exit-10 downgraded.
+- **T0-(e)** **Switch-Order-Pflicht und Artefakt-Kontext** im
+  neuen `mapGenerateErrorToDiagnostic`:
+  (a) **Switch-Order**: ErrGenerateFileSystem FIRST (Multi-`%w`-
+  Sicherheit, sonst Exit-14 → Exit-10-Downgrade);
+  (b) **Mapper-Signatur**: erweitert auf `(err error, artifact
+  domain.Artifact)`, weil `ErrGenerateManualConflict` pro Artefakt
+  einen anderen LH-Anker hat (siehe Tabelle unten). Add/Init haben
+  Single-Artefakt-Mapper und brauchen keinen Artefakt-Param —
+  generate ist hier abweichend.
+  (c) **Diagnostic-Code-Tabelle** (T6-Pin-Pflicht pro Zeile):
+
+  | Sentinel | Artefakt | LH-Code | Exit |
+  | --- | --- | --- | --- |
+  | `ErrGenerateFileSystem` | * (alle) | `LH-NFA-REL-003` | 14 |
+  | `ErrGenerateManualConflict` | changelog | `LH-FA-GEN-002` | 10 |
+  | `ErrGenerateManualConflict` | readme | `LH-FA-GEN-003` | 10 |
+  | `ErrGenerateManualConflict` | env-example | `LH-FA-GEN-004` | 10 |
+  | `ErrGenerateManualConflict` | devcontainer | `LH-FA-DEV-001` | 10 |
+  | `ErrArtifactUnknown` | * (alle) | `LH-FA-CLI-006` | 2 |
+  | Default (unknown) | * (alle) | `LH-FA-CLI-006` | 1 |
+
+  Switch-Order verbindlich: FS-first, dann ManualConflict
+  (artefakt-spezifischer Code via `artifact`-Param), dann
+  ArtifactUnknown, dann Default.
 - **T0-(f)** **NoOp-Envelope-Form festgezurrt**: NoOp produziert
   `plannedFiles: []` UND `changes: []` (beide Arrays leer). Ein
   `changes`-Eintrag mit „nur `action`" ist **schema-illegal** —
@@ -250,10 +294,20 @@ nicht auf reduziertem `make test + lint + docs-check`.
   niemals matchen — `--json` würde dauerhaft rejected bleiben.
   Konsistenz zu init/add ist nebensächlich; der eigentliche
   Grund ist die CommandPath-Semantik.
-- **T0-(m)** **Envelope-Shape**: `command="generate"` mit
-  `subcommand="<artifact>"` (analog `template list`-Form), oder
-  `command="generate"` ohne subcommand und Artefakt im `data`-
-  Block?
+- **T0-(m)** **Envelope-Shape festgezurrt**:
+  `command="generate"`, **kein `subcommand`-Feld**, Artefakt im
+  `data.artifact:
+  "<changelog|readme|env-example|devcontainer>"`. Begründung:
+  (1) Cobra-`<artifact>` ist Positional-Arg, kein Subcommand
+  (analog T0-(l)); ein synthetisches `subcommand`-Feld im
+  Envelope würde von der CLI-Layer-Realität abweichen.
+  (2) Die generischen Error-Emission-Helper (`reportError`/
+  `writeErrorEnvelope` etc.) setzen heute **kein** Subcommand —
+  bei Wahl von `subcommand="<artifact>"` wäre eine Helper-
+  Signatur-Erweiterung nötig (Drift-Risk gegen init/add).
+  Plus: Action-Klassifikation lebt ohnehin in `data.action`
+  (T0-(f)), so dass `data` der natürliche Träger für
+  Generate-spezifische Felder ist.
 - **T0-(n)** **`Codes`-Registry-Ergänzung NICHT nötig**: die
   Codes-Map in `jsontestutil.DefaultAllowedCodes` (cli-json-output.md
   §5) ist für tool-interne **dotted** Codes (`add.*`, `init.*`-
@@ -272,10 +326,10 @@ nicht auf reduziertem `make test + lint + docs-check`.
 | - | ------ | --------------- | --- |
 | T0 | Discovery + Sub-Decisions (a)-(o) klären; Review-Runden | — (Plan) | — |
 | T1 | Refactor-Tranche (wenn überhaupt nötig — generate hat schmalere FS-Surface; ggf. nur ErrGenerateFileSystem-Multi-`%w`-Audit oder gar kein T1) | ~30-80 | T0 |
-| T2 | Port-Types: `GenerateRequest.PreviewMode`, `GenerateResponse.PlannedFiles`/`Changes`-Felder, Action-Marker-Feld (Sub-Decision (f)); `ErrGenerateFileSystem` ist schon da. | ~60 | T0 |
+| T2 | Port-Types: `GenerateRequest.PreviewMode`, `GenerateResponse.PlannedFiles`/`Changes`-Felder. **`data.action`-Klassifikation** liegt im Envelope-Layer (T5), nicht im Port — die existierende `GenerateResponse.Action` (`GenerateAction`-Enum) wird in T5 zum `data.action`-String gerendert; keine neuen Port-Felder dafür (T0-(f) Festzurrung). `ErrGenerateFileSystem` ist schon da. | ~50 | T0 |
 | T3 | Application-Layer: `GenerateService.fsFactory` + `generateMu sync.Mutex` + `NewGenerateServiceWithFactory` + `Generate()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; Multi-`%w`-Wrap an den 8 FS-Wrap-Stellen. | ~200 | T2 |
 | T4 | Composition-Root-Wiring `generateFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
-| T5 | CLI-RunE: `runGenerate` ruft generische Helper mit `command="generate"`, `mapErr=mapGenerateErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapGenerateErrorToDiagnostic` neu. | ~180 | T1 + T2 (T4 für Run-time-Smoke, Code-parallelisierbar) |
+| T5 | CLI-RunE: `runGenerate` ruft generische Helper mit `command="generate"` (kein subcommand, T0-(m)), `mapErr=mapGenerateErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; **`mapGenerateErrorToDiagnostic(err, artifact)` neu mit Artefakt-Parameter** (T0-(e); per-Artefakt LH-Code für ErrGenerateManualConflict). `data.action` aus `resp.Action.String()` gerendert; `data.artifact` aus `req.Artifact.String()`. Helper-Generalisierung (`reportError`/`writeErrorEnvelope`) bleibt unverändert (Signatur trägt heute kein subcommand, T0-(m)). | ~200 | T1 + T2 (T4 für Run-time-Smoke, Code-parallelisierbar) |
 | T6 | Acceptance-Tests: 4 Artefakte × 8 Flag-Kombos (4 Human-Mode + 4 JSON, deckt Aufhebungsbedingung 1:1) + NoOp/UpdatedBlock/RepairedManual/Devcontainer-Phase-1-Validation/Devcontainer-Phase-2-Half-Write/Allow-External-Side-Effect-Pins; Helper `generateFixture(t, opts)` shared (~80 LOC). | ~640 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden). | ~80 | T6 |
 | T8 | Closure: CHANGELOG, cli-json-output.md §6/§6.5/§7, roadmap, slice nach done/ mit DoD-Hash-Tabelle. | — (Doku) | T7 |
@@ -321,6 +375,24 @@ alle adressiert im selben Commit:
 
 R2-Reviewer-Note: docs-check grün, Pattern-Verweise weiterhin
 tragfähig.
+
+## Review-Round-3 (Pre-`next/`)
+
+Dritte Runde gegen den R2-gepflegten Stub (`cffda2c`), Fokus auf
+V2-Rollback-Korrektheit und Plan-interne Konsistenz. Vier
+Findings (1 HIGH gegen V2-Stub, 3 MEDIUM gegen V1-Stub), alle
+adressiert im selben Commit:
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| 1 | HIGH (V2) | V2-Stub bevorzugte Option 3 (per-File Temp+Rename) löste das Multi-File-Half-State-Problem NICHT — wenn Rename 1 succeeds und Rename 2 failt, bleibt File 1 committed. Per-File-Atomicity ≠ Multi-File-Atomicity. | V2-Stub bevorzugte Skizze auf **Option 1 (Snapshot + Rollback-on-Failure)** umgestellt — echte Multi-File-Atomicity mit Best-Effort-Rollback. Option 3 explizit als „verworfen" gelabelt. Failure-Injection-Pin im Trigger-Slice ergänzt: „erste Datei committed, zweite Rename/YAML-Write failt → Restore aktiviert" |
+| 2 | MEDIUM | Action-Vertrag widersprüchlich: AK fordert vier Generate-Actions, T0-(f) verbietet Action-Marker, T2 plante zugleich ein „Action-Marker-Feld". `plannedFiles[i].action: "modify"` unterscheidet UpdatedBlock und RepairedManual nicht. | T0-(f) auf **`data.action: "<…>"`** umgestellt (Top-Level-Voll-Schema-Feld in `data`, schema-konform). T2-Tranchen-Zelle: keine Port-Felder, Rendering im T5-Layer. Action-Diskriminations-Acceptance-Pin in den AK-Block (changelog UpdatedBlock vs. RepairedManual mit identischem `plannedFiles[i].action: "modify"`, Discriminator `data.action`) |
+| 3 | MEDIUM | Diagnostic-Code zu lose gepinnt (`[LH-FA-CLI-006 oder LH-FA-DEV-001]`); ErrGenerateManualConflict braucht Artefakt-Kontext, geplanter `mapGenerateErrorToDiagnostic(err)` hat keinen | T0-(e) erweitert um **Mapper-Signatur `(err, artifact)`** mit Begründung und um eine **per-Artefakt LH-Code-Tabelle** (changelog→GEN-002, readme→GEN-003, env-example→GEN-004, devcontainer→DEV-001). Acceptance-Pin auf exakten `LH-FA-DEV-001` umgestellt (statt „either/or"). T5-Tranche um Mapper-Signatur-Erweiterung ergänzt |
+| 4 | MEDIUM | Envelope-Shape offen (T0-(m)) — `subcommand="<artifact>"` vs. `data.artifact`. Helper-Signatur-Drift-Risiko, weil heutige Helper kein subcommand setzen | T0-(m) festgezurrt auf **`command="generate"`, kein subcommand, `data.artifact: "<…>"`**. Begründungen: (1) Cobra-Positional-Arg-Semantik analog T0-(l), (2) Helper-Signatur bleibt unverändert, (3) `data` ist ohnehin Träger für `data.action`. AK Vier-Artefakt-Symmetrie-Zeile entsprechend |
+
+R3-Reviewer-Note: docs-check grün, V2-Stub-Korrektur ist die
+wichtigste Erkenntnis (Stub hätte sonst eine falsche Lösung
+empfohlen, die den Carveout nicht schließt).
 
 ## Out of Scope
 
