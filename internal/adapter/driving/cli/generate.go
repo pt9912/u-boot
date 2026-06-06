@@ -224,14 +224,21 @@ func writeGenerateJSON(out io.Writer, resp driving.GenerateResponse, dryRun, dif
 // diagnosticItem with the spec-konforme LH-Kennung per T0-(e)
 // Switch-Order-Pflicht plus T0-(e) per-Artefakt LH-Code-Tabelle.
 //
-// Order matters (Multi-`%w`-wraps from T3): FS-class FIRST so an
-// inner fachlich-Sentinel doesn't downgrade Exit 14 to Exit 10.
-// LH-FA-DEV-003 (`ErrConfigValueInvalid`-URL-Reject, Spec §720)
-// comes before ManualConflict because the typed wrap is
-// devcontainer-specific and unambiguous; ManualConflict
-// resolves the per-artefact code from the `artifact`-Parameter
-// (changelog→GEN-002, readme→GEN-003, env-example→GEN-004,
-// devcontainer→DEV-001).
+// Switch-Order verbindlich (slice-Plan T0-(e), R10-Korrektur):
+// FS-first → ManualConflict (per-Artefakt) → ConfigValueInvalid →
+// ArtifactUnknown → ProjectNotInitialized → Default. FS-first
+// schützt vor Multi-`%w`-Wraps gegen einen inneren fachlich-
+// Sentinel, der sonst Exit 14 auf Exit 10 downgraden würde
+// (init R6-Erbschaft, generate T3 etabliert die Multi-`%w`-Wraps
+// an ~17 FS-Wrap-Stellen). ManualConflict vor ConfigValueInvalid
+// ist Plan-Konvention — operationale Trennung ist heute klar
+// (ManualConflict im Block-Pfad, ConfigValueInvalid nur im
+// Allowlist-Pfad), aber die Plan-Reihenfolge bleibt das
+// verbindliche Drift-Anker.
+//
+// ManualConflict resolves the per-artefact code from the
+// `artifact`-Parameter (changelog→GEN-002, readme→GEN-003,
+// env-example→GEN-004, devcontainer→DEV-001).
 //
 // Default fallback maps to LH-FA-CLI-006 / Exit 1 via cli.ExitCode
 // (NICHT automatisch Exit 2 — isUsageError matched nur unsere
@@ -240,10 +247,10 @@ func mapGenerateErrorToDiagnostic(err error, artifact domain.Artifact) diagnosti
 	switch {
 	case errors.Is(err, driving.ErrGenerateFileSystem):
 		return diagnosticItem{Level: "error", Code: "LH-NFA-REL-003", Message: err.Error()}
-	case errors.Is(err, driving.ErrConfigValueInvalid):
-		return diagnosticItem{Level: "error", Code: "LH-FA-DEV-003", Message: err.Error()}
 	case errors.Is(err, driving.ErrGenerateManualConflict):
 		return diagnosticItem{Level: "error", Code: manualConflictCodeFor(artifact), Message: err.Error()}
+	case errors.Is(err, driving.ErrConfigValueInvalid):
+		return diagnosticItem{Level: "error", Code: "LH-FA-DEV-003", Message: err.Error()}
 	case errors.Is(err, driving.ErrArtifactUnknown):
 		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
 	case errors.Is(err, driving.ErrProjectNotInitialized):
@@ -255,11 +262,20 @@ func mapGenerateErrorToDiagnostic(err error, artifact domain.Artifact) diagnosti
 
 // manualConflictCodeFor resolves the per-artefact LH-Code for
 // ErrGenerateManualConflict (T0-(e) Diagnostic-Code-Tabelle).
-// Unknown / zero-value artefact falls back to changelog's code
-// (most common path) so a misclassified branch doesn't drop to
-// LH-FA-CLI-006 silently.
+// Alle vier bekannten Artefakte sind explizit gelistet (inkl.
+// changelog — kein Default-Fall-Through, weil die Tabelle nicht
+// rotiert wenn ein zukünftiges Enum-Mitglied hinzukommt).
+//
+// Unknown / future enum value fällt auf LH-FA-CLI-006 zurück
+// (Plan-T0-(e) Default-Zeile + R10-MEDIUM-2-Fix). Vorher routete
+// ein Zero-Value defensiv auf changelog (LH-FA-GEN-002), was bei
+// einer Enum-Erweiterung ohne Switch-Update einen falschen Code
+// stillschweigend produziert hätte; jetzt wird die Erweiterung
+// als CLI-006-Misclassification sichtbar.
 func manualConflictCodeFor(artifact domain.Artifact) string {
 	switch artifact {
+	case domain.ArtifactChangelog:
+		return "LH-FA-GEN-002"
 	case domain.ArtifactReadme:
 		return "LH-FA-GEN-003"
 	case domain.ArtifactEnvExample:
@@ -267,7 +283,7 @@ func manualConflictCodeFor(artifact domain.Artifact) string {
 	case domain.ArtifactDevcontainer:
 		return "LH-FA-DEV-001"
 	}
-	return "LH-FA-GEN-002"
+	return "LH-FA-CLI-006"
 }
 
 // printGenerateSummary writes a short, deterministic summary of the
