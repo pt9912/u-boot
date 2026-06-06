@@ -31,6 +31,20 @@ type GenerateRequest struct {
 	// but the use case re-checks for safety. Empty leaves the
 	// allowlist untouched. Slice-v1-devcontainer-features T4.
 	AllowExternalFeatureSources []string
+
+	// PreviewMode encodes the --dry-run × --diff flag combination per
+	// slice-v1-cli-json-dry-run-generate T0-(b) (inherited 1:1 from
+	// init T0-(b)/add T0-(b) truth table — kein generate-Prefix-Alias,
+	// init-Slice-T0-(c) Alias-Lebensdauer-Pflicht zwingt direktes
+	// [PreviewMode]). Default zero value [PreviewNone] preserves the
+	// existing production-write behaviour; non-zero values route every
+	// FS access of this Generate() invocation through the recordingfs
+	// adapter (Composition-Root generateFSFactory closure, T4).
+	//
+	// Generate hat KEIN SilenceProgress-Feld — der GenerateService
+	// nutzt keinen [driven.Progress]-Port (nur driven.FileSystem +
+	// driven.YAMLCodec + driven.Logger), kein stdout-Pollution-Risk.
+	PreviewMode PreviewMode
 }
 
 // GenerateAction classifies what `u-boot generate` did with the
@@ -89,7 +103,11 @@ type GenerateResponse struct {
 	Artifact domain.Artifact
 
 	// Action classifies the outcome (LH-FA-GEN-005 idempotency: NoOp
-	// is the second-call shape).
+	// is the second-call shape). The CLI adapter renders this enum
+	// to the `data.action: "<created|updated-block|no-op|repaired-
+	// manual>"`-field in the JSON envelope (slice-v1-cli-json-dry-
+	// run-generate T0-(f) — kein Port-Feld dafür, Rendering lebt im
+	// Envelope-Layer T5).
 	Action GenerateAction
 
 	// Changed lists project-relative paths the handler mutated.
@@ -97,6 +115,35 @@ type GenerateResponse struct {
 	// Empty for NoOp; for Created / UpdatedBlock / RepairedManual it
 	// names the artefact files actually written.
 	Changed []string
+
+	// PlannedFiles is the FS-plan emitted when [GenerateRequest.
+	// PreviewMode] is non-zero (slice-v1-cli-json-dry-run-generate
+	// T2 / inherited from init T2 / add T0-(i)). One entry per
+	// mutated path captured by the recorder, in the order the use
+	// case attempted them. Empty for PreviewNone (no recorder wired)
+	// and for true no-ops. Carries NewContent and OldContent for the
+	// CLI-adapter diff renderer; these two fields stay out of the
+	// JSON wire-format via `json:"-"` (Spec §326 has no place for
+	// raw bytes).
+	//
+	// Mid-Write-Failure-Semantik (R4 Recorder-Realität,
+	// recordingfs.go:139 zeichnet vor Delegieren auf): bei einem
+	// underlying.WriteFile-Failure des i-ten Files enthält
+	// PlannedFiles trotzdem die i Captures inkl. des fehlgeschlagenen
+	// — die T0-(i) Devcontainer-Phase-2-Half-Write-AK und der
+	// generate T6 Pin testen exakt diese Form.
+	PlannedFiles []PlannedFile
+
+	// Changes mirrors PlannedFiles' paths with their line-count
+	// summaries (LH-FA-CLI-007 §365-371). Filled only in preview
+	// modes; nil for PreviewNone. Count semantics follow add T0-(g)
+	// (1:1 inherited): create = CountLines(NewContent); modify = sum
+	// of `+`-lines via diff.CountAdditions; delete = 0. Today
+	// populated by the CLI-adapter's mapPlannedFilesToWire helper,
+	// not directly by the application service (matches add/init
+	// pattern; the use case fills PlannedFiles, the CLI computes
+	// Changes from them).
+	Changes []ChangeEntry
 }
 
 // All Generate sentinels below live in the `driving` package (not in
