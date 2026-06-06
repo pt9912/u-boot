@@ -16,8 +16,9 @@ import (
 // (ErrJSONNotImplemented).
 //
 // Migrate-Forms: "doctor", "template list", "add" (T4 add-slice),
-// "init" (T5 init-slice). Reject-Forms: 9 — see slice-doctor
-// §T0-(g) §Subcommand-Form-Inventar minus the migrated forms.
+// "init" (T5 init-slice), "generate" (T5 generate-slice). Reject-
+// Forms: 8 — see slice-doctor §T0-(g) §Subcommand-Form-Inventar
+// minus the migrated forms.
 func TestRootJSON_RejectsAllNonMigratedForms(t *testing.T) {
 	cases := []struct {
 		name        string
@@ -28,7 +29,6 @@ func TestRootJSON_RejectsAllNonMigratedForms(t *testing.T) {
 		{"up", []string{"--json", "up"}, "up-down"},
 		{"down", []string{"--json", "down"}, "up-down"},
 		{"logs", []string{"--json", "logs"}, "logs"},
-		{"generate", []string{"--json", "generate", "readme"}, "generate"},
 		{"config (bare)", []string{"--json", "config"}, "config"},
 		{"config get", []string{"--json", "config", "get", "project.name"}, "config"},
 		{"config set", []string{"--json", "config", "set", "project.name", "x"}, "config"},
