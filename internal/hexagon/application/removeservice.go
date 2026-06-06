@@ -6,6 +6,7 @@ import (
 	"fmt"
 	iofs "io/fs"
 	"path/filepath"
+	"sync"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application/managedblock"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
@@ -27,9 +28,18 @@ import (
 // + inserts blocks).
 type RemoveServiceService struct {
 	fs        driven.FileSystem
+	fsFactory func(driving.PreviewMode) (driven.FileSystem, driven.RecorderPort)
 	yaml      driven.YAMLCodec
 	confirmer driven.Confirmer
 	logger    driven.Logger
+	// removeMu serialises Remove() invocations on a single service
+	// instance. The PreviewMode-aware s.fs/s.confirmer-swaps in Remove()
+	// mutate shared service fields; concurrent Remove calls would race
+	// on the swap/restore pairs and one caller's writes would route
+	// through the other caller's recorder (slice-v1-cli-json-dry-run-
+	// remove T0-(c) R5-F1; inherited from init T0-(d) / add review
+	// #10).
+	removeMu sync.Mutex
 }
 
 // Static check: RemoveServiceService satisfies the driving port.
@@ -43,6 +53,12 @@ var _ driving.RemoveServiceUseCase = (*RemoveServiceService)(nil)
 // tolerant and fall back to the package-internal no-op
 // implementations so callers (tests, scripts that do not care
 // about prompts) need not wire a stub.
+//
+// Legacy constructor: the resulting service has no fsFactory wired,
+// so PreviewMode is ignored at Remove() time (PlannedFiles stays
+// nil, recorder is nil). Production wiring uses
+// [NewRemoveServiceServiceWithFactory] instead — this constructor
+// remains for test sites that don't exercise preview paths.
 func NewRemoveServiceService(fs driven.FileSystem, yaml driven.YAMLCodec, confirmer driven.Confirmer, logger driven.Logger) *RemoveServiceService {
 	if confirmer == nil {
 		confirmer = noopConfirmer{}
@@ -53,36 +69,141 @@ func NewRemoveServiceService(fs driven.FileSystem, yaml driven.YAMLCodec, confir
 	return &RemoveServiceService{fs: fs, yaml: yaml, confirmer: confirmer, logger: logger}
 }
 
-// Remove implements [driving.RemoveServiceUseCase.Remove].
+// NewRemoveServiceServiceWithFactory is the slice-v1-cli-json-dry-
+// run-remove T3 Composition-Root constructor (analog to
+// [NewInitProjectServiceWithFactory] / [NewGenerateServiceWithFactory]):
+// instead of a fixed [driven.FileSystem], the service receives a
+// factory that picks the FS per [driving.PreviewMode]. Composition-
+// Root wires PreviewNone → production FS, PreviewDryRun/
+// PreviewAndApply → recording FS.
 //
-// State-machine flow:
+// [Remove] reads the mode from [driving.RemoveServiceRequest.PreviewMode],
+// asks the factory for a fresh (fs, recorder) tuple, swaps the
+// service-level [fs] field for the request's duration (defer-restored)
+// and — if the recorder is non-nil — maps its
+// [driven.RecorderPort.Captured] output into
+// [driving.RemoveServiceResponse.PlannedFiles] on the way out.
+func NewRemoveServiceServiceWithFactory(
+	fsFactory func(driving.PreviewMode) (driven.FileSystem, driven.RecorderPort),
+	yaml driven.YAMLCodec,
+	confirmer driven.Confirmer,
+	logger driven.Logger,
+) *RemoveServiceService {
+	if confirmer == nil {
+		confirmer = noopConfirmer{}
+	}
+	if logger == nil {
+		logger = noopLogger{}
+	}
+	// Bootstrap fs from PreviewNone so methods that read s.fs outside
+	// of a Remove() call see a valid adapter (mirrors
+	// AddServiceServiceWithFactory / InitProjectServiceWithFactory).
+	bootstrapFS, _ := fsFactory(driving.PreviewNone)
+	return &RemoveServiceService{
+		fs:        bootstrapFS,
+		fsFactory: fsFactory,
+		yaml:      yaml,
+		confirmer: confirmer,
+		logger:    logger,
+	}
+}
+
+// selectFS picks the per-request FS pair (slice-v1-cli-json-dry-run-
+// remove T3, inherited from init T0-(d) / generate T3): if the
+// factory is wired (Composition-Root path) it returns the
+// mode-specific tuple; otherwise the legacy [fs] field with a nil
+// recorder (PreviewMode is ignored — the use case keeps writing to
+// production).
+func (s *RemoveServiceService) selectFS(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
+	if s.fsFactory == nil {
+		return s.fs, nil
+	}
+	return s.fsFactory(mode)
+}
+
+// Remove implements [driving.RemoveServiceUseCase.Remove]. T3 wraps
+// the original dispatch in a PreviewMode-aware FS-swap +
+// Confirmer-Swap + Mutex guard (slice-v1-cli-json-dry-run-remove
+// T0-(c) Control-Flow-Skeleton):
+//
+//  1. Lock removeMu for the whole request — serialises concurrent
+//     calls so the per-request s.fs/s.confirmer swaps stay atomic
+//     (R5-F1 race-safety; ALL swaps INSIDE the lock region).
+//  2. If req.SilenceConfirmer: swap s.confirmer to noopConfirmer{}
+//     with defer-restore (R12-F3 mechanism analog init's
+//     s.progress-swap initproject.go:345-349).
+//  3. Ask the factory for a mode-specific (fs, recorder) tuple
+//     (call-scoped local recorder, R6-F2 — NOT a service field).
+//     Swap s.fs for the request's duration (defer-restored).
+//  4. Call [runRemove] (the original dispatch body) — detectService
+//     State runs INSIDE the swap region so the recorder sees the
+//     read captures.
+//  5. Drain recorder captures BEFORE unswaps and map to
+//     resp.PlannedFiles — also on the error path (R4-Recorder-
+//     Realität: failing WriteFile/RemoveAll attempt-content lands
+//     in PlannedFiles too, see Mid-Write-Failure-AK).
+//
+// State-machine flow (delegated to runRemove):
 //
 //   - Unregistered                       → [driving.ErrServiceUnregistered]
 //   - InconsistentYAML                   → [driving.ErrServiceInconsistent]
-//     (orphan compose block without YAML entry — requires manual
-//     cleanup; remove cannot infer the intended YAML state)
-//   - Deactivated                        → idempotent no-op (Changed=nil);
-//     NO `--purge` confirmation gate fires (no destructive op happens)
-//   - Active                             → 3-action transition via
-//     two-phase plan-then-write (review-followup F1+F2)
-//   - EnabledUnset                       → same 3 actions (normalises
-//     a service that lacks the explicit enabled key)
-//   - InconsistentBlock                  → forwards-only convergence
-//     (review-followup F1): YAML says enabled=true but no compose
-//     block. Remove sets enabled=false + idempotent block-removes —
-//     `removeBlock` is no-op-on-absent, so a partial-write retry
-//     completes the unfinished work. Asymmetric to
-//     [AddServiceService] which rejects InconsistentBlock — add
-//     cannot auto-converge to "active" without knowing the original
-//     state; remove can converge to "disabled" unambiguously.
+//   - Deactivated                        → idempotent no-op (Changed=nil)
+//   - Active / EnabledUnset / InconsistentBlock → state transition
 //
-// `--purge` (T3 + review-followup F6): the LH-FA-CLI-005A §254
-// confirmation gate fires only when the call WILL transition state
-// (Active / EnabledUnset / InconsistentBlock). On Deactivated the
-// gate is a no-op for a no-op — we skip it. Volume removal itself
-// remains deferred — `VolumesPurged` stays false even on a passed
-// gate; the CLI summary (T4) flags the deferred work for the user.
+// `--purge` (T0-(h)): the LH-FA-CLI-005A §254 confirmation gate
+// fires only when the call WILL transition state (Active /
+// EnabledUnset / InconsistentBlock) AND PreviewMode != PreviewDryRun
+// (T0-(h)(a) skip-logic: Dry-Run implies null-mutations, no gate).
+// Volume removal itself remains deferred — `VolumesPurged` stays
+// false even on a passed gate.
 func (s *RemoveServiceService) Remove(ctx context.Context, req driving.RemoveServiceRequest) (driving.RemoveServiceResponse, error) {
+	// Serialise per-request fs/confirmer-swap (slice-v1-cli-json-
+	// dry-run-remove T0-(c) R5-F1, inherited from init T0-(d) /
+	// add review #10).
+	s.removeMu.Lock()
+	defer s.removeMu.Unlock()
+
+	// Confirmer-Swap-Mechanismus (T0-(j) NEW, R12-F3): service-field
+	// mutation with defer-restore. Conditional on req.SilenceConfirmer
+	// analog init's s.progress-swap (initproject.go:345-349) — R7-F4.
+	if req.SilenceConfirmer {
+		prevConfirmer := s.confirmer
+		s.confirmer = noopConfirmer{}
+		defer func() { s.confirmer = prevConfirmer }()
+	}
+
+	// PreviewMode-aware FS-swap: route every FS access of this
+	// Remove() invocation through the mode-specific adapter
+	// (production FS for PreviewNone, RecordingFileSystem for
+	// PreviewDryRun/PreviewAndApply). recorder is a CALL-SCOPED
+	// local variable (R6-F2 — NOT a service field), so parallel
+	// Goroutines can't leak captures via the service.
+	fs, recorder := s.selectFS(req.PreviewMode)
+	prevFS := s.fs
+	s.fs = fs
+	defer func() { s.fs = prevFS }()
+
+	resp, removeErr := s.runRemove(ctx, req)
+
+	// Drain recorder captures BEFORE the unswaps (LIFO defer
+	// resolves fs/confirmer-unswap after this return). Map to
+	// resp.PlannedFiles also on the error path (T0-(i) Mid-Write-
+	// Failure-AK: user sees captured calls up to the failure point
+	// inclusive of the failing underlying attempt; recordingfs.go:
+	// 139 records before delegating).
+	if recorder != nil {
+		resp.PlannedFiles = mapCaptureToPlannedFiles(recorder.Captured(), req.BaseDir)
+	}
+	return resp, removeErr
+}
+
+// runRemove is the original Remove() body unchanged from the pre-T3
+// flow: validation → catalogue check → detect → dispatch on state.
+// T3 split it out so [Remove] can wrap it with the PreviewMode-aware
+// FS/Confirmer-swap + mutex + recorder-capture mapping without
+// duplicating the dispatch logic (analog to init's runInit /
+// generate's runGenerate).
+func (s *RemoveServiceService) runRemove(ctx context.Context, req driving.RemoveServiceRequest) (driving.RemoveServiceResponse, error) {
 	if req.BaseDir == "" {
 		return driving.RemoveServiceResponse{}, errors.New("BaseDir is required")
 	}
@@ -122,13 +243,27 @@ func (s *RemoveServiceService) Remove(ctx context.Context, req driving.RemoveSer
 	case domain.ServiceStateActive,
 		domain.ServiceStateEnabledUnset,
 		domain.ServiceStateInconsistentBlock:
+		// WARN emission BEFORE the gate (T0-(c) R8-F3): WARN is
+		// visible even in the ErrConfirmationRequired path (user
+		// learns: your --purge would have been deferred anyway).
+		// T5 unterdrückt WARN bei Error-Diagnostic (R4-F3-Variante A).
+		warnings := s.volumesPurgedWarnings(req)
+
 		// Gate fires here — a state transition (or convergence) IS
 		// happening. Spec LH-FA-CLI-005A §254 confirmation lives
 		// adjacent to the actual destructive intent.
-		if err := s.runPurgeGate(ctx, req); err != nil {
-			return driving.RemoveServiceResponse{}, err
+		//
+		// T0-(h)(a) Skip-Logic: in PreviewDryRun the gate is skipped
+		// (null-mutations implies no destructive op happens; analog
+		// init's initGit-skip T0-(n)).
+		if req.PreviewMode != driving.PreviewDryRun {
+			if err := s.runPurgeGate(ctx, req); err != nil {
+				return driving.RemoveServiceResponse{Warnings: warnings}, err
+			}
 		}
-		return s.executeRemove(req.BaseDir, req.ServiceName, state)
+		resp, execErr := s.executeRemove(req.BaseDir, req.ServiceName, state)
+		resp.Warnings = warnings
+		return resp, execErr
 
 	default:
 		// Defensive: detectServiceState's six wohlgeformte LH-FA-ADD-
@@ -136,6 +271,40 @@ func (s *RemoveServiceService) Remove(ctx context.Context, req driving.RemoveSer
 		// code bug, not a user error.
 		return driving.RemoveServiceResponse{}, fmt.Errorf("remove: unexpected state %s for %q",
 			state.String(), req.ServiceName.String())
+	}
+}
+
+// volumesPurgedWarnings constructs the soft-warning Diagnostics for
+// the --purge && !VolumesPurged path (slice-v1-cli-json-dry-run-
+// remove T0-(g) R5-F2 + R3-F1 Volume-Presence-Check). Returns a
+// single-element slice when:
+//
+//   - req.Purge is true, AND
+//   - the catalogue entry declares a named volume
+//     (volumeOptional == false — postgres today; keycloak/otel are
+//     volumeOptional=true and produce no WARN, R3-F1).
+//
+// VolumesPurged is implicitly false in v0.3.0 (deferred auto-removal,
+// Out-of-Scope). The WARN-Diagnostic carries code LH-FA-ADD-007 +
+// level "warn"; T5 maps it into the JSON envelope's `diagnostics[]`
+// array. T5 also unterdrückt WARN on the error path (R4-F3 variante A).
+//
+// Returns nil for `--purge=false` and for volumeless catalogue
+// entries — no semantic-falsche WARN for services without volumes.
+func (*RemoveServiceService) volumesPurgedWarnings(req driving.RemoveServiceRequest) []driving.WarningEntry {
+	if !req.Purge {
+		return nil
+	}
+	entry, ok := catalogueFor(req.ServiceName)
+	if !ok || entry.volumeOptional {
+		return nil
+	}
+	return []driving.WarningEntry{
+		{
+			Code:    "LH-FA-ADD-007",
+			Level:   "warn",
+			Message: fmt.Sprintf("--purge requested for service %q but volume removal is deferred (v0.3.0); the named volumes are still on disk and untouched", req.ServiceName.String()),
+		},
 	}
 }
 
@@ -168,7 +337,13 @@ func (s *RemoveServiceService) runPurgeGate(ctx context.Context, req driving.Rem
 	}
 	confirmed, err := s.confirmer.ConfirmRemoveVolumes(ctx, req.BaseDir)
 	if err != nil {
-		return fmt.Errorf("remove service: confirmer error: %w", err)
+		// Multi-`%w` (T3 R2-F1): two sentinels — ErrConfirmerUnavailable
+		// for the I/O-class classification (LH-FA-CLI-005A / Exit 10)
+		// and the raw err for errors.Is-matches against Driven-Errors.
+		// Switch-Order in mapRemoveErrorToDiagnostic checks
+		// ErrConfirmerUnavailable AFTER ErrRemoveFileSystem and BEFORE
+		// the fachlich service sentinels (T0-(e) R3-F3 + R5-F2).
+		return fmt.Errorf("remove service: confirmer: %w: %w", driving.ErrConfirmerUnavailable, err)
 	}
 	if !confirmed {
 		return fmt.Errorf("remove service: --purge declined by user: %w",
@@ -232,13 +407,13 @@ func (s *RemoveServiceService) executeRemove(baseDir string, svc domain.ServiceN
 			continue
 		}
 		if err := s.fs.WriteFile(f.path, f.content, f.mode); err != nil {
-			return driving.RemoveServiceResponse{}, fmt.Errorf("write %s: %w", f.path, err)
+			return driving.RemoveServiceResponse{}, fmt.Errorf("remove: write %s: %w: %w", f.path, driving.ErrRemoveFileSystem, err)
 		}
 		changed = append(changed, f.relPath)
 	}
 	for _, f := range extraDeletes {
 		if err := s.fs.RemoveAll(f.path); err != nil {
-			return driving.RemoveServiceResponse{}, fmt.Errorf("remove %s: %w", f.relPath, err)
+			return driving.RemoveServiceResponse{}, fmt.Errorf("remove: remove-all %s: %w: %w", f.relPath, driving.ErrRemoveFileSystem, err)
 		}
 		changed = append(changed, f.relPath)
 	}
@@ -269,7 +444,7 @@ func (s *RemoveServiceService) planBlockRemoval(baseDir, filename string, svc do
 	path := filepath.Join(baseDir, filename)
 	exists, err := s.fs.Exists(path)
 	if err != nil {
-		return plannedRemoveFile{}, fmt.Errorf("check %s: %w", filename, err)
+		return plannedRemoveFile{}, fmt.Errorf("remove: exists %s: %w: %w", filename, driving.ErrRemoveFileSystem, err)
 	}
 	if !exists {
 		return plannedRemoveFile{skip: true}, nil
@@ -279,11 +454,11 @@ func (s *RemoveServiceService) planBlockRemoval(baseDir, filename string, svc do
 		if errors.Is(err, iofs.ErrNotExist) {
 			return plannedRemoveFile{skip: true}, nil
 		}
-		return plannedRemoveFile{}, fmt.Errorf("read %s: %w", filename, err)
+		return plannedRemoveFile{}, fmt.Errorf("remove: read %s: %w: %w", filename, driving.ErrRemoveFileSystem, err)
 	}
 	mode, err := s.fileMode(path, defaultFileMode)
 	if err != nil {
-		return plannedRemoveFile{}, fmt.Errorf("stat %s: %w", filename, err)
+		return plannedRemoveFile{}, fmt.Errorf("remove: stat %s: %w: %w", filename, driving.ErrRemoveFileSystem, err)
 	}
 	marker := managedblock.Marker{
 		Style: managedblock.StyleHash,
@@ -304,8 +479,15 @@ func (s *RemoveServiceService) planBlockRemoval(baseDir, filename string, svc do
 		return plannedRemoveFile{}, fmt.Errorf("%w: malformed managed block for %q in %s: %v",
 			driving.ErrServiceInconsistent, svc.String(), filename, err)
 	default:
-		return plannedRemoveFile{}, fmt.Errorf("scan %s for %q block: %w",
-			filename, serviceMarkerName(svc), err)
+		// R4-HIGH-F1 + R5-MED-F3 Klassifikations-Fix: Scanner-default-
+		// branch ist KEIN FS-Wrap (kein s.fs.*-Aufruf); semantisch
+		// gleicher Marker/Datenkonsistenz-Defekt wie Z. 304
+		// (managedblock-malformed). Wrap mit ErrServiceInconsistent
+		// statt ErrRemoveFileSystem — Datenkonsistenz-Klasse (Exit 10
+		// User-Action: YAML reparieren), nicht FS-Klasse
+		// (Exit 14 retry-safe).
+		return plannedRemoveFile{}, fmt.Errorf("%w: scan %s for %q block: %v",
+			driving.ErrServiceInconsistent, filename, serviceMarkerName(svc), err)
 	}
 }
 
@@ -318,16 +500,23 @@ func (s *RemoveServiceService) planYAMLDisable(baseDir string, svc domain.Servic
 	path := filepath.Join(baseDir, "u-boot.yaml")
 	body, err := s.fs.ReadFile(path)
 	if err != nil {
-		return plannedRemoveFile{}, fmt.Errorf("read u-boot.yaml: %w", err)
+		return plannedRemoveFile{}, fmt.Errorf("remove: read u-boot.yaml: %w: %w", driving.ErrRemoveFileSystem, err)
 	}
 	mode, err := s.fileMode(path, defaultFileMode)
 	if err != nil {
-		return plannedRemoveFile{}, fmt.Errorf("stat u-boot.yaml: %w", err)
+		return plannedRemoveFile{}, fmt.Errorf("remove: stat u-boot.yaml: %w: %w", driving.ErrRemoveFileSystem, err)
 	}
 	patched, err := s.yaml.PatchScalar(body,
 		[]string{"services", svc.String(), "enabled"}, false)
 	if err != nil {
-		return plannedRemoveFile{}, fmt.Errorf("patch u-boot.yaml: %w", err)
+		// R4-HIGH-F1 + R5-MED-F3 Klassifikations-Fix: yaml.PatchScalar-
+		// Failure ist KEIN FS-I/O (s.yaml.* call, kein s.fs.*).
+		// Datenkonsistenz-Klasse (invalides YAML-Schema, Exit 10
+		// User-Action: YAML reparieren) — Konsolidierung auf
+		// ErrServiceInconsistent statt eigenem ErrYAMLPatchFailed-
+		// Sentinel.
+		return plannedRemoveFile{}, fmt.Errorf("%w: patch u-boot.yaml: %v",
+			driving.ErrServiceInconsistent, err)
 	}
 	return plannedRemoveFile{
 		path:    path,
@@ -355,7 +544,7 @@ func (s *RemoveServiceService) planExtraFileDeletes(baseDir string, svc domain.S
 		path := filepath.Join(baseDir, xf.Path)
 		exists, err := s.fs.Exists(path)
 		if err != nil {
-			return nil, fmt.Errorf("check %s: %w", xf.Path, err)
+			return nil, fmt.Errorf("remove: exists %s: %w: %w", xf.Path, driving.ErrRemoveFileSystem, err)
 		}
 		if !exists {
 			continue
