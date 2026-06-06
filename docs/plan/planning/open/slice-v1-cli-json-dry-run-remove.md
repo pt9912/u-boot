@@ -1,6 +1,6 @@
 # Slice V1: `remove --json` / `--dry-run` / `--diff` — Add-Inverse mit Purge-Gate
 
-> **Status:** T0-Discovery + R1/R2/R3 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
+> **Status:** T0-Discovery + R1/R2/R3/R4 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 5/9). Konsumiert das Pattern-Vorbild aus
@@ -166,28 +166,81 @@ docs-check).
   `RemovePreviewMode`-Alias) — durch init-T0-(c) Alias-
   Lebensdauer-Pflicht erzwungen.
 - **T0-(c)** `RemoveServiceService.fsFactory`-Form analog
-  `InitProjectService.fsFactory`.
-- **T0-(d)** `ErrRemoveFileSystem`-Sentinel-Einführung +
-  Wrap-Audit (R2-MED-F3-Kalibrierung): heute Single-`%w` an
-  **10 FS-Stellen** in `removeservice.go` (NICHT ~6 wie initialer
-  Stub):
-  - **Write/Remove**: Z. 235 (WriteFile), Z. 241 (RemoveAll
-    extraFiles) — 2 Stellen.
-  - **Read/Exists/Stat**: Z. 272 (Exists compose/env), Z. 282
-    (ReadFile compose/env), Z. 286 (Lstat compose/env), Z. 321
-    (ReadFile u-boot.yaml), Z. 325 (Lstat u-boot.yaml), Z. 358
-    (Exists extraFiles) — 6 Stellen.
-  - **YAML-Codec**: Z. 330 (yaml.PatchScalar) — 1 Stelle.
-  - **Managedblock-Scanner**: Z. 307 (scan compose/env for block)
-    — 1 Stelle.
-  - **AUSGESCHLOSSEN**: Z. 304 (managedblock-malformed wrappt
-    `ErrServiceInconsistent`, KEIN FS-Wrap) — bleibt fachlich-
-    Klasse.
+  `InitProjectService.fsFactory`. **Control-Flow-Skeleton im
+  `Remove()`-Wrapper** (R4-MED-F2-Fix — Plan-Vertrag pinnt
+  Reihenfolge der Phasen, damit T3-Implementer keine Wahlfreiheit
+  hat):
 
-  T3 migriert alle 10 auf Multi-`%w` analog init's
-  `initproject.go:925/967/1015/1117/1143`-Pattern. T6 ergänzt
-  Read-Pfad-FS-Failure-Pin (mindestens einer) damit die Switch-
-  Order-Garantie nicht löchrig wird.
+  ```
+  Remove(req):
+    confirmerSwap(req.SilenceConfirmer)     # NEUER Swap-Mechanismus T0-(j)
+    LOCK removeMu                            # generateMu/initMu-Pattern
+    fsSwap(req.PreviewMode != PreviewNone)   # init's Swap-Pattern
+    state := detectServiceState(s.fs, s.yaml, ...)
+    if state == Unregistered:    return early (ErrServiceUnregistered)
+    if state == InconsistentYAML: return early (ErrServiceInconsistent)
+    if state == Deactivated:     return no-op (KEIN runPurgeGate)
+    # Active / EnabledUnset / InconsistentBlock:
+    if req.PreviewMode != PreviewDryRun:     # T0-(h)(a) Skip-Logik
+        runPurgeGate(req)
+    executeRemove(...)
+    fsUnswap; UNLOCK
+    captures := recorder.Drain()
+    resp.PlannedFiles = mapCaptureToPlannedFiles(captures, req.BaseDir)
+    return response
+  ```
+
+  **`detectServiceState` läuft INNERHALB der Swap-Region** — sonst
+  würde der Recorder die Read-Captures (compose.yaml / .env.example
+  / u-boot.yaml) nicht sehen, und ein Mid-Read-Failure im
+  Capture-FS würde stillschweigend mit dem Real-FS arbeiten.
+  T6-Pin: `TestRemove_DryRun_DetectStateUsesCaptureF S` mit
+  Spy-Read-Counter.
+
+  **`runPurgeGate` läuft mit dem geswappten `s.confirmer`**
+  (entweder `noopConfirmer` bei `SilenceConfirmer=true` oder dem
+  echten Confirmer), aber NUR wenn `PreviewMode != PreviewDryRun`.
+  T6-Pin: `TestRemove_DryRunPurgeYes_NoConfirmerCall` mit
+  Confirmer-Call-Counter == 0.
+- **T0-(d)** `ErrRemoveFileSystem`-Sentinel-Einführung +
+  Wrap-Audit (R2-MED-F3 + R4-HIGH-F1-Korrektur): heute Single-
+  `%w` an **8 FS-Wrap-Stellen** in `removeservice.go` (NICHT
+  ~6, NICHT 10):
+  - **Write/Remove** (2 Stellen): Z. 235 (WriteFile), Z. 241
+    (RemoveAll extraFiles).
+  - **Read/Exists/Stat** (6 Stellen): Z. 272 (Exists compose/env),
+    Z. 282 (ReadFile compose/env), Z. 286 (Lstat compose/env),
+    Z. 321 (ReadFile u-boot.yaml), Z. 325 (Lstat u-boot.yaml),
+    Z. 358 (Exists extraFiles).
+
+  T3 migriert alle 8 auf Multi-`%w` mit `ErrRemoveFileSystem`-
+  Sentinel analog init's `initproject.go:925/967/1015/1117/1143`-
+  Pattern. T6 ergänzt Read-Pfad-FS-Failure-Pin (mindestens einer)
+  damit die Switch-Order-Garantie nicht löchrig wird.
+
+  **Fachlich-klassifizierte Wraps** (2 Stellen, NICHT auf
+  `ErrRemoveFileSystem`):
+  - Z. 304 (managedblock-malformed): wrappt bereits korrekt
+    `ErrServiceInconsistent` → bleibt unverändert.
+  - Z. 307 (default-Branch im managedblock-Scanner): wraps
+    unexpected Scanner-Error. R4-Korrektur: **T3 wrappt mit
+    `ErrServiceInconsistent`** analog Z. 304 (gleicher Marker,
+    gleicher Fail-Modus, gleiche Datenkonsistenz-Klasse).
+    NICHT auf `ErrRemoveFileSystem` — Z. 307 ist KEIN
+    `s.fs.*`-Aufruf, sondern ein Scanner-Format-Defekt am
+    Managed-Block.
+  - Z. 330 (`s.yaml.PatchScalar`-Failure): YAML-Codec-Fehler,
+    KEIN FS-I/O. R4-Korrektur: **T3 wrappt mit
+    `ErrServiceInconsistent`** (Datenkonsistenz-Klasse —
+    invalides YAML-Schema). Alternative wäre ein neuer
+    `ErrYAMLPatch`-Sentinel; weil aber heute nur der eine
+    Codec-Wrap-Pfad existiert und Exit 10 / Fachlich-Klasse
+    semantisch passt, ist die Konsolidierung auf
+    `ErrServiceInconsistent` die schlankere Lösung.
+
+  Inkonsistenz im initialen Inventar (R3-MED-F3 hatte alle 10
+  als "FS-Wrap-Bucket" gelistet, obwohl Z. 307 + Z. 330 fachlich
+  sind) ist mit dieser Aufteilung behoben.
 - **T0-(e)** **Switch-Order-Pflicht** im neuen
   `mapRemoveErrorToDiagnostic`. Diagnostic-Code-Tabelle (T6-Pin-
   Pflicht pro Zeile):
@@ -213,7 +266,13 @@ docs-check).
   T6-Pin verifiziert: ein konstruierter
   `fmt.Errorf("%w: %w", ErrConfirmerUnavailable,
   ErrConfirmationRequired)` MUSS `LH-FA-CLI-005A` / Exit 10
-  (I/O-Klasse), NICHT `LH-FA-INIT-005`.
+  (I/O-Klasse), NICHT `LH-FA-INIT-005`. **Defense-only-Pin**
+  (R4-LOW-F5-Klarstellung): heute existiert KEIN Code-Pfad der
+  beide Sentinels gemeinsam chained — der Pin verifiziert die
+  Mapper-Robustheit gegen einen synthetisch konstruierten
+  Multi-Wrap, nicht ein reales Failure-Szenario. Cluster-T_close
+  kann eine generische `mapErrorToDiagnostic`-Registry die
+  Multi-`%w`-Resilienz cluster-übergreifend pinnen.
 
 - **T0-(f)** **Envelope-`data`-Form festgezurrt**: Success-Envelope
   trägt `data: {"service": "<…>", "priorState": "<…>", "state":
@@ -324,6 +383,20 @@ docs-check).
   (Spec §447-Kopplung) — Warn-only verschiebt nicht den
   Exit-Code. T6-Pin: `TestRemove_PurgeYesJSON_WarnOnly` mit
   `status: warn`, exit 0, `data.volumesPurged: false`.
+
+  **`--purge --yes --json` PLUS Mid-Write-Failure-Variante**
+  (R4-MED-F3-Fix, Doppel-Diagnostic-Klärung): wenn die Execute-
+  Phase mid-write failt (z. B. compose.yaml WriteFile-Error vor
+  yaml.WriteFile), wird **Variante A** festgezurrt: Error-
+  Diagnostic dominiert, WARN unterdrückt. Envelope: `diagnostics:
+  [{level: "error", code: "LH-NFA-REL-003", file: "<…>"}]`,
+  `status: error`, exit 14, `data: {"service": "<…>"}` ohne
+  `volumesPurged` (Zero-Response analog T0-(f) Error-Pfad).
+  Begründung: WARN über `volumesPurged: false` würde sich auf
+  ein nicht-existentes Datenfeld beziehen — die Zero-Response-
+  Klausel zieht den `data`-Bereich konsistent auf den Diagnostics-
+  Channel. T6-Pin: `TestRemove_PurgeYesJSON_MidWriteFailure_
+  ErrorOnly`.
 - **T0-(k)** Path-Anchor: `plannedFiles[].path` ist project-
   relativ (analog init T0-(k)) — `mapCaptureToPlannedFiles(records,
   baseDir)`-Erbe.
@@ -335,7 +408,25 @@ docs-check).
   (LH-Codes sind generisch erlaubt; nur §6.6-Doku pflegt die
   remove-Sektion).
 - **T0-(o)** Pre-`next/`-Review-Runden-Erwartung: ≥ 2 (Discovery
-  + Adversarial).
+  + Adversarial). Steht aktuell bei R1-R4.
+- **T0-(p)** **`delete`-Action-Vertrag (NEU, R4-HIGH-F4)**:
+  remove ist der **erste** Use-Case, der `PlannedFile.Action ==
+  "delete"` produziert — `RemoveAll` (Z. 241) für extraFiles wird
+  von `recordingfs.RemoveAll` (`recordingfs.go:197-206`) mit
+  `Action: actionDelete` capturet, `mapCaptureToPlannedFiles`
+  mapped das auf den Spec-§354-Wert `"delete"`. Init/add/generate
+  produzieren nur `create`/`modify`. Diff-Renderer-Behavior:
+  `delete` = reiner Old-only-Hunk (`OldContent` voll, `NewContent`
+  leer → full-file-Remove-Block). Plus: `OldContent` für
+  RemoveAll wird via `recordingfs.snapshot` über `ReadFile`
+  geladen — für regular files (z. B. otel-Catalog
+  `extraFiles`-Eintrag) OK, für Dir-Trees aber `nil`. Heute kein
+  Risiko (postgres/keycloak/otel haben File-extraFiles), aber
+  Pattern-Vorlauf für künftige Dir-extraFiles wäre out-of-scope.
+  T6-Pin: `TestRemove_OtelExtraFileDelete_DiffHasDeleteHunk`
+  prüft `data.changes[].action == "delete"` plus den
+  Unified-Diff-Body. `cli-json-output.md` §7 Mutations-Matrix
+  und §6.6 dokumentieren `action: "delete"` explizit.
 
 ## Tranchen (vorgeschlagen — präzisiert in T0-Outcomes)
 
@@ -346,7 +437,7 @@ docs-check).
 | T2 | Port-Types: `RemoveServiceRequest.PreviewMode` + `SilenceConfirmer`-Feld, `RemoveServiceResponse.PlannedFiles`/`Changes`-Felder, **zwei neue Sentinels**: `ErrRemoveFileSystem` (FS-Klasse, T0-(d)) UND `ErrConfirmerUnavailable` (Confirmer-I/O-Error-Klasse, R2-HIGH-F1-Fix für T0-(e)-Tabelle). | ~90 | T0 |
 | T3 | Application-Layer: `RemoveServiceService.fsFactory` + `removeMu sync.Mutex` + `NewRemoveServiceServiceWithFactory` + `Remove()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; **Multi-`%w`-Wrap an den 10 FS-Wrap-Stellen** (R3-MED-F4-Kalibrierung, T0-(d) Inventar); `ErrConfirmerUnavailable`-Sentinel-Wrap in `runPurgeGate` Z. 171; Confirmer-Swap auf existierenden `noopConfirmer` im JSON-Mode. | ~240 | T2 |
 | T4 | Composition-Root-Wiring `removeFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
-| T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`); **Pre-UC-Sentinel-Kanal** für `domain.ErrInvalidServiceName`, `ErrConflictingModeFlags` UND `getwd`-Failure (`fmt.Errorf("determine working directory: %w", err)`, R3-LOW-F6-Fix analog `init.go:221`): müssen via `reportError`-Helper emittiert werden, NICHT durch Cobra-Default-Print (R1-LOW-7-Fix), damit der JSON-stdout-Cleanliness-Pin aus init T0-(o) hält. **Human-Mode-Diff-Renderer** (R2-LOW-F6-Fix): bei `--purge --diff` ohne `--json` bleibt die deferred-Volumes-Prosa auf `errOut`, NICHT im Diff-Body. T6-Pin: `TestRemove_PurgeHumanDiff_StderrSeparation` mit getrennten Buffer-Assertions. | ~250 | T1 + T2 |
+| T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`); **Pre-UC-Sentinel-Kanal** (R4-LOW-F6-Klarstellung: Codepfade existieren bereits in `cli/remove.go:108-120`, NEU ist nur die Kanalisierung via `reportError` analog `init.go:205, 216, 221`) für `domain.ErrInvalidServiceName`, `ErrConflictingModeFlags` UND `getwd`-Failure (`fmt.Errorf("determine working directory: %w", err)`, R3-LOW-F6-Fix). Der `getwd`-Wrap trägt KEIN typed Sentinel und fällt in den Default-Branch `LH-FA-CLI-006` / Exit 1 (Pattern-Erbe von init T0-(o)); Mapper-Tabelle T0-(e) NICHT ergänzt. **Human-Mode-Diff-Renderer** (R2-LOW-F6-Fix): bei `--purge --diff` ohne `--json` bleibt die deferred-Volumes-Prosa auf `errOut`, NICHT im Diff-Body. T6-Pin: `TestRemove_PurgeHumanDiff_StderrSeparation` mit getrennten Buffer-Assertions. | ~250 | T1 + T2 |
 | T6 | Acceptance-Tests: ~20-25 Tests (drei JSON-Modi + NoOp Single+Repeat + Mid-Write-Failure + ConfirmationRequired-Pfade × 3 Varianten + Service-Sentinels × 4 + WARNING-Migration-Pin + `--purge`-on/off × Dry-Run-Kombos (T0-(h)) + `--purge --yes --json` WarnOnly-Pin (T0-(j) R1-MED-5) + `ErrConflictingModeFlags`-Pin). R1-MED-6-Kalibrierung: ~600-700 LOC realistisch (Confirmer-Pattern-Neumuster zieht Test-Surface). | ~650 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe). | ~80 | T6 |
 | T8 | Closure: CHANGELOG, cli-json-output.md §6/§6.6/§7, roadmap, slice nach done/ mit DoD-Hash-Tabelle; **Carveout-Eintrag in `carveouts.md`** für deferred-Volume-Auto-Removal + WARN-on-Success-Semantik mit Trigger auf einen Volume-Auto-Removal-Folge-Slice (R3-MED-F5-Fix, Pattern-Vorbild `slice-v2-generate-devcontainer-rollback-aware-write`); ggf. **`open/`-Plan-Stub für den Trigger-Slice** anlegen analog generate's V2-Rollback-Stub. | — (Doku) | T7 |
@@ -432,6 +523,32 @@ konsistent mit `executeRemove`-Sequenz, AK Idempotenz-vs-
 EnabledUnset-Trennung lesbar, T0-(j) Selbstkonsistenz Recon vs
 AK, LOC-Bilanz T6 defensibel. Confirmer-Pattern nach F2-Fix
 deutlich kleiner (nur Swap-Mechanismus statt neuer Helper).
+
+## Review-Round-4 (Pre-`next/`)
+
+Deep-Implementation-Reality + adversariale Coverage der R3-Fixes
+gegen den R3-konsolidierten Stub (`35d6d51`). Sechs Findings (2
+HIGH, 2 MEDIUM, 2 LOW). Die zwei HIGH-Befunde decken eine
+Klassifikations-Fehler im R3-Inventar (Z. 307/330 sind nicht-FS)
+und einen komplett neuen `delete`-Action-Vertrag auf (remove
+ist der erste Use-Case mit dieser Action).
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| F1 | HIGH | T0-(d) 10-Stellen-Inventar enthielt zwei Nicht-FS-Wrap-Stellen fälschlich. Z. 307 (default-Branch managedblock-Scanner) und Z. 330 (yaml.PatchScalar) sind fachliche Klassen, KEINE FS-I/O. Migration auf `ErrRemoveFileSystem` würde Datenkonsistenz-Defekte als Disk-Failure (Exit 14, retry-safe) klassifizieren — semantisch falsch | Inventar auf **8 FS-Wrap-Stellen** rekalibriert; Z. 307 + Z. 330 separat als fachlich-Klasse mit `ErrServiceInconsistent`-Wrap (analog Z. 304) festgezurrt |
+| F2 | MEDIUM | T3-Cell verspricht `Remove()`-Wrapper mit FS-Swap, lässt aber offen wo `runPurgeGate` relativ zu `detectServiceState`/`fsSwap`/early-returns landet — drei plausible Varianten ohne Pin | T0-(c) um **Control-Flow-Skeleton** erweitert (Phasen-Reihenfolge explizit: confirmerSwap → Lock → fsSwap → detect → early-returns → conditional gate → execute → unswap → captures-mapping); T6-Pins für DryRun-skip + DetectInCaptureFS |
+| F3 | MEDIUM | `--purge --yes --json` PLUS Mid-Write-Failure-Variante nicht im Plan — drei plausible Envelope-Formen (Error-only, Doppel-Diagnostic, Special-Code) | T0-(j) erweitert um **Variante A** festgezurrt: Error-Diagnostic dominiert, WARN unterdrückt, Zero-Response (`data: {service}` ohne `volumesPurged`); T6-Pin `TestRemove_PurgeYesJSON_MidWriteFailure_ErrorOnly` |
+| F4 | HIGH | `delete`-Action-Vertrag fehlt — remove ist der erste Use-Case mit `PlannedFile.Action == "delete"` (für `RemoveAll`-Captures auf extraFiles). Init/add/generate produzieren nur `create`/`modify`; Diff-Renderer-Behavior für `delete` nicht im Plan | Neue **T0-(p)** Sub-Decision: `delete` = Old-only-Hunk (full-file-Remove); `cli-json-output.md` §6.6+§7 dokumentieren `action: "delete"`; T6-Pin `TestRemove_OtelExtraFileDelete_DiffHasDeleteHunk` |
+| F5 | LOW | T6-Multi-`%w`-Switch-Order-Pin (R3-F3-Fix) ist Defense-only — heute kein Code-Pfad chained beide Sentinels; Pin-Rahmung "versehentlich" überzeichnet User-Value | T0-(e) als "Defense-only-Pin" qualifiziert mit Hinweis auf Cluster-T_close Mapper-Registry-Slice |
+| F6 | LOW | T5-Cell sagte "Pre-UC-Sentinel-Kanal **ergänzt** werden" — Codepfade existieren bereits in `cli/remove.go:108-120`, NEU ist nur die Kanalisierung via `reportError`. Plus `getwd`-Wrap fällt in Default-Branch ohne typed Sentinel — Plan dokumentierte das nicht | T5-Cell-Formulierung präzisiert; `getwd`-Wrap-Default-Pfad explizit dokumentiert; Mapper-Tabelle bleibt unverändert |
+
+R4-Reviewer-Note: docs-check grün. Implementation-Reality-Pass
+deckte zwei HIGHs auf — eine Klassifikations-Fehler im R3-
+Inventar (textuelle Konsolidierung verwechselte Scanner/Codec-
+Wraps mit FS-Wraps) und einen kompletten neuen Action-Vertrag
+(`delete` ist remove-spezifisch). Confirmer-Pattern und
+`--purge`-Dimension sind nach R1-R4 vollständig durchspezifiziert.
+Weitere Runden würden vermutlich nur noch Cosmetic-Drift fangen.
 
 ## Out of Scope
 
