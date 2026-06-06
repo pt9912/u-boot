@@ -41,6 +41,19 @@ func MinimalEnvelopeForTest(command, subcommand string, diagnostics []Diagnostic
 	return marshalEnvelopeForTest(newMinimalEnvelope(command, subcommand, items, exitCode))
 }
 
+// DataEnvelopeForTest exposes newDataEnvelope as a JSON-bytes
+// helper for slice-v1-cli-json-dry-run-generate T0-(p) Marshal-
+// Pins. Minimalkontrakt-Form mit zusätzlichem `data`-Träger;
+// `data == nil` lässt das Feld via omitempty aus dem JSON
+// fallen — anti-drift Pin gegen versehentliches `"data":null`.
+func DataEnvelopeForTest(command, subcommand string, data any, diagnostics []DiagnosticItemForTest, exitCode int) ([]byte, error) {
+	items := make([]diagnosticItem, len(diagnostics))
+	for i, d := range diagnostics {
+		items[i] = diagnosticItem(d)
+	}
+	return marshalEnvelopeForTest(newDataEnvelope(command, subcommand, data, items, exitCode))
+}
+
 // FullEnvelopeForTest exposes newFullEnvelope, same shape as
 // MinimalEnvelopeForTest. The dryRun=false/diff=false pin (M1
 // anti-drift) lives in jsonenvelope_test.go and exercises the
@@ -68,7 +81,7 @@ func FullEnvelopeForTest(
 	for i, d := range diagnostics {
 		items[i] = diagnosticItem(d)
 	}
-	return marshalEnvelopeForTest(newFullEnvelope(command, subcommand, dryRun, diff, pfs, chs, items, exitCode))
+	return marshalEnvelopeForTest(newFullEnvelope(command, subcommand, dryRun, diff, pfs, chs, nil, items, exitCode))
 }
 
 // DiagnosticItemForTest mirrors the unexported diagnosticItem so

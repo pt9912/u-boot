@@ -27,6 +27,13 @@ import (
 //     UND returnt den original err so cli.ExitCode den richtigen
 //     Exit-Code bestimmen kann (add review #2 — ohne Propagation
 //     wäre die Shell-Exit 0 trotz envelope-claimed 14).
+// `data` ist als Trailing-Param vorbereitet für generate (Folge-Slice
+// 4/9 T1/T5): generate reicht `{"artifact":"<…>"}` durch (T0-(q)).
+// init/add reichen heute `nil` durch — `unparam` würde das als
+// "always nil" markieren, daher die Suppression mit Verweis auf den
+// zweiten Caller im in-progress-Slice.
+//
+//nolint:unparam // generate T5 ist der zweite Caller mit data!=nil (slice-v1-cli-json-dry-run-generate)
 func reportError(
 	out io.Writer,
 	err error,
@@ -34,11 +41,12 @@ func reportError(
 	dryRun, diffFlag, jsonFlag bool,
 	command string,
 	mapErr func(error) diagnosticItem,
+	data any,
 ) error {
 	if !jsonFlag {
 		return err
 	}
-	if envErr := writeErrorEnvelope(out, err, planned, dryRun, diffFlag, command, mapErr); envErr != nil {
+	if envErr := writeErrorEnvelope(out, err, planned, dryRun, diffFlag, command, mapErr, data); envErr != nil {
 		return envErr
 	}
 	return err
@@ -60,6 +68,16 @@ func reportError(
 // File-Annotation: `diag.File = lastPlannedPath(planned)` für
 // Mid-Write-Failure-Diagnostics (add review-round-6 #lastPlannedPath
 // erblich).
+//
+// data ist ein optionales Free-Form-Feld (slice-v1-cli-json-dry-run-
+// generate T0-(p)/(q)): generate reicht `{"artifact":"<…>"}` durch,
+// damit Konsumenten im multi-artifact-Fehlerpfad das betroffene
+// Artefakt lesen können. init/add reichen `nil` durch (kein
+// Artefakt-Kontext nötig — Single-Subcommand). Wenn data!=nil und
+// die Envelope-Stufe wäre Minimal, wird stattdessen
+// [newDataEnvelope] verwendet (Konstruktor-Disziplin); im Voll-
+// Schema-Pfad wird das `data`-Feld direkt an `newFullEnvelope`
+// durchgereicht.
 func writeErrorEnvelope(
 	out io.Writer,
 	addErr error,
@@ -67,6 +85,7 @@ func writeErrorEnvelope(
 	dryRun, diffFlag bool,
 	command string,
 	mapErr func(error) diagnosticItem,
+	data any,
 ) error {
 	diag := mapErr(addErr)
 	exitCode := ExitCode(addErr)
@@ -75,11 +94,16 @@ func writeErrorEnvelope(
 	}
 	wantsFullSchema := len(planned) > 0 || dryRun || diffFlag
 	if !wantsFullSchema {
-		env := newMinimalEnvelope(command, "", []diagnosticItem{diag}, exitCode)
+		var env cliJSONEnvelope
+		if data != nil {
+			env = newDataEnvelope(command, "", data, []diagnosticItem{diag}, exitCode)
+		} else {
+			env = newMinimalEnvelope(command, "", []diagnosticItem{diag}, exitCode)
+		}
 		return writeEnvelope(out, env)
 	}
 	pfs, chs := mapPlannedFilesToWire(planned, diffFlag)
-	env := newFullEnvelope(command, "", dryRun, diffFlag, pfs, chs, []diagnosticItem{diag}, exitCode)
+	env := newFullEnvelope(command, "", dryRun, diffFlag, pfs, chs, data, []diagnosticItem{diag}, exitCode)
 	return writeEnvelope(out, env)
 }
 

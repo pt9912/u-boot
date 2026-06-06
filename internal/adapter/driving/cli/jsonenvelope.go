@@ -35,13 +35,18 @@ type cliJSONEnvelope struct {
 	Changes      *[]changeEntry   `json:"changes,omitempty"`
 	Diagnostics  []diagnosticItem `json:"diagnostics"`
 	ExitCode     int              `json:"exitCode"`
-	// Data: bewusst weggelassen. Spec §1839 erlaubt zusätzliche
-	// Felder im Minimal-Mode; T0-(c) hatte ein optionales `Data any`
-	// vorgesehen. Im Doctor-Slice gibt es aber keinen Konsumenten;
-	// ein totes Feld ohne Konstruktor-Pfad würde die Disziplin
-	// "Konstruktor pinnt die Stufe" brechen. Der Folge-Slice
-	// `slice-v1-cli-json-dry-run-template` (Platz 9) ergänzt Data
-	// inkl. dediziertem `newDataEnvelope`-Konstruktor + Pin-Test.
+	// Data: optionales Free-Form-Feld (Spec §1839 erlaubt zusätzliche
+	// Felder im Minimal-Mode). slice-v1-cli-json-dry-run-generate T0-(p)
+	// hat das ursprünglich für Template-Slice 9/9 reservierte Feld
+	// vorgezogen, weil generate als erster Multi-Artefakt-Subcommand
+	// ein `data.artifact: "<…>"` braucht (T0-(m)) plus `data.action:
+	// "<…>"` als Discriminator zwischen UpdatedBlock und
+	// RepairedManual (T0-(f)). Template-Slice 9/9 erbt das Feld nur
+	// noch (`data: []templateJSON`). Disziplin „Konstruktor pinnt
+	// die Stufe": `newDataEnvelope` ist der einzige Konstruktor, der
+	// Data setzt; `omitempty` hält die Minimal/Voll-Envelopes
+	// data-frei. Marshal-Pin-Test in jsonenvelope_test.go.
+	Data any `json:"data,omitempty"`
 }
 
 // diagnosticItem ist ein Eintrag im `diagnostics[]`-Array. Spec
@@ -89,10 +94,14 @@ type changeEntry struct {
 }
 
 // newMinimalEnvelope baut einen Minimalkontrakt-Envelope (LH-NFA-
-// USE-004 §1841). DryRun/Diff/PlannedFiles/Changes bleiben nil und
-// fallen per omitempty aus dem JSON. status wird aus diags
+// USE-004 §1841). DryRun/Diff/PlannedFiles/Changes/Data bleiben nil
+// und fallen per omitempty aus dem JSON. status wird aus diags
 // abgeleitet (Spec §447 / §1837): error → "error"; warn ohne
 // error → "warn"; sonst "ok".
+//
+// Für Minimal+Data-Pfade (generate, template list) gibt es den
+// dedizierten [newDataEnvelope]-Konstruktor — "Konstruktor pinnt
+// die Stufe", siehe Doc oben am Typ.
 func newMinimalEnvelope(command, subcommand string, diags []diagnosticItem, exitCode int) cliJSONEnvelope {
 	if diags == nil {
 		diags = []diagnosticItem{}
@@ -110,11 +119,17 @@ func newMinimalEnvelope(command, subcommand string, diags []diagnosticItem, exit
 // §326). Alle vier Voll-Felder werden explizit gesetzt; bei
 // `dryRun=false`/`diff=false` erscheint im JSON entsprechend
 // `"dryRun":false`/`"diff":false` (Spec-Required-Set).
+//
+// data trägt subcommand-spezifische Free-Form-Inhalte (slice-v1-
+// cli-json-dry-run-generate T0-(p)/(q)); init/add reichen `nil`
+// durch, generate reicht `{"artifact":"<…>","action":"<…>"}` durch.
+// `data == nil` lässt das Feld via omitempty aus dem JSON fallen.
 func newFullEnvelope(
 	command, subcommand string,
 	dryRun, diff bool,
 	planned []plannedFile,
 	changes []changeEntry,
+	data any,
 	diags []diagnosticItem,
 	exitCode int,
 ) cliJSONEnvelope {
@@ -137,6 +152,43 @@ func newFullEnvelope(
 		Changes:      &changes,
 		Diagnostics:  diags,
 		ExitCode:     exitCode,
+		Data:         data,
+	}
+}
+
+// newDataEnvelope baut einen Minimalkontrakt-Envelope mit einem
+// zusätzlichen `data`-Träger für subcommand-spezifische Free-Form-
+// Inhalte (slice-v1-cli-json-dry-run-generate T0-(p)). DryRun/Diff/
+// PlannedFiles/Changes bleiben nil und fallen per omitempty aus dem
+// JSON — `data` ist orthogonal zum Voll-Schema und ergänzt den
+// Minimalkontrakt um ein Konsumenten-lesbares Datenfeld.
+//
+// Aufrufer:
+//   - generate (Folge-Slice 4/9): `command="generate"`,
+//     `subcommand=""`, `data={"artifact":"<…>","action":"<…>"}`.
+//   - template list (Folge-Slice 9/9): `command="template"`,
+//     `subcommand="list"`, `data=[]templateJSON`.
+//
+// `data == nil` lässt das Feld via omitempty aus dem JSON fallen,
+// sodass dieser Konstruktor auch als trivialer Wrapper-Pfad für
+// Fälle ohne data-Träger nutzbar bleibt (init/add im Error-Pfad
+// ohne Artefakt-Kontext reichen `nil` durch).
+func newDataEnvelope(
+	command, subcommand string,
+	data any,
+	diags []diagnosticItem,
+	exitCode int,
+) cliJSONEnvelope {
+	if diags == nil {
+		diags = []diagnosticItem{}
+	}
+	return cliJSONEnvelope{
+		Status:      statusFromDiagnostics(diags),
+		Command:     command,
+		Subcommand:  subcommand,
+		Diagnostics: diags,
+		ExitCode:    exitCode,
+		Data:        data,
 	}
 }
 

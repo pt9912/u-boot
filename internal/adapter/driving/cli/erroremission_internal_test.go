@@ -289,7 +289,7 @@ func TestNewMinimalEnvelope_NilDiagsAreReplaced(t *testing.T) {
 // rendered JSON ships `"diagnostics": []`, `"plannedFiles": []`,
 // `"changes": []` (Spec-Required-Set, never `null`).
 func TestNewFullEnvelope_NilSlicesAreReplaced(t *testing.T) {
-	env := newFullEnvelope("u-boot init", "", false, false, nil, nil, nil, 0)
+	env := newFullEnvelope("u-boot init", "", false, false, nil, nil, nil, nil, 0)
 	if env.PlannedFiles == nil {
 		t.Errorf("nil planned must be replaced (got nil pointer)")
 	} else if *env.PlannedFiles == nil {

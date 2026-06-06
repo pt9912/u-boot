@@ -202,7 +202,7 @@ func runInit(
 	mapErr := mapInitErrorToDiagnostic
 
 	if flags.Yes && flags.NoInteractive {
-		return reportError(out, ErrConflictingModeFlags, nil, flags.DryRun, flags.Diff, flags.JSON, "init", mapErr)
+		return reportError(out, ErrConflictingModeFlags, nil, flags.DryRun, flags.Diff, flags.JSON, "init", mapErr, nil)
 	}
 
 	// Template-Mutex-Check (slice-v1-cli-json-dry-run-init T0-(i)
@@ -213,12 +213,12 @@ func runInit(
 	// (kein Production-Write im Dry-Run) wäre für Template-Pfade
 	// nicht haltbar.
 	if flags.Template != "" && (flags.DryRun || flags.Diff) {
-		return reportError(out, driving.ErrTemplateConflictsWithFlag, nil, flags.DryRun, flags.Diff, flags.JSON, "init", mapErr)
+		return reportError(out, driving.ErrTemplateConflictsWithFlag, nil, flags.DryRun, flags.Diff, flags.JSON, "init", mapErr, nil)
 	}
 
 	cwd, err := getwd()
 	if err != nil {
-		return reportError(out, fmt.Errorf("determine working directory: %w", err), nil, flags.DryRun, flags.Diff, flags.JSON, "init", mapErr)
+		return reportError(out, fmt.Errorf("determine working directory: %w", err), nil, flags.DryRun, flags.Diff, flags.JSON, "init", mapErr, nil)
 	}
 
 	mode := previewModeFromFlags(flags.DryRun, flags.Diff)
@@ -244,7 +244,7 @@ func runInit(
 
 	resp, initErr := uc.Init(ctx, req)
 	if initErr != nil {
-		return reportError(out, initErr, resp.PlannedFiles, flags.DryRun, flags.Diff, flags.JSON, "init", mapErr)
+		return reportError(out, initErr, resp.PlannedFiles, flags.DryRun, flags.Diff, flags.JSON, "init", mapErr, nil)
 	}
 
 	if flags.JSON {
@@ -273,7 +273,7 @@ func writeInitJSON(out io.Writer, resp driving.InitProjectResponse, dryRun, diff
 		return writeEnvelope(out, env)
 	}
 	pfs, chs := mapPlannedFilesToWire(resp.PlannedFiles, diffFlag)
-	env := newFullEnvelope("init", "", dryRun, diffFlag, pfs, chs, nil, 0)
+	env := newFullEnvelope("init", "", dryRun, diffFlag, pfs, chs, nil, nil, 0)
 	return writeEnvelope(out, env)
 }
 

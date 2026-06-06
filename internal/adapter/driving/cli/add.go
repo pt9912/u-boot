@@ -131,17 +131,17 @@ func runAdd(
 	mapErr := mapAddErrorToDiagnostic
 
 	if flags.Yes && flags.NoInteractive {
-		return reportError(out, ErrConflictingModeFlags, nil, flags.DryRun, flags.Diff, flags.JSON, "add", mapErr)
+		return reportError(out, ErrConflictingModeFlags, nil, flags.DryRun, flags.Diff, flags.JSON, "add", mapErr, nil)
 	}
 
 	svcName, err := domain.NewServiceName(args[0])
 	if err != nil {
-		return reportError(out, err, nil, flags.DryRun, flags.Diff, flags.JSON, "add", mapErr)
+		return reportError(out, err, nil, flags.DryRun, flags.Diff, flags.JSON, "add", mapErr, nil)
 	}
 
 	cwd, err := getwd()
 	if err != nil {
-		return reportError(out, fmt.Errorf("determine working directory: %w", err), nil, flags.DryRun, flags.Diff, flags.JSON, "add", mapErr)
+		return reportError(out, fmt.Errorf("determine working directory: %w", err), nil, flags.DryRun, flags.Diff, flags.JSON, "add", mapErr, nil)
 	}
 
 	mode := previewModeFromFlags(flags.DryRun, flags.Diff)
@@ -155,7 +155,7 @@ func runAdd(
 	})
 
 	if addErr != nil {
-		return reportError(out, addErr, resp.PlannedFiles, flags.DryRun, flags.Diff, flags.JSON, "add", mapErr)
+		return reportError(out, addErr, resp.PlannedFiles, flags.DryRun, flags.Diff, flags.JSON, "add", mapErr, nil)
 	}
 
 	if flags.JSON {
@@ -184,7 +184,7 @@ func writeAddJSON(out io.Writer, resp driving.AddServiceResponse, dryRun, diffFl
 		return writeEnvelope(out, env)
 	}
 	pfs, chs := mapPlannedFilesToWire(resp.PlannedFiles, diffFlag)
-	env := newFullEnvelope("add", "", dryRun, diffFlag, pfs, chs, nil, 0)
+	env := newFullEnvelope("add", "", dryRun, diffFlag, pfs, chs, nil, nil, 0)
 	return writeEnvelope(out, env)
 }
 

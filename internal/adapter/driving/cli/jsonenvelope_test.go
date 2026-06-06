@@ -204,3 +204,45 @@ func TestMinimalEnvelope_SubcommandPresentWhenSet(t *testing.T) {
 		t.Errorf("subcommand: want \"list\", got %v", got["subcommand"])
 	}
 }
+
+// TestDataEnvelope_DataPresent pins that newDataEnvelope renders
+// the data-Träger im JSON (slice-v1-cli-json-dry-run-generate
+// T0-(p)). Marshal-Pin gegen Tag-Drift (`data,omitempty`).
+func TestDataEnvelope_DataPresent(t *testing.T) {
+	payload := map[string]any{"artifact": "changelog", "action": "no-op"}
+	raw, err := cli.DataEnvelopeForTest("generate", "", payload, nil, 0)
+	if err != nil {
+		t.Fatalf("marshal failed: %v", err)
+	}
+	var got map[string]any
+	if err := json.Unmarshal(raw, &got); err != nil {
+		t.Fatalf("unmarshal failed: %v\nraw=%s", err, raw)
+	}
+	data, ok := got["data"].(map[string]any)
+	if !ok {
+		t.Fatalf("data must be a JSON object, got %T (raw=%s)", got["data"], raw)
+	}
+	if data["artifact"] != "changelog" || data["action"] != "no-op" {
+		t.Errorf("data: want {artifact:changelog, action:no-op}, got %#v", data)
+	}
+}
+
+// TestDataEnvelope_DataNilOmitted pins omitempty-Verhalten: ein
+// newDataEnvelope-Aufruf mit data=nil rendert KEIN `"data":null`
+// und KEIN `"data":` im JSON — das Feld fällt komplett aus. So
+// bleibt newDataEnvelope mit data=nil byte-identisch zu
+// newMinimalEnvelope (Anti-Drift-Pin gegen json.Marshal-Verhalten
+// auf `any`-Typed-Nil-Pointers).
+func TestDataEnvelope_DataNilOmitted(t *testing.T) {
+	raw, err := cli.DataEnvelopeForTest("doctor", "", nil, nil, 0)
+	if err != nil {
+		t.Fatalf("marshal failed: %v", err)
+	}
+	var got map[string]any
+	if err := json.Unmarshal(raw, &got); err != nil {
+		t.Fatalf("unmarshal failed: %v", err)
+	}
+	if _, present := got["data"]; present {
+		t.Errorf("data with nil value must be omitted (omitempty), got %v", got["data"])
+	}
+}
