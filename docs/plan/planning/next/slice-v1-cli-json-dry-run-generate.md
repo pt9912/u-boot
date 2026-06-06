@@ -1,6 +1,6 @@
 # Slice V1: `generate --json` / `--dry-run` / `--diff` — Vier-Artefakt-Surface
 
-> **Status:** T0-Discovery + R1/R2/R3/R4/R5 adressiert, `open/`. Vierter Folge-Slice (4/9) des
+> **Status:** T0-Discovery + R1/R2/R3/R4/R5 adressiert, `next/` (Lifecycle-Übergang aus `open/` nach fünf Pre-`next/`-Review-Runden; 21 Findings gesamt: 4 HIGH, 14 MED, 3 LOW). Vierter Folge-Slice (4/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 4/9). Konsumiert das Pattern-Vorbild aus
@@ -504,7 +504,7 @@ HIGH-Befunde; weitere Runden sind diminishing returns.
   (`CountAdditions`-Semantik §477, `checkHunks`-Helper) bleiben
   geerbt.
 - Cleanup-Stub:
-  [`slice-v1-cli-cleanup-add-preview-mode-alias`](slice-v1-cli-cleanup-add-preview-mode-alias.md)
+  [`slice-v1-cli-cleanup-add-preview-mode-alias`](../open/slice-v1-cli-cleanup-add-preview-mode-alias.md)
   — wartet auf „mindestens einen weiteren Folge-Slice"; generate
   IST dieser Folge-Slice, MUSS `driving.PreviewMode` direkt
   nutzen.
