@@ -121,10 +121,11 @@ type GenerateResponse struct {
 	// T2 / inherited from init T2 / add T0-(i)). One entry per
 	// mutated path captured by the recorder, in the order the use
 	// case attempted them. Empty for PreviewNone (no recorder wired)
-	// and for true no-ops. Carries NewContent and OldContent for the
-	// CLI-adapter diff renderer; these two fields stay out of the
-	// JSON wire-format via `json:"-"` (Spec §326 has no place for
-	// raw bytes).
+	// and for true no-ops. The [PlannedFile] type itself trägt die
+	// NewContent/OldContent-Felder mit `json:"-"` (siehe addservice.go
+	// Definition), damit Raw-Bytes nicht in der CLI-Wire-Form landen
+	// (Spec §326). Der Port serialisiert nichts direkt — die CLI baut
+	// eigene Wire-Typen in `cli/jsonenvelope.go` (plannedFile/hunk).
 	//
 	// Mid-Write-Failure-Semantik (R4 Recorder-Realität,
 	// recordingfs.go:139 zeichnet vor Delegieren auf): bei einem
