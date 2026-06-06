@@ -306,6 +306,154 @@ func TestAssertFullEnvelope_HunkAbsenceIsOK(t *testing.T) {
 	}
 }
 
+// TestWithDataKeyPresent_PassesWhenKeyAndValueMatch is the positive
+// pin for [jsontestutil.WithDataKeyPresent] (slice-v1-cli-json-dry-
+// run-remove T6-A). All three data fields are present with the
+// expected values; the helper must not flag anything.
+func TestWithDataKeyPresent_PassesWhenKeyAndValueMatch(t *testing.T) {
+	r := newRecorder(t)
+	raw := []byte(`{
+		"status":"ok","command":"remove",
+		"diagnostics":[],"exitCode":0,
+		"data":{"service":"postgres","priorState":"active","volumesPurged":false}
+	}`)
+	jsontestutil.AssertMinimalEnvelope(r, raw,
+		jsontestutil.WithDataKeyPresent("service", "postgres"),
+		jsontestutil.WithDataKeyPresent("priorState", "active"),
+		jsontestutil.WithDataKeyPresent("volumesPurged", false),
+	)
+	if len(r.errors) != 0 {
+		t.Errorf("matching data.key pins must pass; got errors: %v", r.errors)
+	}
+}
+
+// TestWithDataKeyPresent_NilValueIgnoresValueMismatch pins that
+// value=nil means "key must be present, value is irrelevant" — useful
+// for dynamic fields the test asserts separately.
+func TestWithDataKeyPresent_NilValueIgnoresValueMismatch(t *testing.T) {
+	r := newRecorder(t)
+	raw := []byte(`{
+		"status":"ok","command":"remove",
+		"diagnostics":[],"exitCode":0,
+		"data":{"service":"postgres"}
+	}`)
+	jsontestutil.AssertMinimalEnvelope(r, raw,
+		jsontestutil.WithDataKeyPresent("service", nil),
+	)
+	if len(r.errors) != 0 {
+		t.Errorf("nil-value pin must accept any value; got errors: %v", r.errors)
+	}
+}
+
+// TestWithDataKeyPresent_FailsOnValueMismatch verifies the
+// reflect.DeepEqual-Wertvergleich. JSON-Decoder produziert string
+// für Strings — auf Test-Seite ist `"deactivated"` (das Decoded-
+// Form) korrekt.
+func TestWithDataKeyPresent_FailsOnValueMismatch(t *testing.T) {
+	r := newRecorder(t)
+	raw := []byte(`{
+		"status":"ok","command":"remove",
+		"diagnostics":[],"exitCode":0,
+		"data":{"service":"postgres","priorState":"deactivated"}
+	}`)
+	jsontestutil.AssertMinimalEnvelope(r, raw,
+		jsontestutil.WithDataKeyPresent("priorState", "active"),
+	)
+	if !containsSubstring(r.errors, "WithDataKeyPresent") {
+		t.Errorf("expected value-mismatch reject, errors=%v", r.errors)
+	}
+}
+
+// TestWithDataKeyPresent_FailsOnAbsentKey verifies the absent-key
+// detection — `data` ist da, aber der Key fehlt.
+func TestWithDataKeyPresent_FailsOnAbsentKey(t *testing.T) {
+	r := newRecorder(t)
+	raw := []byte(`{
+		"status":"ok","command":"remove",
+		"diagnostics":[],"exitCode":0,
+		"data":{"service":"postgres"}
+	}`)
+	jsontestutil.AssertMinimalEnvelope(r, raw,
+		jsontestutil.WithDataKeyPresent("volumesPurged", false),
+	)
+	if !containsSubstring(r.errors, "key absent from data") {
+		t.Errorf("expected key-absent reject, errors=%v", r.errors)
+	}
+}
+
+// TestWithDataKeyPresent_FailsWhenDataMissing pins the failure when
+// `data` itself isn't in the envelope (z.B. minimal envelope without
+// data-Carrier).
+func TestWithDataKeyPresent_FailsWhenDataMissing(t *testing.T) {
+	r := newRecorder(t)
+	raw := []byte(`{
+		"status":"ok","command":"add",
+		"diagnostics":[],"exitCode":0
+	}`)
+	jsontestutil.AssertMinimalEnvelope(r, raw,
+		jsontestutil.WithDataKeyPresent("service", "postgres"),
+	)
+	if !containsSubstring(r.errors, "no `data` field") {
+		t.Errorf("expected data-missing reject, errors=%v", r.errors)
+	}
+}
+
+// TestWithDataKeyAbsent_PassesWhenKeyMissing pins the positive case:
+// `data` exists but the named key is not in it (= the Zero-Response-
+// Klausel auf Error-Pfad in remove).
+func TestWithDataKeyAbsent_PassesWhenKeyMissing(t *testing.T) {
+	r := newRecorder(t)
+	raw := []byte(`{
+		"status":"error","command":"remove",
+		"diagnostics":[{"level":"error","code":"LH-FA-ADD-007","message":"x"}],
+		"exitCode":10,
+		"data":{"service":"postgres"}
+	}`)
+	jsontestutil.AssertMinimalEnvelope(r, raw,
+		jsontestutil.WithDataKeyAbsent("volumesPurged", "priorState", "state"),
+	)
+	if len(r.errors) != 0 {
+		t.Errorf("absent-key pins must pass; got errors: %v", r.errors)
+	}
+}
+
+// TestWithDataKeyAbsent_PassesWhenDataMissing pins that absent-key
+// on an envelope without `data` is OK — der Key ist faktisch
+// abwesend (Cluster-Pattern für Envelopes ohne data-Carrier).
+func TestWithDataKeyAbsent_PassesWhenDataMissing(t *testing.T) {
+	r := newRecorder(t)
+	raw := []byte(`{
+		"status":"ok","command":"add",
+		"diagnostics":[],"exitCode":0
+	}`)
+	jsontestutil.AssertMinimalEnvelope(r, raw,
+		jsontestutil.WithDataKeyAbsent("volumesPurged"),
+	)
+	if len(r.errors) != 0 {
+		t.Errorf("absent-data + absent-key pin must pass; got errors: %v", r.errors)
+	}
+}
+
+// TestWithDataKeyAbsent_FailsWhenKeyPresent verifies the rejection
+// when data.<key> is actually there (z. B. Variante-A-Verletzung bei
+// remove's Error-Pfad: `volumesPurged` darf NICHT in der Zero-
+// Response landen).
+func TestWithDataKeyAbsent_FailsWhenKeyPresent(t *testing.T) {
+	r := newRecorder(t)
+	raw := []byte(`{
+		"status":"error","command":"remove",
+		"diagnostics":[{"level":"error","code":"LH-NFA-REL-003","message":"x"}],
+		"exitCode":14,
+		"data":{"service":"postgres","volumesPurged":false}
+	}`)
+	jsontestutil.AssertMinimalEnvelope(r, raw,
+		jsontestutil.WithDataKeyAbsent("volumesPurged"),
+	)
+	if !containsSubstring(r.errors, "MUST be absent") {
+		t.Errorf("expected absent-key violation, errors=%v", r.errors)
+	}
+}
+
 func TestDefaultAllowedCodes_NotEmpty(t *testing.T) {
 	codes := jsontestutil.DefaultAllowedCodes()
 	if len(codes) == 0 {

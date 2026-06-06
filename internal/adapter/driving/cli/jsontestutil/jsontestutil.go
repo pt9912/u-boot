@@ -2,6 +2,7 @@ package jsontestutil
 
 import (
 	"encoding/json"
+	"reflect"
 	"slices"
 	"strings"
 	"testing"
@@ -16,6 +17,24 @@ type assertConfig struct {
 	expectedCodes      []string
 	expectedExitCode   *int
 	allowedCodes       map[string]string
+	// data-Key-Assertions (slice-v1-cli-json-dry-run-remove T6-A,
+	// T0-(f) R8-HIGH-F1-Helper-Gap-Fix): mit [WithDataKeyAbsent] /
+	// [WithDataKeyPresent] können Tests einzelne `data.<key>`-Form
+	// ohne manuellen `env["data"].(map[string]any)["..."]`-Cast
+	// pinnen. Pattern-Vorlauf für Folge-Slices die typed
+	// data-Carrier nutzen (up/down/config-set).
+	dataKeyAbsent  []string
+	dataKeyPresent []dataKeyExpectation
+}
+
+// dataKeyExpectation pinnt eine Anwesenheits-plus-Wert-Erwartung
+// auf `data.<key>`. Value-`nil` heißt "Key MUSS anwesend sein, Wert
+// egal"; nicht-nil prüft via reflect.DeepEqual gegen den unmarshal-
+// ten JSON-Wert. JSON-Wertformen: bool/string/float64/nil/
+// []any/map[string]any (Go's `encoding/json`-Default).
+type dataKeyExpectation struct {
+	key   string
+	value any
 }
 
 // AssertOption ist die Functional-Options-Form für die Helper.
@@ -53,6 +72,45 @@ func WithExitCode(code int) AssertOption {
 	return func(c *assertConfig) { c.expectedExitCode = &code }
 }
 
+// WithDataKeyAbsent pinnt, dass `data.<key>` im JSON FEHLT. Schlägt
+// fehl, wenn entweder `data` selbst fehlt UND key erwartet wird
+// (key kann nicht abwesend sein wenn der Container fehlt — das ist
+// ein No-Op-OK-Fall, der separat geprüft werden muss) oder `data`
+// existiert und `data.<key>` anwesend ist.
+//
+// Konkreter Use-Case: `u-boot remove --json` Error-Pfad MUSS
+// `data.volumesPurged` aus dem Envelope fallen lassen
+// (Zero-Response-Klausel, slice-v1-cli-json-dry-run-remove
+// T0-(f)) — pinnbar via `WithDataKeyAbsent("volumesPurged")` plus
+// `WithDataKeyPresent("service", ...)`.
+//
+// Cluster-Vorlauf: up/down (6/9) reichen ähnliche Per-Service-
+// `data`-Strukturen durch, config-set (8/9) Per-Key-Outcomes.
+func WithDataKeyAbsent(keys ...string) AssertOption {
+	return func(c *assertConfig) { c.dataKeyAbsent = append(c.dataKeyAbsent, keys...) }
+}
+
+// WithDataKeyPresent pinnt, dass `data.<key>` im JSON ANWESEND ist.
+// Wenn value != nil, wird der unmarshal-te Wert via
+// reflect.DeepEqual gegen value verglichen — JSON-Decoder-Defaults
+// gelten (bool/string/float64/nil/[]any/map[string]any), also für
+// numerische Pins `float64(N)` verwenden, NICHT `int(N)`. Wenn
+// value == nil heißt das "Key MUSS anwesend sein, Wert egal" — z.B.
+// für ein dynamisches Service-Name-Feld dessen Wert der Test
+// separat assertet.
+//
+// Beispiele:
+//
+//	WithDataKeyPresent("service", "postgres")
+//	WithDataKeyPresent("volumesPurged", false)
+//	WithDataKeyPresent("priorState", "active")
+//	WithDataKeyPresent("service", nil) // präsent, Wert egal
+func WithDataKeyPresent(key string, value any) AssertOption {
+	return func(c *assertConfig) {
+		c.dataKeyPresent = append(c.dataKeyPresent, dataKeyExpectation{key: key, value: value})
+	}
+}
+
 // AssertMinimalEnvelope prüft den Minimalkontrakt aus LH-NFA-USE-
 // 004 §1841 gegen raw. Failures via t.Errorf — Helper failt nicht
 // fatal, damit Tests mehrere Befunde gleichzeitig sehen.
@@ -84,6 +142,7 @@ func AssertMinimalEnvelope(t testing.TB, raw []byte, opts ...AssertOption) {
 	checkDiagnostics(t, env, cfg)
 	checkStatusCoupling(t, env)
 	checkNoFullFields(t, env)
+	checkDataKeys(t, env, cfg)
 }
 
 // AssertFullEnvelope prüft das Voll-Schema aus LH-FA-CLI-007 §326
@@ -114,6 +173,7 @@ func AssertFullEnvelope(t testing.TB, raw []byte, opts ...AssertOption) {
 	checkStatusCoupling(t, env)
 	checkPlannedFiles(t, env)
 	checkChanges(t, env)
+	checkDataKeys(t, env, cfg)
 }
 
 func buildConfig(opts ...AssertOption) assertConfig {
@@ -377,6 +437,57 @@ func checkHunks(t testing.TB, raw any, plannedFileIdx int) {
 		}
 		if _, ok := h["content"].(string); !ok {
 			t.Errorf("plannedFiles[%d].hunks[%d].content must be a string", plannedFileIdx, j)
+		}
+	}
+}
+
+// checkDataKeys validates the [WithDataKeyAbsent]/[WithDataKeyPresent]
+// pin-Options against `env["data"]` (slice-v1-cli-json-dry-run-
+// remove T6-A, T0-(f) R8-HIGH-F1-Helper-Gap-Fix).
+//
+// Drei Failure-Modes:
+//  1. `WithDataKeyPresent("x", …)` aber `data` selbst fehlt im
+//     Envelope → fail (Konsument bekäme den Key nie zu sehen).
+//  2. `WithDataKeyPresent("x", value)` und `data.x` fehlt → fail.
+//  3. `WithDataKeyPresent("x", value)` mit value != nil und
+//     `data.x` ≠ value (DeepEqual) → fail.
+//  4. `WithDataKeyAbsent("x")` und `data` existiert und `data.x` ist
+//     präsent → fail.
+//
+// `WithDataKeyAbsent("x")` ohne `data` ist OK — der Key ist
+// faktisch abwesend.
+func checkDataKeys(t testing.TB, env map[string]any, cfg assertConfig) {
+	t.Helper()
+	if len(cfg.dataKeyAbsent) == 0 && len(cfg.dataKeyPresent) == 0 {
+		return
+	}
+	rawData, hasData := env["data"]
+	data, _ := rawData.(map[string]any)
+	for _, exp := range cfg.dataKeyPresent {
+		if !hasData {
+			t.Errorf("WithDataKeyPresent(%q): envelope has no `data` field", exp.key)
+			continue
+		}
+		got, present := data[exp.key]
+		if !present {
+			t.Errorf("WithDataKeyPresent(%q): key absent from data (data=%v)", exp.key, data)
+			continue
+		}
+		if exp.value == nil {
+			continue
+		}
+		if !reflect.DeepEqual(got, exp.value) {
+			t.Errorf("WithDataKeyPresent(%q): want %#v (%T), got %#v (%T)",
+				exp.key, exp.value, exp.value, got, got)
+		}
+	}
+	for _, key := range cfg.dataKeyAbsent {
+		if !hasData {
+			continue
+		}
+		if _, present := data[key]; present {
+			t.Errorf("WithDataKeyAbsent(%q): key MUST be absent but data[%q]=%#v",
+				key, key, data[key])
 		}
 	}
 }

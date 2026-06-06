@@ -325,6 +325,13 @@ func isValidationError(err error) bool {
 		errors.Is(err, driving.ErrProjectNotInitialized) ||
 		errors.Is(err, driving.ErrComposeFileMissing) ||
 		errors.Is(err, driving.ErrConfirmationRequired) ||
+		// slice-v1-cli-json-dry-run-remove T0-(e) R2-HIGH-F1:
+		// ErrConfirmerUnavailable (Confirmer-I/O-Failure beim --purge-
+		// Gate, z.B. stdin EOF / pipe break) teilt die LH-FA-CLI-005A-
+		// Klasse mit ErrConfirmationRequired und mappt auf exit 10.
+		// Distinct vom User-Refusal-Pfad — beide sind Gate-Failures
+		// vom selben Spec-Anker (§254).
+		errors.Is(err, driving.ErrConfirmerUnavailable) ||
 		errors.Is(err, driving.ErrGenerateManualConflict) ||
 		isServiceValidationError(err) ||
 		isConfigValidationError(err) ||
@@ -399,7 +406,15 @@ func isFilesystemError(err error) bool {
 		errors.Is(err, driving.ErrTemplateCatalog) ||
 		errors.Is(err, driving.ErrTemplateRender) ||
 		errors.Is(err, driving.ErrAddFileSystem) ||
-		errors.Is(err, driving.ErrInitFileSystem)
+		errors.Is(err, driving.ErrInitFileSystem) ||
+		// slice-v1-cli-json-dry-run-remove T5: ErrRemoveFileSystem
+		// wraps raw os.WriteFile / RemoveAll / Exists / ReadFile /
+		// Lstat errors in removeservice.go (8 FS-Wrap-Stellen) so
+		// remove-mid-write failures map to LH-NFA-REL-003 / exit-code
+		// 14, not the default "1" — without this entry the recorder
+		// would surface plannedFiles[] to the user but the process
+		// would exit with the wrong code class.
+		errors.Is(err, driving.ErrRemoveFileSystem)
 }
 
 // isUsageError detects two distinct classes of usage-level errors:

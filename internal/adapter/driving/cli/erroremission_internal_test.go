@@ -482,19 +482,41 @@ func TestPrintInitSummary_AllPaths(t *testing.T) {
 	})
 }
 
-// TestComputeChangeCountAndHunks_AllActions covers the four
-// branches in computeChangeCountAndHunks: delete (short-circuit),
-// binary non-delete (CountBytesDiff), create (CountLines + hunks),
-// modify (CountAdditions + hunks). The default-fallback branch is
+// TestComputeChangeCountAndHunks_AllActions covers the five
+// branches in computeChangeCountAndHunks: delete text (T0-(p)
+// full-file removal hunks), delete binary (hunkless), binary
+// non-delete (CountBytesDiff), create (CountLines + hunks), modify
+// (CountAdditions + hunks). The default-fallback branch is
 // unreachable per spec (action ∈ {create, modify, delete}) but we
 // also exercise an unknown action so the switch's default is
 // observed by coverage.
 func TestComputeChangeCountAndHunks_AllActions(t *testing.T) {
-	t.Run("delete → (0, nil) regardless of content", func(t *testing.T) {
-		pf := driving.PlannedFile{Path: "x", Action: "delete", OldContent: []byte("anything"), NewContent: nil}
+	t.Run("delete text → (0, hunks) full-file removal block", func(t *testing.T) {
+		// slice-v1-cli-json-dry-run-remove T0-(p): delete renders the
+		// old content as a removal hunk so --diff --json consumers see
+		// WHAT got deleted. count remains 0 (delete contributes no
+		// added lines, Spec §477).
+		pf := driving.PlannedFile{Path: "x.txt", Action: "delete", OldContent: []byte("one\ntwo\n"), NewContent: nil}
 		count, hunks := computeChangeCountAndHunks(pf)
-		if count != 0 || hunks != nil {
-			t.Errorf("delete: want (0, nil), got (%d, %v)", count, hunks)
+		if count != 0 {
+			t.Errorf("delete text: count want 0, got %d", count)
+		}
+		if len(hunks) == 0 {
+			t.Errorf("delete text: expected at least one hunk (full-file removal block, T0-(p)), got nil")
+		}
+	})
+	t.Run("delete binary → (0, nil) hunkless", func(t *testing.T) {
+		// Binary-delete-Trap-Schutz aus add review #8: binary content
+		// hat keinen lesbaren Diff, hunks bleiben nil. count=0 (T0-(p)
+		// — KEIN CountBytesDiff für delete, weil Konsumenten sonst
+		// einen Byte-Delta sähen statt der 0-added-Lines-Semantik).
+		pf := driving.PlannedFile{Path: "blob.bin", Action: "delete", OldContent: []byte{0xff, 0xfe, 0xfd, 0xfc}, NewContent: nil}
+		count, hunks := computeChangeCountAndHunks(pf)
+		if count != 0 {
+			t.Errorf("delete binary: count want 0, got %d", count)
+		}
+		if hunks != nil {
+			t.Errorf("delete binary: hunks must be nil (no readable diff), got %v", hunks)
 		}
 	})
 	t.Run("binary non-delete → CountBytesDiff, nil hunks", func(t *testing.T) {

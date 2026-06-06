@@ -49,15 +49,22 @@ func mapPlannedFilesToWire(planned []driving.PlannedFile, withHunks bool) ([]pla
 //   - "modify": count = CountAdditions(hunks) — only the `+` lines
 //     (Spec §477 pins `count: 6` for a 6-line postgres-block append,
 //     NOT 6 + context lines; add review-round-7 finding B).
-//   - "delete": count = 0 — short-circuit BEFORE the binary-check
-//     so the CountBytesDiff trap doesn't fire for binary deletes
-//     (add review #8).
+//   - "delete" (slice-v1-cli-json-dry-run-remove T0-(p)): count = 0
+//     (delete contributes zero added lines per Spec §477 semantics);
+//     hunks rendert den Old-Inhalt als full-file-Remove-Block, damit
+//     `--diff --json`-Konsumenten sehen WAS gelöscht wird. Add review
+//     #8 binary-delete-Trap bleibt geschützt: ein Pre-Compute
+//     IsBinary-Check unterdrückt Hunks (und `CountBytesDiff` — wir
+//     wollen `0` und nicht den Byte-Delta) für binary content.
 //   - binary content (non-delete): count = CountBytesDiff, hunks=nil
 //     so wirePF.Hunks remains omitted (T0-(l) Spec-konformes
 //     Fallback).
 func computeChangeCountAndHunks(pf driving.PlannedFile) (int, []driving.Hunk) {
 	if pf.Action == "delete" {
-		return 0, nil
+		if diff.IsBinary(pf.OldContent, pf.NewContent) {
+			return 0, nil
+		}
+		return 0, diff.Compute(pf.OldContent, pf.NewContent)
 	}
 	if diff.IsBinary(pf.OldContent, pf.NewContent) {
 		return diff.CountBytesDiff(pf.OldContent, pf.NewContent), nil
