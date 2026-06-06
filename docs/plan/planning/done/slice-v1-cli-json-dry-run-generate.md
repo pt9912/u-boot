@@ -1,10 +1,54 @@
 # Slice V1: `generate --json` / `--dry-run` / `--diff` — Vier-Artefakt-Surface
 
-> **Status:** T0-Discovery + R1-R7 + R10 adressiert, `in-progress/`. Lifecycle-Übergänge: `open/` nach R1-R5, `next/` nach R6/R7, `in-progress/` ab T1. Findings-Bilanz: 33 gesamt (7 HIGH, 19 MED, 7 LOW); R10 ergab 5 (0 HIGH, 2 MED, 3 LOW) gegen die T1-T6-Implementation. **T1-T6 done; T7 done.** Vierter Folge-Slice (4/9) des
+> **Status:** ✅ **done** — vierter Folge-Slice (4/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
-> (T0-(e) Reihenfolge 4/9). Konsumiert das Pattern-Vorbild aus
-> [`slice-v1-cli-json-dry-run-init`](../done/slice-v1-cli-json-dry-run-init.md)
+> (T0-(e) Reihenfolge 4/9). Lifecycle-Übergänge: `open/` nach R1-R5,
+> `next/` nach R6/R7, `in-progress/` ab T1, `done/` mit T8-Closure.
+> Findings-Bilanz: 33 gesamt (7 HIGH, 19 MED, 7 LOW); R10 ergab
+> 5 (0 HIGH, 2 MED, 3 LOW) gegen die T1-T6-Implementation.
+>
+> Generate ist der **erste** Subcommand, der mehrere Artefakte
+> (changelog/readme/env-example/devcontainer) über einen einzigen
+> Subcommand bedient. Pattern-Erbe init→generate 1:1; Generate-
+> spezifische Erweiterungen: `command="generate"` ohne
+> `subcommand`-Feld (Cobra-Positional-Arg-Semantik),
+> `data.artifact`/`data.action`-Carrier-Form, per-Artefakt
+> LH-Code-Tabelle in `mapGenerateErrorToDiagnostic(err, artifact)`,
+> `ErrConfigValueInvalid`-Sentinel-Wrap für den
+> `LH-FA-DEV-003`-URL-Reject-Pfad (Spec §720). `cliJSONEnvelope.Data`
+> + `newDataEnvelope`-Konstruktor wurden aus dem Template-Slice 9/9
+> vorgezogen — Template-Slice erbt das Feld nur noch. Cluster-Stand
+> nach Closure: **4/9 done** (doctor, add, init, generate); offene
+> 5/9: remove, up-down, logs, config, template.
+>
+> **DoD-Tranchen-Hashes** (alle T0-T8 + R-Runden):
+>
+> | Tranche / Round | Inhalt | Commit |
+> | --- | --- | --- |
+> | T0 — Stub | `open/`-Stub Cluster-Folge-Slice 4/9 | `fbef9b5` |
+> | T0 — R1 | Pre-`next/` Review-Round-1 (5 Findings, 2 HIGH / 2 MED / 1 LOW) | `f3134bd` |
+> | T0 — R2 | Pre-`next/` Review-Round-2 + Carveout-Inventarisierung | `cffda2c` |
+> | T0 — R3 | Pre-`next/` Review-Round-3 (V2-Stub-Korrektur, Action-Vertrag, Diagnostic-Code-Tabelle, Envelope-Shape) | `0edcf25` |
+> | T0 — R4 | Pre-`next/` Review-Round-4 (Carveout-Roadmap-Sichtbarkeit, Data-Feld-Migration, Recorder-Realität, V2-Verzeichnis-Cleanup) | `0b3e1ad` |
+> | T0 — R5 | Pre-`next/` Review-Round-5 (3 MED Intra-Plan-Drift) | `b14d2e8` |
+> | T0 — `next/`-Übergang | Lifecycle aus `open/` | `2e3d577` |
+> | T0 — R6 | `next/` Review-Round-6 (Implementation-Reality + Spec-Coverage) | `8d7d847` |
+> | T0 — R7 | `next/` Review-Round-7 (Test-Härte + Plan-Drift) | `2a6f4d4` |
+> | T0 — `in-progress/`-Übergang | Lifecycle aus `next/` | `17a50f4` |
+> | T1 | `cliJSONEnvelope.Data` + `newDataEnvelope` + Helper-`data any`-Param (aus Template-Slice 9/9 vorgezogen) | `bd3de20` |
+> | T2 | Port-Types: `GenerateRequest.PreviewMode` + `GenerateResponse.PlannedFiles`/`Changes` | `96edf40` |
+> | T3 | Application-Layer: `GenerateService.fsFactory` + `generateMu` + Multi-`%w` (~17 Stellen) + `ErrConfigValueInvalid`-Wrap | `242690f` |
+> | T4 | Composition-Root: `generateFSFactory`-Closure in `cmd/uboot/main.go` | `41f0231` |
+> | T5 | CLI-RunE: drei JSON-Pfade + Allowlist-Migration + `mapGenerateErrorToDiagnostic(err, artifact)` + `generateEnvelopeData` | `9f8937d` |
+> | T6 | 15 Acceptance-Pins — JSON-Pfade + Error-Scenarios + Action-Discriminator | `b0b31e0` |
+> | T7 — R10 R1+R2 | Switch-Order auf Plan-T0-(e) + `manualConflictCodeFor` explizit | `031fd79` |
+> | T7 — R10 LOW-Bundle | `unparam`-Suppression + Doc-Drifts + T6-Coverage-Text | `1e20c87` |
+> | T7 — Doku-Closure | Review-Round-10-Tabelle | `a6a7d2f` |
+> | T8 — Closure | CHANGELOG + `cli-json-output.md` §6/§6.5/§7 + Template-Slice-Plan-Update + roadmap-Update (4/9) + done/-Move | dieser Commit |
+>
+> Konsumiert das Pattern-Vorbild aus
+> [`slice-v1-cli-json-dry-run-init`](slice-v1-cli-json-dry-run-init.md)
 > 1:1 für den `PreviewMode`-Carrier (kanonisch — kein neuer Service-
 > Prefix-Alias, Alias-Lebensdauer-Pflicht aus init-T0-(c)), den
 > `RecordingFileSystem`-driven-Adapter, den Pure-Go LCS-Diff-
@@ -654,12 +698,12 @@ Reihenfolge, Defensiv-Fallbacks und Doku-Drift.
   [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
   §T0-Outcomes — Vorgaben für den Folge-Slice-Block.
 - Pattern-Vorbild:
-  [`slice-v1-cli-json-dry-run-init`](../done/slice-v1-cli-json-dry-run-init.md)
+  [`slice-v1-cli-json-dry-run-init`](slice-v1-cli-json-dry-run-init.md)
   — T0-T8 + Review-Round-9 voll abgeschlossen. Erbschafts-
   Disziplin in T0-(a) dieses Slices; Alias-Lebensdauer-Pflicht
   aus init-T0-(c) zwingt direktes `driving.PreviewMode`.
 - Add-Slice (sekundär):
-  [`slice-v1-cli-json-dry-run-add`](../done/slice-v1-cli-json-dry-run-add.md)
+  [`slice-v1-cli-json-dry-run-add`](slice-v1-cli-json-dry-run-add.md)
   — Pattern-Founder; relevante Sub-Decisions
   (`CountAdditions`-Semantik §477, `checkHunks`-Helper) bleiben
   geerbt.

@@ -61,16 +61,21 @@ keit zwischen Help und List schaffen).
 
 - ✅ **Envelope-Migration**: `cliJSONEnvelope` mit
   `command: "template"`, `subcommand: "list"`, `Data` als
-  `[]templateJSON`. **Neuer Konstruktor `newDataEnvelope`**
-  (oder analoger Helper) etabliert die "Data-im-Minimal-Mode"-
-  Disziplin mit eigenem Marshal-Pin-Test (Review-Finding H1 aus
-  `slice-v1-cli-json-dry-run-doctor` adressiert).
-- ✅ **`Data`-Feld im `cliJSONEnvelope`**: wird in diesem Slice
-  wieder eingeführt (war in T2 entfernt, weil kein Konsument
-  existierte). Type bleibt `any` mit `omitempty`-Tag. Sub-
-  Decision: Pattern-Disziplin per `newDataEnvelope(command,
-  subcommand, data any, ...)`-Konstruktor (Plan-Vorgabe aus
-  Doctor-Slice T0-(c)).
+  `[]templateJSON`. Konstruktor `newDataEnvelope(command,
+  subcommand, data any, diags, exitCode)` ist **bereits im
+  generate-Slice 4/9 T1 eingeführt** (Ownership aus T0-(p)
+  vorgezogen, Commit `bd3de20`); Template-Slice **erbt** nur
+  und ruft mit `subcommand="list"` + `data=[]templateJSON`.
+  Marshal-Pin-Tests `TestDataEnvelope_DataPresent` /
+  `TestDataEnvelope_DataNilOmitted` in
+  `jsonenvelope_test.go` decken das Feld bereits ab.
+- ✅ **`Data`-Feld im `cliJSONEnvelope`**: ist bereits
+  vorhanden (generate T1, Commit `bd3de20`). Type `any` mit
+  `omitempty`-Tag, in der Struct-Definition Z. 45 in
+  `jsonenvelope.go`. Template-Slice fügt KEIN Feld mehr hinzu,
+  sondern verbraucht es nur — die ursprüngliche Sub-Decision
+  Plan-Vorgabe ist damit erfüllt; T1-LOC-Schätzung sinkt
+  entsprechend (siehe Tranchen-Tabelle).
 - ✅ **Code-Registry-Sektion** in
   [`docs/user/cli-json-output.md`](../../../user/cli-json-output.md)
   §5 erweitert um eine `template`-Sektion (sofern eigene Codes
@@ -99,14 +104,15 @@ keit zwischen Help und List schaffen).
 
 | T | Inhalt | LOC (Schätzung) |
 | - | ------ | --------------- |
-| T0 | **Discovery + Sub-Decisions** für bare-`template`-Verhalten (Reject vs. Default-Subcommand), `Data`-Konstruktor-Form, Code-Registry-Bedarf. | — (Plan-Arbeit) |
-| T1 | **`cliJSONEnvelope` erweitern**: `Data any \`json:"data,omitempty"\`` wieder ergänzen; `newDataEnvelope(command, subcommand string, data any, diags, exitCode)`-Konstruktor + Marshal-Pin-Test. | ~80 |
+| T0 | **Discovery + Sub-Decisions** für bare-`template`-Verhalten (Reject vs. Default-Subcommand), Code-Registry-Bedarf. `Data`-Konstruktor-Form ist seit generate T1 (`bd3de20`) bereits etabliert. | — (Plan-Arbeit) |
+| T1 | **Entfällt** — `cliJSONEnvelope.Data` + `newDataEnvelope(command, subcommand string, data any, diags, exitCode)` sind seit generate-Slice 4/9 T1 (Commit `bd3de20`) vorhanden, inkl. Marshal-Pin-Tests. Template-Slice nutzt sie nur (T2). | — (entfällt) |
 | T2 | **`runTemplateList`-Migration**: Array-Output durch Envelope ersetzen, `templateJSON`-Slice als `Data`. Bestehender Pin-Test `TestRootJSON_AcceptsTemplateList_BothFlagPositions` muss überarbeitet werden — Format-Wechsel ist Breaking-Change im JSON-Surface (rechtfertigt v0.5.0-Bump oder Carveouts.md-permanent-Eintrag falls Konsument-Verträglichkeit erforderlich). | ~80 |
 | T3 | **bare `template` Sub-Decision umsetzen**: Default-Subcommand oder expliziter Reject. | ~30 |
 | T4 | **Cluster-T_close-Vorbereitung**: Carveouts-Eintrag entfernen, Allowlist-Mechanik komplett abbauen (siehe Cluster-Slice §T0-(g) Cluster-T_close-Pflicht-Check). | ~40 |
 | T5 | **Closure.** CHANGELOG, Roadmap, Cluster-Slice nach `done/` (zusammen mit diesem Slice), DoD-Hash-Tabelle. | — (Doku) |
 
-LOC-Schätzung: ~230 LOC, im niedrigen Bereich der Cluster-
+LOC-Schätzung: ~150 LOC (nach T1-Entfall aus generate-Vorziehung),
+im niedrigen Bereich der Cluster-
 LOC-Bandbreite.
 
 ## Out of Scope

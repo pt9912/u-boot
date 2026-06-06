@@ -2,7 +2,7 @@
 
 > **Status:** `open/`, on hold pending trigger. Cleanup-/Hardening-
 > Slice zum Devcontainer-Phase-2-Half-Write-Carveout aus
-> [`slice-v1-cli-json-dry-run-generate`](../in-progress/slice-v1-cli-json-dry-run-generate.md)
+> [`slice-v1-cli-json-dry-run-generate`](../done/slice-v1-cli-json-dry-run-generate.md)
 > T0-(i). Carveout-Plan-Anker
 > ([[feedback_carveouts_need_plans]]); verlinkt aus
 > [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
@@ -192,7 +192,7 @@ File-1+2-Rollback + Dir-Cleanup + YAML-No-Touch.
   [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
   §Temporäre Carveouts — Eintrag verweist hierher.
 - Generate-Slice T0-(i):
-  [`slice-v1-cli-json-dry-run-generate`](../in-progress/slice-v1-cli-json-dry-run-generate.md)
+  [`slice-v1-cli-json-dry-run-generate`](../done/slice-v1-cli-json-dry-run-generate.md)
   §Sub-Decisions T0-(i) Devcontainer-Atomicity-Klärung.
 - Code-Anker:
   [`generate.go:618-690`](../../../../internal/hexagon/application/generate.go)

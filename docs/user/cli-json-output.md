@@ -367,7 +367,7 @@ Reihenfolge gemäß Cluster-T0-(e):
 | 1 | `slice-v1-cli-json-dry-run-doctor` | `doctor` + `template list`-Flag-Schnitt | done |
 | 2 | `slice-v1-cli-json-dry-run-add` | `add` (modifying, etabliert Full-Modus + RecordingFileSystem) | done (DoD-Hash-Tabelle im Slice-File) |
 | 3 | `slice-v1-cli-json-dry-run-init` | `init` | done (DoD-Hash-Tabelle im Slice-File) |
-| 4 | `slice-v1-cli-json-dry-run-generate` | `generate` | T0-Discovery + R1-R7 adressiert, `in-progress/` (T1-Refactor läuft) |
+| 4 | `slice-v1-cli-json-dry-run-generate` | `generate` | done (DoD-Hash-Tabelle im Slice-File) |
 | 5 | `slice-v1-cli-json-dry-run-remove` | `remove` | offen |
 | 6 | `slice-v1-cli-json-dry-run-up-down` | `up`, `down` (gebündelt, read-only Compose-Status) | offen |
 | 7 | `slice-v1-cli-json-dry-run-logs` | `logs` (Sub-Decision: JSON-Lines vs. Single-Envelope) | offen |
@@ -528,6 +528,84 @@ race-frei ohne Lock. Zwei Goroutinen, die parallel `init` auf
 denselben Service mit unterschiedlichen TempDirs aufrufen, werden
 serialisiert (Acceptance-Pin).
 
+### 6.5 `u-boot generate --json` (slice-v1-cli-json-dry-run-generate, done)
+
+`u-boot generate <artifact>` ist der **erste** Subcommand, der
+mehrere Artefakte (`changelog` / `readme` / `env-example` /
+`devcontainer`) über einen einzigen Subcommand bedient. Vier
+Flag-Kombinationen mit derselben Symmetrie wie `add`/`init`:
+
+- **`--json` ohne `--dry-run`/`--diff`** → Minimal+Data-Envelope
+  via `newDataEnvelope`. Operation schreibt das FS um; das
+  JSON-Output trägt **keinen** Plan-Inhalt, aber `data.artifact`
+  und `data.action` für Konsumenten-Klassifikation.
+- **`--dry-run --json`** → Voll-Schema mit `plannedFiles[]`/
+  `changes[]` plus `data.action`, `dryRun: true`, `diff: false`.
+  Es wird **nichts** auf die Disk geschrieben.
+- **`--diff --json`** → Voll-Schema mit `plannedFiles[].hunks[]`,
+  `dryRun: false`, `diff: true`, plus `data.action`. Es wird
+  geschrieben **und** capturet.
+- **`--dry-run --diff --json`** → wie `--dry-run --json`, aber
+  mit Hunks. Kein Write.
+
+**Envelope-Shape** (T0-(m)): `command="generate"`, **kein
+`subcommand`-Feld** (Cobra-`<artifact>` ist Positional-Arg, kein
+Subcommand). Artefakt wird in `data.artifact:
+"<changelog|readme|env-example|devcontainer>"` getragen.
+
+**Action-Klassifikation via `data.action`** (T0-(f)):
+`<created|updated-block|no-op|repaired-manual>`. **NoOp**
+produziert zusätzlich `plannedFiles: []` UND `changes: []`
+(beide leer). **UpdatedBlock** und **RepairedManual** sind
+FS-semantisch identisch (`plannedFiles[i].action: "modify"`);
+`data.action` ist der **einzige** Discriminator zwischen ihnen
+(Acceptance-Pin in `generate_acceptance_test.go`).
+
+**Error-Envelope** trägt `data.artifact` aber **kein
+`data.action`** (T0-(q)): die Use-Case-Response ist Zero auf
+dem Error-Pfad, eine Action existiert nicht. Bei unbekanntem
+Artefakt (`ErrArtifactUnknown` aus
+`domain.NewArtifact`-Validation) entfällt `data` komplett —
+das Artefakt ist nicht klassifizierbar.
+
+**Per-Artefakt LH-Code-Tabelle** (T0-(e)) für
+`ErrGenerateManualConflict`:
+
+| Artefakt | LH-Code | Exit-Code |
+| --- | --- | --- |
+| `changelog` | `LH-FA-GEN-002` | 10 |
+| `readme` | `LH-FA-GEN-003` | 10 |
+| `env-example` | `LH-FA-GEN-004` | 10 |
+| `devcontainer` | `LH-FA-DEV-001` | 10 |
+
+Plus weitere Diagnostic-Codes: `ErrGenerateFileSystem` →
+`LH-NFA-REL-003` / Exit 14 (FS-Klasse, Switch-Order-First);
+`ErrConfigValueInvalid` (ungültige
+`--allow-external-feature-sources`-URL) → `LH-FA-DEV-003` /
+Exit 10 (Spec §720); `ErrArtifactUnknown` → `LH-FA-CLI-006` /
+Exit 2 (CLI-Validation, Spec §1157); `ErrProjectNotInitialized`
+→ `LH-FA-INIT-001` / Exit 10.
+
+**`--allow-external-feature-sources`-Mutex-Check**: der Flag ist
+NUR für `generate devcontainer` gültig. Auf anderen Artefakten
+rejected die CLI mit `ErrArtifactUnknown` / Exit 2 **vor** dem
+Use-Case-Call (Acceptance-Pin).
+
+**Devcontainer-Atomicity-Asymmetrie** (T0-(i)): Phase 1
+(`planDevcontainerFiles`) ist Pre-Write-Validation-atomar (kein
+WriteFile bei `ErrGenerateManualConflict`); Phase 2
+(`executeDevcontainerPlans`) ist **nicht** Roll-back-atomar —
+Mid-Write zweiter File hinterlässt halbgeschriebenen Zustand.
+Carveout dokumentiert in
+[`carveouts.md`](../plan/planning/in-progress/carveouts.md)
+§Temporäre Carveouts; Rollback-Slice
+[`slice-v2-generate-devcontainer-rollback-aware-write`](../plan/planning/open/slice-v2-generate-devcontainer-rollback-aware-write.md)
+on hold pending trigger.
+
+**Concurrency**: `GenerateService.generateMu sync.Mutex`
+serialisiert konkurrierende `Generate()`-Calls auf demselben
+Service (analog `InitProjectService.initMu`).
+
 ---
 
 ## 7. Mutations-Matrix pro Subcommand
@@ -545,8 +623,9 @@ in derselben PR ergänzen.
 | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `add` (slice-v1-cli-json-dry-run-add) | ✓ (3 Slots + N ExtraFiles) | — | — | ✓ (implizit, Recorder synthetisiert) | — | — | — | — |
 | `init` (slice-v1-cli-json-dry-run-init) | ✓ (Skeleton-Files + `u-boot.yaml`) | — | ✓ (Backup-Verz.) | ✓ (Skeleton-Dirs direkt; Backup indirekt) | — | ✓ (Backup) | ✓ (Backup) | ✓ (Backup) |
+| `generate` (slice-v1-cli-json-dry-run-generate) | ✓ (Artefakt-Files + `u-boot.yaml`-Allowlist-Mutation) | — | — | ✓ (devcontainer-Dir) | — | — | — | — |
 
-Andere modifying-Subcommands (`generate`, `remove`,
+Andere modifying-Subcommands (`remove`,
 `config set`) ergänzen ihre Zeile im jeweiligen Slice — heute
 `doctor`, `add` und `init` migriert.
 

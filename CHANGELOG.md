@@ -11,6 +11,68 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- `feat(cli): u-boot generate --json / --dry-run / --diff
+  (LH-FA-CLI-007/008 / LH-NFA-USE-004 / LH-FA-GEN-001..005 /
+  LH-FA-DEV-001/003)` — vierter Folge-Slice (4/9) des Cluster-
+  Slice `slice-v1-cli-json-dry-run`. `u-boot generate` ist nach
+  doctor/add/init der nächste modifying-Subcommand und der
+  **erste**, der mehrere Artefakte (changelog/readme/env-example/
+  devcontainer) über einen einzigen Subcommand bedient. Vier
+  Flag-Kombinationen mit derselben Symmetrie wie add/init:
+  `--json` (Minimal+Data-Envelope), `--dry-run --json`
+  (Voll-Schema mit `plannedFiles[]`/`changes[]`, kein FS-Write),
+  `--diff --json` (Voll-Schema mit Hunks, Preview-and-Apply),
+  `--dry-run --diff --json` (Vorschau plus Hunks, kein Write).
+  Human-Mode `generate --diff` rendert Unified-Diff am stdout.
+  **Action-Klassifikation via `data.action`** (`created` /
+  `updated-block` / `no-op` / `repaired-manual`):
+  UpdatedBlock und RepairedManual sind FS-semantisch identisch
+  (`plannedFiles[i].action: "modify"`), `data.action` ist der
+  einzige Discriminator. **Multi-Artefakt-Envelope-Form**:
+  `command="generate"`, kein `subcommand`-Feld (Cobra-Positional-
+  Arg-Semantik), `data.artifact` trägt das Artefakt. Pattern-
+  Erbe init→generate 1:1: `PreviewMode`-Carrier (direkt, kein
+  Service-Prefix-Alias), `RecordingFileSystem`-driven-Adapter,
+  Pure-Go LCS-Diff-Renderer, `previewModeFromFlags`-Mapping,
+  generalisierte Error-Emission-Helper. Generate-spezifische
+  Erweiterungen: **2 von 8 Recorder-Mutations-Methoden** im
+  Capture-Set (`WriteFile`, `MkdirAll`); **kein** `GitClient`
+  und **kein** `ProgressPort` (schmaler als init);
+  **`generateMu sync.Mutex`** auf `GenerateService`;
+  **per-Artefakt LH-Code-Tabelle** im neuen
+  `mapGenerateErrorToDiagnostic(err, artifact)` (changelog→
+  `LH-FA-GEN-002`, readme→`LH-FA-GEN-003`, env-example→
+  `LH-FA-GEN-004`, devcontainer→`LH-FA-DEV-001`);
+  **`ErrConfigValueInvalid`-Sentinel-Wrap** auf
+  `validateAllowExternalFeatureSourcesEntries`/
+  `applyAllowExternalFeatureSources` für den
+  `LH-FA-DEV-003`-URL-Reject-Pfad (Spec §720 fordert exakt
+  Exit 10 für ungültige `--allow-external-feature-sources`-URLs;
+  ohne den Sentinel-Wrap wäre der Pfad auf Default
+  `LH-FA-CLI-006`/Exit 1 gefallen); **Multi-`%w`-Wrap auf
+  ~17 FS-Wrap-Stellen** in `application/generate.go` (Switch-
+  Order-Sicherheit analog init T6; ohne Multi-`%w` würde ein
+  Multi-Wrap mit FS-Sentinel + fachlich-Sentinel auf Exit 10
+  downgraden). **`cliJSONEnvelope.Data`-Feld + `newDataEnvelope`-
+  Konstruktor** wurden aus dem Template-Slice 9/9 in generate
+  vorgezogen (Generate ist der erste Multi-Artefakt-Konsument
+  mit `data`-Bedarf); Template-Slice 9/9 erbt das Feld nur noch.
+  **`writeErrorEnvelope`/`reportError` um `data any`-Trailing-
+  Param erweitert** (init/add reichen `nil` durch — nicht-
+  brechende Erweiterung). Acceptance-Coverage: 15 Tests in
+  `generate_acceptance_test.go` (drei JSON-Modi, 4 ManualConflict-
+  Codes als Sub-Tests, URL-Reject-LH-FA-DEV-003, ArtifactUnknown-
+  Exit-2, ProjectNotInitialized-Exit-10, FS-Failure-Exit-14,
+  Allow-External-Mutex, NoOp-Empty-Arrays, UpdatedBlock-vs-
+  RepairedManual-Action-Discriminator, Human-Mode-Summary +
+  Diff-Rendering). Devcontainer-Phase-1-Atomicity + Phase-2-
+  Half-Write-Carveout (V2-Open-Slice
+  `slice-v2-generate-devcontainer-rollback-aware-write`) +
+  Repeat-Idempotency leben in den Application-Layer-Tests.
+  Coverage-Gate ≥ 91 %.
+
 ### Fixed
 
 - `fix(cli): mapAddErrorToDiagnostic Backup-Sentinels auf
