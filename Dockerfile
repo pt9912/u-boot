@@ -26,7 +26,7 @@
 
 # Global build args. Both must be declared before the first FROM so they
 # are usable in every stage's FROM-line.
-ARG GO_VERSION=1.26.3
+ARG GO_VERSION=1.26.4
 ARG GOLANGCI_LINT_VERSION=v2.12.2
 
 # UBOOT_VERSION is injected at build time and re-published as the
