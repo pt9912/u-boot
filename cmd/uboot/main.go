@@ -118,67 +118,23 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// to TemplateInitService while git init / soft-existing-detection
 	// / project-structure-dirs stay in InitProjectService).
 	templateInitSvc := application.NewTemplateInitService(templateCatalogAdapter, fsAdapter, logAdapter)
-	// InitProjectService runs through the T0-(d) Option 4 factory
-	// (slice-v1-cli-json-dry-run-init T4 — analog to addFSFactory
-	// below): PreviewNone uses the production FS directly;
-	// PreviewDryRun and PreviewAndApply each wrap it in a fresh
-	// RecordingFileSystem with the matching passthrough switch.
-	// A fresh recorder per request keeps captures scoped to a single
-	// Init() call.
-	initFSFactory := func(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
-		switch mode {
-		case driving.PreviewDryRun:
-			rec := recordingfs.New(fsAdapter, recordingfs.WithPassthrough(false))
-			return rec, rec
-		case driving.PreviewAndApply:
-			rec := recordingfs.New(fsAdapter, recordingfs.WithPassthrough(true))
-			return rec, rec
-		default:
-			return fsAdapter, nil
-		}
-	}
+	// Four use cases run through the [newPreviewFSFactory]-Closure
+	// (init T4 / add T1-D / generate T4 / remove T4 — Altitude-
+	// Reviewer add R6 #I3 Generalisierungs-Trigger met at 4 Factories):
+	// PreviewNone uses the production fsAdapter directly; PreviewDryRun
+	// and PreviewAndApply each wrap it in a fresh RecordingFileSystem
+	// with the matching passthrough switch. A fresh recorder per
+	// request keeps captures scoped to a single Use-Case call.
+	initFSFactory := newPreviewFSFactory(fsAdapter)
+	addFSFactory := newPreviewFSFactory(fsAdapter)
+	generateFSFactory := newPreviewFSFactory(fsAdapter)
+	removeFSFactory := newPreviewFSFactory(fsAdapter)
 	initSvc := application.NewInitProjectServiceWithFactory(initFSFactory, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter, application.WithTemplateInit(templateInitSvc))
 	doctorSvc := application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, runtimeAdapter, logAdapter)
-	// AddServiceService runs through the T0-(e) Option 4 factory:
-	// PreviewNone uses the production FS directly; PreviewDryRun and
-	// PreviewAndApply each wrap it in a fresh RecordingFileSystem
-	// (different passthrough switch). A fresh recorder per request
-	// keeps captures scoped to a single Add() call — concurrent or
-	// sequential requests never share mutation logs.
-	addFSFactory := func(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
-		switch mode {
-		case driving.PreviewDryRun:
-			rec := recordingfs.New(fsAdapter, recordingfs.WithPassthrough(false))
-			return rec, rec
-		case driving.PreviewAndApply:
-			rec := recordingfs.New(fsAdapter, recordingfs.WithPassthrough(true))
-			return rec, rec
-		default:
-			return fsAdapter, nil
-		}
-	}
 	addSvc := application.NewAddServiceServiceWithFactory(addFSFactory, yamlAdapter, confirmAdapter, logAdapter)
-	removeSvc := application.NewRemoveServiceService(fsAdapter, yamlAdapter, confirmAdapter, logAdapter)
+	removeSvc := application.NewRemoveServiceServiceWithFactory(removeFSFactory, yamlAdapter, confirmAdapter, logAdapter)
 	upSvc := application.NewUpService(fsAdapter, yamlAdapter, dockerEngineAdapter, netprobeAdapter, clockAdapter, logAdapter)
 	downSvc := application.NewDownService(fsAdapter, dockerEngineAdapter, confirmAdapter, logAdapter)
-	// GenerateService runs through the slice-v1-cli-json-dry-run-
-	// generate T4 factory (analog to initFSFactory/addFSFactory above):
-	// PreviewNone uses the production FS directly; PreviewDryRun and
-	// PreviewAndApply each wrap it in a fresh RecordingFileSystem with
-	// the matching passthrough switch. A fresh recorder per request
-	// keeps captures scoped to a single Generate() call.
-	generateFSFactory := func(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
-		switch mode {
-		case driving.PreviewDryRun:
-			rec := recordingfs.New(fsAdapter, recordingfs.WithPassthrough(false))
-			return rec, rec
-		case driving.PreviewAndApply:
-			rec := recordingfs.New(fsAdapter, recordingfs.WithPassthrough(true))
-			return rec, rec
-		default:
-			return fsAdapter, nil
-		}
-	}
 	generateSvc := application.NewGenerateServiceWithFactory(generateFSFactory, yamlAdapter, logAdapter)
 	configSvc := application.NewConfigService(fsAdapter, yamlAdapter, logAdapter)
 	templateListSvc := application.NewTemplateListService(templateCatalogAdapter, logAdapter)
@@ -192,4 +148,39 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "u-boot: %v\n", err)
 	}
 	return cli.ExitCode(err)
+}
+
+// newPreviewFSFactory builds the PreviewMode → (FS, Recorder)-Closure
+// shared by all four modifying-Use-Cases (init / add / generate /
+// remove). Altitude-Reviewer add R6 #I3 marked this as a
+// generalisation candidate that should fire once 3+ Subcommands use
+// the same pattern; with remove T4 the threshold is met (4 Factories).
+//
+// PreviewNone → production fsAdapter, kein Recorder.
+// PreviewDryRun → recordingfs.New(fsAdapter, Passthrough=false), recorder
+//
+//	für Capture-only (kein FS-Write).
+//
+// PreviewAndApply → recordingfs.New(fsAdapter, Passthrough=true),
+//
+//	recorder für Preview-and-Apply mit Capture.
+//
+// Eine frische Recorder-Instanz pro Aufruf hält Captures scoped auf
+// einen einzelnen Use-Case-Call — Application-Layer-Mutex
+// (initMu / addMu / generateMu / removeMu) serialisiert konkurrierende
+// Calls innerhalb desselben Services, die Factory liefert die
+// per-Call-Recorder-Frische.
+func newPreviewFSFactory(fsAdapter driven.FileSystem) func(driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
+	return func(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
+		switch mode {
+		case driving.PreviewDryRun:
+			rec := recordingfs.New(fsAdapter, recordingfs.WithPassthrough(false))
+			return rec, rec
+		case driving.PreviewAndApply:
+			rec := recordingfs.New(fsAdapter, recordingfs.WithPassthrough(true))
+			return rec, rec
+		default:
+			return fsAdapter, nil
+		}
+	}
 }
