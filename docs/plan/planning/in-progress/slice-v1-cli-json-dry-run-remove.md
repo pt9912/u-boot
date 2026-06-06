@@ -1,6 +1,6 @@
 # Slice V1: `remove --json` / `--dry-run` / `--diff` — Add-Inverse mit Purge-Gate
 
-> **Status:** T0-Discovery + R1-R12 adressiert, `in-progress/` (Lifecycle-Übergänge: `open/` nach R1-R11, `next/` nach R12, `in-progress/` ab T2; 56 Findings gesamt: 16 HIGH, 25 MED, 15 LOW; HIGH-Frequenz konstant 1/Runde über R5-R12 (acht Runden Asymptote)). **T2-Port-Types läuft.** Fünfter Folge-Slice (5/9) des
+> **Status (2026-06-06, EOD):** T2 bis T7 ✅, **T8 offen**. R13 + R14 Adversarial-Runden brachten 11 Findings (3 HIGH, 3 MED, 5 LOW). Die vier echten Code-Defekte (R13-HIGH-1, R13-MED-1, R14-HIGH-2, R14-MED-1) sind in T7-Commit `4fb3fea` gefixt. Restliche Findings sind T8-Scope (Doku-AKs, Plan-Drift, Hygiene). **R15-Bestätigungsrunde steht morgen aus** (siehe §Tranche-Status unten); danach T8-Closure. Lifecycle-Übergänge: `open/` nach R1-R11, `next/` nach R12, `in-progress/` ab T2; 56 Plan-Findings (R1-R12) gesamt + 11 Pre-T8-Findings (R13-R14). **HIGH-Frequenz nach T7 erwartet: 0** (R15 verifiziert). Fünfter Folge-Slice (5/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 5/9). Konsumiert das Pattern-Vorbild aus
@@ -1045,3 +1045,86 @@ Variations.
   `ErrServiceUnregistered`; `ErrRemoveFileSystem` muss in T2
   ergänzt werden).
 - Phase: V1 (Teil des V1-pünktlichen Cluster-Slices).
+
+## Tranche-Status (2026-06-06, EOD)
+
+| Tranche | Status | Commit-Hash | Notiz |
+| --- | --- | --- | --- |
+| T0 (Plan, R1-R12, in-progress) | ✅ | `d7f9e65` | 56 Plan-Findings adressiert |
+| T1 (entfällt) | ✅ | — | `noopConfirmer` lebt bereits in `application/noop.go:17-33` (M4 Confirmer-Port-Slice). R3-HIGH-F2-Fix |
+| T2 (Port-Types) | ✅ | `d0c9c5d` | PreviewMode + SilenceConfirmer + Warnings + WarningEntry-Type + ErrRemoveFileSystem + ErrConfirmerUnavailable |
+| T3 (Application-Layer) | ✅ | `dbbf7b1` | fsFactory + removeMu + Remove()-Wrapper + 8 FS-Wrap-Stellen Multi-`%w` + volumesPurgedWarnings |
+| T4 (Composition-Root + Helper) | ✅ | `3b079dd` | `newPreviewFSFactory`-Helper (Altitude-Reviewer add R6 #I3 Trigger bei 4 Factories met) |
+| T5 (CLI-RunE-Rewrite) | ✅ | `3188e75` | validateRemoveArgs + removeEnvelopeData + runRemove + writeRemoveJSON + mapWarningsToDiagnostics + mapRemoveErrorToDiagnostic + Allowlist |
+| T6 + T6-A (Acceptance-Tests) | ✅ | `9eae9ec` | 21 Pin-Tests + WithDataKeyAbsent/Present-Helper + delete-Hunk-Vertrag T0-(p) |
+| T7 (Pre-T8-Review-Fixes) | ✅ | `4fb3fea` | R13-HIGH-1 + R13-MED-1 + R14-HIGH-2 + R14-MED-1 plus 4 Pin-Tests |
+| T8 (Closure) | ⏳ offen | — | siehe §Resume-Punkt-Morgen unten |
+
+**Coverage**: 91.10% (von 90.50% nach T5 → stabil durch T6/T7).
+
+**Pre-T8-Review-Findings-Konsolidierung**:
+- R13 (6 Findings): 1 HIGH, 1 MED, 4 LOW
+- R14 (5 Findings): 2 HIGH, 1 MED, 2 LOW
+- T7-Code-Fixes: 4 Findings adressiert (R13-HIGH-1, R13-MED-1, R14-HIGH-2, R14-MED-1)
+- T8-Scope-Carveouts: 6 Findings (R14-HIGH-1 Doku, R13-LOW-1 Plan-Drift, R13-LOW-2/3/4 + R14-LOW-1/2 Hygiene)
+- R15-Bestätigungsrunde: ausstehend
+
+## Resume-Punkt-Morgen
+
+**Erster Schritt morgen: R15-Bestätigungs-Review starten.**
+
+R15-Prompt-Skeleton (siehe Session-Historie für vollen Wortlaut, sechs
+Verifikations-Angles):
+
+- A. Validator-Flag-Read-Timing: liefert `cmd.Flags().GetBool("dry-run"/
+  "diff")` zum `Args:`-Callback-Zeitpunkt bereits parsed Values? Cobra
+  v1.10.2-Verhalten verifizieren.
+- B. Sanitizer-Wrapper-Edge-Cases: `errors.As`, Multi-`%w`-Chain-
+  Traversal, nested Unwrap durch Library-Code.
+- C. WARN-Konsistenz: PreviewAndApply-Pfad behält WARN; Pre-T7-Test
+  `TestRemove_PurgeHumanDiff_StderrSeparation` noch grün.
+- D. Pattern-Drift gegen init/add/generate: leiden die anderen
+  Subcommands unter denselben Bugs (R13-HIGH-1 / R13-MED-1 / R14-MED-1)?
+  Falls JA → Cluster-Pattern-Konsolidierung als Plan-Sub-Decision.
+- E. Coverage-Pfade: `--json --dry-run remove a b c` (3-arg + dry-run)?
+  Multi-Wrap-Sanitizer-Pfad?
+- F. Plan-T0-(q)/T0-(r) für Sanitizer + Flag-Awareness fehlen in der
+  Sub-Decisions-Tabelle — T8-Plan-Verdichtung ergänzen.
+
+**STRENGE Build-Tool-Restriktion** für R15-Agent: KEINE direkten
+`go`-Befehle. Nur `make test`/`make gates`/`make coverage` und
+Read-only Tools. Wenn Test-Output gebraucht wird: `make test` ODER
+existierende CI-Reports.
+
+**Erwartete R15-Outcomes**:
+- HIGH=0 → ready for T8.
+- HIGH≥1 → kurze T7-Followup-Tranche vor T8.
+
+**Nach R15: T8-Closure-Reihenfolge** (R10-MED-F2-Pflicht Plan-
+Verdichtung beim done/-Übergang):
+1. CHANGELOG `### Added`-Eintrag analog generate-Pattern (Z. 16-74).
+2. `cli-json-output.md`: §6-Tabelle (remove→done mit Commit-Hash), neue
+   §6.6-Sektion (drei Flag-Kombos + `data`-Carrier + WARN-Migration +
+   EnabledUnset-Pin + `delete`-Action worked example), §7 Mutations-
+   Matrix-Zeile (KEINE neue `action`-Spalte, R9-HIGH-F1).
+3. `roadmap.md`: done-Zähler 4→5, `remove` aus Cluster-AP-Offen-Liste
+   streichen, `Nächster Schritt` auf 6/9 `up-down` umstellen.
+4. `carveouts.md`: neuer Eintrag (Volume-Auto-Removal, Pattern-Vorbild
+   `slice-v2-generate-devcontainer-rollback-aware-write`, Status
+   `open/, on hold pending trigger`).
+5. `open/`-Plan-Stub: `slice-v1-volume-auto-removal.md` mit Auslöser,
+   Out-of-Scope-V1-Bestätigung, Spec-Anker.
+6. Plan-Verdichtung: (i) Review-Round-Tabellen R1-R10 Adressierungs-
+   Spalte auf einen Satz pro Finding kürzen, (ii) T0-(c) Skeleton-
+   Block in dedizierte H3-Sektion verschieben, (iii) AK-Block 17
+   Bullets auf zentrale-Anforderungs + Adressierungs-Pin-Trennung
+   gliedern. (iv) **R13-R14-Findings im Plan dokumentieren** (neue
+   §Review-Runde-Tabelle für R13/R14/R15).
+7. **R13-LOW-1 Plan-Drift dokumentieren**: drei T6-Cell-Pin-Namen
+   (`TestRemove_ConcurrentInvocationsSerializeSwaps`,
+   `TestRemove_DryRun_DetectStateUsesCaptureFS`,
+   `TestRemove_DryRunPurgeYes_NoConfirmerCall`) als bewusste Application-
+   Layer-Heim-Carveouts oder als Folge-Slice-Stub markieren.
+8. Slice nach `done/` mit DoD-Hash-Tabelle (T2 `d0c9c5d`, T3 `dbbf7b1`,
+   T4 `3b079dd`, T5 `3188e75`, T6 `9eae9ec`, T7 `4fb3fea`, T8 = der
+   Closure-Commit selbst).
