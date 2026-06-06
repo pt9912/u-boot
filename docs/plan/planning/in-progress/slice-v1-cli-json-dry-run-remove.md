@@ -1,6 +1,6 @@
 # Slice V1: `remove --json` / `--dry-run` / `--diff` — Add-Inverse mit Purge-Gate
 
-> **Status:** T0-Discovery + R1-R12 adressiert, `next/` (Lifecycle-Übergang aus `open/` nach elf Pre-`next/`-Runden + 1 next/-Runde (R12) mit Implementation-Pre-Flight-Validation; 56 Findings gesamt: 16 HIGH, 25 MED, 15 LOW; HIGH-Frequenz konstant 1/Runde über R5-R12 (acht Runden Asymptote)). Fünfter Folge-Slice (5/9) des
+> **Status:** T0-Discovery + R1-R12 adressiert, `in-progress/` (Lifecycle-Übergänge: `open/` nach R1-R11, `next/` nach R12, `in-progress/` ab T2; 56 Findings gesamt: 16 HIGH, 25 MED, 15 LOW; HIGH-Frequenz konstant 1/Runde über R5-R12 (acht Runden Asymptote)). **T2-Port-Types läuft.** Fünfter Folge-Slice (5/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 5/9). Konsumiert das Pattern-Vorbild aus
