@@ -1,6 +1,6 @@
 # Slice V1: `generate --json` / `--dry-run` / `--diff` — Vier-Artefakt-Surface
 
-> **Status:** T0-Discovery + R1-R7 adressiert, `in-progress/` (Lifecycle-Übergänge: `open/` nach fünf Pre-`next/`-Runden, `next/` nach R6/R7; 28 Findings gesamt: 7 HIGH, 17 MED, 4 LOW). T1-Refactor läuft. Vierter Folge-Slice (4/9) des
+> **Status:** T0-Discovery + R1-R7 + R10 adressiert, `in-progress/`. Lifecycle-Übergänge: `open/` nach R1-R5, `next/` nach R6/R7, `in-progress/` ab T1. Findings-Bilanz: 33 gesamt (7 HIGH, 19 MED, 7 LOW); R10 ergab 5 (0 HIGH, 2 MED, 3 LOW) gegen die T1-T6-Implementation. **T1-T6 done; T7 done.** Vierter Folge-Slice (4/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 4/9). Konsumiert das Pattern-Vorbild aus
@@ -608,6 +608,29 @@ R7-Reviewer-Note: docs-check grün. Keine neuen Vertragslücken;
 R7 räumt Plan-interne Drift nach R6 auf und härtet einen
 Acceptance-Pin gegen no-op-passing-Tests. Stub konvergiert
 weiterhin.
+
+## Review-Round-10 (T7 Pre-T8 Code-Review)
+
+Code-Review nach T1-T6 (Diff-Range `bd3de20..b0b31e0`), Fokus auf
+Code-Korrektheit gegen die Plan-Versprechen, Pattern-Erbe-
+Konsistenz init→generate und potentielle Inkonsistenzen zwischen
+den Tranchen. Fünf Findings (2 MEDIUM, 3 LOW), alle adressiert:
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| 1 | MEDIUM | Switch-Order in `mapGenerateErrorToDiagnostic` war `FS → ConfigValueInvalid → ManualConflict → …` — Plan-T0-(e) pinnt aber `FS → ManualConflict → ConfigValueInvalid → …`. Operational heute kein Bug (Sentinels in getrennten Pfaden), aber Plan-Drift gegen verbindliche Sub-Decision | Switch-Order auf Plan-Konformität gezogen (Commit `031fd79`); Doc-Kommentar dokumentiert die Plan-Reihenfolge mit Begründung |
+| 2 | MEDIUM | `manualConflictCodeFor` hatte impliziten Fall-Through auf `LH-FA-GEN-002` (changelog) — Plan-T0-(e) Default-Zeile sagt aber `LH-FA-CLI-006`. Zero-Value Artifact wirkte zufällig korrekt (zero=changelog), aber Enum-Erweiterung ohne Switch-Update würde Code stillschweigend falsch routen | Alle vier Artefakte explizit als case gelistet (inkl. changelog); Default-Fallback auf `LH-FA-CLI-006` — macht Switch-Lücken nach Enum-Erweiterung sichtbar (Commit `031fd79`) |
+| 3 | LOW | `//nolint:unparam` auf `reportError.data` mit "T5 ist der zweite Caller"-Begründung — nach T5-Merge ist generate der reale zweite Caller, unparam akzeptiert die Mischform | Suppression entfernt; Doc auf etablierte Realität umgestellt (Commit `1e20c87`) |
+| 4 | LOW | T6-Plan-Text suggerierte strikte 4×8=32-Matrix; T6 implementiert 15 repräsentative Pins. Devcontainer-Phase-1/Phase-2 + Repeat-Idempotency leben im Application-Layer | Plan-T6-Zelle auf "repräsentative Pin-Coverage" präzisiert; Bezug auf Application-Layer-Tests; LOC-Schätzung 680→530 (Commit `1e20c87`) |
+| 5 | LOW | Doc-Drift in `GenerateResponse.PlannedFiles`-Kommentar — verwies auf JSON-Tags am Slice statt am PlannedFile-Type; Port serialisiert nichts direkt | Kommentar nachgezogen: Verweis auf `PlannedFile`-Definition + Klarstellung dass CLI eigene Wire-Typen baut (Commit `1e20c87`) |
+
+R10-Reviewer-Note: docs-check + lint + test + coverage grün
+(91.10 %). Keine HIGH-Befunde — Pattern-Erbe init→generate ist
+strukturell sauber (`Generate()`-Wrapper 1:1 zu `Init()`-Wrapper,
+Multi-`%w`-Migration vollständig auf den ~17 FS-Stellen,
+`ErrConfigValueInvalid`-Sentinel-Wrap für URL-Reject etabliert,
+Allowlist-Migration konsistent). Lücken nur an Switch-Order-
+Reihenfolge, Defensiv-Fallbacks und Doku-Drift.
 
 ## Out of Scope
 
