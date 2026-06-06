@@ -1,6 +1,6 @@
 # Slice V1: `remove --json` / `--dry-run` / `--diff` — Add-Inverse mit Purge-Gate
 
-> **Status:** T0-Discovery, `open/`. Fünfter Folge-Slice (5/9) des
+> **Status:** T0-Discovery + R1 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 5/9). Konsumiert das Pattern-Vorbild aus
@@ -65,10 +65,13 @@ deckt sie als Drift-Schutz trotzdem ab.
 Use-Case-Deps: `driven.FileSystem` (Read + Write + RemoveAll),
 `driven.YAMLCodec`, `driven.Confirmer` (für `--purge`-Gate),
 `driven.Logger`. **KEIN** `GitClient`, **KEIN** `Progress`-Port.
-**Confirmer-Port-Kollision mit `--json`-Mode**: der Confirmer
-prompt würde stdin/stdout polluten — analog zu init's
-ProgressPort-Silencing T0-(o) braucht remove eine
-Silence-Variante (Sub-Decision T0-(o)).
+**Confirmer-Port-Kollision mit `--json`-Mode** (R1-HIGH-2-
+Klarstellung): der Confirmer-Prompt würde stdin/stdout
+polluten. Init's T0-(o) ProgressPort-Silencing ist NICHT
+direkt geerbt — init swappt nur `s.progress`, nicht
+`s.confirmer`. **Confirmer-Swap ist ein neues Pattern, das
+remove etabliert** (T0-(j) Sub-Decision), nicht ein geerbtes.
+Pattern-Erbe-Disziplin T0-(a) Spalte führt das entsprechend.
 
 ## Aufhebungsbedingung
 
@@ -168,6 +171,7 @@ docs-check).
   | `ErrProjectNotInitialized` | `LH-FA-ADD-001` | 10 |
   | `ErrConfirmationRequired` | `LH-FA-INIT-005` | 10 |
   | `domain.ErrInvalidServiceName` | `LH-FA-INIT-006` | 10 |
+  | `ErrConflictingModeFlags` (`--yes ⊕ --no-interactive`) | `LH-FA-CLI-005A` | 2 |
   | Default (unknown) | `LH-FA-CLI-006` | 1 |
 
 - **T0-(f)** **Envelope-`data`-Form festgezurrt**: Success-Envelope
@@ -176,33 +180,70 @@ docs-check).
   `data: {"service": "<…>"}` ohne `priorState`/`state`/
   `volumesPurged` (Zero-Response auf Error-Pfad — analog
   generate T0-(q)).
-- **T0-(g)** **WARNING-Migration**: heutige `printRemoveSummary`-
-  stderr-WARNING (Z. 163-171) bei `--purge && !VolumesPurged` muss
-  im JSON-Mode in den Envelope. Drei Optionen:
-  (a) `diagnostics[]` mit `level: "warn"` und eigenem LH-Code
-  (z. B. `LH-FA-ADD-007-VOLUMES-DEFERRED`).
-  (b) `data.warnings[]`-Array als Free-Form-Liste.
-  (c) `data.volumesPurged: false` allein + Konsument leitet
-  WARNING ab.
-  Vorschlag: (a) — passt zum Diagnostics-Schema-Vertrag (Spec
-  §1834 erlaubt `warn`-Level), pinnbar via `jsontestutil.
-  AssertFullEnvelope`.
-- **T0-(h)** **`--purge`-in-Dry-Run-Verhalten**: Dry-Run impliziert
-  Null-Mutationen. Sollte der Confirmer-Gate trotzdem laufen?
-  Vorschlag: **nein** — analog init's `initGit`-Skip im Dry-Run
-  (T0-(n)). Implementierung: `if req.PreviewMode == PreviewDryRun
-  { skip confirmer gate, set VolumesPurged: false }`.
+- **T0-(g)** **WARNING-Migration festgezurrt** (R1-HIGH-1-Fix):
+  heutige `printRemoveSummary`-stderr-WARNING (Z. 163-171) bei
+  `--purge && !VolumesPurged` wandert im JSON-Mode in
+  `diagnostics[]` mit `level: "warn"` und Code
+  **`LH-FA-ADD-007`** (Spec §924 / §2602 — die Anforderung selbst
+  beschreibt das deferred-Volumes-Verhalten). KEIN Suffix-Schema
+  wie `-VOLUMES-DEFERRED` — Spec §1834 erlaubt nur die feste
+  `LH-<Bereich>-<Modul>-<3-stellige-Zahl>`-Form oder tool-interne
+  Codes mit Doku-Pflicht; ein freier Suffix verletzt das Schema.
+  Differenzierung zur Confirmation-Required-Diagnostik läuft über
+  den `level: "warn"`-vs-`"error"`-Vertrag plus den
+  `message`-Text plus `data.volumesPurged`-Status. Pinnbar via
+  `jsontestutil.AssertFullEnvelope`.
+- **T0-(h)** **`--purge`-in-Dry-Run-Verhalten festgezurrt** (R1-
+  HIGH-3-Fix): Dry-Run impliziert Null-Mutationen. Drei
+  Vertragsränder gepinnt:
+  (a) **Confirmer-Gate-Skip**: `if req.PreviewMode ==
+      PreviewDryRun { skip confirmer gate }` — auch ohne `--yes`
+      keine `ErrConfirmationRequired` im Dry-Run (analog init's
+      `initGit`-Skip T0-(n)).
+  (b) **Envelope-Form im Dry-Run**: `data.volumesPurged: false`
+      IMMER (deferred unabhängig vom Gate-Skip);
+      `diagnostics[]` enthält EINEN `warn`-Eintrag mit Code
+      `LH-FA-ADD-007` (T0-(g) WARN-Migration) wenn
+      `req.Purge && req.PreviewMode != PreviewNone` — dem User
+      ist klar: Purge wurde requested, im Dry-Run aber
+      semantisch geskippt.
+  (c) **Diff-Pfad rendert KEINE Volume-Aktion**: Volume-Removal
+      ist nicht-FS-Side-Effect; der Recorder capturet nur FS-
+      Mutations. `changes[]` enthält ausschließlich
+      FS-Captures; die Purge-Side-Effect-Information lebt
+      ausschließlich in `data.volumesPurged` + `diagnostics[]`-
+      WARN.
+
+  T6-Pflicht: 1 Test pro `--purge`-on-Variante in jedem der
+  vier Dry-Run-Kombos (Dry-Run, Dry-Run+Diff, Dry-Run+JSON,
+  Dry-Run+Diff+JSON).
 - **T0-(i)** **`--purge`-Mutex mit `--dry-run`/`--diff`?** Analog
   init's `--template`-Mutex (T0-(i))? Vorschlag: **NEIN** — Purge
   ist eine Side-Effect-Dimension, kein Renderer-Pfad. Dry-Run +
   Purge ist semantisch konsistent: "zeige was Remove + Purge
   ändern WÜRDE", auch wenn der Gate-Run skipped wird.
-- **T0-(j)** **Confirmer-Silencing-Form**: analog init T0-(o):
+- **T0-(j)** **Confirmer-Swap-Pattern (NEU, R1-HIGH-2-Fix)**:
+  remove etabliert das Pattern; es ist NICHT geerbt von init
+  (init swappt nur ProgressPort, nicht Confirmer). Form:
   `req.SilenceConfirmer = flags.JSON`. Bei `--purge --json` ohne
-  `--yes`: ConfirmerPort wird auf einen `noopConfirmer` umgeswapt
-  der **defensiv refused** (gibt `false` zurück, was zu
-  `ErrConfirmationRequired` führt). User muss explizit `--yes`
-  setzen um im JSON-Mode zu purgen.
+  `--yes`: ConfirmerPort wird auf einen `defensiveNoopConfirmer`
+  umgeswapt der `false, nil` returnt — `runPurgeGate`
+  (removeservice.go:173-176) wandelt das in
+  `ErrConfirmationRequired`. **Semantik-Klarstellung**: das ist
+  KEIN Silencing (keine UX-Information-Verlust-Symmetrie zu
+  noopProgress), sondern eine **bewusste Behaviour-Change** im
+  JSON-Mode — User muss explizit `--yes` setzen um im
+  JSON-Mode zu purgen. Pattern-Erbe-Disziplin T0-(a) Spalte
+  führt das als remove-spezifisch.
+
+  **`--purge --yes --json`-Pfad** (R1-MED-5-Fix): bei
+  `req.Yes==true` skipped runPurgeGate (Z. 162-164) ohne
+  Confirmer-Call → Execute läuft durch → `VolumesPurged: false`
+  (v0.3.0 deferred). Plan-Vertrag: trotzdem WARN-Diagnostic
+  emittiert (T0-(g)), aber `exitCode: 0` UND `status: warn`
+  (Spec §447-Kopplung) — Warn-only verschiebt nicht den
+  Exit-Code. T6-Pin: `TestRemove_PurgeYesJSON_WarnOnly` mit
+  `status: warn`, exit 0, `data.volumesPurged: false`.
 - **T0-(k)** Path-Anchor: `plannedFiles[].path` ist project-
   relativ (analog init T0-(k)) — `mapCaptureToPlannedFiles(records,
   baseDir)`-Erbe.
@@ -225,15 +266,40 @@ docs-check).
 | T2 | Port-Types: `RemoveServiceRequest.PreviewMode` + `SilenceConfirmer`-Feld, `RemoveServiceResponse.PlannedFiles`/`Changes`-Felder, neuer `ErrRemoveFileSystem`-Sentinel. | ~70 | T0 |
 | T3 | Application-Layer: `RemoveServiceService.fsFactory` + `removeMu sync.Mutex` + `NewRemoveServiceServiceWithFactory` + `Remove()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; Multi-`%w`-Wrap an den ~6 FS-Wrap-Stellen; Confirmer-Swap auf noopConfirmer im JSON-Mode. | ~200 | T2 |
 | T4 | Composition-Root-Wiring `removeFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
-| T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`). | ~220 | T1 + T2 |
-| T6 | Acceptance-Tests: ~15-18 Tests (drei JSON-Modi + NoOp Single+Repeat + Mid-Write-Failure + ConfirmationRequired-Pfade + Service-Sentinels + WARNING-Migration-Pin). | ~500 | T5 |
+| T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`); **Pre-UC-Sentinel-Kanal** für `domain.ErrInvalidServiceName` und `ErrConflictingModeFlags`: müssen via `reportError`-Helper emittiert werden, NICHT durch Cobra-Default-Print (R1-LOW-7-Fix), damit der JSON-stdout-Cleanliness-Pin aus init T0-(o) hält. | ~240 | T1 + T2 |
+| T6 | Acceptance-Tests: ~20-25 Tests (drei JSON-Modi + NoOp Single+Repeat + Mid-Write-Failure + ConfirmationRequired-Pfade × 3 Varianten + Service-Sentinels × 4 + WARNING-Migration-Pin + `--purge`-on/off × Dry-Run-Kombos (T0-(h)) + `--purge --yes --json` WarnOnly-Pin (T0-(j) R1-MED-5) + `ErrConflictingModeFlags`-Pin). R1-MED-6-Kalibrierung: ~600-700 LOC realistisch (Confirmer-Pattern-Neumuster zieht Test-Surface). | ~650 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe). | ~80 | T6 |
 | T8 | Closure: CHANGELOG, cli-json-output.md §6/§6.6/§7, roadmap, slice nach done/ mit DoD-Hash-Tabelle. | — (Doku) | T7 |
 
-LOC-Bilanz vorläufig: ~1100-1200 — schmaler als init (~1480), in
-der Größenordnung von generate (~1150). Pattern-Erbe von init/
-generate spart die Infrastruktur; remove-spezifisch sind nur die
-Confirmer-Silencing- und WARNING-Migration-Sub-Decisions.
+LOC-Bilanz vorläufig: ~1200-1400 (R1-MED-6-Kalibrierung —
+Confirmer-Swap-Pattern ist neu und nicht von init geerbt, zieht
+zusätzliche Test-Surface in T6). Pattern-Erbe von init/generate
+spart die FS/PreviewMode-Infrastruktur; remove-spezifisch sind
+das Confirmer-Swap-Pattern (T0-(j) NEU), die WARNING-Migration
+(T0-(g)) und die `--purge`-Dimensions-Coverage (T0-(h)).
+
+## Review-Round-1 (Pre-`next/`)
+
+Eine adversarial-orientierte Review-Runde gegen den initialen
+Stub (`12c49df`). Sieben Findings (3 HIGH, 3 MEDIUM, 1 LOW),
+alle adressiert im selben Commit:
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| 1 | HIGH | `LH-FA-ADD-007-VOLUMES-DEFERRED` ist erfundene Code-Form — Spec §1834 erlaubt nur `LH-<Bereich>-<Modul>-<3-Zahl>` oder tool-interne Codes mit Doku-Pflicht; freie Suffix-Form verletzt das Schema | T0-(g) auf `LH-FA-ADD-007` korrigiert (Spec §924/§2602 trägt die deferred-Volumes-Semantik); Differenzierung läuft über `level`-Vertrag + `message`-Text + `data.volumesPurged` |
+| 2 | HIGH | T0-(j) Confirmer-Silencing-Pattern als "analog init T0-(o)" deklariert — existiert in keinem Done-Slice; init swappt nur ProgressPort, nicht Confirmer | T0-(j) auf "NEUES Pattern, nicht geerbt" umgestellt; Recon-Block + Pattern-Erbe-Disziplin-Anchor entsprechend; Semantik klargestellt (Behaviour-Change im JSON-Mode, kein Silencing) |
+| 3 | HIGH | `--purge --dry-run --diff`-JSON-Vertrag offen: WARN-Diagnostic-Verhalten? Diff-Volume-Visualisierung? Gate-Skip-Pfad ohne `--yes`? | T0-(h) auf drei Pin-Punkte erweitert: (a) Confirmer-Gate-Skip im Dry-Run unabhängig vom `--yes`, (b) `data.volumesPurged: false` + WARN-Diagnostic IMMER bei `req.Purge && PreviewMode != PreviewNone`, (c) Diff rendert KEINE Volume-Aktion (nicht-FS-Side-Effect). T6-Pflicht: 1 Test pro `--purge`-on-Variante in den 4 Dry-Run-Kombos |
+| 4 | MEDIUM | `ErrConflictingModeFlags`-Mutex (`--yes ⊕ --no-interactive`) fehlt in T0-(e) Mapper-Tabelle | Tabelle erweitert: `ErrConflictingModeFlags → LH-FA-CLI-005A / Exit 2` |
+| 5 | MEDIUM | `--purge --yes --json` Silent-Approval-Pfad nicht gepinnt — wirft `status: warn` exit-Code-Anomalie? | T0-(j) ergänzt: WARN-Diagnostic IMMER bei `purge && !VolumesPurged`, aber `exitCode: 0` UND `status: warn`. T6-Pin `TestRemove_PurgeYesJSON_WarnOnly` |
+| 6 | MEDIUM | T6-LOC unterschätzt (~500 für 15-18 Tests); Confirmer-Pattern ist neu, zusätzliche Test-Surface | T6-LOC auf ~650, Test-Anzahl ~20-25; LOC-Gesamt-Bilanz auf ~1200-1400 |
+| 7 | LOW | Pre-UC-Sentinels `domain.ErrInvalidServiceName` + `ErrConflictingModeFlags` werden heute via Cobra-Default-Print emittiert — verletzt JSON-stdout-Cleanliness-Pin | T5-Tranchen-Zelle ergänzt: Pre-UC-Sentinel-Kanal via `reportError`-Helper, nicht Cobra-Default |
+
+R1-Reviewer-Note: docs-check grün; Recon-Verifikationen
+(`recordingfs.RemoveAll` als Capture-Methode, `executeRemove`-
+deterministische Reihenfolge, `ServiceState.String()`-Strings,
+Code-LOC-Anker) bestätigt. Sub-Decisions a-o sind nach R1
+konsolidiert; Confirmer-Pattern bleibt der substanziellste
+Eigenleistungs-Anteil.
 
 ## Out of Scope
 
