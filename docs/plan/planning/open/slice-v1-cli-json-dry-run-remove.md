@@ -1,6 +1,6 @@
 # Slice V1: `remove --json` / `--dry-run` / `--diff` — Add-Inverse mit Purge-Gate
 
-> **Status:** T0-Discovery + R1/R2/R3/R4 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
+> **Status:** T0-Discovery + R1/R2/R3/R4/R5 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 5/9). Konsumiert das Pattern-Vorbild aus
@@ -173,8 +173,8 @@ docs-check).
 
   ```
   Remove(req):
-    confirmerSwap(req.SilenceConfirmer)     # NEUER Swap-Mechanismus T0-(j)
     LOCK removeMu                            # generateMu/initMu-Pattern
+    confirmerSwap(req.SilenceConfirmer)     # NEUER Swap-Mechanismus T0-(j), INNERHALB Lock
     fsSwap(req.PreviewMode != PreviewNone)   # init's Swap-Pattern
     state := detectServiceState(s.fs, s.yaml, ...)
     if state == Unregistered:    return early (ErrServiceUnregistered)
@@ -184,11 +184,23 @@ docs-check).
     if req.PreviewMode != PreviewDryRun:     # T0-(h)(a) Skip-Logik
         runPurgeGate(req)
     executeRemove(...)
-    fsUnswap; UNLOCK
-    captures := recorder.Drain()
+    captures := recorder.Drain()             # vor Unswaps drainen
+    fsUnswap; confirmerUnswap; UNLOCK         # Defer-Restore-Pattern analog init
     resp.PlannedFiles = mapCaptureToPlannedFiles(captures, req.BaseDir)
     return response
   ```
+
+  **Race-Sicherheit (R5-HIGH-F1-Fix)**: ALLE Swaps (`confirmerSwap`,
+  `fsSwap`) laufen **INNERHALB** der `removeMu`-Lock-Region. Außerhalb
+  der Lock-Region könnte eine parallel laufende Goroutine zwischen
+  Swap und Lock-Acquisition ihren eigenen Swap durchführen — beide
+  Goroutinen würden auf demselben `s.confirmer`/`s.fs`-Field race.
+  Pattern-Erbe init's `Init()`-Wrapper
+  (`initproject.go:328-348`): erst Lock, dann `s.fs`/`s.progress`-
+  Swap mit `defer`-Restore innerhalb des Lock-Scopes.
+  T6-Pin: `TestRemove_ConcurrentInvocationsSerializeSwaps` mit zwei
+  Goroutinen die parallel Remove() auf demselben Service-Instance
+  rufen — Confirmer/FS-State darf nicht race-corruption zeigen.
 
   **`detectServiceState` läuft INNERHALB der Swap-Region** — sonst
   würde der Recorder die Read-Captures (compose.yaml / .env.example
@@ -241,6 +253,26 @@ docs-check).
   Inkonsistenz im initialen Inventar (R3-MED-F3 hatte alle 10
   als "FS-Wrap-Bucket" gelistet, obwohl Z. 307 + Z. 330 fachlich
   sind) ist mit dieser Aufteilung behoben.
+
+  **`ErrServiceInconsistent` Triple-Use-Klarstellung**
+  (R5-MED-F3-Fix): Der Sentinel deckt nach R4-F1-Fix drei
+  Sub-Semantiken:
+  (a) Z. 304: Managedblock-Marker malformed (BEGIN ohne END /
+      duplicate BEGIN) — kanonischer ErrServiceInconsistent-Sinn.
+  (b) Z. 307: Scanner-Default-Branch (unexpected scanner state) —
+      ähnlicher Marker-Defekt, Inhalts-Semantik-Stretching klein.
+  (c) Z. 330: YAML-Patch-Failure (`s.yaml.PatchScalar` failt auf
+      `services.<name>.enabled`-Pfad) — KEIN managed-block-Defekt;
+      Sentinel-Stretching auf "YAML-Schema-Inkonsistenz".
+  Alternative wäre ein eigener `ErrYAMLPatchFailed`-Sentinel mit
+  eigener LH-Zeile in T0-(e). T3-Implementer entscheidet zwischen
+  (i) Konsolidierung auf `ErrServiceInconsistent` (schlanker, aber
+  semantisch dehnend) oder (ii) Sub-Sentinel einführen (sauberer
+  aber +1 Tabellen-Zeile + Plan-Anpassung). Plan-Vorschlag:
+  Konsolidierung — die drei Sub-Semantiken teilen sich
+  Exit-Code 10 und Repair-Hint (User-Action: YAML manuell
+  reparieren), nur die Message-Text-Differenzierung bleibt. T6-Pin
+  pinnt den `LH-FA-ADD-005`-Code für alle drei Pfade.
 - **T0-(e)** **Switch-Order-Pflicht** im neuen
   `mapRemoveErrorToDiagnostic`. Diagnostic-Code-Tabelle (T6-Pin-
   Pflicht pro Zeile):
@@ -294,7 +326,21 @@ docs-check).
   `message`-Text plus `data.volumesPurged`-Status. Pinnbar via
   `jsontestutil.AssertFullEnvelope`.
 
-  **Volume-Presence-Pflicht** (R2-MED-F5 + R3-HIGH-F1-Korrektur):
+  **`LH-FA-ADD-007` Multi-Use-Klarstellung** (R5-MED-F2-Fix):
+  Plan nutzt `LH-FA-ADD-007` an zwei Stellen:
+  (1) **ERROR-Diagnostic-Code** für `ErrServiceUnregistered`
+      (Mapper-Tabelle T0-(e)) — Exit 10.
+  (2) **WARN-Diagnostic-Code** für `--purge && !VolumesPurged`
+      (T0-(g)) — Exit 0 oder Exit 14 (bei Mid-Write-Variante).
+  Beide referenzieren das Spec-Umbrella `LH-FA-ADD-007 "Service
+  entfernen"` (§924-947) — der Code identifiziert die *Anforderung*,
+  nicht die Sub-Semantik. Spec §1834-Vertrag erlaubt das, weil
+  `diagnostics[].level` (warn vs error) und ggf. `message`-Text
+  + `data.volumesPurged`-Status den konkreten Sub-Pfad
+  disambiguieren. Konsumenten dürfen NICHT nur auf `code` filtern,
+  sondern müssen `(code, level)` als Tupel betrachten. Pattern
+  ist konsistent mit init/down's `LH-FA-INIT-005`-Multi-Use für
+  `ErrConfirmationRequired` (geteilt zwischen init und down).
   WARN-Diagnostic wird NUR emittiert wenn der Catalog-Entry
   tatsächlich ein named volume deklariert. Echter Field-Name auf
   der `serviceCatalogueEntry`-Struct
@@ -409,7 +455,8 @@ docs-check).
   remove-Sektion).
 - **T0-(o)** Pre-`next/`-Review-Runden-Erwartung: ≥ 2 (Discovery
   + Adversarial). Steht aktuell bei R1-R4.
-- **T0-(p)** **`delete`-Action-Vertrag (NEU, R4-HIGH-F4)**:
+- **T0-(p)** **`delete`-Action-Vertrag (NEU, R4-HIGH-F4 +
+  R5-LOW-F4-Erweiterung)**:
   remove ist der **erste** Use-Case, der `PlannedFile.Action ==
   "delete"` produziert — `RemoveAll` (Z. 241) für extraFiles wird
   von `recordingfs.RemoveAll` (`recordingfs.go:197-206`) mit
@@ -423,10 +470,24 @@ docs-check).
   `extraFiles`-Eintrag) OK, für Dir-Trees aber `nil`. Heute kein
   Risiko (postgres/keycloak/otel haben File-extraFiles), aber
   Pattern-Vorlauf für künftige Dir-extraFiles wäre out-of-scope.
-  T6-Pin: `TestRemove_OtelExtraFileDelete_DiffHasDeleteHunk`
-  prüft `data.changes[].action == "delete"` plus den
-  Unified-Diff-Body. `cli-json-output.md` §7 Mutations-Matrix
-  und §6.6 dokumentieren `action: "delete"` explizit.
+
+  **Mid-Stream-Capture-Semantik bei `RemoveAll`-Failure**
+  (R5-LOW-F4-Klarstellung): wenn `RemoveAll` mid-stream failt,
+  läuft `recordingfs.RemoveAll` (Z. 197-206) in zwei Phasen:
+  (1) `snapshot` (via internal `ReadFile`) → setzt `OldContent`.
+  (2) `underlying.RemoveAll` → mutiert echte Disk (im
+      Passthrough-Modus) oder no-op (Dry-Run-Modus).
+  Wenn Phase 1 failt (File unreadable, Permission denied), bleibt
+  `OldContent` leer und der Capture trägt `Action: "delete"` +
+  `OldContent: nil`. Wenn Phase 2 failt nach erfolgreichem
+  Snapshot, ist Capture vollständig (OldContent gesetzt). Beide
+  Pfade kommen in `plannedFiles[]` als gleichberechtigte Einträge
+  vor. Diff-Renderer behandelt `OldContent: nil` als "binary or
+  unreadable" — leerer Hunk-Body. T6-Pin: `TestRemove_OtelExtra
+  FileDelete_DiffHasDeleteHunk` prüft `data.changes[].action ==
+  "delete"` plus den Unified-Diff-Body. `cli-json-output.md` §7
+  Mutations-Matrix und §6.6 dokumentieren `action: "delete"`
+  explizit.
 
 ## Tranchen (vorgeschlagen — präzisiert in T0-Outcomes)
 
@@ -549,6 +610,29 @@ Wraps mit FS-Wraps) und einen kompletten neuen Action-Vertrag
 (`delete` ist remove-spezifisch). Confirmer-Pattern und
 `--purge`-Dimension sind nach R1-R4 vollständig durchspezifiziert.
 Weitere Runden würden vermutlich nur noch Cosmetic-Drift fangen.
+
+## Review-Round-5 (Pre-`next/`)
+
+Spec-Coverage-Audit + Cross-Plan-Konsistenz gegen den R4-
+konsolidierten Stub (`c6cef92`). User-getriebene Runde wegen
+2-HIGH-Pattern in R3+R4. Vier Findings (1 HIGH, 2 MEDIUM, 1 LOW),
+alle adressiert im selben Commit:
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| F1 | HIGH | T0-(c) Control-Flow-Skeleton hatte `confirmerSwap` AUSSERHALB der `removeMu`-Lock-Region — Race-Bedingung mit parallel laufenden Goroutinen die ihren eigenen Swap durchführen. Pattern-Erbe init (`initproject.go:328-348`) hat ALLE Swaps INNERHALB Lock | Skeleton reorganisiert: `LOCK → confirmerSwap → fsSwap → … → captures.Drain() → fsUnswap → confirmerUnswap → UNLOCK`. Race-Sicherheits-Block hinzugefügt; T6-Pin `TestRemove_ConcurrentInvocationsSerializeSwaps` für zwei parallele Goroutinen |
+| F2 | MEDIUM | `LH-FA-ADD-007` Multi-Use als ERROR-Code (ErrServiceUnregistered) UND WARN-Code (Volumes-deferred) — Konsumenten können nicht über Code allein disambiguieren | T0-(g) Klarstellung: Code identifiziert Spec-Anforderung (Umbrella §924-947), nicht Sub-Semantik. Konsumenten müssen `(code, level)`-Tupel betrachten + `data.volumesPurged`-Status. Pattern konsistent mit init/down's `LH-FA-INIT-005`-Multi-Use für `ErrConfirmationRequired` |
+| F3 | MEDIUM | `ErrServiceInconsistent` Triple-Use für Z. 304/307/330 — Z. 330 YAML-Patch-Defect ist semantisch Sentinel-Stretching (kein managed-block) | T0-(d) Triple-Use-Klarstellung mit zwei Alternativen (Konsolidierung vs. Sub-Sentinel `ErrYAMLPatchFailed`); Plan-Vorschlag Konsolidierung (Exit-Code 10 + Repair-Hint geteilt) mit T6-Pin auf `LH-FA-ADD-005` für alle drei Pfade |
+| F4 | LOW | T0-(p) `delete`-Action-Vertrag spezifiziert RemoveAll Mid-Stream-Failure-Capture nicht — was wenn snapshot vor RemoveAll failt? | T0-(p) erweitert: Zwei-Phasen-Capture-Semantik (snapshot ReadFile → underlying.RemoveAll); Phase-1-Failure → `OldContent: nil`, Phase-2-Failure → vollständiges OldContent; Diff-Renderer behandelt nil als binary/unreadable |
+
+R5-Reviewer-Note: docs-check grün. Spec-Coverage-Audit
+bestätigt: LH-FA-CLI-005A (Confirmer-Gate), LH-FA-ADD-007 (Service
+entfernen Umbrella §924-947), LH-FA-INIT-005 (Pattern-Erbe für
+ErrConfirmationRequired), LH-FA-ADD-001/002/005, LH-NFA-REL-003
+sind alle in der Spec verankert und korrekt gemappt. F1 ist der
+substanziellste R5-Befund — Race-Bedingung wäre erst in
+Concurrent-Production-Tests aufgefallen. Plan-Konsistenz nach 5
+Runden weiterhin tragfähig.
 
 ## Out of Scope
 
