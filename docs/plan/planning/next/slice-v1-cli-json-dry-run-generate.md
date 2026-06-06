@@ -1,6 +1,6 @@
 # Slice V1: `generate --json` / `--dry-run` / `--diff` — Vier-Artefakt-Surface
 
-> **Status:** T0-Discovery + R1/R2/R3/R4/R5/R6 adressiert, `next/` (Lifecycle-Übergang aus `open/` nach fünf Pre-`next/`-Review-Runden; R6 im `next/`-Status mit Implementation-Reality + Spec-Coverage-Angle; 26 Findings gesamt: 6 HIGH, 16 MED, 4 LOW). Vierter Folge-Slice (4/9) des
+> **Status:** T0-Discovery + R1-R7 adressiert, `next/` (Lifecycle-Übergang aus `open/` nach fünf Pre-`next/`-Review-Runden; R6/R7 im `next/`-Status mit Implementation-Reality + Spec-Coverage + Test-Härte/Plan-Drift; 28 Findings gesamt: 7 HIGH, 17 MED, 4 LOW). Vierter Folge-Slice (4/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 4/9). Konsumiert das Pattern-Vorbild aus
@@ -130,8 +130,12 @@ nicht auf reduziertem `make test + lint + docs-check`.
   nicht Subcommand — analog T0-(l)-Allowlist). Artefakt wird in
   `data.artifact: "<changelog|readme|env-example|devcontainer>"`
   geführt. Helper-Signatur (`reportError`/`writeErrorEnvelope`/
-  `writeDiff`) bleibt unverändert — generate setzt nur `command`,
-  kein `subcommand`.
+  `writeDiff`) wird im T5 um einen `data any`-Param erweitert
+  (R7-Korrektur, T0-(q)) — generate reicht
+  `data: {"artifact": "<…>"}` durch, init/add reichen `nil`
+  durch (nicht-brechende Trailing-Param-Erweiterung). Subcommand-
+  Feld bleibt wie bisher unbenutzt — generate setzt nur
+  `command`, kein `subcommand`.
 - ✅ **Action-Klassifikation via `data.action`** (T0-(f)
   festgezurrt): Generate-Action wird im Voll-Schema-Envelope
   als Top-Level-Feld `data.action:
@@ -415,8 +419,11 @@ nicht auf reduziertem `make test + lint + docs-check`.
   Envelope würde von der CLI-Layer-Realität abweichen.
   (2) Die generischen Error-Emission-Helper (`reportError`/
   `writeErrorEnvelope` etc.) setzen heute **kein** Subcommand —
-  bei Wahl von `subcommand="<artifact>"` wäre eine Helper-
-  Signatur-Erweiterung nötig (Drift-Risk gegen init/add).
+  bei Wahl von `subcommand="<artifact>"` wäre eine zusätzliche
+  Signatur-Änderung nötig. (Der `data any`-Param wird ohnehin
+  via T0-(q)/R7 nachgezogen — das ist nicht-brechend; eine
+  parallele `subcommand`-Erweiterung wäre dagegen semantisch
+  schiefe Symmetrie.)
   Plus: Action-Klassifikation lebt ohnehin in `data.action`
   (T0-(f)), so dass `data` der natürliche Träger für
   Generate-spezifische Felder ist.
@@ -460,7 +467,7 @@ nicht auf reduziertem `make test + lint + docs-check`.
 | T2 | Port-Types: `GenerateRequest.PreviewMode`, `GenerateResponse.PlannedFiles`/`Changes`-Felder. **`data.action`-Klassifikation** liegt im Envelope-Layer (T5), nicht im Port — die existierende `GenerateResponse.Action` (`GenerateAction`-Enum) wird in T5 zum `data.action`-String gerendert; keine neuen Port-Felder dafür (T0-(f) Festzurrung). `ErrGenerateFileSystem` ist schon da. | ~50 | T0 |
 | T3 | Application-Layer: `GenerateService.fsFactory` + `generateMu sync.Mutex` + `NewGenerateServiceWithFactory` + `Generate()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; Multi-`%w`-Wrap an den **~17 FS-Wrap-Stellen** (T0-(d) Audit, R6-Kalibrierung — Write/Mkdir + Read/Exists/Marshal); `ErrConfigValueInvalid`-Sentinel-Wrap für `--allow-external-feature-sources`-URL-Reject (T0-(e) `LH-FA-DEV-003`-Pfad). | ~280 | T2 |
 | T4 | Composition-Root-Wiring `generateFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
-| T5 | CLI-RunE: `runGenerate` ruft generische Helper mit `command="generate"` (kein subcommand, T0-(m)), `mapErr=mapGenerateErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; **`mapGenerateErrorToDiagnostic(err, artifact)` neu mit Artefakt-Parameter** (T0-(e); per-Artefakt LH-Code für ErrGenerateManualConflict). `data.action` aus `resp.Action.String()` gerendert; `data.artifact` aus `req.Artifact.String()`. Helper-Generalisierung (`reportError`/`writeErrorEnvelope`) bleibt unverändert (Signatur trägt heute kein subcommand, T0-(m)). | ~200 | T1 + T2 (T4 für Run-time-Smoke, Code-parallelisierbar) |
+| T5 | CLI-RunE: `runGenerate` ruft generische Helper mit `command="generate"` (kein subcommand, T0-(m)), `mapErr=mapGenerateErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; **`mapGenerateErrorToDiagnostic(err, artifact)` neu mit Artefakt-Parameter** (T0-(e); per-Artefakt LH-Code für ErrGenerateManualConflict). `data.action` aus `resp.Action.String()` gerendert; `data.artifact` aus `req.Artifact.String()`. **Helper-Signatur-Erweiterung (R7-Korrektur, T0-(q))**: `writeErrorEnvelope`/`reportError` werden um einen `data any`-Param erweitert (Default `nil`), damit Generate `data: {"artifact": "<…>"}` auch im Error-Envelope durchreichen kann (Mid-Write-Failure, ManualConflict, URL-Reject). Init/add-RunE-Stellen reichen `nil` durch — Drift-Risiko gering, weil die Signatur-Änderung nicht-brechend ist (neuer Trailing-Param). | ~240 | T1 + T2 (T4 für Run-time-Smoke, Code-parallelisierbar) |
 | T6 | Acceptance-Tests: 4 Artefakte × 8 Flag-Kombos (4 Human-Mode + 4 JSON, deckt Aufhebungsbedingung 1:1) + Single-Call-NoOp/Repeat-Idempotency-NoOp (changelog + devcontainer)/UpdatedBlock/RepairedManual/Devcontainer-Phase-1-Validation/Devcontainer-Phase-2-Half-Write/Allow-External-Side-Effect/**`--allow-external-feature-sources`-URL-Reject (LH-FA-DEV-003)**/Read-Pfad-FS-Failure (mindestens ein Pfad, T0-(d))-Pins; Helper `generateFixture(t, opts)` shared (~80 LOC). Total ~40-42 Tests. | ~680 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden). | ~80 | T6 |
 | T8 | Closure: CHANGELOG, cli-json-output.md §6/§6.5/§7, roadmap, slice nach done/ mit DoD-Hash-Tabelle. | — (Doku) | T7 |
@@ -585,6 +592,22 @@ Spec-Anker nicht in Mapping; Error-Envelope-Symmetrie nicht
 durchspezifiziert) und an einer **Audit-Untererfassung** (Read-
 Pfade in Wrap-Inventar fehlten). Keine fundamentalen Plan-
 Reorganisationen nötig.
+
+## Review-Round-7 (`next/`, Test-Härte + Plan-Drift)
+
+Siebte Runde gegen den R6-gepflegten Stub (`8d7d847`), Fokus
+Test-Realismus und Plan-Drift nach den R6-Vertragserweiterungen.
+Zwei Findings (1 HIGH gegen V2-Stub, 1 MEDIUM gegen V1-T5):
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| 1 | HIGH (V2) | YAML-Rollback-Pin B kann mit no-op-failing Spy bestanden werden, ohne den echten Restore-Pfad zu belegen. Echter `FS.WriteFile` (`fs.go:56-61`) delegiert auf `os.WriteFile` → truncate-overwrite mit anschließend möglichem Failure (Disk-Full nach Truncate, Signal-Interrupt) ist realistisch. Ohne explizite Forderung an den Fake bleibt der YAML-Restore-Pfad ungetestet. | V2-Stub Pin B explizit: Spy muss vor dem Failure eine **partielle/truncated Mutation** auf u-boot.yaml ausführen. Hash-Snapshot pre/post Pflicht (nicht nur tree-Vergleich); Post-Hash IDENTISCH zum Pre-Hash → Rollback hat den truncierten Zustand restauriert, nicht am Original vorbeigelaufen |
+| 2 | MEDIUM | T5-Tranchen-Zelle sagte „Helper-Generalisierung bleibt unverändert" — widerspricht T0-(q) und AK-Block, die `writeErrorEnvelope`/`reportError` um `data any`-Param für `data.artifact` im Error-Envelope erweitern fordern. Plan-interne Drift nach R6-Erweiterung. | T5-Zelle nachgezogen: Helper-Signatur-Erweiterung um `data any`-Param explizit (init/add reichen `nil` durch, nicht-brechende Trailing-Param-Erweiterung); LOC ~200 → ~240. AK-Zeile (R3-Festzurrung) und T0-(m)-Drift-Risk-Notiz auf die nicht-brechende Form aktualisiert |
+
+R7-Reviewer-Note: docs-check grün. Keine neuen Vertragslücken;
+R7 räumt Plan-interne Drift nach R6 auf und härtet einen
+Acceptance-Pin gegen no-op-passing-Tests. Stub konvergiert
+weiterhin.
 
 ## Out of Scope
 

@@ -145,21 +145,33 @@ Rollback-Pfad ab.
   ausgeführt, weil File 2 vor `applyAllowExternalFeatureSources`
   failte).
 
-**Pin B — u-boot.yaml-Write-Failure** (deckt YAML-Rollback-Pfad
-explizit, weil Pin A diesen NICHT ausübt — File-2-Failure
-passiert VOR der YAML-Mutation):
+**Pin B — u-boot.yaml-Write-Failure mit partieller Mutation**
+(deckt YAML-Rollback-Pfad explizit, weil Pin A diesen NICHT
+ausübt — File-2-Failure passiert VOR der YAML-Mutation):
 - frisches Projekt OHNE `.devcontainer/`-Dir und OHNE
   `feature-sources`-Block in `u-boot.yaml`
-- `tree`-Snapshot vor dem Aufruf
+- `tree`-Snapshot + Hash-Snapshot von `u-boot.yaml` vor dem
+  Aufruf
 - `generate devcontainer --allow-external-feature-sources
   https://...`
 - WriteFile-Spy lässt **beide** devcontainer-Files erfolgreich
-  durch, aber **der u-boot.yaml-Write failt**
+  durch. Beim u-boot.yaml-Write: **der Spy muss zuerst eine
+  partielle/truncated Mutation auf u-boot.yaml ausführen,
+  DANN den Fehler returnen** (sonst kann eine no-op-failing
+  Implementierung den Pin bestehen, ohne den echten
+  YAML-Restore-Pfad zu belegen). Hintergrund: der produktive
+  `FS.WriteFile` (`internal/adapter/driven/fs/fs.go:56-61`)
+  delegiert auf `os.WriteFile`, das truncate-overwriten und
+  dann erst beim eigentlichen Schreiben failen kann
+  (z. B. Disk-Full nach Truncate, Signal-Interruption,
+  Filesystem-Inkonsistenz) — der Fake muss diese reale
+  Failure-Topologie nachstellen.
 - `tree`-Vergleich nach dem Aufruf: IDENTISCH zum Pre-State
-  (kein `.devcontainer/`-Dir, keine devcontainer-Files,
-  `u-boot.yaml` byte-identisch — Rollback rollt beide
-  devcontainer-Files plus die Dir-Anlage zurück, weil der
-  spätere YAML-Write fail-stoppt).
+  (kein `.devcontainer/`-Dir, keine devcontainer-Files).
+  **Plus: u-boot.yaml-Hash IDENTISCH zum Pre-State** —
+  Rollback hat den durch den Fake truncierten/teilgeschriebenen
+  Zustand auf den ursprünglichen Inhalt restauriert, NICHT
+  einfach am Originalzustand vorbeigelaufen.
 
 Beide Pins gemeinsam decken alle drei Side-Effects ab: Pin A
 zeigt File-2-Rollback + Dir-Cleanup, Pin B zeigt
