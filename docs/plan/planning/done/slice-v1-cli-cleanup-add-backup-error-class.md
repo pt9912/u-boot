@@ -4,7 +4,7 @@
 > [`slice-v1-cli-json-dry-run-init`](slice-v1-cli-json-dry-run-init.md)
 > T7 Review-Round-9 Finding #5.
 >
-> **DoD:** Commit `<TBD>` (`fix(cli)`: `mapAddErrorToDiagnostic`
+> **DoD:** Commit `1cbc3a7` (`fix(cli)`: `mapAddErrorToDiagnostic`
 > Backup-Sentinels von `LH-FA-INIT-005` auf `LH-NFA-REL-003`
 > umgestellt; `erroremission_internal_test.go`-Cases nachgezogen;
 > add-Pfad-Defense-Branch dokumentiert; CHANGELOG `### Fixed`-
