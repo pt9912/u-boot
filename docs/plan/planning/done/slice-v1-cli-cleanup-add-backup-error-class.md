@@ -1,8 +1,15 @@
 # Slice V1: `add` Backup-Sentinel LH-Code-Harmonisierung
 
-> **Status:** geplant für v0.4.0+ — Cleanup-Folge-Slice aus
-> [`slice-v1-cli-json-dry-run-init`](../done/slice-v1-cli-json-dry-run-init.md)
+> **Status:** ✅ **done** — Cleanup-Folge-Slice aus
+> [`slice-v1-cli-json-dry-run-init`](slice-v1-cli-json-dry-run-init.md)
 > T7 Review-Round-9 Finding #5.
+>
+> **DoD:** Commit `<TBD>` (`fix(cli)`: `mapAddErrorToDiagnostic`
+> Backup-Sentinels von `LH-FA-INIT-005` auf `LH-NFA-REL-003`
+> umgestellt; `erroremission_internal_test.go`-Cases nachgezogen;
+> add-Pfad-Defense-Branch dokumentiert; CHANGELOG `### Fixed`-
+> Eintrag plus Code-Liste in add-Slice-Eintrag auf
+> `LH-FA-INIT-{004,006}` korrigiert).
 
 ## Auslöser
 

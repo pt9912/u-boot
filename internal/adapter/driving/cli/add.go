@@ -249,7 +249,16 @@ func mapAddErrorToDiagnostic(err error) diagnosticItem {
 	case errors.Is(err, driving.ErrFileExists), errors.Is(err, driving.ErrProjectExists):
 		return diagnosticItem{Level: "error", Code: "LH-FA-INIT-004", Message: err.Error()}
 	case errors.Is(err, driving.ErrBackupSuffixExhausted), errors.Is(err, driving.ErrBackupSourceMissing):
-		return diagnosticItem{Level: "error", Code: "LH-FA-INIT-005", Message: err.Error()}
+		// Defensive branch — add ruft heute keine Backup-Logik
+		// (kein runBackup/BackupPath im add-Use-Case-Pfad). Branch
+		// bleibt für zukünftige Catalog-Erweiterungen, die Backup
+		// rufen könnten, und wird auf LH-NFA-REL-003 + Exit 14
+		// klassifiziert — analog mapInitErrorToDiagnostic. Vorher
+		// fälschlich LH-FA-INIT-005 (Validation-Klasse, würde Exit 10
+		// suggerieren); isFilesystemError routet ohnehin zu Exit 14,
+		// also war Envelope-Code und Exit-Klasse desynchron
+		// (slice-v1-cli-cleanup-add-backup-error-class).
+		return diagnosticItem{Level: "error", Code: "LH-NFA-REL-003", Message: err.Error()}
 	default:
 		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
 	}

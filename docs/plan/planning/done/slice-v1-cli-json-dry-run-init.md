@@ -1094,7 +1094,7 @@ und einer trivialer Dead-Code-Cleanup.
 | 2 | med  | `initFromTemplate` ohne `PreviewMode`-Guard im Application-Layer (CLI fängt es, UC asymmetrisch) | R2: `PreviewMode != PreviewNone → ErrTemplateConflictsWithFlag` am UC-Eintritt; Acceptance-Pin — `e897fa7` |
 | 3 | low  | `runBackup` Wrap-Strategie (raw FS ↔ typed Sentinel) ohne direkten Application-Test | R3: Zwei Tests via `RunBackupForTest`-Bridge — `e10b57d`            |
 | 4 | low  | T0-(k) Path-Anchor für positional `<name>` ungetestet (trailing-slash, dot-slash, abs-path) | R4: Vier-Cases Acceptance-Table mit `validatingInitUseCaseStub` — `ee30c3c` |
-| 5 | low  | Add↔Init divergieren bei `ErrBackupSuffixExhausted`-Code (Add: `LH-FA-INIT-005` + Exit 14 → inkonsistent; Init: `LH-NFA-REL-003` + Exit 14 → konsistent) | Folge-Slice: [`slice-v1-cli-cleanup-add-backup-error-class`](../open/slice-v1-cli-cleanup-add-backup-error-class.md) |
+| 5 | low  | Add↔Init divergieren bei `ErrBackupSuffixExhausted`-Code (Add: `LH-FA-INIT-005` + Exit 14 → inkonsistent; Init: `LH-NFA-REL-003` + Exit 14 → konsistent) | Folge-Slice: [`slice-v1-cli-cleanup-add-backup-error-class`](slice-v1-cli-cleanup-add-backup-error-class.md) |
 | 6 | info | Init's mapErr-Switch hat `ErrInvalidServiceName`-Case — dead-code (Init hat keinen Service-Arg) | R1: Case entfernt im selben Commit — `6e5ad01`                     |
 
 T7-LOC-Bilanz: 4 R-Commits (~90 LOC) + 1 Folge-Slice-Stub

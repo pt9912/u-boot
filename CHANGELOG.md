@@ -11,6 +11,23 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Fixed
+
+- `fix(cli): mapAddErrorToDiagnostic Backup-Sentinels auf
+  LH-NFA-REL-003 (add↔init Diagnostic-Code-Harmonisierung)` —
+  `mapAddErrorToDiagnostic` mappte `ErrBackupSuffixExhausted`/
+  `ErrBackupSourceMissing` auf `LH-FA-INIT-005` (Validation-Klasse,
+  Exit-10-Suggestion), während `isFilesystemError` sie ohnehin
+  zu Exit 14 routet — Envelope-Code und Exit-Klasse waren also
+  desynchron. `mapInitErrorToDiagnostic` macht es bereits korrekt
+  (`LH-NFA-REL-003` + Exit 14). Cleanup zieht add auf dieselbe
+  Klassifikation nach. Die Branch ist im add-Pfad defensiv (heute
+  ruft kein add-Use-Case `runBackup`/`BackupPath`), bleibt aber
+  für zukünftige Catalog-Erweiterungen erhalten. Cross-Slice-
+  Drift-Finding aus `slice-v1-cli-json-dry-run-init` Review-Round-9
+  (`d7f9e65`); Plan-Pfad `slice-v1-cli-cleanup-add-backup-error-
+  class`. Coverage-Gate unverändert grün (91.10 %).
+
 ### Added
 
 - `feat(cli): u-boot init --json / --dry-run / --diff
@@ -88,7 +105,7 @@ this file is the same format applied to u-boot itself.
   Renderer (`internal/adapter/driving/cli/diff/`); Composition-
   Root-`fsFactory(driving.AddPreviewMode)`-Closure in
   `cmd/uboot/main.go`. Diagnostic-Codes sind LH-Kennungen
-  (`LH-FA-ADD-{001,002,005,006}`/`LH-FA-INIT-{004,005,006}`/
+  (`LH-FA-ADD-{001,002,005,006}`/`LH-FA-INIT-{004,006}`/
   `LH-NFA-REL-003`). Mid-Write-Failure-UX: Voll-Schema-Envelope
   zeigt `plannedFiles[]` bis zur Failure-Stelle, `diagnostics[].file`
   markiert die Failure-Position, `exitCode: 14` (LH-NFA-REL-003).

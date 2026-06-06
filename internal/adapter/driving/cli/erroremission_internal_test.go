@@ -39,8 +39,8 @@ func TestMapAddErrorToDiagnostic_AllCases(t *testing.T) {
 		{"ErrInvalidServiceName", domain.ErrInvalidServiceName, "LH-FA-INIT-006", "error"},
 		{"ErrFileExists", driving.ErrFileExists, "LH-FA-INIT-004", "error"},
 		{"ErrProjectExists", driving.ErrProjectExists, "LH-FA-INIT-004", "error"},
-		{"ErrBackupSuffixExhausted", driving.ErrBackupSuffixExhausted, "LH-FA-INIT-005", "error"},
-		{"ErrBackupSourceMissing", driving.ErrBackupSourceMissing, "LH-FA-INIT-005", "error"},
+		{"ErrBackupSuffixExhausted", driving.ErrBackupSuffixExhausted, "LH-NFA-REL-003", "error"},
+		{"ErrBackupSourceMissing", driving.ErrBackupSourceMissing, "LH-NFA-REL-003", "error"},
 		{"unknown sentinel → default LH-FA-CLI-006", errors.New("unknown"), "LH-FA-CLI-006", "error"},
 		// T0-(f) Switch-Order pin: multi-`%w` mit ErrAddFileSystem +
 		// ErrProjectNotInitialized muss als FS-class klassifiziert
