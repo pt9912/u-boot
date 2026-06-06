@@ -1,6 +1,6 @@
 # Slice V1: `remove --json` / `--dry-run` / `--diff` — Add-Inverse mit Purge-Gate
 
-> **Status:** T0-Discovery + R1/R2/R3/R4/R5/R6 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
+> **Status:** T0-Discovery + R1-R7 adressiert, `open/`. Fünfter Folge-Slice (5/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 5/9). Konsumiert das Pattern-Vorbild aus
@@ -169,8 +169,22 @@ docs-check).
 
 ## Sub-Decisions (TODO — füllt sich in Review-Runden)
 
-- **T0-(a)** Pattern-Erbe-Disziplin (was 1:1 von init/generate,
-  was remove-spezifisch).
+- **T0-(a)** **Pattern-Erbe-Disziplin festgezurrt** (R7-MED-F3-Fix
+  nach 6 Iterationen): die Erbe-Disziplin ist über die anderen
+  Sub-Decisions verteilt; hier als Anchor-Tabelle konsolidiert.
+
+  | Erbe 1:1 von init/generate | Remove-spezifisch (NEU) |
+  | --- | --- |
+  | `driving.PreviewMode` direkt (T0-(b)) | Confirmer-Swap-Mechanismus (T0-(j), `noopConfirmer` aus M4) |
+  | `RecordingFileSystem`-driven-Adapter (Pattern-Vorbild add T1-B) | `--purge`-Flag-Dimension (T0-(h)) |
+  | Pure-Go LCS-Diff-Renderer (add T2) | WARN-Migration in `diagnostics[]` (T0-(g)) |
+  | `previewModeFromFlags`-Mapping (init T1-B) | `delete`-Action für RemoveAll-Captures (T0-(p)) |
+  | Generalisierte Helper `reportError`/`writeEnvelope`/`mapPlannedFilesToWire` (init T5/generate T5) | Neuer `ErrRemoveFileSystem`-Sentinel (T0-(d)) |
+  | Multi-`%w`-Switch-Order-Pattern (init T0-(f)) | Neuer `ErrConfirmerUnavailable`-Sentinel (T0-(e) R2-F1) |
+  | `mapCaptureToPlannedFiles(records, baseDir)` (add T0-(i)) | `LH-FA-ADD-007` Multi-Use ERROR+WARN (T0-(g) R5-F2) |
+  | Pre-UC-Sentinel-`reportError`-Kanal (init T0-(o)/T5) | `RemoveServiceResponse.Warnings`-Feld als WARN-Source-of-Truth (T2 R7-F2) |
+  | `cliJSONEnvelope.Data` + `newDataEnvelope` (generate T1, vorgezogen aus Template 9/9) | typed `removeEnvelopeData`-Struct mit `*bool`-Wrapping für `omitempty` (T0-(f) R7-F1) |
+  | Path-Anchor `plannedFiles[].path` project-relativ (init T0-(k)) | Two-Phase-Capture-Semantik bei RemoveAll-Failure (T0-(p) R5-F4) |
 - **T0-(b)** **`driving.PreviewMode` direkt** (kein
   `RemovePreviewMode`-Alias) — durch init-T0-(c) Alias-
   Lebensdauer-Pflicht erzwungen.
@@ -183,7 +197,7 @@ docs-check).
   ```
   Remove(req):
     LOCK removeMu                            # generateMu/initMu-Pattern
-    confirmerSwap(req.SilenceConfirmer)     # NEUER Swap-Mechanismus T0-(j), INNERHALB Lock
+    if req.SilenceConfirmer { confirmerSwap() }  # konditional analog init's SilenceProgress (R7-LOW-F4); INNERHALB Lock
     fs, recorder := s.selectFS(req.PreviewMode)  # recorder ist CALL-SCOPED, lokale Variable
     fsSwap(fs)                               # init's Swap-Pattern
     state := detectServiceState(s.fs, s.yaml, ...)
@@ -335,6 +349,30 @@ docs-check).
   `data: {"service": "<…>"}` ohne `priorState`/`state`/
   `volumesPurged` (Zero-Response auf Error-Pfad — analog
   generate T0-(q)).
+
+  **Struct-Form festgezurrt** (R7-HIGH-F1-Fix, Pattern-Erbe-Wahl
+  zwischen init und generate): generate-Symmetrie — eine typed
+  Struct `removeEnvelopeData` in `cli/remove.go` analog generate's
+  `generateEnvelopeData`. Felder mit **Pointer-Wrapping**, damit
+  `omitempty` Key-Abwesenheit pinnen kann (nicht nur Zero-Value):
+
+  ```go
+  type removeEnvelopeData struct {
+      Service       string  `json:"service"`
+      PriorState    *string `json:"priorState,omitempty"`
+      State         *string `json:"state,omitempty"`
+      VolumesPurged *bool   `json:"volumesPurged,omitempty"`
+  }
+  ```
+
+  Begründung für `*bool` statt `bool`: `bool`-`omitempty` würde
+  den Error-Pfad-`false`-Wert UND den Success-Pfad-`false`-Wert
+  identisch droppen (Spec §1841 fordert Key-Presence-vs-Absence-
+  Disambiguierung). Pattern-Erbe `cliJSONEnvelope.DryRun` /
+  `Diff` (`jsonenvelope.go:34-37`) nutzt `*bool` aus genau diesem
+  Grund. T6-Pin verwendet `jsontestutil.AssertFullEnvelope`-Key-
+  Presence-Assertion (statt `false`-Vergleich) für Error-Envelope:
+  `volumesPurged`-Key MUSS abwesend sein, NICHT `false`.
 - **T0-(g)** **WARNING-Migration festgezurrt** (R1-HIGH-1-Fix +
   R2-MED-F5-Erweiterung): heutige `printRemoveSummary`-stderr-
   WARNING (Z. 163-171) bei `--purge && !VolumesPurged` wandert
@@ -518,7 +556,7 @@ docs-check).
 | - | ------ | --------------- | --- |
 | T0 | Discovery + Sub-Decisions (a)-(o) klären; Review-Runden | — (Plan) | — |
 | T1 | **Entfällt** (R3-HIGH-F2-Fix): `noopConfirmer` existiert bereits seit M4 Confirmer-Port-Slice in `application/noop.go:17-33` und tut exakt was T0-(j) braucht (`ConfirmRemoveVolumes → false, nil`). `RemoveServiceService`-Konstruktor (`removeservice.go:48`) nutzt ihn schon als nil-Fallback. T3 swappt den existierenden Helper request-time, kein neuer Helper nötig. | — (entfällt) | T0 |
-| T2 | Port-Types: `RemoveServiceRequest.PreviewMode` + `SilenceConfirmer`-Feld, `RemoveServiceResponse.PlannedFiles`/`Changes`-Felder, **zwei neue Sentinels**: `ErrRemoveFileSystem` (FS-Klasse, T0-(d)) UND `ErrConfirmerUnavailable` (Confirmer-I/O-Error-Klasse, R2-HIGH-F1-Fix für T0-(e)-Tabelle). | ~90 | T0 |
+| T2 | Port-Types: `RemoveServiceRequest.PreviewMode` + `SilenceConfirmer`-Feld, `RemoveServiceResponse.PlannedFiles`/`Changes`-Felder, **`RemoveServiceResponse.Warnings []DiagnosticEntry`-Feld** (R7-MED-F2-Fix für WARN-Emission-Ort: Use-Case ist Source-of-Truth für WARN, weil er den Catalog-Lookup für `volumeOptional` kennt — CLI mapped via `mapWarningsToDiagnostics`-Helper auf `diagnosticItem`; Layer-Trennung sauber), **zwei neue Sentinels**: `ErrRemoveFileSystem` (FS-Klasse, T0-(d)) UND `ErrConfirmerUnavailable` (Confirmer-I/O-Error-Klasse, R2-HIGH-F1-Fix für T0-(e)-Tabelle). | ~110 | T0 |
 | T3 | Application-Layer: `RemoveServiceService.fsFactory` + `removeMu sync.Mutex` + `NewRemoveServiceServiceWithFactory` + `Remove()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; **Multi-`%w`-Wrap an den 10 FS-Wrap-Stellen** (R3-MED-F4-Kalibrierung, T0-(d) Inventar); `ErrConfirmerUnavailable`-Sentinel-Wrap in `runPurgeGate` Z. 171; Confirmer-Swap auf existierenden `noopConfirmer` im JSON-Mode. | ~240 | T2 |
 | T4 | Composition-Root-Wiring `removeFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
 | T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`); **Pre-UC-Sentinel-Kanal** (R4-LOW-F6-Klarstellung: Codepfade existieren bereits in `cli/remove.go:108-120`, NEU ist nur die Kanalisierung via `reportError` analog `init.go:205, 216, 221`) für `domain.ErrInvalidServiceName`, `ErrConflictingModeFlags` UND `getwd`-Failure (`fmt.Errorf("determine working directory: %w", err)`, R3-LOW-F6-Fix). Der `getwd`-Wrap trägt KEIN typed Sentinel und fällt in den Default-Branch `LH-FA-CLI-006` / Exit 1 (Pattern-Erbe von init T0-(o)); Mapper-Tabelle T0-(e) NICHT ergänzt. **Human-Mode-Diff-Renderer** (R2-LOW-F6-Fix): bei `--purge --diff` ohne `--json` bleibt die deferred-Volumes-Prosa auf `errOut`, NICHT im Diff-Body. T6-Pin: `TestRemove_PurgeHumanDiff_StderrSeparation` mit getrennten Buffer-Assertions. | ~250 | T1 + T2 |
@@ -680,6 +718,27 @@ implizit gelassen hatte. F3 schließt eine Pin-Asymmetrie zwischen
 WARN- und ERROR-Pfad für denselben Code. F4 ist
 Inventarisierungs-Hygiene. Plan-Konsistenz nach 6 Runden ist
 stabil; weitere Runden bringen vermutlich nur LOW-Befunde.
+
+## Review-Round-7 (Pre-`next/`)
+
+Implementation-Path-Walk (T2→T3→T5) + Cross-Reference-Audit
+gegen den R6-konsolidierten Stub (`82eb121`). Vier Findings
+(1 HIGH, 2 MEDIUM, 1 LOW):
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| F1 | HIGH | `removeEnvelopeData`-Struct-Form mehrdeutig zwischen init-Pattern (`nil` data) und generate-Pattern (typed Struct). Plus: `bool VolumesPurged`-omitempty würde `false` UND Key-Abwesenheit identisch droppen — Error-Pfad-Pin (`volumesPurged` ABWESEND) nicht enforceable | T0-(f) konkret festgezurrt: generate-Symmetrie + Pointer-Wrapping (`*PriorState`, `*State`, `*VolumesPurged`) für Key-Presence-vs-Absence-Disambiguierung; Pattern-Erbe `cliJSONEnvelope.DryRun`-`*bool`-Style |
+| F2 | MEDIUM | WARN-Diagnostic-Emission-Ort offen: CLI-Layer kennt `--purge`-Flag aber nicht Catalog (Layer-Verletzung); Use-Case kennt Catalog aber Response trägt keine Warnings | T2 erweitert um **`RemoveServiceResponse.Warnings []DiagnosticEntry`-Feld** (Variante (b), saubere Layer-Trennung); LOC ~90→~110; CLI mapped via `mapWarningsToDiagnostics`-Helper |
+| F3 | MEDIUM | T0-(a) Pattern-Erbe-Disziplin war nach 6 Runden noch TODO-Form; Verweise wie T0-(j) "Pattern-Erbe-Disziplin T0-(a) Spalte" zeigten ins Leere | T0-(a) als **zweispaltige Anchor-Tabelle** ausformuliert: 10 Erbe-1:1-Patterns + 10 Remove-spezifische Patterns mit Cross-Refs auf Sub-Decisions |
+| F4 | LOW | Confirmer-Swap unconditional vs. konditional auf `SilenceConfirmer` nicht spezifiziert — init's Pattern (`initproject.go:345-349`) ist konditional | Skeleton auf `if req.SilenceConfirmer { confirmerSwap() }` umgestellt — Pattern-Erbe init-symmetrisch, weniger Code |
+
+R7-Reviewer-Note: docs-check grün. HIGH-Frequenz weiter
+konstant: R1=3, R2=1, R3=2, R4=2, R5=1, R6=1, **R7=1**. F1 ist
+der substanziellste Befund — `bool`-vs-`*bool` Wahl beeinflusst
+T6-Acceptance-Pin-Form (Key-Presence-Assertion vs Zero-Value-
+Vergleich). F2 schließt eine Layer-Trennung sauber durch
+Response-Type-Erweiterung. F3 löst eine 6-Runden-überfällige
+TODO-Auflösung. F4 ist Pattern-Konsistenz mit init.
 
 ## Out of Scope
 
