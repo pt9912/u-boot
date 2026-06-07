@@ -65,11 +65,17 @@ Wrap-Site-Inventar (Stichproben aus R15-Audit):
   devcontainer-Phase-2-Block)
 
 **Subset already covered durch up-down T5** (Update 2026-06-07
-nach up-down-Stub R3-MED-4): up/down's FS-Read-Wraps
-(`upservice.go:105/138/148`, `downservice.go:81/97`) sind durch
-den up-down-Slice (Folge-Slice 6/9) selbst sanitized — dieser
-Konsolidierungs-Slice braucht sie NICHT mehr im Scope. Liste
-oben bleibt für add/init/generate die Refactor-Ziele.
+nach up-down-Stub R3-MED-4 + R5-MED-3 Wortlaut-Präzisierung):
+up/down's **FS-Read-Wraps UND Compose-Runtime-Wraps** (11
+Stellen insgesamt: `upservice.go:80,105,108,138,141,146,148`,
+`downservice.go:69,81,84,97,100` — beide Klassen tragen
+absolute Pfade via `req.BaseDir` oder `filepath.Join(...)`) sind
+durch den up-down-Slice (Folge-Slice 6/9) selbst sanitized.
+Pre-R5-Wortlaut "FS-Read-Wraps" war zu eng — Compose-Runtime-
+Wraps (`ComposeUp on %q`, `ComposeDown on %q`) tragen
+ebenfalls Pfad-Leak. Dieser Konsolidierungs-Slice braucht
+beide Klassen NICHT mehr im Scope. Liste oben bleibt für
+add/init/generate die Refactor-Ziele.
 
 remove löste das in T7/T8 via `baseDirSanitizedError`-Wrapper
 (`cli/remove.go:465-491`) + `replaceBareBaseDir`-Word-Boundary-
