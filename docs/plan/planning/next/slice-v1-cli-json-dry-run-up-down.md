@@ -697,7 +697,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
 | - | --- | --- | --- |
 | T0 | Discovery + Sub-Decisions (a)-(k) klären; Review-Runden | — (Plan) | — |
 | T1 | **Entfällt** (analog remove T1): `noopConfirmer` lebt bereits in `application/noop.go:17-33`, `io.Discard` ist Go-stdlib — beide Helper für ProgressSink-Silencing und Confirmer-Swap existieren | — (entfällt) | T0 |
-| T2 | Port-Types: **`UpRequest.SilenceProgress bool`** + **`DownRequest.SilenceConfirmer bool`** (analog `RemoveServiceRequest.SilenceConfirmer`); `UpResponse.Warnings []driving.WarningEntry` (Type schon da aus remove T2). **Zwei neue Port-Sentinels** (R2-HIGH-2 Fix): `driving.ErrUpFileSystem` und `driving.ErrDownFileSystem` (Pattern-Erbe `driving.ErrRemoveFileSystem` mit Read-spezifischer Sentinel-Message-Form, R3-MED-1: `"up: filesystem read failed"` / `"down: filesystem read failed"` — NICHT `"mutation failed"`, weil up/down read-only). **Sentinel-Heim-Position** (R5-LOW-1 + R6-LOW-2 für beide Sentinels): `driving.ErrUpFileSystem` direkt vor `ErrComposeFileMissing` in `up.go` (analog `removeservice.go:234`-Schichtung "Infrastruktur-Sentinel vor Runtime-Sentinel"); `driving.ErrDownFileSystem` direkt vor `ErrConfirmationRequired` in `down.go:101`. Beide Heime explizit gepinnt. **Co-Migration der Port-Sentinel-Kommentare** (R3-HIGH-3 + R5-MED-2 + R5-HIGH-1): `up.go:43,89,97`: `ErrComposeFileMissing`-Kommentar `"Maps to LH-FA-CLI-006 exit code 10"` → `"Maps to LH-FA-UP-001 exit code 10"`; `ErrStabilizationTimeout`-Kommentar dito `LH-FA-UP-001 exit code 12`; `ErrInvalidTimeout` bleibt `LH-FA-CLI-006` (CLI-Form-Validierung). `up.go:50` (R5-HIGH-1 Kommentar-Lüge + R6-MED-1 Wortlaut-Symmetrie): `"nil is treated as io.Discard by the application service"` → `"nil is treated as io.Discard."` (schlichte Form analog `down.go:66` + `docker_engine.go:51` — symmetrisch, adapter-agnostic, zukunftsstabil bei Mock-/Test-Adapter-Erweiterung). Code-Realität: `engine.go:91,115,277` `progressSinkOrDiscard` toleriert nil; Verantwortung liegt im Adapter-Layer aber Kommentar fixiert sich nicht auf den heutigen Adapter. `down.go:90` (R5-MED-2 Co-Migration vergessen, asymmetrisch zu up): `ErrConfirmationRequired`-Kommentar `"Maps to LH-FA-CLI-006 exit code 10"` → `"Maps to LH-FA-INIT-005 exit code 10"`. **Reihenfolge-Pflicht** (R5-LOW-3): erst Sentinel anlegen, dann Kommentare migrieren — sonst zeigen Kommentare auf nicht-existente Sentinels. | ~125 | T0 |
+| T2 | **Port-Types-Erweiterung + zwei neue FS-Sentinels + Port-Kommentar-Co-Migration**. Strukturierte Aufschlüsselung in §T2-Details unten (R6-Reviewer Pre-T2-Hygiene-Entflechtung): fünf Sub-Sektionen (Port-Type-Erweiterungen / Neue Port-Sentinels / Sentinel-Heim-Positionen / Port-Kommentar-Co-Migration / Reihenfolge-Pflicht). | ~125 | T0 |
 | T3 | Application-Layer: **ProgressSink-Application-Layer-Branch-Wiring** im JSON-Mode (T0-(c) Form (d), R4-LOW-2 Wortlaut-Fix): `UpService.Up()` ergänzt um `effective := req.ProgressSink; if req.SilenceProgress { effective = io.Discard }`, dann `s.engine.ComposeUp(..., ProgressSink: effective)`. **nil-Default bleibt im Adapter** (R5-MED-1 festgezurrt): `engine.go:91,115,277` `progressSinkOrDiscard` toleriert `effective == nil` — kein zusätzlicher Application-Layer-nil-Check nötig, DRY-Prinzip. T3-Implementer-Pflicht: verifizieren dass die Adapter-nil-Toleranz nach Merge erhalten bleibt (kein Regression-Risiko via T3). `DownService.Down()`-Request-time Gate-Branch ohne Field-Mutation (T0-(d) Option (b) — kein `downMu` nötig, race-frei) — KEIN remove-1:1-Service-Field-Swap mit Mutex. **Multi-`%w`-Wrap-Migration** (R2-HIGH-2 Fix) der fünf FS-Read-Stellen auf `ErrUpFileSystem`/`ErrDownFileSystem`. Mapper-Helper `mapComposeRuntimeSentinel(err)` in `cli/composesentinel.go` für die geteilten Docker/Compose-Sentinels (T0-(e) R2-LOW-2) | ~120 | T2 |
 | T4 | **Entfällt-Kandidat** (R3-LOW-2, analog T1): Composition-Root `cmd/uboot/main.go` hat heute schon `NewUpService` und `NewDownService` mit den nötigen Deps (FileSystem, DockerEngine, Confirmer, Logger). Kein Recorder, kein fsFactory-Closure-Wechsel. Bei `SilenceProgress`/`SilenceConfirmer`-Form (Bool-Field, kein Service-Field-Swap) braucht es kein Wiring-Update. **T4 entfällt** wenn die T0-(c)+(d) Form (d)/(b) gewählt sind — falls Pre-Implementation noch ein Wiring-Edit auftritt, wandert T4 wieder rein. | — (entfällt erwartet) | T3 |
 | T5 | CLI-RunE: `runUp`/`runDown` ruft generische Helper mit `command="up"`/`"down"`, `mapErr=mapUpErrorToDiagnostic`/`mapDownErrorToDiagnostic`; Envelope-Pfade; Allowlist-Migration mit zwei separaten Einträgen (R2-LOW-1); Mapper neu; `data`-Structs (`upStatusData`/`downStatusData`); WARN-Migration. **`baseDirSanitizedError`-Helper-Extraktion** (R2-MED-5 Fix + R3-LOW-1 File-Form-Pin + R4-LOW-1 Range-Korrektur): geteilter Helper aus `cli/remove.go:465-538` (incl. `replaceBareBaseDir` + `isPathComponentByte` + `sanitizeBaseDir` selbst) nach neuem File **`cli/sanitize.go`** (im **bestehenden `package cli`**, NICHT Sub-Package `cli/sanitize/`). Begründung: `remove.go:299` kann den Helper ohne Migration weiternutzen (package-interne Symbole bleiben package-intern). Up/down's `runUp`/`runDown` rufen `sanitizeBaseDir(err, cwd)` vor `reportError` analog `remove.go:299`. | ~250 | T2 |
@@ -718,6 +718,90 @@ init swappt `s.progress` als Interface-Port, up/down nutzen
 `io.Writer`-`effective`-Variable; **Mechanismus fundamental
 verschieden**, JSON-Mode-Brücke gleich), doctor (typed Data-
 Carrier `upStatusData`/`downStatusData`-Vorlauf).
+
+### T2-Details: Port-Types, Sentinels, Co-Migration
+
+T2-Cell in der Tranchen-Tabelle verweist hier her — Implementer-
+strukturierte Aufschlüsselung der ~10 Sub-Pins (R6-Reviewer
+Pre-T2-Hygiene-Empfehlung). Adressierungs-Anker R2-HIGH-2,
+R3-HIGH-3, R3-MED-1, R5-HIGH-1, R5-MED-2, R5-LOW-1, R5-LOW-3,
+R6-LOW-2, R6-MED-1.
+
+#### Port-Type-Erweiterungen
+
+Drei neue Felder analog `RemoveServiceRequest.SilenceConfirmer`-
+Pattern:
+
+- **`UpRequest.SilenceProgress bool`** (`port/driving/up.go`) —
+  CLI setzt `req.SilenceProgress = flags.JSON` (T0-(c) Form (d)
+  Festzurrung).
+- **`DownRequest.SilenceConfirmer bool`** (`port/driving/down.go`)
+  — CLI setzt `req.SilenceConfirmer = flags.JSON` (T0-(d) Option
+  (b) Request-time Gate-Branch).
+- **`UpResponse.Warnings []driving.WarningEntry`** — Type schon
+  aus remove T2 Cluster-Vorlauf (R12-LOW-F4) etabliert,
+  inkl. `Subject`-Feld für Multi-Service-Recreate-WARN-Vorlauf.
+
+#### Neue Port-Sentinels
+
+Zwei neue FS-Sentinels (R2-HIGH-2 Fix gegen Phantom-Pin):
+
+- **`driving.ErrUpFileSystem`** (`port/driving/up.go`) — Read-
+  spezifische Message-Form `"up: filesystem read failed"`
+  (R3-MED-1, NICHT `"mutation failed"` weil up/down read-only).
+- **`driving.ErrDownFileSystem`** (`port/driving/down.go`) —
+  analog `"down: filesystem read failed"`.
+
+Pattern-Erbe `driving.ErrRemoveFileSystem`; Verwendung in T3
+Multi-`%w`-Migration der fünf FS-Read-Wraps.
+
+#### Sentinel-Heim-Positionen
+
+Beide Heime explizit gepinnt (R5-LOW-1 + R6-LOW-2):
+
+- **`ErrUpFileSystem`** direkt vor `ErrComposeFileMissing` in
+  `up.go` (Pattern-Erbe `removeservice.go:234`-Schichtung
+  "Infrastruktur-Sentinel vor Runtime-Sentinel").
+- **`ErrDownFileSystem`** direkt vor `ErrConfirmationRequired`
+  in `down.go:101` (analoge Schichtung).
+
+#### Port-Kommentar-Co-Migration
+
+Sentinel-Kommentare migrieren auf die T0-(e) Mapper-Tabellen-
+Codes — sonst tunneln Port-Anker und CLI-Mapper getrennte
+Wahrheiten (R3-HIGH-3 + R5-MED-2 + R5-HIGH-1 + R6-MED-1).
+
+**`up.go`** (vier Stellen):
+
+| Zeile | Sentinel | Pre-T2 | Post-T2 | Begründung |
+| --- | --- | --- | --- | --- |
+| 43 | `ErrInvalidTimeout` | `LH-FA-CLI-006 exit code 2` | unverändert | CLI-Form-Validierung |
+| 50 | (ProgressSink-Doku) | `"nil is treated as io.Discard by the application service"` | `"nil is treated as io.Discard."` | R5-HIGH-1 + R6-MED-1: schlichte Form analog `down.go:66` + `docker_engine.go:51`; adapter-agnostic, zukunftsstabil. Code-Realität: `engine.go:91,115,277` `progressSinkOrDiscard` toleriert nil — Verantwortung im Adapter, Kommentar bindet sich aber nicht an heutigen Adapter |
+| 89 | `ErrComposeFileMissing` | `LH-FA-CLI-006 exit code 10` | `LH-FA-UP-001 exit code 10` | Fachliche Validierung |
+| 97 | `ErrStabilizationTimeout` | `LH-FA-CLI-006 exit code 12` | `LH-FA-UP-001 exit code 12` | Up-spezifische Runtime-Klasse |
+
+**`down.go`** (eine Stelle, R5-MED-2 vergessene Co-Migration):
+
+| Zeile | Sentinel | Pre-T2 | Post-T2 | Begründung |
+| --- | --- | --- | --- | --- |
+| 90 | `ErrConfirmationRequired` | `LH-FA-CLI-006 exit code 10` | `LH-FA-INIT-005 exit code 10` | Confirmer-Refuse-Klasse (geteilt mit init/remove) |
+
+#### Reihenfolge-Pflicht
+
+R5-LOW-3: Sentinel-Anlage VOR Port-Kommentar-Migration. Sonst
+zeigen die migrierten Kommentare auf nicht-existente Sentinels.
+T2-Commit-Reihenfolge:
+
+1. Neue Bool-Felder in Request-Types ergänzen
+   (`UpRequest.SilenceProgress`, `DownRequest.SilenceConfirmer`).
+2. Neue FS-Sentinels einfügen
+   (`ErrUpFileSystem` + `ErrDownFileSystem` an den oben
+   gepinnten Heim-Positionen).
+3. Port-Kommentar-Co-Migration (vier Stellen `up.go` +
+   eine `down.go:90`).
+4. T2-Commit-Granularität: **ein Commit** für T2 analog
+   remove T2 (`d0c9c5d feat(port): RemoveServiceRequest…`),
+   nicht zwei separate Commits per Subcommand.
 
 ## Out of Scope
 
@@ -758,7 +842,7 @@ Carrier `upStatusData`/`downStatusData`-Vorlauf).
 - **Args-Validator-Pattern-Drift** mit add/init/generate
   (R15-Cross-Slice-1 aus remove): up/down landen VOR der
   Konsolidierung
-  ([`slice-v1-cli-json-envelope-consolidation`](slice-v1-cli-json-envelope-consolidation.md))
+  ([`slice-v1-cli-json-envelope-consolidation`](../open/slice-v1-cli-json-envelope-consolidation.md))
   und übernehmen den heutigen Drift-Status mit — **soweit
   Args-Validator betrifft**: `cobra.NoArgs` (`up.go:63`,
   `down.go:73`), kein positional-Arg-Pfad, kein
@@ -796,7 +880,7 @@ Carrier `upStatusData`/`downStatusData`-Vorlauf).
 
   **Sub-Sequenz-Folge** für envelope-consolidation-Stub
   Update (R3-MED-3 + R3-MED-4): der existierende Stub
-  ([`slice-v1-cli-json-envelope-consolidation`](slice-v1-cli-json-envelope-consolidation.md))
+  ([`slice-v1-cli-json-envelope-consolidation`](../open/slice-v1-cli-json-envelope-consolidation.md))
   beschreibt Pattern-Drift nur für add/init/generate, NICHT
   für up/down. Nach up-down-T5 ist der Sanitizer schon in
   `cli/sanitize.go` extrahiert und up/down nutzt ihn. Drei
@@ -857,7 +941,7 @@ Carrier `upStatusData`/`downStatusData`-Vorlauf).
   [`cli/jsonallowlist.go`](../../../../internal/adapter/driving/cli/jsonallowlist.go)
   Z. 29/74-75.
 - Folge-Slices:
-  [`slice-v1-cli-json-envelope-consolidation`](slice-v1-cli-json-envelope-consolidation.md)
+  [`slice-v1-cli-json-envelope-consolidation`](../open/slice-v1-cli-json-envelope-consolidation.md)
   (R15-Cross-Slice-1 — retroaktive Helper-Extraction, Trigger
   Cluster-Stand 8/9).
 - Phase: V1 (Teil des V1-pünktlichen Cluster-Slices).
