@@ -10,4 +10,4 @@ Dateiname-Konventionen.
 ## Bestand
 
 (zur Zeit leer — slice-v1-cli-json-dry-run-logs ist nach
-`in-progress/` gewandert; T2-Implementation läuft)
+`done/` gewandert; Cluster-Stand 7/9 done, 2/9 offen: `config`, `template`)

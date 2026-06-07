@@ -896,6 +896,105 @@ by construction.
 
 ---
 
+### 6.8 `u-boot logs --json` (slice-v1-cli-json-dry-run-logs, done)
+
+`u-boot logs` ist der siebte Folge-Slice. **Read-only-Klasse** auf
+lokalem FS (analog up-down): weder `--dry-run` noch `--diff` — nur
+`--json` mit typisiertem Data-Carrier. Docker-Daemon-State unverändert
+(`compose logs` ist read-only auf der Daemon-Seite).
+
+- **`u-boot logs --json`** → Minimal+Data-Envelope mit
+  `data: {lines: [string, ...]}`. **`lines` ohne `omitempty`**
+  (Empty-Array-Pin: bei leerem Service-Set wird `"lines":[]`
+  emittiert, NICHT `"lines":null` — Pattern-Erbe up-down's
+  `services []serviceStatus`).
+
+**T0-(a) Single-Envelope + `--follow --json` Reject** (Option (A)):
+Spec-§1841-Konsens (Single-Envelope pro CLI-Call) wird honoriert.
+`--follow` produziert konzeptionell einen Tail-Stream, nicht eine
+beschränkte Antwort — und die NDJSON-Stream-Form ist Cluster-weit
+nicht vorgesehen. Daher wird `--follow --json` in `runLogs` Stage-1
+(VOR jedem UC-Call) mit `cli.ErrFollowJSONNotSupported` →
+`LH-FA-CLI-006/Exit 2` rejected. **Bounded `--tail=N`** ist die
+einzige `--json`-akquisitionsform.
+
+**T0-(i) Validation-Reihenfolge**: bei `--follow --json --tail=-1`
+ist `--follow --json` der dominante Reject-Pfad — die CLI-Stage-1-
+Reihenfolge pinnt Reject-Sentinel VOR Tail-Validation (siehe
+`TestLogsJSON_ValidationOrder_FollowJSONBeatsInvalidTail`). Konsumenten
+können sich darauf verlassen, dass die kombinierte Fehler-Klasse
+immer `LH-FA-CLI-006`/Exit 2 ist, ohne die Reject-Reihenfolge raten zu
+müssen.
+
+**Envelope-Shape**: `command="logs"`, KEIN `subcommand`-Feld. KEIN
+`dryRun`/`diff`/`plannedFiles`/`changes`/`hunks`-Feld (read-only-Klasse).
+
+**`--quiet --json` semantisch identisch zu `--json`**: Cluster-T0-(a)
+doctor-Pattern. `--quiet` darf den JSON-Output NICHT unterdrücken.
+
+**Mapper-Tabelle mit verbindlicher Switch-Order** (T0-(f)) —
+Reihenfolge ist Switch-Sequenz im Mapper-Code (`mapLogsErrorToDiagnostic`):
+
+| # | Sentinel | LH-Code | Exit | Begründung |
+| - | -------- | ------- | ---- | ---------- |
+| 1 | `driving.ErrLogsFileSystem` | `LH-NFA-REL-003` | 14 | FS-first damit Multi-`%w` mit FS+Docker auf FS-Klasse fällt |
+| 2 | `driven.ErrDockerUnavailable` | `LH-NFA-REL-003` | 11 | helper `mapComposeRuntimeSentinel`, Docker-Daemon vor Compose-Runtime |
+| 3 | `driven.ErrComposeRuntime` | `LH-NFA-REL-003` | 12 | helper, Compose-Runtime nach Daemon |
+| 4 | `driving.ErrComposeFileMissing` | `LH-FA-UP-001` | 10 | Fachliche Validierung (Datei-Schema) |
+| 5 | `driving.ErrProjectNotInitialized` | `LH-FA-INIT-001` | 10 | Pattern-Erbe generate (Environment-Operation) |
+| 6 | `domain.ErrInvalidServiceName` | `LH-FA-INIT-006` | 10 | Domain-level service-name Validierung |
+| 7 | `cli.ErrFollowJSONNotSupported` | `LH-FA-CLI-006` | 2 | T0-(a) Reject-Pfad |
+| 8 | `cli.ErrInvalidLogsTail` | `LH-FA-CLI-006` | 2 | CLI-Form-Validierung |
+| 9 | Default (unknown) | `LH-FA-CLI-006` | 1 | Fallback |
+
+**Cross-Slice-Klassen-Pin für `ErrProjectNotInitialized`**: derselbe
+Sentinel mappt auf **`LH-FA-INIT-001`** bei Environment-Subcommands
+(up/down/generate/logs) UND auf **`LH-FA-ADD-001`** bei Service-
+Subcommands (add/remove) — bewusste Cluster-Konvention.
+
+**`(code, exitCode)`-Tupel-Disambiguation für Multi-`%w`-Wraps**
+(Pattern-Erbe up-down §6.7): Mapper ist FS-first (Row 1), aber der
+ExitCode-Helper (`cli/cli.go`) checkt Driven-Sentinels ZUERST.
+Beispiel-Tabelle:
+
+| Multi-Wrap | `code` (Mapper) | `exitCode` (Helper) | Interpretation |
+| --- | --- | --- | --- |
+| `%w: %w` mit `ErrLogsFileSystem` + `ErrDockerUnavailable` | `LH-NFA-REL-003` | 11 | FS-Klasse-Signal + Docker-Daemon-Sub |
+| `%w: %w` mit `ErrLogsFileSystem` + `ErrComposeRuntime` | `LH-NFA-REL-003` | 12 | FS-Klasse-Signal + Compose-Runtime-Sub |
+
+Konsumenten MÜSSEN auf `(code, exitCode)`-Tupel filtern. Heute existiert
+kein realer Code-Pfad der diese Sentinel-Paare chained (`Exists()`
+failed VOR `ComposeLogs`) — Defense-only-Pin
+(`TestLogsJSON_MultiWrap_FSAndDocker_SwitchOrderFSFirst_ByDesign`)
+gegen künftige Multi-Wrap-Konstruktionen.
+
+**Path-Leak-Defense**: `runLogs` wrappt UC-Errors mit
+`sanitizeBaseDir(err, cwd)` vor `reportError` (Pattern-Erbe up-down).
+
+**Bekannte Limitationen**:
+
+- **`--follow --json` Reject**: konsequent inkompatibel, kein
+  künftiger Streaming-Pfad geplant. Konsumenten die einen Tail-Stream
+  brauchen müssen Human-Mode benutzen oder direkt `docker compose
+  logs --follow` aufrufen.
+- **`--tail=all`-Buffer-Caveat** (Pre-T6-Review MED-3): bei sehr großen
+  Log-Volumina hält `--tail=all` die komplette Antwort vor dem JSON-
+  Emit im Speicher. Konsumenten mit Mehr-GB-Logs sollten ein endliches
+  `--tail=N` setzen. Eine Streaming-Form ist Cluster-weit nicht
+  vorgesehen (siehe T0-(a) Reject-Entscheidung).
+- **CRLF-Edge-Case** (Pre-T8-Bestätigungsrunde LOW-2): `splitLogLines`
+  splittet nur auf `\n`. Bei einem hypothetischen CRLF-terminierten
+  Compose-Output (Windows-Edge-Case) trügen alle `lines[i]` ein
+  trailing `\r`. Heute kein bekannter Konsument-Pfad — Compose-CLI
+  emittiert auf allen Plattformen `\n`. Falls je relevant: Folge-Slice
+  ergänzt explizites `\r\n`-Handling.
+
+**Concurrency**: kein `logsMu`. `JSON` und `Quiet` sind Bool-Felder im
+`logsFlags`; der Reject-Pfad und der Acquisition-Pfad sind reine
+Funktionsaufrufe ohne State-Mutation. Race-frei by construction.
+
+---
+
 ## 7. Mutations-Matrix pro Subcommand
 
 Drift-Anker für den Cluster-Folge-Slice-Block (T0-(f)): jeder
@@ -915,13 +1014,15 @@ in derselben PR ergänzen.
 | `remove` (slice-v1-cli-json-dry-run-remove) | ✓ (managed-block strip auf `compose.yaml` + `.env.example` + `enabled: false` auf `u-boot.yaml`) | — | — | — | — | ✓ (Catalog-`extraFiles`, optional) | — | — |
 | `up` (slice-v1-cli-json-dry-run-up-down) | — | — | — | — | — | — | — | — |
 | `down` (slice-v1-cli-json-dry-run-up-down) | — | — | — | — | — | — | — | — |
+| `logs` (slice-v1-cli-json-dry-run-logs) | — | — | — | — | — | — | — | — |
 
 Andere modifying-Subcommands (`config set`) ergänzen ihre Zeile
 im jeweiligen Slice — heute `doctor`, `add`, `init`, `generate`,
-`remove`, `up` und `down` migriert. `up`/`down` sind read-only
-auf lokalem FS (nur `ReadFile(compose.yaml)` + `Exists`-Pre-
-Checks); die Docker-Daemon-Mutationen passieren durch den
-`DockerEngine`-Adapter ausserhalb dieser Matrix.
+`remove`, `up`, `down` und `logs` migriert. `up`/`down`/`logs` sind
+read-only auf lokalem FS (nur `Exists`-Pre-Checks; bei `logs`
+zusätzlich kein `ReadFile`, weil `compose logs` direkt gegen die
+Docker-Daemon-Schicht läuft); die Docker-Daemon-Reads/-Mutationen
+passieren durch den `DockerEngine`-Adapter ausserhalb dieser Matrix.
 
 ---
 

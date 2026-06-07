@@ -13,6 +13,81 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- `feat(cli): u-boot logs --json (LH-FA-CLI-007 /
+  LH-NFA-USE-004 / LH-FA-CLI-006)` — siebter Folge-Slice
+  (7/9) des Cluster-Slice `slice-v1-cli-json-dry-run`.
+  **Read-only-Klasse** auf lokalem FS (analog up-down):
+  weder `--dry-run` noch `--diff` — nur `--json` mit
+  typisiertem Data-Carrier. **`logsStatusData.lines []string`
+  ohne omitempty** (Empty-Array-Pin: `[]`, NICHT `null`,
+  Pattern-Erbe up-down's `services []serviceStatus` ohne
+  omitempty). **T0-(a) Single-Envelope + `--follow --json`
+  Reject** (Option (A)): Spec-§1841-Konsens (Single-Envelope
+  pro CLI-Call) wird honoriert; `--follow --json` ist
+  inkompatibel und wird in `runLogs` Stage-1 (vor UC-Call)
+  mit neuem `ErrFollowJSONNotSupported` → `LH-FA-CLI-006/
+  Exit 2` rejected — bounded `--tail=N`-Pfad ist die
+  einzige Akquisitions-Form. **T0-(i) Validation-Order**:
+  `--follow --json` schlägt `--tail=-1`; CLI-Stage-1
+  reihenfolge pinnt Reject-Sentinel VOR Tail-Validation
+  (`TestLogsJSON_ValidationOrder_FollowJSONBeatsInvalidTail`
+  Pin). **Neuer FS-Sentinel** `driving.ErrLogsFileSystem`
+  mit Read-spezifischer Message-Form (`"logs: filesystem
+  read failed"`, Pattern-Erbe up-down). T3 wrapt zwei
+  FS-Read-Stellen (`logsservice.go:117/137` —
+  `checkProjectInitialized` + `checkComposeFile`) auf
+  Multi-`%w` (`fmt.Errorf("logs service: Exists(%q): %w: %w",
+  path, driving.ErrLogsFileSystem, err)`). **Mapper-Tabelle
+  mit 9 Rows** (T0-(f)): Row 1 FS-Sentinel-first (LH-NFA-REL-
+  003/Exit 14), Rows 2-3 shared `mapComposeRuntimeSentinel`-
+  Helper (Docker/ComposeRuntime → LH-NFA-REL-003), Row 4
+  shared `ErrComposeFileMissing` (LH-FA-UP-001/Exit 10),
+  Row 5 cross-cutting `ErrProjectNotInitialized` (LH-FA-INIT-
+  001/Exit 10, Pattern-Erbe generate als Environment-
+  Operation), Row 6 domain-level `ErrInvalidServiceName`
+  (LH-FA-INIT-006/Exit 10), Row 7 logs-only
+  `ErrFollowJSONNotSupported` (LH-FA-CLI-006/Exit 2 — T0-(a)
+  Reject-Pfad), Row 8 logs-only `ErrInvalidLogsTail`
+  (LH-FA-CLI-006/Exit 2), Row 9 Default LH-FA-CLI-006/Exit 1.
+  **Switch-Order-FS-first-Defense** (Pattern-Erbe up-down
+  R2-HIGH-2 / R3-HIGH-1) via `TestLogsJSON_MultiWrap_
+  FSAndDocker_SwitchOrderFSFirst_ByDesign`-Pin — synthetische
+  FS+Docker-Chain → `diagnostics[0].code = LH-NFA-REL-003`
+  (FS-Klasse, Mapper-FS-first), `exitCode = 11` (Docker-
+  Sub-Klasse, ExitCode-Helper-Driven-first); **`(code,
+  exitCode)`-Tupel-Disambiguation** per `cli-json-output.md
+  §6.7` ist der Vertrag (Pattern-Erbe up-down T8).
+  **`baseDirSanitizedError`-Wiederverwendung**: `runLogs`
+  wrappt UC-Errors mit `sanitizeBaseDir(err, cwd)` vor
+  `reportError` (Path-Leak-Defense, Pattern-Erbe up-down
+  T5). **`runLogs(ctx, stdout, errOut io.Writer, args,
+  flags, uc, getwd)`-Signatur** Cluster-konsistent mit
+  up/down/remove (errOut für strukturierte Pfade reserviert,
+  heute `_ = errOut`-Stub). **`logsFlags{Follow, Tail,
+  Service, JSON, Quiet}`** mit neuen `JSON`/`Quiet`-Boolean-
+  Feldern und `IsValid()`-Builder (Pattern-Erbe up's
+  `upFlags`). **Cluster-Allowlist** erweitert
+  (`jsonallowlist.go`): `"u-boot logs": true`; Reject-Liste
+  von 5 → 4 (`config bare/get/set`, `template bare` bleiben).
+  **`cli.isFilesystemError`** erweitert um
+  `driving.ErrLogsFileSystem` → Exit 14;
+  **`cli.isUsageError`** erweitert um
+  `cli.ErrFollowJSONNotSupported` → Exit 2 (`cli.go`).
+  **15 Acceptance-Pins** (`logs_acceptance_test.go`):
+  T0-(a)/T0-(i)/T0-(j)(ii) verbatim, 9 Mapper-Coverage-
+  Pins, Empty-Array-Pin, Trailing-Newline-Strip-Pin, Path-
+  Leak-Sanitizer-Pin, FS+Docker-Switch-Order-Defense-Pin.
+  Pre-T6-Review: HIGH=0, MED=4, LOW=6 (T7 fixte MED-1 +
+  LOW-5; MED-3 → §6.8-Doku-Pflicht hier eingelöst).
+  Pre-T8-Bestätigungsrunde: HIGH=0, MED=2, LOW=2 (MED-1
+  Mapper-Kommentar-Drift + MED-2 Defense-Pin + LOW-1 Plan-
+  Drift in `ba7d06f` gefixt; LOW-2 CRLF-Lücke in §6.8 als
+  bekannte Limitation dokumentiert). **Vier neue
+  open/-Stubs** (T6 R2-LOW): `slice-v1-logs-format-flags`,
+  `slice-v1-logs-multi-service-filter`, `slice-v1-logs-
+  time-range-filter`. `[ba7d06f, b502cd5, 343e622, 69cfc0d,
+  c21ba28, 0fe74e4]`.
+
 - `feat(cli): u-boot up --json / u-boot down --json
   (LH-FA-CLI-007 / LH-NFA-USE-004 / LH-FA-UP-001/003/004 /
   LH-FA-CLI-005A)` — sechster Folge-Slice (6/9) des Cluster-

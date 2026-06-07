@@ -1,15 +1,33 @@
-# Slice V1: `logs --json` — Streaming-Output mit Modell-Entscheidung
+# Slice V1: `logs --json` — Single-Envelope (T0-(a) Option (A))
 
-> **Status:** `open/`. Siebter Folge-Slice (7/9) des Cluster-Slice
+> **Status:** **done** (2026-06-07). Siebter Folge-Slice (7/9) des
+> Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
-> (T0-(e) Reihenfolge 7/9). **Read-only-Klasse** mit Streaming-
-> Vertrag: weder `--dry-run` noch `--diff` (Cluster-Slice
-> Z. 464-467); zentrale Sub-Decision ist das **Output-Modell**
-> für `--json` (JSON-Lines vs. Single-Envelope) — Cluster-Plan
-> Z. 326-329 hat diese explizit hierher ausgelagert.
+> (T0-(e) Reihenfolge 7/9). **Read-only-Klasse** auf lokalem FS
+> (analog up-down): weder `--dry-run` noch `--diff` (Cluster-Slice
+> Z. 464-467); T0-(a) festgezurrt auf **Option (A) Single-Envelope
+> + `--follow --json` Reject** (Spec-§1841-Konsens). NDJSON-
+> Stream-Form Cluster-weit nicht vorgesehen.
+>
+> **DoD-Tranchen-Hashes** (alle T0-T8 + Review-Runden):
+>
+> | Tranche / Round | Inhalt | Commit |
+> | --- | --- | --- |
+> | T0 — Stub | Discovery-Stub für 7/9 logs in `open/` | `744b578` |
+> | T0 — R1 | adversarialer Stub-Review (4 HIGH + 6 MED + 4 LOW + LOC) | `7ca309d` |
+> | T0 — R2 | adversarialer Stub-Review (3 HIGH + 5 MED + 3 LOW) + 3 open/-Stubs für Folge-Slices | `f156a76` |
+> | T0 — R3 | adversarialer Stub-Review + T0-(a) auf Option (A) festgezurrt + Lifecycle `open/`→`next/` | `eee12b8` |
+> | T2 | Port-Types (`logsFlags.JSON`, `logsFlags.Quiet`, `ErrLogsFileSystem`-Sentinel) + Lifecycle `next/`→`in-progress/` | `0fe74e4` |
+> | T3 | Application-Layer (Multi-`%w`-Wrap an zwei FS-Read-Stellen `logsservice.go:117/137`) | `c21ba28` |
+> | T4 | entfällt wie geplant — Composition-Root unverändert | — |
+> | T5 | CLI-RunE-Refactor + `mapLogsErrorToDiagnostic` + `ErrFollowJSONNotSupported`-Reject-Sentinel + Allowlist-Migration + `isFilesystemError`/`isUsageError`-Co-Migration | `69cfc0d` |
+> | T6 | 14 CLI-Acceptance-Tests (T0-(a)/(i)/(j)(ii) Pins + Mapper-Coverage-Rows + Empty-Array + Sanitizer + Trailing-Newline-Strip) | `343e622` |
+> | T7 | Pre-T8-Plan-Edits (MED-1 Mapper-Row 7 + LOW-5 T2-Cell-Wortlaut) | `b502cd5` |
+> | T7 — T8-Bestätigungsrunde | R15-äquivalente Post-T7-Verifikation (0 HIGH + 2 MED + 2 LOW): Mapper-Kommentar-Drift + 15. Test (FS+Docker-Switch-Order-Defense-Pin) + Plan-AK-Cell-Drift | `ba7d06f` |
+> | T8 — Closure | CHANGELOG + `cli-json-output.md` §6.8/§7 + roadmap done-Zähler 6→7 + 4 carveouts-Einträge (3 logs-open-Stubs + CRLF-Limitation) + done/-Move | dieser Commit |
 >
 > Erbt Read-only-Klassen-Disziplin aus
-> [`slice-v1-cli-json-dry-run-up-down`](../done/slice-v1-cli-json-dry-run-up-down.md)
+> [`slice-v1-cli-json-dry-run-up-down`](slice-v1-cli-json-dry-run-up-down.md)
 > (kein PreviewMode, kein RecordingFileSystem, kein
 > `--dry-run`/`--diff`). Erbt `cli/sanitize.go`-Helper
 > (Pfad-Leak-Defense) und `cli/composesentinel.go`-Mapper-
@@ -577,12 +595,12 @@ Closure nachgezogen.
   [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
   (Folge-Slice 7/9).
 - Pattern-Vorbilder:
-  [`slice-v1-cli-json-dry-run-up-down`](../done/slice-v1-cli-json-dry-run-up-down.md)
+  [`slice-v1-cli-json-dry-run-up-down`](slice-v1-cli-json-dry-run-up-down.md)
   (Read-only-Klassen-Disziplin + FS-Sentinel-Pattern +
   Sanitizer-Helper-Quelle + ComposeRuntime-Helper-Quelle),
-  [`slice-v1-cli-json-dry-run-remove`](../done/slice-v1-cli-json-dry-run-remove.md)
+  [`slice-v1-cli-json-dry-run-remove`](slice-v1-cli-json-dry-run-remove.md)
   (`reportError`-Helper-Form für Pre-UC-Validation),
-  [`slice-v1-logs`](../done/slice-v1-logs.md) (M6-Logs-Auslieferung
+  [`slice-v1-logs`](slice-v1-logs.md) (M6-Logs-Auslieferung
   mit T0-Outcomes — der `--json`-Pfad ist bewusst hierher
   ausgelagert worden).
 - Code-Anker:
