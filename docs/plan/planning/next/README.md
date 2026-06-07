@@ -6,3 +6,9 @@ sind ausgereift genug, um in `in-progress/` übernommen zu werden.
 Übergang nach `in-progress/` per `git mv`, sobald die Arbeit beginnt.
 Siehe `docs/plan/planning/README.md` für Lifecycle und
 Dateiname-Konventionen.
+
+## Bestand
+
+| Datei | Gegenstand |
+| ----- | ---------- |
+| [`slice-v1-cli-json-dry-run-logs.md`](slice-v1-cli-json-dry-run-logs.md) | Folge-Slice 7/9 des Cluster-Slice `slice-v1-cli-json-dry-run`: `logs --json` Streaming-Output |
