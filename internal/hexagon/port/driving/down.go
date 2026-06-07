@@ -65,6 +65,19 @@ type DownRequest struct {
 	// stream (per LH-NFA-PERF-002). The CLI adapter wires this to
 	// `os.Stderr`; `nil` is treated as `io.Discard`.
 	ProgressSink io.Writer
+
+	// SilenceConfirmer switches the destructive-confirmation gate
+	// into refuse-by-default mode for the duration of this request
+	// (slice-v1-cli-json-dry-run-up-down T0-(d) form (b) request-time
+	// gate-branch). When `true` AND the request hits the truth-table
+	// row 4 (`--volumes` set, !AssumeYes, !NonInteractive), the use
+	// case substitutes a no-op confirmer that returns `(false, nil)`,
+	// so the gate routes through [ErrConfirmationRequired] without
+	// prompting on stdin. The CLI adapter sets this to `true` when
+	// `--json` is active, so JSON consumers never see an interactive
+	// prompt and must opt in via `--yes`. Pattern is symmetric to
+	// [RemoveServiceRequest.SilenceConfirmer].
+	SilenceConfirmer bool
 }
 
 // DownResponse is the output of [DownUseCase.Down]. The CLI adapter
@@ -84,11 +97,30 @@ type DownResponse struct {
 	RemovedVolumes bool
 }
 
+// ErrDownFileSystem signals that the down use case hit a raw
+// filesystem error during the read-only phase that loads
+// `u-boot.yaml` / `compose.yaml` (slice-v1-cli-json-dry-run-up-down
+// T2 / T0-(d) inherited from remove's ErrRemoveFileSystem; up/down
+// read-only so the message form is "read failed", not "mutation
+// failed"). T3 wraps the FS-Read Stellen in downservice.go
+// (Z. 81, 97) with multi-`%w`-form (Go 1.20+):
+//
+//	`fmt.Errorf("down service: <action>(%q): %w: %w", path,
+//	            ErrDownFileSystem, rawErr)`
+//
+// Switch-Order in `mapDownErrorToDiagnostic` (T0-(e)) MUST check
+// ErrDownFileSystem FIRST so multi-`%w` chains that include both
+// ErrDownFileSystem AND a fachlich sentinel route to the FS-class
+// (LH-NFA-REL-003 / exit 14), not the fachlich-class. Maps to
+// LH-NFA-REL-003 exit code 14 via cli's `isFilesystemError`.
+var ErrDownFileSystem = errors.New("down: filesystem read failed")
+
 // ErrConfirmationRequired signals the destructive-confirmation
 // abort path from LH-FA-CLI-005A §254 — `u-boot down --volumes` in
 // non-interactive mode without `--yes`, or with an interactive
-// confirmer that returned `(false, nil)`. Maps to LH-FA-CLI-006
-// exit code 10 (fachliche Validierung).
+// confirmer that returned `(false, nil)`. Maps to LH-FA-INIT-005
+// exit code 10 (fachliche Validierung; shared with init/remove
+// confirmation-required path).
 //
 // Distinct from the §235 root-level exclusivity error (`--yes` AND
 // `--no-interactive` set simultaneously → exit code 2): the

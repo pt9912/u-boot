@@ -47,10 +47,20 @@ type UpRequest struct {
 	// `DockerEngine.ComposeUp` adapter so the Compose stderr stream
 	// (pull/create/start/healthcheck phases per LH-NFA-PERF-002)
 	// reaches the user. The CLI adapter wires this to `os.Stderr`;
-	// `nil` is treated as `io.Discard` by the application service.
+	// `nil` is treated as `io.Discard`.
 	// `--quiet` does **not** silence this stream — see the M6 slice
 	// for the rationale.
 	ProgressSink io.Writer
+
+	// SilenceProgress switches the application-layer ProgressSink to
+	// `io.Discard` for the duration of this request, so the Compose
+	// stderr stream does not pollute machine-consumable output
+	// (slice-v1-cli-json-dry-run-up-down T0-(c) form (d)). The CLI
+	// adapter sets this to `true` when `--json` is active. Pattern is
+	// symmetric to [RemoveServiceRequest.SilenceConfirmer]: a boolean
+	// request flag that lets the use case branch internally without
+	// the CLI having to know about `io.Discard`.
+	SilenceProgress bool
 }
 
 // UpResponse is the output of [UpUseCase.Up]. The CLI adapter (T6)
@@ -62,6 +72,14 @@ type UpResponse struct {
 	// `--timeout=0` fire-and-forget shape (Services=nil,
 	// Stabilized=false, Diagnostics carrying a single info entry).
 	Result domain.UpResult
+
+	// Warnings carries soft-warning diagnostics the use case wants the
+	// CLI adapter to surface via the JSON envelope's `diagnostics[]`
+	// array (slice-v1-cli-json-dry-run-up-down T2 — type inherited
+	// from remove T2 cluster-vorlauf R12-LOW-F4). Empty / nil on the
+	// happy path; populated when recreate-detection (T0-(k) follow-up
+	// slice) or future read-side WARN paths land.
+	Warnings []WarningEntry
 }
 
 // All Up sentinels below live in the `driving` package (not in
@@ -79,6 +97,24 @@ type UpResponse struct {
 // original sentinel identity and make exit code 11 unreachable
 // from `errors.Is` at the CLI.
 
+// ErrUpFileSystem signals that the up use case hit a raw filesystem
+// error during the read-only phase that loads `u-boot.yaml` /
+// `compose.yaml` (slice-v1-cli-json-dry-run-up-down T2 / T0-(d)
+// inherited from remove's ErrRemoveFileSystem; up/down read-only
+// so the message form is "read failed", not "mutation failed").
+// T3 wraps the FS-Read Stellen in upservice.go (Z. 105, 138, 148)
+// with multi-`%w`-form (Go 1.20+):
+//
+//	`fmt.Errorf("up service: <action>(%q): %w: %w", path,
+//	            ErrUpFileSystem, rawErr)`
+//
+// Switch-Order in `mapUpErrorToDiagnostic` (T0-(e)) MUST check
+// ErrUpFileSystem FIRST so multi-`%w` chains that include both
+// ErrUpFileSystem AND a fachlich sentinel route to the FS-class
+// (LH-NFA-REL-003 / exit 14), not the fachlich-class. Maps to
+// LH-NFA-REL-003 exit code 14 via cli's `isFilesystemError`.
+var ErrUpFileSystem = errors.New("up: filesystem read failed")
+
 // ErrComposeFileMissing signals that `BaseDir` contains a
 // `u-boot.yaml` (passes the [ErrProjectNotInitialized] gate) but no
 // `compose.yaml` — the file the engine would feed to
@@ -86,14 +122,14 @@ type UpResponse struct {
 // because the user message and repair path differ: missing
 // `u-boot.yaml` → "run `u-boot init`"; missing `compose.yaml` →
 // "compose file was deleted, restore it or re-init". Maps to
-// LH-FA-CLI-006 exit code 10 (fachliche Validierung).
+// LH-FA-UP-001 exit code 10 (fachliche Validierung).
 var ErrComposeFileMissing = errors.New("compose file missing")
 
 // ErrStabilizationTimeout signals that the polling loop reached the
 // [UpRequest.Timeout] bound without classifying every service as
 // [domain.OutcomeStabilized]. The wrapped error carries the list of
 // services still pending so the CLI can render the offending names.
-// Maps to LH-FA-CLI-006 exit code 12 (fachlicher Ausführungsfehler).
+// Maps to LH-FA-UP-001 exit code 12 (fachlicher Ausführungsfehler).
 //
 // Distinct from `driven.ErrComposeRuntime` (T2) even though both
 // map to exit code 12: the timeout is u-boot's own polling-loop
