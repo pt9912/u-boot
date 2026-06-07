@@ -424,7 +424,16 @@ func isFilesystemError(err error) bool {
 		// (T0-(e) R3-HIGH-1) so synthetic multi-`%w`-wraps with
 		// FS+Docker fall to FS+exit-14, not Docker+exit-11.
 		errors.Is(err, driving.ErrUpFileSystem) ||
-		errors.Is(err, driving.ErrDownFileSystem)
+		errors.Is(err, driving.ErrDownFileSystem) ||
+		// slice-v1-cli-json-dry-run-logs T2/T3: ErrLogsFileSystem
+		// wraps raw os.fs.Exists errors in logsservice.go (2 FS-Read-
+		// Wrap-Stellen: checkProjectInitialized + checkComposeFile)
+		// so logs FS-read failures map to LH-NFA-REL-003 / exit-code
+		// 14, not the default "1". Switch-Order in
+		// mapLogsErrorToDiagnostic checks the FS-Sentinel FIRST
+		// (T0-(e) R3-HIGH-1) so synthetic multi-`%w`-wraps with
+		// FS+Docker fall to FS+exit-14, not Docker+exit-11.
+		errors.Is(err, driving.ErrLogsFileSystem)
 }
 
 // isUsageError detects two distinct classes of usage-level errors:
@@ -459,6 +468,7 @@ func isUsageError(err error) bool {
 	// [isValidationError].
 	if errors.Is(err, ErrConflictingModeFlags) || errors.Is(err, ErrInvalidTimeout) ||
 		errors.Is(err, ErrInvalidLogsTail) ||
+		errors.Is(err, ErrFollowJSONNotSupported) ||
 		errors.Is(err, ErrJSONNotImplemented) ||
 		errors.Is(err, ErrServiceNameMissing) ||
 		errors.Is(err, driving.ErrArtifactUnknown) ||

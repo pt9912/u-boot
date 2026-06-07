@@ -1,10 +1,12 @@
 package cli
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -35,17 +37,21 @@ type logsFlags struct {
 	Tail string
 
 	// JSON read-through from the App's persistent root flag
-	// (slice-v1-cli-json-dry-run-logs T0-(j)(ii)). T5 routes via
-	// the JSON-Mode envelope path; at T2 the field is populated
-	// by the Cobra closure for downstream consumers.
+	// (slice-v1-cli-json-dry-run-logs T0-(j)(ii)). When true,
+	// runLogs routes via the Single-Envelope JSON path (T0-(a)
+	// Option (A) festgezurrt): `--follow --json` is rejected with
+	// [ErrFollowJSONNotSupported] / Exit 2 before the use case
+	// runs; bounded-output (`--tail=N --json` or `--json` without
+	// `--follow`) buffers the Compose-Stream and emits a
+	// Minimal+Data envelope with `data.lines []string`.
 	JSON bool
 
 	// Quiet read-through from the App's persistent root flag.
 	// Today logs streams Compose-Output to OutputSink directly and
 	// `--quiet` does not silence it (Status-quo from
-	// slice-v1-logs). T2 adds the field for T5 to consume — in
-	// JSON mode `--quiet` is a no-op (Cluster-T0-(a) doctor-Pattern:
-	// `--quiet --json` is semantically identical to `--json`).
+	// slice-v1-logs). In JSON mode `--quiet` is a no-op
+	// (Cluster-T0-(a) doctor-Pattern: `--quiet --json` is
+	// semantically identical to `--json`).
 	Quiet bool
 }
 
@@ -56,6 +62,30 @@ type logsFlags struct {
 // application service. Lives in the cli package because the
 // LH-FA-CLI-006 mapping to exit code 2 is a CLI concern.
 var ErrInvalidLogsTail = errors.New("--tail must be a non-negative integer")
+
+// ErrFollowJSONNotSupported is returned by `u-boot logs --follow
+// --json` (slice-v1-cli-json-dry-run-logs T0-(a) Option (A)
+// festgezurrt): the unbounded streaming use case cannot be
+// reconciled with the LH-NFA-USE-004 §1841 Single-Envelope-pro-
+// Aufruf-Vertrag. Konsumenten die strukturiert streamen wollen
+// können `--tail=N --json` für Bounded-Snapshots nutzen ODER
+// einen Folge-Slice mit NDJSON-Carveout abwarten. Maps to Exit-
+// Code 2 (LH-FA-CLI-006-Klasse) via [isUsageError].
+var ErrFollowJSONNotSupported = errors.New("--follow is not supported with --json (use --tail=N --json for bounded snapshots)")
+
+// logsStatusData is the typed `data` carrier for the `--json`
+// envelope of `u-boot logs` (slice-v1-cli-json-dry-run-logs T5,
+// T0-(a) Option (A)). Compose-Output wird im CLI-Layer in einen
+// bytes.Buffer gepuffert; nach UC-Return wird der Buffer per
+// Newline gesplittet und in `data.lines` serialisiert.
+//
+// **Lines: NO omitempty** — leerer Stream MUSS als `[]`
+// serialisieren, nicht `null`. CLI-Layer initialisiert nil-Slice
+// mit `[]string{}` bevor er das Envelope baut. Pattern-Erbe
+// up-down T0-(j) Empty-Array-Pin.
+type logsStatusData struct {
+	Lines []string `json:"lines"`
+}
 
 // newLogsCommand builds the `u-boot logs [service]` Cobra
 // subcommand (LH-FA-UP-005). Slice-v1-logs §AK contract:
@@ -74,7 +104,12 @@ var ErrInvalidLogsTail = errors.New("--tail must be a non-negative integer")
 //
 // Output: Compose-Default (with service-prefix, without
 // timestamps). The CLI writes Compose stdout/stderr through the
-// application service's OutputSink to `cmd.OutOrStdout()`.
+// application service's OutputSink to `cmd.OutOrStdout()` in
+// Human-Mode. In `--json` mode (slice-v1-cli-json-dry-run-logs T5,
+// T0-(a) Option (A)) the Compose-Stream is buffered and emitted as
+// a Minimal+Data envelope after UC-Return; `--follow --json` is
+// rejected with [ErrFollowJSONNotSupported] / Exit 2 before the
+// use case runs.
 func newLogsCommand(a *App) *cobra.Command {
 	flags := &logsFlags{}
 	cmd := &cobra.Command{
@@ -90,6 +125,8 @@ Compose runtime error path.
 
 Flags:
   --follow         stream until Ctrl-C (LH-FA-UP-005); SIGINT exits 0.
+                   NOT supported with --json (use --tail=N --json
+                   for bounded snapshots).
   --tail <n>       show only the last n lines per service. Default
                    shows all lines (Compose-Default). Negative or
                    non-numeric inputs ⇒ exit 2.
@@ -97,19 +134,19 @@ Flags:
 LH-FA-CLI-006 exit codes:
   - 0   success (incl. --follow terminated by SIGINT)
   - 2   --tail with invalid value, or malformed CLI usage
+        (--follow --json combo also returns exit 2)
   - 10  no u-boot.yaml / compose.yaml; or invalid service name
         (regex-only, per T0-(b))
   - 11  Docker daemon unreachable / compose plugin missing
-  - 12  Compose runtime failure (unknown service at runtime, etc.)`,
+  - 12  Compose runtime failure (unknown service at runtime, etc.)
+  - 14  filesystem read failure (u-boot.yaml / compose.yaml)`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// JSON/Quiet read-through from the App's persistent
-			// root flags (slice-v1-cli-json-dry-run-logs T2).
-			// T5 will consume these via mapLogsErrorToDiagnostic
-			// and the --follow --json reject path.
+			// root flags (slice-v1-cli-json-dry-run-logs T2/T5).
 			flags.JSON = a.json
 			flags.Quiet = a.quiet
-			return runLogs(cmd.Context(), cmd.OutOrStdout(), args, *flags, a.logsUseCase, a.getwd)
+			return runLogs(cmd.Context(), cmd.OutOrStdout(), cmd.ErrOrStderr(), args, *flags, a.logsUseCase, a.getwd)
 		},
 	}
 	cmd.Flags().BoolVar(&flags.Follow, "follow", false,
@@ -123,45 +160,184 @@ LH-FA-CLI-006 exit codes:
 // the positional service argument and the --tail flag, then
 // delegates to the LogsUseCase.
 //
-// Slice-v1-logs §AK pinned the validation order:
+// Slice-v1-logs §AK pinned the validation order, extended by
+// slice-v1-cli-json-dry-run-logs T5 with JSON-Mode-Reject and
+// envelope-error-emission via [reportError]:
 //
-//  1. --tail Stage-1 validation (Exit-Code 2 on invalid).
-//  2. Service-name format validation via [domain.NewServiceName]
+//  1. --follow --json combo Reject (Exit-Code 2 via
+//     [ErrFollowJSONNotSupported]) — slice-v1-cli-json-dry-run-logs
+//     T0-(a) Option (A) festgezurrt.
+//  2. --tail Stage-1 validation (Exit-Code 2 on invalid).
+//  3. Service-name format validation via [domain.NewServiceName]
 //     (Exit-Code 10 via isServiceValidationError on regex failure).
 //     Skipped when no positional argument is given.
-//  3. Working-directory probe → BaseDir.
-//  4. Use-Case dispatch.
+//  4. Working-directory probe → BaseDir.
+//  5. Use-Case dispatch. In Human-Mode the Compose-Stream goes
+//     straight to stdout; in JSON-Mode it is buffered for the
+//     Minimal+Data envelope after UC-Return.
+//
+// Error path: errors flow through [reportError] with
+// [sanitizeBaseDir] applied to keep absolute filesystem paths out
+// of diagnostic.message (cluster-weite Path-Leak-Defense via
+// `cli/sanitize.go` — Helper aus up-down T5). `data` is nil on the
+// error path (interface-nil, NOT zero-value-struct, otherwise
+// `lines: null` would break the empty-array-pin).
 func runLogs(
 	ctx context.Context,
-	out io.Writer,
+	stdout, errOut io.Writer,
 	args []string,
 	flags logsFlags,
 	uc driving.LogsUseCase,
 	getwd func() (string, error),
 ) error {
-	if err := validateLogsTailFlag(flags.Tail); err != nil {
-		return err
+	mapErr := mapLogsErrorToDiagnostic
+	_ = errOut // human-mode renders straight to stdout; reserved for future stderr-routed diagnostics
+
+	// Pre-UC-Validation 1: --follow + --json reject (T0-(a)
+	// Option (A) festgezurrt).
+	if flags.Follow && flags.JSON {
+		return reportError(stdout, ErrFollowJSONNotSupported, nil, false, false, flags.JSON, "logs", mapErr, nil)
 	}
+
+	// Pre-UC-Validation 2: --tail format.
+	if err := validateLogsTailFlag(flags.Tail); err != nil {
+		return reportError(stdout, err, nil, false, false, flags.JSON, "logs", mapErr, nil)
+	}
+
+	// Pre-UC-Validation 3: positional service name format.
 	var service string
 	if len(args) == 1 {
 		svc, err := domain.NewServiceName(args[0])
 		if err != nil {
-			return err
+			return reportError(stdout, err, nil, false, false, flags.JSON, "logs", mapErr, nil)
 		}
 		service = svc.String()
 	}
+
 	cwd, err := getwd()
 	if err != nil {
-		return fmt.Errorf("determine working directory: %w", err)
+		return reportError(stdout, fmt.Errorf("determine working directory: %w", err), nil, false, false, flags.JSON, "logs", mapErr, nil)
 	}
+
+	// Output sink selection: JSON-Mode buffers, Human-Mode streams
+	// straight to stdout. Buffer-Größe ist proportional zu
+	// --tail × durchschnittliche Zeilenlänge; bei Default
+	// --tail=all der gesamte Compose-Log-Inhalt. Heute kein
+	// expliziter Cap — Konsumenten nutzen typisch --tail=100..1000.
+	var sink io.Writer
+	var buf *bytes.Buffer
+	if flags.JSON {
+		buf = &bytes.Buffer{}
+		sink = buf
+	} else {
+		sink = stdout
+	}
+
 	_, err = uc.Logs(ctx, driving.LogsRequest{
 		BaseDir:    cwd,
 		Service:    service,
 		Follow:     flags.Follow,
 		Tail:       flags.Tail,
-		OutputSink: out,
+		OutputSink: sink,
 	})
-	return err
+	if err != nil {
+		return reportError(stdout, sanitizeBaseDir(err, cwd), nil, false, false, flags.JSON, "logs", mapErr, nil)
+	}
+
+	if flags.JSON {
+		return writeLogsJSON(stdout, buf.Bytes())
+	}
+	return nil
+}
+
+// writeLogsJSON emits the success-path Minimal+Data envelope.
+// Compose-Output wird per Newline gesplittet und in
+// `data.lines []string` serialisiert. Empty-Array-Pin: nil/empty
+// Buffer wird zu `[]string{}` initialisiert damit `lines: []`
+// (nicht `null`) im JSON erscheint (Cluster-Pattern aus up-down
+// T0-(j) R5-LOW-3).
+//
+// Trailing-Newline-Handling: ein leerer letzter Token von
+// strings.Split nach `\n`-Split (Buffer endet typisch mit `\n`)
+// wird gestrippt — sonst hätte der letzte Line-Eintrag immer
+// `""` als Wert.
+func writeLogsJSON(out io.Writer, raw []byte) error {
+	lines := splitLogLines(raw)
+	if lines == nil {
+		lines = []string{}
+	}
+	data := logsStatusData{Lines: lines}
+	env := newDataEnvelope("logs", "", data, nil, 0)
+	return writeEnvelope(out, env)
+}
+
+// splitLogLines splits the Compose-output buffer on `\n` and
+// strips a trailing empty token (the buffer usually ends with a
+// newline, which would otherwise produce a phantom empty line).
+func splitLogLines(raw []byte) []string {
+	if len(raw) == 0 {
+		return nil
+	}
+	s := string(raw)
+	s = strings.TrimSuffix(s, "\n")
+	if s == "" {
+		return nil
+	}
+	return strings.Split(s, "\n")
+}
+
+// mapLogsErrorToDiagnostic maps a logs-path error to a
+// [diagnosticItem] with the spec-konforme LH-Kennung per T0-(e)
+// Switch-Order-Pflicht.
+//
+// Switch-Order verbindlich (slice plan T0-(e), R3-HIGH-1
+// Reihenfolge-Pin): FS-Sentinel FIRST (driving.ErrLogsFileSystem)
+// damit ein Multi-`%w`-Wrap mit FS+Docker auf LH-NFA-REL-003/Exit
+// 14 fällt. Danach Docker/Compose-Runtime via shared
+// [mapComposeRuntimeSentinel] helper, dann fachliche Validierung
+// (Compose-File / Project-Init / Service-Name), dann CLI-Form
+// (ErrFollowJSONNotSupported / ErrInvalidLogsTail), dann Default.
+//
+// Cross-Slice-Klassen-Pin (Pattern-Erbe up-down R4-MED-2):
+// `driving.ErrProjectNotInitialized` mappt hier auf
+// `LH-FA-INIT-001` (Pattern-Erbe generate als Environment-
+// Operation, identisch zu up/down).
+//
+// nolint:dupl // Per-Subcommand-Mapper-Pattern: alle Cluster-
+// Mapper teilen Rows 6-7 (ComposeFileMissing + ProjectNotInitialized)
+// und Default — strukturelle Ähnlichkeit ist bewusst (T0-(e)
+// Tabellen-Form), Konsolidierung würde die per-Subcommand-Switch-
+// Order-Klarheit auflösen.
+func mapLogsErrorToDiagnostic(err error) diagnosticItem {
+	switch {
+	// Row 1: FS-class first (Multi-`%w`-defense).
+	case errors.Is(err, driving.ErrLogsFileSystem):
+		return diagnosticItem{Level: "error", Code: "LH-NFA-REL-003", Message: err.Error()}
+	}
+	// Rows 2-3: shared Docker/Compose-runtime via helper.
+	if code, matched := mapComposeRuntimeSentinel(err); matched {
+		return diagnosticItem{Level: "error", Code: code, Message: err.Error()}
+	}
+	switch {
+	// Row 4: shared fachliche Validierung (ComposeFileMissing).
+	case errors.Is(err, driving.ErrComposeFileMissing):
+		return diagnosticItem{Level: "error", Code: "LH-FA-UP-001", Message: err.Error()}
+	// Row 5: cross-cutting project-init (LH-FA-INIT-001, identisch
+	// zu up/down/generate).
+	case errors.Is(err, driving.ErrProjectNotInitialized):
+		return diagnosticItem{Level: "error", Code: "LH-FA-INIT-001", Message: err.Error()}
+	// Row 6: domain-level service-name validation.
+	case errors.Is(err, domain.ErrInvalidServiceName):
+		return diagnosticItem{Level: "error", Code: "LH-FA-INIT-006", Message: err.Error()}
+	// Row 7: logs-only CLI-form follow+json reject.
+	case errors.Is(err, ErrFollowJSONNotSupported):
+		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
+	// Row 8: logs-only CLI-form tail validation.
+	case errors.Is(err, ErrInvalidLogsTail):
+		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
+	default:
+		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
+	}
 }
 
 // validateLogsTailFlag enforces T0-(c) at the CLI Stage-1: empty
