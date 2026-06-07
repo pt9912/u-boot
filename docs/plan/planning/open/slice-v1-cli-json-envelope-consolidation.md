@@ -156,11 +156,22 @@ zu klären:
 - **`template` (9/9)**: read-only Array-Output ohne
   modifying-Args-Validator. Kein Pattern-Drift, deshalb nicht
   Teil dieses Slice.
-- **Confirmer-Swap-Pattern für `--purge`-Gate**: das ist
-  remove-spezifisch (Confirmer ist heute nur im remove-Pfad
-  aktiv). Falls künftige Slices Confirmer brauchen (down --volumes
-  hat einen, ist aber kein modifying-CLI-Subcommand mit
-  `--purge`-Symmetrie), eigener Konsolidierungs-Schritt.
+- **Confirmer-Swap-Pattern für `--purge`-Gate** (Update
+  2026-06-07 nach up-down-Stub R4-MED-3): nach up-down-T2 ist
+  `SilenceConfirmer`-Bool-Pattern in BEIDEN
+  `RemoveServiceRequest` UND `DownRequest` etabliert
+  (identische Form). `down --volumes` nutzt jetzt dasselbe
+  Pattern wie `remove --purge`. Konsolidierungs-Wert für
+  zukünftige Slices: das `SilenceConfirmer`-Bool plus Request-
+  time Gate-Branch ist ein Pattern, kein remove-Spezifikum.
+  Falls künftige Slices weitere Confirmer-Pfade einführen
+  (z. B. `config set` destructive-Reset oder ein
+  hypothetisches `prune`-Subcommand), erben sie die etablierte
+  Bool-Form direkt. **Aktive Konsolidierungs-Pflicht** falls
+  ein dritter Confirmer-Subcommand landet (Trigger-Schwelle):
+  Helper-Heim für die `noopConfirmer{}`-Branch-Logic in einen
+  geteilten `cli`-Sub-Helper (analog `mapComposeRuntimeSentinel`-
+  Pattern für Mappers).
 - **Pattern-Inventur für `LH-FA-ADD-007` Multi-Use**: derselbe
   LH-Code für ERROR + WARN ist heute nur in remove relevant.
   Falls ein zukünftiger Slice analogen Multi-Use einführt,
