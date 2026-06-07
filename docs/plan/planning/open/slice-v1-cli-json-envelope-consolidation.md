@@ -25,8 +25,12 @@ sind. Pre-T7-Code-State im remove-Slice + R15-Cross-Slice-Audit:
 - `u-boot --json add postgres extra` → analog, kein Envelope
   (Spec §1841-Verletzung).
 - `u-boot --dry-run --json add` → Minimal-Envelope statt
-  Voll-Schema (Spec §1842-Verletzung; analog R13-HIGH-1 für
-  remove).
+  Voll-Schema (Spec §1842-Verletzung, `LH-FA-CLI-007`-Vertrag;
+  analog R13-HIGH-1 für remove).
+- `u-boot --diff --json add` → analog, Minimal-Envelope statt
+  Voll-Schema mit Hunks (`LH-FA-CLI-008` §451-489-Verletzung).
+  Defense-Symmetrie zum `--dry-run`-Pfad: Validator MUSS auch
+  `--diff` lesen und Voll-Schema-Wahl pinnen.
 
 Generate hat dasselbe Pattern an `cli/generate.go:78`. Init
 nutzt `cobra.MaximumNArgs(1)` mit interner Logik die zumindest
@@ -69,17 +73,28 @@ Helper (R15-LOW-1 robust gegen Substring-Kollisionen wie
 
 Plan-Stub bleibt `on hold` bis einer der folgenden Trigger feuert:
 
-- **Cluster-Stand 7/9 oder 8/9 erreicht**: die Konsolidierung
-  lohnt sich erst wenn alle modifying-Subcommands JSON-Envelopes
-  tragen — sonst verliert die Helper-Extraktion an Konsumenten.
-  Up-down (6/9) + Config (8/9) sind die nächsten Folge-Slices,
-  die das Pattern erben — wenn die ohne Konsolidierung landen,
-  vergrößert sich der Refactoring-Druck.
+- **Cluster-Stand 8/9 erreicht** (config done): erst dann tragen
+  ALLE modifying-Subcommands (add/init/generate/remove/up-down/
+  logs/config) JSON-Envelopes, und die Helper-Extraktion lohnt
+  sich gegen das vollständige Konsumenten-Set. **Cluster-
+  Reihenfolge** (`slice-v1-cli-json-dry-run.md` §Per-Command-
+  Folge-Slices): 6 up-down, 7 logs, 8 config, 9 template
+  (template ist read-only Array-Output, kein Args-Validator-
+  Pattern-Drift). Up-down (6/9) + logs (7/9) **erben** den
+  Pattern-Drift, weil sie nach diesem Stub landen (Konsolidierung
+  ist post-hoc, keine Pre-Pattern-Vorlage). Der Slice ist deshalb
+  **retroaktive Konsolidierung** für alle dann existierenden
+  Subcommands — nicht ein "von Anfang an erben"-Vorlauf.
+- **Pre-Cluster-T_close-Hygiene-Pass**: alternativ bündelt
+  Cluster-T_close (`slice-v1-cli-json-dry-run` Closure-Slice)
+  die Konsolidierung mit der Allowlist-/PersistentPreRunE-
+  Entfernung in einem Refactoring-Schritt. Dann entfällt dieser
+  Stub und wird in Cluster-T_close absorbiert.
 - **Real-World-Beschwerde** über fehlende Envelope-Symmetrie
   (z. B. CI-Konsument bricht auf `u-boot add --json` ohne arg
-  ab weil kein JSON kommt).
+  ab weil kein JSON kommt) — feuert auch vor 8/9.
 - **Security-Audit-Befund** zum Path-Leak in `diagnostic.message`
-  (Info-Disclosure-CVE-Klasse).
+  (Info-Disclosure-CVE-Klasse) — feuert auch vor 8/9.
 
 ## Lösungs-Skizze (vorläufig)
 
@@ -112,11 +127,17 @@ zu klären:
 
 ## Out of Scope
 
-- **`up`/`down`/`logs`/`config`/`template`**: diese landen erst
-  in den Folge-Slices 6-9. Sie erben das konsolidierte Pattern
-  von Anfang an (Plan-Vertrag: Folge-Slices 6-9 referenzieren
-  diesen Stub als Pattern-Vorbild, falls die Konsolidierung vor
-  ihnen landet).
+- **Pre-Pattern-Vorlage für Folge-Slices 6/7/8**: up-down (6/9),
+  logs (7/9) und config (8/9) landen **vor** diesem
+  Konsolidierungs-Slice (Cluster-Reihenfolge ist fix, kein
+  Re-Sequencing). Sie kopieren das Pattern-Drift-Vorbild aus
+  add/init/generate weiter — diese Slice ist deshalb
+  retroaktive Helper-Extraktion über das vollständige
+  Subcommand-Set, NICHT ein Pre-Pattern-Vorlauf den 6/7/8 von
+  Anfang an erben.
+- **`template` (9/9)**: read-only Array-Output ohne
+  modifying-Args-Validator. Kein Pattern-Drift, deshalb nicht
+  Teil dieses Slice.
 - **Confirmer-Swap-Pattern für `--purge`-Gate**: das ist
   remove-spezifisch (Confirmer ist heute nur im remove-Pfad
   aktiv). Falls künftige Slices Confirmer brauchen (down --volumes
@@ -132,6 +153,13 @@ zu klären:
 
 - `LH-NFA-USE-004` §1841 — Minimalkontrakt-Envelope-Vertrag
   (Symmetrie-Pflicht für alle JSON-Pfade).
-- `LH-FA-CLI-007` §322-417 — Voll-Schema-Vertrag (Flag-
-  Awareness-Pflicht: Voll-Schema bei `--dry-run` ODER `--diff`).
-- `LH-FA-CLI-006` — usage-Error-Klasse für Form-Validierung.
+- `LH-FA-CLI-007` §322-417 — Voll-Schema-Vertrag bei
+  `--dry-run --json` (Flag-Awareness-Pflicht: Voll-Schema bei
+  `--dry-run`).
+- `LH-FA-CLI-008` §451-489 — Voll-Schema-Vertrag bei
+  `--diff --json` (Hunks-Pflicht plus Pre-Service-Validation-
+  Symmetrie: NoPositionalArg- und TooManyArgs-Pfad mit
+  `--diff` MUSS Voll-Schema-Envelope tragen, sonst Spec-
+  Verletzung analog R13-HIGH-1 für `--dry-run`).
+- `LH-FA-CLI-006` — usage-Error-Klasse für Form-Validierung
+  (gemeinsamer Code-Pfad für NoPositionalArg + TooManyArgs).
