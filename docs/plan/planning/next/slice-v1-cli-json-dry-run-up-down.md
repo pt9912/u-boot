@@ -700,7 +700,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
 | T2 | **Port-Types-Erweiterung + zwei neue FS-Sentinels + Port-Kommentar-Co-Migration**. Strukturierte Aufschlüsselung in §T2-Details unten (R6-Reviewer Pre-T2-Hygiene-Entflechtung): fünf Sub-Sektionen (Port-Type-Erweiterungen / Neue Port-Sentinels / Sentinel-Heim-Positionen / Port-Kommentar-Co-Migration / Reihenfolge-Pflicht). | ~125 | T0 |
 | T3 | Application-Layer: **ProgressSink-Application-Layer-Branch-Wiring** im JSON-Mode (T0-(c) Form (d), R4-LOW-2 Wortlaut-Fix): `UpService.Up()` ergänzt um `effective := req.ProgressSink; if req.SilenceProgress { effective = io.Discard }`, dann `s.engine.ComposeUp(..., ProgressSink: effective)`. **nil-Default bleibt im Adapter** (R5-MED-1 festgezurrt): `engine.go:91,115,277` `progressSinkOrDiscard` toleriert `effective == nil` — kein zusätzlicher Application-Layer-nil-Check nötig, DRY-Prinzip. T3-Implementer-Pflicht: verifizieren dass die Adapter-nil-Toleranz nach Merge erhalten bleibt (kein Regression-Risiko via T3). `DownService.Down()`-Request-time Gate-Branch ohne Field-Mutation (T0-(d) Option (b) — kein `downMu` nötig, race-frei) — KEIN remove-1:1-Service-Field-Swap mit Mutex. **Multi-`%w`-Wrap-Migration** (R2-HIGH-2 Fix) der fünf FS-Read-Stellen auf `ErrUpFileSystem`/`ErrDownFileSystem`. Mapper-Helper `mapComposeRuntimeSentinel(err)` in `cli/composesentinel.go` für die geteilten Docker/Compose-Sentinels (T0-(e) R2-LOW-2) | ~120 | T2 |
 | T4 | **Entfällt-Kandidat** (R3-LOW-2, analog T1): Composition-Root `cmd/uboot/main.go` hat heute schon `NewUpService` und `NewDownService` mit den nötigen Deps (FileSystem, DockerEngine, Confirmer, Logger). Kein Recorder, kein fsFactory-Closure-Wechsel. Bei `SilenceProgress`/`SilenceConfirmer`-Form (Bool-Field, kein Service-Field-Swap) braucht es kein Wiring-Update. **T4 entfällt** wenn die T0-(c)+(d) Form (d)/(b) gewählt sind — falls Pre-Implementation noch ein Wiring-Edit auftritt, wandert T4 wieder rein. | — (entfällt erwartet) | T3 |
-| T5 | CLI-RunE: `runUp`/`runDown` ruft generische Helper mit `command="up"`/`"down"`, `mapErr=mapUpErrorToDiagnostic`/`mapDownErrorToDiagnostic`; Envelope-Pfade; Allowlist-Migration mit zwei separaten Einträgen (R2-LOW-1); Mapper neu; `data`-Structs (`upStatusData`/`downStatusData`); WARN-Migration. **`baseDirSanitizedError`-Helper-Extraktion** (R2-MED-5 Fix + R3-LOW-1 File-Form-Pin + R4-LOW-1 Range-Korrektur): geteilter Helper aus `cli/remove.go:465-538` (incl. `replaceBareBaseDir` + `isPathComponentByte` + `sanitizeBaseDir` selbst) nach neuem File **`cli/sanitize.go`** (im **bestehenden `package cli`**, NICHT Sub-Package `cli/sanitize/`). Begründung: `remove.go:299` kann den Helper ohne Migration weiternutzen (package-interne Symbole bleiben package-intern). Up/down's `runUp`/`runDown` rufen `sanitizeBaseDir(err, cwd)` vor `reportError` analog `remove.go:299`. | ~250 | T2 |
+| T5 | **CLI-RunE-Migration für up + down** (sechs Sub-Pins). Strukturierte Aufschlüsselung in §T5-Details unten (Pre-T5-Hygiene-Entflechtung analog T2): Sanitizer-Helper-Extraktion / Allowlist-Migration / Mapper-Files-Anlage / `data`-Carrier-Structs / WARN-Migration / `runUp`/`runDown`-Refactor. | ~250 | T2 |
 | T6 | Acceptance-Tests: **~14-18 Tests** (R3-LOW-3 Count-Anpassung, +3 für neue Pin-Klassen aus R2/R3): Envelope-Pin both Subcommands, Idempotenz-Pin für down, `--quiet --json`-Pin, `SilenceProgress`-Pin (R3-HIGH-2 Form (d)), Confirmer-Branch-Pin für `down --volumes --json` ohne `--yes` (R2-MED-2), ConflictingModeFlags-Pin, Service-Sentinels-Pins (Rows 1-9 der Mapper-Tabelle), Multi-`%w`-Switch-Order-Pin FS-first für FS+Docker (R2-HIGH-2 + R3-HIGH-1), Path-Leak-Sanitizer-Pin (R2-MED-5), Empty-Array-Pins für services+diagnostics (R2-LOW-3), CommandConfigGate-Refuse-by-Default-Pin (R2-MED-2 Symmetrie-Pin) | ~500-600 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe) | ~50 | T6 |
 | T8 | Closure: CHANGELOG, **`cli-json-output.md` §6/§6.7/§7** mit konkretem **`(code, exitCode)`-Tupel-Disambiguation-Block** in §6.7 (R3-MED-5: Pattern-Vorlage analog remove `LH-FA-ADD-007` Multi-Use; verbatim Beispiel: `LH-NFA-REL-003`/Exit 14 ist FS, Exit 11 ist Docker-Daemon, Exit 12 ist Compose-Runtime — Konsumenten MÜSSEN auf (`code, exitCode`)-Tupel filtern, nicht nur auf `code`). **Cross-Slice-Klassen-Pin** (R4-MED-2): `ErrProjectNotInitialized` mappt auf **`LH-FA-INIT-001`** bei Environment-Subcommands (up/down/generate) UND auf **`LH-FA-ADD-001`** bei Service-Subcommands (add/remove) — explicit dokumentieren als bewusste Cluster-Konvention, damit Cluster-Closure-Audit den Drift nicht als Bug erfindet. §7 zwei neue Zeilen "nur ReadFile" für up/down; roadmap done-Zähler 5→6, **carveouts.md** drei neue Einträge (Recreate-Warnings, Volume-Named-Liste, Partial-Snapshot — siehe Out-of-Scope-Block §"Strukturierte Multi-Port-Liste" für vierten Carveout-Trigger falls Real-World-Druck, R3-Bonus-Klarstellung), **vier open/-Stubs** schaffen (R2-MED-1 Memory-`carveouts_need_plans`): `slice-v1-recreate-detection`, `slice-v1-down-volumes-named-list`, `slice-v1-up-partial-snapshot-on-failure`, ggf. `slice-v1-multi-port-services`. **envelope-consolidation-Stub-Update** (R3-MED-3+R3-MED-4 plus R4-MED-3): Sub-Decision 2 dort als "festgelegt durch up-down T5" markieren; Wrap-Site-Inventar erläutern dass up/down-Sites schon abgedeckt sind; Extraktions-Quelle auf `cli/sanitize.go` aktualisieren; **plus Z. 159-163 dort aktualisieren** dass `down --volumes` ebenfalls `SilenceConfirmer`-Pattern nutzt (übernommen aus up-down T2, identisch zu remove) — der Confirmer-Swap-Carveout dort ist nicht mehr remove-spezifisch. Slice nach `done/` mit DoD-Hash-Tabelle | — (Doku) | T7 |
@@ -802,6 +802,150 @@ T2-Commit-Reihenfolge:
 4. T2-Commit-Granularität: **ein Commit** für T2 analog
    remove T2 (`d0c9c5d feat(port): RemoveServiceRequest…`),
    nicht zwei separate Commits per Subcommand.
+
+### T5-Details: CLI-RunE-Migration
+
+T5-Cell in der Tranchen-Tabelle verweist hier her — strukturierte
+Aufschlüsselung der sechs Sub-Pins (analog T2-Entflechtung).
+Adressierungs-Anker R2-MED-5, R2-LOW-1, R3-LOW-1, R4-LOW-1,
+T0-(e), T0-(f), T0-(g), T0-(h).
+
+#### Sanitizer-Helper-Extraktion (Pre-Refactor)
+
+Adressierung R2-MED-5 + R3-LOW-1 + R4-LOW-1: gemeinsamer
+`baseDirSanitizedError`-Wrapper aus `cli/remove.go:465-538`
+nach neuem File extrahieren.
+
+- **Quelle:** `cli/remove.go:465-538` (inkl. `replaceBareBaseDir`
+  + `isPathComponentByte` + `sanitizeBaseDir` selbst).
+- **Ziel:** neuer File **`cli/sanitize.go`** im **bestehenden
+  `package cli`** (R3-LOW-1, NICHT Sub-Package `cli/sanitize/`).
+- **Begründung:** `remove.go:299` kann den Helper ohne Migration
+  weiternutzen — package-interne Symbole bleiben package-intern,
+  kein Import-Update am bestehenden remove-Code.
+- **Verifikation:** existierende remove-Acceptance-Tests
+  (`remove_acceptance_test.go` Path-Leak-Pin aus T7 +
+  Substring-Pin aus T8) müssen nach der Extraktion grün
+  bleiben.
+
+#### Allowlist-Migration
+
+Adressierung R2-LOW-1: zwei separate Einträge in
+`cli/jsonallowlist.go` (KEIN gemeinsamer `"u-boot up-down"`-Key).
+
+- `"u-boot up": true`
+- `"u-boot down": true`
+
+Reject-Mapping in `jsonallowlist.go:74-75` (Follow-up `"up-down"`)
+verschwindet komplett wenn beide migriert sind — Übergangs-
+Phase ist die eine T5-Commit-Sequenz.
+
+#### Mapper-Files-Anlage
+
+Drei neue Files (T0-(e) + T0-(f) Festzurrung, R3-HIGH-1
+Switch-Order-Pflicht):
+
+- **`cli/up.go`** ergänzt um `mapUpErrorToDiagnostic(err)
+  diagnosticItem` mit Rows aus der T0-(e)-Mapper-Tabelle, die
+  als `mapUp` markiert sind (FS-Sentinel up-spezifisch +
+  ErrStabilizationTimeout + ErrInvalidTimeout + cross-cutting
+  Rows 6/7 + Default).
+- **`cli/down.go`** ergänzt um `mapDownErrorToDiagnostic(err)
+  diagnosticItem` analog (FS-Sentinel down-spezifisch +
+  ErrConfirmationRequired + ErrConflictingModeFlags + cross-
+  cutting Rows 6/7 + Default).
+- **`cli/composesentinel.go`** (NEU, R2-LOW-2 Helper-Heim):
+  `mapComposeRuntimeSentinel(err) (code string, exitCode int,
+  matched bool)` für die geteilten Sentinels Rows 2-3
+  (Docker-Daemon + Compose-Runtime). Beide Subcommand-Mapper
+  rufen diesen Helper.
+
+**Switch-Order-Disziplin** (R3-HIGH-1): die T0-(e)-Tabellen-
+Reihenfolge IST die Switch-Sequenz im Mapper (Pattern-Erbe
+`mapRemoveErrorToDiagnostic` `remove.go:420-443`).
+
+#### `data`-Carrier-Structs
+
+Adressierung T0-(g) + T0-(h) Festzurrungen mit Read-only-
+Klassen-Disziplin:
+
+- **`upStatusData`** in `cli/up.go` (Pattern aus doctor T0-(c)/
+  (d) Vorbild):
+  ```go
+  type upStatusData struct {
+      Services              []serviceStatus `json:"services"`
+      TimeoutFireAndForget  *bool           `json:"timeoutFireAndForget,omitempty"`
+  }
+  type serviceStatus struct {
+      Name        string `json:"name"`
+      State       string `json:"state"`
+      Port        string `json:"port,omitempty"`
+      Healthcheck string `json:"healthcheck,omitempty"`
+  }
+  ```
+  Empty-Array-Pin (T0-(j)): `Services`-Field OHNE omitempty —
+  CLI-Layer initialisiert nil-Slice mit `[]serviceStatus{}`.
+- **`downStatusData`** in `cli/down.go`:
+  ```go
+  type downStatusData struct {
+      RemovedVolumes bool `json:"removedVolumes"`
+  }
+  ```
+  KEIN omitempty (T0-(h)) — `false` ist legitimer Success-Wert
+  ("nichts entfernt").
+
+Error-Pfad-`data`: `nil` als interface{} (R2-MED-4 Call-Site-
+Pin), NICHT Zero-Value-Struct.
+
+#### WARN-Migration
+
+Adressierung T0-(g)-Vorlauf für `driving.WarningEntry` (Type
+schon da aus remove T2 R12-LOW-F4): `mapWarningsToDiagnostics`-
+Helper aus `cli/remove.go:365-382` ist package-intern wiederver-
+wendbar. `runUp` mapped `resp.Warnings` analog
+`writeRemoveJSON` (`remove.go:340-348`) in `diagnostics[]` mit
+`level: "warn"`.
+
+Recreate-Warnings selbst sind V1-Out-of-Scope (T0-(k) Carveout
+→ Folge-Slice `slice-v1-recreate-detection`); Type ist proaktiv
+vorhanden, Detection wandert.
+
+#### `runUp`/`runDown`-Refactor
+
+Pattern-Erbe `runRemove` (`remove.go:253-313`):
+
+- `runUp(ctx, out, errOut, args, flags, useCase, getwd)`:
+  - Pre-UC-Validation: `flags.TimeoutSec < 0` → `reportError(out,
+    ErrInvalidTimeout, nil, false, false, flags.JSON, "up",
+    mapUpErrorToDiagnostic, nil)`.
+  - `cwd, err := getwd()` analog remove.
+  - `useCase.Up(ctx, UpRequest{BaseDir: cwd, Timeout: timeout,
+    SilenceProgress: flags.JSON, ProgressSink: errOut})`.
+  - Auf Error-Pfad: `reportError(out, sanitizeBaseDir(err, cwd),
+    nil, false, false, flags.JSON, "up",
+    mapUpErrorToDiagnostic, nil)` — `data=nil` interface.
+  - Auf Success-Pfad bei `flags.JSON`: `writeUpJSON(out, resp,
+    flags.TimeoutSec == 0)` mit `data.timeoutFireAndForget`-
+    Marker bei `--timeout=0`.
+  - Auf Success-Pfad ohne `flags.JSON`: `renderUpStatus(out,
+    resp.Result.Services)` (heutiger Pfad bleibt).
+
+- `runDown(ctx, out, errOut, flags, useCase, getwd)`:
+  - Pre-UC-Validation: `flags.Yes && flags.NoInteractive` →
+    `reportError(out, ErrConflictingModeFlags, nil, false,
+    false, flags.JSON, "down", mapDownErrorToDiagnostic, nil)`.
+  - `useCase.Down(ctx, DownRequest{BaseDir, RemoveVolumes,
+    AssumeYes, NonInteractive, SilenceConfirmer: flags.JSON,
+    ProgressSink: errOut})`.
+  - Auf Error-Pfad: analog `runUp`.
+  - Auf Success-Pfad bei `flags.JSON`: `writeDownJSON(out, resp)`
+    mit `data.removedVolumes: bool`.
+  - Auf Success-Pfad ohne `flags.JSON`: `renderDownSuccess`
+    bleibt.
+
+`writeUpJSON`/`writeDownJSON` analog `writeRemoveJSON`
+(`remove.go:330-348`): jeweils `newDataEnvelope` (Minimal+Data)
+weil up/down keine Voll-Schema-Pfade tragen.
 
 ## Out of Scope
 
