@@ -191,13 +191,43 @@ docs-check).
     `type`-Feld. Erweiterung oder logs-spezifischer Wire-
     Type pflichtig (R1-HIGH-3). Siehe T0-(c).
 
-  **R2/R3-Pflicht**: eine der drei Optionen mit dokumentierten
-  Konsumenten-Belegen oder Cluster-T_close-Konsens festzurren.
-  Vorab-Festlegung ist ausgeschlossen — die Begründung muss
-  belastbar sein.
+  **Plan-Empfehlung FESTGEZURRT auf (A)** (R3-Such-Lauf
+  2026-06-07): drei interne Such-Pfade haben durchgeführte
+  Konsumenten-Suche lieferten **alle Null-Belege**:
+  - Pfad 1 `.github/workflows/*.yml`: kein `u-boot logs --json`-
+    Aufruf in CI-Workflows.
+  - Pfad 2 `Makefile + scripts/`: kein `logs`-Aufruf in
+    Build-/Dev-Skripten.
+  - Pfad 3 `docs/`: nur Plan-interne Selbstrefs (logs-Stub
+    + Carveout-Stubs + Cluster-Plan), keine Konsumenten-Use-
+    Cases dokumentiert. `docs/user/cli-json-output.md` hat
+    heute keine `logs --json`-Sektion.
+  - Pfad 4 (extern): nicht prüfbar in R3-Lauf — markiert.
 
-- **T0-(b) NDJSON-Per-Line-Object-Form** (relevant nur falls
-  T0-(a) Option B, R1-HIGH-2 Schema-Konsistenz-Korrektur):
+  Memory `diagnose_vor_carveout`-konform: nicht spekulieren,
+  schmale Option wählen. **Option (A) festgezurrt** —
+  reversibel zu (B) bei künftigem belegtem Real-World-Push-
+  Back, ohne dass bis dahin spec-brechende Carveout-Doku oder
+  Cluster-Slice T_close-Tranche-Konsens-Pflicht entsteht.
+
+  **Konsequenzen für die restlichen Sub-Decisions**:
+  - T0-(b) NDJSON-Per-Line-Object-Form: **entfällt** bei (A).
+  - T0-(c) Final-Envelope-Wire-Type: **entfällt** bei (A).
+  - T0-(d) Final-Envelope-Trigger: **entfällt** bei (A) — Single-
+    Envelope wird IMMER nach UC-Return geschrieben; kein
+    `--follow --json`-Pfad weil Reject.
+  - T0-(h) SIGINT-Vertrag im JSON-Mode: **vereinfacht** — kein
+    SIGINT-Pfad weil `--follow --json` rejected; bounded-Pfad
+    schreibt Single-Envelope nach UC-Return.
+  - T0-(k) Compose-Log-Output-Form: **bedingt entfällt** —
+    Compose-Stream wird im (A)-Modus im Use-Case in
+    `data.lines []string` gepuffert, kein Per-Line-Parsing
+    im CLI-Layer.
+
+- **T0-(b) NDJSON-Per-Line-Object-Form** — **ENTFÄLLT bei T0-(a)
+  Option (A) festgezurrt**. Historischer Stand für
+  Audit-Trail / Reversibilität bei künftiger (B)-Migration
+  unten erhalten:
   drei Optionen mit Industrie-Standard-Belegen:
   (i) `{"line": "<raw-compose-output>"}` — schmalste Form;
       `level`-Feld weggelassen. Konsument muss Service-Prefix
@@ -231,9 +261,10 @@ docs-check).
   aus `--timestamps`-Form falls jemals aktiviert);
   `container` bleibt heute weg.
 
-- **T0-(c) Final-Envelope-Form** (Stream-Ende-Marker, relevant
-  nur falls T0-(a) Option B oder C, R1-HIGH-3 Schema-Bruch-
-  Auflösung): die letzte NDJSON-Zeile MUSS einen vollen
+- **T0-(c) Final-Envelope-Form** — **ENTFÄLLT bei T0-(a)
+  Option (A) festgezurrt**. Single-Envelope braucht keinen
+  Diskriminator-Mechanismus weil nur EIN Envelope geschrieben
+  wird. Historischer Stand: die letzte NDJSON-Zeile MUSS einen vollen
   Minimalkontrakt-Envelope tragen damit Konsument
   `status`/`exitCode` ausliest. **R1-HIGH-3-Konflikt**: das
   `cliJSONEnvelope`-Schema (`jsonenvelope.go:21-50`) hat
@@ -268,7 +299,10 @@ docs-check).
   disambiguiert über das Feld-Set, nicht über expliziten
   Diskriminator.
 
-- **T0-(d) Final-Envelope-Trigger** (relevant falls T0-(a) B/C):
+- **T0-(d) Final-Envelope-Trigger** — **ENTFÄLLT bei T0-(a)
+  Option (A) festgezurrt**. Single-Envelope wird nach UC-Return
+  geschrieben — kein `--follow --json`-Pfad weil Reject, kein
+  SIGINT-vs-natural-End-Distinction-Problem. Historischer Stand:
   bei Unbounded-Stream ist Stream-Ende = SIGINT-Cancel ODER
   natural-end (bounded `--tail` ohne `--follow`). **R1-HIGH-4
   Plan-Konflikt-Auflösung**: heute liefert
@@ -356,24 +390,16 @@ docs-check).
   Mapper-Tabelle Z. 235 entsprechend korrigiert (R1-MED-2
   Tabellen-Drift behoben).
 
-- **T0-(h) SIGINT-Vertrag im JSON-Mode** (R1-HIGH-4 plan-
-  intern aufgelöst via T0-(d)(i) `ctx.Err()`-Check):
-  Final-Envelope-Emission und SIGINT-Distinction sind durch
-  T0-(d) gelöst. Sub-Decision-Form:
-  - **Option (A) Single-Envelope**: Single-Envelope nach
-    UC-Return mit `status: ok` (bounded `--tail`-Pfad) ODER
-    Final-Envelope-mit-Diagnostic falls UC-Error. Kein
-    SIGINT-Pfad weil `--follow --json` rejected.
-  - **Option (B/C) NDJSON**: CLI-Layer prüft `ctx.Err()` post-
-    UC. Bei `context.Canceled` → Final-Envelope `{type:
-    "envelope" (falls T0-(c)(ii)) | implicit-by-feldset (falls
-    T0-(c)(i)), status: "ok", exitCode: 0}`. Bei natural-end
-    identisches Format. Konsument disambiguiert NICHT — beide
-    Pfade sind aus Konsument-Sicht "Stream sauber beendet".
-  Plan-Empfehlung **bedingt auf T0-(a)**: konsistent mit
-  T0-(d)(i) `ctx.Err()`-Check. Application-Layer-Vertrag
-  (`LogsResponse{}`, kein TerminatedBy-Feld) bleibt
-  unverändert.
+- **T0-(h) SIGINT-Vertrag im JSON-Mode** — **VEREINFACHT bei
+  T0-(a) Option (A) festgezurrt**: kein SIGINT-Pfad im JSON-
+  Mode weil `--follow --json` mit Exit 2 rejected wird. Das
+  heutige SIGINT-Verhalten (`logsservice.go:102-110`
+  `context.Canceled` → `(LogsResponse{}, nil)` → Exit 0) gilt
+  weiterhin für `--follow` ohne `--json`. Im `--json --tail=N`-
+  Pfad gibt's keinen SIGINT-Use-Case weil Compose-Stream
+  bounded ist. Single-Envelope wird nach UC-Return geschrieben
+  mit `status: ok`/`exitCode: 0` bei Success oder Error-
+  Envelope via `reportError`.
 
 - **T0-(i) Heute-Validation-Pfad-Drift**: `runLogs:118-121`
   ruft `validateLogsTailFlag` VOR `domain.NewServiceName`. Im
@@ -415,8 +441,17 @@ docs-check).
   unterdrücken (oder bleibt Status-quo "Compose-Stream-Output
   ignoriert `--quiet`" — siehe Out-of-Scope).
 
-- **T0-(k) Compose-Log-Output-Form** (R1-MED-5 Format-
-  Korrektur, R1-LOW-4 Belastbarkeit): Compose liefert pro
+- **T0-(k) Compose-Log-Output-Form** — **VEREINFACHT bei
+  T0-(a) Option (A) festgezurrt**: Per-Line-Parsing entfällt;
+  Compose-Stream wird im Application-Layer (oder durch einen
+  bufferinden CLI-Layer-Wrapper) in `data.lines []string`
+  gepuffert. Bei großen `--tail`-Werten ist die Buffer-Größe
+  proportional zu `--tail` × durchschnittliche Zeilenlänge —
+  bei Default `--tail=all` ist das die gesamte Compose-Log-
+  Historie. Praktischer Cap: nicht erforderlich heute
+  (Konsumenten nutzen typisch `--tail=100..1000`). Historischer
+  Pre-R3-Stand mit Compose-Output-Form-Korrektur unten für
+  Audit-Trail: Compose liefert pro
   Zeile **`<service-name>-<idx>  | <line>`** (Container-Index
   `-1`/`-2`, ZWEI Leerzeichen vor dem Pipe, NICHT `<service>
   | <line>` wie Pre-R1-Form annahm). Plus: Adapter
@@ -472,15 +507,18 @@ docs-check).
 | - | --- | --- | --- |
 | T0 | Discovery + Sub-Decisions (a)-(k) klären; Review-Runden | — (Plan) | — |
 | T1 | **Entfällt** (analog up-down T1): `cli/sanitize.go` + `cli/composesentinel.go`-Helper existieren bereits aus up-down T5 | — (entfällt) | T0 |
-| T2 | Port-Types: **`driving.ErrLogsFileSystem`-Sentinel** (T0-(e) Option (i) festgezurrt, R1-MED-1); Read-spezifische Message-Form `"logs: filesystem read failed"`; Heim-Position in `port/driving/logs.go` analog `up.go` (vor `ErrComposeFileMissing`-Cluster). Plus: **`logsFlags.JSON bool` + `logsFlags.Quiet bool` Felder** im CLI-Layer-Struct (T0-(j)(ii) festgezurrt, R1-MED-4). KEIN `SilenceProgress`-Field — `LogsRequest` hat `OutputSink io.Writer`, kein ProgressSink. Co-Migration der heutigen Port-Sentinel-Kommentare falls heute generische `LH-FA-CLI-006`-Anker (Code-Recon in T2). T4 entfällt (kein Composition-Root-Wechsel). | ~70 | T0 |
+| T2 | Port-Types: **`driving.ErrLogsFileSystem`-Sentinel** (T0-(e) Option (i) festgezurrt, R1-MED-1); Read-spezifische Message-Form `"logs: filesystem read failed"`; Heim-Position in `port/driving/logs.go` analog `up.go` (vor `ErrComposeFileMissing`-Cluster). Plus: **`logsFlags.JSON bool` + `logsFlags.Quiet bool` Felder** im CLI-Layer-Struct (T0-(j)(ii) festgezurrt, R1-MED-4). KEIN `SilenceProgress`-Field — `LogsRequest` hat `OutputSink io.Writer`, kein ProgressSink. Co-Migration der heutigen Port-Sentinel-Kommentare falls heute generische `LH-FA-CLI-006`-Anker (Code-Recon in T2). **`checkComposeFile`-Cluster-Code-Konsistenz** (R3-MED-1): `downservice.go:57/89/93` nutzt `checkComposeFilePresent` (Suffix-Drift gegen `upservice.go`/`logsservice.go` die `checkComposeFile` nutzen). T2 lässt den Drift **bewusst bestehen** weil Rename-Refactor in `downservice.go` Out-of-Scope für logs-Slice ist (separater Cluster-Hygiene-Slice oder Cluster-T_close-Tranche). T4 entfällt (kein Composition-Root-Wechsel). | ~70 | T0 |
 | T3 | Application-Layer: Multi-`%w`-Wrap-Migration der **zwei FS-Read-Stellen** (`logsservice.go:117-127` `checkProjectInitialized` + `:133-143` `checkComposeFile`) auf `ErrLogsFileSystem`. KEIN ProgressSink-Branch nötig (OutputSink ist Stream-Sink, nicht Phase-Sink). KEIN `LogsResponse`-Field-Erweiterung (`TerminatedBy`-Feld verworfen via T0-(d)(i) `ctx.Err()`-Check). | ~30 | T2 |
 | T4 | **Entfällt** (analog up-down T4): Composition-Root `cmd/uboot/main.go` hat heute schon `NewLogsService` mit allen Deps. T2 führt nur Port-Sentinel + CLI-Flag-Fields ein — kein Service-Wiring-Wechsel. | — (entfällt) | T3 |
-| T5 | CLI-RunE: **`runLogs(ctx, stdout, errOut io.Writer, args, flags, uc, getwd)`-Signatur-Refactor** (R2-HIGH-3 Cluster-Pattern-Konsistenz mit up/down/remove `up.go:133`/`down.go:128`/`remove.go:253`) + `logsFlags.JSON`/`logsFlags.Quiet` Fields durchreichen analog up/down (T0-(j)(ii)). Allowlist-Migration `"u-boot logs": true` in `jsonAllowlist()`. **`isFilesystemError`-Co-Migration** (`cli/cli.go:401-428`, R1-MED-6): `driving.ErrLogsFileSystem` ergänzen damit Exit-Code-Mapping auf 14 fällt. Neuer `mapLogsErrorToDiagnostic` mit Switch-Order T0-(f). Pre-UC-Validation-Pfade via `reportError` für Single-Envelope-Form (Option (A)) ODER **Single-Object-NDJSON-Pre-Stream-Output** im Stream-Pfad für NDJSON (Option (B), R1-MED-3 Aufschlüsselung — `reportError` ist NDJSON-Frame-konform weil `writeEnvelope`/`fmt.Fprintln` einen Newline-terminierten Single-Object schreibt; kein Wrap-Layer nötig). Bei Option (B): **NDJSON-OutputSink-Wrapping** (T0-(k)(ii)) — wrappt `cmd.OutOrStdout()` in `ndjsonOutputSink` der Per-Line-Object emittiert; Final-Envelope-Emission nach `useCase.Logs(...)`-Return mit `ctx.Err()`-Check (T0-(d)(i)); eigener `logsLineEnvelope`-Wire-Type (T0-(c)(i)) plus `writeLogsLineEnvelope`-Constructor analog `writeEnvelope`. Sanitizer-Aufrufe via `cli/sanitize.go`. | (A) ~150-200 / (B) ~250-300 | T2 |
-| T6 | Acceptance-Tests: ~14-18 Tests (bounded `--tail`-Pin, `--follow --json`-Pin je T0-(a) Form, `--quiet --json`-Pin, Mapper-Rows 1-8, SIGINT-Vertrag (Option (B) only), Final-Envelope-Form (Option (B) only), NDJSON-Per-Line-Object-Form (Option (B) only), Path-Leak-Sanitizer-Pin, `--follow --json`-Reject (Option (A) only)) | (A) ~400-500 / (B) ~500-600 | T5 |
+| T5 | CLI-RunE: **`runLogs(ctx, stdout, errOut io.Writer, args, flags, uc, getwd)`-Signatur-Refactor** (R2-HIGH-3 Cluster-Pattern-Konsistenz mit up/down/remove `up.go:133`/`down.go:128`/`remove.go:253`) + `logsFlags.JSON`/`logsFlags.Quiet` Fields durchreichen analog up/down (T0-(j)(ii)). Allowlist-Migration `"u-boot logs": true` in `jsonAllowlist()`. **`isFilesystemError`-Co-Migration** (`cli/cli.go:401-428`, R1-MED-6): `driving.ErrLogsFileSystem` ergänzen damit Exit-Code-Mapping auf 14 fällt. Neuer `mapLogsErrorToDiagnostic` mit Switch-Order T0-(f). Pre-UC-Validation-Pfade via `reportError` (Single-Envelope-Form). **`--follow --json`-Reject** im CLI-Layer vor UC-Aufruf: ErrFollowJSONNotSupported / Exit 2 (LH-FA-CLI-006) — gepinnt durch T6-Test. **Single-Envelope-Pfad** (T0-(a) Option (A)): Compose-Output wird im Application-Layer/CLI-Layer in `data.lines []string` gepuffert; nach UC-Return ein `newDataEnvelope("logs", "", data, warnDiags, 0)`. Sanitizer-Aufrufe via `cli/sanitize.go`. | ~150-200 | T2 |
+| T6 | Acceptance-Tests: ~10-12 Tests (bounded `--tail`-Pin, `--follow --json`-Reject-Pin (LH-FA-CLI-006/Exit 2), `--quiet --json`-Pin, Mapper-Rows 1-8 (ErrLogsFileSystem, ErrDockerUnavailable, ErrComposeRuntime, ErrComposeFileMissing, ErrProjectNotInitialized, ErrInvalidServiceName, ErrInvalidLogsTail, Default), Path-Leak-Sanitizer-Pin, Empty-`data.lines`-Pin (Empty-Service-Set)) | ~400-500 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe) | ~50 | T6 |
-| T8 | Closure: CHANGELOG, `cli-json-output.md` §6/§6.8/§7 (Form je T0-(a)-Wahl: bei (A) §6.8 als reguläre Read-only-Sektion; bei (B) §6.8 mit **NDJSON-Streaming-Carveout-Doku** als erster Subcommand der Spec-§1841 als N-Objects-pro-Aufruf interpretiert — explizit dokumentieren), roadmap done-Zähler 6→7, carveouts.md-Einträge für die drei `open/`-Stubs (`slice-v1-logs-format-flags`, `-multi-service-filter`, `-time-range-filter` — bereits in `open/` angelegt bei R2-Adressierung, R2-HIGH-2 Memory-Disziplin), Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
+| T8 | Closure: CHANGELOG, `cli-json-output.md` §6/§6.8/§7 (§6.8 als reguläre Read-only-Sektion analog §6.7 up-down, mit `--follow --json`-Reject-Doku als Spec-konformer Mechanismus; §7 Mutations-Matrix-Zeile "logs: nur ReadFile"), roadmap done-Zähler 6→7, carveouts.md-Einträge für die drei `open/`-Stubs (`slice-v1-logs-format-flags`, `-multi-service-filter`, `-time-range-filter` — bereits in `open/` angelegt bei R2-Adressierung, R2-HIGH-2 Memory-Disziplin), Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
 
-LOC-Bilanz vorläufig: **~900-1050** (R1-LOW-3 Korrektur — T5 +50-100 für NDJSON-Wrapping/Line-Parsing falls Option B, T6 +50 für NDJSON-Stream-Decoding-Tests). Bei T0-(a) Option (A) wird die Bilanz auf ~780-880 reduziert (kein NDJSON-Wrapping). Deutlich kleiner als up-
+LOC-Bilanz nach T0-(a) Festzurrung auf (A): **~700-800**
+(R3-Konsolidierung: T2 ~70 + T3 ~30 + T5 ~150-200 + T6 ~400-500
++ T7 ~50 = ~700-850 Tranchen-Summe; Untergrenze 700, Obergrenze
+800 puffert T8-Doku-Diffs). Deutlich kleiner als up-
 down ~1035-1135 weil keine zwei Subcommands zu bündeln,
 kein zweiter FS-Sentinel, keine zwei Mapper-Files). Pattern-
 Erbe von up-down (FS-Sentinel-Pattern + Mapper-Switch-Order +
@@ -493,23 +531,28 @@ Pfade).
 Memory-Feedback `carveouts_need_plans` (R1-MED-7 + R2-HIGH-2):
 **sofort** mit Plan in `open/` versehen. Drei `open/`-Stubs
 sind bei R2-Adressierung angelegt (Verzicht auf T8-Verschiebung
-um Memory-konform zu bleiben).
+um Memory-konform zu bleiben). Forward-Link auf
+[`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
+für Symmetrie (R3-LOW-1): die drei sub-Stubs verlinken
+`carveouts.md` als Container, der logs-Stub verlinkt hier
+ebenfalls dorthin — `carveouts.md`-Einträge werden in T8-
+Closure nachgezogen.
 
 - **`--no-log-prefix` / `--timestamps`** (Spec-Erweiterung für
   Compose-Logs-Format-Flags): bewusste Logs-Slice-Erweiterung
   außerhalb des V1-Scope. Pattern-Vorbild Compose-CLI direkt
   passend. Plan-Stub:
-  [`slice-v1-logs-format-flags`](slice-v1-logs-format-flags.md)
+  [`slice-v1-logs-format-flags`](../open/slice-v1-logs-format-flags.md)
   (`open/`, Status `on hold pending trigger`).
 - **Multi-Service-Filter** (`u-boot logs svc1 svc2`): heute
   Single-Service via `cobra.MaximumNArgs(1)`. Multi-Args-Form
   wäre Spec-Erweiterung (LH-FA-UP-005 spricht Singular).
   Plan-Stub:
-  [`slice-v1-logs-multi-service-filter`](slice-v1-logs-multi-service-filter.md)
+  [`slice-v1-logs-multi-service-filter`](../open/slice-v1-logs-multi-service-filter.md)
   (`open/`, Status `on hold pending trigger`).
 - **`--since` / `--until` Time-Range-Filter**: nicht in Spec.
   Plan-Stub:
-  [`slice-v1-logs-time-range-filter`](slice-v1-logs-time-range-filter.md)
+  [`slice-v1-logs-time-range-filter`](../open/slice-v1-logs-time-range-filter.md)
   (`open/`, Status `on hold pending trigger`).
 - **WARN-Migration**: `driving.WarningEntry`-Type ist aus
   remove T2 verfügbar, aber logs hat heute keine bekannten

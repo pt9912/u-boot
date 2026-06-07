@@ -2,7 +2,7 @@
 
 > **Status:** `open/`, on hold pending trigger. Cleanup-/Feature-
 > Slice zum Multi-Service-Filter-Carveout aus
-> [`slice-v1-cli-json-dry-run-logs`](slice-v1-cli-json-dry-run-logs.md)
+> [`slice-v1-cli-json-dry-run-logs`](../next/slice-v1-cli-json-dry-run-logs.md)
 > §Out of Scope. Carveout-Plan-Anker
 > ([[feedback_carveouts_need_plans]]); verlinkt aus
 > [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
