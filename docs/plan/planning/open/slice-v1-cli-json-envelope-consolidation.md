@@ -64,10 +64,23 @@ Wrap-Site-Inventar (Stichproben aus R15-Audit):
 - `application/generate.go:210` (+ weitere im
   devcontainer-Phase-2-Block)
 
+**Subset already covered durch up-down T5** (Update 2026-06-07
+nach up-down-Stub R3-MED-4): up/down's FS-Read-Wraps
+(`upservice.go:105/138/148`, `downservice.go:81/97`) sind durch
+den up-down-Slice (Folge-Slice 6/9) selbst sanitized — dieser
+Konsolidierungs-Slice braucht sie NICHT mehr im Scope. Liste
+oben bleibt für add/init/generate die Refactor-Ziele.
+
 remove löste das in T7/T8 via `baseDirSanitizedError`-Wrapper
 (`cli/remove.go:465-491`) + `replaceBareBaseDir`-Word-Boundary-
 Helper (R15-LOW-1 robust gegen Substring-Kollisionen wie
-`<baseDir>-cache/...`).
+`<baseDir>-cache/...`). **Helper-Heim festgelegt durch up-down
+T5** (Update 2026-06-07 nach up-down-Stub R3-MED-3): up-down's
+T5 extrahiert den Wrapper aus `cli/remove.go:465-540` in einen
+neuen File **`cli/sanitize.go`** (im bestehenden `package cli`,
+keine Sub-Package-Form). Wenn dieser Konsolidierungs-Slice
+zieht, ist `cli/sanitize.go` schon das Heim — Sub-Decision 2
+unten (Sub-Package-vs-File) ist obsolet, übernimm File-Heim.
 
 ## Trigger
 
@@ -111,14 +124,19 @@ zu klären:
    die generische Form ohne Mapper (`LH-FA-CLI-006` ist der
    einzige Code in beiden Pfaden, Pre-Service-Validation-
    Sentinel-Klasse).
-2. **Helper-Heim für `baseDirSanitizedError`**: extrahiere den
-   Wrapper + `replaceBareBaseDir` + `isPathComponentByte` aus
-   `cli/remove.go` in eine eigene `cli/sanitize/` Sub-Package
-   oder als `cli/`-Helper. Add/init/generate wrappen ihre
-   UC-Errors analog `runRemove:299` mit `sanitizeBaseDir(err,
-   cwd)`. Sub-Decision: greedy (wrap ALLE Errors) vs. selektiv
-   (nur FS-Errors, weil Pre-Service-Sentinels nichts mit Pfad
-   tunneln — overhead vs. defense-in-depth).
+2. **Helper-Heim für `baseDirSanitizedError`** — **festgelegt
+   durch up-down T5 (2026-06-07, R3-MED-3 Festzurrung)**:
+   Helper-Heim ist `cli/sanitize.go` (File im bestehenden
+   `package cli`), extrahiert aus `cli/remove.go:465-540`.
+   Sub-Decision (File-vs-Sub-Package) obsolet. Verbleibende
+   Sub-Decision für DIESEN Slice: **Aufruf-Granularität** —
+   greedy (wrap ALLE Errors) vs. selektiv (nur FS-Errors, weil
+   Pre-Service-Sentinels nichts mit Pfad tunneln — overhead
+   vs. defense-in-depth). Plan-Empfehlung: **selektiv**
+   (Defense-in-Depth via Switch-Order, kein Performance-Penalty
+   für CLI-Form-Validierungen die eh kein FS gesehen haben).
+   Add/init/generate wrappen ihre UC-Errors analog `runRemove
+   :299` mit `sanitizeBaseDir(err, cwd)`.
 3. **Migrations-Reihenfolge**: alle drei (add/init/generate) in
    einer PR, ODER per-Command-Sub-Tranchen mit jeweils eigener
    Pin-Test-Sequenz. R15-Cross-Slice empfiehlt eine PR weil das

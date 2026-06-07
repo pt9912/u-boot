@@ -203,15 +203,25 @@ u-boot down --volumes --json             # default interactive prompt — analog
   JSON-Output NICHT unterdrücken — JSON ist die Maschinen-
   Schnittstelle, `--quiet` ist die Human-Schnittstelle-Unterdrückung
   und kollidiert semantisch.
-- ✅ **ProgressSink-Silencing im JSON-Mode**: Compose-Phase-
-  Streaming auf stderr (LH-NFA-PERF-002 "pull/create/start/
-  healthcheck phases stream to stderr live") MUSS in `--json`
-  unterdrückt werden, sonst polluten Live-Phasen-Logs den stderr
-  für JSON-Konsumenten. Pattern-Erbe von init T0-(o)
-  `ProgressPort`-Silencing — aber up/down nutzen `ProgressSink
-  io.Writer` (kein Port), also via Request-Field
-  `req.ProgressSink = io.Discard` oder Service-Field-Swap.
-  T0-Sub-Decision: welche der zwei Formen.
+- ✅ **ProgressSink-Silencing im JSON-Mode** (T0-(c) R3-HIGH-2
+  Form-festgezurrt): Compose-Phase-Streaming auf stderr
+  (LH-NFA-PERF-002 "pull/create/start/healthcheck phases stream
+  to stderr live") MUSS in `--json` unterdrückt werden, sonst
+  polluten Live-Phasen-Logs den stderr für JSON-Konsumenten.
+  Pattern-Erbe von init T0-(o) `ProgressPort`-Silencing — aber
+  up/down nutzen `ProgressSink io.Writer` (kein Port).
+  **Festgezurrte Form**: neuer Bool-Field `UpRequest.SilenceProgress`
+  + Application-Layer-Branch: wenn `req.SilenceProgress == true`,
+  setze die effektive ProgressSink auf `io.Discard` vor
+  `engine.ComposeUp(..., ProgressSink: effective)`. Pattern-
+  Konsistenz mit Remove's `req.SilenceConfirmer`-Bool (NICHT
+  request-time-Pointer-Override). Begründung: (a) Symmetrie
+  zum Confirmer-Pattern, (b) Use-Case bleibt Source-of-Truth
+  für Silencing-Entscheidung (CLI-Layer setzt nur den Flag),
+  (c) keine Layer-Vermischung — CLI weiß nicht über
+  `io.Discard`, Use-Case weiß nicht über `flags.JSON`. CLI:
+  `req.SilenceProgress = flags.JSON` analog
+  `req.SilenceConfirmer = flags.JSON` (down).
 - ✅ **`down --volumes`-Confirmer-Branch** (R2-HIGH-1 ↔ T0-(d)-
   Synchronisierung): `req.SilenceConfirmer = flags.JSON` triggert
   einen **Request-time Gate-Branch** im `DownService.Down()`-
@@ -236,27 +246,44 @@ u-boot down --volumes --json             # default interactive prompt — analog
   will be replaced"*) nutzen das proaktiv eingeführte
   `Subject`-Feld auf `driving.WarningEntry` (R12-LOW-F4-Vorlauf
   aus remove T2).
-- ✅ **Mapper-Tabelle** (analog `mapRemoveErrorToDiagnostic`,
-  R2-HIGH-2 Sentinel-Liste erweitert): per-Subcommand-Mapper
+- ✅ **Mapper-Tabelle mit verbindlicher Switch-Order** (analog
+  `mapRemoveErrorToDiagnostic` R3-MED-F3-Fix; R3-HIGH-1
+  Reihenfolge-Pflicht): per-Subcommand-Mapper
   `mapUpErrorToDiagnostic` und `mapDownErrorToDiagnostic` mit
   geteiltem internem Helper `mapComposeRuntimeSentinel` in
   `cli/composesentinel.go` (T0-(e) R2-LOW-2). **Switch-Order
-  FS-first** (T0-(f) R2-HIGH-2): die zwei neuen FS-Sentinels
-  matchen vor Docker-Klasse. Sentinels:
-  `driving.ErrUpFileSystem`/`driving.ErrDownFileSystem` (NEU
-  in T2) → `LH-NFA-REL-003`/Exit 14;
-  `driven.ErrDockerUnavailable` → `LH-NFA-REL-003`/Exit 11
-  (T0-(f) Konsolidierung mit Doku/Test-Pin);
-  `driven.ErrComposeRuntime` → `LH-NFA-REL-003`/Exit 12 (dito);
-  `ErrConfirmationRequired` → `LH-FA-INIT-005`/Exit 10
-  (geteilt mit init/remove); `ErrConflictingModeFlags` →
-  `LH-FA-CLI-005A`/Exit 2; `ErrInvalidTimeout` →
-  `LH-FA-CLI-006`/Exit 2; `ErrStabilizationTimeout` →
-  `LH-FA-UP-001`/Exit 12 (Compose-Runtime-Klasse, Up-spezifisch);
-  `ErrComposeFileMissing` → `LH-FA-UP-001`/Exit 10 (fachliche
-  Klasse); `ErrProjectNotInitialized` → `LH-FA-INIT-001`/Exit
-  10 (Pattern-Erbe init/add/remove — NICHT `LH-FA-UP-001`,
-  weil ProjectNotInitialized eine cross-cutting Klasse ist).
+  verbindlich** (R3-HIGH-1): die Tabellen-Reihenfolge IST die
+  Switch-Sequenz im Mapper. Pattern-Erbe remove T0-(e) — eine
+  willkürliche Reihenfolge würde Multi-`%w`-Wraps falsch
+  klassifizieren.
+
+  | # | Sentinel | LH-Code | Exit | Begründung |
+  | - | -------- | ------- | ---- | ---------- |
+  | 1 | `driving.ErrUpFileSystem` / `driving.ErrDownFileSystem` (NEU in T2) | `LH-NFA-REL-003` | 14 | FS-first damit Multi-`%w` mit FS+Docker auf FS-Klasse fällt (R2-HIGH-2 Defense) |
+  | 2 | `driven.ErrDockerUnavailable` | `LH-NFA-REL-003` | 11 | Docker-Daemon vor Compose-Runtime (Daemon ist Voraussetzung für Runtime) |
+  | 3 | `driven.ErrComposeRuntime` | `LH-NFA-REL-003` | 12 | Compose-Runtime nach Daemon |
+  | 4 | `driving.ErrStabilizationTimeout` (up-only) | `LH-FA-UP-001` | 12 | Up-spezifische Runtime-Klasse, eigene LH-Anchor |
+  | 5 | `driving.ErrConfirmationRequired` (down-only) | `LH-FA-INIT-005` | 10 | Confirmer-Refuse vor fachlichen Validations (geteilt mit init/remove) |
+  | 6 | `driving.ErrComposeFileMissing` (up+down) | `LH-FA-UP-001` | 10 | Fachliche Validierung (Datei-Schema) |
+  | 7 | `driving.ErrProjectNotInitialized` (cross-cutting) | `LH-FA-INIT-001` | 10 | Pattern-Erbe generate (nicht add/remove — up/down sind Environment-Operations, kein Service-Add) |
+  | 8 | `cli.ErrInvalidTimeout` (up-only, CLI-Layer) | `LH-FA-CLI-006` | 2 | CLI-Form-Validierung |
+  | 9 | `cli.ErrConflictingModeFlags` (down-only) | `LH-FA-CLI-005A` | 2 | Mode-Mutex-Verträge |
+  | 10 | Default (unknown) | `LH-FA-CLI-006` | 1 | Fallback |
+
+  **Reihenfolge-Disziplin** (R3-HIGH-1): Infrastruktur-First
+  (Rows 1-3) vor fachlichen Sentinels (Rows 4-7) vor
+  CLI-Form (Rows 8-9) vor Default (Row 10). Damit fällt ein
+  synthetisch konstruierter `fmt.Errorf("%w: %w",
+  ErrUpFileSystem, ErrDockerUnavailable)` auf Row 1
+  (`LH-NFA-REL-003`/Exit 14), NICHT auf Row 2 (Exit 11).
+  T6-Pin verifiziert die Reihenfolge per konstruiertem
+  Multi-Wrap. **Port-Kommentar-Co-Migration** (R3-HIGH-3, T2):
+  Port-Kommentare in `up.go:43,89,97` haben heute
+  `LH-FA-CLI-006`-Anker (Pre-Mapper-Stand); T2 migriert diese
+  auf die Tabelle-Codes (`LH-FA-UP-001` für
+  `ErrComposeFileMissing`/`ErrStabilizationTimeout`). Pattern-
+  Erbe remove `removeservice.go:254` `ErrConfirmerUnavailable`-
+  Kommentar-Migration.
 - ✅ **Mid-Operation-Failure-UX** (T0-(i) revidiert nach
   Review-Finding HIGH-2 + Followup): heute liefert `UpService`
   bei `ComposeUp`-Fehlern (`upservice.go:76-80`) UND bei
@@ -330,17 +357,33 @@ u-boot down --volumes --json             # default interactive prompt — analog
   { … return writeUpJSON(...) } if flags.Quiet { return nil }
   … renderUpStatus(...)`. T6-Pin verifiziert beide Reihenfolgen
   `--quiet --json` und `--json --quiet`.
-- **T0-(c) ProgressSink-Silencing-Form**: drei Optionen:
+- **T0-(c) ProgressSink-Silencing-Form** (R3-HIGH-2
+  Festzurrung — vier Optionen, eine gewählt): vier Optionen:
   (a) `req.ProgressSink = io.Discard` aus dem CLI bei
       `flags.JSON` — request-time Substitution, Use-Case sieht
-      das Discard-Writer.
+      das Discard-Writer. CLI weiß über `io.Discard`, Use-Case
+      sieht das transparent.
   (b) Service-Field-Swap analog init T0-(o) ProgressPort —
       braucht Service-Mutation und defer-Restore innerhalb der
       Lock-Region (gibt's heute keinen `upMu` / `downMu`).
   (c) CLI-Layer-Wrap: ein `discardOnJSONWriter`-Decorator,
       injiziert in den ProgressSink-Field.
-  Plan-Empfehlung: (a) — `io.Discard` ist die schlankste Form,
-  Use-Case-Signatur unverändert, kein Mutex-Erfordernis.
+  (d) **`UpRequest.SilenceProgress bool`-Field + Use-Case-
+      Branch** — symmetrisch zum Confirmer-Pattern aus remove
+      T0-(j): CLI setzt `req.SilenceProgress = flags.JSON`, Use-
+      Case-Layer verzweigt intern (`effective := req.ProgressSink;
+      if req.SilenceProgress { effective = io.Discard };
+      s.engine.ComposeUp(..., ProgressSink: effective)`). Use-
+      Case ist Source-of-Truth, CLI kennt `io.Discard` nicht.
+  **Plan-Empfehlung WECHSELT auf (d)** (R3-HIGH-2 Festzurrung):
+  Symmetrie zum `SilenceConfirmer`-Pattern in remove ist Pattern-
+  Erbe-Disziplin (T2 R12-LOW-F4 Cluster-Vorlauf). Form (a) wäre
+  schlanker (kein neues Bool-Field), aber bricht die
+  Layer-Trennung: CLI würde `io.Discard` (eine Use-Case-
+  Semantik) direkt setzen. Pattern-Konsistenz mit remove's
+  Confirmer-Swap-Bool ist die wichtigere Disziplin. Form-Wahl
+  (d) zieht +5 LOC am Port (Bool-Field plus Kommentar) und +3
+  LOC im Service-Layer (Branch) — vernachlässigbar.
 - **T0-(d) `down --volumes` Confirmer-Pattern** (Review-
   Finding MED-3 Form-Korrektur): drei Optionen:
   (a) **Service-Field-Mutation mit defer-Restore** PLUS neuer
@@ -386,6 +429,38 @@ u-boot down --volumes --json             # default interactive prompt — analog
   Security-by-Default-Verletzung. T6-Pin:
   `TestDown_VolumesJSONWithoutYes_EmitsErrConfirmationRequired`
   verifiziert Exit 10 + `LH-FA-INIT-005`-Diagnostic.
+
+  **Code-Pfad-Form festgezurrt** (R3-MED-2): die Truth-Table
+  `runConfirmationGate(ctx, req)` in `downservice.go:109-131`
+  hat heute vier Rows (AssumeYes / NonInteractive /
+  Confirmer.Refused / Confirmer.Accepted). Der
+  `SilenceConfirmer`-Branch sitzt **innerhalb** Row 4
+  (Confirmer-Aufrufstelle), NICHT als neue Row vor der
+  Truth-Table:
+
+  ```go
+  // runConfirmationGate (downservice.go:109-131), erweitert:
+  if !req.RemoveVolumes      { return nil }                  // Row 1
+  if req.AssumeYes           { return nil }                  // Row 2
+  if req.NonInteractive      { return ErrConfirmationRequired } // Row 3
+  // Row 4 ERWEITERT um SilenceConfirmer-Branch (T0-(d)):
+  var confirmer driven.Confirmer = s.confirmer
+  if req.SilenceConfirmer {
+      confirmer = noopConfirmer{}
+  }
+  ok, err := confirmer.ConfirmRemoveVolumes(ctx)
+  if err != nil  { return fmt.Errorf("confirmer error: %w", err) }
+  if !ok         { return ErrConfirmationRequired }
+  return nil
+  ```
+
+  **Begründung der Branch-Position**: (a) Row 2/3-Vorlauf
+  bleibt unangetastet — `--yes` und `--no-interactive` haben
+  Vorrang vor dem JSON-Silencing-Branch (analoge Disziplin
+  zum `--quiet --json`-Pattern: explicit Flags > impliziter
+  Mode-Default). (b) Branch wirkt nur wenn die Truth-Table
+  Row 4 erreicht — vor `--yes` ist alles short-circuit. (c)
+  Pattern bleibt Pure-Function (kein State-Mutiert).
 - **T0-(e) Mapper-Tabelle Layer-Heim** (R2-LOW-2 Heim-
   Festzurrung): zwei separate Mapper
   `mapUpErrorToDiagnostic`/`mapDownErrorToDiagnostic` ODER ein
@@ -607,22 +682,21 @@ u-boot down --volumes --json             # default interactive prompt — analog
 | - | --- | --- | --- |
 | T0 | Discovery + Sub-Decisions (a)-(k) klären; Review-Runden | — (Plan) | — |
 | T1 | **Entfällt** (analog remove T1): `noopConfirmer` lebt bereits in `application/noop.go:17-33`, `io.Discard` ist Go-stdlib — beide Helper für ProgressSink-Silencing und Confirmer-Swap existieren | — (entfällt) | T0 |
-| T2 | Port-Types: `UpRequest.SilenceProgress` request-time ProgressSink-Discard; `DownRequest.SilenceConfirmer`-Feld; `UpResponse.Warnings []driving.WarningEntry` (Type schon da aus remove T2). **Zwei neue Port-Sentinels** (R2-HIGH-2 Fix): `driving.ErrUpFileSystem` (`port/driving/up.go`) und `driving.ErrDownFileSystem` (`port/driving/down.go`) analog `driving.ErrRemoveFileSystem` — für die fünf FS-Read-Wraps (`upservice.go:105/138/148`, `downservice.go:81/97`) als Multi-`%w`-Wrap-Target | ~120 | T0 |
+| T2 | Port-Types: **`UpRequest.SilenceProgress bool`** + **`DownRequest.SilenceConfirmer bool`** (analog `RemoveServiceRequest.SilenceConfirmer`); `UpResponse.Warnings []driving.WarningEntry` (Type schon da aus remove T2). **Zwei neue Port-Sentinels** (R2-HIGH-2 Fix): `driving.ErrUpFileSystem` und `driving.ErrDownFileSystem` (Pattern-Erbe `driving.ErrRemoveFileSystem` mit Read-spezifischer Sentinel-Message-Form, R3-MED-1: `"up: filesystem read failed"` / `"down: filesystem read failed"` — NICHT `"mutation failed"`, weil up/down read-only). Co-Migration der Port-Sentinel-Kommentare (`up.go:43,89,97`, R3-HIGH-3): `ErrComposeFileMissing`-Kommentar `"Maps to LH-FA-CLI-006 exit code 10"` → `"Maps to LH-FA-UP-001 exit code 10"`; `ErrStabilizationTimeout`-Kommentar dito `LH-FA-UP-001 exit code 12`; `ErrInvalidTimeout` bleibt `LH-FA-CLI-006` (CLI-Form-Validierung). | ~120 | T0 |
 | T3 | Application-Layer: ProgressSink-Discard-Wiring im JSON-Mode (request-time analog T0-(c)); `DownService.Down()`-Request-time Gate-Branch ohne Field-Mutation (T0-(d) Option (b) — kein `downMu` nötig, race-frei) — KEIN remove-1:1-Service-Field-Swap mit Mutex. **Multi-`%w`-Wrap-Migration** (R2-HIGH-2 Fix) der fünf FS-Read-Stellen auf `ErrUpFileSystem`/`ErrDownFileSystem`. Mapper-Helper `mapComposeRuntimeSentinel(err)` in `cli/composesentinel.go` für die geteilten Docker/Compose-Sentinels (T0-(e) R2-LOW-2) | ~120 | T2 |
-| T4 | Composition-Root: heute existiert KEINE up/down-fsFactory (kein Recorder) — T4 prüft ob `cmd/uboot/main.go` Wiring-Updates braucht (vermutlich nur Confirmer-Bezug für down) | ~20 | T3 |
-| T5 | CLI-RunE: `runUp`/`runDown` ruft generische Helper mit `command="up"`/`"down"`, `mapErr=mapUpErrorToDiagnostic`/`mapDownErrorToDiagnostic`; Envelope-Pfade; Allowlist-Migration mit zwei separaten Einträgen (R2-LOW-1); Mapper neu; `data`-Structs (`upStatusData`/`downStatusData`); WARN-Migration. **`baseDirSanitizedError`-Helper-Extraktion** (R2-MED-5 Fix): geteilter Helper aus `cli/remove.go:465-491` nach neuem `cli/sanitize.go` extrahieren; `runUp`/`runDown` rufen `sanitizeBaseDir(err, cwd)` vor `reportError` analog `remove.go:299` | ~250 | T2 |
-| T6 | Acceptance-Tests: ~12-16 Tests (Envelope-Pin both Subcommands, Idempotenz-Pin für down, `--quiet --json`-Pin, ProgressSink-Silencing-Pin, Confirmer-Branch-Pin für `down --volumes --json` ohne `--yes` (R2-MED-2), ConflictingModeFlags-Pin, Service-Sentinels-Pins, Multi-`%w`-Switch-Order-Pin für FS+Docker (R2-HIGH-2), Path-Leak-Sanitizer-Pin (R2-MED-5), Empty-Array-Pins für services+diagnostics (R2-LOW-3)) | ~500-600 | T5 |
+| T4 | **Entfällt-Kandidat** (R3-LOW-2, analog T1): Composition-Root `cmd/uboot/main.go` hat heute schon `NewUpService` und `NewDownService` mit den nötigen Deps (FileSystem, DockerEngine, Confirmer, Logger). Kein Recorder, kein fsFactory-Closure-Wechsel. Bei `SilenceProgress`/`SilenceConfirmer`-Form (Bool-Field, kein Service-Field-Swap) braucht es kein Wiring-Update. **T4 entfällt** wenn die T0-(c)+(d) Form (d)/(b) gewählt sind — falls Pre-Implementation noch ein Wiring-Edit auftritt, wandert T4 wieder rein. | — (entfällt erwartet) | T3 |
+| T5 | CLI-RunE: `runUp`/`runDown` ruft generische Helper mit `command="up"`/`"down"`, `mapErr=mapUpErrorToDiagnostic`/`mapDownErrorToDiagnostic`; Envelope-Pfade; Allowlist-Migration mit zwei separaten Einträgen (R2-LOW-1); Mapper neu; `data`-Structs (`upStatusData`/`downStatusData`); WARN-Migration. **`baseDirSanitizedError`-Helper-Extraktion** (R2-MED-5 Fix + R3-LOW-1 File-Form-Pin): geteilter Helper aus `cli/remove.go:465-540` (incl. `replaceBareBaseDir` + `isPathComponentByte`) nach neuem File **`cli/sanitize.go`** (im **bestehenden `package cli`**, NICHT Sub-Package `cli/sanitize/`). Begründung: `remove.go:299` kann den Helper ohne Migration weiternutzen (package-interne Symbole bleiben package-intern). Up/down's `runUp`/`runDown` rufen `sanitizeBaseDir(err, cwd)` vor `reportError` analog `remove.go:299`. | ~250 | T2 |
+| T6 | Acceptance-Tests: **~14-18 Tests** (R3-LOW-3 Count-Anpassung, +3 für neue Pin-Klassen aus R2/R3): Envelope-Pin both Subcommands, Idempotenz-Pin für down, `--quiet --json`-Pin, `SilenceProgress`-Pin (R3-HIGH-2 Form (d)), Confirmer-Branch-Pin für `down --volumes --json` ohne `--yes` (R2-MED-2), ConflictingModeFlags-Pin, Service-Sentinels-Pins (Rows 1-9 der Mapper-Tabelle), Multi-`%w`-Switch-Order-Pin FS-first für FS+Docker (R2-HIGH-2 + R3-HIGH-1), Path-Leak-Sanitizer-Pin (R2-MED-5), Empty-Array-Pins für services+diagnostics (R2-LOW-3), CommandConfigGate-Refuse-by-Default-Pin (R2-MED-2 Symmetrie-Pin) | ~500-600 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe) | ~50 | T6 |
-| T8 | Closure: CHANGELOG, cli-json-output.md §6/§6.7/§7 (zwei §7-Zeilen "nur ReadFile"), roadmap done-Zähler 5→6, **carveouts.md** drei neue Einträge (Recreate-Warnings, Volume-Named-Liste, Partial-Snapshot — Multi-Port als vierter falls Real-World-Trigger), **vier open/-Stubs** schaffen (R2-MED-1 Fix Memory-`carveouts_need_plans`): `slice-v1-recreate-detection`, `slice-v1-down-volumes-named-list`, `slice-v1-up-partial-snapshot-on-failure`, ggf. `slice-v1-multi-port-services`. Slice nach `done/` mit DoD-Hash-Tabelle | — (Doku) | T7 |
+| T8 | Closure: CHANGELOG, **`cli-json-output.md` §6/§6.7/§7** mit konkretem **`(code, exitCode)`-Tupel-Disambiguation-Block** in §6.7 (R3-MED-5: Pattern-Vorlage analog remove `LH-FA-ADD-007` Multi-Use; verbatim Beispiel: `LH-NFA-REL-003`/Exit 14 ist FS, Exit 11 ist Docker-Daemon, Exit 12 ist Compose-Runtime — Konsumenten MÜSSEN auf (`code, exitCode`)-Tupel filtern, nicht nur auf `code`); §7 zwei neue Zeilen "nur ReadFile" für up/down; roadmap done-Zähler 5→6, **carveouts.md** drei neue Einträge (Recreate-Warnings, Volume-Named-Liste, Partial-Snapshot — Multi-Port als vierter falls Real-World-Trigger, R3-LOW-Bonus-Klarstellung im Stub-Trigger), **vier open/-Stubs** schaffen (R2-MED-1 Memory-`carveouts_need_plans`): `slice-v1-recreate-detection`, `slice-v1-down-volumes-named-list`, `slice-v1-up-partial-snapshot-on-failure`, ggf. `slice-v1-multi-port-services`. **envelope-consolidation-Stub-Update** (R3-MED-3+R3-MED-4): Sub-Decision 2 dort als "festgelegt durch up-down T5" markieren; Wrap-Site-Inventar erläutern dass up/down-Sites schon abgedeckt sind; Extraktions-Quelle auf `cli/sanitize.go` aktualisieren. Slice nach `done/` mit DoD-Hash-Tabelle | — (Doku) | T7 |
 
-LOC-Bilanz vorläufig: **~1060-1160** (R2-Korrektur nach oben:
-T2+40 für zwei neue FS-Sentinels, T3+40 für Multi-`%w`-Migration
-der 5 FS-Wrap-Stellen, T5+50 für `sanitizeBaseDir`-Helper-
-Extraktion + Aufrufe, T6+100 für drei neue Pin-Klassen
-(Sanitizer, Switch-Order, Confirmer-Branch). Pattern-Erbe von
-remove (Confirmer-Konzept + FS-Sentinel-Pattern + Sanitizer-
-Pattern), init (ProgressPort-Silencing-Vorbild) und doctor
-(typed Data-Carrier).
+LOC-Bilanz: **~1040-1140** (R3-Justierung: T4 entfällt
+erwartet = -20; T2 +5 für `SilenceProgress`-Bool-Field; T3 +3
+für Service-Layer-Branch). Tranchen-Summen jetzt T2(~125) +
+T3(~125) + T4(0 erwartet) + T5(~250) + T6(500-600) + T7(~50).
+Pattern-Erbe von remove (Confirmer-Konzept + FS-Sentinel-Pattern
++ Sanitizer-Pattern), init (ProgressPort-Silencing-Vorbild)
+und doctor (typed Data-Carrier).
 
 ## Out of Scope
 
@@ -700,20 +774,44 @@ Pattern), init (ProgressPort-Silencing-Vorbild) und doctor
   `sanitizeBaseDir(removeErr, cwd)`-Aufruf.
 
   **Sub-Sequenz-Folge** für envelope-consolidation-Stub
-  Update: der existierende Stub
+  Update (R3-MED-3 + R3-MED-4): der existierende Stub
   ([`slice-v1-cli-json-envelope-consolidation`](slice-v1-cli-json-envelope-consolidation.md))
   beschreibt Pattern-Drift nur für add/init/generate, NICHT
-  für up/down — der existierende Stub-Trigger "Cluster-Stand
-  8/9" wäre semantisch eh in Cluster-T_close-Nähe, also
-  passt das. Wenn up/down den Sanitizer-Wrap selbst nutzen
-  (geteilter Helper), trägt der up/down-Slice den Pattern-Fix
-  bereits — der envelope-consolidation-Slice braucht nur noch
-  add/init/generate retroaktiv zu refactorn.
-- **Multi-Port-Form** für Services mit mehreren exposed Ports
-  (T0-(g) Option (ii)): heutiger `domain.ServiceStatus.Port`
-  ist single Display-String. Umstellung auf `Ports []string`
-  bricht das Domain-Pattern und ist eigener Slice falls
-  Real-World-Druck (z. B. Multi-Port-Service-Health-Reporting).
+  für up/down. Nach up-down-T5 ist der Sanitizer schon in
+  `cli/sanitize.go` extrahiert und up/down nutzt ihn. Drei
+  Konsequenzen für den envelope-consolidation-Stub:
+  (1) Sub-Decision 2 dort ("Helper-Heim für
+      `baseDirSanitizedError`-Extraktion") ist **obsolet** —
+      File-Heim ist `cli/sanitize.go` (durch up-down T5
+      festgenagelt), Stub-Update markiert die Sub-Decision
+      als "festgelegt, übernehme aus up-down T5".
+  (2) Wrap-Site-Inventar dort (Z. 60-66 in
+      envelope-consolidation-Stub) bleibt für add/init/
+      generate gültig — up/down ist nach T5 schon abgedeckt
+      und gehört NICHT in die Refactor-Liste.
+  (3) Die Extraktions-Quelle ist nach up-down-T5 NICHT mehr
+      `cli/remove.go:465-491`, sondern `cli/sanitize.go`
+      direkt. Stub-Text-Update nötig.
+  **T8-Closure-Pflicht** (R3-MED-3): up-down-T8 trägt einen
+  expliziten Edit am envelope-consolidation-Stub mit diesen
+  drei Konsequenzen. Memory-Feedback `carveouts_need_plans`-
+  Disziplin: Stubs werden bei Vorlauf-Festzurrung
+  aktualisiert, nicht nur bei Closure.
+- **Strukturierte Multi-Port-Liste** für Services mit
+  mehreren exposed Ports (T0-(g) Option (ii), R3-Bonus
+  Trigger-Klarstellung): heutiger
+  `domain.ServiceStatus.Port` (`serviceup.go:170-174`) IST
+  bereits Multi-Port-tauglich als **Komma-getrennter
+  Display-String** (`"5432:5432, 127.0.0.1:9091:9091"`).
+  JSON-Konsument bekommt im Stub-Form schon Multi-Port-Werte
+  als single `"port"`-CSV. Ein dedizierter Folge-Slice
+  `slice-v1-multi-port-services` macht NUR Sinn für
+  **strukturierte Liste** (`ports []string` mit pro-Port-
+  Splitting für Konsumenten-Parse-Erleichterung), nicht für
+  Multi-Port-Reporting-Fähigkeit-an-sich (die existiert schon).
+  Trigger entsprechend: Real-World-Konsument-Bedarf nach
+  strukturierter Form (z. B. Per-Port-Health-Reporting,
+  Per-Port-Filter in CI-Scripts).
 - **Docker-Daemon-Version-Reporting im Envelope** (z. B.
   `data.dockerVersion`): nicht in Spec gefordert, eigener Slice
   falls Konsumenten-Bedarf.
