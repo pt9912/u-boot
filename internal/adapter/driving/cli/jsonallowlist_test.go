@@ -17,16 +17,15 @@ import (
 //
 // Migrate-Forms: "doctor", "template list", "add" (T4 add-slice),
 // "init" (T5 init-slice), "generate" (T5 generate-slice), "remove"
-// (T5 remove-slice). Reject-Forms: 7 — see slice-doctor §T0-(g)
-// §Subcommand-Form-Inventar minus the migrated forms.
+// (T5 remove-slice), "up" + "down" (T5 up-down-slice). Reject-Forms:
+// 5 — see slice-doctor §T0-(g) §Subcommand-Form-Inventar minus the
+// migrated forms.
 func TestRootJSON_RejectsAllNonMigratedForms(t *testing.T) {
 	cases := []struct {
-		name        string
-		args        []string
-		wantSuffix  string
+		name       string
+		args       []string
+		wantSuffix string
 	}{
-		{"up", []string{"--json", "up"}, "up-down"},
-		{"down", []string{"--json", "down"}, "up-down"},
 		{"logs", []string{"--json", "logs"}, "logs"},
 		{"config (bare)", []string{"--json", "config"}, "config"},
 		{"config get", []string{"--json", "config", "get", "project.name"}, "config"},

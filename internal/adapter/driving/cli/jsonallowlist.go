@@ -26,8 +26,8 @@ import (
 //     generate: voll-schema via slice-v1-cli-json-dry-run-generate
 //     T5; remove: voll-schema via slice-v1-cli-json-dry-run-remove
 //     T5).
-//   - 7 Reject (heute): up, down, logs, config (bare),
-//     config get, config set, template (bare).
+//   - 5 Reject (heute): logs, config (bare), config get, config
+//     set, template (bare).
 //
 // Cluster-T_close: alle 13 in Allowlist ODER Mechanik komplett raus.
 func jsonAllowlist() map[string]bool {
@@ -38,6 +38,8 @@ func jsonAllowlist() map[string]bool {
 		"u-boot init":          true, // slice-v1-cli-json-dry-run-init T5
 		"u-boot generate":      true, // slice-v1-cli-json-dry-run-generate T5
 		"u-boot remove":        true, // slice-v1-cli-json-dry-run-remove T5
+		"u-boot up":            true, // slice-v1-cli-json-dry-run-up-down T5
+		"u-boot down":          true, // slice-v1-cli-json-dry-run-up-down T5
 	}
 }
 

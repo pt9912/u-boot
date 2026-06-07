@@ -414,7 +414,17 @@ func isFilesystemError(err error) bool {
 		// 14, not the default "1" — without this entry the recorder
 		// would surface plannedFiles[] to the user but the process
 		// would exit with the wrong code class.
-		errors.Is(err, driving.ErrRemoveFileSystem)
+		errors.Is(err, driving.ErrRemoveFileSystem) ||
+		// slice-v1-cli-json-dry-run-up-down T2/T3: ErrUpFileSystem /
+		// ErrDownFileSystem wrap raw os.fs.Exists / ReadFile errors in
+		// upservice.go (3 FS-Read-Wrap-Stellen) and downservice.go (2)
+		// so up/down FS-read failures map to LH-NFA-REL-003 / exit-
+		// code 14, not the default "1". Switch-Order in
+		// mapUp/mapDownErrorToDiagnostic checks the FS-Sentinel FIRST
+		// (T0-(e) R3-HIGH-1) so synthetic multi-`%w`-wraps with
+		// FS+Docker fall to FS+exit-14, not Docker+exit-11.
+		errors.Is(err, driving.ErrUpFileSystem) ||
+		errors.Is(err, driving.ErrDownFileSystem)
 }
 
 // isUsageError detects two distinct classes of usage-level errors:
