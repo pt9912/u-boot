@@ -66,10 +66,15 @@ Wrap-Site-Inventar (Stichproben aus R15-Audit):
 
 **Subset already covered durch up-down T5** (Update 2026-06-07
 nach up-down-Stub R3-MED-4 + R5-MED-3 Wortlaut-Präzisierung +
-R6-MED-2 Inventur-Korrektur): up/down's **FS-Read-Wraps UND
-Compose-Runtime-Wraps** — insgesamt **12 Stellen** (7 in
-`upservice.go:80,105,108,138,141,146,148` + 5 in
-`downservice.go:69,81,84,97,100`) — beide Klassen tragen
+R6-MED-2 Inventur-Korrektur + up-down T8-Closure):
+**HELPER-EXTRAKTION VOLLZOGEN** in up-down T5 — `cli/sanitize.go`
+existiert seit Commit `a5aaf9c` als File im bestehenden
+`package cli`. Sub-Decision 2 unten (File-vs-Sub-Package-Heim)
+ist **OBSOLET** weil festgelegt.
+
+up/down's **FS-Read-Wraps UND Compose-Runtime-Wraps** — insgesamt
+**12 Stellen** (7 in `upservice.go:80,105,108,138,141,146,148` +
+5 in `downservice.go:69,81,84,97,100`) — beide Klassen tragen
 absolute Pfade via `req.BaseDir` oder `filepath.Join(...)`.
 Function-Anker (robust gegen Zeilen-Drift): in `upservice`
 betroffen `readUBootYAML` + `readComposeFile` + `Up`-Wrapper

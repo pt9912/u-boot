@@ -13,6 +13,92 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- `feat(cli): u-boot up --json / u-boot down --json
+  (LH-FA-CLI-007 / LH-NFA-USE-004 / LH-FA-UP-001/003/004 /
+  LH-FA-CLI-005A)` — sechster Folge-Slice (6/9) des Cluster-
+  Slice `slice-v1-cli-json-dry-run`. **Read-only-Klasse** auf
+  lokalem FS: weder `--dry-run` noch `--diff` (Cluster-Slice
+  Z. 464-467) — nur `--json` mit typisierten Data-Carriern.
+  `u-boot up` und `u-boot down` sind im selben Slice gebündelt
+  weil beide den Compose-Status lesen und das Confirmer-Swap-
+  Pattern teilen. **`upStatusData.services[]`** trägt
+  `serviceStatus{name, state, port, healthcheck}` (plain Go-
+  Strings mit `omitempty` für port/healthcheck — keine Three-
+  State-Disambiguation nötig; LH-FA-UP-003 Mindestangaben);
+  `data.timeoutFireAndForget *bool omitempty` als Marker nur im
+  `--timeout=0`-Pfad (Pattern-Erbe remove's `*bool`-Key-
+  Absence-Disambiguation). **`downStatusData.removedVolumes
+  bool`** ohne omitempty (`false` ist legitimer Success-Wert
+  "nichts entfernt"). **`UpRequest.SilenceProgress bool` +
+  `DownRequest.SilenceConfirmer bool`** symmetrisch zum
+  remove-Pattern; CLI setzt sie auf `flags.JSON`. **Application-
+  Layer-ProgressSink-Branch** (`UpService.Up`): `effective :=
+  req.ProgressSink; if req.SilenceProgress { effective =
+  io.Discard }` — Compose-Phase-Stream wird im JSON-Mode
+  unterdrückt, nil-Default bleibt im DockerEngine-Adapter
+  (`progressSinkOrDiscard`-Pattern). **Application-Layer-
+  Confirmer-Branch** (`DownService.runConfirmationGate` Row 4):
+  Request-time Gate-Branch ohne Field-Mutation (`confirmer :=
+  s.confirmer; if req.SilenceConfirmer { confirmer =
+  noopConfirmer{} }`) — kein neuer `downMu`-Mutex nötig, race-
+  frei by construction. **Refuse-by-Default-Semantik** im
+  JSON-Mode: bei `--volumes --json` OHNE `--yes` returnt
+  `noopConfirmer.ConfirmRemoveVolumes` `(false, nil)` → fällt
+  durch in `ErrConfirmationRequired`/Exit 10 (Symmetrie zum
+  `--no-interactive`-Pfad). JSON-Konsumenten MUSSEN `--yes`
+  explizit setzen für destructive `--volumes`. **Zwei neue
+  FS-Sentinels** `driving.ErrUpFileSystem` /
+  `driving.ErrDownFileSystem` mit Read-spezifischer Message-Form
+  (`"<cmd>: filesystem read failed"`, NICHT `"mutation
+  failed"` weil up/down read-only auf lokalem FS). T3 migriert
+  fünf FS-Read-Wraps (`upservice.go:105/138/148` +
+  `downservice.go:81/97`) auf Multi-`%w`. **Mapper-Tabelle mit
+  verbindlicher Switch-Order** (T0-(e) R3-HIGH-1): zehn Rows
+  mit Mapper-Heim-Spalte (`mapUp`/`mapDown`/`helper`/`beide`).
+  Row 1 FS-Sentinel-first (LH-NFA-REL-003/Exit 14), Rows 2-3
+  shared `mapComposeRuntimeSentinel(err)`-Helper in neuem File
+  `cli/composesentinel.go` (LH-NFA-REL-003 für `driven.ErrDocker
+  Unavailable` und `driven.ErrComposeRuntime`), Row 4 up-only
+  `ErrStabilizationTimeout`/LH-FA-UP-001/Exit 12, Row 5 down-
+  only `ErrConfirmationRequired`/LH-FA-INIT-005/Exit 10
+  (geteilt mit init/remove), Row 6 shared `ErrComposeFileMissing`
+  /LH-FA-UP-001, Row 7 cross-cutting `ErrProjectNotInitialized`/
+  **LH-FA-INIT-001** (Pattern-Erbe generate als Environment-
+  Operation, NICHT add/remove `LH-FA-ADD-001`), Row 8 up-only
+  `ErrInvalidTimeout`/LH-FA-CLI-006, Row 9 down-only
+  `ErrConflictingModeFlags`/LH-FA-CLI-005A, Row 10 Default
+  LH-FA-CLI-006. **`(code, exitCode)`-Tupel-Disambiguation**
+  (cli-json-output.md §6.7-Doku-Pin): bei Multi-`%w`-Wraps
+  liefern Mapper (FS-first) und ExitCode-Helper (Driven-first
+  per `cli.go:285-313`) zwei getrennte Klassifikationen —
+  Konsument disambiguiert über das Tupel, NICHT über `code`
+  allein. Pattern-Erbe remove's `LH-FA-ADD-007` Multi-Use.
+  **`baseDirSanitizedError`-Helper-Extraktion**: aus
+  `cli/remove.go:465-538` nach neuem File `cli/sanitize.go`
+  (package-intern; `remove.go:299` nutzt unverändert weiter).
+  `runUp`/`runDown` wrappen UC-Errors mit `sanitizeBaseDir(err,
+  cwd)` vor `reportError` — 11 FS-Read- und Compose-Runtime-
+  Wraps in upservice/downservice tunneln keinen absoluten
+  Filesystem-Pfad mehr in `diagnostic.message`. **Allowlist-
+  Migration**: `u-boot up` + `u-boot down` als zwei separate
+  Einträge in `jsonAllowlist()` (Cobra-CommandPath-Form);
+  Reject-Liste schrumpft von 7 auf 5 (logs, config bare/get/set,
+  template bare). Tranchen-Reihenfolge: T1 + T4 entfallen
+  (noopConfirmer/io.Discard existieren als Helper; Composition-
+  Root braucht kein Wiring-Update bei Bool-Field-Pattern); T2
+  Port-Types (`e966a83`), T3 Application-Layer (`86fb5b2`), T5
+  CLI-RunE + Mapper + Sanitizer-Helper-Extraktion (`a5aaf9c`),
+  T6 28 Acceptance-Tests (`2473988`), T7 Pre-T8-Adressierung
+  von 11 Findings (`31f7238`), T8 Closure. **Acceptance-
+  Coverage**: 28 CLI-Tests (18 up + 10 down) plus 2 Application-
+  Layer-Tests in `downservice_test.go` für die `noopConfirmer`-
+  Branch-Defense (`removeVolumesCalls == 0` + Contrast-Pin).
+  **Out-of-Scope-V1 Carveouts mit open/-Stubs**: Recreate-
+  Detection (`slice-v1-recreate-detection`), Volume-Named-Liste
+  (`slice-v1-down-volumes-named-list`), Partial-Snapshot bei
+  Mid-ComposeUp-Failure (`slice-v1-up-partial-snapshot-on-
+  failure`), strukturierte Multi-Port-Liste (`slice-v1-multi-
+  port-services`). Coverage-Gate 91 %.
 - `feat(cli): u-boot remove --json / --dry-run / --diff
   (LH-FA-CLI-007/008 / LH-NFA-USE-004 / LH-FA-ADD-007 /
   LH-FA-CLI-005A)` — fünfter Folge-Slice (5/9) des Cluster-Slice

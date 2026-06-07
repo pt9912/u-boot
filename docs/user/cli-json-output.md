@@ -369,7 +369,7 @@ Reihenfolge gemäß Cluster-T0-(e):
 | 3 | `slice-v1-cli-json-dry-run-init` | `init` | done (DoD-Hash-Tabelle im Slice-File) |
 | 4 | `slice-v1-cli-json-dry-run-generate` | `generate` | done (DoD-Hash-Tabelle im Slice-File) |
 | 5 | `slice-v1-cli-json-dry-run-remove` | `remove` | done (DoD-Hash-Tabelle im Slice-File) |
-| 6 | `slice-v1-cli-json-dry-run-up-down` | `up`, `down` (gebündelt, read-only Compose-Status) | offen |
+| 6 | `slice-v1-cli-json-dry-run-up-down` | `up`, `down` (gebündelt, read-only Compose-Status) | done (DoD-Hash-Tabelle im Slice-File) |
 | 7 | `slice-v1-cli-json-dry-run-logs` | `logs` (Sub-Decision: JSON-Lines vs. Single-Envelope) | offen |
 | 8 | `slice-v1-cli-json-dry-run-config` | `config`, `config get`, `config set` (gebündelt, drei Formen) | offen |
 | 9 | `slice-v1-cli-json-dry-run-template` | `template` (bare) + `template list`-Envelope-Migration | offen |
@@ -769,6 +769,131 @@ Service (analog `InitProjectService.initMu` /
 laufen **innerhalb** der Lock-Region — sonst könnten parallel
 laufende Goroutinen ihre Swaps gegenseitig korrumpieren.
 
+### 6.7 `u-boot up --json` / `u-boot down --json` (slice-v1-cli-json-dry-run-up-down, done)
+
+`u-boot up` und `u-boot down` sind im sechsten Folge-Slice
+gebündelt weil beide Subcommands den Compose-Status lesen und
+das Confirmer-Swap-Pattern teilen. **Read-only-Klasse** auf
+lokalem FS: weder `--dry-run` noch `--diff` (Cluster-Slice
+Z. 464-467) — nur `--json` mit typisierten Data-Carriern.
+Docker-Daemon-State ändern beide (Container starten / stoppen,
+optional Volumes entfernen), aber das ist keine `--dry-run`-
+fähige Surface.
+
+- **`u-boot up --json`** → Minimal+Data-Envelope mit
+  `data: {services: [{name, state, port, healthcheck}],
+  timeoutFireAndForget?: bool}`. Stabilisierungs-Polling läuft
+  wie im Human-Mode; nur die Compose-Progress-Stream-Ausgabe
+  auf stderr wird unterdrückt
+  (`req.SilenceProgress = flags.JSON` triggert
+  Application-Layer-Branch auf `io.Discard`).
+- **`u-boot down --json`** → Minimal+Data-Envelope mit
+  `data: {removedVolumes: bool}`. Bool ohne `omitempty`:
+  `false` ist der legitime Success-Wert "kein `--volumes`
+  gesetzt".
+
+**Envelope-Shape**: `command="up"` bzw. `command="down"`, KEIN
+`subcommand`-Feld (beide sind Top-Level-Subcommands ohne Sub-
+Form). KEIN `dryRun`/`diff`/`plannedFiles`/`changes`/`hunks`-
+Feld (read-only-Klasse).
+
+**`--quiet --json` semantisch identisch zu `--json`**:
+Cluster-T0-(a) doctor-Pattern. `--quiet` darf den JSON-Output
+NICHT unterdrücken — JSON ist die Maschinen-Schnittstelle.
+Beide Flag-Reihenfolgen `--quiet --json` und `--json --quiet`
+produzieren denselben Envelope.
+
+**`--timeout=0` Fire-and-Forget im JSON-Mode**: Marker
+`data.timeoutFireAndForget: true` erscheint ausschließlich im
+`--timeout=0`-Pfad (`*bool`-Pointer mit `omitempty` —
+Key-Absence-Disambiguation analog remove's `volumesPurged`).
+`data.services: []` (NICHT `null`) auch bei Fire-and-Forget;
+nil-Slice wird im CLI-Layer mit `[]serviceStatus{}`
+initialisiert.
+
+**`down --volumes` Confirmer-Branch im JSON-Mode** (T0-(d)
+Option (b)): Request-time Gate-Branch in `runConfirmationGate`
+Row 4 swappt den wired Confirmer auf einen lokalen
+`noopConfirmer{}` (`(false, nil)`-Returns) wenn
+`req.SilenceConfirmer == true`. **Refuse-by-Default-Semantik**:
+bei `--volumes --json` OHNE `--yes` MUSS der User `--yes`
+explizit setzen — Symmetrie zum `--no-interactive`-Pfad.
+Direkter-Skip (proceed wie `AssumeYes`) wäre Security-by-
+Default-Verletzung. Refuse-Pfad liefert
+`ErrConfirmationRequired` → `LH-FA-INIT-005`/Exit 10 (geteilt
+mit init/remove). Rows 1-3 (`!RemoveVolumes` / `AssumeYes` /
+`NonInteractive`) behalten Vorrang vor dem JSON-Silencing-
+Branch — explicit Flags > impliziter Mode-Default. Kein
+State-Mutiert, kein neuer `downMu`-Mutex nötig, race-frei by
+construction.
+
+**Mapper-Tabelle mit verbindlicher Switch-Order** (T0-(e)
+R3-HIGH-1) — Reihenfolge ist Switch-Sequenz im Mapper-Code:
+
+| # | Sentinel | LH-Code | Exit | Mapper-Heim | Begründung |
+| - | -------- | ------- | ---- | ----------- | ---------- |
+| 1a | `driving.ErrUpFileSystem` | `LH-NFA-REL-003` | 14 | `mapUp` | FS-first damit Multi-`%w` mit FS+Docker auf FS-Klasse fällt |
+| 1b | `driving.ErrDownFileSystem` | `LH-NFA-REL-003` | 14 | `mapDown` | analog 1a |
+| 2 | `driven.ErrDockerUnavailable` | `LH-NFA-REL-003` | 11 | `helper` | Docker-Daemon vor Compose-Runtime |
+| 3 | `driven.ErrComposeRuntime` | `LH-NFA-REL-003` | 12 | `helper` | Compose-Runtime nach Daemon |
+| 4 | `driving.ErrStabilizationTimeout` | `LH-FA-UP-001` | 12 | `mapUp` | Up-spezifische Runtime-Klasse |
+| 5 | `driving.ErrConfirmationRequired` | `LH-FA-INIT-005` | 10 | `mapDown` | Confirmer-Refuse (geteilt mit init/remove) |
+| 6 | `driving.ErrComposeFileMissing` | `LH-FA-UP-001` | 10 | `beide` | Fachliche Validierung (Datei-Schema) |
+| 7 | `driving.ErrProjectNotInitialized` | `LH-FA-INIT-001` | 10 | `beide` | Pattern-Erbe generate (Environment-Operation) |
+| 8 | `cli.ErrInvalidTimeout` | `LH-FA-CLI-006` | 2 | `mapUp` | CLI-Form-Validierung |
+| 9 | `cli.ErrConflictingModeFlags` | `LH-FA-CLI-005A` | 2 | `mapDown` | Mode-Mutex-Verträge |
+| 10 | Default (unknown) | `LH-FA-CLI-006` | 1 | `beide` | Fallback |
+
+**Cross-Slice-Klassen-Pin für `ErrProjectNotInitialized`**:
+derselbe Sentinel mappt auf **`LH-FA-INIT-001`** bei
+Environment-Subcommands (up/down/generate) UND auf
+**`LH-FA-ADD-001`** bei Service-Subcommands (add/remove) —
+bewusste Cluster-Konvention. Konsumenten dürfen NICHT erwarten
+dass derselbe Sentinel cluster-weit auf denselben LH-Code
+mappt; sie disambiguieren über `command` plus `code`.
+
+**`(code, exitCode)`-Tupel-Disambiguation für Multi-`%w`-
+Wraps**: Mapper-Tabelle ist FS-first (Row 1), aber der
+ExitCode-Helper (`cli/cli.go:285-313`) checkt Driven-Sentinels
+ZUERST. Das ergibt eine bewusste Zwei-Pfad-Klassifikation:
+
+- Mapper → `diagnostics[0].code` (FS-Klasse-Signal)
+- ExitCode-Helper → `exitCode` (Sub-Sentinel-Quelle)
+
+Beispiele bei synthetisch konstruierten Multi-`%w`-Wraps:
+
+| Multi-Wrap | `code` (Mapper) | `exitCode` (Helper) | Interpretation |
+| --- | --- | --- | --- |
+| `%w: %w` mit `ErrUpFileSystem` + `ErrDockerUnavailable` | `LH-NFA-REL-003` | 11 | FS-Klasse-Signal + Docker-Daemon-Sub |
+| `%w: %w` mit `ErrUpFileSystem` + `ErrStabilizationTimeout` | `LH-NFA-REL-003` | 12 | FS-Klasse-Signal + Stabilization-Sub |
+| `%w: %w` mit `ErrUpFileSystem` + `ErrComposeRuntime` | `LH-NFA-REL-003` | 12 | FS-Klasse-Signal + Compose-Runtime-Sub |
+
+Konsumenten MÜSSEN auf `(code, exitCode)`-Tupel filtern, NICHT
+nur auf `code` allein. Pattern-Erbe remove's `LH-FA-ADD-007`-
+Multi-Use ist die Disambiguation-Vorlage. Heute existiert kein
+realer Code-Pfad der diese Sentinel-Paare chained
+(`readComposeFile` failed VOR `ComposeUp`, `runConfirmationGate`
+failed VOR `ComposeDown`) — die Disambiguation ist Defense-
+only gegen künftige Multi-Wrap-Konstruktionen. Acceptance-
+Tests pinnen ein Repräsentant pro Sub-Klasse (FS+Docker für
+Exit 11, FS+StabilizationTimeout für Exit 12); FS+ConfirmRequired
+/ FS+ComposeRuntime / FS+ProjectNotInitialized sind als
+by-design-Carveouts dokumentiert.
+
+**Path-Leak-Defense**: `runUp`/`runDown` wrappen UC-Errors mit
+`sanitizeBaseDir(err, cwd)` vor `reportError` — der Sanitizer
+extrahiert aus `cli/remove.go` (T7) in `cli/sanitize.go` (T5)
+lebt jetzt package-intern. 11 FS-Read- und Compose-Runtime-
+Wraps in upservice/downservice tunneln nach T3 keinen
+absoluten Filesystem-Pfad mehr in `diagnostic.message`.
+
+**Concurrency**: kein `upMu` / `downMu` — Pattern-Erbe init
+T0-(d) (Service-Field-Swap mit Mutex) ist HIER explizit
+**verworfen**. `SilenceProgress` und `SilenceConfirmer` sind
+Bool-Felder im Request, die Branches sind lokale Variablen im
+Use-Case-Method-Body. Kein Service-State mutiert → race-frei
+by construction.
+
 ---
 
 ## 7. Mutations-Matrix pro Subcommand
@@ -788,10 +913,15 @@ in derselben PR ergänzen.
 | `init` (slice-v1-cli-json-dry-run-init) | ✓ (Skeleton-Files + `u-boot.yaml`) | — | ✓ (Backup-Verz.) | ✓ (Skeleton-Dirs direkt; Backup indirekt) | — | ✓ (Backup) | ✓ (Backup) | ✓ (Backup) |
 | `generate` (slice-v1-cli-json-dry-run-generate) | ✓ (Artefakt-Files + `u-boot.yaml`-Allowlist-Mutation) | — | — | ✓ (devcontainer-Dir) | — | — | — | — |
 | `remove` (slice-v1-cli-json-dry-run-remove) | ✓ (managed-block strip auf `compose.yaml` + `.env.example` + `enabled: false` auf `u-boot.yaml`) | — | — | — | — | ✓ (Catalog-`extraFiles`, optional) | — | — |
+| `up` (slice-v1-cli-json-dry-run-up-down) | — | — | — | — | — | — | — | — |
+| `down` (slice-v1-cli-json-dry-run-up-down) | — | — | — | — | — | — | — | — |
 
 Andere modifying-Subcommands (`config set`) ergänzen ihre Zeile
-im jeweiligen Slice — heute `doctor`, `add`, `init`, `generate`
-und `remove` migriert.
+im jeweiligen Slice — heute `doctor`, `add`, `init`, `generate`,
+`remove`, `up` und `down` migriert. `up`/`down` sind read-only
+auf lokalem FS (nur `ReadFile(compose.yaml)` + `Exists`-Pre-
+Checks); die Docker-Daemon-Mutationen passieren durch den
+`DockerEngine`-Adapter ausserhalb dieser Matrix.
 
 ---
 

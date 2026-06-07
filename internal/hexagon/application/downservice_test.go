@@ -346,4 +346,11 @@ func TestDownService_SilenceConfirmer_False_UsesWiredConfirmer(t *testing.T) {
 	if len(f.confirmer.removeVolumesCalls) != 1 {
 		t.Errorf("wired confirmer was called %d times, want exactly 1", len(f.confirmer.removeVolumesCalls))
 	}
+	// T8-Bestätigungsrunde LOW-1 Symmetrie-Pin: bei wired-Confirmer
+	// + answer=true MUSS ComposeDown durchgereicht werden — schließt
+	// die Lücke dass ein Branch sowohl Confirmer-Call als auch
+	// Engine-Call stilllegen könnte.
+	if f.engine.downCallCount != 1 {
+		t.Errorf("ComposeDown was called %d times, want exactly 1 (wired-Confirmer + answer=true MUST proceed)", f.engine.downCallCount)
+	}
 }
