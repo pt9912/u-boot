@@ -1,9 +1,10 @@
 # Slice V1: `config --json` / `config get --json` / `config set --json` — drei Sub-Forms unter einem Folge-Slice
 
-> **Status:** `open/` (R1 + R2-Adressierung gefahren: R1=4+6+4, R2=3+6+4
-> alle adressiert; T0-Sub-Decisions auf (a)-(p) erweitert; LOC-Bilanz
-> auf ~1500-1900 hochgezogen wegen T4-Composition-Root-Wechsel +
-> zwei neuer Port-Sentinels). Achter Folge-Slice (8/9) des Cluster-Slice
+> **Status:** `next/` (R1+R2+R3-Adressierung gefahren: R1=4+6+4, R2=3+6+4,
+> R3=0+4+4 — Asymptote erreicht; T0-Sub-Decisions (a)-(p) komplett
+> mit R3-festgezurrten Beschlüssen für (a)/(b)/(g)/(o)/(p); vier
+> Folge-Slice-Stubs in `open/` gespawned; LOC-Bilanz ~1500-1900).
+> Achter Folge-Slice (8/9) des Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 8/9). **Drei Sub-Forms unter einem Slice**
 > (analog up-down-Bündelung): `u-boot config` (bare), `u-boot
@@ -24,7 +25,7 @@
 > [`slice-v1-cli-json-dry-run-logs`](../done/slice-v1-cli-json-dry-run-logs.md)
 > (Single-Envelope für Read-only + `(code, exitCode)`-Tupel-
 > Disambiguation Pattern). Erbt `subcommand`-Pflichtfeld-Form aus
-> [`slice-v1-cli-json-dry-run-template`](slice-v1-cli-json-dry-run-template.md)-
+> [`slice-v1-cli-json-dry-run-template`](../open/slice-v1-cli-json-dry-run-template.md)-
 > Stub (`command="config"` + `subcommand="list"|"get"|"set"` —
 > T0-(b) Sub-Decision).
 
@@ -232,7 +233,7 @@ docs-check).
        Stub-Overhead, 3x Review-Runden, redundante Pattern-
        Erbe-Sektionen.
   Plan-Empfehlung: **(i)** Bündelung. Pattern-Erbe up-down
-  bewiesen tragfähig.
+  bewiesen tragfähig. **R3-festgezurrt: (i) Bündelung**.
 
 - **T0-(b) Bare-Subcommand-Wert**: was steht in
   `envelope.subcommand` für **bare** `u-boot config`?
@@ -245,6 +246,12 @@ docs-check).
   unmittelbar mit der Code-Realität abgleichbar bleibt. `"list"`
   ist Drift gegen die Code-Benennung; `""` ist Spec-§322-
   fragwürdig.
+  **R3-festgezurrt: (i) `"show"`**. Cluster-Plan Z. 111-113
+  schlug `"list"`/`""` als Kandidaten vor; R3-Cross-Reference
+  schlägt Cluster-Plan-Vorschlag mit Code-Heim-Begründung
+  (`runConfigShow` ist der real existierende RunE). Cluster-
+  Plan-Klausel war Vorschlag, kein Beschluss (R3-LOW-3-
+  Adressierung).
 
 - **T0-(c) DTO-Carrier-Layout**: drei Sub-Forms tragen drei
   Carrier-Types:
@@ -379,19 +386,16 @@ docs-check).
   Pfad ist (i.a)-konform (`--follow` ist registriert,
   Reject im RunE). (R1-MED-3-Adressierung.)
 
-  **Help-UX-Trade-off** (R2-MED-2): bei (i.a) zeigt
-  `u-boot config --help` das `--dry-run`/`--diff`-Flag in der
-  Flag-Liste, obwohl die Verwendung zwingend zu Exit 2 führt.
-  Pattern-Erbe logs `--follow` ist anders: dort ist `--follow`
-  für Human-Mode echte Funktion (Stream-Tail) — bei config
-  bare/get sind die Flags **rein synthetisch**. Diskussion
-  wird in T0-Outcomes-Festzurrung erneut aufgegriffen mit
-  zwei Sub-Optionen: (i.a) Status-quo wie hier vorgeschlagen
-  ODER (i.c) PersistentFlag nur am `set`-Cmd, kein Register
-  an bare/get; `runConfigShow`/`runConfigGet` lesen via
-  `cmd.Flags().Changed("dry-run")` (cobra durchsucht parent-
-  chain auf dem Weg nach unten — Lookup kommt aus set) und
-  rejecten dann. T0-Review präzisiert.
+  **R3-festgezurrt: (i.a)**. Begründung: Variante (i.c)
+  "PersistentFlag nur am set + Parent-Chain-Lookup via
+  `cmd.Flags().Changed("dry-run")`" hängt von Cobra-Parent-
+  Chain-Default-Behavior ab, das nicht stabil dokumentiert
+  ist — Drift-Risiko gegen Cobra-Upgrades (heute v1.10.2 →
+  künftig v2). Die Help-UX-Pollution durch synthetische
+  Flags ist akzeptabel: der `--help`-Output zeigt zwei Flags
+  mit klarer Reject-Beschreibung ("only valid for `config
+  set`") — Pattern-Erbe init's `--no-confirm` ist analog
+  semantisch synthetisch für bestimmte Pfade.
 
 - **T0-(h) `subcommand`-Pflicht-Form für `config get` / `config
   set`**: bei Cobra-Compound (`u-boot config get`) trägt
@@ -491,6 +495,19 @@ docs-check).
   `validateConfigShowArgs` nur dann auf, wenn kein Child-
   Match — also ist der Validator-Pfad sauber.
 
+  **Cobra-Mechanik-Anker** (R3-MED-1-Adressierung):
+  `spf13/cobra/command.go:Find()` führt `legacyArgs`-Pfad
+  aus, der bei `u-boot config foo` (kein Child-Match) auf
+  den Parent-Cmd `config` als Target dispatcht plus
+  `args=["foo"]`. Cobra v1.10.2 ruft danach `Args(cmd,
+  args)` — also genau `validateConfigShowArgs(cmd, ["foo"])`.
+  Pattern-Erbe `remove` ist **kein direkter Vorbild**
+  (`remove` ist Leaf-Cmd ohne Children); Vorbild ist
+  konzeptionell die Custom-Validator-Form selbst. T6-Pin
+  `TestConfigUnknownSubcommand_FooEmitsEnvelope` pinnt
+  den Pfad und schützt gegen Cobra-Mechanik-Drift bei
+  Version-Upgrades.
+
 - **T0-(m) `ErrConfigValueInvalid`-Drei-Klassen-Disambiguation**
   (R2-MED-4-Adressierung): heute mappt `ErrConfigValueInvalid`
   drei semantisch unterschiedliche Pfade auf einen Sentinel:
@@ -523,13 +540,33 @@ docs-check).
   T0-(f) entsprechend erweitert (5 → 7 Rows fachlich plus
   FS/Schema/Default = 9-10 Rows total).
 
+  **`LH-FA-CONF-005`-Multi-Use mit drei Sentinels**
+  (R3-MED-2-Adressierung): Mapper-Tabelle T0-(f) belegt
+  `LH-FA-CONF-005` jetzt in **drei Rows** (Row 4
+  `ErrConfigPathUnknown`, Row 5 `ErrConfigWriteRejected`,
+  Row 7 `ErrConfigValueNotSet`). Pattern-Erbe `LH-FA-ADD-007`
+  (remove) war doppelt belegt — drei Sentinels auf einem
+  LH-Code ist eine Steigerung. Konsumenten können per
+  `code: LH-FA-CONF-005` allein nicht disambiguieren —
+  müssen auf den Sentinel-Klassen-Hint im Message-Body
+  zurückgreifen. T8 dokumentiert das in `cli-json-output.md`
+  §6.9 als expliziter Konsumenten-Disambiguation-Block
+  analog `(code, exitCode)`-Tupel für up-down/logs (nur
+  hier: `(code, message-prefix)` weil keine ExitCode-
+  Disambiguation hilft, alle drei sind Exit 10).
+
 - **T0-(n) Logger-Output im JSON-Mode + Orphan-Feature-Warn-
-  Migration** (R2-MED-5-Adressierung): heute drei
-  `s.logger.Info(...)`-Sites im `ConfigService.Set`-Pfad:
-  `config.go:200` (Set-Success-Log), `config.go:237`
-  (`maybeWarnOrphanFeatureActivation` — User-Warn dass
-  ein Feature aktiviert wurde aber sein Service nicht
-  registriert ist), `config.go:813` (Allow-Set-Success).
+  Migration** (R2-MED-5-Adressierung; R3-MED-4-Erweiterung
+  um zwei Debug-Sites): heute **fünf** `s.logger.*`-Sites
+  im `ConfigService.Set`-Pfad: drei `Info` plus zwei
+  `Debug`. Alle werden durch den `SilenceLogger`-Swap
+  betroffen (`logger := s.logger; if req.SilenceLogger {
+  logger = noopLogger{} }` an Method-Beginn). Sites:
+  `config.go:158` (NoOp-Debug), `:200` (Set-Success-Info),
+  `:237` (`maybeWarnOrphanFeatureActivation` — User-Warn
+  dass ein Feature aktiviert wurde aber sein Service nicht
+  registriert ist), `:782` (Allow-NoOp-Debug), `:813`
+  (Allow-Set-Success-Info).
   Im JSON-Mode emittieren sie stderr-Logs parallel zum
   Envelope auf stdout. Pattern-Erbe up-down `SilenceProgress`,
   remove `SilenceConfirmer` haben Bool-Field-Pattern.
@@ -572,6 +609,7 @@ docs-check).
   Failures (Stages 1-4); **(ii)** Voll-Form ab Stage 5
   (NoOp/Schema-Sanity nach Patch). Pattern-Erbe init T0-(l)
   Stage-Map-Form analog. T6-Pin pro Stage.
+  **R3-festgezurrt: Plan-Empfehlung** (Mixed-Form je Stage).
 
 - **T0-(p) Hint-String-Sanitization für Error-Messages**
   (R2-Sub-Decision-Lücke D-Hint): `ErrConfigPathUnknown`
@@ -585,6 +623,8 @@ docs-check).
   separater Sanitizer-Helper nötig — `cli/sanitize.go` ist
   ausreichend wenn `runConfig*`-RunE konsequent `sanitize
   BaseDir(err, cwd)` vor `reportError` aufruft.
+  **R3-festgezurrt: Plan-Empfehlung** (alle UC-Errors mit
+  `sanitizeBaseDir` wrappen via `cli/sanitize.go`).
 
 ## Tranchen (vorgeschlagen — präzisiert in T0-Outcomes)
 
@@ -592,13 +632,13 @@ docs-check).
 | - | --- | --- | --- |
 | T0 | Discovery + Sub-Decisions (a)-(p) klären; Review-Runden | — (Plan) | — |
 | T1 | **Entfällt** (analog up-down/logs T1): `cli/sanitize.go`-Helper, `RecordingFileSystem`-Adapter, Pure-Go-Diff-Renderer existieren bereits aus add/init/generate/remove/up-down T5 | — (entfällt) | T0 |
-| T2 | Port-Types: `configFlags{JSON, Quiet, DryRun, Diff}` (Set-Form), `configGetFlags{JSON, Quiet}`, `configShowFlags{JSON, Quiet}` — ggf. zu **einem** `configFlags` konsolidiert wenn Bare/Get die Modifying-Felder ignorieren. **`ConfigSetRequest.PreviewMode driving.PreviewMode`-Field-Erweiterung** + **`ConfigSetRequest.SilenceLogger bool`-Field** (Pattern-Erbe `UpRequest.SilenceProgress`; R2-MED-5 T0-(n)). **`ConfigSetResponse.Warnings []driving.WarningEntry`-Field** für Orphan-Feature-WARN-Migration (Pattern-Erbe `RemoveResponse.Warnings`; R2-MED-5 T0-(n)). **Zwei neue Port-Sentinels** (R2-MED-4 T0-(m)): `driving.ErrConfigWriteRejected` + `driving.ErrConfigPostPatchSanityFailed`. **KEIN neuer FS-Sentinel** (`ErrConfigFileSystem` existiert bereits). `cli.ErrDryRunNotApplicable`-Sentinel (T0-(g) Option (i.a)) im CLI-Layer als **Pflicht** (R2-LOW-3-Fix). | ~130 | T0 |
+| T2 | Port-Types: `configFlags{JSON, Quiet, DryRun, Diff}` (Set-Form), `configGetFlags{JSON, Quiet}`, `configShowFlags{JSON, Quiet}` — ggf. zu **einem** `configFlags` konsolidiert wenn Bare/Get die Modifying-Felder ignorieren. **`ConfigSetRequest.PreviewMode driving.PreviewMode`-Field-Erweiterung** + **`ConfigSetRequest.SilenceLogger bool`-Field** (Pattern-Erbe `UpRequest.SilenceProgress`; R2-MED-5 T0-(n)). **`ConfigSetResponse.Warnings []driving.WarningEntry`-Field** für Orphan-Feature-WARN-Migration (Pattern-Erbe `RemoveResponse.Warnings`; R2-MED-5 T0-(n)). **Zwei neue Port-Sentinels** (R2-MED-4 T0-(m)): `driving.ErrConfigWriteRejected` + `driving.ErrConfigPostPatchSanityFailed`. **KEIN neuer FS-Sentinel** (`ErrConfigFileSystem` existiert bereits). **KEIN `ConfigSetResponse.AppendedSources`-Field** — `appendedSources` lebt CLI-Layer-only (R2-MED-1 T0-(c); R3-LOW-2-Klarstellung). `cli.ErrDryRunNotApplicable`-Sentinel (T0-(g) Option (i.a)) im CLI-Layer als **Pflicht** (R2-LOW-3-Fix). | ~130 | T0 |
 | T3 | Application-Layer: **Multi-`%w`-Wrap-Migration** der 5 bestehenden FS-Read/Write-Wrap-Sites in `application/config.go` (Z. 196, 524, 565, 592, 810) von heutiger Form `%w: ... : %v` auf `%w: ... : %w` (Pattern-Erbe up-down T3). **`ErrConfigValueInvalid`-Multi-Use-Splitting** (R2-MED-4 T0-(m)): WriteAllowed-Reject-Sites (Z. 251-256) auf `ErrConfigWriteRejected` umlenken; Post-Patch-Sanity-Sites (Z. 376, 388) auf `ErrConfigPostPatchSanityFailed` umlenken; Value-Coercion-Sites (Z. 278, 287, 296, 308, 313) bleiben auf `ErrConfigValueInvalid`. **`PreviewMode`-Handling** im `Set`-Method-Body: `selectFS(req.PreviewMode)` analog `AddService.Add`. **Logger-Branch** im `Set`-Method-Body: `logger := s.logger; if req.SilenceLogger { logger = noopLogger{} }` (R2-MED-5 T0-(n) — Pattern-Erbe up-down ProgressSink). **Orphan-Feature-Warn-Migration**: `maybeWarnOrphanFeatureActivation`-Output (Z. 237) wird zusätzlich als `driving.WarningEntry{Code: "LH-FA-DEV-003", Level: "warn", …}` in `ConfigSetResponse.Warnings` angehängt. KEIN ProgressSink-Branch nötig (config emittiert keinen Stream). KEIN Confirmer-Branch nötig (config set nicht destructive). | ~80 | T2 |
 | T4 | **Composition-Root-Erweiterung** (R2-HIGH-2-Adressierung — ursprüngliche "entfällt"-Aussage war falsch): `NewConfigServiceWithFactory(fsFactory, yaml, logger)`-Konstruktor neu (analog `NewAddServiceServiceWithFactory` etc.) + `configFSFactory := newPreviewFSFactory(fsAdapter)`-Zeile in `cmd/uboot/main.go:121-138`-Block + Konstruktor-Wechsel `NewConfigService` → `NewConfigServiceWithFactory`. Heute (Z. 139) ist `ConfigService` der **einzige Modifying-Service ohne `WithFactory`-Variante**. | ~40 | T3 |
 | T5 | CLI-RunE: drei `runConfig*`-Refactors auf Cluster-Signatur (ctx, stdout, errOut, args, flags, uc, getwd). Allowlist-Migration 3 Forms. Neuer `mapConfigErrorToDiagnostic` mit Switch-Order T0-(f) (10 Rows nach R2-MED-4-Splitting). Pre-UC-Validation via `reportError`. **Custom-Args-Validatoren** `validateConfigSetArgs` + `validateConfigGetArgs` + `validateConfigShowArgs` (T0-(l)) für Envelope-konforme Args-Mismatch- und `unknown command`-Rejects (R1-HIGH-4 + R2-HIGH-3). **`config set` Voll-Schema-Pfad** mit `fsFactory(mode)` für Dry-Run (Pattern-Erbe add T5). **`config set --diff`-Pfad** mit Pure-Go-Diff-Renderer (Pattern-Erbe add T5). **bare/get `--dry-run`/`--diff`-Reject** via `ErrDryRunNotApplicable` (T0-(g) Option (i.a)). **`flags.JSON = a.json` Inheritance-Lesen** im RunE-Closure analog `runTemplateList`. **`SilenceLogger`-Field-Wiring** im Set-Request (T0-(n)). **WARN-Diagnostics-Mapping**: `Response.Warnings []driving.WarningEntry` → Envelope-`diagnostics[]` mit `level: "warn"`-Einträgen analog remove-Pattern. **KEINE `isFilesystemError`-Co-Migration nötig** — `ErrConfigFileSystem` ist seit Pre-Cluster-Slice in `cli.go:405` registriert (R1-LOW-1). Sanitizer-Aufrufe via `cli/sanitize.go` (T0-(p)). | ~350-450 | T2, T4 |
-| T6 | Acceptance-Tests: **~24-28 Tests** (Erhöhung nach R2-MED-4/MED-5/HIGH-3): bare-Envelope-Pin (data.body), Get-Envelope-Pin (data.path/value), Set-Voll-Schema-Pin (Subcommand-Pflicht + plannedFiles + changes), Set-Dry-Run-Pin (kein WriteFile-Call), Set-Diff-Pin (hunks-Form), Set-NoOp-Pin (empty plannedFiles + empty diagnostics + `data.noOp=true`, T0-(d) **R2-HIGH-1-konform** kein Info-Diagnostic), `--quiet --json`-Pin **für alle drei Sub-Forms** (R1-MED-2), **Mapper-Rows 1-10** (R2-MED-4 — drei neue Rows für `ErrConfigWriteRejected`, `ErrConfigPostPatchSanityFailed`, `ErrDryRunNotApplicable`), Pre-UC-Validation-Pin (Path-Kind-Mismatch für `--allow-external-feature-sources`), Sanitizer-Pin, Subcommand-Pflicht-Pin (`""`-Reject), `--dry-run`-Reject-Pin auf bare/get (T0-(g)), Custom-Args-Validator-Pins (NoPositionalArg + TooManyArgs auf set/get) für Envelope-konformen Exit 2, **`unknown command`-Pin** für `u-boot config foo` envelope-konformer Reject (R2-HIGH-3), Cobra-Help-Edge-Case-Pin (`--help --json` kein Envelope-Pfad, R1-MED-6), **Orphan-Feature-WARN-Pin** für `diagnostics[].level: "warn"`-Migration (R2-MED-5), **SilenceLogger-Pin** im JSON-Mode (R2-MED-5), **Mid-Stage-Failure-Snapshot-Pin** pro Stage 1-5 (R2-T0-(o)), **FS+Validation-Multi-`%w`-Switch-Order-Defense-Pin** analog up-down/logs `_ByDesign`-Suffix. | ~750-950 | T5 |
+| T6 | Acceptance-Tests: **~24-28 Tests**: bare-Envelope-Pin (data.body), Get-Envelope-Pin (data.path/value), Set-Voll-Schema-Pin (Subcommand-Pflicht + plannedFiles + changes), Set-Dry-Run-Pin (kein WriteFile-Call), Set-Diff-Pin (hunks-Form), Set-NoOp-Pin (empty plannedFiles + empty diagnostics + `data.noOp=true`, T0-(d) **R2-HIGH-1-konform** kein Info-Diagnostic), `--quiet --json`-Pin **für alle drei Sub-Forms** (R1-MED-2), **Mapper-Rows 1-10** (R2-MED-4), Pre-UC-Validation-Pin (Path-Kind-Mismatch für `--allow-external-feature-sources`), Sanitizer-Pin, Subcommand-Pflicht-Pin (`""`-Reject), `--dry-run`-Reject-Pin auf bare/get (T0-(g)), Custom-Args-Validator-Pins (NoPositionalArg + TooManyArgs auf set/get) für Envelope-konformen Exit 2, **`TestConfigUnknownSubcommand_FooEmitsEnvelope`** (R3-MED-1: pinnt Cobra-Mechanik `legacyArgs`-Pfad gegen Version-Drift), **`LH-FA-CONF-005`-Disambiguation-Pin** (R3-MED-2: drei Rows 4/5/7 produzieren unterschiedliche `data`-Carrier oder Message-Prefixes), Cobra-Help-Edge-Case-Pin (`--help --json` kein Envelope-Pfad, R1-MED-6), **Orphan-Feature-WARN-Pin** für `diagnostics[].level: "warn"`-Migration (R2-MED-5), **SilenceLogger-Pin** im JSON-Mode für alle fünf Logger-Sites (R2-MED-5 + R3-MED-4), **Mid-Stage-Failure-Snapshot-Pin** pro Stage 1-5 (R2-T0-(o)), **FS+Validation-Multi-`%w`-Switch-Order-Defense-Pin** analog up-down/logs `_ByDesign`-Suffix. | ~750-950 | T5 |
 | T7 | **Review-Fix-Rounds + Pre-T8-Bestätigungsrunde** (R1-MED-5-Schärfung) analog logs (T7 + R15-äquivalente Bestätigungsrunde). Erwartet bei drei Sub-Forms + erste Read-only+Modifying-Hybrid: höhere Review-Komplexität als logs/up-down — `~150-250 LOC + Pre-T8-Bestätigungsrunde`. | ~150-250 | T6 |
-| T8 | Closure: CHANGELOG, `cli-json-output.md` **neue §6.9-Sektion** mit drei Sub-Form-Envelopes + Set-Voll-Schema-Beispiel + Subcommand-Pflicht-Doku (RunE-only-Geltungsbereich) + `--dry-run`/`--diff`-Reject-Doku für Read-only-Forms; **`(code, exitCode)`-Tupel-Disambiguation-Block entfällt für config** (R2-MED-6 — config hat keine Driven-Sentinels-Klassen-Kollision wie up-down/logs; FS vs. Validation hat saubere Code-Disambiguation). **§6.1 Reject-Liste-Update von 4 auf 1** (R2-MED-6 + R2-LOW-4: nur `template bare` bleibt reject). **§6 Tabelle Z. 374 Status `offen → done (DoD-Hash-Tabelle im Slice-File)`**. **§7 NEUEINTRAG** `config set` mit `WriteFile`-Spalte ✓ (R1-HIGH-2-Adressierung). roadmap done-Zähler 7→8. carveouts.md-Einträge falls T0-Review Folge-Slices spawnt. Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
+| T8 | Closure: CHANGELOG, `cli-json-output.md` **neue §6.9-Sektion** mit drei Sub-Form-Envelopes + Set-Voll-Schema-Beispiel + Subcommand-Pflicht-Doku (RunE-only-Geltungsbereich) + `--dry-run`/`--diff`-Reject-Doku für Read-only-Forms; **`(code, exitCode)`-Tupel-Disambiguation-Block entfällt für config** (R2-MED-6); **NEU: `LH-FA-CONF-005`-Multi-Use-Disambiguation-Block** (R3-MED-2) — `code: LH-FA-CONF-005` mit drei Sentinels (Path-Unknown / Write-Rejected / Value-Not-Set), Konsumenten disambiguieren per Message-Prefix oder Sentinel-Klassen-Hint da alle drei Exit 10 sind. **§6.1 Reject-Liste-Update von 4 auf 1**. **§6 Tabelle Z. 374 Status `offen → done`**. **§7 NEUEINTRAG** `config set` mit `WriteFile`-Spalte ✓. roadmap done-Zähler 7→8. carveouts.md-Einträge **für vier Folge-Slice-Stubs** (R3-MED-3): `slice-v1-config-multi-path-set`, `slice-v1-config-list-subcommand`, `slice-v1-config-multi-path-get`, `slice-v1-config-structured-hint`. Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
 
 LOC-Bilanz vorläufig: **~1500-1900** (T2 ~130 + T3 ~80 + T4
 ~40 + T5 ~350-450 + T6 ~750-950 + T7 ~150-250 = ~1500-1900

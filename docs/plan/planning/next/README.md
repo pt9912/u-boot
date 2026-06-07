@@ -9,5 +9,6 @@ Dateiname-Konventionen.
 
 ## Bestand
 
-(zur Zeit leer — slice-v1-cli-json-dry-run-logs ist nach
-`done/` gewandert; Cluster-Stand 7/9 done, 2/9 offen: `config`, `template`)
+| Datei | Gegenstand |
+| ----- | ---------- |
+| [`slice-v1-cli-json-dry-run-config.md`](slice-v1-cli-json-dry-run-config.md) | Folge-Slice 8/9 des Cluster-Slice `slice-v1-cli-json-dry-run`: drei Sub-Forms `config`/`config get`/`config set` (R1+R2+R3 durchlaufen, T2-Start ready) |

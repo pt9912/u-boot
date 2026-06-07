@@ -12,7 +12,10 @@ Dateiname-Konventionen.
 | Datei | Gegenstand |
 | ----- | ---------- |
 | [`slice-v1-cli-cleanup-add-preview-mode-alias.md`](slice-v1-cli-cleanup-add-preview-mode-alias.md) | Cleanup: `AddPreviewMode`-Alias entfernen |
-| [`slice-v1-cli-json-dry-run-config.md`](slice-v1-cli-json-dry-run-config.md) | Folge-Slice 8/9 des Cluster-Slice `slice-v1-cli-json-dry-run`: `config` bare/get/set drei Sub-Forms (Read-only + Modifying gebündelt) |
+| [`slice-v1-config-list-subcommand.md`](slice-v1-config-list-subcommand.md) | Cleanup: `u-boot config list` als eigener Subcommand mit strukturiertem Path-Value-Tree |
+| [`slice-v1-config-multi-path-get.md`](slice-v1-config-multi-path-get.md) | Cleanup: `u-boot config get` Multi-Pfad-Get mit `--json-array` |
+| [`slice-v1-config-multi-path-set.md`](slice-v1-config-multi-path-set.md) | Cleanup: `u-boot config set` Multi-Path-Set (atomar mehrere Pfade) |
+| [`slice-v1-config-structured-hint.md`](slice-v1-config-structured-hint.md) | Cleanup: `config` strukturiertes `data.hint{action, argument}`-Field |
 | [`slice-v1-cli-json-dry-run-template.md`](slice-v1-cli-json-dry-run-template.md) | Folge-Slice 9/9 des Cluster-Slice `slice-v1-cli-json-dry-run`: `template list --json` Envelope-Migration |
 | [`slice-v1-cli-json-envelope-consolidation.md`](slice-v1-cli-json-envelope-consolidation.md) | Konsolidierung: CLI-JSON-Envelope-Pattern add/init/generate (R15-Cross-Slice-1) |
 | [`slice-v1-down-volumes-named-list.md`](slice-v1-down-volumes-named-list.md) | Cleanup: `u-boot down --volumes` Named-Volume-Liste |
