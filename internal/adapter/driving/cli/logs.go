@@ -15,7 +15,10 @@ import (
 // logsFlags bundles the per-invocation flag state of `u-boot logs`.
 // Slice-v1-logs §T0-Outcomes pinned the surface: only `--follow`
 // and `--tail` are exposed (T0-(d) Spec-treu — no
-// `--no-log-prefix`/`--timestamps`).
+// `--no-log-prefix`/`--timestamps`). Slice-v1-cli-json-dry-run-logs
+// T2 adds JSON/Quiet read-through from the App's persistent root
+// flags so `u-boot --json logs` and `u-boot logs --json` behave
+// identically (T0-(j)(ii) Cluster-Pattern analog up/down).
 type logsFlags struct {
 	// Follow mirrors `docker compose logs --follow`. Blocks until
 	// SIGINT cancels `cmd.Context()`; the application service
@@ -30,6 +33,20 @@ type logsFlags struct {
 	// are rejected by [validateLogsTailFlag] before the use case
 	// runs.
 	Tail string
+
+	// JSON read-through from the App's persistent root flag
+	// (slice-v1-cli-json-dry-run-logs T0-(j)(ii)). T5 routes via
+	// the JSON-Mode envelope path; at T2 the field is populated
+	// by the Cobra closure for downstream consumers.
+	JSON bool
+
+	// Quiet read-through from the App's persistent root flag.
+	// Today logs streams Compose-Output to OutputSink directly and
+	// `--quiet` does not silence it (Status-quo from
+	// slice-v1-logs). T2 adds the field for T5 to consume — in
+	// JSON mode `--quiet` is a no-op (Cluster-T0-(a) doctor-Pattern:
+	// `--quiet --json` is semantically identical to `--json`).
+	Quiet bool
 }
 
 // ErrInvalidLogsTail is returned by `u-boot logs` when `--tail` is
@@ -86,6 +103,12 @@ LH-FA-CLI-006 exit codes:
   - 12  Compose runtime failure (unknown service at runtime, etc.)`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// JSON/Quiet read-through from the App's persistent
+			// root flags (slice-v1-cli-json-dry-run-logs T2).
+			// T5 will consume these via mapLogsErrorToDiagnostic
+			// and the --follow --json reject path.
+			flags.JSON = a.json
+			flags.Quiet = a.quiet
 			return runLogs(cmd.Context(), cmd.OutOrStdout(), args, *flags, a.logsUseCase, a.getwd)
 		},
 	}

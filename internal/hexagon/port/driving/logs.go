@@ -2,6 +2,7 @@ package driving
 
 import (
 	"context"
+	"errors"
 	"io"
 )
 
@@ -71,6 +72,26 @@ type LogsRequest struct {
 // return value the CLI needs to render.
 type LogsResponse struct{}
 
+// ErrLogsFileSystem signals that the logs use case hit a raw
+// filesystem error during the read-only phase that loads
+// `u-boot.yaml` / `compose.yaml` (slice-v1-cli-json-dry-run-logs
+// T2 / T0-(e) — Pattern-Erbe up-down T2's ErrUpFileSystem +
+// ErrDownFileSystem; logs is read-only on the local FS so the
+// message form is "read failed", not "mutation failed"). T3 wraps
+// the FS-Read Stellen in logsservice.go (Z. ~121 + ~137 in
+// `checkProjectInitialized` + `checkComposeFile`) with
+// multi-`%w`-form (Go 1.20+):
+//
+//	`fmt.Errorf("logs service: <action>(%q): %w: %w", path,
+//	            ErrLogsFileSystem, rawErr)`
+//
+// Switch-Order in `mapLogsErrorToDiagnostic` (T0-(e)) MUST check
+// ErrLogsFileSystem FIRST so multi-`%w` chains that include both
+// ErrLogsFileSystem AND a fachlich sentinel route to the FS-class
+// (LH-NFA-REL-003 / exit 14), not the fachlich-class. Maps to
+// LH-NFA-REL-003 exit code 14 via cli's `isFilesystemError`.
+var ErrLogsFileSystem = errors.New("logs: filesystem read failed")
+
 // LogsUseCase is the driving-port for `u-boot logs` (LH-FA-UP-005).
 // The CLI adapter holds a reference and calls [Logs] from the
 // Cobra command handler.
@@ -84,6 +105,8 @@ type LogsResponse struct{}
 //   - Project not initialised (no `u-boot.yaml`) →
 //     [ErrProjectNotInitialized] (Exit 10).
 //   - Compose file missing → [ErrComposeFileMissing] (Exit 10).
+//   - Filesystem read failure on u-boot.yaml/compose.yaml pre-
+//     check → [ErrLogsFileSystem] (Exit 14).
 //   - Docker environment unavailable → wraps
 //     `driven.ErrDockerUnavailable` (Exit 11).
 //   - Compose runtime failure (unknown service, exit ≠ 0) →

@@ -9,6 +9,5 @@ Dateiname-Konventionen.
 
 ## Bestand
 
-| Datei | Gegenstand |
-| ----- | ---------- |
-| [`slice-v1-cli-json-dry-run-logs.md`](slice-v1-cli-json-dry-run-logs.md) | Folge-Slice 7/9 des Cluster-Slice `slice-v1-cli-json-dry-run`: `logs --json` Streaming-Output |
+(zur Zeit leer — slice-v1-cli-json-dry-run-logs ist nach
+`in-progress/` gewandert; T2-Implementation läuft)
