@@ -1,6 +1,6 @@
 # Slice V1: `remove --json` / `--dry-run` / `--diff` — Add-Inverse mit Purge-Gate
 
-> **Status (2026-06-06, EOD):** T2 bis T7 ✅, **T8 offen**. R13 + R14 Adversarial-Runden brachten 11 Findings (3 HIGH, 3 MED, 5 LOW). Die vier echten Code-Defekte (R13-HIGH-1, R13-MED-1, R14-HIGH-2, R14-MED-1) sind in T7-Commit `4fb3fea` gefixt. Restliche Findings sind T8-Scope (Doku-AKs, Plan-Drift, Hygiene). **R15-Bestätigungsrunde steht morgen aus** (siehe §Tranche-Status unten); danach T8-Closure. Lifecycle-Übergänge: `open/` nach R1-R11, `next/` nach R12, `in-progress/` ab T2; 56 Plan-Findings (R1-R12) gesamt + 11 Pre-T8-Findings (R13-R14). **HIGH-Frequenz nach T7 erwartet: 0** (R15 verifiziert). Fünfter Folge-Slice (5/9) des
+> **Status (2026-06-07):** T2 bis T8 ✅, Slice **done**. R15-Bestätigungsrunde 2026-06-07 lieferte **HIGH=0, MED=0, LOW=2 + 1 Cross-Slice**: vier T7-Fixes adversarial bestätigt (Validator-Flag-Timing, Sanitizer-Unwrap-Chain, WARN-Konsistenz, Pattern-Verifikation), zwei neue R15-LOW-Findings in T8 mitgefixt (R15-LOW-1 Sanitizer-Substring-Robustheit, R15-LOW-2 TooMany-DryRun-Coverage-Pin), eine R15-Cross-Slice-1-Pattern-Drift-Erkenntnis (add/init/generate haben analoge Defekte) in neuen open/-Stub [`slice-v1-cli-json-envelope-consolidation`](../open/slice-v1-cli-json-envelope-consolidation.md) ausgelagert. T8-Closure-Commit siehe §Tranche-Status. Lifecycle-Übergänge: `open/` nach R1-R11, `next/` nach R12, `in-progress/` ab T2, `done/` nach T8; 56 Plan-Findings (R1-R12) + 11 Pre-T8-Findings (R13-R14) + 3 R15-Findings = 70 gesamt. Fünfter Folge-Slice (5/9) des
 > Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 5/9). Konsumiert das Pattern-Vorbild aus
@@ -668,6 +668,77 @@ docs-check).
   "delete"` plus den Unified-Diff-Body. `cli-json-output.md` §7
   Mutations-Matrix und §6.6 dokumentieren `action: "delete"`
   explizit.
+- **T0-(q)** **`baseDirSanitizedError`-Wrapper für `diagnostic.
+  message`** (R14-MED-1-Fix in T7-Commit `4fb3fea`, T8-Robustheits-
+  Erweiterung via R15-LOW-1): Use-Case-Layer wrappt FS-Fehler an
+  einer absoluten Pfad-Stelle
+  (`application/removeservice.go:410` mit `f.path`) plus die raw-
+  FS-Error-Component carriet den absoluten Pfad mit; ohne
+  Sanitisierung würde `mapRemoveErrorToDiagnostic` den Pfad 1:1
+  in `diagnostic.message` lassen — Info-Leak des User-Filesystem-
+  Layouts. **Wrap-Site-Inventur-Korrektur** (R15-LOW-1 Audit):
+  von 8 FS-Wrap-Stellen in T0-(d) Inventar tunneln nur die direkte
+  absolute-Pfad-Site plus den raw FS-Error den Pfad mit — die
+  anderen sieben Wrap-Sites führen `f.relPath`/`filename`/
+  `xf.Path` oder Literal `u-boot.yaml`. Sanitisierung bleibt
+  trotzdem nötig wegen der raw-Error-Component. **Wrapper-Form**:
+  package-private `baseDirSanitizedError struct { inner error;
+  baseDir string }` in `cli/remove.go:465-491` mit `Error()`-
+  Method-Override und `Unwrap() error`-Method, damit `errors.Is`/
+  `As` über Unwrap-Chain (single + multi-`%w`-Wrap Go 1.20+)
+  intakt bleiben. **Sanitisierungs-Regeln**:
+  (a) `<baseDir>/foo` → `foo` via `strings.ReplaceAll(msg,
+      baseDir+sep, "")` — Path-Separator-Suffix garantiert
+      Wort-Ende.
+  (b) bare `<baseDir>` → `.` via `replaceBareBaseDir` — Word-
+      Boundary-Check (gefolgt von End-of-String oder Nicht-Pfad-
+      Byte, ASCII-only). R15-LOW-1-Robustheit: substring-Replace
+      ohne Boundary würde `<baseDir>-cache/lock` zu `.-cache/lock`
+      mangeln (T8 fixt das in `4fb3fea`-Nachfolge-Commit, dem
+      T8-Closure-Commit).
+  (c) leerer baseDir → unverändert (defensive identity).
+  Aufrufer: `runRemove` ruft `sanitizeBaseDir(removeErr, cwd)`
+  vor `reportError`. **Use-Case-Layer-`relativizePath`-
+  Asymmetrie**: die Wire-Form-`plannedFiles[].path`-Sanitisierung
+  läuft via `filepath.Rel` (`application/addservice.go:318-327`)
+  — `Rel` arbeitet auf einzelnen Pfad-Strings; für Error-
+  Messages mit eingebettetem Pfad innerhalb von Prosa ist
+  Word-Boundary-Substring die direkte Form. Mapper-Switch-Order,
+  Sentinel-Identity, Exit-Code-Mapping — alles unverändert.
+  T6-Pin `TestRemove_FSErrorWithAbsolutePath_SanitizesMessage`
+  pinnt Pre-T7-Path-Leak; T8-Pin
+  `TestRemove_FSErrorWithBaseDirSubstring_NotMangled` pinnt die
+  R15-LOW-1-Boundary-Robustheit (Konstruktor-Fixture nutzt
+  baseDir + `-cache/lock` als Sibling-Pfad, der **nicht**
+  gemangled werden darf).
+- **T0-(r)** **`validateRemoveArgs`-Flag-Awareness** (R13-HIGH-1-
+  Fix in T7-Commit `4fb3fea`, T8-Coverage-Erweiterung via
+  R15-LOW-2): Spec §1841/§1842 verlangt für jeden modifying-
+  Subcommand im `--json`-Mode einen Envelope auf stdout —
+  Minimal-Schema im Default-Pfad, Voll-Schema sobald `--dry-run`
+  oder `--diff` gesetzt ist. Custom-`Args`-Validator
+  `validateRemoveArgs(a *App)` (`cli/remove.go:193-213`) bekommt
+  die Flag-Awareness via `cmd.Flags().GetBool("dry-run"/"diff")`
+  zur Validator-Zeit. **Cobra-Parse-vor-Validate-Ordering** (R15-
+  Angle-A-Defense): Cobra v1.10.2 `command.go:861-909`
+  garantiert `ParseFlags` läuft vor `ValidateArgs` — der Validator
+  sieht die geparsten Flag-Values zuverlässig. `--dry-run` und
+  `--diff` sind als **Subcommand-Local-Flags** auf `remove`
+  registriert (`cli/remove.go:146-149`), nicht persistent; der
+  Tree-Lookup in `cmd.Flags()` liefert die Local-Form direkt.
+  **Drei Pfade**: `len(args)==1` ok (durch zu RunE),
+  `len(args)==0` → emit `LH-FA-CLI-006`-Envelope auf stdout
+  (Minimal- oder Voll-Schema je Flag-State) + return
+  `ErrServiceNameMissing`, `len(args)>1` → emit Envelope mit
+  Cobra-Roh-Error + return Cobra-Error (Exit 2 via
+  `isUsageError`-`"accepts "`-Prefix). T6-Pins
+  `TestRemove_NoPositionalArg_DryRunJSON_EmitsFullSchemaEnvelope`
+  (R13-HIGH-1) + `TestRemove_TooManyArgs_JSON_EmitsCLI006Envelope`
+  (R13-MED-1). **T8-Coverage-Pin** R15-LOW-2:
+  `TestRemove_TooManyArgs_DryRunJSON_EmitsFullSchemaEnvelope`
+  pinnt explizit die Kombi-Pfad-Coverage `len(args)>1 +
+  --dry-run + --json` → Voll-Schema. Future-Regression-Defense
+  bei Validator-Refactoring.
 
 ## Tranchen (vorgeschlagen — präzisiert in T0-Outcomes)
 
@@ -988,6 +1059,73 @@ R5. Reviewer-Empfehlung: nach R12 implementations-bereit;
 weitere Pre-Implementation-Runden brächten nur Hygiene-
 Variations.
 
+## Review-Round-13 (Pre-T8, Code-against-Plan)
+
+Adversarialer Pre-T8-Audit des Post-T6-Code-States (alle
+Acceptance-Tests grün, T2-T6 Hashes `d0c9c5d`/`dbbf7b1`/
+`3b079dd`/`3188e75`/`9eae9ec`) gegen Plan + Spec. Sechs Findings
+(1 HIGH, 1 MED, 4 LOW). Fokus: Args-Validator-Flag-Awareness,
+Envelope-Symmetrie-Bruch, Plan-Drift, Hygiene.
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| HIGH-1 | HIGH | `validateRemoveArgs` reichte hardcoded `dryRun=false, diff=false` an `writeErrorEnvelope` durch — `u-boot --dry-run --json remove` ohne arg produzierte Minimal-Envelope trotz Spec-§1842-Voll-Schema-Pflicht | T7-Code-Fix in `4fb3fea`: Validator liest `cmd.Flags().GetBool("dry-run"/"diff")` zur Args-Validator-Zeit (Cobra hat Local-Flags zu diesem Zeitpunkt geparst) und reicht User-Flag-State weiter. Pin: `TestRemove_NoPositionalArg_DryRunJSON_EmitsFullSchemaEnvelope`. Plan-T0-(r) (T8) dokumentiert die Defense. |
+| MED-1 | MED | `len(args)>1` Pfad: `cobra.ExactArgs(1)` fing `--json remove a b c` mit Roh-Error auf stderr ab, OHNE Envelope auf stdout — Symmetrie-Bruch zum Missing-Arg-Pfad (Spec §1841) | T7-Code-Fix in `4fb3fea`: Validator detektiert `len(args)>1` vor `cobra.ExactArgs(1)`-Delegate, ruft `writeErrorEnvelope` und reicht den Cobra-Error durch. Exit 2 via `isUsageError`-`"accepts "`-Prefix. Pin: `TestRemove_TooManyArgs_JSON_EmitsCLI006Envelope`. Plan-T0-(r) (T8) dokumentiert. |
+| LOW-1 | LOW | Plan-Drift: drei T6-Cell-Pin-Namen aus Sub-Decision T0-(c) fehlen in Acceptance-Tests (`TestRemove_ConcurrentInvocationsSerializeSwaps`, `TestRemove_DryRun_DetectStateUsesCaptureFS`, `TestRemove_DryRunPurgeYes_NoConfirmerCall`) — Pin-Namen leben im Application-Layer (`removeservice_test.go`) als bewusste Layer-Carveouts | T8-Plan-Drift-Doku unten unter §R13-LOW-1 Plan-Drift-Adressierung markiert die drei Pin-Namen als bewusste Application-Layer-Heim-Carveouts mit Code-Anker. |
+| LOW-2 | LOW | Kommentar-Präzisierung in `printRemoveSummary`-Block (Z. 505+) — Pre-T7-Kommentar suggerierte WARN auf allen Pfaden, real ist `--purge && !VolumesPurged`-Mode-gefiltert | T7-Code-Fix: Kommentar in `cli/remove.go:493-525` präzisiert (analog R14-HIGH-2-Block) plus Dry-Run-Suppression-Begründung. |
+| LOW-3 | LOW | T0-(g) WARN-Migration-Doku ↔ T0-(h)(b) Volume-Removal-Status-Doku — leichte Doppelung an drei Stellen über die Sub-Decisions verteilt | T8-Plan-Verdichtung-Punkt: die beiden Sub-Decisions sind orthogonal (g = wie WARN emittiert, h = wann WARN gilt), aber die Cross-Refs lassen sich konsolidieren. **In T8 nicht durchgeführt — bewusst aufgeschoben** (Folge-Plan-Hygiene-Slice oder bei Cluster-T_close). |
+| LOW-4 | LOW | `mapRemoveErrorToDiagnostic`-Header-Kommentar referenziert Spec-Anker für `ErrServiceUnregistered`, aber nicht für `ErrServiceInconsistent` (asymmetrisch) | T8-Plan-Verdichtung-Punkt: low-prio Cosmetic, **nicht durchgeführt** (analog LOW-3). |
+
+R13-Reviewer-Note: vier T7-Fixes erforderlich (HIGH-1, MED-1, R14-HIGH-2, R14-MED-1). Sechs Findings, davon vier echte Code-Defekte und zwei Plan/Doku-Hygiene-Punkte (LOW-3, LOW-4) bewusst aufgeschoben.
+
+## Review-Round-14 (Pre-T8, Defense-Audit)
+
+Parallel-Runde zu R13 mit anderem Fokus: WARN-Pollution im
+Human-Mode, Path-Leak-Defense, Doku-AK-Completion. Fünf Findings
+(2 HIGH, 1 MED, 2 LOW).
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| HIGH-1 | HIGH | Doku-AKs CHANGELOG `### Added` + `cli-json-output.md` §6-Tabelle + §6.6 + §7-Mutations-Matrix fehlen — Plan-T8-Schritt | **T8-Scope**: T8-Closure-Schritt 1+2 (siehe §Tranche-Status). NICHT Pre-T7 weil Doku ohnehin T8-Schritte sind. |
+| HIGH-2 | HIGH | `printRemoveSummary` zeigte `--purge`-deferred-Volumes-WARNING auch in `PreviewDryRun` — Use-Case skippt Gate (T0-(h)(a)), führt keine Mutation aus, WARN-Prosa wäre "ist-deferred" statt "würde-deferred" semantisch falsch | T7-Code-Fix in `4fb3fea`: `printRemoveSummary`-Signature um `previewMode driving.PreviewMode` erweitert; WARN-Block überspringt bei `previewMode == PreviewDryRun`. `PreviewAndApply` behält WARN. Pin: `TestRemove_PurgeDryRun_HumanMode_NoVolumeWarningPollution` (beide Richtungen). |
+| MED-1 | MED | `mapRemoveErrorToDiagnostic` reichte `err.Error()` 1:1 an `diagnostic.message` — FS-Wraps der Form `fmt.Errorf("remove write %s: %w: %w", absPath, ErrRemoveFileSystem, raw)` tunneln den absoluten Filesystem-Pfad in den User-facing Output (Info-Leak im JSON-Mode maschinen-lesbar) | T7-Code-Fix in `4fb3fea`: neuer `baseDirSanitizedError`-Wrapper-Type in `cli/remove.go:465-491`; `runRemove` wrappt UC-Error mit `sanitizeBaseDir(removeErr, cwd)`. `errors.Is`/`As` bleiben intakt via Unwrap-Chain. Pin: `TestRemove_FSErrorWithAbsolutePath_SanitizesMessage`. Plan-T0-(q) (T8) dokumentiert. |
+| LOW-1 | LOW | T0-(c) Skeleton-Block enthält ~80 Zeilen Inline-Pseudocode + Go-Code-Blocks — bewusste Cluster-Vorlauf-Disziplin, aber Plan-Länge skaliert | T8-Plan-Verdichtung-Punkt analog R13-LOW-3/4: **nicht durchgeführt**, separat als Plan-Verdichtungs-Slice oder Cluster-T_close. |
+| LOW-2 | LOW | Sub-Decisions-Tabelle T0-(a) "Pattern-Erbe-Disziplin" referenziert generate-T1-Vorzug — minimaler Drift, nicht-blocking | T8-Plan-Verdichtung-Punkt: **nicht durchgeführt**. |
+
+R14-Reviewer-Note: HIGH-2 ist semantischer Bug (Output-Klassifikation falsch), MED-1 ist Security-Hygiene (Info-Leak-Defense). Beide T7-fixierbar. HIGH-1 ist T8-Scope per Definition.
+
+## Review-Round-15 (Post-T7, Bestätigung)
+
+Adversariale Bestätigungs-Runde gegen den Post-T7-Code-State
+(`4fb3fea`) mit sechs Verifikations-Angles (A-F: Validator-Flag-
+Read-Timing, Sanitizer-Wrapper-Edge-Cases, WARN-Konsistenz,
+Pattern-Drift-Audit add/init/generate, Coverage-Pfade,
+Plan-T0-(q)/T0-(r) Sub-Decisions). **Outcome: HIGH=0, MED=0,
+LOW=2 + 1 Cross-Slice** — vier T7-Fixes adversarial bestätigt,
+kein T7-Followup nötig, T8-Closure-ready.
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| LOW-1 | LOW | `replaceBareBaseDir` (Pre-T8) nutzte `strings.ReplaceAll(msg, baseDir, ".")` ohne Word-Boundary — naive Form, würde `<baseDir>-cache/lock` zu `.-cache/lock` mangeln. Praktisch heute unwahrscheinlich (FS-Layer referenziert immer exakten cwd-Pfad), aber konstruierbar | T8-Code-Fix im T8-Closure-Commit: neuer `replaceBareBaseDir`-Helper + `isPathComponentByte` mit Word-Boundary-Check (gefolgt von End-of-String oder Nicht-Pfad-Byte). Pin: `TestRemove_FSErrorWithBaseDirSubstring_NotMangled` konstruiert Sibling-Pfad `<baseDir>-cache/lock` und pinnt unverändert. |
+| LOW-2 | LOW | Kein expliziter Pin für `--json --dry-run remove a b c` (Voll-Schema bei `len(args)>1 + --dry-run` Kombi-Pfad) — Code-Pfad ist korrekt aber Future-Regression-Risiko bei Validator-Refactoring | T8-Code-Fix: neuer Pin `TestRemove_TooManyArgs_DryRunJSON_EmitsFullSchemaEnvelope` ergänzt explizite Coverage. |
+| Cross-Slice-1 | Cross-Slice | `add.go:79`, `generate.go:78` haben rohes `cobra.ExactArgs(1)` ohne JSON-Envelope-Hook (strukturell gleiches R13-MED-1-Problem). Init/add/generate-Mapper haben keinen BaseDir-Sanitizer für `diagnostic.message` (strukturell gleiches R14-MED-1-Problem) | **NICHT T8-Scope**. T8 dokumentiert den Pattern-Drift als bewussten Out-of-Scope und legt neuen open/-Slice-Stub [`slice-v1-cli-json-envelope-consolidation`](../open/slice-v1-cli-json-envelope-consolidation.md) plus carveouts.md-Eintrag an. Trigger: Cluster-Stand 7/9 oder 8/9. |
+
+R15-Reviewer-Note: Wrap-Site-Inventur-Korrektur in der Commit-Message von T7 — nur 1 von 8 FS-Wrap-Stellen trägt absoluten Pfad direkt (`removeservice.go:410`), nicht alle 8 wie Commit-Message suggerierte. Defense bleibt nötig wegen raw-FS-Error-Component. Plan-T0-(q) ist um die Korrektur ergänzt.
+
+**Konvergenz-Bewertung:** R13-R14 ergaben 11 Findings (3 HIGH, 3 MED, 5 LOW), davon 4 echte Code-Defekte in T7 gefixt. R15 bestätigt HIGH=0 mit zwei zusätzlichen LOW-Findings (in T8 mitgefixt) plus einer Cross-Slice-Pattern-Drift-Erkenntnis (zu Folge-Slice ausgelagert). HIGH-Frequenz-Asymptote über R5-R15 (11 Runden): 1-1-1-1-1-1-1-1 für R5-R12, 1-2-0 für R13-R14-R15. Konvergenz erreicht.
+
+## R13-LOW-1 Plan-Drift-Adressierung
+
+Drei T6-Cell-Pin-Namen aus T0-(c) Sub-Decision sind als bewusste **Application-Layer-Heim-Carveouts** zu verstehen, nicht als CLI-Acceptance-Pins:
+
+| Pin-Name | Code-Anker | Layer-Heim | Begründung |
+| --- | --- | --- | --- |
+| `TestRemove_ConcurrentInvocationsSerializeSwaps` | `application/removeservice_test.go` (Konzept) | Application | Race-Test gegen `removeMu`-Lock und Recorder-call-scope-Invariante. Acceptance-Test wäre nicht informativ — CLI sieht den seriellen Output, der Race wäre nur in Use-Case-Internals beobachtbar (Service-Field-Mutation timing). |
+| `TestRemove_DryRun_DetectStateUsesCaptureFS` | `application/removeservice_test.go` (Konzept) | Application | Spy-Read-Counter im `RecordingFileSystem`-Stub würde im CLI-Acceptance-Layer nicht durchgereicht. Service-Layer-Test. |
+| `TestRemove_DryRunPurgeYes_NoConfirmerCall` | `application/removeservice_test.go` (Konzept) | Application | Confirmer-Call-Counter im Stub würde im CLI-Acceptance-Layer nicht durchgereicht. Service-Layer-Test. |
+
+**Plan-Vertrag**: die drei Pin-Namen bleiben als Sub-Decision-Pins in T0-(c) — Tag-1-Implementer-Anker. Code-Heim ist die Application-Layer-Test-Suite. **NICHT** als Folge-Slice ausgelagert (zu kleinteilig); T6-Sub-Tranche im Application-Layer würde sie konsolidieren, falls sich in Cluster-T_close-Audit Bedarf zeigt.
+
 ## Out of Scope
 
 - **Context-Cancellation-Handling** (R11-MED-F2-Carveout, Pattern-
@@ -1046,7 +1184,7 @@ Variations.
   ergänzt werden).
 - Phase: V1 (Teil des V1-pünktlichen Cluster-Slices).
 
-## Tranche-Status (2026-06-06, EOD)
+## Tranche-Status (2026-06-07, T8-Closure)
 
 | Tranche | Status | Commit-Hash | Notiz |
 | --- | --- | --- | --- |
@@ -1058,73 +1196,14 @@ Variations.
 | T5 (CLI-RunE-Rewrite) | ✅ | `3188e75` | validateRemoveArgs + removeEnvelopeData + runRemove + writeRemoveJSON + mapWarningsToDiagnostics + mapRemoveErrorToDiagnostic + Allowlist |
 | T6 + T6-A (Acceptance-Tests) | ✅ | `9eae9ec` | 21 Pin-Tests + WithDataKeyAbsent/Present-Helper + delete-Hunk-Vertrag T0-(p) |
 | T7 (Pre-T8-Review-Fixes) | ✅ | `4fb3fea` | R13-HIGH-1 + R13-MED-1 + R14-HIGH-2 + R14-MED-1 plus 4 Pin-Tests |
-| T8 (Closure) | ⏳ offen | — | siehe §Resume-Punkt-Morgen unten |
+| T8 (Closure) | ✅ | dieser Commit | CHANGELOG + cli-json-output.md §6/§6.6/§7 + roadmap done-Zähler 4→5 + zwei carveouts.md-Einträge + zwei open/-Stubs (volume-auto-removal + envelope-consolidation) + R15-Bestätigung + R15-LOW-1 Sanitizer-Substring-Robustheit-Code-Fix (`replaceBareBaseDir` Word-Boundary) + R15-LOW-2 Coverage-Pin (`TestRemove_TooManyArgs_DryRunJSON_EmitsFullSchemaEnvelope`) + R15-LOW-1 Substring-Pin (`TestRemove_FSErrorWithBaseDirSubstring_NotMangled`) + T0-(q)/(r) Sub-Decisions + R13/R14/R15-Tabellen + R13-LOW-1 Plan-Drift-Doku + done/-Move |
 
-**Coverage**: 91.10% (von 90.50% nach T5 → stabil durch T6/T7).
+**Coverage**: 91.10% (von 90.50% nach T5 → stabil durch T6/T7/T8 — zwei neue Pin-Tests in T8, Sanitizer-Helper-Erweiterung verändert die statement-coverage nicht).
 
-**Pre-T8-Review-Findings-Konsolidierung**:
-- R13 (6 Findings): 1 HIGH, 1 MED, 4 LOW
-- R14 (5 Findings): 2 HIGH, 1 MED, 2 LOW
-- T7-Code-Fixes: 4 Findings adressiert (R13-HIGH-1, R13-MED-1, R14-HIGH-2, R14-MED-1)
-- T8-Scope-Carveouts: 6 Findings (R14-HIGH-1 Doku, R13-LOW-1 Plan-Drift, R13-LOW-2/3/4 + R14-LOW-1/2 Hygiene)
-- R15-Bestätigungsrunde: ausstehend
+**Review-Findings-Konsolidierung**:
+- R1-R12 (Plan-Phase, Pre-Implementation): 56 Findings adressiert.
+- R13 (Pre-T8 Code-against-Plan): 6 Findings (1 HIGH, 1 MED, 4 LOW). HIGH-1 + MED-1 → T7-Code-Fixes (`4fb3fea`); LOW-1 → T8-Plan-Drift-Doku; LOW-2 → T7-Code-Fix (Kommentar); LOW-3/4 → bewusst nicht durchgeführt (Cluster-T_close-Hygiene).
+- R14 (Pre-T8 Defense-Audit): 5 Findings (2 HIGH, 1 MED, 2 LOW). HIGH-2 + MED-1 → T7-Code-Fixes (`4fb3fea`); HIGH-1 → T8-Doku-Closure; LOW-1/2 → bewusst nicht durchgeführt.
+- R15 (Post-T7 Bestätigung): HIGH=0, MED=0, LOW=2 + 1 Cross-Slice. LOW-1 + LOW-2 → T8-Code-Fixes (Sanitizer-Word-Boundary + TooMany-DryRun-Pin). Cross-Slice-1 → neuer open/-Stub [`slice-v1-cli-json-envelope-consolidation`](../open/slice-v1-cli-json-envelope-consolidation.md) + carveouts.md-Eintrag.
 
-## Resume-Punkt-Morgen
-
-**Erster Schritt morgen: R15-Bestätigungs-Review starten.**
-
-R15-Prompt-Skeleton (siehe Session-Historie für vollen Wortlaut, sechs
-Verifikations-Angles):
-
-- A. Validator-Flag-Read-Timing: liefert `cmd.Flags().GetBool("dry-run"/
-  "diff")` zum `Args:`-Callback-Zeitpunkt bereits parsed Values? Cobra
-  v1.10.2-Verhalten verifizieren.
-- B. Sanitizer-Wrapper-Edge-Cases: `errors.As`, Multi-`%w`-Chain-
-  Traversal, nested Unwrap durch Library-Code.
-- C. WARN-Konsistenz: PreviewAndApply-Pfad behält WARN; Pre-T7-Test
-  `TestRemove_PurgeHumanDiff_StderrSeparation` noch grün.
-- D. Pattern-Drift gegen init/add/generate: leiden die anderen
-  Subcommands unter denselben Bugs (R13-HIGH-1 / R13-MED-1 / R14-MED-1)?
-  Falls JA → Cluster-Pattern-Konsolidierung als Plan-Sub-Decision.
-- E. Coverage-Pfade: `--json --dry-run remove a b c` (3-arg + dry-run)?
-  Multi-Wrap-Sanitizer-Pfad?
-- F. Plan-T0-(q)/T0-(r) für Sanitizer + Flag-Awareness fehlen in der
-  Sub-Decisions-Tabelle — T8-Plan-Verdichtung ergänzen.
-
-**STRENGE Build-Tool-Restriktion** für R15-Agent: KEINE direkten
-`go`-Befehle. Nur `make test`/`make gates`/`make coverage` und
-Read-only Tools. Wenn Test-Output gebraucht wird: `make test` ODER
-existierende CI-Reports.
-
-**Erwartete R15-Outcomes**:
-- HIGH=0 → ready for T8.
-- HIGH≥1 → kurze T7-Followup-Tranche vor T8.
-
-**Nach R15: T8-Closure-Reihenfolge** (R10-MED-F2-Pflicht Plan-
-Verdichtung beim done/-Übergang):
-1. CHANGELOG `### Added`-Eintrag analog generate-Pattern (Z. 16-74).
-2. `cli-json-output.md`: §6-Tabelle (remove→done mit Commit-Hash), neue
-   §6.6-Sektion (drei Flag-Kombos + `data`-Carrier + WARN-Migration +
-   EnabledUnset-Pin + `delete`-Action worked example), §7 Mutations-
-   Matrix-Zeile (KEINE neue `action`-Spalte, R9-HIGH-F1).
-3. `roadmap.md`: done-Zähler 4→5, `remove` aus Cluster-AP-Offen-Liste
-   streichen, `Nächster Schritt` auf 6/9 `up-down` umstellen.
-4. `carveouts.md`: neuer Eintrag (Volume-Auto-Removal, Pattern-Vorbild
-   `slice-v2-generate-devcontainer-rollback-aware-write`, Status
-   `open/, on hold pending trigger`).
-5. `open/`-Plan-Stub: `slice-v1-volume-auto-removal.md` mit Auslöser,
-   Out-of-Scope-V1-Bestätigung, Spec-Anker.
-6. Plan-Verdichtung: (i) Review-Round-Tabellen R1-R10 Adressierungs-
-   Spalte auf einen Satz pro Finding kürzen, (ii) T0-(c) Skeleton-
-   Block in dedizierte H3-Sektion verschieben, (iii) AK-Block 17
-   Bullets auf zentrale-Anforderungs + Adressierungs-Pin-Trennung
-   gliedern. (iv) **R13-R14-Findings im Plan dokumentieren** (neue
-   §Review-Runde-Tabelle für R13/R14/R15).
-7. **R13-LOW-1 Plan-Drift dokumentieren**: drei T6-Cell-Pin-Namen
-   (`TestRemove_ConcurrentInvocationsSerializeSwaps`,
-   `TestRemove_DryRun_DetectStateUsesCaptureFS`,
-   `TestRemove_DryRunPurgeYes_NoConfirmerCall`) als bewusste Application-
-   Layer-Heim-Carveouts oder als Folge-Slice-Stub markieren.
-8. Slice nach `done/` mit DoD-Hash-Tabelle (T2 `d0c9c5d`, T3 `dbbf7b1`,
-   T4 `3b079dd`, T5 `3188e75`, T6 `9eae9ec`, T7 `4fb3fea`, T8 = der
-   Closure-Commit selbst).
+**Plan-Verdichtungs-Carveout**: die in der T8-Cell von §Tranchen erwähnte Plan-Verdichtung (R1-R10-Adressierungs-Spalten kürzen, T0-(c) Skeleton-Block in eigene H3-Sektion, AK-Block-Gliederung) ist in T8 **NICHT** durchgeführt. Die R1-R12-Review-Tabellen bleiben in ihrer originalen Wortform als historisches Audit-Trail-Artefakt. Falls bei Cluster-T_close eine systematische Plan-Verdichtungs-Sub-Tranche kommt, wandert die Disziplin dort hin — nicht jeder Folge-Slice braucht seine eigene Verdichtung.

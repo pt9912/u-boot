@@ -368,7 +368,7 @@ Reihenfolge gemäß Cluster-T0-(e):
 | 2 | `slice-v1-cli-json-dry-run-add` | `add` (modifying, etabliert Full-Modus + RecordingFileSystem) | done (DoD-Hash-Tabelle im Slice-File) |
 | 3 | `slice-v1-cli-json-dry-run-init` | `init` | done (DoD-Hash-Tabelle im Slice-File) |
 | 4 | `slice-v1-cli-json-dry-run-generate` | `generate` | done (DoD-Hash-Tabelle im Slice-File) |
-| 5 | `slice-v1-cli-json-dry-run-remove` | `remove` | T0-Discovery + R1-R12 adressiert, `in-progress/` (T2-Port-Types läuft) |
+| 5 | `slice-v1-cli-json-dry-run-remove` | `remove` | done (DoD-Hash-Tabelle im Slice-File) |
 | 6 | `slice-v1-cli-json-dry-run-up-down` | `up`, `down` (gebündelt, read-only Compose-Status) | offen |
 | 7 | `slice-v1-cli-json-dry-run-logs` | `logs` (Sub-Decision: JSON-Lines vs. Single-Envelope) | offen |
 | 8 | `slice-v1-cli-json-dry-run-config` | `config`, `config get`, `config set` (gebündelt, drei Formen) | offen |
@@ -606,6 +606,169 @@ on hold pending trigger.
 serialisiert konkurrierende `Generate()`-Calls auf demselben
 Service (analog `InitProjectService.initMu`).
 
+### 6.6 `u-boot remove --json` (slice-v1-cli-json-dry-run-remove, done)
+
+`u-boot remove <service>` ist der fünfte modifying-Subcommand und
+die **inverse Operation zu `add`**: strip managed-block aus
+`compose.yaml` + `.env.example`, flip `services.<name>.enabled`
+auf `false` in `u-boot.yaml`, optional Volume-Purge via
+`--purge`-Gate (`LH-FA-CLI-005A` §254). Acht Flag-Kombinationen
+plus die orthogonale `--purge`-Dimension (T0-(h)):
+
+- **`--json` ohne `--dry-run`/`--diff`** → Minimal+Data-Envelope
+  via `newDataEnvelope`. Operation schreibt das FS um; das
+  JSON-Output trägt **keinen** Plan-Inhalt, aber das Success-
+  Quartet `data: {service, priorState, state, volumesPurged}`
+  für Konsumenten-Klassifikation.
+- **`--dry-run --json`** → Voll-Schema mit `plannedFiles[]`/
+  `changes[]` plus dem `data`-Quartet, `dryRun: true`,
+  `diff: false`. Es wird **nichts** auf die Disk geschrieben —
+  `RecordingFileSystem` capturet alle geplanten Mutations,
+  inklusive der `RemoveAll`-Captures als
+  `plannedFiles[].action: "delete"`.
+- **`--diff --json`** → Voll-Schema mit `plannedFiles[].hunks[]`,
+  `dryRun: false`, `diff: true`, plus `data`-Quartet. Es wird
+  geschrieben **und** capturet (Preview-and-Apply).
+- **`--dry-run --diff --json`** → wie `--dry-run --json`, aber
+  mit Hunks. Kein Write.
+
+**Envelope-Shape** (T0-(f)): `command="remove"`, **kein
+`subcommand`-Feld** (Cobra-`<service>` ist Positional-Arg).
+Success-`data` ist typed `removeEnvelopeData` mit
+**Pointer-Wrapping**:
+
+```json
+{
+  "service": "postgres",
+  "priorState": "active",
+  "state": "deactivated",
+  "volumesPurged": false
+}
+```
+
+`PriorState`/`State`/`VolumesPurged` sind Pointer (`*string`/
+`*bool`), damit `omitempty` Key-**Abwesenheit** statt nur
+Zero-Value-Drop pinnen kann (Spec §1841). `VolumesPurged` MUSS
+`*bool` weil `false` ein valider Success-Wert ist (v0.3.0
+deferred-Volumes). **Error-Envelope** trägt nur
+`data: {"service": "<…>"}` ohne PriorState/State/VolumesPurged
+(Zero-Response auf Error-Pfad, analog generate). Pre-Service-
+Validation-Pfade (NoPositionalArg, ConflictingModeFlags,
+InvalidServiceName) übergeben `data: null` — kein Service-
+Kontext existiert.
+
+**Idempotenz-NoOp-Semantik**: nur `PriorState=Deactivated`
+qualifiziert als NoOp. Single+Repeat-Call gegen bereits
+disabled Service liefern `plannedFiles: []` UND `changes: []`,
+`data.priorState=data.state="deactivated"`, `status: ok`,
+Exit 0. `EnabledUnset` und `InconsistentBlock` sind
+state-transitioning (`Changed!=nil`, voll-`plannedFiles[]`)
+— `EnabledUnset` wird auf `Deactivated` normalisiert mit
+`data.priorState: "enabled-unset"` und
+`data.state: "deactivated"`.
+
+**`--purge`-Gate-Verhalten im JSON-Mode** (T0-(j)):
+Confirmer-Prompt-Silencing via Service-Field-Mutation —
+`req.SilenceConfirmer = flags.JSON` swappt `s.confirmer` auf
+`noopConfirmer` (M4 Confirmer-Slice) innerhalb der
+`removeMu`-Lock-Region; defer-Restore beim Wrapper-Return.
+Pattern ist **nicht** aus init's `ProgressPort`-Silencing
+geerbt (init swappt `s.progress`, nicht `s.confirmer`), sondern
+ein remove-spezifisches Neu-Pattern. Bei
+`--purge --no-interactive --json` OHNE `--yes` returnt der Gate
+`ErrConfirmationRequired` → `LH-FA-INIT-005`-Envelope mit
+Exit 10.
+
+**WARN-Migration in `diagnostics[]`** (T0-(g)): heutige
+`printRemoveSummary`-stderr-WARNING bei
+`--purge && !VolumesPurged` (Volume-Removal ist in v0.3.0
+deferred) wandert im JSON-Mode in `diagnostics[]`-Eintrag mit
+`code: "LH-FA-ADD-007"`, `level: "warn"`, plus
+`data.volumesPurged: false`. **`LH-FA-ADD-007` Multi-Use**:
+derselbe Code identifiziert die Spec-Anforderung "Service
+entfernen" (§924-947) UND markiert die deferred-Volumes-WARN.
+Konsumenten disambiguieren ausschließlich über
+`(code, level)`-Tupel: ERROR-Pfad
+`ErrServiceUnregistered` liefert `code: "LH-FA-ADD-007"`,
+`level: "error"`, Exit 10; WARN-Pfad liefert `level: "warn"`,
+Exit 0. **Dry-Run-WARN-Suppression**: in `PreviewDryRun`
+skippt die Use-Case den `runPurgeGate` (T0-(h)(a)) und führt
+keine Mutation aus — die WARN-Prosa wäre semantisch falsch
+("ist-deferred" statt "würde-deferred"); Human-Mode
+`printRemoveSummary` unterdrückt entsprechend den WARN-Block.
+`PreviewAndApply` behält die WARN.
+
+**Custom-`Args`-Validator** (R11/R12/R13-Pins):
+`validateRemoveArgs(a *App)` ist eine Cobra-PositionalArgs-
+Closure mit `*App`-Capture, die `cobra.ExactArgs(1)` ersetzt.
+Drei Cases:
+
+- `len(args) == 1` → ok, weiter zu RunE.
+- `len(args) == 0` → emit `LH-FA-CLI-006`-Envelope auf stdout
+  bei `--json`, dann return `ErrServiceNameMissing`. Exit 2.
+- `len(args) > 1` → emit `LH-FA-CLI-006`-Envelope auf stdout
+  bei `--json` mit dem Cobra-Roh-Error `"accepts 1 arg(s),
+  received N"`, dann return den Cobra-Error.
+  Exit 2 via `isUsageError`-`"accepts "`-Prefix-Match.
+
+In allen drei Fällen liest der Validator
+`cmd.Flags().GetBool("dry-run"/"diff")` zur Validator-Zeit
+(Cobra hat die Subcommand-Local-Flags zu diesem Zeitpunkt
+bereits geparst) — Voll-Schema-Envelope bei `--dry-run` ODER
+`--diff` (Spec §1842), sonst Minimal-Schema.
+
+**`baseDirSanitizedError`-Wrapper**: FS-Wraps in der Use-Case
+der Form `fmt.Errorf("remove write %s: %w: %w", absPath,
+ErrRemoveFileSystem, raw)` tunneln den absoluten Filesystem-
+Pfad in `diagnostic.message`. `runRemove` wrappt den UC-Error
+vor dem `reportError`-Call mit `sanitizeBaseDir(removeErr,
+cwd)`. Regeln:
+
+- `<baseDir>/foo` → `foo` (project-relative)
+- bare `<baseDir>` → `.` (project-root reference, an
+  Word-Boundaries via `replaceBareBaseDir` — robust gegen
+  Substring-Kollisionen wie `<baseDir>-cache/lock`)
+- leerer baseDir → unverändert (defensive identity)
+
+`Error()` ersetzt nur die Text-Form; `errors.Is`/`As` bleiben
+intakt via Unwrap-Chain. Mapper-Switch-Order, Sentinel-
+Identity, Exit-Code-Mapping — alles unverändert.
+
+**Remove-LH-Code-Mapper-Tabelle** (FS-first Switch-Order,
+Multi-`%w`-Defense):
+
+| Sentinel | LH-Code | Exit |
+| --- | --- | --- |
+| `ErrRemoveFileSystem` | `LH-NFA-REL-003` | 14 |
+| `ErrConfirmerUnavailable` | `LH-FA-CLI-005A` | 10 |
+| `ErrConfirmationRequired` | `LH-FA-INIT-005` | 10 |
+| `ErrServiceUnsupported` | `LH-FA-ADD-002` | 10 |
+| `ErrServiceUnregistered` (ERROR) | `LH-FA-ADD-007` | 10 |
+| `ErrServiceInconsistent` | `LH-FA-ADD-005` | 10 |
+| `ErrProjectNotInitialized` | `LH-FA-ADD-001` | 10 |
+| `domain.ErrInvalidServiceName` | `LH-FA-INIT-006` | 10 |
+| `ErrConflictingModeFlags` | `LH-FA-CLI-005A` | 2 |
+| `cli.ErrServiceNameMissing` | `LH-FA-CLI-006` | 2 |
+| Default (unknown) | `LH-FA-CLI-006` | 1 |
+
+Plus die WARN-Multi-Use von `LH-FA-ADD-007` (siehe oben) — der
+Code identifiziert die Spec-Anforderung, nicht die Sub-Semantik;
+Disambiguation via `(code, level)`-Tupel.
+
+**`delete`-Action im Recorder** (T0-(p)): `RemoveAll`-Captures
+für `extraFiles` aus dem Catalog werden im Recorder als
+`plannedFiles[].action: "delete"` gewired. `--diff` rendert
+für `delete`-Aktionen Old-Content (der heute existierende
+Datei-Inhalt) plus leeren New-Content; die Unified-Diff zeigt
+nur `-`-Lines.
+
+**Concurrency**: `RemoveServiceService.removeMu sync.Mutex`
+serialisiert konkurrierende `Remove()`-Calls auf demselben
+Service (analog `InitProjectService.initMu` /
+`GenerateService.generateMu`). Confirmer-Swap UND fs-Swap
+laufen **innerhalb** der Lock-Region — sonst könnten parallel
+laufende Goroutinen ihre Swaps gegenseitig korrumpieren.
+
 ---
 
 ## 7. Mutations-Matrix pro Subcommand
@@ -624,10 +787,11 @@ in derselben PR ergänzen.
 | `add` (slice-v1-cli-json-dry-run-add) | ✓ (3 Slots + N ExtraFiles) | — | — | ✓ (implizit, Recorder synthetisiert) | — | — | — | — |
 | `init` (slice-v1-cli-json-dry-run-init) | ✓ (Skeleton-Files + `u-boot.yaml`) | — | ✓ (Backup-Verz.) | ✓ (Skeleton-Dirs direkt; Backup indirekt) | — | ✓ (Backup) | ✓ (Backup) | ✓ (Backup) |
 | `generate` (slice-v1-cli-json-dry-run-generate) | ✓ (Artefakt-Files + `u-boot.yaml`-Allowlist-Mutation) | — | — | ✓ (devcontainer-Dir) | — | — | — | — |
+| `remove` (slice-v1-cli-json-dry-run-remove) | ✓ (managed-block strip auf `compose.yaml` + `.env.example` + `enabled: false` auf `u-boot.yaml`) | — | — | — | — | ✓ (Catalog-`extraFiles`, optional) | — | — |
 
-Andere modifying-Subcommands (`remove`,
-`config set`) ergänzen ihre Zeile im jeweiligen Slice — heute
-`doctor`, `add` und `init` migriert.
+Andere modifying-Subcommands (`config set`) ergänzen ihre Zeile
+im jeweiligen Slice — heute `doctor`, `add`, `init`, `generate`
+und `remove` migriert.
 
 ---
 

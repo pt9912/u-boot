@@ -1104,6 +1104,96 @@ func TestRemove_FSErrorWithAbsolutePath_SanitizesMessage(t *testing.T) {
 	}
 }
 
+// TestRemove_FSErrorWithBaseDirSubstring_NotMangled (R15-LOW-1):
+// Sanitizer-Robustheit gegen Substring-Kollisionen. Pre-T8 nutzte der
+// Sanitizer `strings.ReplaceAll(msg, baseDir, ".")` — naive Form, die
+// einen Error-Pfad `<baseDir>-cache/<…>` zu `.-cache/<…>` mangeln
+// würde. Fix in T8: `replaceBareBaseDir` ersetzt baseDir nur an
+// Word-Boundaries (gefolgt von End-of-String oder Nicht-Pfad-Byte).
+//
+// Test-Fixture-Trick: `newAppWithRemoveStub` setzt cwd auf
+// `/tmp/u-boot-remove-test/demo`. Der konstruierte Fehler enthält
+// `/tmp/u-boot-remove-test/demo-cache/lock` — Substring-Prefix von
+// cwd, aber NICHT cwd selbst. Robust-Sanitizer MUSS den Pfad
+// unangetastet lassen; daneben aber `/tmp/u-boot-remove-test/demo/
+// compose.yaml` korrekt zu `compose.yaml` reduzieren.
+func TestRemove_FSErrorWithBaseDirSubstring_NotMangled(t *testing.T) {
+	stub := &removeUseCaseStub{
+		err: fmt.Errorf(
+			"remove write /tmp/u-boot-remove-test/demo/compose.yaml: "+
+				"unrelated lock held at /tmp/u-boot-remove-test/demo-cache/lock: %w: %w",
+			driving.ErrRemoveFileSystem, errors.New("disk full")),
+	}
+	app := newAppWithRemoveStub(stub)
+
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(),
+		[]string{"--json", "remove", "postgres"}, &stdout, &stderr)
+	if !errors.Is(err, driving.ErrRemoveFileSystem) {
+		t.Fatalf("errors.Is(ErrRemoveFileSystem) broken; got %v", err)
+	}
+	env := unmarshalRemoveEnv(t, stdout.Bytes())
+	diags, _ := env["diagnostics"].([]any)
+	if len(diags) != 1 {
+		t.Fatalf("want 1 diagnostic, got %d", len(diags))
+	}
+	diag, _ := diags[0].(map[string]any)
+	msg, _ := diag["message"].(string)
+	// Project-relative Pfad MUSS erscheinen (baseDir+sep-Pass).
+	if !strings.Contains(msg, "compose.yaml") {
+		t.Errorf("sanitized message MUST contain project-relative path %q; got: %q", "compose.yaml", msg)
+	}
+	// Substring-Kollision MUSS NICHT mangled werden. `-cache/lock`
+	// nach dem nicht-cwd-Pfad-Prefix darf NICHT zu `.-cache/lock`
+	// werden — der Defense-Check pinnt das ungemangelte Original.
+	if strings.Contains(msg, ".-cache/lock") {
+		t.Errorf("R15-LOW-1 substring-collision: baseDir-prefixed sibling path MUST NOT be mangled to %q; got: %q", ".-cache/lock", msg)
+	}
+	if !strings.Contains(msg, "/tmp/u-boot-remove-test/demo-cache/lock") {
+		t.Errorf("R15-LOW-1 substring-collision: sibling path MUST stay intact (no boundary-less ReplaceAll); got: %q", msg)
+	}
+	// Bare baseDir-Form: kein cwd-Pfad als nackter Suffix mehr im
+	// Pre-Pass-Output (nur die Substring-Kollisions-Form).
+	if strings.Contains(msg, "/tmp/u-boot-remove-test/demo/compose.yaml") {
+		t.Errorf("R14-MED-1 regression: cwd-prefixed path MUST be relativized; got: %q", msg)
+	}
+}
+
+// TestRemove_TooManyArgs_DryRunJSON_EmitsFullSchemaEnvelope (R15-LOW-2):
+// Coverage-Pin für die Flag-Awareness-Pfad-Kombination von R13-MED-1
+// (too-many-args-Envelope-Symmetrie) UND R13-HIGH-1 (Voll-Schema bei
+// `--dry-run`). `--json --dry-run remove a b c` MUSS einen Voll-Schema-
+// Envelope auf stdout produzieren — Symmetrie zum NoPositionalArg-
+// DryRun-Pin und zum TooManyArgs-Minimal-Pin. Future-Regression-Defense:
+// wenn jemand den `len(args)>1`-Pfad ohne Flag-Read refaktoriert, würde
+// dieser Pin als Erstes fallen.
+func TestRemove_TooManyArgs_DryRunJSON_EmitsFullSchemaEnvelope(t *testing.T) {
+	stub := &removeUseCaseStub{}
+	app := newAppWithRemoveStub(stub)
+
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(),
+		[]string{"--dry-run", "--json", "remove", "postgres", "extra-arg"}, &stdout, &stderr)
+	if err == nil {
+		t.Fatal("expected error (too many positional args)")
+	}
+	if code := cli.ExitCode(err); code != 2 {
+		t.Errorf("exit code: want 2 (LH-FA-CLI-006 usage class), got %d", code)
+	}
+	jsontestutil.AssertFullEnvelope(t, stdout.Bytes(),
+		jsontestutil.WithCommand("remove"),
+		jsontestutil.WithExitCode(2),
+		jsontestutil.WithExpectedCodes("LH-FA-CLI-006"),
+	)
+	env := unmarshalRemoveEnv(t, stdout.Bytes())
+	if got, _ := env["dryRun"].(bool); !got {
+		t.Errorf("dryRun: want true (--dry-run flag set), got false; envelope=%s", stdout.String())
+	}
+	if stub.called {
+		t.Errorf("use case called despite too-many-args validation failure")
+	}
+}
+
 // TestRemove_DryRunDiffJSONCombo pins the 3-flag combo: `--dry-run
 // --diff --json` produces voll-schema with BOTH dryRun=true AND
 // diff=true, hunks populated, no production write (previewModeFromFlags

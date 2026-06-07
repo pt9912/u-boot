@@ -13,6 +13,89 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- `feat(cli): u-boot remove --json / --dry-run / --diff
+  (LH-FA-CLI-007/008 / LH-NFA-USE-004 / LH-FA-ADD-007 /
+  LH-FA-CLI-005A)` — fünfter Folge-Slice (5/9) des Cluster-Slice
+  `slice-v1-cli-json-dry-run`. `u-boot remove` ist die **inverse
+  Operation zu `add`** (strip managed-block aus `compose.yaml` +
+  `.env.example`, flip `services.<name>.enabled` auf `false` in
+  `u-boot.yaml`, optional Volume-Purge via `--purge`-Gate). Acht
+  Flag-Kombinationen plus `--purge`-Dimension: drei JSON-Modi
+  (Minimal+Data, Voll-Schema Dry-Run, Voll-Schema Preview-and-
+  Apply) plus Human-Mode mit/ohne `--diff`/`--purge`. Pattern-
+  Erbe von add/init/generate 1:1: `driving.PreviewMode` direkt
+  (kein Service-Prefix-Alias), `RecordingFileSystem`-driven-
+  Adapter, Pure-Go LCS-Diff-Renderer, `previewModeFromFlags`-
+  Mapping, generalisierte Error-Emission-Helper. Remove-spezifisch:
+  **Confirmer-Gate für `--purge`** (`LH-FA-CLI-005A` §254) mit
+  `noopConfirmer`-Swap im JSON-Mode (T0-(j) — neues Pattern,
+  nicht aus init-Progress-Swap geerbt: Service-Field-Mutation
+  mit defer-Restore innerhalb `removeMu`-Lock-Scope; lokale-
+  Variable-Variante verworfen weil `runPurgeGate`-Signature-
+  Refactor); **`data.volumesPurged`** als `*bool` im Envelope
+  (`false` deferred-Status in v0.3.0 ist valider Success-Wert,
+  Plain-`bool`+omitempty würde Error-Pfad-Zero und Success-Pfad-
+  `false` identisch droppen); **WARN-Migration**: heutige
+  `printRemoveSummary`-stderr-WARNING bei `--purge && !VolumesPurged`
+  wandert im JSON-Mode in `diagnostics[]` mit
+  `code: "LH-FA-ADD-007"`, `level: "warn"` (Multi-Use des Codes
+  für ERROR `ErrServiceUnregistered` UND WARN deferred-Volumes —
+  Konsumenten disambiguieren über `(code, level)`-Tupel);
+  **Custom-`Args`-Validator** `validateRemoveArgs(a *App)` als
+  Cobra-PositionalArgs-Closure mit `*App`-Capture (R11/R12/R13-Pin),
+  ersetzt `cobra.ExactArgs(1)` — emittiert den
+  `LH-FA-CLI-006`-Envelope auf stdout BEVOR der Sentinel zu Cobra
+  zurückgeht (Spec §1841-Symmetrie); **Voll-Schema bei `--dry-run`/
+  `--diff`** auch im NoPositionalArg- und TooManyArgs-Pfad
+  (Spec §1842, R13-HIGH-1 Validator-Flag-Awareness via
+  `cmd.Flags().GetBool`); **`baseDirSanitizedError`-Wrapper** für
+  `diagnostic.message`: FS-Wraps der Form
+  `fmt.Errorf("... %s: %w: %w", absPath, ErrRemoveFileSystem, raw)`
+  tunneln den absoluten Filesystem-Pfad in den User-facing Output —
+  Sanitizer ersetzt `<baseDir>/foo` durch `foo` und bare `<baseDir>`
+  durch `.`, an Word-Boundaries (`replaceBareBaseDir` ist robust
+  gegen Substring-Kollisionen wie `<baseDir>-cache/lock`,
+  R14-MED-1 + R15-LOW-1); `errors.Is`/`As` bleiben intakt via
+  Unwrap-Chain. **Dry-Run-WARN-Suppression** in
+  `printRemoveSummary`: Use-Case skippt `runPurgeGate` in
+  `PreviewDryRun` (T0-(h)(a)) und führt keine Mutation aus — die
+  WARN-Prosa wäre semantisch falsch ("ist-deferred" statt
+  "würde-deferred"); Fix unterdrückt WARN-Block bei
+  `previewMode == PreviewDryRun`, `PreviewAndApply` behält die
+  WARN. Remove-spezifische LH-Code-Mapper-Tabelle in
+  `mapRemoveErrorToDiagnostic` (FS-first Switch-Order):
+  `LH-NFA-REL-003`/14 für `ErrRemoveFileSystem`, `LH-FA-CLI-005A`/10
+  für `ErrConfirmerUnavailable` (neuer Sentinel) UND
+  `ErrConflictingModeFlags`/2, `LH-FA-INIT-005`/10 für
+  `ErrConfirmationRequired`, `LH-FA-ADD-{001,002,005,007}`/10 für
+  fachliche Service-Sentinels, `LH-FA-CLI-006`/2 für
+  `ErrServiceNameMissing` und Cobra-too-many-args. **Idempotenz-
+  NoOp-Semantik**: nur `PriorState=Deactivated` qualifiziert
+  (Single+Repeat-Call → `plannedFiles: []`, `changes: []`,
+  `data.priorState=data.state="deactivated"`, Exit 0);
+  `EnabledUnset` und `InconsistentBlock` sind state-transitioning
+  (`Changed!=nil`, Voll-`plannedFiles[]`). **`delete`-Action im
+  Recorder**: `RemoveAll`-Captures für `extraFiles` werden als
+  `plannedFiles[].action: "delete"` gewired — `--diff` rendert
+  Old-Content + leeren New-Content. Tranchen-Reihenfolge (T1
+  entfällt — `noopConfirmer` lebt bereits in M4 Confirmer-Slice):
+  T2 Port-Types (`d0c9c5d`), T3 Application-Layer mit 8 FS-Wrap-
+  Stellen Multi-`%w` (`dbbf7b1`), T4 `newPreviewFSFactory`-Helper
+  (`3b079dd`), T5 CLI-RunE-Rewrite (`3188e75`), T6+T6-A
+  Acceptance-Tests inkl. `WithDataKeyAbsent`/`WithDataKeyPresent`-
+  Helper-Erweiterung in `jsontestutil` (`9eae9ec`), T7 Pre-T8-
+  Review-Fixes R13-HIGH-1 + R13-MED-1 + R14-HIGH-2 + R14-MED-1
+  (`4fb3fea`), T8 Closure mit R15-LOW-1 Sanitizer-Substring-
+  Robustheit + R15-LOW-2 Coverage-Pin. Acceptance-Coverage:
+  23 Pin-Tests in `remove_acceptance_test.go` (drei JSON-Modi,
+  Idempotenz-Repeat, EnabledUnset-Normalisierung, Mid-Write-
+  Failure mit `plannedFiles[]`-Capture, ConfirmationRequired-
+  Pfad, ServiceUnregistered ERROR vs. deferred-Volumes WARN,
+  Concurrent-Invocations-Mutex, Dry-Run-WARN-Suppression mit
+  PreviewAndApply-Kontrast, Sanitizer-Path-Leak-Defense plus
+  Substring-Kollisions-Robustheit, TooManyArgs-Voll-Schema bei
+  `--dry-run`, `delete`-Action-Hunk-Vertrag). Coverage-Gate
+  91.10 %.
 - `feat(cli): u-boot generate --json / --dry-run / --diff
   (LH-FA-CLI-007/008 / LH-NFA-USE-004 / LH-FA-GEN-001..005 /
   LH-FA-DEV-001/003)` — vierter Folge-Slice (4/9) des Cluster-
