@@ -277,3 +277,73 @@ func TestDownService_ProgressSinkWiredToEngine(t *testing.T) {
 		t.Errorf("ComposeDown called with ProgressSink = %v, want the caller's sink %v", f.engine.downOptions.ProgressSink, sink)
 	}
 }
+
+// TestDownService_SilenceConfirmer_True_SwapsToNoopConfirmer pins the
+// Request-time Gate-Branch from slice-v1-cli-json-dry-run-up-down
+// T0-(d) Option (b) + T3-Implementation: when `req.SilenceConfirmer ==
+// true`, `runConfirmationGate` Row 4 MUST substitute a local
+// noopConfirmer{} BEFORE calling ConfirmRemoveVolumes — the wired
+// `s.confirmer` MUST NOT be called.
+//
+// T7-HIGH-1 closes the test-coverage gap that the CLI-Acceptance-
+// Tests left open: CLI-Acceptance stubs the use case before
+// runConfirmationGate executes, so the real branch was never
+// exercised. This Application-Layer test pins the branch directly.
+//
+// Refuse-by-Default contract (R2-MED-2 festgezurrt): noopConfirmer.
+// ConfirmRemoveVolumes returns `(false, nil)` → runConfirmationGate
+// Z. 138 returns wrapped ErrConfirmationRequired. JSON-Mode-Konsument
+// MUST opt in via `--yes` for destructive `--volumes`.
+func TestDownService_SilenceConfirmer_True_SwapsToNoopConfirmer(t *testing.T) {
+	t.Parallel()
+	f := newDownFixture(t)
+	// Setup: configure the wired confirmer to return (true, nil) —
+	// IF the branch fails to swap, the use case would proceed to
+	// ComposeDown. Our pin asserts it does NOT proceed AND the wired
+	// confirmer is NOT called.
+	f.confirmer.removeVolumesAnswer = true
+	_, err := f.svc.Down(context.Background(), driving.DownRequest{
+		BaseDir:          "/proj",
+		RemoveVolumes:    true,
+		AssumeYes:        false, // force Row 4 (not the AssumeYes-shortcut)
+		NonInteractive:   false, // force Row 4 (not the NonInteractive-shortcut)
+		SilenceConfirmer: true,  // T3 branch trigger
+	})
+	if !errors.Is(err, driving.ErrConfirmationRequired) {
+		t.Fatalf("expected ErrConfirmationRequired (Refuse-by-Default), got: %v", err)
+	}
+	// Defense-Pin: the wired confirmer MUST NOT have been called.
+	// If the branch fails to swap, fakeConfirmer.removeVolumesCalls
+	// would be 1 (with removeVolumesAnswer=true), and the use case
+	// would proceed to ComposeDown.
+	if len(f.confirmer.removeVolumesCalls) != 0 {
+		t.Errorf("wired confirmer was called %d times despite SilenceConfirmer=true; the branch did not swap to noopConfirmer", len(f.confirmer.removeVolumesCalls))
+	}
+	// Defense-Pin: ComposeDown MUST NOT have been called either
+	// (the Gate fail-fasts before the engine call).
+	if f.engine.downCallCount != 0 {
+		t.Errorf("ComposeDown was called %d times despite refused confirmation", f.engine.downCallCount)
+	}
+}
+
+// TestDownService_SilenceConfirmer_False_UsesWiredConfirmer is the
+// contrast-pin to TestDownService_SilenceConfirmer_True: without the
+// flag, the wired confirmer IS called and its answer drives the gate.
+func TestDownService_SilenceConfirmer_False_UsesWiredConfirmer(t *testing.T) {
+	t.Parallel()
+	f := newDownFixture(t)
+	f.confirmer.removeVolumesAnswer = true // proceed
+	_, err := f.svc.Down(context.Background(), driving.DownRequest{
+		BaseDir:          "/proj",
+		RemoveVolumes:    true,
+		AssumeYes:        false,
+		NonInteractive:   false,
+		SilenceConfirmer: false, // wired confirmer MUST be used
+	})
+	if err != nil {
+		t.Fatalf("Down: %v", err)
+	}
+	if len(f.confirmer.removeVolumesCalls) != 1 {
+		t.Errorf("wired confirmer was called %d times, want exactly 1", len(f.confirmer.removeVolumesCalls))
+	}
+}

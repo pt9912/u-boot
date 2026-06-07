@@ -318,6 +318,140 @@ func TestUpJSON_ErrUpFileSystem_LHNFAREL003_Exit14(t *testing.T) {
 	)
 }
 
+// TestUpJSON_ComposeRuntime_LHNFAREL003_Exit12 pins Row 3 der Mapper-
+// Tabelle (T7-MED-2): mapComposeRuntimeSentinel matched
+// driven.ErrComposeRuntime auf LH-NFA-REL-003, Exit-Code 12 vom
+// ExitCode-Helper.
+func TestUpJSON_ComposeRuntime_LHNFAREL003_Exit12(t *testing.T) {
+	stub := &upUseCaseStub{
+		err: fmt.Errorf("up service: ComposeUp on %q: %w",
+			"/tmp/u-boot-up-test/demo", driven.ErrComposeRuntime),
+	}
+	app := newAppWithUpStub(stub)
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(), []string{"--json", "up"}, &stdout, &stderr)
+	if !errors.Is(err, driven.ErrComposeRuntime) {
+		t.Fatalf("expected ErrComposeRuntime, got %v", err)
+	}
+	if cli.ExitCode(err) != 12 {
+		t.Errorf("exit code: want 12, got %d", cli.ExitCode(err))
+	}
+	jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
+		jsontestutil.WithCommand("up"),
+		jsontestutil.WithExitCode(12),
+		jsontestutil.WithExpectedCodes("LH-NFA-REL-003"),
+	)
+}
+
+// TestUpJSON_StabilizationTimeout_LHFAUP001_Exit12 pins Row 4 (T7-MED-3):
+// up-spezifischer Runtime-Sentinel ErrStabilizationTimeout → LH-FA-UP-001,
+// Exit-Code 12 via ExitCode-Helper (cli.go:296).
+func TestUpJSON_StabilizationTimeout_LHFAUP001_Exit12(t *testing.T) {
+	stub := &upUseCaseStub{
+		err: fmt.Errorf("up service: stabilization timeout after 60s: %w", driving.ErrStabilizationTimeout),
+	}
+	app := newAppWithUpStub(stub)
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(), []string{"--json", "up"}, &stdout, &stderr)
+	if !errors.Is(err, driving.ErrStabilizationTimeout) {
+		t.Fatalf("expected ErrStabilizationTimeout, got %v", err)
+	}
+	if cli.ExitCode(err) != 12 {
+		t.Errorf("exit code: want 12, got %d", cli.ExitCode(err))
+	}
+	jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
+		jsontestutil.WithCommand("up"),
+		jsontestutil.WithExitCode(12),
+		jsontestutil.WithExpectedCodes("LH-FA-UP-001"),
+	)
+}
+
+// TestUpJSON_ComposeFileMissing_LHFAUP001_Exit10 pins Row 6 der
+// Mapper-Tabelle (T7-LOW-3): geteilte fachliche Validierung (auch in
+// mapDown). Einen Pin in up genügt; down nutzt den selben Code.
+func TestUpJSON_ComposeFileMissing_LHFAUP001_Exit10(t *testing.T) {
+	stub := &upUseCaseStub{
+		err: fmt.Errorf("up service: %q absent: %w",
+			"/tmp/u-boot-up-test/demo/compose.yaml", driving.ErrComposeFileMissing),
+	}
+	app := newAppWithUpStub(stub)
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(), []string{"--json", "up"}, &stdout, &stderr)
+	if !errors.Is(err, driving.ErrComposeFileMissing) {
+		t.Fatalf("expected ErrComposeFileMissing, got %v", err)
+	}
+	if cli.ExitCode(err) != 10 {
+		t.Errorf("exit code: want 10, got %d", cli.ExitCode(err))
+	}
+	jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
+		jsontestutil.WithCommand("up"),
+		jsontestutil.WithExitCode(10),
+		jsontestutil.WithExpectedCodes("LH-FA-UP-001"),
+	)
+}
+
+// TestUpJSON_UnknownError_DefaultsToLHFACLI006_Exit1 pins Row 10 der
+// Mapper-Tabelle (T7-LOW-4): ein ungemappter Error fällt auf den
+// Default-Branch LH-FA-CLI-006 / Exit 1.
+func TestUpJSON_UnknownError_DefaultsToLHFACLI006_Exit1(t *testing.T) {
+	stub := &upUseCaseStub{
+		err: errors.New("up service: synthetic unknown error"),
+	}
+	app := newAppWithUpStub(stub)
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(), []string{"--json", "up"}, &stdout, &stderr)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if cli.ExitCode(err) != 1 {
+		t.Errorf("exit code: want 1 (default), got %d", cli.ExitCode(err))
+	}
+	jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
+		jsontestutil.WithCommand("up"),
+		jsontestutil.WithExitCode(1),
+		jsontestutil.WithExpectedCodes("LH-FA-CLI-006"),
+	)
+}
+
+// TestUpJSON_MultiWrap_FSAndStabilizationTimeout_FSFirst_ByDesign is
+// T7-LOW-5 / T7-MED-1 by-design verification: zusätzlicher Defense-
+// Pin für ein FS+Driving-Sentinel-Pair. Konstruierter Multi-`%w`-Wrap
+// mit ErrUpFileSystem + ErrStabilizationTimeout demonstriert die
+// Zwei-Pfad-Disambiguation:
+//   - Mapper FS-first → code = LH-NFA-REL-003 (FS-Klasse via Row 1)
+//   - ExitCode-Helper checkt driving.ErrStabilizationTimeout VOR
+//     isFilesystemError (cli.go:296) → exit = 12 (StabilizationTimeout
+//     Sub-Klasse).
+//
+// Beide Pfade unabhängig; Konsumenten disambiguieren über
+// (code, exitCode)-Tupel per T8 §6.7-Doku-Pin. Selbe Logik wie beim
+// FS+Docker-Wrap (TestUpJSON_MultiWrap_FSAndDocker).
+func TestUpJSON_MultiWrap_FSAndStabilizationTimeout_FSFirst_ByDesign(t *testing.T) {
+	stub := &upUseCaseStub{
+		err: fmt.Errorf("up service: synthetic chain: %w: %w",
+			driving.ErrUpFileSystem, driving.ErrStabilizationTimeout),
+	}
+	app := newAppWithUpStub(stub)
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(), []string{"--json", "up"}, &stdout, &stderr)
+	if !errors.Is(err, driving.ErrUpFileSystem) {
+		t.Errorf("errors.Is(ErrUpFileSystem) MUST match; got %v", err)
+	}
+	if !errors.Is(err, driving.ErrStabilizationTimeout) {
+		t.Errorf("errors.Is(ErrStabilizationTimeout) MUST match; got %v", err)
+	}
+	// ExitCode-Helper StabilizationTimeout-first (cli.go:296) → 12.
+	if cli.ExitCode(err) != 12 {
+		t.Errorf("ExitCode: want 12 (StabilizationTimeout-Sub-Klasse via cli.go:296), got %d", cli.ExitCode(err))
+	}
+	// Mapper FS-first → diagnostics[0].code = LH-NFA-REL-003.
+	jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
+		jsontestutil.WithCommand("up"),
+		jsontestutil.WithExitCode(12),
+		jsontestutil.WithExpectedCodes("LH-NFA-REL-003"),
+	)
+}
+
 // TestUpJSON_DockerUnavailable_LHNFAREL003_Exit11 pins the shared
 // helper (Row 2 der Mapper-Tabelle): mapComposeRuntimeSentinel
 // matched ErrDockerUnavailable auf LH-NFA-REL-003, Exit-Code 11 vom
@@ -367,17 +501,18 @@ func TestUpJSON_MultiWrap_FSAndDocker_SwitchOrderFSFirst(t *testing.T) {
 	if !errors.Is(err, driven.ErrDockerUnavailable) {
 		t.Errorf("errors.Is(ErrDockerUnavailable) MUST match in multi-wrap; got %v", err)
 	}
-	// FS-first: ExitCode-Helper checked driven.ErrDockerUnavailable
-	// FIRST (Z. 290) und gibt 11 zurück. Hmm — das ist der
-	// Switch-Order-Drift gegen den Plan. Dokumentiere die heutige
-	// Realität: ExitCode-Helper ist Docker-first, Mapper ist FS-
-	// first. Die Disambiguation passiert auf separaten Pfaden.
+	// T7-MED-1 by-design: Mapper ist FS-first → diagnostics[0].code
+	// = LH-NFA-REL-003 (FS-Klasse). ExitCode-Helper (cli.go:290)
+	// checked driven-Sentinels first → exitCode = 11
+	// (Docker-Sub-Klasse). Beide Pfade getrennt; (code, exitCode)-
+	// Tupel-Disambiguation per §6.7 ist der Vertrag — der FS-Code
+	// signalisiert die Klasse, der Exit differenziert die Sub-
+	// Sentinel-Quelle. Pin verifiziert das Zwei-Pfad-Verhalten.
 	if code := cli.ExitCode(err); code != 11 {
-		t.Logf("ExitCode-Helper: heutige Reihenfolge ist Docker-first (cli.go:290), got %d", code)
+		t.Errorf("ExitCode: want 11 (Docker-Sub-Klasse via cli.go:290 Driven-first), got %d", code)
 	}
 	// Mapper-Tabelle ist FS-first: diagnostics[0].code MUSS
-	// LH-NFA-REL-003 (FS-Klasse) sein, nicht versehentlich auf
-	// einen anderen Code droppen.
+	// LH-NFA-REL-003 (FS-Klasse) sein.
 	jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
 		jsontestutil.WithCommand("up"),
 		jsontestutil.WithExpectedCodes("LH-NFA-REL-003"),

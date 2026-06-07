@@ -11,6 +11,7 @@ import (
 
 	"github.com/pt9912/u-boot/internal/adapter/driving/cli"
 	"github.com/pt9912/u-boot/internal/adapter/driving/cli/jsontestutil"
+	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
@@ -225,6 +226,48 @@ func TestDownJSON_ErrDownFileSystem_LHNFAREL003_Exit14(t *testing.T) {
 	jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
 		jsontestutil.WithCommand("down"),
 		jsontestutil.WithExitCode(14),
+		jsontestutil.WithExpectedCodes("LH-NFA-REL-003"),
+	)
+}
+
+// TestDownJSON_QuietJSON_StillEmitsEnvelope pins T0-(b) für down
+// (T7-LOW-1 Symmetrie zu up). --quiet --json MUSS Envelope emittieren.
+func TestDownJSON_QuietJSON_StillEmitsEnvelope(t *testing.T) {
+	stub := &downUseCaseStub{resp: driving.DownResponse{RemovedVolumes: false}}
+	app := newAppWithDownStub(stub)
+	var stdout, stderr bytes.Buffer
+	if err := app.Execute(context.Background(), []string{"--quiet", "--json", "down"}, &stdout, &stderr); err != nil {
+		t.Fatalf("execute: %v (stderr=%s)", err, stderr.String())
+	}
+	if stdout.Len() == 0 {
+		t.Fatalf("--quiet --json MUST emit envelope on stdout (T0-(b)); got empty")
+	}
+	jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
+		jsontestutil.WithCommand("down"),
+		jsontestutil.WithExitCode(0),
+	)
+}
+
+// TestDownJSON_DockerUnavailable_LHNFAREL003_Exit11 pins Row 2 der
+// Mapper-Tabelle für down (T7-LOW-2 Symmetrie zu up). Selber shared
+// helper mapComposeRuntimeSentinel.
+func TestDownJSON_DockerUnavailable_LHNFAREL003_Exit11(t *testing.T) {
+	stub := &downUseCaseStub{
+		err: fmt.Errorf("down service: ComposeDown on %q: %w",
+			"/tmp/u-boot-down-test/demo", driven.ErrDockerUnavailable),
+	}
+	app := newAppWithDownStub(stub)
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(), []string{"--json", "down"}, &stdout, &stderr)
+	if !errors.Is(err, driven.ErrDockerUnavailable) {
+		t.Fatalf("expected ErrDockerUnavailable, got %v", err)
+	}
+	if cli.ExitCode(err) != 11 {
+		t.Errorf("exit code: want 11, got %d", cli.ExitCode(err))
+	}
+	jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
+		jsontestutil.WithCommand("down"),
+		jsontestutil.WithExitCode(11),
 		jsontestutil.WithExpectedCodes("LH-NFA-REL-003"),
 	)
 }

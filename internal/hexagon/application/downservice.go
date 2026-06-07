@@ -126,7 +126,7 @@ func (s *DownService) runConfirmationGate(ctx context.Context, req driving.DownR
 	// (false, nil) — refuse-by-default, so JSON consumers must opt
 	// in via --yes for destructive --volumes. No service-state
 	// mutation, race-free by construction (no downMu needed).
-	confirmer := driven.Confirmer(s.confirmer)
+	confirmer := s.confirmer
 	if req.SilenceConfirmer {
 		confirmer = noopConfirmer{}
 	}

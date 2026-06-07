@@ -544,12 +544,21 @@ u-boot down --volumes --json             # default interactive prompt — analog
       auf Multi-`%w` mit dem neuen Sentinel. Mapper-Tabelle
       T0-(e) ergänzt um `ErrUpFileSystem`/
       `ErrDownFileSystem` → `LH-NFA-REL-003`/Exit 14
-      (kanonische FS-Klasse). Switch-Order-Pin ist dann
-      **real, nicht Phantom**: konstruierter
-      `fmt.Errorf("%w: %w", ErrUpFileSystem,
-      ErrDockerUnavailable)` MUSS `LH-NFA-REL-003`/Exit 14
-      liefern, nicht `LH-NFA-REL-003`/Exit 11. Pattern-Erbe
-      remove `mapRemoveErrorToDiagnostic` Switch-Order T0-(e).
+      (kanonische FS-Klasse, kommt nur zustande wenn der
+      ExitCode-Helper KEIN driven-Sentinel zuvor matched).
+      Switch-Order-Pin ist dann **real, nicht Phantom**:
+      konstruierter `fmt.Errorf("%w: %w", ErrUpFileSystem,
+      ErrDockerUnavailable)` liefert `diagnostics[0].code =
+      LH-NFA-REL-003` (Mapper FS-first via Row 1) UND
+      `exitCode = 11` (ExitCode-Helper Driven-first cli.go:290).
+      **T7-MED-1 by-design**: die zwei Pfade sind getrennt —
+      Mapper bestimmt die FS-Code-Klasse, ExitCode differenziert
+      die Sub-Sentinel-Quelle. Pre-T7-Wortlaut "MUSS Exit 14
+      liefern" war ungenau; korrekt: Mapper liefert FS-Code,
+      ExitCode bleibt Sub-Klasse-spezifisch. Konsument
+      disambiguiert via (`code, exitCode`)-Tupel per T8 §6.7-
+      Doku-Pin. Pattern-Erbe remove `mapRemoveErrorToDiagnostic`
+      Switch-Order T0-(e).
   Alternative-Wechsel auf neuen `LH-NFA-REL-005`: zieht
   Spec-Erweiterung und Lastenheft-Edit. Plan bleibt bei (ii)
   weil Spec-Footprint-Stabilität V1-prioritär.
@@ -705,19 +714,49 @@ u-boot down --volumes --json             # default interactive prompt — analog
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe) | ~50 | T6 |
 | T8 | Closure: CHANGELOG, **`cli-json-output.md` §6/§6.7/§7** mit konkretem **`(code, exitCode)`-Tupel-Disambiguation-Block** in §6.7 (R3-MED-5: Pattern-Vorlage analog remove `LH-FA-ADD-007` Multi-Use; verbatim Beispiel: `LH-NFA-REL-003`/Exit 14 ist FS, Exit 11 ist Docker-Daemon, Exit 12 ist Compose-Runtime — Konsumenten MÜSSEN auf (`code, exitCode`)-Tupel filtern, nicht nur auf `code`). **Cross-Slice-Klassen-Pin** (R4-MED-2): `ErrProjectNotInitialized` mappt auf **`LH-FA-INIT-001`** bei Environment-Subcommands (up/down/generate) UND auf **`LH-FA-ADD-001`** bei Service-Subcommands (add/remove) — explicit dokumentieren als bewusste Cluster-Konvention, damit Cluster-Closure-Audit den Drift nicht als Bug erfindet. §7 zwei neue Zeilen "nur ReadFile" für up/down; roadmap done-Zähler 5→6, **carveouts.md** drei neue Einträge (Recreate-Warnings, Volume-Named-Liste, Partial-Snapshot — siehe Out-of-Scope-Block §"Strukturierte Multi-Port-Liste" für vierten Carveout-Trigger falls Real-World-Druck, R3-Bonus-Klarstellung), **vier open/-Stubs** schaffen (R2-MED-1 Memory-`carveouts_need_plans`): `slice-v1-recreate-detection`, `slice-v1-down-volumes-named-list`, `slice-v1-up-partial-snapshot-on-failure`, ggf. `slice-v1-multi-port-services`. **envelope-consolidation-Stub-Update** (R3-MED-3+R3-MED-4 plus R4-MED-3): Sub-Decision 2 dort als "festgelegt durch up-down T5" markieren; Wrap-Site-Inventar erläutern dass up/down-Sites schon abgedeckt sind; Extraktions-Quelle auf `cli/sanitize.go` aktualisieren; **plus Z. 159-163 dort aktualisieren** dass `down --volumes` ebenfalls `SilenceConfirmer`-Pattern nutzt (übernommen aus up-down T2, identisch zu remove) — der Confirmer-Swap-Carveout dort ist nicht mehr remove-spezifisch. Slice nach `done/` mit DoD-Hash-Tabelle | — (Doku) | T7 |
 
-LOC-Bilanz: **~1035-1135** (R5-Justierung: T3 zurück auf ~120
-weil nil-Default im Adapter bleibt (R5-MED-1, kein zusätzlicher
-Application-Layer-nil-Check); T2 ~125 inkl. R5-MED-2/HIGH-1
-Port-Kommentar-Co-Migration `down.go:90` + `up.go:50`).
-Tranchen-Summen jetzt T2(~125) + T3(~120) + T4(0 erwartet) +
-T5(~250) + T6(500-600) + T7(~50). Pattern-Erbe (R6-LOW-1
-präzisiert): remove (Confirmer-Konzept via `SilenceConfirmer`-
-Bool-Field + FS-Sentinel-Pattern + Sanitizer-Helper-Quelle),
-init (**konzeptuelle** Vorlage für JSON-Mode-Silencing —
-init swappt `s.progress` als Interface-Port, up/down nutzen
-`io.Writer`-`effective`-Variable; **Mechanismus fundamental
-verschieden**, JSON-Mode-Brücke gleich), doctor (typed Data-
-Carrier `upStatusData`/`downStatusData`-Vorlauf).
+LOC-Bilanz: **Plan ~1035-1135 / IST ~1220+** (T7-LOW-6 Drift-
+Doku):
+
+| Tranche | Plan-Soll | IST (Commit) | Drift-Begründung |
+| --- | --- | --- | --- |
+| T2 (Port-Types) | ~125 | 73 (`e966a83`) | unter weil Kommentar-Co-Migration knapper als geschätzt |
+| T3 (Application-Layer) | ~120 | 29 (`86fb5b2`) | unter weil `cli/composesentinel.go`-Helper-Arbeit nach T5 wanderte (Plan-Drift T3-Cell vs. T5-Details, dokumentiert in T3-Commit-Body) |
+| T4 (Composition-Root) | 0 erwartet | 0 (entfällt) | wie geplant |
+| T5 (CLI-RunE) | ~250 | 441 (`a5aaf9c`) | über weil composesentinel.go (~40 LOC) + Sanitizer-Helper-Extraktion (~95 LOC) + Mapper-Funktionen (~80 LOC) zusammen mehr als geschätzt |
+| T6 (Acceptance) | 500-600 | 677 (`2473988`) | leicht über; 21 Tests statt 14-18 (T7-Adressierung erhöht auf ~26) |
+| T7 (Pre-T8-Fix) | ~50 | TBD | T7-Adressierung (HIGH-1 Application-Layer-Test + MED-1/2/3 + LOWs) |
+| **Production-Code total** | ~545 | 543 | ✓ on-target trotz Tranchen-Verschiebung |
+
+Pattern-Erbe (R6-LOW-1 präzisiert): remove (Confirmer-Konzept
+via `SilenceConfirmer`-Bool-Field + FS-Sentinel-Pattern +
+Sanitizer-Helper-Quelle), init (**konzeptuelle** Vorlage für
+JSON-Mode-Silencing — init swappt `s.progress` als Interface-
+Port, up/down nutzen `io.Writer`-`effective`-Variable;
+**Mechanismus fundamental verschieden**, JSON-Mode-Brücke
+gleich), doctor (typed Data-Carrier `upStatusData`/
+`downStatusData`-Vorlauf).
+
+### T7-Pre-T8-Review-Findings (2026-06-07)
+
+Adversarial Code-against-Plan-Audit nach T2-T6. **HIGH=1, MED=4,
+LOW=6**, alle adressiert vor T8-Closure:
+
+| # | Sev | Finding | Adressierung |
+| - | --- | --- | --- |
+| HIGH-1 | HIGH | `runConfirmationGate` Row 4 `noopConfirmer`-Branch wird durch CLI-Acceptance-Tests nie ausgeführt (Stub fängt UC vor dem Branch ab) — Plan-T6-Cell "CommandConfigGate-Refuse-by-Default-Pin" nicht erfüllt | Application-Layer-Test `TestDownService_SilenceConfirmer_True_SwapsToNoopConfirmer` in `downservice_test.go` mit Defense-Pin auf `fakeConfirmer.removeVolumesCalls == 0` plus Contrast-Pin `SilenceConfirmer_False` |
+| MED-1 | MED | Plan-Wortlaut Z. 547-552: "MUSS Exit 14 liefern" — real: Mapper-FS-first → code LH-NFA-REL-003, ExitCode-Helper Driven-first → exit 11. Zwei-Pfad-Disambiguation als by-design dokumentiert. | Plan-Text präzisiert (siehe Z. 549-555); T6-Test-Kommentar von Drift- auf by-design-Wortlaut umgestellt |
+| MED-2 | MED | Mapper-Row 3 `ErrComposeRuntime` ungepinnt | Neuer Pin `TestUpJSON_ComposeRuntime_LHNFAREL003_Exit12` |
+| MED-3 | MED | Mapper-Row 4 `ErrStabilizationTimeout` ungepinnt | Neuer Pin `TestUpJSON_StabilizationTimeout_LHFAUP001_Exit12` |
+| MED-4 | MED | `confirmer := driven.Confirmer(s.confirmer)` Type-Cast redundant | `confirmer := s.confirmer` (Lesbarkeit) |
+| LOW-1 | LOW | down hat kein `--quiet --json`-Pin (Symmetrie) | `TestDownJSON_QuietJSON_StillEmitsEnvelope` |
+| LOW-2 | LOW | down hat kein `ErrDockerUnavailable`-Pin (Symmetrie) | `TestDownJSON_DockerUnavailable_LHNFAREL003_Exit11` |
+| LOW-3 | LOW | Mapper-Row 6 `ErrComposeFileMissing` ungepinnt | `TestUpJSON_ComposeFileMissing_LHFAUP001_Exit10` (one Pin reicht, geteilte Row) |
+| LOW-4 | LOW | Mapper-Row 10 Default ungepinnt | `TestUpJSON_UnknownError_DefaultsToLHFACLI006_Exit1` |
+| LOW-5 | LOW | FS+Driving-Sentinel-Multi-Wrap nicht gepinnt (heutiger Pin nur FS+Driven) | `TestUpJSON_MultiWrap_FSAndStabilizationTimeout_FSFirst_ByDesign` |
+| LOW-6 | LOW | LOC-Bilanz Plan-Soll vs IST | Drift-Tabelle oben |
+
+Nach T7-Adressierung: 26 Acceptance-Tests (15 up + 11 down) plus
+2 neue Application-Layer-Tests.
 
 ### T2-Details: Port-Types, Sentinels, Co-Migration
 
