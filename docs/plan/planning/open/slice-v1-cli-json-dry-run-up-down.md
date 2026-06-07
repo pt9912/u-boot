@@ -113,19 +113,47 @@ u-boot down --volumes --json             # default interactive prompt — analog
   Feld (read-only-Klasse). Pflicht-Felder pro Spec §1841:
   `status`/`command`/`diagnostics`/`exitCode` plus typed `data`-
   Carrier.
-- ✅ **`upStatusData`-Carrier-Form** (doctor T0-(c)/(d) Vorlauf):
-  pro Service `{name, state, ports, healthcheck}` als
-  `serviceStatus`-Sub-Struct mit `json:"…"`-Tags. **Pointer-
-  Wrapping** auf optionalen Feldern (`Healthcheck *string` weil
-  nicht alle Services healthchecks haben).
-- ✅ **`downStatusData`-Carrier-Form** (T0-Sub-Decision):
-  `{removedVolumes []string, stoppedContainers []string}` oder
-  schmaler `{removedVolumes []string}` — abhängig davon, was die
-  Use-Case-Response heute trägt. Bei `down` ohne `--volumes`
-  ist `removedVolumes: []`.
+- ✅ **`upStatusData`-Carrier-Form** (doctor T0-(c)/(d) Vorlauf,
+  T0-(g) Review-Finding MED-1 Field-Korrektur): pro Service
+  `{name, state, port, healthcheck}` als `serviceStatus`-Sub-
+  Struct mit `json:"…"`-Tags. **Single `port string`** (NICHT
+  `ports []string`) — matched heutigen
+  `domain.ServiceStatus.Port`-Display-String-Vertrag
+  (`cli/statusview.go:11ff`, Spec LH-FA-UP-003 Mindestangabe
+  "Port" Singular). Multi-Port-Form wäre eigener Sub-Decision-
+  Pfad (Use-Case-Layer-Anpassung nötig — Folge-Slice falls
+  Real-World-Bedarf). **Pointer-Wrapping** auf optionalen
+  Feldern (`Healthcheck *string` weil nicht alle Services
+  healthchecks haben; `Port *string` weil Services ohne
+  exposed Port den heutigen `"-"`-Display-String tragen — im
+  JSON-Mode wandert das auf Key-Absence via omitempty).
+- ✅ **`downStatusData`-Carrier-Form** (T0-(h) revidiert nach
+  Review-Finding HIGH-1): matched den heutigen Port-Vertrag
+  `DownResponse{RemovedVolumes bool}`
+  (`port/driving/down.go:80`). Der Port-Kommentar verbietet
+  explizit Counts/Namen: *"No stop / removed counters — docker
+  compose down emits a human-readable progress stream rather
+  than a structured count, and inventing an 'unknown' sentinel
+  value would force every caller to special-case it. If a
+  future slice needs precise counts (e.g. for --json output,
+  LH-NFA-USE-004 V1), it would add a ComposePs diff
+  before/after the call rather than parse the stderr stream."*
+  Carrier-Form: `{removedVolumes bool}` — Spec-konform-minimal,
+  matched Port. ComposePs-Diff-Form für `[]string`-Namen ist
+  expliziter Folge-Slice-Pfad (Out-of-Scope, siehe T0-(h)
+  unten).
 - ✅ **Idempotenz-Pin**: `down` gegen bereits-gestoppte Umgebung
-  liefert `removedVolumes: []`, `status: ok`, Exit 0 (analog
-  remove NoOp-Semantik).
+  liefert `removedVolumes: false`, `status: ok`, Exit 0 (analog
+  remove NoOp-Semantik — `false` ist der valide
+  "nichts-zu-removen"-Wert).
+- ✅ **Empty-Array-Pin** (T0-(j) Review-Finding MED): leere
+  Service-Listen MÜSSEN als `[]` serialisieren, NICHT `null`.
+  Besonders relevant bei `up --timeout=0` (fire-and-forget,
+  heute `services: []`) und bei Mid-Failure-Pfaden. T6-Pin
+  prüft `json.Unmarshal → []serviceStatus{}`, nicht
+  `[]serviceStatus(nil)`. Pointer-Wrapping in der Go-Struct
+  oder leeres Slice-Initialisieren — Pattern-Wahl analog
+  doctor `diagnostics: []`.
 - ✅ **`--quiet --json` semantisch identisch zu `--json`**
   (Cluster-T0-(a) Pattern aus doctor T6-Pin): `--quiet` darf den
   JSON-Output NICHT unterdrücken — JSON ist die Maschinen-
@@ -167,11 +195,22 @@ u-boot down --volumes --json             # default interactive prompt — analog
   `LH-FA-UP-001`/Exit 10. T0-Sub-Decision: welcher LH-Code für
   Docker-/Compose-Runtime-Klasse — heute gibt's keinen
   `LH-NFA-REL`-Eintrag für Docker-Daemon-Verfügbarkeit.
-- ✅ **Mid-Operation-Failure-UX** (analog Mid-Write aber für
-  Docker): wenn `ComposeUp` mid-stream failt (Container A
-  started, Container B failed), liefert der Envelope den
-  Status-Snapshot bis zur Failure-Stelle plus `diagnostics[]`-
-  Eintrag mit Failure-Position und Exit-Code 12.
+- ✅ **Mid-Operation-Failure-UX** (T0-(i) revidiert nach
+  Review-Finding HIGH-2): heute liefert `UpService` bei
+  `ComposeUp`-Fehlern (`upservice.go:76-80`) UND bei terminalen
+  Poll-Failures (`upservice.go:200-202`) eine **Zero-Response**
+  zurück, keinen Snapshot. Plus: `domain.ContainerState`-Enum
+  (`domain/serviceup.go:20ff`) kennt nur
+  `unknown|starting|running|restarting|dead`, KEIN `failed`.
+  Plan-Empfehlung: Failure-Pfad trägt **nur**
+  `diagnostics[]`-Eintrag mit Failure-Service-Name + Failure-
+  State + Exit-Code 12 (für `ErrComposeRuntime`) / 11 (für
+  `ErrDockerUnavailable`) / 10 (für `ErrProjectNotInitialized`).
+  `data` ist `nil` auf Error-Pfad (Zero-Response analog
+  generate Error-Envelope). Partial-Snapshot-Form (Snapshot
+  der teilweise gestarteten Services bis zur Failure-Stelle)
+  wäre eigener Application-Port-Contract mit T0-Sub-Decision-
+  Pfad — siehe T0-(i) unten.
 - ✅ **CLI-Pin-Tests**: ~10-14 Acceptance-Tests in
   `up_acceptance_test.go` + `down_acceptance_test.go` (oder
   einer gebündelter Form `updown_acceptance_test.go`).
@@ -220,10 +259,34 @@ u-boot down --volumes --json             # default interactive prompt — analog
       injiziert in den ProgressSink-Field.
   Plan-Empfehlung: (a) — `io.Discard` ist die schlankste Form,
   Use-Case-Signatur unverändert, kein Mutex-Erfordernis.
-- **T0-(d) `down --volumes` Confirmer-Swap-Erbe**: 1:1 aus
-  remove T0-(j). `req.SilenceConfirmer = flags.JSON` (oder
-  request-time-swap, analog T0-(c) ProgressSink). Sub-
-  Entscheidung: gleicher Form-Erbe wie T0-(c), Konsistenz-Pin.
+- **T0-(d) `down --volumes` Confirmer-Pattern** (Review-
+  Finding MED-3 Form-Korrektur): drei Optionen:
+  (a) **Service-Field-Mutation mit defer-Restore** PLUS neuer
+      `downMu sync.Mutex` — vollständig analog remove T0-(j)
+      (`removeservice.go:159-178`). Race-Sicherheit fordert
+      Mutex; ohne ihn wäre Field-Swap nicht race-frei.
+      `DownService` hat heute KEINEN Mutex.
+  (b) **Request-time Gate-Branch** ohne Field-Mutation: der
+      Use-Case verzweigt im Code-Pfad selbst auf
+      `req.SilenceConfirmer` und benutzt entweder
+      `s.confirmer` oder einen lokalen `noopConfirmer{}`.
+      Kein Service-State mutiert → kein Mutex nötig → race-frei
+      by construction.
+  (c) **Request-time Confirmer-Field** in `DownRequest`:
+      `req.Confirmer driven.Confirmer` (optional, default
+      Service-Field). CLI injiziert `noopConfirmer{}` bei
+      `flags.JSON`. Schlankste Form, aber bricht heutigen
+      `DownRequest`-Vertrag (`SilenceConfirmer bool` wäre
+      Pattern-Erbe-konsistenter).
+  Plan-Empfehlung **WECHSELT auf (b)** Request-time Gate-
+  Branch: kein Service-State mutiert (race-frei), kein
+  neuer Mutex nötig (kleinere Application-Layer-Erweiterung),
+  Pattern-Erbe-Konsistenz mit remove bleibt nur **konzeptuell**
+  (gleiches Ergebnis im JSON-Mode) — nicht 1:1 strukturell.
+  remove brauchte Field-Mutation weil `runPurgeGate`-Aufruf
+  außerhalb der Verzweigung lag und nur über `s.confirmer`
+  drauf zugreifen konnte; in `down` ist die Confirmer-Nutzung
+  lokaler und kann via Branch direkt ausgewählt werden.
 - **T0-(e) Mapper-Tabelle Layer-Heim**: zwei separate Mapper
   `mapUpErrorToDiagnostic`/`mapDownErrorToDiagnostic` ODER ein
   gemeinsamer `mapComposeErrorToDiagnostic(err, command
@@ -237,53 +300,154 @@ u-boot down --volumes --json             # default interactive prompt — analog
   (Pattern-Erbe), aber geteilter Helper für die
   Docker-/Compose-Runtime-Sentinels als interner
   `mapComposeRuntimeSentinel(err)`-Helper.
-- **T0-(f) LH-Code-Klassifikation für Docker-Runtime-Klasse**:
+- **T0-(f) LH-Code-Klassifikation für Docker-Runtime-Klasse**
+  (Review-Finding MED-2 Risiko-Klarstellung):
   `ErrDockerUnavailable` → Exit 11 ist gesetzt, aber welcher
   LH-Code? Spec hat `LH-NFA-REL-003` für FS-Failure und
   `LH-FA-CLI-006` als Default. Für Docker-Daemon-
   Unverfügbarkeit gibt's keinen dedizierten LH-Code.
-  Sub-Decision: (i) neuer `LH-NFA-REL-005`-Code (Plan-
-  Annahme) ODER (ii) Konsolidierung auf existierenden
-  `LH-NFA-REL-003` mit Sub-Semantik-Dehnung (analog remove's
-  Triple-Use von `LH-FA-ADD-005`). Plan-Vorschlag: (ii)
-  Konsolidierung — der Exit-Code 11 differenziert bereits;
-  Spec-Eintrag bleibt schmal.
-- **T0-(g) `upStatusData`-Field-Granularität**: doctor T0-(c)
-  zitiert das Vorbild als `Services []serviceStatus`, aber
-  `serviceStatus`-Felder sind nicht festgenagelt. Spec
-  LH-FA-UP-003 fordert: Name, Containerstatus, Port,
-  Healthcheck (optional). Sub-Decision: (i) genau diese vier
-  Felder ODER (ii) erweitert um zusätzliche Container-Metadaten
-  (Image-Digest, Uptime, Restart-Count). Plan-Empfehlung: (i)
-  Spec-konform-minimal, Erweiterung als eigener
-  Sub-Slice falls Real-World-Druck.
-- **T0-(h) `downStatusData`-Field-Definition**: was trägt der
-  Carrier? Heute liefert `DownService.Down`
-  `DownResponse{RemovedVolumes []string}` — das ist die
-  einzige nicht-triviale Datenstruktur. Sub-Decision: nur
-  `{removedVolumes []string}` ODER ergänzt um
-  `{stoppedContainers []string, removedVolumes []string}` für
-  Konsumenten-Klassifikation. Plan-Empfehlung: minimal nur
-  `removedVolumes` (das ist das einzige destructive-Sub-Result),
-  Container-Liste ist Compose-Implicit.
-- **T0-(i) Mid-`ComposeUp`-Failure-Capture-Vertrag** (analog
-  init/add Mid-Write-Failure-UX): wenn `ComposeUp` mid-stream
-  failt (Container A started, B failed), trägt der Envelope
-  `data.services[]` Snapshot bis zur Failure-Stelle plus
-  `diagnostics[]` mit Failure-Position. Sub-Decision: trägt
-  `serviceStatus` ein `state: "failed"`-Wert ODER ist Failure
-  nur in `diagnostics[]` markiert (Service fehlt im `services[]`-
-  Array)? Plan-Empfehlung: `state: "failed"` analog
-  `domain.ContainerState`-Enum.
-- **T0-(j) `--timeout=0` Fire-and-Forget im JSON-Mode**: heute
+  Sub-Decision: (i) neuer `LH-NFA-REL-005`-Code ODER (ii)
+  Konsolidierung auf existierenden `LH-NFA-REL-003` mit
+  Sub-Semantik-Dehnung (analog remove's Triple-Use von
+  `LH-FA-ADD-005`).
+  Plan-Vorschlag: **(ii) Konsolidierung mit explizitem
+  Doku-/Test-Pin-Block**. Risiko (Review-MED-2): `LH-NFA-REL-003`
+  ist heute im Repo stark mit technischen Persistenz-/FS-
+  Fehlern UND Exit 14 assoziiert. Bei Konsolidierung MUSS der
+  Slice drei Pins liefern:
+  (1) **Doku-Pin** in `cli-json-output.md` §6.7: dass derselbe
+      `LH-NFA-REL-003`-Code mit Exit 11 (Docker-Daemon) oder
+      Exit 12 (Compose-Runtime) erscheinen kann, NICHT nur 14
+      (FS) — Disambiguation via `(code, exitCode)`-Tupel
+      analog remove's `LH-FA-ADD-007` Multi-Use (ERROR + WARN
+      via `(code, level)`).
+  (2) **Test-Pin** `TestUp_DockerUnavailable_DiagnosticCodeIs
+      RELN003_ExitCode11` verifiziert die Kombination explizit.
+  (3) **Mapper-Switch-Order-Pin** verifiziert dass FS-Klasse
+      (`ErrUpFileSystem` falls nötig oder via `driven.ErrFile
+      System`) VOR Docker-Klasse matched — damit ein
+      Multi-`%w`-Wrap mit beiden Sentinels auf FS+Exit-14
+      fällt, nicht auf Docker+Exit-11. Pattern-Erbe der
+      `LH-FA-ADD-007`-Multi-Use-Disziplin.
+  Alternative-Wechsel auf neuen `LH-NFA-REL-005`: zieht
+  Spec-Erweiterung und Lastenheft-Edit. Plan bleibt bei (ii)
+  weil Spec-Footprint-Stabilität V1-prioritär.
+- **T0-(g) `upStatusData`-Field-Granularität** (Review-Finding
+  MED-2 Port-Vertrag-Korrektur): doctor T0-(c) zitiert das
+  Vorbild als `Services []serviceStatus`, aber `serviceStatus`-
+  Felder sind nicht festgenagelt. Spec LH-FA-UP-003 fordert:
+  Name, Containerstatus, Port (Singular), Healthcheck
+  (optional). Heutiger `domain.ServiceStatus.Port`
+  (`cli/statusview.go:11ff`) ist **single Display-String**, NICHT
+  `[]string`. Sub-Decision-Optionen:
+  (i) **`port string`** matched heutigen Port-Vertrag
+      Spec-konform-minimal.
+  (ii) **`ports []string`** braucht Use-Case-Layer-Anpassung
+       (`domain.ServiceStatus.Port` zu `Ports []string` umbauen
+       plus alle Aufrufstellen). Bricht Pattern.
+  (iii) Beide Felder mit `port` deprecated → `ports`: zwei
+        JSON-Keys parallel für eine Übergangszeit. Doppelarbeit,
+        wenig Nutzen.
+  Plan-Empfehlung **(i) single `port string`** — matched Port-
+  Vertrag, kein Domain-Refactor, JSON-Konsument kann via
+  `strings.Split(port, ", ")` parsen falls Mehrfach-Ports
+  drinstehen. Multi-Port-Form als eigener Folge-Slice falls
+  Real-World-Bedarf (Domain-Erweiterung notwendig).
+- **T0-(h) `downStatusData`-Field-Definition** (Review-Finding
+  HIGH-1 Port-Vertrag-Korrektur): heutiger Port liefert
+  `DownResponse{RemovedVolumes bool}` (`port/driving/down.go:80`).
+  Der Port-Kommentar verbietet explizit Counts/Namen:
+  *"No stop / removed counters — docker compose down emits a
+  human-readable progress stream rather than a structured
+  count, and inventing an 'unknown' sentinel value would force
+  every caller to special-case it. If a future slice needs
+  precise counts (e.g. for --json output, LH-NFA-USE-004 V1),
+  it would add a ComposePs diff before/after the call rather
+  than parse the stderr stream."* Drei Sub-Decision-Optionen:
+  (i) **`{removedVolumes bool}`** — 1:1-Echo von
+      `DownResponse.RemovedVolumes`. Spec-konform-minimal,
+      kein Port-Refactor. JSON-Konsument bekommt einen
+      Boolean-Status statt einer namensbasierten Liste.
+  (ii) **`{removedVolumes []string}` mit ComposePs-Diff**:
+       expliziter Application-Port-Vertrag, der vor und nach
+       `ComposeDown` ein `ComposePs --filter "label=…
+       project=<n>" --format json` aufruft und die Differenz
+       als Volume-Namen-Liste trägt. Großer Architektur-
+       Eingriff: neuer `DockerEngine.ListVolumes`-Port-Method,
+       zusätzlicher Compose-Daemon-Roundtrip, Volume-vs-
+       Container-Naming-Disambiguation, Roll-back-Semantik bei
+       Mid-Failure. Nicht V1-würdig (Port-Kommentar verweist
+       explizit auf Folge-Slice).
+  (iii) Hybrid — `{removedVolumesEcho bool, removedVolumeNames
+        []string}` mit Names als optional (omitempty). Doppel-
+        Field zieht Klassifikations-Verwirrung.
+  Plan-Empfehlung **(i) `bool`** — matched heutigen Port,
+  Spec-konform, kein Architektur-Eingriff. Option (ii) als
+  **Out-of-Scope** Carveout mit eigenem Folge-Slice
+  `slice-v1-down-volumes-named-list` (Trigger: Real-World-
+  Konsumenten-Bedarf nach Namen-Liste).
+- **T0-(i) Mid-`ComposeUp`-Failure-Capture-Vertrag** (Review-
+  Finding HIGH-2 Port/Enum-Vertrag-Korrektur):
+  Pre-Plan-Empfehlung-Vorschlag *"`state: "failed"` analog
+  `domain.ContainerState`-Enum + Snapshot bis zur Failure-
+  Stelle"* ist nicht umsetzbar:
+  (a) `domain.ContainerState` kennt nur `unknown|starting|
+      running|restarting|dead`, KEIN `failed`
+      (`domain/serviceup.go:20-40`).
+  (b) `UpService` returnt bei `ComposeUp`-Fehlern
+      (`upservice.go:76-80`) UND bei terminalen Poll-Failures
+      (`upservice.go:200-202`) eine **Zero-Response** — kein
+      Snapshot. Architektur-Vertrag heute: Error-Pfad ohne
+      Data.
+  Drei Sub-Decision-Optionen:
+  (i) **Failure nur in `diagnostics[]`** — `data` ist `nil`
+      auf Error-Pfad (analog generate Error-Envelope-Form aus
+      generate T0-(q)). Diagnostic-Eintrag trägt Failure-
+      Service-Name + Failure-State + LH-Code + Exit 11/12/10.
+      Pattern-konsistent mit heutigem Port-Vertrag, kein
+      Architektur-Eingriff.
+  (ii) **Partial-Snapshots-Application-Port-Contract**: neuer
+       `UpResponse.PartialServices []domain.ServiceStatus`-Feld
+       PLUS Use-Case-Refactor (Z. 76/200) um vor dem
+       Error-Return einen `ComposePs`-Snapshot zu ziehen.
+       Großer Eingriff (drei Aufrufstellen in `upservice.go`
+       müssen Snapshot statt Zero-Response liefern; Enum-
+       Erweiterung um `StateFailed` mit Migrationspflicht für
+       alle bestehenden Switch-Statements). Nicht V1-würdig.
+  (iii) Hybrid mit `data.lastObservedServices []serviceStatus`
+        nur im JSON-Pfad: CLI-Layer ruft `ComposePs` nochmal
+        bei Error. Bricht Layer-Trennung (CLI macht Docker-
+        Side-Effects).
+  Plan-Empfehlung **(i) Failure nur in `diagnostics[]`** —
+  matched heutigen Port-Vertrag, Spec-konform-minimal, kein
+  Application-Refactor. Option (ii) als **Out-of-Scope**
+  Carveout mit eigenem Folge-Slice
+  `slice-v1-up-partial-snapshot-on-failure` (Trigger: Real-
+  World-Bedarf nach "was lief schon" bei Mid-Failure-Debugging
+  + Domain-Enum-Erweiterung).
+- **T0-(j) `--timeout=0` Fire-and-Forget im JSON-Mode**
+  (Review-Finding MED-2 Empty-Array-Klarstellung): heute
   bedeutet `--timeout=0` "no polling, no probes, status table
   omitted, info diagnostic shown" (`up.go:53-54`). Im JSON-Mode
-  bleibt das info-diagnostic erhalten (`level: "info"` ist
+  bleibt das info-diagnostic problematisch (`level: "info"` ist
   Spec §1834 verboten — siehe doctor-Pattern aus §97 doctor-
-  Slice). Sub-Decision: `level: "warn"` UpRound oder Field-
-  Drop. Plan-Empfehlung: Field-Drop weil "fire-and-forget" kein
-  WARN-Niveau erreicht; ggf. eigener `data.timeoutFireAndForget:
-  true`-Marker im Carrier.
+  Slice). Sub-Decision-Optionen:
+  (i) `level: "warn"` Upgrade — semantisch unscharf weil
+      Fire-and-Forget ein User-Wunsch ist, kein Problem.
+  (ii) **Field-Drop des info-diagnostic + Marker**
+       `data.timeoutFireAndForget: true` im Carrier.
+       Konsumenten-Klassifikation via Marker-Field, kein
+       Severity-Niveau-Stretching.
+  (iii) Field-Drop ohne Marker — Konsument kann nur indirekt
+        ableiten (`services: []` UND Exit 0).
+  Plan-Empfehlung **(ii) Field-Drop + Marker**. **Empty-Array-
+  Pin** explizit: `services: []` (NICHT `null`)
+  serialisieren — `data.services []serviceStatus
+  ` + "`json:\"services\"`" + ` ` (kein omitempty auf `services`-
+  Feld!), bei nil-Slice mit `[]serviceStatus{}` initialisieren.
+  Pattern-Analog doctor `diagnostics: []`. T6-Pin:
+  `TestUp_TimeoutZero_JSON_ServicesIsEmptyArrayNotNull` mit
+  `json.RawMessage`-Re-Marshal-Check.
 - **T0-(k) Recreate-Warnings-Semantik** (R12-LOW-F4 aus remove
   T2 setzt den Type-Vorlauf): wann emittiert `up` eine WARN
   *"container 'postgres' will be replaced"*? Heute existiert
@@ -302,17 +466,19 @@ u-boot down --volumes --json             # default interactive prompt — analog
 | T0 | Discovery + Sub-Decisions (a)-(k) klären; Review-Runden | — (Plan) | — |
 | T1 | **Entfällt** (analog remove T1): `noopConfirmer` lebt bereits in `application/noop.go:17-33`, `io.Discard` ist Go-stdlib — beide Helper für ProgressSink-Silencing und Confirmer-Swap existieren | — (entfällt) | T0 |
 | T2 | Port-Types: `UpRequest.SilenceProgress`/`SilenceDiagnostics` (oder request-time ProgressSink-Discard); `DownRequest.SilenceConfirmer`-Feld analog `RemoveServiceRequest`. `UpResponse.Warnings []driving.WarningEntry` (Type schon da aus remove T2). Sentinels: ggf. neuer `LH-FA-UP-001`-Sub-Sentinel für ProjectNotInitialized falls heute Roh-Error | ~80 | T0 |
-| T3 | Application-Layer: ProgressSink-Discard-Wiring im JSON-Mode (oder Service-Field-Swap), `DownService.Down()`-Wrapper mit Confirmer-Swap (analog `RemoveServiceService.Remove()`-Wrapper) | ~120 | T2 |
+| T3 | Application-Layer: ProgressSink-Discard-Wiring im JSON-Mode (request-time analog T0-(c)); `DownService.Down()`-Request-time Gate-Branch ohne Field-Mutation (T0-(d) Option (b) — kein `downMu` nötig, race-frei) — KEIN remove-1:1-Service-Field-Swap mit Mutex. Mapper-Helper `mapComposeRuntimeSentinel(err)` für die geteilten Docker/Compose-Sentinels (T0-(e)) | ~80 | T2 |
 | T4 | Composition-Root: heute existiert KEINE up/down-fsFactory (kein Recorder) — T4 prüft ob `cmd/uboot/main.go` Wiring-Updates braucht (vermutlich nur Confirmer-Bezug für down) | ~20 | T3 |
 | T5 | CLI-RunE: `runUp`/`runDown` ruft generische Helper mit `command="up"`/`"down"`, `mapErr=mapUpErrorToDiagnostic`/`mapDownErrorToDiagnostic`; Envelope-Pfade; Allowlist-Migration; Mapper neu; `data`-Structs (`upStatusData`/`downStatusData`); WARN-Migration | ~200 | T2 |
 | T6 | Acceptance-Tests: ~10-14 Tests (Envelope-Pin both Subcommands, Idempotenz-Pin für down, `--quiet --json`-Pin, ProgressSink-Silencing-Pin, Confirmer-Swap-Pin für down --volumes, ConflictingModeFlags-Pin, Service-Sentinels-Pins) | ~400-500 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe) | ~50 | T6 |
 | T8 | Closure: CHANGELOG, cli-json-output.md §6/§6.7/§7 (zwei §7-Zeilen "nur ReadFile"), roadmap done-Zähler 5→6, ggf. carveouts.md (Recreate-Warnings-Carveout aus T0-(k)), Slice nach `done/` mit DoD-Hash-Tabelle | — (Doku) | T7 |
 
-LOC-Bilanz vorläufig: ~800-1000 (Schätzung nach unten korrigiert
-gegenüber remove ~1200-1400 wegen Read-Only-Klasse). Pattern-Erbe
-von remove (Confirmer-Swap), init (ProgressPort-Silencing-Vorbild)
-und doctor (typed Data-Carrier).
+LOC-Bilanz vorläufig: ~700-900 (Schätzung nach Review-Feedback
+nochmals nach unten korrigiert: T3 entfällt der Mutex-/Field-Swap-
+Pattern aus remove wegen T0-(d)-Wechsel auf Request-time Gate-
+Branch, ~40 LOC weniger). Pattern-Erbe von remove (Confirmer-
+Konzept), init (ProgressPort-Silencing-Vorbild) und doctor (typed
+Data-Carrier).
 
 ## Out of Scope
 
@@ -323,6 +489,28 @@ und doctor (typed Data-Carrier).
   proaktiv vorhanden, konkrete Detection wandert in Folge-Slice
   (Trigger: User-Feedback über fehlende Replace-Warnings oder
   Cluster-T_close-Audit).
+- **`down --volumes` Named-Volume-Liste** (T0-(h) Option (ii)):
+  `removedVolumes` ist heute `bool` auf dem Port-Vertrag
+  (`port/driving/down.go:80`). Named-Liste braucht einen neuen
+  `DockerEngine.ListVolumes`-Port-Method plus ComposePs-Diff-
+  Pattern vor/nach `ComposeDown` (so der heutige Port-Kommentar
+  selbst). Folge-Slice
+  `slice-v1-down-volumes-named-list` (Trigger: Real-World-
+  Konsumenten-Bedarf nach Namen-Liste z. B. für Audit-Logs oder
+  CI-Cleanup-Scripts; aktueller `removedVolumes: bool` ist
+  Spec-konform-minimal).
+- **Partial-Snapshot bei Mid-`ComposeUp`-Failure** (T0-(i)
+  Option (ii)): heutige Zero-Response auf Error-Pfad
+  (`upservice.go:76/200`) reflektiert den Port-Vertrag.
+  Partial-Snapshot brauchte (a) `UpResponse.PartialServices
+  []domain.ServiceStatus`-Feld, (b) Use-Case-Refactor um vor
+  Error-Return einen `ComposePs`-Snapshot zu ziehen,
+  (c) `domain.ContainerState`-Enum-Erweiterung um `StateFailed`
+  mit Migrations-Pflicht für alle Switch-Statements. Großer
+  Architektur-Eingriff. Folge-Slice
+  `slice-v1-up-partial-snapshot-on-failure` (Trigger: Real-
+  World-Bedarf nach "was lief schon"-Mid-Failure-Debugging,
+  z. B. interaktive CI-Diagnose).
 - **`up --service <name>`-Selective-Form**: heute liefert `up`
   alle Compose-Services (`cobra.NoArgs`); ein zukünftiger
   Sub-Form für Single-Service-Start wäre eigener Slice mit Args-
@@ -335,6 +523,11 @@ und doctor (typed Data-Carrier).
   und übernehmen den heutigen Drift-Status mit (kein Args-
   Validator weil `cobra.NoArgs`, kein BaseDirSanitizedError-
   Bedarf für Compose-Runtime-Errors).
+- **Multi-Port-Form** für Services mit mehreren exposed Ports
+  (T0-(g) Option (ii)): heutiger `domain.ServiceStatus.Port`
+  ist single Display-String. Umstellung auf `Ports []string`
+  bricht das Domain-Pattern und ist eigener Slice falls
+  Real-World-Druck (z. B. Multi-Port-Service-Health-Reporting).
 - **Docker-Daemon-Version-Reporting im Envelope** (z. B.
   `data.dockerVersion`): nicht in Spec gefordert, eigener Slice
   falls Konsumenten-Bedarf.
