@@ -118,7 +118,7 @@ func (s *LogsService) checkProjectInitialized(baseDir string) error {
 	path := filepath.Join(baseDir, "u-boot.yaml")
 	exists, err := s.fs.Exists(path)
 	if err != nil {
-		return fmt.Errorf("logs service: Exists(%q): %w", path, err)
+		return fmt.Errorf("logs service: Exists(%q): %w: %w", path, driving.ErrLogsFileSystem, err)
 	}
 	if !exists {
 		return fmt.Errorf("logs service: %q absent: %w", path, driving.ErrProjectNotInitialized)
@@ -134,7 +134,7 @@ func (s *LogsService) checkComposeFile(baseDir string) error {
 	path := filepath.Join(baseDir, "compose.yaml")
 	exists, err := s.fs.Exists(path)
 	if err != nil {
-		return fmt.Errorf("logs service: Exists(%q): %w", path, err)
+		return fmt.Errorf("logs service: Exists(%q): %w: %w", path, driving.ErrLogsFileSystem, err)
 	}
 	if !exists {
 		return fmt.Errorf("logs service: %q absent: %w", path, driving.ErrComposeFileMissing)
