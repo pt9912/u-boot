@@ -407,3 +407,42 @@ func TestLogsJSON_TrailingNewline_StrippedFromLastLine(t *testing.T) {
 		t.Errorf("last line should be the `redis`-line, got %q", last)
 	}
 }
+
+// TestLogsJSON_MultiWrap_FSAndDocker_SwitchOrderFSFirst_ByDesign is the
+// Pre-T8-Bestätigungsrunde MED-2 Defense-only-Pin (Pattern-Erbe up-down
+// R2-HIGH-2 + R3-HIGH-1): a synthetic multi-`%w` chain with BOTH
+// ErrLogsFileSystem AND ErrDockerUnavailable MUST resolve to
+// LH-NFA-REL-003 in diagnostics[0].code (Mapper is FS-first per
+// T0-(e) Row 1).
+//
+// Heute existiert kein realer Code-Pfad der beide Sentinels chained
+// (Exists()-Read failed VOR ComposeLogs). Der Pin verifiziert die
+// Mapper-Robustheit gegen einen synthetisch konstruierten Multi-Wrap.
+//
+// `_ByDesign`-Suffix wie up-down T7-MED-1: ExitCode-Helper (cli.go)
+// checked Driven-Sentinels first → exitCode = 11 (Docker-Sub-Klasse).
+// (code, exitCode)-Tupel-Disambiguation per cli-json-output.md §6.7 ist
+// der Vertrag: der FS-Code signalisiert die Klasse, der Exit
+// differenziert die Sub-Sentinel-Quelle.
+func TestLogsJSON_MultiWrap_FSAndDocker_SwitchOrderFSFirst_ByDesign(t *testing.T) {
+	stub := &fakeLogsUseCase{
+		err: fmt.Errorf("logs service: synthetic chain: %w: %w",
+			driving.ErrLogsFileSystem, driven.ErrDockerUnavailable),
+	}
+	app := newAppWithLogsStub(stub)
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(), []string{"--json", "logs"}, &stdout, &stderr)
+	if !errors.Is(err, driving.ErrLogsFileSystem) {
+		t.Errorf("errors.Is(ErrLogsFileSystem) MUST match in multi-wrap; got %v", err)
+	}
+	if !errors.Is(err, driven.ErrDockerUnavailable) {
+		t.Errorf("errors.Is(ErrDockerUnavailable) MUST match in multi-wrap; got %v", err)
+	}
+	if code := cli.ExitCode(err); code != 11 {
+		t.Errorf("ExitCode: want 11 (Docker-Sub-Klasse via Driven-first ExitCode-Helper), got %d", code)
+	}
+	jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
+		jsontestutil.WithCommand("logs"),
+		jsontestutil.WithExpectedCodes("LH-NFA-REL-003"),
+	)
+}

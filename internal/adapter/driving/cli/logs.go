@@ -304,10 +304,12 @@ func splitLogLines(raw []byte) []string {
 // Operation, identisch zu up/down).
 //
 // nolint:dupl // Per-Subcommand-Mapper-Pattern: alle Cluster-
-// Mapper teilen Rows 6-7 (ComposeFileMissing + ProjectNotInitialized)
+// Mapper teilen Rows 4-5 (ComposeFileMissing + ProjectNotInitialized)
 // und Default — strukturelle Ähnlichkeit ist bewusst (T0-(e)
 // Tabellen-Form), Konsolidierung würde die per-Subcommand-Switch-
-// Order-Klarheit auflösen.
+// Order-Klarheit auflösen. (Bestätigungsrunde MED-1: Row-Nummern an
+// logs-Mapper-Tabelle angepasst — up/down hat eigene Rows 4-5 wie
+// StabilizationTimeout/ConfirmerRefuse, logs nicht.)
 func mapLogsErrorToDiagnostic(err error) diagnosticItem {
 	switch {
 	// Row 1: FS-class first (Multi-`%w`-defense).

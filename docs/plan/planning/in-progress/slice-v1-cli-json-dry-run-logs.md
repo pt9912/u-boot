@@ -128,11 +128,14 @@ docs-check).
   down-T5 — der Helper lebt seit up-down T5 in
   `cli/sanitize.go` package-intern (R1-LOW-1 Redundanz-
   Konsolidierung).
-- ✅ **CLI-Pin-Tests**: ~10-14 Acceptance-Tests in
-  `logs_acceptance_test.go` (Envelope-Pin Single-/Stream-
-  Form je T0-(a) Wahl, --quiet --json, --follow --json
-  Sub-Decision-Pin, --tail-Bounded-Pin, Service-Sentinels
-  Mapper-Rows, SIGINT-Vertrag-Pin, Path-Leak-Sanitizer-Pin).
+- ✅ **CLI-Pin-Tests**: ~14-16 Acceptance-Tests in
+  `logs_acceptance_test.go` (T0-(a) Single-Envelope + Follow-
+  JSON-Reject-Pin, --quiet --json-Pin, --tail-Bounded-Pin,
+  Validation-Order-Pin, Mapper-Rows 1-9, Path-Leak-Sanitizer-
+  Pin, Empty-Array-Pin, Trailing-Newline-Strip-Pin, FS+Docker-
+  Multi-`%w`-Switch-Order-Defense-Pin). (Pre-T8-Bestätigungs-
+  runde LOW-1 + MED-2: AK-Cell auf T6-Cell-Test-Zahl angeglichen
+  + Defense-Pin ergänzt.)
 - ✅ **`cli-json-output.md`-Update**: §6-Tabelle (logs→done),
   neue §6.8-Sektion mit Output-Modell-Form + ggf. Streaming-
   Carveout-Vermerk, §7 Mutations-Matrix-Zeile (logs: nur
@@ -512,7 +515,7 @@ docs-check).
 | T3 | Application-Layer: Multi-`%w`-Wrap-Migration der **zwei FS-Read-Stellen** (`logsservice.go:117-127` `checkProjectInitialized` + `:133-143` `checkComposeFile`) auf `ErrLogsFileSystem`. KEIN ProgressSink-Branch nötig (OutputSink ist Stream-Sink, nicht Phase-Sink). KEIN `LogsResponse`-Field-Erweiterung (`TerminatedBy`-Feld verworfen via T0-(d)(i) `ctx.Err()`-Check). | ~30 | T2 |
 | T4 | **Entfällt** (analog up-down T4): Composition-Root `cmd/uboot/main.go` hat heute schon `NewLogsService` mit allen Deps. T2 führt nur Port-Sentinel + CLI-Flag-Fields ein — kein Service-Wiring-Wechsel. | — (entfällt) | T3 |
 | T5 | CLI-RunE: **`runLogs(ctx, stdout, errOut io.Writer, args, flags, uc, getwd)`-Signatur-Refactor** (R2-HIGH-3 Cluster-Pattern-Konsistenz mit up/down/remove `up.go:133`/`down.go:128`/`remove.go:253`) + `logsFlags.JSON`/`logsFlags.Quiet` Fields durchreichen analog up/down (T0-(j)(ii)). Allowlist-Migration `"u-boot logs": true` in `jsonAllowlist()`. **`isFilesystemError`-Co-Migration** (`cli/cli.go:401-428`, R1-MED-6): `driving.ErrLogsFileSystem` ergänzen damit Exit-Code-Mapping auf 14 fällt. Neuer `mapLogsErrorToDiagnostic` mit Switch-Order T0-(f). Pre-UC-Validation-Pfade via `reportError` (Single-Envelope-Form). **`--follow --json`-Reject** im CLI-Layer vor UC-Aufruf: ErrFollowJSONNotSupported / Exit 2 (LH-FA-CLI-006) — gepinnt durch T6-Test. **Single-Envelope-Pfad** (T0-(a) Option (A)): Compose-Output wird im Application-Layer/CLI-Layer in `data.lines []string` gepuffert; nach UC-Return ein `newDataEnvelope("logs", "", data, warnDiags, 0)`. Sanitizer-Aufrufe via `cli/sanitize.go`. | ~150-200 | T2 |
-| T6 | Acceptance-Tests: **~14-16 Tests** (Pre-T6-Review-Korrektur — Reviewer-Empfehlung höher als ursprüngliche 10-12): bounded `--tail`-Pin, `--follow --json`-Reject-Pin (LH-FA-CLI-006/Exit 2 — T0-(a) Option (A) Verbatim), Validation-Order-Pin (`--follow --json --tail=-1` → Follow-JSON-Reject zuerst, T0-(i)), `--quiet --json`-Pin, Mapper-Rows 1-9 (ErrLogsFileSystem, ErrDockerUnavailable, ErrComposeRuntime, ErrComposeFileMissing, ErrProjectNotInitialized, ErrInvalidServiceName, ErrFollowJSONNotSupported, ErrInvalidLogsTail, Default), Path-Leak-Sanitizer-Pin, Empty-`data.lines`-Pin (Empty-Service-Set), Trailing-Newline-Strip-Pin. | ~400-500 | T5 |
+| T6 | Acceptance-Tests: **~14-16 Tests** (Pre-T6-Review-Korrektur — Reviewer-Empfehlung höher als ursprüngliche 10-12; Pre-T8-Bestätigungsrunde MED-2 ergänzt FS+Docker-Defense-Pin): bounded `--tail`-Pin, `--follow --json`-Reject-Pin (LH-FA-CLI-006/Exit 2 — T0-(a) Option (A) Verbatim), Validation-Order-Pin (`--follow --json --tail=-1` → Follow-JSON-Reject zuerst, T0-(i)), `--quiet --json`-Pin, Mapper-Rows 1-9 (ErrLogsFileSystem, ErrDockerUnavailable, ErrComposeRuntime, ErrComposeFileMissing, ErrProjectNotInitialized, ErrInvalidServiceName, ErrFollowJSONNotSupported, ErrInvalidLogsTail, Default), Path-Leak-Sanitizer-Pin, Empty-`data.lines`-Pin (Empty-Service-Set), Trailing-Newline-Strip-Pin, **FS+Docker-Multi-`%w`-Switch-Order-Defense-Pin (`_ByDesign`-Suffix; ExitCode-Helper-Driven-first vs. Mapper-FS-first per §6.7 (code, exitCode)-Tupel-Disambiguation)**. | ~400-500 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe) | ~50 | T6 |
 | T8 | Closure: CHANGELOG, `cli-json-output.md` §6/§6.8/§7 (§6.8 als reguläre Read-only-Sektion analog §6.7 up-down, mit `--follow --json`-Reject-Doku als Spec-konformer Mechanismus; §7 Mutations-Matrix-Zeile "logs: nur ReadFile"), roadmap done-Zähler 6→7, carveouts.md-Einträge für die drei `open/`-Stubs (`slice-v1-logs-format-flags`, `-multi-service-filter`, `-time-range-filter` — bereits in `open/` angelegt bei R2-Adressierung, R2-HIGH-2 Memory-Disziplin), Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
 
