@@ -128,8 +128,8 @@ u-boot down --volumes --json             # default interactive prompt — analog
   exposed Port den heutigen `"-"`-Display-String tragen — im
   JSON-Mode wandert das auf Key-Absence via omitempty).
 - ✅ **`downStatusData`-Carrier-Form** (T0-(h) revidiert nach
-  Review-Finding HIGH-1): matched den heutigen Port-Vertrag
-  `DownResponse{RemovedVolumes bool}`
+  Review-Finding HIGH-1 + Followup): matched den heutigen
+  Port-Vertrag `DownResponse{RemovedVolumes bool}`
   (`port/driving/down.go:80`). Der Port-Kommentar verbietet
   explizit Counts/Namen: *"No stop / removed counters — docker
   compose down emits a human-readable progress stream rather
@@ -139,9 +139,21 @@ u-boot down --volumes --json             # default interactive prompt — analog
   LH-NFA-USE-004 V1), it would add a ComposePs diff
   before/after the call rather than parse the stderr stream."*
   Carrier-Form: `{removedVolumes bool}` — Spec-konform-minimal,
-  matched Port. ComposePs-Diff-Form für `[]string`-Namen ist
-  expliziter Folge-Slice-Pfad (Out-of-Scope, siehe T0-(h)
-  unten).
+  matched Port. **Kein `omitempty`** auf dem Feld
+  (Followup-Pin): `false` ist der legitime Success-Wert
+  "nichts entfernt" und MUSS im Erfolgs-Envelope explizit
+  erscheinen, sonst kann der Konsument Key-Abwesenheit nicht
+  von "kein --volumes gesetzt" disambiguieren. Pattern-Erbe
+  remove's `*bool` ist hier nicht nötig weil `down` keine
+  Three-State-Disambiguation hat (Error-Pfad trägt `data=nil`
+  laut T0-(i), Success-Pfad immer `bool` mit klarem Wert).
+  **Feldname-Anmerkung**: `removedVolumes` reflektiert den
+  Port-Vertrag-Namen 1:1. `volumesRemoved` wäre als JSON-Name
+  natürlicher (Substantiv + Past-Participle), aber Spiegelung
+  Port-↔-Wire ist Pattern-konsistent mit remove's
+  `volumesPurged`/`VolumesPurged`. ComposePs-Diff-Form für
+  `[]string`-Namen ist expliziter Folge-Slice-Pfad (Out-of-Scope,
+  siehe T0-(h) unten).
 - ✅ **Idempotenz-Pin**: `down` gegen bereits-gestoppte Umgebung
   liefert `removedVolumes: false`, `status: ok`, Exit 0 (analog
   remove NoOp-Semantik — `false` ist der valide
@@ -196,21 +208,31 @@ u-boot down --volumes --json             # default interactive prompt — analog
   Docker-/Compose-Runtime-Klasse — heute gibt's keinen
   `LH-NFA-REL`-Eintrag für Docker-Daemon-Verfügbarkeit.
 - ✅ **Mid-Operation-Failure-UX** (T0-(i) revidiert nach
-  Review-Finding HIGH-2): heute liefert `UpService` bei
-  `ComposeUp`-Fehlern (`upservice.go:76-80`) UND bei terminalen
-  Poll-Failures (`upservice.go:200-202`) eine **Zero-Response**
-  zurück, keinen Snapshot. Plus: `domain.ContainerState`-Enum
-  (`domain/serviceup.go:20ff`) kennt nur
-  `unknown|starting|running|restarting|dead`, KEIN `failed`.
-  Plan-Empfehlung: Failure-Pfad trägt **nur**
+  Review-Finding HIGH-2 + Followup): heute liefert `UpService`
+  bei `ComposeUp`-Fehlern (`upservice.go:76-80`) UND bei
+  terminalen Poll-Failures (`upservice.go:200-202`) eine
+  **Zero-Response** zurück, keinen Snapshot. Plus:
+  `domain.ContainerState`-Enum (`domain/serviceup.go:20ff`)
+  kennt nur `unknown|starting|running|restarting|dead`, KEIN
+  `failed`. Plan-Empfehlung: Failure-Pfad trägt **nur**
   `diagnostics[]`-Eintrag mit Failure-Service-Name + Failure-
   State + Exit-Code 12 (für `ErrComposeRuntime`) / 11 (für
   `ErrDockerUnavailable`) / 10 (für `ErrProjectNotInitialized`).
   `data` ist `nil` auf Error-Pfad (Zero-Response analog
-  generate Error-Envelope). Partial-Snapshot-Form (Snapshot
-  der teilweise gestarteten Services bis zur Failure-Stelle)
-  wäre eigener Application-Port-Contract mit T0-Sub-Decision-
-  Pfad — siehe T0-(i) unten.
+  generate Error-Envelope). **Mapper-als-Single-Source-of-Truth-
+  Pin** (Followup): wenn `data=nil`, MUSS der Mapper
+  (`mapUpErrorToDiagnostic` / `mapDownErrorToDiagnostic`) ALLE
+  relevanten Failure-Felder in `diagnostics[0]` liefern —
+  `code`, `level: "error"`, `message` (mit Failure-Service-
+  Name + Terminal-State falls anwendbar), plus `exitCode` am
+  Envelope-Top-Level. Kein `data.lastObservedService` o.ä.
+  Backup-Channel. T6-Pin verifiziert das End-to-End:
+  konstruierter `ErrComposeRuntime`-Failure mit
+  "postgres reached terminal state dead" liefert
+  `diagnostics[0].message` als einzige Service-Name-Quelle.
+  Partial-Snapshot-Form (Snapshot der teilweise gestarteten
+  Services bis zur Failure-Stelle) wäre eigener Application-
+  Port-Contract mit T0-Sub-Decision-Pfad — siehe T0-(i) unten.
 - ✅ **CLI-Pin-Tests**: ~10-14 Acceptance-Tests in
   `up_acceptance_test.go` + `down_acceptance_test.go` (oder
   einer gebündelter Form `updown_acceptance_test.go`).
@@ -323,12 +345,21 @@ u-boot down --volumes --json             # default interactive prompt — analog
       via `(code, level)`).
   (2) **Test-Pin** `TestUp_DockerUnavailable_DiagnosticCodeIs
       RELN003_ExitCode11` verifiziert die Kombination explizit.
-  (3) **Mapper-Switch-Order-Pin** verifiziert dass FS-Klasse
-      (`ErrUpFileSystem` falls nötig oder via `driven.ErrFile
-      System`) VOR Docker-Klasse matched — damit ein
-      Multi-`%w`-Wrap mit beiden Sentinels auf FS+Exit-14
-      fällt, nicht auf Docker+Exit-11. Pattern-Erbe der
-      `LH-FA-ADD-007`-Multi-Use-Disziplin.
+  (3) **Mapper-Switch-Order-Pin (Defense-only)** verifiziert
+      dass FS-Klasse (`ErrUpFileSystem` falls nötig oder via
+      `driven.ErrFileSystem`) VOR Docker-Klasse matched —
+      damit ein synthetisch konstruierter Multi-`%w`-Wrap mit
+      beiden Sentinels auf FS+Exit-14 fällt, nicht auf
+      Docker+Exit-11. **Klarstellung (Followup)**: heute
+      existiert in den up/down-Code-Pfaden KEIN realer
+      Multi-Wrap der beide Klassen enthält (Compose-Runtime
+      und FS-Read sind disjunkt — `readComposeFile` failed
+      vor `ComposeUp`, kein gemeinsamer Wrap). Der Pin ist
+      **Defense-only** gegen künftige Code-Pfade die einen
+      Multi-Wrap einführen, NICHT Verifikation eines realen
+      Failure-Szenarios. Pattern-Erbe remove R4-LOW-F5
+      Defense-only-Pin für `ErrConfirmerUnavailable +
+      ErrConfirmationRequired`-Multi-Wrap.
   Alternative-Wechsel auf neuen `LH-NFA-REL-005`: zieht
   Spec-Erweiterung und Lastenheft-Edit. Plan bleibt bei (ii)
   weil Spec-Footprint-Stabilität V1-prioritär.
@@ -440,14 +471,25 @@ u-boot down --volumes --json             # default interactive prompt — analog
        Severity-Niveau-Stretching.
   (iii) Field-Drop ohne Marker — Konsument kann nur indirekt
         ableiten (`services: []` UND Exit 0).
-  Plan-Empfehlung **(ii) Field-Drop + Marker**. **Empty-Array-
-  Pin** explizit: `services: []` (NICHT `null`)
-  serialisieren — `data.services []serviceStatus
-  ` + "`json:\"services\"`" + ` ` (kein omitempty auf `services`-
-  Feld!), bei nil-Slice mit `[]serviceStatus{}` initialisieren.
-  Pattern-Analog doctor `diagnostics: []`. T6-Pin:
-  `TestUp_TimeoutZero_JSON_ServicesIsEmptyArrayNotNull` mit
-  `json.RawMessage`-Re-Marshal-Check.
+  Plan-Empfehlung **(ii) Field-Drop + Marker** (Followup-
+  Präzisierung): `timeoutFireAndForget` MUSS in genau **einem**
+  Modus erscheinen — `true` ausschließlich bei `--timeout=0`-
+  Pfad; in jedem anderen Up-Pfad **fehlt** das Feld komplett
+  (Key-Abwesenheit via Pointer-Wrapping `*bool` mit
+  omitempty), NICHT als explizit `false` getragen. Sub-
+  Decision-Form: `TimeoutFireAndForget *bool
+  ` + "`json:\"timeoutFireAndForget,omitempty\"`" + ` ` — analog
+  remove's `*bool`-Pattern für `volumesPurged`-Key-Presence-vs-
+  Absence-Disambiguation. **Empty-Array-Pin** für BEIDE
+  Carrier-Felder explizit (Followup): `data.services: []` UND
+  `diagnostics: []` (NICHT `null`) — beide Felder OHNE
+  omitempty serialisieren, bei nil-Slice mit `[]…{}`
+  initialisieren. Pattern-Analog doctor `diagnostics: []`
+  (Spec §1846-1852 Beispiel). T6-Pins:
+  `TestUp_TimeoutZero_JSON_ServicesIsEmptyArrayNotNull` und
+  `TestUp_AllStable_JSON_DiagnosticsIsEmptyArrayNotNull` —
+  beide mit `json.RawMessage`-Re-Marshal-Check (verifiziert
+  Byte-Sequenz `"services":[]` statt `"services":null`).
 - **T0-(k) Recreate-Warnings-Semantik** (R12-LOW-F4 aus remove
   T2 setzt den Type-Vorlauf): wann emittiert `up` eine WARN
   *"container 'postgres' will be replaced"*? Heute existiert
