@@ -11,14 +11,28 @@
 > definiert Reihenfolge + geteilte Konventionen für die
 > Per-Command-Folge-Slice-Serie. T0 ✅ festgezurrt
 > (§T0-Outcomes — 5 Sub-Decisions plus Mutations-Matrix-Pre-Scan);
-> in `in-progress/`, Folge-Slice 1/9
-> [`slice-v1-cli-json-dry-run-doctor`](../done/slice-v1-cli-json-dry-run-doctor.md)
-> **done** ✅, Folge-Slice 2/9
-> [`slice-v1-cli-json-dry-run-add`](../done/slice-v1-cli-json-dry-run-add.md)
-> ebenfalls in `in-progress/`, T0 ✅ festgezurrt (12 Sub-Decisions
-> in §T0-Outcomes), T1-Arbeit beginnt: `recordingfs`-Adapter +
-> Carrier-Types in `port/driving/addservice.go` +
-> `driven.RecorderPort`-Interface + `ErrAddFileSystem`-Sentinel.
+> in `in-progress/`. **Cluster-Stand (2026-06-07): 7/9 done, 1/9
+> next, 1/9 open.**
+>
+> **Done (7/9)**:
+> [`doctor`](../done/slice-v1-cli-json-dry-run-doctor.md) (1/9),
+> [`add`](../done/slice-v1-cli-json-dry-run-add.md) (2/9),
+> [`init`](../done/slice-v1-cli-json-dry-run-init.md) (3/9),
+> [`generate`](../done/slice-v1-cli-json-dry-run-generate.md) (4/9),
+> [`remove`](../done/slice-v1-cli-json-dry-run-remove.md) (5/9),
+> [`up-down`](../done/slice-v1-cli-json-dry-run-up-down.md) (6/9),
+> [`logs`](../done/slice-v1-cli-json-dry-run-logs.md) (7/9).
+>
+> **Next (1/9, T2-Start ready)**:
+> [`config`](../next/slice-v1-cli-json-dry-run-config.md) (8/9) —
+> R1+R2+R3 Adversarial-Reviews durchlaufen (Asymptote HIGH 4→3→0;
+> 16 T0-Sub-Decisions T0-(a)..(p) festgezurrt; LOC-Bilanz
+> ~1500-1900). Vier Folge-Carveout-Stubs in `open/` gespawned
+> (config-multi-path-set, -list, -multi-path-get, -structured-hint).
+>
+> **Open (1/9)**:
+> [`template`](../open/slice-v1-cli-json-dry-run-template.md) (9/9)
+> — T0-Discovery + Sub-Decisions noch nicht gefahren.
 
 ## Auslöser
 
@@ -685,6 +699,41 @@ ADR-0010 als Vorgänger referenziert und „JSON-CLI
 ausgeliefert" als eigenständigen Entscheid trägt — oder ob
 der Roadmap-Liefer-Vermerk und der done/-Slice ausreichen.
 Diese Entscheidung gehört nicht ins T0.
+
+## Resume-Punkt-Morgen (Session-Ende 2026-06-07)
+
+Cluster-Stand 7/9 done, 1/9 next (config), 1/9 open (template).
+
+**Nächste Sitzung — natürlicher Folge-Schritt:**
+
+1. **Config-Slice 8/9 `next/`→`in-progress/`-Übergang + T2-Start**
+   ([`config-Stub`](../next/slice-v1-cli-json-dry-run-config.md)):
+   - T2-Inhalt: drei Flag-Structs (`configFlags`,
+     `configGetFlags`, `configShowFlags`),
+     `ConfigSetRequest.PreviewMode`/`SilenceLogger`-Fields,
+     `ConfigSetResponse.Warnings []driving.WarningEntry`,
+     **zwei neue Port-Sentinels** (`ErrConfigWriteRejected`,
+     `ErrConfigPostPatchSanityFailed`) + `ErrDryRunNotApplicable`-
+     CLI-Sentinel. **KEIN neuer FS-Sentinel** (`ErrConfigFile
+     System` existiert bereits). LOC ~130.
+   - **Pattern-Erbe-Anker**: up-down T2 (`e966a83`) für FS-
+     Sentinel-Co-Migration-Form; remove T2 für
+     `Warnings`-Field-Pattern.
+
+2. **Sub-Decision-Reststagen vor T2**: alle 16 T0-(a)..(p)
+   sind R3-festgezurrt; **keine** ungeklärten Plan-Drift-Punkte.
+
+3. **Cluster-Restweg nach config**: Folge-Slice 9/9 template
+   ([`open/`](../open/slice-v1-cli-json-dry-run-template.md))
+   — T0-Discovery + R-Runden noch nicht gefahren.
+
+Heutige Session-Commits (Schwer-Block):
+- `d5fd11c + 2d3ef5a`: logs-T8-Closure + DoD-Hash-Followup (7/9 done).
+- `da3c7f0`: config-T0-Discovery-Stub.
+- `13b76d3`: config-R1-Adressierung (4 HIGH + 6 MED + 4 LOW).
+- `0990a9d`: config-R2-Adressierung (3 HIGH + 6 MED + 4 LOW).
+- `e813b05`: config-R3-Adressierung + Lifecycle `open/`→`next/`
+  (0 HIGH + 4 MED + 4 LOW; Asymptote erreicht).
 
 ## Out of Scope
 
