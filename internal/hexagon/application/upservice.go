@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	iofs "io/fs"
 	"path/filepath"
 	"sort"
@@ -73,9 +74,19 @@ func (s *UpService) Up(ctx context.Context, req driving.UpRequest) (driving.UpRe
 		return driving.UpResponse{}, err
 	}
 
+	// ProgressSink-Silencing (slice-v1-cli-json-dry-run-up-down
+	// T0-(c) form (d) + T3 wiring): CLI sets req.SilenceProgress =
+	// flags.JSON; the use case swaps the effective sink to
+	// io.Discard so the Compose stderr stream does not pollute
+	// machine-consumable output. nil-Default stays in the adapter
+	// (`progressSinkOrDiscard`, R5-MED-1 DRY-Prinzip).
+	effective := req.ProgressSink
+	if req.SilenceProgress {
+		effective = io.Discard
+	}
 	if _, err := s.engine.ComposeUp(ctx, req.BaseDir, driven.ComposeUpOptions{
 		Detach:       true,
-		ProgressSink: req.ProgressSink,
+		ProgressSink: effective,
 	}); err != nil {
 		return driving.UpResponse{}, fmt.Errorf("up service: ComposeUp on %q: %w", req.BaseDir, err)
 	}
@@ -102,7 +113,7 @@ func (s *UpService) checkProjectInitialized(baseDir string) error {
 	path := filepath.Join(baseDir, "u-boot.yaml")
 	exists, err := s.fs.Exists(path)
 	if err != nil {
-		return fmt.Errorf("up service: Exists(%q): %w", path, err)
+		return fmt.Errorf("up service: Exists(%q): %w: %w", path, driving.ErrUpFileSystem, err)
 	}
 	if !exists {
 		return fmt.Errorf("up service: %q absent: %w", path, driving.ErrProjectNotInitialized)
@@ -135,7 +146,7 @@ func (s *UpService) readComposeFile(baseDir string) (composeFileDecode, error) {
 	path := filepath.Join(baseDir, "compose.yaml")
 	exists, err := s.fs.Exists(path)
 	if err != nil {
-		return out, fmt.Errorf("up service: Exists(%q): %w", path, err)
+		return out, fmt.Errorf("up service: Exists(%q): %w: %w", path, driving.ErrUpFileSystem, err)
 	}
 	if !exists {
 		return out, fmt.Errorf("up service: %q absent: %w", path, driving.ErrComposeFileMissing)
@@ -145,7 +156,7 @@ func (s *UpService) readComposeFile(baseDir string) (composeFileDecode, error) {
 		if errors.Is(err, iofs.ErrNotExist) {
 			return out, fmt.Errorf("up service: %q vanished after Exists: %w", path, driving.ErrComposeFileMissing)
 		}
-		return out, fmt.Errorf("up service: ReadFile(%q): %w", path, err)
+		return out, fmt.Errorf("up service: ReadFile(%q): %w: %w", path, driving.ErrUpFileSystem, err)
 	}
 	if err := s.yaml.Unmarshal(data, &out); err != nil {
 		return out, fmt.Errorf("up service: parse compose.yaml: %w", err)

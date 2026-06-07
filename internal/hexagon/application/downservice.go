@@ -78,7 +78,7 @@ func (s *DownService) checkProjectInitialized(baseDir string) error {
 	path := filepath.Join(baseDir, "u-boot.yaml")
 	exists, err := s.fs.Exists(path)
 	if err != nil {
-		return fmt.Errorf("down service: Exists(%q): %w", path, err)
+		return fmt.Errorf("down service: Exists(%q): %w: %w", path, driving.ErrDownFileSystem, err)
 	}
 	if !exists {
 		return fmt.Errorf("down service: %q absent: %w", path, driving.ErrProjectNotInitialized)
@@ -94,7 +94,7 @@ func (s *DownService) checkComposeFilePresent(baseDir string) error {
 	path := filepath.Join(baseDir, "compose.yaml")
 	exists, err := s.fs.Exists(path)
 	if err != nil {
-		return fmt.Errorf("down service: Exists(%q): %w", path, err)
+		return fmt.Errorf("down service: Exists(%q): %w: %w", path, driving.ErrDownFileSystem, err)
 	}
 	if !exists {
 		return fmt.Errorf("down service: %q absent: %w", path, driving.ErrComposeFileMissing)
@@ -119,8 +119,18 @@ func (s *DownService) runConfirmationGate(ctx context.Context, req driving.DownR
 		// No confirmer call, no engine call.
 		return fmt.Errorf("down service: --volumes refused in --no-interactive without --yes: %w", driving.ErrConfirmationRequired)
 	}
-	// Row 4: interactive confirmation.
-	confirmed, err := s.confirmer.ConfirmRemoveVolumes(ctx, req.BaseDir)
+	// Row 4: interactive confirmation. Request-time gate-branch on
+	// req.SilenceConfirmer (slice-v1-cli-json-dry-run-up-down
+	// T0-(d) option (b)): when the CLI runs in --json mode, the
+	// confirmer is swapped to a local noopConfirmer that returns
+	// (false, nil) — refuse-by-default, so JSON consumers must opt
+	// in via --yes for destructive --volumes. No service-state
+	// mutation, race-free by construction (no downMu needed).
+	confirmer := driven.Confirmer(s.confirmer)
+	if req.SilenceConfirmer {
+		confirmer = noopConfirmer{}
+	}
+	confirmed, err := confirmer.ConfirmRemoveVolumes(ctx, req.BaseDir)
 	if err != nil {
 		return fmt.Errorf("down service: confirmer error: %w", err)
 	}
