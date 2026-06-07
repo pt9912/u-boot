@@ -65,12 +65,17 @@ Wrap-Site-Inventar (Stichproben aus R15-Audit):
   devcontainer-Phase-2-Block)
 
 **Subset already covered durch up-down T5** (Update 2026-06-07
-nach up-down-Stub R3-MED-4 + R5-MED-3 Wortlaut-Präzisierung):
-up/down's **FS-Read-Wraps UND Compose-Runtime-Wraps** (11
-Stellen insgesamt: `upservice.go:80,105,108,138,141,146,148`,
-`downservice.go:69,81,84,97,100` — beide Klassen tragen
-absolute Pfade via `req.BaseDir` oder `filepath.Join(...)`) sind
-durch den up-down-Slice (Folge-Slice 6/9) selbst sanitized.
+nach up-down-Stub R3-MED-4 + R5-MED-3 Wortlaut-Präzisierung +
+R6-MED-2 Inventur-Korrektur): up/down's **FS-Read-Wraps UND
+Compose-Runtime-Wraps** — insgesamt **12 Stellen** (7 in
+`upservice.go:80,105,108,138,141,146,148` + 5 in
+`downservice.go:69,81,84,97,100`) — beide Klassen tragen
+absolute Pfade via `req.BaseDir` oder `filepath.Join(...)`.
+Function-Anker (robust gegen Zeilen-Drift): in `upservice`
+betroffen `readUBootYAML` + `readComposeFile` + `Up`-Wrapper
+selbst; in `downservice` analog `readUBootYAML` +
+`readComposeFile` + `Down`-Wrapper. Alle sind durch den
+up-down-Slice (Folge-Slice 6/9) selbst sanitized.
 Pre-R5-Wortlaut "FS-Read-Wraps" war zu eng — Compose-Runtime-
 Wraps (`ComposeUp on %q`, `ComposeDown on %q`) tragen
 ebenfalls Pfad-Leak. Dieser Konsolidierungs-Slice braucht
