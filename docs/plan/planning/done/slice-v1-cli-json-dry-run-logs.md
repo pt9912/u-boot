@@ -24,7 +24,7 @@
 > | T6 | 14 CLI-Acceptance-Tests (T0-(a)/(i)/(j)(ii) Pins + Mapper-Coverage-Rows + Empty-Array + Sanitizer + Trailing-Newline-Strip) | `343e622` |
 > | T7 | Pre-T8-Plan-Edits (MED-1 Mapper-Row 7 + LOW-5 T2-Cell-Wortlaut) | `b502cd5` |
 > | T7 — T8-Bestätigungsrunde | R15-äquivalente Post-T7-Verifikation (0 HIGH + 2 MED + 2 LOW): Mapper-Kommentar-Drift + 15. Test (FS+Docker-Switch-Order-Defense-Pin) + Plan-AK-Cell-Drift | `ba7d06f` |
-> | T8 — Closure | CHANGELOG + `cli-json-output.md` §6.8/§7 + roadmap done-Zähler 6→7 + 4 carveouts-Einträge (3 logs-open-Stubs + CRLF-Limitation) + done/-Move | dieser Commit |
+> | T8 — Closure | CHANGELOG + `cli-json-output.md` §6.8/§7 + roadmap done-Zähler 6→7 + 4 carveouts-Einträge (3 logs-open-Stubs + CRLF-Limitation) + done/-Move | `d5fd11c` |
 >
 > Erbt Read-only-Klassen-Disziplin aus
 > [`slice-v1-cli-json-dry-run-up-down`](slice-v1-cli-json-dry-run-up-down.md)
