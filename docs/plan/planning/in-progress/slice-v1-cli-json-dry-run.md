@@ -832,6 +832,122 @@ Session-Commits 2026-06-08:
   carveouts (4 Stubs) + Slice nach `done/` + DoD-Hash-Tabelle
   (dieser Commit; DoD-Hash-Followup trägt den Closure-Hash nach).
 
+## T_close — Detaillierter Umsetzungsplan (review-bereit, 2026-06-08)
+
+Der **finale Schritt der Serie**. Alle 9 Folge-Slices sind in
+`done/` → Closure-Hard-Rule erfüllt. T_close baut die Übergangs-
+Mechanik ab, führt den verschobenen bare-`template`-Reject ein und
+schließt den Cluster-Slice.
+
+### Kern-Einsicht: atomare Kopplung
+
+Gate-Abbau und bare-`template`-RunE-Reject **müssen zusammen
+landen**. Solange das Allowlist-Gate existiert, rejected es bare
+`template --json` (`ErrJSONNotImplemented`) **vor** der RunE — ein
+RunE-Reject wäre toter Code. Erst mit dem Gate-Abbau wird der
+RunE-Reject erreichbar + testbar (genau der Grund, warum template-T3
+hierher verschoben wurde).
+
+### Pre-Scan (Code-Realität — was abzubauen ist)
+
+- [`jsonallowlist.go`](../../../../internal/adapter/driving/cli/jsonallowlist.go):
+  `jsonAllowlist()`, `jsonRejectError()`, `jsonSliceSuffix()`,
+  `applyJSONRejectGate()`, `helpRequested()` — die **gesamte
+  Datei** ist nur die Gate-Mechanik.
+- [`root.go`](../../../../internal/adapter/driving/cli/root.go) `PersistentPreRunE`
+  (Z. 76-83): Gate-Call `applyJSONRejectGate(cmd, a.json)` (der
+  Logger-Level-Teil bleibt).
+- [`cli.go`](../../../../internal/adapter/driving/cli/cli.go):
+  `ErrJSONNotImplemented` (Def Z. 216 + `isUsageError`-Eintrag
+  Z. 481). **Verifiziert: keine externe Nutzung** (`grep` über
+  Non-cli-Package = 0) → sicher entfernbar.
+- [`template.go`](../../../../internal/adapter/driving/cli/template.go)
+  Z. 56-58: bare-RunE = `cmd.Help()`.
+- Tests: `jsonallowlist_test.go` (7 Test-Funktionen + `appendStubArgs`),
+  `erroremission_internal_test.go` (`helpRequested`- + `jsonSliceSuffix`-
+  Cases), `export_test.go` (`JSONSliceSuffixForTest`,
+  `JSONAllowlistPathsForTest`, `WalkRootCommandPathsForTest`).
+
+### Änderungen (file-by-file)
+
+1. **template.go** — bare-RunE: `if a.json { return ErrTemplate
+   SubcommandRequired }; return cmd.Help()` (Human-Modus
+   unverändert). Neuer Sentinel `ErrTemplateSubcommandRequired`
+   (Heim template.go, Pattern-Erbe logs `ErrFollowJSONNotSupported`).
+   Doc-Block (Z. 47-55) aktualisieren.
+2. **cli.go** — `ErrJSONNotImplemented` + dessen `isUsageError`-
+   Eintrag entfernen; `ErrTemplateSubcommandRequired` in
+   `isUsageError` (Exit 2).
+3. **root.go** — Gate-Call (Z. 81-83) entfernen; PersistentPreRunE
+   behält nur Logger-Level; Kommentare (Z. 57-62, 77-80) aktualisieren.
+4. **jsonallowlist.go** — `git rm` (ganze Datei).
+5. **export_test.go** — `JSONSliceSuffixForTest` +
+   `JSONAllowlistPathsForTest` entfernen; `WalkRootCommandPathsForTest`
+   **behalten** (vom repurposed Tree-Walk genutzt).
+6. **Tests**:
+   - `jsonallowlist_test.go` (`git mv` → `rootjson_test.go`):
+     **entfernen** `RejectsAllNonMigratedForms`, `AcceptsDoctor`,
+     `AllowlistAndTreeMatch`, `JSONSliceSuffix_StableMapping`,
+     `AcceptsHelpFlag` (Gate-spezifisch/obsolet). **Behalten**
+     `AcceptsTemplateList_BothFlagPositions`,
+     `AcceptsTemplateList_FlagBeforeSubcommand` (reales Verhalten).
+     **Repurposen** `TreeWalkAllowlistCompleteness` → „alle Forms
+     antworten post-T_close, keiner leakt rohen Output" (kein
+     `ErrJSONNotImplemented`-Ref mehr). **Neu**: bare-`template
+     --json` → `ErrTemplateSubcommandRequired`/Exit 2/kein
+     Help-Leak; bare-`template` Human-Modus → `cmd.Help()` (kein
+     Reject).
+   - `erroremission_internal_test.go`: `helpRequested`- +
+     `jsonSliceSuffix`-Test-Cases entfernen.
+
+### Verifikation (Aufhebungsbedingung T_close)
+
+- `make gates` grün.
+- Alle zehn Spec-Enum-Forms: `--json` antwortet korrekt; kein
+  `ErrJSONNotImplemented` mehr im Code (`grep` == 0); kein
+  Help-Leak; bare `template --json` → Exit 2.
+- `ErrJSONNotImplemented` nirgends mehr referenziert.
+
+### Sub-Decisions (zum Review)
+
+- **SD-1 — Folge-ADR?** ADR-0010 §Folgepunkte Re-Eval-Trigger 2
+  ist mit T_close erfüllt („JSON-CLI als Maschinen-Schnittstelle
+  ausgeliefert"). Optionen: (a) knappe Folge-ADR-00XX als
+  ADR-0010-Nachfolger; (b) Roadmap-Liefervermerk + done-Slice
+  reichen (ADR-0010 selbst sagt „T_close entscheidet"). **Plan-
+  Empfehlung: (b)** — kein neuer Entscheid, nur Auslieferung; ein
+  done-Slice + Roadmap-Vermerk dokumentieren es ausreichend. Review
+  kann (a) fordern.
+- **SD-2 — Test-Redistribution.** `git mv jsonallowlist_test.go →
+  rootjson_test.go` (behält Git-Historie) vs. Tests in bestehende
+  Files verteilen. **Empfehlung: git mv** (saubere Historie, ein
+  Heim für Root-`--json`-Verhaltens-Pins).
+- **SD-3 — Sentinel-Message.** Vorschlag: `"u-boot template
+  requires a subcommand (try u-boot template list)"`. Exit 2 via
+  `isUsageError`.
+- **SD-4 — Commit-Struktur.** (a) Code-T_close (Mechanik-Abbau +
+  Sentinel + Tests) als ein Commit, dann (b) Cluster-Slice → `done/`
+  + DoD-Tabelle als zweiter Commit (+ DoD-Hash-Followup). **Empfehlung:
+  zwei Commits** (Code zuerst grün, dann Lifecycle).
+
+### Risiken
+
+- **Coverage**: Entfernen von Gate-Code **plus** seiner Tests ist
+  netto-neutral; der neue Reject + repurposed Tree-Walk decken das
+  Neue. `make gates` (90%-Gate) fängt Rest-Lücken.
+- **Negativer LOC-Slice**: ~ **-120 LOC** Mechanik+Tests, **+30 LOC**
+  Sentinel+Reject+Pins → netto **~-90 LOC**. Der einzige Slice der
+  Serie, der Code *entfernt*.
+- **Irreversibilität**: nach Mechanik-Abbau gibt es kein Reject-Gate
+  mehr; ein künftiger nicht-migrierter Subcommand müsste seinen
+  eigenen `--json`-Pfad mitbringen (das ist gewollt — alle Spec-Enum-
+  Forms sind migriert).
+
+### Out-of-Scope für T_close
+
+- Keine neuen `--json`-Features (alle Forms sind migriert).
+- Keine Änderung an den 9 done-Slices (nur Mechanik + bare-template).
+
 ## Out of Scope
 
 - **Reihenfolge der Folge-Slice-Implementierung als
