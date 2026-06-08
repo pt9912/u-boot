@@ -75,7 +75,16 @@ Examples:
   u-boot generate readme           # create or refresh README.md
   u-boot generate env-example      # create or refresh .env.example
   u-boot generate devcontainer     # both .devcontainer/ files`,
-		Args: cobra.ExactArgs(1),
+		// slice-v1-cli-json-envelope-consolidation T2: Args-Fehler
+		// tragen im --json-Modus den Envelope (§1841); kein Artefakt
+		// ist zum Validierungs-Zeitpunkt geparst → zeroArtifact (der
+		// Mapper-Default-Pfad LH-FA-CLI-006 konsultiert das Feld
+		// nicht). previewFlags=true → Voll-Schema bei --dry-run/--diff.
+		Args: jsonArgsValidator(a, "generate", "", cobra.ExactArgs(1),
+			func(e error) diagnosticItem {
+				var zeroArtifact domain.Artifact
+				return mapGenerateErrorToDiagnostic(e, zeroArtifact)
+			}, true),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Read-through persistent --json (LH-NFA-USE-004) from
 			// the App; Cobra has parsed it by RunE-time.

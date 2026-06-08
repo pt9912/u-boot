@@ -76,7 +76,11 @@ Examples:
   u-boot add postgres --diff --json   # voll-schema with hunks
   u-boot add redis                    # exit 10 — not in catalogue
   u-boot add keycloak --with-deps     # auto-install missing deps`,
-		Args: cobra.ExactArgs(1),
+		// slice-v1-cli-json-envelope-consolidation T2: Args-Fehler
+		// (NoPositionalArg/TooMany) tragen im --json-Modus den
+		// Envelope (§1841); previewFlags=true → Voll-Schema bei
+		// --dry-run/--diff (§1842).
+		Args: jsonArgsValidator(a, "add", "", cobra.ExactArgs(1), mapAddErrorToDiagnostic, true),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			flags.Yes = a.yes
 			flags.NoInteractive = a.noInteractive

@@ -135,7 +135,12 @@ Examples:
   u-boot init --assume-existing --backup # re-init a partial layout
   u-boot init --devcontainer             # LH-AK-005 devcontainer flow
   u-boot init --devcontainer --force --backup  # re-splice over generate output`,
-		Args: cobra.MaximumNArgs(1),
+		// slice-v1-cli-json-envelope-consolidation T2/SD-C: base
+		// stays MaximumNArgs(1) → 0 args is a valid success (default
+		// project name); only len>1 errors, and that error now
+		// carries the --json envelope (§1841). previewFlags=true →
+		// Voll-Schema bei --dry-run/--diff.
+		Args: jsonArgsValidator(a, "init", "", cobra.MaximumNArgs(1), mapInitErrorToDiagnostic, true),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Read-through persistent flags from the App; Cobra has
 			// already parsed them by the time RunE fires.
