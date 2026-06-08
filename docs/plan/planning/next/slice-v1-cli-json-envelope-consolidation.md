@@ -1,9 +1,14 @@
 # Slice V1: CLI-JSON-Envelope-Pattern-Konsolidierung add/init/generate
 
-> **Status:** `open/` — **Trigger gefeuert (2026-06-08): Cluster
-> `slice-v1-cli-json-dry-run` vollständig done (9/9 + T_close).**
-> T0-Discovery gefahren (post-cluster Pre-Scan + Sub-Decisions
-> geschärft); R-Runden + Lifecycle `open/`→`next/` **noch offen**.
+> **Status:** `next/` — **Plan User-reviewed (2026-06-08), bereit
+> für Umsetzung.** Trigger gefeuert (Cluster `slice-v1-cli-json-dry-
+> run` vollständig done, 9/9 + T_close). T0-Discovery + User-Review:
+> **SD-A (a) Voll-Konsolidierung mit zwei Schutzplanken**
+> (Preview-Policy `previewFlags` für config show/get; remove
+> `ErrServiceNameMissing`-Base-Closure), SD-B greedy/post-getwd,
+> SD-C/SD-D bestätigt. Keine breiten R-Runden (User-Entscheid);
+> Lifecycle `open/`→`next/`. Nächster Schritt: `next/`→`in-progress/`
+> + T1.
 > Konsolidierungs-Slice für den R15-Cross-Slice-1-Pattern-Drift aus
 > [`slice-v1-cli-json-dry-run-remove`](../done/slice-v1-cli-json-dry-run-remove.md)
 > §Review-Round-15. Carveout-Plan-Anker ([[feedback_carveouts_need_plans]]);
@@ -142,27 +147,51 @@ Penalty. Stub-Empfehlung „selektiv" ist damit **überholt** → greedy
 
 ## Sub-Decisions (T0-geschärft — zum Review)
 
-- **SD-A — Shared-Helper für Args-Validator.** Extrahiere
-  `jsonArgsValidator(a *App, command, subcommand string, base
-  cobra.PositionalArgs, mapErr func(error) diagnosticItem)
-  cobra.PositionalArgs` (generalisierte `configArgsValidator`-Form,
-  Flag-Reads unbedingt). **Reichweite (Sub-Decision zum Review):**
-  (a) **Voll-Konsolidierung** — `configArgsValidator` +
-  `validateRemoveArgs` refactoren auf den Shared-Helper (ihre
-  Wrapper werden 1-Zeilen-Delegationen / entfallen), add/init/
-  generate adoptieren ihn. Entfernt die Duplizierung vollständig
-  (= Carveout-Geist), berührt aber done+getesteten config/remove-
-  Code (Risiko durch starke Test-Suiten beherrscht). (b)
-  **Minimal** — nur add/init/generate bekommen den Helper,
-  config/remove bleiben wie sie sind (zwei Near-Duplikate bleiben).
-  **Plan-Empfehlung: (a)** — die Konsolidierung ist genau der
-  Carveout-Zweck; ein Near-Duplikat-Rest würde den Drift nur
-  verschieben.
-- **SD-B — Sanitize-Granularität → greedy** (überholt §Lösungs-
-  Skizze-2): add/init/generate wrappen ihre UC-Errors an JEDER
-  `reportError`-Site mit `sanitizeBaseDir(err, cwd)`, symmetrisch zu
-  config/remove. `cli/sanitize.go` ist das Heim (up-down T5,
-  `a5aaf9c`).
+- **SD-A — Shared-Helper für Args-Validator → (a) Voll-
+  Konsolidierung** (User-Review 2026-06-08, mit zwei Schutzplanken).
+  `configArgsValidator` + `validateRemoveArgs` refactoren auf den
+  Shared-Helper, add/init/generate adoptieren ihn. Begründung:
+  ein Near-Duplikat-Rest würde genau den Drift stehen lassen, den
+  der Slice abbaut. Signatur:
+
+  ```go
+  func jsonArgsValidator(a *App, command, subcommand string,
+      base cobra.PositionalArgs, mapErr func(error) diagnosticItem,
+      previewFlags bool) cobra.PositionalArgs
+  ```
+
+  **Schutzplanke 1 — Preview-Policy (`previewFlags bool`).** Der
+  Helper darf **NICHT** stumpf immer `--dry-run`/`--diff` lesen und
+  Voll-Schema wählen. `config show`/`config get` **registrieren**
+  diese Flags (als Reject-Flags via
+  `registerConfigPreviewRejectFlags`), sollen bei Args-Fehlern aber
+  **Minimal-Envelope** bleiben. Also: `previewFlags=true` nur für
+  add/init/generate/remove/`config set`; `false` für `config show`/
+  `config get` → erzwingt `dryRun=diff=false` im Args-Fehler-
+  Envelope. (Ersetzt config's heutige `if subcommand == "set"`-
+  Guard 1:1 durch den expliziten Param — die Policy bleibt, wird nur
+  generisch.)
+  **Schutzplanke 2 — remove `len(args)==0`-Sentinel.** remove muss
+  den Missing-Arg-Sonderfall mit `ErrServiceNameMissing` (statt
+  cobra's „accepts 1 arg(s)") behalten. Lösung: `base` ist eine
+  **kleine per-Command-Closure**, NICHT rohes `cobra.ExactArgs(1)`
+  — remove übergibt einen Base-Validator, der für `len(args)==0`
+  `ErrServiceNameMissing` und für `>1` den TooMany-Fehler liefert.
+  Der Helper ruft nur `base(cmd, args)` und emittiert dessen Fehler;
+  add/generate übergeben `cobra.ExactArgs(1)` direkt (kein Custom-
+  Sentinel nötig), init `cobra.MaximumNArgs(1)` (SD-C).
+
+  **Beide Planken sind T1-Pflicht** (nicht „später"): die
+  bestehenden config-show/get-Reject-Pins + remove-Missing-Arg-Pins
+  müssen nach dem Refactor grün bleiben.
+- **SD-B — Sanitize-Granularität → greedy, aber post-`getwd`**
+  (User-Review): add/init/generate wrappen ihre **UC-Errors** an
+  jeder `reportError`-Site mit `sanitizeBaseDir(err, cwd)`,
+  symmetrisch zu config/remove. **Praktisch**: alle Fehlerpfade
+  **ab vorhandenem `cwd`** (besonders UC-Errors); Pre-`getwd`-CLI-
+  Sentinels (z. B. Flag-Mutex, Args-Fehler) tragen keinen Pfad und
+  brauchen **keinen** Sanitizer. `cli/sanitize.go` ist das Heim
+  (up-down T5, `a5aaf9c`).
 - **SD-C — init `MaximumNArgs(1)`-Sonderfall.** init nimmt 0-1
   Args (0 → Default-Projektname). Der `>1`-Pfad ist heute offen
   (kein Envelope). Lösung: `base = cobra.MaximumNArgs(1)` durch den
@@ -193,9 +222,9 @@ Penalty. Stub-Empfehlung „selektiv" ist damit **überholt** → greedy
 | Tranche | Inhalt | LOC |
 | --- | --- | --- |
 | T0 | Discovery (dieser Pre-Scan) + Sub-Decisions geschärft | — |
-| T1 | Shared-Helper `jsonArgsValidator` in `cli/` + (SD-A (a)) `configArgsValidator`/`validateRemoveArgs` darauf refactoren; bestehende config/remove-Pins müssen grün bleiben | ~40 |
-| T2 | add/init/generate adoptieren `jsonArgsValidator` (init via `MaximumNArgs(1)`-base, SD-C) + Pin-Tests pro Command (NoArg/TooMany × Minimal/Voll-Schema) | ~120 |
-| T3 | greedy `sanitizeBaseDir` an allen add/init/generate-`reportError`-Sites + Path-Leak-Pins (mapper-message trägt keinen abs. Pfad) | ~60 |
+| T1 | Shared-Helper `jsonArgsValidator(a, command, subcommand, base, mapErr, previewFlags)` in `cli/` + `configArgsValidator`/`validateRemoveArgs` darauf refactoren. **Schutzplanke 1**: `previewFlags=false` für config show/get (Minimal bleibt). **Schutzplanke 2**: remove übergibt eine Base-Closure mit `ErrServiceNameMissing` für `len==0`. Bestehende config-show/get-Reject- + remove-Missing-Arg-Pins MÜSSEN grün bleiben | ~50 |
+| T2 | add/init/generate adoptieren `jsonArgsValidator` (add/generate `ExactArgs(1)`/`previewFlags=true`; init `MaximumNArgs(1)`-base/`previewFlags=true`, SD-C) + Pin-Tests: **add/generate** NoArg + TooMany × Minimal/Voll-Schema (je 4); **init** nur TooMany × Minimal/Voll-Schema (NoArg ist bewusst gültig → 0-Arg-success-Pin bleibt) | ~120 |
+| T3 | greedy `sanitizeBaseDir(err, cwd)` an allen add/init/generate-**UC-Error**-`reportError`-Sites (post-`getwd`; Pre-`getwd`-Sentinels ohne Sanitizer) + Path-Leak-Pins (mapper-message trägt keinen abs. Pfad) | ~60 |
 | T4 | Closure: carveouts.md Z. 30 entfernen, ggf. CHANGELOG (Bug-Fix: §1841-Envelope-Symmetrie + Path-Leak-Defense), `done/`-Move + DoD | — |
 
 LOC-Schätzung **~220** (mittlerer Slice). Read-bestätigt: kein neuer

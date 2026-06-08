@@ -16,7 +16,6 @@ Dateiname-Konventionen.
 | [`slice-v1-config-multi-path-get.md`](slice-v1-config-multi-path-get.md) | Cleanup: `u-boot config get` Multi-Pfad-Get mit `--json-array` |
 | [`slice-v1-config-multi-path-set.md`](slice-v1-config-multi-path-set.md) | Cleanup: `u-boot config set` Multi-Path-Set (atomar mehrere Pfade) |
 | [`slice-v1-config-structured-hint.md`](slice-v1-config-structured-hint.md) | Cleanup: `config` strukturiertes `data.hint{action, argument}`-Field |
-| [`slice-v1-cli-json-envelope-consolidation.md`](slice-v1-cli-json-envelope-consolidation.md) | Konsolidierung: CLI-JSON-Envelope-Pattern add/init/generate (R15-Cross-Slice-1) |
 | [`slice-v1-down-volumes-named-list.md`](slice-v1-down-volumes-named-list.md) | Cleanup: `u-boot down --volumes` Named-Volume-Liste |
 | [`slice-v1-keycloak-ci-flake.md`](slice-v1-keycloak-ci-flake.md) | Hardening: Keycloak-Acceptance-Test (`LH-AK-003`) in CI grün |
 | [`slice-v1-logs-format-flags.md`](slice-v1-logs-format-flags.md) | Cleanup: `u-boot logs --no-log-prefix`/`--timestamps` Format-Flags |
