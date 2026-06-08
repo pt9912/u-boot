@@ -12,7 +12,7 @@
 > Per-Command-Folge-Slice-Serie. T0 ✅ festgezurrt
 > (§T0-Outcomes — 5 Sub-Decisions plus Mutations-Matrix-Pre-Scan);
 > in `in-progress/`. **Cluster-Stand (2026-06-08): 7/9 done, 1/9
-> in-progress (config T5 done), 1/9 open.**
+> in-progress (config T6 done), 1/9 open.**
 >
 > **Done (7/9)**:
 > [`doctor`](../done/slice-v1-cli-json-dry-run-doctor.md) (1/9),
@@ -23,20 +23,20 @@
 > [`up-down`](../done/slice-v1-cli-json-dry-run-up-down.md) (6/9),
 > [`logs`](../done/slice-v1-cli-json-dry-run-logs.md) (7/9).
 >
-> **In-progress (1/9, T2–T5 done — Port + Application + Composition-Root + CLI)**:
+> **In-progress (1/9, T2–T6 done — Port + Application + Composition-Root + CLI + Acceptance)**:
 > [`config`](slice-v1-cli-json-dry-run-config.md) (8/9) —
-> T2 Port, T3 Application (Multi-`%w` + Sentinel-Split + SilenceLogger
-> + Orphan-WARN), T4 PreviewMode-Cluster/Composition-Root und T5
-> CLI-RunE (3 Data-Carrier + Subcommand-Pflicht inkl. Error-Pfad via
-> subcommand-bewusste `reportErrorSub` + Allowlist 3 Forms + Mapper
-> Switch-Order T0-(f) + `configArgsValidator` + Voll-Schema/Dry-Run/
-> Diff + bare/get-Reject + WARN→diagnostics) fertig. Zwei Review-
-> Runden vor T5 (R-T4-1 + unabhängig R-IR-1, beide HIGH, gefixt).
-> R1+R2+R3 Adversarial-Reviews durchlaufen (Asymptote HIGH 4→3→0;
-> 16 T0-Sub-Decisions festgezurrt; LOC-Bilanz ~1500-1900). Vier
-> Folge-Carveout-Stubs in `open/` gespawned. **Nächster Schritt: T6**
-> (Acceptance-Tests ~24-28: Mapper-Rows, Cobra-unknown-sub-Pin,
-> LH-FA-CONF-005-Disambiguation, Mid-Stage-Snapshot, `--quiet --json`).
+> T2 Port, T3 Application, T4 PreviewMode-Cluster/Composition-Root,
+> T5 CLI-RunE (3 Data-Carrier + Subcommand-Pflicht inkl. Error-Pfad
+> via subcommand-bewusste `reportErrorSub` + Allowlist 3 Forms +
+> Mapper Switch-Order T0-(f) + Voll-Schema/Dry-Run/Diff + Reject +
+> WARN→diagnostics) und T6 Acceptance-Suite (Mapper-Rows white-box +
+> Switch-Order-`_ByDesign` + `--quiet --json` + Cobra-unknown-sub +
+> Help-Edge-Case + CONF-005-Disambiguation + Sanitizer + Subcommand-
+> Pflicht + Mid-Stage-Shapes) fertig. Zwei Review-Runden vor T5
+> (R-T4-1 + unabhängig R-IR-1, beide HIGH, gefixt). R1+R2+R3
+> durchlaufen; 16 T0-Sub-Decisions festgezurrt; LOC ~1500-1900;
+> vier Folge-Carveout-Stubs in `open/`. **Nächster Schritt: T7**
+> (Review-Fix-Rounds + Pre-T8-Bestätigungsrunde).
 >
 > **Open (1/9)**:
 > [`template`](../open/slice-v1-cli-json-dry-run-template.md) (9/9)
@@ -710,11 +710,11 @@ Diese Entscheidung gehört nicht ins T0.
 
 ## Resume-Punkt-Morgen (Session-Ende 2026-06-08)
 
-Cluster-Stand 7/9 done, 1/9 in-progress (config T5 done), 1/9
+Cluster-Stand 7/9 done, 1/9 in-progress (config T6 done), 1/9
 open (template).
 
-**T2–T5 erledigt** — `make gates` grün (lint + test, Coverage
-91.20 % ≥ 90 %, docs-check):
+**T2–T6 erledigt** — `make gates` grün (lint + test, Coverage
+91.30 % ≥ 90 %, docs-check):
 
 - **T2 (Port + CLI-Scaffold)**: Port-Felder + zwei Sentinels
   `ErrConfigWriteRejected` + `ErrConfigPostPatchSanityFailed`
@@ -748,6 +748,12 @@ open (template).
   `ErrDryRunNotApplicable` + `isUsageError`-Branch (Exit 2);
   `SilenceLogger=flags.JSON`; WARN→`diagnostics[]`; `sanitizeBaseDir`.
   Acceptance-Tests `config_acceptance_test.go`.
+- **T6 (Acceptance-Vervollständigung)**: white-box Mapper-Rows 1-10
+  + Switch-Order-`_ByDesign` + Pure-FS-Exit-14 (`config_internal_
+  test.go`); `--quiet --json` (3 Forms); Cobra-unknown-sub-Pin
+  (bestätigt Parent-Validator-Dispatch); Help-Edge-Case; CONF-005-
+  Disambiguation; Sanitizer-Worst-Case; Subcommand-Pflicht-Pin;
+  Mid-Stage-Shapes. Coverage 91.20→91.30 %.
 
 **Bewusste Tranchen-Verschiebungen** (alle dokumentiert + erledigt):
 - **T2→T5**: `configGetFlags`/`configShowFlags` + `DryRun`/`Diff` +
@@ -756,15 +762,14 @@ open (template).
 - **Plan-Refinement T3**: Post-Patch-Sanity-Split auf alle
   `revalidateFeatureEntry`-Sites ausgeweitet (Mapper-Row-6-Konsistenz).
 
-**Nächste Sitzung — natürlicher Folge-Schritt: T6 (Acceptance-Tests)**
-([`config-Stub`](slice-v1-cli-json-dry-run-config.md), T6-Zelle):
-~24-28 Pins. T5 lieferte schon eine Basis-Acceptance-Suite; T6
-ergänzt: Mapper-Rows 1-10 vollständig, **Cobra-unknown-subcommand-
-Mechanik-Pin** (`config foo` → Envelope, R2-HIGH-3/R3-MED-1),
-LH-FA-CONF-005-Multi-Use-Disambiguation, Mid-Stage-Failure-Snapshot
-pro Stage, `--quiet --json`-Pins für alle drei Forms, Sanitizer-
-Worst-Case (Filename-Leak), Subcommand-Pflicht-Empty-Drift-Pin,
-Cobra-Help-Edge-Case (`config --help --json` kein Envelope).
+**Nächste Sitzung — natürlicher Folge-Schritt: T7 (Review-Fix-Rounds)**
+([`config-Stub`](slice-v1-cli-json-dry-run-config.md), T7-Zelle):
+Review-Fix-Rounds + Pre-T8-Bestätigungsrunde analog logs. Bei der
+ersten Read-only+Modifying-Hybrid + drei Sub-Forms höhere Review-
+Komplexität erwartet als logs/up-down (~150-250 LOC). Die zwei
+HIGH-Findings (R-T4-1 + R-IR-1) wurden bereits vor T5 gefixt — T7
+ist die finale Konsolidierungs-/Bestätigungsrunde vor der
+T8-Closure.
 
 **Cluster-Restweg nach config**: Folge-Slice 9/9 template
 ([`open/`](../open/slice-v1-cli-json-dry-run-template.md))
@@ -801,7 +806,11 @@ Session-Commits 2026-06-08:
   Split-Sentinels gefixt + ExitCode-Pin.
 - config-T5: CLI-RunE-Neufassung + subcommand-bewusste Error-Envelopes
   + Allowlist + Mapper + Validator + Voll-Schema/Dry-Run/Diff +
-  Reject + WARN-Mapping + Acceptance-Tests (dieser Commit).
+  Reject + WARN-Mapping + Acceptance-Tests.
+- config-T6: Acceptance-Vervollständigung (white-box Mapper-Rows +
+  Switch-Order-`_ByDesign` + Cobra-unknown-sub + Help-Edge-Case +
+  CONF-005-Disambiguation + Sanitizer + Subcommand-Pflicht +
+  `--quiet --json` + Mid-Stage-Shapes) (dieser Commit).
 
 ## Out of Scope
 

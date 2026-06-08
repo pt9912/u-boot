@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -266,6 +267,205 @@ func TestConfigJSON_SetWarningsMapToDiagnostics(t *testing.T) {
 	if len(diags) != 1 {
 		t.Fatalf("want 1 diagnostic, got %d: %v", len(diags), diags)
 	}
+}
+
+// TestConfigJSON_QuietJSONIdenticalToJSON pins Cluster-T0-(a)
+// doctor-Pattern for all three forms: `--quiet --json` is
+// semantically identical to `--json` (quiet is a no-op in JSON
+// mode). Same exit 0, same envelope shape.
+func TestConfigJSON_QuietJSONIdenticalToJSON(t *testing.T) {
+	cases := []struct {
+		name string
+		args []string
+		uc   *fakeConfigUseCase
+		sub  string
+	}{
+		{"show", []string{"config"}, &fakeConfigUseCase{showResp: driving.ConfigShowResponse{Body: []byte("schemaVersion: 1\n")}}, "show"},
+		{"get", []string{"config", "get", "project.name"}, &fakeConfigUseCase{getResp: driving.ConfigGetResponse{Path: mustCfgPath(t, "project.name"), Value: "demo"}}, "get"},
+		{"set", []string{"config", "set", "project.name", "x"}, &fakeConfigUseCase{setResp: driving.ConfigSetResponse{Path: mustCfgPath(t, "project.name"), OldValue: "a", NewValue: "x"}}, "set"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			app := newAppWithConfigStub(tc.uc)
+			var out bytes.Buffer
+			args := append([]string{"--quiet", "--json"}, tc.args...)
+			if err := app.Execute(context.Background(), args, &out, &bytes.Buffer{}); err != nil {
+				t.Fatalf("execute: %v", err)
+			}
+			jsontestutil.AssertMinimalEnvelope(t, out.Bytes(),
+				jsontestutil.WithCommand("config"),
+				jsontestutil.WithSubcommand(tc.sub),
+				jsontestutil.WithExitCode(0),
+			)
+		})
+	}
+}
+
+// TestConfigJSON_UnknownSubcommandEmitsEnvelope pins R2-HIGH-3/
+// R3-MED-1: `u-boot config foo` (foo is no registered sub-verb)
+// dispatches to the bare command's configArgsValidator (cobra.NoArgs
+// with args=["foo"]) which emits an Envelope-konformen Exit-2 reject
+// instead of Cobra's raw stderr "unknown command". Guards against
+// Cobra-mechanic drift on version upgrades.
+func TestConfigJSON_UnknownSubcommandEmitsEnvelope(t *testing.T) {
+	app := newAppWithConfigStub(&fakeConfigUseCase{})
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(), []string{"--json", "config", "foo"}, &stdout, &stderr)
+	if cli.ExitCode(err) != 2 {
+		t.Fatalf("exit = %d, want 2 (err=%v)", cli.ExitCode(err), err)
+	}
+	jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
+		jsontestutil.WithCommand("config"),
+		jsontestutil.WithSubcommand("show"),
+		jsontestutil.WithExitCode(2),
+	)
+}
+
+// TestConfigJSON_HelpEdgeCaseNoEnvelope pins R1-MED-6: `config
+// --help --json` runs through the Help-Escape-Hatch (no RunE, no
+// envelope) — Cobra renders help on stdout. The subcommand-pflicht
+// applies only to RunE-emitted envelopes.
+func TestConfigJSON_HelpEdgeCaseNoEnvelope(t *testing.T) {
+	app := newAppWithConfigStub(&fakeConfigUseCase{})
+	var stdout, stderr bytes.Buffer
+	if err := app.Execute(context.Background(), []string{"--json", "config", "--help"}, &stdout, &stderr); err != nil {
+		t.Fatalf("help should not error: %v", err)
+	}
+	if strings.Contains(stdout.String(), "\"exitCode\"") {
+		t.Errorf("--help --json must NOT emit an envelope; got %s", stdout.String())
+	}
+	if !strings.Contains(stdout.String(), "Usage:") {
+		t.Errorf("--help should render usage text; got %s", stdout.String())
+	}
+}
+
+// TestConfigJSON_CONF005Disambiguation pins R3-MED-2: the three
+// LH-FA-CONF-005 sentinels (Path-Unknown / Write-Rejected /
+// Value-Not-Set) all carry code LH-FA-CONF-005 + exit 10, but the
+// diagnostic messages differ so consumers can disambiguate by
+// message-prefix (code alone is insufficient).
+func TestConfigJSON_CONF005Disambiguation(t *testing.T) {
+	messages := map[string]string{}
+	type row struct {
+		name string
+		args []string
+		uc   *fakeConfigUseCase
+	}
+	rows := []row{
+		{"path-unknown", []string{"--json", "config", "get", "bogus.path"}, &fakeConfigUseCase{}},
+		{"write-rejected", []string{"--json", "config", "set", "services.postgres.enabled", "true"}, &fakeConfigUseCase{setErr: driving.ErrConfigWriteRejected}},
+		{"value-not-set", []string{"--json", "config", "get", "devcontainer.enabled"}, &fakeConfigUseCase{getErr: driving.ErrConfigValueNotSet}},
+	}
+	for _, r := range rows {
+		t.Run(r.name, func(t *testing.T) {
+			app := newAppWithConfigStub(r.uc)
+			var out bytes.Buffer
+			err := app.Execute(context.Background(), r.args, &out, &bytes.Buffer{})
+			if cli.ExitCode(err) != 10 {
+				t.Fatalf("exit = %d, want 10 (err=%v)", cli.ExitCode(err), err)
+			}
+			var env map[string]any
+			if e := json.Unmarshal(out.Bytes(), &env); e != nil {
+				t.Fatalf("unmarshal: %v", e)
+			}
+			diags, _ := env["diagnostics"].([]any)
+			if len(diags) != 1 {
+				t.Fatalf("want 1 diagnostic, got %v", diags)
+			}
+			d, _ := diags[0].(map[string]any)
+			if d["code"] != "LH-FA-CONF-005" {
+				t.Errorf("code = %v, want LH-FA-CONF-005", d["code"])
+			}
+			messages[r.name] = d["message"].(string)
+		})
+	}
+	if len(messages) == 3 {
+		if messages["path-unknown"] == messages["write-rejected"] ||
+			messages["write-rejected"] == messages["value-not-set"] ||
+			messages["path-unknown"] == messages["value-not-set"] {
+			t.Errorf("LH-FA-CONF-005 messages must be pairwise distinct for disambiguation: %+v", messages)
+		}
+	}
+}
+
+// TestConfigJSON_SanitizerStripsAbsolutePath pins T0-(p): an FS
+// error carrying the absolute baseDir path is sanitized to a
+// project-relative path before it reaches diagnostic.message (no
+// filesystem-layout leak in the machine-readable output).
+func TestConfigJSON_SanitizerStripsAbsolutePath(t *testing.T) {
+	uc := &fakeConfigUseCase{setErr: fmt.Errorf(
+		"%w: write %q: permission denied",
+		driving.ErrConfigFileSystem, "/tmp/u-boot-config-test/demo/u-boot.yaml")}
+	app := newAppWithConfigStub(uc)
+	var out bytes.Buffer
+	err := app.Execute(context.Background(), []string{"--json", "config", "set", "project.name", "x"}, &out, &bytes.Buffer{})
+	if cli.ExitCode(err) != 14 {
+		t.Fatalf("exit = %d, want 14 (FS)", cli.ExitCode(err))
+	}
+	if strings.Contains(out.String(), "/tmp/u-boot-config-test") {
+		t.Errorf("absolute baseDir leaked into envelope: %s", out.String())
+	}
+	if !strings.Contains(out.String(), "u-boot.yaml") {
+		t.Errorf("expected project-relative u-boot.yaml in message; got %s", out.String())
+	}
+}
+
+// TestConfigJSON_SubcommandAlwaysSet pins T0-(h)/§322: every
+// RunE-emitted config envelope carries a non-empty subcommand,
+// across success AND error paths and all three forms.
+func TestConfigJSON_SubcommandAlwaysSet(t *testing.T) {
+	cases := []struct {
+		name string
+		args []string
+		uc   *fakeConfigUseCase
+		want string
+	}{
+		{"show-success", []string{"--json", "config"}, &fakeConfigUseCase{}, "show"},
+		{"get-success", []string{"--json", "config", "get", "project.name"}, &fakeConfigUseCase{getResp: driving.ConfigGetResponse{Path: mustCfgPath(t, "project.name"), Value: "x"}}, "get"},
+		{"set-success", []string{"--json", "config", "set", "project.name", "x"}, &fakeConfigUseCase{}, "set"},
+		{"set-error", []string{"--json", "config", "set", "project.name", "x"}, &fakeConfigUseCase{setErr: driving.ErrConfigValueInvalid}, "set"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			app := newAppWithConfigStub(tc.uc)
+			var out bytes.Buffer
+			_ = app.Execute(context.Background(), tc.args, &out, &bytes.Buffer{})
+			var env map[string]any
+			if err := json.Unmarshal(out.Bytes(), &env); err != nil {
+				t.Fatalf("unmarshal: %v (out=%s)", err, out.String())
+			}
+			if env["subcommand"] != tc.want {
+				t.Errorf("subcommand = %v, want %q (§322 subcommand-pflicht)", env["subcommand"], tc.want)
+			}
+		})
+	}
+}
+
+// TestConfigJSON_SetErrorShapesByPreviewFlag pins the Mid-Stage
+// envelope-shape contract (T0-(o)): a set error without preview
+// flags emits the minimal shape (no dryRun field); with --dry-run
+// it emits the voll-schema shape (dryRun:true present).
+func TestConfigJSON_SetErrorShapesByPreviewFlag(t *testing.T) {
+	t.Run("plain-minimal", func(t *testing.T) {
+		app := newAppWithConfigStub(&fakeConfigUseCase{setErr: driving.ErrConfigValueInvalid})
+		var out bytes.Buffer
+		_ = app.Execute(context.Background(), []string{"--json", "config", "set", "project.name", "x"}, &out, &bytes.Buffer{})
+		var env map[string]any
+		_ = json.Unmarshal(out.Bytes(), &env)
+		if _, present := env["dryRun"]; present {
+			t.Errorf("plain set error must be minimal (no dryRun field); got %s", out.String())
+		}
+	})
+	t.Run("dryrun-full", func(t *testing.T) {
+		app := newAppWithConfigStub(&fakeConfigUseCase{setErr: driving.ErrConfigValueInvalid})
+		var out bytes.Buffer
+		_ = app.Execute(context.Background(), []string{"--json", "config", "set", "project.name", "x", "--dry-run"}, &out, &bytes.Buffer{})
+		var env map[string]any
+		_ = json.Unmarshal(out.Bytes(), &env)
+		if env["dryRun"] != true {
+			t.Errorf("dry-run set error must be voll-schema (dryRun:true); got %s", out.String())
+		}
+	})
 }
 
 // TestConfig_HumanMode_ShowAndSet pins the non-JSON paths stay
