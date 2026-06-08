@@ -17,7 +17,7 @@
 > | R3 | adversarial (0 HIGH + 1 MED + 1 LOW): T0-(a) gegen Cluster-„alle Enum-Subcommands"-Gegenargument gehärtet (Daten-Kommando vs. Help-Parent); Asymptote + Lifecycle `open/`→`next/` | `0ba5ea0` |
 > | T2 | `runTemplateList`→`writeTemplateListJSON` (`newDataEnvelope("template","list",…)`) + `mapTemplateErrorToDiagnostic` + 3 Array-Tests→Envelope + Acceptance-Suite + Lifecycle `next/`→`in-progress/` | `b4e1df5` |
 > | T3 — entfällt (→ T_close) | bare-`template`-Reject verschoben: wäre solange das Gate existiert toter Code; `ErrTemplateSubcommandRequired` + RunE-Reject kommen mit dem Gate-Abbau in T_close | `ecbfd29` |
-> | T4 — Closure | carveouts-Eintrag entfernt + CHANGELOG `### Changed` (Breaking) + `cli-json-output.md` §6.2/§6-Tabelle + roadmap + `done/`-Move | `(DoD-Hash-Followup)` |
+> | T4 — Closure | carveouts-Eintrag entfernt + CHANGELOG `### Changed` (Breaking) + `cli-json-output.md` §6.2/§6-Tabelle + roadmap + `done/`-Move | `f243fc5` |
 >
 > T2 geliefert:
 > `runTemplateList`→`writeTemplateListJSON`
