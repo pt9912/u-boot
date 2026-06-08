@@ -394,6 +394,19 @@ this file is the same format applied to u-boot itself.
 
 ### Fixed
 
+- **`add`/`init`/`generate` `--json` Envelope-Symmetrie + Path-Leak-
+  Defense** (slice-v1-cli-json-envelope-consolidation, R15-Cross-
+  Slice-1): ein Wrong-Arg-Aufruf unter `--json` (`u-boot --json add`
+  ohne Service, `u-boot --json add a b` mit zu vielen) emittierte
+  bisher nur eine nackte Cobra-stderr-Meldung und **kein** JSON auf
+  stdout (Spec §1841-Verletzung); `--dry-run`/`--diff` wählten zudem
+  nicht das Voll-Schema (§1842). Jetzt tragen alle drei Commands den
+  Args-Envelope (Exit 2) über den geteilten `jsonArgsValidator` —
+  konsolidiert mit `config`/`remove`, die das Muster schon hatten.
+  Zusätzlich: absolute Filesystem-Pfade aus Use-Case-Fehler-Wraps
+  werden nun via `sanitizeBaseDir` aus `diagnostic.message`
+  entfernt (Path-Leak/Info-Disclosure-Defense, symmetrisch zu
+  `config`/`remove`). Kein Verhaltenswechsel für korrekte Aufrufe.
 - `fix(cli): mapAddErrorToDiagnostic Backup-Sentinels auf
   LH-NFA-REL-003 (add↔init Diagnostic-Code-Harmonisierung)` —
   `mapAddErrorToDiagnostic` mappte `ErrBackupSuffixExhausted`/

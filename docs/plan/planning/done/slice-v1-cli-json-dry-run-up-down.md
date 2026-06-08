@@ -1062,7 +1062,7 @@ weil up/down keine Voll-Schema-Pfade tragen.
 - **Args-Validator-Pattern-Drift** mit add/init/generate
   (R15-Cross-Slice-1 aus remove): up/down landen VOR der
   Konsolidierung
-  ([`slice-v1-cli-json-envelope-consolidation`](../in-progress/slice-v1-cli-json-envelope-consolidation.md))
+  ([`slice-v1-cli-json-envelope-consolidation`](../done/slice-v1-cli-json-envelope-consolidation.md))
   und übernehmen den heutigen Drift-Status mit — **soweit
   Args-Validator betrifft**: `cobra.NoArgs` (`up.go:63`,
   `down.go:73`), kein positional-Arg-Pfad, kein
@@ -1100,7 +1100,7 @@ weil up/down keine Voll-Schema-Pfade tragen.
 
   **Sub-Sequenz-Folge** für envelope-consolidation-Stub
   Update (R3-MED-3 + R3-MED-4): der existierende Stub
-  ([`slice-v1-cli-json-envelope-consolidation`](../in-progress/slice-v1-cli-json-envelope-consolidation.md))
+  ([`slice-v1-cli-json-envelope-consolidation`](../done/slice-v1-cli-json-envelope-consolidation.md))
   beschreibt Pattern-Drift nur für add/init/generate, NICHT
   für up/down. Nach up-down-T5 ist der Sanitizer schon in
   `cli/sanitize.go` extrahiert und up/down nutzt ihn. Drei
@@ -1161,7 +1161,7 @@ weil up/down keine Voll-Schema-Pfade tragen.
   [`cli/jsonallowlist.go``
   Z. 29/74-75.
 - Folge-Slices:
-  [`slice-v1-cli-json-envelope-consolidation`](../in-progress/slice-v1-cli-json-envelope-consolidation.md)
+  [`slice-v1-cli-json-envelope-consolidation`](../done/slice-v1-cli-json-envelope-consolidation.md)
   (R15-Cross-Slice-1 — retroaktive Helper-Extraction, Trigger
   Cluster-Stand 8/9).
 - Phase: V1 (Teil des V1-pünktlichen Cluster-Slices).

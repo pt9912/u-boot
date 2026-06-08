@@ -1,22 +1,28 @@
 # Slice V1: CLI-JSON-Envelope-Pattern-Konsolidierung add/init/generate
 
-> **Status:** `next/` — **Plan User-reviewed (2026-06-08), bereit
-> für Umsetzung.** Trigger gefeuert (Cluster `slice-v1-cli-json-dry-
-> run` vollständig done, 9/9 + T_close). T0-Discovery + User-Review:
-> **SD-A (a) Voll-Konsolidierung mit zwei Schutzplanken**
-> (Preview-Policy `previewFlags` für config show/get; remove
-> `ErrServiceNameMissing`-Base-Closure), SD-B greedy/post-getwd,
-> SD-C/SD-D bestätigt. Keine breiten R-Runden (User-Entscheid).
-> Lifecycle `open/`→`next/`→`in-progress/`. **T1 ✅ done
-> (2026-06-08)**: Shared-`jsonArgsValidator` (`cli/jsonargs.go`) +
-> config/remove darauf refactored, beide Schutzplanken erhalten,
-> `make gates` grün. **Nächster Schritt: T2** (add/init/generate
-> adoptieren den Helper).
+> **Status:** `done/` — **vollständig abgeschlossen (T0→T4,
+> 2026-06-08)**, `make gates` grün. SD-A (a) Voll-Konsolidierung mit
+> zwei User-Review-Schutzplanken (Preview-Policy `previewFlags` für
+> config show/get; remove `ErrServiceNameMissing`-Base-Closure)
+> umgesetzt; der R15-Cross-Slice-1-Pattern-Drift (add/init/generate)
+> ist an der Wurzel beseitigt. Keine breiten R-Runden (User-
+> Entscheid), Plan-Review-Followup zu den Schutzplanken.
+>
+> **DoD-Tranchen-Hashes**:
+>
+> | Tranche | Inhalt | Commit |
+> | --- | --- | --- |
+> | T0 — Discovery | post-cluster Pre-Scan + Sub-Decisions geschärft (Trigger 9/9 gefeuert) | `72432d5` |
+> | Plan-Review | 2 Schutzplanken + SD-Antworten + Lifecycle `open/`→`next/` | `0d5935b` |
+> | T1 | Shared `jsonArgsValidator` (`cli/jsonargs.go`) + config/remove darauf refactored; toter `writeErrorEnvelope`-Wrapper entfernt | `83917ad` |
+> | T2 | add/init/generate adoptieren den Helper + 11 Pin-Tests (`consolidation_args_test.go`) | `33024b3` |
+> | T3 | greedy `sanitizeBaseDir` an 3 UC-Error-Sites + 3 Path-Leak-Pins | `e443ecd` |
+> | T4 — Closure | carveouts-Eintrag entfernt + CHANGELOG `### Fixed` + `done/`-Move + DoD | `(dieser Commit; DoD-Hash-Followup)` |
 > Konsolidierungs-Slice für den R15-Cross-Slice-1-Pattern-Drift aus
-> [`slice-v1-cli-json-dry-run-remove`](../done/slice-v1-cli-json-dry-run-remove.md)
+> [`slice-v1-cli-json-dry-run-remove`](slice-v1-cli-json-dry-run-remove.md)
 > §Review-Round-15. Carveout-Plan-Anker ([[feedback_carveouts_need_plans]]);
 > verlinkt aus
-> [`docs/plan/planning/in-progress/carveouts.md`](carveouts.md)
+> [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
 > §Temporäre Carveouts.
 >
 > **Standalone, NICHT in T_close absorbiert**: der Stub nannte als
@@ -228,7 +234,7 @@ Penalty. Stub-Empfehlung „selektiv" ist damit **überholt** → greedy
 | T1 ✅ (2026-06-08) | **Geliefert** (`make gates` grün): Shared-Helper `jsonArgsValidator(a, command, subcommand, base, mapErr, previewFlags)` in neuem `cli/jsonargs.go`; `configArgsValidator` → 1-Zeilen-Delegation (`previewFlags = subcommand == "set"`, **Schutzplanke 1**); `validateRemoveArgs` → Delegation + neue `removeArgsBase` (`len==0` → `ErrServiceNameMissing`, **Schutzplanke 2**). Toter `writeErrorEnvelope`-Wrapper entfernt (Caller über `reportErrorSub`/`jsonArgsValidator` → `writeErrorEnvelopeSub`). config-show/get-Reject- + remove-Missing-Arg-Pins blieben grün. | ~50 |
 | T2 ✅ (2026-06-08) | **Geliefert** (`make gates` grün): add/generate `jsonArgsValidator(…, ExactArgs(1), …, true)`; init `MaximumNArgs(1)`-base (SD-C); generate-mapErr via `zeroArtifact`-Closure (Mapper hat 2 Params). Neue `consolidation_args_test.go`: add/generate NoArg+TooMany × Minimal/Voll (je 4), init nur TooMany × Minimal/Voll + 0-Arg-success-Pin. **Test-Befund**: lokale `--dry-run`/`--diff` müssen NACH dem Subcommand stehen (Root-Position = „unknown flag" vor Args-Validierung) — Pins nutzen die korrekte Position. | ~120 |
 | T3 ✅ (2026-06-08) | **Geliefert** (`make gates` grün): `sanitizeBaseDir(err, cwd)` an den drei UC-Error-Sites (`add.go:162`, `init.go:252`, `generate.go:190`); Pre-`getwd`-Sentinels (Flag-Mutex, Name-Validierung, getwd-Fehler) bleiben ungewrappt (kein Pfad). Drei Path-Leak-Pins: `errors.Is(Err…FileSystem)` durch den Sanitizer intakt, Exit 14, absoluter `cwd`-Prefix raus aus `diagnostic.message`, relativer Rest erhalten. | ~55 |
-| T4 | Closure: carveouts.md Z. 30 entfernen, ggf. CHANGELOG (Bug-Fix: §1841-Envelope-Symmetrie + Path-Leak-Defense), `done/`-Move + DoD | — |
+| T4 ✅ (2026-06-08) | **Closure**: carveouts-Eintrag entfernt; CHANGELOG `### Fixed` (Bug-Fix: §1841-Envelope-Symmetrie + Path-Leak-Defense für add/init/generate); Slice nach `done/` + DoD-Hash-Tabelle. | — |
 
 LOC-Schätzung **~220** (mittlerer Slice). Read-bestätigt: kein neuer
 Sentinel (Args-Fehler = `LH-FA-CLI-006`/Exit 2, schon vorhanden),
