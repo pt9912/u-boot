@@ -17,7 +17,7 @@
 > | T1 | Shared `jsonArgsValidator` (`cli/jsonargs.go`) + config/remove darauf refactored; toter `writeErrorEnvelope`-Wrapper entfernt | `83917ad` |
 > | T2 | add/init/generate adoptieren den Helper + 11 Pin-Tests (`consolidation_args_test.go`) | `33024b3` |
 > | T3 | greedy `sanitizeBaseDir` an 3 UC-Error-Sites + 3 Path-Leak-Pins | `e443ecd` |
-> | T4 — Closure | carveouts-Eintrag entfernt + CHANGELOG `### Fixed` + `done/`-Move + DoD | `(dieser Commit; DoD-Hash-Followup)` |
+> ### Fixed` + `done/`-Move + DoD | `(dieser Commit; DoD-Hash-Followup)` |
 > Konsolidierungs-Slice für den R15-Cross-Slice-1-Pattern-Drift aus
 > [`slice-v1-cli-json-dry-run-remove`](slice-v1-cli-json-dry-run-remove.md)
 > §Review-Round-15. Carveout-Plan-Anker ([[feedback_carveouts_need_plans]]);
