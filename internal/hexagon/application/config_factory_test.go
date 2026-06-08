@@ -13,28 +13,20 @@ import (
 // configFactoryForProd mirrors the cmd/uboot/main.go newPreviewFSFactory
 // closure: PreviewNone → production FS (no recorder), PreviewDryRun →
 // recording FS with passthrough off (capture, no disk write),
-// PreviewAndApply → recording FS with passthrough on. The returned
-// `lastRec` pointer lets the test inspect what the recorder captured.
-func configFactoryForProd(prod driven.FileSystem) (
-	func(driving.PreviewMode) (driven.FileSystem, driven.RecorderPort),
-	*driven.RecorderPort,
-) {
-	var lastRec driven.RecorderPort
-	factory := func(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
+// PreviewAndApply → recording FS with passthrough on.
+func configFactoryForProd(prod driven.FileSystem) func(driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
+	return func(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
 		switch mode {
 		case driving.PreviewDryRun:
 			rec := recordingfs.New(prod, recordingfs.WithPassthrough(false))
-			lastRec = rec
 			return rec, rec
 		case driving.PreviewAndApply:
 			rec := recordingfs.New(prod, recordingfs.WithPassthrough(true))
-			lastRec = rec
 			return rec, rec
 		default:
 			return prod, nil
 		}
 	}
-	return factory, &lastRec
 }
 
 // TestConfigService_WithFactory_DryRunDoesNotTouchProduction pins the
@@ -48,7 +40,7 @@ func TestConfigService_WithFactory_DryRunDoesNotTouchProduction(t *testing.T) {
 	prod.markDirExists(configTestBaseDir)
 	seedConfigUbootYAML(t, prod) // project.name: t-uboot-config
 
-	factory, lastRec := configFactoryForProd(prod)
+	factory := configFactoryForProd(prod)
 	svc := application.NewConfigServiceWithFactory(factory, &fakeYAML{}, nil)
 
 	resp, err := svc.Set(context.Background(), driving.ConfigSetRequest{
@@ -65,10 +57,19 @@ func TestConfigService_WithFactory_DryRunDoesNotTouchProduction(t *testing.T) {
 			resp.OldValue, resp.NewValue)
 	}
 
-	// The recorder must have captured the write (proves the dry-run
-	// path actually routed through selectFS, not a silent skip).
-	if *lastRec == nil || len((*lastRec).Captured()) == 0 {
-		t.Fatalf("PreviewDryRun must capture the WriteFile in the recorder; got %v", *lastRec)
+	// R-T4-1: the captured mutation must surface on the response so
+	// the CLI --diff renderer has its byte source. Exactly one entry
+	// (u-boot.yaml), with the patched NewContent populated.
+	if len(resp.PlannedFiles) != 1 {
+		t.Fatalf("PreviewDryRun must surface 1 PlannedFile (u-boot.yaml); got %d: %+v",
+			len(resp.PlannedFiles), resp.PlannedFiles)
+	}
+	pf := resp.PlannedFiles[0]
+	if pf.Path != "u-boot.yaml" {
+		t.Errorf("PlannedFile.Path = %q, want project-relative u-boot.yaml", pf.Path)
+	}
+	if len(pf.NewContent) == 0 {
+		t.Error("PlannedFile.NewContent empty — --diff renderer would have no patched bytes")
 	}
 
 	// Production must be untouched: a fresh Get reads via s.fs (prod)
@@ -94,16 +95,21 @@ func TestConfigService_WithFactory_PreviewNoneWritesProduction(t *testing.T) {
 	prod.markDirExists(configTestBaseDir)
 	seedConfigUbootYAML(t, prod)
 
-	factory, _ := configFactoryForProd(prod)
+	factory := configFactoryForProd(prod)
 	svc := application.NewConfigServiceWithFactory(factory, &fakeYAML{}, nil)
 
-	if _, err := svc.Set(context.Background(), driving.ConfigSetRequest{
+	resp, err := svc.Set(context.Background(), driving.ConfigSetRequest{
 		BaseDir:     configTestBaseDir,
 		Path:        mustConfigPath(t, "project.name"),
 		Value:       "renamed-for-real",
 		PreviewMode: driving.PreviewNone,
-	}); err != nil {
+	})
+	if err != nil {
 		t.Fatalf("Set: %v", err)
+	}
+	// PreviewNone uses production FS (no recorder) → no PlannedFiles.
+	if resp.PlannedFiles != nil {
+		t.Errorf("PreviewNone must not surface PlannedFiles, got %+v", resp.PlannedFiles)
 	}
 
 	got, err := svc.Get(context.Background(), driving.ConfigGetRequest{
@@ -129,13 +135,18 @@ func TestConfigService_LegacyConstructorIgnoresPreviewMode(t *testing.T) {
 
 	svc := application.NewConfigService(prod, &fakeYAML{}, nil)
 
-	if _, err := svc.Set(context.Background(), driving.ConfigSetRequest{
+	resp, err := svc.Set(context.Background(), driving.ConfigSetRequest{
 		BaseDir:     configTestBaseDir,
 		Path:        mustConfigPath(t, "project.name"),
 		Value:       "legacy-write",
 		PreviewMode: driving.PreviewDryRun, // ignored by the nil-factory path
-	}); err != nil {
+	})
+	if err != nil {
 		t.Fatalf("Set: %v", err)
+	}
+	// nil factory → nil recorder → no PlannedFiles (backward-compat).
+	if resp.PlannedFiles != nil {
+		t.Errorf("legacy path must not surface PlannedFiles, got %+v", resp.PlannedFiles)
 	}
 
 	got, err := svc.Get(context.Background(), driving.ConfigGetRequest{

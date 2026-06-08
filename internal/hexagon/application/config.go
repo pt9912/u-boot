@@ -62,11 +62,13 @@ func NewConfigService(fs driven.FileSystem, yaml driven.YAMLCodec, logger driven
 // dry-run captures the mutation instead of touching disk. Reads stay
 // on the production FS — dry-run inspects the real current state.
 //
-// config is unusual among the modifying services: its dry-run
-// `plannedFiles[]` is statically known (always exactly
-// `u-boot.yaml`), so the CLI builds it without consulting the
-// recorder — the factory's recorder return is therefore discarded
-// here; the recording FS is used purely to suppress the disk write.
+// config's dry-run `plannedFiles[]` is a single statically-known
+// entry (`u-boot.yaml`), but the recorder is still load-bearing:
+// `config set --diff` needs the captured patched + current bytes
+// ([PlannedFile.NewContent]/[OldContent]) to render hunks, so
+// [Set] surfaces the recorder output via
+// [driving.ConfigSetResponse.PlannedFiles] exactly like add
+// (T4-Review R-T4-1).
 func NewConfigServiceWithFactory(
 	fsFactory func(driving.PreviewMode) (driven.FileSystem, driven.RecorderPort),
 	yaml driven.YAMLCodec,
@@ -86,18 +88,18 @@ func NewConfigServiceWithFactory(
 	}
 }
 
-// selectFS picks the per-request write FS: if the factory is wired
-// (Composition-Root path) it returns the mode-specific FS; otherwise
-// the legacy [fs] field (PreviewMode ignored — the use case keeps
-// writing to production). The recorder return is discarded — config
-// does not surface captured mutations (see
-// [NewConfigServiceWithFactory]).
-func (s *ConfigService) selectFS(mode driving.PreviewMode) driven.FileSystem {
+// selectFS picks the per-request write FS pair: if the factory is
+// wired (Composition-Root path) it returns the mode-specific
+// (fs, recorder); otherwise the legacy [fs] field with a nil
+// recorder (PreviewMode ignored — the use case keeps writing to
+// production). The recorder, when non-nil, captures the WriteFile so
+// [Set] can surface it via [driving.ConfigSetResponse.PlannedFiles]
+// for the `--diff` renderer (T4-Review R-T4-1).
+func (s *ConfigService) selectFS(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
 	if s.fsFactory == nil {
-		return s.fs
+		return s.fs, nil
 	}
-	fs, _ := s.fsFactory(mode)
-	return fs
+	return s.fsFactory(mode)
 }
 
 
@@ -266,8 +268,9 @@ func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (dr
 	// FS (T4): PreviewDryRun routes to the recording FS so the
 	// mutation is captured instead of written to disk; PreviewNone
 	// writes to production. Reads above used s.fs (real state).
+	fs, recorder := s.selectFS(req.PreviewMode)
 	path := filepath.Join(req.BaseDir, "u-boot.yaml")
-	if err := s.selectFS(req.PreviewMode).WriteFile(path, patched, defaultFileMode); err != nil {
+	if err := fs.WriteFile(path, patched, defaultFileMode); err != nil {
 		return driving.ConfigSetResponse{}, fmt.Errorf("%w: write %q: %w",
 			driving.ErrConfigFileSystem, path, err)
 	}
@@ -276,10 +279,17 @@ func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (dr
 	logger.Info("config set: updated",
 		"path", req.Path.String(), "old", oldValue, "new", newValue)
 	warnings := maybeWarnOrphanFeatureActivation(logger, patchedCfg, req.Path)
-	return driving.ConfigSetResponse{
+	resp := driving.ConfigSetResponse{
 		Path: req.Path, OldValue: oldValue, NewValue: newValue,
 		Warnings: warnings,
-	}, nil
+	}
+	// Surface the captured u-boot.yaml mutation for the CLI's
+	// --diff renderer (T4-Review R-T4-1). recorder is nil on the
+	// PreviewNone / legacy path → PlannedFiles stays nil.
+	if recorder != nil {
+		resp.PlannedFiles = mapCaptureToPlannedFiles(recorder.Captured(), req.BaseDir)
+	}
+	return resp, nil
 }
 
 // maybeWarnOrphanFeatureActivation reports an orphan-feature
@@ -921,17 +931,22 @@ func (s *ConfigService) setFeatureSourcesAllow(
 
 	// Stage 5: WriteFile through the PreviewMode-selected FS (T4) —
 	// list-path mirror of the scalar Set write routing.
+	fs, recorder := s.selectFS(req.PreviewMode)
 	path := filepath.Join(req.BaseDir, "u-boot.yaml")
-	if err := s.selectFS(req.PreviewMode).WriteFile(path, rewritten, defaultFileMode); err != nil {
+	if err := fs.WriteFile(path, rewritten, defaultFileMode); err != nil {
 		return driving.ConfigSetResponse{}, fmt.Errorf("%w: write %q: %w",
 			driving.ErrConfigFileSystem, path, err)
 	}
 
 	logger.Info("config set: updated",
 		"path", req.Path.String(), "old", oldValue, "new", newValue)
-	return driving.ConfigSetResponse{
+	resp := driving.ConfigSetResponse{
 		Path: req.Path, OldValue: oldValue, NewValue: newValue,
-	}, nil
+	}
+	if recorder != nil {
+		resp.PlannedFiles = mapCaptureToPlannedFiles(recorder.Captured(), req.BaseDir)
+	}
+	return resp, nil
 }
 
 // parseFeatureSourcesArgument splits a comma-separated user

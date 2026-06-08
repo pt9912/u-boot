@@ -762,13 +762,20 @@ Flag-Registrierung). ~350-450 LOC.
 ([`open/`](../open/slice-v1-cli-json-dry-run-template.md))
 — T0-Discovery + R-Runden noch nicht gefahren.
 
+**Fokussierter T2–T4-Review (2026-06-08) vor T5**: Multi-`%w`,
+Sentinel-Split-Vollständigkeit und `Warnings`-Form clear; **ein
+HIGH-Finding R-T4-1** gefixt — der T4-Recorder-Verzicht hätte dem
+T5-`--diff`-Pfad die Byte-Quelle entzogen; Korrektur:
+`ConfigSetResponse.PlannedFiles`-Feld + Recorder-Surfacing wie add.
+
 Session-Commits 2026-06-08:
 - config-T2: Port-Felder + 2 Sentinels + CLI-Scaffold +
   Pin-Tests + Lifecycle `next/`→`in-progress/`.
 - config-T3: Multi-`%w` + Sentinel-Split + SilenceLogger +
   Orphan-WARN→Warnings + Tests.
-- config-T4: PreviewMode-Cluster + Composition-Root +
-  Factory-Tests (dieser Commit).
+- config-T4: PreviewMode-Cluster + Composition-Root + Factory-Tests.
+- config-T4-Review-Followup R-T4-1: `ConfigSetResponse.PlannedFiles`
+  + Recorder-Surfacing (dieser Commit).
 
 ## Out of Scope
 

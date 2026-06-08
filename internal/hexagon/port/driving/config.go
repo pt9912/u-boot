@@ -101,6 +101,24 @@ type ConfigSetResponse struct {
 	// registered (LH-FA-DEV-003 / `level: "warn"`). T3 appends the
 	// entries; T5 maps them to `diagnostics[]`.
 	Warnings []WarningEntry
+
+	// PlannedFiles carries the recorder-captured `u-boot.yaml`
+	// mutation when the request ran under a non-PreviewNone
+	// [PreviewMode] (slice-v1-cli-json-dry-run-config T4-Review
+	// R-T4-1; Pattern-Erbe [AddServiceResponse.PlannedFiles]). It is
+	// the data source the CLI's shared diff renderer
+	// (`mapPlannedFilesToWire` / `writeDiff`) needs for `config set
+	// --diff`: the [PlannedFile.NewContent] (patched bytes) and
+	// [PlannedFile.OldContent] (current bytes) only exist in the
+	// recorder, not in the scalar OldValue/NewValue fields.
+	//
+	// nil on three paths: PreviewNone (production write, no recorder —
+	// the CLI doesn't render a plan), the NoOp short-circuit (no write
+	// captured → `plannedFiles: []` per T0-(d)), and the legacy
+	// [NewConfigService] constructor (nil factory). Always exactly
+	// one entry (`u-boot.yaml`) when populated. T5 maps it to the
+	// envelope's `plannedFiles[]` + `hunks[]`.
+	PlannedFiles []PlannedFile
 }
 
 // ConfigShowRequest is the input for [ConfigUseCase.Show]. No

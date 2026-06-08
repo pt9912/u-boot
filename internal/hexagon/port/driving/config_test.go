@@ -126,3 +126,26 @@ func TestConfigSetResponse_WarningsField(t *testing.T) {
 		t.Errorf("Warnings append did not stick: %+v", resp.Warnings)
 	}
 }
+
+// TestConfigSetResponse_PlannedFilesField pins the T4-Review R-T4-1
+// field: the recorder-captured u-boot.yaml mutation surfaces here so
+// the CLI --diff renderer can read PlannedFile.NewContent/OldContent.
+// Type must be []driving.PlannedFile so the shared
+// mapPlannedFilesToWire/writeDiff renderer (Pattern-Erbe add) works
+// unchanged. Nil on the PreviewNone / NoOp / legacy paths.
+func TestConfigSetResponse_PlannedFilesField(t *testing.T) {
+	t.Parallel()
+	var resp driving.ConfigSetResponse
+	if resp.PlannedFiles != nil {
+		t.Errorf("PlannedFiles zero-value: want nil, got %v", resp.PlannedFiles)
+	}
+	resp.PlannedFiles = append(resp.PlannedFiles, driving.PlannedFile{
+		Path:       "u-boot.yaml",
+		Action:     "modify",
+		NewContent: []byte("schemaVersion: 1\n"),
+		OldContent: []byte("schemaVersion: 1\n"),
+	})
+	if len(resp.PlannedFiles) != 1 || resp.PlannedFiles[0].Path != "u-boot.yaml" {
+		t.Errorf("PlannedFiles append did not stick: %+v", resp.PlannedFiles)
+	}
+}
