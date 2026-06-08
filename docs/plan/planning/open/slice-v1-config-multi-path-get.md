@@ -2,7 +2,7 @@
 
 > **Status:** `open/`, on hold pending trigger. Cleanup-/Feature-
 > Slice zum config-multi-path-get-Carveout aus
-> [`slice-v1-cli-json-dry-run-config`](../next/slice-v1-cli-json-dry-run-config.md)
+> [`slice-v1-cli-json-dry-run-config`](../in-progress/slice-v1-cli-json-dry-run-config.md)
 > §Out of Scope. Carveout-Plan-Anker
 > ([[feedback_carveouts_need_plans]]); verlinkt aus
 > [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)

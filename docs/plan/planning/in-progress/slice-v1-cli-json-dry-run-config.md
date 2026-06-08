@@ -1,11 +1,22 @@
 # Slice V1: `config --json` / `config get --json` / `config set --json` — drei Sub-Forms unter einem Folge-Slice
 
-> **Status:** `next/` (R1+R2+R3-Adressierung gefahren: R1=4+6+4, R2=3+6+4,
-> R3=0+4+4 — Asymptote erreicht; T0-Sub-Decisions (a)-(p) komplett
-> mit R3-festgezurrten Beschlüssen für (a)/(b)/(g)/(o)/(p); vier
-> Folge-Slice-Stubs in `open/` gespawned; LOC-Bilanz ~1500-1900).
+> **Status:** `in-progress/` — **T2 done (2026-06-08, Port-Layer +
+> CLI-Scaffold)**, `make gates` grün (Coverage 91.20 %). Geliefert:
+> `ConfigSetRequest.PreviewMode`/`SilenceLogger`,
+> `ConfigSetResponse.Warnings`, zwei Sentinels
+> `ErrConfigWriteRejected`/`ErrConfigPostPatchSanityFailed`
+> (T0-(m)-Split), `cli.ErrDryRunNotApplicable`,
+> `configSetFlags.JSON`/`Quiet` read-through + Pin-Tests.
+> **Verschoben nach T5** (Lint-/Behavior-Grund, s. T2-Zelle):
+> `configGetFlags`/`configShowFlags` + `DryRun`/`Diff`-Felder +
+> `--dry-run`/`--diff`-Flag-Registrierung. Nächster Schritt: **T3**
+> (Application-Layer). R1+R2+R3-Adressierung gefahren: R1=4+6+4,
+> R2=3+6+4, R3=0+4+4 — Asymptote erreicht; T0-Sub-Decisions (a)-(p)
+> komplett mit R3-festgezurrten Beschlüssen für
+> (a)/(b)/(g)/(o)/(p); vier Folge-Slice-Stubs in `open/` gespawned;
+> LOC-Bilanz ~1500-1900.
 > Achter Folge-Slice (8/9) des Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 8/9). **Drei Sub-Forms unter einem Slice**
 > (analog up-down-Bündelung): `u-boot config` (bare), `u-boot
 > config get <path>`, `u-boot config set <path> <value>`. Bare +
@@ -632,7 +643,7 @@ docs-check).
 | - | --- | --- | --- |
 | T0 | Discovery + Sub-Decisions (a)-(p) klären; Review-Runden | — (Plan) | — |
 | T1 | **Entfällt** (analog up-down/logs T1): `cli/sanitize.go`-Helper, `RecordingFileSystem`-Adapter, Pure-Go-Diff-Renderer existieren bereits aus add/init/generate/remove/up-down T5 | — (entfällt) | T0 |
-| T2 | Port-Types: `configFlags{JSON, Quiet, DryRun, Diff}` (Set-Form), `configGetFlags{JSON, Quiet}`, `configShowFlags{JSON, Quiet}` — ggf. zu **einem** `configFlags` konsolidiert wenn Bare/Get die Modifying-Felder ignorieren. **`ConfigSetRequest.PreviewMode driving.PreviewMode`-Field-Erweiterung** + **`ConfigSetRequest.SilenceLogger bool`-Field** (Pattern-Erbe `UpRequest.SilenceProgress`; R2-MED-5 T0-(n)). **`ConfigSetResponse.Warnings []driving.WarningEntry`-Field** für Orphan-Feature-WARN-Migration (Pattern-Erbe `RemoveResponse.Warnings`; R2-MED-5 T0-(n)). **Zwei neue Port-Sentinels** (R2-MED-4 T0-(m)): `driving.ErrConfigWriteRejected` + `driving.ErrConfigPostPatchSanityFailed`. **KEIN neuer FS-Sentinel** (`ErrConfigFileSystem` existiert bereits). **KEIN `ConfigSetResponse.AppendedSources`-Field** — `appendedSources` lebt CLI-Layer-only (R2-MED-1 T0-(c); R3-LOW-2-Klarstellung). `cli.ErrDryRunNotApplicable`-Sentinel (T0-(g) Option (i.a)) im CLI-Layer als **Pflicht** (R2-LOW-3-Fix). | ~130 | T0 |
+| T2 ✅ (2026-06-08) | **Geliefert**: **`ConfigSetRequest.PreviewMode driving.PreviewMode`-Field** + **`ConfigSetRequest.SilenceLogger bool`-Field** (Pattern-Erbe `UpRequest.SilenceProgress`; R2-MED-5 T0-(n)). **`ConfigSetResponse.Warnings []driving.WarningEntry`-Field** für Orphan-Feature-WARN-Migration (Pattern-Erbe `RemoveResponse.Warnings`; R2-MED-5 T0-(n)). **Zwei neue Port-Sentinels** (R2-MED-4 T0-(m)): `driving.ErrConfigWriteRejected` + `driving.ErrConfigPostPatchSanityFailed`. `cli.ErrDryRunNotApplicable`-Sentinel (T0-(g) Option (i.a)) im CLI-Layer (R2-LOW-3-Fix). `configSetFlags.JSON`/`Quiet` read-through (in Set-Closure populated, Pattern-Erbe logs T2). Pin-Tests (`port/driving/config_test.go` + `cli/config_test.go`). **KEIN neuer FS-Sentinel** (`ErrConfigFileSystem` existiert). **KEIN `ConfigSetResponse.AppendedSources`-Field** — `appendedSources` lebt CLI-Layer-only (R2-MED-1 T0-(c); R3-LOW-2). **Nach T5 verschoben** (Lint-/Behavior-Grund — Präzedenz logs/up-down T2 = `feat(port)`; black-box `cli_test` kann unexported Structs nicht ohne RunE-Signatur-Refactor referenzieren, + user-sichtbare `--dry-run`/`--diff` ohne Reject-Wiring wäre Behavior-Trap): `configGetFlags{JSON, Quiet}` + `configShowFlags{JSON, Quiet}` + `configSetFlags.DryRun`/`.Diff`-Felder + `--dry-run`/`--diff`-Cobra-Flag-Registrierung. | ~130 (Port + Scaffold + Pins) | T0 |
 | T3 | Application-Layer: **Multi-`%w`-Wrap-Migration** der 5 bestehenden FS-Read/Write-Wrap-Sites in `application/config.go` (Z. 196, 524, 565, 592, 810) von heutiger Form `%w: ... : %v` auf `%w: ... : %w` (Pattern-Erbe up-down T3). **`ErrConfigValueInvalid`-Multi-Use-Splitting** (R2-MED-4 T0-(m)): WriteAllowed-Reject-Sites (Z. 251-256) auf `ErrConfigWriteRejected` umlenken; Post-Patch-Sanity-Sites (Z. 376, 388) auf `ErrConfigPostPatchSanityFailed` umlenken; Value-Coercion-Sites (Z. 278, 287, 296, 308, 313) bleiben auf `ErrConfigValueInvalid`. **`PreviewMode`-Handling** im `Set`-Method-Body: `selectFS(req.PreviewMode)` analog `AddService.Add`. **Logger-Branch** im `Set`-Method-Body: `logger := s.logger; if req.SilenceLogger { logger = noopLogger{} }` (R2-MED-5 T0-(n) — Pattern-Erbe up-down ProgressSink). **Orphan-Feature-Warn-Migration**: `maybeWarnOrphanFeatureActivation`-Output (Z. 237) wird zusätzlich als `driving.WarningEntry{Code: "LH-FA-DEV-003", Level: "warn", …}` in `ConfigSetResponse.Warnings` angehängt. KEIN ProgressSink-Branch nötig (config emittiert keinen Stream). KEIN Confirmer-Branch nötig (config set nicht destructive). | ~80 | T2 |
 | T4 | **Composition-Root-Erweiterung** (R2-HIGH-2-Adressierung — ursprüngliche "entfällt"-Aussage war falsch): `NewConfigServiceWithFactory(fsFactory, yaml, logger)`-Konstruktor neu (analog `NewAddServiceServiceWithFactory` etc.) + `configFSFactory := newPreviewFSFactory(fsAdapter)`-Zeile in `cmd/uboot/main.go:121-138`-Block + Konstruktor-Wechsel `NewConfigService` → `NewConfigServiceWithFactory`. Heute (Z. 139) ist `ConfigService` der **einzige Modifying-Service ohne `WithFactory`-Variante**. | ~40 | T3 |
 | T5 | CLI-RunE: drei `runConfig*`-Refactors auf Cluster-Signatur (ctx, stdout, errOut, args, flags, uc, getwd). Allowlist-Migration 3 Forms. Neuer `mapConfigErrorToDiagnostic` mit Switch-Order T0-(f) (10 Rows nach R2-MED-4-Splitting). Pre-UC-Validation via `reportError`. **Custom-Args-Validatoren** `validateConfigSetArgs` + `validateConfigGetArgs` + `validateConfigShowArgs` (T0-(l)) für Envelope-konforme Args-Mismatch- und `unknown command`-Rejects (R1-HIGH-4 + R2-HIGH-3). **`config set` Voll-Schema-Pfad** mit `fsFactory(mode)` für Dry-Run (Pattern-Erbe add T5). **`config set --diff`-Pfad** mit Pure-Go-Diff-Renderer (Pattern-Erbe add T5). **bare/get `--dry-run`/`--diff`-Reject** via `ErrDryRunNotApplicable` (T0-(g) Option (i.a)). **`flags.JSON = a.json` Inheritance-Lesen** im RunE-Closure analog `runTemplateList`. **`SilenceLogger`-Field-Wiring** im Set-Request (T0-(n)). **WARN-Diagnostics-Mapping**: `Response.Warnings []driving.WarningEntry` → Envelope-`diagnostics[]` mit `level: "warn"`-Einträgen analog remove-Pattern. **KEINE `isFilesystemError`-Co-Migration nötig** — `ErrConfigFileSystem` ist seit Pre-Cluster-Slice in `cli.go:405` registriert (R1-LOW-1). Sanitizer-Aufrufe via `cli/sanitize.go` (T0-(p)). | ~350-450 | T2, T4 |
@@ -703,7 +714,7 @@ Kombi). (R1-MED-5 + R2-HIGH-2 + R2-MED-4/5-Adressierung.)
 ## Bezug
 
 - Cluster:
-  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
   (Folge-Slice 8/9).
 - Pattern-Vorbilder:
   - **Modifying-Klasse**:

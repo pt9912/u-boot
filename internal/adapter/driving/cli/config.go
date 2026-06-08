@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 
@@ -92,6 +93,18 @@ func newConfigGetCommand(a *App) *cobra.Command {
 // re-checks before applying.
 type configSetFlags struct {
 	AllowExternalFeatureSources []string
+
+	// JSON read-through from the App's persistent root flag
+	// (slice-v1-cli-json-dry-run-config T2, Pattern-Erbe logs T2).
+	// At T2 the field is only populated by the Cobra closure; T5
+	// routes the JSON-Mode Voll-Schema envelope path off it.
+	JSON bool
+
+	// Quiet read-through from the App's persistent root flag. In
+	// JSON mode `--quiet` is a no-op (Cluster-T0-(a) doctor-Pattern:
+	// `--quiet --json` is semantically identical to `--json`). T2
+	// adds the field; T5 consumes it.
+	Quiet bool
 }
 
 func newConfigSetCommand(a *App) *cobra.Command {
@@ -101,6 +114,12 @@ func newConfigSetCommand(a *App) *cobra.Command {
 		Short: "Set a single configuration value (schema-validated)",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// JSON/Quiet read-through from the App's persistent root
+			// flags (slice-v1-cli-json-dry-run-config T2). T5 will
+			// consume these via mapConfigErrorToDiagnostic and the
+			// Voll-Schema envelope path.
+			flags.JSON = a.json
+			flags.Quiet = a.quiet
 			return runConfigSet(cmd.Context(), cmd.OutOrStdout(), args, *flags, a.configUseCase, a.getwd)
 		},
 	}
@@ -108,6 +127,22 @@ func newConfigSetCommand(a *App) *cobra.Command {
 		"additional URLs to append to devcontainer.featureSources.allow (LH-FA-DEV-003; only valid when <path> is devcontainer.featureSources.allow; cumulative with the positional value).")
 	return cmd
 }
+
+// ErrDryRunNotApplicable is returned when `--dry-run` (or `--diff`)
+// is given to a read-only config form — `u-boot config` (Show) or
+// `u-boot config get` (slice-v1-cli-json-dry-run-config T0-(g)
+// Option (i.a)). Only the modifying form `config set` carries the
+// preview flags (Cluster-Plan Z. 91-100: "nur modifying tragen
+// Dry-Run"). Pattern-Erbe logs' [ErrFollowJSONNotSupported]: the
+// flag is registered on the command so Cobra parses it cleanly, and
+// the RunE rejects it Envelope-konform rather than letting Cobra
+// emit a raw `unknown flag` to stderr (LH-NFA-USE-004 §1841).
+//
+// Maps to Exit-Code 2 (LH-FA-CLI-006 usage class) via
+// [isUsageError]. Defined in T2; T5 registers the synthetic flags
+// on the bare/get commands, wires the reject path, and adds the
+// [isUsageError] branch.
+var ErrDryRunNotApplicable = errors.New("--dry-run/--diff is only valid for `config set`")
 
 // runConfigShow streams the full u-boot.yaml body to stdout
 // byte-identically (slice-m8-config.md §D5).

@@ -55,6 +55,31 @@ type ConfigSetRequest struct {
 	// positional [Value] before validation + dedupe. Slice-v1-
 	// devcontainer-features T4.
 	AllowExternalFeatureSources []string
+
+	// PreviewMode selects the FS-mutation regime for `config set`
+	// per slice-v1-cli-json-dry-run-config T0-(g)/T2 — the same
+	// three-state contract every modifying subcommand shares
+	// (add/init/generate/remove). The CLI maps the --dry-run/--diff
+	// flag combination to one of [PreviewNone]/[PreviewDryRun]/
+	// [PreviewAndApply]; the Composition-Root's fsFactory routes the
+	// `s.fs.WriteFile(u-boot.yaml, …)` call through the recording
+	// adapter accordingly. Default zero value [PreviewNone] keeps
+	// today's production-write behaviour, so the non-JSON path is
+	// unchanged. T3 reads it in `ConfigService.Set`; T5 sets it
+	// from the parsed flags.
+	PreviewMode PreviewMode
+
+	// SilenceLogger switches the application-layer logger to a no-op
+	// sink for the duration of this request so the five
+	// `s.logger.*` sites in the Set path (three Info, two Debug)
+	// do not pollute stdout-bound machine output with stderr lines
+	// (slice-v1-cli-json-dry-run-config T0-(n)). The CLI sets this
+	// to `true` when `--json` is active. Pattern is symmetric to
+	// [UpRequest.SilenceProgress] / [RemoveServiceRequest.
+	// SilenceConfirmer]: a boolean request flag that lets the use
+	// case branch internally without the CLI knowing about the
+	// no-op sink. T3 wires the branch; T5 sets the field.
+	SilenceLogger bool
 }
 
 // ConfigSetResponse is the output of [ConfigUseCase.Set]. The CLI
@@ -65,6 +90,17 @@ type ConfigSetResponse struct {
 	Path     domain.ConfigPath
 	OldValue string
 	NewValue string
+
+	// Warnings carries soft-warning diagnostics the use case wants
+	// the CLI adapter to surface via the JSON envelope's
+	// `diagnostics[]` array (slice-v1-cli-json-dry-run-config T0-(n)
+	// Orphan-Feature-WARN-Migration; [WarningEntry] type inherited
+	// from remove/up T2). Empty / nil on the happy path; populated
+	// when `maybeWarnOrphanFeatureActivation` fires for a
+	// `services.<svc>.enabled` write whose service is not
+	// registered (LH-FA-DEV-003 / `level: "warn"`). T3 appends the
+	// entries; T5 maps them to `diagnostics[]`.
+	Warnings []WarningEntry
 }
 
 // ConfigShowRequest is the input for [ConfigUseCase.Show]. No
@@ -83,15 +119,26 @@ type ConfigShowResponse struct {
 
 // All Config sentinels below live in the `driving` package so the
 // CLI adapter can branch via [errors.Is] without importing
-// `application` (LH-FA-ARCH-003 depguard rule). All four map to
+// `application` (LH-FA-ARCH-003 depguard rule). They map to
 // LH-FA-CLI-006 exit codes:
 //
-//   - ErrConfigPathUnknown    → 10 (validation; unknown dotted path)
-//   - ErrConfigValueInvalid   → 10 (validation; bad value coercion
-//                                or write-rejected path)
-//   - ErrConfigSchemaInvalid  → 10 (validation; post-patch schema
-//                                roundtrip failed)
-//   - ErrConfigFileSystem     → 14 (technical; IO/permission)
+//   - ErrConfigPathUnknown            → 10 (validation; unknown dotted path)
+//   - ErrConfigValueInvalid           → 10 (validation; bad value coercion)
+//   - ErrConfigWriteRejected          → 10 (validation; non-writable path,
+//                                        `u-boot add <svc>` hint)
+//   - ErrConfigPostPatchSanityFailed  → 10 (validation; post-patch
+//                                        roundtrip mismatch)
+//   - ErrConfigSchemaInvalid          → 10 (validation; post-patch schema
+//                                        roundtrip failed)
+//   - ErrConfigValueNotSet            → 10 (validation; optional path unset)
+//   - ErrConfigFileSystem             → 14 (technical; IO/permission)
+//
+// ErrConfigWriteRejected and ErrConfigPostPatchSanityFailed are new
+// in slice-v1-cli-json-dry-run-config T2: they split the three
+// semantic classes that [ErrConfigValueInvalid] conflated today
+// (T0-(m)) so JSON consumers can disambiguate by `code` instead of
+// a message substring. T3 redirects the corresponding wrap-sites in
+// `application/config.go`; until then nothing returns them.
 
 // ErrConfigPathUnknown signals that the CLI received a `<path>`
 // argument that does not match the [domain.ConfigPath] whitelist.
@@ -100,19 +147,44 @@ type ConfigShowResponse struct {
 // regardless of the Go error chain depth.
 var ErrConfigPathUnknown = errors.New("config: unknown path")
 
-// ErrConfigValueInvalid signals one of two value-rejection
-// shapes:
+// ErrConfigValueInvalid signals a value-coercion failure: the raw
+// value cannot be coerced to the path's expected scalar type (e.g.
+// `set devcontainer.enabled vielleicht`). Code 10. The CLI emits
+// the wrapped detail verbatim so the user sees the specific reason.
 //
-//  1. The raw value cannot be coerced to the path's expected
-//     scalar type (e.g. `set devcontainer.enabled vielleicht`).
-//  2. The path's [domain.ConfigPath.WriteAllowed] flag is false
-//     and the use case rejects the Set call (M8 §D1: only
-//     `services.<svc>.enabled` falls under this rejection today;
-//     the user is pointed at `u-boot add <svc>`).
-//
-// Code 10. The CLI emits the wrapped detail verbatim so the user
-// sees the specific reason.
+// Historically this sentinel also carried the write-rejected-path
+// and post-patch-sanity classes; slice-v1-cli-json-dry-run-config
+// T0-(m) split those into [ErrConfigWriteRejected] and
+// [ErrConfigPostPatchSanityFailed] so consumers can disambiguate by
+// `code`. T3 performs the redirect in `application/config.go`.
 var ErrConfigValueInvalid = errors.New("config: invalid value")
+
+// ErrConfigWriteRejected signals that the requested path's
+// [domain.ConfigPath.WriteAllowed] flag is false, so `config set`
+// refuses the write (slice-m8-config.md §D1: only
+// `services.<svc>.enabled` falls under this rejection today; the
+// user is pointed at `u-boot add <svc>`). Code 10.
+//
+// Split out of [ErrConfigValueInvalid] in
+// slice-v1-cli-json-dry-run-config T2 (T0-(m)). The message keeps
+// the `u-boot add <svc>` hint so the human path is unchanged; the
+// new sentinel only adds a distinct `code` for JSON consumers.
+// T3 redirects the WriteAllowed-reject sites
+// (`application/config.go` ~Z. 251-256) onto this sentinel.
+var ErrConfigWriteRejected = errors.New("config: write rejected for non-writable path")
+
+// ErrConfigPostPatchSanityFailed signals that the value round-trip
+// after [PatchScalar] did not reproduce the expected value — a rare
+// schema-drift indicator distinct from the structural / domain
+// re-validation covered by [ErrConfigSchemaInvalid]. Code 10. The
+// use case MUST NOT write the file in this case.
+//
+// Split out of [ErrConfigValueInvalid] in
+// slice-v1-cli-json-dry-run-config T2 (T0-(m)) so consumers can
+// tell post-patch sanity failures apart from value-coercion
+// failures. T3 redirects the post-patch-sanity sites
+// (`application/config.go` ~Z. 376, 388) onto this sentinel.
+var ErrConfigPostPatchSanityFailed = errors.New("config: post-patch sanity check failed")
 
 // ErrConfigSchemaInvalid signals that the post-patch YAML body
 // fails the two-stage schema validation
