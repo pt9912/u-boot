@@ -12,7 +12,7 @@
 > Per-Command-Folge-Slice-Serie. T0 ✅ festgezurrt
 > (§T0-Outcomes — 5 Sub-Decisions plus Mutations-Matrix-Pre-Scan);
 > in `in-progress/`. **Cluster-Stand (2026-06-08): 8/9 done, 1/9
-> next (template — T0+R1+R2+R3 done, T2-Start ready).**
+> in-progress (template T2 done — Envelope-Migration).**
 >
 > **Done (8/9)**:
 > [`doctor`](../done/slice-v1-cli-json-dry-run-doctor.md) (1/9),
@@ -26,15 +26,16 @@
 > T0–T8 + drei Review-Runden R-T4-1/R-IR-1/R-CLI-1; erster
 > Read-only+Modifying-Hybrid, drei Sub-Forms gebündelt).
 >
-> **Next (1/9, T0+R1+R2+R3 done — T2-Start ready)**:
-> [`template`](../next/slice-v1-cli-json-dry-run-template.md) (9/9)
+> **In-progress (1/9, T2 done — Envelope-Migration)**:
+> [`template`](../in-progress/slice-v1-cli-json-dry-run-template.md) (9/9)
 > — der **kleinste Slice** (~90 LOC). T0-Discovery + drei R-Runden
-> gefahren (Asymptote HIGH 1→0→0); Lifecycle `open/`→`next/`.
-> Sub-Decisions festgezurrt: bare `template --json` → Reject Exit 2
-> (envelope-LOS per §1838; RunE-getragen, T_close-stabil),
-> `template list --json` Array→Envelope-Migration (Breaking-Change,
-> CHANGELOG `### Changed`). Nach template-done greift die
-> Closure-Hard-Rule → Cluster-Slice selbst via T_close nach `done/`.
+> (Asymptote HIGH 1→0→0). T2 geliefert: `template list --json`
+> Array→Minimalkontrakt-Envelope (`command:"template"`,
+> `subcommand:"list"`, `data:[…]`) + `mapTemplateErrorToDiagnostic`-
+> Error-Pfad. **Nächster Schritt: T3** (bare `template --json`-Reject
+> via `cli.ErrTemplateSubcommandRequired`, T_close-stabil). Danach
+> T4-Closure → Closure-Hard-Rule → Cluster-Slice selbst via T_close
+> nach `done/`.
 
 ## Auslöser
 
@@ -775,7 +776,7 @@ mit DoD-Hash-Tabelle. Cluster-Stand jetzt **8/9 done**.
 
 **Folge-Slice 9/9 template — T0-Discovery + R1+R2+R3 gefahren,
 Lifecycle `open/`→`next/`**
-([`next/`](../next/slice-v1-cli-json-dry-run-template.md)): der
+([`next/`](../in-progress/slice-v1-cli-json-dry-run-template.md)): der
 **letzte und kleinste** Cluster-Slice (~90 LOC). Asymptote erreicht
 (HIGH 1→0→0). Festgezurrt: `template list --json` Array→Envelope
 (Breaking-Change, CHANGELOG `### Changed`), bare `template --json`

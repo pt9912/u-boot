@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/pt9912/u-boot/internal/adapter/driving/cli"
+	"github.com/pt9912/u-boot/internal/adapter/driving/cli/jsontestutil"
 )
 
 // TestRootJSON_RejectsAllNonMigratedForms is the slice-v1-cli-json-
@@ -86,8 +87,16 @@ func TestRootJSON_AcceptsTemplateList_BothFlagPositions(t *testing.T) {
 		t.Errorf("output mismatch:\n--- subcommand --json ---\n%s\n--- --json subcommand ---\n%s",
 			out1.String(), out2.String())
 	}
-	if !strings.HasPrefix(strings.TrimSpace(out1.String()), "[") {
-		t.Errorf("template list --json should emit a JSON array, got: %q", out1.String())
+	// slice-v1-cli-json-dry-run-template T2: output migrated from a
+	// raw JSON array to the LH-NFA-USE-004 Minimalkontrakt-Envelope
+	// with command="template", subcommand="list", data=[…].
+	jsontestutil.AssertMinimalEnvelope(t, out1.Bytes(),
+		jsontestutil.WithCommand("template"),
+		jsontestutil.WithSubcommand("list"),
+		jsontestutil.WithExitCode(0),
+	)
+	if !strings.Contains(out1.String(), "\"data\"") {
+		t.Errorf("template list --json envelope must carry a data field, got: %q", out1.String())
 	}
 }
 

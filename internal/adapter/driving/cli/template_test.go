@@ -85,15 +85,23 @@ func TestTemplateList_JSON(t *testing.T) {
 		t.Fatalf("Execute: %v (stderr=%q)", err, stderr.String())
 	}
 
-	// Parse the output back through encoding/json so we exercise the
-	// wire shape, not the prettifying side effects (whitespace,
-	// indent).
-	var got []map[string]any
-	if err := json.Unmarshal(stdout.Bytes(), &got); err != nil {
+	// slice-v1-cli-json-dry-run-template T2: output migrated from a
+	// raw array to the Minimalkontrakt-Envelope; the projection now
+	// rides in `data`.
+	var env struct {
+		Command    string           `json:"command"`
+		Subcommand string           `json:"subcommand"`
+		Data       []map[string]any `json:"data"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &env); err != nil {
 		t.Fatalf("json.Unmarshal: %v; output was:\n%s", err, stdout.String())
 	}
+	if env.Command != "template" || env.Subcommand != "list" {
+		t.Errorf("envelope command/subcommand = %q/%q, want template/list", env.Command, env.Subcommand)
+	}
+	got := env.Data
 	if len(got) != 1 {
-		t.Fatalf("len(got) = %d, want 1", len(got))
+		t.Fatalf("len(data) = %d, want 1", len(got))
 	}
 	want := map[string]any{
 		"name":            "basic",
@@ -124,12 +132,18 @@ func TestTemplateList_EmptyCatalog_JSONIsEmptyArray(t *testing.T) {
 	if err := newAppWithTemplateList(uc).Execute(context.Background(), []string{"template", "list", "--json"}, &stdout, &stderr); err != nil {
 		t.Fatalf("Execute: %v (stderr=%q)", err, stderr.String())
 	}
-	var got []map[string]any
-	if err := json.Unmarshal(stdout.Bytes(), &got); err != nil {
+	// T2: empty catalog → envelope with `data: []` (not null).
+	if !strings.Contains(stdout.String(), "\"data\":[]") {
+		t.Errorf("empty catalog must emit data:[] (not null); got %s", stdout.String())
+	}
+	var env struct {
+		Data []map[string]any `json:"data"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &env); err != nil {
 		t.Fatalf("json.Unmarshal: %v; output was:\n%s", err, stdout.String())
 	}
-	if len(got) != 0 {
-		t.Errorf("len(got) = %d, want 0 (empty catalog → []); got = %v", len(got), got)
+	if len(env.Data) != 0 {
+		t.Errorf("len(data) = %d, want 0 (empty catalog → []); got = %v", len(env.Data), env.Data)
 	}
 }
 

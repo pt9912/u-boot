@@ -1,7 +1,13 @@
 # Slice V1: `template list --json` — Envelope-Migration
 
-> **Status:** `next/` — **T0-Discovery + R1+R2+R3 gefahren,
-> Asymptote erreicht, Lifecycle `open/`→`next/` (2026-06-08)**.
+> **Status:** `in-progress/` — **T2 done (2026-06-08, Envelope-
+> Migration)**, `make gates` grün. T0-Discovery + R1+R2+R3 +
+> Lifecycle `next/`→`in-progress/`. T2 geliefert:
+> `runTemplateList`→`writeTemplateListJSON`
+> (`newDataEnvelope("template","list",dtos,…)`) +
+> `mapTemplateErrorToDiagnostic`-Error-Pfad; drei bestehende
+> Array-Tests auf Envelope umgestellt + neue Acceptance-Suite.
+> **Nächster Schritt: T3** (bare-`template`-Reject).
 > R1 (1 HIGH + 2 MED) drehte T0-(a) am Spec-Text um (→ Reject).
 > R2 (0 HIGH + 2 MED + 3 LOW) ergänzte den Error-Envelope-Pfad
 > (T0-(f)) + Envelope-Asymmetrie. R3 (0 HIGH + 1 MED + 1 LOW)
@@ -12,7 +18,7 @@
 > Scan + Sub-Decisions (a)-(f) festgezurrt. Bereit für T2-Start.
 > Letzter
 > Folge-Slice (9/9) des Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
 > (T0-(e) Platz 9). Closure-Pflicht-Slice für den
 > Cluster-T_close-Lauf, weil er den bewussten Übergangs-Carveout
 > aus dem Doctor-Slice schließt. **Der einfachste Slice des
@@ -30,7 +36,7 @@ T3+T4 hat das lokale `--json`-Flag auf `template list` entfernt
 und das Output-Format **bewusst unverändert** gelassen: heutige
 `templateJSON`-Array-Struktur ohne Spec-§1841-Minimalkontrakt-
 Felder. Carveouts-Eintrag in
-[`carveouts.md`](../in-progress/carveouts.md) §Temporäre Carveouts
+[`carveouts.md`](carveouts.md) §Temporäre Carveouts
 verweist auf diesen Slice als Re-Trigger.
 
 Code-Realität heute:
@@ -301,7 +307,7 @@ Default-`list` erzeugte eine Human-vs-JSON-Asymmetrie.
   LH-Codes genutzt, keine tool-internen Codes; `template list`
   emittiert auf dem Happy-Path `diagnostics: []`.
 - ✅ **Carveouts-Eintrag entfernt**: Zeile aus
-  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
+  [`carveouts.md`](carveouts.md) §Temporäre
   Carveouts gestrichen (T4).
 - ✅ **bare-`template`-Verhalten festgezurrt** (T0-(a) (i),
   R1+R3): `u-boot template --json` → **Reject Exit 2** via
@@ -332,7 +338,7 @@ Default-`list` erzeugte eine Human-vs-JSON-Asymmetrie.
 | - | ------ | --------------- |
 | T0 | **Discovery + R-Runden**: Pre-Scan + Sub-Decisions (a)-(e); T0-(a) per R1 auf Reject festgezurrt. `Data`-Konstruktor seit generate T1 (`bd3de20`) etabliert. | — (Plan-Arbeit) |
 | T1 | **Entfällt** — `cliJSONEnvelope.Data` + `newDataEnvelope(command, subcommand, data, diags, exitCode)` seit generate-Slice 4/9 T1 (`bd3de20`) vorhanden inkl. Marshal-Pin-Tests. Template-Slice nutzt sie nur (T2). | — (entfällt) |
-| T2 | **`runTemplateList`-Envelope-Migration**: `renderTemplateListJSON` ersetzt das rohe `[]templateJSON`-Array durch `newDataEnvelope("template", "list", dtos, nil, 0)` → `writeEnvelope` (`subcommand: "list"`-Pflicht, T0-(d)). **Error-Pfad** (T0-(f)/R2-MED-1): minimaler `mapTemplateErrorToDiagnostic` (2 Rows) + `reportErrorSub(out, err, …, "template", "list", mapErr, nil)`. **Format-Change** (R2-LOW-1): `MarshalIndent` (indent) → `writeEnvelope`/`json.Marshal` (compact, single-line) — Teil des Breaking-Change. **Test-Update** (R2-LOW-3): `TestRootJSON_AcceptsTemplateList_BothFlagPositions` (jsonallowlist_test.go:90) asserted heute „JSON array" — Pin auf Envelope-Form umstellen (`AssertMinimalEnvelope` + `WithCommand`/`WithSubcommand("list")` + `data`-Inhalt); Both-Flag-Positionen bleiben. **Empty-Catalog-Pin** (R2-LOW-2): leerer Katalog → `data: []` (nicht `null`; `make([]templateJSON,0,…)` normalisiert bereits). | ~60 |
+| T2 ✅ (2026-06-08) | **Geliefert** (`make gates` grün): `runTemplateList` ruft `writeTemplateListJSON` (`newDataEnvelope("template", "list", dtos, nil, 0)` → `writeEnvelope`, `subcommand: "list"`); altes `renderTemplateListJSON`/`MarshalIndent` ersetzt (`encoding/json`-Import raus, `errors` rein). **Error-Pfad**: `mapTemplateErrorToDiagnostic` (2 Rows: `ErrTemplateCatalog`→`LH-NFA-REL-003`/14, Default→`LH-FA-CLI-006`) + `reportErrorSub(…, "template", "list", …)`. **Format-Change** indent→compact (Breaking-Change). **Test-Updates**: drei bestehende Array-asserting Tests (`BothFlagPositions` + `TestTemplateList_JSON` + `EmptyCatalog_JSONIsEmptyArray` in `template_test.go`) auf Envelope-Parsing umgestellt; neue `template_acceptance_test.go` (Non-empty-Envelope + Empty-`data:[]` + Error-Envelope-Exit-14 + Text-Form-intakt). | ~60 |
 | T3 | **bare `template --json`-Reject in der RunE** (R1-HIGH-1b): bare-`template`-RunE prüft `a.json` und returnt **`cli.ErrTemplateSubcommandRequired`** (R2-MED-2, neuer Exit-2-Sentinel via `isUsageError`; Message „u-boot template requires a subcommand (try `u-boot template list`)") statt `cmd.Help()` — **envelope-LOS** (§1838-Ausnahme, T0-(f)), T_close-stabil. `template list` bleibt in der Allowlist; bare `template` bleibt rejected (jetzt RunE-getragen, nicht gate-abhängig). + Pin-Test. | ~30 |
 | T4 | **Closure** (NICHT Allowlist-Mechanik-Abbau — R1-MED-2: das ist Cluster-T_close-Scope, eigener Schritt nach diesem Slice, Cluster-Slice §T0-(g)): carveouts.md `template list`-Eintrag entfernen; CHANGELOG **`### Changed`** (Breaking: `template list --json` Array→Envelope + indent→compact, T0-(b)); `cli-json-output.md` **§6.2** (bestehende „Sonderfall template list --json"-Carveout-Sektion auf Envelope-Form aktualisieren — R2-LOW: KEINE separate §6.10, der template-Inhalt lebt schon in §6.2) + §6-Tabelle (template→done); roadmap; Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) |
 
@@ -360,13 +366,13 @@ weiterhin korrekt antworten (kein read-only-Form leakt rohen Output).
 ## Bezug
 
 - Cluster-Slice:
-  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
   §T0-(e) Platz 9.
 - Vorgänger-Slice:
   [`slice-v1-cli-json-dry-run-doctor`](../done/slice-v1-cli-json-dry-run-doctor.md)
   T3+T4 (Flag-Schnitt + Carveouts-Eintrag).
 - Carveouts:
-  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
+  [`carveouts.md`](carveouts.md) §Temporäre
   Carveouts §`template list --json`.
 - Code-Realität: `internal/adapter/driving/cli/template.go`,
   `internal/adapter/driving/cli/jsonenvelope.go`.

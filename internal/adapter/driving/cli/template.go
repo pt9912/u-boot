@@ -2,7 +2,7 @@ package cli
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"text/tabwriter"
@@ -111,14 +111,36 @@ func runTemplateList(
 	flags templateFlags,
 	uc driving.TemplateListUseCase,
 ) error {
+	// slice-v1-cli-json-dry-run-template T2: read-only error path
+	// flows through reportErrorSub so a List failure produces a
+	// spec-§1841 error envelope (subcommand "list"), not a raw
+	// Cobra stderr error — Cluster-Symmetrie mit logs. dryRun/diff
+	// are false (template list is read-only).
 	resp, err := uc.List(ctx, driving.TemplateListRequest{})
 	if err != nil {
-		return err
+		return reportErrorSub(out, err, nil, false, false, flags.JSON, "template", "list", mapTemplateErrorToDiagnostic, nil)
 	}
 	if flags.JSON {
-		return renderTemplateListJSON(out, resp.Templates)
+		return writeTemplateListJSON(out, resp.Templates)
 	}
 	return renderTemplateListText(out, resp.Templates)
+}
+
+// mapTemplateErrorToDiagnostic maps a template-path error to a
+// [diagnosticItem] (slice-v1-cli-json-dry-run-template T2 / T0-(f)).
+// Two rows: the catalog-adapter IO failure
+// ([driving.ErrTemplateCatalog]) is a technical-persistence error
+// (LH-NFA-REL-003 / Exit 14 via isFilesystemError) — unreachable in
+// a passing CI build because the production embed.FS adapter
+// validates at load time; the default falls back to LH-FA-CLI-006.
+// No new code-registry entry: only existing LH-codes are emitted.
+func mapTemplateErrorToDiagnostic(err error) diagnosticItem {
+	switch {
+	case errors.Is(err, driving.ErrTemplateCatalog):
+		return diagnosticItem{Level: "error", Code: "LH-NFA-REL-003", Message: err.Error()}
+	default:
+		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
+	}
 }
 
 // renderTemplateListText writes the human-readable tabwriter form:
@@ -147,28 +169,28 @@ func renderTemplateListText(out io.Writer, metas []domain.TemplateMetadata) erro
 	return nil
 }
 
-// renderTemplateListJSON marshals the metadata list as a pretty-
-// indented JSON array. The CLI uses a private DTO ([templateJSON])
-// instead of tagging the domain type so the domain layer stays
-// presentation-agnostic (hexagonal purity) — adapters own the
-// rendering shape.
+// writeTemplateListJSON emits the LH-NFA-USE-004 Minimalkontrakt-
+// Envelope for `template list --json` (slice-v1-cli-json-dry-run-
+// template T2). The `[]templateJSON` projection rides in the
+// envelope's `data` field via [newDataEnvelope] with
+// `command="template"`, `subcommand="list"` (§322 subcommand-
+// Pflicht), `diagnostics=[]`, `exitCode=0`.
 //
-// Nil slices are normalised to `[]` so JSON consumers always see
-// arrays (never `null`); a missing `requiredTools` in `template.yaml`
-// is semantically "no required tools", not "field absent".
-func renderTemplateListJSON(out io.Writer, metas []domain.TemplateMetadata) error {
+// Breaking change vs. the pre-migration shape (Doctor-Slice
+// carveout): the output moves from a top-level pretty-indented JSON
+// array to a single-line envelope object whose `data` holds the
+// array. Documented in CHANGELOG `### Changed` (T4).
+//
+// Nil slices are normalised to `[]` inside [toTemplateJSON] so JSON
+// consumers always see arrays (never `null`); an empty catalog
+// renders `"data": []`.
+func writeTemplateListJSON(out io.Writer, metas []domain.TemplateMetadata) error {
 	dtos := make([]templateJSON, 0, len(metas))
 	for _, m := range metas {
 		dtos = append(dtos, toTemplateJSON(m))
 	}
-	data, err := json.MarshalIndent(dtos, "", "  ")
-	if err != nil {
-		return fmt.Errorf("marshal template list: %w", err)
-	}
-	if _, err := out.Write(append(data, '\n')); err != nil {
-		return fmt.Errorf("write json: %w", err)
-	}
-	return nil
+	env := newDataEnvelope("template", "list", dtos, nil, 0)
+	return writeEnvelope(out, env)
 }
 
 // templateJSON is the CLI-local JSON projection of
