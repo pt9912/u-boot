@@ -1,12 +1,24 @@
 # Slice V1: CLI-JSON-Envelope-Pattern-Konsolidierung add/init/generate
 
-> **Status:** `open/`, on hold pending trigger. Konsolidierungs-Slice
-> für den R15-Cross-Slice-1-Pattern-Drift aus
+> **Status:** `open/` — **Trigger gefeuert (2026-06-08): Cluster
+> `slice-v1-cli-json-dry-run` vollständig done (9/9 + T_close).**
+> T0-Discovery gefahren (post-cluster Pre-Scan + Sub-Decisions
+> geschärft); R-Runden + Lifecycle `open/`→`next/` **noch offen**.
+> Konsolidierungs-Slice für den R15-Cross-Slice-1-Pattern-Drift aus
 > [`slice-v1-cli-json-dry-run-remove`](../done/slice-v1-cli-json-dry-run-remove.md)
 > §Review-Round-15. Carveout-Plan-Anker ([[feedback_carveouts_need_plans]]);
 > verlinkt aus
 > [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
 > §Temporäre Carveouts.
+>
+> **Standalone, NICHT in T_close absorbiert**: der Stub nannte als
+> Option, die Konsolidierung in den Cluster-T_close zu bündeln
+> (§Trigger Punkt 2). Das wurde **nicht** getan — der T_close war
+> rein Mechanik-Abbau (Allowlist/Gate). Diese Konsolidierung ist
+> damit ein eigenständiger post-cluster-Hygiene-Slice. **Verifiziert
+> noch akkurat** (2026-06-08): `add.go:79` + `generate.go:78` rohes
+> `cobra.ExactArgs(1)`; `init.go:138` `MaximumNArgs(1)`; add/init/
+> generate nutzen **kein** `sanitizeBaseDir` (grep == 0).
 
 ## Auslöser
 
@@ -97,6 +109,98 @@ neuen File **`cli/sanitize.go`** (im bestehenden `package cli`,
 keine Sub-Package-Form). Wenn dieser Konsolidierungs-Slice
 zieht, ist `cli/sanitize.go` schon das Heim — Sub-Decision 2
 unten (Sub-Package-vs-File) ist obsolet, übernimm File-Heim.
+
+## Heute-Stand-Pre-Scan (T0-Discovery 2026-06-08, post-cluster)
+
+Code-Realität verifiziert (nach Cluster-Abschluss):
+
+| Aspekt | add | init | generate | (Vorbild) remove | (Vorbild) config |
+| --- | --- | --- | --- | --- | --- |
+| `Args:` | `cobra.ExactArgs(1)` (`add.go:79`) | `cobra.MaximumNArgs(1)` (`init.go:138`) | `cobra.ExactArgs(1)` (`generate.go:78`) | `validateRemoveArgs(a)` | `configArgsValidator(a, sub, base)` |
+| Envelope bei Args-Fehler | ❌ kein | ❌ (nur `>1` offen) | ❌ kein | ✅ | ✅ |
+| `sanitizeBaseDir` an reportError | ❌ (grep 0) | ❌ | ❌ | ✅ `remove.go:297` | ✅ `config.go:264/300/355` |
+
+**Zwei Vorbilder existieren jetzt** (beide nach dem Stub-Schreiben
+gelandet) — und das **config-Muster ist bereits generisch**:
+`configArgsValidator(a, subcommand, base)` (`config.go:224`) ruft
+`base(cmd, args)` und bei Fehler im `--json`-Modus
+`writeErrorEnvelopeSub(out, err, …, "config", subcommand,
+mapConfigErrorToDiagnostic, nil)`. Der einzige config-Spezifikum-
+Rest: hartkodiertes `"config"` + `mapConfigErrorToDiagnostic` + die
+`subcommand == "set"`-Flag-Guard. **Generalisierung ist trivial** —
+`command` + `mapErr` als Params, und die Flag-Reads unbedingt
+versuchen (`cmd.Flags().GetBool` liefert `false` wenn das Flag nicht
+registriert ist, also kein Guard nötig).
+
+**Greedy-Sanitize ist das etablierte Muster** (NICHT selektiv, wie
+der §Lösungs-Skizze-Punkt-2 oben vorschlug): config + remove wrappen
+**jeden** UC-Error mit `sanitizeBaseDir(err, cwd)` vor `reportError`
+(`config.go:264/300/355`, `remove.go:297`) — der Wrapper schreibt nur
+um, wenn `baseDir` wirklich im String vorkommt, kein Performance-
+Penalty. Stub-Empfehlung „selektiv" ist damit **überholt** → greedy
+übernehmen (Defense-in-Depth, Symmetrie mit config/remove).
+
+## Sub-Decisions (T0-geschärft — zum Review)
+
+- **SD-A — Shared-Helper für Args-Validator.** Extrahiere
+  `jsonArgsValidator(a *App, command, subcommand string, base
+  cobra.PositionalArgs, mapErr func(error) diagnosticItem)
+  cobra.PositionalArgs` (generalisierte `configArgsValidator`-Form,
+  Flag-Reads unbedingt). **Reichweite (Sub-Decision zum Review):**
+  (a) **Voll-Konsolidierung** — `configArgsValidator` +
+  `validateRemoveArgs` refactoren auf den Shared-Helper (ihre
+  Wrapper werden 1-Zeilen-Delegationen / entfallen), add/init/
+  generate adoptieren ihn. Entfernt die Duplizierung vollständig
+  (= Carveout-Geist), berührt aber done+getesteten config/remove-
+  Code (Risiko durch starke Test-Suiten beherrscht). (b)
+  **Minimal** — nur add/init/generate bekommen den Helper,
+  config/remove bleiben wie sie sind (zwei Near-Duplikate bleiben).
+  **Plan-Empfehlung: (a)** — die Konsolidierung ist genau der
+  Carveout-Zweck; ein Near-Duplikat-Rest würde den Drift nur
+  verschieben.
+- **SD-B — Sanitize-Granularität → greedy** (überholt §Lösungs-
+  Skizze-2): add/init/generate wrappen ihre UC-Errors an JEDER
+  `reportError`-Site mit `sanitizeBaseDir(err, cwd)`, symmetrisch zu
+  config/remove. `cli/sanitize.go` ist das Heim (up-down T5,
+  `a5aaf9c`).
+- **SD-C — init `MaximumNArgs(1)`-Sonderfall.** init nimmt 0-1
+  Args (0 → Default-Projektname). Der `>1`-Pfad ist heute offen
+  (kein Envelope). Lösung: `base = cobra.MaximumNArgs(1)` durch den
+  Shared-Helper → der `>1`-Fehler trägt dann den Envelope. 0-Arg-
+  Default-Logik bleibt in der RunE unberührt.
+- **SD-D — Migrations-Reihenfolge → eine Tranche pro Schicht**
+  (Helper → Adoptionen → Sanitize), nicht per-Command-Sub-Tranchen
+  (R15-Empfehlung): der Helper-Extract berührt ohnehin alle Files;
+  per-Command-Splitting würde Helper-Drift einführen.
+
+## Aufhebungsbedingung
+
+- `add`/`init`/`generate` tragen einen Args-Validator mit JSON-
+  Envelope-Hook: `--json <cmd>` mit falscher Arg-Zahl
+  (NoPositionalArg + TooManyArg) emittiert den Envelope auf stdout
+  (§1841), und `--dry-run`/`--diff --json` wählt das Voll-Schema
+  (§1842 / `LH-FA-CLI-007`/`-008`).
+- Kein absoluter Filesystem-Pfad leakt mehr in `diagnostic.message`
+  von add/init/generate (greedy `sanitizeBaseDir`).
+- Bei SD-A (a): genau **ein** Shared-`jsonArgsValidator`; keine
+  Near-Duplikate mehr (`configArgsValidator`/`validateRemoveArgs`
+  delegieren oder sind weg).
+- `make gates` grün (inkl. Pin-Tests pro Command für beide Pfade).
+- Carveout-Eintrag (carveouts.md Z. 30) entfernt.
+
+## Tranchen (vorläufig)
+
+| Tranche | Inhalt | LOC |
+| --- | --- | --- |
+| T0 | Discovery (dieser Pre-Scan) + Sub-Decisions geschärft | — |
+| T1 | Shared-Helper `jsonArgsValidator` in `cli/` + (SD-A (a)) `configArgsValidator`/`validateRemoveArgs` darauf refactoren; bestehende config/remove-Pins müssen grün bleiben | ~40 |
+| T2 | add/init/generate adoptieren `jsonArgsValidator` (init via `MaximumNArgs(1)`-base, SD-C) + Pin-Tests pro Command (NoArg/TooMany × Minimal/Voll-Schema) | ~120 |
+| T3 | greedy `sanitizeBaseDir` an allen add/init/generate-`reportError`-Sites + Path-Leak-Pins (mapper-message trägt keinen abs. Pfad) | ~60 |
+| T4 | Closure: carveouts.md Z. 30 entfernen, ggf. CHANGELOG (Bug-Fix: §1841-Envelope-Symmetrie + Path-Leak-Defense), `done/`-Move + DoD | — |
+
+LOC-Schätzung **~220** (mittlerer Slice). Read-bestätigt: kein neuer
+Sentinel (Args-Fehler = `LH-FA-CLI-006`/Exit 2, schon vorhanden),
+kein Port-Contract-Change.
 
 ## Trigger
 
