@@ -28,14 +28,16 @@
 >
 > **In-progress (1/9, T2 done — Envelope-Migration)**:
 > [`template`](../in-progress/slice-v1-cli-json-dry-run-template.md) (9/9)
-> — der **kleinste Slice** (~90 LOC). T0-Discovery + drei R-Runden
+> — der **kleinste Slice** (~60 LOC). T0-Discovery + drei R-Runden
 > (Asymptote HIGH 1→0→0). T2 geliefert: `template list --json`
 > Array→Minimalkontrakt-Envelope (`command:"template"`,
 > `subcommand:"list"`, `data:[…]`) + `mapTemplateErrorToDiagnostic`-
-> Error-Pfad. **Nächster Schritt: T3** (bare `template --json`-Reject
-> via `cli.ErrTemplateSubcommandRequired`, T_close-stabil). Danach
-> T4-Closure → Closure-Hard-Rule → Cluster-Slice selbst via T_close
-> nach `done/`.
+> Error-Pfad. **T3 entfällt** (bare-`template`-Reject nach
+> Cluster-T_close verschoben — wäre solange das Gate existiert toter
+> Code; T_close führt `ErrTemplateSubcommandRequired` + RunE-Reject
+> mit dem Gate-Abbau ein). **Nächster Schritt: T4-Closure**, danach
+> Closure-Hard-Rule → Cluster-Slice selbst via T_close nach `done/`
+> (Gate-Abbau **+ bare-`template`-RunE-Reject + Help-Leak-Pin**).
 
 ## Auslöser
 

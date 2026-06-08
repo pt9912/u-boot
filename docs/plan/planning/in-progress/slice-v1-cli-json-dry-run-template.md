@@ -7,7 +7,21 @@
 > (`newDataEnvelope("template","list",dtos,…)`) +
 > `mapTemplateErrorToDiagnostic`-Error-Pfad; drei bestehende
 > Array-Tests auf Envelope umgestellt + neue Acceptance-Suite.
-> **Nächster Schritt: T3** (bare-`template`-Reject).
+> **Nächster Schritt: T4-Closure.** **T3 entfällt — bare-`template`-
+> Reject nach Cluster-T_close verschoben** (Implementierungs-Befund
+> bei T3-Start): solange das Allowlist-Gate existiert, ist es der
+> aktive Contract für bare `template --json` (Gate-Reject
+> `ErrJSONNotImplemented`); ein zusätzlicher RunE-Reject wäre toter,
+> nicht erreichbarer Code (Gate feuert vor RunE) ODER erzwänge eine
+> künstliche Allowlist-Ausnahme, die den bestehenden Gate-Reject-Pin
+> + `jsonRejectError`-Coverage schwächt. `ErrTemplateSubcommand
+> Required` + RunE-Reject werden erst **mit dem Gate-Abbau**
+> (T_close) eingeführt, wo sie live + erreichbar sind. Die frühere
+> R1-HIGH-1b/R3-Festzurrung war eine **Timing-Fehleinordnung** (richtig:
+> „T_close-stabil"; falsch: „in template-T3"), kein offenes
+> template-Defizit. T_close-Pflicht-Test: bare `template --json`
+> darf nach Gate-Abbau NICHT in Help leaken (siehe T_close-Forward-
+> Concern).
 > R1 (1 HIGH + 2 MED) drehte T0-(a) am Spec-Text um (→ Reject).
 > R2 (0 HIGH + 2 MED + 3 LOW) ergänzte den Error-Envelope-Pfad
 > (T0-(f)) + Envelope-Asymmetrie. R3 (0 HIGH + 1 MED + 1 LOW)
@@ -270,14 +284,17 @@ Test pinnt die Envelope-Form via
 `jsontestutil.AssertMinimalEnvelope` mit
 `WithCommand("template")` + `WithSubcommand("list")`.
 
-`u-boot --json template` (bare) wird **per R1-festgezurrt mit
-Exit-Code 2 rejected** (T0-(a) (i)) — und zwar T_close-stabil in
-der bare-`template`-RunE selbst (nicht nur am Allowlist-Gate),
-damit der spätere Cluster-T_close-Gate-Abbau keinen Hilfetext
-leakt (R1-HIGH-1b). Begründung im Detail siehe Sub-Decision
-T0-(a): §1838 macht `subcommand` für `command="template"`
-verpflichtend (bare hat keinen), die Cluster-Aufhebungsbedingung
-verlangt nur `template list`, §1813 macht `--json` optional, und
+`u-boot --json template` (bare) wird **mit Exit-Code 2 rejected**
+(T0-(a) (i)) — **bis Cluster-T_close vom Allowlist-Gate getragen**
+(`ErrJSONNotImplemented`); der RunE-Reject +
+`cli.ErrTemplateSubcommandRequired` kommen **mit dem Gate-Abbau in
+T_close** (T3-Implementierungs-Befund: vorher wäre der RunE-Check
+toter Code — siehe Status-Block + Tranche T3). T_close-Pflicht:
+nach Gate-Abbau kein Help-Leak. Begründung der Reject-Wahl siehe
+Sub-Decision T0-(a): §1838 macht `subcommand` für
+`command="template"` verpflichtend (bare hat keinen), die
+Cluster-Aufhebungsbedingung verlangt nur `template list`, §1813
+macht `--json` optional, und
 Default-`list` erzeugte eine Human-vs-JSON-Asymmetrie.
 
 ## Akzeptanzkriterien
@@ -309,17 +326,19 @@ Default-`list` erzeugte eine Human-vs-JSON-Asymmetrie.
 - ✅ **Carveouts-Eintrag entfernt**: Zeile aus
   [`carveouts.md`](carveouts.md) §Temporäre
   Carveouts gestrichen (T4).
-- ✅ **bare-`template`-Verhalten festgezurrt** (T0-(a) (i),
-  R1+R3): `u-boot template --json` → **Reject Exit 2** via
-  `cli.ErrTemplateSubcommandRequired`, RunE-getragen (T_close-
-  stabil), **envelope-LOS** (§1838-Ausnahme). Human-Modus
-  unverändert `cmd.Help()`. Pin-Test gegen Help-Leak.
-- ✅ **Allowlist unverändert**:
+- ✅ **bare-`template`-Verhalten festgezurrt** (T0-(a) (i)):
+  `u-boot template --json` → **Reject Exit 2**, **envelope-LOS**
+  (§1838-Ausnahme). **Bis T_close vom Allowlist-Gate getragen**
+  (`ErrJSONNotImplemented`); `cli.ErrTemplateSubcommandRequired` +
+  RunE-Reject + Help-Leak-Pin kommen mit dem Gate-Abbau in T_close
+  (T3-Befund). Human-Modus unverändert `cmd.Help()`.
+- ✅ **Allowlist unverändert** (in diesem Slice):
   [`jsonallowlist.go`](../../../../internal/adapter/driving/cli/jsonallowlist.go)
-  behält `"u-boot template list": true`; bare `template` wird
-  **NICHT** eingetragen (bleibt rejected, jetzt RunE-getragen).
-  Der Allowlist-Mechanik-**Abbau** gehört zum Cluster-T_close
-  (R1-MED-2), nicht zu diesem Slice.
+  behält `"u-boot template list": true`; bare `template` bleibt
+  **gate-rejected** (NICHT eingetragen) — bis T_close die Mechanik
+  abbaut UND den RunE-Reject einführt. Der Allowlist-Mechanik-
+  **Abbau** gehört zum Cluster-T_close (R1-MED-2), nicht zu diesem
+  Slice.
 - ✅ **CLI-Pin-Tests**: bestehende `TestRootJSON_AcceptsTemplate
   List_BothFlagPositions`-Logik bleibt grün (beide Flag-
   Positionen), aber der schwache „JSON array"-Assert
@@ -339,22 +358,26 @@ Default-`list` erzeugte eine Human-vs-JSON-Asymmetrie.
 | T0 | **Discovery + R-Runden**: Pre-Scan + Sub-Decisions (a)-(e); T0-(a) per R1 auf Reject festgezurrt. `Data`-Konstruktor seit generate T1 (`bd3de20`) etabliert. | — (Plan-Arbeit) |
 | T1 | **Entfällt** — `cliJSONEnvelope.Data` + `newDataEnvelope(command, subcommand, data, diags, exitCode)` seit generate-Slice 4/9 T1 (`bd3de20`) vorhanden inkl. Marshal-Pin-Tests. Template-Slice nutzt sie nur (T2). | — (entfällt) |
 | T2 ✅ (2026-06-08) | **Geliefert** (`make gates` grün): `runTemplateList` ruft `writeTemplateListJSON` (`newDataEnvelope("template", "list", dtos, nil, 0)` → `writeEnvelope`, `subcommand: "list"`); altes `renderTemplateListJSON`/`MarshalIndent` ersetzt (`encoding/json`-Import raus, `errors` rein). **Error-Pfad**: `mapTemplateErrorToDiagnostic` (2 Rows: `ErrTemplateCatalog`→`LH-NFA-REL-003`/14, Default→`LH-FA-CLI-006`) + `reportErrorSub(…, "template", "list", …)`. **Format-Change** indent→compact (Breaking-Change). **Test-Updates**: drei bestehende Array-asserting Tests (`BothFlagPositions` + `TestTemplateList_JSON` + `EmptyCatalog_JSONIsEmptyArray` in `template_test.go`) auf Envelope-Parsing umgestellt; neue `template_acceptance_test.go` (Non-empty-Envelope + Empty-`data:[]` + Error-Envelope-Exit-14 + Text-Form-intakt). | ~60 |
-| T3 | **bare `template --json`-Reject in der RunE** (R1-HIGH-1b): bare-`template`-RunE prüft `a.json` und returnt **`cli.ErrTemplateSubcommandRequired`** (R2-MED-2, neuer Exit-2-Sentinel via `isUsageError`; Message „u-boot template requires a subcommand (try `u-boot template list`)") statt `cmd.Help()` — **envelope-LOS** (§1838-Ausnahme, T0-(f)), T_close-stabil. `template list` bleibt in der Allowlist; bare `template` bleibt rejected (jetzt RunE-getragen, nicht gate-abhängig). + Pin-Test. | ~30 |
+| T3 | **Entfällt — nach Cluster-T_close verschoben** (Implementierungs-Befund bei T3-Start, User-bestätigt): der bare-`template --json`-Reject (`cli.ErrTemplateSubcommandRequired` + RunE-Check) wäre solange das Allowlist-Gate existiert toter, nicht erreichbarer Code (Gate feuert vor RunE) — oder erzwänge eine künstliche Allowlist-Ausnahme, die den bestehenden Gate-Reject-Pin + `jsonRejectError`-Coverage schwächt. Bis T_close ist das **Gate** der aktive Contract (bare `template --json` → `ErrJSONNotImplemented`/Exit 2). Sentinel + RunE-Reject kommen **mit dem Gate-Abbau** in T_close (live + testbar). Timing-Korrektur der R1-HIGH-1b/R3-Festzurrung. | — (→ T_close) |
 | T4 | **Closure** (NICHT Allowlist-Mechanik-Abbau — R1-MED-2: das ist Cluster-T_close-Scope, eigener Schritt nach diesem Slice, Cluster-Slice §T0-(g)): carveouts.md `template list`-Eintrag entfernen; CHANGELOG **`### Changed`** (Breaking: `template list --json` Array→Envelope + indent→compact, T0-(b)); `cli-json-output.md` **§6.2** (bestehende „Sonderfall template list --json"-Carveout-Sektion auf Envelope-Form aktualisieren — R2-LOW: KEINE separate §6.10, der template-Inhalt lebt schon in §6.2) + §6-Tabelle (template→done); roadmap; Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) |
 
-LOC-Schätzung: **~90 LOC** (T2 ~60 inkl. Error-Pfad + T3 ~30 inkl.
-Sentinel; T1 + Allowlist-Abbau entfallen) — der **kleinste Slice
-des Clusters**. Nach template-Slice-
-done greift die **Cluster-Closure-Hard-Rule** → der Cluster-Slice
-selbst geht via **T_close** nach `done/` (Allowlist + `applyJSONReject
-Gate` + `PersistentPreRunE` Abbau, optional Folge-ADR — alles
-Cluster-Scope, NICHT dieser Slice).
+LOC-Schätzung: **~60 LOC** (nur T2; T1 entfällt, T3 → T_close
+verschoben) — der **kleinste Slice des Clusters**. Nach template-
+Slice-done greift die **Cluster-Closure-Hard-Rule** → der Cluster-
+Slice selbst geht via **T_close** nach `done/` (Allowlist +
+`applyJSONRejectGate` + `PersistentPreRunE` Abbau **plus** bare-
+`template`-RunE-Reject, optional Folge-ADR — alles Cluster-Scope,
+NICHT dieser Slice).
 
-**Cluster-T_close Forward-Concern** (R1-Notiz): nach dem Gate-Abbau
-darf bare `template --json` nicht auf `cmd.Help()` zurückfallen —
-deshalb trägt T3 den Reject in der RunE (T_close-stabil). T_close
-muss verifizieren, dass nach Mechanik-Abbau alle 9 migrierten Forms
-weiterhin korrekt antworten (kein read-only-Form leakt rohen Output).
+**Cluster-T_close Forward-Concern** (R1-Notiz, bei T3-Befund
+verschärft): T_close baut Allowlist + Gate ab. **Pflicht-Schritt
+dabei**: bare `template --json` darf danach NICHT auf `cmd.Help()`
+zurückfallen → T_close führt `cli.ErrTemplateSubcommandRequired` +
+den RunE-Reject ein (envelope-LOS, §1838-Ausnahme) UND einen
+Pin-Test „bare `template --json` nach Gate-Abbau → Exit 2, kein
+Help-Leak". T_close verifiziert zudem, dass nach Mechanik-Abbau alle
+9 migrierten Forms weiterhin korrekt antworten (kein read-only-Form
+leakt rohen Output).
 
 ## Out of Scope
 
