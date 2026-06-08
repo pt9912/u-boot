@@ -94,11 +94,11 @@ type App struct {
 	verbose bool
 	debug   bool
 
-	// json is bound to the LH-NFA-USE-004 root --json PersistentFlag
-	// (slice-v1-cli-json-dry-run-doctor T3). Subcommands that
-	// implement the JSON envelope read this state; non-migrated
-	// subcommands are rejected by the root PersistentPreRunE with
-	// ErrJSONNotImplemented (exit code 2).
+	// json is bound to the LH-NFA-USE-004 root --json PersistentFlag.
+	// Every spec-enum subcommand reads this state and emits the
+	// envelope (migration completed at Cluster-T_close; the
+	// transitional reject gate is gone). bare `template --json` is
+	// the only RunE-borne reject (ErrTemplateSubcommandRequired).
 	json bool
 
 	// logLevel is the slog level handle the wiring layer also
@@ -203,17 +203,6 @@ var ErrServiceNameMissing = errors.New("service name is required")
 // Maps to LH-FA-CLI-006 exit code 2.
 var ErrInvalidTimeout = errors.New("--timeout must be >= 0")
 
-// ErrJSONNotImplemented is returned by the root PersistentPreRunE
-// when --json is passed to a subcommand form that has not yet been
-// migrated to the LH-NFA-USE-004 envelope (slice-v1-cli-json-dry-run
-// cluster T0-(g)). Maps to LH-FA-CLI-006 exit code 2. The error
-// message itself is built by [jsonRejectError] and includes the
-// concrete CommandPath + follow-up slice reference.
-//
-// Cluster-T_close-Pflicht-Check: every spec-enum subcommand form
-// must end up in the allowlist (or the allowlist mechanic is removed
-// completely). See docs/user/cli-json-output.md §6.1.
-var ErrJSONNotImplemented = errors.New("json output not implemented for this subcommand")
 
 // ErrDoctorFailures signals that `u-boot doctor` ran successfully
 // (use-case returned no error) but the diagnostic report contained
@@ -478,7 +467,7 @@ func isUsageError(err error) bool {
 		errors.Is(err, ErrInvalidLogsTail) ||
 		errors.Is(err, ErrFollowJSONNotSupported) ||
 		errors.Is(err, ErrDryRunNotApplicable) ||
-		errors.Is(err, ErrJSONNotImplemented) ||
+		errors.Is(err, ErrTemplateSubcommandRequired) ||
 		errors.Is(err, ErrServiceNameMissing) ||
 		errors.Is(err, driving.ErrArtifactUnknown) ||
 		errors.Is(err, driving.ErrTemplateConflictsWithFlag) {

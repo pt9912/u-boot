@@ -372,26 +372,23 @@ Reihenfolge gemäß Cluster-T0-(e):
 | 6 | `slice-v1-cli-json-dry-run-up-down` | `up`, `down` (gebündelt, read-only Compose-Status) | done (DoD-Hash-Tabelle im Slice-File) |
 | 7 | `slice-v1-cli-json-dry-run-logs` | `logs` (Single-Envelope, T0-(a) Option (A)) | done (DoD-Hash-Tabelle im Slice-File) |
 | 8 | `slice-v1-cli-json-dry-run-config` | `config`, `config get`, `config set` (gebündelt, drei Formen) | done (DoD-Hash-Tabelle im Slice-File) |
-| 9 | `slice-v1-cli-json-dry-run-template` | `template list`-Envelope-Migration (bare `template --json` bleibt Gate-Reject bis Cluster-T_close) | done (DoD-Hash-Tabelle im Slice-File) |
+| 9 | `slice-v1-cli-json-dry-run-template` | `template list`-Envelope-Migration; bare `template --json` → RunE-Reject `ErrTemplateSubcommandRequired`/Exit 2 (envelope-LOS §1838, Cluster-T_close) | done (DoD-Hash-Tabelle im Slice-File) |
 
-### 6.1 Übergangs-Reject für nicht-migrierte Forms
+### 6.1 Migration abgeschlossen (Cluster-T_close)
 
-Bis der jeweilige Folge-Slice landet, rejected `u-boot <sub> --json`
-für die nicht-migrierten Subcommand-Formen mit Exit-Code `2`
-(`LH-FA-CLI-006`-Klasse) und Fehlermeldung:
+**Alle** Spec-Enum-Subcommand-Formen tragen den `--json`-
+Minimalkontrakt (bzw. das Voll-Schema im `--dry-run`/`--diff`-Pfad).
+Die **Übergangs-Mechanik** — eine Allowlist-Map plus
+`applyJSONRejectGate` am Root-`PersistentPreRunE`, die `--json` auf
+noch nicht migrierten Formen mit Exit 2 rejectete — wurde im
+**Cluster-T_close entfernt** (es gibt nichts mehr zu rejecten).
 
-```
-JSON-Ausgabe für 'u-boot <sub>' ist noch nicht implementiert
-(siehe slice-v1-cli-json-dry-run-<sub>).
-```
-
-Mechanik: zentrale Allowlist-Map in
-[`internal/adapter/driving/cli/root.go`](../../internal/adapter/driving/cli/)
-plus `PersistentPreRunE` am Root-Command. Map-Key ist Cobra-
-`cmd.CommandPath()` (`"u-boot doctor"`, `"u-boot config get"`,
-…). Pro Folge-Slice-Merge wandern die Allowlist-Einträge der
-migrierten Formen rein; Cluster-T_close entfernt Allowlist und
-`PersistentPreRunE` komplett.
+Die **einzige verbliebene `--json`-Reject-Form** ist bare
+`u-boot template` (ohne Subcommand): §1838/§420 machen `subcommand`
+für `command="template"` verpflichtend, und der Help-Parent hat kein
+eigenes Datum — er kann also keinen spec-validen Envelope erzeugen.
+Dieser Reject ist **RunE-getragen** (`ErrTemplateSubcommandRequired`,
+Exit 2, envelope-LOS), nicht mehr gate-getragen — siehe §6.2.
 
 ### 6.2 `u-boot template list --json` (slice-v1-cli-json-dry-run-template, done)
 
@@ -421,10 +418,12 @@ umstellen (CHANGELOG `### Changed`).
 
 **bare `u-boot template --json`** (ohne Subcommand) wird mit Exit 2
 rejected — §1838/§420 macht `subcommand` für `command="template"`
-verpflichtend, und der Help-Parent hat kein eigenes Datum. Bis zum
-Cluster-T_close trägt der Allowlist-Gate diesen Reject
-(`ErrJSONNotImplemented`); mit dem Gate-Abbau im T_close übernimmt
-ein RunE-Reject (`ErrTemplateSubcommandRequired`, envelope-LOS).
+verpflichtend, und der Help-Parent hat kein eigenes Datum. Der Reject
+ist **RunE-getragen** (`ErrTemplateSubcommandRequired`, envelope-LOS;
+Cluster-T_close), nicht gate-getragen: er fällt in der
+bare-`template`-RunE, damit `--json template` nach dem Gate-Abbau
+keinen Hilfetext leakt. Im Human-Modus (ohne `--json`) druckt bare
+`template` weiterhin den Hilfetext.
 
 ### 6.3 `u-boot add --json` (slice-v1-cli-json-dry-run-add, done)
 
@@ -1177,6 +1176,8 @@ kanonischen Maschinen-Schnittstelle; HTTP-/gRPC-/WebSocket-
 Adapter sind gegen genau dieses Surface abgewogen und verworfen.
 Dieses Doku ist der Liefer-Anker für ADR-0010 §Trigger 2. ADR-0010
 selbst bleibt **unverändert** (AGENTS.md §ADR-Disziplin: accepted
-ADRs werden nicht umgeschrieben); ob bei Cluster-T_close eine
-neue Folge-ADR „JSON-CLI ausgeliefert" angelegt wird, entscheidet
-der Cluster-Slice.
+ADRs werden nicht umgeschrieben). **Cluster-T_close-Entscheid: keine
+neue Folge-ADR** — T_close lieferte nur das mit ADR-0010 bereits
+beschlossene Surface aus (kein neuer Architektur-Entscheid); die
+Auslieferung ist über den done-Cluster-Slice + den Roadmap-Liefer-
+Vermerk dokumentiert.

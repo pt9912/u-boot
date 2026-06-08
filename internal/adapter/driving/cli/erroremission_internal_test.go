@@ -7,8 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/spf13/cobra"
-
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
@@ -175,73 +173,6 @@ func TestWriteDiff_EdgeCases(t *testing.T) {
 			t.Errorf("expected blank-line separator between a and b, got: %q", between)
 		}
 	})
-}
-
-// TestApplyJSONRejectGate_Branches covers the early-return
-// branches that the existing acceptance-tests do not exercise:
-// jsonFlag=false (pass-through), cmd==nil (defensive), help
-// subcommand, and __complete (Cobra-internal shell-completion
-// escape hatch). The Allowlist-hit + reject paths are exercised
-// in jsonallowlist_test.go via the full Execute() flow.
-func TestApplyJSONRejectGate_Branches(t *testing.T) {
-	t.Run("jsonFlag=false → no-op", func(t *testing.T) {
-		if err := applyJSONRejectGate(nil, false); err != nil {
-			t.Errorf("want nil, got %v", err)
-		}
-	})
-	t.Run("cmd==nil → defensive no-op", func(t *testing.T) {
-		if err := applyJSONRejectGate(nil, true); err != nil {
-			t.Errorf("want nil, got %v", err)
-		}
-	})
-	t.Run("cmd.Name()==help → escape hatch", func(t *testing.T) {
-		c := &cobra.Command{Use: "help"}
-		if err := applyJSONRejectGate(c, true); err != nil {
-			t.Errorf("help cmd must pass through, got %v", err)
-		}
-	})
-	t.Run("cmd.Name()==__complete → escape hatch", func(t *testing.T) {
-		c := &cobra.Command{Use: "__complete"}
-		if err := applyJSONRejectGate(c, true); err != nil {
-			t.Errorf("__complete cmd must pass through, got %v", err)
-		}
-	})
-}
-
-// TestHelpRequested_NoFlag covers the nil-flag branch of
-// helpRequested — a Cobra command that has not had a --help
-// persistent flag registered. The applyJSONRejectGate caller relies
-// on this defensive fallback so a malformed command tree does not
-// crash the gate.
-func TestHelpRequested_NoFlag(t *testing.T) {
-	c := &cobra.Command{Use: "x"}
-	if helpRequested(c) {
-		t.Errorf("cmd without --help flag must return false")
-	}
-}
-
-// TestJSONSliceSuffix_DefaultCases covers the jsonSliceSuffix
-// branches not exercised through the public TreeWalk-paths: the
-// no-root-prefix (defensive), the empty-first-segment after the
-// prefix (orphan "u-boot " with trailing space), and the recognised
-// "up"/"down" → "up-down" collapse.
-func TestJSONSliceSuffix_DefaultCases(t *testing.T) {
-	cases := []struct {
-		path string
-		want string
-	}{
-		{"weird/no-root", "unknown"},
-		{"u-boot ", "unknown"},
-		{"u-boot up", "up-down"},
-		{"u-boot down", "up-down"},
-		{"u-boot logs", "logs"},
-	}
-	for _, tc := range cases {
-		got := jsonSliceSuffix(tc.path)
-		if got != tc.want {
-			t.Errorf("path %q: want %q, got %q", tc.path, tc.want, got)
-		}
-	}
 }
 
 // TestStatusFromDiagnostics_AllBranches pins Spec §447 / §1837 —

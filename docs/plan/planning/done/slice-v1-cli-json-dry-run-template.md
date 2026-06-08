@@ -350,7 +350,7 @@ Default-`list` erzeugte eine Human-vs-JSON-Asymmetrie.
   RunE-Reject + Help-Leak-Pin kommen mit dem Gate-Abbau in T_close
   (T3-Befund). Human-Modus unverändert `cmd.Help()`.
 - ✅ **Allowlist unverändert** (in diesem Slice):
-  [`jsonallowlist.go`](../../../../internal/adapter/driving/cli/jsonallowlist.go)
+  [`jsonallowlist.go``
   behält `"u-boot template list": true`; bare `template` bleibt
   **gate-rejected** (NICHT eingetragen) — bis T_close die Mechanik
   abbaut UND den RunE-Reject einführt. Der Allowlist-Mechanik-

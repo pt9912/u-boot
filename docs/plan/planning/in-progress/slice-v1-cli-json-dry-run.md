@@ -850,7 +850,7 @@ hierher verschoben wurde).
 
 ### Pre-Scan (Code-Realität — was abzubauen ist)
 
-- [`jsonallowlist.go`](../../../../internal/adapter/driving/cli/jsonallowlist.go):
+- [`jsonallowlist.go``:
   `jsonAllowlist()`, `jsonRejectError()`, `jsonSliceSuffix()`,
   `applyJSONRejectGate()`, `helpRequested()` — die **gesamte
   Datei** ist nur die Gate-Mechanik.

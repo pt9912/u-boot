@@ -1158,7 +1158,7 @@ weil up/down keine Voll-Schema-Pfade tragen.
   [`cli/down.go`](../../../../internal/adapter/driving/cli/down.go),
   [`application/upservice.go`](../../../../internal/hexagon/application/upservice.go),
   [`application/downservice.go`](../../../../internal/hexagon/application/downservice.go),
-  [`cli/jsonallowlist.go`](../../../../internal/adapter/driving/cli/jsonallowlist.go)
+  [`cli/jsonallowlist.go``
   Z. 29/74-75.
 - Folge-Slices:
   [`slice-v1-cli-json-envelope-consolidation`](../open/slice-v1-cli-json-envelope-consolidation.md)

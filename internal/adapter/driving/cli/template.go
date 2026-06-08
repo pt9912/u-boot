@@ -21,6 +21,21 @@ type templateFlags struct {
 	JSON bool
 }
 
+// ErrTemplateSubcommandRequired is returned by bare `u-boot template
+// --json` (Cluster-T_close; slice-v1-cli-json-dry-run-template
+// T0-(a)/(f), moved from template-T3). `template` is a help-parent
+// without its own data, and §1838/§420 make `subcommand` mandatory
+// for command="template" — so bare template cannot emit a spec-valid
+// envelope. It rejects with Exit 2 (LH-FA-CLI-006 usage class via
+// [isUsageError]), envelope-LOS by design. Human mode (no --json)
+// is unaffected and still prints `cmd.Help()`.
+//
+// This replaces the former allowlist-gate reject
+// (ErrJSONNotImplemented) that the Cluster-T_close removed: it is
+// RunE-borne so the behaviour survives the gate teardown without
+// leaking help text on `--json template`.
+var ErrTemplateSubcommandRequired = errors.New("u-boot template requires a subcommand (try `u-boot template list`)")
+
 // newTemplateCommand builds the `u-boot template` Cobra subcommand
 // group (slice-v1-template-list T3). The parent has no Run path —
 // `u-boot template` alone prints the help text via Cobra's default
@@ -44,16 +59,21 @@ Coming in later slices:
   u-boot init --template ./path   use a local template directory
                                   (slice-later-local-templates)`,
 		Args: cobra.NoArgs,
-		// Help-Parent: druckt Help-Text via cmd.Help(). Im --json-
-		// Modus läuft der LH-NFA-USE-004-Reject-Gate aus
-		// buildRootCommand's PersistentPreRunE (siehe
-		// jsonallowlist.go:applyJSONRejectGate) ZUERST und rejected
-		// mit ErrJSONNotImplemented — der Help-Pfad hier wird
-		// im --json-Fall nie erreicht. Spec §1838 fordert subcommand-
-		// Pflicht bei command="template"; bare template hat keinen
-		// Spec-vorgesehenen Subcommand-Default, daher Reject bis
-		// slice-v1-cli-json-dry-run-template die Sub-Decision trifft.
+		// Help-Parent: prints help via cmd.Help() in human mode.
+		// In --json mode bare `template` is rejected (Cluster-T_close):
+		// §1838/§420 make `subcommand` mandatory for
+		// command="template", and the help-parent has no data of its
+		// own — so it cannot emit a spec-valid `command:"template"`
+		// envelope. The reject is RunE-borne (not gate-borne) since
+		// the Cluster-T_close removed the allowlist gate; it must
+		// fire here so `--json template` does not leak help text.
+		// Envelope-LOS by design — the only gate-less reject form of
+		// the cluster (slice-v1-cli-json-dry-run-template T0-(a)/(f),
+		// moved here from template-T3).
 		RunE: func(cmd *cobra.Command, _ []string) error {
+			if a.json {
+				return ErrTemplateSubcommandRequired
+			}
 			return cmd.Help()
 		},
 	}

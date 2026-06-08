@@ -54,12 +54,13 @@ Quickstart and user docs: https://github.com/pt9912/u-boot#readme`,
 	root.PersistentFlags().BoolVar(&a.debug, "debug", false,
 		"show internal diagnostic output")
 
-	// LH-NFA-USE-004 machine-readable output (slice-v1-cli-json-dry-
-	// run-doctor T3). Persistent flag, inherited by every subcommand.
-	// Migrated subcommands read a.json from their RunE; non-migrated
-	// subcommand forms are rejected by the PersistentPreRunE below
-	// via ErrJSONNotImplemented (exit code 2). See
-	// docs/user/cli-json-output.md §6 for the migration roadmap.
+	// LH-NFA-USE-004 machine-readable output. Persistent flag,
+	// inherited by every subcommand. All spec-enum subcommand forms
+	// read a.json from their RunE and emit the envelope (the
+	// migration completed with the Cluster-T_close; the transitional
+	// allowlist reject gate is gone). The only `--json` reject left
+	// is bare `u-boot template` (RunE-borne, see template.go). See
+	// docs/user/cli-json-output.md §6.
 	root.PersistentFlags().BoolVar(&a.json, "json", false,
 		"emit machine-readable JSON output where supported")
 
@@ -73,15 +74,15 @@ Quickstart and user docs: https://github.com/pt9912/u-boot#readme`,
 	// --debug and --verbose both map to LevelDebug today; a future
 	// slice can introduce a Verbose-only level if a service-specific
 	// pegel between Info and Debug becomes useful.
-	root.PersistentPreRunE = func(cmd *cobra.Command, _ []string) error {
-		// LH-NFA-USE-004 reject gate first: a non-migrated subcommand
-		// form receiving --json must fail with exit code 2 BEFORE
-		// any side effects (logger level switching, RunE invocation).
-		// See slice-v1-cli-json-dry-run-doctor §T0-(g).
-		if err := applyJSONRejectGate(cmd, a.json); err != nil {
-			return err
-		}
-
+	root.PersistentPreRunE = func(_ *cobra.Command, _ []string) error {
+		// LH-FA-CLI-005 verbosity → slog level. The LH-NFA-USE-004
+		// `--json` reject gate (allowlist + applyJSONRejectGate) was
+		// REMOVED at Cluster-T_close: all spec-enum subcommand forms
+		// carry `--json` now, so there is nothing left to reject. The
+		// only remaining `--json` reject is bare `u-boot template`,
+		// handled RunE-borne via [ErrTemplateSubcommandRequired]
+		// (slice-v1-cli-json-dry-run-template T0-(a)). See
+		// docs/user/cli-json-output.md §6.1.
 		if a.logLevel == nil {
 			return nil
 		}

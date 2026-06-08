@@ -379,6 +379,18 @@ this file is the same format applied to u-boot itself.
   Help-Parent ohne eigenes Datum). Ein Katalog-IO-Fehler mappt auf
   `LH-NFA-REL-003`/Exit 14. Doku in
   [`docs/user/cli-json-output.md §6.2`](docs/user/cli-json-output.md).
+- **Cluster-T_close** (Abschluss des `slice-v1-cli-json-dry-run`-
+  Clusters): die transitionale `--json`-Reject-Mechanik (Allowlist-
+  Map + `applyJSONRejectGate` am Root-`PersistentPreRunE` +
+  `ErrJSONNotImplemented`) wurde **entfernt** — alle Spec-Enum-Forms
+  sind migriert, es gibt nichts mehr zu rejecten. Der bare-
+  `u-boot template --json`-Reject ist von gate-getragen
+  (`ErrJSONNotImplemented`) auf **RunE-getragen**
+  (`ErrTemplateSubcommandRequired`, Exit 2, envelope-LOS) umgestellt,
+  damit er den Gate-Abbau überlebt ohne Hilfetext zu leaken. Keine
+  Verhaltensänderung für Konsumenten (Exit 2 bleibt); rein interner
+  Mechanik-Abbau (netto −90 LOC). Doku in
+  [`docs/user/cli-json-output.md §6.1`](docs/user/cli-json-output.md).
 
 ### Fixed
 

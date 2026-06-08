@@ -607,7 +607,7 @@ Closure nachgezogen.
   [`cli/logs.go`](../../../../internal/adapter/driving/cli/logs.go),
   [`application/logsservice.go`](../../../../internal/hexagon/application/logsservice.go),
   [`port/driving/logs.go`](../../../../internal/hexagon/port/driving/logs.go),
-  [`cli/jsonallowlist.go`](../../../../internal/adapter/driving/cli/jsonallowlist.go)
+  [`cli/jsonallowlist.go``
   Z. 29/74.
 - Folge-Slices: keine direkten Forward-Refs aus logs heraus;
   `slice-v1-recreate-detection` ist up-down-Carveout (nicht

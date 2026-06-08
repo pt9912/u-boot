@@ -114,32 +114,12 @@ func marshalEnvelopeForTest(env cliJSONEnvelope) ([]byte, error) {
 	return json.Marshal(env)
 }
 
-// JSONSliceSuffixForTest exposes [jsonSliceSuffix] (slice-v1-cli-
-// json-dry-run-doctor T3). External _test packages call this to
-// pin the path → slice-suffix mapping used in error messages.
-func JSONSliceSuffixForTest(cmdPath string) string {
-	return jsonSliceSuffix(cmdPath)
-}
-
-// JSONAllowlistPathsForTest returns the keys of the runtime allowlist
-// (slice-v1-cli-json-dry-run-doctor T3 §M2-Drift). Used by the Cobra-
-// Tree-Walk-Test to compare the registered Cobra paths against the
-// migrated set.
-func JSONAllowlistPathsForTest() []string {
-	m := jsonAllowlist()
-	out := make([]string, 0, len(m))
-	for path := range m {
-		out = append(out, path)
-	}
-	return out
-}
-
 // WalkRootCommandPathsForTest enumerates every command path under the
 // constructed root: all runnable leaves PLUS every help-parent
 // (cobra.NoArgs without RunE → prints help; cobra.NoArgs with
 // RunE=cmd.Help() also counts as a user-facing form, e.g. bare
-// `template`). The walk powers the Cobra-Tree-Walk-Anti-Drift-Pin
-// in jsonallowlist_test.go.
+// `template`). The walk powers the post-T_close „alle Forms
+// antworten"-Pin in rootjson_test.go.
 func (a *App) WalkRootCommandPathsForTest() []string {
 	root := buildRootCommand(a)
 	var paths []string
