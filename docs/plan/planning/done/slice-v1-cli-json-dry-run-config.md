@@ -20,7 +20,7 @@
 > | T5 | CLI-RunE-Neufassung: 3 Data-Carrier + Subcommand-Pflicht (inkl. Error-Pfad via `reportErrorSub`) + Allowlist 3 Forms + Mapper Switch-Order T0-(f) + `configArgsValidator` + Voll-Schema/Dry-Run/Diff + Reject + WARN→diagnostics + Acceptance-Tests | `11aea03` |
 > | T6 | Acceptance-Vervollständigung: white-box Mapper-Rows + Switch-Order-`_ByDesign` + Cobra-unknown-sub + Help-Edge-Case + CONF-005-Disambiguation + Sanitizer + Subcommand-Pflicht + `--quiet --json` + Mid-Stage-Shapes | `4cb7e90` |
 > | T7 — Review R-CLI-1 (MED) | unabhängiger Agent (CLI-Layer): Args-Validator-Voll-Schema-Leak auf Read-only-Forms gefixt + 2 Regression-Pins + Diff-Hunks-Assertion verschärft | `5cca4d5` |
-> | T8 — Closure | CHANGELOG + `cli-json-output.md` §6.9/§6-Tabelle/§7 + roadmap done-Zähler 7→8 + 4 carveouts-Einträge + `done/`-Move | `(DoD-Hash-Followup)` |
+> | T8 — Closure | CHANGELOG + `cli-json-output.md` §6.9/§6-Tabelle/§7 + roadmap done-Zähler 7→8 + 4 carveouts-Einträge + `done/`-Move | `724a283` |
 >
 > T2–T7 geliefert:
 > Port-Felder + zwei Sentinels
