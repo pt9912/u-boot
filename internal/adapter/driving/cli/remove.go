@@ -148,66 +148,32 @@ Examples:
 	return cmd
 }
 
-// validateRemoveArgs is the custom [cobra.PositionalArgs]-Validator
-// for `u-boot remove <service>` (slice-v1-cli-json-dry-run-remove
-// T5, R11-HIGH-F1 + R12-HIGH-F1 + R12-MED-F2; T7 R13-HIGH-1 +
-// R13-MED-1 für Flag-Bewusstsein und too-many-args-Symmetrie). It
-// captures `*App` via closure so the JSON-mode envelope-emission can
-// run BEFORE the sentinel is returned to Cobra — `cobra.ExactArgs(1)`
-// would otherwise feuer den `accepts 1 arg(s)`-Error VOR RunE und der
-// Konsument bekäme im --json-Pfad keinen Envelope (Spec §1841/§1842
-// verletzt).
+// validateRemoveArgs is the `u-boot remove <service>` positional-args
+// validator. Originally a bespoke closure (slice-v1-cli-json-dry-run-
+// remove T5/T7: R11/R12/R13 — JSON-envelope-emission BEFORE the Cobra
+// return so `--json remove` without an arg emits the envelope per
+// Spec §1841/§1842, plus too-many-args symmetry and --dry-run/--diff
+// flag-awareness for the Voll-Schema).
 //
-// Three cases:
-//
-//   - `len(args) == 0` → emit the [ErrServiceNameMissing]-Envelope
-//     on stdout if `--json` is set, then return the sentinel raw.
-//     ExitCode-Mapping: 2 (LH-FA-CLI-006 / usage-error class).
-//   - `len(args) == 1` → ok.
-//   - `len(args) > 1` → emit the Cobra "accepts 1 arg(s), received N"
-//     error in the same Envelope-Form (T7 R13-MED-1 Symmetrie-Fix:
-//     too-many-args muss denselben --json-Vertrag halten wie
-//     missing-arg). Cobra produziert nur den Roh-Error für stderr;
-//     der Validator hängt VOR dem Cobra-Return den Envelope auf
-//     stdout dran. ExitCode-Mapping: 2 via isUsageError's
-//     `"accepts "`-Prefix-Match in `cli/cli.go`.
-//
-// Flag-Awareness (T7 R13-HIGH-1 Fix): die `--dry-run`/`--diff`-Flags
-// werden zum Validator-Zeitpunkt aus `cmd.Flags()` gelesen und an
-// `writeErrorEnvelope` durchgereicht. Spec §1842 verlangt das
-// Voll-Schema sobald einer der beiden Preview-Flags gesetzt ist —
-// ohne das Lesen würde `u-boot --dry-run --json remove` ohne arg
-// einen Minimal-Envelope produzieren (Spec-Bruch).
-// `cmd.Flags().GetBool` returnt `(false, error)` wenn das Flag nicht
-// existiert; in unserer Cobra-Tree-Struktur sind `--dry-run`/`--diff`
-// als Subcommand-Local-Flags registriert (siehe `cmd.Flags().
-// BoolVar(&flags.DryRun, "dry-run", …)` weiter unten in
-// newRemoveCommand) → der Validator sieht sie zuverlässig.
-//
-// `data` is `nil` on both error envelopes because no service context
-// exists yet (the positional has not been parsed). The minimal/voll-
-// Form-Wahl folgt T0-(c) → R13-HIGH-1: voll-schema bei dry-run ODER
-// diff, sonst minimal.
+// At slice-v1-cli-json-envelope-consolidation T1 (SD-A (a)) it became
+// a delegation to the shared [jsonArgsValidator]: previewFlags=true
+// (remove carries --dry-run/--diff → Voll-Schema on arg errors), and
+// the base closure [removeArgsBase] preserves the
+// [ErrServiceNameMissing] missing-arg sentinel (Schutzplanke 2)
+// instead of cobra's bare "accepts 1 arg(s)". `data` stays nil — no
+// service context exists before the positional is parsed.
 func validateRemoveArgs(a *App) cobra.PositionalArgs {
-	return func(cmd *cobra.Command, args []string) error {
-		if len(args) == 1 {
-			return nil
-		}
-		dryRun, _ := cmd.Flags().GetBool("dry-run")
-		diffFlag, _ := cmd.Flags().GetBool("diff")
-		if len(args) == 0 {
-			if a.json {
-				_ = writeErrorEnvelope(cmd.OutOrStdout(), ErrServiceNameMissing, nil, dryRun, diffFlag, "remove", mapRemoveErrorToDiagnostic, nil)
-			}
-			return ErrServiceNameMissing
-		}
-		// len(args) > 1
-		cobraErr := cobra.ExactArgs(1)(cmd, args)
-		if a.json {
-			_ = writeErrorEnvelope(cmd.OutOrStdout(), cobraErr, nil, dryRun, diffFlag, "remove", mapRemoveErrorToDiagnostic, nil)
-		}
-		return cobraErr
+	return jsonArgsValidator(a, "remove", "", removeArgsBase, mapRemoveErrorToDiagnostic, true)
+}
+
+// removeArgsBase is the per-command base validator: len(args)==0 →
+// ErrServiceNameMissing (custom sentinel, Exit 2 via isUsageError),
+// len(args)==1 → ok, len(args)>1 → cobra's TooMany error.
+func removeArgsBase(cmd *cobra.Command, args []string) error {
+	if len(args) == 0 {
+		return ErrServiceNameMissing
 	}
+	return cobra.ExactArgs(1)(cmd, args)
 }
 
 // runRemove is split from the Cobra closure for direct unit-testing
@@ -238,7 +204,7 @@ func validateRemoveArgs(a *App) cobra.PositionalArgs {
 //
 // Error-Pfad (T0-(j) R4-MED-F3 Variante A): Error-Diagnostic
 // dominiert, WARN unterdrückt. reportError reicht `resp.Warnings`
-// NICHT durch — der `mapErr`-Pfad in [writeErrorEnvelope] emittiert
+// NICHT durch — der `mapErr`-Pfad in [writeErrorEnvelopeSub] emittiert
 // ausschließlich den Error-Diagnostic (`level: "error"`); ein
 // WARN würde sich auf nicht-vorhandene `data.volumesPurged`-Daten
 // beziehen, weil die Zero-Response-Klausel `priorState`/`state`/

@@ -6,14 +6,17 @@
 > **SD-A (a) Voll-Konsolidierung mit zwei Schutzplanken**
 > (Preview-Policy `previewFlags` für config show/get; remove
 > `ErrServiceNameMissing`-Base-Closure), SD-B greedy/post-getwd,
-> SD-C/SD-D bestätigt. Keine breiten R-Runden (User-Entscheid);
-> Lifecycle `open/`→`next/`. Nächster Schritt: `next/`→`in-progress/`
-> + T1.
+> SD-C/SD-D bestätigt. Keine breiten R-Runden (User-Entscheid).
+> Lifecycle `open/`→`next/`→`in-progress/`. **T1 ✅ done
+> (2026-06-08)**: Shared-`jsonArgsValidator` (`cli/jsonargs.go`) +
+> config/remove darauf refactored, beide Schutzplanken erhalten,
+> `make gates` grün. **Nächster Schritt: T2** (add/init/generate
+> adoptieren den Helper).
 > Konsolidierungs-Slice für den R15-Cross-Slice-1-Pattern-Drift aus
 > [`slice-v1-cli-json-dry-run-remove`](../done/slice-v1-cli-json-dry-run-remove.md)
 > §Review-Round-15. Carveout-Plan-Anker ([[feedback_carveouts_need_plans]]);
 > verlinkt aus
-> [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
+> [`docs/plan/planning/in-progress/carveouts.md`](carveouts.md)
 > §Temporäre Carveouts.
 >
 > **Standalone, NICHT in T_close absorbiert**: der Stub nannte als
@@ -222,7 +225,7 @@ Penalty. Stub-Empfehlung „selektiv" ist damit **überholt** → greedy
 | Tranche | Inhalt | LOC |
 | --- | --- | --- |
 | T0 | Discovery (dieser Pre-Scan) + Sub-Decisions geschärft | — |
-| T1 | Shared-Helper `jsonArgsValidator(a, command, subcommand, base, mapErr, previewFlags)` in `cli/` + `configArgsValidator`/`validateRemoveArgs` darauf refactoren. **Schutzplanke 1**: `previewFlags=false` für config show/get (Minimal bleibt). **Schutzplanke 2**: remove übergibt eine Base-Closure mit `ErrServiceNameMissing` für `len==0`. Bestehende config-show/get-Reject- + remove-Missing-Arg-Pins MÜSSEN grün bleiben | ~50 |
+| T1 ✅ (2026-06-08) | **Geliefert** (`make gates` grün): Shared-Helper `jsonArgsValidator(a, command, subcommand, base, mapErr, previewFlags)` in neuem `cli/jsonargs.go`; `configArgsValidator` → 1-Zeilen-Delegation (`previewFlags = subcommand == "set"`, **Schutzplanke 1**); `validateRemoveArgs` → Delegation + neue `removeArgsBase` (`len==0` → `ErrServiceNameMissing`, **Schutzplanke 2**). Toter `writeErrorEnvelope`-Wrapper entfernt (Caller über `reportErrorSub`/`jsonArgsValidator` → `writeErrorEnvelopeSub`). config-show/get-Reject- + remove-Missing-Arg-Pins blieben grün. | ~50 |
 | T2 | add/init/generate adoptieren `jsonArgsValidator` (add/generate `ExactArgs(1)`/`previewFlags=true`; init `MaximumNArgs(1)`-base/`previewFlags=true`, SD-C) + Pin-Tests: **add/generate** NoArg + TooMany × Minimal/Voll-Schema (je 4); **init** nur TooMany × Minimal/Voll-Schema (NoArg ist bewusst gültig → 0-Arg-success-Pin bleibt) | ~120 |
 | T3 | greedy `sanitizeBaseDir(err, cwd)` an allen add/init/generate-**UC-Error**-`reportError`-Sites (post-`getwd`; Pre-`getwd`-Sentinels ohne Sanitizer) + Path-Leak-Pins (mapper-message trägt keinen abs. Pfad) | ~60 |
 | T4 | Closure: carveouts.md Z. 30 entfernen, ggf. CHANGELOG (Bug-Fix: §1841-Envelope-Symmetrie + Path-Leak-Defense), `done/`-Move + DoD | — |

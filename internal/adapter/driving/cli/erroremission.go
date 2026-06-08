@@ -70,7 +70,13 @@ func reportErrorSub(
 	return err
 }
 
-// writeErrorEnvelope renders the JSON envelope on the error path.
+// writeErrorEnvelopeSub renders the JSON envelope on the error path.
+// `subcommand` is threaded into the envelope constructors so
+// multi-form commands satisfy the §322 subcommand-pflicht on the
+// error path too; single-form callers pass "" (→ omitempty). The
+// former subcommand-less `writeErrorEnvelope` wrapper was removed at
+// slice-v1-cli-json-envelope-consolidation T1 once all callers
+// routed through [reportErrorSub] / [jsonArgsValidator].
 //
 // Voll-Schema-Switch (add review #4): voll-schema applies whenever
 // the recorder captured anything (`len(planned) > 0`) OR the user
@@ -96,24 +102,6 @@ func reportErrorSub(
 // [newDataEnvelope] verwendet (Konstruktor-Disziplin); im Voll-
 // Schema-Pfad wird das `data`-Feld direkt an `newFullEnvelope`
 // durchgereicht.
-func writeErrorEnvelope(
-	out io.Writer,
-	addErr error,
-	planned []driving.PlannedFile,
-	dryRun, diffFlag bool,
-	command string,
-	mapErr func(error) diagnosticItem,
-	data any,
-) error {
-	return writeErrorEnvelopeSub(out, addErr, planned, dryRun, diffFlag, command, "", mapErr, data)
-}
-
-// writeErrorEnvelopeSub is the subcommand-aware variant of
-// [writeErrorEnvelope] (slice-v1-cli-json-dry-run-config T5 /
-// T0-(h)). Identical voll-schema-switch behaviour; the only
-// difference is that `subcommand` is threaded into the envelope
-// constructors so multi-form commands satisfy the §322 subcommand-
-// pflicht on the error path too.
 func writeErrorEnvelopeSub(
 	out io.Writer,
 	addErr error,

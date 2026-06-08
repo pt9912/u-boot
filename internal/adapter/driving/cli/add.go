@@ -190,7 +190,7 @@ func writeAddJSON(out io.Writer, resp driving.AddServiceResponse, dryRun, diffFl
 
 // writeAddErrorEnvelope/lastPlannedPath wurden in slice-v1-cli-json-
 // dry-run-init T5-a nach `cli/erroremission.go` extrahiert als
-// `writeErrorEnvelope`/`lastPlannedPath` mit decomposed-Slices-
+// `writeErrorEnvelopeSub`/`lastPlannedPath` mit decomposed-Slices-
 // Signatur. runAdd ruft jetzt `reportError(out, err, planned, ...,
 // "add", mapAddErrorToDiagnostic)`.
 

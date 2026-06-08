@@ -221,21 +221,14 @@ func registerConfigPreviewRejectFlags(cmd *cobra.Command, form string, dryRun, d
 // (`dryRun:true`, `plannedFiles:[]`) and diverge from the RunE
 // reject path (which hard-codes false/false). So read-only validators
 // hard-code false; only `set` reads the real flags.
+// configArgsValidator delegates to the shared [jsonArgsValidator]
+// (slice-v1-cli-json-envelope-consolidation T1). previewFlags is
+// `subcommand == "set"` (Schutzplanke 1): only the modifying form
+// reads --dry-run/--diff for the Voll-Schema; `config show`/`config
+// get` register those flags as reject-flags but stay Minimal on arg
+// errors.
 func configArgsValidator(a *App, subcommand string, base cobra.PositionalArgs) cobra.PositionalArgs {
-	return func(cmd *cobra.Command, args []string) error {
-		if err := base(cmd, args); err != nil {
-			if a.json {
-				dryRun, diffFlag := false, false
-				if subcommand == "set" {
-					dryRun, _ = cmd.Flags().GetBool("dry-run")
-					diffFlag, _ = cmd.Flags().GetBool("diff")
-				}
-				_ = writeErrorEnvelopeSub(cmd.OutOrStdout(), err, nil, dryRun, diffFlag, "config", subcommand, mapConfigErrorToDiagnostic, nil)
-			}
-			return err
-		}
-		return nil
-	}
+	return jsonArgsValidator(a, "config", subcommand, base, mapConfigErrorToDiagnostic, subcommand == "set")
 }
 
 // ErrDryRunNotApplicable is returned when `--dry-run` (or `--diff`)

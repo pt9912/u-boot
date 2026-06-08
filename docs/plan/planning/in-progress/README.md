@@ -13,8 +13,9 @@ Dateiname-Konventionen.
 | ----- | ---------- |
 | [`carveouts.md`](carveouts.md) | Master-Dokument: Carveout-Inventar (`LH-FA-PROJDOCS-005`) |
 | [`roadmap.md`](roadmap.md) | Master-Dokument: Slice-/Tranchen-Stand (`LH-FA-PROJDOCS-003`) |
+| [`slice-v1-cli-json-envelope-consolidation.md`](slice-v1-cli-json-envelope-consolidation.md) | Konsolidierung CLI-JSON-Envelope-Pattern add/init/generate (R15-Cross-Slice-1); T1 in Arbeit |
 
-(Nur noch die zwei Master-Dokumente liegen dauerhaft in
-`in-progress/`. Der Cluster-Slice `slice-v1-cli-json-dry-run` ist am
-2026-06-08 vollständig nach `done/` ausgeliefert — alle neun
-Folge-Slices + T_close abgeschlossen.)
+(Die zwei Master-Dokumente liegen dauerhaft in `in-progress/`. Der
+Cluster-Slice `slice-v1-cli-json-dry-run` ist am 2026-06-08
+vollständig nach `done/` ausgeliefert — alle neun Folge-Slices +
+T_close.)

@@ -927,7 +927,7 @@ func TestRemove_DryRun_PropagatesPreviewDryRunFlag(t *testing.T) {
 // `dryRun=false, diff=false` und produzierte einen Minimal-Envelope
 // trotz `--dry-run` → Spec §1842 Verletzung. Fix in T7: Validator
 // liest `cmd.Flags().GetBool("dry-run"/"diff")` und reicht den
-// User-Flag-State an `writeErrorEnvelope` durch.
+// User-Flag-State an `writeErrorEnvelopeSub` durch.
 func TestRemove_NoPositionalArg_DryRunJSON_EmitsFullSchemaEnvelope(t *testing.T) {
 	stub := &removeUseCaseStub{}
 	app := newAppWithRemoveStub(stub)
