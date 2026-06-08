@@ -118,9 +118,8 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// to TemplateInitService while git init / soft-existing-detection
 	// / project-structure-dirs stay in InitProjectService).
 	templateInitSvc := application.NewTemplateInitService(templateCatalogAdapter, fsAdapter, logAdapter)
-	// Four use cases run through the [newPreviewFSFactory]-Closure
-	// (init T4 / add T1-D / generate T4 / remove T4 — Altitude-
-	// Reviewer add R6 #I3 Generalisierungs-Trigger met at 4 Factories):
+	// Five use cases run through the [newPreviewFSFactory]-Closure
+	// (init T4 / add T1-D / generate T4 / remove T4 / config T4):
 	// PreviewNone uses the production fsAdapter directly; PreviewDryRun
 	// and PreviewAndApply each wrap it in a fresh RecordingFileSystem
 	// with the matching passthrough switch. A fresh recorder per
@@ -129,6 +128,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	addFSFactory := newPreviewFSFactory(fsAdapter)
 	generateFSFactory := newPreviewFSFactory(fsAdapter)
 	removeFSFactory := newPreviewFSFactory(fsAdapter)
+	configFSFactory := newPreviewFSFactory(fsAdapter)
 	initSvc := application.NewInitProjectServiceWithFactory(initFSFactory, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter, application.WithTemplateInit(templateInitSvc))
 	doctorSvc := application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, runtimeAdapter, logAdapter)
 	addSvc := application.NewAddServiceServiceWithFactory(addFSFactory, yamlAdapter, confirmAdapter, logAdapter)
@@ -136,7 +136,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	upSvc := application.NewUpService(fsAdapter, yamlAdapter, dockerEngineAdapter, netprobeAdapter, clockAdapter, logAdapter)
 	downSvc := application.NewDownService(fsAdapter, dockerEngineAdapter, confirmAdapter, logAdapter)
 	generateSvc := application.NewGenerateServiceWithFactory(generateFSFactory, yamlAdapter, logAdapter)
-	configSvc := application.NewConfigService(fsAdapter, yamlAdapter, logAdapter)
+	configSvc := application.NewConfigServiceWithFactory(configFSFactory, yamlAdapter, logAdapter)
 	templateListSvc := application.NewTemplateListService(templateCatalogAdapter, logAdapter)
 	logsSvc := application.NewLogsService(fsAdapter, dockerEngineAdapter, logAdapter)
 

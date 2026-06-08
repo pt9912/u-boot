@@ -21,9 +21,10 @@ import (
 // fills Set with the two-stage schema validation
 // (slice-m8-config.md §D3).
 type ConfigService struct {
-	fs     driven.FileSystem
-	yaml   driven.YAMLCodec
-	logger driven.Logger
+	fs        driven.FileSystem
+	fsFactory func(driving.PreviewMode) (driven.FileSystem, driven.RecorderPort)
+	yaml      driven.YAMLCodec
+	logger    driven.Logger
 }
 
 // Static check: ConfigService satisfies the driving port.
@@ -33,11 +34,70 @@ var _ driving.ConfigUseCase = (*ConfigService)(nil)
 // adapters injected by the wiring layer. logger accepts nil and
 // is routed to the package-local [noopLogger]; fs and yaml are
 // mandatory.
+//
+// The factory stays nil on this path, so [ConfigService.selectFS]
+// falls back to the stored [fs] field and ignores
+// [driving.ConfigSetRequest.PreviewMode] — `config set` keeps
+// writing to production regardless of the requested preview mode.
+// Use [NewConfigServiceWithFactory] for the dry-run/diff-aware
+// Composition-Root path.
 func NewConfigService(fs driven.FileSystem, yaml driven.YAMLCodec, logger driven.Logger) *ConfigService {
 	if logger == nil {
 		logger = noopLogger{}
 	}
 	return &ConfigService{fs: fs, yaml: yaml, logger: logger}
+}
+
+// NewConfigServiceWithFactory is the slice-v1-cli-json-dry-run-config
+// T4 constructor (Pattern-Erbe [NewAddServiceServiceWithFactory]):
+// instead of a fixed [driven.FileSystem], the service receives a
+// factory that picks the FS per [driving.PreviewMode]. The
+// Composition-Root in `cmd/uboot/main.go` wires PreviewNone →
+// production FS, PreviewDryRun/PreviewAndApply → recording FS (with
+// the matching passthrough switch).
+//
+// [ConfigService.Set] (and the list-path [setFeatureSourcesAllow])
+// read the mode from [driving.ConfigSetRequest.PreviewMode] and
+// route their `u-boot.yaml` WriteFile through the selected FS, so a
+// dry-run captures the mutation instead of touching disk. Reads stay
+// on the production FS — dry-run inspects the real current state.
+//
+// config is unusual among the modifying services: its dry-run
+// `plannedFiles[]` is statically known (always exactly
+// `u-boot.yaml`), so the CLI builds it without consulting the
+// recorder — the factory's recorder return is therefore discarded
+// here; the recording FS is used purely to suppress the disk write.
+func NewConfigServiceWithFactory(
+	fsFactory func(driving.PreviewMode) (driven.FileSystem, driven.RecorderPort),
+	yaml driven.YAMLCodec,
+	logger driven.Logger,
+) *ConfigService {
+	if logger == nil {
+		logger = noopLogger{}
+	}
+	// Bootstrap fs from the PreviewNone branch so methods that read
+	// s.fs (Get/Show + the Set-path reads) see a valid adapter.
+	bootstrapFS, _ := fsFactory(driving.PreviewNone)
+	return &ConfigService{
+		fs:        bootstrapFS,
+		fsFactory: fsFactory,
+		yaml:      yaml,
+		logger:    logger,
+	}
+}
+
+// selectFS picks the per-request write FS: if the factory is wired
+// (Composition-Root path) it returns the mode-specific FS; otherwise
+// the legacy [fs] field (PreviewMode ignored — the use case keeps
+// writing to production). The recorder return is discarded — config
+// does not surface captured mutations (see
+// [NewConfigServiceWithFactory]).
+func (s *ConfigService) selectFS(mode driving.PreviewMode) driven.FileSystem {
+	if s.fsFactory == nil {
+		return s.fs
+	}
+	fs, _ := s.fsFactory(mode)
+	return fs
 }
 
 
@@ -202,9 +262,12 @@ func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (dr
 		return driving.ConfigSetResponse{}, err
 	}
 
-	// Stage 6: WriteFile (only now).
+	// Stage 6: WriteFile (only now) through the PreviewMode-selected
+	// FS (T4): PreviewDryRun routes to the recording FS so the
+	// mutation is captured instead of written to disk; PreviewNone
+	// writes to production. Reads above used s.fs (real state).
 	path := filepath.Join(req.BaseDir, "u-boot.yaml")
-	if err := s.fs.WriteFile(path, patched, defaultFileMode); err != nil {
+	if err := s.selectFS(req.PreviewMode).WriteFile(path, patched, defaultFileMode); err != nil {
 		return driving.ConfigSetResponse{}, fmt.Errorf("%w: write %q: %w",
 			driving.ErrConfigFileSystem, path, err)
 	}
@@ -856,9 +919,10 @@ func (s *ConfigService) setFeatureSourcesAllow(
 			driving.ErrConfigSchemaInvalid, err)
 	}
 
-	// Stage 5: WriteFile.
+	// Stage 5: WriteFile through the PreviewMode-selected FS (T4) —
+	// list-path mirror of the scalar Set write routing.
 	path := filepath.Join(req.BaseDir, "u-boot.yaml")
-	if err := s.fs.WriteFile(path, rewritten, defaultFileMode); err != nil {
+	if err := s.selectFS(req.PreviewMode).WriteFile(path, rewritten, defaultFileMode); err != nil {
 		return driving.ConfigSetResponse{}, fmt.Errorf("%w: write %q: %w",
 			driving.ErrConfigFileSystem, path, err)
 	}
