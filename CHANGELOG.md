@@ -360,6 +360,26 @@ this file is the same format applied to u-boot itself.
   Repeat-Idempotency leben in den Application-Layer-Tests.
   Coverage-Gate ≥ 91 %.
 
+### Changed
+
+- **BREAKING** `u-boot template list --json` Ausgabe-Format
+  (slice-v1-cli-json-dry-run-template, neunter und letzter
+  Folge-Slice des Cluster-Slice `slice-v1-cli-json-dry-run`):
+  der bisherige rohe, pretty-indented `[]templateJSON`-Array-
+  Output wurde auf den LH-NFA-USE-004-Minimalkontrakt-Envelope
+  migriert — `{"status":"ok","command":"template","subcommand":
+  "list","diagnostics":[],"exitCode":0,"data":[…]}` (single-line,
+  compact). Die Template-Liste lebt jetzt im `data`-Feld;
+  Konsumenten, die das Top-Level-Array lasen, müssen auf `.data`
+  umstellen. Damit ist das letzte nicht-spec-konforme `--json`-
+  Surface geschlossen (alle neun Folge-Slices des Clusters tragen
+  jetzt den Minimalkontrakt; der bewusste Doctor-Slice-Carveout ist
+  aufgelöst). bare `u-boot template --json` bleibt Exit-2-Reject
+  (§1838: `subcommand` verpflichtend für `command="template"`;
+  Help-Parent ohne eigenes Datum). Ein Katalog-IO-Fehler mappt auf
+  `LH-NFA-REL-003`/Exit 14. Doku in
+  [`docs/user/cli-json-output.md §6.2`](docs/user/cli-json-output.md).
+
 ### Fixed
 
 - `fix(cli): mapAddErrorToDiagnostic Backup-Sentinels auf

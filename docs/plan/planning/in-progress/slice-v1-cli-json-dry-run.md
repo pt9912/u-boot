@@ -11,10 +11,10 @@
 > definiert Reihenfolge + geteilte Konventionen für die
 > Per-Command-Folge-Slice-Serie. T0 ✅ festgezurrt
 > (§T0-Outcomes — 5 Sub-Decisions plus Mutations-Matrix-Pre-Scan);
-> in `in-progress/`. **Cluster-Stand (2026-06-08): 8/9 done, 1/9
-> in-progress (template T2 done — Envelope-Migration).**
+> in `in-progress/`. **Cluster-Stand (2026-06-08): 9/9 Folge-Slices
+> done — Cluster-Slice selbst noch `in-progress/` (T_close pending).**
 >
-> **Done (8/9)**:
+> **Done (9/9 Folge-Slices)**:
 > [`doctor`](../done/slice-v1-cli-json-dry-run-doctor.md) (1/9),
 > [`add`](../done/slice-v1-cli-json-dry-run-add.md) (2/9),
 > [`init`](../done/slice-v1-cli-json-dry-run-init.md) (3/9),
@@ -23,21 +23,20 @@
 > [`up-down`](../done/slice-v1-cli-json-dry-run-up-down.md) (6/9),
 > [`logs`](../done/slice-v1-cli-json-dry-run-logs.md) (7/9),
 > [`config`](../done/slice-v1-cli-json-dry-run-config.md) (8/9 —
-> T0–T8 + drei Review-Runden R-T4-1/R-IR-1/R-CLI-1; erster
-> Read-only+Modifying-Hybrid, drei Sub-Forms gebündelt).
+> T0–T8 + drei Review-Runden; erster Read-only+Modifying-Hybrid),
+> [`template`](../done/slice-v1-cli-json-dry-run-template.md) (9/9 —
+> T0→T2→T4, `template list --json` Array→Envelope; T3 (bare-Reject)
+> nach T_close verschoben).
 >
-> **In-progress (1/9, T2 done — Envelope-Migration)**:
-> [`template`](../in-progress/slice-v1-cli-json-dry-run-template.md) (9/9)
-> — der **kleinste Slice** (~60 LOC). T0-Discovery + drei R-Runden
-> (Asymptote HIGH 1→0→0). T2 geliefert: `template list --json`
-> Array→Minimalkontrakt-Envelope (`command:"template"`,
-> `subcommand:"list"`, `data:[…]`) + `mapTemplateErrorToDiagnostic`-
-> Error-Pfad. **T3 entfällt** (bare-`template`-Reject nach
-> Cluster-T_close verschoben — wäre solange das Gate existiert toter
-> Code; T_close führt `ErrTemplateSubcommandRequired` + RunE-Reject
-> mit dem Gate-Abbau ein). **Nächster Schritt: T4-Closure**, danach
-> Closure-Hard-Rule → Cluster-Slice selbst via T_close nach `done/`
-> (Gate-Abbau **+ bare-`template`-RunE-Reject + Help-Leak-Pin**).
+> **Cluster-T_close (offen — der letzte Schritt der Serie)**: Alle
+> neun Folge-Slices sind in `done/` → die Closure-Hard-Rule ist
+> erfüllt. T_close baut die Übergangs-Mechanik ab (Allowlist-Map +
+> `applyJSONRejectGate` + `PersistentPreRunE`) UND führt dabei den
+> bare-`template`-RunE-Reject (`cli.ErrTemplateSubcommandRequired`,
+> envelope-LOS §1838) + Help-Leak-Pin ein (aus template-T3 hierher
+> verschoben); verifiziert, dass alle neun Forms nach Mechanik-Abbau
+> korrekt antworten; optional eine Folge-ADR „JSON-CLI ausgeliefert"
+> (ADR-0010-Nachfolger). Danach Cluster-Slice selbst nach `done/`.
 
 ## Auslöser
 
@@ -778,7 +777,7 @@ mit DoD-Hash-Tabelle. Cluster-Stand jetzt **8/9 done**.
 
 **Folge-Slice 9/9 template — T0-Discovery + R1+R2+R3 gefahren,
 Lifecycle `open/`→`next/`**
-([`next/`](../in-progress/slice-v1-cli-json-dry-run-template.md)): der
+([`next/`](../done/slice-v1-cli-json-dry-run-template.md)): der
 **letzte und kleinste** Cluster-Slice (~90 LOC). Asymptote erreicht
 (HIGH 1→0→0). Festgezurrt: `template list --json` Array→Envelope
 (Breaking-Change, CHANGELOG `### Changed`), bare `template --json`

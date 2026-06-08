@@ -372,7 +372,7 @@ Reihenfolge gemäß Cluster-T0-(e):
 | 6 | `slice-v1-cli-json-dry-run-up-down` | `up`, `down` (gebündelt, read-only Compose-Status) | done (DoD-Hash-Tabelle im Slice-File) |
 | 7 | `slice-v1-cli-json-dry-run-logs` | `logs` (Single-Envelope, T0-(a) Option (A)) | done (DoD-Hash-Tabelle im Slice-File) |
 | 8 | `slice-v1-cli-json-dry-run-config` | `config`, `config get`, `config set` (gebündelt, drei Formen) | done (DoD-Hash-Tabelle im Slice-File) |
-| 9 | `slice-v1-cli-json-dry-run-template` | `template` (bare) + `template list`-Envelope-Migration | offen |
+| 9 | `slice-v1-cli-json-dry-run-template` | `template list`-Envelope-Migration (bare `template --json` bleibt Gate-Reject bis Cluster-T_close) | done (DoD-Hash-Tabelle im Slice-File) |
 
 ### 6.1 Übergangs-Reject für nicht-migrierte Forms
 
@@ -393,17 +393,38 @@ plus `PersistentPreRunE` am Root-Command. Map-Key ist Cobra-
 migrierten Formen rein; Cluster-T_close entfernt Allowlist und
 `PersistentPreRunE` komplett.
 
-### 6.2 Sonderfall `template list --json`
+### 6.2 `u-boot template list --json` (slice-v1-cli-json-dry-run-template, done)
 
-`template list --json` existiert heute mit eigenem lokalem
-`--json`-Flag und einem subcommand-spezifischen Array-Output
-(`templateJSON`). Der Doctor-Folge-Slice führt **nur** den
-Flag-Schnitt durch (lokales Flag → Root-Flag), das Output-Format
-bleibt **unverändert** und ist deshalb **nicht** Minimalkontrakt-
-konform. Carveouts-Eintrag in
-[`docs/plan/planning/in-progress/carveouts.md`](../plan/planning/in-progress/carveouts.md)
-§Temporäre Carveouts mit Re-Trigger
-`slice-v1-cli-json-dry-run-template` (Platz 9 — Envelope-Migration).
+`template list --json` liefert den LH-NFA-USE-004-Minimalkontrakt-
+Envelope mit `command: "template"`, `subcommand: "list"` (§322
+Subcommand-Pflicht), `diagnostics: []`, `exitCode: 0` und der
+`[]templateJSON`-Projektion im `data`-Feld:
+
+```json
+{ "status": "ok", "command": "template", "subcommand": "list",
+  "diagnostics": [], "exitCode": 0,
+  "data": [ { "name": "basic", "description": "…", "version": "1.0.0",
+              "supportedAddOns": [], "generatedFiles": [],
+              "requiredTools": [], "variables": [] } ] }
+```
+
+Leerer Katalog → `data: []` (nicht `null`). Ein Katalog-Adapter-IO-
+Fehler (`ErrTemplateCatalog`, in einem grünen CI-Build via `embed.FS`
+load-time-Validierung nie erreicht) mappt auf `LH-NFA-REL-003` /
+Exit 14 (`mapTemplateErrorToDiagnostic`).
+
+**Breaking-Change** (slice-v1-cli-json-dry-run-template T2): vor der
+Migration war der Output ein roher, pretty-indented `[]templateJSON`-
+Array; jetzt ein single-line Envelope-Objekt mit der Liste in `data`.
+Konsumenten, die das Top-Level-Array lasen, müssen auf `.data`
+umstellen (CHANGELOG `### Changed`).
+
+**bare `u-boot template --json`** (ohne Subcommand) wird mit Exit 2
+rejected — §1838/§420 macht `subcommand` für `command="template"`
+verpflichtend, und der Help-Parent hat kein eigenes Datum. Bis zum
+Cluster-T_close trägt der Allowlist-Gate diesen Reject
+(`ErrJSONNotImplemented`); mit dem Gate-Abbau im T_close übernimmt
+ein RunE-Reject (`ErrTemplateSubcommandRequired`, envelope-LOS).
 
 ### 6.3 `u-boot add --json` (slice-v1-cli-json-dry-run-add, done)
 

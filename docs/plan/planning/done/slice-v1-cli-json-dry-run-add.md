@@ -1218,7 +1218,7 @@ denkbar. **Verworfen**, weil:
 
 - **Envelope-Migration für `template list`**: bleibt
   `slice-v1-cli-json-dry-run-template`
-  ([`open/slice-v1-cli-json-dry-run-template.md`](../in-progress/slice-v1-cli-json-dry-run-template.md))
+  ([`open/slice-v1-cli-json-dry-run-template.md`](slice-v1-cli-json-dry-run-template.md))
   vorbehalten (Platz 9).
 - **`cliJSONEnvelope.Data`-Feld**: im Doctor-Slice entfernt (Review
   H1); kommt mit `template`-Slice wieder, weil `template list` ein

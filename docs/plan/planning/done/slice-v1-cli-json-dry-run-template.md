@@ -1,8 +1,25 @@
 # Slice V1: `template list --json` — Envelope-Migration
 
-> **Status:** `in-progress/` — **T2 done (2026-06-08, Envelope-
-> Migration)**, `make gates` grün. T0-Discovery + R1+R2+R3 +
-> Lifecycle `next/`→`in-progress/`. T2 geliefert:
+> **Status:** `done/` — **alle Tranchen abgeschlossen, T4-Closure
+> (2026-06-08)**, `make gates` grün. Der **neunte und letzte**
+> Folge-Slice des JSON-CLI-Clusters. T3 entfiel (bare-Reject → T_close,
+> s.u.); der Slice ist damit T0→T2→T4. **Nach diesem Slice greift die
+> Cluster-Closure-Hard-Rule** → der Cluster-Slice selbst geht via
+> T_close nach `done/`.
+>
+> **DoD-Tranchen-Hashes** (T0–T4 + R-Runden):
+>
+> | Tranche / Round | Inhalt | Commit |
+> | --- | --- | --- |
+> | T0 — Discovery | Pre-Scan (`cli/template.go`) + Sub-Decisions (a)-(e) | `a44ab68` |
+> | R1 | adversarial (1 HIGH + 2 MED): T0-(a) am Spec-Text umgedreht (Default-`list` → Reject) + Tranchen-Korrektur (Allowlist-Abbau = T_close) | `aee9697` |
+> | R2 | adversarial (0 HIGH + 2 MED + 3 LOW): Error-Envelope-Pfad T0-(f) + Envelope-Asymmetrie (bare-Reject envelope-LOS §1838) | `03cca36` |
+> | R3 | adversarial (0 HIGH + 1 MED + 1 LOW): T0-(a) gegen Cluster-„alle Enum-Subcommands"-Gegenargument gehärtet (Daten-Kommando vs. Help-Parent); Asymptote + Lifecycle `open/`→`next/` | `0ba5ea0` |
+> | T2 | `runTemplateList`→`writeTemplateListJSON` (`newDataEnvelope("template","list",…)`) + `mapTemplateErrorToDiagnostic` + 3 Array-Tests→Envelope + Acceptance-Suite + Lifecycle `next/`→`in-progress/` | `b4e1df5` |
+> | T3 — entfällt (→ T_close) | bare-`template`-Reject verschoben: wäre solange das Gate existiert toter Code; `ErrTemplateSubcommandRequired` + RunE-Reject kommen mit dem Gate-Abbau in T_close | `ecbfd29` |
+> | T4 — Closure | carveouts-Eintrag entfernt + CHANGELOG `### Changed` (Breaking) + `cli-json-output.md` §6.2/§6-Tabelle + roadmap + `done/`-Move | `(DoD-Hash-Followup)` |
+>
+> T2 geliefert:
 > `runTemplateList`→`writeTemplateListJSON`
 > (`newDataEnvelope("template","list",dtos,…)`) +
 > `mapTemplateErrorToDiagnostic`-Error-Pfad; drei bestehende
@@ -32,7 +49,7 @@
 > Scan + Sub-Decisions (a)-(f) festgezurrt. Bereit für T2-Start.
 > Letzter
 > Folge-Slice (9/9) des Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Platz 9). Closure-Pflicht-Slice für den
 > Cluster-T_close-Lauf, weil er den bewussten Übergangs-Carveout
 > aus dem Doctor-Slice schließt. **Der einfachste Slice des
@@ -45,12 +62,12 @@
 
 Cluster-Slice §T0-(e)-Reihenfolge stellt diesen Slice auf
 **Platz 9** (letzter). Vorgänger
-[`slice-v1-cli-json-dry-run-doctor`](../done/slice-v1-cli-json-dry-run-doctor.md)
+[`slice-v1-cli-json-dry-run-doctor`](slice-v1-cli-json-dry-run-doctor.md)
 T3+T4 hat das lokale `--json`-Flag auf `template list` entfernt
 und das Output-Format **bewusst unverändert** gelassen: heutige
 `templateJSON`-Array-Struktur ohne Spec-§1841-Minimalkontrakt-
 Felder. Carveouts-Eintrag in
-[`carveouts.md`](carveouts.md) §Temporäre Carveouts
+[`carveouts.md`](../in-progress/carveouts.md) §Temporäre Carveouts
 verweist auf diesen Slice als Re-Trigger.
 
 Code-Realität heute:
@@ -324,7 +341,7 @@ Default-`list` erzeugte eine Human-vs-JSON-Asymmetrie.
   LH-Codes genutzt, keine tool-internen Codes; `template list`
   emittiert auf dem Happy-Path `diagnostics: []`.
 - ✅ **Carveouts-Eintrag entfernt**: Zeile aus
-  [`carveouts.md`](carveouts.md) §Temporäre
+  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
   Carveouts gestrichen (T4).
 - ✅ **bare-`template`-Verhalten festgezurrt** (T0-(a) (i)):
   `u-boot template --json` → **Reject Exit 2**, **envelope-LOS**
@@ -389,13 +406,13 @@ leakt rohen Output).
 ## Bezug
 
 - Cluster-Slice:
-  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
   §T0-(e) Platz 9.
 - Vorgänger-Slice:
-  [`slice-v1-cli-json-dry-run-doctor`](../done/slice-v1-cli-json-dry-run-doctor.md)
+  [`slice-v1-cli-json-dry-run-doctor`](slice-v1-cli-json-dry-run-doctor.md)
   T3+T4 (Flag-Schnitt + Carveouts-Eintrag).
 - Carveouts:
-  [`carveouts.md`](carveouts.md) §Temporäre
+  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
   Carveouts §`template list --json`.
 - Code-Realität: `internal/adapter/driving/cli/template.go`,
   `internal/adapter/driving/cli/jsonenvelope.go`.
