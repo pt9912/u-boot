@@ -26,7 +26,7 @@
 > | T0 — Outcomes | T0-Outcomes festgezurrt + R1+R2 (5 Sub-Decisions + Mutations-Matrix) | `c6c3bb2` |
 > | Folge-Slices 1-9 | doctor/add/init/generate/remove/up-down/logs/config/template — je eigene DoD-Hash-Tabelle im Slice-File (siehe Done-Liste unten) | `done/` |
 > | T_close — Code | Übergangs-Reject-Mechanik entfernt (jsonallowlist.go, Gate, `ErrJSONNotImplemented`) + bare-`template`-RunE-Reject (`ErrTemplateSubcommandRequired`) + Public-Doku; netto −90 LOC | `3a35d58` |
-> | T_close — Lifecycle | Cluster-Slice nach `done/` + DoD + Roadmap (dieser Commit; DoD-Hash-Followup) | `(Followup)` |
+> | T_close — Lifecycle | Cluster-Slice nach `done/` + DoD + Roadmap | `a6882e1` |
 >
 > **Done (9/9 Folge-Slices)**:
 > [`doctor`](slice-v1-cli-json-dry-run-doctor.md) (1/9),
