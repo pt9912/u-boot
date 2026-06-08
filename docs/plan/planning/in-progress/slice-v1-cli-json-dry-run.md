@@ -11,30 +11,20 @@
 > definiert Reihenfolge + geteilte Konventionen für die
 > Per-Command-Folge-Slice-Serie. T0 ✅ festgezurrt
 > (§T0-Outcomes — 5 Sub-Decisions plus Mutations-Matrix-Pre-Scan);
-> in `in-progress/`. **Cluster-Stand (2026-06-08): 7/9 done, 1/9
-> in-progress (config T7 done), 1/9 open.**
+> in `in-progress/`. **Cluster-Stand (2026-06-08): 8/9 done, 1/9
+> open (template).**
 >
-> **Done (7/9)**:
+> **Done (8/9)**:
 > [`doctor`](../done/slice-v1-cli-json-dry-run-doctor.md) (1/9),
 > [`add`](../done/slice-v1-cli-json-dry-run-add.md) (2/9),
 > [`init`](../done/slice-v1-cli-json-dry-run-init.md) (3/9),
 > [`generate`](../done/slice-v1-cli-json-dry-run-generate.md) (4/9),
 > [`remove`](../done/slice-v1-cli-json-dry-run-remove.md) (5/9),
 > [`up-down`](../done/slice-v1-cli-json-dry-run-up-down.md) (6/9),
-> [`logs`](../done/slice-v1-cli-json-dry-run-logs.md) (7/9).
->
-> **In-progress (1/9, T2–T7 done — Port + Application + Composition-Root + CLI + Acceptance + Review)**:
-> [`config`](slice-v1-cli-json-dry-run-config.md) (8/9) —
-> T2 Port, T3 Application, T4 PreviewMode-Cluster/Composition-Root,
-> T5 CLI-RunE, T6 Acceptance-Suite und T7 Review-Fix-Rounds fertig.
-> **Drei Review-Runden**: (1) Selbst-Review → R-T4-1 (HIGH,
-> PlannedFiles-Surfacing); (2) unabhängiger Agent Port/Application →
-> R-IR-1 (HIGH, ExitCode-Regression); (3) unabhängiger Agent
-> CLI-Layer → R-CLI-1 (MED, Args-Validator-Voll-Schema-Leak auf
-> Read-only-Forms) — alle gefixt. R1+R2+R3 durchlaufen; 16 T0-Sub-
-> Decisions festgezurrt; LOC ~1500-1900; vier Folge-Carveout-Stubs
-> in `open/`. **Nächster Schritt: T8** (Closure: CHANGELOG +
-> `cli-json-output.md` §6.9 + Slice nach `done/`).
+> [`logs`](../done/slice-v1-cli-json-dry-run-logs.md) (7/9),
+> [`config`](../done/slice-v1-cli-json-dry-run-config.md) (8/9 —
+> T0–T8 + drei Review-Runden R-T4-1/R-IR-1/R-CLI-1; erster
+> Read-only+Modifying-Hybrid, drei Sub-Forms gebündelt).
 >
 > **Open (1/9)**:
 > [`template`](../open/slice-v1-cli-json-dry-run-template.md) (9/9)
@@ -708,11 +698,14 @@ Diese Entscheidung gehört nicht ins T0.
 
 ## Resume-Punkt-Morgen (Session-Ende 2026-06-08)
 
-Cluster-Stand 7/9 done, 1/9 in-progress (config T7 done), 1/9
-open (template).
+Cluster-Stand **8/9 done** (config T8-Closure abgeschlossen, nach
+`done/` verschoben), 1/9 open (template).
 
-**T2–T7 erledigt** — `make gates` grün (lint + test, Coverage
-91.30 % ≥ 90 %, docs-check):
+**Config-Slice 8/9 vollständig erledigt (T0–T8 + drei Review-
+Runden)** — `make gates` grün (lint + test, Coverage 91.30 % ≥ 90 %,
+docs-check). DoD-Hash-Tabelle im
+[`done/slice-v1-cli-json-dry-run-config.md`](../done/slice-v1-cli-json-dry-run-config.md).
+Zusammenfassung der Tranchen:
 
 - **T2 (Port + CLI-Scaffold)**: Port-Felder + zwei Sentinels
   `ErrConfigWriteRejected` + `ErrConfigPostPatchSanityFailed`
@@ -766,21 +759,23 @@ open (template).
 - **Plan-Refinement T3**: Post-Patch-Sanity-Split auf alle
   `revalidateFeatureEntry`-Sites ausgeweitet (Mapper-Row-6-Konsistenz).
 
-**Nächste Sitzung — natürlicher Folge-Schritt: T8 (Closure)**
-([`config-Stub`](slice-v1-cli-json-dry-run-config.md), T8-Zelle):
-CHANGELOG `### Added`; `cli-json-output.md` neue §6.9-Sektion (drei
-Sub-Form-Envelopes + Set-Voll-Schema-Beispiel + Subcommand-Pflicht-
-Doku RunE-only + `--dry-run`/`--diff`-Reject-Doku für Read-only +
-LH-FA-CONF-005-Multi-Use-Disambiguation-Block); §6.1 Reject-Liste
-4→1; §6-Tabelle config→done; §7-NEUEINTRAG `config set` WriteFile;
-roadmap done-Zähler 7→8; carveouts.md für vier Folge-Stubs
-(R3-MED-3); Slice nach `done/` mit DoD-Hash-Tabelle (Commit-Hashes
-T2-T7). Danach Cluster-Restweg: nur noch Folge-Slice 9/9 template
-offen (T0-Discovery noch nicht gefahren).
+**T8-Closure erledigt**: CHANGELOG `### Added`; `cli-json-output.md`
+neue §6.9-Sektion (drei Sub-Form-Envelopes + Set-Voll-Schema +
+Subcommand-Pflicht + Reject-Doku + Mapper-Tabelle + CONF-005-
+Disambiguation + YAML-Comment-Limitation) + §6-Tabelle Rows 7+8
+→done (logs-Row-Drift mitgefixt) + §7-Mutations-Zeile `config set`;
+carveouts.md vier Folge-Stub-Einträge (R3-MED-3); Slice nach `done/`
+mit DoD-Hash-Tabelle. Cluster-Stand jetzt **8/9 done**.
 
-**Cluster-Restweg nach config**: Folge-Slice 9/9 template
-([`open/`](../open/slice-v1-cli-json-dry-run-template.md))
-— T0-Discovery + R-Runden noch nicht gefahren.
+**Nächste Sitzung — natürlicher Folge-Schritt: Folge-Slice 9/9
+template** ([`open/`](../open/slice-v1-cli-json-dry-run-template.md)):
+**der letzte offene Cluster-Slice**. T0-Discovery + R-Runden noch
+nicht gefahren — `template` (bare) braucht Envelope-Migration plus
+`template list`-Envelope-Migration (heute Carveout: `templateJSON`-
+Array statt Minimalkontrakt, siehe carveouts.md). Nach template 9/9
+done greift die Closure-Hard-Rule → Cluster-Slice selbst nach
+`done/` (T_close: Allowlist-Mechanik + `PersistentPreRunE` raus,
+optional Folge-ADR — Entscheidung in T_close).
 
 **Zweistufiger T2–T4-Review (2026-06-08) vor T5 — zwei HIGH-Findings**:
 - **R-T4-1** (Selbst-Review): T4-Recorder-Verzicht hätte dem
@@ -820,7 +815,10 @@ Session-Commits 2026-06-08:
   `--quiet --json` + Mid-Stage-Shapes).
 - config-T7: unabhängiger CLI-Review → R-CLI-1 (MED) Args-Validator-
   Voll-Schema-Leak gefixt + 2 Regression-Pins + Diff-Hunks-Assertion
-  verschärft (dieser Commit).
+  verschärft.
+- config-T8-Closure: CHANGELOG + `cli-json-output.md` §6.9/§6/§7 +
+  carveouts (4 Stubs) + Slice nach `done/` + DoD-Hash-Tabelle
+  (dieser Commit; DoD-Hash-Followup trägt den Closure-Hash nach).
 
 ## Out of Scope
 

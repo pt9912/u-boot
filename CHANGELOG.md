@@ -13,6 +13,49 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- `feat(cli): u-boot config/config get/config set --json
+  (LH-FA-CLI-007/008 / LH-NFA-USE-004 / LH-FA-CONF-001..005)` —
+  achter Folge-Slice (8/9) des Cluster-Slice
+  `slice-v1-cli-json-dry-run`. **Erster Read-only+Modifying-
+  Hybrid**: drei Sub-Formen teilen `command: "config"` mit
+  Pflicht-`subcommand` (`"show"`/`"get"`/`"set"`, §322). Bare +
+  `get` sind read-only (nur `--json`, Minimal+Data-Carrier
+  `{body}` bzw. `{path, value}`); `set` ist modifying mit
+  `--dry-run`/`--diff` (Voll-Schema, `plannedFiles[]` =
+  genau eine Zeile `u-boot.yaml`, `hunks[]` aus patched-vs-
+  current Bytes). **NoOp**: `oldValue == newValue` → kein
+  WriteFile, `plannedFiles: []` + `data.noOp: true` + leeres
+  `diagnostics: []` (kein `level: "info"`, Spec §2.1).
+  **`--dry-run`/`--diff`-Reject auf den Read-only-Formen** via
+  neuem `cli.ErrDryRunNotApplicable` → Exit 2 (T0-(g),
+  Pattern-Erbe logs' `ErrFollowJSONNotSupported`). **Drei-Klassen-
+  Sentinel-Split** (T0-(m)): `ErrConfigValueInvalid` aufgeteilt in
+  `driving.ErrConfigWriteRejected` (non-writable Pfad, Hint
+  `u-boot add <svc>`) + `driving.ErrConfigPostPatchSanityFailed`
+  (Post-Patch-Roundtrip) — beide Exit 10, damit JSON-Konsumenten
+  per `code` disambiguieren statt per Message-Substring.
+  **Mapper-Tabelle mit 10 Rows** (T0-(f), FS-first): Row 1
+  `ErrConfigFileSystem`→`LH-NFA-REL-003`/Exit 14, Rows 2-3
+  Schema/Post-Patch-Sanity→`LH-FA-CONF-002`, Rows 4-5-7
+  `LH-FA-CONF-005` (Multi-Use: Path-Unknown/Write-Rejected/
+  Value-Not-Set — Disambiguation per Message-Prefix), Row 6
+  `ErrConfigValueInvalid`→`LH-FA-CONF-001`, Row 8
+  `ErrProjectNotInitialized`→`LH-FA-INIT-001` (Environment-
+  Operation Pattern-Erbe up/down/generate/logs), Row 9 Reject
+  →Exit 2, Row 10 Default. **PreviewMode-Cluster**:
+  `ConfigService.fsFactory` + `selectFS` + `NewConfigServiceWith
+  Factory` + `cmd/uboot/main.go`-Wiring (fünfter Preview-Factory);
+  `config set` routet seinen WriteFile über die mode-spezifische
+  FS und surface't `ConfigSetResponse.PlannedFiles` aus dem
+  Recorder für den `--diff`-Renderer. **SilenceLogger** silenced
+  die fünf `s.logger.*`-Sites im JSON-Mode; **Orphan-Feature-WARN**
+  (`LH-FA-DEV-003`/`level: "warn"`) migriert in `diagnostics[]`
+  (Dual-Emission). **Subcommand-bewusste `reportErrorSub`/
+  `writeErrorEnvelopeSub`** (additiv; Single-Form-Caller
+  unverändert) erfüllen die §322-Pflicht auch auf dem Error-Pfad.
+  Allowlist-Reject-Liste schrumpft von 4 auf 1 (nur noch
+  `template (bare)`). Drei Review-Runden (zwei HIGH + ein MED, alle
+  gefixt). Doku in [`docs/user/cli-json-output.md §6.9`](docs/user/cli-json-output.md).
 - `feat(cli): u-boot logs --json (LH-FA-CLI-007 /
   LH-NFA-USE-004 / LH-FA-CLI-006)` — siebter Folge-Slice
   (7/9) des Cluster-Slice `slice-v1-cli-json-dry-run`.

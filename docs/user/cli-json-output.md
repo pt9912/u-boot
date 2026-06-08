@@ -370,8 +370,8 @@ Reihenfolge gemäß Cluster-T0-(e):
 | 4 | `slice-v1-cli-json-dry-run-generate` | `generate` | done (DoD-Hash-Tabelle im Slice-File) |
 | 5 | `slice-v1-cli-json-dry-run-remove` | `remove` | done (DoD-Hash-Tabelle im Slice-File) |
 | 6 | `slice-v1-cli-json-dry-run-up-down` | `up`, `down` (gebündelt, read-only Compose-Status) | done (DoD-Hash-Tabelle im Slice-File) |
-| 7 | `slice-v1-cli-json-dry-run-logs` | `logs` (Sub-Decision: JSON-Lines vs. Single-Envelope) | offen |
-| 8 | `slice-v1-cli-json-dry-run-config` | `config`, `config get`, `config set` (gebündelt, drei Formen) | offen |
+| 7 | `slice-v1-cli-json-dry-run-logs` | `logs` (Single-Envelope, T0-(a) Option (A)) | done (DoD-Hash-Tabelle im Slice-File) |
+| 8 | `slice-v1-cli-json-dry-run-config` | `config`, `config get`, `config set` (gebündelt, drei Formen) | done (DoD-Hash-Tabelle im Slice-File) |
 | 9 | `slice-v1-cli-json-dry-run-template` | `template` (bare) + `template list`-Envelope-Migration | offen |
 
 ### 6.1 Übergangs-Reject für nicht-migrierte Forms
@@ -995,6 +995,123 @@ Funktionsaufrufe ohne State-Mutation. Race-frei by construction.
 
 ---
 
+### 6.9 `u-boot config` / `config get` / `config set --json` (slice-v1-cli-json-dry-run-config, done)
+
+`config` ist der **erste Read-only+Modifying-Hybrid** des Clusters:
+drei Sub-Formen teilen `command: "config"` und tragen je ein
+**Pflicht-`subcommand`** (`LH-FA-CLI-007` §322). Die Read-only-Formen
+`config` (bare) und `config get` tragen nur `--json`; die
+Modifying-Form `config set` trägt zusätzlich `--dry-run`/`--diff`.
+
+| Form | `subcommand` | Klasse | Envelope (plain `--json`) |
+| --- | --- | --- | --- |
+| `u-boot config` (bare) | `"show"` | read-only | Minimal+Data `{body}` |
+| `u-boot config get <path>` | `"get"` | read-only | Minimal+Data `{path, value}` |
+| `u-boot config set <path> <value>` | `"set"` | modifying | Minimal+Data `{path, oldValue, newValue, noOp[, appendedSources]}` |
+
+**`subcommand`-Wert für bare** (T0-(b)): `"show"` — Code-Heim ist
+`runConfigShow`, der Wert bleibt 1:1 mit der Code-Realität
+abgleichbar (Cluster-Plan-Vorschläge `"list"`/`""` verworfen).
+
+**Data-Carrier** (T0-(c)):
+
+```jsonc
+// u-boot config --json                          → subcommand "show"
+{ "status": "ok", "command": "config", "subcommand": "show",
+  "diagnostics": [], "exitCode": 0,
+  "data": { "body": "schemaVersion: 1\nproject:\n  name: demo\n" } }
+
+// u-boot config get project.name --json          → subcommand "get"
+{ "status": "ok", "command": "config", "subcommand": "get",
+  "diagnostics": [], "exitCode": 0,
+  "data": { "path": "project.name", "value": "demo" } }
+
+// u-boot config set project.name demo --json     → subcommand "set"
+{ "status": "ok", "command": "config", "subcommand": "set",
+  "diagnostics": [], "exitCode": 0,
+  "data": { "path": "project.name", "oldValue": "old",
+            "newValue": "demo", "noOp": false } }
+```
+
+- `body`/`path`/`value`/`oldValue`/`newValue`/`noOp` tragen **kein**
+  `omitempty` — ein leeres `u-boot.yaml`, ein leerer Scalar oder
+  `noOp: false` sind legitime Werte, nicht Abwesenheit.
+- `appendedSources []string` erscheint **nur** beim
+  `devcontainer.featureSources.allow`-Pfad (T0-(c) Hybrid): es echo't
+  den rohen `--allow-external-feature-sources`-Input, damit der
+  Konsument sieht, was der Flag anhängen wollte (vor Dedupe).
+
+**`config set` Voll-Schema** (`--dry-run`/`--diff`): wie die übrigen
+Modifying-Subcommands `newFullEnvelope` mit `dryRun`/`diff`/
+`plannedFiles[]`/`changes[]`. `config set` schreibt **genau eine**
+Datei (`u-boot.yaml`), also trägt `plannedFiles[]` höchstens eine
+Zeile; `--diff` rendert ihre `hunks[]` aus den patched-vs-current
+Bytes (Recorder-Surfacing). **NoOp** (`oldValue == newValue`): kein
+WriteFile → `plannedFiles: []` + `data.noOp: true` + leeres
+`diagnostics: []` (T0-(d); **kein** `level: "info"`-Diagnostic —
+Spec §2.1).
+
+**`--quiet --json`** ist auf allen drei Formen ein No-op (≡ `--json`,
+doctor-Pattern §2.2).
+
+**`--dry-run`/`--diff`-Reject auf den Read-only-Formen** (T0-(g)):
+`config`/`config get` registrieren `--dry-run`/`--diff` synthetisch
+(damit Cobra sie sauber parst) und rejecten sie im RunE Envelope-
+konform mit `cli.ErrDryRunNotApplicable` → **Exit 2** (`LH-FA-CLI-006`).
+Der Reject-Envelope bleibt Minimal (Read-only-Form-Invariante — auch
+im Args-Validator-Pfad, R-CLI-1).
+
+**Mapper-Tabelle** `mapConfigErrorToDiagnostic` (T0-(f), FS-first):
+
+| # | Sentinel | `code` | Exit |
+| - | -------- | ------ | ---- |
+| 1 | `driving.ErrConfigFileSystem` | `LH-NFA-REL-003` | 14 |
+| 2 | `driving.ErrConfigSchemaInvalid` | `LH-FA-CONF-002` | 10 |
+| 3 | `driving.ErrConfigPostPatchSanityFailed` | `LH-FA-CONF-002` | 10 |
+| 4 | `driving.ErrConfigPathUnknown` | `LH-FA-CONF-005` | 10 |
+| 5 | `driving.ErrConfigWriteRejected` | `LH-FA-CONF-005` | 10 |
+| 6 | `driving.ErrConfigValueInvalid` | `LH-FA-CONF-001` | 10 |
+| 7 | `driving.ErrConfigValueNotSet` | `LH-FA-CONF-005` | 10 |
+| 8 | `driving.ErrProjectNotInitialized` | `LH-FA-INIT-001` | 10 |
+| 9 | `cli.ErrDryRunNotApplicable` | `LH-FA-CLI-006` | 2 |
+| 10 | Default | `LH-FA-CLI-006` | 1 |
+
+Row 1 ist FS-first: eine synthetische Multi-`%w`-Chain mit FS +
+Validation fällt im **Mapper** auf `LH-NFA-REL-003`. Der **ExitCode**-
+Helper (`cli.go`) prüft Validation vor FS und liefert für dieselbe
+Chain Exit 10 — das ist die `(code, exitCode)`-Disambiguation
+**by-design** (Pattern-Erbe up-down §6.7): der Code signalisiert die
+Klasse, der Exit die Sub-Sentinel-Quelle. Ein reiner FS-Fehler
+(FS-Sentinel + roher OS-Error) trägt Exit 14.
+
+**`LH-FA-CONF-005`-Multi-Use-Disambiguation** (T0-(m)/R3-MED-2): drei
+Sentinels teilen `code: LH-FA-CONF-005` (Rows 4/5/7) und alle drei
+Exit 10. Konsumenten können sie **nicht** per `code` allein trennen —
+die Disambiguation läuft über den Message-Prefix:
+
+| Sentinel | Message-Form (Prefix) |
+| -------- | --------------------- |
+| `ErrConfigPathUnknown` | `config: unknown path: …` |
+| `ErrConfigWriteRejected` | `config: write rejected for non-writable path: …` (Hint `u-boot add <svc>`) |
+| `ErrConfigValueNotSet` | `config: value not set: …` |
+
+Analog zum `(code, exitCode)`-Tupel der Read-only-Slices, hier aber
+`(code, message-prefix)` weil alle drei Exit 10 sind und der Exit
+nicht differenziert.
+
+**Bekannte Limitation — YAML-Kommentare** (config Out-of-Scope):
+`config set devcontainer.featureSources.allow <url>` läuft über einen
+Marshal-Rewrite (Listen-Pfad) und **verliert Kommentare** in
+`u-boot.yaml`. Spec §711-721 fordert keine Comment-Preservation für
+diesen Listen-Pfad. Scalar-Pfade (`project.name`, `*.enabled`, …)
+behalten Kommentare via `yaml.v3.PatchScalar`.
+
+**Path-Leak-Defense**: alle Use-Case-Errors laufen vor der
+`diagnostic.message`-Emission durch `sanitizeBaseDir` (`cli/sanitize.go`,
+Pattern-Erbe up-down/remove) — absolute Pfade werden project-relativ.
+
+---
+
 ## 7. Mutations-Matrix pro Subcommand
 
 Drift-Anker für den Cluster-Folge-Slice-Block (T0-(f)): jeder
@@ -1015,14 +1132,19 @@ in derselben PR ergänzen.
 | `up` (slice-v1-cli-json-dry-run-up-down) | — | — | — | — | — | — | — | — |
 | `down` (slice-v1-cli-json-dry-run-up-down) | — | — | — | — | — | — | — | — |
 | `logs` (slice-v1-cli-json-dry-run-logs) | — | — | — | — | — | — | — | — |
+| `config set` (slice-v1-cli-json-dry-run-config) | ✓ (genau eine Zeile — `u-boot.yaml`; Scalar-`PatchScalar` oder Listen-`Marshal`-Rewrite) | — | — | — | — | — | — | — |
 
-Andere modifying-Subcommands (`config set`) ergänzen ihre Zeile
-im jeweiligen Slice — heute `doctor`, `add`, `init`, `generate`,
-`remove`, `up`, `down` und `logs` migriert. `up`/`down`/`logs` sind
-read-only auf lokalem FS (nur `Exists`-Pre-Checks; bei `logs`
-zusätzlich kein `ReadFile`, weil `compose logs` direkt gegen die
-Docker-Daemon-Schicht läuft); die Docker-Daemon-Reads/-Mutationen
-passieren durch den `DockerEngine`-Adapter ausserhalb dieser Matrix.
+Alle modifying-Subcommands sind damit migriert (`doctor`, `add`,
+`init`, `generate`, `remove`, `up`, `down`, `logs`, `config`).
+`up`/`down`/`logs` sowie die Read-only-Formen `config`/`config get`
+sind read-only auf lokalem FS (nur `Exists`/`ReadFile`-Pre-Checks);
+bei `logs` zusätzlich kein `ReadFile`, weil `compose logs` direkt
+gegen die Docker-Daemon-Schicht läuft. `config set` schreibt
+**genau eine** Datei (`u-boot.yaml`), weshalb seine
+`plannedFiles[]`-Liste statisch bekannt ist (kein Recorder-Readback
+für die Pfad-Liste; der Recorder liefert nur die patched/current
+Bytes für `--diff`). Die Docker-Daemon-Reads/-Mutationen passieren
+durch den `DockerEngine`-Adapter ausserhalb dieser Matrix.
 
 ---
 

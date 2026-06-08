@@ -1,7 +1,28 @@
 # Slice V1: `config --json` / `config get --json` / `config set --json` — drei Sub-Forms unter einem Folge-Slice
 
-> **Status:** `in-progress/` — **T7 done (2026-06-08, Review-Fix-
-> Rounds)**, `make gates` grün (Coverage 91.30 %). T2–T7 geliefert:
+> **Status:** `done/` — **alle Tranchen T0–T7 + drei Review-Runden
+> abgeschlossen, T8-Closure (2026-06-08)**, `make gates` grün
+> (Coverage 91.30 %).
+>
+> **DoD-Tranchen-Hashes** (T0–T8 + Review-Runden):
+>
+> | Tranche / Round | Inhalt | Commit |
+> | --- | --- | --- |
+> | T0 — Stub | Discovery-Stub für 8/9 config in `open/` | `da3c7f0` |
+> | T0 — R1 | adversarialer Stub-Review (4 HIGH + 6 MED + 4 LOW) | `13b76d3` |
+> | T0 — R2 | adversarialer Stub-Review (3 HIGH + 6 MED + 4 LOW) | `0990a9d` |
+> | T0 — R3 | adversarialer Stub-Review (0 HIGH + 4 MED + 4 LOW; Asymptote) + Lifecycle `open/`→`next/` | `e813b05` |
+> | T2 | Port-Felder (`PreviewMode`/`SilenceLogger`/`Warnings`) + 2 Sentinels (`ErrConfigWriteRejected`/`ErrConfigPostPatchSanityFailed`) + `cli.ErrDryRunNotApplicable` + `configSetFlags.JSON`/`Quiet` + Pin-Tests + Lifecycle `next/`→`in-progress/` | `acbd97d` |
+> | T3 | Application-Layer: Multi-`%w`-FS-Wraps + Sentinel-Split-Wiring + SilenceLogger-Branch + Orphan-WARN→`Warnings` Dual-Emission | `e29fd1e` |
+> | T4 | PreviewMode-Cluster: `fsFactory` + `selectFS` + Write-Routing + `NewConfigServiceWithFactory` + `cmd/uboot/main.go`-Wiring (fünfter Preview-Factory) | `a2aafc8` |
+> | T4 — Review R-T4-1 (HIGH) | Selbst-Review: `ConfigSetResponse.PlannedFiles`-Feld + Recorder-Surfacing (sonst `--diff` ohne Byte-Quelle) | `1ad1344` |
+> | Review R-IR-1 (HIGH) | unabhängiger Agent (Port/App): zwei Split-Sentinels fehlten in `isConfigValidationError` → Exit-10→Exit-1-Regression gefixt + ExitCode-Pin | `ebd5119` |
+> | T5 | CLI-RunE-Neufassung: 3 Data-Carrier + Subcommand-Pflicht (inkl. Error-Pfad via `reportErrorSub`) + Allowlist 3 Forms + Mapper Switch-Order T0-(f) + `configArgsValidator` + Voll-Schema/Dry-Run/Diff + Reject + WARN→diagnostics + Acceptance-Tests | `11aea03` |
+> | T6 | Acceptance-Vervollständigung: white-box Mapper-Rows + Switch-Order-`_ByDesign` + Cobra-unknown-sub + Help-Edge-Case + CONF-005-Disambiguation + Sanitizer + Subcommand-Pflicht + `--quiet --json` + Mid-Stage-Shapes | `4cb7e90` |
+> | T7 — Review R-CLI-1 (MED) | unabhängiger Agent (CLI-Layer): Args-Validator-Voll-Schema-Leak auf Read-only-Forms gefixt + 2 Regression-Pins + Diff-Hunks-Assertion verschärft | `5cca4d5` |
+> | T8 — Closure | CHANGELOG + `cli-json-output.md` §6.9/§6-Tabelle/§7 + roadmap done-Zähler 7→8 + 4 carveouts-Einträge + `done/`-Move | `(DoD-Hash-Followup)` |
+>
+> T2–T7 geliefert:
 > Port-Felder + zwei Sentinels
 > `ErrConfigWriteRejected`/`ErrConfigPostPatchSanityFailed`
 > (T0-(m)-Split) + `cli.ErrDryRunNotApplicable` +
@@ -47,7 +68,7 @@
 > Beschlüssen für (a)/(b)/(g)/(o)/(p); vier Folge-Slice-Stubs in
 > `open/` gespawned; LOC-Bilanz ~1500-1900.
 > Achter Folge-Slice (8/9) des Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 8/9). **Drei Sub-Forms unter einem Slice**
 > (analog up-down-Bündelung): `u-boot config` (bare), `u-boot
 > config get <path>`, `u-boot config set <path> <value>`. Bare +
@@ -57,14 +78,14 @@
 > Modifying-Pattern in einer einzigen Stub-Lieferung bündelt**.
 >
 > Erbt Modifying-Klassen-Disziplin aus
-> [`slice-v1-cli-json-dry-run-remove`](../done/slice-v1-cli-json-dry-run-remove.md)
+> [`slice-v1-cli-json-dry-run-remove`](slice-v1-cli-json-dry-run-remove.md)
 > (RecordingFileSystem + Diff-Renderer + Custom-Args-Validator +
 > Sanitizer für Pre-UC-Validation). Erbt Read-only-Klassen-
 > Disziplin aus
-> [`slice-v1-cli-json-dry-run-up-down`](../done/slice-v1-cli-json-dry-run-up-down.md)
+> [`slice-v1-cli-json-dry-run-up-down`](slice-v1-cli-json-dry-run-up-down.md)
 > (FS-Sentinel-Pattern + Mapper-Switch-Order +
 > `cli/sanitize.go`-Helper) und
-> [`slice-v1-cli-json-dry-run-logs`](../done/slice-v1-cli-json-dry-run-logs.md)
+> [`slice-v1-cli-json-dry-run-logs`](slice-v1-cli-json-dry-run-logs.md)
 > (Single-Envelope für Read-only + `(code, exitCode)`-Tupel-
 > Disambiguation Pattern). Erbt `subcommand`-Pflichtfeld-Form aus
 > [`slice-v1-cli-json-dry-run-template`](../open/slice-v1-cli-json-dry-run-template.md)-
@@ -745,23 +766,23 @@ Kombi). (R1-MED-5 + R2-HIGH-2 + R2-MED-4/5-Adressierung.)
 ## Bezug
 
 - Cluster:
-  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
   (Folge-Slice 8/9).
 - Pattern-Vorbilder:
   - **Modifying-Klasse**:
-    [`slice-v1-cli-json-dry-run-add`](../done/slice-v1-cli-json-dry-run-add.md)
+    [`slice-v1-cli-json-dry-run-add`](slice-v1-cli-json-dry-run-add.md)
     (RecordingFS + Diff + fsFactory),
-    [`slice-v1-cli-json-dry-run-init`](../done/slice-v1-cli-json-dry-run-init.md)
+    [`slice-v1-cli-json-dry-run-init`](slice-v1-cli-json-dry-run-init.md)
     (ProgressPort-Silencing, hier nicht relevant),
-    [`slice-v1-cli-json-dry-run-generate`](../done/slice-v1-cli-json-dry-run-generate.md)
+    [`slice-v1-cli-json-dry-run-generate`](slice-v1-cli-json-dry-run-generate.md)
     (data-Envelope-Form, per-Artefakt-Mapper),
-    [`slice-v1-cli-json-dry-run-remove`](../done/slice-v1-cli-json-dry-run-remove.md)
+    [`slice-v1-cli-json-dry-run-remove`](slice-v1-cli-json-dry-run-remove.md)
     (Custom-Args-Validator + Sanitizer + Pre-UC-`reportError`).
   - **Read-only-Klasse**:
-    [`slice-v1-cli-json-dry-run-up-down`](../done/slice-v1-cli-json-dry-run-up-down.md)
+    [`slice-v1-cli-json-dry-run-up-down`](slice-v1-cli-json-dry-run-up-down.md)
     (FS-Sentinel-Pattern + Mapper-Switch-Order + Sanitizer-
     Helper-Quelle + (code, exitCode)-Tupel-Disambiguation),
-    [`slice-v1-cli-json-dry-run-logs`](../done/slice-v1-cli-json-dry-run-logs.md)
+    [`slice-v1-cli-json-dry-run-logs`](slice-v1-cli-json-dry-run-logs.md)
     (Single-Envelope-Vertrag + Reject-Sentinel-Pattern für
     inkompatible Flag-Kombi).
 - Code-Anker:
