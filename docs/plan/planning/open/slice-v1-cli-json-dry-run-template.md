@@ -1,8 +1,11 @@
 # Slice V1: `template list --json` — Envelope-Migration
 
-> **Status:** `open/` — **T0-Discovery gefahren (2026-06-08)**:
-> Heute-Stand-Pre-Scan + explizite Sub-Decisions (a)-(e) ergänzt,
-> R-Runden (R1/R2/R3 adversarial) **noch offen**. Letzter
+> **Status:** `open/` — **T0-Discovery + R1 gefahren (2026-06-08)**.
+> R1 (3 Findings: 1 HIGH + 2 MED) hat die zentrale Sub-Decision
+> T0-(a) am echten Spec-Text **umgedreht** (Default-`list` →
+> **Reject**) und die Tranchen-Tabelle korrigiert (Allowlist-Abbau
+> ist Cluster-T_close, nicht dieser Slice). R2/R3 **noch offen**.
+> Heute-Stand-Pre-Scan + Sub-Decisions (a)-(e). Letzter
 > Folge-Slice (9/9) des Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Platz 9). Closure-Pflicht-Slice für den
@@ -101,10 +104,35 @@ Code-Realität heute:
         (§1813 erfüllt) ohne Datum, aber `subcommand: ""`
         kollidiert mit der `command="template"`-§322-Subcommand-
         Pflicht. Wahrscheinlich verworfen.
-  Plan-Empfehlung (vorläufig, R1 präzisiert): **(ii) Default
-  `"list"`** scheint die einzige §1813+§322-konforme Option —
-  der Stub-Vorschlag (i) Reject ist adversarial fragwürdig. R1
-  klärt die §1813-vs-§322-Interpretation verbindlich.
+  **R1-festgezurrt: (i) Reject Exit 2** (HIGH-1 — Discovery-
+  Empfehlung (ii) am Spec-Text widerlegt). Begründung:
+  - **§1838/§420**: bei `command == "template"` ist `subcommand`
+    **verpflichtend** — bare `template` hat keinen natürlichen
+    Subcommand, kann also gar keinen spec-validen `command:
+    "template"`-Envelope erzeugen. Option (ii) müsste künstlich
+    `subcommand: "list"` setzen.
+  - **Cluster-Aufhebungsbedingung** (Cluster-Slice §Aufhebungs-
+    bedingung bash-Block) verlangt nur `u-boot template list
+    --json`, **nicht** bare `u-boot template --json` — bare
+    template ist NICHT in der Cluster-Pflicht-Formenliste.
+  - **§1813**: `--json` ist „**optional** maschinenlesbare
+    Ausgabe" — kein Zwang, dass ein Help-Parent ohne Datum JSON
+    emittiert.
+  - **Asymmetrie-Wart**: Option (ii) machte `u-boot template`
+    (Human → Help) und `u-boot template --json` (→ Liste) zu
+    zwei verschiedenen Operationen je nach Flag. Reject ist
+    konsistent: „Subcommand fehlt" in beiden Modi.
+  **R1-Verfeinerung (HIGH-1b)**: der Reject muss in die **bare-
+  `template`-RunE** wandern (nicht nur am Allowlist-Gate hängen).
+  Heute feuert der Reject-Gate VOR `cmd.Help()`; sobald der
+  Cluster-T_close das Gate + `PersistentPreRunE` abbaut, würde
+  bare `template --json` sonst auf `cmd.Help()` fallen und
+  **Hilfetext statt Reject** leaken. Fix: bare-`template`-RunE
+  prüft `a.json` selbst und returnt einen `ErrJSON…`/Exit-2-
+  Reject (Pattern-Erbe config's `ErrDryRunNotApplicable`-RunE-
+  Reject), damit das Verhalten T_close-stabil ist. Das ist die
+  **einzige Code-Berührung an bare `template`** in diesem Slice
+  (~15 LOC RunE + Pin-Test).
 
 - **T0-(b) Breaking-Change-Politik** (MED): Array→Envelope ist
   ein Breaking-Change am ausgelieferten `template list --json`-
@@ -176,12 +204,15 @@ Test pinnt die Envelope-Form via
 `jsontestutil.AssertMinimalEnvelope` mit
 `WithCommand("template")` + `WithSubcommand("list")`.
 
-`u-boot --json template` (bare) klärt die Spec-§1838-
-`subcommand`-Pflicht für den Help-Parent — Sub-Decision in
-diesem Slice: Reject mit Exit-Code 2 (status quo) oder
-Default-`subcommand: "list"`? Vorschlag: Reject (Help-Parent
-trägt kein eigenes Datum, Default-Subcommand würde Doppeldeutig-
-keit zwischen Help und List schaffen).
+`u-boot --json template` (bare) wird **per R1-festgezurrt mit
+Exit-Code 2 rejected** (T0-(a) (i)) — und zwar T_close-stabil in
+der bare-`template`-RunE selbst (nicht nur am Allowlist-Gate),
+damit der spätere Cluster-T_close-Gate-Abbau keinen Hilfetext
+leakt (R1-HIGH-1b). Begründung im Detail siehe Sub-Decision
+T0-(a): §1838 macht `subcommand` für `command="template"`
+verpflichtend (bare hat keinen), die Cluster-Aufhebungsbedingung
+verlangt nur `template list`, §1813 macht `--json` optional, und
+Default-`list` erzeugte eine Human-vs-JSON-Asymmetrie.
 
 ## Akzeptanzkriterien
 
@@ -230,16 +261,24 @@ keit zwischen Help und List schaffen).
 
 | T | Inhalt | LOC (Schätzung) |
 | - | ------ | --------------- |
-| T0 | **Discovery + Sub-Decisions** für bare-`template`-Verhalten (Reject vs. Default-Subcommand), Code-Registry-Bedarf. `Data`-Konstruktor-Form ist seit generate T1 (`bd3de20`) bereits etabliert. | — (Plan-Arbeit) |
-| T1 | **Entfällt** — `cliJSONEnvelope.Data` + `newDataEnvelope(command, subcommand string, data any, diags, exitCode)` sind seit generate-Slice 4/9 T1 (Commit `bd3de20`) vorhanden, inkl. Marshal-Pin-Tests. Template-Slice nutzt sie nur (T2). | — (entfällt) |
-| T2 | **`runTemplateList`-Migration**: Array-Output durch Envelope ersetzen, `templateJSON`-Slice als `Data`. Bestehender Pin-Test `TestRootJSON_AcceptsTemplateList_BothFlagPositions` muss überarbeitet werden — Format-Wechsel ist Breaking-Change im JSON-Surface (rechtfertigt v0.5.0-Bump oder Carveouts.md-permanent-Eintrag falls Konsument-Verträglichkeit erforderlich). | ~80 |
-| T3 | **bare `template` Sub-Decision umsetzen**: Default-Subcommand oder expliziter Reject. | ~30 |
-| T4 | **Cluster-T_close-Vorbereitung**: Carveouts-Eintrag entfernen, Allowlist-Mechanik komplett abbauen (siehe Cluster-Slice §T0-(g) Cluster-T_close-Pflicht-Check). | ~40 |
-| T5 | **Closure.** CHANGELOG, Roadmap, Cluster-Slice nach `done/` (zusammen mit diesem Slice), DoD-Hash-Tabelle. | — (Doku) |
+| T0 | **Discovery + R-Runden**: Pre-Scan + Sub-Decisions (a)-(e); T0-(a) per R1 auf Reject festgezurrt. `Data`-Konstruktor seit generate T1 (`bd3de20`) etabliert. | — (Plan-Arbeit) |
+| T1 | **Entfällt** — `cliJSONEnvelope.Data` + `newDataEnvelope(command, subcommand, data, diags, exitCode)` seit generate-Slice 4/9 T1 (`bd3de20`) vorhanden inkl. Marshal-Pin-Tests. Template-Slice nutzt sie nur (T2). | — (entfällt) |
+| T2 | **`runTemplateList`-Envelope-Migration**: `renderTemplateListJSON` ersetzt das rohe `[]templateJSON`-Array durch `newDataEnvelope("template", "list", dtos, nil, 0)` → `writeEnvelope`. `subcommand: "list"`-Pflicht (T0-(d)). Bestehende `TestRootJSON_AcceptsTemplateList_BothFlagPositions`-Logik bleibt grün (beide Flag-Positionen), aber der Output-Pin wechselt von Array auf Envelope (Breaking-Change am ausgelieferten Surface, T0-(b)). | ~60 |
+| T3 | **bare `template --json`-Reject in der RunE** (R1-HIGH-1b): bare-`template`-RunE prüft `a.json` und returnt einen Exit-2-Reject (Pattern-Erbe config `ErrDryRunNotApplicable`-RunE-Reject) statt `cmd.Help()` — T_close-stabil. `template list` bleibt in der Allowlist; bare `template` bleibt rejected (jetzt RunE-getragen, nicht gate-abhängig). + Pin-Test. | ~25 |
+| T4 | **Closure** (NICHT Allowlist-Mechanik-Abbau — R1-MED-2: das ist Cluster-T_close-Scope, eigener Schritt nach diesem Slice, Cluster-Slice §T0-(g)): carveouts.md `template list`-Eintrag entfernen; CHANGELOG **`### Changed`** (Breaking: `template list --json` Array→Envelope, T0-(b)); `cli-json-output.md` §6.2/§6-Tabelle (template→done) + §6.10-Sektion; roadmap; Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) |
 
-LOC-Schätzung: ~150 LOC (nach T1-Entfall aus generate-Vorziehung),
-im niedrigen Bereich der Cluster-
-LOC-Bandbreite.
+LOC-Schätzung: **~85 LOC** (T2 ~60 + T3 ~25; T1 + Allowlist-Abbau
+entfallen) — der **kleinste Slice des Clusters**. Nach template-Slice-
+done greift die **Cluster-Closure-Hard-Rule** → der Cluster-Slice
+selbst geht via **T_close** nach `done/` (Allowlist + `applyJSONReject
+Gate` + `PersistentPreRunE` Abbau, optional Folge-ADR — alles
+Cluster-Scope, NICHT dieser Slice).
+
+**Cluster-T_close Forward-Concern** (R1-Notiz): nach dem Gate-Abbau
+darf bare `template --json` nicht auf `cmd.Help()` zurückfallen —
+deshalb trägt T3 den Reject in der RunE (T_close-stabil). T_close
+muss verifizieren, dass nach Mechanik-Abbau alle 9 migrierten Forms
+weiterhin korrekt antworten (kein read-only-Form leakt rohen Output).
 
 ## Out of Scope
 
