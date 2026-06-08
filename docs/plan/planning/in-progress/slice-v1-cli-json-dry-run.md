@@ -12,7 +12,7 @@
 > Per-Command-Folge-Slice-Serie. T0 ✅ festgezurrt
 > (§T0-Outcomes — 5 Sub-Decisions plus Mutations-Matrix-Pre-Scan);
 > in `in-progress/`. **Cluster-Stand (2026-06-08): 7/9 done, 1/9
-> in-progress (config T4 done), 1/9 open.**
+> in-progress (config T5 done), 1/9 open.**
 >
 > **Done (7/9)**:
 > [`doctor`](../done/slice-v1-cli-json-dry-run-doctor.md) (1/9),
@@ -23,18 +23,20 @@
 > [`up-down`](../done/slice-v1-cli-json-dry-run-up-down.md) (6/9),
 > [`logs`](../done/slice-v1-cli-json-dry-run-logs.md) (7/9).
 >
-> **In-progress (1/9, T2–T4 done — Port + Application + Composition-Root)**:
+> **In-progress (1/9, T2–T5 done — Port + Application + Composition-Root + CLI)**:
 > [`config`](slice-v1-cli-json-dry-run-config.md) (8/9) —
-> T2 Port-Layer, T3 Application-Layer (Multi-`%w` + Sentinel-Split +
-> SilenceLogger + Orphan-WARN-Migration) und T4 PreviewMode-Cluster
-> (`fsFactory` + `selectFS` + Write-Routing + `NewConfigServiceWith
-> Factory` + `cmd/uboot/main.go`-Wiring) fertig. R1+R2+R3
-> Adversarial-Reviews durchlaufen (Asymptote HIGH 4→3→0; 16
-> T0-Sub-Decisions T0-(a)..(p) festgezurrt; LOC-Bilanz ~1500-1900).
-> Vier Folge-Carveout-Stubs in `open/` gespawned (config-multi-path-
-> set, -list, -multi-path-get, -structured-hint). **Nächster
-> Schritt: T5** (CLI-RunE-Refactors + Allowlist-Migration + Mapper +
-> Custom-Args-Validatoren + Voll-Schema/Dry-Run/Diff + Reject-Wiring).
+> T2 Port, T3 Application (Multi-`%w` + Sentinel-Split + SilenceLogger
+> + Orphan-WARN), T4 PreviewMode-Cluster/Composition-Root und T5
+> CLI-RunE (3 Data-Carrier + Subcommand-Pflicht inkl. Error-Pfad via
+> subcommand-bewusste `reportErrorSub` + Allowlist 3 Forms + Mapper
+> Switch-Order T0-(f) + `configArgsValidator` + Voll-Schema/Dry-Run/
+> Diff + bare/get-Reject + WARN→diagnostics) fertig. Zwei Review-
+> Runden vor T5 (R-T4-1 + unabhängig R-IR-1, beide HIGH, gefixt).
+> R1+R2+R3 Adversarial-Reviews durchlaufen (Asymptote HIGH 4→3→0;
+> 16 T0-Sub-Decisions festgezurrt; LOC-Bilanz ~1500-1900). Vier
+> Folge-Carveout-Stubs in `open/` gespawned. **Nächster Schritt: T6**
+> (Acceptance-Tests ~24-28: Mapper-Rows, Cobra-unknown-sub-Pin,
+> LH-FA-CONF-005-Disambiguation, Mid-Stage-Snapshot, `--quiet --json`).
 >
 > **Open (1/9)**:
 > [`template`](../open/slice-v1-cli-json-dry-run-template.md) (9/9)
@@ -708,10 +710,10 @@ Diese Entscheidung gehört nicht ins T0.
 
 ## Resume-Punkt-Morgen (Session-Ende 2026-06-08)
 
-Cluster-Stand 7/9 done, 1/9 in-progress (config T4 done), 1/9
+Cluster-Stand 7/9 done, 1/9 in-progress (config T5 done), 1/9
 open (template).
 
-**T2–T4 erledigt** — `make gates` grün (lint + test, Coverage
+**T2–T5 erledigt** — `make gates` grün (lint + test, Coverage
 91.20 % ≥ 90 %, docs-check):
 
 - **T2 (Port + CLI-Scaffold)**: Port-Felder + zwei Sentinels
@@ -734,29 +736,35 @@ open (template).
   `configFSFactory` (jetzt fünf Factories) + Konstruktor-Wechsel.
   Tests `config_factory_test.go` (DryRun-touch-nichts, PreviewNone-
   persistiert, Legacy-ignoriert-Mode).
+- **T5 (CLI-RunE)**: vollständige `config.go`-Neufassung — drei
+  `runConfig*` auf Cluster-Signatur + JSON-Pfade; 3 Data-Carrier
+  (`configShowData`/`configGetData`/`configSetData`); Subcommand-
+  Pflicht auf ALLEN Envelopes inkl. Error-Pfad via neue subcommand-
+  bewusste `reportErrorSub`/`writeErrorEnvelopeSub` (additiv in
+  `erroremission.go`, Single-Form-Caller unverändert); Allowlist
+  3 Forms (Reject 4→1); `mapConfigErrorToDiagnostic` Switch-Order
+  T0-(f) FS-first; konsolidierter `configArgsValidator`; Voll-
+  Schema/Dry-Run/Diff aus `resp.PlannedFiles`; bare/get-Reject via
+  `ErrDryRunNotApplicable` + `isUsageError`-Branch (Exit 2);
+  `SilenceLogger=flags.JSON`; WARN→`diagnostics[]`; `sanitizeBaseDir`.
+  Acceptance-Tests `config_acceptance_test.go`.
 
-**Bewusste Tranchen-Verschiebungen** (alle dokumentiert in den
-jeweiligen Zellen):
-- **T2→T5** (Lint/Behavior): `configGetFlags`/`configShowFlags` +
-  `DryRun`/`Diff`-Felder + `--dry-run`/`--diff`-Flag-Registrierung
-  (black-box `cli_test` + Behavior-Trap-Vermeidung).
-- **T3→T4** (Coverage): PreviewMode-Handling — erledigt in T4.
+**Bewusste Tranchen-Verschiebungen** (alle dokumentiert + erledigt):
+- **T2→T5**: `configGetFlags`/`configShowFlags` + `DryRun`/`Diff` +
+  Flag-Registrierung — in T5 gelandet.
+- **T3→T4**: PreviewMode-Handling — in T4 gelandet.
 - **Plan-Refinement T3**: Post-Patch-Sanity-Split auf alle
   `revalidateFeatureEntry`-Sites ausgeweitet (Mapper-Row-6-Konsistenz).
 
-**Nächste Sitzung — natürlicher Folge-Schritt: T5 (CLI-RunE)**
-([`config-Stub`](slice-v1-cli-json-dry-run-config.md), T5-Zelle):
-drei `runConfig*`-Refactors auf Cluster-Signatur; Allowlist-Migration
-(3 Forms, Reject-Liste 4→1); neuer `mapConfigErrorToDiagnostic`
-(10 Rows, Switch-Order T0-(f)); Custom-Args-Validatoren
-(`validateConfigSetArgs`/`Get`/`Show` — T0-(l)); `config set`
-Voll-Schema-Pfad mit `fsFactory(mode)` für Dry-Run + `--diff`
-Pure-Go-Diff; bare/get `--dry-run`/`--diff`-Reject via
-`ErrDryRunNotApplicable` (jetzt das T5-Wiring + `isUsageError`-
-Branch); `SilenceLogger`/`flags.JSON`-Wiring; WARN-Diagnostics-
-Mapping; **plus die T2→T5-verschobenen Flag-Structs**
-(`configGetFlags`/`configShowFlags` + `DryRun`/`Diff` +
-Flag-Registrierung). ~350-450 LOC.
+**Nächste Sitzung — natürlicher Folge-Schritt: T6 (Acceptance-Tests)**
+([`config-Stub`](slice-v1-cli-json-dry-run-config.md), T6-Zelle):
+~24-28 Pins. T5 lieferte schon eine Basis-Acceptance-Suite; T6
+ergänzt: Mapper-Rows 1-10 vollständig, **Cobra-unknown-subcommand-
+Mechanik-Pin** (`config foo` → Envelope, R2-HIGH-3/R3-MED-1),
+LH-FA-CONF-005-Multi-Use-Disambiguation, Mid-Stage-Failure-Snapshot
+pro Stage, `--quiet --json`-Pins für alle drei Forms, Sanitizer-
+Worst-Case (Filename-Leak), Subcommand-Pflicht-Empty-Drift-Pin,
+Cobra-Help-Edge-Case (`config --help --json` kein Envelope).
 
 **Cluster-Restweg nach config**: Folge-Slice 9/9 template
 ([`open/`](../open/slice-v1-cli-json-dry-run-template.md))
@@ -790,7 +798,10 @@ Session-Commits 2026-06-08:
 - config-T4-Review-Followup R-T4-1: `ConfigSetResponse.PlannedFiles`
   + Recorder-Surfacing.
 - config-Review-Followup R-IR-1: ExitCode-Regression der zwei
-  Split-Sentinels gefixt + ExitCode-Pin (dieser Commit).
+  Split-Sentinels gefixt + ExitCode-Pin.
+- config-T5: CLI-RunE-Neufassung + subcommand-bewusste Error-Envelopes
+  + Allowlist + Mapper + Validator + Voll-Schema/Dry-Run/Diff +
+  Reject + WARN-Mapping + Acceptance-Tests (dieser Commit).
 
 ## Out of Scope
 

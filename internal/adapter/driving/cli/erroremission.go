@@ -42,10 +42,29 @@ func reportError(
 	mapErr func(error) diagnosticItem,
 	data any,
 ) error {
+	return reportErrorSub(out, err, planned, dryRun, diffFlag, jsonFlag, command, "", mapErr, data)
+}
+
+// reportErrorSub is the subcommand-aware variant of [reportError]
+// for multi-form commands (slice-v1-cli-json-dry-run-config T5 /
+// T0-(h)): `config`/`config get`/`config set` share command="config"
+// but MUST each set `subcommand` on every RunE-emitted envelope
+// (LH-FA-CLI-007 §322), including the error path. Single-form
+// commands keep calling [reportError] (subcommand="" → omitempty).
+// Template-Slice 9/9 (`template list`) inherits this helper.
+func reportErrorSub(
+	out io.Writer,
+	err error,
+	planned []driving.PlannedFile,
+	dryRun, diffFlag, jsonFlag bool,
+	command, subcommand string,
+	mapErr func(error) diagnosticItem,
+	data any,
+) error {
 	if !jsonFlag {
 		return err
 	}
-	if envErr := writeErrorEnvelope(out, err, planned, dryRun, diffFlag, command, mapErr, data); envErr != nil {
+	if envErr := writeErrorEnvelopeSub(out, err, planned, dryRun, diffFlag, command, subcommand, mapErr, data); envErr != nil {
 		return envErr
 	}
 	return err
@@ -86,6 +105,24 @@ func writeErrorEnvelope(
 	mapErr func(error) diagnosticItem,
 	data any,
 ) error {
+	return writeErrorEnvelopeSub(out, addErr, planned, dryRun, diffFlag, command, "", mapErr, data)
+}
+
+// writeErrorEnvelopeSub is the subcommand-aware variant of
+// [writeErrorEnvelope] (slice-v1-cli-json-dry-run-config T5 /
+// T0-(h)). Identical voll-schema-switch behaviour; the only
+// difference is that `subcommand` is threaded into the envelope
+// constructors so multi-form commands satisfy the §322 subcommand-
+// pflicht on the error path too.
+func writeErrorEnvelopeSub(
+	out io.Writer,
+	addErr error,
+	planned []driving.PlannedFile,
+	dryRun, diffFlag bool,
+	command, subcommand string,
+	mapErr func(error) diagnosticItem,
+	data any,
+) error {
 	diag := mapErr(addErr)
 	exitCode := ExitCode(addErr)
 	if path := lastPlannedPath(planned); path != "" {
@@ -95,14 +132,14 @@ func writeErrorEnvelope(
 	if !wantsFullSchema {
 		var env cliJSONEnvelope
 		if data != nil {
-			env = newDataEnvelope(command, "", data, []diagnosticItem{diag}, exitCode)
+			env = newDataEnvelope(command, subcommand, data, []diagnosticItem{diag}, exitCode)
 		} else {
-			env = newMinimalEnvelope(command, "", []diagnosticItem{diag}, exitCode)
+			env = newMinimalEnvelope(command, subcommand, []diagnosticItem{diag}, exitCode)
 		}
 		return writeEnvelope(out, env)
 	}
 	pfs, chs := mapPlannedFilesToWire(planned, diffFlag)
-	env := newFullEnvelope(command, "", dryRun, diffFlag, pfs, chs, data, []diagnosticItem{diag}, exitCode)
+	env := newFullEnvelope(command, subcommand, dryRun, diffFlag, pfs, chs, data, []diagnosticItem{diag}, exitCode)
 	return writeEnvelope(out, env)
 }
 

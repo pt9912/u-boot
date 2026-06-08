@@ -18,17 +18,14 @@ import (
 // Migrate-Forms: "doctor", "template list", "add" (T4 add-slice),
 // "init" (T5 init-slice), "generate" (T5 generate-slice), "remove"
 // (T5 remove-slice), "up" + "down" (T5 up-down-slice), "logs" (T5
-// logs-slice). Reject-Forms: 4 — see slice-doctor §T0-(g)
-// §Subcommand-Form-Inventar minus the migrated forms.
+// logs-slice), "config"/"config get"/"config set" (T5 config-slice).
+// Reject-Forms: 1 — only "template (bare)" remains non-migrated.
 func TestRootJSON_RejectsAllNonMigratedForms(t *testing.T) {
 	cases := []struct {
 		name       string
 		args       []string
 		wantSuffix string
 	}{
-		{"config (bare)", []string{"--json", "config"}, "config"},
-		{"config get", []string{"--json", "config", "get", "project.name"}, "config"},
-		{"config set", []string{"--json", "config", "set", "project.name", "x"}, "config"},
 		{"template (bare)", []string{"--json", "template"}, "template"},
 	}
 	for _, tc := range cases {

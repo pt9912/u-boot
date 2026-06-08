@@ -477,6 +477,7 @@ func isUsageError(err error) bool {
 	if errors.Is(err, ErrConflictingModeFlags) || errors.Is(err, ErrInvalidTimeout) ||
 		errors.Is(err, ErrInvalidLogsTail) ||
 		errors.Is(err, ErrFollowJSONNotSupported) ||
+		errors.Is(err, ErrDryRunNotApplicable) ||
 		errors.Is(err, ErrJSONNotImplemented) ||
 		errors.Is(err, ErrServiceNameMissing) ||
 		errors.Is(err, driving.ErrArtifactUnknown) ||
