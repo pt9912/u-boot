@@ -186,8 +186,10 @@ func runGenerate(
 	resp, genErr := uc.Generate(ctx, req)
 	if genErr != nil {
 		// Error-Envelope trägt data.artifact aber kein data.action
-		// (Zero-Response auf Error-Pfad — T0-(q)).
-		return reportError(out, genErr, resp.PlannedFiles, flags.DryRun, flags.Diff, flags.JSON, "generate", mapErr, data)
+		// (Zero-Response auf Error-Pfad — T0-(q)). sanitizeBaseDir
+		// (consolidation T3) hält absolute Pfade aus den UC-Wraps aus
+		// diagnostic.message (greedy/post-getwd; Path-Leak-Defense).
+		return reportError(out, sanitizeBaseDir(genErr, cwd), resp.PlannedFiles, flags.DryRun, flags.Diff, flags.JSON, "generate", mapErr, data)
 	}
 
 	if flags.JSON {

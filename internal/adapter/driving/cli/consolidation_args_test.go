@@ -3,6 +3,10 @@ package cli_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/pt9912/u-boot/internal/adapter/driving/cli"
@@ -119,4 +123,82 @@ func TestConsolidation_InitNoArg_StaysSuccess(t *testing.T) {
 		jsontestutil.WithCommand("init"),
 		jsontestutil.WithExitCode(0),
 	)
+}
+
+// ----------------------------------------------------------------------
+// T3 — greedy sanitizeBaseDir on the UC-error path (Path-Leak-Defense)
+// ----------------------------------------------------------------------
+
+// assertSanitizedNoLeak pins that the single diagnostic message has
+// the absolute baseDir stripped (→ `.`) but keeps the project-relative
+// remainder. Mirrors remove's TestRemove_FSErrorWithAbsolutePath.
+func assertSanitizedNoLeak(t *testing.T, raw []byte, abs, rel string) {
+	t.Helper()
+	var env map[string]any
+	if err := json.Unmarshal(raw, &env); err != nil {
+		t.Fatalf("unmarshal envelope: %v\nraw=%s", err, raw)
+	}
+	diags, _ := env["diagnostics"].([]any)
+	if len(diags) != 1 {
+		t.Fatalf("want 1 diagnostic, got %d (raw=%s)", len(diags), raw)
+	}
+	diag, _ := diags[0].(map[string]any)
+	msg, _ := diag["message"].(string)
+	if strings.Contains(msg, abs) {
+		t.Errorf("path-leak: absolute baseDir %q must not appear in diagnostic.message; got %q", abs, msg)
+	}
+	if !strings.Contains(msg, rel) {
+		t.Errorf("sanitized message should keep project-relative %q; got %q", rel, msg)
+	}
+}
+
+func TestConsolidation_AddFSError_SanitizesPath(t *testing.T) {
+	const cwd = "/tmp/u-boot-add-test/demo"
+	stub := &addUseCaseStub{err: fmt.Errorf("add write %s/u-boot.yaml: %w: %w",
+		cwd, driving.ErrAddFileSystem, errors.New("disk full"))}
+	app := newAppWithAddStub(stub)
+
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(), []string{"--json", "add", "postgres"}, &stdout, &stderr)
+	if !errors.Is(err, driving.ErrAddFileSystem) {
+		t.Fatalf("errors.Is(ErrAddFileSystem) broken by sanitizer; got %v", err)
+	}
+	if code := cli.ExitCode(err); code != 14 {
+		t.Errorf("exit: want 14, got %d", code)
+	}
+	assertSanitizedNoLeak(t, stdout.Bytes(), cwd, "u-boot.yaml")
+}
+
+func TestConsolidation_GenerateFSError_SanitizesPath(t *testing.T) {
+	const cwd = "/tmp/u-boot-generate-test"
+	stub := &fakeGenerateUseCase{err: fmt.Errorf("generate write %s/README.md: %w: %w",
+		cwd, driving.ErrGenerateFileSystem, errors.New("disk full"))}
+	app := newAppWithGenerateStub(stub)
+
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(), []string{"--json", "generate", "readme"}, &stdout, &stderr)
+	if !errors.Is(err, driving.ErrGenerateFileSystem) {
+		t.Fatalf("errors.Is(ErrGenerateFileSystem) broken by sanitizer; got %v", err)
+	}
+	if code := cli.ExitCode(err); code != 14 {
+		t.Errorf("exit: want 14, got %d", code)
+	}
+	assertSanitizedNoLeak(t, stdout.Bytes(), cwd, "README.md")
+}
+
+func TestConsolidation_InitFSError_SanitizesPath(t *testing.T) {
+	const cwd = "/tmp/u-boot-init-test"
+	stub := &initUseCaseStub{err: fmt.Errorf("init write %s/u-boot.yaml: %w: %w",
+		cwd, driving.ErrInitFileSystem, errors.New("disk full"))}
+	app := newAppWithInitStub(stub)
+
+	var stdout, stderr bytes.Buffer
+	err := app.Execute(context.Background(), []string{"--json", "init", "myproj"}, &stdout, &stderr)
+	if !errors.Is(err, driving.ErrInitFileSystem) {
+		t.Fatalf("errors.Is(ErrInitFileSystem) broken by sanitizer; got %v", err)
+	}
+	if code := cli.ExitCode(err); code != 14 {
+		t.Errorf("exit: want 14, got %d", code)
+	}
+	assertSanitizedNoLeak(t, stdout.Bytes(), cwd, "u-boot.yaml")
 }

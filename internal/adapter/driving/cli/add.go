@@ -159,7 +159,10 @@ func runAdd(
 	})
 
 	if addErr != nil {
-		return reportError(out, addErr, resp.PlannedFiles, flags.DryRun, flags.Diff, flags.JSON, "add", mapErr, nil)
+		// sanitizeBaseDir (consolidation T3): keep absolute paths from
+		// the UC error wraps out of diagnostic.message (greedy/post-
+		// getwd; Path-Leak-Defense, symmetric to remove/config).
+		return reportError(out, sanitizeBaseDir(addErr, cwd), resp.PlannedFiles, flags.DryRun, flags.Diff, flags.JSON, "add", mapErr, nil)
 	}
 
 	if flags.JSON {
