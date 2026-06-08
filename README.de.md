@@ -8,9 +8,11 @@ Devcontainer-Konfiguration, Service-Add-Ons (PostgreSQL, Keycloak,
 OpenTelemetry, …) und wiederkehrende Artefakte (README, CHANGELOG,
 `.env.example`).
 
-> **Stand:** `v0.3.0` released 2026-06-01 (GHCR + sechs Plattform-
-> Binaries). Ergänzt `add keycloak` + `add otel` +
-> `remove <service>` + `--with-deps` in der Add-on-Catalogue.
+> **Stand:** `v0.4.0` ready to tag (2026-06-08). Vervollständigt die
+> maschinenlesbare CLI — `--json` / `--dry-run` / `--diff` für alle
+> zehn Subcommands (`LH-NFA-USE-004` + `LH-FA-CLI-007/008`), plus
+> `u-boot logs` und Devcontainer-Features. `v0.3.0` released
+> 2026-06-01 (GHCR + sechs Plattform-Binaries).
 > Vollständige Release-Tabelle unten.
 
 Das verbindliche Lastenheft
@@ -173,6 +175,7 @@ Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien). Siehe den
 | `v0.1.0` | 2026-05-31 | MVP vollständig — sieben Subkommandos (`init`, `doctor`, `add`, `up`, `down`, `generate`, `config`), alle MVP-prioritären Lastenheft-IDs geliefert. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.1.0). |
 | `v0.2.0` | 2026-06-01 | Container-aware `doctor`, Six-Plattform-Binary-Distribution, `template list` + `init --template basic`. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.2.0). |
 | `v0.3.0` | 2026-06-01 | Milestone „Add-on Catalogue Expansion" — `u-boot add keycloak` (LH-FA-ADD-003), `add otel` (LH-FA-ADD-004), `add <service> --with-deps` (LH-FA-ADD-006), `remove <service> [--purge]` (LH-FA-ADD-007) plus Doku-Audit-Closure für drei V1-Spec-IDs. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.3.0). |
+| `v0.4.0` | 2026-06-08 | Milestone „Maschinenlesbare CLI" — `--json` / `--dry-run` / `--diff` für alle zehn Spec-Enum-Subcommands (`LH-NFA-USE-004` Minimalkontrakt + `LH-FA-CLI-007/008` Voll-Schema), `u-boot logs`, Devcontainer-Features mit Drift-Doctor-Check. _Ready to tag._ |
 
 Die Roadmap
 ([`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md))

@@ -7,9 +7,11 @@ environments — project structure, Docker Compose stack, devcontainer
 configuration, service add-ons (PostgreSQL, Keycloak, OpenTelemetry, …),
 and the usual recurring artefacts (README, CHANGELOG, `.env.example`).
 
-> **Status:** `v0.3.0` released 2026-06-01 (GHCR + six-platform
-> binaries). Adds `add keycloak` + `add otel` + `remove <service>` +
-> `--with-deps` to the catalogue. Full release table below.
+> **Status:** `v0.4.0` ready to tag (2026-06-08). Completes the
+> machine-readable CLI — `--json` / `--dry-run` / `--diff` for all
+> ten subcommands (`LH-NFA-USE-004` + `LH-FA-CLI-007/008`), plus
+> `u-boot logs` and devcontainer-features. `v0.3.0` released
+> 2026-06-01 (GHCR + six-platform binaries). Full release table below.
 
 The normative requirements ([`spec/lastenheft.md`](spec/lastenheft.md))
 are written in German; CLI output and generated files are English
@@ -166,6 +168,7 @@ Re-init on an existing project requires an explicit strategy
 | `v0.1.0` | 2026-05-31 | MVP complete — seven subcommands (`init`, `doctor`, `add`, `up`, `down`, `generate`, `config`), all MVP-priority Lastenheft IDs delivered. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.1.0). |
 | `v0.2.0` | 2026-06-01 | Container-aware `doctor`, six-platform binary distribution, `template list` + `init --template basic`. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.2.0). |
 | `v0.3.0` | 2026-06-01 | "Add-on Catalogue Expansion" milestone — `u-boot add keycloak` (LH-FA-ADD-003), `add otel` (LH-FA-ADD-004), `add <service> --with-deps` (LH-FA-ADD-006), `remove <service> [--purge]` (LH-FA-ADD-007), plus a doku-audit closure for three V1 spec-IDs. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.3.0). |
+| `v0.4.0` | 2026-06-08 | "Machine-readable CLI" milestone — `--json` / `--dry-run` / `--diff` for all ten spec-enum subcommands (`LH-NFA-USE-004` Minimalkontrakt + `LH-FA-CLI-007/008` Voll-Schema), `u-boot logs`, devcontainer-features with a drift-doctor check. _Ready to tag._ |
 
 The roadmap ([`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md))
 has the full audit trail: Phase table (M1..M8 + Closure + V1

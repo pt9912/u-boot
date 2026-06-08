@@ -11,6 +11,18 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-08
+
+Fourth release. Completes the V1 machine-readable-CLI milestone: the
+full `slice-v1-cli-json-dry-run` cluster delivers `--json` /
+`--dry-run` / `--diff` for **all ten** spec-enum subcommands
+(`LH-NFA-USE-004` Minimalkontrakt + `LH-FA-CLI-007/008` Voll-Schema),
+followed by the `jsonArgsValidator`-consolidation for add/init/
+generate. Plus the `u-boot logs` subcommand, devcontainer-features
+support with a drift-doctor check, and the transitional reject-gate
+teardown at cluster T_close. `ADR-0010`-Re-Eval-Trigger-2 (JSON-CLI
+as the canonical machine interface) is satisfied. Details below.
+
 ### Added
 
 - `feat(cli): u-boot config/config get/config set --json
@@ -947,7 +959,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/pt9912/u-boot/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/pt9912/u-boot/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/pt9912/u-boot/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/pt9912/u-boot/releases/tag/v0.1.0
