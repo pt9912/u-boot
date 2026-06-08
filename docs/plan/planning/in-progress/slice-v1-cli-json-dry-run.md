@@ -12,7 +12,7 @@
 > Per-Command-Folge-Slice-Serie. T0 ✅ festgezurrt
 > (§T0-Outcomes — 5 Sub-Decisions plus Mutations-Matrix-Pre-Scan);
 > in `in-progress/`. **Cluster-Stand (2026-06-08): 7/9 done, 1/9
-> in-progress (config T2 done), 1/9 open.**
+> in-progress (config T3 done), 1/9 open.**
 >
 > **Done (7/9)**:
 > [`doctor`](../done/slice-v1-cli-json-dry-run-doctor.md) (1/9),
@@ -23,20 +23,17 @@
 > [`up-down`](../done/slice-v1-cli-json-dry-run-up-down.md) (6/9),
 > [`logs`](../done/slice-v1-cli-json-dry-run-logs.md) (7/9).
 >
-> **In-progress (1/9, T2 done — Port-Layer)**:
+> **In-progress (1/9, T2+T3 done — Port + Application)**:
 > [`config`](slice-v1-cli-json-dry-run-config.md) (8/9) —
-> `next/`→`in-progress/` vollzogen; T2 Port-Layer fertig
-> (ConfigSetRequest.PreviewMode/SilenceLogger,
-> ConfigSetResponse.Warnings, zwei neue Sentinels
-> ErrConfigWriteRejected/ErrConfigPostPatchSanityFailed,
-> cli.ErrDryRunNotApplicable, configSetFlags.JSON/Quiet
-> read-through). R1+R2+R3 Adversarial-Reviews durchlaufen
-> (Asymptote HIGH 4→3→0; 16 T0-Sub-Decisions T0-(a)..(p)
-> festgezurrt; LOC-Bilanz ~1500-1900). Vier Folge-Carveout-Stubs
-> in `open/` gespawned (config-multi-path-set, -list,
-> -multi-path-get, -structured-hint). **Nächster Schritt: T3**
-> (Application-Layer: Multi-`%w`-Wrap-Migration + Sentinel-Split +
-> PreviewMode/SilenceLogger/Warnings-Wiring).
+> T2 Port-Layer (Felder + zwei Sentinels + CLI-Scaffold) und T3
+> Application-Layer (Multi-`%w`-FS-Wraps + Sentinel-Split-Wiring +
+> SilenceLogger-Branch + Orphan-WARN→`Warnings` Dual-Emission)
+> fertig. R1+R2+R3 Adversarial-Reviews durchlaufen (Asymptote
+> HIGH 4→3→0; 16 T0-Sub-Decisions T0-(a)..(p) festgezurrt;
+> LOC-Bilanz ~1500-1900). Vier Folge-Carveout-Stubs in `open/`
+> gespawned (config-multi-path-set, -list, -multi-path-get,
+> -structured-hint). **Nächster Schritt: T4** (PreviewMode-Cluster
+> aus T3 verschoben + Composition-Root `WithFactory`).
 >
 > **Open (1/9)**:
 > [`template`](../open/slice-v1-cli-json-dry-run-template.md) (9/9)
@@ -710,54 +707,47 @@ Diese Entscheidung gehört nicht ins T0.
 
 ## Resume-Punkt-Morgen (Session-Ende 2026-06-08)
 
-Cluster-Stand 7/9 done, 1/9 in-progress (config T2 done), 1/9
+Cluster-Stand 7/9 done, 1/9 in-progress (config T3 done), 1/9
 open (template).
 
-**T2 erledigt (Port-Layer + CLI-Scaffold)** — `make gates` grün
-(lint + test, Coverage 91.20 % ≥ 90 %, docs-check):
+**T2 + T3 erledigt** — `make gates` grün (lint + test, Coverage
+91.20 % ≥ 90 %, docs-check):
 
-- Port (`port/driving/config.go`): `ConfigSetRequest.PreviewMode`
-  + `.SilenceLogger`, `ConfigSetResponse.Warnings
-  []driving.WarningEntry`, zwei neue Sentinels
+- **T2 (Port + CLI-Scaffold)**: `ConfigSetRequest.PreviewMode` +
+  `.SilenceLogger`, `ConfigSetResponse.Warnings`, zwei Sentinels
   `ErrConfigWriteRejected` + `ErrConfigPostPatchSanityFailed`
-  (T0-(m)-Drei-Klassen-Split aus `ErrConfigValueInvalid`),
-  Sentinel-Block-Header + Doc. **KEIN neuer FS-Sentinel**
-  (`ErrConfigFileSystem` existiert).
-- CLI (`cli/config.go`): `configSetFlags.JSON`/`.Quiet`
-  read-through (in Set-Closure populated, Pattern-Erbe logs T2)
-  + exportierter `cli.ErrDryRunNotApplicable`-Sentinel (T0-(g)
-  Option (i.a)).
-- Pin-Tests: `port/driving/config_test.go` (Sentinel-Identity +
-  Distinktheit + Wrap-Survival + Field-Pins) und
-  `cli/config_test.go` (`ErrDryRunNotApplicable`-Identity + Wrap).
+  (T0-(m)-Split), `cli.ErrDryRunNotApplicable`,
+  `configSetFlags.JSON`/`Quiet` read-through, Pin-Tests.
+- **T3 (Application-Layer)**: Multi-`%w`-Migration der 5 FS-Wrap-
+  Sites; Sentinel-Split-Wiring (`writeRejectedError` →
+  `ErrConfigWriteRejected`; Post-Patch-Sanity inkl. der
+  `revalidateFeatureEntry`-Sites → `ErrConfigPostPatchSanityFailed`;
+  Coercion + Allowlist-Enforcement bleiben `ErrConfigValueInvalid`);
+  SilenceLogger-Branch in `Set` + `setFeatureSourcesAllow`;
+  Orphan-WARN als freie Funktion mit Dual-Emission (stderr-Info +
+  `Warnings`-Entry). Tests `config_t3_test.go` + zwei WriteRejected-
+  Test-Updates.
 
-**Bewusste Tranchen-Verschiebung gegenüber Plan-T2-Zelle**
-(Präzedenz logs/up-down T2 = `feat(port)`, nicht Flag-Struct-
-Vollausbau): `configGetFlags`/`configShowFlags` und die
-`DryRun`/`Diff`-Felder + deren `--dry-run`/`--diff`-Flag-
-Registrierung wandern nach **T5**. Grund: (a) black-box
-`cli_test` kann unexported Structs nicht referenzieren → ohne
-RunE-Signatur-Refactor (= T5) wären sie `unused`-lint-Fehler;
-(b) user-sichtbare `--dry-run`/`--diff`-Flags ohne Reject-
-/Voll-Schema-Wiring (= T5) wären ein Behavior-Trap im
-Zwischen-Commit. T2 bleibt damit compile-stabil + verhaltens-
-neutral wie die Vorgänger-T2.
+**Bewusste Tranchen-Verschiebungen**:
+- **T2→T5** (Lint/Behavior): `configGetFlags`/`configShowFlags` +
+  `DryRun`/`Diff`-Felder + `--dry-run`/`--diff`-Flag-Registrierung
+  (black-box `cli_test` + Behavior-Trap-Vermeidung).
+- **T3→T4** (Coverage): `PreviewMode`-Handling (`fsFactory`-Feld +
+  `selectFS` + Write-Routing) wandert zum `WithFactory`-Konstruktor
+  + Composition-Root, sonst wäre die `selectFS`-Nicht-nil-Branch
+  uncovered.
+- **Plan-Refinement T3**: Pre-Scan nannte nur Z. 376/388 für
+  Post-Patch-Sanity; die strukturell identischen
+  `revalidateFeatureEntry`-Sites wurden konsistenz-halber
+  mitmigriert (Mapper-Row-6 „nur Value-Coercion").
 
-**Nächste Sitzung — natürlicher Folge-Schritt: T3 (Application-Layer)**
-([`config-Stub`](slice-v1-cli-json-dry-run-config.md), Tranchen-Tabelle):
-
-1. **Multi-`%w`-Wrap-Migration** der 5 FS-Read/Write-Sites in
-   `application/config.go` (Z. 196, 524, 565, 592, 810) von
-   `%w: …: %v` auf `%w: …: %w` (Pattern-Erbe up-down T3).
-2. **`ErrConfigValueInvalid`-Split-Wiring** (T0-(m)): WriteAllowed-
-   Reject-Sites → `ErrConfigWriteRejected`; Post-Patch-Sanity-
-   Sites → `ErrConfigPostPatchSanityFailed`; Value-Coercion
-   bleibt.
-3. **`PreviewMode`-Branch** (`selectFS(req.PreviewMode)`) +
-   **`SilenceLogger`-Branch** (`logger := s.logger; if
-   req.SilenceLogger { logger = noopLogger{} }`) +
-   **Orphan-Feature-WARN** in `ConfigSetResponse.Warnings`.
-   (~80 LOC; danach T4 Composition-Root `WithFactory`.)
+**Nächste Sitzung — natürlicher Folge-Schritt: T4**
+([`config-Stub`](slice-v1-cli-json-dry-run-config.md), T4-Zelle):
+PreviewMode-Cluster (`ConfigService.fsFactory` + nil-safe
+`selectFS` + Write-Routing in `Set`/`setFeatureSourcesAllow`) +
+`NewConfigServiceWithFactory`-Konstruktor + `cmd/uboot/main.go`-
+Wiring (`configFSFactory := newPreviewFSFactory(fsAdapter)`,
+Konstruktor-Wechsel) + Dry-Run-Acceptance-Tests (~60 LOC).
 
 **Cluster-Restweg nach config**: Folge-Slice 9/9 template
 ([`open/`](../open/slice-v1-cli-json-dry-run-template.md))
@@ -765,7 +755,9 @@ neutral wie die Vorgänger-T2.
 
 Session-Commits 2026-06-08:
 - config-T2: Port-Felder + 2 Sentinels + CLI-Scaffold +
-  Pin-Tests + Lifecycle `next/`→`in-progress/` (dieser Commit).
+  Pin-Tests + Lifecycle `next/`→`in-progress/`.
+- config-T3: Multi-`%w` + Sentinel-Split + SilenceLogger +
+  Orphan-WARN→Warnings + Tests (dieser Commit).
 
 ## Out of Scope
 

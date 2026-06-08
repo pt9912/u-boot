@@ -329,8 +329,8 @@ func TestConfigSet_ProjectName_InvalidName_NoWrite(t *testing.T) {
 // TestConfigSet_ServicesEnabled_Rejected_WithHint pins the M1
 // review-fix: services.<svc>.enabled is Get-only because the
 // LH-FA-ADD-005 state machine owns the lifecycle. Set must
-// reject with ErrConfigValueInvalid + a hint pointing at
-// `u-boot add <svc>`.
+// reject with ErrConfigWriteRejected (T0-(m) split out of
+// ErrConfigValueInvalid) + a hint pointing at `u-boot add <svc>`.
 func TestConfigSet_ServicesEnabled_Rejected_WithHint(t *testing.T) {
 	t.Parallel()
 	svc, fs := newConfigService(t)
@@ -342,8 +342,13 @@ func TestConfigSet_ServicesEnabled_Rejected_WithHint(t *testing.T) {
 		Path:    mustConfigPath(t, "services.postgres.enabled"),
 		Value:   "true",
 	})
-	if !errors.Is(err, driving.ErrConfigValueInvalid) {
-		t.Fatalf("err = %v, want wrap of ErrConfigValueInvalid", err)
+	if !errors.Is(err, driving.ErrConfigWriteRejected) {
+		t.Fatalf("err = %v, want wrap of ErrConfigWriteRejected", err)
+	}
+	// T0-(m): write-reject must NOT alias the value-coercion class —
+	// consumers disambiguate the two Exit-10 classes by code.
+	if errors.Is(err, driving.ErrConfigValueInvalid) {
+		t.Errorf("err = %v leaks ErrConfigValueInvalid; write-reject is its own class", err)
 	}
 	if !strings.Contains(err.Error(), "u-boot add postgres") {
 		t.Errorf("error message %q lacks `u-boot add postgres` hint", err.Error())
@@ -606,8 +611,8 @@ func TestConfigSet_S1_ServicesEnabled_RejectedBeforeRead(t *testing.T) {
 		Path:    mustConfigPath(t, "services.postgres.enabled"),
 		Value:   "true",
 	})
-	if !errors.Is(err, driving.ErrConfigValueInvalid) {
-		t.Fatalf("err = %v, want wrap of ErrConfigValueInvalid (not ErrProjectNotInitialized — gate runs first)", err)
+	if !errors.Is(err, driving.ErrConfigWriteRejected) {
+		t.Fatalf("err = %v, want wrap of ErrConfigWriteRejected (not ErrProjectNotInitialized — gate runs first)", err)
 	}
 	if errors.Is(err, driving.ErrProjectNotInitialized) {
 		t.Errorf("err %v leaks ErrProjectNotInitialized; the gate must short-circuit before the FS read", err)

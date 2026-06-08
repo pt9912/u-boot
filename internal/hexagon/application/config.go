@@ -85,7 +85,7 @@ func (s *ConfigService) Get(_ context.Context, req driving.ConfigGetRequest) (dr
 //  1. WriteAllowed gate (M1 review-fix): paths whose
 //     [domain.ConfigPath.WriteAllowed] is false (today:
 //     `services.<svc>.enabled`) reject the Set with
-//     [driving.ErrConfigValueInvalid] and a hint pointing at
+//     [driving.ErrConfigWriteRejected] and a hint pointing at
 //     the canonical write path (`u-boot add <svc>`).
 //  2. Value coercion: per-path string→Go-scalar parse
 //     (`domain.NewProjectName` for project.name,
@@ -106,12 +106,25 @@ func (s *ConfigService) Get(_ context.Context, req driving.ConfigGetRequest) (dr
 //  6. Stage-3 domain re-validation: per-path domain
 //     validators on the patched config (yaml.v3 Unmarshal is
 //     lenient — it accepts a garbage string into a string
-//     field without applying domain rules). Failure ⇒
-//     [driving.ErrConfigValueInvalid].
+//     field without applying domain rules). A post-patch
+//     structural failure ⇒ [driving.ErrConfigPostPatchSanityFailed];
+//     the LH-FA-DEV-003 allowlist-enforcement branch ⇒
+//     [driving.ErrConfigValueInvalid] (user-actionable).
 //  7. WriteFile (only now).
 func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (driving.ConfigSetResponse, error) {
 	if req.BaseDir == "" {
 		return driving.ConfigSetResponse{}, errors.New("BaseDir is required")
+	}
+
+	// JSON-mode logger silencing (slice-v1-cli-json-dry-run-config
+	// T0-(n)): when the CLI sets req.SilenceLogger (== --json active),
+	// route the five Set-path log sites to a no-op sink so the
+	// stderr stream does not interleave with the stdout-bound JSON
+	// envelope. Pattern-Erbe UpRequest.SilenceProgress. Default
+	// (false) keeps today's stderr logging unchanged.
+	logger := s.logger
+	if req.SilenceLogger {
+		logger = noopLogger{}
 	}
 
 	// Stage 0: WriteAllowed gate (M1 review-fix). Runs **before**
@@ -154,7 +167,7 @@ func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (dr
 	// value, skip the write entirely.
 	oldValue := extractConfigValueLenient(cfg, req.Path)
 	if oldValue == formatted {
-		s.logger.Debug("config set: no-op",
+		logger.Debug("config set: no-op",
 			"path", req.Path.String(), "value", formatted)
 		return driving.ConfigSetResponse{
 			Path: req.Path, OldValue: oldValue, NewValue: formatted,
@@ -192,68 +205,92 @@ func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (dr
 	// Stage 6: WriteFile (only now).
 	path := filepath.Join(req.BaseDir, "u-boot.yaml")
 	if err := s.fs.WriteFile(path, patched, defaultFileMode); err != nil {
-		return driving.ConfigSetResponse{}, fmt.Errorf("%w: write %q: %v",
+		return driving.ConfigSetResponse{}, fmt.Errorf("%w: write %q: %w",
 			driving.ErrConfigFileSystem, path, err)
 	}
 
 	newValue := extractConfigValueLenient(patchedCfg, req.Path)
-	s.logger.Info("config set: updated",
+	logger.Info("config set: updated",
 		"path", req.Path.String(), "old", oldValue, "new", newValue)
-	s.maybeWarnOrphanFeatureActivation(patchedCfg, req.Path)
+	warnings := maybeWarnOrphanFeatureActivation(logger, patchedCfg, req.Path)
 	return driving.ConfigSetResponse{
 		Path: req.Path, OldValue: oldValue, NewValue: newValue,
+		Warnings: warnings,
 	}, nil
 }
 
-// maybeWarnOrphanFeatureActivation emits a [Logger.Info] hint when
-// the user activates a feature name that is neither in the built-in
-// catalogue nor carries a `source:` override (Review-Followup R3 /
-// reviewer-finding I1). Such an "orphan" activation is not an error
-// (PatchScalar wrote a valid YAML scalar; T3's renderer silently
-// skips the entry; T5-doctor will surface it as a warn). The Info-
-// line gives the user a chance to spot a typo (e.g. `nde` instead
-// of `node`) before they wonder why `generate devcontainer` does
+// maybeWarnOrphanFeatureActivation reports an orphan-feature
+// activation: the user activated a feature name that is neither in
+// the built-in catalogue nor carries a `source:` override
+// (Review-Followup R3 / reviewer-finding I1). Such an activation is
+// not an error (PatchScalar wrote a valid YAML scalar; the renderer
+// silently skips the entry; `doctor` surfaces it as a warn). The
+// hint gives the user a chance to spot a typo (e.g. `nde` instead of
+// `node`) before they wonder why `generate devcontainer` does
 // nothing.
+//
+// Dual emission (slice-v1-cli-json-dry-run-config T0-(n)): the
+// orphan hint is logged via the passed-in logger (silenced in
+// JSON-mode by the caller's SilenceLogger swap) AND returned as a
+// [driving.WarningEntry] so the CLI can map it into the JSON
+// envelope's `diagnostics[]` array without forcing the consumer to
+// capture stderr (Pattern-Erbe RemoveResponse.Warnings). Returns nil
+// on the non-orphan path.
 //
 // Only fires for [domain.ConfigDevcontainerFeatureEnabled] paths
 // where the user set the value to `true`; deactivations and the
 // .source / .version leafs do not trigger the warning.
-func (s *ConfigService) maybeWarnOrphanFeatureActivation(cfg ubootYAMLConfig, path domain.ConfigPath) {
+func maybeWarnOrphanFeatureActivation(
+	logger driven.Logger, cfg ubootYAMLConfig, path domain.ConfigPath,
+) []driving.WarningEntry {
 	if path.Kind != domain.ConfigDevcontainerFeatureEnabled {
-		return
+		return nil
 	}
 	entry, ok := lookupFeatureEntry(cfg, path.Feature)
 	if !ok || entry.Enabled == nil || !*entry.Enabled {
-		return
+		return nil
 	}
 	// Source override present → not an orphan.
 	if entry.Source != "" {
-		return
+		return nil
 	}
 	// Catalogue lookup hit → not an orphan.
 	if _, hit := featureFor(path.Feature); hit {
-		return
+		return nil
 	}
-	s.logger.Info(
-		"config set: orphan feature activation — name not in catalogue and no source override; `generate devcontainer` will skip it; `doctor` will flag it",
-		"path", path.String(), "feature", path.Feature.String())
+	const msg = "config set: orphan feature activation — name not in catalogue and no source override; `generate devcontainer` will skip it; `doctor` will flag it"
+	logger.Info(msg, "path", path.String(), "feature", path.Feature.String())
+	return []driving.WarningEntry{{
+		Code:    "LH-FA-DEV-003",
+		Level:   "warn",
+		Message: msg,
+		Subject: path.Feature.String(),
+	}}
 }
 
-// writeRejectedError builds the ErrConfigValueInvalid response for
-// a path whose [domain.ConfigPath.WriteAllowed] is false. The
-// message is kind-conditional so a future write-disallowed
-// non-service kind would not leak the "register the service"
-// phrasing through a wrong-shape interpolation (M8-T5-Review N1).
+// writeRejectedError builds the [driving.ErrConfigWriteRejected]
+// response for a path whose [domain.ConfigPath.WriteAllowed] is
+// false. The message is kind-conditional so a future
+// write-disallowed non-service kind would not leak the "register
+// the service" phrasing through a wrong-shape interpolation
+// (M8-T5-Review N1).
+//
+// slice-v1-cli-json-dry-run-config T3 (T0-(m)) split this class out
+// of the formerly-overloaded [driving.ErrConfigValueInvalid] so a
+// JSON consumer can tell a non-writable-path rejection apart from a
+// value-coercion failure by `code` alone — both are Exit 10, so the
+// sentinel identity is the only disambiguator. The `u-boot add
+// <svc>` hint is preserved verbatim, so the human path is unchanged.
 func writeRejectedError(path domain.ConfigPath) error {
 	switch path.Kind {
 	case domain.ConfigServiceEnabled:
 		return fmt.Errorf(
 			"%w: %s is not writable via `u-boot config set` because the LH-FA-ADD-005 state machine owns the lifecycle; use `u-boot add %s` to register the service",
-			driving.ErrConfigValueInvalid, path, path.Service.String())
+			driving.ErrConfigWriteRejected, path, path.Service.String())
 	}
 	return fmt.Errorf(
 		"%w: %s is not writable via `u-boot config set`",
-		driving.ErrConfigValueInvalid, path)
+		driving.ErrConfigWriteRejected, path)
 }
 
 // coerceConfigValue parses raw into the path's expected Go
@@ -350,8 +387,16 @@ func configPathToYAMLPath(path domain.ConfigPath) []string {
 // revalidateConfigDomain runs the per-path domain validators on
 // the patched config (Stage 5 of the Set pipeline). yaml.v3
 // Unmarshal accepts strings without applying domain rules; this
-// closes that gap. Returns [driving.ErrConfigValueInvalid] on
-// failure.
+// closes that gap.
+//
+// Post-patch structural failures (PatchScalar produced an absent /
+// unbound / empty leaf where a bound value was expected) return
+// [driving.ErrConfigPostPatchSanityFailed] — a schema-drift
+// indicator distinct from the value-coercion class
+// (slice-v1-cli-json-dry-run-config T3 / T0-(m)). The LH-FA-DEV-003
+// allowlist-enforcement branch in [revalidateFeatureEntry] keeps
+// [driving.ErrConfigValueInvalid]: that one is a user-actionable
+// value rejection, not a sanity failure.
 //
 // Symmetric to [configPathToYAMLPath]: only the two write-allowed
 // kinds are handled because Set rejects ConfigServiceEnabled at
@@ -372,8 +417,8 @@ func revalidateConfigDomain(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 		// value (M8-T5-Review N2 informational).
 		if _, err := domain.NewProjectName(cfg.Project.Name); err != nil {
 			return fmt.Errorf(
-				"%w: post-patch project.name failed domain re-validation: %v",
-				driving.ErrConfigValueInvalid, err)
+				"%w: post-patch project.name failed domain re-validation: %w",
+				driving.ErrConfigPostPatchSanityFailed, err)
 		}
 		return nil
 	case domain.ConfigDevcontainerEnabled:
@@ -385,7 +430,7 @@ func revalidateConfigDomain(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 		if cfg.Devcontainer == nil || cfg.Devcontainer.Enabled == nil {
 			return fmt.Errorf(
 				"%w: post-patch devcontainer.enabled is absent or unbound",
-				driving.ErrConfigValueInvalid)
+				driving.ErrConfigPostPatchSanityFailed)
 		}
 		return nil
 	case domain.ConfigDevcontainerFeatureEnabled,
@@ -412,19 +457,19 @@ func revalidateFeatureEntry(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 	entry, ok := lookupFeatureEntry(cfg, path.Feature)
 	if !ok {
 		return fmt.Errorf("%w: post-patch %s is absent",
-			driving.ErrConfigValueInvalid, path)
+			driving.ErrConfigPostPatchSanityFailed, path)
 	}
 	switch path.Kind {
 	case domain.ConfigDevcontainerFeatureEnabled:
 		if entry.Enabled == nil {
 			return fmt.Errorf("%w: post-patch %s is unbound",
-				driving.ErrConfigValueInvalid, path)
+				driving.ErrConfigPostPatchSanityFailed, path)
 		}
 		return nil
 	case domain.ConfigDevcontainerFeatureSource:
 		if entry.Source == "" {
 			return fmt.Errorf("%w: post-patch %s is empty",
-				driving.ErrConfigValueInvalid, path)
+				driving.ErrConfigPostPatchSanityFailed, path)
 		}
 		if !featureSourceInAllow(cfg, entry.Source) {
 			return fmt.Errorf(
@@ -435,7 +480,7 @@ func revalidateFeatureEntry(cfg ubootYAMLConfig, path domain.ConfigPath) error {
 	case domain.ConfigDevcontainerFeatureVersion:
 		if entry.Version == "" {
 			return fmt.Errorf("%w: post-patch %s is empty",
-				driving.ErrConfigValueInvalid, path)
+				driving.ErrConfigPostPatchSanityFailed, path)
 		}
 		return nil
 	}
@@ -520,7 +565,7 @@ func (s *ConfigService) readUbootYAMLBody(baseDir string) ([]byte, ubootYAMLConf
 				"%w: %s vanished between Exists and ReadFile",
 				driving.ErrProjectNotInitialized, path)
 		}
-		return nil, ubootYAMLConfig{}, fmt.Errorf("%w: read %q: %v",
+		return nil, ubootYAMLConfig{}, fmt.Errorf("%w: read %q: %w",
 			driving.ErrConfigFileSystem, path, err)
 	}
 	var cfg ubootYAMLConfig
@@ -561,7 +606,7 @@ func (s *ConfigService) Show(_ context.Context, req driving.ConfigShowRequest) (
 				"%w: %s vanished between Exists and ReadFile",
 				driving.ErrProjectNotInitialized, path)
 		}
-		return driving.ConfigShowResponse{}, fmt.Errorf("%w: read %q: %v",
+		return driving.ConfigShowResponse{}, fmt.Errorf("%w: read %q: %w",
 			driving.ErrConfigFileSystem, path, err)
 	}
 	return driving.ConfigShowResponse{Body: body}, nil
@@ -588,7 +633,7 @@ func (s *ConfigService) readUbootYAML(baseDir string) (ubootYAMLConfig, error) {
 				"%w: %s vanished between Exists and ReadFile",
 				driving.ErrProjectNotInitialized, path)
 		}
-		return ubootYAMLConfig{}, fmt.Errorf("%w: read %q: %v",
+		return ubootYAMLConfig{}, fmt.Errorf("%w: read %q: %w",
 			driving.ErrConfigFileSystem, path, err)
 	}
 	var cfg ubootYAMLConfig
@@ -729,6 +774,14 @@ func (s *ConfigService) checkProjectInitialized(baseDir string) error {
 func (s *ConfigService) setFeatureSourcesAllow(
 	req driving.ConfigSetRequest, cfg ubootYAMLConfig,
 ) (driving.ConfigSetResponse, error) {
+	// JSON-mode logger silencing (slice-v1-cli-json-dry-run-config
+	// T0-(n)): mirror the scalar Set path so the list-path's two
+	// log sites also fall silent when --json is active.
+	logger := s.logger
+	if req.SilenceLogger {
+		logger = noopLogger{}
+	}
+
 	// Stage 1: parse the user-provided inputs (positional value +
 	// `--allow-external-feature-sources` flag cumulation per Spec
 	// §714-718) and validate them as user input. Failures here
@@ -778,7 +831,7 @@ func (s *ConfigService) setFeatureSourcesAllow(
 	newValue := strings.Join(merged, ",")
 
 	if oldValue == newValue {
-		s.logger.Debug("config set: no-op",
+		logger.Debug("config set: no-op",
 			"path", req.Path.String(), "value", newValue)
 		return driving.ConfigSetResponse{
 			Path: req.Path, OldValue: oldValue, NewValue: newValue,
@@ -806,11 +859,11 @@ func (s *ConfigService) setFeatureSourcesAllow(
 	// Stage 5: WriteFile.
 	path := filepath.Join(req.BaseDir, "u-boot.yaml")
 	if err := s.fs.WriteFile(path, rewritten, defaultFileMode); err != nil {
-		return driving.ConfigSetResponse{}, fmt.Errorf("%w: write %q: %v",
+		return driving.ConfigSetResponse{}, fmt.Errorf("%w: write %q: %w",
 			driving.ErrConfigFileSystem, path, err)
 	}
 
-	s.logger.Info("config set: updated",
+	logger.Info("config set: updated",
 		"path", req.Path.String(), "old", oldValue, "new", newValue)
 	return driving.ConfigSetResponse{
 		Path: req.Path, OldValue: oldValue, NewValue: newValue,
