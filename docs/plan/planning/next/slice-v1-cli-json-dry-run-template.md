@@ -1,13 +1,16 @@
 # Slice V1: `template list --json` — Envelope-Migration
 
-> **Status:** `open/` — **T0-Discovery + R1 + R2 gefahren
-> (2026-06-08)**. R1 (1 HIGH + 2 MED) drehte T0-(a) am Spec-Text um
-> (→ Reject). R2 (0 HIGH + 2 MED + 3 LOW) ergänzte den Error-
-> Envelope-Pfad (T0-(f): `mapTemplateErrorToDiagnostic` +
-> `reportError`, Cluster-Symmetrie) und schärfte die Envelope-
-> Asymmetrie (bare-Reject envelope-LOS per §1838; `list`-Error
-> envelope-VOLL). R3 **noch offen** (vermutlich Asymptote-nah).
-> Heute-Stand-Pre-Scan + Sub-Decisions (a)-(f). Letzter
+> **Status:** `next/` — **T0-Discovery + R1+R2+R3 gefahren,
+> Asymptote erreicht, Lifecycle `open/`→`next/` (2026-06-08)**.
+> R1 (1 HIGH + 2 MED) drehte T0-(a) am Spec-Text um (→ Reject).
+> R2 (0 HIGH + 2 MED + 3 LOW) ergänzte den Error-Envelope-Pfad
+> (T0-(f)) + Envelope-Asymmetrie. R3 (0 HIGH + 1 MED + 1 LOW)
+> härtete T0-(a) gegen das stärkste Gegenargument (Cluster-„alle
+> Enum-Subcommands tragen `--json`" — aufgelöst über Daten-Kommando
+> bare-`config` vs. Help-Parent bare-`template`) + Akzeptanz-
+> kriterien-Politur. **Asymptote** (HIGH 1→0→0). Heute-Stand-Pre-
+> Scan + Sub-Decisions (a)-(f) festgezurrt. Bereit für T2-Start.
+> Letzter
 > Folge-Slice (9/9) des Cluster-Slice
 > [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
 > (T0-(e) Platz 9). Closure-Pflicht-Slice für den
@@ -130,11 +133,32 @@ Code-Realität heute:
   Cluster-T_close das Gate + `PersistentPreRunE` abbaut, würde
   bare `template --json` sonst auf `cmd.Help()` fallen und
   **Hilfetext statt Reject** leaken. Fix: bare-`template`-RunE
-  prüft `a.json` selbst und returnt einen `ErrJSON…`/Exit-2-
-  Reject (Pattern-Erbe config's `ErrDryRunNotApplicable`-RunE-
-  Reject), damit das Verhalten T_close-stabil ist. Das ist die
-  **einzige Code-Berührung an bare `template`** in diesem Slice
-  (~15 LOC RunE + Pin-Test).
+  prüft `a.json` selbst und returnt `cli.ErrTemplateSubcommand
+  Required`/Exit-2 (T0-(f); Pattern-Erbe config's RunE-Reject),
+  damit das Verhalten T_close-stabil ist. Im **Human-Modus**
+  (`!a.json`) bleibt `cmd.Help()` unverändert — der Reject gilt
+  nur im JSON-Pfad. Das ist die **einzige Code-Berührung an bare
+  `template`** in diesem Slice (~20 LOC RunE + Sentinel + Pin).
+
+  **R3-Härtung gegen das stärkste Gegenargument** (R3-MED-1): die
+  Cluster-Aufhebungsbedingung (`config`-Cluster-Pflicht-Callout)
+  formuliert „`LH-NFA-USE-004` gilt für **alle** Spec-Enum-
+  Subcommands" — und `template` IST im Enum (§338). Liest man das
+  wörtlich, müsste bare `template --json` einen Envelope tragen.
+  **Auflösung**: das Argument trägt nicht, weil es **bare `config`
+  vs. bare `template`** verwechselt:
+  - bare `config` ist ein **Daten-Kommando** (`runConfigShow`
+    emittiert den `u-boot.yaml`-Body) → bekam zu Recht einen
+    Envelope (`subcommand: "show"`).
+  - bare `template` ist ein **reiner Help-Parent** (`RunE =
+    cmd.Help()`, kein eigenes Datum) — das `template`-Enum wird
+    durch seine **einzige daten-produzierende Form**
+    `template list --json` erfüllt; bare trägt nichts, was ein
+    Envelope serialisieren könnte, und §1838 verbietet einen
+    `subcommand`-losen `command:"template"`-Envelope unabhängig.
+  Damit ist Reject die einzige spec-kohärente Wahl — **nicht**
+  trotz, sondern **wegen** „alle Enum-Subcommands tragen `--json`"
+  (die Form, die das Enum trägt, ist `list`).
 
 - **T0-(b) Breaking-Change-Politik** (MED): Array→Envelope ist
   ein Breaking-Change am ausgelieferten `template list --json`-
@@ -269,26 +293,35 @@ Default-`list` erzeugte eine Human-vs-JSON-Asymmetrie.
   sondern verbraucht es nur — die ursprüngliche Sub-Decision
   Plan-Vorgabe ist damit erfüllt; T1-LOC-Schätzung sinkt
   entsprechend (siehe Tranchen-Tabelle).
-- ✅ **Code-Registry-Sektion** in
-  [`docs/user/cli-json-output.md`](../../../user/cli-json-output.md)
-  §5 erweitert um eine `template`-Sektion (sofern eigene Codes
-  emittiert werden — heute null, also evtl. nur Hinweis
-  „template list emittiert keine diagnostics-Codes").
+- ✅ **Error-Envelope-Pfad** (R2-MED-1 / T0-(f)): `template list`
+  trägt einen minimalen `mapTemplateErrorToDiagnostic` (Katalog-IO
+  → `LH-NFA-REL-003`/Exit 14; Default → `LH-FA-CLI-006`/Exit 1) +
+  `reportErrorSub(…, "template", "list", mapErr, nil)`. **Keine
+  neue §5-Code-Registry-Sektion** (R3): es werden nur bestehende
+  LH-Codes genutzt, keine tool-internen Codes; `template list`
+  emittiert auf dem Happy-Path `diagnostics: []`.
 - ✅ **Carveouts-Eintrag entfernt**: Zeile aus
   [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
-  Carveouts gestrichen.
-- ✅ **bare-`template`-Sub-Decision**: `u-boot template --json`
-  Verhalten festgezurrt (Reject oder Default-Subcommand,
-  Vorschlag siehe Aufhebungsbedingung).
-- ✅ **Allowlist-Erweiterung**:
+  Carveouts gestrichen (T4).
+- ✅ **bare-`template`-Verhalten festgezurrt** (T0-(a) (i),
+  R1+R3): `u-boot template --json` → **Reject Exit 2** via
+  `cli.ErrTemplateSubcommandRequired`, RunE-getragen (T_close-
+  stabil), **envelope-LOS** (§1838-Ausnahme). Human-Modus
+  unverändert `cmd.Help()`. Pin-Test gegen Help-Leak.
+- ✅ **Allowlist unverändert**:
   [`jsonallowlist.go`](../../../../internal/adapter/driving/cli/jsonallowlist.go)
-  `jsonAllowlist`-Map enthält `"u-boot template list"` (heute
-  schon) und entweder den bare-`template`-Pfad (Default-
-  Sub-Decision) oder bleibt bei Reject.
+  behält `"u-boot template list": true`; bare `template` wird
+  **NICHT** eingetragen (bleibt rejected, jetzt RunE-getragen).
+  Der Allowlist-Mechanik-**Abbau** gehört zum Cluster-T_close
+  (R1-MED-2), nicht zu diesem Slice.
 - ✅ **CLI-Pin-Tests**: bestehende `TestRootJSON_AcceptsTemplate
-  List_BothFlagPositions`-Logik bleibt grün; **neuer**
-  Envelope-Acceptance-Test prüft `command: "template"`/
-  `subcommand: "list"`/`data`-Inhalt.
+  List_BothFlagPositions`-Logik bleibt grün (beide Flag-
+  Positionen), aber der schwache „JSON array"-Assert
+  (jsonallowlist_test.go:90) wird auf die Envelope-Form
+  verschärft (`AssertMinimalEnvelope` + `WithCommand("template")`
+  + `WithSubcommand("list")` + `data`-Inhalt). Neuer
+  bare-`template --json`-Reject-Pin (Exit 2, kein Envelope,
+  Human-Help-unberührt). Empty-Catalog-`data: []`-Pin (R2-LOW-2).
 - ✅ **README EN+DE Verweis-Block** auf
   `docs/user/cli-json-output.md` bleibt unverändert (kein neuer
   Doku-Pfad).

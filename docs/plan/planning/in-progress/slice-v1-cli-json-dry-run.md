@@ -12,7 +12,7 @@
 > Per-Command-Folge-Slice-Serie. T0 ✅ festgezurrt
 > (§T0-Outcomes — 5 Sub-Decisions plus Mutations-Matrix-Pre-Scan);
 > in `in-progress/`. **Cluster-Stand (2026-06-08): 8/9 done, 1/9
-> open (template).**
+> next (template — T0+R1+R2+R3 done, T2-Start ready).**
 >
 > **Done (8/9)**:
 > [`doctor`](../done/slice-v1-cli-json-dry-run-doctor.md) (1/9),
@@ -26,9 +26,15 @@
 > T0–T8 + drei Review-Runden R-T4-1/R-IR-1/R-CLI-1; erster
 > Read-only+Modifying-Hybrid, drei Sub-Forms gebündelt).
 >
-> **Open (1/9)**:
-> [`template`](../open/slice-v1-cli-json-dry-run-template.md) (9/9)
-> — T0-Discovery + Sub-Decisions noch nicht gefahren.
+> **Next (1/9, T0+R1+R2+R3 done — T2-Start ready)**:
+> [`template`](../next/slice-v1-cli-json-dry-run-template.md) (9/9)
+> — der **kleinste Slice** (~90 LOC). T0-Discovery + drei R-Runden
+> gefahren (Asymptote HIGH 1→0→0); Lifecycle `open/`→`next/`.
+> Sub-Decisions festgezurrt: bare `template --json` → Reject Exit 2
+> (envelope-LOS per §1838; RunE-getragen, T_close-stabil),
+> `template list --json` Array→Envelope-Migration (Breaking-Change,
+> CHANGELOG `### Changed`). Nach template-done greift die
+> Closure-Hard-Rule → Cluster-Slice selbst via T_close nach `done/`.
 
 ## Auslöser
 
@@ -767,15 +773,19 @@ Disambiguation + YAML-Comment-Limitation) + §6-Tabelle Rows 7+8
 carveouts.md vier Folge-Stub-Einträge (R3-MED-3); Slice nach `done/`
 mit DoD-Hash-Tabelle. Cluster-Stand jetzt **8/9 done**.
 
-**Nächste Sitzung — natürlicher Folge-Schritt: Folge-Slice 9/9
-template** ([`open/`](../open/slice-v1-cli-json-dry-run-template.md)):
-**der letzte offene Cluster-Slice**. T0-Discovery + R-Runden noch
-nicht gefahren — `template` (bare) braucht Envelope-Migration plus
-`template list`-Envelope-Migration (heute Carveout: `templateJSON`-
-Array statt Minimalkontrakt, siehe carveouts.md). Nach template 9/9
-done greift die Closure-Hard-Rule → Cluster-Slice selbst nach
-`done/` (T_close: Allowlist-Mechanik + `PersistentPreRunE` raus,
-optional Folge-ADR — Entscheidung in T_close).
+**Folge-Slice 9/9 template — T0-Discovery + R1+R2+R3 gefahren,
+Lifecycle `open/`→`next/`**
+([`next/`](../next/slice-v1-cli-json-dry-run-template.md)): der
+**letzte und kleinste** Cluster-Slice (~90 LOC). Asymptote erreicht
+(HIGH 1→0→0). Festgezurrt: `template list --json` Array→Envelope
+(Breaking-Change, CHANGELOG `### Changed`), bare `template --json`
+→ Reject Exit 2 (envelope-LOS per §1838, RunE-getragen via neuem
+`cli.ErrTemplateSubcommandRequired`, T_close-stabil), Error-Pfad
+`mapTemplateErrorToDiagnostic` (T0-(f)). **Nächster Schritt: T2**
+(`runTemplateList`-Envelope-Migration). Nach template-done greift
+die Closure-Hard-Rule → Cluster-Slice selbst via **T_close** nach
+`done/` (Allowlist-Mechanik + `PersistentPreRunE`-Abbau, optional
+Folge-ADR — Entscheidung in T_close, NICHT im template-Slice).
 
 **Zweistufiger T2–T4-Review (2026-06-08) vor T5 — zwei HIGH-Findings**:
 - **R-T4-1** (Selbst-Review): T4-Recorder-Verzicht hätte dem

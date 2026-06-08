@@ -90,7 +90,7 @@
 > [`slice-v1-cli-json-dry-run-logs`](slice-v1-cli-json-dry-run-logs.md)
 > (Single-Envelope für Read-only + `(code, exitCode)`-Tupel-
 > Disambiguation Pattern). Erbt `subcommand`-Pflichtfeld-Form aus
-> [`slice-v1-cli-json-dry-run-template`](../open/slice-v1-cli-json-dry-run-template.md)-
+> [`slice-v1-cli-json-dry-run-template`](../next/slice-v1-cli-json-dry-run-template.md)-
 > Stub (`command="config"` + `subcommand="list"|"get"|"set"` —
 > T0-(b) Sub-Decision).
 
