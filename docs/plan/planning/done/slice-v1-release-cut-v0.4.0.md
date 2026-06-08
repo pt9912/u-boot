@@ -1,7 +1,9 @@
 # Slice V1: Release-Cut `v0.4.0`
 
-> **Status:** `done/` — T1–T3 ✅ (2026-06-08), `make gates` grün.
-> T4 ist die **Nutzer-Aktion** (Tag-Push). Vorbild
+> **Status:** `done/` — T1–T4 ✅ (2026-06-08). **`v0.4.0`
+> released**: Tag `v0.4.0` auf `bce886f` gepusht, `publish.yml`
+> triggert GHCR + Sechs-Plattform-Binaries. `make gates` grün.
+> Vorbild
 > [`slice-v1-release-cut-v0.3.0`](slice-v1-release-cut-v0.3.0.md)
 > (identisches T1–T4-Pattern: drei Doku-Tranchen + eine
 > Nutzer-Tranche).

@@ -13,7 +13,7 @@ in [`docs/archive/roadmap-history-v0.1-v0.3.md`](../../../archive/roadmap-histor
 | v0.1.0 | released | 2026-05-31 | MVP-Core, Release-Pipeline, GHCR | [`slice-v1-release-cut-v0.1.0`](../done/slice-v1-release-cut-v0.1.0.md) |
 | v0.2.0 | released | 2026-06-01 | Container-aware `doctor`, Binary-Distribution, Template-Katalog | [`slice-v1-release-cut-v0.2.0`](../done/slice-v1-release-cut-v0.2.0.md) |
 | v0.3.0 | released | 2026-06-01 | Add-on Catalogue Expansion (`remove`, deps, Keycloak, OTel) | [`slice-v1-release-cut-v0.3.0`](../done/slice-v1-release-cut-v0.3.0.md) |
-| v0.4.0 | 🔖 ready to tag | 2026-06-08 | Maschinenlesbare CLI (`--json`/`--dry-run`/`--diff` für alle 10 Subcommands), `logs`, Devcontainer-Features | [`slice-v1-release-cut-v0.4.0`](../done/slice-v1-release-cut-v0.4.0.md) |
+| v0.4.0 | released | 2026-06-08 | Maschinenlesbare CLI (`--json`/`--dry-run`/`--diff` für alle 10 Subcommands), `logs`, Devcontainer-Features | [`slice-v1-release-cut-v0.4.0`](../done/slice-v1-release-cut-v0.4.0.md) (Tag `v0.4.0` auf `bce886f`) |
 
 ## v0.4.0 Arbeitspakete
 
