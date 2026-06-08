@@ -49,7 +49,7 @@
 > Scan + Sub-Decisions (a)-(f) festgezurrt. Bereit für T2-Start.
 > Letzter
 > Folge-Slice (9/9) des Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
 > (T0-(e) Platz 9). Closure-Pflicht-Slice für den
 > Cluster-T_close-Lauf, weil er den bewussten Übergangs-Carveout
 > aus dem Doctor-Slice schließt. **Der einfachste Slice des
@@ -406,7 +406,7 @@ leakt rohen Output).
 ## Bezug
 
 - Cluster-Slice:
-  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
   §T0-(e) Platz 9.
 - Vorgänger-Slice:
   [`slice-v1-cli-json-dry-run-doctor`](slice-v1-cli-json-dry-run-doctor.md)

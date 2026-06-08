@@ -2,7 +2,7 @@
 
 > **Status:** ✅ **done** — vierter Folge-Slice (4/9) des
 > Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 4/9). Lifecycle-Übergänge: `open/` nach R1-R5,
 > `next/` nach R6/R7, `in-progress/` ab T1, `done/` mit T8-Closure.
 > Findings-Bilanz: 33 gesamt (7 HIGH, 19 MED, 7 LOW); R10 ergab
@@ -695,7 +695,7 @@ Reihenfolge, Defensiv-Fallbacks und Doku-Drift.
 ## Bezug
 
 - Cluster-Slice:
-  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
   §T0-Outcomes — Vorgaben für den Folge-Slice-Block.
 - Pattern-Vorbild:
   [`slice-v1-cli-json-dry-run-init`](slice-v1-cli-json-dry-run-init.md)

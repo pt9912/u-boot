@@ -2,7 +2,7 @@
 
 > **Status:** ✅ **done** — dritter Folge-Slice (3/9) des
 > Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 3/9). Konsumiert das Pattern-Vorbild aus
 > [`slice-v1-cli-json-dry-run-add`](slice-v1-cli-json-dry-run-add.md)
 > 1:1 für die Carrier-Types, den `RecordingFileSystem`-driven-
@@ -1121,7 +1121,7 @@ unchanged nach R4).
 ## Bezug
 
 - Cluster-Slice:
-  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
   §T0-Outcomes — Vorgaben für den Folge-Slice-Block.
 - Pattern-Vorbild:
   [`slice-v1-cli-json-dry-run-add`](slice-v1-cli-json-dry-run-add.md)

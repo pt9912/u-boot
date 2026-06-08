@@ -11,32 +11,49 @@
 > definiert Reihenfolge + geteilte Konventionen für die
 > Per-Command-Folge-Slice-Serie. T0 ✅ festgezurrt
 > (§T0-Outcomes — 5 Sub-Decisions plus Mutations-Matrix-Pre-Scan);
-> in `in-progress/`. **Cluster-Stand (2026-06-08): 9/9 Folge-Slices
-> done — Cluster-Slice selbst noch `in-progress/` (T_close pending).**
+> **Status: `done/` — Cluster vollständig abgeschlossen, T_close
+> gefahren (2026-06-08).** Alle neun Folge-Slices in `done/`
+> (Closure-Hard-Rule erfüllt) + Übergangs-Mechanik abgebaut. Der
+> gesamte `LH-NFA-USE-004`-Surface ist ausgeliefert (alle zehn
+> Spec-Enum-Subcommand-Formen tragen `--json`).
+>
+> **DoD-Cluster-Meilensteine**:
+>
+> | Meilenstein | Inhalt | Commit / Anker |
+> | --- | --- | --- |
+> | T0 — Stub | Initialer Cluster-Stub in `open/` | `1d3f652` |
+> | T0 — Review R1 | H1+M1+M2+L1 adressiert | `5d651bf` |
+> | T0 — Outcomes | T0-Outcomes festgezurrt + R1+R2 (5 Sub-Decisions + Mutations-Matrix) | `c6c3bb2` |
+> | Folge-Slices 1-9 | doctor/add/init/generate/remove/up-down/logs/config/template — je eigene DoD-Hash-Tabelle im Slice-File (siehe Done-Liste unten) | `done/` |
+> | T_close — Code | Übergangs-Reject-Mechanik entfernt (jsonallowlist.go, Gate, `ErrJSONNotImplemented`) + bare-`template`-RunE-Reject (`ErrTemplateSubcommandRequired`) + Public-Doku; netto −90 LOC | `3a35d58` |
+> | T_close — Lifecycle | Cluster-Slice nach `done/` + DoD + Roadmap (dieser Commit; DoD-Hash-Followup) | `(Followup)` |
 >
 > **Done (9/9 Folge-Slices)**:
-> [`doctor`](../done/slice-v1-cli-json-dry-run-doctor.md) (1/9),
-> [`add`](../done/slice-v1-cli-json-dry-run-add.md) (2/9),
-> [`init`](../done/slice-v1-cli-json-dry-run-init.md) (3/9),
-> [`generate`](../done/slice-v1-cli-json-dry-run-generate.md) (4/9),
-> [`remove`](../done/slice-v1-cli-json-dry-run-remove.md) (5/9),
-> [`up-down`](../done/slice-v1-cli-json-dry-run-up-down.md) (6/9),
-> [`logs`](../done/slice-v1-cli-json-dry-run-logs.md) (7/9),
-> [`config`](../done/slice-v1-cli-json-dry-run-config.md) (8/9 —
+> [`doctor`](slice-v1-cli-json-dry-run-doctor.md) (1/9),
+> [`add`](slice-v1-cli-json-dry-run-add.md) (2/9),
+> [`init`](slice-v1-cli-json-dry-run-init.md) (3/9),
+> [`generate`](slice-v1-cli-json-dry-run-generate.md) (4/9),
+> [`remove`](slice-v1-cli-json-dry-run-remove.md) (5/9),
+> [`up-down`](slice-v1-cli-json-dry-run-up-down.md) (6/9),
+> [`logs`](slice-v1-cli-json-dry-run-logs.md) (7/9),
+> [`config`](slice-v1-cli-json-dry-run-config.md) (8/9 —
 > T0–T8 + drei Review-Runden; erster Read-only+Modifying-Hybrid),
-> [`template`](../done/slice-v1-cli-json-dry-run-template.md) (9/9 —
+> [`template`](slice-v1-cli-json-dry-run-template.md) (9/9 —
 > T0→T2→T4, `template list --json` Array→Envelope; T3 (bare-Reject)
 > nach T_close verschoben).
 >
-> **Cluster-T_close (offen — der letzte Schritt der Serie)**: Alle
-> neun Folge-Slices sind in `done/` → die Closure-Hard-Rule ist
-> erfüllt. T_close baut die Übergangs-Mechanik ab (Allowlist-Map +
-> `applyJSONRejectGate` + `PersistentPreRunE`) UND führt dabei den
+> **Cluster-T_close (✅ abgeschlossen, `3a35d58`)**: Übergangs-
+> Mechanik abgebaut (Allowlist-Map + `applyJSONRejectGate` +
+> `PersistentPreRunE`-Gate + `ErrJSONNotImplemented` entfernt);
 > bare-`template`-RunE-Reject (`cli.ErrTemplateSubcommandRequired`,
-> envelope-LOS §1838) + Help-Leak-Pin ein (aus template-T3 hierher
-> verschoben); verifiziert, dass alle neun Forms nach Mechanik-Abbau
-> korrekt antworten; optional eine Folge-ADR „JSON-CLI ausgeliefert"
-> (ADR-0010-Nachfolger). Danach Cluster-Slice selbst nach `done/`.
+> envelope-LOS §1838) + Help-Leak-Pin eingeführt (aus template-T3);
+> `TestRootJSON_AllFormsRespondPostTClose` verifiziert, dass alle
+> registrierten Cobra-Forms nach Mechanik-Abbau korrekt antworten;
+> Public-Doku (§6.1/§6.2) nachgezogen. **SD-1: keine Folge-ADR**
+> (T_close lieferte nur das mit ADR-0010 beschlossene Surface aus —
+> kein neuer Architektur-Entscheid; Auslieferung via done-Slice +
+> Roadmap-Vermerk). Netto −90 LOC (einziger Slice der Serie, der
+> Code entfernt).
 
 ## Auslöser
 
@@ -394,7 +411,7 @@ Logik trägt.
 | T | Inhalt | LOC (Schätzung) |
 | - | ------ | --------------- |
 | T0 | **Discovery + Sub-Decisions.** Fünf T0-Fragen aus §T0-Discovery klären (Flag-Scope, Dry-Run-Architektur, DTO-Lokalisation, Diff-Renderer, Reihenfolge). Entscheidung pro Frage mit Begründung in einem `T0-Outcomes`-Block dokumentieren. ADR-0010 bleibt unangetastet (§AK ADR-Disziplin). | — (Plan-Arbeit) |
-| T1 | **Schema-Vertrag-Doku.** `docs/user/cli-json-output.md` (neu) zitiert `LH-FA-CLI-007`-Schema verbatim, dokumentiert DTO-Konvention, listet Per-Command-Folge-Slice-Reihenfolge. README EN+DE bekommt Verweis-Zeile. **Delegation: geliefert via `slice-v1-cli-json-dry-run-doctor`** ([`done/slice-v1-cli-json-dry-run-doctor.md`](../done/slice-v1-cli-json-dry-run-doctor.md) T1-Tranche, DoD-Hash `299e792`). Cluster-T_close-Reviewer sucht **keinen** separaten Cluster-T1-Commit. | ~80 (reine Doku, via Doctor-Slice) |
+| T1 | **Schema-Vertrag-Doku.** `docs/user/cli-json-output.md` (neu) zitiert `LH-FA-CLI-007`-Schema verbatim, dokumentiert DTO-Konvention, listet Per-Command-Folge-Slice-Reihenfolge. README EN+DE bekommt Verweis-Zeile. **Delegation: geliefert via `slice-v1-cli-json-dry-run-doctor`** ([`done/slice-v1-cli-json-dry-run-doctor.md`](slice-v1-cli-json-dry-run-doctor.md) T1-Tranche, DoD-Hash `299e792`). Cluster-T_close-Reviewer sucht **keinen** separaten Cluster-T1-Commit. | ~80 (reine Doku, via Doctor-Slice) |
 | T2..Tn | **Spawn Folge-Slice-Stubs** in `open/` für alle 9 Per-Command-Slices. Pro Stub: Auslöser + grobe AKs + LOC-Schätzung + Verweis auf gemeinsamen Schema-Vertrag. Reihenfolge nach T0-(e). | ~30 LOC pro Stub × 9 = ~270 |
 | T_close | **Cluster-Closure.** Pflicht-Bedingung gemäß §Aufhebungsbedingung Closure-Hard-Rule (§124-148): **alle 9** Folge-Slices in `done/`. Punkt. Cluster-Slice mit DoD-Hash-Line aller Folge-Slices nach `done/` plus Roadmap-Update. ADR-0010 bleibt **unverändert**; optionale Folge-ADR ist Sub-Decision (siehe AK „ADR-0010-Liefer-Anker"). **Kein** „kritisches Quorum", **kein** MVP-Bypass, **kein** Restweg-Carveout als Closure-Alternative. Der **Notfall-Slip-Pfad** aus §Aufhebungsbedingung §137-148 (Carveout-Eintrag + abgeschwächte Liefer-Aussage) ist explizit **kein wählbarer** T_close-Pfad — er ist Restlauf-Disziplin für einen unvermeidbaren Slip und tritt nur in Kraft, **nachdem** ein Slip bereits passiert ist (Default-Erwartung bleibt „keine Slips"). | — (Doku) |
 
@@ -712,7 +729,7 @@ Cluster-Stand **8/9 done** (config T8-Closure abgeschlossen, nach
 **Config-Slice 8/9 vollständig erledigt (T0–T8 + drei Review-
 Runden)** — `make gates` grün (lint + test, Coverage 91.30 % ≥ 90 %,
 docs-check). DoD-Hash-Tabelle im
-[`done/slice-v1-cli-json-dry-run-config.md`](../done/slice-v1-cli-json-dry-run-config.md).
+[`done/slice-v1-cli-json-dry-run-config.md`](slice-v1-cli-json-dry-run-config.md).
 Zusammenfassung der Tranchen:
 
 - **T2 (Port + CLI-Scaffold)**: Port-Felder + zwei Sentinels
@@ -776,7 +793,7 @@ carveouts.md vier Folge-Stub-Einträge (R3-MED-3); Slice nach `done/`
 mit DoD-Hash-Tabelle. Cluster-Stand jetzt **9/9 Folge-Slices done**.
 
 **Folge-Slice 9/9 template — vollständig done (T0→T2→T4)**
-([`done/`](../done/slice-v1-cli-json-dry-run-template.md)): der
+([`done/`](slice-v1-cli-json-dry-run-template.md)): der
 **letzte und kleinste** Cluster-Slice (~60 LOC). T0-Discovery +
 R1+R2+R3 (Asymptote HIGH 1→0→0) + T2 (`template list --json`
 Array→Minimalkontrakt-Envelope, Breaking-Change CHANGELOG

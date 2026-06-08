@@ -2,7 +2,7 @@
 
 > **Status (2026-06-07):** T2 bis T8 ✅, Slice **done**. R15-Bestätigungsrunde 2026-06-07 lieferte **HIGH=0, MED=0, LOW=2 + 1 Cross-Slice**: vier T7-Fixes adversarial bestätigt (Validator-Flag-Timing, Sanitizer-Unwrap-Chain, WARN-Konsistenz, Pattern-Verifikation), zwei neue R15-LOW-Findings in T8 mitgefixt (R15-LOW-1 Sanitizer-Substring-Robustheit, R15-LOW-2 TooMany-DryRun-Coverage-Pin), eine R15-Cross-Slice-1-Pattern-Drift-Erkenntnis (add/init/generate haben analoge Defekte) in neuen open/-Stub [`slice-v1-cli-json-envelope-consolidation`](../open/slice-v1-cli-json-envelope-consolidation.md) ausgelagert. T8-Closure-Commit siehe §Tranche-Status. Lifecycle-Übergänge: `open/` nach R1-R11, `next/` nach R12, `in-progress/` ab T2, `done/` nach T8; 56 Plan-Findings (R1-R12) + 11 Pre-T8-Findings (R13-R14) + 3 R15-Findings = 70 gesamt. Fünfter Folge-Slice (5/9) des
 > Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 5/9). Konsumiert das Pattern-Vorbild aus
 > [`slice-v1-cli-json-dry-run-add`](../done/slice-v1-cli-json-dry-run-add.md)
 > 1:1 für die symmetrische Service-Operation und aus
@@ -1158,7 +1158,7 @@ Drei T6-Cell-Pin-Namen aus T0-(c) Sub-Decision sind als bewusste **Application-L
 ## Bezug
 
 - Cluster-Slice:
-  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
   §T0-Outcomes — Vorgaben für den Folge-Slice-Block.
 - Pattern-Vorbilder:
   [`slice-v1-cli-json-dry-run-add`](../done/slice-v1-cli-json-dry-run-add.md)

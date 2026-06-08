@@ -5,7 +5,7 @@
 | Projektname      | `u-boot`                                                      |
 | Bezug            | `LH-NFA-USE-004`, `LH-FA-CLI-007`, `LH-FA-CLI-008`, `LH-FA-CLI-006` in [`spec/lastenheft.md`](../../spec/lastenheft.md) |
 | ADR              | [`docs/plan/adr/0010-kein-http-driving-adapter.md`](../plan/adr/0010-kein-http-driving-adapter.md) |
-| Slice-Anker      | [`docs/plan/planning/in-progress/slice-v1-cli-json-dry-run.md`](../plan/planning/in-progress/slice-v1-cli-json-dry-run.md) (Cluster) + [`docs/plan/planning/done/slice-v1-cli-json-dry-run-doctor.md`](../plan/planning/done/slice-v1-cli-json-dry-run-doctor.md) (Doctor-Folge-Slice, done) |
+| Slice-Anker      | [`docs/plan/planning/in-progress/slice-v1-cli-json-dry-run.md`](../plan/planning/done/slice-v1-cli-json-dry-run.md) (Cluster) + [`docs/plan/planning/done/slice-v1-cli-json-dry-run-doctor.md`](../plan/planning/done/slice-v1-cli-json-dry-run-doctor.md) (Doctor-Folge-Slice, done) |
 | Status           | Entwurf 0.4.0                                                 |
 | Datum            | 2026-06-04                                                    |
 
@@ -359,7 +359,7 @@ Weitere Subcommand-Sektionen kommen mit den jeweiligen Folge-Slices
 Spec-Enum (`LH-FA-CLI-007` §338) listet zehn Subcommands; alle
 sollen `--json` tragen (`LH-NFA-USE-004` §1813). Migration läuft
 **inkrementell** über neun Folge-Slices unterhalb des Cluster-
-Slices [`slice-v1-cli-json-dry-run`](../plan/planning/in-progress/slice-v1-cli-json-dry-run.md);
+Slices [`slice-v1-cli-json-dry-run`](../plan/planning/done/slice-v1-cli-json-dry-run.md);
 Reihenfolge gemäß Cluster-T0-(e):
 
 | # | Folge-Slice | Subcommand-Form(en) | Status |

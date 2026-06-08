@@ -2,7 +2,7 @@
 
 > **Status:** geplant für v0.4.0 — zweiter Folge-Slice des
 > Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
 > (T0-(e) Platz 2). Etabliert die schwerere Cluster-Infrastruktur,
 > die der Doctor-Slice (Platz 1) bewusst ausgelassen hat:
 > **`RecordingFileSystem`-driven-Adapter** (Cluster-T0-(b)
@@ -1245,7 +1245,7 @@ denkbar. **Verworfen**, weil:
 ## Bezug
 
 - Cluster-Slice:
-  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
   §T0-Outcomes (b)+(d)+(e) sind die Vorgaben dieses Slices.
 - Vorgänger-Slice:
   [`slice-v1-cli-json-dry-run-doctor`](../done/slice-v1-cli-json-dry-run-doctor.md)

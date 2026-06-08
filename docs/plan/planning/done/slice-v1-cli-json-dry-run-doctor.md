@@ -2,7 +2,7 @@
 
 > **Status:** geplant für v0.4.0 — erster Folge-Slice des
 > Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
 > (T0-(e) Platz 1). Liefert die gemeinsame Infrastruktur für die
 > 9er-Folge-Slice-Serie: Root-PersistentFlag `--json` (T0-(a)),
 > Common-Envelope `cliJSONEnvelope` (T0-(c)) und Schema-Helper
@@ -13,7 +13,7 @@
 > Tranchen geliefert (T0-T5), DoD-Hashes in §Tranchen unten.
 > Cluster-T1-Doku via L1-Delegation in dieser Slice geliefert
 > (`docs/user/cli-json-output.md`); Cluster-Slice-Tabelle in
-> [`slice-v1-cli-json-dry-run.md`](../in-progress/slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run.md`](slice-v1-cli-json-dry-run.md)
 > §Tranchen T1-Zelle nachgezogen.
 
 ## Auslöser
@@ -933,7 +933,7 @@ Bandbreiten-Überschreitung ist begründet (Pattern-Vorbild-Last für
 ## Bezug
 
 - Cluster-Slice:
-  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
   — §T0-Outcomes (a, c, e) sind die Vorgaben dieses Slices,
   §Aufhebungsbedingung Closure-Hard-Rule ist verbindlich für die
   Cluster-Schließung.

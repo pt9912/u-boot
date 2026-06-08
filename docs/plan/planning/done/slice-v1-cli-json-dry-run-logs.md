@@ -2,7 +2,7 @@
 
 > **Status:** **done** (2026-06-07). Siebter Folge-Slice (7/9) des
 > Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 7/9). **Read-only-Klasse** auf lokalem FS
 > (analog up-down): weder `--dry-run` noch `--diff` (Cluster-Slice
 > Z. 464-467); T0-(a) festgezurrt auf **Option (A) Single-Envelope
@@ -592,7 +592,7 @@ Closure nachgezogen.
 ## Bezug
 
 - Cluster:
-  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
   (Folge-Slice 7/9).
 - Pattern-Vorbilder:
   [`slice-v1-cli-json-dry-run-up-down`](slice-v1-cli-json-dry-run-up-down.md)

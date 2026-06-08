@@ -70,7 +70,7 @@
 > Beschlüssen für (a)/(b)/(g)/(o)/(p); vier Folge-Slice-Stubs in
 > `open/` gespawned; LOC-Bilanz ~1500-1900.
 > Achter Folge-Slice (8/9) des Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 8/9). **Drei Sub-Forms unter einem Slice**
 > (analog up-down-Bündelung): `u-boot config` (bare), `u-boot
 > config get <path>`, `u-boot config set <path> <value>`. Bare +
@@ -768,7 +768,7 @@ Kombi). (R1-MED-5 + R2-HIGH-2 + R2-MED-4/5-Adressierung.)
 ## Bezug
 
 - Cluster:
-  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
   (Folge-Slice 8/9).
 - Pattern-Vorbilder:
   - **Modifying-Klasse**:

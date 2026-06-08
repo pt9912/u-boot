@@ -2,7 +2,7 @@
 
 > **Status:** **done** (2026-06-07). Sechster Folge-Slice (6/9) des
 > Cluster-Slice
-> [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+> [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
 > (T0-(e) Reihenfolge 6/9). **Read-only-Klasse**: weder `--dry-run`
 > noch `--diff` (Cluster-Slice Z. 464-467), nur `--json` mit
 > typisiertem Data-Carrier. **Bündelt up+down** in einem Slice
@@ -1144,7 +1144,7 @@ weil up/down keine Voll-Schema-Pfade tragen.
 ## Bezug
 
 - Cluster:
-  [`slice-v1-cli-json-dry-run`](../in-progress/slice-v1-cli-json-dry-run.md)
+  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)
   (Folge-Slice 6/9).
 - Pattern-Vorbilder:
   [`slice-v1-cli-json-dry-run-doctor`](slice-v1-cli-json-dry-run-doctor.md)
