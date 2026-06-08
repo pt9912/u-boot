@@ -899,36 +899,65 @@ hierher verschoben wurde).
      Reject).
    - `erroremission_internal_test.go`: `helpRequested`- +
      `jsonSliceSuffix`-Test-Cases entfernen.
+7. **Public-Contract-Doku** (Review-MEDIUM — sonst driftet die
+   Vertragsdoku gegen das CLI-Verhalten):
+   - `docs/user/cli-json-output.md` **§6-Tabelle Zeile 9**: „bare
+     `template --json` bleibt Gate-Reject bis Cluster-T_close" →
+     „bare `template --json` → RunE-Reject
+     `ErrTemplateSubcommandRequired`/Exit 2 (envelope-LOS §1838)".
+   - **§6.1 „Übergangs-Reject für nicht-migrierte Forms"**: die
+     Sektion beschreibt die **abgebaute** Gate-Mechanik
+     (Allowlist + `PersistentPreRunE` + `ErrJSONNotImplemented`).
+     Umschreiben auf: „alle Spec-Enum-Forms sind migriert; die
+     Übergangs-Mechanik wurde im Cluster-T_close **entfernt**; die
+     einzige verbliebene Reject-Form ist bare `template --json`
+     (RunE-getragen, §1838-Ausnahme)." `ErrJSONNotImplemented`-
+     Erwähnung raus.
+   - **§6.2 bare-`template`-Absatz**: „Bis Cluster-T_close trägt
+     der Allowlist-Gate diesen Reject (`ErrJSONNotImplemented`);
+     mit dem Gate-Abbau übernimmt ein RunE-Reject" → „trägt ein
+     RunE-Reject (`ErrTemplateSubcommandRequired`, envelope-LOS)".
+   - **§ADR-Bezug** (~Z. 1178): „ob bei Cluster-T_close eine neue
+     Folge-ADR angelegt wird, entscheidet der Cluster-Slice" →
+     „Cluster-T_close hat entschieden: **keine** neue Folge-ADR
+     (SD-1 (b)); der done-Slice + Roadmap-Liefervermerk
+     dokumentieren die Auslieferung; ADR-0010 bleibt unverändert."
+   - **CHANGELOG.md** (§Unreleased ### Changed): den Mechanik-
+     Wechsel spiegeln — bare `template --json` wird jetzt per
+     `ErrTemplateSubcommandRequired` (RunE) statt Gate
+     (`ErrJSONNotImplemented`) rejected; die Allowlist-/Reject-
+     Gate-Übergangs-Mechanik ist mit dem Cluster-Abschluss
+     entfernt. (Entweder Erweiterung des bestehenden template-
+     Eintrags oder eigener Closure-Eintrag.)
 
 ### Verifikation (Aufhebungsbedingung T_close)
 
-- `make gates` grün.
-- Alle zehn Spec-Enum-Forms: `--json` antwortet korrekt; kein
-  `ErrJSONNotImplemented` mehr im Code (`grep` == 0); kein
-  Help-Leak; bare `template --json` → Exit 2.
-- `ErrJSONNotImplemented` nirgends mehr referenziert.
+- `make gates` grün (inkl. `docs-check` — fängt Vertragsdoku-
+  Drift via Link-/Anchor-Checks; die §6.1/§6.2-Prosa wird im
+  Review der genannten Abschnitte verifiziert).
+- **Alle registrierten JSON-relevanten Cobra-Forms** (Spec-Enum
+  inkl. der gruppierten Subcommands — `config`/`config get`/`config
+  set`, `template`/`template list` zählen separat; Tree-Walk über
+  `WalkRootCommandPathsForTest`): `--json` antwortet korrekt, kein
+  Help-Leak, kein roher Output. Bare `template --json` →
+  `ErrTemplateSubcommandRequired`/Exit 2 (expliziter Pin).
+- `ErrJSONNotImplemented` nirgends mehr referenziert (`grep` == 0,
+  inkl. Tests).
 
-### Sub-Decisions (zum Review)
+### Sub-Decisions (User-Review 2026-06-08 — festgezurrt)
 
-- **SD-1 — Folge-ADR?** ADR-0010 §Folgepunkte Re-Eval-Trigger 2
-  ist mit T_close erfüllt („JSON-CLI als Maschinen-Schnittstelle
-  ausgeliefert"). Optionen: (a) knappe Folge-ADR-00XX als
-  ADR-0010-Nachfolger; (b) Roadmap-Liefervermerk + done-Slice
-  reichen (ADR-0010 selbst sagt „T_close entscheidet"). **Plan-
-  Empfehlung: (b)** — kein neuer Entscheid, nur Auslieferung; ein
-  done-Slice + Roadmap-Vermerk dokumentieren es ausreichend. Review
-  kann (a) fordern.
-- **SD-2 — Test-Redistribution.** `git mv jsonallowlist_test.go →
-  rootjson_test.go` (behält Git-Historie) vs. Tests in bestehende
-  Files verteilen. **Empfehlung: git mv** (saubere Historie, ein
-  Heim für Root-`--json`-Verhaltens-Pins).
-- **SD-3 — Sentinel-Message.** Vorschlag: `"u-boot template
-  requires a subcommand (try u-boot template list)"`. Exit 2 via
-  `isUsageError`.
-- **SD-4 — Commit-Struktur.** (a) Code-T_close (Mechanik-Abbau +
-  Sentinel + Tests) als ein Commit, dann (b) Cluster-Slice → `done/`
-  + DoD-Tabelle als zweiter Commit (+ DoD-Hash-Followup). **Empfehlung:
-  zwei Commits** (Code zuerst grün, dann Lifecycle).
+- **SD-1 — Folge-ADR? → (b) KEINE Folge-ADR.** Nur die bestehende
+  User-Doku (cli-json-output.md §ADR-Bezug) finalisieren: „T_close
+  hat entschieden, keine neue ADR; Auslieferung via done-Slice +
+  Roadmap-Vermerk". ADR-0010 bleibt unverändert.
+- **SD-2 — Test-Redistribution → `git mv jsonallowlist_test.go →
+  rootjson_test.go`** (behält Git-Historie).
+- **SD-3 — Sentinel-Message → `"u-boot template requires a
+  subcommand (try u-boot template list)"`** (Englisch korrekt,
+  Exit 2 via `isUsageError`).
+- **SD-4 — Commit-Struktur → zwei Commits**: erst Code-T_close
+  (Mechanik-Abbau + Sentinel + Tests + Public-Doku) grün, dann
+  Cluster-Slice → `done/` + DoD-Tabelle (+ DoD-Hash-Followup).
 
 ### Risiken
 
