@@ -58,10 +58,12 @@
 > SilenceLogger, kein Mutex nötig) clear.
 > Die zuvor nach T5 verschobenen Flag-Structs
 > (`configGetFlags`/`configShowFlags` + `DryRun`/`Diff` +
-> Flag-Registrierung) sind in T5 gelandet. Nächster Schritt: **T8**
-> (Closure: CHANGELOG, `cli-json-output.md` §6.9 + Reject-Liste 4→1
-> + §7-Mutations-Zeile, roadmap done-Zähler 7→8, carveouts.md für
-> die vier Folge-Stubs, Slice nach `done/` mit DoD-Hash-Tabelle).
+> Flag-Registrierung) sind in T5 gelandet. **T8-Closure
+> abgeschlossen** (`724a283`): CHANGELOG, `cli-json-output.md`
+> §6.9 + §6-Tabelle (Reject 4→1) + §7-Mutations-Zeile, roadmap
+> done-Zähler 7→8, carveouts.md für die vier Folge-Stubs, Slice
+> nach `done/` mit DoD-Hash-Tabelle. Slice damit vollständig done;
+> Cluster-Stand 8/9 (nur noch template 9/9 offen).
 > R1+R2+R3-
 > Adressierung gefahren: R1=4+6+4, R2=3+6+4, R3=0+4+4 — Asymptote
 > erreicht; T0-Sub-Decisions (a)-(p) komplett mit R3-festgezurrten
