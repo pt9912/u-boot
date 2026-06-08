@@ -762,11 +762,24 @@ Flag-Registrierung). ~350-450 LOC.
 ([`open/`](../open/slice-v1-cli-json-dry-run-template.md))
 — T0-Discovery + R-Runden noch nicht gefahren.
 
-**Fokussierter T2–T4-Review (2026-06-08) vor T5**: Multi-`%w`,
-Sentinel-Split-Vollständigkeit und `Warnings`-Form clear; **ein
-HIGH-Finding R-T4-1** gefixt — der T4-Recorder-Verzicht hätte dem
-T5-`--diff`-Pfad die Byte-Quelle entzogen; Korrektur:
-`ConfigSetResponse.PlannedFiles`-Feld + Recorder-Surfacing wie add.
+**Zweistufiger T2–T4-Review (2026-06-08) vor T5 — zwei HIGH-Findings**:
+- **R-T4-1** (Selbst-Review): T4-Recorder-Verzicht hätte dem
+  T5-`--diff`-Pfad die Byte-Quelle entzogen; Fix
+  `ConfigSetResponse.PlannedFiles`-Feld + Recorder-Surfacing wie add.
+- **R-IR-1** (unabhängiger Reviewer-Agent, frischer Kontext): die
+  T3-Split-Sentinels `ErrConfigWriteRejected`/`ErrConfigPostPatch
+  SanityFailed` fehlten in `cli.go isConfigValidationError` — ein von
+  der geplanten T5-Mapper-Tabelle **unabhängiger**, bereits live
+  wirksamer ExitCode-Klassifikator. Folge: heutige Exit-10→Exit-1-
+  Regression bei `config set services.x.enabled` + jedem Post-Patch-
+  Sanity-Failure. Vom Selbst-Review übersehen (Fokus lag auf dem
+  neuen Mapper). Gefixt + `TestExitCode_ConfigValidationSentinels`-
+  Tabellen-Pin. Lehre: bei Sentinel-Splits IMMER beide Klassifikator-
+  Pfade (Mapper + ExitCode) prüfen.
+- Übrige Punkte clear: Multi-`%w` (kein Fremd-Sentinel-Match),
+  Read/Write-Trennung (Reads auf `s.fs`, kein dry-run-Leak),
+  SilenceLogger (alle 5 Sites), kein Mutex nötig (config swappt
+  `s.fs` nie).
 
 Session-Commits 2026-06-08:
 - config-T2: Port-Felder + 2 Sentinels + CLI-Scaffold +
@@ -775,7 +788,9 @@ Session-Commits 2026-06-08:
   Orphan-WARN→Warnings + Tests.
 - config-T4: PreviewMode-Cluster + Composition-Root + Factory-Tests.
 - config-T4-Review-Followup R-T4-1: `ConfigSetResponse.PlannedFiles`
-  + Recorder-Surfacing (dieser Commit).
+  + Recorder-Surfacing.
+- config-Review-Followup R-IR-1: ExitCode-Regression der zwei
+  Split-Sentinels gefixt + ExitCode-Pin (dieser Commit).
 
 ## Out of Scope
 

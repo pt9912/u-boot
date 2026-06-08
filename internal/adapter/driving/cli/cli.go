@@ -372,6 +372,14 @@ func isTemplateInitValidationError(err error) bool {
 func isConfigValidationError(err error) bool {
 	return errors.Is(err, driving.ErrConfigPathUnknown) ||
 		errors.Is(err, driving.ErrConfigValueInvalid) ||
+		// slice-v1-cli-json-dry-run-config T0-(m) split two classes
+		// out of ErrConfigValueInvalid (T3). Both share the LH-FA-
+		// CONF Exit-10 class — they MUST be listed here or ExitCode
+		// (a classifier independent of the new T5 mapConfigError…
+		// mapper) silently drops them to Exit 1. Independent-Review
+		// finding R-IR-1: present regression on the plain CLI path.
+		errors.Is(err, driving.ErrConfigWriteRejected) ||
+		errors.Is(err, driving.ErrConfigPostPatchSanityFailed) ||
 		errors.Is(err, driving.ErrConfigSchemaInvalid) ||
 		errors.Is(err, driving.ErrConfigValueNotSet) ||
 		// slice-v1-devcontainer-features Review-Followup R1:

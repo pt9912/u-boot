@@ -10,13 +10,20 @@
 > WARN→`Warnings` Dual-Emission (T3); `fsFactory`-Feld + nil-safe
 > `selectFS` + Write-Routing über `selectFS(req.PreviewMode)` +
 > `NewConfigServiceWithFactory` + `cmd/uboot/main.go`-Wiring (T4).
-> **Fokussierter T2–T4-Review (2026-06-08) vor T5**: Multi-`%w` /
-> Sentinel-Split / `Warnings`-Form clear; **R-T4-1 (HIGH) gefixt** —
-> `ConfigSetResponse.PlannedFiles []driving.PlannedFile`-Feld neu +
-> Recorder-Surfacing (`mapCaptureToPlannedFiles`), weil
-> `config set --diff` die patched/current Bytes für den geteilten
-> Diff-Renderer braucht (ursprünglicher T4-Recorder-Verzicht war
-> falsch).
+> **Review-Runde vor T5 (2026-06-08, zwei Stufen)**: (1) Selbst-
+> Review fand **R-T4-1 (HIGH)** — `ConfigSetResponse.PlannedFiles
+> []driving.PlannedFile`-Feld neu + Recorder-Surfacing
+> (`mapCaptureToPlannedFiles`), weil `config set --diff` die
+> patched/current Bytes für den geteilten Diff-Renderer braucht
+> (T4-Recorder-Verzicht war falsch). (2) **Unabhängiger** Reviewer-
+> Agent fand **R-IR-1 (HIGH)** — die T3-Sentinel-Split-Sentinels
+> `ErrConfigWriteRejected`/`ErrConfigPostPatchSanityFailed` fehlten
+> in `cli.go isConfigValidationError` (ein von der T5-Mapper-Tabelle
+> **unabhängiger**, bereits live wirksamer ExitCode-Klassifikator) →
+> heutige Exit-10→Exit-1-Regression auf dem Plain-CLI-Pfad. Gefixt +
+> `TestExitCode_ConfigValidationSentinels`-Tabellen-Pin gegen künftige
+> Split-Regressions. Übrige Punkte (Multi-`%w`, Read/Write-Trennung,
+> SilenceLogger, kein Mutex nötig) clear.
 > **Verschoben nach T5** (Lint-/Behavior-Grund):
 > `configGetFlags`/`configShowFlags` + `DryRun`/`Diff`-Felder +
 > `--dry-run`/`--diff`-Flag-Registrierung. Nächster Schritt: **T5**
