@@ -161,8 +161,26 @@ func TestConfigJSON_SetDiffHunks(t *testing.T) {
 		jsontestutil.WithSubcommand("set"),
 		jsontestutil.WithExitCode(0),
 	)
-	if !strings.Contains(stdout.String(), "hunks") {
-		t.Errorf("--diff --json envelope should carry hunks; got %s", stdout.String())
+	// R-CLI-1 LOW-1: assert real hunk content, not just the key
+	// string. plannedFiles[0].hunks must carry ≥1 hunk whose body
+	// shows the old→new line change.
+	var env map[string]any
+	if err := json.Unmarshal(stdout.Bytes(), &env); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	pfs, _ := env["plannedFiles"].([]any)
+	if len(pfs) != 1 {
+		t.Fatalf("want 1 plannedFile, got %v", pfs)
+	}
+	pf0, _ := pfs[0].(map[string]any)
+	hunks, _ := pf0["hunks"].([]any)
+	if len(hunks) == 0 {
+		t.Fatalf("plannedFiles[0].hunks must be non-empty; got %s", stdout.String())
+	}
+	h0, _ := hunks[0].(map[string]any)
+	content, _ := h0["content"].(string)
+	if !strings.Contains(content, "-name: old") || !strings.Contains(content, "+name: new") {
+		t.Errorf("hunk content should show old→new change; got %q", content)
 	}
 }
 
@@ -319,6 +337,43 @@ func TestConfigJSON_UnknownSubcommandEmitsEnvelope(t *testing.T) {
 		jsontestutil.WithSubcommand("show"),
 		jsontestutil.WithExitCode(2),
 	)
+}
+
+// TestConfigJSON_ReadOnlyArgsErrorStaysMinimalWithDryRun pins
+// T7-Review R-CLI-1: an args error on a READ-ONLY form combined
+// with --dry-run must still emit a Minimal envelope (the bare/get
+// envelope-shape invariant) — the args-validator must NOT leak a
+// Voll-Schema envelope just because the synthetic --dry-run flag is
+// present. Two shapes: unknown-subcommand (bare) and missing-arg
+// (get). Both read-only → no dryRun field in the envelope.
+func TestConfigJSON_ReadOnlyArgsErrorStaysMinimalWithDryRun(t *testing.T) {
+	cases := []struct {
+		name string
+		args []string
+	}{
+		{"bare-unknown-sub", []string{"--json", "config", "foo", "--dry-run"}},
+		{"get-missing-arg", []string{"--json", "config", "get", "--dry-run"}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			app := newAppWithConfigStub(&fakeConfigUseCase{})
+			var out bytes.Buffer
+			err := app.Execute(context.Background(), tc.args, &out, &bytes.Buffer{})
+			if cli.ExitCode(err) != 2 {
+				t.Fatalf("exit = %d, want 2 (err=%v)", cli.ExitCode(err), err)
+			}
+			var env map[string]any
+			if e := json.Unmarshal(out.Bytes(), &env); e != nil {
+				t.Fatalf("unmarshal: %v (out=%s)", e, out.String())
+			}
+			if _, present := env["dryRun"]; present {
+				t.Errorf("read-only args error must stay Minimal (no dryRun field); got %s", out.String())
+			}
+			if _, present := env["plannedFiles"]; present {
+				t.Errorf("read-only args error must not carry plannedFiles; got %s", out.String())
+			}
+		})
+	}
 }
 
 // TestConfigJSON_HelpEdgeCaseNoEnvelope pins R1-MED-6: `config

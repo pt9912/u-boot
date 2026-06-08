@@ -12,7 +12,7 @@
 > Per-Command-Folge-Slice-Serie. T0 ✅ festgezurrt
 > (§T0-Outcomes — 5 Sub-Decisions plus Mutations-Matrix-Pre-Scan);
 > in `in-progress/`. **Cluster-Stand (2026-06-08): 7/9 done, 1/9
-> in-progress (config T6 done), 1/9 open.**
+> in-progress (config T7 done), 1/9 open.**
 >
 > **Done (7/9)**:
 > [`doctor`](../done/slice-v1-cli-json-dry-run-doctor.md) (1/9),
@@ -23,20 +23,18 @@
 > [`up-down`](../done/slice-v1-cli-json-dry-run-up-down.md) (6/9),
 > [`logs`](../done/slice-v1-cli-json-dry-run-logs.md) (7/9).
 >
-> **In-progress (1/9, T2–T6 done — Port + Application + Composition-Root + CLI + Acceptance)**:
+> **In-progress (1/9, T2–T7 done — Port + Application + Composition-Root + CLI + Acceptance + Review)**:
 > [`config`](slice-v1-cli-json-dry-run-config.md) (8/9) —
 > T2 Port, T3 Application, T4 PreviewMode-Cluster/Composition-Root,
-> T5 CLI-RunE (3 Data-Carrier + Subcommand-Pflicht inkl. Error-Pfad
-> via subcommand-bewusste `reportErrorSub` + Allowlist 3 Forms +
-> Mapper Switch-Order T0-(f) + Voll-Schema/Dry-Run/Diff + Reject +
-> WARN→diagnostics) und T6 Acceptance-Suite (Mapper-Rows white-box +
-> Switch-Order-`_ByDesign` + `--quiet --json` + Cobra-unknown-sub +
-> Help-Edge-Case + CONF-005-Disambiguation + Sanitizer + Subcommand-
-> Pflicht + Mid-Stage-Shapes) fertig. Zwei Review-Runden vor T5
-> (R-T4-1 + unabhängig R-IR-1, beide HIGH, gefixt). R1+R2+R3
-> durchlaufen; 16 T0-Sub-Decisions festgezurrt; LOC ~1500-1900;
-> vier Folge-Carveout-Stubs in `open/`. **Nächster Schritt: T7**
-> (Review-Fix-Rounds + Pre-T8-Bestätigungsrunde).
+> T5 CLI-RunE, T6 Acceptance-Suite und T7 Review-Fix-Rounds fertig.
+> **Drei Review-Runden**: (1) Selbst-Review → R-T4-1 (HIGH,
+> PlannedFiles-Surfacing); (2) unabhängiger Agent Port/Application →
+> R-IR-1 (HIGH, ExitCode-Regression); (3) unabhängiger Agent
+> CLI-Layer → R-CLI-1 (MED, Args-Validator-Voll-Schema-Leak auf
+> Read-only-Forms) — alle gefixt. R1+R2+R3 durchlaufen; 16 T0-Sub-
+> Decisions festgezurrt; LOC ~1500-1900; vier Folge-Carveout-Stubs
+> in `open/`. **Nächster Schritt: T8** (Closure: CHANGELOG +
+> `cli-json-output.md` §6.9 + Slice nach `done/`).
 >
 > **Open (1/9)**:
 > [`template`](../open/slice-v1-cli-json-dry-run-template.md) (9/9)
@@ -710,10 +708,10 @@ Diese Entscheidung gehört nicht ins T0.
 
 ## Resume-Punkt-Morgen (Session-Ende 2026-06-08)
 
-Cluster-Stand 7/9 done, 1/9 in-progress (config T6 done), 1/9
+Cluster-Stand 7/9 done, 1/9 in-progress (config T7 done), 1/9
 open (template).
 
-**T2–T6 erledigt** — `make gates` grün (lint + test, Coverage
+**T2–T7 erledigt** — `make gates` grün (lint + test, Coverage
 91.30 % ≥ 90 %, docs-check):
 
 - **T2 (Port + CLI-Scaffold)**: Port-Felder + zwei Sentinels
@@ -754,6 +752,12 @@ open (template).
   (bestätigt Parent-Validator-Dispatch); Help-Edge-Case; CONF-005-
   Disambiguation; Sanitizer-Worst-Case; Subcommand-Pflicht-Pin;
   Mid-Stage-Shapes. Coverage 91.20→91.30 %.
+- **T7 (Review-Fix-Rounds)**: dritte Review-Runde — unabhängiger
+  Agent über den CLI-Layer (T5/T6) → **R-CLI-1 (MED)**:
+  `configArgsValidator` leakte ein Voll-Schema-Error-Envelope auf
+  den Read-only-Forms bei `--dry-run`. Fix: Read-only-Validatoren
+  hartkodieren `false/false` + zwei Regression-Pins. LOW-1:
+  Diff-Hunks-Test auf echte Hunk-Inhalt-Assertion verschärft.
 
 **Bewusste Tranchen-Verschiebungen** (alle dokumentiert + erledigt):
 - **T2→T5**: `configGetFlags`/`configShowFlags` + `DryRun`/`Diff` +
@@ -762,14 +766,17 @@ open (template).
 - **Plan-Refinement T3**: Post-Patch-Sanity-Split auf alle
   `revalidateFeatureEntry`-Sites ausgeweitet (Mapper-Row-6-Konsistenz).
 
-**Nächste Sitzung — natürlicher Folge-Schritt: T7 (Review-Fix-Rounds)**
-([`config-Stub`](slice-v1-cli-json-dry-run-config.md), T7-Zelle):
-Review-Fix-Rounds + Pre-T8-Bestätigungsrunde analog logs. Bei der
-ersten Read-only+Modifying-Hybrid + drei Sub-Forms höhere Review-
-Komplexität erwartet als logs/up-down (~150-250 LOC). Die zwei
-HIGH-Findings (R-T4-1 + R-IR-1) wurden bereits vor T5 gefixt — T7
-ist die finale Konsolidierungs-/Bestätigungsrunde vor der
-T8-Closure.
+**Nächste Sitzung — natürlicher Folge-Schritt: T8 (Closure)**
+([`config-Stub`](slice-v1-cli-json-dry-run-config.md), T8-Zelle):
+CHANGELOG `### Added`; `cli-json-output.md` neue §6.9-Sektion (drei
+Sub-Form-Envelopes + Set-Voll-Schema-Beispiel + Subcommand-Pflicht-
+Doku RunE-only + `--dry-run`/`--diff`-Reject-Doku für Read-only +
+LH-FA-CONF-005-Multi-Use-Disambiguation-Block); §6.1 Reject-Liste
+4→1; §6-Tabelle config→done; §7-NEUEINTRAG `config set` WriteFile;
+roadmap done-Zähler 7→8; carveouts.md für vier Folge-Stubs
+(R3-MED-3); Slice nach `done/` mit DoD-Hash-Tabelle (Commit-Hashes
+T2-T7). Danach Cluster-Restweg: nur noch Folge-Slice 9/9 template
+offen (T0-Discovery noch nicht gefahren).
 
 **Cluster-Restweg nach config**: Folge-Slice 9/9 template
 ([`open/`](../open/slice-v1-cli-json-dry-run-template.md))
@@ -810,7 +817,10 @@ Session-Commits 2026-06-08:
 - config-T6: Acceptance-Vervollständigung (white-box Mapper-Rows +
   Switch-Order-`_ByDesign` + Cobra-unknown-sub + Help-Edge-Case +
   CONF-005-Disambiguation + Sanitizer + Subcommand-Pflicht +
-  `--quiet --json` + Mid-Stage-Shapes) (dieser Commit).
+  `--quiet --json` + Mid-Stage-Shapes).
+- config-T7: unabhängiger CLI-Review → R-CLI-1 (MED) Args-Validator-
+  Voll-Schema-Leak gefixt + 2 Regression-Pins + Diff-Hunks-Assertion
+  verschärft (dieser Commit).
 
 ## Out of Scope
 

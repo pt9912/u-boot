@@ -212,12 +212,24 @@ func registerConfigPreviewRejectFlags(cmd *cobra.Command, form string, dryRun, d
 // (R2-HIGH-3: `u-boot config foo` dispatches to the parent with
 // args=["foo"]). All three map to Exit 2 via [isUsageError]
 // (`unknown command` / `accepts ` prefix).
+//
+// Envelope-Stufe (T7-Review R-CLI-1): only the modifying `set` form
+// may emit a Voll-Schema error envelope; the read-only `show`/`get`
+// forms ALWAYS emit Minimal+Data (the bare/get envelope-shape
+// invariant). Passing the user's real --dry-run/--diff through on a
+// read-only form would flip the args-error envelope to Voll-Schema
+// (`dryRun:true`, `plannedFiles:[]`) and diverge from the RunE
+// reject path (which hard-codes false/false). So read-only validators
+// hard-code false; only `set` reads the real flags.
 func configArgsValidator(a *App, subcommand string, base cobra.PositionalArgs) cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		if err := base(cmd, args); err != nil {
 			if a.json {
-				dryRun, _ := cmd.Flags().GetBool("dry-run")
-				diffFlag, _ := cmd.Flags().GetBool("diff")
+				dryRun, diffFlag := false, false
+				if subcommand == "set" {
+					dryRun, _ = cmd.Flags().GetBool("dry-run")
+					diffFlag, _ = cmd.Flags().GetBool("diff")
+				}
 				_ = writeErrorEnvelopeSub(cmd.OutOrStdout(), err, nil, dryRun, diffFlag, "config", subcommand, mapConfigErrorToDiagnostic, nil)
 			}
 			return err
