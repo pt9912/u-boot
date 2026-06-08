@@ -773,21 +773,21 @@ Subcommand-Pflicht + Reject-Doku + Mapper-Tabelle + CONF-005-
 Disambiguation + YAML-Comment-Limitation) + §6-Tabelle Rows 7+8
 →done (logs-Row-Drift mitgefixt) + §7-Mutations-Zeile `config set`;
 carveouts.md vier Folge-Stub-Einträge (R3-MED-3); Slice nach `done/`
-mit DoD-Hash-Tabelle. Cluster-Stand jetzt **8/9 done**.
+mit DoD-Hash-Tabelle. Cluster-Stand jetzt **9/9 Folge-Slices done**.
 
-**Folge-Slice 9/9 template — T0-Discovery + R1+R2+R3 gefahren,
-Lifecycle `open/`→`next/`**
-([`next/`](../done/slice-v1-cli-json-dry-run-template.md)): der
-**letzte und kleinste** Cluster-Slice (~90 LOC). Asymptote erreicht
-(HIGH 1→0→0). Festgezurrt: `template list --json` Array→Envelope
-(Breaking-Change, CHANGELOG `### Changed`), bare `template --json`
-→ Reject Exit 2 (envelope-LOS per §1838, RunE-getragen via neuem
-`cli.ErrTemplateSubcommandRequired`, T_close-stabil), Error-Pfad
-`mapTemplateErrorToDiagnostic` (T0-(f)). **Nächster Schritt: T2**
-(`runTemplateList`-Envelope-Migration). Nach template-done greift
-die Closure-Hard-Rule → Cluster-Slice selbst via **T_close** nach
-`done/` (Allowlist-Mechanik + `PersistentPreRunE`-Abbau, optional
-Folge-ADR — Entscheidung in T_close, NICHT im template-Slice).
+**Folge-Slice 9/9 template — vollständig done (T0→T2→T4)**
+([`done/`](../done/slice-v1-cli-json-dry-run-template.md)): der
+**letzte und kleinste** Cluster-Slice (~60 LOC). T0-Discovery +
+R1+R2+R3 (Asymptote HIGH 1→0→0) + T2 (`template list --json`
+Array→Minimalkontrakt-Envelope, Breaking-Change CHANGELOG
+`### Changed`; `mapTemplateErrorToDiagnostic`) + T4-Closure. **T3
+entfiel** (bare-`template`-Reject + `cli.ErrTemplateSubcommandRequired`
+nach Cluster-T_close verschoben — wäre solange das Gate existiert
+toter Code). **Nächster Schritt: der finale Cluster-T_close** —
+alle neun Folge-Slices sind in `done/`, die Closure-Hard-Rule ist
+erfüllt: Allowlist-Mechanik + `PersistentPreRunE`-Abbau **+ bare-
+`template`-RunE-Reject + Help-Leak-Pin**, optional Folge-ADR, dann
+Cluster-Slice selbst nach `done/`.
 
 **Zweistufiger T2–T4-Review (2026-06-08) vor T5 — zwei HIGH-Findings**:
 - **R-T4-1** (Selbst-Review): T4-Recorder-Verzicht hätte dem
