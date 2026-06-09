@@ -1,13 +1,13 @@
 # Slice Later: Lokale User-Templates (`u-boot init --template ./pfad`, `LH-FA-TPL-003`)
 
-> **Status:** on hold — `Priorität: Later`. Kein aktiver Trigger.
-> Dieser Plan macht den Roadmap-Eintrag `slice-later-local-templates`
-> ausführungsreif (vorher „noch kein Slice-Plan"), damit der
-> `LH-FA-PROJDOCS-005`-Anker steht und ADR-0009 §Folgepunkte einen
-> konkreten Slice referenzieren kann. Format und Architektur sind
-> durch [ADR-0009](../../adr/0009-template-format-yaml-files.md)
-> §Entscheidung bereits gesetzt — dieser Slice fügt nur den
-> Filesystem-Auflösungspfad hinzu.
+> **Status:** in progress — **T1 done (`66c347d`)**. `Priorität: Later`;
+> Implementierung auf Nutzer-Wunsch gestartet (vor regulärem Trigger).
+> Format und Architektur sind durch
+> [ADR-0009](../../adr/0009-template-format-yaml-files.md)
+> §Entscheidung gesetzt; dieser Slice fügt den Filesystem-
+> Auflösungspfad hinzu. Verbleibend: T2–T5. Der
+> `LH-FA-PROJDOCS-005`-Anker (carveouts.md ↔ roadmap ↔ ADR-0009
+> §Folgepunkte) bleibt bis zur T5-Closure bestehen.
 
 ## Auslöser
 
@@ -96,7 +96,7 @@ Render-Vertrag geprüft (T0-(g)).
 | T | Inhalt (Skizze) |
 | - | --------------- |
 | T0 | Decisions (a)–(g) festzurren; Out-of-Scope-Carveout für `--var` als Stub in `open/` falls nötig. |
-| T1 | **Fundament (pure/infra + Service):** (1) `readTemplate`/apiVersion-Gate/`KnownFields`/`Validate` aus `externaltemplates/catalog.go` in wiederverwendbares Driven-Helper-Paket ziehen, ohne den Katalog-Pfad zu brechen; (2) `domain`-Klassifikator (a) als reine Funktion + Unit-Tests, inkl. `./`, `../`, `/abs`, `~/x`, `foo/bar`, `foo\bar`, `C:\x`, `basic`; (3) Port-/Request-Docs von „TemplateName" auf rohen Template-Ref präzisieren, ohne Feldnamen zwingend umzubenennen; (4) neue Sentinels `driven.ErrTemplateInvalid` + `driving.ErrTemplateInvalid`; (5) `TemplateInitService` zwei umrissene Änderungen: `Open`-Mapping-Branch `ErrTemplateInvalid`→Exit 10 (d) **und** Symlink-Guard im `planRender`-Walk-Callback → `driving.ErrInvalidTemplatePath` Exit 10 (e). Symlink-Table-Test (Walk-Fixture mit Symlink → Exit 10, kein Write). `make gates` grün. |
+| T1 ✅ | **Fundament (pure/infra + Service) — done (`66c347d`):** (1) `templateyaml`-Paket: `Read`/apiVersion-Gate/`KnownFields`/`Validate` aus `externaltemplates/catalog.go` extrahiert, Katalog-Pfad unverändert grün; (2) `domain.ClassifyTemplateRef` reine Funktion + 17-Fall-Tabelle (`./`, `../`, `/abs`, `~`, `~/x`, `foo/bar`, `foo\bar`, `C:\x`, `c:tpl`, `basic`, `~user`, …), 100% Coverage; (3) Port-/Request-Docs auf rohen Template-Ref präzisiert (Feldname `TemplateName` beibehalten); (4) Sentinels `driven.ErrTemplateInvalid` + `driving.ErrTemplateInvalid`; (5) `TemplateInitService` zwei umrissene Änderungen: `Open`-Mapping-Branch `ErrTemplateInvalid`→Exit 10 (d) **und** Symlink-Guard im `planRender`-Walk-Callback → `driving.ErrInvalidTemplatePath` Exit 10 (e), Two-Phase-No-Write-Pin; Dual-Klassifikator (`isTemplateInitValidationError` + `mapInitErrorToDiagnostic` LH-FA-TPL-002) + ExitCode-Pin-Test. `make gates` grün (lint 0, coverage 91.40%). |
 | T2 | **FS-Resolver + Composite (Driven-Adapter):** neue Driven-Impl (z. B. `internal/adapter/driven/localtemplates/`), die `Open(ctx, path)` mit stdlib `os`/`io/fs` rootet (`os.DirFS` + test seam), Root-Existenz/Verzeichnis-Check, `~`/`~/...`-Expansion und `template.yaml`-Gate (→ `ErrTemplateNotFound` bzw. `ErrTemplateInvalid` aus T1) prüft. **Kein Import des Geschwister-Adapters `adapter/driven/fs`**; `localtemplates` ist selbst ein konkreter Adapter. **Symlink-Policy liegt nicht hier**, sondern im Application-Walk-Loop (T1/(e)) — der Resolver liefert den gerooteten `iofs.FS` unverfolgt weiter. Composite-`TemplateFiles` (a2), der via `domain`-Klassifikator an Katalog oder FS-Resolver delegiert. Table-driven Tests mit `fstest.MapFS`/TempDir-Fixtures (inkl. malformed-metadata-, missing-`template.yaml`-, `~`-Expansion- und Windows-Drive-Klassifikationsfällen). |
 | T3 | **Wiring + End-to-End:** `main.go` verdrahtet **einen** Composite-Resolver (Katalog + FS); CLI `--template` bleibt unverändert (kein Business-Dispatch im CLI). Exit-Code-Mapping end-to-end gepinnt (not-found 10 / invalid metadata 10 / symlink-invalid-path 10 / render-IO 14). Mutex-Regeln (`--template` + `--dry-run`/`--diff`/`--devcontainer`/`--force`/`--backup`) aus `slice-v1-cli-json-dry-run-init` gelten unverändert. |
 | T4 | **E2E + Docs:** Acceptance-Test (lokales Template-Fixture → gerendertes Projekt), README (EN + DE) um `--template ./pfad`-Snippet ergänzt, ADR-0009 §Folgepunkte `slice-later-local-templates` auf ✅, CHANGELOG `### Added`. |
