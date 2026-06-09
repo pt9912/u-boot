@@ -12,6 +12,15 @@
 > [`carveouts.md`](../in-progress/carveouts.md) §Carveout-Auflösungs-
 > Slices (historisch) gewandert. `--var`-Variablen bleiben
 > out-of-scope (eigener Folge-Slice).
+>
+> **Post-Closure-Review #1 (`POSTREV_HASH`):** Zweite Review-Runde
+> (Konvergenz-Test) fand einen MEDIUM, den Runde 1 übersah —
+> `ClassifyTemplateRef` stufte bare `.`/`..` als Katalog-Namen ein
+> (statt FS-Pfad), wodurch `init --template .` auf die Katalog-Wurzel
+> und `..` via `path.Join` auf die embed-FS-Wurzel auflöste. Gefixt:
+> `.`/`..` → `TemplateRefPath` **plus** Defense-in-Depth-Guard in
+> `catalog.Open` (pfad-förmige Namen → `ErrTemplateNotFound`). Tests
+> erweitert. `make gates` grün.
 
 ## Auslöser
 

@@ -188,6 +188,8 @@ func TestComposite_DispatchesByKind(t *testing.T) {
 	}{
 		{"catalog name", "basic", false},
 		{"kebab name", "micronaut-sveltekit", false},
+		{"bare dot is path", ".", true},
+		{"bare dotdot is path", "..", true},
 		{"dot-slash path", "./my-template", true},
 		{"absolute path", "/abs/tpl", true},
 		{"home path", "~/tpl", true},

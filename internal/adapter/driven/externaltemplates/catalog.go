@@ -24,6 +24,7 @@ import (
 	iofs "io/fs"
 	"path"
 	"sort"
+	"strings"
 
 	"github.com/pt9912/u-boot/internal/adapter/driven/templateyaml"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
@@ -138,6 +139,16 @@ func (c *Catalog) Open(ctx context.Context, name string) (iofs.FS, error) {
 	}
 	if name == "" {
 		return nil, fmt.Errorf("%w: empty template name", driven.ErrTemplateNotFound)
+	}
+	// Defense-in-depth (Post-Closure-Review #1): a catalog name is a bare
+	// identifier. Reject path-shaped names (`.`/`..`/separators) so a
+	// mis-classified ref can never resolve to the catalog ROOT (`.` →
+	// path.Join collapses to catalogRoot) or escape it (`..`). The
+	// Composite already routes these to the FS resolver via
+	// domain.ClassifyTemplateRef; this guard holds even if a future
+	// caller bypasses that classification.
+	if name == "." || name == ".." || strings.ContainsAny(name, `/\`) {
+		return nil, fmt.Errorf("%w: %q is not a catalog name", driven.ErrTemplateNotFound, name)
 	}
 	subDir := path.Join(catalogRoot, name)
 	entries, err := iofs.ReadDir(c.fs, subDir)

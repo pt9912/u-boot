@@ -29,6 +29,7 @@ const (
 //
 // ref is a path when it:
 //
+//   - is exactly `.` or `..` (current / parent dir);
 //   - starts with `./`, `../`, or `/`;
 //   - is exactly `~` or starts with `~/`;
 //   - contains a forward slash `/` or backslash `\` anywhere;
@@ -42,6 +43,14 @@ const (
 // the catalog branch, where it harmlessly fails name lookup.
 func ClassifyTemplateRef(ref string) TemplateRefKind {
 	switch {
+	// Bare `.` / `..` are filesystem paths (current / parent dir), not
+	// catalog names. Without this case they fall through to the catalog
+	// branch, where `catalog.Open(".")` resolves to the catalog root and
+	// `".."` escapes it via path.Join — both surprising mis-renders
+	// (Post-Closure-Review #1). The `./x` / `../x` forms are already
+	// caught by the prefix cases below.
+	case ref == ".", ref == "..":
+		return TemplateRefPath
 	case strings.HasPrefix(ref, "./"),
 		strings.HasPrefix(ref, "../"),
 		strings.HasPrefix(ref, "/"):

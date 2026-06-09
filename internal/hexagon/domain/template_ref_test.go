@@ -22,6 +22,10 @@ func TestClassifyTemplateRef(t *testing.T) {
 		{"tilde-user not a home alias", "~user", domain.TemplateRefCatalog},
 		{"empty stays catalog", "", domain.TemplateRefCatalog},
 
+		// Bare current/parent dir.
+		{"bare dot", ".", domain.TemplateRefPath},
+		{"bare dotdot", "..", domain.TemplateRefPath},
+
 		// Explicit relative / absolute prefixes.
 		{"dot-slash", "./my-template", domain.TemplateRefPath},
 		{"dot-dot-slash", "../tpl", domain.TemplateRefPath},

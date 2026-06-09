@@ -296,6 +296,22 @@ func TestCatalog_Open_EmptyNameReturnsErrTemplateNotFound(t *testing.T) {
 	}
 }
 
+// Post-Closure-Review #1 (slice-later-local-templates): a path-shaped
+// name must NOT resolve to the catalog root (`.` → path.Join collapses
+// to catalogRoot) or escape it (`..`). Defense-in-depth guard — the
+// Composite already routes these to the FS resolver, but the catalog
+// rejects them regardless of caller.
+func TestCatalog_Open_PathShapedNameRejected(t *testing.T) {
+	t.Parallel()
+	cat := externaltemplates.New()
+	for _, name := range []string{".", "..", "a/b", `a\b`, "../etc"} {
+		_, err := cat.Open(context.Background(), name)
+		if !errors.Is(err, driven.ErrTemplateNotFound) {
+			t.Errorf("Open(%q) err = %v, want ErrTemplateNotFound (not catalog-root resolution)", name, err)
+		}
+	}
+}
+
 func TestCatalog_Open_HonorsCancelledContext(t *testing.T) {
 	t.Parallel()
 	cat := externaltemplates.New()
