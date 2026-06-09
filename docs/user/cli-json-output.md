@@ -519,6 +519,26 @@ kombiniert mit `--dry-run` oder `--diff` wird mit
 rejected. V1 liefert keine Template-Preview; die Migration läuft
 über einen eigenen Folge-Slice (Cluster-Roadmap).
 
+**Lokale Templates** (`slice-later-local-templates`,
+`LH-FA-TPL-003`): `--template` nimmt neben Katalog-Namen (`basic`)
+auch Dateisystem-Pfade (`./mein-tpl`, `/abs/tpl`, `~/tpl`). Die
+Klassifikation ist eine reine, plattformunabhängige Regel
+(`domain.ClassifyTemplateRef`, kein FS-Stat). Die `init --json`-
+Fehlerklassen sind harmonisiert (Code-Klasse == Exit-Klasse):
+
+| Fehler | `diagnostics[].code` | `exitCode` |
+| --- | --- | --- |
+| Pfad/Name nicht gefunden, kein Verzeichnis, fehlende `template.yaml` | `LH-FA-TPL-001` | 10 |
+| `template.yaml` malformed / unsupported `apiVersion` / Metadaten-Minimum verletzt | `LH-FA-TPL-002` | 10 |
+| Unsicherer Pfad im Template-Baum (Symlink / `..` / absolut) | `LH-FA-TPL-002` | 10 |
+| Render-/IO-Fehler (`text/template`-Syntax, Schreibfehler) | `LH-NFA-REL-003` | 14 |
+
+Ein `template.yaml` darf `variables:` deklarieren (für `template
+list`), aber im Render werden sie **aktuell ignoriert** — keine
+Substitution, kein Prompt. Variable-Auflösung (`--var key=value`)
+ist out-of-scope und kommt in einem eigenen Folge-Slice; bis dahin
+rendern lokale Templates nur `{{ .Name }}`.
+
 **ProgressPort-Silencing-Hint** (T0-(o)): Modifying-Subcommands
 mit stdout-bound ProgressPorts MÜSSEN den Port im JSON-Mode
 silencen — der Recorder schützt nur die FS-Layer, nicht stdout.

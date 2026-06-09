@@ -56,6 +56,13 @@ func New() *Resolver { return &Resolver{} }
 // absolute path, a `..`-bearing path, or a symlink — it is the user's
 // explicit choice (T0-(f)); only paths *inside* the template are
 // guarded.
+//
+// Relative refs (e.g. `./tpl`) resolve against the OS process working
+// directory via [os.Stat] / [os.DirFS], NOT against any injected
+// getwd seam the CLI uses for the project base dir. In production the
+// two coincide (the CLI's getwd defaults to [os.Getwd]); a caller that
+// injects a divergent getwd (a future daemon, a test) must pass an
+// absolute `--template` path to stay unambiguous.
 func (*Resolver) Open(ctx context.Context, name string) (iofs.FS, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err

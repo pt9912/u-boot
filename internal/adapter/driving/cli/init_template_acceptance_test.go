@@ -13,6 +13,7 @@ import (
 	"github.com/pt9912/u-boot/internal/adapter/driven/localtemplates"
 	"github.com/pt9912/u-boot/internal/adapter/driven/yaml"
 	"github.com/pt9912/u-boot/internal/adapter/driving/cli"
+	"github.com/pt9912/u-boot/internal/adapter/driving/cli/jsontestutil"
 	"github.com/pt9912/u-boot/internal/hexagon/application"
 )
 
@@ -96,4 +97,53 @@ func TestInitCLI_LocalTemplate_MissingPath(t *testing.T) {
 	if _, serr := os.Stat(filepath.Join(baseDir, "u-boot.yaml")); !os.IsNotExist(serr) {
 		t.Errorf("u-boot.yaml must not be written when the template path is missing")
 	}
+}
+
+// TestInitCLI_LocalTemplate_JSONEnvelope pins the `--json` error
+// envelope for the local-template diagnostic codes (Pre-T5-Review #2):
+// the harmonised codes (LH-FA-TPL-001 not-found / LH-FA-TPL-002
+// malformed) reach the full-schema init envelope with the matching
+// exit code, mirroring the LH-FA-CLI-007/008 discipline of the other
+// subcommands.
+func TestInitCLI_LocalTemplate_JSONEnvelope(t *testing.T) {
+	t.Parallel()
+
+	t.Run("malformed metadata -> LH-FA-TPL-002", func(t *testing.T) {
+		t.Parallel()
+		bad := "apiVersion: github.com/pt9912/u-boot/template/v2\nname: x\ndescription: y\nversion: 1\n"
+		tplDir := writeLocalTemplate(t, bad, nil)
+		var stdout, stderr bytes.Buffer
+		err := realInitApp(t.TempDir()).Execute(
+			context.Background(),
+			[]string{"--json", "init", "myproj", "--template", tplDir, "--no-git"},
+			&stdout, &stderr,
+		)
+		if got := cli.ExitCode(err); got != 10 {
+			t.Errorf("ExitCode = %d, want 10 (err=%v)", got, err)
+		}
+		jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
+			jsontestutil.WithCommand("init"),
+			jsontestutil.WithExpectedCodes("LH-FA-TPL-002"),
+			jsontestutil.WithExitCode(10),
+		)
+	})
+
+	t.Run("missing path -> LH-FA-TPL-001", func(t *testing.T) {
+		t.Parallel()
+		missing := filepath.Join(t.TempDir(), "nope")
+		var stdout, stderr bytes.Buffer
+		err := realInitApp(t.TempDir()).Execute(
+			context.Background(),
+			[]string{"--json", "init", "myproj", "--template", missing, "--no-git"},
+			&stdout, &stderr,
+		)
+		if got := cli.ExitCode(err); got != 10 {
+			t.Errorf("ExitCode = %d, want 10 (err=%v)", got, err)
+		}
+		jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
+			jsontestutil.WithCommand("init"),
+			jsontestutil.WithExpectedCodes("LH-FA-TPL-001"),
+			jsontestutil.WithExitCode(10),
+		)
+	})
 }

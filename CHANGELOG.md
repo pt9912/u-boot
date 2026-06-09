@@ -27,7 +27,10 @@ this file is the same format applied to u-boot itself.
   (`ErrTemplateNotFound`); malformed `template.yaml` → Exit 10
   (`ErrTemplateInvalid`); Symlink im Template-Baum → Exit 10
   (Pfad-Safety-Reject, kein Teil-Output); Render-Fehler → Exit 14.
-  `--var`-Variablen bleiben out-of-scope (eigener Folge-Slice).
+  In einem lokalen `template.yaml` deklarierte `variables:` werden
+  beim Render aktuell **ignoriert** (keine Substitution, kein
+  Prompt); Variable-Auflösung (`--var key=value`) ist out-of-scope
+  und folgt in einem eigenen Slice.
 
 ## [0.4.0] - 2026-06-08
 
