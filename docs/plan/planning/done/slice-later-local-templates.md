@@ -13,7 +13,7 @@
 > Slices (historisch) gewandert. `--var`-Variablen bleiben
 > out-of-scope (eigener Folge-Slice).
 >
-> **Post-Closure-Review #1 (`POSTREV_HASH`):** Zweite Review-Runde
+> **Post-Closure-Review #1 (`d03d73d`):** Zweite Review-Runde
 > (Konvergenz-Test) fand einen MEDIUM, den Runde 1 übersah —
 > `ClassifyTemplateRef` stufte bare `.`/`..` als Katalog-Namen ein
 > (statt FS-Pfad), wodurch `init --template .` auf die Katalog-Wurzel
