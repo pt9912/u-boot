@@ -26,9 +26,14 @@ type TemplateInitRequest struct {
 	// `.Name` in every `*.tmpl` rendering.
 	ProjectName domain.ProjectName
 
-	// TemplateName is the catalog identifier (e.g. `basic`). The
-	// driven [driven.TemplateFiles] adapter resolves it; an unknown
-	// name surfaces as [ErrTemplateNotFound].
+	// TemplateName is the raw template reference the user passed to
+	// `--template`: either a catalog identifier (e.g. `basic`) or a
+	// local filesystem path (e.g. `./my-template`, slice-later-local-
+	// templates). The driven [driven.TemplateFiles] resolver
+	// classifies (via [domain.ClassifyTemplateRef]) and resolves it;
+	// an unknown name / missing path surfaces as [ErrTemplateNotFound],
+	// a present-but-malformed `template.yaml` as [ErrTemplateInvalid].
+	// The field name is retained for source compatibility.
 	TemplateName string
 }
 
@@ -52,6 +57,16 @@ var ErrTemplateNotFound = errors.New("template: not found")
 // (see [domain.NewTemplatePath]'s reject list). Exit code 10 —
 // the user must edit the template, not retry.
 var ErrInvalidTemplatePath = errors.New("template: invalid path")
+
+// ErrTemplateInvalid signals that the resolved template was found but
+// its `template.yaml` is malformed, carries an unsupported apiVersion,
+// or fails the LH-FA-TPL-002 metadata minimum. Exit code 10 — the
+// user must fix the template metadata. Distinct from
+// [ErrTemplateRender] (exit 14, technical) and [ErrTemplateNotFound]
+// (template absent). The use case wraps the driven-port
+// [driven.ErrTemplateInvalid] with this sentinel
+// (slice-later-local-templates T1).
+var ErrTemplateInvalid = errors.New("template: invalid metadata")
 
 // ErrTemplateRender signals a render-time failure: malformed
 // `text/template` syntax, evaluation panic, or an IO failure during

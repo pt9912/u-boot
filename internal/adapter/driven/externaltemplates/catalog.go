@@ -18,7 +18,6 @@
 package externaltemplates
 
 import (
-	"bytes"
 	"context"
 	"embed"
 	"fmt"
@@ -26,8 +25,7 @@ import (
 	"path"
 	"sort"
 
-	"gopkg.in/yaml.v3"
-
+	"github.com/pt9912/u-boot/internal/adapter/driven/templateyaml"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 )
@@ -47,22 +45,6 @@ var templatesFS embed.FS
 // matches the same prefix; same constant is used by the test seam
 // fixture FS so the production and test paths stay parallel.
 const catalogRoot = "templates"
-
-// metadataFile is the per-template metadata filename. ADR-0009
-// §Entscheidung pins it; any directory inside [catalogRoot] without
-// this file is treated as an invalid template (caught at List time
-// so a packaging mistake fails fast in CI).
-const metadataFile = "template.yaml"
-
-// supportedAPIVersion is the only `apiVersion` value the adapter
-// accepts. ADR-0009 §Entscheidung pins the v1 schema; future
-// schema evolution must land in a new slice that bumps this
-// constant (and either rejects or migrates v1-shaped files). The
-// gate runs at load time so a packaging mistake — or a future
-// template author copying a v2 example — fails fast with
-// `domain.ErrInvalidTemplate` rather than silently rendering
-// under wrong assumptions (review-followup N4).
-const supportedAPIVersion = "github.com/pt9912/u-boot/template/v1"
 
 // Catalog is the production TemplateCatalog adapter. The zero value
 // is NOT usable — production callers go through [New] (or [NewWithFS]
@@ -111,7 +93,7 @@ func NewWithFS(fs iofs.FS) *Catalog { return &Catalog{fs: fs} }
 //   - The catalog root must exist; a missing root surfaces as a
 //     wrapped [iofs.PathError] (production embed guarantees it
 //     exists, so a runtime miss is a packaging bug).
-//   - A directory missing its [metadataFile], or with a malformed
+//   - A directory missing its [templateyaml.MetadataFile], or with a malformed
 //     `template.yaml`, fails the call — partial enumeration would
 //     hide build problems. The per-template prefix in the wrap
 //     ("template %q: …") lets the caller pinpoint the offender.
@@ -129,7 +111,7 @@ func (c *Catalog) List(ctx context.Context) ([]domain.TemplateMetadata, error) {
 		if !ent.IsDir() {
 			continue
 		}
-		meta, err := readTemplate(c.fs, path.Join(catalogRoot, ent.Name()))
+		meta, err := templateyaml.Read(c.fs, path.Join(catalogRoot, ent.Name()))
 		if err != nil {
 			return nil, fmt.Errorf("template %q: %w", ent.Name(), err)
 		}
@@ -173,97 +155,4 @@ func (c *Catalog) Open(ctx context.Context, name string) (iofs.FS, error) {
 		return nil, fmt.Errorf("template subfs %q: %w", name, err)
 	}
 	return sub, nil
-}
-
-// readTemplate parses a single `template.yaml` into a domain
-// [TemplateMetadata] and validates it. The intermediate
-// [rawTemplateYAML] struct keeps yaml.v3 tag knowledge inside the
-// adapter; the domain type stays free of YAML-library imports per
-// the depguard `domain-isoliert` rule.
-//
-// Strict decoding (review-followup N1): the decoder is run with
-// KnownFields(true) so a typo like `requiredTool:` (singular) or
-// `addOns:` (instead of `supportedAddOns:`) fails at load time
-// instead of silently dropping the author's intent. Same protection
-// covers stray vendor extensions ahead of any schema-v2 work.
-//
-// apiVersion gate (review-followup N4): rawTemplateYAML.APIVersion
-// must equal [supportedAPIVersion]; a template carrying a future
-// version (e.g. v2) is rejected with a `domain.ErrInvalidTemplate`
-// wrap so the message is uniform with the other validation paths.
-func readTemplate(fs iofs.FS, dir string) (domain.TemplateMetadata, error) {
-	metaPath := path.Join(dir, metadataFile)
-	data, err := iofs.ReadFile(fs, metaPath)
-	if err != nil {
-		return domain.TemplateMetadata{}, fmt.Errorf("read %s: %w", metaPath, err)
-	}
-	var raw rawTemplateYAML
-	dec := yaml.NewDecoder(bytes.NewReader(data))
-	dec.KnownFields(true)
-	if err := dec.Decode(&raw); err != nil {
-		return domain.TemplateMetadata{}, fmt.Errorf("parse %s: %w", metaPath, err)
-	}
-	if raw.APIVersion != supportedAPIVersion {
-		return domain.TemplateMetadata{}, fmt.Errorf("%s: %w: apiVersion %q is not supported (want %q)",
-			metaPath, domain.ErrInvalidTemplate, raw.APIVersion, supportedAPIVersion)
-	}
-	meta := raw.toDomain()
-	if err := meta.Validate(); err != nil {
-		return domain.TemplateMetadata{}, fmt.Errorf("%s: %w", metaPath, err)
-	}
-	return meta, nil
-}
-
-// rawTemplateYAML mirrors the on-disk schema per ADR-0009
-// §Entscheidung. Private so the adapter is the only place that
-// knows the `apiVersion`-tagged YAML shape; the application layer
-// consumes only the curated domain projection.
-//
-// `apiVersion` is parsed but not validated at the listing stage —
-// slice-v1-template-init can introduce a version-rejection sentinel
-// when it needs to gate render behaviour on the schema version.
-type rawTemplateYAML struct {
-	APIVersion      string           `yaml:"apiVersion"`
-	Name            string           `yaml:"name"`
-	Description     string           `yaml:"description"`
-	Version         string           `yaml:"version"`
-	SupportedAddOns []string         `yaml:"supportedAddOns"`
-	GeneratedFiles  []string         `yaml:"generatedFiles"`
-	RequiredTools   []string         `yaml:"requiredTools"`
-	Variables       []rawTemplateVar `yaml:"variables"`
-}
-
-// rawTemplateVar is the on-disk variable schema.
-type rawTemplateVar struct {
-	Name        string `yaml:"name"`
-	Description string `yaml:"description"`
-	Default     string `yaml:"default"`
-	Required    bool   `yaml:"required"`
-}
-
-// toDomain copies the raw YAML projection into the domain value.
-// Flat copy by design — see ADR-0009 §Entscheidung; any future
-// schema evolution (vX → vX+1) lives in the adapter so the domain
-// shape stays stable.
-func (r rawTemplateYAML) toDomain() domain.TemplateMetadata {
-	out := domain.TemplateMetadata{
-		Name:            r.Name,
-		Description:     r.Description,
-		Version:         r.Version,
-		SupportedAddOns: r.SupportedAddOns,
-		GeneratedFiles:  r.GeneratedFiles,
-		RequiredTools:   r.RequiredTools,
-	}
-	if len(r.Variables) > 0 {
-		out.Variables = make([]domain.TemplateVariable, len(r.Variables))
-		for i, v := range r.Variables {
-			out.Variables[i] = domain.TemplateVariable{
-				Name:        v.Name,
-				Description: v.Description,
-				Default:     v.Default,
-				Required:    v.Required,
-			}
-		}
-	}
-	return out
 }

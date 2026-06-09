@@ -303,6 +303,13 @@ func mapInitErrorToDiagnostic(err error) diagnosticItem {
 		return diagnosticItem{Level: "error", Code: "LH-NFA-REL-003", Message: err.Error()}
 	case errors.Is(err, driving.ErrTemplateConflictsWithFlag):
 		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
+	case errors.Is(err, driving.ErrTemplateInvalid):
+		// slice-later-local-templates T1: malformed local template.yaml.
+		// LH-FA-TPL-002 is the violated requirement (template metadata
+		// minimum). Dual-classifier partner of isTemplateInitValidationError
+		// in cli.go (both exit-10 class) — kept in sync so the envelope
+		// code and the ExitCode never diverge.
+		return diagnosticItem{Level: "error", Code: "LH-FA-TPL-002", Message: err.Error()}
 	case errors.Is(err, driving.ErrConfirmationRequired),
 		errors.Is(err, driving.ErrForceRequiresBackup),
 		errors.Is(err, driving.ErrBackupUnsupportedKind):

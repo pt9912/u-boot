@@ -144,6 +144,72 @@ func TestTemplateInitService_UnknownTemplateWrapsSentinel(t *testing.T) {
 	}
 }
 
+// slice-later-local-templates T0-(d): a present-but-malformed
+// template.yaml surfaces from the resolver as driven.ErrTemplateInvalid
+// and MUST be wrapped as driving.ErrTemplateInvalid (exit 10), not the
+// ErrTemplateRender default (exit 14). Pins the exit-class split.
+func TestTemplateInitService_InvalidTemplateWrapsSentinel(t *testing.T) {
+	t.Parallel()
+	files := &fakeTemplateFiles{openErr: fmt.Errorf("%w: apiVersion %q not supported", driven.ErrTemplateInvalid, "v2")}
+	fs := newFakeFS()
+	svc := application.NewTemplateInitService(files, fs, nil)
+
+	_, err := svc.Init(context.Background(), driving.TemplateInitRequest{
+		BaseDir:      "/proj",
+		ProjectName:  mustProjectNameForTest(t, "x"),
+		TemplateName: "./bad-metadata",
+	})
+	if err == nil {
+		t.Fatal("Init: want error, got nil")
+	}
+	if !errors.Is(err, driving.ErrTemplateInvalid) {
+		t.Errorf("err = %v, want wrap of driving.ErrTemplateInvalid", err)
+	}
+	if !errors.Is(err, driven.ErrTemplateInvalid) {
+		t.Errorf("err = %v, want preserve of driven.ErrTemplateInvalid via multi-%%w", err)
+	}
+	// Exit-class pin: must NOT be the technical render class (exit 14).
+	if errors.Is(err, driving.ErrTemplateRender) {
+		t.Errorf("err = %v, must not classify as ErrTemplateRender (exit 14)", err)
+	}
+}
+
+// slice-later-local-templates T0-(e): a symlink anywhere in the
+// template tree aborts the whole render with driving.ErrInvalidTemplatePath
+// (exit 10) and writes NOTHING — even though a renderable file is also
+// present. The guard sits in the phase-1 walk, so the two-phase render
+// guarantees no partial output.
+func TestTemplateInitService_SymlinkInTreeRejected(t *testing.T) {
+	t.Parallel()
+	files := &fakeTemplateFiles{
+		name: "basic",
+		fs: fstest.MapFS{
+			"ok.txt.tmpl": &fstest.MapFile{Data: []byte("hi {{ .Name }}\n")},
+			"evil":        &fstest.MapFile{Mode: iofs.ModeSymlink, Data: []byte("../../etc/passwd")},
+		},
+	}
+	fs := newFakeFS()
+	svc := application.NewTemplateInitService(files, fs, nil)
+
+	_, err := svc.Init(context.Background(), driving.TemplateInitRequest{
+		BaseDir:      "/proj",
+		ProjectName:  mustProjectNameForTest(t, "x"),
+		TemplateName: "basic",
+	})
+	if err == nil {
+		t.Fatal("Init: want symlink rejection, got nil")
+	}
+	if !errors.Is(err, driving.ErrInvalidTemplatePath) {
+		t.Errorf("err = %v, want wrap of driving.ErrInvalidTemplatePath", err)
+	}
+	if errors.Is(err, driving.ErrTemplateRender) {
+		t.Errorf("err = %v, must not classify as ErrTemplateRender (exit 14)", err)
+	}
+	if len(fs.writes) != 0 {
+		t.Errorf("fs.writes = %v, want empty (symlink reject must write nothing)", fs.writes)
+	}
+}
+
 func TestTemplateInitService_RenderFailureMidWalkNoPartialWrite(t *testing.T) {
 	t.Parallel()
 	// Review-followup F1: render of file A succeeds, render of file

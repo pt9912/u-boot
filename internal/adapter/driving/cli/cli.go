@@ -349,7 +349,14 @@ func isServiceValidationError(err error) bool {
 // content").
 func isTemplateInitValidationError(err error) bool {
 	return errors.Is(err, driving.ErrTemplateNotFound) ||
-		errors.Is(err, driving.ErrInvalidTemplatePath)
+		errors.Is(err, driving.ErrInvalidTemplatePath) ||
+		// slice-later-local-templates T1: a present-but-malformed local
+		// template.yaml (apiVersion / KnownFields / Validate fail) is a
+		// user-fixable validation error → exit 10. Must be listed here
+		// (ExitCode classifier) AND in mapInitErrorToDiagnostic (envelope
+		// code) — the dual-classifier rule: otherwise ExitCode silently
+		// drops it to exit 1 while the envelope shows a code-10 class.
+		errors.Is(err, driving.ErrTemplateInvalid)
 }
 
 // isConfigValidationError is the M8-T5 carve-out from

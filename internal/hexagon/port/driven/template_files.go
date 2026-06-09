@@ -19,6 +19,25 @@ import (
 // adapter` rule).
 var ErrTemplateNotFound = errors.New("template not found")
 
+// ErrTemplateInvalid signals that a template was found but its
+// `template.yaml` is malformed, carries an unsupported apiVersion, or
+// fails the LH-FA-TPL-002 metadata minimum. Distinct from
+// [ErrTemplateNotFound] (the template is present, just not valid).
+//
+// Produced by the filesystem-backed resolver (slice-later-local-
+// templates), which wraps the layer-neutral
+// `templateyaml.Read` / [domain.ErrInvalidTemplate] result with this
+// sentinel. The embed.FS catalog validates at build time and does not
+// emit it on the user path. The application service for
+// `u-boot init --template <ref>` wraps it with a driving-port sentinel
+// that maps to LH-FA-CLI-006 exit code 10 (user-actionable: fix the
+// template metadata) — NOT exit 14 (technical render failure).
+//
+// Lives in the driven port (not the adapter) so the application layer
+// can branch on it via `errors.Is` without importing the concrete
+// resolver (depguard `application-no-adapter` rule).
+var ErrTemplateInvalid = errors.New("template invalid")
+
 // TemplateFiles exposes the per-template file tree for the render
 // path of `u-boot init --template <name>` (slice-v1-template-init).
 // Read-only; complements [TemplateCatalog]'s listing role with the

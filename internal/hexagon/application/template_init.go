@@ -89,10 +89,20 @@ func (s *TemplateInitService) Init(ctx context.Context, req driving.TemplateInit
 	}
 	sub, err := s.files.Open(ctx, req.TemplateName)
 	if err != nil {
-		if errors.Is(err, driven.ErrTemplateNotFound) {
+		switch {
+		case errors.Is(err, driven.ErrTemplateNotFound):
 			return driving.TemplateInitResponse{}, fmt.Errorf("%w: %w", driving.ErrTemplateNotFound, err)
+		case errors.Is(err, driven.ErrTemplateInvalid):
+			// slice-later-local-templates T0-(d): a present-but-malformed
+			// template.yaml is a user-fixable validation error (exit 10),
+			// not a technical render failure (exit 14). Without this
+			// branch the resolver's ErrTemplateInvalid would fall through
+			// to the ErrTemplateRender default and misclassify the exit
+			// code. The driven sentinel is preserved via multi-%w.
+			return driving.TemplateInitResponse{}, fmt.Errorf("%w: %w", driving.ErrTemplateInvalid, err)
+		default:
+			return driving.TemplateInitResponse{}, fmt.Errorf("%w: %w", driving.ErrTemplateRender, err)
 		}
-		return driving.TemplateInitResponse{}, fmt.Errorf("%w: %w", driving.ErrTemplateRender, err)
 	}
 
 	data := templateData{Name: req.ProjectName.String()}
@@ -144,6 +154,22 @@ func (s *TemplateInitService) planRender(sub iofs.FS, data templateData) ([]rend
 		}
 		if p == "." || d.IsDir() {
 			return nil
+		}
+		// Symlink-Guard (slice-later-local-templates T0-(e)): reject the
+		// whole render the moment any tree entry is a symlink. Local
+		// templates resolve against the real filesystem, where a symlink
+		// could point outside the template root; a blanket reject is the
+		// simplest safe policy (no target-follow, no outside-root check).
+		// embed.FS never yields symlinks, so this is a harmless no-op for
+		// the built-in catalog (defense-in-depth, applies to both
+		// sources). Exit code 10 via ErrInvalidTemplatePath — a
+		// path-safety violation the user fixes in the template, NOT a
+		// technical render failure (exit 14). The check sits before the
+		// metadata-file skip so a symlinked template.yaml is rejected too.
+		// Phase-1 placement guarantees no partial output: the reject
+		// fires before any phase-2 WriteFile.
+		if d.Type()&iofs.ModeSymlink != 0 {
+			return fmt.Errorf("%w: %q is a symlink", driving.ErrInvalidTemplatePath, p)
 		}
 		if p == templateMetadataFilename {
 			return nil
