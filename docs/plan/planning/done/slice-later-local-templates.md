@@ -1,19 +1,17 @@
 # Slice Later: Lokale User-Templates (`u-boot init --template ./pfad`, `LH-FA-TPL-003`)
 
-> **Status:** in progress — **T1 (`66c347d`), T2 (`87a8704`), T3
-> (`5031b5f`), T4 (`adaafbe`) done**. `Priorität: Later`;
-> Implementierung auf Nutzer-Wunsch gestartet (vor regulärem Trigger).
-> `u-boot init --template ./pfad` ist funktional, getestet und
-> dokumentiert (README EN+DE, CHANGELOG, ADR-0009 §Folgepunkte ✅).
-> **Pre-T5-Review (`7d63532`):** 5 Findings gefixt (keine Bugs) —
-> §6.4-Doku für lokale Templates + Fehlerklassen-Tabelle, `--json`-
-> Envelope-Tests, `variables:`-ignoriert dokumentiert, Diagnostic-
-> Codes der vier Template-Sentinels harmonisiert (Code-Klasse ==
-> Exit-Klasse), Resolver-cwd-Doc-Hinweis.
-> **Verbleibend: nur noch T5 (Closure — `open/` → `done/`,
-> roadmap/carveouts/Lastenheft-Bilanz).** Der
-> `LH-FA-PROJDOCS-005`-Anker (carveouts.md ↔ roadmap ↔ ADR-0009
-> §Folgepunkte) bleibt bis zur T5-Closure bestehen.
+> **Status: DONE** — `u-boot init --template ./pfad` ausgeliefert
+> (`LH-FA-TPL-003`, `Priorität: Later`; auf Nutzer-Wunsch vor
+> regulärem Trigger umgesetzt). DoD-Hashes: T1 `66c347d`, T2
+> `87a8704`, T3 `5031b5f`, T4 `adaafbe`, Pre-T5-Review `7d63532`,
+> T5-Closure `T5_HASH`. Funktional, getestet (Unit + FS-Resolver +
+> End-to-End-Exit-Code-Matrix + `--json`-Envelope + CLI-Acceptance),
+> dokumentiert (README EN+DE, CHANGELOG, `cli-json-output.md` §6.4,
+> ADR-0009 §Folgepunkte ✅). Der `LH-FA-PROJDOCS-005`-Carveout ist
+> mit dieser Closure aufgelöst → von §Temporäre Carveouts in
+> [`carveouts.md`](../in-progress/carveouts.md) §Carveout-Auflösungs-
+> Slices (historisch) gewandert. `--var`-Variablen bleiben
+> out-of-scope (eigener Folge-Slice).
 
 ## Auslöser
 
@@ -106,7 +104,7 @@ Render-Vertrag geprüft (T0-(g)).
 | T2 ✅ | **FS-Resolver + Composite (Driven-Adapter) — done (`87a8704`):** `internal/adapter/driven/localtemplates/` mit `Resolver.Open(ctx, path)` über stdlib `os`/`io/fs` (`os.Stat` + `os.DirFS`), Root-Existenz/Verzeichnis-Check, `~`/`~/…`-Expansion via `os.UserHomeDir`, `template.yaml`-Gate via `templateyaml.Read` mit `ErrNotExist`-Split (→ `ErrTemplateNotFound` bzw. `ErrTemplateInvalid`). Kein Import von `externaltemplates`/`driven/fs`. **Symlink-Policy nicht hier** — Resolver liefert den gerooteten `iofs.FS` unverfolgt; Walk-Guard sitzt in T1. `Composite.Open` dispatcht via `domain.ClassifyTemplateRef` (raw-passthrough). Test-Seam-frei: TempDir + `t.Setenv("HOME")`-Fixtures (valid/notexist/notdir/missing/malformed/`~`/`~/…`/HOME-unresolvable/ctx-cancel) + Composite-Dispatch-Tabelle. `make gates` grün (coverage 91.40%). |
 | T3 ✅ | **Wiring + End-to-End — done (`5031b5f`):** `main.go` verdrahtet `localtemplates.NewComposite(externaltemplates.New(), localtemplates.New())` als einzigen `TemplateFiles` für `NewTemplateInitService`; `templateCatalogAdapter` bleibt für die `template list`-`TemplateCatalog`-Rolle. CLI unverändert (kein Business-Dispatch, `--template` roh durchgereicht). End-to-End-Test (`cli_test`, echte Adapter-Kette): Exit-Code-Matrix not-found 10 / invalid-metadata 10 / symlink 10 / render-IO 14 + local-valid byte-identisch + Katalog-`basic`-Regressionspin. Mutex-Regeln unverändert (erblich aus `slice-v1-cli-json-dry-run-init`). **Feature ab hier funktional**; Docs/Acceptance in T4. `make gates` grün. |
 | T4 ✅ | **E2E + Docs — done (`adaafbe`):** CLI-Command-Acceptance (`cli_test`, voll verdrahteter `init`-Pfad via `getwd`-Seam): lokales Fixture → Projekt byte-identisch + INIT-003-Strukturdirs, Missing-Path → Exit 10. README EN+DE um `--template ./pfad`-Snippet + `<name\|pfad>`-Referenz ergänzt; CHANGELOG `[Unreleased] ### Added`; ADR-0009 §Folgepunkte auf ✅. `make gates` grün. |
-| T5 | **Closure:** Slice `open/` → `done/` (`git mv`), DoD-Hash-Tabelle im Slice-File, roadmap.md-Zeile von „Plan vorhanden, on hold" auf done, Lastenheft-`LH-FA-TPL-003`-Bilanz markiert. |
+| T5 ✅ | **Closure — done (`T5_HASH`):** Slice `git mv` `open/` → `done/`; Status-Block + DoD-Hash-Tabelle finalisiert; roadmap.md-Zeile auf done (`LH-FA-TPL-003` ausgeliefert); `carveouts.md` LH-FA-TPL-003-Zeile von §Temporäre Carveouts → §Carveout-Auflösungs-Slices (historisch); `open/README.md`-Eintrag entfernt; ADR-0009 §Folgepunkte-Link auf `done/`-Pfad. `make gates` grün. |
 
 ## Akzeptanzkriterien
 
@@ -152,10 +150,10 @@ Render-Vertrag geprüft (T0-(g)).
 - Spec: `LH-FA-TPL-003` (`spec/lastenheft.md`), `Priorität: Later`.
 - ADR: [ADR-0009 §Entscheidung „Lokale User-Templates" + §Folgepunkte](../../adr/0009-template-format-yaml-files.md)
   — verbindlicher Architektur-Anker.
-- Carveout: [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
-  Carveouts, `LH-FA-TPL-003`-Zeile — doppelte Verankerung
-  (`LH-FA-PROJDOCS-005`): Inventar-Zeile ↔ dieser Plan ↔ ADR-0009
-  §Folgepunkte.
+- Carveout: [`carveouts.md`](../in-progress/carveouts.md) §Carveout-
+  Auflösungs-Slices (historisch), `LH-FA-TPL-003`-Zeile — der
+  `LH-FA-PROJDOCS-005`-Carveout wurde mit dieser Closure aufgelöst
+  und aus §Temporäre Carveouts entfernt.
 - Voraussetzungs-Slices:
   [`slice-v1-template-list`](../done/slice-v1-template-list.md),
   [`slice-v1-template-init`](../done/slice-v1-template-init.md).

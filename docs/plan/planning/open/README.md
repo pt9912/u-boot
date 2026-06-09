@@ -25,7 +25,6 @@ Dateiname-Konventionen.
 | [`slice-v1-recreate-detection.md`](slice-v1-recreate-detection.md) | Cleanup: `u-boot up` Recreate-Warnings-Detection |
 | [`slice-v1-up-partial-snapshot-on-failure.md`](slice-v1-up-partial-snapshot-on-failure.md) | Cleanup: `u-boot up` Partial-Snapshot bei Mid-`ComposeUp`-Failure |
 | [`slice-v1-volume-auto-removal.md`](slice-v1-volume-auto-removal.md) | Cleanup: `u-boot remove --purge` Volume-Auto-Removal |
-| [`slice-later-local-templates.md`](slice-later-local-templates.md) | Plan: lokale User-Templates `u-boot init --template ./pfad` (`LH-FA-TPL-003`, Later) |
 | [`slice-v2-distro-pakete.md`](slice-v2-distro-pakete.md) | Plan-Stub: Debian-/RPM-Pakete (`LH-OPEN-002`-Restweg) |
 | [`slice-v2-generate-devcontainer-rollback-aware-write.md`](slice-v2-generate-devcontainer-rollback-aware-write.md) | Cleanup: `generate devcontainer` Rollback-aware Multi-File-Write |
 | [`slice-v2-homebrew-formula.md`](slice-v2-homebrew-formula.md) | Plan-Stub: Homebrew-Formula (`LH-OPEN-002`-Restweg) |
