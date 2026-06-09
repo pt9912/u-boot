@@ -66,24 +66,27 @@ u-boot init my-service --template ./my-tpl  # aus einem lokalen Template-Verzeic
 ```
 
 `--template` nimmt einen Katalog-Namen (`basic`) **oder** einen
-Dateisystem-Pfad (`./my-tpl`, `/abs/tpl`, `~/tpl`,
-`slice-later-local-templates`). Ein lokales Template ist ein Verzeichnis
+Dateisystem-Pfad (`./my-tpl`, `/abs/tpl`, `~/tpl`). Ein lokales Template
+ist ein Verzeichnis
 mit gültiger `template.yaml` plus `*.tmpl`-Dateien (`{{ .Name }}` wird
 mit dem Projektnamen gerendert) und beliebigen 1:1-kopierten Dateien.
 
 ## 5. CI / maschinenlesbar
 
 ```bash
-u-boot add postgres --json --dry-run   # geplante Änderungen als JSON, kein Schreiben aufs FS
-u-boot add postgres --diff             # Diff-Vorschau des geplanten Endzustands
-u-boot init my-service --no-interactive # keine Rückfragen; nötige Bestätigung bricht mit Exit 2 ab
-u-boot down --volumes --yes            # destruktiv, deterministisch bestätigt (kein Prompt)
+u-boot add postgres --json --dry-run             # geplante Änderungen als JSON, kein Schreiben aufs FS
+u-boot add postgres --diff                       # Diff-Vorschau des geplanten Endzustands
+u-boot add keycloak --with-deps --no-interactive # deterministisch: Abhängigkeiten ohne Rückfrage
+u-boot down --volumes --yes                      # destruktiv, deterministisch bestätigt (kein Prompt)
 ```
 
-`--yes` und `--no-interactive` sind exklusiv (`LH-FA-CLI-005A`); bei
-destruktiven Operationen (`down --volumes`, `remove --purge`) bricht der
-nicht-interaktive Modus ohne `--yes` mit Exit `10` ab. JSON-Envelope-
-Schema + Exit-Code-Matrix: [`cli-json-output.md`](cli-json-output.md).
+`--yes` und `--no-interactive` sind exklusiv — gemeinsam angegeben → Exit
+`2` (`LH-FA-CLI-005A`). Im nicht-interaktiven Modus brechen Pfade, die
+eine Bestätigung bräuchten, deterministisch mit Exit `10` ab: destruktive
+Operationen (`down --volumes`, `remove --purge`) ohne `--yes`, und die
+implizite Bestehend-Projekt-Erkennung von `init` ohne `--assume-existing`.
+JSON-Envelope-Schema + vollständige Exit-Code-Matrix:
+[`cli-json-output.md`](cli-json-output.md).
 
 ## 6. Service entfernen und aufräumen
 
