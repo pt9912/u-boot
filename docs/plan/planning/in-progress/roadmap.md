@@ -35,7 +35,7 @@ listet nur das **offene v0.4.0-Backlog**.
 | [`slice-v2-homebrew-formula`](../open/slice-v2-homebrew-formula.md) | `open/`, on hold | Erste konkrete macOS-/Homebrew-Nutzeranfrage. |
 | [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md) | `open/`, on hold pending trigger | Carveout-Plan-Anker für `generate devcontainer` Phase-2-Half-Write-State (siehe [`carveouts.md`](carveouts.md) §Temporäre Carveouts). Trigger: Real-World-Beschwerde über Half-State oder Devcontainer-Schema-Erweiterung. Bevorzugte Skizze Option 1 (Snapshot + Rollback). |
 | [`slice-v2-distro-pakete`](../open/slice-v2-distro-pakete.md) | `open/`, on hold | Konkrete Debian-/RPM-Anfrage mit Bereitschaft für Packaging-Overhead. |
-| `slice-later-local-templates` | noch kein Slice-Plan | `--template ./pfad` konkretisieren (`LH-FA-TPL-003`). |
+| [`slice-later-local-templates`](../open/slice-later-local-templates.md) | `open/`, on hold (Later) | Plan ausgearbeitet (Architektur via ADR-0009 gesetzt; zweite `TemplateFiles`-Impl + Name-vs-Pfad-Dispatch). Trigger: konkrete Anfrage nach lokalen/projekteigenen Templates (`LH-FA-TPL-003`). |
 | `slice-later-migration` | noch kein Slice-Plan | Konfigurationsmigration konkretisieren (`LH-FA-CONF-006`). |
 | `slice-later-custom-data-sources` | noch kein Slice-Plan | Erweiterung jenseits YAML-Quellen konkretisieren (`LH-DA-004`). |
 | `slice-vN-podman-formal` | noch kein Slice-Plan | Podman-first Probe-Adapter und CI-Matrix konkretisieren; heutiger Stand bleibt Docker-compatible Drop-in. |
