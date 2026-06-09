@@ -5,6 +5,11 @@
 > Implementierung auf Nutzer-Wunsch gestartet (vor regulärem Trigger).
 > `u-boot init --template ./pfad` ist funktional, getestet und
 > dokumentiert (README EN+DE, CHANGELOG, ADR-0009 §Folgepunkte ✅).
+> **Pre-T5-Review (`7d63532`):** 5 Findings gefixt (keine Bugs) —
+> §6.4-Doku für lokale Templates + Fehlerklassen-Tabelle, `--json`-
+> Envelope-Tests, `variables:`-ignoriert dokumentiert, Diagnostic-
+> Codes der vier Template-Sentinels harmonisiert (Code-Klasse ==
+> Exit-Klasse), Resolver-cwd-Doc-Hinweis.
 > **Verbleibend: nur noch T5 (Closure — `open/` → `done/`,
 > roadmap/carveouts/Lastenheft-Bilanz).** Der
 > `LH-FA-PROJDOCS-005`-Anker (carveouts.md ↔ roadmap ↔ ADR-0009
