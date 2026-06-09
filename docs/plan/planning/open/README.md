@@ -11,6 +11,7 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
+| [`slice-v1-release-cut-v0.5.0.md`](slice-v1-release-cut-v0.5.0.md) | **Ready-to-execute:** Release-Cut v0.5.0 (Ein-Feature-Minor: local-templates) — T1–T3 morgen, T4 Tag-Push |
 | [`slice-v1-cli-cleanup-add-preview-mode-alias.md`](slice-v1-cli-cleanup-add-preview-mode-alias.md) | Cleanup: `AddPreviewMode`-Alias entfernen |
 | [`slice-v1-config-list-subcommand.md`](slice-v1-config-list-subcommand.md) | Cleanup: `u-boot config list` als eigener Subcommand mit strukturiertem Path-Value-Tree |
 | [`slice-v1-config-multi-path-get.md`](slice-v1-config-multi-path-get.md) | Cleanup: `u-boot config get` Multi-Pfad-Get mit `--json-array` |
