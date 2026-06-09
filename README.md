@@ -46,7 +46,9 @@ u-boot init demo --template ./my-tpl    # render from a local template directory
 
 All subcommands respect LH-FA-CLI-006 exit codes
 (`0` / `2` / `10` / `11` / `12` / `14`). The *Subcommand reference*
-table below maps each subcommand to its Lastenheft IDs.
+table below maps each subcommand to its Lastenheft IDs. End-to-end
+recipes (Postgres stack, Keycloak+OTel, devcontainer, templates, CI/JSON)
+live in [`docs/user/examples.md`](docs/user/examples.md).
 
 ## What makes it trustworthy?
 

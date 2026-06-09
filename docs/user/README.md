@@ -7,18 +7,26 @@ User-facing Dokumentation für u-boot:
 - Troubleshooting
 - Beispiel-Workflows
 
-Stand M8: nur zwei meta-Themen sind aktuell hier publiziert
-([`quality.md`](quality.md) und
-[`branch-protection.md`](branch-protection.md)); pro-Command-
-Guides für die sieben verdrahteten Subcommands (`init`, `doctor`,
-`add`, `up`, `down`, `generate`, `config`) folgen, sobald sich
-Quickstart-Beispiele gegen reale Compose-Workloads validieren
-lassen — siehe das Carveout-Slice
-[`slice-m6-docker-integrationstests`](../plan/planning/done/slice-m6-docker-integrationstests.md)
-(Done) für die End-to-End-Pins, die diesen Guides als
-Quelle dienen werden.
+Aktuell publiziert:
 
-Bis dahin ist die kanonische User-Dokumentation `u-boot --help`
-und `u-boot <command> --help` im built Binary, die das Lastenheft
-(`spec/lastenheft.md`) und die Slice-Pläne in
-[`docs/plan/planning/done/`](../plan/planning/done/) referenzieren.
+- [`examples.md`](examples.md) — Beispiel-Workflows als Kommando-Rezepte
+  (Postgres-Stack, Keycloak+OTel, Devcontainer, Templates, CI/JSON,
+  Cleanup, Config).
+- [`cli-json-output.md`](cli-json-output.md) — `--json`/`--dry-run`/
+  `--diff`-Envelope-Schema und Exit-Code-Matrix pro Subcommand.
+- [`devcontainer-features.md`](devcontainer-features.md) — Devcontainer-
+  Features + Drift-Doctor-Check.
+- [`quality.md`](quality.md) — Quality-Gate-/Linter-Profil.
+- [`branch-protection.md`](branch-protection.md) — Required-Checks-Setup.
+
+`examples.md` führt **Befehle**, keinen committeten Output: die
+byte-genaue Ausgabe ist in den Acceptance-/e2e-Tests gegen reale
+Compose-Workloads gepinnt (Single-Source-of-Truth, siehe
+[`slice-m6-docker-integrationstests`](../plan/planning/done/slice-m6-docker-integrationstests.md)).
+Eine generierte+gegatete `examples/`-Variante (Doku-Variante A) ist als
+Backlog-Idee denkbar, aber bewusst nicht umgesetzt — statische
+Beispiel-Outputs würden ohne Gate driften.
+
+Die kanonische pro-Command-Referenz bleibt `u-boot --help` /
+`u-boot <command> --help` im gebauten Binary, die das Lastenheft
+(`spec/lastenheft.md`) referenziert.
