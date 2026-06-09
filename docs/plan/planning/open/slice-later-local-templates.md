@@ -1,13 +1,12 @@
 # Slice Later: Lokale User-Templates (`u-boot init --template ./pfad`, `LH-FA-TPL-003`)
 
 > **Status:** in progress — **T1 (`66c347d`), T2 (`87a8704`), T3
-> (`5031b5f`) done**. `Priorität: Later`; Implementierung auf
-> Nutzer-Wunsch gestartet (vor regulärem Trigger). Format und
-> Architektur sind durch
-> [ADR-0009](../../adr/0009-template-format-yaml-files.md)
-> §Entscheidung gesetzt. **Seit T3 ist `u-boot init --template ./pfad`
-> funktional verdrahtet** (Composite in `main.go`); Verbleibend: T4
-> (README/CHANGELOG/ADR-Doku + Acceptance) und T5 (Closure). Der
+> (`5031b5f`), T4 (`adaafbe`) done**. `Priorität: Later`;
+> Implementierung auf Nutzer-Wunsch gestartet (vor regulärem Trigger).
+> `u-boot init --template ./pfad` ist funktional, getestet und
+> dokumentiert (README EN+DE, CHANGELOG, ADR-0009 §Folgepunkte ✅).
+> **Verbleibend: nur noch T5 (Closure — `open/` → `done/`,
+> roadmap/carveouts/Lastenheft-Bilanz).** Der
 > `LH-FA-PROJDOCS-005`-Anker (carveouts.md ↔ roadmap ↔ ADR-0009
 > §Folgepunkte) bleibt bis zur T5-Closure bestehen.
 
@@ -101,7 +100,7 @@ Render-Vertrag geprüft (T0-(g)).
 | T1 ✅ | **Fundament (pure/infra + Service) — done (`66c347d`):** (1) `templateyaml`-Paket: `Read`/apiVersion-Gate/`KnownFields`/`Validate` aus `externaltemplates/catalog.go` extrahiert, Katalog-Pfad unverändert grün; (2) `domain.ClassifyTemplateRef` reine Funktion + 17-Fall-Tabelle (`./`, `../`, `/abs`, `~`, `~/x`, `foo/bar`, `foo\bar`, `C:\x`, `c:tpl`, `basic`, `~user`, …), 100% Coverage; (3) Port-/Request-Docs auf rohen Template-Ref präzisiert (Feldname `TemplateName` beibehalten); (4) Sentinels `driven.ErrTemplateInvalid` + `driving.ErrTemplateInvalid`; (5) `TemplateInitService` zwei umrissene Änderungen: `Open`-Mapping-Branch `ErrTemplateInvalid`→Exit 10 (d) **und** Symlink-Guard im `planRender`-Walk-Callback → `driving.ErrInvalidTemplatePath` Exit 10 (e), Two-Phase-No-Write-Pin; Dual-Klassifikator (`isTemplateInitValidationError` + `mapInitErrorToDiagnostic` LH-FA-TPL-002) + ExitCode-Pin-Test. `make gates` grün (lint 0, coverage 91.40%). |
 | T2 ✅ | **FS-Resolver + Composite (Driven-Adapter) — done (`87a8704`):** `internal/adapter/driven/localtemplates/` mit `Resolver.Open(ctx, path)` über stdlib `os`/`io/fs` (`os.Stat` + `os.DirFS`), Root-Existenz/Verzeichnis-Check, `~`/`~/…`-Expansion via `os.UserHomeDir`, `template.yaml`-Gate via `templateyaml.Read` mit `ErrNotExist`-Split (→ `ErrTemplateNotFound` bzw. `ErrTemplateInvalid`). Kein Import von `externaltemplates`/`driven/fs`. **Symlink-Policy nicht hier** — Resolver liefert den gerooteten `iofs.FS` unverfolgt; Walk-Guard sitzt in T1. `Composite.Open` dispatcht via `domain.ClassifyTemplateRef` (raw-passthrough). Test-Seam-frei: TempDir + `t.Setenv("HOME")`-Fixtures (valid/notexist/notdir/missing/malformed/`~`/`~/…`/HOME-unresolvable/ctx-cancel) + Composite-Dispatch-Tabelle. `make gates` grün (coverage 91.40%). |
 | T3 ✅ | **Wiring + End-to-End — done (`5031b5f`):** `main.go` verdrahtet `localtemplates.NewComposite(externaltemplates.New(), localtemplates.New())` als einzigen `TemplateFiles` für `NewTemplateInitService`; `templateCatalogAdapter` bleibt für die `template list`-`TemplateCatalog`-Rolle. CLI unverändert (kein Business-Dispatch, `--template` roh durchgereicht). End-to-End-Test (`cli_test`, echte Adapter-Kette): Exit-Code-Matrix not-found 10 / invalid-metadata 10 / symlink 10 / render-IO 14 + local-valid byte-identisch + Katalog-`basic`-Regressionspin. Mutex-Regeln unverändert (erblich aus `slice-v1-cli-json-dry-run-init`). **Feature ab hier funktional**; Docs/Acceptance in T4. `make gates` grün. |
-| T4 | **E2E + Docs:** Acceptance-Test (lokales Template-Fixture → gerendertes Projekt), README (EN + DE) um `--template ./pfad`-Snippet ergänzt, ADR-0009 §Folgepunkte `slice-later-local-templates` auf ✅, CHANGELOG `### Added`. |
+| T4 ✅ | **E2E + Docs — done (`adaafbe`):** CLI-Command-Acceptance (`cli_test`, voll verdrahteter `init`-Pfad via `getwd`-Seam): lokales Fixture → Projekt byte-identisch + INIT-003-Strukturdirs, Missing-Path → Exit 10. README EN+DE um `--template ./pfad`-Snippet + `<name\|pfad>`-Referenz ergänzt; CHANGELOG `[Unreleased] ### Added`; ADR-0009 §Folgepunkte auf ✅. `make gates` grün. |
 | T5 | **Closure:** Slice `open/` → `done/` (`git mv`), DoD-Hash-Tabelle im Slice-File, roadmap.md-Zeile von „Plan vorhanden, on hold" auf done, Lastenheft-`LH-FA-TPL-003`-Bilanz markiert. |
 
 ## Akzeptanzkriterien
