@@ -204,11 +204,14 @@ braucht eigene Slices:
   T5 Slice-Closure). Variable-Resolution + Prompt-Pfad bewusst
   out-of-scope — `basic` hat `variables: []`; eigene Folge-Slice
   bei erstem variable-bedürftigem Built-in.
-- [`slice-later-local-templates`](../planning/open/slice-later-local-templates.md)
+- ✅ [`slice-later-local-templates`](../planning/open/slice-later-local-templates.md)
   — `--template ./pfad`-Auflösung gegen das Dateisystem
-  (`LH-FA-TPL-003`, Later/on hold). Plan ausgearbeitet: zweite
-  `TemplateFiles`-Impl gegen reales FS + Name-vs-Pfad-Dispatch,
-  Render-Loop unverändert wiederverwendet.
+  (`LH-FA-TPL-003`). Geliefert T1–T4: geteiltes `templateyaml`-Paket,
+  reine `domain.ClassifyTemplateRef`-Klassifikation, `localtemplates`-
+  FS-Resolver + Composite (zweite `TemplateFiles`-Impl), Render-Loop
+  wiederverwendet mit Symlink-Guard + `ErrTemplateInvalid`-Exit-10-
+  Pfad. Closure (open→done) folgt in T5. `--var`-Variablen
+  out-of-scope (eigener Folge-Slice).
 - ✅ Built-in `basic` als Bootstrap-Stand wurde mit
   `slice-v1-template-list` T1 ausgeliefert
   (`templates/basic/template.yaml`); weitere Templates (Micronaut,

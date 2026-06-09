@@ -40,7 +40,8 @@ u-boot remove postgres                  # mirror of add — disable + cut blocks
 u-boot generate readme                  # refresh a managed-block artefact
 u-boot config set project.name renamed-service
 u-boot template list                    # browse the built-in template catalogue
-u-boot init demo --template basic       # render a project from a template
+u-boot init demo --template basic       # render a project from a built-in template
+u-boot init demo --template ./my-tpl    # render from a local template directory
 ```
 
 All subcommands respect LH-FA-CLI-006 exit codes
@@ -179,7 +180,7 @@ and §Nächste Schritte for the in-progress backlog.
 
 | Subcommand | Spec IDs | Brief |
 | ---------- | -------- | ----- |
-| `init [name] [--devcontainer] [--template <name>]` | `LH-FA-INIT-001..007`, `LH-FA-TPL-001` | Scaffold project + `git init`. |
+| `init [name] [--devcontainer] [--template <name\|path>]` | `LH-FA-INIT-001..007`, `LH-FA-TPL-001/003` | Scaffold project + `git init`. `--template` takes a catalogue name (`basic`) or a local directory path (`./my-tpl`, `~/tpl`). |
 | `doctor [--strict]` | `LH-FA-DIAG-001..004`, `LH-FA-DEV-003` | 13 diagnostic checks; container-aware skip for host probes. |
 | `add <service> [--with-deps]` | `LH-FA-ADD-001..006` | Idempotent state-machine for service add-ons (`postgres`, `keycloak`, `otel`); `--with-deps` auto-installs missing dependencies. |
 | `remove <service> [--purge]` | `LH-FA-ADD-007` | Mirror of `add` — disable + cut managed blocks. |

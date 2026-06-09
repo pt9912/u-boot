@@ -43,7 +43,8 @@ u-boot remove postgres                  # Spiegel von add — disable + Blocks r
 u-boot generate readme                  # Managed-Block-Artefakt aktualisieren
 u-boot config set project.name renamed-service
 u-boot template list                    # Eingebauten Template-Katalog browsen
-u-boot init demo --template basic       # Projekt aus einem Template rendern
+u-boot init demo --template basic       # Projekt aus eingebautem Template rendern
+u-boot init demo --template ./mein-tpl  # Projekt aus lokalem Template-Verzeichnis rendern
 ```
 
 Alle Subkommandos respektieren die LH-FA-CLI-006-Exit-Codes
@@ -187,7 +188,7 @@ Auflösungs-Slices und §Nächste Schritte für das laufende Backlog.
 
 | Subkommando | Spec-IDs | Kurz |
 | ----------- | -------- | ---- |
-| `init [name] [--devcontainer] [--template <name>]` | `LH-FA-INIT-001..007`, `LH-FA-TPL-001` | Projekt-Skelett + `git init`. |
+| `init [name] [--devcontainer] [--template <name\|pfad>]` | `LH-FA-INIT-001..007`, `LH-FA-TPL-001/003` | Projekt-Skelett + `git init`. `--template` nimmt einen Katalog-Namen (`basic`) oder einen lokalen Verzeichnis-Pfad (`./mein-tpl`, `~/tpl`). |
 | `doctor [--strict]` | `LH-FA-DIAG-001..004`, `LH-FA-DEV-003` | 13 Diagnose-Checks; container-aware Skip für Host-Probes. |
 | `add <service> [--with-deps]` | `LH-FA-ADD-001..006` | Idempotente State-Machine für Service-Add-Ons (`postgres`, `keycloak`, `otel`); `--with-deps` installiert fehlende Abhängigkeiten automatisch. |
 | `remove <service> [--purge]` | `LH-FA-ADD-007` | Spiegel von `add` — disable + Managed-Blocks raus. |

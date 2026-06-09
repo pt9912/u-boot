@@ -11,6 +11,24 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- `feat(template): u-boot init --template ./pfad` — lokale
+  User-Templates (`LH-FA-TPL-003`, ADR-0009 §Entscheidung „Lokale
+  User-Templates"). `--template` löst jetzt neben Katalog-Namen
+  (`basic`) auch Dateisystem-Pfade auf (`./mein-tpl`, `/abs/tpl`,
+  `~/tpl`). Die Klassifikation ist eine reine, plattformunabhängige
+  `domain.ClassifyTemplateRef`-Regel (kein FS-Stat); ein Composite-
+  Resolver delegiert an den eingebauten `embed.FS`-Katalog oder den
+  neuen Filesystem-Resolver (`localtemplates`). Gleiche `template.yaml`-
+  Validierung (apiVersion-Gate + Metadaten-Minimum) wie der Katalog
+  über das geteilte `templateyaml`-Paket. Fehlerklassen: fehlender
+  Pfad / kein Verzeichnis / fehlende `template.yaml` → Exit 10
+  (`ErrTemplateNotFound`); malformed `template.yaml` → Exit 10
+  (`ErrTemplateInvalid`); Symlink im Template-Baum → Exit 10
+  (Pfad-Safety-Reject, kein Teil-Output); Render-Fehler → Exit 14.
+  `--var`-Variablen bleiben out-of-scope (eigener Folge-Slice).
+
 ## [0.4.0] - 2026-06-08
 
 Fourth release. Completes the V1 machine-readable-CLI milestone: the
