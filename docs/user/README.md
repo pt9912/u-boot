@@ -23,9 +23,10 @@ Aktuell publiziert:
 byte-genaue Ausgabe ist in den Acceptance-/e2e-Tests gegen reale
 Compose-Workloads gepinnt (Single-Source-of-Truth, siehe
 [`slice-m6-docker-integrationstests`](../plan/planning/done/slice-m6-docker-integrationstests.md)).
-Eine generierte+gegatete `examples/`-Variante (Doku-Variante A) ist als
-Backlog-Idee denkbar, aber bewusst nicht umgesetzt — statische
-Beispiel-Outputs würden ohne Gate driften.
+Eine generierte+gegatete `examples/`-Variante (ein `make`-Target oder
+Golden-Test, der Beispiel-Projekte erzeugt und vergleicht) ist denkbar,
+aber bewusst nicht umgesetzt — statische, committete Beispiel-Outputs
+würden ohne Gate driften.
 
 Die kanonische pro-Command-Referenz bleibt `u-boot --help` /
 `u-boot <command> --help` im gebauten Binary, die das Lastenheft

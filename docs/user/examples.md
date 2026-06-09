@@ -54,7 +54,8 @@ u-boot generate devcontainer --allow-external-feature-sources ghcr.io/owner/feat
 
 `u-boot doctor` prüft die erzeugte `devcontainer.json` auf
 VS-Code-Mindestkompatibilität und `forwardPorts`-Konsistenz zu
-aktivierten Services.
+aktivierten Services — als `error` bei `devcontainer.enabled: true` in
+`u-boot.yaml`, sonst als `warn` (`LH-FA-DIAG-002`).
 
 ## 4. Projekt aus einem Template rendern
 
@@ -75,7 +76,7 @@ mit dem Projektnamen gerendert) und beliebigen 1:1-kopierten Dateien.
 ```bash
 u-boot add postgres --json --dry-run   # geplante Änderungen als JSON, kein Schreiben aufs FS
 u-boot add postgres --diff             # Diff-Vorschau des geplanten Endzustands
-u-boot up --no-interactive             # keine Rückfragen; offene Bestätigung → Exit 2
+u-boot init my-service --no-interactive # keine Rückfragen; nötige Bestätigung bricht mit Exit 2 ab
 u-boot down --volumes --yes            # destruktiv, deterministisch bestätigt (kein Prompt)
 ```
 
