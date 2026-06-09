@@ -39,6 +39,7 @@ listet nur das **offene v0.4.0-Backlog**.
 | `slice-later-migration` | noch kein Slice-Plan | Konfigurationsmigration konkretisieren (`LH-FA-CONF-006`). |
 | `slice-later-custom-data-sources` | noch kein Slice-Plan | Erweiterung jenseits YAML-Quellen konkretisieren (`LH-DA-004`). |
 | `slice-vN-podman-formal` | noch kein Slice-Plan | Podman-first Probe-Adapter und CI-Matrix konkretisieren; heutiger Stand bleibt Docker-compatible Drop-in. |
+| `slice-vN-harness-bootstrap-scaffold` | noch kein Slice-Plan; Entscheidung offen in [ADR-0011](../../adr/0011-agent-harness-scaffolding.md) (`Proposed`) | u-boot scaffoldet **Agent-Harness-Artefakte** (`AGENTS.md`/`harness/`/`spec/`/`docs/plan/`/ADR) opt-in und GF/BF-aware — nutzt die bestehende `LH-FA-INIT-004`-Detection (GF=frisch, BF=bestehend); u-boot legt nur das Skelett, der Agent reconciled. Idee aus dem `ai-harness-course` (Modul 2, GF/BF-Bootstrap). Vor Code: ADR ratifizieren + Spec-Erweiterung (`LH-FA-*` / `LH-ZB-002`) + Lizenz-Check. |
 | Branch-Protection-UI | Nutzeraktion, kein Code-Slice | Repo-Owner aktiviert Required Checks vor erstem externem PR; Anleitung in [`docs/user/branch-protection.md`](../../../user/branch-protection.md). |
 
 ## Bereits Geschlossen
