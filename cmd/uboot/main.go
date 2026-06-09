@@ -24,6 +24,7 @@ import (
 	"github.com/pt9912/u-boot/internal/adapter/driven/externaltemplates"
 	"github.com/pt9912/u-boot/internal/adapter/driven/fs"
 	"github.com/pt9912/u-boot/internal/adapter/driven/git"
+	"github.com/pt9912/u-boot/internal/adapter/driven/localtemplates"
 	"github.com/pt9912/u-boot/internal/adapter/driven/logger"
 	"github.com/pt9912/u-boot/internal/adapter/driven/netprobe"
 	"github.com/pt9912/u-boot/internal/adapter/driven/progress"
@@ -104,6 +105,15 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// (LH-FA-TPL-004). Backs the TemplateCatalog driven port; the
 	// `basic` bootstrap template ships with v0.1.1.
 	templateCatalogAdapter := externaltemplates.New()
+	// The local-templates resolver (slice-later-local-templates) backs
+	// `--template ./path` against the real filesystem. The Composite is
+	// the single driven.TemplateFiles the render service consumes: it
+	// classifies the raw --template ref via domain.ClassifyTemplateRef
+	// and delegates to the embed.FS catalog (a name like `basic`) or to
+	// the local resolver (a path like `./tpl`, `~/tpl`). The CLI does
+	// no dispatch (LH-FA-ARCH-003); templateCatalogAdapter still backs
+	// the TemplateCatalog `template list` role below.
+	templateFilesAdapter := localtemplates.NewComposite(templateCatalogAdapter, localtemplates.New())
 
 	// Application services. The text-progress adapter renders
 	// LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 affected-paths
@@ -117,7 +127,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// init T4 delegation: --template <name> dispatches file rendering
 	// to TemplateInitService while git init / soft-existing-detection
 	// / project-structure-dirs stay in InitProjectService).
-	templateInitSvc := application.NewTemplateInitService(templateCatalogAdapter, fsAdapter, logAdapter)
+	templateInitSvc := application.NewTemplateInitService(templateFilesAdapter, fsAdapter, logAdapter)
 	// Five use cases run through the [newPreviewFSFactory]-Closure
 	// (init T4 / add T1-D / generate T4 / remove T4 / config T4):
 	// PreviewNone uses the production fsAdapter directly; PreviewDryRun
