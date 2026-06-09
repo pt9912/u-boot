@@ -12,6 +12,11 @@ CLI-Fehlnutzung · `10` Validierung · `11` Umgebung · `12` Ausführung ·
 `14` IO/Persistenz). Maschinenlesbare Ausgabe + Dry-Run/Diff sind in
 [`cli-json-output.md`](cli-json-output.md) dokumentiert.
 
+Rezept 1 legt das Projekt an; die Rezepte 2–7 setzen ein **initialisiertes
+Projekt** voraus (`u-boot.yaml` vorhanden). `add`/`remove`/`generate`/`up`
+in einem nicht-initialisierten Verzeichnis brechen mit Exit `10` und
+Hinweis auf `u-boot init` ab (`LH-FA-ADD-001`).
+
 ## 1. PostgreSQL-Stack von Grund auf (MVP-Kern)
 
 ```bash
