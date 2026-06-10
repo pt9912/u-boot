@@ -28,13 +28,13 @@ vorher das Envelope + den Schema-Helper auf Read-only-Boden.
 
 Spec-Bezug für `doctor --json` (read-only-Pfad):
 
-- **[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)** (Maschinen-lesbar, V1): Pflicht-`--json`
+- **[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)** (Maschinen-lesbar, V1): Pflicht-`--json`
   für alle 10 Spec-Enum-Subcommands. **Minimalkontrakt** (bindend
   für `--json` ohne `--dry-run`/`--diff`, Lastenheft §1841):
   `status` ∈ `{ok, warn, error}`, `command` ∈ Spec-Enum,
   optional `subcommand` (Pflicht bei `command ∈ {template,
   config}`), `diagnostics` (leer = `[]`), `exitCode` (vgl.
-  [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes))
+  [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes))
   ([`spec/lastenheft.md`](../../../../spec/lastenheft.md)).
   Zusätzliche Pflichtregeln: `diagnostics[].level` **nur**
   `warn` oder `error` (Lastenheft §1834 — der All-OK-Fall
@@ -43,7 +43,7 @@ Spec-Bezug für `doctor --json` (read-only-Pfad):
   konform (Lastenheft §1835 + §445); `status`-Kopplung an
   höchstes `level` (`error → "error"`, `warn ohne error →
   "warn"`, sonst `"ok"`).
-- **[`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)** (Dry-Run, V1, Voll-Schema): gilt
+- **[`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)** (Dry-Run, V1, Voll-Schema): gilt
   ausschließlich für `--dry-run --json` und `--diff --json`
   (Lastenheft §1842, §468). Pflichtfelder
   `dryRun`/`diff`/`plannedFiles`/`changes` plus die Minimal-
@@ -53,13 +53,13 @@ Spec-Bezug für `doctor --json` (read-only-Pfad):
   (`AssertMinimalEnvelope` und `AssertFullEnvelope`), damit
   der zweite Folge-Slice (`add`) den Full-Mode auf bereits
   stabilem Minimal-Helper aufsetzt.
-- **[`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003-fehlerklassifikation)** (Severity-Klassifikation): bereits
+- **[`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003--fehlerklassifikation)** (Severity-Klassifikation): bereits
   implementiert in
   [`doctor.go`](../../../../internal/adapter/driving/cli/doctor.go),
   Exit-Code 11 für Error (und für Warn unter `--strict`). Der
   `--json`-Pfad muss `exitCode` konsistent zu
   [`ErrDoctorFailures`](../../../../internal/adapter/driving/cli/cli.go)
-  serialisieren ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)).
+  serialisieren ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)).
 
 Heute existierender Pfad:
 [`doctor.go:71-78`](../../../../internal/adapter/driving/cli/doctor.go)
@@ -84,7 +84,7 @@ Migration für `template list` ist Platz 9
 ## Aufhebungsbedingung
 
 `u-boot doctor --json` liefert einen **Minimalkontrakt-konformen**
-Envelope ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1841) und `make test` + `make lint` +
+Envelope ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) §1841) und `make test` + `make lint` +
 `make docs-check` bleiben grün. Im selben Commit-Set ist das
 lokale `template list --json`-Flag entfernt und beide CLI-Pin-
 Tests (`u-boot template list --json` **und** `u-boot --json
@@ -111,7 +111,7 @@ einige sind gruppiert):
   §96-107: `"list"`, `"show"`, explizit `""`).
 
 Reject-Form heute (alle 11): Exit-Code `2`
-([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-Klasse) und Verweis auf den jeweiligen
+([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)-Klasse) und Verweis auf den jeweiligen
 Folge-Slice — kein Subcommand „akzeptiert `--json` still und
 liefert Human-Output" (sonst untergrabener V1-Maschinenvertrag).
 Cluster-T_close-Pflicht-Check: alle 13 Formen (2 Migrate +
@@ -158,7 +158,7 @@ Pin-Werte für `diagnostics[].code` spiegeln den **T0-(h)-
 Vorschlag Option (3)** (Tool-interne Codes aus
 `domain.Diagnostic.ID`, dokumentiert in der Code-Registry).
 Wird T0-(h) auf Option (1) LH-ID-Mapping festgezurrt, werden
-die Codes durch [`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen) / [`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003-fehlerklassifikation) ersetzt
+die Codes durch [`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen) / [`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003--fehlerklassifikation) ersetzt
 — die Pin-Tests müssen dann gegen die finale T0-(h)-Wahl
 geschnitten werden.
 
@@ -188,7 +188,7 @@ JSON-Modus darum semantisch ein No-op.
   `config get`, `config set`, `template` (bare) — `config`
   zählt als 3 Formen, `template` als 1 bare-Form plus
   Sonderregel `template list` unten) rejecten `--json` mit
-  Exit-Code `2` ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-Klasse) und Fehlermeldung
+  Exit-Code `2` ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)-Klasse) und Fehlermeldung
   `JSON-Ausgabe für 'u-boot <sub>' ist noch nicht implementiert
   (siehe [slice-v1-cli-json-dry-run](slice-v1-cli-json-dry-run.md)-<sub>).` Mechanik T0-(g).
   Pflicht-Pin-Test je nicht-migrierter Subcommand-Form (11
@@ -211,7 +211,7 @@ JSON-Modus darum semantisch ein No-op.
   beim `add`-/modifying-Pfad). Read-only-Output trägt die
   Voll-Schema-Felder gar nicht im JSON (Lastenheft §1841,
   Minimalkontrakt-bindend); modifying-Output muss sie alle
-  vier explizit setzen ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §326).
+  vier explizit setzen ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) §326).
 - ✅ **Schema-Helper-Modus-Split**: zwei Helper-Modi im
   Sub-Package `internal/adapter/driving/cli/jsontestutil/`:
   - `AssertMinimalEnvelope(t, raw)` prüft den Lastenheft-§1841-
@@ -225,7 +225,7 @@ JSON-Modus darum semantisch ein No-op.
     **Verbietet** `dryRun`/`diff`/`plannedFiles`/`changes` im
     Envelope (sonst ist es kein Minimalkontrakt mehr).
   - `AssertFullEnvelope(t, raw)` prüft zusätzlich die
-    [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)-Voll-Felder. Wird in diesem Slice
+    [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)-Voll-Felder. Wird in diesem Slice
     angelegt, aber **nicht** verwendet — Pattern-Anker für
     den nachfolgenden `add`-Slice.
 
@@ -251,8 +251,8 @@ JSON-Modus darum semantisch ein No-op.
   pflichtbestandteil. Wenn T0-(h) `Diagnostic.ID`-basierte
   Tool-interne Codes wählt (z. B. `docker.available`), trägt
   diese Sektion jeden Code mit seiner Bedeutung; wenn T0-(h)
-  LH-ID-Mapping wählt (z. B. alle Doctor-Checks → [`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen)
-  oder [`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003-fehlerklassifikation)), dokumentiert die Sektion das Mapping.
+  LH-ID-Mapping wählt (z. B. alle Doctor-Checks → [`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)
+  oder [`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003--fehlerklassifikation)), dokumentiert die Sektion das Mapping.
   Der Minimal-Helper konsultiert diese Sektion über eine
   embedded Allowlist (Sub-Decision T0-(b)/(h)).
 - ✅ **`template list --json`-Schnitt (Cluster T0-(e) §M3)**:
@@ -278,12 +278,12 @@ JSON-Modus darum semantisch ein No-op.
 - ✅ **Schema-Konformität via Helper**: drei Acceptance-Tests
   pinnen `doctor --json` (All-OK-Fall mit `diagnostics: []`,
   Warn-Fall, Error-Fall) via `jsontestutil.AssertMinimalEnvelope`.
-  Exit-Code konsistent mit [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) (`0` für ok / warn,
+  Exit-Code konsistent mit [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (`0` für ok / warn,
   `11` für error / strict-warn — gleicher Pfad wie heute,
   gemeinsamer `ErrDoctorFailures`-Anker).
 - ✅ **Architektur-Grenzen sauber**: `cliJSONEnvelope` und
   Helper leben im CLI-Adapter, **nicht** im Domain- oder
-  Application-Layer ([`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002-schichten-und-verzeichnislayout)/[`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement)). `make lint`
+  Application-Layer ([`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)/[`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)). `make lint`
   (depguard) grün; CLI-Adapter importiert keine neuen
   `hexagon/port/driven`-Typen (RecordingFileSystem kommt erst
   im `add`-Folge-Slice).
@@ -291,8 +291,8 @@ JSON-Modus darum semantisch ein No-op.
   parallel mitliefern oder eigener Cluster-T1-Schritt
   vorab — Sub-Decision T0-(f) dieses Slices): zentraler
   Reference-Block (Kandidat `docs/user/cli-json-output.md`)
-  zitiert sowohl den [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)-Minimalkontrakt
-  (§1823-1842) als auch das [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)-Voll-Schema
+  zitiert sowohl den [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)-Minimalkontrakt
+  (§1823-1842) als auch das [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)-Voll-Schema
   (§322-417) verbatim und benennt Envelope-Lokation plus
   Code-Registry; README EN+DE bekommen Verweis-Zeile.
 
@@ -439,7 +439,7 @@ Heute trägt
 einen stabilen Check-Identifier wie `"docker.available"`. Spec
 §1835 + §445 erlaubt für `diagnostics[].code` **zwei** Formen:
 (a) LH-Kennung der verursachenden Anforderung (z. B.
-[`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen), [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)) oder (b) Tool-interne Codes,
+[`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen), [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)) oder (b) Tool-interne Codes,
 **falls** ihre Bedeutung in der Doku festgehalten ist.
 `docker.available` ist tool-intern → Option (b) braucht eine
 Code-Registry in `docs/user/cli-json-output.md`.
@@ -448,7 +448,7 @@ Drei Sub-Optionen:
 
 1. **LH-ID-Mapping in der Adapter-Schicht**: CLI-Adapter
    übersetzt `Diagnostic.ID → LH-ID` (z. B. alle Doctor-Checks
-   gemeinsam → [`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen) oder [`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003-fehlerklassifikation)). Vorteil:
+   gemeinsam → [`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen) oder [`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003--fehlerklassifikation)). Vorteil:
    keine Domain-Änderung; Nachteil: Mapping-Logik im Adapter,
    Mehrere Checks teilen eine LH-ID (verliert Stabilität für
    CI-Scrapings).
@@ -457,7 +457,7 @@ Drei Sub-Optionen:
    Check-Konstruktor setzt eine LH-ID. Vorteil: pro-Check-
    Spezifik; Nachteil: rückwirkend alle Doctor-Checks
    anpassen — größerer Eingriff, Domain-Layer-Berührung
-   ([`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002-schichten-und-verzeichnislayout)-OK, aber spec-getrieben).
+   ([`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)-OK, aber spec-getrieben).
 3. **Tool-interne Codes plus Registry-Doku**: heutige
    `Diagnostic.ID` direkt durchreichen, Code-Registry-Sektion
    in `docs/user/cli-json-output.md` dokumentiert die Bedeutung
@@ -870,7 +870,7 @@ Template-Stub, Daten-Asymmetrie). Alle adressiert vor T6.
 | T | Inhalt | LOC (Schätzung) |
 | - | ------ | --------------- |
 | T0 | **Discovery + Sub-Decisions** aus §T0-Discovery klären (acht Sub-Decisions, inkl. T0-(g) Reject-Mechanik und T0-(h) `diagnostics[].code`-Quelle). Entscheidungen mit Begründung in einem `T0-Outcomes`-Block dokumentieren. | — (Plan-Arbeit) |
-| T1 | **Schema-Vertrag-Doku.** `docs/user/cli-json-output.md` anlegen: Minimalkontrakt ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1823-1842) und Voll-Schema ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §322-417) verbatim getrennt zitiert; **Code-Registry-Sektion** für Doctor-Checks (gemäß T0-(h)); Envelope-Lokation benennen; Minimal-vs.-Voll-Diff klargestellt. README EN+DE bekommt einen Verweis-Eintrag. (Cluster-T1; per T0-(f) hier mitgeliefert.) | ~120 |
+| T1 | **Schema-Vertrag-Doku.** `docs/user/cli-json-output.md` anlegen: Minimalkontrakt ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) §1823-1842) und Voll-Schema ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) §322-417) verbatim getrennt zitiert; **Code-Registry-Sektion** für Doctor-Checks (gemäß T0-(h)); Envelope-Lokation benennen; Minimal-vs.-Voll-Diff klargestellt. README EN+DE bekommt einen Verweis-Eintrag. (Cluster-T1; per T0-(f) hier mitgeliefert.) | ~120 |
 | T2 | **Envelope + Helper-Split + Drift-Gates.** `cliJSONEnvelope`-Typ (Minimal-Felder Pflicht, Voll-Felder `omitempty` via `*bool`/nil-Slices — gemäß T0-(d), inkl. Anti-Drift-Struct-Kommentar gegen `*bool → bool`-Refactor) plus zwei Helper `AssertMinimalEnvelope` und `AssertFullEnvelope` mit Options (`WithCommand`, `WithSubcommand`, `WithExpectedCodes`, `WithExitCode`). **Pin-Tests:** (i) Helper positive/negative (fehlende Pflichtfelder, ungültiges `status`, `level: "ok"`/`level: "info"`-Reject, Voll-Schema-Feld im Minimal-Pfad-Reject, undokumentierter Code-Reject); (ii) Marshal-Pin `newFullEnvelope(..., dryRun=false, diff=false, ...)` produziert `"dryRun":false,"diff":false` (nicht weggelassen — M1-Schutz); (iii) **Drift-Gate 1** Map ↔ `doctor.go:74-114`-Vollständigkeit; (iv) **Drift-Gate 2** Map ↔ Markdown-Roundtrip-Parser. | ~220 |
 | T3 | **Root-PersistentFlag `--json` + Reject-Allowlist + Cobra-Tree-Walk-Pin** am Cobra-Root registrieren plus `PersistentPreRunE`-Reject für nicht-migrierte Subcommand-Formen (Mechanik gemäß T0-(g)). **11 Reject-Pin-Tests**, je einer pro nicht-migrierter Form (`init`, `add`, `remove`, `up`, `down`, `logs`, `generate`, `config`, `config get`, `config set`, `template` (bare); `template list` siehe T4 — kein Reject). **Anti-Drift-Pin** Cobra-Tree-Walk: rekursiver `rootCmd.Commands()`-Traversal vergleicht jeden Leaf-Path mit erwartetem Map-Key (M2-Schutz gegen `cmd.Use`-Renames). App-Struktur-Field für den Flag-State. | ~110 |
 | T4 | **`template list`-Schnitt + Carveouts-Eintrag.** Lokales Flag entfernen, `runTemplateList` liest Root-Flag. Zwei Pin-Tests grün (`u-boot template list --json` + `u-boot --json template list` → gleicher Output). Carveouts-Eintrag in `carveouts.md` §Temporäre Carveouts: `template list --json` heute nicht Minimalkontrakt-konform, Re-Trigger [`slice-v1-cli-json-dry-run-template`](slice-v1-cli-json-dry-run-template.md). | ~40 |
@@ -889,9 +889,9 @@ Bandbreiten-Überschreitung ist begründet (Pattern-Vorbild-Last für
 ## Out of Scope
 
 - **`--dry-run` / `--diff` für `doctor`**: `doctor` ist
-  read-only, schreibt nichts. [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)/[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) Voll-Schema
+  read-only, schreibt nichts. [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)/[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) Voll-Schema
   gelten nicht — `doctor --json` erfüllt den Minimalkontrakt
-  aus [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1841 (T0-(d)).
+  aus [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) §1841 (T0-(d)).
 - **`AssertFullEnvelope`-Nutzung in diesem Slice**: der
   Voll-Helper wird hier nur als Stub angelegt, **nicht** verwendet
   (keine modifying-Tests). Erstnutzung im Folge-Slice
@@ -937,9 +937,9 @@ Bandbreiten-Überschreitung ist begründet (Pattern-Vorbild-Last für
   — §T0-Outcomes (a, c, e) sind die Vorgaben dieses Slices,
   §Aufhebungsbedingung Closure-Hard-Rule ist verbindlich für die
   Cluster-Schließung.
-- Spec: [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) (Minimalkontrakt read-only),
-  [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) (Pflicht-Schema), [`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003-fehlerklassifikation) (Severity),
-  [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) (Exit-Codes)
+- Spec: [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) (Minimalkontrakt read-only),
+  [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Pflicht-Schema), [`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003--fehlerklassifikation) (Severity),
+  [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Exit-Codes)
   ([`spec/lastenheft.md`](../../../../spec/lastenheft.md)).
 - ADR: [`ADR-0010`](../../adr/0010-kein-http-driving-adapter.md)
   §Folgepunkte Re-Eval-Trigger 2 — dieser Folge-Slice ist Teil

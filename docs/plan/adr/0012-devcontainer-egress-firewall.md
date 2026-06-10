@@ -25,7 +25,7 @@ einen **minimalen** Devcontainer: `devcontainer.json` (`name`, `build`,
 `USER vscode`). **Keine Netzwerk-Restriktion** — kein
 `postCreate`/`initializeCommand`, kein `runArgs`, kein
 `iptables`/`ipset`. In `spec/lastenheft.md` kommt Firewall/Egress
-nirgends vor ([`LH-FA-DOC-003`](../../../spec/lastenheft.md#lh-fa-doc-003-netzwerk) „Netzwerk" meint das gemeinsame
+nirgends vor ([`LH-FA-DOC-003`](../../../spec/lastenheft.md#lh-fa-doc-003--netzwerk) „Netzwerk" meint das gemeinsame
 *Compose*-Netzwerk, nicht Egress-Kontrolle).
 
 Verbreiteter Pattern („network-hardened devcontainer"): ein
@@ -37,8 +37,8 @@ Container eindämmen (keine Exfiltration, keine beliebigen Hosts).
 
 **Fit mit u-boot:**
 
-- Die Sicherheits-Philosophie existiert bereits: [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte)
-  (keine verdeckte Fremd-Code-Ausführung) + [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)
+- Die Sicherheits-Philosophie existiert bereits: [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)
+  (keine verdeckte Fremd-Code-Ausführung) + [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)
   (`--allow-external-feature-sources`, explizite Allowlist für
   Feature-*Quellen*). Eine Egress-Firewall ist das **Runtime-Pendant**
   zur bestehenden **Build-Time/Supply-Chain-Allowlist** —
@@ -83,7 +83,7 @@ u-boot erzeugt eine Devcontainer-Egress-Firewall als **opt-in**:
 Positiv:
 
 - Schließt die Runtime-Lücke neben der bestehenden Build-Time-Allowlist
-  ([`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)); konsistente Sicherheits-Story.
+  ([`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)); konsistente Sicherheits-Story.
 - Rein additiv, opt-in — kein Bruch für bestehende Devcontainer.
 - Template + Config + doctor sind etablierte u-boot-Muster.
 
@@ -113,10 +113,10 @@ Negativ / Risiken:
    inaktiv) vs. opt-in-`--require-firewall`, das ohne `NET_ADMIN`
    hart abbricht (Exit 11)?
 3. **Aktivierungs-Surface:** Flag, Config-Key, oder beides; Interaktion
-   mit `--no-interactive`/`--yes` ([`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung)).
+   mit `--no-interactive`/`--yes` ([`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)).
 4. **iptables vs. nftables**, und Verhältnis zur Distro-Basis des
    Devcontainer-Image (`debian` → iptables-legacy/nft?).
-5. **Verhältnis zu [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features):** geteilte Allowlist-Semantik/
+5. **Verhältnis zu [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features):** geteilte Allowlist-Semantik/
    Config-Form oder bewusst getrennt (Build-Source vs. Runtime-Egress)?
 
 ## Folgepunkte

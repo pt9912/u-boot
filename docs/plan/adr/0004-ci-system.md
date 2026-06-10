@@ -10,7 +10,7 @@ Accepted
 
 ## Kontext
 
-[`LH-QA-003`](../../../spec/lastenheft.md#lh-qa-003-ci-fähigkeit-github-actions) verlangt CI-Fähigkeit. Bisher (M1–M2b) ist die Anforderung
+[`LH-QA-003`](../../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions) verlangt CI-Fähigkeit. Bisher (M1–M2b) ist die Anforderung
 abstrakt erfüllt (`make gates` / `make ci` laufen Docker-only auf
 jedem Host mit Docker + `make`), aber kein konkretes CI-System mit
 PR-blockierenden Status-Checks ist angeschlossen.
@@ -28,10 +28,10 @@ Vorlagen:
 
 Lastenheft-Bezug:
 
-- [`LH-QA-003`](../../../spec/lastenheft.md#lh-qa-003-ci-fähigkeit-github-actions) – CI-Fähigkeit (in diesem Commit von "soll testbar" auf
+- [`LH-QA-003`](../../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions) – CI-Fähigkeit (in diesem Commit von "soll testbar" auf
   konkrete Pflichten verschärft).
-- [`LH-FA-BUILD-005`](../../../spec/lastenheft.md#lh-fa-build-005-makefile-mit-standard-targets)..[`LH-FA-BUILD-007`](../../../spec/lastenheft.md#lh-fa-build-007-docker-only-workflow) – Make-Targets und Docker-only-Workflow.
-- [`LH-NFA-PORT-002`](../../../spec/lastenheft.md#lh-nfa-port-002-keine-unnötigen-systemabhängigkeiten) – möglichst wenige Systemabhängigkeiten am Host;
+- [`LH-FA-BUILD-005`](../../../spec/lastenheft.md#lh-fa-build-005--makefile-mit-standard-targets)..[`LH-FA-BUILD-007`](../../../spec/lastenheft.md#lh-fa-build-007--docker-only-workflow) – Make-Targets und Docker-only-Workflow.
+- [`LH-NFA-PORT-002`](../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten) – möglichst wenige Systemabhängigkeiten am Host;
   Docker-only bleibt auch im CI-Runner Pflicht.
 
 ## Entscheidung
@@ -62,7 +62,7 @@ Muster:
   (`contents: read` für reine Build-Jobs).
 - `timeout-minutes: 20` pro Job (analog k-deskflight).
 - `DOCKER_BUILDKIT=1` als Job-Env (BuildKit-Cache + Multi-Stage-Cache-
-  Filter aus [`LH-FA-BUILD-005`](../../../spec/lastenheft.md#lh-fa-build-005-makefile-mit-standard-targets)).
+  Filter aus [`LH-FA-BUILD-005`](../../../spec/lastenheft.md#lh-fa-build-005--makefile-mit-standard-targets)).
 
 Bewusst **noch nicht** Teil der CI-Grundentscheidung:
 
@@ -100,7 +100,7 @@ Positiv:
 - **Supply-Chain-Härtung**: SHA-pinned Actions verhindern den
   klassischen Tag-Move-Angriff; explizite `permissions: {}` blockt
   versehentlich neu hinzukommende Steps mit schreibendem Token.
-- **Docker-only-Konsistenz** ([`LH-FA-BUILD-007`](../../../spec/lastenheft.md#lh-fa-build-007-docker-only-workflow)): identische
+- **Docker-only-Konsistenz** ([`LH-FA-BUILD-007`](../../../spec/lastenheft.md#lh-fa-build-007--docker-only-workflow)): identische
   Build-/Lint-/Test-Pfade lokal und in CI; keine "läuft nur in CI"-
   Drift.
 
@@ -137,8 +137,8 @@ Alternativen (verworfen):
 - Sobald M3 (`u-boot init`) merged ist und produktive Pakete in
   `./internal/...` liegen: Coverage-Schwellwert per
   `make coverage-gate THRESHOLD=…` im Workflow setzen
-  ([`LH-FA-BUILD-008`](../../../spec/lastenheft.md#lh-fa-build-008-coverage-bootstrap)).
-- ~~Image-Publish-Workflow als eigenes Inkrement ([`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002-paketierung))~~
+  ([`LH-FA-BUILD-008`](../../../spec/lastenheft.md#lh-fa-build-008--coverage-bootstrap)).
+- ~~Image-Publish-Workflow als eigenes Inkrement ([`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002--paketierung))~~
   — erledigt nach Distributionsentscheidung in [ADR-0007](0007-distributionswege-ghcr.md).
 - ~~Trivy-Image-Scan als optionaler dritter Job~~ — geliefert als
   PR-blockierender dritter CI-Job.

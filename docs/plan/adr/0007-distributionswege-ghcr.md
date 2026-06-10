@@ -10,7 +10,7 @@ Accepted
 
 ## Kontext
 
-[`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002-paketierung) Paketierung (siehe `spec/lastenheft.md` §14) ist seit
+[`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002--paketierung) Paketierung (siehe `spec/lastenheft.md` §14) ist seit
 M0 offen. Mit dem Abschluss des MVP (Stand `e0d6c87`) und dem
 bevorstehenden ersten Release-Schnitt (`v0.1.0`) muss die Frage konkret
 beantwortet werden, bevor `.github/workflows/publish.yml` geschrieben
@@ -27,10 +27,10 @@ Sechs Optionen stehen laut `spec/lastenheft.md` §14 zur Wahl:
 
 Rahmenbedingungen aus dem bisherigen Projektstand:
 
-- u-boot **orchestriert** Docker ([`LH-FA-UP-001`](../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten), M5/M6); Docker ist
+- u-boot **orchestriert** Docker ([`LH-FA-UP-001`](../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten), M5/M6); Docker ist
   faktisch Laufzeit-Voraussetzung, nicht nur Bau-Voraussetzung.
-- Build ist Docker-only ([`LH-FA-BUILD-007`](../../../spec/lastenheft.md#lh-fa-build-007-docker-only-workflow)), Runtime-Image existiert
-  bereits als Mehr-Stufen-Dockerfile mit OCI-Labels ([`LH-FA-BUILD-002`](../../../spec/lastenheft.md#lh-fa-build-002-runtime-stage-pflichten)).
+- Build ist Docker-only ([`LH-FA-BUILD-007`](../../../spec/lastenheft.md#lh-fa-build-007--docker-only-workflow)), Runtime-Image existiert
+  bereits als Mehr-Stufen-Dockerfile mit OCI-Labels ([`LH-FA-BUILD-002`](../../../spec/lastenheft.md#lh-fa-build-002--runtime-stage-pflichten)).
 - `docker/login-action` + `docker/build-push-action` für GHCR sind
   in der Go-CLI-Domäne (`gh`, `helm`, `kubectl`) Standard, SHA-pinbar
   und benötigen kein zusätzliches Secret außer dem automatischen
@@ -60,7 +60,7 @@ Security-Gates aus dem Lastenheft erfüllen.
 | Option | Entscheidung | Begründung |
 | ------ | ------------ | ---------- |
 | Container Image (GHCR) | **Gewählt** | Geringster Reibungspunkt, passt zu Docker-only-Build und Docker-Laufzeit-Voraussetzung; OCI-Labels schon da; SHA-pinbare Standard-Actions. |
-| Einzelnes Binary | **Gewählt** (zusätzlich zu GHCR, ab v0.1.1) | Trigger ist am 2026-05-31 materialisiert: der v0.1.1-doctor-container-Befund zeigte, dass `doctor` als Host-Diagnostik-Subkommando eine host-native Form braucht — das distroless-Image bringt keine `docker`/`git`-Binaries für die [`LH-FA-DIAG-002`](../../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen)-Probes mit. Distribution umfasst sechs Plattformen (Linux/macOS/Windows × amd64/arm64). |
+| Einzelnes Binary | **Gewählt** (zusätzlich zu GHCR, ab v0.1.1) | Trigger ist am 2026-05-31 materialisiert: der v0.1.1-doctor-container-Befund zeigte, dass `doctor` als Host-Diagnostik-Subkommando eine host-native Form braucht — das distroless-Image bringt keine `docker`/`git`-Binaries für die [`LH-FA-DIAG-002`](../../../spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)-Probes mit. Distribution umfasst sechs Plattformen (Linux/macOS/Windows × amd64/arm64). |
 | npm package | **Verworfen** | Sprach-Ökosystem-Mismatch (Go-Binary ist kein Node-Modul). npm/yarn-Distribution hätte nur Mehrwert bei Frontend-/JS-Team-Targets; u-boot ist Tooling für beliebige Stacks. |
 | pip package | **Verworfen** | Analog npm: u-boot ist Go, kein Python-Modul. `pipx`-Wrapper für Go-Binaries hat keinen erkennbaren Mehrwert über GHCR. |
 | Homebrew | **Vertagt** mit Trigger | Natürlicher Folgeweg nach Binary; ohne Binary keine Homebrew-Formula. Trigger: macOS-Nutzer-Nachfrage. |
@@ -81,7 +81,7 @@ Konkrete Setzungen für den GHCR-Weg:
     OCI-Tag-Zeichen.
 - **Auth:** `GITHUB_TOKEN` mit `packages: write`. Kein PAT, kein
   Org-Secret.
-- **OCI-Labels:** Aus [`LH-FA-BUILD-002`](../../../spec/lastenheft.md#lh-fa-build-002-runtime-stage-pflichten) im Dockerfile gesetzt; der
+- **OCI-Labels:** Aus [`LH-FA-BUILD-002`](../../../spec/lastenheft.md#lh-fa-build-002--runtime-stage-pflichten) im Dockerfile gesetzt; der
   Workflow lädt nichts nach.
 
 ## Konsequenzen
@@ -92,7 +92,7 @@ Positiv:
   parallel zu wartender Pipelines.
 - **GHCR ist OCI-konform** — Wechsel zu Docker Hub / Quay / privatem
   Mirror ist später ohne Schema-Bruch möglich.
-- **[`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002-paketierung) ist für den GHCR-Anteil entschieden;** die anderen
+- **[`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002--paketierung) ist für den GHCR-Anteil entschieden;** die anderen
   Wege haben jeweils konkrete Trigger, sind also nicht mehr „offen ohne
   Plan", sondern „vertagt mit Trigger".
 - **Versions-Pin verifiziert vor dem Push.** Die Tag-`VERSION` wird
@@ -107,14 +107,14 @@ Positiv:
 Negativ / Trade-offs:
 
 - **Docker-Pflicht für Endnutzer.** Wer u-boot nutzt, muss bereits
-  Docker installiert haben — was wegen [`LH-FA-DIAG-002`](../../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen) ohnehin
+  Docker installiert haben — was wegen [`LH-FA-DIAG-002`](../../../spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen) ohnehin
   geprüft wird. Für reines Lokal-CLI-Tooling ohne Docker-Use-Case
   gibt es bis zur Binary-Vertagung keinen Distributionsweg.
 - **`:latest`-Floating-Tag.** Konventionsgemäß bequem, aber bei
   Breaking Changes mit Vorsicht zu nutzen. Wird in
   `docs/user/branch-protection.md` / Release-Doku adressiert, sobald
   ein Breaking Change ansteht.
-- **[`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002-paketierung) bleibt formal offen,** weil Binary / Homebrew /
+- **[`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002--paketierung) bleibt formal offen,** weil Binary / Homebrew /
   Distro-Pakete weiter aussehen — aber jeweils mit Trigger, statt als
   Plan-Loch.
 
@@ -132,5 +132,5 @@ Alternativen (verworfen):
 
 - Wenn Homebrew oder Debian/RPM konkret nachgefragt werden, wird die
   jeweilige Distributionsentscheidung neu bewertet.
-- Wenn ein weiterer Distributionsweg gewählt wird, muss [`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002-paketierung)
+- Wenn ein weiterer Distributionsweg gewählt wird, muss [`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002--paketierung)
   im Lastenheft auf den neuen Produktstand gebracht werden.

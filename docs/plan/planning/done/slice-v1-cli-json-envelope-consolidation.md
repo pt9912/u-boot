@@ -51,10 +51,10 @@ sind. Pre-T7-Code-State im remove-Slice + R15-Cross-Slice-Audit:
 - `u-boot --json add postgres extra` → analog, kein Envelope
   (Spec §1841-Verletzung).
 - `u-boot --dry-run --json add` → Minimal-Envelope statt
-  Voll-Schema (Spec §1842-Verletzung, [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)-Vertrag;
+  Voll-Schema (Spec §1842-Verletzung, [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)-Vertrag;
   analog R13-HIGH-1 für remove).
 - `u-boot --diff --json add` → analog, Minimal-Envelope statt
-  Voll-Schema mit Hunks ([`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) §451-489-Verletzung).
+  Voll-Schema mit Hunks ([`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) §451-489-Verletzung).
   Defense-Symmetrie zum `--dry-run`-Pfad: Validator MUSS auch
   `--diff` lesen und Voll-Schema-Wahl pinnen.
 
@@ -217,7 +217,7 @@ Penalty. Stub-Empfehlung „selektiv" ist damit **überholt** → greedy
   Envelope-Hook: `--json <cmd>` mit falscher Arg-Zahl
   (NoPositionalArg + TooManyArg) emittiert den Envelope auf stdout
   (§1841), und `--dry-run`/`--diff --json` wählt das Voll-Schema
-  (§1842 / [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)/[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe)).
+  (§1842 / [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)/[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)).
 - Kein absoluter Filesystem-Pfad leakt mehr in `diagnostic.message`
   von add/init/generate (greedy `sanitizeBaseDir`).
 - Bei SD-A (a): genau **ein** Shared-`jsonArgsValidator`; keine
@@ -237,7 +237,7 @@ Penalty. Stub-Empfehlung „selektiv" ist damit **überholt** → greedy
 | T4 ✅ (2026-06-08) | **Closure**: carveouts-Eintrag entfernt; CHANGELOG `### Fixed` (Bug-Fix: §1841-Envelope-Symmetrie + Path-Leak-Defense für add/init/generate); Slice nach `done/` + DoD-Hash-Tabelle. | — |
 
 LOC-Schätzung **~220** (mittlerer Slice). Read-bestätigt: kein neuer
-Sentinel (Args-Fehler = [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)/Exit 2, schon vorhanden),
+Sentinel (Args-Fehler = [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)/Exit 2, schon vorhanden),
 kein Port-Contract-Change.
 
 ## Trigger
@@ -279,7 +279,7 @@ zu klären:
    Sub-Package. Add/init/generate rüsten ihre `Args:`-Felder
    um. Sub-Decision: per-Command-Custom-Mapper (analog
    `mapRemoveErrorToDiagnostic`) als Parameter mitgeben, ODER
-   die generische Form ohne Mapper ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) ist der
+   die generische Form ohne Mapper ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) ist der
    einzige Code in beiden Pfaden, Pre-Service-Validation-
    Sentinel-Klasse).
 2. **Helper-Heim für `baseDirSanitizedError`** — **festgelegt
@@ -330,7 +330,7 @@ zu klären:
   Helper-Heim für die `noopConfirmer{}`-Branch-Logic in einen
   geteilten `cli`-Sub-Helper (analog `mapComposeRuntimeSentinel`-
   Pattern für Mappers).
-- **Pattern-Inventur für [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) Multi-Use**: derselbe
+- **Pattern-Inventur für [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen) Multi-Use**: derselbe
   LH-Code für ERROR + WARN ist heute nur in remove relevant.
   Falls ein zukünftiger Slice analogen Multi-Use einführt,
   wandert der Disambiguations-Vertrag in einen separaten
@@ -338,15 +338,15 @@ zu klären:
 
 ## Spec-Bezug
 
-- [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1841 — Minimalkontrakt-Envelope-Vertrag
+- [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) §1841 — Minimalkontrakt-Envelope-Vertrag
   (Symmetrie-Pflicht für alle JSON-Pfade).
-- [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §322-417 — Voll-Schema-Vertrag bei
+- [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) §322-417 — Voll-Schema-Vertrag bei
   `--dry-run --json` (Flag-Awareness-Pflicht: Voll-Schema bei
   `--dry-run`).
-- [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) §451-489 — Voll-Schema-Vertrag bei
+- [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) §451-489 — Voll-Schema-Vertrag bei
   `--diff --json` (Hunks-Pflicht plus Pre-Service-Validation-
   Symmetrie: NoPositionalArg- und TooManyArgs-Pfad mit
   `--diff` MUSS Voll-Schema-Envelope tragen, sonst Spec-
   Verletzung analog R13-HIGH-1 für `--dry-run`).
-- [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) — usage-Error-Klasse für Form-Validierung
+- [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) — usage-Error-Klasse für Form-Validierung
   (gemeinsamer Code-Pfad für NoPositionalArg + TooManyArgs).

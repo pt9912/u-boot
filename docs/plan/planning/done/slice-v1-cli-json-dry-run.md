@@ -1,9 +1,9 @@
 # Slice V1: Maschinen-lesbare CLI — `--json`, `--dry-run`, `--diff`
 
 > **Status:** geplant für v0.4.0+ — Spec ✅
-> ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) Dry-Run [`spec/lastenheft.md:302-447`](../../../../spec/lastenheft.md),
-> [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) Diff [`spec/lastenheft.md:451-489`](../../../../spec/lastenheft.md),
-> [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) Maschinen-lesbar
+> ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) Dry-Run [`spec/lastenheft.md:302-447`](../../../../spec/lastenheft.md),
+> [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) Diff [`spec/lastenheft.md:451-489`](../../../../spec/lastenheft.md),
+> [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) Maschinen-lesbar
 > [`spec/lastenheft.md:1809-1853`](../../../../spec/lastenheft.md)),
 > ADR-Anker ✅ ([`ADR-0010`](../../adr/0010-kein-http-driving-adapter.md)
 > — JSON-CLI ist *die* Maschinen-Schnittstelle, HTTP-Adapter
@@ -14,7 +14,7 @@
 > **Status: `done/` — Cluster vollständig abgeschlossen, T_close
 > gefahren (2026-06-08).** Alle neun Folge-Slices in `done/`
 > (Closure-Hard-Rule erfüllt) + Übergangs-Mechanik abgebaut. Der
-> gesamte [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)-Surface ist ausgeliefert (alle zehn
+> gesamte [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)-Surface ist ausgeliefert (alle zehn
 > Spec-Enum-Subcommand-Formen tragen `--json`).
 >
 > **DoD-Cluster-Meilensteine**:
@@ -59,17 +59,17 @@
 
 Drei V1-Pflicht-Spec-IDs fordern eine maschinen-lesbare CLI:
 
-- **[`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)** (Dry-Run, V1): für dateiverändernde
+- **[`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)** (Dry-Run, V1): für dateiverändernde
   Befehle muss `--dry-run` zeigen, welche Dateien erzeugt /
   geändert / gelöscht würden, **ohne** Dateisystem-Schreiben.
   Pflicht-JSON-Schema definiert (`$schema` draft 2020-12,
   Pflichtfelder `status`, `command`, `dryRun`, `diff`,
   `plannedFiles`, `changes`, `diagnostics`, `exitCode`).
-- **[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe)** (Diff, V1): `--diff` zeigt Unterschiede
+- **[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)** (Diff, V1): `--diff` zeigt Unterschiede
   zwischen aktuellem und geplantem Zustand der betroffenen
   Dateien. Kombinierbar mit `--dry-run`. Bei `--diff --json`
-  gilt das [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)-Schema mit `diff: true`.
-- **[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)** (Maschinen-lesbar, V1): `--json` für
+  gilt das [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)-Schema mit `diff: true`.
+- **[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)** (Maschinen-lesbar, V1): `--json` für
   **alle** zehn Subcommands (Spec-Enum:
   `init, add, remove, up, down, doctor, logs, generate,
   config, template`). Minimalkontrakt für read-only
@@ -82,8 +82,8 @@ Heute existiert genau ein `--json`-Pfad im Repo:
 (`renderTemplateListJSON` mit `templateJSON`-DTO + nil-Slice→`[]`-
 Normalisierung). Der Pfad ist Vorbild für die DTO-Lokalisation
 (Driving-Adapter besitzt das Wire-Format, Domain bleibt
-präsentations-agnostisch — [`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002-schichten-und-verzeichnislayout) / [ADR-0002](../../adr/0002-hexagonale-architektur.md)), trägt
-aber **noch nicht** das [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)-Pflicht-Schema mit
+präsentations-agnostisch — [`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout) / [ADR-0002](../../adr/0002-hexagonale-architektur.md)), trägt
+aber **noch nicht** das [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)-Pflicht-Schema mit
 `status`/`command`/`diagnostics`/`exitCode` — auch der existierende
 `template list --json`-Pfad muss im Zuge dieser Slice-Cluster-
 Serie spec-konform werden (Folge-Slice
@@ -93,9 +93,9 @@ Serie spec-konform werden (Folge-Slice
 Architektur: **JSON-CLI ist die kanonische Maschinen-
 Schnittstelle**; HTTP-Adapter wurde mit [ADR-0010](../../adr/0010-kein-http-driving-adapter.md) §Folgepunkte
 Re-Eval-Trigger 2 ausdrücklich gegen das hier kommende
-[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)-Surface abgewogen. Wenn dieser Slice slipt,
+[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)-Surface abgewogen. Wenn dieser Slice slipt,
 würde [ADR-0010](../../adr/0010-kein-http-driving-adapter.md) selbst angreifbar (Folge-Trigger 2 aus §144 —
-„Maschinen-Schnittstelle über [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) hinaus"). Deshalb
+„Maschinen-Schnittstelle über [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) hinaus"). Deshalb
 ist [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md) V1-pünktlich zu liefern, nicht
 „V1+1" oder „nach Trigger".
 
@@ -110,7 +110,7 @@ Subcommand-Beispiel und liegt im Cluster.
 ## Aufhebungsbedingung
 
 Alle zehn Spec-Enum-Subcommands tragen einen `--json`-Pfad
-gemäß [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)-Minimalkontrakt:
+gemäß [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)-Minimalkontrakt:
 
 ```bash
 u-boot doctor --json                # alle read-only-Befehle
@@ -138,18 +138,18 @@ u-boot config set <path> <value> --dry-run --diff --json
 `u-boot config`, `u-boot config get <path>`, `u-boot config
 set <path> <value>` sind drei separate Subcommand-Formen
 unter dem `config`-Hauptkommando. Alle drei brauchen
-`--json` ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) gilt für alle
-Spec-Enum-Subcommands, nicht nur Schreibpfade). [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)
+`--json` ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) gilt für alle
+Spec-Enum-Subcommands, nicht nur Schreibpfade). [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)
 fordert für `command == "config"` zusätzlich
 `subcommand`-Pflicht — der Wert für **bare** `u-boot config`
 (ohne weiteren Pfad) ist Sub-Decision im Folge-Slice
 [`slice-v1-cli-json-dry-run-config`](slice-v1-cli-json-dry-run-config.md) (Kandidaten: `"list"`,
 `"show"`, oder explizit `""` falls Spec leeren Subcommand
-erlaubt — Aufklärung gegen [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern) im Folge-Slice).
+erlaubt — Aufklärung gegen [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) im Folge-Slice).
 
 Jede `--json`-Ausgabe validiert gegen das
-[`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)-Pflicht-Schema (oder den
-[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)-Minimalkontrakt für read-only). Validierung
+[`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)-Pflicht-Schema (oder den
+[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)-Minimalkontrakt für read-only). Validierung
 in Tests pinnt:
 
 - `status` an höchstem `diagnostics.level` gekoppelt
@@ -158,7 +158,7 @@ in Tests pinnt:
 - `subcommand` bei `command == "template"` / `"config"` gesetzt,
 - `plannedFiles[].action` ∈ `{create, modify, delete}`,
 - `changes[].count` ≥ 0,
-- `exitCode` ≥ 0 und konsistent mit [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes).
+- `exitCode` ≥ 0 und konsistent mit [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes).
 
 Die einzelnen Subcommand-Implementierungen leben in
 **Per-Command-Folge-Slices** (siehe §Per-Command-Folge-Slices).
@@ -180,7 +180,7 @@ nach `done/` muss
 [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
 Carveouts erscheinen, der den fehlenden Subcommand benennt
 und mit einem benannten Re-Trigger-Slice-Plan-Stub in `open/`
-verlinkt ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin) Carveout-Plan-Anker-Pflicht);
+verlinkt ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin) Carveout-Plan-Anker-Pflicht);
 (2) der **done/-Eintrag dieses Cluster-Slices** und der
 **Roadmap-Liefer-Vermerk** dürfen **nicht** „JSON-CLI als
 Maschinen-Schnittstelle ausgeliefert" sagen, sondern müssen
@@ -333,7 +333,7 @@ subcommand-spezifisch (kein gemeinsamer Envelope).
 
 ### T0-(d) `--diff`-Renderer: Unified oder strukturiert?
 
-[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) lässt das Format offen. Optionen:
+[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) lässt das Format offen. Optionen:
 
 - **Unified-Diff** (`go-diff`-Library oder eigene Impl): klassisch,
   human-lesbar, aber im JSON-Modus als String-Field eingebettet
@@ -371,7 +371,7 @@ Use-Case-Druck (geschätzt):
    <path>`, `config set <path> <value>`) — `config` und
    `config get` sind read-only-`--json`, `config set` ist
    modifying-`--dry-run --diff --json`. Drei-Form-Bündel,
-   damit `subcommand`-Pflicht aus [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) einmal
+   damit `subcommand`-Pflicht aus [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) einmal
    geschlossen wird.
 9. `template list --json` — Audit + Schema-Migration
    (existierender Pfad spec-konform machen).
@@ -411,7 +411,7 @@ Logik trägt.
 | T | Inhalt | LOC (Schätzung) |
 | - | ------ | --------------- |
 | T0 | **Discovery + Sub-Decisions.** Fünf T0-Fragen aus §T0-Discovery klären (Flag-Scope, Dry-Run-Architektur, DTO-Lokalisation, Diff-Renderer, Reihenfolge). Entscheidung pro Frage mit Begründung in einem `T0-Outcomes`-Block dokumentieren. [ADR-0010](../../adr/0010-kein-http-driving-adapter.md) bleibt unangetastet (§AK ADR-Disziplin). | — (Plan-Arbeit) |
-| T1 | **Schema-Vertrag-Doku.** `docs/user/cli-json-output.md` (neu) zitiert [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)-Schema verbatim, dokumentiert DTO-Konvention, listet Per-Command-Folge-Slice-Reihenfolge. README EN+DE bekommt Verweis-Zeile. **Delegation: geliefert via [`slice-v1-cli-json-dry-run-doctor`](slice-v1-cli-json-dry-run-doctor.md)** ([`done/slice-v1-cli-json-dry-run-doctor.md`](slice-v1-cli-json-dry-run-doctor.md) T1-Tranche, DoD-Hash `299e792`). Cluster-T_close-Reviewer sucht **keinen** separaten Cluster-T1-Commit. | ~80 (reine Doku, via Doctor-Slice) |
+| T1 | **Schema-Vertrag-Doku.** `docs/user/cli-json-output.md` (neu) zitiert [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)-Schema verbatim, dokumentiert DTO-Konvention, listet Per-Command-Folge-Slice-Reihenfolge. README EN+DE bekommt Verweis-Zeile. **Delegation: geliefert via [`slice-v1-cli-json-dry-run-doctor`](slice-v1-cli-json-dry-run-doctor.md)** ([`done/slice-v1-cli-json-dry-run-doctor.md`](slice-v1-cli-json-dry-run-doctor.md) T1-Tranche, DoD-Hash `299e792`). Cluster-T_close-Reviewer sucht **keinen** separaten Cluster-T1-Commit. | ~80 (reine Doku, via Doctor-Slice) |
 | T2..Tn | **Spawn Folge-Slice-Stubs** in `open/` für alle 9 Per-Command-Slices. Pro Stub: Auslöser + grobe AKs + LOC-Schätzung + Verweis auf gemeinsamen Schema-Vertrag. Reihenfolge nach T0-(e). | ~30 LOC pro Stub × 9 = ~270 |
 | T_close | **Cluster-Closure.** Pflicht-Bedingung gemäß §Aufhebungsbedingung Closure-Hard-Rule (§124-148): **alle 9** Folge-Slices in `done/`. Punkt. Cluster-Slice mit DoD-Hash-Line aller Folge-Slices nach `done/` plus Roadmap-Update. [ADR-0010](../../adr/0010-kein-http-driving-adapter.md) bleibt **unverändert**; optionale Folge-ADR ist Sub-Decision (siehe AK „[ADR-0010](../../adr/0010-kein-http-driving-adapter.md)-Liefer-Anker"). **Kein** „kritisches Quorum", **kein** MVP-Bypass, **kein** Restweg-Carveout als Closure-Alternative. Der **Notfall-Slip-Pfad** aus §Aufhebungsbedingung §137-148 (Carveout-Eintrag + abgeschwächte Liefer-Aussage) ist explizit **kein wählbarer** T_close-Pfad — er ist Restlauf-Disziplin für einen unvermeidbaren Slip und tritt nur in Kraft, **nachdem** ein Slip bereits passiert ist (Default-Erwartung bleibt „keine Slips"). | — (Doku) |
 
@@ -436,14 +436,14 @@ erbt es. `--dry-run` und `--diff` werden ausschließlich auf den
 5 modifying Subcommands (`init`, `add`, `remove`, `generate`,
 `config set`) per `cmd.Flags()` lokal registriert.
 
-**Begründung:** [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) fordert `--json` für **alle**
+**Begründung:** [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) fordert `--json` für **alle**
 zehn Subcommands — Root-Persistent ist die natürliche Heimat
 (sonst 10× lokales Wiring + Drift-Risiko, vgl. heutiges Vorbild
 `--verbose/--debug/--quiet/--yes/--no-interactive` aus
 [`cli/root.go:38-54`](../../../../internal/adapter/driving/cli/root.go),
 [slice-followup-verbosity-wiring](slice-followup-verbosity-wiring.md) §`7c6fbce`). `--dry-run`/`--diff`
 sind nur für die 5 modifying-Subcommands spec-pflichtig
-([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)/[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe)); persistent würde die 5
+([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)/[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)); persistent würde die 5
 read-only-Subcommands zwingen, sie aktiv abzulehnen — 5× extra
 Reject-Wiring ohne Gegenwert.
 
@@ -475,7 +475,7 @@ ausschließlich im Composition-Root**
 **einzige Ort**, an dem `RecordingFileSystem` und die
 Production-FS koexistieren. Hard Rule Hexagonale Architektur
 ([`spec/architecture.md:154`](../../../../spec/architecture.md)
-plus depguard [`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002-schichten-und-verzeichnislayout)/[`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement)): der CLI-Adapter
+plus depguard [`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)/[`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)): der CLI-Adapter
 unter `internal/adapter/driving/cli/` darf **keine**
 `hexagon/port/driven`-Abhängigkeit tragen.
 
@@ -512,7 +512,7 @@ mit `Passthrough=false` zählt Mutations-Aufrufe — Production-FS
 sieht null Calls), und der Recorder ist der einzige Ort, an dem
 die FS-Mutations-Liste vollständig getragen werden muss → ein
 Drift-Anker. Der **Passthrough-Modus** löst gleichzeitig
-[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) `--diff` ohne `--dry-run` (Preview-and-Apply):
+[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) `--diff` ohne `--dry-run` (Preview-and-Apply):
 derselbe Adapter capturet den Preview-Plan **und** führt die
 Writes aus — keine doppelte Use-Case-Ausführung nötig,
 Preview-vs-Apply-Drift ausgeschlossen.
@@ -554,7 +554,7 @@ vorbeischmuggeln.
   Acceptance-Tests sowohl den `--dry-run`-Pfad (Passthrough=
   false, null FS-Mutationen) als auch den `--diff`-ohne-
   `--dry-run`-Pfad (Passthrough=true, Preview-Output + echte
-  Writes in einem Lauf, [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe)).
+  Writes in einem Lauf, [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)).
 - **Wiring-Kontrolle:** Das Composition-Root in
   `cmd/uboot/main.go` ist die **einzige** Stelle, an der
   konkrete `driven.FileSystem`-Adapter (Production-FS und
@@ -565,7 +565,7 @@ vorbeischmuggeln.
   Flag-Kombination. Der CLI-Adapter importiert weder
   `driven.FileSystem` noch den `RecordingFileSystem`-Konkret-
   Typ — depguard/Hexagonal-Architektur-Hard-Rule
-  ([`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002-schichten-und-verzeichnislayout)/[`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement)) bleibt grün, prüfbar via
+  ([`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)/[`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)) bleibt grün, prüfbar via
   `make lint`.
 - **Read-after-Write-Audit pro Use-Case:** Der erste modifying
   Folge-Slice prüft explizit, ob ein Use-Case in derselben
@@ -591,7 +591,7 @@ vorbeischmuggeln.
 **Entscheidung:** Ein gemeinsamer Envelope-Type
 `cliJSONEnvelope` im CLI-Adapter (Lokation: vermutlich
 `internal/adapter/driving/cli/jsonenvelope.go` — Sub-Decision
-im ersten Folge-Slice) trägt die [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)-Pflichtfelder
+im ersten Folge-Slice) trägt die [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)-Pflichtfelder
 **einmal**: `Status`, `Command`, `Subcommand` (omitempty,
 gesetzt für `template`/`config`), `DryRun`, `Diff`,
 `PlannedFiles`, `Changes`, `Diagnostics`, `ExitCode`, plus
@@ -606,7 +606,7 @@ Conformance-Test der anderen 9 fängt es nicht). Common-
 Envelope ist gleichzeitig die natürliche Verankerungsstelle
 für den `jsontestutil.AssertSchemaConform`-Helper aus den
 Cluster-AKs (ein Validator, der den Envelope parst und gegen
-das [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)-Schema prüft — jeder Folge-Slice ruft
+das [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)-Schema prüft — jeder Folge-Slice ruft
 ihn auf). Vorbild `templateJSON` aus
 [`cli/template.go:163-186`](../../../../internal/adapter/driving/cli/template.go)
 ist subcommand-spezifisch, trägt aber **null** der
@@ -616,7 +616,7 @@ migriert (Schema-Audit).
 
 ### T0-(d) Diff-Renderer: Beides — Unified-String im Human-Mode, strukturierte Hunks per `plannedFiles[]` im JSON-Mode
 
-**Entscheidung:** [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) lässt das Format offen, daher
+**Entscheidung:** [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) lässt das Format offen, daher
 zweigleisig.
 
 - **Human-Mode** (`--diff` ohne `--json`): klassischer
@@ -624,7 +624,7 @@ zweigleisig.
   Hunk-Header `@@ -oldStart,oldLines +newStart,newLines @@`).
 - **JSON-Mode** (`--diff --json`): das Envelope-Feld `diff`
   bleibt **Boolean** und auf `true` gesetzt, wie
-  [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) es als Pflichtfeld definiert. Die
+  [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) es als Pflichtfeld definiert. Die
   strukturierten Hunks landen **nicht** in `diff`, sondern
   als **omitempty-Hunk-Array per `plannedFiles[]`-Eintrag**
   (Vorschlag-Field-Name: `plannedFiles[].hunks` mit
@@ -636,7 +636,7 @@ zweigleisig.
   Field-Name** und ob `hunks` direkt unter `plannedFiles[]`
   oder unter einem `plannedFiles[].diff`-Sub-Objekt sitzt,
   ist Sub-Decision des ersten modifying Folge-Slices —
-  Verankerung gegen den [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)-Schema-Wortlaut
+  Verankerung gegen den [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)-Schema-Wortlaut
   passiert in T1 (Schema-Vertrag-Doku) und der erste
   Folge-Slice referenziert das.
 
@@ -1026,8 +1026,8 @@ hierher verschoben wurde).
 
 ## Bezug
 
-- Spec: [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) (Dry-Run), [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) (Diff),
-  [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) (Maschinen-lesbar) — alle V1
+- Spec: [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Dry-Run), [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) (Diff),
+  [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) (Maschinen-lesbar) — alle V1
   ([`spec/lastenheft.md:302-489`](../../../../spec/lastenheft.md),
   [`spec/lastenheft.md:1809-1853`](../../../../spec/lastenheft.md)).
 - ADR: [`ADR-0010`](../../adr/0010-kein-http-driving-adapter.md)

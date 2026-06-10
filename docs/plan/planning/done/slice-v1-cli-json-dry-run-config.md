@@ -97,7 +97,7 @@
 ## Auslöser
 
 Cluster-Slice §T0-Outcomes (a) macht `--json` für jeden
-Spec-Enum-Subcommand verbindlich ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1813);
+Spec-Enum-Subcommand verbindlich ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) §1813);
 Cluster-Slice Z. 102-113 **§config-Cluster-Pflicht** (Review-
 Finding MEDIUM) zwingt explizit alle drei Sub-Forms in **einen**
 Slice: gemeinsamer `ConfigUseCase`, gemeinsame Sentinels
@@ -114,12 +114,12 @@ keine neue Pattern-Erfindung, ausschließlich Wiederverwendung.
 
 Spec-Bezug:
 
-- [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration)..[`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern) — Config-Subcommand-Vertrag.
-- [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1813 / §1841 — Minimalkontrakt-Pflicht für
+- [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)..[`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) — Config-Subcommand-Vertrag.
+- [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) §1813 / §1841 — Minimalkontrakt-Pflicht für
   alle drei Sub-Forms.
-- [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §322-417 — Voll-Schema-Vertrag (für `config
+- [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) §322-417 — Voll-Schema-Vertrag (für `config
   set` mit `--dry-run`/`--diff`; bare/get nutzen Minimalkontrakt).
-- [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) §451-489 — Diff-Vertrag (für `config set
+- [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) §451-489 — Diff-Vertrag (für `config set
   --diff`).
 
 Heute-Stand-Pre-Scan
@@ -133,7 +133,7 @@ Heute-Stand-Pre-Scan
 | Aspekt | bare (`config`) | `config get` | `config set` |
 | --- | --- | --- | --- |
 | Positional-Args | `NoArgs` | `ExactArgs(1)` (`<path>`) | `ExactArgs(2)` (`<path> <value>`) |
-| Lokale Flags | — | — | `--allow-external-feature-sources` (StringSlice, [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)) |
+| Lokale Flags | — | — | `--allow-external-feature-sources` (StringSlice, [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)) |
 | FS-Mutation | — | — | `WriteFile(u-boot.yaml, patched)` (`config.go:194`) |
 | FS-Read | `ReadFile(u-boot.yaml)` (Show) | `ReadFile(u-boot.yaml)` + parse | `ReadFile(u-boot.yaml)` + parse |
 | UC-Method | `ConfigUseCase.Show` | `ConfigUseCase.Get` | `ConfigUseCase.Set` |
@@ -251,7 +251,7 @@ docs-check).
   `ErrDryRunNotApplicable`-Sentinel — Sub-Decision T0-(g))
   rejected werden. Analog logs-`--follow --json`-Reject (T0-(a)).
 - ✅ **`--diff` für bare/get rejected**: dito.
-- ✅ **`subcommand`-Pflichtfeld-Validierung** ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)
+- ✅ **`subcommand`-Pflichtfeld-Validierung** ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)
   §322): jeder **RunE-emittierte** Envelope mit
   `command="config"` MUSS `subcommand` setzen; T6-Pin gegen
   Empty-Subcommand-Drift. **Cobra-Help-Edge-Case ausgenommen**
@@ -409,21 +409,21 @@ docs-check).
 
   | # | Sentinel | LH-Code | Exit | Begründung |
   | - | -------- | ------- | ---- | ---------- |
-  | 1 | `driving.ErrConfigFileSystem` | [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 14 | FS-first damit Multi-`%w` mit FS+Validation auf FS-Klasse fällt |
-  | 2 | `driving.ErrConfigSchemaInvalid` | [`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002-inhalt-der-konfiguration) | 10 | Schema-Bruch vor Path-Unknown (Schema-Defekt > Form-Defekt) |
-  | 3 | `driving.ErrConfigPostPatchSanityFailed` (NEU, T2 — R2-MED-4) | [`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002-inhalt-der-konfiguration) | 10 | Post-Patch-Roundtrip-Sanity-Fehler (Schema-Drift-Indikator); semantisch nahe `ErrConfigSchemaInvalid` aber separat extrahiert aus heutigem `ErrConfigValueInvalid`-Multi-Use |
-  | 4 | `driving.ErrConfigPathUnknown` | [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern) | 10 | Path-Whitelist-Bruch |
-  | 5 | `driving.ErrConfigWriteRejected` (NEU, T2 — R2-MED-4) | [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern) | 10 | WriteAllowed-Reject (`services.<svc>.enabled` etc.); separat extrahiert aus heutigem `ErrConfigValueInvalid`-Multi-Use; Hint "u-boot add <svc>" im message |
-  | 6 | `driving.ErrConfigValueInvalid` | [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration) | 10 | **Nur Value-Coercion-Bruch** (set; nach T2-Separation der zwei anderen Klassen) |
-  | 7 | `driving.ErrConfigValueNotSet` | [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern) | 10 | Optionaler Pfad nicht gesetzt (nur get) |
-  | 8 | `driving.ErrProjectNotInitialized` | [`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren) | 10 | Pattern-Erbe up/down/generate/logs (Environment-Operation) |
-  | 9 | `cli.ErrDryRunNotApplicable` (NEU, T2) | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 2 | bare/get rejecten `--dry-run` (T0-(g) Option (i.a)) |
-  | 10 | Default (unknown) | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 1 | Fallback |
+  | 1 | `driving.ErrConfigFileSystem` | [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) | 14 | FS-first damit Multi-`%w` mit FS+Validation auf FS-Klasse fällt |
+  | 2 | `driving.ErrConfigSchemaInvalid` | [`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration) | 10 | Schema-Bruch vor Path-Unknown (Schema-Defekt > Form-Defekt) |
+  | 3 | `driving.ErrConfigPostPatchSanityFailed` (NEU, T2 — R2-MED-4) | [`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration) | 10 | Post-Patch-Roundtrip-Sanity-Fehler (Schema-Drift-Indikator); semantisch nahe `ErrConfigSchemaInvalid` aber separat extrahiert aus heutigem `ErrConfigValueInvalid`-Multi-Use |
+  | 4 | `driving.ErrConfigPathUnknown` | [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) | 10 | Path-Whitelist-Bruch |
+  | 5 | `driving.ErrConfigWriteRejected` (NEU, T2 — R2-MED-4) | [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) | 10 | WriteAllowed-Reject (`services.<svc>.enabled` etc.); separat extrahiert aus heutigem `ErrConfigValueInvalid`-Multi-Use; Hint "u-boot add <svc>" im message |
+  | 6 | `driving.ErrConfigValueInvalid` | [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration) | 10 | **Nur Value-Coercion-Bruch** (set; nach T2-Separation der zwei anderen Klassen) |
+  | 7 | `driving.ErrConfigValueNotSet` | [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) | 10 | Optionaler Pfad nicht gesetzt (nur get) |
+  | 8 | `driving.ErrProjectNotInitialized` | [`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren) | 10 | Pattern-Erbe up/down/generate/logs (Environment-Operation) |
+  | 9 | `cli.ErrDryRunNotApplicable` (NEU, T2) | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) | 2 | bare/get rejecten `--dry-run` (T0-(g) Option (i.a)) |
+  | 10 | Default (unknown) | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) | 1 | Fallback |
 
   **Cross-Slice-Klassen-Pin**: `ErrProjectNotInitialized`
-  mappt hier auf **[`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren)** (Environment-Operation
+  mappt hier auf **[`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren)** (Environment-Operation
   Pattern-Erbe up/down/generate/logs) — NICHT auf
-  [`LH-FA-ADD-001`](../../../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl) wie bei add/remove. Bewusste Cluster-
+  [`LH-FA-ADD-001`](../../../../spec/lastenheft.md#lh-fa-add-001--add-on-befehl) wie bei add/remove. Bewusste Cluster-
   Konvention.
 
 - **T0-(g) `--dry-run`/`--diff` auf bare/get Reject-Sentinel**:
@@ -493,21 +493,21 @@ docs-check).
   `reportError`-Wrap analog up-down/logs T5.
 
 - **T0-(j) Echte Spec-Anker für `LH-FA-CONF-*`-Codes statt
-  [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-Fallback**: heutiger Doc-Block in
+  [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)-Fallback**: heutiger Doc-Block in
   `cli/config.go:14-65` nutzt nur generische Exit-Code-Tabelle
-  (Z. 53 "Exit codes ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes))") und nennt **keinen
+  (Z. 53 "Exit codes ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes))") und nennt **keinen
   per-Sentinel-LH-FA-CONF-Mapping**; lediglich Spec-Bezug für
   Subcommand-Tree (Z. 15) und writable paths (Z. 37) als
-  [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration) / §D1. Heutige Mapping-Form im CLI-Layer
-  fällt deshalb auf [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) für **alle** Validation-
+  [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration) / §D1. Heutige Mapping-Form im CLI-Layer
+  fällt deshalb auf [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) für **alle** Validation-
   Errors (Pfad-Unknown, Wert-Invalid, Schema-Invalid). Der neue
   `mapConfigErrorToDiagnostic` muss die echten Spec-Anker
   zuweisen — Pattern-Erbe up-down/logs nutzt echte Spec-Anker
-  ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten), [`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren), [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung)) statt
+  ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten), [`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren), [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006--projektnamen-validierung)) statt
   generischen Fallback. (R1-HIGH-3-Adressierung: ursprüngliche
   Begründung „heutige Code-Doc-Block-Mapping honorieren" war
   Hineinprojektion — der Doc-Block enthält das nicht.)
-  Plan-Empfehlung: **echte Spec-Anker** [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration)/[`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002-inhalt-der-konfiguration)/[`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern)
+  Plan-Empfehlung: **echte Spec-Anker** [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)/[`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration)/[`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)
   per Mapper-Row T0-(f), siehe dort.
 
 - **T0-(k) `config set --diff`-Renderer-Pfad**: Pattern-Erbe
@@ -584,18 +584,18 @@ docs-check).
       Roundtrip nach `PatchScalar` produziert nicht den
       erwarteten Wert (sehr selten — Schema-Drift-Indikator).
   Konsumenten können die drei Klassen heute nicht auseinander-
-  halten (gleicher code: [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration), gleicher Exit 10).
+  halten (gleicher code: [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration), gleicher Exit 10).
   Sub-Decision-Optionen:
   (i) **Separate Sentinels** `ErrConfigWriteRejected` (für b)
       und `ErrConfigPostPatchSanityFailed` (für c) im Port-
       Layer. Mapper-Tabelle T0-(f) bekommt drei neue Rows.
       Konsument disambiguiert per `code`. Pattern-Erbe doctor
       (per-Check-Sentinels).
-  (ii) **Multi-Use mit Code-Suffix**: [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration)-Coerce
-       vs. [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration)-WriteReject vs. [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration)-
+  (ii) **Multi-Use mit Code-Suffix**: [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)-Coerce
+       vs. [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)-WriteReject vs. [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)-
        PostPatchSanity`. KEIN Spec-Anker — eigener Cluster-
        Konvention-Bruch.
-  (iii) **Status-quo**: alle drei auf [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration)
+  (iii) **Status-quo**: alle drei auf [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)
         belassen, Konsument disambiguiert per
         `diagnostic.message`-Substring-Match. Brüchig.
   Plan-Empfehlung: **(i)** separate Sentinels — Pattern-Erbe
@@ -605,14 +605,14 @@ docs-check).
   T0-(f) entsprechend erweitert (5 → 7 Rows fachlich plus
   FS/Schema/Default = 9-10 Rows total).
 
-  **[`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern)-Multi-Use mit drei Sentinels**
+  **[`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)-Multi-Use mit drei Sentinels**
   (R3-MED-2-Adressierung): Mapper-Tabelle T0-(f) belegt
-  [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern) jetzt in **drei Rows** (Row 4
+  [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) jetzt in **drei Rows** (Row 4
   `ErrConfigPathUnknown`, Row 5 `ErrConfigWriteRejected`,
-  Row 7 `ErrConfigValueNotSet`). Pattern-Erbe [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen)
+  Row 7 `ErrConfigValueNotSet`). Pattern-Erbe [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen)
   (remove) war doppelt belegt — drei Sentinels auf einem
   LH-Code ist eine Steigerung. Konsumenten können per
-  code: [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern) allein nicht disambiguieren —
+  code: [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) allein nicht disambiguieren —
   müssen auf den Sentinel-Klassen-Hint im Message-Body
   zurückgreifen. T8 dokumentiert das in `cli-json-output.md`
   §6.9 als expliziter Konsumenten-Disambiguation-Block
@@ -649,7 +649,7 @@ docs-check).
   (a) **WARN-Migration in `diagnostics[]`**: Pattern-Erbe
       remove `mapWarningsToDiagnostics` — der
       `maybeWarnOrphanFeatureActivation`-Output wird als
-      [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features) / `level: "warn"`-Entry in `diagnostics[]`
+      [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) / `level: "warn"`-Entry in `diagnostics[]`
       des Envelopes emittiert. ConfigSetResponse braucht
       `Warnings []driving.WarningEntry`-Field analog
       `RemoveResponse`. Pattern-konsistent + JSON-Konsument
@@ -698,12 +698,12 @@ docs-check).
 | T0 | Discovery + Sub-Decisions (a)-(p) klären; Review-Runden | — (Plan) | — |
 | T1 | **Entfällt** (analog up-down/logs T1): `cli/sanitize.go`-Helper, `RecordingFileSystem`-Adapter, Pure-Go-Diff-Renderer existieren bereits aus add/init/generate/remove/up-down T5 | — (entfällt) | T0 |
 | T2 ✅ (2026-06-08) | **Geliefert**: **`ConfigSetRequest.PreviewMode driving.PreviewMode`-Field** + **`ConfigSetRequest.SilenceLogger bool`-Field** (Pattern-Erbe `UpRequest.SilenceProgress`; R2-MED-5 T0-(n)). **`ConfigSetResponse.Warnings []driving.WarningEntry`-Field** für Orphan-Feature-WARN-Migration (Pattern-Erbe `RemoveResponse.Warnings`; R2-MED-5 T0-(n)). **Zwei neue Port-Sentinels** (R2-MED-4 T0-(m)): `driving.ErrConfigWriteRejected` + `driving.ErrConfigPostPatchSanityFailed`. `cli.ErrDryRunNotApplicable`-Sentinel (T0-(g) Option (i.a)) im CLI-Layer (R2-LOW-3-Fix). `configSetFlags.JSON`/`Quiet` read-through (in Set-Closure populated, Pattern-Erbe logs T2). Pin-Tests (`port/driving/config_test.go` + `cli/config_test.go`). **KEIN neuer FS-Sentinel** (`ErrConfigFileSystem` existiert). **KEIN `ConfigSetResponse.AppendedSources`-Field** — `appendedSources` lebt CLI-Layer-only (R2-MED-1 T0-(c); R3-LOW-2). **Nach T5 verschoben** (Lint-/Behavior-Grund — Präzedenz logs/up-down T2 = `feat(port)`; black-box `cli_test` kann unexported Structs nicht ohne RunE-Signatur-Refactor referenzieren, + user-sichtbare `--dry-run`/`--diff` ohne Reject-Wiring wäre Behavior-Trap): `configGetFlags{JSON, Quiet}` + `configShowFlags{JSON, Quiet}` + `configSetFlags.DryRun`/`.Diff`-Felder + `--dry-run`/`--diff`-Cobra-Flag-Registrierung. | ~130 (Port + Scaffold + Pins) | T0 |
-| T3 ✅ (2026-06-08) | **Geliefert** (`make gates` grün, Coverage 91.20 %): **Multi-`%w`-Wrap-Migration** der 5 FS-Read/Write-Wrap-Sites in `application/config.go` (real: 3× `%w: read %q: %w` + 2× `%w: write %q: %w`) von `%v`-tail auf echtes Multi-`%w` (Pattern-Erbe up-down T3). **`ErrConfigValueInvalid`-Multi-Use-Splitting** (R2-MED-4 T0-(m)): WriteAllowed-Reject (`writeRejectedError`, beide Sites) → `ErrConfigWriteRejected`; Post-Patch-Sanity → `ErrConfigPostPatchSanityFailed`; Value-Coercion (`coerceConfigValue`) + Allowlist-Enforcement (`featureSourceInAllow`-Reject, user-actionable) bleiben `ErrConfigValueInvalid`. **Logger-Branch** im `Set`- + `setFeatureSourcesAllow`-Body (`logger := s.logger; if req.SilenceLogger { logger = noopLogger{} }`, T0-(n)). **Orphan-Feature-WARN-Migration**: `maybeWarnOrphanFeatureActivation` (jetzt freie Funktion mit `logger`-Param) liefert zusätzlich []driving.WarningEntry{{Code:"[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)", Level:"warn", Subject:<feature>}} → `ConfigSetResponse.Warnings` (Dual-Emission: stderr-Info + strukturierte WARN). T3-Tests (`config_t3_test.go`: SilenceLogger-Suppression, Dual-Emission, Warnings-survive-suppression, Non-Orphan-nil) + zwei WriteRejected-Test-Updates. **Refinement gegenüber Plan-Zeilennummern**: Pre-Scan nannte nur Z. 376/388 für Post-Patch-Sanity; die strukturell identischen `revalidateFeatureEntry`-Sites (absent/unbound/empty) wurden konsistenz-halber mitmigriert (sonst Mapper-Row-6-„nur Value-Coercion"-Bruch). **Nach T4 verschoben**: `PreviewMode`-Handling (`fsFactory`-Feld + `selectFS` + Set-Write-Routing) — zusammen mit dem `WithFactory`-Konstruktor + Composition-Root, weil die `selectFS`-Nicht-nil-Branch sonst untestbar/uncovered wäre (Coverage-Gate). KEIN ProgressSink-Branch. KEIN Confirmer-Branch. | ~80 (ohne PreviewMode → T4) | T2 |
+| T3 ✅ (2026-06-08) | **Geliefert** (`make gates` grün, Coverage 91.20 %): **Multi-`%w`-Wrap-Migration** der 5 FS-Read/Write-Wrap-Sites in `application/config.go` (real: 3× `%w: read %q: %w` + 2× `%w: write %q: %w`) von `%v`-tail auf echtes Multi-`%w` (Pattern-Erbe up-down T3). **`ErrConfigValueInvalid`-Multi-Use-Splitting** (R2-MED-4 T0-(m)): WriteAllowed-Reject (`writeRejectedError`, beide Sites) → `ErrConfigWriteRejected`; Post-Patch-Sanity → `ErrConfigPostPatchSanityFailed`; Value-Coercion (`coerceConfigValue`) + Allowlist-Enforcement (`featureSourceInAllow`-Reject, user-actionable) bleiben `ErrConfigValueInvalid`. **Logger-Branch** im `Set`- + `setFeatureSourcesAllow`-Body (`logger := s.logger; if req.SilenceLogger { logger = noopLogger{} }`, T0-(n)). **Orphan-Feature-WARN-Migration**: `maybeWarnOrphanFeatureActivation` (jetzt freie Funktion mit `logger`-Param) liefert zusätzlich []driving.WarningEntry{{Code:"[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)", Level:"warn", Subject:<feature>}} → `ConfigSetResponse.Warnings` (Dual-Emission: stderr-Info + strukturierte WARN). T3-Tests (`config_t3_test.go`: SilenceLogger-Suppression, Dual-Emission, Warnings-survive-suppression, Non-Orphan-nil) + zwei WriteRejected-Test-Updates. **Refinement gegenüber Plan-Zeilennummern**: Pre-Scan nannte nur Z. 376/388 für Post-Patch-Sanity; die strukturell identischen `revalidateFeatureEntry`-Sites (absent/unbound/empty) wurden konsistenz-halber mitmigriert (sonst Mapper-Row-6-„nur Value-Coercion"-Bruch). **Nach T4 verschoben**: `PreviewMode`-Handling (`fsFactory`-Feld + `selectFS` + Set-Write-Routing) — zusammen mit dem `WithFactory`-Konstruktor + Composition-Root, weil die `selectFS`-Nicht-nil-Branch sonst untestbar/uncovered wäre (Coverage-Gate). KEIN ProgressSink-Branch. KEIN Confirmer-Branch. | ~80 (ohne PreviewMode → T4) | T2 |
 | T4 ✅ (2026-06-08) | **Geliefert** (`make gates` grün, Coverage 91.20 %): **PreviewMode-Cluster (aus T3 verschoben)** + **Composition-Root-Erweiterung** (R2-HIGH-2): `ConfigService.fsFactory`-Feld + nil-safe `selectFS(mode) (FS, RecorderPort)`-Methode (Pattern-Erbe `AddServiceService`); `Set` + `setFeatureSourcesAllow` routen ihren `WriteFile` über `fs, recorder := s.selectFS(req.PreviewMode)` (Reads bleiben auf Production-`s.fs`) und surfacen `recorder.Captured()` via `mapCaptureToPlannedFiles` → **`ConfigSetResponse.PlannedFiles`** (R-T4-1, s.u.). `NewConfigServiceWithFactory(fsFactory, yaml, logger)`-Konstruktor neu (Bootstrap-FS aus `fsFactory(PreviewNone)`). `cmd/uboot/main.go`: `configFSFactory := newPreviewFSFactory(fsAdapter)` (jetzt **fünf** Factories) + Konstruktor-Wechsel `NewConfigService` → `NewConfigServiceWithFactory`. Damit ist `ConfigService` nicht mehr der einzige Modifying-Service ohne `WithFactory`-Variante. Tests `config_factory_test.go`: DryRun-touch-nichts-in-Production + `PlannedFiles[0].NewContent` befüllt, PreviewNone-persistiert + PlannedFiles nil, Legacy-Konstruktor-ignoriert-PreviewMode + PlannedFiles nil. **T4-Review-Followup R-T4-1 (HIGH)**: ursprünglicher T4-Entwurf verwarf den Recorder („CLI baut plannedFiles statisch") — falsch, weil `config set --diff` die patched+current Bytes (`PlannedFile.NewContent`/`OldContent`) für den geteilten `mapPlannedFilesToWire`/`writeDiff`-Renderer braucht; die existieren nur im Recorder. Fix: `ConfigSetResponse.PlannedFiles []driving.PlannedFile`-Feld neu + Recorder-Surfacing wie add. | ~60 + R-T4-1 | T3 |
 | T5 ✅ (2026-06-08) | **Geliefert** (`make gates` grün, Coverage 91.20 %): vollständige `config.go`-Neufassung — drei `runConfig*` auf Cluster-Signatur (flags-Struct + JSON-Pfade); drei Data-Carrier (`configShowData{body}`, `configGetData{path,value}`, `configSetData{path,oldValue,newValue,noOp,appendedSources omitempty}`); Subcommand-Pflicht (`show`/`get`/`set`) auf ALLEN Envelopes inkl. Error-Pfad via neue **subcommand-bewusste `reportErrorSub`/`writeErrorEnvelopeSub`** in `erroremission.go` (additiv, bestehende Single-Form-Caller unverändert; template 9/9 erbt sie). Allowlist-Migration 3 Forms (Reject 4→1). `mapConfigErrorToDiagnostic` Switch-Order T0-(f) FS-first (10 Rows). Konsolidierter Custom-Args-Validator `configArgsValidator(a, sub, base)` (T0-(l): NoArgs für bare, ExactArgs für get/set; Envelope-Reject vor Cobra-Return). `config set` Voll-Schema mit `previewModeFromFlags`→`PreviewMode` + plannedFiles/changes/hunks aus `resp.PlannedFiles` (R-T4-1) via `mapPlannedFilesToWire`/`writeDiff`. bare/get `--dry-run`/`--diff`-Reject via `ErrDryRunNotApplicable` (synthetische Flags an die Struct-Felder gebunden) + `isUsageError`-Branch (Exit 2). `SilenceLogger=flags.JSON`-Wiring im Set-Request. WARN→`diagnostics[]` via `mapWarningsToDiagnostics`. `sanitizeBaseDir` auf allen UC-Errors (T0-(p)). Acceptance-Tests `config_acceptance_test.go` (Show/Get/Set-Data, NoOp, Dry-Run-Voll-Schema, Diff-Hunks, Reject bare/get, Args-Mismatch, WriteRejected→Exit10, WARN→diagnostics, Human-Mode). **Cobra-unknown-subcommand-Mechanik-Pin** (R2/R3) → T6. | ~350-450 | T2, T4 |
-| T6 ✅ (2026-06-08) | **Geliefert** (`make gates` grün, Coverage 91.30 %): T5 lieferte schon die Basis-Suite (`config_acceptance_test.go`: Show/Get/Set-Data, NoOp, Dry-Run-Voll-Schema, Diff-Hunks, bare/get-Reject, Args-Mismatch, WriteRejected→Exit10, WARN→diagnostics, Human-Mode). T6 ergänzte: **`--quiet --json`-Pin für alle drei Forms** (R1-MED-2), **white-box Mapper-Rows 1-10** + **FS-first-Switch-Order-`_ByDesign`-Pin** + Pure-FS-Exit-14-Pin (`config_internal_test.go`, R2-MED-4/T0-(f)), **`TestConfigJSON_UnknownSubcommandEmitsEnvelope`** (R3-MED-1: Cobra-`config foo`-Dispatch → Parent-`configArgsValidator` → Envelope; bestätigt die Cobra-Mechanik-Annahme), **[`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern)-Disambiguation-Pin** (R3-MED-2: drei Rows gleicher Code, paarweise verschiedene Messages), **Cobra-Help-Edge-Case-Pin** (`--help --json` kein Envelope, R1-MED-6), **Sanitizer-Worst-Case-Pin** (abs-Pfad relativiert, T0-(p)), **Subcommand-Pflicht-Pin** (alle Forms + Error-Pfad, §322), **Mid-Stage-Shape-Pin** (plain=minimal vs --dry-run=voll, T0-(o)). Orphan-WARN/SilenceLogger sind über die Application-Tests (T3 `config_t3_test.go`) + den CLI-WARN→diagnostics-Pin abgedeckt. | T5+T6 ~750-950 | T5 |
+| T6 ✅ (2026-06-08) | **Geliefert** (`make gates` grün, Coverage 91.30 %): T5 lieferte schon die Basis-Suite (`config_acceptance_test.go`: Show/Get/Set-Data, NoOp, Dry-Run-Voll-Schema, Diff-Hunks, bare/get-Reject, Args-Mismatch, WriteRejected→Exit10, WARN→diagnostics, Human-Mode). T6 ergänzte: **`--quiet --json`-Pin für alle drei Forms** (R1-MED-2), **white-box Mapper-Rows 1-10** + **FS-first-Switch-Order-`_ByDesign`-Pin** + Pure-FS-Exit-14-Pin (`config_internal_test.go`, R2-MED-4/T0-(f)), **`TestConfigJSON_UnknownSubcommandEmitsEnvelope`** (R3-MED-1: Cobra-`config foo`-Dispatch → Parent-`configArgsValidator` → Envelope; bestätigt die Cobra-Mechanik-Annahme), **[`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)-Disambiguation-Pin** (R3-MED-2: drei Rows gleicher Code, paarweise verschiedene Messages), **Cobra-Help-Edge-Case-Pin** (`--help --json` kein Envelope, R1-MED-6), **Sanitizer-Worst-Case-Pin** (abs-Pfad relativiert, T0-(p)), **Subcommand-Pflicht-Pin** (alle Forms + Error-Pfad, §322), **Mid-Stage-Shape-Pin** (plain=minimal vs --dry-run=voll, T0-(o)). Orphan-WARN/SilenceLogger sind über die Application-Tests (T3 `config_t3_test.go`) + den CLI-WARN→diagnostics-Pin abgedeckt. | T5+T6 ~750-950 | T5 |
 | T7 ✅ (2026-06-08) | **Geliefert** (`make gates` grün, Coverage 91.30 %): drei Review-Runden insgesamt — (1) Selbst-Review T2–T4 → **R-T4-1 (HIGH)** PlannedFiles-Surfacing; (2) **unabhängiger** Reviewer-Agent Port/Application → **R-IR-1 (HIGH)** ExitCode-Regression; (3) **unabhängiger** Reviewer-Agent CLI-Layer (T5/T6) → **R-CLI-1 (MED)**: `configArgsValidator` leakte ein Voll-Schema-Error-Envelope auf den Read-only-Forms (`config foo --dry-run --json` / `config get --dry-run --json` ohne Arg), inkonsistent zum RunE-Reject-Pfad. Fix: Read-only-Validatoren hartkodieren `dryRun/diff=false` (nur `set` reicht echte Flags durch) + zwei Regression-Pins (Read-only-Args-Error bleibt Minimal trotz `--dry-run`). LOW-1: Diff-Hunks-Test auf echte Hunk-Inhalt-Assertion (old→new) verschärft. LOW-2 (`Quiet`-Feld zugewiesen-aber-ungelesen) bewusst belassen (no-op-Semantik, pattern-konsistent, im Struct-Doc dokumentiert). Übriger CLI-Layer clear (Subcommand-Pflicht alle Pfade, Mapper↔ExitCode-Kopplung, erroremission-Refactor verhaltensidentisch, NoOp-Envelope, Sanitizer, ctx-Propagation). | ~150-250 | T6 |
-| T8 | Closure: CHANGELOG, `cli-json-output.md` **neue §6.9-Sektion** mit drei Sub-Form-Envelopes + Set-Voll-Schema-Beispiel + Subcommand-Pflicht-Doku (RunE-only-Geltungsbereich) + `--dry-run`/`--diff`-Reject-Doku für Read-only-Forms; **`(code, exitCode)`-Tupel-Disambiguation-Block entfällt für config** (R2-MED-6); **NEU: [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern)-Multi-Use-Disambiguation-Block** (R3-MED-2) — code: [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern) mit drei Sentinels (Path-Unknown / Write-Rejected / Value-Not-Set), Konsumenten disambiguieren per Message-Prefix oder Sentinel-Klassen-Hint da alle drei Exit 10 sind. **§6.1 Reject-Liste-Update von 4 auf 1**. **§6 Tabelle Z. 374 Status `offen → done`**. **§7 NEUEINTRAG** `config set` mit `WriteFile`-Spalte ✓. roadmap done-Zähler 7→8. carveouts.md-Einträge **für vier Folge-Slice-Stubs** (R3-MED-3): [`slice-v1-config-multi-path-set`](../open/slice-v1-config-multi-path-set.md), [`slice-v1-config-list-subcommand`](../open/slice-v1-config-list-subcommand.md), [`slice-v1-config-multi-path-get`](../open/slice-v1-config-multi-path-get.md), [`slice-v1-config-structured-hint`](../open/slice-v1-config-structured-hint.md). Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
+| T8 | Closure: CHANGELOG, `cli-json-output.md` **neue §6.9-Sektion** mit drei Sub-Form-Envelopes + Set-Voll-Schema-Beispiel + Subcommand-Pflicht-Doku (RunE-only-Geltungsbereich) + `--dry-run`/`--diff`-Reject-Doku für Read-only-Forms; **`(code, exitCode)`-Tupel-Disambiguation-Block entfällt für config** (R2-MED-6); **NEU: [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)-Multi-Use-Disambiguation-Block** (R3-MED-2) — code: [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) mit drei Sentinels (Path-Unknown / Write-Rejected / Value-Not-Set), Konsumenten disambiguieren per Message-Prefix oder Sentinel-Klassen-Hint da alle drei Exit 10 sind. **§6.1 Reject-Liste-Update von 4 auf 1**. **§6 Tabelle Z. 374 Status `offen → done`**. **§7 NEUEINTRAG** `config set` mit `WriteFile`-Spalte ✓. roadmap done-Zähler 7→8. carveouts.md-Einträge **für vier Folge-Slice-Stubs** (R3-MED-3): [`slice-v1-config-multi-path-set`](../open/slice-v1-config-multi-path-set.md), [`slice-v1-config-list-subcommand`](../open/slice-v1-config-list-subcommand.md), [`slice-v1-config-multi-path-get`](../open/slice-v1-config-multi-path-get.md), [`slice-v1-config-structured-hint`](../open/slice-v1-config-structured-hint.md). Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
 
 LOC-Bilanz vorläufig: **~1500-1900** (T2 ~130 + T3 ~80 + T4
 ~40 + T5 ~350-450 + T6 ~750-950 + T7 ~150-250 = ~1500-1900

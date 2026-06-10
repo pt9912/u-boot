@@ -1,12 +1,12 @@
-# Slice V1: `u-boot add otel` ([`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004-opentelemetry-hinzufügen) + [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow))
+# Slice V1: `u-boot add otel` ([`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004--opentelemetry-hinzufügen) + [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004--opentelemetry-flow))
 
 ## Auslöser
 
-[`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004-opentelemetry-hinzufügen) (V1) verlangt, dass `u-boot add otel` einen
+[`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004--opentelemetry-hinzufügen) (V1) verlangt, dass `u-boot add otel` einen
 OpenTelemetry Collector mit Compose-Service, Collector-Konfig-
 Datei, Standard-OTLP-Ports und Beispielkonfiguration für Logs,
 Metrics und Traces in ein initialisiertes Projekt einbaut.
-[`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow) ist der zugehörige Acceptance-Flow (`init` + `add
+[`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004--opentelemetry-flow) ist der zugehörige Acceptance-Flow (`init` + `add
 otel` + `up` + TCP-Probe auf 4317 + 4318).
 
 Fünfter und letzter Slice des v0.3.0-Milestones, parallel-
@@ -32,7 +32,7 @@ Block. Bei OTel ist das die `otel-collector-config.yaml`.
    - `command: ["--config=/etc/otel-collector-config.yaml"]`,
    - Volume-Mount der gerenderten Config-Datei (read-only
      Bind-Mount auf die Datei im Projektverzeichnis),
-   - **Kein Healthcheck**: [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow) verlangt nur Container-Status
+   - **Kein Healthcheck**: [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004--opentelemetry-flow) verlangt nur Container-Status
      `running` ODER `healthy` — Collector-Default-Healthcheck-
      Endpoint braucht eine separate Extension-Konfiguration, die
      im Mindestumfang nicht gefordert ist.
@@ -48,7 +48,7 @@ Block. Bei OTel ist das die `otel-collector-config.yaml`.
    keine Admin-Credentials).
 4. `services.otel.enabled: true` in `u-boot.yaml`.
 
-[`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow)-Akzeptanz: `init demo --no-git` + `add otel` + `up`
+[`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004--opentelemetry-flow)-Akzeptanz: `init demo --no-git` + `add otel` + `up`
 bringt den Collector-Container auf `running` oder `healthy`;
 OTLP/gRPC und OTLP/HTTP auf `localhost:4317`/`:4318` erreichbar.
 
@@ -65,7 +65,7 @@ OTLP/gRPC und OTLP/HTTP auf `localhost:4317`/`:4318` erreichbar.
   `ErrProjectNotInitialized` + Exit 10 (vorhandener Code-Pfad).
 - ✅ `u-boot add otel --with-deps`: `dependenciesFor(otel)`
   returnt heute `[]` (Spec-Beispielkonfigurationen für App-Services
-  aus [`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006-add-on-abhängigkeiten) §909 sind out-of-scope, siehe unten); der
+  aus [`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006--add-on-abhängigkeiten) §909 sind out-of-scope, siehe unten); der
   `--with-deps`-Pfad läuft normal durch.
 - ✅ `u-boot remove otel` funktioniert reziprok — entfernt
   Compose-Block UND die `otel-collector-config.yaml` (extraFiles-
@@ -90,19 +90,19 @@ OTLP/gRPC und OTLP/HTTP auf `localhost:4317`/`:4318` erreichbar.
 | T1 | `4a20bd7` | **Templates + extraFiles-Catalogue-Erweiterung.** Drei Templates neu — `templates/services/otel.compose.tmpl` (Image `otel/opentelemetry-collector:0.108.0` — T1-Decision Stable-Pin; Ports 4317+4318; `command: --config=/etc/otel-collector-config.yaml`; read-only Bind-Mount `./otel-collector-config.yaml:/etc/otel-collector-config.yaml`), `otel.env.tmpl` (leer), `otel.config.tmpl` (Receivers `otlp/grpc+http`, Processors `batch`, Exporters `debug`, Pipelines `logs`/`metrics`/`traces`). **Kein** `otel.volume.tmpl` (analog Keycloak; Config-File liegt im Projektverzeichnis, nicht in einem Named Volume). `serviceCatalogueEntry` erweitert um `extraFiles []extraFileEntry`; `renderServiceTemplates` liefert die zusätzlichen Bytes pro Service zurück. **T1-Sub-Decision:** `extraFileEntry.managedBlock = false` für OTel-Config (die ganze Datei wird vom Slice-Generator erzeugt; User-Edits außerhalb sind ohnehin sinnlos, weil die Datei ein einziges YAML-Dokument ist). Test-Helper-Erweiterung: `RenderServiceTemplatesForTest` returnt jetzt auch ExtraFiles. Tests: Template-Existenz-Pin (Postgres unverändert, Keycloak unverändert, OTel compose+env+config), Render-Smoke (OTel rendert ohne Fehler, config.yaml ist syntaktisch valides YAML via Test-only-Roundtrip durch yaml.Unmarshal), Postgres-Byte-Identity bleibt unverändert. Catalogue für `isSupportedService` **noch nicht** erweitert (gleicher Grund wie Keycloak T1 — vor T2 ist `executeAdd`/`executeRemove` noch nicht extraFiles-aware). |
 | T2 | `3d9d83e` | **executeAdd + executeRemove + Catalogue-Erweiterung.** `executeAdd` schreibt die `extraFiles` nach dem Compose-Patch und nimmt sie in `Changed` auf. Plan-Phase: file-mode-Erfassung (oder default 0o644 für create-paths), Two-Phase Plan-then-Write analog F1-Fix aus [slice-v1-add-remove](slice-v1-add-remove.md). `executeRemove`: für jeden `extraFiles`-Eintrag im Catalogue-Eintrag des Service die Datei löschen (idempotent — `os.Remove` mit `IsNotExist`-skip), in `Changed` aufnehmen. `isSupportedService("otel")` + `supportedServices()` erweitert auf `[postgres, keycloak, otel]`. **Designentscheidung T2:** `extraFiles` werden **nicht** in der Active-Repair-Detect-Pfad integriert (`detectActiveArtifacts`) — die Datei-Existenz pro extraFile wäre eine vierte Repair-Flag, aber für OTel ist Datei-Vorhandensein ein vollständiger Re-add-Trigger (state=Unregistered/Deactivated) statt eines partiellen Repair-Pfades. Dies ist eine bewusste Vereinfachung; ein Folge-Slice kann das nachholen wenn ein Add-on mehrere extraFiles + partielle Korruption realistisch wird. Tests: 100% Coverage auf neue executeAdd/Remove-Pfade, Postgres + Keycloak Snapshot-Pin (Byte-Identity), OTel-Idempotenz-Pin (`AddTwice_NoRepairLoop` analog Keycloak T2). |
 | T3 | `efd75e9` + `9a1e841` + `b0604df` | **E2E-Acceptance + CI-Bind-Mount-Fix.** `otel_acceptance_docker_test.go` nutzt `acceptance_helpers.go` ([slice-v1-keycloak](slice-v1-keycloak.md) T3). `dialTCP` für 4317 (OTLP/gRPC) + 4318 (OTLP/HTTP), UpService-Timeout 2 min (`9a1e841` nach erstem 60s-Timeout in CI). **CI-Diagnose-Erfolg:** zweiter roter Run zeigte „compose runtime error" — lokal mit CI-Setup (`docker run --network=host -v /tmp:/tmp -v /var/run/docker.sock ... docker compose up`) reproduziert, Failure-Cause isoliert: Compose-CLI im Test-Container interpretiert relative Bind-Mount-Pfade als Container-Pfade, Host-Daemon findet `/tmp/<test>/otel-collector-config.yaml` nicht ohne `/tmp`-Share → Collector crasht mit `read /etc/otel-collector-config.yaml: is a directory`. Fix in Makefile `test-docker`-Target: `-v /tmp:/tmp` (`b0604df`). **Kein Carveout** — die im Plan §T3 Out-of-Scope angedeutete `acceptance_extended`-Eskalation wurde nicht aktiviert, weil die Diagnose vor Eskalation passierte (siehe [`slice-v1-keycloak-ci-flake.md`](../open/slice-v1-keycloak-ci-flake.md) §Vorgehens-Hinweis als persistente Konvention für künftige Slices). |
-| T4 | dieser Commit | **Closure.** READMEs (`add <service>`-Reference erwähnt jetzt alle drei Add-ons + [`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004-opentelemetry-hinzufügen)), CHANGELOG `## [Unreleased]` Added-Eintrag mit [`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004-opentelemetry-hinzufügen) + [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow) + extraFiles-Mechanik + CI-Bind-Mount-Fix-Querverweis, roadmap.md §v0.3.0-Tabelle markiert [`slice-v1-otel`](slice-v1-otel.md) ✅ mit T1..T3-Hashes + Stand-Bump 5/5 = **v0.3.0-Milestone feature-complete**. Slice-Plan `open/` → `done/`. Folge-Slice: [`slice-v1-release-cut-v0.3.0`](slice-v1-release-cut-v0.3.0.md) analog [`slice-v1-release-cut-v0.2.0`](slice-v1-release-cut-v0.2.0.md). |
+| T4 | dieser Commit | **Closure.** READMEs (`add <service>`-Reference erwähnt jetzt alle drei Add-ons + [`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004--opentelemetry-hinzufügen)), CHANGELOG `## [Unreleased]` Added-Eintrag mit [`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004--opentelemetry-hinzufügen) + [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004--opentelemetry-flow) + extraFiles-Mechanik + CI-Bind-Mount-Fix-Querverweis, roadmap.md §v0.3.0-Tabelle markiert [`slice-v1-otel`](slice-v1-otel.md) ✅ mit T1..T3-Hashes + Stand-Bump 5/5 = **v0.3.0-Milestone feature-complete**. Slice-Plan `open/` → `done/`. Folge-Slice: [`slice-v1-release-cut-v0.3.0`](slice-v1-release-cut-v0.3.0.md) analog [`slice-v1-release-cut-v0.2.0`](slice-v1-release-cut-v0.2.0.md). |
 
 ## Out of Scope
 
 - **Beispielkonfigurationen für bestehende App-Services**
-  ([`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006-add-on-abhängigkeiten) §909 sagt „OpenTelemetry kann
+  ([`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006--add-on-abhängigkeiten) §909 sagt „OpenTelemetry kann
   Beispielkonfigurationen für bestehende App-Services erzeugen").
   Das ist eine OTel-spezifische Erweiterung der Add-Phase, die
   Service-spezifische Receivers (Postgres-Receiver, Keycloak-
   Receiver, …) in die `otel-collector-config.yaml` einfügen würde.
   Heute noch nicht im Catalogue; eigenes Folge-Slice
   `slice-v1-otel-app-service-receivers` bei konkretem Bedarf.
-- **Healthcheck via Collector-Health-Extension**: [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow)
+- **Healthcheck via Collector-Health-Extension**: [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004--opentelemetry-flow)
   verlangt nur Container-Status `running` ODER `healthy` — der
   Collector-Default ohne Health-Extension läuft auf `running`,
   was ausreicht. Health-Extension + entsprechender Healthcheck
@@ -115,7 +115,7 @@ OTLP/gRPC und OTLP/HTTP auf `localhost:4317`/`:4318` erreichbar.
 
 ## Bezug
 
-- Spec: [`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004-opentelemetry-hinzufügen) (V1, §862-§881) + [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow) (V1, §2356-§2374).
+- Spec: [`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004--opentelemetry-hinzufügen) (V1, §862-§881) + [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004--opentelemetry-flow) (V1, §2356-§2374).
 - Voraussetzungs-Slices:
   - [`slice-m5-add-postgres`](../done/slice-m5-add-postgres.md) —
     M5-Pattern.
@@ -127,7 +127,7 @@ OTLP/gRPC und OTLP/HTTP auf `localhost:4317`/`:4318` erreichbar.
     Per-Service Probe-Mechanismus, volumeOptional-Catalogue-Feld,
     acceptance_helpers.go-Extraktion. Voraussetzung für T1 + T3.
 - Folge-Slices:
-  - `slice-v1-otel-app-service-receivers` — [`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006-add-on-abhängigkeiten) §909
+  - `slice-v1-otel-app-service-receivers` — [`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006--add-on-abhängigkeiten) §909
     Beispielkonfigurationen für bestehende App-Services.
   - Falls CI-Flake gemeinsam: ggf. Migration von
     [`slice-v1-keycloak-ci-flake`](../open/slice-v1-keycloak-ci-flake.md) zu allgemein

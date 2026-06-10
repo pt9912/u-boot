@@ -16,7 +16,7 @@
 > `data.artifact`/`data.action`-Carrier-Form, per-Artefakt
 > LH-Code-Tabelle in `mapGenerateErrorToDiagnostic(err, artifact)`,
 > `ErrConfigValueInvalid`-Sentinel-Wrap für den
-> [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)-URL-Reject-Pfad (Spec §720). `cliJSONEnvelope.Data`
+> [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)-URL-Reject-Pfad (Spec §720). `cliJSONEnvelope.Data`
 > + `newDataEnvelope`-Konstruktor wurden aus dem Template-Slice 9/9
 > vorgezogen — Template-Slice erbt das Feld nur noch. Cluster-Stand
 > nach Closure: **4/9 done** (doctor, add, init, generate); offene
@@ -83,7 +83,7 @@
 
 Cluster-Slice §T0-Outcomes (a)+(b)+(e) machen jeden modifying-
 Subcommand für `--json`/`--dry-run`/`--diff` verbindlich
-([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1813, [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §326, [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe)
+([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) §1813, [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) §326, [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)
 §451-489). `u-boot generate <artifact>` ist nach `doctor`, `add`
 und `init` der vierte Subcommand — und der erste, der
 **mehrere Artefakte** über einen einzigen Subcommand bedient. Die
@@ -93,21 +93,21 @@ die Action-Klassifikation (`Created`/`UpdatedBlock`/`NoOp`/
 
 Spec-Bezug (geerbt von init/add):
 
-- [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) (Dry-Run, Voll-Schema §326)
-- [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) (Diff, §451-489)
-- [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) (Minimalkontrakt §1841)
+- [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Dry-Run, Voll-Schema §326)
+- [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) (Diff, §451-489)
+- [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) (Minimalkontrakt §1841)
 
 Generate-spezifische Spec-Anker:
 
-- [`LH-FA-GEN-001`](../../../../spec/lastenheft.md#lh-fa-gen-001-generate-befehl) (Subcommand-Surface mit unbekanntem Artefakt
+- [`LH-FA-GEN-001`](../../../../spec/lastenheft.md#lh-fa-gen-001--generate-befehl) (Subcommand-Surface mit unbekanntem Artefakt
   → Exit 2)
-- [`LH-FA-GEN-002`](../../../../spec/lastenheft.md#lh-fa-gen-002-changelog-erzeugen) (changelog / [`LH-AK-007`](../../../../spec/lastenheft.md#lh-ak-007-changelog-generator) Keep-a-Changelog)
-- [`LH-FA-GEN-003`](../../../../spec/lastenheft.md#lh-fa-gen-003-readme-erzeugen) (readme)
-- [`LH-FA-GEN-004`](../../../../spec/lastenheft.md#lh-fa-gen-004-beispiel-env-erzeugen) (env-example)
-- [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen) (devcontainer)
-- [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features) (`--allow-external-feature-sources` Side-Effect)
-- [`LH-FA-GEN-005`](../../../../spec/lastenheft.md#lh-fa-gen-005-idempotenz) (Idempotenz / NoOp)
-- [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) (FS-Failure-Klasse, geerbt für Mid-Write
+- [`LH-FA-GEN-002`](../../../../spec/lastenheft.md#lh-fa-gen-002--changelog-erzeugen) (changelog / [`LH-AK-007`](../../../../spec/lastenheft.md#lh-ak-007--changelog-generator) Keep-a-Changelog)
+- [`LH-FA-GEN-003`](../../../../spec/lastenheft.md#lh-fa-gen-003--readme-erzeugen) (readme)
+- [`LH-FA-GEN-004`](../../../../spec/lastenheft.md#lh-fa-gen-004--beispiel-env-erzeugen) (env-example)
+- [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen) (devcontainer)
+- [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (`--allow-external-feature-sources` Side-Effect)
+- [`LH-FA-GEN-005`](../../../../spec/lastenheft.md#lh-fa-gen-005--idempotenz) (Idempotenz / NoOp)
+- [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) (FS-Failure-Klasse, geerbt für Mid-Write
   analog init)
 
 Heute-Stand-Pre-Scan
@@ -197,7 +197,7 @@ nicht auf reduziertem `make test + lint + docs-check`.
   idempotenter Datei liefert `plannedFiles: []` UND `changes:
   []` (beide Arrays leer), `data.action: "no-op"`, `status: ok`,
   Exit 0.
-- ✅ **Repeat-Idempotency-Pin** ([`LH-FA-GEN-005`](../../../../spec/lastenheft.md#lh-fa-gen-005-idempotenz) §1203-1213
+- ✅ **Repeat-Idempotency-Pin** ([`LH-FA-GEN-005`](../../../../spec/lastenheft.md#lh-fa-gen-005--idempotenz) §1203-1213
   Wiederholungs-Eigenschaft, Port-Vertrag generate.go:171-174
   „calling `Generate` twice with the same request is safe"):
   mindestens für **changelog** (wegen Hash-Heuristik-Fragilität
@@ -232,8 +232,8 @@ nicht auf reduziertem `make test + lint + docs-check`.
   einziges WriteFile**. Acceptance-Pin: `--dry-run --json` mit
   einem manuell editierten `.devcontainer/devcontainer.json`
   ohne Marker → `plannedFiles: []`, **`diagnostics[].code:
-  "[`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen)"`** (Devcontainer-Render-Spec, NICHT
-  [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) — der ist Default-Fallback und würde Drift
+  "[`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)"`** (Devcontainer-Render-Spec, NICHT
+  [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) — der ist Default-Fallback und würde Drift
   signalisieren), `exitCode: 10`, kein FS-Touch.
 - ✅ **Devcontainer-Phase-2-Half-Write-Carveout** (T0-(i)):
   Mid-Write zweiter File in Phase 2 (`executeDevcontainerPlans`)
@@ -251,7 +251,7 @@ nicht auf reduziertem `make test + lint + docs-check`.
   liefert den letzten Eintrag, also File 2, als
   `diagnostics[].file`. Korrekte Pin-Form: `plannedFiles[]`
   enthält **beide** Captures (File 1 mit success-Content, File 2
-  mit attempt-Content); diagnostics[].code: "[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)",
+  mit attempt-Content); diagnostics[].code: "[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)",
   `diagnostics[].file: "<File 2-Pfad>"`, `exitCode: 14`.
   Konsistent mit init's Mid-Write-Failure-Pattern (init T6
   pinnt das genauso).
@@ -344,20 +344,20 @@ nicht auf reduziertem `make test + lint + docs-check`.
 
   | Sentinel | Artefakt | LH-Code | Exit |
   | --- | --- | --- | --- |
-  | `ErrGenerateFileSystem` | * (alle) | [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 14 |
-  | `ErrGenerateManualConflict` | changelog | [`LH-FA-GEN-002`](../../../../spec/lastenheft.md#lh-fa-gen-002-changelog-erzeugen) | 10 |
-  | `ErrGenerateManualConflict` | readme | [`LH-FA-GEN-003`](../../../../spec/lastenheft.md#lh-fa-gen-003-readme-erzeugen) | 10 |
-  | `ErrGenerateManualConflict` | env-example | [`LH-FA-GEN-004`](../../../../spec/lastenheft.md#lh-fa-gen-004-beispiel-env-erzeugen) | 10 |
-  | `ErrGenerateManualConflict` | devcontainer | [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen) | 10 |
-  | `ErrConfigValueInvalid` (`--allow-external-feature-sources` URL) | devcontainer | [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features) | 10 |
-  | `ErrArtifactUnknown` | * (alle) | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 2 |
-  | Default (unknown) | * (alle) | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 1 |
+  | `ErrGenerateFileSystem` | * (alle) | [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) | 14 |
+  | `ErrGenerateManualConflict` | changelog | [`LH-FA-GEN-002`](../../../../spec/lastenheft.md#lh-fa-gen-002--changelog-erzeugen) | 10 |
+  | `ErrGenerateManualConflict` | readme | [`LH-FA-GEN-003`](../../../../spec/lastenheft.md#lh-fa-gen-003--readme-erzeugen) | 10 |
+  | `ErrGenerateManualConflict` | env-example | [`LH-FA-GEN-004`](../../../../spec/lastenheft.md#lh-fa-gen-004--beispiel-env-erzeugen) | 10 |
+  | `ErrGenerateManualConflict` | devcontainer | [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen) | 10 |
+  | `ErrConfigValueInvalid` (`--allow-external-feature-sources` URL) | devcontainer | [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) | 10 |
+  | `ErrArtifactUnknown` | * (alle) | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) | 2 |
+  | Default (unknown) | * (alle) | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) | 1 |
 
   Switch-Order verbindlich: FS-first, dann ManualConflict
   (artefakt-spezifischer Code via `artifact`-Param), dann
   ConfigValueInvalid (devcontainer-only, `--allow-external-
   feature-sources`-URL-Reject — Spec §720 fordert exakt
-  [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)/Exit 10), dann ArtifactUnknown, dann Default.
+  [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)/Exit 10), dann ArtifactUnknown, dann Default.
   **T3-Pflicht**: `validateAllowExternalFeatureSourcesEntries`
   (`generate.go:893-901`) und `applyAllowExternalFeatureSources`
   (`generate.go:912-934`) wrappen heute mit
@@ -366,7 +366,7 @@ nicht auf reduziertem `make test + lint + docs-check`.
   `ErrConfigValueInvalid` aber wrappt ihn nicht. T3 zieht den
   Sentinel-Wrap nach (Multi-`%w` analog FS-Wraps).
   **T6-Pflicht**: Reject-Pin-Test für `--allow-external-feature-
-  sources <invalid-url> --json` → `code: "[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)"`,
+  sources <invalid-url> --json` → `code: "[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)"`,
   `exitCode: 10`.
 - **T0-(f)** **Action-Klassifikation via `data.action` festgezurrt**
   (R3-Festzurrung, R2-Variante „kein Marker" verworfen, weil sie
@@ -422,7 +422,7 @@ nicht auf reduziertem `make test + lint + docs-check`.
   Sub-Decision pinnt zwei Acceptance-Verhalten:
   (a) Phase-1-Failure (manuell editierter devcontainer-File ohne
       Marker) → `plannedFiles: []`, kein FS-Touch, Exit 10
-      ([`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen)).
+      ([`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)).
   (b) Phase-2-Mid-Write-Failure → File 1 committed auf Disk,
       File 2 underlying-Write fehlgeschlagen. Envelope-Form
       (R4-Recorder-Realität): `plannedFiles[]` enthält **beide**
@@ -430,7 +430,7 @@ nicht auf reduziertem `make test + lint + docs-check`.
       attempt-Content — Recorder zeichnet vor Delegieren auf,
       `recordingfs.go:139`), `lastPlannedPath` liefert File 2
       als `diagnostics[].file`, `diagnostics[].code:
-      "[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)"`, Exit 14. Konsistent mit init T6
+      "[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)"`, Exit 14. Konsistent mit init T6
       Mid-Write-Pattern.
   Der **Phase-2-Half-State** ist ein bewusster Carveout
   ([[feedback_carveouts_need_plans]]); `carveouts.md`-Eintrag
@@ -475,8 +475,8 @@ nicht auf reduziertem `make test + lint + docs-check`.
   Codes-Map in `jsontestutil.DefaultAllowedCodes` (cli-json-output.md
   §5) ist für tool-interne **dotted** Codes (`add.*`, `init.*`-
   Style) gedacht — LH-Codes werden vom Acceptance-Helper bereits
-  generisch erlaubt ([`LH-FA-GEN-001`](../../../../spec/lastenheft.md#lh-fa-gen-001-generate-befehl)..[`LH-FA-GEN-005`](../../../../spec/lastenheft.md#lh-fa-gen-005-idempotenz)/[`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen)/[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)/
-  [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)/[`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) sind alle LH-präfixiert). T6
+  generisch erlaubt ([`LH-FA-GEN-001`](../../../../spec/lastenheft.md#lh-fa-gen-001--generate-befehl)..[`LH-FA-GEN-005`](../../../../spec/lastenheft.md#lh-fa-gen-005--idempotenz)/[`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)/[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)/
+  [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)/[`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) sind alle LH-präfixiert). T6
   ergänzt keine Registry-Einträge; Doku-Update für §6.5
   (Per-Command-Sektion) genügt.
 - **T0-(o)** Pre-`next/`-Review-Runden-Erwartung: init hatte
@@ -509,10 +509,10 @@ nicht auf reduziertem `make test + lint + docs-check`.
 | T0 | Discovery + Sub-Decisions (a)-(o) klären; Review-Runden | — (Plan) | — |
 | T1 | Refactor-Tranche (wenn überhaupt nötig — generate hat schmalere FS-Surface; ggf. nur ErrGenerateFileSystem-Multi-`%w`-Audit oder gar kein T1) | ~30-80 | T0 |
 | T2 | Port-Types: `GenerateRequest.PreviewMode`, `GenerateResponse.PlannedFiles`/`Changes`-Felder. **`data.action`-Klassifikation** liegt im Envelope-Layer (T5), nicht im Port — die existierende `GenerateResponse.Action` (`GenerateAction`-Enum) wird in T5 zum `data.action`-String gerendert; keine neuen Port-Felder dafür (T0-(f) Festzurrung). `ErrGenerateFileSystem` ist schon da. | ~50 | T0 |
-| T3 | Application-Layer: `GenerateService.fsFactory` + `generateMu sync.Mutex` + `NewGenerateServiceWithFactory` + `Generate()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; Multi-`%w`-Wrap an den **~17 FS-Wrap-Stellen** (T0-(d) Audit, R6-Kalibrierung — Write/Mkdir + Read/Exists/Marshal); `ErrConfigValueInvalid`-Sentinel-Wrap für `--allow-external-feature-sources`-URL-Reject (T0-(e) [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)-Pfad). | ~280 | T2 |
+| T3 | Application-Layer: `GenerateService.fsFactory` + `generateMu sync.Mutex` + `NewGenerateServiceWithFactory` + `Generate()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; Multi-`%w`-Wrap an den **~17 FS-Wrap-Stellen** (T0-(d) Audit, R6-Kalibrierung — Write/Mkdir + Read/Exists/Marshal); `ErrConfigValueInvalid`-Sentinel-Wrap für `--allow-external-feature-sources`-URL-Reject (T0-(e) [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)-Pfad). | ~280 | T2 |
 | T4 | Composition-Root-Wiring `generateFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
 | T5 | CLI-RunE: `runGenerate` ruft generische Helper mit `command="generate"` (kein subcommand, T0-(m)), `mapErr=mapGenerateErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; **`mapGenerateErrorToDiagnostic(err, artifact)` neu mit Artefakt-Parameter** (T0-(e); per-Artefakt LH-Code für ErrGenerateManualConflict). `data.action` aus `resp.Action.String()` gerendert; `data.artifact` aus `req.Artifact.String()`. **Helper-Signatur-Erweiterung (R7-Korrektur, T0-(q))**: `writeErrorEnvelope`/`reportError` werden um einen `data any`-Param erweitert (Default `nil`), damit Generate `data: {"artifact": "<…>"}` auch im Error-Envelope durchreichen kann (Mid-Write-Failure, ManualConflict, URL-Reject). Init/add-RunE-Stellen reichen `nil` durch — Drift-Risiko gering, weil die Signatur-Änderung nicht-brechend ist (neuer Trailing-Param). | ~240 | T1 + T2 (T4 für Run-time-Smoke, Code-parallelisierbar) |
-| T6 | Acceptance-Tests: **repräsentative Pin-Coverage** statt 8×4-Matrix-Durchlauf (R10-LOW-2-Klarstellung) — pro Flag-Modus ein Pin auf einem repräsentativen Artefakt, pro Artefakt mindestens ein Pin (ManualConflict-Sub-Tests decken die 4-Artefakt-Symmetrie). Pflicht-Pins: drei JSON-Modi (Bare/DryRun/Diff/Combo); per-Artefakt ManualConflict-Codes; URL-Reject ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)); ArtifactUnknown/ProjectNotInitialized/FS-Failure-Exit-Codes; Allow-External-Mutex; NoOp-Empty-Arrays; UpdatedBlock-vs-RepairedManual-Action-Diskriminator; Human-Mode-Summary + Diff-Rendering. Devcontainer-Phase-1/Phase-2-Half-Write und Repeat-Idempotency leben im Application-Layer (`generate_test.go`/`generate_features_test.go`) — CLI-Stub-Tests können FS-Phasen nicht simulieren. Total 15 Tests (~530 LOC realistic). | ~530 | T5 |
+| T6 | Acceptance-Tests: **repräsentative Pin-Coverage** statt 8×4-Matrix-Durchlauf (R10-LOW-2-Klarstellung) — pro Flag-Modus ein Pin auf einem repräsentativen Artefakt, pro Artefakt mindestens ein Pin (ManualConflict-Sub-Tests decken die 4-Artefakt-Symmetrie). Pflicht-Pins: drei JSON-Modi (Bare/DryRun/Diff/Combo); per-Artefakt ManualConflict-Codes; URL-Reject ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)); ArtifactUnknown/ProjectNotInitialized/FS-Failure-Exit-Codes; Allow-External-Mutex; NoOp-Empty-Arrays; UpdatedBlock-vs-RepairedManual-Action-Diskriminator; Human-Mode-Summary + Diff-Rendering. Devcontainer-Phase-1/Phase-2-Half-Write und Repeat-Idempotency leben im Application-Layer (`generate_test.go`/`generate_features_test.go`) — CLI-Stub-Tests können FS-Phasen nicht simulieren. Total 15 Tests (~530 LOC realistic). | ~530 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden). | ~80 | T6 |
 | T8 | Closure: CHANGELOG, cli-json-output.md §6/§6.5/§7, roadmap, slice nach done/ mit DoD-Hash-Tabelle. | — (Doku) | T7 |
 
@@ -549,7 +549,7 @@ alle adressiert im selben Commit:
 
 | # | Sev | Finding | Adressierung |
 | - | --- | --- | --- |
-| 1 | HIGH | Phase-2-Half-Write-Carveout war im Slice angekündigt, aber NICHT in `carveouts.md` inventarisiert und ohne Plan-Stub (verletzt [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin) und MEMORY-Rule [[feedback_carveouts_need_plans]]) | Neuer Eintrag in `carveouts.md` §Temporäre Carveouts mit Re-Trigger; neuer open/-Plan-Stub [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md) (Status `on hold pending trigger`, drei Lösungs-Skizzen) |
+| 1 | HIGH | Phase-2-Half-Write-Carveout war im Slice angekündigt, aber NICHT in `carveouts.md` inventarisiert und ohne Plan-Stub (verletzt [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin) und MEMORY-Rule [[feedback_carveouts_need_plans]]) | Neuer Eintrag in `carveouts.md` §Temporäre Carveouts mit Re-Trigger; neuer open/-Plan-Stub [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md) (Status `on hold pending trigger`, drei Lösungs-Skizzen) |
 | 2 | MEDIUM | Header-Vertrag „zwei Files atomar oder gar nicht" widersprach T0-(i)-Ergebnis (Phase 1 atomar, Phase 2 nicht) | Header-Text auf „Devcontainer-Atomicity-**Asymmetrie**" umgestellt mit expliziter Phase-1/Phase-2-Trennung |
 | 3 | MEDIUM | T6-Tranchen-Zelle plante 4×4-Matrix; Aufhebungsbedingung + AK fordern 4×8 | T6-Zelle auf 4×8 + Special-Pins erweitert, LOC-Schätzung ~640 (vorher ~500) |
 | 4 | MEDIUM | T0-(f) NoOp-Action-Marker war schema-unklar — `changes: []` mit `action: no-op` wäre schema-illegal (Helper enforced `path`/`count` pro `changes[]`-Eintrag) | T0-(f) festgezurrt: NoOp = `plannedFiles: []` UND `changes: []`, keine Action-Marker-Schema-Erweiterung; Konsumenten leiten NoOp aus Leerheit beider Arrays ab. AK-Block entsprechend nachgezogen |
@@ -569,7 +569,7 @@ adressiert im selben Commit:
 | - | --- | --- | --- |
 | 1 | HIGH (V2) | V2-Stub bevorzugte Option 3 (per-File Temp+Rename) löste das Multi-File-Half-State-Problem NICHT — wenn Rename 1 succeeds und Rename 2 failt, bleibt File 1 committed. Per-File-Atomicity ≠ Multi-File-Atomicity. | V2-Stub bevorzugte Skizze auf **Option 1 (Snapshot + Rollback-on-Failure)** umgestellt — echte Multi-File-Atomicity mit Best-Effort-Rollback. Option 3 explizit als „verworfen" gelabelt. Failure-Injection-Pin im Trigger-Slice ergänzt: „erste Datei committed, zweite Rename/YAML-Write failt → Restore aktiviert" |
 | 2 | MEDIUM | Action-Vertrag widersprüchlich: AK fordert vier Generate-Actions, T0-(f) verbietet Action-Marker, T2 plante zugleich ein „Action-Marker-Feld". `plannedFiles[i].action: "modify"` unterscheidet UpdatedBlock und RepairedManual nicht. | T0-(f) auf **`data.action: "<…>"`** umgestellt (Top-Level-Voll-Schema-Feld in `data`, schema-konform). T2-Tranchen-Zelle: keine Port-Felder, Rendering im T5-Layer. Action-Diskriminations-Acceptance-Pin in den AK-Block (changelog UpdatedBlock vs. RepairedManual mit identischem `plannedFiles[i].action: "modify"`, Discriminator `data.action`) |
-| 3 | MEDIUM | Diagnostic-Code zu lose gepinnt ([[`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) oder [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen)]); ErrGenerateManualConflict braucht Artefakt-Kontext, geplanter `mapGenerateErrorToDiagnostic(err)` hat keinen | T0-(e) erweitert um **Mapper-Signatur `(err, artifact)`** mit Begründung und um eine **per-Artefakt LH-Code-Tabelle** (changelog→GEN-002, readme→GEN-003, env-example→GEN-004, devcontainer→DEV-001). Acceptance-Pin auf exakten [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen) umgestellt (statt „either/or"). T5-Tranche um Mapper-Signatur-Erweiterung ergänzt |
+| 3 | MEDIUM | Diagnostic-Code zu lose gepinnt ([[`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) oder [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)]); ErrGenerateManualConflict braucht Artefakt-Kontext, geplanter `mapGenerateErrorToDiagnostic(err)` hat keinen | T0-(e) erweitert um **Mapper-Signatur `(err, artifact)`** mit Begründung und um eine **per-Artefakt LH-Code-Tabelle** (changelog→GEN-002, readme→GEN-003, env-example→GEN-004, devcontainer→DEV-001). Acceptance-Pin auf exakten [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen) umgestellt (statt „either/or"). T5-Tranche um Mapper-Signatur-Erweiterung ergänzt |
 | 4 | MEDIUM | Envelope-Shape offen (T0-(m)) — `subcommand="<artifact>"` vs. `data.artifact`. Helper-Signatur-Drift-Risiko, weil heutige Helper kein subcommand setzen | T0-(m) festgezurrt auf **`command="generate"`, kein subcommand, `data.artifact: "<…>"`**. Begründungen: (1) Cobra-Positional-Arg-Semantik analog T0-(l), (2) Helper-Signatur bleibt unverändert, (3) `data` ist ohnehin Träger für `data.action`. AK Vier-Artefakt-Symmetrie-Zeile entsprechend |
 
 R3-Reviewer-Note: docs-check grün, V2-Stub-Korrektur ist die
@@ -585,7 +585,7 @@ gegen V1-Stub), alle adressiert im selben Commit:
 
 | # | Sev | Finding | Adressierung |
 | - | --- | --- | --- |
-| 1 | HIGH | V2-Slice fehlte als Roadmap-Slice-Zeile ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin) fordert Doppel-Sichtbarkeit in `carveouts.md` UND `roadmap.md`) | Neuer Roadmap-Eintrag in `roadmap.md` §AP-Tabelle für [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md) mit Status `on hold pending trigger` und Carveout-Anker-Verweis |
+| 1 | HIGH | V2-Slice fehlte als Roadmap-Slice-Zeile ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin) fordert Doppel-Sichtbarkeit in `carveouts.md` UND `roadmap.md`) | Neuer Roadmap-Eintrag in `roadmap.md` §AP-Tabelle für [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md) mit Status `on hold pending trigger` und Carveout-Anker-Verweis |
 | 2 | MEDIUM | `data.action`/`data.artifact`-Vertrag widersprüchlich: AK forderte beide Felder, T0-(f) sagte aber gleichzeitig „nicht über separates Top-Level-Feld geführt" (R2-Drift). Zusätzlich: heutige `cliJSONEnvelope` hat **kein** `Data`-Feld (Doctor-Slice T0-(c) reserviert es für Template-Slice 9/9 mit `newDataEnvelope`-Konstruktor). | T0-(f)-Text konsolidiert auf R3-Festzurrung (`data.action` als eindeutiger Discriminator); R2-Drift-Sätze entfernt. **Neuer T0-(p)**: `cliJSONEnvelope.Data`-Feld-Migration aus Template-Slice 9/9 in den generate-Slice vorgezogen — Generate ist erster Data-Konsument, ergänzt `Data any \`json:"data,omitempty"\`` plus `newDataEnvelope`-Konstruktor in T1/T2-Sub-Tranche; T8-Closure pflegt den Template-Slice-Plan nach |
 | 3 | MEDIUM | Mid-Write-Envelope passt nicht zur Recorder-Semantik: Plan sagte `plannedFiles[]` zeigt File 1, `diagnostics[].file` markiert File 2 — aber `RecordingFileSystem.WriteFile` (`recordingfs.go:139`) zeichnet VOR dem Delegieren auf, der fehlgeschlagene Write steht also in `plannedFiles[]` mit drin | Devcontainer-Phase-2-Pin auf Recorder-Realität korrigiert: `plannedFiles[]` enthält BEIDE Captures (File 1 success-Content, File 2 attempt-Content), `lastPlannedPath` liefert File 2 als `diagnostics[].file` — konsistent mit init's Mid-Write-Failure-Pattern (init T6) |
 | 4 | MEDIUM | V2-Rollback-Skizze deckt Verzeichnis-/Scratch-State nicht ab: `MkdirAll` erstellt `.devcontainer/` vor Write-Sequenz; `.bak.<n>`-Snapshots wären Scratch-Artefakte. „Disk-Zustand nach Aufruf == vor Aufruf" muss diese explizit fordern. | V2-Stub um **Rollback-Scope-Erklärung** erweitert: drei Side-Effects (Dir-Anlage, YAML-Mutation, Snapshot-Persistierung); Acceptance-Pin auf frischem Projekt ohne `.devcontainer/`-Dir mit `tree`-Vergleich Pre-State == Post-State |
@@ -621,9 +621,9 @@ Fünf Findings (2 HIGH, 2 MEDIUM, 1 LOW gegen V2-Stub):
 
 | # | Sev | Finding | Adressierung |
 | - | --- | --- | --- |
-| 1 | HIGH | [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)-URL-Reject-Pfad nicht im Diagnostic-Code-Mapping abgebildet — Spec §720 fordert exakt [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)/Exit 10 bei ungültiger `--allow-external-feature-sources`-URL; heutiger Code (generate.go:898-933) wrappt ohne typed Sentinel; T0-(e)-Tabelle hatte keinen Eintrag → Acceptance-Test würde auf Default-Branch ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)/Exit 1) fallen | T0-(e)-Tabelle um Zeile ErrConfigValueInvalid | devcontainer | [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features) | 10 erweitert; Switch-Order-Block erweitert; T3-Pflicht für `ErrConfigValueInvalid`-Sentinel-Wrap nachgezogen; T6 um Reject-Pin-Test ergänzt; T3-LOC angehoben |
+| 1 | HIGH | [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)-URL-Reject-Pfad nicht im Diagnostic-Code-Mapping abgebildet — Spec §720 fordert exakt [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)/Exit 10 bei ungültiger `--allow-external-feature-sources`-URL; heutiger Code (generate.go:898-933) wrappt ohne typed Sentinel; T0-(e)-Tabelle hatte keinen Eintrag → Acceptance-Test würde auf Default-Branch ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)/Exit 1) fallen | T0-(e)-Tabelle um Zeile ErrConfigValueInvalid | devcontainer | [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) | 10 erweitert; Switch-Order-Block erweitert; T3-Pflicht für `ErrConfigValueInvalid`-Sentinel-Wrap nachgezogen; T6 um Reject-Pin-Test ergänzt; T3-LOC angehoben |
 | 2 | HIGH | `data.action` im Error-Envelope undefiniert — AK pinnte `data.action` für Success, Phase-2-Half-Write-AK schwieg; `writeErrorEnvelope` setzt heute `subcommand=""` hardcoded und hat keinen Daten-Slot → Vertragsambiguität | Phase-2-Half-Write-AK um Error-Envelope-`data`-Klärung ergänzt (`data.artifact` JA, `data.action` NEIN — Zero-Response auf Error-Pfad); **neue T0-(q)** Sub-Decision für volle Symmetrie-Klärung; T5-Pflicht: `writeErrorEnvelope`-Signatur um `data any`-Param erweitern (zieht init/add mit hoch — `nil` durchreichen) |
-| 3 | MEDIUM | [`LH-FA-GEN-005`](../../../../spec/lastenheft.md#lh-fa-gen-005-idempotenz)-Idempotenz nur Single-Call gepinnt; Spec §1203-1213 + Port-Vertrag generate.go:171-174 fordern Wiederholungs-Eigenschaft | Repeat-Idempotency-Pin in AK ergänzt (mindestens changelog wegen Hash-Heuristik + devcontainer wegen Two-Phase); zweiter Aufruf → `NoOp`, 0 Recorder-Mutations-Records (Spy), `data.action: "no-op"`. T6-Zelle um den Pin erweitert; Test-Total ~40-42 |
+| 3 | MEDIUM | [`LH-FA-GEN-005`](../../../../spec/lastenheft.md#lh-fa-gen-005--idempotenz)-Idempotenz nur Single-Call gepinnt; Spec §1203-1213 + Port-Vertrag generate.go:171-174 fordern Wiederholungs-Eigenschaft | Repeat-Idempotency-Pin in AK ergänzt (mindestens changelog wegen Hash-Heuristik + devcontainer wegen Two-Phase); zweiter Aufruf → `NoOp`, 0 Recorder-Mutations-Records (Spy), `data.action: "no-op"`. T6-Zelle um den Pin erweitert; Test-Total ~40-42 |
 | 4 | MEDIUM | T0-(d)-Wrap-Audit zählte 8 Stellen, real ~17 (Read-Pfade fehlten); Wrap-Form ist `%w: …: %v` (Single-`%w`) — kein Multi-`%w`-Pattern | T0-(d) auf ~17 Stellen kalibriert mit Code-Anker-Inventar (Write/Mkdir + Read/Exists/Marshal); Pre-Scan-Tabelle um Read-Pfad-Notiz; T3-LOC von ~200 auf ~280 angehoben; T6 um Read-Pfad-FS-Failure-Pin (mindestens einer) |
 | 5 | LOW (V2) | V2-Side-Effect-Liste übersah `collectDevcontainerForwardPorts`-Pre-Read-Sequenz; heutiger Flow ist konsistent (Reads laufen vor MkdirAll), aber V2-Stub nicht zukunftsfest gegen Schema-Erweiterung | V2-Stub um Sequenz-Reihenfolge-Notiz (heutige `generate.go:636-672`-Sequenz) + Trigger-Zukunftsfestigkeit-Hinweis ergänzt |
 
@@ -663,7 +663,7 @@ den Tranchen. Fünf Findings (2 MEDIUM, 3 LOW), alle adressiert:
 | # | Sev | Finding | Adressierung |
 | - | --- | --- | --- |
 | 1 | MEDIUM | Switch-Order in `mapGenerateErrorToDiagnostic` war `FS → ConfigValueInvalid → ManualConflict → …` — Plan-T0-(e) pinnt aber `FS → ManualConflict → ConfigValueInvalid → …`. Operational heute kein Bug (Sentinels in getrennten Pfaden), aber Plan-Drift gegen verbindliche Sub-Decision | Switch-Order auf Plan-Konformität gezogen (Commit `031fd79`); Doc-Kommentar dokumentiert die Plan-Reihenfolge mit Begründung |
-| 2 | MEDIUM | `manualConflictCodeFor` hatte impliziten Fall-Through auf [`LH-FA-GEN-002`](../../../../spec/lastenheft.md#lh-fa-gen-002-changelog-erzeugen) (changelog) — Plan-T0-(e) Default-Zeile sagt aber [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes). Zero-Value Artifact wirkte zufällig korrekt (zero=changelog), aber Enum-Erweiterung ohne Switch-Update würde Code stillschweigend falsch routen | Alle vier Artefakte explizit als case gelistet (inkl. changelog); Default-Fallback auf [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) — macht Switch-Lücken nach Enum-Erweiterung sichtbar (Commit `031fd79`) |
+| 2 | MEDIUM | `manualConflictCodeFor` hatte impliziten Fall-Through auf [`LH-FA-GEN-002`](../../../../spec/lastenheft.md#lh-fa-gen-002--changelog-erzeugen) (changelog) — Plan-T0-(e) Default-Zeile sagt aber [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes). Zero-Value Artifact wirkte zufällig korrekt (zero=changelog), aber Enum-Erweiterung ohne Switch-Update würde Code stillschweigend falsch routen | Alle vier Artefakte explizit als case gelistet (inkl. changelog); Default-Fallback auf [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) — macht Switch-Lücken nach Enum-Erweiterung sichtbar (Commit `031fd79`) |
 | 3 | LOW | `//nolint:unparam` auf `reportError.data` mit "T5 ist der zweite Caller"-Begründung — nach T5-Merge ist generate der reale zweite Caller, unparam akzeptiert die Mischform | Suppression entfernt; Doc auf etablierte Realität umgestellt (Commit `1e20c87`) |
 | 4 | LOW | T6-Plan-Text suggerierte strikte 4×8=32-Matrix; T6 implementiert 15 repräsentative Pins. Devcontainer-Phase-1/Phase-2 + Repeat-Idempotency leben im Application-Layer | Plan-T6-Zelle auf "repräsentative Pin-Coverage" präzisiert; Bezug auf Application-Layer-Tests; LOC-Schätzung 680→530 (Commit `1e20c87`) |
 | 5 | LOW | Doc-Drift in `GenerateResponse.PlannedFiles`-Kommentar — verwies auf JSON-Tags am Slice statt am PlannedFile-Type; Port serialisiert nichts direkt | Kommentar nachgezogen: Verweis auf `PlannedFile`-Definition + Klarstellung dass CLI eigene Wire-Typen baut (Commit `1e20c87`) |
@@ -712,8 +712,8 @@ Reihenfolge, Defensiv-Fallbacks und Doku-Drift.
   — wartet auf „mindestens einen weiteren Folge-Slice"; generate
   IST dieser Folge-Slice, MUSS `driving.PreviewMode` direkt
   nutzen.
-- Spec: [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)/[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe), [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe),
-  [`LH-FA-GEN-001`](../../../../spec/lastenheft.md#lh-fa-gen-001-generate-befehl)..[`LH-FA-GEN-005`](../../../../spec/lastenheft.md#lh-fa-gen-005-idempotenz), [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen)/[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features), [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)
+- Spec: [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)/[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe), [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe),
+  [`LH-FA-GEN-001`](../../../../spec/lastenheft.md#lh-fa-gen-001--generate-befehl)..[`LH-FA-GEN-005`](../../../../spec/lastenheft.md#lh-fa-gen-005--idempotenz), [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)/[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)
   ([`spec/lastenheft.md`](../../../../spec/lastenheft.md)).
 - Code-Anker heute:
   [`generate.go`](../../../../internal/hexagon/application/generate.go)

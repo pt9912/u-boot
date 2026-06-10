@@ -12,10 +12,10 @@ Review-Followups:
   build-binaries` + `publish.yml`-Asset-Upload für sechs
   Plattformen (Linux/macOS/Windows × amd64/arm64).
 - [`slice-v1-template-list`](slice-v1-template-list.md) (4 Tranchen + Review-Followup
-  `c807cdb`) — `u-boot template list [--json]` ([`LH-FA-TPL-004`](../../../../spec/lastenheft.md#lh-fa-tpl-004-templates-auflisten))
+  `c807cdb`) — `u-boot template list [--json]` ([`LH-FA-TPL-004`](../../../../spec/lastenheft.md#lh-fa-tpl-004--templates-auflisten))
   plus `basic`-Bootstrap-Metadaten.
 - [`slice-v1-template-init`](slice-v1-template-init.md) (5 Tranchen + Review-Followup
-  `7fe26e0`) — `u-boot init --template <name>` ([`LH-FA-TPL-001`](../../../../spec/lastenheft.md#lh-fa-tpl-001-projektvorlagen)
+  `7fe26e0`) — `u-boot init --template <name>` ([`LH-FA-TPL-001`](../../../../spec/lastenheft.md#lh-fa-tpl-001--projektvorlagen)
   für `basic`).
 
 Die ursprüngliche Planung sah `v0.1.1` als reinen Patch-Release
@@ -76,7 +76,7 @@ Nutzer-Aktion (CHANGELOG-Datum + Tag-Push).
   ein Patch-Only-Release vom Doctor-Container-Commit möglich,
   aber Cherry-Pick + Branch-Management lohnt sich für ein
   Solo-Projekt nicht. v0.1.1 wird übersprungen.
-- **V1-Add-ons** (Keycloak [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow), OTel [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow)),
+- **V1-Add-ons** (Keycloak [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow), OTel [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004--opentelemetry-flow)),
   **V1-Generators** (`logs`, `--json`/`--dry-run`),
   **[`slice-later-local-templates`](slice-later-local-templates.md)** (`--template ./pfad`),
   **Template-Init-Variables** — alles Post-v0.2.0.

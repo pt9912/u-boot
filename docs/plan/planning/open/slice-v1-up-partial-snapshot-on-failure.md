@@ -83,6 +83,6 @@ Drei Sub-Entscheidungen vor der Implementation:
 
 ## Spec-Bezug
 
-- [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) §966-§969 (Stabilisierungs-Semantik).
-- [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) (FS-Failure-Klasse, indirekt für
+- [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten) §966-§969 (Stabilisierungs-Semantik).
+- [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) (FS-Failure-Klasse, indirekt für
   Mid-Failure-Reporting).

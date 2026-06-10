@@ -9,8 +9,8 @@ ein Doku-Audit-Slice und ein Pure-Refactor-Slice für die
 Dependency-Mechanik.
 
 - [`slice-v1-audit-done`](../done/slice-v1-audit-done.md) —
-  Doku-Audit für [`LH-FA-BUILD-006`](../../../../spec/lastenheft.md#lh-fa-build-006-aggregator-targets)/[`LH-NFA-MAINT-004`](../../../../spec/lastenheft.md#lh-nfa-maint-004-dokumentierte-schnittstellen)/
-  [`LH-NFA-PORT-003`](../../../../spec/lastenheft.md#lh-nfa-port-003-containerfreundlichkeit). Pure-Doku.
+  Doku-Audit für [`LH-FA-BUILD-006`](../../../../spec/lastenheft.md#lh-fa-build-006--aggregator-targets)/[`LH-NFA-MAINT-004`](../../../../spec/lastenheft.md#lh-nfa-maint-004--dokumentierte-schnittstellen)/
+  [`LH-NFA-PORT-003`](../../../../spec/lastenheft.md#lh-nfa-port-003--containerfreundlichkeit). Pure-Doku.
 - [`slice-v1-add-remove`](../done/slice-v1-add-remove.md) — fünf
   Tranchen + Review-Followup `78ddcc6` (F1..F6). Liefert
   `u-boot remove <service> [--purge]` analog M5-Postgres-Pattern,
@@ -21,13 +21,13 @@ Dependency-Mechanik.
   `--with-deps`-CLI mit Vier-Modi-Dispatch. Breaking refactor:
   `NewAddServiceService` nimmt jetzt einen `Confirmer`.
 - [`slice-v1-keycloak`](../done/slice-v1-keycloak.md) — vier
-  Tranchen. `u-boot add keycloak` ([`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003-keycloak-hinzufügen) / [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow));
+  Tranchen. `u-boot add keycloak` ([`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003--keycloak-hinzufügen) / [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow));
   per-Service Probe-Mechanismus (`requiredEnvKeys` /
   `volumeRefLiteral` / `volumeOptional` Catalogue-Felder);
   `acceptance_helpers.go`-Extraktion (init+add+up-Pipeline für
   alle künftigen Acceptance-Docker-Tests).
 - [`slice-v1-otel`](../done/slice-v1-otel.md) — vier Tranchen.
-  `u-boot add otel` ([`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004-opentelemetry-hinzufügen) / [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow)); zweites
+  `u-boot add otel` ([`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004--opentelemetry-hinzufügen) / [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004--opentelemetry-flow)); zweites
   Catalogue-Pattern-Update: `extraFiles []extraFileEntry` für
   whole-file artefacts + `healthcheckOptional`. Makefile-Patch
   `test-docker` `-v /tmp:/tmp` für Compose-Bind-Mount-Auflösung
@@ -41,7 +41,7 @@ ohne aktive Tranchen liegen:
   Auflösung des Keycloak-Acceptance-Tests. Nicht v0.3.0-blocking.
 - [`slice-v2-homebrew-formula.md`](../open/slice-v2-homebrew-formula.md)
   + [`slice-v2-distro-pakete.md`](../open/slice-v2-distro-pakete.md) —
-  proaktive Trigger-Stubs für [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung)-Restwege. Bewusst
+  proaktive Trigger-Stubs für [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Restwege. Bewusst
   ohne v0.3.0-Bezug.
 
 ## Aufhebungsbedingung

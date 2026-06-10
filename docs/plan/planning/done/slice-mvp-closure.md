@@ -1,7 +1,7 @@
 # Slice MVP-Closure: `init --devcontainer` + LH-AK-Pin-Vervollständigung
 
 > **Status:** Done
-> **DoD:** T1 ✅ `bfe6416` / T2 ✅ `8525c4c` (inkl. Doctor-Severity-Fix für `compose.yaml.valid` no-services: Error → Warn, [`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001-minimaler-init-flow) §2299-Konformität) / T3 ✅ (Slice-Move + MVP-Bilanz, **M8 `u-boot config` als verbleibender MVP-Item dokumentiert**)
+> **DoD:** T1 ✅ `bfe6416` / T2 ✅ `8525c4c` (inkl. Doctor-Severity-Fix für `compose.yaml.valid` no-services: Error → Warn, [`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001--minimaler-init-flow) §2299-Konformität) / T3 ✅ (Slice-Move + MVP-Bilanz, **M8 `u-boot config` als verbleibender MVP-Item dokumentiert**)
 
 ## Auslöser
 
@@ -10,13 +10,13 @@ Nach M7 sind alle MVP-`LH-FA-*`-Anforderungen geliefert (`init`,
 Zeile `MVP-Closure | Open` zieht die letzten zwei Lücken zu
 einem Slice zusammen:
 
-1. **[`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow) Devcontainer-Flow** verlangt `u-boot init
+1. **[`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005--devcontainer-flow) Devcontainer-Flow** verlangt `u-boot init
    --devcontainer`. M7-T5 lieferte zwei Templates und den
    `generate devcontainer`-Pfad, ließ den Flag aber explizit als
    MVP-Closure-Scope offen (siehe [slice-m7-generate.md](slice-m7-generate.md) §"Out of
    Scope" + §Architektur-Punkt "Block-Name in allen generierten
    Dateien").
-2. **[`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001-minimaler-init-flow)** (`init && doctor`) und **[`LH-AK-006`](../../../../spec/lastenheft.md#lh-ak-006-idempotenz)**
+2. **[`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001--minimaler-init-flow)** (`init && doctor`) und **[`LH-AK-006`](../../../../spec/lastenheft.md#lh-ak-006--idempotenz)**
    (Doppel-`add postgres`) haben keine dedizierten e2e-Test-Pins
    mit dem Spec-Wortlaut. Die zugrundeliegende Semantik ist
    getestet (Init-Tests + `TestAdd_ActiveWithAllArtifactsIsNoOp`),
@@ -30,23 +30,23 @@ gepinnt; 001/005/006 ergänzt dieser Slice).
 
 Spec-Pflicht (alle MVP-Priorität):
 
-- **[`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001-minimaler-init-flow)** Vorbedingung Docker-Engine erreichbar;
+- **[`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001--minimaler-init-flow)** Vorbedingung Docker-Engine erreichbar;
   `mkdir demo && cd demo && u-boot init && u-boot doctor`
   liefert „keinen `error`-Eintrag" und „vorhandene Dateien wurden
   nicht ungewollt überschrieben" (`spec/lastenheft.md` §2281).
-- **[`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow)** `u-boot init --devcontainer` ⇒ beide
+- **[`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005--devcontainer-flow)** `u-boot init --devcontainer` ⇒ beide
   Devcontainer-Dateien existieren, `devcontainer.json` enthält
   `name` + `build`/`image`, `forwardPorts` falls aktive Ports,
   `u-boot doctor` ohne `error` zu Devcontainer-Konfig (§2367).
-- **[`LH-AK-006`](../../../../spec/lastenheft.md#lh-ak-006-idempotenz)** `u-boot add postgres && u-boot add postgres`
+- **[`LH-AK-006`](../../../../spec/lastenheft.md#lh-ak-006--idempotenz)** `u-boot add postgres && u-boot add postgres`
   ⇒ Postgres ist genau einmal in der Konfig, verständliche
   Meldung (§2387).
 
 Out of Scope (V1+):
 
-- **[`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow)** Keycloak-Flow / **[`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow)** OTel-Flow —
-  V1-Add-ons, nicht MVP ([`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003-keycloak-hinzufügen)/[`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004-opentelemetry-hinzufügen)).
-- **[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)** Externe Feature-Quellen (V1, eigener Flow
+- **[`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow)** Keycloak-Flow / **[`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004--opentelemetry-flow)** OTel-Flow —
+  V1-Add-ons, nicht MVP ([`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003--keycloak-hinzufügen)/[`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004--opentelemetry-hinzufügen)).
+- **[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)** Externe Feature-Quellen (V1, eigener Flow
   mit `--allow-external-feature-sources`).
 - **MVP-Release-Pipeline** — kein MVP-Scope; eigener V1-Slice
   ([`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md)).
@@ -91,12 +91,12 @@ Out of Scope (V1+):
 - **`u-boot.yaml.devcontainer.enabled` wird auf `true` gesetzt
   (T1).** Mirror zu `services.<name>.enabled` aus M5; setzt das
   Doctor-Severity-Eskalations-Gate aus M5-T7 scharf
-  ([`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen) §1073: `devcontainer.enabled == true` ⇒
+  ([`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen) §1073: `devcontainer.enabled == true` ⇒
   `.devcontainer/devcontainer.json` Syntax-Check ist `error`).
 - **`forwardPorts` bei `init --devcontainer` ist leer.** Beim
   ersten Init existieren noch keine aktiven Services; die
   Render-Daten-Struktur (`templateData.ForwardPorts: nil`)
-  greift dieselbe [`LH-FA-DEV-005`](../../../../spec/lastenheft.md#lh-fa-dev-005-ports)-Optionalität wie `generate
+  greift dieselbe [`LH-FA-DEV-005`](../../../../spec/lastenheft.md#lh-fa-dev-005--ports)-Optionalität wie `generate
   devcontainer` (Feld fehlt im JSON). Erst nach `u-boot add
   postgres` und einem späteren `u-boot generate devcontainer`
   taucht der Port auf — das ist konsistent mit der M7-T5-
@@ -117,7 +117,7 @@ Drei Tranchen, in Reihenfolge implementierbar. T1 ist die
 substantielle Arbeit; T2 + T3 sind kurze Doku-/Test-Pin-
 Stücke.
 
-### T1 — `u-boot init --devcontainer` ([`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow))
+### T1 — `u-boot init --devcontainer` ([`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005--devcontainer-flow))
 
 - `internal/hexagon/port/driving/initproject.go`:
   `InitProjectRequest.Devcontainer bool`-Field hinzufügen,
@@ -169,7 +169,7 @@ Stücke.
   bestehende Init-Tests grün (Backward-Compat).
 - [ ] `u-boot.yaml.devcontainer.enabled = true` beim Init mit
   Flag (Pin via parse-and-check).
-- [ ] [`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow)-e2e-Pin grün (init + doctor → kein Error für
+- [ ] [`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005--devcontainer-flow)-e2e-Pin grün (init + doctor → kein Error für
   Devcontainer-Konfig; M5-T7-Severity-Gate fired correctly).
 - [ ] `--devcontainer`-Flag in `u-boot init --help` sichtbar.
 - [ ] Kollisions-Test mit Generate-Output dokumentiert (force-
@@ -177,7 +177,7 @@ Stücke.
 - [ ] `make gates` grün.
 - [ ] DoD-Line: `T1 ✅ <commit-hash>`.
 
-### T2 — [`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001-minimaler-init-flow) + [`LH-AK-006`](../../../../spec/lastenheft.md#lh-ak-006-idempotenz) benannte e2e-Pins
+### T2 — [`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001--minimaler-init-flow) + [`LH-AK-006`](../../../../spec/lastenheft.md#lh-ak-006--idempotenz) benannte e2e-Pins
 
 Beide Pins folgen dem Muster von `TestGenerateChangelog_LHAK007_FlowEndToEnd`:
 direkter Service-Aufruf im `application_test`-Package, kein
@@ -205,7 +205,7 @@ Docker, kein CLI-Layer.
     (analog T2-NoOp-Pin aus M7).
 - Beide Tests landen in einer neuen Datei
   `internal/hexagon/application/acceptance_test.go` —
-  dediziert für die LH-AK-Pins, damit ein künftiger [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow)/
+  dediziert für die LH-AK-Pins, damit ein künftiger [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow)/
   -004-Pin (V1) eine offensichtliche Heimat hat.
 
 **DoD T2:**
@@ -224,8 +224,8 @@ Docker, kein CLI-Layer.
 - Roadmap `MVP-Closure | Open` → `Done` mit Slice-Link.
 - Roadmap "Nächste Schritte"-Block: nach MVP-Closure folgt die
   V1-Phase. Konkret offene V1-Slices: Plugin-System
-  ([`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003-plugin-system-entschieden)), Template-Format ([`LH-OPEN-004`](../../../../spec/lastenheft.md#lh-open-004-template-format-entschieden)),
-  Release-Pipeline ([`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung)), YAML-Parse-Error-Sentinel
+  ([`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003--plugin-system-entschieden)), Template-Format ([`LH-OPEN-004`](../../../../spec/lastenheft.md#lh-open-004--template-format-entschieden)),
+  Release-Pipeline ([`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)), YAML-Parse-Error-Sentinel
   (Review-Followup N2). Diese vier hängen nicht voneinander
   ab; der Triage-Trigger ist „erster externer User-Report" oder
   „erste Release-Vorbereitung".
@@ -254,15 +254,15 @@ Docker, kein CLI-Layer.
 
 ### Verhalten
 
-- **[`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001-minimaler-init-flow)**: `init + doctor` ohne Error.
-- **[`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow)**: bereits gepinnt
+- **[`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001--minimaler-init-flow)**: `init + doctor` ohne Error.
+- **[`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)**: bereits gepinnt
   (`TestE2E_LHAK002_PostgresAcceptanceFlow`).
-- **[`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow)**: `init --devcontainer` produziert beide
+- **[`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005--devcontainer-flow)**: `init --devcontainer` produziert beide
   Pflichtdateien, `devcontainer.enabled=true` in
   `u-boot.yaml`, JSON valid.
-- **[`LH-AK-006`](../../../../spec/lastenheft.md#lh-ak-006-idempotenz)**: Doppel-`add postgres` ⇒ keine Duplikate, NoOp-
+- **[`LH-AK-006`](../../../../spec/lastenheft.md#lh-ak-006--idempotenz)**: Doppel-`add postgres` ⇒ keine Duplikate, NoOp-
   Aktion beim zweiten Aufruf.
-- **[`LH-AK-007`](../../../../spec/lastenheft.md#lh-ak-007-changelog-generator)**: bereits gepinnt
+- **[`LH-AK-007`](../../../../spec/lastenheft.md#lh-ak-007--changelog-generator)**: bereits gepinnt
   (`TestGenerateChangelog_LHAK007_FlowEndToEnd`).
 
 ### Negative
@@ -279,8 +279,8 @@ Docker, kein CLI-Layer.
 
 ## Bezug
 
-- Auslösende Spec: `spec/lastenheft.md` §9 [`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001-minimaler-init-flow)/[`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow)/[`LH-AK-006`](../../../../spec/lastenheft.md#lh-ak-006-idempotenz),
-  §4.3 [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen)/[`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004-benutzerrechte)/[`LH-FA-DEV-005`](../../../../spec/lastenheft.md#lh-fa-dev-005-ports) (DEV-002 implizit über
+- Auslösende Spec: `spec/lastenheft.md` §9 [`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001--minimaler-init-flow)/[`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005--devcontainer-flow)/[`LH-AK-006`](../../../../spec/lastenheft.md#lh-ak-006--idempotenz),
+  §4.3 [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)/[`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004--benutzerrechte)/[`LH-FA-DEV-005`](../../../../spec/lastenheft.md#lh-fa-dev-005--ports) (DEV-002 implizit über
   VS-Code-Kompatibilität von `name` + `build`).
 - Hängt von: M3 (`actionReplaceBlock`/`--force`/`--backup`),
   M5 (`devcontainer.enabled`-Gate aus T7), M7-T5

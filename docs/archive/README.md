@@ -3,7 +3,7 @@
 Abgelöste oder veraltete Doku-Inhalte aus `docs/user/`, `docs/plan/` oder
 anderen Bereichen. Statt zu löschen wird hierher verschoben, damit die
 Historie auffindbar bleibt (siehe
-[`LH-FA-PROJDOCS-004`](../../spec/lastenheft.md#lh-fa-projdocs-004-archivierung)).
+[`LH-FA-PROJDOCS-004`](../../spec/lastenheft.md#lh-fa-projdocs-004--archivierung)).
 
 Konventionen:
 

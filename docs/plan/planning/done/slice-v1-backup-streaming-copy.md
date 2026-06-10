@@ -6,7 +6,7 @@
 ## Auslöser
 
 Die T4a-Review (Finding #6) hat die Speicherspitze der Backup-Mechanik
-aus [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) adressiert: `BackupPath` rief `fs.ReadFile`+
+aus [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz) adressiert: `BackupPath` rief `fs.ReadFile`+
 `fs.WriteFile` auf, lud also den vollständigen Dateiinhalt in den
 Prozess-Heap. Bei einem multi-GB-Asset im Backup-Scope (`docs/`,
 `docker/`) hätte das den Prozess gekippt. Als MVP-Kompromiss war ein
@@ -89,7 +89,7 @@ sind entfernt.
 
 - Auslöser: T4a-Review Finding #6 (Commit `5296671` + Review-Fix
   `ecb8379` für M3-T4a).
-- Spec-Bezug: [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) (Überschreibschutz), implizit
+- Spec-Bezug: [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz) (Überschreibschutz), implizit
   `LH-NFA-USE-*` (kein Memory-Footgun).
 - Aufhebung dokumentiert in: [`carveouts.md`](../in-progress/carveouts.md)
   und [`roadmap.md`](../in-progress/roadmap.md).

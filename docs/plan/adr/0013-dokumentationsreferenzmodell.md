@@ -10,7 +10,7 @@ Accepted
 
 ## Kontext
 
-[`LH-FA-PROJDOCS-001`](../../../spec/lastenheft.md#lh-fa-projdocs-001-mindeststruktur)..[`LH-FA-PROJDOCS-005`](../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin) definieren Struktur, ADR-Format,
+[`LH-FA-PROJDOCS-001`](../../../spec/lastenheft.md#lh-fa-projdocs-001--mindeststruktur)..[`LH-FA-PROJDOCS-005`](../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin) definieren Struktur, ADR-Format,
 Planning-Lifecycle und Carveout-Disziplin. Bisher war aber nicht
 verbindlich geregelt, welche Dokument-Referenzen normative Kraft tragen
 und welche nur Planungskontext oder Buchfuehrung sind.
@@ -21,7 +21,7 @@ auseinander, sobald ein eingefrorenes Artefakt seine normative Kraft
 verliert. Eine superseded ADR ist stabil, aber nicht mehr autoritativ.
 Das Referenzmodell muss deshalb Normativitaet explizit regeln.
 
-[`LH-FA-PROJDOCS-006`](../../../spec/lastenheft.md#lh-fa-projdocs-006-dokumentationsreferenzmodell) legt fest, dass das Lastenheft die normative Decke
+[`LH-FA-PROJDOCS-006`](../../../spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell) legt fest, dass das Lastenheft die normative Decke
 des Projektmodells ist. Externe Normen, Gesetze, Standards,
 Upstream-Vertraege oder Produktvorgaben wirken im Repo nur ueber
 explizite `LH-*`-Anforderungen normativ.

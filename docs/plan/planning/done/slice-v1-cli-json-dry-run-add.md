@@ -27,7 +27,7 @@
 > synchronisiert), Runde 5 H1-M2 (1× HIGH, 2× MEDIUM —
 > `driving.PlannedFile` mit `NewContent`/`OldContent` (`json:"-"`)
 > als Content-Träger zwischen Layern, `ErrAddFileSystem`-LH-Code
-> auf [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) korrigiert, T0-(e)-Skizze auf `fsFactory`-
+> auf [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) korrigiert, T0-(e)-Skizze auf `fsFactory`-
 > Tuple-Vertrag synchronisiert). **Slice ✅ done** — Cluster-
 > Folge-Slice 2/9 (Add) komplett abgeschlossen, alle Tranchen
 > und zwei Code-Review-Runden (R6: 15 Findings, R7: 3 Findings)
@@ -80,18 +80,18 @@ fest:
 
 Spec-Bezug:
 
-- **[`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)** (Dry-Run, V1, Voll-Schema): für dateiver-
+- **[`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)** (Dry-Run, V1, Voll-Schema): für dateiver-
   ändernde Befehle muss `--dry-run` die geplanten Änderungen
   ohne FS-Schreiben zeigen. Bei `--dry-run --json` greift das
   Pflicht-Schema mit `dryRun`/`diff`/`plannedFiles`/`changes`
   als Pflichtfelder (§326,
   [`spec/lastenheft.md`](../../../../spec/lastenheft.md) §302-447).
-- **[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe)** (Diff, V1): `--diff` zeigt Unterschiede
+- **[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)** (Diff, V1): `--diff` zeigt Unterschiede
   zwischen aktuellem und geplantem Zustand. Bei `--diff --json`
   gilt das Voll-Schema mit `diff: true`. Kombinierbar mit
   `--dry-run` (Vorschau ohne Schreiben) oder ohne (Vorschau plus
   Schreiben, „Preview-and-Apply"). Spec §451-489.
-- **[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)** (Maschinen-lesbar, V1): wenn `--json` ohne
+- **[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)** (Maschinen-lesbar, V1): wenn `--json` ohne
   `--dry-run`/`--diff` aufgerufen wird, gilt der Minimalkontrakt
   (§1841) — auch `add` muss diese Form tragen, weil `--json` für
   alle 10 Spec-Enum-Subcommands Pflicht ist.
@@ -137,7 +137,7 @@ Vorgänger-Slice (Doctor-Platz-1) hat etabliert:
 - `newFullEnvelope`-Konstruktor bereits da, **noch nicht** verwendet
   — Erstnutzung in diesem Slice.
 - `jsontestutil.AssertFullEnvelope` als Stub angelegt; voll
-  funktional, prüft [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §326 Required-Set, `action`-
+  funktional, prüft [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) §326 Required-Set, `action`-
   Enum, `count ≥ 0`.
 - Root-PersistentFlag `--json` + Reject-Allowlist + Code-Registry-
   Disziplin. `u-boot add` ist heute Reject-Eintrag; dieser Slice
@@ -266,7 +266,7 @@ mit einem Spy auf alle 8 Mutations-Methoden und assertet `Calls
   und `cli.New(...)`-Signatur **bleiben unverändert**; CLI-RunE
   setzt `req.PreviewMode` gemäß T0-(b)-Wahrheitstabelle. Der
   CLI-Adapter importiert weder `driven.FileSystem` noch
-  `recordingfs` direkt (Hard-Rule [`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002-schichten-und-verzeichnislayout)/[`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement),
+  `recordingfs` direkt (Hard-Rule [`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)/[`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement),
   geprüft via `make lint` depguard).
 - ✅ **Diff-Renderer zweigleisig** (Cluster T0-(d)): Pure-Go
   LCS-Hunk-Algorithmus (~150-200 LOC) oder
@@ -385,11 +385,11 @@ und Recorder-Capture-Realität):
 | Scenario | `plannedFiles[]` | `diagnostics[]` | `status` | `exitCode` |
 | --- | --- | --- | --- | --- |
 | **Success-Sequenz** (alle 3 Files OK) | alle 3 Files mit korrekter Action | `[]` | `"ok"` | `0` |
-| **Mid-Write-Failure** (File 1 OK, File 2 failt) | nur die bis zum Failure tatsächlich gecaptureten Aufrufe (File 1 + File 2) | 1× `level:"error"` mit [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-konformem FS-Code, `file:` für File 2 | `"error"` | `14` |
-| **Pre-Write-Validation-Failure** (z. B. ungültiger Service-Name vor erstem Write) | `[]` (keine Files geplant) | 1× `level:"error"` mit [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung) | `"error"` | `10` |
+| **Mid-Write-Failure** (File 1 OK, File 2 failt) | nur die bis zum Failure tatsächlich gecaptureten Aufrufe (File 1 + File 2) | 1× `level:"error"` mit [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)-konformem FS-Code, `file:` für File 2 | `"error"` | `14` |
+| **Pre-Write-Validation-Failure** (z. B. ungültiger Service-Name vor erstem Write) | `[]` (keine Files geplant) | 1× `level:"error"` mit [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006--projektnamen-validierung) | `"error"` | `10` |
 
 **Round-2-H2-Korrektur (Exit-Code-Klasse)**: FS-Write-Failure
-(Mid-Write-Failure-Scenario) klassifiziert nach [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)
+(Mid-Write-Failure-Scenario) klassifiziert nach [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)
 als **technischer Persistenz-/Dateisystem-Fehler** → Exit-Code
 **14**, **nicht** 11. Code 11 ist für fachliche
 Umgebungs-/Prüfungsfehler (`ErrDoctorFailures`,
@@ -877,26 +877,26 @@ exempt) kennt den konkreten Typ. depguard `adapter-no-application`
 `internal/hexagon/port/driving/addservice.go:106-138` definiert
 **vier** Spec-konforme Sentinels:
 
-- `ErrServiceUnsupported` ([`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen) — unbekannter Service)
-- `ErrServiceInconsistent` ([`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern) — Catalog-State-Mismatch)
-- `ErrDependenciesRequired` ([`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006-add-on-abhängigkeiten) — fehlende Add-On-Deps)
-- `ErrProjectNotInitialized` ([`LH-FA-ADD-001`](../../../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl) — kein u-boot.yaml)
+- `ErrServiceUnsupported` ([`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002--postgresql-hinzufügen) — unbekannter Service)
+- `ErrServiceInconsistent` ([`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005--mehrfaches-hinzufügen-verhindern) — Catalog-State-Mismatch)
+- `ErrDependenciesRequired` ([`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006--add-on-abhängigkeiten) — fehlende Add-On-Deps)
+- `ErrProjectNotInitialized` ([`LH-FA-ADD-001`](../../../../spec/lastenheft.md#lh-fa-add-001--add-on-befehl) — kein u-boot.yaml)
 
 Plus drei Application-Sentinels, die heute beim Add aufkommen
 können (siehe [`cli.go`](../../../../internal/adapter/driving/cli/cli.go)
 `ExitCode`-Mapping):
 
-- `ErrInvalidServiceName` ([`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung) — Service-Name-
+- `ErrInvalidServiceName` ([`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006--projektnamen-validierung) — Service-Name-
   Validation, geteilt mit init)
-- `ErrFileExists`/`ErrProjectExists` ([`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004-bestehendes-projekt-erkennen) —
+- `ErrFileExists`/`ErrProjectExists` ([`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen) —
   Marker-Kollision, fachlich auch bei add möglich)
 - `ErrBackupSuffixExhausted` / `ErrBackupSourceMissing`
-  ([`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) — Backup-Pfad-Failures)
+  ([`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz) — Backup-Pfad-Failures)
 
 **Entscheidung (T0-Festlegung): LH-Codes**. Begründung:
 
 - Spec §445 erlaubt **LH-Kennung der verursachenden Anforderung**
-  als kanonische Code-Form ("z. B. [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)").
+  als kanonische Code-Form ("z. B. [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)").
 - `jsontestutil.codeAllowed`
   ([`jsontestutil.go:280-291`](../../../../internal/adapter/driving/cli/jsontestutil/jsontestutil.go))
   akzeptiert LH-Codes (`strings.HasPrefix("LH-")`) **ohne**
@@ -910,14 +910,14 @@ der Mutations-Matrix-Doku aus T0-(f)):
 
 | Sentinel | LH-Code | Level | Exit-Code |
 | --- | --- | --- | --- |
-| `ErrProjectNotInitialized` | [`LH-FA-ADD-001`](../../../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl) | error | 10 |
-| `ErrServiceUnsupported` | [`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen) | error | 10 |
-| `ErrServiceInconsistent` | [`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern) | error | 10 |
-| `ErrDependenciesRequired` | [`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006-add-on-abhängigkeiten) | error | 10 |
-| `ErrInvalidServiceName` | [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung) | error | 10 |
-| `ErrFileExists` | [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004-bestehendes-projekt-erkennen) | error | 10 |
-| `ErrBackupSuffixExhausted` | [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) | error | 14 |
-| **`ErrAddFileSystem` (neu)** | **[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)** | **error** | **14** |
+| `ErrProjectNotInitialized` | [`LH-FA-ADD-001`](../../../../spec/lastenheft.md#lh-fa-add-001--add-on-befehl) | error | 10 |
+| `ErrServiceUnsupported` | [`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002--postgresql-hinzufügen) | error | 10 |
+| `ErrServiceInconsistent` | [`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005--mehrfaches-hinzufügen-verhindern) | error | 10 |
+| `ErrDependenciesRequired` | [`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006--add-on-abhängigkeiten) | error | 10 |
+| `ErrInvalidServiceName` | [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006--projektnamen-validierung) | error | 10 |
+| `ErrFileExists` | [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen) | error | 10 |
+| `ErrBackupSuffixExhausted` | [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz) | error | 14 |
+| **`ErrAddFileSystem` (neu)** | **[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)** | **error** | **14** |
 
 **Neuer Sentinel `ErrAddFileSystem`** (Review-Round-4-Finding H2
 adressiert; Round-5-Finding M1 LH-Code-Korrektur): heutige
@@ -928,12 +928,12 @@ return 1`-Zweig. Der Mid-Write-Failure-Scenario aus T0-(b)
 (`exitCode: 14`) ist damit ohne Sentinel nicht spec-konform
 erreichbar.
 
-**LH-Code-Wahl** (Round-5-M1-Korrektur): [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)
+**LH-Code-Wahl** (Round-5-M1-Korrektur): [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)
 ([`spec/lastenheft.md`](../../../../spec/lastenheft.md) §1875-1879
 „Abbruch bei kritischen Fehlern: bei kritischen Fehlern muss das
 Produkt abbrechen und eine klare Fehlermeldung ausgeben") matched
 die FS-Write-Failure-Semantik exakt. Der vorherige Round-4-Vorschlag
-[`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen) war Drift — der Code beschreibt unbekannte
+[`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002--postgresql-hinzufügen) war Drift — der Code beschreibt unbekannte
 Services, nicht FS-/Persistenzfehler. T1 ergänzt:
 
 ```go
@@ -974,11 +974,11 @@ func (s *AddServiceService) Add(ctx context.Context, req AddServiceRequest) (Add
 
 CLI-RunE: bei Error-Return baut der RunE-Pfad den Voll-Schema-
 Envelope aus der Response (`PlannedFiles` ist befüllt) und ergänzt
-`diagnostics[]`-Eintrag mit `level: "error"`, code: "[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)",
+`diagnostics[]`-Eintrag mit `level: "error"`, code: "[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)",
 `file: failedPath`, `message`. Exit-Code via `cli.ExitCode(err)
 → 14`. Pin-Test in T5 verifiziert den kompletten Pfad:
 FS-Fake-Failure bei zweitem WriteFile → JSON mit File 1 + File 2,
-diagnostics[0].code: "[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)", `diagnostics[0].file:
+diagnostics[0].code: "[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)", `diagnostics[0].file:
 "compose.yaml"`, `status: "error"`, `exitCode: 14`.
 
 **Success-Pfade** (`AddServiceResponse.Changed != nil`):
@@ -1111,7 +1111,7 @@ Check auf alte Datei) gilt **Spec-konformes Fallback**:
   lässt `count` als Integer ≥ 0 offen, Byte-Diff ist eine valide
   Form.
 - Optional: `diagnostics[]`-Eintrag mit `level: "warn"` und Code
-  [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) (Binary-Diff-Skip-Hinweis) als User-Hint —
+  [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) (Binary-Diff-Skip-Hinweis) als User-Hint —
   Sub-Decision T0-(l) Variante: notwendig oder out-of-scope?
   Vorschlag: ohne diagnostics-Eintrag, weil das Information-Level
   ist (Spec §1834 verbietet `level: "info"`), und Warn würde den
@@ -1135,7 +1135,7 @@ nennt die Tranche, die das Outcome materialisiert.
 | Sub-Decision | Outcome | Implementations-Pflicht |
 | --- | --- | --- |
 | [T0-(a)](#t0-a-recordingfilesystem-lokation) RecordingFileSystem-Lokation | Sub-Package `internal/adapter/driven/recordingfs/` analog `driven/fs/`/`driven/git/`-Repo-Konvention | T1 |
-| [T0-(b)](#t0-b-passthrough-schalter-form) Passthrough + Failure-Scenarios | Konstruktor-Option `WithPassthrough(bool)`; Aufruf-Reihenfolge im Passthrough=true-Pfad: (1) capturen → (2) Production-Mutation → (3) bei Fehler Plan-Eintrag bestehen lassen + `diagnostics[]`-Item mit [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern). **Drei Failure-Scenarios** spec-konform gepinnt: Success (`status:"ok"`/`exitCode:0`), Mid-Write-Failure (Capture bis Failure-Stelle, `status:"error"`/`exitCode:14`), Pre-Write-Validation-Failure (`plannedFiles:[]`, [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung)/`exitCode:10`). Dry-Run-Modus liefert vollständige Liste, Preview-and-Apply nur Calls bis Failure. | T1 (Recorder-Mechanik) + T4 (CLI-RunE-Error-Pfad) + T5 (Acceptance-Pins) |
+| [T0-(b)](#t0-b-passthrough-schalter-form) Passthrough + Failure-Scenarios | Konstruktor-Option `WithPassthrough(bool)`; Aufruf-Reihenfolge im Passthrough=true-Pfad: (1) capturen → (2) Production-Mutation → (3) bei Fehler Plan-Eintrag bestehen lassen + `diagnostics[]`-Item mit [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern). **Drei Failure-Scenarios** spec-konform gepinnt: Success (`status:"ok"`/`exitCode:0`), Mid-Write-Failure (Capture bis Failure-Stelle, `status:"error"`/`exitCode:14`), Pre-Write-Validation-Failure (`plannedFiles:[]`, [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006--projektnamen-validierung)/`exitCode:10`). Dry-Run-Modus liefert vollständige Liste, Preview-and-Apply nur Calls bis Failure. | T1 (Recorder-Mechanik) + T4 (CLI-RunE-Error-Pfad) + T5 (Acceptance-Pins) |
 | [T0-(c)](#t0-c-diff-hunk-field-name-im-json) Diff-Hunk-Field-Name | `plannedFiles[].hunks` als flaches Top-Level-Array pro Datei (kein `plannedFiles[].diff`-Sub-Objekt) | T2 (Renderer) + T4 (Envelope-Befüllung) |
 | [T0-(d)](#t0-d-diff-library-pure-go-intern-vs-pmezardgo-difflib) Diff-Library | **Pure-Go intern** (~150-200 LOC LCS+Unified-Diff); kein neuer Dep (`go.mod`-4-Dep-Disziplin); Sub-Decision-Revert auf `pmezard/go-difflib` möglich, falls Pure-Go-Implementation in T2 unerwartete Komplexität zeigt | T2 |
 | [T0-(e)](#t0-e-composition-root-doppel-wiring-form) Composition-Root-Wiring | **Option 4**: `Request.PreviewMode` als Enum `AddPreviewMode {PreviewNone, PreviewDryRun, PreviewAndApply}`; Composition-Root-Closure `fsFactory(mode) (driven.FileSystem, driven.RecorderPort)`-Tuple; App-Struct + `cli.New(...)`-Signatur unverändert | T1-D (ursprünglich T3) |
@@ -1143,9 +1143,9 @@ nennt die Tranche, die das Outcome materialisiert.
 | [T0-(g)](#t0-g-changesicount-semantik) `changes[].count`-Semantik | **`newLines`-Form** (Spec §430+§477 konsistent): `create` = total lines neue Datei (trailing-newline-robust via `bytes.Count + HasSuffix`); `modify` = `sum(+-Zeilen über alle Hunks)` via `diff.CountAdditions` (Round-7-B-Korrektur: Stub-Form `sum(hunk.newLines)` zählte Context mit, drifted gegen Spec §477 `count: 6`); `delete` = `0` (short-circuit vor IsBinary, Round-6 #8). Vier Edge-Case-Pin-Tests in T5 (`"a\n"→1`, `"a"→1`, `""→0`, `"a\nb\n"→2`). | T2 (Counter im Renderer) + T5 (Pin-Tests) |
 | [T0-(h)](#t0-h-pre-scan-read-after-write-stichprobe-für-add) Read-after-Write-Stichprobe | `add` ist Read-then-Write (catalog → service-Files), **kein** Write-then-Read → kein Overlay-Map-Fallback nötig. T0-Outcomes-Tabelle pro `addservice_*.go`-Datei mit Pre-Scan-Ergebnis in T1-Doc-Comment. | T1 (Doc-Comment) |
 | [T0-(i)](#t0-i-recorder-carrier-typ-über-die-schicht-grenze) Recorder-Carrier-Typ | **Option 1**: Carrier-Types in `internal/hexagon/port/driving/addservice.go` als Public-Types (`PlannedFile{Path, Action, NewContent json:"-", OldContent json:"-"}`, `ChangeEntry`, `Hunk`). `AddServiceResponse` bekommt `PlannedFiles []PlannedFile` + `Changes []ChangeEntry`. **`driven.RecorderPort`-Interface** (neu, `port/driven/recordingport.go`) mit `Captured() []FileMutationRecord`-Methode (`FileMutationRecord` trägt `Path`/`Action`/`NewContent`/`OldContent`). `recordingfs.RecordingFileSystem` implementiert beide Ports. depguard `adapter-no-application`/`application-no-adapter` bleiben grün. | T1 (Carrier-Types + RecorderPort + Recorder-Implementation + Capture-Mechanik) + T4 (Mapping recorder.Captured → Response in Use-Case) |
-| [T0-(j)](#t0-j-diagnostic-code-quelle-für-add) Diagnostic-Code-Quelle | **LH-Kennungen** (keine erfundenen `add.*`-Codes). Mapping-Tabelle pinnt acht Sentinels auf `LH-FA-ADD-{001,002,005,006}`/`LH-FA-INIT-{004,005,006}`/[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern). Success-Pfad: `status:"ok"`/`diagnostics:[]`. Idempotent-no-op: leere `plannedFiles[]`/`changes[]`. **Neuer Sentinel `ErrAddFileSystem`** (in `port/driving/addservice.go`, gemappt auf [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern), Exit-Code 14). `cli.ExitCode.isFilesystemError` ergänzt um `ErrAddFileSystem`. **Non-empty Response on Error-Pfad**: Use-Case returnt `(Response{PlannedFiles: ...}, wrappedErr)` bei FS-Failure. Keine `DefaultAllowedCodes`-Erweiterung (LH-Prefix-Pfad). | T1 (Sentinel + Wrap) + `cli.ExitCode`-Erweiterung in T4 + Mapping in T4 |
+| [T0-(j)](#t0-j-diagnostic-code-quelle-für-add) Diagnostic-Code-Quelle | **LH-Kennungen** (keine erfundenen `add.*`-Codes). Mapping-Tabelle pinnt acht Sentinels auf `LH-FA-ADD-{001,002,005,006}`/`LH-FA-INIT-{004,005,006}`/[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern). Success-Pfad: `status:"ok"`/`diagnostics:[]`. Idempotent-no-op: leere `plannedFiles[]`/`changes[]`. **Neuer Sentinel `ErrAddFileSystem`** (in `port/driving/addservice.go`, gemappt auf [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern), Exit-Code 14). `cli.ExitCode.isFilesystemError` ergänzt um `ErrAddFileSystem`. **Non-empty Response on Error-Pfad**: Use-Case returnt `(Response{PlannedFiles: ...}, wrappedErr)` bei FS-Failure. Keine `DefaultAllowedCodes`-Erweiterung (LH-Prefix-Pfad). | T1 (Sentinel + Wrap) + `cli.ExitCode`-Erweiterung in T4 + Mapping in T4 |
 | [T0-(k)](#t0-k-add---json-minimalkontrakt-ohne---dry-run--diff-output-form) `add --json` (Minimal) Output | **Spec-streng Minimalkontrakt**: ohne `--dry-run`/`--diff` keine FS-Plan-Information im JSON; nur `status`/`command`/`diagnostics`/`exitCode`. Doku-Hint in `cli-json-output.md` §6.1 (Add-Sektion): „use `--dry-run --json` to preview, `--diff --json` to preview-and-apply with FS-Plan". | T4 (Code-Pfad-Verzweigung) + T6 (Doku-Hint) |
-| [T0-(l)](#t0-l-hunks-schema-pin-binary-content-detection) Hunks-Schema + Binary-Detection | Hunks-Schema: `{OldStart, OldLines, NewStart, NewLines int, Content string}` mit `json:"oldStart"`/etc. Field-Name-Tags und Range-Constraints (`Start ≥ 1` bei `Lines > 0`, sonst egal). **`AssertFullEnvelope`-Erweiterung** in `jsontestutil.checkPlannedFiles` mit `checkHunks`-Helper (positive + negative Pin gegen Field-Name-Drift `offset` statt `oldStart`). **Binary-Content-Detection** (`!utf8.Valid(...)`): `action` bleibt Spec-Enum, `hunks` weggelassen via `omitempty`, `count` = Byte-Diff statt Lines, **kein** Diagnostic-Eintrag. | T1 (Hunk-Type-Definition) + T2 (UTF-8-Check + checkHunks-Helper) |
+| [T0-(l)](#t0-l-hunks-schema-pin--binary-content-detection) Hunks-Schema + Binary-Detection | Hunks-Schema: `{OldStart, OldLines, NewStart, NewLines int, Content string}` mit `json:"oldStart"`/etc. Field-Name-Tags und Range-Constraints (`Start ≥ 1` bei `Lines > 0`, sonst egal). **`AssertFullEnvelope`-Erweiterung** in `jsontestutil.checkPlannedFiles` mit `checkHunks`-Helper (positive + negative Pin gegen Field-Name-Drift `offset` statt `oldStart`). **Binary-Content-Detection** (`!utf8.Valid(...)`): `action` bleibt Spec-Enum, `hunks` weggelassen via `omitempty`, `count` = Byte-Diff statt Lines, **kein** Diagnostic-Eintrag. | T1 (Hunk-Type-Definition) + T2 (UTF-8-Check + checkHunks-Helper) |
 
 **Status nach Outcomes**: T0 ✅ festgezurrt. Sub-Decisions sind
 verbindlich; jede T1-T6-Tranche referenziert die zugehörigen
@@ -1251,8 +1251,8 @@ denkbar. **Verworfen**, weil:
   [`slice-v1-cli-json-dry-run-doctor`](../done/slice-v1-cli-json-dry-run-doctor.md)
   T2-T5 etabliert die Infrastruktur (Envelope, Helper, Allowlist,
   Drift-Gates), die dieser Slice **nicht erneut** baut.
-- Spec: [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) (Voll-Schema §326), [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) (Diff
-  §451-489), [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) (Minimalkontrakt §1841)
+- Spec: [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Voll-Schema §326), [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) (Diff
+  §451-489), [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) (Minimalkontrakt §1841)
   ([`spec/lastenheft.md`](../../../../spec/lastenheft.md)).
 - ADR: [`ADR-0010`](../../adr/0010-kein-http-driving-adapter.md)
   §Folgepunkte Re-Eval-Trigger 2.

@@ -1,8 +1,8 @@
-# Slice V1: Plugin-System-Entscheidung ([`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003-plugin-system-entschieden))
+# Slice V1: Plugin-System-Entscheidung ([`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003--plugin-system-entschieden))
 
 ## Auslöser
 
-[`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003-plugin-system-entschieden) (Plugin-System) ist in `spec/lastenheft.md` §14 offen:
+[`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003--plugin-system-entschieden) (Plugin-System) ist in `spec/lastenheft.md` §14 offen:
 
 > *„Es ist zu klären, ob Add-ons langfristig fest eingebaut oder als
 > Plugins nachladbar sein sollen."*
@@ -27,26 +27,26 @@ zwischen mindestens diesen Optionen:
 ## Akzeptanzkriterien
 
 - ADR existiert mit Vergleich der Optionen, Trade-offs,
-  Sicherheits-Implikationen ([`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte) ist relevant) und
+  Sicherheits-Implikationen ([`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) ist relevant) und
   konkreter Entscheidung.
-- [`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003-plugin-system-entschieden) in `spec/lastenheft.md` § 14 wird als entschieden
-  markiert (analog [`LH-OPEN-001`](../../../../spec/lastenheft.md#lh-open-001-implementierungssprache-entschieden) Go).
+- [`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003--plugin-system-entschieden) in `spec/lastenheft.md` § 14 wird als entschieden
+  markiert (analog [`LH-OPEN-001`](../../../../spec/lastenheft.md#lh-open-001--implementierungssprache-entschieden) Go).
 - `spec/architecture.md` §7 wird auf das ADR umgebogen.
-- Eintrag in `carveouts.md` ([`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003-plugin-system-entschieden)) wird entfernt.
+- Eintrag in `carveouts.md` ([`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003--plugin-system-entschieden)) wird entfernt.
 - Falls die Entscheidung "Plugin-System" lautet, folgt ein eigener
   Implementierungs-Slice in `open/`.
 
 ## Bezug
 
-- Auslösende Spec: [`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003-plugin-system-entschieden), `spec/architecture.md` §7.
+- Auslösende Spec: [`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003--plugin-system-entschieden), `spec/architecture.md` §7.
 - Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
-  [`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003-plugin-system-entschieden) (mit Slice-Closure entfernt).
+  [`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003--plugin-system-entschieden) (mit Slice-Closure entfernt).
 - Hängt von: erster Wunsch nach drittem Add-on oder externem Service,
   der nicht zum Kern gehört (vermutlich nach MVP-Closure).
 - Phase: V1, weil das Add-on-System bis MVP-Closure statisch bleibt.
 - **Schließung 2026-05-31:** Entscheidung in
   [ADR-0008](../../adr/0008-plugin-system-statisch.md) — Option 1
-  (statisch). [`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003-plugin-system-entschieden) in `spec/lastenheft.md` §14 als
+  (statisch). [`LH-OPEN-003`](../../../../spec/lastenheft.md#lh-open-003--plugin-system-entschieden) in `spec/lastenheft.md` §14 als
   entschieden markiert; `spec/architecture.md` §7 prospektiver
   Plugin-Bullet durch Verweis auf [ADR-0008](../../adr/0008-plugin-system-statisch.md) ersetzt. Re-Evaluation-
   Trigger sind in [ADR-0008](../../adr/0008-plugin-system-statisch.md) §Folgepunkte verbindlich aufgeführt.

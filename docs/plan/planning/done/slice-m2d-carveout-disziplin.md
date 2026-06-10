@@ -18,12 +18,12 @@ Plan-Spur. Risiko: vergessen werden, sobald das Projekt fachlich wächst.
 
 ## Lieferumfang
 
-- **Neue Spec-Anforderung [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin) (MVP-Pflicht)**: jeder
+- **Neue Spec-Anforderung [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin) (MVP-Pflicht)**: jeder
   temporäre Carveout (Bootstrap-Schwellwert, leerer Regelblock,
   prospektive Doku-Phrase, ADR-Folgepunkt) bekommt **parallel** zur
   Entstehung einen Slice-Plan in `open/` und einen Eintrag in
   `carveouts.md`. Permanente Carveouts kommen ins Inventar **ohne** Plan,
-  aber mit Begründung. [`LH-MVP-001`](../../../../spec/lastenheft.md#lh-mvp-001-muss-im-mvp-enthalten-sein) ergänzt; Traceability-Matrix-Zeile
+  aber mit Begründung. [`LH-MVP-001`](../../../../spec/lastenheft.md#lh-mvp-001--muss-im-mvp-enthalten-sein) ergänzt; Traceability-Matrix-Zeile
   angelegt.
 - **Master-Inventar** `docs/plan/planning/in-progress/carveouts.md`:
   zwei Sektionen (temporär = Plan-Pflicht, permanent = nur Begründung).
@@ -52,7 +52,7 @@ Plan-Spur. Risiko: vergessen werden, sobald das Projekt fachlich wächst.
 
 - `carveouts.md` existiert, gepflegt, mit getrennten Sektionen
   (`temporär` / `permanent`).
-- [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin) ist MVP-Pflicht und in Traceability-Matrix.
+- [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin) ist MVP-Pflicht und in Traceability-Matrix.
 - Jeder bewusste Carveout in `.golangci.yml`, Dockerfile, Makefile,
   Specs hat einen Plan-Verweis in `carveouts.md`.
 - Memory-Anker [[feedback-carveouts-need-plans]] (User-Vorgabe
@@ -60,7 +60,7 @@ Plan-Spur. Risiko: vergessen werden, sobald das Projekt fachlich wächst.
 
 ## Bezug
 
-- Auslösende Spec: [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin) (in M2d entstanden).
+- Auslösende Spec: [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin) (in M2d entstanden).
 - Vorgänger: [`slice-m2c-ci-pipeline`](slice-m2c-ci-pipeline.md).
 - Nachfolger: M3 (`u-boot init`-Flow) — der erste fachliche Slice unter
   voller Carveout-Disziplin.

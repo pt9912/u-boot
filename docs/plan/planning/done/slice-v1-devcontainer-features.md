@@ -1,4 +1,4 @@
-# Slice V1: Devcontainer-Features / Toolchains ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features))
+# Slice V1: Devcontainer-Features / Toolchains ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features))
 
 > **Status:** ✅ Done (v0.4.0-Material). T0 Discovery `7a8b8ad`,
 > T1 Schema + `domain.FeatureName` `a97337a`,
@@ -33,7 +33,7 @@ nachziehen.
 Die Spec hat das vorgesehen, aber die Anforderung ist bisher
 nicht implementiert:
 
-- **[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)** (Priorität V1) listet explizit Git, Docker
+- **[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)** (Priorität V1) listet explizit Git, Docker
   CLI, Node.js, Java, SDKMAN, PostgreSQL Client, Kubernetes Tools
   als Beispiele und legt das Security-Modell fest
   (`--allow-external-feature-sources`,
@@ -66,7 +66,7 @@ Stabilität analog zu M7).
   dedupliziert (`spec/lastenheft.md:1352`). Konkrete
   Failure-Cases der Validation: leerer Quell-String, fehlendes
   URL-Scheme, fehlende Host-Komponente — siehe T1 für die
-  vollständige Failure-Tabelle. Diagnose-Code: [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features),
+  vollständige Failure-Tabelle. Diagnose-Code: [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features),
   Exit-Code `10` (`spec/lastenheft.md:1353`).
 - ✅ **Feature-Aktivierung in u-boot.yaml (Plan-eigene Schema-
   Erweiterung, *nicht* Spec-mandatiert):** Spec definiert nur
@@ -96,8 +96,8 @@ Stabilität analog zu M7).
   (Default-Variante, Spec-treu).
 - ✅ **Allowlist-Enforcement:** Ohne explizit erlaubte Quelle
   bricht der Versuch, eine externe Feature-Quelle zu aktivieren,
-  mit code [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features) / Exit-Code `10` ab. `--yes` reicht
-  nicht ([`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte)). `--allow-external-feature-sources`-
+  mit code [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) / Exit-Code `10` ab. `--yes` reicht
+  nicht ([`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)). `--allow-external-feature-sources`-
   Flag-Argumente werden in `u-boot.yaml`
   (`devcontainer.featureSources.allow`) persistiert — Flag ist
   Erweiterung der Liste, nicht Ein-Aufruf-Override
@@ -148,7 +148,7 @@ Stabilität analog zu M7).
   `featureCatalogueEntry.defaultVersion` plus optionalem
   `ubootYAMLDevcontainerFeature.Version`-Override.
 - ✅ **Spec-Pin:** `internal/hexagon/application/acceptance_test.go`
-  deckt [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features) ab. Test-Naming-Konvention analog zum
+  deckt [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) ab. Test-Naming-Konvention analog zum
   bestehenden `TestLHAK###_<Title>`-Muster (siehe
   `acceptance_test.go:39, 98`):
   `TestLHFADEV003_AllowlistEnforcement` (negativer Pfad — externe
@@ -172,9 +172,9 @@ Stabilität analog zu M7).
 | T2  | **Feature-Katalog.** ✅ Done. `featureCatalogueEntry`-Struct (`source` als OCI-ref-Form ohne Scheme, `defaultVersion`, `shortDesc`) + `featureCatalogue()`-Map mit 8 Spec-Beispielen (`cpp`, `docker-cli`, `git`, `go`, `java`, `kubectl-helm`, `node`, `postgres-client`) + `featureFor`-Lookup. Tests pinnen Spec-Beispiele-Vollständigkeit, Per-Entry-Invarianten (FeatureName-Regex / source-Prefix / non-empty version+desc) und Lookup-Contract (known/unknown). | ~100 geschätzt / **~84 real** (unter Budget) |
 | T3  | **Generator-Patch.** ✅ Done. `devcontainerFeatureData`-Projection + `collectDevcontainerFeatures`/`projectFeatureEntry`-Helper (devcontainer_features.go); `templateData.Features` (templates.go); `devcontainer.json.tmpl` um conditional `"features": {…}`-Block erweitert (innerhalb init-Block, kein Nesting); `generateDevcontainer` verdrahtet. Skip-Logik: enabled fehlt/false → skip; unknown catalogue ohne source-Override → skip (T4 enforced den Error). Sort by Source. Tests: 9 Projection-Sub-Cases + 3 End-to-End-Tests (no-features-key-Backwards-Compat, KeysSortedAndShape, Idempotent). | ~200 geschätzt / **~115 real** (deutlich unter Budget) |
 | T4  | **CLI-Subkommando.** ✅ Done. M8-Path-Whitelist um 4 neue Kinds erweitert (`devcontainer.featureSources.allow` + `devcontainer.features.<name>.{enabled,source,version}`); `domain.ConfigPath.Feature`-Feld + Parser-Erweiterung. ConfigService: scalar-Pfade via PatchScalar; list-Pfad (`featureSources.allow`) via Marshal-Rewrite (`setFeatureSourcesAllow`); Source-Allowlist-Enforcement in `revalidateFeatureEntry` (Exit-Code 10, `--yes` reicht nicht). `--allow-external-feature-sources <quelle>[,<quelle>...]` per `StringSliceVar` (comma-split + multi-flag cumulate) auf den drei Spec-§714-717-Pfaden (init/generate/config-set) registriert; CLI-Layer rejected den Flag auf nicht-Spec-Pfaden. Init-Use-Case rejected Flag ohne `--devcontainer`. Generate-Use-Case appended Flag-URLs in u-boot.yaml NACH erfolgreichem Plan/Execute (Review-Followup R2). Komplexitäts-Refactoring: `validateInitPreconditions`, `revalidateFeatureEntry`, `extractDevcontainerFeatureValue` als Helper. **Review-Followup R1..R6** in `dc8…` (siehe Commit-Hash unten): R1 `ErrInvalidFeatureSource` nach `domain/` verschoben + in `isValidationError` registriert (Exit-Code 10 für init+generate-Flag-Pfade); R2 atomare Reihenfolge (validate früh, write spät); R3 Orphan-Feature-Info-Log nach config-set-enabled; R4 Allowlist-Membership-Error-Message + Doku-Klärung (trailing-slash/case); R5 Doc-Präzisierung second-normalise; R6 misleading `--yes`-Hinweis entfernt. Tests: 11 neue ConfigService-Tests + 3 Init-Tests + 3 Generate-Tests + 2 ConfigPath-Tests + 2 Exit-Code-CLI-Tests + 1 Atomic-Pin-Test + 3 Orphan-Warning-Tests; Coverage 90.0 %. | ~250 geschätzt / **~580 real** (T4 ~510 + Followup ~70; +132 %; primär durch 4 neue config-Pfade × Stages 1-5 + list-Pfad-Sonderfall + R1-R6-Härtung) |
-| T5  | **Doctor-Checks (nur Teil A; Teil B ausgelagert).** ✅ Done. Check-ID `devcontainer.features.allowlist` mit drei Klassifikationen pro Feature-Eintrag: (1) `Source`-Override nicht in Allowlist → **Error** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)/[`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte); (2) Orphan-Activation (Source leer + Name nicht im Katalog) → **Warn**; (3) `Enabled == nil` → **Warn** (analog [`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern) §893). Worst-severity-wins-Aggregation. Skip-Pfade: u-boot.yaml fehlt/unparsable, kein devcontainer-subtree, leere features-Map. Spec §2394 (kein error ohne legitimen Anlass) durch `OKWhenNoFeatures`-Test gepinnt. `classifyFeatureEntries`-Helper extrahiert (gocognit). 8 neue Doctor-Tests + Anpassung der Total-Anzahl 11→12. Teil B (`devcontainer.features.drift`) lebt in [`slice-followup-devcontainer-features-drift-doctor`](slice-followup-devcontainer-features-drift-doctor.md). | ~120 geschätzt / **~163 real** (+36 %; primär durch dreifach-Klassifikation + Worst-severity-wins-Aggregation) |
-| T6  | **E2E + Spec-Pin.** ✅ Done. `TestLHFADEV003_CatalogueActivation` (Init→config-set→generate→JSON-Key-Verify für catalogued `node`) + `TestLHFADEV003_AllowlistEnforcement` (negativ: `features.X.source` ohne Allowlist → `ErrConfigValueInvalid` mit [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)/[`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte)-Message; danach Allowlist-Seed via Spec-§717-Pfad + Wiederholung succeeds). Coverage durch die E2E-Pfade auf 90.4 % gestiegen (von 90.0 %). | ~100 geschätzt / **~144 real** (+44 %; verzweigte Happy+Negative+Recovery-Paths) |
-| T7  | **Doku-Closure.** READMEs (EN + DE), `docs/user/devcontainer-features.md`, CHANGELOG `## [Unreleased]`-Eintrag (Conventional-Commit-Stil: feat(devcontainer): Devcontainer-Features-Allowlist und Katalog ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features))), Slice `open/` → `done/` **mit DoD-Hash-Line direkt** (kein `git log --grep`-Platzhalter, vgl. `feedback-done-slice-dod-hash`), Roadmap-Status-Update. | — (Doku, nicht im Go-LOC-Budget) |
+| T5  | **Doctor-Checks (nur Teil A; Teil B ausgelagert).** ✅ Done. Check-ID `devcontainer.features.allowlist` mit drei Klassifikationen pro Feature-Eintrag: (1) `Source`-Override nicht in Allowlist → **Error** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)/[`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte); (2) Orphan-Activation (Source leer + Name nicht im Katalog) → **Warn**; (3) `Enabled == nil` → **Warn** (analog [`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005--mehrfaches-hinzufügen-verhindern) §893). Worst-severity-wins-Aggregation. Skip-Pfade: u-boot.yaml fehlt/unparsable, kein devcontainer-subtree, leere features-Map. Spec §2394 (kein error ohne legitimen Anlass) durch `OKWhenNoFeatures`-Test gepinnt. `classifyFeatureEntries`-Helper extrahiert (gocognit). 8 neue Doctor-Tests + Anpassung der Total-Anzahl 11→12. Teil B (`devcontainer.features.drift`) lebt in [`slice-followup-devcontainer-features-drift-doctor`](slice-followup-devcontainer-features-drift-doctor.md). | ~120 geschätzt / **~163 real** (+36 %; primär durch dreifach-Klassifikation + Worst-severity-wins-Aggregation) |
+| T6  | **E2E + Spec-Pin.** ✅ Done. `TestLHFADEV003_CatalogueActivation` (Init→config-set→generate→JSON-Key-Verify für catalogued `node`) + `TestLHFADEV003_AllowlistEnforcement` (negativ: `features.X.source` ohne Allowlist → `ErrConfigValueInvalid` mit [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)/[`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)-Message; danach Allowlist-Seed via Spec-§717-Pfad + Wiederholung succeeds). Coverage durch die E2E-Pfade auf 90.4 % gestiegen (von 90.0 %). | ~100 geschätzt / **~144 real** (+44 %; verzweigte Happy+Negative+Recovery-Paths) |
+| T7  | **Doku-Closure.** READMEs (EN + DE), `docs/user/devcontainer-features.md`, CHANGELOG `## [Unreleased]`-Eintrag (Conventional-Commit-Stil: feat(devcontainer): Devcontainer-Features-Allowlist und Katalog ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features))), Slice `open/` → `done/` **mit DoD-Hash-Line direkt** (kein `git log --grep`-Platzhalter, vgl. `feedback-done-slice-dod-hash`), Roadmap-Status-Update. | — (Doku, nicht im Go-LOC-Budget) |
 
 **Go-LOC-Summe T1-T6 ≈ 920** (geschätzt nach Carveout: T1 150 + T2 100 + T3 200 + T4 250 + T5 120 + T6 100; Teil-B-Schätzung des Folge-Slice ≈ 200 LOC nach Plan-Followup-S1/S2, siehe dort). **Real-LOC nach T5:** T1 ≈ 230 (+53 %), T2 ≈ 84 (−16 %), T3 ≈ 115 (−43 %), T4 ≈ 510 (+104 %), T4-Review-Followup R1..R6 ≈ 70, T5 ≈ 163 (+36 %, dreifach-Klassifikation + Worst-severity-Aggregation). **T1-T5-Summe (in diesem Slice, ohne ausgelagerten Folge-Slice) ≈ 1172 LOC**, davon T1-T4 inkl. Followup ≈ 1009 LOC > 800-Schwelle (Carveout-Trigger gefeuert, Folge-Slice [`slice-followup-devcontainer-features-drift-doctor`](slice-followup-devcontainer-features-drift-doctor.md) (~200 LOC) angelegt). T6 (~100 LOC E2E-Pin) noch offen. Vergleichswerte aus
 [`slice-m5-add-postgres`](../done/slice-m5-add-postgres.md) +
@@ -196,7 +196,7 @@ sind als Out of Scope notiert oder explizit dokumentiert.
 
 **Begründung:** Reuse bestehender M7/M8-Pfade; kein neuer
 CLI-Namespace; UX-Konsistenz mit
-`config set devcontainer.enabled` aus M8 ([`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern)). Die
+`config set devcontainer.enabled` aus M8 ([`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)). Die
 Spec-§714-717-Pfade für `--allow-external-feature-sources`
 (`init --devcontainer`, `generate devcontainer`,
 `config set devcontainer.featureSources.allow`) lassen sich
@@ -368,7 +368,7 @@ Tabelle oben aktualisiert. Quelle: Upstream-Tags der
 ## Out of Scope
 
 - **Eigene/lokale Features** (Custom-Feature im Repo-Pfad statt
-  externer Quelle): geht über [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features) hinaus; eigenes
+  externer Quelle): geht über [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) hinaus; eigenes
   Folge-Slice mit eigenem Trigger.
 - **Sprach-spezifische Build-Aktionen** (Gradle-Wrapper anlegen,
   Go-Module-Init, npm-init, …): das ist Template-Job
@@ -385,7 +385,7 @@ Tabelle oben aktualisiert. Quelle: Upstream-Tags der
 
 ## Bezug
 
-- Spec: [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features) ([`spec/lastenheft.md:692`](../../../../spec/lastenheft.md))
+- Spec: [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) ([`spec/lastenheft.md:692`](../../../../spec/lastenheft.md))
   + Schema-Skizze [`spec/lastenheft.md:1340-1353`](../../../../spec/lastenheft.md)
   + Doctor-Pin [`spec/lastenheft.md:2394`](../../../../spec/lastenheft.md).
 - ADR: [ADR-0008 §78](../../adr/0008-plugin-system-statisch.md)

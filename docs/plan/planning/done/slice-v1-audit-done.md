@@ -11,9 +11,9 @@ Code-Änderung.
 
 Spec-IDs:
 
-- [`LH-FA-BUILD-006`](../../../../spec/lastenheft.md#lh-fa-build-006-aggregator-targets) Aggregator-Targets
-- [`LH-NFA-MAINT-004`](../../../../spec/lastenheft.md#lh-nfa-maint-004-dokumentierte-schnittstellen) Dokumentierte Schnittstellen
-- [`LH-NFA-PORT-003`](../../../../spec/lastenheft.md#lh-nfa-port-003-containerfreundlichkeit) Containerfreundlichkeit
+- [`LH-FA-BUILD-006`](../../../../spec/lastenheft.md#lh-fa-build-006--aggregator-targets) Aggregator-Targets
+- [`LH-NFA-MAINT-004`](../../../../spec/lastenheft.md#lh-nfa-maint-004--dokumentierte-schnittstellen) Dokumentierte Schnittstellen
+- [`LH-NFA-PORT-003`](../../../../spec/lastenheft.md#lh-nfa-port-003--containerfreundlichkeit) Containerfreundlichkeit
 
 ## Aufhebungsbedingung
 
@@ -27,19 +27,19 @@ Pro ID:
 
 ## Akzeptanzkriterien
 
-- ✅ [`LH-FA-BUILD-006`](../../../../spec/lastenheft.md#lh-fa-build-006-aggregator-targets) — Makefile-Aggregator-Targets `gates`,
+- ✅ [`LH-FA-BUILD-006`](../../../../spec/lastenheft.md#lh-fa-build-006--aggregator-targets) — Makefile-Aggregator-Targets `gates`,
   `ci`, `fullbuild` sind vorhanden und decken die spec-
   geforderten Sub-Targets ab.
-- ✅ [`LH-NFA-MAINT-004`](../../../../spec/lastenheft.md#lh-nfa-maint-004-dokumentierte-schnittstellen) — Add-on- und Template-Schnittstellen
+- ✅ [`LH-NFA-MAINT-004`](../../../../spec/lastenheft.md#lh-nfa-maint-004--dokumentierte-schnittstellen) — Add-on- und Template-Schnittstellen
   sind via ADRs + Port-Doc-Comments + Slice-Dokus dokumentiert.
-- ✅ [`LH-NFA-PORT-003`](../../../../spec/lastenheft.md#lh-nfa-port-003-containerfreundlichkeit) — u-boot läuft in Container/Devcontainer;
+- ✅ [`LH-NFA-PORT-003`](../../../../spec/lastenheft.md#lh-nfa-port-003--containerfreundlichkeit) — u-boot läuft in Container/Devcontainer;
   GHCR-Distroless-Image + container-aware `doctor` decken den
   Container-Pfad; Binary-Distribution decken den Host-Pfad; `init
   --devcontainer` erzeugt Devcontainer-Files.
 
 ## Audit-Evidence
 
-### [`LH-FA-BUILD-006`](../../../../spec/lastenheft.md#lh-fa-build-006-aggregator-targets) Aggregator-Targets
+### [`LH-FA-BUILD-006`](../../../../spec/lastenheft.md#lh-fa-build-006--aggregator-targets) Aggregator-Targets
 
 Spec-Anforderung (V1): `gates`, `ci`, `fullbuild`-Targets im
 Makefile; bei Subtarget-Failure Non-Zero-Exit mit klarer Fehler-
@@ -60,7 +60,7 @@ Sub-Target-Abdeckung:
   Markdown-Link-Validierung, kein Spec-Bruch).
 - `ci` enthält `gates` + `govulncheck` + `image-scan`. Der
   `govulncheck`-Target-Comment trägt bereits den
-  [`LH-FA-BUILD-006`](../../../../spec/lastenheft.md#lh-fa-build-006-aggregator-targets)-Anker.
+  [`LH-FA-BUILD-006`](../../../../spec/lastenheft.md#lh-fa-build-006--aggregator-targets)-Anker.
 - `fullbuild` enthält `ci` + `build` — Closure-Lauf.
 
 Non-Zero-Exit: standardmäßige Make-Semantik bricht bei jedem
@@ -72,7 +72,7 @@ optional").
 
 ✅ erfüllt.
 
-### [`LH-NFA-MAINT-004`](../../../../spec/lastenheft.md#lh-nfa-maint-004-dokumentierte-schnittstellen) Dokumentierte Schnittstellen
+### [`LH-NFA-MAINT-004`](../../../../spec/lastenheft.md#lh-nfa-maint-004--dokumentierte-schnittstellen) Dokumentierte Schnittstellen
 
 Spec-Anforderung (V1): interne Schnittstellen für Add-ons und
 Templates dokumentieren.
@@ -87,11 +87,11 @@ Templates dokumentieren.
   (`ErrServiceUnsupported`, `ErrServiceInconsistent`,
   `ErrProjectNotInitialized`) mit Doc-Comments.
 - `internal/hexagon/port/driving/removeservice.go` — `RemoveServiceUseCase`
-  mit dem [`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern)-State-Machine-Vertrag dokumentiert.
+  mit dem [`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005--mehrfaches-hinzufügen-verhindern)-State-Machine-Vertrag dokumentiert.
 - [`done/slice-m5-add-postgres.md`](slice-m5-add-postgres.md) —
   detaillierte Add-on-Mechanik-Doku.
 - [`done/slice-v1-add-remove.md`](slice-v1-add-remove.md) —
-  [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen)-State-Machine-Spiegelung.
+  [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen)-State-Machine-Spiegelung.
 
 Add-on-Katalog ist heute statisch (postgres only); neue Add-ons
 werden direkt im Code (`isSupportedService`/`supportedServices`
@@ -118,7 +118,7 @@ Beide Schnittstellen haben ADR-Plan-Anker (verbindliche
 Entscheidung) + Port-Doc-Comments (Interface-Vertrag im Code) +
 Slice-Dokus (How-To für Maintainer). ✅ erfüllt.
 
-### [`LH-NFA-PORT-003`](../../../../spec/lastenheft.md#lh-nfa-port-003-containerfreundlichkeit) Containerfreundlichkeit
+### [`LH-NFA-PORT-003`](../../../../spec/lastenheft.md#lh-nfa-port-003--containerfreundlichkeit) Containerfreundlichkeit
 
 Spec-Anforderung (V1): u-boot selbst muss in Container oder
 Devcontainer ausführbar sein.
@@ -155,7 +155,7 @@ Devcontainer ausführbar sein.
 - `u-boot init --devcontainer` schreibt
   `.devcontainer/devcontainer.json` und `.devcontainer/Dockerfile`
   + setzt `devcontainer.enabled: true` in `u-boot.yaml`.
-  Akzeptanztest-gepinnt durch [`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow)-Test (`bfe6416`).
+  Akzeptanztest-gepinnt durch [`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005--devcontainer-flow)-Test (`bfe6416`).
 
 ✅ erfüllt. Container-Pfad (GHCR + container-aware `doctor`),
 Host-Pfad (Binary) und Devcontainer-Generierung sind alle drei
@@ -177,7 +177,7 @@ abgedeckt.
 
 ## Bezug
 
-- Spec: [`LH-FA-BUILD-006`](../../../../spec/lastenheft.md#lh-fa-build-006-aggregator-targets), [`LH-NFA-MAINT-004`](../../../../spec/lastenheft.md#lh-nfa-maint-004-dokumentierte-schnittstellen), [`LH-NFA-PORT-003`](../../../../spec/lastenheft.md#lh-nfa-port-003-containerfreundlichkeit)
+- Spec: [`LH-FA-BUILD-006`](../../../../spec/lastenheft.md#lh-fa-build-006--aggregator-targets), [`LH-NFA-MAINT-004`](../../../../spec/lastenheft.md#lh-nfa-maint-004--dokumentierte-schnittstellen), [`LH-NFA-PORT-003`](../../../../spec/lastenheft.md#lh-nfa-port-003--containerfreundlichkeit)
   (alle V1).
 - v0.3.0-Milestone: erster Slice der „Add-on Catalogue Expansion"-
   Reihenfolge per [roadmap.md §v0.3.0](../in-progress/roadmap.md);

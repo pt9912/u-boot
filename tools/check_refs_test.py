@@ -22,6 +22,29 @@ class CheckRefsTest(unittest.TestCase):
             "slice-v1-u-boot-logs-lh-fa-up-005",
         )
 
+    def test_heading_slug_preserves_repeated_whitespace_as_repeated_hyphens(self) -> None:
+        self.assertEqual(
+            check_refs._github_heading_slug("Alpha  Beta"),
+            "alpha--beta",
+        )
+
+    def test_anchor_check_rejects_collapsed_whitespace_slug(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            repo = Path(temp)
+            source = repo / "README.md"
+            source.write_text(
+                "# Alpha  Beta\n\n"
+                "[bad](#alpha-beta)\n"
+                "[good](#alpha--beta)\n",
+                encoding="utf-8",
+            )
+
+            violations = list(check_refs._check_file(repo, source))
+
+        self.assertEqual(len(violations), 1)
+        self.assertEqual(violations[0].target, "#alpha-beta")
+        self.assertIn("anchor not found", violations[0].reason)
+
     def test_reference_style_definition_counts_as_link(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             repo = Path(temp)

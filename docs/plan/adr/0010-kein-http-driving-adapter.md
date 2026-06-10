@@ -17,22 +17,22 @@ Accepted
 > Daemon-Variante bekommen soll."*
 
 Keine Spec-Anforderung (`LH-FA-*`, `LH-AK-*`, `LH-SA-*`) fordert
-einen HTTP-Adapter; auch [`LH-OPEN-001`](../../../spec/lastenheft.md#lh-open-001-implementierungssprache-entschieden)..[`LH-OPEN-004`](../../../spec/lastenheft.md#lh-open-004-template-format-entschieden) listen ihn nicht.
+einen HTTP-Adapter; auch [`LH-OPEN-001`](../../../spec/lastenheft.md#lh-open-001--implementierungssprache-entschieden)..[`LH-OPEN-004`](../../../spec/lastenheft.md#lh-open-004--template-format-entschieden) listen ihn nicht.
 Der prospektive Architektur-Hinweis war ein temporärer Planning-Punkt
-([`LH-FA-PROJDOCS-005`](../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)), ohne einen konkreten Use-Case heute.
+([`LH-FA-PROJDOCS-005`](../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)), ohne einen konkreten Use-Case heute.
 
-Hexagonale Architektur ([`LH-FA-ARCH-001`](../../../spec/lastenheft.md#lh-fa-arch-001-hexagonales-pattern)..[`LH-FA-ARCH-003`](../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement), [ADR-0002](0002-hexagonale-architektur.md)) erlaubt
+Hexagonale Architektur ([`LH-FA-ARCH-001`](../../../spec/lastenheft.md#lh-fa-arch-001--hexagonales-pattern)..[`LH-FA-ARCH-003`](../../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement), [ADR-0002](0002-hexagonale-architektur.md)) erlaubt
 weitere Driving-Adapter ohne Anpassung der Domain/Application-
 Schicht — der HTTP-Adapter wäre eine reine Adapter-Ergänzung
 unter `internal/adapter/driving/http/`. Trotzdem gilt: jeder
 Adapter erhöht die Code-/Test-Surface dauerhaft.
 
-[`LH-NFA-USE-004`](../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) (Maschinen-lesbare Ausgabe, Priorität V1) deckt
+[`LH-NFA-USE-004`](../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) (Maschinen-lesbare Ausgabe, Priorität V1) deckt
 den naheliegenden Maschinen-Schnittstellen-Bedarf bereits *auf
 Spec-Ebene* ab: jeder relevante Subkommando-Output ist via
 `--json`/`--dry-run`-Flags maschinenlesbar vorgesehen (Pflicht-
-Schema in [`LH-FA-CLI-007`](../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) / [`LH-FA-CLI-008`](../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) und im
-`status`-Feld-Vertrag aus [`LH-NFA-USE-004`](../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) selbst,
+Schema in [`LH-FA-CLI-007`](../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) / [`LH-FA-CLI-008`](../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) und im
+`status`-Feld-Vertrag aus [`LH-NFA-USE-004`](../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) selbst,
 `spec/lastenheft.md` §1799ff). Die Implementierung ist V1, noch
 nicht ausgeliefert; dieses ADR baut darauf auf, dass die
 JSON-CLI-Spur V1-pünktlich landet. Für die heute absehbaren
@@ -62,7 +62,7 @@ zurückgebaut.
 
 **Kein HTTP-Driving-Adapter.** u-boot bleibt CLI-only. Maschinen-
 lesbare Schnittstellen werden ausschließlich über die bestehenden
-`--json`/`--dry-run`-Flags ([`LH-NFA-USE-004`](../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe), [`LH-FA-CLI-007`](../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)/[`LH-FA-CLI-008`](../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe))
+`--json`/`--dry-run`-Flags ([`LH-NFA-USE-004`](../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe), [`LH-FA-CLI-007`](../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)/[`LH-FA-CLI-008`](../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe))
 ausgeliefert.
 
 Konkrete Setzungen:
@@ -78,7 +78,7 @@ Konkrete Setzungen:
   V1 ausgeliefert). Wer u-boot programmatisch ansprechen
   möchte, nutzt `subprocess.run` / `os/exec`-Aufrufe mit
   `--json`-Flag und parst die strukturierte Ausgabe nach dem
-  [`LH-FA-CLI-007`](../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)-Schema. Bis dahin steht die CLI nur mit ihrer
+  [`LH-FA-CLI-007`](../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)-Schema. Bis dahin steht die CLI nur mit ihrer
   human-lesbaren Ausgabe; siehe Folgepunkt 2 für den Eskalations-
   Trigger, falls die V1-Spur slipt.
 - **Re-Evaluation-Trigger explizit dokumentiert** (siehe
@@ -96,7 +96,7 @@ Positiv:
   TLS-/Auth-/CORS-/Rate-Limit-Pflichtsetzungen, kein Bind-Address-
   Default-Risiko, keine `LH-NFA-SEC-*`-Erweiterung für eine
   Daemon-Variante.
-- **[`LH-NFA-USE-004`](../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)-konsistent.** Maschinen-Lesbarkeit liegt
+- **[`LH-NFA-USE-004`](../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)-konsistent.** Maschinen-Lesbarkeit liegt
   bereits auf dem CLI-Layer; jedes Subkommando ist ohnehin
   `--json`-fähig, ein HTTP-Layer würde dieselbe Information nur
   über ein zweites Protokoll exponieren.
@@ -121,7 +121,7 @@ Negativ / Trade-offs:
   schon geschlossen; HTTP-Bullet schließt mit diesem ADR.** Die
   §7-Sektion „Evolution" wird damit zu einem reinen ADR-Verweis-
   Block — was OK ist, weil die Architektur-Evolution per ADR
-  läuft ([`LH-FA-PROJDOCS-002`](../../../spec/lastenheft.md#lh-fa-projdocs-002-adr-format)).
+  läuft ([`LH-FA-PROJDOCS-002`](../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format)).
 
 Alternativen (verworfen):
 
@@ -147,7 +147,7 @@ eintritt, wird eine neue ADR vorbereitet, die dieses ADR superseded.
    Compose-Stack-Monitoring, langlaufender Health-Watcher.
    Trigger: ein dokumentierter Use-Case, der mit
    Subprocess-Aufrufen praktisch nicht abdeckbar ist.
-2. **Maschinen-Schnittstelle über [`LH-NFA-USE-004`](../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) hinaus.**
+2. **Maschinen-Schnittstelle über [`LH-NFA-USE-004`](../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) hinaus.**
    Beispiele: Streaming-Output für lange Operationen (Compose-
    Logs in Echtzeit), bidirektionale Kommunikation (Inputs an
    Healthcheck-Probes durchreichen), Push-Notifications an

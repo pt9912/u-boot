@@ -88,14 +88,14 @@ Code-, Test- und Doku-Aenderungen muessen die betroffenen `LH-*`,
 mindestens einen Spec- oder ADR-Anker und einen Test- oder Gate-Nachweis.
 
 CLI-Ausgaben, Fehlermeldungen und generierte Dateien bleiben Englisch
-([`LH-LESE-002`](spec/lastenheft.md#lh-lese-002-sprache)), auch wenn
+([`LH-LESE-002`](spec/lastenheft.md#lh-lese-002--sprache)), auch wenn
 Plan- und Spec-Dokumente deutsch sind.
 
 ### Dokumentationsreferenzen
 
 Referenzen zwischen Lastenheft, ADRs, Slices, Carveouts und
 Roadmap/Wellen folgen
-[`LH-FA-PROJDOCS-006`](spec/lastenheft.md#lh-fa-projdocs-006-dokumentationsreferenzmodell)
+[`LH-FA-PROJDOCS-006`](spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell)
 und
 [`ADR-0013`](docs/plan/adr/0013-dokumentationsreferenzmodell.md):
 Normative Kraft existiert nur auf aufwaertsgerichteten
@@ -120,7 +120,7 @@ geaenderter Output muss in Slice, Test oder Commit begruendet werden.
 ### Exit-Code-Vertraege
 
 Die Klassifikation aus
-[`LH-FA-CLI-006`](spec/lastenheft.md#lh-fa-cli-006-exit-codes) ist ein
+[`LH-FA-CLI-006`](spec/lastenheft.md#lh-fa-cli-006--exit-codes) ist ein
 Produktvertrag. Neue Subcommands muessen ihre Fehlerpfade auf die
 bestehenden Exit-Code-Kategorien abbilden und Tests fuer relevante
 Sentinels pinnen.

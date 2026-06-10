@@ -1,4 +1,4 @@
-# Slice V1: `u-boot logs` ([`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen))
+# Slice V1: `u-boot logs` ([`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen))
 
 > **Status:** ✅ Done (v0.4.0-Material). Spec ✅
 > ([`spec/lastenheft.md:1023-1040`](../../../../spec/lastenheft.md)),
@@ -17,9 +17,9 @@
 
 ## Auslöser
 
-[`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen) ist die einzige fehlende `u-boot up`/`down`-
+[`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen) ist die einzige fehlende `u-boot up`/`down`-
 Familie-Spec-ID in der V1-Phase: M6 hat `up`/`down` ausgeliefert
-([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten)..[`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004-umgebung-stoppen)), `logs` ist die V1-Erweiterung. Heute muss
+([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)..[`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen)), `logs` ist die V1-Erweiterung. Heute muss
 der User für Logs direkt auf `docker compose -f compose.yaml
 logs ...` ausweichen — das funktioniert, umgeht aber die
 M6-Konvention, dass der Compose-Adapter alle Compose-Calls
@@ -170,7 +170,7 @@ Compose-/Docker-Failures klassifizieren strikt analog M6
     `u-boot logs --follow` startet und wird via Test-Timeout +
     Context-Cancellation beendet (Exit 0).
 - ✅ **Spec-Pin:** `internal/hexagon/application/acceptance_test.go`
-  oder Docker-e2e-Test deckt [`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen) ab; Test-Naming
+  oder Docker-e2e-Test deckt [`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen) ab; Test-Naming
   `TestLHFAUP005_Logs<…>` analog `TestLHFADEV003_*`.
 - ✅ **Doku:** README (EN + DE) Quickstart-Block oder Subcommand-
   Tabelle um `u-boot logs` ergänzt; ggf. neue
@@ -185,8 +185,8 @@ Compose-/Docker-Failures klassifizieren strikt analog M6
 | T1  | **Driven-Port + Adapter.** ✅ Done. `ComposeLogsOptions{Services, Follow, Tail, Sink}` + `ComposeLogs(ctx, dir, opts)` in `port/driven/docker_engine.go`. Adapter in `adapter/driven/docker/engine.go` mit `exec.CommandContext`; **zweistufiger SIGINT-Pass-Through (P3-Vertrag):** (1) `ctx.Err()`-Pre-Preflight-Check, (2) `ctx.Err()`-Post-`cmd.Run()`-Check. Beide returnen `ctx.Err()` unverdeckt, damit Ctrl-C nicht in ErrComposeRuntime/ErrDockerUnavailable maskiert. 3 Adapter-Tests (missing-binary→ErrDockerUnavailable, happy-path-stream-to-sink, ctx-canceled-pre-call→context.Canceled). `fakeDockerEngine` um `ComposeLogs`-Stub erweitert (T2 ergänzt die scripting-Helper). | ~120 geschätzt / **~102 real** (−15 %, unter Budget) |
 | T2  | **Use-Case.** ✅ Done. `LogsRequest{BaseDir, Service, Follow, Tail, OutputSink}` + `LogsResponse{}` + `LogsUseCase` in `port/driving/logs.go` (mit ausführlichen T0-Outcomes-Referenzen im Doc-Kommentar). `LogsService` in `application/logsservice.go`: BaseDir-Check → Project-State-Check (u-boot.yaml + compose.yaml) → Tail-Normalisierung (T0-(c): leer → `"all"`) → ComposeLogs-Aufruf → SIGINT-Pass-Through (`context.Canceled` und `context.DeadlineExceeded` → `(LogsResponse{}, nil)`). Service-Name-Validation NICHT im Use-Case (T0-(b): nur Regex auf CLI-Ebene, Compose macht Existenz-Check). 8 Tests (BaseDir-empty, ohne u-boot.yaml, ohne compose.yaml, Happy-Path-Tail-Normalisierung, Happy-Path-Service-Filter, SIGINT-Canceled, SIGINT-Deadline, ErrComposeRuntime-Propagation, ErrDockerUnavailable-Propagation). | ~120 geschätzt / **~245 real** (+104 %; getrieben durch ausführliche Doc-Kommentare mit T0/P3-Referenzen — analog Parent-Slice T4-Verlauf) |
 | T3  | **CLI-Subcommand.** ✅ Done. `internal/adapter/driving/cli/logs.go` mit Cobra `logs [service]` (`MaximumNArgs(1)`), `--follow` (BoolVar), `--tail` (StringVar). `validateLogsTailFlag` für Stage-1-Validation (T0-(c)). Service-Name-Validation via `domain.NewServiceName` (Format-Regex → Exit-10). SIGINT-Wiring von `main.go:signal.NotifyContext`. App-Wiring: neues `logsUseCase`-Feld + alle 9 `cli.New`-Call-Sites + main.go. `ErrInvalidLogsTail` in `isUsageError` → Exit-2. 10 CLI-Tests pinnen alle Exit-Code-Pfade. **Review-Followup F1..F8** (post-Konsolidierten-Review der T1+T2+T3-Schichten): F1 `--tail "all"`-Wording-Hint, F2 Sink-Doc-vs-Code aufgelöst (sagt jetzt "BOTH stdout+stderr"), F3 Cancel-mid-flight via `wrapComposeRunError`-Helper-Extraktion + 4 hermetische Sub-Tests, F4 Sink-Pointer-Identity-Pin (Service- und CLI-seitig), F5 `normaliseTail` Doc-Begründung, F6 Tail=""-Skip-Flag-Pin im Adapter, F7 `LogsService`-Doku trusts-CLI-Validation explizit, F8 `strconv.ParseUint` statt `Atoi` (rejected `+5`/whitespace). | ~80 geschätzt / **~174 real** + **~70 LOC Followup** = ~244 (+205 %; getrieben durch App-Wiring + 13 Test-Pin-Funktionen + Review-Followup-Härtung) |
-| T4  | **Docker-Tag E2E + Spec-Pin.** ✅ Done. `internal/e2e/logs_acceptance_docker_test.go` (`//go:build docker`, 119 LOC): zwei Tests gegen echten postgres-Compose-Stack via `runAcceptanceFlow`-Helper (Variante A — kein Helper-Refactor). `TestE2E_LHFAUP005_LogsTail` (`--tail 20`, Buffer enthält die kanonische postgres-Boot-Phrase `database system is ready`), `TestE2E_LHFAUP005_LogsFollow` (`--follow` mit 8 s `ctx.Deadline`, Pin auf SIGINT-Vertrag Schicht 2 — DeadlineExceeded → nil-error + Sink-Buffer-Flush-Content). Plus Application-Layer-Spec-Pin in `internal/hexagon/application/acceptance_test.go` (+128 LOC): `TestLHFAUP005_LogsHappyPath` (init+add+Logs gegen `fakeDockerEngine`; Pin Tail-Normalisierung T0-(c), Service-Filter T0-(a)/(b), Sink-Pointer-Identity F4) und `TestLHFAUP005_LogsSIGINTReturnsNil` (`context.Canceled`-Sentinel → `(LogsResponse{}, nil)`). Lokal grün: `make test` 6.8s, `make test-docker` 31s für die zwei [`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen)-Tests. | ~150 geschätzt / **~247 real** (+65 %; Doc-Kommentare mit T0/F4/SIGINT-Vertrag-Referenzen analog T2-Verlauf) |
-| T5  | **Doku + Closure.** ✅ Done. README.md + README.de.md Subcommand-Referenz-Tabelle um `logs [service] [--follow] [--tail <n>]` ([`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen)) ergänzt. CHANGELOG.md `## [Unreleased]`-Block: `feat(logs)`-Eintrag mit Compose-Facade-Semantik, SIGINT-Vertrag und Exit-Code-Mapping. Slice von `in-progress/` nach `done/` verschoben mit Status-Header-DoD-Line (T1-T4-Hashes inline; T5-Hash via Followup-Commit). roadmap.md v0.4.0-Arbeitspakete-Tabelle: [slice-v1-logs](slice-v1-logs.md)-Zeile von „in-progress" auf „Done". | — (Doku) |
+| T4  | **Docker-Tag E2E + Spec-Pin.** ✅ Done. `internal/e2e/logs_acceptance_docker_test.go` (`//go:build docker`, 119 LOC): zwei Tests gegen echten postgres-Compose-Stack via `runAcceptanceFlow`-Helper (Variante A — kein Helper-Refactor). `TestE2E_LHFAUP005_LogsTail` (`--tail 20`, Buffer enthält die kanonische postgres-Boot-Phrase `database system is ready`), `TestE2E_LHFAUP005_LogsFollow` (`--follow` mit 8 s `ctx.Deadline`, Pin auf SIGINT-Vertrag Schicht 2 — DeadlineExceeded → nil-error + Sink-Buffer-Flush-Content). Plus Application-Layer-Spec-Pin in `internal/hexagon/application/acceptance_test.go` (+128 LOC): `TestLHFAUP005_LogsHappyPath` (init+add+Logs gegen `fakeDockerEngine`; Pin Tail-Normalisierung T0-(c), Service-Filter T0-(a)/(b), Sink-Pointer-Identity F4) und `TestLHFAUP005_LogsSIGINTReturnsNil` (`context.Canceled`-Sentinel → `(LogsResponse{}, nil)`). Lokal grün: `make test` 6.8s, `make test-docker` 31s für die zwei [`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen)-Tests. | ~150 geschätzt / **~247 real** (+65 %; Doc-Kommentare mit T0/F4/SIGINT-Vertrag-Referenzen analog T2-Verlauf) |
+| T5  | **Doku + Closure.** ✅ Done. README.md + README.de.md Subcommand-Referenz-Tabelle um `logs [service] [--follow] [--tail <n>]` ([`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen)) ergänzt. CHANGELOG.md `## [Unreleased]`-Block: `feat(logs)`-Eintrag mit Compose-Facade-Semantik, SIGINT-Vertrag und Exit-Code-Mapping. Slice von `in-progress/` nach `done/` verschoben mit Status-Header-DoD-Line (T1-T4-Hashes inline; T5-Hash via Followup-Commit). roadmap.md v0.4.0-Arbeitspakete-Tabelle: [slice-v1-logs](slice-v1-logs.md)-Zeile von „in-progress" auf „Done". | — (Doku) |
 
 LOC-Summe T1-T4: Plan-Schätzung **~470 LOC**, Real **~838 LOC**
 (T1 ~102 + T2 ~245 + T3 ~244 inkl. F1..F8-Followup + T4 ~247).
@@ -263,7 +263,7 @@ mit benanntem Trigger (siehe §Out of Scope).
 
 **Begründung:** Hält den Surface klein und vermeidet, dass der
 spätere [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)-Slice direkt noch
-Format-Sonderfälle mitziehen muss. Spec-treu ([`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen)
+Format-Sonderfälle mitziehen muss. Spec-treu ([`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen)
 fordert genau zwei Flags). Compose-Output-Default (mit
 Service-Prefix, ohne Timestamps) bleibt erhalten — der User
 sieht das gleiche Layout wie bei `docker compose logs`.
@@ -300,7 +300,7 @@ sieht das gleiche Layout wie bei `docker compose logs`.
 
 ## Bezug
 
-- Spec: [`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen)
+- Spec: [`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen)
   ([`spec/lastenheft.md:1023`](../../../../spec/lastenheft.md)).
 - Port-Anker:
   [`internal/hexagon/port/driving/README.md:39`](../../../../internal/hexagon/port/driving/README.md)

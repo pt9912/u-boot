@@ -15,7 +15,7 @@ Proposed
 
 ## Kontext
 
-`u-boot` ist laut [`LH-ZB-002`](../../../spec/lastenheft.md#lh-zb-002-produktvision) ein „Bootloader für
+`u-boot` ist laut [`LH-ZB-002`](../../../spec/lastenheft.md#lh-zb-002--produktvision) ein „Bootloader für
 Entwicklungsumgebungen". Bisher scaffoldet es die **Laufzeit-/Projekt-
 Schicht** (Docker, Compose, Devcontainer, Services, `u-boot.yaml`,
 README/CHANGELOG, optional lokale/Katalog-Templates via
@@ -45,9 +45,9 @@ beschreibt diesen Einstiegsprozess als **GF/BF-Modus pro Sub-Area**:
 
 - u-boot *ist* ein Bootstrapper — Harness-Bootstrap ist dieselbe
   Verb-Klasse, eine Schicht höher.
-- **GF/BF ist in u-boot bereits erstklassig:** [`LH-FA-INIT-004`](../../../spec/lastenheft.md#lh-fa-init-004-bestehendes-projekt-erkennen)
+- **GF/BF ist in u-boot bereits erstklassig:** [`LH-FA-INIT-004`](../../../spec/lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen)
   (Bestehendes-Projekt-Erkennung) + `--assume-existing`
-  ([`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung)) ist exakt die GF-(frisch)- vs.
+  ([`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)) ist exakt die GF-(frisch)- vs.
   BF-(bestehend)-Unterscheidung. Der Discovery-Trigger existiert.
 - Die **Template-Engine existiert** ([ADR-0009](0009-template-format-yaml-files.md)): ein Harness-Skelett ist
   ein weiteres `text/template`-Template-Set.
@@ -79,10 +79,10 @@ u-boot scaffoldet Agent-Harness-Artefakte als **opt-in**, GF/BF-aware:
    Diskrepanz-Tabelle. u-boot führt **keine** Code-Inventur/Reverse-
    Engineering durch — das bleibt Agenten-Arbeit (Scope-Grenze oben).
 3. **GF/BF wird automatisch gewählt** über die bestehende
-   [`LH-FA-INIT-004`](../../../spec/lastenheft.md#lh-fa-init-004-bestehendes-projekt-erkennen)-Detection (kein neues Detektions-Konzept):
+   [`LH-FA-INIT-004`](../../../spec/lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen)-Detection (kein neues Detektions-Konzept):
    leeres/neues Verzeichnis → GF-Skelett; erkanntes bestehendes Projekt
    → BF-Skelett + Modus-Block. `--assume-existing`/`--no-interactive`-
-   Semantik aus [`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) gilt unverändert.
+   Semantik aus [`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) gilt unverändert.
 4. **Engine + Format wie [ADR-0009](0009-template-format-yaml-files.md)** (`text/template` + `template.yaml`),
    damit kein zweiter Stack entsteht.
 
@@ -90,9 +90,9 @@ u-boot scaffoldet Agent-Harness-Artefakte als **opt-in**, GF/BF-aware:
 
 Positiv:
 
-- u-boots Vision ([`LH-ZB-002`](../../../spec/lastenheft.md#lh-zb-002-produktvision)) wächst konsistent um eine Schicht, ohne
+- u-boots Vision ([`LH-ZB-002`](../../../spec/lastenheft.md#lh-zb-002--produktvision)) wächst konsistent um eine Schicht, ohne
   neuen technischen Stack ([ADR-0009](0009-template-format-yaml-files.md)-Engine wiederverwendet).
-- GF/BF kostet kein neues Konzept — [`LH-FA-INIT-004`](../../../spec/lastenheft.md#lh-fa-init-004-bestehendes-projekt-erkennen) trägt es schon.
+- GF/BF kostet kein neues Konzept — [`LH-FA-INIT-004`](../../../spec/lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen) trägt es schon.
 - Dogfooding: u-boots eigenes Repo ist die Referenz-Ausgabe.
 
 Negativ / Risiken:
@@ -107,13 +107,13 @@ Negativ / Risiken:
   `ai-harness-course`-Templates (`lab/templates/`, CC-BY für Markdown /
   MIT für Code) abgeleitet werden, ist Namensnennung zu klären, bevor
   abgeleitete Vorlagen mit u-boot ausgeliefert werden.
-- **Spec-Wachstum.** Neue `LH-FA-*`-IDs + [`LH-ZB-002`](../../../spec/lastenheft.md#lh-zb-002-produktvision)-Visions-
+- **Spec-Wachstum.** Neue `LH-FA-*`-IDs + [`LH-ZB-002`](../../../spec/lastenheft.md#lh-zb-002--produktvision)-Visions-
   Erweiterung nötig — kein reines Adapter-Inkrement.
 
 ## Offene Fragen (vor `Accepted` zu beantworten)
 
 1. **Subcommand-Form:** `generate harness` (Artefakt-Generator,
-   [`LH-FA-GEN-001`](../../../spec/lastenheft.md#lh-fa-gen-001-generate-befehl)-Familie) vs. `init --template harness`
+   [`LH-FA-GEN-001`](../../../spec/lastenheft.md#lh-fa-gen-001--generate-befehl)-Familie) vs. `init --template harness`
    (Template-Pfad, [ADR-0009](0009-template-format-yaml-files.md)). Tendenz: `generate harness`, weil es ein
    *Zusatz-Artefakt* in ein bestehendes oder frisches Projekt legt, kein
    vollständiges Projekt-Skelett ersetzt.
@@ -133,7 +133,7 @@ Dieses ADR liefert nur die Entscheidungs-Rahmung. Vor Implementierung:
 - Ratifizierung (`Proposed` → `Accepted`) nach Klärung der §Offenen
   Fragen.
 - Spec-Erweiterung: neue `LH-FA-*`-Anforderungen +
-  [`LH-ZB-002`](../../../spec/lastenheft.md#lh-zb-002-produktvision)-Visions-Satz.
+  [`LH-ZB-002`](../../../spec/lastenheft.md#lh-zb-002--produktvision)-Visions-Satz.
 - Planning-Artefakt fuer die Umsetzung.
 - Lizenz-/Attribution-Check gegen `ai-harness-course`.
 

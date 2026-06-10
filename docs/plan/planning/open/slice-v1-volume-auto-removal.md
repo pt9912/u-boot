@@ -26,12 +26,12 @@
   `docker volume ls --filter label=…` + `docker volume rm <name>`-
   Cleanup-Hint.
 - JSON-Mode emittiert die WARNING als `diagnostics[]`-Eintrag mit
-  code: "[`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen)", `level: "warn"` (T0-(g) WARN-Migration).
+  code: "[`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen)", `level: "warn"` (T0-(g) WARN-Migration).
 
-Spec §2602 ([`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) Volume-Anforderung) ist damit
+Spec §2602 ([`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen) Volume-Anforderung) ist damit
 **partiell** erfüllt: `--purge` ist als opt-in CLI-Surface
 vorhanden, der Confirmation-Gate ist konsistent mit `down
---volumes` ([`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) §254), aber die tatsächliche
+--volumes` ([`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) §254), aber die tatsächliche
 Volume-Removal ist auf den User abgewälzt.
 
 ## Trigger
@@ -91,10 +91,10 @@ zu klären:
 
 ## Spec-Bezug
 
-- [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) §2602 — Volume-Anforderung (`--purge`-Opt-in-
+- [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen) §2602 — Volume-Anforderung (`--purge`-Opt-in-
   Form ist erfüllt; tatsächliche Removal ist offen).
-- [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) §254 — Confirmation-Gate für destruktive
+- [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) §254 — Confirmation-Gate für destruktive
   Operationen (heute bereits implementiert).
-- [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) — FS-Failure-Klasse erbt auf Docker-Failure-
-  Klassifikation; ggf. neuer [`LH-NFA-REL-004`](../../../../spec/lastenheft.md#lh-nfa-rel-004-validierung-erzeugter-dateien)-Sentinel für
+- [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) — FS-Failure-Klasse erbt auf Docker-Failure-
+  Klassifikation; ggf. neuer [`LH-NFA-REL-004`](../../../../spec/lastenheft.md#lh-nfa-rel-004--validierung-erzeugter-dateien)-Sentinel für
   Docker-Volume-Errors.

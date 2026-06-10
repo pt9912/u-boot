@@ -4,7 +4,7 @@
 
 ## Auslöser
 
-[`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005-verbosity-und-logging) schreibt vier Verbosity-Stufen vor: `--quiet`,
+[`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) schreibt vier Verbosity-Stufen vor: `--quiet`,
 Standard, `--verbose`, `--debug`. Mit M4-T7 wurden die zugehörigen
 `PersistentFlags` auf der Root-Cobra eingebaut; `--quiet` ist
 load-bearing (filtert OK-Items aus dem Doctor-Render), `--verbose`
@@ -72,7 +72,7 @@ Application-Service mit Logger-Konsumenten) soll:
 
 ## Bezug
 
-- Auslösende Spec: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005-verbosity-und-logging).
+- Auslösende Spec: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging).
 - Slice-Vorgänger: [`slice-m4-doctor`](../done/slice-m4-doctor.md)
   T7 hat `--verbose`/`--debug` per Spec eingebaut, aber bewusst
   ohne Logger-Level-Wiring (Scope-Constraint).

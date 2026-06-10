@@ -24,7 +24,7 @@ sie nicht unterscheiden, weil die
 (`spec/architecture.md` §4 / `.golangci.yml`) den Import von
 `gopkg.in/yaml.v3` in der Application-Schicht verbietet. Damit
 landet ein Parse-Fehler heute als `ErrGenerateFileSystem` → Exit-
-Code **14** (technisch), obwohl [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) Code **10**
+Code **14** (technisch), obwohl [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) Code **10**
 (fachlich) verlangt.
 
 Die Lücke ist real-existierend in M7-T5, aber strukturell breiter:
@@ -137,7 +137,7 @@ Bis dahin bleibt die Lücke explizit im Top-Kommentar von
   Review N1): `ErrGenerateManualConflict` wird hier bewusst über
   managed-block-Konflikte hinaus auf „User muss YAML manuell
   reparieren" erweitert. Beide Fälle teilen die Semantik
-  „[`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) Code 10: fachlich, manuelles Eingreifen", und
+  „[`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) Code 10: fachlich, manuelles Eingreifen", und
   der Exit-Code ist gleich — eine separate
   `ErrGenerateInvalidCompose`-Sentinel würde ohne aktuellen
   Mehrwert die Sentinel-Tabelle aufblähen. Diese Erweiterung
@@ -214,7 +214,7 @@ Bis dahin bleibt die Lücke explizit im Top-Kommentar von
 
 - Auslösender Review: M7 Post-Merge-Review-Followup N2
   (`27de9c5` Fix-Commit, `51d8f6d` Slice-Plan-Eintrag).
-- Spec: [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) (Exit-Code-Partitionierung 10 vs 14).
+- Spec: [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Exit-Code-Partitionierung 10 vs 14).
 - Architektur: `spec/architecture.md` §4 (`depguard.application-
   no-yaml`-Regel, die die heutige inline-Lösung blockt).
 - Hängt von: nichts. Sentinel-Einführung ist eine reine

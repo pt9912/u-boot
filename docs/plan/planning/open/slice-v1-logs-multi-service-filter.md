@@ -15,7 +15,7 @@ Heutige `u-boot logs`-Surface ([slice-v1-logs](../done/slice-v1-logs.md) §AK) n
 (alle Services). Multi-Service-Form `u-boot logs svc1 svc2`
 würde Subset-Filter erlauben (nicht alle, aber mehr als einer).
 
-Spec [`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen) spricht von "Service" im Singular —
+Spec [`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen) spricht von "Service" im Singular —
 Multi-Service ist Spec-Erweiterung.
 
 ## Trigger
@@ -35,5 +35,5 @@ Driven-Port-Refactor.
 
 ## Spec-Bezug
 
-- [`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen) (Logs anzeigen) — Erweiterung von Singular
+- [`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen) (Logs anzeigen) — Erweiterung von Singular
   auf Plural Args.

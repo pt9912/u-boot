@@ -73,7 +73,7 @@ Negativbefunde fuer relevante Linsen.
 | Linse | Prueffrage |
 | --- | --- |
 | Spec / Traceability | Sind `LH-*`-/ADR-Anker korrekt, vollstaendig und testbar? |
-| Exit Codes | Sind Fehlerpfade nach [`LH-FA-CLI-006`](../spec/lastenheft.md#lh-fa-cli-006-exit-codes) klassifiziert und getestet? |
+| Exit Codes | Sind Fehlerpfade nach [`LH-FA-CLI-006`](../spec/lastenheft.md#lh-fa-cli-006--exit-codes) klassifiziert und getestet? |
 | Architecture | Bleiben hexagonale Grenzen, Ports, Adapter und Wiring sauber? |
 | Docker-only / Gates | Bleibt der reproduzierbare `make`-/Docker-Harness intakt? |
 | File Safety | Sind managed blocks, Backups, Two-Phase-Planung und Confirmers respektiert? |

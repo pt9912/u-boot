@@ -5,12 +5,12 @@
 
 ## Auslöser
 
-[`LH-FA-BUILD-008`](../../../../spec/lastenheft.md#lh-fa-build-008-coverage-bootstrap) definiert einen Bootstrap-Modus für den Coverage-Gate:
+[`LH-FA-BUILD-008`](../../../../spec/lastenheft.md#lh-fa-build-008--coverage-bootstrap) definiert einen Bootstrap-Modus für den Coverage-Gate:
 solange `./internal/...` keinen produktiven Code enthält, läuft
 `scripts/coverage-gate.sh` mit Schwellwert `0` und akzeptiert leeren
 Coverage-Input ohne Fail. Das vermeidet während M1–M2c falsche
 Grün-Signale, ist aber ein temporärer Carveout
-([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)).
+([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)).
 
 ## Aufhebung
 
@@ -36,7 +36,7 @@ Schwellen-Absenken.
 
 ## Bezug
 
-- Auslösende Spec: [`LH-FA-BUILD-008`](../../../../spec/lastenheft.md#lh-fa-build-008-coverage-bootstrap) Coverage-Bootstrap.
+- Auslösende Spec: [`LH-FA-BUILD-008`](../../../../spec/lastenheft.md#lh-fa-build-008--coverage-bootstrap) Coverage-Bootstrap.
 - Aufhebung dokumentiert in: [`carveouts.md`](../in-progress/carveouts.md).
 - Hängt von: M3-T1 (erste produktive Pakete) — erfüllt mit Commit
   `132d1a1`.

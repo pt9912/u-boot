@@ -10,15 +10,15 @@ Accepted
 
 ## Kontext
 
-[`LH-OPEN-004`](../../../spec/lastenheft.md#lh-open-004-template-format-entschieden) (Template-Format) ist in `spec/lastenheft.md` §14 offen:
+[`LH-OPEN-004`](../../../spec/lastenheft.md#lh-open-004--template-format-entschieden) (Template-Format) ist in `spec/lastenheft.md` §14 offen:
 
 > *„Das genaue Format für Templates ist noch festzulegen. Mögliche
 > Optionen: YAML-Metadaten plus Dateivorlagen / Cookiecutter-kompatible
 > Templates / eigenes Template-System / OCI-basierte Template-Pakete."*
 
-[`LH-FA-TPL-001`](../../../spec/lastenheft.md#lh-fa-tpl-001-projektvorlagen)..[`LH-FA-TPL-004`](../../../spec/lastenheft.md#lh-fa-tpl-004-templates-auflisten) (V1) fordern Projektvorlagen mit Metadaten,
+[`LH-FA-TPL-001`](../../../spec/lastenheft.md#lh-fa-tpl-001--projektvorlagen)..[`LH-FA-TPL-004`](../../../spec/lastenheft.md#lh-fa-tpl-004--templates-auflisten) (V1) fordern Projektvorlagen mit Metadaten,
 Listing und CLI-Auswahl (`u-boot init --template <name>`,
-`u-boot template list`). [`LH-FA-TPL-003`](../../../spec/lastenheft.md#lh-fa-tpl-003-eigene-templates) (Later) fordert lokale
+`u-boot template list`). [`LH-FA-TPL-003`](../../../spec/lastenheft.md#lh-fa-tpl-003--eigene-templates) (Later) fordert lokale
 User-Templates (`u-boot init --template ./my-template`).
 
 **Vorhandenes Pattern (M3-T2):** u-boot nutzt intern bereits
@@ -34,7 +34,7 @@ Lebenszyklus: es liefert keine u-boot-Codebase-Templates, sondern
 gilt: jede zweite Engine im Projekt erhöht den Wartungsaufwand
 und die Test-Surface.
 
-Sicherheits-Rahmen: [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte) (MVP) verbietet die
+Sicherheits-Rahmen: [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (MVP) verbietet die
 verdeckte Ausführung externer Skripte ohne ausdrückliche
 Nutzer-Zustimmung. Template-Engines mit Code-Eval-Fähigkeit
 (Jinja2 `{% set %}` mit beliebigem Python-Ausdruck) müssen mit
@@ -46,7 +46,7 @@ Vergleichbare Tools:
   als Variable-Schema. Reife Ökosystem-Reichweite, aber bringt
   vollständige Python-Toolchain als Voraussetzung mit. Pre-/Post-
   Hooks erlauben Python-Skript-Ausführung — direkter Konflikt mit
-  [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte).
+  [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte).
 - `gh repo create --template` (GitHub): Repository-Templates,
   keine Variable-Substitution. Reduzierte Mächtigkeit, einfach,
   aber nicht für lokale Initialisierung gedacht.
@@ -103,7 +103,7 @@ Konkrete Setzungen:
   confirm, docker, fs, git, logger, netprobe, progress, runtime,
   yaml) hyphen-frei sind und Go-Package-Namen ohnehin keine
   Hyphen erlauben.
-- **Lokale User-Templates ([`LH-FA-TPL-003`](../../../spec/lastenheft.md#lh-fa-tpl-003-eigene-templates), Later):** `--template
+- **Lokale User-Templates ([`LH-FA-TPL-003`](../../../spec/lastenheft.md#lh-fa-tpl-003--eigene-templates), Later):** `--template
   ./mein-template` löst gegen das Dateisystem statt `embed.FS`
   auf. Same Schema, same Engine.
 - **Pfad-Eskalation verhindert:** beim Rendern werden absolute
@@ -111,22 +111,22 @@ Konkrete Setzungen:
   abgewiesen. Der konkrete Validator nutzt ein Domain-Path-Pattern
   analog zum bestehenden `domain.ConfigPath`.
 - **Keine Pre-/Post-Hooks im Template** — kein Code-Eval-Pfad,
-  also kein [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte)-Risiko. Falls später Setup-Skripte
+  also kein [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)-Risiko. Falls später Setup-Skripte
   gewünscht werden, brauchen sie eine explizite Entscheidung mit eigenem
   Sandbox-Modell.
 - **CLI-Subkommandos:**
   - `u-boot template list [--json]` — Listing aus dem Template-
-    Katalog ([`LH-FA-TPL-004`](../../../spec/lastenheft.md#lh-fa-tpl-004-templates-auflisten)).
+    Katalog ([`LH-FA-TPL-004`](../../../spec/lastenheft.md#lh-fa-tpl-004--templates-auflisten)).
   - `u-boot init --template <name|path> [--var key=value …]` —
-    Template-getriebener Init ([`LH-FA-TPL-001`](../../../spec/lastenheft.md#lh-fa-tpl-001-projektvorlagen)).
+    Template-getriebener Init ([`LH-FA-TPL-001`](../../../spec/lastenheft.md#lh-fa-tpl-001--projektvorlagen)).
   - Beide werden als getrennte Inkremente implementiert; dieses ADR
     liefert nur die Format-Entscheidung.
 
 Cookiecutter, eigenes System und OCI-Pakete werden verworfen:
 
 - **Cookiecutter:** Python-Toolchain-Abhängigkeit (verletzt
-  [`LH-NFA-PORT-002`](../../../spec/lastenheft.md#lh-nfa-port-002-keine-unnötigen-systemabhängigkeiten) „möglichst wenige Host-Deps"), Jinja2-Code-Eval
-  mit [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte)-Risiko, doppelter Template-Stack.
+  [`LH-NFA-PORT-002`](../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten) „möglichst wenige Host-Deps"), Jinja2-Code-Eval
+  mit [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)-Risiko, doppelter Template-Stack.
 - **Eigenes System:** maximal pflegeintensiv, kein erkennbarer
   Vorteil gegenüber `text/template`.
 - **OCI-Pakete:** prospektive Architektur ohne Use-Case-Trigger.
@@ -144,10 +144,10 @@ Positiv:
 - **Pure Go.** Keine Python-Toolchain im Image, kein
   zusätzlicher Docker-Stage, kein zusätzlicher CI-Job für
   Jinja2-Linting.
-- **[`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte) trivial erfüllt.** `text/template`-Engine ist
+- **[`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) trivial erfüllt.** `text/template`-Engine ist
   per Design ohne Code-Eval; ohne Pre-/Post-Hooks gibt es keinen
   Pfad, über den ein Template fremden Code ausführt.
-- **[`LH-NFA-PORT-002`](../../../spec/lastenheft.md#lh-nfa-port-002-keine-unnötigen-systemabhängigkeiten) gewahrt.** Keine neuen Host-Voraussetzungen
+- **[`LH-NFA-PORT-002`](../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten) gewahrt.** Keine neuen Host-Voraussetzungen
   über Docker + Make hinaus.
 - **Konsistent zum gewählten Stack:** [ADR-0001](0001-implementierungssprache-go.md) (Go), [ADR-0002](0002-hexagonale-architektur.md)
   (hexagonal — Templates sind Driven-Adapter-Ressourcen),
@@ -167,7 +167,7 @@ Negativ / Trade-offs:
   Validator-Helfer).
 - **Kein integrierter Variable-Prompt-UI.** Cookiecutter prompted
   interaktiv für Variablen; u-boot muss diesen Pfad über die
-  bestehenden [`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung)-Mode-Flags
+  bestehenden [`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)-Mode-Flags
   (`--yes`/`--no-interactive`) selbst aufsetzen.
 
 Alternativen (verworfen):
@@ -185,11 +185,11 @@ Dieses ADR liefert nur die Format-Entscheidung. Die Implementierung
 folgt den `LH-FA-TPL-*`-Anforderungen:
 
 - `u-boot template list [--json]`-Subkommando + `embed.FS`-Katalog-Scan
-  ([`LH-FA-TPL-004`](../../../spec/lastenheft.md#lh-fa-tpl-004-templates-auflisten)).
-- `u-boot init --template <name>` mit Render-Loop ([`LH-FA-TPL-001`](../../../spec/lastenheft.md#lh-fa-tpl-001-projektvorlagen),
-  [`LH-FA-TPL-002`](../../../spec/lastenheft.md#lh-fa-tpl-002-template-metadaten) Metadaten-Surface).
+  ([`LH-FA-TPL-004`](../../../spec/lastenheft.md#lh-fa-tpl-004--templates-auflisten)).
+- `u-boot init --template <name>` mit Render-Loop ([`LH-FA-TPL-001`](../../../spec/lastenheft.md#lh-fa-tpl-001--projektvorlagen),
+  [`LH-FA-TPL-002`](../../../spec/lastenheft.md#lh-fa-tpl-002--template-metadaten) Metadaten-Surface).
 - `--template ./pfad`-Auflösung gegen das Dateisystem
-  ([`LH-FA-TPL-003`](../../../spec/lastenheft.md#lh-fa-tpl-003-eigene-templates)).
+  ([`LH-FA-TPL-003`](../../../spec/lastenheft.md#lh-fa-tpl-003--eigene-templates)).
 - Variable-Resolution + Prompt-Pfad bleiben eigener Produktumfang bei
   erstem variable-bedürftigem Built-in.
 - Weitere Templates (Micronaut, SvelteKit, …) folgen konkretem Bedarf.

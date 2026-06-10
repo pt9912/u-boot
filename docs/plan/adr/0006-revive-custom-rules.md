@@ -106,5 +106,5 @@ Eintrag in dieser ADR-Folgesektion plus einen `Why:` im
 ## Bezug
 
 - Auslösende ADR: `0003-solid-nahes-lint-profil.md` Folgepunkte.
-- LH-Verweise: [`LH-QA-004`](../../../spec/lastenheft.md#lh-qa-004-linting-solid-nahes-lint-profil) (SOLID-Profil), [`LH-FA-PROJDOCS-005`](../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)
+- LH-Verweise: [`LH-QA-004`](../../../spec/lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil) (SOLID-Profil), [`LH-FA-PROJDOCS-005`](../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)
   (Carveout-Disziplin).

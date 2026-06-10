@@ -8,12 +8,12 @@
 Nach M3 (`u-boot init`), M4 (`u-boot doctor`) und M5 (`u-boot add postgres`)
 fehlen die letzten beiden MVP-Subkommandos, um die Compose-Umgebung
 tatsächlich zu betreiben: `u-boot up` und `u-boot down`. Erst damit
-schließt sich der MVP-Acceptance-Flow [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow) (`u-boot init &&
+schließt sich der MVP-Acceptance-Flow [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow) (`u-boot init &&
 u-boot add postgres && u-boot up`).
 
 Spec-Pflicht für M6 (alle MVP-Priorität, `spec/lastenheft.md` §4.6):
 
-- **[`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten)** Umgebung starten. Standard-Wartezeit 60 s auf
+- **[`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)** Umgebung starten. Standard-Wartezeit 60 s auf
   Stabilisierung; `--timeout <sek>` überschreibt; `--timeout=0`
   bedeutet fire-and-forget (kein Warten). Negative Werte ⇒ Exit-Code 2.
   Stabilisierungsdefinition:
@@ -21,19 +21,19 @@ Spec-Pflicht für M6 (alle MVP-Priorität, `spec/lastenheft.md` §4.6):
   - Service ohne Healthcheck: Zielzustand `running` ausreicht.
   - Ports: TCP-Probe auf `localhost`; nicht-TCP / nicht eindeutig
     probebar ⇒ `warn`-Diagnose statt Abbruch.
-- **[`LH-FA-UP-002`](../../../../spec/lastenheft.md#lh-fa-up-002-docker-compose-verwenden)** Intern Docker Compose verwenden.
-- **[`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003-startstatus-anzeigen)** Startstatus anzeigen — Mindestangaben:
+- **[`LH-FA-UP-002`](../../../../spec/lastenheft.md#lh-fa-up-002--docker-compose-verwenden)** Intern Docker Compose verwenden.
+- **[`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen)** Startstatus anzeigen — Mindestangaben:
   Service-Name, Containerstatus, Port, Healthcheck-Status (falls
   vorhanden).
-- **[`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004-umgebung-stoppen)** Umgebung stoppen; `--volumes` für vollständiges
+- **[`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen)** Umgebung stoppen; `--volumes` für vollständiges
   Aufräumen (Container + Volumes).
 
 Plus aus angrenzenden Spec-Punkten:
 
-- **[`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung)** Destruktive Bestätigung für `down --volumes`
+- **[`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)** Destruktive Bestätigung für `down --volumes`
   (`--yes` oder interaktive Bestätigung; `--no-interactive` ohne
   `--yes` ⇒ Exit-Code 10).
-- **[`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)** Exit-Code-Mapping (vollständige
+- **[`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)** Exit-Code-Mapping (vollständige
   Sentinel→Code-Tabelle in T7; hier nur die Übersicht):
   - `2` — CLI-Validierung (`--timeout=-1`, gleichzeitiges `--yes`
     + `--no-interactive`, unbekannte Flags).
@@ -47,14 +47,14 @@ Plus aus angrenzenden Spec-Punkten:
   - `12` — Ausführungsfehler **nach** bestandenen Pre-Probes:
     Compose-Start-Failure (`ErrComposeRuntime`),
     Stabilisierungs-Timeout (`ErrStabilizationTimeout`).
-- **[`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002-startzeit-abhängig-von-docker)** Fortschritt einzelner Services (Pull/Create/
+- **[`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker)** Fortschritt einzelner Services (Pull/Create/
   Start/Healthcheck) sichtbar darstellen.
 
 Out of Scope (V1):
 
-- **[`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen)** `u-boot logs` / `u-boot logs <service>` — eigener
+- **[`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen)** `u-boot logs` / `u-boot logs <service>` — eigener
   V1-Slice (eigene Flags `--follow`, `--tail`).
-- **[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)** `--json`-Output für `up`/`down` — bewusst V1,
+- **[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)** `--json`-Output für `up`/`down` — bewusst V1,
   analog M4-doctor-Entscheidung. Text-Output zuerst stabilisieren.
 
 ## Vorbereitende Slices (Status)
@@ -110,7 +110,7 @@ Out of Scope (V1):
   Application-Service frei von `net`-Importen (depguard-Regel
   `application-no-net`/`application-no-stdlib-io` — siehe carveouts);
   Fake im Test injizierbar ohne realen TCP-Versuch.
-- **Streaming-Output für [`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002-startzeit-abhängig-von-docker):** `docker compose up`
+- **Streaming-Output für [`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker):** `docker compose up`
   emittiert die Phasen (Pull/Create/Start/Healthcheck) bereits auf
   stderr. Adapter sollte die Streams durchreichen, ohne sie zu
   puffern; Detail-Entscheidung (Channel vs. Writer-Injection) in T2.
@@ -182,7 +182,7 @@ Tuning-Möglichkeit per Flag bleibt V1-Folge-Slice.
 
 | `containerState`                      | zusätzliche Bedingung                                                         | Klassifikation |
 | ------------------------------------- | ----------------------------------------------------------------------------- | -------------- |
-| `stateRunning`                        | **kein Healthcheck definiert UND kein TCP-Port deklariert** ⇒ Service zählt **allein auf Basis von `running`** als stabilisiert ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) §967: „Für Dienste ohne Healthcheck ist `running` als Zielzustand ausreichend"). | `Stabilized` (`ok`) |
+| `stateRunning`                        | **kein Healthcheck definiert UND kein TCP-Port deklariert** ⇒ Service zählt **allein auf Basis von `running`** als stabilisiert ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten) §967: „Für Dienste ohne Healthcheck ist `running` als Zielzustand ausreichend"). | `Stabilized` (`ok`) |
 | `stateRunning`                        | Healthcheck definiert UND Healthcheck `healthy`; deklarierte Ports werden zusätzlich geprüft, aber nur als `warn`-Diagnose, nicht als Stabilisierungs-Veto (Healthcheck dominiert die Klassifikation) | `Stabilized` (`ok`) |
 | `stateRunning`                        | kein Healthcheck definiert UND TCP-Port deklariert UND Port erreichbar         | `Stabilized` (`ok`) |
 | `stateRunning`                        | Healthcheck definiert, aber noch nicht `healthy` (z. B. `starting`)            | `RunningOnly` (`warn`, Polling läuft) |
@@ -207,8 +207,8 @@ mit T4 Schritt 5 abgestimmt):** kein Polling, **kein**
 returnt direkt nach erfolgreichem `ComposeUp` mit
 `UpResult{Services: nil, Stabilized: false, Diagnostics:
 [{ID: "up.fire-and-forget", Severity: SeverityInfo}]}`. Die
-[`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003-startstatus-anzeigen)-Statusanzeige entfällt in diesem Modus per Spec
-([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) §970 ist die explizite Ausnahme zu §988); CLI
+[`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen)-Statusanzeige entfällt in diesem Modus per Spec
+([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten) §970 ist die explizite Ausnahme zu §988); CLI
 rendert statt der Service-Tabelle nur die Info-Diagnose-Zeile.
 Dieser Pfad ist an **drei** Stellen test-gepinnt, damit
 zukünftige Implementierungen nicht versehentlich auf einen
@@ -307,7 +307,7 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
      - **`NonInteractive` ist eigenes Request-Feld**, **nicht**
        aus `AssumeYes` ableitbar (siehe T5-Algorithmus für die
        Wahrheitstabelle). Es spiegelt das persistente CLI-Flag
-       `--no-interactive` ([`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung)) und macht den
+       `--no-interactive` ([`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)) und macht den
        Confirmation-Pfad deterministisch ohne dass der Confirmer-
        Adapter den Interaktivitätsmodus selbst kennen muss.
    - **Sentinel-Schichtung (zentral, damit `errors.Is` über die
@@ -402,7 +402,7 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
      `os/exec docker compose -f <dir>/compose.yaml up -d` /
      `down [-v]` / `ps --format json`. JSON-Format ist seit Compose
      v2.20 stabil (das ist gerade die doctor-Mindestversion —
-     [`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen)); kein Fallback nötig.
+     [`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)); kein Fallback nötig.
    - **Env-Error-Klassifikation (Adapter-Vertrag):** der Adapter
      übernimmt die Unterscheidung Env-Fehler vs. Runtime-Fehler
      **nicht** über Stderr-Parse (zu fragil, Compose-Strings
@@ -501,7 +501,7 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
         Hint: "run `u-boot doctor` or `docker compose ps` for
         live status",
         }}}}, nil`.
-        - **Begründung (Spec-Treue):** [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) §970 sagt
+        - **Begründung (Spec-Treue):** [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten) §970 sagt
           „Mit `--timeout=0` wird auf das Warten verzichtet; `up`
           beendet nach Initiierung der Compose-Aktionen." Ein
           zusätzlicher `engine.ComposePs`-Call wäre ein
@@ -512,7 +512,7 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
           könnte, obwohl der eigentliche `up` schon angekommen
           ist. Der User hat explizit fire-and-forget gewählt;
           jedes zusätzliche Engine-Risiko verwässert die Garantie.
-        - **Konflikt mit [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003-startstatus-anzeigen) (Status anzeigen) bewusst
+        - **Konflikt mit [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen) (Status anzeigen) bewusst
           akzeptiert:** §988 fordert Status nach dem Start, aber
           nur als Konsequenz aus dem Default-Stabilisierungs-Pfad.
           Im `--timeout=0`-Modus ist Status per Definition nicht
@@ -610,7 +610,7 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
      Fehler — er erzeugt einen `Diagnostics`-Eintrag in
      `UpResult` (Severity `warn`, ID `up.port.<service>.<index>`)
      und der Service stabilisiert allein auf Basis seines
-     Healthcheck-/Running-Status ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) §969). Test-
+     Healthcheck-/Running-Status ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten) §969). Test-
      Fixture: jeder Tabellen-Zeile genau ein Unit-Test.
 
      Healthcheck-Existenz: `services.<name>.healthcheck` als
@@ -626,7 +626,7 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
      - Single-Running-Service (kein Healthcheck) **und kein Port
        deklariert** ⇒ stabilisiert sobald `stateRunning` in der
        ersten Polling-Iteration (allein-`running`-Pfad,
-       [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) §967). Pin verhindert die Drift „warten, bis
+       [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten) §967). Pin verhindert die Drift „warten, bis
        irgendwas anderes auch noch passiert".
      - Single-Running-Service (kein Healthcheck) **mit
        deklariertem TCP-Port** ⇒ stabilisiert sobald `running` +
@@ -703,7 +703,7 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
         Fail-Fast-Pfad **vor** dem Confirmer-Call deterministisch:
         die Application braucht keinen Confirmer-Adapter, der
         seinen Interaktivitätsmodus selbst kennt, und der Spec-
-        Pfad [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) („nicht-interaktiv ohne `--yes` ⇒
+        Pfad [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) („nicht-interaktiv ohne `--yes` ⇒
         Code 10") ist eindeutig an dieser Tabelle ablesbar.
      4. `engine.ComposeDown(ctx, baseDir, {RemoveVolumes:
         req.RemoveVolumes, ProgressSink: req.ProgressSink})`.
@@ -744,7 +744,7 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
        Beide Sentinels überleben den Application-Wrap.
    - DoD T5: alle Tests grün.
 
-6. **T6 — Output-Layer ([`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003-startstatus-anzeigen) + [`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002-startzeit-abhängig-von-docker)).**
+6. **T6 — Output-Layer ([`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen) + [`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker)).**
    - `internal/adapter/driving/cli/statusview.go` (neue Datei oder
      in `up.go` lokal — T6-Entscheidung): Tabellen-Renderer für
      `UpResult.Services` mit den vier Pflicht-Spalten Name /
@@ -758,11 +758,11 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
      `ProgressSink` an `engine.ComposeUp`/`ComposeDown`, sodass
      Compose-Phasen (`Pulling…`, `Creating…`, `Starting…`,
      `Healthchecking…`) live durchlaufen.
-   - **`--quiet` ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005-verbosity-und-logging), persistent Root-Flag, von M4-T7
+   - **`--quiet` ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), persistent Root-Flag, von M4-T7
      verkabelt) — Geltungsbereich pro Subcommand explizit
      getrennt:**
      - **`up --quiet`**: unterdrückt die finale Status-Tabelle
-       ([`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003-startstatus-anzeigen)) und die Diagnose-Warn-Sektion am Ende; der
+       ([`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen)) und die Diagnose-Warn-Sektion am Ende; der
        Erfolgs-Exit (Code 0) bleibt ohne stdout-Print stehen.
      - **`down --quiet`**: unterdrückt die einzeilige
        Erfolgsmeldung (`"environment stopped"` /
@@ -778,7 +778,7 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
      - **Progress-Stream bleibt in beiden Subcommands**: der
        `engine.ComposeUp`/`ComposeDown`-stderr-Stream wird
        **nicht** durch `--quiet` stummgeschaltet, weil
-       [`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002-startzeit-abhängig-von-docker) die Sichtbarkeit der Pull/Create/Start/
+       [`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker) die Sichtbarkeit der Pull/Create/Start/
        Healthcheck-Phasen explizit fordert. Trade-off bewusst:
        `--quiet` reduziert das u-boot-eigene UI, nicht den
        durchgereichten Compose-Output; ein zukünftiges
@@ -826,8 +826,8 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
 
      | Regel                                  | Spec-Stelle                             | Wann triggert                                                                   | Exit-Code | Wo implementiert                                            |
      | -------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------- |
-     | **Flag-Exklusivität**                  | [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) §235 / §258              | `--yes` UND `--no-interactive` werden **beide** gesetzt — unabhängig von der Aktion | **2**     | Root-Resolver (M4-T7, kein M6-Touch)                        |
-     | **Destruktiver Bestätigungs-Abbruch**  | [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) §254                     | `--volumes` UND `--no-interactive` UND **nicht** `--yes` — explizit destruktiv  | **10**    | T5-Application (`ErrConfirmationRequired`)                  |
+     | **Flag-Exklusivität**                  | [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) §235 / §258              | `--yes` UND `--no-interactive` werden **beide** gesetzt — unabhängig von der Aktion | **2**     | Root-Resolver (M4-T7, kein M6-Touch)                        |
+     | **Destruktiver Bestätigungs-Abbruch**  | [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) §254                     | `--volumes` UND `--no-interactive` UND **nicht** `--yes` — explizit destruktiv  | **10**    | T5-Application (`ErrConfirmationRequired`)                  |
 
      Lese-Reihenfolge in `down`: Cobra/Root-Resolver prüft §235
      **zuerst** (Exit 2, fail-fast vor jedem Service-Aufruf);
@@ -849,7 +849,7 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
      | ----------------------------------- | --------- | ------------------------------------------------- |
      | `driving.ErrProjectNotInitialized`  | 10        | fachliche Validierung (kein u-boot.yaml)          |
      | `driving.ErrComposeFileMissing`     | 10        | fachliche Validierung (kein compose.yaml)         |
-     | `driving.ErrConfirmationRequired`   | 10        | [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) (`down --volumes` ohne `--yes`)    |
+     | `driving.ErrConfirmationRequired`   | 10        | [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) (`down --volumes` ohne `--yes`)    |
      | `driven.ErrDockerUnavailable`       | **11**    | Umgebung (Docker/Compose-Plugin nicht verfügbar) |
      | `driving.ErrStabilizationTimeout`   | 12        | Ausführung (Polling-Timeout)                      |
      | `driven.ErrComposeRuntime`          | 12        | Ausführung (Compose-Stderr-Fehler)                |
@@ -877,35 +877,35 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
      - `down --volumes` ohne `--yes`, Confirmer returnt false ⇒
        Code 10.
      - `up` in Verzeichnis ohne `u-boot.yaml` ⇒ Code 10.
-   - **[`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow)-Acceptance** (Integration über die existierenden
+   - **[`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)-Acceptance** (Integration über die existierenden
      M5-Postgres-Templates): Test seed'et ein
      u-boot-Projekt mit aktivem `postgres`-Service (analog
      M5-T4c-e2e), führt `up` gegen `fakeDockerEngine` aus, das
      einen `healthy`-State nach 2 Polls liefert, und asserted die
-     vier [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow)-Erwartungen (Service in compose.yaml,
+     vier [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)-Erwartungen (Service in compose.yaml,
      `.env.example`-Block, Healthcheck erreicht, Port erreichbar).
-     Der echte Compose-Lauf ([`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow) mit echter Docker-Engine)
+     Der echte Compose-Lauf ([`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow) mit echter Docker-Engine)
      bleibt im separaten [`slice-m6-docker-integrationstests`](../done/slice-m6-docker-integrationstests.md).
-   - DoD T7: `make gates` grün; [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow)-Acceptance-Test grün;
+   - DoD T7: `make gates` grün; [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)-Acceptance-Test grün;
      Roadmap auf M6 = Done; M5-add-postgres-DoD-Link auf
-     [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow)-Erfüllung erweitern (separater Doku-Commit).
+     [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)-Erfüllung erweitern (separater Doku-Commit).
 
 ## Akzeptanzkriterien (Slice-Level)
 
-- [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten)..[`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004-umgebung-stoppen) abgehakt.
-- [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow) (PostgreSQL-Flow) als CLI-e2e-Test grün
+- [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)..[`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen) abgehakt.
+- [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow) (PostgreSQL-Flow) als CLI-e2e-Test grün
   (Docker-Engine-Fake; reale Docker-Acceptance über den
   Carveout-Slice).
 - `make gates` grün (lint + test + coverage-gate + docs-check).
 - Exit-Codes 2/10/11/12 für die in §Auslöser tabellierten Fehlerpfade
   pinned.
 - Keine neuen temporären Carveouts ohne Slice-Plan
-  ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)); falls T-Granular doch einen Carveout
+  ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)); falls T-Granular doch einen Carveout
   öffnet, parallel Slice in `open/` + Eintrag in `carveouts.md`.
 
 ## Out of Scope
 
-- **[`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen) Logs**: eigener V1-Slice
+- **[`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen) Logs**: eigener V1-Slice
   (`slice-v1-up-logs.md` o. ä., wird angelegt, sobald V1-Stoßrichtung
   klar ist; Carveout entsteht erst bei Bedarf).
 - **`--json`-Output für up/down**: V1, analog M4-doctor-Vertagung.
@@ -944,12 +944,12 @@ Commit-Hash (Konvention `[[feedback-done-slice-dod-hash]]`).
 
 ## Bezug
 
-- Auslösende Spec: [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten)..[`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004-umgebung-stoppen) (`spec/lastenheft.md` §4.6),
-  [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes), [`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002-startzeit-abhängig-von-docker), [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow).
+- Auslösende Spec: [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)..[`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen) (`spec/lastenheft.md` §4.6),
+  [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker), [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow).
 - Vorgänger: [`slice-m5-add-postgres`](../done/slice-m5-add-postgres.md)
   (liefert die Postgres-Templates und den `services`-Schema-Block,
   ohne den `up` keinen Service zu starten hätte).
 - Nachfolger: [`slice-m6-docker-integrationstests`](../done/slice-m6-docker-integrationstests.md)
   (fachlich freigeschaltet durch T7); danach M7 (`u-boot generate`)
-  oder MVP-Closure ([`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen)..[`LH-FA-DEV-005`](../../../../spec/lastenheft.md#lh-fa-dev-005-ports) Devcontainer-Mindestumfang
-  + [`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001-minimaler-init-flow)/[`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow)..[`LH-AK-007`](../../../../spec/lastenheft.md#lh-ak-007-changelog-generator)).
+  oder MVP-Closure ([`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)..[`LH-FA-DEV-005`](../../../../spec/lastenheft.md#lh-fa-dev-005--ports) Devcontainer-Mindestumfang
+  + [`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001--minimaler-init-flow)/[`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005--devcontainer-flow)..[`LH-AK-007`](../../../../spec/lastenheft.md#lh-ak-007--changelog-generator)).

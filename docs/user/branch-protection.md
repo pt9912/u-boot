@@ -1,6 +1,6 @@
 # Branch Protection für `main`
 
-[LH-QA-003](../../spec/lastenheft.md#lh-qa-003-ci-fähigkeit-github-actions) verlangt, dass die drei CI-Jobs aus `.github/workflows/ci.yml`
+[LH-QA-003](../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions) verlangt, dass die drei CI-Jobs aus `.github/workflows/ci.yml`
 für jeden Pull-Request **blockierend** sind. Die exakten Required-
 Status-Check-Namen sind die Workflow-`name:`-Felder
 (`gates (lint + test + coverage-gate)`, `security-gates (govulncheck)`,
@@ -33,9 +33,9 @@ ausgeführt sein.
      Display-Namen sind die `name:`-Felder aus `.github/workflows/ci.yml`,
      nicht die kürzeren `jobs.<key>`-Identifier. Bei einer Hebung der
      `name:`-Werte muss diese Checkliste mitgezogen werden.
-     - `gates (lint + test + coverage-gate)` ([LH-QA-003](../../spec/lastenheft.md#lh-qa-003-ci-fähigkeit-github-actions))
-     - `security-gates (govulncheck)` ([LH-QA-003](../../spec/lastenheft.md#lh-qa-003-ci-fähigkeit-github-actions))
-     - `image-scan (trivy HIGH+CRITICAL)` ([LH-QA-003](../../spec/lastenheft.md#lh-qa-003-ci-fähigkeit-github-actions), geliefert mit
+     - `gates (lint + test + coverage-gate)` ([LH-QA-003](../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions))
+     - `security-gates (govulncheck)` ([LH-QA-003](../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions))
+     - `image-scan (trivy HIGH+CRITICAL)` ([LH-QA-003](../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions), geliefert mit
        [`slice-v1-release-pipeline`](../plan/planning/done/slice-v1-release-pipeline.md)
        T3, siehe
        [ADR-0007](../plan/adr/0007-distributionswege-ghcr.md))
@@ -73,13 +73,13 @@ Wahrheit. Für das Solo-Bootstrap reicht diese Markdown-Checkliste.
 
 ## Bezug
 
-- Auslösende Spec: [LH-QA-003](../../spec/lastenheft.md#lh-qa-003-ci-fähigkeit-github-actions) (drei Jobs `gates` / `security-gates` /
+- Auslösende Spec: [LH-QA-003](../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions) (drei Jobs `gates` / `security-gates` /
   `image-scan`, alle PR-blockierend; image-scan via
   [slice-v1-release-pipeline](../plan/planning/done/slice-v1-release-pipeline.md) T3 in den Spec-Pflicht-Block geschrieben);
   [ADR-0004](../plan/adr/0004-ci-system.md) Folgepunkt „Branch-Protection nicht versioniert".
 - Slice: [`slice-v1-release-pipeline`](../plan/planning/done/slice-v1-release-pipeline.md)
   (Teilabschluss Branch-Protection 2026-05-27; T2 `publish.yml` +
-  T3 `image-scan` 2026-05-31; [LH-OPEN-002](../../spec/lastenheft.md#lh-open-002-paketierung)-Restwege bleiben mit
+  T3 `image-scan` 2026-05-31; [LH-OPEN-002](../../spec/lastenheft.md#lh-open-002--paketierung)-Restwege bleiben mit
   Trigger-Slices vertagt — siehe
   [ADR-0007](../plan/adr/0007-distributionswege-ghcr.md)).
 - Carveout-Inventar: [`carveouts.md`](../plan/planning/in-progress/carveouts.md).

@@ -10,7 +10,7 @@
 
 ## Auslöser
 
-`u-boot up` ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten)..[`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003-startstatus-anzeigen)) startet die Compose-Environment
+`u-boot up` ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)..[`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen)) startet die Compose-Environment
 und liefert per `--json` einen Status-Envelope mit
 `data.services[]`. Heute fehlt jede Warning bei
 **Container-Recreate** (Compose-Plan-Drift gegen laufenden
@@ -68,7 +68,7 @@ Drei Sub-Entscheidungen vor der Implementation:
    (image-digest changed)", Subject: "postgres"}`. Subject
    ist proaktiv im WarningEntry-Type aus remove T2 R12-LOW-F4.
    LH-Code-Anker noch offen (eigene Spec-Erweiterung oder
-   Subsumtion unter [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003-startstatus-anzeigen)).
+   Subsumtion unter [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen)).
 
 ## Out of Scope
 
@@ -80,7 +80,7 @@ Drei Sub-Entscheidungen vor der Implementation:
 
 ## Spec-Bezug
 
-- [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003-startstatus-anzeigen) — Startstatus anzeigen (Erweiterungs-Kandidat
+- [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen) — Startstatus anzeigen (Erweiterungs-Kandidat
   für WARN-Anker).
-- [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1813 — Minimalkontrakt-Vertrag (WARN-
+- [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) §1813 — Minimalkontrakt-Vertrag (WARN-
   Diagnostic-Form ist konsistent).

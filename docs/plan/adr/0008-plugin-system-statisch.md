@@ -10,7 +10,7 @@ Accepted
 
 ## Kontext
 
-[`LH-OPEN-003`](../../../spec/lastenheft.md#lh-open-003-plugin-system-entschieden) (Plugin-System) ist in `spec/lastenheft.md` §14 offen:
+[`LH-OPEN-003`](../../../spec/lastenheft.md#lh-open-003--plugin-system-entschieden) (Plugin-System) ist in `spec/lastenheft.md` §14 offen:
 
 > *„Es ist zu klären, ob Add-ons langfristig fest eingebaut oder als
 > Plugins nachladbar sein sollen."*
@@ -18,8 +18,8 @@ Accepted
 `spec/architecture.md` §7 nennt das Plugin-System prospektiv als
 „geplante Erweiterung" (Driven-Port `PluginRegistry`). MVP-Stand
 (`e0d6c87`): `postgres` ist das einzige ausgelieferte Add-on
-([`LH-FA-ADD-001`](../../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl)..[`LH-FA-ADD-002`](../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen), [`LH-FA-ADD-005`](../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern)); Keycloak ([`LH-FA-ADD-003`](../../../spec/lastenheft.md#lh-fa-add-003-keycloak-hinzufügen),
-[`LH-AK-003`](../../../spec/lastenheft.md#lh-ak-003-keycloak-flow)) und OpenTelemetry ([`LH-FA-ADD-004`](../../../spec/lastenheft.md#lh-fa-add-004-opentelemetry-hinzufügen), [`LH-AK-004`](../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow)) sind
+([`LH-FA-ADD-001`](../../../spec/lastenheft.md#lh-fa-add-001--add-on-befehl)..[`LH-FA-ADD-002`](../../../spec/lastenheft.md#lh-fa-add-002--postgresql-hinzufügen), [`LH-FA-ADD-005`](../../../spec/lastenheft.md#lh-fa-add-005--mehrfaches-hinzufügen-verhindern)); Keycloak ([`LH-FA-ADD-003`](../../../spec/lastenheft.md#lh-fa-add-003--keycloak-hinzufügen),
+[`LH-AK-003`](../../../spec/lastenheft.md#lh-ak-003--keycloak-flow)) und OpenTelemetry ([`LH-FA-ADD-004`](../../../spec/lastenheft.md#lh-fa-add-004--opentelemetry-hinzufügen), [`LH-AK-004`](../../../spec/lastenheft.md#lh-ak-004--opentelemetry-flow)) sind
 für V1 statisch geplant. Es gibt heute keinen externen Wunsch nach
 einem vierten, nicht-Kern-Add-on.
 
@@ -31,7 +31,7 @@ Die Entscheidungsfindung betrachtet drei Optionen:
    externe Plugin-Binaries oder OCI-Bundles zur Laufzeit.
 3. **Hybrid** — Kern-Add-ons statisch, exotische via Plugin.
 
-Sicherheits-Rahmen: [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte) (MVP) verbietet die verdeckte
+Sicherheits-Rahmen: [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (MVP) verbietet die verdeckte
 Ausführung externer Skripte ohne ausdrückliche Nutzer-Zustimmung.
 Jedes Plugin-Loader-Modell muss dieses Pflicht-Setting respektieren —
 mit explizitem Allowlist-Mechanismus, Signature-Verifikation und
@@ -55,7 +55,7 @@ prospektiv.
 
 **Statisch** (Option 1). Add-ons bleiben im u-boot-Binary fest
 eingebaut. Neue Services werden im u-boot-Repository als
-Add-on-Implementierung gegen [`LH-FA-ADD-001`](../../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl)..[`LH-FA-ADD-005`](../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern) ergänzt und mit
+Add-on-Implementierung gegen [`LH-FA-ADD-001`](../../../spec/lastenheft.md#lh-fa-add-001--add-on-befehl)..[`LH-FA-ADD-005`](../../../spec/lastenheft.md#lh-fa-add-005--mehrfaches-hinzufügen-verhindern) ergänzt und mit
 einem regulären u-boot-Release distribuiert.
 
 Konkrete Setzungen:
@@ -67,13 +67,13 @@ Konkrete Setzungen:
 - **Add-on-Erweiterung über den Planning-Lifecycle.** Jedes neue Add-on (`add
   keycloak`, `add otel`, später ggf. `add redis`, `add minio`) wird
   als eigenes Planungsartefakt angelegt. Damit bleibt der Add-on-Pfad
-  reviewbar und folgt der Planning-Disziplin ([`LH-FA-PROJDOCS-005`](../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)).
-- **[`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte) automatisch erfüllt.** Ohne Plugin-Loader gibt
+  reviewbar und folgt der Planning-Disziplin ([`LH-FA-PROJDOCS-005`](../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)).
+- **[`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) automatisch erfüllt.** Ohne Plugin-Loader gibt
   es keinen Pfad, über den u-boot fremden Code aus nicht-
   freigegebenen Quellen lädt. Die einzigen externen Quellen sind
   Docker-Images (`compose.yaml`/Dockerfile, ohnehin von
-  [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte) ausgenommen) und devcontainer-Features (über
-  `devcontainer.featureSources.allow`, [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)).
+  [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) ausgenommen) und devcontainer-Features (über
+  `devcontainer.featureSources.allow`, [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)).
 - **Re-Evaluation-Trigger explizit dokumentiert** (siehe
   §Folgepunkte). Sobald einer der genannten Trigger eintritt, wird eine
   neue Entscheidung vorbereitet, die dieses ADR superseded.
@@ -96,7 +96,7 @@ Positiv:
 
 - **Minimale Surface.** Kein neuer Driven-Port, keine Plugin-Loader-
   Logik, keine zusätzliche Test-Strecke für Plugin-Lifecycle.
-- **[`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte) trivial erfüllt.** Kein Diskussionsbedarf zu
+- **[`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) trivial erfüllt.** Kein Diskussionsbedarf zu
   Signature-Verifikation, Sandbox-Boundaries, Plugin-Allowlist-
   Format.
 - **Add-on-Distribution = u-boot-Distribution.** Genau eine GHCR-

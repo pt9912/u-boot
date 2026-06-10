@@ -19,7 +19,7 @@ Accepted
 M1 hat `flag` aus der stdlib für den `--help`/`--version`-Stub
 benutzt; mit M3-T3 (dem ersten Subkommando `init`) wird das zu eng.
 Die offene Entscheidung muss formal getroffen und dokumentiert werden
-([`LH-FA-PROJDOCS-005`](../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)).
+([`LH-FA-PROJDOCS-005`](../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)).
 
 Vorlagen / Markt:
 
@@ -40,12 +40,12 @@ Dep `github.com/spf13/pflag v1.0.9`, `github.com/inconshreveable/mousetrap v1.1.
 
 Konkrete Setzungen:
 
-- `internal/adapter/driving/cli/` als Cobra-Adapter ([`LH-FA-ARCH-002`](../../../spec/lastenheft.md#lh-fa-arch-002-schichten-und-verzeichnislayout)).
+- `internal/adapter/driving/cli/` als Cobra-Adapter ([`LH-FA-ARCH-002`](../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)).
 - App-Konstruktor `cli.New(version, useCase, opts...)` nimmt die
   Driving-Ports als Konstruktor-Args; Wiring erfolgt in `cmd/uboot/`.
 - Funktionale Options (`cli.WithGetwd(...)`) für Test-Seams.
 - Exit-Code-Mapping (`cli.ExitCode(err)`) bündelt die
-  [`LH-FA-CLI-006`](../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-Logik im Adapter:
+  [`LH-FA-CLI-006`](../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)-Logik im Adapter:
   - `nil` → 0
   - `driving.ErrProjectExists` → 10
   - Cobra-Usage-Errors (unbekannte Subkommandos/Flags, falsche

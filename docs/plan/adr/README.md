@@ -2,7 +2,7 @@
 
 Architecture Decision Records (ADRs) für u-boot.
 
-Format und Konventionen sind in [`LH-FA-PROJDOCS-002`](../../../spec/lastenheft.md#lh-fa-projdocs-002-adr-format)
+Format und Konventionen sind in [`LH-FA-PROJDOCS-002`](../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format)
 ([../../../spec/lastenheft.md](../../../spec/lastenheft.md)) verbindlich
 festgelegt:
 

@@ -10,4 +10,4 @@ vorhergehenden Stand.
 
 Veraltete Inhalte, die keinen historischen Wert für das aktive Projekt
 mehr haben, werden nach `docs/archive/` verschoben
-([`LH-FA-PROJDOCS-004`](../../../../spec/lastenheft.md#lh-fa-projdocs-004-archivierung)).
+([`LH-FA-PROJDOCS-004`](../../../../spec/lastenheft.md#lh-fa-projdocs-004--archivierung)).

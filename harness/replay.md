@@ -45,7 +45,7 @@ stabil bleiben soll oder wenn ein Diff im Test schwer lesbar wird.
 | --- | --- | --- |
 | `generate env-example` | Absent -> Created, stale managed block -> UpdatedBlock, double-run -> NoOp, manual conflict ohne Write, add-on block bleibt byte-identisch | `internal/hexagon/application/generate_test.go` (`TestGenerateEnvExample_*`) |
 | `generate readme` | Absent -> Created, user content nach managed block bleibt erhalten, double-run -> NoOp | `internal/hexagon/application/generate_test.go` (`TestGenerateReadme_*`) |
-| `generate changelog` | Absent -> Created, double-run -> NoOp, manual conflict, fenced-code-block-Schutz, [`LH-AK-007`](../spec/lastenheft.md#lh-ak-007-changelog-generator) Flow | `internal/hexagon/application/generate_test.go` (`TestGenerateChangelog_*`) |
+| `generate changelog` | Absent -> Created, double-run -> NoOp, manual conflict, fenced-code-block-Schutz, [`LH-AK-007`](../spec/lastenheft.md#lh-ak-007--changelog-generator) Flow | `internal/hexagon/application/generate_test.go` (`TestGenerateChangelog_*`) |
 | `generate devcontainer` | JSONC gueltig, Mindestfelder, Ports sortiert, features map stabil, double-run -> NoOp, atomare Konfliktpfade | `internal/hexagon/application/generate_test.go`, `generate_features_test.go` |
 | `init --template basic` | Basic-Template ist byte-identisch zum Default-Init-Pfad | `internal/hexagon/application/initproject_template_test.go` |
 | `template list` | Human-readable und JSON-Ausgabe stabil | `internal/adapter/driving/cli/template_test.go` |

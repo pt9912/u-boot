@@ -10,18 +10,18 @@ Accepted
 
 ## Kontext
 
-Das Lastenheft ([`LH-OPEN-001`](../../../spec/lastenheft.md#lh-open-001-implementierungssprache-entschieden)) ließ die Implementierungssprache zunächst
+Das Lastenheft ([`LH-OPEN-001`](../../../spec/lastenheft.md#lh-open-001--implementierungssprache-entschieden)) ließ die Implementierungssprache zunächst
 offen und nannte vier Kandidaten: Go, Rust, Python, TypeScript/Node.js.
 Vor Beginn der Codebase muss eine Entscheidung getroffen werden, damit
-Build-Pipeline ([`LH-FA-BUILD-001`](../../../spec/lastenheft.md#lh-fa-build-001-multi-stage-dockerfile-u-boot-repo)..[`LH-FA-BUILD-009`](../../../spec/lastenheft.md#lh-fa-build-009-repository-layout)), Paketierung
-([`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002-paketierung)) und Toolchain-Pins festgezurrt werden können.
+Build-Pipeline ([`LH-FA-BUILD-001`](../../../spec/lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)..[`LH-FA-BUILD-009`](../../../spec/lastenheft.md#lh-fa-build-009--repository-layout)), Paketierung
+([`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002--paketierung)) und Toolchain-Pins festgezurrt werden können.
 
 Entscheidungsrelevante Anforderungen aus dem Lastenheft:
 
-- [`LH-NFA-PORT-001`](../../../spec/lastenheft.md#lh-nfa-port-001-linux-unterstützung) – Linux als primäre Plattform.
-- [`LH-NFA-PORT-002`](../../../spec/lastenheft.md#lh-nfa-port-002-keine-unnötigen-systemabhängigkeiten) – möglichst wenige Systemabhängigkeiten am Host.
-- [`LH-NFA-PERF-001`](../../../spec/lastenheft.md#lh-nfa-perf-001-schnelle-cli-antwort) – `u-boot --help`/`--version` unter 200 ms (Kaltstart).
-- [`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002-paketierung) – Paketierung als Single-Binary bevorzugt.
+- [`LH-NFA-PORT-001`](../../../spec/lastenheft.md#lh-nfa-port-001--linux-unterstützung) – Linux als primäre Plattform.
+- [`LH-NFA-PORT-002`](../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten) – möglichst wenige Systemabhängigkeiten am Host.
+- [`LH-NFA-PERF-001`](../../../spec/lastenheft.md#lh-nfa-perf-001--schnelle-cli-antwort) – `u-boot --help`/`--version` unter 200 ms (Kaltstart).
+- [`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002--paketierung) – Paketierung als Single-Binary bevorzugt.
 - Vorlage `k-deskflight` (Go) für Multi-Stage Dockerfile + Makefile-Pattern.
 
 ## Entscheidung
@@ -33,7 +33,7 @@ Entscheidungsrelevante Anforderungen aus dem Lastenheft:
 - Default-Pin im Dockerfile (`ARG GO_VERSION`): `1.26.3` (aktuelle
   Stable-Version am Entscheidungsdatum).
 - Modul-Pfad: `github.com/pt9912/u-boot`.
-- Repository-Layout nach [`LH-FA-BUILD-009`](../../../spec/lastenheft.md#lh-fa-build-009-repository-layout): `cmd/uboot/`, `internal/`,
+- Repository-Layout nach [`LH-FA-BUILD-009`](../../../spec/lastenheft.md#lh-fa-build-009--repository-layout): `cmd/uboot/`, `internal/`,
   Tests neben Production-Code. Die Substruktur unter `internal/`
   (hexagonale Schichten mit driving/driven-Split) ist in
   [`ADR-0002`](0002-hexagonale-architektur.md) festgelegt.
@@ -45,8 +45,8 @@ Entscheidungsrelevante Anforderungen aus dem Lastenheft:
 Positiv:
 
 - Single statisch gelinktes Binary ohne Sprach-Laufzeit am Zielsystem
-  (erfüllt [`LH-NFA-PORT-002`](../../../spec/lastenheft.md#lh-nfa-port-002-keine-unnötigen-systemabhängigkeiten) und vereinfacht [`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002-paketierung)).
-- Sehr schnelle Startzeit ([`LH-NFA-PERF-001`](../../../spec/lastenheft.md#lh-nfa-perf-001-schnelle-cli-antwort)); CLI-Frameworks
+  (erfüllt [`LH-NFA-PORT-002`](../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten) und vereinfacht [`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002--paketierung)).
+- Sehr schnelle Startzeit ([`LH-NFA-PERF-001`](../../../spec/lastenheft.md#lh-nfa-perf-001--schnelle-cli-antwort)); CLI-Frameworks
   (`spf13/cobra`, `urfave/cli`) sind etabliert.
 - Erstklassige Standard-Library für YAML-/JSON-Verarbeitung,
   HTTP/`os/exec`-Aufrufe gegen Docker, sowie Cross-Compilation.
@@ -66,7 +66,7 @@ Negativ / Trade-offs:
 
 Offene Folgepunkte (eigene ADRs bei Bedarf):
 
-- Paketierung im Detail ([`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002-paketierung)): GHCR-Image, GitHub Release mit
+- Paketierung im Detail ([`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002--paketierung)): GHCR-Image, GitHub Release mit
   Binary-Artefakten, später ggf. Homebrew/Debian. Die konkrete
   Distributionsentscheidung erfolgt in eigenen ADRs.
 

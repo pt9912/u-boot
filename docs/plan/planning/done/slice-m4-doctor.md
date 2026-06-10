@@ -6,31 +6,31 @@
 ## Auslöser
 
 Nach M3 (`u-boot init`) ist das zweite MVP-Subkommando dran:
-`u-boot doctor` liefert die Diagnose-Funktion aus [`LH-FA-DIAG-001`](../../../../spec/lastenheft.md#lh-fa-diag-001-doctor-befehl)..[`LH-FA-DIAG-004`](../../../../spec/lastenheft.md#lh-fa-diag-004-reparaturhinweise).
+`u-boot doctor` liefert die Diagnose-Funktion aus [`LH-FA-DIAG-001`](../../../../spec/lastenheft.md#lh-fa-diag-001--doctor-befehl)..[`LH-FA-DIAG-004`](../../../../spec/lastenheft.md#lh-fa-diag-004--reparaturhinweise).
 
 Pflichten der Spec:
 
-- **[`LH-FA-DIAG-001`](../../../../spec/lastenheft.md#lh-fa-diag-001-doctor-befehl)** Doctor-Befehl muss existieren.
-- **[`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen)** Mindest-Checks: Docker (≥24.0.0), Docker-Erreichbarkeit,
+- **[`LH-FA-DIAG-001`](../../../../spec/lastenheft.md#lh-fa-diag-001--doctor-befehl)** Doctor-Befehl muss existieren.
+- **[`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)** Mindest-Checks: Docker (≥24.0.0), Docker-Erreichbarkeit,
   Docker Compose (≥2.20.0), Git, Schreibrechte im Projektverzeichnis,
   `compose.yaml`-Gültigkeit, `u-boot.yaml`-Gültigkeit, Devcontainer-
   Konsistenz (.devcontainer/devcontainer.json + forwardPorts).
-- **[`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003-fehlerklassifikation)** Severity-Klassifikation `ok`/`warn`/`error` mit
+- **[`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003--fehlerklassifikation)** Severity-Klassifikation `ok`/`warn`/`error` mit
   Exit-Code-Mapping (`error` → ≠0). `--strict` macht `warn`
   ebenfalls zu ≠0.
-- **[`LH-FA-DIAG-004`](../../../../spec/lastenheft.md#lh-fa-diag-004-reparaturhinweise)** Reparaturhinweise bei Problemen.
+- **[`LH-FA-DIAG-004`](../../../../spec/lastenheft.md#lh-fa-diag-004--reparaturhinweise)** Reparaturhinweise bei Problemen.
 
 Plus aus angrenzenden Spec-Punkten:
 
-- **[`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005-verbosity-und-logging)** Verbosity-Flags (`--quiet`, `--verbose`, `--debug`)
+- **[`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)** Verbosity-Flags (`--quiet`, `--verbose`, `--debug`)
   — werden mit doctor erstmals load-bearing.
-- **[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)** JSON-Output (`--json`) — kann auf V1 vertagt
+- **[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)** JSON-Output (`--json`) — kann auf V1 vertagt
   werden, wenn der Text-Output zuerst stabilisiert wird.
 
 ## Vorbereitende Slices (alle bereits abgeschlossen)
 
 - [`slice-m4-soft-existing-detection`](../done/slice-m4-soft-existing-detection.md)
-  — `Confirmer`-Port, [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004-bestehendes-projekt-erkennen) aufgelöst.
+  — `Confirmer`-Port, [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen) aufgelöst.
 - [`slice-m4-logging-port`](../done/slice-m4-logging-port.md) — `Logger`-
   Port + slog-Adapter; doctor nutzt den Port intensiv (jeder Check
   emittiert Debug/Info-Events).
@@ -76,7 +76,7 @@ coverage-gate + docs-check):
 
 4. **T4 — `u-boot.yaml`-Validierung.**
    - `u-boot.yaml`-Schema-Check: Existenz, `schemaVersion: 1`,
-     `project.name`-Format (regex aus [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung)). YAML-Codec-
+     `project.name`-Format (regex aus [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006--projektnamen-validierung)). YAML-Codec-
      Port reicht; nutzt den `Unmarshal`-Pfad.
    - Klassifikation: fehlende Datei → `warn` (kein u-boot-Projekt),
      ungültige Datei → `error`.
@@ -104,33 +104,33 @@ coverage-gate + docs-check):
    - `--strict`: `Warn` → Exit-Code ≠0 (sonst `0`).
    - Verbosity-Flags `--quiet`/`--verbose`/`--debug` werden im selben
      T7 oder einem T8 verdrahtet — Entscheidung beim Schreiben.
-   - JSON-Output (`--json`, [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)) bewusst out-of-scope —
+   - JSON-Output (`--json`, [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)) bewusst out-of-scope —
      eigener V1-Slice, sobald der Text-Output stabilisiert ist.
 
 ## Akzeptanzkriterien (Slice-Level)
 
-- [`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001-minimaler-init-flow) doctor-Anteil: `mkdir demo && cd demo && u-boot init &&
+- [`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001--minimaler-init-flow) doctor-Anteil: `mkdir demo && cd demo && u-boot init &&
   u-boot doctor` läuft grün (alle Checks `ok`).
-- [`LH-FA-DIAG-001`](../../../../spec/lastenheft.md#lh-fa-diag-001-doctor-befehl)..[`LH-FA-DIAG-004`](../../../../spec/lastenheft.md#lh-fa-diag-004-reparaturhinweise) abgehakt.
+- [`LH-FA-DIAG-001`](../../../../spec/lastenheft.md#lh-fa-diag-001--doctor-befehl)..[`LH-FA-DIAG-004`](../../../../spec/lastenheft.md#lh-fa-diag-004--reparaturhinweise) abgehakt.
 - `make gates` grün.
 - Carveouts in `carveouts.md` für M4-Folgepunkte bekommen Slice-
   Pläne (z. B. JSON-Output, falls als V1 vertagt).
 
 ## Out of Scope
 
-- **`--json`-Output ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe))**: separater V1-Slice nach M4-
+- **`--json`-Output ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe))**: separater V1-Slice nach M4-
   Text-Stabilisierung.
 - **Tiefe Compose-Schema-Validierung**: nur Parse-Success +
   Top-Level-Shape im T5.
 - **Network-Reachability** (z. B. Registry-Probes): nicht in
-  [`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen), eigener Slice falls je gewollt.
+  [`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen), eigener Slice falls je gewollt.
 - **Auto-Repair**: doctor diagnostiziert, repariert nicht.
   Reparatur-Hints sind Text, keine Aktionen.
 
 ## Bezug
 
-- Auslösende Spec: [`LH-FA-DIAG-001`](../../../../spec/lastenheft.md#lh-fa-diag-001-doctor-befehl)..[`LH-FA-DIAG-004`](../../../../spec/lastenheft.md#lh-fa-diag-004-reparaturhinweise) (`spec/lastenheft.md` §4.7),
-  [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005-verbosity-und-logging) (Verbosity, Mindest-CLI-Layer).
+- Auslösende Spec: [`LH-FA-DIAG-001`](../../../../spec/lastenheft.md#lh-fa-diag-001--doctor-befehl)..[`LH-FA-DIAG-004`](../../../../spec/lastenheft.md#lh-fa-diag-004--reparaturhinweise) (`spec/lastenheft.md` §4.7),
+  [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Verbosity, Mindest-CLI-Layer).
 - Vorgänger: [`slice-m4-soft-existing-detection`](../done/slice-m4-soft-existing-detection.md),
   [`slice-m4-logging-port`](../done/slice-m4-logging-port.md).
 - Nachfolger: M5 (`u-boot add postgres`).

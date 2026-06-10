@@ -568,7 +568,8 @@ def _github_heading_slug(heading: str) -> str:
     """Best-effort GitHub/GFM heading slug for project documentation.
 
     Keeps unicode word characters and ASCII hyphens, strips common
-    Markdown punctuation, lowercases, and collapses whitespace to `-`.
+    Markdown punctuation, lowercases, and maps each whitespace character
+    to one `-`.
     """
     text = heading.strip()
     text = re.sub(r"<[^>]+>", "", text)
@@ -577,7 +578,7 @@ def _github_heading_slug(heading: str) -> str:
     text = text.replace("`", "")
     text = text.lower()
     text = re.sub(r"[^\w\s-]", "", text, flags=re.UNICODE)
-    return re.sub(r"\s+", "-", text.strip())
+    return re.sub(r"\s", "-", text.strip())
 
 
 def _reference_definition_target(line: str) -> str | None:

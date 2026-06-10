@@ -18,9 +18,9 @@ Konsolidierungs-Folge-Slice:
 - [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md) —
   9-teiliger Cluster-Slice (doctor/add/init/generate/remove/up-down/
   logs/config/template) + **T_close** (`3a35d58`). Liefert `--json`
-  ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)-Minimalkontrakt) für **alle zehn** Spec-Enum-
+  ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)-Minimalkontrakt) für **alle zehn** Spec-Enum-
   Subcommands plus `--dry-run`/`--diff`-Voll-Schema
-  ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)/[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe))
+  ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)/[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe))
   für die dateiverändernden Formen. Übergangs-Reject-Mechanik
   beim T_close abgebaut; [ADR-0010](../../adr/0010-kein-http-driving-adapter.md)-Re-Eval-Trigger-2 erfüllt.
 - [`slice-v1-cli-json-envelope-consolidation`](slice-v1-cli-json-envelope-consolidation.md)
@@ -28,7 +28,7 @@ Konsolidierungs-Folge-Slice:
   den geteilten `jsonArgsValidator` (Envelope-Symmetrie §1841 +
   Path-Leak-Defense).
 - [`slice-v1-logs`](slice-v1-logs.md) — `u-boot logs [service]
-  [--follow] [--tail <n>]` ([`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen)).
+  [--follow] [--tail <n>]` ([`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen)).
 - [`slice-v1-devcontainer-features`](slice-v1-devcontainer-features.md)
   + [`slice-followup-devcontainer-features-drift-doctor`](slice-followup-devcontainer-features-drift-doctor.md)
   — Devcontainer-Features-Allowlist + Katalog + `devcontainer.

@@ -85,7 +85,7 @@ Drei Sub-Entscheidungen vor der Implementation:
 
 ## Spec-Bezug
 
-- [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003-startstatus-anzeigen) — Mindestangabe "Port" (Singular im Spec-
+- [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen) — Mindestangabe "Port" (Singular im Spec-
   Wortlaut; strukturierte Liste ist eine Erweiterung, keine
   Spec-Verletzung).
-- [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1813 — JSON-Konsumenten-Vertrag.
+- [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) §1813 — JSON-Konsumenten-Vertrag.

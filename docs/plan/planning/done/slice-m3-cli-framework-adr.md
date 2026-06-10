@@ -15,7 +15,7 @@ In der M3-Slice-Planung wurde Cobra per User-Entscheidung implizit
 festgelegt (siehe [`slice-m3-init-flow.md`](slice-m3-init-flow.md)
 „Tech-Stack-Entscheidungen für die Tranchen"), aber ohne eigenen
 ADR. Damit ist die Wahl im Repo nirgends formal dokumentiert —
-[`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin) / -002 verlangt einen Slice-Plan plus ADR.
+[`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin) / -002 verlangt einen Slice-Plan plus ADR.
 
 ## Aufhebungsbedingung
 
@@ -26,7 +26,7 @@ und ADR-0001s Folgepunkt schließt.
 ## Akzeptanzkriterien
 
 - `docs/plan/adr/0005-cli-framework-cobra.md` existiert und folgt
-  dem ADR-Format aus [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002-adr-format) (Status, Datum, Kontext,
+  dem ADR-Format aus [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) (Status, Datum, Kontext,
   Entscheidung, Konsequenzen).
 - Inhalt nennt mindestens: Vergleich mit Alternativen (`flag` stdlib,
   `urfave/cli`), Trade-offs (Lernkurve, Dep-Größe), konkrete

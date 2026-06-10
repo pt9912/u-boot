@@ -1,16 +1,16 @@
-# Slice V1: `u-boot add keycloak` ([`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003-keycloak-hinzufügen) + [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow))
+# Slice V1: `u-boot add keycloak` ([`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003--keycloak-hinzufügen) + [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow))
 
 ## Auslöser
 
-[`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003-keycloak-hinzufügen) (V1) verlangt, dass `u-boot add keycloak` einen
+[`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003--keycloak-hinzufügen) (V1) verlangt, dass `u-boot add keycloak` einen
 Keycloak-Service mit Compose-Block, Admin-Env-Block (Placeholder-
 Secrets), Port-Konfiguration und Healthcheck in ein initialisiertes
-Projekt einbaut. [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow) ist der zugehörige Acceptance-Flow
+Projekt einbaut. [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow) ist der zugehörige Acceptance-Flow
 (`init` + `add keycloak` + `up` + Endpoint-Probe auf Port 8080).
 
 Vierter Slice des v0.3.0-Milestones, baut direkt auf dem
 [`slice-m5-add-postgres`](slice-m5-add-postgres.md)-Pattern auf. Die optionale Postgres-
-Anbindung aus [`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003-keycloak-hinzufügen) §857 („optionale PostgreSQL-
+Anbindung aus [`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003--keycloak-hinzufügen) §857 („optionale PostgreSQL-
 Anbindung bei konfigurierter persistenter externer Datenbank")
 ist **out-of-scope** für diesen Slice und an einen Folge-Slice
 abgegeben (siehe Out-of-Scope).
@@ -25,12 +25,12 @@ abgegeben (siehe Out-of-Scope).
    - Port-Mapping `8080:8080`,
    - Healthcheck (T1-Decision: `curl --fail http://localhost:9000/
      health/ready` falls Image die Management-Port-9000-Probe
-     mitbringt, sonst entfällt der Healthcheck per [`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003-keycloak-hinzufügen)
+     mitbringt, sonst entfällt der Healthcheck per [`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003--keycloak-hinzufügen)
      §858 „soweit technisch sinnvoll"),
    - Env-Block mit Admin-Credentials aus `.env`,
    - **Flüchtige H2-In-Container-Persistenz, kein Volume** —
      Keycloak's Default-Embed-DB läuft im Container-Filesystem und
-     ist nach `docker compose down` weg; [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow) verlangt nur
+     ist nach `docker compose down` weg; [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow) verlangt nur
      Endpoint-200/302, keine Persistenz. Persistente externe
      Postgres-Anbindung ist eigener Folge-Slice.
 2. `.env.example` mit `KEYCLOAK_ADMIN=CHANGEME_KEYCLOAK_ADMIN` +
@@ -39,7 +39,7 @@ abgegeben (siehe Out-of-Scope).
    Repo).
 3. `services.keycloak.enabled: true` in `u-boot.yaml`.
 
-[`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow)-Akzeptanz: `init demo --no-git` + `add keycloak` + `up`
+[`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow)-Akzeptanz: `init demo --no-git` + `add keycloak` + `up`
 auf einem Docker-fähigen System bringt Keycloak-Endpoint
 `http://localhost:8080/` mit HTTP 200 oder 302 hoch (Boot-Zeit
 30–90 s JVM-Init, siehe T3-Timeout-Carveout).
@@ -87,17 +87,17 @@ auf einem Docker-fähigen System bringt Keycloak-Endpoint
 
 | T | Commit | Inhalt |
 | - | ------ | ------ |
-| T1 | `2708606` | **Templates + Render-Generalisierung + T1-Sub-Decisions.** Drei Templates anlegen — `templates/services/keycloak.compose.tmpl` (Image `quay.io/keycloak/keycloak:26.0` — T1-Decision LTS-Pin; Port-Mapping `8080:8080`; Healthcheck-Entscheidung dokumentiert: bevorzugt `curl --fail http://localhost:9000/health/ready` mit `--health-cmd` analog Postgres-Template, sonst weglassen; Env-Block; `command: ["start-dev"]` als Compose-Command für die [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow)-Dev-Mode-Boot-Variante), `keycloak.env.tmpl` (`KEYCLOAK_ADMIN=CHANGEME_KEYCLOAK_ADMIN` + `KEYCLOAK_ADMIN_PASSWORD=CHANGEME_KEYCLOAK_ADMIN_PASSWORD`), **kein** `keycloak.volume.tmpl` (siehe T2 Skip-Volume). Service-Catalogue-Tabelle in `addservice_execute.go` (oder neue `servicecatalogue.go`) mit `composeTmpl`, `envTmpl`, `volumeTmpl` (optional) pro Service einführen; `renderPostgresTemplates(svc)` zu `renderServiceTemplates(svc)` umbenennen und über den Catalogue-Lookup auflösen. **Catalogue für `isSupportedService` wird NOCH NICHT erweitert** — Keycloak bleibt nach T1 weiterhin `ErrServiceUnsupported`, weil sonst `u-boot add keycloak` durch den Postgres-only Detect-Pfad läuft (F1-Befund: Endlos-Repair durch `inspectVolumeArtefact` + falsche `hasRequiredEnvKeys`). Catalogue-Erweiterung kommt mit T2 zusammen mit der Detect-Generalisierung. **T1-Sub-Decision: Template-Parametrisierung bleibt inline-hardcoded** wie heute Postgres (`templateData{}` leer), kein `{{ .Name }}`-Refactor — falls späterer Image-Tag-Override (z. B. via `services.keycloak.imageTag`) gewünscht, ist das eigener Slice. `embed.FS`-Eintrag in `templates.go` für Template-Resolution erweitern (Volume-Template wird **per Service** optional). Tests: Template-Existenz-Pin pro Service (Postgres alle 3, Keycloak 2), Render-Smoke für beide Catalogue-Einträge, **expliziter Pin auf `isSupportedService("keycloak") == false`** (T2-Voraussetzungs-Pin); Postgres-Render-Output-Byte-Identity-Pin (no-behavior-change). |
+| T1 | `2708606` | **Templates + Render-Generalisierung + T1-Sub-Decisions.** Drei Templates anlegen — `templates/services/keycloak.compose.tmpl` (Image `quay.io/keycloak/keycloak:26.0` — T1-Decision LTS-Pin; Port-Mapping `8080:8080`; Healthcheck-Entscheidung dokumentiert: bevorzugt `curl --fail http://localhost:9000/health/ready` mit `--health-cmd` analog Postgres-Template, sonst weglassen; Env-Block; `command: ["start-dev"]` als Compose-Command für die [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow)-Dev-Mode-Boot-Variante), `keycloak.env.tmpl` (`KEYCLOAK_ADMIN=CHANGEME_KEYCLOAK_ADMIN` + `KEYCLOAK_ADMIN_PASSWORD=CHANGEME_KEYCLOAK_ADMIN_PASSWORD`), **kein** `keycloak.volume.tmpl` (siehe T2 Skip-Volume). Service-Catalogue-Tabelle in `addservice_execute.go` (oder neue `servicecatalogue.go`) mit `composeTmpl`, `envTmpl`, `volumeTmpl` (optional) pro Service einführen; `renderPostgresTemplates(svc)` zu `renderServiceTemplates(svc)` umbenennen und über den Catalogue-Lookup auflösen. **Catalogue für `isSupportedService` wird NOCH NICHT erweitert** — Keycloak bleibt nach T1 weiterhin `ErrServiceUnsupported`, weil sonst `u-boot add keycloak` durch den Postgres-only Detect-Pfad läuft (F1-Befund: Endlos-Repair durch `inspectVolumeArtefact` + falsche `hasRequiredEnvKeys`). Catalogue-Erweiterung kommt mit T2 zusammen mit der Detect-Generalisierung. **T1-Sub-Decision: Template-Parametrisierung bleibt inline-hardcoded** wie heute Postgres (`templateData{}` leer), kein `{{ .Name }}`-Refactor — falls späterer Image-Tag-Override (z. B. via `services.keycloak.imageTag`) gewünscht, ist das eigener Slice. `embed.FS`-Eintrag in `templates.go` für Template-Resolution erweitern (Volume-Template wird **per Service** optional). Tests: Template-Existenz-Pin pro Service (Postgres alle 3, Keycloak 2), Render-Smoke für beide Catalogue-Einträge, **expliziter Pin auf `isSupportedService("keycloak") == false`** (T2-Voraussetzungs-Pin); Postgres-Render-Output-Byte-Identity-Pin (no-behavior-change). |
 | T2 | `861f231` | **Catalogue-Erweiterung + Per-Service-Probe-Mechanismus.** Heute ist der Detect-Pfad an drei Stellen Postgres-hardcoded — alle drei müssen pro Service konfigurierbar werden: (a) `hasRequiredEnvKeys` (`addservice_detect.go:182`) prüft literal `POSTGRES_USER`/`POSTGRES_PASSWORD`/`POSTGRES_DB` — wird zu `hasRequiredEnvKeysFor(svc, blockBody)` mit Service-Catalogue-Lookup (`postgres → [POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB]`, `keycloak → [KEYCLOAK_ADMIN, KEYCLOAK_ADMIN_PASSWORD]`); (b) `contentScanState` / `feedSubBlockEntry` matchen `postgres-data` als Volume-Ref-Literal und `POSTGRES_*` als Environment-Keys — der Scan-State wird per Service parametrisiert (`requiredEnvKeys`, `volumeRefLiteral`, `skipVolume`-Flag); (c) `inspectVolumeArtefact` (`addservice_detect.go:98`) liefert heute für jeden Service ohne Volume `needsRepair=true` → für Keycloak Endlos-Repair-Schleife; Fix: Service-Catalogue-Eintrag `volumeOptional: true` → `inspectVolumeArtefact` skippt komplett, gibt `false, nil` (no-repair) zurück. **Erst hier** wird `isSupportedService("keycloak")` und `supportedServices()` erweitert. **Designentscheidung T2:** der T1-Service-Catalogue wächst um `requiredEnvKeys []string`, `volumeRefLiteral string`, `volumeOptional bool`. `executeRemove` (RemoveService) muss ebenfalls die Volume-Skip-Logik respektieren — heute liest es blind den Volume-Block; T2-Carveout: Volume-Removal bei `volumeOptional` skippen statt ErrServiceInconsistent. Tests: 100% Coverage auf den neuen Catalogue-Lookup, Catalogue-Pin (`TestSupportedServices` enthält jetzt Keycloak), **Postgres-Snapshot-Pin (Byte-Identity der Postgres-Render-Outputs unverändert)**, Keycloak-Probe-Pin (Active-Detection für Keycloak ohne Volume → kein `needsRepair`). |
 | T3 | `beb222b` | **E2E-Acceptance + Test-Helper-Extraktion.** Beim zweiten Acceptance-Docker-Test landet typisch Copy-Paste — **T3-Decision:** Postgres-spezifische Compose-Up + Endpoint-Probe-Logik aus `postgres_acceptance_docker_test.go` in `internal/e2e/acceptance_helpers.go` extrahieren (signed-off via expliziter T3-Commit-Message), Postgres-Test wird mit-refaktoriert. Keycloak-Test ruft Helper auf, definiert nur die Keycloak-spezifische Probe (`probeEndpoint("http://localhost:8080/", 200, 302)`). **Boot-Zeit-Carveout:** Keycloak JVM-Boot 30–90 s (in CI gerne mehr) vs. Postgres ~5 s — UpService-Default-Healthcheck-Timeout im Test übersteuern; falls `upservice_healthcheck_docker_test.go`-Konventionen ein generisches Timeout-Override nicht erlauben, T3-Commit liefert `WithHealthcheckTimeout`-Option an UpService (sonst Test-spezifischen Override per `t.Cleanup` mit längerem Context-Timeout). Manuelle Smoke-Anleitung im CHANGELOG-Eintrag für Repo-Owner-Spot-Check. Doctor-Smoke: `add keycloak` darf keine neuen Errors auslösen (verifiziert: `collectActiveServicePorts` ist generisch, `forwardPorts.consistency` warnt höchstens). |
-| T4 | dieser Commit | **Closure.** READMEs (`add <service>`-Subcommand-Reference erwähnt jetzt `postgres \| keycloak`), CHANGELOG `## [Unreleased]` Added-Eintrag mit [`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003-keycloak-hinzufügen) + [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow)-Bezug + Hinweis auf flüchtige Default-Persistenz + Folge-Slice-Verweis (`slice-v1-keycloak-external-postgres`), roadmap.md §v0.3.0-Tabelle markiert [`slice-v1-keycloak`](slice-v1-keycloak.md) ✅ mit T1..T3-Hashes + Stand-Bump 4/5, Slice-Plan `open/` → `done/` mit Tranchen+Commit-Tabelle. `make docs-check` grün. |
+| T4 | dieser Commit | **Closure.** READMEs (`add <service>`-Subcommand-Reference erwähnt jetzt `postgres \| keycloak`), CHANGELOG `## [Unreleased]` Added-Eintrag mit [`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003--keycloak-hinzufügen) + [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow)-Bezug + Hinweis auf flüchtige Default-Persistenz + Folge-Slice-Verweis (`slice-v1-keycloak-external-postgres`), roadmap.md §v0.3.0-Tabelle markiert [`slice-v1-keycloak`](slice-v1-keycloak.md) ✅ mit T1..T3-Hashes + Stand-Bump 4/5, Slice-Plan `open/` → `done/` mit Tranchen+Commit-Tabelle. `make docs-check` grün. |
 
 ## Out of Scope
 
 - **`services.keycloak.persistence: external-postgres`-Schema-Feld
-  + Postgres-Dep-Aktivierung**: [`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003-keycloak-hinzufügen) §857 sagt
+  + Postgres-Dep-Aktivierung**: [`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003--keycloak-hinzufügen) §857 sagt
   „optionale PostgreSQL-Anbindung bei konfigurierter persistenter
-  externer Datenbank". Heute hat das [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern)-Schema dafür
+  externer Datenbank". Heute hat das [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)-Schema dafür
   keinen Slot; der Schema-Slot + die CLI-Setter +
   `dependenciesFor("keycloak")` mit dem konkreten `WhenPath` /
   `EqualsValue` sind eigene Slice-Arbeit. Plan-Anker: Folge-Slice
@@ -111,7 +111,7 @@ auf einem Docker-fähigen System bringt Keycloak-Endpoint
   konkretisiert wird; greift dann auf den T2-Catalogue-Slot
   `volumeOptional: false` zurück.
 - **Custom-Realm-Import / Theme-Konfiguration**: nicht in
-  [`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003-keycloak-hinzufügen) Mindestumfang. Nutzer kann nach `add keycloak`
+  [`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003--keycloak-hinzufügen) Mindestumfang. Nutzer kann nach `add keycloak`
   manuell zusätzliche Volumes / Env-Vars im managed-block-freien
   Bereich der compose.yaml ergänzen.
 - **CI-Stabilisierung des Keycloak-Acceptance-Tests**: in GitHub-
@@ -125,18 +125,18 @@ auf einem Docker-fähigen System bringt Keycloak-Endpoint
   CI ziehen, dann entweder Pull-Retry-Wrapper im UpService oder
   Quay-Mirror via Docker-Hub-Pull-Through-Cache).
 - **OpenTelemetry-Add-on**: eigener Slice [`slice-v1-otel`](slice-v1-otel.md)
-  ([`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004-opentelemetry-hinzufügen) + [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow)), parallel-entwickelbar weil keine
+  ([`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004--opentelemetry-hinzufügen) + [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004--opentelemetry-flow)), parallel-entwickelbar weil keine
   Dep zwischen Keycloak und OTel.
 - **`{{ .Name }}`-Template-Parametrisierung**: T1 wählt explizit
   inline-hardcoded Service-Namen (Variante a aus dem
   `renderPostgresTemplates`-Doc-Comment). Variable-Templates +
   Image-Tag-Override (z. B. `services.keycloak.imageTag`) sind
-  eigene Slice-Arbeit, weil sie das [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern)-Schema
+  eigene Slice-Arbeit, weil sie das [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)-Schema
   erweitern.
 
 ## Bezug
 
-- Spec: [`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003-keycloak-hinzufügen) (V1, §838-§859) + [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow) (V1, §2336-§2353).
+- Spec: [`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003--keycloak-hinzufügen) (V1, §838-§859) + [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow) (V1, §2336-§2353).
 - Voraussetzungs-Slices: keine harten (Catalogue +
   Template-Refactor + Detect-Generalisierung sind in diesem Slice
   enthalten); weiche Voraussetzungen:
@@ -146,7 +146,7 @@ auf einem Docker-fähigen System bringt Keycloak-Endpoint
   liefert die Dep-Mechanik (heute hier inaktiv — leere Dep-Liste
   für Keycloak).
 - Folge-Slices:
-  - [`slice-v1-otel`](slice-v1-otel.md) ([`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004-opentelemetry-hinzufügen) + [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow)) — parallel
+  - [`slice-v1-otel`](slice-v1-otel.md) ([`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004--opentelemetry-hinzufügen) + [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004--opentelemetry-flow)) — parallel
     entwickelbar.
   - `slice-v1-keycloak-external-postgres` — Schema-Erweiterung
     (`services.keycloak.persistence`) + Dep-Aktivierung (siehe

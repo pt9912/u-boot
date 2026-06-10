@@ -2,7 +2,7 @@
 
 ## Auslöser
 
-[`slice-v1-keycloak`](../done/slice-v1-keycloak.md) T3 hat den [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow)-Acceptance-Test
+[`slice-v1-keycloak`](../done/slice-v1-keycloak.md) T3 hat den [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow)-Acceptance-Test
 (`internal/e2e/keycloak_acceptance_docker_test.go`) angelegt.
 GitHub-Actions `integration-docker` failt damit seitdem
 reproduzierbar nach < 1 s:
@@ -33,7 +33,7 @@ Pflicht-Lane sein.
 
 ## Aufhebungsbedingung
 
-`make test-docker` lässt [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow) wieder mitlaufen (build-tag
+`make test-docker` lässt [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow) wieder mitlaufen (build-tag
 `docker` reicht; kein `acceptance_extended` mehr nötig).
 GitHub-Actions `integration-docker` läuft mit dem Keycloak-Test
 über drei aufeinanderfolgende Runs grün.
@@ -117,7 +117,7 @@ denselben Pfad gehen.
   CI-Flake-Carveout).
 - Carveout-Eintrag:
   [`carveouts.md`](../in-progress/carveouts.md) §Temporäre Carveouts.
-- Spec-Bezug: [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow) Keycloak-Flow (V1) — Test existiert,
+- Spec-Bezug: [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow) Keycloak-Flow (V1) — Test existiert,
   läuft aber nicht in der CI-Pflicht-Lane bis dieser Slice
   schließt.
 - Milestone: v0.3.0 oder v0.4.0 — abhängig davon ob T2-Fix vor
