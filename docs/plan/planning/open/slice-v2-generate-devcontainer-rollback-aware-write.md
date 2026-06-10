@@ -197,6 +197,6 @@ File-1+2-Rollback + Dir-Cleanup + YAML-No-Touch.
 - Code-Anker:
   [`generate.go:618-690`](../../../../internal/hexagon/application/generate.go)
   (Phase-1-Comment + Phase-2-Implementation).
-- Spec: `LH-FA-DEV-001` (Devcontainer-Render),
-  `LH-NFA-REL-003` (technische Persistenz-Klasse).
+- Spec: [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen) (Devcontainer-Render),
+  [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) (technische Persistenz-Klasse).
 - Phase: V2 (Hardening, post-V1-Cluster-Closure).

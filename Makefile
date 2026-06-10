@@ -176,14 +176,17 @@ verify-depguard: ## Verify all eight depguard layer rules fire (LH-FA-ARCH-003).
 
 # ---- docs gates ------------------------------------------------------------
 
-# docs-check validates relative markdown links across docs/, spec/, and
-# root *.md. Docker-encapsulated Python (stdlib-only) — no host Python
-# requirement. Adapted from c-hsm-doc.
-docs-check: ## Validate relative markdown links in docs/, spec/, README*.
+# docs-check validates the markdown reference model and runs the stdlib
+# regression tests for the validator. Covered: relative link paths,
+# heading anchors, linked ADR/LH/Planning/Trace ids, and reference-model
+# edges across docs/, spec/, harness/, and root *.md. Docker-encapsulated
+# Python (stdlib-only) — no host Python requirement. Adapted from
+# c-hsm-doc.
+docs-check: ## Validate markdown refs, ADR links, anchors, and model edges.
 	docker run --rm \
 	    -v "$(CURDIR)":/src -w /src \
 	    python:$(PYTHON_VERSION) \
-	    python tools/check_refs.py
+	    sh -c "python -B -m unittest tools.check_refs_test && python -B tools/check_refs.py"
 
 # ---- aggregators -----------------------------------------------------------
 

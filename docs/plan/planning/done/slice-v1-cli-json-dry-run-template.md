@@ -107,7 +107,7 @@ Code-Realität heute:
    trägt `u-boot.yaml`-Body). Im `--json`-Modus feuert der
    Reject-Gate VOR `cmd.Help()` → heute Exit 2. **Das ist die
    zentrale Sub-Decision (a)** und steht in Spannung zu
-   LH-NFA-USE-004 §1813 (alle zehn Spec-Enum-Subcommands tragen
+   [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1813 (alle zehn Spec-Enum-Subcommands tragen
    `--json`) — siehe Sub-Decisions.
 3. **`newDataEnvelope` + `cliJSONEnvelope.Data` existieren bereits**
    (aus generate 4/9 T1, `bd3de20`) — T1 entfällt, der Slice
@@ -126,8 +126,8 @@ Code-Realität heute:
   Optionen:
   (i) **Reject Exit 2 beibehalten** (Status quo, Stub-
       Vorschlag). **Adversariale Spannung**: `template` IST ein
-      Spec-Enum-Subcommand (`LH-FA-CLI-007` §338 listet zehn,
-      inkl. `template`); `LH-NFA-USE-004` §1813 fordert `--json`
+      Spec-Enum-Subcommand ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §338 listet zehn,
+      inkl. `template`); [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1813 fordert `--json`
       für **alle zehn**. Ein dauerhafter Reject von bare
       `template --json` wäre damit eine **Spec-Lücke** — die
       Cluster-Closure-Hard-Rule fordert „alle Subcommand-Formen
@@ -179,7 +179,7 @@ Code-Realität heute:
 
   **R3-Härtung gegen das stärkste Gegenargument** (R3-MED-1): die
   Cluster-Aufhebungsbedingung (`config`-Cluster-Pflicht-Callout)
-  formuliert „`LH-NFA-USE-004` gilt für **alle** Spec-Enum-
+  formuliert „[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) gilt für **alle** Spec-Enum-
   Subcommands" — und `template` IST im Enum (§338). Liest man das
   wörtlich, müsste bare `template --json` einen Envelope tragen.
   **Auflösung**: das Argument trägt nicht, weil es **bare `config`
@@ -232,7 +232,7 @@ Code-Realität heute:
   R-Runde korrigiert die Tranchen-Tabelle.
 
 - **T0-(d) `subcommand: "list"`-Pflicht** (LOW): der migrierte
-  Envelope MUSS `subcommand: "list"` setzen (`LH-FA-CLI-007`
+  Envelope MUSS `subcommand: "list"` setzen ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)
   §322 Subcommand-Pflicht bei `command="template"`). Trivial,
   aber T-Pin gegen Empty-Subcommand-Drift (analog config).
 
@@ -242,7 +242,7 @@ Code-Realität heute:
   also **keinen** neuen Code-Registry-Eintrag — nur ggf. einen
   Hinweis. Der Katalog-Adapter-IO-Fehler (Exit 14) ist in CI
   nie erreichbar (`embed.FS` load-time-validiert); falls ein
-  Envelope-Error-Pfad doch gebaut wird, nutzt er `LH-NFA-REL-003`
+  Envelope-Error-Pfad doch gebaut wird, nutzt er [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)
   (bestehender Code, kein neuer Registry-Eintrag).
 
 - **T0-(f) Error-Envelope-Pfad + Envelope-Asymmetrie**
@@ -254,7 +254,7 @@ Code-Realität heute:
     reale Fehler (Katalog-Adapter-IO) in CI unerreichbar ist
     (`embed.FS` load-time-validiert), trägt `template list` einen
     minimalen **`mapTemplateErrorToDiagnostic`** (2 Rows: Katalog-
-    IO `LH-NFA-REL-003`/Exit 14; Default `LH-FA-CLI-006`/Exit 1)
+    IO [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)/Exit 14; Default [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)/Exit 1)
     + `reportErrorSub(out, err, …, "template", "list", mapErr,
     nil)`. `subcommand: "list"` ist auch im Error-Envelope
     gesetzt (§322). Bare-`return err` wäre Cluster-Inkonsistenz.
@@ -335,7 +335,7 @@ Default-`list` erzeugte eine Human-vs-JSON-Asymmetrie.
   entsprechend (siehe Tranchen-Tabelle).
 - ✅ **Error-Envelope-Pfad** (R2-MED-1 / T0-(f)): `template list`
   trägt einen minimalen `mapTemplateErrorToDiagnostic` (Katalog-IO
-  → `LH-NFA-REL-003`/Exit 14; Default → `LH-FA-CLI-006`/Exit 1) +
+  → [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)/Exit 14; Default → [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)/Exit 1) +
   `reportErrorSub(…, "template", "list", mapErr, nil)`. **Keine
   neue §5-Code-Registry-Sektion** (R3): es werden nur bestehende
   LH-Codes genutzt, keine tool-internen Codes; `template list`
@@ -374,7 +374,7 @@ Default-`list` erzeugte eine Human-vs-JSON-Asymmetrie.
 | - | ------ | --------------- |
 | T0 | **Discovery + R-Runden**: Pre-Scan + Sub-Decisions (a)-(e); T0-(a) per R1 auf Reject festgezurrt. `Data`-Konstruktor seit generate T1 (`bd3de20`) etabliert. | — (Plan-Arbeit) |
 | T1 | **Entfällt** — `cliJSONEnvelope.Data` + `newDataEnvelope(command, subcommand, data, diags, exitCode)` seit generate-Slice 4/9 T1 (`bd3de20`) vorhanden inkl. Marshal-Pin-Tests. Template-Slice nutzt sie nur (T2). | — (entfällt) |
-| T2 ✅ (2026-06-08) | **Geliefert** (`make gates` grün): `runTemplateList` ruft `writeTemplateListJSON` (`newDataEnvelope("template", "list", dtos, nil, 0)` → `writeEnvelope`, `subcommand: "list"`); altes `renderTemplateListJSON`/`MarshalIndent` ersetzt (`encoding/json`-Import raus, `errors` rein). **Error-Pfad**: `mapTemplateErrorToDiagnostic` (2 Rows: `ErrTemplateCatalog`→`LH-NFA-REL-003`/14, Default→`LH-FA-CLI-006`) + `reportErrorSub(…, "template", "list", …)`. **Format-Change** indent→compact (Breaking-Change). **Test-Updates**: drei bestehende Array-asserting Tests (`BothFlagPositions` + `TestTemplateList_JSON` + `EmptyCatalog_JSONIsEmptyArray` in `template_test.go`) auf Envelope-Parsing umgestellt; neue `template_acceptance_test.go` (Non-empty-Envelope + Empty-`data:[]` + Error-Envelope-Exit-14 + Text-Form-intakt). | ~60 |
+| T2 ✅ (2026-06-08) | **Geliefert** (`make gates` grün): `runTemplateList` ruft `writeTemplateListJSON` (`newDataEnvelope("template", "list", dtos, nil, 0)` → `writeEnvelope`, `subcommand: "list"`); altes `renderTemplateListJSON`/`MarshalIndent` ersetzt (`encoding/json`-Import raus, `errors` rein). **Error-Pfad**: `mapTemplateErrorToDiagnostic` (2 Rows: `ErrTemplateCatalog`→[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)/14, Default→[`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)) + `reportErrorSub(…, "template", "list", …)`. **Format-Change** indent→compact (Breaking-Change). **Test-Updates**: drei bestehende Array-asserting Tests (`BothFlagPositions` + `TestTemplateList_JSON` + `EmptyCatalog_JSONIsEmptyArray` in `template_test.go`) auf Envelope-Parsing umgestellt; neue `template_acceptance_test.go` (Non-empty-Envelope + Empty-`data:[]` + Error-Envelope-Exit-14 + Text-Form-intakt). | ~60 |
 | T3 | **Entfällt — nach Cluster-T_close verschoben** (Implementierungs-Befund bei T3-Start, User-bestätigt): der bare-`template --json`-Reject (`cli.ErrTemplateSubcommandRequired` + RunE-Check) wäre solange das Allowlist-Gate existiert toter, nicht erreichbarer Code (Gate feuert vor RunE) — oder erzwänge eine künstliche Allowlist-Ausnahme, die den bestehenden Gate-Reject-Pin + `jsonRejectError`-Coverage schwächt. Bis T_close ist das **Gate** der aktive Contract (bare `template --json` → `ErrJSONNotImplemented`/Exit 2). Sentinel + RunE-Reject kommen **mit dem Gate-Abbau** in T_close (live + testbar). Timing-Korrektur der R1-HIGH-1b/R3-Festzurrung. | — (→ T_close) |
 | T4 | **Closure** (NICHT Allowlist-Mechanik-Abbau — R1-MED-2: das ist Cluster-T_close-Scope, eigener Schritt nach diesem Slice, Cluster-Slice §T0-(g)): carveouts.md `template list`-Eintrag entfernen; CHANGELOG **`### Changed`** (Breaking: `template list --json` Array→Envelope + indent→compact, T0-(b)); `cli-json-output.md` **§6.2** (bestehende „Sonderfall template list --json"-Carveout-Sektion auf Envelope-Form aktualisieren — R2-LOW: KEINE separate §6.10, der template-Inhalt lebt schon in §6.2) + §6-Tabelle (template→done); roadmap; Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) |
 
@@ -398,7 +398,7 @@ leakt rohen Output).
 
 ## Out of Scope
 
-- **HTTP- oder gRPC-Schnittstellen**: ADR-0010 schließt
+- **HTTP- oder gRPC-Schnittstellen**: [ADR-0010](../../adr/0010-kein-http-driving-adapter.md) schließt
   explizit aus.
 - **Schema-Versionierung** (`schemaVersion: 1`): siehe
   Cluster-Slice §Out of Scope.
@@ -416,8 +416,8 @@ leakt rohen Output).
   Carveouts §`template list --json`.
 - Code-Realität: `internal/adapter/driving/cli/template.go`,
   `internal/adapter/driving/cli/jsonenvelope.go`.
-- Spec: `LH-NFA-USE-004` Minimalkontrakt
+- Spec: [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) Minimalkontrakt
   ([`spec/lastenheft.md`](../../../../spec/lastenheft.md) §1841),
-  `LH-FA-TPL-004` Template-Listing.
+  [`LH-FA-TPL-004`](../../../../spec/lastenheft.md#lh-fa-tpl-004-templates-auflisten) Template-Listing.
 - ADR: [`ADR-0010`](../../adr/0010-kein-http-driving-adapter.md).
 - Phase: V1 (Cluster-Closure-Pflicht).

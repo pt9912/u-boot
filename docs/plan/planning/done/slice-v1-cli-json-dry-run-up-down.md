@@ -36,7 +36,7 @@
 >
 > Erbt das `Data any`-Wire-Field aus
 > [`slice-v1-cli-json-dry-run-doctor`](slice-v1-cli-json-dry-run-doctor.md)
-> T0-(c)/(d): explizit *"für `slice-v1-cli-json-dry-run-up-down`"*
+> T0-(c)/(d): explizit *"für [`slice-v1-cli-json-dry-run-up-down`](slice-v1-cli-json-dry-run-up-down.md)"*
 > vorgesehen mit Vorbild
 > `type upStatusData struct { Services []serviceStatus
 > ` + "`json:\"services\"`" + ` }`. Erbt
@@ -49,7 +49,7 @@
 ## Auslöser
 
 Cluster-Slice §T0-Outcomes (a) macht jeden read-only-Subcommand
-für `--json` verbindlich (`LH-NFA-USE-004` §1813). `up` und `down`
+für `--json` verbindlich ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1813). `up` und `down`
 sind nach `doctor`/`add`/`init`/`generate`/`remove` die nächsten
 und einzig verbleibenden modifying-CLI-Subcommands mit
 Compose-Side-Effects: sie schreiben **nichts** auf das lokale
@@ -59,20 +59,20 @@ entfernen).
 
 Spec-Bezug:
 
-- `LH-FA-UP-001` (Umgebung starten, §955-§978) — `u-boot up` mit
+- [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) (Umgebung starten, §955-§978) — `u-boot up` mit
   `--timeout`-Stabilisierung
-- `LH-FA-UP-002` (Docker Compose verwenden, §980-§986)
-- `LH-FA-UP-003` (Startstatus anzeigen, §988-§1000) — Service-
+- [`LH-FA-UP-002`](../../../../spec/lastenheft.md#lh-fa-up-002-docker-compose-verwenden) (Docker Compose verwenden, §980-§986)
+- [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003-startstatus-anzeigen) (Startstatus anzeigen, §988-§1000) — Service-
   Name, Containerstatus, Port, Healthcheck-Status als
   Mindestangaben → direkter Carrier-Field-Anker für
   `upStatusData`
-- `LH-FA-UP-004` (Umgebung stoppen, §1003-§1019) — `u-boot down`
+- [`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004-umgebung-stoppen) (Umgebung stoppen, §1003-§1019) — `u-boot down`
   mit `--volumes`-destructive-Opt-in
-- `LH-FA-CLI-005A` §234/§246/§254 — Confirmation-Gate für
+- [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) §234/§246/§254 — Confirmation-Gate für
   `down --volumes` (gemeinsam mit `remove --purge`, `init
   --force`, `config set` destructive paths)
-- `LH-NFA-USE-004` §1813 / §1841 — Minimalkontrakt-Pflicht
-- `LH-FA-CLI-007` §322-417 — Voll-Schema-Vertrag (NICHT für
+- [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1813 / §1841 — Minimalkontrakt-Pflicht
+- [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §322-417 — Voll-Schema-Vertrag (NICHT für
   up/down weil keine `--dry-run`-Variante, aber das
   `Data any`-Field gehört zur `cliJSONEnvelope`-Struktur)
 
@@ -92,7 +92,7 @@ Heute-Stand-Pre-Scan
 | Docker-Mutation | `engine.ComposeUp` + `engine.ComposePs`-Polling | `engine.ComposeDown` (+ optional `ComposeRm --volumes`) |
 | WARN-Emission heute | `renderUpDiagnostics(stdout, resp.Result.Diagnostics, quiet)` — auf **stdout** (M6 §T6) | `renderDownSuccess` — minimal output, keine Diagnostics |
 | Confirmer-Pfad | KEIN | `down --volumes` ruft Confirmer analog `remove --purge` (Spec §1015 + §254) |
-| ProgressSink | `stderr` für Compose-pull/create/start/healthcheck (LH-NFA-PERF-002) | `stderr` für compose-down-phases (LH-NFA-PERF-002) |
+| ProgressSink | `stderr` für Compose-pull/create/start/healthcheck ([`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002-startzeit-abhängig-von-docker)) | `stderr` für compose-down-phases ([`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002-startzeit-abhängig-von-docker)) |
 | Exit-Codes | 10 (no-yaml), 11 (Docker unreachable), 12 (Compose-Runtime) | 10 (no-yaml, confirmation refused), 11, 12 |
 | Allowlist heute | `jsonallowlist.go:74-75` Reject mit Follow-up `up-down` | analog |
 
@@ -149,7 +149,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
   healthcheck}` als `serviceStatus`-Sub-Struct mit `json:"…"`-
   Tags. **Single `port string`** (NICHT `ports []string`) —
   matched heutigen `domain.ServiceStatus.Port`-Display-String-
-  Vertrag (`cli/statusview.go:11ff`, Spec LH-FA-UP-003
+  Vertrag (`cli/statusview.go:11ff`, Spec [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003-startstatus-anzeigen)
   Mindestangabe "Port" Singular). Multi-Port-Form wäre eigener
   Sub-Decision-Pfad (Use-Case-Layer-Anpassung nötig — Folge-
   Slice falls Real-World-Bedarf). **Pointer-Wrap-Disziplin
@@ -175,7 +175,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
   Verlust. (c) Pattern-Konsistenz mit doctor's
   `serviceStatus`-Vorbild (T0-(c) Z.565-575) das ebenfalls
   plain-Strings nutzt. **Name** und **State** sind Pflicht-
-  Felder ohne omitempty (Spec LH-FA-UP-003 Mindestangabe).
+  Felder ohne omitempty (Spec [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003-startstatus-anzeigen) Mindestangabe).
 - ✅ **`downStatusData`-Carrier-Form** (T0-(h) revidiert nach
   Review-Finding HIGH-1 + Followup): matched den heutigen
   Port-Vertrag `DownResponse{RemovedVolumes bool}`
@@ -185,7 +185,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
   than a structured count, and inventing an 'unknown' sentinel
   value would force every caller to special-case it. If a
   future slice needs precise counts (e.g. for --json output,
-  LH-NFA-USE-004 V1), it would add a ComposePs diff
+  [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) V1), it would add a ComposePs diff
   before/after the call rather than parse the stderr stream."*
   Carrier-Form: `{removedVolumes bool}` — Spec-konform-minimal,
   matched Port. **Kein `omitempty`** auf dem Feld
@@ -228,7 +228,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
   und kollidiert semantisch.
 - ✅ **ProgressSink-Silencing im JSON-Mode** (T0-(c) R3-HIGH-2
   Form-festgezurrt): Compose-Phase-Streaming auf stderr
-  (LH-NFA-PERF-002 "pull/create/start/healthcheck phases stream
+  ([`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002-startzeit-abhängig-von-docker) "pull/create/start/healthcheck phases stream
   to stderr live") MUSS in `--json` unterdrückt werden, sonst
   polluten Live-Phasen-Logs den stderr für JSON-Konsumenten.
   Pattern-Erbe von init T0-(o) `ProgressPort`-Silencing — aber
@@ -257,7 +257,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
   Semantik festgezurrt** (R2-MED-2): bei `--volumes --json`
   OHNE `--yes` → `noopConfirmer.ConfirmRemoveVolumes` returnt
   `(false, nil)` → `ErrConfirmationRequired`-Envelope mit
-  `LH-FA-INIT-005`/Exit 10 (Symmetrie zum `--no-interactive`-
+  [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz)/Exit 10 (Symmetrie zum `--no-interactive`-
   Pfad). Konsistenz-Vertrag: JSON-Mode-Konsumenten erleben das
   **Confirmer-Silencing als Refuse-by-Default**, NICHT als
   Implicit-Auto-Confirm. User MUSS `--yes` explizit setzen für
@@ -282,17 +282,17 @@ u-boot down --volumes --json             # default interactive prompt — analog
 
   | # | Sentinel | LH-Code | Exit | Mapper-Heim | Begründung |
   | - | -------- | ------- | ---- | ----------- | ---------- |
-  | 1a | `driving.ErrUpFileSystem` (NEU in T2) | `LH-NFA-REL-003` | 14 | `mapUp` | FS-first damit Multi-`%w` mit FS+Docker auf FS-Klasse fällt (R2-HIGH-2 Defense) |
-  | 1b | `driving.ErrDownFileSystem` (NEU in T2) | `LH-NFA-REL-003` | 14 | `mapDown` | analog 1a, per-Subcommand-Sentinel |
-  | 2 | `driven.ErrDockerUnavailable` | `LH-NFA-REL-003` | 11 | `helper` | Docker-Daemon vor Compose-Runtime (Daemon ist Voraussetzung für Runtime) — Aufruf via `mapComposeRuntimeSentinel` aus beiden Mappers |
-  | 3 | `driven.ErrComposeRuntime` | `LH-NFA-REL-003` | 12 | `helper` | Compose-Runtime nach Daemon — Helper-Form |
-  | 4 | `driving.ErrStabilizationTimeout` | `LH-FA-UP-001` | 12 | `mapUp` | Up-spezifische Runtime-Klasse, eigene LH-Anchor |
-  | 5 | `driving.ErrConfirmationRequired` | `LH-FA-INIT-005` | 10 | `mapDown` | Confirmer-Refuse vor fachlichen Validations (geteilt mit init/remove) |
-  | 6 | `driving.ErrComposeFileMissing` | `LH-FA-UP-001` | 10 | `beide` | Fachliche Validierung (Datei-Schema), in `mapUp` UND `mapDown` (beide rufen `readComposeFile`) |
-  | 7 | `driving.ErrProjectNotInitialized` | `LH-FA-INIT-001` | 10 | `beide` | Pattern-Erbe generate (nicht add/remove — up/down sind Environment-Operations, kein Service-Add); cross-cutting in `mapUp` + `mapDown`. **Forward-Ref T8 §6.7 Cross-Slice-Pin** (R5-LOW-2): Cluster-Konvention dokumentiert dass derselbe Sentinel je nach Subcommand-Klasse zwei verschiedene LH-Codes liefert. |
-  | 8 | `cli.ErrInvalidTimeout` | `LH-FA-CLI-006` | 2 | `mapUp` | CLI-Form-Validierung (up-Local-Flag `--timeout`) |
-  | 9 | `cli.ErrConflictingModeFlags` | `LH-FA-CLI-005A` | 2 | `mapDown` | Mode-Mutex-Verträge (`--yes` × `--no-interactive`) |
-  | 10 | Default (unknown) | `LH-FA-CLI-006` | 1 | `beide` | Fallback in beiden Mappers |
+  | 1a | `driving.ErrUpFileSystem` (NEU in T2) | [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 14 | `mapUp` | FS-first damit Multi-`%w` mit FS+Docker auf FS-Klasse fällt (R2-HIGH-2 Defense) |
+  | 1b | `driving.ErrDownFileSystem` (NEU in T2) | [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 14 | `mapDown` | analog 1a, per-Subcommand-Sentinel |
+  | 2 | `driven.ErrDockerUnavailable` | [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 11 | `helper` | Docker-Daemon vor Compose-Runtime (Daemon ist Voraussetzung für Runtime) — Aufruf via `mapComposeRuntimeSentinel` aus beiden Mappers |
+  | 3 | `driven.ErrComposeRuntime` | [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 12 | `helper` | Compose-Runtime nach Daemon — Helper-Form |
+  | 4 | `driving.ErrStabilizationTimeout` | [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) | 12 | `mapUp` | Up-spezifische Runtime-Klasse, eigene LH-Anchor |
+  | 5 | `driving.ErrConfirmationRequired` | [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) | 10 | `mapDown` | Confirmer-Refuse vor fachlichen Validations (geteilt mit init/remove) |
+  | 6 | `driving.ErrComposeFileMissing` | [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) | 10 | `beide` | Fachliche Validierung (Datei-Schema), in `mapUp` UND `mapDown` (beide rufen `readComposeFile`) |
+  | 7 | `driving.ErrProjectNotInitialized` | [`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren) | 10 | `beide` | Pattern-Erbe generate (nicht add/remove — up/down sind Environment-Operations, kein Service-Add); cross-cutting in `mapUp` + `mapDown`. **Forward-Ref T8 §6.7 Cross-Slice-Pin** (R5-LOW-2): Cluster-Konvention dokumentiert dass derselbe Sentinel je nach Subcommand-Klasse zwei verschiedene LH-Codes liefert. |
+  | 8 | `cli.ErrInvalidTimeout` | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 2 | `mapUp` | CLI-Form-Validierung (up-Local-Flag `--timeout`) |
+  | 9 | `cli.ErrConflictingModeFlags` | [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) | 2 | `mapDown` | Mode-Mutex-Verträge (`--yes` × `--no-interactive`) |
+  | 10 | Default (unknown) | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 1 | `beide` | Fallback in beiden Mappers |
 
   **Mapper-Heim-Legende** (R4-MED-1): `mapUp` lebt in
   `mapUpErrorToDiagnostic` (cli/up.go), `mapDown` in
@@ -308,12 +308,12 @@ u-boot down --volumes --json             # default interactive prompt — analog
   CLI-Form (Rows 8-9) vor Default (Row 10). Damit fällt ein
   synthetisch konstruierter `fmt.Errorf("%w: %w",
   ErrUpFileSystem, ErrDockerUnavailable)` auf Row 1
-  (`LH-NFA-REL-003`/Exit 14), NICHT auf Row 2 (Exit 11).
+  ([`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)/Exit 14), NICHT auf Row 2 (Exit 11).
   T6-Pin verifiziert die Reihenfolge per konstruiertem
   Multi-Wrap. **Port-Kommentar-Co-Migration** (R3-HIGH-3, T2):
   Port-Kommentare in `up.go:43,89,97` haben heute
-  `LH-FA-CLI-006`-Anker (Pre-Mapper-Stand); T2 migriert diese
-  auf die Tabelle-Codes (`LH-FA-UP-001` für
+  [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-Anker (Pre-Mapper-Stand); T2 migriert diese
+  auf die Tabelle-Codes ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) für
   `ErrComposeFileMissing`/`ErrStabilizationTimeout`). Pattern-
   Erbe remove `removeservice.go:254` `ErrConfirmerUnavailable`-
   Kommentar-Migration.
@@ -461,7 +461,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
   User-Consent im JSON-Mode triggern würde —
   Security-by-Default-Verletzung. T6-Pin:
   `TestDown_VolumesJSONWithoutYes_EmitsErrConfirmationRequired`
-  verifiziert Exit 10 + `LH-FA-INIT-005`-Diagnostic.
+  verifiziert Exit 10 + [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz)-Diagnostic.
 
   **Code-Pfad-Form festgezurrt** (R3-MED-2): die Truth-Table
   `runConfirmationGate(ctx, req)` in `downservice.go:109-131`
@@ -525,23 +525,23 @@ u-boot down --volumes --json             # default interactive prompt — analog
 - **T0-(f) LH-Code-Klassifikation für Docker-Runtime-Klasse**
   (Review-Finding MED-2 Risiko-Klarstellung):
   `ErrDockerUnavailable` → Exit 11 ist gesetzt, aber welcher
-  LH-Code? Spec hat `LH-NFA-REL-003` für FS-Failure und
-  `LH-FA-CLI-006` als Default. Für Docker-Daemon-
+  LH-Code? Spec hat [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) für FS-Failure und
+  [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) als Default. Für Docker-Daemon-
   Unverfügbarkeit gibt's keinen dedizierten LH-Code.
-  Sub-Decision: (i) neuer `LH-NFA-REL-005`-Code ODER (ii)
-  Konsolidierung auf existierenden `LH-NFA-REL-003` mit
+  Sub-Decision: (i) neuer dedizierter `LH-NFA-REL-*`-Code ODER (ii)
+  Konsolidierung auf existierenden [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) mit
   Sub-Semantik-Dehnung (analog remove's Triple-Use von
-  `LH-FA-ADD-005`).
+  [`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern)).
   Plan-Vorschlag: **(ii) Konsolidierung mit explizitem
-  Doku-/Test-Pin-Block**. Risiko (Review-MED-2): `LH-NFA-REL-003`
+  Doku-/Test-Pin-Block**. Risiko (Review-MED-2): [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)
   ist heute im Repo stark mit technischen Persistenz-/FS-
   Fehlern UND Exit 14 assoziiert. Bei Konsolidierung MUSS der
   Slice drei Pins liefern:
   (1) **Doku-Pin** in `cli-json-output.md` §6.7: dass derselbe
-      `LH-NFA-REL-003`-Code mit Exit 11 (Docker-Daemon) oder
+      [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)-Code mit Exit 11 (Docker-Daemon) oder
       Exit 12 (Compose-Runtime) erscheinen kann, NICHT nur 14
       (FS) — Disambiguation via `(code, exitCode)`-Tupel
-      analog remove's `LH-FA-ADD-007` Multi-Use (ERROR + WARN
+      analog remove's [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) Multi-Use (ERROR + WARN
       via `(code, level)`).
   (2) **Test-Pin** `TestUp_DockerUnavailable_DiagnosticCodeIs
       RELN003_ExitCode11` verifiziert die Kombination explizit.
@@ -553,7 +553,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
       Wraps in `upservice.go:105/138/148` und
       `downservice.go:81/97` nutzen rohes `%w` ohne typed
       Sentinel — sie fallen heute auf Default-Mapper
-      `LH-FA-CLI-006`/Exit 1. **Konsequenz**: ohne neuen
+      [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)/Exit 1. **Konsequenz**: ohne neuen
       Sentinel ist der Switch-Order-Pin ein Phantom-Test
       (es gibt keinen FS-Sentinel der matchen würde —
       konstruierter Multi-Wrap wäre nur `ErrDockerUnavailable
@@ -566,13 +566,13 @@ u-boot down --volumes --json             # default interactive prompt — analog
       (`upservice.go:105/138/148`, `downservice.go:81/97`)
       auf Multi-`%w` mit dem neuen Sentinel. Mapper-Tabelle
       T0-(e) ergänzt um `ErrUpFileSystem`/
-      `ErrDownFileSystem` → `LH-NFA-REL-003`/Exit 14
+      `ErrDownFileSystem` → [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)/Exit 14
       (kanonische FS-Klasse, kommt nur zustande wenn der
       ExitCode-Helper KEIN driven-Sentinel zuvor matched).
       Switch-Order-Pin ist dann **real, nicht Phantom**:
       konstruierter `fmt.Errorf("%w: %w", ErrUpFileSystem,
       ErrDockerUnavailable)` liefert `diagnostics[0].code =
-      LH-NFA-REL-003` (Mapper FS-first via Row 1) UND
+      [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) (Mapper FS-first via Row 1) UND
       `exitCode = 11` (ExitCode-Helper Driven-first cli.go:290).
       **T7-MED-1 by-design**: die zwei Pfade sind getrennt —
       Mapper bestimmt die FS-Code-Klasse, ExitCode differenziert
@@ -582,13 +582,13 @@ u-boot down --volumes --json             # default interactive prompt — analog
       disambiguiert via (`code, exitCode`)-Tupel per T8 §6.7-
       Doku-Pin. Pattern-Erbe remove `mapRemoveErrorToDiagnostic`
       Switch-Order T0-(e).
-  Alternative-Wechsel auf neuen `LH-NFA-REL-005`: zieht
+  Alternative-Wechsel auf einen neuen dedizierten `LH-NFA-REL-*`-Code: zieht
   Spec-Erweiterung und Lastenheft-Edit. Plan bleibt bei (ii)
   weil Spec-Footprint-Stabilität V1-prioritär.
 - **T0-(g) `upStatusData`-Field-Granularität** (Review-Finding
   MED-2 Port-Vertrag-Korrektur): doctor T0-(c) zitiert das
   Vorbild als `Services []serviceStatus`, aber `serviceStatus`-
-  Felder sind nicht festgenagelt. Spec LH-FA-UP-003 fordert:
+  Felder sind nicht festgenagelt. Spec [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003-startstatus-anzeigen) fordert:
   Name, Containerstatus, Port (Singular), Healthcheck
   (optional). Heutiger `domain.ServiceStatus.Port`
   (`cli/statusview.go:11ff`) ist **single Display-String**, NICHT
@@ -614,7 +614,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
   human-readable progress stream rather than a structured
   count, and inventing an 'unknown' sentinel value would force
   every caller to special-case it. If a future slice needs
-  precise counts (e.g. for --json output, LH-NFA-USE-004 V1),
+  precise counts (e.g. for --json output, [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) V1),
   it would add a ComposePs diff before/after the call rather
   than parse the stderr stream."* Drei Sub-Decision-Optionen:
   (i) **`{removedVolumes bool}`** — 1:1-Echo von
@@ -637,7 +637,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
   Plan-Empfehlung **(i) `bool`** — matched heutigen Port,
   Spec-konform, kein Architektur-Eingriff. Option (ii) als
   **Out-of-Scope** Carveout mit eigenem Folge-Slice
-  `slice-v1-down-volumes-named-list` (Trigger: Real-World-
+  [`slice-v1-down-volumes-named-list`](../open/slice-v1-down-volumes-named-list.md) (Trigger: Real-World-
   Konsumenten-Bedarf nach Namen-Liste).
 - **T0-(i) Mid-`ComposeUp`-Failure-Capture-Vertrag** (Review-
   Finding HIGH-2 Port/Enum-Vertrag-Korrektur):
@@ -675,7 +675,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
   matched heutigen Port-Vertrag, Spec-konform-minimal, kein
   Application-Refactor. Option (ii) als **Out-of-Scope**
   Carveout mit eigenem Folge-Slice
-  `slice-v1-up-partial-snapshot-on-failure` (Trigger: Real-
+  [`slice-v1-up-partial-snapshot-on-failure`](../open/slice-v1-up-partial-snapshot-on-failure.md) (Trigger: Real-
   World-Bedarf nach "was lief schon" bei Mid-Failure-Debugging
   + Domain-Enum-Erweiterung).
 - **T0-(j) `--timeout=0` Fire-and-Forget im JSON-Mode**
@@ -735,7 +735,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
 | T5 | **CLI-RunE-Migration für up + down** (sechs Sub-Pins). Strukturierte Aufschlüsselung in §T5-Details unten (Pre-T5-Hygiene-Entflechtung analog T2): Sanitizer-Helper-Extraktion / Allowlist-Migration / Mapper-Files-Anlage / `data`-Carrier-Structs / WARN-Migration / `runUp`/`runDown`-Refactor. | ~250 | T2 |
 | T6 | Acceptance-Tests: **Plan-Soll ~14-18, IST 28** (T7-Adressierung erhöht). Pin-Klassen: Envelope-Pin both Subcommands, Idempotenz-Pin für down, `--quiet --json`-Pin, `SilenceProgress`-Pin (R3-HIGH-2 Form (d)), Confirmer-Branch-Pin für `down --volumes --json` ohne `--yes` (R2-MED-2), ConflictingModeFlags-Pin, Service-Sentinels-Pins (Rows 1-9 der Mapper-Tabelle), Multi-`%w`-Switch-Order-Pin FS-first für FS+Docker (R2-HIGH-2 + R3-HIGH-1), Path-Leak-Sanitizer-Pin (R2-MED-5), Empty-Array-Pins für services+diagnostics (R2-LOW-3), CommandConfigGate-Refuse-by-Default-Pin (R2-MED-2 Symmetrie-Pin) | ~500-600 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe) | ~50 | T6 |
-| T8 | Closure: CHANGELOG, **`cli-json-output.md` §6/§6.7/§7** mit konkretem **`(code, exitCode)`-Tupel-Disambiguation-Block** in §6.7 (R3-MED-5: Pattern-Vorlage analog remove `LH-FA-ADD-007` Multi-Use; verbatim Beispiel: `LH-NFA-REL-003`/Exit 14 ist FS, Exit 11 ist Docker-Daemon, Exit 12 ist Compose-Runtime — Konsumenten MÜSSEN auf (`code, exitCode`)-Tupel filtern, nicht nur auf `code`). **Cross-Slice-Klassen-Pin** (R4-MED-2): `ErrProjectNotInitialized` mappt auf **`LH-FA-INIT-001`** bei Environment-Subcommands (up/down/generate) UND auf **`LH-FA-ADD-001`** bei Service-Subcommands (add/remove) — explicit dokumentieren als bewusste Cluster-Konvention, damit Cluster-Closure-Audit den Drift nicht als Bug erfindet. §7 zwei neue Zeilen "nur ReadFile" für up/down; roadmap done-Zähler 5→6, **carveouts.md** drei neue Einträge (Recreate-Warnings, Volume-Named-Liste, Partial-Snapshot — siehe Out-of-Scope-Block §"Strukturierte Multi-Port-Liste" für vierten Carveout-Trigger falls Real-World-Druck, R3-Bonus-Klarstellung), **vier open/-Stubs** schaffen (R2-MED-1 Memory-`carveouts_need_plans`): `slice-v1-recreate-detection`, `slice-v1-down-volumes-named-list`, `slice-v1-up-partial-snapshot-on-failure`, ggf. `slice-v1-multi-port-services`. **envelope-consolidation-Stub-Update** (R3-MED-3+R3-MED-4 plus R4-MED-3): Sub-Decision 2 dort als "festgelegt durch up-down T5" markieren; Wrap-Site-Inventar erläutern dass up/down-Sites schon abgedeckt sind; Extraktions-Quelle auf `cli/sanitize.go` aktualisieren; **plus Z. 159-163 dort aktualisieren** dass `down --volumes` ebenfalls `SilenceConfirmer`-Pattern nutzt (übernommen aus up-down T2, identisch zu remove) — der Confirmer-Swap-Carveout dort ist nicht mehr remove-spezifisch. Slice nach `done/` mit DoD-Hash-Tabelle | — (Doku) | T7 |
+| T8 | Closure: CHANGELOG, **`cli-json-output.md` §6/§6.7/§7** mit konkretem **`(code, exitCode)`-Tupel-Disambiguation-Block** in §6.7 (R3-MED-5: Pattern-Vorlage analog remove [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) Multi-Use; verbatim Beispiel: [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)/Exit 14 ist FS, Exit 11 ist Docker-Daemon, Exit 12 ist Compose-Runtime — Konsumenten MÜSSEN auf (`code, exitCode`)-Tupel filtern, nicht nur auf `code`). **Cross-Slice-Klassen-Pin** (R4-MED-2): `ErrProjectNotInitialized` mappt auf **[`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren)** bei Environment-Subcommands (up/down/generate) UND auf **[`LH-FA-ADD-001`](../../../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl)** bei Service-Subcommands (add/remove) — explicit dokumentieren als bewusste Cluster-Konvention, damit Cluster-Closure-Audit den Drift nicht als Bug erfindet. §7 zwei neue Zeilen "nur ReadFile" für up/down; roadmap done-Zähler 5→6, **carveouts.md** drei neue Einträge (Recreate-Warnings, Volume-Named-Liste, Partial-Snapshot — siehe Out-of-Scope-Block §"Strukturierte Multi-Port-Liste" für vierten Carveout-Trigger falls Real-World-Druck, R3-Bonus-Klarstellung), **vier open/-Stubs** schaffen (R2-MED-1 Memory-`carveouts_need_plans`): [`slice-v1-recreate-detection`](../open/slice-v1-recreate-detection.md), [`slice-v1-down-volumes-named-list`](../open/slice-v1-down-volumes-named-list.md), [`slice-v1-up-partial-snapshot-on-failure`](../open/slice-v1-up-partial-snapshot-on-failure.md), ggf. [`slice-v1-multi-port-services`](../open/slice-v1-multi-port-services.md). **envelope-consolidation-Stub-Update** (R3-MED-3+R3-MED-4 plus R4-MED-3): Sub-Decision 2 dort als "festgelegt durch up-down T5" markieren; Wrap-Site-Inventar erläutern dass up/down-Sites schon abgedeckt sind; Extraktions-Quelle auf `cli/sanitize.go` aktualisieren; **plus Z. 159-163 dort aktualisieren** dass `down --volumes` ebenfalls `SilenceConfirmer`-Pattern nutzt (übernommen aus up-down T2, identisch zu remove) — der Confirmer-Swap-Carveout dort ist nicht mehr remove-spezifisch. Slice nach `done/` mit DoD-Hash-Tabelle | — (Doku) | T7 |
 
 LOC-Bilanz: **Plan ~1035-1135 / IST ~1220+** (T7-LOW-6 Drift-
 Doku):
@@ -767,7 +767,7 @@ LOW=6**, alle adressiert vor T8-Closure:
 | # | Sev | Finding | Adressierung |
 | - | --- | --- | --- |
 | HIGH-1 | HIGH | `runConfirmationGate` Row 4 `noopConfirmer`-Branch wird durch CLI-Acceptance-Tests nie ausgeführt (Stub fängt UC vor dem Branch ab) — Plan-T6-Cell "CommandConfigGate-Refuse-by-Default-Pin" nicht erfüllt | Application-Layer-Test `TestDownService_SilenceConfirmer_True_SwapsToNoopConfirmer` in `downservice_test.go` mit Defense-Pin auf `fakeConfirmer.removeVolumesCalls == 0` plus Contrast-Pin `SilenceConfirmer_False` |
-| MED-1 | MED | Plan-Wortlaut Z. 547-552: "MUSS Exit 14 liefern" — real: Mapper-FS-first → code LH-NFA-REL-003, ExitCode-Helper Driven-first → exit 11. Zwei-Pfad-Disambiguation als by-design dokumentiert. | Plan-Text präzisiert (siehe Z. 549-555); T6-Test-Kommentar von Drift- auf by-design-Wortlaut umgestellt |
+| MED-1 | MED | Plan-Wortlaut Z. 547-552: "MUSS Exit 14 liefern" — real: Mapper-FS-first → code [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern), ExitCode-Helper Driven-first → exit 11. Zwei-Pfad-Disambiguation als by-design dokumentiert. | Plan-Text präzisiert (siehe Z. 549-555); T6-Test-Kommentar von Drift- auf by-design-Wortlaut umgestellt |
 | MED-2 | MED | Mapper-Row 3 `ErrComposeRuntime` ungepinnt | Neuer Pin `TestUpJSON_ComposeRuntime_LHNFAREL003_Exit12` |
 | MED-3 | MED | Mapper-Row 4 `ErrStabilizationTimeout` ungepinnt | Neuer Pin `TestUpJSON_StabilizationTimeout_LHFAUP001_Exit12` |
 | MED-4 | MED | `confirmer := driven.Confirmer(s.confirmer)` Type-Cast redundant | `confirmer := s.confirmer` (Lesbarkeit) |
@@ -851,16 +851,16 @@ Wahrheiten (R3-HIGH-3 + R5-MED-2 + R5-HIGH-1 + R6-MED-1).
 
 | Zeile | Sentinel | Pre-T2 | Post-T2 | Begründung |
 | --- | --- | --- | --- | --- |
-| 43 | `ErrInvalidTimeout` | `LH-FA-CLI-006 exit code 2` | unverändert | CLI-Form-Validierung |
+| 43 | `ErrInvalidTimeout` | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) exit code 2 | unverändert | CLI-Form-Validierung |
 | 50 | (ProgressSink-Doku) | `"nil is treated as io.Discard by the application service"` | `"nil is treated as io.Discard."` | R5-HIGH-1 + R6-MED-1: schlichte Form analog `down.go:66` + `docker_engine.go:51`; adapter-agnostic, zukunftsstabil. Code-Realität: `engine.go:91,115,277` `progressSinkOrDiscard` toleriert nil — Verantwortung im Adapter, Kommentar bindet sich aber nicht an heutigen Adapter |
-| 89 | `ErrComposeFileMissing` | `LH-FA-CLI-006 exit code 10` | `LH-FA-UP-001 exit code 10` | Fachliche Validierung |
-| 97 | `ErrStabilizationTimeout` | `LH-FA-CLI-006 exit code 12` | `LH-FA-UP-001 exit code 12` | Up-spezifische Runtime-Klasse |
+| 89 | `ErrComposeFileMissing` | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) exit code 10 | [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) exit code 10 | Fachliche Validierung |
+| 97 | `ErrStabilizationTimeout` | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) exit code 12 | [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) exit code 12 | Up-spezifische Runtime-Klasse |
 
 **`down.go`** (eine Stelle, R5-MED-2 vergessene Co-Migration):
 
 | Zeile | Sentinel | Pre-T2 | Post-T2 | Begründung |
 | --- | --- | --- | --- | --- |
-| 90 | `ErrConfirmationRequired` | `LH-FA-CLI-006 exit code 10` | `LH-FA-INIT-005 exit code 10` | Confirmer-Refuse-Klasse (geteilt mit init/remove) |
+| 90 | `ErrConfirmationRequired` | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) exit code 10 | [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) exit code 10 | Confirmer-Refuse-Klasse (geteilt mit init/remove) |
 
 #### Reihenfolge-Pflicht
 
@@ -983,7 +983,7 @@ wendbar. `runUp` mapped `resp.Warnings` analog
 `level: "warn"`.
 
 Recreate-Warnings selbst sind V1-Out-of-Scope (T0-(k) Carveout
-→ Folge-Slice `slice-v1-recreate-detection`); Type ist proaktiv
+→ Folge-Slice [`slice-v1-recreate-detection`](../open/slice-v1-recreate-detection.md)); Type ist proaktiv
 vorhanden, Detection wandert.
 
 #### `runUp`/`runDown`-Refactor
@@ -1038,7 +1038,7 @@ weil up/down keine Voll-Schema-Pfade tragen.
   `DockerEngine.ListVolumes`-Port-Method plus ComposePs-Diff-
   Pattern vor/nach `ComposeDown` (so der heutige Port-Kommentar
   selbst). Folge-Slice
-  `slice-v1-down-volumes-named-list` (Trigger: Real-World-
+  [`slice-v1-down-volumes-named-list`](../open/slice-v1-down-volumes-named-list.md) (Trigger: Real-World-
   Konsumenten-Bedarf nach Namen-Liste z. B. für Audit-Logs oder
   CI-Cleanup-Scripts; aktueller `removedVolumes: bool` ist
   Spec-konform-minimal).
@@ -1051,7 +1051,7 @@ weil up/down keine Voll-Schema-Pfade tragen.
   (c) `domain.ContainerState`-Enum-Erweiterung um `StateFailed`
   mit Migrations-Pflicht für alle Switch-Statements. Großer
   Architektur-Eingriff. Folge-Slice
-  `slice-v1-up-partial-snapshot-on-failure` (Trigger: Real-
+  [`slice-v1-up-partial-snapshot-on-failure`](../open/slice-v1-up-partial-snapshot-on-failure.md) (Trigger: Real-
   World-Bedarf nach "was lief schon"-Mid-Failure-Debugging,
   z. B. interaktive CI-Diagnose).
 - **`up --service <name>`-Selective-Form**: heute liefert `up`
@@ -1130,7 +1130,7 @@ weil up/down keine Voll-Schema-Pfade tragen.
   Display-String** (`"5432:5432, 127.0.0.1:9091:9091"`).
   JSON-Konsument bekommt im Stub-Form schon Multi-Port-Werte
   als single `"port"`-CSV. Ein dedizierter Folge-Slice
-  `slice-v1-multi-port-services` macht NUR Sinn für
+  [`slice-v1-multi-port-services`](../open/slice-v1-multi-port-services.md) macht NUR Sinn für
   **strukturierte Liste** (`ports []string` mit pro-Port-
   Splitting für Konsumenten-Parse-Erleichterung), nicht für
   Multi-Port-Reporting-Fähigkeit-an-sich (die existiert schon).

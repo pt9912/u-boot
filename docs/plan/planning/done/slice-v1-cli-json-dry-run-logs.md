@@ -38,7 +38,7 @@
 ## Auslöser
 
 Cluster-Slice §T0-Outcomes (a) macht `--json` für jeden
-Subcommand verbindlich (`LH-NFA-USE-004` §1813). `u-boot logs`
+Subcommand verbindlich ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1813). `u-boot logs`
 ist nach `up`/`down` der nächste Read-only-Subcommand und der
 **erste Streaming-Subcommand** — alle bisherigen Folge-Slices
 (doctor/add/init/generate/remove/up-down) liefern Single-
@@ -48,10 +48,10 @@ strukturell anders: ohne `--follow` Bounded-Output mit
 
 Spec-Bezug:
 
-- `LH-FA-UP-005` (Logs anzeigen) — Streaming-Vertrag + Tail-
+- [`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen) (Logs anzeigen) — Streaming-Vertrag + Tail-
   Semantik.
-- `LH-NFA-USE-004` §1813 / §1841 — Minimalkontrakt-Pflicht.
-- `LH-FA-CLI-007` §322-417 — Voll-Schema-Vertrag (NICHT für
+- [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1813 / §1841 — Minimalkontrakt-Pflicht.
+- [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §322-417 — Voll-Schema-Vertrag (NICHT für
   logs weil keine `--dry-run`-Variante; Plan-Anker bleibt für
   `cliJSONEnvelope`-Struktur).
 
@@ -114,7 +114,7 @@ docs-check).
   (T0-(c) Sub-Decision).
 - ✅ **JSON-Lines-Pfad** (falls T0-(a) Option B): pro Compose-
   Log-Zeile ein NDJSON-Object `{"level": "info", "code":
-  "LH-FA-UP-005", "message": "<line>", "service":
+  "[`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen)", "message": "<line>", "service":
   "<prefix>"}` auf stdout. Letzte Zeile ein Final-Envelope
   mit `status`/`exitCode`. **Spec-§1841-Vertrag-Bruch**:
   Konsument bekommt nicht EINEN Envelope sondern N — als
@@ -392,23 +392,23 @@ docs-check).
 
   | # | Sentinel | LH-Code | Exit | Mapper-Heim | Begründung |
   | - | -------- | ------- | ---- | ----------- | ---------- |
-  | 1 | `driving.ErrLogsFileSystem` (NEU, T2) | `LH-NFA-REL-003` | 14 | `mapLogs` | FS-first damit Multi-`%w` mit FS+Docker auf FS-Klasse fällt |
-  | 2 | `driven.ErrDockerUnavailable` | `LH-NFA-REL-003` | 11 | `helper` | shared via `mapComposeRuntimeSentinel` aus up-down T5 |
-  | 3 | `driven.ErrComposeRuntime` | `LH-NFA-REL-003` | 12 | `helper` | dito |
-  | 4 | `driving.ErrComposeFileMissing` | `LH-FA-UP-001` | 10 | `mapLogs` | Cluster-Konsens mit up/down (T0-(g) festgezurrt: same Sentinel → same LH-Code) |
-  | 5 | `driving.ErrProjectNotInitialized` | `LH-FA-INIT-001` | 10 | `mapLogs` | Pattern-Erbe up/down/generate (Environment-Operation) |
-  | 6 | `domain.ErrInvalidServiceName` | `LH-FA-INIT-006` | 10 | `mapLogs` | Pattern-Erbe init |
-  | 7 | `cli.ErrFollowJSONNotSupported` (NEU, T5) | `LH-FA-CLI-006` | 2 | `mapLogs` | T0-(a) Option (A) Reject-Pfad — Pre-T6-Review MED-1 Plan-Drift-Fix |
-  | 8 | `cli.ErrInvalidLogsTail` | `LH-FA-CLI-006` | 2 | `mapLogs` | CLI-Form-Validierung |
-  | 9 | Default (unknown) | `LH-FA-CLI-006` | 1 | `mapLogs` | Fallback |
+  | 1 | `driving.ErrLogsFileSystem` (NEU, T2) | [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 14 | `mapLogs` | FS-first damit Multi-`%w` mit FS+Docker auf FS-Klasse fällt |
+  | 2 | `driven.ErrDockerUnavailable` | [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 11 | `helper` | shared via `mapComposeRuntimeSentinel` aus up-down T5 |
+  | 3 | `driven.ErrComposeRuntime` | [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 12 | `helper` | dito |
+  | 4 | `driving.ErrComposeFileMissing` | [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) | 10 | `mapLogs` | Cluster-Konsens mit up/down (T0-(g) festgezurrt: same Sentinel → same LH-Code) |
+  | 5 | `driving.ErrProjectNotInitialized` | [`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren) | 10 | `mapLogs` | Pattern-Erbe up/down/generate (Environment-Operation) |
+  | 6 | `domain.ErrInvalidServiceName` | [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung) | 10 | `mapLogs` | Pattern-Erbe init |
+  | 7 | `cli.ErrFollowJSONNotSupported` (NEU, T5) | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 2 | `mapLogs` | T0-(a) Option (A) Reject-Pfad — Pre-T6-Review MED-1 Plan-Drift-Fix |
+  | 8 | `cli.ErrInvalidLogsTail` | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 2 | `mapLogs` | CLI-Form-Validierung |
+  | 9 | Default (unknown) | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 1 | `mapLogs` | Fallback |
 
 - **T0-(g) `ErrComposeFileMissing` LH-Code Cluster-Konsens**
   (R1-MED-2 festgezurrt): up/down haben das auf
-  `LH-FA-UP-001` gemappt. Cluster-Konvention "same Sentinel →
+  [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) gemappt. Cluster-Konvention "same Sentinel →
   same LH-Code" (R4-MED-2 Pattern aus up-down) gilt auch für
   logs — `ErrComposeFileMissing` ist derselbe Port-Sentinel
   egal welcher Subcommand ihn auslöst. Plan-Empfehlung
-  **festgezurrt**: **`LH-FA-UP-001`** für Cluster-Konsistenz.
+  **festgezurrt**: **[`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten)** für Cluster-Konsistenz.
   Mapper-Tabelle Z. 235 entsprechend korrigiert (R1-MED-2
   Tabellen-Drift behoben).
 
@@ -529,13 +529,13 @@ docs-check).
 | - | --- | --- | --- |
 | T0 | Discovery + Sub-Decisions (a)-(k) klären; Review-Runden | — (Plan) | — |
 | T1 | **Entfällt** (analog up-down T1): `cli/sanitize.go` + `cli/composesentinel.go`-Helper existieren bereits aus up-down T5 | — (entfällt) | T0 |
-| T2 | Port-Types: **`driving.ErrLogsFileSystem`-Sentinel** (T0-(e) Option (i) festgezurrt, R1-MED-1); Read-spezifische Message-Form `"logs: filesystem read failed"`; Heim-Position in `port/driving/logs.go` vor dem `LogsUseCase`-Interface (Pre-T6-Review LOW-5 Wortlaut-Fix: `logs.go` hat heute keinen eigenen Sentinel-Cluster; `ErrComposeFileMissing` lebt in `up.go`, daher kein "vor ErrComposeFileMissing"-Pattern direkt anwendbar — der Sentinel wird vor dem Interface-Block platziert analog `ErrInvalidLogsTail`-Position in `cli/logs.go`). Plus: **`logsFlags.JSON bool` + `logsFlags.Quiet bool` Felder** im CLI-Layer-Struct (T0-(j)(ii) festgezurrt, R1-MED-4). KEIN `SilenceProgress`-Field — `LogsRequest` hat `OutputSink io.Writer`, kein ProgressSink. Co-Migration der heutigen Port-Sentinel-Kommentare falls heute generische `LH-FA-CLI-006`-Anker (Code-Recon in T2). **`checkComposeFile`-Cluster-Code-Konsistenz** (R3-MED-1): `downservice.go:57/89/93` nutzt `checkComposeFilePresent` (Suffix-Drift gegen `upservice.go`/`logsservice.go` die `checkComposeFile` nutzen). T2 lässt den Drift **bewusst bestehen** weil Rename-Refactor in `downservice.go` Out-of-Scope für logs-Slice ist (separater Cluster-Hygiene-Slice oder Cluster-T_close-Tranche). T4 entfällt (kein Composition-Root-Wechsel). | ~70 | T0 |
+| T2 | Port-Types: **`driving.ErrLogsFileSystem`-Sentinel** (T0-(e) Option (i) festgezurrt, R1-MED-1); Read-spezifische Message-Form `"logs: filesystem read failed"`; Heim-Position in `port/driving/logs.go` vor dem `LogsUseCase`-Interface (Pre-T6-Review LOW-5 Wortlaut-Fix: `logs.go` hat heute keinen eigenen Sentinel-Cluster; `ErrComposeFileMissing` lebt in `up.go`, daher kein "vor ErrComposeFileMissing"-Pattern direkt anwendbar — der Sentinel wird vor dem Interface-Block platziert analog `ErrInvalidLogsTail`-Position in `cli/logs.go`). Plus: **`logsFlags.JSON bool` + `logsFlags.Quiet bool` Felder** im CLI-Layer-Struct (T0-(j)(ii) festgezurrt, R1-MED-4). KEIN `SilenceProgress`-Field — `LogsRequest` hat `OutputSink io.Writer`, kein ProgressSink. Co-Migration der heutigen Port-Sentinel-Kommentare falls heute generische [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-Anker (Code-Recon in T2). **`checkComposeFile`-Cluster-Code-Konsistenz** (R3-MED-1): `downservice.go:57/89/93` nutzt `checkComposeFilePresent` (Suffix-Drift gegen `upservice.go`/`logsservice.go` die `checkComposeFile` nutzen). T2 lässt den Drift **bewusst bestehen** weil Rename-Refactor in `downservice.go` Out-of-Scope für logs-Slice ist (separater Cluster-Hygiene-Slice oder Cluster-T_close-Tranche). T4 entfällt (kein Composition-Root-Wechsel). | ~70 | T0 |
 | T3 | Application-Layer: Multi-`%w`-Wrap-Migration der **zwei FS-Read-Stellen** (`logsservice.go:117-127` `checkProjectInitialized` + `:133-143` `checkComposeFile`) auf `ErrLogsFileSystem`. KEIN ProgressSink-Branch nötig (OutputSink ist Stream-Sink, nicht Phase-Sink). KEIN `LogsResponse`-Field-Erweiterung (`TerminatedBy`-Feld verworfen via T0-(d)(i) `ctx.Err()`-Check). | ~30 | T2 |
 | T4 | **Entfällt** (analog up-down T4): Composition-Root `cmd/uboot/main.go` hat heute schon `NewLogsService` mit allen Deps. T2 führt nur Port-Sentinel + CLI-Flag-Fields ein — kein Service-Wiring-Wechsel. | — (entfällt) | T3 |
-| T5 | CLI-RunE: **`runLogs(ctx, stdout, errOut io.Writer, args, flags, uc, getwd)`-Signatur-Refactor** (R2-HIGH-3 Cluster-Pattern-Konsistenz mit up/down/remove `up.go:133`/`down.go:128`/`remove.go:253`) + `logsFlags.JSON`/`logsFlags.Quiet` Fields durchreichen analog up/down (T0-(j)(ii)). Allowlist-Migration `"u-boot logs": true` in `jsonAllowlist()`. **`isFilesystemError`-Co-Migration** (`cli/cli.go:401-428`, R1-MED-6): `driving.ErrLogsFileSystem` ergänzen damit Exit-Code-Mapping auf 14 fällt. Neuer `mapLogsErrorToDiagnostic` mit Switch-Order T0-(f). Pre-UC-Validation-Pfade via `reportError` (Single-Envelope-Form). **`--follow --json`-Reject** im CLI-Layer vor UC-Aufruf: ErrFollowJSONNotSupported / Exit 2 (LH-FA-CLI-006) — gepinnt durch T6-Test. **Single-Envelope-Pfad** (T0-(a) Option (A)): Compose-Output wird im Application-Layer/CLI-Layer in `data.lines []string` gepuffert; nach UC-Return ein `newDataEnvelope("logs", "", data, warnDiags, 0)`. Sanitizer-Aufrufe via `cli/sanitize.go`. | ~150-200 | T2 |
-| T6 | Acceptance-Tests: **~14-16 Tests** (Pre-T6-Review-Korrektur — Reviewer-Empfehlung höher als ursprüngliche 10-12; Pre-T8-Bestätigungsrunde MED-2 ergänzt FS+Docker-Defense-Pin): bounded `--tail`-Pin, `--follow --json`-Reject-Pin (LH-FA-CLI-006/Exit 2 — T0-(a) Option (A) Verbatim), Validation-Order-Pin (`--follow --json --tail=-1` → Follow-JSON-Reject zuerst, T0-(i)), `--quiet --json`-Pin, Mapper-Rows 1-9 (ErrLogsFileSystem, ErrDockerUnavailable, ErrComposeRuntime, ErrComposeFileMissing, ErrProjectNotInitialized, ErrInvalidServiceName, ErrFollowJSONNotSupported, ErrInvalidLogsTail, Default), Path-Leak-Sanitizer-Pin, Empty-`data.lines`-Pin (Empty-Service-Set), Trailing-Newline-Strip-Pin, **FS+Docker-Multi-`%w`-Switch-Order-Defense-Pin (`_ByDesign`-Suffix; ExitCode-Helper-Driven-first vs. Mapper-FS-first per §6.7 (code, exitCode)-Tupel-Disambiguation)**. | ~400-500 | T5 |
+| T5 | CLI-RunE: **`runLogs(ctx, stdout, errOut io.Writer, args, flags, uc, getwd)`-Signatur-Refactor** (R2-HIGH-3 Cluster-Pattern-Konsistenz mit up/down/remove `up.go:133`/`down.go:128`/`remove.go:253`) + `logsFlags.JSON`/`logsFlags.Quiet` Fields durchreichen analog up/down (T0-(j)(ii)). Allowlist-Migration `"u-boot logs": true` in `jsonAllowlist()`. **`isFilesystemError`-Co-Migration** (`cli/cli.go:401-428`, R1-MED-6): `driving.ErrLogsFileSystem` ergänzen damit Exit-Code-Mapping auf 14 fällt. Neuer `mapLogsErrorToDiagnostic` mit Switch-Order T0-(f). Pre-UC-Validation-Pfade via `reportError` (Single-Envelope-Form). **`--follow --json`-Reject** im CLI-Layer vor UC-Aufruf: ErrFollowJSONNotSupported / Exit 2 ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)) — gepinnt durch T6-Test. **Single-Envelope-Pfad** (T0-(a) Option (A)): Compose-Output wird im Application-Layer/CLI-Layer in `data.lines []string` gepuffert; nach UC-Return ein `newDataEnvelope("logs", "", data, warnDiags, 0)`. Sanitizer-Aufrufe via `cli/sanitize.go`. | ~150-200 | T2 |
+| T6 | Acceptance-Tests: **~14-16 Tests** (Pre-T6-Review-Korrektur — Reviewer-Empfehlung höher als ursprüngliche 10-12; Pre-T8-Bestätigungsrunde MED-2 ergänzt FS+Docker-Defense-Pin): bounded `--tail`-Pin, `--follow --json`-Reject-Pin ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)/Exit 2 — T0-(a) Option (A) Verbatim), Validation-Order-Pin (`--follow --json --tail=-1` → Follow-JSON-Reject zuerst, T0-(i)), `--quiet --json`-Pin, Mapper-Rows 1-9 (ErrLogsFileSystem, ErrDockerUnavailable, ErrComposeRuntime, ErrComposeFileMissing, ErrProjectNotInitialized, ErrInvalidServiceName, ErrFollowJSONNotSupported, ErrInvalidLogsTail, Default), Path-Leak-Sanitizer-Pin, Empty-`data.lines`-Pin (Empty-Service-Set), Trailing-Newline-Strip-Pin, **FS+Docker-Multi-`%w`-Switch-Order-Defense-Pin (`_ByDesign`-Suffix; ExitCode-Helper-Driven-first vs. Mapper-FS-first per §6.7 (code, exitCode)-Tupel-Disambiguation)**. | ~400-500 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe) | ~50 | T6 |
-| T8 | Closure: CHANGELOG, `cli-json-output.md` §6/§6.8/§7 (§6.8 als reguläre Read-only-Sektion analog §6.7 up-down, mit `--follow --json`-Reject-Doku als Spec-konformer Mechanismus; §7 Mutations-Matrix-Zeile "logs: nur ReadFile"), roadmap done-Zähler 6→7, carveouts.md-Einträge für die drei `open/`-Stubs (`slice-v1-logs-format-flags`, `-multi-service-filter`, `-time-range-filter` — bereits in `open/` angelegt bei R2-Adressierung, R2-HIGH-2 Memory-Disziplin), Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
+| T8 | Closure: CHANGELOG, `cli-json-output.md` §6/§6.8/§7 (§6.8 als reguläre Read-only-Sektion analog §6.7 up-down, mit `--follow --json`-Reject-Doku als Spec-konformer Mechanismus; §7 Mutations-Matrix-Zeile "logs: nur ReadFile"), roadmap done-Zähler 6→7, carveouts.md-Einträge für die drei `open/`-Stubs ([`slice-v1-logs-format-flags`](../open/slice-v1-logs-format-flags.md), `-multi-service-filter`, `-time-range-filter` — bereits in `open/` angelegt bei R2-Adressierung, R2-HIGH-2 Memory-Disziplin), Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
 
 LOC-Bilanz nach T0-(a) Festzurrung auf (A): **~700-800**
 (R3-Konsolidierung: T2 ~70 + T3 ~30 + T5 ~150-200 + T6 ~400-500
@@ -568,7 +568,7 @@ Closure nachgezogen.
   (`open/`, Status `on hold pending trigger`).
 - **Multi-Service-Filter** (`u-boot logs svc1 svc2`): heute
   Single-Service via `cobra.MaximumNArgs(1)`. Multi-Args-Form
-  wäre Spec-Erweiterung (LH-FA-UP-005 spricht Singular).
+  wäre Spec-Erweiterung ([`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen) spricht Singular).
   Plan-Stub:
   [`slice-v1-logs-multi-service-filter`](../open/slice-v1-logs-multi-service-filter.md)
   (`open/`, Status `on hold pending trigger`).
@@ -580,7 +580,7 @@ Closure nachgezogen.
   remove T2 verfügbar, aber logs hat heute keine bekannten
   WARN-Pfade. **KEIN eigener Folge-Slice-Stub** — falls
   künftige Erweiterung WARN braucht (z. B. "service has no
-  logs"), wandert das in den `slice-v1-recreate-detection`-
+  logs"), wandert das in den [`slice-v1-recreate-detection`](../open/slice-v1-recreate-detection.md)-
   Folge-Slice (Memory-Wieder-Verknüpfung mit existing
   up-down-Carveout-Stub).
 - **JSON-Lines vs. Spec-§1841 Cluster-Audit**: bei T0-(a)
@@ -610,6 +610,6 @@ Closure nachgezogen.
   [`cli/jsonallowlist.go``
   Z. 29/74.
 - Folge-Slices: keine direkten Forward-Refs aus logs heraus;
-  `slice-v1-recreate-detection` ist up-down-Carveout (nicht
+  [`slice-v1-recreate-detection`](../open/slice-v1-recreate-detection.md) ist up-down-Carveout (nicht
   logs).
 - Phase: V1 (Teil des V1-pünktlichen Cluster-Slices).

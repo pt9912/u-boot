@@ -1,18 +1,18 @@
-# Slice V1: Add-on-Abhängigkeiten (LH-FA-ADD-006)
+# Slice V1: Add-on-Abhängigkeiten ([`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006-add-on-abhängigkeiten))
 
 ## Auslöser
 
 Dritter Slice des v0.3.0-Milestones. Voraussetzung für
-`slice-v1-keycloak`: Keycloak deklariert eine optionale Postgres-
+[`slice-v1-keycloak`](slice-v1-keycloak.md): Keycloak deklariert eine optionale Postgres-
 Dependency über `services.keycloak.persistence: external-postgres`
-(Spec-Beispiel aus `LH-FA-ADD-006`). Ohne den Dependency-
+(Spec-Beispiel aus [`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006-add-on-abhängigkeiten)). Ohne den Dependency-
 Mechanismus müsste der Keycloak-Slice den Mechanismus mit-bauen
 oder still-laufen lassen — beides würde den Keycloak-Scope
 verwässern. Dieser Slice baut die Mechanik isoliert, mit dem
 heutigen Postgres-Add-on als no-op-Pfad (Postgres hat keine
 Deps).
 
-Spec-Anforderungen aus `LH-FA-ADD-006` (V1):
+Spec-Anforderungen aus [`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006-add-on-abhängigkeiten) (V1):
 
 1. Add-on-Abhängigkeiten erkennen (z. B. Keycloak →
    PostgreSQL bei `services.keycloak.persistence: external-postgres`).
@@ -73,29 +73,29 @@ Spec-Anforderungen aus `LH-FA-ADD-006` (V1):
 
 | T | Commit | Inhalt |
 | - | ------ | ------ |
-| T1 | `23abd2b` | Domain-Typ `domain.AddOnDependency` (Requires/WhenPath/EqualsValue) mit `Validate` + Sentinel `domain.ErrInvalidAddOnDependency`. Application-Side-Table `dependenciesFor(svc) []domain.AddOnDependency` in addservice.go (Postgres → nil, MVP). `//nolint:unparam` mit Begründung „erste echte Row landet in slice-v1-keycloak". Tests: Validate 100%, `dependenciesFor(postgres)` → nil, `dependenciesFor(ghost)` → nil. KEINE Verhaltensänderung in `Add()`. |
+| T1 | `23abd2b` | Domain-Typ `domain.AddOnDependency` (Requires/WhenPath/EqualsValue) mit `Validate` + Sentinel `domain.ErrInvalidAddOnDependency`. Application-Side-Table `dependenciesFor(svc) []domain.AddOnDependency` in addservice.go (Postgres → nil, MVP). `//nolint:unparam` mit Begründung „erste echte Row landet in [slice-v1-keycloak](slice-v1-keycloak.md)". Tests: Validate 100%, `dependenciesFor(postgres)` → nil, `dependenciesFor(ghost)` → nil. KEINE Verhaltensänderung in `Add()`. |
 | T2 | `cd4f88c` | Pure-Resolver `resolveAddDependencies(cfg, deps) []ServiceName`: WhenPath-Match (Trigger-Bedingung) UND Service-NICHT-in-cfg.Services → missing-Liste, dedupliziert in Insertion-Order. Helper `resolveScalarPath` deckt `project.name`, `devcontainer.enabled`, `services.<svc>.enabled` ab (v0.3.0-Scope). Integration in `Add()` zwischen `detectServiceState` und State-Switch über `checkAddDependencies(baseDir, svc, deps)` (load + resolve + wrap Missing in `ErrDependenciesRequired`). Neuer Driving-Sentinel `ErrDependenciesRequired` (Exit 10, in `isServiceValidationError` aufgenommen). Tests via neuem `addservice_dependencies_test.go` (export_test-Seam `ResolveAddDependenciesForTest` / `ResolveScalarPathForTest` / `CheckAddDependenciesForTest`). Postgres-Tests bleiben grün (no-deps short-circuit). |
 | T3 | `41b51ed` | CLI `--with-deps` BoolVar auf `add` + Plumbing in `AddServiceRequest{WithDeps, Yes, NoInteractive}`. Application: T2's `checkAddDependencies` zu Orchestrator refaktoriert + `findMissingDependencies` (load+resolve) + `handleMissingDependencies` (Vier-Modi-Dispatch): WithDeps OR Yes → autoInstall (rekursive `Add`-Calls; Flags vererben sich auf Sub-Requests); NoInteractive ohne Yes/WithDeps → Fail-Fast mit `ErrDependenciesRequired`; default → `Confirmer.ConfirmAddDependency`-Prompt → YES promotet zu autoInstall, NO → ErrDependenciesRequired. Neue Driven-Port-Method `ConfirmAddDependency(ctx, svc, missing []string)` (mirror von `ConfirmRemoveVolumes`); Production-Adapter + noopConfirmer + fakeConfirmer extended. **Breaking**: `NewAddServiceService` nimmt jetzt einen Confirmer zwischen yaml und logger; alle 8 Callsites (main.go, e2e, 4 application-Tests) angepasst. Tests: 7 Dispatch-Arme über neuen `HandleMissingDependenciesForTest` (ghost-service als unsupported sub-target ist Beweis-Marker für recursive-Add ohne Disk-Setup); 4 Production-Confirmer-Adapter-Tests; 4 CLI-Plumbing-Tests inkl. `--with-deps`/`--yes`/`--no-interactive`. lint + test + coverage (90.10%) grün. |
-| T4 | dieser Commit | Closure: README.{md,de.md} subcommand-Reference erwähnt `--with-deps`; CHANGELOG `## [Unreleased]` Added-Eintrag mit LH-FA-ADD-006-Bezug + Verweis auf diesen Slice-Plan; roadmap.md v0.3.0-Milestone-Tabelle markiert `slice-v1-addons-deps` ✅ mit T1..T3-Hashes und bumpt Stand auf 3/5; Slice-Plan `open/` → `done/`. `make docs-check` grün. |
+| T4 | dieser Commit | Closure: README.{md,de.md} subcommand-Reference erwähnt `--with-deps`; CHANGELOG `## [Unreleased]` Added-Eintrag mit [`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006-add-on-abhängigkeiten)-Bezug + Verweis auf diesen Slice-Plan; roadmap.md v0.3.0-Milestone-Tabelle markiert [`slice-v1-addons-deps`](slice-v1-addons-deps.md) ✅ mit T1..T3-Hashes und bumpt Stand auf 3/5; Slice-Plan `open/` → `done/`. `make docs-check` grün. |
 
 ## Out of Scope
 
 - **Keycloak-/OTel-Add-on-Implementation**: jeweils eigener
-  Slice (`slice-v1-keycloak`, `slice-v1-otel`). Dieser Slice
+  Slice ([`slice-v1-keycloak`](slice-v1-keycloak.md), [`slice-v1-otel`](slice-v1-otel.md)). Dieser Slice
   baut nur den Mechanismus.
 - **Rekursive Dep-Auflösung über mehrere Ebenen**: heute reicht
   eine Ebene (Keycloak → Postgres). Falls Postgres selbst
   Deps bekäme (unwahrscheinlich), wäre das eigene Slice-Arbeit.
-- **Dep-Removal beim `remove`**: `LH-FA-ADD-007` mentioned
+- **Dep-Removal beim `remove`**: [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) mentioned
   Dependency-Warn-on-Remove; das integriert sich später nach
   diesem Slice oder bei Keycloak.
 - **OTel sample-config Generation für App-Services**: aus dem
   Spec-Text scheint das eher ein OTel-Feature-Detail zu sein
-  als eine Dependency. Bleibt in `slice-v1-otel` zu klären.
+  als eine Dependency. Bleibt in [`slice-v1-otel`](slice-v1-otel.md) zu klären.
 
 ## Bezug
 
-- Spec: `LH-FA-ADD-006` (V1).
+- Spec: [`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006-add-on-abhängigkeiten) (V1).
 - Voraussetzungs-Slice: keine (steht für sich).
 - Wird-genutzt-von-Slice:
   [`slice-v1-keycloak`](../in-progress/roadmap.md) (kommt nach
@@ -109,4 +109,4 @@ Spec-Anforderungen aus `LH-FA-ADD-006` (V1):
   `ConfirmRemoveVolumes` ist das parallele Pattern; neue Methode
   `ConfirmAddDependency` folgt derselben Signatur-Familie.
 - Milestone: v0.3.0 „Add-on Catalogue Expansion".
-- Phase: V1 (nach `slice-v1-add-remove` und `slice-v1-audit-done`).
+- Phase: V1 (nach [`slice-v1-add-remove`](slice-v1-add-remove.md) und [`slice-v1-audit-done`](slice-v1-audit-done.md)).

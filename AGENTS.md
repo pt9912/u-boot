@@ -88,7 +88,20 @@ Code-, Test- und Doku-Aenderungen muessen die betroffenen `LH-*`,
 mindestens einen Spec- oder ADR-Anker und einen Test- oder Gate-Nachweis.
 
 CLI-Ausgaben, Fehlermeldungen und generierte Dateien bleiben Englisch
-(`LH-LESE-002`), auch wenn Plan- und Spec-Dokumente deutsch sind.
+([`LH-LESE-002`](spec/lastenheft.md#lh-lese-002-sprache)), auch wenn
+Plan- und Spec-Dokumente deutsch sind.
+
+### Dokumentationsreferenzen
+
+Referenzen zwischen Lastenheft, ADRs, Slices, Carveouts und
+Roadmap/Wellen folgen
+[`LH-FA-PROJDOCS-006`](spec/lastenheft.md#lh-fa-projdocs-006-dokumentationsreferenzmodell)
+und
+[`ADR-0013`](docs/plan/adr/0013-dokumentationsreferenzmodell.md):
+Normative Kraft existiert nur auf aufwaertsgerichteten
+Inter-Layer-Kanten plus ADR-interner Lineage. Alles Richtung Slice,
+Carveout oder Roadmap ist Kontext, Traceability oder Buchfuehrung,
+keine Spezifikation.
 
 ### Verification Evidence
 
@@ -106,9 +119,11 @@ geaenderter Output muss in Slice, Test oder Commit begruendet werden.
 
 ### Exit-Code-Vertraege
 
-Die `LH-FA-CLI-006`-Klassifikation ist ein Produktvertrag. Neue
-Subcommands muessen ihre Fehlerpfade auf die bestehenden Exit-Code-
-Kategorien abbilden und Tests fuer relevante Sentinels pinnen.
+Die Klassifikation aus
+[`LH-FA-CLI-006`](spec/lastenheft.md#lh-fa-cli-006-exit-codes) ist ein
+Produktvertrag. Neue Subcommands muessen ihre Fehlerpfade auf die
+bestehenden Exit-Code-Kategorien abbilden und Tests fuer relevante
+Sentinels pinnen.
 
 ### Managed-Block- und Dateisicherheit
 
@@ -159,7 +174,7 @@ Nur reale Make-Targets zaehlen als Harness-Sensoren:
 | `make test` | `go test ./...` im Docker-Test-Stage |
 | `make test-docker` | Docker-tag Integrationstests gegen echte Docker Engine |
 | `make coverage-gate` | Coverage-Schwelle, Default 90 Prozent |
-| `make docs-check` | relative Markdown-Links in `docs/`, `spec/`, README-Dateien |
+| `make docs-check` | Markdown-Link-Pfade, Heading-Anker, verlinkte ADR-Kennungen, LH-Kennungen in Spec-/User-/Harness-/Archiv-/Root-Doku, Planning-ID-Kennungen in nicht-normativer Doku, Traceability-Alias-Kennungen und Referenzmodell-Kanten in `docs/`, `spec/`, `harness/`, README-Dateien |
 | `make govulncheck` | Go-Vulnerability-Scan |
 | `make image-scan` | Trivy HIGH/CRITICAL gegen Runtime-Image |
 | `make verify-depguard` | On-demand Nachweis, dass depguard-Regeln feuern |

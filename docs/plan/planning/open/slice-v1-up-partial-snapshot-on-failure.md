@@ -47,7 +47,7 @@ Plan-Stub bleibt `on hold` bis einer der folgenden Trigger feuert:
   weit etabliert (z. B. für `doctor`-Erweiterung): dann lohnt
   sich der Partial-Snapshot als sekundärer Konsument.
 - **Compose-`config`-Pre-Walk-Slice** (siehe
-  `slice-v1-recreate-detection`): hat ohnehin `ComposePs`-
+  [`slice-v1-recreate-detection`](slice-v1-recreate-detection.md)): hat ohnehin `ComposePs`-
   Snapshot-Infrastruktur.
 
 ## Lösungs-Skizze (vorläufig)
@@ -83,6 +83,6 @@ Drei Sub-Entscheidungen vor der Implementation:
 
 ## Spec-Bezug
 
-- `LH-FA-UP-001` §966-§969 (Stabilisierungs-Semantik).
-- `LH-NFA-REL-003` (FS-Failure-Klasse, indirekt für
+- [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) §966-§969 (Stabilisierungs-Semantik).
+- [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) (FS-Failure-Klasse, indirekt für
   Mid-Failure-Reporting).

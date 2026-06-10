@@ -2,7 +2,7 @@
 
 ## Auslöser
 
-`LH-FA-ADD-007` (V1) verlangt einen Mechanismus, ein Add-on
+[`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) (V1) verlangt einen Mechanismus, ein Add-on
 wieder zu entfernen. Heute kann man Postgres via `u-boot add
 postgres` aktivieren — aber nicht sauber entfernen; nur
 `u-boot config get services.postgres.enabled` zeigt den State,
@@ -19,7 +19,7 @@ aktivem Postgres-Add-on entfernt den Compose-Block, den
 env-Block und setzt `services.postgres.enabled: false` in
 `u-boot.yaml`. Idempotent: bereits-disabled liefert eine
 „nothing to do"-Meldung ohne Fehler. `--purge` triggert das
-LH-FA-CLI-005A-§254-Confirmation-Gate analog `down --volumes`
+[`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung)-§254-Confirmation-Gate analog `down --volumes`
 (actual Volume-Removal in v0.3.0 deferred, CLI surface'd den
 Cleanup-Hint).
 
@@ -33,7 +33,7 @@ Cleanup-Hint).
   idempotent eine Meldung („Service \"postgres\" is already
   disabled; no changes") + Exit 0; KEINE Dateien werden angefasst.
 - ✅ `u-boot remove postgres` (Service nicht registriert) failt
-  mit `ErrServiceUnregistered` + Exit 10 (LH-FA-CLI-006).
+  mit `ErrServiceUnregistered` + Exit 10 ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)).
 - ✅ `u-boot remove unknown-svc` failt mit `ErrServiceUnsupported`
   + Exit 10.
 - ✅ `u-boot remove postgres --purge`: Confirmation-Gate analog
@@ -61,7 +61,7 @@ Cleanup-Hint).
 | T2 | `e26cb42` | Refactor: `(s *AddServiceService).detectServiceState` zu Package-Level-Free-Function `detectServiceState(fs, yaml, baseDir, svc)` extrahiert, Add+Remove nutzen sie. Volle State-Machine in `RemoveServiceService.Remove`: Catalogue-Check via `isSupportedService`, Detect-Phase liefert PriorState, Branch-Logik (Unregistered → `ErrServiceUnregistered`; Inconsistent → `ErrServiceInconsistent`; Deactivated → idempotent No-Op; Active/EnabledUnset → `executeRemove`). `executeRemove` macht drei Mutations in der Reihenfolge compose-Block → env-Block → u-boot.yaml-PatchScalar(enabled=false) — u-boot.yaml zuletzt damit Mid-Flight-Fail die enabled-Flag unangetastet lässt. `removeBlock` per `managedblock.Replace(content, marker, nil)`. 11 Tests inkl. InconsistentBlock, Malformed-Block, FS-Error-Propagation, Snapshot-basiertem No-Op-Pin. |
 | T3 | `c508b4f` | `--purge`-Confirmation-Gate via neuer `runPurgeGate(ctx, req)`-Methode — exakt parallel zu `DownService.runConfirmationGate` (M6-T5), Truth-Table komplett: `!Purge` → proceed; `Purge && Yes` → proceed; `Purge && NoInteractive && !Yes` → `ErrConfirmationRequired`; `Purge && interactive` → `Confirmer.ConfirmRemoveVolumes(ctx, baseDir)` → proceed oder Refuse. Remove() umstrukturiert: Gate-Call NACH Reject-States (Unregistered, Inconsistent) und VOR proceeding-Branch — User bekommt informative Fehler statt Confirmation-Prompt für nichts. Gate feuert auch für `Deactivated + Purge` (Spec-mandatiert; Approval führt zu idempotent No-Op). **T3-Decision**: actual Volume-Removal bleibt out-of-scope; `VolumesPurged` bleibt `false`; T4-CLI surface'd den Cleanup-Hint. 6 neue Tests inkl. Snapshot-Pins „no-side-effect on refuse" + Reihenfolge-Pin „UnregisteredSkipsGate". |
 | T4 | `3cc2646` | CLI-Subkommando `u-boot remove <service> [--purge]` in `internal/adapter/driving/cli/remove.go` (analog `add.go`). `removeFlags{Purge, Yes, NoInteractive}` mit Yes/NoInteractive read-through vom Root, `--purge` als lokale BoolVar. `runRemove` macht Mutex-Check (`ErrConflictingModeFlags` → Exit 2), `domain.NewServiceName`-Validation (invalid → Exit 10), Delegation an UseCase. `printRemoveSummary` mit drei Shapes (No-Op / Transition / Transition+Purge-NOTE). Wiring: `cli.New` 10. positional `removeUC`; alle 8 bestehenden `newApp*`-Test-Helper + `fakeRemoveServiceUseCase` + neuer `newAppWithRemove`-Helper. `isValidationError` refaktoriert: `ErrServiceUnsupported`/`ErrServiceInconsistent`/`ErrServiceUnregistered` in neuem `isServiceValidationError`-Helper gebündelt (gocyclo-Carve-Out parallel zu `isConfigValidationError`). `cmd/uboot/main.go`: `NewRemoveServiceService` konstruiert (selber `confirmAdapter` wie init/down), an `cli.New` durchgereicht. 8 CLI-Tests + **E2E-Smoketest** gegen das gebaute Image: `init demo --no-git` + `add postgres` (enabled: true) + `remove postgres` (enabled: false, 3 Changed-Files) + zweiter `remove` (idempotent „already disabled"). |
-| T5 | `764e737` | Slice-Plan nach `done/`; README.{md,de.md} `add`-Bullet erwähnt `remove`; `CHANGELOG.md ## [Unreleased]` Added-Eintrag; `roadmap.md` §Nächste Schritte 2 (v0.3.0-Milestone) markiert `slice-v1-add-remove` ✅ mit T1..T4-Hashes. `make docs-check` grün. |
+| T5 | `764e737` | Slice-Plan nach `done/`; README.{md,de.md} `add`-Bullet erwähnt `remove`; `CHANGELOG.md ## [Unreleased]` Added-Eintrag; `roadmap.md` §Nächste Schritte 2 (v0.3.0-Milestone) markiert [`slice-v1-add-remove`](slice-v1-add-remove.md) ✅ mit T1..T4-Hashes. `make docs-check` grün. |
 | Review | dieser Commit | Code-Review-Followup: sechs Findings (F1..F6) direkt am Slice gepatcht — Two-Phase Plan-then-Write + InconsistentBlock-Convergence (F1), Doc-Comment-Truth (F2), File-Mode-Preservation via Lstat (F3), WARNING auf stderr statt NOTE auf stdout (F4+F5), Gate-Skip für Deactivated+Purge (F6). Siehe Review-Followup-Tabelle unten. |
 
 ## Review-Followup (post-T5)
@@ -76,7 +76,7 @@ kein eigener Slice — selber Pattern wie post-template-list/init):
 | F1 | `application/removeservice.go` | Mid-Flight-Write-Failure ließ Projekt in `InconsistentBlock` zurück; Retry war blockiert weil das Dispatch `InconsistentBlock` als Reject-State behandelte. | (a) Two-Phase Plan-then-Write: alle Reads + managedblock.Replaces + PatchScalar passieren in-memory; Phase 2 schreibt erst nach Erfolg aller Plan-Steps. Plan-time-Fehler (Malformed-Block, Patch-Fehler) short-circuiten vor jedem Disk-Write. (b) `InconsistentBlock` aus Reject-Liste raus, in proceeding-Switch aufgenommen — Remove konvergiert forwards (removeBlock ist idempotent; PatchScalar setzt enabled=false). Asymmetrisch zu Add, das InconsistentBlock weiter rejected (Add hat keinen klaren Konvergenz-Ziel). Neuer Test `InconsistentBlockConverges` ersetzt den alten Reject-Pin. |
 | F2 | `application/removeservice.go` | Doc-Comment versprach "project stays self-consistent for a retry" — Lüge, weil compose-removed + env-kept + enabled=true ist `InconsistentBlock`. | Comment auf den tatsächlichen Mechanismus umgeschrieben: F1's InconsistentBlock-Convergence macht den Retry funktionsfähig; die "self-consistent"-Behauptung ist gestrichen. |
 | F3 | `application/removeservice.go` | File-Mode (0o644 hardcoded) statt Original-Mode preserved — Hardened-Setups mit 0o600 wären silent downgraded. Asymmetrisch zu Add das via `loadForPatch` preserved. | Neuer `fileMode(path, fallback)`-Helper liest die Original-Mode via `s.fs.Lstat(path).Mode().Perm()` und gibt sie ans `WriteFile` durch. Fallback nur bei `iofs.ErrNotExist` (TOCTOU-Race; Apply-Loop würde sowieso scheitern). |
-| F4 | `cli/remove.go` | NOTE-Block ging auf stdout — würde zukünftige `--json`-Pipes (LH-FA-CLI-007 / LH-NFA-USE-004) verpesten. | `runRemove`-Signatur um `errOut io.Writer` erweitert; `printRemoveSummary` schreibt Success-Summary auf `out`, WARNING-Block auf `errOut`. Cobra-Closure übergibt `cmd.ErrOrStderr()`. Smoketest gegen das Image: stdout enthält nur die Success-Zeilen, stderr den WARNING-Block. |
+| F4 | `cli/remove.go` | NOTE-Block ging auf stdout — würde zukünftige `--json`-Pipes ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) / [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)) verpesten. | `runRemove`-Signatur um `errOut io.Writer` erweitert; `printRemoveSummary` schreibt Success-Summary auf `out`, WARNING-Block auf `errOut`. Cobra-Closure übergibt `cmd.ErrOrStderr()`. Smoketest gegen das Image: stdout enthält nur die Success-Zeilen, stderr den WARNING-Block. |
 | F5 | `cli/remove.go` | "NOTE:"-Präfix war zu mild; passive Sprache ("was requested; volume removal is not auto-handled") konnte überlesen werden. | "WARNING:" als Präfix; explizite Sprache "volume removal is NOT yet automated in v0.3.0" + "are still on disk and untouched". Volume-`ls`-Empfehlung um `--filter label=com.docker.compose.project=<...>` ergänzt, damit der User nicht alle Volumes des Hosts gezeigt bekommt. |
 | F6 | `application/removeservice.go` | Gate feuerte für `Deactivated + Purge` und konsumierte User-Confirmation für eine No-Op — User sagte YES zu einem Prompt, der ins Nichts führte. | Gate-Position aus dem zentralen Pfad raus, ins proceeding-Branch geschoben: Gate fires nur bei Active/EnabledUnset/InconsistentBlock (Pfade die wirklich State transitionen). Deactivated-Branch ist gate-frei. Bestehender Test `PurgeOnDeactivatedStateRequiresGate` invertiert: zu `PurgeOnDeactivatedSkipsGate` (Confirmer wird NICHT gerufen). |
 
@@ -92,10 +92,10 @@ docs-check. E2E-Smoketest gegen das gebaute Image:
 ## Out of Scope
 
 - **Dependency-Check** („Abhängigkeiten anderer Services prüfen
-  und vor dem Entfernen warnen" aus LH-FA-ADD-007): heute hat
+  und vor dem Entfernen warnen" aus [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen)): heute hat
   Postgres keine Dependents (es ist die einzige Add-on-Option).
   Mit Keycloak (`requires: [postgres]`) wird das relevant —
-  eigener Slice `slice-v1-addons-deps` deckt die Mechanik ab
+  eigener Slice [`slice-v1-addons-deps`](slice-v1-addons-deps.md) deckt die Mechanik ab
   und ergänzt sie hier nachträglich.
 - **Echte Volume-Löschung** (statt nur Confirmation-Gate +
   CLI-Cleanup-Hint): T3-Decision verschiebt die Volume-Entfernung
@@ -111,9 +111,9 @@ docs-check. E2E-Smoketest gegen das gebaute Image:
 
 ## Bezug
 
-- Spec: `LH-FA-ADD-007` (V1) — vollständig geliefert für
+- Spec: [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) (V1) — vollständig geliefert für
   `postgres`; Dependency-Check (Sub-Punkt der Spec)
-  deferred an `slice-v1-addons-deps`; Volume-Removal
+  deferred an [`slice-v1-addons-deps`](slice-v1-addons-deps.md); Volume-Removal
   deferred an einen Folge-Slice (T3-Decision).
 - M5-Vorbild:
   [`slice-m5-add-postgres`](../done/slice-m5-add-postgres.md)

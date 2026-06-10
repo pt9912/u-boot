@@ -42,5 +42,5 @@ Neuer `cli/config.go` `newConfigListCommand(a *App)` analog
 
 ## Spec-Bezug
 
-- `LH-FA-CONF-001` (Config-Subcommand) — Spec listet `list`
+- [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration) (Config-Subcommand) — Spec listet `list`
   nicht; Erweiterung ist Konsument-Komfort-Argument.

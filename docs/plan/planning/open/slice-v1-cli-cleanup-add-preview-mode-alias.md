@@ -67,7 +67,7 @@ Lebensdauer-Pflicht).
 
 ## Reihenfolge im Cluster
 
-Außerhalb des `slice-v1-cli-json-dry-run`-Folge-Slice-Blocks —
+Außerhalb des [`slice-v1-cli-json-dry-run`](../done/slice-v1-cli-json-dry-run.md)-Folge-Slice-Blocks —
 reine Code-Cleanup, kein Schema-Migrations-Anteil. Kann
 unabhängig vom Cluster-T_close-Lauf gemerged werden,
 **vorzugsweise nach** mindestens einem weiteren Folge-Slice

@@ -11,7 +11,7 @@ Lücken offengelegt, die u-boot übernehmen sollte:
 
 1. **`govulncheck @latest`** in `make govulncheck` ist ein
    nicht-dokumentierter Carveout — Reproduzierbarkeit kippt, sobald
-   eine neue Release rauskommt, und die Pin-Politik aus ADR-0004
+   eine neue Release rauskommt, und die Pin-Politik aus [ADR-0004](../../adr/0004-ci-system.md)
    („alle Tool-Versionen pin-bar") gilt sonst überall (Go, golangci-lint,
    distroless-Image). `c-hsm-doc` setzt `GOVULNCHECK_VERSION ?= v1.1.4`
    und installiert `@$(GOVULNCHECK_VERSION)`.
@@ -54,4 +54,4 @@ Polish-Slice").
 
 - Auslösende Quelle: Vergleich `c-hsm-doc/Makefile` vs.
   `u-boot/Makefile` (Sitzung 2026-05-27).
-- ADR-0004 (Pin-Politik) — `govulncheck`-Pin schließt die Lücke.
+- [ADR-0004](../../adr/0004-ci-system.md) (Pin-Politik) — `govulncheck`-Pin schließt die Lücke.

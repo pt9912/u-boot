@@ -7,8 +7,8 @@
 
 `.golangci.yml` aktivierte `gomodguard_v2` mit `blocked: {}` (leerer
 Block-Set) — das Profil ließ damit jedes externe Modul ohne Prüfung
-zu und verletzte `LH-QA-004` („Profil insgesamt nicht aufweicht",
-`LH-FA-PROJDOCS-005`).
+zu und verletzte [`LH-QA-004`](../../../../spec/lastenheft.md#lh-qa-004-linting-solid-nahes-lint-profil) („Profil insgesamt nicht aufweicht",
+[`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)).
 
 ## Aufhebung
 
@@ -20,7 +20,7 @@ Vier Anti-Module sind jetzt in `.golangci.yml`
 | --- | --- | --- |
 | `gopkg.in/yaml.v2` | `gopkg.in/yaml.v3` | v2 feature-frozen; M3-T1 hat v3-Codec-Adapter etabliert |
 | `github.com/pkg/errors` | `errors`, `fmt` | stdlib seit Go 1.13 vollständig (errors.Is/As/Unwrap + wrap-aware fmt.Errorf) |
-| `github.com/sirupsen/logrus` | `log/slog` | Project-Default für Logging (slice-m4-logging-port) |
+| `github.com/sirupsen/logrus` | `log/slog` | Project-Default für Logging ([slice-m4-logging-port](slice-m4-logging-port.md)) |
 | `go.uber.org/zap` | `log/slog` | Gleiches Baseline wie logrus |
 
 ## Unerwarteter Beifang: golangci-lint-Bump v2.12.1 → v2.12.2
@@ -43,7 +43,7 @@ für die Carveout-Auflösung.
   v2-Schema-Form `[{module, recommendations, reason}, ...]` (statt v1
   `blocked.modules: [name: {...}]`).
 - `Dockerfile` + `Makefile`: `GOLANGCI_LINT_VERSION` v2.12.1 → v2.12.2.
-- Fixtur-Test einmalig manuell durchgeführt (LH-QA-004
+- Fixtur-Test einmalig manuell durchgeführt ([`LH-QA-004`](../../../../spec/lastenheft.md#lh-qa-004-linting-solid-nahes-lint-profil)
   Akzeptanz-Kriterium): `go get pkg/errors && go mod tidy` + Smoke-
   Datei `internal/hexagon/domain/gomodguard_smoke.go` mit
   `errors.New(...)` → `make lint` produziert genau diese Meldung:

@@ -6,16 +6,16 @@ Seit `v0.1.0` (Tag-Push am 2026-05-31) sind drei substantielle
 Features auf `main` gelandet, plus ein Patch-Slice und zwei
 Review-Followups:
 
-- `slice-v0.1.1-doctor-container-awareness` (4 Tranchen) —
+- [`slice-v0.1.1-doctor-container-awareness`](slice-v0.1.1-doctor-container-awareness.md) (4 Tranchen) —
   `doctor` skipped Host-Prerequisite-Checks im Container-Modus.
-- `slice-v2-binary-distribution` (4 Tranchen) — `make
+- [`slice-v2-binary-distribution`](slice-v2-binary-distribution.md) (4 Tranchen) — `make
   build-binaries` + `publish.yml`-Asset-Upload für sechs
   Plattformen (Linux/macOS/Windows × amd64/arm64).
-- `slice-v1-template-list` (4 Tranchen + Review-Followup
-  `c807cdb`) — `u-boot template list [--json]` (LH-FA-TPL-004)
+- [`slice-v1-template-list`](slice-v1-template-list.md) (4 Tranchen + Review-Followup
+  `c807cdb`) — `u-boot template list [--json]` ([`LH-FA-TPL-004`](../../../../spec/lastenheft.md#lh-fa-tpl-004-templates-auflisten))
   plus `basic`-Bootstrap-Metadaten.
-- `slice-v1-template-init` (5 Tranchen + Review-Followup
-  `7fe26e0`) — `u-boot init --template <name>` (LH-FA-TPL-001
+- [`slice-v1-template-init`](slice-v1-template-init.md) (5 Tranchen + Review-Followup
+  `7fe26e0`) — `u-boot init --template <name>` ([`LH-FA-TPL-001`](../../../../spec/lastenheft.md#lh-fa-tpl-001-projektvorlagen)
   für `basic`).
 
 Die ursprüngliche Planung sah `v0.1.1` als reinen Patch-Release
@@ -27,8 +27,8 @@ einen MINOR-Bump. Daher **v0.2.0 statt v0.1.1**.
 ## Aufhebungsbedingung
 
 `v0.2.0` ist veröffentlicht. Die Release-Maschinerie aus
-`slice-v1-release-pipeline` (T1..T5 done) plus die Binary-
-Asset-Erweiterung aus `slice-v2-binary-distribution` T2 sind
+[`slice-v1-release-pipeline`](slice-v1-release-pipeline.md) (T1..T5 done) plus die Binary-
+Asset-Erweiterung aus [`slice-v2-binary-distribution`](slice-v2-binary-distribution.md) T2 sind
 bereits in `publish.yml` aktiv; T1..T3 dieses Slices bereiten
 die Dokumentation und Versionsstrings vor; T4 ist die
 Nutzer-Aktion (CHANGELOG-Datum + Tag-Push).
@@ -54,7 +54,7 @@ Nutzer-Aktion (CHANGELOG-Datum + Tag-Push).
 - `roadmap.md` §Nächste Schritte 1 ist auf „v0.2.0-Tag-Push
   offen" umgestellt; der alte „v0.1.1-Tag-Push offen"-Wortlaut
   ist konsumiert. Der Punkt verweist auf den eigenen Slice
-  (`done/slice-v1-release-cut-v0.2.0.md` nach T4).
+  (`done/[slice-v1-release-cut-v0.2.0.md](slice-v1-release-cut-v0.2.0.md)` nach T4).
 - `make gates` grün gegen den v0.2.0-Stand.
 
 ## Tranchen
@@ -76,9 +76,9 @@ Nutzer-Aktion (CHANGELOG-Datum + Tag-Push).
   ein Patch-Only-Release vom Doctor-Container-Commit möglich,
   aber Cherry-Pick + Branch-Management lohnt sich für ein
   Solo-Projekt nicht. v0.1.1 wird übersprungen.
-- **V1-Add-ons** (Keycloak `LH-AK-003`, OTel `LH-AK-004`),
+- **V1-Add-ons** (Keycloak [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow), OTel [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow)),
   **V1-Generators** (`logs`, `--json`/`--dry-run`),
-  **`slice-later-local-templates`** (`--template ./pfad`),
+  **[`slice-later-local-templates`](slice-later-local-templates.md)** (`--template ./pfad`),
   **Template-Init-Variables** — alles Post-v0.2.0.
 
 ## Bezug
@@ -90,7 +90,7 @@ Nutzer-Aktion (CHANGELOG-Datum + Tag-Push).
   kosmetisch.
 - Hängt von:
   [`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md)
-  T2/T3 (publish.yml-Mechanik) + ADR-0007 §Entscheidung +
+  T2/T3 (publish.yml-Mechanik) + [ADR-0007](../../adr/0007-distributionswege-ghcr.md) §Entscheidung +
   [`slice-v2-binary-distribution`](../done/slice-v2-binary-distribution.md)
   T2 (Binary-Asset-Upload).
 - Phase: V1-Release-Cut, keine Carveout-Auflösung — daher kein

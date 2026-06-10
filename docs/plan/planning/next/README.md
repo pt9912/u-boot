@@ -10,7 +10,7 @@ Dateiname-Konventionen.
 ## Bestand
 
 Zur Zeit leer. Der Konsolidierungs-Slice
-`slice-v1-cli-json-envelope-consolidation` ist am 2026-06-08
+[`slice-v1-cli-json-envelope-consolidation`](../done/slice-v1-cli-json-envelope-consolidation.md) ist am 2026-06-08
 vollständig nach `done/` ausgeliefert (T0→T4). Der JSON-CLI-Cluster
-`slice-v1-cli-json-dry-run` ist ebenfalls vollständig in `done/`
+[`slice-v1-cli-json-dry-run`](../done/slice-v1-cli-json-dry-run.md) ist ebenfalls vollständig in `done/`
 (9/9 Folge-Slices + T_close).

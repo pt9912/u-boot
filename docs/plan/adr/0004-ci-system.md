@@ -10,7 +10,7 @@ Accepted
 
 ## Kontext
 
-`LH-QA-003` verlangt CI-Fähigkeit. Bisher (M1–M2b) ist die Anforderung
+[`LH-QA-003`](../../../spec/lastenheft.md#lh-qa-003-ci-fähigkeit-github-actions) verlangt CI-Fähigkeit. Bisher (M1–M2b) ist die Anforderung
 abstrakt erfüllt (`make gates` / `make ci` laufen Docker-only auf
 jedem Host mit Docker + `make`), aber kein konkretes CI-System mit
 PR-blockierenden Status-Checks ist angeschlossen.
@@ -28,10 +28,10 @@ Vorlagen:
 
 Lastenheft-Bezug:
 
-- `LH-QA-003` – CI-Fähigkeit (in diesem Commit von "soll testbar" auf
+- [`LH-QA-003`](../../../spec/lastenheft.md#lh-qa-003-ci-fähigkeit-github-actions) – CI-Fähigkeit (in diesem Commit von "soll testbar" auf
   konkrete Pflichten verschärft).
-- `LH-FA-BUILD-005..007` – Make-Targets und Docker-only-Workflow.
-- `LH-NFA-PORT-002` – möglichst wenige Systemabhängigkeiten am Host;
+- [`LH-FA-BUILD-005`](../../../spec/lastenheft.md#lh-fa-build-005-makefile-mit-standard-targets)..[`LH-FA-BUILD-007`](../../../spec/lastenheft.md#lh-fa-build-007-docker-only-workflow) – Make-Targets und Docker-only-Workflow.
+- [`LH-NFA-PORT-002`](../../../spec/lastenheft.md#lh-nfa-port-002-keine-unnötigen-systemabhängigkeiten) – möglichst wenige Systemabhängigkeiten am Host;
   Docker-only bleibt auch im CI-Runner Pflicht.
 
 ## Entscheidung
@@ -40,9 +40,8 @@ Lastenheft-Bezug:
 Muster:
 
 - Eine Workflow-Datei: `.github/workflows/ci.yml`.
-- Drei parallele Jobs (image-scan via `slice-v1-release-pipeline`
-  T3 ergänzt, Distributionsentscheidung in
-  [ADR-0007](0007-distributionswege-ghcr.md)):
+- Drei parallele Jobs (image-scan nach Distributionsentscheidung in
+  [ADR-0007](0007-distributionswege-ghcr.md) ergänzt):
   - `gates (lint + test + coverage-gate)` — `make gates`.
   - `security-gates (govulncheck)` — `make govulncheck`.
   - `image-scan (trivy HIGH+CRITICAL)` — `make image-scan` (lokale
@@ -63,37 +62,29 @@ Muster:
   (`contents: read` für reine Build-Jobs).
 - `timeout-minutes: 20` pro Job (analog k-deskflight).
 - `DOCKER_BUILDKIT=1` als Job-Env (BuildKit-Cache + Multi-Stage-Cache-
-  Filter aus `LH-FA-BUILD-005`).
+  Filter aus [`LH-FA-BUILD-005`](../../../spec/lastenheft.md#lh-fa-build-005-makefile-mit-standard-targets)).
 
-Bewusst **noch nicht** in diesem Slice (Stand 2026-05-31 mit
-Verweisen auf die Nachfolge-Slices ergänzt):
+Bewusst **noch nicht** Teil der CI-Grundentscheidung:
 
-- Image-Publish-Workflow (`publish.yml` / GHCR) — geliefert mit
-  [`slice-v1-release-pipeline`](../planning/done/slice-v1-release-pipeline.md)
-  T2 (`93b703e`), Distributionsentscheidung in
-  [ADR-0007](0007-distributionswege-ghcr.md).
-- Trivy-Image-Scan — geliefert mit `slice-v1-release-pipeline` T3
-  (`8212889`) als dritter PR-blockierender CI-Job
-  (`ci.yml::image-scan`).
+- Image-Publish-Workflow (`publish.yml` / GHCR) — eigene
+  Distributionsentscheidung in [ADR-0007](0007-distributionswege-ghcr.md).
+- Trivy-Image-Scan — spaeter als dritter PR-blockierender CI-Job
+  (`ci.yml::image-scan`) ergaenzt.
 - Compose-Stack-Smoke und Adapter-Integrationstests gegen die externe
-  Docker-Engine — geliefert mit
-  [`slice-m6-docker-integrationstests`](../planning/done/slice-m6-docker-integrationstests.md)
-  als eigenständiger Workflow `.github/workflows/integration.yml`.
-  Der Begriff „Cluster-Smoke" aus `k-deskflight` (Kubernetes-Smoke
-  gegen `kind`) passt für u-boot nicht, weil u-boot Compose-Stacks
+  Docker-Engine — eigener Workflow `.github/workflows/integration.yml`.
+  Der Begriff „Cluster-Smoke" aus `k-deskflight` (Kubernetes-Smoke gegen
+  `kind`) passt für u-boot nicht, weil u-boot Compose-Stacks
   orchestriert, nicht Kubernetes.
 - DCO-Bot / Branch Protection — Branch-Protection-Checkliste in
   [`docs/user/branch-protection.md`](../../user/branch-protection.md)
-  publiziert (`slice-v1-release-pipeline` Teilabschluss 2026-05-27);
-  DCO-Bot bleibt Out of Scope ohne eigenen Trigger.
+  publiziert; DCO-Bot bleibt Out of Scope ohne eigenen Trigger.
 
 ## Konsequenzen
 
 Positiv:
 
 - **Pflicht-Gates ab Tag 1 enforced**: PRs ohne grünes `gates` /
-  `security-gates` / `image-scan` (letzteres seit
-  `slice-v1-release-pipeline` T3) werden nicht gemerged, sobald die
+  `security-gates` / `image-scan` werden nicht gemerged, sobald die
   Branch-Protection-Required-Status-Checks aktiviert sind
   (siehe [`docs/user/branch-protection.md`](../../user/branch-protection.md)).
 - **Low maintenance**: drei Jobs, alle starten von Make-Targets aus —
@@ -109,7 +100,7 @@ Positiv:
 - **Supply-Chain-Härtung**: SHA-pinned Actions verhindern den
   klassischen Tag-Move-Angriff; explizite `permissions: {}` blockt
   versehentlich neu hinzukommende Steps mit schreibendem Token.
-- **Docker-only-Konsistenz** (`LH-FA-BUILD-007`): identische
+- **Docker-only-Konsistenz** ([`LH-FA-BUILD-007`](../../../spec/lastenheft.md#lh-fa-build-007-docker-only-workflow)): identische
   Build-/Lint-/Test-Pfade lokal und in CI; keine "läuft nur in CI"-
   Drift.
 
@@ -129,8 +120,7 @@ Negativ / Trade-offs:
   Action) ergänzen.
 - **Branch-Protection im UI** ist nicht im Repo versioniert. Schritt-
   für-Schritt-Aktivierung dokumentiert in
-  [`docs/user/branch-protection.md`](../../user/branch-protection.md)
-  (`slice-v1-release-pipeline` Teilabschluss 2026-05-27).
+  [`docs/user/branch-protection.md`](../../user/branch-protection.md).
 
 Alternativen (verworfen):
 
@@ -147,13 +137,10 @@ Alternativen (verworfen):
 - Sobald M3 (`u-boot init`) merged ist und produktive Pakete in
   `./internal/...` liegen: Coverage-Schwellwert per
   `make coverage-gate THRESHOLD=…` im Workflow setzen
-  (`LH-FA-BUILD-008`).
-- ~~Image-Publish-Workflow in einem eigenen Slice (`LH-OPEN-002`)~~
-  — geliefert mit `slice-v1-release-pipeline` T2 (`93b703e`,
-  Distributionsentscheidung in ADR-0007).
-- ~~Trivy-Image-Scan als optionaler dritter Job~~ — geliefert mit
-  `slice-v1-release-pipeline` T3 (`8212889`) als PR-blockierender
-  dritter CI-Job.
+  ([`LH-FA-BUILD-008`](../../../spec/lastenheft.md#lh-fa-build-008-coverage-bootstrap)).
+- ~~Image-Publish-Workflow als eigenes Inkrement ([`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002-paketierung))~~
+  — erledigt nach Distributionsentscheidung in [ADR-0007](0007-distributionswege-ghcr.md).
+- ~~Trivy-Image-Scan als optionaler dritter Job~~ — geliefert als
+  PR-blockierender dritter CI-Job.
 - ~~Branch-Protection-Konfiguration im README dokumentieren~~ —
-  veröffentlicht in `docs/user/branch-protection.md`
-  (`slice-v1-release-pipeline` Teilabschluss 2026-05-27).
+  veröffentlicht in `docs/user/branch-protection.md`.

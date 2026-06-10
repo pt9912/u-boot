@@ -8,14 +8,14 @@
 Bis M2d ist u-boot ein Bootstrap-Skelett (Build-Infrastruktur, leere
 hexagonale Schichten, CLI mit `--help`/`--version`-Stub). M3 liefert
 den ersten fachlichen Use-Case: `u-boot init` erzeugt eine Projekt-
-struktur (`LH-FA-INIT-001..007`, `LH-FA-CONF-001..003`).
+struktur ([`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren)..[`LH-FA-INIT-007`](../../../../spec/lastenheft.md#lh-fa-init-007-git-repository-initialisierung), [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration)..[`LH-FA-CONF-003`](../../../../spec/lastenheft.md#lh-fa-conf-003-konfiguration-lesen)).
 
 Mit M3 entstehen die ersten produktiven Pakete unter `internal/`,
 wodurch zwei M2-Carveouts automatisch greifbar werden:
 
-- `slice-m3-coverage-threshold-aktivieren.md` (Schwellwert von 0 auf
+- [`slice-m3-coverage-threshold-aktivieren.md`](slice-m3-coverage-threshold-aktivieren.md) (Schwellwert von 0 auf
   80 heben).
-- `slice-m3-depguard-aktivierung-verifizieren.md` (alle 8
+- [`slice-m3-depguard-aktivierung-verifizieren.md`](slice-m3-depguard-aktivierung-verifizieren.md) (alle 8
   depguard-Regelblöcke real verifizieren).
 
 ## Lieferumfang (MVP-Pflicht-Set)
@@ -25,22 +25,22 @@ wodurch zwei M2-Carveouts automatisch greifbar werden:
 
 Pflicht-Verhalten (Lastenheft-Verweis):
 
-- `LH-FA-INIT-001` Befehl `u-boot init`.
-- `LH-FA-INIT-002` Projektname: explizit oder aus Arbeitsverzeichnis
+- [`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren) Befehl `u-boot init`.
+- [`LH-FA-INIT-002`](../../../../spec/lastenheft.md#lh-fa-init-002-projektname) Projektname: explizit oder aus Arbeitsverzeichnis
   abgeleitet + normalisiert.
-- `LH-FA-INIT-003` Projektstruktur: `docker/`, `scripts/`, `docs/`,
+- [`LH-FA-INIT-003`](../../../../spec/lastenheft.md#lh-fa-init-003-projektstruktur-erzeugen) Projektstruktur: `docker/`, `scripts/`, `docs/`,
   `README.md`, `CHANGELOG.md`, `compose.yaml`, `.env.example`,
   `u-boot.yaml`, `.gitignore`.
-- `LH-FA-INIT-004` Bestehendes Projekt erkennen.
-- `LH-FA-INIT-005` Überschreibschutz mit `--backup`/`--force`.
-- `LH-FA-INIT-006` Projektnamen-Validierung
+- [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004-bestehendes-projekt-erkennen) Bestehendes Projekt erkennen.
+- [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) Überschreibschutz mit `--backup`/`--force`.
+- [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung) Projektnamen-Validierung
   (`^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`).
-- `LH-FA-INIT-007` Git-Repository-Initialisierung (Default an,
+- [`LH-FA-INIT-007`](../../../../spec/lastenheft.md#lh-fa-init-007-git-repository-initialisierung) Git-Repository-Initialisierung (Default an,
   `--no-git`-Override).
-- `LH-FA-CLI-005A` Interaktivität (`--yes`, `--no-interactive`,
+- [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) Interaktivität (`--yes`, `--no-interactive`,
   `--assume-existing`).
-- `LH-FA-CLI-006` Exit-Codes (`0`/`2`/`10`/`11`/`14`).
-- `LH-FA-CONF-001..003` u-boot.yaml mit `schemaVersion: 1`.
+- [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) Exit-Codes (`0`/`2`/`10`/`11`/`14`).
+- [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration)..[`LH-FA-CONF-003`](../../../../spec/lastenheft.md#lh-fa-conf-003-konfiguration-lesen) u-boot.yaml mit `schemaVersion: 1`.
 
 Devcontainer-Erzeugung (`--devcontainer`-Flag) folgt in M4 als eigener
 Slice — M3 erzeugt die Devcontainer-Dateien **nicht**.
@@ -52,7 +52,7 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
 1. **T1 — Domain + Driven Ports + minimale Driven Adapter.** ✅ Done
    (Commit `132d1a1` + Review-Fixes `f5c784a`)
    `internal/hexagon/domain/`: `Project`, `ProjectName` (mit Regex aus
-   `LH-FA-INIT-006`). `internal/hexagon/port/driven/`: `FileSystem`,
+   [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung)). `internal/hexagon/port/driven/`: `FileSystem`,
    `YAMLCodec`, `Git`, `Clock`. `internal/adapter/driven/{fs,yaml,git,
    clock}/`: konkrete Implementierungen. Tests pro Schicht (Domain mit
    Property-Style, Driven-Adapter mit `t.TempDir`/`os/exec` echt).
@@ -62,7 +62,7 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
    `internal/hexagon/port/driving/InitProjectUseCase`.
    `internal/hexagon/application/InitProjectService` orchestriert
    die Driven-Ports; Tests mit Fakes für FileSystem/YAMLCodec/Git.
-   *Bewusste Lücke:* `LH-FA-INIT-004` Soft-Existing-Detection
+   *Bewusste Lücke:* [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004-bestehendes-projekt-erkennen) Soft-Existing-Detection
    (≥3 Strukturelemente + `--assume-existing`) liegt in
    [`slice-m4-soft-existing-detection`](slice-m4-soft-existing-detection.md)
    (in derselben Sitzung vorgezogen + abgeschlossen).
@@ -70,16 +70,16 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
 3. **T3 — Driving Adapter CLI + Wiring → erster lauffähiger
    `u-boot init`.** ✅ Done (dieser Commit)
    `internal/adapter/driving/cli/`: Cobra-basiertes `init`-Command
-   plus Exit-Code-Mapping; CLI-Framework-Wahl in ADR-0005
-   verankert (löst gleichzeitig `slice-m3-cli-framework-adr` auf).
+   plus Exit-Code-Mapping; CLI-Framework-Wahl in [ADR-0005](../../adr/0005-cli-framework-cobra.md)
+   verankert (löst gleichzeitig [`slice-m3-cli-framework-adr`](slice-m3-cli-framework-adr.md) auf).
    `cmd/uboot/main.go`: Wiring aller Schichten. End-to-End-Smoke
    verifiziert: `docker run … init demo-project --no-git` erzeugt
-   die LH-FA-INIT-003-Mindeststruktur + `u-boot.yaml` (LH-FA-CONF-002).
+   die [`LH-FA-INIT-003`](../../../../spec/lastenheft.md#lh-fa-init-003-projektstruktur-erzeugen)-Mindeststruktur + `u-boot.yaml` ([`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002-inhalt-der-konfiguration)).
 
 4. **T4 — Überschreibschutz + nicht-interaktive Modi.**
    Wird in drei Sub-Tranchen geliefert, weil die Spec-Anforderungen
-   (`LH-FA-INIT-005` Backup-Konvention + Managed-Block-Logik nach
-   `LH-SA-FILE-002`, plus `LH-FA-CLI-005A` Modi-Flags) sonst einen
+   ([`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) Backup-Konvention + Managed-Block-Logik nach
+   [`LH-SA-FILE-002`](../../../../spec/lastenheft.md#lh-sa-file-002-markierte-verwaltete-bereiche), plus [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) Modi-Flags) sonst einen
    einzelnen Commit überfrachten:
 
    - **T4a — Backup-Mechanik.** ✅ Done (`5296671` + Review-Fix-Commit folgt)
@@ -88,7 +88,7 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
      `IsDir` durch das Lstat-basierte Trio ersetzt — Mode-Preservation
      + Symlink-Detection + TOCTOU-Schutz in einem Schwung).
      `application/backup.go` mit `BackupPath` — kleinster-freier-
-     Suffix-Algorithmus (`.bak`, `.bak.1`, …) nach `LH-FA-INIT-005`
+     Suffix-Algorithmus (`.bak`, `.bak.1`, …) nach [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz)
      §607/608, Files und Verzeichnisse (rekursiv), Rollback bei
      Tree-Backup-Fehler mit `errors.Join` für Sekundär-Fehler;
      Symlink-Rejection (`ErrBackupUnsupportedKind`), 256 MiB-Size-Cap
@@ -110,14 +110,14 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
 
    - **T4b — Managed-Block-Parser + Force/Backup-Flow.** ✅ Done (`077c3e5` + Review-Fix-Commit folgt)
      `application/managedblock/` mit Marker-Parser pro Dateityp nach
-     `LH-SA-FILE-002` (YAML/.env `#`, Markdown `<!-- -->`, JSONC `//`):
+     [`LH-SA-FILE-002`](../../../../spec/lastenheft.md#lh-sa-file-002-markierte-verwaltete-bereiche) (YAML/.env `#`, Markdown `<!-- -->`, JSONC `//`):
      `Find` / `Has` / `Replace` plus `ErrBlockNotFound` /
      `ErrBlockMalformed`. Regex-basierter Matcher mit `(?m)`-Multiline,
      leading-whitespace-Toleranz (für indentierte Blocks) und
      CRLF-Toleranz.
      `InitProjectRequest` um `Force`/`Backup` erweitert,
      `driving.ErrForceRequiresBackup` (Code 10) neu. Service-Logik:
-     literale Spec-Lesart (LH-FA-INIT-005 §605/§609/§617/§619) — plan-
+     literale Spec-Lesart ([`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) §605/§609/§617/§619) — plan-
      and-execute split, `planFile` entscheidet pro Datei
      `Write`/`ReplaceBlock`/`OverwriteFull`/`Abort*`, Execute-Phase
      dispatcht. Plan-Fehler verhindern jeden Side-Effect.
@@ -135,10 +135,10 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
    - **T4c — Modi-Flags + Exit-Codes.** ✅ Done (Commit folgt + Review-Fix-Commit)
      Cobra-Flags `--force` / `--backup` / `--assume-existing` lokal
      am init-Command, `--yes` / `--no-interactive` als persistente
-     Root-Flags (LH-FA-CLI-005A — gelten auch für künftige Befehle
+     Root-Flags ([`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) — gelten auch für künftige Befehle
      wie `add`/`remove`/`config set`). Konflikt-Check `--yes` +
      `--no-interactive` → `cli.ErrConflictingModeFlags` →
-     `isUsageError`-Pfad → Exit-Code 2 nach `LH-FA-CLI-005A` §235.
+     `isUsageError`-Pfad → Exit-Code 2 nach [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) §235.
      `--assume-existing` wird angenommen + validiert (init-only,
      spec §238), als `AssumeExisting bool` in
      `driving.InitProjectRequest` durchgereicht; M3 hat keine
@@ -170,7 +170,7 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
 
 ## Akzeptanzkriterien (Slice-Level)
 
-- `LH-AK-001` Minimaler Init-Flow läuft grün (`mkdir demo && cd demo
+- [`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001-minimaler-init-flow) Minimaler Init-Flow läuft grün (`mkdir demo && cd demo
   && u-boot init && u-boot doctor`). `doctor` ist noch nicht
   implementiert; dieser AK wird mit M4 vollständig erfüllt. M3
   liefert: `u-boot init` läuft und erzeugt die Pflichtstruktur.
@@ -194,17 +194,17 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
 ## Out of Scope
 
 - Devcontainer-Erzeugung (`--devcontainer`-Flag): eigener Slice
-  M4 (`LH-FA-DEV-001..005`).
+  M4 ([`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen)..[`LH-FA-DEV-005`](../../../../spec/lastenheft.md#lh-fa-dev-005-ports)).
 - `u-boot doctor`: eigener Slice M4 (`LH-FA-DIAG-*`).
 - Service-Add-ons (`u-boot add postgres` etc.): eigener Slice M5+.
-- `--dry-run`/`--diff`-Flags (`LH-FA-CLI-007/008`, V1).
-- JSON-Output (`LH-NFA-USE-004`, V1).
+- `--dry-run`/`--diff`-Flags ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)/[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe), V1).
+- JSON-Output ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe), V1).
 - Template-System (`LH-FA-TPL-*`, V1).
 
 ## Bezug
 
-- Auslösende Spec: `LH-FA-INIT-001..007`, `LH-FA-CONF-001..003`,
-  `LH-FA-CLI-005A`, `LH-FA-CLI-006`.
+- Auslösende Spec: [`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren)..[`LH-FA-INIT-007`](../../../../spec/lastenheft.md#lh-fa-init-007-git-repository-initialisierung), [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration)..[`LH-FA-CONF-003`](../../../../spec/lastenheft.md#lh-fa-conf-003-konfiguration-lesen),
+  [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes).
 - Hängt von: M2d (Carveout-Disziplin etabliert).
 - Löst auf: zwei M3-Carveouts in
   [`carveouts.md`](../in-progress/carveouts.md).

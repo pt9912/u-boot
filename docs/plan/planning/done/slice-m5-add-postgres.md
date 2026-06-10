@@ -11,21 +11,21 @@ konkreten Add-on.
 
 Spec-Pflicht für M5 (alle MVP-Priorität):
 
-- **`LH-FA-ADD-001`** Befehlsstruktur `u-boot add <service>`, nur in
+- **[`LH-FA-ADD-001`](../../../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl)** Befehlsstruktur `u-boot add <service>`, nur in
   initialisiertem Projekt (`u-boot.yaml` vorhanden).
-- **`LH-FA-ADD-002`** PostgreSQL hinzufügen: Compose-Service +
+- **[`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen)** PostgreSQL hinzufügen: Compose-Service +
   Volume + `.env.example`-Einträge + Port + Healthcheck.
-- **`LH-FA-ADD-005`** Doppel-Add-Verhinderung über die
+- **[`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern)** Doppel-Add-Verhinderung über die
   `services.<name>.enabled`-State-Machine in `u-boot.yaml`.
 
 Out of Scope (V1):
 
-- **`LH-FA-ADD-003`** Keycloak (V1).
-- **`LH-FA-ADD-004`** OTel (V1).
-- **`LH-FA-ADD-006`** Add-on-Abhängigkeiten + `--with-deps` (V1).
-- **`LH-FA-ADD-007`** `u-boot remove <service>` (V1).
+- **[`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003-keycloak-hinzufügen)** Keycloak (V1).
+- **[`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004-opentelemetry-hinzufügen)** OTel (V1).
+- **[`LH-FA-ADD-006`](../../../../spec/lastenheft.md#lh-fa-add-006-add-on-abhängigkeiten)** Add-on-Abhängigkeiten + `--with-deps` (V1).
+- **[`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen)** `u-boot remove <service>` (V1).
 
-## State-Machine (LH-FA-ADD-005)
+## State-Machine ([`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern))
 
 Pro Service-Name gibt es sechs beobachtbare Zustände beim Add-Versuch.
 Malformed Managed-Blocks für den Ziel-Service sind ein Pre-Classification-
@@ -36,7 +36,7 @@ wohlgeformt-vorhanden/fehlend-Fälle.
 
 | Zustand                | `services.<name>` in u-boot.yaml | `enabled` | Managed-Block in compose.yaml | Add-Aktion                                                                              |
 | ---------------------- | -------------------------------- | --------- | ----------------------------- | --------------------------------------------------------------------------------------- |
-| **unregistered**       | fehlt                            | —         | fehlt                         | Neu anlegen: services-Eintrag + Compose-Block + .env.example-Block (LH-FA-ADD-002).     |
+| **unregistered**       | fehlt                            | —         | fehlt                         | Neu anlegen: services-Eintrag + Compose-Block + .env.example-Block ([`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen)).     |
 | **active**             | vorhanden                        | `true`    | vorhanden                     | No-op, wenn PostgreSQL-Artefakte vollständig sind; sonst Artefakt-Repair ohne Service-Duplikat. |
 | **deactivated**        | vorhanden                        | `false`   | vorhanden/fehlend, aber wohlgeformt | Re-Aktivierung: `enabled: true` + Compose-Block + .env-Block neu erzeugen.              |
 | **enabled-key-fehlt**  | vorhanden                        | (unset)   | vorhanden/fehlend, aber wohlgeformt | (Doctor-warn-Pfad; Add interpretiert als deactivated und re-aktiviert wie oben.)        |
@@ -74,10 +74,10 @@ wohlgeformt-vorhanden/fehlend-Fälle.
    - Sentinels:
      - `ErrServiceUnsupported` (Service-Name nicht im
        built-in-Katalog, heute nur „postgres").
-     - `ErrServiceInconsistent` (LH-FA-ADD-005-inconsistent-yaml-Fall
+     - `ErrServiceInconsistent` ([`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern)-inconsistent-yaml-Fall
        sowie malformed managed compose-block).
-     - `ErrProjectNotInitialized` (kein `u-boot.yaml` → LH-FA-ADD-001).
-     Mapping zu LH-FA-CLI-006-Exit-Code 10 (validation); kein eigener
+     - `ErrProjectNotInitialized` (kein `u-boot.yaml` → [`LH-FA-ADD-001`](../../../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl)).
+     Mapping zu [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-Exit-Code 10 (validation); kein eigener
      Code 13 für Add-Projektzustand in M5.
 
 3. **T3 — Application-Service-Skeleton + State-Detection.**
@@ -90,7 +90,7 @@ wohlgeformt-vorhanden/fehlend-Fälle.
    execute: not yet implemented (M5-T4)")` zurückgibt — kein eigener
    Carveout-Eintrag nötig, weil T4 in derselben Slice-Datei als
    nächste Tranche dokumentiert ist (Plan-Pflicht aus
-   `LH-FA-PROJDOCS-005` erfüllt) und der CLI-Subcommand erst T6 ist,
+   [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin) erfüllt) und der CLI-Subcommand erst T6 ist,
    d. h. der Stub ist bis dahin nur über direkte Service-Aufrufe in
    Tests erreichbar.
 
@@ -127,7 +127,7 @@ wohlgeformt-vorhanden/fehlend-Fälle.
      Scalars und Insert eines fehlenden `services.postgres.enabled`.
    - Die Application-Schicht importiert **nicht** `gopkg.in/yaml.v3`;
      YAML-Bibliotheksdetails bleiben im Driven-Adapter
-     (LH-FA-ARCH-003).
+     ([`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement)).
 
    **`detectServiceState(baseDir, name)`-Algorithmus:**
    1. `s.fs.Exists(baseDir/u-boot.yaml)` → `(false, nil)` ⇒
@@ -740,8 +740,8 @@ wohlgeformt-vorhanden/fehlend-Fälle.
      `POSTGRES_DB: ${POSTGRES_DB:-postgres}`.
      **Begründung:** Docker Compose liest automatisch nur `.env`
      (nicht `.env.example`); ohne Defaults im Compose-File würde
-     der Acceptance-Flow LH-AK-002 (`u-boot init && u-boot add
-     postgres && u-boot up`, `spec/lastenheft.md` §LH-AK-002) ohne
+     der Acceptance-Flow [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow) (`u-boot init && u-boot add
+     postgres && u-boot up`, `spec/lastenheft.md` §[`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow)) ohne
      manuelles `cp .env.example .env` scheitern. `u-boot up` ist
      M6 und kann den Acceptance-Bug nicht für M5 schließen, also
      muss M5 selbst out-of-the-box laufbar sein. `.env.example`
@@ -760,7 +760,7 @@ wohlgeformt-vorhanden/fehlend-Fälle.
      BLOCK: service.postgres`-Marker. Die Marker werden in T4c über
      einen Wrap-Schritt ergänzt; das Template selbst bleibt
      marker-frei, damit dieselben drei Zeilen auch für die
-     Compose-`environment:`-Referenz (LH-AK-002-Default-Werte)
+     Compose-`environment:`-Referenz ([`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow)-Default-Werte)
      wiederverwendbar bleiben. Sicherheits-Convention: explizit
      `CHANGEME_*`, nie reale Defaults.
 
@@ -1075,7 +1075,7 @@ wohlgeformt-vorhanden/fehlend-Fälle.
    (activeArtifactsStatus, error)` auf. Er macht keine FS-Writes
    und bekommt keine Plan-Datenstruktur — nur Flags zurück. Ein
    Marker allein reicht bewusst **nicht** als „komplett" —
-   LH-FA-ADD-002 verlangt konkreten Inhalt (Compose-Service +
+   [`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen) verlangt konkreten Inhalt (Compose-Service +
    Volume + .env.example-Einträge + Port + Healthcheck).
 
    Der classifier nutzt den **`LocateMarkedEntry`-Port** für die
@@ -1106,14 +1106,14 @@ wohlgeformt-vorhanden/fehlend-Fälle.
    3. **Healthcheck-`disable: true`-Ausnahme**: ein `healthcheck:`-
       Mapping mit `disable: true` zählt **nicht** als gültiger
       Healthcheck (Compose-Semantik: `disable: true` schaltet den
-      Healthcheck aus, was LH-AK-002 verletzt). Der Stale-Detector
+      Healthcheck aus, was [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow) verletzt). Der Stale-Detector
       muss diese Form explizit als „kein Healthcheck" werten.
    4. **Trimmed, non-empty value**: `image:` ohne Wert (`image:`
       gefolgt von Leerzeile/Kommentar) zählt nicht; `image: foo`
       zählt; `image: ""` zählt nicht.
 
    Das ist immer noch kein voller YAML-Parser, aber präzise genug
-   für LH-FA-ADD-002/LH-AK-002. Negative Tests pinnen die obigen
+   für [`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen)/[`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow). Negative Tests pinnen die obigen
    Edge-Cases explizit (s. Test-Liste unten).
 
    - **Service-Block** (`service.postgres` unter `services.postgres`)
@@ -1128,7 +1128,7 @@ wohlgeformt-vorhanden/fehlend-Fälle.
        Pre-Patch-Anker-Check).
      - `MarkerInEntry=true` ⇒ **Inhalts-Check** auf `BlockBody`
        via zeilenbasiertem Substring-Matching. Pflichtfelder gemäß
-       LH-FA-ADD-002 und LH-AK-002 — der Check prüft **Präsenz**,
+       [`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen) und [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow) — der Check prüft **Präsenz**,
        nicht Werte (User-Tuning ist erlaubt: Port-Mapping ändern,
        Healthcheck-Intervall anpassen, Postgres-Image-Version
        pinnen):
@@ -1138,10 +1138,10 @@ wohlgeformt-vorhanden/fehlend-Fälle.
        - Zeile mit `volumes:` und mindestens eine Folge-Zeile die
          `postgres-data` enthält.
        - Zeile mit `ports:` und mindestens eine Folge-Zeile mit
-         `- ` (Sequenz-Eintrag) — LH-AK-002 verlangt explizit „der
+         `- ` (Sequenz-Eintrag) — [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow) verlangt explizit „der
          konfigurierte Port … ist auf localhost erreichbar".
        - Zeile mit `healthcheck:` und mindestens eine eingerückte
-         Folge-Zeile (Mapping mit Sub-Key) — LH-AK-002 verlangt
+         Folge-Zeile (Mapping mit Sub-Key) — [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow) verlangt
          explizit „Container … erreicht den Healthcheck-Status
          `healthy`".
        Fehlt eine Pflicht-Komponente ⇒ `status.ServiceStale = true`.
@@ -1207,7 +1207,7 @@ wohlgeformt-vorhanden/fehlend-Fälle.
    benennt seinen Custom-Service auf einen anderen Compose-Key (z. B.
    `postgres-custom`). Eine explizite „Service aus u-boot-Verwaltung
    nehmen, aber unter gleichem Namen weiterpflegen"-Funktion ist V1
-   (LH-FA-ADD-007 `u-boot remove` + Folge-Slice).
+   ([`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) `u-boot remove` + Folge-Slice).
 
    *Tests für stale/incomplete (T4c-Scope):*
    - `Active` + `service.postgres`-Block ohne `image:` ⇒
@@ -1215,10 +1215,10 @@ wohlgeformt-vorhanden/fehlend-Fälle.
    - `Active` + `service.postgres`-Block ohne `environment.POSTGRES_PASSWORD` ⇒
      `actionRepairArtifacts`, Service-Block neu.
    - `Active` + `service.postgres`-Block ohne `ports:` ⇒
-     `actionRepairArtifacts`, Service-Block neu (LH-AK-002 verlangt
+     `actionRepairArtifacts`, Service-Block neu ([`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow) verlangt
      Port-Erreichbarkeit).
    - `Active` + `service.postgres`-Block ohne `healthcheck:` ⇒
-     `actionRepairArtifacts`, Service-Block neu (LH-AK-002 verlangt
+     `actionRepairArtifacts`, Service-Block neu ([`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow) verlangt
      Healthcheck-Status `healthy`).
    - `Active` + `service.postgres`-Block mit allen Pflichtfeldern
      plus User-Custom-Port (`ports: ["5433:5432"]`) ⇒ echter No-op,
@@ -1245,7 +1245,7 @@ wohlgeformt-vorhanden/fehlend-Fälle.
      Parent).
    - `Active` + `service.postgres`-Block mit `healthcheck:` aber nur
      `disable: true` darunter ⇒ `actionRepairArtifacts`, Service-Block
-     neu (disable-Ausnahme greift; LH-AK-002 erwartet aktiven
+     neu (disable-Ausnahme greift; [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow) erwartet aktiven
      Healthcheck).
    - `Active` + `service.postgres`-Block mit `image:` ohne Wert
      (z. B. `image:` gefolgt von Leerzeile oder
@@ -1260,9 +1260,9 @@ wohlgeformt-vorhanden/fehlend-Fälle.
      erfolgreich).
 
    *Architektur-Hinweis:* Diese Prüfung wird bewusst **nicht** als
-   siebter `ServiceState` modelliert; LH-FA-ADD-005 beschreibt nur
+   siebter `ServiceState` modelliert; [`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern) beschreibt nur
    die Doppel-Add-State-Machine. Fehlende/incomplete Volume-/Env-/
-   Service-Artefakte sind PostgreSQL-spezifische LH-FA-ADD-002-
+   Service-Artefakte sind PostgreSQL-spezifische [`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen)-
    Repair-Fälle und gehören damit zum Service-Plan, nicht zur
    State-Klassifikation.
 
@@ -1296,9 +1296,9 @@ wohlgeformt-vorhanden/fehlend-Fälle.
    - `s.yaml.PatchMappingEntryYAML(composeBody, "volumes",
      "postgres-data", volumeBlockBody, "volume.postgres")` für den
      Volume-Block.
-   - LH-FA-ADD-005-State-Detection bleibt am
+   - [`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern)-State-Detection bleibt am
      `service.postgres`-Marker; der Volume-Marker ist Teil des
-     LH-FA-ADD-002-Write-Pfads und wird bei jedem mutierenden Add
+     [`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen)-Write-Pfads und wird bei jedem mutierenden Add
      deterministisch mitgeschrieben.
 
    *Plan-and-Execute-Garantie:* T4c hält den M3-Split ein. Alle
@@ -1472,7 +1472,7 @@ wohlgeformt-vorhanden/fehlend-Fälle.
      korrekt durch Sub-Tranchen-Hashes); §T4c kann den
      Carveout-Entfernungspunkt referenzieren.
 
-5. **T5 — LH-FA-ADD-005-State-Machine-Tests.**
+5. **T5 — [`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern)-State-Machine-Tests.**
    - End-to-end-Tests für jede State-Transition (mit fake FS +
      fake yaml-codec):
      - unregistered → active (neu-anlegen).
@@ -1527,7 +1527,7 @@ wohlgeformt-vorhanden/fehlend-Fälle.
 
 7. **T7 — Closure: doctor-Integration + Slice-Move.**
    - Doctor-Check `services.<name>.enabled` muss explizit gesetzt
-     sein (LH-FA-ADD-005 §893): neuer Check `services.enabled-key`
+     sein ([`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern) §893): neuer Check `services.enabled-key`
      mit warn-Severity bei unset.
    - Doctor-Check für die in M4-T6 deferred
      `forwardPorts`-Konsistenz: jetzt mit dem neuen services-Schema
@@ -1539,11 +1539,11 @@ wohlgeformt-vorhanden/fehlend-Fälle.
      verschieben.
    - End-to-end-Smoke (`docker run u-boot init demo && u-boot add
      postgres && u-boot doctor`) muss grün laufen.
-   - slice-m5-add-postgres.md nach `done/`. Roadmap M5 → Done.
+   - [slice-m5-add-postgres.md](slice-m5-add-postgres.md) nach `done/`. Roadmap M5 → Done.
 
 > **Archiv-Hinweis zum Smoke-Punkt (M5-Done-Review):** Im distroless
 > Runtime-Image (`make build`, distroless/static-nonroot) fehlen
-> `git` und `docker` per Design (LH-NFA-PORT-002 — minimale
+> `git` und `docker` per Design ([`LH-NFA-PORT-002`](../../../../spec/lastenheft.md#lh-nfa-port-002-keine-unnötigen-systemabhängigkeiten) — minimale
 > Host-Deps). `u-boot doctor` meldet diese Werkzeuge dann als
 > Error (`git.installed`, `docker.installed`). Die `u-boot init`-
 > und `u-boot add postgres`-Schritte des Smoke laufen im Runtime-
@@ -1558,7 +1558,7 @@ wohlgeformt-vorhanden/fehlend-Fälle.
 
 ## Akzeptanzkriterien (Slice-Level)
 
-- `LH-FA-ADD-001`, `LH-FA-ADD-002`, `LH-FA-ADD-005` abgehakt.
+- [`LH-FA-ADD-001`](../../../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl), [`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen), [`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern) abgehakt.
 - `make gates` grün.
 - M4-T6-deferred-Carveouts (forwardPorts + devcontainer.enabled)
   in T7 entweder geschlossen oder explizit auf eigene Folge-
@@ -1573,11 +1573,11 @@ wohlgeformt-vorhanden/fehlend-Fälle.
 
 ## Bezug
 
-- Auslösende Spec: `LH-FA-ADD-001..002`, `LH-FA-ADD-005`
+- Auslösende Spec: [`LH-FA-ADD-001`](../../../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl)..[`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen), [`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern)
   (`spec/lastenheft.md` §4.5).
 - Vorgänger: [`slice-m4-doctor`](../done/slice-m4-doctor.md) hat
   zwei explizit-deferred Concerns (forwardPorts + devcontainer-
   Severity), die mit T7 hier zur Auflösung kommen können.
-- Nachfolger: MVP-Closure-Slice (LH-AK-001..002) ist der
+- Nachfolger: MVP-Closure-Slice ([`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001-minimaler-init-flow)..[`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002-postgresql-flow)) ist der
   Acceptance-Demo-Pfad `mkdir demo && cd demo && u-boot init &&
   u-boot add postgres && u-boot doctor`.

@@ -5,12 +5,12 @@
 
 ## Auslöser
 
-`LH-FA-ARCH-003` und `spec/architecture.md` §4 definieren acht
+[`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement) und `spec/architecture.md` §4 definieren acht
 `depguard`-Regelblöcke für die hexagonalen Schicht-Imports. Sie waren
 seit M2b in `.golangci.yml` aktiv, **matchten aber nichts**, weil
 `./internal/...` keinen produktiven Code enthielt. Die Regeln greifen
 laut Konvention „automatisch mit dem ersten Paket pro Schicht" — das
-war bis M3 nur Behauptung, kein Test (`LH-FA-PROJDOCS-005`).
+war bis M3 nur Behauptung, kein Test ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)).
 
 ## Aufhebung
 
@@ -56,7 +56,7 @@ auch bei Abbruch.
 
 ## Bezug
 
-- Auslösende Spec: `LH-FA-ARCH-003`, `spec/architecture.md` §4.
+- Auslösende Spec: [`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement), `spec/architecture.md` §4.
 - Aufhebung dokumentiert in: [`carveouts.md`](../in-progress/carveouts.md)
   (Zeile entfernt) und [`roadmap.md`](../in-progress/roadmap.md)
   (Carveout-Auflösungs-Slice-Tabelle).

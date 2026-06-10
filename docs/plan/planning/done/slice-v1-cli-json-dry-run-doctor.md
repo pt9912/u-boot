@@ -18,23 +18,23 @@
 
 ## Auslöser
 
-Cluster-Slice `slice-v1-cli-json-dry-run` §T0-Outcomes
+Cluster-Slice [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md) §T0-Outcomes
 festgezurrt: `doctor` ist **Platz 1** der Folge-Slice-Reihenfolge
 (T0-(e)) — niedrige Komplexität, schon read-only, „gutes Schema-
 Pilot" ohne Architektur-Last. Der schwerere `RecordingFileSystem`-
 Wiring-Komplex aus T0-(b) wird im **zweiten** Folge-Slice
-`slice-v1-cli-json-dry-run-add` validiert; `doctor` etabliert
+[`slice-v1-cli-json-dry-run-add`](slice-v1-cli-json-dry-run-add.md) validiert; `doctor` etabliert
 vorher das Envelope + den Schema-Helper auf Read-only-Boden.
 
 Spec-Bezug für `doctor --json` (read-only-Pfad):
 
-- **`LH-NFA-USE-004`** (Maschinen-lesbar, V1): Pflicht-`--json`
+- **[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)** (Maschinen-lesbar, V1): Pflicht-`--json`
   für alle 10 Spec-Enum-Subcommands. **Minimalkontrakt** (bindend
   für `--json` ohne `--dry-run`/`--diff`, Lastenheft §1841):
   `status` ∈ `{ok, warn, error}`, `command` ∈ Spec-Enum,
   optional `subcommand` (Pflicht bei `command ∈ {template,
   config}`), `diagnostics` (leer = `[]`), `exitCode` (vgl.
-  `LH-FA-CLI-006`)
+  [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes))
   ([`spec/lastenheft.md`](../../../../spec/lastenheft.md)).
   Zusätzliche Pflichtregeln: `diagnostics[].level` **nur**
   `warn` oder `error` (Lastenheft §1834 — der All-OK-Fall
@@ -43,7 +43,7 @@ Spec-Bezug für `doctor --json` (read-only-Pfad):
   konform (Lastenheft §1835 + §445); `status`-Kopplung an
   höchstes `level` (`error → "error"`, `warn ohne error →
   "warn"`, sonst `"ok"`).
-- **`LH-FA-CLI-007`** (Dry-Run, V1, Voll-Schema): gilt
+- **[`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)** (Dry-Run, V1, Voll-Schema): gilt
   ausschließlich für `--dry-run --json` und `--diff --json`
   (Lastenheft §1842, §468). Pflichtfelder
   `dryRun`/`diff`/`plannedFiles`/`changes` plus die Minimal-
@@ -53,13 +53,13 @@ Spec-Bezug für `doctor --json` (read-only-Pfad):
   (`AssertMinimalEnvelope` und `AssertFullEnvelope`), damit
   der zweite Folge-Slice (`add`) den Full-Mode auf bereits
   stabilem Minimal-Helper aufsetzt.
-- **`LH-FA-DIAG-003`** (Severity-Klassifikation): bereits
+- **[`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003-fehlerklassifikation)** (Severity-Klassifikation): bereits
   implementiert in
   [`doctor.go`](../../../../internal/adapter/driving/cli/doctor.go),
   Exit-Code 11 für Error (und für Warn unter `--strict`). Der
   `--json`-Pfad muss `exitCode` konsistent zu
   [`ErrDoctorFailures`](../../../../internal/adapter/driving/cli/cli.go)
-  serialisieren (`LH-FA-CLI-006`).
+  serialisieren ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)).
 
 Heute existierender Pfad:
 [`doctor.go:71-78`](../../../../internal/adapter/driving/cli/doctor.go)
@@ -79,12 +79,12 @@ T0-(a). Dieser Slice **muss** den Schnitt durchführen — lokales
 Flag entfernen, `runTemplateList` liest Root-Flag-State,
 **Output-Format bleibt unverändert** (die spätere Envelope-
 Migration für `template list` ist Platz 9
-`slice-v1-cli-json-dry-run-template`).
+[`slice-v1-cli-json-dry-run-template`](slice-v1-cli-json-dry-run-template.md)).
 
 ## Aufhebungsbedingung
 
 `u-boot doctor --json` liefert einen **Minimalkontrakt-konformen**
-Envelope (`LH-NFA-USE-004` §1841) und `make test` + `make lint` +
+Envelope ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1841) und `make test` + `make lint` +
 `make docs-check` bleiben grün. Im selben Commit-Set ist das
 lokale `template list --json`-Flag entfernt und beide CLI-Pin-
 Tests (`u-boot template list --json` **und** `u-boot --json
@@ -106,12 +106,12 @@ einige sind gruppiert):
   — aber **ohne** Spec-vorgesehenen `subcommand`-Wert (§1838
   fordert `subcommand`-Pflicht bei `command == "config"`). Beide
   Bare-Forms rejecten daher `--json` bis zum jeweiligen Folge-Slice
-  (`slice-v1-cli-json-dry-run-config`/`-template`), der für bare
+  ([`slice-v1-cli-json-dry-run-config`](slice-v1-cli-json-dry-run-config.md)/`-template`), der für bare
   die `subcommand`-Sub-Decision trifft (Kandidaten gemäß Cluster
   §96-107: `"list"`, `"show"`, explizit `""`).
 
 Reject-Form heute (alle 11): Exit-Code `2`
-(`LH-FA-CLI-006`-Klasse) und Verweis auf den jeweiligen
+([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-Klasse) und Verweis auf den jeweiligen
 Folge-Slice — kein Subcommand „akzeptiert `--json` still und
 liefert Human-Output" (sonst untergrabener V1-Maschinenvertrag).
 Cluster-T_close-Pflicht-Check: alle 13 Formen (2 Migrate +
@@ -158,7 +158,7 @@ Pin-Werte für `diagnostics[].code` spiegeln den **T0-(h)-
 Vorschlag Option (3)** (Tool-interne Codes aus
 `domain.Diagnostic.ID`, dokumentiert in der Code-Registry).
 Wird T0-(h) auf Option (1) LH-ID-Mapping festgezurrt, werden
-die Codes durch `LH-FA-DIAG-002` / `LH-FA-DIAG-003` ersetzt
+die Codes durch [`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen) / [`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003-fehlerklassifikation) ersetzt
 — die Pin-Tests müssen dann gegen die finale T0-(h)-Wahl
 geschnitten werden.
 
@@ -188,9 +188,9 @@ JSON-Modus darum semantisch ein No-op.
   `config get`, `config set`, `template` (bare) — `config`
   zählt als 3 Formen, `template` als 1 bare-Form plus
   Sonderregel `template list` unten) rejecten `--json` mit
-  Exit-Code `2` (`LH-FA-CLI-006`-Klasse) und Fehlermeldung
+  Exit-Code `2` ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-Klasse) und Fehlermeldung
   `JSON-Ausgabe für 'u-boot <sub>' ist noch nicht implementiert
-  (siehe slice-v1-cli-json-dry-run-<sub>).` Mechanik T0-(g).
+  (siehe [slice-v1-cli-json-dry-run](slice-v1-cli-json-dry-run.md)-<sub>).` Mechanik T0-(g).
   Pflicht-Pin-Test je nicht-migrierter Subcommand-Form (11
   Pin-Tests insgesamt). Pro Folge-Slice-Merge fallen **genau**
   die Reject-Pfade der migrierten Subcommand-Formen
@@ -211,7 +211,7 @@ JSON-Modus darum semantisch ein No-op.
   beim `add`-/modifying-Pfad). Read-only-Output trägt die
   Voll-Schema-Felder gar nicht im JSON (Lastenheft §1841,
   Minimalkontrakt-bindend); modifying-Output muss sie alle
-  vier explizit setzen (`LH-FA-CLI-007` §326).
+  vier explizit setzen ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §326).
 - ✅ **Schema-Helper-Modus-Split**: zwei Helper-Modi im
   Sub-Package `internal/adapter/driving/cli/jsontestutil/`:
   - `AssertMinimalEnvelope(t, raw)` prüft den Lastenheft-§1841-
@@ -225,7 +225,7 @@ JSON-Modus darum semantisch ein No-op.
     **Verbietet** `dryRun`/`diff`/`plannedFiles`/`changes` im
     Envelope (sonst ist es kein Minimalkontrakt mehr).
   - `AssertFullEnvelope(t, raw)` prüft zusätzlich die
-    `LH-FA-CLI-007`-Voll-Felder. Wird in diesem Slice
+    [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)-Voll-Felder. Wird in diesem Slice
     angelegt, aber **nicht** verwendet — Pattern-Anker für
     den nachfolgenden `add`-Slice.
 
@@ -251,8 +251,8 @@ JSON-Modus darum semantisch ein No-op.
   pflichtbestandteil. Wenn T0-(h) `Diagnostic.ID`-basierte
   Tool-interne Codes wählt (z. B. `docker.available`), trägt
   diese Sektion jeden Code mit seiner Bedeutung; wenn T0-(h)
-  LH-ID-Mapping wählt (z. B. alle Doctor-Checks → `LH-FA-DIAG-002`
-  oder `LH-FA-DIAG-003`), dokumentiert die Sektion das Mapping.
+  LH-ID-Mapping wählt (z. B. alle Doctor-Checks → [`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen)
+  oder [`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003-fehlerklassifikation)), dokumentiert die Sektion das Mapping.
   Der Minimal-Helper konsultiert diese Sektion über eine
   embedded Allowlist (Sub-Decision T0-(b)/(h)).
 - ✅ **`template list --json`-Schnitt (Cluster T0-(e) §M3)**:
@@ -270,20 +270,20 @@ JSON-Modus darum semantisch ein No-op.
   Der Reject-Pfad oben gilt deshalb **nicht** für `template
   list --json` (würde sonst bestehenden Output brechen). Die
   Minimal-konforme Form folgt mit Cluster-Platz 9
-  `slice-v1-cli-json-dry-run-template`. **Carveouts-Eintrag-
+  [`slice-v1-cli-json-dry-run-template`](slice-v1-cli-json-dry-run-template.md). **Carveouts-Eintrag-
   Pflicht**: dieser Slice trägt einen Carveout-Eintrag in
   [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
   Carveouts mit dem Re-Trigger-Verweis auf
-  `slice-v1-cli-json-dry-run-template`.
+  [`slice-v1-cli-json-dry-run-template`](slice-v1-cli-json-dry-run-template.md).
 - ✅ **Schema-Konformität via Helper**: drei Acceptance-Tests
   pinnen `doctor --json` (All-OK-Fall mit `diagnostics: []`,
   Warn-Fall, Error-Fall) via `jsontestutil.AssertMinimalEnvelope`.
-  Exit-Code konsistent mit `LH-FA-CLI-006` (`0` für ok / warn,
+  Exit-Code konsistent mit [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) (`0` für ok / warn,
   `11` für error / strict-warn — gleicher Pfad wie heute,
   gemeinsamer `ErrDoctorFailures`-Anker).
 - ✅ **Architektur-Grenzen sauber**: `cliJSONEnvelope` und
   Helper leben im CLI-Adapter, **nicht** im Domain- oder
-  Application-Layer (`LH-FA-ARCH-002`/`003`). `make lint`
+  Application-Layer ([`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002-schichten-und-verzeichnislayout)/[`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement)). `make lint`
   (depguard) grün; CLI-Adapter importiert keine neuen
   `hexagon/port/driven`-Typen (RecordingFileSystem kommt erst
   im `add`-Folge-Slice).
@@ -291,8 +291,8 @@ JSON-Modus darum semantisch ein No-op.
   parallel mitliefern oder eigener Cluster-T1-Schritt
   vorab — Sub-Decision T0-(f) dieses Slices): zentraler
   Reference-Block (Kandidat `docs/user/cli-json-output.md`)
-  zitiert sowohl den `LH-NFA-USE-004`-Minimalkontrakt
-  (§1823-1842) als auch das `LH-FA-CLI-007`-Voll-Schema
+  zitiert sowohl den [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)-Minimalkontrakt
+  (§1823-1842) als auch das [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)-Voll-Schema
   (§322-417) verbatim und benennt Envelope-Lokation plus
   Code-Registry; README EN+DE bekommen Verweis-Zeile.
 
@@ -439,7 +439,7 @@ Heute trägt
 einen stabilen Check-Identifier wie `"docker.available"`. Spec
 §1835 + §445 erlaubt für `diagnostics[].code` **zwei** Formen:
 (a) LH-Kennung der verursachenden Anforderung (z. B.
-`LH-FA-DIAG-002`, `LH-FA-DEV-003`) oder (b) Tool-interne Codes,
+[`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen), [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)) oder (b) Tool-interne Codes,
 **falls** ihre Bedeutung in der Doku festgehalten ist.
 `docker.available` ist tool-intern → Option (b) braucht eine
 Code-Registry in `docs/user/cli-json-output.md`.
@@ -448,7 +448,7 @@ Drei Sub-Optionen:
 
 1. **LH-ID-Mapping in der Adapter-Schicht**: CLI-Adapter
    übersetzt `Diagnostic.ID → LH-ID` (z. B. alle Doctor-Checks
-   gemeinsam → `LH-FA-DIAG-002` oder `LH-FA-DIAG-003`). Vorteil:
+   gemeinsam → [`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen) oder [`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003-fehlerklassifikation)). Vorteil:
    keine Domain-Änderung; Nachteil: Mapping-Logik im Adapter,
    Mehrere Checks teilen eine LH-ID (verliert Stabilität für
    CI-Scrapings).
@@ -457,7 +457,7 @@ Drei Sub-Optionen:
    Check-Konstruktor setzt eine LH-ID. Vorteil: pro-Check-
    Spezifik; Nachteil: rückwirkend alle Doctor-Checks
    anpassen — größerer Eingriff, Domain-Layer-Berührung
-   (`LH-FA-ARCH-002`-OK, aber spec-getrieben).
+   ([`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002-schichten-und-verzeichnislayout)-OK, aber spec-getrieben).
 3. **Tool-interne Codes plus Registry-Doku**: heutige
    `Diagnostic.ID` direkt durchreichen, Code-Registry-Sektion
    in `docs/user/cli-json-output.md` dokumentiert die Bedeutung
@@ -568,7 +568,7 @@ Garantie. Pattern-Vorbild-Last dieses Slices: jeder Folge-Slice,
 der `Data` setzt, definiert dafür einen **subcommand-spezifischen
 Wire-Type** mit dedizierten `json`-Tags (z. B. `type
 upStatusData struct { Services []serviceStatus \`json:"services"\` }`
-für `slice-v1-cli-json-dry-run-up-down`) und übergibt eine
+für [`slice-v1-cli-json-dry-run-up-down`](slice-v1-cli-json-dry-run-up-down.md)) und übergibt eine
 **typisierte Instanz** (`Data: upStatusData{...}`) — **kein**
 `map[string]any`, **keine** Inline-Anonym-Structs. Acceptance-
 Helper kann den Sub-Type via `json.RawMessage`-Re-Marshal pinnen,
@@ -688,10 +688,10 @@ Schema-Sektionen unverändert.
 
 **Cluster-T1-Doppelzählung vermeiden (Review-Finding L1):**
 Der Cluster-Slice führt T1 noch in seiner eigenen Lieferpflicht-
-Tabelle (`docs/plan/planning/in-progress/slice-v1-cli-json-dry-run.md`
+Tabelle (`docs/plan/planning/in-progress/[slice-v1-cli-json-dry-run.md](slice-v1-cli-json-dry-run.md)`
 §Tranchen T1). Pflicht-Nachzug **in diesem Slice-Closure (T6)**:
 Cluster-Slice-T1-Zelle muss eine „geliefert via Doctor-Slice
-(`slice-v1-cli-json-dry-run-doctor`)"-Notiz tragen, damit
+([`slice-v1-cli-json-dry-run-doctor`](slice-v1-cli-json-dry-run-doctor.md))"-Notiz tragen, damit
 Cluster-T_close-Reviewer den T1-Schritt nicht doppelt zählt
 oder vergeblich nach einem separaten Cluster-T1-Commit sucht.
 
@@ -713,7 +713,7 @@ var jsonAllowlist = map[string]bool{
 `cmd.CommandPath()` nicht in `jsonAllowlist` → Reject mit
 Exit-Code 2 und Fehlermeldung
 `JSON-Ausgabe für '<cmd.CommandPath()>' ist noch nicht
-implementiert (siehe slice-v1-cli-json-dry-run-<sub>).`
+implementiert (siehe [slice-v1-cli-json-dry-run](slice-v1-cli-json-dry-run.md)-<sub>).`
 
 **Subcommand-Form-Inventar (13 Formen):**
 
@@ -743,7 +743,7 @@ Help, wenn ohne Subcommand aufgerufen. `u-boot config --json`
 und `u-boot template --json` haben **kein** Spec-vorgesehenes
 Output-Format (Spec §420 fordert `subcommand`-Pflicht bei
 `command ∈ {template, config}`); sie rejecten daher bis zum
-jeweiligen Folge-Slice (`slice-v1-cli-json-dry-run-config`/
+jeweiligen Folge-Slice ([`slice-v1-cli-json-dry-run-config`](slice-v1-cli-json-dry-run-config.md)/
 `-template`), der die `subcommand`-Pflicht-Auflösung für
 bare-Form trifft (Kandidaten gemäß Cluster-Plan §96-107:
 `"list"`, `"show"`, explizit `""`).
@@ -870,12 +870,12 @@ Template-Stub, Daten-Asymmetrie). Alle adressiert vor T6.
 | T | Inhalt | LOC (Schätzung) |
 | - | ------ | --------------- |
 | T0 | **Discovery + Sub-Decisions** aus §T0-Discovery klären (acht Sub-Decisions, inkl. T0-(g) Reject-Mechanik und T0-(h) `diagnostics[].code`-Quelle). Entscheidungen mit Begründung in einem `T0-Outcomes`-Block dokumentieren. | — (Plan-Arbeit) |
-| T1 | **Schema-Vertrag-Doku.** `docs/user/cli-json-output.md` anlegen: Minimalkontrakt (`LH-NFA-USE-004` §1823-1842) und Voll-Schema (`LH-FA-CLI-007` §322-417) verbatim getrennt zitiert; **Code-Registry-Sektion** für Doctor-Checks (gemäß T0-(h)); Envelope-Lokation benennen; Minimal-vs.-Voll-Diff klargestellt. README EN+DE bekommt einen Verweis-Eintrag. (Cluster-T1; per T0-(f) hier mitgeliefert.) | ~120 |
+| T1 | **Schema-Vertrag-Doku.** `docs/user/cli-json-output.md` anlegen: Minimalkontrakt ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1823-1842) und Voll-Schema ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §322-417) verbatim getrennt zitiert; **Code-Registry-Sektion** für Doctor-Checks (gemäß T0-(h)); Envelope-Lokation benennen; Minimal-vs.-Voll-Diff klargestellt. README EN+DE bekommt einen Verweis-Eintrag. (Cluster-T1; per T0-(f) hier mitgeliefert.) | ~120 |
 | T2 | **Envelope + Helper-Split + Drift-Gates.** `cliJSONEnvelope`-Typ (Minimal-Felder Pflicht, Voll-Felder `omitempty` via `*bool`/nil-Slices — gemäß T0-(d), inkl. Anti-Drift-Struct-Kommentar gegen `*bool → bool`-Refactor) plus zwei Helper `AssertMinimalEnvelope` und `AssertFullEnvelope` mit Options (`WithCommand`, `WithSubcommand`, `WithExpectedCodes`, `WithExitCode`). **Pin-Tests:** (i) Helper positive/negative (fehlende Pflichtfelder, ungültiges `status`, `level: "ok"`/`level: "info"`-Reject, Voll-Schema-Feld im Minimal-Pfad-Reject, undokumentierter Code-Reject); (ii) Marshal-Pin `newFullEnvelope(..., dryRun=false, diff=false, ...)` produziert `"dryRun":false,"diff":false` (nicht weggelassen — M1-Schutz); (iii) **Drift-Gate 1** Map ↔ `doctor.go:74-114`-Vollständigkeit; (iv) **Drift-Gate 2** Map ↔ Markdown-Roundtrip-Parser. | ~220 |
 | T3 | **Root-PersistentFlag `--json` + Reject-Allowlist + Cobra-Tree-Walk-Pin** am Cobra-Root registrieren plus `PersistentPreRunE`-Reject für nicht-migrierte Subcommand-Formen (Mechanik gemäß T0-(g)). **11 Reject-Pin-Tests**, je einer pro nicht-migrierter Form (`init`, `add`, `remove`, `up`, `down`, `logs`, `generate`, `config`, `config get`, `config set`, `template` (bare); `template list` siehe T4 — kein Reject). **Anti-Drift-Pin** Cobra-Tree-Walk: rekursiver `rootCmd.Commands()`-Traversal vergleicht jeden Leaf-Path mit erwartetem Map-Key (M2-Schutz gegen `cmd.Use`-Renames). App-Struktur-Field für den Flag-State. | ~110 |
-| T4 | **`template list`-Schnitt + Carveouts-Eintrag.** Lokales Flag entfernen, `runTemplateList` liest Root-Flag. Zwei Pin-Tests grün (`u-boot template list --json` + `u-boot --json template list` → gleicher Output). Carveouts-Eintrag in `carveouts.md` §Temporäre Carveouts: `template list --json` heute nicht Minimalkontrakt-konform, Re-Trigger `slice-v1-cli-json-dry-run-template`. | ~40 |
+| T4 | **`template list`-Schnitt + Carveouts-Eintrag.** Lokales Flag entfernen, `runTemplateList` liest Root-Flag. Zwei Pin-Tests grün (`u-boot template list --json` + `u-boot --json template list` → gleicher Output). Carveouts-Eintrag in `carveouts.md` §Temporäre Carveouts: `template list --json` heute nicht Minimalkontrakt-konform, Re-Trigger [`slice-v1-cli-json-dry-run-template`](slice-v1-cli-json-dry-run-template.md). | ~40 |
 | T5 | **`doctor --json`-Pfad.** Envelope-Befüllung aus `domain.DiagnosticReport` mit `SeverityOK`- + `SeverityInfo`-Filter (kein `level: "ok"`/`level: "info"`-Eintrag), `status`-Mapping (höchstes vorhandenes Severity-Level), `exitCode` konsistent mit `ErrDoctorFailures`. Drei Acceptance-Tests (All-OK mit `diagnostics: []`, Warn-Fall, Error-Fall) via `jsontestutil.AssertMinimalEnvelope`. `--quiet`/`--strict`-Interaktion gemäß T0-(e), **inkl. Pin-Test `u-boot doctor --quiet --json` liefert semantisch identischen Envelope wie `u-boot doctor --json`** (gleiche `status`/`exitCode`, gleiche `diagnostics`-Reihenfolge mit gleichen `code`/`level`-Paaren — bewusst nicht byte-identisch, M4-Schutz gegen brüchige Pins bei zeitabhängigen Messages). Doctor-Check-Codes in Code-Registry aus T1 ergänzt. | ~140 |
-| T6 | **Closure.** CHANGELOG `## [Unreleased]` Added-Eintrag (Envelope + Helper-Split + Drift-Gates + Root-Flag + Reject-Allowlist + Cobra-Tree-Walk-Pin + `doctor --json` + `template list`-Flag-Schnitt + Carveout). **roadmap.md v0.4.0-Tabelle:** Cluster-Slice-Zelle aktualisiert (Doctor done, nächster Schritt `add`). **Cluster-Slice-T1-Zelle** in `docs/plan/planning/in-progress/slice-v1-cli-json-dry-run.md` mit „geliefert via `slice-v1-cli-json-dry-run-doctor`"-Notiz versehen (L1-Konsistenz). Slice-File `open/` → `done/` mit Tranchen+Commit-Tabelle. `make docs-check` grün. | — (Doku) |
+| T6 | **Closure.** CHANGELOG `## [Unreleased]` Added-Eintrag (Envelope + Helper-Split + Drift-Gates + Root-Flag + Reject-Allowlist + Cobra-Tree-Walk-Pin + `doctor --json` + `template list`-Flag-Schnitt + Carveout). **roadmap.md v0.4.0-Tabelle:** Cluster-Slice-Zelle aktualisiert (Doctor done, nächster Schritt `add`). **Cluster-Slice-T1-Zelle** in `docs/plan/planning/in-progress/[slice-v1-cli-json-dry-run.md](slice-v1-cli-json-dry-run.md)` mit „geliefert via [`slice-v1-cli-json-dry-run-doctor`](slice-v1-cli-json-dry-run-doctor.md)"-Notiz versehen (L1-Konsistenz). Slice-File `open/` → `done/` mit Tranchen+Commit-Tabelle. `make docs-check` grün. | — (Doku) |
 
 LOC-Schätzung Folge-Slice: ~630 LOC — leicht über der vom
 Cluster-Slice gesetzten 200..600-Bandbreite. Treiber des Anstiegs
@@ -889,20 +889,20 @@ Bandbreiten-Überschreitung ist begründet (Pattern-Vorbild-Last für
 ## Out of Scope
 
 - **`--dry-run` / `--diff` für `doctor`**: `doctor` ist
-  read-only, schreibt nichts. `LH-FA-CLI-007`/`-008` Voll-Schema
+  read-only, schreibt nichts. [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)/[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) Voll-Schema
   gelten nicht — `doctor --json` erfüllt den Minimalkontrakt
-  aus `LH-NFA-USE-004` §1841 (T0-(d)).
+  aus [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1841 (T0-(d)).
 - **`AssertFullEnvelope`-Nutzung in diesem Slice**: der
   Voll-Helper wird hier nur als Stub angelegt, **nicht** verwendet
   (keine modifying-Tests). Erstnutzung im Folge-Slice
-  `slice-v1-cli-json-dry-run-add`.
+  [`slice-v1-cli-json-dry-run-add`](slice-v1-cli-json-dry-run-add.md).
 - **`template list`-Envelope-Migration**: dieser Slice macht
   nur den Flag-Schnitt (lokal → Root), Output bleibt heutiges
   Array. Die Envelope-Migration mit Minimalkontrakt landet
-  im Cluster-Platz-9 `slice-v1-cli-json-dry-run-template`
+  im Cluster-Platz-9 [`slice-v1-cli-json-dry-run-template`](slice-v1-cli-json-dry-run-template.md)
   (Carveouts-Eintrag aus T4 ist der Re-Trigger).
 - **`RecordingFileSystem` und alles aus Cluster-T0-(b)**:
-  kommt erst im Folge-Slice `slice-v1-cli-json-dry-run-add`.
+  kommt erst im Folge-Slice [`slice-v1-cli-json-dry-run-add`](slice-v1-cli-json-dry-run-add.md).
   Dieser Slice **importiert keinen** neuen `driven.FileSystem`-
   Typ und etabliert kein Composition-Root-Wiring für
   Preview-Adapter. Konkret:
@@ -921,11 +921,11 @@ Bandbreiten-Überschreitung ist begründet (Pattern-Vorbild-Last für
   Flag-Schnitt wandert hierher (T0-(e)-Pflicht aus dem Cluster).
   Die Migration der `templateJSON`-Array-Form auf den
   Envelope-`Data`-Field passiert in Platz 9
-  `slice-v1-cli-json-dry-run-template`.
+  [`slice-v1-cli-json-dry-run-template`](slice-v1-cli-json-dry-run-template.md).
 - **JSON-Output für alle anderen 8 Subcommands**: jeder eigener
   Folge-Slice gemäß Cluster-T0-(e)-Reihenfolge.
 - **Neue Folge-ADR** „JSON-CLI ausgeliefert": entscheidet
-  Cluster-T_close, nicht dieser Slice. ADR-0010 bleibt
+  Cluster-T_close, nicht dieser Slice. [ADR-0010](../../adr/0010-kein-http-driving-adapter.md) bleibt
   unverändert (AGENTS.md §ADR-Disziplin).
 - **Schema-Versionierung** (`schemaVersion: 1` im Envelope):
   Cluster §Out-of-Scope hat das als YAGNI für V1 eingestuft.
@@ -937,13 +937,13 @@ Bandbreiten-Überschreitung ist begründet (Pattern-Vorbild-Last für
   — §T0-Outcomes (a, c, e) sind die Vorgaben dieses Slices,
   §Aufhebungsbedingung Closure-Hard-Rule ist verbindlich für die
   Cluster-Schließung.
-- Spec: `LH-NFA-USE-004` (Minimalkontrakt read-only),
-  `LH-FA-CLI-007` (Pflicht-Schema), `LH-FA-DIAG-003` (Severity),
-  `LH-FA-CLI-006` (Exit-Codes)
+- Spec: [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) (Minimalkontrakt read-only),
+  [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) (Pflicht-Schema), [`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003-fehlerklassifikation) (Severity),
+  [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) (Exit-Codes)
   ([`spec/lastenheft.md`](../../../../spec/lastenheft.md)).
 - ADR: [`ADR-0010`](../../adr/0010-kein-http-driving-adapter.md)
   §Folgepunkte Re-Eval-Trigger 2 — dieser Folge-Slice ist Teil
-  der JSON-CLI-Spur, die ADR-0010 voraussetzt.
+  der JSON-CLI-Spur, die [ADR-0010](../../adr/0010-kein-http-driving-adapter.md) voraussetzt.
 - Code-Anker heute:
   [`cli/doctor.go`](../../../../internal/adapter/driving/cli/doctor.go),
   [`cli/template.go`](../../../../internal/adapter/driving/cli/template.go)
@@ -957,4 +957,4 @@ Bandbreiten-Überschreitung ist begründet (Pattern-Vorbild-Last für
 - Vorbild-Slice für T0-Outcomes-Layout:
   [`slice-v1-logs`](../done/slice-v1-logs.md) §T0-Outcomes.
 - Phase: V1 (Teil des V1-pünktlichen
-  `slice-v1-cli-json-dry-run`-Clusters).
+  [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md)-Clusters).

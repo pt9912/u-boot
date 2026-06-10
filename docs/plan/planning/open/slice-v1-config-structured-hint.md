@@ -129,6 +129,6 @@ Subcommand.
 
 ## Spec-Bezug
 
-- `LH-FA-CONF-005` (Path-Whitelist) — Spec macht keine
+- [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern) (Path-Whitelist) — Spec macht keine
   Aussage zur Hint-Form. Strukturierung ist Konsument-
   Komfort-Argument (V1+-Ergonomik, kein Spec-Pflicht-Surface).

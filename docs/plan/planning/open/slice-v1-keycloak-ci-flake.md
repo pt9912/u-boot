@@ -2,7 +2,7 @@
 
 ## Auslöser
 
-`slice-v1-keycloak` T3 hat den LH-AK-003-Acceptance-Test
+[`slice-v1-keycloak`](../done/slice-v1-keycloak.md) T3 hat den [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow)-Acceptance-Test
 (`internal/e2e/keycloak_acceptance_docker_test.go`) angelegt.
 GitHub-Actions `integration-docker` failt damit seitdem
 reproduzierbar nach < 1 s:
@@ -33,7 +33,7 @@ Pflicht-Lane sein.
 
 ## Aufhebungsbedingung
 
-`make test-docker` lässt LH-AK-003 wieder mitlaufen (build-tag
+`make test-docker` lässt [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow) wieder mitlaufen (build-tag
 `docker` reicht; kein `acceptance_extended` mehr nötig).
 GitHub-Actions `integration-docker` läuft mit dem Keycloak-Test
 über drei aufeinanderfolgende Runs grün.
@@ -77,7 +77,7 @@ CI-Lauf soll aber sein:
    bewusst ausgegrenzt wird (eigener Folge-Slice mit benanntem
    Trigger).
 
-slice-v1-otel T3 hat die Methodik live demonstriert: zwei rote
+[slice-v1-otel](../done/slice-v1-otel.md) T3 hat die Methodik live demonstriert: zwei rote
 CI-Runs → lokale Reproduktion → Diagnose (Daemon-Pfad-Mismatch) →
 10-Zeilen-Makefile-Fix (`-v /tmp:/tmp` in test-docker, commit
 `b0604df`) — kein Carveout nötig. Slice-v1-keycloak-ci-flake soll
@@ -89,7 +89,7 @@ denselben Pfad gehen.
 | - | ------ |
 | T1 | **Diagnose.** `docker compose --verbose up -d` aus dem GitHub-Actions-`test-docker-tools`-Container ziehen — entweder über einen extra CI-Step der nur bei Failure läuft (`if: failure()` mit `docker compose logs --no-color` + `docker compose --verbose ps`) oder lokal durch Reproduktion mit slow-network-Throttling. Failure-Cause eindeutig isolieren: (a) Manifest-Lookup-Fehler (Quay-Registry transient) → Pull-Retry-Wrapper; (b) Compose-Validate-Fehler (Image-Hashing, Plugin-Inkompatibilität) → Compose-Plugin-Version oder Compose-File-Syntax fixen; (c) Network-Access aus dem nested-docker-Container blockiert → Mirror notwendig. **T1-Decision:** ein Sub-Punkt aus a/b/c als root cause. Carveout-Hinweis dokumentiert. |
 | T2 | **Fix.** Je nach T1-Decision: (a) UpService-Pull-Retry — neuer `driven.DockerEngine.PullImage(ctx, image, opts)`-Port mit konfigurierbarer Retry-Strategie (3 Versuche mit Exponential-Backoff bei 5xx/Timeout), UpService ruft ihn explizit vor `ComposeUp` für jedes Service-Image; (b) Image-Mirror — `ghcr.io/<org>/keycloak`-Mirror eingerichtet via `publish.yml` Cross-Push-Step oder Docker-Hub-Pull-Through-Cache via Actions-Service-Container; Template aktualisiert. Tests: Unit-Test für Pull-Retry-Logik (mock-Registry liefert erst 503, dann 200), Integration-Smoke gegen GHCR-Mirror-URL. |
-| T3 | **Re-Activate.** `//go:build docker && acceptance_extended` zurück auf `//go:build docker`; Carveout-Kommentar-Block aus `keycloak_acceptance_docker_test.go` raus; carveouts.md-Zeile gelöscht; slice-v1-keycloak.md §Out-of-Scope-Punkt 1 gestrichen. `make test-docker` lokal grün; ein commit-and-push, dann drei aufeinanderfolgende `integration-docker`-Runs beobachten. Falls einer von drei rot → zurück zu T1. |
+| T3 | **Re-Activate.** `//go:build docker && acceptance_extended` zurück auf `//go:build docker`; Carveout-Kommentar-Block aus `keycloak_acceptance_docker_test.go` raus; carveouts.md-Zeile gelöscht; [slice-v1-keycloak.md](../done/slice-v1-keycloak.md) §Out-of-Scope-Punkt 1 gestrichen. `make test-docker` lokal grün; ein commit-and-push, dann drei aufeinanderfolgende `integration-docker`-Runs beobachten. Falls einer von drei rot → zurück zu T1. |
 | T4 | **Closure.** CHANGELOG `## [Unreleased]` Fixed-Eintrag mit Failure-Diagnose-Auszug + Fix-Strategie; roadmap.md ggf. Stand-Update (falls v0.3.0-Milestone-Zeile betroffen); Slice-Plan `open/` → `done/` mit Tranchen+Commit-Tabelle. `make docs-check` grün. |
 
 ## Out of Scope
@@ -105,7 +105,7 @@ denselben Pfad gehen.
   Folge-Slice falls praktisch nötig.
 - **Andere flaky Acceptance-Tests**: dieser Slice deckt nur
   Keycloak ab. OTel-Acceptance-Test landet mit
-  [`slice-v1-otel`](../in-progress/roadmap.md#v030--milestone-tabelle-add-on-catalogue-expansion);
+  [`slice-v1-otel`](../../../archive/roadmap-history-v0.1-v0.3.md#v030-cluster);
   falls dort dieselbe Quay-Klasse von Flake auftaucht, ggf. den
   Pull-Retry-Pfad aus diesem Slice mitnutzen.
 
@@ -117,11 +117,11 @@ denselben Pfad gehen.
   CI-Flake-Carveout).
 - Carveout-Eintrag:
   [`carveouts.md`](../in-progress/carveouts.md) §Temporäre Carveouts.
-- Spec-Bezug: `LH-AK-003` Keycloak-Flow (V1) — Test existiert,
+- Spec-Bezug: [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow) Keycloak-Flow (V1) — Test existiert,
   läuft aber nicht in der CI-Pflicht-Lane bis dieser Slice
   schließt.
 - Milestone: v0.3.0 oder v0.4.0 — abhängig davon ob T2-Fix vor
   oder nach dem v0.3.0-Release-Cut landet. Trigger: nächste
-  produktive Compose-Run-Cycle (slice-v1-otel oder Sammel-
+  produktive Compose-Run-Cycle ([slice-v1-otel](../done/slice-v1-otel.md) oder Sammel-
   Refactor).
 - Phase: V1 (Test-Stabilisierungs-Slice; kein neues Spec-Feature).

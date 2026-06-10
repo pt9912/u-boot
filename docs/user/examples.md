@@ -7,7 +7,7 @@ veralten diese Rezepte nicht bei jeder Template-Änderung. Pro-Command-
 Details liefert `u-boot <command> --help`; das Verhalten ist verbindlich
 in [`spec/lastenheft.md`](../../spec/lastenheft.md) festgelegt.
 
-Alle Subcommands liefern LH-FA-CLI-006-Exit-Codes (`0` Erfolg · `2`
+Alle Subcommands liefern [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-Exit-Codes (`0` Erfolg · `2`
 CLI-Fehlnutzung · `10` Validierung · `11` Umgebung · `12` Ausführung ·
 `14` IO/Persistenz). Maschinenlesbare Ausgabe + Dry-Run/Diff sind in
 [`cli-json-output.md`](cli-json-output.md) dokumentiert.
@@ -30,7 +30,7 @@ u-boot down                 # Container stoppen (Volumes bleiben erhalten)
 
 `u-boot add postgres` ist idempotent: ein zweiter Aufruf reaktiviert
 einen deaktivierten Service oder meldet „bereits vorhanden", ohne
-doppelt einzufügen (`LH-FA-ADD-005`).
+doppelt einzufügen ([LH-FA-ADD-005](../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern)).
 
 ## 2. Keycloak + OpenTelemetry
 
@@ -41,7 +41,7 @@ u-boot up
 ```
 
 Ist in `u-boot.yaml` `services.keycloak.persistence: external-postgres`
-deklariert, hängt Keycloak von PostgreSQL ab (`LH-FA-ADD-006`).
+deklariert, hängt Keycloak von PostgreSQL ab ([LH-FA-ADD-006](../../spec/lastenheft.md#lh-fa-add-006-add-on-abhängigkeiten)).
 `--with-deps` zieht das fehlende PostgreSQL deterministisch nach; im
 nicht-interaktiven Modus **ohne** `--with-deps` bricht der Aufruf mit
 Exit `10` und Hinweis auf die fehlende Abhängigkeit ab.
@@ -60,7 +60,7 @@ u-boot generate devcontainer --allow-external-feature-sources ghcr.io/owner/feat
 `u-boot doctor` prüft die erzeugte `devcontainer.json` auf
 VS-Code-Mindestkompatibilität und `forwardPorts`-Konsistenz zu
 aktivierten Services — als `error` bei `devcontainer.enabled: true` in
-`u-boot.yaml`, sonst als `warn` (`LH-FA-DIAG-002`).
+`u-boot.yaml`, sonst als `warn` ([LH-FA-DIAG-002](../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen)).
 
 ## 4. Projekt aus einem Template rendern
 
@@ -86,7 +86,7 @@ u-boot down --volumes --yes                      # destruktiv, deterministisch b
 ```
 
 `--yes` und `--no-interactive` sind exklusiv — gemeinsam angegeben → Exit
-`2` (`LH-FA-CLI-005A`). Im nicht-interaktiven Modus brechen Pfade, die
+`2` ([LH-FA-CLI-005A](../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung)). Im nicht-interaktiven Modus brechen Pfade, die
 eine Bestätigung bräuchten, deterministisch mit Exit `10` ab: destruktive
 Operationen (`down --volumes`, `remove --purge`) ohne `--yes`, und die
 implizite Bestehend-Projekt-Erkennung von `init` ohne `--assume-existing`.

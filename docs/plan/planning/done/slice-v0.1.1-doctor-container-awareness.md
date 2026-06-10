@@ -7,7 +7,7 @@ Nutzer hat `docker run -it --rm ghcr.io/pt9912/u-boot:latest doctor`
 gegen ein gesundes Host-System ausgeführt. Resultat: vier `error`-
 Diagnostiken, weil `doctor` die Tools `docker`, `docker compose`
 und `git` im Container-PATH sucht. Das distroless-Image
-(`gcr.io/distroless/static-debian12:nonroot`, ADR-0007 / Dockerfile
+(`gcr.io/distroless/static-debian12:nonroot`, [ADR-0007](../../adr/0007-distributionswege-ghcr.md) / Dockerfile
 L142) enthält bewusst keine dieser Binaries — nur das u-boot-Binary.
 
 Konkrete Fehlausgabe (Auszug):
@@ -21,7 +21,7 @@ Konkrete Fehlausgabe (Auszug):
 
 Ein ansonsten gesunder Host-Stand wird als „4 errors" gemeldet,
 weil `doctor` keinen Begriff von „läuft im Container" hat. Das
-ist ein UX-Bug, der aus der Distributions-Entscheidung (ADR-0007:
+ist ein UX-Bug, der aus der Distributions-Entscheidung ([ADR-0007](../../adr/0007-distributionswege-ghcr.md):
 GHCR-Image als primärer Distributionsweg) hervorgeht, aber dort
 nicht antizipiert wurde.
 
@@ -37,16 +37,16 @@ Pfad. Mindestens eine der folgenden Strategien ist umgesetzt:
    `severity: info, status: skipped` markiert mit einer
    Repair-Hint-Zeile, die erklärt: „Diese Checks gelten dem Host,
    nicht dem Container. Installiere u-boot lokal (siehe
-   `slice-v2-binary-distribution`) oder bewerte den Host
+   [`slice-v2-binary-distribution`](slice-v2-binary-distribution.md)) oder bewerte den Host
    gesondert."
 2. **Doc + Help-Text:** `doctor --help` und die README-Quickstart
    erläutern, dass `doctor` für die Host-Installation gedacht ist;
    im Container-Modus liefert es nur die Datei-Checks
    (`uboot.yaml`, `compose.yaml`, `.devcontainer/*`) sinnvoll.
 3. **Binary-Distribution-Trigger:** dieser Befund zieht den ersten
-   ADR-0007-Re-Evaluation-Trigger („erste konkrete Nachfrage nach
+   [ADR-0007](../../adr/0007-distributionswege-ghcr.md)-Re-Evaluation-Trigger („erste konkrete Nachfrage nach
    Cross-Plattform-Distribution") in einen aktiven Slice-Plan
-   `slice-v2-binary-distribution`.
+   [`slice-v2-binary-distribution`](slice-v2-binary-distribution.md).
 
 ## Akzeptanzkriterien
 
@@ -57,8 +57,8 @@ Pfad. Mindestens eine der folgenden Strategien ist umgesetzt:
 - Exit-Code im Container-Modus bei sonst gesundem Projekt: 0
   (statt 11 wie heute), weil keine Errors mehr.
 - `doctor --help` und README dokumentieren das Container-Verhalten.
-- Slice-Plan `slice-v2-binary-distribution.md` ist in `open/`
-  angelegt (Trigger ADR-0007 §Folgepunkte 1 ist materialisiert).
+- Slice-Plan [`slice-v2-binary-distribution.md`](slice-v2-binary-distribution.md) ist in `open/`
+  angelegt (Trigger [ADR-0007](../../adr/0007-distributionswege-ghcr.md) §Folgepunkte 1 ist materialisiert).
 
 ## Tranchen
 
@@ -85,7 +85,7 @@ Pfad. Mindestens eine der folgenden Strategien ist umgesetzt:
 - Hängt von:
   [ADR-0007](../../adr/0007-distributionswege-ghcr.md) §Folgepunkte 1
   („erste konkrete Nachfrage nach Cross-Plattform-Distribution")
-  als Trigger für `slice-v2-binary-distribution`.
+  als Trigger für [`slice-v2-binary-distribution`](slice-v2-binary-distribution.md).
 - Plan-Anker: dieser Slice plus
   [`slice-v2-binary-distribution`](slice-v2-binary-distribution.md).
 - Phase: V1-Followup (post-v0.1.0, Pre-v0.1.1).

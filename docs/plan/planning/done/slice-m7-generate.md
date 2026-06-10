@@ -8,39 +8,39 @@
 Nach M3 (`u-boot init`), M4 (`u-boot doctor`), M5 (`u-boot add
 postgres`) und M6 (`u-boot up`/`down`) fehlt das letzte MVP-Subkommando
 aus §4.8: **`u-boot generate <artifact>`**. Erst damit schließt sich
-`LH-AK-007` (Changelog-Generator) und der MVP-Akzeptanz-Pfad für
+[`LH-AK-007`](../../../../spec/lastenheft.md#lh-ak-007-changelog-generator) (Changelog-Generator) und der MVP-Akzeptanz-Pfad für
 artefaktbasierte Wiederherstellung / -Aktualisierung.
 
 Spec-Pflicht für M7 (alle MVP-Priorität, `spec/lastenheft.md` §4.8):
 
-- **`LH-FA-GEN-001`** Befehlsstruktur `u-boot generate <artifact>`.
+- **[`LH-FA-GEN-001`](../../../../spec/lastenheft.md#lh-fa-gen-001-generate-befehl)** Befehlsstruktur `u-boot generate <artifact>`.
   Erlaubte Werte: `changelog`, `readme`, `env-example`, `devcontainer`.
   Unbekannter Wert ⇒ Exit-Code **2** mit explizit aufgelistetem Katalog
   (analog `domain.NewServiceName` für `add`, aber Exit-Code 2 weil
   CLI-Validierung — `add` mappt unbekannte Service-Namen auf Code 10
   als fachliche Inkonsistenz; `generate` macht das **nicht**, weil die
   Spec explizit Code 2 fordert).
-- **`LH-FA-GEN-002`** `u-boot generate changelog` (LH-AK-007).
-- **`LH-FA-GEN-003`** `u-boot generate readme`.
-- **`LH-FA-GEN-004`** `u-boot generate env-example`.
-- **`LH-FA-GEN-005`** Idempotenz: mehrfaches Ausführen erzeugt keine
+- **[`LH-FA-GEN-002`](../../../../spec/lastenheft.md#lh-fa-gen-002-changelog-erzeugen)** `u-boot generate changelog` ([`LH-AK-007`](../../../../spec/lastenheft.md#lh-ak-007-changelog-generator)).
+- **[`LH-FA-GEN-003`](../../../../spec/lastenheft.md#lh-fa-gen-003-readme-erzeugen)** `u-boot generate readme`.
+- **[`LH-FA-GEN-004`](../../../../spec/lastenheft.md#lh-fa-gen-004-beispiel-env-erzeugen)** `u-boot generate env-example`.
+- **[`LH-FA-GEN-005`](../../../../spec/lastenheft.md#lh-fa-gen-005-idempotenz)** Idempotenz: mehrfaches Ausführen erzeugt keine
   Duplikate; bestehende manuelle Inhalte bleiben erhalten; automatisch
   verwaltete Bereiche sind eindeutig markiert.
 
 Plus aus angrenzenden Spec-Punkten, die `generate` einlöst:
 
-- **`LH-FA-DEV-001`** Devcontainer-Mindestdateien
+- **[`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen)** Devcontainer-Mindestdateien
   (`.devcontainer/devcontainer.json` + `.devcontainer/Dockerfile`).
   M7 liefert die Templates und den `generate devcontainer`-Pfad; das
-  parallele `init --devcontainer`-Flag (LH-AK-005) bleibt **MVP-
+  parallele `init --devcontainer`-Flag ([`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow)) bleibt **MVP-
   Closure-Slice**, der die hier eingeführten Templates wiederverwendet.
-- **`LH-FA-DEV-004`** Devcontainer mit nicht-root Default-User
+- **[`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004-benutzerrechte)** Devcontainer mit nicht-root Default-User
   (User wird in der Template-Defaultsektion verankert).
-- **`LH-FA-DEV-005`** Ports aus aktiven Services in
+- **[`LH-FA-DEV-005`](../../../../spec/lastenheft.md#lh-fa-dev-005-ports)** Ports aus aktiven Services in
   `devcontainer.json`.`forwardPorts`. Quelle: u-boot.yaml-`services`-
   Tree + `compose.yaml`-Ports; MVP liest die Container-Seite der
   Compose-Port-Mappings aus `compose.yaml`-managed-Blocks (siehe T5).
-- **`LH-FA-CLI-006`** Exit-Code-Mapping:
+- **[`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)** Exit-Code-Mapping:
   - `2` — CLI-Validierung (unbekanntes Artefakt, fehlende
     positional args).
   - `10` — fachlicher Validierungsfehler
@@ -58,7 +58,7 @@ Plus aus angrenzenden Spec-Punkten, die `generate` einlöst:
     (`driven.ErrFileSystem*` — Scan ergab: existiert heute nicht),
     bleibt der Wrap; sonst zeigt `errors.Is` direkt auf den
     Driven-Sentinel.
-- **`LH-SA-FILE-002`** Managed-Block-Konvention pro Datei-Format:
+- **[`LH-SA-FILE-002`](../../../../spec/lastenheft.md#lh-sa-file-002-markierte-verwaltete-bereiche)** Managed-Block-Konvention pro Datei-Format:
   - `.env.example` ⇒ `StyleHash` (`# BEGIN ...`).
   - `README.md`, `CHANGELOG.md` ⇒ `StyleHTMLComment` (`<!-- BEGIN ... -->`).
   - `.devcontainer/devcontainer.json` ⇒ `StyleDoubleSlash` (`// BEGIN ...`).
@@ -71,18 +71,18 @@ Plus aus angrenzenden Spec-Punkten, die `generate` einlöst:
 
 Out of Scope (V1+):
 
-- **`LH-FA-TPL-001..004`** Template-System mit benutzerdefinierten
+- **[`LH-FA-TPL-001`](../../../../spec/lastenheft.md#lh-fa-tpl-001-projektvorlagen)..[`LH-FA-TPL-004`](../../../../spec/lastenheft.md#lh-fa-tpl-004-templates-auflisten)** Template-System mit benutzerdefinierten
   Projektvorlagen — eigener V1-Slice
   ([`slice-v1-template-format-entscheidung`](../done/slice-v1-template-format-entscheidung.md)).
-- **`LH-FA-DOC-005`** Compose-Validierung — M7 generiert keinen
+- **[`LH-FA-DOC-005`](../../../../spec/lastenheft.md#lh-fa-doc-005-compose-validierung)** Compose-Validierung — M7 generiert keinen
   Compose-Output, nur die vier oben genannten Artefakte.
-- **`LH-FA-DEV-003`** Externe Devcontainer-Feature-Quellen
+- **[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)** Externe Devcontainer-Feature-Quellen
   (`--allow-external-feature-sources`) — V1 mit eigenem Flow,
   hier nur das Mindest-Template.
-- **`LH-FA-GEN-001` mit anderen Artefakten** (z. B. `generate
+- **[`LH-FA-GEN-001`](../../../../spec/lastenheft.md#lh-fa-gen-001-generate-befehl) mit anderen Artefakten** (z. B. `generate
   compose`, `generate dockerfile`) — Spec listet nur die vier oben;
   weitere kommen als eigene Slices.
-- **`u-boot init --devcontainer`** (LH-AK-005) — gehört zu
+- **`u-boot init --devcontainer`** ([`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow)) — gehört zu
   MVP-Closure, nutzt aber die T5-Templates aus M7.
 
 ## Vorbereitende Slices (Status)
@@ -129,7 +129,7 @@ Out of Scope (V1+):
     `managedblock.ErrBlockMalformed`-Fall mit BEGIN ohne END /
     duplicate BEGIN); Code 10 mit Repair-Hint („Benenne die Datei um
     und führe `u-boot generate <artifact>` erneut aus, oder füge den
-    formatgerechten BEGIN/END-Marker aus `LH-SA-FILE-002` manuell
+    formatgerechten BEGIN/END-Marker aus [`LH-SA-FILE-002`](../../../../spec/lastenheft.md#lh-sa-file-002-markierte-verwaltete-bereiche) manuell
     ein"). MVP schreibt nichts, V1-Folge-Slice könnte `--replace`
     ergänzen — Runtime-Fehlermeldungen in M7 erwähnen diesen nicht
     implementierten Flag aber bewusst nicht; siehe „Out of Scope".
@@ -193,7 +193,7 @@ Out of Scope (V1+):
   Artefakte verwenden denselben Block-Namen `init`, identisch zu den
   M3-Templates (`# BEGIN U-BOOT MANAGED BLOCK: init`). M7 führt
   bewusst **keinen** dedizierten `devcontainer`-Block-Namen ein,
-  damit das spätere `init --devcontainer`-Flag (LH-AK-005, MVP-
+  damit das spätere `init --devcontainer`-Flag ([`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow), MVP-
   Closure) und das `generate devcontainer` denselben Block reaktivieren
   — sonst entstünden zwei konkurrierende Marker in derselben Datei.
 
@@ -330,7 +330,7 @@ Template wird re-gerendered.
 
 Komplexer als T2/T3 wegen der Doppelrolle des `init`-Blocks: der
 M3-Template-Block enthält den initialen Header und einen
-`## [Unreleased]`-Stub. LH-AK-007 verlangt: „vorhandene Inhalte
+`## [Unreleased]`-Stub. [`LH-AK-007`](../../../../spec/lastenheft.md#lh-ak-007-changelog-generator) verlangt: „vorhandene Inhalte
 werden nicht zerstört, neuer Abschnitt wird korrekt ergänzt oder
 vorbereitet" — was im Widerspruch dazu steht, den `init`-Block
 einfach zu re-rendern (denn User-Einträge unter `### Added`
@@ -374,7 +374,7 @@ braucht. Siehe „Out of Scope".
 
 **DoD T4:**
 - [ ] `generateChangelog`-Handler implementiert.
-- [ ] LH-AK-007-Pin: ein End-to-end-Test, der genau dem Spec-Wortlaut
+- [ ] [`LH-AK-007`](../../../../spec/lastenheft.md#lh-ak-007-changelog-generator)-Pin: ein End-to-end-Test, der genau dem Spec-Wortlaut
   folgt (`u-boot init && u-boot generate changelog`) — Datei existiert,
   Vor-Inhalt nicht zerstört, Sektion korrekt ergänzt.
 - [ ] Stub-Pin-Test auf **1** verbliebenen Stub (`devcontainer`)
@@ -396,11 +396,11 @@ hartcodiert.
   - `name`: `"{{.Name}}"` (Projektname aus `u-boot.yaml`).
   - `build`: Object mit `dockerfile: "./Dockerfile"` und
     `context: "."`. (Spec verlangt mindestens eines aus `build` oder
-    `image`, LH-AK-005; `build` ist konsistent mit dem mit-
+    `image`, [`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow); `build` ist konsistent mit dem mit-
     generierten Dockerfile.)
   - `forwardPorts`: Array; T5 lässt das Template das Feld **leer**
     (`[]`) und füllt es im Render-Schritt aus dem Service-State.
-  - `remoteUser`: `"vscode"` (LH-FA-DEV-004 nicht-root).
+  - `remoteUser`: `"vscode"` ([`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004-benutzerrechte) nicht-root).
 - `internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl`
   — Multi-Stage-Dockerfile-Template mit `# BEGIN U-BOOT MANAGED BLOCK: init`-
   Marker. Basisimage z. B. `mcr.microsoft.com/devcontainers/base:debian`,
@@ -409,7 +409,7 @@ hartcodiert.
   `templates/devcontainer/*.tmpl` in `//go:embed` aufnehmen, damit
   `renderTemplate("devcontainer/...")` die neuen Templates findet.
 
-**`forwardPorts`-Quelle (entscheidend für LH-FA-DEV-005):**
+**`forwardPorts`-Quelle (entscheidend für [`LH-FA-DEV-005`](../../../../spec/lastenheft.md#lh-fa-dev-005-ports)):**
 
 Drei Kandidaten:
 1. `u-boot.yaml`-`services.<name>.ports` (existiert heute nicht;
@@ -426,7 +426,7 @@ Compose-Port-Mappings; `8080:80` ⇒ `80`,
 `127.0.0.1:8080:80/tcp` ⇒ `80`). Das entspricht der bestehenden
 Doctor-Logik für `devcontainer.forwardPorts.consistency`. Sortiert,
 dedupliziert. Bei `[]` ⇒ `forwardPorts` fehlt im
-generierten JSON (LH-FA-DEV-005: „darf fehlen"). Kandidat (1) wäre
+generierten JSON ([`LH-FA-DEV-005`](../../../../spec/lastenheft.md#lh-fa-dev-005-ports): „darf fehlen"). Kandidat (1) wäre
 ein zusätzlicher Spec-Tree (V1-Folgeslice), Kandidat (3) würde Add-on-
 Katalog-Pflege erzwingen.
 
@@ -447,7 +447,7 @@ nächste Lauf erneut als Konflikt sieht):
 | **fs-error**     | Read/Write-Fehler  | beliebig           | `ErrGenerateFileSystem`-Wrap; Aufruf endet mit Exit 14. Kein Teil-Write. |
 
 **Tests:**
-- Mindestfelder-Pin (LH-FA-DEV-001/004/005, **nicht** LH-AK-005 —
+- Mindestfelder-Pin ([`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen)/[`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004-benutzerrechte)/[`LH-FA-DEV-005`](../../../../spec/lastenheft.md#lh-fa-dev-005-ports), **nicht** [`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow) —
   letzteres verlangt explizit `u-boot init --devcontainer` und
   gehört in den MVP-Closure-Slice): `u-boot init && u-boot add
   postgres && u-boot generate devcontainer` ⇒ beide Dateien
@@ -461,7 +461,7 @@ nächste Lauf erneut als Konflikt sieht):
   (c) Postgres aktiv + zweiter Service mit `ports: ["8080:80"]` ⇒
   `[80, 5432]` (sortiert; Container-Ports).
 - Idempotenz: doppelter Lauf ohne Service-Änderung ⇒ `NoOp`.
-- `remoteUser: vscode`-Pin (LH-FA-DEV-004).
+- `remoteUser: vscode`-Pin ([`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004-benutzerrechte)).
 - `doctor`-Integration (Bestätigungstest, kein neuer Code) — Test
   benannt `TestDoctor_AfterGenerateDevcontainer_PinsWarnPath_WhenEnabledFalse`,
   damit ein späterer Maintainer die Intention nicht versehentlich
@@ -494,7 +494,7 @@ nächste Lauf erneut als Konflikt sieht):
   `FileSystem.WriteFile`-Counter auf 0 prüft).
 - [ ] Anti-Drift-Pin gegen `doctor.collectActiveServicePorts` grün.
 - [ ] Mindestfelder-Pin grün (End-to-end mit Postgres,
-  LH-FA-DEV-001/004/005).
+  [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen)/[`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004-benutzerrechte)/[`LH-FA-DEV-005`](../../../../spec/lastenheft.md#lh-fa-dev-005-ports)).
 - [ ] Stub-Pin-Test aus T1 (`errStubHandler`) wird hier entfernt — alle
   vier Handler sind ab T5 implementiert.
 - [ ] `make gates` grün.
@@ -609,28 +609,28 @@ nächste Lauf erneut als Konflikt sieht):
 
 ### Verhalten
 
-- **LH-FA-GEN-001**: `u-boot generate <artifact>` mit den vier
+- **[`LH-FA-GEN-001`](../../../../spec/lastenheft.md#lh-fa-gen-001-generate-befehl)**: `u-boot generate <artifact>` mit den vier
   erlaubten Werten; alle anderen Werte ⇒ Exit-Code 2 mit explizit
   aufgelistetem Katalog in Stderr.
-- **LH-FA-GEN-002 / LH-AK-007**: `generate changelog` schafft oder
+- **[`LH-FA-GEN-002`](../../../../spec/lastenheft.md#lh-fa-gen-002-changelog-erzeugen) / [`LH-AK-007`](../../../../spec/lastenheft.md#lh-ak-007-changelog-generator)**: `generate changelog` schafft oder
   aktualisiert `CHANGELOG.md`, zerstört keine User-Einträge.
-- **LH-FA-GEN-003**: `generate readme` schafft oder aktualisiert
+- **[`LH-FA-GEN-003`](../../../../spec/lastenheft.md#lh-fa-gen-003-readme-erzeugen)**: `generate readme` schafft oder aktualisiert
   `README.md`, zerstört keine User-Sektionen außerhalb des
   `init`-Blocks.
-- **LH-FA-GEN-004**: `generate env-example` schafft oder aktualisiert
+- **[`LH-FA-GEN-004`](../../../../spec/lastenheft.md#lh-fa-gen-004-beispiel-env-erzeugen)**: `generate env-example` schafft oder aktualisiert
   `.env.example`, zerstört keine Service-Add-on-Blöcke noch User-
   Variablen außerhalb des Blocks.
-- **LH-FA-GEN-005 / LH-AK-006-analog**: doppelter Aufruf ist ein
+- **[`LH-FA-GEN-005`](../../../../spec/lastenheft.md#lh-fa-gen-005-idempotenz) / [`LH-AK-006`](../../../../spec/lastenheft.md#lh-ak-006-idempotenz)-analog**: doppelter Aufruf ist ein
   `NoOp` (Action-Field expliziter Beleg; CLI-Output „already up to
   date").
-- **LH-FA-DEV-001**: `generate devcontainer` produziert beide
+- **[`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen)**: `generate devcontainer` produziert beide
   Pflichtdateien; JSON ist syntaktisch gültig (JSONC-Stripper +
-  `encoding/json.Valid`). **Hinweis:** LH-AK-005 ist hiermit
+  `encoding/json.Valid`). **Hinweis:** [`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow) ist hiermit
   **nicht** geschlossen — die Akzeptanz verlangt explizit
   `u-boot init --devcontainer`; dieser Flag-Pfad gehört in den
   MVP-Closure-Slice (siehe Out of Scope), nutzt aber die hier
   eingeführten Templates wieder.
-- **LH-FA-DEV-005**: `forwardPorts` enthält die Container-Ports aller
+- **[`LH-FA-DEV-005`](../../../../spec/lastenheft.md#lh-fa-dev-005-ports)**: `forwardPorts` enthält die Container-Ports aller
   aktiven Services (Postgres ⇒ 5432); leer ⇒ Feld fehlt.
 
 ### Negative
@@ -654,7 +654,7 @@ nächste Lauf erneut als Konflikt sieht):
   oder eigener Folge-Slice). Begründung: MVP ist konservativ
   no-write, der Recovery-Pfad ist „Datei umbenennen, generate
   erneut laufen lassen".
-- **`init --devcontainer`-Flag** (LH-AK-005) — gehört zu
+- **`init --devcontainer`-Flag** ([`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow)) — gehört zu
   MVP-Closure; M7 liefert nur die Templates. **Risikohinweis für
   den Closure-Slice:** weil M7 für die zwei Devcontainer-Dateien
   denselben Block-Namen `init` verwendet wie alle M3-Templates
@@ -674,7 +674,7 @@ nächste Lauf erneut als Konflikt sieht):
   initiierter Release-Schnitt) — V1-Folge-Slice, ggf. gekoppelt an
   [`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md).
 - **`generate dockerfile`** für ein Anwendungs-Dockerfile außerhalb
-  von `.devcontainer/` (LH-FA-DOC-002 V1) — eigener V1-Slice.
+  von `.devcontainer/` ([`LH-FA-DOC-002`](../../../../spec/lastenheft.md#lh-fa-doc-002-dockerfile-erzeugen) V1) — eigener V1-Slice.
 - **`--json`-Output** für Generate-Summary — analog zur M4/M6-
   Entscheidung V1.
 - **Template-Migration für `init`-Blocks** (versionierte Marker
@@ -686,8 +686,8 @@ nächste Lauf erneut als Konflikt sieht):
 
 ## Bezug
 
-- Auslösende Spec: `spec/lastenheft.md` §4.8 (`LH-FA-GEN-001..005`),
-  §4.3 (`LH-FA-DEV-001/004/005`), §LH-AK-005, §LH-AK-007.
+- Auslösende Spec: `spec/lastenheft.md` §4.8 ([`LH-FA-GEN-001`](../../../../spec/lastenheft.md#lh-fa-gen-001-generate-befehl)..[`LH-FA-GEN-005`](../../../../spec/lastenheft.md#lh-fa-gen-005-idempotenz)),
+  §4.3 ([`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen)/[`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004-benutzerrechte)/[`LH-FA-DEV-005`](../../../../spec/lastenheft.md#lh-fa-dev-005-ports)), §[`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005-devcontainer-flow), §[`LH-AK-007`](../../../../spec/lastenheft.md#lh-ak-007-changelog-generator).
 - Hängt von: M3 (Template-Embed + `actionReplaceBlock`), M5
   (`YAMLCodec`/`managedblock`-Konventionen und Doctor-Referenz für
   `devcontainer.forwardPorts.consistency`), M6 (Abgrenzung:
@@ -750,7 +750,7 @@ Nach dem Merge von T6 lief ein Code-Review über T1..T6 (Agent
   duplizierte Switch-Blöcke (~13 Zeilen je) zusammengezogen; alle
   drei Callsites routen jetzt `ErrBlockNotFound`/`ErrBlockMalformed`
   durch dieselbe `ErrGenerateManualConflict`-Message (format-
-  agnostic, referenziert LH-SA-FILE-002).
+  agnostic, referenziert [`LH-SA-FILE-002`](../../../../spec/lastenheft.md#lh-sa-file-002-markierte-verwaltete-bereiche)).
 - **N5 — `printGenerateSummary` default-Branch.** Zeigt jetzt
   `resp.Action` und `resp.Changed` statt silent auf
   `"Generated <name>"` zu truncaten.

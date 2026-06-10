@@ -10,22 +10,22 @@ M1 lieferte das Build-Skelett, aber die Architektur war noch unbestimmt.
 Der erste fachliche Slice (M3 `u-boot init`) brauchte einen klaren
 Layer-Schnitt für Tests (Fakes auf Driven-Ports) und Linter-Enforcement
 (`depguard`-Regeln pro Schicht), bevor produktiver Code entstehen
-konnte. Adressiert `LH-FA-ARCH-001..003`.
+konnte. Adressiert [`LH-FA-ARCH-001`](../../../../spec/lastenheft.md#lh-fa-arch-001-hexagonales-pattern)..[`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement).
 
 ## Lieferumfang
 
 - **Spec-Erweiterung** in `spec/lastenheft.md`:
-  - Sektion 4.13 mit `LH-FA-ARCH-001..003` (hexagonales Pattern,
+  - Sektion 4.13 mit [`LH-FA-ARCH-001`](../../../../spec/lastenheft.md#lh-fa-arch-001-hexagonales-pattern)..[`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement) (hexagonales Pattern,
     Layer-Schnitt mit driving/driven-Split, Import-Regeln + Enforcement
     via `depguard`).
-  - `LH-FA-BUILD-009` Layout-Tree um `internal/{hexagon,adapter}/`
+  - [`LH-FA-BUILD-009`](../../../../spec/lastenheft.md#lh-fa-build-009-repository-layout) Layout-Tree um `internal/{hexagon,adapter}/`
     erweitert.
-  - `LH-MVP-001` und Traceability-Matrix um die ARCH-Einträge ergänzt.
+  - [`LH-MVP-001`](../../../../spec/lastenheft.md#lh-mvp-001-muss-im-mvp-enthalten-sein) und Traceability-Matrix um die ARCH-Einträge ergänzt.
 - **Architektur-Detailspec** `spec/architecture.md` (neu): Layer-Diagramm
   (ASCII), Verantwortlichkeiten je Schicht, Import-Regel-Tabelle, die 8
   `depguard`-Regelblöcke vollständig (scharf zu schalten mit M3),
   Test-Pattern, Anti-Patterns, Evolution.
-- **ADR-0002** (`docs/plan/adr/0002-hexagonale-architektur.md`)
+- **[ADR-0002](../../adr/0002-hexagonale-architektur.md)** (`docs/plan/adr/0002-hexagonale-architektur.md`)
   begründet die Wahl gegenüber flachem Layout (k-deskflight) und
   alternativen Patterns (Clean / Onion); Trade-offs Boilerplate vs.
   Testbarkeit/Wartbarkeit explizit.
@@ -43,11 +43,11 @@ konnte. Adressiert `LH-FA-ARCH-001..003`.
   nichts; reale Verifikation kam mit M3-T5, siehe
   [`slice-m3-depguard-aktivierung-verifizieren`](slice-m3-depguard-aktivierung-verifizieren.md)).
 - `spec/architecture.md` existiert und ist über READMEs verlinkt.
-- LH-FA-ARCH-001..003 abgehakt.
+- [`LH-FA-ARCH-001`](../../../../spec/lastenheft.md#lh-fa-arch-001-hexagonales-pattern)..[`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement) abgehakt.
 
 ## Bezug
 
-- Auslösende Spec: `LH-FA-ARCH-001..003`, `LH-FA-BUILD-009`.
+- Auslösende Spec: [`LH-FA-ARCH-001`](../../../../spec/lastenheft.md#lh-fa-arch-001-hexagonales-pattern)..[`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement), [`LH-FA-BUILD-009`](../../../../spec/lastenheft.md#lh-fa-build-009-repository-layout).
 - ADR: `0002-hexagonale-architektur.md`.
 - Vorgänger: [`slice-m1-repo-skeleton`](slice-m1-repo-skeleton.md).
 - Nachfolger: M2b (SOLID-Lint-Profil verschärft das Lint-Profil

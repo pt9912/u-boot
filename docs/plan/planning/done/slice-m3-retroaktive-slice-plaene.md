@@ -8,8 +8,8 @@
 Die abgeschlossenen Bootstrap-Slices M1, M2, M2b, M2c und M2d waren
 nur in der Roadmap und in Commit-Messages dokumentiert. Es gab keine
 zugehörigen Slice-Pläne in `docs/plan/planning/done/`, wie es
-`LH-FA-PROJDOCS-003` für den Standard-Lifecycle vorsieht
-(`LH-FA-PROJDOCS-005`).
+[`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003-planning-lifecycle) für den Standard-Lifecycle vorsieht
+([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)).
 
 M2-Review #10 hatte das angeschnitten („Slice-Plan folgt mit nächster
 Iteration"); danach blieb der Stand unverändert. Bei M3-Anker-Triage
@@ -48,8 +48,8 @@ verweist jeweils auf den Slice-Plan statt nur auf den Commit-Hash.
 
 ## Bezug
 
-- Auslösende Spec: `LH-FA-PROJDOCS-003` Lifecycle,
-  `LH-FA-PROJDOCS-005` Carveout-Disziplin.
+- Auslösende Spec: [`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003-planning-lifecycle) Lifecycle,
+  [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin) Carveout-Disziplin.
 - Aufhebung dokumentiert in: [`carveouts.md`](../in-progress/carveouts.md)
   (Zeile entfernt) und [`roadmap.md`](../in-progress/roadmap.md)
   (Carveout-Auflösungs-Slice-Tabelle + M1–M2d-Artefakt-Spalte).

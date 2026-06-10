@@ -10,10 +10,10 @@ Accepted
 
 ## Kontext
 
-`LH-QA-004` verlangt Linting für Quellcode und Konfigurationsdateien.
+[`LH-QA-004`](../../../spec/lastenheft.md#lh-qa-004-linting-solid-nahes-lint-profil) verlangt Linting für Quellcode und Konfigurationsdateien.
 Die Bootstrap-`.golangci.yml` aus M1 aktiviert nur die 5 Default-Linter
 (`govet`, `errcheck`, `staticcheck`, `unused`, `ineffassign`) plus
-`depguard` für die Schicht-Regeln aus `LH-FA-ARCH-003`. Das ist die
+`depguard` für die Schicht-Regeln aus [`LH-FA-ARCH-003`](../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement). Das ist die
 Mindestmenge gegen offensichtliche Bug-Patterns, deckt aber
 Designsignale (Komplexität, Funktionslänge, Interface-Pollution,
 globale Kopplung, Context-Disziplin) nicht ab.
@@ -29,11 +29,11 @@ Beide Vorlagen-Projekte fahren ein erweitertes Profil:
 
 Lastenheft-Bezug:
 
-- `LH-QA-004` – Linting (in diesem Commit auf MVP-Pflicht gehoben,
+- [`LH-QA-004`](../../../spec/lastenheft.md#lh-qa-004-linting-solid-nahes-lint-profil) – Linting (in diesem Commit auf MVP-Pflicht gehoben,
   Spezifikation auf SOLID-nahes Profil verschärft).
-- `LH-FA-BUILD-001` – `lint`-Stage des Dockerfile.
-- `LH-FA-ARCH-003` – `depguard` für Schicht-Regeln (bereits aktiv).
-- `LH-NFA-MAINT-001..003` – modulare Architektur, Erweiterbarkeit,
+- [`LH-FA-BUILD-001`](../../../spec/lastenheft.md#lh-fa-build-001-multi-stage-dockerfile-u-boot-repo) – `lint`-Stage des Dockerfile.
+- [`LH-FA-ARCH-003`](../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement) – `depguard` für Schicht-Regeln (bereits aktiv).
+- [`LH-NFA-MAINT-001`](../../../spec/lastenheft.md#lh-nfa-maint-001-modulare-architektur)..[`LH-NFA-MAINT-003`](../../../spec/lastenheft.md#lh-nfa-maint-003-testbarkeit) – modulare Architektur, Erweiterbarkeit,
   Testbarkeit.
 
 ## Entscheidung
@@ -41,7 +41,7 @@ Lastenheft-Bezug:
 u-boot übernimmt das **SOLID-nahe Lint-Profil aus m-trace**
 unverändert für den Go-Teil: 5 Default-Linter plus 24 SOLID-nahe
 Linter (`depguard` ist als Schicht-Regel-Linter Teil dieser 24, siehe
-`LH-FA-ARCH-003`). Damit sind 29 Linter aktiv.
+[`LH-FA-ARCH-003`](../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement)). Damit sind 29 Linter aktiv.
 
 Konkrete Setzungen:
 
@@ -58,7 +58,7 @@ Konkrete Setzungen:
   Regeln folgen, sobald externe Modul-Dependencies dazukommen. Der
   v1-`gomodguard` ist seit `golangci-lint` v2.12.0 deprecated und wird
   in u-boot nicht mehr verwendet.
-- `//nolint`-Pragmas sind verboten (analog `LH-FA-ARCH-003` für
+- `//nolint`-Pragmas sind verboten (analog [`LH-FA-ARCH-003`](../../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement) für
   `depguard`). Pro-Pfad-Carveouts in `issues.exclude-rules` mit
   `Why:`-Kommentar.
 - Aktive MVP-Carveouts (Detail in `docs/user/quality.md` §1.3):
@@ -81,7 +81,7 @@ Positiv:
 - **Konsistenz** mit `k-deskflight` und `m-trace` — Reviewer und
   Beitragende kennen das Profil bereits, Schwellen sind kalibriert.
 - **Interface-Disziplin** (`iface`, `interfacebloat`, `ireturn`) passt
-  direkt zu `LH-FA-ARCH-002`: kleine, fokussierte Ports.
+  direkt zu [`LH-FA-ARCH-002`](../../../spec/lastenheft.md#lh-fa-arch-002-schichten-und-verzeichnislayout): kleine, fokussierte Ports.
 - **Carveouts zentral** in `.golangci.yml`; kein `//nolint`-Streuen
   über den Code.
 
@@ -104,7 +104,7 @@ Negativ / Trade-offs:
 
 Alternativen (verworfen):
 
-- **Nur Defaults belassen:** widerspricht `LH-NFA-MAINT-001..003`,
+- **Nur Defaults belassen:** widerspricht [`LH-NFA-MAINT-001`](../../../spec/lastenheft.md#lh-nfa-maint-001-modulare-architektur)..[`LH-NFA-MAINT-003`](../../../spec/lastenheft.md#lh-nfa-maint-003-testbarkeit),
   überlässt Designdrift dem Review.
 - **Engerer Schwellen-Satz als m-trace** (z. B. `funlen.lines=80`):
   ohne Daten-Basis spekulativ; m-trace-Werte sind in einem produktiven
@@ -114,7 +114,7 @@ Alternativen (verworfen):
 
 ## Folgepunkte
 
-- Mit dem ersten produktiven Slice (M3): Lint-Findings aus der
+- Mit dem ersten produktiven Inkrement (M3): Lint-Findings aus der
   Erweiterung systematisch abarbeiten und Schwellen ggf. nachziehen.
 - `gomodguard`-Regeln definieren, sobald externe Modul-Dependencies
   (z. B. `spf13/cobra`, `gopkg.in/yaml.v3`) konkret werden.

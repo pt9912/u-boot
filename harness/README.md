@@ -50,7 +50,7 @@ Feedback-Gates, die reale Projektzustaende messen:
 | `make test` | Computational feedback: Unit- und Default-Tests im Docker-Test-Stage | Nach Codeaenderungen |
 | `make test-docker` | Computational feedback: Docker-tag Integrationstests | Nach Docker-/Compose-/E2E-Aenderungen |
 | `make coverage-gate` | Computational feedback: Coverage-Schwelle, Default 90 Prozent | Nach produktiven Codeaenderungen |
-| `make docs-check` | Computational feedback: Markdown-Link- und Pfadpruefung | Nach Doku-, Spec-, ADR- oder Planning-Aenderungen |
+| `make docs-check` | Computational feedback: Markdown-Link-Pfad-, Anker-, ADR-/LH-/Planning-ID-/Traceability-Alias-Link- und Referenzmodell-Pruefung | Nach Doku-, Spec-, ADR- oder Planning-Aenderungen |
 | `make govulncheck` | Computational feedback: Go-Vulnerability-Scan | Vor CI-/Release-Handoff |
 | `make image-scan` | Computational feedback: Trivy gegen Runtime-Image | Vor CI-/Release-Handoff |
 | `make verify-depguard` | Computational feedback: depguard-Regeln feuern wirklich | Bei Aenderungen an Layern oder depguard-Konfig |
@@ -64,6 +64,11 @@ nicht ausgefuehrt wurde.
 
 ## Traceability
 
+- Dokument-Referenzen folgen dem Referenzmodell aus
+  [`ADR-0013`](../docs/plan/adr/0013-dokumentationsreferenzmodell.md):
+  Normative Kraft existiert nur auf aufwaertsgerichteten
+  Inter-Layer-Kanten plus ADR-interner Lineage; Slice-, Carveout- und
+  Roadmap-Kanten sind Kontext.
 - Jede oeffentliche Verhaltensaenderung braucht einen `LH-*`-, `ADR-*`-
   oder Slice-Anker.
 - Neue oder geaenderte Anforderungen brauchen einen Nachweis: Test,
@@ -108,7 +113,9 @@ getrennte Artefakte.
   Produktvertraege, keine Komfortdetails.
 - CLI-Output und generierte Artefakte sind Englisch; normative Specs und
   Planning-Dokumente koennen Deutsch bleiben.
-- Release- und Distributionsaenderungen muessen ADR-0004/ADR-0007,
+- Release- und Distributionsaenderungen muessen
+  [`ADR-0004`](../docs/plan/adr/0004-ci-system.md)/
+  [`ADR-0007`](../docs/plan/adr/0007-distributionswege-ghcr.md),
   CI-Gates und README/CHANGELOG zusammen betrachten.
 
 ## Minimal Agent Workflow

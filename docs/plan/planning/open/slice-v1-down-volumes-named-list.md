@@ -11,7 +11,7 @@
 ## Auslöser
 
 `u-boot down --volumes` entfernt Named-Volumes via
-`docker compose down -v` (LH-FA-UP-004 §1015 destructive op).
+`docker compose down -v` ([`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004-umgebung-stoppen) §1015 destructive op).
 Heutiger Port-Vertrag
 ([`port/driving/down.go:80`](../../../../internal/hexagon/port/driving/down.go))
 trägt `DownResponse.RemovedVolumes bool` als boolean Echo —
@@ -22,7 +22,7 @@ removed counters — `docker compose down` emits a human-
 readable progress stream rather than a structured count, and
 inventing an 'unknown' sentinel value would force every caller
 to special-case it. If a future slice needs precise counts
-(e.g. for `--json` output, LH-NFA-USE-004 V1), it would add a
+(e.g. for `--json` output, [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) V1), it would add a
 `ComposePs` diff before/after the call rather than parse the
 stderr stream."*
 
@@ -73,12 +73,12 @@ Drei Sub-Entscheidungen vor der Implementation:
   Volume-Inhalte vor Removal in `<project>/.u-boot-volume-
   backup-<timestamp>/<volume-name>.tar.gz` archiviert.
   Separater Slice falls Real-World-Druck (analog dem remove-
-  Slice `slice-v1-volume-auto-removal` Out-of-Scope).
+  Slice [`slice-v1-volume-auto-removal`](slice-v1-volume-auto-removal.md) Out-of-Scope).
 - **Volume-Lifecycle-Reporting** für `up` (welche Volumes
   wurden erstellt): wäre eigener Slice; up nutzt
   `RemovedVolumes` als Bool nicht.
 
 ## Spec-Bezug
 
-- `LH-FA-UP-004` §1015 (Volume-Removal-Destructive-Op).
-- `LH-NFA-USE-004` §1813 (JSON-Konsumenten-Vertrag).
+- [`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004-umgebung-stoppen) §1015 (Volume-Removal-Destructive-Op).
+- [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1813 (JSON-Konsumenten-Vertrag).

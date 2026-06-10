@@ -12,7 +12,7 @@
 > `previewModeFromFlags`-Mapping und Error-Emission-Helper.
 >
 > Remove-spezifisch sind der **Confirmation-Gate für `--purge`**
-> (`LH-FA-CLI-005A` §254 — mediated by `Yes` / `NoInteractive`),
+> ([`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) §254 — mediated by `Yes` / `NoInteractive`),
 > die **stderr-WARNING für `--purge` ohne Volume-Removal**
 > (review-followup F4 — stderr-Sauberkeit für `--json`-Konsumenten
 > ist genau das Problem, das diese Slice lösen muss), das
@@ -23,7 +23,7 @@
 
 Cluster-Slice §T0-Outcomes (a)+(b)+(e) machen jeden modifying-
 Subcommand für `--json`/`--dry-run`/`--diff` verbindlich
-(`LH-NFA-USE-004` §1813, `LH-FA-CLI-007` §326, `LH-FA-CLI-008`
+([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1813, [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §326, [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe)
 §451-489). `u-boot remove` ist nach `doctor`/`add`/`init`/`generate`
 der nächste modifying-Subcommand und die **inverse Operation zu
 `add`** — strip managed blocks aus `compose.yaml` + `.env.example`,
@@ -32,17 +32,17 @@ optional Volume-Purge via `--purge`-Gate.
 
 Spec-Bezug (geerbt von add/init):
 
-- `LH-FA-CLI-007` (Dry-Run, Voll-Schema §326)
-- `LH-FA-CLI-008` (Diff, §451-489)
-- `LH-NFA-USE-004` (Minimalkontrakt §1841)
+- [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) (Dry-Run, Voll-Schema §326)
+- [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) (Diff, §451-489)
+- [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) (Minimalkontrakt §1841)
 
 Remove-spezifische Spec-Anker:
 
-- `LH-FA-ADD-007` (`u-boot remove <service>`-Surface inkl. `--purge`-
+- [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) (`u-boot remove <service>`-Surface inkl. `--purge`-
   Opt-in)
-- `LH-FA-CLI-005A` §254 (Confirmation-Gate für destruktive
+- [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) §254 (Confirmation-Gate für destruktive
   Operationen — geteilt mit `down --volumes`)
-- `LH-NFA-REL-003` (FS-Failure-Klasse, geerbt für Mid-Write
+- [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) (FS-Failure-Klasse, geerbt für Mid-Write
   analog init)
 
 Heute-Stand-Pre-Scan
@@ -126,22 +126,22 @@ docs-check).
   `req.SilenceConfirmer = flags.JSON` oder per
   request-time-swap. Bei `--purge --no-interactive --json` OHNE
   `--yes` → `ErrConfirmationRequired` Envelope mit
-  `LH-FA-INIT-005` / Exit 10.
+  [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) / Exit 10.
 - ✅ **stderr-WARNING-Migration** (T0-(g) festgezurrt): die
   heutige `printRemoveSummary`-WARNING auf errOut bei
   `--purge`-Status FALSE muss in den Envelope wandern als
   `diagnostics[]`-Eintrag. **AK-Pin explizit** (R2-LOW-F7-Fix):
-  `diagnostics[0].code == "LH-FA-ADD-007"` AND
+  diagnostics[0].code == "[`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen)" AND
   `diagnostics[0].level == "warn"` AND `data.volumesPurged ==
   false`. Im JSON-Mode darf stderr nicht durch die
   WARNING-Prosa polluten.
 - ✅ **Cobra-Args-Missing-Pfad-Pin** (R11-HIGH-F1-Fix für
-  Spec-LH-NFA-USE-004-§1841-Konformität): `u-boot remove --json`
+  Spec-[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)-§1841-Konformität): `u-boot remove --json`
   ohne positional arg läuft via `cobra.ExactArgs(1)`-Guard
   (`cli/remove.go:77`) **vor** RunE — der JSON-Helper aus T5
   wird NIE aufgerufen, Konsument bekommt KEINEN Envelope und
   Exit 2. Symmetrie-Bruch zu `remove "bad name" --json` (voller
-  Envelope mit `LH-FA-INIT-006`/Exit 10). **T5-Pflicht
+  Envelope mit [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung)/Exit 10). **T5-Pflicht
   festgezurrt** (R12-MED-F2-Mechanismus): **Custom-`Args`-
   Validator** als Closure die `*App` per Konstruktor-Closure-
   Capture einfängt (analog `newRemoveCommand`-Form
@@ -156,20 +156,20 @@ docs-check).
   re-checken — redundant) plus `cobra.ExactArgs(1)` müsste
   trotzdem auf `cobra.ArbitraryArgs` umgestellt werden. Custom-
   `Args`-Closure ist die schlankere Form. `RunE`-Pfad:
-  `reportError` mit dem Sentinel (`code: "LH-FA-CLI-006"` /
+  `reportError` mit dem Sentinel (code: "[`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)" /
   `exitCode: 2`); `data` ist `nil` weil kein Service-Kontext
   vorhanden. T6-Pin:
   `TestRemove_NoPositionalArg_JSON_EmitsCLI006Envelope` mit
   empty `args[]` + `--json` → voller Envelope mit `command:
   "remove"`, `data: nil` (kein Service-Kontext), `code:
-  "LH-FA-CLI-006"`, exit 2. Pattern-Erbe-Vorlauf für künftige
+  "[`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)"`, exit 2. Pattern-Erbe-Vorlauf für künftige
   Folge-Slices (up/down haben `cobra.ExactArgs(1)` für
   `<service>`-Subform — denselben Args-Guard-Pfad).
 - ✅ **`ErrServiceUnregistered` ERROR-Pfad-Pin** (R6-MED-F3-Fix,
-  Symmetrie zum WARN-Pfad-Pin oben): `LH-FA-ADD-007` wird auch
+  Symmetrie zum WARN-Pfad-Pin oben): [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) wird auch
   als Error-Code für `ErrServiceUnregistered` genutzt (R5-F2
   Multi-Use-Klarstellung). AK-Pin: `diagnostics[0].code ==
-  "LH-FA-ADD-007"` AND `diagnostics[0].level == "error"` AND
+  "[`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen)"` AND `diagnostics[0].level == "error"` AND
   `status == "error"` AND `exitCode == 10`. Konsumenten
   disambiguieren WARN-Pfad und ERROR-Pfad ausschließlich über
   `(code, level)`-Tupel, nicht über Code allein. T6-Pin
@@ -211,7 +211,7 @@ docs-check).
   | `previewModeFromFlags`-Mapping (init T1-B) | `delete`-Action für RemoveAll-Captures (T0-(p)) |
   | Generalisierte Helper `reportError`/`writeEnvelope`/`mapPlannedFilesToWire` (init T5/generate T5) | Neuer `ErrRemoveFileSystem`-Sentinel (T0-(d)) |
   | Multi-`%w`-Switch-Order-Pattern (init T0-(f)) | Neuer `ErrConfirmerUnavailable`-Sentinel (T0-(e) R2-F1) |
-  | `mapCaptureToPlannedFiles(records, baseDir)` (add T0-(i)) | `LH-FA-ADD-007` Multi-Use ERROR+WARN (T0-(g) R5-F2) |
+  | `mapCaptureToPlannedFiles(records, baseDir)` (add T0-(i)) | [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) Multi-Use ERROR+WARN (T0-(g) R5-F2) |
   | Pre-UC-Sentinel-`reportError`-Kanal (init T0-(o)/T5) | `RemoveServiceResponse.Warnings`-Feld als WARN-Source-of-Truth (T2 R7-F2) |
   | `cliJSONEnvelope.Data` + `newDataEnvelope` (generate T1, vorgezogen aus Template 9/9) | typed `removeEnvelopeData`-Struct mit `*bool`-Wrapping für `omitempty` (T0-(f) R7-F1) |
   | Path-Anchor `plannedFiles[].path` project-relativ (init T0-(k)) | Two-Phase-Capture-Semantik bei RemoveAll-Failure (T0-(p) R5-F4) |
@@ -376,24 +376,24 @@ docs-check).
   Konsolidierung — die drei Sub-Semantiken teilen sich
   Exit-Code 10 und Repair-Hint (User-Action: YAML manuell
   reparieren), nur die Message-Text-Differenzierung bleibt. T6-Pin
-  pinnt den `LH-FA-ADD-005`-Code für alle drei Pfade.
+  pinnt den [`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern)-Code für alle drei Pfade.
 - **T0-(e)** **Switch-Order-Pflicht** im neuen
   `mapRemoveErrorToDiagnostic`. Diagnostic-Code-Tabelle (T6-Pin-
   Pflicht pro Zeile):
 
   | Sentinel | LH-Code | Exit |
   | --- | --- | --- |
-  | `ErrRemoveFileSystem` | `LH-NFA-REL-003` | 14 |
-  | `ErrConfirmerUnavailable` (NEU, T2; wrappt heutigen string-Error in `removeservice.go:171`) | `LH-FA-CLI-005A` | 10 |
-  | `ErrConfirmationRequired` | `LH-FA-INIT-005` | 10 |
-  | `ErrServiceUnsupported` | `LH-FA-ADD-002` | 10 |
-  | `ErrServiceUnregistered` | `LH-FA-ADD-007` | 10 |
-  | `ErrServiceInconsistent` | `LH-FA-ADD-005` | 10 |
-  | `ErrProjectNotInitialized` | `LH-FA-ADD-001` | 10 |
-  | `domain.ErrInvalidServiceName` | `LH-FA-INIT-006` | 10 |
-  | `ErrConflictingModeFlags` (`--yes ⊕ --no-interactive`) | `LH-FA-CLI-005A` | 2 |
-  | `cli.ErrServiceNameMissing` (NEU **T5**, R11-HIGH-F1 + R12-HIGH-F1: Layer-Heim CLI-Adapter analog `cli.ErrConflictingModeFlags` `cli/cli.go:177`; KEIN driving-Sentinel weil Form-Validierungs-Sentinel vom CLI-Adapter emittiert, vom Use-Case nie gesehen) | `LH-FA-CLI-006` | 2 |
-  | Default (unknown) | `LH-FA-CLI-006` | 1 |
+  | `ErrRemoveFileSystem` | [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 14 |
+  | `ErrConfirmerUnavailable` (NEU, T2; wrappt heutigen string-Error in `removeservice.go:171`) | [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) | 10 |
+  | `ErrConfirmationRequired` | [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) | 10 |
+  | `ErrServiceUnsupported` | [`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen) | 10 |
+  | `ErrServiceUnregistered` | [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) | 10 |
+  | `ErrServiceInconsistent` | [`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern) | 10 |
+  | `ErrProjectNotInitialized` | [`LH-FA-ADD-001`](../../../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl) | 10 |
+  | `domain.ErrInvalidServiceName` | [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung) | 10 |
+  | `ErrConflictingModeFlags` (`--yes ⊕ --no-interactive`) | [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) | 2 |
+  | `cli.ErrServiceNameMissing` (NEU **T5**, R11-HIGH-F1 + R12-HIGH-F1: Layer-Heim CLI-Adapter analog `cli.ErrConflictingModeFlags` `cli/cli.go:177`; KEIN driving-Sentinel weil Form-Validierungs-Sentinel vom CLI-Adapter emittiert, vom Use-Case nie gesehen) | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 2 |
+  | Default (unknown) | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 1 |
 
   **Tabellen-Reihenfolge = Switch-Reihenfolge** (R3-MED-F3-Fix):
   Infrastruktur-Sentinels (`ErrRemoveFileSystem`,
@@ -402,8 +402,8 @@ docs-check).
   1.20+) nicht versehentlich auf einen fachlich-Branch matchen.
   T6-Pin verifiziert: ein konstruierter
   `fmt.Errorf("%w: %w", ErrConfirmerUnavailable,
-  ErrConfirmationRequired)` MUSS `LH-FA-CLI-005A` / Exit 10
-  (I/O-Klasse), NICHT `LH-FA-INIT-005`. **Defense-only-Pin**
+  ErrConfirmationRequired)` MUSS [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) / Exit 10
+  (I/O-Klasse), NICHT [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz). **Defense-only-Pin**
   (R4-LOW-F5-Klarstellung): heute existiert KEIN Code-Pfad der
   beide Sentinels gemeinsam chained — der Pin verifiziert die
   Mapper-Robustheit gegen einen synthetisch konstruierten
@@ -477,7 +477,7 @@ docs-check).
   R2-MED-F5-Erweiterung): heutige `printRemoveSummary`-stderr-
   WARNING (Z. 163-171) bei `--purge && !VolumesPurged` wandert
   im JSON-Mode in `diagnostics[]` mit `level: "warn"` und Code
-  **`LH-FA-ADD-007`** (Spec §924 / §2602 — die Anforderung selbst
+  **[`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen)** (Spec §924 / §2602 — die Anforderung selbst
   beschreibt das deferred-Volumes-Verhalten). KEIN Suffix-Schema
   wie `-VOLUMES-DEFERRED` — Spec §1834 erlaubt nur die feste
   `LH-<Bereich>-<Modul>-<3-stellige-Zahl>`-Form oder tool-interne
@@ -487,20 +487,20 @@ docs-check).
   `message`-Text plus `data.volumesPurged`-Status. Pinnbar via
   `jsontestutil.AssertFullEnvelope`.
 
-  **`LH-FA-ADD-007` Multi-Use-Klarstellung** (R5-MED-F2-Fix):
-  Plan nutzt `LH-FA-ADD-007` an zwei Stellen:
+  **[`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) Multi-Use-Klarstellung** (R5-MED-F2-Fix):
+  Plan nutzt [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) an zwei Stellen:
   (1) **ERROR-Diagnostic-Code** für `ErrServiceUnregistered`
       (Mapper-Tabelle T0-(e)) — Exit 10.
   (2) **WARN-Diagnostic-Code** für `--purge && !VolumesPurged`
       (T0-(g)) — Exit 0 oder Exit 14 (bei Mid-Write-Variante).
-  Beide referenzieren das Spec-Umbrella `LH-FA-ADD-007 "Service
+  Beide referenzieren das Spec-Umbrella [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) "Service
   entfernen"` (§924-947) — der Code identifiziert die *Anforderung*,
   nicht die Sub-Semantik. Spec §1834-Vertrag erlaubt das, weil
   `diagnostics[].level` (warn vs error) und ggf. `message`-Text
   + `data.volumesPurged`-Status den konkreten Sub-Pfad
   disambiguieren. Konsumenten dürfen NICHT nur auf `code` filtern,
   sondern müssen `(code, level)` als Tupel betrachten. Pattern
-  ist konsistent mit init/down's `LH-FA-INIT-005`-Multi-Use für
+  ist konsistent mit init/down's [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz)-Multi-Use für
   `ErrConfirmationRequired` (geteilt zwischen init und down).
   WARN-Diagnostic wird NUR emittiert wenn der Catalog-Entry
   tatsächlich ein named volume deklariert. Echter Field-Name auf
@@ -528,7 +528,7 @@ docs-check).
   (b) **Envelope-Form im Dry-Run**: `data.volumesPurged: false`
       IMMER (deferred unabhängig vom Gate-Skip);
       `diagnostics[]` enthält EINEN `warn`-Eintrag mit Code
-      `LH-FA-ADD-007` (T0-(g) WARN-Migration) wenn
+      [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) (T0-(g) WARN-Migration) wenn
       `req.Purge && req.PreviewMode != PreviewNone` — dem User
       ist klar: Purge wurde requested, im Dry-Run aber
       semantisch geskippt.
@@ -596,7 +596,7 @@ docs-check).
   Phase mid-write failt (z. B. compose.yaml WriteFile-Error vor
   yaml.WriteFile), wird **Variante A** festgezurrt: Error-
   Diagnostic dominiert, WARN unterdrückt. Envelope: `diagnostics:
-  [{level: "error", code: "LH-NFA-REL-003", file: "<…>"}]`,
+  [{level: "error", code: "[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)", file: "<…>"}]`,
   `status: error`, exit 14, `data: {"service": "<…>"}` ohne
   `volumesPurged` (Zero-Response analog T0-(f) Error-Pfad).
   Begründung: WARN über `volumesPurged: false` würde sich auf
@@ -727,7 +727,7 @@ docs-check).
   registriert (`cli/remove.go:146-149`), nicht persistent; der
   Tree-Lookup in `cmd.Flags()` liefert die Local-Form direkt.
   **Drei Pfade**: `len(args)==1` ok (durch zu RunE),
-  `len(args)==0` → emit `LH-FA-CLI-006`-Envelope auf stdout
+  `len(args)==0` → emit [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-Envelope auf stdout
   (Minimal- oder Voll-Schema je Flag-State) + return
   `ErrServiceNameMissing`, `len(args)>1` → emit Envelope mit
   Cobra-Roh-Error + return Cobra-Error (Exit 2 via
@@ -749,10 +749,10 @@ docs-check).
 | T2 | Port-Types: `RemoveServiceRequest.PreviewMode` + `SilenceConfirmer`-Feld, `RemoveServiceResponse.PlannedFiles`/`Changes`-Felder, **`RemoveServiceResponse.Warnings []driving.WarningEntry`-Feld** (R7-MED-F2-Fix + R8-MED-F2-Type-Klärung: neuer Port-Type `driving.WarningEntry struct { Code string; Level string; Message string; Subject string \`json:",omitempty"\` }` analog `diagnosticItem`-Wire-Form — Layer-sauber (KEIN `domain.Diagnostic`-Wiederverwendung, weil dessen Severity-Enum + ID-Field semantisch mismatch zum Wire-Type ist). **`Subject`-Feld** (R12-LOW-F4-Vorlauf): proaktiv eingeführt für up/down Multi-Service-WARN ("container 'postgres' will be replaced") + config-set Multi-Key-WARN; remove nutzt das Feld NICHT (`""`, omitempty), aber Pattern-Erbe für 6/9 + 8/9 ist proaktiv abgedeckt — kein breaking Type-Change im Cluster. **Cluster-Vorlauf-Disziplin** (R9-MED-F2-Fix): Type ist bewusst generisch `driving.WarningEntry` benannt, NICHT `RemoveWarningEntry`, weil up/down's recreate-Warnings und config-set's value-warnings denselben Type erben werden (Cluster-Folge-Slices 6/9 + 8/9). Erste-Slice-Pattern-Last analog `PreviewMode`-Rename in init T0-(c). Use-Case ist Source-of-Truth für WARN (Catalog-Lookup für `volumeOptional`), CLI mapped via `mapWarningsToDiagnostics(resp.Warnings) []diagnosticItem`. Triviales Field-Mapping, kein Severity-Enum-zu-String-Cast nötig.), **zwei neue Port-Sentinels** (R12-HIGH-F1-Layer-Korrektur, der dritte Sentinel `cli.ErrServiceNameMissing` lebt im CLI-Layer und wird in T5 etabliert): `ErrRemoveFileSystem` (FS-Klasse, T0-(d)) UND `ErrConfirmerUnavailable` (Confirmer-I/O-Error-Klasse, R2-HIGH-F1-Fix für T0-(e)-Tabelle). | ~120 | T0 |
 | T3 | Application-Layer: `RemoveServiceService.fsFactory` + `removeMu sync.Mutex` + `NewRemoveServiceServiceWithFactory` + `Remove()`-Wrapper mit FS-Swap; `mapCaptureToPlannedFiles(captured, req.BaseDir)`; **Multi-`%w`-Wrap an den 8 FS-Wrap-Stellen** (R4-HIGH-F1-Klassifikations-Fix gegen R3-Initial-10, T0-(d) Inventar Z. 264-285); Z. 307 + Z. 330 separat mit `ErrServiceInconsistent`-Wrap (KEIN ErrRemoveFileSystem, fachlich-Klasse, T0-(d)); `ErrConfirmerUnavailable`-Sentinel-Wrap in `runPurgeGate` Z. 171; Confirmer-Swap auf existierenden `noopConfirmer` im JSON-Mode. | ~240 | T2 |
 | T4 | Composition-Root-Wiring `removeFSFactory`-Closure in `cmd/uboot/main.go`. | ~30 | T3 |
-| T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`); **Pre-UC-Sentinel-Kanal** (R4-LOW-F6-Klarstellung: Codepfade existieren bereits in `cli/remove.go:108-120`, NEU ist nur die Kanalisierung via `reportError` analog `init.go:205, 216, 221`) für `domain.ErrInvalidServiceName`, `ErrConflictingModeFlags` UND `getwd`-Failure (`fmt.Errorf("determine working directory: %w", err)`, R3-LOW-F6-Fix). Der `getwd`-Wrap trägt KEIN typed Sentinel und fällt in den Default-Branch `LH-FA-CLI-006` / Exit 1 (Pattern-Erbe von init T0-(o)); Mapper-Tabelle T0-(e) NICHT ergänzt. **Human-Mode-Diff-Renderer** (R2-LOW-F6-Fix): bei `--purge --diff` ohne `--json` bleibt die deferred-Volumes-Prosa auf `errOut`, NICHT im Diff-Body. T6-Pin: `TestRemove_PurgeHumanDiff_StderrSeparation` mit getrennten Buffer-Assertions. | ~250 | T1 + T2 |
+| T5 | CLI-RunE: `runRemove` ruft generische Helper mit `command="remove"`, `mapErr=mapRemoveErrorToDiagnostic`; drei JSON-Pfade; Allowlist-Migration; `mapRemoveErrorToDiagnostic` neu; `data`-Struct (`removeEnvelopeData`); WARNING-Migration in `diagnostics[]` (`level: "warn"`); **Pre-UC-Sentinel-Kanal** (R4-LOW-F6-Klarstellung: Codepfade existieren bereits in `cli/remove.go:108-120`, NEU ist nur die Kanalisierung via `reportError` analog `init.go:205, 216, 221`) für `domain.ErrInvalidServiceName`, `ErrConflictingModeFlags` UND `getwd`-Failure (`fmt.Errorf("determine working directory: %w", err)`, R3-LOW-F6-Fix). Der `getwd`-Wrap trägt KEIN typed Sentinel und fällt in den Default-Branch [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) / Exit 1 (Pattern-Erbe von init T0-(o)); Mapper-Tabelle T0-(e) NICHT ergänzt. **Human-Mode-Diff-Renderer** (R2-LOW-F6-Fix): bei `--purge --diff` ohne `--json` bleibt die deferred-Volumes-Prosa auf `errOut`, NICHT im Diff-Body. T6-Pin: `TestRemove_PurgeHumanDiff_StderrSeparation` mit getrennten Buffer-Assertions. | ~250 | T1 + T2 |
 | T6 | Acceptance-Tests: ~20-25 Tests (drei JSON-Modi + NoOp Single+Repeat + Mid-Write-Failure + ConfirmationRequired-Pfade × 3 Varianten + Service-Sentinels × 4 + WARNING-Migration-Pin + `--purge`-on/off × Dry-Run-Kombos (T0-(h)) + `--purge --yes --json` WarnOnly-Pin (T0-(j) R1-MED-5) + `ErrConflictingModeFlags`-Pin). R1-MED-6-Kalibrierung: ~600-700 LOC realistisch (Confirmer-Pattern-Neumuster zieht Test-Surface). **Pin-Namen-Mapping** (R6-LOW-F4) — kanonische Tags pro Finding-Anker: `TestRemove_ConcurrentInvocationsSerializeSwaps` (R5-F1+R6-F2 Race+Recorder-Scope), `TestRemove_DryRun_DetectStateUsesCaptureFS` + `TestRemove_DryRunPurgeYes_NoConfirmerCall` (R4-F2 Control-Flow), `TestRemove_PurgeOnVolumelessService_NoWarn` (R3-F1 Volume-Presence), `TestRemove_PurgeYesJSON_WarnOnly` (R1-MED-5 + R5-F2 WARN-Pfad), `TestRemove_PurgeYesJSON_MidWriteFailure_ErrorOnly` (R4-F3 Variante A), `TestRemove_OtelExtraFileDelete_DiffHasDeleteHunk` (R4-F4 delete-Action), `TestRemove_PurgeHumanDiff_StderrSeparation` (R2-F6 stderr-Trennung), `TestRemove_ServiceUnregisteredJSON_ErrorLevelCodePin` (R6-F3 ERROR-Pfad-Symmetrie). Weitere ~12 Pins (Idempotenz-Repeat, EnabledUnset-Normalisierung, ManualConflict × 3 (R5-F3 Triple-Use), Service-Sentinels × 4, ConfirmerUnavailable-allein-Pfad (R2-F1), Multi-`%w`-Switch-Order-Defense (R3-F3), Read-Pfad-FS-Failure (R2-F3), `ErrConflictingModeFlags` (R1-F4), `TestRemove_NoPositionalArg_JSON_EmitsCLI006Envelope` (R11-F1)) lassen sich aus AK-Block + Sub-Decision-Pins direkt ableiten. **Failure-Mode-Coverage-Summary** (R11-LOW-F3): FMEA-Walk identifizierte 20 Failure-Szenarien; nach R11-Adressierung sind 18/20 explizit gepinnt + 2/20 als bewusste Out-of-Scope-Carveouts (Context-Cancellation als Status-quo-Erbe, fsFactory-NPE als Composition-Root-Defekt-Klasse). | ~650 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe). | ~80 | T6 |
-| T8 | Closure (R9 präzisierte Liste): **CHANGELOG** Unreleased-Eintrag analog generate T8. **`cli-json-output.md`**: §6-Tabelle (remove→done), neue §6.6-Sektion (`u-boot remove --json` mit drei Flag-Kombos + `data`-Carrier `{service, priorState, state, volumesPurged}` + `--purge`-Mutex + WARN-Migration + EnabledUnset-Normalisierungs-Pin), §7 Mutations-Matrix-Zeile (`remove (slice-v1-cli-json-dry-run-remove): WriteFile + RemoveAll` — KEINE neue `action`-Spalte, R9-HIGH-F1: §7 ist die `driven.FileSystem`-Methoden-Tabelle, `action: "delete"` ist Spec-§354-enum-Wert der bereits dokumentiert ist; §6.6 ergänzt nur ein worked example mit `data.changes[].action: "delete"` für otel-extraFile). **`roadmap.md`**: zwei explizite Edits — (i) done-Zähler 4→5 + `remove` aus der Offen-Liste der Cluster-AP-Zelle streichen, (ii) `Nächster Schritt`-Klausel auf Folge-Slice 6/9 `up-down` umstellen (R9-LOW-F4). **Carveouts.md**: **neuer Eintrag** (kein bestehender Volume-Removal-Eintrag — Verifikation `carveouts.md` Z. 22-29 zeigt nur Paketierung/Keycloak-CI/template-list/generate-devcontainer-Half-Write); Pattern-Vorbild `slice-v2-generate-devcontainer-rollback-aware-write` mit Status `open/, on hold pending trigger`; Spec-Anker `LH-FA-ADD-007 §"Volumes nur auf explizite Anforderung"` (R3-MED-F5 + R9-LOW-F3). **`open/`-Plan-Stub**: `slice-v1-volume-auto-removal.md` mit Auslöser (real-world Volume-Reclamation-Anfrage), Out-of-Scope-V1-Bestätigung, Spec-Anker. **Slice nach `done/`** mit DoD-Hash-Tabelle analog generate T8. **Plan-Verdichtung beim Übergang nach `done/`** (R10-MED-F2-Pflicht, Plan-Länge ist mit ~900 Zeilen über generate-done ~700 + remove-Initial ~280): (i) Review-Round-Tabellen R1-R10 Adressierungs-Spalte auf einen Satz pro Finding kürzen (Aufzeichnung *was* eingearbeitet wurde, nicht *wie*); (ii) Sub-Decision T0-(c) Skeleton-Block (~80 Zeilen Inline-Code) in dedizierte H3-Sektion verschieben analog init-done Pattern; (iii) AK-Block 17 Bullets auf zentrale-Anforderungs + Adressierungs-Pin-Trennung gliedern. Pattern-Vorbild generate-done T8 verdichtet ähnlich. | — (Doku) | T7 |
+| T8 | Closure (R9 präzisierte Liste): **CHANGELOG** Unreleased-Eintrag analog generate T8. **`cli-json-output.md`**: §6-Tabelle (remove→done), neue §6.6-Sektion (`u-boot remove --json` mit drei Flag-Kombos + `data`-Carrier `{service, priorState, state, volumesPurged}` + `--purge`-Mutex + WARN-Migration + EnabledUnset-Normalisierungs-Pin), §7 Mutations-Matrix-Zeile (`remove ([slice-v1-cli-json-dry-run-remove](slice-v1-cli-json-dry-run-remove.md)): WriteFile + RemoveAll` — KEINE neue `action`-Spalte, R9-HIGH-F1: §7 ist die `driven.FileSystem`-Methoden-Tabelle, `action: "delete"` ist Spec-§354-enum-Wert der bereits dokumentiert ist; §6.6 ergänzt nur ein worked example mit `data.changes[].action: "delete"` für otel-extraFile). **`roadmap.md`**: zwei explizite Edits — (i) done-Zähler 4→5 + `remove` aus der Offen-Liste der Cluster-AP-Zelle streichen, (ii) `Nächster Schritt`-Klausel auf Folge-Slice 6/9 `up-down` umstellen (R9-LOW-F4). **Carveouts.md**: **neuer Eintrag** (kein bestehender Volume-Removal-Eintrag — Verifikation `carveouts.md` Z. 22-29 zeigt nur Paketierung/Keycloak-CI/template-list/generate-devcontainer-Half-Write); Pattern-Vorbild [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md) mit Status `open/, on hold pending trigger`; Spec-Anker [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) §"Volumes nur auf explizite Anforderung" (R3-MED-F5 + R9-LOW-F3). **`open/`-Plan-Stub**: [`slice-v1-volume-auto-removal.md`](../open/slice-v1-volume-auto-removal.md) mit Auslöser (real-world Volume-Reclamation-Anfrage), Out-of-Scope-V1-Bestätigung, Spec-Anker. **Slice nach `done/`** mit DoD-Hash-Tabelle analog generate T8. **Plan-Verdichtung beim Übergang nach `done/`** (R10-MED-F2-Pflicht, Plan-Länge ist mit ~900 Zeilen über generate-done ~700 + remove-Initial ~280): (i) Review-Round-Tabellen R1-R10 Adressierungs-Spalte auf einen Satz pro Finding kürzen (Aufzeichnung *was* eingearbeitet wurde, nicht *wie*); (ii) Sub-Decision T0-(c) Skeleton-Block (~80 Zeilen Inline-Code) in dedizierte H3-Sektion verschieben analog init-done Pattern; (iii) AK-Block 17 Bullets auf zentrale-Anforderungs + Adressierungs-Pin-Trennung gliedern. Pattern-Vorbild generate-done T8 verdichtet ähnlich. | — (Doku) | T7 |
 
 LOC-Bilanz vorläufig: ~1200-1400 (R1-MED-6-Kalibrierung —
 Confirmer-Swap-Pattern ist neu und nicht von init geerbt, zieht
@@ -769,10 +769,10 @@ alle adressiert im selben Commit:
 
 | # | Sev | Finding | Adressierung |
 | - | --- | --- | --- |
-| 1 | HIGH | `LH-FA-ADD-007-VOLUMES-DEFERRED` ist erfundene Code-Form — Spec §1834 erlaubt nur `LH-<Bereich>-<Modul>-<3-Zahl>` oder tool-interne Codes mit Doku-Pflicht; freie Suffix-Form verletzt das Schema | T0-(g) auf `LH-FA-ADD-007` korrigiert (Spec §924/§2602 trägt die deferred-Volumes-Semantik); Differenzierung läuft über `level`-Vertrag + `message`-Text + `data.volumesPurged` |
+| 1 | HIGH | [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen)-VOLUMES-DEFERRED ist erfundene Code-Form — Spec §1834 erlaubt nur `LH-<Bereich>-<Modul>-<3-Zahl>` oder tool-interne Codes mit Doku-Pflicht; freie Suffix-Form verletzt das Schema | T0-(g) auf [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) korrigiert (Spec §924/§2602 trägt die deferred-Volumes-Semantik); Differenzierung läuft über `level`-Vertrag + `message`-Text + `data.volumesPurged` |
 | 2 | HIGH | T0-(j) Confirmer-Silencing-Pattern als "analog init T0-(o)" deklariert — existiert in keinem Done-Slice; init swappt nur ProgressPort, nicht Confirmer | T0-(j) auf "NEUES Pattern, nicht geerbt" umgestellt; Recon-Block + Pattern-Erbe-Disziplin-Anchor entsprechend; Semantik klargestellt (Behaviour-Change im JSON-Mode, kein Silencing) |
 | 3 | HIGH | `--purge --dry-run --diff`-JSON-Vertrag offen: WARN-Diagnostic-Verhalten? Diff-Volume-Visualisierung? Gate-Skip-Pfad ohne `--yes`? | T0-(h) auf drei Pin-Punkte erweitert: (a) Confirmer-Gate-Skip im Dry-Run unabhängig vom `--yes`, (b) `data.volumesPurged: false` + WARN-Diagnostic IMMER bei `req.Purge && PreviewMode != PreviewNone`, (c) Diff rendert KEINE Volume-Aktion (nicht-FS-Side-Effect). T6-Pflicht: 1 Test pro `--purge`-on-Variante in den 4 Dry-Run-Kombos |
-| 4 | MEDIUM | `ErrConflictingModeFlags`-Mutex (`--yes ⊕ --no-interactive`) fehlt in T0-(e) Mapper-Tabelle | Tabelle erweitert: `ErrConflictingModeFlags → LH-FA-CLI-005A / Exit 2` |
+| 4 | MEDIUM | `ErrConflictingModeFlags`-Mutex (`--yes ⊕ --no-interactive`) fehlt in T0-(e) Mapper-Tabelle | Tabelle erweitert: ErrConflictingModeFlags → [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) / Exit 2 |
 | 5 | MEDIUM | `--purge --yes --json` Silent-Approval-Pfad nicht gepinnt — wirft `status: warn` exit-Code-Anomalie? | T0-(j) ergänzt: WARN-Diagnostic IMMER bei `purge && !VolumesPurged`, aber `exitCode: 0` UND `status: warn`. T6-Pin `TestRemove_PurgeYesJSON_WarnOnly` |
 | 6 | MEDIUM | T6-LOC unterschätzt (~500 für 15-18 Tests); Confirmer-Pattern ist neu, zusätzliche Test-Surface | T6-LOC auf ~650, Test-Anzahl ~20-25; LOC-Gesamt-Bilanz auf ~1200-1400 |
 | 7 | LOW | Pre-UC-Sentinels `domain.ErrInvalidServiceName` + `ErrConflictingModeFlags` werden heute via Cobra-Default-Print emittiert — verletzt JSON-stdout-Cleanliness-Pin | T5-Tranchen-Zelle ergänzt: Pre-UC-Sentinel-Kanal via `reportError`-Helper, nicht Cobra-Default |
@@ -792,13 +792,13 @@ R1-gepflegten Stub (`91e4dd1`). Sieben Findings (1 HIGH,
 
 | # | Sev | Finding | Adressierung |
 | - | --- | --- | --- |
-| F1 | HIGH | Confirmer-I/O-Error-Pfad (`removeservice.go:171`) fällt in Default-Mapper-Branch `LH-FA-CLI-006 / Exit 1` — semantisch falsch für I/O-Failures (`os.Stdin`-EOF, Pipe-Bruch). Spec `LH-FA-CLI-005A` §254 koppelt Confirmation-Gate-Failures an Exit 10 | Neuer Sentinel `ErrConfirmerUnavailable` in T2 ergänzt; T0-(e)-Mapper-Tabelle erweitert (→ `LH-FA-CLI-005A` / Exit 10) |
+| F1 | HIGH | Confirmer-I/O-Error-Pfad (`removeservice.go:171`) fällt in Default-Mapper-Branch [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) / Exit 1 — semantisch falsch für I/O-Failures (`os.Stdin`-EOF, Pipe-Bruch). Spec [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) §254 koppelt Confirmation-Gate-Failures an Exit 10 | Neuer Sentinel `ErrConfirmerUnavailable` in T2 ergänzt; T0-(e)-Mapper-Tabelle erweitert (→ [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) / Exit 10) |
 | F2 | MEDIUM | NoOp-Pin AK kollidiert mit `EnabledUnset`-State — der wäre state-transitioning (`Changed!=nil`), nicht NoOp | AK explizit: NUR `PriorState=Deactivated` qualifiziert als NoOp; **neuer EnabledUnset-Normalisierungs-Pin** als separater Test mit `priorState: "enabled-unset"`, `changes[]` non-leer |
 | F3 | MEDIUM | T0-(d) Wrap-Audit nannte ~6 FS-Stellen — real sind es **10** (Z. 235, 241, 272, 282, 286, 307, 321, 325, 330, 358) | T0-(d) auf 10 Stellen kalibriert mit Code-Anker-Inventar (Write/Remove + Read/Exists/Stat + YAML-Codec + Managedblock-Scanner); Z. 304 als Nicht-FS-Wrap explizit ausgeschlossen; T6 ergänzt Read-Pfad-FS-Failure-Pin |
 | F4 | MEDIUM | `--purge --diff` ohne `--dry-run` (PreviewAndApply) Gate-Vertrag offen — T0-(h) pinnte nur PreviewDryRun-Branch | T0-(h) erweitert um PreviewAndApply-Branch mit drei expliziten Pins: (a) ohne `--yes` → ErrConfirmationRequired-Envelope; (b) mit `--yes` → Execute + WARN-Diagnostic + Exit 0; (c) Non-JSON-Non-Yes-Pfad bleibt Cobra-Default |
 | F5 | MEDIUM | WARN-Diagnostic-Bedingung pinnt nicht Volume-Presence-Check — bei zukünftigen Volumeless-Catalog-Entries würde WARN fälschlich emittieren | T0-(g) erweitert: WARN NUR wenn `catalogueFor(svc).Volumes != nil`; T6-Pin `TestRemove_PurgeOnVolumelessService_NoWarn` für Pattern-Vorlauf |
 | F6 | LOW | Human-Mode-Diff + `--purge`-deferred-Volume-Prosa-Trennung offen — soll inline im Diff oder auf errOut? | T5-Zelle ergänzt: Human-Mode-Diff-Renderer hält die Prosa auf `errOut`, NICHT im Diff-Body; T6-Pin `TestRemove_PurgeHumanDiff_StderrSeparation` |
-| F7 | LOW | T6-Code-Pin für `LH-FA-ADD-007` nicht explizit im AK — laxer Implementer pinnt nur `level: "warn"` ohne Code-Assertion | AK-WARNING-Migration-Zeile ergänzt um expliziten Code+Level+volumesPurged-Triple-Pin |
+| F7 | LOW | T6-Code-Pin für [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) nicht explizit im AK — laxer Implementer pinnt nur `level: "warn"` ohne Code-Assertion | AK-WARNING-Migration-Zeile ergänzt um expliziten Code+Level+volumesPurged-Triple-Pin |
 
 R2-Reviewer-Note: docs-check grün; weitere geprüfte Edge-Cases
 ohne Befund: `Changed: nil` vs. `[]` (jsonenvelope.go:139-143
@@ -820,9 +820,9 @@ HIGH-Befunde sind echte API-Realitäts-Lücken die R1/R2 textuell
 | - | --- | --- | --- |
 | F1 | HIGH | `catalogueFor(svc).Volumes != nil` ist erfundene API — `serviceCatalogueEntry` (`addservice_execute.go:190-224`) hat KEIN `Volumes`-Feld. Echte Felder: `volumeOptional bool`, `volumeRefLiteral string`. Plan-T6-Pin mit "Mock-Catalog `Volumes: nil`" nicht implementierbar | T0-(g) auf `catalogueFor(svc).volumeOptional == false` umgestellt; T6-Pin nutzt keycloak/otel als realistische Volumeless-Fixtures (heute existierende Catalog-Entries mit `volumeOptional: true`); kein Mock nötig |
 | F2 | HIGH | Confirmer-Helper-Triple-Drift: T0-(j)/(h) sprachen `defensiveNoopConfirmer`, T3 sprach `noopConfirmer`, T1 plante "noopConfirmer-Helper analog noopProgress bauen". Realität: `noopConfirmer` existiert seit M4 in `application/noop.go:17-33` und tut genau was T0-(j) braucht | Alle Plan-Stellen auf `noopConfirmer` vereinheitlicht; T1-Tranche entfällt komplett ("kein neuer Helper, nur Swap-Mechanismus request-time"); T0-(j) klargestellt: NEU ist nur der Swap-Mechanismus, der Helper ist M4-Erbe |
-| F3 | MEDIUM | T0-(e) Switch-Order-Tabelle hatte `ErrConfirmerUnavailable` NACH `ErrConfirmationRequired` — ein Multi-`%w`-Wrap mit beiden Sentinels würde falsch auf `LH-FA-INIT-005` matchen | Tabelle umsortiert: Infrastruktur-Sentinels (`ErrRemoveFileSystem`, `ErrConfirmerUnavailable`) VOR den fachlichen; expliziter "Tabellen-Reihenfolge = Switch-Reihenfolge"-Hinweis + T6-Multi-`%w`-Pin |
+| F3 | MEDIUM | T0-(e) Switch-Order-Tabelle hatte `ErrConfirmerUnavailable` NACH `ErrConfirmationRequired` — ein Multi-`%w`-Wrap mit beiden Sentinels würde falsch auf [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) matchen | Tabelle umsortiert: Infrastruktur-Sentinels (`ErrRemoveFileSystem`, `ErrConfirmerUnavailable`) VOR den fachlichen; expliziter "Tabellen-Reihenfolge = Switch-Reihenfolge"-Hinweis + T6-Multi-`%w`-Pin |
 | F4 | MEDIUM | T3-Cell sagte noch "~6 FS-Wrap-Stellen" — T0-(d) R2-F3 hatte schon auf 10 kalibriert | T3-Cell auf 10 Stellen nachgezogen; LOC 200→240; ErrConfirmerUnavailable-Wrap explizit ergänzt |
-| F5 | MEDIUM | Carveout-Inventarisierungs-Pflicht für WARN-on-Success-Pfad fehlt — generate hatte das Half-Write-State-Vorbild korrekt in `carveouts.md`+`open/`-Stub eingetragen, remove macht das nicht | T8-Cell um Carveout-Eintrag-Pflicht + ggf. open/-Trigger-Slice-Stub ergänzt (Pattern-Vorbild `slice-v2-generate-devcontainer-rollback-aware-write`) |
+| F5 | MEDIUM | Carveout-Inventarisierungs-Pflicht für WARN-on-Success-Pfad fehlt — generate hatte das Half-Write-State-Vorbild korrekt in `carveouts.md`+`open/`-Stub eingetragen, remove macht das nicht | T8-Cell um Carveout-Eintrag-Pflicht + ggf. open/-Trigger-Slice-Stub ergänzt (Pattern-Vorbild [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md)) |
 | F6 | LOW | Pre-UC-Sentinel-Kanal-Liste in T5 unvollständig — `getwd`-Failure (`cli/remove.go:117-120`) fehlte, init's Pattern (`init.go:221`) zeigt es explizit | T5-Cell-Pre-UC-Liste um `getwd`-Failure-Pfad ergänzt |
 
 R3-Reviewer-Note: docs-check grün; Implementation-Reality-Pass
@@ -872,14 +872,14 @@ alle adressiert im selben Commit:
 | # | Sev | Finding | Adressierung |
 | - | --- | --- | --- |
 | F1 | HIGH | T0-(c) Control-Flow-Skeleton hatte `confirmerSwap` AUSSERHALB der `removeMu`-Lock-Region — Race-Bedingung mit parallel laufenden Goroutinen die ihren eigenen Swap durchführen. Pattern-Erbe init (`initproject.go:328-348`) hat ALLE Swaps INNERHALB Lock | Skeleton reorganisiert: `LOCK → confirmerSwap → fsSwap → … → captures.Drain() → fsUnswap → confirmerUnswap → UNLOCK`. Race-Sicherheits-Block hinzugefügt; T6-Pin `TestRemove_ConcurrentInvocationsSerializeSwaps` für zwei parallele Goroutinen |
-| F2 | MEDIUM | `LH-FA-ADD-007` Multi-Use als ERROR-Code (ErrServiceUnregistered) UND WARN-Code (Volumes-deferred) — Konsumenten können nicht über Code allein disambiguieren | T0-(g) Klarstellung: Code identifiziert Spec-Anforderung (Umbrella §924-947), nicht Sub-Semantik. Konsumenten müssen `(code, level)`-Tupel betrachten + `data.volumesPurged`-Status. Pattern konsistent mit init/down's `LH-FA-INIT-005`-Multi-Use für `ErrConfirmationRequired` |
-| F3 | MEDIUM | `ErrServiceInconsistent` Triple-Use für Z. 304/307/330 — Z. 330 YAML-Patch-Defect ist semantisch Sentinel-Stretching (kein managed-block) | T0-(d) Triple-Use-Klarstellung mit zwei Alternativen (Konsolidierung vs. Sub-Sentinel `ErrYAMLPatchFailed`); Plan-Vorschlag Konsolidierung (Exit-Code 10 + Repair-Hint geteilt) mit T6-Pin auf `LH-FA-ADD-005` für alle drei Pfade |
+| F2 | MEDIUM | [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) Multi-Use als ERROR-Code (ErrServiceUnregistered) UND WARN-Code (Volumes-deferred) — Konsumenten können nicht über Code allein disambiguieren | T0-(g) Klarstellung: Code identifiziert Spec-Anforderung (Umbrella §924-947), nicht Sub-Semantik. Konsumenten müssen `(code, level)`-Tupel betrachten + `data.volumesPurged`-Status. Pattern konsistent mit init/down's [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz)-Multi-Use für `ErrConfirmationRequired` |
+| F3 | MEDIUM | `ErrServiceInconsistent` Triple-Use für Z. 304/307/330 — Z. 330 YAML-Patch-Defect ist semantisch Sentinel-Stretching (kein managed-block) | T0-(d) Triple-Use-Klarstellung mit zwei Alternativen (Konsolidierung vs. Sub-Sentinel `ErrYAMLPatchFailed`); Plan-Vorschlag Konsolidierung (Exit-Code 10 + Repair-Hint geteilt) mit T6-Pin auf [`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern) für alle drei Pfade |
 | F4 | LOW | T0-(p) `delete`-Action-Vertrag spezifiziert RemoveAll Mid-Stream-Failure-Capture nicht — was wenn snapshot vor RemoveAll failt? | T0-(p) erweitert: Zwei-Phasen-Capture-Semantik (snapshot ReadFile → underlying.RemoveAll); Phase-1-Failure → `OldContent: nil`, Phase-2-Failure → vollständiges OldContent; Diff-Renderer behandelt nil als binary/unreadable |
 
 R5-Reviewer-Note: docs-check grün. Spec-Coverage-Audit
-bestätigt: LH-FA-CLI-005A (Confirmer-Gate), LH-FA-ADD-007 (Service
-entfernen Umbrella §924-947), LH-FA-INIT-005 (Pattern-Erbe für
-ErrConfirmationRequired), LH-FA-ADD-001/002/005, LH-NFA-REL-003
+bestätigt: [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) (Confirmer-Gate), [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) (Service
+entfernen Umbrella §924-947), [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) (Pattern-Erbe für
+ErrConfirmationRequired), [`LH-FA-ADD-001`](../../../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl)/[`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen)/[`LH-FA-ADD-005`](../../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern), [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)
 sind alle in der Spec verankert und korrekt gemappt. F1 ist der
 substanziellste R5-Befund — Race-Bedingung wäre erst in
 Concurrent-Production-Tests aufgefallen. Plan-Konsistenz nach 5
@@ -896,7 +896,7 @@ nach dem R5-F1-Race-Befund. Vier Findings (1 HIGH, 2 MEDIUM,
 | - | --- | --- | --- |
 | F1 | HIGH | T0-(c) Skeleton verwendete `recorder.Drain()` — Real-API ist `recorder.Captured()` (`recordingfs.go:105`). Auch R5-F1-Adressierungs-Zelle hatte den Drift doppelt. Pattern-Erbe init (`initproject.go:358`) ruft `recorder.Captured()`. T3-Implementer würde Compile-Error sehen | Beide Stellen auf `recorder.Captured()` umgestellt (replace_all) |
 | F2 | MEDIUM | T0-(c) Skeleton ließ Recorder-Lebensdauer-Invariante offen — Plan-Vertrag dokumentierte nicht, dass `recorder` lokale Variable (call-scoped) ist. Service-Feld-Interpretation würde bei parallelen Goroutinen Captures leaken (recordingfs.Captured() NICHT thread-safe) | Skeleton expanded: `fs, recorder := s.selectFS(req.PreviewMode)` als lokale Variable explizit; neue Sub-Block "Recorder-Lebensdauer-Invariante" mit Pattern-Erbe-Verweis; T6-Pin-Erweiterung um disjunkte-Capture-Sets-Assertion |
-| F3 | MEDIUM | `LH-FA-ADD-007` ERROR-Pfad-Pin-Asymmetrie: AK-WARN-Migration hat expliziten `(code, level, volumesPurged)`-Triple-Pin, aber ERROR-Pfad (ErrServiceUnregistered) hat keinen symmetrischen `(code, level)`-Pin — laxer Implementer könnte WARN-Drift im ERROR-Pfad nicht erkennen | Neue AK-Zeile für ErrServiceUnregistered ERROR-Pfad-Pin: `code == "LH-FA-ADD-007"` AND `level == "error"` AND `exitCode == 10`; T6-Pin `TestRemove_ServiceUnregisteredJSON_ErrorLevelCodePin` |
+| F3 | MEDIUM | [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) ERROR-Pfad-Pin-Asymmetrie: AK-WARN-Migration hat expliziten `(code, level, volumesPurged)`-Triple-Pin, aber ERROR-Pfad (ErrServiceUnregistered) hat keinen symmetrischen `(code, level)`-Pin — laxer Implementer könnte WARN-Drift im ERROR-Pfad nicht erkennen | Neue AK-Zeile für ErrServiceUnregistered ERROR-Pfad-Pin: code == "[`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen)" AND `level == "error"` AND `exitCode == 10`; T6-Pin `TestRemove_ServiceUnregisteredJSON_ErrorLevelCodePin` |
 | F4 | LOW | Pin-Namen-Inventar nur 8 explizit; T6 zählt 20-25 — restliche ~12 Pins (Idempotenz, Sentinels, Switch-Order-Defense) ohne kanonische Tags | T6-Cell um Pin-Namen-Mapping erweitert mit kanonischen Tags für die 9 explizit benannten Pins plus Hinweis dass die weiteren ~12 aus AK-Block + Sub-Decision-Pins direkt ableitbar sind |
 
 R6-Reviewer-Note: docs-check grün. HIGH-Frequenz weiter
@@ -968,7 +968,7 @@ den R8-konsolidierten Stub (`899af45`). Vier Findings (1 HIGH,
 | - | --- | --- | --- |
 | F1 | HIGH | T0-(p) verschmolz zwei Layer ("`delete` erster Use-Case"): Wire-Spec hat `delete` bereits als enum-Wert; Recorder hat `actionDelete` seit Rename/RemoveAll-Support. NEU ist nur die end-to-end-Sichtbarkeit. T8-Cell `§7 Mutations-Matrix` Wortlaut führt Closure-Implementer in die Irre (versucht neue action-Spalte zu bauen statt FS-Methoden-Zeile zu ergänzen) | T0-(p) Layer-Klarstellung: "erster end-to-end-sichtbare delete-Capture, der via mapCaptureToPlannedFiles in den Wire-Envelope wandert". T8-Cell präzisiert: §7-Zeile ergänzt `remove: WriteFile + RemoveAll`, KEINE neue action-Spalte; §6.6 worked example mit `data.changes[].action: "delete"` für otel-extraFile |
 | F2 | MEDIUM | `driving.WarningEntry` ist erster Multi-Diagnostic-Port-Type im Cluster — Plan begründete die Layer-Wahl nicht als bewussten Cluster-Vorlauf. T2-Implementer könnte ihn als isolierte remove-Lösung lesen und z.B. `RemoveWarningEntry` umbenennen | T2-Cell um Cluster-Vorlauf-Disziplin ergänzt: Type bewusst generisch `driving.WarningEntry` für up/down recreate-Warnings (6/9) + config-set value-warnings (8/9); Erste-Slice-Pattern-Last analog `PreviewMode`-Rename in init T0-(c) |
-| F3 | LOW | T8-Cell sagte generisch "Carveout-Eintrag" — Closure-Implementer könnte bestehenden Eintrag suchen. carveouts.md hat keinen Volume-Removal-Eintrag (verifiziert) | T8-Cell präzisiert: "**neuer Eintrag**" + Pattern-Vorbild generate-V2-Stub-Form + Spec-Anker `LH-FA-ADD-007 §"Volumes nur auf explizite Anforderung"` |
+| F3 | LOW | T8-Cell sagte generisch "Carveout-Eintrag" — Closure-Implementer könnte bestehenden Eintrag suchen. carveouts.md hat keinen Volume-Removal-Eintrag (verifiziert) | T8-Cell präzisiert: "**neuer Eintrag**" + Pattern-Vorbild generate-V2-Stub-Form + Spec-Anker [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) §"Volumes nur auf explizite Anforderung" |
 | F4 | LOW | T8-Cell sagte generisch "roadmap" — zwei konkrete Edits nötig (done-Zähler + Nächster-Schritt-Klausel) | T8-Cell präzisiert: zwei explizite Edits — done-Zähler 4→5 + remove aus Offen-Liste; Nächster-Schritt-Klausel auf Folge-Slice 6/9 up-down |
 
 R9-Reviewer-Note: docs-check grün. F1 ist Cluster-Pattern-
@@ -1020,7 +1020,7 @@ HIGH-Frequenz 1 (R5-R11) — Asymptote endgültig bestätigt.
 
 | # | Sev | Finding | Adressierung |
 | - | --- | --- | --- |
-| F1 | HIGH | Failure-Mode #2 (`u-boot remove --json` ohne positional arg) hatte KEINEN Plan-Vertrag — `cobra.ExactArgs(1)`-Guard feuert VOR RunE, JSON-Helper läuft nie, Konsument bekommt Exit 2 ohne Envelope. Symmetrie-Bruch zu `remove "bad name" --json` (voller Envelope). Spec-LH-NFA-USE-004-§1841-Verletzung | AK-Pin `Cobra-Args-Missing-Pfad` ergänzt: T5-Pflicht Custom-`Args`-Validator (oder PreRunE) der `ErrServiceNameMissing`-Sentinel emittiert; via Pre-UC-Kanal in Envelope mit `LH-FA-CLI-006`/Exit 2. T0-(e)-Tabelle erweitert. T6-Pin `TestRemove_NoPositionalArg_JSON_EmitsCLI006Envelope` |
+| F1 | HIGH | Failure-Mode #2 (`u-boot remove --json` ohne positional arg) hatte KEINEN Plan-Vertrag — `cobra.ExactArgs(1)`-Guard feuert VOR RunE, JSON-Helper läuft nie, Konsument bekommt Exit 2 ohne Envelope. Symmetrie-Bruch zu `remove "bad name" --json` (voller Envelope). Spec-[`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)-§1841-Verletzung | AK-Pin `Cobra-Args-Missing-Pfad` ergänzt: T5-Pflicht Custom-`Args`-Validator (oder PreRunE) der `ErrServiceNameMissing`-Sentinel emittiert; via Pre-UC-Kanal in Envelope mit [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)/Exit 2. T0-(e)-Tabelle erweitert. T6-Pin `TestRemove_NoPositionalArg_JSON_EmitsCLI006Envelope` |
 | F2 | MEDIUM | Failure-Modes #16 (fsFactory-NPE) und #17 (Context-Cancellation) hatten keinen Carveout-Verweis. Init's done-T0-(p) carved Context-Cancellation explizit Out-of-Scope; remove-Plan erwähnte das nicht. Tag-1-Implementer könnte plausibel ctx.Err()-Check einbauen | Out-of-Scope-Block erweitert: **Context-Cancellation-Carveout** (Pattern-Erbe init's done-T0-(p), Cluster-T_close-Block für Exit-130-Convention); **fsFactory-NPE-Schutz** als Composition-Root-Defekt-Klasse markiert |
 | F3 | LOW | T6-Pin-Inventar war nur 9 von 20 Failure-Modes explizit benannt. R6-F4 etablierte Pin-Namen-Mapping aber FMEA-Coverage-Summary fehlte | T6-Cell um **Failure-Mode-Coverage-Summary** erweitert: nach R11 sind 18/20 explizit gepinnt + 2/20 als bewusste Out-of-Scope-Carveouts |
 
@@ -1131,7 +1131,7 @@ Drei T6-Cell-Pin-Namen aus T0-(c) Sub-Decision sind als bewusste **Application-L
 - **Context-Cancellation-Handling** (R11-MED-F2-Carveout, Pattern-
   Erbe init's done-T0-(p)): `ctx.Err() == context.Canceled` mid-
   Remove() bleibt Status-quo — fällt auf Default-Branch
-  `LH-FA-CLI-006` / Exit 2. Eine konsistente Exit-130-Convention
+  [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) / Exit 2. Eine konsistente Exit-130-Convention
   für ALLE modifying-Subcommands ist Cross-Cutting-Concern,
   eigener Cluster-T_close-Block. Remove ändert den heutigen Pfad
   NICHT — `cli-json-output.md` §6.6 nimmt den Doku-Hint von
@@ -1143,10 +1143,10 @@ Drei T6-Cell-Pin-Namen aus T0-(c) Sub-Decision sind als bewusste **Application-L
   Root-Bug = Defekt, kein User-Pfad". Out-of-Scope-Verbleib
   konsistent mit Cluster-Pattern.
 - **Volume-Auto-Removal**: heute `--purge` deferred mit WARNING.
-  Auto-Removal bleibt eigener Slice (LH-FA-ADD-007 §"Volumes
+  Auto-Removal bleibt eigener Slice ([`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) §"Volumes
   nur auf explizite Anforderung" implementiert den Gate, aber
   nicht den Removal-Aufruf an `docker volume rm`).
-- **HTTP- oder gRPC-Schnittstellen**: ADR-0010 schließt
+- **HTTP- oder gRPC-Schnittstellen**: [ADR-0010](../../adr/0010-kein-http-driving-adapter.md) schließt
   explizit aus.
 - **Schema-Versionierung** (`schemaVersion: 1`): siehe
   Cluster-Slice §Out of Scope.
@@ -1169,8 +1169,8 @@ Drei T6-Cell-Pin-Namen aus T0-(c) Sub-Decision sind als bewusste **Application-L
   ProgressPort-Silencing T0-(o));
   [`slice-v1-cli-json-dry-run-generate`](../done/slice-v1-cli-json-dry-run-generate.md)
   — Data-Carrier-Form (T0-(p) bereits etabliert).
-- Spec: `LH-FA-CLI-007/008`, `LH-NFA-USE-004`, `LH-FA-ADD-007`,
-  `LH-FA-CLI-005A` §254, `LH-NFA-REL-003`
+- Spec: [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)/[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe), [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe), [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen),
+  [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) §254, [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)
   ([`spec/lastenheft.md`](../../../../spec/lastenheft.md)).
 - Code-Anker heute:
   [`removeservice.go`](../../../../internal/hexagon/application/removeservice.go)

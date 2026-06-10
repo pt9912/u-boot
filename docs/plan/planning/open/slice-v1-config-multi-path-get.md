@@ -42,5 +42,5 @@ trägt `data.entries []` ohne `omitempty` (Empty-Pin).
 
 ## Spec-Bezug
 
-- `LH-FA-CONF-005` (Path-Whitelist) — Spec listet Multi-Path
+- [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern) (Path-Whitelist) — Spec listet Multi-Path
   nicht; Erweiterung ist Use-Case-Druck-Argument.

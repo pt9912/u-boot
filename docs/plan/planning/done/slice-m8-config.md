@@ -9,22 +9,22 @@ Nach MVP-Closure ist `u-boot config` der **letzte MVP-blockierende
 Slice** (siehe Roadmap §Nächste Schritte / MVP-Bilanz). Spec-Pflicht
 (alle MVP-Priorität, `spec/lastenheft.md` §4.10):
 
-- **`LH-FA-CONF-001`** Projektkonfiguration über `u-boot config
+- **[`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration)** Projektkonfiguration über `u-boot config
   get project.name` / `u-boot config set project.name <wert>`
   pflegbar.
-- **`LH-FA-CONF-003`** Konfiguration lesen + bei Befehlen
+- **[`LH-FA-CONF-003`](../../../../spec/lastenheft.md#lh-fa-conf-003-konfiguration-lesen)** Konfiguration lesen + bei Befehlen
   berücksichtigen (read-Pfad ist seit M3 implementiert; das hier
   bestätigt nur den User-CLI-Zugriff).
-- **`LH-FA-CONF-004`** Konfiguration aktualisieren bei Add-on-
+- **[`LH-FA-CONF-004`](../../../../spec/lastenheft.md#lh-fa-conf-004-konfiguration-aktualisieren)** Konfiguration aktualisieren bei Add-on-
   Änderungen — durch M5 (`u-boot add`) bereits abgedeckt; M8
   liefert die ergänzende User-direkte-Mutation via `set`.
-- **`LH-FA-CONF-005`** `u-boot config` ohne Argumente zeigt die
+- **[`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern)** `u-boot config` ohne Argumente zeigt die
   gesamte Konfiguration; `get` ein einzelner Wert; `set <pfad>
   <wert>` muss die Schema-Konformität prüfen.
 
 Out of Scope (Later):
 
-- **`LH-FA-CONF-006`** `u-boot config migrate` — Priorität
+- **[`LH-FA-CONF-006`](../../../../spec/lastenheft.md#lh-fa-conf-006-konfiguration-migrieren)** `u-boot config migrate` — Priorität
   „Later", eigener Slice mit Schema-Versionierung.
 
 ## Design-Entscheidungen (kanonisch, vor Implementierung
@@ -33,13 +33,13 @@ unterschrieben)
 ### D1 — Set-Pfad-Whitelist statt freie YAML-Pfade
 
 Ein freier YAML-Pfad würde User-Schreiben überall hin erlauben
-(`set foo.bar.baz xxx`), aber die LH-FA-CONF-002-Schema-Pflicht
+(`set foo.bar.baz xxx`), aber die [`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002-inhalt-der-konfiguration)-Schema-Pflicht
 verlangt, dass nur die dort definierten Felder existieren. **Set
 akzeptiert ausschließlich Pfade aus einer engen Whitelist**:
 
 | Pfad                              | Get | Set | Domain-Validierung                                     |
 | --------------------------------- | --- | --- | ------------------------------------------------------ |
-| `project.name`                    | ✅  | ✅  | `domain.NewProjectName` (LH-FA-INIT-006 regex)         |
+| `project.name`                    | ✅  | ✅  | `domain.NewProjectName` ([`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung) regex)         |
 | `devcontainer.enabled`            | ✅  | ✅  | `strconv.ParseBool` pre-write                          |
 | `services.<svc>.enabled`          | ✅  | ❌  | für Set: Fehler mit Hint „use `u-boot add <svc>`"      |
 
@@ -49,8 +49,8 @@ Unbekannte Pfade ⇒ `ErrConfigPathUnknown` → Exit-Code 10.
 ist** (Review-Followup M1): das Boolean ist im M5-State-Machine-
 Modell nur die *Sichtbarkeits-Spitze* der Service-Aktivierung; ein
 echter Aktivierungs-Schritt schreibt zusätzlich den compose-Block,
-den volume-Block und den `.env.example`-Block (`LH-FA-ADD-002` /
-slice-m5-add-postgres §State-Machine). Würde `config set
+den volume-Block und den `.env.example`-Block ([`LH-FA-ADD-002`](../../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen) /
+[slice-m5-add-postgres](slice-m5-add-postgres.md) §State-Machine). Würde `config set
 services.postgres.enabled true` nur den Boolean flippen, entstünde
 ein Halbzustand mit `enabled: true` aber fehlenden Artefakten —
 und der nächste `u-boot up` würde gegen einen nicht-existenten
@@ -93,7 +93,7 @@ WriteFile.
 2. **Domain-Re-Validation**: jeder Whitelist-Pfad ruft seinen
    Domain-Validator auf der gepatchten Config erneut auf. yaml.v3
    Unmarshal ist lenient — es akzeptiert string-fähigen Müll für
-   `project.name` ohne LH-FA-INIT-006-Regex zu prüfen. Der
+   `project.name` ohne [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung)-Regex zu prüfen. Der
    Re-Validator schließt die Lücke: nach Unmarshal läuft
    `domain.NewProjectName(cfg.Project.Name)` (und analoge
    Validatoren für andere Whitelist-Pfade); jeder Domain-Fehler
@@ -318,7 +318,7 @@ Fünf Tranchen, in Reihenfolge implementierbar.
     ErrConfigSchemaInvalid + null `WriteFile`-Calls.
   - Set `project.name = "valid-name"` ⇒ Erfolg + Datei
     enthält neuen Wert + Pre-Existing-Comments survived.
-- LH-FA-CONF-005-Pin: ein End-to-End-Test reproduziert exakt
+- [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern)-Pin: ein End-to-End-Test reproduziert exakt
   `u-boot config get project.name → u-boot config set
   project.name foo → u-boot config get project.name` und
   assertet dass der gesetzte Wert beim nächsten Get sichtbar
@@ -328,7 +328,7 @@ Fünf Tranchen, in Reihenfolge implementierbar.
 - [ ] Set-Handler implementiert; alle drei D3-Validate-Stufen
   greifen, fehlt eine ⇒ kein WriteFile.
 - [ ] Stub-Pin entfernt (alle drei Handler real).
-- [ ] LH-FA-CONF-005-Roundtrip-Pin im acceptance_test.go ergänzt.
+- [ ] [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern)-Roundtrip-Pin im acceptance_test.go ergänzt.
 - [ ] Test pinnt: `set project.name "Invalid Name"` ⇒
   ErrConfigValueInvalid **vor write** (writesBefore == writesAfter).
 - [ ] Test pinnt: `set services.postgres.enabled true` ⇒
@@ -394,13 +394,13 @@ Fünf Tranchen, in Reihenfolge implementierbar.
 
 ### Verhalten
 
-- **LH-FA-CONF-001/-005**: `u-boot config get/set/show`
+- **[`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration)/[`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern)**: `u-boot config get/set/show`
   funktionieren wie spec'd.
-- **LH-FA-CONF-002**: Schema-Konformität nach Set geprüft;
+- **[`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002-inhalt-der-konfiguration)**: Schema-Konformität nach Set geprüft;
   Schema-Verletzung ⇒ Datei unverändert.
-- **LH-FA-CONF-003**: read-Pfad reused den existierenden
+- **[`LH-FA-CONF-003`](../../../../spec/lastenheft.md#lh-fa-conf-003-konfiguration-lesen)**: read-Pfad reused den existierenden
   M3-Read-Pfad.
-- **LH-FA-CONF-004**: Set ist die direkte User-Mutation;
+- **[`LH-FA-CONF-004`](../../../../spec/lastenheft.md#lh-fa-conf-004-konfiguration-aktualisieren)**: Set ist die direkte User-Mutation;
   `add`/`remove` sind die fachlichen Mutationen.
 
 ### Negative
@@ -416,7 +416,7 @@ Fünf Tranchen, in Reihenfolge implementierbar.
 
 ## Out of Scope (Later / V1)
 
-- **`LH-FA-CONF-006`** Migration (`u-boot config migrate`) —
+- **[`LH-FA-CONF-006`](../../../../spec/lastenheft.md#lh-fa-conf-006-konfiguration-migrieren)** Migration (`u-boot config migrate`) —
   Priorität „Later" in der Spec.
 - **Nested set** (`set services '{postgres: {enabled: true}}'`)
   — kein Spec-Mandat; M5-Path-Granularität reicht.
@@ -429,7 +429,7 @@ Fünf Tranchen, in Reihenfolge implementierbar.
   unnötig, weil `set` pre-write validiert (D3).
 - **Secret-Redaction in `show`** (Klarstellung N2): heute hat
   `u-boot.yaml` keine Secret-Felder (`.env.example` ist der
-  kanonische Secret-Träger, LH-SA-FILE-002). Sobald V1-Felder
+  kanonische Secret-Träger, [`LH-SA-FILE-002`](../../../../spec/lastenheft.md#lh-sa-file-002-markierte-verwaltete-bereiche)). Sobald V1-Felder
   wie `devcontainer.featureSources.allow` private Registry-
   Tokens enthalten könnten, müsste `show` redacten — ein
   Folge-Slice. M8 reicht die Datei byte-identisch durch
@@ -438,7 +438,7 @@ Fünf Tranchen, in Reihenfolge implementierbar.
 ## Bezug
 
 - Auslösende Spec: `spec/lastenheft.md` §4.10
-  (`LH-FA-CONF-001..005`).
+  ([`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration)..[`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern)).
 - Hängt von: M3 (`u-boot.yaml`-Schema), M5
   (`YAMLCodec.PatchScalar`), V1-yaml-parse-sentinel
   (`driven.ErrYAMLParse` für Schema-Roundtrip-Klassifikation).

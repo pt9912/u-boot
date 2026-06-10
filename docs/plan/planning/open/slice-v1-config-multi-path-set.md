@@ -43,5 +43,5 @@ WriteFile als einzelner finaler Schreib-Akt.
 
 ## Spec-Bezug
 
-- `LH-FA-CONF-001` (Config-Subcommand) — Spec listet Multi-
+- [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration) (Config-Subcommand) — Spec listet Multi-
   Path nicht; Erweiterung ist Use-Case-Druck-Argument.

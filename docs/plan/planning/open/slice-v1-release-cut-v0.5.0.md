@@ -6,9 +6,9 @@
 >
 > **Scope-Entscheidung (vor T1 bestätigen):** v0.5.0 ist ein **schlankes
 > Ein-Feature-Minor** — einziger auslieferbarer Inhalt seit `v0.4.0` ist
-> `u-boot init --template ./pfad` (lokale User-Templates, `LH-FA-TPL-003`,
+> `u-boot init --template ./pfad` (lokale User-Templates, [`LH-FA-TPL-003`](../../../../spec/lastenheft.md#lh-fa-tpl-003-eigene-templates),
 > [`done/slice-later-local-templates.md`](../done/slice-later-local-templates.md)).
-> Alles andere seit v0.4.0 ist `docs(plan)` (ADR-0011/0012 Proposed,
+> Alles andere seit v0.4.0 ist `docs(plan)` ([ADR-0011](../../adr/0011-agent-harness-scaffolding.md)/[ADR-0012](../../adr/0012-devcontainer-egress-firewall.md) Proposed,
 > Roadmap-APs, `examples.md`) — release-neutral. Falls vor dem Cut mehr
 > gebündelt werden soll (ADR ratifizieren+bauen, Backlog-Slice), zuerst
 > das tun; sonst v0.5.0 = local-templates.
@@ -57,7 +57,7 @@ sechs Plattformen); `u-boot --version` eines Release-Binaries zeigt
 > ./path` resolves a project template from the real filesystem (not just
 > the built-in catalogue), with a pure, platform-independent name-vs-path
 > classification, a shared `template.yaml` parser, a symlink guard, and
-> harmonised exit codes (`LH-FA-TPL-003`, ADR-0009). Details below.
+> harmonised exit codes ([`LH-FA-TPL-003`](../../../../spec/lastenheft.md#lh-fa-tpl-003-eigene-templates), [ADR-0009](../../adr/0009-template-format-yaml-files.md)). Details below.
 
 ## Releases-Tabellen-Zeile (Vorlage)
 
@@ -84,7 +84,7 @@ README.de.md:
 
 - **Mehr Features bündeln**: Scope-Frage (siehe Status-Block) — falls ja,
   vor T1 erledigen; dieser Plan setzt local-templates-only voraus.
-- **ADR-0011/0012 ratifizieren**: bleiben Proposed; keine v0.5.0-Blocker.
+- **[ADR-0011](../../adr/0011-agent-harness-scaffolding.md)/[ADR-0012](../../adr/0012-devcontainer-egress-firewall.md) ratifizieren**: bleiben Proposed; keine v0.5.0-Blocker.
 - **Spec-`Datum`/`Version`-Header in `spec/lastenheft.md`**: bleibt
   unverändert (Spec-Version ≠ Release-Version, wie in v0.1–v0.4).
 
@@ -93,7 +93,7 @@ README.de.md:
 - Prozess-Vorbild:
   [`done/slice-v1-release-cut-v0.4.0.md`](../done/slice-v1-release-cut-v0.4.0.md).
 - Inhalt: [`done/slice-later-local-templates.md`](../done/slice-later-local-templates.md)
-  (`LH-FA-TPL-003`), [ADR-0009](../../adr/0009-template-format-yaml-files.md).
+  ([`LH-FA-TPL-003`](../../../../spec/lastenheft.md#lh-fa-tpl-003-eigene-templates)), [ADR-0009](../../adr/0009-template-format-yaml-files.md).
 - Roadmap: [`roadmap.md`](../in-progress/roadmap.md) §Aktueller Snapshot.
 - `publish.yml` (Tag-Push-Trigger), `Makefile`/`Dockerfile`/`main.go`
   (Versionsstrings).

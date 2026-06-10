@@ -3,7 +3,7 @@
 | Dokument    | Devcontainer-Features-User-Guide |
 | ----------- | -------------------------------- |
 | Projektname | `u-boot` |
-| Bezug       | `LH-FA-DEV-003` in [`spec/lastenheft.md`](../../spec/lastenheft.md) §692-721 + §1340-1353 + §2394 |
+| Bezug       | [LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features) in [`spec/lastenheft.md`](../../spec/lastenheft.md) §692-721 + §1340-1353 + §2394 |
 | Slice       | [`slice-v1-devcontainer-features`](../plan/planning/done/slice-v1-devcontainer-features.md) |
 | ADR         | [`docs/plan/adr/0008-plugin-system-statisch.md`](../plan/adr/0008-plugin-system-statisch.md) §78 |
 | Status      | v0.4.0 |
@@ -17,7 +17,7 @@ out-of-the-box im Built-in-Katalog stehen, wie der User externe
 Quellen freigeben muss, und welche Doctor- bzw.
 Generator-Verhaltensregeln daraus folgen.
 
-Die Pflichtaussagen leben im Lastenheft (`LH-FA-DEV-003`); dieses
+Die Pflichtaussagen leben im Lastenheft ([LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)); dieses
 Dokument ist die Bedien-Doku.
 
 ---
@@ -112,7 +112,7 @@ Render-Output: `"ghcr.io/devcontainers/features/java:21": {}`.
 
 Spec §710-721 verlangt, dass externe Features nur mit expliziter
 Freigabe aktiviert werden können. `--yes` reicht **nicht** als
-Substitut (LH-NFA-SEC-004).
+Substitut ([LH-NFA-SEC-004](../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte)).
 
 ### Allowlist befüllen
 
@@ -206,9 +206,9 @@ Aufruf.
 
 | Schweregrad | Trigger                                                                                       |
 | ----------- | --------------------------------------------------------------------------------------------- |
-| **Error**   | `source:`-Override gesetzt, aber URL nicht in `featureSources.allow` (LH-FA-DEV-003 §720).    |
+| **Error**   | `source:`-Override gesetzt, aber URL nicht in `featureSources.allow` ([LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features) §720).    |
 | **Warn**    | Orphan-Activation: `source:` leer und Name nicht im Built-in-Katalog (Renderer skippt den Eintrag still). |
-| **Warn**    | `enabled:` fehlt für einen Feature-Eintrag (LH-FA-ADD-005 §893-Analog).                       |
+| **Warn**    | `enabled:` fehlt für einen Feature-Eintrag ([LH-FA-ADD-005](../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern) §893-Analog).                       |
 
 Die Worst-Severity gewinnt: wenn Allowlist-Violation UND
 Orphan-Activation gleichzeitig vorliegen, surface Doctor die
@@ -293,7 +293,7 @@ u-boot doctor
 ## 8. Out of Scope
 
 - **Eigene/lokale Features** (Custom-Feature im Repo-Pfad statt
-  externer Quelle): geht über `LH-FA-DEV-003` hinaus; eigener
+  externer Quelle): geht über [LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features) hinaus; eigener
   Folge-Slice mit eigenem Trigger.
 - **Sprach-spezifische Build-Aktionen** (Gradle-Wrapper anlegen,
   Go-Module-Init, …): das ist Template-Job (`LH-FA-TPL-*`), nicht

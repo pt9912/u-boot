@@ -5,7 +5,7 @@
 
 ## Auslöser
 
-M3-T2 hatte nur die **Hard**-Marker-Erkennung aus `LH-FA-INIT-004`
+M3-T2 hatte nur die **Hard**-Marker-Erkennung aus [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004-bestehendes-projekt-erkennen)
 implementiert (`u-boot.yaml`/`compose.yaml`/`.env.example` präsent
 → `ErrProjectExists`). Die **Soft**-Erkennung fehlte komplett — Spec
 verlangt:
@@ -16,9 +16,9 @@ verlangt:
 > In diesem Fall muss `u-boot init` im interaktiven Modus explizit
 > nachfragen ..."*
 
-Bewusste M3-Lücke (Carveout, `LH-FA-PROJDOCS-005`); M3-T4c hatte das
+Bewusste M3-Lücke (Carveout, [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)); M3-T4c hatte das
 `--assume-existing`-Flag bereits durch den CLI bis in die Request
-durchgereicht („load-bearing when slice-m4-soft-existing-detection
+durchgereicht („load-bearing when [slice-m4-soft-existing-detection](slice-m4-soft-existing-detection.md)
 lands"). Dieser Slice macht es load-bearing.
 
 ## Aufhebung
@@ -92,7 +92,7 @@ Projekt". Entscheidungs-Baum vor `planTemplatedFiles`:
 ## Out of Scope
 
 - **`--yes`-Verhalten** für die Soft-Detection-Prompt: heute
-  unspezifiziert. `--yes` (`LH-FA-CLI-005A`) bedeutet „answer the
+  unspezifiziert. `--yes` ([`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung)) bedeutet „answer the
   default" — für `[y/N]` wäre das `N` (proceed). Eine saubere
   Implementierung bräuchte eine Konstruktions-Zeit-Aware Confirmer-
   Variante; das Wiring ist heute Service-vor-Flag-Parsing
@@ -107,7 +107,7 @@ Projekt". Entscheidungs-Baum vor `planTemplatedFiles`:
 
 ## Bezug
 
-- Auslösende Spec: `LH-FA-INIT-004`, `LH-FA-CLI-005A`.
+- Auslösende Spec: [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004-bestehendes-projekt-erkennen), [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung).
 - Aufhebung dokumentiert in: [`carveouts.md`](../in-progress/carveouts.md)
   (Zeile entfernt) und [`roadmap.md`](../in-progress/roadmap.md)
   (Carveout-Auflösungs-Slice-Tabelle).

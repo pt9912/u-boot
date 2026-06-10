@@ -1,7 +1,7 @@
-# Slice V2: Homebrew-Formula für u-boot (`LH-OPEN-002`-Restweg)
+# Slice V2: Homebrew-Formula für u-boot ([`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung)-Restweg)
 
 > **Status:** on hold — Trigger noch nicht gefeuert. Plan-Stub
-> existiert, damit `LH-FA-PROJDOCS-005`-Disziplin den Carveout-
+> existiert, damit [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)-Disziplin den Carveout-
 > Anker erfüllt (siehe
 > [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
 > Carveouts, [ADR-0007](../../adr/0007-distributionswege-ghcr.md)
@@ -10,7 +10,7 @@
 ## Auslöser
 
 `spec/lastenheft.md` §14 listet sechs Distributionswege als
-mögliche Optionen für `LH-OPEN-002`. Drei sind in ADR-0007
+mögliche Optionen für [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung). Drei sind in [ADR-0007](../../adr/0007-distributionswege-ghcr.md)
 gewählt (GHCR + Binary), zwei verworfen (npm, pip), zwei vertagt
 mit eigenem Trigger-Slice — Homebrew und Debian/RPM.
 
@@ -57,7 +57,7 @@ läuft ohne Errors.
 | T1 | Tap-Repo `pt9912/homebrew-tap` anlegen + initiale Formula-Datei für die aktuelle v0.x.y-Version (manuelle SHA-Pins). Formula-Syntax-Check (`brew audit --strict`). |
 | T2 | Automatisierung: `publish.yml` (oder neuer `homebrew-bump.yml`) erkennt v*-Tag-Push, holt SHA256 für Linux/macOS amd64/arm64 aus den GitHub-Release-Assets, committet ins Tap-Repo via GitHub-App-Token oder PAT. |
 | T3 | Tap-Repo-Smoke-Workflow (macOS-Runner): `brew install` + `u-boot init demo --no-git` + `u-boot doctor`. Tap-Repo-README + main-Repo-READMEs (EN + DE) mit `brew install`-Install-Block. |
-| T4 | Closure: CHANGELOG `## [Unreleased]` Added-Eintrag, carveouts.md `LH-OPEN-002`-Restweg-Zeile reduziert (nur noch Debian/RPM offen), ADR-0007 §Entscheidung „Vertagt → Gewählt" für Homebrew. Slice-Plan `open/` → `done/`. |
+| T4 | Closure: CHANGELOG `## [Unreleased]` Added-Eintrag, carveouts.md [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung)-Restweg-Zeile reduziert (nur noch Debian/RPM offen), [ADR-0007](../../adr/0007-distributionswege-ghcr.md) §Entscheidung „Vertagt → Gewählt" für Homebrew. Slice-Plan `open/` → `done/`. |
 
 ## Out of Scope
 
@@ -71,7 +71,7 @@ läuft ohne Errors.
 
 ## Bezug
 
-- Spec: `LH-OPEN-002` §14 (offene Distributionswege).
+- Spec: [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung) §14 (offene Distributionswege).
 - ADR: [ADR-0007 §Entscheidung Tabelle „Homebrew"](../../adr/0007-distributionswege-ghcr.md)
   — verbindlicher Plan-Anker bis Trigger.
 - Voraussetzungs-Slice:
@@ -79,7 +79,7 @@ läuft ohne Errors.
   — Binaries existieren seit T2 `5e5166b` als GitHub-Release-Asset.
 - Carveout:
   [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
-  Carveouts, LH-OPEN-002-Zeile.
+  Carveouts, [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung)-Zeile.
 - Roadmap:
   [`roadmap.md`](../in-progress/roadmap.md) §v0.4.0+ Backlog.
 - Phase: V2 (nach v0.3.0-Milestone, Trigger-getrieben).

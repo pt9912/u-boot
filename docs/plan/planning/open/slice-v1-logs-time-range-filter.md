@@ -18,7 +18,7 @@ Zeilen). Docker-Compose-CLI selbst trägt `--since` und
 Compose-Verbund noch verfügbar) sind Zeitbereiche
 informativer als reine Zeilen-Anzahl.
 
-Spec `LH-FA-UP-005` listet die zwei Flags nicht.
+Spec [`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen) listet die zwei Flags nicht.
 
 ## Trigger
 
@@ -37,5 +37,5 @@ Application-Layer-Logik-Änderung.
 
 ## Spec-Bezug
 
-- `LH-FA-UP-005` (Logs anzeigen) — Erweiterung um Time-Range-
+- [`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005-logs-anzeigen) (Logs anzeigen) — Erweiterung um Time-Range-
   Format.

@@ -9,8 +9,8 @@ ein Doku-Audit-Slice und ein Pure-Refactor-Slice für die
 Dependency-Mechanik.
 
 - [`slice-v1-audit-done`](../done/slice-v1-audit-done.md) —
-  Doku-Audit für `LH-FA-BUILD-006`/`LH-NFA-MAINT-004`/
-  `LH-NFA-PORT-003`. Pure-Doku.
+  Doku-Audit für [`LH-FA-BUILD-006`](../../../../spec/lastenheft.md#lh-fa-build-006-aggregator-targets)/[`LH-NFA-MAINT-004`](../../../../spec/lastenheft.md#lh-nfa-maint-004-dokumentierte-schnittstellen)/
+  [`LH-NFA-PORT-003`](../../../../spec/lastenheft.md#lh-nfa-port-003-containerfreundlichkeit). Pure-Doku.
 - [`slice-v1-add-remove`](../done/slice-v1-add-remove.md) — fünf
   Tranchen + Review-Followup `78ddcc6` (F1..F6). Liefert
   `u-boot remove <service> [--purge]` analog M5-Postgres-Pattern,
@@ -21,13 +21,13 @@ Dependency-Mechanik.
   `--with-deps`-CLI mit Vier-Modi-Dispatch. Breaking refactor:
   `NewAddServiceService` nimmt jetzt einen `Confirmer`.
 - [`slice-v1-keycloak`](../done/slice-v1-keycloak.md) — vier
-  Tranchen. `u-boot add keycloak` (LH-FA-ADD-003 / LH-AK-003);
+  Tranchen. `u-boot add keycloak` ([`LH-FA-ADD-003`](../../../../spec/lastenheft.md#lh-fa-add-003-keycloak-hinzufügen) / [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003-keycloak-flow));
   per-Service Probe-Mechanismus (`requiredEnvKeys` /
   `volumeRefLiteral` / `volumeOptional` Catalogue-Felder);
   `acceptance_helpers.go`-Extraktion (init+add+up-Pipeline für
   alle künftigen Acceptance-Docker-Tests).
 - [`slice-v1-otel`](../done/slice-v1-otel.md) — vier Tranchen.
-  `u-boot add otel` (LH-FA-ADD-004 / LH-AK-004); zweites
+  `u-boot add otel` ([`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004-opentelemetry-hinzufügen) / [`LH-AK-004`](../../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow)); zweites
   Catalogue-Pattern-Update: `extraFiles []extraFileEntry` für
   whole-file artefacts + `healthcheckOptional`. Makefile-Patch
   `test-docker` `-v /tmp:/tmp` für Compose-Bind-Mount-Auflösung
@@ -41,7 +41,7 @@ ohne aktive Tranchen liegen:
   Auflösung des Keycloak-Acceptance-Tests. Nicht v0.3.0-blocking.
 - [`slice-v2-homebrew-formula.md`](../open/slice-v2-homebrew-formula.md)
   + [`slice-v2-distro-pakete.md`](../open/slice-v2-distro-pakete.md) —
-  proaktive Trigger-Stubs für `LH-OPEN-002`-Restwege. Bewusst
+  proaktive Trigger-Stubs für [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung)-Restwege. Bewusst
   ohne v0.3.0-Bezug.
 
 ## Aufhebungsbedingung
@@ -72,7 +72,7 @@ bereiten Doku und Versionsstrings vor; T4 ist die Nutzer-Aktion
   bzw. „v0.3.0 released" (post-Tag-Push) umgemünzt. Die
   Feature-Liste nennt die fünf v0.3.0-Slices explizit, plus
   `u-boot add keycloak / otel` in der Subcommand-Reference
-  (schon mit slice-v1-keycloak T4 + slice-v1-otel T4 gelandet).
+  (schon mit [slice-v1-keycloak](slice-v1-keycloak.md) T4 + [slice-v1-otel](slice-v1-otel.md) T4 gelandet).
 - `roadmap.md` `§Releases`-Tabelle: v0.3.0-Zeile von
   „feature-complete (5/5)" auf „✅ released" + Tag-Commit-Hash
   + Datum gehoben. `§v0.1.0/v0.2.0 — Audit-Trail`-Sektion
@@ -93,9 +93,9 @@ bereiten Doku und Versionsstrings vor; T4 ist die Nutzer-Aktion
 
 ## Out of Scope
 
-- **`slice-v1-keycloak-ci-flake`-Auflösung**: der Keycloak-
+- **[`slice-v1-keycloak-ci-flake`](../open/slice-v1-keycloak-ci-flake.md)-Auflösung**: der Keycloak-
   Acceptance-Test ist seit `9d0be1c` hinter `acceptance_extended`
-  versteckt; der CI-Bind-Mount-Fix aus slice-v1-otel T3 könnte
+  versteckt; der CI-Bind-Mount-Fix aus [slice-v1-otel](slice-v1-otel.md) T3 könnte
   ihn vermutlich befreien, das ist aber nicht v0.3.0-blocking.
   Trigger bleibt offen; bei der Diagnose-Runde nach v0.3.0
   könnte der Test schnell zurück in die Pflicht-Lane (die echte
@@ -105,7 +105,7 @@ bereiten Doku und Versionsstrings vor; T4 ist die Nutzer-Aktion
   user-getriebener One-Shot offen aus der v0.1.0-Era; nicht
   v0.3.0-spezifisch (`docs/user/branch-protection.md`).
 - **V1-Generators** (`u-boot logs`, `--json`/`--dry-run`),
-  **`slice-later-local-templates`** (`--template ./pfad`),
+  **[`slice-later-local-templates`](slice-later-local-templates.md)** (`--template ./pfad`),
   **Migration / Custom-Data-Sources**, **Homebrew / Distro-
   Pakete** — alles Post-v0.3.0, gelistet in
   [`roadmap.md`](../in-progress/roadmap.md) §v0.4.0+ Backlog.
@@ -121,12 +121,12 @@ bereiten Doku und Versionsstrings vor; T4 ist die Nutzer-Aktion
   + eine Nutzer-Tranche.
 - Hängt von:
   [`slice-v1-release-pipeline`](../done/slice-v1-release-pipeline.md)
-  T2/T3 (publish.yml-Mechanik) + ADR-0007 §Entscheidung +
+  T2/T3 (publish.yml-Mechanik) + [ADR-0007](../../adr/0007-distributionswege-ghcr.md) §Entscheidung +
   [`slice-v2-binary-distribution`](../done/slice-v2-binary-distribution.md)
   T2 (Binary-Asset-Upload). Beide seit v0.2.0 unverändert in
   `publish.yml` aktiv.
 - Milestone:
-  [v0.3.0](../in-progress/roadmap.md#v030) — letzter Slice des
+  [v0.3.0](../../../archive/roadmap-history-v0.1-v0.3.md#v030-cluster) — letzter Slice des
   Milestones.
 - Phase: V1-Release-Cut, keine Carveout-Auflösung — daher kein
   Eintrag in `carveouts.md`, nur in der Roadmap.

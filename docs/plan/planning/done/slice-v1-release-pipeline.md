@@ -2,18 +2,18 @@
 
 ## Auslöser
 
-ADR-0004 schließt drei bewusst aus dem M2c-CI aus
-(`LH-FA-PROJDOCS-005`):
+[ADR-0004](../../adr/0004-ci-system.md) schließt drei bewusst aus dem M2c-CI aus
+([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)):
 
 1. Image-Publish-Workflow (`.github/workflows/publish.yml`) — kommt mit
-   dem Release-Slice, gekoppelt an `LH-OPEN-002` (Paketierung).
+   dem Release-Slice, gekoppelt an [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung) (Paketierung).
 2. Trivy-Image-Scan — optionaler dritter Job, der das
    `runtime`-Image scannt und CRITICAL/HIGH-Findings blockiert.
 3. **Branch-Protection** im GitHub-UI — Required-Status-Checks für die
    tatsächlichen GitHub-Check-Namen `gates (lint + test +
    coverage-gate)` und `security-gates (govulncheck)` sind manuell zu
    aktivieren, sonst sind beide Jobs zwar grün, aber nicht
-   PR-blockierend (`LH-QA-003`).
+   PR-blockierend ([`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003-ci-fähigkeit-github-actions)).
    Bei M3-Anker-Triage 2026-05-27 in diesen Slice gebündelt, weil die
    gleiche Sitzung (erster Release / erster externer PR) auch
    Image-Publish + Trivy aufsetzt; Standalone wäre Disziplin-Overhead.
@@ -51,7 +51,7 @@ Release-Teile bleiben als offene Restarbeit in diesem Slice.
     `vMAJOR.MINOR.PATCH`-Tags gesetzt, nicht für Prereleases.
   - `permissions: contents: read, packages: write` (Per-Job minimal).
   - SHA-pinned `docker/login-action`, `docker/build-push-action` o. ä.
-  - OCI-Labels aus `LH-FA-BUILD-002` sind im gepushten Image gesetzt.
+  - OCI-Labels aus [`LH-FA-BUILD-002`](../../../../spec/lastenheft.md#lh-fa-build-002-runtime-stage-pflichten) sind im gepushten Image gesetzt.
 - `.github/workflows/ci.yml` bekommt einen optionalen dritten Job
   `image-scan` (oder eigener Workflow `image-scan.yml`), der nach `make
   build` `trivy image --severity HIGH,CRITICAL --exit-code 1`
@@ -65,10 +65,10 @@ Release-Teile bleiben als offene Restarbeit in diesem Slice.
 - `docs/user/quality.md` §4 und §6 werden um die neuen Workflows
   erweitert; die bisherige Aussage "Trivy/SBOM folgen mit dem
   Release-Slice" wird aktualisiert oder entfernt.
-- `LH-OPEN-002` (Paketierung) wird für den GHCR-Anteil konkret
+- [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung) (Paketierung) wird für den GHCR-Anteil konkret
   entschieden. Weitere Distributionswege (Binary-Release, Homebrew,
   Debian/RPM, npm/pip) werden entweder explizit verworfen/vertagt oder
-  bekommen eigene Slice-Pläne; `LH-OPEN-002` wird nur geschlossen, wenn
+  bekommen eigene Slice-Pläne; [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung) wird nur geschlossen, wenn
   diese Restwege ebenfalls entschieden sind.
 - `docs/user/branch-protection.md` beschreibt Schritt-für-Schritt die
   einmalige UI-Aktivierung:
@@ -84,12 +84,12 @@ Release-Teile bleiben als offene Restarbeit in diesem Slice.
 - README (de/en) Section „Setup" verweist auf die Branch-Protection-
   Checkliste.
 - Alle drei Zeilen in `carveouts.md` (Image-Publish/Trivy, Branch-
-  Protection, `LH-OPEN-002`) passend aktualisieren:
+  Protection, [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung)) passend aktualisieren:
   - Branch-Protection entfernen/als gelöst markieren, sobald der
     externe-PR-Pfad umgesetzt ist.
   - Image-Publish/Trivy entfernen/als gelöst markieren, sobald der
     Release-Pfad umgesetzt ist.
-  - `LH-OPEN-002` nur entfernen/als gelöst markieren, wenn alle
+  - [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung) nur entfernen/als gelöst markieren, wenn alle
     Distributionswege entschieden sind; andernfalls den Carveout auf
     die verbleibenden Wege reduzieren.
 
@@ -98,18 +98,18 @@ Release-Teile bleiben als offene Restarbeit in diesem Slice.
 Fünf Tranchen, in Reihenfolge implementierbar. Stand 2026-05-31
 ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
 
-### T1 — ADR-0007 Distributionswege + `LH-OPEN-002`-Update
+### T1 — [ADR-0007](../../adr/0007-distributionswege-ghcr.md) Distributionswege + [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung)-Update
 
 - `docs/plan/adr/0007-distributionswege-ghcr.md` neu: GHCR primär;
   Binary / Homebrew / Distro-Pakete vertagt mit Trigger-Slices;
   npm / pip verworfen.
-- `spec/lastenheft.md` §14 `LH-OPEN-002`-Abschnitt + Übersichts-
+- `spec/lastenheft.md` §14 [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung)-Abschnitt + Übersichts-
   tabellen-Zeile auf den Stand „GHCR entschieden, Restwege
   vertagt/verworfen" gehoben.
 
 **DoD T1:**
-- [x] ADR-0007 angelegt; Mindest-Abschnitte erfüllt (`adr/README.md`).
-- [x] `LH-OPEN-002` §14 enthält Entscheidungs-Tabelle + ADR-Verweis.
+- [x] [ADR-0007](../../adr/0007-distributionswege-ghcr.md) angelegt; Mindest-Abschnitte erfüllt (`adr/README.md`).
+- [x] [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung) §14 enthält Entscheidungs-Tabelle + ADR-Verweis.
 - [x] `make gates` grün.
 - [x] T1 ✅ `0f64938`.
 
@@ -122,12 +122,12 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
   `ghcr.io/pt9912/u-boot:<version>`; `:latest` nur für stable Tags.
 - SHA-pinned `docker/login-action` + `docker/build-push-action`;
   `permissions: contents: read, packages: write` per-Job.
-- OCI-Labels aus `LH-FA-BUILD-002` im gepushten Image verifizieren.
+- OCI-Labels aus [`LH-FA-BUILD-002`](../../../../spec/lastenheft.md#lh-fa-build-002-runtime-stage-pflichten) im gepushten Image verifizieren.
 
 **DoD T2:**
 - [x] Workflow-File angelegt; Validate-Step + Push-Step getrennt.
 - [x] Probe-Lauf lokal: `make build` + `docker tag` + Label-Inspect
-  gegen die 5 LH-FA-BUILD-002 Labels grün.
+  gegen die 5 [`LH-FA-BUILD-002`](../../../../spec/lastenheft.md#lh-fa-build-002-runtime-stage-pflichten) Labels grün.
 - [x] `make gates` grün.
 - [x] T2 ✅ `93b703e`.
 
@@ -162,7 +162,7 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
 **DoD T4:**
 - [x] `quality.md` §4 + §6 sind ohne offene Carveout-Sätze
   (Trivy-Folgepunkt-Satz und Image-Publish-Folgepunkt-Block durch
-  konkrete Verweise auf publish.yml + image-scan + ADR-0007 ersetzt).
+  konkrete Verweise auf publish.yml + image-scan + [ADR-0007](../../adr/0007-distributionswege-ghcr.md) ersetzt).
 - [x] `branch-protection.md` listet `image-scan` (Header +
   Required-Status-Checks + Bezug-Block).
 - [x] READMEs verlinken Branch-Protection (bereits seit
@@ -174,8 +174,8 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
 
 - `docs/plan/planning/in-progress/carveouts.md`:
   - Image-Publish/Trivy-Zeile entfernen.
-  - `LH-OPEN-002`-Zeile auf verbleibende Wege (Binary / Homebrew /
-    Distro-Pakete) reduzieren, mit Verweis auf ADR-0007.
+  - [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung)-Zeile auf verbleibende Wege (Binary / Homebrew /
+    Distro-Pakete) reduzieren, mit Verweis auf [ADR-0007](../../adr/0007-distributionswege-ghcr.md).
 - Slice-Plan von `open/` nach `done/` verschieben; DoD-Lines auf
   Commit-Hashes auflösen.
 - `docs/plan/planning/in-progress/roadmap.md`: V1-Liste der Trigger-
@@ -184,7 +184,7 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
 
 **DoD T5:**
 - [x] `carveouts.md` Image-Publish/Trivy-Zeile entfernt;
-  `LH-OPEN-002`-Zeile auf Restwege reduziert.
+  [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung)-Zeile auf Restwege reduziert.
 - [x] Slice-Plan in `done/` mit allen T1..T5 DoD-Lines.
 - [x] Roadmap-Carveout-Tabellen-Zeile auf Done; "Nächste Schritte"
   und MVP-Bilanz V1-Liste aktualisiert.
@@ -194,7 +194,7 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
 
 ## Out of Scope
 
-- DCO-Bot-Aktivierung (separater ADR-0004-Folgepunkt; lebt im
+- DCO-Bot-Aktivierung (separater [ADR-0004](../../adr/0004-ci-system.md)-Folgepunkt; lebt im
   GitHub-Marketplace, kein Repo-Artefakt).
 - CODEOWNERS-Datei (eigener Slice, wenn Teilautoren dazukommen).
 
@@ -202,21 +202,21 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
 
 - Auslösende ADR: `0004-ci-system.md` Folgepunkte (3 davon),
   `0007-distributionswege-ghcr.md` (mit T1 aus diesem Slice angelegt).
-- Auslösende Spec: `LH-OPEN-002` Paketierung, `LH-QA-003` PR-Blocking.
+- Auslösende Spec: [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung) Paketierung, [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003-ci-fähigkeit-github-actions) PR-Blocking.
 - Inventar-Eintrag: [`carveouts.md`](../in-progress/carveouts.md) →
   Image-Publish + Trivy mit Slice-Closure entfernt;
-  `LH-OPEN-002`-Zeile auf Restwege (Binary / Homebrew /
+  [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung)-Zeile auf Restwege (Binary / Homebrew /
   Distro-Pakete) reduziert (siehe
   [ADR-0007](../../adr/0007-distributionswege-ghcr.md)).
 - Branch-Protection-Checkliste:
   [`docs/user/branch-protection.md`](../../../user/branch-protection.md).
 - **Teilabschluss 2026-05-27:** Branch-Protection-Checkliste in
   `docs/user/branch-protection.md` veröffentlicht.
-- **Schließung 2026-05-31:** T1..T5 abgeschlossen. ADR-0007 setzt
+- **Schließung 2026-05-31:** T1..T5 abgeschlossen. [ADR-0007](../../adr/0007-distributionswege-ghcr.md) setzt
   GHCR als primären Weg; `publish.yml` liefert Tag-getriebenen
   Image-Push; `ci.yml::image-scan` liefert Trivy als dritten
   PR-blockierenden Job; `quality.md` und `branch-protection.md`
-  spiegeln den neuen Stand. `LH-OPEN-002`-Restwege bleiben mit
-  Trigger-Slices vertagt (per ADR-0007).
+  spiegeln den neuen Stand. [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002-paketierung)-Restwege bleiben mit
+  Trigger-Slices vertagt (per [ADR-0007](../../adr/0007-distributionswege-ghcr.md)).
 - Absorbiert (2026-05-27): vormalig eigenständiges
   `slice-m3-branch-protection-checkliste.md`.

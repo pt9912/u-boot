@@ -3,7 +3,7 @@
 | Dokument         | Quality-Gates-Übersicht                                       |
 | ---------------- | -------------------------------------------------------------- |
 | Projektname      | `u-boot`                                                       |
-| Bezug            | `LH-QA-001..004`, `LH-FA-BUILD-001..009` in [`spec/lastenheft.md`](../../spec/lastenheft.md) |
+| Bezug            | [LH-QA-001](../../spec/lastenheft.md#lh-qa-001-automatisierte-tests)..[LH-QA-004](../../spec/lastenheft.md#lh-qa-004-linting-solid-nahes-lint-profil), [LH-FA-BUILD-001](../../spec/lastenheft.md#lh-fa-build-001-multi-stage-dockerfile-u-boot-repo)..[LH-FA-BUILD-009](../../spec/lastenheft.md#lh-fa-build-009-repository-layout) in [`spec/lastenheft.md`](../../spec/lastenheft.md) |
 | ADR              | [`docs/plan/adr/0003-solid-nahes-lint-profil.md`](../plan/adr/0003-solid-nahes-lint-profil.md) |
 | Status           | Entwurf 0.1.0                                                  |
 | Datum            | 2026-05-21                                                     |
@@ -13,7 +13,7 @@
 Übersicht über die verbindlichen Quality-Gates der u-boot-Codebase: was
 läuft im `lint`-Stage, was im `test`-Stage, welche Schwellen gelten,
 welche Carveouts sind dokumentiert. Das Dokument ist die Detail-Doku
-zu `LH-QA-004`; die Pflichtaussagen leben im Lastenheft, die konkreten
+zu [LH-QA-004](../../spec/lastenheft.md#lh-qa-004-linting-solid-nahes-lint-profil); die Pflichtaussagen leben im Lastenheft, die konkreten
 Konfigurations- und Schwellwerte hier.
 
 ---
@@ -21,7 +21,7 @@ Konfigurations- und Schwellwerte hier.
 ## 1. Statische Analyse (`golangci-lint`)
 
 Statische Analyse läuft Docker-basiert über die `lint`-Stage des
-Top-Level-`Dockerfile` (`LH-FA-BUILD-001`):
+Top-Level-`Dockerfile` ([LH-FA-BUILD-001](../../spec/lastenheft.md#lh-fa-build-001-multi-stage-dockerfile-u-boot-repo)):
 
 ```bash
 docker build --target lint -t u-boot:lint .
@@ -42,7 +42,7 @@ SOLID-nahen Zusatzprofil aus:
 
 Die vollständige Konfiguration (5 Defaults + 24 SOLID-nahe Linter
 aus §1.2; `depguard` ist als Schicht-Regel-Linter Teil dieser 24,
-siehe `LH-FA-ARCH-003`) lebt in
+siehe [LH-FA-ARCH-003](../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement)) lebt in
 [`.golangci.yml`](../../.golangci.yml). Damit sind 29 Linter aktiv. `//nolint`-Suppressions bleiben
 ausgeschlossen — falls ein Linter auf einem Pfad designseitig keinen
 Sinn ergibt (z. B. `testpackage` im `cmd/uboot`-Wiring), wird der Pfad
@@ -50,7 +50,7 @@ per `issues.exclude-rules` mit `Why:`-Kommentar ausgenommen; dort
 dokumentierte Scope-Definitionen sind keine Suppressions, sondern
 bewusste Profil-Entscheidungen. Verstöße brechen den Build.
 
-Verbindliche Make-Targets (`LH-FA-BUILD-005`/`-006`):
+Verbindliche Make-Targets ([LH-FA-BUILD-005](../../spec/lastenheft.md#lh-fa-build-005-makefile-mit-standard-targets)/`-006`):
 
 ```bash
 make lint            # nur statische Analyse
@@ -78,7 +78,7 @@ Import-/Modulgrenzen (DIP) oder reduzierte globale Kopplung.
 | `containedctx`     | `context.Context` nicht in Structs speichern      | Y              |
 | `contextcheck`     | Context korrekt weiterreichen                     | Y              |
 | `cyclop`           | Zyklomatische Komplexität                         | Y              |
-| `depguard`         | Import-Regeln/Layer-Grenzen (`LH-FA-ARCH-003`)    | Y              |
+| `depguard`         | Import-Regeln/Layer-Grenzen ([LH-FA-ARCH-003](../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement))    | Y              |
 | `dupl`             | Code-Duplikate                                    | Y              |
 | `fatcontext`       | Context in Loops/Closures                         | Y              |
 | `forbidigo`        | Verbotene Identifier/APIs                         | Y              |
@@ -158,7 +158,7 @@ Integrationstests bleiben aus dem Default-Pfad ausgeschlossen
 
 Adapter- und e2e-Integrationstests gegen eine echte Docker-Engine
 laufen unter dem `docker`-Build-Tag (`spec/architecture.md` §5,
-slice `slice-m6-docker-integrationstests`):
+slice [slice-m6-docker-integrationstests](../plan/planning/done/slice-m6-docker-integrationstests.md)):
 
 ```bash
 make test-docker
@@ -181,19 +181,19 @@ Pin-Inventar (Stand M6-docker-int Sub-T3):
 
 | Spec-ID | Test-Datei |
 | ------- | ---------- |
-| LH-NFA-PERF-002 | `internal/adapter/driven/docker/engine_progressstream_docker_test.go` |
-| LH-FA-DIAG-002 | `internal/adapter/driven/docker/engine_psjsonschema_docker_test.go` |
-| LH-FA-UP-001 §966 | `internal/hexagon/application/upservice_healthcheck_docker_test.go` |
-| LH-FA-UP-001 §968 | `internal/hexagon/application/upservice_portprobe_docker_test.go` |
-| LH-AK-002 | `internal/e2e/postgres_acceptance_docker_test.go` |
-| LH-FA-UP-004 §1015 | `internal/e2e/down_volumes_docker_test.go` |
+| [LH-NFA-PERF-002](../../spec/lastenheft.md#lh-nfa-perf-002-startzeit-abhängig-von-docker) | `internal/adapter/driven/docker/engine_progressstream_docker_test.go` |
+| [LH-FA-DIAG-002](../../spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen) | `internal/adapter/driven/docker/engine_psjsonschema_docker_test.go` |
+| [LH-FA-UP-001](../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) §966 | `internal/hexagon/application/upservice_healthcheck_docker_test.go` |
+| [LH-FA-UP-001](../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) §968 | `internal/hexagon/application/upservice_portprobe_docker_test.go` |
+| [LH-AK-002](../../spec/lastenheft.md#lh-ak-002-postgresql-flow) | `internal/e2e/postgres_acceptance_docker_test.go` |
+| [LH-FA-UP-004](../../spec/lastenheft.md#lh-fa-up-004-umgebung-stoppen) §1015 | `internal/e2e/down_volumes_docker_test.go` |
 
 ---
 
 ## 3. Coverage
 
 Coverage-Messung über die `coverage`-Stage, bootstrap-aware
-(`LH-FA-BUILD-008`):
+([LH-FA-BUILD-008](../../spec/lastenheft.md#lh-fa-build-008-coverage-bootstrap)):
 
 ```bash
 make coverage-gate
@@ -235,7 +235,7 @@ CI-Job).
 > `v`-Prefix). Detail-Kommentar am jeweiligen Pin. Wer nur eine
 > der zwei Stellen hebt, bricht die Inner-/Outer-Loop-Parität.
 
-SBOM-Erzeugung (`LH-FA-BUILD-006` optional) folgt bei konkretem
+SBOM-Erzeugung ([LH-FA-BUILD-006](../../spec/lastenheft.md#lh-fa-build-006-aggregator-targets) optional) folgt bei konkretem
 Bedarf in einem eigenen Slice.
 
 ---
@@ -243,7 +243,7 @@ Bedarf in einem eigenen Slice.
 ## 5. Architektur-Enforcement
 
 `depguard` (Teil des SOLID-nahen Profils) erzwingt die Schicht-Regeln
-aus `LH-FA-ARCH-003`. Detail in [`spec/architecture.md`](../../spec/architecture.md) §4.
+aus [LH-FA-ARCH-003](../../spec/lastenheft.md#lh-fa-arch-003-import-regeln-und-enforcement). Detail in [`spec/architecture.md`](../../spec/architecture.md) §4.
 
 Die `depguard`-Regelblöcke sind heute aktiv, matchen aber nichts,
 solange `./internal/...` keinen produktiven Code enthält. Mit dem
@@ -258,11 +258,11 @@ CI läuft auf GitHub Actions; drei Workflows in
 
 - [`ci.yml`](../../.github/workflows/ci.yml) — Inner-Loop-Gates
   (`gates`, `security-gates`, `image-scan`), verbindlich aus
-  `LH-QA-003`, Begründung in
+  [LH-QA-003](../../spec/lastenheft.md#lh-qa-003-ci-fähigkeit-github-actions), Begründung in
   [ADR-0004](../plan/adr/0004-ci-system.md).
 - [`integration.yml`](../../.github/workflows/integration.yml) —
-  `make test-docker` gegen echten Daemon (slice-m6-docker-
-  integrationstests).
+  `make test-docker` gegen echten Daemon
+  ([slice-m6-docker-integrationstests](../plan/planning/done/slice-m6-docker-integrationstests.md)).
 - [`publish.yml`](../../.github/workflows/publish.yml) — GHCR-
   Image-Publish auf Tag `v*`, Begründung in
   [ADR-0007](../plan/adr/0007-distributionswege-ghcr.md). Der
@@ -288,7 +288,7 @@ Pflichten `ci.yml`:
     + `aquasecurity/trivy-action` (`severity: HIGH,CRITICAL`,
     `exit-code: 1`).
 - **Runner:** `ubuntu-latest` mit vorinstalliertem Docker + BuildKit.
-- **Keine Host-Toolchain:** Docker-only (`LH-FA-BUILD-007`); der
+- **Keine Host-Toolchain:** Docker-only ([LH-FA-BUILD-007](../../spec/lastenheft.md#lh-fa-build-007-docker-only-workflow)); der
   Workflow installiert weder Go noch `golangci-lint` am Runner.
 - **Actions SHA-gepinnt** mit Tag-Kommentar, z. B.
   `uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2`.

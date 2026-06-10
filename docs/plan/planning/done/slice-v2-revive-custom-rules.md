@@ -5,7 +5,7 @@
 
 ## Auslöser
 
-ADR-0003 (SOLID-nahes Lint-Profil) hatte als offenen Folgepunkt die
+[ADR-0003](../../adr/0003-solid-nahes-lint-profil.md) (SOLID-nahes Lint-Profil) hatte als offenen Folgepunkt die
 revive-Custom-Rules-Erweiterung. Bis zu dieser Sitzung lief revive
 ohne expliziten `rules`-Block und nutzte damit die Default-Regeln aus
 golangci-lint — implizit, nicht versioniert.
@@ -23,7 +23,7 @@ zur Policy-Entscheidung statt zum implizit-Mitwachsen.
 alle 24 Default-Regeln explizit aufgezählt plus eine projekt-
 spezifische Erweiterung (`unused-receiver`). golangci-lint's Schema-
 Verhalten (`rules:` ersetzt die Defaults vollständig) macht die
-Enumeration zur Pflicht; sie ist in ADR-0006 ausführlich begründet.
+Enumeration zur Pflicht; sie ist in [ADR-0006](../../adr/0006-revive-custom-rules.md) ausführlich begründet.
 
 ## Geliefert
 
@@ -32,7 +32,7 @@ Enumeration zur Pflicht; sie ist in ADR-0006 ausführlich begründet.
   Konsequenzen, Verworfenes.
 - **`.golangci.yml`** `linters.settings.revive.rules` mit 25 Regeln
   in zwei klar getrennten Sektionen („revive default rule set
-  (preserved)" + „project-specific extras (ADR-0006)").
+  (preserved)" + „project-specific extras ([ADR-0006](../../adr/0006-revive-custom-rules.md))").
 - **`.golangci.yml`** zweiter Test-Exclude für `revive`
   (`^unused-receiver` in `_test.go`), gleicher Grund wie der
   bestehende `^unused-parameter`-Exclude (stateless Test-Fakes).
@@ -40,7 +40,7 @@ Enumeration zur Pflicht; sie ist in ADR-0006 ausführlich begründet.
   `internal/hexagon/application/initproject.go` von Methode auf
   `InitProjectService` zu Free-Function umgebaut (Service-Receiver
   wurde nicht referenziert; jetzt klar als stateless markiert).
-- **Carveouts.md**: `ADR-0003 revive-Custom-Rules`-Zeile entfernt.
+- **Carveouts.md**: `[ADR-0003](../../adr/0003-solid-nahes-lint-profil.md) revive-Custom-Rules`-Zeile entfernt.
 - **Roadmap**: Slice → Done, Phase „V2-vorgezogen".
 - **READMEs**: Carveout-Count 8 → 7.
 - **`make lint` grün** mit dem neuen Regel-Block; 6 initiale
@@ -51,7 +51,7 @@ Enumeration zur Pflicht; sie ist in ADR-0006 ausführlich begründet.
 
 - Weitere Custom-Rules wie `early-return`, `confusing-naming`,
   `cognitive-complexity`: ohne konkreten Trigger schwer zu
-  rechtfertigen. Bei nächstem Bedarf in einer ADR-0006-Folgesektion
+  rechtfertigen. Bei nächstem Bedarf in einer [ADR-0006](../../adr/0006-revive-custom-rules.md)-Folgesektion
   ergänzen.
 - Pro-Schicht-revive-Profile (z. B. striktere Regeln in `domain/`):
   Overengineering für den aktuellen Stand.

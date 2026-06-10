@@ -26,12 +26,12 @@
   `docker volume ls --filter label=…` + `docker volume rm <name>`-
   Cleanup-Hint.
 - JSON-Mode emittiert die WARNING als `diagnostics[]`-Eintrag mit
-  `code: "LH-FA-ADD-007"`, `level: "warn"` (T0-(g) WARN-Migration).
+  code: "[`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen)", `level: "warn"` (T0-(g) WARN-Migration).
 
-Spec §2602 (`LH-FA-ADD-007` Volume-Anforderung) ist damit
+Spec §2602 ([`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) Volume-Anforderung) ist damit
 **partiell** erfüllt: `--purge` ist als opt-in CLI-Surface
 vorhanden, der Confirmation-Gate ist konsistent mit `down
---volumes` (`LH-FA-CLI-005A` §254), aber die tatsächliche
+--volumes` ([`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) §254), aber die tatsächliche
 Volume-Removal ist auf den User abgewälzt.
 
 ## Trigger
@@ -41,7 +41,7 @@ Plan-Stub bleibt `on hold` bis einer der folgenden Trigger feuert:
 - **Real-World-Beschwerde** über manuellen Cleanup-Schritt
   (z. B. User berichtet "ich hatte 12 stale postgres-data-Volumes
   bevor ich gemerkt habe dass `--purge` nichts entfernt").
-- **Cluster-T_close-Audit** (slice-v1-cli-json-dry-run nach 9/9
+- **Cluster-T_close-Audit** ([slice-v1-cli-json-dry-run](../done/slice-v1-cli-json-dry-run.md) nach 9/9
   Folge-Slices) fordert vollständige `--purge`-Semantik als
   Vertrags-Schuld.
 - **Docker-Compose-V3-Migration** oder ähnliche Compose-Spec-
@@ -91,10 +91,10 @@ zu klären:
 
 ## Spec-Bezug
 
-- `LH-FA-ADD-007` §2602 — Volume-Anforderung (`--purge`-Opt-in-
+- [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) §2602 — Volume-Anforderung (`--purge`-Opt-in-
   Form ist erfüllt; tatsächliche Removal ist offen).
-- `LH-FA-CLI-005A` §254 — Confirmation-Gate für destruktive
+- [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) §254 — Confirmation-Gate für destruktive
   Operationen (heute bereits implementiert).
-- `LH-NFA-REL-003` — FS-Failure-Klasse erbt auf Docker-Failure-
-  Klassifikation; ggf. neuer `LH-NFA-REL-004`-Sentinel für
+- [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) — FS-Failure-Klasse erbt auf Docker-Failure-
+  Klassifikation; ggf. neuer [`LH-NFA-REL-004`](../../../../spec/lastenheft.md#lh-nfa-rel-004-validierung-erzeugter-dateien)-Sentinel für
   Docker-Volume-Errors.

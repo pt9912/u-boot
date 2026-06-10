@@ -10,7 +10,7 @@ Accepted
 
 ## Kontext
 
-`LH-OPEN-003` (Plugin-System) ist in `spec/lastenheft.md` §14 offen:
+[`LH-OPEN-003`](../../../spec/lastenheft.md#lh-open-003-plugin-system-entschieden) (Plugin-System) ist in `spec/lastenheft.md` §14 offen:
 
 > *„Es ist zu klären, ob Add-ons langfristig fest eingebaut oder als
 > Plugins nachladbar sein sollen."*
@@ -18,13 +18,12 @@ Accepted
 `spec/architecture.md` §7 nennt das Plugin-System prospektiv als
 „geplante Erweiterung" (Driven-Port `PluginRegistry`). MVP-Stand
 (`e0d6c87`): `postgres` ist das einzige ausgelieferte Add-on
-(`LH-FA-ADD-001..002`, `LH-FA-ADD-005`); Keycloak (`LH-FA-ADD-003`,
-`LH-AK-003`) und OpenTelemetry (`LH-FA-ADD-004`, `LH-AK-004`) sind
+([`LH-FA-ADD-001`](../../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl)..[`LH-FA-ADD-002`](../../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen), [`LH-FA-ADD-005`](../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern)); Keycloak ([`LH-FA-ADD-003`](../../../spec/lastenheft.md#lh-fa-add-003-keycloak-hinzufügen),
+[`LH-AK-003`](../../../spec/lastenheft.md#lh-ak-003-keycloak-flow)) und OpenTelemetry ([`LH-FA-ADD-004`](../../../spec/lastenheft.md#lh-fa-add-004-opentelemetry-hinzufügen), [`LH-AK-004`](../../../spec/lastenheft.md#lh-ak-004-opentelemetry-flow)) sind
 für V1 statisch geplant. Es gibt heute keinen externen Wunsch nach
 einem vierten, nicht-Kern-Add-on.
 
-Die [`slice-v1-plugin-system-entscheidung`](../planning/done/slice-v1-plugin-system-entscheidung.md)
-nennt drei Optionen:
+Die Entscheidungsfindung betrachtet drei Optionen:
 
 1. **Statisch eingebaute Add-ons** — neue Services im u-boot-Binary;
    neue Add-ons brauchen u-boot-Release.
@@ -32,7 +31,7 @@ nennt drei Optionen:
    externe Plugin-Binaries oder OCI-Bundles zur Laufzeit.
 3. **Hybrid** — Kern-Add-ons statisch, exotische via Plugin.
 
-Sicherheits-Rahmen: `LH-NFA-SEC-004` (MVP) verbietet die verdeckte
+Sicherheits-Rahmen: [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte) (MVP) verbietet die verdeckte
 Ausführung externer Skripte ohne ausdrückliche Nutzer-Zustimmung.
 Jedes Plugin-Loader-Modell muss dieses Pflicht-Setting respektieren —
 mit explizitem Allowlist-Mechanismus, Signature-Verifikation und
@@ -56,7 +55,7 @@ prospektiv.
 
 **Statisch** (Option 1). Add-ons bleiben im u-boot-Binary fest
 eingebaut. Neue Services werden im u-boot-Repository als
-Add-on-Implementierung gegen `LH-FA-ADD-001..005` ergänzt und mit
+Add-on-Implementierung gegen [`LH-FA-ADD-001`](../../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl)..[`LH-FA-ADD-005`](../../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern) ergänzt und mit
 einem regulären u-boot-Release distribuiert.
 
 Konkrete Setzungen:
@@ -65,21 +64,19 @@ Konkrete Setzungen:
   wird auf den Stand „kein Plugin-Loader, statisches Add-on-Modell"
   umgeschrieben; der prospektive Hinweis verschwindet, der HTTP-
   Driving-Adapter bleibt als geplante Erweiterung erhalten.
-- **Add-on-Erweiterung über Slice-Plan.** Jedes neue Add-on (`add
+- **Add-on-Erweiterung über den Planning-Lifecycle.** Jedes neue Add-on (`add
   keycloak`, `add otel`, später ggf. `add redis`, `add minio`) wird
-  als eigener Slice-Plan in `open/` angelegt, gleichberechtigt zu
-  M5 (`slice-m5-add-postgres`). Damit bleibt der Add-on-Pfad
-  reviewbar und folgt der Slice-Disziplin (`LH-FA-PROJDOCS-005`).
-- **`LH-NFA-SEC-004` automatisch erfüllt.** Ohne Plugin-Loader gibt
+  als eigenes Planungsartefakt angelegt. Damit bleibt der Add-on-Pfad
+  reviewbar und folgt der Planning-Disziplin ([`LH-FA-PROJDOCS-005`](../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)).
+- **[`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte) automatisch erfüllt.** Ohne Plugin-Loader gibt
   es keinen Pfad, über den u-boot fremden Code aus nicht-
   freigegebenen Quellen lädt. Die einzigen externen Quellen sind
   Docker-Images (`compose.yaml`/Dockerfile, ohnehin von
-  `LH-NFA-SEC-004` ausgenommen) und devcontainer-Features (über
-  `devcontainer.featureSources.allow`, `LH-FA-DEV-003`).
+  [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte) ausgenommen) und devcontainer-Features (über
+  `devcontainer.featureSources.allow`, [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)).
 - **Re-Evaluation-Trigger explizit dokumentiert** (siehe
-  §Folgepunkte). Sobald einer der genannten Trigger eintritt, wird
-  ein neuer `slice-v2-plugin-system-implementation.md`-Plan in
-  `open/` angelegt, der dieses ADR superseded.
+  §Folgepunkte). Sobald einer der genannten Trigger eintritt, wird eine
+  neue Entscheidung vorbereitet, die dieses ADR superseded.
 
 Hybrid (Option 3) und volles Plugin-System (Option 2) werden
 verworfen:
@@ -90,9 +87,8 @@ verworfen:
 - **Plugin-System:** komplexes Sicherheits-Modell (Signing,
   Sandboxing, ABI-Versionierung) für einen heute nicht vorhandenen
   Anwendungsfall. Prospektive Architektur widerspricht der
-  Slice-Disziplin („Plan-Loch ist nicht erlaubt"; ohne Trigger ist
-  jeder Carveout nur Vertagung mit Trigger-Slice — siehe
-  `feedback-carveouts-need-plans`).
+  Planning-Disziplin („Plan-Loch ist nicht erlaubt"; ohne Trigger ist
+  jeder temporäre Carveout nur Vertagung mit Trigger).
 
 ## Konsequenzen
 
@@ -100,14 +96,14 @@ Positiv:
 
 - **Minimale Surface.** Kein neuer Driven-Port, keine Plugin-Loader-
   Logik, keine zusätzliche Test-Strecke für Plugin-Lifecycle.
-- **`LH-NFA-SEC-004` trivial erfüllt.** Kein Diskussionsbedarf zu
+- **[`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte) trivial erfüllt.** Kein Diskussionsbedarf zu
   Signature-Verifikation, Sandbox-Boundaries, Plugin-Allowlist-
   Format.
 - **Add-on-Distribution = u-boot-Distribution.** Genau eine GHCR-
-  Pipeline (ADR-0007), genau ein Release-Schnitt; keine separate
+  Pipeline ([ADR-0007](0007-distributionswege-ghcr.md)), genau ein Release-Schnitt; keine separate
   Plugin-Registry / kein zweiter Distributions-Weg.
-- **Konsistenz mit der `slice-v1-release-pipeline`-Entscheidung**:
-  GHCR als einziger Distributionsweg für `v0.1.0` (ADR-0007) +
+- **Konsistenz mit der Distributionsentscheidung**:
+  GHCR als Distributionsweg für `v0.1.0` ([ADR-0007](0007-distributionswege-ghcr.md)) +
   statische Add-ons heißt: ein Pull = vollständige u-boot-
   Funktionalität.
 
@@ -120,7 +116,7 @@ Negativ / Trade-offs:
 - **Drittanbieter können keine Add-ons hinzufügen, ohne den
   u-boot-Code zu forken oder einen PR einzureichen.** Solange das
   Projekt klein bleibt, ist PR-getrieben der gewünschte Modus
-  (Review-Punkt, Slice-Disziplin); wenn das später eng wird,
+  (Review-Punkt, Planning-Disziplin); wenn das später eng wird,
   greift einer der Re-Eval-Trigger.
 - **`PluginRegistry`-Port-Skizze in `architecture.md` §7 fällt
   weg.** Wer den prospektiven Hinweis in der Vergangenheit gelesen
@@ -139,15 +135,14 @@ Alternativen (verworfen):
   zwei parallele Add-on-Pfade ohne klare Trennlinie. Erschwert
   Reviews und führt mit hoher Wahrscheinlichkeit dazu, dass jeder
   neue Service nach „Kern oder Plugin?" gefragt wird; der
-  Slice-Plan-Pfad wäre derselbe Diskussionsoverhead bei einem
+  Planning-Pfad wäre derselbe Diskussionsoverhead bei einem
   rein statischen Modell, ohne Plugin-Komplexität.
 
 ## Folgepunkte (Re-Evaluation-Trigger)
 
 Dieses ADR ist **revertierbar**: sobald einer der folgenden
-Trigger eintritt, wird ein neuer Slice-Plan in `open/`
-(`slice-v2-plugin-system-implementation.md`, ADR-Nummer noch
-zu vergeben) angelegt, der diesen ADR superseded.
+Trigger eintritt, wird eine neue ADR vorbereitet, die dieses ADR
+superseded.
 
 1. **Drittes externes Add-on-Anfrage.** Konkret: ein Issue oder
    PR fordert einen Service, der nicht zum Kern-Katalog gehört
@@ -168,7 +163,3 @@ zu vergeben) angelegt, der diesen ADR superseded.
 
 Solange keiner dieser Trigger eintritt, bleibt das Add-on-System
 statisch.
-
-Der carveouts-Eintrag `LH-OPEN-003` wird mit der
-[`slice-v1-plugin-system-entscheidung`](../planning/done/slice-v1-plugin-system-entscheidung.md)-
-Closure entfernt.

@@ -9,13 +9,13 @@ and the usual recurring artefacts (README, CHANGELOG, `.env.example`).
 
 > **Status:** `v0.4.0` released 2026-06-08 (GHCR + six-platform
 > binaries). Completes the machine-readable CLI — `--json` /
-> `--dry-run` / `--diff` for all ten subcommands (`LH-NFA-USE-004` +
-> `LH-FA-CLI-007/008`), plus `u-boot logs` and devcontainer-features.
+> `--dry-run` / `--diff` for all ten subcommands ([LH-NFA-USE-004](spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) +
+> [LH-FA-CLI-007](spec/lastenheft.md#lh-fa-cli-007-dry-run)/[LH-FA-CLI-008](spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe)), plus `u-boot logs` and devcontainer-features.
 > Full release table below.
 
 The normative requirements ([`spec/lastenheft.md`](spec/lastenheft.md))
 are written in German; CLI output and generated files are English
-(`LH-LESE-002`).
+([LH-LESE-002](spec/lastenheft.md#lh-lese-002-sprache)).
 
 ## Who is it for?
 
@@ -44,7 +44,7 @@ u-boot init demo --template basic       # render a project from a built-in templ
 u-boot init demo --template ./my-tpl    # render from a local template directory
 ```
 
-All subcommands respect LH-FA-CLI-006 exit codes
+All subcommands respect [LH-FA-CLI-006](spec/lastenheft.md#lh-fa-cli-006-exit-codes) exit codes
 (`0` / `2` / `10` / `11` / `12` / `14`). The *Subcommand reference*
 table below maps each subcommand to its Lastenheft IDs. End-to-end
 recipes (Postgres stack, Keycloak+OTel, devcontainer, templates, CI/JSON)
@@ -133,7 +133,7 @@ directories — and a healthy Postgres container ready at the declared
 port.
 
 Add a development toolchain via the devcontainer features catalogue
-(`LH-FA-DEV-003`, 8 built-in features: `git`, `docker-cli`, `node`,
+([LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003-devcontainer-features), 8 built-in features: `git`, `docker-cli`, `node`,
 `java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`):
 
 ```bash
@@ -147,9 +147,9 @@ u-boot generate devcontainer
 External feature sources need an explicit allowlist entry; see
 [`docs/user/devcontainer-features.md`](docs/user/devcontainer-features.md)
 for the `--allow-external-feature-sources` flow and the
-`LH-NFA-SEC-004` discipline (`--yes` is not sufficient).
+[LH-NFA-SEC-004](spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte) discipline (`--yes` is not sufficient).
 
-`u-boot doctor` adds two LH-FA-DEV-003 checks against the feature
+`u-boot doctor` adds two [LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003-devcontainer-features) checks against the feature
 configuration: `devcontainer.features.allowlist` (Error when a
 `source:` override is not in the allowlist) and
 `devcontainer.features.drift` (Warn when `u-boot.yaml` and the
@@ -160,7 +160,7 @@ Re-init on an existing project requires an explicit strategy
 (`--force` for managed-block edits, `--backup` for full overwrite with
 `.bak[.N]` safety copies). See the
 [init slice](docs/plan/planning/done/slice-m3-init-flow.md) for the
-`LH-FA-INIT-005` state machine.
+[LH-FA-INIT-005](spec/lastenheft.md#lh-fa-init-005-überschreibschutz) state machine.
 
 ---
 
@@ -170,8 +170,8 @@ Re-init on an existing project requires an explicit strategy
 | ------- | ---- | ---------- |
 | `v0.1.0` | 2026-05-31 | MVP complete — seven subcommands (`init`, `doctor`, `add`, `up`, `down`, `generate`, `config`), all MVP-priority Lastenheft IDs delivered. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.1.0). |
 | `v0.2.0` | 2026-06-01 | Container-aware `doctor`, six-platform binary distribution, `template list` + `init --template basic`. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.2.0). |
-| `v0.3.0` | 2026-06-01 | "Add-on Catalogue Expansion" milestone — `u-boot add keycloak` (LH-FA-ADD-003), `add otel` (LH-FA-ADD-004), `add <service> --with-deps` (LH-FA-ADD-006), `remove <service> [--purge]` (LH-FA-ADD-007), plus a doku-audit closure for three V1 spec-IDs. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.3.0). |
-| `v0.4.0` | 2026-06-08 | "Machine-readable CLI" milestone — `--json` / `--dry-run` / `--diff` for all ten spec-enum subcommands (`LH-NFA-USE-004` Minimalkontrakt + `LH-FA-CLI-007/008` Voll-Schema), `u-boot logs`, devcontainer-features with a drift-doctor check. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.4.0). |
+| `v0.3.0` | 2026-06-01 | "Add-on Catalogue Expansion" milestone — `u-boot add keycloak` ([LH-FA-ADD-003](spec/lastenheft.md#lh-fa-add-003-keycloak-hinzufügen)), `add otel` ([LH-FA-ADD-004](spec/lastenheft.md#lh-fa-add-004-opentelemetry-hinzufügen)), `add <service> --with-deps` ([LH-FA-ADD-006](spec/lastenheft.md#lh-fa-add-006-add-on-abhängigkeiten)), `remove <service> [--purge]` ([LH-FA-ADD-007](spec/lastenheft.md#lh-fa-add-007-service-entfernen)), plus a doku-audit closure for three V1 spec-IDs. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.3.0). |
+| `v0.4.0` | 2026-06-08 | "Machine-readable CLI" milestone — `--json` / `--dry-run` / `--diff` for all ten spec-enum subcommands ([LH-NFA-USE-004](spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) Minimalkontrakt + [LH-FA-CLI-007](spec/lastenheft.md#lh-fa-cli-007-dry-run)/[LH-FA-CLI-008](spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) Voll-Schema), `u-boot logs`, devcontainer-features with a drift-doctor check. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.4.0). |
 
 The roadmap ([`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md))
 has the full audit trail: Phase table (M1..M8 + Closure + V1
@@ -182,20 +182,20 @@ and §Nächste Schritte for the in-progress backlog.
 
 | Subcommand | Spec IDs | Brief |
 | ---------- | -------- | ----- |
-| `init [name] [--devcontainer] [--template <name\|path>]` | `LH-FA-INIT-001..007`, `LH-FA-TPL-001/003` | Scaffold project + `git init`. `--template` takes a catalogue name (`basic`) or a local directory path (`./my-tpl`, `~/tpl`). |
-| `doctor [--strict]` | `LH-FA-DIAG-001..004`, `LH-FA-DEV-003` | 13 diagnostic checks; container-aware skip for host probes. |
-| `add <service> [--with-deps]` | `LH-FA-ADD-001..006` | Idempotent state-machine for service add-ons (`postgres`, `keycloak`, `otel`); `--with-deps` auto-installs missing dependencies. |
-| `remove <service> [--purge]` | `LH-FA-ADD-007` | Mirror of `add` — disable + cut managed blocks. |
-| `up [--timeout <s>]` | `LH-FA-UP-001..003` | Compose up + healthcheck-poll + TCP probe. |
-| `down [--volumes]` | `LH-FA-UP-004` | Compose down with destructive-confirmation gate. |
-| `logs [service] [--follow] [--tail <n>]` | `LH-FA-UP-005` | Stream Compose logs (all services or one); `--follow` exits 0 on Ctrl-C. |
-| `generate <artifact>` | `LH-FA-GEN-001..005` | Idempotent block-replace via `U-BOOT MANAGED BLOCK` marker. |
-| `config [get\|set] [<path> [<value>]]` | `LH-FA-CONF-001..005` | Whitelist-scoped reads/writes with two-stage schema validation. |
-| `template list [--json]` | `LH-FA-TPL-004` | Browse the built-in template catalogue. |
+| `init [name] [--devcontainer] [--template <name\|path>]` | [LH-FA-INIT-001](spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren)..[LH-FA-INIT-007](spec/lastenheft.md#lh-fa-init-007-git-repository-initialisierung), [LH-FA-TPL-001](spec/lastenheft.md#lh-fa-tpl-001-projektvorlagen)/[LH-FA-TPL-003](spec/lastenheft.md#lh-fa-tpl-003-eigene-templates) | Scaffold project + `git init`. `--template` takes a catalogue name (`basic`) or a local directory path (`./my-tpl`, `~/tpl`). |
+| `doctor [--strict]` | [LH-FA-DIAG-001](spec/lastenheft.md#lh-fa-diag-001-doctor-befehl)..[LH-FA-DIAG-004](spec/lastenheft.md#lh-fa-diag-004-reparaturhinweise), [LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003-devcontainer-features) | 13 diagnostic checks; container-aware skip for host probes. |
+| `add <service> [--with-deps]` | [LH-FA-ADD-001](spec/lastenheft.md#lh-fa-add-001-add-on-befehl)..[LH-FA-ADD-006](spec/lastenheft.md#lh-fa-add-006-add-on-abhängigkeiten) | Idempotent state-machine for service add-ons (`postgres`, `keycloak`, `otel`); `--with-deps` auto-installs missing dependencies. |
+| `remove <service> [--purge]` | [LH-FA-ADD-007](spec/lastenheft.md#lh-fa-add-007-service-entfernen) | Mirror of `add` — disable + cut managed blocks. |
+| `up [--timeout <s>]` | [LH-FA-UP-001](spec/lastenheft.md#lh-fa-up-001-umgebung-starten)..[LH-FA-UP-003](spec/lastenheft.md#lh-fa-up-003-startstatus-anzeigen) | Compose up + healthcheck-poll + TCP probe. |
+| `down [--volumes]` | [LH-FA-UP-004](spec/lastenheft.md#lh-fa-up-004-umgebung-stoppen) | Compose down with destructive-confirmation gate. |
+| `logs [service] [--follow] [--tail <n>]` | [LH-FA-UP-005](spec/lastenheft.md#lh-fa-up-005-logs-anzeigen) | Stream Compose logs (all services or one); `--follow` exits 0 on Ctrl-C. |
+| `generate <artifact>` | [LH-FA-GEN-001](spec/lastenheft.md#lh-fa-gen-001-generate-befehl)..[LH-FA-GEN-005](spec/lastenheft.md#lh-fa-gen-005-idempotenz) | Idempotent block-replace via `U-BOOT MANAGED BLOCK` marker. |
+| `config [get\|set] [<path> [<value>]]` | [LH-FA-CONF-001](spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration)..[LH-FA-CONF-005](spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern) | Whitelist-scoped reads/writes with two-stage schema validation. |
+| `template list [--json]` | [LH-FA-TPL-004](spec/lastenheft.md#lh-fa-tpl-004-templates-auflisten) | Browse the built-in template catalogue. |
 
 ## Prerequisites
 
-For consumers of `u-boot` (`LH-FA-DIAG-002`):
+For consumers of `u-boot` ([LH-FA-DIAG-002](spec/lastenheft.md#lh-fa-diag-002-lokale-voraussetzungen-prüfen)):
 
 - Docker Engine ≥ 24.0.0 or Podman ≥ 5.0 (drop-in supported; see
   [`spec/architecture.md §2.4`](spec/architecture.md))
@@ -203,10 +203,10 @@ For consumers of `u-boot` (`LH-FA-DIAG-002`):
 - Git
 - Optional: VS Code with the Dev Containers extension
 
-For building from source (`LH-FA-BUILD-007`):
+For building from source ([LH-FA-BUILD-007](spec/lastenheft.md#lh-fa-build-007-docker-only-workflow)):
 
 - Docker Engine
-- GNU `make` (single permanent carveout to `LH-NFA-PORT-002`)
+- GNU `make` (single permanent carveout to [LH-NFA-PORT-002](spec/lastenheft.md#lh-nfa-port-002-keine-unnötigen-systemabhängigkeiten))
 
 ## Repository layout
 
@@ -244,7 +244,7 @@ Full layout contract: [`LH-FA-BUILD-009` in `spec/lastenheft.md`](spec/lastenhef
 
 ## Build, Test, Lint
 
-The build is Docker-only (`LH-FA-BUILD-007`); no Go toolchain on the
+The build is Docker-only ([LH-FA-BUILD-007](spec/lastenheft.md#lh-fa-build-007-docker-only-workflow)); no Go toolchain on the
 host is required. Only Docker and `make` need to be installed.
 
 ```bash

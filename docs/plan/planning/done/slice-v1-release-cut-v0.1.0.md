@@ -5,7 +5,7 @@
 
 ## Auslöser
 
-Mit `slice-v1-release-pipeline` (T1..T5 done, `bc487fc`) ist die
+Mit [`slice-v1-release-pipeline`](slice-v1-release-pipeline.md) (T1..T5 done, `bc487fc`) ist die
 Maschinerie für GHCR-Image-Publish auf Tag `v*` bereit. Auf die
 Frage „Können wir schon ein MVP-Release erstellen?" (2026-05-31)
 hat ein Pre-Release-Check vier Blocker gefunden, davon einen
@@ -19,7 +19,7 @@ echten Code-Bug:
    `u-boot --version` mit „0.1.0-dev" beantwortet — falsch.
 2. **CHANGELOG.md im Repo-Root fehlt** (Convention-Gap): u-boot
    hat zwar einen `generate changelog`-Handler für Nutzer-Projekte
-   (`LH-AK-007`), aber keinen eigenen Top-Level-Changelog.
+   ([`LH-AK-007`](../../../../spec/lastenheft.md#lh-ak-007-changelog-generator)), aber keinen eigenen Top-Level-Changelog.
 3. **31 lokale Commits, nicht gepusht** (Prerequisite): alle
    Pipeline-Bausteine seit `e0d6c87` waren nur lokal.
 4. **Branch-Protection-UI nicht aktiviert** (Nutzer-Aktion):
@@ -69,14 +69,14 @@ nicht Auto-Trigger.
 ## Out of Scope
 
 - Erweiterte Distributionswege (Binary, Homebrew, Debian/RPM) — in
-  ADR-0007 §Entscheidung als vertagt mit Trigger-Slices benannt.
+  [ADR-0007](../../adr/0007-distributionswege-ghcr.md) §Entscheidung als vertagt mit Trigger-Slices benannt.
 - V1-Add-ons (Keycloak, OTel), V1-Generators (`logs`, `--json`),
   Template-Implementation-Slices (`template-list`/`-init`/
   `local-templates`) — jeweils eigener V1-Slice.
 
 ## Bezug
 
-- Auslöser: `slice-v1-release-pipeline` lieferte die Mechanik;
+- Auslöser: [`slice-v1-release-pipeline`](slice-v1-release-pipeline.md) lieferte die Mechanik;
   dieser Slice füllt die letzten Lücken vor dem ersten Tag.
 - Hängt von:
   [`slice-v1-release-pipeline`](slice-v1-release-pipeline.md)

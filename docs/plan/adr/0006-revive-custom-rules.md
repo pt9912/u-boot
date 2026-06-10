@@ -10,7 +10,7 @@ Accepted
 
 ## Kontext
 
-ADR-0003 (SOLID-nahes Lint-Profil) hat als offenen Folgepunkt:
+[ADR-0003](0003-solid-nahes-lint-profil.md) (SOLID-nahes Lint-Profil) hat als offenen Folgepunkt:
 
 > *„Erweiterung um `revive`-Custom-Rules in einem Folge-ADR, falls
 > die default-Konfiguration zu schwach wird."*
@@ -24,8 +24,8 @@ absichtlich provozierten Verstößen (z. B. `verify-depguard.sh`-Stub-
 Dateien ohne Package-Doc — siehe M3-T5).
 
 Auslöser für diesen ADR: in der M3-Anker-Triage-Sitzung 2026-05-27
-wurde der `slice-v2-revive-custom-rules.md`-Carveout vorgezogen, obwohl
-keiner der ursprünglichen Trigger (wiederholte Reviewer-Findings, neuer
+wurde das revive-Custom-Rules-Thema vorgezogen, obwohl keiner der
+ursprünglichen Trigger (wiederholte Reviewer-Findings, neuer
 Style-Beschluss) eingetreten ist. Begründung des Vorziehens: die
 Code-Basis stabilisiert sich gerade auf der MVP-Schwelle, und ein
 expliziter Regel-Block macht zukünftige Änderungen (jede Rule-Hebung
@@ -33,7 +33,7 @@ wird zur expliziten Policy-Entscheidung) transparenter als das
 implizite „läuft halt mit den Defaults".
 
 `golangci-lint`-Mechanik: sobald `linters.settings.revive.rules`
-gesetzt ist, **ersetzt** das Slice die Defaults vollständig — es gibt
+gesetzt ist, **ersetzt** die Liste die Defaults vollständig — es gibt
 keinen „defaults + extras"-Modus. Folge: das Profil muss alle
 Default-Regeln explizit aufzählen, sonst werden sie deaktiviert.
 
@@ -72,7 +72,7 @@ Eintrag in dieser ADR-Folgesektion plus einen `Why:` im
 
 ## Konsequenzen
 
-- **Refactoring-Beifang in diesem Slice:** `resolveProjectName` in
+- **Refactoring-Beifang bei der Umsetzung:** `resolveProjectName` in
   `internal/hexagon/application/initproject.go` war eine Methode auf
   `InitProjectService`, ohne den Receiver zu nutzen. Refactored zu
   einer Free-Function (gleicher Code, einfachere Aufruf-Signatur).
@@ -106,7 +106,5 @@ Eintrag in dieser ADR-Folgesektion plus einen `Why:` im
 ## Bezug
 
 - Auslösende ADR: `0003-solid-nahes-lint-profil.md` Folgepunkte.
-- Slice: [`slice-v2-revive-custom-rules.md`](../planning/done/slice-v2-revive-custom-rules.md)
-  (vorgezogen 2026-05-27).
-- LH-Verweise: `LH-QA-004` (SOLID-Profil), `LH-FA-PROJDOCS-005`
+- LH-Verweise: [`LH-QA-004`](../../../spec/lastenheft.md#lh-qa-004-linting-solid-nahes-lint-profil) (SOLID-Profil), [`LH-FA-PROJDOCS-005`](../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)
   (Carveout-Disziplin).

@@ -122,7 +122,7 @@ Drift wird in beiden gemeldet.
   `TestDoctor_DevcontainerJSON_OKWhenAbsent` in
   `doctor_test.go:758` pinnt das) bleibt **bewusst unberührt**:
   jener Check ist auf die File-selbst-Existenz fokussiert
-  (LH-FA-DEV-001 „darf fehlen, ist optional"), unser Check ist
+  ([`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen) „darf fehlen, ist optional"), unser Check ist
   auf die *Konsistenz zwischen cfg und gerendertem JSON*
   fokussiert. T0-Decision: keine Severity-Eskalation in
   `checkDevcontainerJSON` in diesem Slice; falls dort ein
@@ -200,7 +200,7 @@ nötig) hat T1 unter Plan-Schätzung gehalten.
   [`slice-v1-devcontainer-features`](../done/slice-v1-devcontainer-features.md)
   §T0-Outcomes (Doctor-Integration Teil B) + Tranchen-Tabelle T5
   (LOC-Carveout-Trigger).
-- Spec: `LH-FA-DEV-003`
+- Spec: [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)
   ([`spec/lastenheft.md:692`](../../../../spec/lastenheft.md))
   + Doctor-Pin
   [`spec/lastenheft.md:2394`](../../../../spec/lastenheft.md)

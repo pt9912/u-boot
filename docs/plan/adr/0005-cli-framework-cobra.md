@@ -10,7 +10,7 @@ Accepted
 
 ## Kontext
 
-ADR-0001 (Implementierungssprache Go) hat als offenen Folgepunkt:
+[ADR-0001](0001-implementierungssprache-go.md) (Implementierungssprache Go) hat als offenen Folgepunkt:
 
 > *„Wahl des CLI-Frameworks (`flag` aus stdlib reicht für MVP-Stub;
 > Cobra wird mit `add`/`generate`/`config`-Subkommandos
@@ -19,8 +19,7 @@ ADR-0001 (Implementierungssprache Go) hat als offenen Folgepunkt:
 M1 hat `flag` aus der stdlib für den `--help`/`--version`-Stub
 benutzt; mit M3-T3 (dem ersten Subkommando `init`) wird das zu eng.
 Die offene Entscheidung muss formal getroffen und dokumentiert werden
-(`LH-FA-PROJDOCS-005`, slice
-[`slice-m3-cli-framework-adr.md`](../planning/done/slice-m3-cli-framework-adr.md)).
+([`LH-FA-PROJDOCS-005`](../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)).
 
 Vorlagen / Markt:
 
@@ -41,12 +40,12 @@ Dep `github.com/spf13/pflag v1.0.9`, `github.com/inconshreveable/mousetrap v1.1.
 
 Konkrete Setzungen:
 
-- `internal/adapter/driving/cli/` als Cobra-Adapter (LH-FA-ARCH-002).
+- `internal/adapter/driving/cli/` als Cobra-Adapter ([`LH-FA-ARCH-002`](../../../spec/lastenheft.md#lh-fa-arch-002-schichten-und-verzeichnislayout)).
 - App-Konstruktor `cli.New(version, useCase, opts...)` nimmt die
   Driving-Ports als Konstruktor-Args; Wiring erfolgt in `cmd/uboot/`.
 - Funktionale Options (`cli.WithGetwd(...)`) für Test-Seams.
 - Exit-Code-Mapping (`cli.ExitCode(err)`) bündelt die
-  `LH-FA-CLI-006`-Logik im Adapter:
+  [`LH-FA-CLI-006`](../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-Logik im Adapter:
   - `nil` → 0
   - `driving.ErrProjectExists` → 10
   - Cobra-Usage-Errors (unbekannte Subkommandos/Flags, falsche
@@ -57,8 +56,7 @@ Konkrete Setzungen:
   explizit annimmt — so passt es zu `contextcheck` auf der Tiefe
   unter dem Cobra-Closure. Cobras `RunE`-Signatur selbst kennt
   keinen Context-Parameter; das ist ein permanenter `contextcheck`-
-  Carveout für `internal/adapter/driving/cli/`
-  (`carveouts.md`-Permanent-Tabelle).
+  Carveout für `internal/adapter/driving/cli/`.
 
 ## Konsequenzen
 
@@ -68,7 +66,7 @@ Positiv:
   `down`/`doctor`/`generate`/`config`/`template` folgen).
 - **Help-Layout** ohne Boilerplate; `--help` und `<command> --help`
   identisch in jeder Tiefe.
-- **Shell-Completion** out-of-the-box; in einem späteren Slice für
+- **Shell-Completion** out-of-the-box; in einem späteren Inkrement für
   alle Subkommandos aktiviert.
 - **Idiomatisches Test-Pattern** (`SetArgs`/`SetOut`/`SetErr` für
   In-Memory-Buffers).
@@ -81,8 +79,7 @@ Negativ / Trade-offs:
   (~3 zusätzliche transitive Module, alle stabil und gepflegt).
 - **`contextcheck`-Carveout** für den CLI-Adapter — Cobras
   `RunE`-Signatur hat keinen Context-Parameter; das Pattern
-  „`cmd.Context()` im Closure extrahieren" ist unvermeidbar
-  (siehe Permanent-Carveout in carveouts.md).
+  „`cmd.Context()` im Closure extrahieren" ist unvermeidbar.
 - **Cobra-Versions-Major-Bumps** können Help-/Error-Messaging
   ändern; der `cli.ExitCode`-Test pinnt die heutigen Cobra-Usage-
   Error-Präfixe, ein Bump erfordert ggf. eine Aktualisierung.
@@ -100,8 +97,8 @@ Alternativen (verworfen):
 ## Folgepunkte
 
 - Shell-Completion-Generation (`cobra completion bash|zsh|fish`)
-  in einem späteren Slice exposed.
+  in einem späteren Inkrement exposed.
 - Bei Bedarf: `cobra/doc` für automatische Manpage-/Markdown-
   Generation der Subkommandos.
-- ADR-0001 „Offene Folgepunkte" wird mit M3-Closure auf
-  „CLI-Framework geschlossen via ADR-0005" verkürzt.
+- [ADR-0001](0001-implementierungssprache-go.md) „Offene Folgepunkte" wird mit M3-Closure auf
+  „CLI-Framework geschlossen via [ADR-0005](0005-cli-framework-cobra.md)" verkürzt.

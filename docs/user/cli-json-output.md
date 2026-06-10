@@ -3,7 +3,7 @@
 | Dokument         | CLI-JSON-Vertrag                                              |
 | ---------------- | ------------------------------------------------------------- |
 | Projektname      | `u-boot`                                                      |
-| Bezug            | `LH-NFA-USE-004`, `LH-FA-CLI-007`, `LH-FA-CLI-008`, `LH-FA-CLI-006` in [`spec/lastenheft.md`](../../spec/lastenheft.md) |
+| Bezug            | [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe), [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007-dry-run), [LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe), [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) in [`spec/lastenheft.md`](../../spec/lastenheft.md) |
 | ADR              | [`docs/plan/adr/0010-kein-http-driving-adapter.md`](../plan/adr/0010-kein-http-driving-adapter.md) |
 | Slice-Anker      | [`docs/plan/planning/in-progress/slice-v1-cli-json-dry-run.md`](../plan/planning/done/slice-v1-cli-json-dry-run.md) (Cluster) + [`docs/plan/planning/done/slice-v1-cli-json-dry-run-doctor.md`](../plan/planning/done/slice-v1-cli-json-dry-run-doctor.md) (Doctor-Folge-Slice, done) |
 | Status           | Entwurf 0.4.0                                                 |
@@ -17,12 +17,14 @@ zitiert; die zugehörige Code-Lokation im Repo, die Spec-konformen
 Diagnostic-Codes und die Migrations-Reihenfolge der 10 Spec-Enum-
 Subcommands sind als verbindliche Quellen dokumentiert.
 
-Die Pflichtaussagen leben im Lastenheft (§1809-1853 für `LH-NFA-
-USE-004`, §302-447 für `LH-FA-CLI-007`, §451-489 für `LH-FA-CLI-008`).
+Die Pflichtaussagen leben im Lastenheft (§1809-1853 für
+[LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe),
+§302-447 für [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007-dry-run),
+§451-489 für [LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe)).
 Dieses Dokument ist die Detail-Doku für CLI-Konsumenten und für
 den Test-Helper [`internal/adapter/driving/cli/jsontestutil/`](../../internal/adapter/driving/cli/).
 
-ADR-0010 §Folgepunkte Re-Eval-Trigger 2 verankert: **JSON-CLI ist
+[ADR-0010](../plan/adr/0010-kein-http-driving-adapter.md) §Folgepunkte Re-Eval-Trigger 2 verankert: **JSON-CLI ist
 die kanonische Maschinen-Schnittstelle von u-boot**; HTTP-/gRPC-
 /WebSocket-Adapter sind ausdrücklich gegen genau dieses Surface
 abgewogen und verworfen.
@@ -31,15 +33,15 @@ abgewogen und verworfen.
 
 ## 1. Zwei Kontraktstufen — wann gilt was?
 
-`LH-NFA-USE-004` (§1841-1842) trennt zwei Vertragsstufen, die
+[LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) (§1841-1842) trennt zwei Vertragsstufen, die
 **beide** im selben Wire-Format (`cliJSONEnvelope`, siehe §4)
 gerendert werden:
 
 | Aufruf-Modus | Pflicht-Vertrag | Spec |
 | --- | --- | --- |
-| `u-boot <cmd> --json` (read-only oder ohne Dry-Run/Diff) | **Minimalkontrakt** (§2) | `LH-NFA-USE-004` §1841 |
-| `u-boot <cmd> --dry-run --json` | **Voll-Schema** (§3) | `LH-FA-CLI-007` §1842 |
-| `u-boot <cmd> --diff --json` (mit oder ohne `--dry-run`) | **Voll-Schema** (§3) | `LH-FA-CLI-008` §468 |
+| `u-boot <cmd> --json` (read-only oder ohne Dry-Run/Diff) | **Minimalkontrakt** (§2) | [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1841 |
+| `u-boot <cmd> --dry-run --json` | **Voll-Schema** (§3) | [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §1842 |
+| `u-boot <cmd> --diff --json` (mit oder ohne `--dry-run`) | **Voll-Schema** (§3) | [LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) §468 |
 
 Voll-Schema ist eine **Obermenge** des Minimalkontrakts: zusätzlich
 zu den Minimal-Pflichtfeldern werden `dryRun`, `diff`, `plannedFiles`,
@@ -49,7 +51,7 @@ der Test-Helper `AssertMinimalEnvelope` rejected sie aktiv.
 
 ---
 
-## 2. Minimalkontrakt (`LH-NFA-USE-004` §1823-1842)
+## 2. Minimalkontrakt ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1823-1842)
 
 Verbatim-Zitat des Lastenhefts:
 
@@ -57,22 +59,22 @@ Verbatim-Zitat des Lastenhefts:
 > Minimalkontrakt-Schema:
 >
 > - `status` (`ok`/`warn`/`error`)
-> - `command` (Hauptbefehl als in `LH-FA-CLI-007` definiertes Enum)
+> - `command` (Hauptbefehl als in [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007-dry-run) definiertes Enum)
 > - optional `subcommand` (für gruppierte Befehle wie `template`
 >   oder `config`)
 > - `diagnostics` (Liste von Objekten mit mind. `level`, `code`,
 >   `message`, optional `file`)
-> - `exitCode` (vgl. `LH-FA-CLI-006`)
+> - `exitCode` (vgl. [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes))
 >
 > Für `--json`-Antworten gilt zusätzlich:
 >
 > - `diagnostics`, wenn leer, darf als `[]` ausgegeben werden.
 > - `diagnostics.level` darf nur `warn` oder `error` enthalten.
 > - `diagnostics.code` folgt der Konvention: LH-Kennung der
->   verursachenden Anforderung (z. B. `LH-FA-DEV-003`). Tool-
+>   verursachenden Anforderung (z. B. [LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)). Tool-
 >   interne Codes ohne LH-Bezug dürfen nur dann verwendet werden,
 >   wenn ihre Bedeutung in der Dokumentation festgehalten ist
->   (Verweis: `LH-FA-CLI-007`).
+>   (Verweis: [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007-dry-run)).
 > - `diagnostics.file` ist optional.
 > - `status` ist an den höchsten in `diagnostics` enthaltenen
 >   `level` gekoppelt: `error` → `status == "error"`; `warn` ohne
@@ -111,7 +113,7 @@ liefert einen **semantisch identischen** Envelope wie
 `u-boot doctor --json` (gleiche `status`/`exitCode`, gleiche
 `diagnostics`-Reihenfolge mit gleichen `code`/`level`-Paaren).
 
-### 2.3 Exit-Codes (`LH-FA-CLI-006`)
+### 2.3 Exit-Codes ([LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes))
 
 `exitCode` im Envelope spiegelt den Prozess-Exit-Code:
 
@@ -119,13 +121,13 @@ liefert einen **semantisch identischen** Envelope wie
 - `2` — CLI-Validierungsfehler (unzulässige Argument-Kombination,
   noch nicht implementierte Subcommand-Forms, siehe §6)
 - `11` — Doctor-Report enthält Errors, oder Warns unter `--strict`
-  (`LH-FA-DIAG-003`)
+  ([LH-FA-DIAG-003](../../spec/lastenheft.md#lh-fa-diag-003-fehlerklassifikation))
 - `10` — destruktive Operation ohne Freigabe, projekt-spezifisch
-  (siehe `LH-FA-CLI-005A`)
+  (siehe [LH-FA-CLI-005A](../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung))
 
 ---
 
-## 3. Voll-Schema (`LH-FA-CLI-007` §322-417)
+## 3. Voll-Schema ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §322-417)
 
 Voll-Schema gilt für `--dry-run --json` und `--diff --json`. Verbatim-
 Zitat des Lastenhefts:
@@ -295,15 +297,15 @@ Der Go-Wire-Type lebt im CLI-Adapter:
   Allowlist-Erweiterung), `WithExitCode(int)`.
 
 Architektur-Grenze: Envelope-Type und Helper leben im **CLI-Adapter**,
-**nicht** in Domain oder Application (`LH-FA-ARCH-002`/`-003`).
+**nicht** in Domain oder Application ([LH-FA-ARCH-002](../../spec/lastenheft.md#lh-fa-arch-002-schichten-und-verzeichnislayout)/`-003`).
 
 ---
 
 ## 5. Code-Registry für `diagnostics[].code`
 
-Spec §1835 (`LH-NFA-USE-004`) erlaubt für `diagnostics[].code`
+Spec §1835 ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)) erlaubt für `diagnostics[].code`
 zwei Quellen: **(a)** LH-Kennung der verursachenden Anforderung
-(z. B. `LH-FA-DEV-003`, `LH-FA-CLI-007`), oder **(b)** tool-interne
+(z. B. [LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features), [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007-dry-run)), oder **(b)** tool-interne
 Codes, falls ihre Bedeutung **in der Dokumentation festgehalten**
 ist. u-boot verwendet aktuell tool-interne Codes mit Dotted-
 Notation (`docker.installed`, `uboot.yaml.valid` etc.); diese
@@ -356,23 +358,23 @@ Weitere Subcommand-Sektionen kommen mit den jeweiligen Folge-Slices
 
 ## 6. Per-Command-Migrations-Reihenfolge
 
-Spec-Enum (`LH-FA-CLI-007` §338) listet zehn Subcommands; alle
-sollen `--json` tragen (`LH-NFA-USE-004` §1813). Migration läuft
+Spec-Enum ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §338) listet zehn Subcommands; alle
+sollen `--json` tragen ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1813). Migration läuft
 **inkrementell** über neun Folge-Slices unterhalb des Cluster-
 Slices [`slice-v1-cli-json-dry-run`](../plan/planning/done/slice-v1-cli-json-dry-run.md);
 Reihenfolge gemäß Cluster-T0-(e):
 
 | # | Folge-Slice | Subcommand-Form(en) | Status |
 | --- | --- | --- | --- |
-| 1 | `slice-v1-cli-json-dry-run-doctor` | `doctor` + `template list`-Flag-Schnitt | done |
-| 2 | `slice-v1-cli-json-dry-run-add` | `add` (modifying, etabliert Full-Modus + RecordingFileSystem) | done (DoD-Hash-Tabelle im Slice-File) |
-| 3 | `slice-v1-cli-json-dry-run-init` | `init` | done (DoD-Hash-Tabelle im Slice-File) |
-| 4 | `slice-v1-cli-json-dry-run-generate` | `generate` | done (DoD-Hash-Tabelle im Slice-File) |
-| 5 | `slice-v1-cli-json-dry-run-remove` | `remove` | done (DoD-Hash-Tabelle im Slice-File) |
-| 6 | `slice-v1-cli-json-dry-run-up-down` | `up`, `down` (gebündelt, read-only Compose-Status) | done (DoD-Hash-Tabelle im Slice-File) |
-| 7 | `slice-v1-cli-json-dry-run-logs` | `logs` (Single-Envelope, T0-(a) Option (A)) | done (DoD-Hash-Tabelle im Slice-File) |
-| 8 | `slice-v1-cli-json-dry-run-config` | `config`, `config get`, `config set` (gebündelt, drei Formen) | done (DoD-Hash-Tabelle im Slice-File) |
-| 9 | `slice-v1-cli-json-dry-run-template` | `template list`-Envelope-Migration; bare `template --json` → RunE-Reject `ErrTemplateSubcommandRequired`/Exit 2 (envelope-LOS §1838, Cluster-T_close) | done (DoD-Hash-Tabelle im Slice-File) |
+| 1 | [slice-v1-cli-json-dry-run-doctor](../plan/planning/done/slice-v1-cli-json-dry-run-doctor.md) | `doctor` + `template list`-Flag-Schnitt | done |
+| 2 | [slice-v1-cli-json-dry-run-add](../plan/planning/done/slice-v1-cli-json-dry-run-add.md) | `add` (modifying, etabliert Full-Modus + RecordingFileSystem) | done (DoD-Hash-Tabelle im Slice-File) |
+| 3 | [slice-v1-cli-json-dry-run-init](../plan/planning/done/slice-v1-cli-json-dry-run-init.md) | `init` | done (DoD-Hash-Tabelle im Slice-File) |
+| 4 | [slice-v1-cli-json-dry-run-generate](../plan/planning/done/slice-v1-cli-json-dry-run-generate.md) | `generate` | done (DoD-Hash-Tabelle im Slice-File) |
+| 5 | [slice-v1-cli-json-dry-run-remove](../plan/planning/done/slice-v1-cli-json-dry-run-remove.md) | `remove` | done (DoD-Hash-Tabelle im Slice-File) |
+| 6 | [slice-v1-cli-json-dry-run-up-down](../plan/planning/done/slice-v1-cli-json-dry-run-up-down.md) | `up`, `down` (gebündelt, read-only Compose-Status) | done (DoD-Hash-Tabelle im Slice-File) |
+| 7 | [slice-v1-cli-json-dry-run-logs](../plan/planning/done/slice-v1-cli-json-dry-run-logs.md) | `logs` (Single-Envelope, T0-(a) Option (A)) | done (DoD-Hash-Tabelle im Slice-File) |
+| 8 | [slice-v1-cli-json-dry-run-config](../plan/planning/done/slice-v1-cli-json-dry-run-config.md) | `config`, `config get`, `config set` (gebündelt, drei Formen) | done (DoD-Hash-Tabelle im Slice-File) |
+| 9 | [slice-v1-cli-json-dry-run-template](../plan/planning/done/slice-v1-cli-json-dry-run-template.md) | `template list`-Envelope-Migration; bare `template --json` → RunE-Reject `ErrTemplateSubcommandRequired`/Exit 2 (envelope-LOS §1838, Cluster-T_close) | done (DoD-Hash-Tabelle im Slice-File) |
 
 ### 6.1 Migration abgeschlossen (Cluster-T_close)
 
@@ -392,7 +394,7 @@ Exit 2, envelope-LOS), nicht mehr gate-getragen — siehe §6.2.
 
 ### 6.2 `u-boot template list --json` (slice-v1-cli-json-dry-run-template, done)
 
-`template list --json` liefert den LH-NFA-USE-004-Minimalkontrakt-
+`template list --json` liefert den [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe)-Minimalkontrakt-
 Envelope mit `command: "template"`, `subcommand: "list"` (§322
 Subcommand-Pflicht), `diagnostics: []`, `exitCode: 0` und der
 `[]templateJSON`-Projektion im `data`-Feld:
@@ -407,10 +409,10 @@ Subcommand-Pflicht), `diagnostics: []`, `exitCode: 0` und der
 
 Leerer Katalog → `data: []` (nicht `null`). Ein Katalog-Adapter-IO-
 Fehler (`ErrTemplateCatalog`, in einem grünen CI-Build via `embed.FS`
-load-time-Validierung nie erreicht) mappt auf `LH-NFA-REL-003` /
+load-time-Validierung nie erreicht) mappt auf [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) /
 Exit 14 (`mapTemplateErrorToDiagnostic`).
 
-**Breaking-Change** (slice-v1-cli-json-dry-run-template T2): vor der
+**Breaking-Change** ([slice-v1-cli-json-dry-run-template](../plan/planning/done/slice-v1-cli-json-dry-run-template.md) T2): vor der
 Migration war der Output ein roher, pretty-indented `[]templateJSON`-
 Array; jetzt ein single-line Envelope-Objekt mit der Liste in `data`.
 Konsumenten, die das Top-Level-Array lasen, müssen auf `.data`
@@ -429,7 +431,7 @@ keinen Hilfetext leakt. Im Human-Modus (ohne `--json`) druckt bare
 
 `u-boot add` ist der erste modifying-Subcommand mit JSON-
 Envelope-Migration. Drei Flag-Kombinationen, drei Output-Formen
-(`LH-FA-CLI-007/008`):
+([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007-dry-run)/[LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe)):
 
 - **`--json` ohne `--dry-run`/`--diff`** → Minimalkontrakt
   (Spec §1841). Die Operation schreibt das FS um, das JSON-Output
@@ -447,10 +449,10 @@ Envelope-Migration. Drei Flag-Kombinationen, drei Output-Formen
 - **`--dry-run --diff --json`** → wie `--dry-run --json`, aber mit
   Hunks und `diff: true`. Kein Write.
 
-**Mid-Write-Failure-UX** (`LH-NFA-REL-003`): wenn im
+**Mid-Write-Failure-UX** ([LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)): wenn im
 `--diff --json`-Preview-and-Apply-Pfad ein Write mid-stream failt,
 trägt `plannedFiles[]` nur die Aufrufe bis zur Failure-Stelle. Der
-Diagnostic-Eintrag (`diagnostics[].code: "LH-NFA-REL-003"`) trägt
+Diagnostic-Eintrag (`diagnostics[].code: "[LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)"`) trägt
 `file:` mit der Failure-Stelle; `exitCode: 14`. Die später nicht
 mehr geschriebenen Files erscheinen **nicht** in `plannedFiles[]`
 — ein Roll-back-aware Capture ist V1-Out-of-Scope (Cluster-T0-(b)
@@ -466,7 +468,7 @@ newLines, content}]`, T0-(l)), Pure-Go LCS-Diff-Renderer
 (`CountAdditions` über die `+`-Lines der Hunks, T0-(g)).
 Diagnostic-Codes sind LH-Kennungen
 (`LH-FA-ADD-{001,002,005,006}`/`LH-FA-INIT-{004,005,006}`/
-`LH-NFA-REL-003`); keine erfundenen `add.*`-Codes (T0-(j)).
+[LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)); keine erfundenen `add.*`-Codes (T0-(j)).
 
 ### 6.4 `u-boot init --json` (slice-v1-cli-json-dry-run-init, done)
 
@@ -494,12 +496,12 @@ exakter Symmetrie zu `add` (T0-(a) Pattern-Erbe-Disziplin):
 - **`--dry-run --diff --json`** → wie `--dry-run --json`, aber
   mit Hunks und `diff: true`. Kein Write.
 
-**Mid-Write-Failure-UX** (`LH-NFA-REL-003`): identisch zu `add`
+**Mid-Write-Failure-UX** ([LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)): identisch zu `add`
 — Voll-Schema-Envelope trägt `plannedFiles[]` bis zur Failure-
 Stelle, `diagnostics[].file` markiert die Position,
 `exitCode: 14`. Backup-Sentinels
 (`ErrBackupSuffixExhausted`/`ErrBackupSourceMissing`) und der neue
-`ErrInitFileSystem`-Sentinel klassifizieren als `LH-NFA-REL-003`
+`ErrInitFileSystem`-Sentinel klassifizieren als [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)
 (technische Persistenz, T0-(f)). **Switch-Order-Pflicht**: das
 init-CLI prüft `ErrInitFileSystem` als ersten `errors.Is`-Case,
 weil Multi-`%w`-Wraps (Go 1.20+) einen FS-Fehler sonst auf einen
@@ -508,19 +510,19 @@ Exit-10-Fachfehler downgraden könnten.
 **Planning-Phase-Failures** (T0-(q)): Fehler vor dem
 Recorder-Capture (Force-without-Backup, ungültige Service-Namen,
 Template-Read-Failures) produzieren `plannedFiles: []` mit
-fachlichem Diagnostic-Code (z. B. `LH-FA-INIT-005` / Exit 10) —
+fachlichem Diagnostic-Code (z. B. [LH-FA-INIT-005](../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) / Exit 10) —
 **nicht** Exit 14. Die Unterscheidung zu Mid-Write-Failure ist
 load-bearing: Planning-Errors sind User-Action-Klasse,
 Write-Errors sind FS-Klasse.
 
 **Template-Modus-Mutex** (T0-(i)): `init --template <name>`
 kombiniert mit `--dry-run` oder `--diff` wird mit
-`ErrTemplateConflictsWithFlag` (Exit-Code 2, `LH-FA-CLI-006`)
+`ErrTemplateConflictsWithFlag` (Exit-Code 2, [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes))
 rejected. V1 liefert keine Template-Preview; die Migration läuft
 über einen eigenen Folge-Slice (Cluster-Roadmap).
 
-**Lokale Templates** (`slice-later-local-templates`,
-`LH-FA-TPL-003`): `--template` nimmt neben Katalog-Namen (`basic`)
+**Lokale Templates** ([slice-later-local-templates](../plan/planning/done/slice-later-local-templates.md),
+[LH-FA-TPL-003](../../spec/lastenheft.md#lh-fa-tpl-003-eigene-templates)): `--template` nimmt neben Katalog-Namen (`basic`)
 auch Dateisystem-Pfade (`./mein-tpl`, `/abs/tpl`, `~/tpl`). Die
 Klassifikation ist eine reine, plattformunabhängige Regel
 (`domain.ClassifyTemplateRef`, kein FS-Stat). Die `init --json`-
@@ -528,10 +530,10 @@ Fehlerklassen sind harmonisiert (Code-Klasse == Exit-Klasse):
 
 | Fehler | `diagnostics[].code` | `exitCode` |
 | --- | --- | --- |
-| Pfad/Name nicht gefunden, kein Verzeichnis, fehlende `template.yaml` | `LH-FA-TPL-001` | 10 |
-| `template.yaml` malformed / unsupported `apiVersion` / Metadaten-Minimum verletzt | `LH-FA-TPL-002` | 10 |
-| Unsicherer Pfad im Template-Baum (Symlink / `..` / absolut) | `LH-FA-TPL-002` | 10 |
-| Render-/IO-Fehler (`text/template`-Syntax, Schreibfehler) | `LH-NFA-REL-003` | 14 |
+| Pfad/Name nicht gefunden, kein Verzeichnis, fehlende `template.yaml` | [LH-FA-TPL-001](../../spec/lastenheft.md#lh-fa-tpl-001-projektvorlagen) | 10 |
+| `template.yaml` malformed / unsupported `apiVersion` / Metadaten-Minimum verletzt | [LH-FA-TPL-002](../../spec/lastenheft.md#lh-fa-tpl-002-template-metadaten) | 10 |
+| Unsicherer Pfad im Template-Baum (Symlink / `..` / absolut) | [LH-FA-TPL-002](../../spec/lastenheft.md#lh-fa-tpl-002-template-metadaten) | 10 |
+| Render-/IO-Fehler (`text/template`-Syntax, Schreibfehler) | [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 14 |
 
 Ein `template.yaml` darf `variables:` deklarieren (für `template
 list`), aber im Render werden sie **aktuell ignoriert** — keine
@@ -551,7 +553,7 @@ verbindlich.
 
 **Context-Cancellation-Carveout** (T0-(p)): Ctrl-C oder
 `context.Canceled` während eines modifying-Subcommands fällt
-heute auf die `LH-FA-CLI-006`-Default-Klausel und Exit 2. Eine
+heute auf die [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-Default-Klausel und Exit 2. Eine
 Interrupt-aware Exit-130-Convention bleibt eigener
 Cross-Cutting-Folge-Slice für **alle** modifying-Subcommands —
 init ändert den Status-quo nicht.
@@ -613,18 +615,18 @@ das Artefakt ist nicht klassifizierbar.
 
 | Artefakt | LH-Code | Exit-Code |
 | --- | --- | --- |
-| `changelog` | `LH-FA-GEN-002` | 10 |
-| `readme` | `LH-FA-GEN-003` | 10 |
-| `env-example` | `LH-FA-GEN-004` | 10 |
-| `devcontainer` | `LH-FA-DEV-001` | 10 |
+| `changelog` | [LH-FA-GEN-002](../../spec/lastenheft.md#lh-fa-gen-002-changelog-erzeugen) | 10 |
+| `readme` | [LH-FA-GEN-003](../../spec/lastenheft.md#lh-fa-gen-003-readme-erzeugen) | 10 |
+| `env-example` | [LH-FA-GEN-004](../../spec/lastenheft.md#lh-fa-gen-004-beispiel-env-erzeugen) | 10 |
+| `devcontainer` | [LH-FA-DEV-001](../../spec/lastenheft.md#lh-fa-dev-001-devcontainer-erzeugen) | 10 |
 
 Plus weitere Diagnostic-Codes: `ErrGenerateFileSystem` →
-`LH-NFA-REL-003` / Exit 14 (FS-Klasse, Switch-Order-First);
+[LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) / Exit 14 (FS-Klasse, Switch-Order-First);
 `ErrConfigValueInvalid` (ungültige
-`--allow-external-feature-sources`-URL) → `LH-FA-DEV-003` /
-Exit 10 (Spec §720); `ErrArtifactUnknown` → `LH-FA-CLI-006` /
+`--allow-external-feature-sources`-URL) → [LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features) /
+Exit 10 (Spec §720); `ErrArtifactUnknown` → [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) /
 Exit 2 (CLI-Validation, Spec §1157); `ErrProjectNotInitialized`
-→ `LH-FA-INIT-001` / Exit 10.
+→ [LH-FA-INIT-001](../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren) / Exit 10.
 
 **`--allow-external-feature-sources`-Mutex-Check**: der Flag ist
 NUR für `generate devcontainer` gültig. Auf anderen Artefakten
@@ -652,7 +654,7 @@ Service (analog `InitProjectService.initMu`).
 die **inverse Operation zu `add`**: strip managed-block aus
 `compose.yaml` + `.env.example`, flip `services.<name>.enabled`
 auf `false` in `u-boot.yaml`, optional Volume-Purge via
-`--purge`-Gate (`LH-FA-CLI-005A` §254). Acht Flag-Kombinationen
+`--purge`-Gate ([LH-FA-CLI-005A](../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) §254). Acht Flag-Kombinationen
 plus die orthogonale `--purge`-Dimension (T0-(h)):
 
 - **`--json` ohne `--dry-run`/`--diff`** → Minimal+Data-Envelope
@@ -716,20 +718,20 @@ Pattern ist **nicht** aus init's `ProgressPort`-Silencing
 geerbt (init swappt `s.progress`, nicht `s.confirmer`), sondern
 ein remove-spezifisches Neu-Pattern. Bei
 `--purge --no-interactive --json` OHNE `--yes` returnt der Gate
-`ErrConfirmationRequired` → `LH-FA-INIT-005`-Envelope mit
+`ErrConfirmationRequired` → [LH-FA-INIT-005](../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz)-Envelope mit
 Exit 10.
 
 **WARN-Migration in `diagnostics[]`** (T0-(g)): heutige
 `printRemoveSummary`-stderr-WARNING bei
 `--purge && !VolumesPurged` (Volume-Removal ist in v0.3.0
 deferred) wandert im JSON-Mode in `diagnostics[]`-Eintrag mit
-`code: "LH-FA-ADD-007"`, `level: "warn"`, plus
-`data.volumesPurged: false`. **`LH-FA-ADD-007` Multi-Use**:
+`code: "[LH-FA-ADD-007](../../spec/lastenheft.md#lh-fa-add-007-service-entfernen)"`, `level: "warn"`, plus
+`data.volumesPurged: false`. **[LH-FA-ADD-007](../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) Multi-Use**:
 derselbe Code identifiziert die Spec-Anforderung "Service
 entfernen" (§924-947) UND markiert die deferred-Volumes-WARN.
 Konsumenten disambiguieren ausschließlich über
 `(code, level)`-Tupel: ERROR-Pfad
-`ErrServiceUnregistered` liefert `code: "LH-FA-ADD-007"`,
+`ErrServiceUnregistered` liefert `code: "[LH-FA-ADD-007](../../spec/lastenheft.md#lh-fa-add-007-service-entfernen)"`,
 `level: "error"`, Exit 10; WARN-Pfad liefert `level: "warn"`,
 Exit 0. **Dry-Run-WARN-Suppression**: in `PreviewDryRun`
 skippt die Use-Case den `runPurgeGate` (T0-(h)(a)) und führt
@@ -744,9 +746,9 @@ Closure mit `*App`-Capture, die `cobra.ExactArgs(1)` ersetzt.
 Drei Cases:
 
 - `len(args) == 1` → ok, weiter zu RunE.
-- `len(args) == 0` → emit `LH-FA-CLI-006`-Envelope auf stdout
+- `len(args) == 0` → emit [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-Envelope auf stdout
   bei `--json`, dann return `ErrServiceNameMissing`. Exit 2.
-- `len(args) > 1` → emit `LH-FA-CLI-006`-Envelope auf stdout
+- `len(args) > 1` → emit [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)-Envelope auf stdout
   bei `--json` mit dem Cobra-Roh-Error `"accepts 1 arg(s),
   received N"`, dann return den Cobra-Error.
   Exit 2 via `isUsageError`-`"accepts "`-Prefix-Match.
@@ -779,19 +781,19 @@ Multi-`%w`-Defense):
 
 | Sentinel | LH-Code | Exit |
 | --- | --- | --- |
-| `ErrRemoveFileSystem` | `LH-NFA-REL-003` | 14 |
-| `ErrConfirmerUnavailable` | `LH-FA-CLI-005A` | 10 |
-| `ErrConfirmationRequired` | `LH-FA-INIT-005` | 10 |
-| `ErrServiceUnsupported` | `LH-FA-ADD-002` | 10 |
-| `ErrServiceUnregistered` (ERROR) | `LH-FA-ADD-007` | 10 |
-| `ErrServiceInconsistent` | `LH-FA-ADD-005` | 10 |
-| `ErrProjectNotInitialized` | `LH-FA-ADD-001` | 10 |
-| `domain.ErrInvalidServiceName` | `LH-FA-INIT-006` | 10 |
-| `ErrConflictingModeFlags` | `LH-FA-CLI-005A` | 2 |
-| `cli.ErrServiceNameMissing` | `LH-FA-CLI-006` | 2 |
-| Default (unknown) | `LH-FA-CLI-006` | 1 |
+| `ErrRemoveFileSystem` | [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 14 |
+| `ErrConfirmerUnavailable` | [LH-FA-CLI-005A](../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) | 10 |
+| `ErrConfirmationRequired` | [LH-FA-INIT-005](../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) | 10 |
+| `ErrServiceUnsupported` | [LH-FA-ADD-002](../../spec/lastenheft.md#lh-fa-add-002-postgresql-hinzufügen) | 10 |
+| `ErrServiceUnregistered` (ERROR) | [LH-FA-ADD-007](../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) | 10 |
+| `ErrServiceInconsistent` | [LH-FA-ADD-005](../../spec/lastenheft.md#lh-fa-add-005-mehrfaches-hinzufügen-verhindern) | 10 |
+| `ErrProjectNotInitialized` | [LH-FA-ADD-001](../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl) | 10 |
+| `domain.ErrInvalidServiceName` | [LH-FA-INIT-006](../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung) | 10 |
+| `ErrConflictingModeFlags` | [LH-FA-CLI-005A](../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) | 2 |
+| `cli.ErrServiceNameMissing` | [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 2 |
+| Default (unknown) | [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 1 |
 
-Plus die WARN-Multi-Use von `LH-FA-ADD-007` (siehe oben) — der
+Plus die WARN-Multi-Use von [LH-FA-ADD-007](../../spec/lastenheft.md#lh-fa-add-007-service-entfernen) (siehe oben) — der
 Code identifiziert die Spec-Anforderung, nicht die Sub-Semantik;
 Disambiguation via `(code, level)`-Tupel.
 
@@ -860,7 +862,7 @@ bei `--volumes --json` OHNE `--yes` MUSS der User `--yes`
 explizit setzen — Symmetrie zum `--no-interactive`-Pfad.
 Direkter-Skip (proceed wie `AssumeYes`) wäre Security-by-
 Default-Verletzung. Refuse-Pfad liefert
-`ErrConfirmationRequired` → `LH-FA-INIT-005`/Exit 10 (geteilt
+`ErrConfirmationRequired` → [LH-FA-INIT-005](../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz)/Exit 10 (geteilt
 mit init/remove). Rows 1-3 (`!RemoveVolumes` / `AssumeYes` /
 `NonInteractive`) behalten Vorrang vor dem JSON-Silencing-
 Branch — explicit Flags > impliziter Mode-Default. Kein
@@ -872,22 +874,22 @@ R3-HIGH-1) — Reihenfolge ist Switch-Sequenz im Mapper-Code:
 
 | # | Sentinel | LH-Code | Exit | Mapper-Heim | Begründung |
 | - | -------- | ------- | ---- | ----------- | ---------- |
-| 1a | `driving.ErrUpFileSystem` | `LH-NFA-REL-003` | 14 | `mapUp` | FS-first damit Multi-`%w` mit FS+Docker auf FS-Klasse fällt |
-| 1b | `driving.ErrDownFileSystem` | `LH-NFA-REL-003` | 14 | `mapDown` | analog 1a |
-| 2 | `driven.ErrDockerUnavailable` | `LH-NFA-REL-003` | 11 | `helper` | Docker-Daemon vor Compose-Runtime |
-| 3 | `driven.ErrComposeRuntime` | `LH-NFA-REL-003` | 12 | `helper` | Compose-Runtime nach Daemon |
-| 4 | `driving.ErrStabilizationTimeout` | `LH-FA-UP-001` | 12 | `mapUp` | Up-spezifische Runtime-Klasse |
-| 5 | `driving.ErrConfirmationRequired` | `LH-FA-INIT-005` | 10 | `mapDown` | Confirmer-Refuse (geteilt mit init/remove) |
-| 6 | `driving.ErrComposeFileMissing` | `LH-FA-UP-001` | 10 | `beide` | Fachliche Validierung (Datei-Schema) |
-| 7 | `driving.ErrProjectNotInitialized` | `LH-FA-INIT-001` | 10 | `beide` | Pattern-Erbe generate (Environment-Operation) |
-| 8 | `cli.ErrInvalidTimeout` | `LH-FA-CLI-006` | 2 | `mapUp` | CLI-Form-Validierung |
-| 9 | `cli.ErrConflictingModeFlags` | `LH-FA-CLI-005A` | 2 | `mapDown` | Mode-Mutex-Verträge |
-| 10 | Default (unknown) | `LH-FA-CLI-006` | 1 | `beide` | Fallback |
+| 1a | `driving.ErrUpFileSystem` | [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 14 | `mapUp` | FS-first damit Multi-`%w` mit FS+Docker auf FS-Klasse fällt |
+| 1b | `driving.ErrDownFileSystem` | [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 14 | `mapDown` | analog 1a |
+| 2 | `driven.ErrDockerUnavailable` | [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 11 | `helper` | Docker-Daemon vor Compose-Runtime |
+| 3 | `driven.ErrComposeRuntime` | [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 12 | `helper` | Compose-Runtime nach Daemon |
+| 4 | `driving.ErrStabilizationTimeout` | [LH-FA-UP-001](../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) | 12 | `mapUp` | Up-spezifische Runtime-Klasse |
+| 5 | `driving.ErrConfirmationRequired` | [LH-FA-INIT-005](../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) | 10 | `mapDown` | Confirmer-Refuse (geteilt mit init/remove) |
+| 6 | `driving.ErrComposeFileMissing` | [LH-FA-UP-001](../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) | 10 | `beide` | Fachliche Validierung (Datei-Schema) |
+| 7 | `driving.ErrProjectNotInitialized` | [LH-FA-INIT-001](../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren) | 10 | `beide` | Pattern-Erbe generate (Environment-Operation) |
+| 8 | `cli.ErrInvalidTimeout` | [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 2 | `mapUp` | CLI-Form-Validierung |
+| 9 | `cli.ErrConflictingModeFlags` | [LH-FA-CLI-005A](../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung) | 2 | `mapDown` | Mode-Mutex-Verträge |
+| 10 | Default (unknown) | [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 1 | `beide` | Fallback |
 
 **Cross-Slice-Klassen-Pin für `ErrProjectNotInitialized`**:
-derselbe Sentinel mappt auf **`LH-FA-INIT-001`** bei
+derselbe Sentinel mappt auf **[LH-FA-INIT-001](../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren)** bei
 Environment-Subcommands (up/down/generate) UND auf
-**`LH-FA-ADD-001`** bei Service-Subcommands (add/remove) —
+**[LH-FA-ADD-001](../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl)** bei Service-Subcommands (add/remove) —
 bewusste Cluster-Konvention. Konsumenten dürfen NICHT erwarten
 dass derselbe Sentinel cluster-weit auf denselben LH-Code
 mappt; sie disambiguieren über `command` plus `code`.
@@ -904,12 +906,12 @@ Beispiele bei synthetisch konstruierten Multi-`%w`-Wraps:
 
 | Multi-Wrap | `code` (Mapper) | `exitCode` (Helper) | Interpretation |
 | --- | --- | --- | --- |
-| `%w: %w` mit `ErrUpFileSystem` + `ErrDockerUnavailable` | `LH-NFA-REL-003` | 11 | FS-Klasse-Signal + Docker-Daemon-Sub |
-| `%w: %w` mit `ErrUpFileSystem` + `ErrStabilizationTimeout` | `LH-NFA-REL-003` | 12 | FS-Klasse-Signal + Stabilization-Sub |
-| `%w: %w` mit `ErrUpFileSystem` + `ErrComposeRuntime` | `LH-NFA-REL-003` | 12 | FS-Klasse-Signal + Compose-Runtime-Sub |
+| `%w: %w` mit `ErrUpFileSystem` + `ErrDockerUnavailable` | [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 11 | FS-Klasse-Signal + Docker-Daemon-Sub |
+| `%w: %w` mit `ErrUpFileSystem` + `ErrStabilizationTimeout` | [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 12 | FS-Klasse-Signal + Stabilization-Sub |
+| `%w: %w` mit `ErrUpFileSystem` + `ErrComposeRuntime` | [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 12 | FS-Klasse-Signal + Compose-Runtime-Sub |
 
 Konsumenten MÜSSEN auf `(code, exitCode)`-Tupel filtern, NICHT
-nur auf `code` allein. Pattern-Erbe remove's `LH-FA-ADD-007`-
+nur auf `code` allein. Pattern-Erbe remove's [LH-FA-ADD-007](../../spec/lastenheft.md#lh-fa-add-007-service-entfernen)-
 Multi-Use ist die Disambiguation-Vorlage. Heute existiert kein
 realer Code-Pfad der diese Sentinel-Paare chained
 (`readComposeFile` failed VOR `ComposeUp`, `runConfirmationGate`
@@ -955,7 +957,8 @@ Spec-§1841-Konsens (Single-Envelope pro CLI-Call) wird honoriert.
 beschränkte Antwort — und die NDJSON-Stream-Form ist Cluster-weit
 nicht vorgesehen. Daher wird `--follow --json` in `runLogs` Stage-1
 (VOR jedem UC-Call) mit `cli.ErrFollowJSONNotSupported` →
-`LH-FA-CLI-006/Exit 2` rejected. **Bounded `--tail=N`** ist die
+[LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)/Exit 2
+rejected. **Bounded `--tail=N`** ist die
 einzige `--json`-akquisitionsform.
 
 **T0-(i) Validation-Reihenfolge**: bei `--follow --json --tail=-1`
@@ -963,7 +966,7 @@ ist `--follow --json` der dominante Reject-Pfad — die CLI-Stage-1-
 Reihenfolge pinnt Reject-Sentinel VOR Tail-Validation (siehe
 `TestLogsJSON_ValidationOrder_FollowJSONBeatsInvalidTail`). Konsumenten
 können sich darauf verlassen, dass die kombinierte Fehler-Klasse
-immer `LH-FA-CLI-006`/Exit 2 ist, ohne die Reject-Reihenfolge raten zu
+immer [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)/Exit 2 ist, ohne die Reject-Reihenfolge raten zu
 müssen.
 
 **Envelope-Shape**: `command="logs"`, KEIN `subcommand`-Feld. KEIN
@@ -977,19 +980,19 @@ Reihenfolge ist Switch-Sequenz im Mapper-Code (`mapLogsErrorToDiagnostic`):
 
 | # | Sentinel | LH-Code | Exit | Begründung |
 | - | -------- | ------- | ---- | ---------- |
-| 1 | `driving.ErrLogsFileSystem` | `LH-NFA-REL-003` | 14 | FS-first damit Multi-`%w` mit FS+Docker auf FS-Klasse fällt |
-| 2 | `driven.ErrDockerUnavailable` | `LH-NFA-REL-003` | 11 | helper `mapComposeRuntimeSentinel`, Docker-Daemon vor Compose-Runtime |
-| 3 | `driven.ErrComposeRuntime` | `LH-NFA-REL-003` | 12 | helper, Compose-Runtime nach Daemon |
-| 4 | `driving.ErrComposeFileMissing` | `LH-FA-UP-001` | 10 | Fachliche Validierung (Datei-Schema) |
-| 5 | `driving.ErrProjectNotInitialized` | `LH-FA-INIT-001` | 10 | Pattern-Erbe generate (Environment-Operation) |
-| 6 | `domain.ErrInvalidServiceName` | `LH-FA-INIT-006` | 10 | Domain-level service-name Validierung |
-| 7 | `cli.ErrFollowJSONNotSupported` | `LH-FA-CLI-006` | 2 | T0-(a) Reject-Pfad |
-| 8 | `cli.ErrInvalidLogsTail` | `LH-FA-CLI-006` | 2 | CLI-Form-Validierung |
-| 9 | Default (unknown) | `LH-FA-CLI-006` | 1 | Fallback |
+| 1 | `driving.ErrLogsFileSystem` | [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 14 | FS-first damit Multi-`%w` mit FS+Docker auf FS-Klasse fällt |
+| 2 | `driven.ErrDockerUnavailable` | [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 11 | helper `mapComposeRuntimeSentinel`, Docker-Daemon vor Compose-Runtime |
+| 3 | `driven.ErrComposeRuntime` | [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 12 | helper, Compose-Runtime nach Daemon |
+| 4 | `driving.ErrComposeFileMissing` | [LH-FA-UP-001](../../spec/lastenheft.md#lh-fa-up-001-umgebung-starten) | 10 | Fachliche Validierung (Datei-Schema) |
+| 5 | `driving.ErrProjectNotInitialized` | [LH-FA-INIT-001](../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren) | 10 | Pattern-Erbe generate (Environment-Operation) |
+| 6 | `domain.ErrInvalidServiceName` | [LH-FA-INIT-006](../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung) | 10 | Domain-level service-name Validierung |
+| 7 | `cli.ErrFollowJSONNotSupported` | [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 2 | T0-(a) Reject-Pfad |
+| 8 | `cli.ErrInvalidLogsTail` | [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 2 | CLI-Form-Validierung |
+| 9 | Default (unknown) | [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 1 | Fallback |
 
 **Cross-Slice-Klassen-Pin für `ErrProjectNotInitialized`**: derselbe
-Sentinel mappt auf **`LH-FA-INIT-001`** bei Environment-Subcommands
-(up/down/generate/logs) UND auf **`LH-FA-ADD-001`** bei Service-
+Sentinel mappt auf **[LH-FA-INIT-001](../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren)** bei Environment-Subcommands
+(up/down/generate/logs) UND auf **[LH-FA-ADD-001](../../spec/lastenheft.md#lh-fa-add-001-add-on-befehl)** bei Service-
 Subcommands (add/remove) — bewusste Cluster-Konvention.
 
 **`(code, exitCode)`-Tupel-Disambiguation für Multi-`%w`-Wraps**
@@ -999,8 +1002,8 @@ Beispiel-Tabelle:
 
 | Multi-Wrap | `code` (Mapper) | `exitCode` (Helper) | Interpretation |
 | --- | --- | --- | --- |
-| `%w: %w` mit `ErrLogsFileSystem` + `ErrDockerUnavailable` | `LH-NFA-REL-003` | 11 | FS-Klasse-Signal + Docker-Daemon-Sub |
-| `%w: %w` mit `ErrLogsFileSystem` + `ErrComposeRuntime` | `LH-NFA-REL-003` | 12 | FS-Klasse-Signal + Compose-Runtime-Sub |
+| `%w: %w` mit `ErrLogsFileSystem` + `ErrDockerUnavailable` | [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 11 | FS-Klasse-Signal + Docker-Daemon-Sub |
+| `%w: %w` mit `ErrLogsFileSystem` + `ErrComposeRuntime` | [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 12 | FS-Klasse-Signal + Compose-Runtime-Sub |
 
 Konsumenten MÜSSEN auf `(code, exitCode)`-Tupel filtern. Heute existiert
 kein realer Code-Pfad der diese Sentinel-Paare chained (`Exists()`
@@ -1039,7 +1042,7 @@ Funktionsaufrufe ohne State-Mutation. Race-frei by construction.
 
 `config` ist der **erste Read-only+Modifying-Hybrid** des Clusters:
 drei Sub-Formen teilen `command: "config"` und tragen je ein
-**Pflicht-`subcommand`** (`LH-FA-CLI-007` §322). Die Read-only-Formen
+**Pflicht-`subcommand`** ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §322). Die Read-only-Formen
 `config` (bare) und `config get` tragen nur `--json`; die
 Modifying-Form `config set` trägt zusätzlich `--dry-run`/`--diff`.
 
@@ -1097,7 +1100,7 @@ doctor-Pattern §2.2).
 **`--dry-run`/`--diff`-Reject auf den Read-only-Formen** (T0-(g)):
 `config`/`config get` registrieren `--dry-run`/`--diff` synthetisch
 (damit Cobra sie sauber parst) und rejecten sie im RunE Envelope-
-konform mit `cli.ErrDryRunNotApplicable` → **Exit 2** (`LH-FA-CLI-006`).
+konform mit `cli.ErrDryRunNotApplicable` → **Exit 2** ([LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes)).
 Der Reject-Envelope bleibt Minimal (Read-only-Form-Invariante — auch
 im Args-Validator-Pfad, R-CLI-1).
 
@@ -1105,27 +1108,29 @@ im Args-Validator-Pfad, R-CLI-1).
 
 | # | Sentinel | `code` | Exit |
 | - | -------- | ------ | ---- |
-| 1 | `driving.ErrConfigFileSystem` | `LH-NFA-REL-003` | 14 |
-| 2 | `driving.ErrConfigSchemaInvalid` | `LH-FA-CONF-002` | 10 |
-| 3 | `driving.ErrConfigPostPatchSanityFailed` | `LH-FA-CONF-002` | 10 |
-| 4 | `driving.ErrConfigPathUnknown` | `LH-FA-CONF-005` | 10 |
-| 5 | `driving.ErrConfigWriteRejected` | `LH-FA-CONF-005` | 10 |
-| 6 | `driving.ErrConfigValueInvalid` | `LH-FA-CONF-001` | 10 |
-| 7 | `driving.ErrConfigValueNotSet` | `LH-FA-CONF-005` | 10 |
-| 8 | `driving.ErrProjectNotInitialized` | `LH-FA-INIT-001` | 10 |
-| 9 | `cli.ErrDryRunNotApplicable` | `LH-FA-CLI-006` | 2 |
-| 10 | Default | `LH-FA-CLI-006` | 1 |
+| 1 | `driving.ErrConfigFileSystem` | [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 14 |
+| 2 | `driving.ErrConfigSchemaInvalid` | [LH-FA-CONF-002](../../spec/lastenheft.md#lh-fa-conf-002-inhalt-der-konfiguration) | 10 |
+| 3 | `driving.ErrConfigPostPatchSanityFailed` | [LH-FA-CONF-002](../../spec/lastenheft.md#lh-fa-conf-002-inhalt-der-konfiguration) | 10 |
+| 4 | `driving.ErrConfigPathUnknown` | [LH-FA-CONF-005](../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern) | 10 |
+| 5 | `driving.ErrConfigWriteRejected` | [LH-FA-CONF-005](../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern) | 10 |
+| 6 | `driving.ErrConfigValueInvalid` | [LH-FA-CONF-001](../../spec/lastenheft.md#lh-fa-conf-001-projektkonfiguration) | 10 |
+| 7 | `driving.ErrConfigValueNotSet` | [LH-FA-CONF-005](../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern) | 10 |
+| 8 | `driving.ErrProjectNotInitialized` | [LH-FA-INIT-001](../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren) | 10 |
+| 9 | `cli.ErrDryRunNotApplicable` | [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 2 |
+| 10 | Default | [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 1 |
 
 Row 1 ist FS-first: eine synthetische Multi-`%w`-Chain mit FS +
-Validation fällt im **Mapper** auf `LH-NFA-REL-003`. Der **ExitCode**-
+Validation fällt im **Mapper** auf [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern). Der **ExitCode**-
 Helper (`cli.go`) prüft Validation vor FS und liefert für dieselbe
 Chain Exit 10 — das ist die `(code, exitCode)`-Disambiguation
 **by-design** (Pattern-Erbe up-down §6.7): der Code signalisiert die
 Klasse, der Exit die Sub-Sentinel-Quelle. Ein reiner FS-Fehler
 (FS-Sentinel + roher OS-Error) trägt Exit 14.
 
-**`LH-FA-CONF-005`-Multi-Use-Disambiguation** (T0-(m)/R3-MED-2): drei
-Sentinels teilen `code: LH-FA-CONF-005` (Rows 4/5/7) und alle drei
+**[LH-FA-CONF-005](../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern)-Multi-Use-Disambiguation** (T0-(m)/R3-MED-2): drei
+Sentinels teilen den Diagnostic-Code
+[LH-FA-CONF-005](../../spec/lastenheft.md#lh-fa-conf-005-konfiguration-anzeigen-und-ändern)
+(Rows 4/5/7), und alle drei
 Exit 10. Konsumenten können sie **nicht** per `code` allein trennen —
 die Disambiguation läuft über den Message-Prefix:
 
@@ -1165,14 +1170,14 @@ in derselben PR ergänzen.
 
 | Subcommand | WriteFile | WriteFileExclusive | Mkdir | MkdirAll | Rename | RemoveAll | Copy | CopyExclusive |
 | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `add` (slice-v1-cli-json-dry-run-add) | ✓ (3 Slots + N ExtraFiles) | — | — | ✓ (implizit, Recorder synthetisiert) | — | — | — | — |
-| `init` (slice-v1-cli-json-dry-run-init) | ✓ (Skeleton-Files + `u-boot.yaml`) | — | ✓ (Backup-Verz.) | ✓ (Skeleton-Dirs direkt; Backup indirekt) | — | ✓ (Backup) | ✓ (Backup) | ✓ (Backup) |
-| `generate` (slice-v1-cli-json-dry-run-generate) | ✓ (Artefakt-Files + `u-boot.yaml`-Allowlist-Mutation) | — | — | ✓ (devcontainer-Dir) | — | — | — | — |
-| `remove` (slice-v1-cli-json-dry-run-remove) | ✓ (managed-block strip auf `compose.yaml` + `.env.example` + `enabled: false` auf `u-boot.yaml`) | — | — | — | — | ✓ (Catalog-`extraFiles`, optional) | — | — |
-| `up` (slice-v1-cli-json-dry-run-up-down) | — | — | — | — | — | — | — | — |
-| `down` (slice-v1-cli-json-dry-run-up-down) | — | — | — | — | — | — | — | — |
-| `logs` (slice-v1-cli-json-dry-run-logs) | — | — | — | — | — | — | — | — |
-| `config set` (slice-v1-cli-json-dry-run-config) | ✓ (genau eine Zeile — `u-boot.yaml`; Scalar-`PatchScalar` oder Listen-`Marshal`-Rewrite) | — | — | — | — | — | — | — |
+| `add` ([slice-v1-cli-json-dry-run-add](../plan/planning/done/slice-v1-cli-json-dry-run-add.md)) | ✓ (3 Slots + N ExtraFiles) | — | — | ✓ (implizit, Recorder synthetisiert) | — | — | — | — |
+| `init` ([slice-v1-cli-json-dry-run-init](../plan/planning/done/slice-v1-cli-json-dry-run-init.md)) | ✓ (Skeleton-Files + `u-boot.yaml`) | — | ✓ (Backup-Verz.) | ✓ (Skeleton-Dirs direkt; Backup indirekt) | — | ✓ (Backup) | ✓ (Backup) | ✓ (Backup) |
+| `generate` ([slice-v1-cli-json-dry-run-generate](../plan/planning/done/slice-v1-cli-json-dry-run-generate.md)) | ✓ (Artefakt-Files + `u-boot.yaml`-Allowlist-Mutation) | — | — | ✓ (devcontainer-Dir) | — | — | — | — |
+| `remove` ([slice-v1-cli-json-dry-run-remove](../plan/planning/done/slice-v1-cli-json-dry-run-remove.md)) | ✓ (managed-block strip auf `compose.yaml` + `.env.example` + `enabled: false` auf `u-boot.yaml`) | — | — | — | — | ✓ (Catalog-`extraFiles`, optional) | — | — |
+| `up` ([slice-v1-cli-json-dry-run-up-down](../plan/planning/done/slice-v1-cli-json-dry-run-up-down.md)) | — | — | — | — | — | — | — | — |
+| `down` ([slice-v1-cli-json-dry-run-up-down](../plan/planning/done/slice-v1-cli-json-dry-run-up-down.md)) | — | — | — | — | — | — | — | — |
+| `logs` ([slice-v1-cli-json-dry-run-logs](../plan/planning/done/slice-v1-cli-json-dry-run-logs.md)) | — | — | — | — | — | — | — | — |
+| `config set` ([slice-v1-cli-json-dry-run-config](../plan/planning/done/slice-v1-cli-json-dry-run-config.md)) | ✓ (genau eine Zeile — `u-boot.yaml`; Scalar-`PatchScalar` oder Listen-`Marshal`-Rewrite) | — | — | — | — | — | — | — |
 
 Alle modifying-Subcommands sind damit migriert (`doctor`, `add`,
 `init`, `generate`, `remove`, `up`, `down`, `logs`, `config`).
@@ -1194,10 +1199,10 @@ durch den `DockerEngine`-Adapter ausserhalb dieser Matrix.
 §Folgepunkte Re-Eval-Trigger 2 macht JSON-CLI verbindlich zur
 kanonischen Maschinen-Schnittstelle; HTTP-/gRPC-/WebSocket-
 Adapter sind gegen genau dieses Surface abgewogen und verworfen.
-Dieses Doku ist der Liefer-Anker für ADR-0010 §Trigger 2. ADR-0010
+Dieses Doku ist der Liefer-Anker für [ADR-0010](../plan/adr/0010-kein-http-driving-adapter.md) §Trigger 2. [ADR-0010](../plan/adr/0010-kein-http-driving-adapter.md)
 selbst bleibt **unverändert** (AGENTS.md §ADR-Disziplin: accepted
 ADRs werden nicht umgeschrieben). **Cluster-T_close-Entscheid: keine
-neue Folge-ADR** — T_close lieferte nur das mit ADR-0010 bereits
+neue Folge-ADR** — T_close lieferte nur das mit [ADR-0010](../plan/adr/0010-kein-http-driving-adapter.md) bereits
 beschlossene Surface aus (kein neuer Architektur-Entscheid); die
 Auslieferung ist über den done-Cluster-Slice + den Roadmap-Liefer-
 Vermerk dokumentiert.

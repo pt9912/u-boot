@@ -11,10 +11,10 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| [`carveouts.md`](carveouts.md) | Master-Dokument: Carveout-Inventar (`LH-FA-PROJDOCS-005`) |
-| [`roadmap.md`](roadmap.md) | Master-Dokument: Slice-/Tranchen-Stand (`LH-FA-PROJDOCS-003`) |
+| [`carveouts.md`](carveouts.md) | Master-Dokument: Carveout-Inventar ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)) |
+| [`roadmap.md`](roadmap.md) | Master-Dokument: Slice-/Tranchen-Stand ([`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003-planning-lifecycle)) |
 
 (Nur die zwei Master-Dokumente liegen dauerhaft in `in-progress/`.
-Der JSON-CLI-Cluster `slice-v1-cli-json-dry-run` (9/9 + T_close) und
-der Folge-`slice-v1-cli-json-envelope-consolidation` sind am
+Der JSON-CLI-Cluster [`slice-v1-cli-json-dry-run`](../done/slice-v1-cli-json-dry-run.md) (9/9 + T_close) und
+der Folge-[`slice-v1-cli-json-envelope-consolidation`](../done/slice-v1-cli-json-envelope-consolidation.md) sind am
 2026-06-08 vollständig nach `done/` ausgeliefert.)

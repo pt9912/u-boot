@@ -14,11 +14,11 @@
 > Methoden; `WriteFileExclusive` und `Rename` werden NICHT aus
 > init-Pfaden gerufen, Recorder deckt sie als Drift-Schutz
 > trotzdem ab), sieben init-spezifische LH-Codes als Spec-Anker
-> (`LH-FA-INIT-001`..`-007`) — davon drei mit dedizierten
+> ([`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren)..[`LH-FA-INIT-007`](../../../../spec/lastenheft.md#lh-fa-init-007-git-repository-initialisierung)) — davon drei mit dedizierten
 > Sentinels in der `mapErrorToDiagnostic`-Map (INIT-004 für
 > Marker-Kollision; INIT-005 für `--force`/`--backup`-Usage-
 > Failures; INIT-006 für Name-Validierung), die anderen vier
-> rein als Phasen-Anker. **`LH-NFA-REL-003` für Backup-FS-
+> rein als Phasen-Anker. **[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) für Backup-FS-
 > Failures** (Suffix-Exhaustion, Source-Missing) und Mid-Write-
 > FS-Failures. Template-Modus (`init --template <name>`) ist in
 > V1 mutex zu `--dry-run`/`--diff` (siehe T0-(i) Out-of-Scope-
@@ -60,15 +60,15 @@
 > | R2 | `initFromTemplate` Defense-in-Depth-Guard für `PreviewMode` | `e897fa7` |
 > | R3 | `runBackup` Wrap-Strategie pinnen — raw FS vs typed Sentinel | `e10b57d` |
 > | R4 | T0-(k) Path-Anchor Acceptance-Pin für positional `<name>` | `ee30c3c` |
-> | T7 — Doku-Closure | Review-Round-9-Tabelle + Folge-Slice-Stub `slice-v1-cli-cleanup-add-backup-error-class` | `d7f9e65` |
-> | T8 — Closure | CHANGELOG, `cli-json-output.md` §6/§6.4/§7, `cli.go`-Godoc-Backup-Sentinels-Korrektur, roadmap-Update, `open/slice-v1-cli-cleanup-add-preview-mode-alias`-Stub, Slice in `done/` | dieser Commit |
+> | T7 — Doku-Closure | Review-Round-9-Tabelle + Folge-Slice-Stub [`slice-v1-cli-cleanup-add-backup-error-class`](slice-v1-cli-cleanup-add-backup-error-class.md) | `d7f9e65` |
+> | T8 — Closure | CHANGELOG, `cli-json-output.md` §6/§6.4/§7, `cli.go`-Godoc-Backup-Sentinels-Korrektur, roadmap-Update, `open/[slice-v1-cli-cleanup-add-preview-mode-alias](../open/slice-v1-cli-cleanup-add-preview-mode-alias.md)`-Stub, Slice in `done/` | dieser Commit |
 
 ## Auslöser
 
-Cluster-Slice `slice-v1-cli-json-dry-run` §T0-Outcomes (a)+(b)+(e)
+Cluster-Slice [`slice-v1-cli-json-dry-run`](slice-v1-cli-json-dry-run.md) §T0-Outcomes (a)+(b)+(e)
 machen jeden modifying-Subcommand für `--json`/`--dry-run`/`--diff`
-verbindlich (`LH-NFA-USE-004` §1813, `LH-FA-CLI-007` §326,
-`LH-FA-CLI-008` §451-489). `u-boot init` ist nach `add` der zweite
+verbindlich ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) §1813, [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) §326,
+[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) §451-489). `u-boot init` ist nach `add` der zweite
 modifying-Subcommand und der **wichtigste Onboarding-Use-Case**
 (Cluster-§T0-Discovery Z. 320 nennt `init --dry-run --diff --json`
 explizit als Beispiel-Hauptanwendung): ein neuer Nutzer will sehen,
@@ -77,16 +77,16 @@ einer existierenden Codebase ausführt.
 
 Spec-Bezug (geerbt von add-Slice):
 
-- `LH-FA-CLI-007` (Dry-Run, Voll-Schema §326)
-- `LH-FA-CLI-008` (Diff, §451-489)
-- `LH-NFA-USE-004` (Minimalkontrakt §1841)
+- [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run) (Dry-Run, Voll-Schema §326)
+- [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe) (Diff, §451-489)
+- [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe) (Minimalkontrakt §1841)
 
 Init-spezifische Sentinels und Spec-Stellen:
 
-- `LH-FA-INIT-001`..`-007` (Projekt-Skeleton, Verzeichnisstruktur,
+- [`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren)..[`LH-FA-INIT-007`](../../../../spec/lastenheft.md#lh-fa-init-007-git-repository-initialisierung) (Projekt-Skeleton, Verzeichnisstruktur,
   Soft-Existing-Detection, Backup-Pfad-Failures, Service-Name-
   Validation)
-- `LH-NFA-REL-003` (FS-Failure-Klasse, geerbt für Mid-Write-Failure
+- [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) (FS-Failure-Klasse, geerbt für Mid-Write-Failure
   analog `add`)
 
 Heute-Stand-Pre-Scan
@@ -96,7 +96,7 @@ Heute-Stand-Pre-Scan
 | --- | --- | --- | --- |
 | Skeleton-Dirs (`writeDirectories` Z. 768 → `projectStructureDirs` Z. 30) | `MkdirAll` (Call Z. 776) | `docker/`, `scripts/`, `docs/` (immer); `.devcontainer/` (nur bei `--devcontainer`) | direkt |
 | Skeleton-Files (`executeTemplatedFiles` → `fileTemplates()` in [`templates.go`](../../../../internal/hexagon/application/templates.go) Z. 73-81) | `WriteFile` (Calls Z. 818 actionWrite, Z. 866 actionReplaceBlock, Z. 968 actionOverwriteFull) | `README.md`, `CHANGELOG.md`, `compose.yaml`, `.env.example`, `.gitignore` (in dieser Aufruf-Reihenfolge aus `fileTemplates()`); devcontainer-Files (nur bei `--devcontainer`) | direkt |
-| u-boot.yaml (`Init()` Z. 302 ruft `executeUBootYAML` Z. 1037 → `executeFile` Z. 814 → `WriteFile` Z. 818/866/968) | `WriteFile` | `u-boot.yaml` (ZULETZT — nach Dirs und Skeleton-Files; LH-FA-INIT-002 anchor) | direkt |
+| u-boot.yaml (`Init()` Z. 302 ruft `executeUBootYAML` Z. 1037 → `executeFile` Z. 814 → `WriteFile` Z. 818/866/968) | `WriteFile` | `u-boot.yaml` (ZULETZT — nach Dirs und Skeleton-Files; [`LH-FA-INIT-002`](../../../../spec/lastenheft.md#lh-fa-init-002-projektname) anchor) | direkt |
 | Backup (Aufrufer: `initproject.go` Z. 978 `runBackup` → [`backup.go`](../../../../internal/hexagon/application/backup.go) `BackupPath` Z. 57) | `RemoveAll` (Z. 88), `CopyExclusive` (Z. 139), `Mkdir` (Z. 149), `MkdirAll` (Z. 198), `Copy` (Z. 209) | `<file>.bak.<n>` plus Backup-Verzeichnis | indirekt via `BackupPath` |
 
 Damit nutzt init **sechs der acht** `driven.FileSystem`-Mutations-
@@ -177,7 +177,7 @@ Negative-Pin: bei `--dry-run` null Production-FS-Mutationen, gleicher
 Spy-Mechanismus wie in add T5 (Recorder schickt nichts an die
 underlying-FS bei `WithPassthrough(false)`).
 
-Soft-Existing-Detection-Pin (`LH-FA-INIT-004`):
+Soft-Existing-Detection-Pin ([`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004-bestehendes-projekt-erkennen)):
 `u-boot init myproj --dry-run --json` auf eine **existierende**
 Projekt-CWD ohne `--backup`/`--force`/`--no-interactive` liefert
 einen Error-Envelope (drei Disambiguatoren, nicht zwei; siehe
@@ -202,7 +202,7 @@ normalisiert ggf. via `mapErrorToDiagnostic` — Sub-Decision T0-(f):
 }
 ```
 
-**Template-Reject-Pin** (`LH-FA-CLI-006`, T0-(i) Out-of-Scope-
+**Template-Reject-Pin** ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes), T0-(i) Out-of-Scope-
 Carveout für V1): `u-boot init myproj --template basic --dry-run
 --json` rejects am CLI-RunE-Level (T5 mutex-check vor uc.Init-
 Call):
@@ -221,7 +221,7 @@ Call):
 Minimal-Envelope (kein plannedFiles/changes), weil die Validation
 VOR jedem Recorder-Setup fired.
 
-**Planning-Phase-Force-Failure-Pin** (`LH-FA-INIT-005`, T0-(q)):
+**Planning-Phase-Force-Failure-Pin** ([`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz), T0-(q)):
 `u-boot init myproj --force --dry-run --json` auf CWD mit
 existierender `.gitignore` (kein managed-Block, kein `--backup`)
 failed im planFile bevor irgendein Write das Capture erreicht.
@@ -242,7 +242,7 @@ failed im planFile bevor irgendein Write das Capture erreicht.
 }
 ```
 
-**Mid-Write-Failure-Pin** (`LH-NFA-REL-003`, T0-(f) Switch-Order
+**Mid-Write-Failure-Pin** ([`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern), T0-(f) Switch-Order
 + T0-(k) writeInitDiff-Verträge):
 `u-boot init myproj --dry-run --diff --json` mit FS-Failure bei
 File-Index N im Use-Case-Pfad — Recorder hat die ersten N
@@ -305,30 +305,30 @@ Argument wie add-T0-(b)).
   LH-Codes (Mapping respektiert `cli.go:217-224`-Konvention für
   bereits etablierte Sentinels — abweichend von der naiven
   „Spec-Code = LH-Sektionsnummer"-Lesart):
-  - `LH-FA-INIT-004`: `driving.ErrProjectExists`,
+  - [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004-bestehendes-projekt-erkennen): `driving.ErrProjectExists`,
     `driving.ErrFileExists` (Marker-Kollision, „Bestehendes
     Projekt erkennen" §567)
-  - `LH-FA-INIT-005`: `driving.ErrConfirmationRequired`,
+  - [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz): `driving.ErrConfirmationRequired`,
     `driving.ErrForceRequiresBackup`,
     `driving.ErrBackupUnsupportedKind` (Überschreibschutz §595-619
     Usage-Klasse → Exit 10)
-  - `LH-NFA-REL-003`: `driving.ErrBackupSuffixExhausted`,
+  - [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern): `driving.ErrBackupSuffixExhausted`,
     `driving.ErrBackupSourceMissing` (FS-Klasse: Suffix-Exhaustion
     und Source-Missing sind technische Filesystem-Failures, kein
     User-Action; Exit 14 via `isFilesystemError` — präzisere
     Klassifikation als Spec §605/§619 dem User die richtige Klasse
     signalisiert)
-  - `LH-FA-INIT-006`: `domain.ErrInvalidProjectName` UND
+  - [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung): `domain.ErrInvalidProjectName` UND
     `domain.ErrInvalidServiceName` (Name-Validierung §625;
     Konvention aus `add.go:410` weitergeführt — Carveout-Pin
     siehe T0-(f) Footnote, dass §625 strikt nur „Projektname"
     benennt)
-  - `LH-FA-CLI-006`: `driving.ErrTemplateConflictsWithFlag` (Usage-
+  - [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes): `driving.ErrTemplateConflictsWithFlag` (Usage-
     Error, Exit-Code 2 via `isUsageError`)
-  - `LH-NFA-REL-003`: neuer `driving.ErrInitFileSystem`-Sentinel
+  - [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern): neuer `driving.ErrInitFileSystem`-Sentinel
     für FS-Failures (analog `ErrAddFileSystem` → Exit-Code 14
     via `isFilesystemError`)
-  - LH-FA-INIT-001/-002/-003/-007 sind heute ohne dedizierten
+  - [`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren)/[`LH-FA-INIT-002`](../../../../spec/lastenheft.md#lh-fa-init-002-projektname)/[`LH-FA-INIT-003`](../../../../spec/lastenheft.md#lh-fa-init-003-projektstruktur-erzeugen)/[`LH-FA-INIT-007`](../../../../spec/lastenheft.md#lh-fa-init-007-git-repository-initialisierung) sind heute ohne dedizierten
     Sentinel — Spec-Anker für Use-Case-Phasen, kein Error-Pfad.
 - ✅ **Composition-Root-Wiring** (T4-Tranche, kein eigener T0-
   Sub-Decision-Slot weil Pattern-Erbe von add-T1-D 1:1):
@@ -381,7 +381,7 @@ Begründung im Outcome.
 ### T0-(b) `previewModeFromFlags` extrahieren
 
 `add.go` hat heute `previewModeFromFlags(dryRun, diff)` als private
-Funktion (slice-v1-cli-json-dry-run-add Z. 114). Init braucht
+Funktion ([slice-v1-cli-json-dry-run-add](slice-v1-cli-json-dry-run-add.md) Z. 114). Init braucht
 dieselbe Wahrheitstabelle. **Vorschlag (T0-Festlegung)**:
 Extraktion in ein neues `cli`-Paket-internes File
 (`internal/adapter/driving/cli/previewmode.go`) als Package-Helper.
@@ -423,15 +423,17 @@ plus Factory-Signature-Identity-Check.
 **Carveout-Plan-Pflicht** (MEMORY.md
 [[feedback_carveouts_need_plans]]): die Alias-Lebensdauer „bis
 Cluster-T_close" braucht einen eigenen Slice-Plan-Stub im
-`open/`-Verzeichnis (`slice-v1-cli-cleanup-add-preview-mode-
-alias`, T8 dieses Slices legt ihn an). Ohne Plan wäre der
+`open/`-Verzeichnis
+([`slice-v1-cli-cleanup-add-preview-mode-alias`](../open/slice-v1-cli-cleanup-add-preview-mode-alias.md),
+T8 dieses Slices legt ihn an). Ohne Plan wäre der
 Carveout ein loser Hänger ohne Cleanup-Owner. Alternative:
 **Alias als permanente Backward-Compat-Garantie** deklarieren
 und das Cluster-T_close-Removal-Versprechen ganz fallen lassen.
 
 **Vorschlag (T0-Festlegung)**: Cleanup-Plan-Stub-Variante —
-init-T8 erzeugt `open/slice-v1-cli-cleanup-add-preview-mode-
-alias.md` mit Auslöser („Carveout aus init-Slice T0-(c)"),
+init-T8 erzeugt
+[`open/slice-v1-cli-cleanup-add-preview-mode-alias.md`](../open/slice-v1-cli-cleanup-add-preview-mode-alias.md)
+mit Auslöser („Carveout aus init-Slice T0-(c)"),
 einer AK („Alias-Decl raus, Verifikation via
 addservice_factory_test.go") und LOC-Schätzung (~10 LOC, ein
 git rm + ein paar Test-Aliases). **Alias-Lebensdauer-Pflicht**:
@@ -571,13 +573,13 @@ auf den gemeinsamen Helper. Acceptance-Tests aus add bleiben grün
 
 ### T0-(f) Diagnostic-Code-Quelle für init
 
-Plan-Bezug: `LH-FA-INIT-001`..`-007`. Sub-Decision: gibt es einen
+Plan-Bezug: [`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren)..[`LH-FA-INIT-007`](../../../../spec/lastenheft.md#lh-fa-init-007-git-repository-initialisierung). Sub-Decision: gibt es einen
 init-spezifischen FS-Failure-Sentinel (analog `ErrAddFileSystem` →
-`LH-NFA-REL-003`)?
+[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern))?
 
 **Vorschlag (T0-Festlegung)**: ja — neuer
 `driving.ErrInitFileSystem`-Sentinel in `port/driving/initproject.go`,
-gemappt auf `LH-NFA-REL-003`/Exit-Code 14 in
+gemappt auf [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)/Exit-Code 14 in
 `cli.isFilesystemError`. Wrap-Stellen in `initproject.go`
 (`WriteFile`-Sites Z. 818/866/968 und backup-relevante Pfade)
 ergänzen. Analog zum add-Pattern.
@@ -588,16 +590,16 @@ gegenüber dem ursprünglichen Stub gemäß
 
 | Sentinel | Quell-Datei | LH-Code | Exit-Code |
 | --- | --- | --- | --- |
-| `domain.ErrInvalidProjectName` | `domain/projectname.go` | `LH-FA-INIT-006` | 10 |
-| `driving.ErrProjectExists`, `driving.ErrFileExists` | `port/driving/initproject.go` | `LH-FA-INIT-004` | 10 |
-| `driving.ErrConfirmationRequired` (shared) | `port/driving/down.go` | `LH-FA-INIT-005` | 10 |
-| `driving.ErrForceRequiresBackup`, `driving.ErrBackupUnsupportedKind` | `port/driving/initproject.go` | `LH-FA-INIT-005` | 10 |
-| `driving.ErrBackupSuffixExhausted`, `driving.ErrBackupSourceMissing` | `port/driving/initproject.go` | `LH-NFA-REL-003` | 14 (heute schon via `cli.go::isFilesystemError` Z. 369-370 — siehe Doku-Korrektur unten) |
-| `domain.ErrInvalidServiceName` (geteilt mit add) | `domain/servicename.go` | `LH-FA-INIT-006` | 10 |
-| `driving.ErrTemplateConflictsWithFlag` | `port/driving/initproject.go` | `LH-FA-CLI-006` | 2 |
-| **`driving.ErrInitFileSystem` (neu)** | `port/driving/initproject.go` (T2) | **`LH-NFA-REL-003`** | **14** |
+| `domain.ErrInvalidProjectName` | `domain/projectname.go` | [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung) | 10 |
+| `driving.ErrProjectExists`, `driving.ErrFileExists` | `port/driving/initproject.go` | [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004-bestehendes-projekt-erkennen) | 10 |
+| `driving.ErrConfirmationRequired` (shared) | `port/driving/down.go` | [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) | 10 |
+| `driving.ErrForceRequiresBackup`, `driving.ErrBackupUnsupportedKind` | `port/driving/initproject.go` | [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) | 10 |
+| `driving.ErrBackupSuffixExhausted`, `driving.ErrBackupSourceMissing` | `port/driving/initproject.go` | [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) | 14 (heute schon via `cli.go::isFilesystemError` Z. 369-370 — siehe Doku-Korrektur unten) |
+| `domain.ErrInvalidServiceName` (geteilt mit add) | `domain/servicename.go` | [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung) | 10 |
+| `driving.ErrTemplateConflictsWithFlag` | `port/driving/initproject.go` | [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) | 2 |
+| **`driving.ErrInitFileSystem` (neu)** | `port/driving/initproject.go` (T2) | **[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)** | **14** |
 
-**Footnote — INIT-006-Carveout**: Spec §625 nennt LH-FA-INIT-006
+**Footnote — INIT-006-Carveout**: Spec §625 nennt [`LH-FA-INIT-006`](../../../../spec/lastenheft.md#lh-fa-init-006-projektnamen-validierung)
 strikt „Projektnamen-Validierung". Die etablierte Codebase-
 Konvention (`cli.go:217-220`, `add.go:410`) erweitert das auf
 Service-Name-Validierung. Init übernimmt diese Konvention; ein
@@ -607,11 +609,11 @@ Cluster-T_close-Sub-Decision.
 **Footnote — Backup-Sentinel-Doku-Korrektur (T8-Pflicht)**:
 heutiges `cli.go::ExitCode`-Godoc Z. 241-244 labelt
 `ErrBackupSuffixExhausted` + `ErrBackupSourceMissing` als
-`LH-FA-INIT-005`-Klasse, obwohl `isFilesystemError` (Z. 369-370)
+[`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz)-Klasse, obwohl `isFilesystemError` (Z. 369-370)
 sie schon auf Exit 14 routet. Spec §595-619 (INIT-005 „Über-
 schreibschutz") spricht NICHT von „filesystem-failure-class";
 die Slice-Engineering-Entscheidung shiftet die LH-Code-Klassifi-
-kation auf `LH-NFA-REL-003` (technical-FS-failure), um Envelope-
+kation auf [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) (technical-FS-failure), um Envelope-
 Code und Exit-Code-Klasse zu synchronisieren. T8-Doku-Edit:
 `cli.go` Z. 241-244 Godoc-Comment auf neue Klassifikation
 nachziehen.
@@ -626,7 +628,7 @@ heutiger Stand ist Single-`%w` (`initproject.go` Z. 819/867/969:
 `fmt.Errorf("write %s: %w", plan.Template.Path, err)`), T3
 erweitert auf Multi-`%w` analog `addservice_execute.go`. Ohne
 FS-first-Order würde ein künftiger fachlicher Sentinel im Multi-
-Wrap die FS-Klassifikation (`LH-NFA-REL-003` / Exit-Code 14) auf
+Wrap die FS-Klassifikation ([`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) / Exit-Code 14) auf
 einen Exit-Code-10-Fachfehler downgraden.
 
 **Switch-Order verbindlich** (T6-Pin verifiziert die Reihenfolge):
@@ -659,7 +661,7 @@ default:
 
 T6-Pin-Test mit künstlich konstruiertem
 `fmt.Errorf("%w: %w", ErrInitFileSystem, ErrProjectExists)` MUSS
-LH-NFA-REL-003 / Exit-14 erzeugen — NICHT LH-FA-INIT-004 / Exit-10.
+[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) / Exit-14 erzeugen — NICHT [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004-bestehendes-projekt-erkennen) / Exit-10.
 
 ### T0-(g) `plannedFiles[]`-Reihenfolge + Catalog-Read-Phase
 
@@ -683,7 +685,7 @@ für V1.
 liest init im Dry-Run-Pfad auch über `s.fs.Exists`/`Lstat`/
 `ReadFile`:
 - `checkSoftExisting` (initproject.go Z. 478-507) prüft 6
-  LH-FA-INIT-003-Indikator-Pfade via `Exists`.
+  [`LH-FA-INIT-003`](../../../../spec/lastenheft.md#lh-fa-init-003-projektstruktur-erzeugen)-Indikator-Pfade via `Exists`.
 - `planFile`/`fileHasManagedBlock` lesen Templates und existierende
   Files.
 
@@ -777,7 +779,7 @@ nichts, der Dry-Run schreibt trotzdem.
    TemplateInit-Port-Signatur.
 3. **V1-Out-of-Scope-Carveout**: `init --template <name>` lehnt
    `--dry-run`/`--diff` ab; CLI emittiert eine
-   `ErrTemplateConflictsWithFlag`-Diagnostic (LH-FA-CLI-006,
+   `ErrTemplateConflictsWithFlag`-Diagnostic ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes),
    Exit 2). Folge-Slice
    `slice-v1-cli-json-dry-run-template-preview` (neu in open/
    anzulegen) löst die Composition-Root-Refactor sauber als
@@ -802,7 +804,7 @@ Composition-Root-Refactor-Variante."
 
 Template-Failures (`ErrTemplateNotFound`/`ErrTemplateRender`/
 `ErrTemplateCatalog`) bleiben mit ihrer heutigen LH-Klassifikation
-(`LH-FA-CLI-006`, Exit 2 für Conflicts; `LH-NFA-REL-003` Exit 14
+([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes), Exit 2 für Conflicts; [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) Exit 14
 für Catalog/Render via existierender `isFilesystemError`).
 
 ### T0-(j) `init --json` (Minimalkontrakt) ohne `--dry-run`/`--diff`
@@ -973,7 +975,7 @@ Recorder schützt nur die FS-Layer, nicht stdout."
 keine `ctx.Err()`/`select-on-Done`-Checks. Eine
 `context.Canceled` mid-init produziert keinen Spec-konformen
 Envelope — sie fällt durch zur default-Klausel
-(`LH-FA-CLI-006` / Exit 2).
+([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) / Exit 2).
 
 **Vorschlag (T0-Festlegung)**: **Status-quo Out-of-Scope** für
 V1. Context-Cancellation ist Cross-Cutting-Concern für ALLE
@@ -981,7 +983,7 @@ modifying-Subcommands; ein konsistenter Exit-Code-130-Convention-
 Slice wäre eigener Cluster-T_close-Block. Init-Slice ändert
 heutigen Pfad NICHT — Doku-Hint in `cli-json-output.md` §7:
 „Ctrl-C / context-cancellation während eines modifying-Sub-
-commands fällt heute auf `LH-FA-CLI-006` / Exit 2; eine
+commands fällt heute auf [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) / Exit 2; eine
 Interrupt-aware Exit-130-Convention bleibt eigener Folge-Slice."
 
 ### T0-(q) Planning-Phase-Failures (Force/Validation vor Recorder)
@@ -999,7 +1001,7 @@ Execute-Phase-Failures ab. Planning-Phase-Failures haben
 ergänzt). T6-Acceptance ergänzt einen dedizierten Test für
 `init --force --dry-run --json` auf CWD mit unmanaged
 `.gitignore` — Pin: `plannedFiles: [], diagnostics:
-[LH-FA-INIT-005], exitCode: 10`. Die Unterscheidung zu Mid-
+[[`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz)], exitCode: 10`. Die Unterscheidung zu Mid-
 Write-Failure (`exitCode: 14`) ist load-bearing — Planning-
 Errors sind User-Action-Klasse (Exit 10), Write-Errors sind
 FS-Klasse (Exit 14).
@@ -1030,7 +1032,7 @@ die Acceptance-Test-Matrix größer.
 | T5 | **CLI-RunE + Helper-Generalisierung**: zwei Sub-Schritte zusammen, weil init's RunE der zweite Caller ist und damit den Helper-Refactor erst real motiviert (`unparam`-Linter-Friendliness statt premature abstraction in T1): (a) **Helper-Generalisierung** `reportAddError`/`writeAddErrorEnvelope`/`writeAddDiff`/`lastPlannedPath` aus add.go extrahieren nach `cli/erroremission.go` als `reportError`/`writeErrorEnvelope`/`writeDiff`/`lastPlannedPath` mit decomposed-Slices-Signatur (T0-(e)); 4 Add-Call-Sites in runAdd migrieren; `mapErrorToDiagnostic → mapAddErrorToDiagnostic` Rename. (b) **init-RunE**: ruft die generischen Helper mit `command="init"` + `mapErr=mapInitErrorToDiagnostic`; **NEUER CLI-Mutex-Check** `--template + --dry-run|--diff → ErrTemplateConflictsWithFlag` (T0-(i)); drei JSON-Pfade analog add; `req.SilenceProgress = flags.JSON` setzen (T0-(o)); Allowlist-Migration (`"u-boot init": true`); Reject-Pin-Test `TestRootJSON_RejectsAllNonMigratedForms` in `internal/adapter/driving/cli/jsonallowlist_test.go` (T0-Outcome verifiziert pre-T5-Count durch lokales `make test`; post-T5 = pre-T5 − 1). | ~280 (Helper-Generalisierung ~120 + init-RunE ~160) | T1 + T2 (T4 für Run-time-Smoke aber Code-parallelisierbar) |
 | T6 | **Acceptance-Tests**: ~13 Flag-Matrix-Tests (T0-(m)); plus Soft-Existing-Pin (3 Disambiguatoren) + Soft-Existing × `--devcontainer` (T0-(g)); Planning-Phase-Force-Failure-Pin (T0-(q), exitCode 10); Mid-Write-Failure-Pin (zwei Positionen, T0-(f) Switch-Order-Pin mit Multi-`%w`-Konstrukt, exitCode 14); Template-Reject-Pin (T0-(i), exitCode 2); 3-Flag-Combo `--dry-run --diff --json`; Concurrent-Init-Mutex-Pin (zwei Goroutinen auf ein InitProjectService-Instance, unterschiedliche TempDirs); Path-Anchor-Pin (`PlannedFile.Path` ist project-relativ); **initGit-Skip-Pin** (T0-(n): `--dry-run --json` in non-git CWD → kein .git/-Dir + Spy-Counter 0); **JSON-stdout-Cleanliness-Pin** (T0-(o): `json.Decode → io.EOF`). Test-Fixture-Helper `initFixture(t, opts)` für TempDir + ExistingProject-Setup (shared, ~50 LOC) — per-Test-Body ~25 LOC. ~17 Tests + Mid-Failure-Helper-Cluster + Helper-File = ~600 LOC realistisch. | ~600 | T5 |
 | T7 | **Review-Fix-Rounds** (~1-2 Runden bei Pattern-Erbe; add hatte R6/R7/R8): Diff aus Reviewer-Findings konsolidieren, Fixes als eigene Sub-Commits, DoD-Hash-Tabelle ergänzen. | ~80 | T6 |
-| T8 | **Closure**: CHANGELOG-Eintrag, `cli-json-output.md` §6-Tabelle (init→done) + §6.1-Reject-Liste (init raus) + §6.4 neue init-Sektion (inkl. Context-Cancellation-Carveout T0-(p) und ProgressPort-Silencing-Hint T0-(o)) + §7 Mutations-Matrix (init-Zeile); `cli.go` Z. 241-244 Godoc-Korrektur (Backup-Sentinels auf LH-NFA-REL-003 nachziehen, T0-(f) Footnote); roadmap-Update (3/9 done); **`slice-v1-cli-cleanup-add-preview-mode-alias` als open/-Stub anlegen** (Carveout-Plan-Pflicht T0-(c)); Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
+| T8 | **Closure**: CHANGELOG-Eintrag, `cli-json-output.md` §6-Tabelle (init→done) + §6.1-Reject-Liste (init raus) + §6.4 neue init-Sektion (inkl. Context-Cancellation-Carveout T0-(p) und ProgressPort-Silencing-Hint T0-(o)) + §7 Mutations-Matrix (init-Zeile); `cli.go` Z. 241-244 Godoc-Korrektur (Backup-Sentinels auf [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) nachziehen, T0-(f) Footnote); roadmap-Update (3/9 done); **[`slice-v1-cli-cleanup-add-preview-mode-alias`](../open/slice-v1-cli-cleanup-add-preview-mode-alias.md) als open/-Stub anlegen** (Carveout-Plan-Pflicht T0-(c)); Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
 
 LOC-Bilanz: ~1480 LOC (unchanged trotz T1-E-Verschiebung — die
 Helper-Generalisierung wandert nur aus T1 nach T5, Total bleibt
@@ -1061,8 +1063,9 @@ T7 wartet auf T6; T8 wartet auf T7.
 **DoD-Hash-Snapshot-Policy** (MEMORY.md feedback
 [[feedback_done_slice_dod_hash]]): die DoD-Hash-Tabelle nutzt
 **Commit-Hashes pro Tranche** (nicht File-Content-Hashes —
-entspricht etablierter Praxis in `done/slice-v1-cli-json-dry-
-run-add.md` und anderen done-Slices). T1-Commits mutieren bis
+entspricht etablierter Praxis in
+[`done/slice-v1-cli-json-dry-run-add.md`](slice-v1-cli-json-dry-run-add.md)
+und anderen done-Slices). T1-Commits mutieren bis
 zu **8 Files** aus dem add-Slice's done-Snapshot
 (`port/driving/addservice.go`, `application/addservice.go`,
 `recordingfs.go`, `recordingport.go`, `cmd/uboot/main.go`,
@@ -1090,11 +1093,11 @@ und einer trivialer Dead-Code-Cleanup.
 
 | # | Sev  | Finding                                                  | Adressierung                                                       |
 | - | ---  | -------------------------------------------------------- | ------------------------------------------------------------------ |
-| 1 | med  | `mapInitErrorToDiagnostic` fehlt `ErrInvalidFeatureSource`-Case → Code/Exit-Klassen-Drift (LH-FA-CLI-006 + Exit 10) | R1: Case auf `LH-FA-DEV-003`; Test im `AllCases`-Table — `6e5ad01` |
+| 1 | med  | `mapInitErrorToDiagnostic` fehlt `ErrInvalidFeatureSource`-Case → Code/Exit-Klassen-Drift ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006-exit-codes) + Exit 10) | R1: Case auf [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features); Test im `AllCases`-Table — `6e5ad01` |
 | 2 | med  | `initFromTemplate` ohne `PreviewMode`-Guard im Application-Layer (CLI fängt es, UC asymmetrisch) | R2: `PreviewMode != PreviewNone → ErrTemplateConflictsWithFlag` am UC-Eintritt; Acceptance-Pin — `e897fa7` |
 | 3 | low  | `runBackup` Wrap-Strategie (raw FS ↔ typed Sentinel) ohne direkten Application-Test | R3: Zwei Tests via `RunBackupForTest`-Bridge — `e10b57d`            |
 | 4 | low  | T0-(k) Path-Anchor für positional `<name>` ungetestet (trailing-slash, dot-slash, abs-path) | R4: Vier-Cases Acceptance-Table mit `validatingInitUseCaseStub` — `ee30c3c` |
-| 5 | low  | Add↔Init divergieren bei `ErrBackupSuffixExhausted`-Code (Add: `LH-FA-INIT-005` + Exit 14 → inkonsistent; Init: `LH-NFA-REL-003` + Exit 14 → konsistent) | Folge-Slice: [`slice-v1-cli-cleanup-add-backup-error-class`](slice-v1-cli-cleanup-add-backup-error-class.md) |
+| 5 | low  | Add↔Init divergieren bei `ErrBackupSuffixExhausted`-Code (Add: [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005-überschreibschutz) + Exit 14 → inkonsistent; Init: [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern) + Exit 14 → konsistent) | Folge-Slice: [`slice-v1-cli-cleanup-add-backup-error-class`](slice-v1-cli-cleanup-add-backup-error-class.md) |
 | 6 | info | Init's mapErr-Switch hat `ErrInvalidServiceName`-Case — dead-code (Init hat keinen Service-Arg) | R1: Case entfernt im selben Commit — `6e5ad01`                     |
 
 T7-LOC-Bilanz: 4 R-Commits (~90 LOC) + 1 Folge-Slice-Stub
@@ -1127,8 +1130,8 @@ unchanged nach R4).
   [`slice-v1-cli-json-dry-run-add`](slice-v1-cli-json-dry-run-add.md)
   — T0-T6 + Review-Rounds 6-8 voll abgeschlossen. Erbschafts-
   Disziplin in §T0-(a) dieses Slices.
-- Spec: `LH-FA-CLI-007/008`, `LH-NFA-USE-004`,
-  `LH-FA-INIT-001..007`, `LH-NFA-REL-003`
+- Spec: [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007-dry-run)/[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008-diff-ausgabe), [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004-maschinenlesbare-ausgabe),
+  [`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001-neues-projekt-initialisieren)..[`LH-FA-INIT-007`](../../../../spec/lastenheft.md#lh-fa-init-007-git-repository-initialisierung), [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003-abbruch-bei-kritischen-fehlern)
   ([`spec/lastenheft.md`](../../../../spec/lastenheft.md)).
 - Code-Anker heute:
   [`initproject.go`](../../../../internal/hexagon/application/initproject.go)

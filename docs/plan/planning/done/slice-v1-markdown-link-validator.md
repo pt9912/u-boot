@@ -6,7 +6,7 @@
 ## Auslöser
 
 Relative `[text](path)`-Links in `docs/`, `spec/` und Root-READMEs sind
-heute nicht maschinell geprüft (M2-Review #11, `LH-FA-PROJDOCS-005`).
+heute nicht maschinell geprüft (M2-Review #11, [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)).
 Nach den vielen Slice-Moves in M3-Closure und M3-Anker-Triage ist das
 Drift-Risiko konkret: heutiger erster Lauf hat 3 Findings produziert,
 darunter zwei echte Drift-Bugs (Pfad nach Slice-Rename, Pfad nach
@@ -39,7 +39,7 @@ Markdown-Beispiel-Block produziert.
   - `docs/plan/adr/0004-ci-system.md:71`: stale Pfad
     `slice-v1-docker-integrationstests.md` → `slice-m6-docker-...`
     (Slice-Rename bei Phase-Re-Anker).
-  - `docs/plan/planning/done/slice-m3-coverage-threshold-aktivieren.md:40`:
+  - `docs/plan/planning/done/[slice-m3-coverage-threshold-aktivieren.md](slice-m3-coverage-threshold-aktivieren.md):40`:
     same-dir-Link auf `carveouts.md` → `../in-progress/carveouts.md`
     (Datei lebt dauerhaft in `in-progress/`).
   - `docs/archive/README.md:14`: Falsch-Positiv durch Beispiel im
@@ -64,7 +64,7 @@ Markdown-Beispiel-Block produziert.
 
 ## Bezug
 
-- Auslösende Konvention: `LH-FA-PROJDOCS-005` Carveout-Disziplin +
+- Auslösende Konvention: [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin) Carveout-Disziplin +
   M2-Review #11.
 - Aufhebung dokumentiert in: [`carveouts.md`](../in-progress/carveouts.md)
   (Zeile entfernt) und [`roadmap.md`](../in-progress/roadmap.md)

@@ -5,10 +5,10 @@
 Proposed
 
 > **Entwurf — noch nicht ratifiziert.** Festgehalten, damit die Idee
-> nicht verloren geht (Roadmap-AP `slice-vN-devcontainer-egress-firewall`).
-> Die §Entscheidung unten ist ein **Vorschlag**; die §Offenen Fragen
-> müssen vor `Accepted` beantwortet werden. Kein Code, bis ratifiziert
-> + Spec-Erweiterung + Slice-Plan stehen. Gleiche Klasse wie
+> nicht verloren geht. Die §Entscheidung unten ist ein **Vorschlag**;
+> die §Offenen Fragen müssen vor `Accepted` beantwortet werden. Kein
+> Code, bis ratifiziert + Spec-Erweiterung + Planning-Artefakt stehen.
+> Gleiche Klasse wie
 > [ADR-0011](0011-agent-harness-scaffolding.md) (prospektives Feature,
 > Produkt-Scope-Entscheidung).
 
@@ -25,7 +25,7 @@ einen **minimalen** Devcontainer: `devcontainer.json` (`name`, `build`,
 `USER vscode`). **Keine Netzwerk-Restriktion** — kein
 `postCreate`/`initializeCommand`, kein `runArgs`, kein
 `iptables`/`ipset`. In `spec/lastenheft.md` kommt Firewall/Egress
-nirgends vor (`LH-FA-DOC-003` „Netzwerk" meint das gemeinsame
+nirgends vor ([`LH-FA-DOC-003`](../../../spec/lastenheft.md#lh-fa-doc-003-netzwerk) „Netzwerk" meint das gemeinsame
 *Compose*-Netzwerk, nicht Egress-Kontrolle).
 
 Verbreiteter Pattern („network-hardened devcontainer"): ein
@@ -37,8 +37,8 @@ Container eindämmen (keine Exfiltration, keine beliebigen Hosts).
 
 **Fit mit u-boot:**
 
-- Die Sicherheits-Philosophie existiert bereits: `LH-NFA-SEC-004`
-  (keine verdeckte Fremd-Code-Ausführung) + `LH-FA-DEV-003`
+- Die Sicherheits-Philosophie existiert bereits: [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004-keine-verdeckte-ausführung-fremder-skripte)
+  (keine verdeckte Fremd-Code-Ausführung) + [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)
   (`--allow-external-feature-sources`, explizite Allowlist für
   Feature-*Quellen*). Eine Egress-Firewall ist das **Runtime-Pendant**
   zur bestehenden **Build-Time/Supply-Chain-Allowlist** —
@@ -83,7 +83,7 @@ u-boot erzeugt eine Devcontainer-Egress-Firewall als **opt-in**:
 Positiv:
 
 - Schließt die Runtime-Lücke neben der bestehenden Build-Time-Allowlist
-  (`LH-FA-DEV-003`); konsistente Sicherheits-Story.
+  ([`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features)); konsistente Sicherheits-Story.
 - Rein additiv, opt-in — kein Bruch für bestehende Devcontainer.
 - Template + Config + doctor sind etablierte u-boot-Muster.
 
@@ -113,10 +113,10 @@ Negativ / Risiken:
    inaktiv) vs. opt-in-`--require-firewall`, das ohne `NET_ADMIN`
    hart abbricht (Exit 11)?
 3. **Aktivierungs-Surface:** Flag, Config-Key, oder beides; Interaktion
-   mit `--no-interactive`/`--yes` (`LH-FA-CLI-005A`).
+   mit `--no-interactive`/`--yes` ([`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a-interaktivität-und-automatisierung)).
 4. **iptables vs. nftables**, und Verhältnis zur Distro-Basis des
    Devcontainer-Image (`debian` → iptables-legacy/nft?).
-5. **Verhältnis zu `LH-FA-DEV-003`:** geteilte Allowlist-Semantik/
+5. **Verhältnis zu [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003-devcontainer-features):** geteilte Allowlist-Semantik/
    Config-Form oder bewusst getrennt (Build-Source vs. Runtime-Egress)?
 
 ## Folgepunkte
@@ -127,9 +127,8 @@ Dieses ADR liefert nur die Entscheidungs-Rahmung. Vor Implementierung:
   Fragen.
 - Spec-Erweiterung: neue `LH-FA-DEV-*`-Anforderungen (+ ggf.
   `LH-NFA-SEC-*` für die Guardrail-Semantik).
-- Slice-Plan `slice-vN-devcontainer-egress-firewall` in `open/` (heute
-  nur als Roadmap-AP geführt, ohne Plan); doctor-Check als eigene
-  Tranche (analog `slice-followup-devcontainer-features-drift-doctor`).
+- Planning-Artefakt fuer die Umsetzung; doctor-Check als eigenes
+  Inkrement.
 
 Re-Evaluation-Trigger: konkrete Nutzer-/Team-Nachfrage nach
 egress-restringierten Devcontainern, oder ein Agenten-Sandbox-Use-Case

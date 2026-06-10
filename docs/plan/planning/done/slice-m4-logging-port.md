@@ -6,10 +6,10 @@
 ## Auslöser
 
 Die `forbidigo`-Regel in `.golangci.yml` verbot `fmt.Print*` mit der
-Begründung *„use log/slog (LH-QA-004); a project-specific logging
+Begründung *„use log/slog ([`LH-QA-004`](../../../../spec/lastenheft.md#lh-qa-004-linting-solid-nahes-lint-profil)); a project-specific logging
 port may replace this once it exists"*. Der referenzierte
 „configured logging port" existierte nicht — es war prospektive Doku
-(`LH-FA-PROJDOCS-005`). Mit M4-doctor steht ein Subbefehl an, der
+([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005-carveout-disziplin)). Mit M4-doctor steht ein Subbefehl an, der
 nennenswert strukturiertes Logging produziert; der Port muss vor
 diesem Konsumenten stehen.
 
@@ -51,7 +51,7 @@ package `driven`, interface `Logger`. Konsumenten schreiben
   kommt mit M4-doctor.
 - **`.golangci.yml`**: `forbidigo.msg` aktualisiert auf *„use the
   logging port at internal/hexagon/port/driven (driven.Logger)
-  (LH-QA-004)"*. `gomodguard_v2`-Regeln für `logrus`/`zap` zeigen
+  ([`LH-QA-004`](../../../../spec/lastenheft.md#lh-qa-004-linting-solid-nahes-lint-profil))"*. `gomodguard_v2`-Regeln für `logrus`/`zap` zeigen
   jetzt auf den existierenden Adapter statt auf den prospektiven
   Slice.
 - **`carveouts.md`**: `forbidigo.msg`-Zeile entfernt.
@@ -64,7 +64,7 @@ package `driven`, interface `Logger`. Konsumenten schreiben
   separater ADR, falls je nötig. `gomodguard_v2` blockiert die
   Alternativen heute aktiv.
 - **Strukturierte Telemetrie / OTel**: gehört zum OTel-Add-on-Slice
-  (`LH-FA-ADD-004`).
+  ([`LH-FA-ADD-004`](../../../../spec/lastenheft.md#lh-fa-add-004-opentelemetry-hinzufügen)).
 - **CLI-Flags `--verbose` / `--debug` / `--json`**: kommen mit dem
   M4-doctor-Slice; der Adapter ist heute auf `Info` + `Text`
   hartcodiert.
