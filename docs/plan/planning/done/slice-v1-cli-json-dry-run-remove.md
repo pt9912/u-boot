@@ -162,14 +162,14 @@ docs-check).
   `TestRemove_NoPositionalArg_JSON_EmitsCLI006Envelope` mit
   empty `args[]` + `--json` → voller Envelope mit `command:
   "remove"`, `data: nil` (kein Service-Kontext), `code:
-  "[`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)"`, exit 2. Pattern-Erbe-Vorlauf für künftige
+  "LH-FA-CLI-006"`, exit 2. Pattern-Erbe-Vorlauf für künftige
   Folge-Slices (up/down haben `cobra.ExactArgs(1)` für
   `<service>`-Subform — denselben Args-Guard-Pfad).
 - ✅ **`ErrServiceUnregistered` ERROR-Pfad-Pin** (R6-MED-F3-Fix,
   Symmetrie zum WARN-Pfad-Pin oben): [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen) wird auch
   als Error-Code für `ErrServiceUnregistered` genutzt (R5-F2
   Multi-Use-Klarstellung). AK-Pin: `diagnostics[0].code ==
-  "[`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen)"` AND `diagnostics[0].level == "error"` AND
+  "LH-FA-ADD-007"` AND `diagnostics[0].level == "error"` AND
   `status == "error"` AND `exitCode == 10`. Konsumenten
   disambiguieren WARN-Pfad und ERROR-Pfad ausschließlich über
   `(code, level)`-Tupel, nicht über Code allein. T6-Pin
@@ -493,7 +493,7 @@ docs-check).
       (Mapper-Tabelle T0-(e)) — Exit 10.
   (2) **WARN-Diagnostic-Code** für `--purge && !VolumesPurged`
       (T0-(g)) — Exit 0 oder Exit 14 (bei Mid-Write-Variante).
-  Beide referenzieren das Spec-Umbrella [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen) "Service
+  Beide referenzieren das Spec-Umbrella [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen) `"Service
   entfernen"` (§924-947) — der Code identifiziert die *Anforderung*,
   nicht die Sub-Semantik. Spec §1834-Vertrag erlaubt das, weil
   `diagnostics[].level` (warn vs error) und ggf. `message`-Text
@@ -596,7 +596,7 @@ docs-check).
   Phase mid-write failt (z. B. compose.yaml WriteFile-Error vor
   yaml.WriteFile), wird **Variante A** festgezurrt: Error-
   Diagnostic dominiert, WARN unterdrückt. Envelope: `diagnostics:
-  [{level: "error", code: "[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)", file: "<…>"}]`,
+  [{level: "error", code: "LH-NFA-REL-003", file: "<…>"}]`,
   `status: error`, exit 14, `data: {"service": "<…>"}` ohne
   `volumesPurged` (Zero-Response analog T0-(f) Error-Pfad).
   Begründung: WARN über `volumesPurged: false` würde sich auf

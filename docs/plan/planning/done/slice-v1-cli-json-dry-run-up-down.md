@@ -571,7 +571,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
       ExitCode-Helper KEIN driven-Sentinel zuvor matched).
       Switch-Order-Pin ist dann **real, nicht Phantom**:
       konstruierter `fmt.Errorf("%w: %w", ErrUpFileSystem,
-      ErrDockerUnavailable)` liefert `diagnostics[0].code =
+      ErrDockerUnavailable)` liefert `diagnostics[0].code =`
       [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) (Mapper FS-first via Row 1) UND
       `exitCode = 11` (ExitCode-Helper Driven-first cli.go:290).
       **T7-MED-1 by-design**: die zwei Pfade sind getrennt —

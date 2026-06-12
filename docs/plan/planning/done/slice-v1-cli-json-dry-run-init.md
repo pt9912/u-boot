@@ -1001,7 +1001,7 @@ Execute-Phase-Failures ab. Planning-Phase-Failures haben
 ergänzt). T6-Acceptance ergänzt einen dedizierten Test für
 `init --force --dry-run --json` auf CWD mit unmanaged
 `.gitignore` — Pin: `plannedFiles: [], diagnostics:
-[[`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)], exitCode: 10`. Die Unterscheidung zu Mid-
+[LH-FA-INIT-005], exitCode: 10`. Die Unterscheidung zu Mid-
 Write-Failure (`exitCode: 14`) ist load-bearing — Planning-
 Errors sind User-Action-Klasse (Exit 10), Write-Errors sind
 FS-Klasse (Exit 14).

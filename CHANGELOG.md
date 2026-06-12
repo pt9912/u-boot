@@ -46,7 +46,7 @@ as the canonical machine interface) is satisfied. Details below.
 
 ### Added
 
-- `feat(cli): u-boot config/config get/config set --json
+- `feat(cli): u-boot config/config get/config set --json`
   ([`LH-FA-CLI-007`](spec/lastenheft.md#lh-fa-cli-007--dry-run)/[`LH-FA-CLI-008`](spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) / [`LH-NFA-USE-004`](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) / [`LH-FA-CONF-001`](spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)..[`LH-FA-CONF-005`](spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)) —
   achter Folge-Slice (8/9) des Cluster-Slice
   [`slice-v1-cli-json-dry-run`](docs/plan/planning/done/slice-v1-cli-json-dry-run.md). **Erster Read-only+Modifying-
@@ -89,7 +89,7 @@ as the canonical machine interface) is satisfied. Details below.
   Allowlist-Reject-Liste schrumpft von 4 auf 1 (nur noch
   `template (bare)`). Drei Review-Runden (zwei HIGH + ein MED, alle
   gefixt). Doku in [`docs/user/cli-json-output.md §6.9`](docs/user/cli-json-output.md).
-- `feat(cli): u-boot logs --json ([`LH-FA-CLI-007`](spec/lastenheft.md#lh-fa-cli-007--dry-run) /
+- `feat(cli): u-boot logs --json` ([`LH-FA-CLI-007`](spec/lastenheft.md#lh-fa-cli-007--dry-run) /
   [`LH-NFA-USE-004`](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) / [`LH-FA-CLI-006`](spec/lastenheft.md#lh-fa-cli-006--exit-codes)) — siebter Folge-Slice
   (7/9) des Cluster-Slice [`slice-v1-cli-json-dry-run`](docs/plan/planning/done/slice-v1-cli-json-dry-run.md).
   **Read-only-Klasse** auf lokalem FS (analog up-down):
@@ -165,7 +165,7 @@ as the canonical machine interface) is satisfied. Details below.
   `[ba7d06f, b502cd5, 343e622, 69cfc0d,
   c21ba28, 0fe74e4]`.
 
-- `feat(cli): u-boot up --json / u-boot down --json
+- `feat(cli): u-boot up --json / u-boot down --json`
   ([`LH-FA-CLI-007`](spec/lastenheft.md#lh-fa-cli-007--dry-run) / [`LH-NFA-USE-004`](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) / [`LH-FA-UP-001`](spec/lastenheft.md#lh-fa-up-001--umgebung-starten)/[`LH-FA-UP-003`](spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen)/[`LH-FA-UP-004`](spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen) /
   [`LH-FA-CLI-005A`](spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)) — sechster Folge-Slice (6/9) des Cluster-
   Slice [`slice-v1-cli-json-dry-run`](docs/plan/planning/done/slice-v1-cli-json-dry-run.md). **Read-only-Klasse** auf
@@ -253,7 +253,7 @@ as the canonical machine interface) is satisfied. Details below.
   strukturierte Multi-Port-Liste
   ([`slice-v1-multi-port-services`](docs/plan/planning/open/slice-v1-multi-port-services.md)).
   Coverage-Gate 91 %.
-- `feat(cli): u-boot remove --json / --dry-run / --diff
+- `feat(cli): u-boot remove --json / --dry-run / --diff`
   ([`LH-FA-CLI-007`](spec/lastenheft.md#lh-fa-cli-007--dry-run)/[`LH-FA-CLI-008`](spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) / [`LH-NFA-USE-004`](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) / [`LH-FA-ADD-007`](spec/lastenheft.md#lh-fa-add-007--service-entfernen) /
   [`LH-FA-CLI-005A`](spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)) — fünfter Folge-Slice (5/9) des Cluster-Slice
   [`slice-v1-cli-json-dry-run`](docs/plan/planning/done/slice-v1-cli-json-dry-run.md). `u-boot remove` ist die **inverse
@@ -336,7 +336,7 @@ as the canonical machine interface) is satisfied. Details below.
   Substring-Kollisions-Robustheit, TooManyArgs-Voll-Schema bei
   `--dry-run`, `delete`-Action-Hunk-Vertrag). Coverage-Gate
   91.10 %.
-- `feat(cli): u-boot generate --json / --dry-run / --diff
+- `feat(cli): u-boot generate --json / --dry-run / --diff`
   ([`LH-FA-CLI-007`](spec/lastenheft.md#lh-fa-cli-007--dry-run)/[`LH-FA-CLI-008`](spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) / [`LH-NFA-USE-004`](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) / [`LH-FA-GEN-001`](spec/lastenheft.md#lh-fa-gen-001--generate-befehl)..[`LH-FA-GEN-005`](spec/lastenheft.md#lh-fa-gen-005--idempotenz) /
   [`LH-FA-DEV-001`](spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)/[`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)) — vierter Folge-Slice (4/9) des Cluster-
   Slice [`slice-v1-cli-json-dry-run`](docs/plan/planning/done/slice-v1-cli-json-dry-run.md). `u-boot generate` ist nach
@@ -443,7 +443,7 @@ as the canonical machine interface) is satisfied. Details below.
   werden nun via `sanitizeBaseDir` aus `diagnostic.message`
   entfernt (Path-Leak/Info-Disclosure-Defense, symmetrisch zu
   `config`/`remove`). Kein Verhaltenswechsel für korrekte Aufrufe.
-- `fix(cli): mapAddErrorToDiagnostic Backup-Sentinels auf
+- `fix(cli): mapAddErrorToDiagnostic Backup-Sentinels auf`
   [`LH-NFA-REL-003`](spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) (add↔init Diagnostic-Code-Harmonisierung) —
   `mapAddErrorToDiagnostic` mappte `ErrBackupSuffixExhausted`/
   `ErrBackupSourceMissing` auf [`LH-FA-INIT-005`](spec/lastenheft.md#lh-fa-init-005--überschreibschutz) (Validation-Klasse,
@@ -461,7 +461,7 @@ as the canonical machine interface) is satisfied. Details below.
 
 ### Added
 
-- `feat(cli): u-boot init --json / --dry-run / --diff
+- `feat(cli): u-boot init --json / --dry-run / --diff`
   ([`LH-FA-CLI-007`](spec/lastenheft.md#lh-fa-cli-007--dry-run)/[`LH-FA-CLI-008`](spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) / [`LH-NFA-USE-004`](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)) — zweiter modifying-Sub-
   command mit JSON-Envelope-Migration und wichtigster Onboarding-
   Use-Case (Cluster-Slice [`slice-v1-cli-json-dry-run`](docs/plan/planning/done/slice-v1-cli-json-dry-run.md), Folge-Slice
@@ -519,7 +519,7 @@ as the canonical machine interface) is satisfied. Details below.
   fehlt + Spy-Counter 0), JSON-stdout-Cleanliness-Pin
   (`json.Decode → io.EOF`). Coverage-Gate ≥ 91 %.
 
-- `feat(cli): u-boot add --json / --dry-run / --diff
+- `feat(cli): u-boot add --json / --dry-run / --diff`
   ([`LH-FA-CLI-007`](spec/lastenheft.md#lh-fa-cli-007--dry-run)/[`LH-FA-CLI-008`](spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) / [`LH-NFA-USE-004`](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)) — erster modifying-Sub-
   command mit JSON-Envelope-Migration (Cluster-Slice
   [`slice-v1-cli-json-dry-run`](docs/plan/planning/done/slice-v1-cli-json-dry-run.md), Folge-Slice 2/9). Vier neue
@@ -551,7 +551,7 @@ as the canonical machine interface) is satisfied. Details below.
   (`offset` statt `oldStart` failt sofort).
 
 - `feat(cli): u-boot doctor --json plus Root-PersistentFlag
-  --json ([`LH-NFA-USE-004`](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) / [`LH-FA-CLI-007`](spec/lastenheft.md#lh-fa-cli-007--dry-run)) — Pattern-Vorbild für
+  --json` ([`LH-NFA-USE-004`](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) / [`LH-FA-CLI-007`](spec/lastenheft.md#lh-fa-cli-007--dry-run)) — Pattern-Vorbild für
   die maschinen-lesbare CLI-Surface (Cluster-Slice
   [`slice-v1-cli-json-dry-run`](docs/plan/planning/done/slice-v1-cli-json-dry-run.md), Folge-Slice 1/9). **Doctor**
   emittiert mit `--json` einen Spec-§1841-Minimalkontrakt-
@@ -591,7 +591,7 @@ as the canonical machine interface) is satisfied. Details below.
   ([`docs/user/cli-json-output.md`](docs/user/cli-json-output.md))
   zitiert Minimalkontrakt und Voll-Schema verbatim, dokumentiert
   Code-Registry und Per-Command-Migrations-Reihenfolge.
-- `feat(logs): u-boot logs [service] [--follow] [--tail <n>]
+- `feat(logs): u-boot logs [service] [--follow] [--tail <n>]`
   ([`LH-FA-UP-005`](spec/lastenheft.md#lh-fa-up-005--logs-anzeigen)) — neuer Subcommand streamt Compose-Logs als
   V1-Erweiterung der `up`/`down`-Familie. Ohne Service-Argument
   läuft `docker compose logs` über alle Services aus
@@ -609,7 +609,7 @@ as the canonical machine interface) is satisfied. Details below.
   14 (FS), 2 (CLI-Usage). Docker-tag E2E-Tests gegen echten
   postgres-Stack pinnen `--tail`-Buffer-Content und
   `--follow`-SIGINT-Vertrag.
-- `feat(devcontainer): Devcontainer-Features-Allowlist und Katalog
+- `feat(devcontainer): Devcontainer-Features-Allowlist und Katalog`
   ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)) — 8 Built-in-Features (`git`, `docker-cli`,
   `node`, `java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`)
   plus External-Source-Allowlist via

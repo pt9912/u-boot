@@ -114,7 +114,7 @@ docs-check).
   (T0-(c) Sub-Decision).
 - ✅ **JSON-Lines-Pfad** (falls T0-(a) Option B): pro Compose-
   Log-Zeile ein NDJSON-Object `{"level": "info", "code":
-  "[`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen)", "message": "<line>", "service":
+  "LH-FA-UP-005", "message": "<line>", "service":
   "<prefix>"}` auf stdout. Letzte Zeile ein Final-Envelope
   mit `status`/`exitCode`. **Spec-§1841-Vertrag-Bruch**:
   Konsument bekommt nicht EINEN Envelope sondern N — als

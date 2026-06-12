@@ -232,7 +232,7 @@ nicht auf reduziertem `make test + lint + docs-check`.
   einziges WriteFile**. Acceptance-Pin: `--dry-run --json` mit
   einem manuell editierten `.devcontainer/devcontainer.json`
   ohne Marker → `plannedFiles: []`, **`diagnostics[].code:
-  "[`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen)"`** (Devcontainer-Render-Spec, NICHT
+  "LH-FA-DEV-001"`** (Devcontainer-Render-Spec, NICHT
   [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) — der ist Default-Fallback und würde Drift
   signalisieren), `exitCode: 10`, kein FS-Touch.
 - ✅ **Devcontainer-Phase-2-Half-Write-Carveout** (T0-(i)):
@@ -366,7 +366,7 @@ nicht auf reduziertem `make test + lint + docs-check`.
   `ErrConfigValueInvalid` aber wrappt ihn nicht. T3 zieht den
   Sentinel-Wrap nach (Multi-`%w` analog FS-Wraps).
   **T6-Pflicht**: Reject-Pin-Test für `--allow-external-feature-
-  sources <invalid-url> --json` → `code: "[`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)"`,
+  sources <invalid-url> --json` → `code: "LH-FA-DEV-003"`,
   `exitCode: 10`.
 - **T0-(f)** **Action-Klassifikation via `data.action` festgezurrt**
   (R3-Festzurrung, R2-Variante „kein Marker" verworfen, weil sie
@@ -430,7 +430,7 @@ nicht auf reduziertem `make test + lint + docs-check`.
       attempt-Content — Recorder zeichnet vor Delegieren auf,
       `recordingfs.go:139`), `lastPlannedPath` liefert File 2
       als `diagnostics[].file`, `diagnostics[].code:
-      "[`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)"`, Exit 14. Konsistent mit init T6
+      "LH-NFA-REL-003"`, Exit 14. Konsistent mit init T6
       Mid-Write-Pattern.
   Der **Phase-2-Half-State** ist ein bewusster Carveout
   ([[feedback_carveouts_need_plans]]); `carveouts.md`-Eintrag

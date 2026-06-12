@@ -593,7 +593,7 @@ docs-check).
       (per-Check-Sentinels).
   (ii) **Multi-Use mit Code-Suffix**: [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)-Coerce
        vs. [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)-WriteReject vs. [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)-
-       PostPatchSanity`. KEIN Spec-Anker — eigener Cluster-
+       PostPatchSanity. KEIN Spec-Anker — eigener Cluster-
        Konvention-Bruch.
   (iii) **Status-quo**: alle drei auf [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)
         belassen, Konsument disambiguiert per
