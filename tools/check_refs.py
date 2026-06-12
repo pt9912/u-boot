@@ -1,4 +1,14 @@
-"""Markdown-Link-Validator fuer u-boot.
+"""Markdown-Link-Validator fuer u-boot. **DEPRECATED seit 2026-06-12.**
+
+`make docs-check` laeuft jetzt ueber d-check
+(https://github.com/pt9912/d-check, digest-gepinnt, Konfiguration in
+`.d-check.yml`) — dieses Skript ist kein Gate mehr. Grund: der
+zeilenbasierte Parser hier missdeutet CommonMark-Code-Spans, die ueber
+Zeilenumbrueche laufen (8 False Positives im Migrations-Vergleich, die
+d-check korrekt exempt). Drei u-boot-spezifische Lints dieses Skripts
+deckt d-check nicht ab und warten auf Extraktion in einen Rest-Sensor:
+verschachtelte Link-Artefakte, LH-Shorthand-Suffixe,
+Reference-Definition-Targets.
 
 Scant alle Markdown-Dateien unter `docs/`, `spec/`, `harness/` und im
 Repo-Root nach relativen `[text](path)`-Links und meldet alle nicht

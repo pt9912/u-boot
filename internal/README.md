@@ -83,7 +83,7 @@ ihren Detail-Stand jeweils selbst; Kurz-Inventar:
 `LH-FA-BUILD-009`). Bootstrap-Modus ist ab T1 verlassen; aktuelle
 Messung liegt über 90 %. Schwellwert wird in M3-T5 von `0` auf `80`
 gehoben (siehe
-[`slice-m3-coverage-threshold-aktivieren.md`](../docs/plan/planning/in-progress/slice-m3-coverage-threshold-aktivieren.md)).
+[`slice-m3-coverage-threshold-aktivieren.md`](../docs/plan/planning/done/slice-m3-coverage-threshold-aktivieren.md)).
 
 ## Import-Regeln
 

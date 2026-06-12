@@ -1,0 +1,59 @@
+# Doku-Referenz-Checks via d-check (ghcr.io/pt9912/d-check) — ersetzt
+# die Link-/Anker-/ids-/Matrix-Prüfungen von tools/check_refs.py
+# (Pilot-Migration 2026-06-12, Python-Familie/Vollausbau).
+# Scan-Scope wie das Alt-Tool (docs/, spec/, harness/, Root-*.md):
+# die internal/-READMEs bleiben per Ignore-Regel außen vor — dort
+# stehen historisch ungelinkte LH-Kennungen (dokumentierter
+# Migrations-Restbestand, Erweiterung ist u-boot-Entscheidung).
+scan:
+  roots: ["."]
+  ignore: ["internal/**"]
+modules: [links, anchors, ids, matrix]
+
+# Linkpflicht für Kennungen — Muster aus tools/check_refs.py übersetzt
+# (\b-Wortgrenzen wie dort); Planning-Muster ohne Lookahead (RE2),
+# Punkt-Varianten entfallen.
+ids:
+  patterns:
+    - regex: '\bADR-\d{4}\b'
+      target: docs/plan/adr/
+    - regex: '\bLH(?:-[A-Z0-9]+)+-\d{3}[A-Z]?\b'
+      target: spec/lastenheft.md
+    - regex: '\b(?:PH|TC|CO)(?:-[A-Z0-9]+)+-\d{3}[A-Z]?\b'
+      target: spec/lastenheft.md
+    - regex: '\b(?:slice|tranche)-[a-z0-9][a-z0-9-]*[a-z0-9]\b'
+      target: docs/plan/planning/
+
+# Referenzmatrix — normatives Referenzmodell aus check_refs.py:
+# Vertrag verweist nie abwärts, Sicht-Spec nur auf Spec-Straten,
+# ADRs nie Richtung Planning; Referenzen auf inaktive Dokumente
+# (Status superseded/deprecated) sind Befunde.
+matrix:
+  classes:
+    - name: contract-spec
+      paths: [spec/lastenheft.md]
+    - name: view-spec
+      paths: [spec/architecture.md]
+    - name: adr
+      paths: ["docs/plan/adr/[0-9]*.md"]
+    - name: slice
+      paths: ["docs/plan/planning/**/slice-*.md", "docs/plan/planning/**/tranche-*.md"]
+    - name: carveout
+      paths: ["docs/plan/planning/in-progress/carveouts.md"]
+    - name: roadmap
+      paths: ["docs/plan/planning/in-progress/roadmap.md"]
+  rules:
+    - {from: contract-spec, to: view-spec, allow: false}
+    - {from: contract-spec, to: adr, allow: false}
+    - {from: contract-spec, to: slice, allow: false}
+    - {from: contract-spec, to: carveout, allow: false}
+    - {from: contract-spec, to: roadmap, allow: false}
+    - {from: view-spec, to: adr, allow: false}
+    - {from: view-spec, to: slice, allow: false}
+    - {from: view-spec, to: carveout, allow: false}
+    - {from: view-spec, to: roadmap, allow: false}
+    - {from: adr, to: slice, allow: false}
+    - {from: adr, to: carveout, allow: false}
+    - {from: adr, to: roadmap, allow: false}
+  status:
+    forbidden: [superseded, deprecated]

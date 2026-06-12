@@ -176,17 +176,19 @@ verify-depguard: ## Verify all eight depguard layer rules fire (LH-FA-ARCH-003).
 
 # ---- docs gates ------------------------------------------------------------
 
-# docs-check validates the markdown reference model and runs the stdlib
-# regression tests for the validator. Covered: relative link paths,
-# heading anchors, linked ADR/LH/Planning/Trace ids, and reference-model
-# edges across docs/, spec/, harness/, and root *.md. Docker-encapsulated
-# Python (stdlib-only) — no host Python requirement. Adapted from
-# c-hsm-doc.
+# docs-check validates the markdown reference model via d-check
+# (digest-pinned container image, configured in .d-check.yml; see
+# https://github.com/pt9912/d-check/releases/tag/v0.2.0). Covered:
+# relative link paths, heading anchors, linked ADR/LH/Planning/Trace
+# ids, and reference-model edges across docs/, spec/, harness/, and
+# root *.md. tools/check_refs.py is deprecated (its line-based parser
+# misreads CommonMark multi-line code spans); its three u-boot-specific
+# lints (nested-link artifacts, LH shorthand suffixes,
+# reference-definition targets) await extraction into a rest sensor.
+D_CHECK_IMAGE ?= ghcr.io/pt9912/d-check@sha256:f2e0ac7bd9650fe560058e530c8890a629e2df43b8b2e696e78488794d311846
+
 docs-check: ## Validate markdown refs, ADR links, anchors, and model edges.
-	docker run --rm \
-	    -v "$(CURDIR)":/src -w /src \
-	    python:$(PYTHON_VERSION) \
-	    sh -c "python -B -m unittest tools.check_refs_test && python -B tools/check_refs.py"
+	docker run --rm -v "$(CURDIR)":/repo:ro $(D_CHECK_IMAGE)
 
 # ---- aggregators -----------------------------------------------------------
 
