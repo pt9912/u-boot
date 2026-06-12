@@ -161,7 +161,7 @@ u-boot add postgres --dry-run --diff --json  # Voll-Schema, Hunks, kein Write
 
 `make test` + `make lint` + `make docs-check` grün. **Reject-Eintrag
 für `u-boot add` in
-[`jsonallowlist.go``
+`jsonallowlist.go`
 entfernt**; statt dessen Allowlist-Eintrag `"u-boot add": true`.
 
 Konkrete Pin-Form für `add --dry-run --json` (Spec §326-Voll-Schema;
@@ -1269,7 +1269,7 @@ denkbar. **Verworfen**, weil:
   (`*[]plannedFile`/`*[]changeEntry` bereits da),
   [`cli/jsontestutil/`](../../../../internal/adapter/driving/cli/jsontestutil/)
   (`AssertFullEnvelope`-Erstnutzung),
-  [`cli/jsonallowlist.go``
+  `cli/jsonallowlist.go`
   (Allowlist-Migration).
 - Vorbild-Slice für T0-Outcomes-Layout:
   [`done/slice-v1-cli-json-dry-run-doctor`](../done/slice-v1-cli-json-dry-run-doctor.md)

@@ -791,7 +791,7 @@ Kombi). (R1-MED-5 + R2-HIGH-2 + R2-MED-4/5-Adressierung.)
   [`cli/config.go`](../../../../internal/adapter/driving/cli/config.go),
   [`application/config.go`](../../../../internal/hexagon/application/config.go),
   [`port/driving/config.go`](../../../../internal/hexagon/port/driving/config.go),
-  [`cli/jsonallowlist.go``
+  `cli/jsonallowlist.go`
   Z. 29 (heutige Reject-Liste).
 - Folge-Slices: noch keine direkten Forward-Refs aus config
   heraus; T0-Review kann Folge-Stubs spawnen (Kandidaten: Multi-
