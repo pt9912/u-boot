@@ -28,6 +28,12 @@ Thumbs.db
 .codex/
 .agents/
 
+# Vendored Regelwerk-Baseline unter .harness/baseline/ ist COMMITTET
+# (harness/conventions.md MR-004/MR-007); nur ephemere Harness-Nebenprodukte
+# ignorieren. Aktuell defensiv / No-op: fetch-baseline-cache.sh nutzt mktemp,
+# nicht .harness/cache/.
+.harness/cache/
+
 # Local env overrides (if ever added — never commit secrets)
 .env
 .env.local

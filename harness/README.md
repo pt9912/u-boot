@@ -1,5 +1,7 @@
 # Harness
 
+## Purpose
+
 Dieser Harness verbindet Spezifikationen, ADRs, Slice-Plaene,
 Quality-Gates und Betriebsdokumentation fuer `u-boot`. Er ist kein
 Ersatz fuer `spec/` oder `docs/`, sondern der Einstiegspunkt fuer
@@ -38,6 +40,8 @@ Feedforward-Quellen, die Arbeit vor der Umsetzung lenken:
 | [`harness/review.md`](review.md) | Review-Kategorien, Prueflinsen und Output-Schema |
 | [`harness/replay.md`](replay.md) | Replay-/Golden-Set-Regeln fuer CLI-Generatoren |
 | [`harness/verification.md`](verification.md) | Verification-Evidence und Slice-Closure-Schema |
+| [`harness/conventions.md`](conventions.md) | Repo-lokale Strukturregeln: Baseline-Pin, Adaptions-Ledger (`MR-*`), Modus-Deklaration pro Sub-Area |
+| `.harness/baseline/v3.5.1/regelwerk/README.md` | Vendored Betriebsregelwerk (AI-Harness-Kurs, Index); pro Entscheidung den benoetigten Abschnitt nachschlagen |
 | [`AGENTS.md`](../AGENTS.md) | Hard Rules, Source Precedence, Minimal Workflow |
 
 ## Sensors

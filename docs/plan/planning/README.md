@@ -24,6 +24,28 @@ open/ → next/ → in-progress/ → done/
   [`../../../harness/verification.md`](../../../harness/verification.md)
   tragen oder auf ein eigenes Evidence-Artefakt verweisen.
 
+## Slices vs. Wellen — zwei Status-Mechanismen
+
+Zwei bewusst getrennte Status-Mechanismen:
+
+- **Slices** (und Tranchen) tragen ihren Status über das **Verzeichnis**
+  (`open/` → `next/` → `in-progress/` → `done/`). Der aktive Durchlauf nimmt
+  ausschließlich Slices/Tranchen auf.
+- **Wellen** sind bei u-boot die **Release-Versionen** und werden **in der
+  Roadmap** geführt ([`in-progress/roadmap.md`](in-progress/roadmap.md):
+  Aktuelle Welle, Nächste Wellen, Meilensteine, Abgeschlossene Wellen); ihr
+  Status lebt dort, nicht in einem Lifecycle-Verzeichnis.
+
+u-boot-Abweichungen vom Baseline-Default (dokumentiert in
+[`harness/conventions.md`](../../../harness/conventions.md), `MR-003`/`MR-002`):
+
+- **Keine eigenständigen Welle-Plan-Dateien** und **keine
+  `welle-NN-results.md`** — die Welle-Closure lebt vollständig im jeweiligen
+  `done/`-Release-Cut-Slice (Detailquelle inkl. Tranchen-Hashes).
+- **Aufgelöste Carveouts** wandern **nicht** nach `done/`, sondern bleiben im
+  Master-Inventar [`in-progress/carveouts.md`](in-progress/carveouts.md) mit
+  Audit-Trail des auflösenden Slice.
+
 ## Referenzsemantik
 
 Planning-Artefakte folgen [`LH-FA-PROJDOCS-006`](../../../spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell) und

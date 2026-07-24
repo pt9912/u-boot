@@ -5,9 +5,14 @@
 # die internal/-READMEs bleiben per Ignore-Regel außen vor — dort
 # stehen historisch ungelinkte LH-Kennungen (dokumentierter
 # Migrations-Restbestand, Erweiterung ist u-boot-Entscheidung).
+# .harness/baseline/** ist das committet-vendored Betriebsregelwerk
+# (harness/conventions.md MR-004/MR-007); die Regelwerk-/Template-Module
+# tragen repo-relative Links (../templates/…) und werden nicht gewertet.
+# Der Glob ist tag-agnostisch (**), damit künftige vendored Stände
+# automatisch erfasst sind; .harness/skills/ bleibt bewusst prüfbar.
 scan:
   roots: ["."]
-  ignore: ["internal/**"]
+  ignore: ["internal/**", ".harness/baseline/**"]
 modules: [links, anchors, ids, matrix]
 
 # Linkpflicht für Kennungen — Muster aus tools/check_refs.py übersetzt

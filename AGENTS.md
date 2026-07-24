@@ -8,6 +8,32 @@ Slice-Doku.
 Bei Konflikt zwischen dieser Datei und einer kanonischen Quelle gewinnt
 die kanonische Quelle. Dann ist diese Datei anzupassen.
 
+## Betriebsregelwerk (vendored Baseline)
+
+Das adoptierte Betriebsregelwerk (AI-Harness-Kurs,
+`pt9912/ai-harness-course`) ist committet vendored unter
+`.harness/baseline/v3.5.1/regelwerk/` (`README.md` = Index); das
+Integritaets-Manifest `.harness/baseline/v3.5.1/SHA256SUMS` ist offline
+pruefbar per `tools/harness/fetch-baseline-cache.sh --verify`. Netzlos auf
+jedem Checkout.
+
+Lesemodell: pro Entscheidung nur den benoetigten Abschnitt nachschlagen
+(README = Index), nicht das ganze Regelwerk im Kontext halten. Breiter
+Pflicht-Blick nur bei Bootstrap, Aenderung an
+[`harness/conventions.md`](harness/conventions.md) oder Drift-Audit gegen die
+Baseline.
+
+Die Skelett-Vorlagen liegen vendored unter
+`.harness/baseline/v3.5.1/templates/` und tragen zwei Rollen: Referenz-Form
+(Ziel der `../templates/...`-Verweise) und Kopiervorlage - neue Artefakte
+(ADR, Slice, Welle, Carveout, Review-Report) aus der Vorlage kopieren und
+ausfuellen, nicht frei formulieren.
+
+Repo-lokale Strukturregeln (ID-Schemata, Adaptionen gegenueber der Baseline,
+Modus-Deklarationen pro Sub-Area) leben in
+[`harness/conventions.md`](harness/conventions.md); der adoptierte Stand steht
+dort unter Baseline.
+
 ## Source Precedence
 
 In dieser Reihenfolge lesen und aufloesen:
