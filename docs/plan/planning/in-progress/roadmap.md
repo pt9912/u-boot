@@ -18,7 +18,7 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 **Geplantes Ende:** offen (Wartungs-Welle; trigger-getriebene Folge-Slices)
 
 **Closure-Trigger:** DoD des Adoptions-Slice
-[`slice-harness-regelwerk-adoption-v3.5.1`](../open/slice-harness-regelwerk-adoption-v3.5.1.md)
+[`slice-harness-regelwerk-adoption-v3.5.1`](../done/slice-harness-regelwerk-adoption-v3.5.1.md)
 erfüllt (`make gates` grün, Review + Verification) **und** die Folge-Slices
 FS-1..FS-4 (Reviewer-Skill, `docs/reviews/`, Sub-Area-Modus-Audit,
 Freshness-Audit) sind entweder ausgeliefert oder als eigene `open/`-Slices

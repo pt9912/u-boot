@@ -9,7 +9,7 @@ Verzeichnisse bewegt).
 [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format)
 (Vertrags-Stratum `spec/lastenheft.md`, „vertraglich abnahmebindend") auf die
 vendored MADR-ADR-Template-Form gehoben wird. Trigger ist die v3.5.1-Adoption
-([`slice-harness-regelwerk-adoption-v3.5.1`](slice-harness-regelwerk-adoption-v3.5.1.md),
+([`slice-harness-regelwerk-adoption-v3.5.1`](../done/slice-harness-regelwerk-adoption-v3.5.1.md),
 dortiger `MR-008` verweist auf diesen CR, ändert aber `LH-FA-PROJDOCS-002`
 nicht). Kohärent mit dem Referenzmodell
 ([`LH-FA-PROJDOCS-006`](../../../../spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell),
@@ -100,7 +100,7 @@ CR-Artefakt).
 ## 4. Trigger
 
 Manuell, nach Review dieses Plans **und** nach Schließung des
-[`slice-harness-regelwerk-adoption-v3.5.1`](slice-harness-regelwerk-adoption-v3.5.1.md)
+[`slice-harness-regelwerk-adoption-v3.5.1`](../done/slice-harness-regelwerk-adoption-v3.5.1.md)
 (die vendored Baseline + `MR-008`-Verweis müssen stehen).
 
 ## 5. Closure-Trigger
