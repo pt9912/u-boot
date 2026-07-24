@@ -13,24 +13,25 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**Welle-ID:** welle-harness-adoption-v3.5.1
-**Start:** 2026-07-24
-**Geplantes Ende:** offen (Wartungs-Welle; trigger-getriebene Folge-Slices)
+**Welle-ID:** — (keine aktive Welle)
+**Stand:** 2026-07-24
 
-**Closure-Trigger:** DoD des Adoptions-Slice
-[`slice-harness-regelwerk-adoption-v3.5.1`](../done/slice-harness-regelwerk-adoption-v3.5.1.md)
-erfüllt (`make gates` grün, Review + Verification) **und** die Folge-Slices
-FS-1..FS-4 (Reviewer-Skill, `docs/reviews/`, Sub-Area-Modus-Audit,
-Freshness-Audit) sind entweder ausgeliefert oder als eigene `open/`-Slices
-vertagt.
+Die Welle `welle-harness-adoption-v3.5.1` (Regelwerk-v3.5.1-Adoption +
+ADR-Format-CR) ist **abgeschlossen** (s. Abgeschlossene Wellen). Aktuell läuft
+keine Welle.
 
-Die Produktarbeit wartet nach v0.4.0 (released 2026-06-08) auf externe Trigger
-(siehe Nächste Wellen); die aktive Welle ist die Harness-/Baseline-Wartung.
+**Nächster Aufsatzpunkt:** der **Harness-Konformitäts-Nachlauf** — die im
+Adoptions-Slice §7 dokumentierten Folge-Punkte FS-1..FS-4 und die
+`spec/architecture.md`-Konformität (s. Nächste Wellen). Sie sind noch **nicht**
+als eigene `open/`-Slices angelegt; erster Schritt ist, den jeweils
+bearbeiteten Punkt als `open/`-Slice zu stubben. Produkt-Wellen (v0.5.0) warten
+weiter auf externe Trigger.
 
 ## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
+| **Harness-Konformitäts-Nachlauf** (nächster Aufsatzpunkt) | direkt fortsetzbar, kein externer Trigger | FS-1 Reviewer-/Closure-Skill (`.harness/skills/`) + FS-2 `docs/reviews/`; FS-3 Sub-Area-Modus-Audit Bestandscode; FS-4 Freshness-Audit; `spec/architecture.md` §Sequenz/§Fehlermodelle — spezifiziert in [`slice-harness-regelwerk-adoption-v3.5.1`](../done/slice-harness-regelwerk-adoption-v3.5.1.md) §7 (je als `open/`-Slice zu stubben) | M |
 | macOS-Distribution | konkrete Homebrew-Nutzeranfrage | [`slice-v2-homebrew-formula`](../open/slice-v2-homebrew-formula.md) | S |
 | Linux-Pakete | konkrete Debian-/RPM-Anfrage | [`slice-v2-distro-pakete`](../open/slice-v2-distro-pakete.md) ([ADR-0007](../../adr/0007-distributionswege-ghcr.md)) | M |
 | Devcontainer-Robustheit | Real-World-Half-State-Beschwerde oder Schema-Erweiterung | [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md) | M |
@@ -74,6 +75,7 @@ flowchart LR
 | v0.3.0 | 2026-06-01 | [`slice-v1-release-cut-v0.3.0`](../done/slice-v1-release-cut-v0.3.0.md) |
 | v0.4.0 (maschinenlesbare CLI, `logs`, Devcontainer-Features) | 2026-06-08 | [`slice-v1-release-cut-v0.4.0`](../done/slice-v1-release-cut-v0.4.0.md); JSON-CLI-Cluster [`slice-v1-cli-json-dry-run`](../done/slice-v1-cli-json-dry-run.md) (9/9 Folge-Slices + `T_close`, `3a35d58`) |
 | Lokale FS-Templates | 2026-06 | [`slice-later-local-templates`](../done/slice-later-local-templates.md) ([`LH-FA-TPL-003`](../../../../spec/lastenheft.md#lh-fa-tpl-003--eigene-templates)) |
+| welle-harness-adoption-v3.5.1 (Regelwerk v3.5.1 + ADR-Format-CR auf MADR) | 2026-07-24 | [`slice-harness-regelwerk-adoption-v3.5.1`](../done/slice-harness-regelwerk-adoption-v3.5.1.md) (`8d897d3`); [`slice-cr-adr-format-madr`](../done/slice-cr-adr-format-madr.md) (`7633cbb`) |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-NN-results.md`; die Welle-Closure lebt vollständig im jeweiligen
