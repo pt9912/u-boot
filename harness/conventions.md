@@ -220,7 +220,7 @@ Fundstelle: `.harness/baseline/v3.5.1/regelwerk/modul-02-harness-bootstrap.md`.
 
 - **Datum:** 2026-07-24
 - **Geltungsbereich:** ADR-Form-Politik; verweist auf den CR-Slice
-  [`slice-cr-adr-format-madr`](../docs/plan/planning/open/slice-cr-adr-format-madr.md).
+  [`slice-cr-adr-format-madr`](../docs/plan/planning/done/slice-cr-adr-format-madr.md).
   Aendert `spec/lastenheft.md` NICHT von hier aus.
 - **Adaption:** Das vendored ADR-Template (MADR-/Nygard-Stil) kollidiert mit dem
   heutigen [`LH-FA-PROJDOCS-002`](../spec/lastenheft.md#lh-fa-projdocs-002--adr-format)

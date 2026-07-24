@@ -133,7 +133,7 @@ Bestandscodes) werden als **dokumentierte Folge-Slices** ausgelagert
     das vendored MADR-Template kollidiert mit `LH-FA-PROJDOCS-002` (Vertrags-
     Stratum) und ist ein Change Request, kein conventions-MR. Dieser Block
     dokumentiert nur den Stand und zeigt auf den CR-Slice
-    [`slice-cr-adr-format-madr`](../open/slice-cr-adr-format-madr.md) (FS-5); Bestand
+    [`slice-cr-adr-format-madr`](slice-cr-adr-format-madr.md) (FS-5); Bestand
     lean+grandfathered, neue ADRs MADR.
 - [ ] **`AGENTS.md` §1/Source-Precedence-Kopf ergänzt** um den Pointer auf die
   vendored Baseline (Sync-Trigger **T2**): Regelwerk vendored unter
@@ -266,7 +266,7 @@ geschrieben. Danach `git mv` `open/` → (`next/` →) `in-progress/` → `done/
   Kurs-Release-**Liste** (nicht nur Asset-Hash), die einen Review-Bump auslöst
   statt Auto-Update.
 - **FS-5 — ADR-Format-CR:** eigener Change-Request-Slice
-  [`slice-cr-adr-format-madr`](../open/slice-cr-adr-format-madr.md), der
+  [`slice-cr-adr-format-madr`](slice-cr-adr-format-madr.md), der
   `LH-FA-PROJDOCS-002` (Vertrags-Stratum) auf die vendored MADR-ADR-Template-Form
   hebt und den Accepted-Bestand grandfathered. Bewusst **nicht** in diesem
   Harness-Slice, weil er eine Rang-1-Anforderung ändert; `MR-008` verweist nur.
@@ -281,7 +281,7 @@ Scope:
   Baseline-Adoption); [`LH-FA-PROJDOCS-006`](../../../../spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell)
   und [`ADR-0013`](../../adr/0013-dokumentationsreferenzmodell.md) nur lesend
   berührt. Die Vertrags-Änderung `LH-FA-PROJDOCS-002` ist als CR ausgelagert
-  (FS-5, [`slice-cr-adr-format-madr`](../open/slice-cr-adr-format-madr.md)).
+  (FS-5, [`slice-cr-adr-format-madr`](slice-cr-adr-format-madr.md)).
 - Artefakte: `tools/harness/fetch-baseline-cache.sh`,
   `.harness/baseline/v3.5.1/{regelwerk,templates}/` (+`SHA256SUMS`, 42 Dateien),
   `harness/conventions.md` (`MR-000..MR-008`), `AGENTS.md`, `harness/README.md`,
