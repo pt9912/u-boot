@@ -227,20 +227,20 @@ Fundstelle: `.harness/baseline/v3.5.1/regelwerk/modul-02-harness-bootstrap.md`.
   (Status/Datum als Inline-Felder statt `##`-Ueberschriften; Titel-/Superseded-
   Format; zusaetzliche Pflicht-Sections). Die Angleichung aendert das
   **Vertrags-Stratum** und ist damit ein **Change Request**, nicht per
-  conventions-MR moeglich. Dieser Block **dokumentiert** nur den Stand und
-  verweist; die eigentliche Aenderung traegt der CR-Slice. Bis dessen
-  Ausfuehrung gilt `LH-FA-PROJDOCS-002` in der leanen 5-Abschnitt-Form. Nach CR:
-  die zum CR-Zeitpunkt Accepted ADRs (`0001`-`0010`, `0013`) bleiben lean +
-  immutabel (grandfathered, Hard Rule); Proposed (`0011`, `0012`) und alle neuen
-  ADRs sind MADR-konform.
+  conventions-MR moeglich. Die Aenderung traegt der CR-Slice, nicht dieser Block.
+  **CR ausgefuehrt (2026-07-24):** `LH-FA-PROJDOCS-002` traegt jetzt die
+  MADR-Form; die zum CR-Zeitpunkt Accepted ADRs (`0001`-`0010`, `0013`) bleiben
+  lean + immutabel (grandfathered, Hard Rule); Proposed (`0011`, `0012`) und alle
+  neuen ADRs sind MADR-konform.
 - **Begruendung:** conventions.md ist form-bringend, nicht vertrags-aendernd; eine
   Vertrags-Anforderung darf hier nur referenziert werden. Das Template-Feld
   "Schaerft" deckt sich mit u-boots Referenzmodell
   ([`ADR-0013`](../docs/plan/adr/0013-dokumentationsreferenzmodell.md) /
   [`LH-FA-PROJDOCS-006`](../spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell)):
   die `Schaerft`-Aufwaerts-Deklaration ist die Aenderungskopplung Spec-ADR.
-- **Aufloesungs-Trigger:** bei Ausfuehrung des CR-Slice diesen Block auf "CR
-  ausgefuehrt" fortschreiben (Datum + Grandfather-Record).
+- **Aufloesungs-Trigger:** erledigt (CR ausgefuehrt 2026-07-24; Delivery-Hash im
+  CR-Slice). Die status-basierte Grandfather-Grenze gilt permanent; neue
+  Accepted-ADRs entstehen bereits MADR-konform, kein neuer Grandfather noetig.
 
 ## Zusatzklassen-Deklaration fuer Sensors-Bindung
 

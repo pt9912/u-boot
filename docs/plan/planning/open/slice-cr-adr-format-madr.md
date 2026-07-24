@@ -126,7 +126,63 @@ DoD vollständig + `make gates` grün + Review nach
 
 ## 7. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen: Commit-Hash, Steering-Loop-Lerneintrag. -->
+### Verification Evidence
+
+Scope:
+- Slice: `slice-cr-adr-format-madr` (Change Request am Vertrags-Stratum)
+- IDs: [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format)
+  (geändert); [`LH-FA-PROJDOCS-006`](../../../../spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell)
+  / [`ADR-0013`](../../adr/0013-dokumentationsreferenzmodell.md) (Referenzmodell,
+  kohärent, unverändert).
+- Artefakte: `spec/lastenheft.md` (`LH-FA-PROJDOCS-002`),
+  [`docs/plan/adr/README.md`](../../adr/README.md), `harness/conventions.md`
+  (`MR-008`).
+
+DoD-Abgleich: alle Punkte erfüllt — CR-Charakter dokumentiert (§1);
+`LH-FA-PROJDOCS-002` auf MADR-Form; Reconciliation (Titel `# ADR <Nr>:`,
+Superseded `<NNNN>-<slug>` klickbar, Status-Werte) explizit entschieden;
+Grandfathering status-basiert (`0001`–`0010`, `0013` Accepted = lean+immutabel);
+Proposed `0011`/`0012` mutabel/MADR-künftig; `adr/README.md` nachgezogen;
+`MR-008` auf „ausgeführt". **Kein Accepted-ADR angefasst** (Immutabilität
+gewahrt).
+
+Sensors:
+| Sensor | Ergebnis | Evidence |
+| --- | --- | --- |
+| `make gates` | pass | `lint + test + coverage-gate + docs-check green` (Coverage 91.40%) |
+| `make docs-check` | pass | 120 Dateien, 0 Befunde; Anker `lh-fa-projdocs-002--adr-format` stabil |
+
+Traceability:
+| ID / Regel | Beleg |
+| --- | --- |
+| [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) | Anforderungstext = MADR-Form; `docs-check` `ids`/`anchors` grün |
+| Immutabilität (Hard Rule) | `git diff --name-only`: nur `lastenheft`/`adr/README`/`conventions`; kein `00NN-*.md` |
+| Referenzmodell ([`ADR-0013`](../../adr/0013-dokumentationsreferenzmodell.md)) | `Schärft`-Aufwärtskopplung ins Template-Feld übernommen |
+
+Carveouts: Neu: none. Gelöst: none. Unverändert: none.
+
+Nicht ausgeführt:
+- `make ci` / `govulncheck` / `image-scan` / `test-docker` — reiner Doku-/Spec-CR,
+  kein Code-/Image-Delta.
+
+Independent Review (Frischkontext, Rollentrennung): kein HIGH/MEDIUM; 2 INFO
+(nicht handlungspflichtig — redundanter Klartext-Link bewusst entfernt;
+`Schärft`-Beispiel bewusst auf `architecture.md` reduziert). Anker-Stabilität,
+MADR-Treue, status-basiertes Grandfathering (11 Accepted selbst verifiziert),
+Immutabilität und `MR-008`-Konsistenz bestätigt.
+
+Commit / Artefakt: **pending** (Closing-Commit; Hash hier eintragen) + `git mv`
+`open/` → `done/`.
+
+### Steering-Loop-Lerneintrag
+
+- Vertrags-Kollision korrekt als **CR** behandelt (nicht conventions-MR): das
+  Template kollidierte strukturell mit `LH-FA-PROJDOCS-002`, also wurde die
+  Anforderung selbst geändert, form-bringende `conventions.md` verweist nur.
+- MADR-**Substanz** übernommen, u-boot-Link-Konventionen (Titel/Superseded)
+  behalten — Reconciliation explizit, keine blinde Template-Übernahme.
+- Grandfathering **status-basiert** statt Nummern-Präfix, weil die Accepted-
+  Grenze (`0013`) nicht am Nummern-Präfix liegt.
 
 ## 8. Sub-Area-Modus-Begründung
 

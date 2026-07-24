@@ -3,19 +3,24 @@
 Architecture Decision Records (ADRs) für u-boot.
 
 Format und Konventionen sind in [`LH-FA-PROJDOCS-002`](../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format)
-([../../../spec/lastenheft.md](../../../spec/lastenheft.md)) verbindlich
-festgelegt:
+verbindlich festgelegt (MADR-/Nygard-Form, vendortes Template, Regelwerk-Stand
+v3.5.1). Kurzfassung:
 
 - Dateiname: `<NNNN>-<kebab-slug>.md`, beginnend bei `0001`, monoton steigend.
-- Mindestabschnitte in dieser Reihenfolge:
-  1. Dokumenttitel als `#`: `# ADR <Nr>: <Titel>`
-  2. `## Status` – `Proposed` | `Accepted` | `Superseded by <NNNN>-<slug>` | `Deprecated`
-  3. `## Datum` – `YYYY-MM-DD`
-  4. `## Kontext`
-  5. `## Entscheidung`
-  6. `## Konsequenzen`
-- ADR-Nummern werden nie wiederverwendet. Abgelöste ADRs bleiben mit
-  Status `Superseded by <NNNN>-<slug>` erhalten.
+- Titel `# ADR <Nr>: <Titel>`; darunter die Kopf-Felder als **fette
+  Inline-Felder**: `**Status:**` (`Proposed` | `Accepted` | `Deprecated` |
+  `Superseded by <NNNN>-<slug>`), `**Datum:**`, `**Autor:**`, `**Bezug:**`,
+  `**Schärft:**` (Aufwärts-Kopplung Spec/ADR).
+- Abschnitte (`##`) in dieser Reihenfolge: Kontext, Entscheidung, Verglichene
+  Alternativen, Konsequenzen, Fitness Function (falls zutreffend),
+  Re-Evaluierungs-Trigger, Geschichte.
+- ADR-Nummern werden nie wiederverwendet; abgelöste ADRs bleiben mit
+  `Superseded by <NNNN>-<slug>` erhalten (klickbarer Link).
+
+**Grandfathering.** Die zum v3.5.1-Format-Wechsel bereits `Accepted` ADRs
+(`0001`–`0010`, `0013`) bleiben in der leanen Vorform und sind unveränderlich;
+das MADR-Format gilt für neu angelegte ADRs sowie für die noch mutable
+`Proposed`-ADRs (`0011`, `0012`) beim nächsten inhaltlichen Anfassen.
 
 ## Index
 

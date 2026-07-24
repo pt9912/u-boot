@@ -1636,18 +1636,29 @@ Abgrenzung zu Zielprojekten: Für per `u-boot init` erzeugte Zielprojekte ist nu
 
 Priorität: MVP
 
-Architecture Decision Records in `docs/plan/adr/` müssen folgenden Konventionen folgen:
+Architecture Decision Records in `docs/plan/adr/` folgen dem vendorten MADR-/Nygard-Template (`.harness/baseline/<tag>/templates/docs/plan/adr/NNNN-titel.template.md`, adoptiert mit Regelwerk-Stand v3.5.1):
 
-- Dateiname beginnt mit vierstelliger Nummer, beginnend bei `0001` und monoton steigend: `0001-<slug>.md`, `0002-<slug>.md`.
-- Slug nach der Nummer in Kebab-Case (z. B. `0001-implementierungssprache-go.md`).
-- Mindestabschnitte im Dokument, in dieser Reihenfolge, jeweils als `##`-Überschrift:
-  1. Dokumenttitel als `#`-Überschrift: `# ADR <Nr>: <Titel>`.
-  2. `## Status` – einer aus `Proposed`, `Accepted`, `Superseded by <NNNN>-<slug>`, `Deprecated`.
-  3. `## Datum` – Entscheidungsdatum im Format `YYYY-MM-DD`.
-  4. `## Kontext` – warum die Entscheidung nötig wird.
-  5. `## Entscheidung` – was beschlossen wird.
-  6. `## Konsequenzen` – kurz- und langfristige Auswirkungen, inkl. Trade-offs.
-- ADR-Nummern werden nie wiederverwendet; abgelöste ADRs bleiben mit Status `Superseded by <NNNN>-<slug>` erhalten und verweisen auf den Nachfolger über den vollen Dateinamen-Stamm (ohne `.md`).
+- Dateiname beginnt mit vierstelliger Nummer, beginnend bei `0001` und monoton steigend: `0001-<slug>.md`, `0002-<slug>.md`; Slug in Kebab-Case (z. B. `0001-implementierungssprache-go.md`).
+- Dokumenttitel als `#`-Überschrift: `# ADR <Nr>: <Titel>`.
+- Direkt darunter die Kopf-Felder als **fette Inline-Felder** (nicht als `##`-Überschriften):
+  - `**Status:**` – einer aus `Proposed`, `Accepted`, `Deprecated`, `Superseded by <NNNN>-<slug>`.
+  - `**Datum:**` – Entscheidungsdatum im Format `YYYY-MM-DD`.
+  - `**Autor:**` – verantwortliche Rolle oder Person.
+  - `**Bezug:**` – betroffene `LH-*`- und ggf. Vorgänger-ADR-IDs als Markdown-Links (optional, wenn zutreffend).
+  - `**Schärft:**` – welche Spec-Stelle (`architecture.md §N`) diese ADR verbindlich macht, als Aufwärts-Deklaration der Änderungskopplung (wer die ADR ändert, zieht von hier die Spec-Stellen nach); `—`, wenn Prozess-ADR ohne Spec-Bezug.
+- Danach die Abschnitte, jeweils als `##`-Überschrift, in dieser Reihenfolge:
+  1. `## Kontext` – Ausgangslage, auslösende Anforderung, tragende Annahmen.
+  2. `## Entscheidung` – die Wahl, eindeutig.
+  3. `## Verglichene Alternativen` – Optionen mit Pro/Contra (auch „nichts tun").
+  4. `## Konsequenzen` – kurz- und langfristige Folgen, positiv und negativ, inkl. Folgepflichten.
+  5. `## Fitness Function` – die maschinell prüfbare Regel, falls die Entscheidung sich in einer Code-Eigenschaft niederschlägt (sonst entfällt der Abschnitt).
+  6. `## Re-Evaluierungs-Trigger` – wann die Entscheidung erneut zu prüfen ist.
+  7. `## Geschichte` – Tabelle Datum/Ereignis/Verweis (`Proposed`, `Accepted`, …).
+- ADR-Nummern werden nie wiederverwendet; abgelöste ADRs bleiben mit Status `Superseded by <NNNN>-<slug>` erhalten und verweisen auf den Nachfolger über den vollen Dateinamen-Stamm (ohne `.md`), als klickbaren Link.
+
+**Grandfathering (Bestand).** Die zum Zeitpunkt der Format-Umstellung (Regelwerk-v3.5.1-Adoption) bereits `Accepted` ADRs (`0001`–`0010`, `0013`) bleiben in der vorherigen leanen Form (`## Status`/`## Datum` als Überschriften; Abschnitte Kontext/Entscheidung/Konsequenzen) und sind als `Accepted` **unveränderlich**; sie werden **nicht** migriert. Das MADR-Format gilt für alle **neu** angelegten ADRs sowie für noch mutable `Proposed`-ADRs (`0011`, `0012`) beim nächsten inhaltlichen Anfassen.
+
+**Reconciliation.** Titel-Form (`# ADR <Nr>: <Titel>`) und Superseded-Referenz (`<NNNN>-<slug>`, klickbar) folgen der bestehenden u-boot-Konvention, nicht dem Template-Wortlaut (`# ADR-NNNN:` bzw. `Superseded by ADR-NNNN`); die MADR-**Substanz** (Inline-Kopf-Felder, `Schärft`-Aufwärtskopplung, Alternativen/Fitness-Function/Re-Eval/Geschichte) wird übernommen. Die Umstellung ist ein Change Request am Vertrags-Stratum (Trigger: v3.5.1-Adoption).
 
 ---
 
