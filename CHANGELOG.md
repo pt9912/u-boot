@@ -11,6 +11,14 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Security
+
+- `build(deps): Go-Toolchain 1.26.4 → 1.26.5` — behebt **CVE-2026-39822**
+  (`os.Root` Symlink-Following / Directory-Traversal in der Go-`stdlib`,
+  Severity HIGH, von Trivy im Runtime-Image gemeldet). Routine-Pin-Bump nach
+  [`LH-FA-BUILD-003`](spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik)
+  (`GO_VERSION` in `Dockerfile` + `Makefile`), kein Verhaltens-Delta.
+
 ### Added
 
 - `feat(template): u-boot init --template ./pfad` — lokale
