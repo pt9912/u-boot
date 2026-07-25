@@ -227,6 +227,11 @@ Baseline still.
   qualifizierter Sub-Area. Ergebnis: acht Sub-Areas statt drei, davon eine
   Hybrid (`internal/adapter/driving/cli`) und eine Brownfield
   (`internal/**/README.md`); `cmd/uboot` faellt auf Sub-Area-Aspirantin zurueck.
+  **Graduation im selben Durchlauf:** Die Hybrid-Aussage zu
+  `internal/adapter/driving/cli` hat ihre Bedingung noch in dieser Welle
+  erfuellt (beide Adapter-Konventionen stehen in der Sicht-Spec) und ist auf GF
+  gesetzt - eine Graduation, die stattgefunden hat, bleibt nicht als offene
+  Ausnahme stehen.
 - **Begruendung:** Das Regelwerk verlangt eine Modus-Aussage pro qualifizierter
   Sub-Area; eine BF-Sub-Area ohne Graduation-Plan waere "permanente Ausnahme als
   temporaer getarnt".
@@ -343,7 +348,7 @@ Kandidat). Das **Audit-Protokoll** - inklusive der abgewiesenen Kandidaten
 | `internal/hexagon/domain` | Greenfield | Reine Datentypen; I/O-Freiheit und Value-Object-Pflicht standen als Architektur-Regel vor dem Code. | n/a (GF) |
 | `internal/hexagon/application` | Greenfield | Use-Case-Schnittstellen lagen als Ports in der Architektur-Sicht, bevor die Services entstanden. | n/a (GF). Eine code-seitig entstandene Konvention (nil-tolerante Ports via `noop*`-Defaults) wird in die Sicht-Spec nachgezogen. |
 | `internal/hexagon/port` (`driving` + `driven`) | Greenfield | Kreuz-blinde Port-Trennung ist Architektur-Vorgabe und depguard-durchgesetzt. | n/a (GF) |
-| `internal/adapter/driving/cli` | **Hybrid** | Exit-Code-/JSON-Vertrag sind spec-gefuehrt, aber zwei tragende Implementierungs-Konventionen (Sentinel-Schichtung, Dual-Classifier-Regel) sind aus Slice-/Review-Arbeit entstanden und leben nur im Code-Kommentar - dort laeuft die Richtung Code -> Doku. | Beide Regeln stehen in der Sicht-Spec (Abschnitt Fehlermodelle), geliefert von [`slice-harness-architecture-template-konformitaet`](../docs/plan/planning/open/slice-harness-architecture-template-konformitaet.md) -> dann GF. |
+| `internal/adapter/driving/cli` | Greenfield (**graduiert 2026-07-25**, vorher Hybrid) | Exit-Code- und JSON-Vertrag waren immer spec-gefuehrt; die beiden Implementierungs-Konventionen (Sentinel-Schichtung, Dual-Classifier-Regel) lebten nur im Code-Kommentar - Richtung Code -> Doku. Diese Luecke ist geschlossen: beide stehen jetzt in der Sicht-Spec (Abschnitt Fehlermodelle), die Dual-Classifier-Regel dabei praeziser als der Code-Kommentar (zentrale Klassifikation **plus** je Subkommando eine Diagnostic-Abbildung). | n/a (GF, Graduation vollzogen). Rueckstufung, falls wieder eine tragende Adapter-Konvention nur im Code entsteht. |
 | `internal/adapter/driven` | Greenfield | Adapter implementieren vorher definierte Driven-Ports; der Port-Pin (`var _ driven.X`) macht Drift zum Build-Fehler. | n/a (GF) |
 | `internal/e2e` (Test-Infrastruktur) | Greenfield | Build-Tag-Konvention (`//go:build docker`) und Fake-Clock-Pflicht sind in der Architektur-Sicht (Abschnitt Tests) verankert. | n/a (GF) |
 | `tools/`, `scripts/` (Harness-Tooling) | Greenfield | Skripte materialisieren zuerst geschriebene Konventionen (`MR-004`, `MR-005`, Coverage-Bootstrap). | n/a (GF) |

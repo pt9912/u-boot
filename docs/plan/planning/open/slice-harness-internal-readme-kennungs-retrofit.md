@@ -3,7 +3,7 @@
 **Status:** open → next → in-progress → done (Datei wird durch die
 Verzeichnisse bewegt).
 
-**Welle:** ohne Welle (Harness-Wartung) — Folge-Befund aus
+**Welle:** noch keiner Welle zugeordnet (Wartungs-Kandidat in [`roadmap.md`](../in-progress/roadmap.md) §Nächste Wellen) — Folge-Befund aus
 [`slice-harness-sub-area-modus-audit`](slice-harness-sub-area-modus-audit.md)
 §9.2.
 

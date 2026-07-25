@@ -47,15 +47,21 @@ Vollständige Kategorie-Definitionen: [`harness/review.md`](../../harness/review
 **HIGH** — eines der folgenden:
 
 - **Dual-Classifier-Bruch (repo-spezifisch #1).** Ein neuer oder aufgeteilter
-  Driving-Sentinel ist nur in *einem* der beiden Klassifikatoren des
-  Driving-Adapters eingetragen — Exit-Code-Klassifikation *oder*
-  Envelope-/Diagnostic-Abbildung. Beide müssen den Sentinel führen, sonst
-  driften Exit-Code
+  Driving-Sentinel ist nicht in *allen* zuständigen Klassifikatoren des
+  Driving-Adapters eingetragen. Zuständig sind: die **eine, zentrale**
+  Exit-Code-Klassifikation **und** die Diagnostic-Abbildung **jedes**
+  Subkommandos, über dessen Pfad der Sentinel auftreten kann — von diesen
+  Abbildungen gibt es **eine pro Subkommando**, nicht eine gemeinsame. Ein
+  querliegender Sentinel (z. B. „Projekt nicht initialisiert") steht damit an
+  der zentralen Stelle plus in *mehreren* Kommando-Abbildungen; prüfe beim
+  Review ausdrücklich, ob alle betroffenen Kommandos nachgezogen wurden.
+  Andernfalls driften Exit-Code
   ([`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)) und
   maschinenlesbare Ausgabe
   ([`LH-NFA-USE-004`](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe))
-  auseinander. Ebenfalls HIGH: der Eintrag ist doppelt geführt, aber ohne
-  Exit-Code-Pin-Test — dann fällt die Drift beim nächsten Split lautlos aus.
+  je nach Subkommando auseinander. Ebenfalls HIGH: alle Einträge vorhanden, aber
+  ohne Exit-Code-Pin-Test — dann fällt die Drift beim nächsten Split lautlos
+  aus. Kein Gate prüft diese Abdeckung; sie ist Review-Aufgabe.
 - **Referenzmodell-Verstoß (repo-spezifisch #2).** Ein Dokument der Ränge 1–3
   (Lastenheft, Architektur-Sicht, ADR) verweist **abwärts** auf Slice, Carveout
   oder Roadmap. Normative Kraft existiert nur aufwärts

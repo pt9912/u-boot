@@ -219,3 +219,14 @@ und wird im Architektur-Slice dieser Welle mitgenommen.
 Zwei Folge-Wirkungen außerhalb der Modus-Tabelle: ein Carveout-Inventar-Eintrag
 für den `scan.ignore`-Glob `internal/**` (mit Plan-Anker) und ein neuer
 `open/`-Slice für den Retrofit.
+
+> **Nachtrag zur Graduation (2026-07-25, noch innerhalb der Welle).** Die
+> Hybrid-Aussage zu `internal/adapter/driving/cli` hat ihre Graduation-Bedingung
+> im selben Durchlauf erfüllt: Sentinel-Schichtung und Dual-Classifier-Regel
+> stehen seither in der Sicht-Spec. Die Modus-Tabelle in
+> [`harness/conventions.md`](../../../../harness/conventions.md) führt die
+> Sub-Area deshalb als **GF (graduiert)**; die Hybrid-Diagnose oben bleibt als
+> Audit-Befund stehen — sie war zum Prüfzeitpunkt korrekt und ist der Grund,
+> warum die Regeln überhaupt in die Spec gehoben wurden. Aufgedeckt hat den
+> nicht nachgezogenen Ledger der Review-Lauf zu dieser Welle (F-1,
+> [`docs/reviews/`](../../../reviews/README.md)).

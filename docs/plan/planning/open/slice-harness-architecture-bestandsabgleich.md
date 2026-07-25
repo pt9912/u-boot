@@ -3,7 +3,7 @@
 **Status:** open → next → in-progress → done (Datei wird durch die
 Verzeichnisse bewegt).
 
-**Welle:** ohne Welle (Spec-Wartung) — Befund aus
+**Welle:** noch keiner Welle zugeordnet (Wartungs-Kandidat in [`roadmap.md`](../in-progress/roadmap.md) §Nächste Wellen) — Befund aus
 [`slice-harness-architecture-template-konformitaet`](slice-harness-architecture-template-konformitaet.md).
 
 **Bezug:** [`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)

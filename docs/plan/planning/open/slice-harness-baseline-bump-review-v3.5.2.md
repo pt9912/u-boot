@@ -3,7 +3,7 @@
 **Status:** open → next → in-progress → done (Datei wird durch die
 Verzeichnisse bewegt).
 
-**Welle:** ohne Welle (Harness-Wartung).
+**Welle:** noch keiner Welle zugeordnet; als Wartungs-Kandidat in [`roadmap.md`](../in-progress/roadmap.md) §Nächste Wellen geführt.
 
 **Bezug:** Ausgelöst vom **ersten** Freshness-Audit-Lauf
 (`tools/harness/fetch-baseline-cache.sh --check-freshness`, 2026-07-25,

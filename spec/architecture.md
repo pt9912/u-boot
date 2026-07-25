@@ -302,17 +302,23 @@ Jede `depguard`-Regel matcht mindestens ein Paket im Produktiv-Code; die Pro-Sch
 ## 6. Sequenz-Diagramme
 
 Die kritischen Use-Cases als Fluss durch die Schichten. Lanes sind
-Architektur-Schichten, nicht Funktionen — diese Granularität ist per `depguard`
-abgesichert und driftet nicht, ohne dass ein Gate ausschlägt. Die
+Architektur-Schichten, nicht Funktionen. Was maschinell abgesichert ist, sind
+die **Schicht-Grenzen** selbst (`depguard` prüft Import-Richtungen); die
+**Schritt-Reihenfolge** in den Diagrammen ist es *nicht* — sie altert mit dem
+Code und muss beim Ändern eines Use-Case von Hand mitgezogen werden. Die
 Fehlerpfade sind bewusst ausgespart; sie stehen in §7.
 
 ### Use-Case: Projekt initialisieren ([`LH-FA-INIT-001`](lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren), [`LH-FA-INIT-004`](lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen), [`LH-FA-INIT-005`](lastenheft.md#lh-fa-init-005--überschreibschutz))
 
-Der Re-Init-Pfad ist der eigentliche Lehrfall: **Plan vor Execute**. Erst
-entscheidet der Use-Case pro Datei, was passieren würde, dann meldet er die
-betroffenen Pfade, holt gegebenenfalls eine Bestätigung — und erst danach
-schreibt er. Ein Fehler in der Planungsphase erzeugt keinen einzigen
-Seiteneffekt.
+Der Re-Init-Pfad ist der eigentliche Lehrfall: **Plan vor Execute**. Der
+Use-Case entscheidet pro Datei vollständig, was passieren würde, meldet die
+betroffenen Pfade und schreibt erst danach. Ein Fehler in der Planungsphase
+erzeugt keinen einzigen Seiteneffekt.
+
+Die Bestätigung der Soft-Existing-Erkennung läuft bewusst **vor** dem
+Datei-Plan: Sie ist eine Frage auf Projekt-Ebene („behandle ich das hier als
+bestehendes Projekt?") und wird einmal gestellt, statt als Kaskade von
+Kollisions-Rückfragen pro Datei aufzutreten.
 
 ```mermaid
 sequenceDiagram
@@ -327,12 +333,12 @@ sequenceDiagram
     App->>PN: Bestand pruefen (Exists/Lstat)
     PN->>Ad: Dateisystem lesen
     Ad-->>App: Marker-/Kollisionsbefund
+    App->>PN: Bestaetigung auf Projekt-Ebene (nur bei Soft-Existing)
+    PN->>Ad: Prompt
+    Ad-->>App: Entscheidung
     App->>App: Plan je Datei (write / replace-block / overwrite / abort)
     App->>PN: betroffene Pfade melden
     PN->>Ad: Report ausgeben
-    App->>PN: Bestaetigung anfordern (nur bei Soft-Existing)
-    PN->>Ad: Prompt
-    Ad-->>App: Entscheidung
     App->>PN: Backup + Schreiben (Plan ausfuehren)
     PN->>Ad: Dateien anlegen, Repository initialisieren
     Ad-->>App: Ergebnis
@@ -375,23 +381,31 @@ Hier verlässt der Fluss den Prozess: Die Container-Runtime ist ein externes,
 langsames und fehleranfälliges System. Deshalb trägt dieser Port einen Context,
 und deshalb hat er eigene Fehlerklassen (§7).
 
+Zwei Eigenheiten dieses Flusses: Der Use-Case prüft die Voraussetzungen über
+**Datei-Ports** (Projekt initialisiert, Compose-Datei lesbar), nicht über die
+Runtime — die read-only Erreichbarkeitsprüfung der Runtime liegt eine Ebene
+tiefer *im Driven-Adapter* und läuft dort vor jedem Lifecycle-Kommando. Und die
+Stabilisierungs-Schleife ist optional: Ohne gesetztes Zeitlimit endet der
+Use-Case unmittelbar nach dem Start, mit einem Hinweis-Diagnostic statt einem
+Status.
+
 ```mermaid
 sequenceDiagram
     participant CLI as adapter/driving (CLI)
     participant PD as port/driving
     participant App as application
     participant PN as port/driven
-    participant Ad as adapter/driven (Runtime, Clock)
+    participant Ad as adapter/driven (FS, YAML, Runtime, NetProbe, Clock)
 
     CLI->>PD: Request (BaseDir, Optionen) mit Context
     PD->>App: Use-Case-Aufruf
-    App->>PN: Compose-Datei validieren
-    PN->>Ad: Runtime-Aufruf (read-only)
-    Ad-->>App: Befund
+    App->>PN: Projekt-Marker und Compose-Datei lesen
+    PN->>Ad: Dateisystem lesen, deserialisieren
+    Ad-->>App: Compose-Modell
     App->>PN: Umgebung starten
-    PN->>Ad: Compose-Lifecycle-Kommando
+    PN->>Ad: Erreichbarkeit pruefen (Adapter-intern), dann Lifecycle-Kommando
     Ad-->>App: Start-Ergebnis
-    loop bis stabil oder Timeout
+    loop nur bei gesetztem Zeitlimit: bis stabil oder Timeout
         App->>PN: Status abfragen
         PN->>Ad: Container-Status lesen
         Ad-->>App: Status je Service
@@ -415,15 +429,18 @@ keine Exit-Codes; der Adapter kennt keine Use-Case-Interna.
 | --- | --- | --- | --- | --- |
 | Falsche Kommandozeilen-Nutzung (unbekanntes Flag, widersprüchliche Modus-Flags, falsche Argumentzahl) | `adapter/driving` | `adapter/driving` | 2 | Fehlertext auf stderr, Hilfe-Hinweis |
 | Fachliche Validierung (Namen, Projekt-Zustand, Konfigurations-Inhalt) | `hexagon/domain` bzw. `hexagon/application` als `port/driving`-Sentinel | `adapter/driving` | 10 | Fehlertext bzw. Diagnostic im Envelope |
-| Bestätigungs-/Interaktions-Gate (Bestätigung verweigert oder nicht einholbar) | `hexagon/application` | `adapter/driving` | 10 | wie oben; Refusal und I/O-Fehler sind unterschiedliche Sentinels |
+| Bestätigungs-Gate: Freigabe verweigert oder Bestätigung nicht einholbar (destruktiver Pfad, implizite Bestandserkennung) | `hexagon/application` | `adapter/driving` | 10 | wie oben; Refusal und Confirmer-I/O-Fehler sind unterschiedliche Sentinels |
+| Nicht-interaktiver Lauf trifft auf eine offene Bestätigungsfrage; ebenso sich ausschließende Modus-Flags | `adapter/driving` | `adapter/driving` | 2 | Fehlertext; der Vertrag verzweigt hier bewusst gegen die Zeile darüber |
 | Diagnose-Befund im strikten Modus | `hexagon/application` (Report), Schwelle im Adapter | `adapter/driving` | 11 | Report-Ausgabe, Severity je Befund |
 | Container-Runtime nicht erreichbar | `port/driven`-Sentinel aus dem Adapter | `adapter/driving` | 11 | Fehlertext mit Reparaturhinweis |
 | Laufzeitfehler der Runtime (Compose-Start, Stabilisierungs-Timeout) | `port/driven`- bzw. `port/driving`-Sentinel | `adapter/driving` | 12 | Fehlertext, ggf. Teil-Status |
 | Technischer Dateisystem-/Persistenzfehler (unerwartete IO-, Permission-, Backup-Slot-Fehler) | `hexagon/application` als `port/driving`-Sentinel | `adapter/driving` | 14 | Fehlertext; Plan-Phase verhindert Teil-Schreibzustände |
 | Alles übrige | — | `adapter/driving` | 1 | generischer Fehlertext |
 
-Die Klassen `13` und `15` des Exit-Code-Vertrags sind reserviert und aktuell
-nicht belegt; `3`–`9` und `16`–`19` sind laut Vertrag nicht zu verwenden.
+Die technischen Klassen `13` und `15` sind vertraglich **erlaubt**, sobald ihre
+Bedeutung für den aufrufenden Kontext dokumentiert ist; u-boot belegt sie heute
+nicht. **Reserviert** — also nicht zu verwenden — sind allein `3`–`9` und
+`16`–`19`.
 
 ### 7.2 Zwei Regeln, die die Klassifikation zusammenhalten
 
@@ -434,16 +451,28 @@ fachliche Hülle zuerst greifen, verlöre die Ausgabe die genauere Ursache. Die
 Prüf-Reihenfolge folgt damit der Schicht-Hierarchie, nicht der Lesereihenfolge
 im Code. Sentinels überschneiden sich nicht.
 
-**Dual-Classifier-Regel.** Ein Driving-Sentinel wird an **zwei** Stellen des
-Driving-Adapters geführt: in der Exit-Code-Klassifikation *und* in der
-Abbildung auf den maschinenlesbaren Envelope (Diagnostic-Code). Wer nur eine
-der beiden Stellen pflegt, erzeugt einen Prozess, dessen Exit-Code und dessen
-JSON-Ausgabe verschiedene Dinge behaupten — ein Vertragsbruch gegenüber
+**Dual-Classifier-Regel.** Ein Driving-Sentinel wird im Driving-Adapter über
+**zwei voneinander unabhängige Klassifikatoren** geführt:
+
+1. die **eine, zentrale** Exit-Code-Klassifikation des Adapters, und
+2. die **Diagnostic-Abbildung des Subkommandos**, über dessen Pfad der Sentinel
+   auftreten kann — davon gibt es **eine pro Subkommando**, nicht eine
+   gemeinsame.
+
+Daraus folgt die eigentliche Falle: Ein *querliegender* Sentinel (etwa „Projekt
+nicht initialisiert", der an fast jedem Subkommando auftreten kann) steht in der
+zentralen Klassifikation **plus in jeder** betroffenen Kommando-Abbildung. Wer
+nur die zentrale Stelle und *ein* Kommando pflegt, erzeugt einen Prozess, dessen
+Exit-Code und dessen JSON-Ausgabe je nach Subkommando verschiedene Dinge
+behaupten — ein Vertragsbruch gegenüber
 [`LH-FA-CLI-006`](lastenheft.md#lh-fa-cli-006--exit-codes) und
 [`LH-NFA-USE-004`](lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)
 zugleich. Der Fehlerfall tritt typisch beim **Aufteilen** eines bestehenden
-Sentinels auf. Deshalb gilt: Jeder neue oder aufgeteilte Driving-Sentinel
-braucht beide Einträge und einen Test, der seine Exit-Klasse pinnt.
+Sentinels auf, und er trifft zuerst die Sentinels mit der größten Reichweite.
+Deshalb gilt: Jeder neue oder aufgeteilte Driving-Sentinel braucht den Eintrag
+in der zentralen Klassifikation, den Eintrag in *jeder* betroffenen
+Kommando-Abbildung und einen Test, der seine Exit-Klasse pinnt. Ein Sensor, der
+die Abdeckung über alle Kommandos hinweg vergleicht, existiert heute nicht.
 
 ### 7.3 Resilienz-Muster
 
@@ -503,7 +532,7 @@ Die folgenden Muster sind verboten und werden im Review abgelehnt:
 
 ## 10. Evolution
 
-Diese Architektur ist der Stand vom 2026-05-22. Änderungen erfolgen über
+Änderungen an dieser Architektur erfolgen über
 neue Architekturentscheidungen und anschließende Spec-Nachführung
 ([`LH-FA-PROJDOCS-002`](lastenheft.md#lh-fa-projdocs-002--adr-format)).
 
