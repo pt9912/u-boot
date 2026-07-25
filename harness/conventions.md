@@ -208,7 +208,19 @@ Baseline still.
   als duennen Alias auf dessen `doc-check`. Der Digest-Pin lebt als
   `DCHECK_DIGEST` im `Makefile`, **nicht** im Fragment - ein Re-Generieren
   ueberschreibt ihn damit nicht. Aktive Module:
-  `[links, anchors, ids, matrix]`. Bewusst **kein** `MR-<NNN>`-ID-Pattern - die
+  `[links, anchors, ids, matrix, planning, targets]`.
+  **Arbeitsfluss-Regel aus `planning` (2026-07-25):** Das Modul koppelt "die
+  Roadmap benennt eine aktive Welle" an "ein `slice-*` liegt in `in-progress/`".
+  Eine deklarierte Welle ohne Slice in Arbeit ist damit ein **Befund**, kein
+  Zwischenzustand - wer einen Slice schliesst, zieht im selben Commit den
+  naechsten nach oder schliesst die Welle. Bewusst uebernommen statt
+  wegkonfiguriert: Eine Roadmap, die Aktivitaet behauptet, die nicht
+  stattfindet, ist genau die Drift, die vorher nur per Aufmerksamkeit auffiel.
+  **`targets`-Abgrenzung:** Autoritaet ist die Gate-Tabelle in
+  [`AGENTS.md`](../AGENTS.md) §Quality Gates; sie fuehrt Harness-**Sensoren**,
+  nicht jede Makefile-Regel. Acht Build-/Utility-Regeln stehen einzeln benannt
+  in `exempt-targets` - eine Bereichsabgrenzung, **kein** Carveout (es wird
+  keine Pruefung ausgesetzt). Bewusst **kein** `MR-<NNN>`-ID-Pattern - die
   Adaptions-IDs dieses Ledgers bleiben linkfrei. `.harness/baseline/**` liegt im
   `scan.ignore` (tag-agnostischer Glob `**`), damit die repo-relativen Links der
   vendorten Regelwerk-/Template-Dateien nicht gewertet werden.
