@@ -179,7 +179,7 @@ Befund ist als Folge-Slice ausgewiesen statt still behoben. Bei einem Bump mit
 geänderten Regel- oder Template-Inhalten wäre ein Frischkontext-Review
 angezeigt.
 
-Commit / Artefakt: `<wird beim Closure-Commit eingetragen>`
+Commit / Artefakt: `162141f` (Bump als Einheit: Vendor-Baum v3.5.2, Entfernung v3.5.1, alle sechs Pointer, `MR-003`/`MR-004`/`MR-008`, Folge-Plan).
 
 ### Steering-Loop-Lerneintrag
 
