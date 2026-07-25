@@ -196,7 +196,7 @@ Independent Review: nicht durchgeführt. Der Sensor ist durch vier Proben in
 **beide** Richtungen belegt (schlägt an, wo er soll; schweigt, wo er soll) —
 das ist stärker als eine zweite Meinung über die Konfiguration.
 
-Commit / Artefakt: `<wird beim Closure-Commit eingetragen>`
+Commit / Artefakt: `7d9c4c2` (`.d-check.yml` `vcs`-Block, `AGENTS.md` Gate-Tabelle, `MR-005`).
 
 ### Steering-Loop-Lerneintrag
 
