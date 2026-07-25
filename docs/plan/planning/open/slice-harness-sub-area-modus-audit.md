@@ -109,5 +109,113 @@ Alle Kandidaten qualifiziert oder als Aspirantin abgewiesen, Modus-Tabelle in
 
 Schreibend berührt wird nur die Sub-Area *harness / Konventionen* (**GF**,
 Doku-führt). Die auditierten Code-Sub-Areas werden **lesend** inventarisiert —
-ihre Modus-Aussage ist das *Ergebnis* dieses Slice und steht in §Audit bzw. in
+ihre Modus-Aussage ist das *Ergebnis* dieses Slice und steht in §9 bzw. in
 [`harness/conventions.md`](../../../../harness/conventions.md).
+
+## 9. Audit-Protokoll
+
+Durchgeführt 2026-07-25 gegen den Stand `d5d896a`. Das Protokoll lebt hier,
+nicht in `harness/conventions.md` — dort steht nur das Ergebnis.
+
+### 9.1 Inklusions-Prüfung (drei Achsen, Schwelle ≥ 2)
+
+Achse 1 = eigene `MR-NNN`-Adaption plausibel formulierbar; Achse 2 = eigene
+Diskrepanz-/Inventur-Zeile sinnvoll, ohne Nachbar mitzuziehen; Achse 3 = eigene
+Pfad-/Datei-Familie.
+
+| Kandidat | A1 | A2 | A3 | Ergebnis |
+|---|---|---|---|---|
+| `internal/hexagon/domain` | ✅ I/O-Freiheit, Value-Object-Pflicht | ✅ „anämischer Domänentyp" ist eine eigene Diskrepanz | ✅ | **Sub-Area** (3/3) |
+| `internal/hexagon/application` | ✅ ein Service pro Use-Case-Familie; nil-tolerante Ports via `noop*`-Defaults | ✅ Use-Case ohne Port-Abstraktion | ✅ | **Sub-Area** (3/3) |
+| `internal/hexagon/port` (`driving` + `driven`) | ✅ Kreuz-Blindheit; Sentinel-Definition liegt im `driving`-Port | ✅ Port-/Adapter-Drift | ✅ | **Sub-Area** (3/3) |
+| `internal/adapter/driving/cli` | ✅ Exit-Code-Klassifikation, Dual-Classifier-Regel, JSON-Envelope-Form | ✅ Sentinel ohne Klassifikations-Eintrag | ✅ | **Sub-Area** (3/3) |
+| `internal/adapter/driven` | ✅ Port-Pin `var _ driven.X = (*Adapter)(nil)` im Produktivcode | ✅ Adapter ohne Pin / ohne Port | ✅ | **Sub-Area** (3/3) |
+| `cmd/uboot` | ❌ „nur Wiring" ist eine Architektur-Regel, keine eigene `MR` | ❌ eine Verletzung ist ein Import-Regel-Befund und gehört zur Hexagon-Linie | ✅ eigenes Verzeichnis | **Aspirantin** (1/3) — 2 Dateien, 302 LOC; aggregiert in die Hexagon-Schichtungs-Linie |
+| `internal/e2e` (Test-Infrastruktur) | ✅ Build-Tag-Konvention `//go:build docker`, „kein reales `time.Sleep` in Tests" | ✅ Acceptance-Test ohne `LH-*`-Anker | ✅ | **Sub-Area** (3/3) |
+| `tools/` + `scripts/` (Harness-Tooling) | ✅ self-contained Bash, Docker-only-Harness, `MR-004`/`MR-005` betreffen sie direkt | ✅ Skript-Modus vs. dokumentierte Zusage | ✅ | **Sub-Area** (3/3) |
+| `internal/**/README.md` (Code-Paket-READMEs) | ✅ eigene Form-Regel plausibel (Status-/Inventar-Abschnitt, Kennungs-Linkpflicht) | ✅ **eigene Linie:** README-Aussage vs. Code-Bestand — heute ohne Sensor, weil `internal/**` im `scan.ignore` liegt | ✅ eigenes Dateimuster | **Sub-Area** (3/3) — im Erst-Pass **nicht** sichtbar |
+| `internal/hexagon/application/{templates,managedblock}` | ❌ keine von `application` getrennte Konvention | ❌ keine eigenständig abgleichbare Linie | ✅ | **Aspirantin** (1/3) — Teil von `application` |
+| `internal/adapter/driven/<einzelner Adapter>` | ❌ | ❌ | ✅ | **Aspirantin** (1/3) — Aggregation nach `driven` (gleiche Trigger, gleiche Modus-Aussage) |
+
+**Ergebnis der Inklusion:** acht qualifizierte Sub-Areas statt der drei
+Erst-Pass-Einträge. Zwei Korrekturen gegenüber dem Erst-Pass: `cmd/uboot` fällt
+auf Aspirantin zurück (Struktur ohne eigene Substanz), und die **Code-Paket-
+READMEs** kommen als eigene Sub-Area hinzu — sie tragen eine Inventur-Linie, die
+der Erst-Pass gar nicht gesehen hat.
+
+### 9.2 Modus-Diagnose (vier Pflichtkriterien)
+
+Nur die Sub-Areas mit nicht-trivialem Befund sind hier ausgeführt; die
+GF-Diagnose der reinen Hexagon-Schichten ist in der Ergebnis-Tabelle
+zusammengefasst.
+
+#### `internal/adapter/driving/cli` — **Hybrid**
+
+- **Konventionen-Dichte:** gemischt. Exit-Code-Vertrag und maschinenlesbare
+  Ausgabe sind im Lastenheft verankert
+  ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes),
+  [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)).
+  Die zwei **tragenden Implementierungs-Konventionen** sind es nicht:
+  (a) **Sentinel-Schichtung** — Driven-Sentinels werden vor Driving-Sentinels
+  klassifiziert; (b) **Dual-Classifier-Regel** — ein Sentinel muss in der
+  Exit-Code-Klassifikation *und* in der Envelope-/Diagnostic-Abbildung stehen.
+  Beide leben ausschließlich als Code-Kommentar im Adapter, entstanden aus
+  Slice-Arbeit und Review-Runden — also **Code → Doku**.
+- **Phase-Reife:** 4 (kohärent). Der Bestand ist vollständig und konsistent,
+  aber die Sicht-Spec kennt die beiden Regeln nicht — genau die Diskrepanz, die
+  Phase 4 im BF-Lesart sichtbar macht.
+- **Evidenz-/Diskrepanz-Risiko:** mittel. Ohne Doku-Anker ist die Regel nur so
+  lange wirksam, wie jemand den Kommentar liest; ein neuer Sentinel-Split ist
+  der realistische Fehlerfall.
+- **Reconciliation-Aufwand / Graduation:** klein und **bereits eingeplant** —
+  [`slice-harness-architecture-template-konformitaet`](slice-harness-architecture-template-konformitaet.md)
+  nimmt beide Regeln in den neuen Abschnitt Fehlermodelle auf. Danach steht die
+  Doku vor der nächsten Änderung → **Graduation nach GF**.
+
+#### `internal/**/README.md` — **Brownfield**
+
+- **Konventionen-Dichte:** niedrig. Es gibt keine Form-Regel für diese READMEs:
+  sie tragen Status-Abschnitte mit Meilenstein-/Tranchen-Tags („Stand M8",
+  „M3-T2", „MVP-Closure-T1") und `LH-*`-Kennungen **ohne Links**.
+- **Phase-Reife:** 3 (partiell). Manche Pakete dokumentieren ihren Stand
+  detailliert, andere knapp; die Aktualität hängt am jeweiligen Slice-Autor.
+- **Evidenz-/Diskrepanz-Risiko:** **hoch, und heute unbeobachtet.** `internal/**`
+  liegt im `scan.ignore` von [`.d-check.yml`](../../../../.d-check.yml) („historisch
+  ungelinkte LH-Kennungen, dokumentierter Migrations-Restbestand"). Die
+  Ausnahme ist im Konfigurations-Kommentar begründet, steht aber **weder im
+  Carveout-Inventar noch trägt sie einen Plan-Anker** — nach
+  [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)
+  ist genau das die Lücke. Zweitbefund: Die Meilenstein-Tags machen diese
+  Dateien zu einer *zeitlichen Schicht* neben Roadmap und Closure-Notizen.
+- **Reconciliation-Aufwand / Graduation:** ein eigener Slice
+  ([`slice-harness-internal-readme-kennungs-retrofit`](slice-harness-internal-readme-kennungs-retrofit.md)):
+  Kennungen verlinken, Status-Abschnitte entzeitlichen, `internal/**` aus dem
+  `scan.ignore` nehmen. Danach existiert ein Sensor für die Inventur-Linie →
+  **Graduation nach GF**.
+
+#### `internal/hexagon/application` — GF mit benannter Rückwärts-Lücke
+
+GF ist belegt: Die Use-Case-Schnittstellen standen als Ports in
+[`spec/architecture.md`](../../../../spec/architecture.md) §2.2/§2.4, bevor die
+Services entstanden. **Eine** Konvention ist dennoch code-seitig entstanden:
+„alle Ports nil-tolerant via package-private `noop*`-Defaults" steht nur im
+Paket-README. Kein Modus-Wechsel — aber die Aussage gehört in die Sicht-Spec
+und wird im Architektur-Slice dieser Welle mitgenommen.
+
+### 9.3 Ergebnis
+
+| Sub-Area | Modus | Änderung ggü. Erst-Pass |
+|---|---|---|
+| `internal/hexagon/domain` | GF | keine (ausdifferenziert aus „`hexagon/`") |
+| `internal/hexagon/application` | GF | keine; Rückwärts-Lücke benannt (§9.2) |
+| `internal/hexagon/port` | GF | keine |
+| `internal/adapter/driving/cli` | **Hybrid** | **neu** — Erst-Pass sagte GF |
+| `internal/adapter/driven` | GF | keine |
+| `internal/e2e` | GF | **neu qualifiziert** |
+| `tools/` + `scripts/` | GF | **neu qualifiziert** |
+| `internal/**/README.md` | **BF** | **neu qualifiziert**, im Erst-Pass unsichtbar |
+| `cmd/uboot` | — | **Rückstufung auf Aspirantin** |
+
+Zwei Folge-Wirkungen außerhalb der Modus-Tabelle: ein Carveout-Inventar-Eintrag
+für den `scan.ignore`-Glob `internal/**` (mit Plan-Anker) und ein neuer
+`open/`-Slice für den Retrofit.

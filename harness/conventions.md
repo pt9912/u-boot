@@ -187,14 +187,20 @@ Fundstelle: `.harness/baseline/v3.5.1/regelwerk/modul-02-harness-bootstrap.md`.
 - **Geltungsbereich:** Abschnitt Modus-Deklaration unten.
 - **Adaption:** u-boot traegt Bestandscode (`hexagon/`, `cmd/`, `internal/`) neben
   den Doku-Sub-Areas. Der Abschnitt Modus-Deklaration unten ordnet jede Sub-Area
-  als GF/BF/Hybrid ein; jede BF-Markierung traegt eine Graduation-Bedingung. Erst-Pass:
-  spec-/architektur-getriebene Sub-Areas als GF; ein vollstaendiges
-  Drei-Achsen-Audit je Code-Sub-Area ist als Folge-Slice ausgelagert.
+  als GF/BF/Hybrid ein; jede BF-/Hybrid-Markierung traegt eine
+  Graduation-Bedingung. **Audit ausgefuehrt (2026-07-25):** Der Erst-Pass
+  (drei grobe Sub-Areas, pauschal GF) ist durch eine auditierte Einordnung
+  ersetzt - Drei-Achsen-Inklusion je Kandidat, dann vier Modus-Kriterien je
+  qualifizierter Sub-Area. Ergebnis: acht Sub-Areas statt drei, davon eine
+  Hybrid (`internal/adapter/driving/cli`) und eine Brownfield
+  (`internal/**/README.md`); `cmd/uboot` faellt auf Sub-Area-Aspirantin zurueck.
 - **Begruendung:** Das Regelwerk verlangt eine Modus-Aussage pro qualifizierter
   Sub-Area; eine BF-Sub-Area ohne Graduation-Plan waere "permanente Ausnahme als
   temporaer getarnt".
-- **Aufloesungs-Trigger:** re-evaluieren, sobald eine Code-Sub-Area BF-Zuege traegt
-  (uebernommener Bestandscode ohne fuehrende Spec).
+- **Aufloesungs-Trigger:** Audit erledigt; Delivery-Verweis im Slice
+  [`slice-harness-sub-area-modus-audit`](../docs/plan/planning/open/slice-harness-sub-area-modus-audit.md)
+  §9. Re-evaluieren bei jeder neuen Pfad-Familie im Produktivcode sowie beim
+  Erfuellen einer der beiden Graduation-Bedingungen oben.
 
 ### MR-007 - Ortswahl `.harness/` (dot-prefixed, committet) neben `harness/`
 
@@ -292,19 +298,31 @@ Reproduzierbarkeit) hinaus nutzt dieses Repo:
 
 ## Modus-Deklaration pro Sub-Area
 
+Stand: auditiert am 2026-07-25 (Drei-Achsen-Inklusion + vier Modus-Kriterien je
+Kandidat). Das **Audit-Protokoll** - inklusive der abgewiesenen Kandidaten
+(Sub-Area-Aspirantinnen) - liegt im Slice
+[`slice-harness-sub-area-modus-audit`](../docs/plan/planning/open/slice-harness-sub-area-modus-audit.md)
+§9; hier steht nur das Ergebnis.
+
 | Sub-Area (Pfad) | Modus | Begruendung | Graduation-Bedingung / Folge-Slice |
 |---|---|---|---|
 | `spec/`, `harness/`, `docs/plan/` (Spec, Architektur, ADR, Planung, Konventionen) | Greenfield | Doku-fuehrt-Sub-Areas; Spec/Architektur beschreiben vor dem Code. | n/a (GF) |
-| `hexagon/` (Domain, Application, Ports/Adapter) | Greenfield | Spec-/architektur-getrieben entstanden (hexagonale Regeln aus `spec/architecture.md`, Doku vor Code). | Erst-Pass; vollstaendiges Drei-Achsen-Audit als Folge-Slice, falls BF-Zuege auftauchen. |
-| `cmd/uboot` (Wiring/Entrypoint) | Greenfield | Wiring folgt der Architektur-Spec; keine uebernommene Fremd-Codebasis. | s. o. (Erst-Pass) |
-| `internal/` (Support/Tooling) | Greenfield | Eigenentwicklung entlang der Spec; keine BF-Uebernahme. | s. o. (Erst-Pass) |
+| `internal/hexagon/domain` | Greenfield | Reine Datentypen; I/O-Freiheit und Value-Object-Pflicht standen als Architektur-Regel vor dem Code. | n/a (GF) |
+| `internal/hexagon/application` | Greenfield | Use-Case-Schnittstellen lagen als Ports in der Architektur-Sicht, bevor die Services entstanden. | n/a (GF). Eine code-seitig entstandene Konvention (nil-tolerante Ports via `noop*`-Defaults) wird in die Sicht-Spec nachgezogen. |
+| `internal/hexagon/port` (`driving` + `driven`) | Greenfield | Kreuz-blinde Port-Trennung ist Architektur-Vorgabe und depguard-durchgesetzt. | n/a (GF) |
+| `internal/adapter/driving/cli` | **Hybrid** | Exit-Code-/JSON-Vertrag sind spec-gefuehrt, aber zwei tragende Implementierungs-Konventionen (Sentinel-Schichtung, Dual-Classifier-Regel) sind aus Slice-/Review-Arbeit entstanden und leben nur im Code-Kommentar - dort laeuft die Richtung Code -> Doku. | Beide Regeln stehen in der Sicht-Spec (Abschnitt Fehlermodelle), geliefert von [`slice-harness-architecture-template-konformitaet`](../docs/plan/planning/open/slice-harness-architecture-template-konformitaet.md) -> dann GF. |
+| `internal/adapter/driven` | Greenfield | Adapter implementieren vorher definierte Driven-Ports; der Port-Pin (`var _ driven.X`) macht Drift zum Build-Fehler. | n/a (GF) |
+| `internal/e2e` (Test-Infrastruktur) | Greenfield | Build-Tag-Konvention (`//go:build docker`) und Fake-Clock-Pflicht sind in der Architektur-Sicht (Abschnitt Tests) verankert. | n/a (GF) |
+| `tools/`, `scripts/` (Harness-Tooling) | Greenfield | Skripte materialisieren zuerst geschriebene Konventionen (`MR-004`, `MR-005`, Coverage-Bootstrap). | n/a (GF) |
+| `internal/**/README.md` (Code-Paket-READMEs) | **Brownfield** | Beschreiben den Code-Bestand nachtraeglich, tragen Meilenstein-/Tranchen-Tags und ungelinkte `LH-*`-Kennungen; `internal/**` liegt im `scan.ignore` - die Inventur-Linie existiert, hat aber keinen Sensor. | Kennungen verlinkt, Status-Abschnitte entzeitlicht, `internal/**` aus dem `scan.ignore` entfernt: [`slice-harness-internal-readme-kennungs-retrofit`](../docs/plan/planning/open/slice-harness-internal-readme-kennungs-retrofit.md) -> dann GF. |
+| `cmd/uboot` (Wiring/Entrypoint) | - (keine Sub-Area) | Erfuellt nur eine der drei Inklusions-Achsen (eigenes Verzeichnis, aber keine eigene Konvention und keine eigenstaendige Inventur-Linie): **Sub-Area-Aspirantin**, gefuehrt in der Hexagon-Schichtungs-Linie. | n/a - re-evaluieren, wenn das Wiring eigene Regeln traegt (z. B. DI-Container). |
 
-> Die Erst-Pass-Einordnung des Bestandscodes (GF) ist bewusst pragmatisch. Ein
-> vollstaendiges Drei-Achsen-Audit je Code-Sub-Area - falls eine Struktur doch
-> BF-Zuege traegt (retrofit-verdaechtige Bereiche) - ist als eigener Folge-Slice
-> ausgelagert und bekaeme dort seine Graduation-Bedingung. Ein Wechsel nach BF
-> (z. B. uebernommener Bestandscode ohne fuehrende Spec) erhielte eine eigene
-> Modus-Aussage mit Graduation-Plan.
+> Zwei Nicht-GF-Aussagen und ihre Bedeutung: **Hybrid** heisst, in dieser
+> Sub-Area laufen beide Richtungen nebeneinander (Vertrag fuehrt, Detail-
+> Konvention folgt dem Code); **Brownfield** heisst, die Doku beschreibt den
+> Bestand nachtraeglich. Beide tragen oben eine benannte Graduation-Bedingung -
+> eine BF-/Hybrid-Markierung ohne Graduation-Plan waere eine permanente Ausnahme
+> als temporaer getarnt.
 
 ## Glossar (optional)
 

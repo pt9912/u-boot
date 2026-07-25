@@ -38,6 +38,7 @@ Teil dieser Welle.
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
+| Harness-Wartung: `internal/`-READMEs in den Referenz-Scan | kein externer Trigger; Befund aus dem Sub-Area-Audit dieser Welle | [`slice-harness-internal-readme-kennungs-retrofit`](../open/slice-harness-internal-readme-kennungs-retrofit.md) — Kennungen verlinken, Status-Abschnitte entzeitlichen, `scan.ignore`-Glob `internal/**` auflösen | S |
 | macOS-Distribution | konkrete Homebrew-Nutzeranfrage | [`slice-v2-homebrew-formula`](../open/slice-v2-homebrew-formula.md) | S |
 | Linux-Pakete | konkrete Debian-/RPM-Anfrage | [`slice-v2-distro-pakete`](../open/slice-v2-distro-pakete.md) ([ADR-0007](../../adr/0007-distributionswege-ghcr.md)) | M |
 | Devcontainer-Robustheit | Real-World-Half-State-Beschwerde oder Schema-Erweiterung | [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md) | M |
