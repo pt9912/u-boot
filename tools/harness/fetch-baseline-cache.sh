@@ -21,6 +21,17 @@
 #              verifiziert. Netz nötig (Release-Download) — Anlass: Baseline-Bump.
 #   --verify   nur Integritätsprüfung des committeten Bestands gegen SHA256SUMS.
 #              Offline, kein Netz — für CI/Audit/frischen Checkout.
+#   --check-freshness
+#              Freshness-Audit: liest die Release-LISTE des Kurs-Repos und
+#              vergleicht sie mit dem lokalen Pin. READ-ONLY — kein Vendoring,
+#              kein Pin-Update, kein Schreibzugriff. Netz nötig.
+#              Exit 0 = Pin ist der neueste Tag, 3 = neuerer Tag vorhanden
+#              (Review-Bump fällig, KEIN Auto-Update), 1 = Ausführungsfehler.
+#
+# Integrität ist nicht Aktualität: --verify beantwortet „ist der vendorte
+# Bestand unversehrt?", --check-freshness beantwortet „ist der gepinnte Stand
+# noch der aktuelle?". Kadenz und Zuständigkeit: harness/conventions.md
+# §Freshness-Audit (MR-004).
 #
 # Tag-Quelle: ohne Argument die §Baseline-`**Stand:**`-Zeile in
 # harness/conventions.md (Skript-Eingabe; der Pin ist nicht vollumfänglicher
@@ -36,7 +47,10 @@ repo="pt9912/ai-harness-course"
 conventions="harness/conventions.md"
 
 mode="vendor"
-if [ "${1:-}" = "--verify" ]; then mode="verify"; shift; fi
+case "${1:-}" in
+  --verify)          mode="verify"; shift ;;
+  --check-freshness) mode="freshness"; shift ;;
+esac
 
 tag="${1:-}"
 if [ -z "$tag" ]; then
@@ -76,6 +90,54 @@ verify() {
     || { echo "fetch-baseline-cache: Manifest (${manifest} Zeilen) != Dateien auf Platte (${on_disk}) — unvollständig" >&2; exit 1; }
   echo "fetch-baseline-cache: verify ok (${manifest} Dateien, vollständig)"
 }
+
+check_freshness() {
+  # Freshness-Audit (MR-004 / §Freshness-Audit): Release-LISTE gegen den Pin.
+  # Read-only — dieser Pfad fasst .harness/baseline/ nicht an. Ein neuer Tag
+  # loest einen REVIEW-Bump aus (menschliche Entscheidung), kein Auto-Update:
+  # ein Regelwerk-Bump zieht vier Stellen nach (MR-004 Bump-Prozedur) und ist
+  # deshalb nichts, was ein Skript still tun darf.
+  command -v curl >/dev/null 2>&1 \
+    || { echo "fetch-baseline-cache: 'curl' nicht gefunden (Host-Werkzeug)" >&2; exit 1; }
+
+  local api tags newest newer
+  api="https://api.github.com/repos/${repo}/releases?per_page=100"
+  echo "fetch-baseline-cache: freshness-check gegen ${repo} (Pin: ${tag})"
+
+  # Fail-loud: Netz-/API-Fehler duerfen NICHT als "alles aktuell" durchgehen.
+  tags="$(curl -fsSL -H 'Accept: application/vnd.github+json' "$api" \
+    | grep -o '"tag_name"[[:space:]]*:[[:space:]]*"[^"]*"' \
+    | sed 's/.*"\([^"]*\)"$/\1/' \
+    | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
+    | LC_ALL=C sort -V -u || true)"
+  [ -n "$tags" ] \
+    || { echo "fetch-baseline-cache: keine Release-Tags gelesen — Netz-, API- oder Formatfehler (kein Freshness-Urteil moeglich)" >&2; exit 1; }
+
+  newest="$(printf '%s\n' "$tags" | tail -1)"
+  # Alles echt Neuere als der Pin: sortiert anhaengen, Pin und Aelteres wegwerfen.
+  newer="$(printf '%s\n' "$tags" | LC_ALL=C sort -V | sed -n "/^${tag}\$/,\$p" | tail -n +2)"
+
+  if [ "$newest" = "$tag" ]; then
+    echo "fetch-baseline-cache: freshness ok — Pin ${tag} ist der neueste Release-Tag"
+    return 0
+  fi
+  if [ -z "$newer" ]; then
+    # Pin taucht in der Liste nicht auf (zurueckgezogener Release, Pre-Release-
+    # Pin, Listen-Fenster zu klein) — ebenfalls ein Audit-Befund, kein "ok".
+    echo "fetch-baseline-cache: Pin ${tag} nicht in der Release-Liste gefunden (neuester Tag: ${newest}) — manuell pruefen" >&2
+    exit 1
+  fi
+  echo "fetch-baseline-cache: REVIEW-BUMP faellig — Pin ${tag}, neuer verfuegbar:"
+  printf '%s\n' "$newer" | sed 's/^/  /'
+  echo "fetch-baseline-cache: kein Auto-Update. Bump als Einheit nach MR-004 (Pin, Vendor-Pfad, AGENTS.md, harness/README.md)."
+  return 3
+}
+
+if [ "$mode" = "freshness" ]; then
+  rc=0
+  check_freshness || rc=$?
+  exit "$rc"
+fi
 
 if [ "$mode" = "verify" ]; then
   verify

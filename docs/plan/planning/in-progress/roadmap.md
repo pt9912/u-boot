@@ -38,6 +38,7 @@ Teil dieser Welle.
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
+| Harness-Wartung: Baseline-Review-Bump v3.5.1 → v3.5.2 | **bereits gefeuert** — erstes Freshness-Audit (2026-07-25) meldet `v3.5.2` upstream | [`slice-harness-baseline-bump-review-v3.5.2`](../open/slice-harness-baseline-bump-review-v3.5.2.md) — Delta lesen, `MR-*`-Ledger gegenprüfen, Bump als Einheit nach `MR-004` | S |
 | Harness-Wartung: `internal/`-READMEs in den Referenz-Scan | kein externer Trigger; Befund aus dem Sub-Area-Audit dieser Welle | [`slice-harness-internal-readme-kennungs-retrofit`](../open/slice-harness-internal-readme-kennungs-retrofit.md) — Kennungen verlinken, Status-Abschnitte entzeitlichen, `scan.ignore`-Glob `internal/**` auflösen | S |
 | macOS-Distribution | konkrete Homebrew-Nutzeranfrage | [`slice-v2-homebrew-formula`](../open/slice-v2-homebrew-formula.md) | S |
 | Linux-Pakete | konkrete Debian-/RPM-Anfrage | [`slice-v2-distro-pakete`](../open/slice-v2-distro-pakete.md) ([ADR-0007](../../adr/0007-distributionswege-ghcr.md)) | M |

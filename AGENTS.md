@@ -17,6 +17,13 @@ Integritaets-Manifest `.harness/baseline/v3.5.1/SHA256SUMS` ist offline
 pruefbar per `tools/harness/fetch-baseline-cache.sh --verify`. Netzlos auf
 jedem Checkout.
 
+Ob der gepinnte Stand noch der aktuelle ist, beantwortet ein zweiter,
+netzgebundener Lauf: `tools/harness/fetch-baseline-cache.sh --check-freshness`
+(Exit `3` = Review-Bump faellig). Jeder Harness-/Baseline-Slice fuehrt ihn aus
+und haelt das Ergebnis in seiner Evidence fest - auch den Negativbefund.
+Kadenz, Zustaendigkeit und Nicht-Ziele: [`harness/conventions.md`](harness/conventions.md)
+Abschnitt Freshness-Audit.
+
 Lesemodell: pro Entscheidung nur den benoetigten Abschnitt nachschlagen
 (README = Index), nicht das ganze Regelwerk im Kontext halten. Breiter
 Pflicht-Blick nur bei Bootstrap, Aenderung an
