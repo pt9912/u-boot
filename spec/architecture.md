@@ -1,11 +1,14 @@
 # Architektur — u-boot
 
-| Dokument    | Architektur-Spezifikation                                                                         |
-| ----------- | ------------------------------------------------------------------------------------------------- |
-| Projektname | `u-boot`                                                                                          |
-| Bezug       | [`LH-FA-ARCH-001`](lastenheft.md#lh-fa-arch-001--hexagonales-pattern)..[`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement) |
-| Status      | Entwurf 0.1.0                                                                                     |
-| Datum       | 2026-05-22                                                                                        |
+**Status:** Aktiv. **Letzte Änderung:** 2026-07-25.
+
+**Bezug:** [`LH-FA-ARCH-001`](lastenheft.md#lh-fa-arch-001--hexagonales-pattern)..[`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)
+
+**Hard Rule:** Diese Datei enthält *keine* Wellen, Slices, Commit-Hashes,
+Meilenstein-Tags oder Closure-Daten. Sie beschreibt das Zielbild, nicht den
+Projektfortschritt; die zeitliche Schicht lebt in
+`docs/plan/planning/in-progress/roadmap.md` und in den Closure-Notizen der
+Slices.
 
 ---
 
@@ -43,7 +46,7 @@ Sechs Schichten plus Wiring, klare Verantwortungen und einseitig gerichtete Abh�
                           └──────────────────────┘
 ```
 
-Pfeile zeigen die **Aufruf-/Datenfluss-Richtung** zur Laufzeit. Die **Import-Richtung** ist nicht überall identisch: `application` importiert nur Ports (Interfaces) und kennt die konkreten Adapter nicht; Dependency Injection findet im Wiring (`cmd/uboot/`) statt. Die innere Welt (`hexagon/`) kennt die äußere Welt (`adapter/`) **nicht** — das wird per `depguard` durchgesetzt ([`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement), siehe §4).
+Pfeile zeigen die **Aufruf-/Datenfluss-Richtung** zur Laufzeit. Die **Import-Richtung** ist nicht überall identisch: `application` importiert nur Ports (Interfaces) und kennt die konkreten Adapter nicht; Dependency Injection findet im Wiring (`cmd/uboot/`) statt. Die innere Welt (`hexagon/`) kennt die äußere Welt (`adapter/`) **nicht** — das wird per `depguard` durchgesetzt ([`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement), siehe §5).
 
 ---
 
@@ -113,9 +116,9 @@ Konkrete Driver — Einstiegspunkte aus der Außenwelt.
 - **Inhalt:** `cli/` mit Cobra. Pro Subkommando ein eigenes Cobra-Command in einer eigenen Datei.
   - Lokale Flags pro Subkommando (z. B. `init`: `--no-git`/`--force`/`--backup`/`--assume-existing`).
   - **Persistente Flags (Root):** `--yes`, `--no-interactive` ([`LH-FA-CLI-005A`](lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) — gelten für alle bestätigungs-relevanten Subbefehle). Konflikt-Check `--yes` + `--no-interactive` → `ErrConflictingModeFlags` (CLI-internes Sentinel) → Exit-Code 2.
-  - `ExitCode(err)` bündelt die [`LH-FA-CLI-006`](lastenheft.md#lh-fa-cli-006--exit-codes)-Klassifikation (0 / 2 / 10 / 14 / 1); `isValidationError` und `isFilesystemError` mappen die in §2.3 gelisteten Driving-Sentinels.
+  - `ExitCode(err)` bündelt die [`LH-FA-CLI-006`](lastenheft.md#lh-fa-cli-006--exit-codes)-Klassifikation (0 / 2 / 10 / 11 / 12 / 14 / 1); Prädikat-Helper mappen die in §2.3 gelisteten Driving-Sentinels. Vollständige Klassifikations-Reihenfolge und die zwei tragenden Regeln: §7.
   - `cli.App` mit Functional-Options-Pattern (`WithGetwd` als Test-Seam); persistente Flag-Werte werden beim Re-Build der Root-Cobra pro `Execute` zurückgesetzt — kein Flag-Leak zwischen Aufrufen.
-- **Vorgesehene Erweiterungen:** weitere Subkommandos (`add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `template`). Ein HTTP-/Daemon-Adapter ist nicht vorgesehen; u-boot bleibt CLI-only (siehe §7).
+- **Vorgesehene Erweiterungen:** weitere Subkommandos (`add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `template`). Ein HTTP-/Daemon-Adapter ist nicht vorgesehen; u-boot bleibt CLI-only (siehe §10).
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driving`, externe Libraries (z. B. Cobra).
 - **Verbotene Imports:** `hexagon/application` und `adapter/driven`. Die Instanziierung von Application-Services und Driven-Adaptern erfolgt ausschließlich im Wiring (`cmd/uboot/`), das beide Welten zusammenfügt; der Driving-Adapter erhält fertig konstruierte Driving-Port-Implementierungen per Konstruktor.
 - **Permanenter Carveout:** `contextcheck`-Ausnahme in `.golangci.yml`, weil Cobras `RunE`-Signatur (`func(cmd, args) error`) keinen Context-Parameter kennt — die Closure muss `cmd.Context()` extrahieren und an `runInit` durchreichen. Strikte Propagation passiert eine Ebene tiefer.
@@ -148,7 +151,31 @@ Einziger Ort, an dem `application` und `adapter` zusammen importiert werden.
 
 ---
 
-## 3. Import-Regeln
+## 3. Externe Abhängigkeiten
+
+Welche externen Systeme und Bibliotheken Teil der Architektur sind, in welcher
+Schicht sie auftauchen dürfen und wie austauschbar sie sind. Die
+*Wahl-Begründung* je Abhängigkeit gehört nicht hierher — sie steht in der
+jeweiligen Architekturentscheidung, die ihre Kopplung an diese Sicht aufwärts
+deklariert.
+
+| System | Rolle | Sichtbar in Schicht | Substituierbarkeit |
+| --- | --- | --- | --- |
+| Container-Runtime mit Compose-Schnittstelle (Docker-API-kompatibles Binary auf `$PATH`) | Diagnose (read-only Probes) und Lifecycle-Operationen der erzeugten Umgebung | `adapter/driven` (hinter `DockerProbe`/`DockerEngine`) | hoch — die Application kennt nur die Ports; ein Podman-Setup funktioniert als Drop-in, ein SDK-basierter Adapter wäre ein Paket-Austausch ohne Änderung an `application` |
+| CLI-Framework (Kommando-/Flag-Parsing) | Aufbau des Kommando-Baums, Flag-Bindung, Hilfe-Ausgabe | ausschließlich `adapter/driving/cli` | hoch — kein Port, kein Use-Case und kein Domänentyp kennt das Framework; der Austausch bleibt im Driving-Adapter |
+| YAML-Serialisierung | Lesen/Schreiben der Projektkonfiguration und der Compose-Datei | `adapter/driven` (hinter `YAMLCodec`) | hoch — ein Adapter-Paket |
+| `git`-Binary | optionale Repository-Initialisierung beim Anlegen eines Projekts | `adapter/driven` (hinter `Git`) | hoch — fehlt es, degradiert der Pfad kontrolliert; die Application sieht nur den Port |
+| Go-Standardbibliothek (Dateisystem, Prozess-Start, strukturiertes Logging, eingebettete Templates) | Ausführungsunterbau der Adapter sowie Template-Rendering in der Application | `adapter/*`, `hexagon/application` (nur Template-Rendering) | niedrig (Sprachumfeld) — die Domäne bleibt davon frei |
+
+Zwei Regeln halten die Liste kurz: Externe Abhängigkeiten erscheinen **nur** in
+Adaptern (Ausnahme: das I/O-freie Template-Rendering in der Application), und
+jede von ihnen steht hinter einem Port. `hexagon/domain` importiert keine
+externe Bibliothek — das ist die schärfste der Import-Regeln und per `depguard`
+durchgesetzt.
+
+---
+
+## 4. Import-Regeln
 
 | Schicht                | darf importieren                                                              | darf nicht importieren                                     |
 | ---------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------- |
@@ -169,9 +196,9 @@ Begründung der Regeln:
 
 ---
 
-## 4. Enforcement via `golangci-lint depguard`
+## 5. Enforcement via `golangci-lint depguard`
 
-Die Regeln aus Abschnitt 3 werden im `lint`-Stage ([`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) per `golangci-lint` mit dem `depguard`-Linter durchgesetzt. Konfiguration aktiv in [`.golangci.yml`](../.golangci.yml); das untenstehende Schema ist deckungsgleich mit der dortigen Konfiguration. Bei Änderungen müssen beide Quellen synchron gehalten werden.
+Die Regeln aus Abschnitt 4 werden im `lint`-Stage ([`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) per `golangci-lint` mit dem `depguard`-Linter durchgesetzt. Konfiguration aktiv in [`.golangci.yml`](../.golangci.yml); das untenstehende Schema ist deckungsgleich mit der dortigen Konfiguration. Bei Änderungen müssen beide Quellen synchron gehalten werden.
 
 Konventionen für jeden Regelblock:
 
@@ -272,7 +299,181 @@ Jede `depguard`-Regel matcht mindestens ein Paket im Produktiv-Code; die Pro-Sch
 
 ---
 
-## 5. Tests
+## 6. Sequenz-Diagramme
+
+Die kritischen Use-Cases als Fluss durch die Schichten. Lanes sind
+Architektur-Schichten, nicht Funktionen — diese Granularität ist per `depguard`
+abgesichert und driftet nicht, ohne dass ein Gate ausschlägt. Die
+Fehlerpfade sind bewusst ausgespart; sie stehen in §7.
+
+### Use-Case: Projekt initialisieren ([`LH-FA-INIT-001`](lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren), [`LH-FA-INIT-004`](lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen), [`LH-FA-INIT-005`](lastenheft.md#lh-fa-init-005--überschreibschutz))
+
+Der Re-Init-Pfad ist der eigentliche Lehrfall: **Plan vor Execute**. Erst
+entscheidet der Use-Case pro Datei, was passieren würde, dann meldet er die
+betroffenen Pfade, holt gegebenenfalls eine Bestätigung — und erst danach
+schreibt er. Ein Fehler in der Planungsphase erzeugt keinen einzigen
+Seiteneffekt.
+
+```mermaid
+sequenceDiagram
+    participant CLI as adapter/driving (CLI)
+    participant PD as port/driving
+    participant App as application
+    participant PN as port/driven
+    participant Ad as adapter/driven (FS, Git, Confirm, Progress)
+
+    CLI->>PD: Request (Name, BaseDir, Flags)
+    PD->>App: Use-Case-Aufruf
+    App->>PN: Bestand pruefen (Exists/Lstat)
+    PN->>Ad: Dateisystem lesen
+    Ad-->>App: Marker-/Kollisionsbefund
+    App->>App: Plan je Datei (write / replace-block / overwrite / abort)
+    App->>PN: betroffene Pfade melden
+    PN->>Ad: Report ausgeben
+    App->>PN: Bestaetigung anfordern (nur bei Soft-Existing)
+    PN->>Ad: Prompt
+    Ad-->>App: Entscheidung
+    App->>PN: Backup + Schreiben (Plan ausfuehren)
+    PN->>Ad: Dateien anlegen, Repository initialisieren
+    Ad-->>App: Ergebnis
+    App-->>PD: Response (Projekt, angelegte Dateien, Backups)
+    PD-->>CLI: Ausgabe + Exit-Code
+```
+
+### Use-Case: Add-on hinzufügen ([`LH-FA-ADD-001`](lastenheft.md#lh-fa-add-001--add-on-befehl), [`LH-FA-ADD-005`](lastenheft.md#lh-fa-add-005--mehrfaches-hinzufügen-verhindern), [`LH-FA-ADD-006`](lastenheft.md#lh-fa-add-006--add-on-abhängigkeiten))
+
+Kennzeichen dieses Flusses ist die **Idempotenz-Entscheidung vor jeder
+Mutation**: Der Use-Case liest den Ist-Zustand aus Konfiguration *und*
+Compose-Datei, bevor er etwas ändert; ein Zweit-Add mit gleichen Argumenten ist
+ein no-op ohne Fehler.
+
+```mermaid
+sequenceDiagram
+    participant CLI as adapter/driving (CLI)
+    participant PD as port/driving
+    participant App as application
+    participant PN as port/driven
+    participant Ad as adapter/driven (FS, YAML)
+
+    CLI->>PD: Request (BaseDir, ServiceName)
+    PD->>App: Use-Case-Aufruf
+    App->>App: Service-Name validieren (Domaene)
+    App->>PN: Projektkonfiguration + Compose-Datei lesen
+    PN->>Ad: Dateien lesen und deserialisieren
+    Ad-->>App: Ist-Zustand
+    App->>App: Zustand bestimmen (fehlt / aktiv / inkonsistent) + Abhaengigkeiten aufloesen
+    App->>PN: Konfiguration und Compose-Datei schreiben
+    PN->>Ad: Serialisieren und persistieren
+    Ad-->>App: Ergebnis
+    App-->>PD: Response (Vorzustand, Zustand, geaenderte Dateien)
+    PD-->>CLI: Ausgabe + Exit-Code
+```
+
+### Use-Case: Umgebung starten ([`LH-FA-UP-001`](lastenheft.md#lh-fa-up-001--umgebung-starten), [`LH-FA-UP-003`](lastenheft.md#lh-fa-up-003--startstatus-anzeigen))
+
+Hier verlässt der Fluss den Prozess: Die Container-Runtime ist ein externes,
+langsames und fehleranfälliges System. Deshalb trägt dieser Port einen Context,
+und deshalb hat er eigene Fehlerklassen (§7).
+
+```mermaid
+sequenceDiagram
+    participant CLI as adapter/driving (CLI)
+    participant PD as port/driving
+    participant App as application
+    participant PN as port/driven
+    participant Ad as adapter/driven (Runtime, Clock)
+
+    CLI->>PD: Request (BaseDir, Optionen) mit Context
+    PD->>App: Use-Case-Aufruf
+    App->>PN: Compose-Datei validieren
+    PN->>Ad: Runtime-Aufruf (read-only)
+    Ad-->>App: Befund
+    App->>PN: Umgebung starten
+    PN->>Ad: Compose-Lifecycle-Kommando
+    Ad-->>App: Start-Ergebnis
+    loop bis stabil oder Timeout
+        App->>PN: Status abfragen
+        PN->>Ad: Container-Status lesen
+        Ad-->>App: Status je Service
+    end
+    App-->>PD: Response (Services, Status, Ports)
+    PD-->>CLI: Ausgabe + Exit-Code
+```
+
+---
+
+## 7. Fehlermodelle und Resilienz
+
+### 7.1 Wo Fehler entstehen und wer sie behandelt
+
+Grundsatz: Die inneren Schichten **klassifizieren** Fehler fachlich (als
+Sentinel-Werte), der Driving-Adapter **übersetzt** sie in den
+Exit-Code-Vertrag und in die maschinenlesbare Ausgabe. Die Application kennt
+keine Exit-Codes; der Adapter kennt keine Use-Case-Interna.
+
+| Fehlerquelle | Klassifiziert in | Behandelt in | Exit-Klasse | Sichtbarkeit |
+| --- | --- | --- | --- | --- |
+| Falsche Kommandozeilen-Nutzung (unbekanntes Flag, widersprüchliche Modus-Flags, falsche Argumentzahl) | `adapter/driving` | `adapter/driving` | 2 | Fehlertext auf stderr, Hilfe-Hinweis |
+| Fachliche Validierung (Namen, Projekt-Zustand, Konfigurations-Inhalt) | `hexagon/domain` bzw. `hexagon/application` als `port/driving`-Sentinel | `adapter/driving` | 10 | Fehlertext bzw. Diagnostic im Envelope |
+| Bestätigungs-/Interaktions-Gate (Bestätigung verweigert oder nicht einholbar) | `hexagon/application` | `adapter/driving` | 10 | wie oben; Refusal und I/O-Fehler sind unterschiedliche Sentinels |
+| Diagnose-Befund im strikten Modus | `hexagon/application` (Report), Schwelle im Adapter | `adapter/driving` | 11 | Report-Ausgabe, Severity je Befund |
+| Container-Runtime nicht erreichbar | `port/driven`-Sentinel aus dem Adapter | `adapter/driving` | 11 | Fehlertext mit Reparaturhinweis |
+| Laufzeitfehler der Runtime (Compose-Start, Stabilisierungs-Timeout) | `port/driven`- bzw. `port/driving`-Sentinel | `adapter/driving` | 12 | Fehlertext, ggf. Teil-Status |
+| Technischer Dateisystem-/Persistenzfehler (unerwartete IO-, Permission-, Backup-Slot-Fehler) | `hexagon/application` als `port/driving`-Sentinel | `adapter/driving` | 14 | Fehlertext; Plan-Phase verhindert Teil-Schreibzustände |
+| Alles übrige | — | `adapter/driving` | 1 | generischer Fehlertext |
+
+Die Klassen `13` und `15` des Exit-Code-Vertrags sind reserviert und aktuell
+nicht belegt; `3`–`9` und `16`–`19` sind laut Vertrag nicht zu verwenden.
+
+### 7.2 Zwei Regeln, die die Klassifikation zusammenhalten
+
+**Sentinel-Schichtung.** Die Klassifikation prüft **Driven-Sentinels zuerst**,
+danach Driving-/Application-Sentinels. Grund: Ein Fehler der äußeren Welt kann
+auf dem Weg nach oben von einer fachlichen Hülle umschlossen werden; würde die
+fachliche Hülle zuerst greifen, verlöre die Ausgabe die genauere Ursache. Die
+Prüf-Reihenfolge folgt damit der Schicht-Hierarchie, nicht der Lesereihenfolge
+im Code. Sentinels überschneiden sich nicht.
+
+**Dual-Classifier-Regel.** Ein Driving-Sentinel wird an **zwei** Stellen des
+Driving-Adapters geführt: in der Exit-Code-Klassifikation *und* in der
+Abbildung auf den maschinenlesbaren Envelope (Diagnostic-Code). Wer nur eine
+der beiden Stellen pflegt, erzeugt einen Prozess, dessen Exit-Code und dessen
+JSON-Ausgabe verschiedene Dinge behaupten — ein Vertragsbruch gegenüber
+[`LH-FA-CLI-006`](lastenheft.md#lh-fa-cli-006--exit-codes) und
+[`LH-NFA-USE-004`](lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)
+zugleich. Der Fehlerfall tritt typisch beim **Aufteilen** eines bestehenden
+Sentinels auf. Deshalb gilt: Jeder neue oder aufgeteilte Driving-Sentinel
+braucht beide Einträge und einen Test, der seine Exit-Klasse pinnt.
+
+### 7.3 Resilienz-Muster
+
+- **Plan vor Execute.** Zustandsverändernde Use-Cases entscheiden vollständig,
+  bevor sie schreiben. Ein Fehler in der Planungsphase hinterlässt keinen
+  Seiteneffekt. Grenze des Musters: Innerhalb der Ausführungsphase gibt es
+  keinen generellen Rollback über mehrere Dateien — wo das relevant ist, wird es
+  als bewusste Ausnahme geführt.
+- **Kein stilles Überschreiben.** Bestehende Nutzerdateien werden entweder in
+  ihrem markierten verwalteten Bereich ersetzt oder nur nach Bestätigung und mit
+  Backup vollständig überschrieben
+  ([`LH-NFA-REL-001`](lastenheft.md#lh-nfa-rel-001--kein-stilles-überschreiben),
+  [`LH-SA-FILE-002`](lastenheft.md#lh-sa-file-002--markierte-verwaltete-bereiche)).
+  Backup-Slots werden kollisionssicher reserviert, nicht optimistisch benannt.
+- **Nil-tolerante Ports.** Use-Cases akzeptieren fehlende optionale Ports und
+  fallen auf wirkungslose Standard-Implementierungen zurück, statt zu
+  dereferenzieren. Ein unvollständiges Wiring degradiert damit die Ausgabe,
+  statt den Prozess abstürzen zu lassen.
+- **Context an den blockierenden Rändern.** Ports, deren Adapter externe
+  Prozesse starten, führen einen Context; nicht-blockierende Ports bleiben
+  context-frei. Das Wiring verbindet den Context mit den Abbruch-Signalen des
+  Betriebssystems, sodass ein Abbruch bis in den Runtime-Aufruf durchschlägt.
+- **Idempotenz als Vertrag, nicht als Zufall.** Wiederholte Aufrufe mit
+  gleichen Argumenten sind no-ops mit Erfolgs-Ergebnis
+  ([`LH-AK-006`](lastenheft.md#lh-ak-006--idempotenz)); der Ist-Zustand wird vor
+  jeder Mutation gelesen, nicht angenommen.
+
+---
+
+## 8. Tests
 
 - Unit-Tests stehen als `*_test.go` neben dem produktiven Code im selben Paket.
 - **Domäne:** klassische Property/Value-Tests; keine Mocks nötig.
@@ -287,7 +488,7 @@ Jede `depguard`-Regel matcht mindestens ein Paket im Produktiv-Code; die Pro-Sch
 
 ---
 
-## 6. Anti-Patterns
+## 9. Anti-Patterns
 
 Die folgenden Muster sind verboten und werden im Review abgelehnt:
 
@@ -300,7 +501,7 @@ Die folgenden Muster sind verboten und werden im Review abgelehnt:
 
 ---
 
-## 7. Evolution
+## 10. Evolution
 
 Diese Architektur ist der Stand vom 2026-05-22. Änderungen erfolgen über
 neue Architekturentscheidungen und anschließende Spec-Nachführung
