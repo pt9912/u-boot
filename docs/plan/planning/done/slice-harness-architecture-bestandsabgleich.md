@@ -157,7 +157,7 @@ Kennung ist verlinkt und von `docs-check` bestätigt). Das Risiko liegt hier
 nicht bei falschen Aussagen, sondern bei *ausgelassenen* — und dagegen hilft
 die Zähl-Tabelle oben mehr als ein zweiter Leser.
 
-Commit / Artefakt: `<wird beim Closure-Commit eingetragen>`
+Commit / Artefakt: `b49fe9f` (§2.1-§2.7 abgeglichen, Detailtiefe-Regel gesetzt).
 
 ### Steering-Loop-Lerneintrag
 
