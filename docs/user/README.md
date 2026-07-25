@@ -9,6 +9,12 @@ User-facing Dokumentation für u-boot:
 
 Aktuell publiziert:
 
+- [`benutzerhandbuch.md`](benutzerhandbuch.md) — **Einstiegspunkt für Nutzer:**
+  aufgabenbasiertes Handbuch (Installation, Erste Schritte, Aufgaben,
+  Konfiguration, Fehlerbehebung, FAQ, Glossar). Folgt
+  [`benutzerhandbuch-standard.md`](benutzerhandbuch-standard.md).
+- [`benutzerhandbuch-standard.md`](benutzerhandbuch-standard.md) — Vorgabe,
+  nach der das Handbuch geschrieben und gepflegt wird.
 - [`examples.md`](examples.md) — Beispiel-Workflows als Kommando-Rezepte
   (Postgres-Stack, Keycloak+OTel, Devcontainer, Templates, CI/JSON,
   Cleanup, Config).
