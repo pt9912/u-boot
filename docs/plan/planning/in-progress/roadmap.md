@@ -23,7 +23,7 @@ heute an Aufmerksamkeit hängen, bekommen einen Sensor. Kein Produkt-Delta.
 
 | Slice | Inhalt | Status |
 |---|---|---|
-| [`slice-gate-print-mk-einbindung`](../done/slice-gate-print-mk-einbindung.md) | `--print-mk`-Fragment einbinden, `docs-check` als Alias auf `doc-check` | open |
+| [`slice-gate-print-mk-einbindung`](../done/slice-gate-print-mk-einbindung.md) | `--print-mk`-Fragment einbinden, `docs-check` als Alias auf `doc-check` | **done** |
 | [`slice-gate-planning-targets-module`](../open/slice-gate-planning-targets-module.md) | `planning` (Roadmap ↔ Lifecycle) + `targets` (Gate-Tabelle ↔ Makefile) | open |
 | [`slice-gate-ids-link-policy-always`](../open/slice-gate-ids-link-policy-always.md) | `ids` prüft auch Code-Spans; 100 Befunde gemessen, `exempt-paths`-Politik zu entscheiden | open |
 | [`slice-gate-immutabilitaets-sensor`](../open/slice-gate-immutabilitaets-sensor.md) | `vcs`-Sensor für die zwei Immutabilitäts-Hard-Rules (Accepted-ADRs, `done/`) | open |
