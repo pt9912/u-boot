@@ -151,7 +151,7 @@ Aussage „alle Kennungen verlinkt" ist maschinell geprüft, und die inhaltliche
 Ergänzungen sind gegen dieselbe Code-Inventur belegt, die zwei Slices zuvor
 `spec/architecture.md` §2 getragen hat.
 
-Commit / Artefakt: `<wird beim Closure-Commit eingetragen>`
+Commit / Artefakt: `8cab0e2` (7 READMEs, `.d-check.yml`, Carveout-Aufloesung, `MR-006`-Graduation).
 
 ### Steering-Loop-Lerneintrag
 
