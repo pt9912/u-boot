@@ -38,16 +38,21 @@ Fußabdruck angenommener Vertragsänderungen.
 die Sicht beschrieb zuvor weitgehend den Stand nach den ersten beiden
 Meilensteinen.
 
-**Nächster Aufsatzpunkt:** die verbliebenen Wartungs-Kandidaten (s. Nächste
-Wellen) — alle als `open/`-Slices ausgearbeitet, alle ohne weiteren Trigger,
-es fehlt nur die Priorisierung. Produkt-Wellen (v0.5.0) warten weiter auf
-externe Trigger.
+**Doku-Stand:** Die Code-Paket-READMEs unter `internal/` liegen seit
+2026-07-25 im Referenz-Scan
+([`slice-harness-internal-readme-kennungs-retrofit`](../done/slice-harness-internal-readme-kennungs-retrofit.md));
+`make docs-check` deckt damit 139 statt 132 Dateien, und die letzte
+Brownfield-Sub-Area ist auf Greenfield graduiert.
+
+**Nächster Aufsatzpunkt:** **keiner ohne Trigger.** Alle Wartungs-Kandidaten
+aus dem Konformitäts-Nachlauf sind abgearbeitet; die verbleibenden Einträge
+unter Nächste Wellen warten sämtlich auf externe Trigger (Nutzeranfragen,
+Real-World-Befunde, ADR-Annahmen). Produkt-Wellen (v0.5.0) ebenso.
 
 ## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
-| Harness-Wartung: `internal/`-READMEs in den Referenz-Scan | kein externer Trigger; Befund aus dem Sub-Area-Audit dieser Welle | [`slice-harness-internal-readme-kennungs-retrofit`](../open/slice-harness-internal-readme-kennungs-retrofit.md) — Kennungen verlinken, Status-Abschnitte entzeitlichen, `scan.ignore`-Glob `internal/**` auflösen | S |
 | macOS-Distribution | konkrete Homebrew-Nutzeranfrage | [`slice-v2-homebrew-formula`](../open/slice-v2-homebrew-formula.md) | S |
 | Linux-Pakete | konkrete Debian-/RPM-Anfrage | [`slice-v2-distro-pakete`](../open/slice-v2-distro-pakete.md) ([ADR-0007](../../adr/0007-distributionswege-ghcr.md)) | M |
 | Devcontainer-Robustheit | Real-World-Half-State-Beschwerde oder Schema-Erweiterung | [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md) | M |

@@ -21,29 +21,29 @@ den Test-Build.
   `Version` parsed das `git version <X.Y.Z>`-Format und liefert
   die bare semver.
 - `clock/` — `Clock`-Adapter mit `time.Now()` in UTC und
-  `time.Sleep` (M6-T4-fund). Sleep ist seit M6 load-bearing für
+  `time.Sleep`. Sleep ist load-bearing für
   den UpService-Polling-Loop; Tests ersetzen ihn durch einen
-  manual-advance Fake (slice-mandatorisch "kein real time.Sleep
-  in Tests").
+  manual-advance Fake (Vorgabe aus dem Slice-Plan: "kein reales
+  time.Sleep in Tests").
 - `progress/` — `ProgressPort`-Adapter (Text-Output für
   `LH-FA-INIT-005`-§609-Reports).
 - `confirm/` — `Confirmer`-Adapter (`bufio.Scanner` über stdin,
-  Prompt auf stderr; Default `[y/N]`). M6 fügt
-  `ConfirmRemoveVolumes` für den destruktiven `down --volumes`-
-  Pfad (LH-FA-CLI-005A §254).
+  Prompt auf stderr; Default `[y/N]`).
+  `ConfirmRemoveVolumes` deckt den destruktiven `down --volumes`-
+  Pfad ([`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) §254).
 - `logger/` — `Logger`-Adapter via `log/slog` (Text- und
   JSON-Format).
 - `docker/` — zwei Adapter im selben Package:
-  - `Probe` (M4) implementiert `DockerProbe` via `os/exec docker
+  - `Probe` implementiert `DockerProbe` via `os/exec docker
     version` + `docker compose version --short` (read-only
     diagnostics für `LH-FA-DIAG-002`).
-  - `Engine` (M6-T2) implementiert `DockerEngine` via `docker
+  - `Engine` implementiert `DockerEngine` via `docker
     compose -f compose.yaml up -d` / `down [-v]` / `ps --format
     json`. Jeder Call durchläuft den `preflight`-Pfad (LookPath
     + Probe.Info + Probe.ComposeVersion) zur deterministischen
     `ErrDockerUnavailable`-vs-`ErrComposeRuntime`-Klassifikation
     (CLI-Codes 11 vs. 12 per `LH-FA-CLI-006`).
-- `netprobe/` — `NetProbe`-Adapter (M6-T3) via
+- `netprobe/` — `NetProbe`-Adapter via
   `net.Dialer.DialContext` mit `Dialer.Timeout`. Wraps mit
   noctx-Lint-konformen `*net.OpError`, sodass `errors.Is`
   context.Canceled / context.DeadlineExceeded durchläuft.
@@ -54,10 +54,10 @@ den Test-Build.
 
 - Build-Tagged Adapter-Integrationstests (`//go:build docker`)
   laufen via `make test-docker` gegen einen echten Docker-Daemon
-  (mountet `/var/run/docker.sock`). Stand M6-T2 existiert nur das
-  Skeleton `docker/engine_docker_test.go`; die LH-AK-002-/
-  LH-NFA-PERF-002-Verhaltens-Pins folgen mit dem Carveout-Slice
-  [`docs/plan/planning/in-progress/slice-m6-docker-integrationstests.md`](../../../docs/plan/planning/done/slice-m6-docker-integrationstests.md).
+  (mountet `/var/run/docker.sock`). Die Verhaltens-Pins für
+  [`LH-AK-002`](../../../spec/lastenheft.md#lh-ak-002--postgresql-flow) und
+  [`LH-NFA-PERF-002`](../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker)
+  liegen in der `e2e/`-Suite.
 
 ## Import-Regeln
 

@@ -116,7 +116,7 @@ Scope:
   [`harness/conventions.md`](../../../../harness/conventions.md)
   (§Modus-Deklaration ersetzt, `MR-006` eingelöst),
   [`carveouts.md`](../in-progress/carveouts.md) (neuer Eintrag),
-  [`slice-harness-internal-readme-kennungs-retrofit`](../open/slice-harness-internal-readme-kennungs-retrofit.md)
+  [`slice-harness-internal-readme-kennungs-retrofit`](slice-harness-internal-readme-kennungs-retrofit.md)
   (neuer `open/`-Plan), [`roadmap.md`](../in-progress/roadmap.md).
 
 DoD-Abgleich: alle Punkte erfüllt. Elf Kandidaten geprüft, acht qualifiziert,
@@ -175,7 +175,7 @@ Commit / Artefakt: `be3d33c` (Audit, Ergebnis-Tabelle, Carveout, Folge-Plan);
   aufdecken (F-1). Konsequenz: Wer eine Bedingung erfüllt, prüft im selben
   Durchlauf den Ledger.
 - **Folge-Slices:**
-  [`slice-harness-internal-readme-kennungs-retrofit`](../open/slice-harness-internal-readme-kennungs-retrofit.md)
+  [`slice-harness-internal-readme-kennungs-retrofit`](slice-harness-internal-readme-kennungs-retrofit.md)
   (BF → GF für die Code-Paket-READMEs).
 
 ## 8. Sub-Area-Modus-Begründung
@@ -261,7 +261,7 @@ zusammengefasst.
   ist genau das die Lücke. Zweitbefund: Die Meilenstein-Tags machen diese
   Dateien zu einer *zeitlichen Schicht* neben Roadmap und Closure-Notizen.
 - **Reconciliation-Aufwand / Graduation:** ein eigener Slice
-  ([`slice-harness-internal-readme-kennungs-retrofit`](../open/slice-harness-internal-readme-kennungs-retrofit.md)):
+  ([`slice-harness-internal-readme-kennungs-retrofit`](slice-harness-internal-readme-kennungs-retrofit.md)):
   Kennungen verlinken, Status-Abschnitte entzeitlichen, `internal/**` aus dem
   `scan.ignore` nehmen. Danach existiert ein Sensor für die Inventur-Linie →
   **Graduation nach GF**.

@@ -1,10 +1,11 @@
 # Doku-Referenz-Checks via d-check (ghcr.io/pt9912/d-check) — ersetzt
 # die Link-/Anker-/ids-/Matrix-Prüfungen von tools/check_refs.py
 # (Pilot-Migration 2026-06-12, Python-Familie/Vollausbau).
-# Scan-Scope wie das Alt-Tool (docs/, spec/, harness/, Root-*.md):
-# die internal/-READMEs bleiben per Ignore-Regel außen vor — dort
-# stehen historisch ungelinkte LH-Kennungen (dokumentierter
-# Migrations-Restbestand, Erweiterung ist u-boot-Entscheidung).
+# Scan-Scope: das gesamte Repo außer der vendorten Baseline. Die
+# internal/-READMEs waren bis 2026-07-25 per Ignore-Regel ausgenommen
+# (historisch ungelinkte LH-Kennungen aus der check_refs.py-Ära); der
+# Retrofit hat sie verlinkt und den Glob aufgelöst — die Inventur-Linie
+# "README-Aussage vs. Code-Bestand" hat damit erstmals einen Sensor.
 # .harness/baseline/** ist das committet-vendored Betriebsregelwerk
 # (harness/conventions.md MR-004/MR-007); die Regelwerk-/Template-Module
 # tragen repo-relative Links (../templates/…) und werden nicht gewertet.
@@ -12,7 +13,7 @@
 # automatisch erfasst sind; .harness/skills/ bleibt bewusst prüfbar.
 scan:
   roots: ["."]
-  ignore: ["internal/**", ".harness/baseline/**"]
+  ignore: [".harness/baseline/**"]
 modules: [links, anchors, ids, matrix]
 
 # Linkpflicht für Kennungen — Muster aus tools/check_refs.py übersetzt

@@ -19,71 +19,75 @@ internal/
     └── driven/              # konkrete Adapter (docker/, fs/, yaml/, …)
 ```
 
-## Status (M1–M8 Done, MVP vollständig)
+## Inventar
 
-Alle hexagonalen Schichten sind seit M6 produktiv besetzt; M7
-ergänzte den Generate-Pfad, MVP-Closure den `init --devcontainer`-
-Flag, M8 schließt mit `u-boot config`. Die Package-READMEs pflegen
-ihren Detail-Stand jeweils selbst; Kurz-Inventar:
+Alle hexagonalen Schichten sind produktiv besetzt. Die Package-READMEs
+pflegen ihren Detail-Stand jeweils selbst; Kurz-Inventar:
 
-- `hexagon/domain/` — Project + Service-Name Value-Objects,
+- `hexagon/domain/` — Value-Objects für Projekt- und Service-Namen,
   Diagnostic-Severities (4-stufig inkl. `SeverityInfo`),
   ContainerState / StabilizationOutcome / UpResult für
-  `u-boot up` (M6), `Artifact` für `u-boot generate` (M7-T1),
-  `ConfigPath` mit `WriteAllowed`-Flag für `u-boot config` (M8-T1).
-- `hexagon/application/` — sieben Use-Cases verdrahtet:
-  `InitProjectService` (M3 + MVP-Closure-T1), `DoctorService` (M4),
-  `AddServiceService` (M5), `UpService` + `DownService` (M6),
-  `GenerateService` (M7), `ConfigService` (M8).
-- `hexagon/port/driving/` — sieben Use-Case-Interfaces mit
-  narrow-scoped Sentinels (M5 add-/M6 up-/M7 generate-/M8 config-
-  Familien).
+  `u-boot up`, `Artifact` für `u-boot generate`,
+  `ConfigPath` mit `WriteAllowed`-Flag für `u-boot config`,
+  Vorlagen-Metadaten für `u-boot template`.
+- `hexagon/application/` — ein Service je Use-Case-Familie:
+  `InitProjectService`, `DoctorService`, `AddServiceService`,
+  `RemoveServiceService`, `UpService`, `DownService`, `LogsService`,
+  `GenerateService`, `ConfigService`, `TemplateListService`,
+  `TemplateInitService`.
+- `hexagon/port/driving/` — je Use-Case-Familie ein Interface mit
+  eigenem Request-/Response-Paar plus narrow-scoped Sentinels für die
+  Exit-Code-Klassifikation.
 - `hexagon/port/driven/` — `FileSystem`, `YAMLCodec` (mit
   `PatchScalar` + `PatchMappingEntryYAML` + `LocateMarkedEntry`
-  und seit V1-yaml-parse-Sentinel auch `ErrYAMLParse`), `Git`,
+  und `ErrYAMLParse`), `Git`,
   `Clock` (mit `Sleep`), `ProgressPort`, `Confirmer`, `Logger`,
-  `DockerProbe` (read-only, M4), `DockerEngine` (state-mutierend,
-  M6), `NetProbe` (M6).
+  `DockerProbe` (read-only), `DockerEngine` (state-mutierend),
+  `NetProbe`, `TemplateCatalog`, `TemplateFiles`, `RecorderPort`,
+  `RuntimeEnvironment`.
 - `adapter/driven/` — konkrete Implementierungen aller Driven-
-  Ports; der YAML-Adapter wrappt seit V1-yaml-parse-Sentinel
+  Ports; jeder Adapter pinnt sein Port-Interface im Produktivcode,
+  sodass Drift den Package-Build bricht. Der YAML-Adapter wrappt
   Parse-Fehler über vier Codec-Methoden hinweg konsistent mit
   `driven.ErrYAMLParse`.
-- `adapter/driving/cli/` — sieben Cobra-Subcommands plus
+- `adapter/driving/cli/` — ein Cobra-Command je Subkommando plus
   Status-Renderer; persistente `--quiet`/`--verbose`/`--debug`-
-  Flags steuern seit [`slice-followup-verbosity-wiring`](../docs/plan/planning/done/slice-followup-verbosity-wiring.md)
-  den `slog.Level` zur Laufzeit (`PersistentPreRunE` mutiert ein
-  `*slog.LevelVar`, das mit dem Logger-Adapter geteilt wird).
+  Flags steuern den `slog.Level` zur Laufzeit (`PersistentPreRunE`
+  mutiert ein `*slog.LevelVar`, das mit dem Logger-Adapter geteilt
+  wird).
 - `e2e/` — `//go:build docker`-Integrationstests, die mehrere
   Application-Services in Sequenz gegen eine echte Compose-Engine
   fahren (`LH-AK-002` PostgreSQL-Acceptance,
   `LH-FA-UP-004` §1015 Volume-Removal). Laufen ausschließlich
   über `make test-docker` — siehe
-  [`docs/user/quality.md`](../docs/user/quality.md) §2.2 und
-  [`slice-m6-docker-integrationstests`](../docs/plan/planning/done/slice-m6-docker-integrationstests.md) (Done).
-- `acceptance_test.go` (M8-Closure) — benannte Spec-Pins für
-  LH-AK-001 (Init+Doctor) und LH-AK-006 (Doppel-Add-Idempotenz);
-  LH-AK-007 lebt im `generate_test.go` neben den Set-Helpern;
-  LH-AK-002 ist in der Docker-tagged `e2e/`-Suite gepinnt.
+  [`docs/user/quality.md`](../docs/user/quality.md) §2.2.
+- `acceptance_test.go` — benannte Spec-Pins für
+  [`LH-AK-001`](../spec/lastenheft.md#lh-ak-001--minimaler-init-flow) (Init+Doctor) und [`LH-AK-006`](../spec/lastenheft.md#lh-ak-006--idempotenz) (Doppel-Add-Idempotenz);
+  [`LH-AK-007`](../spec/lastenheft.md#lh-ak-007--changelog-generator) lebt im `generate_test.go` neben den Set-Helpern;
+  [`LH-AK-002`](../spec/lastenheft.md#lh-ak-002--postgresql-flow) ist in der Docker-tagged `e2e/`-Suite gepinnt.
 
 ## CLI-Subcommands
 
-| Command | Slice | Spec |
-| ------- | ----- | ---- |
-| `u-boot init [name] [--devcontainer]` | M3 + MVP-Closure-T1 | `LH-FA-INIT-001..007` + `LH-AK-005` |
-| `u-boot doctor` | M4 (+ MVP-Closure-T2 Severity-Fix) | `LH-FA-DIAG-001..004` |
-| `u-boot add <service>` | M5 | `LH-FA-ADD-001..002`, `-005` |
-| `u-boot up` | M6 | `LH-FA-UP-001..003` |
-| `u-boot down` | M6 | `LH-FA-UP-004` |
-| `u-boot generate <artifact>` | M7 | `LH-FA-GEN-001..005`, `LH-AK-007` |
-| `u-boot config [get/set]` | M8 | `LH-FA-CONF-001..005` |
+| Command | Spec |
+| ------- | ---- |
+| `u-boot init [name] [--devcontainer]` | `LH-FA-INIT-001..007` + `LH-AK-005` |
+| `u-boot doctor` | `LH-FA-DIAG-001..004` |
+| `u-boot add <service>` | `LH-FA-ADD-001..006` |
+| `u-boot remove <service>` | `LH-FA-ADD-007` |
+| `u-boot up` | `LH-FA-UP-001..003` |
+| `u-boot down` | `LH-FA-UP-004` |
+| `u-boot logs [service]` | `LH-FA-UP-005` |
+| `u-boot generate <artifact>` | `LH-FA-GEN-001..005`, `LH-AK-007` |
+| `u-boot config [get/set]` | `LH-FA-CONF-001..005` |
+| `u-boot template list` | `LH-FA-TPL-001..004` |
+
+Alle Subkommandos tragen `--json`, `--dry-run` und `--diff`.
 
 ## Coverage
 
-`./internal/...` ist seit M3-T1 der Coverage-Scope (`LH-FA-BUILD-008`,
-`LH-FA-BUILD-009`). Bootstrap-Modus ist ab T1 verlassen; aktuelle
-Messung liegt über 90 %. Schwellwert wird in M3-T5 von `0` auf `80`
-gehoben (siehe
-[`slice-m3-coverage-threshold-aktivieren.md`](../docs/plan/planning/done/slice-m3-coverage-threshold-aktivieren.md)).
+`./internal/...` ist der Coverage-Scope (`LH-FA-BUILD-008`,
+`LH-FA-BUILD-009`); `./cmd/...` ist ausgeschlossen. Der Schwellwert ist
+aktiv und wird über `make coverage-gate` durchgesetzt.
 
 ## Import-Regeln
 
