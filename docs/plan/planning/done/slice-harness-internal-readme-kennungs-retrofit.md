@@ -98,7 +98,7 @@ zu sein. Umformuliert statt unterdrückt — ein Gate, das man mit einer
 Ausnahme beruhigt, prüft danach weniger.
 
 **Wichtiger Nebenbefund zur Reichweite des Gates:** Es meldet nur *bare*
-Kennungen. Steht eine ID in Backticks (`` `LH-FA-UP-004` ``), gilt sie als
+Kennungen. Steht eine ID in Backticks (`` [`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen) ``), gilt sie als
 Code-Beispiel und bleibt ungeprüft — so lag der Großteil der Kennungen in
 diesen Dateien. Der Sensor deckt die Inventur-Linie also **nicht
 vollständig** ab; er fängt die prosaischen Referenzen, nicht die

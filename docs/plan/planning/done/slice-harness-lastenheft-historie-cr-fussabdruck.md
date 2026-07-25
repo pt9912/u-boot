@@ -27,7 +27,7 @@ Vertragsänderungen erhöht, und einen Abschnitt **Historie**, der jede solche
 
 Heute steht das Lastenheft unverändert auf Version `0.1.0` / Status `Entwurf` /
 Datum `2026-05-21` und hat keinen Historie-Abschnitt — obwohl
-`LH-FA-PROJDOCS-002` am 2026-07-24 auf die MADR-ADR-Form umgestellt wurde. Die
+[`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) am 2026-07-24 auf die MADR-ADR-Form umgestellt wurde. Die
 Änderung ist also passiert, aber am Vertrag selbst nicht ablesbar; sie ist nur
 über einen `done/`-Slice rekonstruierbar.
 
@@ -38,7 +38,7 @@ Datum `2026-05-21` und hat keinen Historie-Abschnitt — obwohl
   Version / Datum / Änderung / Verweis (Form aus der vendorten
   `lastenheft.template.md`).
 - [x] **Bestandszeile für die MADR-Umstellung** eingetragen: Datum 2026-07-24,
-  geänderte Anforderung `LH-FA-PROJDOCS-002`, Verweis auf den ausführenden
+  geänderte Anforderung [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format), Verweis auf den ausführenden
   `done/`-Slice als *Vehikel* — mit dem ausdrücklichen Vermerk, dass die
   Entscheidung außerhalb des Repos fiel (der Slice ist nicht die Autorität).
 - [x] **Versions-Feld entschieden und gesetzt.** Zu klären: Bleibt die

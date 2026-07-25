@@ -130,7 +130,7 @@ Bestandscodes) werden als **dokumentierte Folge-Slices** ausgelagert
     Bestandscode-Sub-Areas mit ehrlicher GF/BF-Einordnung + Graduation-Bedingung
     für jede BF-Markierung.
   - `MR-008` — **Verweis** (kein Vertrags-Edit): die Angleichung der ADR-Form an
-    das vendored MADR-Template kollidiert mit `LH-FA-PROJDOCS-002` (Vertrags-
+    das vendored MADR-Template kollidiert mit [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) (Vertrags-
     Stratum) und ist ein Change Request, kein conventions-MR. Dieser Block
     dokumentiert nur den Stand und zeigt auf den CR-Slice
     [`slice-cr-adr-format-madr`](slice-cr-adr-format-madr.md) (FS-5); Bestand
@@ -267,7 +267,7 @@ geschrieben. Danach `git mv` `open/` → (`next/` →) `in-progress/` → `done/
   statt Auto-Update.
 - **FS-5 — ADR-Format-CR:** eigener Change-Request-Slice
   [`slice-cr-adr-format-madr`](slice-cr-adr-format-madr.md), der
-  `LH-FA-PROJDOCS-002` (Vertrags-Stratum) auf die vendored MADR-ADR-Template-Form
+  [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) (Vertrags-Stratum) auf die vendored MADR-ADR-Template-Form
   hebt und den Accepted-Bestand grandfathered. Bewusst **nicht** in diesem
   Harness-Slice, weil er eine Rang-1-Anforderung ändert; `MR-008` verweist nur.
 
@@ -280,7 +280,7 @@ Scope:
 - IDs: **keine** `LH-*`-/`ADR-*`-Anforderung geändert (reine Harness-/
   Baseline-Adoption); [`LH-FA-PROJDOCS-006`](../../../../spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell)
   und [`ADR-0013`](../../adr/0013-dokumentationsreferenzmodell.md) nur lesend
-  berührt. Die Vertrags-Änderung `LH-FA-PROJDOCS-002` ist als CR ausgelagert
+  berührt. Die Vertrags-Änderung [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) ist als CR ausgelagert
   (FS-5, [`slice-cr-adr-format-madr`](slice-cr-adr-format-madr.md)).
 - Artefakte: `tools/harness/fetch-baseline-cache.sh`,
   `.harness/baseline/v3.5.1/{regelwerk,templates}/` (+`SHA256SUMS`, 42 Dateien),

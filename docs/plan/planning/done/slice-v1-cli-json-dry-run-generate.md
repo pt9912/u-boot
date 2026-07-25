@@ -366,7 +366,7 @@ nicht auf reduziertem `make test + lint + docs-check`.
   `ErrConfigValueInvalid` aber wrappt ihn nicht. T3 zieht den
   Sentinel-Wrap nach (Multi-`%w` analog FS-Wraps).
   **T6-Pflicht**: Reject-Pin-Test für `--allow-external-feature-
-  sources <invalid-url> --json` → `code: "LH-FA-DEV-003"`,
+  sources <invalid-url> --json` → `code: "LH-FA-DEV-003"`,  <!-- d-check:ignore (JSON-Payload-Beispiel, keine Referenz) -->
   `exitCode: 10`.
 - **T0-(f)** **Action-Klassifikation via `data.action` festgezurrt**
   (R3-Festzurrung, R2-Variante „kein Marker" verworfen, weil sie

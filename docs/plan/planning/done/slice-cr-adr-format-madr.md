@@ -10,7 +10,7 @@ Verzeichnisse bewegt).
 (Vertrags-Stratum `spec/lastenheft.md`, „vertraglich abnahmebindend") auf die
 vendored MADR-ADR-Template-Form gehoben wird. Trigger ist die v3.5.1-Adoption
 ([`slice-harness-regelwerk-adoption-v3.5.1`](slice-harness-regelwerk-adoption-v3.5.1.md),
-dortiger `MR-008` verweist auf diesen CR, ändert aber `LH-FA-PROJDOCS-002`
+dortiger `MR-008` verweist auf diesen CR, ändert aber [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format)
 nicht). Kohärent mit dem Referenzmodell
 ([`LH-FA-PROJDOCS-006`](../../../../spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell),
 [`ADR-0013`](../../adr/0013-dokumentationsreferenzmodell.md)): das
@@ -28,7 +28,7 @@ MADR-/Nygard-Stil) **kollidiert** mit dem heutigen
 [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format)
 — es ist nicht additiv:
 
-| Punkt | `LH-FA-PROJDOCS-002` (heute) | MADR-Template |
+| Punkt | [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) (heute) | MADR-Template |
 |---|---|---|
 | Status / Datum | `##`-Überschriften | fette Inline-Felder (`**Status:**`) |
 | Kopf-Felder | keine | `**Autor:**`, `**Bezug:**`, `**Schärft:**` |
@@ -58,7 +58,7 @@ CR-Artefakt).
   `Konsequenzen` · `Fitness Function` (falls maschinell prüfbar) ·
   `Re-Evaluierungs-Trigger` · `Geschichte`.
 - [ ] **Reconciliation der Format-Divergenzen** explizit entschieden und in
-  `LH-FA-PROJDOCS-002` festgehalten (nicht offen lassen):
+  [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) festgehalten (nicht offen lassen):
   - **Titel:** `# ADR-NNNN: <Titel>` (Template) **oder** u-boots bisheriges
     `# ADR <Nr>: <Titel>` — eine Form wählen, begründen.
   - **Superseded-Ref:** klickbarer Datei-Link statt roher Tokens; Abgleich mit
@@ -70,7 +70,7 @@ CR-Artefakt).
   CR-Zeitpunkt **Accepted** ADRs (`0001`–`0010`, `0013` = 11 Stück) bleiben in
   der leanen 5-Abschnitt-Form und **immutabel** (Hard Rule „Accepted =
   nicht inhaltlich überschreiben"); sie werden **nicht** auf MADR migriert.
-  `LH-FA-PROJDOCS-002` trägt die Grandfather-Klausel explizit.
+  [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) trägt die Grandfather-Klausel explizit.
 - [ ] **Proposed-ADRs (`0011`, `0012`) + alle künftigen ADRs** MADR-konform:
   0011/0012 sind noch mutabel → beim nächsten Anfassen (ihre offenen
   Ratifizierungs-Slices) auf MADR heben; neu angelegte ADRs kopieren die
@@ -91,7 +91,7 @@ CR-Artefakt).
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `spec/lastenheft.md` (`LH-FA-PROJDOCS-002`) | update (CR) | Pflicht-ADR-Form auf MADR; Grandfather-Klausel; Format-Reconciliation |
+| `spec/lastenheft.md` ([`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format)) | update (CR) | Pflicht-ADR-Form auf MADR; Grandfather-Klausel; Format-Reconciliation |
 | `docs/plan/adr/README.md` | update | `## Konventionen` auf MADR + `Schärft`-Deklaration + Grandfather-Hinweis |
 | `harness/conventions.md` (`MR-008`) | update | „pending CR" → „ausgeführt"; Grandfather-Record |
 | `docs/plan/adr/0011`, `0012` | prüfen | Proposed → optional MADR beim nächsten Anfassen (nicht erzwungen) |
@@ -111,7 +111,7 @@ DoD vollständig + `make gates` grün + Review nach
 
 ## 6. Risiken und offene Punkte
 
-- **Vertrags-Änderung ist abnahmebindend:** `LH-FA-PROJDOCS-002` hat Priorität
+- **Vertrags-Änderung ist abnahmebindend:** [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) hat Priorität
   MVP. Die Umschreibung muss RTM-/`ids`-kompatibel bleiben (keine gebrochenen
   `LH-*`-Anker durch Heading-Umbau der Anforderung selbst).
 - **Immutabilitäts-Kollision vermeiden:** Kein Wort an den 11 Accepted-ADRs
@@ -134,12 +134,12 @@ Scope:
   (geändert); [`LH-FA-PROJDOCS-006`](../../../../spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell)
   / [`ADR-0013`](../../adr/0013-dokumentationsreferenzmodell.md) (Referenzmodell,
   kohärent, unverändert).
-- Artefakte: `spec/lastenheft.md` (`LH-FA-PROJDOCS-002`),
+- Artefakte: `spec/lastenheft.md` ([`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format)),
   [`docs/plan/adr/README.md`](../../adr/README.md), `harness/conventions.md`
   (`MR-008`).
 
 DoD-Abgleich: alle Punkte erfüllt — CR-Charakter dokumentiert (§1);
-`LH-FA-PROJDOCS-002` auf MADR-Form; Reconciliation (Titel `# ADR <Nr>:`,
+[`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) auf MADR-Form; Reconciliation (Titel `# ADR <Nr>:`,
 Superseded `<NNNN>-<slug>` klickbar, Status-Werte) explizit entschieden;
 Grandfathering status-basiert (`0001`–`0010`, `0013` Accepted = lean+immutabel);
 Proposed `0011`/`0012` mutabel/MADR-künftig; `adr/README.md` nachgezogen;
@@ -171,13 +171,13 @@ Independent Review (Frischkontext, Rollentrennung): kein HIGH/MEDIUM; 2 INFO
 MADR-Treue, status-basiertes Grandfathering (11 Accepted selbst verifiziert),
 Immutabilität und `MR-008`-Konsistenz bestätigt.
 
-Commit / Artefakt: `7633cbb` (CR: `LH-FA-PROJDOCS-002` + `adr/README` +
+Commit / Artefakt: `7633cbb` (CR: [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) + `adr/README` +
 `MR-008`); Lifecycle-Move `open/` → `done/` im Folge-Commit.
 
 ### Steering-Loop-Lerneintrag
 
 - Vertrags-Kollision korrekt als **CR** behandelt (nicht conventions-MR): das
-  Template kollidierte strukturell mit `LH-FA-PROJDOCS-002`, also wurde die
+  Template kollidierte strukturell mit [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format), also wurde die
   Anforderung selbst geändert, form-bringende `conventions.md` verweist nur.
 - MADR-**Substanz** übernommen, u-boot-Link-Konventionen (Titel/Superseded)
   behalten — Reconciliation explizit, keine blinde Template-Übernahme.

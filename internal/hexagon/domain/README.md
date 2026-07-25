@@ -1,16 +1,16 @@
 # internal/hexagon/domain
 
 Reine Datentypen und invariantes Verhalten der u-boot-Domäne. Kein I/O,
-keine externen Libraries (`LH-FA-ARCH-002`).
+keine externen Libraries ([`LH-FA-ARCH-002`](../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)).
 
 ## Aktueller Inhalt
 
 Project-Identität:
 - `ProjectName` — validierter Value-Object-Typ; Regex aus
-  `LH-FA-INIT-006`. `NewProjectName` liefert
+  [`LH-FA-INIT-006`](../../../spec/lastenheft.md#lh-fa-init-006--projektnamen-validierung). `NewProjectName` liefert
   `ErrInvalidProjectName`-gewrappte Fehler.
 - `NormalizeProjectName` — deterministische 6-Schritt-
-  Normalisierung nach `LH-FA-INIT-002`.
+  Normalisierung nach [`LH-FA-INIT-002`](../../../spec/lastenheft.md#lh-fa-init-002--projektname).
 - `Project` — Aggregat mit `Name ProjectName` und
   `SchemaVersion int`; `SchemaVersionCurrent = 1`.
 
@@ -18,7 +18,7 @@ Services:
 - `ServiceName` — validierter Value-Object-Typ analog `ProjectName`.
 - `ServiceState` — 6-stelliger State-Machine-Enum (`Unregistered`,
   `Active`, `Deactivated`, `EnabledUnset`, `InconsistentYAML`,
-  `InconsistentBlock`) für `LH-FA-ADD-005`.
+  `InconsistentBlock`) für [`LH-FA-ADD-005`](../../../spec/lastenheft.md#lh-fa-add-005--mehrfaches-hinzufügen-verhindern).
 
 Diagnostics:
 - `Severity` — 4-stufig: `Ok`, `Info` (für non-judgmental
@@ -42,7 +42,7 @@ Service-Lifecycle:
 
 Generate-Artefakte:
 - `Artifact` — 4-Element-Enum (`changelog`, `readme`,
-  `env-example`, `devcontainer`) für `LH-FA-GEN-001`.
+  `env-example`, `devcontainer`) für [`LH-FA-GEN-001`](../../../spec/lastenheft.md#lh-fa-gen-001--generate-befehl).
   Out-of-Range-`String()` rendert als `Artifact(N)` statt
   `unknown`.
 
@@ -65,4 +65,4 @@ Config-Pfade:
 ## Import-Regeln
 
 Ausschließlich Go-Standard-Library. Verstöße werden durch
-`golangci-lint depguard` im `lint`-Stage abgewiesen (`LH-FA-ARCH-003`).
+`golangci-lint depguard` im `lint`-Stage abgewiesen ([`LH-FA-ARCH-003`](../../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)).

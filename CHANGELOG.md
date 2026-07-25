@@ -713,7 +713,7 @@ by adding one catalogue row and three templates.
   Volume, nach `docker compose down` weg; [`LH-AK-003`](spec/lastenheft.md#lh-ak-003--keycloak-flow) verlangt nur
   Endpoint-200/302. Persistente externe Postgres-Anbindung
   ([`LH-FA-ADD-003`](spec/lastenheft.md#lh-fa-add-003--keycloak-hinzufügen) §857) bleibt als eigener Folge-Slice
-  (`slice-v1-keycloak-external-postgres`, Trigger: Nutzer-Bedarf).
+  (`slice-v1-keycloak-external-postgres`, Trigger: Nutzer-Bedarf).  <!-- d-check:ignore (angekuendigter Folge-Slice, noch ohne Plan-Datei) -->
   Internal refactor: `renderPostgresTemplates` → generischer
   `renderServiceTemplates(svc)` über neue Service-Catalogue-
   Tabelle; `hasRequiredEnvKeys` / `contentScanState` /

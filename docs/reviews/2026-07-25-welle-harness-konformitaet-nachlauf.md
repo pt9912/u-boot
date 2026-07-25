@@ -69,7 +69,7 @@ Reviewer-Skills.
   (`MR-006` Adaptions-Text)
 - `befund`: Die Modus-Tabelle führt `internal/adapter/driving/cli` als **Hybrid**
   mit der Graduation-Bedingung „Beide Regeln stehen in der Sicht-Spec (Abschnitt
-  Fehlermodelle), geliefert von `slice-harness-architecture-template-konformitaet`
+  Fehlermodelle), geliefert von [`slice-harness-architecture-template-konformitaet`](../plan/planning/done/slice-harness-architecture-template-konformitaet.md)
   → dann GF". Diese Bedingung ist im selben Diff eingetreten:
   `spec/architecture.md` §7.2 (`c35249d`) enthält Sentinel-Schichtung und
   Dual-Classifier-Regel; die Commit-Message von `c35249d` stellt das selbst fest
@@ -214,7 +214,7 @@ Reviewer-Skills.
 - `quelle`: [`AGENTS.md`](../../AGENTS.md) §Source Precedence Rang 4 und
   §Planning-Lifecycle;
   [`LH-FA-PROJDOCS-003`](../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)
-- `pfad`: `docs/plan/planning/open/slice-harness-*.md` (vier Dateien),
+- `pfad`: `docs/plan/planning/open/slice-harness-*.md` (vier Dateien),  <!-- d-check:ignore (Fundort zum Pruefzeitpunkt) -->
   `docs/plan/planning/in-progress/roadmap.md:28`-`31`,
   `harness/conventions.md:228`-`236` (`MR-006`), `harness/conventions.md:334`
 - `befund`: Die Inhalte der vier Wellen-Slices sind geliefert
@@ -228,7 +228,7 @@ Reviewer-Skills.
   für bereits existierende Dateien. `AGENTS.md` verortet den aktiven Slice in
   `next/` oder `in-progress/`.
 - `risiko`: Wer `harness/conventions.md` liest, kann nicht erkennen, dass das
-  zitierte Audit-Protokoll (`…/open/slice-harness-sub-area-modus-audit.md` §9)
+  zitierte Audit-Protokoll (`…/open/slice-harness-sub-area-modus-audit.md` §9)  <!-- d-check:ignore (Fundort zum Pruefzeitpunkt) -->
   aus einem ungeschlossenen Slice stammt. Das Lifecycle-Verzeichnis verliert
   seine Aussagekraft als Statusquelle, und die Verzeichnis-Angabe ist die
   einzige, die maschinell sichtbar wäre.
@@ -279,9 +279,9 @@ Reviewer-Skills.
 - `kategorie`: LOW
 - `quelle`: `MR-003` ([`harness/conventions.md`](../../harness/conventions.md)),
   Maintainability
-- `pfad`: `docs/plan/planning/open/slice-harness-baseline-bump-review-v3.5.2.md:5`,
-  `docs/plan/planning/open/slice-harness-architecture-bestandsabgleich.md:5`,
-  `docs/plan/planning/open/slice-harness-internal-readme-kennungs-retrofit.md:5`;
+- `pfad`: `docs/plan/planning/open/slice-harness-baseline-bump-review-v3.5.2.md:5`,  <!-- d-check:ignore (Fundort zum Pruefzeitpunkt) -->
+  `docs/plan/planning/open/slice-harness-architecture-bestandsabgleich.md:5`,  <!-- d-check:ignore (Fundort zum Pruefzeitpunkt) -->
+  `docs/plan/planning/open/slice-harness-internal-readme-kennungs-retrofit.md:5`;  <!-- d-check:ignore (Fundort zum Pruefzeitpunkt) -->
   Gegenstück `docs/plan/planning/in-progress/roadmap.md:41`-`43`
 - `befund`: Alle drei Dateien tragen im Kopf „**Welle:** ohne Welle
   (Harness-/Spec-Wartung)". Die Roadmap führt dieselben drei unter „Nächste
@@ -313,7 +313,7 @@ Reviewer-Skills.
 - `pfad`: `tools/harness/fetch-baseline-cache.sh:100`-`132`
 - `befund`: Die Meldungen von `--check-freshness` („nicht gefunden", „faellig",
   „manuell pruefen") sind deutsch, konsistent mit den bestehenden Modi
-  `--verify`/re-vendor derselben Datei. `LH-LESE-002` bindet CLI-Ausgaben,
+  `--verify`/re-vendor derselben Datei. [`LH-LESE-002`](../../spec/lastenheft.md#lh-lese-002--sprache) bindet CLI-Ausgaben,
   Fehlermeldungen und generierte Dateien des **Produkts**; ein Harness-Skript
   ist keine Produkt-Ausgabe. Grenzfall bewusst geprüft, kein Finding höherer
   Kategorie.
@@ -354,7 +354,7 @@ Reviewer-Skills.
   Mapper, code-seitig belegt in `cli.go:269`-`302` und den `map*ToDiagnostic`-
   Funktionen, entstanden aus u-boots eigener Review-Historie); der
   Referenzmodell-Verstoß hängt an
-  [`LH-FA-PROJDOCS-006`](../../spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell)/`ADR-0013`,
+  [`LH-FA-PROJDOCS-006`](../../spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell)/[`ADR-0013`](../plan/adr/0013-dokumentationsreferenzmodell.md),
   einer repo-eigenen Erfindung mit eigener d-check-`matrix`-Klasse. Ein
   generischer Reviewer prüft weder das eine noch das andere. Zur *Formulierung*
   des ersten Ankers siehe F-2 — die Zahl der Regeln erfüllt FS-1, die Präzision
@@ -381,7 +381,7 @@ Reviewer-Skills.
   (Mindest- statt Maximalstruktur, additiv, kein CR) und Auflösungs-Trigger sind
   vollständig; die Ortswahl ist mit `MR-005`/`MR-007` konsistent.
 - geprüft, ohne Befund: **FS-3 „echtes Audit oder Bestätigungs-Audit"** — das
-  Protokoll (`slice-harness-sub-area-modus-audit` §9) widerlegt den Erst-Pass an
+  Protokoll ([`slice-harness-sub-area-modus-audit`](../plan/planning/done/slice-harness-sub-area-modus-audit.md) §9) widerlegt den Erst-Pass an
   drei Stellen statt ihn zu bestätigen: `cmd/uboot` wird auf Aspirantin
   zurückgestuft (1/3 Achsen), `internal/**/README.md` kommt als vorher
   unsichtbare Sub-Area hinzu, `internal/adapter/driving/cli` wird von GF auf
@@ -393,8 +393,8 @@ Reviewer-Skills.
   `.golangci.yml`: bestätigt.
 - geprüft, ohne Befund: **Graduation-Bedingungen der Nicht-GF-Aussagen** — beide
   Nicht-GF-Sub-Areas tragen eine benannte, überprüfbare Bedingung mit
-  Folge-Slice (Hybrid → `slice-harness-architecture-template-konformitaet`;
-  BF → `slice-harness-internal-readme-kennungs-retrofit`). Dass die erste
+  Folge-Slice (Hybrid → [`slice-harness-architecture-template-konformitaet`](../plan/planning/done/slice-harness-architecture-template-konformitaet.md);
+  BF → [`slice-harness-internal-readme-kennungs-retrofit`](../plan/planning/done/slice-harness-internal-readme-kennungs-retrofit.md)). Dass die erste
   bereits erfüllt und nicht nachgezogen ist, steht als F-1.
 - geprüft, ohne Befund: **Carveout-Disziplin
   ([`LH-FA-PROJDOCS-005`](../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin))** —
@@ -432,7 +432,7 @@ Reviewer-Skills.
   darauf ein. `AGENTS.md` trägt den Pointer.
 - geprüft, ohne Befund: **Regelkonforme Reaktion auf den ersten Befund** — der
   Lauf meldete `v3.5.2` gegen den Pin `v3.5.1`; statt eines stillen Bumps liegt
-  `slice-harness-baseline-bump-review-v3.5.2` als Plan in `open/`, dessen DoD
+  [`slice-harness-baseline-bump-review-v3.5.2`](../plan/planning/done/slice-harness-baseline-bump-review-v3.5.2.md) als Plan in `open/`, dessen DoD
   Delta-Lektüre und `MR-*`-Gegenprobe **vor** dem Bump verlangt. Kein
   Auto-Update, keine Pin-Mutation im Diff. Ich habe den Lauf reproduziert.
 - geprüft, ohne Befund: **Referenzmodell
@@ -543,7 +543,7 @@ Reviewer-Skills.
   (`MR-005`). Die Integrität wurde nicht neu verifiziert; `--verify` ist im
   Diff unverändert.
 - nicht geprüft: **Inhaltlicher Abgleich `v3.5.1` gegen `v3.5.2`** — das ist der
-  Auftrag des ausgelösten `slice-harness-baseline-bump-review-v3.5.2` und nicht
+  Auftrag des ausgelösten [`slice-harness-baseline-bump-review-v3.5.2`](../plan/planning/done/slice-harness-baseline-bump-review-v3.5.2.md) und nicht
   Gegenstand dieses Diffs.
 - nicht geprüft: **`internal/**/README.md` gegen den Code-Bestand** — die
   BF-Diagnose des Audits wurde stichprobenfrei übernommen; der Retrofit liegt

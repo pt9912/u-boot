@@ -220,7 +220,25 @@ Baseline still.
   [`AGENTS.md`](../AGENTS.md) §Quality Gates; sie fuehrt Harness-**Sensoren**,
   nicht jede Makefile-Regel. Acht Build-/Utility-Regeln stehen einzeln benannt
   in `exempt-targets` - eine Bereichsabgrenzung, **kein** Carveout (es wird
-  keine Pruefung ausgesetzt). Bewusst **kein** `MR-<NNN>`-ID-Pattern - die
+  keine Pruefung ausgesetzt).
+  **`ids`-Linkpolitik (seit 2026-07-25):** Alle vier Muster laufen mit
+  `link-policy: always` - Kennungen sind auch **innerhalb von Code-Spans**
+  linkpflichtig, nicht nur im nackten Fliesstext. **Kein `exempt-paths`,
+  nirgends.** Ein Verzeichnis-Glob haette den Bestand *und* jedes kuenftige
+  Dokument ausgenommen; stattdessen drei zeilengenaue Mechanismen:
+  (1) verlinken, wo die Kennung eine echte Referenz ist - in `done/` ist das
+  ausdruecklich zulaessig, weil
+  [`LH-FA-PROJDOCS-003`](../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)
+  "Querverweise" als erlaubte nachtraegliche Korrektur nennt;
+  (2) `d-check:ignore` **je Zeile**, wo die Kennung ein *Beleg* ist und kein
+  Verweis (JSON-Payload-Beispiel, `pfad:`-Feld eines Review-Findings, das den
+  Fundort zum Pruefzeitpunkt festhaelt) - die Begruendung steht an Ort und
+  Stelle; (3) Bereichs-Schreibweisen (`LH-FA-INIT-001..007`) werden zu  <!-- d-check:ignore (Notations-Beispiel, keine Referenz) -->
+  verlinkten Paaren aufgeloest, wie in
+  [`spec/architecture.md`](../spec/architecture.md) laengst ueblich.
+  Das `slice`-Muster traegt zusaetzlich ein Versions-Suffix
+  (`(?:\.[0-9]+)*`), damit ein Name wie `slice-...-v3.5.2` vollstaendig
+  matcht statt am Punkt abzubrechen. Bewusst **kein** `MR-<NNN>`-ID-Pattern - die
   Adaptions-IDs dieses Ledgers bleiben linkfrei. `.harness/baseline/**` liegt im
   `scan.ignore` (tag-agnostischer Glob `**`), damit die repo-relativen Links der
   vendorten Regelwerk-/Template-Dateien nicht gewertet werden.
@@ -319,7 +337,7 @@ Baseline still.
   Format; zusaetzliche Pflicht-Sections). Die Angleichung aendert das
   **Vertrags-Stratum** und ist damit ein **Change Request**, nicht per
   conventions-MR moeglich. Die Aenderung traegt der CR-Slice, nicht dieser Block.
-  **CR ausgefuehrt (2026-07-24):** `LH-FA-PROJDOCS-002` traegt jetzt die
+  **CR ausgefuehrt (2026-07-24):** [`LH-FA-PROJDOCS-002`](../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) traegt jetzt die
   MADR-Form; die zum CR-Zeitpunkt Accepted ADRs (`0001`-`0010`, `0013`) bleiben
   lean + immutabel (grandfathered, Hard Rule); Proposed (`0011`, `0012`) und alle
   neuen ADRs sind MADR-konform.
@@ -342,7 +360,7 @@ Baseline still.
   (die Entscheidung fiel ausserhalb des Repos, der Slice war nur das
   Ausfuehrungs-Vehikel), der **Fussabdruck fehlt aber**: `spec/lastenheft.md`
   hat keine `## Historie` und steht unveraendert auf Version `0.1.0`, obwohl
-  `LH-FA-PROJDOCS-002` am 2026-07-24 geaendert wurde. **Nachgezogen am
+  [`LH-FA-PROJDOCS-002`](../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) am 2026-07-24 geaendert wurde. **Nachgezogen am
   2026-07-25** im Folge-Slice
   [`slice-harness-lastenheft-historie-cr-fussabdruck`](../docs/plan/planning/done/slice-harness-lastenheft-historie-cr-fussabdruck.md):
   Das Lastenheft traegt jetzt Version `0.2.0`, Status `Accepted` und einen

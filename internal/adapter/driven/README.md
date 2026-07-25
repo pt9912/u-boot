@@ -1,7 +1,7 @@
 # internal/adapter/driven
 
 Konkrete externe Adapter — Implementierungen der Driven-Ports aus
-`internal/hexagon/port/driven/` (`LH-FA-ARCH-002`).
+`internal/hexagon/port/driven/` ([`LH-FA-ARCH-002`](../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)).
 
 Jeder Adapter pinnt sein Port-Interface per
 `var _ driven.X = (*Adapter)(nil)` im Production-Code; ein Drift
@@ -26,7 +26,7 @@ den Test-Build.
   manual-advance Fake (Vorgabe aus dem Slice-Plan: "kein reales
   time.Sleep in Tests").
 - `progress/` — `ProgressPort`-Adapter (Text-Output für
-  `LH-FA-INIT-005`-§609-Reports).
+  [`LH-FA-INIT-005`](../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)-§609-Reports).
 - `confirm/` — `Confirmer`-Adapter (`bufio.Scanner` über stdin,
   Prompt auf stderr; Default `[y/N]`).
   `ConfirmRemoveVolumes` deckt den destruktiven `down --volumes`-
@@ -36,13 +36,13 @@ den Test-Build.
 - `docker/` — zwei Adapter im selben Package:
   - `Probe` implementiert `DockerProbe` via `os/exec docker
     version` + `docker compose version --short` (read-only
-    diagnostics für `LH-FA-DIAG-002`).
+    diagnostics für [`LH-FA-DIAG-002`](../../../spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)).
   - `Engine` implementiert `DockerEngine` via `docker
     compose -f compose.yaml up -d` / `down [-v]` / `ps --format
     json`. Jeder Call durchläuft den `preflight`-Pfad (LookPath
     + Probe.Info + Probe.ComposeVersion) zur deterministischen
     `ErrDockerUnavailable`-vs-`ErrComposeRuntime`-Klassifikation
-    (CLI-Codes 11 vs. 12 per `LH-FA-CLI-006`).
+    (CLI-Codes 11 vs. 12 per [`LH-FA-CLI-006`](../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)).
 - `netprobe/` — `NetProbe`-Adapter via
   `net.Dialer.DialContext` mit `Dialer.Timeout`. Wraps mit
   noctx-Lint-konformen `*net.OpError`, sodass `errors.Is`

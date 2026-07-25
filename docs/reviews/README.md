@@ -14,7 +14,7 @@ Verzeichnis ist nur die Ablage.
 - **Ein Report pro Lauf.** Folgeläufe erzeugen eine **neue Datei**, kein
   Überschreiben — sonst geht die Historie der Findings verloren und der
   Steering-Loop („dasselbe Finding zum dritten Mal") ist nicht belegbar.
-- **Dateiname:** `<YYYY-MM-DD>-<slice-oder-diff-ref>.md`. Mehrere Läufe am
+- **Dateiname:** `<YYYY-MM-DD>-<referenz>.md`. Mehrere Läufe am
   selben Tag zum selben Gegenstand bekommen ein Suffix (`-r2`, `-r3`).
 - **Kopiervorlage:**
   `.harness/baseline/v3.5.2/templates/docs/reviews/review-report.template.md`

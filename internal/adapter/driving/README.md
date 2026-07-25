@@ -1,7 +1,7 @@
 # internal/adapter/driving
 
 Konkrete Driver — Einstiegspunkte aus der Außenwelt
-(`LH-FA-ARCH-002`).
+([`LH-FA-ARCH-002`](../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)).
 
 ## Status
 
@@ -15,16 +15,16 @@ am Root. Wiring erfolgt zentral in `cmd/uboot/main.go`; der Constructor
 
 - `cli/` — Cobra-basierte Commands:
   - `init [name] [--devcontainer]` —
-    `LH-FA-INIT-001..007` + `LH-AK-005`.
-  - `doctor` — `LH-FA-DIAG-001..004`, `--strict`.
-  - `add <service>` — `LH-FA-ADD-001..002`/`-005`.
-  - `up [--timeout <sek>]` — `LH-FA-UP-001..003`.
-  - `down [--volumes]` — `LH-FA-UP-004`.
-  - `remove <service>` — `LH-FA-ADD-007`, inkl. `--purge`.
-  - `logs [service]` — `LH-FA-UP-005`.
-  - `generate <artifact>` — `LH-FA-GEN-001..005`.
-  - `template list` — `LH-FA-TPL-001..004`.
-  - `config [get/set]` — `LH-FA-CONF-001..005`. Drei
+    [`LH-FA-INIT-001`](../../../spec/lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren)..[`LH-FA-INIT-007`](../../../spec/lastenheft.md#lh-fa-init-007--git-repository-initialisierung) + [`LH-AK-005`](../../../spec/lastenheft.md#lh-ak-005--devcontainer-flow).
+  - `doctor` — [`LH-FA-DIAG-001`](../../../spec/lastenheft.md#lh-fa-diag-001--doctor-befehl)..[`LH-FA-DIAG-004`](../../../spec/lastenheft.md#lh-fa-diag-004--reparaturhinweise), `--strict`.
+  - `add <service>` — [`LH-FA-ADD-001`](../../../spec/lastenheft.md#lh-fa-add-001--add-on-befehl)..[`LH-FA-ADD-002`](../../../spec/lastenheft.md#lh-fa-add-002--postgresql-hinzufügen)/`-005`.
+  - `up [--timeout <sek>]` — [`LH-FA-UP-001`](../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)..[`LH-FA-UP-003`](../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen).
+  - `down [--volumes]` — [`LH-FA-UP-004`](../../../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen).
+  - `remove <service>` — [`LH-FA-ADD-007`](../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen), inkl. `--purge`.
+  - `logs [service]` — [`LH-FA-UP-005`](../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen).
+  - `generate <artifact>` — [`LH-FA-GEN-001`](../../../spec/lastenheft.md#lh-fa-gen-001--generate-befehl)..[`LH-FA-GEN-005`](../../../spec/lastenheft.md#lh-fa-gen-005--idempotenz).
+  - `template list` — [`LH-FA-TPL-001`](../../../spec/lastenheft.md#lh-fa-tpl-001--projektvorlagen)..[`LH-FA-TPL-004`](../../../spec/lastenheft.md#lh-fa-tpl-004--templates-auflisten).
+  - `config [get/set]` — [`LH-FA-CONF-001`](../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)..[`LH-FA-CONF-005`](../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern). Drei
     Cobra-Shapes: parent-`config` läuft Show via `Args: NoArgs +
     RunE`, `get`/`set` sind Children mit `ExactArgs(1)` /
     `ExactArgs(2)`.

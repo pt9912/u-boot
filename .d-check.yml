@@ -23,12 +23,16 @@ ids:
   patterns:
     - regex: '\bADR-\d{4}\b'
       target: docs/plan/adr/
+      link-policy: always
     - regex: '\bLH(?:-[A-Z0-9]+)+-\d{3}[A-Z]?\b'
       target: spec/lastenheft.md
+      link-policy: always
     - regex: '\b(?:PH|TC|CO)(?:-[A-Z0-9]+)+-\d{3}[A-Z]?\b'
       target: spec/lastenheft.md
-    - regex: '\b(?:slice|tranche)-[a-z0-9][a-z0-9-]*[a-z0-9]\b'
+      link-policy: always
+    - regex: '\b(?:slice|tranche)-[a-z0-9][a-z0-9-]*[a-z0-9](?:\.[0-9]+)*\b'
       target: docs/plan/planning/
+      link-policy: always
 
 # Referenzmatrix — normatives Referenzmodell aus check_refs.py:
 # Vertrag verweist nie abwärts, Sicht-Spec nur auf Spec-Straten,

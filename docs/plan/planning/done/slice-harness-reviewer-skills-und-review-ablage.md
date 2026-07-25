@@ -52,7 +52,7 @@ kanonischen Quellen; die Skills verweisen aufwärts auf sie.
 - [x] **Adaptions-Ledger-Eintrag** `MR-009` in
   [`harness/conventions.md`](../../../../harness/conventions.md): Ortswahl
   `.harness/skills/` + `docs/reviews/`, Abgrenzung zur Prosa unter `harness/`,
-  Begründung, warum `LH-FA-PROJDOCS-001` dadurch nicht verletzt ist.
+  Begründung, warum [`LH-FA-PROJDOCS-001`](../../../../spec/lastenheft.md#lh-fa-projdocs-001--mindeststruktur) dadurch nicht verletzt ist.
 - [x] **Erster formaler Lauf** des Reviewer-Skills auf dem Diff dieser Welle,
   abgelegt als Report unter `docs/reviews/` — damit ist `docs/reviews/` nicht
   nur ein leeres Verzeichnis mit README (FS-2 fordert genau diesen
