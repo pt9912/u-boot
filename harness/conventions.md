@@ -215,8 +215,23 @@ Baseline still.
   Doku-Referenz-Vertrag. Der `scan.ignore`-Glob verengt **nicht** auf einen Tag,
   damit kuenftige vendored Staende automatisch erfasst sind; `.harness/skills/`
   (`MR-009`) bleibt ausserhalb des Baseline-Globs und damit pruefbar.
-- **Aufloesungs-Trigger:** permanent; Modul-Auswahl bei d-check-Upgrade
-  re-evaluieren.
+- **Gate-Image-Stand:** `v0.51.1` (digest-gepinnt, Bump 2026-07-25 von `0.2.0`).
+  Der Pin war 50 Releases alt geworden - es gibt fuer ihn **keine**
+  Aktualitaets-Routine (anders als fuer die Regelwerk-Baseline, s. Abschnitt
+  Freshness-Audit). Bump-Prozedur heute: `D_CHECK_IMAGE` im `Makefile` auf den
+  Digest der Zielversion, Trockenlauf gegen die **unveraenderte**
+  `.d-check.yml` (Regression), dann diesen Stand nachziehen.
+- **Aufloesungs-Trigger:** Der Teil "Modul-Auswahl bei d-check-Upgrade
+  re-evaluieren" ist mit dem Bump auf `v0.51.1` **eingeloest**: Delta gesichtet,
+  Kandidaten benannt, Auswahl bewusst vertagt (Protokoll im Slice
+  [`slice-harness-dcheck-image-bump`](../docs/plan/planning/done/slice-harness-dcheck-image-bump.md)).
+  **Offen und ausdruecklich neu zu bewerten:** die Ablehnung des
+  `--print-mk`-Fragments oben. Sie fiel gegen den `0.2.0`-Stand; gegen
+  `v0.51.1` liefert das Fragment `--network none`, fertige Targets fuer die
+  opt-in-Module samt `--disable`-Ketten und den Pin an einer Stelle. Dagegen
+  steht der Namens-Bruch `doc-check` vs. u-boots `docs-check`. Eine
+  Adaptions-Entscheidung altert mit ihrer Grundlage - deshalb steht der Stand
+  jetzt oben im Block.
 
 ### MR-006 - Modus-Deklaration pro Sub-Area
 

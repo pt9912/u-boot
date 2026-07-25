@@ -185,7 +185,7 @@ verify-depguard: ## Verify all eight depguard layer rules fire (LH-FA-ARCH-003).
 # misreads CommonMark multi-line code spans); its three u-boot-specific
 # lints (nested-link artifacts, LH shorthand suffixes,
 # reference-definition targets) await extraction into a rest sensor.
-D_CHECK_IMAGE ?= ghcr.io/pt9912/d-check@sha256:f2e0ac7bd9650fe560058e530c8890a629e2df43b8b2e696e78488794d311846
+D_CHECK_IMAGE ?= ghcr.io/pt9912/d-check@sha256:fede3d027b2ebc1dd8534460853e57b67cc7a9a182cad2e2138c8eebf7a2d03c
 
 docs-check: ## Validate markdown refs, ADR links, anchors, and model edges.
 	docker run --rm -v "$(CURDIR)":/repo:ro $(D_CHECK_IMAGE)
