@@ -17,7 +17,7 @@ Verzeichnis ist nur die Ablage.
 - **Dateiname:** `<YYYY-MM-DD>-<slice-oder-diff-ref>.md`. Mehrere Läufe am
   selben Tag zum selben Gegenstand bekommen ein Suffix (`-r2`, `-r3`).
 - **Kopiervorlage:**
-  `.harness/baseline/v3.5.1/templates/docs/reviews/review-report.template.md`
+  `.harness/baseline/v3.5.2/templates/docs/reviews/review-report.template.md`
   (vendorte Referenz-Form). Es liegt bewusst **keine** zweite Kopie der Vorlage
   in diesem Verzeichnis — eine Kopie wäre eine Drift-Quelle gegenüber der
   Baseline.

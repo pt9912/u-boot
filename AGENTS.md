@@ -12,8 +12,8 @@ die kanonische Quelle. Dann ist diese Datei anzupassen.
 
 Das adoptierte Betriebsregelwerk (AI-Harness-Kurs,
 `pt9912/ai-harness-course`) ist committet vendored unter
-`.harness/baseline/v3.5.1/regelwerk/` (`README.md` = Index); das
-Integritaets-Manifest `.harness/baseline/v3.5.1/SHA256SUMS` ist offline
+`.harness/baseline/v3.5.2/regelwerk/` (`README.md` = Index); das
+Integritaets-Manifest `.harness/baseline/v3.5.2/SHA256SUMS` ist offline
 pruefbar per `tools/harness/fetch-baseline-cache.sh --verify`. Netzlos auf
 jedem Checkout.
 
@@ -31,7 +31,7 @@ Pflicht-Blick nur bei Bootstrap, Aenderung an
 Baseline.
 
 Die Skelett-Vorlagen liegen vendored unter
-`.harness/baseline/v3.5.1/templates/` und tragen zwei Rollen: Referenz-Form
+`.harness/baseline/v3.5.2/templates/` und tragen zwei Rollen: Referenz-Form
 (Ziel der `../templates/...`-Verweise) und Kopiervorlage - neue Artefakte
 (ADR, Slice, Welle, Carveout, Review-Report) aus der Vorlage kopieren und
 ausfuellen, nicht frei formulieren.

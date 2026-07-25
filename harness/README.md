@@ -41,7 +41,7 @@ Feedforward-Quellen, die Arbeit vor der Umsetzung lenken:
 | [`harness/replay.md`](replay.md) | Replay-/Golden-Set-Regeln fuer CLI-Generatoren |
 | [`harness/verification.md`](verification.md) | Verification-Evidence und Slice-Closure-Schema |
 | [`harness/conventions.md`](conventions.md) | Repo-lokale Strukturregeln: Baseline-Pin, Adaptions-Ledger (`MR-*`), Modus-Deklaration pro Sub-Area |
-| `.harness/baseline/v3.5.1/regelwerk/README.md` | Vendored Betriebsregelwerk (AI-Harness-Kurs, Index); pro Entscheidung den benoetigten Abschnitt nachschlagen |
+| `.harness/baseline/v3.5.2/regelwerk/README.md` | Vendored Betriebsregelwerk (AI-Harness-Kurs, Index); pro Entscheidung den benoetigten Abschnitt nachschlagen |
 | [`AGENTS.md`](../AGENTS.md) | Hard Rules, Source Precedence, Minimal Workflow |
 
 ## Sensors

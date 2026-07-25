@@ -36,7 +36,7 @@
 # Tag-Quelle: ohne Argument die §Baseline-`**Stand:**`-Zeile in
 # harness/conventions.md (Skript-Eingabe; der Pin ist nicht vollumfänglicher
 # SSoT — ein Bump zieht zusätzlich Vendor-Pfad, AGENTS.md und harness/README.md
-# nach, MR-004 Bump-Prozedur). Mit Argument ein expliziter Tag (z. B. `v3.5.1`);
+# nach, MR-004 Bump-Prozedur). Mit Argument ein expliziter Tag (z. B. `v3.5.2`);
 # der erste Vendor-Lauf während der Erst-Adoption nutzt das explizite Argument,
 # weil conventions.md im selben Slice erst entsteht (Bootstrap-Barriere).
 set -euo pipefail
@@ -170,7 +170,7 @@ src_regelwerk="$(dirname "$modul0")"
 archive_root="$(dirname "$src_regelwerk")"
 src_templates="${archive_root}/templates"
 [ -d "$src_templates" ] \
-  || { echo "fetch-baseline-cache: kein templates/-Geschwisterbaum neben regelwerk/ gefunden (v3.5.1 bündelt beide; Schritt-0-Annahme verletzt)" >&2; exit 1; }
+  || { echo "fetch-baseline-cache: kein templates/-Geschwisterbaum neben regelwerk/ gefunden (das Bundle liefert beide als Geschwister; Schritt-0-Annahme verletzt)" >&2; exit 1; }
 
 rm -rf "${baseline}/regelwerk" "${baseline}/templates"
 mkdir -p "${baseline}/regelwerk" "${baseline}/templates"

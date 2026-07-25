@@ -20,23 +20,26 @@ Quelle (Source Precedence). Diese Datei ist konformitaets-bringend fuer
 ## Baseline
 
 - **Konvention:** AI-Harness-Kurs (`pt9912/ai-harness-course`)
-- **Stand:** v3.5.1 (Regelwerk-Bundle; Kurs-Welle 33)
-- **Datum der Adoption:** 2026-07-24 (Erst-Adoption direkt auf `v3.5.1`).
-- **Integritaets-Pin:** `.harness/baseline/v3.5.1/SHA256SUMS` ueber den vendorten
+- **Stand:** v3.5.2 (Regelwerk-Bundle; Kurs-Welle 34)
+- **Datum der Adoption:** 2026-07-24 (Erst-Adoption direkt auf `v3.5.1`);
+  **Review-Bump auf `v3.5.2` am 2026-07-25** (Kurs-Welle 34), ausgeloest vom
+  ersten Freshness-Audit-Lauf. Delta-Lektuere und `MR-*`-Gegenprobe im Slice
+  [`slice-harness-baseline-bump-review-v3.5.2`](../docs/plan/planning/done/slice-harness-baseline-bump-review-v3.5.2.md).
+- **Integritaets-Pin:** `.harness/baseline/v3.5.2/SHA256SUMS` ueber den vendorten
   Bestand (`regelwerk/` + `templates/`); offline pruefbar per
   `tools/harness/fetch-baseline-cache.sh --verify`.
 
 ## Adoptierte Konventions-Quellen
 
-- **Extern (Lehrmaterial):** <https://github.com/pt9912/ai-harness-course/tree/v3.5.1>
+- **Extern (Lehrmaterial):** <https://github.com/pt9912/ai-harness-course/tree/v3.5.2>
 - **Regelwerk (committet vendored, `MR-004`/`MR-007`):** die Lese-Form ist das
   nach Modulen und Grundlagen-Abschnitten aufgeteilte Bundle, entpackt und
-  committet unter `.harness/baseline/v3.5.1/regelwerk/` (Index
-  `regelwerk/README.md`), samt `.harness/baseline/v3.5.1/SHA256SUMS` - netzlos
+  committet unter `.harness/baseline/v3.5.2/regelwerk/` (Index
+  `regelwerk/README.md`), samt `.harness/baseline/v3.5.2/SHA256SUMS` - netzlos
   auf jedem Checkout, offline verifizierbar. Bundle-Quelle: Release-Asset
-  `lab-regelwerk.zip`, Tag `v3.5.1`.
+  `lab-regelwerk.zip`, Tag `v3.5.2`.
 - **Templates (committet vendored, `MR-004`):** die Skelett-Vorlagen liegen
-  vendored unter `.harness/baseline/v3.5.1/templates/` (aus demselben Bundle)
+  vendored unter `.harness/baseline/v3.5.2/templates/` (aus demselben Bundle)
   und tragen zwei Rollen: **Referenz-Form**, auf die das Regelwerk mit
   `../templates/...` als "Ziel-Form" verweist (netzlos, weil parallel zu
   `regelwerk/` vendored), und **Kopiervorlage** - beim Anlegen neuer Artefakte
@@ -57,9 +60,9 @@ vendored Baseline muss an **zwei** Stellen synchron gehalten werden.
 - **T2** - Pointer in der Source-Precedence-/Kopf-Sektion von
   [`AGENTS.md`](../AGENTS.md) (Verweis auf die vendored Baseline + Lesemodell).
 
-Beide zeigen auf `.harness/baseline/v3.5.1/regelwerk/README.md` (Index) und
+Beide zeigen auf `.harness/baseline/v3.5.2/regelwerk/README.md` (Index) und
 werden bei einem Baseline-Bump gemeinsam nachgezogen (`MR-004` Bump-Prozedur).
-Fundstelle: `.harness/baseline/v3.5.1/regelwerk/modul-02-harness-bootstrap.md`.
+Fundstelle: `.harness/baseline/v3.5.2/regelwerk/modul-02-harness-bootstrap.md`.
 
 ## Freshness-Audit
 
@@ -149,7 +152,8 @@ Baseline still.
 - **Geltungsbereich:**
   [`docs/plan/planning/in-progress/roadmap.md`](../docs/plan/planning/in-progress/roadmap.md),
   [`docs/plan/planning/README.md`](../docs/plan/planning/README.md).
-- **Adaption:** Die Roadmap folgt der v3.5.1-`roadmap.template.md`-Struktur
+- **Adaption:** Die Roadmap folgt der `roadmap.template.md`-Struktur der
+  vendorten Baseline
   (Aktuelle Welle, Naechste Wellen, Meilensteine, Abhaengigkeitsgraph,
   Abgeschlossene Wellen, Historische Trigger-Verschiebungen). u-boots
   **Release-Versionen sind die Wellen**; Termine erscheinen nur als *Konsequenz*
@@ -169,7 +173,7 @@ Baseline still.
   `done/`-Release-Cut-Slice die Closure bereits vollstaendig traegt.
 - **Aufloesungs-Trigger:** permanent, solange Release-Versionen die Wellen sind.
 
-### MR-004 - Regelwerk-Lese-Form committet vendored; Baseline-Pin v3.5.1; beide Baeume
+### MR-004 - Regelwerk-Lese-Form committet vendored; Baseline-Pin v3.5.2; beide Baeume
 
 - **Datum:** 2026-07-24
 - **Geltungsbereich:** `.harness/baseline/`,
@@ -179,7 +183,7 @@ Baseline still.
   (`scan.ignore`), `.gitignore`, Abschnitt Baseline oben.
 - **Adaption:** Die Lese-Form des adoptierten Regelwerks ist **committet
   vendored** (kein Remote-ZIP pro Lauf, kein Submodule):
-  `.harness/baseline/v3.5.1/{regelwerk,templates}/` + `SHA256SUMS`, netzlos auf
+  `.harness/baseline/v3.5.2/{regelwerk,templates}/` + `SHA256SUMS`, netzlos auf
   jedem Checkout, offline verifizierbar. u-boot vendored **beide** Baeume
   (Upstream-Default), damit die `../templates/...`-Verweise der Module netzlos
   aufloesen und die Templates als Kopiervorlage bereitstehen - **kein**
@@ -285,6 +289,21 @@ Baseline still.
 - **Aufloesungs-Trigger:** erledigt (CR ausgefuehrt 2026-07-24; Delivery-Hash im
   CR-Slice). Die status-basierte Grandfather-Grenze gilt permanent; neue
   Accepted-ADRs entstehen bereits MADR-konform, kein neuer Grandfather noetig.
+- **Nachtrag Baseline-`v3.5.2` (2026-07-25):** Die Baseline schaerft, dass
+  "Change Request" **kein Harness-Konstrukt** ist (kein `CR-*`-Schema, keine
+  eigene Datei, kein Gate), sondern der *externe* Vorgang der Vertrags-
+  vereinbarung; im Repo hinterlaesst ein angenommener CR nur einen **Fussabdruck**
+  (Version-Bump des Lastenhefts + Zeile in dessen `## Historie` + die geaenderten
+  `LH-*`). Dazu die Hard Rule: **weder ADR noch Slice duerfen `LH-*` je aendern**
+  - sie referenzieren nur. u-boots Praxis ist damit **inhaltlich** vereinbar
+  (die Entscheidung fiel ausserhalb des Repos, der Slice war nur das
+  Ausfuehrungs-Vehikel), der **Fussabdruck fehlt aber**: `spec/lastenheft.md`
+  hat keine `## Historie` und steht unveraendert auf Version `0.1.0`, obwohl
+  `LH-FA-PROJDOCS-002` am 2026-07-24 geaendert wurde. Nachgezogen wird das im
+  Folge-Slice
+  [`slice-harness-lastenheft-historie-cr-fussabdruck`](../docs/plan/planning/open/slice-harness-lastenheft-historie-cr-fussabdruck.md);
+  die Bezeichnung "CR-Slice" oben bleibt als historischer Name stehen, meint
+  aber das Vehikel, nicht die Entscheidungs-Autoritaet.
 
 ### MR-009 - Skill-Dateien unter `.harness/skills/`, Review-Reports unter `docs/reviews/`
 

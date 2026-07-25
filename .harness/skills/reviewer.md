@@ -17,7 +17,7 @@ Findings); hier steht das repo-spezifische „worauf achtest du".
 
 Für die engere Closure-Prüfung gibt es den Schwester-Skill
 [`closure-note-reviewer.md`](closure-note-reviewer.md). Report-Gerüst pro Lauf:
-`.harness/baseline/v3.5.1/templates/docs/reviews/review-report.template.md`
+`.harness/baseline/v3.5.2/templates/docs/reviews/review-report.template.md`
 (Kopiervorlage, siehe [`docs/reviews/README.md`](../../docs/reviews/README.md)).
 
 ## Kontext-Eingang (Pflicht)

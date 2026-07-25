@@ -4,7 +4,7 @@
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
-`.harness/baseline/v3.5.1/regelwerk/modul-06-roadmap.md`). u-boots Wellen
+`.harness/baseline/v3.5.2/regelwerk/modul-06-roadmap.md`). u-boots Wellen
 entsprechen den **Release-Versionen**; Termine erscheinen nur als *Konsequenz*
 einer abgeschlossenen Welle (Release-Datum), nicht als Treiber. Diese Datei
 liegt dauerhaft in `in-progress/` und bleibt bewusst knapp: der per-Slice-
@@ -20,18 +20,23 @@ Die Welle `welle-harness-konformitaet-nachlauf` ist **abgeschlossen** (s.
 Abgeschlossene Wellen); damit sind alle Folge-Punkte der Regelwerk-Adoption
 geschlossen. Aktuell läuft keine Welle.
 
-**Nächster Aufsatzpunkt:** die drei Wartungs-Kandidaten aus den Befunden dieser
-Welle (s. Nächste Wellen) — sie sind bereits als `open/`-Slices ausgearbeitet
-und brauchen nur eine Priorisierung, keinen weiteren Trigger. Der
-Baseline-Review-Bump auf `v3.5.2` ist davon der einzige mit bereits gefeuertem
-Trigger. Produkt-Wellen (v0.5.0) warten weiter auf externe Trigger.
+**Baseline-Stand:** Der Review-Bump auf **`v3.5.2`** (Kurs-Welle 34) ist am
+2026-07-25 als Einzel-Slice ohne Welle ausgeführt
+([`slice-harness-baseline-bump-review-v3.5.2`](../done/slice-harness-baseline-bump-review-v3.5.2.md)),
+weil sein Trigger als einziger bereits gefeuert war. Das Freshness-Audit meldet
+seither Exit 0.
+
+**Nächster Aufsatzpunkt:** die verbliebenen Wartungs-Kandidaten (s. Nächste
+Wellen) — alle als `open/`-Slices ausgearbeitet, alle ohne weiteren Trigger,
+es fehlt nur die Priorisierung. Produkt-Wellen (v0.5.0) warten weiter auf
+externe Trigger.
 
 ## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
 | Spec-Wartung: `architecture.md` §2 gegen den Ist-Bestand | kein externer Trigger; Befund aus dem Architektur-Slice dieser Welle (§2 führt Implementiertes als „vorgesehen") | [`slice-harness-architecture-bestandsabgleich`](../open/slice-harness-architecture-bestandsabgleich.md) — Ports und Services vollständig, „Vorgesehene Erweiterungen" bereinigen | M |
-| Harness-Wartung: Baseline-Review-Bump v3.5.1 → v3.5.2 | **bereits gefeuert** — erstes Freshness-Audit (2026-07-25) meldet `v3.5.2` upstream | [`slice-harness-baseline-bump-review-v3.5.2`](../open/slice-harness-baseline-bump-review-v3.5.2.md) — Delta lesen, `MR-*`-Ledger gegenprüfen, Bump als Einheit nach `MR-004` | S |
+| Spec-Wartung: CR-Fußabdruck im Lastenheft | kein externer Trigger; Befund des Baseline-Bumps (Baseline `v3.5.2` fordert Version-Bump + `## Historie` je angenommenem Change Request) | [`slice-harness-lastenheft-historie-cr-fussabdruck`](../open/slice-harness-lastenheft-historie-cr-fussabdruck.md) — Historie anlegen, Bestandszeile für die MADR-Umstellung, Version/Status entscheiden | S |
 | Harness-Wartung: `internal/`-READMEs in den Referenz-Scan | kein externer Trigger; Befund aus dem Sub-Area-Audit dieser Welle | [`slice-harness-internal-readme-kennungs-retrofit`](../open/slice-harness-internal-readme-kennungs-retrofit.md) — Kennungen verlinken, Status-Abschnitte entzeitlichen, `scan.ignore`-Glob `internal/**` auflösen | S |
 | macOS-Distribution | konkrete Homebrew-Nutzeranfrage | [`slice-v2-homebrew-formula`](../open/slice-v2-homebrew-formula.md) | S |
 | Linux-Pakete | konkrete Debian-/RPM-Anfrage | [`slice-v2-distro-pakete`](../open/slice-v2-distro-pakete.md) ([ADR-0007](../../adr/0007-distributionswege-ghcr.md)) | M |

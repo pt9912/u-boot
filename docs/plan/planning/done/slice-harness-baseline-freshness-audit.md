@@ -107,7 +107,7 @@ Scope:
   [`harness/conventions.md`](../../../../harness/conventions.md)
   (§Freshness-Audit neu, `MR-004` eingelöst),
   [`AGENTS.md`](../../../../AGENTS.md) (Pointer auf die Ereignis-Kadenz),
-  [`slice-harness-baseline-bump-review-v3.5.2`](../open/slice-harness-baseline-bump-review-v3.5.2.md)
+  [`slice-harness-baseline-bump-review-v3.5.2`](../done/slice-harness-baseline-bump-review-v3.5.2.md)
   (ausgelöster Folge-Plan), [`roadmap.md`](../in-progress/roadmap.md).
 
 DoD-Abgleich: alle Punkte erfüllt. Der Plan-Eintrag
@@ -166,7 +166,7 @@ Commit / Artefakt: `c7fe437`; Lifecycle-Move `open/` → `done/` im Folge-Commit
   Quartals-Regel wird vergessen; die Kopplung an „jeder Harness-Slice prüft"
   hat einen natürlichen Auslöser und wurde deshalb ins Agenten-Briefing gehoben.
 - **Folge-Slices:**
-  [`slice-harness-baseline-bump-review-v3.5.2`](../open/slice-harness-baseline-bump-review-v3.5.2.md)
+  [`slice-harness-baseline-bump-review-v3.5.2`](../done/slice-harness-baseline-bump-review-v3.5.2.md)
   — vom Sensor selbst ausgelöst, bewusst nicht in dieser Welle ausgeführt.
 
 ## 8. Sub-Area-Modus-Begründung
