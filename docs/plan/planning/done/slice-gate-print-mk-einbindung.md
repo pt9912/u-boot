@@ -144,7 +144,7 @@ Sensor-Lauf ablesbar.
 - **Folge-Slices:** keine aus diesem Slice; die übrigen drei der Welle waren
   bereits geplant.
 
-Commit / Artefakt: `<wird beim Closure-Commit eingetragen>`
+Commit / Artefakt: `e246bbf` (`d-check.mk`, `Makefile`-Wiring, `MR-005` neu gefasst).
 
 ## 8. Sub-Area-Modus-Begründung
 
