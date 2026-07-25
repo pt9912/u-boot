@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-07-24.
+**Status:** Aktiv. **Letzte Änderung:** 2026-07-25.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -13,25 +13,31 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**Welle-ID:** — (keine aktive Welle)
-**Stand:** 2026-07-24
+**Welle-ID:** `welle-harness-konformitaet-nachlauf`
+**Stand:** 2026-07-25
 
-Die Welle `welle-harness-adoption-v3.5.1` (Regelwerk-v3.5.1-Adoption +
-ADR-Format-CR) ist **abgeschlossen** (s. Abgeschlossene Wellen). Aktuell läuft
-keine Welle.
+Der **Harness-Konformitäts-Nachlauf** ist eröffnet: die vier in
+[`slice-harness-regelwerk-adoption-v3.5.1`](../done/slice-harness-regelwerk-adoption-v3.5.1.md)
+§7 dokumentierten Folge-Punkte (FS-1..FS-4) plus die
+`spec/architecture.md`-Template-Konformität sind als `open/`-Slices angelegt.
+Kein Produkt-Delta: reine Harness-/Doku-Konformität; Produkt-Wellen (v0.5.0)
+warten weiter auf externe Trigger.
 
-**Nächster Aufsatzpunkt:** der **Harness-Konformitäts-Nachlauf** — die im
-Adoptions-Slice §7 dokumentierten Folge-Punkte FS-1..FS-4 und die
-`spec/architecture.md`-Konformität (s. Nächste Wellen). Sie sind noch **nicht**
-als eigene `open/`-Slices angelegt; erster Schritt ist, den jeweils
-bearbeiteten Punkt als `open/`-Slice zu stubben. Produkt-Wellen (v0.5.0) warten
-weiter auf externe Trigger.
+| Slice | Inhalt | Status |
+|---|---|---|
+| [`slice-harness-reviewer-skills-und-review-ablage`](../open/slice-harness-reviewer-skills-und-review-ablage.md) | FS-1 Reviewer-/Closure-Note-Skill unter `.harness/skills/` + FS-2 Ablage `docs/reviews/` | open |
+| [`slice-harness-sub-area-modus-audit`](../open/slice-harness-sub-area-modus-audit.md) | FS-3 Drei-Achsen-Inklusion + Modus-Diagnose je Code-Sub-Area | open |
+| [`slice-harness-baseline-freshness-audit`](../open/slice-harness-baseline-freshness-audit.md) | FS-4 Prüf-Kadenz der Kurs-Release-Liste, Review-Bump statt Auto-Update | open |
+| [`slice-harness-architecture-template-konformitaet`](../open/slice-harness-architecture-template-konformitaet.md) | `spec/architecture.md` §Externe Abhängigkeiten/§Sequenz/§Fehlermodelle + Kopf-Form | open |
+
+FS-5 (ADR-Format-CR) ist bereits mit der Vorwelle geschlossen
+([`slice-cr-adr-format-madr`](../done/slice-cr-adr-format-madr.md)) und nicht
+Teil dieser Welle.
 
 ## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
-| **Harness-Konformitäts-Nachlauf** (nächster Aufsatzpunkt) | direkt fortsetzbar, kein externer Trigger | FS-1 Reviewer-/Closure-Skill (`.harness/skills/`) + FS-2 `docs/reviews/`; FS-3 Sub-Area-Modus-Audit Bestandscode; FS-4 Freshness-Audit; `spec/architecture.md` §Sequenz/§Fehlermodelle — spezifiziert in [`slice-harness-regelwerk-adoption-v3.5.1`](../done/slice-harness-regelwerk-adoption-v3.5.1.md) §7 (je als `open/`-Slice zu stubben) | M |
 | macOS-Distribution | konkrete Homebrew-Nutzeranfrage | [`slice-v2-homebrew-formula`](../open/slice-v2-homebrew-formula.md) | S |
 | Linux-Pakete | konkrete Debian-/RPM-Anfrage | [`slice-v2-distro-pakete`](../open/slice-v2-distro-pakete.md) ([ADR-0007](../../adr/0007-distributionswege-ghcr.md)) | M |
 | Devcontainer-Robustheit | Real-World-Half-State-Beschwerde oder Schema-Erweiterung | [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md) | M |
@@ -61,9 +67,10 @@ flowchart LR
     V3[v0.3.0 add-ons]
     V4[v0.4.0 JSON-CLI]
     H[welle-harness-adoption-v3.5.1]
+    K[welle-harness-konformitaet-nachlauf]
     N[Naechste Wellen: trigger-getrieben]
 
-    V1 --> V2 --> V3 --> V4 --> H --> N
+    V1 --> V2 --> V3 --> V4 --> H --> K --> N
 ```
 
 ## Abgeschlossene Wellen
