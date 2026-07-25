@@ -177,18 +177,23 @@ verify-depguard: ## Verify all eight depguard layer rules fire (LH-FA-ARCH-003).
 # ---- docs gates ------------------------------------------------------------
 
 # docs-check validates the markdown reference model via d-check
-# (digest-pinned container image, configured in .d-check.yml; see
-# https://github.com/pt9912/d-check/releases/tag/v0.2.0). Covered:
+# (digest-pinned container image, configured in .d-check.yml). Covered:
 # relative link paths, heading anchors, linked ADR/LH/Planning/Trace
 # ids, and reference-model edges across docs/, spec/, harness/, and
 # root *.md. tools/check_refs.py is deprecated (its line-based parser
 # misreads CommonMark multi-line code spans); its three u-boot-specific
 # lints (nested-link artifacts, LH shorthand suffixes,
 # reference-definition targets) await extraction into a rest sensor.
-D_CHECK_IMAGE ?= ghcr.io/pt9912/d-check@sha256:fede3d027b2ebc1dd8534460853e57b67cc7a9a182cad2e2138c8eebf7a2d03c
+#
+# The doc-* recipes live in the tool-generated d-check.mk (see its
+# header). Only the digest pin lives here, so regenerating the fragment
+# never rewrites it. `docs-check` stays the u-boot-wide target name
+# (AGENTS.md, harness/verification.md, CI, done/ closures) and aliases
+# the fragment's `doc-check`.
+DCHECK_DIGEST ?= sha256:fede3d027b2ebc1dd8534460853e57b67cc7a9a182cad2e2138c8eebf7a2d03c
+include d-check.mk
 
-docs-check: ## Validate markdown refs, ADR links, anchors, and model edges.
-	docker run --rm -v "$(CURDIR)":/repo:ro $(D_CHECK_IMAGE)
+docs-check: doc-check ## Validate markdown refs, ADR links, anchors, and model edges.
 
 # ---- aggregators -----------------------------------------------------------
 

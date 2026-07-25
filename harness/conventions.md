@@ -203,18 +203,34 @@ Baseline still.
 - **Datum:** 2026-07-24
 - **Geltungsbereich:** [`.d-check.yml`](../.d-check.yml), [`Makefile`](../Makefile)
   (`docs-check`).
-- **Adaption:** `make docs-check` laeuft via direktem
-  `docker run ... $(D_CHECK_IMAGE)` gegen die repo-lokale `.d-check.yml` (kein
-  tool-generiertes `d-check.mk`-`--print-mk`-Fragment). Aktive Module:
+- **Adaption (neu gefasst 2026-07-25):** u-boot bindet das **tool-generierte
+  Fragment** `d-check.mk` per `include` ein (`--print-mk`) und haelt `docs-check`
+  als duennen Alias auf dessen `doc-check`. Der Digest-Pin lebt als
+  `DCHECK_DIGEST` im `Makefile`, **nicht** im Fragment - ein Re-Generieren
+  ueberschreibt ihn damit nicht. Aktive Module:
   `[links, anchors, ids, matrix]`. Bewusst **kein** `MR-<NNN>`-ID-Pattern - die
   Adaptions-IDs dieses Ledgers bleiben linkfrei. `.harness/baseline/**` liegt im
   `scan.ignore` (tag-agnostischer Glob `**`), damit die repo-relativen Links der
   vendorten Regelwerk-/Template-Dateien nicht gewertet werden.
-- **Begruendung:** Der direkte Container-Lauf ist die etablierte u-boot-Form
-  (digest-gepinntes `D_CHECK_IMAGE`); die Modul-Auswahl deckt den bestehenden
-  Doku-Referenz-Vertrag. Der `scan.ignore`-Glob verengt **nicht** auf einen Tag,
+- **Begruendung:** Bis `v0.51.1` lief `docs-check` als handgeschriebener
+  `docker run`-Aufruf, und das Fragment wurde gegen den `0.2.0`-Stand
+  abgelehnt. Gegen `v0.51.1` kehrt sich die Abwaegung um: Das Fragment bringt
+  `--network none` an jedem Target (ein Doku-Gate braucht kein Netz), fertige
+  Targets fuer die opt-in-Module samt der jeweils rund achtzehn Glieder langen
+  `--disable`-Ketten - die wachsen mit jedem neuen d-check-Modul und waeren von
+  Hand eine Drift-Quelle ohne Sensor - und den Pin an einer Stelle. Der
+  Target-Name bleibt `docs-check`, weil er in [`AGENTS.md`](../AGENTS.md),
+  [`harness/verification.md`](verification.md), den CI-Workflows und dutzenden
+  `done/`-Closures steht; ein Alias kostet eine Zeile, ein Umbenennen einen
+  Doku-Sweep durch unveraenderliche Artefakte. Die Modul-Auswahl deckt den
+  bestehenden Doku-Referenz-Vertrag. Der `scan.ignore`-Glob verengt **nicht** auf einen Tag,
   damit kuenftige vendored Staende automatisch erfasst sind; `.harness/skills/`
   (`MR-009`) bleibt ausserhalb des Baseline-Globs und damit pruefbar.
+- **Fragment-Re-Generierung:** Bei einem Image-Bump wird `d-check.mk` neu
+  erzeugt (`--print-mk` aus dem **neuen** Image, Ausgabe nach `d-check.mk`);
+  der Digest im `Makefile` wird separat gesetzt. Das Fragment ist generiert -
+  Handaenderungen daran waeren stille Drift und gehoeren stattdessen ins
+  `Makefile` (eigene Targets) oder in `.d-check.yml` (Konfiguration).
 - **Gate-Image-Stand:** `v0.51.1` (digest-gepinnt, Bump 2026-07-25 von `0.2.0`).
   Der Pin war 50 Releases alt geworden - es gibt fuer ihn **keine**
   Aktualitaets-Routine (anders als fuer die Regelwerk-Baseline, s. Abschnitt

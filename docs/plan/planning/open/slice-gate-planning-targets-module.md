@@ -66,7 +66,7 @@ Beide sind hermetisch (kein git, kein Netz) und billig zu konfigurieren.
 
 Gefeuert: Entscheidung des Projektinhabers nach dem Image-Bump. Sinnvoll
 **nach** der `--print-mk`-Einbindung
-([`slice-gate-print-mk-einbindung`](slice-gate-print-mk-einbindung.md)), weil
+([`slice-gate-print-mk-einbindung`](../done/slice-gate-print-mk-einbindung.md)), weil
 das Fragment für beide Module fertige Targets mitbringt.
 
 ## 5. Closure-Trigger
