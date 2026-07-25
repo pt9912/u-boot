@@ -236,7 +236,7 @@ Baseline still.
   Sub-Area; eine BF-Sub-Area ohne Graduation-Plan waere "permanente Ausnahme als
   temporaer getarnt".
 - **Aufloesungs-Trigger:** Audit erledigt; Delivery-Verweis im Slice
-  [`slice-harness-sub-area-modus-audit`](../docs/plan/planning/open/slice-harness-sub-area-modus-audit.md)
+  [`slice-harness-sub-area-modus-audit`](../docs/plan/planning/done/slice-harness-sub-area-modus-audit.md)
   §9. Re-evaluieren bei jeder neuen Pfad-Familie im Produktivcode sowie beim
   Erfuellen einer der beiden Graduation-Bedingungen oben.
 
@@ -339,7 +339,7 @@ Reproduzierbarkeit) hinaus nutzt dieses Repo:
 Stand: auditiert am 2026-07-25 (Drei-Achsen-Inklusion + vier Modus-Kriterien je
 Kandidat). Das **Audit-Protokoll** - inklusive der abgewiesenen Kandidaten
 (Sub-Area-Aspirantinnen) - liegt im Slice
-[`slice-harness-sub-area-modus-audit`](../docs/plan/planning/open/slice-harness-sub-area-modus-audit.md)
+[`slice-harness-sub-area-modus-audit`](../docs/plan/planning/done/slice-harness-sub-area-modus-audit.md)
 §9; hier steht nur das Ergebnis.
 
 | Sub-Area (Pfad) | Modus | Begruendung | Graduation-Bedingung / Folge-Slice |

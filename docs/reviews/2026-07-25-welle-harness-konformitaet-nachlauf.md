@@ -26,10 +26,10 @@ diese Liste ist der Lauf nicht reproduzierbar):
 - [`harness/conventions.md`](../../harness/conventions.md) (`MR-000`..`MR-009`,
   §Freshness-Audit, §Modus-Deklaration)
 - Slice-Pläne der Welle:
-  [`slice-harness-reviewer-skills-und-review-ablage`](../plan/planning/open/slice-harness-reviewer-skills-und-review-ablage.md),
-  [`slice-harness-sub-area-modus-audit`](../plan/planning/open/slice-harness-sub-area-modus-audit.md),
-  [`slice-harness-baseline-freshness-audit`](../plan/planning/open/slice-harness-baseline-freshness-audit.md),
-  [`slice-harness-architecture-template-konformitaet`](../plan/planning/open/slice-harness-architecture-template-konformitaet.md)
+  [`slice-harness-reviewer-skills-und-review-ablage`](../plan/planning/done/slice-harness-reviewer-skills-und-review-ablage.md),
+  [`slice-harness-sub-area-modus-audit`](../plan/planning/done/slice-harness-sub-area-modus-audit.md),
+  [`slice-harness-baseline-freshness-audit`](../plan/planning/done/slice-harness-baseline-freshness-audit.md),
+  [`slice-harness-architecture-template-konformitaet`](../plan/planning/done/slice-harness-architecture-template-konformitaet.md)
 - Vorgabe FS-1..FS-4:
   [`slice-harness-regelwerk-adoption-v3.5.1`](../plan/planning/done/slice-harness-regelwerk-adoption-v3.5.1.md)
   §7
@@ -89,7 +89,7 @@ Reviewer-Skills.
 - `quelle`: [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) /
   [`LH-NFA-USE-004`](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe);
   DoD-Punkt „Bestand unverletzt — jede Aussage ist am Code belegbar"
-  ([`slice-harness-architecture-template-konformitaet`](../plan/planning/open/slice-harness-architecture-template-konformitaet.md) §2)
+  ([`slice-harness-architecture-template-konformitaet`](../plan/planning/done/slice-harness-architecture-template-konformitaet.md) §2)
 - `pfad`: `spec/architecture.md:437` (§7.2 Dual-Classifier-Regel);
   gleichlautend `.harness/skills/reviewer.md:49`-`58` (HIGH-Anker #1)
 - `befund`: Beide Texte formulieren die Regel als „ein Driving-Sentinel wird an
@@ -118,7 +118,7 @@ Reviewer-Skills.
 
 - `kategorie`: MEDIUM
 - `quelle`: DoD-Punkt „Bestand unverletzt — jede Aussage ist am Code belegbar"
-  ([`slice-harness-architecture-template-konformitaet`](../plan/planning/open/slice-harness-architecture-template-konformitaet.md) §2);
+  ([`slice-harness-architecture-template-konformitaet`](../plan/planning/done/slice-harness-architecture-template-konformitaet.md) §2);
   [`LH-FA-INIT-004`](../../spec/lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen)
 - `pfad`: `spec/architecture.md:330`-`334` (Sequenz „Projekt initialisieren")
 - `befund`: Das Diagramm ordnet `Plan je Datei` (Zeile 330) →

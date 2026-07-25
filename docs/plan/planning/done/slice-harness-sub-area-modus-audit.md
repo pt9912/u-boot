@@ -7,7 +7,7 @@ Verzeichnisse bewegt).
 s. [`roadmap.md`](../in-progress/roadmap.md)).
 
 **Bezug:** Konformitätslücke der Regelwerk-Adoption, dokumentiert als FS-3 in
-[`slice-harness-regelwerk-adoption-v3.5.1`](../done/slice-harness-regelwerk-adoption-v3.5.1.md)
+[`slice-harness-regelwerk-adoption-v3.5.1`](slice-harness-regelwerk-adoption-v3.5.1.md)
 §7/§9 und als Auflösungs-Trigger in `MR-006`
 ([`harness/conventions.md`](../../../../harness/conventions.md)). Berührt
 [`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)
@@ -35,32 +35,32 @@ Modus-Tabelle in `harness/conventions.md` belastbar.
 
 ## 2. Definition of Done
 
-- [ ] **Kandidaten-Inventar** aller Code-/Tooling-Strukturen aufgestellt
+- [x] **Kandidaten-Inventar** aller Code-/Tooling-Strukturen aufgestellt
   (mindestens: `internal/hexagon/domain`, `internal/hexagon/application`,
   `internal/hexagon/port`, `internal/adapter/driving/cli`,
   `internal/adapter/driven/*`, `cmd/uboot`, `internal/e2e`,
   `tools/` + `scripts/`).
-- [ ] **Inklusions-Prüfung je Kandidat** dokumentiert: Achse 1
+- [x] **Inklusions-Prüfung je Kandidat** dokumentiert: Achse 1
   (Konventions-Härte — eigene `MR-NNN` plausibel?), Achse 2 (Inventur-Linie —
   eigene Diskrepanz-Zeile sinnvoll?), Achse 3 (struktureller Cluster — eigene
   Pfad-/Datei-Familie?), Schwelle ≥ 2. Nicht-qualifizierte Kandidaten werden
   als **Sub-Area-Aspirantin** benannt und der aufnehmenden Sub-Area zugeordnet
   — Aggregation ist ein Ergebnis, kein Versäumnis.
-- [ ] **Vier Pflichtkriterien je qualifizierter Sub-Area** ausgefüllt, inklusive
+- [x] **Vier Pflichtkriterien je qualifizierter Sub-Area** ausgefüllt, inklusive
   Phase-Reife (0–5) gegen die Phase-×-Modus-Matrix und expliziter
   GF/BF/Hybrid-Aussage.
-- [ ] **Jede BF-/Hybrid-Markierung trägt eine Graduation-Bedingung** (Trigger-
+- [x] **Jede BF-/Hybrid-Markierung trägt eine Graduation-Bedingung** (Trigger-
   Klasse oder Folge-Slice); jede GF-Aussage trägt den Beleg, dass Doku vor Code
   lag. Keine Modus-Aussage ohne Beleg — „GF, weil neu" ist kein Beleg.
-- [ ] **`harness/conventions.md` §Modus-Deklaration ersetzt**: die Vier-Zeilen-
+- [x] **`harness/conventions.md` §Modus-Deklaration ersetzt**: die Vier-Zeilen-
   Erst-Pass-Tabelle weicht der auditierten Tabelle; der Erst-Pass-Vorbehalt
   („bewusst pragmatisch", „Folge-Slice") wird eingelöst, nicht bloß umformuliert.
   `MR-006` bekommt den erledigten Auflösungs-Trigger mit Delivery-Verweis.
-- [ ] **Audit-Detailtabelle** (drei Achsen je Kandidat) lebt in **diesem Slice**,
+- [x] **Audit-Detailtabelle** (drei Achsen je Kandidat) lebt in **diesem Slice**,
   nicht in `conventions.md` — dort steht nur das Ergebnis. Begründung:
   `conventions.md` ist Regelwerks-Deklaration, nicht Audit-Protokoll.
-- [ ] `make docs-check` grün.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] `make docs-check` grün.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 3. Plan (vor Code)
 
@@ -103,7 +103,80 @@ Alle Kandidaten qualifiziert oder als Aspirantin abgewiesen, Modus-Tabelle in
 
 ## 7. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+### Verification Evidence
+
+Scope:
+- Slice: `slice-harness-sub-area-modus-audit` (FS-3)
+- IDs: **keine** Anforderung geändert.
+  [`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)
+  nur lesend (Verzeichnislayout als Ausgangsinventar);
+  [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)
+  durch den nachgetragenen Carveout-Eintrag erfüllt.
+- Artefakte: §9 dieses Slice (Audit-Protokoll),
+  [`harness/conventions.md`](../../../../harness/conventions.md)
+  (§Modus-Deklaration ersetzt, `MR-006` eingelöst),
+  [`carveouts.md`](../in-progress/carveouts.md) (neuer Eintrag),
+  [`slice-harness-internal-readme-kennungs-retrofit`](../open/slice-harness-internal-readme-kennungs-retrofit.md)
+  (neuer `open/`-Plan), [`roadmap.md`](../in-progress/roadmap.md).
+
+DoD-Abgleich: alle Punkte erfüllt. Elf Kandidaten geprüft, acht qualifiziert,
+drei als Aspirantin abgewiesen; jede Modus-Aussage mit Beleg, beide Nicht-GF-
+Aussagen mit Graduation-Bedingung. Das Audit-Protokoll liegt hier, die
+Ergebnis-Tabelle in `conventions.md` — wie in der DoD verlangt.
+
+Sensors:
+| Sensor | Ergebnis | Evidence |
+| --- | --- | --- |
+| `make docs-check` | pass | 128 Dateien / 0 Befunde |
+| Inklusions-Gegenprobe am Bestand | pass | Pfad-Familien, Dateizahlen und LOC je Kandidat erhoben (§9.1); `cmd/uboot` 2 Dateien / 302 LOC als Beleg der Rückstufung |
+
+Traceability:
+| ID / Pflicht | Beleg |
+| --- | --- |
+| Regelwerk `grundlagen-konventionen` (Sub-Area-Inklusion, Schwelle ≥ 2) | §9.1 mit Achsen-Bewertung je Kandidat, inklusive der abgewiesenen |
+| Regelwerk `modul-05` (vier Modus-Pflichtkriterien) | §9.2 für die drei nicht-trivialen Fälle, Zusammenfassung in §9.3 |
+| `MR-006` Auflösungs-Trigger | Erst-Pass-Tabelle ersetzt; Delivery-Verweis im Ledger |
+| [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin) | `scan.ignore`-Glob `internal/**` jetzt inventarisiert **mit** Plan-Anker |
+
+Carveouts: Neu: none. Gelöst: none. **Nachinventarisiert:** der bestehende
+`scan.ignore`-Ausschluss `internal/**` (war nur ein Konfigurations-Kommentar) —
+jetzt im Inventar mit Folge-Slice.
+
+Nicht ausgeführt:
+- `make gates` / `make lint` — kein Code-Delta; das Audit beschreibt den
+  Bestand, es ändert ihn nicht. Der Bestand wurde ausschließlich lesend
+  inventarisiert.
+
+Independent Review (Frischkontext, Rollentrennung): Das Audit ist als
+substanziell bestätigt („widerlegt den Erst-Pass an drei Stellen statt ihn zu
+bestätigen"), die Graduation-Bedingungen als benannt und überprüfbar. Ein
+MEDIUM (**F-1**): Die Hybrid-Aussage zu `internal/adapter/driving/cli` hatte
+ihre Graduation-Bedingung noch in derselben Welle erfüllt, ohne dass der Ledger
+nachzog — behoben in `4fed84f` (jetzt GF, graduiert), Audit-Befund bleibt als
+§9.3-Nachtrag stehen.
+
+Commit / Artefakt: `be3d33c` (Audit, Ergebnis-Tabelle, Carveout, Folge-Plan);
+`4fed84f` (F-1-Graduation); Lifecycle-Move `open/` → `done/` im Folge-Commit.
+
+### Steering-Loop-Lerneintrag
+
+- **Der Erst-Pass war nicht nur ungenau, er war blind.** Die drei Korrekturen
+  (Hybrid statt GF, `cmd/uboot` zur Aspirantin, READMEs als eigene Sub-Area)
+  entstanden nicht aus feinerer Bewertung derselben Kandidaten, sondern daraus,
+  dass die Inklusions-Achsen **andere Kandidaten sichtbar machen** als die
+  Verzeichnis-Intuition. Wer Sub-Areas nach Top-Level-Ordnern schneidet, findet
+  READMEs nie — weil sie quer zu allen Ordnern liegen.
+- **Ein Audit findet, wonach es nicht gesucht hat.** Der `internal/**`-Ausschluss
+  in `.d-check.yml` war weder Auftrag noch Verdacht; er fiel auf, weil Achse 2
+  (Inventur-Linie) die Frage „gibt es hier einen Sensor?" erzwingt. Das ist das
+  Argument für die drei Achsen gegen eine reine Modus-Abfrage.
+- **Graduation ist ein eigener Arbeitsschritt.** Eine erfüllte
+  Graduation-Bedingung zieht sich nicht selbst nach; das musste der Review
+  aufdecken (F-1). Konsequenz: Wer eine Bedingung erfüllt, prüft im selben
+  Durchlauf den Ledger.
+- **Folge-Slices:**
+  [`slice-harness-internal-readme-kennungs-retrofit`](../open/slice-harness-internal-readme-kennungs-retrofit.md)
+  (BF → GF für die Code-Paket-READMEs).
 
 ## 8. Sub-Area-Modus-Begründung
 
@@ -188,7 +261,7 @@ zusammengefasst.
   ist genau das die Lücke. Zweitbefund: Die Meilenstein-Tags machen diese
   Dateien zu einer *zeitlichen Schicht* neben Roadmap und Closure-Notizen.
 - **Reconciliation-Aufwand / Graduation:** ein eigener Slice
-  ([`slice-harness-internal-readme-kennungs-retrofit`](slice-harness-internal-readme-kennungs-retrofit.md)):
+  ([`slice-harness-internal-readme-kennungs-retrofit`](../open/slice-harness-internal-readme-kennungs-retrofit.md)):
   Kennungen verlinken, Status-Abschnitte entzeitlichen, `internal/**` aus dem
   `scan.ignore` nehmen. Danach existiert ein Sensor für die Inventur-Linie →
   **Graduation nach GF**.

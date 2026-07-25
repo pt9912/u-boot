@@ -13,26 +13,18 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**Welle-ID:** `welle-harness-konformitaet-nachlauf`
+**Welle-ID:** — (keine aktive Welle)
 **Stand:** 2026-07-25
 
-Der **Harness-Konformitäts-Nachlauf** ist eröffnet: die vier in
-[`slice-harness-regelwerk-adoption-v3.5.1`](../done/slice-harness-regelwerk-adoption-v3.5.1.md)
-§7 dokumentierten Folge-Punkte (FS-1..FS-4) plus die
-`spec/architecture.md`-Template-Konformität sind als `open/`-Slices angelegt.
-Kein Produkt-Delta: reine Harness-/Doku-Konformität; Produkt-Wellen (v0.5.0)
-warten weiter auf externe Trigger.
+Die Welle `welle-harness-konformitaet-nachlauf` ist **abgeschlossen** (s.
+Abgeschlossene Wellen); damit sind alle Folge-Punkte der Regelwerk-Adoption
+geschlossen. Aktuell läuft keine Welle.
 
-| Slice | Inhalt | Status |
-|---|---|---|
-| [`slice-harness-reviewer-skills-und-review-ablage`](../open/slice-harness-reviewer-skills-und-review-ablage.md) | FS-1 Reviewer-/Closure-Note-Skill unter `.harness/skills/` + FS-2 Ablage `docs/reviews/` | open |
-| [`slice-harness-sub-area-modus-audit`](../open/slice-harness-sub-area-modus-audit.md) | FS-3 Drei-Achsen-Inklusion + Modus-Diagnose je Code-Sub-Area | open |
-| [`slice-harness-baseline-freshness-audit`](../open/slice-harness-baseline-freshness-audit.md) | FS-4 Prüf-Kadenz der Kurs-Release-Liste, Review-Bump statt Auto-Update | open |
-| [`slice-harness-architecture-template-konformitaet`](../open/slice-harness-architecture-template-konformitaet.md) | `spec/architecture.md` §Externe Abhängigkeiten/§Sequenz/§Fehlermodelle + Kopf-Form | open |
-
-FS-5 (ADR-Format-CR) ist bereits mit der Vorwelle geschlossen
-([`slice-cr-adr-format-madr`](../done/slice-cr-adr-format-madr.md)) und nicht
-Teil dieser Welle.
+**Nächster Aufsatzpunkt:** die drei Wartungs-Kandidaten aus den Befunden dieser
+Welle (s. Nächste Wellen) — sie sind bereits als `open/`-Slices ausgearbeitet
+und brauchen nur eine Priorisierung, keinen weiteren Trigger. Der
+Baseline-Review-Bump auf `v3.5.2` ist davon der einzige mit bereits gefeuertem
+Trigger. Produkt-Wellen (v0.5.0) warten weiter auf externe Trigger.
 
 ## Nächste Wellen
 
@@ -86,6 +78,7 @@ flowchart LR
 | v0.4.0 (maschinenlesbare CLI, `logs`, Devcontainer-Features) | 2026-06-08 | [`slice-v1-release-cut-v0.4.0`](../done/slice-v1-release-cut-v0.4.0.md); JSON-CLI-Cluster [`slice-v1-cli-json-dry-run`](../done/slice-v1-cli-json-dry-run.md) (9/9 Folge-Slices + `T_close`, `3a35d58`) |
 | Lokale FS-Templates | 2026-06 | [`slice-later-local-templates`](../done/slice-later-local-templates.md) ([`LH-FA-TPL-003`](../../../../spec/lastenheft.md#lh-fa-tpl-003--eigene-templates)) |
 | welle-harness-adoption-v3.5.1 (Regelwerk v3.5.1 + ADR-Format-CR auf MADR) | 2026-07-24 | [`slice-harness-regelwerk-adoption-v3.5.1`](../done/slice-harness-regelwerk-adoption-v3.5.1.md) (`8d897d3`); [`slice-cr-adr-format-madr`](../done/slice-cr-adr-format-madr.md) (`7633cbb`) |
+| welle-harness-konformitaet-nachlauf (FS-1..FS-4 + `architecture.md`-Template-Konformität) | 2026-07-25 | [`slice-harness-reviewer-skills-und-review-ablage`](../done/slice-harness-reviewer-skills-und-review-ablage.md) (`d5d896a`); [`slice-harness-sub-area-modus-audit`](../done/slice-harness-sub-area-modus-audit.md) (`be3d33c`); [`slice-harness-baseline-freshness-audit`](../done/slice-harness-baseline-freshness-audit.md) (`c7fe437`); [`slice-harness-architecture-template-konformitaet`](../done/slice-harness-architecture-template-konformitaet.md) (`c35249d`); Review-Findings (`4fed84f`), Report in [`docs/reviews/`](../../../reviews/README.md) |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-NN-results.md`; die Welle-Closure lebt vollständig im jeweiligen

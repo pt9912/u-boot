@@ -7,7 +7,7 @@ Verzeichnisse bewegt).
 s. [`roadmap.md`](../in-progress/roadmap.md)).
 
 **Bezug:** Konformitätslücke der Regelwerk-Adoption, dokumentiert als FS-1/FS-2
-in [`slice-harness-regelwerk-adoption-v3.5.1`](../done/slice-harness-regelwerk-adoption-v3.5.1.md)
+in [`slice-harness-regelwerk-adoption-v3.5.1`](slice-harness-regelwerk-adoption-v3.5.1.md)
 §7. Kein `LH`-/`ADR`-Neubezug auf Anforderungsebene: reine Harness-Konformität.
 Die Doku-Mindeststruktur
 ([`LH-FA-PROJDOCS-001`](../../../../spec/lastenheft.md#lh-fa-projdocs-001--mindeststruktur))
@@ -34,35 +34,35 @@ kanonischen Quellen; die Skills verweisen aufwärts auf sie.
 
 ## 2. Definition of Done
 
-- [ ] **`.harness/skills/reviewer.md`** angelegt (aus der vendorten Vorlage
+- [x] **`.harness/skills/reviewer.md`** angelegt (aus der vendorten Vorlage
   `.harness/baseline/v3.5.1/templates/.harness/skills/reviewer.template.md`
   kopiert und ausgefüllt, Template-Hinweis-Block gelöscht) mit **mindestens zwei
   repo-spezifischen HIGH-Regeln**, die ein generischer Reviewer-Skill nicht
   abdeckt.
-- [ ] **`.harness/skills/closure-note-reviewer.md`** angelegt, angepasst an
+- [x] **`.harness/skills/closure-note-reviewer.md`** angelegt, angepasst an
   u-boot: es gibt **kein** computational Closure-Note-Gate
   (`check_closure_notes.py` existiert hier nicht) — die Abgrenzung „semantische
   Schicht über einem Struktur-Gate" wird durch die u-boot-Realität ersetzt
   (Struktur-Pflichtfelder aus `harness/verification.md`, inferentielle Prüfung
   von Substanz vs. Floskel). Der Skill benennt diese Abweichung explizit.
-- [ ] **`docs/reviews/README.md`** angelegt: Zweck, Dateiname-Konvention
+- [x] **`docs/reviews/README.md`** angelegt: Zweck, Dateiname-Konvention
   `<YYYY-MM-DD>-<slice-oder-diff-ref>.md`, Regel „ein Report pro Lauf,
   Folgeläufe als neue Datei statt Überschreibung", Verweis auf das vendorte
   Report-Gerüst als Kopiervorlage (keine Kopie im Repo → keine Drift-Quelle).
-- [ ] **Adaptions-Ledger-Eintrag** `MR-009` in
+- [x] **Adaptions-Ledger-Eintrag** `MR-009` in
   [`harness/conventions.md`](../../../../harness/conventions.md): Ortswahl
   `.harness/skills/` + `docs/reviews/`, Abgrenzung zur Prosa unter `harness/`,
   Begründung, warum `LH-FA-PROJDOCS-001` dadurch nicht verletzt ist.
-- [ ] **Erster formaler Lauf** des Reviewer-Skills auf dem Diff dieser Welle,
+- [x] **Erster formaler Lauf** des Reviewer-Skills auf dem Diff dieser Welle,
   abgelegt als Report unter `docs/reviews/` — damit ist `docs/reviews/` nicht
   nur ein leeres Verzeichnis mit README (FS-2 fordert genau diesen
   Entstehungs-Zeitpunkt). Rollentrennung: der Lauf erfolgt in Frischkontext
   gegen den Diff, nicht aus dem Autoren-Kontext heraus.
-- [ ] `make docs-check` grün — insbesondere: die neuen Dateien unter
+- [x] `make docs-check` grün — insbesondere: die neuen Dateien unter
   `.harness/skills/` liegen **außerhalb** des `scan.ignore`-Globs
   `.harness/baseline/**` (so in `MR-005` zugesagt) und werden damit tatsächlich
   auf Link-/Anker-/ID-Pflicht geprüft.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 3. Plan (vor Code)
 
@@ -104,7 +104,74 @@ Closure-Notiz mit Verification Evidence geschrieben.
 
 ## 7. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+### Verification Evidence
+
+Scope:
+- Slice: `slice-harness-reviewer-skills-und-review-ablage` (FS-1/FS-2)
+- IDs: **keine** `LH-*`-/`ADR-*`-Anforderung geändert. Lesend/additiv berührt:
+  [`LH-FA-PROJDOCS-001`](../../../../spec/lastenheft.md#lh-fa-projdocs-001--mindeststruktur)
+  (Mindeststruktur additiv ergänzt, kein CR).
+- Artefakte: `.harness/skills/reviewer.md`,
+  `.harness/skills/closure-note-reviewer.md`, `docs/reviews/README.md`,
+  `docs/reviews/2026-07-25-welle-harness-konformitaet-nachlauf.md`,
+  [`harness/conventions.md`](../../../../harness/conventions.md) (`MR-009` neu,
+  `MR-005` Vorwärtsverweis eingelöst).
+
+DoD-Abgleich: alle Punkte erfüllt. Der Punkt „mindestens zwei repo-spezifische
+HIGH-Regeln" ist vom unabhängigen Review ausdrücklich bestätigt worden
+(Negativbefund-Zeile „FS-1 ≥ 2 repo-spezifische HIGH-Regeln"); die
+*Formulierung* der ersten Regel war jedoch ungenau und wurde nachgeschärft
+(F-2, s. u.).
+
+Sensors:
+| Sensor | Ergebnis | Evidence |
+| --- | --- | --- |
+| `make docs-check` | pass | 127 Dateien / 0 Befunde nach Artefakt-Anlage, 131 / 0 nach Report und Finding-Abarbeitung |
+| Reviewer-Skill-Lauf (Frischkontext) | pass mit Findings | 0 HIGH, 7 MEDIUM, 3 LOW, 3 INFO; Report in [`docs/reviews/`](../../../reviews/README.md) |
+
+Traceability:
+| ID / Pflicht | Beleg |
+| --- | --- |
+| Regelwerk `modul-10` (Reviewer-Skill-Datei je Repo) | `.harness/skills/reviewer.md` mit zwei bestätigt repo-spezifischen HIGH-Ankern |
+| Regelwerk `modul-11` (Closure-Note-Prüfung) | `.harness/skills/closure-note-reviewer.md` inkl. dokumentierter Abweichung „kein computational Gate in u-boot" |
+| `MR-005`-Zusage „`.harness/skills/` bleibt prüfbar" | `docs-check` zählt 127 statt 124 Dateien — die neuen Skills liegen im Scan |
+| [`LH-FA-PROJDOCS-001`](../../../../spec/lastenheft.md#lh-fa-projdocs-001--mindeststruktur) | `docs/reviews/README.md` erfüllt die README-Pflicht je Unterverzeichnis |
+
+Carveouts: Neu: none. Gelöst: none. Unverändert: none.
+
+Nicht ausgeführt:
+- `make gates` / `make ci` / `make test-docker` — kein Go-Delta, kein
+  Docker-/Compose-Verhalten berührt; `make docs-check` ist der passende
+  Closure-Sensor (Sensor-Auswahl-Tabelle „Nur Markdown/Doku").
+
+Independent Review (Frischkontext, Rollentrennung): kein HIGH. Ein MEDIUM
+betrifft diesen Slice direkt — **F-2**: Der HIGH-Anker „Dual-Classifier-Bruch"
+war als „an zwei Stellen" formuliert; im Bestand steht der einen zentralen
+Exit-Code-Klassifikation aber **je Subkommando eine** Diagnostic-Abbildung
+gegenüber (neun Stück; querliegende Sentinels stehen in mehreren). Nachgeschärft
+in `4fed84f`. Alle übrigen Prüfpunkte des Slice (Closure-Note-Skill, Abgrenzung
+Skill vs. Prosa, `docs/reviews/README.md`, `MR-009`) sind als Negativbefund
+ohne Befund vermerkt.
+
+Commit / Artefakt: `d5d896a` (Skills, Ablage, `MR-009`); `4fed84f`
+(Finding-Abarbeitung F-2); Lifecycle-Move `open/` → `done/` im Folge-Commit.
+
+### Steering-Loop-Lerneintrag
+
+- **Ein Skill wird erst durch seinen ersten Lauf scharf.** Der HIGH-Anker
+  „Dual-Classifier" las sich beim Schreiben präzise und war beim ersten realen
+  Lauf trotzdem irreführend — weil „die zwei Klassifikatoren" im Bestand
+  „einer plus neun" heißt. Konsequenz für künftige Skill-Arbeit: Jede
+  Anker-Formulierung, die eine *Anzahl* behauptet, wird gegen den Code gezählt,
+  nicht aus dem Gedächtnis geschrieben.
+- **Der Report ist die Rechtfertigung der Ablage.** FS-2 verlangt die
+  `docs/reviews/`-Ablage „spätestens mit dem ersten Lauf". Ein Verzeichnis mit
+  README allein hätte den Punkt formal erfüllt und praktisch nichts belegt; die
+  25 Negativbefund-Zeilen des ersten Reports sind der eigentliche Ertrag.
+- **Folge-Slices:** keine aus diesem Slice. Offen bleibt der im
+  Closure-Note-Skill benannte Kandidat „computational Closure-Note-Gate" — er
+  entsteht erst, wenn dreimal dieselbe Floskel-Art auftritt (Steering-Loop des
+  Skills), und wird dann als eigener Slice geplant, nicht nebenbei eingezogen.
 
 ## 8. Sub-Area-Modus-Begründung
 

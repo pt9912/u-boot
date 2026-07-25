@@ -4,7 +4,7 @@
 Verzeichnisse bewegt).
 
 **Welle:** noch keiner Welle zugeordnet (Wartungs-Kandidat in [`roadmap.md`](../in-progress/roadmap.md) §Nächste Wellen) — Folge-Befund aus
-[`slice-harness-sub-area-modus-audit`](slice-harness-sub-area-modus-audit.md)
+[`slice-harness-sub-area-modus-audit`](../done/slice-harness-sub-area-modus-audit.md)
 §9.2.
 
 **Bezug:** [`LH-FA-PROJDOCS-006`](../../../../spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell)
