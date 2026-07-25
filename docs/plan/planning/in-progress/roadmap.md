@@ -13,12 +13,26 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**Welle-ID:** — (keine aktive Welle)
+**Welle-ID:** `welle-gate-ausbau-v0.51`
 **Stand:** 2026-07-25
 
-Die Welle `welle-harness-konformitaet-nachlauf` ist **abgeschlossen** (s.
-Abgeschlossene Wellen); damit sind alle Folge-Punkte der Regelwerk-Adoption
-geschlossen. Aktuell läuft keine Welle.
+Der Bump des `d-check`-Gate-Images von `0.2.0` auf `v0.51.1` hat 16 neue
+Regelmodule und das `ids`-Schema-Feld `link-policy` freigeschaltet. Diese Welle
+schaltet die für u-boot einschlägigen Prüfungen scharf — Disziplinen, die
+heute an Aufmerksamkeit hängen, bekommen einen Sensor. Kein Produkt-Delta.
+
+| Slice | Inhalt | Status |
+|---|---|---|
+| [`slice-gate-print-mk-einbindung`](../open/slice-gate-print-mk-einbindung.md) | `--print-mk`-Fragment einbinden, `docs-check` als Alias auf `doc-check` | open |
+| [`slice-gate-planning-targets-module`](../open/slice-gate-planning-targets-module.md) | `planning` (Roadmap ↔ Lifecycle) + `targets` (Gate-Tabelle ↔ Makefile) | open |
+| [`slice-gate-ids-link-policy-always`](../open/slice-gate-ids-link-policy-always.md) | `ids` prüft auch Code-Spans; 100 Befunde gemessen, `exempt-paths`-Politik zu entscheiden | open |
+| [`slice-gate-immutabilitaets-sensor`](../open/slice-gate-immutabilitaets-sensor.md) | `vcs`-Sensor für die zwei Immutabilitäts-Hard-Rules (Accepted-ADRs, `done/`) | open |
+
+Reihenfolge ist Ökonomie, keine Abhängigkeit: Das Fragment bringt fertige
+Targets für die übrigen Module mit, deshalb zuerst.
+
+Die Vorwelle `welle-harness-konformitaet-nachlauf` ist **abgeschlossen** (s.
+Abgeschlossene Wellen).
 
 **Baseline-Stand:** Der Review-Bump auf **`v3.5.2`** (Kurs-Welle 34) ist am
 2026-07-25 als Einzel-Slice ohne Welle ausgeführt
@@ -44,10 +58,10 @@ Meilensteinen.
 `make docs-check` deckt damit 139 statt 132 Dateien, und die letzte
 Brownfield-Sub-Area ist auf Greenfield graduiert.
 
-**Nächster Aufsatzpunkt:** **keiner ohne Trigger.** Alle Wartungs-Kandidaten
-aus dem Konformitäts-Nachlauf sind abgearbeitet; die verbleibenden Einträge
-unter Nächste Wellen warten sämtlich auf externe Trigger (Nutzeranfragen,
-Real-World-Befunde, ADR-Annahmen). Produkt-Wellen (v0.5.0) ebenso.
+**Nach dieser Welle:** kein triggerloser Aufsatzpunkt mehr — die verbleibenden
+Einträge unter Nächste Wellen warten sämtlich auf externe Trigger
+(Nutzeranfragen, Real-World-Befunde, ADR-Annahmen). Produkt-Wellen (v0.5.0)
+ebenso.
 
 ## Nächste Wellen
 
@@ -83,9 +97,10 @@ flowchart LR
     V4[v0.4.0 JSON-CLI]
     H[welle-harness-adoption-v3.5.1]
     K[welle-harness-konformitaet-nachlauf]
+    G[welle-gate-ausbau-v0.51]
     N[Naechste Wellen: trigger-getrieben]
 
-    V1 --> V2 --> V3 --> V4 --> H --> K --> N
+    V1 --> V2 --> V3 --> V4 --> H --> K --> G --> N
 ```
 
 ## Abgeschlossene Wellen
