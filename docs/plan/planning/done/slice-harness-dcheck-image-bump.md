@@ -215,7 +215,7 @@ Independent Review: nicht durchgeführt. Der Diff ist eine Zeile; die
 inhaltliche Leistung ist die Sichtung, und ihr Ergebnis ist mit zwei
 Trockenläufen belegt.
 
-Commit / Artefakt: `<wird beim Closure-Commit eingetragen>`
+Commit / Artefakt: `225627c` (Digest-Pin im `Makefile`, `MR-005` Stand + Neubewertungs-Auftrag).
 
 ### Steering-Loop-Lerneintrag
 
