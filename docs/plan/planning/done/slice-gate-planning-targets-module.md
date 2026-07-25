@@ -185,7 +185,7 @@ Independent Review: nicht durchgeführt. Beide Module sind durch ihre eigenen
 Trockenläufe belegt, inklusive der Gegenprobe in zwei Zuständen für
 `planning` — ein Sensor, der in beide Richtungen gezeigt hat, ist verifiziert.
 
-Commit / Artefakt: `<wird beim Closure-Commit eingetragen>`
+Commit / Artefakt: `83efe46` (`.d-check.yml` Module + Bloecke, `MR-005` Modul-Liste und Arbeitsfluss-Regel).
 
 ### Steering-Loop-Lerneintrag
 
