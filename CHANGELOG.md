@@ -11,6 +11,18 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-07-25
+
+Fünftes Release. **Sicherheits-Fix und lokale Templates.** Der
+Go-Toolchain-Bump schließt CVE-2026-39822 im ausgelieferten Runtime-Image
+(HIGH, `os.Root` Directory-Traversal) — das ist der eigentliche Anlass des
+Cuts. Fachlich neu: `u-boot init --template ./pfad` löst eine Projektvorlage
+aus dem echten Dateisystem auf, nicht mehr nur aus dem eingebauten Katalog,
+mit plattformunabhängiger Name-vs-Pfad-Klassifikation, geteiltem
+`template.yaml`-Parser, Symlink-Schutz und harmonisierten Exit-Codes
+([`LH-FA-TPL-003`](spec/lastenheft.md#lh-fa-tpl-003--eigene-templates),
+[ADR-0009](docs/plan/adr/0009-template-format-yaml-files.md)). Details unten.
+
 ### Security
 
 - `build(deps): Go-Toolchain 1.26.4 → 1.26.5` — behebt **CVE-2026-39822**
@@ -993,7 +1005,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/pt9912/u-boot/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/pt9912/u-boot/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/pt9912/u-boot/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/pt9912/u-boot/compare/v0.1.0...v0.2.0

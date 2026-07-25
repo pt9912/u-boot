@@ -1,7 +1,7 @@
 # Benutzerhandbuch: u-boot
 
-Handbuch-Version: 1.0
-Software-Version: v0.4.0
+Handbuch-Version: 1.1
+Software-Version: v0.5.0
 Stand: 2026-07-25
 
 ---
@@ -97,7 +97,7 @@ Invoke-WebRequest `
 ```
 
 **Ergebnis:** `u-boot --version` gibt die installierte Version aus, zum
-Beispiel `u-boot version 0.4.0`.
+Beispiel `u-boot version 0.5.0`.
 
 ### Container-Image
 
@@ -501,7 +501,15 @@ NAME   DESCRIPTION                                        VERSION
 basic  Minimal u-boot project skeleton — same files …     0.1.0
 ```
 
-`init --template` rendert das Projekt aus der gewählten Vorlage.
+`init --template` rendert das Projekt aus der gewählten Vorlage. Sie können
+statt eines Katalognamens auch einen **Verzeichnispfad** angeben:
+
+```bash
+u-boot init mein-projekt --template ./meine-vorlage
+```
+
+Das Verzeichnis muss eine `template.yaml` enthalten. Symlinks im
+Vorlagenbaum werden abgelehnt.
 
 #### Hinweise
 
@@ -760,12 +768,8 @@ Ausgabe von `u-boot doctor`, Ihr Betriebssystem und den genauen Befehl.
 | Handbuch-Version | Software-Version | Datum | Änderung |
 |---|---|---|---|
 | 1.0 | v0.4.0 | 2026-07-25 | Erstfassung |
+| 1.1 | v0.5.0 | 2026-07-25 | Lokale Vorlagen (`--template ./pfad`) aufgenommen; Versionsbezug auf v0.5.0 |
 
-**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.4.0. Prüfen Sie
+**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.5.0. Prüfen Sie
 mit `u-boot --version`, welche Version Sie einsetzen. Weicht sie ab, ist
 `u-boot <befehl> --help` die verbindliche Auskunft.
-
-**Noch nicht enthalten:** Mit der nächsten Version löst `--template` auch
-Dateisystempfade auf (`u-boot init --template ./meine-vorlage`), nicht nur
-Katalognamen. Bis dahin gilt die Beschreibung in
-[Abschnitt 4.9](#49-vorlagen-nutzen).

@@ -13,55 +13,19 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**Welle-ID:** `welle-gate-ausbau-v0.51`
+**Welle-ID:** `v0.5.0`
 **Stand:** 2026-07-25
 
-Der Bump des `d-check`-Gate-Images von `0.2.0` auf `v0.51.1` hat 16 neue
-Regelmodule und das `ids`-Schema-Feld `link-policy` freigeschaltet. Diese Welle
-schaltet die für u-boot einschlägigen Prüfungen scharf — Disziplinen, die
-heute an Aufmerksamkeit hängen, bekommen einen Sensor. Kein Produkt-Delta.
+Release-Cut läuft
+([`slice-v1-release-cut-v0.5.0`](../in-progress/slice-v1-release-cut-v0.5.0.md)).
+T1–T3 (CHANGELOG, Versionsstrings, READMEs, Roadmap) sind erledigt; **T4 ist
+Nutzer-Aktion**: `git tag v0.5.0 && git push origin v0.5.0` löst `publish.yml`
+aus (GHCR + Binaries für sechs Plattformen). Danach wandert die Welle nach
+Abgeschlossene Wellen und der Meilenstein auf `erreicht`.
 
-| Slice | Inhalt | Status |
-|---|---|---|
-| [`slice-gate-print-mk-einbindung`](../done/slice-gate-print-mk-einbindung.md) | `--print-mk`-Fragment einbinden, `docs-check` als Alias auf `doc-check` | **done** |
-| [`slice-gate-planning-targets-module`](../done/slice-gate-planning-targets-module.md) | `planning` (Roadmap ↔ Lifecycle) + `targets` (Gate-Tabelle ↔ Makefile) | **done** |
-| [`slice-gate-ids-link-policy-always`](../done/slice-gate-ids-link-policy-always.md) | `ids` prüft auch Code-Spans; 100 Befunde gemessen, `exempt-paths`-Politik zu entscheiden | **done** |
-| [`slice-gate-immutabilitaets-sensor`](../done/slice-gate-immutabilitaets-sensor.md) | `vcs`-Sensor für die zwei Immutabilitäts-Hard-Rules (Accepted-ADRs, `done/`) | **done** |
-
-Reihenfolge ist Ökonomie, keine Abhängigkeit: Das Fragment bringt fertige
-Targets für die übrigen Module mit, deshalb zuerst.
-
-Die Vorwelle `welle-harness-konformitaet-nachlauf` ist **abgeschlossen** (s.
-Abgeschlossene Wellen).
-
-**Baseline-Stand:** Der Review-Bump auf **`v3.5.2`** (Kurs-Welle 34) ist am
-2026-07-25 als Einzel-Slice ohne Welle ausgeführt
-([`slice-harness-baseline-bump-review-v3.5.2`](../done/slice-harness-baseline-bump-review-v3.5.2.md)),
-weil sein Trigger als einziger bereits gefeuert war. Das Freshness-Audit meldet
-seither Exit 0.
-
-**Vertrags-Stand:** Ein Befund dieses Bumps ist ebenfalls geschlossen
-([`slice-harness-lastenheft-historie-cr-fussabdruck`](../done/slice-harness-lastenheft-historie-cr-fussabdruck.md)):
-[`spec/lastenheft.md`](../../../../spec/lastenheft.md) steht seit 2026-07-25 auf
-Version `0.2.0`, Status `Accepted`, und trägt einen Historie-Abschnitt als
-Fußabdruck angenommener Vertragsänderungen.
-
-**Architektur-Stand:** [`spec/architecture.md`](../../../../spec/architecture.md)
-§2 ist gegen den Ist-Bestand abgeglichen
-([`slice-harness-architecture-bestandsabgleich`](../done/slice-harness-architecture-bestandsabgleich.md));
-die Sicht beschrieb zuvor weitgehend den Stand nach den ersten beiden
-Meilensteinen.
-
-**Doku-Stand:** Die Code-Paket-READMEs unter `internal/` liegen seit
-2026-07-25 im Referenz-Scan
-([`slice-harness-internal-readme-kennungs-retrofit`](../done/slice-harness-internal-readme-kennungs-retrofit.md));
-`make docs-check` deckt damit 139 statt 132 Dateien, und die letzte
-Brownfield-Sub-Area ist auf Greenfield graduiert.
-
-**Nach dieser Welle:** kein triggerloser Aufsatzpunkt mehr — die verbleibenden
-Einträge unter Nächste Wellen warten sämtlich auf externe Trigger
-(Nutzeranfragen, Real-World-Befunde, ADR-Annahmen). Produkt-Wellen (v0.5.0)
-ebenso.
+**Auslieferbarer Inhalt:** der Go-Toolchain-Bump, der CVE-2026-39822 (HIGH) im
+Runtime-Image schließt — der eigentliche Anlass — plus `u-boot init --template
+./pfad` (lokale Vorlagen).
 
 ## Nächste Wellen
 
@@ -99,9 +63,10 @@ flowchart LR
     H[welle-harness-adoption-v3.5.1]
     K[welle-harness-konformitaet-nachlauf]
     G[welle-gate-ausbau-v0.51]
+    V5[v0.5.0 security+local-templates]
     N[Naechste Wellen: trigger-getrieben]
 
-    V1 --> V2 --> V3 --> V4 --> H --> K --> G --> N
+    V1 --> V2 --> V3 --> V4 --> H --> K --> G --> V5 --> N
 ```
 
 ## Abgeschlossene Wellen
@@ -115,6 +80,8 @@ flowchart LR
 | Lokale FS-Templates | 2026-06 | [`slice-later-local-templates`](../done/slice-later-local-templates.md) ([`LH-FA-TPL-003`](../../../../spec/lastenheft.md#lh-fa-tpl-003--eigene-templates)) |
 | welle-harness-adoption-v3.5.1 (Regelwerk v3.5.1 + ADR-Format-CR auf MADR) | 2026-07-24 | [`slice-harness-regelwerk-adoption-v3.5.1`](../done/slice-harness-regelwerk-adoption-v3.5.1.md) (`8d897d3`); [`slice-cr-adr-format-madr`](../done/slice-cr-adr-format-madr.md) (`7633cbb`) |
 | welle-harness-konformitaet-nachlauf (FS-1..FS-4 + `architecture.md`-Template-Konformität) | 2026-07-25 | [`slice-harness-reviewer-skills-und-review-ablage`](../done/slice-harness-reviewer-skills-und-review-ablage.md) (`d5d896a`); [`slice-harness-sub-area-modus-audit`](../done/slice-harness-sub-area-modus-audit.md) (`be3d33c`); [`slice-harness-baseline-freshness-audit`](../done/slice-harness-baseline-freshness-audit.md) (`c7fe437`); [`slice-harness-architecture-template-konformitaet`](../done/slice-harness-architecture-template-konformitaet.md) (`c35249d`); Review-Findings (`4fed84f`), Report in [`docs/reviews/`](../../../reviews/README.md) |
+
+| welle-gate-ausbau-v0.51 (d-check-Bump + vier Sensoren) | 2026-07-25 | [`slice-gate-print-mk-einbindung`](../done/slice-gate-print-mk-einbindung.md) (`e246bbf`); [`slice-gate-planning-targets-module`](../done/slice-gate-planning-targets-module.md) (`83efe46`); [`slice-gate-ids-link-policy-always`](../done/slice-gate-ids-link-policy-always.md) (`0d896fc`); [`slice-gate-immutabilitaets-sensor`](../done/slice-gate-immutabilitaets-sensor.md) (`7d9c4c2`); Vorlauf: Image-Bump (`225627c`) |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-NN-results.md`; die Welle-Closure lebt vollständig im jeweiligen
