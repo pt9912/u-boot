@@ -178,7 +178,7 @@ Ermessens-Entscheidung — Status und Versions-Sprung — ist vom Projektinhaber
 getroffen, nicht vom Autor. Ein Frischkontext-Review würde hier den
 Entscheidungsträger prüfen, nicht die Umsetzung.
 
-Commit / Artefakt: `<wird beim Closure-Commit eingetragen>`
+Commit / Artefakt: `2cd9146` (Kopf-Felder, §16 Historie, `MR-008`-Nachtrag aufgeloest, Roadmap).
 
 ### Steering-Loop-Lerneintrag
 
