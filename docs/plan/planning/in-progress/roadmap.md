@@ -26,7 +26,7 @@ heute an Aufmerksamkeit hängen, bekommen einen Sensor. Kein Produkt-Delta.
 | [`slice-gate-print-mk-einbindung`](../done/slice-gate-print-mk-einbindung.md) | `--print-mk`-Fragment einbinden, `docs-check` als Alias auf `doc-check` | **done** |
 | [`slice-gate-planning-targets-module`](../done/slice-gate-planning-targets-module.md) | `planning` (Roadmap ↔ Lifecycle) + `targets` (Gate-Tabelle ↔ Makefile) | **done** |
 | [`slice-gate-ids-link-policy-always`](../done/slice-gate-ids-link-policy-always.md) | `ids` prüft auch Code-Spans; 100 Befunde gemessen, `exempt-paths`-Politik zu entscheiden | **done** |
-| [`slice-gate-immutabilitaets-sensor`](../in-progress/slice-gate-immutabilitaets-sensor.md) | `vcs`-Sensor für die zwei Immutabilitäts-Hard-Rules (Accepted-ADRs, `done/`) | in-progress |
+| [`slice-gate-immutabilitaets-sensor`](../done/slice-gate-immutabilitaets-sensor.md) | `vcs`-Sensor für die zwei Immutabilitäts-Hard-Rules (Accepted-ADRs, `done/`) | **done** |
 
 Reihenfolge ist Ökonomie, keine Abhängigkeit: Das Fragment bringt fertige
 Targets für die übrigen Module mit, deshalb zuerst.

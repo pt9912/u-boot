@@ -97,3 +97,28 @@ targets:
   doc-tables: [AGENTS.md]
   authority: AGENTS.md
   exempt-targets: [help, clean, deps, compile, coverage, build, run, build-binaries]
+# Immutabilitaets-Sensor fuer Accepted-ADRs (braucht eine Commit-Range,
+# laeuft deshalb NICHT in docs-check, sondern on-demand:
+#   make doc-immutable RANGE="<base>..<head>"   bzw.   STAGED=1
+#
+# immutable-when trifft u-boots Form: der Status steht als eigene Zeile
+# unter der Ueberschrift "## Status", nicht als Inline-Feld "**Status:**
+# Accepted" wie in den d-check-Beispielen. Ein Proposed-ADR ist damit
+# aenderbar, ein Accepted nicht.
+#
+# exclude-sections statt status-line: status-line strippt eine KOPF-Zeile;
+# u-boots Status lebt in einem Abschnitt. Ohne diese Auflösung meldet der
+# zulaessige Uebergang Accepted -> "Superseded by <NNNN>-<slug>" eine
+# Drift (gemessen). Mit ihr ist der Uebergang frei und jede inhaltliche
+# Aenderung bleibt ein Befund - beides gegengeprueft.
+#
+# done/-Slices sind BEWUSST NICHT erfasst: Ihre Regel lautet "nur
+# korrigierend aenderbar" (LH-FA-PROJDOCS-003 nennt Tippfehler,
+# Querverweise, Archiv-Hinweise). Das ist eine semantische Bedingung, die
+# ein Diff-Vergleich nicht treffen kann - vcs wuerde jede erlaubte
+# Querverweis-Korrektur als Drift melden. Ein Sensor, der die eigene
+# Regel bricht, ist schlechter als keiner.
+vcs:
+  paths: ["docs/plan/adr/[0-9]*.md"]
+  immutable-when: '^Accepted$'
+  exclude-sections: [Status, Geschichte]

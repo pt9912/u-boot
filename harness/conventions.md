@@ -236,6 +236,17 @@ Baseline still.
   Stelle; (3) Bereichs-Schreibweisen (`LH-FA-INIT-001..007`) werden zu  <!-- d-check:ignore (Notations-Beispiel, keine Referenz) -->
   verlinkten Paaren aufgeloest, wie in
   [`spec/architecture.md`](../spec/architecture.md) laengst ueblich.
+  **Immutabilitaets-Sensor (seit 2026-07-25):** Das Modul `vcs` schuetzt
+  **Accepted-ADRs** ueber eine Commit-Range (`make doc-immutable RANGE=…`,
+  `STAGED=1` lokal) - kein Default-Modul, weil es eine Range braucht.
+  `immutable-when: '^Accepted$'` trifft u-boots Form (Status als Zeile unter
+  `## Status`, nicht als Inline-Feld); die Status-Trennung laeuft ueber
+  `exclude-sections: [Status, Geschichte]`, weil `status-line` nur Kopf-Felder
+  strippt und der zulaessige Uebergang nach `Superseded by <NNNN>-<slug>` sonst
+  als Drift meldet (gemessen). **`done/`-Slices sind bewusst nicht erfasst:**
+  Ihre Regel "nur korrigierend aenderbar" ist semantisch; ein Diff-Vergleich
+  wuerde jede erlaubte Querverweis-Korrektur als Drift melden. Ein Sensor, der
+  die eigene Regel bricht, ist schlechter als keiner.
   Das `slice`-Muster traegt zusaetzlich ein Versions-Suffix
   (`(?:\.[0-9]+)*`), damit ein Name wie `slice-...-v3.5.2` vollstaendig
   matcht statt am Punkt abzubrechen. Bewusst **kein** `MR-<NNN>`-ID-Pattern - die

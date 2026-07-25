@@ -211,6 +211,7 @@ Nur reale Make-Targets zaehlen als Harness-Sensoren:
 | `make govulncheck` | Go-Vulnerability-Scan |
 | `make image-scan` | Trivy HIGH/CRITICAL gegen Runtime-Image |
 | `make verify-depguard` | On-demand Nachweis, dass depguard-Regeln feuern |
+| `make doc-immutable RANGE="<base>..<head>"` | On-demand Nachweis, dass Accepted-ADRs ueber eine Commit-Range unveraendert sind (`STAGED=1` fuer den lokalen Pre-Commit-Lauf) |
 | `make gates` | `lint` + `test` + `coverage-gate` + `docs-check` |
 | `make ci` | `gates` + `govulncheck` + `image-scan` |
 | `make fullbuild` | `ci` + Runtime-Image-Build |
