@@ -194,7 +194,7 @@ verlinkt" ist maschinell geprüft; die inhaltliche Frage — ist eine Kennung
 Referenz oder Beleg? — ist für die sechs Grenzfälle einzeln im Diff
 nachvollziehbar begründet.
 
-Commit / Artefakt: `<wird beim Closure-Commit eingetragen>`
+Commit / Artefakt: `0d896fc` (`.d-check.yml`, 18 Dateien verlinkt/markiert, `MR-005` Linkpolitik).
 
 ### Steering-Loop-Lerneintrag
 
