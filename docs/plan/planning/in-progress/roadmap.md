@@ -67,6 +67,7 @@ ebenso.
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
+| Spec-Wartung: Traceability-Matrix konfigurieren | kein externer Trigger; Befund beim Durchsehen der offenen Lastenheft-Punkte | [`slice-gate-rtm-traceability`](../open/slice-gate-rtm-traceability.md) — `--trace` sieht 79 von 139 Kennungen und meldet 12 echte Belege-Lücken; Familien-Auswahl und §13-Kollision sind die Arbeit | M |
 | macOS-Distribution | konkrete Homebrew-Nutzeranfrage | [`slice-v2-homebrew-formula`](../open/slice-v2-homebrew-formula.md) | S |
 | Linux-Pakete | konkrete Debian-/RPM-Anfrage | [`slice-v2-distro-pakete`](../open/slice-v2-distro-pakete.md) ([ADR-0007](../../adr/0007-distributionswege-ghcr.md)) | M |
 | Devcontainer-Robustheit | Real-World-Half-State-Beschwerde oder Schema-Erweiterung | [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md) | M |
