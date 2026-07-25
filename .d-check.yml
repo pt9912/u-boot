@@ -14,7 +14,7 @@
 scan:
   roots: ["."]
   ignore: [".harness/baseline/**"]
-modules: [links, anchors, ids, matrix]
+modules: [links, anchors, ids, matrix, planning, targets]
 
 # Linkpflicht für Kennungen — Muster aus tools/check_refs.py übersetzt
 # (\b-Wortgrenzen wie dort); Planning-Muster ohne Lookahead (RE2),
@@ -63,3 +63,33 @@ matrix:
     - {from: adr, to: roadmap, allow: false}
   status:
     forbidden: [superseded, deprecated]
+
+# Planning-Lifecycle-Invariante: Die Roadmap traegt den Ruhe-Marker im
+# §Aktuelle-Welle-Block genau dann, wenn kein slice-* in in-progress/ liegt.
+# Konsequenz fuer den Arbeitsfluss (bewusst): Eine deklarierte Welle ohne
+# Slice in Arbeit ist ein Befund, kein Zwischenzustand — wer einen Slice
+# schliesst, zieht im selben Commit den naechsten nach oder schliesst die
+# Welle. Der Marker ist u-boots Formulierung (kleingeschrieben, Default
+# waere "Keine aktive Welle").
+planning:
+  roadmap: docs/plan/planning/in-progress/roadmap.md
+  marker: "keine aktive Welle"
+
+# Deklarations-Konsistenz Doku <-> Build-Targets. Autoritaet ist die
+# Gate-Tabelle in AGENTS.md §Quality Gates; sie fuehrt bewusst nur
+# HARNESS-SENSOREN, nicht jede Regel. makefiles listet nur das eigene
+# Makefile: die doc-*-Targets stammen aus dem generierten d-check.mk und
+# werden vom Werkzeug selbst dokumentiert (make doc-help).
+# exempt-targets sind die acht Build-/Utility-Regeln, die keine Sensoren
+# sind — jede einzeln benannt (das Modul kennt keine Globs), damit ein
+# kuenftiges Gate nicht versehentlich mit ausgenommen wird:
+#   help/clean       — Bedienung und Aufraeumen
+#   deps/compile     — Zwischenstufen des Docker-Build-Flusses
+#   coverage         — Alias auf coverage-gate (der Sensor ist dokumentiert)
+#   build/run        — Runtime-Image bauen und Smoke-Test; von fullbuild gedeckt
+#   build-binaries   — Release-Artefakte, kein Inner-Loop-Sensor
+targets:
+  makefiles: [Makefile]
+  doc-tables: [AGENTS.md]
+  authority: AGENTS.md
+  exempt-targets: [help, clean, deps, compile, coverage, build, run, build-binaries]

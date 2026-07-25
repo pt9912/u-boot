@@ -61,7 +61,7 @@ Review-Report und 15 in `done/`-Slices (**nicht** mechanisch behebbar, s. §6).
 
 Gefeuert: Entscheidung des Projektinhabers nach dem Image-Bump. Reihenfolge
 innerhalb der Welle: **nach**
-[`slice-gate-planning-targets-module`](slice-gate-planning-targets-module.md),
+[`slice-gate-planning-targets-module`](../done/slice-gate-planning-targets-module.md),
 weil dieser Slice den breitesten Diff hat.
 
 ## 5. Closure-Trigger
