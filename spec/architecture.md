@@ -57,7 +57,7 @@ Pfeile zeigen die **Aufruf-/Datenfluss-Richtung** zur Laufzeit. Die **Import-Ric
 Reine Datentypen und invariantenhaltige Verhaltensregeln ohne I/O.
 
 - **Inhalt:** `Project` (Aggregat mit `SchemaVersion`), `ProjectName` (Value-Object mit Regex aus [`LH-FA-INIT-006`](lastenheft.md#lh-fa-init-006--projektnamen-validierung)), `NormalizeProjectName` (deterministische Normalisierung nach [`LH-FA-INIT-002`](lastenheft.md#lh-fa-init-002--projektname)), `ErrInvalidProjectName`-Sentinel; `ServiceName` (Value-Object für Add-on-Identifier mit eigener Regex, Sentinel `ErrInvalidServiceName`) und `ServiceState`-Enum (Active/Deactivated/EnabledUnset/Unregistered/InconsistentYAML/InconsistentBlock) für die [`LH-FA-ADD-005`](lastenheft.md#lh-fa-add-005--mehrfaches-hinzufügen-verhindern)-State-Machine; `DiagnosticReport` mit `Severity`-Enum (`SeverityOK`/`SeverityWarn`/`SeverityError`) und `Diagnostic{ID, Severity, Message, Hint}` für die Doctor-Use-Cases ([`LH-FA-DIAG-003`](lastenheft.md#lh-fa-diag-003--fehlerklassifikation)).
-- **Vorgesehene Erweiterungen:** `Service`, `Port`, `ImageRef`, `ComposeFile`, `EnvVar` für Add-on-Use-Cases.
+- **Weiterer Bestand:** Value-Objects und Enums für die späteren Use-Case-Familien — Feature-Namen und Add-on-Abhängigkeiten ([`LH-FA-ADD-006`](lastenheft.md#lh-fa-add-006--add-on-abhängigkeiten)), Vorlagen-Metadaten und -Referenzen ([`LH-FA-TPL-002`](lastenheft.md#lh-fa-tpl-002--template-metadaten)), Konfigurations-Pfadtypen ([`LH-FA-CONF-003`](lastenheft.md#lh-fa-conf-003--konfiguration-lesen)), Artefakt-Kennungen der Generatoren sowie Container-Status, Service-Status und Stabilisierungs-Ergebnis für den Lifecycle ([`LH-FA-UP-003`](lastenheft.md#lh-fa-up-003--startstatus-anzeigen)). Alle ohne I/O und ohne externe Bibliothek.
 - **Erlaubte Imports:** ausschließlich Go-Standard-Library.
 - **Verbotene Imports:** alle anderen `internal/`-Pakete, externe Libraries mit I/O.
 - **Tests:** Unit-Tests mit `*_test.go` im selben Paket; pure Validierung ohne Mocks.
@@ -66,11 +66,57 @@ Reine Datentypen und invariantenhaltige Verhaltensregeln ohne I/O.
 
 Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält keine externe I/O.
 
-- **Inhalt:**
-  - `InitProjectService` orchestriert `FileSystem`/`YAMLCodec`/`Git`/`ProgressPort`/`Confirmer`/`Logger` zum [`LH-FA-INIT-001`](lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren)..[`LH-FA-INIT-007`](lastenheft.md#lh-fa-init-007--git-repository-initialisierung)-Flow inklusive Re-Init-Pfaden nach [`LH-FA-INIT-005`](lastenheft.md#lh-fa-init-005--überschreibschutz) (`--force`/`--backup`) und [`LH-FA-INIT-004`](lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen) Soft-Existing-Detection. Templates für die erzeugten Dateien via `embed.FS` + `text/template` (Templates leben unter `application/templates/*.tmpl`; die §611-strukturierten Configs wrappen ihren Inhalt in `BEGIN/END U-BOOT MANAGED BLOCK: init`-Marker). `ubootYAMLConfig`-Struct als Schema-Repräsentation für `u-boot.yaml` ([`LH-FA-CONF-002`](lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration)). Re-Init folgt einem strikten Plan-and-Execute-Split: `planFile` entscheidet pro Datei (`actionWrite`/`actionReplaceBlock`/`actionOverwriteFull`/Abort-Sentinel), Plan-Fehler verhindern jeden Side-Effect.
-  - `DoctorService` orchestriert `FileSystem`/`Git`/`DockerProbe`/`Logger` zu den [`LH-FA-DIAG-002`](lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)-Checks (write-permissions, git availability, docker installed/reachable, compose installed, später u-boot.yaml/compose.yaml-Validierung, Devcontainer-Konsistenz). Stdlib-Semver-Min-Check (`parseSemverMajorMinor` + `classifyVersionAtLeast`) für die Mindestversionen 24.0 (Docker) / 2.20 (Compose). Service ist severity-agnostisch — failures sind `SeverityError`-Diagnostics im Report, kein Go-error.
-- **Hilfs-Pakete:** `application/managedblock/` ([`LH-SA-FILE-002`](lastenheft.md#lh-sa-file-002--markierte-verwaltete-bereiche)-Marker-Parser: `Find`/`Has`/`Replace`, drei Comment-Styles Hash/HTMLComment/DoubleSlash, Sentinel `ErrBlockNotFound`/`ErrBlockMalformed`); `application/backup.go` mit `BackupPath` (kleinster-freier-Suffix-Algorithmus für `<path>.bak[.N]`, File + rekursive Verzeichnisse, TOCTOU-sicher via `WriteFileExclusive`/`Mkdir`, Rollback bei partiellem Tree-Copy, Mode- und Symlink-Reject per Lstat, Streaming-Copy via `FileSystem.Copy`/`CopyExclusive`).
-- **Vorgesehene Erweiterungen:** `AddServiceService` (LH-FA-ADD-*), `UpService`/`DownService` (LH-FA-UP-*), `GenerateService` (LH-FA-GEN-*).
+- **Inhalt — ein Service je Use-Case-Familie:**
+  - `InitProjectService` — Projekt anlegen und re-initialisieren
+    ([`LH-FA-INIT-001`](lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren)..[`LH-FA-INIT-007`](lastenheft.md#lh-fa-init-007--git-repository-initialisierung)),
+    inklusive Überschreibschutz
+    ([`LH-FA-INIT-005`](lastenheft.md#lh-fa-init-005--überschreibschutz)) und
+    Soft-Existing-Detection
+    ([`LH-FA-INIT-004`](lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen)).
+    Trägt den strikten Plan-and-Execute-Split (§7.3) und rendert die erzeugten
+    Dateien aus eingebetteten Vorlagen — der einzige Ort, an dem die Application
+    eine externe Stdlib-Fähigkeit direkt nutzt (Template-Rendering, kein I/O).
+  - `DoctorService` — Diagnose der lokalen Voraussetzungen
+    ([`LH-FA-DIAG-001`](lastenheft.md#lh-fa-diag-001--doctor-befehl)..[`LH-FA-DIAG-004`](lastenheft.md#lh-fa-diag-004--reparaturhinweise)).
+    Severity-agnostisch: Check-Fehlschläge sind Diagnostics im Report, kein
+    Go-Fehler; die Schwelle für den Exit-Code liegt im Adapter (§7.1).
+  - `AddServiceService` — Add-on hinzufügen samt Abhängigkeitsauflösung und
+    Idempotenz-Zustandsmaschine
+    ([`LH-FA-ADD-001`](lastenheft.md#lh-fa-add-001--add-on-befehl)..[`LH-FA-ADD-006`](lastenheft.md#lh-fa-add-006--add-on-abhängigkeiten)).
+  - `RemoveServiceService` — Add-on entfernen, inklusive destruktivem
+    Purge-Pfad hinter Bestätigungs-Gate
+    ([`LH-FA-ADD-007`](lastenheft.md#lh-fa-add-007--service-entfernen)).
+  - `UpService` — Umgebung starten und bis zur Stabilisierung beobachten
+    ([`LH-FA-UP-001`](lastenheft.md#lh-fa-up-001--umgebung-starten)..[`LH-FA-UP-003`](lastenheft.md#lh-fa-up-003--startstatus-anzeigen)).
+  - `DownService` — Umgebung stoppen, optional mit Volume-Entfernung
+    ([`LH-FA-UP-004`](lastenheft.md#lh-fa-up-004--umgebung-stoppen)).
+  - `LogsService` — Log-Ausgabe der laufenden Services
+    ([`LH-FA-UP-005`](lastenheft.md#lh-fa-up-005--logs-anzeigen)).
+  - `GenerateService` — Artefakt-Generatoren (Changelog, README, Beispiel-ENV,
+    Devcontainer) mit Idempotenz-Garantie
+    ([`LH-FA-GEN-001`](lastenheft.md#lh-fa-gen-001--generate-befehl)..[`LH-FA-GEN-005`](lastenheft.md#lh-fa-gen-005--idempotenz)).
+  - `ConfigService` — Projektkonfiguration lesen, anzeigen und ändern
+    ([`LH-FA-CONF-001`](lastenheft.md#lh-fa-conf-001--projektkonfiguration)..[`LH-FA-CONF-005`](lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)).
+  - `TemplateListService` — Projektvorlagen auflisten
+    ([`LH-FA-TPL-004`](lastenheft.md#lh-fa-tpl-004--templates-auflisten)).
+  - `TemplateInitService` — Initialisierung aus einer Vorlage
+    ([`LH-FA-TPL-001`](lastenheft.md#lh-fa-tpl-001--projektvorlagen)..[`LH-FA-TPL-003`](lastenheft.md#lh-fa-tpl-003--eigene-templates)).
+    Wird vom `InitProjectService` als Driving-Port konsumiert, nicht vom Adapter
+    direkt: Der Vorlagen-Pfad teilt sich Verzeichnis-, Erkennungs- und
+    Git-Logik mit dem Standard-Pfad und delegiert nur das Datei-Rendering.
+  - Ein paket-privater Konfigurations-Service kapselt das `u-boot.yaml`-Schema
+    ([`LH-FA-CONF-002`](lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration))
+    für alle Services, die es lesen oder schreiben.
+- **Hilfs-Pakete:** `application/managedblock/` — Parser für die markierten
+  verwalteten Bereiche
+  ([`LH-SA-FILE-002`](lastenheft.md#lh-sa-file-002--markierte-verwaltete-bereiche));
+  `application/backup.go` — kollisionssichere Backup-Slot-Reservierung für
+  Dateien und Verzeichnisse, mit Rollback bei partieller Kopie und
+  Symlink-Zurückweisung.
+- **Nil-tolerante Ports:** Optionale Driven-Ports (Logger, Progress, Confirmer)
+  werden über paket-private Standard-Implementierungen ohne Wirkung
+  aufgefangen; ein unvollständiges Wiring degradiert die Ausgabe, statt zu
+  dereferenzieren (§7.3).
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driving`, `hexagon/port/driven` (zum Konsumieren von Driven-Ports und Implementieren von Driving-Ports).
 - **Verbotene Imports:** `adapter/*`, externe I/O-Libraries.
 - **Tests:** Unit-Tests mit Test-Doubles für Driven-Ports (Fakes oder Mocks in `_test.go`); Test-Library-Imports (z. B. `yaml.v3` für Fake-YAMLCodec) sind über den `*_test.go`-Carveout in [`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement) erlaubt.
@@ -79,16 +125,41 @@ Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält keine exte
 
 Interfaces, über die u-boot von außen angesprochen wird.
 
-- **Inhalt:**
-  - `InitProjectUseCase` mit `InitProjectRequest` (`Name`/`BaseDir`/`SkipGit`/`Force`/`Backup`/`AssumeExisting`/`NoInteractive`) und `InitProjectResponse` (`Project`/`Created`/`Backups []BackupAction`).
-  - `DoctorUseCase` mit `DoctorRequest` (`BaseDir`) und `DoctorResponse` (`Report domain.DiagnosticReport`). Per Kontrakt liefert `Check` immer einen Report; check-failures sind `SeverityError`-Diagnostics, kein Go-error. Severity-Klassifikation + Exit-Code-Mapping (`--strict`) übernimmt der CLI-Adapter.
-  - `AddServiceUseCase` mit `AddServiceRequest` (`BaseDir`/`ServiceName`) und `AddServiceResponse` (`ServiceName`/`PriorState`/`State`/`Changed []string`). Idempotenz-garantiert: Zweit-Add mit gleichen Args ist no-op + nil-error (`PriorState=Active`, `Changed=nil`).
-- **Sentinels** für die [`LH-FA-CLI-006`](lastenheft.md#lh-fa-cli-006--exit-codes)-Exit-Code-Klassifikation (liegen im `driving`-Paket statt im `application`-Paket, damit der CLI-Adapter via `errors.Is` auf sie verzweigt, ohne `application` zu importieren — [`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)):
-  - **Code 10 (Validierung):** `ErrProjectExists` ([`LH-FA-INIT-004`](lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen) Marker u-boot.yaml/compose.yaml/.env.example), `ErrFileExists` (Non-Marker-Kollision), `ErrBaseDirMissing` ([`LH-AK-001`](lastenheft.md#lh-ak-001--minimaler-init-flow) oder leeres `BaseDir`-Feld; geteilt zwischen `InitProjectUseCase` und `DoctorUseCase`), `ErrForceRequiresBackup` ([`LH-FA-INIT-005`](lastenheft.md#lh-fa-init-005--überschreibschutz) §619), `ErrBackupUnsupportedKind` (Symlink-Reject), `ErrProjectNotInitialized` ([`LH-FA-ADD-001`](lastenheft.md#lh-fa-add-001--add-on-befehl) — kein/unparsbares u-boot.yaml), `ErrServiceUnsupported` ([`LH-FA-ADD-002`](lastenheft.md#lh-fa-add-002--postgresql-hinzufügen) — ServiceName syntaktisch valide aber nicht im built-in catalog), `ErrServiceInconsistent` ([`LH-FA-ADD-005`](lastenheft.md#lh-fa-add-005--mehrfaches-hinzufügen-verhindern) §896 — orphan compose-block ohne YAML-Anker). Plus die `domain`-Validierungs-Sentinels `ErrInvalidProjectName` und `ErrInvalidServiceName`.
-  - **Code 14 (Technischer FS-Fehler):** `ErrBackupSourceMissing` (Race zwischen Caller-Check und Backup), `ErrBackupSuffixExhausted` (.bak[.0..999] alle belegt).
-- **Vorgesehene Erweiterungen:** `RemoveServiceUseCase`, `LifecycleUseCase` (Up/Down), `GenerateUseCase`, `ConfigUseCase`.
+- **Inhalt — je Use-Case-Familie ein Interface mit eigenem Request-/Response-Paar:**
+  `InitProjectUseCase`, `DoctorUseCase`, `AddServiceUseCase`,
+  `RemoveServiceUseCase`, `UpUseCase`, `DownUseCase`, `LogsUseCase`,
+  `GenerateUseCase`, `ConfigUseCase`, `TemplateListUseCase`,
+  `TemplateInitUseCase`. Die Request-/Response-Typen sind Teil des Ports, nicht
+  des Adapters: Sie transportieren ausschließlich Domänen- und Primitivwerte,
+  damit weder Cobra-Flags noch Ausgabeformate in die innere Welt lecken.
+- **Zwei Vertrags-Eigenschaften, die in den Interfaces selbst festgeschrieben
+  sind:**
+  - **Diagnose liefert immer einen Report.** Der Doctor-Port gibt Befunde als
+    Diagnostics zurück, nicht als Go-Fehler; die Severity-Schwelle und ihr
+    Exit-Code liegen im Adapter (§7.1).
+  - **Idempotenz ist Vertrag, nicht Zufall.** Wiederholte Add-/Generate-Aufrufe
+    mit gleichen Argumenten sind no-ops mit Erfolgs-Ergebnis und leerer
+    Änderungsliste ([`LH-AK-006`](lastenheft.md#lh-ak-006--idempotenz)).
+- **Sentinels** für die [`LH-FA-CLI-006`](lastenheft.md#lh-fa-cli-006--exit-codes)-Exit-Code-Klassifikation.
+  Sie liegen im `driving`-Paket statt im `application`-Paket, damit der
+  CLI-Adapter via `errors.Is` auf sie verzweigen kann, ohne `application` zu
+  importieren ([`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)).
+  Die Familien nach Exit-Klasse:
+  - **Code 10 (fachliche Validierung):** Projekt-/Datei-Kollisionen beim Init,
+    Überschreibschutz-Verstöße, fehlendes oder unlesbares Projekt, unbekannte
+    oder inkonsistente Add-on-Zustände, Konfigurations- und
+    Vorlagen-Validierung, Bestätigungs-Gates (verweigerte Freigabe wie auch
+    nicht einholbare Bestätigung — bewusst getrennte Sentinels), sowie die
+    Namens-Validierungen aus `hexagon/domain`.
+  - **Code 12 (fachliche Ausführung):** Stabilisierungs-Timeout beim Start.
+  - **Code 14 (technische Persistenz):** Backup-Slot-Fehler (Quelle
+    verschwunden, Suffix-Raum erschöpft).
+
+  Die vollständige, aktuelle Liste steht im Code — sie wächst mit jedem neuen
+  Use-Case. Diese Sicht nennt die Familien und ihre Zuordnung; verbindlich für
+  jede Erweiterung ist die Dual-Classifier-Regel (§7.2).
 - **Implementiert von:** Strukturen in `hexagon/application`.
-- **Verwendet von:** `adapter/driving/*` (z. B. `cli/`).
+- **Verwendet von:** `adapter/driving/*` (heute ausschließlich `cli/`).
 
 ### 2.4 `hexagon/port/driven`
 
@@ -103,9 +174,26 @@ Interfaces, über die `hexagon/application` externe Systeme nutzt.
   - `ProgressPort` (`AffectedFiles(baseDir, rows)`) zum strukturierten Reporting der [`LH-FA-INIT-005`](lastenheft.md#lh-fa-init-005--überschreibschutz) §609 / [`LH-FA-CLI-005A`](lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) §262 betroffenen Pfade vor jedem Re-Init-Write. `AffectedFile` trägt `Path`/`Action AffectedAction`/`Backup bool`; `AffectedAction` enumeriert `AffectedReplaceBlock`/`AffectedOverwriteFull`. Presentation lebt im Adapter.
   - `Confirmer` (`ConfirmTreatAsExisting(ctx, baseDir, indicators)`) für die [`LH-FA-INIT-004`](lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen) Soft-Existing-Detection-Prompts. Narrowly scoped per Confirm-Kontext.
   - `Logger` (`Debug`/`Info`/`Warn`/`Error`, slog-konforme `...any`-Variadic) als [`LH-QA-004`](lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil)-Logging-Port.
-  - `DockerProbe` (`Version`/`Info`/`ComposeVersion`) für die read-only [`LH-FA-DIAG-002`](lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)-Probes (`docker version --format`, `docker compose version --short`). Bewusst getrennt vom state-mutierenden `DockerEngine` (siehe Erweiterungen). Backend-Annahme: ein Docker-API-kompatibles Engine-Binary auf `$PATH`. Heute Docker; Podman ≥ 4.0 funktioniert als Drop-in (`docker → podman`-Symlink + `DOCKER_HOST` auf `podman.socket`) — die Version-Klassifikation pinnt die Docker-Mindestwerte (24.0 / 2.20), Podman-Versionen werden vorerst als `Severity: warn` ("unrecognized version") emittiert, kein Exit-Code-Eskalation. Ein dedizierter Podman-Probe-Pfad ist ein eigener Slice (Trigger: erster konkreter Bedarf).
+  - `DockerProbe` (`Version`/`Info`/`ComposeVersion`) für die read-only [`LH-FA-DIAG-002`](lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)-Probes (`docker version --format`, `docker compose version --short`). Bewusst getrennt vom state-mutierenden `DockerEngine`, weil read-only und state-mutierend unterschiedliche Fehlerklassen tragen (§7.1). Backend-Annahme: ein Docker-API-kompatibles Engine-Binary auf `$PATH`. Heute Docker; Podman ≥ 4.0 funktioniert als Drop-in (`docker → podman`-Symlink + `DOCKER_HOST` auf `podman.socket`) — die Version-Klassifikation pinnt die Docker-Mindestwerte (24.0 / 2.20), Podman-Versionen werden vorerst als `Severity: warn` ("unrecognized version") emittiert, kein Exit-Code-Eskalation. Ein dedizierter Podman-Probe-Pfad ist ein eigener Slice (Trigger: erster konkreter Bedarf).
+  - `DockerEngine` (`Up`/`Down`/`Ps`/`Logs`/…) für die state-mutierenden
+    Compose-Lifecycle-Operationen. Der Adapter prüft die Erreichbarkeit der
+    Runtime intern vor jedem Kommando (§6, Use-Case „Umgebung starten") und
+    klassifiziert „Runtime nicht erreichbar" gegen „Runtime-Laufzeitfehler" —
+    die Trennung von Exit-Klasse 11 und 12 entsteht hier, nicht im Use-Case.
+  - `NetProbe` für Erreichbarkeits-Prüfungen beim Warten auf startende
+    Services ([`LH-FA-UP-003`](lastenheft.md#lh-fa-up-003--startstatus-anzeigen)).
+  - `TemplateCatalog` und `TemplateFiles` — Auflisten der verfügbaren
+    Projektvorlagen und Lesen ihrer Dateien
+    ([`LH-FA-TPL-001`](lastenheft.md#lh-fa-tpl-001--projektvorlagen)..[`LH-FA-TPL-004`](lastenheft.md#lh-fa-tpl-004--templates-auflisten)).
+    Zwei Ports statt einem, weil Katalog-Metadaten und Datei-Inhalte aus
+    verschiedenen Quellen stammen können (eingebettet oder lokales
+    Verzeichnis).
+  - `RecorderPort` — Aufzeichnung geplanter Dateisystem-Operationen für die
+    Vorschau-Modi ([`LH-FA-CLI-007`](lastenheft.md#lh-fa-cli-007--dry-run),
+    [`LH-FA-CLI-008`](lastenheft.md#lh-fa-cli-008--diff-ausgabe)): Der
+    Use-Case läuft unverändert, der Schreibpfad wird aufgezeichnet statt
+    ausgeführt.
   - `RuntimeEnvironment` (`InContainer() bool`) für die best-effort Container-Self-Detection via `/.dockerenv` (Docker) / `/run/.containerenv` (Podman/CRI-O/buildah). Treibt das `doctor`-Skip-Verhalten für die vier Host-Prerequisite-Checks im distroless-Container-Run, ohne dass die Adapter im Container fehlschlagen müssten.
-- **Vorgesehene Erweiterungen:** `DockerEngine` (`Up`/`Down`/`Ps`/`Logs`/`Exec`) für die Compose-Lifecycle-Operationen — explizit getrennt von `DockerProbe`, weil state-mutierend.
 - **Implementiert von:** Strukturen in `adapter/driven/*`.
 - **Verwendet von:** `hexagon/application`.
 
@@ -114,11 +202,20 @@ Interfaces, über die `hexagon/application` externe Systeme nutzt.
 Konkrete Driver — Einstiegspunkte aus der Außenwelt.
 
 - **Inhalt:** `cli/` mit Cobra. Pro Subkommando ein eigenes Cobra-Command in einer eigenen Datei.
+  - Implementiert sind `init`, `add`, `remove`, `up`, `down`, `logs`, `doctor`,
+    `generate`, `config` (mit `get`/`set`) und `template` (mit `list`).
   - Lokale Flags pro Subkommando (z. B. `init`: `--no-git`/`--force`/`--backup`/`--assume-existing`).
+  - **Maschinenlesbare Ausgabe:** Jedes Subkommando trägt `--json`, `--dry-run`
+    und `--diff` ([`LH-NFA-USE-004`](lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe),
+    [`LH-FA-CLI-007`](lastenheft.md#lh-fa-cli-007--dry-run),
+    [`LH-FA-CLI-008`](lastenheft.md#lh-fa-cli-008--diff-ausgabe)). Der
+    JSON-Envelope hat eine gemeinsame Hülle für alle Kommandos; die
+    Diagnostic-Abbildung liegt dagegen **pro Subkommando** vor — daraus folgt
+    die Dual-Classifier-Regel (§7.2).
   - **Persistente Flags (Root):** `--yes`, `--no-interactive` ([`LH-FA-CLI-005A`](lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) — gelten für alle bestätigungs-relevanten Subbefehle). Konflikt-Check `--yes` + `--no-interactive` → `ErrConflictingModeFlags` (CLI-internes Sentinel) → Exit-Code 2.
   - `ExitCode(err)` bündelt die [`LH-FA-CLI-006`](lastenheft.md#lh-fa-cli-006--exit-codes)-Klassifikation (0 / 2 / 10 / 11 / 12 / 14 / 1); Prädikat-Helper mappen die in §2.3 gelisteten Driving-Sentinels. Vollständige Klassifikations-Reihenfolge und die zwei tragenden Regeln: §7.
   - `cli.App` mit Functional-Options-Pattern (`WithGetwd` als Test-Seam); persistente Flag-Werte werden beim Re-Build der Root-Cobra pro `Execute` zurückgesetzt — kein Flag-Leak zwischen Aufrufen.
-- **Vorgesehene Erweiterungen:** weitere Subkommandos (`add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `template`). Ein HTTP-/Daemon-Adapter ist nicht vorgesehen; u-boot bleibt CLI-only (siehe §10).
+- **Nicht vorgesehen:** ein HTTP-/Daemon-Adapter; u-boot bleibt CLI-only, Maschinen-Schnittstellen laufen über die Flags oben (siehe §10).
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driving`, externe Libraries (z. B. Cobra).
 - **Verbotene Imports:** `hexagon/application` und `adapter/driven`. Die Instanziierung von Application-Services und Driven-Adaptern erfolgt ausschließlich im Wiring (`cmd/uboot/`), das beide Welten zusammenfügt; der Driving-Adapter erhält fertig konstruierte Driving-Port-Implementierungen per Konstruktor.
 - **Permanenter Carveout:** `contextcheck`-Ausnahme in `.golangci.yml`, weil Cobras `RunE`-Signatur (`func(cmd, args) error`) keinen Context-Parameter kennt — die Closure muss `cmd.Context()` extrahieren und an `runInit` durchreichen. Strikte Propagation passiert eine Ebene tiefer.
@@ -135,9 +232,13 @@ Konkrete externe Adapter — Implementierungen der Driven-Ports.
   - `progress/` — `ProgressPort`-Adapter (TextWriter rendert Events auf einen `io.Writer`).
   - `confirm/` — `Confirmer`-Adapter (`bufio.Scanner` über stdin, Prompt auf stderr, Default `[y/N]`).
   - `logger/` — `Logger`-Adapter via `log/slog` (Text + JSON-Format konfigurierbar).
-  - `docker/` — `DockerProbe`-Adapter via `os/exec docker` (read-only diagnostics für [LH-FA-DIAG-002](lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)).
+  - `docker/` — zwei Adapter im selben Paket: `DockerProbe` via `os/exec docker` (read-only diagnostics für [LH-FA-DIAG-002](lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)) und `DockerEngine` für die Compose-Lifecycle-Operationen. Der Engine-Adapter prüft die Erreichbarkeit der Runtime vor jedem Kommando und trennt dabei die Fehlerklassen 11 und 12 (§7.1).
+  - `netprobe/` — `NetProbe`-Adapter für die Erreichbarkeits-Prüfung startender Services.
+  - `runtime/` — `RuntimeEnvironment`-Adapter (Container-Self-Detection).
+  - `localtemplates/` und `externaltemplates/` — zwei `TemplateCatalog`-/`TemplateFiles`-Quellen: eingebettete Vorlagen und ein lokales Verzeichnis ([`LH-FA-TPL-003`](lastenheft.md#lh-fa-tpl-003--eigene-templates)). Dieselben Ports, austauschbare Herkunft — der Use-Case sieht keinen Unterschied.
+  - `templateyaml/` — Codec für die Vorlagen-Metadaten ([`LH-FA-TPL-002`](lastenheft.md#lh-fa-tpl-002--template-metadaten)), getrennt vom Projekt-`YAMLCodec`, weil beide unterschiedliche Schemata tragen.
+  - `recordingfs/` — `FileSystem`-Dekorator, der Schreiboperationen aufzeichnet statt ausführt; trägt die Vorschau-Modi `--dry-run`/`--diff`, ohne dass der Use-Case sie kennt.
   - Jeder Adapter pinnt sein Port-Interface per `var _ driven.X = (*Adapter)(nil)` im Production-Code; Drift bricht den Package-Build.
-- **Vorgesehene Erweiterungen:** `docker/`-Erweiterung um den `DockerEngine`-Adapter (`Up`/`Down`/`Ps`/`Logs`/`Exec` via `docker compose`); `progress/json` für [`LH-NFA-USE-004`](lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) `--json`.
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driven`, externe Libraries.
 - **Verbotene Imports:** `hexagon/application`, `adapter/driving`.
 - **Test-Pfad:** `t.TempDir()` für FS, echte `git`-Binary via `os/exec.LookPath`-Skip (CI-Runner ohne git skippen sauber).
@@ -146,7 +247,7 @@ Konkrete externe Adapter — Implementierungen der Driven-Ports.
 
 Einziger Ort, an dem `application` und `adapter` zusammen importiert werden.
 
-- **Inhalt:** `main.go` instantiiert die Driven-Adapter (`fs.New()`, `yaml.New()`, `git.New()`, `progress.NewText(stdout)`, `confirm.New(os.Stdin, stderr)`, `logger.New(stderr, ...)`, `docker.New()`), konstruiert die Application-Services (`InitProjectService`, `DoctorService`) mit den nötigen Ports und übergibt sie dem `cli.New(version, ...)`-Konstruktor. Plus signal-aware Context via `signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)` und Error→Exit-Code-Mapping über `cli.ExitCode(err)`.
+- **Inhalt:** `main.go` instantiiert **alle** Driven-Adapter aus §2.6, konstruiert daraus **alle** Application-Services aus §2.2 und übergibt sie dem CLI-Konstruktor als Driving-Port-Implementierungen. Dazu ein signal-aware Context, der Abbruch-Signale des Betriebssystems bis in die Runtime-Aufrufe durchreicht, und das abschließende Fehler→Exit-Code-Mapping (§7.1).
 - Hält keine Geschäftslogik. So klein wie sinnvoll möglich (Größenordnung 150–300 Zeilen `main.go` plus ein paar kleine Wiring-Helper); ab dieser Marke ist eine Aufteilung in mehrere Wiring-Pakete (`internal/wire/<feature>/`) zu erwägen.
 
 ---

@@ -334,7 +334,7 @@ Reviewer-Skills.
   Template-Sentinels. Der in diesem Diff neu gefasste §2.5-Satz („Prädikat-Helper
   mappen die in §2.3 gelisteten Driving-Sentinels") verweist damit auf eine
   unvollständige Liste. Der Befund ist bekannt und als
-  [`slice-harness-architecture-bestandsabgleich`](../plan/planning/open/slice-harness-architecture-bestandsabgleich.md)
+  [`slice-harness-architecture-bestandsabgleich`](../plan/planning/done/slice-harness-architecture-bestandsabgleich.md)
   eingeplant; der Diff hat ihn nicht erzeugt, sondern nur einen Verweis darauf
   gelegt.
 - `risiko`: Gering, solange der Folge-Slice läuft; ohne ihn wächst die Liste

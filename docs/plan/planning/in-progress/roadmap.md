@@ -32,6 +32,12 @@ seither Exit 0.
 Version `0.2.0`, Status `Accepted`, und trägt einen Historie-Abschnitt als
 Fußabdruck angenommener Vertragsänderungen.
 
+**Architektur-Stand:** [`spec/architecture.md`](../../../../spec/architecture.md)
+§2 ist gegen den Ist-Bestand abgeglichen
+([`slice-harness-architecture-bestandsabgleich`](../done/slice-harness-architecture-bestandsabgleich.md));
+die Sicht beschrieb zuvor weitgehend den Stand nach den ersten beiden
+Meilensteinen.
+
 **Nächster Aufsatzpunkt:** die verbliebenen Wartungs-Kandidaten (s. Nächste
 Wellen) — alle als `open/`-Slices ausgearbeitet, alle ohne weiteren Trigger,
 es fehlt nur die Priorisierung. Produkt-Wellen (v0.5.0) warten weiter auf
@@ -41,7 +47,6 @@ externe Trigger.
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
-| Spec-Wartung: `architecture.md` §2 gegen den Ist-Bestand | kein externer Trigger; Befund aus dem Architektur-Slice dieser Welle (§2 führt Implementiertes als „vorgesehen") | [`slice-harness-architecture-bestandsabgleich`](../open/slice-harness-architecture-bestandsabgleich.md) — Ports und Services vollständig, „Vorgesehene Erweiterungen" bereinigen | M |
 | Harness-Wartung: `internal/`-READMEs in den Referenz-Scan | kein externer Trigger; Befund aus dem Sub-Area-Audit dieser Welle | [`slice-harness-internal-readme-kennungs-retrofit`](../open/slice-harness-internal-readme-kennungs-retrofit.md) — Kennungen verlinken, Status-Abschnitte entzeitlichen, `scan.ignore`-Glob `internal/**` auflösen | S |
 | macOS-Distribution | konkrete Homebrew-Nutzeranfrage | [`slice-v2-homebrew-formula`](../open/slice-v2-homebrew-formula.md) | S |
 | Linux-Pakete | konkrete Debian-/RPM-Anfrage | [`slice-v2-distro-pakete`](../open/slice-v2-distro-pakete.md) ([ADR-0007](../../adr/0007-distributionswege-ghcr.md)) | M |

@@ -127,7 +127,7 @@ Scope:
 - Artefakte: [`spec/architecture.md`](../../../../spec/architecture.md) (Kopf,
   §3 Externe Abhängigkeiten, §6 Sequenz-Diagramme, §7 Fehlermodelle und
   Resilienz, Umnummerierung),
-  [`slice-harness-architecture-bestandsabgleich`](../open/slice-harness-architecture-bestandsabgleich.md)
+  [`slice-harness-architecture-bestandsabgleich`](slice-harness-architecture-bestandsabgleich.md)
   (Folge-Plan), [`roadmap.md`](../in-progress/roadmap.md).
 
 DoD-Abgleich: alle Punkte erfüllt — der Punkt „Bestand unverletzt: jede Aussage
@@ -197,7 +197,7 @@ Commit / Artefakt: `c35249d` (Kopf, §3/§6/§7, Umnummerierung); `4fed84f`
   Tabellenzelle verdichtet wurde. Wo der Vertrag verzweigt, verzweigt die Sicht
   auch — oder sie verweist, statt zu verdichten.
 - **Folge-Slices:**
-  [`slice-harness-architecture-bestandsabgleich`](../open/slice-harness-architecture-bestandsabgleich.md)
+  [`slice-harness-architecture-bestandsabgleich`](slice-harness-architecture-bestandsabgleich.md)
   — §2 beschreibt weitgehend den Frühstand (elf Driving-Ports existieren, drei
   sind dokumentiert).
 
