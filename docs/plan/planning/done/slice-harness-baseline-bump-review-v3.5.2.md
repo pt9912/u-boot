@@ -126,7 +126,7 @@ am 2026-07-24 geändert wurde. Die Vertragsänderung ist damit am Vertrag selbst
 nicht ablesbar. Bewusst **nicht** in diesem Slice behoben: Der Fußabdruck
 braucht Entscheidungen (Versions-Sprung, Status-Feld, Form des Verweises unter
 der `matrix`-Regel), die über einen Baseline-Bump hinausgehen — ausgelagert als
-[`slice-harness-lastenheft-historie-cr-fussabdruck`](../open/slice-harness-lastenheft-historie-cr-fussabdruck.md).
+[`slice-harness-lastenheft-historie-cr-fussabdruck`](slice-harness-lastenheft-historie-cr-fussabdruck.md).
 
 ### Verification Evidence
 
@@ -204,7 +204,7 @@ Commit / Artefakt: `162141f` (Bump als Einheit: Vendor-Baum v3.5.2, Entfernung v
   `docs/reviews/README.md` kamen mit `MR-009` dazu). Die Zahl „vier" in der
   Prozedur ist beim nächsten Bump zu prüfen, statt ihr zu vertrauen.
 - **Folge-Slices:**
-  [`slice-harness-lastenheft-historie-cr-fussabdruck`](../open/slice-harness-lastenheft-historie-cr-fussabdruck.md).
+  [`slice-harness-lastenheft-historie-cr-fussabdruck`](slice-harness-lastenheft-historie-cr-fussabdruck.md).
 
 ## 8. Sub-Area-Modus-Begründung
 

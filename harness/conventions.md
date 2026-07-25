@@ -299,11 +299,13 @@ Baseline still.
   (die Entscheidung fiel ausserhalb des Repos, der Slice war nur das
   Ausfuehrungs-Vehikel), der **Fussabdruck fehlt aber**: `spec/lastenheft.md`
   hat keine `## Historie` und steht unveraendert auf Version `0.1.0`, obwohl
-  `LH-FA-PROJDOCS-002` am 2026-07-24 geaendert wurde. Nachgezogen wird das im
-  Folge-Slice
-  [`slice-harness-lastenheft-historie-cr-fussabdruck`](../docs/plan/planning/open/slice-harness-lastenheft-historie-cr-fussabdruck.md);
-  die Bezeichnung "CR-Slice" oben bleibt als historischer Name stehen, meint
-  aber das Vehikel, nicht die Entscheidungs-Autoritaet.
+  `LH-FA-PROJDOCS-002` am 2026-07-24 geaendert wurde. **Nachgezogen am
+  2026-07-25** im Folge-Slice
+  [`slice-harness-lastenheft-historie-cr-fussabdruck`](../docs/plan/planning/done/slice-harness-lastenheft-historie-cr-fussabdruck.md):
+  Das Lastenheft traegt jetzt Version `0.2.0`, Status `Accepted` und einen
+  Abschnitt Historie mit der MADR-Zeile. Die Bezeichnung "CR-Slice" oben bleibt
+  als historischer Name stehen, meint aber das **Vehikel**, nicht die
+  Entscheidungs-Autoritaet - die lag beim Projektinhaber.
 
 ### MR-009 - Skill-Dateien unter `.harness/skills/`, Review-Reports unter `docs/reviews/`
 

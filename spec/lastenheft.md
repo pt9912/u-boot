@@ -6,9 +6,9 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.1.0                                                              |
-| Status           | Entwurf                                                            |
-| Datum            | 2026-05-21                                                         |
+| Version          | 0.2.0                                                              |
+| Status           | Accepted                                                           |
+| Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
 ---
 
@@ -2848,3 +2848,32 @@ Vergleich der vier Optionen:
 | Idempotenz           | Mehrfaches Ausführen führt zum gleichen stabilen Ergebnis                                 |
 | Managed Block        | Automatisch verwalteter Bereich in einer Datei (Markierung: `BEGIN U-BOOT MANAGED BLOCK`) |
 | OTLP                 | OpenTelemetry Protocol – Protokoll zur Übertragung von Logs, Metrics und Traces           |
+
+---
+
+## 16. Historie
+
+Dieser Abschnitt ist der **Fußabdruck angenommener Vertragsänderungen**. Er
+entsteht nicht aus interner Arbeit: Weder eine ADR noch ein Slice darf eine
+`LH-*`-Anforderung ändern — beide referenzieren nur. Eine Änderung an einer
+angenommenen Anforderung ist eine Vereinbarung mit dem Projektinhaber; im Repo
+hinterlässt sie genau drei Spuren: das Versions-Feld oben, eine Zeile hier und
+die geänderte Anforderung selbst.
+
+Die Spalte **Verweis** benennt den *externen* Vorgang (Vereinbarung, Ticket,
+Vertragsanhang), nicht das interne Artefakt, das die Änderung ausgeführt hat —
+das Lastenheft verweist nie abwärts auf Planung
+([`LH-FA-PROJDOCS-006`](#lh-fa-projdocs-006--dokumentationsreferenzmodell)).
+
+| Version | Datum | Änderung | Verweis |
+| ------- | ---------- | ------------------------------------------------------------ | ---------------------------------------------- |
+| 0.1.0 | 2026-05-21 | Initiale Fassung. Der Bestand bis 2026-07-23 entstand in der Entwurfsphase (Status `Entwurf`) und trägt deshalb keine Einzeleinträge — in dieser Phase steuern die IDs noch keine Verbindlichkeit. | — (Entwurfsphase) |
+| 0.2.0 | 2026-07-24 | [`LH-FA-PROJDOCS-002`](#lh-fa-projdocs-002--adr-format) auf die MADR-/Nygard-Template-Form umgestellt (Inline-Kopf-Felder inkl. `Schärft`; Pflicht-Abschnitte Alternativen, Fitness Function, Re-Evaluierungs-Trigger, Geschichte). Zum Umstellungszeitpunkt `Accepted` ADRs bleiben in der leanen Form und unveränderlich (Grandfathering). | Vereinbarung mit dem Projektinhaber, ausgelöst durch die Adoption des externen Betriebsregelwerks |
+
+**Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
+Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt
+wurden (Gates, Exit-Code-Vertrag, Traceability-Matrix). Der Wechsel zieht die
+Deklaration an die gelebte Praxis nach; ab hier ist jede Änderung einer
+Anforderung vertragspflichtig und bekommt eine Zeile in dieser Tabelle.
+Rückwirkend aufgenommen ist nur die eine Änderung, die bereits ausdrücklich als
+Vertragsänderung geführt wurde (0.2.0).

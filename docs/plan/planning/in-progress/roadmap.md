@@ -26,6 +26,12 @@ geschlossen. Aktuell läuft keine Welle.
 weil sein Trigger als einziger bereits gefeuert war. Das Freshness-Audit meldet
 seither Exit 0.
 
+**Vertrags-Stand:** Ein Befund dieses Bumps ist ebenfalls geschlossen
+([`slice-harness-lastenheft-historie-cr-fussabdruck`](../done/slice-harness-lastenheft-historie-cr-fussabdruck.md)):
+[`spec/lastenheft.md`](../../../../spec/lastenheft.md) steht seit 2026-07-25 auf
+Version `0.2.0`, Status `Accepted`, und trägt einen Historie-Abschnitt als
+Fußabdruck angenommener Vertragsänderungen.
+
 **Nächster Aufsatzpunkt:** die verbliebenen Wartungs-Kandidaten (s. Nächste
 Wellen) — alle als `open/`-Slices ausgearbeitet, alle ohne weiteren Trigger,
 es fehlt nur die Priorisierung. Produkt-Wellen (v0.5.0) warten weiter auf
@@ -36,7 +42,6 @@ externe Trigger.
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
 | Spec-Wartung: `architecture.md` §2 gegen den Ist-Bestand | kein externer Trigger; Befund aus dem Architektur-Slice dieser Welle (§2 führt Implementiertes als „vorgesehen") | [`slice-harness-architecture-bestandsabgleich`](../open/slice-harness-architecture-bestandsabgleich.md) — Ports und Services vollständig, „Vorgesehene Erweiterungen" bereinigen | M |
-| Spec-Wartung: CR-Fußabdruck im Lastenheft | kein externer Trigger; Befund des Baseline-Bumps (Baseline `v3.5.2` fordert Version-Bump + `## Historie` je angenommenem Change Request) | [`slice-harness-lastenheft-historie-cr-fussabdruck`](../open/slice-harness-lastenheft-historie-cr-fussabdruck.md) — Historie anlegen, Bestandszeile für die MADR-Umstellung, Version/Status entscheiden | S |
 | Harness-Wartung: `internal/`-READMEs in den Referenz-Scan | kein externer Trigger; Befund aus dem Sub-Area-Audit dieser Welle | [`slice-harness-internal-readme-kennungs-retrofit`](../open/slice-harness-internal-readme-kennungs-retrofit.md) — Kennungen verlinken, Status-Abschnitte entzeitlichen, `scan.ignore`-Glob `internal/**` auflösen | S |
 | macOS-Distribution | konkrete Homebrew-Nutzeranfrage | [`slice-v2-homebrew-formula`](../open/slice-v2-homebrew-formula.md) | S |
 | Linux-Pakete | konkrete Debian-/RPM-Anfrage | [`slice-v2-distro-pakete`](../open/slice-v2-distro-pakete.md) ([ADR-0007](../../adr/0007-distributionswege-ghcr.md)) | M |
