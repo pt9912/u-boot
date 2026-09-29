@@ -19,7 +19,6 @@ keine aktive Welle
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
-| Spec-Wartung: Traceability-Matrix konfigurieren | kein externer Trigger; Befund beim Durchsehen der offenen Lastenheft-Punkte | [`slice-gate-rtm-traceability`](../done/slice-gate-rtm-traceability.md) — `--trace` sieht 79 von 139 Kennungen und meldet 12 echte Belege-Lücken; Familien-Auswahl und §13-Kollision sind die Arbeit | M |
 | macOS-Distribution | konkrete Homebrew-Nutzeranfrage | [`slice-v2-homebrew-formula`](../open/slice-v2-homebrew-formula.md) | S |
 | Linux-Pakete | konkrete Debian-/RPM-Anfrage | [`slice-v2-distro-pakete`](../open/slice-v2-distro-pakete.md) ([ADR-0007](../../adr/0007-distributionswege-ghcr.md)) | M |
 | Devcontainer-Robustheit | Real-World-Half-State-Beschwerde oder Schema-Erweiterung | [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md) | M |
@@ -71,6 +70,7 @@ flowchart LR
 
 | welle-gate-ausbau-v0.51 (d-check-Bump + vier Sensoren) | 2026-07-25 | [`slice-gate-print-mk-einbindung`](../done/slice-gate-print-mk-einbindung.md) (`e246bbf`); [`slice-gate-planning-targets-module`](../done/slice-gate-planning-targets-module.md) (`83efe46`); [`slice-gate-ids-link-policy-always`](../done/slice-gate-ids-link-policy-always.md) (`0d896fc`); [`slice-gate-immutabilitaets-sensor`](../done/slice-gate-immutabilitaets-sensor.md) (`7d9c4c2`); Vorlauf: Image-Bump (`225627c`) |
 | v0.5.0 (Security-Release + lokale Templates) | 2026-07-25 | [`slice-v1-release-cut-v0.5.0`](../done/slice-v1-release-cut-v0.5.0.md) — Tag `v0.5.0` auf `1bc071f` |
+| Spec-Wartung: Traceability-Matrix konfiguriert | 2026-09-29 | [`slice-gate-rtm-traceability`](../done/slice-gate-rtm-traceability.md) — RTM 79 Anforderungen, 0 Waisen |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-NN-results.md`; die Welle-Closure lebt vollständig im jeweiligen
