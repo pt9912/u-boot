@@ -57,6 +57,9 @@ Lebensdauer-Pflicht).
 
 ## Done-Definition
 
+Alle drei Kriterien am 2026-09-29 erfüllt; **Delivery-Hash: `ddede40`**
+(`make gates` grün, Coverage-Gate ≥ 90 % weiter gültig).
+
 - `grep -rn "AddPreviewMode" internal/ cmd/` liefert null
   Treffer (`scripts/`/`docs/` ausgenommen — historische Bezüge
   in done/-Plänen bleiben erhalten).
