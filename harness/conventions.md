@@ -20,26 +20,30 @@ Quelle (Source Precedence). Diese Datei ist konformitaets-bringend fuer
 ## Baseline
 
 - **Konvention:** AI-Harness-Kurs (`pt9912/ai-harness-course`)
-- **Stand:** v3.5.2 (Regelwerk-Bundle; Kurs-Welle 34)
+- **Stand:** v6.13.0 (Regelwerk-Bundle)
 - **Datum der Adoption:** 2026-07-24 (Erst-Adoption direkt auf `v3.5.1`);
   **Review-Bump auf `v3.5.2` am 2026-07-25** (Kurs-Welle 34), ausgeloest vom
   ersten Freshness-Audit-Lauf. Delta-Lektuere und `MR-*`-Gegenprobe im Slice
   [`slice-harness-baseline-bump-review-v3.5.2`](../docs/plan/planning/done/slice-harness-baseline-bump-review-v3.5.2.md).
-- **Integritaets-Pin:** `.harness/baseline/v3.5.2/SHA256SUMS` ueber den vendorten
+  **Review-Bump auf `v6.13.0` am 2026-09-29** (46 Releases, drei
+  Major-Spruege v4/v5/v6), ausgeloesst vom naechsten Freshness-Audit-Lauf
+  (Exit 3); Delta-Lektuere und `MR-*`-Gegenprobe im Slice
+  [`slice-harness-regelwerk-adoption-v6.13.0`](../docs/plan/planning/done/slice-harness-regelwerk-adoption-v6.13.0.md).
+- **Integritaets-Pin:** `.harness/baseline/v6.13.0/SHA256SUMS` ueber den vendorten
   Bestand (`regelwerk/` + `templates/`); offline pruefbar per
   `tools/harness/fetch-baseline-cache.sh --verify`.
 
 ## Adoptierte Konventions-Quellen
 
-- **Extern (Lehrmaterial):** <https://github.com/pt9912/ai-harness-course/tree/v3.5.2>
+- **Extern (Lehrmaterial):** <https://github.com/pt9912/ai-harness-course/tree/v6.13.0>
 - **Regelwerk (committet vendored, `MR-004`/`MR-007`):** die Lese-Form ist das
   nach Modulen und Grundlagen-Abschnitten aufgeteilte Bundle, entpackt und
-  committet unter `.harness/baseline/v3.5.2/regelwerk/` (Index
-  `regelwerk/README.md`), samt `.harness/baseline/v3.5.2/SHA256SUMS` - netzlos
+  committet unter `.harness/baseline/v6.13.0/regelwerk/` (Index
+  `regelwerk/README.md`), samt `.harness/baseline/v6.13.0/SHA256SUMS` - netzlos
   auf jedem Checkout, offline verifizierbar. Bundle-Quelle: Release-Asset
-  `lab-regelwerk.zip`, Tag `v3.5.2`.
+  `lab-regelwerk.zip`, Tag `v6.13.0`.
 - **Templates (committet vendored, `MR-004`):** die Skelett-Vorlagen liegen
-  vendored unter `.harness/baseline/v3.5.2/templates/` (aus demselben Bundle)
+  vendored unter `.harness/baseline/v6.13.0/templates/` (aus demselben Bundle)
   und tragen zwei Rollen: **Referenz-Form**, auf die das Regelwerk mit
   `../templates/...` als "Ziel-Form" verweist (netzlos, weil parallel zu
   `regelwerk/` vendored), und **Kopiervorlage** - beim Anlegen neuer Artefakte
@@ -60,9 +64,9 @@ vendored Baseline muss an **zwei** Stellen synchron gehalten werden.
 - **T2** - Pointer in der Source-Precedence-/Kopf-Sektion von
   [`AGENTS.md`](../AGENTS.md) (Verweis auf die vendored Baseline + Lesemodell).
 
-Beide zeigen auf `.harness/baseline/v3.5.2/regelwerk/README.md` (Index) und
+Beide zeigen auf `.harness/baseline/v6.13.0/regelwerk/README.md` (Index) und
 werden bei einem Baseline-Bump gemeinsam nachgezogen (`MR-004` Bump-Prozedur).
-Fundstelle: `.harness/baseline/v3.5.2/regelwerk/modul-02-harness-bootstrap.md`.
+Fundstelle: `.harness/baseline/v6.13.0/regelwerk/modul-02-harness-bootstrap.md`.
 
 ## Freshness-Audit
 
@@ -173,7 +177,7 @@ Baseline still.
   `done/`-Release-Cut-Slice die Closure bereits vollstaendig traegt.
 - **Aufloesungs-Trigger:** permanent, solange Release-Versionen die Wellen sind.
 
-### MR-004 - Regelwerk-Lese-Form committet vendored; Baseline-Pin v3.5.2; beide Baeume
+### MR-004 - Regelwerk-Lese-Form committet vendored; Baseline-Pin v6.13.0; beide Baeume
 
 - **Datum:** 2026-07-24
 - **Geltungsbereich:** `.harness/baseline/`,
@@ -183,7 +187,7 @@ Baseline still.
   (`scan.ignore`), `.gitignore`, Abschnitt Baseline oben.
 - **Adaption:** Die Lese-Form des adoptierten Regelwerks ist **committet
   vendored** (kein Remote-ZIP pro Lauf, kein Submodule):
-  `.harness/baseline/v3.5.2/{regelwerk,templates}/` + `SHA256SUMS`, netzlos auf
+  `.harness/baseline/v6.13.0/{regelwerk,templates}/` + `SHA256SUMS`, netzlos auf
   jedem Checkout, offline verifizierbar. u-boot vendored **beide** Baeume
   (Upstream-Default), damit die `../templates/...`-Verweise der Module netzlos
   aufloesen und die Templates als Kopiervorlage bereitstehen - **kein**

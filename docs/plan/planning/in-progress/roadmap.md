@@ -4,7 +4,7 @@
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
-`.harness/baseline/v3.5.2/regelwerk/modul-06-roadmap.md`). u-boots Wellen
+`.harness/baseline/v6.13.0/regelwerk/modul-06-roadmap.md`). u-boots Wellen
 entsprechen den **Release-Versionen**; Termine erscheinen nur als *Konsequenz*
 einer abgeschlossenen Welle (Release-Datum), nicht als Treiber. Diese Datei
 liegt dauerhaft in `in-progress/` und bleibt bewusst knapp: der per-Slice-
