@@ -257,6 +257,16 @@ Baseline still.
   Adaptions-IDs dieses Ledgers bleiben linkfrei. `.harness/baseline/**` liegt im
   `scan.ignore` (tag-agnostischer Glob `**`), damit die repo-relativen Links der
   vendorten Regelwerk-/Template-Dateien nicht gewertet werden.
+  **RTM-Trace (seit 2026-09-29):** `trace.slices` (dir `docs/plan/planning`,
+  Pattern `^(slice-.+)\.md$`) schliesst u-boots Kennungsform an. Die Belegsicht
+  bleibt auf die Liefer-Familien `LH-FA-*`/`LH-QA-*` (Default
+  `requirements.id-pattern`) beschaenkt — Lesehinweise, Abgrenzungen,
+  Zielbestimmung, Risiken u. a. sind strukturell belegfrei und wuerden als
+  Waisen nur Rauschen erzeugen. `ids`-Muster um `ÄÖÜ` ergaenzt
+  ([`LH-PÜ-001`](../spec/lastenheft.md#lh-pü-001--grundfunktion)/[`LH-PÜ-002`](../spec/lastenheft.md#lh-pü-002--hauptmodule)). `--require-complete` bleibt **aus**: advisory, weil
+  ein Spec-CR neue Kennungen ohne Slice-Coverage gebiert — ein rotes Gate
+  wird abgeschaltet statt befolgt. Begründung und Lückenbewertung im Slice
+  [`slice-gate-rtm-traceability`](../docs/plan/planning/done/slice-gate-rtm-traceability.md).
 - **Begruendung:** Bis `v0.51.1` lief `docs-check` als handgeschriebener
   `docker run`-Aufruf, und das Fragment wurde gegen den `0.2.0`-Stand
   abgelehnt. Gegen `v0.51.1` kehrt sich die Abwaegung um: Das Fragment bringt

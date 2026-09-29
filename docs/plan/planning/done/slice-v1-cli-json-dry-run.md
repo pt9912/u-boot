@@ -1048,3 +1048,10 @@ hierher verschoben wurde).
   Arbeitspakete-Tabelle.
 - Phase: V1 — V1-pünktlich notwendig, weil [ADR-0010](../../adr/0010-kein-http-driving-adapter.md)
   Re-Eval-Trigger 2 auf diesen Slice referenziert.
+
+---
+
+> **Nachtrag Traceability (2026-09-29, [`slice-gate-rtm-traceability`](slice-gate-rtm-traceability.md)):**
+> Dieser Slice hat [`LH-FA-CLI-004`](../../../../spec/lastenheft.md#lh-fa-cli-004--fehlerausgabe) (Fehlerausgabe: strukturiertes `diagnostics`/`exitCode`-Fehlermodell, siehe oben) geliefert — die Kennung stand hier ursprünglich
+> nicht; nachgetragen als Querverweis-Korrektur nach
+> [`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle).

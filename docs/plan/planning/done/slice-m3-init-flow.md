@@ -210,3 +210,10 @@ Vorschlag (jede Tranche eigener Commit, je grün durch alle Gates):
   [`carveouts.md`](../in-progress/carveouts.md).
 - Wird ggf. auslösen: `slice-v1-gomodguard-rules.md` (sobald Cobra
   und yaml.v3 in `go.mod` landen).
+
+---
+
+> **Nachtrag Traceability (2026-09-29, [`slice-gate-rtm-traceability`](slice-gate-rtm-traceability.md)):**
+> Dieser Slice hat [`LH-FA-DOC-001`](../../../../spec/lastenheft.md#lh-fa-doc-001--compose-datei-erzeugen) (Compose-Datei erzeugen) und [`LH-FA-DEV-002`](../../../../spec/lastenheft.md#lh-fa-dev-002--vs-code-kompatibilität) (VS-Code-Kompatibilität der erzeugten Devcontainer-Konfiguration) geliefert — die Kennung stand hier ursprünglich
+> nicht; nachgetragen als Querverweis-Korrektur nach
+> [`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle).

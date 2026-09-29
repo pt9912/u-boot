@@ -1581,3 +1581,10 @@ wohlgeformt-vorhanden/fehlend-Fälle.
 - Nachfolger: MVP-Closure-Slice ([`LH-AK-001`](../../../../spec/lastenheft.md#lh-ak-001--minimaler-init-flow)..[`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)) ist der
   Acceptance-Demo-Pfad `mkdir demo && cd demo && u-boot init &&
   u-boot add postgres && u-boot doctor`.
+
+---
+
+> **Nachtrag Traceability (2026-09-29, [`slice-gate-rtm-traceability`](slice-gate-rtm-traceability.md)):**
+> Dieser Slice hat [`LH-FA-DOC-003`](../../../../spec/lastenheft.md#lh-fa-doc-003--netzwerk) (Netzwerk) und [`LH-FA-DOC-004`](../../../../spec/lastenheft.md#lh-fa-doc-004--volumes) (Volumes: Top-Level-`volumes:`/`networks:` in der erzeugten Compose-Datei) geliefert — die Kennung stand hier ursprünglich
+> nicht; nachgetragen als Querverweis-Korrektur nach
+> [`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle).

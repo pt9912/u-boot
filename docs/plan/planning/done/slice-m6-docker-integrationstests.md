@@ -26,7 +26,7 @@ DoD-Zeile; die Reihenfolge ist hart (Sub-T4 setzt T1–T3 voraus).
   YAML). ~200 LoC.
 - **Sub-T3 — End-to-end-Verhaltens-Pins.** Voller Stack via
   `internal/e2e/` (neues Package):
-  `postgres_acceptance_docker_test.go` ([`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)) +
+  `postgres_acceptance_docker_test.go` ([[`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)) +
   `down_volumes_docker_test.go` ([`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen) §1015). Diese Tests
   wickeln den kompletten `init → add postgres → up → down`-Flow
   gegen die echte Engine ab. ~250 LoC.
@@ -88,7 +88,7 @@ Aufhebung des Carveouts fehlt:
 - **Netzwerk-Namespace-Voraussetzung für Tests mit TCP-Probe-
   Assertions**: alle Pins, die `net.DialTCP` von der Test-Seite
   gegen einen Compose-veröffentlichten Port machen — heute Sub-T2
-  §968 (`upservice_portprobe_docker_test.go`) plus Sub-T3 [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)
+  §968 (`upservice_portprobe_docker_test.go`) plus Sub-T3 [[`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)
   (`postgres_acceptance_docker_test.go`) — verlangen, dass die
   Test-Prozess-Netzwerk-Namespace und die Docker-Daemon-Netzwerk-
   Namespace identisch sind. Konkret: entweder das Test-Binary
@@ -102,7 +102,7 @@ Aufhebung des Carveouts fehlt:
   korrekt läuft. **Sub-T4-Makefile-Verkabelung muss diese
   Anforderung erfüllen** (Empfehlung: `docker run --network=host`
   oder Host-natives `go test -tags docker`); andernfalls würde
-  der `integration-docker`-CI-Job §968 und [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow) falsch-rot
+  der `integration-docker`-CI-Job §968 und [[`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow) falsch-rot
   liefern.
 - `internal/adapter/driven/docker/engine_docker_test.go` (existiert
   seit T2) wird um zusätzliche Verhaltens-Tests aus der Tabelle
@@ -116,7 +116,7 @@ Aufhebung des Carveouts fehlt:
   (`internal/adapter/driven/docker/`) und application-/end-to-end-
   Pins (`internal/hexagon/application/` bzw. ein dediziertes
   `internal/e2e/`-Verzeichnis). Ein auf das Adapter-Package
-  begrenzter Scope würde die [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)-, [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)- und
+  begrenzter Scope würde die [[`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)-, [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)- und
   [`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen)-Pins formal als „nicht im getaggten Pfad" gelten
   lassen — Carveout-Aufhebung wäre nominell erfüllt, faktisch
   nicht. Die Test-Datei-Verortung jedes Pins ist in der Tabelle
@@ -212,7 +212,7 @@ ab, getaggter Integration-Pfad deckt End-to-end-Verhalten ab.
 
 | Spec-ID                | Verhalten, das pin-getestet wird                                                                                                                                          | Test-Datei-Verortung (verbindlich)                                                       | Vorgeschlagener Test-Pfad                                                                                                            |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **[`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)**          | Voller PostgreSQL-Flow: `u-boot init && u-boot add postgres && u-boot up` ⇒ Healthcheck `healthy` in ≤60 s, Port 5432 erreichbar.                                          | `internal/e2e/postgres_acceptance_docker_test.go` (neues Verzeichnis, package `e2e_test`) | End-to-end-Test mit echtem temp-Verzeichnis + InitProjectService + AddServiceService + UpService gegen echte Engine.                 |
+| **[[`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)**          | Voller PostgreSQL-Flow: `u-boot init && u-boot add postgres && u-boot up` ⇒ Healthcheck `healthy` in ≤60 s, Port 5432 erreichbar.                                          | `internal/e2e/postgres_acceptance_docker_test.go` (neues Verzeichnis, package `e2e_test`) | End-to-end-Test mit echtem temp-Verzeichnis + InitProjectService + AddServiceService + UpService gegen echte Engine.                 |
 | **[`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten) §966**  | Service mit Healthcheck stabilisiert erst auf `healthy`, nicht auf `running` allein.                                                                                       | `internal/hexagon/application/upservice_healthcheck_docker_test.go`                       | Compose-Fixture mit langsamem `pg_isready`-Healthcheck; assert dass `up` nicht früh returnt.                                          |
 | **[`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten) §968**  | TCP-Port-Probe gegen `localhost` greift sobald Healthcheck `healthy` ist.                                                                                                  | `internal/hexagon/application/upservice_portprobe_docker_test.go`                         | Postgres-Fixture; assert `net.DialTCP("127.0.0.1:5432")` wird vom UpService durchgeführt und `nil`-error returnt.                     |
 | **[`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker)**    | **Compose-Stderr-Phasen-Stream** (`Pulling…`, `Creating…`, `Starting…`, `Healthchecking…`) reicht **live** an `opts.ProgressSink` durch — kein Buffer, kein Verlust bei fehlschlagendem `up`. | `internal/adapter/driven/docker/engine_progressstream_docker_test.go`                     | Pin via **`io.Pipe`-Event-Ordering** statt absoluter Timing-Schwellen. Setup: `r, w := io.Pipe()`; `opts.ProgressSink = w`; eine Test-Goroutine liest aus `r` und sammelt `(chunk, recvAt time.Time)`-Events bis EOF. Test-Assertion ist rein ereignis-relational, **keine Wall-Clock-Zahlen**: (a) mindestens ein nicht-leerer Chunk empfangen; (b) `events[0].recvAt < composeUpReturnedAt` — das **erste** Chunk-Event muss **vor** dem `ComposeUp`-Return-Zeitpunkt liegen (`composeUpReturnedAt := time.Now()` direkt nach dem `ComposeUp`-Aufruf in der Test-Goroutine). Damit ist „live" als **happens-before**-Relation operational definiert: ein nachträglicher Buffer-Flush würde alle Events erst **nach** dem Return zustellen, wodurch (b) reißt — unabhängig davon, ob der CI-Runner schnell (Pull dauert 2 s) oder langsam (Pull dauert 30 s) ist; relative Reihenfolge bleibt invariant. Fixture: Service mit `image: postgres:16-alpine` (ergo echter Pull mit garantierter `Pulling…`-stderr) + forcibly-fehlschlagender Healthcheck-Definition, damit `up` mit Code 12 endet — der Failure-Pfad ist der härtere Test (Erfolgs-Pfad könnte alle Phasen erfolgreich buffern, der Fail-Pfad nicht). |
@@ -263,3 +263,10 @@ Spec-IDs **nicht** im T2-Unit-Pfad eingelöst werden.
   T2-Unit-Pfad (siehe Out-of-Scope-Begründung oben).
 - Phase: M6 (zusammen mit dem Docker-Adapter), Aufhebung
   spätestens vor M6 Done.
+
+---
+
+> **Nachtrag Traceability (2026-09-29, [`slice-gate-rtm-traceability`](slice-gate-rtm-traceability.md)):**
+> Dieser Slice hat [`LH-QA-001`](../../../../spec/lastenheft.md#lh-qa-001--automatisierte-tests) (Automatisierte Tests) und [`LH-QA-002`](../../../../spec/lastenheft.md#lh-qa-002--testbare-akzeptanzkriterien) (Testbare Akzeptanzkriterien — Acceptance-Test-Vehikel, [`LH-AK-002`](../../../../spec/lastenheft.md#lh-ak-002--postgresql-flow)-Flow) geliefert — die Kennung stand hier ursprünglich
+> nicht; nachgetragen als Querverweis-Korrektur nach
+> [`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle).

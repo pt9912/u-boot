@@ -55,3 +55,10 @@ Polish-Slice").
 - Auslösende Quelle: Vergleich `c-hsm-doc/Makefile` vs.
   `u-boot/Makefile` (Sitzung 2026-05-27).
 - [ADR-0004](../../adr/0004-ci-system.md) (Pin-Politik) — `govulncheck`-Pin schließt die Lücke.
+
+---
+
+> **Nachtrag Traceability (2026-09-29, [`slice-gate-rtm-traceability`](slice-gate-rtm-traceability.md)):**
+> Dieser Slice hat [`LH-FA-BUILD-003`](../../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik) (Build-Args und Pin-Politik) geliefert — die Kennung stand hier ursprünglich
+> nicht; nachgetragen als Querverweis-Korrektur nach
+> [`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle).

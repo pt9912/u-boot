@@ -57,3 +57,10 @@ ADR-Format, Roadmap als Master-Dokument).
 - ADR: `0001-implementierungssprache-go.md`.
 - Nachfolger: M2 (Hexagonale Architektur) baut auf der `internal/`-
   Struktur auf, die hier als leeres Skelett vorbereitet wurde.
+
+---
+
+> **Nachtrag Traceability (2026-09-29, [`slice-gate-rtm-traceability`](slice-gate-rtm-traceability.md)):**
+> Dieser Slice hat [`LH-FA-CLI-001`](../../../../spec/lastenheft.md#lh-fa-cli-001--cli-aufruf) (CLI-Aufruf), [`LH-FA-CLI-002`](../../../../spec/lastenheft.md#lh-fa-cli-002--hilfeausgabe) (Hilfeausgabe) und [`LH-FA-CLI-003`](../../../../spec/lastenheft.md#lh-fa-cli-003--versionsausgabe) (Versionsausgabe) (`cmd/uboot/main.go` mit `--help`/`--version`, siehe oben) geliefert — die Kennung stand hier ursprünglich
+> nicht; nachgetragen als Querverweis-Korrektur nach
+> [`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle).
