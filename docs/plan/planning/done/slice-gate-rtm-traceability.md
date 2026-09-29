@@ -1,6 +1,6 @@
 # Slice Gate: Traceability-Matrix (`--trace`) für u-boot konfigurieren
 
-**Status:** **abgeschlossen** (2026-09-29, Delivery-Hash siehe §7).
+**Status:** **abgeschlossen** (2026-09-29, **Delivery-Hash: `3851589`**).
 Ergebnis: **79 Anforderungen, 0 Waisen** (advisory; `--require-complete`
 bleibt aus).
 
