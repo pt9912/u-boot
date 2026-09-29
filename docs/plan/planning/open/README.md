@@ -11,7 +11,6 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| [`slice-v1-release-cut-v0.5.0.md`](../in-progress/slice-v1-release-cut-v0.5.0.md) | **In Arbeit** (nach `in-progress/` gezogen): Release-Cut v0.5.0 — Sicherheits-Fix + local-templates |
 | [`slice-cr-sandbox-devcontainer.md`](slice-cr-sandbox-devcontainer.md) | CR: Sandbox-Profil für Devcontainer (autonome Agenten) — Spec-Änderung 0.3.0 (V1-Paket: Sandbox-Profil, nested Runtime, Git-Zugang; V2: Egress) |
 | [`slice-v1-cli-cleanup-add-preview-mode-alias.md`](slice-v1-cli-cleanup-add-preview-mode-alias.md) | Cleanup: `AddPreviewMode`-Alias entfernen |
 | [`slice-v1-config-list-subcommand.md`](slice-v1-config-list-subcommand.md) | Cleanup: `u-boot config list` als eigener Subcommand mit strukturiertem Path-Value-Tree |

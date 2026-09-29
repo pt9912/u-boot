@@ -1,8 +1,9 @@
 # Slice V1: Release-Cut `v0.5.0`
 
-> **Status (2026-07-25):** T1–T3 **ausgeführt**; **T4 offen** — Tag-Push ist
-> Nutzer-Aktion. Der Slice bleibt bis dahin in `in-progress/`, siehe
-> §Abweichung.
+> **Status:** **abgeschlossen** — T1–T3 am 2026-07-25 ausgeführt; **T4** am
+> 2026-07-25 durch Nutzer-Aktion vollzogen (`git tag v0.5.0` auf `1bc071f`,
+> Tag-Datum 2026-07-25, `publish.yml` durch den Tag-Push getriggert).
+> Closure-Notiz am Dateiende.
 >
 > **Scope-Korrektur (2026-07-25, vor T1):** Der Plan beschrieb v0.5.0 als
 > **Ein-Feature-Minor** (nur local-templates). Das war beim Schreiben richtig
@@ -127,3 +128,18 @@ Cut und hatte die unveröffentlichte Funktion bewusst nur als Ausblick geführt.
 - Roadmap: [`roadmap.md`](../in-progress/roadmap.md) §Aktueller Snapshot.
 - `publish.yml` (Tag-Push-Trigger), `Makefile`/`Dockerfile`/`main.go`
   (Versionsstrings).
+
+## Closure-Notiz (nach `done/`)
+
+- **Was hat funktioniert:** Tranchen-Trennung Doku-Cut (T1–T3, Commit
+  `1bc071f`) vs. Tag-Push (T4, Nutzer-Aktion) — die Aufhebungsbedingung
+  `(Aufhebungsbedingung)` feuerte genau wie beschrieben; `publish.yml`
+  baute GHCR-Image und Binaries aus dem Tag.
+- **Was ging anders als geplant:** nichts Signifikantes. Der Scope-Zuschlag
+  (Security-Release) kam vor T1 und ist in der Scope-Korrektur dokumentiert.
+- **Steering-Loop:** Der `planning`-Sensor macht Lifecycle-Zustände
+  verhandelbar statt still — beide in §Abweichung dokumentierten Anker-
+  Alternativen (Slice-Ort, Snapshot-Abschnitt) sind so sichtbar korrigiert
+  worden, nicht überlaufen.
+- **Folg-Slices:** keine aus diesem Slice. Die Nachfolge-Welle wird über
+  die Trigger-Tabelle §Nächste Wellen gezogen.

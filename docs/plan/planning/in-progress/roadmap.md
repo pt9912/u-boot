@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-07-25.
+**Status:** Aktiv. **Letzte Änderung:** 2026-09-29.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -13,19 +13,7 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**Welle-ID:** `v0.5.0`
-**Stand:** 2026-07-25
-
-Release-Cut läuft
-([`slice-v1-release-cut-v0.5.0`](../in-progress/slice-v1-release-cut-v0.5.0.md)).
-T1–T3 (CHANGELOG, Versionsstrings, READMEs, Roadmap) sind erledigt; **T4 ist
-Nutzer-Aktion**: `git tag v0.5.0 && git push origin v0.5.0` löst `publish.yml`
-aus (GHCR + Binaries für sechs Plattformen). Danach wandert die Welle nach
-Abgeschlossene Wellen und der Meilenstein auf `erreicht`.
-
-**Auslieferbarer Inhalt:** der Go-Toolchain-Bump, der CVE-2026-39822 (HIGH) im
-Runtime-Image schließt — der eigentliche Anlass — plus `u-boot init --template
-./pfad` (lokale Vorlagen).
+keine aktive Welle
 
 ## Nächste Wellen
 
@@ -50,7 +38,7 @@ Runtime-Image schließt — der eigentliche Anlass — plus `u-boot init --templ
 | Container-aware `doctor` + Binaries | v0.2.0 | Plattform-Binaries, Template-Katalog | erreicht (2026-06-01) |
 | Add-on Catalogue Expansion | v0.3.0 | `remove`, `--with-deps`, Keycloak, OTel | erreicht (2026-06-01) |
 | Maschinenlesbare CLI | v0.4.0 | `--json`/`--dry-run`/`--diff` alle 10 Subcommands, `logs`, Devcontainer-Features | erreicht (2026-06-08) |
-| Nächstes Produkt-Release | v0.5.0 | trigger-getrieben (siehe Nächste Wellen) | offen |
+| Nächstes Produkt-Release | v0.5.0 | trigger-getrieben (siehe Nächste Wellen) | erreicht (2026-07-25) |
 
 ## Abhängigkeitsgraph
 
@@ -82,6 +70,7 @@ flowchart LR
 | welle-harness-konformitaet-nachlauf (FS-1..FS-4 + `architecture.md`-Template-Konformität) | 2026-07-25 | [`slice-harness-reviewer-skills-und-review-ablage`](../done/slice-harness-reviewer-skills-und-review-ablage.md) (`d5d896a`); [`slice-harness-sub-area-modus-audit`](../done/slice-harness-sub-area-modus-audit.md) (`be3d33c`); [`slice-harness-baseline-freshness-audit`](../done/slice-harness-baseline-freshness-audit.md) (`c7fe437`); [`slice-harness-architecture-template-konformitaet`](../done/slice-harness-architecture-template-konformitaet.md) (`c35249d`); Review-Findings (`4fed84f`), Report in [`docs/reviews/`](../../../reviews/README.md) |
 
 | welle-gate-ausbau-v0.51 (d-check-Bump + vier Sensoren) | 2026-07-25 | [`slice-gate-print-mk-einbindung`](../done/slice-gate-print-mk-einbindung.md) (`e246bbf`); [`slice-gate-planning-targets-module`](../done/slice-gate-planning-targets-module.md) (`83efe46`); [`slice-gate-ids-link-policy-always`](../done/slice-gate-ids-link-policy-always.md) (`0d896fc`); [`slice-gate-immutabilitaets-sensor`](../done/slice-gate-immutabilitaets-sensor.md) (`7d9c4c2`); Vorlauf: Image-Bump (`225627c`) |
+| v0.5.0 (Security-Release + lokale Templates) | 2026-07-25 | [`slice-v1-release-cut-v0.5.0`](../done/slice-v1-release-cut-v0.5.0.md) — Tag `v0.5.0` auf `1bc071f` |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-NN-results.md`; die Welle-Closure lebt vollständig im jeweiligen
