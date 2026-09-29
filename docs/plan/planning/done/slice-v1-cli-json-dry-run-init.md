@@ -61,7 +61,7 @@
 > | R3 | `runBackup` Wrap-Strategie pinnen — raw FS vs typed Sentinel | `e10b57d` |
 > | R4 | T0-(k) Path-Anchor Acceptance-Pin für positional `<name>` | `ee30c3c` |
 > | T7 — Doku-Closure | Review-Round-9-Tabelle + Folge-Slice-Stub [`slice-v1-cli-cleanup-add-backup-error-class`](slice-v1-cli-cleanup-add-backup-error-class.md) | `d7f9e65` |
-> | T8 — Closure | CHANGELOG, `cli-json-output.md` §6/§6.4/§7, `cli.go`-Godoc-Backup-Sentinels-Korrektur, roadmap-Update, `open/[slice-v1-cli-cleanup-add-preview-mode-alias](../open/slice-v1-cli-cleanup-add-preview-mode-alias.md)`-Stub, Slice in `done/` | dieser Commit |
+> | T8 — Closure | CHANGELOG, `cli-json-output.md` §6/§6.4/§7, `cli.go`-Godoc-Backup-Sentinels-Korrektur, roadmap-Update, `open/[slice-v1-cli-cleanup-add-preview-mode-alias](../done/slice-v1-cli-cleanup-add-preview-mode-alias.md)`-Stub, Slice in `done/` | dieser Commit |
 
 ## Auslöser
 
@@ -424,7 +424,7 @@ plus Factory-Signature-Identity-Check.
 [[feedback_carveouts_need_plans]]): die Alias-Lebensdauer „bis
 Cluster-T_close" braucht einen eigenen Slice-Plan-Stub im
 `open/`-Verzeichnis
-([`slice-v1-cli-cleanup-add-preview-mode-alias`](../open/slice-v1-cli-cleanup-add-preview-mode-alias.md),
+([`slice-v1-cli-cleanup-add-preview-mode-alias`](../done/slice-v1-cli-cleanup-add-preview-mode-alias.md),
 T8 dieses Slices legt ihn an). Ohne Plan wäre der
 Carveout ein loser Hänger ohne Cleanup-Owner. Alternative:
 **Alias als permanente Backward-Compat-Garantie** deklarieren
@@ -432,7 +432,7 @@ und das Cluster-T_close-Removal-Versprechen ganz fallen lassen.
 
 **Vorschlag (T0-Festlegung)**: Cleanup-Plan-Stub-Variante —
 init-T8 erzeugt
-[`open/slice-v1-cli-cleanup-add-preview-mode-alias.md`](../open/slice-v1-cli-cleanup-add-preview-mode-alias.md)
+[`open/slice-v1-cli-cleanup-add-preview-mode-alias.md`](../done/slice-v1-cli-cleanup-add-preview-mode-alias.md)
 mit Auslöser („Carveout aus init-Slice T0-(c)"),
 einer AK („Alias-Decl raus, Verifikation via
 addservice_factory_test.go") und LOC-Schätzung (~10 LOC, ein
@@ -1032,7 +1032,7 @@ die Acceptance-Test-Matrix größer.
 | T5 | **CLI-RunE + Helper-Generalisierung**: zwei Sub-Schritte zusammen, weil init's RunE der zweite Caller ist und damit den Helper-Refactor erst real motiviert (`unparam`-Linter-Friendliness statt premature abstraction in T1): (a) **Helper-Generalisierung** `reportAddError`/`writeAddErrorEnvelope`/`writeAddDiff`/`lastPlannedPath` aus add.go extrahieren nach `cli/erroremission.go` als `reportError`/`writeErrorEnvelope`/`writeDiff`/`lastPlannedPath` mit decomposed-Slices-Signatur (T0-(e)); 4 Add-Call-Sites in runAdd migrieren; `mapErrorToDiagnostic → mapAddErrorToDiagnostic` Rename. (b) **init-RunE**: ruft die generischen Helper mit `command="init"` + `mapErr=mapInitErrorToDiagnostic`; **NEUER CLI-Mutex-Check** `--template + --dry-run|--diff → ErrTemplateConflictsWithFlag` (T0-(i)); drei JSON-Pfade analog add; `req.SilenceProgress = flags.JSON` setzen (T0-(o)); Allowlist-Migration (`"u-boot init": true`); Reject-Pin-Test `TestRootJSON_RejectsAllNonMigratedForms` in `internal/adapter/driving/cli/jsonallowlist_test.go` (T0-Outcome verifiziert pre-T5-Count durch lokales `make test`; post-T5 = pre-T5 − 1). | ~280 (Helper-Generalisierung ~120 + init-RunE ~160) | T1 + T2 (T4 für Run-time-Smoke aber Code-parallelisierbar) |
 | T6 | **Acceptance-Tests**: ~13 Flag-Matrix-Tests (T0-(m)); plus Soft-Existing-Pin (3 Disambiguatoren) + Soft-Existing × `--devcontainer` (T0-(g)); Planning-Phase-Force-Failure-Pin (T0-(q), exitCode 10); Mid-Write-Failure-Pin (zwei Positionen, T0-(f) Switch-Order-Pin mit Multi-`%w`-Konstrukt, exitCode 14); Template-Reject-Pin (T0-(i), exitCode 2); 3-Flag-Combo `--dry-run --diff --json`; Concurrent-Init-Mutex-Pin (zwei Goroutinen auf ein InitProjectService-Instance, unterschiedliche TempDirs); Path-Anchor-Pin (`PlannedFile.Path` ist project-relativ); **initGit-Skip-Pin** (T0-(n): `--dry-run --json` in non-git CWD → kein .git/-Dir + Spy-Counter 0); **JSON-stdout-Cleanliness-Pin** (T0-(o): `json.Decode → io.EOF`). Test-Fixture-Helper `initFixture(t, opts)` für TempDir + ExistingProject-Setup (shared, ~50 LOC) — per-Test-Body ~25 LOC. ~17 Tests + Mid-Failure-Helper-Cluster + Helper-File = ~600 LOC realistisch. | ~600 | T5 |
 | T7 | **Review-Fix-Rounds** (~1-2 Runden bei Pattern-Erbe; add hatte R6/R7/R8): Diff aus Reviewer-Findings konsolidieren, Fixes als eigene Sub-Commits, DoD-Hash-Tabelle ergänzen. | ~80 | T6 |
-| T8 | **Closure**: CHANGELOG-Eintrag, `cli-json-output.md` §6-Tabelle (init→done) + §6.1-Reject-Liste (init raus) + §6.4 neue init-Sektion (inkl. Context-Cancellation-Carveout T0-(p) und ProgressPort-Silencing-Hint T0-(o)) + §7 Mutations-Matrix (init-Zeile); `cli.go` Z. 241-244 Godoc-Korrektur (Backup-Sentinels auf [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) nachziehen, T0-(f) Footnote); roadmap-Update (3/9 done); **[`slice-v1-cli-cleanup-add-preview-mode-alias`](../open/slice-v1-cli-cleanup-add-preview-mode-alias.md) als open/-Stub anlegen** (Carveout-Plan-Pflicht T0-(c)); Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
+| T8 | **Closure**: CHANGELOG-Eintrag, `cli-json-output.md` §6-Tabelle (init→done) + §6.1-Reject-Liste (init raus) + §6.4 neue init-Sektion (inkl. Context-Cancellation-Carveout T0-(p) und ProgressPort-Silencing-Hint T0-(o)) + §7 Mutations-Matrix (init-Zeile); `cli.go` Z. 241-244 Godoc-Korrektur (Backup-Sentinels auf [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) nachziehen, T0-(f) Footnote); roadmap-Update (3/9 done); **[`slice-v1-cli-cleanup-add-preview-mode-alias`](../done/slice-v1-cli-cleanup-add-preview-mode-alias.md) als open/-Stub anlegen** (Carveout-Plan-Pflicht T0-(c)); Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
 
 LOC-Bilanz: ~1480 LOC (unchanged trotz T1-E-Verschiebung — die
 Helper-Generalisierung wandert nur aus T1 nach T5, Total bleibt

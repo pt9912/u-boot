@@ -74,7 +74,7 @@
 > mit Switch-Order-Pflicht, Helper-Generalisierung, Path-Anchor-
 > Disziplin) ist nach init-T0-T8 voll etabliert. Der
 > `AddPreviewMode → PreviewMode`-Alias-Cleanup steht im open/-
-> Plan [`slice-v1-cli-cleanup-add-preview-mode-alias`](../open/slice-v1-cli-cleanup-add-preview-mode-alias.md) und wartet
+> Plan [`slice-v1-cli-cleanup-add-preview-mode-alias`](../done/slice-v1-cli-cleanup-add-preview-mode-alias.md) und wartet
 > explizit auf „mindestens einen weiteren Folge-Slice" — generate
 > ist genau dieser Folge-Slice, und MUSS deshalb `driving.PreviewMode`
 > direkt referenzieren (kein neuer `GeneratePreviewMode`-Alias).
@@ -708,7 +708,7 @@ Reihenfolge, Defensiv-Fallbacks und Doku-Drift.
   (`CountAdditions`-Semantik §477, `checkHunks`-Helper) bleiben
   geerbt.
 - Cleanup-Stub:
-  [`slice-v1-cli-cleanup-add-preview-mode-alias`](../open/slice-v1-cli-cleanup-add-preview-mode-alias.md)
+  [`slice-v1-cli-cleanup-add-preview-mode-alias`](../done/slice-v1-cli-cleanup-add-preview-mode-alias.md)
   — wartet auf „mindestens einen weiteren Folge-Slice"; generate
   IST dieser Folge-Slice, MUSS `driving.PreviewMode` direkt
   nutzen.

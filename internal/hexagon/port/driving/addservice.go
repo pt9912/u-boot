@@ -141,22 +141,7 @@ type AddServiceResponse struct {
 // PreviewMode] in the init slice) before calling the use case.
 // Composition-Root reads the mode in its fsFactory closure to pick
 // between production FS and the RecordingFileSystem variants.
-//
-// Originally named AddPreviewMode; slice-v1-cli-json-dry-run-init
-// T0-(c) renamed to PreviewMode because the type is consumed by
-// every modifying subcommand (add, init, generate, remove,
-// config set). AddPreviewMode remains as a type-alias for backward
-// compatibility — see below.
 type PreviewMode int
-
-// AddPreviewMode is a backward-compat type-alias for [PreviewMode]
-// (slice-v1-cli-json-dry-run-init T0-(c) Carveout). The `=` syntax
-// makes them the IDENTICAL type, so existing call-sites that say
-// `driving.AddPreviewMode` (and the matching function-types) stay
-// assignable to the renamed canonical form without source edits.
-// Carveout removal owner: slice-v1-cli-cleanup-add-preview-mode-
-// alias (T8 of init-slice creates the open/-stub).
-type AddPreviewMode = PreviewMode
 
 const (
 	// PreviewNone selects the direct production FS path. Default zero

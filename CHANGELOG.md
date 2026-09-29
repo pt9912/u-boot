@@ -11,6 +11,12 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Changed
+
+- Removed the internal `driving.AddPreviewMode` type-alias; the canonical
+  `driving.PreviewMode` is the sole spelling of the preview-mode enum. No
+  external consumers exist (self-contained CLI).
+
 ## [0.5.0] - 2026-07-25
 
 Fünftes Release. **Sicherheits-Fix und lokale Templates.** Der

@@ -1,7 +1,8 @@
 # Slice V1: `AddPreviewMode`-Alias entfernen
 
-> **Status:** geplant für v0.4.0+ — Cleanup-Folge-Slice aus
-> [`slice-v1-cli-json-dry-run-init`](../done/slice-v1-cli-json-dry-run-init.md)
+> **Status:** **abgeschlossen** (2026-09-29, Delivery-Hash siehe DoD).
+> Cleanup-Folge-Slice aus
+> [`slice-v1-cli-json-dry-run-init`](slice-v1-cli-json-dry-run-init.md)
 > T0-(c) Carveout (Carveout-Plan-Pflicht, MEMORY.md
 > [[feedback_carveouts_need_plans]]).
 
@@ -36,10 +37,10 @@ Lebensdauer-Pflicht).
 - [`internal/hexagon/port/driving/addservice.go`](../../../../internal/hexagon/port/driving/addservice.go):
   `type AddPreviewMode = PreviewMode`-Deklaration (Z. ~159) plus
   den umgebenden Carveout-Doku-Block (Z. ~145-158) entfernen.
-- [`internal/hexagon/port/driving/previewmode_test.go`](../../../../internal/hexagon/port/driving/previewmode_test.go):
+- `internal/hexagon/port/driving/previewmode_test.go`:
   komplett entfernen. Die Datei pinnt **nur** die Alias-Identität
   und die Funktions-Typ-Kompatibilität; nach Alias-Removal hat
-  sie keinen Sinn mehr.
+  sie keinen Sinn mehr. (Geschrieben; Datei gelöscht.)
 - [`internal/hexagon/application/addservice_factory_test.go`](../../../../internal/hexagon/application/addservice_factory_test.go)
   Z. ~25, ~125: `driving.AddPreviewMode` → `driving.PreviewMode`.
 - [`internal/adapter/driving/cli/previewmode_internal_test.go`](../../../../internal/adapter/driving/cli/previewmode_internal_test.go)

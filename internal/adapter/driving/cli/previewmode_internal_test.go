@@ -16,7 +16,7 @@ func TestPreviewModeFromFlags(t *testing.T) {
 		name     string
 		dryRun   bool
 		diffFlag bool
-		want     driving.AddPreviewMode
+		want     driving.PreviewMode
 	}{
 		{name: "no flags → PreviewNone (normal write)", dryRun: false, diffFlag: false, want: driving.PreviewNone},
 		{name: "--dry-run → PreviewDryRun (no write)", dryRun: true, diffFlag: false, want: driving.PreviewDryRun},

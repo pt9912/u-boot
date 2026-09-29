@@ -22,7 +22,7 @@ func TestAddService_WithFactory_DryRunMapsRecorderToPlannedFiles(t *testing.T) {
 	prod.markDirExists(addTestBaseDir)
 	seedUBootYAML(t, prod, "schemaVersion: 1\nproject:\n  name: test\n")
 
-	factory := func(mode driving.AddPreviewMode) (driven.FileSystem, driven.RecorderPort) {
+	factory := func(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
 		switch mode {
 		case driving.PreviewDryRun:
 			rec := recordingfs.New(prod, recordingfs.WithPassthrough(false))
@@ -122,7 +122,7 @@ func TestAddService_WithFactory_WriteFailureWrapsErrAddFileSystem(t *testing.T) 
 	prod.failOn = addTestBaseDir + "/compose.yaml"
 	prod.failErr = errors.New("disk full")
 
-	factory := func(mode driving.AddPreviewMode) (driven.FileSystem, driven.RecorderPort) {
+	factory := func(mode driving.PreviewMode) (driven.FileSystem, driven.RecorderPort) {
 		// PreviewAndApply: capture AND delegate, so the production
 		// write actually fails and surfaces the error.
 		if mode == driving.PreviewAndApply {
