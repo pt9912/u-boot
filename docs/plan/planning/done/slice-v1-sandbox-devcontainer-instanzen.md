@@ -108,7 +108,7 @@ ausgeführt, Delivery-Hash in der Closure-Notiz.
 
 ## 7. Closure-Notiz (nach `done/`)
 
-**Status:** **abgeschlossen** (2026-09-30, **Delivery-Hash: `7c41368`**).
+**Status:** **abgeschlossen** (2026-09-30, **Delivery-Hash: `0723eb1`**).
 
 - **Verifikation:** Mit `devcontainer` CLI 0.80.2 gemessen: `${devcontainerId}`
   wird in `mounts` aufgelöst, in `workspaceMount` **nicht**; `"workspaceMount": ""`
