@@ -1,6 +1,6 @@
 # ADR 0014: Nested rootless Podman im Sandbox-Devcontainer — Base-Image und Lockerungsprofil
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Datum:** 2026-09-30
 
@@ -104,3 +104,4 @@ Erwartung nach Linux/Docker-Befund: A scheitert, B und C laufen. Unter Colima (L
 | Datum | Ereignis | Verweis |
 |---|---|---|
 | 2026-09-30 | Entwurf mit Messreihe (Docker 29.8.1, Ubuntu 24.04) | Umsetzungs-Slice V1 Sandbox-Profil |
+| 2026-09-30 | `Accepted` durch den Projektinhaber; macOS/Colima und Podman-Host bleiben bis zur Nachholmessung ungeprüft (§Nachholmessung) | Vereinbarung mit dem Projektinhaber |
