@@ -11,6 +11,18 @@ RUN usermod --uid "${USER_UID}" vscode \
  && groupmod --gid "${USER_UID}" vscode \
  && chown -R "${USER_UID}:${USER_UID}" /home/vscode
 {{- end}}
+{{- if .NestedPodman}}
+# Nested rootless Podman (LH-FA-DEV-007).
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends podman uidmap fuse-overlayfs passt ca-certificates \
+ && rm -rf /var/lib/apt/lists/* \
+ && ln -sf /usr/bin/podman /usr/local/bin/docker \
+ && (grep -q '^vscode:' /etc/subuid || echo 'vscode:100000:65536' >> /etc/subuid) \
+ && (grep -q '^vscode:' /etc/subgid || echo 'vscode:100000:65536' >> /etc/subgid) \
+ && mkdir -p /home/vscode/.local/share/containers \
+ && chown -R vscode:vscode /home/vscode/.local
+COPY sandbox-init.sh /usr/local/bin/u-boot-sandbox-init
+{{- end}}
 {{- if .Sandbox}}
 # Sandbox profile (LH-FA-DEV-006): workspace lives in a named volume that
 # inherits ownership from this directory.

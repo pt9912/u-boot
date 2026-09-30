@@ -11,7 +11,15 @@
 {{- if .Sandbox}}
   "workspaceMount": "source={{.WorkspaceVolume}},target={{.WorkspaceFolder}},type=volume",
   "workspaceFolder": "{{.WorkspaceFolder}}",
-{{- if .CloneURL}}
+{{- if .NestedPodman}}
+  "runArgs": ["--cap-add=SYS_ADMIN", "--security-opt=seccomp=unconfined", "--security-opt=apparmor=unconfined", "--security-opt=systempaths=unconfined", "--device=/dev/fuse"],
+  "mounts": ["source={{.ContainersVolume}},target=/home/vscode/.local/share/containers,type=volume"],
+{{- end}}
+{{- if and .NestedPodman .CloneURL}}
+  "postCreateCommand": "sh /usr/local/bin/u-boot-sandbox-init && { [ -d .git ] || git clone -- {{.CloneURL}} .; }",
+{{- else if .NestedPodman}}
+  "postCreateCommand": "sh /usr/local/bin/u-boot-sandbox-init",
+{{- else if .CloneURL}}
   "postCreateCommand": "[ -d .git ] || git clone -- {{.CloneURL}} .",
 {{- end}}
 {{- end}}

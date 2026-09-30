@@ -273,3 +273,163 @@ func TestGenerateDevcontainer_Sandbox_SwitchKeepsUserContent(t *testing.T) {
 		t.Errorf("block not switched to sandbox:\n%s", after)
 	}
 }
+
+const sandboxPodmanYAML = "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    nestedRuntime: podman\n"
+
+func sandboxInitPath() string {
+	return filepath.Join(generateTestBaseDir, ".devcontainer", "sandbox-init.sh")
+}
+
+// LH-FA-DEV-007: nestedRuntime podman adds runArgs with exactly the
+// measured relaxations, the storage volume, the startup script (COPY
+// + postCreateCommand) and reports every relaxation individually.
+func TestGenerateDevcontainer_SandboxPodman(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, sandboxPodmanYAML)
+	seedGitOrigin(t, fs, "https://github.com/pt9912/demo.git")
+
+	resp, err := generateSandbox(svc, false)
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	m := devcontainerJSONMap(t, fs)
+	wantArgs := []any{"--cap-add=SYS_ADMIN", "--security-opt=seccomp=unconfined",
+		"--security-opt=apparmor=unconfined", "--security-opt=systempaths=unconfined", "--device=/dev/fuse"}
+	gotArgs, _ := m["runArgs"].([]any)
+	if len(gotArgs) != len(wantArgs) {
+		t.Fatalf("runArgs = %v, want %v", gotArgs, wantArgs)
+	}
+	for i := range wantArgs {
+		if gotArgs[i] != wantArgs[i] {
+			t.Errorf("runArgs[%d] = %v, want %v", i, gotArgs[i], wantArgs[i])
+		}
+	}
+	for _, forbidden := range []string{"privileged", "capAdd", "securityOpt"} {
+		if _, ok := m[forbidden]; ok {
+			t.Errorf("must not contain %q (no --privileged)", forbidden)
+		}
+	}
+	mounts, _ := m["mounts"].([]any)
+	if len(mounts) != 1 || mounts[0] != "source=t-uboot-gen-containers,target=/home/vscode/.local/share/containers,type=volume" {
+		t.Errorf("mounts = %v", mounts)
+	}
+	for _, mnt := range mounts {
+		if strings.Contains(mnt.(string), "docker.sock") || strings.Contains(mnt.(string), "type=bind") {
+			t.Errorf("no socket/bind mounts allowed: %v", mnt)
+		}
+	}
+	if m["postCreateCommand"] != "sh /usr/local/bin/u-boot-sandbox-init && { [ -d .git ] || git clone -- https://github.com/pt9912/demo.git .; }" {
+		t.Errorf("postCreateCommand = %v", m["postCreateCommand"])
+	}
+	df, _ := fs.ReadFile(dockerfilePath())
+	for _, want := range []string{"podman uidmap fuse-overlayfs passt", "COPY sandbox-init.sh /usr/local/bin/u-boot-sandbox-init", "ln -sf /usr/bin/podman /usr/local/bin/docker"} {
+		if !strings.Contains(string(df), want) {
+			t.Errorf("Dockerfile lacks %q:\n%s", want, df)
+		}
+	}
+	if strings.Index(string(df), "USER root") > strings.LastIndex(string(df), "USER vscode") {
+		t.Errorf("Dockerfile must end on USER vscode")
+	}
+	script, err := fs.ReadFile(sandboxInitPath())
+	if err != nil {
+		t.Fatalf("sandbox-init.sh not generated: %v", err)
+	}
+	if !strings.Contains(string(script), `on_unavailable="warn"`) || !strings.Contains(string(script), "exit 11") {
+		t.Errorf("script lacks policy/exit 11:\n%s", script)
+	}
+	relaxations := 0
+	for _, w := range resp.Warnings {
+		if w.Code == "LH-FA-DEV-007" && strings.Contains(w.Message, "security relaxation") {
+			relaxations++
+		}
+	}
+	if relaxations != 5 {
+		t.Errorf("relaxation warnings = %d, want 5: %+v", relaxations, resp.Warnings)
+	}
+
+	// Idempotent.
+	if resp2, err := generateSandbox(svc, false); err != nil || resp2.Action != driving.GenerateActionNoOp {
+		t.Errorf("second run: action=%v err=%v, want NoOp", resp2.Action, err)
+	}
+}
+
+// onUnavailable: fail is baked into the script; without a remote the
+// postCreateCommand is only the init script.
+func TestGenerateDevcontainer_SandboxPodman_FailPolicyNoRemote(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, sandboxPodmanYAML+"    onUnavailable: fail\n")
+
+	if _, err := generateSandbox(svc, false); err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	script, _ := fs.ReadFile(sandboxInitPath())
+	if !strings.Contains(string(script), `on_unavailable="fail"`) {
+		t.Errorf("fail policy not baked into script:\n%s", script)
+	}
+	if got := devcontainerJSONMap(t, fs)["postCreateCommand"]; got != "sh /usr/local/bin/u-boot-sandbox-init" {
+		t.Errorf("postCreateCommand = %v", got)
+	}
+}
+
+// nestedRuntime none (default) and podman-without-sandbox generate no
+// nested runtime; the latter warns.
+func TestGenerateDevcontainer_SandboxPodman_NotGenerated(t *testing.T) {
+	t.Parallel()
+	for name, tc := range map[string]struct {
+		yaml     string
+		wantWarn bool
+	}{
+		"none":            {"devcontainer:\n  enabled: true\n  profile: sandbox\n", false},
+		"podman, default": {"devcontainer:\n  enabled: true\n  sandbox:\n    nestedRuntime: podman\n", true},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, tc.yaml)
+			resp, err := generateSandbox(svc, false)
+			if err != nil {
+				t.Fatalf("generate: %v", err)
+			}
+			if exists, _ := fs.Exists(sandboxInitPath()); exists {
+				t.Errorf("sandbox-init.sh must not be generated")
+			}
+			m := devcontainerJSONMap(t, fs)
+			for _, k := range []string{"runArgs", "mounts"} {
+				if _, ok := m[k]; ok {
+					t.Errorf("%q must be absent", k)
+				}
+			}
+			df, _ := fs.ReadFile(dockerfilePath())
+			if strings.Contains(string(df), "podman") {
+				t.Errorf("Dockerfile must not install podman:\n%s", df)
+			}
+			hasWarn := false
+			for _, w := range resp.Warnings {
+				hasWarn = hasWarn || (w.Code == "LH-FA-DEV-007" && strings.Contains(w.Message, "no effect"))
+			}
+			if hasWarn != tc.wantWarn {
+				t.Errorf("no-effect warning = %v, want %v (%+v)", hasWarn, tc.wantWarn, resp.Warnings)
+			}
+		})
+	}
+}
+
+// An existing user-owned sandbox-init.sh without managed block is a
+// manual conflict and nothing is written (no partial write).
+func TestGenerateDevcontainer_SandboxPodman_ScriptConflict(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, sandboxPodmanYAML)
+	if err := fs.WriteFile(sandboxInitPath(), []byte("#!/bin/sh\necho mine\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	_, err := generateSandbox(svc, false)
+	if !errors.Is(err, driving.ErrGenerateManualConflict) {
+		t.Fatalf("err = %v, want ErrGenerateManualConflict", err)
+	}
+	if exists, _ := fs.Exists(devcontainerJSONPath()); exists {
+		t.Errorf("devcontainer.json must not be written on conflict")
+	}
+}

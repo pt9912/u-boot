@@ -163,6 +163,11 @@ func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bo
 		data.WorkspaceVolume = name + "-workspace"
 		data.WorkspaceFolder = sandboxWorkspaceRoot + "/" + name
 		data.CloneURL = cloneURL
+		if nestedPodman(dc) {
+			data.NestedPodman = true
+			data.OnUnavailable = onUnavailablePolicy(dc)
+			data.ContainersVolume = name + "-containers"
+		}
 	}
 	return data
 }
@@ -244,4 +249,62 @@ func resolveSandboxClone(fs driven.FileSystem, baseDir string, sandbox bool) (st
 		return "", nil, err
 	}
 	return url, nil, nil
+}
+
+// nestedPodman reports whether `devcontainer.sandbox.nestedRuntime`
+// is `podman` (LH-FA-DEV-007).
+func nestedPodman(dc *ubootYAMLDevcontainer) bool {
+	return dc != nil && dc.Sandbox != nil && dc.Sandbox.NestedRuntime == string(domain.NestedRuntimePodman)
+}
+
+// onUnavailablePolicy returns the effective degradation policy
+// (`warn` default, LH-FA-DEV-007).
+func onUnavailablePolicy(dc *ubootYAMLDevcontainer) string {
+	if dc != nil && dc.Sandbox != nil && dc.Sandbox.OnUnavailable != "" {
+		return dc.Sandbox.OnUnavailable
+	}
+	return string(domain.OnUnavailableWarn)
+}
+
+// podmanRelaxations returns the container-level security relaxations the
+// nested rootless Podman setup needs under Docker (measured, see the
+// nested-Podman ADR). Each one is reported to the user individually
+// (LH-FA-DEV-006 / -007).
+func podmanRelaxations() []string {
+	return []string{
+		"--cap-add=SYS_ADMIN",
+		"--security-opt=seccomp=unconfined",
+		"--security-opt=apparmor=unconfined",
+		"--security-opt=systempaths=unconfined",
+		"--device=/dev/fuse",
+	}
+}
+
+// sandboxPodmanWarnings returns one warning per relaxation when the
+// nested Podman setup is rendered, plus the "no effect" notice when
+// `nestedRuntime: podman` is set but the profile is not sandbox.
+func sandboxPodmanWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []driving.WarningEntry {
+	if !nestedPodman(dc) {
+		return nil
+	}
+	if !sandbox {
+		return []driving.WarningEntry{{
+			Code:  "LH-FA-DEV-007",
+			Level: "warn",
+			Message: "devcontainer.sandbox.nestedRuntime=podman has no effect without devcontainer.profile=sandbox; " +
+				"no nested runtime was generated",
+			Subject: ".devcontainer/devcontainer.json",
+		}}
+	}
+	relaxations := podmanRelaxations()
+	out := make([]driving.WarningEntry, 0, len(relaxations))
+	for _, r := range relaxations {
+		out = append(out, driving.WarningEntry{
+			Code:    "LH-FA-DEV-007",
+			Level:   "warn",
+			Message: "security relaxation for nested Podman: " + r + " (the sandbox is much weaker than without nestedRuntime)",
+			Subject: ".devcontainer/devcontainer.json",
+		})
+	}
+	return out
 }

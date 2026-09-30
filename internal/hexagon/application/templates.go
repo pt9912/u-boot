@@ -55,6 +55,14 @@ type templateData struct {
 	WorkspaceVolume string
 	WorkspaceFolder string
 	CloneURL        string
+
+	// NestedPodman switches on the LH-FA-DEV-007 rootless Podman
+	// setup (sandbox profile only); OnUnavailable is the
+	// `warn` | `fail` policy baked into the startup script,
+	// ContainersVolume the named volume for the Podman storage.
+	NestedPodman     bool
+	OnUnavailable    string
+	ContainersVolume string
 }
 
 // fileTemplate maps an embedded template to its destination path
