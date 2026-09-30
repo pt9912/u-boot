@@ -40,3 +40,4 @@ das MADR-Format gilt für neu angelegte ADRs sowie für die noch mutable
 | [ADR 0012](0012-devcontainer-egress-firewall.md) | Proposed | Devcontainer-Egress-Firewall |
 | [ADR 0013](0013-dokumentationsreferenzmodell.md) | Accepted | Dokumentationsreferenzmodell und normative Kanten |
 | [ADR 0014](0014-nested-podman-sandbox-devcontainer.md) | Accepted | Nested rootless Podman im Sandbox-Devcontainer |
+| [ADR 0015](0015-sandbox-volumes-pro-instanz.md) | Accepted | Sandbox-Volumes pro Instanz über `${devcontainerId}` in `mounts` |

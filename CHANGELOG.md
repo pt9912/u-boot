@@ -16,6 +16,7 @@ this file is the same format applied to u-boot itself.
 - Sandbox profile for devcontainers (Lastenheft 0.3.1,
   [`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)): `u-boot init --devcontainer --sandbox` /
   `u-boot generate devcontainer --sandbox` render a named-volume workspace
+  per devcontainer instance (`${devcontainerId}` in `mounts`, [ADR-0015](docs/plan/adr/0015-sandbox-volumes-pro-instanz.md))
   that is cloned from `devcontainer.sandbox.repository` or else `origin` (no host bind mount, no socket mount, no
   `--privileged`); no remote → no clone step and a warning; `origin` URLs
   with credentials are rejected (exit 10).

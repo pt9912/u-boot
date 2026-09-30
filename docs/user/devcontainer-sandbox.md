@@ -30,7 +30,7 @@ u-boot config set devcontainer.profile sandbox      # alternativ, dann generate
 
 | Eigenschaft | Sandbox-Profil | Default-Profil |
 | --- | --- | --- |
-| Workspace | benanntes Volume `<projekt>-workspace`, Repo wird im Container geklont | Bind-Mount des Projektordners |
+| Workspace | benanntes Volume `<projekt>-workspace-${devcontainerId}` (pro Ordner eindeutig), Repo wird im Container geklont; `workspaceMount` ist leer | Bind-Mount des Projektordners |
 | Docker-Socket des Hosts | nicht eingebunden | nicht eingebunden |
 | `--privileged` / zusätzliche Capabilities | nein (außer bei `nestedRuntime: podman`, §4) | nein |
 | Host-Dateien mit Geheimnissen (`~/.ssh`, `~/.aws`, …) | nicht eingebunden | nicht eingebunden |
@@ -131,18 +131,23 @@ kompromittierter Agent nicht direkt auf geschützte Branches schreiben kann.
 mögliche Klartext-Tokens in `u-boot.yaml`, `compose.yaml`, `.env.example`
 und `.devcontainer/*` sowie eine fehlende Token-Quelle bei https-Clone.
 
-## 6. Mehrere Instanzen
+## 6. Mehrere Instanzen ([ADR-0015](../plan/adr/0015-sandbox-volumes-pro-instanz.md))
 
-- **Verschiedene Projekte** nebeneinander: unabhängig (eigene Volumes).
-- **Dasselbe Projekt mehrfach**: nicht unterstützt. Die Volume-Namen
-  (`<projekt>-workspace`, `<projekt>-containers`) hängen nur am
-  Projektnamen; zwei Container desselben Projekts teilen sich Workspace und
-  Podman-Storage (der Storage ist nicht für gleichzeitigen Zugriff
-  mehrerer Container ausgelegt). Auch Klone in verschiedenen Ordnern
-  kollidieren, solange der Projektname gleich ist. Workaround: abweichende
-  `project.name`-Werte; Compose-Service-Ports (`u-boot up`) kollidieren
-  zusätzlich. Die Lösung (eindeutige Volume-Namen) ist als Slice
-  [`slice-v1-sandbox-devcontainer-instanzen`](../plan/planning/open/slice-v1-sandbox-devcontainer-instanzen.md) geplant.
+Die Volumes heißen `<projekt>-workspace-${devcontainerId}` und (mit nested
+Podman) `<projekt>-containers-${devcontainerId}`. `devcontainerId` löst das
+Dev-Containers-Werkzeug pro Projektordner auf; das Workspace-Volume steht in
+`mounts` (nicht in `workspaceMount`, dort wird die Variable nicht aufgelöst;
+`workspaceMount` bleibt leer und schaltet den Bind-Mount ab).
+
+- **Parallele Instanzen desselben Projekts:** aus **getrennten Ordnern**
+  (Klone oder `git worktree`); jede Instanz hat eigene Volumes.
+- **Derselbe Ordner** bleibt eine Instanz (gleiche `devcontainerId`).
+- **Compose-Service-Ports** (`u-boot up`) mehrerer Instanzen kollidieren
+  weiterhin; das ist ein eigener Vorgang.
+- Geprüft mit der `devcontainer`-CLI (0.80.2) und Docker auf Linux;
+  **VS Code und Codespaces ungeprüft**.
+- Alte Volumes `<projekt>-workspace` / `<projekt>-containers` aus früheren
+  Entwicklungsständen bleiben verwaist (`docker volume rm`).
 
 ## 7. Grenzen
 

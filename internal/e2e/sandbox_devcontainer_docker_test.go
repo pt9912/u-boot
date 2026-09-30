@@ -82,6 +82,87 @@ func generateSandboxProject(ctx context.Context, t *testing.T, onUnavailable str
 	return dir
 }
 
+func generatedMounts(t *testing.T, dir string) []string {
+	t.Helper()
+	body, err := os.ReadFile(filepath.Join(dir, ".devcontainer", "devcontainer.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var lines []string
+	for _, l := range strings.Split(string(body), "\n") {
+		if !strings.HasPrefix(strings.TrimSpace(l), "//") {
+			lines = append(lines, l)
+		}
+	}
+	var dc struct {
+		WorkspaceMount string   `json:"workspaceMount"`
+		Mounts         []string `json:"mounts"`
+	}
+	if err := json.Unmarshal([]byte(strings.Join(lines, "\n")), &dc); err != nil {
+		t.Fatalf("devcontainer.json: %v", err)
+	}
+	if dc.WorkspaceMount != "" {
+		t.Fatalf("workspaceMount = %q, want empty (no host bind mount)", dc.WorkspaceMount)
+	}
+	return dc.Mounts
+}
+
+// Two instances of the same project (different ${devcontainerId},
+// as the Dev Containers tooling resolves it per folder) must not
+// share the workspace or the Podman storage volumes.
+func TestE2E_SandboxDevcontainer_TwoInstancesIsolated(t *testing.T) {
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Fatalf("docker CLI not on PATH: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+	dir := generateSandboxProject(ctx, t, "warn")
+	image := "uboot-e2e-sandbox-multi:" + strings.ReplaceAll(filepath.Base(dir), "/", "-")
+	if out, code := dockerOutput(ctx, t, "build", "-q", "-t", image, filepath.Join(dir, ".devcontainer")); code != 0 {
+		t.Fatalf("docker build failed:\n%s", out)
+	}
+	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
+
+	mounts := generatedMounts(t, dir)
+	if len(mounts) != 2 {
+		t.Fatalf("mounts = %v, want workspace + containers volume", mounts)
+	}
+	runArgs := generatedRunArgs(t, dir)
+	start := func(id string) string {
+		name := "uboot-e2e-inst-" + id
+		args := []string{"run", "-d", "--name", name}
+		for _, m := range mounts {
+			if strings.Contains(m, "type=bind") {
+				t.Fatalf("bind mount in sandbox mounts: %s", m)
+			}
+			args = append(args, "--mount", strings.ReplaceAll(m, "${devcontainerId}", id))
+		}
+		args = append(append(args, runArgs...), image, "sleep", "600")
+		if out, code := dockerOutput(ctx, t, args...); code != 0 {
+			t.Fatalf("start instance %s: %s", id, out)
+		}
+		t.Cleanup(func() {
+			_, _ = dockerOutput(context.Background(), t, "rm", "-f", name)
+			for _, m := range mounts {
+				src := strings.TrimPrefix(strings.Split(strings.ReplaceAll(m, "${devcontainerId}", id), ",")[0], "source=")
+				_, _ = dockerOutput(context.Background(), t, "volume", "rm", "-f", src)
+			}
+		})
+		return name
+	}
+	a, b := start("idaaaa"), start("idbbbb")
+	ws := "/workspaces/sbxe2e"
+	if out, code := dockerOutput(ctx, t, "exec", a, "sh", "-c", "echo instance-a > "+ws+"/marker"); code != 0 {
+		t.Fatalf("write in instance a: %s", out)
+	}
+	if out, code := dockerOutput(ctx, t, "exec", b, "sh", "-c", "test ! -e "+ws+"/marker && echo instance-b > "+ws+"/marker"); code != 0 {
+		t.Errorf("instance b sees instance a's workspace: %s", out)
+	}
+	if out, _ := dockerOutput(ctx, t, "exec", a, "cat", ws+"/marker"); strings.TrimSpace(out) != "instance-a" {
+		t.Errorf("instance a workspace content = %q", out)
+	}
+}
+
 func generatedRunArgs(t *testing.T, dir string) []string {
 	t.Helper()
 	body, err := os.ReadFile(filepath.Join(dir, ".devcontainer", "devcontainer.json"))

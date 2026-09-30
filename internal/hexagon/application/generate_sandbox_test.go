@@ -57,8 +57,15 @@ func TestGenerateDevcontainer_Sandbox_WithRemote(t *testing.T) {
 		t.Errorf("unexpected warnings: %+v", resp.Warnings)
 	}
 	m := devcontainerJSONMap(t, fs)
-	if got := m["workspaceMount"]; got != "source=t-uboot-gen-workspace,target=/workspaces/t-uboot-gen,type=volume" {
-		t.Errorf("workspaceMount = %v", got)
+	// The default bind mount is switched off; the workspace is a
+	// per-instance volume in `mounts` (${devcontainerId} is resolved
+	// there, not in workspaceMount).
+	if got := m["workspaceMount"]; got != "" {
+		t.Errorf("workspaceMount = %q, want empty (no host bind mount)", got)
+	}
+	wsMounts, _ := m["mounts"].([]any)
+	if len(wsMounts) != 1 || wsMounts[0] != "source=t-uboot-gen-workspace-${devcontainerId},target=/workspaces/t-uboot-gen,type=volume" {
+		t.Errorf("mounts = %v, want the per-instance workspace volume", m["mounts"])
 	}
 	if m["workspaceFolder"] != "/workspaces/t-uboot-gen" {
 		t.Errorf("workspaceFolder = %v", m["workspaceFolder"])
@@ -66,7 +73,7 @@ func TestGenerateDevcontainer_Sandbox_WithRemote(t *testing.T) {
 	if m["postCreateCommand"] != "[ -d .git ] || git clone -- git@github.com:pt9912/demo.git ." {
 		t.Errorf("postCreateCommand = %v", m["postCreateCommand"])
 	}
-	for _, forbidden := range []string{"runArgs", "mounts", "privileged", "capAdd", "securityOpt"} {
+	for _, forbidden := range []string{"runArgs", "privileged", "capAdd", "securityOpt"} {
 		if _, ok := m[forbidden]; ok {
 			t.Errorf("sandbox devcontainer.json must not contain %q", forbidden)
 		}
@@ -319,7 +326,9 @@ func TestGenerateDevcontainer_SandboxPodman(t *testing.T) {
 		}
 	}
 	mounts, _ := m["mounts"].([]any)
-	if len(mounts) != 1 || mounts[0] != "source=t-uboot-gen-containers,target=/home/vscode/.local/share/containers,type=volume" {
+	if len(mounts) != 2 ||
+		mounts[0] != "source=t-uboot-gen-workspace-${devcontainerId},target=/workspaces/t-uboot-gen,type=volume" ||
+		mounts[1] != "source=t-uboot-gen-containers-${devcontainerId},target=/home/vscode/.local/share/containers,type=volume" {
 		t.Errorf("mounts = %v", mounts)
 	}
 	for _, mnt := range mounts {
@@ -404,10 +413,12 @@ func TestGenerateDevcontainer_SandboxPodman_NotGenerated(t *testing.T) {
 				t.Errorf("sandbox-init.sh must not be generated")
 			}
 			m := devcontainerJSONMap(t, fs)
-			for _, k := range []string{"runArgs", "mounts"} {
-				if _, ok := m[k]; ok {
-					t.Errorf("%q must be absent", k)
-				}
+			if _, ok := m["runArgs"]; ok {
+				t.Errorf("runArgs must be absent")
+			}
+			mnts, hasMounts := m["mounts"].([]any)
+			if wantMounts := name == "none"; hasMounts != wantMounts || (hasMounts && len(mnts) != 1) {
+				t.Errorf("mounts = %v, want only the workspace volume for the sandbox profile and none otherwise", m["mounts"])
 			}
 			df, _ := fs.ReadFile(dockerfilePath())
 			if strings.Contains(string(df), "podman") {

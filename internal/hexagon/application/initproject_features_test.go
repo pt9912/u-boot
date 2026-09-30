@@ -105,8 +105,9 @@ func TestInit_Sandbox_RendersProfileAndWarnsWithoutRemote(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read devcontainer.json: %v", err)
 	}
-	if !strings.Contains(string(dc), `"workspaceMount": "source=demo-workspace,target=/workspaces/demo,type=volume"`) {
-		t.Errorf("devcontainer.json lacks sandbox workspaceMount:\n%s", dc)
+	if !strings.Contains(string(dc), `"workspaceMount": ""`) ||
+		!strings.Contains(string(dc), `"source=demo-workspace-${devcontainerId},target=/workspaces/demo,type=volume"`) {
+		t.Errorf("devcontainer.json lacks the per-instance workspace volume:\n%s", dc)
 	}
 	if strings.Contains(string(dc), "postCreateCommand") {
 		t.Errorf("no remote: postCreateCommand must be absent:\n%s", dc)
