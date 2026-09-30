@@ -37,6 +37,7 @@ und die Ergänzung von
 | T2 | `--sandbox` (init/generate), Generator-Ausgabe für das Sandbox-Profil (Volume statt Bind-Mount, keine Socket-/Secret-Mounts, `USER_UID`-Build-Arg), Golden Cases, Mapper-Eintrag (Envelope-Code) | erledigt (`aed7b37`) |
 | T3 | `nestedRuntime: podman`: Dockerfile-Pakete, `runArgs`-Lockerungen (einzeln ausgewiesen), Startscript mit `vfs`-Fallback und Degradationstabelle | erledigt (`f7e4b92`) |
 | T4 | Doctor-Checks (Degradationszustände, Token-Quelle [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)) | erledigt (`915a756`) |
+| T6 | Clone-Quelle `devcontainer.sandbox.repository` statt `origin` (Lastenheft 0.3.2, Wunsch des Projektinhabers): Config-Key, Validierung, Generator, Doctor, Doku | in Arbeit |
 | T5 | Integrationstest (`//go:build docker`), `docs/user/`, README, CHANGELOG, Closure | offen |
 
 **Bekannte Einschränkung (T1):** Die Egress-Schlüssel (`devcontainer.sandbox.egress.*`, [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), V2) sind nicht modelliert. Ein Marshal-Rewrite von `u-boot.yaml` (z. B. `config set devcontainer.featureSources.allow`) würde solche Schlüssel verwerfen; das ist vor dem V2-Slice zu schließen.

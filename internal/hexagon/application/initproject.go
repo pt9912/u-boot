@@ -91,6 +91,9 @@ type ubootYAMLDevcontainerUser struct {
 type ubootYAMLDevcontainerSandbox struct {
 	NestedRuntime string `yaml:"nestedRuntime,omitempty"`
 	OnUnavailable string `yaml:"onUnavailable,omitempty"`
+	// Repository is the LH-FA-DEV-006 clone source that replaces the
+	// project's `origin` (URL; empty = use origin).
+	Repository string `yaml:"repository,omitempty"`
 }
 
 // ubootYAMLFeatureSources is the `devcontainer.featureSources:`
@@ -481,7 +484,7 @@ func (s *InitProjectService) initTemplateData(req driving.InitProjectRequest, pr
 	if !req.Devcontainer {
 		return templateData{Name: name}, nil, nil
 	}
-	cloneURL, warnings, err := resolveSandboxClone(s.fs, req.BaseDir, req.Sandbox)
+	cloneURL, warnings, err := resolveSandboxClone(s.fs, req.BaseDir, req.Sandbox, nil)
 	if err != nil {
 		return templateData{}, nil, err
 	}

@@ -762,7 +762,7 @@ func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.Ge
 	features := collectDevcontainerFeatures(cfg)
 
 	sandbox := req.Sandbox || profileIsSandbox(cfg.Devcontainer)
-	cloneURL, warnings, err := resolveSandboxClone(s.fs, req.BaseDir, sandbox)
+	cloneURL, warnings, err := resolveSandboxClone(s.fs, req.BaseDir, sandbox, cfg.Devcontainer)
 	if err != nil {
 		return driving.GenerateResponse{}, err
 	}

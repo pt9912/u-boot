@@ -100,7 +100,7 @@ func (s *DoctorService) checkSandboxCredentials(_ context.Context, baseDir strin
 			Message: fmt.Sprintf("possible plaintext git credential in: %s (LH-FA-DEV-009).", strings.Join(found, ", ")),
 			Hint:    "Remove it from the file, revoke the token, and pass a short-lived repository-scoped token at runtime via $GIT_TOKEN."}
 	}
-	origin := readGitOriginURL(s.fs, baseDir)
+	origin := effectiveCloneSource(s.fs, baseDir, cfg.Devcontainer)
 	if !strings.HasPrefix(origin, "https://") && !strings.HasPrefix(origin, "http://") {
 		return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityOK,
 			Message: "No plaintext git credentials found; no https clone source needs a token."}

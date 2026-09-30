@@ -441,3 +441,47 @@ func TestGenerateDevcontainer_SandboxPodman_ScriptConflict(t *testing.T) {
 		t.Errorf("devcontainer.json must not be written on conflict")
 	}
 }
+
+// LH-FA-DEV-006 (0.3.2): devcontainer.sandbox.repository replaces
+// origin as the clone source; it works without any origin.
+func TestGenerateDevcontainer_Sandbox_RepositoryOverridesOrigin(t *testing.T) {
+	t.Parallel()
+	yaml := "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    repository: git@github.com:other/fork.git\n"
+	t.Run("with origin", func(t *testing.T) {
+		t.Parallel()
+		svc, fs := newGenerateService(t)
+		seedUBootYAMLWithFeatures(t, fs, yaml)
+		seedGitOrigin(t, fs, "https://github.com/pt9912/demo.git")
+		resp, err := generateSandbox(svc, false)
+		if err != nil {
+			t.Fatalf("generate: %v", err)
+		}
+		if got := devcontainerJSONMap(t, fs)["postCreateCommand"]; got != "[ -d .git ] || git clone -- git@github.com:other/fork.git ." {
+			t.Errorf("postCreateCommand = %v, want clone of the configured repository", got)
+		}
+		if len(resp.Warnings) != 0 {
+			t.Errorf("unexpected warnings: %+v", resp.Warnings)
+		}
+	})
+	t.Run("without origin", func(t *testing.T) {
+		t.Parallel()
+		svc, fs := newGenerateService(t)
+		seedUBootYAMLWithFeatures(t, fs, yaml)
+		resp, err := generateSandbox(svc, false)
+		if err != nil || len(resp.Warnings) != 0 {
+			t.Fatalf("err=%v warnings=%+v, want a clone step without warning", err, resp.Warnings)
+		}
+		if _, ok := devcontainerJSONMap(t, fs)["postCreateCommand"]; !ok {
+			t.Errorf("clone step missing")
+		}
+	})
+	t.Run("credentials rejected on load", func(t *testing.T) {
+		t.Parallel()
+		svc, fs := newGenerateService(t)
+		seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    repository: https://tok@github.com/o/r.git\n")
+		_, err := generateSandbox(svc, false)
+		if err == nil || !errors.Is(err, driving.ErrGenerateManualConflict) || !strings.Contains(err.Error(), "credentials") {
+			t.Fatalf("err = %v, want schema error naming credentials", err)
+		}
+	})
+}

@@ -11,6 +11,27 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- Sandbox profile for devcontainers (Lastenheft 0.3.1,
+  [`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)): `u-boot init --devcontainer --sandbox` /
+  `u-boot generate devcontainer --sandbox` render a named-volume workspace
+  that is cloned from `devcontainer.sandbox.repository` or else `origin` (no host bind mount, no socket mount, no
+  `--privileged`); no remote → no clone step and a warning; `origin` URLs
+  with credentials are rejected (exit 10).
+- `devcontainer.user.uid` ([`LH-FA-DEV-004`](spec/lastenheft.md#lh-fa-dev-004--benutzerrechte)): adjustable container-user
+  UID via the `USER_UID` build argument.
+- `devcontainer.sandbox.nestedRuntime: podman` and
+  `devcontainer.sandbox.onUnavailable: warn | fail`
+  ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0014](docs/plan/adr/0014-nested-podman-sandbox-devcontainer.md)): rootless Podman in the
+  sandbox devcontainer with each security relaxation reported; startup
+  script with `vfs` fallback / exit 11.
+- Git credentials at runtime only ([`LH-FA-DEV-009`](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)): `GIT_TOKEN` pass-through and
+  credential helper; new `u-boot doctor` checks
+  `devcontainer.sandbox.runtime` and `devcontainer.sandbox.credentials`
+  (15 checks in total). See
+  [`docs/user/devcontainer-sandbox.md`](docs/user/devcontainer-sandbox.md).
+
 ### Changed
 
 - Removed the internal `driving.AddPreviewMode` type-alias; the canonical

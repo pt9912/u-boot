@@ -22,6 +22,8 @@ Aktuell publiziert:
   `--diff`-Envelope-Schema und Exit-Code-Matrix pro Subcommand.
 - [`devcontainer-features.md`](devcontainer-features.md) — Devcontainer-
   Features + Drift-Doctor-Check.
+- [`devcontainer-sandbox.md`](devcontainer-sandbox.md) — Sandbox-Profil
+  (Named-Volume-Workspace, UID, nested Podman, Git-Zugangsdaten).
 - [`quality.md`](quality.md) — Quality-Gate-/Linter-Profil.
 - [`branch-protection.md`](branch-protection.md) — Required-Checks-Setup.
 

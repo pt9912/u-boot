@@ -56,6 +56,9 @@ func validateDevcontainerSandbox(dc *ubootYAMLDevcontainer) error {
 			return err
 		}
 	}
+	if dc.Sandbox.Repository != "" {
+		return validateCloneURL(dc.Sandbox.Repository)
+	}
 	return nil
 }
 
@@ -81,6 +84,10 @@ func coerceSandboxConfigValue(path domain.ConfigPath, raw string) (coerced any, 
 		var v domain.OnUnavailable
 		v, verr = domain.NewOnUnavailable(raw)
 		coerced, formatted = string(v), string(v)
+	case domain.ConfigDevcontainerSandboxRepository:
+		repo := strings.TrimSpace(raw)
+		verr = validateCloneURL(repo)
+		coerced, formatted = repo, repo
 	default:
 		return nil, "", false, nil
 	}
@@ -101,35 +108,37 @@ func sandboxConfigYAMLPath(path domain.ConfigPath) ([]string, bool) {
 		return []string{"devcontainer", "sandbox", "nestedRuntime"}, true
 	case domain.ConfigDevcontainerSandboxOnUnavailable:
 		return []string{"devcontainer", "sandbox", "onUnavailable"}, true
+	case domain.ConfigDevcontainerSandboxRepository:
+		return []string{"devcontainer", "sandbox", "repository"}, true
 	}
 	return nil, false
 }
 
 // sandboxConfigValue returns the stored string form of one of the
-// four kinds; "" means unset.
+// five kinds; "" means unset.
 func sandboxConfigValue(cfg ubootYAMLConfig, path domain.ConfigPath) (string, bool) {
-	dc := cfg.Devcontainer
+	var dc ubootYAMLDevcontainer
+	if cfg.Devcontainer != nil {
+		dc = *cfg.Devcontainer
+	}
+	var sb ubootYAMLDevcontainerSandbox
+	if dc.Sandbox != nil {
+		sb = *dc.Sandbox
+	}
 	switch path.Kind {
 	case domain.ConfigDevcontainerUserUID:
-		if dc == nil || dc.User == nil || dc.User.UID == nil {
+		if dc.User == nil || dc.User.UID == nil {
 			return "", true
 		}
 		return fmt.Sprint(*dc.User.UID), true
 	case domain.ConfigDevcontainerProfile:
-		if dc == nil {
-			return "", true
-		}
 		return dc.Profile, true
 	case domain.ConfigDevcontainerSandboxNestedRuntime:
-		if dc == nil || dc.Sandbox == nil {
-			return "", true
-		}
-		return dc.Sandbox.NestedRuntime, true
+		return sb.NestedRuntime, true
 	case domain.ConfigDevcontainerSandboxOnUnavailable:
-		if dc == nil || dc.Sandbox == nil {
-			return "", true
-		}
-		return dc.Sandbox.OnUnavailable, true
+		return sb.OnUnavailable, true
+	case domain.ConfigDevcontainerSandboxRepository:
+		return sb.Repository, true
 	}
 	return "", false
 }
@@ -226,22 +235,31 @@ func readGitOriginURL(fs driven.FileSystem, baseDir string) string {
 	return ""
 }
 
+// effectiveCloneSource returns the clone URL of the sandbox profile:
+// `devcontainer.sandbox.repository` when set, else the `origin` URL.
+func effectiveCloneSource(fs driven.FileSystem, baseDir string, dc *ubootYAMLDevcontainer) string {
+	if dc != nil && dc.Sandbox != nil && dc.Sandbox.Repository != "" {
+		return dc.Sandbox.Repository
+	}
+	return readGitOriginURL(fs, baseDir)
+}
+
 // resolveSandboxClone returns the validated clone URL for the sandbox
 // profile plus the LH-FA-DEV-006 warning when there is no remote
 // (no clone step is generated then). For a non-sandbox render it
 // returns ("", nil, nil). A URL with credentials or unsafe
 // characters is a domain error (exit 10).
-func resolveSandboxClone(fs driven.FileSystem, baseDir string, sandbox bool) (string, []driving.WarningEntry, error) {
+func resolveSandboxClone(fs driven.FileSystem, baseDir string, sandbox bool, dc *ubootYAMLDevcontainer) (string, []driving.WarningEntry, error) {
 	if !sandbox {
 		return "", nil, nil
 	}
-	url := readGitOriginURL(fs, baseDir)
+	url := effectiveCloneSource(fs, baseDir, dc)
 	if url == "" {
 		return "", []driving.WarningEntry{{
 			Code:  "LH-FA-DEV-006",
 			Level: "warn",
 			Message: "sandbox profile: no git remote 'origin' found; no clone step generated. " +
-				"Add a remote and run `u-boot generate devcontainer` to add it",
+				"Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it",
 			Subject: ".devcontainer/devcontainer.json",
 		}}, nil
 	}

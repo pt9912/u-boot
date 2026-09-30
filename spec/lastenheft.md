@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.3.1                                                              |
+| Version          | 0.3.2                                                              |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -766,7 +766,7 @@ oder über die Projektkonfiguration `devcontainer.profile: sandbox` (Werte: `def
 Das erzeugte Ergebnis im Sandbox-Profil muss:
 
 - einen nicht-root Benutzer verwenden ([`LH-FA-DEV-004`](#lh-fa-dev-004--benutzerrechte));
-- das Host-Arbeitsverzeichnis nicht per Bind-Mount einbinden; der Workspace liegt in einem benannten Volume, das Repository wird im Container geklont (Quelle: URL des Remotes `origin` des Projekt-Repositories; enthält die URL Zugangsdaten oder unzulässige Zeichen, ein fachlicher Fehler, Exit-Code `10`; ohne Remote wird kein Clone-Schritt erzeugt und die Befehlsausgabe weist mit einer Warnung darauf hin, `u-boot generate devcontainer` ergänzt den Schritt, sobald ein Remote existiert);
+- das Host-Arbeitsverzeichnis nicht per Bind-Mount einbinden; der Workspace liegt in einem benannten Volume, das Repository wird im Container geklont (Quelle: `devcontainer.sandbox.repository` (URL, optional), sonst die URL des Remotes `origin` des Projekt-Repositories; so kann ein anderes Repository als das Projekt-Repository geklont werden, aus dem im Container gepullt und gepusht wird; enthält die URL Zugangsdaten oder unzulässige Zeichen, ein fachlicher Fehler, Exit-Code `10`; ohne Quelle wird kein Clone-Schritt erzeugt und die Befehlsausgabe weist mit einer Warnung darauf hin, `u-boot generate devcontainer` ergänzt den Schritt, sobald eine Quelle existiert);
 - keinen Container-Runtime-Socket des Hosts einbinden;
 - kein `--privileged` und keine zusätzlichen Capabilities setzen, sofern nicht durch [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) oder [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion) ausdrücklich verlangt;
 - keine Host-Dateien mit Geheimnissen (z. B. `~/.ssh`, `~/.aws`, Credential-Stores) einbinden;
@@ -1432,6 +1432,7 @@ devcontainer:
 #   sandbox:
 #     nestedRuntime: none          # none | podman
 #     onUnavailable: warn          # warn | fail
+#     repository: ''               # Clone-Quelle statt origin (URL)
 #     egress:
 #       enabled: false
 #       allow: []
@@ -2970,6 +2971,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.2.0 | 2026-07-24 | [`LH-FA-PROJDOCS-002`](#lh-fa-projdocs-002--adr-format) auf die MADR-/Nygard-Template-Form umgestellt (Inline-Kopf-Felder inkl. `Schärft`; Pflicht-Abschnitte Alternativen, Fitness Function, Re-Evaluierungs-Trigger, Geschichte). Zum Umstellungszeitpunkt `Accepted` ADRs bleiben in der leanen Form und unveränderlich (Grandfathering). | Vereinbarung mit dem Projektinhaber, ausgelöst durch die Adoption des externen Betriebsregelwerks |
 | 0.3.0 | 2026-09-30 | Neue Anforderungen [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil) bis [`LH-FA-DEV-009`](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) (Sandbox-Profil, Container-Runtime mit Degradationstabelle, Egress-Restriktion, Git-Zugangsdaten); Ergänzung von [`LH-FA-DEV-004`](#lh-fa-dev-004--benutzerrechte) (UID-Anpassbarkeit über `devcontainer.user.uid`). | Vereinbarung mit dem Projektinhaber |
 | 0.3.1 | 2026-09-30 | [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil): Verhalten ohne Git-Remote präzisiert (kein Clone-Schritt und Warnung statt Fehler; Zugangsdaten in der Remote-URL bleiben ein Fehler), weil `u-boot init --sandbox` nie einen Remote vorfindet. | Vereinbarung mit dem Projektinhaber |
+| 0.3.2 | 2026-09-30 | [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil): neuer optionaler Schlüssel `devcontainer.sandbox.repository` als Clone-Quelle statt `origin`, damit im Sandbox-Container ein anderes Repository als das Projekt-Repository geklont und bearbeitet werden kann. | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt

@@ -26,6 +26,7 @@ func TestConfigSetGet_SandboxKeys(t *testing.T) {
 		{"devcontainer.profile", "sandbox"},
 		{"devcontainer.sandbox.nestedRuntime", "podman"},
 		{"devcontainer.sandbox.onUnavailable", "fail"},
+		{"devcontainer.sandbox.repository", "git@github.com:other/fork.git"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.path, func(t *testing.T) {
@@ -72,6 +73,8 @@ func TestConfigSet_SandboxKeys_InvalidValue(t *testing.T) {
 		{"devcontainer.profile", "strict"},
 		{"devcontainer.sandbox.nestedRuntime", "docker"},
 		{"devcontainer.sandbox.onUnavailable", "ignore"},
+		{"devcontainer.sandbox.repository", "https://token@github.com/o/r.git"},
+		{"devcontainer.sandbox.repository", "https://github.com/o/r.git;rm -rf /"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.path+"="+tc.value, func(t *testing.T) {

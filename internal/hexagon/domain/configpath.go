@@ -88,6 +88,11 @@ const (
 	// `devcontainer.sandbox.onUnavailable` (LH-FA-DEV-007). Read +
 	// write; closed set warn | fail.
 	ConfigDevcontainerSandboxOnUnavailable
+
+	// ConfigDevcontainerSandboxRepository addresses
+	// `devcontainer.sandbox.repository` (LH-FA-DEV-006): clone source
+	// URL used instead of `origin`. Read + write.
+	ConfigDevcontainerSandboxRepository
 )
 
 // ConfigPath is a typed, whitelisted reference to a leaf in
@@ -148,6 +153,7 @@ var ErrInvalidConfigPath = errors.New("invalid config path")
 //   - `devcontainer.profile`                        → ConfigDevcontainerProfile, write-OK
 //   - `devcontainer.sandbox.nestedRuntime`          → ConfigDevcontainerSandboxNestedRuntime, write-OK
 //   - `devcontainer.sandbox.onUnavailable`          → ConfigDevcontainerSandboxOnUnavailable, write-OK
+//   - `devcontainer.sandbox.repository`             → ConfigDevcontainerSandboxRepository, write-OK
 //
 // Wildcard segments (`<svc>`, `<feature>`) are parsed through their
 // respective domain validators; format failures wrap into
@@ -155,21 +161,8 @@ var ErrInvalidConfigPath = errors.New("invalid config path")
 // Any other dotted path returns [ErrInvalidConfigPath] with the
 // unknown segment in the message.
 func NewConfigPath(raw string) (ConfigPath, error) {
-	switch raw {
-	case "project.name":
-		return ConfigPath{Kind: ConfigProjectName, WriteAllowed: true}, nil
-	case "devcontainer.enabled":
-		return ConfigPath{Kind: ConfigDevcontainerEnabled, WriteAllowed: true}, nil
-	case "devcontainer.featureSources.allow":
-		return ConfigPath{Kind: ConfigDevcontainerFeatureSourcesAllow, WriteAllowed: true}, nil
-	case "devcontainer.user.uid":
-		return ConfigPath{Kind: ConfigDevcontainerUserUID, WriteAllowed: true}, nil
-	case "devcontainer.profile":
-		return ConfigPath{Kind: ConfigDevcontainerProfile, WriteAllowed: true}, nil
-	case "devcontainer.sandbox.nestedRuntime":
-		return ConfigPath{Kind: ConfigDevcontainerSandboxNestedRuntime, WriteAllowed: true}, nil
-	case "devcontainer.sandbox.onUnavailable":
-		return ConfigPath{Kind: ConfigDevcontainerSandboxOnUnavailable, WriteAllowed: true}, nil
+	if kind, ok := scalarConfigPaths()[raw]; ok {
+		return ConfigPath{Kind: kind, WriteAllowed: true}, nil
 	}
 
 	// `services.<svc>.enabled` requires a 3-segment split with the
@@ -220,8 +213,23 @@ func NewConfigPath(raw string) (ConfigPath, error) {
 		}
 	}
 
-	return ConfigPath{}, fmt.Errorf("%w: %q is not a known config path; allowed: project.name, devcontainer.enabled, devcontainer.featureSources.allow, devcontainer.user.uid, devcontainer.profile, devcontainer.sandbox.{nestedRuntime,onUnavailable}, services.<svc>.enabled, devcontainer.features.<feature>.{enabled,source,version}",
+	return ConfigPath{}, fmt.Errorf("%w: %q is not a known config path; allowed: project.name, devcontainer.enabled, devcontainer.featureSources.allow, devcontainer.user.uid, devcontainer.profile, devcontainer.sandbox.{nestedRuntime,onUnavailable,repository}, services.<svc>.enabled, devcontainer.features.<feature>.{enabled,source,version}",
 		ErrInvalidConfigPath, raw)
+}
+
+// scalarConfigPaths maps the fixed (wildcard-free) write-OK dotted
+// paths to their kinds.
+func scalarConfigPaths() map[string]ConfigPathKind {
+	return map[string]ConfigPathKind{
+		"project.name":                       ConfigProjectName,
+		"devcontainer.enabled":               ConfigDevcontainerEnabled,
+		"devcontainer.featureSources.allow":  ConfigDevcontainerFeatureSourcesAllow,
+		"devcontainer.user.uid":              ConfigDevcontainerUserUID,
+		"devcontainer.profile":               ConfigDevcontainerProfile,
+		"devcontainer.sandbox.nestedRuntime": ConfigDevcontainerSandboxNestedRuntime,
+		"devcontainer.sandbox.onUnavailable": ConfigDevcontainerSandboxOnUnavailable,
+		"devcontainer.sandbox.repository":    ConfigDevcontainerSandboxRepository,
+	}
 }
 
 // String returns the canonical dotted representation of the path.
@@ -246,6 +254,8 @@ func (p ConfigPath) String() string {
 		return "devcontainer.sandbox.nestedRuntime"
 	case ConfigDevcontainerSandboxOnUnavailable:
 		return "devcontainer.sandbox.onUnavailable"
+	case ConfigDevcontainerSandboxRepository:
+		return "devcontainer.sandbox.repository"
 	case ConfigDevcontainerFeatureEnabled:
 		return "devcontainer.features." + p.Feature.String() + ".enabled"
 	case ConfigDevcontainerFeatureSource:

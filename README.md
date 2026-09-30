@@ -34,7 +34,7 @@ After installing the binary (see *Install* below):
 u-boot init my-service                  # scaffold project + git init
 u-boot add postgres                     # register Postgres + write compose block
 u-boot up                               # docker compose up + healthcheck poll
-u-boot doctor                           # 13 diagnostic checks against host + project
+u-boot doctor                           # 15 diagnostic checks against host + project
 u-boot down --volumes                   # stop + named-volume cleanup (confirmed)
 u-boot remove postgres                  # mirror of add — disable + cut blocks
 u-boot generate readme                  # refresh a managed-block artefact
@@ -156,6 +156,12 @@ configuration: `devcontainer.features.allowlist` (Error when a
 rendered `devcontainer.json` features map disagree — repair via
 `u-boot generate devcontainer`).
 
+For autonomous agents, `u-boot init --devcontainer --sandbox` (or
+`generate devcontainer --sandbox`) renders a sandbox devcontainer: named-volume
+workspace cloned from `origin`, no host bind/socket mount, optional rootless
+Podman ([LH-FA-DEV-006](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)/[LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)/[LH-FA-DEV-009](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)); see
+[`docs/user/devcontainer-sandbox.md`](docs/user/devcontainer-sandbox.md).
+
 Re-init on an existing project requires an explicit strategy
 (`--force` for managed-block edits, `--backup` for full overwrite with
 `.bak[.N]` safety copies). See the
@@ -184,7 +190,7 @@ and §Nächste Schritte for the in-progress backlog.
 | Subcommand | Spec IDs | Brief |
 | ---------- | -------- | ----- |
 | `init [name] [--devcontainer] [--template <name\|path>]` | [LH-FA-INIT-001](spec/lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren)..[LH-FA-INIT-007](spec/lastenheft.md#lh-fa-init-007--git-repository-initialisierung), [LH-FA-TPL-001](spec/lastenheft.md#lh-fa-tpl-001--projektvorlagen)/[LH-FA-TPL-003](spec/lastenheft.md#lh-fa-tpl-003--eigene-templates) | Scaffold project + `git init`. `--template` takes a catalogue name (`basic`) or a local directory path (`./my-tpl`, `~/tpl`). |
-| `doctor [--strict]` | [LH-FA-DIAG-001](spec/lastenheft.md#lh-fa-diag-001--doctor-befehl)..[LH-FA-DIAG-004](spec/lastenheft.md#lh-fa-diag-004--reparaturhinweise), [LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) | 13 diagnostic checks; container-aware skip for host probes. |
+| `doctor [--strict]` | [LH-FA-DIAG-001](spec/lastenheft.md#lh-fa-diag-001--doctor-befehl)..[LH-FA-DIAG-004](spec/lastenheft.md#lh-fa-diag-004--reparaturhinweise), [LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) | 15 diagnostic checks; container-aware skip for host probes. |
 | `add <service> [--with-deps]` | [LH-FA-ADD-001](spec/lastenheft.md#lh-fa-add-001--add-on-befehl)..[LH-FA-ADD-006](spec/lastenheft.md#lh-fa-add-006--add-on-abhängigkeiten) | Idempotent state-machine for service add-ons (`postgres`, `keycloak`, `otel`); `--with-deps` auto-installs missing dependencies. |
 | `remove <service> [--purge]` | [LH-FA-ADD-007](spec/lastenheft.md#lh-fa-add-007--service-entfernen) | Mirror of `add` — disable + cut managed blocks. |
 | `up [--timeout <s>]` | [LH-FA-UP-001](spec/lastenheft.md#lh-fa-up-001--umgebung-starten)..[LH-FA-UP-003](spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen) | Compose up + healthcheck-poll + TCP probe. |
@@ -239,6 +245,8 @@ Full layout contract: [`LH-FA-BUILD-009` in `spec/lastenheft.md`](spec/lastenhef
   [`docs/user/branch-protection.md`](docs/user/branch-protection.md)
 - **Devcontainer features:**
   [`docs/user/devcontainer-features.md`](docs/user/devcontainer-features.md)
+- **Devcontainer sandbox profile:**
+  [`docs/user/devcontainer-sandbox.md`](docs/user/devcontainer-sandbox.md)
 - **Machine-readable CLI contract (`--json`, `--dry-run`, `--diff`):**
   [`docs/user/cli-json-output.md`](docs/user/cli-json-output.md)
 - **User documentation:** [`docs/user/`](docs/user/)
