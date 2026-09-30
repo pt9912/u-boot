@@ -82,6 +82,87 @@ func generateSandboxProject(ctx context.Context, t *testing.T, onUnavailable str
 	return dir
 }
 
+// generateEgressProject renders a sandbox project with the egress
+// restriction enabled (no nested Podman) and returns the dir.
+func generateEgressProject(ctx context.Context, t *testing.T, onUnavailable string) string {
+	t.Helper()
+	dir := t.TempDir()
+	fsys := fsadapter.New()
+	yaml := yamladapter.New()
+	logger := loggeradapter.New(os.Stderr, loggeradapter.FormatText, nil)
+	initSvc := application.NewInitProjectService(fsys, yaml, gitadapter.New(),
+		progressadapter.NewText(os.Stderr), confirmadapter.New(strings.NewReader(""), os.Stderr), logger)
+	if _, err := initSvc.Init(ctx, driving.InitProjectRequest{
+		BaseDir: dir, Name: "egrese2e", SkipGit: true, Devcontainer: true, Sandbox: true, SilenceProgress: true,
+	}); err != nil {
+		t.Fatalf("init --devcontainer --sandbox: %v", err)
+	}
+	cfgSvc := application.NewConfigService(fsys, yaml, logger)
+	for path, value := range map[string]string{
+		"devcontainer.sandbox.egress.enabled": "true",
+		"devcontainer.sandbox.onUnavailable":  onUnavailable,
+	} {
+		p, err := domain.NewConfigPath(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := cfgSvc.Set(ctx, driving.ConfigSetRequest{BaseDir: dir, Path: p, Value: value}); err != nil {
+			t.Fatalf("config set %s: %v", path, err)
+		}
+	}
+	genSvc := application.NewGenerateService(fsys, yaml, logger)
+	if _, err := genSvc.Generate(ctx, driving.GenerateRequest{BaseDir: dir, Artifact: domain.ArtifactDevcontainer}); err != nil {
+		t.Fatalf("generate devcontainer: %v", err)
+	}
+	return dir
+}
+
+// LH-FA-DEV-008: the generated egress script blocks everything but the
+// allowlist; without NET_ADMIN it degrades per onUnavailable.
+func TestE2E_SandboxDevcontainer_Egress(t *testing.T) {
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Fatalf("docker CLI not on PATH: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+	build := func(dir, tag string) string {
+		image := tag + ":" + strings.ReplaceAll(filepath.Base(dir), "/", "-")
+		if out, code := dockerOutput(ctx, t, "build", "-q", "-t", image, filepath.Join(dir, ".devcontainer")); code != 0 {
+			t.Fatalf("docker build failed:\n%s", out)
+		}
+		t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
+		return image
+	}
+	warnDir := generateEgressProject(ctx, t, "warn")
+	image := build(warnDir, "uboot-e2e-egress")
+	runArgs := generatedRunArgs(t, warnDir)
+	if len(runArgs) != 1 || runArgs[0] != "--cap-add=NET_ADMIN" {
+		t.Fatalf("runArgs = %v, want only --cap-add=NET_ADMIN", runArgs)
+	}
+
+	probe := "sudo sh /usr/local/bin/u-boot-egress-init && " +
+		"curl -sS -m 10 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w 'allowed=%{http_code}\\n' https://github.com; " +
+		"curl -sS -m 5 -o /dev/null https://example.com && echo example-REACHABLE || echo example-blocked"
+	args := append(append([]string{"run", "--rm"}, runArgs...), image, "bash", "-c", probe)
+	out, code := dockerOutput(ctx, t, args...)
+	if code != 0 || !strings.Contains(out, "allowed=200") || !strings.Contains(out, "example-blocked") {
+		t.Errorf("egress restriction: exit %d, want github reachable and example.com blocked:\n%s", code, out)
+	}
+
+	// Without NET_ADMIN and policy warn: no restriction, exit 0, warning.
+	out, code = dockerOutput(ctx, t, "run", "--rm", image, "sudo", "sh", "/usr/local/bin/u-boot-egress-init")
+	if code != 0 || !strings.Contains(out, "egress restriction unavailable") {
+		t.Errorf("warn policy without NET_ADMIN: exit %d:\n%s", code, out)
+	}
+
+	// Policy fail: exit 11.
+	failDir := generateEgressProject(ctx, t, "fail")
+	failImage := build(failDir, "uboot-e2e-egress-fail")
+	if out, code := dockerOutput(ctx, t, "run", "--rm", failImage, "sudo", "sh", "/usr/local/bin/u-boot-egress-init"); code != 11 {
+		t.Errorf("fail policy without NET_ADMIN: exit %d, want 11:\n%s", code, out)
+	}
+}
+
 func generatedMounts(t *testing.T, dir string) []string {
 	t.Helper()
 	body, err := os.ReadFile(filepath.Join(dir, ".devcontainer", "devcontainer.json"))

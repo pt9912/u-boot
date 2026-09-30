@@ -93,6 +93,17 @@ const (
 	// `devcontainer.sandbox.repository` (LH-FA-DEV-006): clone source
 	// URL used instead of `origin`. Read + write.
 	ConfigDevcontainerSandboxRepository
+
+	// ConfigDevcontainerSandboxEgressEnabled addresses
+	// `devcontainer.sandbox.egress.enabled` (LH-FA-DEV-008). Read +
+	// write; bool.
+	ConfigDevcontainerSandboxEgressEnabled
+
+	// ConfigDevcontainerSandboxEgressAllow addresses
+	// `devcontainer.sandbox.egress.allow` (LH-FA-DEV-008). A LIST:
+	// writes append host names (comma-separated) through the
+	// list-path route in [application.ConfigService].
+	ConfigDevcontainerSandboxEgressAllow
 )
 
 // ConfigPath is a typed, whitelisted reference to a leaf in
@@ -213,7 +224,7 @@ func NewConfigPath(raw string) (ConfigPath, error) {
 		}
 	}
 
-	return ConfigPath{}, fmt.Errorf("%w: %q is not a known config path; allowed: project.name, devcontainer.enabled, devcontainer.featureSources.allow, devcontainer.user.uid, devcontainer.profile, devcontainer.sandbox.{nestedRuntime,onUnavailable,repository}, services.<svc>.enabled, devcontainer.features.<feature>.{enabled,source,version}",
+	return ConfigPath{}, fmt.Errorf("%w: %q is not a known config path; allowed: project.name, devcontainer.enabled, devcontainer.featureSources.allow, devcontainer.user.uid, devcontainer.profile, devcontainer.sandbox.{nestedRuntime,onUnavailable,repository,egress.enabled,egress.allow}, services.<svc>.enabled, devcontainer.features.<feature>.{enabled,source,version}",
 		ErrInvalidConfigPath, raw)
 }
 
@@ -221,14 +232,16 @@ func NewConfigPath(raw string) (ConfigPath, error) {
 // paths to their kinds.
 func scalarConfigPaths() map[string]ConfigPathKind {
 	return map[string]ConfigPathKind{
-		"project.name":                       ConfigProjectName,
-		"devcontainer.enabled":               ConfigDevcontainerEnabled,
-		"devcontainer.featureSources.allow":  ConfigDevcontainerFeatureSourcesAllow,
-		"devcontainer.user.uid":              ConfigDevcontainerUserUID,
-		"devcontainer.profile":               ConfigDevcontainerProfile,
-		"devcontainer.sandbox.nestedRuntime": ConfigDevcontainerSandboxNestedRuntime,
-		"devcontainer.sandbox.onUnavailable": ConfigDevcontainerSandboxOnUnavailable,
-		"devcontainer.sandbox.repository":    ConfigDevcontainerSandboxRepository,
+		"project.name":                        ConfigProjectName,
+		"devcontainer.enabled":                ConfigDevcontainerEnabled,
+		"devcontainer.featureSources.allow":   ConfigDevcontainerFeatureSourcesAllow,
+		"devcontainer.user.uid":               ConfigDevcontainerUserUID,
+		"devcontainer.profile":                ConfigDevcontainerProfile,
+		"devcontainer.sandbox.nestedRuntime":  ConfigDevcontainerSandboxNestedRuntime,
+		"devcontainer.sandbox.onUnavailable":  ConfigDevcontainerSandboxOnUnavailable,
+		"devcontainer.sandbox.repository":     ConfigDevcontainerSandboxRepository,
+		"devcontainer.sandbox.egress.enabled": ConfigDevcontainerSandboxEgressEnabled,
+		"devcontainer.sandbox.egress.allow":   ConfigDevcontainerSandboxEgressAllow,
 	}
 }
 
@@ -237,25 +250,14 @@ func scalarConfigPaths() map[string]ConfigPathKind {
 // (the [ConfigPath] equality compares all four fields). Used by
 // the application service for log lines and error messages.
 func (p ConfigPath) String() string {
+	for raw, kind := range scalarConfigPaths() {
+		if kind == p.Kind {
+			return raw
+		}
+	}
 	switch p.Kind {
-	case ConfigProjectName:
-		return "project.name"
-	case ConfigDevcontainerEnabled:
-		return "devcontainer.enabled"
 	case ConfigServiceEnabled:
 		return "services." + p.Service.String() + ".enabled"
-	case ConfigDevcontainerFeatureSourcesAllow:
-		return "devcontainer.featureSources.allow"
-	case ConfigDevcontainerUserUID:
-		return "devcontainer.user.uid"
-	case ConfigDevcontainerProfile:
-		return "devcontainer.profile"
-	case ConfigDevcontainerSandboxNestedRuntime:
-		return "devcontainer.sandbox.nestedRuntime"
-	case ConfigDevcontainerSandboxOnUnavailable:
-		return "devcontainer.sandbox.onUnavailable"
-	case ConfigDevcontainerSandboxRepository:
-		return "devcontainer.sandbox.repository"
 	case ConfigDevcontainerFeatureEnabled:
 		return "devcontainer.features." + p.Feature.String() + ".enabled"
 	case ConfigDevcontainerFeatureSource:

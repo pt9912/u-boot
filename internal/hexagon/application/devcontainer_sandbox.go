@@ -57,90 +57,11 @@ func validateDevcontainerSandbox(dc *ubootYAMLDevcontainer) error {
 		}
 	}
 	if dc.Sandbox.Repository != "" {
-		return validateCloneURL(dc.Sandbox.Repository)
-	}
-	return nil
-}
-
-// coerceSandboxConfigValue is the Stage-1 coercion of the four
-// Lastenheft 0.3.0 config kinds. ok=false means the kind is not one
-// of them (caller continues its own dispatch).
-func coerceSandboxConfigValue(path domain.ConfigPath, raw string) (coerced any, formatted string, ok bool, err error) {
-	var verr error
-	switch path.Kind {
-	case domain.ConfigDevcontainerUserUID:
-		var uid int
-		uid, verr = domain.ParseContainerUID(raw)
-		coerced, formatted = uid, fmt.Sprint(uid)
-	case domain.ConfigDevcontainerProfile:
-		var v domain.DevcontainerProfile
-		v, verr = domain.NewDevcontainerProfile(raw)
-		coerced, formatted = string(v), string(v)
-	case domain.ConfigDevcontainerSandboxNestedRuntime:
-		var v domain.NestedRuntime
-		v, verr = domain.NewNestedRuntime(raw)
-		coerced, formatted = string(v), string(v)
-	case domain.ConfigDevcontainerSandboxOnUnavailable:
-		var v domain.OnUnavailable
-		v, verr = domain.NewOnUnavailable(raw)
-		coerced, formatted = string(v), string(v)
-	case domain.ConfigDevcontainerSandboxRepository:
-		repo := strings.TrimSpace(raw)
-		verr = validateCloneURL(repo)
-		coerced, formatted = repo, repo
-	default:
-		return nil, "", false, nil
-	}
-	if verr != nil {
-		return nil, "", true, fmt.Errorf("%w: %s: %w", driving.ErrConfigValueInvalid, path, verr)
-	}
-	return coerced, formatted, true, nil
-}
-
-// sandboxConfigYAMLPath maps the four kinds to their YAML paths.
-func sandboxConfigYAMLPath(path domain.ConfigPath) ([]string, bool) {
-	switch path.Kind {
-	case domain.ConfigDevcontainerUserUID:
-		return []string{"devcontainer", "user", "uid"}, true
-	case domain.ConfigDevcontainerProfile:
-		return []string{"devcontainer", "profile"}, true
-	case domain.ConfigDevcontainerSandboxNestedRuntime:
-		return []string{"devcontainer", "sandbox", "nestedRuntime"}, true
-	case domain.ConfigDevcontainerSandboxOnUnavailable:
-		return []string{"devcontainer", "sandbox", "onUnavailable"}, true
-	case domain.ConfigDevcontainerSandboxRepository:
-		return []string{"devcontainer", "sandbox", "repository"}, true
-	}
-	return nil, false
-}
-
-// sandboxConfigValue returns the stored string form of one of the
-// five kinds; "" means unset.
-func sandboxConfigValue(cfg ubootYAMLConfig, path domain.ConfigPath) (string, bool) {
-	var dc ubootYAMLDevcontainer
-	if cfg.Devcontainer != nil {
-		dc = *cfg.Devcontainer
-	}
-	var sb ubootYAMLDevcontainerSandbox
-	if dc.Sandbox != nil {
-		sb = *dc.Sandbox
-	}
-	switch path.Kind {
-	case domain.ConfigDevcontainerUserUID:
-		if dc.User == nil || dc.User.UID == nil {
-			return "", true
+		if err := validateCloneURL(dc.Sandbox.Repository); err != nil {
+			return err
 		}
-		return fmt.Sprint(*dc.User.UID), true
-	case domain.ConfigDevcontainerProfile:
-		return dc.Profile, true
-	case domain.ConfigDevcontainerSandboxNestedRuntime:
-		return sb.NestedRuntime, true
-	case domain.ConfigDevcontainerSandboxOnUnavailable:
-		return sb.OnUnavailable, true
-	case domain.ConfigDevcontainerSandboxRepository:
-		return sb.Repository, true
 	}
-	return "", false
+	return validateEgressHosts(dc.Sandbox.Egress)
 }
 
 // sandboxWorkspaceRoot is the parent directory of the sandbox
@@ -167,19 +88,51 @@ func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bo
 	if dc != nil && dc.User != nil && dc.User.UID != nil && *dc.User.UID != domain.DefaultContainerUID {
 		data.UID = *dc.User.UID
 	}
-	if sandbox {
-		data.Sandbox = true
-		data.WorkspaceVolume = name + "-workspace"
-		data.WorkspaceFolder = sandboxWorkspaceRoot + "/" + name
-		data.CloneURL = cloneURL
-		if nestedPodman(dc) {
-			data.NestedPodman = true
-			data.OnUnavailable = onUnavailablePolicy(dc)
-			data.ContainersVolume = name + "-containers"
-		}
+	if !sandbox {
+		return data
 	}
+	data.Sandbox = true
+	data.WorkspaceVolume = name + "-workspace"
+	data.WorkspaceFolder = sandboxWorkspaceRoot + "/" + name
+	data.CloneURL = cloneURL
+	var postCreate []string
+	if nestedPodman(dc) {
+		data.NestedPodman = true
+		data.OnUnavailable = onUnavailablePolicy(dc)
+		data.ContainersVolume = name + "-containers"
+		data.RunArgs = append(data.RunArgs, podmanRelaxations()...)
+		postCreate = append(postCreate, "sh /usr/local/bin/u-boot-sandbox-init")
+	}
+	if egressEnabled(dc) {
+		data.Egress = true
+		data.OnUnavailable = onUnavailablePolicy(dc)
+		data.EgressHosts = egressHosts(dc, cloneURL)
+		data.RunArgs = append(data.RunArgs, egressRelaxation())
+		data.PostStart = "sudo sh /usr/local/bin/u-boot-egress-init"
+	}
+	data.PostCreate = composePostCreate(postCreate, cloneURL)
 	return data
 }
+
+// composePostCreate joins the optional init steps and the clone step
+// into one `postCreateCommand`: init steps first; a failing step
+// (exit 11) stops the chain before the clone.
+func composePostCreate(steps []string, cloneURL string) string {
+	clone := ""
+	if cloneURL != "" {
+		clone = "[ -d .git ] || git clone -- " + cloneURL + " ."
+	}
+	switch {
+	case len(steps) == 0:
+		return clone
+	case clone == "":
+		return strings.Join(steps, " && ")
+	}
+	return strings.Join(steps, " && ") + " && { " + clone + "; }"
+}
+
+// egressRelaxation is the capability the egress restriction needs.
+func egressRelaxation() string { return "--cap-add=NET_ADMIN" }
 
 // validateCloneURL rejects `origin` URLs that must not be written
 // into a generated file: unsafe characters (shell/JSON injection) or
@@ -298,31 +251,31 @@ func podmanRelaxations() []string {
 	}
 }
 
-// sandboxPodmanWarnings returns one warning per relaxation when the
-// nested Podman setup is rendered, plus the "no effect" notice when
-// `nestedRuntime: podman` is set but the profile is not sandbox.
-func sandboxPodmanWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []driving.WarningEntry {
-	if !nestedPodman(dc) {
-		return nil
+// sandboxRelaxationWarnings returns one warning per security
+// relaxation the rendered sandbox needs (nested Podman: five options,
+// LH-FA-DEV-007; egress restriction: NET_ADMIN, LH-FA-DEV-008), plus
+// a "no effect" notice per feature that is configured without the
+// sandbox profile.
+func sandboxRelaxationWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []driving.WarningEntry {
+	var out []driving.WarningEntry
+	warn := func(code, msg string) {
+		out = append(out, driving.WarningEntry{Code: code, Level: "warn", Message: msg, Subject: ".devcontainer/devcontainer.json"})
 	}
-	if !sandbox {
-		return []driving.WarningEntry{{
-			Code:  "LH-FA-DEV-007",
-			Level: "warn",
-			Message: "devcontainer.sandbox.nestedRuntime=podman has no effect without devcontainer.profile=sandbox; " +
-				"no nested runtime was generated",
-			Subject: ".devcontainer/devcontainer.json",
-		}}
+	if nestedPodman(dc) {
+		if !sandbox {
+			warn("LH-FA-DEV-007", "devcontainer.sandbox.nestedRuntime=podman has no effect without devcontainer.profile=sandbox; no nested runtime was generated")
+		} else {
+			for _, r := range podmanRelaxations() {
+				warn("LH-FA-DEV-007", "security relaxation for nested Podman: "+r+" (the sandbox is much weaker than without nestedRuntime)")
+			}
+		}
 	}
-	relaxations := podmanRelaxations()
-	out := make([]driving.WarningEntry, 0, len(relaxations))
-	for _, r := range relaxations {
-		out = append(out, driving.WarningEntry{
-			Code:    "LH-FA-DEV-007",
-			Level:   "warn",
-			Message: "security relaxation for nested Podman: " + r + " (the sandbox is much weaker than without nestedRuntime)",
-			Subject: ".devcontainer/devcontainer.json",
-		})
+	if egressEnabled(dc) {
+		if !sandbox {
+			warn("LH-FA-DEV-008", "devcontainer.sandbox.egress.enabled has no effect without devcontainer.profile=sandbox; no egress restriction was generated")
+		} else {
+			warn("LH-FA-DEV-008", "security relaxation for the egress restriction: "+egressRelaxation()+" (a guardrail, not a sandbox boundary)")
+		}
 	}
 	return out
 }

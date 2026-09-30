@@ -118,3 +118,28 @@ func TestDoctor_SandboxCredentials(t *testing.T) {
 		})
 	}
 }
+
+// LH-FA-DEV-008: static consistency check.
+func TestDoctor_SandboxEgress(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name     string
+		yaml     string
+		want     domain.Severity
+		contains string
+	}{
+		{"off", sandboxYAMLHead, domain.SeverityOK, "not enabled"},
+		{"on without sandbox", sandboxYAMLHead + "  sandbox:\n    egress:\n      enabled: true\n", domain.SeverityWarn, "no effect"},
+		{"on with sandbox", sandboxYAMLHead + "  profile: sandbox\n  sandbox:\n    egress:\n      enabled: true\n", domain.SeverityOK, "verified when the container starts"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			items := runSandboxDoctor(t, func(fs *fakeFS) { writeDoctorFile(t, fs, "u-boot.yaml", tc.yaml) })
+			d := findDiagnostic(t, items, "devcontainer.sandbox.egress")
+			if d.Severity != tc.want || !strings.Contains(d.Message, tc.contains) {
+				t.Errorf("got %v %q, want %v containing %q", d.Severity, d.Message, tc.want, tc.contains)
+			}
+		})
+	}
+}

@@ -349,6 +349,7 @@ Subcommand-Codes an, ohne den Doctor-Block zu berühren.
 | `devcontainer.features.allowlist` | `devcontainer` Features auf Allowlist |
 | `devcontainer.features.drift` | `devcontainer` Features ohne Drift |
 | `devcontainer.sandbox.runtime` | Sandbox: nested Podman (`/dev/fuse`, Profil-Konsistenz), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
+| `devcontainer.sandbox.egress` | Sandbox: Egress-Restriktion konsistent konfiguriert, [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) |
 | `devcontainer.sandbox.credentials` | Sandbox: keine Klartext-Git-Zugangsdaten, Token-Quelle, [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) |
 
 <!-- code-registry:end -->

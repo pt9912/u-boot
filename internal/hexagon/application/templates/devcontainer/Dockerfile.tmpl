@@ -23,6 +23,13 @@ RUN apt-get update \
  && chown -R vscode:vscode /home/vscode/.local
 COPY sandbox-init.sh /usr/local/bin/u-boot-sandbox-init
 {{- end}}
+{{- if .Egress}}
+# Egress restriction (LH-FA-DEV-008).
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends dnsmasq-base nftables \
+ && rm -rf /var/lib/apt/lists/*
+COPY egress-init.sh /usr/local/bin/u-boot-egress-init
+{{- end}}
 {{- if .Sandbox}}
 # Sandbox profile (LH-FA-DEV-006): workspace lives in a named volume that
 # inherits ownership from this directory.

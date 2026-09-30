@@ -138,6 +138,7 @@ func DoctorCheckIDs() []string {
 		checkIDDevcontainerFeaturesAllowlist,
 		checkIDDevcontainerFeaturesDrift,
 		checkIDSandboxRuntime,
+		checkIDSandboxEgress,
 		checkIDSandboxCredentials,
 	}
 }
@@ -184,6 +185,7 @@ func (s *DoctorService) Check(ctx context.Context, req driving.DoctorRequest) (d
 		s.checkDevcontainerFeaturesAllowlist(ctx, req.BaseDir),
 		s.checkDevcontainerFeaturesDrift(ctx, req.BaseDir),
 		s.checkSandboxRuntime(ctx, req.BaseDir),
+		s.checkSandboxEgress(ctx, req.BaseDir),
 		s.checkSandboxCredentials(ctx, req.BaseDir),
 	}
 	report := domain.DiagnosticReport{Items: items}

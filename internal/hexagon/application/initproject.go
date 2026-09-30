@@ -94,6 +94,16 @@ type ubootYAMLDevcontainerSandbox struct {
 	// Repository is the LH-FA-DEV-006 clone source that replaces the
 	// project's `origin` (URL; empty = use origin).
 	Repository string `yaml:"repository,omitempty"`
+	// Egress is the LH-FA-DEV-008 outbound allowlist (V2).
+	Egress *ubootYAMLSandboxEgress `yaml:"egress,omitempty"`
+}
+
+// ubootYAMLSandboxEgress is the `devcontainer.sandbox.egress:`
+// sub-tree (LH-FA-DEV-008): `Enabled` opts in (nil/false = off),
+// `Allow` lists additional host names on top of the default allowlist.
+type ubootYAMLSandboxEgress struct {
+	Enabled *bool    `yaml:"enabled,omitempty"`
+	Allow   []string `yaml:"allow,omitempty"`
 }
 
 // ubootYAMLFeatureSources is the `devcontainer.featureSources:`

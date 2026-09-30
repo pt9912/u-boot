@@ -37,7 +37,7 @@ Nach Installation des Binarys (siehe *Installation* unten):
 u-boot init my-service                  # Projekt-Skelett + git init
 u-boot add postgres                     # Postgres registrieren + Compose-Block
 u-boot up                               # docker compose up + Healthcheck-Poll
-u-boot doctor                           # 15 Diagnose-Checks gegen Host + Projekt
+u-boot doctor                           # 16 Diagnose-Checks gegen Host + Projekt
 u-boot down --volumes                   # Stop + Named-Volume-Cleanup (bestätigt)
 u-boot remove postgres                  # Spiegel von add — disable + Blocks raus
 u-boot generate readme                  # Managed-Block-Artefakt aktualisieren
@@ -196,7 +196,7 @@ Auflösungs-Slices und §Nächste Schritte für das laufende Backlog.
 | Subkommando | Spec-IDs | Kurz |
 | ----------- | -------- | ---- |
 | `init [name] [--devcontainer] [--template <name\|pfad>]` | [LH-FA-INIT-001](spec/lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren)..[LH-FA-INIT-007](spec/lastenheft.md#lh-fa-init-007--git-repository-initialisierung), [LH-FA-TPL-001](spec/lastenheft.md#lh-fa-tpl-001--projektvorlagen)/[LH-FA-TPL-003](spec/lastenheft.md#lh-fa-tpl-003--eigene-templates) | Projekt-Skelett + `git init`. `--template` nimmt einen Katalog-Namen (`basic`) oder einen lokalen Verzeichnis-Pfad (`./mein-tpl`, `~/tpl`). |
-| `doctor [--strict]` | [LH-FA-DIAG-001](spec/lastenheft.md#lh-fa-diag-001--doctor-befehl)..[LH-FA-DIAG-004](spec/lastenheft.md#lh-fa-diag-004--reparaturhinweise), [LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) | 15 Diagnose-Checks; container-aware Skip für Host-Probes. |
+| `doctor [--strict]` | [LH-FA-DIAG-001](spec/lastenheft.md#lh-fa-diag-001--doctor-befehl)..[LH-FA-DIAG-004](spec/lastenheft.md#lh-fa-diag-004--reparaturhinweise), [LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) | 16 Diagnose-Checks; container-aware Skip für Host-Probes. |
 | `add <service> [--with-deps]` | [LH-FA-ADD-001](spec/lastenheft.md#lh-fa-add-001--add-on-befehl)..[LH-FA-ADD-006](spec/lastenheft.md#lh-fa-add-006--add-on-abhängigkeiten) | Idempotente State-Machine für Service-Add-Ons (`postgres`, `keycloak`, `otel`); `--with-deps` installiert fehlende Abhängigkeiten automatisch. |
 | `remove <service> [--purge]` | [LH-FA-ADD-007](spec/lastenheft.md#lh-fa-add-007--service-entfernen) | Spiegel von `add` — disable + Managed-Blocks raus. |
 | `up [--timeout <s>]` | [LH-FA-UP-001](spec/lastenheft.md#lh-fa-up-001--umgebung-starten)..[LH-FA-UP-003](spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen) | Compose up + Healthcheck-Poll + TCP-Probe. |

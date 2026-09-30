@@ -3,6 +3,7 @@ package domain
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -110,4 +111,19 @@ func ParseContainerUID(raw string) (int, error) {
 			ErrInvalidSandboxSetting, raw)
 	}
 	return NewContainerUID(uid)
+}
+
+var egressHostPattern = regexp.MustCompile(`^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$`)
+
+// NewEgressHost validates one entry of
+// `devcontainer.sandbox.egress.allow` (LH-FA-DEV-008): a lowercase
+// DNS host name with at least one dot and no scheme, port, path or
+// wildcard.
+func NewEgressHost(raw string) (string, error) {
+	h := strings.TrimSpace(raw)
+	if len(h) > 253 || !egressHostPattern.MatchString(h) {
+		return "", fmt.Errorf("%w: devcontainer.sandbox.egress.allow entry %q is not a lowercase host name (no scheme, port, path or wildcard)",
+			ErrInvalidSandboxSetting, raw)
+	}
+	return h, nil
 }

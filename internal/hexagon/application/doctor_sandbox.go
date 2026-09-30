@@ -17,6 +17,12 @@ const (
 	// host (`/dev/fuse`) plus the profile/runtime consistency.
 	checkIDSandboxRuntime = "devcontainer.sandbox.runtime"
 
+	// checkIDSandboxEgress is the LH-FA-DEV-008 check: the egress
+	// restriction is only meaningful together with the sandbox
+	// profile; the NET_ADMIN capability itself cannot be determined
+	// from the host and is verified by the container start script.
+	checkIDSandboxEgress = "devcontainer.sandbox.egress"
+
 	// checkIDSandboxCredentials is the LH-FA-DEV-009 check: git
 	// credentials must not sit in plain text in a project file, and
 	// an https clone needs a runtime token source.
@@ -146,4 +152,20 @@ func (s *DoctorService) hasTokenSource(baseDir string) bool {
 	text := string(body)
 	return strings.Contains(text, "${localEnv:GIT_TOKEN}") ||
 		(strings.Contains(text, "/run/secrets") && strings.Contains(text, "readonly"))
+}
+
+// checkSandboxEgress implements the static part of LH-FA-DEV-008.
+func (s *DoctorService) checkSandboxEgress(_ context.Context, baseDir string) domain.Diagnostic {
+	cfg, err := s.loadUbootYAML(baseDir)
+	if err != nil || !egressEnabled(cfg.Devcontainer) {
+		return domain.Diagnostic{ID: checkIDSandboxEgress, Severity: domain.SeverityOK,
+			Message: "Egress restriction not enabled; check skipped."}
+	}
+	if !profileIsSandbox(cfg.Devcontainer) {
+		return domain.Diagnostic{ID: checkIDSandboxEgress, Severity: domain.SeverityWarn,
+			Message: "devcontainer.sandbox.egress.enabled is set but devcontainer.profile is not `sandbox`; the setting has no effect (LH-FA-DEV-008).",
+			Hint:    "Run `u-boot config set devcontainer.profile sandbox` and `u-boot generate devcontainer`, or disable the egress restriction."}
+	}
+	return domain.Diagnostic{ID: checkIDSandboxEgress, Severity: domain.SeverityOK,
+		Message: "Egress restriction configured; the NET_ADMIN capability is verified when the container starts (guardrail, not a sandbox boundary)."}
 }

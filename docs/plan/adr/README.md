@@ -37,7 +37,7 @@ das MADR-Format gilt für neu angelegte ADRs sowie für die noch mutable
 | [ADR 0009](0009-template-format-yaml-files.md) | Accepted | Template-Format YAML-Metadaten plus `text/template` |
 | [ADR 0010](0010-kein-http-driving-adapter.md) | Accepted | Kein HTTP-Driving-Adapter |
 | [ADR 0011](0011-agent-harness-scaffolding.md) | Proposed | Agent-Harness-Scaffolding |
-| [ADR 0012](0012-devcontainer-egress-firewall.md) | Proposed | Devcontainer-Egress-Firewall |
+| [ADR 0012](0012-devcontainer-egress-firewall.md) | Accepted | Devcontainer-Egress-Firewall im Sandbox-Profil |
 | [ADR 0013](0013-dokumentationsreferenzmodell.md) | Accepted | Dokumentationsreferenzmodell und normative Kanten |
 | [ADR 0014](0014-nested-podman-sandbox-devcontainer.md) | Accepted | Nested rootless Podman im Sandbox-Devcontainer |
 | [ADR 0015](0015-sandbox-volumes-pro-instanz.md) | Accepted | Sandbox-Volumes pro Instanz über `${devcontainerId}` in `mounts` |

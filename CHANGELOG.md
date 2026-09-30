@@ -13,6 +13,10 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- Egress restriction for the sandbox devcontainer ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), V2, [ADR-0012](docs/plan/adr/0012-devcontainer-egress-firewall.md)):
+  `devcontainer.sandbox.egress.enabled` / `.allow`; DNS-driven allowlist
+  (local `dnsmasq` + nftables set), default hosts per stack, `NET_ADMIN`
+  reported as a relaxation, degradation via `onUnavailable`.
 - Sandbox profile for devcontainers (Lastenheft 0.3.1,
   [`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)): `u-boot init --devcontainer --sandbox` /
   `u-boot generate devcontainer --sandbox` render a named-volume workspace
@@ -30,7 +34,7 @@ this file is the same format applied to u-boot itself.
 - Git credentials at runtime only ([`LH-FA-DEV-009`](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)): `GIT_TOKEN` pass-through and
   credential helper; new `u-boot doctor` checks
   `devcontainer.sandbox.runtime` and `devcontainer.sandbox.credentials`
-  (15 checks in total). See
+  and `devcontainer.sandbox.egress` (16 checks in total). See
   [`docs/user/devcontainer-sandbox.md`](docs/user/devcontainer-sandbox.md).
 
 ### Changed

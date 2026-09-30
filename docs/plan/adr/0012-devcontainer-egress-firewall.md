@@ -1,161 +1,75 @@
-# ADR 0012: Devcontainer-Egress-Firewall (network-hardened devcontainer)
+# ADR 0012: Devcontainer-Egress-Firewall im Sandbox-Profil
 
-## Status
+**Status:** Accepted
 
-Proposed
+**Datum:** 2026-09-30
 
-> **Entwurf — noch nicht ratifiziert.** Festgehalten, damit die Idee
-> nicht verloren geht. Die §Entscheidung unten ist ein **Vorschlag**;
-> die §Offenen Fragen müssen vor `Accepted` beantwortet werden. Kein
-> Code, bis ratifiziert + Spec-Erweiterung + Planning-Artefakt stehen.
-> Gleiche Klasse wie
-> [ADR-0011](0011-agent-harness-scaffolding.md) (prospektives Feature,
-> Produkt-Scope-Entscheidung).
+**Autor:** pt9912
 
-## Datum
+**Bezug:** [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [ADR-0014](0014-nested-podman-sandbox-devcontainer.md)
 
-2026-06-09
+**Schärft:** [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) — Mechanismus, Default-Allowlist und Verhalten bei nicht gewährbarer Capability.
+
+**Regeln:** Baseline-Regelwerk `modul-04-adrs.md` §Ziel-Form: ADR (MADR).
+
+---
 
 ## Kontext
 
-`u-boot init --devcontainer` / `generate devcontainer` erzeugt heute
-einen **minimalen** Devcontainer: `devcontainer.json` (`name`, `build`,
-`forwardPorts`, `features`, `remoteUser: vscode`) + ein `Dockerfile`
-(`FROM mcr.microsoft.com/devcontainers/base:debian`, non-root
-`USER vscode`). **Keine Netzwerk-Restriktion** — kein
-`postCreate`/`initializeCommand`, kein `runArgs`, kein
-`iptables`/`ipset`. In `spec/lastenheft.md` kommt Firewall/Egress
-nirgends vor ([`LH-FA-DOC-003`](../../../spec/lastenheft.md#lh-fa-doc-003--netzwerk) „Netzwerk" meint das gemeinsame
-*Compose*-Netzwerk, nicht Egress-Kontrolle).
+Ein autonomer Agent im Sandbox-Devcontainer ([`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)) soll nicht beliebige Hosts erreichen (Exfiltration, unerwünschte Downloads). Verbreitetes Muster („network-hardened devcontainer“): ein Startscript mit `--cap-add=NET_ADMIN`, das ausgehenden Verkehr per `iptables`/`ipset` auf eine Allowlist beschränkt. Die Egress-Restriktion ist das **Runtime-Pendant** zur Build-Time-Allowlist für Feature-Quellen ([`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)).
 
-Verbreiteter Pattern („network-hardened devcontainer"): ein
-`init-firewall.sh`, das mit `--cap-add=NET_ADMIN` läuft und per
-`iptables`+`ipset` nur eine **Allowlist ausgehender Ziele**
-(z. B. GitHub, Paket-Registry, ggf. ein API-Endpoint) zulässt und den
-Rest `DROP`t. Zweck: einen autonomen Agenten oder fremden Code im
-Container eindämmen (keine Exfiltration, keine beliebigen Hosts).
+**Grenze:** Die Restriktion ist ein **Guardrail, keine Sandbox-Grenze**. Ein Prozess im Container, der die Capability hat (und das `sudo` des Base-Images nutzen kann), kann die Regeln aufheben; der Verkehr verschachtelter Podman-Container läuft über `FORWARD`, nicht `OUTPUT`, und wird nicht erfasst.
 
-**Fit mit u-boot:**
+**Messung (2026-09-30, Docker 29.8.1, `devcontainers/base:debian`, `nft` und `dnsmasq` 2.91).** Mit `--cap-add=NET_ADMIN`:
 
-- Die Sicherheits-Philosophie existiert bereits: [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)
-  (keine verdeckte Fremd-Code-Ausführung) + [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)
-  (`--allow-external-feature-sources`, explizite Allowlist für
-  Feature-*Quellen*). Eine Egress-Firewall ist das **Runtime-Pendant**
-  zur bestehenden **Build-Time/Supply-Chain-Allowlist** —
-  komplementär, nicht doppelt.
-- Deterministisch/template-bar: ein `.devcontainer/init-firewall.sh` +
-  `runArgs` + `postCreateCommand` + ein Config-Key in `u-boot.yaml` —
-  u-boots Wheelhouse (Template + Managed-Block + Config + Defaults).
+| Variante | Ergebnis |
+|---|---|
+| `iptables`-Regeln pro einmal aufgelöster IPv4-Adresse | `github.com` liefert pro DNS-Abfrage **wechselnde Adressen** (140.82.112.3, .113.3, .121.3, .121.4); die Verbindung scheitert, sobald `curl` eine andere Adresse als das Script nutzt (im Integrationstest in rund jedem zweiten Lauf Timeout trotz Allowlist) — **nicht tragfähig** |
+| lokaler `dnsmasq` (nur erlaubte Namen, `nftset=` füllt ein nftables-Set mit den Antworten) plus nftables-Policy `drop` | sechs von sechs Abrufen von `github.com` erfolgreich; `example.com` ist **nicht auflösbar** und nicht erreichbar; das Set enthält nur die tatsächlich aufgelöste Adresse (Timeout 1 h) |
+| ohne `NET_ADMIN` | `nft list tables` bricht mit Fehler ab: der Zustand ist im Startscript erkennbar |
 
-**Zentrale Grenze:** Eine Egress-Firewall im Container ist ein
-**Guardrail, kein Sandbox.** Ein In-Container-Prozess *mit* der
-Capability kann die Regeln rückgängig machen; die Firewall begrenzt
-nur den Egress, nicht den In-Container-Root. Das muss ehrlich als
-Defense-in-Depth dokumentiert werden, nicht als harte
-Sicherheitsgrenze.
+Kein `ipset`-Kernelmodul nötig (nftables-Sets). Zusammen mit dem Nested-Podman-Profil ([ADR-0014](0014-nested-podman-sandbox-devcontainer.md)) bleibt `NET_ADMIN` zusätzlich gewährbar.
 
 ## Entscheidung
 
-**(Vorschlag — Status `Proposed`, noch nicht ratifiziert.)**
+1. **Opt-in im Sandbox-Profil** über `devcontainer.sandbox.egress.enabled: true` (Default `false`); keine Flag-Variante (wie im Spec), daher keine Interaktion mit `--yes`/`--no-interactive`. Ohne Sandbox-Profil hat der Schlüssel keine Wirkung (Doctor-Warnung).
+2. **Mechanismus:** DNS-gesteuerte Allowlist. Das Startscript `.devcontainer/egress-init.sh` startet einen lokalen `dnsmasq` (Paket `dnsmasq-base`), der **nur die erlaubten Namen** (samt Subdomains) an die ursprünglichen Resolver weiterleitet und die Antworten per `nftset=` in ein nftables-Set einträgt; `/etc/resolv.conf` zeigt auf `127.0.0.1`. Eine nftables-Kette `output` mit Policy `drop` lässt Loopback, bestehende Verbindungen, DNS zu den Upstream-Resolvern und Ziele im Set zu; IPv6 ist vollständig gesperrt. Die Allowlist ist im Script eingebacken. Ausführung per `postStartCommand` mit `sudo` (die Regeln überleben keinen Container-Neustart); die Clone-Phase läuft vorher im `postCreateCommand`.
+3. **Capability:** `--cap-add=NET_ADMIN` in `runArgs`, in der Befehlsausgabe als Lockerung ausgewiesen (Code [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
+4. **Default-Allowlist** (dokumentiert in `docs/user/devcontainer-sandbox.md`): gemeinsame Basis `github.com`, `api.github.com`, `codeload.github.com`, `raw.githubusercontent.com`, `objects.githubusercontent.com`, `deb.debian.org`, `security.debian.org`; bei `nestedRuntime: podman` zusätzlich `registry-1.docker.io`, `auth.docker.io`, `production.cloudflare.docker.com`, `ghcr.io`; je aktiviertem Feature: `node` → `registry.npmjs.org`; `go` → `proxy.golang.org`, `sum.golang.org`, `storage.googleapis.com`; `java` → `repo.maven.apache.org`, `repo1.maven.org`. Der Host der Clone-Quelle kommt automatisch dazu. Hosts des Agenten selbst (z. B. dessen API) kennt u-boot nicht: sie stehen in `devcontainer.sandbox.egress.allow` (Liste gültiger Hostnamen, Schreibweise klein).
+5. **Getrennt von `devcontainer.featureSources.allow`:** Build-Quelle und Laufzeit-Ziel sind eigene Schlüssel mit eigener Semantik (Entscheidung zu Frage 5 des Entwurfs).
+6. **Degradation** nach der Tabelle in [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): ist `nft` nicht nutzbar (Capability nicht gewährt), entfällt die Restriktion mit Warnung (`onUnavailable: warn`) oder das Startscript endet mit Exit 11 (`fail`). `u-boot doctor` prüft die Konfiguration statisch (Schlüssel ohne Sandbox-Profil → `warn`); die Capability ist vom Host aus nicht zuverlässig bestimmbar und wird beim Containerstart geprüft.
 
-u-boot erzeugt eine Devcontainer-Egress-Firewall als **opt-in**:
+## Verglichene Alternativen
 
-1. **Opt-in, nicht Default.** Aktivierung über ein Flag
-   (`generate devcontainer --firewall` o. ä.) oder einen Config-Key
-   `devcontainer.firewall.enabled: true` — nicht Default, weil
-   `NET_ADMIN` nicht überall verfügbar ist (siehe §Konsequenzen).
-2. **Artefakte:** `.devcontainer/init-firewall.sh` (iptables+ipset,
-   `default DROP` + Allowlist) als Managed-Block-Datei; in
-   `devcontainer.json` `runArgs: ["--cap-add=NET_ADMIN"]` +
-   `postCreateCommand`/`initializeCommand`, der das Script ausführt.
-3. **Allowlist als Config:** `devcontainer.firewall.allow: [<host>…]`
-   in `u-boot.yaml`, mit **sinnvollen Defaults je Ökosystem**
-   (z. B. GitHub + die Registry des gewählten Service-/Sprach-Stacks).
-4. **doctor-Check + graceful degradation:** `u-boot doctor` prüft, ob
-   `NET_ADMIN` gewährbar ist; ist es das nicht, `warn` (nicht `error`)
-   mit klarem Hinweis statt eines `up`-Abbruchs. Kein hartes Scheitern
-   auf Umgebungen ohne die Capability.
-5. **Engine/Format wie heute** (`text/template` + Managed-Block), kein
-   neuer Stack.
+| Option | Pro | Contra |
+|---|---|---|
+| A — Keine Egress-Kontrolle | keine Capability, einfach | Exfiltration und beliebige Downloads möglich |
+| B — `iptables` + `ipset` im Container (verbreitetes Muster) | dynamische Sets | einmalige Auflösung verliert rotierende Adressen (gemessen: nicht tragfähig); `ip_set`-Kernelmodul auf Docker Desktop/Colima nicht garantiert |
+| C — `iptables`-Regeln pro einmal aufgelöster IP | keine weiteren Pakete | rotierende Adressen (GitHub) brechen die Verbindung (gemessen: nicht tragfähig) |
+| **C2 — `dnsmasq` + nftables-Set (DNS-gesteuert)** | deterministisch auch bei rotierenden Adressen, nicht erlaubte Namen sind nicht auflösbar, kein `ipset`-Modul | zwei zusätzliche Pakete (`dnsmasq-base`, `nftables`), `/etc/resolv.conf` wird im Container umgeleitet |
+| D — Restriktion außerhalb des Containers (Netzwerk-/DNS-Ebene, Proxy) | kein `NET_ADMIN`, nicht vom Container aus aufhebbar | braucht Host-/Netzwerk-Konfiguration außerhalb von u-boots Scope (Nicht-Ziel: keine Host-Konfiguration) |
 
 ## Konsequenzen
 
-Positiv:
+- Positiv: Laufzeit-Pendant zur Build-Allowlist; additiv und opt-in; Template, Config und Doctor sind etablierte u-boot-Muster.
+- Negativ: `NET_ADMIN` ist eine weitere Lockerung; Guardrail, nicht Grenze (siehe Kontext); die Allowlist braucht Pflege (zu eng bricht Builds, zu weit ist wertlos); IPv6 ist vollständig gesperrt; `/etc/resolv.conf` wird umgeleitet; nested Podman-Verkehr wird nicht erfasst; Doctor kann die Capability nicht vom Host aus prüfen.
+- Folgepflicht: Doku (Grenzen, Default-Liste), Golden Cases und ein Docker-Integrationstest (erlaubter und gesperrter Host, Degradation).
 
-- Schließt die Runtime-Lücke neben der bestehenden Build-Time-Allowlist
-  ([`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)); konsistente Sicherheits-Story.
-- Rein additiv, opt-in — kein Bruch für bestehende Devcontainer.
-- Template + Config + doctor sind etablierte u-boot-Muster.
+## Fitness Function (falls maschinell prüfbar)
 
-Negativ / Risiken:
+| Tooling | Regel | Make-Target |
+|---|---|---|
+| Golden Case | Egress aus: keine Egress-Ausgabe; Egress an: `NET_ADMIN` in `runArgs`, Script mit Default- plus Nutzer-Hosts, `postStartCommand` | `make test` |
+| Integrationstest (`//go:build docker`) | erlaubter Host erreichbar, gesperrter Host nicht, ohne Capability Exit 11/Warnung | `make test-docker` |
 
-- **`NET_ADMIN`-Abhängigkeit / Portabilität:** rootless Docker,
-  manche CI-Runner, Docker-Desktop-Eigenheiten gewähren die Capability
-  nicht → ohne Degradation bricht `up`. Der doctor-Check (Punkt 4) ist
-  load-bearing.
-- **Guardrail ≠ Sandbox** (siehe §Kontext) — Erwartungs-Management in
-  der Doku Pflicht.
-- **Allowlist-Pflege:** zu eng → Builds brechen (npm/pip/go proxy
-  fehlt); zu weit → Schutz wertlos. Defaults je Ökosystem müssen
-  sorgfältig kuratiert und dokumentiert werden.
-- **Verifikation schwergewichtig:** „blockt die Firewall Host X" ist
-  ein Integrationstest (`//go:build docker` + `NET_ADMIN`), kein
-  Unit-Test — passt zur e2e-Harness, kostet aber mehr.
-- **Spec-Wachstum:** neue `LH-FA-DEV-*` (und ggf. `LH-NFA-SEC-*`).
+## Re-Evaluierungs-Trigger
 
-## Offene Fragen (vor `Accepted` zu beantworten)
-
-1. **Default-Allowlist je Ökosystem:** welche Hosts pro Service-/
-   Sprach-Stack (postgres/keycloak/otel; Node/Python/Go/Java)? Eine
-   gemeinsame Basis (GitHub, ggf. Distro-Mirror) + stack-spezifische
-   Ergänzungen?
-2. **Degradations-Politik:** `warn` + trotzdem starten (Firewall
-   inaktiv) vs. opt-in-`--require-firewall`, das ohne `NET_ADMIN`
-   hart abbricht (Exit 11)?
-3. **Aktivierungs-Surface:** Flag, Config-Key, oder beides; Interaktion
-   mit `--no-interactive`/`--yes` ([`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)).
-4. **iptables vs. nftables**, und Verhältnis zur Distro-Basis des
-   Devcontainer-Image (`debian` → iptables-legacy/nft?).
-5. **Verhältnis zu [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features):** geteilte Allowlist-Semantik/
-   Config-Form oder bewusst getrennt (Build-Source vs. Runtime-Egress)?
-
-## Folgepunkte
-
-Dieses ADR liefert nur die Entscheidungs-Rahmung. Vor Implementierung:
-
-- Ratifizierung (`Proposed` → `Accepted`) nach Klärung der §Offenen
-  Fragen.
-- Spec-Erweiterung: neue `LH-FA-DEV-*`-Anforderungen (+ ggf.
-  `LH-NFA-SEC-*` für die Guardrail-Semantik).
-- Planning-Artefakt fuer die Umsetzung; doctor-Check als eigenes
-  Inkrement.
-
-Re-Evaluation-Trigger: konkrete Nutzer-/Team-Nachfrage nach
-egress-restringierten Devcontainern, oder ein Agenten-Sandbox-Use-Case
-auf u-boot-erzeugten Devcontainern.
+Nutzerbericht über blockierte legitime Ziele (dann Proxy-Variante D), eine Umgebung, in der `nft` im Container nicht nutzbar ist, oder eine Entscheidung, Restriktionen auf Host-/Netzwerk-Ebene zu unterstützen.
 
 ## Geschichte
 
-- 2026-06-09: Entwurf (`Proposed`).
-- 2026-09-30: Re-Evaluierungs-Trigger „Agenten-Sandbox-Use-Case" ist
-  eingetreten: ein CR-Slice zum Sandbox-Profil für Devcontainer (Planning)
-  führt [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)
-  (V2, Egress-Restriktion im Sandbox-Profil) ein. Status bleibt
-  `Proposed`; Ratifizierung steht vor der Umsetzung von `-008` aus.
-  Stand der §Offenen Fragen nach dem Spec-Change:
-  1. Default-Allowlist je Ökosystem — **offen**, an die Ratifizierung
-     delegiert (Spec verlangt nur, dass sie dokumentiert ist).
-  2. Degradations-Politik — **beantwortet** durch
-     [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer):
-     `devcontainer.sandbox.onUnavailable: warn | fail` (Default `warn`,
-     `fail` = Exit 11).
-  3. Aktivierungs-Surface — **beantwortet**: nur Config-Key
-     `devcontainer.sandbox.egress.enabled`, keine Flag-Variante.
-  4. iptables vs. nftables — **offen**, an die Ratifizierung delegiert.
-  5. Verhältnis zu
-     [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) —
-     **beantwortet**: bewusst getrennte Allowlists (Build-Quelle vs.
-     Laufzeit-Egress).
-  Hinweis: Punkt 1 der §Entscheidung nennt `--firewall` bzw.
-  `devcontainer.firewall.enabled`; die Spec-Fassung nutzt stattdessen
-  `devcontainer.sandbox.egress.*` im Sandbox-Profil.
+| Datum | Ereignis | Verweis |
+|---|---|---|
+| 2026-06-09 | Entwurf (`Proposed`) | — |
+| 2026-09-30 | Trigger „Agenten-Sandbox-Use-Case“ eingetreten; offene Fragen 2, 3 und 5 beantwortet | Lastenheft 0.3.0 |
+| 2026-09-30 | Fragen 1 und 4 entschieden, auf MADR-Form gebracht, `Accepted`; Mechanismus gemessen (erste Variante mit einmaliger IP-Auflösung verworfen, `dnsmasq` + nftables-Set gewählt) | Vereinbarung mit dem Projektinhaber („alles fertig machen“) |

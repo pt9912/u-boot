@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.3.2                                                              |
+| Version          | 0.3.3                                                              |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -810,7 +810,7 @@ Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll eine 
 - Erlaubte Ziele: `devcontainer.sandbox.egress.allow` (Liste von Hostnamen); die Default-Allowlist (gemeinsame Basis plus Ergänzungen je gewähltem Stack) ist dokumentiert.
 - Die Allowlist ist unabhängig von `devcontainer.featureSources.allow` ([`LH-FA-DEV-003`](#lh-fa-dev-003--devcontainer-features)): jene steuert erlaubte Build-Quellen, diese die Laufzeit-Ziele.
 - Die Restriktion ist ein Guardrail und keine Sandbox-Grenze; Prozesse mit der nötigen Capability können sie aufheben. Die Dokumentation muss das ausdrücklich sagen.
-- Ist die nötige Capability nicht gewährbar, greift die Degradationstabelle aus [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer); `u-boot doctor` meldet den Zustand als `warn` (bei `onUnavailable: fail` als `error`).
+- Ist die nötige Capability nicht gewährbar, greift die Degradationstabelle aus [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer); die Capability wird beim Containerstart geprüft (Warnung und Wegfall der Restriktion, bei `onUnavailable: fail` Exit-Code `11`). `u-boot doctor` prüft die Konfiguration (Schlüssel ohne Sandbox-Profil: `warn`); die Capability selbst ist vom Host aus nicht zuverlässig bestimmbar.
 
 ---
 
@@ -2972,6 +2972,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.3.0 | 2026-09-30 | Neue Anforderungen [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil) bis [`LH-FA-DEV-009`](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) (Sandbox-Profil, Container-Runtime mit Degradationstabelle, Egress-Restriktion, Git-Zugangsdaten); Ergänzung von [`LH-FA-DEV-004`](#lh-fa-dev-004--benutzerrechte) (UID-Anpassbarkeit über `devcontainer.user.uid`). | Vereinbarung mit dem Projektinhaber |
 | 0.3.1 | 2026-09-30 | [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil): Verhalten ohne Git-Remote präzisiert (kein Clone-Schritt und Warnung statt Fehler; Zugangsdaten in der Remote-URL bleiben ein Fehler), weil `u-boot init --sandbox` nie einen Remote vorfindet. | Vereinbarung mit dem Projektinhaber |
 | 0.3.2 | 2026-09-30 | [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil): neuer optionaler Schlüssel `devcontainer.sandbox.repository` als Clone-Quelle statt `origin`, damit im Sandbox-Container ein anderes Repository als das Projekt-Repository geklont und bearbeitet werden kann. | Vereinbarung mit dem Projektinhaber |
+| 0.3.3 | 2026-09-30 | [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion): Prüfung der Capability beim Containerstart statt im `u-boot doctor` präzisiert (die Capability ist vom Host aus nicht zuverlässig bestimmbar; `doctor` prüft die Konfiguration). | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt

@@ -216,6 +216,10 @@ func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (dr
 	if req.Path.Kind == domain.ConfigDevcontainerFeatureSourcesAllow {
 		return s.setFeatureSourcesAllow(req, cfg)
 	}
+	// LH-FA-DEV-008 list-path: `devcontainer.sandbox.egress.allow`.
+	if req.Path.Kind == domain.ConfigDevcontainerSandboxEgressAllow {
+		return s.setEgressAllow(req, cfg)
+	}
 
 	// Stage 1: value coercion (catches LH-FA-INIT-006 / bool-
 	// parse errors before any patch).

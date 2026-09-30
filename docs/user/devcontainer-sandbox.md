@@ -149,10 +149,50 @@ Dev-Containers-Werkzeug pro Projektordner auf; das Workspace-Volume steht in
 - Alte Volumes `<projekt>-workspace` / `<projekt>-containers` aus früheren
   Entwicklungsständen bleiben verwaist (`docker volume rm`).
 
-## 7. Grenzen
+## 7. Egress-Restriktion ([LH-FA-DEV-008](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [ADR-0012](../plan/adr/0012-devcontainer-egress-firewall.md))
+
+```bash
+u-boot config set devcontainer.sandbox.egress.enabled true
+u-boot config set devcontainer.sandbox.egress.allow api.anthropic.com,example.org
+u-boot generate devcontainer
+```
+
+Mechanismus (DNS-gesteuert, **Guardrail, keine Sandbox-Grenze**): Beim
+Containerstart (`postStartCommand`, `sudo`) startet `.devcontainer/egress-init.sh`
+einen lokalen `dnsmasq`, der **nur erlaubte Namen** auflöst und die Antworten
+in ein nftables-Set einträgt; nftables lässt nur Loopback, bestehende
+Verbindungen, DNS zu den Upstream-Resolvern und Ziele im Set zu. Alles andere
+(IPv6 komplett) wird verworfen; nicht erlaubte Namen sind nicht auflösbar.
+`--cap-add=NET_ADMIN` wird als Lockerung ausgewiesen.
+
+**Default-Allowlist:**
+
+| Quelle | Hosts |
+| --- | --- |
+| immer | `github.com`, `api.github.com`, `codeload.github.com`, `raw.githubusercontent.com`, `objects.githubusercontent.com`, `deb.debian.org`, `security.debian.org` |
+| `nestedRuntime: podman` | `registry-1.docker.io`, `auth.docker.io`, `production.cloudflare.docker.com`, `ghcr.io` |
+| Feature `node` | `registry.npmjs.org` |
+| Feature `go` | `proxy.golang.org`, `sum.golang.org`, `storage.googleapis.com` |
+| Feature `java` | `repo.maven.apache.org`, `repo1.maven.org` |
+| Clone-Quelle | der Host von `devcontainer.sandbox.repository` bzw. `origin` |
+| Nutzer | `devcontainer.sandbox.egress.allow` (kleingeschriebene Hostnamen, ohne Schema/Port/Wildcard) |
+
+**Wichtig:** Hosts des Agenten selbst (z. B. dessen API) kennt u-boot nicht —
+sie gehören in `egress.allow`. Subdomains eines erlaubten Namens sind
+mitgemeint. Die Allowlist steht im Script; nach einer Änderung
+`u-boot generate devcontainer` und Container neu starten.
+
+**Grenzen:** Wer die Capability hat (und das `sudo` des Base-Images
+nutzen kann), kann die Regeln aufheben. Der Verkehr verschachtelter
+Podman-Container läuft über `FORWARD` und wird nicht erfasst.
+**Degradation:** Ohne `NET_ADMIN` entfällt die Restriktion mit Warnung
+(`onUnavailable: warn`) oder das Startscript endet mit Exit `11` (`fail`);
+`u-boot doctor` (`devcontainer.sandbox.egress`) prüft nur die Konfiguration
+(ohne Sandbox-Profil wirkungslos → `warn`).
+
+## 8. Grenzen
 
 - Geprüft unter Docker auf Linux (siehe ADR). **Nicht geprüft:**
   macOS/Colima und Podman als Host-Engine.
-- Egress-Restriktion ([LH-FA-DEV-008](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), V2) ist noch nicht umgesetzt.
 - Wechsel von `podman` zurück auf `none` lässt eine vorhandene
   `sandbox-init.sh` liegen (vom Dockerfile nicht mehr referenziert).

@@ -769,7 +769,7 @@ func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.Ge
 	data := devcontainerTemplateData(cfg.Project.Name, cfg.Devcontainer, sandbox, cloneURL)
 	data.ForwardPorts = ports
 	data.Features = features
-	warnings = append(warnings, sandboxPodmanWarnings(cfg.Devcontainer, sandbox)...)
+	warnings = append(warnings, sandboxRelaxationWarnings(cfg.Devcontainer, sandbox)...)
 	plans, err := s.planDevcontainerFiles(req.BaseDir, data)
 	if err != nil {
 		return driving.GenerateResponse{}, err
@@ -900,13 +900,18 @@ func (s *GenerateService) planDevcontainerFiles(baseDir string, data templateDat
 		{".devcontainer/devcontainer.json", "devcontainer/devcontainer.json.tmpl", managedblock.StyleDoubleSlash},
 		{".devcontainer/Dockerfile", "devcontainer/Dockerfile.tmpl", managedblock.StyleHash},
 	}
+	type spec = struct {
+		relPath  string
+		template string
+		style    managedblock.Style
+	}
 	if data.NestedPodman {
 		// LH-FA-DEV-007: startup check baked into the image via COPY.
-		specs = append(specs, struct {
-			relPath  string
-			template string
-			style    managedblock.Style
-		}{".devcontainer/sandbox-init.sh", "devcontainer/sandbox-init.sh.tmpl", managedblock.StyleHash})
+		specs = append(specs, spec{".devcontainer/sandbox-init.sh", "devcontainer/sandbox-init.sh.tmpl", managedblock.StyleHash})
+	}
+	if data.Egress {
+		// LH-FA-DEV-008: egress restriction script baked via COPY.
+		specs = append(specs, spec{".devcontainer/egress-init.sh", "devcontainer/egress-init.sh.tmpl", managedblock.StyleHash})
 	}
 	plans := make([]devcontainerFilePlan, 0, len(specs))
 	for _, spec := range specs {

@@ -496,3 +496,126 @@ func TestGenerateDevcontainer_Sandbox_RepositoryOverridesOrigin(t *testing.T) {
 		}
 	})
 }
+
+const sandboxEgressYAML = "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    egress:\n      enabled: true\n      allow:\n        - api.anthropic.com\n"
+
+func egressInitPath() string {
+	return filepath.Join(generateTestBaseDir, ".devcontainer", "egress-init.sh")
+}
+
+// LH-FA-DEV-008 / ADR-0012: egress restriction adds NET_ADMIN, the
+// script with default + user hosts (sorted, clone host included), the
+// postStart hook, the nftables/dnsmasq install; nothing without the flag.
+func TestGenerateDevcontainer_SandboxEgress(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, sandboxEgressYAML+"  features:\n    node:\n      enabled: true\n")
+	seedGitOrigin(t, fs, "git@gitlab.example.org:o/r.git")
+
+	resp, err := generateSandbox(svc, false)
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	m := devcontainerJSONMap(t, fs)
+	args, _ := m["runArgs"].([]any)
+	if len(args) != 1 || args[0] != "--cap-add=NET_ADMIN" {
+		t.Errorf("runArgs = %v, want only --cap-add=NET_ADMIN", args)
+	}
+	if m["postStartCommand"] != "sudo sh /usr/local/bin/u-boot-egress-init" {
+		t.Errorf("postStartCommand = %v", m["postStartCommand"])
+	}
+	if m["postCreateCommand"] != "[ -d .git ] || git clone -- git@gitlab.example.org:o/r.git ." {
+		t.Errorf("postCreateCommand = %v (clone must still run before the restriction)", m["postCreateCommand"])
+	}
+	script, err := fs.ReadFile(egressInitPath())
+	if err != nil {
+		t.Fatalf("egress-init.sh not generated: %v", err)
+	}
+	for _, want := range []string{"api.anthropic.com", "github.com", "gitlab.example.org", "registry.npmjs.org", "deb.debian.org", `on_unavailable="warn"`} {
+		if !strings.Contains(string(script), want) {
+			t.Errorf("script lacks host/policy %q:\n%s", want, script)
+		}
+	}
+	for _, unwanted := range []string{"registry-1.docker.io", "proxy.golang.org"} {
+		if strings.Contains(string(script), unwanted) {
+			t.Errorf("script must not contain %q (podman/go not enabled)", unwanted)
+		}
+	}
+	df, _ := fs.ReadFile(dockerfilePath())
+	if !strings.Contains(string(df), "dnsmasq-base nftables") || !strings.Contains(string(df), "COPY egress-init.sh /usr/local/bin/u-boot-egress-init") {
+		t.Errorf("Dockerfile lacks the nftables/dnsmasq/COPY steps:\n%s", df)
+	}
+	found := false
+	for _, w := range resp.Warnings {
+		found = found || (w.Code == "LH-FA-DEV-008" && strings.Contains(w.Message, "NET_ADMIN"))
+	}
+	if !found {
+		t.Errorf("NET_ADMIN relaxation not reported: %+v", resp.Warnings)
+	}
+	if r2, err := generateSandbox(svc, false); err != nil || r2.Action != driving.GenerateActionNoOp {
+		t.Errorf("second run: %v %v, want NoOp", r2.Action, err)
+	}
+}
+
+// Podman + egress: both relaxation sets in runArgs, both init steps in
+// the right lifecycle hook, podman registries in the allowlist.
+func TestGenerateDevcontainer_SandboxEgressWithPodman(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, sandboxPodmanYAML+"    egress:\n      enabled: true\n")
+	seedGitOrigin(t, fs, "https://github.com/o/r.git")
+	if _, err := generateSandbox(svc, false); err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	m := devcontainerJSONMap(t, fs)
+	if args, _ := m["runArgs"].([]any); len(args) != 6 || args[5] != "--cap-add=NET_ADMIN" {
+		t.Errorf("runArgs = %v, want 5 podman options + NET_ADMIN", m["runArgs"])
+	}
+	if m["postCreateCommand"] != "sh /usr/local/bin/u-boot-sandbox-init && { [ -d .git ] || git clone -- https://github.com/o/r.git .; }" {
+		t.Errorf("postCreateCommand = %v", m["postCreateCommand"])
+	}
+	script, _ := fs.ReadFile(egressInitPath())
+	if !strings.Contains(string(script), "registry-1.docker.io") {
+		t.Errorf("podman registries missing from the allowlist:\n%s", script)
+	}
+}
+
+// Egress off (default) or without the sandbox profile: no script, no
+// NET_ADMIN; the latter warns.
+func TestGenerateDevcontainer_SandboxEgress_NotGenerated(t *testing.T) {
+	t.Parallel()
+	for name, tc := range map[string]struct {
+		yaml     string
+		wantWarn bool
+	}{
+		"disabled":        {"devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    egress:\n      enabled: false\n", false},
+		"default profile": {"devcontainer:\n  enabled: true\n  sandbox:\n    egress:\n      enabled: true\n", true},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, tc.yaml)
+			resp, err := generateSandbox(svc, false)
+			if err != nil {
+				t.Fatalf("generate: %v", err)
+			}
+			if exists, _ := fs.Exists(egressInitPath()); exists {
+				t.Errorf("egress-init.sh must not be generated")
+			}
+			m := devcontainerJSONMap(t, fs)
+			if _, ok := m["runArgs"]; ok {
+				t.Errorf("runArgs must be absent: %v", m["runArgs"])
+			}
+			if _, ok := m["postStartCommand"]; ok {
+				t.Errorf("postStartCommand must be absent")
+			}
+			hasWarn := false
+			for _, w := range resp.Warnings {
+				hasWarn = hasWarn || (w.Code == "LH-FA-DEV-008" && strings.Contains(w.Message, "no effect"))
+			}
+			if hasWarn != tc.wantWarn {
+				t.Errorf("no-effect warning = %v, want %v", hasWarn, tc.wantWarn)
+			}
+		})
+	}
+}

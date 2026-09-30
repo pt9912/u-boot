@@ -31,6 +31,8 @@ func TestNewConfigPath_KnownPaths(t *testing.T) {
 		{"devcontainer.sandbox.nestedRuntime", domain.ConfigDevcontainerSandboxNestedRuntime, true, "", ""},
 		{"devcontainer.sandbox.onUnavailable", domain.ConfigDevcontainerSandboxOnUnavailable, true, "", ""},
 		{"devcontainer.sandbox.repository", domain.ConfigDevcontainerSandboxRepository, true, "", ""},
+		{"devcontainer.sandbox.egress.enabled", domain.ConfigDevcontainerSandboxEgressEnabled, true, "", ""},
+		{"devcontainer.sandbox.egress.allow", domain.ConfigDevcontainerSandboxEgressAllow, true, "", ""},
 	}
 	for _, tc := range cases {
 		got, err := domain.NewConfigPath(tc.raw)

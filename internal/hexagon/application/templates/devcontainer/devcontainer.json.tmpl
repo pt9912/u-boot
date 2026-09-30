@@ -11,8 +11,10 @@
 {{- if .Sandbox}}
   "workspaceMount": "",
   "workspaceFolder": "{{.WorkspaceFolder}}",
+{{- if .RunArgs}}
+  "runArgs": [{{range $i, $a := .RunArgs}}{{if $i}}, {{end}}"{{$a}}"{{end}}],
+{{- end}}
 {{- if .NestedPodman}}
-  "runArgs": ["--cap-add=SYS_ADMIN", "--security-opt=seccomp=unconfined", "--security-opt=apparmor=unconfined", "--security-opt=systempaths=unconfined", "--device=/dev/fuse"],
   "mounts": [
     "source={{.WorkspaceVolume}}-${devcontainerId},target={{.WorkspaceFolder}},type=volume",
     "source={{.ContainersVolume}}-${devcontainerId},target=/home/vscode/.local/share/containers,type=volume"
@@ -20,12 +22,11 @@
 {{- else}}
   "mounts": ["source={{.WorkspaceVolume}}-${devcontainerId},target={{.WorkspaceFolder}},type=volume"],
 {{- end}}
-{{- if and .NestedPodman .CloneURL}}
-  "postCreateCommand": "sh /usr/local/bin/u-boot-sandbox-init && { [ -d .git ] || git clone -- {{.CloneURL}} .; }",
-{{- else if .NestedPodman}}
-  "postCreateCommand": "sh /usr/local/bin/u-boot-sandbox-init",
-{{- else if .CloneURL}}
-  "postCreateCommand": "[ -d .git ] || git clone -- {{.CloneURL}} .",
+{{- if .PostCreate}}
+  "postCreateCommand": "{{.PostCreate}}",
+{{- end}}
+{{- if .PostStart}}
+  "postStartCommand": "{{.PostStart}}",
 {{- end}}
   "remoteEnv": {
     "GIT_TOKEN": "${localEnv:GIT_TOKEN}"
