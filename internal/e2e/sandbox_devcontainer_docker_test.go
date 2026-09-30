@@ -297,6 +297,18 @@ func TestE2E_SandboxDevcontainer_NestedPodman(t *testing.T) {
 	runArgs := generatedRunArgs(t, dir)
 	nested := "sh /usr/local/bin/u-boot-sandbox-init && docker run --rm --network=host docker.io/library/alpine:3 echo NESTED_OK"
 
+	// Hosts with kernel.apparmor_restrict_unprivileged_userns=1 (Ubuntu
+	// 24.04+, e.g. GitHub runners) block nested user namespaces even
+	// with apparmor=unconfined: the startup script must degrade with
+	// exit 11 (LH-FA-DEV-007) — the nested run cannot succeed there.
+	if sysctl, err := os.ReadFile("/proc/sys/kernel/apparmor_restrict_unprivileged_userns"); err == nil && strings.TrimSpace(string(sysctl)) == "1" {
+		out, code := dockerOutput(ctx, t, append(append([]string{"run", "--rm"}, runArgs...), image, "sh", "/usr/local/bin/u-boot-sandbox-init")...)
+		if code != 11 || !strings.Contains(out, "nested user namespaces are blocked") {
+			t.Errorf("restricted host: init exit %d, want 11 with the blocked-namespaces message:\n%s", code, out)
+		}
+		t.Skip("host restricts unprivileged user namespaces (kernel.apparmor_restrict_unprivileged_userns=1); nested Podman cannot run here, degradation verified")
+	}
+
 	// AK 2: docker build/run inside the container without a socket.
 	args := append(append([]string{"run", "--rm"}, runArgs...), image, "bash", "-c", nested)
 	if out, code := dockerOutput(ctx, t, args...); code != 0 || !strings.Contains(out, "NESTED_OK") {

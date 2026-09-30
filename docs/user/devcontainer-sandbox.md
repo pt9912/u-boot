@@ -108,6 +108,14 @@ Die Messung und die Alternativen stehen in
 | `/dev/fuse` fehlt | Fallback auf `vfs`-Storage, Warnung | Exit `11` |
 | Nested User-Namespaces blockiert (Seccomp/AppArmor) | Exit `11` | Exit `11` |
 
+**Ubuntu 24.04+ (und Runner/Hosts mit `kernel.apparmor_restrict_unprivileged_userns=1`):**
+Dieser Schalter blockiert verschachtelte User-Namespaces auch mit
+`apparmor=unconfined`; das Startscript endet dann mit Exit `11`. Abhilfe:
+`sysctl kernel.apparmor_restrict_unprivileged_userns=0` auf dem
+Container-Host oder `nestedRuntime: none`. (Gemessen auf einem Host mit dem
+Wert `0`; auf einem GitHub-Runner mit dem Standardwert scheitert der
+Start wie beschrieben.)
+
 `u-boot doctor` (`devcontainer.sandbox.runtime`, [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)) prüft `/dev/fuse` nur auf
 Linux-Hosts; unter macOS/Colima läuft die Engine in einer VM und der Host
 kann das nicht beurteilen (dort prüft das Startscript).

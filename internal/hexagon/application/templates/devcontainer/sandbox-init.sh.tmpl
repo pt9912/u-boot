@@ -13,7 +13,7 @@ unavailable() {
 
 # Nested user namespaces (blocked by Seccomp/AppArmor => Podman cannot run).
 if ! unshare --user --map-root-user true 2>/dev/null; then
-  echo "u-boot sandbox: nested user namespaces are blocked (Seccomp/AppArmor); rootless Podman cannot run" >&2
+  echo "u-boot sandbox: nested user namespaces are blocked (Seccomp/AppArmor; on Ubuntu 24.04+ hosts also kernel.apparmor_restrict_unprivileged_userns=1); rootless Podman cannot run" >&2
   exit 11
 fi
 

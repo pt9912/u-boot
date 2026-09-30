@@ -41,16 +41,18 @@ func TestDoctor_SandboxRuntime(t *testing.T) {
 		yaml     string
 		linux    bool
 		fuse     bool
+		restrict bool
 		want     domain.Severity
 		contains string
 	}{
-		{"no devcontainer config", "schemaVersion: 1\nproject:\n  name: demo\n", true, false, domain.SeverityOK, "skipped"},
-		{"sandbox without nested runtime", sandboxYAMLHead + "  profile: sandbox\n", true, false, domain.SeverityOK, "nothing to check"},
-		{"podman without sandbox profile", sandboxYAMLHead + "  sandbox:\n    nestedRuntime: podman\n", true, true, domain.SeverityWarn, "no effect"},
-		{"fuse available", sandboxYAMLPodman, true, true, domain.SeverityOK, "/dev/fuse is available"},
-		{"fuse missing, warn policy", sandboxYAMLPodman, true, false, domain.SeverityWarn, "vfs"},
-		{"fuse missing, fail policy", sandboxYAMLPodman + "    onUnavailable: fail\n", true, false, domain.SeverityError, "`fail`"},
-		{"non-linux host cannot tell", sandboxYAMLPodman + "    onUnavailable: fail\n", false, false, domain.SeverityOK, "cannot be determined"},
+		{"no devcontainer config", "schemaVersion: 1\nproject:\n  name: demo\n", true, false, false, domain.SeverityOK, "skipped"},
+		{"sandbox without nested runtime", sandboxYAMLHead + "  profile: sandbox\n", true, false, false, domain.SeverityOK, "nothing to check"},
+		{"podman without sandbox profile", sandboxYAMLHead + "  sandbox:\n    nestedRuntime: podman\n", true, true, false, domain.SeverityWarn, "no effect"},
+		{"fuse available", sandboxYAMLPodman, true, true, false, domain.SeverityOK, "/dev/fuse is available"},
+		{"fuse missing, warn policy", sandboxYAMLPodman, true, false, false, domain.SeverityWarn, "vfs"},
+		{"fuse missing, fail policy", sandboxYAMLPodman + "    onUnavailable: fail\n", true, false, false, domain.SeverityError, "`fail`"},
+		{"userns restricted by AppArmor sysctl", sandboxYAMLPodman, true, true, true, domain.SeverityError, "apparmor_restrict_unprivileged_userns"},
+		{"non-linux host cannot tell", sandboxYAMLPodman + "    onUnavailable: fail\n", false, false, false, domain.SeverityOK, "cannot be determined"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -59,6 +61,9 @@ func TestDoctor_SandboxRuntime(t *testing.T) {
 				writeDoctorFile(t, fs, "u-boot.yaml", tc.yaml)
 				if tc.linux {
 					_ = fs.WriteFile("/proc/sys/kernel/osrelease", []byte("6.8\n"), 0o444)
+				}
+				if tc.restrict {
+					_ = fs.WriteFile("/proc/sys/kernel/apparmor_restrict_unprivileged_userns", []byte("1\n"), 0o644)
 				}
 				if tc.fuse {
 					_ = fs.WriteFile("/dev/fuse", []byte{}, 0o666)

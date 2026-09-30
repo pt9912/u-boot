@@ -11,6 +11,10 @@ import (
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 )
 
+// apparmorUsernsSysctl is the Ubuntu 24.04+ switch that blocks
+// unprivileged user namespaces for unconfined processes.
+const apparmorUsernsSysctl = "/proc/sys/kernel/apparmor_restrict_unprivileged_userns"
+
 const (
 	// checkIDSandboxRuntime is the LH-FA-DEV-007 check: state of the
 	// nested-runtime prerequisites that can be determined from the
@@ -78,6 +82,11 @@ func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) d
 	if linux, _ := s.fs.Exists("/proc/sys/kernel/osrelease"); !linux {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityOK,
 			Message: "Nested Podman prerequisites cannot be determined from this host (container engine runs in a VM); the container start script checks /dev/fuse and user namespaces."}
+	}
+	if restricted, _ := s.fs.ReadFile(apparmorUsernsSysctl); strings.TrimSpace(string(restricted)) == "1" {
+		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityError,
+			Message: "kernel.apparmor_restrict_unprivileged_userns=1 on this host blocks nested user namespaces; rootless Podman in the sandbox cannot start (LH-FA-DEV-007, exit 11 at container start).",
+			Hint:    "Set `sysctl kernel.apparmor_restrict_unprivileged_userns=0` on the container host, or set `devcontainer.sandbox.nestedRuntime` to `none`."}
 	}
 	if fuse, _ := s.fs.Exists("/dev/fuse"); fuse {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityOK,
