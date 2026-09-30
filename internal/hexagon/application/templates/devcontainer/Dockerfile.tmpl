@@ -3,5 +3,19 @@
 FROM mcr.microsoft.com/devcontainers/base:debian
 
 # Non-root default user (LH-FA-DEV-004).
+{{- if or .UID .Sandbox}}
+USER root
+{{- if .UID}}
+ARG USER_UID={{.UID}}
+RUN usermod --uid "${USER_UID}" vscode \
+ && groupmod --gid "${USER_UID}" vscode \
+ && chown -R "${USER_UID}:${USER_UID}" /home/vscode
+{{- end}}
+{{- if .Sandbox}}
+# Sandbox profile (LH-FA-DEV-006): workspace lives in a named volume that
+# inherits ownership from this directory.
+RUN mkdir -p "{{.WorkspaceFolder}}" && chown vscode:vscode "{{.WorkspaceFolder}}"
+{{- end}}
+{{- end}}
 USER vscode
 # END U-BOOT MANAGED BLOCK: init

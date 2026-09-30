@@ -3,8 +3,18 @@
   "name": "{{.Name}}",
   "build": {
     "dockerfile": "./Dockerfile",
-    "context": "."
+    "context": "."{{if .UID}},
+    "args": {
+      "USER_UID": "{{.UID}}"
+    }{{end}}
   },
+{{- if .Sandbox}}
+  "workspaceMount": "source={{.WorkspaceVolume}},target={{.WorkspaceFolder}},type=volume",
+  "workspaceFolder": "{{.WorkspaceFolder}}",
+{{- if .CloneURL}}
+  "postCreateCommand": "[ -d .git ] || git clone -- {{.CloneURL}} .",
+{{- end}}
+{{- end}}
 {{- if .ForwardPorts}}
   "forwardPorts": [{{range $i, $p := .ForwardPorts}}{{if $i}}, {{end}}{{$p}}{{end}}],
 {{- end}}

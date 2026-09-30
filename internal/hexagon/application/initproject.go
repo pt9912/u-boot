@@ -436,14 +436,19 @@ func (s *InitProjectService) runInit(ctx context.Context, req driving.InitProjec
 	}
 	created = append(created, dirEntries...)
 
-	fileEntries, fileBackups, err := s.executeTemplatedFiles(req.BaseDir, project, plans)
+	tdata, warnings, err := s.initTemplateData(req, project)
+	if err != nil {
+		return driving.InitProjectResponse{}, err
+	}
+
+	fileEntries, fileBackups, err := s.executeTemplatedFiles(req.BaseDir, plans, tdata)
 	if err != nil {
 		return driving.InitProjectResponse{}, err
 	}
 	created = append(created, fileEntries...)
 	backups = append(backups, fileBackups...)
 
-	yamlEntry, yamlBackup, err := s.executeUBootYAML(req.BaseDir, project, yamlPlan, req.Devcontainer, req.AllowExternalFeatureSources)
+	yamlEntry, yamlBackup, err := s.executeUBootYAML(req.BaseDir, project, yamlPlan, req.Devcontainer, req.AllowExternalFeatureSources, req.Sandbox)
 	if err != nil {
 		return driving.InitProjectResponse{}, err
 	}
@@ -464,7 +469,23 @@ func (s *InitProjectService) runInit(ctx context.Context, req driving.InitProjec
 		}
 	}
 
-	return driving.InitProjectResponse{Project: project, Created: created, Backups: backups}, nil
+	return driving.InitProjectResponse{Project: project, Created: created, Backups: backups, Warnings: warnings}, nil
+}
+
+// initTemplateData builds the shared template data of the default
+// init flow. With `--devcontainer` it resolves the LH-FA-DEV-006
+// sandbox state (clone URL from an existing `origin`, warning when
+// there is none); otherwise only the project name is set.
+func (s *InitProjectService) initTemplateData(req driving.InitProjectRequest, project domain.Project) (templateData, []driving.WarningEntry, error) {
+	name := project.Name.String()
+	if !req.Devcontainer {
+		return templateData{Name: name}, nil, nil
+	}
+	cloneURL, warnings, err := resolveSandboxClone(s.fs, req.BaseDir, req.Sandbox)
+	if err != nil {
+		return templateData{}, nil, err
+	}
+	return devcontainerTemplateData(name, nil, req.Sandbox, cloneURL), warnings, nil
 }
 
 // initFromTemplate handles the `--template <name>` branch of init
@@ -953,8 +974,7 @@ func (s *InitProjectService) writeDirectories(baseDir string, req driving.InitPr
 // executeTemplatedFiles runs the plan for every templated file:
 // render the template, then dispatch to the action-specific helper
 // ([writeNewFile], [replaceManagedBlock], [backupAndOverwrite]).
-func (s *InitProjectService) executeTemplatedFiles(baseDir string, project domain.Project, plans []filePlan) ([]string, []driving.BackupAction, error) {
-	data := templateData{Name: project.Name.String()}
+func (s *InitProjectService) executeTemplatedFiles(baseDir string, plans []filePlan, data templateData) ([]string, []driving.BackupAction, error) {
 	created := make([]string, 0, len(plans))
 	backups := make([]driving.BackupAction, 0)
 	for _, p := range plans {
@@ -1202,6 +1222,10 @@ func (s *InitProjectService) validateInitPreconditions(req driving.InitProjectRe
 			"%w: --allow-external-feature-sources requires --devcontainer (Spec §714)",
 			ErrInvalidFeatureSource)
 	}
+	if req.Sandbox && !req.Devcontainer {
+		return fmt.Errorf("%w: --sandbox requires --devcontainer (LH-FA-DEV-006)",
+			domain.ErrInvalidSandboxSetting)
+	}
 	// BaseDir-exists check intentionally NOT here; the template
 	// branch handles it separately (initFromTemplate) so the
 	// path-specific error wrapping stays accurate.
@@ -1218,7 +1242,7 @@ func (s *InitProjectService) validateInitPreconditions(req driving.InitProjectRe
 	return nil
 }
 
-func (s *InitProjectService) executeUBootYAML(baseDir string, project domain.Project, plan filePlan, devcontainer bool, allowExternalFeatureSources []string) (string, *driving.BackupAction, error) {
+func (s *InitProjectService) executeUBootYAML(baseDir string, project domain.Project, plan filePlan, devcontainer bool, allowExternalFeatureSources []string, sandbox bool) (string, *driving.BackupAction, error) {
 	cfg := ubootYAMLConfig{
 		SchemaVersion: project.SchemaVersion,
 		Project:       ubootYAMLProject{Name: project.Name.String()},
@@ -1226,6 +1250,9 @@ func (s *InitProjectService) executeUBootYAML(baseDir string, project domain.Pro
 	if devcontainer {
 		enabled := true
 		cfg.Devcontainer = &ubootYAMLDevcontainer{Enabled: &enabled}
+		if sandbox {
+			cfg.Devcontainer.Profile = string(domain.ProfileSandbox)
+		}
 		// LH-FA-DEV-003 allowlist seed from
 		// `--allow-external-feature-sources` (Spec §714). The flag-
 		// without-devcontainer case is rejected at the entry to

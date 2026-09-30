@@ -179,6 +179,12 @@ func (s *GenerateService) runGenerate(ctx context.Context, req driving.GenerateR
 		"artifact", req.Artifact.String(),
 	)
 
+	if req.Sandbox && req.Artifact != domain.ArtifactDevcontainer {
+		return driving.GenerateResponse{}, fmt.Errorf(
+			"%w: --sandbox is only valid for `generate devcontainer`; got `generate %s`",
+			domain.ErrInvalidSandboxSetting, req.Artifact)
+	}
+
 	switch req.Artifact {
 	case domain.ArtifactChangelog:
 		return s.generateChangelog(ctx, req)
@@ -755,11 +761,14 @@ func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.Ge
 
 	features := collectDevcontainerFeatures(cfg)
 
-	data := templateData{
-		Name:         cfg.Project.Name,
-		ForwardPorts: ports,
-		Features:     features,
+	sandbox := req.Sandbox || profileIsSandbox(cfg.Devcontainer)
+	cloneURL, warnings, err := resolveSandboxClone(s.fs, req.BaseDir, sandbox)
+	if err != nil {
+		return driving.GenerateResponse{}, err
 	}
+	data := devcontainerTemplateData(cfg.Project.Name, cfg.Devcontainer, sandbox, cloneURL)
+	data.ForwardPorts = ports
+	data.Features = features
 	plans, err := s.planDevcontainerFiles(req.BaseDir, data)
 	if err != nil {
 		return driving.GenerateResponse{}, err
@@ -777,12 +786,25 @@ func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.Ge
 		return driving.GenerateResponse{}, err
 	}
 
+	// LH-FA-DEV-006: `--sandbox` persists the profile — also LAST,
+	// after every devcontainer file was written.
+	profileWritten, err := s.persistSandboxProfile(req.BaseDir, req.Sandbox && !profileIsSandbox(cfg.Devcontainer))
+	if err != nil {
+		return driving.GenerateResponse{}, err
+	}
+	if profileWritten {
+		changed = append(changed, "u-boot.yaml")
+	}
+
 	action := devcontainerAggregateAction(hasWrite, hasReplace)
+	if profileWritten && action == driving.GenerateActionNoOp {
+		action = driving.GenerateActionUpdatedBlock
+	}
 	if action == driving.GenerateActionNoOp {
 		s.logger.Debug("generate devcontainer: no-op",
 			"project", cfg.Project.Name,
 			"forwardPorts", ports, "features", len(features))
-		return driving.GenerateResponse{Artifact: req.Artifact, Action: action}, nil
+		return driving.GenerateResponse{Artifact: req.Artifact, Action: action, Warnings: warnings}, nil
 	}
 	s.logger.Info("generate devcontainer: "+action.String(),
 		"project", cfg.Project.Name,
@@ -792,7 +814,33 @@ func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.Ge
 		Artifact: req.Artifact,
 		Action:   action,
 		Changed:  changed,
+		Warnings: warnings,
 	}, nil
+}
+
+// persistSandboxProfile writes `devcontainer.profile: sandbox` into
+// u-boot.yaml (PatchScalar keeps comments and siblings). No-op when
+// write is false. Reports whether the file was written.
+func (s *GenerateService) persistSandboxProfile(baseDir string, write bool) (bool, error) {
+	if !write {
+		return false, nil
+	}
+	yamlPath := filepath.Join(baseDir, "u-boot.yaml")
+	body, err := s.fs.ReadFile(yamlPath)
+	if err != nil {
+		return false, fmt.Errorf("generate devcontainer: read %q: %w: %w",
+			yamlPath, driving.ErrGenerateFileSystem, err)
+	}
+	patched, err := s.yaml.PatchScalar(body, []string{"devcontainer", "profile"}, string(domain.ProfileSandbox))
+	if err != nil {
+		return false, fmt.Errorf("generate devcontainer: patch u-boot.yaml: %w: %w",
+			driving.ErrGenerateFileSystem, err)
+	}
+	if err := s.fs.WriteFile(yamlPath, patched, defaultFileMode); err != nil {
+		return false, fmt.Errorf("generate devcontainer: write %q: %w: %w",
+			yamlPath, driving.ErrGenerateFileSystem, err)
+	}
+	return true, nil
 }
 
 // collectDevcontainerForwardPorts derives the container-side ports

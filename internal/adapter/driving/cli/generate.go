@@ -28,6 +28,10 @@ import (
 type generateFlags struct {
 	AllowExternalFeatureSources []string
 
+	// Sandbox is `--sandbox` (LH-FA-DEV-006), only valid for
+	// `generate devcontainer`.
+	Sandbox bool
+
 	// DryRun / Diff / JSON (slice-v1-cli-json-dry-run-generate T5):
 	// LH-FA-CLI-007/008/§1841 flags. DryRun/Diff route Generate()
 	// through the RecordingFileSystem via the per-request fsFactory
@@ -94,6 +98,8 @@ Examples:
 	}
 	cmd.Flags().StringSliceVar(&flags.AllowExternalFeatureSources, "allow-external-feature-sources", nil,
 		"append the given URLs to devcontainer.featureSources.allow before generating (LH-FA-DEV-003; only valid for `generate devcontainer`; comma-separated, repeatable). `--yes` does not substitute (LH-NFA-SEC-004).")
+	cmd.Flags().BoolVar(&flags.Sandbox, "sandbox", false,
+		"render the devcontainer with the sandbox profile (LH-FA-DEV-006) and set devcontainer.profile=sandbox (only valid for `generate devcontainer`)")
 	cmd.Flags().BoolVar(&flags.DryRun, "dry-run", false,
 		"preview the planned changes without writing files (LH-FA-CLI-007)")
 	cmd.Flags().BoolVar(&flags.Diff, "diff", false,
@@ -170,6 +176,13 @@ func runGenerate(
 		return reportError(out, wrapped, nil, flags.DryRun, flags.Diff, flags.JSON, "generate", mapErr, data)
 	}
 
+	if flags.Sandbox && artifact != domain.ArtifactDevcontainer {
+		wrapped := fmt.Errorf(
+			"%w: --sandbox is only valid for `generate devcontainer` (LH-FA-DEV-006); got `generate %s`",
+			driving.ErrArtifactUnknown, artifact)
+		return reportError(out, wrapped, nil, flags.DryRun, flags.Diff, flags.JSON, "generate", mapErr, data)
+	}
+
 	cwd, err := getwd()
 	if err != nil {
 		return reportError(out, fmt.Errorf("determine working directory: %w", err), nil, flags.DryRun, flags.Diff, flags.JSON, "generate", mapErr, data)
@@ -180,6 +193,7 @@ func runGenerate(
 		BaseDir:                     cwd,
 		Artifact:                    artifact,
 		AllowExternalFeatureSources: flags.AllowExternalFeatureSources,
+		Sandbox:                     flags.Sandbox,
 		PreviewMode:                 mode,
 	}
 
@@ -202,6 +216,9 @@ func runGenerate(
 		}
 	}
 	printGenerateSummary(out, resp)
+	for _, w := range resp.Warnings {
+		fmt.Fprintf(out, "Warning (%s): %s\n", w.Code, w.Message)
+	}
 	return nil
 }
 
@@ -222,12 +239,13 @@ func writeGenerateJSON(out io.Writer, resp driving.GenerateResponse, dryRun, dif
 		Artifact: artifact.String(),
 		Action:   resp.Action.String(),
 	}
+	warnDiags := mapWarningsToDiagnostics(resp.Warnings)
 	if !dryRun && !diffFlag {
-		env := newDataEnvelope("generate", "", data, nil, 0)
+		env := newDataEnvelope("generate", "", data, warnDiags, 0)
 		return writeEnvelope(out, env)
 	}
 	pfs, chs := mapPlannedFilesToWire(resp.PlannedFiles, diffFlag)
-	env := newFullEnvelope("generate", "", dryRun, diffFlag, pfs, chs, data, nil, 0)
+	env := newFullEnvelope("generate", "", dryRun, diffFlag, pfs, chs, data, warnDiags, 0)
 	return writeEnvelope(out, env)
 }
 
@@ -262,6 +280,10 @@ func mapGenerateErrorToDiagnostic(err error, artifact domain.Artifact) diagnosti
 		return diagnosticItem{Level: "error", Code: manualConflictCodeFor(artifact), Message: err.Error()}
 	case errors.Is(err, driving.ErrConfigValueInvalid):
 		return diagnosticItem{Level: "error", Code: "LH-FA-DEV-003", Message: err.Error()}
+	case errors.Is(err, domain.ErrInvalidSandboxSetting):
+		// LH-FA-DEV-006 (origin URL with credentials / unsafe
+		// characters); ExitCode maps via isConfigValidationError (10).
+		return diagnosticItem{Level: "error", Code: "LH-FA-DEV-006", Message: err.Error()}
 	case errors.Is(err, driving.ErrArtifactUnknown):
 		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
 	case errors.Is(err, driving.ErrProjectNotInitialized):

@@ -93,6 +93,9 @@ func TestMapInitErrorToDiagnostic_AllCases(t *testing.T) {
 		// bereits Code-10 lieferte — Envelope-Code/Exit-Klassen
 		// drifteten auseinander.
 		{"ErrInvalidFeatureSource", domain.ErrInvalidFeatureSource, "LH-FA-DEV-003"},
+		// Lastenheft 0.3.0 (LH-FA-DEV-006): dual-classifier partner of
+		// isConfigValidationError.
+		{"ErrInvalidSandboxSetting", domain.ErrInvalidSandboxSetting, "LH-FA-DEV-006"},
 		{"unknown → default LH-FA-CLI-006", errors.New("unknown"), "LH-FA-CLI-006"},
 		// Multi-`%w` Switch-Order-Pin (analog Add-Test): FS-first
 		// klassifiziert auch wenn der wrap ein fachlich Sentinel

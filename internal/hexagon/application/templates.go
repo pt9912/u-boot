@@ -40,6 +40,21 @@ type templateData struct {
 	// byte-deterministic across runs; empty/nil omits the JSON
 	// `features` key entirely.
 	Features []devcontainerFeatureData
+
+	// UID is the LH-FA-DEV-004 container-user UID. 0 means "default
+	// (1000), emit nothing" so the pre-0.3.0 output stays byte-
+	// identical; a non-zero value adds the `USER_UID` build arg and
+	// the usermod step.
+	UID int
+
+	// Sandbox switches on the LH-FA-DEV-006 sandbox profile of the
+	// devcontainer templates; WorkspaceVolume / WorkspaceFolder name
+	// the named volume and its mount point, CloneURL (may be empty)
+	// is the `origin` URL of the project repository.
+	Sandbox         bool
+	WorkspaceVolume string
+	WorkspaceFolder string
+	CloneURL        string
 }
 
 // fileTemplate maps an embedded template to its destination path

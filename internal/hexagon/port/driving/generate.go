@@ -32,6 +32,12 @@ type GenerateRequest struct {
 	// allowlist untouched. Slice-v1-devcontainer-features T4.
 	AllowExternalFeatureSources []string
 
+	// Sandbox renders the devcontainer with the sandbox profile
+	// (LH-FA-DEV-006) and persists `devcontainer.profile: sandbox`
+	// in u-boot.yaml. Only valid for Artifact == ArtifactDevcontainer
+	// (the CLI restricts the flag; the use case re-checks).
+	Sandbox bool
+
 	// PreviewMode encodes the --dry-run × --diff flag combination per
 	// slice-v1-cli-json-dry-run-generate T0-(b) (inherited 1:1 from
 	// init T0-(b)/add T0-(b) truth table — kein generate-Prefix-Alias,
@@ -145,6 +151,11 @@ type GenerateResponse struct {
 	// pattern; the use case fills PlannedFiles, the CLI computes
 	// Changes from them).
 	Changes []ChangeEntry
+
+	// Warnings carries soft diagnostics (level "warn", exit 0), e.g.
+	// the LH-FA-DEV-006 "no git remote, no clone step" notice. The
+	// CLI maps them to stderr/`diagnostics[]`.
+	Warnings []WarningEntry
 }
 
 // All Generate sentinels below live in the `driving` package (not in

@@ -62,6 +62,10 @@ type initFlags struct {
 	// values split per Cobra StringSlice. Only meaningful when
 	// `--devcontainer` is also set. Slice-v1-devcontainer-features T4.
 	AllowExternalFeatureSources []string
+
+	// Sandbox is `--sandbox` (LH-FA-DEV-006): render the devcontainer
+	// with the sandbox profile. Requires `--devcontainer`.
+	Sandbox bool
 }
 
 // newInitCommand builds the `u-boot init` Cobra subcommand.
@@ -168,6 +172,8 @@ Examples:
 		"render the project from an external template instead of the default flow (`u-boot template list` for the catalog; LH-FA-TPL-001 / slice-v1-template-init T4 — fresh-init only, mutex with --devcontainer/--force/--backup/--dry-run/--diff)")
 	cmd.Flags().StringSliceVar(&flags.AllowExternalFeatureSources, "allow-external-feature-sources", nil,
 		"seed devcontainer.featureSources.allow with the given URLs (LH-FA-DEV-003; comma-separated, repeatable). Requires --devcontainer; `--yes` does not substitute (LH-NFA-SEC-004).")
+	cmd.Flags().BoolVar(&flags.Sandbox, "sandbox", false,
+		"render the devcontainer with the sandbox profile (LH-FA-DEV-006: named-volume workspace, no host bind mount, no socket mount) and set devcontainer.profile=sandbox. Requires --devcontainer.")
 	return cmd
 }
 
@@ -237,6 +243,7 @@ func runInit(
 		Devcontainer:                flags.Devcontainer,
 		Template:                    flags.Template,
 		AllowExternalFeatureSources: flags.AllowExternalFeatureSources,
+		Sandbox:                     flags.Sandbox,
 		PreviewMode:                 mode,
 		// SilenceProgress in JSON-Mode (T0-(o)): emitSummary's
 		// AffectedFiles-Events würden sonst stdout VOR dem JSON-
@@ -276,12 +283,13 @@ func runInit(
 //   - diff=true                  → voll-schema preview-and-apply,
 //     plannedFiles + hunks.
 func writeInitJSON(out io.Writer, resp driving.InitProjectResponse, dryRun, diffFlag bool) error {
+	warnDiags := mapWarningsToDiagnostics(resp.Warnings)
 	if !dryRun && !diffFlag {
-		env := newMinimalEnvelope("init", "", nil, 0)
+		env := newMinimalEnvelope("init", "", warnDiags, 0)
 		return writeEnvelope(out, env)
 	}
 	pfs, chs := mapPlannedFilesToWire(resp.PlannedFiles, diffFlag)
-	env := newFullEnvelope("init", "", dryRun, diffFlag, pfs, chs, nil, nil, 0)
+	env := newFullEnvelope("init", "", dryRun, diffFlag, pfs, chs, nil, warnDiags, 0)
 	return writeEnvelope(out, env)
 }
 
@@ -333,6 +341,11 @@ func mapInitErrorToDiagnostic(err error) diagnosticItem {
 		return diagnosticItem{Level: "error", Code: "LH-FA-INIT-004", Message: err.Error()}
 	case errors.Is(err, domain.ErrInvalidProjectName):
 		return diagnosticItem{Level: "error", Code: "LH-FA-INIT-006", Message: err.Error()}
+	case errors.Is(err, domain.ErrInvalidSandboxSetting):
+		// LH-FA-DEV-006 (`--sandbox` without `--devcontainer`, or an
+		// `origin` URL with credentials) — dual-classifier partner of
+		// isConfigValidationError (exit 10).
+		return diagnosticItem{Level: "error", Code: "LH-FA-DEV-006", Message: err.Error()}
 	case errors.Is(err, domain.ErrInvalidFeatureSource):
 		// LH-FA-DEV-003 (`init --allow-external-feature-sources` ohne
 		// `--devcontainer`) — Spec §714. Exit-Code 10 wird via
@@ -396,6 +409,11 @@ func printInitSummary(out io.Writer, resp driving.InitProjectResponse, dryRun bo
 			if _, err := fmt.Fprintf(out, "  - %s → %s\n", b.Original, b.Backup); err != nil {
 				return err
 			}
+		}
+	}
+	for _, w := range resp.Warnings {
+		if _, err := fmt.Fprintf(out, "\nWarning (%s): %s\n", w.Code, w.Message); err != nil {
+			return err
 		}
 	}
 	return nil

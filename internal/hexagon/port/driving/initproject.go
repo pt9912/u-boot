@@ -120,6 +120,12 @@ type InitProjectRequest struct {
 	// before any write. Slice-v1-devcontainer-features T4.
 	AllowExternalFeatureSources []string
 
+	// Sandbox renders the devcontainer with the sandbox profile
+	// (LH-FA-DEV-006) and writes `devcontainer.profile: sandbox`.
+	// Only valid together with [Devcontainer]; otherwise the call
+	// fails with [domain.ErrInvalidSandboxSetting] before any write.
+	Sandbox bool
+
 	// PreviewMode encodes the --dry-run × --diff flag combination per
 	// slice-v1-cli-json-dry-run-init T0-(b) (inherited from add T0-(b)
 	// truth table). Default zero value [PreviewNone] preserves the
@@ -184,6 +190,10 @@ type InitProjectResponse struct {
 	// application service (matches add-pattern; the use case fills
 	// PlannedFiles, the CLI computes Changes from them).
 	Changes []ChangeEntry
+
+	// Warnings carries soft diagnostics (level "warn", exit 0), e.g.
+	// the LH-FA-DEV-006 "no git remote, no clone step" notice.
+	Warnings []WarningEntry
 }
 
 // ErrProjectExists signals that BaseDir already looks like an

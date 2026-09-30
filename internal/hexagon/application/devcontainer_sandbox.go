@@ -2,8 +2,12 @@ package application
 
 import (
 	"fmt"
+	"path/filepath"
+	"regexp"
+	"strings"
 
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
+	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
@@ -128,4 +132,116 @@ func sandboxConfigValue(cfg ubootYAMLConfig, path domain.ConfigPath) (string, bo
 		return dc.Sandbox.OnUnavailable, true
 	}
 	return "", false
+}
+
+// sandboxWorkspaceRoot is the parent directory of the sandbox
+// workspace mount inside the container (LH-FA-DEV-006).
+const sandboxWorkspaceRoot = "/workspaces"
+
+// cloneURLSafeRE is the character whitelist for the `origin` URL that
+// lands verbatim in a generated shell command inside a JSON string:
+// no quotes, spaces, `$`, backticks, `;`, `&`, `|` or backslashes.
+var cloneURLSafeRE = regexp.MustCompile(`^[A-Za-z0-9._~:/@%+=-]+$`)
+
+// profileIsSandbox reports whether the persisted profile is `sandbox`.
+func profileIsSandbox(dc *ubootYAMLDevcontainer) bool {
+	return dc != nil && dc.Profile == string(domain.ProfileSandbox)
+}
+
+// devcontainerTemplateData builds the template data for the two
+// devcontainer templates from the project name, the parsed
+// `devcontainer:` sub-tree (may be nil) and the resolved sandbox
+// state. UID stays 0 (= emit nothing) for the default 1000 so the
+// pre-0.3.0 output remains byte-identical (LH-FA-DEV-004).
+func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bool, cloneURL string) templateData {
+	data := templateData{Name: name}
+	if dc != nil && dc.User != nil && dc.User.UID != nil && *dc.User.UID != domain.DefaultContainerUID {
+		data.UID = *dc.User.UID
+	}
+	if sandbox {
+		data.Sandbox = true
+		data.WorkspaceVolume = name + "-workspace"
+		data.WorkspaceFolder = sandboxWorkspaceRoot + "/" + name
+		data.CloneURL = cloneURL
+	}
+	return data
+}
+
+// validateCloneURL rejects `origin` URLs that must not be written
+// into a generated file: unsafe characters (shell/JSON injection) or
+// embedded credentials (LH-FA-DEV-009 — none in any generated file).
+// scp-like (`git@host:path`) and `ssh://user@host/…` URLs carry only
+// a user name and pass.
+func validateCloneURL(raw string) error {
+	if !cloneURLSafeRE.MatchString(raw) || strings.HasPrefix(raw, "-") {
+		return fmt.Errorf("%w: git remote 'origin' URL contains characters that cannot be written into the devcontainer safely",
+			domain.ErrInvalidSandboxSetting)
+	}
+	scheme, rest, hasScheme := strings.Cut(raw, "://")
+	if !hasScheme {
+		return nil
+	}
+	authority, _, _ := strings.Cut(rest, "/")
+	userinfo, _, hasUser := strings.Cut(authority, "@")
+	if !hasUser {
+		return nil
+	}
+	if scheme == "http" || scheme == "https" || strings.Contains(userinfo, ":") {
+		return fmt.Errorf("%w: git remote 'origin' URL embeds credentials; remove them from the remote (LH-FA-DEV-009) and pass tokens at runtime",
+			domain.ErrInvalidSandboxSetting)
+	}
+	return nil
+}
+
+// readGitOriginURL returns the URL of remote `origin` from
+// `<baseDir>/.git/config`, or "" when there is no repository, no
+// `.git/config` (worktrees / submodules have a `.git` file), or no
+// such remote. Best-effort discovery through the FileSystem port.
+func readGitOriginURL(fs driven.FileSystem, baseDir string) string {
+	path := filepath.Join(baseDir, ".git", "config")
+	exists, err := fs.Exists(path)
+	if err != nil || !exists {
+		return ""
+	}
+	body, err := fs.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	inOrigin := false
+	for _, line := range strings.Split(string(body), "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "[") {
+			inOrigin = line == `[remote "origin"]`
+			continue
+		}
+		if key, value, ok := strings.Cut(line, "="); inOrigin && ok && strings.TrimSpace(key) == "url" {
+			return strings.TrimSpace(value)
+		}
+	}
+	return ""
+}
+
+// resolveSandboxClone returns the validated clone URL for the sandbox
+// profile plus the LH-FA-DEV-006 warning when there is no remote
+// (no clone step is generated then). For a non-sandbox render it
+// returns ("", nil, nil). A URL with credentials or unsafe
+// characters is a domain error (exit 10).
+func resolveSandboxClone(fs driven.FileSystem, baseDir string, sandbox bool) (string, []driving.WarningEntry, error) {
+	if !sandbox {
+		return "", nil, nil
+	}
+	url := readGitOriginURL(fs, baseDir)
+	if url == "" {
+		return "", []driving.WarningEntry{{
+			Code:  "LH-FA-DEV-006",
+			Level: "warn",
+			Message: "sandbox profile: no git remote 'origin' found; no clone step generated. " +
+				"Add a remote and run `u-boot generate devcontainer` to add it",
+			Subject: ".devcontainer/devcontainer.json",
+		}}, nil
+	}
+	if err := validateCloneURL(url); err != nil {
+		return "", nil, err
+	}
+	return url, nil, nil
 }

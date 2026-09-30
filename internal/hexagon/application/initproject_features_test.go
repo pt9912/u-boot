@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application"
+	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
@@ -83,5 +84,70 @@ func TestInit_AllowExternalFeatureSources_InvalidURL(t *testing.T) {
 	}
 	if !errors.Is(err, application.ErrInvalidFeatureSource) {
 		t.Errorf("err = %v, want wrap of ErrInvalidFeatureSource", err)
+	}
+}
+
+// LH-FA-DEV-006: `init --devcontainer --sandbox` renders the sandbox
+// shape and persists the profile; without a remote it warns.
+func TestInit_Sandbox_RendersProfileAndWarnsWithoutRemote(t *testing.T) {
+	svc, fs, _, _ := newService(t)
+
+	resp, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name: "demo", BaseDir: testBaseDir, SkipGit: true, Devcontainer: true, Sandbox: true,
+	})
+	if err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+	if len(resp.Warnings) != 1 || resp.Warnings[0].Code != "LH-FA-DEV-006" {
+		t.Errorf("warnings = %+v, want one LH-FA-DEV-006", resp.Warnings)
+	}
+	dc, err := fs.ReadFile(filepath.Join(testBaseDir, ".devcontainer", "devcontainer.json"))
+	if err != nil {
+		t.Fatalf("read devcontainer.json: %v", err)
+	}
+	if !strings.Contains(string(dc), `"workspaceMount": "source=demo-workspace,target=/workspaces/demo,type=volume"`) {
+		t.Errorf("devcontainer.json lacks sandbox workspaceMount:\n%s", dc)
+	}
+	if strings.Contains(string(dc), "postCreateCommand") {
+		t.Errorf("no remote: postCreateCommand must be absent:\n%s", dc)
+	}
+	y, _ := fs.ReadFile(filepath.Join(testBaseDir, "u-boot.yaml"))
+	if !strings.Contains(string(y), "profile: sandbox") {
+		t.Errorf("u-boot.yaml lacks profile: sandbox:\n%s", y)
+	}
+}
+
+// Default init (no --sandbox) keeps the pre-0.3.0 devcontainer.json.
+func TestInit_Devcontainer_NoSandbox_Unchanged(t *testing.T) {
+	svc, fs, _, _ := newService(t)
+	resp, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name: "demo", BaseDir: testBaseDir, SkipGit: true, Devcontainer: true,
+	})
+	if err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+	if len(resp.Warnings) != 0 {
+		t.Errorf("unexpected warnings: %+v", resp.Warnings)
+	}
+	dc, _ := fs.ReadFile(filepath.Join(testBaseDir, ".devcontainer", "devcontainer.json"))
+	for _, s := range []string{"workspaceMount", "postCreateCommand", "USER_UID"} {
+		if strings.Contains(string(dc), s) {
+			t.Errorf("default devcontainer.json must not contain %q", s)
+		}
+	}
+}
+
+// `--sandbox` without `--devcontainer` → domain sentinel (exit 10)
+// before any write.
+func TestInit_Sandbox_RequiresDevcontainer(t *testing.T) {
+	svc, fs, _, _ := newService(t)
+	_, err := svc.Init(context.Background(), driving.InitProjectRequest{
+		Name: "demo", BaseDir: testBaseDir, SkipGit: true, Sandbox: true,
+	})
+	if !errors.Is(err, domain.ErrInvalidSandboxSetting) {
+		t.Fatalf("err = %v, want ErrInvalidSandboxSetting", err)
+	}
+	if exists, _ := fs.Exists(filepath.Join(testBaseDir, "u-boot.yaml")); exists {
+		t.Errorf("u-boot.yaml must not be written")
 	}
 }
