@@ -50,7 +50,7 @@ Eine Instanz ist ein Ordner (`devcontainerId` ist pro Ordner stabil). Parallele 
 
 ## Konsequenzen
 
-- Positiv: Parallele Sandbox-Instanzen aus getrennten Ordnern sind isoliert; der Bind-Mount-Ausschluss aus `LH-FA-DEV-006` bleibt erhalten.
+- Positiv: Parallele Sandbox-Instanzen aus getrennten Ordnern sind isoliert; der Bind-Mount-Ausschluss aus [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) bleibt erhalten.
 - Negativ: Die alte Benennung entfällt. Das Sandbox-Profil ist noch nicht released; lokal angelegte Volumes `<projekt>-workspace` / `<projekt>-containers` bleiben verwaist und können mit `docker volume rm` entfernt werden. Der Workspace-Inhalt eines neuen Volumes entsteht durch den Clone-Schritt neu (nicht gepushte Arbeit im alten Volume geht nicht automatisch über).
 - Folgepflicht: Nachholmessung in VS Code (Dev Containers) und Codespaces; Ergebnis als Zeile in der Geschichte. Compose-Service-Ports mehrerer Instanzen bleiben ein getrennter Vorgang.
 
