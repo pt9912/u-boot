@@ -22,6 +22,9 @@
 {{- else if .CloneURL}}
   "postCreateCommand": "[ -d .git ] || git clone -- {{.CloneURL}} .",
 {{- end}}
+  "remoteEnv": {
+    "GIT_TOKEN": "${localEnv:GIT_TOKEN}"
+  },
 {{- end}}
 {{- if .ForwardPorts}}
   "forwardPorts": [{{range $i, $p := .ForwardPorts}}{{if $i}}, {{end}}{{$p}}{{end}}],

@@ -78,6 +78,14 @@ func TestGenerateDevcontainer_Sandbox_WithRemote(t *testing.T) {
 	if !strings.Contains(string(df), `mkdir -p "/workspaces/t-uboot-gen"`) {
 		t.Errorf("Dockerfile lacks workspace dir:\n%s", df)
 	}
+	// LH-FA-DEV-009: token only as a runtime reference, never a value.
+	env, _ := m["remoteEnv"].(map[string]any)
+	if env["GIT_TOKEN"] != "${localEnv:GIT_TOKEN}" {
+		t.Errorf("remoteEnv = %v, want GIT_TOKEN pass-through", m["remoteEnv"])
+	}
+	if !strings.Contains(string(df), "credential.helper") {
+		t.Errorf("Dockerfile lacks the runtime credential helper:\n%s", df)
+	}
 	yamlBody, _ := fs.ReadFile(filepath.Join(generateTestBaseDir, "u-boot.yaml"))
 	if !strings.Contains(string(yamlBody), "profile: sandbox") {
 		t.Errorf("profile not persisted:\n%s", yamlBody)

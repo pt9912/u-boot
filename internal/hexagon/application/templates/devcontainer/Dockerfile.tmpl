@@ -27,6 +27,8 @@ COPY sandbox-init.sh /usr/local/bin/u-boot-sandbox-init
 # Sandbox profile (LH-FA-DEV-006): workspace lives in a named volume that
 # inherits ownership from this directory.
 RUN mkdir -p "{{.WorkspaceFolder}}" && chown vscode:vscode "{{.WorkspaceFolder}}"
+# Git credentials come from $GIT_TOKEN at runtime (LH-FA-DEV-009); nothing is stored in the image.
+RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
 {{- end}}
 {{- end}}
 USER vscode

@@ -43,5 +43,7 @@ func DefaultAllowedCodes() map[string]string {
 		"devcontainer.forwardPorts.consistency":  "doctor: devcontainer.json forwardPorts konsistent",
 		"devcontainer.features.allowlist":        "doctor: devcontainer features auf Allowlist",
 		"devcontainer.features.drift":            "doctor: devcontainer features ohne Drift",
+		"devcontainer.sandbox.runtime":           "doctor: Sandbox nested runtime (LH-FA-DEV-007)",
+		"devcontainer.sandbox.credentials":       "doctor: Sandbox git credentials (LH-FA-DEV-009)",
 	}
 }

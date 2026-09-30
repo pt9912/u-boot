@@ -137,6 +137,8 @@ func DoctorCheckIDs() []string {
 		checkIDForwardPortsConsistency,
 		checkIDDevcontainerFeaturesAllowlist,
 		checkIDDevcontainerFeaturesDrift,
+		checkIDSandboxRuntime,
+		checkIDSandboxCredentials,
 	}
 }
 
@@ -181,6 +183,8 @@ func (s *DoctorService) Check(ctx context.Context, req driving.DoctorRequest) (d
 		s.checkForwardPortsConsistency(ctx, req.BaseDir),
 		s.checkDevcontainerFeaturesAllowlist(ctx, req.BaseDir),
 		s.checkDevcontainerFeaturesDrift(ctx, req.BaseDir),
+		s.checkSandboxRuntime(ctx, req.BaseDir),
+		s.checkSandboxCredentials(ctx, req.BaseDir),
 	}
 	report := domain.DiagnosticReport{Items: items}
 	s.logger.Info("doctor: checks complete",
