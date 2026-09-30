@@ -39,6 +39,9 @@ this file is the same format applied to u-boot itself.
 
 ### Changed
 
+- `build(deps): Go toolchain 1.26.5 → 1.26.6` — fixes eight HIGH stdlib
+  advisories (e.g. CVE-2026-33818, `encoding/asn1` denial of service) that
+  failed the Trivy image scan.
 - Removed the internal `driving.AddPreviewMode` type-alias; the canonical
   `driving.PreviewMode` is the sole spelling of the preview-mode enum. No
   external consumers exist (self-contained CLI).
