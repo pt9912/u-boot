@@ -34,7 +34,7 @@ und die Ergänzung von
 | Tranche | Inhalt | Stand |
 |---|---|---|
 | T1 | Config-Schlüssel `devcontainer.user.uid`, `devcontainer.profile`, `devcontainer.sandbox.nestedRuntime` / `onUnavailable`: Domain-Validierung, `config get/set`, Load-Validierung (Exit 10), Exit-Code-Pin | erledigt (`ef69c05`) |
-| T2 | `--sandbox` (init/generate), Generator-Ausgabe für das Sandbox-Profil (Volume statt Bind-Mount, keine Socket-/Secret-Mounts, `USER_UID`-Build-Arg), Golden Cases, Mapper-Eintrag (Envelope-Code) | offen |
+| T2 | `--sandbox` (init/generate), Generator-Ausgabe für das Sandbox-Profil (Volume statt Bind-Mount, keine Socket-/Secret-Mounts, `USER_UID`-Build-Arg), Golden Cases, Mapper-Eintrag (Envelope-Code) | erledigt (`aed7b37`) |
 | T3 | `nestedRuntime: podman`: Dockerfile-Pakete, `runArgs`-Lockerungen (einzeln ausgewiesen), Startscript mit `vfs`-Fallback und Degradationstabelle | offen |
 | T4 | Doctor-Checks (Degradationszustände, Token-Quelle [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)) | offen |
 | T5 | Integrationstest (`//go:build docker`), `docs/user/`, README, CHANGELOG, Closure | offen |
