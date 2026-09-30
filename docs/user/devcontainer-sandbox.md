@@ -141,7 +141,8 @@ und `.devcontainer/*` sowie eine fehlende Token-Quelle bei https-Clone.
   mehrerer Container ausgelegt). Auch Klone in verschiedenen Ordnern
   kollidieren, solange der Projektname gleich ist. Workaround: abweichende
   `project.name`-Werte; Compose-Service-Ports (`u-boot up`) kollidieren
-  zusätzlich.
+  zusätzlich. Die Lösung (eindeutige Volume-Namen) ist als Slice
+  [`slice-v1-sandbox-devcontainer-instanzen`](../plan/planning/open/slice-v1-sandbox-devcontainer-instanzen.md) geplant.
 
 ## 7. Grenzen
 

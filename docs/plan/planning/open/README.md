@@ -11,6 +11,7 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
+| [`slice-v1-sandbox-devcontainer-instanzen.md`](slice-v1-sandbox-devcontainer-instanzen.md) | Mehrere Sandbox-Devcontainer-Instanzen desselben Projekts (eindeutige Volume-Namen) |
 | [`slice-v1-config-list-subcommand.md`](slice-v1-config-list-subcommand.md) | Cleanup: `u-boot config list` als eigener Subcommand mit strukturiertem Path-Value-Tree |
 | [`slice-v1-config-multi-path-get.md`](slice-v1-config-multi-path-get.md) | Cleanup: `u-boot config get` Multi-Pfad-Get mit `--json-array` |
 | [`slice-v1-config-multi-path-set.md`](slice-v1-config-multi-path-set.md) | Cleanup: `u-boot config set` Multi-Path-Set (atomar mehrere Pfade) |
