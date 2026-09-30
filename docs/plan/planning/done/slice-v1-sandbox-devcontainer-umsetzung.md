@@ -37,7 +37,30 @@ und die Ergänzung von
 | T2 | `--sandbox` (init/generate), Generator-Ausgabe für das Sandbox-Profil (Volume statt Bind-Mount, keine Socket-/Secret-Mounts, `USER_UID`-Build-Arg), Golden Cases, Mapper-Eintrag (Envelope-Code) | erledigt (`aed7b37`) |
 | T3 | `nestedRuntime: podman`: Dockerfile-Pakete, `runArgs`-Lockerungen (einzeln ausgewiesen), Startscript mit `vfs`-Fallback und Degradationstabelle | erledigt (`f7e4b92`) |
 | T4 | Doctor-Checks (Degradationszustände, Token-Quelle [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)) | erledigt (`915a756`) |
-| T6 | Clone-Quelle `devcontainer.sandbox.repository` statt `origin` (Lastenheft 0.3.2, Wunsch des Projektinhabers): Config-Key, Validierung, Generator, Doctor, Doku | in Arbeit |
-| T5 | Integrationstest (`//go:build docker`), `docs/user/`, README, CHANGELOG, Closure | offen |
+| T6 | Clone-Quelle `devcontainer.sandbox.repository` statt `origin` (Lastenheft 0.3.2, Wunsch des Projektinhabers): Config-Key, Validierung, Generator, Doctor, Doku | erledigt (`50dbd84`) |
+| T5 | Integrationstest (`//go:build docker`), `docs/user/`, README, CHANGELOG, Closure | erledigt (`50dbd84`) |
 
 **Bekannte Einschränkung (T1):** Die Egress-Schlüssel (`devcontainer.sandbox.egress.*`, [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), V2) sind nicht modelliert. Ein Marshal-Rewrite von `u-boot.yaml` (z. B. `config set devcontainer.featureSources.allow`) würde solche Schlüssel verwerfen; das ist vor dem V2-Slice zu schließen.
+
+## Closure-Notiz
+
+**Status:** **abgeschlossen** (2026-09-30, **Delivery-Hash: `50dbd84`**).
+
+- **Geliefert:** [`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004--benutzerrechte)-UID-Schlüssel, Sandbox-Profil (`--sandbox`,
+  Named-Volume-Workspace, Clone aus `devcontainer.sandbox.repository` bzw.
+  `origin`), nested Podman mit ausgewiesenen Lockerungen und
+  Degradationstabelle, Git-Zugangsdaten nur zur Laufzeit (`GIT_TOKEN`),
+  zwei Doctor-Checks (15 gesamt), Docker-Integrationstest, Nutzer-Doku,
+  README/CHANGELOG. Der Slice schloss zusätzlich zwei Spec-Anhebungen ein
+  (0.3.1: ohne Remote keine Fehlermeldung; 0.3.2: `repository`-Schlüssel),
+  beide auf Wunsch des Projektinhabers während der Umsetzung.
+- **Nicht geliefert / offen:** [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress, V2) wartet auf die
+  Ratifizierung von [ADR-0012](../../adr/0012-devcontainer-egress-firewall.md); macOS/Colima und Podman-Host sind ungeprüft
+  (Nachholmessung laut ADR 0014); ADR 0014 bleibt `Proposed`; mehrere
+  Instanzen desselben Projekts sind nicht unterstützt (Volume-Namen hängen
+  am Projektnamen); Marshal-Rewrite von `u-boot.yaml` verwirft noch nicht
+  modellierte Egress-Schlüssel.
+- **Sensoren:** `make gates` (lint, test, coverage-gate 91,7 %, docs-check)
+  und `go test -tags docker ./internal/e2e -run SandboxDevcontainer`
+  ausgeführt; `make ci` (govulncheck, image-scan) und der volle
+  `make test-docker`-Lauf nicht ausgeführt.
