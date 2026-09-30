@@ -133,3 +133,29 @@ Dieses ADR liefert nur die Entscheidungs-Rahmung. Vor Implementierung:
 Re-Evaluation-Trigger: konkrete Nutzer-/Team-Nachfrage nach
 egress-restringierten Devcontainern, oder ein Agenten-Sandbox-Use-Case
 auf u-boot-erzeugten Devcontainern.
+
+## Geschichte
+
+- 2026-06-09: Entwurf (`Proposed`).
+- 2026-09-30: Re-Evaluierungs-Trigger „Agenten-Sandbox-Use-Case" ist
+  eingetreten: ein CR-Slice zum Sandbox-Profil für Devcontainer (Planning)
+  führt [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)
+  (V2, Egress-Restriktion im Sandbox-Profil) ein. Status bleibt
+  `Proposed`; Ratifizierung steht vor der Umsetzung von `-008` aus.
+  Stand der §Offenen Fragen nach dem Spec-Change:
+  1. Default-Allowlist je Ökosystem — **offen**, an die Ratifizierung
+     delegiert (Spec verlangt nur, dass sie dokumentiert ist).
+  2. Degradations-Politik — **beantwortet** durch
+     [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer):
+     `devcontainer.sandbox.onUnavailable: warn | fail` (Default `warn`,
+     `fail` = Exit 11).
+  3. Aktivierungs-Surface — **beantwortet**: nur Config-Key
+     `devcontainer.sandbox.egress.enabled`, keine Flag-Variante.
+  4. iptables vs. nftables — **offen**, an die Ratifizierung delegiert.
+  5. Verhältnis zu
+     [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) —
+     **beantwortet**: bewusst getrennte Allowlists (Build-Quelle vs.
+     Laufzeit-Egress).
+  Hinweis: Punkt 1 der §Entscheidung nennt `--firewall` bzw.
+  `devcontainer.firewall.enabled`; die Spec-Fassung nutzt stattdessen
+  `devcontainer.sandbox.egress.*` im Sandbox-Profil.

@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.2.0                                                              |
+| Version          | 0.3.0                                                              |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -728,6 +728,13 @@ Priorität: MVP
 
 Der Devcontainer soll standardmäßig mit einem nicht-root Benutzer arbeiten.
 
+Die UID dieses Benutzers muss an den Host anpassbar sein (z. B. `501` unter macOS mit Colima):
+
+- Konfigurationsschlüssel `devcontainer.user.uid` (Ganzzahl, optional, Default `1000`).
+- Der Wert wird als Build-Argument `USER_UID` an den Image-Build übergeben; der Container-Benutzer wird mit dieser UID angelegt.
+- Zulässig sind Ganzzahlen von `1` bis `65535`. `0` (root), negative oder nicht numerische Werte führen zu einem fachlichen Validierungsfehler (Exit-Code `10`).
+- Ohne `devcontainer.user.uid` bleibt das erzeugte Ergebnis unverändert (Default `1000`).
+
 ---
 
 ### LH-FA-DEV-005 – Ports
@@ -738,6 +745,84 @@ Das Produkt muss Ports aus aktivierten Services in der Devcontainer-Konfiguratio
 
 Konkret müssen die Ports der Services in `devcontainer.json` als `forwardPorts` eingetragen werden.
 Ist keine aktive Port-Exposition in der aktuellen Projektkonfiguration vorhanden, darf `forwardPorts` fehlen.
+
+---
+
+### LH-FA-DEV-006 – Sandbox-Profil
+
+Priorität: V1
+
+Das Produkt soll ein opt-in Sandbox-Profil für Devcontainer erzeugen können, das den Einsatz autonomer Agenten (ohne Rückfrage an den Menschen) im Container auf Schadensbegrenzung auslegt. Das Profil ist eine Schadensbegrenzung und keine harte Isolationsgrenze.
+
+Aktivierung:
+
+```bash
+u-boot init --devcontainer --sandbox
+u-boot generate devcontainer --sandbox
+```
+
+oder über die Projektkonfiguration `devcontainer.profile: sandbox` (Werte: `default` | `sandbox`, Default `default`). `--sandbox` setzt den Konfigurationsschlüssel; `--sandbox` ohne aktivierbaren Devcontainer führt zu einem fachlichen Fehler (Exit-Code `10`).
+
+Das erzeugte Ergebnis im Sandbox-Profil muss:
+
+- einen nicht-root Benutzer verwenden ([`LH-FA-DEV-004`](#lh-fa-dev-004--benutzerrechte));
+- das Host-Arbeitsverzeichnis nicht per Bind-Mount einbinden; der Workspace liegt in einem benannten Volume, das Repository wird im Container geklont (Quelle: Remote-URL des Projekt-Repositories; ohne Remote ein fachlicher Fehler, Exit-Code `10`);
+- keinen Container-Runtime-Socket des Hosts einbinden;
+- kein `--privileged` und keine zusätzlichen Capabilities setzen, sofern nicht durch [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) oder [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion) ausdrücklich verlangt;
+- keine Host-Dateien mit Geheimnissen (z. B. `~/.ssh`, `~/.aws`, Credential-Stores) einbinden;
+- jede Sicherheitslockerung (Capabilities, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices) in der Befehlsausgabe ausweisen.
+
+Nicht-Ziele: `u-boot` startet keinen Agenten und setzt keinen Berechtigungsmodus des Agenten.
+
+Für Devcontainer-Features oder externe Skripte, die das Profil einbindet, gelten [`LH-FA-DEV-003`](#lh-fa-dev-003--devcontainer-features) und [`LH-NFA-SEC-004`](#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) unverändert; das Profil gibt keine externe Quelle implizit frei.
+
+---
+
+### LH-FA-DEV-007 – Container-Runtime im Sandbox-Devcontainer
+
+Priorität: V1
+
+Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll optional eine rootless Container-Runtime im Container bereitgestellt werden, damit Image-Builds ohne Zugriff auf einen Host-Socket möglich sind.
+
+- Konfigurationsschlüssel `devcontainer.sandbox.nestedRuntime` (`podman` | `none`, Default `none`).
+- Bei `podman`: rootless Podman, ein `docker`-Kompatibilitäts-Alias, Zugriff auf `/dev/fuse`, subuid-/subgid-Bereiche für den Container-Benutzer und ein Volume für den Storage.
+- Das Ergebnis ist engine-neutral und startet unter Docker (inkl. Colima) und Podman.
+
+**Degradation und Strenge** (gilt für dieses und das folgende Egress-Feature): `devcontainer.sandbox.onUnavailable` (`warn` | `fail`, Default `warn`).
+
+| Zustand | `warn` (Default) | `fail` |
+| ------- | ---------------- | ------ |
+| `/dev/fuse` nicht verfügbar | Fallback auf `vfs`-Storage, Warnung mit Hinweis | Umgebungsproblem, Exit-Code `11` |
+| Nested User-Namespaces durch Seccomp/AppArmor blockiert und `nestedRuntime: podman` | Umgebungsproblem, Exit-Code `11` | Umgebungsproblem, Exit-Code `11` |
+| Egress-Capability (`NET_ADMIN`) nicht gewährbar ([`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion)) | Egress-Restriktion entfällt, Warnung mit Hinweis auf Restriktion auf Netz-/DNS-Ebene | Umgebungsproblem, Exit-Code `11` |
+
+Ausdrücklich angeforderte Runtime (`nestedRuntime: podman`) wird nie stillschweigend durch etwas anderes ersetzt. Jeder Fallback wird in der Befehlsausgabe und in `u-boot doctor` ausgewiesen. Die Prüfung erfolgt durch `u-boot doctor` (soweit vom Host aus ermittelbar) und beim Containerstart durch das erzeugte Startscript, das im Fehlerfall nicht-null endet. Ungültige Werte der Schlüssel führen zu einem fachlichen Validierungsfehler (Exit-Code `10`).
+
+---
+
+### LH-FA-DEV-008 – Egress-Restriktion
+
+Priorität: V2
+
+Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll eine Allowlist für ausgehenden Netzwerkverkehr aktivierbar sein.
+
+- Aktivierung über `devcontainer.sandbox.egress.enabled: true` (Default `false`); keine Flag-Variante, damit `--yes`/`--no-interactive` ([`LH-FA-CLI-005A`](#lh-fa-cli-005a--interaktivität-und-automatisierung)) ohne Sonderfall bleiben.
+- Erlaubte Ziele: `devcontainer.sandbox.egress.allow` (Liste von Hostnamen); die Default-Allowlist (gemeinsame Basis plus Ergänzungen je gewähltem Stack) ist dokumentiert.
+- Die Allowlist ist unabhängig von `devcontainer.featureSources.allow` ([`LH-FA-DEV-003`](#lh-fa-dev-003--devcontainer-features)): jene steuert erlaubte Build-Quellen, diese die Laufzeit-Ziele.
+- Die Restriktion ist ein Guardrail und keine Sandbox-Grenze; Prozesse mit der nötigen Capability können sie aufheben. Die Dokumentation muss das ausdrücklich sagen.
+- Ist die nötige Capability nicht gewährbar, greift die Degradationstabelle aus [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer); `u-boot doctor` meldet den Zustand als `warn` (bei `onUnavailable: fail` als `error`).
+
+---
+
+### LH-FA-DEV-009 – Git-Zugangsdaten im Sandbox-Devcontainer
+
+Priorität: V1
+
+Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) dürfen Git-Zugangsdaten weder im Image, im Workspace-Volume noch in `u-boot.yaml` oder einer anderen erzeugten Datei stehen.
+
+- Übergabe zur Laufzeit per Umgebungsvariable oder als schreibgeschützter Secret-Mount.
+- Die Dokumentation beschreibt kurzlebige, auf das Repository begrenzte Tokens (privater Schlüssel nie im Container) und die Forderung nach Branch-Protection auf dem Remote.
+- `u-boot doctor` prüft die Token-Quelle: fehlt sie oder liegt sie im Klartext in einer Projektdatei, `warn` (kein Abbruch).
 
 ---
 
@@ -1341,6 +1426,15 @@ devcontainer:
 #   featureSources:
 #     allow:
 #       - https://ghcr.io/devcontainers/features/node
+#   user:
+#     uid: 1000                    # 1..65535
+#   profile: default               # default | sandbox
+#   sandbox:
+#     nestedRuntime: none          # none | podman
+#     onUnavailable: warn          # warn | fail
+#     egress:
+#       enabled: false
+#       allow: []
 ```
 
 Hinweise:
@@ -1350,6 +1444,7 @@ Hinweise:
 - `devcontainer.featureSources.allow` ist optional; fehlt das Feld, ist die Liste leer (nur lokale Features erlaubt).
 - Erlaubte Einträge in `devcontainer.featureSources.allow` müssen gültige, non-empty Quell-Strings (z. B. `https://ghcr.io/devcontainers/features/node`) sein.
 - Beim Schreiben wird die Liste dedupliziert.
+- Die Schlüssel `devcontainer.user.uid`, `devcontainer.profile` und `devcontainer.sandbox.*` sind optional und in [`LH-FA-DEV-004`](#lh-fa-dev-004--benutzerrechte) bis [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion) definiert; ungültige Werte führen zu einem fachlichen Validierungsfehler (Exit-Code `10`).
 - Bei ungültigen oder nicht zugelassenen Quellen ist ein fachlicher Validierungsfehler mit Code `10` zu melden.
 - Nicht-mandatorische Add-ons dürfen im MVP auf `enabled: false` stehen.
 - `services.<name>.enabled` ist immer explizit zu setzen; siehe [`LH-FA-ADD-005`](#lh-fa-add-005--mehrfaches-hinzufügen-verhindern) für die Default-Konvention.
@@ -2662,6 +2757,10 @@ zeigen auf die zugehörige `LH-*`-Anforderung derselben Zeile.
 | [LH-FA-DEV-003](#lh-fa-dev-003--devcontainer-features)      | Devcontainer-Features          | V1        | [PH-DEV-003](#lh-fa-dev-003--devcontainer-features)                         | [TC-DEV-003](#lh-fa-dev-003--devcontainer-features)      |
 | [LH-FA-DEV-004](#lh-fa-dev-004--benutzerrechte)      | Benutzerrechte                 | MVP       | [PH-DEV-004](#lh-fa-dev-004--benutzerrechte)                         | [TC-DEV-004](#lh-fa-dev-004--benutzerrechte)      |
 | [LH-FA-DEV-005](#lh-fa-dev-005--ports)      | Ports                          | MVP       | [PH-DEV-005](#lh-fa-dev-005--ports)                         | [TC-DEV-005](#lh-fa-dev-005--ports)      |
+| [LH-FA-DEV-006](#lh-fa-dev-006--sandbox-profil)      | Sandbox-Profil                 | V1        | [PH-DEV-006](#lh-fa-dev-006--sandbox-profil)                         | [TC-DEV-006](#lh-fa-dev-006--sandbox-profil)      |
+| [LH-FA-DEV-007](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)      | Container-Runtime im Sandbox   | V1        | [PH-DEV-007](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)                         | [TC-DEV-007](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)      |
+| [LH-FA-DEV-008](#lh-fa-dev-008--egress-restriktion)      | Egress-Restriktion             | V2        | [PH-DEV-008](#lh-fa-dev-008--egress-restriktion)                         | [TC-DEV-008](#lh-fa-dev-008--egress-restriktion)      |
+| [LH-FA-DEV-009](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)      | Git-Zugangsdaten               | V1        | [PH-DEV-009](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)                         | [TC-DEV-009](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)      |
 | [LH-FA-DOC-001](#lh-fa-doc-001--compose-datei-erzeugen)      | Compose-Datei erzeugen         | MVP       | [PH-DOC-001](#lh-fa-doc-001--compose-datei-erzeugen)                         | [TC-DOC-001](#lh-fa-doc-001--compose-datei-erzeugen)      |
 | [LH-FA-DOC-002](#lh-fa-doc-002--dockerfile-erzeugen)      | Dockerfile erzeugen            | V1        | [PH-DOC-002](#lh-fa-doc-002--dockerfile-erzeugen)                         | [TC-DOC-002](#lh-fa-doc-002--dockerfile-erzeugen)      |
 | [LH-FA-DOC-003](#lh-fa-doc-003--netzwerk)      | Netzwerk                       | MVP       | [PH-DOC-003](#lh-fa-doc-003--netzwerk)                         | [TC-DOC-003](#lh-fa-doc-003--netzwerk)      |
@@ -2869,6 +2968,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | ------- | ---------- | ------------------------------------------------------------ | ---------------------------------------------- |
 | 0.1.0 | 2026-05-21 | Initiale Fassung. Der Bestand bis 2026-07-23 entstand in der Entwurfsphase (Status `Entwurf`) und trägt deshalb keine Einzeleinträge — in dieser Phase steuern die IDs noch keine Verbindlichkeit. | — (Entwurfsphase) |
 | 0.2.0 | 2026-07-24 | [`LH-FA-PROJDOCS-002`](#lh-fa-projdocs-002--adr-format) auf die MADR-/Nygard-Template-Form umgestellt (Inline-Kopf-Felder inkl. `Schärft`; Pflicht-Abschnitte Alternativen, Fitness Function, Re-Evaluierungs-Trigger, Geschichte). Zum Umstellungszeitpunkt `Accepted` ADRs bleiben in der leanen Form und unveränderlich (Grandfathering). | Vereinbarung mit dem Projektinhaber, ausgelöst durch die Adoption des externen Betriebsregelwerks |
+| 0.3.0 | 2026-09-30 | Neue Anforderungen [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil) bis [`LH-FA-DEV-009`](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) (Sandbox-Profil, Container-Runtime mit Degradationstabelle, Egress-Restriktion, Git-Zugangsdaten); Ergänzung von [`LH-FA-DEV-004`](#lh-fa-dev-004--benutzerrechte) (UID-Anpassbarkeit über `devcontainer.user.uid`). | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt

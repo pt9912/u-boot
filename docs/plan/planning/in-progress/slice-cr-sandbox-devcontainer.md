@@ -12,9 +12,9 @@
 **Lifecycle:** Zustand = Verzeichnis (`open/` → `next/` → `in-progress/`
 → `done/`), Wechsel nur per `git mv`.
 
-**Welle:** ohne Welle (CR am Vertrags-Stratum).
+**Welle:** Spec-Wartung: Sandbox-Profil (Lastenheft 0.3.0); CR am Vertrags-Stratum.
 
-**Bezug:** [`LH-FA-DEV-006`](../../../../spec/lastenheft.md) bis [`LH-FA-DEV-009`](../../../../spec/lastenheft.md) (neu),
+**Bezug:** [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) bis [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) (neu),
 [`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004--benutzerrechte)
 (Ergänzung),
 [`LH-NFA-SEC-003`](../../../../spec/lastenheft.md#lh-nfa-sec-003--sichere-defaults),
@@ -39,22 +39,22 @@ Repo-Kontext, `remoteUser: vscode`, kein Netzwerkschutz).
 
 ### CR-Kern (vorgeschlagene Anforderungen)
 
-- **[`LH-FA-DEV-006`](../../../../spec/lastenheft.md) — Sandbox-Profil (V1):** opt-in über
+- **[`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) — Sandbox-Profil (V1):** opt-in über
   `u-boot generate devcontainer --sandbox` bzw. `devcontainer.profile: sandbox`.
   Nicht-root-Benutzer ([`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004--benutzerrechte)),
   kein Bind-Mount des Host-Arbeitsverzeichnisses (Workspace in benanntem
   Volume, Clone im Container), kein Socket-Mount, kein `--privileged`,
   keine Host-Dateien mit Secrets.
-- **[`LH-FA-DEV-007`](../../../../spec/lastenheft.md) — Container-Runtime im Sandbox-Devcontainer (V1):**
+- **[`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) — Container-Runtime im Sandbox-Devcontainer (V1):**
   optional rootless Podman im Container
   (`devcontainer.sandbox.nestedRuntime: podman | none`, Default `none`),
   docker-Kompatibilitäts-Alias, `/dev/fuse`, subuid/subgid, Storage-Volume.
   Engine-neutral; Sicherheitslockerungen (Seccomp/AppArmor) benennen und
   in der Befehlsausgabe ausweisen.
-- **[`LH-FA-DEV-008`](../../../../spec/lastenheft.md) — Egress-Restriktion (V2):** Allowlist für ausgehenden
+- **[`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) — Egress-Restriktion (V2):** Allowlist für ausgehenden
   Verkehr; Guardrail, keine Sandbox-Grenze; Doctor-Warnung, wenn die
   Capability nicht gewährbar ist (kein Abbruch).
-- **[`LH-FA-DEV-009`](../../../../spec/lastenheft.md) — Git-Zugangsdaten (V1):** Zugangsdaten weder im Image,
+- **[`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) — Git-Zugangsdaten (V1):** Zugangsdaten weder im Image,
   im Volume noch in `u-boot.yaml`; Laufzeit-Übergabe per Env oder
   read-only-Secret-Mount; Doku zu kurzlebigen, repo-begrenzten Tokens
   (Private Key nie im Container) inkl. Branch-Protection-Forderung;
@@ -88,10 +88,10 @@ Projektinhaber |
 
 ## 2. Definition of Done
 
-- [ ] **CR-Charakter dokumentiert** (dieser Slice): Trigger, betroffenes
+- [x] **CR-Charakter dokumentiert** (dieser Slice): Trigger, betroffenes
   Vertrags-Stratum, Resolutions der offenen CR-Fragen. Kein stiller
   Spec-Edit.
-- [ ] **[ADR-0012](../../adr/0012-devcontainer-egress-firewall.md)-Kohärenz** (Review M1): Der CR-Bezug zu
+- [x] **[ADR-0012](../../adr/0012-devcontainer-egress-firewall.md)-Kohärenz** (Review M1): Der CR-Bezug zu
   [ADR-0012](../../adr/0012-devcontainer-egress-firewall.md) ist im ADR
   (Status/Re-Evaluierungs-Trigger/Geschichte) festgehalten; `-008` trägt
   Priorität V2 und hängt an der Ratifizierung des ADR. Die ADR-offenen
@@ -100,35 +100,37 @@ Projektinhaber |
   [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)-Allowlist)
   sind im Zuge des Spec-Changes beantwortet oder explizit an den
   Umsetzungs-ADR delegiert.
-- [ ] **Spec-Änderung 0.3.0** (drei Spuren nach §16): Versions-Feld,
+- [x] **Spec-Änderung 0.3.0** (drei Spuren nach §16): Versions-Feld,
   Historie-Zeile, neue Anforderungen in §4.3 inkl. Prioritäts-Markierung
   (V1/V2) und Ergänzung von
   [`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004--benutzerrechte).
-- [ ] **Exit-Code-Vertrag** (Review M2): Fehlerpfade der neuen Oberfläche
+- [x] **Exit-Code-Vertrag** (Review M2): Fehlerpfade der neuen Oberfläche
   (`--sandbox`, Config-Keys, Doctor-Checks) sind auf die
   [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)-Kategorien
   abgebildet (u. a. fachlicher Fehler → Exit 10, Umgebungsproblem → Exit
   11); Test-Pins für relevante Sentinels im Umsetzungs-Slice.
-- [ ] **Degradationsverhalten definiert** (Review M3): definiertes
+- [x] **Degradationsverhalten definiert** (Review M3): definiertes
   Verhalten für (a) fehlendes `/dev/fuse`, (b) nicht gewährbare
   Egress-Capability (NET_ADMIN), (c) durch Seccomp/AppArmor blockierte
   nested User-Namespaces — je Pfad warn vs. hart abbrechen, im
   Anforderungstext oder Umsetzungs-ADR.
-- [ ] **Traceability-Matrix** (Review L1): [`PH-DEV-006`](../../../../spec/lastenheft.md)..[`PH-DEV-009`](../../../../spec/lastenheft.md) und
+- [x] **Traceability-Matrix** (Review L1): [`PH-DEV-006`](../../../../spec/lastenheft.md)..[`PH-DEV-009`](../../../../spec/lastenheft.md) und
   [`TC-DEV-006`](../../../../spec/lastenheft.md)..[`TC-DEV-009`](../../../../spec/lastenheft.md)-Zeilen in §13.
-- [ ] **Quellen-Gating-Verhältnis** (Review L2): explizit geklärt, ob/wie
+- [x] **Quellen-Gating-Verhältnis** (Review L2): explizit geklärt, ob/wie
   das Sandbox-Profil Devcontainer-Features ergänzt und dass dann
   [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)/
   [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)
   greifen.
-- [ ] **`-004`-Ergänzung in Vertrags-Form** (Review L3): konkreter
+- [x] **`-004`-Ergänzung in Vertrags-Form** (Review L3): konkreter
   Mechanismus der UID-Anpassbarkeit (Config-Key und/oder Build-Arg),
   nicht nur die Absicht.
-- [ ] **Technische Verifikation** (CR-Fragen 2 und 3): NET_ADMIN vs.
-  rootless User-Namespaces und Seccomp/AppArmor-Lockerungen unter Docker
-  sind getestet; Befund ist im Umsetzungs-ADR festgehalten (auch
-  Negativbefunde).
-- [ ] `make docs-check` grün (nächstgelegener Sensor für den
+- [x] **Technische Verifikation** (CR-Fragen 2 und 3, Entscheidung
+  2026-09-30): aus dem Spec-Change **in den Umsetzungs-ADR verschoben**.
+  Der Spec legt nur das erwartete Verhalten fest (Degradationstabelle
+  in [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer));
+  NET_ADMIN vs. rootless User-Namespaces und Seccomp/AppArmor-Lockerungen
+  werden im Umsetzungs-ADR getestet und samt Negativbefunden festgehalten.
+- [x] `make docs-check` grün (nächstgelegener Sensor für den
   Spec-Change; Umsetzung des V1-Pakets erfolgt als Folge-Slice mit
   `make gates`).
 

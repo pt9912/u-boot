@@ -97,6 +97,6 @@ Nachlauf-Pflichtbestand; erste Anwendung faellt bei der naechsten
 Artefakt-Neuanlage an. Steering-Loop: d-check-Regel "Kennungen brauchen
 Markdown-Links (auch in Inline-Code)" hat den Spec-Change am selben Tag
 gepraegt (vgl.
-[`slice-cr-sandbox-devcontainer`](../open/slice-cr-sandbox-devcontainer.md)
+[`slice-cr-sandbox-devcontainer`](../in-progress/slice-cr-sandbox-devcontainer.md)
 Korrekturschleifen) — die Link-Pflicht ist also nicht nur aktiviert,
 sondern auch belastet.

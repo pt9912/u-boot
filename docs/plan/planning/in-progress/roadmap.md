@@ -13,7 +13,7 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-keine aktive Welle
+**Spec-Wartung: Sandbox-Profil (Lastenheft 0.3.0)** — Trigger: Agenten-Sandbox-Use-Case; Slice: [`slice-cr-sandbox-devcontainer`](slice-cr-sandbox-devcontainer.md) (nur Spec-Change; Umsetzung V1/V2 als Folge-Slices).
 
 ## Nächste Wellen
 

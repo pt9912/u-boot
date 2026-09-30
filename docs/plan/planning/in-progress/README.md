@@ -12,6 +12,7 @@ Dateiname-Konventionen.
 | Datei | Gegenstand |
 | ----- | ---------- |
 | [`carveouts.md`](carveouts.md) | Master-Dokument: Carveout-Inventar ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)) |
+| [`slice-cr-sandbox-devcontainer.md`](slice-cr-sandbox-devcontainer.md) | CR: Sandbox-Profil für Devcontainer — Spec-Änderung 0.3.0 (Umsetzung als Folge-Slices) |
 | [`roadmap.md`](roadmap.md) | Master-Dokument: Slice-/Tranchen-Stand ([`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)) |
 
 (Nur die zwei Master-Dokumente liegen dauerhaft in `in-progress/`.
