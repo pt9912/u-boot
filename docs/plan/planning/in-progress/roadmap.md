@@ -24,7 +24,6 @@ keine aktive Welle
 | Devcontainer-Robustheit | Real-World-Half-State-Beschwerde oder Schema-Erweiterung | [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md) | M |
 | CI-Stabilität | belastbare Keycloak-Flake-Logs (Quay-/Mirror-Befund) | [`slice-v1-keycloak-ci-flake`](../open/slice-v1-keycloak-ci-flake.md) | S |
 | Harness-Scaffolding (Produkt) | [ADR-0011](../../adr/0011-agent-harness-scaffolding.md) accepted + Spec-Erweiterung + Lizenz-Check | `slice-vN-harness-bootstrap-scaffold` (noch kein Plan) | L |
-| Devcontainer-Egress-Firewall | [ADR-0012](../../adr/0012-devcontainer-egress-firewall.md) accepted + Spec-Erweiterung | `slice-vN-devcontainer-egress-firewall` (noch kein Plan) | M |
 | Podman-first / Migration / Custom-Sources | Konkretisierung je Thema offen | `slice-vN-podman-formal`; `slice-later-migration` ([`LH-FA-CONF-006`](../../../../spec/lastenheft.md#lh-fa-conf-006--konfiguration-migrieren)); `slice-later-custom-data-sources` ([`LH-DA-004`](../../../../spec/lastenheft.md#lh-da-004--schema-migration)) | L |
 
 ## Meilensteine
@@ -73,6 +72,7 @@ flowchart LR
 | Spec-Wartung: Traceability-Matrix konfiguriert | 2026-09-29 | [`slice-gate-rtm-traceability`](../done/slice-gate-rtm-traceability.md) — RTM 79 Anforderungen, 0 Waisen |
 | Spec-Wartung: Sandbox-Profil (Lastenheft 0.3.0) | 2026-09-30 | [`slice-cr-sandbox-devcontainer`](../done/slice-cr-sandbox-devcontainer.md) (`712af41`) |
 | Sandbox-Profil Umsetzung V1 (Lastenheft 0.3.2) | 2026-09-30 | [`slice-v1-sandbox-devcontainer-umsetzung`](../done/slice-v1-sandbox-devcontainer-umsetzung.md) (`50dbd84`) |
+| Sandbox: Egress-Restriktion (Lastenheft 0.3.3) | 2026-09-30 | [`slice-v2-sandbox-egress`](../done/slice-v2-sandbox-egress.md) (`9b1c414`) |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-NN-results.md`; die Welle-Closure lebt vollständig im jeweiligen
