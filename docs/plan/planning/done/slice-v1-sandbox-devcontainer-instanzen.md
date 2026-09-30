@@ -44,30 +44,30 @@ ist nicht für gleichzeitigen Zugriff mehrerer Container ausgelegt.
 
 ## 2. Definition of Done
 
-- [ ] **Verifikation vorab (Risiko 1):** Ob Dev Containers
+- [x] **Verifikation vorab (Risiko 1):** Ob Dev Containers
   `${devcontainerId}` bzw. `${localWorkspaceFolderBasename}` in
   `workspaceMount` und `mounts` auflöst, ist mit VS Code **und** der
   `devcontainer`-CLI geprüft; Befund (auch Negativbefund) steht im
   Umsetzungs-ADR.
-- [ ] **Entscheidung** (Umsetzungs-ADR, ≥ 3 Alternativen): eindeutiger
+- [x] **Entscheidung** (Umsetzungs-ADR, ≥ 3 Alternativen): eindeutiger
   Instanz-Anteil im Volume-Namen über (a) `${devcontainerId}`, (b)
   `${localWorkspaceFolderBasename}` oder (c) einen Konfigurationsschlüssel
   (z. B. `devcontainer.sandbox.instance`) — inklusive Verhalten bei
   Wechsel der Namensregel für bestehende Projekte (Volumes der alten
   Benennung, Migration oder bewusster Bruch).
-- [ ] **Spec-Prüfung:** Falls die Namensregel vertragsrelevant ist
+- [x] **Spec-Prüfung:** Falls die Namensregel vertragsrelevant ist
   (Konfigurationsschlüssel, Verhalten bestehender Volumes), Spec-Anhebung
   nach §16 mit Historie-Zeile; sonst ausdrücklich „keine Spec-Änderung“
   begründet.
-- [ ] **Generator:** Workspace- und Containers-Volume tragen den
+- [x] **Generator:** Workspace- und Containers-Volume tragen den
   Instanz-Anteil; Default-Profil-Ausgabe bleibt byte-identisch; Golden
   Cases (Fresh, NoOp, Wechsel alte → neue Benennung) nach
   `harness/replay.md`.
-- [ ] **Integrationstest** (`//go:build docker`): zwei Instanzen mit
+- [x] **Integrationstest** (`//go:build docker`): zwei Instanzen mit
   unterschiedlichem Instanz-Anteil laufen gleichzeitig, schreiben in ihren
   Workspace und führen `podman run` aus, ohne dass sich Volumes oder
   Storage berühren.
-- [ ] **Doku:** `docs/user/devcontainer-sandbox.md` §„Mehrere Instanzen“
+- [x] **Doku:** `docs/user/devcontainer-sandbox.md` §„Mehrere Instanzen“
   auf den neuen Stand, CHANGELOG-Eintrag, `make gates` grün.
 
 ## 3. Plan (vor Code)
@@ -108,7 +108,22 @@ ausgeführt, Delivery-Hash in der Closure-Notiz.
 
 ## 7. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Status:** **abgeschlossen** (2026-09-30, **Delivery-Hash: `7c41368`**).
+
+- **Verifikation:** Mit `devcontainer` CLI 0.80.2 gemessen: `${devcontainerId}`
+  wird in `mounts` aufgelöst, in `workspaceMount` **nicht**; `"workspaceMount": ""`
+  plus Workspace-Volume in `mounts` startet ohne Host-Bind-Mount
+  ([ADR-0015](../../adr/0015-sandbox-volumes-pro-instanz.md)).
+- **Entscheidung:** Variante D (`mounts` mit `${devcontainerId}`); keine
+  Spec-Änderung, kein neuer Konfigurationsschlüssel (Spec-Prüfung: das
+  „benannte Volume“ aus [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) bleibt erfüllt, der Name ist kein Vertrag).
+- **Sensoren:** `make gates` grün (Coverage 91,7 %); `go test -tags docker
+  ./internal/e2e -run SandboxDevcontainer` (Zwei-Instanzen-Isolation, nested
+  Podman, Degradation) grün; `make ci` und voller `make test-docker` nicht
+  ausgeführt.
+- **Offen:** VS Code und Codespaces ungeprüft ([ADR-0015](../../adr/0015-sandbox-volumes-pro-instanz.md) Folgepflicht);
+  Compose-Service-Ports mehrerer Instanzen; zwei Instanzen aus demselben
+  Ordner bleiben eine Instanz.
 
 ## 8. Sub-Area-Modus-Begründung
 
