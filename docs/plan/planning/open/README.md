@@ -11,7 +11,6 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| [`slice-v1-sandbox-devcontainer-umsetzung.md`](slice-v1-sandbox-devcontainer-umsetzung.md) | Umsetzung V1-Paket Sandbox-Profil ([`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004--benutzerrechte)/`-006`/`-007`/`-009`) |
 | [`slice-v1-config-list-subcommand.md`](slice-v1-config-list-subcommand.md) | Cleanup: `u-boot config list` als eigener Subcommand mit strukturiertem Path-Value-Tree |
 | [`slice-v1-config-multi-path-get.md`](slice-v1-config-multi-path-get.md) | Cleanup: `u-boot config get` Multi-Pfad-Get mit `--json-array` |
 | [`slice-v1-config-multi-path-set.md`](slice-v1-config-multi-path-set.md) | Cleanup: `u-boot config set` Multi-Path-Set (atomar mehrere Pfade) |

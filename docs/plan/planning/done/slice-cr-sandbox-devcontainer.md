@@ -199,7 +199,7 @@ V1-V2-Pakete als Folge-Slices).
 - **Entscheidungen bei Closure:** technische Verifikation (NET_ADMIN vs.
   User-Namespaces, Seccomp/AppArmor) an den Umsetzungs-ADR verschoben;
   `devcontainer.user.uid` als UID-Mechanismus; Egress nur per Config-Key.
-- **Folge-Slices:** V1-Umsetzung ([`slice-v1-sandbox-devcontainer-umsetzung`](../open/slice-v1-sandbox-devcontainer-umsetzung.md));
+- **Folge-Slices:** V1-Umsetzung ([`slice-v1-sandbox-devcontainer-umsetzung`](../next/slice-v1-sandbox-devcontainer-umsetzung.md));
   `-008` (V2) nach Ratifizierung von [ADR-0012](../../adr/0012-devcontainer-egress-firewall.md) als eigener Slice.
 
 ## 8. Sub-Area-Modus-Begründung

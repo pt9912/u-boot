@@ -9,7 +9,11 @@ Dateiname-Konventionen.
 
 ## Bestand
 
-Zur Zeit leer. Der Konsolidierungs-Slice
+| Datei | Gegenstand |
+| ----- | ---------- |
+| [`slice-v1-sandbox-devcontainer-umsetzung.md`](slice-v1-sandbox-devcontainer-umsetzung.md) | Umsetzung V1-Paket Sandbox-Profil ([`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004--benutzerrechte)/`-006`/`-007`/`-009`) |
+
+Zuvor: Der Konsolidierungs-Slice
 [`slice-v1-cli-json-envelope-consolidation`](../done/slice-v1-cli-json-envelope-consolidation.md) ist am 2026-06-08
 vollständig nach `done/` ausgeliefert (T0→T4). Der JSON-CLI-Cluster
 [`slice-v1-cli-json-dry-run`](../done/slice-v1-cli-json-dry-run.md) ist ebenfalls vollständig in `done/`

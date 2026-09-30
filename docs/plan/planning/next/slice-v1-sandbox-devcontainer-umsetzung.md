@@ -22,9 +22,9 @@ und die Ergänzung von
 3. `--sandbox` in `init --devcontainer` / `generate devcontainer`;
    Golden Cases (Fresh-State, Idempotenz, Safety) nach `harness/replay.md`.
 4. Doctor-Checks (Token-Quelle, Degradationszustände).
-5. Integrationstest (`//go:build docker`) unter Docker und Podman;
+5. Integrationstest (`//go:build docker`) unter Docker (Linux); Colima/macOS und Podman-Host per Nachholmessung des Projektinhabers (Verfahren in ADR 0014) — bis dahin als ungeprüfte Einschränkung dokumentiert;
    `docs/user/`, README, CHANGELOG.
 
 ## Trigger
 
-`open` → `next`: Projektinhaber priorisiert die Umsetzung.
+`open` → `next`: erfolgt am 2026-09-30 (Projektinhaber). `next` → `in-progress`: Beginn der Umsetzung; Umsetzungs-ADR 0014 liegt als `Proposed` vor.
