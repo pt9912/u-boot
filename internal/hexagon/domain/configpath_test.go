@@ -26,6 +26,10 @@ func TestNewConfigPath_KnownPaths(t *testing.T) {
 		{"devcontainer.features.node.enabled", domain.ConfigDevcontainerFeatureEnabled, true, "", "node"},
 		{"devcontainer.features.java.source", domain.ConfigDevcontainerFeatureSource, true, "", "java"},
 		{"devcontainer.features.go.version", domain.ConfigDevcontainerFeatureVersion, true, "", "go"},
+		{"devcontainer.user.uid", domain.ConfigDevcontainerUserUID, true, "", ""},
+		{"devcontainer.profile", domain.ConfigDevcontainerProfile, true, "", ""},
+		{"devcontainer.sandbox.nestedRuntime", domain.ConfigDevcontainerSandboxNestedRuntime, true, "", ""},
+		{"devcontainer.sandbox.onUnavailable", domain.ConfigDevcontainerSandboxOnUnavailable, true, "", ""},
 	}
 	for _, tc := range cases {
 		got, err := domain.NewConfigPath(tc.raw)

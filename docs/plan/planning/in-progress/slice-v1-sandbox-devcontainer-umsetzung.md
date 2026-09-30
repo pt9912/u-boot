@@ -28,3 +28,15 @@ und die Ergänzung von
 ## Trigger
 
 `open` → `next`: erfolgt am 2026-09-30 (Projektinhaber). `next` → `in-progress`: Beginn der Umsetzung; Umsetzungs-ADR 0014 liegt als `Proposed` vor.
+
+## Tranchen
+
+| Tranche | Inhalt | Stand |
+|---|---|---|
+| T1 | Config-Schlüssel `devcontainer.user.uid`, `devcontainer.profile`, `devcontainer.sandbox.nestedRuntime` / `onUnavailable`: Domain-Validierung, `config get/set`, Load-Validierung (Exit 10), Exit-Code-Pin | in Arbeit |
+| T2 | `--sandbox` (init/generate), Generator-Ausgabe für das Sandbox-Profil (Volume statt Bind-Mount, keine Socket-/Secret-Mounts, `USER_UID`-Build-Arg), Golden Cases, Mapper-Eintrag (Envelope-Code) | offen |
+| T3 | `nestedRuntime: podman`: Dockerfile-Pakete, `runArgs`-Lockerungen (einzeln ausgewiesen), Startscript mit `vfs`-Fallback und Degradationstabelle | offen |
+| T4 | Doctor-Checks (Degradationszustände, Token-Quelle [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)) | offen |
+| T5 | Integrationstest (`//go:build docker`), `docs/user/`, README, CHANGELOG, Closure | offen |
+
+**Bekannte Einschränkung (T1):** Die Egress-Schlüssel (`devcontainer.sandbox.egress.*`, [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), V2) sind nicht modelliert. Ein Marshal-Rewrite von `u-boot.yaml` (z. B. `config set devcontainer.featureSources.allow`) würde solche Schlüssel verwerfen; das ist vor dem V2-Slice zu schließen.

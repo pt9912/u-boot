@@ -70,6 +70,27 @@ type ubootYAMLDevcontainer struct {
 	Enabled        *bool                                    `yaml:"enabled,omitempty"`
 	FeatureSources *ubootYAMLFeatureSources                 `yaml:"featureSources,omitempty"`
 	Features       map[string]ubootYAMLDevcontainerFeature  `yaml:"features,omitempty"`
+	// User, Profile and Sandbox carry the Lastenheft 0.3.0 keys
+	// (LH-FA-DEV-004 UID, LH-FA-DEV-006 profile, LH-FA-DEV-007
+	// nested runtime + degradation strictness). Absent = default.
+	User    *ubootYAMLDevcontainerUser    `yaml:"user,omitempty"`
+	Profile string                        `yaml:"profile,omitempty"`
+	Sandbox *ubootYAMLDevcontainerSandbox `yaml:"sandbox,omitempty"`
+}
+
+// ubootYAMLDevcontainerUser is the `devcontainer.user:` sub-tree
+// (LH-FA-DEV-004). UID is a pointer so "unset" (default 1000) stays
+// distinguishable from an explicit value.
+type ubootYAMLDevcontainerUser struct {
+	UID *int `yaml:"uid,omitempty"`
+}
+
+// ubootYAMLDevcontainerSandbox is the `devcontainer.sandbox:`
+// sub-tree (LH-FA-DEV-007). Empty string = default (`none` /
+// `warn`). Egress keys (LH-FA-DEV-008, V2) are not modelled yet.
+type ubootYAMLDevcontainerSandbox struct {
+	NestedRuntime string `yaml:"nestedRuntime,omitempty"`
+	OnUnavailable string `yaml:"onUnavailable,omitempty"`
 }
 
 // ubootYAMLFeatureSources is the `devcontainer.featureSources:`

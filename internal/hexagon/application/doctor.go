@@ -583,7 +583,7 @@ func (s *DoctorService) checkUbootYaml(_ context.Context, baseDir string) domain
 	// mandates Exit-Code 10 for invalid sources / names; `checkUbootYaml`
 	// is the canonical place to surface that as an Error severity
 	// so the user sees one consolidated u-boot.yaml-validity report.
-	if err := validateDevcontainerFeatures(cfg.Devcontainer); err != nil {
+	if err := validateDevcontainer(cfg.Devcontainer); err != nil {
 		return domain.Diagnostic{
 			ID:       checkIDUbootYaml,
 			Severity: domain.SeverityError,

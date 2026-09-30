@@ -380,6 +380,9 @@ func writeRejectedError(path domain.ConfigPath) error {
 // listed in the switch and a defensive panic-safe fallthrough surfaces
 // as the unknown-kind error if the caller bypasses Set().
 func coerceConfigValue(path domain.ConfigPath, raw string) (coerced any, formatted string, err error) {
+	if c, f, ok, serr := coerceSandboxConfigValue(path, raw); ok {
+		return c, f, serr
+	}
 	switch path.Kind {
 	case domain.ConfigProjectName:
 		name, err := domain.NewProjectName(raw)
@@ -435,6 +438,9 @@ func coerceConfigValue(path domain.ConfigPath, raw string) (coerced any, formatt
 // add the case and the corresponding revalidator branch in one
 // PR; until then, dead-branch coverage churn is avoided.
 func configPathToYAMLPath(path domain.ConfigPath) []string {
+	if p, ok := sandboxConfigYAMLPath(path); ok {
+		return p
+	}
 	switch path.Kind {
 	case domain.ConfigProjectName:
 		return []string{"project", "name"}
@@ -476,6 +482,19 @@ func configPathToYAMLPath(path domain.ConfigPath) []string {
 // the WriteAllowed gate before reaching here. A future relaxation
 // would extend both helpers in lock-step.
 func revalidateConfigDomain(cfg ubootYAMLConfig, path domain.ConfigPath) error {
+	if _, ok := sandboxConfigYAMLPath(path); ok {
+		// Closed-set / range check on the patched config; an unbound
+		// leaf is a post-patch structural failure.
+		if v, _ := sandboxConfigValue(cfg, path); v == "" {
+			return fmt.Errorf("%w: post-patch %s is absent or unbound",
+				driving.ErrConfigPostPatchSanityFailed, path)
+		}
+		if err := validateDevcontainerSandbox(cfg.Devcontainer); err != nil {
+			return fmt.Errorf("%w: post-patch %s: %w",
+				driving.ErrConfigPostPatchSanityFailed, path, err)
+		}
+		return nil
+	}
 	switch path.Kind {
 	case domain.ConfigProjectName:
 		// Stage 1 (coerceConfigValue) already runs NewProjectName
@@ -650,7 +669,7 @@ func (s *ConfigService) readUbootYAMLBody(baseDir string) ([]byte, ubootYAMLConf
 	// devcontainer subtree on load. Spec §1353 mandates Exit-Code
 	// 10 for invalid sources / names; ErrConfigSchemaInvalid maps
 	// there via `isConfigValidationError`.
-	if err := validateDevcontainerFeatures(cfg.Devcontainer); err != nil {
+	if err := validateDevcontainer(cfg.Devcontainer); err != nil {
 		return nil, ubootYAMLConfig{}, fmt.Errorf("%w: u-boot.yaml devcontainer schema invalid: %v",
 			driving.ErrConfigSchemaInvalid, err)
 	}
@@ -717,7 +736,7 @@ func (s *ConfigService) readUbootYAML(baseDir string) (ubootYAMLConfig, error) {
 	// Audit-Followup A1: LH-FA-DEV-003 schema-validation on load
 	// for the Get-path too. Same error-classification as the
 	// readUbootYAMLBody helper.
-	if err := validateDevcontainerFeatures(cfg.Devcontainer); err != nil {
+	if err := validateDevcontainer(cfg.Devcontainer); err != nil {
 		return ubootYAMLConfig{}, fmt.Errorf("%w: u-boot.yaml devcontainer schema invalid: %v",
 			driving.ErrConfigSchemaInvalid, err)
 	}
@@ -729,6 +748,13 @@ func (s *ConfigService) readUbootYAML(baseDir string) (ubootYAMLConfig, error) {
 // field is absent. Pure function over cfg + path; no I/O. Used
 // by Get (T3) and by Set (T4) to compute OldValue.
 func extractConfigValue(cfg ubootYAMLConfig, path domain.ConfigPath) (string, error) {
+	if v, ok := sandboxConfigValue(cfg, path); ok {
+		if v == "" {
+			return "", fmt.Errorf("%w: %s — set it via `u-boot config set %s <value>`",
+				driving.ErrConfigValueNotSet, path, path)
+		}
+		return v, nil
+	}
 	switch path.Kind {
 	case domain.ConfigProjectName:
 		if cfg.Project.Name == "" {

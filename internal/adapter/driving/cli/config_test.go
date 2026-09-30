@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/pt9912/u-boot/internal/adapter/driving/cli"
+	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
@@ -59,6 +60,8 @@ func TestExitCode_ConfigValidationSentinels(t *testing.T) {
 		{"ErrConfigPostPatchSanityFailed", driving.ErrConfigPostPatchSanityFailed},
 		{"ErrConfigSchemaInvalid", driving.ErrConfigSchemaInvalid},
 		{"ErrConfigValueNotSet", driving.ErrConfigValueNotSet},
+		// Lastenheft 0.3.0 (LH-FA-DEV-004/-006/-007).
+		{"ErrInvalidSandboxSetting", domain.ErrInvalidSandboxSetting},
 	}
 	for _, c := range cases {
 		wrapped := fmt.Errorf("config service: %w: detail", c.err)

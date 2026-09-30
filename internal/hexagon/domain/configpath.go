@@ -69,6 +69,25 @@ const (
 	// `--allow-external-feature-sources` is the canonical write
 	// vector per Spec §712-717.
 	ConfigDevcontainerFeatureSourcesAllow
+
+	// ConfigDevcontainerUserUID addresses `devcontainer.user.uid`
+	// (LH-FA-DEV-004). Read + write; writes parse as an int in
+	// 1..65535.
+	ConfigDevcontainerUserUID
+
+	// ConfigDevcontainerProfile addresses `devcontainer.profile`
+	// (LH-FA-DEV-006). Read + write; closed set default | sandbox.
+	ConfigDevcontainerProfile
+
+	// ConfigDevcontainerSandboxNestedRuntime addresses
+	// `devcontainer.sandbox.nestedRuntime` (LH-FA-DEV-007). Read +
+	// write; closed set none | podman.
+	ConfigDevcontainerSandboxNestedRuntime
+
+	// ConfigDevcontainerSandboxOnUnavailable addresses
+	// `devcontainer.sandbox.onUnavailable` (LH-FA-DEV-007). Read +
+	// write; closed set warn | fail.
+	ConfigDevcontainerSandboxOnUnavailable
 )
 
 // ConfigPath is a typed, whitelisted reference to a leaf in
@@ -125,6 +144,10 @@ var ErrInvalidConfigPath = errors.New("invalid config path")
 //   - `devcontainer.features.<feature>.enabled`     → ConfigDevcontainerFeatureEnabled, write-OK
 //   - `devcontainer.features.<feature>.source`      → ConfigDevcontainerFeatureSource, write-OK
 //   - `devcontainer.features.<feature>.version`     → ConfigDevcontainerFeatureVersion, write-OK
+//   - `devcontainer.user.uid`                       → ConfigDevcontainerUserUID, write-OK
+//   - `devcontainer.profile`                        → ConfigDevcontainerProfile, write-OK
+//   - `devcontainer.sandbox.nestedRuntime`          → ConfigDevcontainerSandboxNestedRuntime, write-OK
+//   - `devcontainer.sandbox.onUnavailable`          → ConfigDevcontainerSandboxOnUnavailable, write-OK
 //
 // Wildcard segments (`<svc>`, `<feature>`) are parsed through their
 // respective domain validators; format failures wrap into
@@ -139,6 +162,14 @@ func NewConfigPath(raw string) (ConfigPath, error) {
 		return ConfigPath{Kind: ConfigDevcontainerEnabled, WriteAllowed: true}, nil
 	case "devcontainer.featureSources.allow":
 		return ConfigPath{Kind: ConfigDevcontainerFeatureSourcesAllow, WriteAllowed: true}, nil
+	case "devcontainer.user.uid":
+		return ConfigPath{Kind: ConfigDevcontainerUserUID, WriteAllowed: true}, nil
+	case "devcontainer.profile":
+		return ConfigPath{Kind: ConfigDevcontainerProfile, WriteAllowed: true}, nil
+	case "devcontainer.sandbox.nestedRuntime":
+		return ConfigPath{Kind: ConfigDevcontainerSandboxNestedRuntime, WriteAllowed: true}, nil
+	case "devcontainer.sandbox.onUnavailable":
+		return ConfigPath{Kind: ConfigDevcontainerSandboxOnUnavailable, WriteAllowed: true}, nil
 	}
 
 	// `services.<svc>.enabled` requires a 3-segment split with the
@@ -189,7 +220,7 @@ func NewConfigPath(raw string) (ConfigPath, error) {
 		}
 	}
 
-	return ConfigPath{}, fmt.Errorf("%w: %q is not a known config path; allowed: project.name, devcontainer.enabled, devcontainer.featureSources.allow, services.<svc>.enabled, devcontainer.features.<feature>.{enabled,source,version}",
+	return ConfigPath{}, fmt.Errorf("%w: %q is not a known config path; allowed: project.name, devcontainer.enabled, devcontainer.featureSources.allow, devcontainer.user.uid, devcontainer.profile, devcontainer.sandbox.{nestedRuntime,onUnavailable}, services.<svc>.enabled, devcontainer.features.<feature>.{enabled,source,version}",
 		ErrInvalidConfigPath, raw)
 }
 
@@ -207,6 +238,14 @@ func (p ConfigPath) String() string {
 		return "services." + p.Service.String() + ".enabled"
 	case ConfigDevcontainerFeatureSourcesAllow:
 		return "devcontainer.featureSources.allow"
+	case ConfigDevcontainerUserUID:
+		return "devcontainer.user.uid"
+	case ConfigDevcontainerProfile:
+		return "devcontainer.profile"
+	case ConfigDevcontainerSandboxNestedRuntime:
+		return "devcontainer.sandbox.nestedRuntime"
+	case ConfigDevcontainerSandboxOnUnavailable:
+		return "devcontainer.sandbox.onUnavailable"
 	case ConfigDevcontainerFeatureEnabled:
 		return "devcontainer.features." + p.Feature.String() + ".enabled"
 	case ConfigDevcontainerFeatureSource:

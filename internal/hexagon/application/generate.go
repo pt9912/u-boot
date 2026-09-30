@@ -254,7 +254,7 @@ func (s *GenerateService) readProjectConfig(baseDir string) (ubootYAMLConfig, er
 	// hand-edited bad URLs propagate into devcontainer.json as
 	// feature-keys. Spec §1353 mandates Exit-Code 10 →
 	// ErrGenerateManualConflict carries that mapping.
-	if err := validateDevcontainerFeatures(cfg.Devcontainer); err != nil {
+	if err := validateDevcontainer(cfg.Devcontainer); err != nil {
 		return ubootYAMLConfig{}, fmt.Errorf("%w: u-boot.yaml devcontainer schema invalid: %v",
 			driving.ErrGenerateManualConflict, err)
 	}

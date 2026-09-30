@@ -387,7 +387,10 @@ func isConfigValidationError(err error) bool {
 		// `internal/hexagon/domain` so this adapter file can
 		// reference it without violating the
 		// `adapter-no-application` depguard rule.
-		errors.Is(err, domain.ErrInvalidFeatureSource)
+		errors.Is(err, domain.ErrInvalidFeatureSource) ||
+		// Lastenheft 0.3.0 (LH-FA-DEV-004/-006/-007): out-of-set value
+		// of the sandbox/UID settings → exit 10.
+		errors.Is(err, domain.ErrInvalidSandboxSetting)
 }
 
 // isFilesystemError returns true for the LH-FA-CLI-006 code-14
