@@ -70,7 +70,7 @@ Einzelfall-Bewertung unten behandelt deshalb alle zwölf Ursprungslücken.
   [`LH-PÜ-001`](../../../../spec/lastenheft.md#lh-pü-001--grundfunktion)/`-002` sind verlinkt.
 - [x] **Advisory vor Gate.** `--require-complete` bleibt **aus**. Nach
   Abarbeitung der Lückenliste wäre ein Gate jetzt zwar grün — aber
-  jeder Spec-CR (z. B. [`slice-cr-sandbox-devcontainer`](../in-progress/slice-cr-sandbox-devcontainer.md))
+  jeder Spec-CR (z. B. [`slice-cr-sandbox-devcontainer`](../done/slice-cr-sandbox-devcontainer.md))
   gebiert neue Kennungen ohne Slice-Coverage; ein rotes Gate würde
   abgeschaltet statt befolgt. `make doc-trace` bleibt das informative Target.
 - [x] **Die 12 Lücken einzeln bewertet** — Tabelle:

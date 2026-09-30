@@ -13,7 +13,7 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**Spec-Wartung: Sandbox-Profil (Lastenheft 0.3.0)** — Trigger: Agenten-Sandbox-Use-Case; Slice: [`slice-cr-sandbox-devcontainer`](slice-cr-sandbox-devcontainer.md) (nur Spec-Change; Umsetzung V1/V2 als Folge-Slices).
+keine aktive Welle
 
 ## Nächste Wellen
 
@@ -24,6 +24,7 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 | Devcontainer-Robustheit | Real-World-Half-State-Beschwerde oder Schema-Erweiterung | [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md) | M |
 | CI-Stabilität | belastbare Keycloak-Flake-Logs (Quay-/Mirror-Befund) | [`slice-v1-keycloak-ci-flake`](../open/slice-v1-keycloak-ci-flake.md) | S |
 | Harness-Scaffolding (Produkt) | [ADR-0011](../../adr/0011-agent-harness-scaffolding.md) accepted + Spec-Erweiterung + Lizenz-Check | `slice-vN-harness-bootstrap-scaffold` (noch kein Plan) | L |
+| Sandbox-Profil V1-Umsetzung | Priorisierung durch den Projektinhaber | [`slice-v1-sandbox-devcontainer-umsetzung`](../open/slice-v1-sandbox-devcontainer-umsetzung.md) | L |
 | Devcontainer-Egress-Firewall | [ADR-0012](../../adr/0012-devcontainer-egress-firewall.md) accepted + Spec-Erweiterung | `slice-vN-devcontainer-egress-firewall` (noch kein Plan) | M |
 | Podman-first / Migration / Custom-Sources | Konkretisierung je Thema offen | `slice-vN-podman-formal`; `slice-later-migration` ([`LH-FA-CONF-006`](../../../../spec/lastenheft.md#lh-fa-conf-006--konfiguration-migrieren)); `slice-later-custom-data-sources` ([`LH-DA-004`](../../../../spec/lastenheft.md#lh-da-004--schema-migration)) | L |
 
@@ -71,6 +72,7 @@ flowchart LR
 | welle-gate-ausbau-v0.51 (d-check-Bump + vier Sensoren) | 2026-07-25 | [`slice-gate-print-mk-einbindung`](../done/slice-gate-print-mk-einbindung.md) (`e246bbf`); [`slice-gate-planning-targets-module`](../done/slice-gate-planning-targets-module.md) (`83efe46`); [`slice-gate-ids-link-policy-always`](../done/slice-gate-ids-link-policy-always.md) (`0d896fc`); [`slice-gate-immutabilitaets-sensor`](../done/slice-gate-immutabilitaets-sensor.md) (`7d9c4c2`); Vorlauf: Image-Bump (`225627c`) |
 | v0.5.0 (Security-Release + lokale Templates) | 2026-07-25 | [`slice-v1-release-cut-v0.5.0`](../done/slice-v1-release-cut-v0.5.0.md) — Tag `v0.5.0` auf `1bc071f` |
 | Spec-Wartung: Traceability-Matrix konfiguriert | 2026-09-29 | [`slice-gate-rtm-traceability`](../done/slice-gate-rtm-traceability.md) — RTM 79 Anforderungen, 0 Waisen |
+| Spec-Wartung: Sandbox-Profil (Lastenheft 0.3.0) | 2026-09-30 | [`slice-cr-sandbox-devcontainer`](../done/slice-cr-sandbox-devcontainer.md) (`712af41`) |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-NN-results.md`; die Welle-Closure lebt vollständig im jeweiligen

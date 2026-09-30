@@ -9,6 +9,9 @@
 > in seinem Re-Evaluierungs-Trigger nennt („Agenten-Sandbox-Use-Case
 > auf u-boot-erzeugten Devcontainern").
 
+**Status:** **abgeschlossen** (2026-09-30, **Delivery-Hash: `712af41`**).
+Ergebnis: Lastenheft 0.3.0 mit [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) bis `-009` und der `-004`-Ergänzung.
+
 **Lifecycle:** Zustand = Verzeichnis (`open/` → `next/` → `in-progress/`
 → `done/`), Wechsel nur per `git mv`.
 
@@ -187,7 +190,17 @@ V1-V2-Pakete als Folge-Slices).
 
 ## 7. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+- **Was hat funktioniert:** Die Degradationsfrage ließ sich als eine
+  Tabelle (`onUnavailable: warn | fail`, Fallback-Kette) statt als
+  Einzelregeln beantworten; der Spec bleibt bei Verhalten.
+- **Was ging anders als geplant:** Zwei Planning-Invarianten
+  (`planning-drift`, `matrix-forbidden`) erzwangen eine deklarierte
+  Roadmap-Welle und eine Formulierung im ADR ohne Slice-Link.
+- **Entscheidungen bei Closure:** technische Verifikation (NET_ADMIN vs.
+  User-Namespaces, Seccomp/AppArmor) an den Umsetzungs-ADR verschoben;
+  `devcontainer.user.uid` als UID-Mechanismus; Egress nur per Config-Key.
+- **Folge-Slices:** V1-Umsetzung ([`slice-v1-sandbox-devcontainer-umsetzung`](../open/slice-v1-sandbox-devcontainer-umsetzung.md));
+  `-008` (V2) nach Ratifizierung von [ADR-0012](../../adr/0012-devcontainer-egress-firewall.md) als eigener Slice.
 
 ## 8. Sub-Area-Modus-Begründung
 
