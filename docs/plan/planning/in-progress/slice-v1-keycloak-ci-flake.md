@@ -1,7 +1,7 @@
 # Slice V1: Keycloak-Acceptance-Test in CI grün
 
 > **Status:** **in Beobachtung** (2026-10-01): T1 Diagnose abgeschlossen (Ursache war eine transiente
-> Quay.io-Panne, nicht mehr reproduzierbar), T3 Re-Activate geliefert (Commit `HASH`); die drei
+> Quay.io-Panne, nicht mehr reproduzierbar), T3 Re-Activate geliefert (Commit `7175f08`); die drei
 > aufeinanderfolgenden `integration-docker`-Läufe stehen aus. Carveout-Plan-Anker
 > ([[feedback_carveouts_need_plans]]).
 
