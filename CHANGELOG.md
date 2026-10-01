@@ -13,6 +13,15 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- `u-boot config` extensions: `config get <p1> <p2>…` and `--json-array`
+  (`data.entries[]`), atomic `config set <p1> <v1> <p2> <v2>…`, new
+  `config list` (all set paths, sorted), and a structured `data.hint
+  {command, action, argument}` on the `config get`/`set` error envelopes
+  ([`slice-v1-config-structured-hint`](docs/plan/planning/done/slice-v1-config-structured-hint.md),
+  [`-multi-path-get`](docs/plan/planning/done/slice-v1-config-multi-path-get.md),
+  [`-multi-path-set`](docs/plan/planning/done/slice-v1-config-multi-path-set.md),
+  [`-list-subcommand`](docs/plan/planning/done/slice-v1-config-list-subcommand.md);
+  [`LH-FA-CONF-001`](spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration), [`LH-FA-CONF-005`](spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)).
 - Egress restriction for the sandbox devcontainer ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), V2, [ADR-0012](docs/plan/adr/0012-devcontainer-egress-firewall.md)):
   `devcontainer.sandbox.egress.enabled` / `.allow`; DNS-driven allowlist
   (local `dnsmasq` + nftables set), default hosts per stack, `NET_ADMIN`

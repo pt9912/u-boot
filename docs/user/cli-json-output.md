@@ -1053,7 +1053,10 @@ Modifying-Form `config set` trägt zusätzlich `--dry-run`/`--diff`.
 | --- | --- | --- | --- |
 | `u-boot config` (bare) | `"show"` | read-only | Minimal+Data `{body}` |
 | `u-boot config get <path>` | `"get"` | read-only | Minimal+Data `{path, value}` |
+| `u-boot config get <p1> <p2>…` / `get --json-array <path>` | `"get"` | read-only | Minimal+Data `{entries: [{path, value}…]}` (`entries` ohne `omitempty`) |
+| `u-boot config list` | `"list"` | read-only | Minimal+Data `{entries: [{path, value}…]}`, nach Pfad sortiert; nur Pfade mit Wert; leer = `[]` |
 | `u-boot config set <path> <value>` | `"set"` | modifying | Minimal+Data `{path, oldValue, newValue, noOp[, appendedSources]}` |
+| `u-boot config set <p1> <v1> <p2> <v2>…` | `"set"` | modifying | Minimal+Data `{entries: [{path, oldValue, newValue, noOp}…], noOp}`; **atomar** (ein Schreibvorgang nach Validierung aller Paare, sonst bleibt `u-boot.yaml` unverändert) |
 
 **`subcommand`-Wert für bare** (T0-(b)): `"show"` — Code-Heim ist
 `runConfigShow`, der Wert bleibt 1:1 mit der Code-Realität
@@ -1142,6 +1145,14 @@ die Disambiguation läuft über den Message-Prefix:
 | `ErrConfigPathUnknown` | `config: unknown path: …` |
 | `ErrConfigWriteRejected` | `config: write rejected for non-writable path: …` (Hint `u-boot add <svc>`) |
 | `ErrConfigValueNotSet` | `config: value not set: …` |
+
+**Strukturierter Hint** ([slice-v1-config-structured-hint](../plan/planning/done/slice-v1-config-structured-hint.md)): Die Fehler-
+Envelopes von `config get` (`ErrConfigValueNotSet`) und `config set`
+(`ErrConfigWriteRejected` für `services.<svc>.enabled`) tragen
+`data.hint {command, action, argument[, flag]}`; `command` ist die
+ausführbare Form (kann den Platzhalter `<value>` enthalten), `action` ist
+`add` oder `config-set`. Die Message bleibt unverändert; `errors.Is` und
+Exit-Code (10) bleiben intakt.
 
 Analog zum `(code, exitCode)`-Tupel der Read-only-Slices, hier aber
 `(code, message-prefix)` weil alle drei Exit 10 sind und der Exit

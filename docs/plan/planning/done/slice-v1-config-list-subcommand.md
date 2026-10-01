@@ -1,13 +1,9 @@
 # Slice V1: `u-boot config list` als eigener Subcommand (strukturiertes Path-Value-Listing)
 
-> **Status:** `open/`, on hold pending trigger. Cleanup-/Feature-
-> Slice zum config-list-Carveout aus
+> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `HASH`**). Cleanup-/Feature-
+> Slice zum Carveout aus
 > [`slice-v1-cli-json-dry-run-config`](../done/slice-v1-cli-json-dry-run-config.md)
-> §Out of Scope. Carveout-Plan-Anker
-> ([[feedback_carveouts_need_plans]]); verlinkt aus
-> [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
-> §Temporäre Carveouts (T8-Closure des config-Slice trägt den
-> Eintrag nach).
+> §Out of Scope (Carveout-Eintrag entfernt).
 
 ## Auslöser
 
@@ -44,3 +40,13 @@ Neuer `cli/config.go` `newConfigListCommand(a *App)` analog
 
 - [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration) (Config-Subcommand) — Spec listet `list`
   nicht; Erweiterung ist Konsument-Komfort-Argument.
+
+## Closure-Notiz
+
+**Geliefert:** `u-boot config list` (strukturiertes Pfad-Wert-Listing). `ConfigUseCase.List`: Whitelist-Pfade mit Wert, plus `services.<svc>.enabled` und `devcontainer.features.<name>.*` aus dem Dokument, nach Pfad sortiert; human `pfad=wert`, JSON `data.entries[]`; `--dry-run`/`--diff` abgelehnt (Exit 2).
+
+**Sensoren:** `make gates` (lint, test, coverage-gate, docs-check) grün; Funktionsprobe mit
+dem gebauten Binary (Mehrfach-`get`/`set`, `list`, atomarer Abbruch, Hint-Envelope).
+`make test-docker` für diese Änderung nicht gesondert ausgeführt (kein Docker-Pfad berührt).
+
+**Doku:** `docs/user/cli-json-output.md` §6.9, Benutzerhandbuch §Konfiguration, Beispiele, README, CHANGELOG.

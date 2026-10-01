@@ -127,6 +127,29 @@ type fakeConfigUseCase struct {
 	showReq    driving.ConfigShowRequest
 	showResp   driving.ConfigShowResponse
 	showErr    error
+
+	getManyReq  driving.ConfigGetManyRequest
+	getManyResp driving.ConfigGetManyResponse
+	getManyErr  error
+	setManyReq  driving.ConfigSetManyRequest
+	setManyResp driving.ConfigSetManyResponse
+	setManyErr  error
+	listResp    driving.ConfigListResponse
+	listErr     error
+}
+
+func (f *fakeConfigUseCase) GetMany(_ context.Context, req driving.ConfigGetManyRequest) (driving.ConfigGetManyResponse, error) {
+	f.getManyReq = req
+	return f.getManyResp, f.getManyErr
+}
+
+func (f *fakeConfigUseCase) SetMany(_ context.Context, req driving.ConfigSetManyRequest) (driving.ConfigSetManyResponse, error) {
+	f.setManyReq = req
+	return f.setManyResp, f.setManyErr
+}
+
+func (f *fakeConfigUseCase) List(_ context.Context, _ driving.ConfigListRequest) (driving.ConfigListResponse, error) {
+	return f.listResp, f.listErr
 }
 
 func (f *fakeConfigUseCase) Get(_ context.Context, req driving.ConfigGetRequest) (driving.ConfigGetResponse, error) {

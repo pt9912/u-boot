@@ -1,13 +1,9 @@
 # Slice V1: `u-boot config set` Multi-Path-Set (mehrere Pfade in einem Call)
 
-> **Status:** `open/`, on hold pending trigger. Cleanup-/Feature-
-> Slice zum Multi-Path-Set-Carveout aus
+> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `HASH`**). Cleanup-/Feature-
+> Slice zum Carveout aus
 > [`slice-v1-cli-json-dry-run-config`](../done/slice-v1-cli-json-dry-run-config.md)
-> §Out of Scope. Carveout-Plan-Anker
-> ([[feedback_carveouts_need_plans]]); verlinkt aus
-> [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
-> §Temporäre Carveouts (T8-Closure des config-Slice trägt den
-> Eintrag nach).
+> §Out of Scope (Carveout-Eintrag entfernt).
 
 ## Auslöser
 
@@ -45,3 +41,13 @@ WriteFile als einzelner finaler Schreib-Akt.
 
 - [`LH-FA-CONF-001`](../../../../spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration) (Config-Subcommand) — Spec listet Multi-
   Path nicht; Erweiterung ist Use-Case-Druck-Argument.
+
+## Closure-Notiz
+
+**Geliefert:** `config set <p1> <v1> <p2> <v2>…` atomar. `ConfigUseCase.SetMany`: alle Paare der Reihe nach auf einem In-Memory-Dokument (Coerce, Schema-Re-Validierung, Allowlist-Prüfung je Paar), danach genau ein `WriteFile`; Fehler → Datei byte-identisch; ungerade Argumentzahl → Exit 2; Listenpfade (`featureSources.allow`, `egress.allow`) über Plan-Funktionen (Marshal-Rewrite).
+
+**Sensoren:** `make gates` (lint, test, coverage-gate, docs-check) grün; Funktionsprobe mit
+dem gebauten Binary (Mehrfach-`get`/`set`, `list`, atomarer Abbruch, Hint-Envelope).
+`make test-docker` für diese Änderung nicht gesondert ausgeführt (kein Docker-Pfad berührt).
+
+**Doku:** `docs/user/cli-json-output.md` §6.9, Benutzerhandbuch §Konfiguration, Beispiele, README, CHANGELOG.

@@ -203,7 +203,7 @@ Auflösungs-Slices und §Nächste Schritte für das laufende Backlog.
 | `down [--volumes]` | [LH-FA-UP-004](spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen) | Compose down mit destruktiver Bestätigungs-Gate. |
 | `logs [service] [--follow] [--tail <n>]` | [LH-FA-UP-005](spec/lastenheft.md#lh-fa-up-005--logs-anzeigen) | Compose-Logs streamen (alle Services oder einen); `--follow` beendet sauber mit Exit 0 bei Ctrl-C. |
 | `generate <artifact>` | [LH-FA-GEN-001](spec/lastenheft.md#lh-fa-gen-001--generate-befehl)..[LH-FA-GEN-005](spec/lastenheft.md#lh-fa-gen-005--idempotenz) | Idempotente Block-Ersetzung via `U-BOOT MANAGED BLOCK`-Marker. |
-| `config [get\|set] [<pfad> [<wert>]]` | [LH-FA-CONF-001](spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)..[LH-FA-CONF-005](spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) | Whitelist-skopierte Reads/Writes mit zweistufiger Schema-Validierung. |
+| `config [get\|set\|list] [<pfad>…]` | [LH-FA-CONF-001](spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)..[LH-FA-CONF-005](spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) | Whitelist-skopierte Reads/Writes mit zweistufiger Schema-Validierung. |
 | `template list [--json]` | [LH-FA-TPL-004](spec/lastenheft.md#lh-fa-tpl-004--templates-auflisten) | Eingebauten Template-Katalog browsen. |
 
 ## Voraussetzungen

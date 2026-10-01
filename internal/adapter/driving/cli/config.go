@@ -44,6 +44,65 @@ type configSetData struct {
 	AppendedSources []string `json:"appendedSources,omitempty"`
 }
 
+// configHintData is the structured repair hint of a config error
+// (slice-v1-config-structured-hint): `data.hint` on the error
+// envelope of `config get` / `config set`. Command is the ready-to-run
+// form (it may contain a `<value>` placeholder).
+type configHintData struct {
+	Command  string `json:"command"`
+	Action   string `json:"action"`
+	Argument string `json:"argument,omitempty"`
+	Flag     string `json:"flag,omitempty"`
+}
+
+// configErrorData carries the hint on the error path.
+type configErrorData struct {
+	Hint configHintData `json:"hint"`
+}
+
+// configErrorDataOf extracts the structured hint from err (via
+// errors.As; the sentinel chain stays intact) or returns nil when the
+// error carries none.
+func configErrorDataOf(err error) any {
+	var he *driving.ConfigHintError
+	if !errors.As(err, &he) {
+		return nil
+	}
+	return configErrorData{Hint: configHintData{
+		Command: he.Hint.Command, Action: he.Hint.Action,
+		Argument: he.Hint.Argument, Flag: he.Hint.Flag,
+	}}
+}
+
+// configEntryData is one `{path, value}` entry of the multi-path /
+// list forms.
+type configEntryData struct {
+	Path  string `json:"path"`
+	Value string `json:"value"`
+}
+
+// configEntriesData is the `data` carrier of `config get` with several
+// paths (or `--json-array`) and of `config list`. Entries without
+// omitempty: an empty list is `[]`, not absence.
+type configEntriesData struct {
+	Entries []configEntryData `json:"entries"`
+}
+
+// configSetEntryData is one entry of the multi-path `config set`.
+type configSetEntryData struct {
+	Path     string `json:"path"`
+	OldValue string `json:"oldValue"`
+	NewValue string `json:"newValue"`
+	NoOp     bool   `json:"noOp"`
+}
+
+// configSetManyData is the `data` carrier of `config set` with several
+// path/value pairs.
+type configSetManyData struct {
+	Entries []configSetEntryData `json:"entries"`
+	NoOp    bool                 `json:"noOp"`
+}
+
 // configShowFlags / configGetFlags bundle the read-only forms'
 // per-invocation flag state. JSON/Quiet read through from the root
 // (Cluster-T0-(a) doctor-Pattern: `--quiet --json` ≡ `--json`).
@@ -63,6 +122,10 @@ type configGetFlags struct {
 	Quiet  bool
 	DryRun bool
 	Diff   bool
+
+	// JSONArray forces the `data.entries[]` shape even for a single
+	// path (slice-v1-config-multi-path-get).
+	JSONArray bool
 }
 
 // configSetFlags bundles the per-invocation flag state of
@@ -143,15 +206,22 @@ Examples:
 
 	cmd.AddCommand(newConfigGetCommand(a))
 	cmd.AddCommand(newConfigSetCommand(a))
+	cmd.AddCommand(newConfigListCommand(a))
 	return cmd
 }
 
 func newConfigGetCommand(a *App) *cobra.Command {
 	flags := &configGetFlags{}
 	cmd := &cobra.Command{
-		Use:   "get <path>",
-		Short: "Print a single configuration value",
-		Args:  configArgsValidator(a, "get", cobra.ExactArgs(1)),
+		Use:   "get <path> [<path>...]",
+		Short: "Print one or more configuration values",
+		Long: `Print configuration values.
+
+One path prints the bare value. Several paths print one value per line in
+argument order; with --json they are returned as data.entries[{path,value}]
+(--json-array forces that shape for a single path, too). All-or-nothing:
+the first unknown or unset path aborts with exit 10.`,
+		Args: configArgsValidator(a, "get", cobra.MinimumNArgs(1)),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			flags.JSON = a.json
 			flags.Quiet = a.quiet
@@ -159,15 +229,41 @@ func newConfigGetCommand(a *App) *cobra.Command {
 		},
 	}
 	registerConfigPreviewRejectFlags(cmd, "config get", &flags.DryRun, &flags.Diff)
+	cmd.Flags().BoolVar(&flags.JSONArray, "json-array", false,
+		"with --json: always emit data.entries[{path,value}], also for a single path")
+	return cmd
+}
+
+func newConfigListCommand(a *App) *cobra.Command {
+	flags := &configGetFlags{}
+	cmd := &cobra.Command{
+		Use:   "list",
+		Short: "List every configuration path that has a value",
+		Long: `List every whitelisted configuration path that currently has a value
+in u-boot.yaml, sorted by path (path=value per line; with --json:
+data.entries[{path,value}]). Read-only.`,
+		Args: configArgsValidator(a, "list", cobra.NoArgs),
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			flags.JSON = a.json
+			flags.Quiet = a.quiet
+			return runConfigList(cmd.Context(), cmd.OutOrStdout(), *flags, a.configUseCase, a.getwd)
+		},
+	}
+	registerConfigPreviewRejectFlags(cmd, "config list", &flags.DryRun, &flags.Diff)
 	return cmd
 }
 
 func newConfigSetCommand(a *App) *cobra.Command {
 	flags := &configSetFlags{}
 	cmd := &cobra.Command{
-		Use:   "set <path> <value>",
-		Short: "Set a single configuration value (schema-validated)",
-		Args:  configArgsValidator(a, "set", cobra.ExactArgs(2)),
+		Use:   "set <path> <value> [<path> <value>...]",
+		Short: "Set configuration values (schema-validated, atomic)",
+		Long: `Set one or more configuration values. With several path/value pairs the
+change is atomic: every value is coerced and schema-validated against one
+in-memory document before the single final write; any failure leaves
+u-boot.yaml byte-identical. Pairs apply in order (a later pair may depend on
+an earlier one).`,
+		Args: configArgsValidator(a, "set", configSetPairsArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			flags.JSON = a.json
 			flags.Quiet = a.quiet
@@ -181,6 +277,16 @@ func newConfigSetCommand(a *App) *cobra.Command {
 	cmd.Flags().BoolVar(&flags.Diff, "diff", false,
 		"render a unified diff of the planned change (LH-FA-CLI-008)")
 	return cmd
+}
+
+// configSetPairsArgs requires an even number (>= 2) of arguments:
+// <path> <value> pairs. The message starts with `accepts ` so
+// [isUsageError] maps it to exit 2 like the Cobra arity errors.
+func configSetPairsArgs(_ *cobra.Command, args []string) error {
+	if len(args) < 2 || len(args)%2 != 0 {
+		return fmt.Errorf("accepts <path> <value> pairs (an even number of arguments, at least 2), received %d", len(args))
+	}
+	return nil
 }
 
 // registerConfigPreviewRejectFlags registers --dry-run/--diff on a
@@ -280,17 +386,25 @@ func runConfigGet(
 	if flags.DryRun || flags.Diff {
 		return reportErrorSub(out, ErrDryRunNotApplicable, nil, false, false, flags.JSON, "config", "get", mapErr, nil)
 	}
-	path, err := domain.NewConfigPath(args[0])
-	if err != nil {
-		return reportErrorSub(out, fmt.Errorf("%w: %v", driving.ErrConfigPathUnknown, err), nil, false, false, flags.JSON, "config", "get", mapErr, nil)
+	paths := make([]domain.ConfigPath, 0, len(args))
+	for _, raw := range args {
+		p, err := domain.NewConfigPath(raw)
+		if err != nil {
+			return reportErrorSub(out, fmt.Errorf("%w: %v", driving.ErrConfigPathUnknown, err), nil, false, false, flags.JSON, "config", "get", mapErr, nil)
+		}
+		paths = append(paths, p)
 	}
 	cwd, err := getwd()
 	if err != nil {
 		return reportErrorSub(out, fmt.Errorf("determine working directory: %w", err), nil, false, false, flags.JSON, "config", "get", mapErr, nil)
 	}
+	if len(paths) > 1 || flags.JSONArray {
+		return runConfigGetMany(ctx, out, paths, cwd, flags, uc)
+	}
+	path := paths[0]
 	resp, err := uc.Get(ctx, driving.ConfigGetRequest{BaseDir: cwd, Path: path})
 	if err != nil {
-		return reportErrorSub(out, sanitizeBaseDir(err, cwd), nil, false, false, flags.JSON, "config", "get", mapErr, nil)
+		return reportErrorSub(out, sanitizeBaseDir(err, cwd), nil, false, false, flags.JSON, "config", "get", mapErr, configErrorDataOf(err))
 	}
 	if flags.JSON {
 		data := configGetData{Path: path.String(), Value: resp.Value}
@@ -313,6 +427,9 @@ func runConfigSet(
 	uc driving.ConfigUseCase,
 	getwd func() (string, error),
 ) error {
+	if len(args) > 2 {
+		return runConfigSetMany(ctx, out, args, flags, uc, getwd)
+	}
 	mapErr := mapConfigErrorToDiagnostic
 
 	path, err := domain.NewConfigPath(args[0])
@@ -345,7 +462,7 @@ func runConfigSet(
 		SilenceLogger:               flags.JSON,
 	})
 	if setErr != nil {
-		return reportErrorSub(out, sanitizeBaseDir(setErr, cwd), resp.PlannedFiles, flags.DryRun, flags.Diff, flags.JSON, "config", "set", mapErr, nil)
+		return reportErrorSub(out, sanitizeBaseDir(setErr, cwd), resp.PlannedFiles, flags.DryRun, flags.Diff, flags.JSON, "config", "set", mapErr, configErrorDataOf(setErr))
 	}
 
 	if flags.JSON {
@@ -448,4 +565,129 @@ func summaryValue(s string) string {
 		return "(unset)"
 	}
 	return s
+}
+
+// runConfigGetMany handles `config get` with several paths or
+// --json-array (slice-v1-config-multi-path-get): one value per line in
+// argument order, or data.entries[] under --json.
+func runConfigGetMany(ctx context.Context, out io.Writer, paths []domain.ConfigPath, cwd string, flags configGetFlags, uc driving.ConfigUseCase) error {
+	resp, err := uc.GetMany(ctx, driving.ConfigGetManyRequest{BaseDir: cwd, Paths: paths})
+	if err != nil {
+		return reportErrorSub(out, sanitizeBaseDir(err, cwd), nil, false, false, flags.JSON, "config", "get", mapConfigErrorToDiagnostic, configErrorDataOf(err))
+	}
+	return writeConfigEntries(out, "get", resp.Entries, flags.JSON)
+}
+
+// runConfigList prints every path that has a value (subcommand
+// "list"). Read-only → rejects --dry-run/--diff.
+func runConfigList(ctx context.Context, out io.Writer, flags configGetFlags, uc driving.ConfigUseCase, getwd func() (string, error)) error {
+	mapErr := mapConfigErrorToDiagnostic
+	if flags.DryRun || flags.Diff {
+		return reportErrorSub(out, ErrDryRunNotApplicable, nil, false, false, flags.JSON, "config", "list", mapErr, nil)
+	}
+	cwd, err := getwd()
+	if err != nil {
+		return reportErrorSub(out, fmt.Errorf("determine working directory: %w", err), nil, false, false, flags.JSON, "config", "list", mapErr, nil)
+	}
+	resp, err := uc.List(ctx, driving.ConfigListRequest{BaseDir: cwd})
+	if err != nil {
+		return reportErrorSub(out, sanitizeBaseDir(err, cwd), nil, false, false, flags.JSON, "config", "list", mapErr, nil)
+	}
+	return writeConfigEntries(out, "list", resp.Entries, flags.JSON)
+}
+
+// writeConfigEntries renders the multi-path get / list result: JSON
+// data.entries[] or human lines (`get`: bare values, `list`: path=value).
+func writeConfigEntries(out io.Writer, sub string, entries []driving.ConfigPathValue, asJSON bool) error {
+	if asJSON {
+		data := configEntriesData{Entries: make([]configEntryData, 0, len(entries))}
+		for _, e := range entries {
+			data.Entries = append(data.Entries, configEntryData{Path: e.Path.String(), Value: e.Value})
+		}
+		return writeEnvelope(out, newDataEnvelope("config", sub, data, nil, 0))
+	}
+	for _, e := range entries {
+		if sub == "list" {
+			fmt.Fprintf(out, "%s=%s\n", e.Path, e.Value)
+		} else {
+			fmt.Fprintln(out, e.Value)
+		}
+	}
+	return nil
+}
+
+// runConfigSetMany handles `config set` with several path/value pairs
+// (slice-v1-config-multi-path-set): atomic through
+// [driving.ConfigUseCase.SetMany].
+func runConfigSetMany(
+	ctx context.Context,
+	out io.Writer,
+	args []string,
+	flags configSetFlags,
+	uc driving.ConfigUseCase,
+	getwd func() (string, error),
+) error {
+	mapErr := mapConfigErrorToDiagnostic
+	fail := func(err error, planned []driving.PlannedFile) error {
+		return reportErrorSub(out, err, planned, flags.DryRun, flags.Diff, flags.JSON, "config", "set", mapErr, configErrorDataOf(err))
+	}
+	items := make([]driving.ConfigSetItem, 0, len(args)/2)
+	hasSources := false
+	for i := 0; i < len(args); i += 2 {
+		p, err := domain.NewConfigPath(args[i])
+		if err != nil {
+			return fail(fmt.Errorf("%w: %v", driving.ErrConfigPathUnknown, err), nil)
+		}
+		hasSources = hasSources || p.Kind == domain.ConfigDevcontainerFeatureSourcesAllow
+		items = append(items, driving.ConfigSetItem{Path: p, Value: args[i+1]})
+	}
+	if len(flags.AllowExternalFeatureSources) > 0 && !hasSources {
+		return fail(fmt.Errorf(
+			"%w: --allow-external-feature-sources is only valid together with the path devcontainer.featureSources.allow (Spec §714-717)",
+			driving.ErrConfigPathUnknown), nil)
+	}
+	cwd, err := getwd()
+	if err != nil {
+		return fail(fmt.Errorf("determine working directory: %w", err), nil)
+	}
+	resp, setErr := uc.SetMany(ctx, driving.ConfigSetManyRequest{
+		BaseDir:                     cwd,
+		Items:                       items,
+		AllowExternalFeatureSources: flags.AllowExternalFeatureSources,
+		PreviewMode:                 previewModeFromFlags(flags.DryRun, flags.Diff),
+		SilenceLogger:               flags.JSON,
+	})
+	if setErr != nil {
+		return fail(sanitizeBaseDir(setErr, cwd), resp.PlannedFiles)
+	}
+	if flags.JSON {
+		return writeConfigSetManyJSON(out, resp, flags)
+	}
+	if flags.Diff {
+		if err := writeDiff(out, resp.PlannedFiles); err != nil {
+			return err
+		}
+	}
+	for _, e := range resp.Entries {
+		printConfigSetSummary(out, driving.ConfigSetResponse{Path: e.Path, OldValue: e.OldValue, NewValue: e.NewValue})
+	}
+	return nil
+}
+
+// writeConfigSetManyJSON renders the multi-pair success envelope
+// (same plain / Voll-Schema split as [writeConfigSetJSON]).
+func writeConfigSetManyJSON(out io.Writer, resp driving.ConfigSetManyResponse, flags configSetFlags) error {
+	data := configSetManyData{Entries: make([]configSetEntryData, 0, len(resp.Entries)), NoOp: true}
+	for _, e := range resp.Entries {
+		noOp := e.OldValue == e.NewValue
+		data.NoOp = data.NoOp && noOp
+		data.Entries = append(data.Entries, configSetEntryData{
+			Path: e.Path.String(), OldValue: e.OldValue, NewValue: e.NewValue, NoOp: noOp})
+	}
+	warnDiags := mapWarningsToDiagnostics(resp.Warnings)
+	if !flags.DryRun && !flags.Diff {
+		return writeEnvelope(out, newDataEnvelope("config", "set", data, warnDiags, 0))
+	}
+	pfs, chs := mapPlannedFilesToWire(resp.PlannedFiles, flags.Diff)
+	return writeEnvelope(out, newFullEnvelope("config", "set", flags.DryRun, flags.Diff, pfs, chs, data, warnDiags, 0))
 }

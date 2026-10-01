@@ -1,13 +1,9 @@
 # Slice V1: `config set/get` Strukturiertes `data.hint{action, argument}`-Field
 
-> **Status:** `open/`, on hold pending trigger. Cleanup-/Feature-
-> Slice zum WriteAllowed-Reverse-Mapping-Carveout aus
+> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `HASH`**). Cleanup-/Feature-
+> Slice zum Carveout aus
 > [`slice-v1-cli-json-dry-run-config`](../done/slice-v1-cli-json-dry-run-config.md)
-> §Out of Scope. Carveout-Plan-Anker
-> ([[feedback_carveouts_need_plans]]); verlinkt aus
-> [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
-> §Temporäre Carveouts (T8-Closure des config-Slice trägt den
-> Eintrag nach).
+> §Out of Scope (Carveout-Eintrag entfernt).
 
 ## Auslöser
 
@@ -132,3 +128,13 @@ Subcommand.
 - [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) (Path-Whitelist) — Spec macht keine
   Aussage zur Hint-Form. Strukturierung ist Konsument-
   Komfort-Argument (V1+-Ergonomik, kein Spec-Pflicht-Surface).
+
+## Closure-Notiz
+
+**Geliefert:** Strukturierter `data.hint {command, action, argument}` auf den Fehler-Envelopes von `config get`/`config set`. `driving.ConfigHintError` (typed-error-Carrier, SD-A1; `errors.Is`/`ExitCode` intakt) in `writeRejectedError` und `extractConfigValue`; CLI `configErrorDataOf` → `data.hint`; SD-A2: `command` (ausführbar, ggf. `<value>`) plus `action`/`argument`/`flag`; SD-A3: beide Quellen (WriteRejected, ValueNotSet).
+
+**Sensoren:** `make gates` (lint, test, coverage-gate, docs-check) grün; Funktionsprobe mit
+dem gebauten Binary (Mehrfach-`get`/`set`, `list`, atomarer Abbruch, Hint-Envelope).
+`make test-docker` für diese Änderung nicht gesondert ausgeführt (kein Docker-Pfad berührt).
+
+**Doku:** `docs/user/cli-json-output.md` §6.9, Benutzerhandbuch §Konfiguration, Beispiele, README, CHANGELOG.

@@ -361,9 +361,10 @@ func maybeWarnOrphanFeatureActivation(
 func writeRejectedError(path domain.ConfigPath) error {
 	switch path.Kind {
 	case domain.ConfigServiceEnabled:
-		return fmt.Errorf(
+		return driving.NewConfigHintError(fmt.Errorf(
 			"%w: %s is not writable via `u-boot config set` because the LH-FA-ADD-005 state machine owns the lifecycle; use `u-boot add %s` to register the service",
-			driving.ErrConfigWriteRejected, path, path.Service.String())
+			driving.ErrConfigWriteRejected, path, path.Service.String()),
+			addServiceHint(path.Service.String()))
 	}
 	return fmt.Errorf(
 		"%w: %s is not writable via `u-boot config set`",
@@ -752,6 +753,39 @@ func (s *ConfigService) readUbootYAML(baseDir string) (ubootYAMLConfig, error) {
 // field is absent. Pure function over cfg + path; no I/O. Used
 // by Get (T3) and by Set (T4) to compute OldValue.
 func extractConfigValue(cfg ubootYAMLConfig, path domain.ConfigPath) (string, error) {
+	v, err := extractConfigValueRaw(cfg, path)
+	if err != nil && errors.Is(err, driving.ErrConfigValueNotSet) {
+		return "", driving.NewConfigHintError(err, notSetHint(path))
+	}
+	return v, err
+}
+
+// addServiceHint is the structured `u-boot add <svc>` hint.
+func addServiceHint(svc string) driving.ConfigHint {
+	return driving.ConfigHint{Command: "u-boot add " + svc, Action: "add", Argument: svc}
+}
+
+// notSetHint is the structured repair hint of an
+// [driving.ErrConfigValueNotSet] error: register a service via
+// `u-boot add`, anything else via `u-boot config set <path> <value>`.
+func notSetHint(path domain.ConfigPath) driving.ConfigHint {
+	if path.Kind == domain.ConfigServiceEnabled {
+		return addServiceHint(path.Service.String())
+	}
+	placeholder := "<value>"
+	if path.Kind == domain.ConfigDevcontainerEnabled {
+		placeholder = "<true|false>"
+	}
+	return driving.ConfigHint{
+		Command:  "u-boot config set " + path.String() + " " + placeholder,
+		Action:   "config-set",
+		Argument: path.String(),
+	}
+}
+
+// extractConfigValueRaw is the unwrapped extraction (see
+// [extractConfigValue], which adds the structured hint).
+func extractConfigValueRaw(cfg ubootYAMLConfig, path domain.ConfigPath) (string, error) {
 	if v, ok := sandboxConfigValue(cfg, path); ok {
 		if v == "" {
 			return "", fmt.Errorf("%w: %s — set it via `u-boot config set %s <value>`",

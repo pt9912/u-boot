@@ -575,8 +575,19 @@ devcontainer:
 ```bash
 u-boot config                            # ganze Datei anzeigen
 u-boot config get project.name           # einen Wert lesen
+u-boot config get project.name devcontainer.enabled   # mehrere, je Zeile ein Wert
+u-boot config list                       # alle gesetzten Pfade als pfad=wert
 u-boot config set project.name neuer-name
+u-boot config set project.name neuer-name devcontainer.enabled true   # atomar
 ```
+
+Mehrere Pfad-Wert-Paare in einem `config set` werden **atomar** geschrieben:
+Schlägt eine Prüfung fehl, bleibt `u-boot.yaml` unverändert. Die Paare gelten
+der Reihe nach (ein späteres Paar darf auf ein früheres aufbauen, z. B. erst
+`devcontainer.featureSources.allow`, dann die Feature-Quelle). Mit `--json`
+liefert `config get` bei mehreren Pfaden (oder mit `--json-array`) und
+`config list` `data.entries[{path, value}]`; Fehler bei `get`/`set` tragen
+einen strukturierten `data.hint` (`command`, `action`, `argument`).
 
 Schreibbar sind genau zwei Pfade:
 

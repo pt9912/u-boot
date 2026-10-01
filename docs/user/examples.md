@@ -105,8 +105,11 @@ u-boot down --volumes           # Container + Volumes der gesamten Umgebung entf
 
 ```bash
 u-boot config get project.name
+u-boot config get project.name devcontainer.enabled   # mehrere Werte
+u-boot config list                                     # alle gesetzten Pfade
 u-boot config set project.name renamed-service
 u-boot config set devcontainer.enabled true
+u-boot config set project.name renamed-service devcontainer.enabled true   # atomar
 u-boot generate changelog       # changelog | readme | env-example | devcontainer
 ```
 

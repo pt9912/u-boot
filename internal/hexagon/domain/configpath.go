@@ -3,6 +3,7 @@ package domain
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -226,6 +227,18 @@ func NewConfigPath(raw string) (ConfigPath, error) {
 
 	return ConfigPath{}, fmt.Errorf("%w: %q is not a known config path; allowed: project.name, devcontainer.enabled, devcontainer.featureSources.allow, devcontainer.user.uid, devcontainer.profile, devcontainer.sandbox.{nestedRuntime,onUnavailable,repository,egress.enabled,egress.allow}, services.<svc>.enabled, devcontainer.features.<feature>.{enabled,source,version}",
 		ErrInvalidConfigPath, raw)
+}
+
+// FixedConfigPaths returns the dotted forms of every wildcard-free
+// whitelisted path (scalar and list paths), sorted.
+func FixedConfigPaths() []string {
+	m := scalarConfigPaths()
+	out := make([]string, 0, len(m))
+	for raw := range m {
+		out = append(out, raw)
+	}
+	sort.Strings(out)
+	return out
 }
 
 // scalarConfigPaths maps the fixed (wildcard-free) write-OK dotted

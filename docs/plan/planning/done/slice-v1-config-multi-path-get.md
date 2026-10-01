@@ -1,13 +1,9 @@
 # Slice V1: `u-boot config get` Multi-Pfad-Get / `--json-array`
 
-> **Status:** `open/`, on hold pending trigger. Cleanup-/Feature-
-> Slice zum config-multi-path-get-Carveout aus
+> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `HASH`**). Cleanup-/Feature-
+> Slice zum Carveout aus
 > [`slice-v1-cli-json-dry-run-config`](../done/slice-v1-cli-json-dry-run-config.md)
-> §Out of Scope. Carveout-Plan-Anker
-> ([[feedback_carveouts_need_plans]]); verlinkt aus
-> [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
-> §Temporäre Carveouts (T8-Closure des config-Slice trägt den
-> Eintrag nach).
+> §Out of Scope (Carveout-Eintrag entfernt).
 
 ## Auslöser
 
@@ -44,3 +40,13 @@ trägt `data.entries []` ohne `omitempty` (Empty-Pin).
 
 - [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) (Path-Whitelist) — Spec listet Multi-Path
   nicht; Erweiterung ist Use-Case-Druck-Argument.
+
+## Closure-Notiz
+
+**Geliefert:** `config get <p1> <p2>…` und `--json-array`. `ConfigUseCase.GetMany` (ein Lesezugriff, Reihenfolge, all-or-nothing); human: ein Wert je Zeile; `--json`: `data.entries[]` (ohne `omitempty`); ein Pfad ohne Flag behält die alte Form.
+
+**Sensoren:** `make gates` (lint, test, coverage-gate, docs-check) grün; Funktionsprobe mit
+dem gebauten Binary (Mehrfach-`get`/`set`, `list`, atomarer Abbruch, Hint-Envelope).
+`make test-docker` für diese Änderung nicht gesondert ausgeführt (kein Docker-Pfad berührt).
+
+**Doku:** `docs/user/cli-json-output.md` §6.9, Benutzerhandbuch §Konfiguration, Beispiele, README, CHANGELOG.

@@ -7,6 +7,98 @@ import (
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 )
 
+// ConfigPathValue is one path/value pair of the multi-path forms.
+type ConfigPathValue struct {
+	Path  domain.ConfigPath
+	Value string
+}
+
+// ConfigGetManyRequest is the input for [ConfigUseCase.GetMany].
+type ConfigGetManyRequest struct {
+	BaseDir string
+	Paths   []domain.ConfigPath
+}
+
+// ConfigGetManyResponse carries the values in request order.
+type ConfigGetManyResponse struct {
+	Entries []ConfigPathValue
+}
+
+// ConfigSetItem is one path/value pair of [ConfigSetManyRequest].
+type ConfigSetItem struct {
+	Path  domain.ConfigPath
+	Value string
+}
+
+// ConfigSetManyRequest is the input for [ConfigUseCase.SetMany].
+// Items are applied in order on one in-memory document (so a later
+// item may depend on an earlier one, e.g. an allowlist entry before
+// a feature source); AllowExternalFeatureSources merges into every
+// `devcontainer.featureSources.allow` item like for [ConfigSetRequest].
+type ConfigSetManyRequest struct {
+	BaseDir                     string
+	Items                       []ConfigSetItem
+	AllowExternalFeatureSources []string
+	PreviewMode                 PreviewMode
+	SilenceLogger               bool
+}
+
+// ConfigSetEntry is the per-item outcome of [ConfigUseCase.SetMany].
+type ConfigSetEntry struct {
+	Path     domain.ConfigPath
+	OldValue string
+	NewValue string
+}
+
+// ConfigSetManyResponse is the output of [ConfigUseCase.SetMany].
+type ConfigSetManyResponse struct {
+	Entries      []ConfigSetEntry
+	Warnings     []WarningEntry
+	PlannedFiles []PlannedFile
+}
+
+// ConfigListRequest is the input for [ConfigUseCase.List].
+type ConfigListRequest struct {
+	BaseDir string
+}
+
+// ConfigListResponse lists every path with a value, sorted by path.
+type ConfigListResponse struct {
+	Entries []ConfigPathValue
+}
+
+// ConfigHint is the machine-readable repair hint of a config error
+// (slice-v1-config-structured-hint). Command is the human/ready-to-
+// run form (it may still contain a `<value>` placeholder), Action
+// names the u-boot verb (`add`, `config-set`, `init`), Argument the
+// service or path it applies to, Flag an optional flag (e.g.
+// `--devcontainer`).
+type ConfigHint struct {
+	Command  string
+	Action   string
+	Argument string
+	Flag     string
+}
+
+// ConfigHintError wraps a config sentinel error together with its
+// structured [ConfigHint]. Error() is the inner message unchanged and
+// Unwrap exposes the inner chain, so errors.Is(err, ErrConfig…) and
+// the exit-code classification stay intact; consumers extract the
+// hint via errors.As.
+type ConfigHintError struct {
+	inner error
+	Hint  ConfigHint
+}
+
+// NewConfigHintError wraps inner with hint.
+func NewConfigHintError(inner error, hint ConfigHint) *ConfigHintError {
+	return &ConfigHintError{inner: inner, Hint: hint}
+}
+
+func (e *ConfigHintError) Error() string { return e.inner.Error() }
+
+func (e *ConfigHintError) Unwrap() error { return e.inner }
+
 // ConfigGetRequest is the input for [ConfigUseCase.Get]. The CLI
 // adapter parses the positional `<path>` argument through
 // [domain.NewConfigPath] before constructing the request, so by
@@ -274,4 +366,19 @@ type ConfigUseCase interface {
 	Get(ctx context.Context, req ConfigGetRequest) (ConfigGetResponse, error)
 	Set(ctx context.Context, req ConfigSetRequest) (ConfigSetResponse, error)
 	Show(ctx context.Context, req ConfigShowRequest) (ConfigShowResponse, error)
+
+	// GetMany reads several paths in one call (slice-v1-config-multi-
+	// path-get). All-or-nothing: the first failing path aborts with its
+	// error.
+	GetMany(ctx context.Context, req ConfigGetManyRequest) (ConfigGetManyResponse, error)
+
+	// SetMany writes several path/value pairs atomically
+	// (slice-v1-config-multi-path-set): every coercion and schema
+	// validation runs before the single final write, so a failure
+	// leaves u-boot.yaml byte-identical.
+	SetMany(ctx context.Context, req ConfigSetManyRequest) (ConfigSetManyResponse, error)
+
+	// List enumerates every path that currently has a value
+	// (slice-v1-config-list-subcommand), sorted by path.
+	List(ctx context.Context, req ConfigListRequest) (ConfigListResponse, error)
 }
