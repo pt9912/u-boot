@@ -26,8 +26,8 @@
 
 # Global build args. Both must be declared before the first FROM so they
 # are usable in every stage's FROM-line.
-ARG GO_VERSION=1.26.6
-ARG GOLANGCI_LINT_VERSION=v2.12.2
+ARG GO_VERSION=1.27.1
+ARG GOLANGCI_LINT_VERSION=v2.14.0
 
 # UBOOT_VERSION is injected at build time and re-published as the
 # u-boot --version output (via -ldflags -X main.version) and as the

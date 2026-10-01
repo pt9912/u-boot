@@ -39,6 +39,8 @@ this file is the same format applied to u-boot itself.
 
 ### Changed
 
+- `build(deps): Go toolchain 1.26.6 → 1.27.1`, `golangci-lint v2.12.2 → v2.14.0` and `govulncheck v1.1.4 → v1.8.0`
+  (routine pins; the old govulncheck panics on Go 1.27, `go.mod` stays at `go 1.26.0`; no code changes needed).
 - `build(deps): Go toolchain 1.26.5 → 1.26.6` — fixes eight HIGH stdlib
   advisories (e.g. CVE-2026-33818, `encoding/asn1` denial of service) that
   failed the Trivy image scan.
