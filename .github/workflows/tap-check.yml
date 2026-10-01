@@ -1,0 +1,31 @@
+name: tap-check
+
+# Manueller Check des Secrets HOMEBREW_TAP_GITHUB_TOKEN (ADR-0016): darf das Token
+# auf das Homebrew-Tap schreiben? Ein Rerun des Jobs `tap` zeigt das nicht, wenn die
+# Formel schon im Tap liegt. Aufruf: `gh workflow run tap-check`.
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Token darf auf das Tap schreiben?
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+        run: |
+          if [ -z "$TAP_TOKEN" ]; then
+            echo "::error::HOMEBREW_TAP_GITHUB_TOKEN is not configured."
+            exit 2
+          fi
+          scripts/tap-check.sh

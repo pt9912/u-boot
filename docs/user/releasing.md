@@ -38,6 +38,10 @@ Probe für den Release-Pfad (und hinterher löschbar).
   variables → Actions): ein PAT mit Schreibrecht (Contents: Read & Write) auf
   `pt9912/homebrew-u-boot`. Ohne Secret **überspringt** der Job `tap` den Nachzug mit einer
   Warnung; der Release selbst hängt nicht am Tap.
+- **Token prüfen:** `gh workflow run tap-check` (Workflow
+  [`tap-check.yml`](../../.github/workflows/tap-check.yml)) meldet, ob das Secret auf das Tap
+  **schreiben** darf (`403`/„no write permission" = falsches oder zu eng gefasstes Token). Ein
+  Rerun des Jobs `tap` zeigt das nicht, wenn die Formel schon im Tap liegt.
 - **Tap-Repo** `pt9912/homebrew-u-boot` (README und Smoke-Workflow aus
   [`packaging/homebrew-tap/`](../../packaging/homebrew-tap/)).
 - Schreibrecht auf Tags und auf `ghcr.io/pt9912/u-boot` (über `GITHUB_TOKEN` des Workflows).
@@ -124,7 +128,7 @@ Im Tap-Repo läuft nach dem Formel-Commit der Smoke-Workflow (macOS: Install, `-
 | `--version` des Images ≠ Tag | Build-Arg-Drift → Abbruch vor dem Push; Versionsstrings/`make build VERSION` prüfen |
 | Lauf bricht nach dem GHCR-Push | `:x.y.z` ist schon veröffentlicht; Workflow nach Behebung erneut ausführen (`--clobber` ersetzt Assets), nicht den Tag verschieben |
 | Job `tap` warnt „secret not configured" | Secret setzen (§2), Job erneut ausführen (`gh run rerun --job`) |
-| Job `tap` schlägt fehl | PAT-Rechte/Ablauf prüfen; manuell nachziehen: `TAP_TOKEN=… TAG=vX.Y.Z scripts/tap-nachzug.sh` |
+| Job `tap` schlägt fehl (z. B. `403 Permission denied`) | `gh workflow run tap-check` ausführen; PAT-Rechte/Ablauf prüfen (fine-grained: Repo ergänzen, Contents = Read and write); manuell nachziehen: `TAP_TOKEN=… TAG=vX.Y.Z scripts/tap-nachzug.sh` |
 | Formel fehlt im Tap | Asset `u-boot.rb` des Releases fehlt (Prerelease?) oder Tap-Job nicht gelaufen |
 | Trivy-`image-scan` rot | Go-Pin heben (siehe §4), erst dann taggen |
 
