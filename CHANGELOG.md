@@ -11,6 +11,25 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-01
+
+Sixth release. **Devcontainer sandbox profile and a broad CLI cleanup.**
+`u-boot init --devcontainer --sandbox` / `generate devcontainer --sandbox` render a
+devcontainer for autonomous agents (named-volume workspace per instance, cloned from
+`origin` or `devcontainer.sandbox.repository`; optional rootless Podman with every security
+relaxation reported; opt-in DNS-driven egress allowlist; git credentials only at runtime;
+adjustable container UID) — [`LH-FA-DEV-004`](spec/lastenheft.md#lh-fa-dev-004--benutzerrechte),
+[`-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)..[`-009`](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer),
+[ADR-0012](docs/plan/adr/0012-devcontainer-egress-firewall.md),
+[ADR-0014](docs/plan/adr/0014-nested-podman-sandbox-devcontainer.md),
+[ADR-0015](docs/plan/adr/0015-sandbox-volumes-pro-instanz.md). The V1 cleanup backlog is
+done: `config get/set` with several paths (atomic), `config list`, structured error hints,
+`logs` with several services / format flags / time range, `up` recreate warnings and partial
+snapshots, `down` volume names, a real `remove --purge`, and a rollback-aware
+`generate devcontainer`. Homebrew joins the distribution paths
+([ADR-0016](docs/plan/adr/0016-homebrew-distribution-per-tap.md)); the Go toolchain moves to 1.27.1
+(closes eight HIGH stdlib advisories). Details below.
+
 ### Added
 
 - Homebrew distribution ([ADR-0016](docs/plan/adr/0016-homebrew-distribution-per-tap.md), [`LH-OPEN-002`](spec/lastenheft.md#lh-open-002--paketierung)):
@@ -1081,7 +1100,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/pt9912/u-boot/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/pt9912/u-boot/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/pt9912/u-boot/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/pt9912/u-boot/compare/v0.2.0...v0.3.0

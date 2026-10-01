@@ -1,8 +1,8 @@
 # Benutzerhandbuch: u-boot
 
-Handbuch-Version: 1.1
-Software-Version: v0.5.0
-Stand: 2026-07-25
+Handbuch-Version: 1.2
+Software-Version: v0.6.0
+Stand: 2026-10-01
 
 ---
 
@@ -97,7 +97,7 @@ Invoke-WebRequest `
 ```
 
 **Ergebnis:** `u-boot --version` gibt die installierte Version aus, zum
-Beispiel `u-boot version 0.5.0`.
+Beispiel `u-boot version 0.6.0`.
 
 ### Homebrew (macOS und Linux)
 
@@ -511,6 +511,10 @@ Das jeweilige Artefakt entsteht oder wird aktualisiert. Bei bestehenden Dateien
   `u-boot` den Konflikt, statt Ihre Arbeit zu überschreiben.
 - Devcontainer-Features und der zugehörige Drift-Check sind in
   [`devcontainer-features.md`](devcontainer-features.md) beschrieben.
+- Für autonome Agenten gibt es ein **Sandbox-Profil** (`generate devcontainer
+  --sandbox`): Workspace in einem Volume statt Bind-Mount, optional rootless Podman
+  und eine Egress-Allowlist. Es ist in
+  [`devcontainer-sandbox.md`](devcontainer-sandbox.md) beschrieben.
 
 ### 4.9 Vorlagen nutzen
 
@@ -797,6 +801,7 @@ Ausgabe von `u-boot doctor`, Ihr Betriebssystem und den genauen Befehl.
 - [`examples.md`](examples.md) — Beispielabläufe als Kommando-Rezepte
 - [`cli-json-output.md`](cli-json-output.md) — JSON-Schema und Exit-Code-Matrix
 - [`devcontainer-features.md`](devcontainer-features.md) — Devcontainer-Features
+- [`devcontainer-sandbox.md`](devcontainer-sandbox.md) — Sandbox-Profil für autonome Agenten
 - [`quality.md`](quality.md) — Qualitäts-Gates (für Mitwirkende)
 
 **Lizenz:** siehe `LICENSE` im Projektarchiv.
@@ -809,7 +814,8 @@ Ausgabe von `u-boot doctor`, Ihr Betriebssystem und den genauen Befehl.
 |---|---|---|---|
 | 1.0 | v0.4.0 | 2026-07-25 | Erstfassung |
 | 1.1 | v0.5.0 | 2026-07-25 | Lokale Vorlagen (`--template ./pfad`) aufgenommen; Versionsbezug auf v0.5.0 |
+| 1.2 | v0.6.0 | 2026-10-01 | Homebrew-Installation, Multi-Pfad-`config`/`config list`, ausgebautes `logs`/`up`/`down`/`remove --purge`, Hinweis auf das Sandbox-Profil; Versionsbezug auf v0.6.0 |
 
-**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.5.0. Prüfen Sie
+**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.6.0. Prüfen Sie
 mit `u-boot --version`, welche Version Sie einsetzen. Weicht sie ab, ist
 `u-boot <befehl> --help` die verbindliche Auskunft.

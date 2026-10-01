@@ -13,7 +13,7 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**Homebrew-Distribution (Tap-Einrichtung offen)** — Slice: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (repo-seitig geliefert; Tap-Repo und Secret durch den Projektinhaber).
+**v0.6.0 (Sandbox-Devcontainer + V1-Cleanup + Homebrew)** — Slices: [`slice-v1-release-cut-v0.6.0`](slice-v1-release-cut-v0.6.0.md) (Tag-Push), [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (Tap-Verifikation auf macOS nach dem ersten stabilen Tag).
 
 ## Nächste Wellen
 
