@@ -42,7 +42,28 @@ type LogsRequest struct {
 	// Compose services" (T0-(a)). When non-empty, the value is
 	// trusted as already-format-validated by the CLI adapter
 	// (`domain.NewServiceName`).
-	Service string
+	// Services filters on these services (empty = Compose-Default = all
+	// services in compose.yaml). slice-v1-logs-multi-service-filter:
+	// one or more names; each is regex-validated by the CLI, unknown
+	// names fail at runtime in Compose (exit 12).
+	Services []string
+
+	// NoLogPrefix suppresses the `service  |` prefix
+	// (`docker compose logs --no-log-prefix`,
+	// slice-v1-logs-format-flags).
+	NoLogPrefix bool
+
+	// Timestamps adds a timestamp to every line
+	// (`docker compose logs --timestamps`, slice-v1-logs-format-flags).
+	Timestamps bool
+
+	// Since / Until bound the time range (`docker compose logs --since
+	// / --until`, slice-v1-logs-time-range-filter): a relative
+	// duration (`1h`, `30m`) or an absolute timestamp (RFC 3339 or
+	// `YYYY-MM-DD[THH:MM[:SS]]`). Empty = unbounded. Validated by the
+	// CLI; the use case passes them through.
+	Since string
+	Until string
 
 	// Follow mirrors `docker compose logs --follow`. When true,
 	// the call blocks until SIGINT (Ctrl-C) cancels the context.

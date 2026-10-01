@@ -414,8 +414,11 @@ bekommen stattdessen einen Hinweis, den Status später selbst zu prüfen.
 ```bash
 u-boot logs                  # alle Dienste
 u-boot logs postgres         # nur ein Dienst
+u-boot logs postgres keycloak   # mehrere ausgewählte Dienste
 u-boot logs --tail 100       # nur die letzten 100 Zeilen je Dienst
 u-boot logs --follow         # laufend mitlesen, Abbruch mit Strg-C
+u-boot logs --timestamps --no-log-prefix   # Zeitstempel statt Dienst-Präfix
+u-boot logs --since 30m      # nur die letzten 30 Minuten (auch --until, Zeitstempel)
 ```
 
 #### Ergebnis

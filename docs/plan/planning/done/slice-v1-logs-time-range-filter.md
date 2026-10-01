@@ -1,12 +1,9 @@
 # Slice V1: `u-boot logs --since` / `--until` Time-Range-Filter
 
-> **Status:** `open/`, on hold pending trigger. Cleanup-/Feature-
-> Slice zum Time-Range-Filter-Carveout aus
+> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `HASH`**). Cleanup-/Feature-
+> Slice zum Carveout aus
 > [`slice-v1-cli-json-dry-run-logs`](../done/slice-v1-cli-json-dry-run-logs.md)
-> §Out of Scope. Carveout-Plan-Anker
-> ([[feedback_carveouts_need_plans]]); verlinkt aus
-> [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
-> §Temporäre Carveouts (T8-Closure trägt den Eintrag nach).
+> §Out of Scope (Carveout-Eintrag entfernt).
 
 ## Auslöser
 
@@ -39,3 +36,14 @@ Application-Layer-Logik-Änderung.
 
 - [`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen) (Logs anzeigen) — Erweiterung um Time-Range-
   Format.
+
+## Closure-Notiz
+
+**Geliefert:** `--since`/`--until` mit CLI-Validierung (positive Dauer oder Zeitstempel in RFC 3339 / `YYYY-MM-DD[THH:MM[:SS]]`, sonst `ErrInvalidLogsTime` → Exit 2) und Pass-Through an Compose.
+
+**Sensoren:** `make gates` grün; Docker-Integrationstest
+`TestE2E_LHFAUP005_LogsFormatAndTimeRange` gegen echtes Compose
+(Präfix, Zeitstempel, `--since 1h` behält / `--until 1h` leert die Boot-Zeilen);
+Argv-Pin im Adapter-Test; CLI-Tests für Validierung und Exit-Codes.
+
+**Doku:** `docs/user/cli-json-output.md` §6.8, Benutzerhandbuch §Logs, Beispiele, README, CHANGELOG.

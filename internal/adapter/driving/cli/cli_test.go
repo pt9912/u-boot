@@ -2154,8 +2154,8 @@ func TestExecute_Logs_NoArgs_PropagatesEmptyService(t *testing.T) {
 	if !uc.called {
 		t.Fatal("LogsUseCase.Logs not called")
 	}
-	if uc.lastReq.Service != "" {
-		t.Errorf("Service = %q, want empty (T0-(a) Compose-Default)", uc.lastReq.Service)
+	if len(uc.lastReq.Services) != 0 {
+		t.Errorf("Services = %v, want empty (T0-(a) Compose-Default)", uc.lastReq.Services)
 	}
 	if uc.lastReq.Follow {
 		t.Errorf("Follow = true, want false (default)")
@@ -2207,8 +2207,8 @@ func TestExecute_Logs_ServiceArg_PropagatesService(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Execute logs postgres: %v", err)
 	}
-	if uc.lastReq.Service != "postgres" {
-		t.Errorf("Service = %q, want \"postgres\"", uc.lastReq.Service)
+	if len(uc.lastReq.Services) != 1 || uc.lastReq.Services[0] != "postgres" {
+		t.Errorf("Services = %v, want [postgres]", uc.lastReq.Services)
 	}
 }
 
@@ -2374,20 +2374,66 @@ func TestExecute_Logs_InvalidServiceName_Code10(t *testing.T) {
 	}
 }
 
-// TestExecute_Logs_TooManyArgs_Code2 pins MaximumNArgs(1) — Cobra
-// rejects 2+ positional arguments with a usage-error → Exit-2.
-func TestExecute_Logs_TooManyArgs_Code2(t *testing.T) {
+// TestExecute_Logs_MultiService (slice-v1-logs-multi-service-filter):
+// several positional services reach the use case in order, duplicates
+// dropped; one invalid name rejects the whole call before the use case.
+func TestExecute_Logs_MultiService(t *testing.T) {
 	getwd := func() (string, error) { return "/tmp/x/demo", nil }
 	uc := &fakeLogsUseCase{}
 	var stdout, stderr bytes.Buffer
-	err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
-		context.Background(), []string{"logs", "postgres", "keycloak"}, &stdout, &stderr,
-	)
-	if err == nil {
-		t.Fatalf("expected error for two positional args")
+	if err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs", "postgres", "keycloak", "postgres"}, &stdout, &stderr); err != nil {
+		t.Fatalf("Execute: %v", err)
 	}
-	if got := cli.ExitCode(err); got != 2 {
-		t.Errorf("ExitCode = %d, want 2 (Cobra usage error)", got)
+	if got := uc.lastReq.Services; len(got) != 2 || got[0] != "postgres" || got[1] != "keycloak" {
+		t.Errorf("Services = %v, want [postgres keycloak]", got)
+	}
+
+	uc2 := &fakeLogsUseCase{}
+	err := newAppWithLogs(uc2, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"logs", "postgres", "BAD NAME"}, &stdout, &stderr)
+	if got := cli.ExitCode(err); got != 10 {
+		t.Errorf("ExitCode = %d, want 10 (invalid service name)", got)
+	}
+	if uc2.called {
+		t.Error("use case must not be called for an invalid service name")
+	}
+}
+
+// TestExecute_Logs_FormatAndTimeFlags (slice-v1-logs-format-flags,
+// -time-range-filter): flags reach the use case verbatim; invalid time
+// values are a usage error (exit 2) before the use case.
+func TestExecute_Logs_FormatAndTimeFlags(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x/demo", nil }
+	uc := &fakeLogsUseCase{}
+	var stdout, stderr bytes.Buffer
+	if err := newAppWithLogs(uc, cli.WithGetwd(getwd)).Execute(context.Background(),
+		[]string{"logs", "--no-log-prefix", "--timestamps", "--since", "30m", "--until", "2026-06-07T12:00:00Z"},
+		&stdout, &stderr); err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	r := uc.lastReq
+	if !r.NoLogPrefix || !r.Timestamps || r.Since != "30m" || r.Until != "2026-06-07T12:00:00Z" {
+		t.Errorf("request = %+v", r)
+	}
+	for _, val := range []string{"yesterday", "-5m", "0s", "2026-13-40", "12:00"} {
+		for _, flag := range []string{"--since", "--until"} {
+			uc2 := &fakeLogsUseCase{}
+			err := newAppWithLogs(uc2, cli.WithGetwd(getwd)).Execute(context.Background(),
+				[]string{"logs", flag, val}, &stdout, &stderr)
+			if !errors.Is(err, cli.ErrInvalidLogsTime) || cli.ExitCode(err) != 2 || uc2.called {
+				t.Errorf("%s %q: err=%v exit=%d called=%v, want ErrInvalidLogsTime/2/not called",
+					flag, val, err, cli.ExitCode(err), uc2.called)
+			}
+		}
+	}
+	// Accepted absolute layouts.
+	for _, val := range []string{"2026-06-07", "2026-06-07T12:00", "2026-06-07T12:00:05", "2026-06-07T12:00:05+02:00", "90s", "1h30m"} {
+		uc3 := &fakeLogsUseCase{}
+		if err := newAppWithLogs(uc3, cli.WithGetwd(getwd)).Execute(context.Background(),
+			[]string{"logs", "--since", val}, &stdout, &stderr); err != nil {
+			t.Errorf("--since %q rejected: %v", val, err)
+		}
 	}
 }
 

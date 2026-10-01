@@ -101,7 +101,7 @@ func TestLogsService_HappyPath_TailNormalised(t *testing.T) {
 	var sink bytes.Buffer
 	_, err := fix.svc.Logs(context.Background(), driving.LogsRequest{
 		BaseDir:    "/proj",
-		Service:    "", // empty → no Services slice (Compose-Default)
+		Services:   nil, // empty → no Services slice (Compose-Default)
 		Follow:     false,
 		Tail:       "",
 		OutputSink: &sink,
@@ -136,10 +136,10 @@ func TestLogsService_HappyPath_ServiceFilter(t *testing.T) {
 	fix := newLogsFixture(t)
 	fix.engine.scriptLogs(nil)
 	if _, err := fix.svc.Logs(context.Background(), driving.LogsRequest{
-		BaseDir: "/proj",
-		Service: "postgres",
-		Follow:  true,
-		Tail:    "100",
+		BaseDir:  "/proj",
+		Services: []string{"postgres"},
+		Follow:   true,
+		Tail:     "100",
 	}); err != nil {
 		t.Fatalf("Logs: %v", err)
 	}
@@ -201,8 +201,8 @@ func TestLogsService_ComposeRuntimeError_PropagatesSentinel(t *testing.T) {
 	composeErr := fmt.Errorf("docker compose logs failed: %w", driven.ErrComposeRuntime)
 	fix.engine.scriptLogs(composeErr)
 	_, err := fix.svc.Logs(context.Background(), driving.LogsRequest{
-		BaseDir: "/proj",
-		Service: "psotgres", // typo: at runtime Compose says unknown
+		BaseDir:  "/proj",
+		Services: []string{"psotgres"}, // typo: at runtime Compose says unknown
 	})
 	if err == nil {
 		t.Fatalf("expected error, got nil")
@@ -226,5 +226,29 @@ func TestLogsService_DockerUnavailable_PropagatesSentinel(t *testing.T) {
 	}
 	if !errors.Is(err, driven.ErrDockerUnavailable) {
 		t.Errorf("err = %v, want wrap of ErrDockerUnavailable (Exit-11)", err)
+	}
+}
+
+// TestLogsService_PassThrough_FormatTimeAndMultiService pins that the
+// slice-v1-logs-{format-flags,time-range-filter,multi-service-filter}
+// request fields reach ComposeLogsOptions unchanged.
+func TestLogsService_PassThrough_FormatTimeAndMultiService(t *testing.T) {
+	t.Parallel()
+	fix := newLogsFixture(t)
+	fix.engine.scriptLogs(nil)
+	if _, err := fix.svc.Logs(context.Background(), driving.LogsRequest{
+		BaseDir:     "/proj",
+		Services:    []string{"postgres", "keycloak"},
+		NoLogPrefix: true,
+		Timestamps:  true,
+		Since:       "1h",
+		Until:       "2026-06-07T12:00:00Z",
+	}); err != nil {
+		t.Fatalf("Logs: %v", err)
+	}
+	got := fix.engine.logsOptions
+	if len(got.Services) != 2 || got.Services[1] != "keycloak" || !got.NoLogPrefix || !got.Timestamps ||
+		got.Since != "1h" || got.Until != "2026-06-07T12:00:00Z" {
+		t.Errorf("ComposeLogsOptions = %+v", got)
 	}
 }

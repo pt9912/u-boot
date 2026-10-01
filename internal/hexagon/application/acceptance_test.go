@@ -366,7 +366,7 @@ func TestLHFAUP005_LogsHappyPath(t *testing.T) {
 	engine.scriptLogs(nil)
 	if _, err := logsSvc.Logs(context.Background(), driving.LogsRequest{
 		BaseDir:    testBaseDir,
-		Service:    "postgres",
+		Services:   []string{"postgres"},
 		Tail:       "", // CLI-Default; LogsService.normaliseTail → "all"
 		OutputSink: &sink,
 	}); err != nil {

@@ -13,6 +13,13 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- `u-boot logs` extensions: several services (`logs api db`), `--no-log-prefix`,
+  `--timestamps`, and a time range `--since` / `--until` (duration or
+  timestamp; invalid → exit 2), passed through to `docker compose logs`
+  ([`slice-v1-logs-multi-service-filter`](docs/plan/planning/done/slice-v1-logs-multi-service-filter.md),
+  [`-format-flags`](docs/plan/planning/done/slice-v1-logs-format-flags.md),
+  [`-time-range-filter`](docs/plan/planning/done/slice-v1-logs-time-range-filter.md);
+  [`LH-FA-UP-005`](spec/lastenheft.md#lh-fa-up-005--logs-anzeigen)).
 - `u-boot config` extensions: `config get <p1> <p2>…` and `--json-array`
   (`data.entries[]`), atomic `config set <p1> <v1> <p2> <v2>…`, new
   `config list` (all set paths, sorted), and a structured `data.hint
@@ -225,9 +232,9 @@ as the canonical machine interface) is satisfied. Details below.
   Mapper-Kommentar-Drift + MED-2 Defense-Pin + LOW-1 Plan-
   Drift in `ba7d06f` gefixt; LOW-2 CRLF-Lücke in §6.8 als
   bekannte Limitation dokumentiert). **Vier neue
-  open/-Stubs** (T6 R2-LOW): [`slice-v1-logs-format-flags`](docs/plan/planning/open/slice-v1-logs-format-flags.md),
-  [`slice-v1-logs-multi-service-filter`](docs/plan/planning/open/slice-v1-logs-multi-service-filter.md),
-  [`slice-v1-logs-time-range-filter`](docs/plan/planning/open/slice-v1-logs-time-range-filter.md).
+  open/-Stubs** (T6 R2-LOW): [`slice-v1-logs-format-flags`](docs/plan/planning/done/slice-v1-logs-format-flags.md),
+  [`slice-v1-logs-multi-service-filter`](docs/plan/planning/done/slice-v1-logs-multi-service-filter.md),
+  [`slice-v1-logs-time-range-filter`](docs/plan/planning/done/slice-v1-logs-time-range-filter.md).
   `[ba7d06f, b502cd5, 343e622, 69cfc0d,
   c21ba28, 0fe74e4]`.
 

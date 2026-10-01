@@ -96,6 +96,17 @@ type ComposeLogsOptions struct {
 	// inputs >= 0 in the CLI layer; the adapter trusts the value.
 	Tail string
 
+	// NoLogPrefix / Timestamps mirror `docker compose logs
+	// --no-log-prefix` / `--timestamps` (slice-v1-logs-format-flags).
+	NoLogPrefix bool
+	Timestamps  bool
+
+	// Since / Until mirror `docker compose logs --since / --until`
+	// (slice-v1-logs-time-range-filter); empty = not passed. The CLI
+	// validated the format; the adapter forwards verbatim.
+	Since string
+	Until string
+
 	// Sink is the writer the adapter forwards BOTH of Compose's
 	// streams to — stdout (log lines) AND stderr (compose status
 	// like `Attaching to …`, service-exit notices). Review-Followup

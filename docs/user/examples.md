@@ -25,6 +25,7 @@ u-boot add postgres         # PostgreSQL-Service + Volume + .env.example-Block +
 u-boot doctor               # Docker/Compose/Git-Voraussetzungen + compose.yaml/u-boot.yaml-Validität
 u-boot up                   # docker compose up, wartet auf Healthcheck/TCP-Erreichbarkeit
 u-boot logs postgres        # Logs eines einzelnen Service (alle: `u-boot logs`)
+u-boot logs postgres keycloak --since 1h --timestamps   # Auswahl, Zeitbereich, Zeitstempel
 u-boot down                 # Container stoppen (Volumes bleiben erhalten)
 ```
 

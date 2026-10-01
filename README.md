@@ -195,7 +195,7 @@ and §Nächste Schritte for the in-progress backlog.
 | `remove <service> [--purge]` | [LH-FA-ADD-007](spec/lastenheft.md#lh-fa-add-007--service-entfernen) | Mirror of `add` — disable + cut managed blocks. |
 | `up [--timeout <s>]` | [LH-FA-UP-001](spec/lastenheft.md#lh-fa-up-001--umgebung-starten)..[LH-FA-UP-003](spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen) | Compose up + healthcheck-poll + TCP probe. |
 | `down [--volumes]` | [LH-FA-UP-004](spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen) | Compose down with destructive-confirmation gate. |
-| `logs [service] [--follow] [--tail <n>]` | [LH-FA-UP-005](spec/lastenheft.md#lh-fa-up-005--logs-anzeigen) | Stream Compose logs (all services or one); `--follow` exits 0 on Ctrl-C. |
+| `logs [service…] [--follow] [--tail <n>] [--no-log-prefix] [--timestamps] [--since <t>] [--until <t>]` | [LH-FA-UP-005](spec/lastenheft.md#lh-fa-up-005--logs-anzeigen) | Stream Compose logs (all services or a selection); `--follow` exits 0 on Ctrl-C; format flags and time range pass through to Compose. |
 | `generate <artifact>` | [LH-FA-GEN-001](spec/lastenheft.md#lh-fa-gen-001--generate-befehl)..[LH-FA-GEN-005](spec/lastenheft.md#lh-fa-gen-005--idempotenz) | Idempotent block-replace via `U-BOOT MANAGED BLOCK` marker. |
 | `config [get\|set\|list] [<path>…]` | [LH-FA-CONF-001](spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)..[LH-FA-CONF-005](spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) | Whitelist-scoped reads/writes with two-stage schema validation; multi-path `get`, atomic multi-pair `set`, `list`. |
 | `template list [--json]` | [LH-FA-TPL-004](spec/lastenheft.md#lh-fa-tpl-004--templates-auflisten) | Browse the built-in template catalogue. |

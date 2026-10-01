@@ -475,6 +475,7 @@ func isUsageError(err error) bool {
 	// [isValidationError].
 	if errors.Is(err, ErrConflictingModeFlags) || errors.Is(err, ErrInvalidTimeout) ||
 		errors.Is(err, ErrInvalidLogsTail) ||
+		errors.Is(err, ErrInvalidLogsTime) ||
 		errors.Is(err, ErrFollowJSONNotSupported) ||
 		errors.Is(err, ErrDryRunNotApplicable) ||
 		errors.Is(err, ErrTemplateSubcommandRequired) ||

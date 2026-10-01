@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -36,6 +37,15 @@ type logsFlags struct {
 	// runs.
 	Tail string
 
+	// NoLogPrefix / Timestamps / Since / Until are the Compose
+	// pass-through knobs of slice-v1-logs-format-flags and
+	// slice-v1-logs-time-range-filter (Since/Until validated by
+	// [validateLogsTimeFlag]).
+	NoLogPrefix bool
+	Timestamps  bool
+	Since       string
+	Until       string
+
 	// JSON read-through from the App's persistent root flag
 	// (slice-v1-cli-json-dry-run-logs T0-(j)(ii)). When true,
 	// runLogs routes via the Single-Envelope JSON path (T0-(a)
@@ -62,6 +72,12 @@ type logsFlags struct {
 // application service. Lives in the cli package because the
 // LH-FA-CLI-006 mapping to exit code 2 is a CLI concern.
 var ErrInvalidLogsTail = errors.New("--tail must be a non-negative integer")
+
+// ErrInvalidLogsTime is returned by `u-boot logs` when `--since` /
+// `--until` is neither a positive relative duration (`90s`, `30m`,
+// `1h`) nor an absolute timestamp (RFC 3339, or `YYYY-MM-DD`,
+// `YYYY-MM-DDTHH:MM[:SS]`). Maps to LH-FA-CLI-006 exit code 2.
+var ErrInvalidLogsTime = errors.New("--since/--until must be a duration like 30m or a timestamp like 2026-06-07T12:00:00Z")
 
 // ErrFollowJSONNotSupported is returned by `u-boot logs --follow
 // --json` (slice-v1-cli-json-dry-run-logs T0-(a) Option (A)
@@ -113,13 +129,14 @@ type logsStatusData struct {
 func newLogsCommand(a *App) *cobra.Command {
 	flags := &logsFlags{}
 	cmd := &cobra.Command{
-		Use:   "logs [service]",
+		Use:   "logs [service...]",
 		Short: "Stream Compose logs of every service or one selected service",
 		Long: `Stream Docker Compose logs for the project's services.
 
 Without a positional argument, all services declared in compose.yaml
 are streamed (Compose-Default — no u-boot.yaml filter). With a
-positional argument, only that single service streams. Unknown
+positional arguments, only those services stream (one or several, e.g.
+"logs api db"). Unknown
 services at runtime map to LH-FA-CLI-006 exit code 12 via the
 Compose runtime error path.
 
@@ -130,6 +147,11 @@ Flags:
   --tail <n>       show only the last n lines per service. Default
                    shows all lines (Compose-Default). Negative or
                    non-numeric inputs ⇒ exit 2.
+  --no-log-prefix  suppress the "service  |" prefix.
+  --timestamps     prefix every line with its timestamp.
+  --since <t>      only logs since t: a duration (30m, 1h) or a
+                   timestamp (2026-06-07T12:00:00Z). Invalid ⇒ exit 2.
+  --until <t>      only logs before t (same formats).
 
 LH-FA-CLI-006 exit codes:
   - 0   success (incl. --follow terminated by SIGINT)
@@ -140,7 +162,7 @@ LH-FA-CLI-006 exit codes:
   - 11  Docker daemon unreachable / compose plugin missing
   - 12  Compose runtime failure (unknown service at runtime, etc.)
   - 14  filesystem read failure (u-boot.yaml / compose.yaml)`,
-		Args: cobra.MaximumNArgs(1),
+		Args: cobra.ArbitraryArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// JSON/Quiet read-through from the App's persistent
 			// root flags (slice-v1-cli-json-dry-run-logs T2/T5).
@@ -153,6 +175,14 @@ LH-FA-CLI-006 exit codes:
 		"stream logs continuously until Ctrl-C (LH-FA-UP-005 §1038)")
 	cmd.Flags().StringVar(&flags.Tail, "tail", "",
 		"show only the last n lines per service (non-negative integer; default = all)")
+	cmd.Flags().BoolVar(&flags.NoLogPrefix, "no-log-prefix", false,
+		"suppress the service prefix of each line (docker compose logs --no-log-prefix)")
+	cmd.Flags().BoolVar(&flags.Timestamps, "timestamps", false,
+		"show a timestamp on every line (docker compose logs --timestamps)")
+	cmd.Flags().StringVar(&flags.Since, "since", "",
+		"only logs since a duration (30m, 1h) or timestamp (2026-06-07T12:00:00Z)")
+	cmd.Flags().StringVar(&flags.Until, "until", "",
+		"only logs before a duration (30m, 1h) or timestamp (2026-06-07T12:00:00Z)")
 	return cmd
 }
 
@@ -205,13 +235,15 @@ func runLogs(
 	}
 
 	// Pre-UC-Validation 3: positional service name format.
-	var service string
-	if len(args) == 1 {
-		svc, err := domain.NewServiceName(args[0])
-		if err != nil {
+	for _, f := range []struct{ name, val string }{{"--since", flags.Since}, {"--until", flags.Until}} {
+		if err := validateLogsTimeFlag(f.name, f.val); err != nil {
 			return reportError(stdout, err, nil, false, false, flags.JSON, "logs", mapErr, nil)
 		}
-		service = svc.String()
+	}
+
+	services, err := parseLogsServices(args)
+	if err != nil {
+		return reportError(stdout, err, nil, false, false, flags.JSON, "logs", mapErr, nil)
 	}
 
 	cwd, err := getwd()
@@ -234,11 +266,15 @@ func runLogs(
 	}
 
 	_, err = uc.Logs(ctx, driving.LogsRequest{
-		BaseDir:    cwd,
-		Service:    service,
-		Follow:     flags.Follow,
-		Tail:       flags.Tail,
-		OutputSink: sink,
+		BaseDir:     cwd,
+		Services:    services,
+		Follow:      flags.Follow,
+		Tail:        flags.Tail,
+		NoLogPrefix: flags.NoLogPrefix,
+		Timestamps:  flags.Timestamps,
+		Since:       flags.Since,
+		Until:       flags.Until,
+		OutputSink:  sink,
 	})
 	if err != nil {
 		return reportError(stdout, sanitizeBaseDir(err, cwd), nil, false, false, flags.JSON, "logs", mapErr, nil)
@@ -335,7 +371,7 @@ func mapLogsErrorToDiagnostic(err error) diagnosticItem {
 	case errors.Is(err, ErrFollowJSONNotSupported):
 		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
 	// Row 8: logs-only CLI-form tail validation.
-	case errors.Is(err, ErrInvalidLogsTail):
+	case errors.Is(err, ErrInvalidLogsTail), errors.Is(err, ErrInvalidLogsTime):
 		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
 	default:
 		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
@@ -379,4 +415,44 @@ func isDecimalDigits(raw string) bool {
 		}
 	}
 	return true
+}
+
+// parseLogsServices validates every positional service name (regex
+// only, T0-(b)) and drops duplicates, keeping the first-seen order.
+func parseLogsServices(args []string) ([]string, error) {
+	var out []string
+	seen := map[string]bool{}
+	for _, a := range args {
+		svc, err := domain.NewServiceName(a)
+		if err != nil {
+			return nil, err
+		}
+		if !seen[svc.String()] {
+			seen[svc.String()] = true
+			out = append(out, svc.String())
+		}
+	}
+	return out, nil
+}
+
+// validateLogsTimeFlag checks a `--since` / `--until` value: empty =
+// not set; otherwise a positive duration or an absolute timestamp in
+// one of the accepted layouts (the value is forwarded verbatim to
+// Compose, which accepts exactly these forms).
+func validateLogsTimeFlag(name, raw string) error {
+	if raw == "" {
+		return nil
+	}
+	if d, err := time.ParseDuration(raw); err == nil {
+		if d <= 0 {
+			return fmt.Errorf("%w: %s %q must be a positive duration", ErrInvalidLogsTime, name, raw)
+		}
+		return nil
+	}
+	for _, layout := range []string{time.RFC3339, time.RFC3339Nano, "2006-01-02T15:04:05", "2006-01-02T15:04", "2006-01-02"} {
+		if _, err := time.Parse(layout, raw); err == nil {
+			return nil
+		}
+	}
+	return fmt.Errorf("%w: got %s %q", ErrInvalidLogsTime, name, raw)
 }

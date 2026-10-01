@@ -79,17 +79,19 @@ func (s *LogsService) Logs(ctx context.Context, req driving.LogsRequest) (drivin
 	}
 
 	opts := driven.ComposeLogsOptions{
-		Follow: req.Follow,
-		Tail:   normaliseTail(req.Tail),
-		Sink:   req.OutputSink,
-	}
-	if req.Service != "" {
-		opts.Services = []string{req.Service}
+		Follow:      req.Follow,
+		Tail:        normaliseTail(req.Tail),
+		NoLogPrefix: req.NoLogPrefix,
+		Timestamps:  req.Timestamps,
+		Since:       req.Since,
+		Until:       req.Until,
+		Sink:        req.OutputSink,
+		Services:    req.Services,
 	}
 
 	s.logger.Debug("logs: invoking compose logs",
 		"baseDir", req.BaseDir,
-		"service", req.Service,
+		"services", req.Services,
 		"follow", req.Follow,
 		"tail", opts.Tail)
 	err := s.engine.ComposeLogs(ctx, req.BaseDir, opts)

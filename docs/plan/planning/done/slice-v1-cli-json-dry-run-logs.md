@@ -535,7 +535,7 @@ docs-check).
 | T5 | CLI-RunE: **`runLogs(ctx, stdout, errOut io.Writer, args, flags, uc, getwd)`-Signatur-Refactor** (R2-HIGH-3 Cluster-Pattern-Konsistenz mit up/down/remove `up.go:133`/`down.go:128`/`remove.go:253`) + `logsFlags.JSON`/`logsFlags.Quiet` Fields durchreichen analog up/down (T0-(j)(ii)). Allowlist-Migration `"u-boot logs": true` in `jsonAllowlist()`. **`isFilesystemError`-Co-Migration** (`cli/cli.go:401-428`, R1-MED-6): `driving.ErrLogsFileSystem` ergänzen damit Exit-Code-Mapping auf 14 fällt. Neuer `mapLogsErrorToDiagnostic` mit Switch-Order T0-(f). Pre-UC-Validation-Pfade via `reportError` (Single-Envelope-Form). **`--follow --json`-Reject** im CLI-Layer vor UC-Aufruf: ErrFollowJSONNotSupported / Exit 2 ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)) — gepinnt durch T6-Test. **Single-Envelope-Pfad** (T0-(a) Option (A)): Compose-Output wird im Application-Layer/CLI-Layer in `data.lines []string` gepuffert; nach UC-Return ein `newDataEnvelope("logs", "", data, warnDiags, 0)`. Sanitizer-Aufrufe via `cli/sanitize.go`. | ~150-200 | T2 |
 | T6 | Acceptance-Tests: **~14-16 Tests** (Pre-T6-Review-Korrektur — Reviewer-Empfehlung höher als ursprüngliche 10-12; Pre-T8-Bestätigungsrunde MED-2 ergänzt FS+Docker-Defense-Pin): bounded `--tail`-Pin, `--follow --json`-Reject-Pin ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)/Exit 2 — T0-(a) Option (A) Verbatim), Validation-Order-Pin (`--follow --json --tail=-1` → Follow-JSON-Reject zuerst, T0-(i)), `--quiet --json`-Pin, Mapper-Rows 1-9 (ErrLogsFileSystem, ErrDockerUnavailable, ErrComposeRuntime, ErrComposeFileMissing, ErrProjectNotInitialized, ErrInvalidServiceName, ErrFollowJSONNotSupported, ErrInvalidLogsTail, Default), Path-Leak-Sanitizer-Pin, Empty-`data.lines`-Pin (Empty-Service-Set), Trailing-Newline-Strip-Pin, **FS+Docker-Multi-`%w`-Switch-Order-Defense-Pin (`_ByDesign`-Suffix; ExitCode-Helper-Driven-first vs. Mapper-FS-first per §6.7 (code, exitCode)-Tupel-Disambiguation)**. | ~400-500 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe) | ~50 | T6 |
-| T8 | Closure: CHANGELOG, `cli-json-output.md` §6/§6.8/§7 (§6.8 als reguläre Read-only-Sektion analog §6.7 up-down, mit `--follow --json`-Reject-Doku als Spec-konformer Mechanismus; §7 Mutations-Matrix-Zeile "logs: nur ReadFile"), roadmap done-Zähler 6→7, carveouts.md-Einträge für die drei `open/`-Stubs ([`slice-v1-logs-format-flags`](../open/slice-v1-logs-format-flags.md), `-multi-service-filter`, `-time-range-filter` — bereits in `open/` angelegt bei R2-Adressierung, R2-HIGH-2 Memory-Disziplin), Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
+| T8 | Closure: CHANGELOG, `cli-json-output.md` §6/§6.8/§7 (§6.8 als reguläre Read-only-Sektion analog §6.7 up-down, mit `--follow --json`-Reject-Doku als Spec-konformer Mechanismus; §7 Mutations-Matrix-Zeile "logs: nur ReadFile"), roadmap done-Zähler 6→7, carveouts.md-Einträge für die drei `open/`-Stubs ([`slice-v1-logs-format-flags`](../done/slice-v1-logs-format-flags.md), `-multi-service-filter`, `-time-range-filter` — bereits in `open/` angelegt bei R2-Adressierung, R2-HIGH-2 Memory-Disziplin), Slice nach `done/` mit DoD-Hash-Tabelle. | — (Doku) | T7 |
 
 LOC-Bilanz nach T0-(a) Festzurrung auf (A): **~700-800**
 (R3-Konsolidierung: T2 ~70 + T3 ~30 + T5 ~150-200 + T6 ~400-500
@@ -564,17 +564,17 @@ Closure nachgezogen.
   Compose-Logs-Format-Flags): bewusste Logs-Slice-Erweiterung
   außerhalb des V1-Scope. Pattern-Vorbild Compose-CLI direkt
   passend. Plan-Stub:
-  [`slice-v1-logs-format-flags`](../open/slice-v1-logs-format-flags.md)
+  [`slice-v1-logs-format-flags`](../done/slice-v1-logs-format-flags.md)
   (`open/`, Status `on hold pending trigger`).
 - **Multi-Service-Filter** (`u-boot logs svc1 svc2`): heute
   Single-Service via `cobra.MaximumNArgs(1)`. Multi-Args-Form
   wäre Spec-Erweiterung ([`LH-FA-UP-005`](../../../../spec/lastenheft.md#lh-fa-up-005--logs-anzeigen) spricht Singular).
   Plan-Stub:
-  [`slice-v1-logs-multi-service-filter`](../open/slice-v1-logs-multi-service-filter.md)
+  [`slice-v1-logs-multi-service-filter`](../done/slice-v1-logs-multi-service-filter.md)
   (`open/`, Status `on hold pending trigger`).
 - **`--since` / `--until` Time-Range-Filter**: nicht in Spec.
   Plan-Stub:
-  [`slice-v1-logs-time-range-filter`](../open/slice-v1-logs-time-range-filter.md)
+  [`slice-v1-logs-time-range-filter`](../done/slice-v1-logs-time-range-filter.md)
   (`open/`, Status `on hold pending trigger`).
 - **WARN-Migration**: `driving.WarningEntry`-Type ist aus
   remove T2 verfügbar, aber logs hat heute keine bekannten

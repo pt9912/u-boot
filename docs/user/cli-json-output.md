@@ -954,6 +954,17 @@ lokalem FS (analog up-down): weder `--dry-run` noch `--diff` — nur
   emittiert, NICHT `"lines":null` — Pattern-Erbe up-down's
   `services []serviceStatus`).
 
+**Erweiterungen** ([slice-v1-logs-multi-service-filter](../plan/planning/done/slice-v1-logs-multi-service-filter.md),
+[slice-v1-logs-format-flags](../plan/planning/done/slice-v1-logs-format-flags.md),
+[slice-v1-logs-time-range-filter](../plan/planning/done/slice-v1-logs-time-range-filter.md)):
+`u-boot logs [service…]` nimmt mehrere Services (je Name Regex-geprüft, Exit 10;
+Duplikate entfallen), dazu `--no-log-prefix`, `--timestamps`, `--since` und
+`--until`, die 1:1 an `docker compose logs` gehen. `--since`/`--until` nehmen
+eine positive Dauer (`90s`, `30m`, `1h`) oder einen Zeitstempel (RFC 3339,
+`YYYY-MM-DD`, `YYYY-MM-DDTHH:MM[:SS]`); sonst Exit 2
+(`ErrInvalidLogsTime`). Die `--json`-Form bleibt `data.lines[]`
+(die Zeilen tragen dann Präfix bzw. Zeitstempel je nach Flags).
+
 **T0-(a) Single-Envelope + `--follow --json` Reject** (Option (A)):
 Spec-§1841-Konsens (Single-Envelope pro CLI-Call) wird honoriert.
 `--follow` produziert konzeptionell einen Tail-Stream, nicht eine

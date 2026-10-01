@@ -71,7 +71,7 @@ func TestE2E_LHFAUP005_LogsTail(t *testing.T) {
 	defer cancel()
 	if _, err := logsSvc.Logs(ctx, driving.LogsRequest{
 		BaseDir:    res.dir,
-		Service:    "postgres",
+		Services:   []string{"postgres"},
 		Tail:       "20",
 		OutputSink: &sink,
 	}); err != nil {
@@ -106,7 +106,7 @@ func TestE2E_LHFAUP005_LogsFollow(t *testing.T) {
 
 	if _, err := logsSvc.Logs(ctx, driving.LogsRequest{
 		BaseDir:    res.dir,
-		Service:    "postgres",
+		Services:   []string{"postgres"},
 		Follow:     true,
 		Tail:       "all",
 		OutputSink: &sink,
@@ -115,5 +115,51 @@ func TestE2E_LHFAUP005_LogsFollow(t *testing.T) {
 	}
 	if sink.Len() == 0 {
 		t.Errorf("Logs(--follow) sink is empty; expected at least the pre-block Compose-Buffer-Flush content")
+	}
+}
+
+// TestE2E_LHFAUP005_LogsFormatAndTimeRange pins the real Compose
+// behaviour of the pass-through flags (slice-v1-logs-format-flags,
+// slice-v1-logs-time-range-filter): --no-log-prefix drops the
+// `postgres  |` prefix, --timestamps prepends an RFC 3339 timestamp,
+// --since 1h keeps the boot lines, --until 1h (before one hour ago)
+// returns none.
+func TestE2E_LHFAUP005_LogsFormatAndTimeRange(t *testing.T) {
+	res := runAcceptanceFlow(t, acceptanceFlow{
+		projectName: "t-uboot-e2e-logs-format",
+		serviceName: "postgres",
+		envKeys:     []string{"POSTGRES_USER"},
+		upTimeout:   90 * time.Second,
+		ctxTimeout:  3 * time.Minute,
+	})
+	logsSvc := application.NewLogsService(fsadapter.New(), dockeradapter.NewEngine(), nil)
+	run := func(req driving.LogsRequest) string {
+		t.Helper()
+		var sink bytes.Buffer
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		req.BaseDir, req.Services, req.OutputSink = res.dir, []string{"postgres"}, &sink
+		if _, err := logsSvc.Logs(ctx, req); err != nil {
+			t.Fatalf("Logs(%+v): %v", req, err)
+		}
+		return sink.String()
+	}
+
+	if out := run(driving.LogsRequest{Tail: "20"}); !strings.Contains(out, "postgres") || !strings.Contains(out, "|") {
+		t.Errorf("default output should carry the service prefix:\n%s", out)
+	}
+	noPrefix := run(driving.LogsRequest{Tail: "20", NoLogPrefix: true})
+	if !strings.Contains(noPrefix, postgresReadyPhrase) || strings.Contains(noPrefix, "postgres  |") || strings.Contains(noPrefix, "postgres-1  |") {
+		t.Errorf("--no-log-prefix output still prefixed:\n%s", noPrefix)
+	}
+	ts := run(driving.LogsRequest{Tail: "20", NoLogPrefix: true, Timestamps: true})
+	if first := strings.SplitN(ts, "\n", 2)[0]; len(first) < 20 || first[4] != '-' || first[10] != 'T' {
+		t.Errorf("--timestamps first line lacks an RFC 3339 timestamp: %q", first)
+	}
+	if out := run(driving.LogsRequest{Since: "1h"}); !strings.Contains(out, postgresReadyPhrase) {
+		t.Errorf("--since 1h lost the boot lines:\n%s", out)
+	}
+	if out := run(driving.LogsRequest{Until: "1h"}); strings.Contains(out, postgresReadyPhrase) {
+		t.Errorf("--until 1h (before one hour ago) must not contain the boot lines:\n%s", out)
 	}
 }

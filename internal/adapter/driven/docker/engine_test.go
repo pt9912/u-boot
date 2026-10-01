@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/pt9912/u-boot/internal/adapter/driven/docker"
@@ -596,4 +597,36 @@ func equalStringSlices(got, want []string) bool {
 		}
 	}
 	return true
+}
+
+// TestEngine_ComposeLogs_FormatAndTimeArgs pins the pass-through of the
+// slice-v1-logs-format-flags / -time-range-filter options into the
+// compose argv, and that nothing extra is added by default.
+func TestEngine_ComposeLogs_FormatAndTimeArgs(t *testing.T) {
+	t.Parallel()
+	shellBinaryAvailable(t, "/bin/echo")
+	e := docker.WithEngineBinary("/bin/echo")
+
+	var withFlags bytes.Buffer
+	if err := e.ComposeLogs(context.Background(), "/tmp/demo", driven.ComposeLogsOptions{
+		NoLogPrefix: true, Timestamps: true, Since: "30m", Until: "2026-06-07T12:00:00Z",
+		Services: []string{"postgres", "keycloak"}, Sink: &withFlags,
+	}); err != nil {
+		t.Fatalf("ComposeLogs: %v", err)
+	}
+	for _, want := range []string{"--no-log-prefix", "--timestamps", "--since 30m", "--until 2026-06-07T12:00:00Z", "postgres keycloak"} {
+		if !strings.Contains(withFlags.String(), want) {
+			t.Errorf("argv lacks %q:\n%s", want, withFlags.String())
+		}
+	}
+
+	var plain bytes.Buffer
+	if err := e.ComposeLogs(context.Background(), "/tmp/demo", driven.ComposeLogsOptions{Sink: &plain}); err != nil {
+		t.Fatalf("ComposeLogs: %v", err)
+	}
+	for _, unwanted := range []string{"--no-log-prefix", "--timestamps", "--since", "--until"} {
+		if strings.Contains(plain.String(), unwanted) {
+			t.Errorf("default argv must not contain %q:\n%s", unwanted, plain.String())
+		}
+	}
 }

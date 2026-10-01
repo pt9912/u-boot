@@ -158,6 +158,7 @@ func (e *Engine) ComposeLogs(ctx context.Context, dir string, opts driven.Compos
 	if opts.Tail != "" {
 		args = append(args, "--tail", opts.Tail)
 	}
+	args = append(args, logsFormatArgs(opts)...)
 	args = append(args, opts.Services...)
 	cmd := exec.CommandContext(ctx, e.binary, args...)
 	return wrapComposeRunError(ctx, runLineBuffered(cmd, progressSinkOrDiscard(opts.Sink)), "logs")
@@ -395,4 +396,23 @@ func decodeNDJSON(raw []byte) ([]composePsLine, error) {
 		return nil, fmt.Errorf("scan NDJSON: %w", err)
 	}
 	return lines, nil
+}
+
+// logsFormatArgs builds the optional `docker compose logs` flags
+// beyond --follow/--tail: the format flags and the time range.
+func logsFormatArgs(opts driven.ComposeLogsOptions) []string {
+	var args []string
+	if opts.NoLogPrefix {
+		args = append(args, "--no-log-prefix")
+	}
+	if opts.Timestamps {
+		args = append(args, "--timestamps")
+	}
+	if opts.Since != "" {
+		args = append(args, "--since", opts.Since)
+	}
+	if opts.Until != "" {
+		args = append(args, "--until", opts.Until)
+	}
+	return args
 }
