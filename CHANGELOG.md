@@ -66,6 +66,11 @@ this file is the same format applied to u-boot itself.
 
 ### Changed
 
+- `u-boot generate devcontainer` is now rollback-aware: if one of the multi-file
+  writes (`devcontainer.json`, `Dockerfile`, helper scripts, `u-boot.yaml`) fails,
+  the previous state is restored (new files and a newly created `.devcontainer/`
+  are removed); a failing restore is reported as `rollback incomplete`
+  ([`slice-v2-generate-devcontainer-rollback-aware-write`](docs/plan/planning/done/slice-v2-generate-devcontainer-rollback-aware-write.md)).
 - `build(deps): Go toolchain 1.26.6 → 1.27.1`, `golangci-lint v2.12.2 → v2.14.0` and `govulncheck v1.1.4 → v1.8.0`
   (routine pins; the old govulncheck panics on Go 1.27, `go.mod` stays at `go 1.26.0`; no code changes needed).
 - `build(deps): Go toolchain 1.26.5 → 1.26.6` — fixes eight HIGH stdlib
@@ -476,7 +481,7 @@ as the canonical machine interface) is satisfied. Details below.
   RepairedManual-Action-Discriminator, Human-Mode-Summary +
   Diff-Rendering). Devcontainer-Phase-1-Atomicity + Phase-2-
   Half-Write-Carveout (V2-Open-Slice
-  [`slice-v2-generate-devcontainer-rollback-aware-write`](docs/plan/planning/open/slice-v2-generate-devcontainer-rollback-aware-write.md)) +
+  [`slice-v2-generate-devcontainer-rollback-aware-write`](docs/plan/planning/done/slice-v2-generate-devcontainer-rollback-aware-write.md)) +
   Repeat-Idempotency leben in den Application-Layer-Tests.
   Coverage-Gate ≥ 91 %.
 

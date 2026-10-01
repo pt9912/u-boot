@@ -67,7 +67,7 @@ zu klären:
 3. **Partial-Removal-Atomicity**: was passiert wenn Volume 1
    entfernt wird aber Volume 2 failt (Docker-Daemon-Race,
    Volume-in-use)? Analog
-   [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md)
+   [`slice-v2-generate-devcontainer-rollback-aware-write`](../done/slice-v2-generate-devcontainer-rollback-aware-write.md)
    Half-Write-State: Recorder-Architektur kennt keine Roll-back-
    aware-Captures für Docker-Side-Effects (Cluster-T0-(b)
    Variante 3 verworfen). Sub-Decision: Best-Effort mit per-

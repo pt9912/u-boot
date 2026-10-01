@@ -43,6 +43,11 @@ type GenerateService struct {
 	// recorder (slice-v1-cli-json-dry-run-generate T3, inherited from
 	// init T0-(d) / add review #10).
 	generateMu sync.Mutex
+
+	// rollbackFS is the production filesystem a failed multi-file write
+	// is restored through (never the preview recorder); nil during a
+	// dry-run. Set per Generate() call under generateMu.
+	rollbackFS driven.FileSystem
 }
 
 // Static check: GenerateService satisfies the driving port.
@@ -144,7 +149,11 @@ func (s *GenerateService) Generate(ctx context.Context, req driving.GenerateRequ
 	fs, recorder := s.selectFS(req.PreviewMode)
 	prevFS := s.fs
 	s.fs = fs
-	defer func() { s.fs = prevFS }()
+	s.rollbackFS = nil
+	if req.PreviewMode != driving.PreviewDryRun {
+		s.rollbackFS = prevFS // real writes happen: keep a restore path
+	}
+	defer func() { s.fs, s.rollbackFS = prevFS, nil }()
 
 	resp, genErr := s.runGenerate(ctx, req)
 
@@ -775,23 +784,32 @@ func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.Ge
 		return driving.GenerateResponse{}, err
 	}
 
-	changed, hasWrite, hasReplace, err := s.executeDevcontainerPlans(plans)
+	// slice-v2-generate-devcontainer-rollback-aware-write: from here on
+	// real files change; a failure restores the pre-state.
+	journal := newGenerateJournal(s.rollbackFS)
+	changed, hasWrite, hasReplace, err := s.executeDevcontainerPlans(plans, journal)
 	if err != nil {
-		return driving.GenerateResponse{}, err
+		return driving.GenerateResponse{}, s.rollbackOnError(journal, err)
 	}
 
 	// Allowlist write LAST — only after every other write
 	// succeeded. Any failure above this point leaves u-boot.yaml
 	// byte-identical (no comment loss, no half-mutated state).
+	writeProfile := req.Sandbox && !profileIsSandbox(cfg.Devcontainer)
+	if len(req.AllowExternalFeatureSources) > 0 || writeProfile {
+		if err := journal.captureFile(filepath.Join(req.BaseDir, "u-boot.yaml")); err != nil {
+			return driving.GenerateResponse{}, s.rollbackOnError(journal, err)
+		}
+	}
 	if err := s.applyAllowExternalFeatureSources(req.BaseDir, req.AllowExternalFeatureSources); err != nil {
-		return driving.GenerateResponse{}, err
+		return driving.GenerateResponse{}, s.rollbackOnError(journal, err)
 	}
 
 	// LH-FA-DEV-006: `--sandbox` persists the profile — also LAST,
 	// after every devcontainer file was written.
-	profileWritten, err := s.persistSandboxProfile(req.BaseDir, req.Sandbox && !profileIsSandbox(cfg.Devcontainer))
+	profileWritten, err := s.persistSandboxProfile(req.BaseDir, writeProfile)
 	if err != nil {
-		return driving.GenerateResponse{}, err
+		return driving.GenerateResponse{}, s.rollbackOnError(journal, err)
 	}
 	if profileWritten {
 		changed = append(changed, "u-boot.yaml")
@@ -981,8 +999,16 @@ func (s *GenerateService) planDevcontainerFile(
 // execute: writes new files, splices existing blocks, skips NoOps.
 // Returns the sorted list of changed relative paths plus boolean
 // flags driving the aggregate action decision.
-func (s *GenerateService) executeDevcontainerPlans(plans []devcontainerFilePlan) (changed []string, hasWrite, hasReplace bool, err error) {
+func (s *GenerateService) executeDevcontainerPlans(plans []devcontainerFilePlan, journal *generateJournal) (changed []string, hasWrite, hasReplace bool, err error) {
 	for _, plan := range plans {
+		if plan.action != devcontainerActionNoOp {
+			if err := journal.captureDir(filepath.Dir(plan.targetPath)); err != nil {
+				return nil, false, false, err
+			}
+			if err := journal.captureFile(plan.targetPath); err != nil {
+				return nil, false, false, err
+			}
+		}
 		switch plan.action {
 		case devcontainerActionWrite:
 			if err := s.writeDevcontainerNewFile(plan); err != nil {

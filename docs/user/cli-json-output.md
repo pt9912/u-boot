@@ -639,13 +639,17 @@ Use-Case-Call (Acceptance-Pin).
 **Devcontainer-Atomicity-Asymmetrie** (T0-(i)): Phase 1
 (`planDevcontainerFiles`) ist Pre-Write-Validation-atomar (kein
 WriteFile bei `ErrGenerateManualConflict`); Phase 2
-(`executeDevcontainerPlans`) ist **nicht** Roll-back-atomar —
-Mid-Write zweiter File hinterlässt halbgeschriebenen Zustand.
-Carveout dokumentiert in
-[`carveouts.md`](../plan/planning/in-progress/carveouts.md)
-§Temporäre Carveouts; Rollback-Slice
-[`slice-v2-generate-devcontainer-rollback-aware-write`](../plan/planning/open/slice-v2-generate-devcontainer-rollback-aware-write.md)
-on hold pending trigger.
+(`executeDevcontainerPlans`) ist seit
+[`slice-v2-generate-devcontainer-rollback-aware-write`](../plan/planning/done/slice-v2-generate-devcontainer-rollback-aware-write.md)
+**Rollback-aware** (Best-Effort, Option 1): Vor jeder Mutation werden
+Inhalt und Mode der betroffenen Dateien (`devcontainer.json`, `Dockerfile`,
+ggf. `sandbox-init.sh`/`egress-init.sh` und `u-boot.yaml`) im Speicher
+gesichert; scheitert ein Schreibvorgang, werden bestehende Dateien
+wiederhergestellt, neu angelegte entfernt und ein neu angelegtes
+`.devcontainer/` gelöscht — der Disk-Zustand entspricht danach dem vor dem
+Aufruf. Scheitert die Wiederherstellung selbst, nennt die Fehlermeldung
+`rollback incomplete` (Exit 14, Kette `ErrGenerateFileSystem` bleibt). Im
+`--dry-run` wird nichts geschrieben, also auch nichts zurückgerollt.
 
 **Concurrency**: `GenerateService.generateMu sync.Mutex`
 serialisiert konkurrierende `Generate()`-Calls auf demselben

@@ -1,12 +1,9 @@
 # Slice V2: `generate devcontainer` Rollback-aware Multi-File-Write
 
-> **Status:** `open/`, on hold pending trigger. Cleanup-/Hardening-
+> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `HASH`**). Hardening-
 > Slice zum Devcontainer-Phase-2-Half-Write-Carveout aus
 > [`slice-v1-cli-json-dry-run-generate`](../done/slice-v1-cli-json-dry-run-generate.md)
-> T0-(i). Carveout-Plan-Anker
-> ([[feedback_carveouts_need_plans]]); verlinkt aus
-> [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
-> §Temporäre Carveouts.
+> T0-(i) (Carveout-Eintrag entfernt).
 
 ## Auslöser
 
@@ -200,3 +197,25 @@ File-1+2-Rollback + Dir-Cleanup + YAML-No-Touch.
 - Spec: [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen) (Devcontainer-Render),
   [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) (technische Persistenz-Klasse).
 - Phase: V2 (Hardening, post-V1-Cluster-Closure).
+
+## Closure-Notiz
+
+**Geliefert:** Option 1 (Snapshot + Rollback-on-Failure) in `generate_rollback.go`:
+`generateJournal` sichert Inhalt/Mode vor der ersten Mutation (Dateien) und
+merkt sich neu anzulegende Verzeichnisse; Rollback LIFO über die Production-FS
+(`GenerateService.rollbackFS`, nie über den Preview-Recorder, daher bleibt
+`plannedFiles` unverändert; im `--dry-run` entfällt alles). Erfasst werden
+`.devcontainer/`, alle devcontainer-Dateien und `u-boot.yaml` (Allowlist- und
+Profil-Mutation). Ein scheiternder Rollback hängt `rollback incomplete` an die
+Fehlerkette an (kein neuer Sentinel; `ErrGenerateFileSystem` → Exit 14 bleibt).
+
+**Pins:** Pin A (zweite Datei scheitert: erste Datei und frisch angelegtes
+`.devcontainer/` weg, `u-boot.yaml` byte-identisch), Pin B (`u-boot.yaml`-Write scheitert
+**nach** Truncate — realistische Fehlertopologie von `os.WriteFile`; alles zurück, YAML
+byte-genau wiederhergestellt), Restore bestehender Dateien inkl. Mode, Rollback-Fehler
+sichtbar, Dry-Run unberührt.
+
+**Sensoren:** `make gates` grün. Nicht geliefert: Cluster-weiter ChangeSet-Recorder und
+Crash-Recovery über Aufrufe hinweg (Out of Scope laut Slice).
+
+**Doku:** `docs/user/cli-json-output.md` §6.5, CHANGELOG.
