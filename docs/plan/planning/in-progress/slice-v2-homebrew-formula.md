@@ -1,7 +1,7 @@
 # Slice V2: Homebrew-Formula für u-boot ([`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Restweg)
 
 > **Status:** **repo-seitig geliefert, Tap-Einrichtung offen** (2026-10-01,
-> **Delivery-Hash: `HASH`**). Die Entscheidung steht ([ADR-0016](../../adr/0016-homebrew-distribution-per-tap.md)),
+> **Delivery-Hash: `0cab536`**). Die Entscheidung steht ([ADR-0016](../../adr/0016-homebrew-distribution-per-tap.md)),
 > Skeleton, Fill-Skript, Nachzug-Skript, Workflow-Änderung und Tap-Vorlagen sind im
 > Repo; das Tap-Repo selbst und das Secret legt der Projektinhaber an (siehe
 > §Offene Einrichtung unten). Der Slice bleibt bis dahin in `in-progress/`.
