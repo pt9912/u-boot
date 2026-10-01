@@ -142,7 +142,8 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	initSvc := application.NewInitProjectServiceWithFactory(initFSFactory, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter, application.WithTemplateInit(templateInitSvc))
 	doctorSvc := application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, runtimeAdapter, logAdapter)
 	addSvc := application.NewAddServiceServiceWithFactory(addFSFactory, yamlAdapter, confirmAdapter, logAdapter)
-	removeSvc := application.NewRemoveServiceServiceWithFactory(removeFSFactory, yamlAdapter, confirmAdapter, logAdapter)
+	removeSvc := application.NewRemoveServiceServiceWithFactory(removeFSFactory, yamlAdapter, confirmAdapter, logAdapter).
+		WithDockerEngine(dockerEngineAdapter)
 	upSvc := application.NewUpService(fsAdapter, yamlAdapter, dockerEngineAdapter, netprobeAdapter, clockAdapter, logAdapter)
 	downSvc := application.NewDownService(fsAdapter, dockerEngineAdapter, confirmAdapter, logAdapter)
 	generateSvc := application.NewGenerateServiceWithFactory(generateFSFactory, yamlAdapter, logAdapter)

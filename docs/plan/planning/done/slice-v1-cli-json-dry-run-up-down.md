@@ -637,7 +637,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
   Plan-Empfehlung **(i) `bool`** — matched heutigen Port,
   Spec-konform, kein Architektur-Eingriff. Option (ii) als
   **Out-of-Scope** Carveout mit eigenem Folge-Slice
-  [`slice-v1-down-volumes-named-list`](../open/slice-v1-down-volumes-named-list.md) (Trigger: Real-World-
+  [`slice-v1-down-volumes-named-list`](../done/slice-v1-down-volumes-named-list.md) (Trigger: Real-World-
   Konsumenten-Bedarf nach Namen-Liste).
 - **T0-(i) Mid-`ComposeUp`-Failure-Capture-Vertrag** (Review-
   Finding HIGH-2 Port/Enum-Vertrag-Korrektur):
@@ -675,7 +675,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
   matched heutigen Port-Vertrag, Spec-konform-minimal, kein
   Application-Refactor. Option (ii) als **Out-of-Scope**
   Carveout mit eigenem Folge-Slice
-  [`slice-v1-up-partial-snapshot-on-failure`](../open/slice-v1-up-partial-snapshot-on-failure.md) (Trigger: Real-
+  [`slice-v1-up-partial-snapshot-on-failure`](../done/slice-v1-up-partial-snapshot-on-failure.md) (Trigger: Real-
   World-Bedarf nach "was lief schon" bei Mid-Failure-Debugging
   + Domain-Enum-Erweiterung).
 - **T0-(j) `--timeout=0` Fire-and-Forget im JSON-Mode**
@@ -735,7 +735,7 @@ u-boot down --volumes --json             # default interactive prompt — analog
 | T5 | **CLI-RunE-Migration für up + down** (sechs Sub-Pins). Strukturierte Aufschlüsselung in §T5-Details unten (Pre-T5-Hygiene-Entflechtung analog T2): Sanitizer-Helper-Extraktion / Allowlist-Migration / Mapper-Files-Anlage / `data`-Carrier-Structs / WARN-Migration / `runUp`/`runDown`-Refactor. | ~250 | T2 |
 | T6 | Acceptance-Tests: **Plan-Soll ~14-18, IST 28** (T7-Adressierung erhöht). Pin-Klassen: Envelope-Pin both Subcommands, Idempotenz-Pin für down, `--quiet --json`-Pin, `SilenceProgress`-Pin (R3-HIGH-2 Form (d)), Confirmer-Branch-Pin für `down --volumes --json` ohne `--yes` (R2-MED-2), ConflictingModeFlags-Pin, Service-Sentinels-Pins (Rows 1-9 der Mapper-Tabelle), Multi-`%w`-Switch-Order-Pin FS-first für FS+Docker (R2-HIGH-2 + R3-HIGH-1), Path-Leak-Sanitizer-Pin (R2-MED-5), Empty-Array-Pins für services+diagnostics (R2-LOW-3), CommandConfigGate-Refuse-by-Default-Pin (R2-MED-2 Symmetrie-Pin) | ~500-600 | T5 |
 | T7 | Review-Fix-Rounds (~1-2 Runden bei Pattern-Erbe) | ~50 | T6 |
-| T8 | Closure: CHANGELOG, **`cli-json-output.md` §6/§6.7/§7** mit konkretem **`(code, exitCode)`-Tupel-Disambiguation-Block** in §6.7 (R3-MED-5: Pattern-Vorlage analog remove [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen) Multi-Use; verbatim Beispiel: [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)/Exit 14 ist FS, Exit 11 ist Docker-Daemon, Exit 12 ist Compose-Runtime — Konsumenten MÜSSEN auf (`code, exitCode`)-Tupel filtern, nicht nur auf `code`). **Cross-Slice-Klassen-Pin** (R4-MED-2): `ErrProjectNotInitialized` mappt auf **[`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren)** bei Environment-Subcommands (up/down/generate) UND auf **[`LH-FA-ADD-001`](../../../../spec/lastenheft.md#lh-fa-add-001--add-on-befehl)** bei Service-Subcommands (add/remove) — explicit dokumentieren als bewusste Cluster-Konvention, damit Cluster-Closure-Audit den Drift nicht als Bug erfindet. §7 zwei neue Zeilen "nur ReadFile" für up/down; roadmap done-Zähler 5→6, **carveouts.md** drei neue Einträge (Recreate-Warnings, Volume-Named-Liste, Partial-Snapshot — siehe Out-of-Scope-Block §"Strukturierte Multi-Port-Liste" für vierten Carveout-Trigger falls Real-World-Druck, R3-Bonus-Klarstellung), **vier open/-Stubs** schaffen (R2-MED-1 Memory-`carveouts_need_plans`): [`slice-v1-recreate-detection`](../open/slice-v1-recreate-detection.md), [`slice-v1-down-volumes-named-list`](../open/slice-v1-down-volumes-named-list.md), [`slice-v1-up-partial-snapshot-on-failure`](../open/slice-v1-up-partial-snapshot-on-failure.md), ggf. [`slice-v1-multi-port-services`](../open/slice-v1-multi-port-services.md). **envelope-consolidation-Stub-Update** (R3-MED-3+R3-MED-4 plus R4-MED-3): Sub-Decision 2 dort als "festgelegt durch up-down T5" markieren; Wrap-Site-Inventar erläutern dass up/down-Sites schon abgedeckt sind; Extraktions-Quelle auf `cli/sanitize.go` aktualisieren; **plus Z. 159-163 dort aktualisieren** dass `down --volumes` ebenfalls `SilenceConfirmer`-Pattern nutzt (übernommen aus up-down T2, identisch zu remove) — der Confirmer-Swap-Carveout dort ist nicht mehr remove-spezifisch. Slice nach `done/` mit DoD-Hash-Tabelle | — (Doku) | T7 |
+| T8 | Closure: CHANGELOG, **`cli-json-output.md` §6/§6.7/§7** mit konkretem **`(code, exitCode)`-Tupel-Disambiguation-Block** in §6.7 (R3-MED-5: Pattern-Vorlage analog remove [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen) Multi-Use; verbatim Beispiel: [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)/Exit 14 ist FS, Exit 11 ist Docker-Daemon, Exit 12 ist Compose-Runtime — Konsumenten MÜSSEN auf (`code, exitCode`)-Tupel filtern, nicht nur auf `code`). **Cross-Slice-Klassen-Pin** (R4-MED-2): `ErrProjectNotInitialized` mappt auf **[`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren)** bei Environment-Subcommands (up/down/generate) UND auf **[`LH-FA-ADD-001`](../../../../spec/lastenheft.md#lh-fa-add-001--add-on-befehl)** bei Service-Subcommands (add/remove) — explicit dokumentieren als bewusste Cluster-Konvention, damit Cluster-Closure-Audit den Drift nicht als Bug erfindet. §7 zwei neue Zeilen "nur ReadFile" für up/down; roadmap done-Zähler 5→6, **carveouts.md** drei neue Einträge (Recreate-Warnings, Volume-Named-Liste, Partial-Snapshot — siehe Out-of-Scope-Block §"Strukturierte Multi-Port-Liste" für vierten Carveout-Trigger falls Real-World-Druck, R3-Bonus-Klarstellung), **vier open/-Stubs** schaffen (R2-MED-1 Memory-`carveouts_need_plans`): [`slice-v1-recreate-detection`](../done/slice-v1-recreate-detection.md), [`slice-v1-down-volumes-named-list`](../done/slice-v1-down-volumes-named-list.md), [`slice-v1-up-partial-snapshot-on-failure`](../done/slice-v1-up-partial-snapshot-on-failure.md), ggf. [`slice-v1-multi-port-services`](../done/slice-v1-multi-port-services.md). **envelope-consolidation-Stub-Update** (R3-MED-3+R3-MED-4 plus R4-MED-3): Sub-Decision 2 dort als "festgelegt durch up-down T5" markieren; Wrap-Site-Inventar erläutern dass up/down-Sites schon abgedeckt sind; Extraktions-Quelle auf `cli/sanitize.go` aktualisieren; **plus Z. 159-163 dort aktualisieren** dass `down --volumes` ebenfalls `SilenceConfirmer`-Pattern nutzt (übernommen aus up-down T2, identisch zu remove) — der Confirmer-Swap-Carveout dort ist nicht mehr remove-spezifisch. Slice nach `done/` mit DoD-Hash-Tabelle | — (Doku) | T7 |
 
 LOC-Bilanz: **Plan ~1035-1135 / IST ~1220+** (T7-LOW-6 Drift-
 Doku):
@@ -983,7 +983,7 @@ wendbar. `runUp` mapped `resp.Warnings` analog
 `level: "warn"`.
 
 Recreate-Warnings selbst sind V1-Out-of-Scope (T0-(k) Carveout
-→ Folge-Slice [`slice-v1-recreate-detection`](../open/slice-v1-recreate-detection.md)); Type ist proaktiv
+→ Folge-Slice [`slice-v1-recreate-detection`](../done/slice-v1-recreate-detection.md)); Type ist proaktiv
 vorhanden, Detection wandert.
 
 #### `runUp`/`runDown`-Refactor
@@ -1038,7 +1038,7 @@ weil up/down keine Voll-Schema-Pfade tragen.
   `DockerEngine.ListVolumes`-Port-Method plus ComposePs-Diff-
   Pattern vor/nach `ComposeDown` (so der heutige Port-Kommentar
   selbst). Folge-Slice
-  [`slice-v1-down-volumes-named-list`](../open/slice-v1-down-volumes-named-list.md) (Trigger: Real-World-
+  [`slice-v1-down-volumes-named-list`](../done/slice-v1-down-volumes-named-list.md) (Trigger: Real-World-
   Konsumenten-Bedarf nach Namen-Liste z. B. für Audit-Logs oder
   CI-Cleanup-Scripts; aktueller `removedVolumes: bool` ist
   Spec-konform-minimal).
@@ -1051,7 +1051,7 @@ weil up/down keine Voll-Schema-Pfade tragen.
   (c) `domain.ContainerState`-Enum-Erweiterung um `StateFailed`
   mit Migrations-Pflicht für alle Switch-Statements. Großer
   Architektur-Eingriff. Folge-Slice
-  [`slice-v1-up-partial-snapshot-on-failure`](../open/slice-v1-up-partial-snapshot-on-failure.md) (Trigger: Real-
+  [`slice-v1-up-partial-snapshot-on-failure`](../done/slice-v1-up-partial-snapshot-on-failure.md) (Trigger: Real-
   World-Bedarf nach "was lief schon"-Mid-Failure-Debugging,
   z. B. interaktive CI-Diagnose).
 - **`up --service <name>`-Selective-Form**: heute liefert `up`
@@ -1130,7 +1130,7 @@ weil up/down keine Voll-Schema-Pfade tragen.
   Display-String** (`"5432:5432, 127.0.0.1:9091:9091"`).
   JSON-Konsument bekommt im Stub-Form schon Multi-Port-Werte
   als single `"port"`-CSV. Ein dedizierter Folge-Slice
-  [`slice-v1-multi-port-services`](../open/slice-v1-multi-port-services.md) macht NUR Sinn für
+  [`slice-v1-multi-port-services`](../done/slice-v1-multi-port-services.md) macht NUR Sinn für
   **strukturierte Liste** (`ports []string` mit pro-Port-
   Splitting für Konsumenten-Parse-Erleichterung), nicht für
   Multi-Port-Reporting-Fähigkeit-an-sich (die existiert schon).

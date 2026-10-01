@@ -1,12 +1,9 @@
 # Slice V1: `u-boot up` Partial-Snapshot bei Mid-`ComposeUp`-Failure
 
-> **Status:** `open/`, on hold pending trigger. Cleanup-/Feature-
-> Slice zum Partial-Snapshot-Carveout aus
+> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `HASH`**). Cleanup-/Feature-
+> Slice zum Carveout aus
 > [`slice-v1-cli-json-dry-run-up-down`](../done/slice-v1-cli-json-dry-run-up-down.md)
-> §Out of Scope T0-(i). Carveout-Plan-Anker
-> ([[feedback_carveouts_need_plans]]); verlinkt aus
-> [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
-> §Temporäre Carveouts.
+> §Out of Scope (Carveout-Eintrag entfernt).
 
 ## Auslöser
 
@@ -47,7 +44,7 @@ Plan-Stub bleibt `on hold` bis einer der folgenden Trigger feuert:
   weit etabliert (z. B. für `doctor`-Erweiterung): dann lohnt
   sich der Partial-Snapshot als sekundärer Konsument.
 - **Compose-`config`-Pre-Walk-Slice** (siehe
-  [`slice-v1-recreate-detection`](slice-v1-recreate-detection.md)): hat ohnehin `ComposePs`-
+  [`slice-v1-recreate-detection`](../done/slice-v1-recreate-detection.md)): hat ohnehin `ComposePs`-
   Snapshot-Infrastruktur.
 
 ## Lösungs-Skizze (vorläufig)
@@ -86,3 +83,14 @@ Drei Sub-Entscheidungen vor der Implementation:
 - [`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten) §966-§969 (Stabilisierungs-Semantik).
 - [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) (FS-Failure-Klasse, indirekt für
   Mid-Failure-Reporting).
+
+## Closure-Notiz
+
+**Geliefert:** `UpResponse.PartialServices` (ComposeUp-Fehler außer Daemon-nicht-erreichbar, Terminal-Zustand, Stabilisierungs-Timeout); der JSON-Fehler-Envelope trägt `data.services`. Abweichung: kein neues `StateFailed` — `exited` wird bereits als `dead` klassifiziert und reicht für die Diagnose.
+
+**Sensoren:** `make gates` grün; Docker-Integrationstests gegen echtes Docker/Compose
+(`TestE2E_UpDownCluster_NamesRecreateAndDown`, `TestE2E_RemovePurgeRemovesVolume`,
+`TestE2E_RemovePurgeRemovesVolume_StackDown` — das Volume ist nach `--purge` verschwunden);
+Unit-/CLI-/Adapter-Tests (Parser, Snapshot, Fehlerpfade).
+
+**Doku:** `docs/user/cli-json-output.md` §6.7, Benutzerhandbuch §4.4/§4.5, CHANGELOG.

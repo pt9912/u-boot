@@ -1,12 +1,9 @@
 # Slice V1: `u-boot remove --purge` Volume-Auto-Removal
 
-> **Status:** `open/`, on hold pending trigger. Cleanup-/Hardening-
-> Slice zum Volume-Auto-Removal-Carveout aus
-> [`slice-v1-cli-json-dry-run-remove`](../done/slice-v1-cli-json-dry-run-remove.md)
-> §Out of Scope. Carveout-Plan-Anker ([[feedback_carveouts_need_plans]]);
-> verlinkt aus
-> [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
-> §Temporäre Carveouts.
+> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `HASH`**). Cleanup-/Feature-
+> Slice zum Carveout aus
+> [`slice-v1-cli-json-dry-run-up-down`](../done/slice-v1-cli-json-dry-run-up-down.md)
+> §Out of Scope (Carveout-Eintrag entfernt).
 
 ## Auslöser
 
@@ -70,7 +67,7 @@ zu klären:
 3. **Partial-Removal-Atomicity**: was passiert wenn Volume 1
    entfernt wird aber Volume 2 failt (Docker-Daemon-Race,
    Volume-in-use)? Analog
-   [`slice-v2-generate-devcontainer-rollback-aware-write`](slice-v2-generate-devcontainer-rollback-aware-write.md)
+   [`slice-v2-generate-devcontainer-rollback-aware-write`](../open/slice-v2-generate-devcontainer-rollback-aware-write.md)
    Half-Write-State: Recorder-Architektur kennt keine Roll-back-
    aware-Captures für Docker-Side-Effects (Cluster-T0-(b)
    Variante 3 verworfen). Sub-Decision: Best-Effort mit per-
@@ -98,3 +95,14 @@ zu klären:
 - [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) — FS-Failure-Klasse erbt auf Docker-Failure-
   Klassifikation; ggf. neuer [`LH-NFA-REL-004`](../../../../spec/lastenheft.md#lh-nfa-rel-004--validierung-erzeugter-dateien)-Sentinel für
   Docker-Volume-Errors.
+
+## Closure-Notiz
+
+**Geliefert:** `remove --purge` entfernt das benannte Volume des Dienstes wirklich: Name vor dem Entfernen des Compose-Blocks aus `compose config` aufgelöst, nur bei vorhandenem Volume, `docker volume rm`, je Fehlschlag (z. B. in Benutzung) eine Warnung (Best-Effort, Sub-Entscheidung 3); `RemoveServiceService.WithDockerEngine`, ohne Engine bleibt die alte "deferred"-Warnung; Dry-Run und abgelehntes Gate entfernen nichts. `RemoveServiceResponse.PurgeAttempted/PurgedVolumes`; JSON `purgedVolumes`.
+
+**Sensoren:** `make gates` grün; Docker-Integrationstests gegen echtes Docker/Compose
+(`TestE2E_UpDownCluster_NamesRecreateAndDown`, `TestE2E_RemovePurgeRemovesVolume`,
+`TestE2E_RemovePurgeRemovesVolume_StackDown` — das Volume ist nach `--purge` verschwunden);
+Unit-/CLI-/Adapter-Tests (Parser, Snapshot, Fehlerpfade).
+
+**Doku:** `docs/user/cli-json-output.md` §6.7, Benutzerhandbuch §4.4/§4.5, CHANGELOG.

@@ -416,9 +416,14 @@ func TestUpService_EngineUpReturnsErrComposeRuntime_PassesThrough(t *testing.T) 
 	t.Parallel()
 	f := newUpFixture(t, composePostgres)
 	f.engine.scriptUp(driven.ComposeUpResult{}, driven.ErrComposeRuntime)
-	_, err := f.svc.Up(context.Background(), driving.UpRequest{BaseDir: "/proj", Timeout: 60 * time.Second})
+	// slice-v1-up-partial-snapshot-on-failure: a best-effort ps follows.
+	f.engine.scriptPsReply([]driven.ComposeService{{Name: "postgres", State: "running", Ports: []string{"5432:5432"}}}, nil)
+	resp, err := f.svc.Up(context.Background(), driving.UpRequest{BaseDir: "/proj", Timeout: 60 * time.Second})
 	if !errors.Is(err, driven.ErrComposeRuntime) {
 		t.Errorf("expected errors.Is(err, ErrComposeRuntime), got: %v", err)
+	}
+	if len(resp.PartialServices) != 1 || resp.PartialServices[0].Name != "postgres" {
+		t.Errorf("PartialServices = %+v, want the postgres snapshot", resp.PartialServices)
 	}
 }
 

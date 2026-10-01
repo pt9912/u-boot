@@ -832,6 +832,19 @@ fähige Surface.
   auf stderr wird unterdrückt
   (`req.SilenceProgress = flags.JSON` triggert
   Application-Layer-Branch auf `io.Discard`).
+- **Erweiterungen (additiv)** ([slice-v1-multi-port-services](../plan/planning/done/slice-v1-multi-port-services.md),
+  [slice-v1-recreate-detection](../plan/planning/done/slice-v1-recreate-detection.md),
+  [slice-v1-up-partial-snapshot-on-failure](../plan/planning/done/slice-v1-up-partial-snapshot-on-failure.md),
+  [slice-v1-down-volumes-named-list](../plan/planning/done/slice-v1-down-volumes-named-list.md),
+  [slice-v1-volume-auto-removal](../plan/planning/done/slice-v1-volume-auto-removal.md)):
+  `data.services[]` trägt zusätzlich `ports: [string]` (immer ein Array,
+  `[]` ohne Mapping; `port` bleibt als kommagetrennter Anzeigestring).
+  Recreate-Warnungen ([`LH-FA-UP-003`](../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen), `level: "warn"`) aus dem Compose-
+  Dry-Run stehen in `diagnostics[]`. Bei einem Fehler nach dem Compose-Start
+  trägt der Fehler-Envelope `data: {services: [...]}` (Partial-Snapshot).
+  `down --json` trägt `data.removedVolumeNames: [string]` (immer ein Array)
+  und `remove --json` bei `--purge` `data.purgedVolumes` (die entfernten
+  Volumes; Fehler je Volume als Warnung in `diagnostics[]`).
 - **`u-boot down --json`** → Minimal+Data-Envelope mit
   `data: {removedVolumes: bool}`. Bool ohne `omitempty`:
   `false` ist der legitime Success-Wert "kein `--volumes`

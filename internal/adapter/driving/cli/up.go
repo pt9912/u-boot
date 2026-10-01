@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 
+	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
@@ -37,6 +39,38 @@ type serviceStatus struct {
 	State       string `json:"state"`
 	Port        string `json:"port,omitempty"`
 	Healthcheck string `json:"healthcheck,omitempty"`
+
+	// Ports is the structured form of Port (slice-v1-multi-port-
+	// services): one entry per mapping, always an array (`[]` when
+	// none). Additive — `port` (comma-joined display string) stays.
+	Ports []string `json:"ports"`
+}
+
+// splitPortList splits the comma-joined display string of
+// [domain.ServiceStatus.Port] into its entries (never nil).
+func splitPortList(port string) []string {
+	out := []string{}
+	for _, p := range strings.Split(port, ",") {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+// toServiceStatuses maps domain statuses to the wire carrier.
+func toServiceStatuses(in []domain.ServiceStatus) []serviceStatus {
+	out := make([]serviceStatus, 0, len(in))
+	for _, s := range in {
+		out = append(out, serviceStatus{
+			Name:        s.Name,
+			State:       s.ContainerStatus.String(),
+			Port:        s.Port,
+			Healthcheck: s.Healthcheck,
+			Ports:       splitPortList(s.Port),
+		})
+	}
+	return out
 }
 
 // upStatusData is the typed `data` carrier for the `--json` envelope
@@ -151,7 +185,12 @@ func runUp(ctx context.Context, stdout, stderr io.Writer, flags upFlags, useCase
 		SilenceProgress: flags.JSON,
 	})
 	if err != nil {
-		return reportError(stdout, sanitizeBaseDir(err, cwd), nil, false, false, flags.JSON, "up", mapErr, nil)
+		var errData any
+		if len(resp.PartialServices) > 0 {
+			// slice-v1-up-partial-snapshot-on-failure: what did come up.
+			errData = upStatusData{Services: toServiceStatuses(resp.PartialServices)}
+		}
+		return reportError(stdout, sanitizeBaseDir(err, cwd), nil, false, false, flags.JSON, "up", mapErr, errData)
 	}
 	if flags.JSON {
 		return writeUpJSON(stdout, resp, flags.TimeoutSec == 0)
@@ -168,6 +207,9 @@ func runUp(ctx context.Context, stdout, stderr io.Writer, flags upFlags, useCase
 		return fmt.Errorf("render status: %w", err)
 	}
 	renderUpDiagnostics(stdout, resp.Result.Diagnostics, flags.Quiet)
+	for _, w := range resp.Warnings {
+		fmt.Fprintf(stdout, "Warning (%s): %s\n", w.Code, w.Message)
+	}
 	return nil
 }
 
@@ -187,16 +229,7 @@ func runUp(ctx context.Context, stdout, stderr io.Writer, flags upFlags, useCase
 // detection is a follow-up slice (T0-(k) carveout) — for now
 // resp.Warnings is empty on the happy path.
 func writeUpJSON(out io.Writer, resp driving.UpResponse, fireAndForget bool) error {
-	services := make([]serviceStatus, 0, len(resp.Result.Services))
-	for _, s := range resp.Result.Services {
-		services = append(services, serviceStatus{
-			Name:        s.Name,
-			State:       s.ContainerStatus.String(),
-			Port:        s.Port,
-			Healthcheck: s.Healthcheck,
-		})
-	}
-	data := upStatusData{Services: services}
+	data := upStatusData{Services: toServiceStatuses(resp.Result.Services)}
 	if fireAndForget {
 		t := true
 		data.TimeoutFireAndForget = &t

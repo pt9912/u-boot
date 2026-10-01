@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -40,6 +41,11 @@ type downFlags struct {
 // `slice-v1-down-volumes-named-list`).
 type downStatusData struct {
 	RemovedVolumes bool `json:"removedVolumes"`
+
+	// RemovedVolumeNames lists the Docker volumes that `down --volumes`
+	// removed (slice-v1-down-volumes-named-list). Additive; always an
+	// array (`[]` when none or not determinable), never null.
+	RemovedVolumeNames []string `json:"removedVolumeNames"`
 }
 
 // newDownCommand builds the `u-boot down` Cobra subcommand
@@ -154,6 +160,9 @@ func runDown(ctx context.Context, stdout, stderr io.Writer, flags downFlags, use
 		return writeDownJSON(stdout, resp)
 	}
 	renderDownSuccess(stdout, resp.RemovedVolumes, flags.Quiet)
+	if !flags.Quiet && len(resp.RemovedVolumeNames) > 0 {
+		fmt.Fprintf(stdout, "Removed volumes: %s\n", strings.Join(resp.RemovedVolumeNames, ", "))
+	}
 	return nil
 }
 
@@ -162,7 +171,11 @@ func runDown(ctx context.Context, stdout, stderr io.Writer, flags downFlags, use
 // Slice Z. 464-467 — even though it mutates the Docker daemon
 // state). `data.removedVolumes` mirrors the use-case response.
 func writeDownJSON(out io.Writer, resp driving.DownResponse) error {
-	data := downStatusData{RemovedVolumes: resp.RemovedVolumes}
+	names := resp.RemovedVolumeNames
+	if names == nil {
+		names = []string{}
+	}
+	data := downStatusData{RemovedVolumes: resp.RemovedVolumes, RemovedVolumeNames: names}
 	env := newDataEnvelope("down", "", data, nil, 0)
 	return writeEnvelope(out, env)
 }

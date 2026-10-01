@@ -13,6 +13,17 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- `u-boot up` / `down` / `remove --purge` extensions: `up` warns before Compose
+  recreates a container (`docker compose --dry-run up`), reports `ports[]`
+  structurally and, when it fails mid-way, the partial service snapshot;
+  `down --volumes` names the removed volumes; `remove --purge` now really removes
+  the service's named volume (best effort, one warning per volume that is in
+  use) ([`slice-v1-recreate-detection`](docs/plan/planning/done/slice-v1-recreate-detection.md),
+  [`-multi-port-services`](docs/plan/planning/done/slice-v1-multi-port-services.md),
+  [`-up-partial-snapshot-on-failure`](docs/plan/planning/done/slice-v1-up-partial-snapshot-on-failure.md),
+  [`-down-volumes-named-list`](docs/plan/planning/done/slice-v1-down-volumes-named-list.md),
+  [`-volume-auto-removal`](docs/plan/planning/done/slice-v1-volume-auto-removal.md);
+  [`LH-FA-UP-003`](spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen), [`LH-FA-UP-004`](spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen), [`LH-FA-ADD-007`](spec/lastenheft.md#lh-fa-add-007--service-entfernen)).
 - `u-boot logs` extensions: several services (`logs api db`), `--no-log-prefix`,
   `--timestamps`, and a time range `--since` / `--until` (duration or
   timestamp; invalid → exit 2), passed through to `docker compose logs`
@@ -319,12 +330,12 @@ as the canonical machine interface) is satisfied. Details below.
   Layer-Tests in `downservice_test.go` für die `noopConfirmer`-
   Branch-Defense (`removeVolumesCalls == 0` + Contrast-Pin).
   **Out-of-Scope-V1 Carveouts mit open/-Stubs**: Recreate-
-  Detection ([`slice-v1-recreate-detection`](docs/plan/planning/open/slice-v1-recreate-detection.md)), Volume-Named-Liste
-  ([`slice-v1-down-volumes-named-list`](docs/plan/planning/open/slice-v1-down-volumes-named-list.md)), Partial-Snapshot bei
+  Detection ([`slice-v1-recreate-detection`](docs/plan/planning/done/slice-v1-recreate-detection.md)), Volume-Named-Liste
+  ([`slice-v1-down-volumes-named-list`](docs/plan/planning/done/slice-v1-down-volumes-named-list.md)), Partial-Snapshot bei
   Mid-ComposeUp-Failure
-  ([`slice-v1-up-partial-snapshot-on-failure`](docs/plan/planning/open/slice-v1-up-partial-snapshot-on-failure.md)),
+  ([`slice-v1-up-partial-snapshot-on-failure`](docs/plan/planning/done/slice-v1-up-partial-snapshot-on-failure.md)),
   strukturierte Multi-Port-Liste
-  ([`slice-v1-multi-port-services`](docs/plan/planning/open/slice-v1-multi-port-services.md)).
+  ([`slice-v1-multi-port-services`](docs/plan/planning/done/slice-v1-multi-port-services.md)).
   Coverage-Gate 91 %.
 - `feat(cli): u-boot remove --json / --dry-run / --diff`
   ([`LH-FA-CLI-007`](spec/lastenheft.md#lh-fa-cli-007--dry-run)/[`LH-FA-CLI-008`](spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) / [`LH-NFA-USE-004`](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) / [`LH-FA-ADD-007`](spec/lastenheft.md#lh-fa-add-007--service-entfernen) /

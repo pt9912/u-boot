@@ -1,12 +1,9 @@
 # Slice V1: `u-boot up` Recreate-Warnings-Detection
 
-> **Status:** `open/`, on hold pending trigger. Cleanup-/Feature-
-> Slice zum Recreate-Detection-Carveout aus
+> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `HASH`**). Cleanup-/Feature-
+> Slice zum Carveout aus
 > [`slice-v1-cli-json-dry-run-up-down`](../done/slice-v1-cli-json-dry-run-up-down.md)
-> §Out of Scope T0-(k). Carveout-Plan-Anker
-> ([[feedback_carveouts_need_plans]]); verlinkt aus
-> [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
-> §Temporäre Carveouts.
+> §Out of Scope (Carveout-Eintrag entfernt).
 
 ## Auslöser
 
@@ -84,3 +81,14 @@ Drei Sub-Entscheidungen vor der Implementation:
   für WARN-Anker).
 - [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) §1813 — Minimalkontrakt-Vertrag (WARN-
   Diagnostic-Form ist konsistent).
+
+## Closure-Notiz
+
+**Geliefert:** `DockerEngine.ComposeUpPlan` (`docker compose --dry-run up -d`, Parser auf `Container <name> Recreate`; Best-Effort, Fehler → keine Warnung) und `UpService.recreateWarnings` → eine `WarningEntry` (Code [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen), Level `warn`, Subject = Container) VOR `ComposeUp`; Mensch- und JSON-Ausgabe. Code-Anker: Subsumtion unter [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen).
+
+**Sensoren:** `make gates` grün; Docker-Integrationstests gegen echtes Docker/Compose
+(`TestE2E_UpDownCluster_NamesRecreateAndDown`, `TestE2E_RemovePurgeRemovesVolume`,
+`TestE2E_RemovePurgeRemovesVolume_StackDown` — das Volume ist nach `--purge` verschwunden);
+Unit-/CLI-/Adapter-Tests (Parser, Snapshot, Fehlerpfade).
+
+**Doku:** `docs/user/cli-json-output.md` §6.7, Benutzerhandbuch §4.4/§4.5, CHANGELOG.

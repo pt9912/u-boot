@@ -580,7 +580,7 @@ Closure nachgezogen.
   remove T2 verfügbar, aber logs hat heute keine bekannten
   WARN-Pfade. **KEIN eigener Folge-Slice-Stub** — falls
   künftige Erweiterung WARN braucht (z. B. "service has no
-  logs"), wandert das in den [`slice-v1-recreate-detection`](../open/slice-v1-recreate-detection.md)-
+  logs"), wandert das in den [`slice-v1-recreate-detection`](../done/slice-v1-recreate-detection.md)-
   Folge-Slice (Memory-Wieder-Verknüpfung mit existing
   up-down-Carveout-Stub).
 - **JSON-Lines vs. Spec-§1841 Cluster-Audit**: bei T0-(a)
@@ -610,6 +610,6 @@ Closure nachgezogen.
   `cli/jsonallowlist.go`
   Z. 29/74.
 - Folge-Slices: keine direkten Forward-Refs aus logs heraus;
-  [`slice-v1-recreate-detection`](../open/slice-v1-recreate-detection.md) ist up-down-Carveout (nicht
+  [`slice-v1-recreate-detection`](../done/slice-v1-recreate-detection.md) ist up-down-Carveout (nicht
   logs).
 - Phase: V1 (Teil des V1-pünktlichen Cluster-Slices).

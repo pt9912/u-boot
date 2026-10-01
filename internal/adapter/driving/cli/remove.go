@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -59,6 +60,10 @@ type removeEnvelopeData struct {
 	PriorState    *string `json:"priorState,omitempty"`
 	State         *string `json:"state,omitempty"`
 	VolumesPurged *bool   `json:"volumesPurged,omitempty"`
+
+	// PurgedVolumes lists the volumes `--purge` removed
+	// (slice-v1-volume-auto-removal); omitted when none.
+	PurgedVolumes []string `json:"purgedVolumes,omitempty"`
 }
 
 // newRemoveCommand builds the `u-boot remove <service>` Cobra
@@ -300,6 +305,7 @@ func writeRemoveJSON(out io.Writer, resp driving.RemoveServiceResponse, dryRun, 
 		PriorState:    &priorState,
 		State:         &state,
 		VolumesPurged: &volumesPurged,
+		PurgedVolumes: resp.PurgedVolumes,
 	}
 	warnDiags := mapWarningsToDiagnostics(resp.Warnings)
 	if !dryRun && !diffFlag {
@@ -458,6 +464,17 @@ func printRemoveSummary(out, errOut io.Writer, resp driving.RemoveServiceRespons
 		}
 	}
 
+	if len(resp.PurgedVolumes) > 0 {
+		fmt.Fprintf(out, "Removed volumes: %s\n", strings.Join(resp.PurgedVolumes, ", "))
+	}
+	if resp.PurgeAttempted {
+		// Real removal ran: failures / undeterminable volumes arrive as
+		// warnings (one per volume); the legacy "deferred" prose is moot.
+		for _, w := range resp.Warnings {
+			fmt.Fprintf(errOut, "\nWARNING: %s\n", w.Message)
+		}
+		return
+	}
 	if purge && !resp.VolumesPurged && previewMode != driving.PreviewDryRun {
 		fmt.Fprintf(errOut,
 			"\nWARNING: --purge was requested but volume removal is NOT yet automated in v0.3.0.\n"+

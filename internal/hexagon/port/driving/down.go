@@ -95,6 +95,14 @@ type DownResponse struct {
 	// The CLI uses it to choose between
 	// "environment stopped" and "environment stopped, volumes removed".
 	RemovedVolumes bool
+
+	// RemovedVolumeNames lists the Docker volumes that existed before
+	// `down --volumes` and are gone afterwards (before/after snapshot of
+	// the project's declared volumes, slice-v1-down-volumes-named-list).
+	// Sorted; nil when `--volumes` was not requested or the volumes could
+	// not be determined (e.g. `docker volume ls` failed — best effort,
+	// never an error).
+	RemovedVolumeNames []string
 }
 
 // ErrDownFileSystem signals that the down use case hit a raw

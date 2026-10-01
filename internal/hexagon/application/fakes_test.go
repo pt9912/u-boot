@@ -30,26 +30,26 @@ import (
 // The fake is intentionally small — application tests need
 // deterministic in-memory behaviour, not a full ioutil emulator.
 type fakeFS struct {
-	mu            sync.Mutex
-	files         map[string][]byte
-	fileModes     map[string]iofs.FileMode
-	dirs          map[string]bool
-	dirModes      map[string]iofs.FileMode
-	symlinks      map[string]bool // path is a symlink for Lstat purposes
-	irregular     map[string]bool // path is non-regular (e.g. device file) for Lstat purposes
-	writes        []string        // ordered: every successful WriteFile path
-	mkdirs        []string         // ordered: every MkdirAll path
-	failOn        string           // when non-empty, WriteFile / WriteFileExclusive returns failErr for that path
-	failErr       error
-	failReadOn    string // when non-empty, ReadFile returns failReadErr for that path
-	failReadErr   error
-	failExistsOn  string // when non-empty, Exists returns failExistsErr for that path
-	failExistsErr error
-	failLstatOn   string // when non-empty, Lstat returns failLstatErr for that path
-	failLstatErr  error
-	failMkdirOn   string // when non-empty, Mkdir / MkdirAll returns failMkdirErr for that path
-	failMkdirErr  error
-	failReadDirOn string // when non-empty, ReadDir returns failReadDirErr for that path
+	mu             sync.Mutex
+	files          map[string][]byte
+	fileModes      map[string]iofs.FileMode
+	dirs           map[string]bool
+	dirModes       map[string]iofs.FileMode
+	symlinks       map[string]bool // path is a symlink for Lstat purposes
+	irregular      map[string]bool // path is non-regular (e.g. device file) for Lstat purposes
+	writes         []string        // ordered: every successful WriteFile path
+	mkdirs         []string        // ordered: every MkdirAll path
+	failOn         string          // when non-empty, WriteFile / WriteFileExclusive returns failErr for that path
+	failErr        error
+	failReadOn     string // when non-empty, ReadFile returns failReadErr for that path
+	failReadErr    error
+	failExistsOn   string // when non-empty, Exists returns failExistsErr for that path
+	failExistsErr  error
+	failLstatOn    string // when non-empty, Lstat returns failLstatErr for that path
+	failLstatErr   error
+	failMkdirOn    string // when non-empty, Mkdir / MkdirAll returns failMkdirErr for that path
+	failMkdirErr   error
+	failReadDirOn  string // when non-empty, ReadDir returns failReadDirErr for that path
 	failReadDirErr error
 	failRemoveAll  error          // when non-nil, RemoveAll returns this error
 	readFileCalls  map[string]int // per-path ReadFile call counter (tests assert no double-reads)
@@ -437,10 +437,12 @@ type fakeDirEntry struct {
 	isDir bool
 }
 
-func (e fakeDirEntry) Name() string                 { return e.name }
-func (e fakeDirEntry) IsDir() bool                  { return e.isDir }
-func (e fakeDirEntry) Type() iofs.FileMode          { return 0 }
-func (e fakeDirEntry) Info() (iofs.FileInfo, error) { return nil, errors.New("fakeDirEntry.Info: not implemented") }
+func (e fakeDirEntry) Name() string        { return e.name }
+func (e fakeDirEntry) IsDir() bool         { return e.isDir }
+func (e fakeDirEntry) Type() iofs.FileMode { return 0 }
+func (e fakeDirEntry) Info() (iofs.FileInfo, error) {
+	return nil, errors.New("fakeDirEntry.Info: not implemented")
+}
 
 // fakeFileInfo backs the Lstat return value with just the fields
 // the backup service consults: Name / Size / Mode / IsDir.
@@ -450,12 +452,12 @@ type fakeFileInfo struct {
 	mode iofs.FileMode
 }
 
-func (i *fakeFileInfo) Name() string       { return i.name }
-func (i *fakeFileInfo) Size() int64        { return i.size }
+func (i *fakeFileInfo) Name() string        { return i.name }
+func (i *fakeFileInfo) Size() int64         { return i.size }
 func (i *fakeFileInfo) Mode() iofs.FileMode { return i.mode }
-func (i *fakeFileInfo) ModTime() time.Time { return time.Time{} }
-func (i *fakeFileInfo) IsDir() bool        { return i.mode.IsDir() }
-func (i *fakeFileInfo) Sys() any           { return nil }
+func (i *fakeFileInfo) ModTime() time.Time  { return time.Time{} }
+func (i *fakeFileInfo) IsDir() bool         { return i.mode.IsDir() }
+func (i *fakeFileInfo) Sys() any            { return nil }
 
 // fakeYAML uses gopkg.in/yaml.v3 directly. The application layer
 // imports the YAMLCodec port, the test imports the library — the
@@ -706,14 +708,14 @@ func (f *fakeRuntimeEnv) InContainer() bool { return f.inContainer }
 var _ driven.RuntimeEnvironment = (*fakeRuntimeEnv)(nil)
 
 type fakeGit struct {
-	isRepoCalls []string
-	initCalls   []string
+	isRepoCalls  []string
+	initCalls    []string
 	versionCalls int
-	isRepo      bool
-	isRepoErr   error
-	initErr     error
-	version     string
-	versionErr  error
+	isRepo       bool
+	isRepoErr    error
+	initErr      error
+	version      string
+	versionErr   error
 }
 
 func (f *fakeGit) IsRepository(_ context.Context, dir string) (bool, error) {
@@ -898,6 +900,19 @@ type fakeDockerEngine struct {
 	psQueue       []composePsReply
 	psPanicOnCall bool
 
+	// slice-v1-down-volumes-named-list / -volume-auto-removal /
+	// -recreate-detection: scripted replies for the volume / project /
+	// plan methods. Zero values mean "nothing there" (no panic), so
+	// pre-existing tests are unaffected.
+	projectInfo     driven.ComposeProjectInfo
+	projectErr      error
+	volumeSnapshots [][]string // each ListVolumeNames call pops the head; the last one repeats
+	volumesErr      error
+	removeVolumeErr map[string]error
+	removedVolumes  []string
+	plan            []driven.ComposePlanAction
+	planErr         error
+
 	// Captured options for downstream assertions.
 	upOptions   driven.ComposeUpOptions
 	downOptions driven.ComposeDownOptions
@@ -994,6 +1009,44 @@ func (e *fakeDockerEngine) ComposeLogs(_ context.Context, _ string, opts driven.
 		panic("fakeDockerEngine.ComposeLogs called without scriptLogs; test bug")
 	}
 	return e.logs
+}
+
+func (e *fakeDockerEngine) ComposeProject(_ context.Context, _ string) (driven.ComposeProjectInfo, error) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	return e.projectInfo, e.projectErr
+}
+
+func (e *fakeDockerEngine) ListVolumeNames(_ context.Context) ([]string, error) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if e.volumesErr != nil {
+		return nil, e.volumesErr
+	}
+	if len(e.volumeSnapshots) == 0 {
+		return nil, nil
+	}
+	head := e.volumeSnapshots[0]
+	if len(e.volumeSnapshots) > 1 {
+		e.volumeSnapshots = e.volumeSnapshots[1:]
+	}
+	return head, nil
+}
+
+func (e *fakeDockerEngine) RemoveVolume(_ context.Context, name string) error {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	if err := e.removeVolumeErr[name]; err != nil {
+		return err
+	}
+	e.removedVolumes = append(e.removedVolumes, name)
+	return nil
+}
+
+func (e *fakeDockerEngine) ComposeUpPlan(_ context.Context, _ string) ([]driven.ComposePlanAction, error) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	return e.plan, e.planErr
 }
 
 func (e *fakeDockerEngine) ComposePs(_ context.Context, _ string) ([]driven.ComposeService, error) {

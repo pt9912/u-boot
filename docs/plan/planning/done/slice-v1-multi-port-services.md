@@ -1,12 +1,9 @@
 # Slice V1: Strukturierte Multi-Port-Liste für `u-boot up --json`
 
-> **Status:** `open/`, on hold pending trigger. Cleanup-/Feature-
-> Slice zum Multi-Port-Format-Carveout aus
+> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `HASH`**). Cleanup-/Feature-
+> Slice zum Carveout aus
 > [`slice-v1-cli-json-dry-run-up-down`](../done/slice-v1-cli-json-dry-run-up-down.md)
-> §Out of Scope T0-(g). Carveout-Plan-Anker
-> ([[feedback_carveouts_need_plans]]); verlinkt aus
-> [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
-> §Temporäre Carveouts.
+> §Out of Scope (Carveout-Eintrag entfernt).
 
 ## Auslöser
 
@@ -89,3 +86,14 @@ Drei Sub-Entscheidungen vor der Implementation:
   Wortlaut; strukturierte Liste ist eine Erweiterung, keine
   Spec-Verletzung).
 - [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) §1813 — JSON-Konsumenten-Vertrag.
+
+## Closure-Notiz
+
+**Geliefert:** `ports: [string]` additiv neben dem CSV-`port` (Abweichung vom Slice-Entwurf: kein Domain-Refactor `Port string` → `Ports []string`; die Wire-Form wird aus dem Anzeigestring abgeleitet — rückwärtskompatibel, Dual-Field-Übergang ohne Bruch).
+
+**Sensoren:** `make gates` grün; Docker-Integrationstests gegen echtes Docker/Compose
+(`TestE2E_UpDownCluster_NamesRecreateAndDown`, `TestE2E_RemovePurgeRemovesVolume`,
+`TestE2E_RemovePurgeRemovesVolume_StackDown` — das Volume ist nach `--purge` verschwunden);
+Unit-/CLI-/Adapter-Tests (Parser, Snapshot, Fehlerpfade).
+
+**Doku:** `docs/user/cli-json-output.md` §6.7, Benutzerhandbuch §4.4/§4.5, CHANGELOG.

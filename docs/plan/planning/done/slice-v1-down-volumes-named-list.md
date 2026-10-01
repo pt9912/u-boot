@@ -1,12 +1,9 @@
 # Slice V1: `u-boot down --volumes` Named-Volume-Liste
 
-> **Status:** `open/`, on hold pending trigger. Cleanup-/Feature-
-> Slice zum Volume-Named-Liste-Carveout aus
+> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `HASH`**). Cleanup-/Feature-
+> Slice zum Carveout aus
 > [`slice-v1-cli-json-dry-run-up-down`](../done/slice-v1-cli-json-dry-run-up-down.md)
-> §Out of Scope T0-(h). Carveout-Plan-Anker
-> ([[feedback_carveouts_need_plans]]); verlinkt aus
-> [`docs/plan/planning/in-progress/carveouts.md`](../in-progress/carveouts.md)
-> §Temporäre Carveouts.
+> §Out of Scope (Carveout-Eintrag entfernt).
 
 ## Auslöser
 
@@ -73,7 +70,7 @@ Drei Sub-Entscheidungen vor der Implementation:
   Volume-Inhalte vor Removal in `<project>/.u-boot-volume-
   backup-<timestamp>/<volume-name>.tar.gz` archiviert.
   Separater Slice falls Real-World-Druck (analog dem remove-
-  Slice [`slice-v1-volume-auto-removal`](slice-v1-volume-auto-removal.md) Out-of-Scope).
+  Slice [`slice-v1-volume-auto-removal`](../done/slice-v1-volume-auto-removal.md) Out-of-Scope).
 - **Volume-Lifecycle-Reporting** für `up` (welche Volumes
   wurden erstellt): wäre eigener Slice; up nutzt
   `RemovedVolumes` als Bool nicht.
@@ -82,3 +79,14 @@ Drei Sub-Entscheidungen vor der Implementation:
 
 - [`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen) §1015 (Volume-Removal-Destructive-Op).
 - [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) §1813 (JSON-Konsumenten-Vertrag).
+
+## Closure-Notiz
+
+**Geliefert:** `DownResponse.RemovedVolumeNames` aus einem Vorher-/Nachher-Snapshot der im Compose-Projekt deklarierten Volumes (`DockerEngine.ComposeProject` über `docker compose config --format json`, `ListVolumeNames`); JSON `removedVolumeNames` (additiv, immer Array), Mensch: `Removed volumes: …`; Best-Effort, nie ein Fehler. Sub-Entscheidung 1: Variante (b) über die echten Volume-Namen aus `compose config`.
+
+**Sensoren:** `make gates` grün; Docker-Integrationstests gegen echtes Docker/Compose
+(`TestE2E_UpDownCluster_NamesRecreateAndDown`, `TestE2E_RemovePurgeRemovesVolume`,
+`TestE2E_RemovePurgeRemovesVolume_StackDown` — das Volume ist nach `--purge` verschwunden);
+Unit-/CLI-/Adapter-Tests (Parser, Snapshot, Fehlerpfade).
+
+**Doku:** `docs/user/cli-json-output.md` §6.7, Benutzerhandbuch §4.4/§4.5, CHANGELOG.

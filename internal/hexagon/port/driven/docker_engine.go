@@ -166,6 +166,29 @@ type ComposeService struct {
 // another signature break; for M6 it is intentionally empty.
 type ComposeUpResult struct{}
 
+// ComposeVolume is one named volume of the Compose project: Key is the
+// compose-file key (`postgres-data`), Name the real Docker volume name
+// (`<project>_postgres-data`, or an explicit `name:`).
+type ComposeVolume struct {
+	Key  string
+	Name string
+}
+
+// ComposeProjectInfo is the resolved Compose project
+// (`docker compose config --format json`): the project name and its
+// declared named volumes.
+type ComposeProjectInfo struct {
+	Name    string
+	Volumes []ComposeVolume
+}
+
+// ComposePlanAction is one planned container action of a
+// `docker compose --dry-run up` (e.g. Action `Recreate`).
+type ComposePlanAction struct {
+	Container string
+	Action    string
+}
+
 // DockerEngine is the state-mutating Compose port (M6+), separate
 // from the read-only [DockerProbe] used by M4 `doctor`. Splitting
 // the two keeps each port narrow: probe answers "is Docker
@@ -205,6 +228,26 @@ type DockerEngine interface {
 	// polling loop and is forwarded to the CLI with the same
 	// errors.Is identity as a `ComposeUp` failure.
 	ComposePs(ctx context.Context, dir string) ([]ComposeService, error)
+
+	// ComposeProject resolves the Compose project (name + declared named
+	// volumes) via `docker compose config --format json`
+	// (slice-v1-down-volumes-named-list, -volume-auto-removal).
+	ComposeProject(ctx context.Context, dir string) (ComposeProjectInfo, error)
+
+	// ListVolumeNames returns the names of all existing Docker volumes
+	// (`docker volume ls`). Callers intersect it with a project's
+	// declared volumes to learn which exist on disk.
+	ListVolumeNames(ctx context.Context) ([]string, error)
+
+	// RemoveVolume removes one named volume (`docker volume rm <name>`);
+	// a volume that is still in use fails with [ErrComposeRuntime].
+	RemoveVolume(ctx context.Context, name string) error
+
+	// ComposeUpPlan returns the planned container actions of
+	// `docker compose --dry-run up -d` (slice-v1-recreate-detection).
+	// Best effort: an unparsable or failing dry-run yields an empty
+	// plan, not an error; only context cancellation is returned.
+	ComposeUpPlan(ctx context.Context, dir string) ([]ComposePlanAction, error)
 
 	// ComposeLogs shells out to `docker compose -f <dir>/compose.yaml
 	// logs [--follow] [--tail <value>] [<service>…]` (LH-FA-UP-005).

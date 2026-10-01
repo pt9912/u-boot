@@ -9,6 +9,9 @@ import (
 	"io"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"sort"
+	"strings"
 	"sync"
 
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
@@ -415,4 +418,104 @@ func logsFormatArgs(opts driven.ComposeLogsOptions) []string {
 		args = append(args, "--until", opts.Until)
 	}
 	return args
+}
+
+// composeConfigShape is the part of `docker compose config --format
+// json` the adapter reads.
+type composeConfigShape struct {
+	Name    string `json:"name"`
+	Volumes map[string]struct {
+		Name string `json:"name"`
+	} `json:"volumes"`
+}
+
+// ComposeProject implements [driven.DockerEngine].
+func (e *Engine) ComposeProject(ctx context.Context, dir string) (driven.ComposeProjectInfo, error) {
+	if err := e.preflight(ctx); err != nil {
+		return driven.ComposeProjectInfo{}, err
+	}
+	cmd := exec.CommandContext(ctx, e.binary, "compose", "-f", filepath.Join(dir, "compose.yaml"), "config", "--format", "json")
+	out, err := cmd.Output()
+	if err != nil {
+		return driven.ComposeProjectInfo{}, wrapComposeRunError(ctx, err, "config")
+	}
+	var shape composeConfigShape
+	if err := json.Unmarshal(out, &shape); err != nil {
+		return driven.ComposeProjectInfo{}, fmt.Errorf("docker compose config output unparsable (%s): %w", err.Error(), driven.ErrComposeRuntime)
+	}
+	info := driven.ComposeProjectInfo{Name: shape.Name}
+	for key, v := range shape.Volumes {
+		name := v.Name
+		if name == "" {
+			name = shape.Name + "_" + key
+		}
+		info.Volumes = append(info.Volumes, driven.ComposeVolume{Key: key, Name: name})
+	}
+	sort.Slice(info.Volumes, func(i, j int) bool { return info.Volumes[i].Key < info.Volumes[j].Key })
+	return info, nil
+}
+
+// ListVolumeNames implements [driven.DockerEngine].
+func (e *Engine) ListVolumeNames(ctx context.Context) ([]string, error) {
+	if err := e.preflight(ctx); err != nil {
+		return nil, err
+	}
+	out, err := exec.CommandContext(ctx, e.binary, "volume", "ls", "--format", "{{.Name}}").Output()
+	if err != nil {
+		return nil, wrapComposeRunError(ctx, err, "volume ls")
+	}
+	var names []string
+	for _, line := range strings.Split(string(out), "\n") {
+		if n := strings.TrimSpace(line); n != "" {
+			names = append(names, n)
+		}
+	}
+	return names, nil
+}
+
+// RemoveVolume implements [driven.DockerEngine].
+func (e *Engine) RemoveVolume(ctx context.Context, name string) error {
+	if err := e.preflight(ctx); err != nil {
+		return err
+	}
+	out, err := exec.CommandContext(ctx, e.binary, "volume", "rm", name).CombinedOutput()
+	if err != nil {
+		return wrapComposeRunError(ctx, fmt.Errorf("%s: %s", err.Error(), strings.TrimSpace(string(out))), "volume rm "+name)
+	}
+	return nil
+}
+
+// recreateLineRE matches the `Container <name> Recreate` plan line of
+// `docker compose --dry-run up`.
+var recreateLineRE = regexp.MustCompile(`Container\s+(\S+)\s+(Recreate)\b`)
+
+// ComposeUpPlan implements [driven.DockerEngine]: best-effort parse of
+// the dry-run plan; failures of the dry-run itself (e.g. an image that
+// cannot be resolved) leave the plan empty.
+func (e *Engine) ComposeUpPlan(ctx context.Context, dir string) ([]driven.ComposePlanAction, error) {
+	if ctxErr := ctx.Err(); ctxErr != nil {
+		return nil, ctxErr
+	}
+	if err := e.preflight(ctx); err != nil {
+		return nil, err
+	}
+	cmd := exec.CommandContext(ctx, e.binary, "compose", "-f", filepath.Join(dir, "compose.yaml"), "--dry-run", "up", "-d")
+	out, _ := cmd.CombinedOutput()
+	if ctxErr := ctx.Err(); ctxErr != nil {
+		return nil, ctxErr
+	}
+	return parseComposePlan(string(out)), nil
+}
+
+// parseComposePlan extracts the Recreate actions from dry-run output.
+func parseComposePlan(out string) []driven.ComposePlanAction {
+	var plan []driven.ComposePlanAction
+	seen := map[string]bool{}
+	for _, line := range strings.Split(out, "\n") {
+		if m := recreateLineRE.FindStringSubmatch(line); m != nil && !seen[m[1]] {
+			seen[m[1]] = true
+			plan = append(plan, driven.ComposePlanAction{Container: m[1], Action: m[2]})
+		}
+	}
+	return plan
 }

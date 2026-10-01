@@ -32,6 +32,10 @@ type RemoveServiceService struct {
 	yaml      driven.YAMLCodec
 	confirmer driven.Confirmer
 	logger    driven.Logger
+	// engine performs the real `--purge` volume removal
+	// (slice-v1-volume-auto-removal); nil keeps the legacy deferred
+	// warning. Wired via [RemoveServiceService.WithDockerEngine].
+	engine driven.DockerEngine
 	// removeMu serialises Remove() invocations on a single service
 	// instance. The PreviewMode-aware s.fs/s.confirmer-swaps in Remove()
 	// mutate shared service fields; concurrent Remove calls would race
@@ -106,6 +110,14 @@ func NewRemoveServiceServiceWithFactory(
 		confirmer: confirmer,
 		logger:    logger,
 	}
+}
+
+// WithDockerEngine wires the Docker engine used by `--purge` to remove
+// the service's named volumes. Without it `--purge` only runs the
+// confirmation gate and warns that removal is deferred.
+func (s *RemoveServiceService) WithDockerEngine(e driven.DockerEngine) *RemoveServiceService {
+	s.engine = e
+	return s
 }
 
 // selectFS picks the per-request FS pair (slice-v1-cli-json-dry-run-
@@ -261,9 +273,7 @@ func (s *RemoveServiceService) runRemove(ctx context.Context, req driving.Remove
 				return driving.RemoveServiceResponse{Warnings: warnings}, err
 			}
 		}
-		resp, execErr := s.executeRemove(req.BaseDir, req.ServiceName, state)
-		resp.Warnings = warnings
-		return resp, execErr
+		return s.executeRemoveWithPurge(ctx, req, state, warnings)
 
 	default:
 		// Defensive: detectServiceState's six wohlgeformte LH-FA-ADD-
@@ -291,13 +301,16 @@ func (s *RemoveServiceService) runRemove(ctx context.Context, req driving.Remove
 //
 // Returns nil for `--purge=false` and for volumeless catalogue
 // entries — no semantic-falsche WARN for services without volumes.
-func (*RemoveServiceService) volumesPurgedWarnings(req driving.RemoveServiceRequest) []driving.WarningEntry {
+func (s *RemoveServiceService) volumesPurgedWarnings(req driving.RemoveServiceRequest) []driving.WarningEntry {
 	if !req.Purge {
 		return nil
 	}
 	entry, ok := catalogueFor(req.ServiceName)
 	if !ok || entry.volumeOptional {
 		return nil
+	}
+	if s.engine != nil && req.PreviewMode != driving.PreviewDryRun {
+		return nil // the real removal runs; no "deferred" warning
 	}
 	return []driving.WarningEntry{
 		{
@@ -570,4 +583,105 @@ func (s *RemoveServiceService) fileMode(path string, fallbackMode iofs.FileMode)
 		return 0, err
 	}
 	return info.Mode().Perm(), nil
+}
+
+// volumePurgePlan is the pre-computed `--purge` work: the existing
+// Docker volumes that belong to the service, or a warning when they
+// could not be determined.
+type volumePurgePlan struct {
+	service string
+	names   []string
+	warning *driving.WarningEntry
+}
+
+// planVolumePurge resolves, while the compose block still exists, the
+// real Docker volume name of the service's named volume (catalogue
+// `volumeRefLiteral` → project volume `Name`) and keeps it only when
+// it exists on disk. Failures degrade to a warning, never an error.
+func (s *RemoveServiceService) planVolumePurge(ctx context.Context, req driving.RemoveServiceRequest) *volumePurgePlan {
+	plan := &volumePurgePlan{service: req.ServiceName.String()}
+	entry, ok := catalogueFor(req.ServiceName)
+	if !ok || entry.volumeOptional || entry.volumeRefLiteral == "" {
+		return plan
+	}
+	manual := func(reason string) *volumePurgePlan {
+		plan.warning = &driving.WarningEntry{
+			Code:  "LH-FA-ADD-007",
+			Level: "warn",
+			Message: fmt.Sprintf("--purge: %s; the %s service's named volumes were not removed — remove them manually after confirming the data is no longer needed (`docker volume ls`, `docker volume rm <name>`)",
+				reason, plan.service),
+			Subject: plan.service,
+		}
+		return plan
+	}
+	info, err := s.engine.ComposeProject(ctx, req.BaseDir)
+	if err != nil {
+		return manual("cannot resolve the compose project volumes (" + err.Error() + ")")
+	}
+	name := ""
+	for _, v := range info.Volumes {
+		if v.Key == entry.volumeRefLiteral {
+			name = v.Name
+		}
+	}
+	if name == "" {
+		return plan
+	}
+	existing, err := s.engine.ListVolumeNames(ctx)
+	if err != nil {
+		return manual("cannot list the docker volumes (" + err.Error() + ")")
+	}
+	for _, e := range existing {
+		if e == name {
+			plan.names = append(plan.names, name)
+		}
+	}
+	return plan
+}
+
+// applyVolumePurge removes the planned volumes best-effort (one
+// warning per failure, e.g. a volume that is still in use) and fills
+// the response.
+func (s *RemoveServiceService) applyVolumePurge(ctx context.Context, plan *volumePurgePlan, resp *driving.RemoveServiceResponse) {
+	resp.PurgeAttempted = true
+	if plan.warning != nil {
+		resp.Warnings = append(resp.Warnings, *plan.warning)
+		return
+	}
+	failed := false
+	for _, name := range plan.names {
+		if err := s.engine.RemoveVolume(ctx, name); err != nil {
+			failed = true
+			resp.Warnings = append(resp.Warnings, driving.WarningEntry{
+				Code:  "LH-FA-ADD-007",
+				Level: "warn",
+				Message: fmt.Sprintf("--purge: volume %q could not be removed (%v); stop the stack (`u-boot down`) and run `docker volume rm %s`",
+					name, err, name),
+				Subject: plan.service,
+			})
+			continue
+		}
+		resp.PurgedVolumes = append(resp.PurgedVolumes, name)
+	}
+	resp.VolumesPurged = !failed && len(resp.PurgedVolumes) > 0
+}
+
+// executeRemoveWithPurge runs the state transition and, for `--purge`
+// with a wired engine, the real volume removal. The volume names are
+// resolved BEFORE the compose block is removed (afterwards the project
+// no longer declares them); the removal itself runs only after the
+// transition succeeded.
+func (s *RemoveServiceService) executeRemoveWithPurge(
+	ctx context.Context, req driving.RemoveServiceRequest, state domain.ServiceState, warnings []driving.WarningEntry,
+) (driving.RemoveServiceResponse, error) {
+	var purge *volumePurgePlan
+	if req.Purge && s.engine != nil && req.PreviewMode != driving.PreviewDryRun {
+		purge = s.planVolumePurge(ctx, req)
+	}
+	resp, execErr := s.executeRemove(req.BaseDir, req.ServiceName, state)
+	resp.Warnings = warnings
+	if execErr == nil && purge != nil {
+		s.applyVolumePurge(ctx, purge, &resp)
+	}
+	return resp, execErr
 }

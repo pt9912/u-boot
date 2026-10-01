@@ -80,6 +80,14 @@ type UpResponse struct {
 	// happy path; populated when recreate-detection (T0-(k) follow-up
 	// slice) or future read-side WARN paths land.
 	Warnings []WarningEntry
+
+	// PartialServices is the best-effort `compose ps` snapshot taken
+	// when `up` fails after Compose started (ComposeUp error, terminal
+	// service state, stabilization timeout) — "what did come up?"
+	// (slice-v1-up-partial-snapshot-on-failure). Populated only
+	// together with a non-nil error; empty on success and when the
+	// snapshot itself failed.
+	PartialServices []domain.ServiceStatus
 }
 
 // All Up sentinels below live in the `driving` package (not in

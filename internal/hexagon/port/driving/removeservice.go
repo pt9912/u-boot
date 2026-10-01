@@ -113,6 +113,14 @@ type RemoveServiceResponse struct {
 	// refused and no-volume-known paths.
 	VolumesPurged bool
 
+	// PurgeAttempted is true when `--purge` ran the real volume removal
+	// (a Docker engine is wired and the run was not a dry-run), also
+	// when it removed nothing. PurgedVolumes lists the volumes that
+	// were removed (slice-v1-volume-auto-removal); failures surface as
+	// [Warnings] entries (best-effort, one per volume).
+	PurgeAttempted bool
+	PurgedVolumes  []string
+
 	// PlannedFiles is the FS-plan emitted when [RemoveServiceRequest.
 	// PreviewMode] is non-zero (slice-v1-cli-json-dry-run-remove T2 /
 	// inherited from init T2 / add T0-(i) / generate T2). One entry

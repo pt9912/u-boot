@@ -375,9 +375,11 @@ Der Dienst verschwindet aus `u-boot.yaml`, `compose.yaml` und `.env.example`.
 - `--purge` fordert zusätzlich das Entfernen der Datenvolumes an. Das ist
   **destruktiv** und löst eine Sicherheitsabfrage aus; in nicht-interaktiven
   Läufen bricht der Befehl ohne `--yes` ab.
-- In Version 0.4.0 entfernt `--purge` die Volumes **nicht** selbst. Die
-  Zusammenfassung nennt Ihnen die passenden `docker volume rm`-Aufrufe für die
-  manuelle Bereinigung.
+- `--purge` entfernt das benannte Datenvolume des Dienstes (z. B. das
+  Postgres-Datenvolume) tatsächlich. Wird das Volume noch von einem laufenden
+  Container benutzt, bleibt es bestehen und Sie erhalten eine Warnung je Volume
+  (Stack mit `u-boot down` stoppen, dann `docker volume rm <name>`). Die
+  Zusammenfassung nennt die entfernten Volumes.
 
 ### 4.5 Die Umgebung starten und stoppen
 
@@ -392,8 +394,14 @@ u-boot up                # startet und wartet auf Stabilisierung
 u-boot up --timeout 120  # wartet länger
 u-boot up --timeout 0    # startet und kehrt sofort zurück
 u-boot down              # stoppt die Umgebung
-u-boot down --volumes    # stoppt und entfernt die Datenvolumes
+u-boot down --volumes    # stoppt und entfernt die Datenvolumes (nennt sie)
 ```
+
+Ändert sich die Konfiguration so, dass Compose einen Container neu erstellen
+würde (Image, Umgebung, Volumes), warnt `u-boot up` **vorher** je Container
+([`LH-FA-UP-003`](../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen); nicht persistierte Daten gehen dabei verloren). Scheitert
+`u-boot up` nach dem Start, trägt die Fehlerausgabe mit `--json` in
+`data.services` den Stand der bis dahin gestarteten Dienste.
 
 #### Ergebnis
 

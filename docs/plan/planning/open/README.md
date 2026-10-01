@@ -11,12 +11,7 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| [`slice-v1-down-volumes-named-list.md`](slice-v1-down-volumes-named-list.md) | Cleanup: `u-boot down --volumes` Named-Volume-Liste |
 | [`slice-v1-keycloak-ci-flake.md`](slice-v1-keycloak-ci-flake.md) | Hardening: Keycloak-Acceptance-Test ([`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow)) in CI grün |
-| [`slice-v1-multi-port-services.md`](slice-v1-multi-port-services.md) | Cleanup: Strukturierte Multi-Port-Liste für `u-boot up --json` |
-| [`slice-v1-recreate-detection.md`](slice-v1-recreate-detection.md) | Cleanup: `u-boot up` Recreate-Warnings-Detection |
-| [`slice-v1-up-partial-snapshot-on-failure.md`](slice-v1-up-partial-snapshot-on-failure.md) | Cleanup: `u-boot up` Partial-Snapshot bei Mid-`ComposeUp`-Failure |
-| [`slice-v1-volume-auto-removal.md`](slice-v1-volume-auto-removal.md) | Cleanup: `u-boot remove --purge` Volume-Auto-Removal |
 | [`slice-v2-distro-pakete.md`](slice-v2-distro-pakete.md) | Plan-Stub: Debian-/RPM-Pakete ([`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Restweg) |
 | [`slice-v2-generate-devcontainer-rollback-aware-write.md`](slice-v2-generate-devcontainer-rollback-aware-write.md) | Cleanup: `generate devcontainer` Rollback-aware Multi-File-Write |
 | [`slice-v2-homebrew-formula.md`](slice-v2-homebrew-formula.md) | Plan-Stub: Homebrew-Formula ([`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Restweg) |

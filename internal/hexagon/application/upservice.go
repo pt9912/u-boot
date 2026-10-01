@@ -84,15 +84,21 @@ func (s *UpService) Up(ctx context.Context, req driving.UpRequest) (driving.UpRe
 	if req.SilenceProgress {
 		effective = io.Discard
 	}
+	// slice-v1-recreate-detection: warn BEFORE compose recreates anything.
+	warnings := s.recreateWarnings(ctx, req.BaseDir)
 	if _, err := s.engine.ComposeUp(ctx, req.BaseDir, driven.ComposeUpOptions{
 		Detach:       true,
 		ProgressSink: effective,
 	}); err != nil {
-		return driving.UpResponse{}, fmt.Errorf("up service: ComposeUp on %q: %w", req.BaseDir, err)
+		resp := driving.UpResponse{Warnings: warnings}
+		if !errors.Is(err, driven.ErrDockerUnavailable) { // unreachable daemon: nothing to snapshot
+			resp.PartialServices = s.partialSnapshot(ctx, req.BaseDir)
+		}
+		return resp, fmt.Errorf("up service: ComposeUp on %q: %w", req.BaseDir, err)
 	}
 
 	if req.Timeout == 0 {
-		return driving.UpResponse{Result: domain.UpResult{
+		return driving.UpResponse{Warnings: warnings, Result: domain.UpResult{
 			Stabilized: false,
 			Diagnostics: []domain.Diagnostic{{
 				ID:       "up.fire-and-forget",
@@ -103,7 +109,51 @@ func (s *UpService) Up(ctx context.Context, req driving.UpRequest) (driving.UpRe
 		}}, nil
 	}
 
-	return s.pollUntilStabilized(ctx, req.BaseDir, req.Timeout, compose)
+	resp, err := s.pollUntilStabilized(ctx, req.BaseDir, req.Timeout, compose)
+	resp.Warnings = append(warnings, resp.Warnings...)
+	return resp, err
+}
+
+// recreateWarnings runs the Compose dry-run plan and returns one
+// warning per container that `up` is about to recreate (changed image,
+// environment or volumes; non-persistent data is lost). Best effort:
+// a failing plan yields no warnings, never an error
+// (slice-v1-recreate-detection).
+func (s *UpService) recreateWarnings(ctx context.Context, baseDir string) []driving.WarningEntry {
+	plan, err := s.engine.ComposeUpPlan(ctx, baseDir)
+	if err != nil {
+		s.logger.Debug("up: compose plan unavailable", "err", err)
+		return nil
+	}
+	var out []driving.WarningEntry
+	for _, a := range plan {
+		if a.Action != "Recreate" {
+			continue
+		}
+		out = append(out, driving.WarningEntry{
+			Code:  "LH-FA-UP-003",
+			Level: "warn",
+			Message: fmt.Sprintf("container %q will be recreated by Compose (image, environment or volume configuration changed); data in non-persistent volumes is lost",
+				a.Container),
+			Subject: a.Container,
+		})
+	}
+	return out
+}
+
+// partialSnapshot returns the best-effort `compose ps` view after a
+// mid-`up` failure (slice-v1-up-partial-snapshot-on-failure): nil when
+// the context is already cancelled or the snapshot fails.
+func (s *UpService) partialSnapshot(ctx context.Context, baseDir string) []domain.ServiceStatus {
+	if ctx.Err() != nil {
+		return nil
+	}
+	services, err := s.engine.ComposePs(ctx, baseDir)
+	if err != nil {
+		s.logger.Debug("up: partial snapshot unavailable", "err", err)
+		return nil
+	}
+	return buildResult(services, false, nil).Services
 }
 
 // checkProjectInitialized verifies that `<BaseDir>/u-boot.yaml`
@@ -130,7 +180,7 @@ type composeFileDecode struct {
 }
 
 type composeServiceDecode struct {
-	Ports       []any                 `yaml:"ports"`
+	Ports       []any                   `yaml:"ports"`
 	Healthcheck *composeHealthcheckYAML `yaml:"healthcheck"`
 }
 
@@ -210,7 +260,7 @@ func (s *UpService) pollUntilStabilized(ctx context.Context, baseDir string, tim
 
 		stabilized, failedName, failedState := s.classifyAllServices(ctx, services, compose, pollStates, &diagnostics)
 		if failedName != "" {
-			return driving.UpResponse{}, fmt.Errorf("up service: %q reached terminal state %q: %w", failedName, failedState, driven.ErrComposeRuntime)
+			return driving.UpResponse{PartialServices: buildResult(services, false, nil).Services}, fmt.Errorf("up service: %q reached terminal state %q: %w", failedName, failedState, driven.ErrComposeRuntime)
 		}
 		if stabilized {
 			return driving.UpResponse{Result: buildResult(services, true, diagnostics)}, nil
@@ -218,7 +268,7 @@ func (s *UpService) pollUntilStabilized(ctx context.Context, baseDir string, tim
 
 		if s.clock.Now().Sub(startTime) >= timeout {
 			pending := pendingServiceNames(services, compose, pollStates)
-			return driving.UpResponse{}, fmt.Errorf("up service: stabilization timeout after %v, pending: %s: %w", timeout, strings.Join(pending, ", "), driving.ErrStabilizationTimeout)
+			return driving.UpResponse{PartialServices: buildResult(services, false, nil).Services}, fmt.Errorf("up service: stabilization timeout after %v, pending: %s: %w", timeout, strings.Join(pending, ", "), driving.ErrStabilizationTimeout)
 		}
 
 		s.clock.Sleep(pollInterval)
