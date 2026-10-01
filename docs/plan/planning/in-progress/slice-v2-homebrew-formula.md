@@ -90,15 +90,15 @@ Vorbild: `pt9912/ai-harness-init` (Formel-Skeleton + Fill-Skript + Release-Asset
 
 | T | Stand |
 | - | ----- |
-| T1 | **geliefert (repo-seitig):** `scripts/homebrew-formula.rb.tmpl` (Klasse `UBoot`, vier Plattformen, Test-Block `--version`), Fill-Skript `scripts/homebrew-formula-fill.sh` (fail-closed; Go-Test `cmd/uboot/homebrew_scripts_test.go`). **Offen:** Tap-Repo `pt9912/homebrew-u-boot` anlegen, `brew audit --strict` auf einem Mac. |
+| T1 | **geliefert (repo-seitig; Tap-Repo angelegt 2026-10-01):** `scripts/homebrew-formula.rb.tmpl` (Klasse `UBoot`, vier Plattformen, Test-Block `--version`), Fill-Skript `scripts/homebrew-formula-fill.sh` (fail-closed; Go-Test `cmd/uboot/homebrew_scripts_test.go`). **Offen:** `brew audit --strict` auf einem Mac. |
 | T2 | **geliefert:** `publish.yml` erzeugt `SHA256SUMS`, füllt für stabile Tags die Formel und hängt sie als Asset `u-boot.rb` an; Job `tap` → `scripts/tap-nachzug.sh` (überspringt ohne Secret mit Warnung). **Offen:** Secret `HOMEBREW_TAP_GITHUB_TOKEN` (PAT mit Schreibrecht auf das Tap) setzen. |
-| T3 | **geliefert (Vorlagen):** `packaging/homebrew-tap/README.md` und `.github/workflows/smoke.yml` (macOS: install, `--version`, `init`, `doctor` ohne Absturz) zum Kopieren ins Tap; README EN + DE mit `brew install`-Block. **Offen:** in das Tap-Repo kopieren. |
+| T3 | **geliefert (Vorlagen):** `packaging/homebrew-tap/README.md` und `.github/workflows/smoke.yml` (macOS: install, `--version`, `init`, `doctor` ohne Absturz) zum Kopieren ins Tap; README EN + DE mit `brew install`-Block. Im Tap-Repo (2026-10-01). |
 | T4 | **teilweise:** Spec 0.3.4 ([`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung): Homebrew gewählt), [ADR-0016](../../adr/0016-homebrew-distribution-per-tap.md) (statt Umschreiben des Accepted [ADR-0007](../../adr/0007-distributionswege-ghcr.md)), CHANGELOG, Carveout-Zeile angepasst. **Offen:** Verschiebung nach `done/` nach der ersten Tap-Installation. |
 
 ## Offene Einrichtung (nur der Projektinhaber)
 
-1. Repo `pt9912/homebrew-u-boot` anlegen (öffentlich); `packaging/homebrew-tap/README.md` und
-   `packaging/homebrew-tap/.github/workflows/smoke.yml` hineinkopieren.
+1. ~~Repo `pt9912/homebrew-u-boot` anlegen~~ — **erledigt 2026-10-01** (öffentlich, `main`; README und
+   `smoke.yml` aus `packaging/homebrew-tap/` hineinkopiert; die Formel folgt per Nachzug).
 2. PAT (Contents: Read & Write auf dieses Repo) als Secret `HOMEBREW_TAP_GITHUB_TOKEN` im Repo
    `pt9912/u-boot` hinterlegen.
 3. Nächsten **stabilen** Tag setzen; der Job `tap` füllt `Formula/u-boot.rb` und der Smoke-Workflow
