@@ -145,3 +145,7 @@ denselben Pfad gehen.
   `keycloak_acceptance_docker_test.go` entfernt, Carveout-Zeile in `carveouts.md` gelöscht.
 - **Beobachtung:** Der Slice schließt erst nach drei grünen `integration-docker`-Läufen in Folge; ist
   einer rot, zurück zu T1 (dann T2: `DockerEngine.PullImage` mit Retry).
+- **Beobachtungsstand (2026-10-01):** `integration-docker` grün auf `7255416` (Lauf 36875302355) und `50d6c83`
+  (Lauf 36875884251); der dritte Lauf folgt mit dem nächsten Push. Der rote Lauf auf `c93e430` lag vor der
+  Reaktivierung und betraf `TestUpService_RealDocker_PortProbeRunsForNoHealthcheckService`
+  (`compose up` brach nach 2,7 s ab, vermutlich transienter `nginx:alpine`-Pull), nicht Keycloak.
