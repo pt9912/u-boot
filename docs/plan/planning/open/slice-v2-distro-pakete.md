@@ -94,5 +94,5 @@ die korrekte Version; `u-boot doctor` läuft ohne Errors.
   [`roadmap.md`](../in-progress/roadmap.md) §v0.4.0+ Backlog.
 - Phase: V2 (nach v0.3.0-Milestone, Trigger-getrieben).
 - Geschwister-Slice:
-  [`slice-v2-homebrew-formula.md`](slice-v2-homebrew-formula.md) (parallel auf hold; macOS-
+  [`slice-v2-homebrew-formula.md`](../in-progress/slice-v2-homebrew-formula.md) (parallel auf hold; macOS-
   Pendant zu diesem Linux-Paket-Slice).

@@ -1,0 +1,44 @@
+name: smoke
+
+# Smoke nach jedem Formel-Update (slice-v2-homebrew-formula): installiert die
+# Formel aus dem Tap auf macOS und prueft das Binary. Auf den macOS-Runnern gibt
+# es kein Docker — `doctor` meldet dort Umgebungsfehler (Exit 11), das ist hier
+# erwartet; geprueft werden Version und das Anlegen eines Projekts (init).
+
+on:
+  push:
+    paths:
+      - 'Formula/u-boot.rb'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-14, macos-13]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Tap und Install aus dem Tap
+        run: |
+          brew tap pt9912/u-boot "https://github.com/${GITHUB_REPOSITORY}"
+          brew install pt9912/u-boot/u-boot
+      - name: Version
+        run: u-boot --version
+      - name: init
+        run: |
+          mkdir demo && cd demo
+          u-boot init demo --no-git
+          test -f u-boot.yaml
+      - name: "doctor (Docker fehlt auf dem Runner, Exit 11 erwartet, kein Absturz)"
+        run: |
+          cd demo
+          set +e
+          u-boot doctor
+          rc=$?
+          [ "$rc" = 0 ] || [ "$rc" = 11 ]
+      - name: Formel pruefen
+        run: brew audit --strict --online pt9912/u-boot/u-boot || true

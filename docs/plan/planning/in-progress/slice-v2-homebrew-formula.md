@@ -1,11 +1,10 @@
 # Slice V2: Homebrew-Formula für u-boot ([`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Restweg)
 
-> **Status:** on hold — Trigger noch nicht gefeuert. Plan-Stub
-> existiert, damit [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)-Disziplin den Carveout-
-> Anker erfüllt (siehe
-> [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
-> Carveouts, [ADR-0007](../../adr/0007-distributionswege-ghcr.md)
-> §Entscheidung Tabelle „Homebrew").
+> **Status:** **repo-seitig geliefert, Tap-Einrichtung offen** (2026-10-01,
+> **Delivery-Hash: `HASH`**). Die Entscheidung steht ([ADR-0016](../../adr/0016-homebrew-distribution-per-tap.md)),
+> Skeleton, Fill-Skript, Nachzug-Skript, Workflow-Änderung und Tap-Vorlagen sind im
+> Repo; das Tap-Repo selbst und das Secret legt der Projektinhaber an (siehe
+> §Offene Einrichtung unten). Der Slice bleibt bis dahin in `in-progress/`.
 
 ## Auslöser
 
@@ -24,7 +23,7 @@ Homebrew-Formula — Voraussetzung ist also bereits erfüllt.
 
 ## Trigger
 
-**Erste macOS-Nutzer-Nachfrage.** Solange das nicht passiert,
+**Erste macOS-Nutzer-Nachfrage** (am 2026-10-01 durch den Projektinhaber ersetzt: Referenzen `pt9912/homebrew-ai-harness-init` und `pt9912/homebrew-d-migrate` geliefert, Umsetzung angewiesen). Solange das nicht passiert,
 bleibt der Wartungs-Overhead (eigene Tap-Repo unter
 `pt9912/homebrew-tap`, SHA256-Pin pro Release, CI-Smoke gegen
 `brew install`-Pfad) ohne Mehrwert.
@@ -78,8 +77,30 @@ läuft ohne Errors.
   [`slice-v2-binary-distribution`](../done/slice-v2-binary-distribution.md)
   — Binaries existieren seit T2 `5e5166b` als GitHub-Release-Asset.
 - Carveout:
-  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
+  [`carveouts.md`](carveouts.md) §Temporäre
   Carveouts, [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Zeile.
 - Roadmap:
-  [`roadmap.md`](../in-progress/roadmap.md) §v0.4.0+ Backlog.
+  [`roadmap.md`](roadmap.md) §v0.4.0+ Backlog.
 - Phase: V2 (nach v0.3.0-Milestone, Trigger-getrieben).
+
+## Lieferstand (2026-10-01)
+
+Vorbild: `pt9912/ai-harness-init` (Formel-Skeleton + Fill-Skript + Release-Asset + Tap-Nachzug-Job);
+`d-migrate` nutzt dagegen die Drittanbieter-Action `homebrew-releaser` (Begründung der Wahl: [ADR-0016](../../adr/0016-homebrew-distribution-per-tap.md)).
+
+| T | Stand |
+| - | ----- |
+| T1 | **geliefert (repo-seitig):** `scripts/homebrew-formula.rb.tmpl` (Klasse `UBoot`, vier Plattformen, Test-Block `--version`), Fill-Skript `scripts/homebrew-formula-fill.sh` (fail-closed; Go-Test `cmd/uboot/homebrew_scripts_test.go`). **Offen:** Tap-Repo `pt9912/homebrew-u-boot` anlegen, `brew audit --strict` auf einem Mac. |
+| T2 | **geliefert:** `publish.yml` erzeugt `SHA256SUMS`, füllt für stabile Tags die Formel und hängt sie als Asset `u-boot.rb` an; Job `tap` → `scripts/tap-nachzug.sh` (überspringt ohne Secret mit Warnung). **Offen:** Secret `HOMEBREW_TAP_GITHUB_TOKEN` (PAT mit Schreibrecht auf das Tap) setzen. |
+| T3 | **geliefert (Vorlagen):** `packaging/homebrew-tap/README.md` und `.github/workflows/smoke.yml` (macOS: install, `--version`, `init`, `doctor` ohne Absturz) zum Kopieren ins Tap; README EN + DE mit `brew install`-Block. **Offen:** in das Tap-Repo kopieren. |
+| T4 | **teilweise:** Spec 0.3.4 ([`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung): Homebrew gewählt), [ADR-0016](../../adr/0016-homebrew-distribution-per-tap.md) (statt Umschreiben des Accepted [ADR-0007](../../adr/0007-distributionswege-ghcr.md)), CHANGELOG, Carveout-Zeile angepasst. **Offen:** Verschiebung nach `done/` nach der ersten Tap-Installation. |
+
+## Offene Einrichtung (nur der Projektinhaber)
+
+1. Repo `pt9912/homebrew-u-boot` anlegen (öffentlich); `packaging/homebrew-tap/README.md` und
+   `packaging/homebrew-tap/.github/workflows/smoke.yml` hineinkopieren.
+2. PAT (Contents: Read & Write auf dieses Repo) als Secret `HOMEBREW_TAP_GITHUB_TOKEN` im Repo
+   `pt9912/u-boot` hinterlegen.
+3. Nächsten **stabilen** Tag setzen; der Job `tap` füllt `Formula/u-boot.rb` und der Smoke-Workflow
+   im Tap installiert sie auf macOS. Danach `brew install pt9912/u-boot/u-boot` auf einem Mac
+   prüfen und diesen Slice nach `done/` verschieben.

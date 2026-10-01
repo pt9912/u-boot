@@ -91,6 +91,13 @@ chmod +x u-boot && sudo mv u-boot /usr/local/bin/
 u-boot --version
 ```
 
+**macOS / Linux with Homebrew** (stable releases, four platforms):
+
+```bash
+brew install pt9912/u-boot/u-boot
+u-boot --version
+```
+
 **Windows (PowerShell):**
 
 ```powershell

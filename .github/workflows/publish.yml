@@ -208,3 +208,50 @@ jobs:
           gh release upload "$TAG" bin/u-boot-* --clobber
 
           echo "Uploaded $(ls bin/u-boot-* | wc -l) binaries to release $TAG."
+
+      # slice-v2-homebrew-formula (ADR-0016): SHA256SUMS of the six
+      # binaries and — for stable tags — the Homebrew formula, filled from
+      # exactly these digests, travel as further assets of the same release.
+      # The `tap` job below pulls the formula into the tap.
+      - name: Upload SHA256SUMS and Homebrew formula
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.tag.outputs.version }}
+          IS_STABLE: ${{ steps.tag.outputs.is_stable }}
+        run: |
+          set -euo pipefail
+          TAG="v$VERSION"
+          (cd bin && sha256sum u-boot-* > SHA256SUMS)
+          gh release upload "$TAG" bin/SHA256SUMS --clobber
+          if [[ "$IS_STABLE" == "true" ]]; then
+            scripts/homebrew-formula-fill.sh "$TAG" bin/SHA256SUMS scripts/homebrew-formula.rb.tmpl bin/u-boot.rb
+            gh release upload "$TAG" bin/u-boot.rb --clobber
+          fi
+
+  # Tap-Nachzug (ADR-0016): a stable tag pulls its formula into the Homebrew
+  # tap pt9912/homebrew-u-boot. Skipped (not failed) while the secret is not
+  # configured, so the release itself never depends on the tap. The tag and
+  # the token travel only through the step env.
+  tap:
+    name: tap (homebrew formula)
+    needs: publish
+    if: ${{ !contains(github.ref_name, '-') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Pull the formula into the tap
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if [ -z "$TAP_TOKEN" ]; then
+            echo "::warning::HOMEBREW_TAP_GITHUB_TOKEN is not configured; skipping the tap update (ADR-0016)."
+            exit 0
+          fi
+          scripts/tap-nachzug.sh

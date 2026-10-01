@@ -13,6 +13,12 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- Homebrew distribution ([ADR-0016](docs/plan/adr/0016-homebrew-distribution-per-tap.md), [`LH-OPEN-002`](spec/lastenheft.md#lh-open-002--paketierung)):
+  the `publish` workflow now attaches `SHA256SUMS` and, for stable tags, a Homebrew
+  formula (`u-boot.rb`, filled from those digests by `scripts/homebrew-formula-fill.sh`)
+  to every release, and a `tap` job pulls it into `pt9912/homebrew-u-boot` once the
+  tap and the `HOMEBREW_TAP_GITHUB_TOKEN` secret exist. Install:
+  `brew install pt9912/u-boot/u-boot` (macOS/Linux, amd64/arm64).
 - `u-boot up` / `down` / `remove --purge` extensions: `up` warns before Compose
   recreates a container (`docker compose --dry-run up`), reports `ports[]`
   structurally and, when it fails mid-way, the partial service snapshot;

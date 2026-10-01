@@ -1,0 +1,41 @@
+# u-boot.rb — Homebrew-Formel-Skeleton (slice-v2-homebrew-formula, LH-OPEN-002,
+# ADR-0016). Die Formel reist als Release-Asset desselben Tags: die vier
+# markierten Platzhalter werden im publish-Workflow aus der SHA256SUMS des Tags
+# befuellt (scripts/homebrew-formula-fill.sh); dieses Skeleton bleibt unveraendert.
+# Vier Plattformen, nicht sechs: Homebrew traegt Windows nicht.
+class UBoot < Formula
+  desc "Bootstrapper fuer reproduzierbare Docker-/Devcontainer-Stacks"
+  homepage "https://github.com/pt9912/u-boot"
+  version "__VERSION__"
+  license "MIT"
+
+  on_macos do
+    on_arm do
+      url "https://github.com/pt9912/u-boot/releases/download/__TAG__/u-boot-darwin-arm64"
+      sha256 "__SHA256_DARWIN_ARM64__"
+    end
+    on_intel do
+      url "https://github.com/pt9912/u-boot/releases/download/__TAG__/u-boot-darwin-amd64"
+      sha256 "__SHA256_DARWIN_AMD64__"
+    end
+  end
+
+  on_linux do
+    on_arm do
+      url "https://github.com/pt9912/u-boot/releases/download/__TAG__/u-boot-linux-arm64"
+      sha256 "__SHA256_LINUX_ARM64__"
+    end
+    on_intel do
+      url "https://github.com/pt9912/u-boot/releases/download/__TAG__/u-boot-linux-amd64"
+      sha256 "__SHA256_LINUX_AMD64__"
+    end
+  end
+
+  def install
+    bin.install Dir["u-boot-*"].first => "u-boot"
+  end
+
+  test do
+    assert_match version.to_s, shell_output("#{bin}/u-boot --version")
+  end
+end
