@@ -1,6 +1,6 @@
 # Slice V1: `config set/get` Strukturiertes `data.hint{action, argument}`-Field
 
-> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `HASH`**). Cleanup-/Feature-
+> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `acc0233`**). Cleanup-/Feature-
 > Slice zum Carveout aus
 > [`slice-v1-cli-json-dry-run-config`](../done/slice-v1-cli-json-dry-run-config.md)
 > §Out of Scope (Carveout-Eintrag entfernt).

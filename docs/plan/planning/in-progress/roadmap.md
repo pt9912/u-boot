@@ -73,7 +73,7 @@ flowchart LR
 | Spec-Wartung: Sandbox-Profil (Lastenheft 0.3.0) | 2026-09-30 | [`slice-cr-sandbox-devcontainer`](../done/slice-cr-sandbox-devcontainer.md) (`712af41`) |
 | Sandbox-Profil Umsetzung V1 (Lastenheft 0.3.2) | 2026-09-30 | [`slice-v1-sandbox-devcontainer-umsetzung`](../done/slice-v1-sandbox-devcontainer-umsetzung.md) (`50dbd84`) |
 | Sandbox: Egress-Restriktion (Lastenheft 0.3.3) | 2026-09-30 | [`slice-v2-sandbox-egress`](../done/slice-v2-sandbox-egress.md) (`9b1c414`) |
-| Config-Erweiterungen (V1-Cleanup) | 2026-10-01 | [`slice-v1-config-structured-hint`](../done/slice-v1-config-structured-hint.md), [`slice-v1-config-multi-path-get`](../done/slice-v1-config-multi-path-get.md), [`slice-v1-config-multi-path-set`](../done/slice-v1-config-multi-path-set.md), [`slice-v1-config-list-subcommand`](../done/slice-v1-config-list-subcommand.md) (`HASH`) |
+| Config-Erweiterungen (V1-Cleanup) | 2026-10-01 | [`slice-v1-config-structured-hint`](../done/slice-v1-config-structured-hint.md), [`slice-v1-config-multi-path-get`](../done/slice-v1-config-multi-path-get.md), [`slice-v1-config-multi-path-set`](../done/slice-v1-config-multi-path-set.md), [`slice-v1-config-list-subcommand`](../done/slice-v1-config-list-subcommand.md) (`acc0233`) |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-NN-results.md`; die Welle-Closure lebt vollständig im jeweiligen
