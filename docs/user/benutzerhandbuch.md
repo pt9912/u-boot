@@ -54,7 +54,7 @@ die Spezifikation unter `spec/` der richtige Einstieg — nicht dieses Handbuch.
 
 | Voraussetzung | Wofür |
 |---|---|
-| `u-boot`-Binary oder Container-Image | alle Befehle |
+| `u-boot`-Binary, Homebrew-Paket oder Container-Image | alle Befehle |
 | Docker Engine (ab 24.0) | `up`, `down`, `logs` und die Prüfungen von `doctor` |
 | Docker-Compose-Plugin (ab 2.20) | dieselben Befehle |
 | `git` | nur für `init` ohne `--no-git` |
@@ -98,6 +98,24 @@ Invoke-WebRequest `
 
 **Ergebnis:** `u-boot --version` gibt die installierte Version aus, zum
 Beispiel `u-boot version 0.5.0`.
+
+### Homebrew (macOS und Linux)
+
+Für stabile Releases gibt es einen Homebrew-Tap (vier Plattformen: macOS und
+Linux, je `amd64` und `arm64`; Windows trägt Homebrew nicht):
+
+```bash
+brew tap pt9912/u-boot
+brew trust pt9912/u-boot
+brew install u-boot
+u-boot --version
+```
+
+`brew trust` ist nötig, weil Homebrew 5 Programme aus Drittanbieter-Taps erst
+installiert, nachdem Sie den Tap ausdrücklich als vertrauenswürdig markiert
+haben. Die Formel wird aus den Release-Dateien des jeweiligen Tags erzeugt; ein
+Update holen Sie wie üblich mit `brew upgrade u-boot`. Vorabversionen
+(`vX.Y.Z-rc.1`) landen nicht im Tap.
 
 ### Container-Image
 
