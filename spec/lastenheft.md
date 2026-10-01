@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.3.4                                                              |
+| Version          | 0.3.5                                                              |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -2867,7 +2867,7 @@ zeigen auf die zugehörige `LH-*`-Anforderung derselben Zeile.
 | [LH-MVP-001](#lh-mvp-001--muss-im-mvp-enthalten-sein)         | Muss im MVP enthalten sein     | MVP                               | -                                  | -               |
 | [LH-MVP-002](#lh-mvp-002--kann-nach-dem-mvp-folgen)         | Kann nach dem MVP folgen       | -                                  | -                                  | -               |
 | [LH-OPEN-001](#lh-open-001--implementierungssprache-entschieden)        | Implementierungssprache (Go, entschieden 2026-05-21) | - | -                          | -               |
-| [LH-OPEN-002](#lh-open-002--paketierung)        | Paketierung (GHCR, Binary und Homebrew entschieden; Debian/RPM vertagt; npm/pip verworfen) | -                                  | -                                  | -               |
+| [LH-OPEN-002](#lh-open-002--paketierung)        | Paketierung (GHCR, Binary, Homebrew und Debian/RPM entschieden; npm/pip verworfen) | -                                  | -                                  | -               |
 | [LH-OPEN-003](#lh-open-003--plugin-system-entschieden)        | Plugin-System (statisch entschieden; kein Plugin-Loader) | -                                  | -                                  | -               |
 | [LH-OPEN-004](#lh-open-004--template-format-entschieden)        | Template-Format (YAML+`text/template` entschieden) | -                                  | -                                  | -               |
 
@@ -2886,16 +2886,16 @@ Mindest-Toolchain: Go 1.26 oder neuer (`go 1.26.0` in `go.mod`, analog Referenzp
 
 ### LH-OPEN-002 – Paketierung
 
-Status: **GHCR, Binary und Homebrew entschieden**, Debian/RPM
-vertagt, npm und pip verworfen. Formell offen, bis alle Restwege
-entschieden sind.
+Status: **GHCR, Binary, Homebrew und Debian/RPM entschieden**, npm
+und pip verworfen. Formell offen, bis die Auslieferung aller
+gewählten Wege belegt ist.
 
 | Option | Status | Normative Setzung |
 | ------ | ------ | ----------------- |
 | Container Image (GHCR `ghcr.io/pt9912/u-boot`) | **Gewählt** | Primärer Distributionsweg. |
 | Einzelnes Binary | **Gewählt** | Zusätzliches Host-natives Distributionsartefakt. |
 | Homebrew | **Gewählt** | Eigener Tap (`pt9912/homebrew-u-boot`), Formel aus den Release-Assets des Tags; stabile Releases, vier Plattformen. |
-| Debian/RPM | Vertagt mit Trigger | Nur bei konkreter Distro-Nachfrage. |
+| Debian/RPM | **Gewählt** | `.deb` und `.rpm` (amd64, arm64) als Release-Assets des Tags; kein gehostetes APT-/DNF-Repository. |
 | npm package | Verworfen | Sprach-Ökosystem-Mismatch. |
 | pip package | Verworfen | Sprach-Ökosystem-Mismatch. |
 
@@ -2974,6 +2974,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.3.2 | 2026-09-30 | [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil): neuer optionaler Schlüssel `devcontainer.sandbox.repository` als Clone-Quelle statt `origin`, damit im Sandbox-Container ein anderes Repository als das Projekt-Repository geklont und bearbeitet werden kann. | Vereinbarung mit dem Projektinhaber |
 | 0.3.3 | 2026-09-30 | [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion): Prüfung der Capability beim Containerstart statt im `u-boot doctor` präzisiert (die Capability ist vom Host aus nicht zuverlässig bestimmbar; `doctor` prüft die Konfiguration). | Vereinbarung mit dem Projektinhaber |
 | 0.3.4 | 2026-10-01 | [`LH-OPEN-002`](#lh-open-002--paketierung): Homebrew von „vertagt mit Trigger“ auf „gewählt“ gesetzt (eigener Tap, Formel aus den Release-Assets). | Vereinbarung mit dem Projektinhaber |
+| 0.3.5 | 2026-10-01 | [`LH-OPEN-002`](#lh-open-002--paketierung): Debian/RPM von „vertagt mit Trigger“ auf „gewählt“ gesetzt (`.deb`/`.rpm` für amd64 und arm64 als Release-Assets, kein gehostetes Repository). | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt

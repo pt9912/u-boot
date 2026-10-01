@@ -58,7 +58,7 @@ DOCKER_BUILD := docker build $(PROGRESS_FLAG) \
 .DEFAULT_GOAL := help
 
 .PHONY: help deps compile lint test test-docker coverage coverage-gate build build-binaries run clean \
-        gates ci fullbuild govulncheck image-scan verify-depguard docs-check
+        gates ci fullbuild govulncheck packages image-scan verify-depguard docs-check
 
 help: ## Show this help.
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ { printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
@@ -131,6 +131,9 @@ run: build ## Smoke test: run `u-boot --help` from the built image.
 # so mounted worktrees do not receive root-owned output files.
 BIN_DIR    ?= bin
 PLATFORMS  := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64
+
+packages: build-binaries ## Build the .deb and .rpm packages (amd64, arm64) with nfpm (slice-v2-distro-pakete).
+	./scripts/build-packages.sh $(VERSION) $(BIN_DIR) packages
 
 build-binaries: ## Cross-compile u-boot binaries for all release platforms.
 	@mkdir -p $(BIN_DIR)

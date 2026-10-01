@@ -106,11 +106,12 @@ trace:
 #   coverage         — Alias auf coverage-gate (der Sensor ist dokumentiert)
 #   build/run        — Runtime-Image bauen und Smoke-Test; von fullbuild gedeckt
 #   build-binaries   — Release-Artefakte, kein Inner-Loop-Sensor
+#   packages         — .deb/.rpm-Release-Artefakte (ADR-0017), kein Sensor
 targets:
   makefiles: [Makefile]
   doc-tables: [AGENTS.md]
   authority: AGENTS.md
-  exempt-targets: [help, clean, deps, compile, coverage, build, run, build-binaries]
+  exempt-targets: [help, clean, deps, compile, coverage, build, run, build-binaries, packages]
 # Immutabilitaets-Sensor fuer Accepted-ADRs (braucht eine Commit-Range,
 # laeuft deshalb NICHT in docs-check, sondern on-demand:
 #   make doc-immutable RANGE="<base>..<head>"   bzw.   STAGED=1

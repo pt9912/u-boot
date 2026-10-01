@@ -1,0 +1,26 @@
+# nfpm-Spec fuer die Linux-Pakete (.deb und .rpm) — slice-v2-distro-pakete, ADR-0017.
+# Eine Quelle fuer beide Formate; die Platzhalter setzt scripts/build-packages.sh.
+name: u-boot
+arch: ${NFPM_ARCH}
+platform: linux
+version: ${NFPM_VERSION}
+section: devel
+priority: optional
+maintainer: "pt9912 <66826472+pt9912@users.noreply.github.com>"
+description: |
+  Bootstrapper fuer reproduzierbare Docker-/Devcontainer-Stacks.
+  u-boot erzeugt Projektstruktur, Docker-Compose-Stack, Devcontainer-Konfiguration,
+  Service-Add-ons und die ueblichen Begleitdateien (README, CHANGELOG, .env.example).
+vendor: pt9912
+homepage: https://github.com/pt9912/u-boot
+license: MIT
+contents:
+  - src: ${NFPM_BINARY}
+    dst: /usr/bin/u-boot
+    expand: true
+    file_info:
+      mode: 0755
+  - src: LICENSE
+    dst: /usr/share/doc/u-boot/LICENSE
+    file_info:
+      mode: 0644

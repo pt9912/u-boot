@@ -213,6 +213,17 @@ jobs:
       # binaries and — for stable tags — the Homebrew formula, filled from
       # exactly these digests, travel as further assets of the same release.
       # The `tap` job below pulls the formula into the tap.
+      # slice-v2-distro-pakete (ADR-0017): .deb and .rpm (amd64, arm64) from the
+      # same Linux binaries via nfpm, attached as release assets.
+      - name: Build and upload Linux packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          set -euo pipefail
+          scripts/build-packages.sh "$VERSION" bin packages
+          gh release upload "v$VERSION" packages/* --clobber
+
       - name: Upload SHA256SUMS and Homebrew formula
         env:
           GH_TOKEN: ${{ github.token }}
@@ -221,12 +232,56 @@ jobs:
         run: |
           set -euo pipefail
           TAG="v$VERSION"
-          (cd bin && sha256sum u-boot-* > SHA256SUMS)
+          # Binaries and packages in one SHA256SUMS (the formula fill reads only the
+          # four brew platforms by exact name).
+          { (cd bin && sha256sum u-boot-*); (cd packages && sha256sum ./* | sed 's# \./# #'); } > bin/SHA256SUMS
           gh release upload "$TAG" bin/SHA256SUMS --clobber
           if [[ "$IS_STABLE" == "true" ]]; then
             scripts/homebrew-formula-fill.sh "$TAG" bin/SHA256SUMS scripts/homebrew-formula.rb.tmpl bin/u-boot.rb
             gh release upload "$TAG" bin/u-boot.rb --clobber
           fi
+
+  # Package smoke (slice-v2-distro-pakete, ADR-0017): install the freshly published
+  # packages from the release on a clean Ubuntu runner (.deb) and a Fedora container
+  # (.rpm) and run the binary. Needs only the public release assets.
+  package-smoke-deb:
+    name: package smoke (deb, ubuntu)
+    needs: publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Install the .deb from the release
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          curl -fsSL -O "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/u-boot_${VERSION}_amd64.deb"
+          sudo apt-get install -y "./u-boot_${VERSION}_amd64.deb"
+          u-boot --version | grep -F "$VERSION"
+          mkdir demo && cd demo && u-boot init demo --no-git && test -f u-boot.yaml
+
+  package-smoke-rpm:
+    name: package smoke (rpm, fedora)
+    needs: publish
+    runs-on: ubuntu-24.04
+    container: fedora:latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Install the .rpm from the release
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          VERSION="${TAG#v}"
+          curl -fsSL -O "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/u-boot-${VERSION}-1.x86_64.rpm"
+          dnf install -y "./u-boot-${VERSION}-1.x86_64.rpm"
+          u-boot --version | grep -F "$VERSION"
+          mkdir demo && cd demo && u-boot init demo --no-git && test -f u-boot.yaml
 
   # Tap-Nachzug (ADR-0016): a stable tag pulls its formula into the Homebrew
   # tap pt9912/homebrew-u-boot. Skipped (not failed) while the secret is not

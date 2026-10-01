@@ -42,3 +42,4 @@ das MADR-Format gilt für neu angelegte ADRs sowie für die noch mutable
 | [ADR 0014](0014-nested-podman-sandbox-devcontainer.md) | Accepted | Nested rootless Podman im Sandbox-Devcontainer |
 | [ADR 0015](0015-sandbox-volumes-pro-instanz.md) | Accepted | Sandbox-Volumes pro Instanz über `${devcontainerId}` in `mounts` |
 | [ADR 0016](0016-homebrew-distribution-per-tap.md) | Accepted | Homebrew-Distribution über eigenen Tap, Formel als Release-Asset |
+| [ADR 0017](0017-linux-pakete-nfpm.md) | Accepted | Linux-Pakete (.deb/.rpm) per nfpm als Release-Assets |

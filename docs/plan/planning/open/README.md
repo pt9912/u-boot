@@ -11,4 +11,4 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| [`slice-v2-distro-pakete.md`](slice-v2-distro-pakete.md) | Plan-Stub: Debian-/RPM-Pakete ([`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Restweg) |
+| _(leer)_ | Aktuell kein offener Plan-Stub |

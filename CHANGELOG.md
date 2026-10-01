@@ -11,6 +11,14 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- Debian and RPM packages: every release now carries `.deb` and `.rpm` packages (amd64, arm64) built with
+  `nfpm` and listed in `SHA256SUMS`; `make packages` builds them locally. Install with
+  `apt install ./u-boot_<version>_amd64.deb` or `dnf install ./u-boot-<version>-1.x86_64.rpm`
+  ([`LH-OPEN-002`](spec/lastenheft.md#lh-open-002--paketierung),
+  [ADR-0017](docs/plan/adr/0017-linux-pakete-nfpm.md)).
+
 ### Changed
 
 - The Keycloak acceptance test ([`LH-AK-003`](spec/lastenheft.md#lh-ak-003--keycloak-flow)) is back in the default `make test-docker` lane

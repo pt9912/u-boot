@@ -99,6 +99,20 @@ brew install u-boot
 u-boot --version
 ```
 
+**Debian / Ubuntu / Fedora / RHEL** (`.deb` and `.rpm` from the release, amd64 and arm64):
+
+```bash
+VERSION=0.6.0   # the release you want
+# Debian / Ubuntu
+curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
+sudo apt install "./u-boot_${VERSION}_amd64.deb"
+# Fedora / RHEL
+curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot-${VERSION}-1.x86_64.rpm"
+sudo dnf install "./u-boot-${VERSION}-1.x86_64.rpm"
+```
+
+(For arm64 use `_arm64.deb` / `.aarch64.rpm`. There is no APT/DNF repository; update by installing the newer package.)
+
 **Windows (PowerShell):**
 
 ```powershell

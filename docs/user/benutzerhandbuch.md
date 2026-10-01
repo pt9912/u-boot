@@ -117,6 +117,24 @@ haben. Die Formel wird aus den Release-Dateien des jeweiligen Tags erzeugt; ein
 Update holen Sie wie üblich mit `brew upgrade u-boot`. Vorabversionen
 (`vX.Y.Z-rc.1`) landen nicht im Tap.
 
+### Debian-/RPM-Pakete (Linux)
+
+Zu jedem Release gibt es `.deb`- und `.rpm`-Pakete (amd64 und arm64) als Release-Dateien. Ein
+APT-/DNF-Repository gibt es nicht; Sie laden das Paket und installieren es lokal:
+
+```bash
+VERSION=0.6.0
+curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
+sudo apt install "./u-boot_${VERSION}_amd64.deb"        # Debian/Ubuntu
+# oder
+curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot-${VERSION}-1.x86_64.rpm"
+sudo dnf install "./u-boot-${VERSION}-1.x86_64.rpm"     # Fedora/RHEL
+u-boot --version
+```
+
+Für arm64 verwenden Sie `_arm64.deb` bzw. `.aarch64.rpm`. Die Prüfsummen stehen in `SHA256SUMS`.
+Ein Update erfolgt durch die Installation des neueren Pakets.
+
 ### Container-Image
 
 ```bash

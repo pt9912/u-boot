@@ -24,7 +24,9 @@ Der Push eines Tags `vMAJOR.MINOR.PATCH[-PRERELEASE]` startet den Workflow `publ
 | OCI-Labels und `--version` prüfen | das Image meldet genau die Tag-Version, sonst Abbruch |
 | GHCR-Push | `ghcr.io/pt9912/u-boot:<x.y.z>`; `:latest` **nur** für stabile Tags |
 | Binaries | sechs Plattformen (Linux/macOS/Windows × amd64/arm64) als Release-Assets |
-| `SHA256SUMS` | Prüfsummen der sechs Binaries als weiteres Asset |
+| Linux-Pakete | vier Pakete (`.deb`/`.rpm` × amd64/arm64) per `nfpm` ([ADR-0017](../plan/adr/0017-linux-pakete-nfpm.md)) als Release-Assets |
+| `SHA256SUMS` | Prüfsummen der Binaries und Pakete als weiteres Asset |
+| Paket-Smoke | zwei Jobs installieren `.deb` (Ubuntu) und `.rpm` (Fedora) aus dem Release, prüfen `--version` und `init` |
 | Homebrew-Formel | nur stabile Tags: `u-boot.rb` aus den Digests von `SHA256SUMS` |
 | Job `tap` | nur stabile Tags: zieht die Formel nach `pt9912/homebrew-u-boot` nach |
 
@@ -101,7 +103,7 @@ gh release view vX.Y.Z --json assets -q '.assets[].name'
 docker run --rm ghcr.io/pt9912/u-boot:X.Y.Z --version
 ```
 
-Erwartet: sechs Binaries, `SHA256SUMS`, bei stabilen Tags `u-boot.rb`; `--version` gleich
+Erwartet: sechs Binaries, vier Pakete (`.deb`/`.rpm`), `SHA256SUMS`, bei stabilen Tags `u-boot.rb`; `--version` gleich
 `X.Y.Z`; `:latest` zeigt auf dieselbe Version (nur stabil). Der Job `tap` ist grün (oder
 meldet die Warnung zum fehlenden Secret). Danach auf einem Mac:
 

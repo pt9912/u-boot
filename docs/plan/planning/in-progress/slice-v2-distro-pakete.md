@@ -1,11 +1,9 @@
 # Slice V2: Debian-/RPM-Pakete für u-boot ([`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Restweg)
 
-> **Status:** on hold — Trigger noch nicht gefeuert. Plan-Stub
-> existiert, damit [`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)-Disziplin den Carveout-
-> Anker erfüllt (siehe
-> [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
-> Carveouts, [ADR-0007](../../adr/0007-distributionswege-ghcr.md)
-> §Entscheidung Tabelle „Debian/RPM").
+> **Status:** **in Arbeit** (2026-10-01): Entscheidung getroffen
+> ([ADR-0017](../../adr/0017-linux-pakete-nfpm.md): `nfpm`, nur Release-Assets), Paketbau und
+> Release-Workflow repo-seitig geliefert; offen ist die Verifikation auf einem echten Release-Tag
+> (Paket-Smoke-Jobs). Carveout-Plan-Anker ([`carveouts.md`](carveouts.md)).
 
 ## Auslöser
 
@@ -96,3 +94,16 @@ die korrekte Version; `u-boot doctor` läuft ohne Errors.
 - Geschwister-Slice:
   [`slice-v2-homebrew-formula.md`](../in-progress/slice-v2-homebrew-formula.md) (parallel auf hold; macOS-
   Pendant zu diesem Linux-Paket-Slice).
+
+## Lieferstand (2026-10-01)
+
+- **T1 Tooling:** `nfpm` ([ADR-0017](../../adr/0017-linux-pakete-nfpm.md)); `packaging/nfpm.yaml`, `scripts/build-packages.sh`
+  (`make packages`). Lokal gebaut und installiert: `.deb` in `debian:stable`, `.rpm` in `fedora:latest`
+  (Paket-Metadaten, `/usr/bin/u-boot`, `u-boot init`).
+- **T2 CI:** `publish.yml` baut die vier Pakete, hängt sie als Release-Assets an und nimmt sie in
+  `SHA256SUMS` auf (die Formel-Befüllung liest nur die vier Brew-Plattformen per exaktem Namen).
+- **T3 Smoke/Doku:** Jobs `package-smoke-deb` (Ubuntu) und `package-smoke-rpm` (Fedora-Container);
+  READMEs (EN/DE), Benutzerhandbuch, `releasing.md`, CHANGELOG, Lastenheft 0.3.5.
+- **T4 Closure offen:** Schließt nach dem nächsten Release-Tag, wenn beide Smoke-Jobs grün sind
+  (Fehlschlag: Paketspec oder Workflow nachbessern). Danach `in-progress/` → `done/`, Carveout-Zeile
+  [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung) reduzieren.

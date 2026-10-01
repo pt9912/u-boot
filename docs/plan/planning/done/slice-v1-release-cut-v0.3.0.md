@@ -40,7 +40,7 @@ ohne aktive Tranchen liegen:
   offener Trigger-Slice für die `acceptance_extended`-Carveout-
   Auflösung des Keycloak-Acceptance-Tests. Nicht v0.3.0-blocking.
 - [`slice-v2-homebrew-formula.md`](../in-progress/slice-v2-homebrew-formula.md)
-  + [`slice-v2-distro-pakete.md`](../open/slice-v2-distro-pakete.md) —
+  + [`slice-v2-distro-pakete.md`](../in-progress/slice-v2-distro-pakete.md) —
   proaktive Trigger-Stubs für [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Restwege. Bewusst
   ohne v0.3.0-Bezug.
 
