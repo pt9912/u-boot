@@ -1,7 +1,7 @@
 # Benutzerhandbuch: u-boot
 
-Handbuch-Version: 1.2
-Software-Version: v0.6.0
+Handbuch-Version: 1.3
+Software-Version: v0.7.0
 Stand: 2026-10-01
 
 ---
@@ -97,7 +97,7 @@ Invoke-WebRequest `
 ```
 
 **Ergebnis:** `u-boot --version` gibt die installierte Version aus, zum
-Beispiel `u-boot version 0.6.0`.
+Beispiel `u-boot version 0.7.0`.
 
 ### Homebrew (macOS und Linux)
 
@@ -123,7 +123,7 @@ Zu jedem Release gibt es `.deb`- und `.rpm`-Pakete (amd64 und arm64) als Release
 APT-/DNF-Repository gibt es nicht; Sie laden das Paket und installieren es lokal:
 
 ```bash
-VERSION=0.6.0
+VERSION=0.7.0
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"        # Debian/Ubuntu
 # oder
@@ -833,7 +833,8 @@ Ausgabe von `u-boot doctor`, Ihr Betriebssystem und den genauen Befehl.
 | 1.0 | v0.4.0 | 2026-07-25 | Erstfassung |
 | 1.1 | v0.5.0 | 2026-07-25 | Lokale Vorlagen (`--template ./pfad`) aufgenommen; Versionsbezug auf v0.5.0 |
 | 1.2 | v0.6.0 | 2026-10-01 | Homebrew-Installation, Multi-Pfad-`config`/`config list`, ausgebautes `logs`/`up`/`down`/`remove --purge`, Hinweis auf das Sandbox-Profil; Versionsbezug auf v0.6.0 |
+| 1.3 | v0.7.0 | 2026-10-01 | Abschnitt Debian-/RPM-Pakete; Versionsbezug auf v0.7.0 |
 
-**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.6.0. Prüfen Sie
+**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.7.0. Prüfen Sie
 mit `u-boot --version`, welche Version Sie einsetzen. Weicht sie ab, ist
 `u-boot <befehl> --help` die verbindliche Auskunft.

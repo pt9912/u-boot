@@ -8,10 +8,10 @@ Devcontainer-Konfiguration, Service-Add-Ons (PostgreSQL, Keycloak,
 OpenTelemetry, …) und wiederkehrende Artefakte (README, CHANGELOG,
 `.env.example`).
 
-> **Stand:** `v0.6.0` released 2026-10-01 (GHCR + sechs Plattform-
-> Binaries). Ergänzt das Devcontainer-Sandbox-Profil
-> ([LH-FA-DEV-006](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)..[-009](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)) und schließt das V1-CLI-Cleanup ab
-> (Multi-Pfad-`config`, ausgebautes `logs`/`up`/`down`/`remove`).
+> **Stand:** `v0.7.0` released 2026-10-01 (GHCR, sechs Plattform-Binaries,
+> `.deb`-/`.rpm`-Pakete, Homebrew-Tap). Ergänzt Debian- und RPM-Pakete
+> ([ADR-0017](docs/plan/adr/0017-linux-pakete-nfpm.md)); `v0.6.0` brachte das Devcontainer-Sandbox-Profil
+> ([LH-FA-DEV-006](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)..[-009](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)) und das V1-CLI-Cleanup.
 > Vollständige Release-Tabelle unten.
 
 Das verbindliche Lastenheft
@@ -106,7 +106,7 @@ u-boot --version
 **Debian / Ubuntu / Fedora / RHEL** (`.deb` und `.rpm` aus dem Release, amd64 und arm64):
 
 ```bash
-VERSION=0.6.0   # gewünschtes Release
+VERSION=0.7.0   # gewünschtes Release
 # Debian / Ubuntu
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"
@@ -205,6 +205,7 @@ Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien). Siehe den
 | `v0.2.0` | 2026-06-01 | Container-aware `doctor`, Six-Plattform-Binary-Distribution, `template list` + `init --template basic`. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.2.0). |
 | `v0.3.0` | 2026-06-01 | Milestone „Add-on Catalogue Expansion" — `u-boot add keycloak` ([LH-FA-ADD-003](spec/lastenheft.md#lh-fa-add-003--keycloak-hinzufügen)), `add otel` ([LH-FA-ADD-004](spec/lastenheft.md#lh-fa-add-004--opentelemetry-hinzufügen)), `add <service> --with-deps` ([LH-FA-ADD-006](spec/lastenheft.md#lh-fa-add-006--add-on-abhängigkeiten)), `remove <service> [--purge]` ([LH-FA-ADD-007](spec/lastenheft.md#lh-fa-add-007--service-entfernen)) plus Doku-Audit-Closure für drei V1-Spec-IDs. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.3.0). |
 | `v0.6.0` | 2026-10-01 | Milestone „Sandbox-Devcontainer + CLI-Cleanup" — `--sandbox`-Devcontainer-Profil für autonome Agenten (Named-Volume-Workspace je Instanz, optional rootless Podman, DNS-gesteuerte Egress-Allowlist, Git-Zugangsdaten nur zur Laufzeit; [LH-FA-DEV-006](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)..[-009](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)), atomares Multi-Pfad-`config get/set` + `config list`, ausgebautes `logs`/`up`/`down`/`remove --purge`, rollback-aware `generate devcontainer`, Homebrew-Formel, Go 1.27.1. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.6.0). |
+| `v0.7.0` | 2026-10-01 | Milestone „Linux-Pakete“ — `.deb` und `.rpm` (amd64, arm64) als Release-Assets per `nfpm` ([ADR-0017](docs/plan/adr/0017-linux-pakete-nfpm.md)); Keycloak-Acceptance-Test zurück in der Standard-Integrations-Lane. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.7.0). |
 | `v0.5.0` | 2026-07-25 | „Sicherheit + lokale Templates" — Go-Toolchain-Bump schließt CVE-2026-39822 im Runtime-Image (HIGH); `u-boot init --template ./pfad` rendert ein Projekt aus einem lokalen Verzeichnis ([LH-FA-TPL-003](spec/lastenheft.md#lh-fa-tpl-003--eigene-templates)), neben dem eingebauten Katalog. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.5.0). |
 | `v0.4.0` | 2026-06-08 | Milestone „Maschinenlesbare CLI" — `--json` / `--dry-run` / `--diff` für alle zehn Spec-Enum-Subcommands ([LH-NFA-USE-004](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) Minimalkontrakt + [LH-FA-CLI-007](spec/lastenheft.md#lh-fa-cli-007--dry-run)/[LH-FA-CLI-008](spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) Voll-Schema), `u-boot logs`, Devcontainer-Features mit Drift-Doctor-Check. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.4.0). |
 

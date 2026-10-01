@@ -11,6 +11,12 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-01
+
+Seventh release. **Linux packages.** Every release now carries `.deb` and `.rpm` packages
+(amd64, arm64) built with `nfpm`, next to the binaries and the Homebrew formula; the Keycloak
+acceptance test is back in the default integration lane.
+
 ### Added
 
 - Debian and RPM packages: every release now carries `.deb` and `.rpm` packages (amd64, arm64) built with
@@ -1115,7 +1121,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/pt9912/u-boot/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/pt9912/u-boot/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/pt9912/u-boot/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/pt9912/u-boot/compare/v0.3.0...v0.4.0
