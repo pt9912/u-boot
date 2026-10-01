@@ -102,5 +102,5 @@ Vorbild: `pt9912/ai-harness-init` (Formel-Skeleton + Fill-Skript + Release-Asset
 2. PAT (Contents: Read & Write auf dieses Repo) als Secret `HOMEBREW_TAP_GITHUB_TOKEN` im Repo
    `pt9912/u-boot` hinterlegen.
 3. Nächsten **stabilen** Tag setzen; der Job `tap` füllt `Formula/u-boot.rb` und der Smoke-Workflow
-   im Tap installiert sie auf macOS. Danach `brew install pt9912/u-boot/u-boot` auf einem Mac
+   im Tap installiert sie auf macOS. Danach `brew tap pt9912/u-boot`, `brew trust pt9912/u-boot` und `brew install u-boot` auf einem Mac
    prüfen und diesen Slice nach `done/` verschieben.

@@ -6,12 +6,14 @@ Hauptrepo). Die Formel `Formula/u-boot.rb` wird **nicht von Hand gepflegt**: der
 stabilen Tag, und der Job `tap` zieht sie hierher nach (`scripts/tap-nachzug.sh`).
 
 ```bash
-brew install pt9912/u-boot/u-boot
+brew tap pt9912/u-boot
+brew trust pt9912/u-boot     # Homebrew 5 verlangt, Drittanbieter-Taps ausdrücklich zu vertrauen
+brew install u-boot
 u-boot --version
 ```
 
-`brew install pt9912/u-boot/u-boot` legt den Tap (`pt9912/homebrew-u-boot`) bei
-Bedarf selbst an. Vier Plattformen: macOS und Linux, je `amd64` und `arm64`
+`brew tap pt9912/u-boot` bindet diesen Tap (`pt9912/homebrew-u-boot`) ein; Homebrew 5
+installiert aus Drittanbieter-Taps erst nach `brew trust pt9912/u-boot`. Vier Plattformen: macOS und Linux, je `amd64` und `arm64`
 (Homebrew trägt kein Windows). Prereleases (`vX.Y.Z-rc.1`) landen nicht im Tap.
 
 Dieses Verzeichnis (`packaging/homebrew-tap/` im Hauptrepo) enthält die Dateien,

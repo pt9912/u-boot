@@ -18,7 +18,8 @@ this file is the same format applied to u-boot itself.
   formula (`u-boot.rb`, filled from those digests by `scripts/homebrew-formula-fill.sh`)
   to every release, and a `tap` job pulls it into `pt9912/homebrew-u-boot` once the
   tap and the `HOMEBREW_TAP_GITHUB_TOKEN` secret exist. Install:
-  `brew install pt9912/u-boot/u-boot` (macOS/Linux, amd64/arm64).
+  `brew tap pt9912/u-boot && brew trust pt9912/u-boot && brew install u-boot`
+  (macOS/Linux, amd64/arm64; Homebrew 5 requires the explicit `brew trust`).
 - `u-boot up` / `down` / `remove --purge` extensions: `up` warns before Compose
   recreates a container (`docker compose --dry-run up`), reports `ports[]`
   structurally and, when it fails mid-way, the partial service snapshot;

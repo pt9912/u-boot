@@ -94,7 +94,9 @@ u-boot --version
 **macOS / Linux with Homebrew** (stable releases, four platforms):
 
 ```bash
-brew install pt9912/u-boot/u-boot
+brew tap pt9912/u-boot
+brew trust pt9912/u-boot     # Homebrew 5 refuses third-party taps until they are trusted
+brew install u-boot
 u-boot --version
 ```
 

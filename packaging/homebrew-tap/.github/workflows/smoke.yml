@@ -25,7 +25,10 @@ jobs:
       - name: Tap und Install aus dem Tap
         run: |
           brew tap pt9912/u-boot "https://github.com/${GITHUB_REPOSITORY}"
-          brew install pt9912/u-boot/u-boot
+          # Homebrew 5 verweigert Drittanbieter-Taps, bis sie ausdruecklich
+          # als vertrauenswuerdig markiert sind (wie brew es beim Abbruch nennt).
+          brew trust pt9912/u-boot
+          brew install u-boot
       - name: Version
         run: u-boot --version
       - name: init
