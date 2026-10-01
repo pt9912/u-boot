@@ -75,7 +75,7 @@ flowchart LR
 | Config-Erweiterungen (V1-Cleanup) | 2026-10-01 | [`slice-v1-config-structured-hint`](../done/slice-v1-config-structured-hint.md), [`slice-v1-config-multi-path-get`](../done/slice-v1-config-multi-path-get.md), [`slice-v1-config-multi-path-set`](../done/slice-v1-config-multi-path-set.md), [`slice-v1-config-list-subcommand`](../done/slice-v1-config-list-subcommand.md) (`acc0233`) |
 | Logs-Erweiterungen (V1-Cleanup) | 2026-10-01 | [`slice-v1-logs-multi-service-filter`](../done/slice-v1-logs-multi-service-filter.md), [`slice-v1-logs-format-flags`](../done/slice-v1-logs-format-flags.md), [`slice-v1-logs-time-range-filter`](../done/slice-v1-logs-time-range-filter.md) (`4db9f90`) |
 | Up/Down-Erweiterungen (V1-Cleanup) | 2026-10-01 | [`slice-v1-recreate-detection`](../done/slice-v1-recreate-detection.md), [`slice-v1-multi-port-services`](../done/slice-v1-multi-port-services.md), [`slice-v1-up-partial-snapshot-on-failure`](../done/slice-v1-up-partial-snapshot-on-failure.md), [`slice-v1-down-volumes-named-list`](../done/slice-v1-down-volumes-named-list.md), [`slice-v1-volume-auto-removal`](../done/slice-v1-volume-auto-removal.md) (`c4c9b09`) |
-| Generate-Devcontainer-Rollback (V2-Hardening) | 2026-10-01 | [`slice-v2-generate-devcontainer-rollback-aware-write`](../done/slice-v2-generate-devcontainer-rollback-aware-write.md) (`HASH`) |
+| Generate-Devcontainer-Rollback (V2-Hardening) | 2026-10-01 | [`slice-v2-generate-devcontainer-rollback-aware-write`](../done/slice-v2-generate-devcontainer-rollback-aware-write.md) (`2f12ec6`) |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-NN-results.md`; die Welle-Closure lebt vollständig im jeweiligen

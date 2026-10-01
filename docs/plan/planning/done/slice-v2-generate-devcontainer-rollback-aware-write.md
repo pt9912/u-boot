@@ -1,6 +1,6 @@
 # Slice V2: `generate devcontainer` Rollback-aware Multi-File-Write
 
-> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `HASH`**). Hardening-
+> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `2f12ec6`**). Hardening-
 > Slice zum Devcontainer-Phase-2-Half-Write-Carveout aus
 > [`slice-v1-cli-json-dry-run-generate`](../done/slice-v1-cli-json-dry-run-generate.md)
 > T0-(i) (Carveout-Eintrag entfernt).
