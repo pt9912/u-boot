@@ -23,9 +23,19 @@ case "$code" in
 *) echo "tap-check: unexpected HTTP ${code} from the GitHub API." >&2; exit 2 ;;
 esac
 
-if grep -Eq '"push"[[:space:]]*:[[:space:]]*true' "$body"; then
-	echo "tap-check: token may push to ${tap}."
+# Die API-Sicht allein reicht NICHT: bei klassischen PATs zeigt `permissions.push` die Rechte
+# des BENUTZERS, nicht die Scopes des Tokens — ein Token ohne `repo`-Scope meldet dort
+# `push: true` und scheitert beim echten Push mit 403. Deshalb der echte Test: Klon und
+# `git push --dry-run` (verhandelt die Schreib-Verbindung, schreibt aber nichts).
+work="$(mktemp -d)"
+trap 'rm -f "$body"; rm -rf "$work"' EXIT
+git clone --quiet --depth 1 "https://x-access-token:${TAP_TOKEN}@github.com/${tap}.git" "$work/tap"
+branch="$(git -C "$work/tap" rev-parse --abbrev-ref HEAD)"
+if out="$(git -C "$work/tap" push --dry-run origin "HEAD:refs/heads/${branch}" 2>&1)"; then
+	echo "tap-check: token may push to ${tap} (git push --dry-run succeeded)."
 else
-	echo "tap-check: token is valid but has NO write permission on ${tap} (fine-grained PAT: add the repository and set Contents to Read and write)." >&2
+	echo "tap-check: token is valid but git push to ${tap} is DENIED:" >&2
+	printf '  %s\n' "${out//$'\n'/$'\n'  }" >&2
+	echo "tap-check: classic PAT -> needs the 'repo' scope; fine-grained PAT -> add the repository and set Contents to Read and write." >&2
 	exit 1
 fi

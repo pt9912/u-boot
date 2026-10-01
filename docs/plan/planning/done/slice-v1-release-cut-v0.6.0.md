@@ -1,8 +1,8 @@
 # Slice V1: Release-Cut `v0.6.0`
 
-> **Status:** T1–T3 am 2026-10-01 ausgeführt (ein Commit); **T4** (Tag-Push)
-> durch den Projektinhaber freigegeben und von der Session ausgeführt — Closure-Notiz
-> am Dateiende. Ablauf: [`docs/user/releasing.md`](../../../user/releasing.md).
+> **Status:** **abgeschlossen** (2026-10-01) — T1–T3 im Commit `76a8200`, T4: Tag `v0.6.0`
+> gesetzt und `publish` durchgelaufen (Details in der Closure-Notiz; der Tap-Nachzug des Workflows
+> scheiterte am Token und wurde von Hand ersetzt). Ablauf: [`docs/user/releasing.md`](../../../user/releasing.md).
 
 ## Auslöser
 
@@ -37,4 +37,16 @@ Bruch bestehender Verträge.
 
 ## Closure-Notiz (nach `done/`)
 
-<!-- Nach dem Tag-Push füllen: Tag-Commit, publish-Lauf, Assets, Tap-Ergebnis. -->
+- **Tag:** `v0.6.0` auf `76a8200` (2026-10-01), nach grünem CI-Lauf und `make ci` / `make test-docker`.
+- **`publish`-Lauf `36873768725`:** Job `publish` grün — Image `ghcr.io/pt9912/u-boot:0.6.0` und `:latest`
+  melden `0.6.0`; sechs Binaries, `SHA256SUMS` und `u-boot.rb` am Release (Linux-Binary gegen die
+  Summen geprüft). Job `tap` **rot**: `git push` ans Tap endete mit `403 Permission denied to pt9912`
+  — das Secret `HOMEBREW_TAP_GITHUB_TOKEN` in `u-boot` hat (noch) kein Schreibrecht auf
+  `homebrew-u-boot`. Die Formel wurde deshalb einmalig von Hand nachgezogen
+  (`scripts/tap-nachzug.sh`, Tap-Commit `e191e30`).
+- **Folgearbeit:** Der Workflow `tap-check` (`gh workflow run tap-check`, echter Push-Test) wurde
+  nachgereicht; die API-Sicht allein hätte das falsche Token nicht erkannt (`permissions.push` zeigt
+  bei klassischen PATs die Rechte des Benutzers). Ob das Secret korrekt ist, zeigt der nächste Release
+  (Entscheidung des Projektinhabers: dort testen).
+- **Offen:** macOS-Smoke im Tap (queued) und `brew install` auf einem Mac — siehe
+  [`slice-v2-homebrew-formula`](../in-progress/slice-v2-homebrew-formula.md).

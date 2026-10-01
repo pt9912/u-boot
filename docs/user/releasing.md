@@ -40,8 +40,9 @@ Probe für den Release-Pfad (und hinterher löschbar).
   Warnung; der Release selbst hängt nicht am Tap.
 - **Token prüfen:** `gh workflow run tap-check` (Workflow
   [`tap-check.yml`](../../.github/workflows/tap-check.yml)) meldet, ob das Secret auf das Tap
-  **schreiben** darf (`403`/„no write permission" = falsches oder zu eng gefasstes Token). Ein
-  Rerun des Jobs `tap` zeigt das nicht, wenn die Formel schon im Tap liegt.
+  **schreiben** darf — per echtem Klon und `git push --dry-run` (die API-Sicht allein täuscht:
+  bei klassischen PATs zeigt `permissions.push` die Rechte des Benutzers, nicht die Scopes des
+  Tokens). Ein Rerun des Jobs `tap` zeigt das nicht, wenn die Formel schon im Tap liegt.
 - **Tap-Repo** `pt9912/homebrew-u-boot` (README und Smoke-Workflow aus
   [`packaging/homebrew-tap/`](../../packaging/homebrew-tap/)).
 - Schreibrecht auf Tags und auf `ghcr.io/pt9912/u-boot` (über `GITHUB_TOKEN` des Workflows).

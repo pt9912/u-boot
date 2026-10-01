@@ -95,6 +95,15 @@ Vorbild: `pt9912/ai-harness-init` (Formel-Skeleton + Fill-Skript + Release-Asset
 | T3 | **geliefert (Vorlagen):** `packaging/homebrew-tap/README.md` und `.github/workflows/smoke.yml` (macOS: install, `--version`, `init`, `doctor` ohne Absturz) zum Kopieren ins Tap; README EN + DE mit `brew install`-Block. Im Tap-Repo (2026-10-01). |
 | T4 | **teilweise:** Spec 0.3.4 ([`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung): Homebrew gewählt), [ADR-0016](../../adr/0016-homebrew-distribution-per-tap.md) (statt Umschreiben des Accepted [ADR-0007](../../adr/0007-distributionswege-ghcr.md)), CHANGELOG, Carveout-Zeile angepasst. **Offen:** Verschiebung nach `done/` nach der ersten Tap-Installation. |
 
+## Stand nach dem ersten Release (v0.6.0, 2026-10-01)
+
+`publish` hängte `SHA256SUMS` und `u-boot.rb` an das Release. Der Job `tap` scheiterte mit
+`403 Permission denied` beim Push (das Secret hat kein Schreibrecht auf das Tap); die Formel wurde
+einmalig von Hand nachgezogen (`scripts/tap-nachzug.sh`) und liegt im Tap (`Formula/u-boot.rb`, 0.6.0).
+Der Workflow `tap-check` prüft das Token per echtem `git push --dry-run`. Das Secret wird beim
+**nächsten Release** erprobt (Entscheidung des Projektinhabers). Der macOS-Smoke im Tap ist gestartet;
+sein Ergebnis und `brew install` auf einem Mac stehen aus.
+
 ## Offene Einrichtung (nur der Projektinhaber)
 
 1. ~~Repo `pt9912/homebrew-u-boot` anlegen~~ — **erledigt 2026-10-01** (öffentlich, `main`; README und

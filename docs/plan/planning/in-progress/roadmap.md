@@ -13,7 +13,7 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**v0.6.0 (Sandbox-Devcontainer + V1-Cleanup + Homebrew)** — Slices: [`slice-v1-release-cut-v0.6.0`](slice-v1-release-cut-v0.6.0.md) (Tag-Push), [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (Tap-Verifikation auf macOS nach dem ersten stabilen Tag).
+**Homebrew-Tap-Verifikation** — Slice: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (v0.6.0 ist released; offen: Token-Recht im Secret, erprobt beim nächsten Release, und `brew install` auf einem Mac).
 
 ## Nächste Wellen
 
@@ -76,6 +76,7 @@ flowchart LR
 | Logs-Erweiterungen (V1-Cleanup) | 2026-10-01 | [`slice-v1-logs-multi-service-filter`](../done/slice-v1-logs-multi-service-filter.md), [`slice-v1-logs-format-flags`](../done/slice-v1-logs-format-flags.md), [`slice-v1-logs-time-range-filter`](../done/slice-v1-logs-time-range-filter.md) (`4db9f90`) |
 | Up/Down-Erweiterungen (V1-Cleanup) | 2026-10-01 | [`slice-v1-recreate-detection`](../done/slice-v1-recreate-detection.md), [`slice-v1-multi-port-services`](../done/slice-v1-multi-port-services.md), [`slice-v1-up-partial-snapshot-on-failure`](../done/slice-v1-up-partial-snapshot-on-failure.md), [`slice-v1-down-volumes-named-list`](../done/slice-v1-down-volumes-named-list.md), [`slice-v1-volume-auto-removal`](../done/slice-v1-volume-auto-removal.md) (`c4c9b09`) |
 | Generate-Devcontainer-Rollback (V2-Hardening) | 2026-10-01 | [`slice-v2-generate-devcontainer-rollback-aware-write`](../done/slice-v2-generate-devcontainer-rollback-aware-write.md) (`2f12ec6`) |
+| v0.6.0 (Sandbox-Devcontainer + V1-Cleanup + Homebrew) | 2026-10-01 | [`slice-v1-release-cut-v0.6.0`](../done/slice-v1-release-cut-v0.6.0.md) — Tag `v0.6.0` auf `76a8200` |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-NN-results.md`; die Welle-Closure lebt vollständig im jeweiligen
