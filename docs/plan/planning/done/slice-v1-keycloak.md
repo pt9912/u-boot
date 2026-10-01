@@ -121,7 +121,7 @@ auf einem Docker-fähigen System bringt Keycloak-Endpoint
   ebenfalls 502/504 gesehen). T3-Carveout: der Test ist mit
   zusätzlichem build-tag `acceptance_extended` opt-in, default
   `make test-docker` umgeht ihn. Folge-Slice
-  [`slice-v1-keycloak-ci-flake`](../in-progress/slice-v1-keycloak-ci-flake.md) (Trigger: Compose-Verbose-Logs aus
+  [`slice-v1-keycloak-ci-flake`](slice-v1-keycloak-ci-flake.md) (Trigger: Compose-Verbose-Logs aus
   CI ziehen, dann entweder Pull-Retry-Wrapper im UpService oder
   Quay-Mirror via Docker-Hub-Pull-Through-Cache).
 - **OpenTelemetry-Add-on**: eigener Slice [`slice-v1-otel`](slice-v1-otel.md)

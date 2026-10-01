@@ -1,9 +1,8 @@
 # Slice V1: Keycloak-Acceptance-Test in CI grün
 
-> **Status:** **in Beobachtung** (2026-10-01): T1 Diagnose abgeschlossen (Ursache war eine transiente
-> Quay.io-Panne, nicht mehr reproduzierbar), T3 Re-Activate geliefert (Commit `7175f08`); die drei
-> aufeinanderfolgenden `integration-docker`-Läufe stehen aus. Carveout-Plan-Anker
-> ([[feedback_carveouts_need_plans]]).
+> **Status:** **Done** (2026-10-01): Ursache war eine transiente Quay.io-Panne (2026-06-01), der Test
+> läuft wieder in der Default-Lane (T3 `7175f08`); `integration-docker` ist auf drei aufeinanderfolgenden
+> Commits grün (`7255416`, `50d6c83`, `11a6c82`). T2 (Pull-Retry) entfiel mangels reproduzierbaren Fehlers.
 
 ## Auslöser
 
@@ -121,7 +120,7 @@ denselben Pfad gehen.
   (Commit `beb222b` E2E + Helper-Extraktion; Commit `9d0be1c`
   CI-Flake-Carveout).
 - Carveout-Eintrag:
-  [`carveouts.md`](carveouts.md) §Temporäre Carveouts.
+  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre Carveouts.
 - Spec-Bezug: [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow) Keycloak-Flow (V1) — Test existiert,
   läuft aber nicht in der CI-Pflicht-Lane bis dieser Slice
   schließt.

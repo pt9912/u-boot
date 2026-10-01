@@ -13,7 +13,7 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**Paket-Verifikation und CI-Stabilität** — Slices: [`slice-v1-keycloak-ci-flake`](slice-v1-keycloak-ci-flake.md), [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md), [`slice-v2-distro-pakete`](slice-v2-distro-pakete.md) (Linux-Pakete, [ADR-0017](../../adr/0017-linux-pakete-nfpm.md); Verifikation beim nächsten Release) (v0.6.0 ist released; offen: Token-Recht im Secret, erprobt beim nächsten Release, und `brew install` auf einem Mac).
+**Paket-Verifikation** — Slices: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md), [`slice-v2-distro-pakete`](slice-v2-distro-pakete.md) (Linux-Pakete, [ADR-0017](../../adr/0017-linux-pakete-nfpm.md); Verifikation beim nächsten Release) (v0.6.0 ist released; offen: Token-Recht im Secret, erprobt beim nächsten Release, und `brew install` auf einem Mac).
 
 ## Nächste Wellen
 

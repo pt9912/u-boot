@@ -45,7 +45,7 @@
 | --- | --- | --- |
 | Homebrew | Plan-Stub `open/`, Trigger: erste macOS-Nutzeranfrage | [`slice-v2-homebrew-formula`](../plan/planning/in-progress/slice-v2-homebrew-formula.md) |
 | Debian/RPM | Plan-Stub `open/`, Trigger: konkrete Distro-Anfrage | [`slice-v2-distro-pakete`](../plan/planning/in-progress/slice-v2-distro-pakete.md) |
-| Keycloak-CI-Flake | Plan-Stub `open/`, Trigger: belastbarer CI-/Quay-Befund | [`slice-v1-keycloak-ci-flake`](../plan/planning/in-progress/slice-v1-keycloak-ci-flake.md) |
+| Keycloak-CI-Flake | Plan-Stub `open/`, Trigger: belastbarer CI-/Quay-Befund | [`slice-v1-keycloak-ci-flake`](../plan/planning/done/slice-v1-keycloak-ci-flake.md) |
 | Branch Protection | Nutzeraktion im GitHub-UI, nicht versionierbar | [`docs/user/branch-protection.md`](../user/branch-protection.md) |
 
 ## Hinweis zur Detailtiefe
