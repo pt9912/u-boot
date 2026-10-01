@@ -11,5 +11,4 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| [`slice-v1-keycloak-ci-flake.md`](slice-v1-keycloak-ci-flake.md) | Hardening: Keycloak-Acceptance-Test ([`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow)) in CI grün |
 | [`slice-v2-distro-pakete.md`](slice-v2-distro-pakete.md) | Plan-Stub: Debian-/RPM-Pakete ([`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Restweg) |

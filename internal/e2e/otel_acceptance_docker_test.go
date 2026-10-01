@@ -25,9 +25,8 @@
 // die stabilization timeout; 2 min sind die nächst-konservative
 // Stufe und liegen weit unter den 4 min, die Keycloak braucht.
 // Falls die CI das docker.io-Pull weiter als flaky erlebt (analog
-// Quay/Keycloak), eskaliert dieser Test auf `//go:build docker &&
-// acceptance_extended` und der Folge-Slice
-// `slice-v1-keycloak-ci-flake` schließt beide gleichzeitig.
+// Quay/Keycloak), wäre ein Pull-Retry im UpService der Weg
+// (Folge-Slice-Skizze: slice-v1-keycloak-ci-flake T2).
 
 package e2e_test
 

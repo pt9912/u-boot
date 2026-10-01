@@ -1,5 +1,10 @@
 # Slice V1: Keycloak-Acceptance-Test in CI grün
 
+> **Status:** **in Beobachtung** (2026-10-01): T1 Diagnose abgeschlossen (Ursache war eine transiente
+> Quay.io-Panne, nicht mehr reproduzierbar), T3 Re-Activate geliefert (Commit `HASH`); die drei
+> aufeinanderfolgenden `integration-docker`-Läufe stehen aus. Carveout-Plan-Anker
+> ([[feedback_carveouts_need_plans]]).
+
 ## Auslöser
 
 [`slice-v1-keycloak`](../done/slice-v1-keycloak.md) T3 hat den [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow)-Acceptance-Test
@@ -116,7 +121,7 @@ denselben Pfad gehen.
   (Commit `beb222b` E2E + Helper-Extraktion; Commit `9d0be1c`
   CI-Flake-Carveout).
 - Carveout-Eintrag:
-  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre Carveouts.
+  [`carveouts.md`](carveouts.md) §Temporäre Carveouts.
 - Spec-Bezug: [`LH-AK-003`](../../../../spec/lastenheft.md#lh-ak-003--keycloak-flow) Keycloak-Flow (V1) — Test existiert,
   läuft aber nicht in der CI-Pflicht-Lane bis dieser Slice
   schließt.
@@ -125,3 +130,18 @@ denselben Pfad gehen.
   produktive Compose-Run-Cycle ([slice-v1-otel](../done/slice-v1-otel.md) oder Sammel-
   Refactor).
 - Phase: V1 (Test-Stabilisierungs-Slice; kein neues Spec-Feature).
+
+## Lieferstand (2026-10-01)
+
+- **T1 Diagnose:** Der ursprüngliche Fehler (`compose runtime error` nach < 1 s) trat am 2026-06-01 während
+  einer ganztägigen Quay.io-Panne auf (lokal 502/504 beim `docker pull`). Heute läuft der Test lokal
+  ohne Änderung grün (`TestE2E_LHAK003_KeycloakAcceptanceFlow`, 31 s, `go test -tags 'docker
+  acceptance_extended'`). Root cause damit **(a) transienter Registry-Fehler**, nicht (b)
+  Compose-Validate oder (c) Netz-Block; ein Pull-Retry-Wrapper (T2) ist ohne reproduzierbaren Fehler
+  nicht begründet und bleibt Fall-Back (Diagnose vor Carveout).
+- **Image-Pin-Entscheidung:** bleibt `quay.io/keycloak/keycloak:26.0` (Minor-Tag): der Test läuft damit
+  stabil; ein Patch-Pin brächte laufende Bump-Pflege ohne belegten Nutzen.
+- **T3 Re-Activate:** Build-Tag `docker && acceptance_extended` → `docker`, Carveout-Kommentarblock aus
+  `keycloak_acceptance_docker_test.go` entfernt, Carveout-Zeile in `carveouts.md` gelöscht.
+- **Beobachtung:** Der Slice schließt erst nach drei grünen `integration-docker`-Läufen in Folge; ist
+  einer rot, zurück zu T1 (dann T2: `DockerEngine.PullImage` mit Retry).

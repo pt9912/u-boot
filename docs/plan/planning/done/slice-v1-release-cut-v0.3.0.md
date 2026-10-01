@@ -36,7 +36,7 @@ Dependency-Mechanik.
 Plus zwei begleitende Slice-Pläne in `open/`, die als Folge-Slices
 ohne aktive Tranchen liegen:
 
-- [`slice-v1-keycloak-ci-flake`](../open/slice-v1-keycloak-ci-flake.md) —
+- [`slice-v1-keycloak-ci-flake`](../in-progress/slice-v1-keycloak-ci-flake.md) —
   offener Trigger-Slice für die `acceptance_extended`-Carveout-
   Auflösung des Keycloak-Acceptance-Tests. Nicht v0.3.0-blocking.
 - [`slice-v2-homebrew-formula.md`](../in-progress/slice-v2-homebrew-formula.md)
@@ -93,7 +93,7 @@ bereiten Doku und Versionsstrings vor; T4 ist die Nutzer-Aktion
 
 ## Out of Scope
 
-- **[`slice-v1-keycloak-ci-flake`](../open/slice-v1-keycloak-ci-flake.md)-Auflösung**: der Keycloak-
+- **[`slice-v1-keycloak-ci-flake`](../in-progress/slice-v1-keycloak-ci-flake.md)-Auflösung**: der Keycloak-
   Acceptance-Test ist seit `9d0be1c` hinter `acceptance_extended`
   versteckt; der CI-Bind-Mount-Fix aus [slice-v1-otel](slice-v1-otel.md) T3 könnte
   ihn vermutlich befreien, das ist aber nicht v0.3.0-blocking.

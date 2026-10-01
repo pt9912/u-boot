@@ -13,7 +13,7 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**Homebrew-Tap-Verifikation** — Slice: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (v0.6.0 ist released; offen: Token-Recht im Secret, erprobt beim nächsten Release, und `brew install` auf einem Mac).
+**Homebrew-Tap-Verifikation und CI-Stabilität** — Slices: [`slice-v1-keycloak-ci-flake`](slice-v1-keycloak-ci-flake.md), [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (v0.6.0 ist released; offen: Token-Recht im Secret, erprobt beim nächsten Release, und `brew install` auf einem Mac).
 
 ## Nächste Wellen
 
@@ -21,7 +21,6 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 |---|---|---|---|
 | macOS-Distribution (Tap-Einrichtung offen) | Tap-Repo + Secret durch den Projektinhaber | [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) | S |
 | Linux-Pakete | konkrete Debian-/RPM-Anfrage | [`slice-v2-distro-pakete`](../open/slice-v2-distro-pakete.md) ([ADR-0007](../../adr/0007-distributionswege-ghcr.md)) | M |
-| CI-Stabilität | belastbare Keycloak-Flake-Logs (Quay-/Mirror-Befund) | [`slice-v1-keycloak-ci-flake`](../open/slice-v1-keycloak-ci-flake.md) | S |
 | Harness-Scaffolding (Produkt) | [ADR-0011](../../adr/0011-agent-harness-scaffolding.md) accepted + Spec-Erweiterung + Lizenz-Check | `slice-vN-harness-bootstrap-scaffold` (noch kein Plan) | L |
 | Podman-first / Migration / Custom-Sources | Konkretisierung je Thema offen | `slice-vN-podman-formal`; `slice-later-migration` ([`LH-FA-CONF-006`](../../../../spec/lastenheft.md#lh-fa-conf-006--konfiguration-migrieren)); `slice-later-custom-data-sources` ([`LH-DA-004`](../../../../spec/lastenheft.md#lh-da-004--schema-migration)) | L |
 

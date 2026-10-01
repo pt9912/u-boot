@@ -11,6 +11,13 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Changed
+
+- The Keycloak acceptance test ([`LH-AK-003`](spec/lastenheft.md#lh-ak-003--keycloak-flow)) is back in the default `make test-docker` lane
+  (build tag `docker` only; the `acceptance_extended` opt-in is gone). The original failure was a
+  transient Quay.io outage (2026-06-01), not a defect
+  ([`slice-v1-keycloak-ci-flake`](docs/plan/planning/in-progress/slice-v1-keycloak-ci-flake.md)).
+
 ## [0.6.0] - 2026-10-01
 
 Sixth release. **Devcontainer sandbox profile and a broad CLI cleanup.**
