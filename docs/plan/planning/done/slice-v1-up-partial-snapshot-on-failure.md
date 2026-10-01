@@ -1,6 +1,6 @@
 # Slice V1: `u-boot up` Partial-Snapshot bei Mid-`ComposeUp`-Failure
 
-> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `HASH`**). Cleanup-/Feature-
+> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `c4c9b09`**). Cleanup-/Feature-
 > Slice zum Carveout aus
 > [`slice-v1-cli-json-dry-run-up-down`](../done/slice-v1-cli-json-dry-run-up-down.md)
 > §Out of Scope (Carveout-Eintrag entfernt).
