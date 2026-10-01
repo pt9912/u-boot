@@ -101,8 +101,10 @@ Vorbild: `pt9912/ai-harness-init` (Formel-Skeleton + Fill-Skript + Release-Asset
 `403 Permission denied` beim Push (das Secret hat kein Schreibrecht auf das Tap); die Formel wurde
 einmalig von Hand nachgezogen (`scripts/tap-nachzug.sh`) und liegt im Tap (`Formula/u-boot.rb`, 0.6.0).
 Der Workflow `tap-check` prüft das Token per echtem `git push --dry-run`. Das Secret wird beim
-**nächsten Release** erprobt (Entscheidung des Projektinhabers). Der macOS-Smoke im Tap ist gestartet;
-sein Ergebnis und `brew install` auf einem Mac stehen aus.
+**nächsten Release** erprobt (Entscheidung des Projektinhabers). Der macOS-Smoke im Tap (Lauf 36887857752,
+2026-10-01) ist auf **macOS 14 (Apple Silicon) grün**: tap, trust, install, `--version`, `init`, `doctor`.
+Der Intel-Job (macos-13) stand beim Eintrag noch auf `queued` (Runner-Kapazität); er und die Prüfung auf einem
+echten Mac stehen aus.
 
 ## Offene Einrichtung (nur der Projektinhaber)
 
