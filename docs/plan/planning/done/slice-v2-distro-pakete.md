@@ -1,9 +1,8 @@
 # Slice V2: Debian-/RPM-Pakete für u-boot ([`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Restweg)
 
-> **Status:** **in Arbeit** (2026-10-01): Entscheidung getroffen
-> ([ADR-0017](../../adr/0017-linux-pakete-nfpm.md): `nfpm`, nur Release-Assets), Paketbau und
-> Release-Workflow repo-seitig geliefert; offen ist die Verifikation auf einem echten Release-Tag
-> (Paket-Smoke-Jobs). Carveout-Plan-Anker ([`carveouts.md`](carveouts.md)).
+> **Status:** **Done** (2026-10-01): geliefert mit `v0.7.0` (Commit `50d6c83`, Tag auf `cb8f937`).
+> [ADR-0017](../../adr/0017-linux-pakete-nfpm.md): `nfpm`, nur Release-Assets. Beide Paket-Smoke-Jobs
+> (Ubuntu `.deb`, Fedora `.rpm`) liefen auf dem echten Tag grün.
 
 ## Auslöser
 
@@ -104,6 +103,7 @@ die korrekte Version; `u-boot doctor` läuft ohne Errors.
   `SHA256SUMS` auf (die Formel-Befüllung liest nur die vier Brew-Plattformen per exaktem Namen).
 - **T3 Smoke/Doku:** Jobs `package-smoke-deb` (Ubuntu) und `package-smoke-rpm` (Fedora-Container);
   READMEs (EN/DE), Benutzerhandbuch, `releasing.md`, CHANGELOG, Lastenheft 0.3.5.
-- **T4 Closure offen:** Schließt nach dem nächsten Release-Tag, wenn beide Smoke-Jobs grün sind
-  (Fehlschlag: Paketspec oder Workflow nachbessern). Danach `in-progress/` → `done/`, Carveout-Zeile
-  [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung) reduzieren.
+- **T4 Closure (2026-10-01):** `publish`-Lauf `36894700620` zum Tag `v0.7.0` grün — vier Pakete
+  (`u-boot_0.7.0_{amd64,arm64}.deb`, `u-boot-0.7.0-1.{x86_64,aarch64}.rpm`) und `SHA256SUMS` am Release;
+  `package-smoke-deb` (Ubuntu) und `package-smoke-rpm` (Fedora) installieren aus dem Release, `--version`
+  und `init` grün. Carveout-Zeile [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung) auf Homebrew reduziert.

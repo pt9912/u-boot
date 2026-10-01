@@ -32,7 +32,7 @@ Bruch bestehender Verträge.
 
 ## Out of Scope
 
-- Homebrew-Core-Einreichung, Distro-Pakete ([`slice-v2-distro-pakete`](../in-progress/slice-v2-distro-pakete.md)).
+- Homebrew-Core-Einreichung, Distro-Pakete ([`slice-v2-distro-pakete`](slice-v2-distro-pakete.md)).
 - Der Test `keycloak-ci-flake` ([`slice-v1-keycloak-ci-flake`](slice-v1-keycloak-ci-flake.md)): kein Release-Blocker.
 
 ## Closure-Notiz (nach `done/`)

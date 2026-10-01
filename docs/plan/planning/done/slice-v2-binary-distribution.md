@@ -64,7 +64,7 @@ fertigen `.exe`.
   [`slice-v2-homebrew-formula.md`](../in-progress/slice-v2-homebrew-formula.md) ([ADR-0007](../../adr/0007-distributionswege-ghcr.md) §Entscheidung
   „Vertagt").
 - Debian/RPM-Pakete: eigener Slice
-  [`slice-v2-distro-pakete.md`](../in-progress/slice-v2-distro-pakete.md).
+  [`slice-v2-distro-pakete.md`](slice-v2-distro-pakete.md).
 - Signature-/SBOM-Verifikation für Binaries: Folge-Slice bei
   konkretem Bedarf (z. B. Reproducible-Builds-Anfrage oder
   Supply-Chain-Anforderung von einem Konsumenten).

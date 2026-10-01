@@ -115,3 +115,11 @@ echten Mac stehen aus.
 3. Nächsten **stabilen** Tag setzen; der Job `tap` füllt `Formula/u-boot.rb` und der Smoke-Workflow
    im Tap installiert sie auf macOS. Danach `brew tap pt9912/u-boot`, `brew trust pt9912/u-boot` und `brew install u-boot` auf einem Mac
    prüfen und diesen Slice nach `done/` verschieben.
+
+## Stand nach `v0.7.0` (2026-10-01)
+
+- Das Secret `HOMEBREW_TAP_GITHUB_TOKEN` (fine-grained, Contents Read & Write auf das Tap) besteht `tap-check`;
+  der Job `tap` des Tags `v0.7.0` hat die Formel als Tap-Commit `3059299` („u-boot 0.7.0“) nachgezogen
+  (`publish`-Lauf `36894700620`). Damit ist der automatische Nachzug im echten Lauf belegt.
+- Offen: macOS-Smoke im Tap zur Formel 0.7.0 (Lauf `36894925908`, auf `queued` wegen knapper macOS-Runner)
+  sowie die Prüfung von `brew install` auf einem echten Mac. Danach schließt dieser Slice.
