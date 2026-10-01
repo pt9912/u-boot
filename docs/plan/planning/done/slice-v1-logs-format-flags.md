@@ -1,6 +1,6 @@
 # Slice V1: `u-boot logs --no-log-prefix` / `--timestamps` Format-Flags
 
-> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `HASH`**). Cleanup-/Feature-
+> **Status:** **abgeschlossen** (2026-10-01, **Delivery-Hash: `4db9f90`**). Cleanup-/Feature-
 > Slice zum Carveout aus
 > [`slice-v1-cli-json-dry-run-logs`](../done/slice-v1-cli-json-dry-run-logs.md)
 > §Out of Scope (Carveout-Eintrag entfernt).
