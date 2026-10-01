@@ -784,35 +784,9 @@ func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.Ge
 		return driving.GenerateResponse{}, err
 	}
 
-	// slice-v2-generate-devcontainer-rollback-aware-write: from here on
-	// real files change; a failure restores the pre-state.
-	journal := newGenerateJournal(s.rollbackFS)
-	changed, hasWrite, hasReplace, err := s.executeDevcontainerPlans(plans, journal)
+	changed, hasWrite, hasReplace, profileWritten, err := s.writeDevcontainerPhase(req, cfg, plans)
 	if err != nil {
-		return driving.GenerateResponse{}, s.rollbackOnError(journal, err)
-	}
-
-	// Allowlist write LAST — only after every other write
-	// succeeded. Any failure above this point leaves u-boot.yaml
-	// byte-identical (no comment loss, no half-mutated state).
-	writeProfile := req.Sandbox && !profileIsSandbox(cfg.Devcontainer)
-	if len(req.AllowExternalFeatureSources) > 0 || writeProfile {
-		if err := journal.captureFile(filepath.Join(req.BaseDir, "u-boot.yaml")); err != nil {
-			return driving.GenerateResponse{}, s.rollbackOnError(journal, err)
-		}
-	}
-	if err := s.applyAllowExternalFeatureSources(req.BaseDir, req.AllowExternalFeatureSources); err != nil {
-		return driving.GenerateResponse{}, s.rollbackOnError(journal, err)
-	}
-
-	// LH-FA-DEV-006: `--sandbox` persists the profile — also LAST,
-	// after every devcontainer file was written.
-	profileWritten, err := s.persistSandboxProfile(req.BaseDir, writeProfile)
-	if err != nil {
-		return driving.GenerateResponse{}, s.rollbackOnError(journal, err)
-	}
-	if profileWritten {
-		changed = append(changed, "u-boot.yaml")
+		return driving.GenerateResponse{}, err
 	}
 
 	action := devcontainerAggregateAction(hasWrite, hasReplace)
@@ -860,6 +834,42 @@ func (s *GenerateService) persistSandboxProfile(baseDir string, write bool) (boo
 			yamlPath, driving.ErrGenerateFileSystem, err)
 	}
 	return true, nil
+}
+
+// writeDevcontainerPhase is the mutating phase of `generate devcontainer`
+// (slice-v2-generate-devcontainer-rollback-aware-write): the devcontainer
+// files, then the `--allow-external-feature-sources` allowlist, then the
+// sandbox profile — each u-boot.yaml write LAST and only after every
+// file succeeded. Any failure restores the pre-call disk state
+// ([generateJournal]); a failing restore is appended to the error.
+func (s *GenerateService) writeDevcontainerPhase(
+	req driving.GenerateRequest, cfg ubootYAMLConfig, plans []devcontainerFilePlan,
+) (changed []string, hasWrite, hasReplace, profileWritten bool, err error) {
+	journal := newGenerateJournal(s.rollbackFS)
+	fail := func(err error) ([]string, bool, bool, bool, error) {
+		return nil, false, false, false, s.rollbackOnError(journal, err)
+	}
+	changed, hasWrite, hasReplace, err = s.executeDevcontainerPlans(plans, journal)
+	if err != nil {
+		return fail(err)
+	}
+	writeProfile := req.Sandbox && !profileIsSandbox(cfg.Devcontainer)
+	if len(req.AllowExternalFeatureSources) > 0 || writeProfile {
+		if err := journal.captureFile(filepath.Join(req.BaseDir, "u-boot.yaml")); err != nil {
+			return fail(err)
+		}
+	}
+	if err := s.applyAllowExternalFeatureSources(req.BaseDir, req.AllowExternalFeatureSources); err != nil {
+		return fail(err)
+	}
+	// LH-FA-DEV-006: `--sandbox` persists the profile.
+	if profileWritten, err = s.persistSandboxProfile(req.BaseDir, writeProfile); err != nil {
+		return fail(err)
+	}
+	if profileWritten {
+		changed = append(changed, "u-boot.yaml")
+	}
+	return changed, hasWrite, hasReplace, profileWritten, nil
 }
 
 // collectDevcontainerForwardPorts derives the container-side ports
