@@ -1003,17 +1003,7 @@ Priorität: MVP
 
 Die Diagnosefunktion muss mindestens prüfen:
 
-- Docker installiert (Mindestversion: 24.0.0 oder neuer) **oder**
-  ein Docker-API-kompatibler Drop-in (z. B. Podman ≥ 4.0 mit
-  aktivem `podman.socket` und `DOCKER_HOST` darauf gezeigt). Die
-  Checks `docker.installed` / `docker.reachable` /
-  `docker.compose.installed` shellen aus zum `docker`-Binary;
-  Drop-ins, die nicht den Docker-Version-Format-Pin
-  (`<major>.<minor>.<patch>`-Bereich 24.0 / 2.20) treffen,
-  werden als `Severity: warn` („unrecognized version") emittiert,
-  ohne den Exit-Code zu eskalieren. Eine formal getestete
-  Podman-Variante folgt in einem eigenen Slice bei konkretem
-  Bedarf — die heutige MVP-Pflicht ist Docker.
+- Docker installiert (Mindestversion: 24.0.0 oder neuer) **oder** ein Docker-API-kompatibler Drop-in (z. B. Podman ≥ 4.0 mit aktivem `podman.socket` und `DOCKER_HOST` darauf gezeigt); Drop-ins, deren Version nicht erkannt wird, werden als `warn` gemeldet, ohne den Exit-Code zu eskalieren.
 - Docker erreichbar
 - Docker Compose verfügbar (Mindestversion: 2.20.0 oder neuer)
 - Git verfügbar
@@ -1256,43 +1246,7 @@ Die Migrationsfunktion ist in [LH-FA-CONF-006](#lh-fa-conf-006--konfiguration-mi
 
 Priorität: MVP
 
-Die Konfigurationsdatei muss mindestens enthalten:
-
-```yaml
-schemaVersion: 1
-project:
-  name: my-service
-
-services:
-  postgres:
-    enabled: false
-
-devcontainer:
-  enabled: false
-
-# Optionale, V1-relevante Felder:
-# services:
-#   keycloak:
-#     enabled: false
-#     persistence: embedded   # embedded | external-postgres
-#   otel:
-#     enabled: false
-#
-# devcontainer:
-#   featureSources:
-#     allow:
-#       - https://ghcr.io/devcontainers/features/node
-#   user:
-#     uid: 1000                    # 1..65535
-#   profile: default               # default | sandbox
-#   sandbox:
-#     nestedRuntime: none          # none | podman
-#     onUnavailable: warn          # warn | fail
-#     repository: ''               # Clone-Quelle statt origin (URL)
-#     egress:
-#       enabled: false
-#       allow: []
-```
+Die Konfigurationsdatei muss mindestens `schemaVersion`, `project.name`, je Dienst `services.<name>.enabled` und `devcontainer.enabled` enthalten. Optionale V1-Felder sind `services.keycloak.persistence` (`embedded` | `external-postgres`), `services.otel.enabled`, `devcontainer.featureSources.allow`, `devcontainer.user.uid` (1 bis 65535), `devcontainer.profile` (`default` | `sandbox`) sowie `devcontainer.sandbox.nestedRuntime` (`none` | `podman`), `devcontainer.sandbox.onUnavailable` (`warn` | `fail`), `devcontainer.sandbox.repository` und `devcontainer.sandbox.egress.enabled` / `.allow`.
 
 Hinweise:
 

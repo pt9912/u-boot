@@ -39,6 +39,22 @@ Verfeinert [`LH-FA-DEV-004`](lastenheft.md#lh-fa-dev-004--benutzerrechte).
 
 - Der Wert wird als Build-Argument `USER_UID` an den Image-Build übergeben; der Container-Benutzer wird mit dieser UID angelegt.
 
+### LH-FA-DIAG-002.a — Prüfung von Docker und Docker-kompatiblen Drop-ins
+
+Verfeinert [`LH-FA-DIAG-002`](lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen).
+
+- Docker installiert (Mindestversion: 24.0.0 oder neuer) **oder**
+  ein Docker-API-kompatibler Drop-in (z. B. Podman ≥ 4.0 mit
+  aktivem `podman.socket` und `DOCKER_HOST` darauf gezeigt). Die
+  Checks `docker.installed` / `docker.reachable` /
+  `docker.compose.installed` shellen aus zum `docker`-Binary;
+  Drop-ins, die nicht den Docker-Version-Format-Pin
+  (`<major>.<minor>.<patch>`-Bereich 24.0 / 2.20) treffen,
+  werden als `Severity: warn` („unrecognized version") emittiert,
+  ohne den Exit-Code zu eskalieren. Eine formal getestete
+  Podman-Variante folgt in einem eigenen Slice bei konkretem
+  Bedarf — die heutige MVP-Pflicht ist Docker.
+
 ## 2. Datenstrukturen und Schemas
 
 Formate und Schemata (`u-boot.yaml`, JSON-Ausgabe, CLI-Tabellen). Jede Struktur trägt
@@ -197,6 +213,46 @@ Beispiel für `--diff --json` ohne `--dry-run` (Vorschau mit anschließendem Sch
 Gilt für den Projektnamen (`project.name`) bei `init` und `config set`.
 
 - regulärer Ausdruck: `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`
+
+### SPEC-005 — Schema der Projektkonfiguration `u-boot.yaml`
+
+Gilt als Mindestinhalt der Konfigurationsdatei; die Hinweise zu Schlüsseln und Werten nennt die Anforderung.
+
+```yaml
+schemaVersion: 1
+project:
+  name: my-service
+
+services:
+  postgres:
+    enabled: false
+
+devcontainer:
+  enabled: false
+
+# Optionale, V1-relevante Felder:
+# services:
+#   keycloak:
+#     enabled: false
+#     persistence: embedded   # embedded | external-postgres
+#   otel:
+#     enabled: false
+#
+# devcontainer:
+#   featureSources:
+#     allow:
+#       - https://ghcr.io/devcontainers/features/node
+#   user:
+#     uid: 1000                    # 1..65535
+#   profile: default               # default | sandbox
+#   sandbox:
+#     nestedRuntime: none          # none | podman
+#     onUnavailable: warn          # warn | fail
+#     repository: ''               # Clone-Quelle statt origin (URL)
+#     egress:
+#       enabled: false
+#       allow: []
+```
 
 ## 3. Defaults und Konstanten
 
