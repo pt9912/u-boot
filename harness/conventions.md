@@ -456,7 +456,7 @@ Baseline still.
   Sequenzen, Fehlermodelle), behaelt aber ihre **erweiterte Abschnittsfolge**
   (Ueberblick, Schichten je Komponente, Import-Regeln, Enforcement,
   Sequenz-Diagramme, Fehlermodelle, Tests, Anti-Patterns, Evolution). Die
-  Import-Regel-Tabelle fuehrt die Spezifikation (`SPEC-013`); die Sicht
+  Import-Regel-Tabelle fuehrt die Spezifikation ([`SPEC-013`](../spec/spezifikation.md#spec-013--import-regel-tabelle-der-schichten)); die Sicht
   visualisiert sie und verweist aufwaerts.
 - **Begruendung:** Die Abschnittsnummern sind Anker fuer Verweise aus ADRs
   (`Schaerft:`); eine Umnummerierung nach Vorlage waere ein Anker-Bruch ohne
