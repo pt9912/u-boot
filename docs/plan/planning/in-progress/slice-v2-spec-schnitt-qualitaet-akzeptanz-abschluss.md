@@ -1,6 +1,6 @@
 # Slice V2: Lastenheft-Schnitt 4 und Abschluss: Qualität, Akzeptanz, Traceability, Version 0.4.0
 
-> **Status:** **geplant** (`next/`) — startet nach Schnitt 3.
+> **Status:** **in Arbeit** (seit 2026-10-02).
 
 **Welle:** `welle-spec-technik-stratum` (siehe [`roadmap.md`](../in-progress/roadmap.md)).
 **Bezug:** Lastenheft §5 Nichtfunktionale Anforderungen, §8 Qualitätsanforderungen, §9 Akzeptanzkriterien, §10–§16 (Abgrenzung, Risiken, MVP, Traceability, Offene Punkte, Glossar, Historie) (Scope).

@@ -12,7 +12,7 @@ Dateiname-Konventionen.
 | Datei | Gegenstand |
 | ----- | ---------- |
 | [`carveouts.md`](carveouts.md) | Master-Dokument: Carveout-Inventar ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)) |
-| [`slice-v2-spec-schnitt-projektkapitel.md`](slice-v2-spec-schnitt-projektkapitel.md) | Lastenheft-Schnitt 3: §4.11–§4.13 als Randbedingungen, §6.2, §6.3, §7 |
+| [`slice-v2-spec-schnitt-qualitaet-akzeptanz-abschluss.md`](slice-v2-spec-schnitt-qualitaet-akzeptanz-abschluss.md) | Lastenheft-Schnitt 4 und Abschluss: §5, §8–§16, Version 0.4.0 |
 | [`slice-v2-homebrew-formula.md`](slice-v2-homebrew-formula.md) | Homebrew-Formel/Tap (repo-seitig geliefert, Tap-Einrichtung offen) |
 | [`roadmap.md`](roadmap.md) | Master-Dokument: Slice-/Tranchen-Stand ([`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)) |
 
