@@ -1332,16 +1332,9 @@ Die u-boot-Codebase muss ein Multi-Stage `Dockerfile` im Repo-Root bereitstellen
 
 Mindestumfang:
 
-- BuildKit-Direktive in der ersten Zeile: `# syntax=docker/dockerfile:1.7`.
-- Pflicht-Stages im MVP:
-  - `deps` – Modulauflösung (`go mod download`) als Cache-Layer.
-  - `compile` – schnelles Compile-Feedback (`go build`) ohne Tests/Lint.
-  - `test` – `go test ./...`.
-  - `lint` – `golangci-lint run ./...`.
-  - `coverage` – `go test -coverprofile` + Coverage-Gate gegen `COVERAGE_THRESHOLD`; Bootstrap-Verhalten und Scope sind in [`LH-FA-BUILD-008`](#lh-fa-build-008--coverage-bootstrap) und [`LH-FA-BUILD-009`](#lh-fa-build-009--repository-layout) definiert.
-  - `build` – statisch gelinktes Binary (`CGO_ENABLED=0`, `-ldflags="-s -w"`).
-  - `runtime` – minimales Endimage ([`LH-FA-BUILD-002`](#lh-fa-build-002--runtime-stage-pflichten)).
-- Jeder Stage ist ein eigenständiges Build-Ziel und wird per `docker build --target <stage>` einzeln baubar.
+- BuildKit-Direktive in der ersten Zeile des Dockerfiles.
+- Pflicht-Stages: `deps`, `compile`, `test`, `lint`, `coverage`, `build` und `runtime`; die Coverage-Stage erzwingt den Coverage-Schwellwert, die Runtime-Stage ist das minimale Endimage ([`LH-FA-BUILD-002`](#lh-fa-build-002--runtime-stage-pflichten)).
+- Jede Stage ist ein eigenständiges Build-Ziel und per `docker build --target <stage>` einzeln baubar.
 
 ---
 
@@ -1351,15 +1344,11 @@ Priorität: MVP
 
 Der `runtime`-Stage des u-boot-Dockerfiles muss folgende Eigenschaften erfüllen:
 
-- Base-Image: `gcr.io/distroless/static-debian12:nonroot` (oder gleichwertig minimal und ohne Shell).
-- Non-root-Benutzer (Distroless-`nonroot`-User, `USER 65532:65532`).
-- `ENTRYPOINT` zeigt auf das im `build`-Stage erzeugte Binary; der konkrete Pfad (Empfehlung: `/usr/local/bin/u-boot`) ist im Dockerfile dokumentiert.
-- OCI Image Labels gesetzt:
-  - `org.opencontainers.image.source`
-  - `org.opencontainers.image.description`
-  - `org.opencontainers.image.licenses`
-  - `org.opencontainers.image.title`
-- Keine Build-Toolchain im Endimage; alle Build-Artefakte werden aus dem `build`-Stage per `COPY --from=build` übernommen.
+- Minimales Base-Image ohne Shell.
+- Ausführung als Non-root-Benutzer.
+- `ENTRYPOINT` zeigt auf das im `build`-Stage erzeugte Binary.
+- OCI Image Labels für Quelle, Beschreibung, Lizenz und Titel sind gesetzt.
+- Keine Build-Toolchain im Endimage; alle Build-Artefakte stammen aus dem `build`-Stage.
 
 ---
 
@@ -1367,11 +1356,7 @@ Der `runtime`-Stage des u-boot-Dockerfiles muss folgende Eigenschaften erfüllen
 
 Priorität: MVP
 
-Das u-boot-Dockerfile muss versions- und schwellwertbezogene Build-Args bereitstellen:
-
-- `ARG GO_VERSION` – mit Default-Pin (z. B. `1.26.3`); Hebung ist Routine ohne separaten Spec-Eintrag.
-- `ARG GOLANGCI_LINT_VERSION` – mit Default-Pin; gleiche Pin-Politik.
-- `ARG COVERAGE_THRESHOLD` – mit Default `0` (bootstrap) und Override-Pfad `make coverage-gate THRESHOLD=…`.
+Das u-boot-Dockerfile muss versions- und schwellwertbezogene Build-Args bereitstellen: die Go-Version, die golangci-lint-Version und den Coverage-Schwellwert, jeweils mit Default. Die Hebung der Pins ist Routine ohne separaten Spec-Eintrag; der Coverage-Schwellwert lässt sich per `make coverage-gate THRESHOLD=…` überschreiben.
 
 Overrides erfolgen über `docker build --build-arg <NAME>=<value>` bzw. die korrespondierende Makefile-Variable.
 
@@ -1383,12 +1368,7 @@ Priorität: MVP
 
 Das u-boot-Repo muss eine `.dockerignore` im Repo-Root bereitstellen.
 
-Mindestens auszuschließen:
-
-- `.git`, `.gitignore`, `.github`
-- IDE-Verzeichnisse: `.idea`, `.vscode`
-- Agent-Verzeichnisse: `.claude`, `.codex`, `.agents`
-- lokale Build-Artefakte und Caches (z. B. `dist/`, `coverage*`, `*.log`)
+Mindestens auszuschließen sind Versionsverwaltung, IDE- und Agent-Verzeichnisse sowie lokale Build-Artefakte und Caches.
 
 Die `.dockerignore` selbst gehört nicht ins Image und ist daher auszuschließen, sofern sie nicht von einem Stage-Build benötigt wird.
 
@@ -1400,27 +1380,7 @@ Priorität: MVP
 
 Das u-boot-Repo muss ein `Makefile` im Repo-Root bereitstellen.
 
-Pflicht-Eigenschaften:
-
-- `.DEFAULT_GOAL := help`
-- `.PHONY` für alle Targets gesetzt
-- `help`-Target mit Übersicht über alle verfügbaren Targets
-- Variablen mit `?=`-Defaults für Overridability (`IMAGE`, `GO_VERSION`, `GOLANGCI_LINT_VERSION`, `THRESHOLD`)
-
-MVP-Pflicht-Targets:
-
-| Target          | Zweck                                                           |
-| --------------- | --------------------------------------------------------------- |
-| `help`          | Übersicht aller Targets                                         |
-| `deps`          | `docker build --target deps`                                    |
-| `compile`       | `docker build --target compile`                                 |
-| `lint`          | `docker build --target lint`                                    |
-| `test`          | `docker build --target test`                                    |
-| `coverage`      | Alias auf `coverage-gate`                                       |
-| `coverage-gate` | `docker build --target coverage --build-arg COVERAGE_THRESHOLD` |
-| `build`         | `docker build --target runtime`                                 |
-| `run`           | `docker run --rm <image> --help` (Smoketest); Dependency: `build` |
-| `clean`         | lokale Artefakte und gebaute Images entfernen                   |
+Pflicht-Eigenschaften: `help` als Default-Ziel, alle Targets als `.PHONY`, überschreibbare Variablen mit `?=`-Defaults. Pflicht-Targets decken Hilfe, Abhängigkeitsauflösung, Compile, Lint, Test, Coverage-Gate, Runtime-Image-Build, Smoke-Test und Aufräumen ab.
 
 ---
 
@@ -1474,34 +1434,6 @@ Das u-boot-Repo muss folgendem Go-Layout folgen:
 - Unit-Tests stehen als `*_test.go` neben dem produktiven Code im selben Paket.
 - Coverage-Messung ([`LH-FA-BUILD-001`](#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo), [`LH-FA-BUILD-008`](#lh-fa-build-008--coverage-bootstrap)) bezieht sich auf `./internal/...`; `./cmd/...` ist bewusst ausgeschlossen, weil dort nur dünne Wireup-Logik liegt.
 
-Mindestlayout:
-
-```text
-.
-├── cmd/
-│   └── uboot/
-│       └── main.go              # Entry point der CLI (Wiring-Schicht)
-├── internal/                    # nicht-exportierbare Implementierung
-│   ├── hexagon/                 # innere Schichten (LH-FA-ARCH-002)
-│   │   ├── domain/
-│   │   ├── application/
-│   │   └── port/{driving,driven}/
-│   └── adapter/                 # äußere Schichten (LH-FA-ARCH-002)
-│       ├── driving/
-│       └── driven/
-├── spec/                        # Lastenheft, weitere Spezifikationen
-│   ├── lastenheft.md
-│   └── <weitere-spezifikation>.md
-├── docs/                        # Doku-Struktur (LH-FA-PROJDOCS-001)
-├── go.mod
-├── go.sum
-├── Dockerfile
-├── Makefile
-├── .dockerignore
-├── .gitignore
-├── LICENSE
-└── README.md
-```
 
 ---
 
@@ -1517,20 +1449,7 @@ Vorlage: die Referenzprojekte `k-deskflight` und `grid-gym` (Basis-Pattern: arch
 
 Priorität: MVP
 
-Das u-boot-Repo muss folgende `docs/`-Unterstruktur bereitstellen:
-
-```text
-docs/
-├── archive/                  # abgelöste oder ersetzte Inhalte
-├── plan/
-│   ├── adr/                  # Architecture Decision Records
-│   └── planning/
-│       ├── open/             # Backlog
-│       ├── next/             # priorisiert für nächsten Schritt
-│       ├── in-progress/      # aktiv bearbeitet
-│       └── done/             # abgeschlossen
-└── user/                     # User-facing Dokumentation
-```
+Das u-boot-Repo muss eine `docs/`-Unterstruktur bereitstellen: `docs/` enthält die Unterverzeichnisse `archive/`, `plan/adr/`, `plan/planning/` (mit `open/`, `next/`, `in-progress/`, `done/`) und `user/`; weitere Unterverzeichnisse sind zulässig.
 
 Jedes Unterverzeichnis muss mindestens eine `README.md` mit kurzer Zweckbeschreibung enthalten, damit Git die Struktur trackt und Newcomer den Verzeichnisstandard ohne externe Erklärung erfassen können. `.gitkeep` ist als Ersatz unzureichend, weil er den Zweck nicht kommuniziert.
 
@@ -1544,23 +1463,10 @@ Priorität: MVP
 
 Architecture Decision Records in `docs/plan/adr/` folgen dem vendorten MADR-/Nygard-Template (`.harness/baseline/<tag>/templates/docs/plan/adr/NNNN-titel.template.md`, adoptiert mit Regelwerk-Stand v3.5.1):
 
-- Dateiname beginnt mit vierstelliger Nummer, beginnend bei `0001` und monoton steigend: `0001-<slug>.md`, `0002-<slug>.md`; Slug in Kebab-Case (z. B. `0001-implementierungssprache-go.md`).
-- Dokumenttitel als `#`-Überschrift: `# ADR <Nr>: <Titel>`.
-- Direkt darunter die Kopf-Felder als **fette Inline-Felder** (nicht als `##`-Überschriften):
-  - `**Status:**` – einer aus `Proposed`, `Accepted`, `Deprecated`, `Superseded by <NNNN>-<slug>`.
-  - `**Datum:**` – Entscheidungsdatum im Format `YYYY-MM-DD`.
-  - `**Autor:**` – verantwortliche Rolle oder Person.
-  - `**Bezug:**` – betroffene `LH-*`- und ggf. Vorgänger-ADR-IDs als Markdown-Links (optional, wenn zutreffend).
-  - `**Schärft:**` – welche Spec-Stelle (`architecture.md §N`) diese ADR verbindlich macht, als Aufwärts-Deklaration der Änderungskopplung (wer die ADR ändert, zieht von hier die Spec-Stellen nach); `—`, wenn Prozess-ADR ohne Spec-Bezug.
-- Danach die Abschnitte, jeweils als `##`-Überschrift, in dieser Reihenfolge:
-  1. `## Kontext` – Ausgangslage, auslösende Anforderung, tragende Annahmen.
-  2. `## Entscheidung` – die Wahl, eindeutig.
-  3. `## Verglichene Alternativen` – Optionen mit Pro/Contra (auch „nichts tun").
-  4. `## Konsequenzen` – kurz- und langfristige Folgen, positiv und negativ, inkl. Folgepflichten.
-  5. `## Fitness Function` – die maschinell prüfbare Regel, falls die Entscheidung sich in einer Code-Eigenschaft niederschlägt (sonst entfällt der Abschnitt).
-  6. `## Re-Evaluierungs-Trigger` – wann die Entscheidung erneut zu prüfen ist.
-  7. `## Geschichte` – Tabelle Datum/Ereignis/Verweis (`Proposed`, `Accepted`, …).
-- ADR-Nummern werden nie wiederverwendet; abgelöste ADRs bleiben mit Status `Superseded by <NNNN>-<slug>` erhalten und verweisen auf den Nachfolger über den vollen Dateinamen-Stamm (ohne `.md`), als klickbaren Link.
+- Dateiname mit vierstelliger, nie wiederverwendeter Nummer und Slug; Titel `# ADR <Nr>: <Titel>`.
+- Kopf-Felder als fette Inline-Felder: Status, Datum, Autor, Bezug und Schärft (welche Spec-Stelle die ADR verbindlich macht).
+- Abschnitte in fester Reihenfolge: Kontext, Entscheidung, Verglichene Alternativen, Konsequenzen, Fitness Function, Re-Evaluierungs-Trigger, Geschichte.
+- Abgelöste ADRs bleiben mit dem Status „Superseded by“ und einem Link auf den Nachfolger erhalten.
 
 **Grandfathering (Bestand).** Die zum Zeitpunkt der Format-Umstellung (Regelwerk-v3.5.1-Adoption) bereits `Accepted` ADRs (`0001`–`0010`, `0013`) bleiben in der vorherigen leanen Form (`## Status`/`## Datum` als Überschriften; Abschnitte Kontext/Entscheidung/Konsequenzen) und sind als `Accepted` **unveränderlich**; sie werden **nicht** migriert. Das MADR-Format gilt für alle **neu** angelegten ADRs sowie für noch mutable `Proposed`-ADRs (`0011`, `0012`) beim nächsten inhaltlichen Anfassen.
 
@@ -1699,20 +1605,7 @@ Pflichten:
 
 Priorität: MVP
 
-Das u-boot-Repo muss folgende Schichten unter `internal/` bereitstellen:
-
-```text
-internal/
-├── hexagon/
-│   ├── domain/         # reine Datentypen + invariantes Verhalten, keine I/O
-│   ├── application/    # Use-Cases; ruft ausschließlich Ports auf
-│   └── port/
-│       ├── driving/    # Interfaces, die von außen (CLI/HTTP) konsumiert werden
-│       └── driven/     # Interfaces, die das Application nach außen ruft
-└── adapter/
-    ├── driving/        # konkrete Driver (z. B. cli/ mit Cobra-Commands)
-    └── driven/         # konkrete Adapter (z. B. docker/, fs/, yaml/)
-```
+Das u-boot-Repo muss Schichten unter `internal/` bereitstellen: Unter `internal/` liegen die Schichten `hexagon` (mit `domain`, `application` und `port/driving`, `port/driven`) und `adapter` (mit `driving` und `driven`).
 
 Die Wiring-Schicht (`cmd/uboot/`) ist die einzige Stelle, an der `application` und `adapter` zusammen importiert werden dürfen.
 
@@ -1722,22 +1615,12 @@ Die Wiring-Schicht (`cmd/uboot/`) ist die einzige Stelle, an der `application` u
 
 Priorität: MVP
 
-Die verbindliche Import-Regel-Tabelle lautet:
-
-| Schicht | darf importieren | darf nicht importieren |
-| --- | --- | --- |
-| `hexagon/domain` | Go-Standard-Library | alle anderen `internal/`-Pakete, I/O-Libraries |
-| `hexagon/application` | `hexagon/domain`, `hexagon/port/driving`, `hexagon/port/driven` | `adapter/*`, externe I/O-Libraries |
-| `hexagon/port/driving` | `hexagon/domain` | `hexagon/application`, `hexagon/port/driven`, `adapter/*` |
-| `hexagon/port/driven` | `hexagon/domain` | `hexagon/application`, `hexagon/port/driving`, `adapter/*` |
-| `adapter/driving` | `hexagon/domain`, `hexagon/port/driving`, externe Libraries | `hexagon/application`, `adapter/driven` |
-| `adapter/driven` | `hexagon/domain`, `hexagon/port/driven`, externe Libraries | `hexagon/application`, `adapter/driving` |
-| `cmd/uboot` | `internal/...`, Standardbibliothek, externe Libraries | keine Einschränkung; Wiring-Schicht |
+Die Import-Regeln der Schichten sind verbindlich. Kernaussagen: `domain` importiert nur die Go-Standardbibliothek; `application` kennt keine konkreten Adapter; die Port-Pakete `driving` und `driven` kennen einander nicht; Adapter importieren nicht `application` und nicht den jeweils anderen Adapter-Typ; nur `cmd/uboot` verbindet `application` und Adapter.
 
 Pflichten:
 
 - Die Regeln werden im `lint`-Stage ([`LH-FA-BUILD-001`](#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) per `golangci-lint` mit `depguard` durchgesetzt; Verstöße sind PR-blockierend.
-- Die `depguard`-Konfiguration in `.golangci.yml` ist deckungsgleich mit der Regel-Tabelle aus dieser Anforderung zu halten; Drift wird im Review zurückgewiesen.
+- Die `depguard`-Konfiguration in `.golangci.yml` ist deckungsgleich mit den Import-Regeln dieser Anforderung zu halten; Drift wird im Review zurückgewiesen.
 - `//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `Why:`-Kommentar dokumentiert.
 - `depguard`-Regeln gelten production-only; `*_test.go`-Dateien sind ausgenommen, damit Tests Fakes und Test-Libraries (`testify`, …) frei nutzen können.
 - Solange einzelne Schichten noch keine produktiven Pakete enthalten, dürfen `depguard`-Regelblöcke aktiv sein und nichts treffen — die Schicht-Regeln greifen automatisch, sobald das erste produktive Paket angelegt wird.
@@ -2081,31 +1964,9 @@ Priorität: MVP
 
 Automatisch verwaltete Bereiche in Dateien sollen markiert werden.
 
-Markierungsformat je Dateityp:
+Markierungsformat:
 
-- YAML, `.env`, `Dockerfile`, Shell-Skripte (`#`-Kommentare):
-
-  ```yaml
-  # BEGIN U-BOOT MANAGED BLOCK: postgres
-  # ...
-  # END U-BOOT MANAGED BLOCK: postgres
-  ```
-
-- Markdown (`README.md`, `CHANGELOG.md`) als HTML-Kommentar:
-
-  ```markdown
-  <!-- BEGIN U-BOOT MANAGED BLOCK: postgres -->
-  ...
-  <!-- END U-BOOT MANAGED BLOCK: postgres -->
-  ```
-
-- JSONC (z. B. `.devcontainer/devcontainer.json`):
-
-  ```jsonc
-  // BEGIN U-BOOT MANAGED BLOCK: postgres
-  // ...
-  // END U-BOOT MANAGED BLOCK: postgres
-  ```
+Der Anfang eines verwalteten Bereichs trägt die Markierung `BEGIN U-BOOT MANAGED BLOCK: <name>`, das Ende `END U-BOOT MANAGED BLOCK: <name>`; die Markierung steht als Kommentar der jeweiligen Dateiart (`#` bei YAML, `.env`, `Dockerfile` und Shell-Skripten, HTML-Kommentar bei Markdown, `//` bei JSONC).
 
 - Strikte JSON-Dateien ohne Kommentar-Support werden nicht inline markiert; die gesamte Datei gilt als verwaltet, und der verwaltete Status ist in `u-boot.yaml` zu hinterlegen.
 
