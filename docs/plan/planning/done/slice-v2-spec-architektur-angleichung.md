@@ -1,6 +1,6 @@
 # Slice V2: Architektur-Sicht an die Vorlage angleichen
 
-> **Status:** **geplant** (`next/`) — unabhängig vom Lastenheft-Schnitt, kann parallel laufen.
+> **Status:** **Done** (2026-10-02, **Delivery-Hash: `5661be3`**).
 
 **Welle:** `welle-spec-technik-stratum` (siehe [`roadmap.md`](../in-progress/roadmap.md)).
 **Bezug:** [`LH-FA-ARCH-001`](../../../../spec/lastenheft.md#lh-fa-arch-001--hexagonales-pattern)..[`-003`](../../../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement) (Scope).
@@ -24,10 +24,10 @@ Komponenten- und Schnittstellenkennungen `ARC-<NNN>`, Sprach- und Meilensteinfre
 
 ## Definition of Done
 
-- [ ] Vorlagen-Abgleich dokumentiert (Abschnitte, Kopf, Kennungen); Abweichungen entweder behoben oder als `MR-<NNN>` begründet.
-- [ ] `ARC-<NNN>` für Komponenten und Schnittstellen vergeben; `make docs-check` grün.
-- [ ] `make gates` grün (inklusive `make docs-check`), Exit-Code separat geprüft.
-- [ ] Review durch eine andere Rolle als die Umsetzung (`harness/review.md`), Report unter `docs/reviews/`.
+- [x] Vorlagen-Abgleich dokumentiert (Abschnitte, Kopf, Kennungen); Abweichungen entweder behoben oder als `MR-<NNN>` begründet.
+- [x] `ARC-<NNN>` für Komponenten und Schnittstellen vergeben; `make docs-check` grün.
+- [x] `make gates` grün (inklusive `make docs-check`), Exit-Code separat geprüft.
+- [x] Review durch eine andere Rolle als die Umsetzung (`harness/review.md`), Report unter `docs/reviews/`.
 
 ## Tranchen
 
@@ -43,5 +43,6 @@ Komponenten- und Schnittstellenkennungen `ARC-<NNN>`, Sprach- und Meilensteinfre
 
 ## Closure
 
-Offen. Beim Schließen: Verifikation-Evidence nach `harness/verification.md` (DoD, Sensoren, nicht ausgeführte
-Sensoren, Carveouts), Steering-Loop-Lerneintrag, Delivery-Hash im Kopf.
+- **Geliefert (`5661be3`):** `spec/architecture.md` entspricht der Vorlage im Inhalt: Rolle und erweiterte Hard Rule (keine ADR-Bezüge, keine Historie), `ARC-001`..`ARC-007` für die Komponenten, `ARC-008`..`ARC-012` für die externen Berührungspunkte, Komponentenverweis je Schicht-Abschnitt, Verweis der Import-Regel-Tabelle aufwärts auf die Spezifikation ([`SPEC-013`](../../../../spec/spezifikation.md#spec-013--import-regel-tabelle-der-schichten)). Abweichung (erweiterte Abschnittsfolge, Anker-Stabilität) ist als `MR-010` begründet.
+- **Sensoren:** `make gates` grün; `depguard` und Lint-Konfiguration unberührt. Nicht ausgeführt: `make ci`, `make test-docker`.
+- **Review:** in das unabhängige Review der Welle eingeschlossen (keine Befunde zur Sicht außer Wortlaut „Folge-Slice“, behoben).
