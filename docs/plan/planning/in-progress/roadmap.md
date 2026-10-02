@@ -13,6 +13,8 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
+**Lastenheft-Verschlankung (`welle-lastenheft-verschlankung`)** — Ziel: Ausführliche Regelblöcke der Anforderungen als Verfeinerungen in die Spezifikation überführen; das Lastenheft nennt nur die Zusagen. Trigger: Bewertung des Projektinhabers (2026-10-02, „immer noch sehr groß“) nach [`welle-spec-technik-stratum`](#abgeschlossene-wellen). Slice: [`slice-v2-spec-lastenheft-verschlankung`](slice-v2-spec-lastenheft-verschlankung.md). Closure: Verbleib-Tabelle vollständig, `make gates` grün, Review. Aufwand: M.
+
 **Homebrew-Verifikation** — Slice: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (v0.7.0 ist released, Tap-Nachzug lief; offen: macOS-Smoke im Tap zur Formel 0.7.0 und `brew install` auf einem Mac).
 
 ## Nächste Wellen

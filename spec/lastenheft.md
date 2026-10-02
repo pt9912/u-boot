@@ -22,15 +22,11 @@ In diesem Dokument haben Modalverben folgende Bedeutung (in Anlehnung an RFC 211
 - **soll** – Empfehlung; Abweichungen müssen begründet werden.
 - **kann** / **darf** – optionale Eigenschaft oder ausdrückliche Erlaubnis.
 
----
-
 ### LH-LESE-002 – Sprache
 
 Die Spezifikation ist auf Deutsch verfasst.
 
 CLI-Ausgaben, Fehlermeldungen und erzeugte Dateien (Kommentare, Beispielwerte, README-Vorlagen) sind auf Englisch.
-
----
 
 ### LH-LESE-003 – Dokumentenordnung
 
@@ -45,8 +41,6 @@ Dieses Lastenheft ist der Vertrag: Es legt fest, **was** das Produkt leistet. Te
 `u-boot` soll ein CLI-Tool werden, das vollständige Entwicklungsumgebungen für Docker-basierte Softwareprojekte erzeugt, erweitert, prüft und startet.
 
 Das Tool soll insbesondere Projektstrukturen, Docker-Konfigurationen, Devcontainer-Setups, optionale Infrastrukturservices und wiederkehrende Entwicklungsartefakte automatisch bereitstellen.
-
----
 
 ### LH-ZB-002 – Produktvision
 
@@ -65,8 +59,6 @@ u-boot add postgres
 u-boot up
 ```
 
----
-
 ### LH-ZB-003 – Repo-Beschreibung
 
 ```text
@@ -81,8 +73,6 @@ u-boot: A developer environment bootloader for Docker-based projects.
 
 `u-boot` soll für Softwareprojekte eingesetzt werden, die lokal oder in Devcontainern entwickelt werden und Docker beziehungsweise Docker Compose als zentrale Laufzeitumgebung verwenden.
 
----
-
 ### LH-PE-002 – Zielgruppen
 
 Das Produkt richtet sich an:
@@ -92,8 +82,6 @@ Das Produkt richtet sich an:
 - technische Projektleiter
 - Entwicklerteams mit Docker-basierten Entwicklungsumgebungen
 - Teams, die reproduzierbare lokale Setups benötigen
-
----
 
 ### LH-PE-003 – Betriebsumgebung
 
@@ -131,8 +119,6 @@ u-boot add postgres
 u-boot generate changelog
 ```
 
----
-
 ### LH-PÜ-002 – Hauptmodule
 
 Das Produkt soll mindestens folgende fachliche Module besitzen:
@@ -166,8 +152,6 @@ Beispiel:
 u-boot --help
 ```
 
----
-
 ### LH-FA-CLI-002 – Hilfeausgabe
 
 Priorität: MVP
@@ -181,8 +165,6 @@ Die Hilfeausgabe muss mindestens enthalten:
 - Optionen je Befehl
 - Beispiele
 
----
-
 ### LH-FA-CLI-003 – Versionsausgabe
 
 Priorität: MVP
@@ -195,8 +177,6 @@ Beispiel:
 u-boot --version
 ```
 
----
-
 ### LH-FA-CLI-004 – Fehlerausgabe
 
 Priorität: MVP
@@ -208,8 +188,6 @@ Fehlermeldungen müssen enthalten:
 - Ursache
 - betroffener Befehl oder betroffene Datei
 - empfohlene Korrekturmaßnahme
-
----
 
 ### LH-FA-CLI-005 – Verbosity und Logging
 
@@ -226,8 +204,6 @@ Mindestens müssen folgende Stufen unterstützt werden:
 
 Werden mehrere Verbosity-Optionen gleichzeitig angegeben (z. B. `--quiet --verbose`), gewinnt die zuletzt auf der Kommandozeile angegebene Option. Eine Validierungsabweisung wegen Mehrfachangabe erfolgt nicht.
 
----
-
 ### LH-FA-CLI-005A – Interaktivität und Automatisierung
 
 Priorität: MVP
@@ -241,36 +217,12 @@ Es muss mindestens folgende Optionen bieten:
 - `--yes` und `--no-interactive` sind exklusiv. Bei gleichzeitiger Nutzung ist ein CLI-Fehler mit Exit-Code `2` ([`LH-FA-CLI-006`](#lh-fa-cli-006--exit-codes)) zu erzeugen.
 - Für deterministisches Verhalten in Skripten und CI sind beide Modi einzeln nutzbar.
 - Die Optionen sind auf Befehle anzuwenden, die Bestätigungsentscheidungen benötigen (insb. `u-boot init`, `u-boot add`, `u-boot remove`, `u-boot config set`, `u-boot down --volumes`).
-- Für `u-boot init` ist zusätzlich das Flag `--assume-existing` definiert (nicht global, nur für diesen Befehl):
-  - Ohne `--assume-existing` wird eine implizite Erkennung als bestehendes Projekt im nicht-interaktiven Modus nicht automatisch akzeptiert.
-  - Mit `--assume-existing` wird die implizite Erkennung als bestehendes Projekt in nicht-interaktiven Läufen akzeptiert.
-  - `--yes` ist für diesen Sonderfall **nicht** ausreichend; die implizite Erkennung bleibt abgelehnt, wenn keine `--assume-existing` gesetzt ist.
-  - Ohne `--assume-existing` und bei nicht-interaktivem Lauf ist die implizite Erkennung zwingend ablehnend und erzeugt einen fachlichen Fehler.
-  - Der Fehlercode für diese Abweisung ist `10`.
-- Bei aktivierter Nicht-Interaktivität darf keine neue Rückfrage erzeugt werden:
-  - mit `--no-interactive` bricht der Aufruf bei jeder offenen Bestätigungsfrage mit Exit-Code `2` ab,
-  - mit `--yes` wird die vorgesehene Standardentscheidung deterministisch ausgeführt.
-- Für bereits deterministische Ausführungspfade (keine relevante Rückfrage) ist das Verhalten in beiden Modi unverändert.
-
-Bei `u-boot init` gilt zusätzlich die feste Auswertungsreihenfolge im nicht-interaktiven Modus:
-
-- ohne `--assume-existing`: keine implizite Annahme einer bestehenden Projekterkennung, deterministisch abbrechen (Exit-Code `10` bei bestehendem Projekt),
-- mit `--assume-existing`: implizite Annahme als bestehendes Projekt (soweit kompatibel mit den übrigen Validierungen).
+- Für `u-boot init` gilt zusätzlich `--assume-existing` (nur für diesen Befehl): Ohne dieses Flag wird eine implizite Erkennung als bestehendes Projekt im nicht-interaktiven Modus abgelehnt (fachlicher Fehler, Exit-Code `10`); `--yes` genügt dafür nicht.
+- Bei aktivierter Nicht-Interaktivität entsteht keine neue Rückfrage: `--no-interactive` bricht bei jeder offenen Bestätigungsfrage mit Exit-Code `2` ab, `--yes` führt die vorgesehene Standardentscheidung deterministisch aus.
 
 Bei destruktiven Operationen (insb. `u-boot down --volumes` und `u-boot remove --purge`) darf eine Löschung nur über den expliziten Freigabepfad (`--yes` oder aktiv bestätigten interaktiven Pfad) erfolgen. Im nicht-interaktiven Modus ohne `--yes` ist der Befehl mit Exit-Code `10` abzubrechen.
 
-Deterministische Auswertungslogik für bestätigungsrelevante Modi:
-
-- `--yes` und `--no-interactive` sind exklusiv.
-- `--no-interactive` erlaubt keinerlei Rückfragen. Alle Entscheidungswege müssen deterministisch sein oder mit [`LH-FA-CLI-006`](#lh-fa-cli-006--exit-codes)-Code `2` abbrechen, wenn eine notwendige Bestätigung fehlt.
-- `--yes` erlaubt deterministische Standardpfade ohne Nutzerinteraktion.
-- `--force` und/oder `--backup` sind in nicht-interaktiven Läufen explizit zulässig, weil beide Modi deterministisch arbeiten.
-- `--no-interactive` + `--force` erlaubt das Überschreiben ohne Rückfrage; dabei ist immer eine vollständige Zusammenfassung der betroffenen Pfade auszugeben.
-- `--force` darf keine zusätzlichen Rückfragen erzeugen; die Sicherheitslogik beschränkt sich auf die Validierung der Eingabedaten.
-- `--backup` ist optional. Wenn `--backup` gesetzt ist, dürfen Dateischutz-Szenarien mit automatischer Sicherung deterministisch abgearbeitet werden.
-- Bei fehlender Möglichkeit zur sicheren automatischen Abarbeitung (z. B. fehlender verwalteter Block ohne `--backup` bei vollständig kontrolliertem Überschreiben) muss der Befehl mit Fehlercode `10` abbrechen.
-
----
+`--force` und `--backup` sind in nicht-interaktiven Läufen zulässig und arbeiten deterministisch; `--force` erzeugt keine zusätzlichen Rückfragen und gibt immer eine Zusammenfassung der betroffenen Pfade aus. Ist eine sichere automatische Abarbeitung nicht möglich (z. B. fehlender verwalteter Block ohne `--backup`), bricht der Befehl mit Exit-Code `10` ab.
 
 ### LH-FA-CLI-006 – Exit Codes
 
@@ -303,8 +255,6 @@ Nicht-fachliche Fehler dürfen standardmäßig mit `1` codiert werden, wenn eine
 `13` bis `15` dürfen zusätzlich verwendet werden, wenn deren Bedeutung für den aufrufenden Kontext explizit dokumentiert ist.
 `16` bis `19` sind in der aktuellen Spezifikation nicht zu verwenden.
 
----
-
 ### LH-FA-CLI-007 – Dry Run
 
 Priorität: V1
@@ -332,8 +282,6 @@ Weitere Felder sind erlaubt.
 Konvention für `diagnostics[*].code`: LH-Kennung der verursachenden Anforderung (z. B. [`LH-FA-DEV-003`](#lh-fa-dev-003--devcontainer-features), [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run)). Tool-interne Codes ohne LH-Bezug dürfen nur dann verwendet werden, wenn ihre Bedeutung in der Dokumentation festgehalten ist.
 
 Das Feld `status` ist an den höchsten in `diagnostics` enthaltenen `level` gekoppelt: enthält `diagnostics` mindestens einen `error`-Eintrag, ist `status == "error"`; enthält es mindestens einen `warn`-Eintrag (und keinen `error`), ist `status == "warn"`; andernfalls `status == "ok"`. Diese Regel gilt für alle `--json`-Ausgaben ([`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](#lh-fa-cli-008--diff-ausgabe), [`LH-NFA-USE-004`](#lh-nfa-use-004--maschinenlesbare-ausgabe)).
-
----
 
 ### LH-FA-CLI-008 – Diff-Ausgabe
 
@@ -373,8 +321,6 @@ u-boot init
 u-boot init --assume-existing
 ```
 
----
-
 ### LH-FA-INIT-002 – Projektname
 
 Priorität: MVP
@@ -395,8 +341,6 @@ u-boot init my-service
 ```
 
 Ist kein gültiger Name ableitbar oder angegeben, muss der Befehl mit einer klaren Fehlermeldung abbrechen und auf die explizite Übergabe eines Namens (`u-boot init <name>`) verweisen.
-
----
 
 ### LH-FA-INIT-003 – Projektstruktur erzeugen
 
@@ -426,8 +370,6 @@ Bei aktivierter Devcontainer-Unterstützung (siehe [`LH-FA-DEV-001`](#lh-fa-dev-
 .devcontainer/Dockerfile
 ```
 
----
-
 ### LH-FA-INIT-004 – Bestehendes Projekt erkennen
 
 Priorität: MVP
@@ -454,8 +396,6 @@ In diesem Fall muss `u-boot init` im interaktiven Modus explizit nachfragen, ob 
 Das genaue Verhalten im nicht-interaktiven Modus (mit/ohne `--assume-existing`, Exit-Code-Vergabe) ist verbindlich in [`LH-FA-CLI-005A`](#lh-fa-cli-005a--interaktivität-und-automatisierung) definiert; diese Anforderung wiederholt es nicht.
 Bestehende Dateien dürfen auch bei impliziter oder expliziter Annahme als bestehendes Projekt nicht kommentarlos überschrieben werden; es gilt der Überschreibschutz aus [`LH-FA-INIT-005`](#lh-fa-init-005--überschreibschutz).
 
----
-
 ### LH-FA-INIT-005 – Überschreibschutz
 
 Priorität: MVP
@@ -472,19 +412,9 @@ Zusätzliche Strategien über Option:
 - Für bestehende Verzeichnisse (z. B. `docs/`, `scripts/`, `docker/`, `.devcontainer/`) wird der komplette Verzeichnisbaum rekursiv als `<name>.bak*` gesichert und innerhalb derselben Operation ersetzt; bei Fehlern während des Ersetzens muss ein Rollback auf den ursprünglichen Zustand durchgeführt werden (POSIX-Atomarität für rekursive Bäume wird nicht garantiert).
 - `--force` – bestehende Dateien ohne Rückfrage überschreiben; vor dem Schreiben muss eine Zusammenfassung der betroffenen Pfade ausgegeben werden
 
-Zusätzliche Schutzregeln für strukturierte Konfigurationsdateien (`compose.yaml`, `.env.example`, `README.md`, `CHANGELOG.md`, `.devcontainer/devcontainer.json`):
-
-- bestehende, nicht verwaltete Inhalte bleiben in `--force`-Ausführung erhalten.
-- wird ein `U-BOOT MANAGED BLOCK` erkannt, darf bei `--force` nur dieser Block verändert werden. Das Markierungsformat pro Dateityp ist in [`LH-SA-FILE-002`](#lh-sa-file-002--markierte-verwaltete-bereiche) definiert.
-- für `.devcontainer/devcontainer.json` gilt der JSONC-Markerstil (`// BEGIN U-BOOT MANAGED BLOCK: <name>` / `// END U-BOOT MANAGED BLOCK: <name>`); für strikte JSON-Dateien ohne Kommentar-Support wird die gesamte Datei als verwaltet behandelt und in `u-boot.yaml` referenziert.
-- fehlt ein verwalteter Block in einer vorhandenen Datei:
-  - ist `--backup` gesetzt, wird vor jedem vollständigen Überschreiben der komplette Dateiinhalt gesichert und danach ersetzt.
-  - ist `--backup` nicht gesetzt, wird der Vorgang mit einem fachlichen Fehler (Code `10`) abgebrochen; es erfolgt ein klarer Hinweis auf die nötige Option `--backup`.
-- bei vollständiger Überschreibung ohne verwalteten Block gilt ein vollständiges Backup vor dem Schreiben als Pflicht.
+Für strukturierte Konfigurationsdateien bleiben nicht verwaltete Inhalte bei `--force` erhalten; nur ein erkannter `U-BOOT MANAGED BLOCK` wird verändert ([`LH-SA-FILE-002`](#lh-sa-file-002--markierte-verwaltete-bereiche)). Fehlt der verwaltete Block, wird mit `--backup` vor dem vollständigen Überschreiben der gesamte Inhalt gesichert, ohne `--backup` mit Exit-Code `10` abgebrochen.
 
 Für `--force`, `--backup` und nicht-interaktive Modi gilt zusätzlich die in [`LH-FA-CLI-005A`](#lh-fa-cli-005a--interaktivität-und-automatisierung) definierte Entscheidungslogik für Bestätigungen.
-
----
 
 ### LH-FA-INIT-006 – Projektnamen-Validierung
 
@@ -503,8 +433,6 @@ Regeln:
 - maximale Länge: 63 Zeichen
 
 Ungültige Namen müssen mit einer klaren Fehlermeldung abgelehnt werden.
-
----
 
 ### LH-FA-INIT-007 – Git-Repository-Initialisierung
 
@@ -542,15 +470,11 @@ Mindestdateien:
 .devcontainer/Dockerfile
 ```
 
----
-
 ### LH-FA-DEV-002 – VS-Code-Kompatibilität
 
 Priorität: MVP
 
 Die erzeugte Devcontainer-Konfiguration muss mit VS Code Dev Containers kompatibel sein.
-
----
 
 ### LH-FA-DEV-003 – Devcontainer-Features
 
@@ -572,18 +496,10 @@ Für optionale externe Feature-Quellen gilt:
 
 - Keine fremden Skripte dürfen ohne Zustimmung ausgeführt werden ([`LH-NFA-SEC-004`](#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)).
 - Standardmäßig sind nur lokal hinterlegte oder ausdrücklich freigegebene Features erlaubt.
-- Die Freigabe erfolgt als klarer, protokollierter Schritt im interaktiven Modus oder im Skriptmodus nur über die explizite Option:
-  - `--allow-external-feature-sources <quelle>[,<quelle>...]` (`interaktiv`: Quelle bei Nachfrage bestätigen, `nicht-interaktiv`: alle Quellen als Flag-Argumente übergeben).
-  - Die Option ist nur für diese Befehle gültig:
-    - `u-boot init --devcontainer`
-    - `u-boot generate devcontainer`
-    - `u-boot config set devcontainer.featureSources.allow`
-- Ein einzelnes `--allow-external-feature-sources` kann mehrere explizit erlaubte Quellen über Komma trennen.
+- Die Freigabe erfolgt als klarer, protokollierter Schritt: interaktiv durch Bestätigung, nicht-interaktiv nur über `--allow-external-feature-sources <quelle>[,<quelle>...]` (gültig nur für `u-boot init --devcontainer`, `u-boot generate devcontainer` und `u-boot config set devcontainer.featureSources.allow`).
 - Die zugelassenen Quellen werden als explizit freigegebene Liste in der Projektkonfiguration gespeichert.
 - Ohne explizit erlaubte Quelle führt der Versuch, externe Quellen zu nutzen, zu einem fachlichen Fehler (`code [LH-FA-DEV-003](#lh-fa-dev-003--devcontainer-features)`, Exit-Code `10`).
 - `--yes` allein gilt nicht als Zustimmung für externe Quellen.
-
----
 
 ### LH-FA-DEV-004 – Benutzerrechte
 
@@ -597,8 +513,6 @@ Die UID dieses Benutzers muss an den Host anpassbar sein (z. B. `501` unter macO
 - Zulässig sind Ganzzahlen von `1` bis `65535`. `0` (root), negative oder nicht numerische Werte führen zu einem fachlichen Validierungsfehler (Exit-Code `10`).
 - Ohne `devcontainer.user.uid` bleibt das erzeugte Ergebnis unverändert (Default `1000`).
 
----
-
 ### LH-FA-DEV-005 – Ports
 
 Priorität: MVP
@@ -607,8 +521,6 @@ Das Produkt muss Ports aus aktivierten Services in der Devcontainer-Konfiguratio
 
 Konkret müssen die Ports der Services in `devcontainer.json` als `forwardPorts` eingetragen werden.
 Ist keine aktive Port-Exposition in der aktuellen Projektkonfiguration vorhanden, darf `forwardPorts` fehlen.
-
----
 
 ### LH-FA-DEV-006 – Sandbox-Profil
 
@@ -628,7 +540,7 @@ oder über die Projektkonfiguration `devcontainer.profile: sandbox` (Werte: `def
 Das erzeugte Ergebnis im Sandbox-Profil muss:
 
 - einen nicht-root Benutzer verwenden ([`LH-FA-DEV-004`](#lh-fa-dev-004--benutzerrechte));
-- das Host-Arbeitsverzeichnis nicht per Bind-Mount einbinden; der Workspace liegt in einem benannten Volume, das Repository wird im Container geklont (Quelle: `devcontainer.sandbox.repository` (URL, optional), sonst die URL des Remotes `origin` des Projekt-Repositories; so kann ein anderes Repository als das Projekt-Repository geklont werden, aus dem im Container gepullt und gepusht wird; enthält die URL Zugangsdaten oder unzulässige Zeichen, ein fachlicher Fehler, Exit-Code `10`; ohne Quelle wird kein Clone-Schritt erzeugt und die Befehlsausgabe weist mit einer Warnung darauf hin, `u-boot generate devcontainer` ergänzt den Schritt, sobald eine Quelle existiert);
+- das Host-Arbeitsverzeichnis nicht per Bind-Mount einbinden: Der Workspace liegt in einem benannten Volume, das Repository wird im Container geklont (Quelle: `devcontainer.sandbox.repository`, sonst `origin`; URLs mit Zugangsdaten oder unzulässigen Zeichen sind ein fachlicher Fehler, Exit-Code `10`; ohne Quelle entfällt der Clone-Schritt mit Warnung);
 - keinen Container-Runtime-Socket des Hosts einbinden;
 - kein `--privileged` und keine zusätzlichen Capabilities setzen, sofern nicht durch [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) oder [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion) ausdrücklich verlangt;
 - keine Host-Dateien mit Geheimnissen (z. B. `~/.ssh`, `~/.aws`, Credential-Stores) einbinden;
@@ -637,8 +549,6 @@ Das erzeugte Ergebnis im Sandbox-Profil muss:
 Nicht-Ziele: `u-boot` startet keinen Agenten und setzt keinen Berechtigungsmodus des Agenten.
 
 Für Devcontainer-Features oder externe Skripte, die das Profil einbindet, gelten [`LH-FA-DEV-003`](#lh-fa-dev-003--devcontainer-features) und [`LH-NFA-SEC-004`](#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) unverändert; das Profil gibt keine externe Quelle implizit frei.
-
----
 
 ### LH-FA-DEV-007 – Container-Runtime im Sandbox-Devcontainer
 
@@ -650,17 +560,7 @@ Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll optio
 - Bei `podman`: rootless Podman, ein `docker`-Kompatibilitäts-Alias, Zugriff auf `/dev/fuse`, subuid-/subgid-Bereiche für den Container-Benutzer und ein Volume für den Storage.
 - Das Ergebnis ist engine-neutral und startet unter Docker (inkl. Colima) und Podman.
 
-**Degradation und Strenge** (gilt für dieses und das folgende Egress-Feature): `devcontainer.sandbox.onUnavailable` (`warn` | `fail`, Default `warn`).
-
-| Zustand | `warn` (Default) | `fail` |
-| ------- | ---------------- | ------ |
-| `/dev/fuse` nicht verfügbar | Fallback auf `vfs`-Storage, Warnung mit Hinweis | Umgebungsproblem, Exit-Code `11` |
-| Nested User-Namespaces durch Seccomp/AppArmor blockiert und `nestedRuntime: podman` | Umgebungsproblem, Exit-Code `11` | Umgebungsproblem, Exit-Code `11` |
-| Egress-Capability (`NET_ADMIN`) nicht gewährbar ([`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion)) | Egress-Restriktion entfällt, Warnung mit Hinweis auf Restriktion auf Netz-/DNS-Ebene | Umgebungsproblem, Exit-Code `11` |
-
-Ausdrücklich angeforderte Runtime (`nestedRuntime: podman`) wird nie stillschweigend durch etwas anderes ersetzt. Jeder Fallback wird in der Befehlsausgabe und in `u-boot doctor` ausgewiesen. Die Prüfung erfolgt durch `u-boot doctor` (soweit vom Host aus ermittelbar) und beim Containerstart durch das erzeugte Startscript, das im Fehlerfall nicht-null endet. Ungültige Werte der Schlüssel führen zu einem fachlichen Validierungsfehler (Exit-Code `10`).
-
----
+**Degradation:** `devcontainer.sandbox.onUnavailable` (`warn` | `fail`, Default `warn`) steuert, ob fehlende Fähigkeiten (kein `/dev/fuse`, blockierte User-Namespaces, nicht gewährbare Egress-Capability) zu einer Warnung mit Fallback bzw. Wegfall der Restriktion oder zu einem Umgebungsproblem (Exit-Code `11`) führen. Eine ausdrücklich angeforderte Runtime wird nie stillschweigend ersetzt; jeder Fallback wird in der Befehlsausgabe und in `u-boot doctor` ausgewiesen. Ungültige Werte der Schlüssel führen zu einem fachlichen Validierungsfehler (Exit-Code `10`).
 
 ### LH-FA-DEV-008 – Egress-Restriktion
 
@@ -673,8 +573,6 @@ Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll eine 
 - Die Allowlist ist unabhängig von `devcontainer.featureSources.allow` ([`LH-FA-DEV-003`](#lh-fa-dev-003--devcontainer-features)): jene steuert erlaubte Build-Quellen, diese die Laufzeit-Ziele.
 - Die Restriktion ist ein Guardrail und keine Sandbox-Grenze; Prozesse mit der nötigen Capability können sie aufheben. Die Dokumentation muss das ausdrücklich sagen.
 - Ist die nötige Capability nicht gewährbar, greift die Degradationstabelle aus [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer); die Capability wird beim Containerstart geprüft (Warnung und Wegfall der Restriktion, bei `onUnavailable: fail` Exit-Code `11`). `u-boot doctor` prüft die Konfiguration (Schlüssel ohne Sandbox-Profil: `warn`); die Capability selbst ist vom Host aus nicht zuverlässig bestimmbar.
-
----
 
 ### LH-FA-DEV-009 – Git-Zugangsdaten im Sandbox-Devcontainer
 
@@ -696,8 +594,6 @@ Priorität: MVP
 
 Das Produkt muss eine `compose.yaml` erzeugen können.
 
----
-
 ### LH-FA-DOC-002 – Dockerfile erzeugen
 
 Priorität: V1
@@ -711,15 +607,11 @@ Zusätzlich kann optional ein separates Anwendungs-Dockerfile erzeugt werden:
 - Standardpfad: `docker/Dockerfile`
 - Konfigurierbar über Template-/Add-on-Konfiguration
 
----
-
 ### LH-FA-DOC-003 – Netzwerk
 
 Priorität: MVP
 
 Das Produkt muss ein gemeinsames Docker-Netzwerk für Services definieren können.
-
----
 
 ### LH-FA-DOC-004 – Volumes
 
@@ -732,8 +624,6 @@ Beispiele:
 - PostgreSQL-Daten (MVP)
 - Keycloak-Daten (V1)
 - OpenTelemetry-Konfiguration (V1)
-
----
 
 ### LH-FA-DOC-005 – Compose-Validierung
 
@@ -758,8 +648,6 @@ u-boot add <service>
 Der Befehl ist nur in einem initialisierten `u-boot`-Projekt nutzbar (`u-boot.yaml` vorhanden).  
 Ist keine gültige Projektkonfiguration vorhanden, ist mit klarer Fehlermeldung und Hinweis auf `u-boot init` abzubrechen.
 
----
-
 ### LH-FA-ADD-002 – PostgreSQL hinzufügen
 
 Priorität: MVP
@@ -779,8 +667,6 @@ Mindestumfang:
 - `.env.example`-Einträge
 - Port-Konfiguration
 - Healthcheck
-
----
 
 ### LH-FA-ADD-003 – Keycloak hinzufügen
 
@@ -804,8 +690,6 @@ Mindestumfang:
 - optionale PostgreSQL-Anbindung bei konfigurierter persistenter externer Datenbank
 - Healthcheck, soweit technisch sinnvoll
 
----
-
 ### LH-FA-ADD-004 – OpenTelemetry hinzufügen
 
 Priorität: V1
@@ -826,23 +710,13 @@ Mindestumfang:
 - Standardports für OTLP
 - Beispielkonfiguration für Logs, Metrics und Traces
 
----
-
 ### LH-FA-ADD-005 – Mehrfaches Hinzufügen verhindern
 
 Priorität: MVP
 
 Das Produkt muss erkennen, ob ein Service bereits vorhanden ist.
 
-- Ein bereits vorhandener Service darf nicht doppelt eingefügt werden.
-- Ein Service gilt als registriert, sobald `services.<name>` in `u-boot.yaml` existiert.
-- Er gilt als aktiv vorhanden, wenn `services.<name>.enabled` explizit auf `true` steht **und** ein verwalteter Eintrag in `compose.yaml` existiert.
-- `services.<name>.enabled` ist immer explizit zu setzen. Ein registrierter Service ohne expliziten `enabled`-Schlüssel gilt als deaktiviert (`false`) und führt bei `u-boot doctor` zu einer `warn`-Diagnose, die das explizite Setzen empfiehlt.
-- Liegt `services.<name>.enabled: false` vor, gilt der Service als deaktiviert (weiterhin registriert), und `u-boot add <service>` darf ihn idempotent reaktivieren.
-- Besteht `services.<name>` nicht in `u-boot.yaml`, aber ein verwalteter Block in `compose.yaml`, darf die Inkonsistenz nicht stillschweigend ignoriert werden. Der Befehl muss mit klarer Diagnose abbrechen und auf manuelle Bereinigung oder Re-Konfiguration verweisen.
-- Besteht `services.<name>` in `u-boot.yaml` mit `enabled: true`, aber der verwaltete Compose-Eintrag fehlt, muss das Verhalten deterministisch sein: `u-boot add <service>` erzeugt den fehlenden Compose-Block wieder.
-
----
+Ein bereits vorhandener Service wird nicht doppelt eingefügt; `add` ist idempotent und reaktiviert einen deaktivierten Service. Ein Service gilt als registriert, sobald `services.<name>` in `u-boot.yaml` existiert, und als aktiv mit `enabled: true` und verwaltetem Eintrag in `compose.yaml`. `services.<name>.enabled` ist immer explizit zu setzen (fehlt es, gilt der Service als deaktiviert und `u-boot doctor` warnt). Inkonsistenzen werden nie stillschweigend ignoriert: Ein Block ohne Registrierung bricht den Befehl mit klarer Diagnose ab, eine Registrierung ohne Block erzeugt ihn deterministisch neu.
 
 ### LH-FA-ADD-006 – Add-on-Abhängigkeiten
 
@@ -855,18 +729,7 @@ Beispiele:
 - Keycloak kann optional PostgreSQL benötigen, wenn `services.keycloak.persistence: external-postgres` in `u-boot.yaml` gesetzt ist.
 - OpenTelemetry kann Beispielkonfigurationen für bestehende App-Services erzeugen.
 
-Verhalten bei erkannter abhängiger Konfiguration:
-
-- Ist `services.keycloak.persistence: external-postgres` gesetzt und PostgreSQL nicht vorhanden, darf der Aufruf nicht stillschweigend fortfahren.
-- Ist die optionale Abhängigkeit nicht aktiv, darf Keycloak ohne PostgreSQL angelegt werden.
-
-- Im interaktiven Modus (Standardmodus) muss das Produkt nachfragen, ob das fehlende Add-on automatisch hinzugefügt werden soll.
-- Im nicht-interaktiven Modus (`--no-interactive`) ohne `--with-deps` muss das Produkt mit Exit-Code `10` abbrechen und auf die fehlende Abhängigkeit hinweisen.
-- Über die Option `--with-deps` muss das Produkt fehlende Abhängigkeiten automatisch hinzufügen. `--with-deps` ist mit `--no-interactive` kombinierbar; in dem Fall werden Abhängigkeiten deterministisch und ohne Rückfrage installiert.
-- Mit `--yes` (ohne `--with-deps`) wird die Standardentscheidung "Abhängigkeit hinzufügen" deterministisch ausgeführt, ohne dass eine Rückfrage gestellt wird.
-- Mit `--yes` oder `--no-interactive` (jeweils exklusiv) muss das Verhalten in Skript-/CI-Umgebungen deterministisch und nicht-blockierend sein.
-
----
+Bei erkannter Abhängigkeit (z. B. `services.keycloak.persistence: external-postgres` ohne PostgreSQL) fährt der Aufruf nie stillschweigend fort: Interaktiv wird nachgefragt, mit `--no-interactive` ohne `--with-deps` bricht er mit Exit-Code `10` ab, mit `--with-deps` bzw. `--yes` werden Abhängigkeiten deterministisch und ohne Rückfrage hinzugefügt.
 
 ### LH-FA-ADD-007 – Service entfernen
 
@@ -922,15 +785,11 @@ Beispiel:
 u-boot up
 ```
 
----
-
 ### LH-FA-UP-002 – Docker Compose verwenden
 
 Priorität: MVP
 
 Der Befehl `u-boot up` muss intern Docker Compose verwenden können.
-
----
 
 ### LH-FA-UP-003 – Startstatus anzeigen
 
@@ -944,8 +803,6 @@ Mindestangaben:
 - Containerstatus
 - Port
 - Healthcheck-Status, falls vorhanden
-
----
 
 ### LH-FA-UP-004 – Umgebung stoppen
 
@@ -964,8 +821,6 @@ Das Produkt muss zwischen einem regulären Stopp (Container stoppen) und einem v
 ```bash
 u-boot down --volumes
 ```
-
----
 
 ### LH-FA-UP-005 – Logs anzeigen
 
@@ -1001,8 +856,6 @@ Beispiel:
 u-boot doctor
 ```
 
----
-
 ### LH-FA-DIAG-002 – Lokale Voraussetzungen prüfen
 
 Priorität: MVP
@@ -1016,20 +869,8 @@ Die Diagnosefunktion muss mindestens prüfen:
 - Schreibrechte im Projektverzeichnis
 - gültige `compose.yaml`, falls vorhanden
 - gültige `u-boot.yaml`, falls vorhanden
-- falls Devcontainer-Dateien vorhanden sind:
-  - Ist `u-boot.yaml` vorhanden und `devcontainer.enabled == true`, müssen diese Prüfungen mit `error` bewertet werden:
-    - syntaktische Gültigkeit von `.devcontainer/devcontainer.json`
-    - Mindestkompatibilität mit VS Code Dev Containers (`name` gesetzt; mindestens `image` oder `build` vorhanden)
-    - `forwardPorts`-Konsistenz zu aktivierten Services, falls Portangaben existieren
-  - Ist `u-boot.yaml` vorhanden und `devcontainer.enabled == false`, sind die obigen Prüfungen optional (`warn`, keine harte Validierungspflicht).
-  - Ist keine `u-boot.yaml` vorhanden, werden die obigen Prüfungen als ergänzende Qualitätsdiagnosen mit `warn` ausgegeben.
+- falls Devcontainer-Dateien vorhanden sind: syntaktische Gültigkeit von `.devcontainer/devcontainer.json`, Mindestkompatibilität mit VS Code Dev Containers und `forwardPorts`-Konsistenz zu aktivierten Services (Schweregrad `error` bei `devcontainer.enabled == true`, sonst `warn`)
 - falls `.devcontainer/Dockerfile` vorhanden ist: Lesbarkeit und erkennbare Build-Basisstruktur (`FROM` vorhanden)
-- `forwardPorts`-Konsistenzregeln:
-  - Für jeden aktivierten Service mit expliziter `ports`-Zuordnung (TCP) ist der Host-Port in `forwardPorts` enthalten.
-  - bei mehreren TCP-Ports werden eindeutige Portzahlen eingetragen (Duplikate dedupliziert).
-  - UDP- oder nicht eindeutig auflösbare Portangaben dürfen in `forwardPorts` fehlen; dafür ist ein `warn`-Diagnoseeintrag zulässig.
-
----
 
 ### LH-FA-DIAG-003 – Fehlerklassifikation
 
@@ -1054,8 +895,6 @@ Die Diagnosefunktion muss den Exit Code an die höchste festgestellte Stufe bind
 Optional:
 
 - Mit `--strict` muss mindestens ein `warn` zu einem Exit Code ungleich `0` führen.
-
----
 
 ### LH-FA-DIAG-004 – Reparaturhinweise
 
@@ -1093,8 +932,6 @@ Erlaubte Werte für `<artifact>`:
 
 Bei unbekanntem Artefakt muss der Befehl mit Exit Code `2` abbrechen und die erlaubten Werte explizit zurückgeben.
 
----
-
 ### LH-FA-GEN-002 – Changelog erzeugen
 
 Priorität: MVP
@@ -1106,8 +943,6 @@ Beispiel:
 ```bash
 u-boot generate changelog
 ```
-
----
 
 ### LH-FA-GEN-003 – README erzeugen
 
@@ -1121,8 +956,6 @@ Beispiel:
 u-boot generate readme
 ```
 
----
-
 ### LH-FA-GEN-004 – Beispiel-ENV erzeugen
 
 Priorität: MVP
@@ -1134,8 +967,6 @@ Beispiel:
 ```bash
 u-boot generate env-example
 ```
-
----
 
 ### LH-FA-GEN-005 – Idempotenz
 
@@ -1168,8 +999,6 @@ u-boot init --template sveltekit
 u-boot init --template micronaut-sveltekit
 ```
 
----
-
 ### LH-FA-TPL-002 – Template-Metadaten
 
 Priorität: V1
@@ -1185,8 +1014,6 @@ Mindestangaben:
 - erzeugte Dateien
 - benötigte Tools
 
----
-
 ### LH-FA-TPL-003 – Eigene Templates
 
 Priorität: Later
@@ -1198,8 +1025,6 @@ Beispiel:
 ```bash
 u-boot init --template ./my-template
 ```
-
----
 
 ### LH-FA-TPL-004 – Templates auflisten
 
@@ -1246,8 +1071,6 @@ u-boot config set project.name my-service
 
 Die Migrationsfunktion ist in [LH-FA-CONF-006](#lh-fa-conf-006--konfiguration-migrieren) separat beschrieben.
 
----
-
 ### LH-FA-CONF-002 – Inhalt der Konfiguration
 
 Priorität: MVP
@@ -1267,23 +1090,17 @@ Hinweise:
 - `services.<name>.enabled` ist immer explizit zu setzen; siehe [`LH-FA-ADD-005`](#lh-fa-add-005--mehrfaches-hinzufügen-verhindern) für die Default-Konvention.
 - `enabled: false` bedeutet, dass der Service deaktiviert ist und bei erneutem `u-boot add <service>` wieder aktiviert werden kann.
 
----
-
 ### LH-FA-CONF-003 – Konfiguration lesen
 
 Priorität: MVP
 
 Das Produkt muss die Konfiguration lesen und bei Befehlen berücksichtigen können.
 
----
-
 ### LH-FA-CONF-004 – Konfiguration aktualisieren
 
 Priorität: MVP
 
 Das Produkt muss die Konfiguration aktualisieren können, wenn Add-ons hinzugefügt oder entfernt werden.
-
----
 
 ### LH-FA-CONF-005 – Konfiguration anzeigen und ändern
 
@@ -1300,8 +1117,6 @@ u-boot config set project.name foo  # Wert setzen
 ```
 
 Beim Setzen muss die geänderte Konfiguration auf Schema-Konformität geprüft werden.
-
----
 
 ### LH-FA-CONF-006 – Konfiguration migrieren
 
@@ -1328,8 +1143,6 @@ Bezug:
 - Implementierungssprache: [`LH-OPEN-001`](#lh-open-001--implementierungssprache-entschieden) (Go).
 - Vorlage: das Referenzprojekt `k-deskflight` (Docker-only-Workflow, Multi-Stage Dockerfile, Distroless-Runtime).
 
----
-
 ### LH-FA-BUILD-001 – Multi-Stage Dockerfile (u-boot-Repo)
 
 Priorität: MVP
@@ -1341,8 +1154,6 @@ Mindestumfang:
 - BuildKit-Direktive in der ersten Zeile des Dockerfiles.
 - Pflicht-Stages: `deps`, `compile`, `test`, `lint`, `coverage`, `build` und `runtime`; die Coverage-Stage erzwingt den Coverage-Schwellwert, die Runtime-Stage ist das minimale Endimage ([`LH-FA-BUILD-002`](#lh-fa-build-002--runtime-stage-pflichten)).
 - Jede Stage ist ein eigenständiges Build-Ziel und per `docker build --target <stage>` einzeln baubar.
-
----
 
 ### LH-FA-BUILD-002 – Runtime-Stage Pflichten
 
@@ -1356,8 +1167,6 @@ Der `runtime`-Stage des u-boot-Dockerfiles muss folgende Eigenschaften erfüllen
 - OCI Image Labels für Quelle, Beschreibung, Lizenz und Titel sind gesetzt.
 - Keine Build-Toolchain im Endimage; alle Build-Artefakte stammen aus dem `build`-Stage.
 
----
-
 ### LH-FA-BUILD-003 – Build-Args und Pin-Politik
 
 Priorität: MVP
@@ -1365,8 +1174,6 @@ Priorität: MVP
 Das u-boot-Dockerfile muss versions- und schwellwertbezogene Build-Args bereitstellen: die Go-Version, die golangci-lint-Version und den Coverage-Schwellwert, jeweils mit Default. Die Hebung der Pins ist Routine ohne separaten Spec-Eintrag; der Coverage-Schwellwert lässt sich per `make coverage-gate THRESHOLD=…` überschreiben.
 
 Overrides erfolgen über `docker build --build-arg <NAME>=<value>` bzw. die korrespondierende Makefile-Variable.
-
----
 
 ### LH-FA-BUILD-004 – `.dockerignore` Pflicht
 
@@ -1378,8 +1185,6 @@ Mindestens auszuschließen sind Versionsverwaltung, IDE- und Agent-Verzeichnisse
 
 Die `.dockerignore` selbst gehört nicht ins Image und ist daher auszuschließen, sofern sie nicht von einem Stage-Build benötigt wird.
 
----
-
 ### LH-FA-BUILD-005 – Makefile mit Standard-Targets
 
 Priorität: MVP
@@ -1387,8 +1192,6 @@ Priorität: MVP
 Das u-boot-Repo muss ein `Makefile` im Repo-Root bereitstellen.
 
 Pflicht-Eigenschaften: `help` als Default-Ziel, alle Targets als `.PHONY`, überschreibbare Variablen mit `?=`-Defaults. Pflicht-Targets decken Hilfe, Abhängigkeitsauflösung, Compile, Lint, Test, Coverage-Gate, Runtime-Image-Build, Smoke-Test und Aufräumen ab.
-
----
 
 ### LH-FA-BUILD-006 – Aggregator-Targets
 
@@ -1402,8 +1205,6 @@ Das Makefile soll Aggregator-Targets bereitstellen:
 
 Aggregator-Targets müssen bei Fehler eines untergeordneten Targets mit Non-Zero-Exit abbrechen und die Fehlerursache klar benennen.
 
----
-
 ### LH-FA-BUILD-007 – Docker-only-Workflow
 
 Priorität: MVP
@@ -1414,8 +1215,6 @@ Der Standard-Build-/Test-Workflow muss ohne hostseitige Sprach-Toolchain auskomm
 - Voraussetzung am Host: Docker Engine und `make`. `make` ist ein bewusster Carveout zu [`LH-NFA-PORT-002`](#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten) (weit verbreitet, einzige zusätzliche Host-Abhängigkeit neben Docker). Eine Go-Toolchain am Host darf für Standard-Targets nicht vorausgesetzt werden.
 - Carveouts (z. B. ein Bash-Skript, das nicht containerisiert wird) sind im `Makefile`-Header explizit zu dokumentieren.
 
----
-
 ### LH-FA-BUILD-008 – Coverage-Bootstrap
 
 Priorität: MVP
@@ -1425,8 +1224,6 @@ Der `coverage`-Stage muss in der Bootstrap-Phase (noch keine produktiven Pakete 
 - Default-Schwellwert `0` (`ARG COVERAGE_THRESHOLD=0`).
 - Sobald `./internal/...` produktive Pakete enthält, wird die Schwelle in einem Folge-Schritt angehoben; der Override-Pfad `make coverage-gate THRESHOLD=…` muss funktionieren.
 - Leere Coverage darf in der Bootstrap-Phase nicht zu einem falschen Grün führen, das echte Test-Failures maskiert; der `go test`-Exit-Code wird über `set -o pipefail` o. ä. an die Gate-Logik durchgereicht.
-
----
 
 ### LH-FA-BUILD-009 – Repository-Layout
 
@@ -1440,7 +1237,6 @@ Das u-boot-Repo muss folgendem Go-Layout folgen:
 - Unit-Tests stehen als `*_test.go` neben dem produktiven Code im selben Paket.
 - Coverage-Messung ([`LH-FA-BUILD-001`](#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo), [`LH-FA-BUILD-008`](#lh-fa-build-008--coverage-bootstrap)) bezieht sich auf `./internal/...`; `./cmd/...` ist bewusst ausgeschlossen, weil dort nur dünne Wireup-Logik liegt.
 
-
 ---
 
 ## 4.12 Doku-Struktur des u-boot-Projekts
@@ -1448,8 +1244,6 @@ Das u-boot-Repo muss folgendem Go-Layout folgen:
 Diese Sektion definiert die Verzeichnisstruktur unter `docs/` für die **u-boot-Codebase selbst**. Sie ist nicht zu verwechseln mit der `docs/`-Erzeugung in Zielprojekten (siehe [`LH-FA-INIT-003`](#lh-fa-init-003--projektstruktur-erzeugen), [`LH-SA-FILE-001`](#lh-sa-file-001--erzeugte-dateien)), die nur das Top-Level-Verzeichnis anlegt.
 
 Vorlage: die Referenzprojekte `k-deskflight` und `grid-gym` (Basis-Pattern: archive + plan/adr + plan/planning-Lifecycle + user).
-
----
 
 ### LH-FA-PROJDOCS-001 – Mindeststruktur
 
@@ -1461,8 +1255,6 @@ Jedes Unterverzeichnis muss mindestens eine `README.md` mit kurzer Zweckbeschrei
 
 Abgrenzung zu Zielprojekten: Für per `u-boot init` erzeugte Zielprojekte ist nur `docs/` als Top-Level Pflicht ([`LH-FA-INIT-003`](#lh-fa-init-003--projektstruktur-erzeugen)). Ob diese Unterstruktur auch in Zielprojekten erzeugt wird, ist eine spätere Entscheidung (z. B. via Template oder Flag) und gehört nicht zum MVP-Umfang.
 
----
-
 ### LH-FA-PROJDOCS-002 – ADR-Format
 
 Priorität: MVP
@@ -1473,12 +1265,6 @@ Architecture Decision Records in `docs/plan/adr/` folgen dem vendorten MADR-/Nyg
 - Kopf-Felder als fette Inline-Felder: Status, Datum, Autor, Bezug und Schärft (welche Spec-Stelle die ADR verbindlich macht).
 - Abschnitte in fester Reihenfolge: Kontext, Entscheidung, Verglichene Alternativen, Konsequenzen, Fitness Function, Re-Evaluierungs-Trigger, Geschichte.
 - Abgelöste ADRs bleiben mit dem Status „Superseded by“ und einem Link auf den Nachfolger erhalten.
-
-**Grandfathering (Bestand).** Die zum Zeitpunkt der Format-Umstellung (Regelwerk-v3.5.1-Adoption) bereits `Accepted` ADRs (`0001`–`0010`, `0013`) bleiben in der vorherigen leanen Form (`## Status`/`## Datum` als Überschriften; Abschnitte Kontext/Entscheidung/Konsequenzen) und sind als `Accepted` **unveränderlich**; sie werden **nicht** migriert. Das MADR-Format gilt für alle **neu** angelegten ADRs sowie für noch mutable `Proposed`-ADRs (`0011`, `0012`) beim nächsten inhaltlichen Anfassen.
-
-**Reconciliation.** Titel-Form (`# ADR <Nr>: <Titel>`) und Superseded-Referenz (`<NNNN>-<slug>`, klickbar) folgen der bestehenden u-boot-Konvention, nicht dem Template-Wortlaut (`# ADR-NNNN:` bzw. `Superseded by ADR-NNNN`); die MADR-**Substanz** (Inline-Kopf-Felder, `Schärft`-Aufwärtskopplung, Alternativen/Fitness-Function/Re-Eval/Geschichte) wird übernommen. Die Umstellung ist ein Change Request am Vertrags-Stratum (Trigger: v3.5.1-Adoption).
-
----
 
 ### LH-FA-PROJDOCS-003 – Planning-Lifecycle
 
@@ -1495,8 +1281,6 @@ Planning-Artefakte (Slices, Tranchen, Tickets) durchlaufen die Verzeichnisse `op
   Die Wahl zwischen Slice- und Tranchen-Format ist im `README.md` von `docs/plan/planning/` dokumentiert; ein Artefakt verwendet genau eines der beiden Formate.
 - Ausnahme für übergreifende Master-Dokumente: eine `roadmap.md` darf direkt unter `docs/plan/planning/in-progress/` liegen und folgt keinem der beiden Formate. Sie fasst Slices und Tranchen lebendig zusammen und wird laufend gepflegt.
 
----
-
 ### LH-FA-PROJDOCS-005 – Carveout-Disziplin
 
 Priorität: MVP
@@ -1510,18 +1294,9 @@ Als temporärer Carveout zählt insbesondere:
 - Prospektive Doku-Phrasen ("scharf zu schalten mit M3", "wird mit V1 ergänzt", "Logging-Port kommt später", "Folgepflicht im GitHub-UI").
 - Bewusst weggelassene Pflichten in einem CI-/Build-Setup, deren Aufhebung in einem ADR-Folgepunkt vermerkt ist (z. B. Image-Publish, Image-Scan, Branch-Protection).
 
-Pflichten:
-
-- Der Slice-Plan folgt der Dateiname-Konvention aus [`LH-FA-PROJDOCS-003`](#lh-fa-projdocs-003--planning-lifecycle) (`slice-<phase>-<slug>.md`).
-- Der Plan benennt mindestens: Auslöser (was wurde wo bewusst weggelassen), Aufhebungsbedingung (was muss passieren), Akzeptanzkriterien.
-- Wo der Carveout in einer Spec-Anforderung dokumentiert ist (z. B. [`LH-FA-BUILD-008`](#lh-fa-build-008--coverage-bootstrap) für Coverage-Bootstrap), bleibt die Spec-Anforderung die normative Quelle; der Plan-Verweis lebt im Carveout-Inventar und in der Roadmap.
-- **Doppelte Verankerung:** jeder temporäre Carveout ist sowohl im Carveout-Inventar als auch in der Roadmap als Slice-Zeile sichtbar. Carveouts ohne Roadmap-Eintrag oder Slice-Pläne ohne Carveout-Inventar-Verweis sind Verstoß gegen diese Anforderung.
-- Auch Spec-Open-Punkte (`LH-OPEN-*`) und ADR-Folgepunkte gelten als temporäre Carveouts und brauchen einen Slice-Plan — kein „bleibt offen bis MVP-Closure" als Inventar-Eintrag.
-- Ein Master-Inventar in `carveouts.md` listet alle aktuellen Carveouts mit Status (`temporär` + Plan-Verweis vs. `permanent` + Begründung). Diese Datei lebt analog zur `roadmap.md` dauerhaft in `in-progress/`.
+Pflichten: Der Slice-Plan nennt Auslöser, Aufhebungsbedingung und Akzeptanzkriterien; jeder temporäre Carveout ist im Master-Inventar (`carveouts.md`) und in der Roadmap als Slice-Zeile sichtbar (doppelte Verankerung); auch Spec-Open-Punkte und ADR-Folgepunkte gelten als temporäre Carveouts.
 
 Permanente Carveouts (z. B. `errcheck.exclude-functions` für CLI-Writes, `testpackage`/`gochecknoglobals` für die Wiring-Schicht `cmd/uboot/`) sind ebenfalls im Master-Inventar zu listen, brauchen aber keinen Aufhebungsplan; sie tragen den Status `permanent` mit kurzer Begründung.
-
----
 
 ### LH-FA-PROJDOCS-006 – Dokumentationsreferenzmodell
 
@@ -1539,41 +1314,8 @@ begründet oder schärft. Alle Referenzen Richtung Slice, Carveout oder
 Roadmap/Welle sind Planungs-, Traceability- oder Buchführungskontext und
 erzeugen keine Spezifikation.
 
-Pflichten:
-
-- Das Lastenheft darf nur `LH-*`-Anforderungen intern normativ
-  querverweisen. ADRs, Slices, Carveouts und Roadmap/Wellen dürfen im
-  Lastenheft keine Quelle der Normativität sein.
-- Technische oder Sicht-Specs dürfen auf das Lastenheft und innerhalb
-  ihres Stratums referenzieren, aber keine ADRs, Slices, Carveouts oder
-  Roadmap/Wellen als bindenden Text verlinken.
-- ADRs dürfen `LH-*`, betroffene Spec-Stellen und aktive ADRs normativ
-  referenzieren. Superseded ADRs dürfen nur innerhalb der ADR-Lineage als
-  Historie referenziert werden.
-- Slices dürfen `LH-*` und aktive ADRs normativ referenzieren.
-  Slice-zu-Slice-, Slice-zu-Carveout- und Slice-zu-Roadmap-Referenzen
-  sind ausschließlich Kontext.
-- Carveouts dürfen `LH-*` und aktive ADRs normativ referenzieren.
-  Carveout-zu-Slice- und Slice-zu-Carveout-Referenzen sind nur Owner-,
-  Trigger- oder Closure-Buchführung.
-- Roadmap/Wellen orchestrieren Arbeit, tragen aber keine normative
-  Ableitungskraft.
-- `docs-check` muss Markdown-Link-Pfade, Heading-Anker, verlinkte
-  `ADR-*`-Kennungen und die Referenzmatrix für Lastenheft-, ADR-,
-  Spec-, Slice-, Carveout- und Roadmap/Wellen-Artefakte in `docs/`,
-  `spec/`, `harness/` und Root-Markdown prüfen.
-- Die Kennungs-Linkpflicht wird stufenweise aktiviert: `ADR-*` gilt
-  global, `LH-*` gilt in Spec-Straten außerhalb des Lastenhefts, in
-  README-Dateien und in `docs/user/`. Eindeutig auflösbare Slice- und
-  Tranche-IDs gelten in README-Dateien und in `docs/user/`; Markdown-
-  Überschriften sind ausgenommen, damit bestehende Section-Anker stabil
-  bleiben. Konkrete `PH-*`- und `TC-*`-Kennungen in der Traceability-
-  Matrix sind bis zu getrennten Pflichtenheft-/Testfall-Artefakten
-  Traceability-Aliase und verlinken auf die zugehörige `LH-*`-
-  Anforderung derselben Matrixzeile. Konkrete `CO-*`-Kennungen sind
+Pflichten: Das Lastenheft verweist normativ nur auf `LH-*`; technische und Sicht-Specs verweisen aufwärts auf das Lastenheft, nie auf ADRs, Slices, Carveouts oder Roadmap/Wellen; ADRs und Slices dürfen aktive ADRs normativ referenzieren; Carveouts, Slices und Roadmap/Wellen tragen keine normative Ableitungskraft. `docs-check` prüft Link-Pfade, Anker, die Verlinkung der Kennungen und die Referenzmatrix.
   linkpflichtig, sobald sie eingeführt werden.
-
----
 
 ### LH-FA-PROJDOCS-004 – Archivierung
 
@@ -1592,8 +1334,6 @@ Abgelöste oder veraltete Inhalte aus `user/`, `plan/` oder anderen `docs/`-Bere
 Diese Sektion definiert das Architektur-Pattern für die **u-boot-Codebase selbst** und trägt die Pflichten, die für jede Code-Änderung gelten.
 
 Vorlage: die Referenzprojekte `k-deskflight` (Go, flach), `m-trace` (TypeScript, driving/driven-Split) und `grid-gym` (Python, driving/driven-Split). Die konkrete Variante ist durch [`LH-FA-ARCH-001`](#lh-fa-arch-001--hexagonales-pattern)..[`LH-FA-ARCH-003`](#lh-fa-arch-003--import-regeln-und-enforcement) festgelegt.
-
----
 
 ### LH-FA-ARCH-001 – Hexagonales Pattern
 
@@ -1614,8 +1354,6 @@ Priorität: MVP
 Das u-boot-Repo muss unter `internal/` die Schichten `hexagon` (mit `domain`, `application` und `port/driving`, `port/driven`) und `adapter` (mit `driving` und `driven`) bereitstellen.
 
 Die Wiring-Schicht (`cmd/uboot/`) ist die einzige Stelle, an der `application` und `adapter` zusammen importiert werden dürfen.
-
----
 
 ### LH-FA-ARCH-003 – Import-Regeln und Enforcement
 
@@ -1643,8 +1381,6 @@ Priorität: MVP
 
 Das Produkt muss ohne tiefes Vorwissen über die interne Implementierung bedienbar sein.
 
----
-
 ### LH-NFA-USE-002 – Klare Befehle
 
 Priorität: MVP
@@ -1660,15 +1396,11 @@ u-boot doctor
 u-boot up
 ```
 
----
-
 ### LH-NFA-USE-003 – Lesbare Ausgaben
 
 Priorität: MVP
 
 CLI-Ausgaben müssen klar strukturiert und gut lesbar sein.
-
----
 
 ### LH-NFA-USE-004 – Maschinenlesbare Ausgabe
 
@@ -1692,15 +1424,7 @@ Für alle `--json`-Ausgaben gilt ergänzend ein gemeinsames Minimalkontrakt-Sche
 - `diagnostics` (Liste von Objekten mit mind. `level`, `code`, `message`, optional `file`)
 - `exitCode` (vgl. [`LH-FA-CLI-006`](#lh-fa-cli-006--exit-codes))
 
-Für `--json`-Antworten gilt zusätzlich:
-
-- `diagnostics`, wenn leer, darf als `[]` ausgegeben werden.
-- `diagnostics.level` darf nur `warn` oder `error` enthalten.
-- `diagnostics.code` folgt der Konvention: LH-Kennung der verursachenden Anforderung (z. B. [`LH-FA-DEV-003`](#lh-fa-dev-003--devcontainer-features)). Tool-interne Codes ohne LH-Bezug dürfen nur dann verwendet werden, wenn ihre Bedeutung in der Dokumentation festgehalten ist (Verweis: [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run)).
-- `diagnostics.file` ist optional.
-- `status` ist an den höchsten in `diagnostics` enthaltenen `level` gekoppelt: `error` → `status == "error"`; `warn` ohne `error` → `status == "warn"`; sonst `status == "ok"`.
-- Bei `command == "template"` oder `command == "config"` ist `subcommand` verpflichtend.
-- Die Felder `status`, `command`, `diagnostics` und `exitCode` sind minimal verpflichtend und sollten mit anderen Feldern ergänzt werden.
+Für `--json`-Antworten gilt zusätzlich: `diagnostics.level` ist `warn` oder `error`, `status` folgt dem höchsten `level`, bei `template` und `config` ist `subcommand` verpflichtend, und `diagnostics.code` trägt die Kennung der verursachenden Anforderung oder einen dokumentierten tool-internen Code.
 
 Für normale (`--json` ohne `--dry-run`/`--diff`) Ausgaben ist der obige Minimalkontrakt bindend.
 Für `--dry-run`- oder `--diff`-Ausgaben mit `--json` gilt zusätzlich das vollständige Schema aus [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run) als bindender Pflichtkontrakt (inkl. `plannedFiles`, `changes`, `dryRun`, `diff`).
@@ -1717,23 +1441,17 @@ Priorität: MVP
 
 Das Produkt darf bestehende Dateien nicht stillschweigend überschreiben.
 
----
-
 ### LH-NFA-REL-002 – Wiederholbare Ausführung
 
 Priorität: MVP
 
 Wiederholte Ausführung desselben Befehls darf das Projekt nicht beschädigen.
 
----
-
 ### LH-NFA-REL-003 – Abbruch bei kritischen Fehlern
 
 Priorität: MVP
 
 Bei kritischen Fehlern muss das Produkt abbrechen und eine klare Fehlermeldung ausgeben.
-
----
 
 ### LH-NFA-REL-004 – Validierung erzeugter Dateien
 
@@ -1759,23 +1477,17 @@ Das Produkt muss modular aufgebaut sein.
 
 Insbesondere sollen Add-ons, Templates und Generatoren voneinander getrennt implementiert werden.
 
----
-
 ### LH-NFA-MAINT-002 – Erweiterbarkeit
 
 Priorität: MVP
 
 Neue Services müssen mit geringem Aufwand ergänzt werden können.
 
----
-
 ### LH-NFA-MAINT-003 – Testbarkeit
 
 Priorität: MVP
 
 Die fachlichen Funktionen müssen automatisiert testbar sein.
-
----
 
 ### LH-NFA-MAINT-004 – Dokumentierte Schnittstellen
 
@@ -1793,15 +1505,11 @@ Priorität: MVP
 
 Das Produkt muss Linux als primäre Plattform unterstützen.
 
----
-
 ### LH-NFA-PORT-002 – Keine unnötigen Systemabhängigkeiten
 
 Priorität: MVP
 
 Das Produkt soll möglichst wenige externe Systemabhängigkeiten benötigen.
-
----
 
 ### LH-NFA-PORT-003 – Containerfreundlichkeit
 
@@ -1819,23 +1527,17 @@ Priorität: MVP
 
 Das Produkt darf keine echten Secrets in erzeugte Dateien schreiben.
 
----
-
 ### LH-NFA-SEC-002 – Beispielwerte markieren
 
 Priorität: MVP
 
 Beispielwerte in `.env.example` müssen eindeutig als Beispielwerte erkennbar sein.
 
----
-
 ### LH-NFA-SEC-003 – Sichere Defaults
 
 Priorität: MVP
 
 Das Produkt soll sichere Standardwerte verwenden, soweit dies mit lokaler Entwicklung vereinbar ist.
-
----
 
 ### LH-NFA-SEC-004 – Keine verdeckte Ausführung fremder Skripte
 
@@ -1874,8 +1576,6 @@ V1:
 
 - `u-boot config get …` – unter 300 ms
 
----
-
 ### LH-NFA-PERF-002 – Startzeit abhängig von Docker
 
 Priorität: MVP
@@ -1902,8 +1602,6 @@ u-boot <command> [subcommand|args...] [options]
 
 `subcommand` ist für kommandospezifische Unterbefehle reserviert (z. B. `template`, `config`).
 Positionsargumente (z. B. `postgres`, `project.name`) stehen ebenfalls vor den Optionen.
-
----
 
 ### LH-SA-CLI-002 – Vorgesehene Befehle
 
@@ -1953,8 +1651,6 @@ Optional, sobald ein Anwendungs-Dockerfile ([`LH-FA-DOC-002`](#lh-fa-doc-002--do
 .dockerignore
 ```
 
----
-
 ### LH-SA-FILE-002 – Markierte verwaltete Bereiche
 
 Priorität: MVP
@@ -1974,8 +1670,6 @@ Markierungsformat: Der Anfang eines verwalteten Bereichs trägt die Markierung `
 Priorität: MVP
 
 Das Produkt muss Docker Compose aufrufen oder kompatible Compose-Dateien erzeugen können.
-
----
 
 ### LH-SA-DOCKER-002 – Containerstatus
 
@@ -2001,8 +1695,6 @@ Beispiele:
 - Ports
 - Version des `u-boot`-Schemas
 
----
-
 ### LH-DA-002 – Service-Metadaten
 
 Priorität: MVP
@@ -2018,8 +1710,6 @@ Beispiele:
 - Environment-Variablen
 - Healthchecks
 
----
-
 ### LH-DA-003 – Schema-Version
 
 Priorität: MVP
@@ -2031,8 +1721,6 @@ Beispiel:
 ```yaml
 schemaVersion: 1
 ```
-
----
 
 ### LH-DA-004 – Schema-Migration
 
@@ -2065,15 +1753,11 @@ Mindestumfang:
 - Add-on-Erzeugung
 - Konfigurationsparser
 
----
-
 ### LH-QA-002 – Testbare Akzeptanzkriterien
 
 Priorität: MVP
 
 Jede funktionale Anforderung soll durch mindestens einen Akzeptanztest überprüfbar sein.
-
----
 
 ### LH-QA-003 – CI-Fähigkeit (GitHub Actions)
 
@@ -2082,8 +1766,6 @@ Priorität: MVP
 Das u-boot-Repo muss eine CI-Pipeline auf GitHub Actions führen.
 
 Pflicht-Komposition: Die Pipeline läuft bei `pull_request` und `push` auf `main` in drei parallelen, PR-blockierenden Jobs: Gates (`make gates`), Security-Gates (`make govulncheck`) und Image-Scan (`make image-scan`, Trivy gegen das Runtime-Image, Severity HIGH und CRITICAL). Die PR-Blocking-Pflicht aller drei folgt aus diesem Eintrag, auch wenn die Make-Target-Definitionen unter [`LH-FA-BUILD-006`](#lh-fa-build-006--aggregator-targets) liegen. Der Runner braucht nur Docker und BuildKit, keine Host-Go-Toolchain ([`LH-FA-BUILD-007`](#lh-fa-build-007--docker-only-workflow)); Actions sind gepinnt, Token-Rechte minimal gehalten und jeder Job hat ein Zeitlimit. Die Required-Status-Check-Liste im GitHub-UI muss die tatsächlichen Job-Namen des Workflows verwenden.
-
----
 
 ### LH-QA-004 – Linting (SOLID-nahes Lint-Profil)
 
@@ -2127,8 +1809,6 @@ Erwartetes Ergebnis:
 - `u-boot doctor` meldet keinen `error`-Eintrag
 - vorhandene Dateien wurden nicht ungewollt überschrieben
 
----
-
 ### LH-AK-002 – PostgreSQL-Flow
 
 Priorität: MVP
@@ -2148,8 +1828,6 @@ Erwartetes Ergebnis:
 - Container ist gestartet und erreicht den Healthcheck-Status `healthy` innerhalb von 60 Sekunden
 - der konfigurierte Port (Standard: `5432`) ist auf `localhost` erreichbar
 
----
-
 ### LH-AK-003 – Keycloak-Flow
 
 Priorität: V1
@@ -2167,8 +1845,6 @@ Erwartetes Ergebnis:
 - Keycloak-Service ist in `compose.yaml` vorhanden
 - Admin-Zugangsdaten werden über `.env.example` mit Platzhaltern dokumentiert (z. B. `KEYCLOAK_ADMIN=CHANGEME_KEYCLOAK_ADMIN`, `KEYCLOAK_ADMIN_PASSWORD=CHANGEME_KEYCLOAK_ADMIN_PASSWORD`)
 - Web-Oberfläche ist über den konfigurierten Port (Standard: `8080`) auf `localhost` erreichbar (HTTP 200 oder 302 auf `/`)
-
----
 
 ### LH-AK-004 – OpenTelemetry-Flow
 
@@ -2190,8 +1866,6 @@ Erwartetes Ergebnis:
 - OTLP/HTTP ist auf `localhost:4318` erreichbar
 - Collector-Container erreicht innerhalb von 60 Sekunden den Status `running` oder `healthy`
 
----
-
 ### LH-AK-005 – Devcontainer-Flow
 
 Priorität: MVP
@@ -2210,8 +1884,6 @@ Erwartetes Ergebnis:
 - `devcontainer.json` enthält `forwardPorts`, sofern mindestens ein Add-on aktive Ports exportiert
 - `u-boot doctor` enthält keinen `error` zu `devcontainer`-Konfiguration oder Feature-Quellen
 
----
-
 ### LH-AK-006 – Idempotenz
 
 Priorität: MVP
@@ -2227,8 +1899,6 @@ Erwartetes Ergebnis:
 
 - PostgreSQL ist nur einmal in der Konfiguration vorhanden
 - das Tool gibt eine verständliche Meldung aus
-
----
 
 ### LH-AK-007 – Changelog-Generator
 
@@ -2261,13 +1931,9 @@ Nicht im Kernumfang enthalten:
 - Terraform-Management
 - Secret-Management für Produktion
 
----
-
 ### LH-ABG-002 – Keine IDE-Abhängigkeit
 
 `u-boot` darf VS Code Dev Containers unterstützen, soll aber nicht ausschließlich davon abhängig sein.
-
----
 
 ### LH-ABG-003 – Kein Ersatz für Docker Compose
 
@@ -2287,8 +1953,6 @@ Maßnahme:
 - `u-boot doctor` prüft Versionen
 - Die Mindestversionen sind als harte Voraussetzung im Lastenheft, in der README und in der CLI-Hilfe dokumentiert.
 
----
-
 ### LH-RISK-002 – Überschreiben manueller Änderungen
 
 Automatische Generatoren können manuelle Änderungen beschädigen.
@@ -2299,8 +1963,6 @@ Maßnahme:
 - Backups
 - Diff-Anzeige
 - `--force` nur explizit
-
----
 
 ### LH-RISK-003 – Zu großer Funktionsumfang
 
@@ -2345,8 +2007,6 @@ Der MVP muss enthalten:
 - Architektur-Pattern (hexagonal, driving/driven-Split) nach [`LH-FA-ARCH-001`](#lh-fa-arch-001--hexagonales-pattern)..[`LH-FA-ARCH-003`](#lh-fa-arch-003--import-regeln-und-enforcement), mit Import-Enforcement via `golangci-lint depguard`
 - SOLID-nahes Lint-Profil nach [`LH-QA-004`](#lh-qa-004--linting-solid-nahes-lint-profil); die Konfiguration liegt in `.golangci.yml`, die abgeleitete Quality-Doku erklärt Linter und Carveouts
 - CI-Pipeline nach [`LH-QA-003`](#lh-qa-003--ci-fähigkeit-github-actions) (GitHub Actions, drei PR-blockierende Jobs)
-
----
 
 ### LH-MVP-002 – Kann nach dem MVP folgen
 
@@ -2533,8 +2193,6 @@ Sprache: **Go**.
 
 Mindest-Toolchain: Go 1.26 oder neuer. Die Pin-Hebung im Dockerfile ist Routine ohne separaten Spec-Eintrag.
 
----
-
 ### LH-OPEN-002 – Paketierung
 
 Status: **GHCR, Binary, Homebrew und Debian/RPM entschieden**, npm
@@ -2550,8 +2208,6 @@ gewählten Wege belegt ist.
 | npm package | Verworfen | Sprach-Ökosystem-Mismatch. |
 | pip package | Verworfen | Sprach-Ökosystem-Mismatch. |
 
----
-
 ### LH-OPEN-003 – Plugin-System (entschieden)
 
 Status: entschieden am 2026-05-31.
@@ -2560,8 +2216,6 @@ Entscheidung: **statisch eingebaute Add-ons** (kein Plugin-Loader).
 Re-Evaluation erfolgt nur bei konkretem externem Add-on-Bedarf,
 Release-Frequenz-Druck, Contributor-Bedarf für nicht-mainline Add-ons
 oder produktiver Sicherheitsanforderung an isoliertes Sub-Tooling.
-
----
 
 ### LH-OPEN-004 – Template-Format (entschieden)
 

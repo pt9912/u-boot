@@ -110,6 +110,216 @@ Profil-Komposition (29 Linter insgesamt):
 - 5 Default-Linter (`govet`, `errcheck`, `staticcheck`, `unused`, `ineffassign`).
 - 24 SOLID-nahe Zusatz-Linter (Komplexitäts-, Funktionslänge-, Interface-, Kopplungs- und Boundary-Signale). **`depguard`** für die Schicht-Regeln aus [`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement) ist Teil dieser 24.
 
+### LH-FA-CLI-005A.a — Detailregeln des Flags `--assume-existing`
+
+Verfeinert [`LH-FA-CLI-005A`](lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung).
+
+- Für `u-boot init` ist zusätzlich das Flag `--assume-existing` definiert (nicht global, nur für diesen Befehl):
+  - Ohne `--assume-existing` wird eine implizite Erkennung als bestehendes Projekt im nicht-interaktiven Modus nicht automatisch akzeptiert.
+  - Mit `--assume-existing` wird die implizite Erkennung als bestehendes Projekt in nicht-interaktiven Läufen akzeptiert.
+  - `--yes` ist für diesen Sonderfall **nicht** ausreichend; die implizite Erkennung bleibt abgelehnt, wenn keine `--assume-existing` gesetzt ist.
+  - Ohne `--assume-existing` und bei nicht-interaktivem Lauf ist die implizite Erkennung zwingend ablehnend und erzeugt einen fachlichen Fehler.
+  - Der Fehlercode für diese Abweisung ist `10`.
+
+### LH-FA-CLI-005A.b — Verhalten bei aktivierter Nicht-Interaktivität
+
+Verfeinert [`LH-FA-CLI-005A`](lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung).
+
+- Bei aktivierter Nicht-Interaktivität darf keine neue Rückfrage erzeugt werden:
+  - mit `--no-interactive` bricht der Aufruf bei jeder offenen Bestätigungsfrage mit Exit-Code `2` ab,
+  - mit `--yes` wird die vorgesehene Standardentscheidung deterministisch ausgeführt.
+- Für bereits deterministische Ausführungspfade (keine relevante Rückfrage) ist das Verhalten in beiden Modi unverändert.
+
+### LH-FA-CLI-005A.c — Auswertungsreihenfolge von `init` im nicht-interaktiven Modus
+
+Verfeinert [`LH-FA-CLI-005A`](lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung).
+
+Bei `u-boot init` gilt zusätzlich die feste Auswertungsreihenfolge im nicht-interaktiven Modus:
+
+- ohne `--assume-existing`: keine implizite Annahme einer bestehenden Projekterkennung, deterministisch abbrechen (Exit-Code `10` bei bestehendem Projekt),
+- mit `--assume-existing`: implizite Annahme als bestehendes Projekt (soweit kompatibel mit den übrigen Validierungen).
+
+### LH-FA-CLI-005A.d — Auswertungslogik der Bestätigungsmodi
+
+Verfeinert [`LH-FA-CLI-005A`](lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung).
+
+Deterministische Auswertungslogik für bestätigungsrelevante Modi:
+
+- `--yes` und `--no-interactive` sind exklusiv.
+- `--no-interactive` erlaubt keinerlei Rückfragen. Alle Entscheidungswege müssen deterministisch sein oder mit [`LH-FA-CLI-006`](lastenheft.md#lh-fa-cli-006--exit-codes)-Code `2` abbrechen, wenn eine notwendige Bestätigung fehlt.
+- `--yes` erlaubt deterministische Standardpfade ohne Nutzerinteraktion.
+- `--force` und/oder `--backup` sind in nicht-interaktiven Läufen explizit zulässig, weil beide Modi deterministisch arbeiten.
+- `--no-interactive` + `--force` erlaubt das Überschreiben ohne Rückfrage; dabei ist immer eine vollständige Zusammenfassung der betroffenen Pfade auszugeben.
+- `--force` darf keine zusätzlichen Rückfragen erzeugen; die Sicherheitslogik beschränkt sich auf die Validierung der Eingabedaten.
+- `--backup` ist optional. Wenn `--backup` gesetzt ist, dürfen Dateischutz-Szenarien mit automatischer Sicherung deterministisch abgearbeitet werden.
+- Bei fehlender Möglichkeit zur sicheren automatischen Abarbeitung (z. B. fehlender verwalteter Block ohne `--backup` bei vollständig kontrolliertem Überschreiben) muss der Befehl mit Fehlercode `10` abbrechen.
+
+### LH-FA-INIT-005.a — Schutzregeln für strukturierte Konfigurationsdateien
+
+Verfeinert [`LH-FA-INIT-005`](lastenheft.md#lh-fa-init-005--überschreibschutz).
+
+Zusätzliche Schutzregeln für strukturierte Konfigurationsdateien (`compose.yaml`, `.env.example`, `README.md`, `CHANGELOG.md`, `.devcontainer/devcontainer.json`):
+
+- bestehende, nicht verwaltete Inhalte bleiben in `--force`-Ausführung erhalten.
+- wird ein `U-BOOT MANAGED BLOCK` erkannt, darf bei `--force` nur dieser Block verändert werden. Das Markierungsformat pro Dateityp ist in [`LH-SA-FILE-002`](lastenheft.md#lh-sa-file-002--markierte-verwaltete-bereiche) definiert.
+- für `.devcontainer/devcontainer.json` gilt der JSONC-Markerstil (`// BEGIN U-BOOT MANAGED BLOCK: <name>` / `// END U-BOOT MANAGED BLOCK: <name>`); für strikte JSON-Dateien ohne Kommentar-Support wird die gesamte Datei als verwaltet behandelt und in `u-boot.yaml` referenziert.
+- fehlt ein verwalteter Block in einer vorhandenen Datei:
+  - ist `--backup` gesetzt, wird vor jedem vollständigen Überschreiben der komplette Dateiinhalt gesichert und danach ersetzt.
+  - ist `--backup` nicht gesetzt, wird der Vorgang mit einem fachlichen Fehler (Code `10`) abgebrochen; es erfolgt ein klarer Hinweis auf die nötige Option `--backup`.
+- bei vollständiger Überschreibung ohne verwalteten Block gilt ein vollständiges Backup vor dem Schreiben als Pflicht.
+
+### LH-FA-DEV-003.a — Mechanik der Freigabe externer Feature-Quellen
+
+Verfeinert [`LH-FA-DEV-003`](lastenheft.md#lh-fa-dev-003--devcontainer-features).
+
+- Die Freigabe erfolgt als klarer, protokollierter Schritt im interaktiven Modus oder im Skriptmodus nur über die explizite Option:
+  - `--allow-external-feature-sources <quelle>[,<quelle>...]` (`interaktiv`: Quelle bei Nachfrage bestätigen, `nicht-interaktiv`: alle Quellen als Flag-Argumente übergeben).
+  - Die Option ist nur für diese Befehle gültig:
+    - `u-boot init --devcontainer`
+    - `u-boot generate devcontainer`
+    - `u-boot config set devcontainer.featureSources.allow`
+- Ein einzelnes `--allow-external-feature-sources` kann mehrere explizit erlaubte Quellen über Komma trennen.
+
+### LH-FA-DEV-006.a — Workspace-Volume und Clone-Quelle im Sandbox-Profil
+
+Verfeinert [`LH-FA-DEV-006`](lastenheft.md#lh-fa-dev-006--sandbox-profil).
+
+- das Host-Arbeitsverzeichnis nicht per Bind-Mount einbinden; der Workspace liegt in einem benannten Volume, das Repository wird im Container geklont (Quelle: `devcontainer.sandbox.repository` (URL, optional), sonst die URL des Remotes `origin` des Projekt-Repositories; so kann ein anderes Repository als das Projekt-Repository geklont werden, aus dem im Container gepullt und gepusht wird; enthält die URL Zugangsdaten oder unzulässige Zeichen, ein fachlicher Fehler, Exit-Code `10`; ohne Quelle wird kein Clone-Schritt erzeugt und die Befehlsausgabe weist mit einer Warnung darauf hin, `u-boot generate devcontainer` ergänzt den Schritt, sobald eine Quelle existiert);
+
+### LH-FA-DEV-007.a — Degradation und Strenge der Sandbox-Fähigkeiten
+
+Verfeinert [`LH-FA-DEV-007`](lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer).
+
+**Degradation und Strenge** (gilt für dieses und das folgende Egress-Feature): `devcontainer.sandbox.onUnavailable` (`warn` | `fail`, Default `warn`).
+
+| Zustand | `warn` (Default) | `fail` |
+| ------- | ---------------- | ------ |
+| `/dev/fuse` nicht verfügbar | Fallback auf `vfs`-Storage, Warnung mit Hinweis | Umgebungsproblem, Exit-Code `11` |
+| Nested User-Namespaces durch Seccomp/AppArmor blockiert und `nestedRuntime: podman` | Umgebungsproblem, Exit-Code `11` | Umgebungsproblem, Exit-Code `11` |
+| Egress-Capability (`NET_ADMIN`) nicht gewährbar ([`LH-FA-DEV-008`](lastenheft.md#lh-fa-dev-008--egress-restriktion)) | Egress-Restriktion entfällt, Warnung mit Hinweis auf Restriktion auf Netz-/DNS-Ebene | Umgebungsproblem, Exit-Code `11` |
+
+Ausdrücklich angeforderte Runtime (`nestedRuntime: podman`) wird nie stillschweigend durch etwas anderes ersetzt. Jeder Fallback wird in der Befehlsausgabe und in `u-boot doctor` ausgewiesen. Die Prüfung erfolgt durch `u-boot doctor` (soweit vom Host aus ermittelbar) und beim Containerstart durch das erzeugte Startscript, das im Fehlerfall nicht-null endet. Ungültige Werte der Schlüssel führen zu einem fachlichen Validierungsfehler (Exit-Code `10`).
+
+### LH-FA-ADD-005.a — Zustandsregeln für registrierte und aktive Services
+
+Verfeinert [`LH-FA-ADD-005`](lastenheft.md#lh-fa-add-005--mehrfaches-hinzufügen-verhindern).
+
+- Ein bereits vorhandener Service darf nicht doppelt eingefügt werden.
+- Ein Service gilt als registriert, sobald `services.<name>` in `u-boot.yaml` existiert.
+- Er gilt als aktiv vorhanden, wenn `services.<name>.enabled` explizit auf `true` steht **und** ein verwalteter Eintrag in `compose.yaml` existiert.
+- `services.<name>.enabled` ist immer explizit zu setzen. Ein registrierter Service ohne expliziten `enabled`-Schlüssel gilt als deaktiviert (`false`) und führt bei `u-boot doctor` zu einer `warn`-Diagnose, die das explizite Setzen empfiehlt.
+- Liegt `services.<name>.enabled: false` vor, gilt der Service als deaktiviert (weiterhin registriert), und `u-boot add <service>` darf ihn idempotent reaktivieren.
+- Besteht `services.<name>` nicht in `u-boot.yaml`, aber ein verwalteter Block in `compose.yaml`, darf die Inkonsistenz nicht stillschweigend ignoriert werden. Der Befehl muss mit klarer Diagnose abbrechen und auf manuelle Bereinigung oder Re-Konfiguration verweisen.
+- Besteht `services.<name>` in `u-boot.yaml` mit `enabled: true`, aber der verwaltete Compose-Eintrag fehlt, muss das Verhalten deterministisch sein: `u-boot add <service>` erzeugt den fehlenden Compose-Block wieder.
+
+### LH-FA-ADD-006.a — Verhalten bei erkannter Add-on-Abhängigkeit
+
+Verfeinert [`LH-FA-ADD-006`](lastenheft.md#lh-fa-add-006--add-on-abhängigkeiten).
+
+Verhalten bei erkannter abhängiger Konfiguration:
+
+- Ist `services.keycloak.persistence: external-postgres` gesetzt und PostgreSQL nicht vorhanden, darf der Aufruf nicht stillschweigend fortfahren.
+- Ist die optionale Abhängigkeit nicht aktiv, darf Keycloak ohne PostgreSQL angelegt werden.
+
+- Im interaktiven Modus (Standardmodus) muss das Produkt nachfragen, ob das fehlende Add-on automatisch hinzugefügt werden soll.
+- Im nicht-interaktiven Modus (`--no-interactive`) ohne `--with-deps` muss das Produkt mit Exit-Code `10` abbrechen und auf die fehlende Abhängigkeit hinweisen.
+- Über die Option `--with-deps` muss das Produkt fehlende Abhängigkeiten automatisch hinzufügen. `--with-deps` ist mit `--no-interactive` kombinierbar; in dem Fall werden Abhängigkeiten deterministisch und ohne Rückfrage installiert.
+- Mit `--yes` (ohne `--with-deps`) wird die Standardentscheidung "Abhängigkeit hinzufügen" deterministisch ausgeführt, ohne dass eine Rückfrage gestellt wird.
+- Mit `--yes` oder `--no-interactive` (jeweils exklusiv) muss das Verhalten in Skript-/CI-Umgebungen deterministisch und nicht-blockierend sein.
+
+### LH-FA-DIAG-002.b — Schweregrade der Devcontainer-Prüfungen
+
+Verfeinert [`LH-FA-DIAG-002`](lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen).
+
+- falls Devcontainer-Dateien vorhanden sind:
+  - Ist `u-boot.yaml` vorhanden und `devcontainer.enabled == true`, müssen diese Prüfungen mit `error` bewertet werden:
+    - syntaktische Gültigkeit von `.devcontainer/devcontainer.json`
+    - Mindestkompatibilität mit VS Code Dev Containers (`name` gesetzt; mindestens `image` oder `build` vorhanden)
+    - `forwardPorts`-Konsistenz zu aktivierten Services, falls Portangaben existieren
+  - Ist `u-boot.yaml` vorhanden und `devcontainer.enabled == false`, sind die obigen Prüfungen optional (`warn`, keine harte Validierungspflicht).
+  - Ist keine `u-boot.yaml` vorhanden, werden die obigen Prüfungen als ergänzende Qualitätsdiagnosen mit `warn` ausgegeben.
+
+### LH-FA-DIAG-002.c — Konsistenzregeln für `forwardPorts`
+
+Verfeinert [`LH-FA-DIAG-002`](lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen).
+
+- `forwardPorts`-Konsistenzregeln:
+  - Für jeden aktivierten Service mit expliziter `ports`-Zuordnung (TCP) ist der Host-Port in `forwardPorts` enthalten.
+  - bei mehreren TCP-Ports werden eindeutige Portzahlen eingetragen (Duplikate dedupliziert).
+  - UDP- oder nicht eindeutig auflösbare Portangaben dürfen in `forwardPorts` fehlen; dafür ist ein `warn`-Diagnoseeintrag zulässig.
+
+### LH-FA-PROJDOCS-002.a — Bestandsregel und Abgleich zum ADR-Format
+
+Verfeinert [`LH-FA-PROJDOCS-002`](lastenheft.md#lh-fa-projdocs-002--adr-format).
+
+**Grandfathering (Bestand).** Die zum Zeitpunkt der Format-Umstellung (Regelwerk-v3.5.1-Adoption) bereits `Accepted` ADRs (`0001`–`0010`, `0013`) bleiben in der vorherigen leanen Form (`## Status`/`## Datum` als Überschriften; Abschnitte Kontext/Entscheidung/Konsequenzen) und sind als `Accepted` **unveränderlich**; sie werden **nicht** migriert. Das MADR-Format gilt für alle **neu** angelegten ADRs sowie für noch mutable `Proposed`-ADRs (`0011`, `0012`) beim nächsten inhaltlichen Anfassen.
+
+**Reconciliation.** Titel-Form (`# ADR <Nr>: <Titel>`) und Superseded-Referenz (`<NNNN>-<slug>`, klickbar) folgen der bestehenden u-boot-Konvention, nicht dem Template-Wortlaut (`# ADR-NNNN:` bzw. `Superseded by ADR-NNNN`); die MADR-**Substanz** (Inline-Kopf-Felder, `Schärft`-Aufwärtskopplung, Alternativen/Fitness-Function/Re-Eval/Geschichte) wird übernommen. Die Umstellung ist ein Change Request am Vertrags-Stratum (Trigger: v3.5.1-Adoption).
+
+### LH-FA-PROJDOCS-005.a — Pflichten der Carveout-Disziplin
+
+Verfeinert [`LH-FA-PROJDOCS-005`](lastenheft.md#lh-fa-projdocs-005--carveout-disziplin).
+
+Pflichten:
+
+- Der Slice-Plan folgt der Dateiname-Konvention aus [`LH-FA-PROJDOCS-003`](lastenheft.md#lh-fa-projdocs-003--planning-lifecycle) (`slice-<phase>-<slug>.md`).
+- Der Plan benennt mindestens: Auslöser (was wurde wo bewusst weggelassen), Aufhebungsbedingung (was muss passieren), Akzeptanzkriterien.
+- Wo der Carveout in einer Spec-Anforderung dokumentiert ist (z. B. [`LH-FA-BUILD-008`](lastenheft.md#lh-fa-build-008--coverage-bootstrap) für Coverage-Bootstrap), bleibt die Spec-Anforderung die normative Quelle; der Plan-Verweis lebt im Carveout-Inventar und in der Roadmap.
+- **Doppelte Verankerung:** jeder temporäre Carveout ist sowohl im Carveout-Inventar als auch in der Roadmap als Slice-Zeile sichtbar. Carveouts ohne Roadmap-Eintrag oder Slice-Pläne ohne Carveout-Inventar-Verweis sind Verstoß gegen diese Anforderung.
+- Auch Spec-Open-Punkte (`LH-OPEN-*`) und ADR-Folgepunkte gelten als temporäre Carveouts und brauchen einen Slice-Plan — kein „bleibt offen bis MVP-Closure" als Inventar-Eintrag.
+- Ein Master-Inventar in `carveouts.md` listet alle aktuellen Carveouts mit Status (`temporär` + Plan-Verweis vs. `permanent` + Begründung). Diese Datei lebt analog zur `roadmap.md` dauerhaft in `in-progress/`.
+
+### LH-FA-PROJDOCS-006.a — Pflichten des Dokumentationsreferenzmodells
+
+Verfeinert [`LH-FA-PROJDOCS-006`](lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell).
+
+Pflichten:
+
+- Das Lastenheft darf nur `LH-*`-Anforderungen intern normativ
+  querverweisen. ADRs, Slices, Carveouts und Roadmap/Wellen dürfen im
+  Lastenheft keine Quelle der Normativität sein.
+- Technische oder Sicht-Specs dürfen auf das Lastenheft und innerhalb
+  ihres Stratums referenzieren, aber keine ADRs, Slices, Carveouts oder
+  Roadmap/Wellen als bindenden Text verlinken.
+- ADRs dürfen `LH-*`, betroffene Spec-Stellen und aktive ADRs normativ
+  referenzieren. Superseded ADRs dürfen nur innerhalb der ADR-Lineage als
+  Historie referenziert werden.
+- Slices dürfen `LH-*` und aktive ADRs normativ referenzieren.
+  Slice-zu-Slice-, Slice-zu-Carveout- und Slice-zu-Roadmap-Referenzen
+  sind ausschließlich Kontext.
+- Carveouts dürfen `LH-*` und aktive ADRs normativ referenzieren.
+  Carveout-zu-Slice- und Slice-zu-Carveout-Referenzen sind nur Owner-,
+  Trigger- oder Closure-Buchführung.
+- Roadmap/Wellen orchestrieren Arbeit, tragen aber keine normative
+  Ableitungskraft.
+- `docs-check` muss Markdown-Link-Pfade, Heading-Anker, verlinkte
+  `ADR-*`-Kennungen und die Referenzmatrix für Lastenheft-, ADR-,
+  Spec-, Slice-, Carveout- und Roadmap/Wellen-Artefakte in `docs/`,
+  `spec/`, `harness/` und Root-Markdown prüfen.
+- Die Kennungs-Linkpflicht wird stufenweise aktiviert: `ADR-*` gilt
+  global, `LH-*` gilt in Spec-Straten außerhalb des Lastenhefts, in
+  README-Dateien und in `docs/user/`. Eindeutig auflösbare Slice- und
+  Tranche-IDs gelten in README-Dateien und in `docs/user/`; Markdown-
+  Überschriften sind ausgenommen, damit bestehende Section-Anker stabil
+  bleiben. Konkrete `PH-*`- und `TC-*`-Kennungen in der Traceability-
+  Matrix sind bis zu getrennten Pflichtenheft-/Testfall-Artefakten
+  Traceability-Aliase und verlinken auf die zugehörige `LH-*`-
+  Anforderung derselben Matrixzeile. Konkrete `CO-*`-Kennungen sind
+
+### LH-NFA-USE-004.a — Regeln für `--json`-Antworten
+
+Verfeinert [`LH-NFA-USE-004`](lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe).
+
+Für `--json`-Antworten gilt zusätzlich:
+
+- `diagnostics`, wenn leer, darf als `[]` ausgegeben werden.
+- `diagnostics.level` darf nur `warn` oder `error` enthalten.
+- `diagnostics.code` folgt der Konvention: LH-Kennung der verursachenden Anforderung (z. B. [`LH-FA-DEV-003`](lastenheft.md#lh-fa-dev-003--devcontainer-features)). Tool-interne Codes ohne LH-Bezug dürfen nur dann verwendet werden, wenn ihre Bedeutung in der Dokumentation festgehalten ist (Verweis: [`LH-FA-CLI-007`](lastenheft.md#lh-fa-cli-007--dry-run)).
+- `diagnostics.file` ist optional.
+- `status` ist an den höchsten in `diagnostics` enthaltenen `level` gekoppelt: `error` → `status == "error"`; `warn` ohne `error` → `status == "warn"`; sonst `status == "ok"`.
+- Bei `command == "template"` oder `command == "config"` ist `subcommand` verpflichtend.
+- Die Felder `status`, `command`, `diagnostics` und `exitCode` sind minimal verpflichtend und sollten mit anderen Feldern ergänzt werden.
+
 ## 2. Datenstrukturen und Schemas
 
 Formate und Schemata (`u-boot.yaml`, JSON-Ausgabe, CLI-Tabellen). Jede Struktur trägt
