@@ -84,6 +84,32 @@ Verfeinert [`LH-FA-BUILD-002`](lastenheft.md#lh-fa-build-002--runtime-stage-pfli
   - `org.opencontainers.image.title`
 - Keine Build-Toolchain im Endimage; alle Build-Artefakte werden aus dem `build`-Stage per `COPY --from=build` übernommen.
 
+### LH-QA-003.a — Komposition der CI-Pipeline (GitHub Actions)
+
+Verfeinert [`LH-QA-003`](lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions).
+
+- Workflow-Datei: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
+- Trigger: `pull_request` und `push` auf den Branch `main`.
+- Drei Jobs, parallel, alle PR-blockierend (Required-Status-Checks im GitHub-UI nach dem ersten grünen Lauf zu konfigurieren; die Required-Status-Check-Liste muss die tatsächlichen Workflow-`name:`-Felder verwenden, nicht die Kurz-Keys). Die drei delegierten Make-Targets sind in [`LH-FA-BUILD-005`](lastenheft.md#lh-fa-build-005--makefile-mit-standard-targets) (MVP) und [`LH-FA-BUILD-006`](lastenheft.md#lh-fa-build-006--aggregator-targets) (V1) definiert; die PR-Blocking-**Pflicht** für alle drei kommt aus diesem [`LH-QA-003`](lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions)-Eintrag (MVP). Damit ist `make govulncheck` und `make image-scan` über [`LH-QA-003`](lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions) MVP-bindend, auch wenn die jeweiligen Make-Target-Definitionen unter [`LH-FA-BUILD-006`](lastenheft.md#lh-fa-build-006--aggregator-targets) (V1) liegen:
+  - `gates (lint + test + coverage-gate)` — führt `make gates` aus (lint + test + coverage-gate, [`LH-FA-BUILD-005`](lastenheft.md#lh-fa-build-005--makefile-mit-standard-targets)/[`LH-FA-BUILD-006`](lastenheft.md#lh-fa-build-006--aggregator-targets)).
+  - `security-gates (govulncheck)` — führt `make govulncheck` aus ([`LH-FA-BUILD-006`](lastenheft.md#lh-fa-build-006--aggregator-targets), MVP-Pflicht via diesem [`LH-QA-003`](lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions)).
+  - `image-scan (trivy HIGH+CRITICAL)` — führt `make image-scan` aus (Trivy gegen das Runtime-Image, severity `HIGH,CRITICAL`, exit-code `1`; [`LH-FA-BUILD-006`](lastenheft.md#lh-fa-build-006--aggregator-targets), MVP-Pflicht via diesem [`LH-QA-003`](lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions)).
+- Runner: `ubuntu-latest`. Keine Host-Go-Toolchain ([`LH-FA-BUILD-007`](lastenheft.md#lh-fa-build-007--docker-only-workflow)); der Runner braucht nur das vorinstallierte Docker + BuildKit.
+- Actions sind **SHA-gepinnt** mit Tag-Kommentar (Supply-Chain-Härtung gegen Tag-Move). Pin-Hebung ist Routine; neuer Commit-SHA via `gh api repos/<owner>/<repo>/git/refs/tags/<tag>`.
+- Top-Level `permissions: {}` (alle Tokens entzogen); jeder Job lockert auf das Minimum (Defense-in-Depth).
+- Jeder Job mit `timeout-minutes` versehen (Empfehlung: 20).
+- Die konkrete Workflow-Ausprägung muss die hier genannten
+  Anforderungen und die Build-Target-Verträge erfüllen.
+
+### LH-QA-004.a — Zusammensetzung des Lint-Profils
+
+Verfeinert [`LH-QA-004`](lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil).
+
+Profil-Komposition (29 Linter insgesamt):
+
+- 5 Default-Linter (`govet`, `errcheck`, `staticcheck`, `unused`, `ineffassign`).
+- 24 SOLID-nahe Zusatz-Linter (Komplexitäts-, Funktionslänge-, Interface-, Kopplungs- und Boundary-Signale). **`depguard`** für die Schicht-Regeln aus [`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement) ist Teil dieser 24.
+
 ## 2. Datenstrukturen und Schemas
 
 Formate und Schemata (`u-boot.yaml`, JSON-Ausgabe, CLI-Tabellen). Jede Struktur trägt
@@ -426,6 +452,19 @@ internal/
   // END U-BOOT MANAGED BLOCK: postgres
   ```
 
+### SPEC-015 — Beispielinstanz einer Minimalkontrakt-Ausgabe (`doctor --json`)
+
+Beispiel:
+
+```json
+{
+  "status": "ok",
+  "command": "doctor",
+  "diagnostics": [],
+  "exitCode": 0
+}
+```
+
 ## 3. Defaults und Konstanten
 
 Werte, die im Produkt fest sind (Standardwerte, Grenzwerte, Versionsuntergrenzen).
@@ -447,23 +486,102 @@ Mindestens auszuschließen:
 - Agent-Verzeichnisse: `.claude`, `.codex`, `.agents`
 - lokale Build-Artefakte und Caches (z. B. `dist/`, `coverage*`, `*.log`)
 
+### SPEC-016 — Go-Toolchain: Mindestversion und Dockerfile-Pin
+
+Stand zum Entscheidungsdatum 2026-05-21; der aktuelle Pin steht im Dockerfile (`ARG GO_VERSION`).
+
+Mindest-Toolchain: Go 1.26 oder neuer (`go 1.26.0` in `go.mod`, analog Referenzprojekt `k-deskflight`); Default-Pin im Dockerfile als `ARG GO_VERSION` (aktuell `1.26.3`, die aktuelle Stable-Version am Entscheidungsdatum). Pin-Hebung ist Routine ohne separaten Spec-Eintrag.
+
+### SPEC-018 — Standardwerte der Build- und Laufzeitumgebung
+
+| Name | Wert | Quelle |
+|---|---|---|
+| Coverage-Schwellwert (`COVERAGE_THRESHOLD` / `THRESHOLD`) | 90 Prozent | Dockerfile-Build-Arg, Makefile-Variable |
+| Polling-Intervall von `u-boot up` | 500 ms | Stabilisierungsschleife (`docker compose ps`) |
+| Standard-Wartezeit von `u-boot up` | 60 s | `--timeout` |
+| UID des Container-Benutzers | 1000 | `devcontainer.user.uid` |
+
+### SPEC-019 — Default-Allowlist der Egress-Restriktion
+
+Die wirksame Liste ist die Vereinigung aus Basis, Ergänzungen und Nutzerliste, sortiert und ohne Duplikate.
+
+| Quelle | Hosts |
+|---|---|
+| immer | `github.com`, `api.github.com`, `codeload.github.com`, `raw.githubusercontent.com`, `objects.githubusercontent.com`, `deb.debian.org`, `security.debian.org` |
+| `nestedRuntime: podman` | `registry-1.docker.io`, `auth.docker.io`, `production.cloudflare.docker.com`, `ghcr.io` |
+| Feature `node` | `registry.npmjs.org` |
+| Feature `go` | `proxy.golang.org`, `sum.golang.org`, `storage.googleapis.com` |
+| Feature `java` | `repo.maven.apache.org`, `repo1.maven.org` |
+| Clone-Quelle | Host von `devcontainer.sandbox.repository` beziehungsweise `origin` |
+| Nutzer | Einträge von `devcontainer.sandbox.egress.allow` (kleingeschriebene Hostnamen, ohne Schema, Port und Wildcard) |
+
 ## 4. Fehler-Codes und Logging-Felder
 
 Verbindliche Diagnose- und Fehler-Codes sowie Logging-Felder.
 
+### SPEC-017 — Diagnose-Codes der `doctor`-Prüfungen (Code-Registry)
+
+Jede Prüfung von `u-boot doctor` trägt einen stabilen Code in `diagnostics[].code`. Die Tabelle ist die kanonische Registry; der Quelltext (`DefaultAllowedCodes`) und diese Tabelle werden von einem Test symmetrisch abgeglichen. Andere Befehle tragen als Code die Kennung der verursachenden Anforderung.
+
+<!-- code-registry:start -->
+
+| Code | Bedeutung |
+| --- | --- |
+| `fs.write-permissions` | Schreib-Permission im Working Directory |
+| `git.installed` | Git-Binary verfügbar |
+| `docker.installed` | Docker-Binary verfügbar |
+| `docker.reachable` | Docker-Daemon erreichbar |
+| `docker.compose.installed` | Compose-Plugin verfügbar |
+| `uboot.yaml.valid` | `u-boot.yaml` syntaktisch valide |
+| `compose.yaml.valid` | `compose.yaml` syntaktisch valide |
+| `devcontainer.json.valid` | `.devcontainer/devcontainer.json` syntaktisch valide |
+| `devcontainer.dockerfile.valid` | `.devcontainer/Dockerfile` parsebar |
+| `services.enabled-key` | `u-boot.yaml` `services`-Block konsistent |
+| `devcontainer.forwardPorts.consistency` | `devcontainer.json` `forwardPorts` konsistent |
+| `devcontainer.features.allowlist` | `devcontainer` Features auf Allowlist |
+| `devcontainer.features.drift` | `devcontainer` Features ohne Drift |
+| `devcontainer.sandbox.runtime` | Sandbox: nested Podman (`/dev/fuse`, Profil-Konsistenz), [`LH-FA-DEV-007`](lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
+| `devcontainer.sandbox.egress` | Sandbox: Egress-Restriktion konsistent konfiguriert, [`LH-FA-DEV-008`](lastenheft.md#lh-fa-dev-008--egress-restriktion) |
+| `devcontainer.sandbox.credentials` | Sandbox: keine Klartext-Git-Zugangsdaten, Token-Quelle, [`LH-FA-DEV-009`](lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) |
+
+<!-- code-registry:end -->
 
 ## 5. Metriken und Tracing-Felder
 
 Verbindliche Telemetrie-Felder pro Span.
 
+### SPEC-020 — Telemetrie des Produkts
+
+`u-boot` erzeugt selbst keine Metriken oder Traces und hat keine Tracing-Felder. Der Add-on `otel` richtet lediglich einen OpenTelemetry-Collector für das Zielprojekt ein (siehe Add-on-Katalog); dessen Standardports stehen dort.
 
 ## 6. Externe Verträge
 
 Schnittstellen zu Drittsystemen mit Versionsannahme (Docker, Compose, Devcontainer).
 
+### SPEC-021 — Docker, Docker Compose und Podman
+
+| System | Mindestversion | Hinweis |
+|---|---|---|
+| Docker Engine | 24.0.0 | Prüfung durch `u-boot doctor` |
+| Docker Compose (Plugin) | 2.20.0 | Prüfung durch `u-boot doctor` |
+| Podman (als Docker-Ersatz) | 4.0 | mit aktivem `podman.socket` und `DOCKER_HOST` auf den Socket; nicht erkannte Versionen werden als Warnung gemeldet |
+
+### SPEC-022 — Add-on-Katalog: Images und Ports
+
+| Add-on | Image | Host-Ports |
+|---|---|---|
+| `postgres` | `postgres:16-alpine` | 5432 |
+| `keycloak` | `quay.io/keycloak/keycloak:26.0` | 8080 |
+| `otel` | `otel/opentelemetry-collector:0.108.0` | 4317 (OTLP/gRPC), 4318 (OTLP/HTTP) |
+
+### SPEC-023 — Devcontainer: Basis-Image und Feature-Quellen
+
+- Basis-Image des erzeugten Dockerfiles: `mcr.microsoft.com/devcontainers/base:debian`.
+- Eingebaute Features: `git`, `docker-cli`, `node`, `java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, jeweils als `ghcr.io/devcontainers/features/<name>:<version>` mit der Standardversion `1`; jede andere Quelle gilt als extern und braucht eine Freigabe in `devcontainer.featureSources.allow`.
+- Externe Feature-Quellen müssen als URL mit Schema `http://`, `https://` oder `oci://` angegeben werden.
 
 ## 7. Historie
 
 | Datum | Änderung |
 |---|---|
-| 2026-10-02 | Angelegt als Gefäß des Technik-Stratums; die Inhalte werden schrittweise aus dem Lastenheft übernommen. |
+| 2026-10-02 | Angelegt als Technik-Stratum; Schemata, Beispielinstanzen, Algorithmen, Build-/CI-, Doku- und Architektur-Details sowie Markierungsformate wörtlich aus dem Lastenheft übernommen (`SPEC-001`..`SPEC-016`, Verfeinerungen); neu aus dem Bestand von Code und Konfiguration: Standardwerte, Egress-Default-Allowlist, Code-Registry der `doctor`-Prüfungen, Telemetrie-Aussage, externe Verträge (`SPEC-017`..`SPEC-023`). |

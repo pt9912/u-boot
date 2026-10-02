@@ -312,8 +312,7 @@ Notation (`docker.installed`, `uboot.yaml.valid` etc.); diese
 Registry ist die **kanonische Doku-Sektion** für [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe).
 
 Source-of-Truth: `internal/adapter/driving/cli/jsontestutil/coderegistry.go`
-(`DefaultAllowedCodes`-Map). Diese Tabelle ist die spec-pflichtige
-Doku-Form derselben Map; der Test-Helper `AssertMinimalEnvelope`
+(`DefaultAllowedCodes`-Map). Die Registry-Tabelle in der Spezifikation ist die Doku-Form derselben Map; der Test-Helper `AssertMinimalEnvelope`
 rejected `diagnostics[].code`-Werte außerhalb. Drift-Schutz
 (zwei aktive Gates plus Acceptance-Helper):
 
@@ -331,28 +330,7 @@ Markdown). Die Markdown-Tabelle ist zwischen den HTML-Markern
 eingegrenzt — Folge-Slices fügen weitere Tabellen für ihre eigenen
 Subcommand-Codes an, ohne den Doctor-Block zu berühren.
 
-<!-- code-registry:start -->
-
-| Code | Bedeutung |
-| --- | --- |
-| `fs.write-permissions` | Schreib-Permission im Working Directory |
-| `git.installed` | Git-Binary verfügbar |
-| `docker.installed` | Docker-Binary verfügbar |
-| `docker.reachable` | Docker-Daemon erreichbar |
-| `docker.compose.installed` | Compose-Plugin verfügbar |
-| `uboot.yaml.valid` | `u-boot.yaml` syntaktisch valide |
-| `compose.yaml.valid` | `compose.yaml` syntaktisch valide |
-| `devcontainer.json.valid` | `.devcontainer/devcontainer.json` syntaktisch valide |
-| `devcontainer.dockerfile.valid` | `.devcontainer/Dockerfile` parsebar |
-| `services.enabled-key` | `u-boot.yaml` `services`-Block konsistent |
-| `devcontainer.forwardPorts.consistency` | `devcontainer.json` `forwardPorts` konsistent |
-| `devcontainer.features.allowlist` | `devcontainer` Features auf Allowlist |
-| `devcontainer.features.drift` | `devcontainer` Features ohne Drift |
-| `devcontainer.sandbox.runtime` | Sandbox: nested Podman (`/dev/fuse`, Profil-Konsistenz), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
-| `devcontainer.sandbox.egress` | Sandbox: Egress-Restriktion konsistent konfiguriert, [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) |
-| `devcontainer.sandbox.credentials` | Sandbox: keine Klartext-Git-Zugangsdaten, Token-Quelle, [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) |
-
-<!-- code-registry:end -->
+Die kanonische Code-Registry steht in der Spezifikation ([SPEC-017](../../spec/spezifikation.md#spec-017--diagnose-codes-der-doctor-prüfungen-code-registry)).
 
 Weitere Subcommand-Sektionen kommen mit den jeweiligen Folge-Slices
 (siehe §6).

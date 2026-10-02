@@ -18,7 +18,7 @@ package jsontestutil
 //
 // Source-of-Truth-Disziplin: die zurückgegebene Map ist der
 // kanonische Code-Satz. Markdown-Doku-Form lebt in
-// docs/maintainer/cli-json-contract.md §5; der drift_test.go im
+// spec/spezifikation.md §4; der drift_test.go im
 // jsontestutil-Package erzwingt symmetrische Synchronisation
 // (Gate 2 aus dem T0-(h)-Outcome).
 //

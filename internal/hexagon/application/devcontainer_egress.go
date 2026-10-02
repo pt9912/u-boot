@@ -49,7 +49,7 @@ func normaliseEgressHosts(raw []string) ([]string, error) {
 }
 
 // egressBaseHosts is the common part of the default allowlist
-// (documented in docs/user/devcontainer-sandbox.md, ADR-0012).
+// (documented in spec/spezifikation.md).
 func egressBaseHosts() []string {
 	return []string{
 		"github.com", "api.github.com", "codeload.github.com",

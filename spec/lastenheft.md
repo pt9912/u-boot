@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.3.5                                                              |
+| Version          | 0.4.0                                                              |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -29,6 +29,12 @@ In diesem Dokument haben Modalverben folgende Bedeutung (in Anlehnung an RFC 211
 Die Spezifikation ist auf Deutsch verfasst.
 
 CLI-Ausgaben, Fehlermeldungen und erzeugte Dateien (Kommentare, Beispielwerte, README-Vorlagen) sind auf Englisch.
+
+---
+
+### LH-LESE-003 – Dokumentenordnung
+
+Dieses Lastenheft ist der Vertrag: Es legt fest, **was** das Produkt leistet. Technische Festlegungen (Schemata, Algorithmen, Defaults, Fehler-Codes, Build- und Dokumentationsdetails) stehen in einem eigenen technischen Dokument, das dieses Lastenheft präzisiert, aber nie erweitert; bei Widerspruch gilt das Lastenheft. Das Lastenheft verweist nicht auf dieses technische Dokument.
 
 ---
 
@@ -1699,16 +1705,7 @@ Für `--json`-Antworten gilt zusätzlich:
 Für normale (`--json` ohne `--dry-run`/`--diff`) Ausgaben ist der obige Minimalkontrakt bindend.
 Für `--dry-run`- oder `--diff`-Ausgaben mit `--json` gilt zusätzlich das vollständige Schema aus [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run) als bindender Pflichtkontrakt (inkl. `plannedFiles`, `changes`, `dryRun`, `diff`).
 
-Beispiel:
-
-```json
-{
-  "status": "ok",
-  "command": "doctor",
-  "diagnostics": [],
-  "exitCode": 0
-}
-```
+Beispiel: `u-boot doctor --json` im Erfolgsfall liefert `status: ok`, `command: doctor`, eine leere `diagnostics`-Liste und `exitCode: 0`.
 
 ---
 
@@ -2088,18 +2085,7 @@ Das u-boot-Repo muss eine CI-Pipeline auf GitHub Actions führen.
 
 Pflicht-Komposition:
 
-- Workflow-Datei: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
-- Trigger: `pull_request` und `push` auf den Branch `main`.
-- Drei Jobs, parallel, alle PR-blockierend (Required-Status-Checks im GitHub-UI nach dem ersten grünen Lauf zu konfigurieren; die Required-Status-Check-Liste muss die tatsächlichen Workflow-`name:`-Felder verwenden, nicht die Kurz-Keys). Die drei delegierten Make-Targets sind in [`LH-FA-BUILD-005`](#lh-fa-build-005--makefile-mit-standard-targets) (MVP) und [`LH-FA-BUILD-006`](#lh-fa-build-006--aggregator-targets) (V1) definiert; die PR-Blocking-**Pflicht** für alle drei kommt aus diesem [`LH-QA-003`](#lh-qa-003--ci-fähigkeit-github-actions)-Eintrag (MVP). Damit ist `make govulncheck` und `make image-scan` über [`LH-QA-003`](#lh-qa-003--ci-fähigkeit-github-actions) MVP-bindend, auch wenn die jeweiligen Make-Target-Definitionen unter [`LH-FA-BUILD-006`](#lh-fa-build-006--aggregator-targets) (V1) liegen:
-  - `gates (lint + test + coverage-gate)` — führt `make gates` aus (lint + test + coverage-gate, [`LH-FA-BUILD-005`](#lh-fa-build-005--makefile-mit-standard-targets)/[`LH-FA-BUILD-006`](#lh-fa-build-006--aggregator-targets)).
-  - `security-gates (govulncheck)` — führt `make govulncheck` aus ([`LH-FA-BUILD-006`](#lh-fa-build-006--aggregator-targets), MVP-Pflicht via diesem [`LH-QA-003`](#lh-qa-003--ci-fähigkeit-github-actions)).
-  - `image-scan (trivy HIGH+CRITICAL)` — führt `make image-scan` aus (Trivy gegen das Runtime-Image, severity `HIGH,CRITICAL`, exit-code `1`; [`LH-FA-BUILD-006`](#lh-fa-build-006--aggregator-targets), MVP-Pflicht via diesem [`LH-QA-003`](#lh-qa-003--ci-fähigkeit-github-actions)).
-- Runner: `ubuntu-latest`. Keine Host-Go-Toolchain ([`LH-FA-BUILD-007`](#lh-fa-build-007--docker-only-workflow)); der Runner braucht nur das vorinstallierte Docker + BuildKit.
-- Actions sind **SHA-gepinnt** mit Tag-Kommentar (Supply-Chain-Härtung gegen Tag-Move). Pin-Hebung ist Routine; neuer Commit-SHA via `gh api repos/<owner>/<repo>/git/refs/tags/<tag>`.
-- Top-Level `permissions: {}` (alle Tokens entzogen); jeder Job lockert auf das Minimum (Defense-in-Depth).
-- Jeder Job mit `timeout-minutes` versehen (Empfehlung: 20).
-- Die konkrete Workflow-Ausprägung muss die hier genannten
-  Anforderungen und die Build-Target-Verträge erfüllen.
+Die Pipeline läuft bei `pull_request` und `push` auf `main` in drei parallelen, PR-blockierenden Jobs: Gates (`make gates`), Security-Gates (`make govulncheck`) und Image-Scan (`make image-scan`, Trivy gegen das Runtime-Image, Severity HIGH und CRITICAL). Die PR-Blocking-Pflicht aller drei folgt aus diesem Eintrag, auch wenn die Make-Target-Definitionen unter [`LH-FA-BUILD-006`](#lh-fa-build-006--aggregator-targets) liegen. Der Runner braucht nur Docker und BuildKit, keine Host-Go-Toolchain ([`LH-FA-BUILD-007`](#lh-fa-build-007--docker-only-workflow)); Actions sind gepinnt, Token-Rechte minimal gehalten und jeder Job hat ein Zeitlimit. Die Required-Status-Check-Liste im GitHub-UI muss die tatsächlichen Job-Namen des Workflows verwenden.
 
 ---
 
@@ -2109,10 +2095,7 @@ Priorität: MVP
 
 Die u-boot-Codebase muss ein verschärftes Lint-Profil führen, das über die Default-Linter hinausgeht.
 
-Profil-Komposition (29 Linter insgesamt):
-
-- 5 Default-Linter (`govet`, `errcheck`, `staticcheck`, `unused`, `ineffassign`).
-- 24 SOLID-nahe Zusatz-Linter (Komplexitäts-, Funktionslänge-, Interface-, Kopplungs- und Boundary-Signale). **`depguard`** für die Schicht-Regeln aus [`LH-FA-ARCH-003`](#lh-fa-arch-003--import-regeln-und-enforcement) ist Teil dieser 24.
+Das Profil besteht aus den Default-Lintern und SOLID-nahen Zusatz-Lintern (Komplexitäts-, Funktionslänge-, Interface-, Kopplungs- und Boundary-Signale); `depguard` für die Schicht-Regeln aus [`LH-FA-ARCH-003`](#lh-fa-arch-003--import-regeln-und-enforcement) ist Teil davon.
 
 Pflichten:
 
@@ -2364,8 +2347,8 @@ Der MVP muss enthalten:
   - Repository-Layout nach [`LH-FA-BUILD-009`](#lh-fa-build-009--repository-layout)
 - Doku-Struktur der u-boot-Codebase nach [`LH-FA-PROJDOCS-001`](#lh-fa-projdocs-001--mindeststruktur), inkl. ADR-Format ([`LH-FA-PROJDOCS-002`](#lh-fa-projdocs-002--adr-format)), Planning-Lifecycle ([`LH-FA-PROJDOCS-003`](#lh-fa-projdocs-003--planning-lifecycle)), Carveout-Disziplin ([`LH-FA-PROJDOCS-005`](#lh-fa-projdocs-005--carveout-disziplin)) und Dokumentationsreferenzmodell ([`LH-FA-PROJDOCS-006`](#lh-fa-projdocs-006--dokumentationsreferenzmodell))
 - Architektur-Pattern (hexagonal, driving/driven-Split) nach [`LH-FA-ARCH-001`](#lh-fa-arch-001--hexagonales-pattern)..[`LH-FA-ARCH-003`](#lh-fa-arch-003--import-regeln-und-enforcement), mit Import-Enforcement via `golangci-lint depguard`
-- SOLID-nahes Lint-Profil nach [`LH-QA-004`](#lh-qa-004--linting-solid-nahes-lint-profil) (5 Default-Linter + 24 SOLID-nahe Linter inkl. `depguard`, 29 Linter gesamt); Konfiguration in `.golangci.yml`, abgeleitete Quality-Doku muss Linter und Carveouts erklären
-- CI-Pipeline nach [`LH-QA-003`](#lh-qa-003--ci-fähigkeit-github-actions) (GitHub Actions, `.github/workflows/ci.yml`, Jobs `gates` + `security-gates` + `image-scan`, alle drei PR-blockierend)
+- SOLID-nahes Lint-Profil nach [`LH-QA-004`](#lh-qa-004--linting-solid-nahes-lint-profil); die Konfiguration liegt in `.golangci.yml`, die abgeleitete Quality-Doku erklärt Linter und Carveouts
+- CI-Pipeline nach [`LH-QA-003`](#lh-qa-003--ci-fähigkeit-github-actions) (GitHub Actions, drei PR-blockierende Jobs)
 
 ---
 
@@ -2392,6 +2375,7 @@ zeigen auf die zugehörige `LH-*`-Anforderung derselben Zeile.
 | ------------------ | ------------------------------ | --------- | ---------------------------------- | --------------- |
 | [LH-LESE-001](#lh-lese-001--modalverben)        | Modalverben                   | -         | -                                  | -               |
 | [LH-LESE-002](#lh-lese-002--sprache)        | Sprache                       | -         | -                                  | -               |
+| [LH-LESE-003](#lh-lese-003--dokumentenordnung)        | Dokumentenordnung             | -         | -                                  | -               |
 | [LH-ZB-001](#lh-zb-001--projektziel)          | Projektziel                   | -         | -                                  | -               |
 | [LH-ZB-002](#lh-zb-002--produktvision)          | Produktvision                 | -         | -                                  | -               |
 | [LH-ZB-003](#lh-zb-003--repo-beschreibung)          | Repo-Beschreibung             | -         | -                                  | -               |
@@ -2551,7 +2535,7 @@ zeigen auf die zugehörige `LH-*`-Anforderung derselben Zeile.
 Status: entschieden am 2026-05-21.
 Sprache: **Go**.
 
-Mindest-Toolchain: Go 1.26 oder neuer (`go 1.26.0` in `go.mod`, analog Referenzprojekt `k-deskflight`); Default-Pin im Dockerfile als `ARG GO_VERSION` (aktuell `1.26.3`, die aktuelle Stable-Version am Entscheidungsdatum). Pin-Hebung ist Routine ohne separaten Spec-Eintrag.
+Mindest-Toolchain: Go 1.26 oder neuer. Die Pin-Hebung im Dockerfile ist Routine ohne separaten Spec-Eintrag.
 
 ---
 
@@ -2646,6 +2630,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.3.3 | 2026-09-30 | [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion): Prüfung der Capability beim Containerstart statt im `u-boot doctor` präzisiert (die Capability ist vom Host aus nicht zuverlässig bestimmbar; `doctor` prüft die Konfiguration). | Vereinbarung mit dem Projektinhaber |
 | 0.3.4 | 2026-10-01 | [`LH-OPEN-002`](#lh-open-002--paketierung): Homebrew von „vertagt mit Trigger“ auf „gewählt“ gesetzt (eigener Tap, Formel aus den Release-Assets). | Vereinbarung mit dem Projektinhaber |
 | 0.3.5 | 2026-10-01 | [`LH-OPEN-002`](#lh-open-002--paketierung): Debian/RPM von „vertagt mit Trigger“ auf „gewählt“ gesetzt (`.deb`/`.rpm` für amd64 und arm64 als Release-Assets, kein gehostetes Repository). | Vereinbarung mit dem Projektinhaber |
+| 0.4.0 | 2026-10-02 | Strukturänderung ohne neue Produktzusage: Technische Festlegungen (Schemata, Beispielinstanzen, Algorithmen, Defaults, Build-/CI-, Doku- und Architektur-Details, Markierungsformate) wurden in ein eigenes technisches Dokument überführt; Projektkapitel §4.11–§4.13 und einzelne Anforderungen sind auf Vorgaben gekürzt; neue Lesehinweis-Anforderung [`LH-LESE-003`](#lh-lese-003--dokumentenordnung). Alle Anforderungs-Kennungen und Überschriften sind unverändert. | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt

@@ -56,7 +56,7 @@ func TestDriftGate1_MapVsDoctorCheckIDs(t *testing.T) {
 }
 
 // TestDriftGate2_MapVsMarkdownDoc is the T0-(h) Gate 2: every Map
-// entry must have a Markdown table row in docs/maintainer/cli-json-contract.md
+// entry must have a Markdown table row in spec/spezifikation.md
 // §5 Code-Registry, and vice versa. Both drift directions are checked.
 //
 // Sektion-Begrenzung via HTML-Markers `<!-- code-registry:start -->`
@@ -64,15 +64,15 @@ func TestDriftGate1_MapVsDoctorCheckIDs(t *testing.T) {
 // Doku-Erweiterungen um weitere Tabellen in anderen Sektionen
 // (Review M1-Findings adressiert).
 func TestDriftGate2_MapVsMarkdownDoc(t *testing.T) {
-	docPath := filepath.Join(repoRoot(t), "docs", "maintainer", "cli-json-contract.md")
+	docPath := filepath.Join(repoRoot(t), "spec", "spezifikation.md")
 	bytes, err := os.ReadFile(docPath)
 	if err != nil {
-		t.Fatalf("read cli-json-contract.md: %v", err)
+		t.Fatalf("read spezifikation.md: %v", err)
 	}
 
 	section := extractRegistrySection(string(bytes))
 	if section == "" {
-		t.Fatal("code-registry markers not found in cli-json-contract.md — Doku-Anker entfernt?")
+		t.Fatal("code-registry markers not found in spezifikation.md — Doku-Anker entfernt?")
 	}
 
 	docCodes := extractMarkdownCodes(section)
