@@ -116,7 +116,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	templateFilesAdapter := localtemplates.NewComposite(templateCatalogAdapter, localtemplates.New())
 
 	// Application services. The text-progress adapter renders
-	// LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 affected-paths
+	// LH-FA-INIT-005 / LH-FA-CLI-005A affected-paths
 	// events on stdout before any write happens; CLI-emitted post-
 	// success messages land afterwards on the same stream; errors
 	// go to stderr via the `fmt.Fprintf` below so the streams stay

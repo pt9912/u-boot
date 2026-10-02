@@ -8,7 +8,7 @@ import (
 )
 
 // TestMinimalEnvelope_AllOK pins the canonical All-OK shape from
-// Lastenheft §1846-1852: only `status`, `command`, `diagnostics`,
+// Lastenheft LH-NFA-USE-004: only `status`, `command`, `diagnostics`,
 // `exitCode` — no voll-schema fields.
 func TestMinimalEnvelope_AllOK(t *testing.T) {
 	raw, err := cli.MinimalEnvelopeForTest("doctor", "", nil, 0)
@@ -49,12 +49,12 @@ func TestMinimalEnvelope_AllOK(t *testing.T) {
 	forbidden := []string{"dryRun", "diff", "plannedFiles", "changes", "data"}
 	for _, k := range forbidden {
 		if _, present := got[k]; present {
-			t.Errorf("minimal envelope must not contain %q (Spec §1841)", k)
+			t.Errorf("minimal envelope must not contain %q (LH-NFA-USE-004)", k)
 		}
 	}
 }
 
-// TestMinimalEnvelope_StatusCoupling pins Spec §447/§1837: status
+// TestMinimalEnvelope_StatusCoupling pins LH-FA-CLI-007/LH-NFA-USE-004: status
 // follows the highest diagnostics-level present.
 func TestMinimalEnvelope_StatusCoupling(t *testing.T) {
 	cases := []struct {
@@ -108,7 +108,7 @@ func TestFullEnvelope_DryRunFalseDiffFalse_Serialised(t *testing.T) {
 	for _, key := range []string{"dryRun", "diff"} {
 		v, present := got[key]
 		if !present {
-			t.Errorf("%q missing — Spec §326 required-set violated", key)
+			t.Errorf("%q missing — LH-FA-CLI-007 required-set violated", key)
 			continue
 		}
 		if v != false {
@@ -117,7 +117,7 @@ func TestFullEnvelope_DryRunFalseDiffFalse_Serialised(t *testing.T) {
 	}
 }
 
-// TestFullEnvelope_RequiredSet pins Spec §326: required keys are
+// TestFullEnvelope_RequiredSet pins LH-FA-CLI-007: required keys are
 // status, command, dryRun, diff, plannedFiles, changes,
 // diagnostics, exitCode (all eight).
 func TestFullEnvelope_RequiredSet(t *testing.T) {
@@ -137,7 +137,7 @@ func TestFullEnvelope_RequiredSet(t *testing.T) {
 	required := []string{"status", "command", "dryRun", "diff", "plannedFiles", "changes", "diagnostics", "exitCode"}
 	for _, k := range required {
 		if _, present := got[k]; !present {
-			t.Errorf("required field %q missing in full envelope (Spec §326)", k)
+			t.Errorf("required field %q missing in full envelope (LH-FA-CLI-007)", k)
 		}
 	}
 }
@@ -173,7 +173,7 @@ func TestFullEnvelope_EmptyArraysSerialiseAsBracketBracket(t *testing.T) {
 }
 
 // TestMinimalEnvelope_SubcommandOmittedWhenEmpty pins that
-// Subcommand is omitempty (Spec §1827: optional for non-grouped
+// Subcommand is omitempty (LH-NFA-USE-004: optional for non-grouped
 // commands, mandatory for template/config).
 func TestMinimalEnvelope_SubcommandOmittedWhenEmpty(t *testing.T) {
 	raw, err := cli.MinimalEnvelopeForTest("doctor", "", nil, 0)

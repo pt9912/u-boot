@@ -82,7 +82,7 @@ var ErrInvalidLogsTime = errors.New("--since/--until must be a duration like 30m
 // ErrFollowJSONNotSupported is returned by `u-boot logs --follow
 // --json` (slice-v1-cli-json-dry-run-logs T0-(a) Option (A)
 // festgezurrt): the unbounded streaming use case cannot be
-// reconciled with the LH-NFA-USE-004 §1841 Single-Envelope-pro-
+// reconciled with the LH-NFA-USE-004 Single-Envelope-pro-
 // Aufruf-Vertrag. Konsumenten die strukturiert streamen wollen
 // können `--tail=N --json` für Bounded-Snapshots nutzen ODER
 // einen Folge-Slice mit NDJSON-Carveout abwarten. Maps to Exit-
@@ -172,7 +172,7 @@ LH-FA-CLI-006 exit codes:
 		},
 	}
 	cmd.Flags().BoolVar(&flags.Follow, "follow", false,
-		"stream logs continuously until Ctrl-C (LH-FA-UP-005 §1038)")
+		"stream logs continuously until Ctrl-C (LH-FA-UP-005)")
 	cmd.Flags().StringVar(&flags.Tail, "tail", "",
 		"show only the last n lines per service (non-negative integer; default = all)")
 	cmd.Flags().BoolVar(&flags.NoLogPrefix, "no-log-prefix", false,

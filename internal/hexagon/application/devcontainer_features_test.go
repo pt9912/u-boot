@@ -336,7 +336,7 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 //
 //   - The key parses as a [domain.FeatureName] (slice T0-(c)).
 //   - The source is non-empty and starts with the canonical
-//     `ghcr.io/devcontainers/features/` prefix (Spec-§711 — built-
+//     `ghcr.io/devcontainers/features/` prefix (LH-FA-DEV-003 — built-
 //     in catalogue mirrors the upstream devcontainers/features
 //     repository). Custom prefixes are reserved for external
 //     features (via the Allowlist + features.<name>.source override

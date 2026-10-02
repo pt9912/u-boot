@@ -95,13 +95,13 @@ func (e *Engine) ComposeUp(ctx context.Context, dir string, opts driven.ComposeU
 	if err := cmd.Run(); err != nil {
 		return driven.ComposeUpResult{}, fmt.Errorf("docker compose up failed (%s): %w", err.Error(), driven.ErrComposeRuntime)
 	}
-	// LH-FA-UP-001 §970 fire-and-forget pin: ComposeUp must NOT
+	// LH-FA-UP-001 fire-and-forget pin: ComposeUp must NOT
 	// follow up with a `compose ps` roundtrip. The original T2
 	// design included a post-up snapshot in ComposeUpResult.Services,
 	// but a post-T6 review confirmed UpService never reads the field
 	// (the polling loop calls ComposePs separately) and the extra
 	// roundtrip could fail with ErrComposeRuntime after a successful
-	// up — leaking past the §970 fire-and-forget guarantee.
+	// up — leaking past the LH-FA-UP-001 fire-and-forget guarantee.
 	return driven.ComposeUpResult{}, nil
 }
 

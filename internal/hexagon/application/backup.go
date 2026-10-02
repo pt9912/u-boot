@@ -20,14 +20,14 @@ import (
 const backupSuffixCap = 1000
 
 // BackupPath copies src to a sibling backup path and returns the
-// chosen backup path. Suffix selection follows LH-FA-INIT-005 §607:
+// chosen backup path. Suffix selection follows LH-FA-INIT-005:
 // <src>.bak first, then <src>.bak.1, .bak.2, ... — smallest free
 // numeric suffix, existing backups are never overwritten.
 //
 // File-vs-directory dispatch comes from [driven.FileSystem.Lstat]
 // (Lstat, not Stat, so symlinks are detectable). Symlinks are
 // rejected with [driving.ErrBackupUnsupportedKind] — LH-FA-INIT-005
-// §608 does not specify symlink semantics, and silently following
+// LH-FA-INIT-005 does not specify symlink semantics, and silently following
 // would surprise users who symlink shared assets into the project.
 //
 // TOCTOU: two concurrent runs can both pick the same `.bak.N` slot.
@@ -40,7 +40,7 @@ const backupSuffixCap = 1000
 // [driving.ErrBackupSuffixExhausted] outcome.
 //
 // On partial directory-copy failure, BackupPath rolls back by
-// removing the partial destination (LH-FA-INIT-005 §608 explicitly
+// removing the partial destination (LH-FA-INIT-005 explicitly
 // requires this; POSIX atomicity for recursive trees is not
 // guaranteed). A non-nil rollback error is joined to the original
 // via errors.Join so the operator can see both — silently swallowing

@@ -13,7 +13,7 @@ import (
 )
 
 // TestInit_AllowExternalFeatureSources_Seeds pins the LH-FA-DEV-003
-// Spec §714 init wiring: passing `--allow-external-feature-sources
+// LH-FA-DEV-003 init wiring: passing `--allow-external-feature-sources
 // URL[,URL]` together with `--devcontainer` seeds the freshly-
 // written u-boot.yaml's `devcontainer.featureSources.allow` list.
 func TestInit_AllowExternalFeatureSources_Seeds(t *testing.T) {
@@ -45,7 +45,7 @@ func TestInit_AllowExternalFeatureSources_Seeds(t *testing.T) {
 }
 
 // TestInit_AllowExternalFeatureSources_RequiresDevcontainer pins the
-// Spec §714 constraint: the flag is only valid together with
+// LH-FA-DEV-003 constraint: the flag is only valid together with
 // `--devcontainer`. Without it the use case rejects before any FS
 // side effect with the LH-FA-DEV-003 sentinel.
 func TestInit_AllowExternalFeatureSources_RequiresDevcontainer(t *testing.T) {

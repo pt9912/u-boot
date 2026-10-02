@@ -220,7 +220,7 @@ func TestConfigGet_ProjectName_MissingName_ReturnsSchemaInvalid(t *testing.T) {
 	t.Parallel()
 	svc, fs := newConfigService(t)
 	// schemaVersion present but project.name missing — corrupt
-	// config (LH-FA-CONF-002 §1308 requires the name).
+	// config (LH-FA-CONF-002 requires the name).
 	if err := fs.WriteFile(configTestBaseDir+"/u-boot.yaml",
 		[]byte("schemaVersion: 1\nproject: {}\n"), 0o644); err != nil {
 		t.Fatalf("seed: %v", err)
@@ -555,7 +555,7 @@ func TestConfigSet_PatchScalarFails_ReturnsSchemaInvalid(t *testing.T) {
 //	u-boot config get project.name
 //
 // Asserts that the second Get returns the value the Set wrote.
-// Spec anchor: LH-FA-CONF-005 §1366-1380.
+// Spec anchor: LH-FA-CONF-005.
 func TestConfigSet_LHFACONF005_RoundTripPin(t *testing.T) {
 	t.Parallel()
 	svc, fs := newConfigService(t)

@@ -170,7 +170,7 @@ func (a *App) Execute(ctx context.Context, args []string, stdout, stderr io.Writ
 }
 
 // ErrConflictingModeFlags is returned by the init subcommand when
-// `--yes` and `--no-interactive` are both set — LH-FA-CLI-005A §235
+// `--yes` and `--no-interactive` are both set — LH-FA-CLI-005A
 // declares them mutually exclusive. Lives in the cli package (not
 // in `driving`) because the application layer never sees these
 // flags; they are pure CLI-level mode switches.
@@ -187,7 +187,7 @@ var ErrConflictingModeFlags = errors.New("--yes and --no-interactive are mutuall
 // Symmetrie-Bruch-Fix vs. `cobra.ExactArgs(1)`-Vorzustand: das
 // vorherige `cobra.ExactArgs(1)`-Guard feuerte VOR RunE und ließ
 // im --json-Pfad einen Konsumenten ohne Envelope auf stdout
-// zurück (Spec §1841 verletzt — eine JSON-Mode-Invocation MUSS
+// zurück (LH-NFA-USE-004 verletzt — eine JSON-Mode-Invocation MUSS
 // einen Envelope produzieren). Der neue Custom-`Args`-Validator
 // (`validateRemoveArgs`) emittiert den Envelope BEVOR er den
 // Sentinel an Cobra returnt; ExitCode-Mapping bleibt 2
@@ -195,7 +195,7 @@ var ErrConflictingModeFlags = errors.New("--yes and --no-interactive are mutuall
 var ErrServiceNameMissing = errors.New("service name is required")
 
 // ErrInvalidTimeout is returned by the M6 up subcommand when
-// `--timeout` is a negative integer (LH-FA-UP-001 §965). The CLI
+// `--timeout` is a negative integer (LH-FA-UP-001). The CLI
 // could not delegate that validation to the application service —
 // the application takes a `time.Duration` and could not distinguish
 // a deliberate negative value from a unit-mistake-mismatch — so the
@@ -228,7 +228,7 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 //          (ErrInvalidServiceName), LH-AK-001 missing BaseDir
 //          (ErrBaseDirMissing), LH-FA-INIT-005 unsupported
 //          backup-source kind (ErrBackupUnsupportedKind), LH-FA-INIT-005
-//          §619 force-without-backup (ErrForceRequiresBackup),
+//          LH-FA-INIT-005 force-without-backup (ErrForceRequiresBackup),
 //          LH-FA-ADD-001 missing u-boot.yaml
 //          (ErrProjectNotInitialized), LH-FA-ADD-002 unknown
 //          service (ErrServiceUnsupported), LH-FA-ADD-005
@@ -255,7 +255,7 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 //          or IO during the per-file render copy).
 //          Footnote (slice-v1-cli-json-dry-run-init T0-(f)): die
 //          Backup-Sentinels werden hier auf LH-NFA-REL-003 gezogen,
-//          obwohl Spec §595-619 (INIT-005 "Überschreibschutz") sie
+//          obwohl LH-FA-INIT-005 (INIT-005 "Überschreibschutz") sie
 //          ursprünglich der INIT-005-Klasse zuordnete — Engineering-
 //          Entscheidung im init-Slice, um Envelope-Code und
 //          Exit-Code-Klasse (technische Persistenz) zu synchronisieren.
@@ -319,7 +319,7 @@ func isValidationError(err error) bool {
 		// Gate, z.B. stdin EOF / pipe break) teilt die LH-FA-CLI-005A-
 		// Klasse mit ErrConfirmationRequired und mappt auf exit 10.
 		// Distinct vom User-Refusal-Pfad — beide sind Gate-Failures
-		// vom selben Spec-Anker (§254).
+		// vom selben Spec-Anker (LH-FA-CLI-005A).
 		errors.Is(err, driving.ErrConfirmerUnavailable) ||
 		errors.Is(err, driving.ErrGenerateManualConflict) ||
 		isServiceValidationError(err) ||
@@ -383,7 +383,7 @@ func isConfigValidationError(err error) bool {
 		// `init --allow-external-feature-sources` without
 		// `--devcontainer`, and by `generate devcontainer`'s
 		// pre-write allowlist append) must map to exit-code 10
-		// per Spec §720/§1353. The sentinel lives in
+		// per LH-FA-DEV-003/LH-FA-CONF-002. The sentinel lives in
 		// `internal/hexagon/domain` so this adapter file can
 		// reference it without violating the
 		// `adapter-no-application` depguard rule.

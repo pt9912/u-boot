@@ -17,7 +17,7 @@ import (
 // §T5 truth table, then hand off to the [driven.DockerEngine] for
 // the actual `compose down`.
 //
-// Truth table (LH-FA-CLI-005A §254 / slice plan §T5):
+// Truth table (LH-FA-CLI-005A / slice plan §T5):
 //
 //	RemoveVolumes | AssumeYes | NonInteractive | behaviour
 //	false         | *         | *              | proceed, no confirmer call
@@ -168,7 +168,7 @@ func (s *DownService) checkComposeFilePresent(baseDir string) error {
 // runConfirmationGate implements the §T5 truth table. Returns nil
 // when the request should proceed to ComposeDown; returns wrapped
 // [driving.ErrConfirmationRequired] (CLI code 10) when the
-// destructive op is refused or skipped per LH-FA-CLI-005A §254.
+// destructive op is refused or skipped per LH-FA-CLI-005A.
 func (s *DownService) runConfirmationGate(ctx context.Context, req driving.DownRequest) error {
 	if !req.RemoveVolumes {
 		return nil // Row 1: non-destructive; no confirmation needed.
@@ -177,7 +177,7 @@ func (s *DownService) runConfirmationGate(ctx context.Context, req driving.DownR
 		return nil // Row 2: explicit --yes auto-approves.
 	}
 	if req.NonInteractive {
-		// Row 3: LH-FA-CLI-005A §254 — non-interactive without
+		// Row 3: LH-FA-CLI-005A — non-interactive without
 		// --yes ⇒ fail-fast with ErrConfirmationRequired (code 10).
 		// No confirmer call, no engine call.
 		return fmt.Errorf("down service: --volumes refused in --no-interactive without --yes: %w", driving.ErrConfirmationRequired)

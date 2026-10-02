@@ -29,7 +29,7 @@ type portProbeTarget struct {
 // on those forms would block `u-boot up` for a service that is
 // otherwise healthy. Instead, the caller emits a Severity-warn
 // diagnostic (ID prefix `up.port.<service>.<index>`) and proceeds
-// without blocking stabilization on the port (LH-FA-UP-001 §969).
+// without blocking stabilization on the port (LH-FA-UP-001).
 //
 // Eight syntax cases — the M6 slice plan's robust-port-parsing
 // table — are accepted:

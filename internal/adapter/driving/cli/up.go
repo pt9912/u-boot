@@ -100,7 +100,7 @@ type upStatusData struct {
 //	                  declared service to stabilize (default 60).
 //	                  `0` short-circuits to fire-and-forget (no
 //	                  polling, no port/healthcheck probes — see
-//	                  LH-FA-UP-001 §970). Negative values are rejected
+//	                  LH-FA-UP-001). Negative values are rejected
 //	                  with [ErrInvalidTimeout] (exit code 2).
 //
 // The persistent flags --quiet (suppresses the status table) /
@@ -118,13 +118,13 @@ func newUpCommand(a *App) *cobra.Command {
 		Long: `Bring the Compose environment defined in compose.yaml up via
 docker compose up -d, then poll docker compose ps every 500ms until
 every declared service reaches healthy (when a healthcheck is defined)
-or running (when no healthcheck). LH-FA-UP-001 §966-§969 stabilization.
+or running (when no healthcheck). LH-FA-UP-001-LH-FA-UP-001 stabilization.
 
 Stabilization semantics per LH-FA-UP-001:
   - --timeout <sec>      maximum wait (default 60). Negative ⇒ exit 2.
   - --timeout=0          fire-and-forget. No polling, no probes;
                          status table omitted, info diagnostic shown
-                         (LH-FA-UP-001 §970).
+                         (LH-FA-UP-001).
 
 LH-FA-CLI-006 exit codes:
   - 10  no u-boot.yaml or compose.yaml in the current directory
@@ -142,7 +142,7 @@ to stderr live (unaffected by --quiet; silenced in --json mode).`,
 		},
 	}
 	cmd.Flags().IntVar(&flags.TimeoutSec, "timeout", 60,
-		"maximum seconds to wait for stabilization; 0 = fire-and-forget (LH-FA-UP-001 §963/§970)")
+		"maximum seconds to wait for stabilization; 0 = fire-and-forget (LH-FA-UP-001/LH-FA-UP-001)")
 	return cmd
 }
 

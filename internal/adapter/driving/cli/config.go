@@ -131,7 +131,7 @@ type configGetFlags struct {
 // configSetFlags bundles the per-invocation flag state of
 // `u-boot config set`. The LH-FA-DEV-003 allowlist seed flag is
 // only meaningful when the positional path is
-// `devcontainer.featureSources.allow` (Spec §717); the use case
+// `devcontainer.featureSources.allow` (LH-FA-DEV-003); the use case
 // re-checks before applying. DryRun/Diff drive the LH-FA-CLI-007/008
 // preview-mode (T5); JSON/Quiet read through from the root.
 type configSetFlags struct {
@@ -309,7 +309,7 @@ func registerConfigPreviewRejectFlags(cmd *cobra.Command, form string, dryRun, d
 // the form-specific base validator (NoArgs for bare, ExactArgs(N)
 // for get/set) and, on failure with --json active, emits the
 // Envelope-konformen reject on stdout BEFORE returning the error to
-// Cobra (Spec §1841/§1842 — `cobra.ExactArgs` alone would fire its
+// Cobra (LH-NFA-USE-004/LH-NFA-USE-004 — `cobra.ExactArgs` alone would fire its
 // raw stderr error before RunE and the consumer would get no
 // envelope). Pattern-Erbe remove's validateRemoveArgs.
 //
@@ -344,7 +344,7 @@ func configArgsValidator(a *App, subcommand string, base cobra.PositionalArgs) c
 // preview flags (Cluster-Plan Z. 91-100). Pattern-Erbe logs'
 // [ErrFollowJSONNotSupported]: the flag is registered on the command
 // so Cobra parses it cleanly, and the RunE rejects it Envelope-
-// konform (LH-NFA-USE-004 §1841). Maps to Exit 2 via [isUsageError].
+// konform (LH-NFA-USE-004). Maps to Exit 2 via [isUsageError].
 var ErrDryRunNotApplicable = errors.New("--dry-run/--diff is only valid for `config set`")
 
 // runConfigShow streams the full u-boot.yaml body (bare `config`,
@@ -437,12 +437,12 @@ func runConfigSet(
 		return reportErrorSub(out, fmt.Errorf("%w: %v", driving.ErrConfigPathUnknown, err), nil, flags.DryRun, flags.Diff, flags.JSON, "config", "set", mapErr, nil)
 	}
 
-	// Spec §714-717: --allow-external-feature-sources is only valid
+	// LH-FA-DEV-003: --allow-external-feature-sources is only valid
 	// on devcontainer.featureSources.allow (Pre-UC-Validation, T0-(i)).
 	if len(flags.AllowExternalFeatureSources) > 0 &&
 		path.Kind != domain.ConfigDevcontainerFeatureSourcesAllow {
 		err := fmt.Errorf(
-			"%w: --allow-external-feature-sources is only valid for `config set devcontainer.featureSources.allow` (Spec §714-717); got path %s",
+			"%w: --allow-external-feature-sources is only valid for `config set devcontainer.featureSources.allow` (LH-FA-DEV-003); got path %s",
 			driving.ErrConfigPathUnknown, path)
 		return reportErrorSub(out, err, nil, flags.DryRun, flags.Diff, flags.JSON, "config", "set", mapErr, nil)
 	}
@@ -643,7 +643,7 @@ func runConfigSetMany(
 	}
 	if len(flags.AllowExternalFeatureSources) > 0 && !hasSources {
 		return fail(fmt.Errorf(
-			"%w: --allow-external-feature-sources is only valid together with the path devcontainer.featureSources.allow (Spec §714-717)",
+			"%w: --allow-external-feature-sources is only valid together with the path devcontainer.featureSources.allow (LH-FA-DEV-003)",
 			driving.ErrConfigPathUnknown), nil)
 	}
 	cwd, err := getwd()

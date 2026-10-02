@@ -30,7 +30,7 @@ const (
 	ServiceStateDeactivated
 
 	// ServiceStateEnabledUnset means `services.<name>` is present
-	// but the `enabled:` key is missing — per LH-FA-ADD-005 §893
+	// but the `enabled:` key is missing — per LH-FA-ADD-005
 	// this counts as deactivated for add purposes and is flagged as
 	// a Warn in `u-boot doctor`.
 	ServiceStateEnabledUnset

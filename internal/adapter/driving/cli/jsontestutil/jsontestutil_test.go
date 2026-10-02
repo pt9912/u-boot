@@ -86,7 +86,7 @@ func TestAssertMinimalEnvelope_AcceptsLHCode(t *testing.T) {
 	}`)
 	jsontestutil.AssertMinimalEnvelope(r, raw)
 	if len(r.errors) != 0 {
-		t.Errorf("LH-codes must pass (Spec §445), got errors: %v", r.errors)
+		t.Errorf("LH-codes must pass (LH-FA-CLI-007), got errors: %v", r.errors)
 	}
 }
 
@@ -286,7 +286,7 @@ func TestAssertFullEnvelope_RejectsHunkStartZeroWithLinesPositive(t *testing.T) 
 }
 
 // TestAssertFullEnvelope_HunkAbsenceIsOK pins that the hunks field
-// is optional on plannedFile entries — Spec §326 lists it as part of
+// is optional on plannedFile entries — LH-FA-CLI-007 lists it as part of
 // the --diff --json subset only, and omitempty omission must not
 // trigger checkHunks at all.
 func TestAssertFullEnvelope_HunkAbsenceIsOK(t *testing.T) {
@@ -457,7 +457,7 @@ func TestWithDataKeyAbsent_FailsWhenKeyPresent(t *testing.T) {
 func TestDefaultAllowedCodes_NotEmpty(t *testing.T) {
 	codes := jsontestutil.DefaultAllowedCodes()
 	if len(codes) == 0 {
-		t.Errorf("DefaultAllowedCodes must not be empty (Spec §1835)")
+		t.Errorf("DefaultAllowedCodes must not be empty (LH-NFA-USE-004)")
 	}
 }
 

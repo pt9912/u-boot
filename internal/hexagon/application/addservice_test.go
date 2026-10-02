@@ -268,7 +268,7 @@ func TestAdd_ActiveWithAllArtifactsIsNoOp(t *testing.T) {
 	}
 }
 
-// TestAdd_InconsistentYAML_ReturnsSentinel pins Spec §895: a managed
+// TestAdd_InconsistentYAML_ReturnsSentinel pins LH-FA-ADD-005: a managed
 // compose-block without a YAML anchor aborts with a repair hint
 // instead of silently re-creating the anchor.
 func TestAdd_InconsistentYAML_ReturnsSentinel(t *testing.T) {

@@ -127,11 +127,11 @@ func TestEngine_ComposeDown_AllProbesPass_Succeeds(t *testing.T) {
 
 func TestEngine_ComposeUp_AllProbesPass_NoPostUpPsRoundtrip(t *testing.T) {
 	t.Parallel()
-	// Why: pin the LH-FA-UP-001 §970 fire-and-forget contract at
+	// Why: pin the LH-FA-UP-001 fire-and-forget contract at
 	// the adapter level. A successful `compose up` MUST NOT
 	// follow up with a `compose ps` roundtrip — if it did, the
 	// extra call could surface ErrComposeRuntime after the `up`
-	// itself already succeeded, leaking past the §970 guarantee.
+	// itself already succeeded, leaking past the LH-FA-UP-001 guarantee.
 	//
 	// `/bin/echo` returns 0 for `up`; if the adapter had a
 	// follow-up ps it would receive non-JSON stdout and surface

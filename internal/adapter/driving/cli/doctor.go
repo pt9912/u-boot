@@ -25,10 +25,10 @@ import (
 // logger.Debug/Info calls are the surface they govern.
 //
 // JSON-Mode-Interaktion (slice-v1-cli-json-dry-run-doctor §T0-(e)):
-//   - --quiet --json: --quiet is a no-op in JSON mode (Spec §1834
+//   - --quiet --json: --quiet is a no-op in JSON mode (LH-NFA-USE-004
 //     already filters Ok/Info items out of diagnostics[]).
 //   - --strict --json: still upgrades Warn→exitCode 11; status
-//     remains "warn" because Spec §1837 couples status to the
+//     remains "warn" because LH-NFA-USE-004 couples status to the
 //     highest diagnostics-level, not to --strict.
 type doctorFlags struct {
 	Strict bool
@@ -135,7 +135,7 @@ func runDoctor(
 
 // writeDoctorJSON renders the doctor result as a LH-NFA-USE-004
 // minimal envelope (slice-v1-cli-json-dry-run-doctor T5). SeverityOK
-// and SeverityInfo items are filtered out (Spec §1834: level must be
+// and SeverityInfo items are filtered out (LH-NFA-USE-004: level must be
 // warn or error); the All-OK case ships diagnostics: [].
 //
 // exitCode mirrors the Cobra return-value mapping: 0 for ok/warn
@@ -157,7 +157,7 @@ func writeDoctorJSON(out io.Writer, report domain.DiagnosticReport, strict bool)
 
 // mapDiagnosticsToJSON translates domain.Diagnostic items into the
 // wire-format diagnosticItem slice, filtering out SeverityOK and
-// SeverityInfo per Spec §1834 (level must be warn or error). Returns
+// SeverityInfo per LH-NFA-USE-004 (level must be warn or error). Returns
 // an empty (non-nil) slice if no warns/errors remain so the envelope
 // renders `"diagnostics":[]` rather than `"diagnostics":null`.
 func mapDiagnosticsToJSON(items []domain.Diagnostic) []diagnosticItem {
@@ -165,7 +165,7 @@ func mapDiagnosticsToJSON(items []domain.Diagnostic) []diagnosticItem {
 	for _, item := range items {
 		level := severityToJSONLevel(item.Severity)
 		if level == "" {
-			continue // OK / Info items are filtered (Spec §1834)
+			continue // OK / Info items are filtered (LH-NFA-USE-004)
 		}
 		out = append(out, diagnosticItem{
 			Level:   level,
@@ -176,7 +176,7 @@ func mapDiagnosticsToJSON(items []domain.Diagnostic) []diagnosticItem {
 	return out
 }
 
-// severityToJSONLevel maps domain.Severity to the Spec §1834 level
+// severityToJSONLevel maps domain.Severity to the LH-NFA-USE-004 level
 // vocabulary (only warn / error). Returns "" for SeverityOK and
 // SeverityInfo to signal "filter out".
 //

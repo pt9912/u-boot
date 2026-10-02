@@ -99,7 +99,7 @@ func TestConfigSet_OrphanFeature_PopulatesWarnings(t *testing.T) {
 		t.Errorf("Warning.Code = %q, want LH-FA-DEV-003", w.Code)
 	}
 	if w.Level != "warn" {
-		t.Errorf("Warning.Level = %q, want warn (Spec §1834 — warn|error only)", w.Level)
+		t.Errorf("Warning.Level = %q, want warn (LH-NFA-USE-004 — warn|error only)", w.Level)
 	}
 	if w.Subject != "unknown-thing" {
 		t.Errorf("Warning.Subject = %q, want feature name `unknown-thing`", w.Subject)

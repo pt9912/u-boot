@@ -160,7 +160,7 @@ type ComposeService struct {
 // ComposeUpResult is the return value of [DockerEngine.ComposeUp].
 // Carries no fields today — a post-T6 review (M6 closure) dropped
 // the original ComposeUp-internal `compose ps` snapshot to honor
-// the LH-FA-UP-001 §970 fire-and-forget contract (no `ps`
+// the LH-FA-UP-001 fire-and-forget contract (no `ps`
 // roundtrip after a successful `up`). The type stays so future
 // metadata (per-call timing, image-pull stats) can land without
 // another signature break; for M6 it is intentionally empty.

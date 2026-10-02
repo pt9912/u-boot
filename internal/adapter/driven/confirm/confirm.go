@@ -63,7 +63,7 @@ func (c *Confirmer) ConfirmTreatAsExisting(_ context.Context, baseDir string, in
 	return answer == "y" || answer == "yes", nil
 }
 
-// ConfirmRemoveVolumes renders the LH-FA-CLI-005A §254 destructive-
+// ConfirmRemoveVolumes renders the LH-FA-CLI-005A destructive-
 // confirmation prompt for `u-boot down --volumes`. Defaults to `N`
 // because confirming "yes" deletes named Compose volumes (typically
 // persistent service data — Postgres tables, Redis snapshots).

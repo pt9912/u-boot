@@ -1,7 +1,7 @@
 // Package jsontestutil bietet schema-konforme Assertion-Helper für
 // `u-boot --json`-Ausgaben (slice-v1-cli-json-dry-run-doctor T2).
 // Spec-Anker: docs/maintainer/cli-json-contract.md zitiert das Lastenheft
-// §1823-1842 (Minimalkontrakt) und §322-417 (Voll-Schema) verbatim;
+// LH-NFA-USE-004 (Minimalkontrakt) und LH-FA-CLI-007 (Voll-Schema) verbatim;
 // dieses Package prüft Schema-Konformität als Go-Code, kein embedded
 // JSON-Schema, kein zusätzlicher Dep.
 //
@@ -10,7 +10,7 @@
 package jsontestutil
 
 // DefaultAllowedCodes liefert die Code-Registry für
-// `diagnostics[].code`. Spec §1835 / §445 erlaubt zwei Quellen:
+// `diagnostics[].code`. LH-NFA-USE-004 / LH-FA-CLI-007 erlaubt zwei Quellen:
 // LH-Kennungen (`LH-FA-DEV-003`, …) oder tool-interne Codes, falls
 // ihre Bedeutung dokumentiert ist. u-boot verwendet tool-interne
 // Codes mit Dotted-Notation; diese Funktion ist die Source-of-Truth

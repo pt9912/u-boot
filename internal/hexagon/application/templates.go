@@ -80,10 +80,10 @@ type templateData struct {
 //
 // Managed reports whether the template wraps its content in a
 // `U-BOOT MANAGED BLOCK: init` marker (LH-SA-FILE-002) of the given
-// Style. Managed templates support the LH-FA-INIT-005 §611–§614
+// Style. Managed templates support the LH-FA-INIT-005–LH-FA-INIT-005
 // block-only re-init path; whole-file-managed templates
 // (Managed=false, e.g. .gitignore) require --backup for re-init
-// because the §619 backup-mandatory rule kicks in unconditionally.
+// because the LH-FA-INIT-005 backup-mandatory rule kicks in unconditionally.
 type fileTemplate struct {
 	Path         string
 	TemplateName string
@@ -98,7 +98,7 @@ type fileTemplate struct {
 // to avoid the gochecknoglobals false-positive on immutable list
 // constants.
 //
-// The Managed flag tracks the LH-FA-INIT-005 §611 list of
+// The Managed flag tracks the LH-FA-INIT-005 list of
 // structured configuration files. .gitignore is intentionally left
 // off the list (matches the spec verbatim); u-boot.yaml is handled
 // outside this slice in [InitProjectService.executeUBootYAML] with

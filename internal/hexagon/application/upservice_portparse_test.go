@@ -72,7 +72,7 @@ func TestParseComposePort_NonProbableStringForms(t *testing.T) {
 	t.Parallel()
 	// All forms in this table must return probable=false. The
 	// caller emits a Severity-warn diagnostic and skips probing —
-	// LH-FA-UP-001 §969 mandates the graceful warn path.
+	// LH-FA-UP-001 mandates the graceful warn path.
 	cases := []struct {
 		name string
 		raw  string

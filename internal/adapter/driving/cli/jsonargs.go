@@ -5,11 +5,11 @@ import (
 )
 
 // jsonArgsValidator wraps a positional-args base validator with the
-// LH-NFA-USE-004 §1841 envelope hook: when --json is active and the
+// LH-NFA-USE-004 envelope hook: when --json is active and the
 // base validator rejects (wrong arg count), the error is emitted as a
 // spec-valid envelope on stdout BEFORE Cobra returns its usage error.
 // Without it a machine consumer gets a bare stderr message and no
-// JSON on stdout — a §1841 violation.
+// JSON on stdout — a LH-NFA-USE-004 violation.
 //
 // Cluster-Konsolidierung (slice-v1-cli-json-envelope-consolidation
 // T1, SD-A (a)): this is the single shared form that config's
@@ -17,7 +17,7 @@ import (
 // and that add/init/generate adopt — removing the R15-Cross-Slice-1
 // pattern drift.
 //
-// previewFlags selects the §1842 schema policy (Schutzplanke 1):
+// previewFlags selects the LH-NFA-USE-004 schema policy (Schutzplanke 1):
 //   - true for modifying forms (add/init/generate/remove/`config
 //     set`): reads the actual --dry-run/--diff state so a wrong-arg
 //     `--dry-run --json add` still emits the Voll-Schema.

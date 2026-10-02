@@ -35,7 +35,7 @@ func NewText(out io.Writer) *TextWriter {
 	return &TextWriter{out: out}
 }
 
-// AffectedFiles renders the LH-FA-INIT-005 §609 summary as a
+// AffectedFiles renders the LH-FA-INIT-005 summary as a
 // header line plus one line per row. The "(with backup)" marker
 // follows the canonical em-dash + parenthetical format.
 func (t *TextWriter) AffectedFiles(baseDir string, rows []driven.AffectedFile) {

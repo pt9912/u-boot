@@ -716,7 +716,7 @@ func TestDoctor_ComposeYaml_WarnOnMissingServices(t *testing.T) {
 	}
 	d := findDiagnostic(t, resp.Report.Items, "compose.yaml.valid")
 	if d.Severity != domain.SeverityWarn {
-		t.Errorf("Severity = %v, want Warn (LH-AK-001 §2299 forbids Error on fresh init)", d.Severity)
+		t.Errorf("Severity = %v, want Warn (LH-AK-001 forbids Error on fresh init)", d.Severity)
 	}
 	if !strings.Contains(d.Message, "no `services:` entries") {
 		t.Errorf("Message does not name the missing services: %q", d.Message)
@@ -990,7 +990,7 @@ func TestDoctor_SentinelCleanedUpOnSuccess(t *testing.T) {
 func TestDoctor_T7_DevcontainerSeverity_EscalatesWhenEnabledTrue(t *testing.T) {
 	svc, fs, _, _, _ := newDoctorService(t)
 	// u-boot.yaml flips devcontainer.enabled=true → all devcontainer
-	// checks must now be Error per LH-FA-DIAG-002 §1073.
+	// checks must now be Error per LH-FA-DIAG-002.
 	if err := fs.WriteFile(filepath.Join(doctorBaseDir, "u-boot.yaml"),
 		[]byte("schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n"), 0o644); err != nil {
 		t.Fatalf("seed: %v", err)

@@ -18,7 +18,7 @@ import (
 // existing setup (compose.yaml already has redis, 6 lines appended).
 //
 // composeFreshAdd is the new compose.yaml body for the create-from-
-// scratch case — 12 lines exactly (Spec §430 `count: 12`).
+// scratch case — 12 lines exactly (LH-FA-CLI-007 `count: 12`).
 const composeFreshAdd = `services:
   postgres:
     image: postgres:16
@@ -40,11 +40,11 @@ const composeExistingOld = `services:
     restart: unless-stopped
 `
 
-// composeExistingNew appends a six-line postgres block (Spec §477
+// composeExistingNew appends a six-line postgres block (LH-FA-CLI-008
 // `count: 6` — the added lines, not context). The block intentionally
 // totals SIX additive lines (matching the Spec example exactly), not
 // seven — including a fourth attribute would push count to 7 and
-// drift against the §477 canonical example.
+// drift against the LH-FA-CLI-008 canonical example.
 const composeExistingNew = `services:
   redis:
     image: redis:7
@@ -79,7 +79,7 @@ func unmarshalEnv(t *testing.T, raw []byte) map[string]any {
 
 // TestAddAcceptance_VarianteA_FreshInit_PinsCreateCount12 is the
 // Variante-A pin from Plan §Aufhebungsbedingung: the create-from-
-// scratch postgres block has count=12 (Spec §430). Anti-Drift:
+// scratch postgres block has count=12 (LH-FA-CLI-007). Anti-Drift:
 // changing the CountLines formula or breaking the create-action
 // path would surface here before downstream consumers notice.
 func TestAddAcceptance_VarianteA_FreshInit_PinsCreateCount12(t *testing.T) {
@@ -113,7 +113,7 @@ func TestAddAcceptance_VarianteA_FreshInit_PinsCreateCount12(t *testing.T) {
 	}
 	first, _ := changes[0].(map[string]any)
 	if got, _ := first["count"].(float64); int(got) != 12 {
-		t.Errorf("Variante A compose.yaml count: want 12 (Spec §430), got %v", first["count"])
+		t.Errorf("Variante A compose.yaml count: want 12 (LH-FA-CLI-007), got %v", first["count"])
 	}
 	pfs, _ := env["plannedFiles"].([]any)
 	pf, _ := pfs[0].(map[string]any)
@@ -127,7 +127,7 @@ func TestAddAcceptance_VarianteA_FreshInit_PinsCreateCount12(t *testing.T) {
 // compose.yaml with another service gets 6 lines appended. The
 // formal T0-(g) form (CountFromHunks = sum(hunk.NewLines)) reports
 // inserts + context, so the floor invariant is six `+` lines in
-// the hunk content (Spec §477 `count: 6` refers to the additions,
+// the hunk content (LH-FA-CLI-008 `count: 6` refers to the additions,
 // the formal sum may be higher).
 func TestAddAcceptance_VarianteB_Existing_PinsModifyAndAddedLines(t *testing.T) {
 	stub := &addUseCaseStub{
@@ -175,15 +175,15 @@ func TestAddAcceptance_VarianteB_Existing_PinsModifyAndAddedLines(t *testing.T) 
 	content, _ := hunk0["content"].(string)
 	additions := strings.Count(content, "\n+") + boolToInt(strings.HasPrefix(content, "+"))
 	if additions != 6 {
-		t.Errorf("Variante B: want exactly 6 '+' lines (Spec §477), got %d in content=%q", additions, content)
+		t.Errorf("Variante B: want exactly 6 '+' lines (LH-FA-CLI-008), got %d in content=%q", additions, content)
 	}
 	// changes[].count = CountAdditions (review-round-7 B): true
-	// additive lines, NOT additions + context. Spec §477 example
+	// additive lines, NOT additions + context. LH-FA-CLI-008 example
 	// pins this to 6 exactly.
 	changes, _ := env["changes"].([]any)
 	first, _ := changes[0].(map[string]any)
 	if got, _ := first["count"].(float64); int(got) != 6 {
-		t.Errorf("Variante B count: want exactly 6 (Spec §477), got %v", first["count"])
+		t.Errorf("Variante B count: want exactly 6 (LH-FA-CLI-008), got %v", first["count"])
 	}
 }
 
@@ -244,7 +244,7 @@ func TestAddAcceptance_DiffJSON_HunkStructurePin(t *testing.T) {
 }
 
 // TestAddAcceptance_IdempotentNoOp_EmptyPlanAndChanges pins the
-// Spec-§326 voll-schema shape for the idempotent re-add case
+// LH-FA-CLI-007 voll-schema shape for the idempotent re-add case
 // (PriorState=Active, Changed=nil): plannedFiles: [] AND
 // changes: [] (both required even when empty), status: ok,
 // exitCode: 0. This is the success path of T0-(b) Scenario 1's
@@ -325,12 +325,12 @@ func TestAddAcceptance_SuccessScenario_AllThreeFilesCaptured(t *testing.T) {
 	if len(chs) != 3 {
 		t.Errorf("Scenario 1 success: want 3 changes, got %d", len(chs))
 	}
-	// Pin compose.yaml's count to 12 — the canonical Spec §430 value.
+	// Pin compose.yaml's count to 12 — the canonical LH-FA-CLI-007 value.
 	for _, raw := range chs {
 		item, _ := raw.(map[string]any)
 		if item["path"] == "compose.yaml" {
 			if got, _ := item["count"].(float64); int(got) != 12 {
-				t.Errorf("compose.yaml count: want 12 (Spec §430), got %v", item["count"])
+				t.Errorf("compose.yaml count: want 12 (LH-FA-CLI-007), got %v", item["count"])
 			}
 		}
 	}

@@ -23,7 +23,7 @@ import (
 // LH-FA-UP-001 (`healthy` / `running` + TCP-probe) until every
 // service stabilizes or the request's timeout fires.
 //
-// LH-FA-UP-001 §970 (--timeout=0): on Timeout==0 the service
+// LH-FA-UP-001 (--timeout=0): on Timeout==0 the service
 // short-circuits to fire-and-forget — no `ComposePs` roundtrip, no
 // probes, and the result carries a single `up.fire-and-forget`
 // [domain.SeverityInfo] diagnostic.
@@ -236,7 +236,7 @@ type servicePollState struct {
 	// `up.port.<service>.unreachable` warn-diagnostic is emitted
 	// only once per service per Up() call, even if the healthcheck-
 	// dominated probe fails over many iterations after the service
-	// already reached `healthy`. LH-FA-UP-001 §968 + slice plan §141.
+	// already reached `healthy`. LH-FA-UP-001 + slice plan LH-PÜ-002.
 	portUnreachableReported bool
 }
 
@@ -294,7 +294,7 @@ func (*UpService) initPollStates(compose composeFileDecode) map[string]*serviceP
 // parseAllPortDiagnostics walks every service's ports[] at loop
 // start and emits a Severity-warn diagnostic for each non-probable
 // element (one diagnostic per service per port-index — IDs of the
-// form `up.port.<service>.<index>`). LH-FA-UP-001 §969.
+// form `up.port.<service>.<index>`). LH-FA-UP-001.
 func (*UpService) parseAllPortDiagnostics(compose composeFileDecode, _ map[string]*servicePollState) []domain.Diagnostic {
 	names := sortedServiceNames(compose.Services)
 	diagnostics := make([]domain.Diagnostic, 0)
@@ -343,7 +343,7 @@ func (s *UpService) classifyAllServices(ctx context.Context, ps []driven.Compose
 		cs := domain.ParseContainerState(live.State)
 
 		// Update restart-observation counter.
-		// MVP-Limitation (slice plan §176-178): the counter resets
+		// MVP-Limitation (slice plan LH-FA-CLI-002): the counter resets
 		// on ANY non-restarting observation, including a brief
 		// `running` between restart ticks. A pathological restart-
 		// loop that flashes through `running` (e.g. `restarting →
@@ -385,7 +385,7 @@ func (s *UpService) classifyAllServices(ctx context.Context, ps []driven.Compose
 // container state plus the live healthcheck/port observations.
 // May append warn diagnostics to `diagnostics` via classifyRunning
 // when the healthcheck-dominated path discovers an unreachable
-// declared TCP port (LH-FA-UP-001 §968).
+// declared TCP port (LH-FA-UP-001).
 func (s *UpService) classifyOne(ctx context.Context, cs domain.ContainerState, live driven.ComposeService, state *servicePollState, name string, diagnostics *[]domain.Diagnostic) domain.StabilizationOutcome {
 	switch cs {
 	case domain.StateDead:
@@ -404,18 +404,18 @@ func (s *UpService) classifyOne(ctx context.Context, cs domain.ContainerState, l
 	}
 }
 
-// classifyRunning handles the LH-FA-UP-001 §966–§969 matrix:
+// classifyRunning handles the LH-FA-UP-001–LH-FA-UP-001 matrix:
 //
 //   - Healthcheck required + `healthy` → Stabilized. Declared TCP
-//     ports are still probed (LH-FA-UP-001 §968) but a probe
+//     ports are still probed (LH-FA-UP-001) but a probe
 //     failure does NOT veto stabilization — it emits a one-shot
 //     `up.port.<service>.unreachable` Warn diagnostic instead
-//     (slice plan §141: "Healthcheck dominiert die Klassifikation").
+//     (slice plan LH-PÜ-002: "Healthcheck dominiert die Klassifikation").
 //   - Healthcheck required + not yet `healthy` → RunningOnly,
 //     no probe (Compose owns the health gate).
 //   - No healthcheck → port probe gates stabilization: any failure
 //     drops to RunningOnly, all probes pass means Stabilized
-//     (§967 + §968).
+//     (LH-FA-UP-001 + LH-FA-UP-001).
 func (s *UpService) classifyRunning(ctx context.Context, live driven.ComposeService, state *servicePollState, name string, diagnostics *[]domain.Diagnostic) domain.StabilizationOutcome {
 	if state.healthcheckRequired {
 		if !strings.EqualFold(live.Health, "healthy") {
@@ -432,9 +432,9 @@ func (s *UpService) classifyRunning(ctx context.Context, live driven.ComposeServ
 	return domain.OutcomeStabilized
 }
 
-// probePortsForWarn implements the slice plan §141 "Healthcheck
+// probePortsForWarn implements the slice plan LH-PÜ-002 "Healthcheck
 // dominiert" branch: when the service has reached `healthy`, the
-// declared TCP ports are STILL probed per LH-FA-UP-001 §968, but
+// declared TCP ports are STILL probed per LH-FA-UP-001, but
 // a probe failure emits a one-shot Warn diagnostic instead of
 // vetoing stabilization. The first unreachable port short-circuits
 // the loop and arms portUnreachableReported so subsequent
@@ -514,7 +514,7 @@ func buildResult(ps []driven.ComposeService, stabilized bool, diagnostics []doma
 // The function mirrors [UpService.classifyOne]'s logic per service
 // instead of the cruder "not running+healthy" heuristic that an
 // earlier T4-svc revision used: a running-only service without a
-// healthcheck (LH-FA-UP-001 §967 stabilization path) must NOT be
+// healthcheck (LH-FA-UP-001 stabilization path) must NOT be
 // reported as pending. Re-running NetProbe.DialTCP here is
 // avoided — the network is async-unsafe from a no-context callsite,
 // and over-reporting "running + no healthcheck + has probable
@@ -564,7 +564,7 @@ func pendingServiceNames(ps []driven.ComposeService, compose composeFileDecode, 
 			continue
 		}
 		// Running, no healthcheck, no probable ports → stabilized
-		// per LH-FA-UP-001 §967, NOT pending.
+		// per LH-FA-UP-001, NOT pending.
 	}
 	return pending
 }

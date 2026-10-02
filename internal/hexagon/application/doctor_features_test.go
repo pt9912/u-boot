@@ -26,7 +26,7 @@ func seedDoctorUbootYAMLFeatures(t *testing.T, fs *fakeFS, body string) {
 // Followup A1 wiring pin: a hand-edited u-boot.yaml with an
 // invalid `featureSources.allow` entry (ftp:// — unsupported
 // scheme) surfaces as Error severity on the
-// `uboot.yaml.valid` check (LH-FA-DEV-003 / Spec §1353 → Exit-10
+// `uboot.yaml.valid` check (LH-FA-DEV-003 / LH-FA-CONF-002 → Exit-10
 // when the user surface goes through the CLI; in-Doctor we just
 // classify it as Error so the user sees the consolidated
 // u-boot.yaml-validity report).
@@ -163,7 +163,7 @@ devcontainer:
 }
 
 // TestDoctor_FeaturesAllowlist_ErrorWhenSourceNotInAllow pins the
-// LH-FA-DEV-003 Spec §720 violation: source override is set, but
+// LH-FA-DEV-003 violation: source override is set, but
 // not in `featureSources.allow` → Error with repair hint that
 // names both the URL and the LH-NFA-SEC-004 `--yes`-not-sufficient
 // clause.
@@ -233,7 +233,7 @@ devcontainer:
 }
 
 // TestDoctor_FeaturesAllowlist_WarnOnEnabledKeyMissing pins the
-// LH-FA-ADD-005 §893 enabled-key-missing convention extended to
+// LH-FA-ADD-005 enabled-key-missing convention extended to
 // devcontainer features: explicit `true`/`false` is required.
 func TestDoctor_FeaturesAllowlist_WarnOnEnabledKeyMissing(t *testing.T) {
 	t.Parallel()

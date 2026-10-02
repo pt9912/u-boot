@@ -46,7 +46,7 @@ type ubootYAMLProject struct {
 // but disabled). The pointer type distinguishes "explicitly false"
 // (registered + disabled, idempotent re-activation possible) from
 // "key missing" (registered but no explicit decision — doctor warns
-// per §893).
+// per LH-FA-ADD-005).
 //
 // Future fields (M5+ for postgres-specific options, M5+/V1 for
 // keycloak.persistence, otel.exporter, etc.) will be added as
@@ -204,8 +204,8 @@ var _ driving.InitProjectUseCase = (*InitProjectService)(nil)
 
 // NewInitProjectService constructs the service with the driven
 // adapters injected by the wiring layer (cmd/uboot). progress is
-// the [driven.ProgressPort] the service emits LH-FA-INIT-005 §609
-// / LH-FA-CLI-005A §262 "affected paths" events to before any
+// the [driven.ProgressPort] the service emits LH-FA-INIT-005
+// / LH-FA-CLI-005A "affected paths" events to before any
 // write happens on re-init. confirmer is the [driven.Confirmer]
 // used by the M4 soft-existing-detection flow (LH-FA-INIT-004) to
 // ask the user whether a directory with ≥3 LH-FA-INIT-003 structure
@@ -314,11 +314,11 @@ const (
 	actionWrite fileAction = iota
 	// actionReplaceBlock means the file exists with a
 	// `U-BOOT MANAGED BLOCK: init` marker; splice in the new block
-	// (LH-FA-INIT-005 §613–§614).
+	// (LH-FA-INIT-005–LH-FA-INIT-005).
 	actionReplaceBlock
 	// actionOverwriteFull means the file exists and gets fully
 	// rewritten. Always paired with backup=true in the plan
-	// (LH-FA-INIT-005 §617/§619 require backup before any full
+	// (LH-FA-INIT-005/LH-FA-INIT-005 require backup before any full
 	// overwrite of an existing file).
 	actionOverwriteFull
 )
@@ -436,7 +436,7 @@ func (s *InitProjectService) runInit(ctx context.Context, req driving.InitProjec
 		return driving.InitProjectResponse{}, err
 	}
 
-	// Summary: emit before any side effect (LH-FA-INIT-005 §609).
+	// Summary: emit before any side effect (LH-FA-INIT-005).
 	s.emitSummary(req.BaseDir, plans, yamlPlan)
 
 	// Execute.
@@ -663,7 +663,7 @@ const softExistingThreshold = 3
 //  4. If the user asserted existence via --assume-existing, treat as
 //     existing without prompting.
 //  5. If the run is non-interactive (--no-interactive), skip the
-//     prompt per the LH-FA-INIT-004 §247 carve-out — the deterministic
+//     prompt per the LH-FA-INIT-004 LH-FA-CLI-005A carve-out — the deterministic
 //     fresh-init path then plays out (the per-file collision logic in
 //     [planFile] will still surface specific clashes).
 //  6. Otherwise prompt via [driven.Confirmer]. A confirmed "yes" or
@@ -690,7 +690,7 @@ func (s *InitProjectService) checkSoftExisting(ctx context.Context, req driving.
 	case req.AssumeExisting:
 		return softExistingAbort(indicators, "--assume-existing")
 	case req.NoInteractive:
-		// Spec §247: in non-interactive mode the soft-detection only
+		// LH-FA-CLI-005A: in non-interactive mode the soft-detection only
 		// fires through --assume-existing. Skip without prompting.
 		return nil
 	default:
@@ -802,7 +802,7 @@ func devcontainerFileTemplates() []fileTemplate {
 
 // planUBootYAML computes the plan for u-boot.yaml. The file is
 // treated as fully managed (no managed-block marker support — per
-// LH-SA-FILE-002 §615 strict-YAML / steering file), so a re-init
+// LH-SA-FILE-002 LH-FA-INIT-005 strict-YAML / steering file), so a re-init
 // without --backup always aborts.
 func (s *InitProjectService) planUBootYAML(req driving.InitProjectRequest) (filePlan, error) {
 	ft := fileTemplate{Path: "u-boot.yaml", TemplateName: "", Managed: false}
@@ -831,7 +831,7 @@ func (s *InitProjectService) planUBootYAML(req driving.InitProjectRequest) (file
 // have the re-init read and overwrite the link target instead of
 // the link itself.
 //
-// Collision errors split the spec-§604 marker files (u-boot.yaml,
+// Collision errors split the spec-LH-FA-INIT-005 marker files (u-boot.yaml,
 // compose.yaml, .env.example) from the rest: marker collisions
 // produce [driving.ErrProjectExists] (the directory really is an
 // existing u-boot project), non-marker collisions produce
@@ -914,8 +914,8 @@ func (s *InitProjectService) fileHasManagedBlock(fullPath string, ft fileTemplat
 	return managedblock.Has(content, marker), content, nil
 }
 
-// emitSummary collects the LH-FA-INIT-005 §609 / LH-FA-CLI-005A
-// §262 affected-paths events from the per-file plans and forwards
+// emitSummary collects the LH-FA-INIT-005 / LH-FA-CLI-005A
+// LH-FA-CLI-005A affected-paths events from the per-file plans and forwards
 // them to the [driven.ProgressPort]. Only ReplaceBlock and
 // OverwriteFull mutate existing files — fresh init (all
 // actionWrite) produces an empty list and the port is not called
@@ -1206,12 +1206,12 @@ func (s *InitProjectService) runBackup(baseDir, relPath string) (*driving.Backup
 //
 // When devcontainer is true, the marshaled config carries
 // `devcontainer.enabled: true` so the M5-T7 doctor severity-
-// escalation gate (`LH-FA-DIAG-002` §1073: `error` for missing or
+// escalation gate (`LH-FA-DIAG-002` LH-FA-DIAG-002: `error` for missing or
 // invalid `.devcontainer/devcontainer.json` when
 // `devcontainer.enabled == true`) fires after the init.
 // validateInitPreconditions runs the request-level guards that fire
 // before any FS side effect: empty BaseDir (programmer error from
-// the CLI adapter) and the Spec §714 / LH-FA-DEV-003 constraint
+// the CLI adapter) and the LH-FA-DEV-003 / LH-FA-DEV-003 constraint
 // that `--allow-external-feature-sources` requires `--devcontainer`.
 // For `--template <name>` the BaseDir-exists check is the
 // initFromTemplate branch's responsibility; for the default flow
@@ -1232,7 +1232,7 @@ func (s *InitProjectService) validateInitPreconditions(req driving.InitProjectRe
 		// either direction, so mentioning it confuses the
 		// diagnosis.
 		return fmt.Errorf(
-			"%w: --allow-external-feature-sources requires --devcontainer (Spec §714)",
+			"%w: --allow-external-feature-sources requires --devcontainer (LH-FA-DEV-003)",
 			ErrInvalidFeatureSource)
 	}
 	if req.Sandbox && !req.Devcontainer {
@@ -1267,7 +1267,7 @@ func (s *InitProjectService) executeUBootYAML(baseDir string, project domain.Pro
 			cfg.Devcontainer.Profile = string(domain.ProfileSandbox)
 		}
 		// LH-FA-DEV-003 allowlist seed from
-		// `--allow-external-feature-sources` (Spec §714). The flag-
+		// `--allow-external-feature-sources` (LH-FA-DEV-003). The flag-
 		// without-devcontainer case is rejected at the entry to
 		// [Init]; reaching here implies devcontainer == true.
 		if len(allowExternalFeatureSources) > 0 {

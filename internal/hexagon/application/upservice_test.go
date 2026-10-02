@@ -55,7 +55,7 @@ const composePostgres = `services:
 `
 
 // composeNoHealthNoPorts: a service with neither — stabilizes on
-// `running` alone per LH-FA-UP-001 §967.
+// `running` alone per LH-FA-UP-001.
 const composeNoHealthNoPorts = `services:
   worker:
     image: worker:1
@@ -119,7 +119,7 @@ func TestUpService_MissingComposeYAML_ReturnsErrComposeFileMissing(t *testing.T)
 
 func TestUpService_FireAndForget_NoComposePsCall(t *testing.T) {
 	t.Parallel()
-	// LH-FA-UP-001 §970 fire-and-forget pin: with Timeout=0 the
+	// LH-FA-UP-001 fire-and-forget pin: with Timeout=0 the
 	// service must NOT touch ComposePs. The fake's psPanicOnCall
 	// makes any ComposePs call panic, so this test fails loudly
 	// if a future refactor adds an opportunistic ps call.
@@ -168,7 +168,7 @@ func TestUpService_HealthcheckStabilizes_In2Polls(t *testing.T) {
 
 func TestUpService_RunningOnlyNoHealthNoPorts_StabilizesIn1Poll(t *testing.T) {
 	t.Parallel()
-	// LH-FA-UP-001 §967: running is sufficient when there is
+	// LH-FA-UP-001: running is sufficient when there is
 	// neither a healthcheck nor a declared port.
 	f := newUpFixture(t, composeNoHealthNoPorts)
 	f.engine.scriptUp(driven.ComposeUpResult{}, nil)
@@ -513,7 +513,7 @@ func TestUpService_DeadServiceIsAlphabeticallyFirst_DeterministicReport(t *testi
 func TestUpService_TimeoutPending_RunningOnlyWithoutHealthcheckNotListed(t *testing.T) {
 	t.Parallel()
 	// T4-review fix: pendingServiceNames must NOT list a running-
-	// only service without healthcheck (stabilized per §967) as
+	// only service without healthcheck (stabilized per LH-FA-UP-001) as
 	// pending. Setup: "stable" stabilizes immediately, "slow"
 	// stays starting → timeout fires → pending list contains
 	// "slow" but NOT "stable".
@@ -542,15 +542,15 @@ func TestUpService_TimeoutPending_RunningOnlyWithoutHealthcheckNotListed(t *test
 		t.Errorf("timeout error should list 'slow' as pending: %v", err)
 	}
 	if strings.Contains(err.Error(), "stable") {
-		t.Errorf("timeout error should NOT list 'stable' as pending (stabilized per §967): %v", err)
+		t.Errorf("timeout error should NOT list 'stable' as pending (stabilized per LH-FA-UP-001): %v", err)
 	}
 }
 
 func TestUpService_HealthcheckHealthy_PortUnreachable_StillStabilizedPlusWarn(t *testing.T) {
 	t.Parallel()
-	// M6-closure-review fix: LH-FA-UP-001 §968 requires TCP port
+	// M6-closure-review fix: LH-FA-UP-001 requires TCP port
 	// probes for declared ports REGARDLESS of healthcheck presence;
-	// the slice plan §141 specifies that when healthcheck dominates
+	// the slice plan LH-PÜ-002 specifies that when healthcheck dominates
 	// (`healthy`), a probe failure emits a one-shot
 	// up.port.<service>.unreachable Warn diagnostic but MUST NOT
 	// veto stabilization.
@@ -569,7 +569,7 @@ func TestUpService_HealthcheckHealthy_PortUnreachable_StillStabilizedPlusWarn(t 
 		t.Fatalf("Up: %v", err)
 	}
 	if !resp.Result.Stabilized {
-		t.Errorf("Stabilized = false, want true (healthcheck dominates per §141)")
+		t.Errorf("Stabilized = false, want true (healthcheck dominates per LH-PÜ-002)")
 	}
 	foundWarn := false
 	for _, d := range resp.Result.Diagnostics {
@@ -582,7 +582,7 @@ func TestUpService_HealthcheckHealthy_PortUnreachable_StillStabilizedPlusWarn(t 
 	}
 	// Probe should have been called.
 	if f.probe.callCount() == 0 {
-		t.Error("probe was not called for healthcheck-required service with declared port (§968 violation)")
+		t.Error("probe was not called for healthcheck-required service with declared port (LH-FA-UP-001 violation)")
 	}
 }
 

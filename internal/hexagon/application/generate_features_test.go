@@ -410,7 +410,7 @@ func TestGenerateDevcontainer_FeaturesIdempotent_SameSourceTwoVersions(t *testin
 }
 
 // TestGenerateDevcontainer_AllowExternalFeatureSources_Append pins
-// the LH-FA-DEV-003 / Spec §715 flag-wiring on `generate
+// the LH-FA-DEV-003 / LH-FA-DEV-003 flag-wiring on `generate
 // devcontainer`: invoking the use case with a non-empty
 // AllowExternalFeatureSources list appends the URLs to
 // `devcontainer.featureSources.allow` (with silent-dedupe and

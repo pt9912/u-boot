@@ -136,7 +136,7 @@ func TestDownJSON_SilenceConfirmer_TrueWhenJSON(t *testing.T) {
 // ----------------------------------------------------------------------
 
 // TestDownJSON_ConflictingModeFlags_EmitsCLI005AEnvelope pins the
-// LH-FA-CLI-005A §235 Pre-UC-Validation: --yes + --no-interactive →
+// LH-FA-CLI-005A Pre-UC-Validation: --yes + --no-interactive →
 // Exit 2 with code LH-FA-CLI-005A (R2-MED-2 Mode-Mutex-Pattern).
 func TestDownJSON_ConflictingModeFlags_EmitsCLI005AEnvelope(t *testing.T) {
 	stub := &downUseCaseStub{}

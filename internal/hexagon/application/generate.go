@@ -267,7 +267,7 @@ func (s *GenerateService) readProjectConfig(baseDir string) (ubootYAMLConfig, er
 	// (devcontainer.featureSources.allow URL format + features
 	// map-key + features.<name>.source URL format). Without this,
 	// hand-edited bad URLs propagate into devcontainer.json as
-	// feature-keys. Spec §1353 mandates Exit-Code 10 →
+	// feature-keys. LH-FA-CONF-002 mandates Exit-Code 10 →
 	// ErrGenerateManualConflict carries that mapping.
 	if err := validateDevcontainer(cfg.Devcontainer); err != nil {
 		return ubootYAMLConfig{}, fmt.Errorf("%w: u-boot.yaml devcontainer schema invalid: %v",
@@ -744,7 +744,7 @@ type devcontainerFilePlan struct {
 // with **no** WriteFile invocations — half-written state would be
 // re-classified as a conflict on the next call.
 func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.GenerateRequest) (driving.GenerateResponse, error) {
-	// LH-FA-DEV-003 / Spec §715 — validate the
+	// LH-FA-DEV-003 / LH-FA-DEV-003 — validate the
 	// `--allow-external-feature-sources` flag entries early (so a
 	// bad URL fails the generate before any FS side effect), but
 	// **defer the u-boot.yaml mutation** until after the
@@ -1102,7 +1102,7 @@ func validateAllowExternalFeatureSourcesEntries(sources []string) error {
 		// Multi-`%w` (T3 R6-Festzurrung, T0-(e) Diagnostic-Code-Tabelle):
 		// ErrConfigValueInvalid für LH-FA-DEV-003-Klassifikation (Exit 10
 		// per cli.ExitCode) plus der raw err für errors.Is gegen normalise-
-		// interne Sentinels. Spec §720 fordert exakt LH-FA-DEV-003 / Exit 10
+		// interne Sentinels. LH-FA-DEV-003 fordert exakt LH-FA-DEV-003 / Exit 10
 		// für ungültige `--allow-external-feature-sources`-URLs; ohne den
 		// Sentinel-Wrap würde der CLI-Mapper auf Default-Branch
 		// LH-FA-CLI-006 / Exit 1 fallen.
@@ -1112,7 +1112,7 @@ func validateAllowExternalFeatureSourcesEntries(sources []string) error {
 	return nil
 }
 
-// applyAllowExternalFeatureSources implements the Spec §715 wiring
+// applyAllowExternalFeatureSources implements the LH-FA-DEV-003 wiring
 // of `--allow-external-feature-sources` for `generate devcontainer`:
 // after the devcontainer plan-and-execute succeeded, append the
 // flag URLs to `devcontainer.featureSources.allow` and marshal-

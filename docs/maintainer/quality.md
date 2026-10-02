@@ -183,10 +183,10 @@ Pin-Inventar (Stand M6-docker-int Sub-T3):
 | ------- | ---------- |
 | [LH-NFA-PERF-002](../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker) | `internal/adapter/driven/docker/engine_progressstream_docker_test.go` |
 | [LH-FA-DIAG-002](../../spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen) | `internal/adapter/driven/docker/engine_psjsonschema_docker_test.go` |
-| [LH-FA-UP-001](../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten) §966 | `internal/hexagon/application/upservice_healthcheck_docker_test.go` |
-| [LH-FA-UP-001](../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten) §968 | `internal/hexagon/application/upservice_portprobe_docker_test.go` |
+| [LH-FA-UP-001](../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten) | `internal/hexagon/application/upservice_healthcheck_docker_test.go` |
+| [LH-FA-UP-001](../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten) | `internal/hexagon/application/upservice_portprobe_docker_test.go` |
 | [LH-AK-002](../../spec/lastenheft.md#lh-ak-002--postgresql-flow) | `internal/e2e/postgres_acceptance_docker_test.go` |
-| [LH-FA-UP-004](../../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen) §1015 | `internal/e2e/down_volumes_docker_test.go` |
+| [LH-FA-UP-004](../../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen) | `internal/e2e/down_volumes_docker_test.go` |
 
 ---
 

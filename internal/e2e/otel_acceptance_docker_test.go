@@ -13,7 +13,7 @@
 //   - OpenTelemetry Collector is configured (Compose-Service +
 //     `otel-collector-config.yaml`);
 //   - the container reaches `running` ODER `healthy` within the
-//     UpService timeout (Spec §2374 — Healthcheck nicht zwingend
+//     UpService timeout (LH-AK-004 — Healthcheck nicht zwingend
 //     für LH-AK-004; das Mindest-Setup ist healthcheck-frei);
 //   - OTLP/gRPC ist auf `localhost:4317` erreichbar;
 //   - OTLP/HTTP ist auf `localhost:4318` erreichbar.
@@ -45,7 +45,7 @@ func TestE2E_LHAK004_OtelAcceptanceFlow(t *testing.T) {
 		ctxTimeout:  5 * time.Minute,
 	})
 
-	// LH-AK-004 §2374 tolerates `running` OR `healthy`. The
+	// LH-AK-004 tolerates `running` OR `healthy`. The
 	// generic stabilizationCheck-Helper from acceptance_helpers.go
 	// asserts BOTH Stabilized + Healthcheck=="healthy" — that is
 	// stricter than the spec. For OTel we therefore only assert

@@ -279,7 +279,7 @@ func TestConfigJSON_SetWarningsMapToDiagnostics(t *testing.T) {
 		t.Fatalf("unmarshal: %v", err)
 	}
 	if env["status"] != "warn" {
-		t.Errorf("status = %v, want warn (warn-coupling Spec §447)", env["status"])
+		t.Errorf("status = %v, want warn (warn-coupling LH-FA-CLI-007)", env["status"])
 	}
 	diags, _ := env["diagnostics"].([]any)
 	if len(diags) != 1 {
@@ -465,7 +465,7 @@ func TestConfigJSON_SanitizerStripsAbsolutePath(t *testing.T) {
 	}
 }
 
-// TestConfigJSON_SubcommandAlwaysSet pins T0-(h)/§322: every
+// TestConfigJSON_SubcommandAlwaysSet pins T0-(h)/LH-FA-CLI-007: every
 // RunE-emitted config envelope carries a non-empty subcommand,
 // across success AND error paths and all three forms.
 func TestConfigJSON_SubcommandAlwaysSet(t *testing.T) {
@@ -490,7 +490,7 @@ func TestConfigJSON_SubcommandAlwaysSet(t *testing.T) {
 				t.Fatalf("unmarshal: %v (out=%s)", err, out.String())
 			}
 			if env["subcommand"] != tc.want {
-				t.Errorf("subcommand = %v, want %q (§322 subcommand-pflicht)", env["subcommand"], tc.want)
+				t.Errorf("subcommand = %v, want %q (LH-FA-CLI-007 subcommand-pflicht)", env["subcommand"], tc.want)
 			}
 		})
 	}

@@ -17,10 +17,10 @@ zitiert; die zugehörige Code-Lokation im Repo, die Spec-konformen
 Diagnostic-Codes und die Migrations-Reihenfolge der 10 Spec-Enum-
 Subcommands sind als verbindliche Quellen dokumentiert.
 
-Die Pflichtaussagen leben im Lastenheft (§1809-1853 für
+Die Pflichtaussagen leben im Lastenheft ([LH-FA-ARCH-003](../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)..[LH-NFA-USE-002](../../spec/lastenheft.md#lh-nfa-use-002--klare-befehle) für
 [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe),
-§302-447 für [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run),
-§451-489 für [LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)).
+[LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) für [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run),
+[LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) für [LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)).
 Dieses Dokument ist die Detail-Doku für CLI-Konsumenten und für
 den Test-Helper [`internal/adapter/driving/cli/jsontestutil/`](../../internal/adapter/driving/cli/).
 
@@ -33,15 +33,15 @@ abgewogen und verworfen.
 
 ## 1. Zwei Kontraktstufen — wann gilt was?
 
-[LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) (§1841-1842) trennt zwei Vertragsstufen, die
+[LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) ([LH-NFA-USE-001](../../spec/lastenheft.md#lh-nfa-use-001--verständliche-bedienung)..[LH-NFA-USE-002](../../spec/lastenheft.md#lh-nfa-use-002--klare-befehle)) trennt zwei Vertragsstufen, die
 **beide** im selben Wire-Format (`cliJSONEnvelope`, siehe §4)
 gerendert werden:
 
 | Aufruf-Modus | Pflicht-Vertrag | Spec |
 | --- | --- | --- |
-| `u-boot <cmd> --json` (read-only oder ohne Dry-Run/Diff) | **Minimalkontrakt** (§2) | [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) §1841 |
-| `u-boot <cmd> --dry-run --json` | **Voll-Schema** (§3) | [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) §1842 |
-| `u-boot <cmd> --diff --json` (mit oder ohne `--dry-run`) | **Voll-Schema** (§3) | [LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) §468 |
+| `u-boot <cmd> --json` (read-only oder ohne Dry-Run/Diff) | **Minimalkontrakt** (§2) | [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) [LH-NFA-USE-001](../../spec/lastenheft.md#lh-nfa-use-001--verständliche-bedienung) |
+| `u-boot <cmd> --dry-run --json` | **Voll-Schema** (§3) | [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) [LH-NFA-USE-002](../../spec/lastenheft.md#lh-nfa-use-002--klare-befehle) |
+| `u-boot <cmd> --diff --json` (mit oder ohne `--dry-run`) | **Voll-Schema** (§3) | [LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) |
 
 Voll-Schema ist eine **Obermenge** des Minimalkontrakts: zusätzlich
 zu den Minimal-Pflichtfeldern werden `dryRun`, `diff`, `plannedFiles`,
@@ -51,7 +51,7 @@ der Test-Helper `AssertMinimalEnvelope` rejected sie aktiv.
 
 ---
 
-## 2. Minimalkontrakt ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) §1823-1842)
+## 2. Minimalkontrakt ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) LH-FA-ARCH-003..LH-NFA-USE-002)
 
 Verbatim-Zitat des Lastenhefts:
 
@@ -127,7 +127,7 @@ liefert einen **semantisch identischen** Envelope wie
 
 ---
 
-## 3. Voll-Schema ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) §322-417)
+## 3. Voll-Schema ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) LH-FA-CLI-007)
 
 Voll-Schema gilt für `--dry-run --json` und `--diff --json`. Verbatim-
 Zitat des Lastenhefts:
@@ -303,13 +303,13 @@ Architektur-Grenze: Envelope-Type und Helper leben im **CLI-Adapter**,
 
 ## 5. Code-Registry für `diagnostics[].code`
 
-Spec §1835 ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)) erlaubt für `diagnostics[].code`
+[LH-NFA-USE-001](../../spec/lastenheft.md#lh-nfa-use-001--verständliche-bedienung) ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)) erlaubt für `diagnostics[].code`
 zwei Quellen: **(a)** LH-Kennung der verursachenden Anforderung
 (z. B. [LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)), oder **(b)** tool-interne
 Codes, falls ihre Bedeutung **in der Dokumentation festgehalten**
 ist. u-boot verwendet aktuell tool-interne Codes mit Dotted-
 Notation (`docker.installed`, `uboot.yaml.valid` etc.); diese
-Registry ist die **kanonische Doku-Sektion** für Spec §1835.
+Registry ist die **kanonische Doku-Sektion** für [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe).
 
 Source-of-Truth: `internal/adapter/driving/cli/jsontestutil/coderegistry.go`
 (`DefaultAllowedCodes`-Map). Diese Tabelle ist die spec-pflichtige
@@ -361,8 +361,8 @@ Weitere Subcommand-Sektionen kommen mit den jeweiligen Folge-Slices
 
 ## 6. Per-Command-Migrations-Reihenfolge
 
-Spec-Enum ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) §338) listet zehn Subcommands; alle
-sollen `--json` tragen ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) §1813). Migration läuft
+Spec-Enum ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)) listet zehn Subcommands; alle
+sollen `--json` tragen ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) [LH-FA-ARCH-003](../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)). Migration läuft
 **inkrementell** über neun Folge-Slices unterhalb des Cluster-
 Slices [`slice-v1-cli-json-dry-run`](../plan/planning/done/slice-v1-cli-json-dry-run.md);
 Reihenfolge gemäß Cluster-T0-(e):
@@ -377,7 +377,7 @@ Reihenfolge gemäß Cluster-T0-(e):
 | 6 | [slice-v1-cli-json-dry-run-up-down](../plan/planning/done/slice-v1-cli-json-dry-run-up-down.md) | `up`, `down` (gebündelt, read-only Compose-Status) | done (DoD-Hash-Tabelle im Slice-File) |
 | 7 | [slice-v1-cli-json-dry-run-logs](../plan/planning/done/slice-v1-cli-json-dry-run-logs.md) | `logs` (Single-Envelope, T0-(a) Option (A)) | done (DoD-Hash-Tabelle im Slice-File) |
 | 8 | [slice-v1-cli-json-dry-run-config](../plan/planning/done/slice-v1-cli-json-dry-run-config.md) | `config`, `config get`, `config set` (gebündelt, drei Formen) | done (DoD-Hash-Tabelle im Slice-File) |
-| 9 | [slice-v1-cli-json-dry-run-template](../plan/planning/done/slice-v1-cli-json-dry-run-template.md) | `template list`-Envelope-Migration; bare `template --json` → RunE-Reject `ErrTemplateSubcommandRequired`/Exit 2 (envelope-LOS §1838, Cluster-T_close) | done (DoD-Hash-Tabelle im Slice-File) |
+| 9 | [slice-v1-cli-json-dry-run-template](../plan/planning/done/slice-v1-cli-json-dry-run-template.md) | `template list`-Envelope-Migration; bare `template --json` → RunE-Reject `ErrTemplateSubcommandRequired`/Exit 2 (envelope-LOS [LH-NFA-USE-001](../../spec/lastenheft.md#lh-nfa-use-001--verständliche-bedienung), Cluster-T_close) | done (DoD-Hash-Tabelle im Slice-File) |
 
 ### 6.1 Migration abgeschlossen (Cluster-T_close)
 
@@ -389,7 +389,7 @@ noch nicht migrierten Formen mit Exit 2 rejectete — wurde im
 **Cluster-T_close entfernt** (es gibt nichts mehr zu rejecten).
 
 Die **einzige verbliebene `--json`-Reject-Form** ist bare
-`u-boot template` (ohne Subcommand): §1838/§420 machen `subcommand`
+`u-boot template` (ohne Subcommand): [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)/[LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) machen `subcommand`
 für `command="template"` verpflichtend, und der Help-Parent hat kein
 eigenes Datum — er kann also keinen spec-validen Envelope erzeugen.
 Dieser Reject ist **RunE-getragen** (`ErrTemplateSubcommandRequired`,
@@ -398,7 +398,7 @@ Exit 2, envelope-LOS), nicht mehr gate-getragen — siehe §6.2.
 ### 6.2 `u-boot template list --json` (slice-v1-cli-json-dry-run-template, done)
 
 `template list --json` liefert den [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)-Minimalkontrakt-
-Envelope mit `command: "template"`, `subcommand: "list"` (§322
+Envelope mit `command: "template"`, `subcommand: "list"` ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)
 Subcommand-Pflicht), `diagnostics: []`, `exitCode: 0` und der
 `[]templateJSON`-Projektion im `data`-Feld:
 
@@ -422,7 +422,7 @@ Konsumenten, die das Top-Level-Array lasen, müssen auf `.data`
 umstellen (CHANGELOG `### Changed`).
 
 **bare `u-boot template --json`** (ohne Subcommand) wird mit Exit 2
-rejected — §1838/§420 macht `subcommand` für `command="template"`
+rejected — [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)/[LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) macht `subcommand` für `command="template"`
 verpflichtend, und der Help-Parent hat kein eigenes Datum. Der Reject
 ist **RunE-getragen** (`ErrTemplateSubcommandRequired`, envelope-LOS;
 Cluster-T_close), nicht gate-getragen: er fällt in der
@@ -437,7 +437,7 @@ Envelope-Migration. Drei Flag-Kombinationen, drei Output-Formen
 ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)/[LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)):
 
 - **`--json` ohne `--dry-run`/`--diff`** → Minimalkontrakt
-  (Spec §1841). Die Operation schreibt das FS um, das JSON-Output
+  ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)). Die Operation schreibt das FS um, das JSON-Output
   trägt aber **keine** Plan- oder Change-Information. Für die
   Liste der veränderten Files den Preview-Pfad nutzen:
   `--dry-run --json` (Vorschau ohne Schreiben) oder
@@ -448,7 +448,7 @@ Envelope-Migration. Drei Flag-Kombinationen, drei Output-Formen
   `RecordingFileSystem` capturet alle geplanten Mutations.
 - **`--diff --json`** → Voll-Schema mit
   `plannedFiles[].hunks[]`, `dryRun: false`, `diff: true`. Es wird
-  geschrieben **und** capturet (Preview-and-Apply, Spec §465-470).
+  geschrieben **und** capturet (Preview-and-Apply, [LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)).
 - **`--dry-run --diff --json`** → wie `--dry-run --json`, aber mit
   Hunks und `diff: true`. Kein Write.
 
@@ -467,7 +467,7 @@ Schema (`plannedFiles[].hunks: [{oldStart, oldLines, newStart,
 newLines, content}]`, T0-(l)), Pure-Go LCS-Diff-Renderer
 (`internal/adapter/driving/cli/diff/`, T0-(d)), Composition-Root-
 `fsFactory(driving.AddPreviewMode)`-Closure in `cmd/uboot/main.go`
-(T0-(e)) und `changes[].count`-Semantik gemäß Spec §477
+(T0-(e)) und `changes[].count`-Semantik gemäß [LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)
 (`CountAdditions` über die `+`-Lines der Hunks, T0-(g)).
 Diagnostic-Codes sind LH-Kennungen
 (`LH-FA-ADD-{001,002,005,006}`/`LH-FA-INIT-{004,005,006}`/
@@ -627,8 +627,8 @@ Plus weitere Diagnostic-Codes: `ErrGenerateFileSystem` →
 [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) / Exit 14 (FS-Klasse, Switch-Order-First);
 `ErrConfigValueInvalid` (ungültige
 `--allow-external-feature-sources`-URL) → [LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) /
-Exit 10 (Spec §720); `ErrArtifactUnknown` → [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) /
-Exit 2 (CLI-Validation, Spec §1157); `ErrProjectNotInitialized`
+Exit 10 ([LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)); `ErrArtifactUnknown` → [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) /
+Exit 2 (CLI-Validation, [LH-FA-GEN-001](../../spec/lastenheft.md#lh-fa-gen-001--generate-befehl)); `ErrProjectNotInitialized`
 → [LH-FA-INIT-001](../../spec/lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren) / Exit 10.
 
 **`--allow-external-feature-sources`-Mutex-Check**: der Flag ist
@@ -661,7 +661,7 @@ Service (analog `InitProjectService.initMu`).
 die **inverse Operation zu `add`**: strip managed-block aus
 `compose.yaml` + `.env.example`, flip `services.<name>.enabled`
 auf `false` in `u-boot.yaml`, optional Volume-Purge via
-`--purge`-Gate ([LH-FA-CLI-005A](../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) §254). Acht Flag-Kombinationen
+`--purge`-Gate ([LH-FA-CLI-005A](../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)). Acht Flag-Kombinationen
 plus die orthogonale `--purge`-Dimension (T0-(h)):
 
 - **`--json` ohne `--dry-run`/`--diff`** → Minimal+Data-Envelope
@@ -697,7 +697,7 @@ Success-`data` ist typed `removeEnvelopeData` mit
 
 `PriorState`/`State`/`VolumesPurged` sind Pointer (`*string`/
 `*bool`), damit `omitempty` Key-**Abwesenheit** statt nur
-Zero-Value-Drop pinnen kann (Spec §1841). `VolumesPurged` MUSS
+Zero-Value-Drop pinnen kann ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)). `VolumesPurged` MUSS
 `*bool` weil `false` ein valider Success-Wert ist (v0.3.0
 deferred-Volumes). **Error-Envelope** trägt nur
 `data: {"service": "<…>"}` ohne PriorState/State/VolumesPurged
@@ -735,7 +735,7 @@ deferred) wandert im JSON-Mode in `diagnostics[]`-Eintrag mit
 `code: "[LH-FA-ADD-007](../../spec/lastenheft.md#lh-fa-add-007--service-entfernen)"`, `level: "warn"`, plus
 `data.volumesPurged: false`. **[LH-FA-ADD-007](../../spec/lastenheft.md#lh-fa-add-007--service-entfernen) Multi-Use**:
 derselbe Code identifiziert die Spec-Anforderung "Service
-entfernen" (§924-947) UND markiert die deferred-Volumes-WARN.
+entfernen" ([LH-FA-ADD-007](../../spec/lastenheft.md#lh-fa-add-007--service-entfernen)) UND markiert die deferred-Volumes-WARN.
 Konsumenten disambiguieren ausschließlich über
 `(code, level)`-Tupel: ERROR-Pfad
 `ErrServiceUnregistered` liefert `code: "[LH-FA-ADD-007](../../spec/lastenheft.md#lh-fa-add-007--service-entfernen)"`,
@@ -764,7 +764,7 @@ In allen drei Fällen liest der Validator
 `cmd.Flags().GetBool("dry-run"/"diff")` zur Validator-Zeit
 (Cobra hat die Subcommand-Local-Flags zu diesem Zeitpunkt
 bereits geparst) — Voll-Schema-Envelope bei `--dry-run` ODER
-`--diff` (Spec §1842), sonst Minimal-Schema.
+`--diff` ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)), sonst Minimal-Schema.
 
 **`baseDirSanitizedError`-Wrapper**: FS-Wraps in der Use-Case
 der Form `fmt.Errorf("remove write %s: %w: %w", absPath,
@@ -983,7 +983,7 @@ eine positive Dauer (`90s`, `30m`, `1h`) oder einen Zeitstempel (RFC 3339,
 (die Zeilen tragen dann Präfix bzw. Zeitstempel je nach Flags).
 
 **T0-(a) Single-Envelope + `--follow --json` Reject** (Option (A)):
-Spec-§1841-Konsens (Single-Envelope pro CLI-Call) wird honoriert.
+Der Konsens aus [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) (Single-Envelope pro CLI-Call) wird honoriert.
 `--follow` produziert konzeptionell einen Tail-Stream, nicht eine
 beschränkte Antwort — und die NDJSON-Stream-Form ist Cluster-weit
 nicht vorgesehen. Daher wird `--follow --json` in `runLogs` Stage-1
@@ -1073,7 +1073,7 @@ Funktionsaufrufe ohne State-Mutation. Race-frei by construction.
 
 `config` ist der **erste Read-only+Modifying-Hybrid** des Clusters:
 drei Sub-Formen teilen `command: "config"` und tragen je ein
-**Pflicht-`subcommand`** ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) §322). Die Read-only-Formen
+**Pflicht-`subcommand`** ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)). Die Read-only-Formen
 `config` (bare) und `config get` tragen nur `--json`; die
 Modifying-Form `config set` trägt zusätzlich `--dry-run`/`--diff`.
 
@@ -1189,7 +1189,7 @@ nicht differenziert.
 **Bekannte Limitation — YAML-Kommentare** (config Out-of-Scope):
 `config set devcontainer.featureSources.allow <url>` läuft über einen
 Marshal-Rewrite (Listen-Pfad) und **verliert Kommentare** in
-`u-boot.yaml`. Spec §711-721 fordert keine Comment-Preservation für
+`u-boot.yaml`. [LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) fordert keine Comment-Preservation für
 diesen Listen-Pfad. Scalar-Pfade (`project.name`, `*.enabled`, …)
 behalten Kommentare via `yaml.v3.PatchScalar`.
 

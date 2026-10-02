@@ -81,7 +81,7 @@ const (
 	checkIDComposeYaml      = "compose.yaml.valid"
 	checkIDDevcontainerJSON = "devcontainer.json.valid"
 	checkIDDevcontainerDockerfile = "devcontainer.dockerfile.valid"
-	// checkIDServicesEnabledKey is the M5-T7 LH-FA-ADD-005 §893 check:
+	// checkIDServicesEnabledKey is the M5-T7 LH-FA-ADD-005 check:
 	// warns when a services.<name> entry in u-boot.yaml omits the
 	// explicit `enabled:` key. Spec-required to distinguish "registered
 	// and disabled" from "registered without a decision".
@@ -94,8 +94,8 @@ const (
 	checkIDForwardPortsConsistency = "devcontainer.forwardPorts.consistency"
 
 	// checkIDDevcontainerFeaturesAllowlist is the slice-v1-
-	// devcontainer-features T5 Teil A check (LH-FA-DEV-003 §711-721
-	// + §1340-1353). Validates that every entry in
+	// devcontainer-features T5 Teil A check (LH-FA-DEV-003
+	// + LH-FA-CONF-002). Validates that every entry in
 	// `cfg.Devcontainer.Features` is either catalogue-aktivierbar
 	// or carries a `source:` override whose value appears in
 	// `cfg.Devcontainer.FeatureSources.Allow`. Drift detection (the
@@ -585,7 +585,7 @@ func (s *DoctorService) checkUbootYaml(_ context.Context, baseDir string) domain
 	}
 	// Audit-Followup A1: LH-FA-DEV-003 schema validation of the
 	// devcontainer subtree (featureSources.allow entries + features
-	// map-key + features.<name>.source URL-format). Spec §1353
+	// map-key + features.<name>.source URL-format). LH-FA-CONF-002
 	// mandates Exit-Code 10 for invalid sources / names; `checkUbootYaml`
 	// is the canonical place to surface that as an Error severity
 	// so the user sees one consolidated u-boot.yaml-validity report.
@@ -594,7 +594,7 @@ func (s *DoctorService) checkUbootYaml(_ context.Context, baseDir string) domain
 			ID:       checkIDUbootYaml,
 			Severity: domain.SeverityError,
 			Message:  fmt.Sprintf("u-boot.yaml devcontainer schema invalid: %s.", err.Error()),
-			Hint:     "Fix the offending entry (URL scheme, host, or feature name); see LH-FA-DEV-003 / spec/lastenheft.md §1340-1353.",
+			Hint:     "Fix the offending entry (URL scheme, host, or feature name); see LH-FA-DEV-003 / spec/lastenheft.md LH-FA-CONF-002.",
 		}
 	}
 	return domain.Diagnostic{
@@ -628,7 +628,7 @@ type composeYAMLShape struct {
 //                          produces exactly this state — empty
 //                          services scaffold the user fills via
 //                          `u-boot add <service>`. LH-AK-001
-//                          §2299 verlangt nach `init && doctor`
+//                          LH-AK-001 verlangt nach `init && doctor`
 //                          "keinen `error`-Eintrag", deshalb ist
 //                          ein leerer services-Block hier
 //                          Severity Warn, nicht Error. Die
@@ -677,7 +677,7 @@ func (s *DoctorService) checkComposeYaml(_ context.Context, baseDir string) doma
 // forwardPorts is no longer deferred: M5-T7 ships the consistency
 // check via [checkForwardPortsConsistency], which reads forwardPorts
 // through its own [devcontainerForwardPortsShape] projection so this
-// minimal validator stays focused on the LH-FA-DIAG-002 §1071 shape
+// minimal validator stays focused on the LH-FA-DIAG-002 shape
 // fields. Other devcontainer.json fields (`customizations`,
 // `features`, ...) remain out of scope for the doctor today.
 type devcontainerJSONShape struct {
@@ -691,12 +691,12 @@ type devcontainerJSONShape struct {
 // `ubootYAMLConfig.Devcontainer` block:
 //
 //   - u-boot.yaml present + `devcontainer.enabled == true` → Error
-//     (LH-FA-DIAG-002 §1073).
+//     (LH-FA-DIAG-002).
 //   - u-boot.yaml present + `devcontainer.enabled == false` → Warn
-//     (LH-FA-DIAG-002 §1077).
+//     (LH-FA-DIAG-002).
 //   - u-boot.yaml present + `devcontainer.enabled` unset / absent
 //     `devcontainer:` block → Warn (quality hint).
-//   - u-boot.yaml absent / unreadable / unparsable → Warn (§1078:
+//   - u-boot.yaml absent / unreadable / unparsable → Warn (LH-FA-DIAG-002:
 //     supplementary quality diagnostic).
 //
 // Best-effort read: any I/O or parse error degrades to Warn rather
@@ -876,7 +876,7 @@ func hasFromDirective(body []byte) bool {
 	return false
 }
 
-// checkServicesEnabledKey wires the LH-FA-ADD-005 §893 check: every
+// checkServicesEnabledKey wires the LH-FA-ADD-005 check: every
 // `services.<name>` entry in u-boot.yaml must carry an explicit
 // `enabled:` key (true or false). Missing keys surface as
 // SeverityWarn and Doctor groups them in a single diagnostic listing
@@ -914,7 +914,7 @@ func (s *DoctorService) checkServicesEnabledKey(_ context.Context, baseDir strin
 		Severity: domain.SeverityWarn,
 		Message: fmt.Sprintf(
 			"services without an explicit enabled: key: %s. "+
-				"Add `enabled: true` or `enabled: false` per LH-FA-ADD-005 §893.",
+				"Add `enabled: true` or `enabled: false` per LH-FA-ADD-005.",
 			strings.Join(missing, ", ")),
 	}
 }
@@ -1181,7 +1181,7 @@ func joinIntsAscending(ports []int) string {
 //     it so the user can fix a typo or set a source override.
 //   - **Enabled key missing (Warn):** The entry exists but
 //     `Enabled == nil`. Analog to `services.enabled-key`
-//     (LH-FA-ADD-005 §893): an explicit decision (`true`/`false`)
+//     (LH-FA-ADD-005): an explicit decision (`true`/`false`)
 //     belongs in u-boot.yaml.
 //
 // Skip conditions (SeverityOK with a message, no work done):
@@ -1189,12 +1189,12 @@ func joinIntsAscending(ports []int) string {
 //   - u-boot.yaml absent or unparsable — primary file-presence
 //     diagnostics live in [checkUbootYaml].
 //   - `cfg.Devcontainer == nil` or `cfg.Devcontainer.Features` is
-//     empty — Spec §2394 negative pin: doctor must not raise errors
+//     empty — LH-AK-005 negative pin: doctor must not raise errors
 //     against devcontainer config when the user has not opted in.
 //
-// Spec-§711 catalogue-vs-Allowlist split: built-in features (in
+// LH-FA-DEV-003 catalogue-vs-Allowlist split: built-in features (in
 // [featureCatalogue]) are activatable without an Allowlist entry;
-// every other source needs the Allowlist (§713-720).
+// every other source needs the Allowlist (LH-FA-DEV-003).
 func (s *DoctorService) checkDevcontainerFeaturesAllowlist(_ context.Context, baseDir string) domain.Diagnostic {
 	cfg, err := s.loadUbootYAML(baseDir)
 	if err != nil {
@@ -1238,7 +1238,7 @@ func (s *DoctorService) checkDevcontainerFeaturesAllowlist(_ context.Context, ba
 		if len(enabledKeyMissing) > 0 {
 			parts = append(parts, fmt.Sprintf(
 				"feature(s) without explicit enabled: key: %s. "+
-					"Add `enabled: true` or `enabled: false` per LH-FA-ADD-005 §893 (same convention applies to devcontainer.features.<name>)",
+					"Add `enabled: true` or `enabled: false` per LH-FA-ADD-005 (same convention applies to devcontainer.features.<name>)",
 				strings.Join(enabledKeyMissing, ", ")))
 		}
 		return domain.Diagnostic{
@@ -1280,7 +1280,7 @@ func sortedFeatureNames(m map[string]ubootYAMLDevcontainerFeature) []string {
 //     `<name>`, or `<name> (invalid name)` for the defensive branch
 //     when T1's validateDevcontainerFeatures has been bypassed).
 //   - enabledKeyMissing: entries where `Enabled == nil` (LH-FA-
-//     ADD-005 §893 extended to features).
+//     ADD-005 LH-FA-ADD-005 extended to features).
 //
 // Extracted from [DoctorService.checkDevcontainerFeaturesAllowlist]
 // to keep the latter under the gocognit threshold.

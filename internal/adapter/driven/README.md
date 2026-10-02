@@ -26,11 +26,11 @@ den Test-Build.
   manual-advance Fake (Vorgabe aus dem Slice-Plan: "kein reales
   time.Sleep in Tests").
 - `progress/` — `ProgressPort`-Adapter (Text-Output für
-  [`LH-FA-INIT-005`](../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)-§609-Reports).
+  [`LH-FA-INIT-005`](../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)-Reports).
 - `confirm/` — `Confirmer`-Adapter (`bufio.Scanner` über stdin,
   Prompt auf stderr; Default `[y/N]`).
   `ConfirmRemoveVolumes` deckt den destruktiven `down --volumes`-
-  Pfad ([`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) §254).
+  Pfad ([`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)).
 - `logger/` — `Logger`-Adapter via `log/slog` (Text- und
   JSON-Format).
 - `docker/` — zwei Adapter im selben Package:

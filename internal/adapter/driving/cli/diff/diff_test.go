@@ -242,7 +242,7 @@ func TestRender_MultipleHunksConcatenated(t *testing.T) {
 // scenario from Slice §Aufhebungsbedingung Variante A: a fresh
 // compose.yaml gets a 12-line postgres block. Result must yield
 // exactly one hunk with NewLines == 12 so the consumer-side
-// CountFromHunks reports `count: 12` (Spec §430).
+// CountFromHunks reports `count: 12` (LH-FA-CLI-007).
 func TestCompute_PostgresComposeFresh(t *testing.T) {
 	const block = `services:
   postgres:
@@ -262,10 +262,10 @@ func TestCompute_PostgresComposeFresh(t *testing.T) {
 		t.Fatalf("postgres fresh: want 1 hunk, got %d", len(hunks))
 	}
 	if got := hunks[0].NewLines; got != 12 {
-		t.Errorf("postgres fresh: NewLines = %d, want 12 (Spec §430)", got)
+		t.Errorf("postgres fresh: NewLines = %d, want 12 (LH-FA-CLI-007)", got)
 	}
 	if got := diff.CountFromHunks(hunks); got != 12 {
-		t.Errorf("postgres fresh: CountFromHunks = %d, want 12 (Spec §430)", got)
+		t.Errorf("postgres fresh: CountFromHunks = %d, want 12 (LH-FA-CLI-007)", got)
 	}
 }
 
@@ -300,12 +300,12 @@ func TestCompute_PostgresComposeExisting(t *testing.T) {
 		t.Errorf("postgres existing: CountFromHunks = %d, want > 6 (NewLines = inserts + context)", got)
 	}
 	if got := diff.CountAdditions(hunks); got != 6 {
-		t.Errorf("postgres existing: CountAdditions = %d, want exactly 6 (Spec §477)", got)
+		t.Errorf("postgres existing: CountAdditions = %d, want exactly 6 (LH-FA-CLI-008)", got)
 	}
 }
 
 // TestCountAdditions_EdgeCases pins the exact additive-line count
-// against simple cases — keeps drift between Spec §477 and the
+// against simple cases — keeps drift between LH-FA-CLI-008 and the
 // modify-action `count` semantics visible.
 func TestCountAdditions_EdgeCases(t *testing.T) {
 	cases := []struct {

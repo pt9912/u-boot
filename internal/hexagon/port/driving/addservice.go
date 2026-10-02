@@ -114,12 +114,12 @@ type AddServiceResponse struct {
 	// order the use case attempted them. Empty for PreviewNone (no
 	// recorder wired) and for true no-ops. Carries NewContent and
 	// OldContent for the CLI-adapter diff renderer; these two fields
-	// stay out of the JSON wire-format via `json:"-"` (Spec §326 has
+	// stay out of the JSON wire-format via `json:"-"` (LH-FA-CLI-007 has
 	// no place for raw bytes).
 	PlannedFiles []PlannedFile
 
 	// Changes mirrors PlannedFiles' paths with their line-count
-	// summaries (LH-FA-CLI-007 §365-371). Filled only in preview
+	// summaries (LH-FA-CLI-007). Filled only in preview
 	// modes; nil for PreviewNone. Count semantics follow T0-(g):
 	// newLines/totalLines.
 	Changes []ChangeEntry
@@ -156,17 +156,17 @@ const (
 
 	// PreviewAndApply captures every mutation AND writes it through
 	// to the production FS. Used for `--diff` without `--dry-run`
-	// (LH-FA-CLI-008 §465-470 Preview-and-Apply).
+	// (LH-FA-CLI-008 Preview-and-Apply).
 	PreviewAndApply
 )
 
 // PlannedFile is the wire-shape of one FS mutation in the LH-FA-CLI-007
-// §326 voll-schema response. The CLI adapter consumes it for both the
+// LH-FA-CLI-007 voll-schema response. The CLI adapter consumes it for both the
 // JSON envelope's `plannedFiles[]` and the human/JSON unified diff.
 //
 // NewContent and OldContent carry the raw file bytes the recorder
 // captured for the CLI-adapter diff renderer. They are excluded from
-// the JSON wire-form via `json:"-"` — Spec §326 has no field for
+// the JSON wire-form via `json:"-"` — LH-FA-CLI-007 has no field for
 // raw bytes and embedding them would be base64-drift. Diff hunks
 // rendered from these bytes land in Hunks below.
 type PlannedFile struct {
@@ -178,7 +178,7 @@ type PlannedFile struct {
 }
 
 // ChangeEntry is the wire-shape of one line-count summary entry. Spec
-// §365-371 requires count ≥ 0. Semantics (slice-v1-cli-json-dry-run-add
+// LH-FA-CLI-007 requires count ≥ 0. Semantics (slice-v1-cli-json-dry-run-add
 // T0-(g)):
 //
 //   - action "create" → total lines in the new file
@@ -190,7 +190,7 @@ type ChangeEntry struct {
 }
 
 // Hunk is the wire-shape of one diff hunk in
-// [PlannedFile.Hunks] (LH-FA-CLI-008 §477-482). Coordinates are
+// [PlannedFile.Hunks] (LH-FA-CLI-008). Coordinates are
 // 1-based (oldStart/newStart ≥ 1 when the respective Lines > 0).
 // Content holds the raw hunk body with `+`/`-`/space line prefixes.
 type Hunk struct {
@@ -213,7 +213,7 @@ type Hunk struct {
 // add. MVP catalogue: only `postgres`.
 var ErrServiceUnsupported = errors.New("service not supported")
 
-// ErrServiceInconsistent signals an LH-FA-ADD-005-§895 condition:
+// ErrServiceInconsistent signals an LH-FA-ADD-005-LH-FA-ADD-005 condition:
 // a managed `BEGIN/END U-BOOT MANAGED BLOCK: service.<name>` block
 // is present in `compose.yaml` but the matching `services.<name>`
 // entry is missing from `u-boot.yaml` — the YAML anchor has been

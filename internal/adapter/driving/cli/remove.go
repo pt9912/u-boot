@@ -36,7 +36,7 @@ type removeFlags struct {
 // removeEnvelopeData is the typed `data` carrier for the JSON
 // envelope of `u-boot remove` (slice-v1-cli-json-dry-run-remove
 // T0-(f)/(m)). Pointer-Wrapping pinnt Key-Presence-vs-Absence
-// (Spec §1841): Success-Pfad setzt alle vier Felder; Error-Pfad
+// (LH-NFA-USE-004): Success-Pfad setzt alle vier Felder; Error-Pfad
 // trägt nur Service (Zero-Response für PriorState/State/
 // VolumesPurged → die *-Felder bleiben nil und fallen via
 // omitempty aus dem JSON). Pre-Service-Validation-Pfade
@@ -73,7 +73,7 @@ type removeEnvelopeData struct {
 // via [domain.NewServiceName] before reaching the use case; catalog
 // rejection and state-machine mismatches both surface as exit code
 // 10 via [ExitCode]. The local `--purge` flag opts into volume
-// removal (LH-FA-CLI-005A §254-style confirmation gate); the
+// removal (LH-FA-CLI-005A-style confirmation gate); the
 // application service handles the gate consistency with `down
 // --volumes`.
 //
@@ -81,7 +81,7 @@ type removeEnvelopeData struct {
 // R11-HIGH-F1 + R12-HIGH-F1 + R12-MED-F2 mechanism): replaces
 // the legacy `cobra.ExactArgs(1)` guard so that
 // `u-boot remove --json` ohne positional arg den JSON-Envelope
-// auf stdout emittiert (Spec §1841) BEVOR Cobra den
+// auf stdout emittiert (LH-NFA-USE-004) BEVOR Cobra den
 // [ErrServiceNameMissing]-Sentinel an Execute() propagiert.
 // `cobra.ExactArgs(1)` würde sonst FRÜHER feuern und die
 // envelope-emission überstimmen.
@@ -105,7 +105,7 @@ compose.yaml and .env.example, then set services.<name>.enabled to
 false in u-boot.yaml.
 
 --purge is the explicit destructive opt-in for volume removal
-(LH-FA-ADD-007). The same LH-FA-CLI-005A §254 confirmation gate as
+(LH-FA-ADD-007). The same LH-FA-CLI-005A confirmation gate as
 "u-boot down --volumes" applies: --no-interactive without --yes
 exits 10 (ErrConfirmationRequired); interactive mode prompts with a
 safe default-No. In v0.3.0 the gate's "approved" outcome does NOT
@@ -117,7 +117,7 @@ Flag combinations (LH-FA-CLI-007/008):
   --diff               show unified diff of planned changes
   --dry-run --diff     unified diff preview, no write
   --json               JSON output; pairs with --dry-run / --diff
-                       for the LH-FA-CLI-007 §326 voll-schema
+                       for the LH-FA-CLI-007 voll-schema
 
 Exit codes (LH-FA-CLI-006):
   0   success (state transition OR idempotent no-op)
@@ -145,7 +145,7 @@ Examples:
 	}
 
 	cmd.Flags().BoolVar(&flags.Purge, "purge", false,
-		"also request volume removal for the service (LH-FA-ADD-007). Destructive: triggers the LH-FA-CLI-005A §254 confirmation gate (refuses in --no-interactive without --yes). v0.3.0 does NOT auto-remove volumes after approval — the summary points at `docker volume rm` for manual cleanup.")
+		"also request volume removal for the service (LH-FA-ADD-007). Destructive: triggers the LH-FA-CLI-005A confirmation gate (refuses in --no-interactive without --yes). v0.3.0 does NOT auto-remove volumes after approval — the summary points at `docker volume rm` for manual cleanup.")
 	cmd.Flags().BoolVar(&flags.DryRun, "dry-run", false,
 		"preview the planned changes without writing files (LH-FA-CLI-007)")
 	cmd.Flags().BoolVar(&flags.Diff, "diff", false,
@@ -157,7 +157,7 @@ Examples:
 // validator. Originally a bespoke closure (slice-v1-cli-json-dry-run-
 // remove T5/T7: R11/R12/R13 — JSON-envelope-emission BEFORE the Cobra
 // return so `--json remove` without an arg emits the envelope per
-// Spec §1841/§1842, plus too-many-args symmetry and --dry-run/--diff
+// LH-NFA-USE-004/LH-NFA-USE-004, plus too-many-args symmetry and --dry-run/--diff
 // flag-awareness for the Voll-Schema).
 //
 // At slice-v1-cli-json-envelope-consolidation T1 (SD-A (a)) it became
@@ -293,7 +293,7 @@ func runRemove(
 //
 // `resp.Warnings` werden via [mapWarningsToDiagnostics] in
 // `diagnostics[]` mit `level: "warn"` gemapped — Status-Kopplung
-// (Spec §447) macht `status: "warn"` und exit-code bleibt 0
+// (LH-FA-CLI-007) macht `status: "warn"` und exit-code bleibt 0
 // (Warn-only verschiebt den Exit-Code nicht). T0-(j) R1-MED-5-Pin
 // `TestRemove_PurgeYesJSON_WarnOnly`.
 func writeRemoveJSON(out io.Writer, resp driving.RemoveServiceResponse, dryRun, diffFlag bool, svcName domain.ServiceName) error {
@@ -377,9 +377,9 @@ func mapWarningsToDiagnostics(ws []driving.WarningEntry) []diagnosticItem {
 // dürfen NICHT nur auf `code` filtern.
 //
 // `ErrConfirmationRequired` → `LH-FA-INIT-005` (geteilt mit
-// init/down) — der Spec-Anker §195 lebt im INIT-005-Block.
+// init/down) — der Spec-Anker LH-FA-CLI-004 lebt im INIT-005-Block.
 // `ErrConflictingModeFlags` → `LH-FA-CLI-005A` (Mutex-Verträge
-// für `--yes`/`--no-interactive` §235).
+// für `--yes`/`--no-interactive` LH-FA-CLI-005A).
 // `ErrServiceNameMissing` → `LH-FA-CLI-006` (Form-Validierung
 // vom CLI-Adapter emittiert, Exit 2 via [isUsageError]).
 //

@@ -317,128 +317,9 @@ Der Dry-Run muss anzeigen, welche Dateien erzeugt, geändert oder gelöscht wür
 
 Bei gleichzeitiger Verwendung von `--dry-run` und `--json` muss die Ausgabe streng maschinenlesbar (`JSON`) erfolgen und keine unstrukturierten Text-UI-Zeilen enthalten.
 
-Für `--dry-run --json` ist die Ausgabe mindestens wie folgt als maschinenlesbares JSON zu liefern:
-
-```json
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "required": ["status", "command", "dryRun", "diff", "plannedFiles", "changes", "diagnostics", "exitCode"],
-  "properties": {
-    "subcommand": {
-      "type": "string",
-      "description": "Unterkommando bei gruppierten Hauptkommandos wie `template` oder `config`"
-    },
-    "status": {
-      "type": "string",
-      "enum": ["ok", "warn", "error"]
-    },
-    "command": {
-      "type": "string",
-      "enum": ["init", "add", "remove", "up", "down", "doctor", "logs", "generate", "config", "template"]
-    },
-    "dryRun": {
-      "type": "boolean"
-    },
-    "diff": {
-      "type": "boolean"
-    },
-    "plannedFiles": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["path", "action"],
-        "properties": {
-          "path": { "type": "string" },
-          "action": {
-            "type": "string",
-            "enum": ["create", "modify", "delete"]
-          }
-        },
-        "additionalProperties": true
-      }
-    },
-    "changes": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["path", "count"],
-        "properties": {
-          "path": { "type": "string" },
-          "count": { "type": "integer", "minimum": 0 }
-        },
-        "additionalProperties": true
-      }
-    },
-    "diagnostics": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["level", "code", "message"],
-        "properties": {
-          "level": { "type": "string", "enum": ["warn", "error"] },
-          "code": { "type": "string" },
-          "message": { "type": "string" },
-          "file": { "type": "string" }
-        },
-        "additionalProperties": true
-      }
-    },
-    "exitCode": {
-      "type": "integer",
-      "minimum": 0
-    }
-  },
-  "allOf": [
-    {
-      "if": {
-        "properties": {
-          "command": { "const": "template" }
-        },
-        "required": ["command"]
-      },
-      "then": {
-        "required": ["subcommand"]
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "command": { "const": "config" }
-        },
-        "required": ["command"]
-      },
-      "then": {
-        "required": ["subcommand"]
-      }
-    }
-  ],
-  "additionalProperties": true
-}
-```
+Für `--dry-run --json` ist die Ausgabe als maschinenlesbares JSON mit mindestens den Pflichtfeldern `status`, `command`, `dryRun`, `diff`, `plannedFiles`, `changes`, `diagnostics` und `exitCode` zu liefern. Jeder Eintrag in `plannedFiles` trägt `path` und `action` (`create`, `modify` oder `delete`), jeder Eintrag in `changes` trägt `path` und `count`, jeder Eintrag in `diagnostics` trägt `level` (`warn` oder `error`), `code` und `message` (optional `file`).
 
 Bei gruppierten Befehlen wie `command == "template"` oder `command == "config"` muss das Feld `subcommand` gesetzt sein (z. B. `list`, `get`, `set`).
-
-Beispielinstanz:
-
-```json
-{
-  "status": "warn",
-  "command": "add",
-  "dryRun": true,
-  "diff": false,
-  "plannedFiles": [
-    { "path": "compose.yaml", "action": "create" }
-  ],
-  "changes": [
-    { "path": "compose.yaml", "count": 12 }
-  ],
-  "diagnostics": [
-    { "level": "warn", "code": "LH-FA-CLI-007", "message": "Geplante Datei fehlt bereits" }
-  ],
-  "exitCode": 0
-}
-```
 
 Weitere Felder sind erlaubt.
 
@@ -467,24 +348,7 @@ Wird `--diff` mit `--dry-run` kombiniert, gilt dieselbe Vorschau bei vollständi
 
 Bei Kombination von `--diff` mit `--json` ist die komplette JSON-Struktur inkl. Pflichtfeldern aus dem in [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run) definierten Schema auszugeben. Die Felder `dryRun` und `diff` sind dabei korrekt auf den konkreten Ausführungsmodus gesetzt (`dryRun` je nach Aufruf, `diff` immer `true`).
 
-Beispiel für `--diff --json` ohne `--dry-run` (Vorschau mit anschließendem Schreiben):
-
-```json
-{
-  "status": "ok",
-  "command": "add",
-  "dryRun": false,
-  "diff": true,
-  "plannedFiles": [
-    { "path": "compose.yaml", "action": "modify" }
-  ],
-  "changes": [
-    { "path": "compose.yaml", "count": 6 }
-  ],
-  "diagnostics": [],
-  "exitCode": 0
-}
-```
+Beispiel: `u-boot add postgres --diff --json` ohne `--dry-run` (Vorschau mit anschließendem Schreiben) liefert `dryRun: false` und `diff: true`.
 
 Für reine Vorschau-Workflows gelten die selben Exit-Codes wie bei der Nicht-Diff-Ausgabe.
 
@@ -515,13 +379,7 @@ Wird kein Name explizit angegeben, verwendet das Tool standardmäßig den aktuel
 
 Der abgeleitete Name wird deterministisch normalisiert:
 
-1. Der Basisname des Arbeitsverzeichnisses wird auf Kleinbuchstaben gesetzt.
-2. Alle Zeichen außer `a-z`, `0-9` und `-` werden auf `-` abgebildet.
-3. aufeinanderfolgende `-` werden zu einem einzelnen `-` zusammengeführt.
-4. führende und nachgestellte `-` sowie Leerzeichen werden entfernt.
-5. Die Länge wird auf 1 bis 63 Zeichen begrenzt.
-6. Nach Kürzung auf 63 Zeichen wird erneut auf führende/nachgestellte `-` geprüft und diese notfalls entfernt.
-7. Anschließend wird der Name gegen die Validierung in [`LH-FA-INIT-006`](#lh-fa-init-006--projektnamen-validierung) geprüft.
+Kleinbuchstaben, Zeichen außerhalb von `a-z`, `0-9` und `-` werden zu `-`, aufeinanderfolgende `-` zusammengeführt, führende und nachgestellte `-` entfernt, Länge auf 1 bis 63 Zeichen begrenzt; anschließend gilt die Validierung aus [`LH-FA-INIT-006`](#lh-fa-init-006--projektnamen-validierung).
 
 Beispiel:
 
@@ -637,7 +495,6 @@ Regeln:
 - endet mit einem Kleinbuchstaben oder einer Ziffer (entfällt bei einstelligen Namen)
 - minimale Länge: 1 Zeichen
 - maximale Länge: 63 Zeichen
-- regulärer Ausdruck: `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`
 
 Ungültige Namen müssen mit einer klaren Fehlermeldung abgelehnt werden.
 
@@ -731,7 +588,6 @@ Der Devcontainer soll standardmäßig mit einem nicht-root Benutzer arbeiten.
 Die UID dieses Benutzers muss an den Host anpassbar sein (z. B. `501` unter macOS mit Colima):
 
 - Konfigurationsschlüssel `devcontainer.user.uid` (Ganzzahl, optional, Default `1000`).
-- Der Wert wird als Build-Argument `USER_UID` an den Image-Build übergeben; der Container-Benutzer wird mit dieser UID angelegt.
 - Zulässig sind Ganzzahlen von `1` bis `65535`. `0` (root), negative oder nicht numerische Werte führen zu einem fachlichen Validierungsfehler (Exit-Code `10`).
 - Ohne `devcontainer.user.uid` bleibt das erzeugte Ergebnis unverändert (Default `1000`).
 

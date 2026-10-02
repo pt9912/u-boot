@@ -1,9 +1,9 @@
 //go:build docker
 
-// LH-FA-UP-001 §966 healthcheck-domination pin
+// LH-FA-UP-001 healthcheck-domination pin
 // (M6-docker-int Sub-T2).
 //
-// Spec §966: "Für Dienste mit Healthcheck ist `healthy` als
+// LH-FA-UP-001: "Für Dienste mit Healthcheck ist `healthy` als
 // Zielzustand erforderlich." UpService MUST keep polling while a
 // service is running-but-not-yet-healthy; it MUST NOT stabilize on
 // `running` alone.
@@ -42,7 +42,7 @@ import (
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
-// healthcheckFixture pins the §966 contract. The service:
+// healthcheckFixture pins the LH-FA-UP-001 contract. The service:
 //   - touches `/tmp/ready` after 3 s, then sleeps for a minute
 //     (so it stays `running` after the healthcheck flip);
 //   - healthcheck polls every 1 s with `test -f /tmp/ready` —
@@ -133,7 +133,7 @@ func TestUpService_RealDocker_StabilizesOnHealthyNotOnRunning(t *testing.T) {
 	const minimumWaitForHealthy = 2 * time.Second
 	if elapsed < minimumWaitForHealthy {
 		t.Errorf(
-			"Up returned after %v; want ≥ %v (would mean we stabilized on `running` not `healthy` — LH-FA-UP-001 §966 violation)",
+			"Up returned after %v; want ≥ %v (would mean we stabilized on `running` not `healthy` — LH-FA-UP-001 violation)",
 			elapsed, minimumWaitForHealthy,
 		)
 	}

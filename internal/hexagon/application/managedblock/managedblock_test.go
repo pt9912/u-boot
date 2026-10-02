@@ -289,7 +289,7 @@ func TestReplace_BlockMalformed_PropagatesErr(t *testing.T) {
 }
 
 func TestFind_BeginNotAtEndOfLine_NotFound(t *testing.T) {
-	// Why: review finding #3 — spec §2099 shows markers on separate
+	// Why: review finding #3 — spec LH-SA-FILE-002 shows markers on separate
 	// lines, and the BEGIN regex anchors to `$`. A single-line
 	// `BEGIN…--><…END…-->` has the END text appended after BEGIN, so
 	// the BEGIN regex never matches → ErrBlockNotFound (the stricter

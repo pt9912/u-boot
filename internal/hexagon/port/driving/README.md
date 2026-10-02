@@ -31,7 +31,7 @@ neben der Interface-Definition.
   und `driven.ErrComposeRuntime` (CLI-Code 12) durchgereicht via
   `errors.Is`-Wrap-Vertrag.
 - `DownUseCase` — [`LH-FA-UP-004`](../../../../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen). Sentinel:
-  `ErrConfirmationRequired` (CLI-Code 10 für §254-destruktive-Aborts).
+  `ErrConfirmationRequired` (CLI-Code 10 für destruktive Aborts, [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)).
 
 ## Geplante Erweiterungen
 

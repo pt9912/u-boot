@@ -546,7 +546,7 @@ func TestExecute_InitAssumeExistingFlag_PassThrough(t *testing.T) {
 }
 
 func TestExecute_InitAssumeExistingFlag_NotGlobal(t *testing.T) {
-	// Why: LH-FA-CLI-005A §238 — --assume-existing is init-only.
+	// Why: LH-FA-CLI-005A — --assume-existing is init-only.
 	// Putting it on the root command must fail with a usage error.
 	var stdout, stderr bytes.Buffer
 	err := newApp(&fakeInitUseCase{}).Execute(
@@ -563,7 +563,7 @@ func TestExecute_InitAssumeExistingFlag_NotGlobal(t *testing.T) {
 }
 
 func TestExecute_YesAndNoInteractive_Conflict(t *testing.T) {
-	// Why: LH-FA-CLI-005A §235 — `--yes` and `--no-interactive` are
+	// Why: LH-FA-CLI-005A — `--yes` and `--no-interactive` are
 	// mutually exclusive. The conflict surfaces via the CLI sentinel
 	// (not the use-case) → exit code 2.
 	getwd := func() (string, error) { return "/tmp/x/demo", nil }
@@ -590,7 +590,7 @@ func TestExecute_YesAndNoInteractive_Conflict(t *testing.T) {
 }
 
 func TestExecute_YesAlone_OnDeterministicPath_NoEffect(t *testing.T) {
-	// Why: LH-FA-CLI-005A §247 — `--yes` on a deterministic path is
+	// Why: LH-FA-CLI-005A — `--yes` on a deterministic path is
 	// a no-op. The use-case still runs with its plain request; no
 	// conflict check fires.
 	getwd := func() (string, error) { return "/tmp/x/demo", nil }
@@ -638,7 +638,7 @@ func TestExecute_NoInteractiveAlone_OnDeterministicPath_NoEffect(t *testing.T) {
 }
 
 func TestExecute_InitBackupsAppearInSummary(t *testing.T) {
-	// Why: the LH-FA-INIT-005 §609 affected-paths line is emitted by
+	// Why: the LH-FA-INIT-005 affected-paths line is emitted by
 	// the application layer via the progress writer; the CLI's
 	// printInitSummary additionally lists the resulting backup
 	// actions so the user can see where their originals went.
@@ -830,7 +830,7 @@ func TestExecute_InitAssumeExisting_NoLongerEmitsM3Note(t *testing.T) {
 func TestExecute_NoInteractive_PassThrough(t *testing.T) {
 	// Why: M4 soft-detection — --no-interactive must propagate into
 	// req.NoInteractive so the service skips the prompt path
-	// (LH-FA-INIT-004 §247).
+	// (LH-FA-INIT-004 LH-FA-CLI-005A).
 	getwd := func() (string, error) { return "/tmp/x/demo", nil }
 	uc := &fakeInitUseCase{
 		resp: driving.InitProjectResponse{
@@ -1621,7 +1621,7 @@ func TestExecute_Down_VolumesConfirmRefused_ReturnsExitCode10(t *testing.T) {
 
 func TestExecute_Down_RootYesBeforeSubcmd_BypassesConfirm(t *testing.T) {
 	t.Parallel()
-	// M6-closure-review fix #2: spec §237 lists `u-boot down
+	// M6-closure-review fix #2: spec LH-FA-CLI-005A lists `u-boot down
 	// --volumes` among the commands governed by the persistent
 	// --yes / --no-interactive root flags. Pin that `u-boot --yes
 	// down --volumes` (root flag BEFORE subcommand) behaves
@@ -1643,7 +1643,7 @@ func TestExecute_Down_RootYesBeforeSubcmd_BypassesConfirm(t *testing.T) {
 
 func TestExecute_Down_YesAndNoInteractive_ReturnsExitCode2(t *testing.T) {
 	t.Parallel()
-	// §235 mutual exclusion fires before the use case.
+	// LH-FA-CLI-005A mutual exclusion fires before the use case.
 	uc := &fakeDownUseCase{}
 	getwd := func() (string, error) { return "/tmp/proj", nil }
 	var stdout, stderr bytes.Buffer
@@ -2088,14 +2088,14 @@ func mustConfigPathInTest(t *testing.T, raw string) domain.ConfigPath {
 // TestExecute_Init_AllowExternalWithoutDevcontainer_Code10 pins the
 // slice-v1-devcontainer-features Review-Followup R1 fix: the
 // LH-FA-DEV-003 `--allow-external-feature-sources requires
-// --devcontainer` rejection must map to exit-code 10 per Spec §720,
+// --devcontainer` rejection must map to exit-code 10 per LH-FA-DEV-003,
 // not the default-1 fallback. The sentinel was moved from
 // `application` to `domain` so this adapter could include it in
 // [cli.isValidationError]; the test pins the wiring.
 func TestExecute_Init_AllowExternalWithoutDevcontainer_Code10(t *testing.T) {
 	getwd := func() (string, error) { return "/tmp/x/demo", nil }
 	uc := &fakeInitUseCase{
-		err: fmt.Errorf("--allow-external-feature-sources requires --devcontainer (Spec §714): %w", domain.ErrInvalidFeatureSource),
+		err: fmt.Errorf("--allow-external-feature-sources requires --devcontainer (LH-FA-DEV-003): %w", domain.ErrInvalidFeatureSource),
 	}
 	var stdout, stderr bytes.Buffer
 	err := newApp(uc, cli.WithGetwd(getwd)).Execute(
@@ -2110,13 +2110,13 @@ func TestExecute_Init_AllowExternalWithoutDevcontainer_Code10(t *testing.T) {
 		t.Errorf("err = %v, want wrap of domain.ErrInvalidFeatureSource", err)
 	}
 	if got := cli.ExitCode(err); got != 10 {
-		t.Errorf("ExitCode = %d, want 10 (Spec §720)", got)
+		t.Errorf("ExitCode = %d, want 10 (LH-FA-DEV-003)", got)
 	}
 }
 
 // TestExecute_Generate_InvalidAllowFlagURL_Code10 pins that a
 // malformed URL on `generate devcontainer --allow-external-feature-
-// sources <bad>` rejects with exit-code 10 (Spec §1353).
+// sources <bad>` rejects with exit-code 10 (LH-FA-CONF-002).
 func TestExecute_Generate_InvalidAllowFlagURL_Code10(t *testing.T) {
 	getwd := func() (string, error) { return "/tmp/x/demo", nil }
 	uc := &fakeGenerateUseCase{
@@ -2135,7 +2135,7 @@ func TestExecute_Generate_InvalidAllowFlagURL_Code10(t *testing.T) {
 		t.Errorf("err = %v, want wrap of domain.ErrInvalidFeatureSource", err)
 	}
 	if got := cli.ExitCode(err); got != 10 {
-		t.Errorf("ExitCode = %d, want 10 (Spec §1353)", got)
+		t.Errorf("ExitCode = %d, want 10 (LH-FA-CONF-002)", got)
 	}
 }
 

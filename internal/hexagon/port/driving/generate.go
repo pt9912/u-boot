@@ -24,7 +24,7 @@ type GenerateRequest struct {
 
 	// AllowExternalFeatureSources lists LH-FA-DEV-003 source URLs
 	// that should be appended to `devcontainer.featureSources.allow`
-	// before the devcontainer artefact is rendered (Spec §715). Only
+	// before the devcontainer artefact is rendered (LH-FA-DEV-003). Only
 	// applied when Artifact == ArtifactDevcontainer; ignored for the
 	// other artefacts (changelog / readme / env-example) — the CLI
 	// adapter restricts the flag to the devcontainer subcommand,
@@ -130,7 +130,7 @@ type GenerateResponse struct {
 	// and for true no-ops. The [PlannedFile] type itself trägt die
 	// NewContent/OldContent-Felder mit `json:"-"` (siehe addservice.go
 	// Definition), damit Raw-Bytes nicht in der CLI-Wire-Form landen
-	// (Spec §326). Der Port serialisiert nichts direkt — die CLI baut
+	// (LH-FA-CLI-007). Der Port serialisiert nichts direkt — die CLI baut
 	// eigene Wire-Typen in `cli/jsonenvelope.go` (plannedFile/hunk).
 	//
 	// Mid-Write-Failure-Semantik (R4 Recorder-Realität,
@@ -142,7 +142,7 @@ type GenerateResponse struct {
 	PlannedFiles []PlannedFile
 
 	// Changes mirrors PlannedFiles' paths with their line-count
-	// summaries (LH-FA-CLI-007 §365-371). Filled only in preview
+	// summaries (LH-FA-CLI-007). Filled only in preview
 	// modes; nil for PreviewNone. Count semantics follow add T0-(g)
 	// (1:1 inherited): create = CountLines(NewContent); modify = sum
 	// of `+`-lines via diff.CountAdditions; delete = 0. Today

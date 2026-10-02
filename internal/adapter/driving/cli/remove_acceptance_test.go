@@ -72,7 +72,7 @@ func unmarshalRemoveEnv(t *testing.T, raw []byte) map[string]any {
 // TestRemoveJSON_BareUsesDataEnvelope is the T0-(f)/(m) success pin:
 // `u-boot --json remove postgres` (no preview-flag) ships the
 // Minimal+Data envelope with `data: {service, priorState, state,
-// volumesPurged}`. Spec §1841: no plannedFiles/changes/dryRun/diff.
+// volumesPurged}`. LH-NFA-USE-004: no plannedFiles/changes/dryRun/diff.
 func TestRemoveJSON_BareUsesDataEnvelope(t *testing.T) {
 	stub := &removeUseCaseStub{
 		resp: driving.RemoveServiceResponse{
@@ -330,7 +330,7 @@ func TestRemove_OtelExtraFileDelete_DiffHasDeleteHunk(t *testing.T) {
 // pin: `--purge --yes --json` succeeds (Yes skips the gate without
 // confirmer call), VolumesPurged stays false (v0.3.0 deferred), the
 // Use-Case emits a WARN-Diagnostic with LH-FA-ADD-007. status=warn,
-// exit=0 (warn-only does not shift exit code, Spec §447).
+// exit=0 (warn-only does not shift exit code, LH-FA-CLI-007).
 func TestRemove_PurgeYesJSON_WarnOnly(t *testing.T) {
 	stub := &removeUseCaseStub{
 		resp: driving.RemoveServiceResponse{
@@ -360,7 +360,7 @@ func TestRemove_PurgeYesJSON_WarnOnly(t *testing.T) {
 	)
 	env := unmarshalRemoveEnv(t, stdout.Bytes())
 	if status, _ := env["status"].(string); status != "warn" {
-		t.Errorf("status: want \"warn\" (Spec §447 warn-only), got %q", status)
+		t.Errorf("status: want \"warn\" (LH-FA-CLI-007 warn-only), got %q", status)
 	}
 	diags, _ := env["diagnostics"].([]any)
 	if len(diags) != 1 {
@@ -793,7 +793,7 @@ func TestRemove_NoPositionalArg_JSON_EmitsCLI006Envelope(t *testing.T) {
 		t.Errorf("exit code: want 2 (LH-FA-CLI-006), got %d", code)
 	}
 	if stdout.Len() == 0 {
-		t.Fatalf("expected JSON envelope on stdout (Spec §1841 missing-arg pin); got empty")
+		t.Fatalf("expected JSON envelope on stdout (LH-NFA-USE-004 missing-arg pin); got empty")
 	}
 	jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
 		jsontestutil.WithCommand("remove"),
@@ -922,10 +922,10 @@ func TestRemove_DryRun_PropagatesPreviewDryRunFlag(t *testing.T) {
 
 // TestRemove_NoPositionalArg_DryRunJSON_EmitsFullSchemaEnvelope
 // (R13-HIGH-1): `--dry-run --json remove` ohne positional arg MUSS
-// das Voll-Schema-Envelope emittieren (Spec §1842), NICHT das
+// das Voll-Schema-Envelope emittieren (LH-NFA-USE-004), NICHT das
 // Minimal-Schema. Pre-T7 hatte der Args-Validator hardcoded
 // `dryRun=false, diff=false` und produzierte einen Minimal-Envelope
-// trotz `--dry-run` → Spec §1842 Verletzung. Fix in T7: Validator
+// trotz `--dry-run` → LH-NFA-USE-004 Verletzung. Fix in T7: Validator
 // liest `cmd.Flags().GetBool("dry-run"/"diff")` und reicht den
 // User-Flag-State an `writeErrorEnvelopeSub` durch.
 func TestRemove_NoPositionalArg_DryRunJSON_EmitsFullSchemaEnvelope(t *testing.T) {
@@ -957,7 +957,7 @@ func TestRemove_NoPositionalArg_DryRunJSON_EmitsFullSchemaEnvelope(t *testing.T)
 // `--json remove a b c` (zwei extra positional args) MUSS ebenfalls
 // einen Envelope auf stdout produzieren — Symmetrie zum missing-arg-
 // Pfad. Pre-T7 ist der `len(args)>1`-Pfad nur durch `cobra.ExactArgs(1)`
-// abgefangen worden ohne stdout-Envelope (Spec §1841 Verletzung).
+// abgefangen worden ohne stdout-Envelope (LH-NFA-USE-004 Verletzung).
 // Fix in T7: Validator emittiert Envelope vor dem Cobra-Error-Return.
 func TestRemove_TooManyArgs_JSON_EmitsCLI006Envelope(t *testing.T) {
 	stub := &removeUseCaseStub{}
@@ -973,7 +973,7 @@ func TestRemove_TooManyArgs_JSON_EmitsCLI006Envelope(t *testing.T) {
 		t.Errorf("exit code: want 2 (LH-FA-CLI-006 usage class), got %d", code)
 	}
 	if stdout.Len() == 0 {
-		t.Fatalf("expected JSON envelope on stdout (Spec §1841 too-many-args symmetry to missing-arg); got empty")
+		t.Fatalf("expected JSON envelope on stdout (LH-NFA-USE-004 too-many-args symmetry to missing-arg); got empty")
 	}
 	jsontestutil.AssertMinimalEnvelope(t, stdout.Bytes(),
 		jsontestutil.WithCommand("remove"),

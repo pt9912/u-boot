@@ -21,38 +21,202 @@ Eine `SPEC-*` ist eine Adresse, keine Anforderung.
 Verfeinerungen einzelner Anforderungen: Ablauf, Zustandsfolgen, Entscheidungsregeln.
 Tatsächlicher Code gehört nicht hierher.
 
+### LH-FA-INIT-002.a — Normalisierung des abgeleiteten Projektnamens
+
+Verfeinert [`LH-FA-INIT-002`](lastenheft.md#lh-fa-init-002--projektname).
+
+1. Der Basisname des Arbeitsverzeichnisses wird auf Kleinbuchstaben gesetzt.
+2. Alle Zeichen außer `a-z`, `0-9` und `-` werden auf `-` abgebildet.
+3. aufeinanderfolgende `-` werden zu einem einzelnen `-` zusammengeführt.
+4. führende und nachgestellte `-` sowie Leerzeichen werden entfernt.
+5. Die Länge wird auf 1 bis 63 Zeichen begrenzt.
+6. Nach Kürzung auf 63 Zeichen wird erneut auf führende/nachgestellte `-` geprüft und diese notfalls entfernt.
+7. Anschließend wird der Name gegen die Validierung in [`LH-FA-INIT-006`](lastenheft.md#lh-fa-init-006--projektnamen-validierung) geprüft.
+
+### LH-FA-DEV-004.a — Übergabe der Benutzer-ID an den Image-Build
+
+Verfeinert [`LH-FA-DEV-004`](lastenheft.md#lh-fa-dev-004--benutzerrechte).
+
+- Der Wert wird als Build-Argument `USER_UID` an den Image-Build übergeben; der Container-Benutzer wird mit dieser UID angelegt.
+
 ## 2. Datenstrukturen und Schemas
 
 Formate und Schemata (`u-boot.yaml`, JSON-Ausgabe, CLI-Tabellen). Jede Struktur trägt
 eine `SPEC-<NNN>`.
 
+### SPEC-001 — JSON-Schema der Vorschau-Ausgabe (`--dry-run --json`)
+
+Gilt für `--dry-run --json` und `--diff --json`; die Pflichtfelder nennt die Anforderung.
+
+Für `--dry-run --json` ist die Ausgabe mindestens wie folgt als maschinenlesbares JSON zu liefern:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["status", "command", "dryRun", "diff", "plannedFiles", "changes", "diagnostics", "exitCode"],
+  "properties": {
+    "subcommand": {
+      "type": "string",
+      "description": "Unterkommando bei gruppierten Hauptkommandos wie `template` oder `config`"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ok", "warn", "error"]
+    },
+    "command": {
+      "type": "string",
+      "enum": ["init", "add", "remove", "up", "down", "doctor", "logs", "generate", "config", "template"]
+    },
+    "dryRun": {
+      "type": "boolean"
+    },
+    "diff": {
+      "type": "boolean"
+    },
+    "plannedFiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "action"],
+        "properties": {
+          "path": { "type": "string" },
+          "action": {
+            "type": "string",
+            "enum": ["create", "modify", "delete"]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "count"],
+        "properties": {
+          "path": { "type": "string" },
+          "count": { "type": "integer", "minimum": 0 }
+        },
+        "additionalProperties": true
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["level", "code", "message"],
+        "properties": {
+          "level": { "type": "string", "enum": ["warn", "error"] },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "file": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "exitCode": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "command": { "const": "template" }
+        },
+        "required": ["command"]
+      },
+      "then": {
+        "required": ["subcommand"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command": { "const": "config" }
+        },
+        "required": ["command"]
+      },
+      "then": {
+        "required": ["subcommand"]
+      }
+    }
+  ],
+  "additionalProperties": true
+}
+```
+
+### SPEC-002 — Beispielinstanz einer Vorschau-Ausgabe (`add --dry-run --json`)
+
+Beispielinstanz:
+
+```json
+{
+  "status": "warn",
+  "command": "add",
+  "dryRun": true,
+  "diff": false,
+  "plannedFiles": [
+    { "path": "compose.yaml", "action": "create" }
+  ],
+  "changes": [
+    { "path": "compose.yaml", "count": 12 }
+  ],
+  "diagnostics": [
+    { "level": "warn", "code": "LH-FA-CLI-007", "message": "Geplante Datei fehlt bereits" }
+  ],
+  "exitCode": 0
+}
+```
+
+### SPEC-003 — Beispielinstanz einer Diff-Ausgabe (`add --diff --json`, ohne `--dry-run`)
+
+Beispiel für `--diff --json` ohne `--dry-run` (Vorschau mit anschließendem Schreiben):
+
+```json
+{
+  "status": "ok",
+  "command": "add",
+  "dryRun": false,
+  "diff": true,
+  "plannedFiles": [
+    { "path": "compose.yaml", "action": "modify" }
+  ],
+  "changes": [
+    { "path": "compose.yaml", "count": 6 }
+  ],
+  "diagnostics": [],
+  "exitCode": 0
+}
+```
+
+### SPEC-004 — Projektnamen-Muster
+
+Gilt für den Projektnamen (`project.name`) bei `init` und `config set`.
+
+- regulärer Ausdruck: `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`
+
 ## 3. Defaults und Konstanten
 
 Werte, die im Produkt fest sind (Standardwerte, Grenzwerte, Versionsuntergrenzen).
 
-| ID | Name | Wert | Begründung |
-|---|---|---|---|
 
 ## 4. Fehler-Codes und Logging-Felder
 
 Verbindliche Diagnose- und Fehler-Codes sowie Logging-Felder.
 
-| ID | Code | Bedingung | Aktion |
-|---|---|---|---|
 
 ## 5. Metriken und Tracing-Felder
 
 Verbindliche Telemetrie-Felder pro Span.
 
-| ID | Span | Pflicht-Attribute | Quelle |
-|---|---|---|---|
 
 ## 6. Externe Verträge
 
 Schnittstellen zu Drittsystemen mit Versionsannahme (Docker, Compose, Devcontainer).
 
-| ID | System | Version | Vertrag |
-|---|---|---|---|
 
 ## 7. Historie
 

@@ -287,7 +287,7 @@ func (s *AddServiceService) selectFS(mode driving.PreviewMode) (driven.FileSyste
 // NewContent/OldContent.
 //
 // baseDir is stripped from each recorded path so the JSON envelope
-// ships PROJECT-relative paths (Spec §430 / Slice §Aufhebungsbedingung
+// ships PROJECT-relative paths (LH-FA-CLI-007 / Slice §Aufhebungsbedingung
 // pin `compose.yaml`, `u-boot.yaml`, `.env.example` — bare basenames,
 // no absolute cwd-prefix). addservice_execute.go calls
 // `filepath.Join(baseDir, w.Path)` before WriteFile so the recorder
@@ -590,7 +590,7 @@ func (s *AddServiceService) handleMissingDependencies(ctx context.Context, req d
 //   - missing or unparsable u-boot.yaml ⇒ ErrProjectNotInitialized.
 //   - malformed `service.<svc>` managed compose-block (any YAML side)
 //     ⇒ ErrServiceInconsistent. This pre-classification abort is the
-//     Spec §895 repair-hint path applied to the malformed case;
+//     LH-FA-ADD-005 repair-hint path applied to the malformed case;
 //     LH-FA-ADD-005 only describes six wohlgeformte states, so
 //     malformed lives outside the state machine.
 func detectServiceState(fs driven.FileSystem, yaml driven.YAMLCodec, baseDir string, svc domain.ServiceName) (domain.ServiceState, error) {
@@ -698,7 +698,7 @@ func classifyServiceState(entryFound bool, entry ubootYAMLService, blockPresent 
 
 // planAdd derives the [servicePlan] for a mutating state. T3 maps the
 // four mutating LH-FA-ADD-005 states to three actions
-// (EnabledUnset is treated identically to Deactivated per Spec §893,
+// (EnabledUnset is treated identically to Deactivated per LH-FA-ADD-005,
 // so both map to actionReactivate). Active / InconsistentYAML are
 // handled in [Add] before planAdd is reached. Stays a method (with
 // unused receiver) so T4 can grow it into a port-touching planner

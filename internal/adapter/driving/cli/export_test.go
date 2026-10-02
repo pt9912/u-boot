@@ -108,7 +108,7 @@ type ChangeEntryForTest struct {
 
 // marshalEnvelopeForTest centralises the marshal call so both
 // constructors share the same encoding (no SetIndent, no
-// SetEscapeHTML tweaks — Spec §1809 wire-level JSON, byte order
+// SetEscapeHTML tweaks — LH-NFA-USE-004 wire-level JSON, byte order
 // of fields per struct definition).
 func marshalEnvelopeForTest(env cliJSONEnvelope) ([]byte, error) {
 	return json.Marshal(env)

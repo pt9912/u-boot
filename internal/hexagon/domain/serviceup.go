@@ -36,7 +36,7 @@ const (
 	// StateRunning is the main happy path. The stabilization
 	// classifier then looks at the service's healthcheck and TCP
 	// port to decide between [OutcomeStabilized] and
-	// [OutcomeRunningOnly] (LH-FA-UP-001 §966–§969).
+	// [OutcomeRunningOnly] (LH-FA-UP-001–LH-FA-UP-001).
 	StateRunning
 
 	// StateRestarting is a transitional state. A single restart tick
@@ -206,7 +206,7 @@ type UpResult struct {
 	// Diagnostics carries non-fatal observations from the polling
 	// loop — port-parse warns from
 	// [driving.UpRequest]-declared but non-TCP-probable ports
-	// (LH-FA-UP-001 §969), unknown-state warns from Compose-states
+	// (LH-FA-UP-001), unknown-state warns from Compose-states
 	// outside [ParseContainerState]'s allowlist, and the
 	// `up.fire-and-forget` info entry when Timeout=0. Diagnostics
 	// are part of the domain contract (not CLI-side) so the

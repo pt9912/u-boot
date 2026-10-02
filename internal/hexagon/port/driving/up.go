@@ -23,7 +23,7 @@ type UpRequest struct {
 
 	// Timeout is the maximum wall-clock duration the polling loop
 	// waits for every declared service to reach
-	// [domain.OutcomeStabilized]. LH-FA-UP-001 §963: the spec default
+	// [domain.OutcomeStabilized]. LH-FA-UP-001: the spec default
 	// is 60 s; the CLI adapter applies that default before
 	// constructing the request, so the application sees a populated
 	// value here.
@@ -36,7 +36,7 @@ type UpRequest struct {
 	//   - Timeout == 0: fire-and-forget. The use case returns
 	//     immediately after a successful `ComposeUp`, with no
 	//     `ComposePs` roundtrip and no port/healthcheck probes
-	//     (LH-FA-UP-001 §970). The result carries a single
+	//     (LH-FA-UP-001). The result carries a single
 	//     `up.fire-and-forget` [domain.SeverityInfo] diagnostic.
 	//   - Timeout < 0: validation error. The use case returns a
 	//     non-sentinel error before any Compose call; the CLI maps

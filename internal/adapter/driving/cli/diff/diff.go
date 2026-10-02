@@ -2,7 +2,7 @@
 // captured by the recordingfs driven adapter. It is the CLI-adapter-
 // internal renderer for LH-FA-CLI-008 `--diff` output, both as a
 // human-readable unified string (see [Render]) and as the structured
-// `plannedFiles[].hunks` array of the LH-FA-CLI-007 §326 voll-schema
+// `plannedFiles[].hunks` array of the LH-FA-CLI-007 voll-schema
 // JSON envelope (see [Compute]).
 //
 // Algorithmic choice (slice-v1-cli-json-dry-run-add T0-(d)): pure-Go
@@ -51,7 +51,7 @@ func IsBinary(oldContent, newContent []byte) bool {
 //	"a\nb\n"  → 2
 //
 // Generated YAML and .env templates conventionally end with a trailing
-// newline; this form keeps Spec §430 (`count: 12` for a 12-line block)
+// newline; this form keeps LH-FA-CLI-007 (`count: 12` for a 12-line block)
 // stable regardless of which convention the template author followed.
 func CountLines(content []byte) int {
 	n := bytes.Count(content, []byte("\n"))
@@ -64,7 +64,7 @@ func CountLines(content []byte) int {
 // CountFromHunks sums the NewLines field across all hunks — counts
 // additions + context lines on the new side. Kept exported for any
 // caller that wants the new-side line-count (e.g. a richer rendering
-// of the diff). For Spec §477 `changes[].count` use [CountAdditions]
+// of the diff). For LH-FA-CLI-008 `changes[].count` use [CountAdditions]
 // instead — that variant counts only the true `+` lines and matches
 // the slice §Aufhebungsbedingung Variante B `count: 6`.
 func CountFromHunks(hunks []driving.Hunk) int {
@@ -78,10 +78,10 @@ func CountFromHunks(hunks []driving.Hunk) int {
 // CountAdditions counts the `+` lines across all hunks — the true
 // additive-lines count, excluding the context lines that LCS pads
 // around each change cluster. This is the `changes[].count` value
-// for action "modify" per Spec §477 example (`count: 6` for an
+// for action "modify" per LH-FA-CLI-008 example (`count: 6` for an
 // existing-file modify that appends 6 lines). The T0-(g) Stub
 // initially used [CountFromHunks] (which counts context too), but
-// the numbers diverged from the §477 example by the context-tax;
+// the numbers diverged from the LH-FA-CLI-008 example by the context-tax;
 // CountAdditions resolves that drift.
 func CountAdditions(hunks []driving.Hunk) int {
 	total := 0

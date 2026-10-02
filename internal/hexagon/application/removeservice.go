@@ -162,7 +162,7 @@ func (s *RemoveServiceService) selectFS(mode driving.PreviewMode) (driven.FileSy
 //   - Deactivated                        → idempotent no-op (Changed=nil)
 //   - Active / EnabledUnset / InconsistentBlock → state transition
 //
-// `--purge` (T0-(h)): the LH-FA-CLI-005A §254 confirmation gate
+// `--purge` (T0-(h)): the LH-FA-CLI-005A confirmation gate
 // fires only when the call WILL transition state (Active /
 // EnabledUnset / InconsistentBlock) AND PreviewMode != PreviewDryRun
 // (T0-(h)(a) skip-logic: Dry-Run implies null-mutations, no gate).
@@ -262,7 +262,7 @@ func (s *RemoveServiceService) runRemove(ctx context.Context, req driving.Remove
 		warnings := s.volumesPurgedWarnings(req)
 
 		// Gate fires here — a state transition (or convergence) IS
-		// happening. Spec LH-FA-CLI-005A §254 confirmation lives
+		// happening. Spec LH-FA-CLI-005A confirmation lives
 		// adjacent to the actual destructive intent.
 		//
 		// T0-(h)(a) Skip-Logic: in PreviewDryRun the gate is skipped
@@ -321,7 +321,7 @@ func (s *RemoveServiceService) volumesPurgedWarnings(req driving.RemoveServiceRe
 	}
 }
 
-// runPurgeGate implements the LH-FA-CLI-005A §254 confirmation truth
+// runPurgeGate implements the LH-FA-CLI-005A confirmation truth
 // table for `u-boot remove --purge`. Mirrors
 // [DownService.runConfirmationGate]; the two flows share the
 // destructive-op confirmation semantics and reuse the same

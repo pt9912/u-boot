@@ -12,11 +12,11 @@
 //
 //   - Keycloak-Service exists in `compose.yaml`;
 //   - `.env.example` lists `KEYCLOAK_ADMIN`, `KEYCLOAK_ADMIN_PASSWORD`
-//     (with CHANGEME-Placeholder values per Spec §2351);
+//     (with CHANGEME-Placeholder values per LH-AK-003);
 //   - the container reaches healthcheck status `healthy` within the
 //     UpService timeout;
 //   - the admin endpoint at `http://localhost:8080/` responds with
-//     HTTP 200 or 302 (Spec §2352 toleriert beide — Keycloak
+//     HTTP 200 or 302 (LH-AK-003 toleriert beide — Keycloak
 //     redirected ältere Versionen, neuere antworten direkt).
 //
 // Boot-Zeit-Carveout (slice-v1-keycloak.md §T3): Keycloak JVM-Boot

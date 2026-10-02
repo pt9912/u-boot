@@ -49,7 +49,7 @@ func reportError(
 // for multi-form commands (slice-v1-cli-json-dry-run-config T5 /
 // T0-(h)): `config`/`config get`/`config set` share command="config"
 // but MUST each set `subcommand` on every RunE-emitted envelope
-// (LH-FA-CLI-007 §322), including the error path. Single-form
+// (LH-FA-CLI-007), including the error path. Single-form
 // commands keep calling [reportError] (subcommand="" → omitempty).
 // Template-Slice 9/9 (`template list`) inherits this helper.
 func reportErrorSub(
@@ -72,7 +72,7 @@ func reportErrorSub(
 
 // writeErrorEnvelopeSub renders the JSON envelope on the error path.
 // `subcommand` is threaded into the envelope constructors so
-// multi-form commands satisfy the §322 subcommand-pflicht on the
+// multi-form commands satisfy the LH-FA-CLI-007 subcommand-pflicht on the
 // error path too; single-form callers pass "" (→ omitempty). The
 // former subcommand-less `writeErrorEnvelope` wrapper was removed at
 // slice-v1-cli-json-envelope-consolidation T1 once all callers
@@ -82,7 +82,7 @@ func reportErrorSub(
 // the recorder captured anything (`len(planned) > 0`) OR the user
 // explicitly asked for it via `--dry-run`/`--diff`. Without a
 // recorder capture AND without a preview flag the envelope shape is
-// the minimal contract (Spec §1841).
+// the minimal contract (LH-NFA-USE-004).
 //
 // dryRun/diffFlag werden VOM USER-FLAG-STATE durchgereicht, NICHT
 // hardgecodet (add review #4 — frühere Form hatte `false, true`

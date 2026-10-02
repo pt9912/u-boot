@@ -34,7 +34,7 @@ func newService(t *testing.T) (*application.InitProjectService, *fakeFS, *fakeYA
 
 // newServiceWithProgress is newService plus a fakeProgress that
 // records every AffectedFiles call. Tests that assert on the
-// LH-FA-INIT-005 §609 affected-paths events use this constructor.
+// LH-FA-INIT-005 affected-paths events use this constructor.
 func newServiceWithProgress(t *testing.T) (*application.InitProjectService, *fakeFS, *fakeYAML, *fakeGit, *fakeProgress) {
 	t.Helper()
 	fs := newFakeFS()
@@ -407,7 +407,7 @@ func TestTemplateNames_AreSorted(t *testing.T) {
 	}
 }
 
-// --- T4b: Re-Init with --force / --backup (LH-FA-INIT-005 §611–§619) ---
+// --- T4b: Re-Init with --force / --backup (LH-FA-INIT-005–LH-FA-INIT-005) ---
 
 // seedManagedBlockFile writes a synthetic file that already contains a
 // canonical `U-BOOT MANAGED BLOCK: init` (hash style), plus user
@@ -422,7 +422,7 @@ func seedManagedBlockFile(t *testing.T, fs *fakeFS, path, marker, userContent st
 }
 
 func TestInit_Force_ManagedBlock_ReplacesOnlyBlock(t *testing.T) {
-	// Why: LH-FA-INIT-005 §613–§614 — non-managed content must survive
+	// Why: LH-FA-INIT-005–LH-FA-INIT-005 — non-managed content must survive
 	// --force when a marker block is present.
 	svc, fs, _, _ := newService(t)
 	composePath := filepath.Join(testBaseDir, "compose.yaml")
@@ -459,7 +459,7 @@ func TestInit_Force_ManagedBlock_ReplacesOnlyBlock(t *testing.T) {
 }
 
 func TestInit_ForceWithoutBlock_RequiresBackup(t *testing.T) {
-	// Why: LH-FA-INIT-005 §619 — when a managed block is absent, full
+	// Why: LH-FA-INIT-005 — when a managed block is absent, full
 	// overwrite is mandatory and the spec requires --backup.
 	svc, fs, _, _ := newService(t)
 	composePath := filepath.Join(testBaseDir, "compose.yaml")
@@ -482,7 +482,7 @@ func TestInit_ForceWithoutBlock_RequiresBackup(t *testing.T) {
 }
 
 func TestInit_ForceWithBackup_NoBlock_OverwritesAndBacksUp(t *testing.T) {
-	// Why: --force + --backup on a no-block file is the path §619
+	// Why: --force + --backup on a no-block file is the path LH-FA-INIT-005
 	// allows for full overwrite — backup happens first.
 	svc, fs, _, _ := newService(t)
 	composePath := filepath.Join(testBaseDir, "compose.yaml")
@@ -588,7 +588,7 @@ func TestInit_ForceAndBackup_ManagedBlock_BackupsAndReplacesBlock(t *testing.T) 
 }
 
 func TestInit_NonManagedFile_ForceWithoutBackup_RequiresBackup(t *testing.T) {
-	// Why: .gitignore is intentionally not in the §611 managed-block
+	// Why: .gitignore is intentionally not in the LH-FA-INIT-005 managed-block
 	// list — re-init treats it as fully managed (--backup required).
 	svc, fs, _, _ := newService(t)
 	if err := fs.WriteFile(filepath.Join(testBaseDir, ".gitignore"), []byte("*.tmp\n"), 0o644); err != nil {
@@ -611,7 +611,7 @@ func TestInit_NonManagedFile_ForceWithoutBackup_RequiresBackup(t *testing.T) {
 
 func TestInit_UBootYAML_ForceWithoutBackup_RequiresBackup(t *testing.T) {
 	// Why: u-boot.yaml is fully u-boot-managed (no inline block) per
-	// LH-SA-FILE-002 §615 strict-JSON/steering-file fallback. Re-init
+	// LH-SA-FILE-002 LH-FA-INIT-005 strict-JSON/steering-file fallback. Re-init
 	// requires --backup.
 	svc, fs, _, _ := newService(t)
 	if err := fs.WriteFile(filepath.Join(testBaseDir, "u-boot.yaml"), []byte("schemaVersion: 0\n"), 0o644); err != nil {
@@ -633,7 +633,7 @@ func TestInit_UBootYAML_ForceWithoutBackup_RequiresBackup(t *testing.T) {
 }
 
 func TestInit_Summary_EmittedOnReInit(t *testing.T) {
-	// Why: LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 — affected
+	// Why: LH-FA-INIT-005 / LH-FA-CLI-005A — affected
 	// paths must be reported BEFORE the write. With T4c-review the
 	// reporting goes through a structured port (not a text writer);
 	// assert on the recorded event shape.
@@ -832,13 +832,13 @@ func TestInit_RenderedTemplate_ContainsManagedBlockMarkers(t *testing.T) {
 		}
 	}
 	// .gitignore intentionally has no markers (whole-file managed per
-	// §611 list exclusion).
+	// LH-FA-INIT-005 list exclusion).
 	gitignore, err := fs.ReadFile(filepath.Join(testBaseDir, ".gitignore"))
 	if err != nil {
 		t.Fatalf("ReadFile .gitignore: %v", err)
 	}
 	if strings.Contains(string(gitignore), "BEGIN U-BOOT MANAGED BLOCK") {
-		t.Errorf(".gitignore must not have managed-block markers (spec §611 list excludes it): %q", gitignore)
+		t.Errorf(".gitignore must not have managed-block markers (spec LH-FA-INIT-005 list excludes it): %q", gitignore)
 	}
 }
 
@@ -1119,7 +1119,7 @@ func TestInit_SoftDetect_AssumeExisting_AbortsWithoutPrompt(t *testing.T) {
 }
 
 func TestInit_SoftDetect_NoInteractive_SkipsDetectionAndConfirmer(t *testing.T) {
-	// Why: LH-FA-INIT-004 §247 — in non-interactive mode without
+	// Why: LH-FA-INIT-004 LH-FA-CLI-005A — in non-interactive mode without
 	// --assume-existing, the soft-detection does not fire. The
 	// service must proceed; the per-file collision logic in planFile
 	// will still trip on README.md → ErrFileExists, but that is the
@@ -1795,7 +1795,7 @@ func TestInit_LHAK005_DevcontainerFlow_FreshProject(t *testing.T) {
 		t.Errorf("name = %q, want %q", dc.Name, "demo")
 	}
 	if dc.Build.Dockerfile == "" {
-		t.Errorf("build.dockerfile is empty (LH-AK-005 §2381: build OR image required)")
+		t.Errorf("build.dockerfile is empty (LH-AK-005: build OR image required)")
 	}
 	if dc.RemoteUser != "vscode" {
 		t.Errorf("remoteUser = %q, want %q (LH-FA-DEV-004)", dc.RemoteUser, "vscode")

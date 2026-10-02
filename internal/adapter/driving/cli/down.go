@@ -15,7 +15,7 @@ import (
 // downFlags bundles the per-invocation flag state of `u-boot down`.
 // The local flag Volumes is CLI-only; Yes / NoInteractive / Quiet
 // are read through from the App's persistent root flags
-// (LH-FA-CLI-005 / LH-FA-CLI-005A). The spec §237 explicitly names
+// (LH-FA-CLI-005 / LH-FA-CLI-005A). The spec LH-FA-CLI-005A explicitly names
 // `u-boot down --volumes` among the commands governed by the
 // persistent `--yes` / `--no-interactive` switches, so reusing the
 // root values keeps `u-boot --yes down --volumes` working
@@ -54,11 +54,11 @@ type downStatusData struct {
 // Local flags:
 //
 //	--volumes  remove named Compose volumes alongside containers
-//	           (LH-FA-UP-004 §1015 destructive op; default false).
+//	           (LH-FA-UP-004 destructive op; default false).
 //	--yes      auto-confirm the destructive --volumes prompt
-//	           (LH-FA-CLI-005A §234 / §246).
+//	           (LH-FA-CLI-005A / LH-FA-CLI-005A).
 //
-// The persistent flags --no-interactive (LH-FA-CLI-005A §235 / §245)
+// The persistent flags --no-interactive (LH-FA-CLI-005A / LH-FA-CLI-005A)
 // and --quiet (LH-FA-CLI-005) are read from the App after Cobra
 // parses them. `--json` triggers refuse-by-default for the
 // destructive `--volumes`-gate (T0-(d) Option (b) Request-time Gate-
@@ -67,8 +67,8 @@ type downStatusData struct {
 //
 // Mode-flag mutual exclusion: `--yes` AND `--no-interactive` set
 // together returns [ErrConflictingModeFlags] (exit code 2,
-// LH-FA-CLI-005A §235). Independent of whether --volumes is set —
-// the §235 rule is a global CLI-validation, not a destructive-path
+// LH-FA-CLI-005A). Independent of whether --volumes is set —
+// the LH-FA-CLI-005A rule is a global CLI-validation, not a destructive-path
 // concern.
 func newDownCommand(a *App) *cobra.Command {
 	flags := &downFlags{}
@@ -78,9 +78,9 @@ func newDownCommand(a *App) *cobra.Command {
 		Short: "Stop the Compose environment and optionally remove its named volumes",
 		Long: `Tear down the Compose environment via docker compose down.
 With --volumes the named Compose volumes are removed as well (data
-loss; LH-FA-UP-004 §1015).
+loss; LH-FA-UP-004).
 
-Destructive confirmation gate (LH-FA-CLI-005A §254):
+Destructive confirmation gate (LH-FA-CLI-005A):
   - --yes                     auto-confirm
   - --no-interactive          fail-fast with exit 10 (no confirmation
                               possible without user input)
@@ -101,7 +101,7 @@ LH-NFA-PERF-002 progress: compose down phases stream to stderr live
 (unaffected by --quiet; silenced in --json mode).`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			// LH-FA-CLI-005A §237: --yes / --no-interactive are
+			// LH-FA-CLI-005A: --yes / --no-interactive are
 			// persistent root flags that govern down --volumes
 			// (along with init, add, remove, config set). Read
 			// the parsed values into the per-invocation struct
@@ -115,7 +115,7 @@ LH-NFA-PERF-002 progress: compose down phases stream to stderr live
 		},
 	}
 	cmd.Flags().BoolVar(&flags.Volumes, "volumes", false,
-		"also remove named Compose volumes (data loss; LH-FA-UP-004 §1015)")
+		"also remove named Compose volumes (data loss; LH-FA-UP-004)")
 	return cmd
 }
 
@@ -134,7 +134,7 @@ LH-NFA-PERF-002 progress: compose down phases stream to stderr live
 func runDown(ctx context.Context, stdout, stderr io.Writer, flags downFlags, useCase driving.DownUseCase, getwd func() (string, error)) error {
 	mapErr := mapDownErrorToDiagnostic
 
-	// LH-FA-CLI-005A §235 mode-flag exclusion. Note: this checks
+	// LH-FA-CLI-005A mode-flag exclusion. Note: this checks
 	// the LOCAL down --yes flag against the PERSISTENT root
 	// --no-interactive — different fields but same exclusivity
 	// rule.
@@ -222,7 +222,7 @@ func mapDownErrorToDiagnostic(err error) diagnosticItem {
 	// Row 7: cross-cutting project-init.
 	case errors.Is(err, driving.ErrProjectNotInitialized):
 		return diagnosticItem{Level: "error", Code: "LH-FA-INIT-001", Message: err.Error()}
-	// Row 9: down-only CLI-form mutex (LH-FA-CLI-005A §235).
+	// Row 9: down-only CLI-form mutex (LH-FA-CLI-005A).
 	case errors.Is(err, ErrConflictingModeFlags):
 		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-005A", Message: err.Error()}
 	default:

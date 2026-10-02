@@ -24,7 +24,7 @@ type templateFlags struct {
 // ErrTemplateSubcommandRequired is returned by bare `u-boot template
 // --json` (Cluster-T_close; slice-v1-cli-json-dry-run-template
 // T0-(a)/(f), moved from template-T3). `template` is a help-parent
-// without its own data, and §1838/§420 make `subcommand` mandatory
+// without its own data, and LH-NFA-USE-004/LH-FA-CLI-007 make `subcommand` mandatory
 // for command="template" — so bare template cannot emit a spec-valid
 // envelope. It rejects with Exit 2 (LH-FA-CLI-006 usage class via
 // [isUsageError]), envelope-LOS by design. Human mode (no --json)
@@ -61,7 +61,7 @@ Coming in later slices:
 		Args: cobra.NoArgs,
 		// Help-Parent: prints help via cmd.Help() in human mode.
 		// In --json mode bare `template` is rejected (Cluster-T_close):
-		// §1838/§420 make `subcommand` mandatory for
+		// LH-NFA-USE-004/LH-FA-CLI-007 make `subcommand` mandatory for
 		// command="template", and the help-parent has no data of its
 		// own — so it cannot emit a spec-valid `command:"template"`
 		// envelope. The reject is RunE-borne (not gate-borne) since
@@ -133,7 +133,7 @@ func runTemplateList(
 ) error {
 	// slice-v1-cli-json-dry-run-template T2: read-only error path
 	// flows through reportErrorSub so a List failure produces a
-	// spec-§1841 error envelope (subcommand "list"), not a raw
+	// spec-LH-NFA-USE-004 error envelope (subcommand "list"), not a raw
 	// Cobra stderr error — Cluster-Symmetrie mit logs. dryRun/diff
 	// are false (template list is read-only).
 	resp, err := uc.List(ctx, driving.TemplateListRequest{})
@@ -193,7 +193,7 @@ func renderTemplateListText(out io.Writer, metas []domain.TemplateMetadata) erro
 // Envelope for `template list --json` (slice-v1-cli-json-dry-run-
 // template T2). The `[]templateJSON` projection rides in the
 // envelope's `data` field via [newDataEnvelope] with
-// `command="template"`, `subcommand="list"` (§322 subcommand-
+// `command="template"`, `subcommand="list"` (LH-FA-CLI-007 subcommand-
 // Pflicht), `diagnostics=[]`, `exitCode=0`.
 //
 // Breaking change vs. the pre-migration shape (Doctor-Slice

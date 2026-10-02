@@ -32,7 +32,7 @@ type RecorderPort interface {
 
 // FileMutationRecord carries one FS-mutation event captured by the
 // recording adapter. The fields are wire-neutral; the CLI adapter
-// maps them into [driving.PlannedFile] for the LH-FA-CLI-007 §326
+// maps them into [driving.PlannedFile] for the LH-FA-CLI-007
 // JSON envelope.
 //
 // NewContent is the body argument the use case passed to WriteFile /
@@ -41,7 +41,7 @@ type RecorderPort interface {
 // FS's ReadFile) before applying the action; nil when the target did
 // not exist beforehand (Action then is "create").
 //
-// Action holds one of the LH-FA-CLI-007 §354 enum values:
+// Action holds one of the LH-FA-CLI-007 enum values:
 // "create", "modify", "delete". The recorder resolves the value
 // from the OldContent presence (nil → create) and the called
 // method (RemoveAll → delete).

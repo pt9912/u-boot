@@ -66,10 +66,10 @@ func TestAddService_WithFactory_DryRunMapsRecorderToPlannedFiles(t *testing.T) {
 	// so the recorder sees absolute paths; the Add wrapper strips
 	// baseDir before returning. Without that strip, the JSON envelope
 	// would ship "/tmp/u-boot-add-test/demo/compose.yaml" instead of
-	// the Spec §430-canonical "compose.yaml".
+	// the LH-FA-CLI-007-canonical "compose.yaml".
 	for _, pf := range resp.PlannedFiles {
 		if strings.HasPrefix(pf.Path, "/") || strings.HasPrefix(pf.Path, addTestBaseDir) {
-			t.Errorf("PlannedFile.Path must be project-relative (Spec §430), got absolute: %q", pf.Path)
+			t.Errorf("PlannedFile.Path must be project-relative (LH-FA-CLI-007), got absolute: %q", pf.Path)
 		}
 	}
 	// Pin the canonical three add-slot basenames explicitly so a

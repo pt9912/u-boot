@@ -293,7 +293,7 @@ func TestRoundTrip_InitAddInitForce_PreservesAddons(t *testing.T) {
 		t.Fatalf("Add: %v", err)
 	}
 	// Realistic re-init: --force on its own would reject .gitignore
-	// (whole-file-managed, no marker block, LH-FA-INIT-005 §619);
+	// (whole-file-managed, no marker block, LH-FA-INIT-005);
 	// users who actually re-init pair --force with --backup.
 	if _, err := initSvc.Init(ctx, driving.InitProjectRequest{
 		Name:    "demo",

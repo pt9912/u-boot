@@ -58,7 +58,7 @@ type initFlags struct {
 
 	// AllowExternalFeatureSources is the LH-FA-DEV-003 allowlist seed
 	// from `--allow-external-feature-sources <quelle>[,<quelle>...]`
-	// (Spec §714). Multi-flag occurrences cumulate, comma-separated
+	// (LH-FA-DEV-003). Multi-flag occurrences cumulate, comma-separated
 	// values split per Cobra StringSlice. Only meaningful when
 	// `--devcontainer` is also set. Slice-v1-devcontainer-features T4.
 	AllowExternalFeatureSources []string
@@ -77,11 +77,11 @@ type initFlags struct {
 //	                    the working directory's basename.
 //	--no-git            skip the `git init` step (LH-FA-INIT-007).
 //	--force             managed-block-only re-write of existing files
-//	                    (LH-FA-INIT-005 §609 / §613).
+//	                    (LH-FA-INIT-005 / LH-FA-INIT-005).
 //	--backup            backup-then-full-overwrite of existing files
-//	                    (LH-FA-INIT-005 §605 / §607).
+//	                    (LH-FA-INIT-005 / LH-FA-INIT-005).
 //	--assume-existing   accept implicit existing-project detection
-//	                    in non-interactive runs (LH-FA-CLI-005A §238);
+//	                    in non-interactive runs (LH-FA-CLI-005A);
 //	                    no-op until the M4 soft-detection slice lands.
 //	--devcontainer      also write the LH-FA-DEV-001 devcontainer
 //	                    files (`.devcontainer/devcontainer.json`
@@ -111,7 +111,7 @@ a [name] argument is given.
 
 Re-running init on an existing project requires --force (managed-block
 only edit) or --backup (full overwrite with safety copy), per
-LH-FA-INIT-005 §611–§619.
+LH-FA-INIT-005–LH-FA-INIT-005.
 
 Soft-existing-detection (LH-FA-INIT-004): when BaseDir lacks the
 hard markers (u-boot.yaml / compose.yaml / .env.example) but already
@@ -142,7 +142,7 @@ Examples:
 		// slice-v1-cli-json-envelope-consolidation T2/SD-C: base
 		// stays MaximumNArgs(1) → 0 args is a valid success (default
 		// project name); only len>1 errors, and that error now
-		// carries the --json envelope (§1841). previewFlags=true →
+		// carries the --json envelope (LH-NFA-USE-004). previewFlags=true →
 		// Voll-Schema bei --dry-run/--diff.
 		Args: jsonArgsValidator(a, "init", "", cobra.MaximumNArgs(1), mapInitErrorToDiagnostic, true),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -161,7 +161,7 @@ Examples:
 	cmd.Flags().BoolVar(&flags.Backup, "backup", false,
 		"back up existing files to <name>.bak[.N] before overwriting (LH-FA-INIT-005)")
 	cmd.Flags().BoolVar(&flags.AssumeExisting, "assume-existing", false,
-		"assert existing project in non-interactive runs; aborts unless --backup/--force (LH-FA-INIT-004, LH-FA-CLI-005A §238)")
+		"assert existing project in non-interactive runs; aborts unless --backup/--force (LH-FA-INIT-004, LH-FA-CLI-005A)")
 	cmd.Flags().BoolVar(&flags.Devcontainer, "devcontainer", false,
 		"also generate `.devcontainer/devcontainer.json` + `Dockerfile` and set devcontainer.enabled=true in u-boot.yaml (LH-AK-005)")
 	cmd.Flags().BoolVar(&flags.DryRun, "dry-run", false,
@@ -185,7 +185,7 @@ Examples:
 // without a Cobra command.
 //
 // Scope of the mode flags after the M4 soft-detection slice
-// (LH-FA-CLI-005A §238 / LH-FA-INIT-004 §247):
+// (LH-FA-CLI-005A / LH-FA-INIT-004 LH-FA-CLI-005A):
 //   - --yes / --no-interactive — mutual-exclusion check fires here
 //     (exit 2). --no-interactive propagates into the request to
 //     suppress the soft-detection prompt.
@@ -277,7 +277,7 @@ func runInit(
 // writeInitJSON renders the success-path JSON envelope. Three shapes
 // per T0-(k) (analog add writeAddJSON):
 //
-//   - dryRun=false && diff=false → minimal envelope (Spec §1841).
+//   - dryRun=false && diff=false → minimal envelope (LH-NFA-USE-004).
 //   - dryRun=true                → voll-schema, plannedFiles from
 //     recorder, optional hunks if diff=true.
 //   - diff=true                  → voll-schema preview-and-apply,
@@ -348,7 +348,7 @@ func mapInitErrorToDiagnostic(err error) diagnosticItem {
 		return diagnosticItem{Level: "error", Code: "LH-FA-DEV-006", Message: err.Error()}
 	case errors.Is(err, domain.ErrInvalidFeatureSource):
 		// LH-FA-DEV-003 (`init --allow-external-feature-sources` ohne
-		// `--devcontainer`) — Spec §714. Exit-Code 10 wird via
+		// `--devcontainer`) — LH-FA-DEV-003. Exit-Code 10 wird via
 		// cli.isConfigValidationError schon erkannt, der Mapper muss
 		// hier symmetrisch dazu klassifizieren, sonst kommt der
 		// Envelope-Code 'LH-FA-CLI-006' bei Exit-Code 10 raus (Code-
@@ -369,7 +369,7 @@ func mapInitErrorToDiagnostic(err error) diagnosticItem {
 //
 //   - PRE-write the application emits "Affected files in <baseDir>"
 //     with action labels — that is the *intent* the user sees
-//     before any side effect, per LH-FA-INIT-005 §609.
+//     before any side effect, per LH-FA-INIT-005.
 //   - POST-write printInitSummary lists the resolved backup paths
 //     (which may have suffix .bak.N when the .bak slot was taken)
 //     — that is the *result* the user needs for rollback.

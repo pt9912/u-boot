@@ -51,7 +51,7 @@ func WithCommand(cmd string) AssertOption {
 	return func(c *assertConfig) { c.expectedCommand = cmd }
 }
 
-// WithSubcommand pinnt den `subcommand`-Wert. Spec §1838 fordert
+// WithSubcommand pinnt den `subcommand`-Wert. LH-NFA-USE-004 fordert
 // `subcommand`-Pflicht bei `command ∈ {template, config}` —
 // wird vom Helper bei den beiden Commands auch ohne Option geprüft.
 func WithSubcommand(sub string) AssertOption {
@@ -112,7 +112,7 @@ func WithDataKeyPresent(key string, value any) AssertOption {
 }
 
 // AssertMinimalEnvelope prüft den Minimalkontrakt aus LH-NFA-USE-
-// 004 §1841 gegen raw. Failures via t.Errorf — Helper failt nicht
+// 004 LH-NFA-USE-004 gegen raw. Failures via t.Errorf — Helper failt nicht
 // fatal, damit Tests mehrere Befunde gleichzeitig sehen.
 //
 // Geprüft wird:
@@ -124,7 +124,7 @@ func WithDataKeyPresent(key string, value any) AssertOption {
 //   - status-Kopplung an höchsten level
 //   - exitCode ≥ 0
 //   - Voll-Schema-Felder dryRun/diff/plannedFiles/changes FEHLEN
-//     (Minimalkontrakt rejected sie, Spec §1841)
+//     (Minimalkontrakt rejected sie, LH-NFA-USE-004)
 func AssertMinimalEnvelope(t testing.TB, raw []byte, opts ...AssertOption) {
 	t.Helper()
 	cfg := buildConfig(opts...)
@@ -145,7 +145,7 @@ func AssertMinimalEnvelope(t testing.TB, raw []byte, opts ...AssertOption) {
 	checkDataKeys(t, env, cfg)
 }
 
-// AssertFullEnvelope prüft das Voll-Schema aus LH-FA-CLI-007 §326
+// AssertFullEnvelope prüft das Voll-Schema aus LH-FA-CLI-007
 // gegen raw. Zusätzlich zu den Minimal-Checks werden alle vier
 // Voll-Felder als Pflicht geprüft (`dryRun`/`diff`/`plannedFiles`/
 // `changes` müssen ALLE im JSON erscheinen — auch wenn dryRun/diff
@@ -200,7 +200,7 @@ func checkRequiredMinimal(t testing.TB, env map[string]any) {
 	t.Helper()
 	for _, k := range []string{"status", "command", "diagnostics", "exitCode"} {
 		if _, present := env[k]; !present {
-			t.Errorf("missing required field %q (Spec §1823-1839)", k)
+			t.Errorf("missing required field %q (LH-NFA-USE-004)", k)
 		}
 	}
 }
@@ -210,7 +210,7 @@ func checkRequiredFull(t testing.TB, env map[string]any) {
 	required := []string{"status", "command", "dryRun", "diff", "plannedFiles", "changes", "diagnostics", "exitCode"}
 	for _, k := range required {
 		if _, present := env[k]; !present {
-			t.Errorf("missing required field %q (Spec §326)", k)
+			t.Errorf("missing required field %q (LH-FA-CLI-007)", k)
 		}
 	}
 }
@@ -239,10 +239,10 @@ func checkSubcommand(t testing.TB, env map[string]any, cfg assertConfig) {
 	cmd, _ := env["command"].(string)
 	sub, hasSub := env["subcommand"].(string)
 
-	// Spec §1838: subcommand Pflicht bei template/config.
+	// LH-NFA-USE-004: subcommand Pflicht bei template/config.
 	if cmd == "template" || cmd == "config" {
 		if !hasSub || sub == "" {
-			t.Errorf("subcommand required when command == %q (Spec §1838)", cmd)
+			t.Errorf("subcommand required when command == %q (LH-NFA-USE-004)", cmd)
 		}
 	}
 
@@ -258,7 +258,7 @@ func checkExitCode(t testing.TB, env map[string]any, cfg assertConfig) {
 		return
 	}
 	if code < 0 {
-		t.Errorf("exitCode %v must be ≥ 0 (Spec §388)", code)
+		t.Errorf("exitCode %v must be ≥ 0 (LH-FA-CLI-007)", code)
 	}
 	if cfg.expectedExitCode != nil && int(code) != *cfg.expectedExitCode {
 		t.Errorf("exitCode: want %d, got %d", *cfg.expectedExitCode, int(code))
@@ -269,7 +269,7 @@ func checkDiagnostics(t testing.TB, env map[string]any, cfg assertConfig) {
 	t.Helper()
 	diags, ok := env["diagnostics"].([]any)
 	if !ok {
-		t.Errorf("diagnostics must be an array (Spec §373)")
+		t.Errorf("diagnostics must be an array (LH-FA-CLI-007)")
 		return
 	}
 
@@ -299,23 +299,23 @@ func checkDiagnosticItem(t testing.TB, i int, item map[string]any, cfg assertCon
 	t.Helper()
 	for _, k := range []string{"level", "code", "message"} {
 		if _, present := item[k]; !present {
-			t.Errorf("diagnostics[%d] missing required key %q (Spec §377)", i, k)
+			t.Errorf("diagnostics[%d] missing required key %q (LH-FA-CLI-007)", i, k)
 		}
 	}
 
 	level, _ := item["level"].(string)
 	if level != "warn" && level != "error" {
-		t.Errorf("diagnostics[%d].level %q must be warn or error (Spec §1834)", i, level)
+		t.Errorf("diagnostics[%d].level %q must be warn or error (LH-NFA-USE-004)", i, level)
 	}
 
 	code, _ := item["code"].(string)
 	if !codeAllowed(code, cfg.allowedCodes) {
-		t.Errorf("diagnostics[%d].code %q not in DefaultAllowedCodes and not LH-conform (Spec §1835 / §445)", i, code)
+		t.Errorf("diagnostics[%d].code %q not in DefaultAllowedCodes and not LH-conform (LH-NFA-USE-004 / LH-FA-CLI-007)", i, code)
 	}
 }
 
 // codeAllowed validates `code` against the two allowed forms of
-// Spec §445: LH-IDs (prefix "LH-") OR documented tool-internal
+// LH-FA-CLI-007: LH-IDs (prefix "LH-") OR documented tool-internal
 // codes (must appear in the registry map).
 func codeAllowed(code string, allowed map[string]string) bool {
 	if code == "" {
@@ -350,7 +350,7 @@ func checkStatusCoupling(t testing.TB, env map[string]any) {
 	}
 
 	if status != highestLevel {
-		t.Errorf("status %q decoupled from highest diagnostics level %q (Spec §447 / §1837)", status, highestLevel)
+		t.Errorf("status %q decoupled from highest diagnostics level %q (LH-FA-CLI-007 / LH-NFA-USE-004)", status, highestLevel)
 	}
 }
 
@@ -358,7 +358,7 @@ func checkNoFullFields(t testing.TB, env map[string]any) {
 	t.Helper()
 	for _, k := range []string{"dryRun", "diff", "plannedFiles", "changes"} {
 		if _, present := env[k]; present {
-			t.Errorf("minimal envelope must not contain %q (Spec §1841 / §1842)", k)
+			t.Errorf("minimal envelope must not contain %q (LH-NFA-USE-004 / LH-NFA-USE-004)", k)
 		}
 	}
 }
@@ -367,7 +367,7 @@ func checkPlannedFiles(t testing.TB, env map[string]any) {
 	t.Helper()
 	arr, ok := env["plannedFiles"].([]any)
 	if !ok {
-		t.Errorf("plannedFiles must be an array (Spec §346)")
+		t.Errorf("plannedFiles must be an array (LH-FA-CLI-007)")
 		return
 	}
 	for i, raw := range arr {
@@ -378,15 +378,15 @@ func checkPlannedFiles(t testing.TB, env map[string]any) {
 		}
 		for _, k := range []string{"path", "action"} {
 			if _, present := item[k]; !present {
-				t.Errorf("plannedFiles[%d] missing required key %q (Spec §350)", i, k)
+				t.Errorf("plannedFiles[%d] missing required key %q (LH-FA-CLI-007)", i, k)
 			}
 		}
 		action, _ := item["action"].(string)
 		if !slices.Contains([]string{"create", "modify", "delete"}, action) {
-			t.Errorf("plannedFiles[%d].action %q not in {create, modify, delete} (Spec §354)", i, action)
+			t.Errorf("plannedFiles[%d].action %q not in {create, modify, delete} (LH-FA-CLI-007)", i, action)
 		}
 		// Hunks ist optional auf plannedFile-Ebene (LH-FA-CLI-008
-		// §477-482 macht es Pflicht nur im --diff --json-Pfad; ohne
+		// LH-FA-CLI-008 macht es Pflicht nur im --diff --json-Pfad; ohne
 		// --diff bleibt das Feld via omitempty weg). Bei Anwesenheit
 		// gilt das Struktur-Pin aus slice-v1-cli-json-dry-run-add
 		// T0-(l).
@@ -496,7 +496,7 @@ func checkChanges(t testing.TB, env map[string]any) {
 	t.Helper()
 	arr, ok := env["changes"].([]any)
 	if !ok {
-		t.Errorf("changes must be an array (Spec §361)")
+		t.Errorf("changes must be an array (LH-FA-CLI-007)")
 		return
 	}
 	for i, raw := range arr {
@@ -507,12 +507,12 @@ func checkChanges(t testing.TB, env map[string]any) {
 		}
 		for _, k := range []string{"path", "count"} {
 			if _, present := item[k]; !present {
-				t.Errorf("changes[%d] missing required key %q (Spec §365)", i, k)
+				t.Errorf("changes[%d] missing required key %q (LH-FA-CLI-007)", i, k)
 			}
 		}
 		count, ok := item["count"].(float64)
 		if ok && count < 0 {
-			t.Errorf("changes[%d].count %v must be ≥ 0 (Spec §368)", i, count)
+			t.Errorf("changes[%d].count %v must be ≥ 0 (LH-FA-CLI-007)", i, count)
 		}
 	}
 }

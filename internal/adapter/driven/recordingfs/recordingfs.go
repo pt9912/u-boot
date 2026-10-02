@@ -30,7 +30,7 @@ import (
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 )
 
-// Action constants mirror the LH-FA-CLI-007 §354 enum.
+// Action constants mirror the LH-FA-CLI-007 enum.
 const (
 	actionCreate = "create"
 	actionModify = "modify"
@@ -44,7 +44,7 @@ const (
 //   - Passthrough=false → record only; the underlying FS is untouched.
 //     This is the LH-FA-CLI-007 dry-run path (slice T0-(b) Variante 2).
 //   - Passthrough=true  → record AND delegate. This is the
-//     LH-FA-CLI-008 preview-and-apply path (Spec §465-470): the
+//     LH-FA-CLI-008 preview-and-apply path (LH-FA-CLI-008): the
 //     CLI shows the user what is about to be written and writes it.
 //
 // Pre-write capture (slice T0-(b) Mid-Failure semantics): every

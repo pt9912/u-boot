@@ -141,7 +141,7 @@ type ConfigSetRequest struct {
 
 	// AllowExternalFeatureSources carries additional LH-FA-DEV-003
 	// source URLs from the `--allow-external-feature-sources` flag
-	// (Spec §714). Only meaningful when
+	// (LH-FA-DEV-003). Only meaningful when
 	// Path.Kind == domain.ConfigDevcontainerFeatureSourcesAllow; the
 	// use case merges these entries with the comma-separated
 	// positional [Value] before validation + dedupe. Slice-v1-
@@ -337,7 +337,7 @@ var ErrConfigFileSystem = errors.New("config: filesystem error")
 // for services). Code 10 (LH-FA-CLI-006 validation —
 // "user must do something").
 //
-// `project.name` is required by LH-FA-CONF-002 §1308, so a
+// `project.name` is required by LH-FA-CONF-002, so a
 // missing name surfaces as [ErrConfigSchemaInvalid] instead,
 // not this sentinel: the schema is corrupt, not just unset.
 var ErrConfigValueNotSet = errors.New("config: value not set")

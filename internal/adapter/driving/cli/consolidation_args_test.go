@@ -18,9 +18,9 @@ import (
 // slice-v1-cli-json-envelope-consolidation T2: add/init/generate now
 // route their positional-args validation through the shared
 // jsonArgsValidator (T1), so a wrong-arg invocation under --json
-// emits the spec envelope on stdout (§1841) instead of a bare Cobra
+// emits the spec envelope on stdout (LH-NFA-USE-004) instead of a bare Cobra
 // stderr message — and --dry-run/--diff selects the Voll-Schema
-// (§1842). These pins lock the contract per command.
+// (LH-NFA-USE-004). These pins lock the contract per command.
 //
 // Matrix (User-Review): add/generate carry ExactArgs(1) → both NoArg
 // AND TooMany error; init carries MaximumNArgs(1) → only TooMany
@@ -37,7 +37,7 @@ func assertArgsErrorEnvelope(t *testing.T, app *cli.App, args []string, command 
 		t.Errorf("args %v: ExitCode = %d, want 2", args, code)
 	}
 	if stdout.Len() == 0 {
-		t.Fatalf("args %v: --json must emit the envelope on stdout, got empty (Spec §1841); stderr=%s", args, stderr.String())
+		t.Fatalf("args %v: --json must emit the envelope on stdout, got empty (LH-NFA-USE-004); stderr=%s", args, stderr.String())
 	}
 	opts := []jsontestutil.AssertOption{
 		jsontestutil.WithCommand(command),

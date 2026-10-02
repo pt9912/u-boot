@@ -31,7 +31,7 @@ am Root. Wiring erfolgt zentral in `cmd/uboot/main.go`; der Constructor
   - Persistente Root-Flags: `--yes`/`--no-interactive`
     ([`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)), `--quiet`/`--verbose`/`--debug`
     ([`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)). `--yes` gilt explizit auch für
-    `down --volumes` (Spec §237). Die Verbosity-Flags steuern
+    `down --volumes` ([LH-FA-CLI-005A](../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)). Die Verbosity-Flags steuern
     seit [`slice-followup-verbosity-wiring`](../../../docs/plan/planning/done/slice-followup-verbosity-wiring.md)
     zusätzlich den `slog.Level` zur Laufzeit (`PersistentPreRunE`
     flippt ein per `WithLogLevel` injiziertes `*slog.LevelVar`):

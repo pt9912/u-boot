@@ -178,7 +178,7 @@ func TestWriteDiff_EdgeCases(t *testing.T) {
 	})
 }
 
-// TestStatusFromDiagnostics_AllBranches pins Spec §447 / §1837 —
+// TestStatusFromDiagnostics_AllBranches pins LH-FA-CLI-007 / LH-NFA-USE-004 —
 // error wins over warn, warn wins over ok, ok = empty/info-only.
 func TestStatusFromDiagnostics_AllBranches(t *testing.T) {
 	cases := []struct {
@@ -429,7 +429,7 @@ func TestComputeChangeCountAndHunks_AllActions(t *testing.T) {
 		// slice-v1-cli-json-dry-run-remove T0-(p): delete renders the
 		// old content as a removal hunk so --diff --json consumers see
 		// WHAT got deleted. count remains 0 (delete contributes no
-		// added lines, Spec §477).
+		// added lines, LH-FA-CLI-008).
 		pf := driving.PlannedFile{Path: "x.txt", Action: "delete", OldContent: []byte("one\ntwo\n"), NewContent: nil}
 		count, hunks := computeChangeCountAndHunks(pf)
 		if count != 0 {

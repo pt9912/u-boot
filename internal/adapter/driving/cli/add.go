@@ -67,7 +67,7 @@ Flag combinations (LH-FA-CLI-007/008):
   --diff               show unified diff of planned changes
   --dry-run --diff     unified diff preview, no write
   --json               JSON output; pairs with --dry-run / --diff
-                       for the LH-FA-CLI-007 §326 voll-schema
+                       for the LH-FA-CLI-007 voll-schema
 
 Examples:
   u-boot add postgres                 # first add: register + write
@@ -78,8 +78,8 @@ Examples:
   u-boot add keycloak --with-deps     # auto-install missing deps`,
 		// slice-v1-cli-json-envelope-consolidation T2: Args-Fehler
 		// (NoPositionalArg/TooMany) tragen im --json-Modus den
-		// Envelope (§1841); previewFlags=true → Voll-Schema bei
-		// --dry-run/--diff (§1842).
+		// Envelope (LH-NFA-USE-004); previewFlags=true → Voll-Schema bei
+		// --dry-run/--diff (LH-NFA-USE-004).
 		Args: jsonArgsValidator(a, "add", "", cobra.ExactArgs(1), mapAddErrorToDiagnostic, true),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			flags.Yes = a.yes
@@ -110,7 +110,7 @@ Examples:
 // use case owns the LH-FA-ADD-005 dispatch — runAdd only translates
 // the response into output. Output shape is mode-dependent:
 //
-//   - --json without --dry-run/--diff → minimal envelope (Spec §1841
+//   - --json without --dry-run/--diff → minimal envelope (LH-NFA-USE-004
 //     / T0-(k)). FS-mutations happen as in normal mode; the envelope
 //     carries no plan information.
 //   - --dry-run --json (with or without --diff) → voll-schema with
@@ -180,7 +180,7 @@ func runAdd(
 // writeAddJSON renders the success-path JSON envelope. Three shapes
 // per T0-(k) + T0-(b)/(d):
 //
-//   - dryRun=false && diff=false → minimal envelope (Spec §1841).
+//   - dryRun=false && diff=false → minimal envelope (LH-NFA-USE-004).
 //   - dryRun=true                → voll-schema, plannedFiles from
 //     recorder, optional hunks if diff=true.
 //   - diff=true                  → voll-schema preview-and-apply,
@@ -222,7 +222,7 @@ func writeEnvelope(out io.Writer, env cliJSONEnvelope) error {
 // mapAddErrorToDiagnostic maps an add-path error to a diagnosticItem
 // with the spec-konforme LH-Kennung per T0-(j). Unknown errors fall
 // back to a generic LH-FA-CLI-006 wrapper (default error path); the
-// invariants Spec §1834 (level ∈ {warn, error}) and §1837 (status
+// invariants LH-NFA-USE-004 (level ∈ {warn, error}) and LH-NFA-USE-004 (status
 // coupling) carry the rest.
 //
 // Order matters: addservice_execute.go wraps FS-Write-Failures as

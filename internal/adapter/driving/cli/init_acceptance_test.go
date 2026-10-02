@@ -42,7 +42,7 @@ func newAppWithInitStub(stub driving.InitProjectUseCase) *cli.App {
 // =====================================================================
 
 // TestInitJSON_BareUsesMinimalEnvelope pins T0-(j): `u-boot init --json`
-// ohne --dry-run/--diff trägt nur den Spec-§1841-Minimalkontrakt
+// ohne --dry-run/--diff trägt nur den LH-NFA-USE-004-Minimalkontrakt
 // (analog add T0-(k)).
 func TestInitJSON_BareUsesMinimalEnvelope(t *testing.T) {
 	stub := &initUseCaseStub{

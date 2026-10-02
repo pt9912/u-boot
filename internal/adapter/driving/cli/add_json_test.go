@@ -47,7 +47,7 @@ func newAddSvcName(t *testing.T, raw string) domain.ServiceName {
 
 // TestAddJSON_BareUsesMinimalEnvelope pins T0-(k): `u-boot add ...
 // --json` ohne --dry-run/--diff trägt nur den Minimalkontrakt
-// (Spec §1841) — keine plannedFiles/changes/dryRun/diff Felder.
+// (LH-NFA-USE-004) — keine plannedFiles/changes/dryRun/diff Felder.
 func TestAddJSON_BareUsesMinimalEnvelope(t *testing.T) {
 	stub := &addUseCaseStub{
 		resp: driving.AddServiceResponse{

@@ -25,7 +25,7 @@ import (
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
-// TestLHAK001_InitFlow_DoctorClean pins `LH-AK-001` (spec §2281):
+// TestLHAK001_InitFlow_DoctorClean pins `LH-AK-001` (spec LH-AK-001):
 //
 //	mkdir demo && cd demo && u-boot init && u-boot doctor
 //
@@ -79,7 +79,7 @@ func TestLHAK001_InitFlow_DoctorClean(t *testing.T) {
 }
 
 // TestLHAK006_DoubleAddPostgres_NoDuplicate pins `LH-AK-006`
-// (spec §2387):
+// (spec LH-AK-006):
 //
 //	u-boot add postgres
 //	u-boot add postgres
@@ -179,7 +179,7 @@ func TestLHAK006_DoubleAddPostgres_NoDuplicate(t *testing.T) {
 // `features:` block contains the key
 // `ghcr.io/devcontainers/features/node:1` (catalogue lookup + T3
 // renderer projection). No Allowlist needed because `node` is a
-// built-in catalogue feature (Spec §711).
+// built-in catalogue feature (LH-FA-DEV-003).
 func TestLHFADEV003_CatalogueActivation(t *testing.T) {
 	fs := newFakeFS()
 	fs.markDirExists(testBaseDir)
@@ -285,7 +285,7 @@ func TestLHFADEV003_AllowlistEnforcement(t *testing.T) {
 		t.Errorf("err message %q does not name LH-NFA-SEC-004", err.Error())
 	}
 
-	// Positive path after seeding the Allowlist via the Spec §717-
+	// Positive path after seeding the Allowlist via the LH-FA-DEV-003-
 	// `config set devcontainer.featureSources.allow` route — same
 	// shape the CLI flag uses internally.
 	allowPath, err := domain.NewConfigPath("devcontainer.featureSources.allow")
@@ -309,7 +309,7 @@ func TestLHFADEV003_AllowlistEnforcement(t *testing.T) {
 	}
 }
 
-// TestLHFAUP005_LogsHappyPath pins `LH-FA-UP-005` (spec §1023-1040):
+// TestLHFAUP005_LogsHappyPath pins `LH-FA-UP-005` (spec LH-FA-UP-005):
 //
 //	u-boot init
 //	u-boot add postgres

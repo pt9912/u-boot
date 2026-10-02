@@ -47,7 +47,7 @@ func TestBackupPath_File_NumericSuffixOnCollision(t *testing.T) {
 }
 
 func TestBackupPath_File_PicksSmallestFreeSuffix(t *testing.T) {
-	// Why: spec §607 requires *smallest* free numeric suffix, not the
+	// Why: spec LH-FA-INIT-005 requires *smallest* free numeric suffix, not the
 	// next-after-highest. With .bak and .bak.2 occupied but .bak.1
 	// free, BackupPath must pick .bak.1.
 	fs := newFakeFS()
@@ -197,7 +197,7 @@ func TestBackupPath_MissingSourceReturnsErr(t *testing.T) {
 }
 
 func TestBackupPath_TreeCopyFailure_RollsBack(t *testing.T) {
-	// Why: spec §608 requires rollback when a tree-backup fails
+	// Why: spec LH-FA-INIT-005 requires rollback when a tree-backup fails
 	// partway. Setup: directory with two files; force WriteFile to
 	// fail on the second; assert (a) BackupPath returns the
 	// underlying error and (b) the partial destination is gone.

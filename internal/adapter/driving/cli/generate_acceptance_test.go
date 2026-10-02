@@ -263,7 +263,7 @@ func TestGenerateJSON_ManualConflictCodePerArtifact(t *testing.T) {
 
 // TestGenerateJSON_URLRejectLHDEV003 pins the R6-HIGH-1-Finding:
 // invalid --allow-external-feature-sources URL maps to LH-FA-DEV-003 /
-// Exit 10 (Spec §720). Without the T3 ErrConfigValueInvalid wrap the
+// Exit 10 (LH-FA-DEV-003). Without the T3 ErrConfigValueInvalid wrap the
 // path would have fallen to default LH-FA-CLI-006 / Exit 1.
 func TestGenerateJSON_URLRejectLHDEV003(t *testing.T) {
 	stub := &fakeGenerateUseCase{
@@ -292,7 +292,7 @@ func TestGenerateJSON_URLRejectLHDEV003(t *testing.T) {
 	}
 }
 
-// TestGenerateJSON_ArtifactUnknownExit2 pins LH-FA-GEN-001 Spec §1157:
+// TestGenerateJSON_ArtifactUnknownExit2 pins LH-FA-GEN-001:
 // unknown artifact → Exit 2 (CLI-validation), not the default Exit 1.
 // data is nil here because we have no artifact to embed.
 func TestGenerateJSON_ArtifactUnknownExit2(t *testing.T) {

@@ -2,7 +2,7 @@
 
 // LH-FA-UP-005 Logs-Acceptance-Flow Pin (slice-v1-logs T4).
 //
-// Spec §1023-1040: `u-boot logs [service] [--follow] [--tail <n>]`
+// LH-FA-UP-005: `u-boot logs [service] [--follow] [--tail <n>]`
 // streamt Compose-Logs an stdout. Zwei Tests pinnen die zwei
 // Pflicht-Flag-Pfade gegen einen echten postgres-Compose-Stack:
 //

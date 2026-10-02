@@ -2,7 +2,7 @@ package driven
 
 // ProgressPort is the application's side-channel for reporting
 // affected-paths information to the user during a re-init
-// (LH-FA-INIT-005 §609 / LH-FA-CLI-005A §262 — "vor dem Schreiben
+// (LH-FA-INIT-005 / LH-FA-CLI-005A — "vor dem Schreiben
 // muss eine Zusammenfassung der betroffenen Pfade ausgegeben
 // werden"). The application emits structured events through this
 // port; the adapter (text on stdout today, JSON for `--json` later)
@@ -28,7 +28,7 @@ type ProgressPort interface {
 
 // AffectedFile is one entry in a [ProgressPort.AffectedFiles]
 // report. Fields are intentionally narrow: Path + Action + Backup
-// are enough for the LH-FA-INIT-005 §609 summary; presentation
+// are enough for the LH-FA-INIT-005 summary; presentation
 // (labels, indentation, glyphs) belongs in the adapter.
 type AffectedFile struct {
 	// Path is the file path relative to baseDir (e.g. "compose.yaml").
@@ -36,7 +36,7 @@ type AffectedFile struct {
 	// Action is the kind of change the use case will perform.
 	Action AffectedAction
 	// Backup is true when the use case will copy the file to
-	// `<path>.bak[.N]` before mutating it (LH-FA-INIT-005 §605/§617).
+	// `<path>.bak[.N]` before mutating it (LH-FA-INIT-005/LH-FA-INIT-005).
 	Backup bool
 }
 
@@ -48,9 +48,9 @@ type AffectedAction int
 const (
 	// AffectedReplaceBlock means only the file's
 	// `U-BOOT MANAGED BLOCK: init` region is rewritten — content
-	// outside the markers survives unchanged (LH-FA-INIT-005 §613).
+	// outside the markers survives unchanged (LH-FA-INIT-005).
 	AffectedReplaceBlock AffectedAction = iota
 	// AffectedOverwriteFull means the entire file is replaced —
-	// LH-FA-INIT-005 §619 requires --backup for this path.
+	// LH-FA-INIT-005 requires --backup for this path.
 	AffectedOverwriteFull
 )

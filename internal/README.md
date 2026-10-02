@@ -58,7 +58,7 @@ pflegen ihren Detail-Stand jeweils selbst; Kurz-Inventar:
 - `e2e/` — `//go:build docker`-Integrationstests, die mehrere
   Application-Services in Sequenz gegen eine echte Compose-Engine
   fahren ([`LH-AK-002`](../spec/lastenheft.md#lh-ak-002--postgresql-flow) PostgreSQL-Acceptance,
-  [`LH-FA-UP-004`](../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen) §1015 Volume-Removal). Laufen ausschließlich
+  [`LH-FA-UP-004`](../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen) Volume-Removal). Laufen ausschließlich
   über `make test-docker` — siehe
   [`docs/user/quality.md`](../docs/maintainer/quality.md) §2.2.
 - `acceptance_test.go` — benannte Spec-Pins für

@@ -16,8 +16,8 @@ import (
 )
 
 // allOKReport seeds the fake doctor with two OK items so the All-OK
-// envelope case ships diagnostics: [] (Spec §1834 forbids
-// level: "ok", §1846-1852 example pins the empty array).
+// envelope case ships diagnostics: [] (LH-NFA-USE-004 forbids
+// level: "ok", LH-NFA-USE-004 example pins the empty array).
 func allOKReport() driving.DoctorResponse {
 	return driving.DoctorResponse{Report: domain.DiagnosticReport{
 		Items: []domain.Diagnostic{
@@ -46,7 +46,7 @@ func errorReport() driving.DoctorResponse {
 }
 
 // TestDoctorJSON_AllOK pins the canonical empty-diagnostics case
-// (Lastenheft §1846-1852 example).
+// (Lastenheft LH-NFA-USE-004 example).
 func TestDoctorJSON_AllOK(t *testing.T) {
 	stdout := &bytes.Buffer{}
 	app := newAppWithDoctor(&fakeInitUseCase{}, &fakeDoctorUseCase{resp: allOKReport()},
@@ -71,7 +71,7 @@ func TestDoctorJSON_AllOK(t *testing.T) {
 	}
 	diags, _ := env["diagnostics"].([]any)
 	if len(diags) != 0 {
-		t.Errorf("All-OK case must ship diagnostics: [] (Spec §1834 forbids level:ok), got %v", diags)
+		t.Errorf("All-OK case must ship diagnostics: [] (LH-NFA-USE-004 forbids level:ok), got %v", diags)
 	}
 }
 
@@ -177,7 +177,7 @@ func TestDoctorJSON_QuietIsSemanticNoOp(t *testing.T) {
 
 // TestDoctorJSON_StrictWarnExits11 pins that --strict --json with
 // a Warn report still upgrades exitCode to 11; status remains
-// "warn" because Spec §1837 couples status to the highest level,
+// "warn" because LH-NFA-USE-004 couples status to the highest level,
 // not to --strict.
 func TestDoctorJSON_StrictWarnExits11(t *testing.T) {
 	stdout := &bytes.Buffer{}
@@ -193,7 +193,7 @@ func TestDoctorJSON_StrictWarnExits11(t *testing.T) {
 
 	env := parseEnv(t, stdout.Bytes())
 	if env["status"] != "warn" {
-		t.Errorf("status: want %q (Spec §1837 couples to highest level), got %v", "warn", env["status"])
+		t.Errorf("status: want %q (LH-NFA-USE-004 couples to highest level), got %v", "warn", env["status"])
 	}
 	if env["exitCode"] != float64(11) {
 		t.Errorf("exitCode: want 11, got %v", env["exitCode"])

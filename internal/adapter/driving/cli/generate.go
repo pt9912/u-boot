@@ -33,7 +33,7 @@ type generateFlags struct {
 	Sandbox bool
 
 	// DryRun / Diff / JSON (slice-v1-cli-json-dry-run-generate T5):
-	// LH-FA-CLI-007/008/§1841 flags. DryRun/Diff route Generate()
+	// LH-FA-CLI-007/008/LH-NFA-USE-004 flags. DryRun/Diff route Generate()
 	// through the RecordingFileSystem via the per-request fsFactory
 	// (T4); together with JSON they form the three voll-schema/
 	// minimal output paths analog to add/init. JSON is read-through
@@ -80,7 +80,7 @@ Examples:
   u-boot generate env-example      # create or refresh .env.example
   u-boot generate devcontainer     # both .devcontainer/ files`,
 		// slice-v1-cli-json-envelope-consolidation T2: Args-Fehler
-		// tragen im --json-Modus den Envelope (§1841); kein Artefakt
+		// tragen im --json-Modus den Envelope (LH-NFA-USE-004); kein Artefakt
 		// ist zum Validierungs-Zeitpunkt geparst → zeroArtifact (der
 		// Mapper-Default-Pfad LH-FA-CLI-006 konsultiert das Feld
 		// nicht). previewFlags=true → Voll-Schema bei --dry-run/--diff.
@@ -165,13 +165,13 @@ func runGenerate(
 		return mapGenerateErrorToDiagnostic(e, artifact)
 	}
 
-	// Spec §714-717: --allow-external-feature-sources is only
+	// LH-FA-DEV-003: --allow-external-feature-sources is only
 	// valid for `generate devcontainer`. Reject early on other
 	// artefacts so the user gets a clear "wrong command" message
 	// rather than a silent no-op.
 	if len(flags.AllowExternalFeatureSources) > 0 && artifact != domain.ArtifactDevcontainer {
 		wrapped := fmt.Errorf(
-			"%w: --allow-external-feature-sources is only valid for `generate devcontainer` (Spec §714-717); got `generate %s`",
+			"%w: --allow-external-feature-sources is only valid for `generate devcontainer` (LH-FA-DEV-003); got `generate %s`",
 			driving.ErrArtifactUnknown, artifact)
 		return reportError(out, wrapped, nil, flags.DryRun, flags.Diff, flags.JSON, "generate", mapErr, data)
 	}

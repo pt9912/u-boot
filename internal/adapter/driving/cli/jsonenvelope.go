@@ -2,8 +2,8 @@ package cli
 
 // cliJSONEnvelope ist der Wire-Type für `u-boot --json`-Ausgaben
 // (slice-v1-cli-json-dry-run-doctor T2). Das Lastenheft trennt
-// zwei Kontraktstufen — Minimalkontrakt (LH-NFA-USE-004 §1841) und
-// Voll-Schema (LH-FA-CLI-007 §326). Beide werden in **diesem** Typ
+// zwei Kontraktstufen — Minimalkontrakt (LH-NFA-USE-004) und
+// Voll-Schema (LH-FA-CLI-007). Beide werden in **diesem** Typ
 // gerendert, der Konstruktor pinnt die Stufe:
 //
 //   - newMinimalEnvelope: read-only-Aufrufe (doctor, logs, up, …)
@@ -13,7 +13,7 @@ package cli
 //     setzen alle vier Voll-Felder explizit.
 //
 // IMPORTANT: DryRun und Diff sind *bool — NOT plain bool. Spec
-// §326 verlangt dryRun/diff im modifying-Pfad auch wenn der Wert
+// LH-FA-CLI-007 verlangt dryRun/diff im modifying-Pfad auch wenn der Wert
 // false ist. Plain `bool` + omitempty würde false aus dem JSON
 // werfen und das Spec-Required-Set verletzen. Siehe
 // docs/plan/planning/in-progress/slice-v1-cli-json-dry-run-doctor.md
@@ -35,7 +35,7 @@ type cliJSONEnvelope struct {
 	Changes      *[]changeEntry   `json:"changes,omitempty"`
 	Diagnostics  []diagnosticItem `json:"diagnostics"`
 	ExitCode     int              `json:"exitCode"`
-	// Data: optionales Free-Form-Feld (Spec §1839 erlaubt zusätzliche
+	// Data: optionales Free-Form-Feld (LH-NFA-USE-004 erlaubt zusätzliche
 	// Felder im Minimal-Mode). slice-v1-cli-json-dry-run-generate T0-(p)
 	// hat das ursprünglich für Template-Slice 9/9 reservierte Feld
 	// vorgezogen, weil generate als erster Multi-Artefakt-Subcommand
@@ -50,7 +50,7 @@ type cliJSONEnvelope struct {
 }
 
 // diagnosticItem ist ein Eintrag im `diagnostics[]`-Array. Spec
-// §1834 lässt `level` nur `warn` oder `error` zu; SeverityOK- und
+// LH-NFA-USE-004 lässt `level` nur `warn` oder `error` zu; SeverityOK- und
 // SeverityInfo-Items werden beim Mapping aus
 // domain.DiagnosticReport übersprungen, nicht als level: "ok"/"info"
 // serialisiert.
@@ -62,8 +62,8 @@ type diagnosticItem struct {
 }
 
 // plannedFile ist ein Eintrag im Voll-Schema-`plannedFiles[]`. Spec
-// §354 erlaubt `action` nur create/modify/delete. Hunks sind optional
-// (LH-FA-CLI-008 §477-482 macht sie Pflicht nur im `--diff --json`-
+// LH-FA-CLI-007 erlaubt `action` nur create/modify/delete. Hunks sind optional
+// (LH-FA-CLI-008 macht sie Pflicht nur im `--diff --json`-
 // Pfad; ohne `--diff` bleibt das Feld via omitempty weg —
 // slice-v1-cli-json-dry-run-add T0-(l)).
 type plannedFile struct {
@@ -73,7 +73,7 @@ type plannedFile struct {
 }
 
 // hunk ist die Wire-Form eines Diff-Hunks in
-// `plannedFiles[].hunks` (LH-FA-CLI-008 §477-482; slice-v1-cli-json-
+// `plannedFiles[].hunks` (LH-FA-CLI-008; slice-v1-cli-json-
 // dry-run-add T0-(l)). Coordinates sind 1-basiert wenn die jeweilige
 // *Lines-Zahl > 0; pure-add/-delete-Hunks setzen die Off-Seite auf 0
 // per Unified-Diff-Konvention. Field-Tag-Drift (`offset` statt
@@ -86,7 +86,7 @@ type hunk struct {
 	Content  string `json:"content"`
 }
 
-// changeEntry ist ein Eintrag im Voll-Schema-`changes[]`. Spec §368
+// changeEntry ist ein Eintrag im Voll-Schema-`changes[]`. LH-FA-CLI-007
 // fordert count ≥ 0.
 type changeEntry struct {
 	Path  string `json:"path"`
@@ -94,9 +94,9 @@ type changeEntry struct {
 }
 
 // newMinimalEnvelope baut einen Minimalkontrakt-Envelope (LH-NFA-
-// USE-004 §1841). DryRun/Diff/PlannedFiles/Changes/Data bleiben nil
+// USE-004 LH-NFA-USE-004). DryRun/Diff/PlannedFiles/Changes/Data bleiben nil
 // und fallen per omitempty aus dem JSON. status wird aus diags
-// abgeleitet (Spec §447 / §1837): error → "error"; warn ohne
+// abgeleitet (LH-FA-CLI-007 / LH-NFA-USE-004): error → "error"; warn ohne
 // error → "warn"; sonst "ok".
 //
 // Für Minimal+Data-Pfade (generate, template list) gibt es den
@@ -116,7 +116,7 @@ func newMinimalEnvelope(command, subcommand string, diags []diagnosticItem, exit
 }
 
 // newFullEnvelope baut einen Voll-Schema-Envelope (LH-FA-CLI-007
-// §326). Alle vier Voll-Felder werden explizit gesetzt; bei
+// LH-FA-CLI-007). Alle vier Voll-Felder werden explizit gesetzt; bei
 // `dryRun=false`/`diff=false` erscheint im JSON entsprechend
 // `"dryRun":false`/`"diff":false` (Spec-Required-Set).
 //
@@ -192,7 +192,7 @@ func newDataEnvelope(
 	}
 }
 
-// statusFromDiagnostics implementiert Spec §447 / §1837 — die
+// statusFromDiagnostics implementiert LH-FA-CLI-007 / LH-NFA-USE-004 — die
 // `status`-Kopplung an das höchste `level` in `diagnostics`.
 // SeverityOK/SeverityInfo erscheinen nie als diagnosticItem
 // (Filter beim Mapping aus domain.DiagnosticReport).

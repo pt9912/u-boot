@@ -28,7 +28,7 @@ import (
 // derivable from it: the spec distinguishes "automatically agree"
 // (`--yes`) from "refuse to ask" (`--no-interactive`). The CLI
 // adapter sets both fields verbatim from their respective flags.
-// The orthogonal §235 rule (`--yes` AND `--no-interactive` set
+// The orthogonal LH-FA-CLI-005A rule (`--yes` AND `--no-interactive` set
 // together → exit code 2) is enforced earlier in the root resolver
 // and never reaches this use case.
 type DownRequest struct {
@@ -40,7 +40,7 @@ type DownRequest struct {
 	// RemoveVolumes mirrors the `--volumes` CLI flag. When true,
 	// `ComposeDown` is invoked with the equivalent of
 	// `docker compose down -v`, which deletes named volumes
-	// alongside containers. LH-FA-UP-004 §1015 isolates this from
+	// alongside containers. LH-FA-UP-004 isolates this from
 	// the regular stop path so a non-destructive `down` cannot
 	// accidentally drop persisted data.
 	RemoveVolumes bool
@@ -53,7 +53,7 @@ type DownRequest struct {
 	// NonInteractive mirrors the `--no-interactive` persistent
 	// root flag. When true (combined with RemoveVolumes and
 	// !AssumeYes), the use case returns [ErrConfirmationRequired]
-	// without calling the confirmer at all — LH-FA-CLI-005A §254
+	// without calling the confirmer at all — LH-FA-CLI-005A
 	// "im nicht-interaktiven Modus ohne `--yes` ist der Befehl mit
 	// Exit-Code 10 abzubrechen". Modeled as an explicit request
 	// field so the application service does not need to know the
@@ -124,13 +124,13 @@ type DownResponse struct {
 var ErrDownFileSystem = errors.New("down: filesystem read failed")
 
 // ErrConfirmationRequired signals the destructive-confirmation
-// abort path from LH-FA-CLI-005A §254 — `u-boot down --volumes` in
+// abort path from LH-FA-CLI-005A — `u-boot down --volumes` in
 // non-interactive mode without `--yes`, or with an interactive
 // confirmer that returned `(false, nil)`. Maps to LH-FA-INIT-005
 // exit code 10 (fachliche Validierung; shared with init/remove
 // confirmation-required path).
 //
-// Distinct from the §235 root-level exclusivity error (`--yes` AND
+// Distinct from the LH-FA-CLI-005A root-level exclusivity error (`--yes` AND
 // `--no-interactive` set simultaneously → exit code 2): the
 // exclusivity error is a CLI-validation failure that never reaches
 // the use case, while this sentinel signals a use-case-level

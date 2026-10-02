@@ -14,7 +14,7 @@ import (
 // without --diff just to sum their additions, since the alternative
 // (CountLines on the whole new file) overstated the count by orders
 // of magnitude for any add-on-into-existing-file case (add review
-// finding #1 / Spec §477).
+// finding #1 / LH-FA-CLI-008).
 //
 // Originally lived in add.go as mapResponseToWire(resp, withHunks)
 // taking the concrete AddServiceResponse; slice-v1-cli-json-dry-run-
@@ -47,10 +47,10 @@ func mapPlannedFilesToWire(planned []driving.PlannedFile, withHunks bool) ([]pla
 //   - "create": count = CountLines(NewContent), hunks computed for
 //     full-file insertion shape.
 //   - "modify": count = CountAdditions(hunks) — only the `+` lines
-//     (Spec §477 pins `count: 6` for a 6-line postgres-block append,
+//     (LH-FA-CLI-008 pins `count: 6` for a 6-line postgres-block append,
 //     NOT 6 + context lines; add review-round-7 finding B).
 //   - "delete" (slice-v1-cli-json-dry-run-remove T0-(p)): count = 0
-//     (delete contributes zero added lines per Spec §477 semantics);
+//     (delete contributes zero added lines per LH-FA-CLI-008 semantics);
 //     hunks rendert den Old-Inhalt als full-file-Remove-Block, damit
 //     `--diff --json`-Konsumenten sehen WAS gelöscht wird. Add review
 //     #8 binary-delete-Trap bleibt geschützt: ein Pre-Compute
@@ -78,7 +78,7 @@ func computeChangeCountAndHunks(pf driving.PlannedFile) (int, []driving.Hunk) {
 	default:
 		// Unknown action — keep parity with the create branch as the
 		// safe fallback; the spec restricts action to {create, modify,
-		// delete} (Spec §354) so this branch is unreachable today.
+		// delete} (LH-FA-CLI-007) so this branch is unreachable today.
 		return diff.CountLines(pf.NewContent), hunks
 	}
 }

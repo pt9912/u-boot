@@ -109,7 +109,7 @@ func (s *ConfigService) selectFS(mode driving.PreviewMode) (driven.FileSystem, d
 // §D1):
 //
 //   - ConfigProjectName: project.name is required by
-//     LH-FA-CONF-002 §1308; an empty / missing name surfaces as
+//     LH-FA-CONF-002; an empty / missing name surfaces as
 //     [ErrConfigSchemaInvalid] (corrupt config, not just unset).
 //   - ConfigDevcontainerEnabled: the `devcontainer:` block is
 //     optional. Missing block OR missing `enabled:` key both
@@ -209,7 +209,7 @@ func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (dr
 	// LIST, not a scalar — PatchScalar cannot represent it. The
 	// list-append/dedupe + marshal-rewrite code-route lives in
 	// [setFeatureSourcesAllow]. Trade-off: marshal-rewrite loses
-	// comments in u-boot.yaml; the Spec (§711-721) does not require
+	// comments in u-boot.yaml; the Spec (LH-FA-DEV-003) does not require
 	// comment preservation for this list. The scalar feature paths
 	// (.enabled, .source, .version) take the standard PatchScalar
 	// path below.
@@ -619,7 +619,7 @@ func lookupFeatureEntry(cfg ubootYAMLConfig, name domain.FeatureName) (ubootYAML
 //
 // A future normalisation pass (e.g. TrimRight `/`, ToLower(host))
 // would be a separate slice — for now the byte-equal contract is
-// the simplest spec-conformant implementation (Spec §1351 only
+// the simplest spec-conformant implementation (LH-FA-CONF-002 only
 // requires "valid non-empty source strings").
 func featureSourceInAllow(cfg ubootYAMLConfig, src string) bool {
 	if cfg.Devcontainer == nil || cfg.Devcontainer.FeatureSources == nil {
@@ -671,7 +671,7 @@ func (s *ConfigService) readUbootYAMLBody(baseDir string) ([]byte, ubootYAMLConf
 			driving.ErrConfigSchemaInvalid, err)
 	}
 	// Audit-Followup A1: LH-FA-DEV-003 schema-validation of the
-	// devcontainer subtree on load. Spec §1353 mandates Exit-Code
+	// devcontainer subtree on load. LH-FA-CONF-002 mandates Exit-Code
 	// 10 for invalid sources / names; ErrConfigSchemaInvalid maps
 	// there via `isConfigValidationError`.
 	if err := validateDevcontainer(cfg.Devcontainer); err != nil {
@@ -797,7 +797,7 @@ func extractConfigValueRaw(cfg ubootYAMLConfig, path domain.ConfigPath) (string,
 	case domain.ConfigProjectName:
 		if cfg.Project.Name == "" {
 			return "", fmt.Errorf(
-				"%w: u-boot.yaml has no `project.name` value; this is a corrupt config (LH-FA-CONF-002 §1308 requires it)",
+				"%w: u-boot.yaml has no `project.name` value; this is a corrupt config (LH-FA-CONF-002 requires it)",
 				driving.ErrConfigSchemaInvalid)
 		}
 		return cfg.Project.Name, nil
@@ -921,7 +921,7 @@ func (s *ConfigService) setFeatureSourcesAllow(
 
 	// Stage 1: parse the user-provided inputs (positional value +
 	// `--allow-external-feature-sources` flag cumulation per Spec
-	// §714-718) and validate them as user input. Failures here
+	// LH-FA-DEV-003) and validate them as user input. Failures here
 	// map to ErrConfigValueInvalid (Code 10) because the user can
 	// fix them by passing a different URL.
 	incoming, err := parseFeatureSourcesArgument(req.Value)
@@ -985,7 +985,7 @@ func (s *ConfigService) setFeatureSourcesAllow(
 	cfg.Devcontainer.FeatureSources.Allow = merged
 
 	// Stage 4: marshal-rewrite (loses comments; acceptable per
-	// Spec §711-721 which has no comment-preservation requirement
+	// LH-FA-DEV-003 which has no comment-preservation requirement
 	// for this list).
 	rewritten, err := s.yaml.Marshal(cfg)
 	if err != nil {
@@ -1021,7 +1021,7 @@ func (s *ConfigService) setFeatureSourcesAllow(
 // resulting slice is the raw user input — validation + dedupe
 // happen at the next pipeline stage.
 //
-// Spec §718: comma-separation is mandatory. An empty argument
+// LH-FA-DEV-003: comma-separation is mandatory. An empty argument
 // (no entries after split) returns nil so callers can NoOp-check
 // against an empty list.
 func parseFeatureSourcesArgument(raw string) ([]string, error) {

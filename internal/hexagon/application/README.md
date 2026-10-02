@@ -20,13 +20,13 @@ nil-tolerant via package-private `noop*`-Defaults.
 - `DoctorService` — `port/driving.DoctorUseCase`
   ([`LH-FA-DIAG-001`](../../../spec/lastenheft.md#lh-fa-diag-001--doctor-befehl)..[`LH-FA-DIAG-004`](../../../spec/lastenheft.md#lh-fa-diag-004--reparaturhinweise); 11 Checks). `compose.yaml.valid` stuft den
   no-services-Fall als Warn statt Error ein
-  ([`LH-AK-001`](../../../spec/lastenheft.md#lh-ak-001--minimaler-init-flow)-§2299-Konformität).
+  ([`LH-AK-001`](../../../spec/lastenheft.md#lh-ak-001--minimaler-init-flow)-Konformität).
 - `UpService` — `port/driving.UpUseCase` ([`LH-FA-UP-001`](../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)..[`LH-FA-UP-003`](../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen)).
   Polling-Loop mit `pollInterval=500ms` und `dialTimeout=300ms`,
   fail-safe `ContainerState`-Klassifikation (Dead-Allowlist,
   soft-Unknown, Restart-Loop-Counter mit Threshold 3),
   Healthcheck-dominanter Stabilisierungs-Vertrag mit TCP-Port-
-  Probe als Warn-Diagnose (§141 / §968).
+  Probe als Warn-Diagnose ([LH-PÜ-002](../../../spec/lastenheft.md#lh-pü-002--hauptmodule) / [LH-FA-UP-001](../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)).
 - `DownService` — `port/driving.DownUseCase` ([`LH-FA-UP-004`](../../../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen)).
   §T5-Truth-Table für den `--volumes`-Bestätigungs-Pfad (4 Zeilen
   × 2 Sub-Cases bei AssumeYes-und-NonInteractive); ruft

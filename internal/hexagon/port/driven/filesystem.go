@@ -35,7 +35,7 @@ type FileSystem interface {
 	// backup strategy uses this to close the TOCTOU window between
 	// suffix selection (`<src>.bak.N` chosen via [Exists]) and the
 	// actual write, so concurrent runs cannot clobber each other's
-	// fresh backups (spec §607: "ohne vorhandene Backups zu
+	// fresh backups (spec LH-FA-INIT-005: "ohne vorhandene Backups zu
 	// überschreiben").
 	WriteFileExclusive(path string, data []byte, mode fs.FileMode) error
 

@@ -1,9 +1,9 @@
 //go:build docker
 
-// LH-FA-UP-004 §1015 down --volumes-removes-named-volumes pin
+// LH-FA-UP-004 down --volumes-removes-named-volumes pin
 // (M6-docker-int Sub-T3).
 //
-// Spec §1015: "Das Produkt muss zwischen einem regulären Stopp
+// LH-FA-UP-004: "Das Produkt muss zwischen einem regulären Stopp
 // (Container stoppen) und einem vollständigen Aufräumen (Container
 // und Volumes entfernen) unterscheiden". This test pins the
 // `--volumes` half of that contract: after `down --volumes`, every
@@ -129,7 +129,7 @@ func TestE2E_LHFAUP004_DownVolumesRemovesNamedVolumes(t *testing.T) {
 	afterDown := listHostVolumes(t)
 	for vol := range created {
 		if _, present := afterDown[vol]; present {
-			t.Errorf("volume %q still present after down --volumes (LH-FA-UP-004 §1015 violation)", vol)
+			t.Errorf("volume %q still present after down --volumes (LH-FA-UP-004 violation)", vol)
 		}
 	}
 }

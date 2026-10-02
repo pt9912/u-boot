@@ -1,13 +1,13 @@
 //go:build docker
 
-// LH-FA-UP-001 §968 TCP-port-probe-lands pin
+// LH-FA-UP-001 TCP-port-probe-lands pin
 // (M6-docker-int Sub-T2).
 //
-// Spec §968: "Bei definierten Ports wird auf Erreichbarkeit auf
+// LH-FA-UP-001: "Bei definierten Ports wird auf Erreichbarkeit auf
 // `localhost` geprüft, sofern es sich um TCP-basierten Zugriff
 // handelt." For a service WITHOUT a healthcheck, the port probe
 // is load-bearing for stabilization classification — slice plan
-// §141 "no healthcheck + TCP port → port probe gates".
+// LH-PÜ-002 "no healthcheck + TCP port → port probe gates".
 //
 // Pin shape: wrap the production NetProbe in a small spy that
 // counts DialTCP calls plus forwards them to the real adapter.
@@ -164,7 +164,7 @@ func TestUpService_RealDocker_PortProbeRunsForNoHealthcheckService(t *testing.T)
 	// empty.
 	calls := spy.snapshot()
 	if len(calls) == 0 {
-		t.Fatal("NetProbe.DialTCP was never called — LH-FA-UP-001 §968 violation: TCP-port-probe must run for services with declared TCP ports")
+		t.Fatal("NetProbe.DialTCP was never called — LH-FA-UP-001 violation: TCP-port-probe must run for services with declared TCP ports")
 	}
 
 	// Sanity: at least one call hit the declared host port on

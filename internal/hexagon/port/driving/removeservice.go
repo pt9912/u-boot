@@ -33,13 +33,13 @@ type RemoveServiceRequest struct {
 	// (LH-FA-ADD-007 §"Volumes nur auf explizite Anforderung"). When
 	// false (default), the service's named volumes stay on disk
 	// after the compose- and env-block removal — data survives the
-	// remove. When true, the LH-FA-CLI-005A §254 confirmation gate
+	// remove. When true, the LH-FA-CLI-005A confirmation gate
 	// fires (mediated by [Yes] / [NoInteractive] below) before the
 	// destructive step. [VolumesPurged] in the response reflects
 	// whether the purge actually ran.
 	Purge bool
 
-	// Yes is the persistent root flag value (LH-FA-CLI-005A §237);
+	// Yes is the persistent root flag value (LH-FA-CLI-005A);
 	// when true together with [Purge], the confirmation prompt is
 	// skipped and the volume removal proceeds. CLI parses the
 	// `--yes` PersistentFlag and the request constructor copies it.
@@ -138,7 +138,7 @@ type RemoveServiceResponse struct {
 	PlannedFiles []PlannedFile
 
 	// Changes mirrors PlannedFiles' paths with their line-count
-	// summaries (LH-FA-CLI-007 §365-371). Filled only in preview
+	// summaries (LH-FA-CLI-007). Filled only in preview
 	// modes; nil for PreviewNone. Count semantics follow add T0-(g)
 	// (1:1 inherited): create = CountLines(NewContent); modify = sum
 	// of `+`-lines via diff.CountAdditions; delete = 0 (T0-(p)).
@@ -175,7 +175,7 @@ type RemoveServiceResponse struct {
 // (`cli/jsonenvelope.go:diagnosticItem`):
 //   - Code is the LH-Kennung (`LH-FA-ADD-007` for remove's
 //     deferred-volumes WARN; future slices add their own).
-//   - Level is "warn" today (Spec §1834 allows warn | error;
+//   - Level is "warn" today (LH-NFA-USE-004 allows warn | error;
 //     the field is kept for symmetry with diagnosticItem and
 //     future error-level Use-Case-Diagnostics, e.g. doctor's
 //     readonly diagnostics-emission pattern).
@@ -260,7 +260,7 @@ var ErrRemoveFileSystem = errors.New("remove: filesystem mutation failed")
 // fachlich (R3-MED-F3 + R5-MED-F2 classification).
 //
 // Maps to LH-FA-CLI-005A / exit 10 (Confirmation-Gate-Klasse, Spec
-// §254). The User sees the same exit code as ErrConfirmationRequired
+// LH-FA-CLI-005A). The User sees the same exit code as ErrConfirmationRequired
 // but with a different diagnostic message — both are gate-failures
 // from the same Spec-anchor.
 var ErrConfirmerUnavailable = errors.New("remove: confirmer unavailable")

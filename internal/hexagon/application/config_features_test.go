@@ -36,7 +36,7 @@ devcontainer:
 // TestConfigSet_FeatureSourcesAllow_Append pins the LH-FA-DEV-003
 // list-path append + dedupe contract: setting the path with a new
 // URL adds it to the existing list; re-setting with the same URL
-// is a NoOp; comma-separated values split per Spec §718.
+// is a NoOp; comma-separated values split per LH-FA-DEV-003.
 func TestConfigSet_FeatureSourcesAllow_Append(t *testing.T) {
 	t.Parallel()
 	svc, fs := newConfigService(t)
@@ -96,7 +96,7 @@ func TestConfigSet_FeatureSourcesAllow_InvalidURL(t *testing.T) {
 
 // TestConfigSet_FeatureSourcesAllow_FlagMergesWithPositional pins
 // the cumulative semantics of AllowExternalFeatureSources alongside
-// the positional Value (Spec §718 "Multi-Flag-Vorkommen kumulieren").
+// the positional Value (LH-FA-DEV-003 "Multi-Flag-Vorkommen kumulieren").
 func TestConfigSet_FeatureSourcesAllow_FlagMergesWithPositional(t *testing.T) {
 	t.Parallel()
 	svc, fs := newConfigService(t)

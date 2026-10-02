@@ -12,7 +12,7 @@
 // templates, YAML, or any embedding library. Callers render the
 // replacement block themselves and ask [Replace] to splice it in.
 // The LH-FA-INIT-005 re-init flow (M3-T4b) consumes this package to
-// support the §611-§614 "only the block is changed" behaviour for
+// support the LH-FA-INIT-005-LH-FA-INIT-005 "only the block is changed" behaviour for
 // structured configuration files (compose.yaml, .env.example,
 // README.md, CHANGELOG.md, .devcontainer/devcontainer.json).
 package managedblock
@@ -112,7 +112,7 @@ var ErrBlockMalformed = errors.New("managed block malformed")
 // if the END line is the last line). The returned offsets are
 // suitable for direct splice into content[:start] + … + content[end:].
 //
-// Marker pairs MUST sit on separate lines (LH-SA-FILE-002 §2099
+// Marker pairs MUST sit on separate lines (LH-SA-FILE-002
 // shows the format that way); a single-line `BEGIN…><…END` is
 // rejected as [ErrBlockMalformed] because the matcher only searches
 // for END after the BEGIN line's terminating newline.

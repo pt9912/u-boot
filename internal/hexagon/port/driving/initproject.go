@@ -35,15 +35,15 @@ type InitProjectRequest struct {
 	SkipGit bool
 
 	// Force enables the managed-block-only edit path for existing
-	// structured-config files per LH-FA-INIT-005 §611–§614: if a
+	// structured-config files per LH-FA-INIT-005–LH-FA-INIT-005: if a
 	// file already contains a `U-BOOT MANAGED BLOCK: init` marker,
 	// only that block is replaced; non-managed content survives.
 	// Without --backup, --force on a file lacking a managed block
-	// aborts with [ErrForceRequiresBackup] (§619).
+	// aborts with [ErrForceRequiresBackup] (LH-FA-INIT-005).
 	Force bool
 
 	// Backup enables backup-then-full-overwrite for existing files
-	// per LH-FA-INIT-005 §605/§607: each affected file is copied to
+	// per LH-FA-INIT-005/LH-FA-INIT-005: each affected file is copied to
 	// `<path>.bak[.N]` (smallest free numeric suffix) and then
 	// overwritten. Combined with --force on a managed-block file,
 	// the backup is still taken even though only the block is
@@ -58,7 +58,7 @@ type InitProjectRequest struct {
 	// CLI flag, never a flag the service sets internally based on
 	// probing the filesystem.
 	//
-	// Init-only flag per LH-FA-CLI-005A §238 ("nicht global, nur für
+	// Init-only flag per LH-FA-CLI-005A ("nicht global, nur für
 	// diesen Befehl"). Load-bearing since the M4 soft-detection slice:
 	// when ≥3 LH-FA-INIT-003 structure elements are present in
 	// BaseDir without a hard marker, AssumeExisting forces the
@@ -67,7 +67,7 @@ type InitProjectRequest struct {
 	AssumeExisting bool
 
 	// NoInteractive disables the user-prompt path in the soft-
-	// existing-detection flow (LH-FA-INIT-004 §247): when set, the
+	// existing-detection flow (LH-FA-INIT-004 LH-FA-CLI-005A): when set, the
 	// service skips the [driven.Confirmer] call entirely and proceeds
 	// as if no soft-detection were triggered. Spec rule: in non-
 	// interactive runs, soft-detection only fires through the
@@ -114,7 +114,7 @@ type InitProjectRequest struct {
 
 	// AllowExternalFeatureSources lists LH-FA-DEV-003 source URLs
 	// that should be appended to `devcontainer.featureSources.allow`
-	// during init (Spec §714). Empty (default) leaves the allowlist
+	// during init (LH-FA-DEV-003). Empty (default) leaves the allowlist
 	// unset. Only valid when [Devcontainer] is true — using the
 	// flag without `--devcontainer` returns [ErrInvalidFeatureSource]
 	// before any write. Slice-v1-devcontainer-features T4.
@@ -178,11 +178,11 @@ type InitProjectResponse struct {
 	// Empty for PreviewNone (no recorder wired) and for true no-ops.
 	// Carries NewContent and OldContent for the CLI-adapter diff
 	// renderer; these two fields stay out of the JSON wire-format via
-	// `json:"-"` (Spec §326 has no place for raw bytes).
+	// `json:"-"` (LH-FA-CLI-007 has no place for raw bytes).
 	PlannedFiles []PlannedFile
 
 	// Changes mirrors PlannedFiles' paths with their line-count
-	// summaries (LH-FA-CLI-007 §365-371). Filled only in preview
+	// summaries (LH-FA-CLI-007). Filled only in preview
 	// modes; nil for PreviewNone. Count semantics follow T0-(g):
 	// create = CountLines(NewContent); modify = sum of `+`-lines via
 	// diff.CountAdditions; delete = 0. Today populated by the CLI-
@@ -224,7 +224,7 @@ var ErrBaseDirMissing = errors.New("base directory does not exist")
 // filesystem error.
 var ErrBackupSourceMissing = errors.New("backup source does not exist")
 
-// ErrBackupSuffixExhausted signals that the LH-FA-INIT-005 §607
+// ErrBackupSuffixExhausted signals that the LH-FA-INIT-005
 // backup-suffix space (<src>.bak through <src>.bak.999) is fully
 // occupied, including after race-retries. A user hitting this has
 // accumulated unusually many stale backups and must clean up
@@ -233,7 +233,7 @@ var ErrBackupSuffixExhausted = errors.New("backup suffix exhausted")
 
 // ErrBackupUnsupportedKind signals that the backup target is neither
 // a regular file nor a regular directory (currently only symlinks
-// trip this). LH-FA-INIT-005 §608 does not specify symlink
+// trip this). LH-FA-INIT-005 does not specify symlink
 // semantics; rejecting is the safe default until a follow-up slice
 // decides between "copy-as-symlink" and "follow-then-copy". Maps to
 // a validation exit code because the user gave the tool an input it
@@ -243,7 +243,7 @@ var ErrBackupUnsupportedKind = errors.New("backup source kind unsupported")
 // ErrForceRequiresBackup signals that --force was used on a file
 // that has no `U-BOOT MANAGED BLOCK: init` marker (or whose template
 // is fully managed without block-only-edit support, e.g. .gitignore,
-// u-boot.yaml). LH-FA-INIT-005 §619 forbids full overwrite without
+// u-boot.yaml). LH-FA-INIT-005 forbids full overwrite without
 // a backup; the user must add --backup to proceed. Maps to a
 // validation exit code (10) per LH-FA-CLI-006.
 var ErrForceRequiresBackup = errors.New("force requires backup")

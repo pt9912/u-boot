@@ -44,7 +44,7 @@ type Confirmer interface {
 	// ConfirmRemoveVolumes asks the user whether `u-boot down
 	// --volumes` should proceed and drop named Compose volumes
 	// alongside the containers. Surfaces the M6 LH-FA-CLI-005A
-	// §254 destructive-confirmation prompt.
+	// LH-FA-CLI-005A destructive-confirmation prompt.
 	//
 	// Returns (true, nil) when the user confirms (the adapter
 	// MUST default-show `N` capitalized, mirroring the
@@ -58,7 +58,7 @@ type Confirmer interface {
 	//
 	// Caller responsibility (slice plan §T5 truth table): the
 	// application service decides *whether* to invoke this method.
-	// LH-FA-CLI-005A §254 requires that `--no-interactive` without
+	// LH-FA-CLI-005A requires that `--no-interactive` without
 	// `--yes` skip the call entirely and return
 	// `driving.ErrConfirmationRequired` directly — the adapter is
 	// NOT expected to surface that case.

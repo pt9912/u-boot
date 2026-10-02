@@ -20,7 +20,7 @@ func TestDownSentinels_Identity(t *testing.T) {
 
 func TestDownSentinels_DistinctFromOthers(t *testing.T) {
 	t.Parallel()
-	// Why: the §254 destructive-abort sentinel must not be
+	// Why: the LH-FA-CLI-005A destructive-abort sentinel must not be
 	// confused with any other driving sentinel. A future refactor
 	// that aliased it to ErrComposeFileMissing or
 	// ErrProjectNotInitialized would silently retarget exit codes.
@@ -61,7 +61,7 @@ func TestDownRequest_FieldsAreOrthogonal(t *testing.T) {
 	// that all eight combinations are representable in the request
 	// struct — a future refactor that collapsed AssumeYes and
 	// NonInteractive into a single tri-state would silently break
-	// the LH-FA-CLI-005A §235 vs. §254 distinction.
+	// the LH-FA-CLI-005A vs. LH-FA-CLI-005A distinction.
 	combinations := []driving.DownRequest{
 		{RemoveVolumes: false, AssumeYes: false, NonInteractive: false},
 		{RemoveVolumes: false, AssumeYes: false, NonInteractive: true},

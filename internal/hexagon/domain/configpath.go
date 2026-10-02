@@ -68,7 +68,7 @@ const (
 	// sources via the special list-path code-route in
 	// [application.ConfigService] (PatchScalar handles scalars only).
 	// `--allow-external-feature-sources` is the canonical write
-	// vector per Spec §712-717.
+	// vector per LH-FA-DEV-003.
 	ConfigDevcontainerFeatureSourcesAllow
 
 	// ConfigDevcontainerUserUID addresses `devcontainer.user.uid`

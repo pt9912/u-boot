@@ -24,14 +24,14 @@ Implementiert von Strukturen in `internal/adapter/driven/`.
   Production-Implementation non-blocking-now bzw. delegierend an
   time.Sleep ist (Convention im Paket-Doc).
 - `ProgressPort` — `AffectedFiles(baseDir, rows)` für die
-  [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)-§609-betroffenen-Pfade-Reports vor jedem
+  [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)-betroffenen-Pfade-Reports vor jedem
   Re-Init-Write. Presentation lebt im Adapter.
 - `Confirmer` — zwei narrow-scoped Methoden (Konvention "explicit
   names per question"):
   - `ConfirmTreatAsExisting(ctx, baseDir, indicators)` für die
     [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen)-Soft-Existing-Detection-Prompts.
   - `ConfirmRemoveVolumes(ctx, baseDir)` für den
-    [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)-§254-destruktive-Confirmation-Pfad von
+    [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)-destruktive-Confirmation-Pfad von
     `u-boot down --volumes`.
 - `Logger` — `Debug`/`Info`/`Warn`/`Error` (variadisch, slog-konform)
   als [`LH-QA-004`](../../../../spec/lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil)-Logging-Port. Production-Adapter slog-basiert.
@@ -48,11 +48,11 @@ Implementiert von Strukturen in `internal/adapter/driven/`.
   (CLI-Code 12) — `errors.Is` survival pin durch kontextuelle
   Application-Wraps (slice §Sentinel-Schichtung). `ComposeUp`
   liefert eine leere `ComposeUpResult` —
-  kein Follow-up `compose ps` mehr, um den §970 fire-and-forget-
+  kein Follow-up `compose ps` mehr, um den [LH-FA-UP-001](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten) fire-and-forget-
   Vertrag bei `--timeout=0` zu wahren.
 - `NetProbe` — `DialTCP(ctx, host, port, timeout)` für die
   Reachability-Probes des UpService-Polling-Loops
-  ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten) §968). `ctx.Err()` hat Vorrang vor Net-Error
+  ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)). `ctx.Err()` hat Vorrang vor Net-Error
   (Adapter nutzt `net.Dialer.DialContext`).
 
 ## Geplante Erweiterungen
