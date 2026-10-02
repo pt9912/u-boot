@@ -60,9 +60,9 @@ der Verfeinerungen fest, an der die übrigen Schnitt-Slices sich orientieren.
 
 | Quelle (Lastenheft) | Ziel (Spezifikation) | Ort |
 |---|---|---|
-| §4.1 LH-FA-CLI-007 (Schema, 320–418) | SPEC-001 | spezifikation.md §2 |
-| §4.1 LH-FA-CLI-007 (Beispielinstanz, 422–441) | SPEC-002 | spezifikation.md §2 |
-| §4.1 LH-FA-CLI-008 (Beispielinstanz, 470–487) | SPEC-003 | spezifikation.md §2 |
-| §4.2 LH-FA-INIT-002 (Normalisierungsschritte 1–7, 518–524) | LH-FA-INIT-002.a | spezifikation.md §1 |
-| §4.2 LH-FA-INIT-006 (regulärer Ausdruck, 640) | SPEC-004 | spezifikation.md §2 |
-| §4.3 LH-FA-DEV-004 (Build-Argument, 734) | LH-FA-DEV-004.a | spezifikation.md §1 |
+| §4.1 [LH-FA-CLI-007](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Schema, 320–418) | [SPEC-001](../../../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) | spezifikation.md §2 |
+| §4.1 [LH-FA-CLI-007](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Beispielinstanz, 422–441) | [SPEC-002](../../../../spec/spezifikation.md#spec-002--beispielinstanz-einer-vorschau-ausgabe-add---dry-run---json) | spezifikation.md §2 |
+| §4.1 [LH-FA-CLI-008](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) (Beispielinstanz, 470–487) | [SPEC-003](../../../../spec/spezifikation.md#spec-003--beispielinstanz-einer-diff-ausgabe-add---diff---json-ohne---dry-run) | spezifikation.md §2 |
+| §4.2 [LH-FA-INIT-002](../../../../spec/lastenheft.md#lh-fa-init-002--projektname) (Normalisierungsschritte 1–7, 518–524) | [LH-FA-INIT-002.a](../../../../spec/spezifikation.md#lh-fa-init-002a--normalisierung-des-abgeleiteten-projektnamens) | spezifikation.md §1 |
+| §4.2 [LH-FA-INIT-006](../../../../spec/lastenheft.md#lh-fa-init-006--projektnamen-validierung) (regulärer Ausdruck, 640) | [SPEC-004](../../../../spec/spezifikation.md#spec-004--projektnamen-muster) | spezifikation.md §2 |
+| §4.3 [LH-FA-DEV-004](../../../../spec/lastenheft.md#lh-fa-dev-004--benutzerrechte) (Build-Argument, 734) | [LH-FA-DEV-004.a](../../../../spec/spezifikation.md#lh-fa-dev-004a--übergabe-der-benutzer-id-an-den-image-build) | spezifikation.md §1 |
