@@ -146,12 +146,6 @@ Priorität: MVP
 
 Das Produkt muss als Kommandozeilenprogramm mit dem Namen `u-boot` aufrufbar sein.
 
-Beispiel:
-
-```bash
-u-boot --help
-```
-
 ### LH-FA-CLI-002 – Hilfeausgabe
 
 Priorität: MVP
@@ -170,12 +164,6 @@ Die Hilfeausgabe muss mindestens enthalten:
 Priorität: MVP
 
 Das Produkt muss die installierte Version ausgeben können.
-
-Beispiel:
-
-```bash
-u-boot --version
-```
 
 ### LH-FA-CLI-004 – Fehlerausgabe
 
@@ -244,28 +232,13 @@ Mindestens:
 - `15` – technischer Ausführungsfehler außerhalb der fachlichen Domäne
 - `16` bis `19` – reserviert (nicht verwenden)
 
-Empfehlung für typische Fehlerzuordnung:
-
-- `10` bei Struktur-, Namens- oder Konfigurationsvalidierungsfehlern
-- `11` bei Umgebungsproblemen (z. B. fehlende Tools, Versionsinkompatibilität)
-- `12` bei Laufzeitfehlern beim Ausführen von Docker/Compose-Operationen
-
-Für alle fachlichen Fehler ist die Verwendung von `10`, `11` oder `12` bindend.
-Nicht-fachliche Fehler dürfen standardmäßig mit `1` codiert werden, wenn eine feinere technische Klassifikation nicht sinnvoll ist.
-`13` bis `15` dürfen zusätzlich verwendet werden, wenn deren Bedeutung für den aufrufenden Kontext explizit dokumentiert ist.
-`16` bis `19` sind in der aktuellen Spezifikation nicht zu verwenden.
+Für alle fachlichen Fehler ist die Verwendung von `10`, `11` oder `12` bindend (`10` Struktur-, Namens- und Konfigurationsvalidierung, `11` Umgebungsprobleme, `12` Laufzeitfehler bei Docker/Compose). Nicht-fachliche Fehler dürfen mit `1` codiert werden, `13` bis `15` nur mit dokumentierter Bedeutung; `16` bis `19` sind nicht zu verwenden.
 
 ### LH-FA-CLI-007 – Dry Run
 
 Priorität: V1
 
 Das Produkt muss für dateiverändernde Befehle einen Dry-Run-Modus unterstützen.
-
-Beispiel:
-
-```bash
-u-boot add postgres --dry-run
-```
 
 Der Dry-Run muss anzeigen, welche Dateien erzeugt, geändert oder gelöscht würden, ohne Änderungen am Dateisystem vorzunehmen.
 
@@ -279,21 +252,13 @@ Bei gruppierten Befehlen wie `command == "template"` oder `command == "config"` 
 
 Weitere Felder sind erlaubt.
 
-Konvention für `diagnostics[*].code`: LH-Kennung der verursachenden Anforderung (z. B. [`LH-FA-DEV-003`](#lh-fa-dev-003--devcontainer-features), [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run)). Tool-interne Codes ohne LH-Bezug dürfen nur dann verwendet werden, wenn ihre Bedeutung in der Dokumentation festgehalten ist.
-
-Das Feld `status` ist an den höchsten in `diagnostics` enthaltenen `level` gekoppelt: enthält `diagnostics` mindestens einen `error`-Eintrag, ist `status == "error"`; enthält es mindestens einen `warn`-Eintrag (und keinen `error`), ist `status == "warn"`; andernfalls `status == "ok"`. Diese Regel gilt für alle `--json`-Ausgaben ([`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](#lh-fa-cli-008--diff-ausgabe), [`LH-NFA-USE-004`](#lh-nfa-use-004--maschinenlesbare-ausgabe)).
+Für `diagnostics[*].code` und die Kopplung von `status` an den höchsten `level` gilt die Regel aus [`LH-NFA-USE-004`](#lh-nfa-use-004--maschinenlesbare-ausgabe).
 
 ### LH-FA-CLI-008 – Diff-Ausgabe
 
 Priorität: V1
 
 Das Produkt soll bei dateiverändernden Befehlen eine Diff-Ausgabe unterstützen.
-
-Beispiel:
-
-```bash
-u-boot add postgres --diff
-```
 
 Die Diff-Ausgabe muss Unterschiede zwischen aktuellem und geplantem Zustand der betroffenen Dateien zeigen.
 
@@ -314,13 +279,7 @@ Für reine Vorschau-Workflows gelten die selben Exit-Codes wie bei der Nicht-Dif
 
 Priorität: MVP
 
-Das Produkt muss mit folgendem Befehl ein neues Projekt initialisieren können:
-
-```bash
-u-boot init
-u-boot init --assume-existing
-```
-
+Das Produkt muss ein neues Projekt mit `u-boot init` initialisieren können (in einem bestehenden Verzeichnis zusätzlich mit `--assume-existing`).
 ### LH-FA-INIT-002 – Projektname
 
 Priorität: MVP
@@ -332,13 +291,6 @@ Wird kein Name explizit angegeben, verwendet das Tool standardmäßig den aktuel
 Der abgeleitete Name wird deterministisch normalisiert:
 
 Kleinbuchstaben, Zeichen außerhalb von `a-z`, `0-9` und `-` werden zu `-`, aufeinanderfolgende `-` zusammengeführt, führende und nachgestellte `-` entfernt, Länge auf 1 bis 63 Zeichen begrenzt; anschließend gilt die Validierung aus [`LH-FA-INIT-006`](#lh-fa-init-006--projektnamen-validierung).
-
-Beispiel:
-
-```bash
-u-boot init
-u-boot init my-service
-```
 
 Ist kein gültiger Name ableitbar oder angegeben, muss der Befehl mit einer klaren Fehlermeldung abbrechen und auf die explizite Übergabe eines Namens (`u-boot init <name>`) verweisen.
 
@@ -376,18 +328,7 @@ Priorität: MVP
 
 Das Produkt muss erkennen, ob es in einem bestehenden Projektverzeichnis ausgeführt wird.
 
-Relevante Dateien sind mindestens:
-
-- `u-boot.yaml`
-- `compose.yaml`
-- `.env.example`
-- `README.md`
-- `CHANGELOG.md`
-- `.gitignore`
-- `docs/`
-- `scripts/`
-- `docker/`
-- `.devcontainer/devcontainer.json`
+Relevante Dateien sind die Projektsteuerdateien (`u-boot.yaml`, `compose.yaml`, `.env.example`) und die Elemente des Mindestumfangs der Projektstruktur ([`LH-FA-INIT-003`](#lh-fa-init-003--projektstruktur-erzeugen)).
 
 Wenn mindestens eine der Projektsteuerdateien (`u-boot.yaml`, `compose.yaml`, `.env.example`) vorhanden ist, ist das Verzeichnis als bestehendes Projekt zu behandeln.
 Liegt keine Projektsteuerdatei vor, gilt das Verzeichnis nur als wahrscheinliches bestehendes Projekt, wenn mindestens drei Elemente aus dem Mindestumfang der Projektstruktur bereits vorhanden sind.
@@ -408,8 +349,7 @@ Standardverhalten ohne Option:
 
 Zusätzliche Strategien über Option:
 
-- `--backup` – bestehende Datei als `<name>.bak` sichern und ersetzen; ist `<name>.bak` bereits vorhanden, wird automatisch `<name>.bak.1`, `<name>.bak.2`, ... verwendet (kleinster freier numerischer Suffix), ohne vorhandene Backups zu überschreiben.
-- Für bestehende Verzeichnisse (z. B. `docs/`, `scripts/`, `docker/`, `.devcontainer/`) wird der komplette Verzeichnisbaum rekursiv als `<name>.bak*` gesichert und innerhalb derselben Operation ersetzt; bei Fehlern während des Ersetzens muss ein Rollback auf den ursprünglichen Zustand durchgeführt werden (POSIX-Atomarität für rekursive Bäume wird nicht garantiert).
+- `--backup` – bestehende Datei (bei Verzeichnissen der gesamte Baum) als `<name>.bak` sichern und ersetzen, ohne vorhandene Backups zu überschreiben (numerische Suffixe); bei Fehlern erfolgt ein Rollback.
 - `--force` – bestehende Dateien ohne Rückfrage überschreiben; vor dem Schreiben muss eine Zusammenfassung der betroffenen Pfade ausgegeben werden
 
 Für strukturierte Konfigurationsdateien bleiben nicht verwaltete Inhalte bei `--force` erhalten; nur ein erkannter `U-BOOT MANAGED BLOCK` wird verändert ([`LH-SA-FILE-002`](#lh-sa-file-002--markierte-verwaltete-bereiche)). Fehlt der verwaltete Block, wird mit `--backup` vor dem vollständigen Überschreiben der gesamte Inhalt gesichert, ohne `--backup` mit Exit-Code `10` abgebrochen.
@@ -456,13 +396,7 @@ Priorität: MVP
 
 Das Produkt muss eine Devcontainer-Konfiguration erzeugen können.
 
-Die Erzeugung muss sowohl bei `u-boot init` über eine Option als auch nachträglich auslösbar sein:
-
-```bash
-u-boot init --devcontainer
-u-boot generate devcontainer
-```
-
+Die Erzeugung muss sowohl bei `u-boot init` über eine Option als auch nachträglich auslösbar sein (`u-boot init --devcontainer` bzw. `u-boot generate devcontainer`).
 Mindestdateien:
 
 ```text
@@ -528,13 +462,7 @@ Priorität: V1
 
 Das Produkt soll ein opt-in Sandbox-Profil für Devcontainer erzeugen können, das den Einsatz autonomer Agenten (ohne Rückfrage an den Menschen) im Container auf Schadensbegrenzung auslegt. Das Profil ist eine Schadensbegrenzung und keine harte Isolationsgrenze.
 
-Aktivierung:
-
-```bash
-u-boot init --devcontainer --sandbox
-u-boot generate devcontainer --sandbox
-```
-
+Aktivierung über das Flag `--sandbox` (bei `u-boot init --devcontainer` und `u-boot generate devcontainer`)
 oder über die Projektkonfiguration `devcontainer.profile: sandbox` (Werte: `default` | `sandbox`, Default `default`). `--sandbox` setzt den Konfigurationsschlüssel; `--sandbox` ohne aktivierbaren Devcontainer führt zu einem fachlichen Fehler (Exit-Code `10`).
 
 Das erzeugte Ergebnis im Sandbox-Profil muss:
@@ -557,7 +485,7 @@ Priorität: V1
 Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll optional eine rootless Container-Runtime im Container bereitgestellt werden, damit Image-Builds ohne Zugriff auf einen Host-Socket möglich sind.
 
 - Konfigurationsschlüssel `devcontainer.sandbox.nestedRuntime` (`podman` | `none`, Default `none`).
-- Bei `podman`: rootless Podman, ein `docker`-Kompatibilitäts-Alias, Zugriff auf `/dev/fuse`, subuid-/subgid-Bereiche für den Container-Benutzer und ein Volume für den Storage.
+- Bei `podman`: rootless Podman mit `docker`-Kompatibilität im Container.
 - Das Ergebnis ist engine-neutral und startet unter Docker (inkl. Colima) und Podman.
 
 **Degradation:** `devcontainer.sandbox.onUnavailable` (`warn` | `fail`, Default `warn`) steuert, ob fehlende Fähigkeiten (kein `/dev/fuse`, blockierte User-Namespaces, nicht gewährbare Egress-Capability) zu einer Warnung mit Fallback bzw. Wegfall der Restriktion oder zu einem Umgebungsproblem (Exit-Code `11`) führen. Eine ausdrücklich angeforderte Runtime wird nie stillschweigend ersetzt; jeder Fallback wird in der Befehlsausgabe und in `u-boot doctor` ausgewiesen. Ungültige Werte der Schlüssel führen zu einem fachlichen Validierungsfehler (Exit-Code `10`).
@@ -572,7 +500,7 @@ Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll eine 
 - Erlaubte Ziele: `devcontainer.sandbox.egress.allow` (Liste von Hostnamen); die Default-Allowlist (gemeinsame Basis plus Ergänzungen je gewähltem Stack) ist dokumentiert.
 - Die Allowlist ist unabhängig von `devcontainer.featureSources.allow` ([`LH-FA-DEV-003`](#lh-fa-dev-003--devcontainer-features)): jene steuert erlaubte Build-Quellen, diese die Laufzeit-Ziele.
 - Die Restriktion ist ein Guardrail und keine Sandbox-Grenze; Prozesse mit der nötigen Capability können sie aufheben. Die Dokumentation muss das ausdrücklich sagen.
-- Ist die nötige Capability nicht gewährbar, greift die Degradationstabelle aus [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer); die Capability wird beim Containerstart geprüft (Warnung und Wegfall der Restriktion, bei `onUnavailable: fail` Exit-Code `11`). `u-boot doctor` prüft die Konfiguration (Schlüssel ohne Sandbox-Profil: `warn`); die Capability selbst ist vom Host aus nicht zuverlässig bestimmbar.
+- Ist die nötige Capability nicht gewährbar, greift die Degradation aus [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (geprüft beim Containerstart; `u-boot doctor` prüft die Konfiguration).
 
 ### LH-FA-DEV-009 – Git-Zugangsdaten im Sandbox-Devcontainer
 
@@ -639,12 +567,7 @@ Das Produkt soll erzeugte Compose-Dateien auf syntaktische Gültigkeit prüfen k
 
 Priorität: MVP
 
-Das Produkt muss Services über folgenden Befehl hinzufügen können:
-
-```bash
-u-boot add <service>
-```
-
+Das Produkt muss Services mit `u-boot add <service>` hinzufügen können.
 Der Befehl ist nur in einem initialisierten `u-boot`-Projekt nutzbar (`u-boot.yaml` vorhanden).  
 Ist keine gültige Projektkonfiguration vorhanden, ist mit klarer Fehlermeldung und Hinweis auf `u-boot init` abzubrechen.
 
@@ -653,12 +576,6 @@ Ist keine gültige Projektkonfiguration vorhanden, ist mit klarer Fehlermeldung 
 Priorität: MVP
 
 Das Produkt muss PostgreSQL als Service hinzufügen können.
-
-Beispiel:
-
-```bash
-u-boot add postgres
-```
 
 Mindestumfang:
 
@@ -673,12 +590,6 @@ Mindestumfang:
 Priorität: V1
 
 Das Produkt muss Keycloak als Service hinzufügen können.
-
-Beispiel:
-
-```bash
-u-boot add keycloak
-```
 
 Mindestumfang:
 
@@ -695,12 +606,6 @@ Mindestumfang:
 Priorität: V1
 
 Das Produkt muss OpenTelemetry-Komponenten hinzufügen können.
-
-Beispiel:
-
-```bash
-u-boot add otel
-```
 
 Mindestumfang:
 
@@ -736,12 +641,6 @@ Bei erkannter Abhängigkeit (z. B. `services.keycloak.persistence: external-post
 Priorität: V1
 
 Das Produkt muss einen Service wieder entfernen können.
-
-Beispiel:
-
-```bash
-u-boot remove postgres
-```
 
 Der Befehl ist nur in einem initialisierten `u-boot`-Projekt nutzbar (`u-boot.yaml` vorhanden).  
 Ist keine gültige Projektkonfiguration vorhanden, ist mit klarer Fehlermeldung und Hinweis auf `u-boot init` abzubrechen.
@@ -779,12 +678,6 @@ Das Produkt muss die Entwicklungsumgebung starten können.
 - Für nicht-TCP oder nicht eindeutig probebare Ports darf `up` nicht mit Fehler abbrechen; es ist ein strukturiertes `warn`-Diagnoseergebnis auszugeben.
 - Mit `--timeout=0` wird auf das Warten verzichtet; `up` beendet nach Initiierung der Compose-Aktionen.
 
-Beispiel:
-
-```bash
-u-boot up
-```
-
 ### LH-FA-UP-002 – Docker Compose verwenden
 
 Priorität: MVP
@@ -810,30 +703,12 @@ Priorität: MVP
 
 Das Produkt muss die Umgebung stoppen können.
 
-Beispiel:
-
-```bash
-u-boot down
-```
-
-Das Produkt muss zwischen einem regulären Stopp (Container stoppen) und einem vollständigen Aufräumen (Container und Volumes entfernen) unterscheiden:
-
-```bash
-u-boot down --volumes
-```
-
+Das Produkt muss zwischen einem regulären Stopp (Container stoppen) und einem vollständigen Aufräumen (Container und Volumes entfernen) unterscheiden (`u-boot down` bzw. `u-boot down --volumes`).
 ### LH-FA-UP-005 – Logs anzeigen
 
 Priorität: V1
 
 Das Produkt soll Logs anzeigen können.
-
-Beispiel:
-
-```bash
-u-boot logs
-u-boot logs postgres
-```
 
 Mindestens müssen folgende Optionen unterstützt werden:
 
@@ -849,12 +724,6 @@ Mindestens müssen folgende Optionen unterstützt werden:
 Priorität: MVP
 
 Das Produkt muss eine Diagnosefunktion bereitstellen.
-
-Beispiel:
-
-```bash
-u-boot doctor
-```
 
 ### LH-FA-DIAG-002 – Lokale Voraussetzungen prüfen
 
@@ -917,12 +786,7 @@ hint: Start Docker or check your user permissions for /var/run/docker.sock.
 
 Priorität: MVP
 
-Das Produkt muss Generatoren über folgenden Befehl anbieten:
-
-```bash
-u-boot generate <artifact>
-```
-
+Das Produkt muss Generatoren mit `u-boot generate <artifact>` anbieten.
 Erlaubte Werte für `<artifact>`:
 
 - `changelog`
@@ -938,35 +802,17 @@ Priorität: MVP
 
 Das Produkt muss ein Changelog erzeugen oder aktualisieren können.
 
-Beispiel:
-
-```bash
-u-boot generate changelog
-```
-
 ### LH-FA-GEN-003 – README erzeugen
 
 Priorität: MVP
 
 Das Produkt muss eine README-Datei erzeugen können.
 
-Beispiel:
-
-```bash
-u-boot generate readme
-```
-
 ### LH-FA-GEN-004 – Beispiel-ENV erzeugen
 
 Priorität: MVP
 
 Das Produkt muss eine `.env.example` erzeugen oder aktualisieren können.
-
-Beispiel:
-
-```bash
-u-boot generate env-example
-```
 
 ### LH-FA-GEN-005 – Idempotenz
 
@@ -990,15 +836,6 @@ Priorität: V1
 
 Das Produkt soll Projektvorlagen unterstützen.
 
-Beispiele:
-
-```bash
-u-boot init --template basic
-u-boot init --template micronaut
-u-boot init --template sveltekit
-u-boot init --template micronaut-sveltekit
-```
-
 ### LH-FA-TPL-002 – Template-Metadaten
 
 Priorität: V1
@@ -1020,23 +857,11 @@ Priorität: Later
 
 Das Produkt soll später eigene lokale Templates unterstützen können.
 
-Beispiel:
-
-```bash
-u-boot init --template ./my-template
-```
-
 ### LH-FA-TPL-004 – Templates auflisten
 
 Priorität: V1
 
 Das Produkt muss verfügbare Templates auflisten können.
-
-Beispiel:
-
-```bash
-u-boot template list
-```
 
 Die Ausgabe muss mindestens enthalten:
 
@@ -1062,13 +887,7 @@ Beispiel:
 u-boot.yaml
 ```
 
-Die Konfiguration muss über den Konfigurationsbefehl gepflegt werden können:
-
-```bash
-u-boot config get project.name
-u-boot config set project.name my-service
-```
-
+Die Konfiguration muss über den Konfigurationsbefehl gepflegt werden können (`u-boot config get` und `u-boot config set`).
 Die Migrationsfunktion ist in [LH-FA-CONF-006](#lh-fa-conf-006--konfiguration-migrieren) separat beschrieben.
 
 ### LH-FA-CONF-002 – Inhalt der Konfiguration
@@ -1108,14 +927,6 @@ Priorität: MVP
 
 Das Produkt muss einen Befehl zum Anzeigen und Ändern der Konfiguration bereitstellen.
 
-Beispiele:
-
-```bash
-u-boot config                       # gesamte Konfiguration anzeigen
-u-boot config get project.name      # einzelnen Wert anzeigen
-u-boot config set project.name foo  # Wert setzen
-```
-
 Beim Setzen muss die geänderte Konfiguration auf Schema-Konformität geprüft werden.
 
 ### LH-FA-CONF-006 – Konfiguration migrieren
@@ -1123,12 +934,6 @@ Beim Setzen muss die geänderte Konfiguration auf Schema-Konformität geprüft w
 Priorität: Later
 
 Das Produkt muss ein Schema-Migrationskommando bereitstellen.
-
-Beispiel:
-
-```bash
-u-boot config migrate
-```
 
 Die Migration muss mit einem klaren Fehler auf unbekannte Zukunftsversionen reagieren und bei Migrationen mit älteren Versionen eine Sicherung anlegen.
 
@@ -1259,63 +1064,27 @@ Abgrenzung zu Zielprojekten: Für per `u-boot init` erzeugte Zielprojekte ist nu
 
 Priorität: MVP
 
-Architecture Decision Records in `docs/plan/adr/` folgen dem vendorten MADR-/Nygard-Template (`.harness/baseline/<tag>/templates/docs/plan/adr/NNNN-titel.template.md`, adoptiert mit Regelwerk-Stand v3.5.1):
-
-- Dateiname mit vierstelliger, nie wiederverwendeter Nummer und Slug; Titel `# ADR <Nr>: <Titel>`.
-- Kopf-Felder als fette Inline-Felder: Status, Datum, Autor, Bezug und Schärft (welche Spec-Stelle die ADR verbindlich macht).
-- Abschnitte in fester Reihenfolge: Kontext, Entscheidung, Verglichene Alternativen, Konsequenzen, Fitness Function, Re-Evaluierungs-Trigger, Geschichte.
-- Abgelöste ADRs bleiben mit dem Status „Superseded by“ und einem Link auf den Nachfolger erhalten.
+Architecture Decision Records in `docs/plan/adr/` folgen dem vendorten MADR-/Nygard-Template des adoptierten Baseline-Regelwerks (`.harness/baseline/<tag>/templates/docs/plan/adr/NNNN-titel.template.md`): vierstellige, nie wiederverwendete Nummer, Kopf-Felder als Inline-Felder (Status, Datum, Autor, Bezug, Schärft) und die vorgeschriebene Abschnittsfolge. Abgelöste ADRs bleiben mit dem Status „Superseded by“ erhalten.
 
 ### LH-FA-PROJDOCS-003 – Planning-Lifecycle
 
 Priorität: MVP
 
-Planning-Artefakte (Slices, Tranchen, Tickets) durchlaufen die Verzeichnisse `open → next → in-progress → done` in dieser Reihenfolge.
+Planning-Artefakte durchlaufen den Lifecycle `open → next → in-progress → done` des adoptierten Baseline-Regelwerks: Übergang per `git mv`, kein Artefakt in mehreren Verzeichnissen, Inhalte in `done/` nur korrigierend änderbar.
 
-- Ein Artefakt darf nicht in mehreren Lifecycle-Verzeichnissen gleichzeitig liegen.
-- Übergänge zwischen Lifecycle-Stufen erfolgen per `git mv` (Move statt Kopie), damit die Datei-Historie erhalten bleibt.
-- Inhalte in `done/` dürfen nachträglich nur korrigierend (Tippfehler, Querverweise, Archiv-Hinweise) verändert werden; substanzielle inhaltliche Änderungen erzeugen ein neues Artefakt in `open/` oder `next/` mit Verweis auf den vorhergehenden Stand.
-- Dateinamen in `planning/` folgen einem der zwei verbindlichen Formate, abhängig vom Artefakttyp:
-  - `slice-<phase>-<kebab-slug>.md` für Slice-Pläne.
-  - `tranche-<nr>-<kebab-slug>.md` für Tranchen-Pläne.
-  Die Wahl zwischen Slice- und Tranchen-Format ist im `README.md` von `docs/plan/planning/` dokumentiert; ein Artefakt verwendet genau eines der beiden Formate.
-- Ausnahme für übergreifende Master-Dokumente: eine `roadmap.md` darf direkt unter `docs/plan/planning/in-progress/` liegen und folgt keinem der beiden Formate. Sie fasst Slices und Tranchen lebendig zusammen und wird laufend gepflegt.
+Dateinamen in `planning/`: `slice-<phase>-<kebab-slug>.md` für Slice-Pläne und `tranche-<nr>-<kebab-slug>.md` für Tranchen-Pläne; die Wahl ist im `README.md` von `docs/plan/planning/` dokumentiert. Übergreifende Master-Dokumente (`roadmap.md`, `carveouts.md`) liegen dauerhaft in `in-progress/` und folgen keinem der beiden Formate.
 
 ### LH-FA-PROJDOCS-005 – Carveout-Disziplin
 
 Priorität: MVP
 
-Jeder **temporäre Carveout** in der u-boot-Codebase muss parallel zu seiner Entstehung einen Slice-Plan in `docs/plan/planning/open/` bekommen, der die Aufhebungsbedingung benennt. Sobald der Slice priorisiert wird, wandert er per `git mv` nach `next/` ([`LH-FA-PROJDOCS-003`](#lh-fa-projdocs-003--planning-lifecycle)).
-
-Als temporärer Carveout zählt insbesondere:
-
-- Bootstrap-Schwellwerte (z. B. `COVERAGE_THRESHOLD=0` bis erste produktive Pakete existieren).
-- Bewusst leere Regelblöcke in Linter-/Tooling-Konfiguration (z. B. `gomodguard_v2.blocked: {}` bis externe Modul-Dependencies vorhanden sind, `depguard rules: {}` in Bootstrap-Phasen).
-- Prospektive Doku-Phrasen ("scharf zu schalten mit M3", "wird mit V1 ergänzt", "Logging-Port kommt später", "Folgepflicht im GitHub-UI").
-- Bewusst weggelassene Pflichten in einem CI-/Build-Setup, deren Aufhebung in einem ADR-Folgepunkt vermerkt ist (z. B. Image-Publish, Image-Scan, Branch-Protection).
-
-Pflichten: Der Slice-Plan nennt Auslöser, Aufhebungsbedingung und Akzeptanzkriterien; jeder temporäre Carveout ist im Master-Inventar (`carveouts.md`) und in der Roadmap als Slice-Zeile sichtbar (doppelte Verankerung); auch Spec-Open-Punkte und ADR-Folgepunkte gelten als temporäre Carveouts.
-
-Permanente Carveouts (z. B. `errcheck.exclude-functions` für CLI-Writes, `testpackage`/`gochecknoglobals` für die Wiring-Schicht `cmd/uboot/`) sind ebenfalls im Master-Inventar zu listen, brauchen aber keinen Aufhebungsplan; sie tragen den Status `permanent` mit kurzer Begründung.
+Jeder temporäre Carveout in der u-boot-Codebase bekommt parallel zu seiner Entstehung einen Slice-Plan in `docs/plan/planning/open/` mit Aufhebungsbedingung (Carveout-Disziplin des adoptierten Baseline-Regelwerks) und ist im Master-Inventar `carveouts.md` und in der Roadmap sichtbar. Als temporärer Carveout zählen auch Bootstrap-Schwellwerte, bewusst leere Regelblöcke in der Tooling-Konfiguration, prospektive Doku-Phrasen und bewusst weggelassene CI-/Build-Pflichten; Spec-Open-Punkte (`LH-OPEN-*`) und ADR-Folgepunkte gelten ebenfalls. Permanente Carveouts stehen mit Begründung im Master-Inventar und brauchen keinen Aufhebungsplan.
 
 ### LH-FA-PROJDOCS-006 – Dokumentationsreferenzmodell
 
 Priorität: V1
 
-Das Lastenheft ist die normative Decke des Projektmodells. Externe
-Normen, Gesetze, Standards, Upstream-Verträge oder Produktvorgaben
-wirken im Repo nur über explizite `LH-*`-Anforderungen normativ.
-
-Normative Kraft existiert nur auf aufwärtsgerichteten
-Inter-Layer-Kanten und auf der ADR-internen Lineage-Kante. Spec-Straten
-referenzieren nicht abwärts auf ADR, Slice, Carveout oder Roadmap/Welle.
-Die ADR deklariert aufwärts, welche `LH-*`- oder Spec-Stellen sie
-begründet oder schärft. Alle Referenzen Richtung Slice, Carveout oder
-Roadmap/Welle sind Planungs-, Traceability- oder Buchführungskontext und
-erzeugen keine Spezifikation.
-
-Pflichten: Das Lastenheft verweist normativ nur auf `LH-*`; technische und Sicht-Specs verweisen aufwärts auf das Lastenheft, nie auf ADRs, Slices, Carveouts oder Roadmap/Wellen; ADRs und Slices dürfen aktive ADRs normativ referenzieren; Carveouts, Slices und Roadmap/Wellen tragen keine normative Ableitungskraft. `docs-check` prüft Link-Pfade, Anker, die Verlinkung der Kennungen und die Referenzmatrix.
-  linkpflichtig, sobald sie eingeführt werden.
+Das Repo wendet das Dokumentationsreferenzmodell (Referenz-Richtung, Decken-Regel) des adoptierten Baseline-Regelwerks an; `docs-check` erzwingt es. Das Lastenheft ist die normative Decke: Externe Normen, Standards und Vorgaben wirken im Repo nur über explizite `LH-*`-Anforderungen normativ.
 
 ### LH-FA-PROJDOCS-004 – Archivierung
 
@@ -1387,15 +1156,6 @@ Priorität: MVP
 
 Befehle müssen sprechend, konsistent und kurz sein.
 
-Beispiele:
-
-```bash
-u-boot init
-u-boot add postgres
-u-boot doctor
-u-boot up
-```
-
 ### LH-NFA-USE-003 – Lesbare Ausgaben
 
 Priorität: MVP
@@ -1407,12 +1167,6 @@ CLI-Ausgaben müssen klar strukturiert und gut lesbar sein.
 Priorität: V1
 
 Das Produkt soll optional maschinenlesbare Ausgabe unterstützen.
-
-Beispiel:
-
-```bash
-u-boot doctor --json
-```
 
 Für `--dry-run`/`--diff`-Kombinationen gilt zusätzlich die JSON-Ausgabe in [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run) und [`LH-FA-CLI-008`](#lh-fa-cli-008--diff-ausgabe).
 
@@ -1594,12 +1348,7 @@ Insbesondere muss der Fortschritt einzelner Services (Pull, Create, Start, Healt
 
 Priorität: MVP
 
-Die CLI soll folgende Grundstruktur verwenden:
-
-```bash
-u-boot <command> [subcommand|args...] [options]
-```
-
+Die CLI soll die Grundstruktur `u-boot <command> [subcommand|args...] [options]` verwenden.
 `subcommand` ist für kommandospezifische Unterbefehle reserviert (z. B. `template`, `config`).
 Positionsargumente (z. B. `postgres`, `project.name`) stehen ebenfalls vor den Optionen.
 

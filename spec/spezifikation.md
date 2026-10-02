@@ -256,56 +256,6 @@ Verfeinert [`LH-FA-PROJDOCS-002`](lastenheft.md#lh-fa-projdocs-002--adr-format).
 
 **Reconciliation.** Titel-Form (`# ADR <Nr>: <Titel>`) und Superseded-Referenz (`<NNNN>-<slug>`, klickbar) folgen der bestehenden u-boot-Konvention, nicht dem Template-Wortlaut (`# ADR-NNNN:` bzw. `Superseded by ADR-NNNN`); die MADR-**Substanz** (Inline-Kopf-Felder, `Schärft`-Aufwärtskopplung, Alternativen/Fitness-Function/Re-Eval/Geschichte) wird übernommen. Die Umstellung ist ein Change Request am Vertrags-Stratum (Trigger: v3.5.1-Adoption).
 
-### LH-FA-PROJDOCS-005.a — Pflichten der Carveout-Disziplin
-
-Verfeinert [`LH-FA-PROJDOCS-005`](lastenheft.md#lh-fa-projdocs-005--carveout-disziplin).
-
-Pflichten:
-
-- Der Slice-Plan folgt der Dateiname-Konvention aus [`LH-FA-PROJDOCS-003`](lastenheft.md#lh-fa-projdocs-003--planning-lifecycle) (`slice-<phase>-<slug>.md`).
-- Der Plan benennt mindestens: Auslöser (was wurde wo bewusst weggelassen), Aufhebungsbedingung (was muss passieren), Akzeptanzkriterien.
-- Wo der Carveout in einer Spec-Anforderung dokumentiert ist (z. B. [`LH-FA-BUILD-008`](lastenheft.md#lh-fa-build-008--coverage-bootstrap) für Coverage-Bootstrap), bleibt die Spec-Anforderung die normative Quelle; der Plan-Verweis lebt im Carveout-Inventar und in der Roadmap.
-- **Doppelte Verankerung:** jeder temporäre Carveout ist sowohl im Carveout-Inventar als auch in der Roadmap als Slice-Zeile sichtbar. Carveouts ohne Roadmap-Eintrag oder Slice-Pläne ohne Carveout-Inventar-Verweis sind Verstoß gegen diese Anforderung.
-- Auch Spec-Open-Punkte (`LH-OPEN-*`) und ADR-Folgepunkte gelten als temporäre Carveouts und brauchen einen Slice-Plan — kein „bleibt offen bis MVP-Closure" als Inventar-Eintrag.
-- Ein Master-Inventar in `carveouts.md` listet alle aktuellen Carveouts mit Status (`temporär` + Plan-Verweis vs. `permanent` + Begründung). Diese Datei lebt analog zur `roadmap.md` dauerhaft in `in-progress/`.
-
-### LH-FA-PROJDOCS-006.a — Pflichten des Dokumentationsreferenzmodells
-
-Verfeinert [`LH-FA-PROJDOCS-006`](lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell).
-
-Pflichten:
-
-- Das Lastenheft darf nur `LH-*`-Anforderungen intern normativ
-  querverweisen. ADRs, Slices, Carveouts und Roadmap/Wellen dürfen im
-  Lastenheft keine Quelle der Normativität sein.
-- Technische oder Sicht-Specs dürfen auf das Lastenheft und innerhalb
-  ihres Stratums referenzieren, aber keine ADRs, Slices, Carveouts oder
-  Roadmap/Wellen als bindenden Text verlinken.
-- ADRs dürfen `LH-*`, betroffene Spec-Stellen und aktive ADRs normativ
-  referenzieren. Superseded ADRs dürfen nur innerhalb der ADR-Lineage als
-  Historie referenziert werden.
-- Slices dürfen `LH-*` und aktive ADRs normativ referenzieren.
-  Slice-zu-Slice-, Slice-zu-Carveout- und Slice-zu-Roadmap-Referenzen
-  sind ausschließlich Kontext.
-- Carveouts dürfen `LH-*` und aktive ADRs normativ referenzieren.
-  Carveout-zu-Slice- und Slice-zu-Carveout-Referenzen sind nur Owner-,
-  Trigger- oder Closure-Buchführung.
-- Roadmap/Wellen orchestrieren Arbeit, tragen aber keine normative
-  Ableitungskraft.
-- `docs-check` muss Markdown-Link-Pfade, Heading-Anker, verlinkte
-  `ADR-*`-Kennungen und die Referenzmatrix für Lastenheft-, ADR-,
-  Spec-, Slice-, Carveout- und Roadmap/Wellen-Artefakte in `docs/`,
-  `spec/`, `harness/` und Root-Markdown prüfen.
-- Die Kennungs-Linkpflicht wird stufenweise aktiviert: `ADR-*` gilt
-  global, `LH-*` gilt in Spec-Straten außerhalb des Lastenhefts, in
-  README-Dateien und in `docs/user/`. Eindeutig auflösbare Slice- und
-  Tranche-IDs gelten in README-Dateien und in `docs/user/`; Markdown-
-  Überschriften sind ausgenommen, damit bestehende Section-Anker stabil
-  bleiben. Konkrete `PH-*`- und `TC-*`-Kennungen in der Traceability-
-  Matrix sind bis zu getrennten Pflichtenheft-/Testfall-Artefakten
-  Traceability-Aliase und verlinken auf die zugehörige `LH-*`-
-  Anforderung derselben Matrixzeile. Konkrete `CO-*`-Kennungen sind
-
 ### LH-NFA-USE-004.a — Regeln für `--json`-Antworten
 
 Verfeinert [`LH-NFA-USE-004`](lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe).
@@ -319,6 +269,65 @@ Für `--json`-Antworten gilt zusätzlich:
 - `status` ist an den höchsten in `diagnostics` enthaltenen `level` gekoppelt: `error` → `status == "error"`; `warn` ohne `error` → `status == "warn"`; sonst `status == "ok"`.
 - Bei `command == "template"` oder `command == "config"` ist `subcommand` verpflichtend.
 - Die Felder `status`, `command`, `diagnostics` und `exitCode` sind minimal verpflichtend und sollten mit anderen Feldern ergänzt werden.
+
+### LH-FA-CLI-006.a — Zuordnung von Fehlern zu Exit-Codes
+
+Verfeinert [`LH-FA-CLI-006`](lastenheft.md#lh-fa-cli-006--exit-codes).
+
+Empfehlung für typische Fehlerzuordnung:
+
+- `10` bei Struktur-, Namens- oder Konfigurationsvalidierungsfehlern
+- `11` bei Umgebungsproblemen (z. B. fehlende Tools, Versionsinkompatibilität)
+- `12` bei Laufzeitfehlern beim Ausführen von Docker/Compose-Operationen
+
+Für alle fachlichen Fehler ist die Verwendung von `10`, `11` oder `12` bindend.
+Nicht-fachliche Fehler dürfen standardmäßig mit `1` codiert werden, wenn eine feinere technische Klassifikation nicht sinnvoll ist.
+`13` bis `15` dürfen zusätzlich verwendet werden, wenn deren Bedeutung für den aufrufenden Kontext explizit dokumentiert ist.
+`16` bis `19` sind in der aktuellen Spezifikation nicht zu verwenden.
+
+### LH-FA-CLI-007.a — Konvention für Diagnose-Codes und Kopplung des Status
+
+Verfeinert [`LH-FA-CLI-007`](lastenheft.md#lh-fa-cli-007--dry-run).
+
+Konvention für `diagnostics[*].code`: LH-Kennung der verursachenden Anforderung (z. B. [`LH-FA-DEV-003`](lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-CLI-007`](lastenheft.md#lh-fa-cli-007--dry-run)). Tool-interne Codes ohne LH-Bezug dürfen nur dann verwendet werden, wenn ihre Bedeutung in der Dokumentation festgehalten ist.
+
+Das Feld `status` ist an den höchsten in `diagnostics` enthaltenen `level` gekoppelt: enthält `diagnostics` mindestens einen `error`-Eintrag, ist `status == "error"`; enthält es mindestens einen `warn`-Eintrag (und keinen `error`), ist `status == "warn"`; andernfalls `status == "ok"`. Diese Regel gilt für alle `--json`-Ausgaben ([`LH-FA-CLI-007`](lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](lastenheft.md#lh-fa-cli-008--diff-ausgabe), [`LH-NFA-USE-004`](lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)).
+
+### LH-FA-INIT-004.a — Relevante Dateien der Projekterkennung
+
+Verfeinert [`LH-FA-INIT-004`](lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen).
+
+Relevante Dateien sind mindestens:
+
+- `u-boot.yaml`
+- `compose.yaml`
+- `.env.example`
+- `README.md`
+- `CHANGELOG.md`
+- `.gitignore`
+- `docs/`
+- `scripts/`
+- `docker/`
+- `.devcontainer/devcontainer.json`
+
+### LH-FA-INIT-005.b — Backup-Verfahren bei `--backup`
+
+Verfeinert [`LH-FA-INIT-005`](lastenheft.md#lh-fa-init-005--überschreibschutz).
+
+- `--backup` – bestehende Datei als `<name>.bak` sichern und ersetzen; ist `<name>.bak` bereits vorhanden, wird automatisch `<name>.bak.1`, `<name>.bak.2`, ... verwendet (kleinster freier numerischer Suffix), ohne vorhandene Backups zu überschreiben.
+- Für bestehende Verzeichnisse (z. B. `docs/`, `scripts/`, `docker/`, `.devcontainer/`) wird der komplette Verzeichnisbaum rekursiv als `<name>.bak*` gesichert und innerhalb derselben Operation ersetzt; bei Fehlern während des Ersetzens muss ein Rollback auf den ursprünglichen Zustand durchgeführt werden (POSIX-Atomarität für rekursive Bäume wird nicht garantiert).
+
+### LH-FA-DEV-007.b — Ausstattung bei `nestedRuntime: podman`
+
+Verfeinert [`LH-FA-DEV-007`](lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer).
+
+- Bei `podman`: rootless Podman, ein `docker`-Kompatibilitäts-Alias, Zugriff auf `/dev/fuse`, subuid-/subgid-Bereiche für den Container-Benutzer und ein Volume für den Storage.
+
+### LH-FA-DEV-008.a — Verhalten bei nicht gewährbarer Capability
+
+Verfeinert [`LH-FA-DEV-008`](lastenheft.md#lh-fa-dev-008--egress-restriktion).
+
+- Ist die nötige Capability nicht gewährbar, greift die Degradationstabelle aus [`LH-FA-DEV-007`](lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer); die Capability wird beim Containerstart geprüft (Warnung und Wegfall der Restriktion, bei `onUnavailable: fail` Exit-Code `11`). `u-boot doctor` prüft die Konfiguration (Schlüssel ohne Sandbox-Profil: `warn`); die Capability selbst ist vom Host aus nicht zuverlässig bestimmbar.
 
 ## 2. Datenstrukturen und Schemas
 
@@ -589,26 +598,6 @@ docs/
 └── user/                     # User-facing Dokumentation
 ```
 
-### SPEC-011 — Format der Architecture Decision Records
-
-- Dateiname beginnt mit vierstelliger Nummer, beginnend bei `0001` und monoton steigend: `0001-<slug>.md`, `0002-<slug>.md`; Slug in Kebab-Case (z. B. `0001-implementierungssprache-go.md`).
-- Dokumenttitel als `#`-Überschrift: `# ADR <Nr>: <Titel>`.
-- Direkt darunter die Kopf-Felder als **fette Inline-Felder** (nicht als `##`-Überschriften):
-  - `**Status:**` – einer aus `Proposed`, `Accepted`, `Deprecated`, `Superseded by <NNNN>-<slug>`.
-  - `**Datum:**` – Entscheidungsdatum im Format `YYYY-MM-DD`.
-  - `**Autor:**` – verantwortliche Rolle oder Person.
-  - `**Bezug:**` – betroffene `LH-*`- und ggf. Vorgänger-ADR-IDs als Markdown-Links (optional, wenn zutreffend).
-  - `**Schärft:**` – welche Spec-Stelle (Abschnitt `§N` der technischen oder der Sicht-Spezifikation) diese ADR verbindlich macht, als Aufwärts-Deklaration der Änderungskopplung (wer die ADR ändert, zieht von hier die Spec-Stellen nach); `—`, wenn Prozess-ADR ohne Spec-Bezug.
-- Danach die Abschnitte, jeweils als `##`-Überschrift, in dieser Reihenfolge:
-  1. `## Kontext` – Ausgangslage, auslösende Anforderung, tragende Annahmen.
-  2. `## Entscheidung` – die Wahl, eindeutig.
-  3. `## Verglichene Alternativen` – Optionen mit Pro/Contra (auch „nichts tun").
-  4. `## Konsequenzen` – kurz- und langfristige Folgen, positiv und negativ, inkl. Folgepflichten.
-  5. `## Fitness Function` – die maschinell prüfbare Regel, falls die Entscheidung sich in einer Code-Eigenschaft niederschlägt (sonst entfällt der Abschnitt).
-  6. `## Re-Evaluierungs-Trigger` – wann die Entscheidung erneut zu prüfen ist.
-  7. `## Geschichte` – Tabelle Datum/Ereignis/Verweis (`Proposed`, `Accepted`, …).
-- ADR-Nummern werden nie wiederverwendet; abgelöste ADRs bleiben mit Status `Superseded by <NNNN>-<slug>` erhalten und verweisen auf den Nachfolger über den vollen Dateinamen-Stamm (ohne `.md`), als klickbaren Link.
-
 ### SPEC-012 — Schichten und Verzeichnislayout unter `internal/`
 
 ```text
@@ -674,6 +663,41 @@ Beispiel:
   "exitCode": 0
 }
 ```
+
+### SPEC-024 — Beispielaufrufe zu den Anforderungen
+
+Beispielaufrufe zu den Anforderungen (zur Veranschaulichung; verbindlich ist die jeweilige Anforderung).
+
+- [LH-FA-CLI-001](lastenheft.md#lh-fa-cli-001--cli-aufruf): `u-boot --help`
+- [LH-FA-CLI-003](lastenheft.md#lh-fa-cli-003--versionsausgabe): `u-boot --version`
+- [LH-FA-CLI-007](lastenheft.md#lh-fa-cli-007--dry-run): `u-boot add postgres --dry-run`
+- [LH-FA-CLI-008](lastenheft.md#lh-fa-cli-008--diff-ausgabe): `u-boot add postgres --diff`
+- [LH-FA-INIT-001](lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren): `u-boot init`, `u-boot init --assume-existing`
+- [LH-FA-INIT-002](lastenheft.md#lh-fa-init-002--projektname): `u-boot init`, `u-boot init my-service`
+- [LH-FA-DEV-001](lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen): `u-boot init --devcontainer`, `u-boot generate devcontainer`
+- [LH-FA-DEV-006](lastenheft.md#lh-fa-dev-006--sandbox-profil): `u-boot init --devcontainer --sandbox`, `u-boot generate devcontainer --sandbox`
+- [LH-FA-ADD-001](lastenheft.md#lh-fa-add-001--add-on-befehl): `u-boot add <service>`
+- [LH-FA-ADD-002](lastenheft.md#lh-fa-add-002--postgresql-hinzufügen): `u-boot add postgres`
+- [LH-FA-ADD-003](lastenheft.md#lh-fa-add-003--keycloak-hinzufügen): `u-boot add keycloak`
+- [LH-FA-ADD-004](lastenheft.md#lh-fa-add-004--opentelemetry-hinzufügen): `u-boot add otel`
+- [LH-FA-ADD-007](lastenheft.md#lh-fa-add-007--service-entfernen): `u-boot remove postgres`
+- [LH-FA-UP-001](lastenheft.md#lh-fa-up-001--umgebung-starten): `u-boot up`
+- [LH-FA-UP-004](lastenheft.md#lh-fa-up-004--umgebung-stoppen): `u-boot down`; `u-boot down --volumes`
+- [LH-FA-UP-005](lastenheft.md#lh-fa-up-005--logs-anzeigen): `u-boot logs`, `u-boot logs postgres`
+- [LH-FA-DIAG-001](lastenheft.md#lh-fa-diag-001--doctor-befehl): `u-boot doctor`
+- [LH-FA-GEN-001](lastenheft.md#lh-fa-gen-001--generate-befehl): `u-boot generate <artifact>`
+- [LH-FA-GEN-002](lastenheft.md#lh-fa-gen-002--changelog-erzeugen): `u-boot generate changelog`
+- [LH-FA-GEN-003](lastenheft.md#lh-fa-gen-003--readme-erzeugen): `u-boot generate readme`
+- [LH-FA-GEN-004](lastenheft.md#lh-fa-gen-004--beispiel-env-erzeugen): `u-boot generate env-example`
+- [LH-FA-TPL-001](lastenheft.md#lh-fa-tpl-001--projektvorlagen): `u-boot init --template basic`, `u-boot init --template micronaut`, `u-boot init --template sveltekit`, `u-boot init --template micronaut-sveltekit`
+- [LH-FA-TPL-003](lastenheft.md#lh-fa-tpl-003--eigene-templates): `u-boot init --template ./my-template`
+- [LH-FA-TPL-004](lastenheft.md#lh-fa-tpl-004--templates-auflisten): `u-boot template list`
+- [LH-FA-CONF-001](lastenheft.md#lh-fa-conf-001--projektkonfiguration): `u-boot config get project.name`, `u-boot config set project.name my-service`
+- [LH-FA-CONF-005](lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern): `u-boot config`, `u-boot config get project.name`, `u-boot config set project.name foo`
+- [LH-FA-CONF-006](lastenheft.md#lh-fa-conf-006--konfiguration-migrieren): `u-boot config migrate`
+- [LH-NFA-USE-002](lastenheft.md#lh-nfa-use-002--klare-befehle): `u-boot init`, `u-boot add postgres`, `u-boot doctor`, `u-boot up`
+- [LH-NFA-USE-004](lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe): `u-boot doctor --json`
+- [LH-SA-CLI-001](lastenheft.md#lh-sa-cli-001--befehlsstruktur): `u-boot <command> [subcommand|args...] [options]`
 
 ## 3. Defaults und Konstanten
 
