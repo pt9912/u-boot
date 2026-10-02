@@ -168,7 +168,7 @@ u-boot generate devcontainer
 ```
 
 External feature sources need an explicit allowlist entry; see
-[`docs/user/devcontainer-features.md`](docs/user/devcontainer-features.md)
+[`docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen`](docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen)
 for the `--allow-external-feature-sources` flow and the
 [LH-NFA-SEC-004](spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) discipline (`--yes` is not sufficient).
 
@@ -183,7 +183,7 @@ For autonomous agents, `u-boot init --devcontainer --sandbox` (or
 `generate devcontainer --sandbox`) renders a sandbox devcontainer: named-volume
 workspace cloned from `origin`, no host bind/socket mount, optional rootless
 Podman ([LH-FA-DEV-006](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)/[LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)/[LH-FA-DEV-009](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)); see
-[`docs/user/devcontainer-sandbox.md`](docs/user/devcontainer-sandbox.md).
+[`docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten`](docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten).
 
 Re-init on an existing project requires an explicit strategy
 (`--force` for managed-block edits, `--backup` for full overwrite with
@@ -269,9 +269,9 @@ Full layout contract: [`LH-FA-BUILD-009` in `spec/lastenheft.md`](spec/lastenhef
 - **Branch protection:**
   [`docs/user/branch-protection.md`](docs/user/branch-protection.md)
 - **Devcontainer features:**
-  [`docs/user/devcontainer-features.md`](docs/user/devcontainer-features.md)
+  [`docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen`](docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen)
 - **Devcontainer sandbox profile:**
-  [`docs/user/devcontainer-sandbox.md`](docs/user/devcontainer-sandbox.md)
+  [`docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten`](docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten)
 - **Machine-readable CLI contract (`--json`, `--dry-run`, `--diff`):**
   [`docs/user/cli-json-output.md`](docs/user/cli-json-output.md)
 - **User documentation:** [`docs/user/`](docs/user/)

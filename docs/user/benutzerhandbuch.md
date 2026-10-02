@@ -51,8 +51,6 @@ grobes Verständnis von Docker Compose genügen.
 Zusätzliche Anleitungen für Spezialthemen:
 
 - [`examples.md`](examples.md) – Beispielabläufe als Kommando-Rezepte
-- [`devcontainer-features.md`](devcontainer-features.md) – Devcontainer-Features
-- [`devcontainer-sandbox.md`](devcontainer-sandbox.md) – Sandbox-Devcontainer für autonome Agenten
 - [`cli-json-output.md`](cli-json-output.md) – maschinenlesbare Ausgabe
 
 ### Voraussetzungen
@@ -356,8 +354,8 @@ project:
 - `--no-git` unterdrückt das Anlegen des Git-Repositories.
 - `--devcontainer` erzeugt zusätzlich `.devcontainer/devcontainer.json` und ein
   `Dockerfile` (siehe 4.9). `--devcontainer --sandbox` erzeugt das
-  Sandbox-Profil (siehe 4.10).
-- `--template <name>` rendert das Projekt aus einer Vorlage (siehe 4.11).
+  Sandbox-Profil (siehe 4.11).
+- `--template <name>` rendert das Projekt aus einer Vorlage (siehe 4.12).
 
 ### 4.2 Ein bestehendes Projekt erneut initialisieren
 
@@ -640,7 +638,7 @@ Byte für Byte erhalten.
   ergänzt `u-boot` höchstens eine fehlende Überschrift `## [Unreleased]`.
 - Ein unbekannter Artefaktname endet mit Exit-Code 2 und nennt die erlaubten
   Namen.
-- `generate devcontainer` hat zusätzliche Optionen (siehe 4.9 und 4.10).
+- `generate devcontainer` hat zusätzliche Optionen (siehe 4.9 bis 4.11).
   `--dry-run` und `--diff` stehen bei allen vier Artefakten zur Verfügung.
 
 ### 4.9 Einen Devcontainer einrichten
@@ -665,14 +663,7 @@ Devcontainer-fähigen Editor (zum Beispiel VS Code) oder die
    u-boot generate devcontainer
    ```
 
-2. Optional: ein Feature aktivieren und neu erzeugen:
-
-   ```bash
-   u-boot config set devcontainer.features.node.enabled true
-   u-boot generate devcontainer
-   ```
-
-3. Optional: eine andere Benutzer-ID im Container (zum Beispiel unter macOS mit
+2. Optional: eine andere Benutzer-ID im Container (zum Beispiel unter macOS mit
    Colima):
 
    ```bash
@@ -688,23 +679,205 @@ ergeben sich aus den aktivierten Diensten.
 
 #### Hinweise
 
-- Verfügbare eingebaute Features: `git`, `docker-cli`, `node`, `java`, `go`,
-  `cpp`, `kubectl-helm`, `postgres-client`. Eine abweichende Version setzen Sie
-  mit `devcontainer.features.<name>.version`.
-- Externe Feature-Quellen brauchen eine ausdrückliche Freigabe in
-  `devcontainer.featureSources.allow` (`--yes` ersetzt sie nicht). Die
-  Einzelheiten stehen in [`devcontainer-features.md`](devcontainer-features.md).
 - Zulässige Benutzer-IDs: 1 bis 65535 (Standard 1000). Die ID 0 (root) wird
-  abgelehnt.
+  abgelehnt (Exit-Code 10). Bei einem anderen Wert als 1000 erzeugt `u-boot` ein
+  Build-Argument `USER_UID` und einen `usermod`-Schritt im Dockerfile; das gilt
+  für beide Profile.
+- Das Standardprofil bindet den Projektordner ein, aber weder das Docker-Socket
+  des Hosts noch Geheimnis-Verzeichnisse wie `~/.ssh` oder `~/.aws`.
 - `u-boot doctor` meldet, wenn `devcontainer.json` und `u-boot.yaml`
   auseinanderlaufen (Warnung); `u-boot generate devcontainer` behebt das.
+- Werkzeuge im Container (Node.js, Java, Go, …) fügen Sie als Features hinzu
+  (siehe 4.10). Für autonome Agenten gibt es ein eigenes Profil (siehe 4.11).
 
-### 4.10 Einen Sandbox-Devcontainer für autonome Agenten einrichten
+### 4.10 Devcontainer-Features nutzen
+
+Features sind Bausteine des Devcontainers (zum Beispiel Node.js oder Go).
+`u-boot` bringt einen Katalog mit und erlaubt externe Quellen nur nach
+ausdrücklicher Freigabe.
 
 #### Voraussetzung
 
-Ein `u-boot`-Projekt, am besten mit einem Git-Remote `origin`. Das Sandbox-Profil
-ist **Schadensbegrenzung, keine harte Isolationsgrenze**.
+Ein Projekt mit Devcontainer (siehe 4.9).
+
+#### Vorgehen
+
+1. Ein Feature aus dem Katalog aktivieren (`config set` akzeptiert `true`,
+   `false`, `1`, `0`):
+
+   ```bash
+   u-boot config set devcontainer.features.node.enabled true
+   ```
+
+2. Optional: eine bestimmte Version festlegen:
+
+   ```bash
+   u-boot config set devcontainer.features.java.enabled true
+   u-boot config set devcontainer.features.java.version 21
+   ```
+
+3. `devcontainer.json` neu erzeugen:
+
+   ```bash
+   u-boot generate devcontainer
+   ```
+
+#### Ergebnis
+
+Das Feature steht im verwalteten Bereich von `.devcontainer/devcontainer.json`:
+
+```jsonc
+// BEGIN U-BOOT MANAGED BLOCK: init
+{
+  "name": "demo",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {}
+  },
+  "remoteUser": "vscode"
+}
+// END U-BOOT MANAGED BLOCK: init
+```
+
+Mit `version 21` heißt der Eintrag `"ghcr.io/devcontainers/features/java:21": {}`.
+In `u-boot.yaml` steht:
+
+```yaml
+devcontainer:
+  enabled: true
+  features:
+    java:
+      enabled: true
+      version: "21"
+```
+
+#### Eingebauter Katalog
+
+Ohne weitere Freigabe aktivierbar. Die Standardversion ist `1`.
+
+| Name | Inhalt |
+|---|---|
+| `git` | Git |
+| `docker-cli` | Docker-CLI (nutzt den Docker des Hosts: „docker-outside-of-docker“) |
+| `node` | Node.js |
+| `java` | Java und SDKMAN |
+| `go` | Go-Toolchain |
+| `cpp` | C++-Toolchain |
+| `kubectl-helm` | kubectl, helm und minikube |
+| `postgres-client` | PostgreSQL-Client |
+
+#### Externe Feature-Quellen freigeben
+
+Jedes Feature außerhalb des Katalogs braucht eine Freigabe in
+`devcontainer.featureSources.allow`. `--yes` ersetzt sie bewusst nicht.
+
+1. Tragen Sie die URL in die Freigabeliste ein. Alle drei Wege sind
+   gleichwertig:
+
+   ```bash
+   # bei init
+   u-boot init --devcontainer \
+     --allow-external-feature-sources https://ghcr.io/orgX/features/custom-rust
+   # vor jedem generate (kann mehrfach angegeben werden)
+   u-boot generate devcontainer \
+     --allow-external-feature-sources https://ghcr.io/orgX/features/custom-rust
+   # direkt per config set; mehrere URLs kommagetrennt
+   u-boot config set devcontainer.featureSources.allow \
+     https://ghcr.io/orgX/features/custom-rust
+   ```
+
+2. Aktivieren Sie das Feature:
+
+   ```bash
+   u-boot config set devcontainer.features.custom-rust.source \
+     https://ghcr.io/orgX/features/custom-rust
+   u-boot config set devcontainer.features.custom-rust.enabled true
+   u-boot generate devcontainer
+   ```
+
+Danach steht in `u-boot.yaml`:
+
+```yaml
+devcontainer:
+  featureSources:
+    allow:
+      - https://ghcr.io/orgX/features/custom-rust
+  features:
+    custom-rust:
+      enabled: true
+      source: https://ghcr.io/orgX/features/custom-rust
+```
+
+Die Freigabeliste wird bei jeder Angabe ergänzt (nicht ersetzt); doppelte
+Einträge werden still ausgelassen. Mehrere Aufrufe in einem `config set` sind
+atomar (siehe Abschnitt 5).
+
+#### Hinweise
+
+- Die Quelle muss **Zeichen für Zeichen** in der Freigabeliste stehen. Ein
+  abschließender Schrägstrich (`https://x/y` gegenüber `https://x/y/`) und die
+  Groß-/Kleinschreibung des Hosts sind entscheidend.
+- Ohne Freigabe endet `config set …source` mit Exit-Code 10:
+  `external source "…" is not in devcontainer.featureSources.allow`. Die
+  Fehlermeldung nennt den passenden `config set`-Befehl.
+- `--allow-external-feature-sources` gibt es nur bei `init --devcontainer`,
+  `generate devcontainer` und `config set …featureSources.allow`; bei anderen
+  Befehlen wird es abgelehnt.
+- Es erscheinen nur Features mit `enabled: true`, sortiert nach Quelle. Dadurch
+  ist die Ausgabe immer gleich, und ein zweiter `generate devcontainer` ändert
+  nichts.
+- Eigene Features aus einem lokalen Verzeichnis (statt einer URL) werden nicht
+  unterstützt.
+
+#### Prüfungen durch `u-boot doctor`
+
+| Schweregrad | Auslöser | Abhilfe |
+|---|---|---|
+| Fehler | `source` ist gesetzt, steht aber nicht in `featureSources.allow` | URL freigeben (siehe oben) |
+| Warnung | Name steht nicht im Katalog und hat keine `source`; er wird beim Erzeugen übersprungen | `source` setzen oder den Eintrag entfernen |
+| Warnung | `enabled:` fehlt bei einem Feature-Eintrag | `enabled` setzen |
+| Warnung | Feature ist aktiv, fehlt aber in `devcontainer.json` (oder die Datei fehlt) | `u-boot generate devcontainer` |
+| Warnung | Feature ist ausgeschaltet, steht aber noch in `devcontainer.json` | `u-boot generate devcontainer` |
+| Warnung | `devcontainer.json` enthält ein Feature, das in `u-boot.yaml` fehlt | Eintrag in `u-boot.yaml` ergänzen oder aus der JSON-Datei entfernen |
+
+Treffen mehrere Befunde zu, zeigt `doctor` den schwersten. Ohne konfigurierte
+Features oder bei nicht lesbarer `u-boot.yaml` oder `devcontainer.json` schweigt
+die Prüfung; dafür sind die Prüfungen `uboot.yaml.valid` und
+`devcontainer.json.valid` zuständig.
+
+#### Beispiel: vollständiger Ablauf
+
+```bash
+mkdir myproj && cd myproj
+u-boot init --devcontainer
+
+u-boot config set devcontainer.features.git.enabled true
+u-boot config set devcontainer.features.node.enabled true
+u-boot config set devcontainer.features.java.enabled true
+u-boot config set devcontainer.features.java.version 21
+
+u-boot config set devcontainer.featureSources.allow \
+  https://ghcr.io/orgX/features/custom-rust
+u-boot config set devcontainer.features.custom-rust.source \
+  https://ghcr.io/orgX/features/custom-rust
+u-boot config set devcontainer.features.custom-rust.enabled true
+
+u-boot generate devcontainer
+u-boot doctor
+```
+
+Ergebnis: `devcontainer.json` mit vier Features, `doctor` ohne Befund.
+
+### 4.11 Einen Sandbox-Devcontainer für autonome Agenten einrichten
+
+Das Sandbox-Profil erzeugt einen Devcontainer, in dem ein autonomer Agent ohne
+Rückfrage arbeiten kann. Es ist **Schadensbegrenzung, keine harte
+Isolationsgrenze**. `u-boot` startet keinen Agenten und setzt keinen
+Berechtigungsmodus.
+
+#### Voraussetzung
+
+Ein `u-boot`-Projekt, am besten mit einem Git-Remote `origin` (oder einer
+konfigurierten Clone-Quelle, siehe unten).
 
 #### Vorgehen
 
@@ -713,59 +886,177 @@ ist **Schadensbegrenzung, keine harte Isolationsgrenze**.
    ```bash
    u-boot init mein-projekt --devcontainer --sandbox     # neues Projekt
    u-boot generate devcontainer --sandbox                # bestehendes Projekt
+   u-boot config set devcontainer.profile sandbox        # alternativ, danach generate
    ```
 
-2. Optional: ein anderes Repository im Container klonen:
+2. Optional: weitere Einstellungen (siehe die folgenden Abschnitte) und danach
+   neu erzeugen:
 
    ```bash
-   u-boot config set devcontainer.sandbox.repository git@github.com:org/anderes-repo.git
    u-boot generate devcontainer
    ```
 
-3. Optional: den Zugriff ins Internet auf eine Liste erlaubter Hosts beschränken:
-
-   ```bash
-   u-boot config set devcontainer.sandbox.egress.enabled true
-   u-boot config set devcontainer.sandbox.egress.allow api.example.org,registry.npmjs.org
-   u-boot generate devcontainer
-   ```
-
-4. Optional: Container-Programme ohne Zugriff auf den Host-Docker (verschachteltes
-   Podman):
-
-   ```bash
-   u-boot config set devcontainer.sandbox.nestedRuntime podman
-   u-boot generate devcontainer
-   ```
-
-5. Zugangsdaten für `https`-Remotes geben Sie zur Laufzeit mit, nicht in Dateien:
+3. Zugangsdaten für `https`-Remotes geben Sie zur Laufzeit mit, nicht in Dateien:
    Setzen Sie vor dem Start des Containers die Umgebungsvariable `GIT_TOKEN` auf
    dem Host.
 
 #### Ergebnis
 
-Der Workspace liegt in einem benannten Volume statt in einem Bind-Mount; das
-Repository wird beim ersten Start im Container geklont. Das Docker-Socket des
-Hosts, `--privileged` und Ihre Geheimnis-Verzeichnisse (`~/.ssh`, `~/.aws`) sind
-**nicht** eingebunden. Mit `nestedRuntime: podman` weist `u-boot` jede nötige
-Lockerung einzeln als Warnung aus; der Schutz ist dann deutlich schwächer als im
-Standardprofil.
+`--sandbox` setzt `devcontainer.profile: sandbox` in `u-boot.yaml`.
+
+| Eigenschaft | Sandbox-Profil | Standardprofil |
+|---|---|---|
+| Workspace | benanntes Volume `<projekt>-workspace-${devcontainerId}`; das Repository wird im Container geklont | Bind-Mount des Projektordners |
+| Docker-Socket des Hosts | nicht eingebunden | nicht eingebunden |
+| `--privileged` und zusätzliche Fähigkeiten | nein (außer mit verschachteltem Podman) | nein |
+| Geheimnis-Verzeichnisse des Hosts (`~/.ssh`, `~/.aws`, …) | nicht eingebunden | nicht eingebunden |
+| Benutzer | `vscode`, nicht root | `vscode`, nicht root |
 
 #### Hinweise
 
 - `--sandbox` ohne `--devcontainer` (bei `init`) oder bei einem anderen Artefakt
   als `devcontainer` (bei `generate`) ist ein Fehler.
-- Repository-Adressen mit Zugangsdaten (`https://token@…`) oder unsicheren
-  Zeichen werden abgelehnt (Exit-Code 10); es wird nichts geschrieben. Erlaubt
-  sind `git@host:pfad`, `ssh://git@host/pfad` und `https://` ohne Benutzerangabe.
-- Verwenden Sie kurzlebige, auf das Repository begrenzte Tokens und schützen Sie
-  wichtige Branches im Remote.
-- Mehrere Instanzen starten Sie aus getrennten Ordnern (Klone oder
-  `git worktree`); jede hat eigene Volumes.
-- Vollständige Beschreibung mit Grenzen und Sonderfällen:
-  [`devcontainer-sandbox.md`](devcontainer-sandbox.md).
 
-### 4.11 Vorlagen nutzen
+#### Clone-Quelle
+
+Der Clone läuft beim ersten Start, nur wenn der Workspace noch leer ist. Quelle
+ist `devcontainer.sandbox.repository`, sonst die Adresse des Remotes `origin`.
+Um im Container ein **anderes Repository** zu bearbeiten und daraus zu pullen und
+zu pushen:
+
+```bash
+u-boot config set devcontainer.sandbox.repository git@github.com:org/anderes-repo.git
+u-boot generate devcontainer
+```
+
+- Weder `repository` noch `origin` vorhanden (zum Beispiel direkt nach `init`):
+  Es gibt keinen Clone-Schritt, `u-boot` warnt. Nach `git remote add origin …`
+  (oder `config set …repository …`) ergänzt `u-boot generate devcontainer` den
+  Schritt.
+- Adressen mit Zugangsdaten oder unsicheren Zeichen (`https://token@…`,
+  `user:pw@`, `;`, `$(…)`) werden abgelehnt (Exit-Code 10); es wird nichts
+  geschrieben. Erlaubt sind `git@host:pfad`, `ssh://git@host/pfad` und `https://`
+  ohne Benutzerangabe.
+- Git-Worktrees und Submodule (`.git` als Datei) gelten als „kein Remote".
+
+#### Verschachteltes Podman (optional)
+
+```bash
+u-boot config set devcontainer.sandbox.nestedRuntime podman
+u-boot generate devcontainer
+```
+
+Im Container läuft dann rootless Podman mit einem `docker`-Alias, sodass
+`docker build` und `docker run` ohne Host-Socket möglich sind. Unter Docker sind
+dafür diese Lockerungen nötig; **`u-boot` weist jede einzeln als Warnung aus**:
+
+```text
+--cap-add=SYS_ADMIN
+--security-opt=seccomp=unconfined
+--security-opt=apparmor=unconfined
+--security-opt=systempaths=unconfined
+--device=/dev/fuse
+```
+
+Das ist nahe an `--privileged`; der Schutz ist damit deutlich schwächer. Das
+Standardprofil (`nestedRuntime: none`) bleibt ungelockert.
+
+Was beim Containerstart passiert, wenn Fähigkeiten fehlen, steuert
+`devcontainer.sandbox.onUnavailable` (`warn` ist der Standard, `fail` bricht ab):
+
+| Zustand | `warn` | `fail` |
+|---|---|---|
+| `/dev/fuse` fehlt | Rückfall auf `vfs`-Speicher, Warnung | Abbruch mit Exit-Code 11 |
+| Verschachtelte User-Namespaces blockiert (Seccomp oder AppArmor) | Abbruch mit Exit-Code 11 | Abbruch mit Exit-Code 11 |
+
+Unter **Ubuntu 24.04** (und auf Hosts mit
+`kernel.apparmor_restrict_unprivileged_userns=1`) blockiert dieser Schalter
+verschachtelte User-Namespaces auch mit `apparmor=unconfined`; der Start endet
+dann mit Exit-Code 11. Abhilfe: auf dem Container-Host
+`sysctl kernel.apparmor_restrict_unprivileged_userns=0` setzen oder
+`nestedRuntime: none` wählen.
+
+`u-boot doctor` prüft `/dev/fuse` nur auf Linux-Hosts. Unter macOS mit Colima
+läuft die Engine in einer VM, die der Host nicht beurteilen kann; dort prüft das
+Startscript im Container.
+
+#### Internet-Beschränkung (Egress)
+
+```bash
+u-boot config set devcontainer.sandbox.egress.enabled true
+u-boot config set devcontainer.sandbox.egress.allow api.example.org,registry.npmjs.org
+u-boot generate devcontainer
+```
+
+Beim Containerstart startet ein lokaler DNS-Server, der **nur erlaubte Namen**
+auflöst. Eine Firewall lässt nur Loopback, bestehende Verbindungen, DNS und die
+Adressen der erlaubten Namen durch; alles andere (IPv6 ganz) wird verworfen. Das
+ist eine Leitplanke, keine Sandbox-Grenze. Der Container braucht dafür die
+Fähigkeit `NET_ADMIN`, die `u-boot` als Lockerung ausweist.
+
+Standardmäßig erlaubt sind:
+
+| Quelle | Hosts |
+|---|---|
+| immer | `github.com`, `api.github.com`, `codeload.github.com`, `raw.githubusercontent.com`, `objects.githubusercontent.com`, `deb.debian.org`, `security.debian.org` |
+| mit `nestedRuntime: podman` | `registry-1.docker.io`, `auth.docker.io`, `production.cloudflare.docker.com`, `ghcr.io` |
+| Feature `node` | `registry.npmjs.org` |
+| Feature `go` | `proxy.golang.org`, `sum.golang.org`, `storage.googleapis.com` |
+| Feature `java` | `repo.maven.apache.org`, `repo1.maven.org` |
+| Clone-Quelle | der Host von `devcontainer.sandbox.repository` beziehungsweise `origin` |
+| Ihre Ergänzungen | `devcontainer.sandbox.egress.allow` (kleingeschriebene Hostnamen, ohne Schema, Port oder Wildcard) |
+
+- **Wichtig:** Die Hosts des Agenten selbst (zum Beispiel dessen API) kennt
+  `u-boot` nicht. Tragen Sie sie in `egress.allow` ein. Subdomains eines
+  erlaubten Namens sind mitgemeint.
+- Nach einer Änderung führen Sie `u-boot generate devcontainer` aus und starten
+  den Container neu.
+- Wer die Fähigkeit hat und das `sudo` des Base-Images nutzen kann, kann die
+  Regeln aufheben. Der Verkehr verschachtelter Podman-Container wird nicht
+  erfasst.
+- Ohne `NET_ADMIN` entfällt die Beschränkung mit einer Warnung (`warn`) oder das
+  Startscript endet mit Exit-Code 11 (`fail`). `u-boot doctor` prüft nur die
+  Konfiguration; ohne Sandbox-Profil ist sie wirkungslos und `doctor` warnt.
+
+#### Git-Zugangsdaten
+
+Zugangsdaten stehen **nie** im Image, im Volume, in `u-boot.yaml` oder in einer
+erzeugten Datei:
+
+- `devcontainer.json` enthält nur die Referenz
+  `"GIT_TOKEN": "${localEnv:GIT_TOKEN}"`. Setzen Sie `GIT_TOKEN` in der
+  Host-Umgebung, bevor Sie den Container starten.
+- Ein Credential-Helper im Image liefert `$GIT_TOKEN` an `git` (nur für
+  `https`-Remotes; bei `ssh` gibt es keinen Schlüssel im Container).
+- Empfohlen: **kurzlebige, auf das Repository begrenzte Tokens**, nie ein
+  privater Schlüssel im Container, und **Branch-Protection** im Remote, damit ein
+  kompromittierter Agent nicht auf geschützte Branches schreiben kann.
+- `u-boot doctor` warnt vor möglichen Klartext-Tokens in `u-boot.yaml`,
+  `compose.yaml`, `.env.example` und `.devcontainer/*` sowie vor einer fehlenden
+  Token-Quelle bei einem `https`-Clone.
+
+#### Mehrere Instanzen
+
+Die Volumes heißen `<projekt>-workspace-${devcontainerId}` und (mit
+verschachteltem Podman) `<projekt>-containers-${devcontainerId}`. Das
+Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
+
+- Parallele Instanzen desselben Projekts starten Sie aus **getrennten Ordnern**
+  (Klone oder `git worktree`); jede Instanz hat eigene Volumes.
+- Derselbe Ordner bleibt eine Instanz.
+- Die Compose-Ports (`u-boot up`) mehrerer Instanzen kollidieren weiterhin.
+- Alte Volumes `<projekt>-workspace` und `<projekt>-containers` aus früheren
+  Entwicklungsständen bleiben verwaist; entfernen Sie sie mit `docker volume rm`.
+
+#### Grenzen
+
+- Geprüft unter Docker auf Linux mit der `devcontainer`-CLI. **Nicht geprüft:**
+  macOS mit Colima, Podman als Host-Engine, VS Code und Codespaces.
+- Der Wechsel von `podman` zurück auf `none` lässt eine vorhandene
+  `sandbox-init.sh` im Ordner liegen; das Dockerfile verwendet sie dann nicht
+  mehr.
+
+### 4.12 Vorlagen nutzen
 
 #### Vorgehen
 
@@ -795,7 +1086,7 @@ basic  Minimal u-boot project skeleton — same files …       0.1.0
   kombinieren.
 - `u-boot template list --json` liefert den Katalog als JSON-Liste.
 
-### 4.12 In Skripten und CI verwenden
+### 4.13 In Skripten und CI verwenden
 
 #### Voraussetzung
 
@@ -1145,7 +1436,7 @@ oder fehlendes `/dev/fuse`.
 1. Lesen Sie die Meldung des Startscripts im Container-Log.
 2. Setzen Sie `devcontainer.sandbox.nestedRuntime` auf `none` und erzeugen Sie
    den Devcontainer neu, wenn Sie kein verschachteltes Podman brauchen.
-3. Weitere Abhilfen stehen in [`devcontainer-sandbox.md`](devcontainer-sandbox.md).
+3. Weitere Abhilfen stehen in Abschnitt [4.11](#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten) unter „Verschachteltes Podman".
 
 ### Wenn nichts davon hilft
 
@@ -1248,9 +1539,9 @@ neuen Stand.
 | `u-boot down` | Umgebung stoppen | 4.5 |
 | `u-boot logs [dienst…]` | Logs ansehen | 4.6 |
 | `u-boot doctor` | Umgebung prüfen | 4.7 |
-| `u-boot generate <artefakt>` | Artefakt erzeugen oder aktualisieren | 4.8–4.10 |
+| `u-boot generate <artefakt>` | Artefakt erzeugen oder aktualisieren | 4.8–4.11 |
 | `u-boot config [get\|set\|list]` | Konfiguration lesen und ändern | 5 |
-| `u-boot template list` | Vorlagenkatalog anzeigen | 4.11 |
+| `u-boot template list` | Vorlagenkatalog anzeigen | 4.12 |
 | `u-boot completion <shell>` | Shell-Vervollständigung erzeugen | 2 |
 
 ### Optionen je Befehl
@@ -1324,8 +1615,6 @@ Sie vorher Passwörter, Tokens und interne Adressen aus der Ausgabe.
 
 - [`examples.md`](examples.md) – Beispielabläufe als Kommando-Rezepte
 - [`cli-json-output.md`](cli-json-output.md) – JSON-Schema und Exit-Code-Matrix
-- [`devcontainer-features.md`](devcontainer-features.md) – Devcontainer-Features
-- [`devcontainer-sandbox.md`](devcontainer-sandbox.md) – Sandbox-Profil für autonome Agenten
 
 **Lizenz:** MIT, siehe `LICENSE` im Projektarchiv.
 

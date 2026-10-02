@@ -172,7 +172,7 @@ u-boot generate devcontainer
 
 Externe Feature-Quellen brauchen einen expliziten Allowlist-
 Eintrag; siehe
-[`docs/user/devcontainer-features.md`](docs/user/devcontainer-features.md)
+[`docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen`](docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen)
 für den `--allow-external-feature-sources`-Fluss und die
 [LH-NFA-SEC-004](spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)-Disziplin (`--yes` reicht nicht).
 
@@ -187,7 +187,7 @@ Für autonome Agenten rendert `u-boot init --devcontainer --sandbox` (bzw.
 `generate devcontainer --sandbox`) einen Sandbox-Devcontainer: Workspace in
 benanntem Volume (Clone aus `origin`), kein Bind-/Socket-Mount, optional
 rootless Podman ([LH-FA-DEV-006](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)/[LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)/[LH-FA-DEV-009](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)); siehe
-[`docs/user/devcontainer-sandbox.md`](docs/user/devcontainer-sandbox.md).
+[`docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten`](docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten).
 
 Re-Init auf einem bestehenden Projekt verlangt eine explizite
 Strategie (`--force` für Managed-Block-Edits, `--backup` für
@@ -280,7 +280,7 @@ Vollständiger Layout-Kontrakt:
 - **Branch Protection:**
   [`docs/user/branch-protection.md`](docs/user/branch-protection.md)
 - **Devcontainer-Features:**
-  [`docs/user/devcontainer-features.md`](docs/user/devcontainer-features.md)
+  [`docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen`](docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen)
 - **Maschinen-lesbarer CLI-Vertrag (`--json`, `--dry-run`, `--diff`):**
   [`docs/user/cli-json-output.md`](docs/user/cli-json-output.md)
 - **User-Dokumentation:** [`docs/user/`](docs/user/)

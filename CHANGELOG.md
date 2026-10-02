@@ -109,7 +109,7 @@ snapshots, `down` volume names, a real `remove --purge`, and a rollback-aware
   credential helper; new `u-boot doctor` checks
   `devcontainer.sandbox.runtime` and `devcontainer.sandbox.credentials`
   and `devcontainer.sandbox.egress` (16 checks in total). See
-  [`docs/user/devcontainer-sandbox.md`](docs/user/devcontainer-sandbox.md).
+  [`docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten`](docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten).
 
 ### Changed
 
@@ -757,7 +757,7 @@ as the canonical machine interface) is satisfied. Details below.
   Doctor-Check `devcontainer.features.allowlist` (Error bei
   Allowlist-Violation, Warn bei Orphan-Activation oder fehlendem
   `enabled:`-Key). User-Doku in
-  [`docs/user/devcontainer-features.md`](docs/user/devcontainer-features.md).
+  [`docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen`](docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen).
 - `feat(doctor): devcontainer.features.drift Check` — über-Spec
   Drift-Erkennung zwischen `u-boot.yaml`'s Features-Map und den
   Keys im gerenderten `.devcontainer/devcontainer.json`. Drei

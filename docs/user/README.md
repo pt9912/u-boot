@@ -11,7 +11,7 @@ Aktuell publiziert:
 
 - [`benutzerhandbuch.md`](benutzerhandbuch.md) — **Einstiegspunkt für Nutzer:**
   aufgabenbasiertes Handbuch (Installation, Erste Schritte, Aufgaben,
-  Konfiguration, Rollen und Rechte, Fehlerbehebung, FAQ, Glossar, Anhang). Folgt
+  Konfiguration, Devcontainer und Sandbox, Rollen und Rechte, Fehlerbehebung, FAQ, Glossar, Anhang). Folgt
   [`benutzerhandbuch-standard.md`](benutzerhandbuch-standard.md).
 - [`benutzerhandbuch-standard.md`](benutzerhandbuch-standard.md) — Vorgabe,
   nach der das Handbuch geschrieben und gepflegt wird.
@@ -20,10 +20,6 @@ Aktuell publiziert:
   Cleanup, Config).
 - [`cli-json-output.md`](cli-json-output.md) — `--json`/`--dry-run`/
   `--diff`-Envelope-Schema und Exit-Code-Matrix pro Subcommand.
-- [`devcontainer-features.md`](devcontainer-features.md) — Devcontainer-
-  Features + Drift-Doctor-Check.
-- [`devcontainer-sandbox.md`](devcontainer-sandbox.md) — Sandbox-Profil
-  (Named-Volume-Workspace, UID, nested Podman, Git-Zugangsdaten).
 - [`quality.md`](quality.md) — Quality-Gate-/Linter-Profil.
 - [`branch-protection.md`](branch-protection.md) — Required-Checks-Setup.
 - [`releasing.md`](releasing.md) — Release-Ablauf für Maintainer (Tag, `publish`,

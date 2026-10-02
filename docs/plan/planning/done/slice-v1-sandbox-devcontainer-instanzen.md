@@ -11,7 +11,7 @@
 (Podman-Storage-Volume). Folge-Slice von
 [`slice-v1-sandbox-devcontainer-umsetzung`](../done/slice-v1-sandbox-devcontainer-umsetzung.md)
 (Abschnitt „Mehrere Instanzen“ in
-[`docs/user/devcontainer-sandbox.md`](../../../user/devcontainer-sandbox.md)).
+[`docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten`](../../../user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten)).
 
 **Autor:** pt9912. **Datum:** 2026-09-30.
 
@@ -67,7 +67,7 @@ ist nicht für gleichzeitigen Zugriff mehrerer Container ausgelegt.
   unterschiedlichem Instanz-Anteil laufen gleichzeitig, schreiben in ihren
   Workspace und führen `podman run` aus, ohne dass sich Volumes oder
   Storage berühren.
-- [x] **Doku:** `docs/user/devcontainer-sandbox.md` §„Mehrere Instanzen“
+- [x] **Doku:** `docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten` §„Mehrere Instanzen“
   auf den neuen Stand, CHANGELOG-Eintrag, `make gates` grün.
 
 ## 3. Plan (vor Code)
@@ -79,7 +79,7 @@ ist nicht für gleichzeitigen Zugriff mehrerer Container ausgelegt.
 | `internal/hexagon/application/devcontainer_sandbox.go`, `templates.go` | update | Volume-Namen / ggf. Config-Key |
 | `internal/e2e/` | neu | Zwei-Instanzen-Test |
 | `spec/lastenheft.md` | ggf. update | nur falls vertragsrelevant (siehe DoD) |
-| `docs/user/devcontainer-sandbox.md`, `CHANGELOG.md` | update | öffentliche Verträge |
+| `docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten`, `CHANGELOG.md` | update | öffentliche Verträge |
 
 ## 4. Trigger
 
