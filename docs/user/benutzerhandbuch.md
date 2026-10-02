@@ -1629,7 +1629,7 @@ im JSON nicht; `--quiet` ändert die JSON-Ausgabe nicht.
 ```
 
 ```json
-{"status":"error","command":"add","diagnostics":[{"level":"error","code":"LH-FA-ADD-002","message":"service not supported: \"redis\" is not in the built-in catalogue [postgres keycloak otel]"}],"exitCode":10}
+{"status":"warn","command":"doctor","diagnostics":[{"level":"warn","code":"uboot.yaml.valid","message":"u-boot.yaml not present — directory is not a u-boot project."}],"exitCode":0}
 ```
 
 **`data` je Befehl:**
@@ -1663,9 +1663,9 @@ Reparaturvorschlag: `command` (der Befehl zum Kopieren), `action` und `argument`
 **Kennungen in `diagnostics[].code`:**
 
 - Prüfungen von `doctor` tragen den Namen der Prüfung (siehe Tabelle).
-- Andere Fehler tragen eine feste Kennung, die je Fehlerklasse stabil bleibt (im
-  zweiten Beispiel oben für einen unbekannten Dienst). Für die Fehlerbehandlung in
-  Skripten genügt in der Regel der `exitCode`.
+- Bei anderen Fehlern ist `code` eine interne Kennung der Fehlerklasse. Werten Sie
+  für die Fehlerbehandlung in Skripten den `exitCode` aus und zeigen Sie `message`
+  an.
 
 | Prüfung (`code`) | Bedeutung |
 |---|---|
