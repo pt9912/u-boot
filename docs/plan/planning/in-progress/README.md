@@ -12,7 +12,7 @@ Dateiname-Konventionen.
 | Datei | Gegenstand |
 | ----- | ---------- |
 | [`carveouts.md`](carveouts.md) | Master-Dokument: Carveout-Inventar ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)) |
-| [`slice-v2-spec-schnitt-cli-init-devcontainer.md`](slice-v2-spec-schnitt-cli-init-devcontainer.md) | Lastenheft-Schnitt 1 (Pilot): §4.1–§4.3, §6.1 (Welle `welle-spec-technik-stratum`) |
+| [`slice-v2-spec-schnitt-addons-betrieb.md`](slice-v2-spec-schnitt-addons-betrieb.md) | Lastenheft-Schnitt 2: §4.4–§4.10 (Welle `welle-spec-technik-stratum`) |
 | [`slice-v2-homebrew-formula.md`](slice-v2-homebrew-formula.md) | Homebrew-Formel/Tap (repo-seitig geliefert, Tap-Einrichtung offen) |
 | [`roadmap.md`](roadmap.md) | Master-Dokument: Slice-/Tranchen-Stand ([`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)) |
 

@@ -1,6 +1,6 @@
 # Slice V2: Lastenheft-Schnitt 2: Docker/Compose, Add-ons, Betrieb, Diagnose, Generatoren, Templates, Konfiguration
 
-> **Status:** **geplant** (`next/`) — startet nach Schnitt 1.
+> **Status:** **in Arbeit** (seit 2026-10-02).
 
 **Welle:** `welle-spec-technik-stratum` (siehe [`roadmap.md`](../in-progress/roadmap.md)).
 **Bezug:** Lastenheft §4.4 Docker/Compose, §4.5 Service-Add-ons, §4.6 Starten und Stoppen, §4.7 Diagnose, §4.8 Generatoren, §4.9 Template-System, §4.10 Konfigurationsdatei (Scope).
