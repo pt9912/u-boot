@@ -99,7 +99,7 @@ func stringSet(keys []string) map[string]struct{} {
 // dedupeFeatureSources returns a copy of in with duplicate entries
 // removed, preserving the first-occurrence order. Whitespace around
 // entries is trimmed before comparison; per
-// `spec/lastenheft.md:1352` the dedupe is silent (no error on
+// LH-FA-CONF-002 the dedupe is silent (no error on
 // duplicates, the second occurrence is dropped).
 //
 // The function does NOT validate the entries — callers should run
@@ -158,7 +158,7 @@ type featureCatalogueEntry struct {
 }
 
 // featureCatalogue lists the built-in devcontainer-feature catalogue
-// per spec/lastenheft.md:692-707 + T0-Outcomes (c). Built-in entries
+// per LH-FA-DEV-003 + T0-Outcomes (c). Built-in entries
 // are aktivierbar without an Allowlist entry — slice-v1-devcontainer-
 // features §AK "Statischer Katalog". External features that don't
 // match any catalogue key must declare a `source:` override and have

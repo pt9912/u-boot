@@ -80,7 +80,7 @@ type templateData struct {
 //
 // Managed reports whether the template wraps its content in a
 // `U-BOOT MANAGED BLOCK: init` marker (LH-SA-FILE-002) of the given
-// Style. Managed templates support the LH-FA-INIT-005–LH-FA-INIT-005
+// Style. Managed templates support the LH-FA-INIT-005
 // block-only re-init path; whole-file-managed templates
 // (Managed=false, e.g. .gitignore) require --backup for re-init
 // because the LH-FA-INIT-005 backup-mandatory rule kicks in unconditionally.

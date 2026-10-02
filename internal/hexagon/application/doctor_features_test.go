@@ -75,7 +75,7 @@ func TestDoctor_FeaturesAllowlist_OKWhenNoUbootYaml(t *testing.T) {
 }
 
 // TestDoctor_FeaturesAllowlist_OKWhenNoFeatures pins
-// `spec/lastenheft.md:2394` (LH-AK-005 erwartetes Ergebnis):
+// LH-AK-005 (LH-AK-005 erwartetes Ergebnis):
 // `u-boot doctor` enthält keinen `error` zu `devcontainer`-
 // Konfiguration oder Feature-Quellen. A fresh `init --devcontainer`
 // produces a u-boot.yaml with `devcontainer.enabled: true` and no

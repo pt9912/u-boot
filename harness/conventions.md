@@ -122,8 +122,8 @@ Baseline still.
 - **Geltungsbereich:** [`AGENTS.md`](../AGENTS.md) Abschnitt Source Precedence,
   [`harness/README.md`](README.md) Abschnitt Source Precedence,
   `.d-check.yml` (Referenzmatrix).
-- **Adaption:** u-boot fuehrt eine 10-Rang-Source-Precedence mit **drei**
-  Spec-Straten nach Baseline-Regelwerk `modul-03-spec.md`:
+- **Adaption:** u-boot fuehrt eine Source-Precedence mit **drei**
+  Spec-Straten an den Raengen 1 bis 3 nach Baseline-Regelwerk `modul-03-spec.md`:
   `contract_spec` ([`spec/lastenheft.md`](../spec/lastenheft.md), Vertrag, das
   *Was*), `tech_spec` ([`spec/spezifikation.md`](../spec/spezifikation.md),
   Technik, das *Wie genau*) und `view_spec`

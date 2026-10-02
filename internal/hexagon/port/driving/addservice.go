@@ -213,7 +213,7 @@ type Hunk struct {
 // add. MVP catalogue: only `postgres`.
 var ErrServiceUnsupported = errors.New("service not supported")
 
-// ErrServiceInconsistent signals an LH-FA-ADD-005-LH-FA-ADD-005 condition:
+// ErrServiceInconsistent signals an LH-FA-ADD-005 condition:
 // a managed `BEGIN/END U-BOOT MANAGED BLOCK: service.<name>` block
 // is present in `compose.yaml` but the matching `services.<name>`
 // entry is missing from `u-boot.yaml` — the YAML anchor has been

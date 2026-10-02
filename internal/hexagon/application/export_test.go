@@ -274,7 +274,7 @@ func ValidateFeatureSourceForTest(raw string) error {
 }
 
 // DedupeFeatureSourcesForTest exposes the T1 silent-dedupe helper so
-// tests can pin `spec/lastenheft.md:1352` (silent dedupe, first-
+// tests can pin LH-FA-CONF-002 (silent dedupe, first-
 // occurrence-order preserved).
 func DedupeFeatureSourcesForTest(in []string) []string {
 	return dedupeFeatureSources(in)

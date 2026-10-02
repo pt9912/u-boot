@@ -60,7 +60,7 @@ type ubootYAMLService struct {
 // (LH-FA-CONF-002, LH-FA-DEV-001, LH-FA-DEV-003). `Enabled` gates the
 // LH-FA-DIAG-002 severity escalation for the devcontainer checks
 // (M5-T7 wires the read). `FeatureSources` is the LH-FA-DEV-003
-// allowlist for external feature sources (spec/lastenheft.md:1340-1353).
+// allowlist for external feature sources (LH-FA-CONF-002).
 // `Features` is the slice-v1-devcontainer-features T0-(b) activation
 // map (Plan-eigene Erweiterung über die Spec hinaus). The pointer
 // types carry three-valued semantics (nil = unset, &false = disabled,
@@ -107,7 +107,7 @@ type ubootYAMLSandboxEgress struct {
 }
 
 // ubootYAMLFeatureSources is the `devcontainer.featureSources:`
-// sub-tree (LH-FA-DEV-003, spec/lastenheft.md:1341-1343). Today only
+// sub-tree (LH-FA-DEV-003, LH-FA-CONF-002). Today only
 // `Allow` is defined — additional sub-keys (e.g. future deny-lists)
 // would be added here with `omitempty`.
 type ubootYAMLFeatureSources struct {
@@ -314,7 +314,7 @@ const (
 	actionWrite fileAction = iota
 	// actionReplaceBlock means the file exists with a
 	// `U-BOOT MANAGED BLOCK: init` marker; splice in the new block
-	// (LH-FA-INIT-005–LH-FA-INIT-005).
+	// (LH-FA-INIT-005).
 	actionReplaceBlock
 	// actionOverwriteFull means the file exists and gets fully
 	// rewritten. Always paired with backup=true in the plan

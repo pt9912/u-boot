@@ -404,7 +404,7 @@ func (s *UpService) classifyOne(ctx context.Context, cs domain.ContainerState, l
 	}
 }
 
-// classifyRunning handles the LH-FA-UP-001–LH-FA-UP-001 matrix:
+// classifyRunning handles the LH-FA-UP-001 matrix:
 //
 //   - Healthcheck required + `healthy` → Stabilized. Declared TCP
 //     ports are still probed (LH-FA-UP-001) but a probe

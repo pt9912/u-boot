@@ -12,7 +12,7 @@
 // templates, YAML, or any embedding library. Callers render the
 // replacement block themselves and ask [Replace] to splice it in.
 // The LH-FA-INIT-005 re-init flow (M3-T4b) consumes this package to
-// support the LH-FA-INIT-005-LH-FA-INIT-005 "only the block is changed" behaviour for
+// support the LH-FA-INIT-005 "only the block is changed" behaviour for
 // structured configuration files (compose.yaml, .env.example,
 // README.md, CHANGELOG.md, .devcontainer/devcontainer.json).
 package managedblock

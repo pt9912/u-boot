@@ -52,8 +52,8 @@ Verfeinert [`LH-FA-DIAG-002`](lastenheft.md#lh-fa-diag-002--lokale-voraussetzung
   (`<major>.<minor>.<patch>`-Bereich 24.0 / 2.20) treffen,
   werden als `Severity: warn` („unrecognized version") emittiert,
   ohne den Exit-Code zu eskalieren. Eine formal getestete
-  Podman-Variante folgt in einem eigenen Slice bei konkretem
-  Bedarf — die heutige MVP-Pflicht ist Docker.
+  Podman-Variante folgt erst bei konkretem Bedarf — die heutige
+  MVP-Pflicht ist Docker.
 
 ### LH-FA-BUILD-001.a — Stages des Multi-Stage-Dockerfiles
 
@@ -388,7 +388,7 @@ docs/
   - `**Datum:**` – Entscheidungsdatum im Format `YYYY-MM-DD`.
   - `**Autor:**` – verantwortliche Rolle oder Person.
   - `**Bezug:**` – betroffene `LH-*`- und ggf. Vorgänger-ADR-IDs als Markdown-Links (optional, wenn zutreffend).
-  - `**Schärft:**` – welche Spec-Stelle (`architecture.md §N`) diese ADR verbindlich macht, als Aufwärts-Deklaration der Änderungskopplung (wer die ADR ändert, zieht von hier die Spec-Stellen nach); `—`, wenn Prozess-ADR ohne Spec-Bezug.
+  - `**Schärft:**` – welche Spec-Stelle (Abschnitt `§N` der technischen oder der Sicht-Spezifikation) diese ADR verbindlich macht, als Aufwärts-Deklaration der Änderungskopplung (wer die ADR ändert, zieht von hier die Spec-Stellen nach); `—`, wenn Prozess-ADR ohne Spec-Bezug.
 - Danach die Abschnitte, jeweils als `##`-Überschrift, in dieser Reihenfolge:
   1. `## Kontext` – Ausgangslage, auslösende Anforderung, tragende Annahmen.
   2. `## Entscheidung` – die Wahl, eindeutig.
@@ -473,9 +473,9 @@ Werte, die im Produkt fest sind (Standardwerte, Grenzwerte, Versionsuntergrenzen
 
 Gilt für das Dockerfile im Repo-Root; Overrides per `docker build --build-arg <NAME>=<value>` bzw. Makefile-Variable.
 
-- `ARG GO_VERSION` – mit Default-Pin (z. B. `1.26.3`); Hebung ist Routine ohne separaten Spec-Eintrag.
+- `ARG GO_VERSION` – mit Default-Pin (Stand 2026-10-02: `1.27.1`); Hebung ist Routine ohne separaten Spec-Eintrag.
 - `ARG GOLANGCI_LINT_VERSION` – mit Default-Pin; gleiche Pin-Politik.
-- `ARG COVERAGE_THRESHOLD` – mit Default `0` (bootstrap) und Override-Pfad `make coverage-gate THRESHOLD=…`.
+- `ARG COVERAGE_THRESHOLD` – mit Default `90` (Prozent) und Override-Pfad `make coverage-gate THRESHOLD=…`; das Bootstrap-Verhalten bei leerer Coverage-Eingabe steht in der Anforderung.
 
 ### SPEC-007 — Mindest-Ausschlüsse der `.dockerignore`
 
@@ -488,9 +488,7 @@ Mindestens auszuschließen:
 
 ### SPEC-016 — Go-Toolchain: Mindestversion und Dockerfile-Pin
 
-Stand zum Entscheidungsdatum 2026-05-21; der aktuelle Pin steht im Dockerfile (`ARG GO_VERSION`).
-
-Mindest-Toolchain: Go 1.26 oder neuer (`go 1.26.0` in `go.mod`, analog Referenzprojekt `k-deskflight`); Default-Pin im Dockerfile als `ARG GO_VERSION` (aktuell `1.26.3`, die aktuelle Stable-Version am Entscheidungsdatum). Pin-Hebung ist Routine ohne separaten Spec-Eintrag.
+Mindest-Toolchain: Go 1.26 oder neuer (`go 1.26.0` in `go.mod`, analog Referenzprojekt `k-deskflight`); Default-Pin im Dockerfile als `ARG GO_VERSION` (am Entscheidungsdatum `1.26.3`, Stand 2026-10-02 `1.27.1`). Pin-Hebung ist Routine ohne separaten Spec-Eintrag.
 
 ### SPEC-018 — Standardwerte der Build- und Laufzeitumgebung
 
@@ -577,7 +575,7 @@ Schnittstellen zu Drittsystemen mit Versionsannahme (Docker, Compose, Devcontain
 ### SPEC-023 — Devcontainer: Basis-Image und Feature-Quellen
 
 - Basis-Image des erzeugten Dockerfiles: `mcr.microsoft.com/devcontainers/base:debian`.
-- Eingebaute Features: `git`, `docker-cli`, `node`, `java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, jeweils als `ghcr.io/devcontainers/features/<name>:<version>` mit der Standardversion `1`; jede andere Quelle gilt als extern und braucht eine Freigabe in `devcontainer.featureSources.allow`.
+- Eingebaute Features (Schlüssel → Quelle unter `ghcr.io/devcontainers/features/`, jeweils mit der Standardversion `1`): `git` → `git`, `docker-cli` → `docker-outside-of-docker`, `node` → `node`, `java` → `java`, `go` → `go`, `cpp` → `cpp`, `kubectl-helm` → `kubectl-helm-minikube`, `postgres-client` → `postgresql-client`. Jede andere Quelle gilt als extern und braucht eine Freigabe in `devcontainer.featureSources.allow`.
 - Externe Feature-Quellen müssen als URL mit Schema `http://`, `https://` oder `oci://` angegeben werden.
 
 ## 7. Historie

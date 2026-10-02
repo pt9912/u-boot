@@ -118,7 +118,7 @@ func newUpCommand(a *App) *cobra.Command {
 		Long: `Bring the Compose environment defined in compose.yaml up via
 docker compose up -d, then poll docker compose ps every 500ms until
 every declared service reaches healthy (when a healthcheck is defined)
-or running (when no healthcheck). LH-FA-UP-001-LH-FA-UP-001 stabilization.
+or running (when no healthcheck). LH-FA-UP-001 stabilization.
 
 Stabilization semantics per LH-FA-UP-001:
   - --timeout <sec>      maximum wait (default 60). Negative ⇒ exit 2.

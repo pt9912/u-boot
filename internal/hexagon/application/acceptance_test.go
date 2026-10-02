@@ -168,7 +168,7 @@ func TestLHAK006_DoubleAddPostgres_NoDuplicate(t *testing.T) {
 }
 
 // TestLHFADEV003_CatalogueActivation pins `LH-FA-DEV-003` happy
-// path (spec/lastenheft.md:692-721 + slice-v1-devcontainer-features
+// path (LH-FA-DEV-003 + slice-v1-devcontainer-features
 // AK „Spec-Pin"):
 //
 //	u-boot init --devcontainer
@@ -234,7 +234,7 @@ func TestLHFADEV003_CatalogueActivation(t *testing.T) {
 }
 
 // TestLHFADEV003_AllowlistEnforcement pins `LH-FA-DEV-003` negative
-// path (spec/lastenheft.md:720, LH-NFA-SEC-004): an attempt to
+// path (LH-FA-DEV-003, LH-NFA-SEC-004): an attempt to
 // register a `features.<name>.source` URL that is not in
 // `featureSources.allow` fails with [driving.ErrConfigValueInvalid]
 // (LH-FA-CLI-006 exit-code 10). The seed via

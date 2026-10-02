@@ -898,7 +898,7 @@ func (s *ConfigService) checkProjectInitialized(baseDir string) error {
 // `devcontainer.featureSources.allow`. The value is parsed as a
 // comma-separated list of URLs, each entry runs through
 // [validateFeatureSource], the resulting set is appended to the
-// existing list with silent-dedupe per spec/lastenheft.md:1352, and
+// existing list with silent-dedupe per LH-FA-CONF-002, and
 // the whole config is marshal-rewritten back to u-boot.yaml.
 //
 // Unlike the scalar PatchScalar path, this branch loses comment

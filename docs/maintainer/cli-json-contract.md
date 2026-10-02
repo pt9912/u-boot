@@ -12,15 +12,12 @@
 ## Zweck
 
 Vertragsdokument für die maschinen-lesbare CLI-Ausgabe von u-boot.
-Spec-Pflichtkontrakte aus dem Lastenheft sind hier verbatim
+Die Pflichtkontrakte aus Lastenheft und Spezifikation sind hier
 zitiert; die zugehörige Code-Lokation im Repo, die Spec-konformen
 Diagnostic-Codes und die Migrations-Reihenfolge der 10 Spec-Enum-
 Subcommands sind als verbindliche Quellen dokumentiert.
 
-Die Pflichtaussagen leben im Lastenheft ([LH-FA-ARCH-003](../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)..[LH-NFA-USE-002](../../spec/lastenheft.md#lh-nfa-use-002--klare-befehle) für
-[LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe),
-[LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) für [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run),
-[LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) für [LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)).
+Die Pflichtaussagen leben im Lastenheft: [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) (Minimalkontrakt), [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Vorschau-Ausgabe) und [LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) (Diff-Ausgabe). Das JSON-Schema und die Beispielinstanzen führt die Spezifikation ([SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) bis [SPEC-003](../../spec/spezifikation.md#spec-003--beispielinstanz-einer-diff-ausgabe-add---diff---json-ohne---dry-run), [SPEC-015](../../spec/spezifikation.md#spec-015--beispielinstanz-einer-minimalkontrakt-ausgabe-doctor---json)) in `spec/spezifikation.md`.
 Dieses Dokument ist die Detail-Doku für CLI-Konsumenten und für
 den Test-Helper [`internal/adapter/driving/cli/jsontestutil/`](../../internal/adapter/driving/cli/).
 
@@ -33,14 +30,14 @@ abgewogen und verworfen.
 
 ## 1. Zwei Kontraktstufen — wann gilt was?
 
-[LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) ([LH-NFA-USE-001](../../spec/lastenheft.md#lh-nfa-use-001--verständliche-bedienung)..[LH-NFA-USE-002](../../spec/lastenheft.md#lh-nfa-use-002--klare-befehle)) trennt zwei Vertragsstufen, die
+[LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) trennt zwei Vertragsstufen, die
 **beide** im selben Wire-Format (`cliJSONEnvelope`, siehe §4)
 gerendert werden:
 
 | Aufruf-Modus | Pflicht-Vertrag | Spec |
 | --- | --- | --- |
-| `u-boot <cmd> --json` (read-only oder ohne Dry-Run/Diff) | **Minimalkontrakt** (§2) | [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) [LH-NFA-USE-001](../../spec/lastenheft.md#lh-nfa-use-001--verständliche-bedienung) |
-| `u-boot <cmd> --dry-run --json` | **Voll-Schema** (§3) | [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) [LH-NFA-USE-002](../../spec/lastenheft.md#lh-nfa-use-002--klare-befehle) |
+| `u-boot <cmd> --json` (read-only oder ohne Dry-Run/Diff) | **Minimalkontrakt** (§2) | [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) |
+| `u-boot <cmd> --dry-run --json` | **Voll-Schema** (§3) | [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) |
 | `u-boot <cmd> --diff --json` (mit oder ohne `--dry-run`) | **Voll-Schema** (§3) | [LH-FA-CLI-008](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) |
 
 Voll-Schema ist eine **Obermenge** des Minimalkontrakts: zusätzlich
@@ -51,7 +48,7 @@ der Test-Helper `AssertMinimalEnvelope` rejected sie aktiv.
 
 ---
 
-## 2. Minimalkontrakt ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) LH-FA-ARCH-003..LH-NFA-USE-002)
+## 2. Minimalkontrakt ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe))
 
 Verbatim-Zitat des Lastenhefts:
 
@@ -127,10 +124,10 @@ liefert einen **semantisch identischen** Envelope wie
 
 ---
 
-## 3. Voll-Schema ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) LH-FA-CLI-007)
+## 3. Voll-Schema ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run))
 
-Voll-Schema gilt für `--dry-run --json` und `--diff --json`. Verbatim-
-Zitat des Lastenhefts:
+Voll-Schema gilt für `--dry-run --json` und `--diff --json`. Zitat
+der Spezifikation ([SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json)):
 
 ```json
 {
@@ -303,7 +300,7 @@ Architektur-Grenze: Envelope-Type und Helper leben im **CLI-Adapter**,
 
 ## 5. Code-Registry für `diagnostics[].code`
 
-[LH-NFA-USE-001](../../spec/lastenheft.md#lh-nfa-use-001--verständliche-bedienung) ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)) erlaubt für `diagnostics[].code`
+[LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) erlaubt für `diagnostics[].code`
 zwei Quellen: **(a)** LH-Kennung der verursachenden Anforderung
 (z. B. [LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)), oder **(b)** tool-interne
 Codes, falls ihre Bedeutung **in der Dokumentation festgehalten**
@@ -319,16 +316,11 @@ rejected `diagnostics[].code`-Werte außerhalb. Drift-Schutz
 - **Gate 1** (Code ↔ Map): Unit-Test prüft, dass jede
   `checkID*`-Konstante aus [`internal/hexagon/application/doctor.go`](../../internal/hexagon/application/doctor.go)
   einen Map-Eintrag hat.
-- **Gate 2** (Map ↔ Doku): Unit-Test parst diese Tabelle und
-  vergleicht sie symmetrisch gegen die Map. Bricht in beide Drift-
+- **Gate 2** (Map ↔ Doku): Unit-Test parst die Registry-Tabelle der
+  Spezifikation und vergleicht sie symmetrisch gegen die Map. Bricht in beide Drift-
   Richtungen.
 
 ### 5.1 Doctor-Checks
-
-Die folgenden Codes sind die kanonische Quelle für Gate 2 (Map ↔
-Markdown). Die Markdown-Tabelle ist zwischen den HTML-Markern
-eingegrenzt — Folge-Slices fügen weitere Tabellen für ihre eigenen
-Subcommand-Codes an, ohne den Doctor-Block zu berühren.
 
 Die kanonische Code-Registry steht in der Spezifikation ([SPEC-017](../../spec/spezifikation.md#spec-017--diagnose-codes-der-doctor-prüfungen-code-registry)).
 
@@ -340,7 +332,7 @@ Weitere Subcommand-Sektionen kommen mit den jeweiligen Folge-Slices
 ## 6. Per-Command-Migrations-Reihenfolge
 
 Spec-Enum ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)) listet zehn Subcommands; alle
-sollen `--json` tragen ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) [LH-FA-ARCH-003](../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)). Migration läuft
+sollen `--json` tragen ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)). Migration läuft
 **inkrementell** über neun Folge-Slices unterhalb des Cluster-
 Slices [`slice-v1-cli-json-dry-run`](../plan/planning/done/slice-v1-cli-json-dry-run.md);
 Reihenfolge gemäß Cluster-T0-(e):

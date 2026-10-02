@@ -71,7 +71,7 @@ func TestValidateFeatureSource(t *testing.T) {
 }
 
 // TestDedupeFeatureSources pins the silent-dedupe contract from
-// `spec/lastenheft.md:1352`: duplicates are dropped silently,
+// LH-FA-CONF-002: duplicates are dropped silently,
 // first-occurrence order is preserved, whitespace is trimmed before
 // comparison.
 func TestDedupeFeatureSources(t *testing.T) {
@@ -303,7 +303,7 @@ devcontainer:
 
 // TestFeatureCatalogue_KeysCoverSpecExamples pins that the built-in
 // catalogue lists at minimum the Spec-Beispiele from
-// spec/lastenheft.md:698-707. A breaking change to this list is a
+// LH-FA-DEV-003. A breaking change to this list is a
 // breaking change to the AK "Statischer Katalog" — review intent
 // before relaxing.
 func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {

@@ -323,7 +323,7 @@ Der Dry-Run muss anzeigen, welche Dateien erzeugt, geändert oder gelöscht wür
 
 Bei gleichzeitiger Verwendung von `--dry-run` und `--json` muss die Ausgabe streng maschinenlesbar (`JSON`) erfolgen und keine unstrukturierten Text-UI-Zeilen enthalten.
 
-Für `--dry-run --json` ist die Ausgabe als maschinenlesbares JSON mit mindestens den Pflichtfeldern `status`, `command`, `dryRun`, `diff`, `plannedFiles`, `changes`, `diagnostics` und `exitCode` zu liefern. Jeder Eintrag in `plannedFiles` trägt `path` und `action` (`create`, `modify` oder `delete`), jeder Eintrag in `changes` trägt `path` und `count`, jeder Eintrag in `diagnostics` trägt `level` (`warn` oder `error`), `code` und `message` (optional `file`).
+Für `--dry-run --json` ist die Ausgabe als maschinenlesbares JSON mit mindestens den Pflichtfeldern `status`, `command`, `dryRun`, `diff`, `plannedFiles`, `changes`, `diagnostics` und `exitCode` zu liefern; `command` ist einer der Werte `init`, `add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config` oder `template`. Jeder Eintrag in `plannedFiles` trägt `path` und `action` (`create`, `modify` oder `delete`), jeder Eintrag in `changes` trägt `path` und `count`, jeder Eintrag in `diagnostics` trägt `level` (`warn` oder `error`), `code` und `message` (optional `file`).
 
 Bei gruppierten Befehlen wie `command == "template"` oder `command == "config"` muss das Feld `subcommand` gesetzt sein (z. B. `list`, `get`, `set`).
 
@@ -1455,7 +1455,7 @@ Vorlage: die Referenzprojekte `k-deskflight` und `grid-gym` (Basis-Pattern: arch
 
 Priorität: MVP
 
-Das u-boot-Repo muss eine `docs/`-Unterstruktur bereitstellen: `docs/` enthält die Unterverzeichnisse `archive/`, `plan/adr/`, `plan/planning/` (mit `open/`, `next/`, `in-progress/`, `done/`) und `user/`; weitere Unterverzeichnisse sind zulässig.
+Das u-boot-Repo muss `docs/` mit den Unterverzeichnissen `archive/`, `plan/adr/`, `plan/planning/` (mit `open/`, `next/`, `in-progress/`, `done/`) und `user/` bereitstellen; weitere Unterverzeichnisse sind zulässig.
 
 Jedes Unterverzeichnis muss mindestens eine `README.md` mit kurzer Zweckbeschreibung enthalten, damit Git die Struktur trackt und Newcomer den Verzeichnisstandard ohne externe Erklärung erfassen können. `.gitkeep` ist als Ersatz unzureichend, weil er den Zweck nicht kommuniziert.
 
@@ -1611,7 +1611,7 @@ Pflichten:
 
 Priorität: MVP
 
-Das u-boot-Repo muss Schichten unter `internal/` bereitstellen: Unter `internal/` liegen die Schichten `hexagon` (mit `domain`, `application` und `port/driving`, `port/driven`) und `adapter` (mit `driving` und `driven`).
+Das u-boot-Repo muss unter `internal/` die Schichten `hexagon` (mit `domain`, `application` und `port/driving`, `port/driven`) und `adapter` (mit `driving` und `driven`) bereitstellen.
 
 Die Wiring-Schicht (`cmd/uboot/`) ist die einzige Stelle, an der `application` und `adapter` zusammen importiert werden dürfen.
 
@@ -1961,9 +1961,7 @@ Priorität: MVP
 
 Automatisch verwaltete Bereiche in Dateien sollen markiert werden.
 
-Markierungsformat:
-
-Der Anfang eines verwalteten Bereichs trägt die Markierung `BEGIN U-BOOT MANAGED BLOCK: <name>`, das Ende `END U-BOOT MANAGED BLOCK: <name>`; die Markierung steht als Kommentar der jeweiligen Dateiart (`#` bei YAML, `.env`, `Dockerfile` und Shell-Skripten, HTML-Kommentar bei Markdown, `//` bei JSONC).
+Markierungsformat: Der Anfang eines verwalteten Bereichs trägt die Markierung `BEGIN U-BOOT MANAGED BLOCK: <name>`, das Ende `END U-BOOT MANAGED BLOCK: <name>`; die Markierung steht als Kommentar der jeweiligen Dateiart (`#` bei YAML, `.env`, `Dockerfile` und Shell-Skripten, HTML-Kommentar bei Markdown, `//` bei JSONC).
 
 - Strikte JSON-Dateien ohne Kommentar-Support werden nicht inline markiert; die gesamte Datei gilt als verwaltet, und der verwaltete Status ist in `u-boot.yaml` zu hinterlegen.
 
@@ -2083,9 +2081,7 @@ Priorität: MVP
 
 Das u-boot-Repo muss eine CI-Pipeline auf GitHub Actions führen.
 
-Pflicht-Komposition:
-
-Die Pipeline läuft bei `pull_request` und `push` auf `main` in drei parallelen, PR-blockierenden Jobs: Gates (`make gates`), Security-Gates (`make govulncheck`) und Image-Scan (`make image-scan`, Trivy gegen das Runtime-Image, Severity HIGH und CRITICAL). Die PR-Blocking-Pflicht aller drei folgt aus diesem Eintrag, auch wenn die Make-Target-Definitionen unter [`LH-FA-BUILD-006`](#lh-fa-build-006--aggregator-targets) liegen. Der Runner braucht nur Docker und BuildKit, keine Host-Go-Toolchain ([`LH-FA-BUILD-007`](#lh-fa-build-007--docker-only-workflow)); Actions sind gepinnt, Token-Rechte minimal gehalten und jeder Job hat ein Zeitlimit. Die Required-Status-Check-Liste im GitHub-UI muss die tatsächlichen Job-Namen des Workflows verwenden.
+Pflicht-Komposition: Die Pipeline läuft bei `pull_request` und `push` auf `main` in drei parallelen, PR-blockierenden Jobs: Gates (`make gates`), Security-Gates (`make govulncheck`) und Image-Scan (`make image-scan`, Trivy gegen das Runtime-Image, Severity HIGH und CRITICAL). Die PR-Blocking-Pflicht aller drei folgt aus diesem Eintrag, auch wenn die Make-Target-Definitionen unter [`LH-FA-BUILD-006`](#lh-fa-build-006--aggregator-targets) liegen. Der Runner braucht nur Docker und BuildKit, keine Host-Go-Toolchain ([`LH-FA-BUILD-007`](#lh-fa-build-007--docker-only-workflow)); Actions sind gepinnt, Token-Rechte minimal gehalten und jeder Job hat ein Zeitlimit. Die Required-Status-Check-Liste im GitHub-UI muss die tatsächlichen Job-Namen des Workflows verwenden.
 
 ---
 

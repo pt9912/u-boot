@@ -111,7 +111,7 @@ a [name] argument is given.
 
 Re-running init on an existing project requires --force (managed-block
 only edit) or --backup (full overwrite with safety copy), per
-LH-FA-INIT-005–LH-FA-INIT-005.
+LH-FA-INIT-005.
 
 Soft-existing-detection (LH-FA-INIT-004): when BaseDir lacks the
 hard markers (u-boot.yaml / compose.yaml / .env.example) but already

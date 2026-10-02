@@ -407,7 +407,7 @@ func TestTemplateNames_AreSorted(t *testing.T) {
 	}
 }
 
-// --- T4b: Re-Init with --force / --backup (LH-FA-INIT-005–LH-FA-INIT-005) ---
+// --- T4b: Re-Init with --force / --backup (LH-FA-INIT-005) ---
 
 // seedManagedBlockFile writes a synthetic file that already contains a
 // canonical `U-BOOT MANAGED BLOCK: init` (hash style), plus user
@@ -422,7 +422,7 @@ func seedManagedBlockFile(t *testing.T, fs *fakeFS, path, marker, userContent st
 }
 
 func TestInit_Force_ManagedBlock_ReplacesOnlyBlock(t *testing.T) {
-	// Why: LH-FA-INIT-005–LH-FA-INIT-005 — non-managed content must survive
+	// Why: LH-FA-INIT-005 — non-managed content must survive
 	// --force when a marker block is present.
 	svc, fs, _, _ := newService(t)
 	composePath := filepath.Join(testBaseDir, "compose.yaml")

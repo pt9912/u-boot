@@ -254,20 +254,23 @@ Für den Bau aus den Quellen ([LH-FA-BUILD-007](spec/lastenheft.md#lh-fa-build-0
 ├── internal/           # hexagonales Layout (siehe spec/architecture.md)
 │   ├── hexagon/{domain,application,port/{driving,driven}}/
 │   └── adapter/{driving,driven}/
-├── spec/               # Lastenheft + Architektur-Spezifikation
+├── spec/               # Lastenheft (Vertrag), Spezifikation (Technik), Architektur (Sicht)
 ├── docs/               # ADRs, Planning, User-Doku (LH-FA-PROJDOCS-001)
 ├── Dockerfile          # Multi-Stage-Build (LH-FA-BUILD-001)
 ├── Makefile            # Docker-only-Workflow (LH-FA-BUILD-005)
 └── go.mod
 ```
 
-Vollständiger Layout-Kontrakt:
-[`LH-FA-BUILD-009` in `spec/lastenheft.md`](spec/lastenheft.md).
+Layout-Anforderung:
+[`LH-FA-BUILD-009`](spec/lastenheft.md#lh-fa-build-009--repository-layout); das Mindestlayout im Detail steht in
+[`spec/spezifikation.md`](spec/spezifikation.md).
 
 ## Dokumentation
 
-- **Lastenheft** (verbindliche Spezifikation):
+- **Lastenheft** (verbindlicher Vertrag):
   [`spec/lastenheft.md`](spec/lastenheft.md)
+- **Spezifikation** (technische Details, präzisiert das Lastenheft):
+  [`spec/spezifikation.md`](spec/spezifikation.md)
 - **Architektur-Spezifikation:**
   [`spec/architecture.md`](spec/architecture.md) (hexagonales
   Pattern, Schicht-Regeln, Podman-Drop-in §2.4)

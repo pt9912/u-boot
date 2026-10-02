@@ -36,7 +36,7 @@ const (
 	// StateRunning is the main happy path. The stabilization
 	// classifier then looks at the service's healthcheck and TCP
 	// port to decide between [OutcomeStabilized] and
-	// [OutcomeRunningOnly] (LH-FA-UP-001–LH-FA-UP-001).
+	// [OutcomeRunningOnly] (LH-FA-UP-001).
 	StateRunning
 
 	// StateRestarting is a transitional state. A single restart tick

@@ -248,18 +248,19 @@ For building from source ([LH-FA-BUILD-007](spec/lastenheft.md#lh-fa-build-007--
 ├── internal/           # hexagonal layout (see spec/architecture.md)
 │   ├── hexagon/{domain,application,port/{driving,driven}}/
 │   └── adapter/{driving,driven}/
-├── spec/               # Lastenheft + architecture spec
+├── spec/               # Lastenheft (contract), Spezifikation (technical), architecture (view)
 ├── docs/               # ADRs, planning, user docs (LH-FA-PROJDOCS-001)
 ├── Dockerfile          # multi-stage build (LH-FA-BUILD-001)
 ├── Makefile            # docker-only workflow (LH-FA-BUILD-005)
 └── go.mod
 ```
 
-Full layout contract: [`LH-FA-BUILD-009` in `spec/lastenheft.md`](spec/lastenheft.md).
+Layout requirement: [`LH-FA-BUILD-009`](spec/lastenheft.md#lh-fa-build-009--repository-layout); the detailed minimum layout is in [`spec/spezifikation.md`](spec/spezifikation.md).
 
 ## Documentation
 
-- **Lastenheft** (German, normative): [`spec/lastenheft.md`](spec/lastenheft.md)
+- **Lastenheft** (German, normative contract): [`spec/lastenheft.md`](spec/lastenheft.md)
+- **Spezifikation** (German, technical details; refines the Lastenheft): [`spec/spezifikation.md`](spec/spezifikation.md)
 - **Architecture specification:** [`spec/architecture.md`](spec/architecture.md)
   (hexagonal pattern, layer rules, Podman drop-in §2.4)
 - **Architecture Decision Records:** [`docs/plan/adr/`](docs/plan/adr/)

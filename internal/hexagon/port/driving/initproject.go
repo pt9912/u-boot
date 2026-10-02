@@ -35,7 +35,7 @@ type InitProjectRequest struct {
 	SkipGit bool
 
 	// Force enables the managed-block-only edit path for existing
-	// structured-config files per LH-FA-INIT-005–LH-FA-INIT-005: if a
+	// structured-config files per LH-FA-INIT-005: if a
 	// file already contains a `U-BOOT MANAGED BLOCK: init` marker,
 	// only that block is replaced; non-managed content survives.
 	// Without --backup, --force on a file lacking a managed block
