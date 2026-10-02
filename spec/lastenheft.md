@@ -163,7 +163,7 @@ Die Hilfeausgabe muss mindestens enthalten:
 
 Priorität: MVP
 
-Das Produkt muss die installierte Version ausgeben können.
+Das Produkt muss die installierte Version ausgeben können (`u-boot --version`).
 
 ### LH-FA-CLI-004 – Fehlerausgabe
 
@@ -232,7 +232,7 @@ Mindestens:
 - `15` – technischer Ausführungsfehler außerhalb der fachlichen Domäne
 - `16` bis `19` – reserviert (nicht verwenden)
 
-Für alle fachlichen Fehler ist die Verwendung von `10`, `11` oder `12` bindend (`10` Struktur-, Namens- und Konfigurationsvalidierung, `11` Umgebungsprobleme, `12` Laufzeitfehler bei Docker/Compose). Nicht-fachliche Fehler dürfen mit `1` codiert werden, `13` bis `15` nur mit dokumentierter Bedeutung; `16` bis `19` sind nicht zu verwenden.
+Für alle fachlichen Fehler ist die Verwendung von `10`, `11` oder `12` bindend. Typische Zuordnung (Empfehlung): `10` bei Struktur-, Namens- und Konfigurationsvalidierung, `11` bei Umgebungsproblemen, `12` bei Laufzeitfehlern von Docker/Compose. Nicht-fachliche Fehler dürfen mit `1` codiert werden, `13` bis `15` nur mit dokumentierter Bedeutung; `16` bis `19` sind nicht zu verwenden.
 
 ### LH-FA-CLI-007 – Dry Run
 
@@ -280,6 +280,7 @@ Für reine Vorschau-Workflows gelten die selben Exit-Codes wie bei der Nicht-Dif
 Priorität: MVP
 
 Das Produkt muss ein neues Projekt mit `u-boot init` initialisieren können (in einem bestehenden Verzeichnis zusätzlich mit `--assume-existing`).
+
 ### LH-FA-INIT-002 – Projektname
 
 Priorität: MVP
@@ -397,6 +398,7 @@ Priorität: MVP
 Das Produkt muss eine Devcontainer-Konfiguration erzeugen können.
 
 Die Erzeugung muss sowohl bei `u-boot init` über eine Option als auch nachträglich auslösbar sein (`u-boot init --devcontainer` bzw. `u-boot generate devcontainer`).
+
 Mindestdateien:
 
 ```text
@@ -488,7 +490,7 @@ Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll optio
 - Bei `podman`: rootless Podman mit `docker`-Kompatibilität im Container.
 - Das Ergebnis ist engine-neutral und startet unter Docker (inkl. Colima) und Podman.
 
-**Degradation:** `devcontainer.sandbox.onUnavailable` (`warn` | `fail`, Default `warn`) steuert, ob fehlende Fähigkeiten (kein `/dev/fuse`, blockierte User-Namespaces, nicht gewährbare Egress-Capability) zu einer Warnung mit Fallback bzw. Wegfall der Restriktion oder zu einem Umgebungsproblem (Exit-Code `11`) führen. Eine ausdrücklich angeforderte Runtime wird nie stillschweigend ersetzt; jeder Fallback wird in der Befehlsausgabe und in `u-boot doctor` ausgewiesen. Ungültige Werte der Schlüssel führen zu einem fachlichen Validierungsfehler (Exit-Code `10`).
+**Degradation:** `devcontainer.sandbox.onUnavailable` (`warn` | `fail`, Default `warn`) steuert den Umgang mit fehlenden Fähigkeiten: Bei `warn` führen ein fehlendes `/dev/fuse` zu einem Fallback auf `vfs`-Storage und eine nicht gewährbare Egress-Capability zum Wegfall der Restriktion, jeweils mit Warnung; bei `fail` sind beide ein Umgebungsproblem (Exit-Code `11`). Blockierte verschachtelte User-Namespaces (Seccomp/AppArmor) bei `nestedRuntime: podman` sind in beiden Modi ein Umgebungsproblem (Exit-Code `11`). Eine ausdrücklich angeforderte Runtime wird nie stillschweigend ersetzt; jeder Fallback wird in der Befehlsausgabe und in `u-boot doctor` ausgewiesen. Ungültige Werte der Schlüssel führen zu einem fachlichen Validierungsfehler (Exit-Code `10`).
 
 ### LH-FA-DEV-008 – Egress-Restriktion
 
@@ -568,6 +570,7 @@ Das Produkt soll erzeugte Compose-Dateien auf syntaktische Gültigkeit prüfen k
 Priorität: MVP
 
 Das Produkt muss Services mit `u-boot add <service>` hinzufügen können.
+
 Der Befehl ist nur in einem initialisierten `u-boot`-Projekt nutzbar (`u-boot.yaml` vorhanden).  
 Ist keine gültige Projektkonfiguration vorhanden, ist mit klarer Fehlermeldung und Hinweis auf `u-boot init` abzubrechen.
 
@@ -575,7 +578,7 @@ Ist keine gültige Projektkonfiguration vorhanden, ist mit klarer Fehlermeldung 
 
 Priorität: MVP
 
-Das Produkt muss PostgreSQL als Service hinzufügen können.
+Das Produkt muss PostgreSQL als Service hinzufügen können (`u-boot add postgres`).
 
 Mindestumfang:
 
@@ -589,7 +592,7 @@ Mindestumfang:
 
 Priorität: V1
 
-Das Produkt muss Keycloak als Service hinzufügen können.
+Das Produkt muss Keycloak als Service hinzufügen können (`u-boot add keycloak`).
 
 Mindestumfang:
 
@@ -605,7 +608,7 @@ Mindestumfang:
 
 Priorität: V1
 
-Das Produkt muss OpenTelemetry-Komponenten hinzufügen können.
+Das Produkt muss OpenTelemetry-Komponenten hinzufügen können (`u-boot add otel`).
 
 Mindestumfang:
 
@@ -640,7 +643,7 @@ Bei erkannter Abhängigkeit (z. B. `services.keycloak.persistence: external-post
 
 Priorität: V1
 
-Das Produkt muss einen Service wieder entfernen können.
+Das Produkt muss einen Service wieder entfernen können (`u-boot remove <service>`).
 
 Der Befehl ist nur in einem initialisierten `u-boot`-Projekt nutzbar (`u-boot.yaml` vorhanden).  
 Ist keine gültige Projektkonfiguration vorhanden, ist mit klarer Fehlermeldung und Hinweis auf `u-boot init` abzubrechen.
@@ -704,11 +707,12 @@ Priorität: MVP
 Das Produkt muss die Umgebung stoppen können.
 
 Das Produkt muss zwischen einem regulären Stopp (Container stoppen) und einem vollständigen Aufräumen (Container und Volumes entfernen) unterscheiden (`u-boot down` bzw. `u-boot down --volumes`).
+
 ### LH-FA-UP-005 – Logs anzeigen
 
 Priorität: V1
 
-Das Produkt soll Logs anzeigen können.
+Das Produkt soll Logs anzeigen können (`u-boot logs` für alle Services, `u-boot logs <service>` für einen).
 
 Mindestens müssen folgende Optionen unterstützt werden:
 
@@ -723,7 +727,7 @@ Mindestens müssen folgende Optionen unterstützt werden:
 
 Priorität: MVP
 
-Das Produkt muss eine Diagnosefunktion bereitstellen.
+Das Produkt muss eine Diagnosefunktion bereitstellen (`u-boot doctor`).
 
 ### LH-FA-DIAG-002 – Lokale Voraussetzungen prüfen
 
@@ -787,6 +791,7 @@ hint: Start Docker or check your user permissions for /var/run/docker.sock.
 Priorität: MVP
 
 Das Produkt muss Generatoren mit `u-boot generate <artifact>` anbieten.
+
 Erlaubte Werte für `<artifact>`:
 
 - `changelog`
@@ -800,19 +805,19 @@ Bei unbekanntem Artefakt muss der Befehl mit Exit Code `2` abbrechen und die erl
 
 Priorität: MVP
 
-Das Produkt muss ein Changelog erzeugen oder aktualisieren können.
+Das Produkt muss ein Changelog erzeugen oder aktualisieren können (`u-boot generate changelog`).
 
 ### LH-FA-GEN-003 – README erzeugen
 
 Priorität: MVP
 
-Das Produkt muss eine README-Datei erzeugen können.
+Das Produkt muss eine README-Datei erzeugen können (`u-boot generate readme`).
 
 ### LH-FA-GEN-004 – Beispiel-ENV erzeugen
 
 Priorität: MVP
 
-Das Produkt muss eine `.env.example` erzeugen oder aktualisieren können.
+Das Produkt muss eine `.env.example` erzeugen oder aktualisieren können (`u-boot generate env-example`).
 
 ### LH-FA-GEN-005 – Idempotenz
 
@@ -834,7 +839,7 @@ Das bedeutet:
 
 Priorität: V1
 
-Das Produkt soll Projektvorlagen unterstützen.
+Das Produkt soll Projektvorlagen unterstützen (`u-boot init --template <name>`, z. B. `basic`, `micronaut`, `sveltekit`, `micronaut-sveltekit`).
 
 ### LH-FA-TPL-002 – Template-Metadaten
 
@@ -855,13 +860,13 @@ Mindestangaben:
 
 Priorität: Later
 
-Das Produkt soll später eigene lokale Templates unterstützen können.
+Das Produkt soll später eigene lokale Templates unterstützen können (`u-boot init --template ./pfad`).
 
 ### LH-FA-TPL-004 – Templates auflisten
 
 Priorität: V1
 
-Das Produkt muss verfügbare Templates auflisten können.
+Das Produkt muss verfügbare Templates auflisten können (`u-boot template list`).
 
 Die Ausgabe muss mindestens enthalten:
 
@@ -925,7 +930,7 @@ Das Produkt muss die Konfiguration aktualisieren können, wenn Add-ons hinzugef�
 
 Priorität: MVP
 
-Das Produkt muss einen Befehl zum Anzeigen und Ändern der Konfiguration bereitstellen.
+Das Produkt muss einen Befehl zum Anzeigen und Ändern der Konfiguration bereitstellen (`u-boot config` zeigt die gesamte Konfiguration, `u-boot config get <pfad>` einen Wert, `u-boot config set <pfad> <wert>` setzt einen Wert).
 
 Beim Setzen muss die geänderte Konfiguration auf Schema-Konformität geprüft werden.
 
@@ -933,7 +938,7 @@ Beim Setzen muss die geänderte Konfiguration auf Schema-Konformität geprüft w
 
 Priorität: Later
 
-Das Produkt muss ein Schema-Migrationskommando bereitstellen.
+Das Produkt muss ein Schema-Migrationskommando bereitstellen (`u-boot config migrate`).
 
 Die Migration muss mit einem klaren Fehler auf unbekannte Zukunftsversionen reagieren und bei Migrationen mit älteren Versionen eine Sicherung anlegen.
 
@@ -1070,7 +1075,7 @@ Architecture Decision Records in `docs/plan/adr/` folgen dem vendorten MADR-/Nyg
 
 Priorität: MVP
 
-Planning-Artefakte durchlaufen den Lifecycle `open → next → in-progress → done` des adoptierten Baseline-Regelwerks: Übergang per `git mv`, kein Artefakt in mehreren Verzeichnissen, Inhalte in `done/` nur korrigierend änderbar.
+Planning-Artefakte durchlaufen den Lifecycle `open → next → in-progress → done` des adoptierten Baseline-Regelwerks: Übergang per `git mv`, kein Artefakt in mehreren Verzeichnissen, Inhalte in `done/` nur korrigierend änderbar (substanzielle Änderungen erzeugen ein neues Artefakt in `open/` oder `next/` mit Verweis auf den vorhergehenden Stand).
 
 Dateinamen in `planning/`: `slice-<phase>-<kebab-slug>.md` für Slice-Pläne und `tranche-<nr>-<kebab-slug>.md` für Tranchen-Pläne; die Wahl ist im `README.md` von `docs/plan/planning/` dokumentiert. Übergreifende Master-Dokumente (`roadmap.md`, `carveouts.md`) liegen dauerhaft in `in-progress/` und folgen keinem der beiden Formate.
 
@@ -1078,7 +1083,7 @@ Dateinamen in `planning/`: `slice-<phase>-<kebab-slug>.md` für Slice-Pläne und
 
 Priorität: MVP
 
-Jeder temporäre Carveout in der u-boot-Codebase bekommt parallel zu seiner Entstehung einen Slice-Plan in `docs/plan/planning/open/` mit Aufhebungsbedingung (Carveout-Disziplin des adoptierten Baseline-Regelwerks) und ist im Master-Inventar `carveouts.md` und in der Roadmap sichtbar. Als temporärer Carveout zählen auch Bootstrap-Schwellwerte, bewusst leere Regelblöcke in der Tooling-Konfiguration, prospektive Doku-Phrasen und bewusst weggelassene CI-/Build-Pflichten; Spec-Open-Punkte (`LH-OPEN-*`) und ADR-Folgepunkte gelten ebenfalls. Permanente Carveouts stehen mit Begründung im Master-Inventar und brauchen keinen Aufhebungsplan.
+Jeder temporäre Carveout in der u-boot-Codebase bekommt parallel zu seiner Entstehung einen Slice-Plan in `docs/plan/planning/open/` mit Auslöser, Aufhebungsbedingung und Akzeptanzkriterien (Carveout-Disziplin des adoptierten Baseline-Regelwerks) und ist im Master-Inventar `carveouts.md` und in der Roadmap sichtbar. Als temporärer Carveout zählen auch Bootstrap-Schwellwerte, bewusst leere Regelblöcke in der Tooling-Konfiguration, prospektive Doku-Phrasen und bewusst weggelassene CI-/Build-Pflichten; Spec-Open-Punkte (`LH-OPEN-*`) und ADR-Folgepunkte gelten ebenfalls. Permanente Carveouts stehen mit Begründung im Master-Inventar und brauchen keinen Aufhebungsplan.
 
 ### LH-FA-PROJDOCS-006 – Dokumentationsreferenzmodell
 
@@ -1178,7 +1183,7 @@ Für alle `--json`-Ausgaben gilt ergänzend ein gemeinsames Minimalkontrakt-Sche
 - `diagnostics` (Liste von Objekten mit mind. `level`, `code`, `message`, optional `file`)
 - `exitCode` (vgl. [`LH-FA-CLI-006`](#lh-fa-cli-006--exit-codes))
 
-Für `--json`-Antworten gilt zusätzlich: `diagnostics.level` ist `warn` oder `error`, `status` folgt dem höchsten `level`, bei `template` und `config` ist `subcommand` verpflichtend, und `diagnostics.code` trägt die Kennung der verursachenden Anforderung oder einen dokumentierten tool-internen Code.
+Für `--json`-Antworten gilt zusätzlich: `diagnostics.level` ist `warn` oder `error`; enthält `diagnostics` keinen Eintrag, darf es als `[]` ausgegeben werden und `status` ist `ok`, andernfalls folgt `status` dem höchsten `level` (`error` → `error`, `warn` ohne `error` → `warn`); `diagnostics.file` ist optional; bei `template` und `config` ist `subcommand` verpflichtend, und `diagnostics.code` trägt die Kennung der verursachenden Anforderung oder einen dokumentierten tool-internen Code.
 
 Für normale (`--json` ohne `--dry-run`/`--diff`) Ausgaben ist der obige Minimalkontrakt bindend.
 Für `--dry-run`- oder `--diff`-Ausgaben mit `--json` gilt zusätzlich das vollständige Schema aus [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run) als bindender Pflichtkontrakt (inkl. `plannedFiles`, `changes`, `dryRun`, `diff`).
@@ -2029,7 +2034,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.3.3 | 2026-09-30 | [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion): Prüfung der Capability beim Containerstart statt im `u-boot doctor` präzisiert (die Capability ist vom Host aus nicht zuverlässig bestimmbar; `doctor` prüft die Konfiguration). | Vereinbarung mit dem Projektinhaber |
 | 0.3.4 | 2026-10-01 | [`LH-OPEN-002`](#lh-open-002--paketierung): Homebrew von „vertagt mit Trigger“ auf „gewählt“ gesetzt (eigener Tap, Formel aus den Release-Assets). | Vereinbarung mit dem Projektinhaber |
 | 0.3.5 | 2026-10-01 | [`LH-OPEN-002`](#lh-open-002--paketierung): Debian/RPM von „vertagt mit Trigger“ auf „gewählt“ gesetzt (`.deb`/`.rpm` für amd64 und arm64 als Release-Assets, kein gehostetes Repository). | Vereinbarung mit dem Projektinhaber |
-| 0.4.0 | 2026-10-02 | Strukturänderung ohne neue Produktzusage: Technische Festlegungen (Schemata, Beispielinstanzen, Algorithmen, Defaults, Build-/CI-, Doku- und Architektur-Details, Markierungsformate) wurden in ein eigenes technisches Dokument überführt; Projektkapitel §4.11–§4.13 und einzelne Anforderungen sind auf Vorgaben gekürzt; neue Lesehinweis-Anforderung [`LH-LESE-003`](#lh-lese-003--dokumentenordnung). Alle Anforderungs-Kennungen und Überschriften sind unverändert. | Vereinbarung mit dem Projektinhaber |
+| 0.4.0 | 2026-10-02 | Strukturänderung ohne neue Produktzusage: Technische Festlegungen (Schemata, Beispielinstanzen, Algorithmen, Defaults, Build-/CI-, Doku- und Architektur-Details, Markierungsformate) wurden in ein eigenes technisches Dokument überführt; Projektkapitel §4.11–§4.13 und einzelne Anforderungen sind auf Vorgaben gekürzt; neue Lesehinweis-Anforderung [`LH-LESE-003`](#lh-lese-003--dokumentenordnung); die Anforderungen zu ADR-Format, Planning-Lifecycle, Carveout-Disziplin und Dokumentationsreferenzmodell sind auf Kurzzusagen gekürzt (die Einzelregeln führt das adoptierte Baseline-Regelwerk), Aufrufbeispiele und ausführliche Regelblöcke stehen in der technischen Spezifikation. Alle Anforderungs-Kennungen und Überschriften sind unverändert. | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt

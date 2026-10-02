@@ -43,5 +43,5 @@ Der Projektinhaber meldet nach Runde 1: Das Lastenheft ist „immer noch sehr gr
 - **Größe:** Lastenheft 2290 → **2039** Zeilen (vor der Welle 2984); Spezifikation 819.
 - **Gegenlesen:** Skript-Abgleich: nicht wiederfindbar sind nur die Fence-Zeilen der Beispielblöcke (Inhalt steht gesammelt in der Spezifikation) und die bewusst entfernten Regelwerk-Dopplungen.
 - **Sensoren:** `make gates` grün. Nicht ausgeführt: `make ci`, `make test-docker`.
-- **Review:** unabhängiges Review der Runden 1 und 2 steht noch aus.
+- **Review (nachgeholt, unabhängige Rolle, beide Runden):** `docs/reviews/2026-10-02-lastenheft-verschlankung-r2.md` — 0 HIGH, 1 MEDIUM, 7 LOW, 5 INFO. Behoben: abgeschwächte Exit-Code-Zusage bei blockierten User-Namespaces (MEDIUM), Empfehlungs-Charakter der Exit-Code-Zuordnung, Status-/Diagnose-Regeln, inhaltstragende Aufrufangaben, Leerzeilen-Artefakte, fehlende Zusagen in den gekürzten Doku-Anforderungen, Historie-Zeile, Spezifikations-Verweis. Bewusst offen: Verweis in der akzeptierten ADR zur Degradationstabelle (ADR unveränderlich; die Tabelle steht in der Verfeinerung der Anforderung).
 - **Befund:** Die verbleibenden rund 2000 Zeilen bestehen zu über der Hälfte aus Struktur (144 Überschriften mit Priorität, Leerzeilen, Traceability-Matrix 164 Zeilen, Akzeptanzkriterien 132); echte Technik ist in Anforderungstexten kaum noch übrig.

@@ -25,7 +25,7 @@ Nach dem ersten Schnitt ([`welle-spec-technik-stratum`](../in-progress/roadmap.m
 
 - [x] Regelblöcke der Anforderungen (siehe Verbleib-Tabelle) in die Spezifikation verschoben, Lastenheft-Zusagen gekürzt; Verbleib-Tabelle vollständig, Gegenlesen ohne Verlust.
 - [x] `make gates` grün.
-- [ ] Review durch eine andere Rolle (Report unter `docs/reviews/`) — **offen**, siehe Closure.
+- [x] Review durch eine andere Rolle (Report unter `docs/reviews/`).
 
 ## Tranchen
 
@@ -45,7 +45,7 @@ Nach dem ersten Schnitt ([`welle-spec-technik-stratum`](../in-progress/roadmap.m
 - **Größe:** Lastenheft 2984 (vor der Welle) → 2636 → **2290** Zeilen; die Spezifikation trägt 795. Verbleibende Masse: §4 (1235), §5 (215), §13 Traceability-Matrix (164), §9 Akzeptanzkriterien (132).
 - **Gegenlesen:** Skript-Abgleich aller entfernten Zeilen gegen die Spezifikation: nichts verloren; eine Zeile stand nur wegen der Diff-Ausrichtung als entfernt da (Absatz zu destruktiven Operationen blieb im Lastenheft). Eine beim Kürzen verlorene Zusage (Runtime wird nie stillschweigend ersetzt) wurde im Lastenheft wiederhergestellt.
 - **Sensoren:** `make gates` grün. Nicht ausgeführt: `make ci`, `make test-docker`.
-- **Review:** Eigener Review-Lauf einer anderen Rolle steht für diese zweite Runde noch aus; die Schnittart ist mit der ersten Runde identisch (wörtliche Übernahme), deren Review keine Verlustfunde ergab.
+- **Review (nachgeholt, unabhängige Rolle, beide Runden):** `docs/reviews/2026-10-02-lastenheft-verschlankung-r2.md` — 0 HIGH, 1 MEDIUM, 7 LOW, 5 INFO. Behoben: abgeschwächte Exit-Code-Zusage bei blockierten User-Namespaces (MEDIUM), Empfehlungs-Charakter der Exit-Code-Zuordnung, Status-/Diagnose-Regeln, inhaltstragende Aufrufangaben, Leerzeilen-Artefakte, fehlende Zusagen in den gekürzten Doku-Anforderungen, Historie-Zeile, Spezifikations-Verweis. Bewusst offen: Verweis in der akzeptierten ADR zur Degradationstabelle (ADR unveränderlich; die Tabelle steht in der Verfeinerung der Anforderung).
 - **Folgepunkt:** weitere Verkleinerung ist nur noch strukturell möglich (Traceability-Matrix, Akzeptanzkriterien, §5) und braucht eine Entscheidung des Projektinhabers.
 
 ### Verbleib-Tabelle
