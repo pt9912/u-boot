@@ -839,9 +839,7 @@ Die Pflicht-Stages `deps`, `compile`, `test`, `lint`, `coverage`, `build` und `r
 
 ### LH-FA-BUILD-002 – Runtime-Stage Pflichten
 
-*Priorität: MVP.* Der `runtime`-Stage des u-boot-Dockerfiles muss folgende Eigenschaften erfüllen:
-
-Das Endimage ist minimal und shell-los, läuft als Non-root-Benutzer, trägt OCI-Image-Labels und enthält keine Build-Toolchain.
+*Priorität: MVP.* Der `runtime`-Stage des u-boot-Dockerfiles muss ein minimales, shell-loses Endimage erzeugen, das als Non-root-Benutzer läuft, OCI-Image-Labels trägt, keine Build-Toolchain enthält und dessen `ENTRYPOINT` auf das im `build`-Stage erzeugte Binary zeigt.
 
 ### LH-FA-BUILD-003 – Build-Args und Pin-Politik
 

@@ -35,7 +35,7 @@ Der Projektinhaber: „Traceability-Matrix streichen — das Lastenheft ist imme
 
 ## Risiken
 
-- Wegfall der Matrix schwächt eine Prüfung ab: Es gab keine Verifikationsdaten in ihr (alle `PH-`/`TC-`-Spalten leer); `make doc-trace` leitet aus den Kennungen ab.
+- Wegfall der Matrix schwächt eine Prüfung ab: Sie trug keine Verifikationsdaten: Die `PH-`/`TC-`-Spalten enthielten nur Alias-Kennungen, die auf die jeweilige Anforderung zurückverwiesen; `make doc-trace` leitet aus den Kennungen ab.
 
 ## Closure
 

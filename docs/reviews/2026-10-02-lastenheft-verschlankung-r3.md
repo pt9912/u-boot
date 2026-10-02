@@ -1,0 +1,75 @@
+# Review-Report: Lastenheft-Verschlankung Runde 3 — 2026-10-02
+
+**Review-Art:** Plan/Design — Struktur- und Inhaltsreview der dritten Verschlankungsrunde gegen Lastenheft, Spezifikation, Decken-Regel und das adoptierte Regelwerk (Verlustfreiheit, Matrix-Entfernung, Prioritäts-Verdichtung, Lesbarkeit, Verweise).
+
+**Gegenstand:** Commit-Range `ecc1821..HEAD` (Commits `05212da` und `f2ba612`; Diff über `spec/`, `.d-check.yml`, `harness/`, `AGENTS.md` und die Planning-Artefakte).
+
+**Skill:** `.harness/skills/reviewer.md` @ f2ba612 <!-- d-check:ignore (Report zitiert den Stand des Laufs) -->
+**Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-02
+
+> **Zitier-Form.** Der Report friert ein. Kennungen statt Adressen; Baseline-Stellen als Tag + Pfad in Inline-Code.
+
+**Eingangs-Kontext:**
+
+- [`slice-v2-spec-lastenheft-verschlankung-runde-3`](../plan/planning/done/slice-v2-spec-lastenheft-verschlankung-runde-3.md) und [`slice-v2-spec-lastenheft-coverage-default`](../plan/planning/done/slice-v2-spec-lastenheft-coverage-default.md)
+- Baseline `v6.13.0`: `regelwerk/modul-03-spec.md`, `regelwerk/modul-13-*` und `regelwerk/modul-14-*` (Multi-Stage-/Docker-only-/Bootstrap-Disziplin)
+- berührte `LH-*`: [`LH-FA-BUILD-001`](../../spec/lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo), [`LH-FA-BUILD-002`](../../spec/lastenheft.md#lh-fa-build-002--runtime-stage-pflichten), [`LH-FA-BUILD-003`](../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik), [`LH-FA-BUILD-007`](../../spec/lastenheft.md#lh-fa-build-007--docker-only-workflow), [`LH-FA-BUILD-008`](../../spec/lastenheft.md#lh-fa-build-008--coverage-bootstrap), [`LH-FA-BUILD-009`](../../spec/lastenheft.md#lh-fa-build-009--repository-layout), [`LH-FA-ARCH-003`](../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement), [`LH-QA-004`](../../spec/lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil)
+- `AGENTS.md` (Hard Rules), `harness/review.md`
+
+Methode: (1) Skript-Abgleich jeder Nicht-Leerzeile der acht betroffenen Anforderungen aus `ecc1821:spec/lastenheft.md` gegen heutiges Lastenheft plus Spezifikation (whitespace- und link-normalisiert): keine Zeile fehlt, alle verschobenen Detailzeilen stehen wörtlich in `spec/spezifikation.md` (Zeilen 332-403). (2) Skript-Abgleich der Priorität je Anforderung vor und nach der Änderung (143 Überschriften, gleiche Reihenfolge, 121 Prioritätszeilen vorher, 120 verdichtet plus 1 bewusst belassen). (3) Anker-Skript über alle `#`-Links in Lastenheft und Spezifikation (0 tote Anker). (4) Repo-weites grep auf Matrix-/PH-/TC-Reste.
+
+---
+
+## Findings
+
+| ID | Kategorie | Befund | Quelle | Pfad | Verifizierbar | Klasse |
+|---|---|---|---|---|---|---|
+| F-1 | MEDIUM | Die wörtlich verschobene Zeile „Default-Schwellwert `0` (`ARG COVERAGE_THRESHOLD=0`)" steht in der Verfeinerung [`LH-FA-BUILD-008.a`](../../spec/spezifikation.md#lh-fa-build-008a--bootstrap-verhalten-der-coverage-stage) und widerspricht der Spezifikation selbst (Zeilen 785 und 804: Default 90), dem Dockerfile (`ARG COVERAGE_THRESHOLD=90`) und dem Makefile (`THRESHOLD ?= 90`). Die Absicht (d), die Angabe entfallen zu lassen, ist damit nur im Lastenheft umgesetzt; die Closure von [`slice-v2-spec-lastenheft-coverage-default`](../plan/planning/done/slice-v2-spec-lastenheft-coverage-default.md) behauptet „der gelebte Wert (90) steht in der Spezifikation", ohne den Gegenbeleg zu nennen. | [`LH-FA-BUILD-008`](../../spec/lastenheft.md#lh-fa-build-008--coverage-bootstrap), [`LH-FA-BUILD-003`](../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik), Hard Rule „Gates nicht still lockern" (AGENTS.md) | spec/spezifikation.md:370 (vs. :785, :804); Dockerfile:126; Makefile:37 | ja — `grep -n 'COVERAGE_THRESHOLD=0' spec/spezifikation.md` liefert einen Treffer; ein Zahlenabgleich Spezifikation gegen Dockerfile/Makefile schlägt an | Verschobene Zeile mit überholtem Wert in der Spezifikation belassen |
+| F-2 | MEDIUM | Der Satz „Der `runtime`-Stage des u-boot-Dockerfiles muss folgende Eigenschaften erfüllen:" endet mit Doppelpunkt und wird nicht von einer Liste, sondern von einem Fließtextabsatz („Das Endimage ist minimal und shell-los, ...") gefolgt (hängende Einleitung). | [`LH-FA-BUILD-002`](../../spec/lastenheft.md#lh-fa-build-002--runtime-stage-pflichten), Lesbarkeit | spec/lastenheft.md:842-844 | ja — Sichtprüfung; ein Lint auf „Doppelpunkt vor Nicht-Liste" gibt es nicht | Hängende Einleitung nach Kürzung |
+| F-3 | LOW | Die Kurzfassung von [`LH-FA-BUILD-002`](../../spec/lastenheft.md#lh-fa-build-002--runtime-stage-pflichten) nennt nicht mehr, dass der `ENTRYPOINT` auf das im `build`-Stage erzeugte Binary zeigt und alle Artefakte aus dem `build`-Stage stammen; die Pflicht „Minimales Base-Image ohne Shell" ist verdichtet zu „minimal und shell-los". Beides steht in der Verfeinerung, der Vertragskern (Non-root, Labels, keine Toolchain) bleibt. | Spec-Strata (Abschwächung der Zusage im Vertrag) | spec/lastenheft.md:844 vs. spec/spezifikation.md:342-350 | ja — Zeilenabgleich gegen `ecc1821:spec/lastenheft.md` | Zusage im Vertrag verdichtet, Detail nur im Technik-Stratum |
+| F-4 | LOW | Die Verfeinerungen [`LH-FA-BUILD-001.b`](../../spec/spezifikation.md#lh-fa-build-001b--mindestumfang-des-multi-stage-dockerfiles) und [`LH-FA-BUILD-002.b`](../../spec/spezifikation.md#lh-fa-build-002b--pflichten-der-runtime-stage) überlappen die bereits bestehenden Verfeinerungen [`LH-FA-BUILD-001.a`](../../spec/spezifikation.md#lh-fa-build-001a--stages-des-multi-stage-dockerfiles) und [`LH-FA-BUILD-002.a`](../../spec/spezifikation.md#lh-fa-build-002a--eigenschaften-der-runtime-stage) inhaltlich fast vollständig (Stage-Liste, Einzel-Baubarkeit, Non-root, Labels, `COPY --from=build`). Der Wortlaut ist dadurch doppelt zu pflegen. | Maintainability; Decken-Regel (eine Wahrheit je Aussage) | spec/spezifikation.md:58-71 vs. :332-350 | ja — Sichtprüfung der beiden Paare | Doppelte Verfeinerung desselben Gegenstands |
+| F-5 | LOW | [`LH-FA-BUILD-002.b`](../../spec/spezifikation.md#lh-fa-build-002b--pflichten-der-runtime-stage) und [`LH-QA-004.b`](../../spec/spezifikation.md#lh-qa-004b--pflichten-des-lint-profils) tragen das Suffix `.b`, ohne dass der Anker im Lastenheft darauf Bezug nimmt, und die Zeile „bei Drift gewinnt diese Anforderung" in [`LH-QA-004.b`](../../spec/spezifikation.md#lh-qa-004b--pflichten-des-lint-profils) bezieht sich im Technik-Stratum auf „diese Anforderung" (gemeint: das Lastenheft); nach Verschiebung ist der Bezug uneindeutig. In [`LH-FA-ARCH-003.a`](../../spec/spezifikation.md#lh-fa-arch-003a--enforcement-der-import-regeln) gilt dasselbe für „Import-Regeln dieser Anforderung". | Lesbarkeit der wörtlich verschobenen Zeilen | spec/spezifikation.md:397, :387 | ja — Sichtprüfung | Deiktischer Bezug nach Verschiebung uneindeutig |
+| F-6 | LOW | Die Closure von [`slice-v2-spec-lastenheft-verschlankung-runde-3`](../plan/planning/done/slice-v2-spec-lastenheft-verschlankung-runde-3.md) begründet den Wegfall der Matrix mit „alle `PH-`/`TC-`-Spalten leer". Das ist unzutreffend: in 128 Zeilen standen Alias-Kennungen (`PH-CLI-001`, `TC-CLI-001`, ...), die auf die jeweilige `LH-*`-Anforderung derselben Zeile verwiesen. Es gab keine Verifikationsdaten, aber nicht leere Spalten. | Evidence-Korrektheit | Runde-3-Slice unter docs/plan/planning/done/, Abschnitt Risiken | ja — `git show ecc1821:spec/lastenheft.md` Abschnitt 13 | Unzutreffende Begründung in Done-Evidence |
+| F-7 | LOW | Das erledigte Planning-Artefakt [`slice-v2-spec-lastenheft-coverage-default`](../plan/planning/done/slice-v2-spec-lastenheft-coverage-default.md) liegt in `done/`, trägt aber keinen Commit-Hash (Memory-Regel „Done-Slice DoD-Line"); die Closure nennt keinen Delivery-Hash, und die Roadmap führt den Slice in der Zeile der Vorgänger-Welle statt bei `welle-lastenheft-verschlankung`. | Planning-Lifecycle / Verification Evidence | Coverage-Default-Slice unter docs/plan/planning/done/, Zeilen 3 und 27-29; docs/plan/planning/in-progress/roadmap.md:67 | ja — Sichtprüfung | Done-Slice ohne Delivery-Hash |
+| F-8 | INFO | [`LH-SA-CLI-002`](../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle) behält die Zeile „Priorität: MVP/V1 gemischt (siehe Spalte)" (Tabelle folgt), alle anderen 120 Anforderungen tragen `*Priorität: X.*` im ersten Satz. Das ist begründet und korrekt, aber eine Format-Ausnahme; die Aussage steht im Slice nicht. | Konsistenz | spec/lastenheft.md:1144 | ja — grep `^Priorität:` | Format-Ausnahme bei Prioritätsverdichtung |
+| F-9 | INFO | Die Matrix führte für [`LH-MVP-001`](../../spec/lastenheft.md#lh-mvp-001--muss-im-mvp-enthalten-sein) die Priorität MVP, die Anforderung selbst trug nie eine Prioritätszeile; mit der Matrix entfällt diese einzige Prioritätsangabe (inhaltlich aus dem Titel ableitbar). | Verlustfreiheit (Matrix) | spec/lastenheft.md:1475 | ja — `git show ecc1821:spec/lastenheft.md` Matrixzeile | Einzige Priorität nur in der Matrix geführt |
+| F-10 | INFO | Reste des alten Alias-Modells außerhalb der freigestellten Bereiche: `tools/check_refs.py` (als deprecated gekennzeichnet) trägt weiter das `PH|TC|CO`-Muster und den Doku-Absatz zu Traceability-Aliasen; der akzeptierte [`ADR-0013`](../plan/adr/0013-dokumentationsreferenzmodell.md) (Zeile 102) erwähnt sie ebenfalls (unveränderlich). Die Kennungs-Regel in `.d-check.yml` ist korrekt (`\bCO(?:-[A-Z0-9]+)+-\d{3}[A-Z]?\b`, gültiges RE2) und trifft aktuell keine Kennung im Repo; das Ziel `spec/lastenheft.md` für `CO-*` war schon vorher gesetzt. | Konsistenz Tooling | tools/check_refs.py:47, :95; .d-check.yml:33 | ja — `grep -rn 'PH|TC' tools/ .d-check.yml` | Veraltetes Alias-Muster in deprecated Tooling |
+
+## Negativbefunde
+
+| Bereich | Ergebnis |
+|---|---|
+| Verlust von Zusagen in den acht gekürzten Anforderungen (Skript-Abgleich gegen `ecc1821`): jede Nicht-Leerzeile steht entweder im Lastenheft oder wörtlich in der Spezifikation | geprüft, ohne Befund (ausgenommen F-1/F-3 als Qualitätsfragen, nicht als Verlust) |
+| Gates, Exit-Codes, Sicherheits-/Opt-in-Verhalten, Non-root, Docker-only, depguard und `//nolint`-Verbot, Coverage-Gate: Zusage bleibt im Lastenheft bestehen ([`LH-FA-BUILD-007`](../../spec/lastenheft.md#lh-fa-build-007--docker-only-workflow), [`LH-FA-ARCH-003`](../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement), [`LH-QA-004`](../../spec/lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil), [`LH-FA-BUILD-008`](../../spec/lastenheft.md#lh-fa-build-008--coverage-bootstrap)); Details (Modul-Pfad/Binary-Name in [`LH-FA-BUILD-009.a`](../../spec/spezifikation.md#lh-fa-build-009a--go-layout-des-repositories), Schwellen/Drift-Regel in [`LH-QA-004.b`](../../spec/spezifikation.md#lh-qa-004b--pflichten-des-lint-profils), Bootstrap-Regel in [`LH-FA-ARCH-003.a`](../../spec/spezifikation.md#lh-fa-arch-003a--enforcement-der-import-regeln)) wörtlich vorhanden | geprüft, ohne Befund |
+| Prioritäts-Verdichtung (Skript, 143 Überschriften): keine verlorene oder falsch zugeordnete Priorität; Reihenfolge identisch; kein Rest alter `Priorität:`-Zeilen außer [`LH-SA-CLI-002`](../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle) | geprüft, ohne Befund (siehe F-8) |
+| Markdown nach Verdichtung bei Anforderungen mit Liste/Codeblock im ersten Absatz (z. B. [`LH-SA-FILE-001`](../../spec/lastenheft.md#lh-sa-file-001--erzeugte-dateien), [`LH-AK-002`](../../spec/lastenheft.md#lh-ak-002--postgresql-flow), [`LH-AK-003`](../../spec/lastenheft.md#lh-ak-003--keycloak-flow)): Prioritätssatz steht in eigener Textzeile, Liste/Codeblock folgt nach Leerzeile | geprüft, ohne Befund |
+| Matrix-Entfernung: Lastenheft Abschnitt 13 auf einen Satz, keine verwaisten Anker (`#13-...`) im Repo; `.d-check.yml`-Muster, `harness/conventions.md`, `harness/README.md`, `AGENTS.md` konsistent angepasst; `make doc-trace` und das `trace`-Modul (aus Kennungen abgeleitet) hängen nicht an der Matrix; kein Test unter `internal/`, `cmd/`, `scripts/`, `.github/` liest Lastenheft-Abschnitt 13 | geprüft, ohne Befund |
+| Decken-Regel: Lastenheft enthält keine Links auf Spezifikation oder Architektur; Spezifikation keine Links auf ADRs oder Planning; alle `#`-Anker in beiden Dokumenten auflösbar (Skript, 0 tote) | geprüft, ohne Befund |
+| Lesbarkeit der Kürzungen von [`LH-FA-BUILD-001`](../../spec/lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo), [`LH-FA-BUILD-003`](../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik), [`LH-FA-BUILD-007`](../../spec/lastenheft.md#lh-fa-build-007--docker-only-workflow), [`LH-FA-BUILD-009`](../../spec/lastenheft.md#lh-fa-build-009--repository-layout), [`LH-FA-ARCH-003`](../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement), [`LH-QA-003`](../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions) (unverändert), [`LH-QA-004`](../../spec/lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil), [`LH-FA-ARCH-002`](../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout) (unverändert bis auf Priorität) | geprüft, ohne Befund (Ausnahme F-2) |
+| Historie 0.4.0 des Lastenhefts nennt Matrix-Wegfall und Wegfall des Default-Schwellwerts 0 | geprüft, ohne Befund |
+
+**Nicht geprüft:**
+
+| Bereich | Grund |
+|---|---|
+| Lauf von `make docs-check`, `make gates` | Auftrag: keine langlaufenden Make-Targets; Evidence des Slice nennt `make gates` als grün, nicht unabhängig reproduziert |
+| Inhaltliche Richtigkeit von Dockerfile/Makefile gegen die verschobenen Detailzeilen außer dem Coverage-Default (z. B. Binary-Pfad `-o /out/u-boot`, distroless-Tag) | Außerhalb des Rundengegenstands; unverändert verschoben |
+| Regelwerk-Module 13 und 14 im Volltext | Nur als Kontext gelesen; Prüfung auf Gate-Abschwächung erfolgte gegen Lastenheft/AGENTS.md |
+| Abschnitte des Lastenhefts außerhalb der in der Methode genannten Anforderungen (inhaltlicher Wortlaut) | Nur Prioritätsformat und Anker geprüft, nicht der Wortlaut (Runde 1 und 2 sind separat reviewt) |
+
+## Summary
+
+| Kategorie | Anzahl |
+|---|---|
+| HIGH | 0 |
+| MEDIUM | 2 |
+| LOW | 5 |
+| INFO | 3 |
+
+**Finding-Klassen dieses Laufs:** Verschobene Zeile mit überholtem Wert in der Spezifikation belassen · Hängende Einleitung nach Kürzung · Zusage im Vertrag verdichtet, Detail nur im Technik-Stratum · Doppelte Verfeinerung desselben Gegenstands · Deiktischer Bezug nach Verschiebung uneindeutig · Unzutreffende Begründung in Done-Evidence · Done-Slice ohne Delivery-Hash
+
+## Verdikt
+
+**Merge-blockierend:** nein, mit Auflage — kein HIGH. Die beiden MEDIUM-Findings (F-1 widersprüchlicher Coverage-Default in der Spezifikation, F-2 hängende Einleitung) sind klein und mechanisch, sollten aber vor dem Abschluss der Welle behoben werden; F-1 berührt eine Gate-Angabe (der Wert 0 in der Spezifikation widerspricht dem gelebten Gate 90), die laut Absicht (d) entfallen sollte.
+
+**Übergabe:** Findings gehen an den Implementer; die Finding-Klassen gehen zusätzlich in die Closure des Slices und von dort in den Zähler. Dieser Report ist ein Lauf-Beleg und ersetzt keine Verifikation.

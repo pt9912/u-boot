@@ -367,8 +367,8 @@ Verfeinert [`LH-FA-BUILD-007`](lastenheft.md#lh-fa-build-007--docker-only-workfl
 
 Verfeinert [`LH-FA-BUILD-008`](lastenheft.md#lh-fa-build-008--coverage-bootstrap).
 
-- Default-Schwellwert `0` (`ARG COVERAGE_THRESHOLD=0`).
-- Sobald `./internal/...` produktive Pakete enthält, wird die Schwelle in einem Folge-Schritt angehoben; der Override-Pfad `make coverage-gate THRESHOLD=…` muss funktionieren.
+- Default-Schwellwert `90` Prozent (`ARG COVERAGE_THRESHOLD=90`, Makefile `THRESHOLD ?= 90`); in der Bootstrap-Phase war er `0`.
+- Der Override-Pfad `make coverage-gate THRESHOLD=…` muss funktionieren.
 - Leere Coverage darf in der Bootstrap-Phase nicht zu einem falschen Grün führen, das echte Test-Failures maskiert; der `go test`-Exit-Code wird über `set -o pipefail` o. ä. an die Gate-Logik durchgereicht.
 
 ### LH-FA-BUILD-009.a — Go-Layout des Repositories
@@ -386,7 +386,7 @@ Verfeinert [`LH-FA-BUILD-009`](lastenheft.md#lh-fa-build-009--repository-layout)
 Verfeinert [`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement).
 
 - Die Regeln werden im `lint`-Stage ([`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) per `golangci-lint` mit `depguard` durchgesetzt; Verstöße sind PR-blockierend.
-- Die `depguard`-Konfiguration in `.golangci.yml` ist deckungsgleich mit den Import-Regeln dieser Anforderung zu halten; Drift wird im Review zurückgewiesen.
+- Die `depguard`-Konfiguration in `.golangci.yml` ist deckungsgleich mit den Import-Regeln der Anforderung zu halten; Drift wird im Review zurückgewiesen.
 - `//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `Why:`-Kommentar dokumentiert.
 - `depguard`-Regeln gelten production-only; `*_test.go`-Dateien sind ausgenommen, damit Tests Fakes und Test-Libraries (`testify`, …) frei nutzen können.
 - Solange einzelne Schichten noch keine produktiven Pakete enthalten, dürfen `depguard`-Regelblöcke aktiv sein und nichts treffen — die Schicht-Regeln greifen automatisch, sobald das erste produktive Paket angelegt wird.
@@ -396,7 +396,7 @@ Verfeinert [`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-en
 Verfeinert [`LH-QA-004`](lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil).
 
 - Die Konfiguration lebt in `.golangci.yml` (v2-Schema).
-- Schwellen und Linter-Settings sind in `.golangci.yml` konfiguriert und in abgeleiteter Quality-Doku zu erklären; bei Drift gewinnt diese Anforderung, Config und Doku sind anzupassen.
+- Schwellen und Linter-Settings sind in `.golangci.yml` konfiguriert und in abgeleiteter Quality-Doku zu erklären; bei Drift gewinnt die Anforderung, Config und Doku sind anzupassen.
 - `//nolint`-Pragmas sind verboten. Pro-Pfad-Carveouts (z. B. Tests, `cmd/uboot`) werden zentral in `.golangci.yml` unter `issues.exclude-rules` mit `Why:`-Kommentar dokumentiert.
 - Verstöße brechen den `lint`-Stage ([`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) und damit `make gates`/`make ci`/`make fullbuild`.
 - Die konkrete Linter-Auswahl muss die hier genannten Anforderungen
