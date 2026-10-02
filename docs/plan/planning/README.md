@@ -37,7 +37,7 @@ Zwei bewusst getrennte Status-Mechanismen:
   Status lebt dort, nicht in einem Lifecycle-Verzeichnis.
 
 u-boot-Abweichungen vom Baseline-Default (dokumentiert in
-[`harness/conventions.md`](../../../harness/conventions.md), `MR-003`/`MR-002`):
+[`harness/conventions.md`](../../../harness/conventions.md), [`MR-003`](../../../harness/conventions/MR-003-roadmap-wellen.md)/[`MR-002`](../../../harness/conventions/MR-002-carveout-inventar.md)):
 
 - **Keine eigenständigen Welle-Plan-Dateien** und **keine
   `welle-NN-results.md`** — die Welle-Closure lebt vollständig im jeweiligen

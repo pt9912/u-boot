@@ -1,10 +1,10 @@
 # MR-006 — Modus-Deklaration pro Sub-Area
 
 - **Datum:** 2026-07-24
-- **Geltungsbereich:** Abschnitt Modus-Deklaration in [`conventions.md`](../../conventions.md).
-- **Ersetzt-Baseline-Regel:** [`grundlagen-bootstrap.md` §Modus pro Sub-Area: Greenfield vs Brownfield](../../../.harness/baseline/v6.13.0/regelwerk/grundlagen-bootstrap.md#modus-pro-sub-area-greenfield-vs-brownfield)
+- **Geltungsbereich:** Abschnitt Modus-Deklaration in [`conventions.md`](../conventions.md).
+- **Ersetzt-Baseline-Regel:** [`grundlagen-bootstrap.md` §Modus pro Sub-Area: Greenfield vs Brownfield](../../.harness/baseline/v6.13.0/regelwerk/grundlagen-bootstrap.md#modus-pro-sub-area-greenfield-vs-brownfield)
 - **Adaption:** u-boot traegt Bestandscode (`hexagon/`, `cmd/`, `internal/`) neben
-  den Doku-Sub-Areas. Der Abschnitt Modus-Deklaration unten ordnet jede Sub-Area
+  den Doku-Sub-Areas. Der Abschnitt Modus-Deklaration in `conventions.md` ordnet jede Sub-Area
   als GF/BF/Hybrid ein; jede BF-/Hybrid-Markierung traegt eine
   Graduation-Bedingung. **Audit ausgefuehrt (2026-07-25):** Der Erst-Pass
   (drei grobe Sub-Areas, pauschal GF) ist durch eine auditierte Einordnung
@@ -21,6 +21,6 @@
   Sub-Area; eine BF-Sub-Area ohne Graduation-Plan waere "permanente Ausnahme als
   temporaer getarnt".
 - **Aufloesungs-Trigger:** Audit erledigt; Delivery-Verweis im Slice
-  [`slice-harness-sub-area-modus-audit`](../../../docs/plan/planning/done/slice-harness-sub-area-modus-audit.md)
+  [`slice-harness-sub-area-modus-audit`](../../docs/plan/planning/done/slice-harness-sub-area-modus-audit.md)
   §9. Re-evaluieren bei jeder neuen Pfad-Familie im Produktivcode sowie beim
   Erfuellen einer der beiden Graduation-Bedingungen oben.

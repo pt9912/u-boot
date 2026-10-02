@@ -3,7 +3,7 @@
 - **Datum:** 2026-07-24
 - **Geltungsbereich:** Carveout-Ablage;
   [`docs/plan/planning/in-progress/carveouts.md`](../../docs/plan/planning/in-progress/carveouts.md),
-  [`AGENTS.md`](../../AGENTS.md) §3.16, `.d-check.yml` `matrix`.
+  [`AGENTS.md`](../../AGENTS.md) §3.15, `.d-check.yml` `matrix`.
 - **Ersetzt-Baseline-Regel:** [`modul-07-carveouts.md` §Ziel-Form: Carveout](../../.harness/baseline/v6.13.0/regelwerk/modul-07-carveouts.md#ziel-form-carveout)
 - **Adaption:** Carveouts werden **inventarisiert** in der einen Datei
   `docs/plan/planning/in-progress/carveouts.md` (mit Plan-Anker je Eintrag),

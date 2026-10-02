@@ -66,7 +66,8 @@ In dieser Reihenfolge lesen und auflösen:
 6. Ausführbare Harness-Verträge: [`Makefile`](Makefile), [`Dockerfile`](Dockerfile), [`.golangci.yml`](.golangci.yml) und [`.github/workflows/`](.github/workflows/).
 7. Nutzer-Doku unter [`docs/user/`](docs/user/) und Maintainer-Doku unter [`docs/maintainer/`](docs/maintainer/), besonders [`docs/maintainer/quality.md`](docs/maintainer/quality.md).
 8. [`README.md`](README.md), [`README.de.md`](README.de.md) und [`CHANGELOG.md`](CHANGELOG.md).
-9. **AGENTS.md (diese Datei)** und [`harness/README.md`](harness/README.md) — Harness-Einstieg.
+9. **AGENTS.md (diese Datei)** — Agent-Briefing und Hard Rules.
+10. [`harness/README.md`](harness/README.md) — Harness-Einstieg.
 
 ## 3. Harte Regeln
 
@@ -170,17 +171,7 @@ Reviews folgen [`harness/review.md`](harness/review.md): Findings werden als
 HIGH/MEDIUM/LOW/INFO klassifiziert und mit Quelle, Risiko und Verifizierbarkeit
 dokumentiert. Reviewer implementieren nicht und ersetzen keine Verification.
 
-### 3.9 Hexagonale Architektur
-
-Die Import- und Verantwortungsregeln aus [`spec/architecture.md`](spec/architecture.md)
-sind verbindlich:
-
-- `hexagon/application` kennt keine konkreten Adapter.
-- Ports bleiben kreuz-blind (`driving` importiert nicht `driven` und umgekehrt).
-- Konkrete Adapter werden nur im Wiring unter `cmd/uboot` verbunden.
-- Docker-/Compose-Zugriffe laufen über Ports und Adapter, nicht direkt aus Application-Code.
-
-### 3.10 Spec-Traceability
+### 3.9 Spec-Traceability
 
 Code-, Test- und Doku-Änderungen müssen die betroffenen `LH-*`, `ADR-*` oder
 Slice-IDs kennen. Neue öffentliche CLI-Verträge brauchen mindestens einen Spec-
@@ -189,7 +180,7 @@ Fehlermeldungen und generierte Dateien bleiben Englisch
 ([`LH-LESE-002`](spec/lastenheft.md#lh-lese-002--sprache)), auch wenn Plan- und
 Spec-Dokumente deutsch sind.
 
-### 3.11 Dokumentationsreferenzen
+### 3.10 Dokumentationsreferenzen
 
 Referenzen zwischen Lastenheft, Spezifikation, Architektur, ADRs, Slices,
 Carveouts und Roadmap/Wellen folgen
@@ -199,35 +190,35 @@ Kraft existiert nur auf aufwärtsgerichteten Inter-Layer-Kanten plus
 ADR-interner Lineage. Alles Richtung Slice, Carveout oder Roadmap ist Kontext,
 Traceability oder Buchführung, keine Spezifikation.
 
-### 3.12 Verification Evidence
+### 3.11 Verification Evidence
 
 Slice-Closure braucht Verification-Evidence nach
 [`harness/verification.md`](harness/verification.md). Gates allein reichen
 nicht: Die Evidence muss DoD, Spec-/ADR-IDs, ausgeführte Sensors, nicht
 ausgeführte Sensors und Carveouts sichtbar verbinden.
 
-### 3.13 Replay / Golden Sets
+### 3.12 Replay / Golden Sets
 
 Generator-Änderungen folgen [`harness/replay.md`](harness/replay.md). Neue oder
 geänderte CLI-Generatoren brauchen Golden Cases für Fresh-State, Idempotenz und
 relevante Safety-Pfade. Intentional geänderter Output muss in Slice, Test oder
 Commit begründet werden.
 
-### 3.14 Exit-Code-Verträge
+### 3.13 Exit-Code-Verträge
 
 Die Klassifikation aus
 [`LH-FA-CLI-006`](spec/lastenheft.md#lh-fa-cli-006--exit-codes) ist ein
 Produktvertrag. Neue Subcommands müssen ihre Fehlerpfade auf die bestehenden
 Exit-Code-Kategorien abbilden und Tests für relevante Sentinels pinnen.
 
-### 3.15 Managed-Block- und Dateisicherheit
+### 3.14 Managed-Block- und Dateisicherheit
 
 Generatoren und Re-Init-Pfade dürfen User-Dateien nicht opportunistisch
 überschreiben. Nutze die vorhandenen managed-block-, Plan-and-Execute-,
 Backup- und Two-Phase-Patterns. Destruktive Operationen brauchen die im
 Spec/Slice verlangte Bestätigungslogik.
 
-### 3.16 Planning-Lifecycle und Carveouts
+### 3.15 Planning-Lifecycle und Carveouts
 
 Planning-Artefakte folgen `open/ → next/ → in-progress/ → done/`;
 Lifecycle-Bewegungen erfolgen per `git mv` (siehe 3.3). Substanzielle

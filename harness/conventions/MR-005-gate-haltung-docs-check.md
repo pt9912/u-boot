@@ -86,7 +86,7 @@
 - **Gate-Image-Stand:** `v0.51.1` (digest-gepinnt, Bump 2026-07-25 von `0.2.0`).
   Der Pin war 50 Releases alt geworden - es gibt fuer ihn **keine**
   Aktualitaets-Routine (anders als fuer die Regelwerk-Baseline, s. Abschnitt
-  Freshness-Audit). Bump-Prozedur heute: `D_CHECK_IMAGE` im `Makefile` auf den
+  Freshness-Audit). Bump-Prozedur heute: `DCHECK_DIGEST` im `Makefile` auf den
   Digest der Zielversion, Trockenlauf gegen die **unveraenderte**
   `.d-check.yml` (Regression), dann diesen Stand nachziehen.
 - **Aufloesungs-Trigger:** Der Teil "Modul-Auswahl bei d-check-Upgrade

@@ -4,7 +4,7 @@
 - **Geltungsbereich:** `.harness/baseline/`,
   `tools/harness/fetch-baseline-cache.sh`, [`AGENTS.md`](../../AGENTS.md) §1,
   [`harness/README.md`](../README.md) §Guides, [`.d-check.yml`](../../.d-check.yml)
-  (`scan.ignore`), `.gitignore`, Abschnitt Baseline oben.
+  (`scan.ignore`), `.gitignore`, Abschnitt Baseline in [`conventions.md`](../conventions.md).
 - **Ersetzt-Baseline-Regel:** [`modul-02-harness-bootstrap.md` §Greenfield-Bootstrap: Schritt-Sequenz (Modul 2)](../../.harness/baseline/v6.13.0/regelwerk/modul-02-harness-bootstrap.md#greenfield-bootstrap-schritt-sequenz-modul-2)
 - **Adaption:** Die Lese-Form des adoptierten Regelwerks ist **committet
   vendored** (kein Remote-ZIP pro Lauf, kein Submodule):
@@ -13,14 +13,16 @@
   (Upstream-Default), damit die `../templates/...`-Verweise der Module netzlos
   aufloesen und die Templates als Kopiervorlage bereitstehen - **kein**
   Consumer-Ausschluss der Templates.
-- **Aufloesungs-Trigger / Bump-Prozedur:** Der `**Stand:**`-Pin ist nur die
+- **Begruendung:** Netzlose, offline verifizierbare Reproduzierbarkeit des Regelwerks auf jedem Checkout; beide Baeume, damit die Verweise der Module aufloesen und die Templates als Kopiervorlage bereitstehen.
+- **Aufloesungs-Trigger:** permanent, solange die Baseline vendored wird.
+- **Bump-Prozedur:** Der `**Stand:**`-Pin ist nur die
   **Skript-Eingabe**, **nicht** vollumfaenglicher Single Source of Truth. Ein
   Versions-Bump ist als Einheit auszufuehren und fasst mindestens vier Stellen an:
-  (1) `**Stand:**`-Pin oben, (2) Vendor-Pfad `.harness/baseline/<tag>/`
+  (1) `**Stand:**`-Pin in `conventions.md` §Baseline, (2) Vendor-Pfad `.harness/baseline/<tag>/`
   (Skript-Lauf), (3) `AGENTS.md`-Pointer, (4) `harness/README.md`-Guides-Zeile.
   Ein neuer Kurs-Tag wird ueber die Release-**Liste** erkannt und loest einen
   Review-Bump aus, keinen Auto-Update. Sensor, Exit-Codes, Kadenz und
-  Zustaendigkeit stehen im Abschnitt Freshness-Audit oben
+  Zustaendigkeit stehen im Abschnitt Freshness-Audit unten
   (`--check-freshness`, seit 2026-07-25 ausfuehrbar statt nur zugesagt).
 
 ### Sync-Trigger (T1/T2)
@@ -46,7 +48,7 @@ Baseline still.
 
 - **Sensor:** `tools/harness/fetch-baseline-cache.sh --check-freshness` -
   liest die Release-**Liste** von `pt9912/ai-harness-course` und vergleicht sie
-  mit dem `**Stand:**`-Pin oben. Read-only: kein Vendoring, kein Pin-Update,
+  mit dem `**Stand:**`-Pin in `conventions.md` §Baseline. Read-only: kein Vendoring, kein Pin-Update,
   kein Schreibzugriff auf `.harness/baseline/`.
 - **Exit-Codes:** `0` = Pin ist der neueste Tag; `3` = neuerer Tag vorhanden
   (Review-Bump faellig); `1` = Ausfuehrungsfehler (Netz, Werkzeug, Format,

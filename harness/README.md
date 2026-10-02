@@ -30,8 +30,8 @@ Diese Datei dupliziert sie nicht.
 | 10 | diese Datei | Harness-Einstieg |
 
 > Die Ränge 1–3 sind die drei Spec-Straten (Vertrag, Technik, Sicht). Die Ränge 5
-> und 6 sind eine repo-lokale Ergänzung der Baseline-Tabelle (aktive Slices und
-> ausführbare Verträge als eigene Ränge); Begründung in
+> und 6 (Roadmap/aktive Slices und ausführbare Verträge) sind eine repo-lokale
+> Ergänzung der Baseline-Tabelle; Begründung in
 > [`MR-001`](conventions/MR-001-source-precedence-drei-straten.md).
 
 ## Guides (Feedforward-Quellen)
@@ -67,18 +67,19 @@ Diese Datei dupliziert sie nicht.
 | `make govulncheck` | Go-Vulnerability-Scan | [`ADR-0004`](../docs/plan/adr/0004-ci-system.md) |
 | `make image-scan` | Trivy HIGH/CRITICAL gegen das Runtime-Image | [`ADR-0004`](../docs/plan/adr/0004-ci-system.md) |
 | `make verify-depguard` | on-demand: die `depguard`-Regeln feuern wirklich | [`ADR-0003`](../docs/plan/adr/0003-solid-nahes-lint-profil.md) |
-| `make doc-immutable RANGE="<base>..<head>"` | on-demand: Accepted-ADRs sind über eine Commit-Range unverändert (lokal `STAGED=1`); Aufruf mit Argument, daher nicht im Makefile-Gate-Index | [`ADR-0013`](../docs/plan/adr/0013-dokumentationsreferenzmodell.md) |
+| `make doc-immutable RANGE="<base>..<head>"` | on-demand: Accepted-ADRs sind über eine Commit-Range unverändert (lokal `STAGED=1`); Aufruf mit Argument, daher nicht im Makefile-Gate-Index | [`MR-005`](conventions.md#mr-005) |
 | `make gates` | alle inneren Gates: `lint` + `test` + `coverage-gate` + `docs-check` | — |
 | `make ci` | `gates` + `govulncheck` + `image-scan` | [`ADR-0004`](../docs/plan/adr/0004-ci-system.md) |
 | `make fullbuild` | volle Closure: `ci` + Runtime-Image-Build | — |
 
 **Aktueller Lauf-Status:** CI-Badge bzw. lokal `make help` / `make gates`.
+**Nicht behauptet** (geplant): — keine —.
 **Rote Gates:** keine strukturell roten; Begründung eines etwaigen Carveouts im Master-Inventar [`carveouts.md`](../docs/plan/planning/in-progress/carveouts.md).
 Läuft ein Sensor wegen Umgebung oder Sandbox nicht, wird der Grund im Handoff genannt; eine grüne Closure wird nicht behauptet, wenn der passende Sensor nicht lief.
 
 ## Traceability rules
 
-- PRs/Commits **müssen** mindestens eine `LH-*`- oder `ADR-*`-ID nennen.
+- PRs/Commits **müssen** mindestens eine `LH-*`-, `ADR-*`- oder Slice-ID nennen.
 - Neue oder geänderte Anforderungen brauchen einen Beleg: Test, Gate, Demo oder ADR.
 - Dokument-Referenzen folgen dem Referenzmodell ([`ADR-0013`](../docs/plan/adr/0013-dokumentationsreferenzmodell.md)): Normative Kraft nur auf aufwärtsgerichteten Kanten; Slice-, Carveout- und Roadmap-Kanten sind Kontext.
 - Slice-Closure braucht Verification-Evidence nach [`verification.md`](verification.md); Generator-Änderungen brauchen Replay-/Golden-Evidence nach [`replay.md`](replay.md).

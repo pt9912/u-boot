@@ -6,7 +6,10 @@
   `.d-check.yml` (Referenzmatrix).
 - **Ersetzt-Baseline-Regel:** [`grundlagen-source-precedence.md` §Source Precedence](../../.harness/baseline/v6.13.0/regelwerk/grundlagen-source-precedence.md#source-precedence)
 - **Adaption:** u-boot fuehrt eine Source-Precedence mit **drei**
-  Spec-Straten an den Raengen 1 bis 3 nach Baseline-Regelwerk `modul-03-spec.md`:
+  Spec-Straten an den Raengen 1 bis 3 (Baseline-Default) und zwei repo-lokalen
+  Zusatz-Raengen: Rang 5 fasst Roadmap und aktive Slices zusammen, Rang 6 fuehrt die
+  ausfuehrbaren Vertraege (`Makefile`, `Dockerfile`, `.golangci.yml`, Workflows) als eigenen
+  Rang; `AGENTS.md` und `harness/README.md` stehen als Raenge 9 und 10 nach Baseline-Regelwerk `modul-03-spec.md`:
   `contract_spec` ([`spec/lastenheft.md`](../../spec/lastenheft.md), Vertrag, das
   *Was*), `tech_spec` ([`spec/spezifikation.md`](../../spec/spezifikation.md),
   Technik, das *Wie genau*) und `view_spec`

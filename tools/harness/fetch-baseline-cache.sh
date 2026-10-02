@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # fetch-baseline-cache — materialisiert die lokale, netzlose Lese-Form des
 # adoptierten Betriebsregelwerks (AI-Harness-Kurs) als committet-vendored
-# Baseline (harness/conventions.md MR-004 „committet vendored", MR-007 Ortswahl
+# Baseline (harness/conventions/MR-004 „committet vendored", MR-007 Ortswahl
 # `.harness/`):
 #
 #   regelwerk → .harness/baseline/<tag>/regelwerk/   (COMMITTET, vendored)

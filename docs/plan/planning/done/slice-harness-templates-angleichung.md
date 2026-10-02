@@ -22,7 +22,7 @@ Der Projektinhaber verlangt, `harness/README.md`, `harness/conventions.md` und `
 
 ## Definition of Done
 
-- [x] Drei Dateien nach Vorlage gegliedert, zehn Adaptionen als Einzeldateien (zwei aufgelöst nach `done/`), Gate-Index zentral in `harness/README.md` (`.d-check.yml` `targets`), Verweise nachgezogen.
+- [x] Drei Dateien nach Vorlage gegliedert, zehn Adaptionen als Einzeldateien, Gate-Index zentral in `harness/README.md` (`.d-check.yml` `targets`), Verweise nachgezogen.
 - [x] `make gates` grün.
 
 ## Tranchen
@@ -39,7 +39,7 @@ Der Projektinhaber verlangt, `harness/README.md`, `harness/conventions.md` und `
 
 ## Closure
 
-- **Geliefert (`4c70f04`):** `AGENTS.md` mit den Abschnitten 1–6 der Vorlage (Hard Rules 3.1–3.7 nach Vorlage, repo-spezifische Rules als 3.8–3.16 unverändert im Inhalt, Gate-Index nur als Zeiger, Dokumentations-Regeln als Tabelle); `harness/README.md` mit allen Vorlagen-Abschnitten und dem einzigen Gate-Index (Target · Vertrag · Bindung); `harness/conventions.md` als Index (Purpose, Baseline, Konventions-Quellen, `MR-000`, Tabellen „Aktive“ und „Aufgelöste“ Adaptionen, Zusatzklassen, Modus-Deklaration, Glossar) mit zehn Adaptionen als Einzeldateien unter `harness/conventions/`; `MR-006` (Audit abgeschlossen) und `MR-008` (Change Request ausgeführt) liegen unter `done/`; Freshness-Audit und Sync-Trigger stehen jetzt in `MR-004`.
+- **Geliefert (`4c70f04`):** `AGENTS.md` mit den Abschnitten 1–6 der Vorlage (Hard Rules 3.1–3.7 nach Vorlage, repo-spezifische Rules als 3.8–3.15 unverändert im Inhalt, Gate-Index nur als Zeiger, Dokumentations-Regeln als Tabelle); `harness/README.md` mit allen Vorlagen-Abschnitten und dem einzigen Gate-Index (Target · Vertrag · Bindung); `harness/conventions.md` als Index (Purpose, Baseline, Konventions-Quellen, `MR-000`, Tabellen „Aktive“ und „Aufgelöste“ Adaptionen, Zusatzklassen, Modus-Deklaration, Glossar) mit zehn Adaptionen als Einzeldateien unter `harness/conventions/`; alle zehn Adaptionen sind aktiv (`MR-006` und `MR-008` tragen geltende Reste und bleiben im Index; „Aufgelöste Adaptionen“ ist leer); Freshness-Audit und Sync-Trigger stehen jetzt in `MR-004`.
 - **Anpassungen:** `.d-check.yml` `targets` (`doc-tables` und `authority` auf `harness/README.md`), Skript-Kommentar in `tools/harness/fetch-baseline-cache.sh` (`--verify` weiter ok), Verweise auf Abschnitte von `AGENTS.md` in den Adaptions-Dateien und der JSON-Vertragsdoku. Ersetzte-Baseline-Regel je Adaption verlinkt mit Anker in das vendorte Regelwerk (Linkprüfung grün).
 - **Sensoren:** `make gates` grün (lint, test, coverage-gate, docs-check); `tools/harness/fetch-baseline-cache.sh --verify` ok. Nicht ausgeführt: `make ci`, `make test-docker`.
-- **Review:** unabhängiges Review dieser Umstellung steht aus.
+- **Review (unabhängige Rolle):** `docs/reviews/2026-10-02-harness-templates-angleichung.md` — 0 HIGH, 4 MEDIUM, 6 LOW, 3 INFO; behoben: Bindung von `doc-immutable`, Pflichtfelder und Selbstverweise in `MR-004`, Rangzählung (AGENTS.md jetzt zehn Ränge wie die README) samt `MR-001`-Erweiterung, `MR-006`/`MR-008` zurück in den aktiven Index, abgeschnittene Index-Zellen, Verweise auf `conventions.md` für einzelne Adaptionen, Bump-Kette, Traceability-Regel; aus der Rückfrage des Projektinhabers entfällt die Hard Rule „Hexagonale Architektur“ in `AGENTS.md` (steht in `spec/architecture.md`). Bewusst offen: Sensors-Tabelle führt nur `doc-immutable` aus den `d-check.mk`-Targets (INFO).
