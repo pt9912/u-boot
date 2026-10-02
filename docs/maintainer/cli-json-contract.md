@@ -1212,7 +1212,7 @@ durch den `DockerEngine`-Adapter ausserhalb dieser Matrix.
 kanonischen Maschinen-Schnittstelle; HTTP-/gRPC-/WebSocket-
 Adapter sind gegen genau dieses Surface abgewogen und verworfen.
 Dieses Doku ist der Liefer-Anker für [ADR-0010](../plan/adr/0010-kein-http-driving-adapter.md) §Trigger 2. [ADR-0010](../plan/adr/0010-kein-http-driving-adapter.md)
-selbst bleibt **unverändert** (AGENTS.md §ADR-Disziplin: accepted
+selbst bleibt **unverändert** (AGENTS.md §3.5: accepted
 ADRs werden nicht umgeschrieben). **Cluster-T_close-Entscheid: keine
 neue Folge-ADR** — T_close lieferte nur das mit [ADR-0010](../plan/adr/0010-kein-http-driving-adapter.md) bereits
 beschlossene Surface aus (kein neuer Architektur-Entscheid); die

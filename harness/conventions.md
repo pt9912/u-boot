@@ -1,472 +1,108 @@
-# Harness-Konventionen - u-boot
+# Harness-Konventionen — u-boot
 
 ## Purpose
 
 Diese Datei deklariert die *repo-lokalen* Strukturregeln von `u-boot`
-gegenueber der adoptierten Harness-Konvention (Baseline). Sie ist der
-Default-Ort fuer:
+gegenüber der adoptierten Harnesskonvention (Baseline). Sie ist der
+Default-Ort für:
 
-- **Adaptionen** gegenueber der Baseline (mit Begruendung und Aufloesungs-Trigger).
-- **ID-Schema-Deklaration** - welches Praefix-Schema dieses Repo nutzt.
-- **Zusatzklassen-Deklarationen** fuer repo-spezifische Bindung-Klassen der
-  Sensors-Tabelle, die ueber die kanonischen hinausgehen.
-- **Modus-Deklarationen** pro Sub-Area (Greenfield / Brownfield / Hybrid).
+- **Adaptionen** ggü. der Baseline (mit Begründung und Auflösungs-Trigger).
+- **ID-Schema-Deklaration** — welches Präfix-Schema dieses Repo nutzt.
+  Der Baseline-Default wird als Teil der `MR-000`-Aussage festgehalten;
+  ein abweichendes Präfix oder Schema ist ein eigener `MR`-Eintrag.
+- **Zusatzklassen-Deklarationen** für repo-spezifische
+  Bindung-Klassen in der Sensors-Tabelle, die über die vier kanonischen
+  hinausgehen (ADR, Carveout, Schwelle, Reproduzierbarkeit).
+- **Modus-Deklarationen** pro Sub-Area (Greenfield / Brownfield /
+  Hybrid) inklusive Konvergenz-Auftrag bei BF.
 
-Sie **dupliziert keinen Baseline-Text** - sie verweist und ergaenzt. Bei
-Konflikt zwischen dieser Datei und einer kanonischen Quelle gilt die kanonische
-Quelle (Source Precedence). Diese Datei ist konformitaets-bringend fuer
-*Form*-Fragen, nicht autoritativ ueber Inhalt.
+Bei Konflikt zwischen dieser Datei und einer kanonischen Quelle gilt die
+kanonische Quelle (Source Precedence). Diese Datei ist konformitäts-
+bringend für *Form*-Fragen, nicht autoritativ über Inhalt.
 
 ## Baseline
 
 - **Konvention:** AI-Harness-Kurs (`pt9912/ai-harness-course`)
 - **Stand:** v6.13.0 (Regelwerk-Bundle)
-- **Datum der Adoption:** 2026-07-24 (Erst-Adoption direkt auf `v3.5.1`);
-  **Review-Bump auf `v3.5.2` am 2026-07-25** (Kurs-Welle 34), ausgeloest vom
-  ersten Freshness-Audit-Lauf. Delta-Lektuere und `MR-*`-Gegenprobe im Slice
-  [`slice-harness-baseline-bump-review-v3.5.2`](../docs/plan/planning/done/slice-harness-baseline-bump-review-v3.5.2.md).
-  **Review-Bump auf `v6.13.0` am 2026-09-29** (46 Releases, drei
-  Major-Spruege v4/v5/v6), ausgeloesst vom naechsten Freshness-Audit-Lauf
-  (Exit 3); Delta-Lektuere und `MR-*`-Gegenprobe im Slice
-  [`slice-harness-regelwerk-adoption-v6.13.0`](../docs/plan/planning/done/slice-harness-regelwerk-adoption-v6.13.0.md).
-- **Integritaets-Pin:** `.harness/baseline/v6.13.0/SHA256SUMS` ueber den vendorten
-  Bestand (`regelwerk/` + `templates/`); offline pruefbar per
+- **Datum der Adoption:** 2026-07-24 (Erst-Adoption direkt auf `v3.5.1`; Review-Bumps auf `v3.5.2` am 2026-07-25 und auf `v6.13.0` am 2026-09-29, Protokoll in den Bump-Slices, Verfahren in [`MR-004`](conventions/MR-004-regelwerk-vendored.md))
+- **Integritäts-Pin:** `.harness/baseline/v6.13.0/SHA256SUMS` über den vendorten
+  Bestand (`regelwerk/` + `templates/`); offline prüfbar per
   `tools/harness/fetch-baseline-cache.sh --verify`.
 
 ## Adoptierte Konventions-Quellen
 
 - **Extern (Lehrmaterial):** <https://github.com/pt9912/ai-harness-course/tree/v6.13.0>
-- **Regelwerk (committet vendored, `MR-004`/`MR-007`):** die Lese-Form ist das
-  nach Modulen und Grundlagen-Abschnitten aufgeteilte Bundle, entpackt und
-  committet unter `.harness/baseline/v6.13.0/regelwerk/` (Index
-  `regelwerk/README.md`), samt `.harness/baseline/v6.13.0/SHA256SUMS` - netzlos
-  auf jedem Checkout, offline verifizierbar. Bundle-Quelle: Release-Asset
-  `lab-regelwerk.zip`, Tag `v6.13.0`.
-- **Templates (committet vendored, `MR-004`):** die Skelett-Vorlagen liegen
-  vendored unter `.harness/baseline/v6.13.0/templates/` (aus demselben Bundle)
-  und tragen zwei Rollen: **Referenz-Form**, auf die das Regelwerk mit
-  `../templates/...` als "Ziel-Form" verweist (netzlos, weil parallel zu
-  `regelwerk/` vendored), und **Kopiervorlage** - beim Anlegen neuer Artefakte
-  (ADR, Slice, Welle, Carveout, Review-Report) das passende Template **kopieren
-  und ausfuellen** statt frei zu formulieren.
-- **In-Repo (verkoerperte Form):** die Gate-Baseline (`.d-check.yml`, `Makefile`,
+- **Vendored Baseline (Regelwerk + Templates):** aus dem self-contained
+  Release-Asset `lab-regelwerk.zip` (Tag `v6.13.0`) nach
+  `.harness/baseline/v6.13.0/{regelwerk,templates}/` entpackt (netzlos,
+  `SHA256SUMS`); Index `regelwerk/README.md`. Die Skelett-Vorlagen unter
+  `templates/` sind Referenz-Form („Ziel-Form“ des Regelwerks) und
+  Kopiervorlage für neue Artefakte (ADR, Slice, Welle, Carveout, Review-Report).
+  Bump-Prozedur, Sync-Trigger und Freshness-Audit stehen in
+  [`MR-004`](conventions/MR-004-regelwerk-vendored.md).
+- **In-Repo (verkörperte Form):** die Gate-Baseline (`.d-check.yml`, `Makefile`,
   `Dockerfile`, `.golangci.yml`, `.github/workflows/`) und die
   autoren-gepflegte Harness-Prosa unter `harness/` (`README.md`, `roles.md`,
-  `review.md`, `verification.md`, `replay.md`, diese Datei).
-
-## Sync-Trigger (T1/T2)
-
-Begriffe aus dem Regelwerk (`modul-02-harness-bootstrap`): Ein Pointer auf die
-vendored Baseline muss an **zwei** Stellen synchron gehalten werden.
-
-- **T1** - Pointer in [`harness/README.md`](README.md) Abschnitt Guides (Verweis auf das
-  vendored Regelwerk und diese Datei).
-- **T2** - Pointer in der Source-Precedence-/Kopf-Sektion von
-  [`AGENTS.md`](../AGENTS.md) (Verweis auf die vendored Baseline + Lesemodell).
-
-Beide zeigen auf `.harness/baseline/v6.13.0/regelwerk/README.md` (Index) und
-werden bei einem Baseline-Bump gemeinsam nachgezogen (`MR-004` Bump-Prozedur).
-Fundstelle: `.harness/baseline/v6.13.0/regelwerk/modul-02-harness-bootstrap.md`.
-
-## Freshness-Audit
-
-Der Integritaets-Pin (`SHA256SUMS`) beantwortet *"ist der vendorte Bestand
-unversehrt?"*. Das Freshness-Audit beantwortet die andere Frage: *"ist der
-gepinnte Stand noch der aktuelle?"*. Ohne den zweiten Sensor altert die
-Baseline still.
-
-- **Sensor:** `tools/harness/fetch-baseline-cache.sh --check-freshness` -
-  liest die Release-**Liste** von `pt9912/ai-harness-course` und vergleicht sie
-  mit dem `**Stand:**`-Pin oben. Read-only: kein Vendoring, kein Pin-Update,
-  kein Schreibzugriff auf `.harness/baseline/`.
-- **Exit-Codes:** `0` = Pin ist der neueste Tag; `3` = neuerer Tag vorhanden
-  (Review-Bump faellig); `1` = Ausfuehrungsfehler (Netz, Werkzeug, Format,
-  Pin nicht in der Liste). Ein Fehler ist nie ein stilles "alles aktuell" -
-  Fail-loud ist Pflicht, weil ein Falsch-Negativ die Routine wertlos macht.
-- **Kadenz:** (a) **ereignisgetrieben** - jeder Harness-/Baseline-Slice fuehrt
-  den Check aus und haelt sein Ergebnis in der Verification Evidence fest,
-  auch den Negativbefund; (b) **kalendarisch** - mindestens quartalsweise,
-  falls in dem Zeitraum kein Harness-Slice lief. Die Ereignis-Kadenz ist die
-  tragende; die kalendarische ist nur das Sicherheitsnetz gegen lange Pausen.
-- **Zustaendig:** die Rolle, die den jeweiligen Harness-/Baseline-Slice fuehrt.
-- **Auslöser bei Befund:** ein **Review-Bump** - ein eigener Slice, der die
-  Aenderungen zwischen den Tags liest und den Bump als Einheit ausfuehrt
-  (`MR-004` Bump-Prozedur: Pin, Vendor-Pfad, `AGENTS.md`, `harness/README.md`).
-  **Kein Auto-Update**: Ein Regelwerks-Wechsel kann Adaptionen dieses Ledgers
-  ungueltig machen; das ist eine Lese- und Entscheidungsleistung, nichts, was
-  ein Skript still tut.
-- **Nicht-Ziele:** kein Eintrag in `make gates` oder `make ci` - ein
-  Kurs-Release darf u-boots Pipeline nicht rot faerben; kein automatischer
-  Vendor-Lauf; keine Pin-Mutation durch den Check.
+  `review.md`, `verification.md`, `replay.md`, diese Datei samt
+  `conventions/`) sowie `AGENTS.md`.
 
 ## Adaptions-Block
 
-### MR-000 - Baseline-Aussage
+Regeln dieser Sektion: Diese Datei trägt den **Index**, nicht die Einträge.
+Jede Adaption ist eine eigene Datei unter `harness/conventions/`, kopiert aus
+`harness/conventions/MR-NNN-titel.template.md` der vendored Baseline;
+ist ihr Auflösungs-Trigger eingetreten, wandert sie per `git mv` nach
+`conventions/done/`. Der Zustand ist die Verzeichnis-Position, kein
+Status-Feld. Der Grund für den Schnitt: Was hier steht, liest **jeder**
+Agentenlauf — aufgelöste Adaptionen gehören nicht in diesen Pfad
+(Baseline-Regelwerk `grundlagen-harness-dateien.md`
+§harness/conventions.md als Konventionsspeicher).
+
+### MR-000 — Baseline-Aussage
+
+Bleibt hier: Sie ist keine Adaption, sondern die Adoptions-Erklärung, und
+sie gilt für jeden Lauf.
 
 - **Datum:** 2026-07-24
 - **Geltungsbereich:** gesamtes Repo
-- **Adaption:** *keine inhaltlichen Adaptionen gegenueber Baseline-Default fuer
-  Verzeichniskonvention, Lifecycle-Regeln (`open` -> `next` -> `in-progress` ->
-  `done`) und die etablierten ID-Schemata* (`ADR-<NNNN>`, `LH-*`,
-  `slice-<phase>-<slug>`,
-  `tranche-<nr>-<slug>`, Carveout-Familie `CO-*`). Konkrete Abweichungen sind als
-  eigene `MR-<NNN>` unten dokumentiert.
-- **Begruendung:** Initial-Setzung. u-boot war vor der Adoption bereits
-  harness-geformt; dieser Block haelt den konformen Grundstand fest, spaetere
+- **Ersetzt-Baseline-Regel:** — *(keine; dieser Eintrag ist die
+  Adoptions-Erklärung, keine Adaption)*
+- **Adaption:** *keine inhaltlichen Adaptionen ggü. Baseline-Default
+  für Verzeichniskonvention, Lifecycle-Regeln (`open` → `next` → `in-progress` →
+  `done`), Carveout-Disziplin und ID-Schema:* Vertrags-Präfix `LH`
+  (`LH-FA-*`, `LH-QA-*`, `LH-NFA-*` u. a. Familien des Lastenhefts), `SPEC-<NNN>` und
+  `ARC-<NNN>` (fest, kodieren das Stratum), `ADR-<NNNN>`, `CO-<NNN>`,
+  `slice-<phase>-<slug>`, `tranche-<nr>-<slug>`, `MR-<NNN>`. Ein Bereichssegment
+  wird nicht geführt (ein schreibender Entwickler-Kontext, Zählraum repo-weit).
+  Konkrete Abweichungen sind als eigene `MR-<NNN>` im Index unten dokumentiert.
+- **Begründung:** Initial-Setzung. u-boot war vor der Adoption bereits
+  harness-geformt; dieser Block hält den konformen Grundstand fest, spätere
   Adaptionen folgen als `MR-<NNN>`.
-- **Aufloesungs-Trigger:** permanent.
+- **Auflösungs-Trigger:** permanent.
 
-### MR-001 - Source Precedence mit drei Spec-Straten (Vollform)
+### Aktive Adaptionen
 
-- **Datum:** 2026-10-02 (Fassung 2; Fassung 1 vom 2026-07-24 fuehrte nur zwei Straten und liess das Technik-Stratum bewusst weg)
-- **Geltungsbereich:** [`AGENTS.md`](../AGENTS.md) Abschnitt Source Precedence,
-  [`harness/README.md`](README.md) Abschnitt Source Precedence,
-  `.d-check.yml` (Referenzmatrix).
-- **Adaption:** u-boot fuehrt eine Source-Precedence mit **drei**
-  Spec-Straten an den Raengen 1 bis 3 nach Baseline-Regelwerk `modul-03-spec.md`:
-  `contract_spec` ([`spec/lastenheft.md`](../spec/lastenheft.md), Vertrag, das
-  *Was*), `tech_spec` ([`spec/spezifikation.md`](../spec/spezifikation.md),
-  Technik, das *Wie genau*) und `view_spec`
-  ([`spec/architecture.md`](../spec/architecture.md), Sicht, das *Wodurch*).
-  Konfliktregel: Lastenheft vor Spezifikation vor Architektur - die untere
-  Schicht praezisiert, erweitert nie. Die **Decken-Regel** gilt fuer alle drei:
-  kein Spec-Stratum nennt eine ADR, einen Slice, einen Carveout oder die
-  Roadmap; die Spezifikation verweist nur aufwaerts auf das Lastenheft.
-  Repo-Klasse: **Tooling/Referenz**.
-- **ID-Schemata (Technik-Stratum):** Eine **Verfeinerung** einer einzelnen
-  Anforderung traegt deren Kennung mit Buchstabensuffix (`<Anforderungs-ID>.a`,
-  `.b`, ...); alles, was keine einzelne Anforderung verfeinert (Datenschemata,
-  Defaults, Fehler-Codes, Metrik-Felder, externe Vertraege), traegt
-  `SPEC-<NNN>` (dreistellig, fortlaufend je Datei). Eine `SPEC-*` ist eine
-  Adresse, keine Anforderung. Die Sicht fuehrt `ARC-<NNN>` fuer Komponenten.
-- **Begruendung:** Fassung 1 stuetzte sich auf die Optionalitaet des
-  Technik-Stratums; das Lastenheft wuchs dadurch auf rund 3000 Zeilen und
-  vermischte Vertrag und Technik (Schemata, Defaults, Build-Details). Das
-  Regelwerk (v6.13.0) macht alle drei Straten obligatorisch: Technik im
-  Vertrag zu falten verschiebt den Aenderungs-Prozess (nur per Change Request
-  aenderbar, keine schaerfende ADR moeglich). Der Projektinhaber hat die
-  Vollform am 2026-10-02 beschlossen.
-- **Aufloesungs-Trigger:** permanent. Die Befuellung der Spezifikation ist
-  Gegenstand der Welle `welle-spec-technik-stratum` (Roadmap).
+| MR | Titel | Geltungsbereich | Ersetzt-Baseline-Regel |
+|---|---|---|---|
+| [001](conventions/MR-001-source-precedence-drei-straten.md) <a id="mr-001"></a> | Source Precedence mit drei Spec-Straten (Vollform) | `AGENTS.md` Abschnitt Source Precedence, `harness/README.md` Abschnitt Source Precedence, `.d-check.yml` (Referenzmatrix). | [`grundlagen-source-precedence.md` §Source Precedence](../.harness/baseline/v6.13.0/regelwerk/grundlagen-source-precedence.md#source-precedence) |
+| [002](conventions/MR-002-carveout-inventar.md) <a id="mr-002"></a> | Carveout-Inventar an fester Stelle statt `docs/plan/carveouts/` | Carveout-Ablage; `docs/plan/planning/in-progress/carveouts.md`, `AGENTS.md` Abschnitt Planning-Lifecycle, `.d-check.yml` `matrix`. | [`modul-07-carveouts.md` §Ziel-Form: Carveout](../.harness/baseline/v6.13.0/regelwerk/modul-07-carveouts.md#ziel-form-carveout) |
+| [003](conventions/MR-003-roadmap-wellen.md) <a id="mr-003"></a> | Roadmap folgt Wellen-Template; Release-Versionen = Wellen; Ort in-progress/ | `docs/plan/planning/in-progress/roadmap.md`, `docs/plan/planning/README.md`. | [`modul-06-roadmap.md` §Roadmap-Struktur: fünf Abschnitte (Modul 6)](../.harness/baseline/v6.13.0/regelwerk/modul-06-roadmap.md#roadmap-struktur-fünf-abschnitte-modul-6) |
+| [004](conventions/MR-004-regelwerk-vendored.md) <a id="mr-004"></a> | Regelwerk-Lese-Form committet vendored; Baseline-Pin v6.13.0; beide Baeume | `.harness/baseline/`, `tools/harness/fetch-baseline-cache.sh`, `AGENTS.md` Abschnitt "Betriebsregelwerk (vendored Baseline)", `harness/READM | [`modul-02-harness-bootstrap.md` §Greenfield-Bootstrap: Schritt-Sequenz (Modul 2)](../.harness/baseline/v6.13.0/regelwerk/modul-02-harness-bootstrap.md#greenfield-bootstrap-schritt-sequenz-modul-2) |
+| [005](conventions/MR-005-gate-haltung-docs-check.md) <a id="mr-005"></a> | Gate-Haltung: `docs-check` via direktem Container-Lauf; `scan.ignore` erweitert | `.d-check.yml`, `Makefile` (`docs-check`). | [`modul-02-harness-bootstrap.md` §Gate-Fragment `d-check.mk` (Schritt 2)](../.harness/baseline/v6.13.0/regelwerk/modul-02-harness-bootstrap.md#gate-fragment-d-checkmk-schritt-2) |
+| [007](conventions/MR-007-ortswahl-harness-verzeichnis.md) <a id="mr-007"></a> | Ortswahl `.harness/` (dot-prefixed, committet) neben `harness/` | `.harness/` (vendored Baseline, kuenftig `.harness/skills/`), `harness/` (Autoren-Prosa), `.gitignore`. | [`grundlagen-harness-dateien.md` §Verzeichniskonvention](../.harness/baseline/v6.13.0/regelwerk/grundlagen-harness-dateien.md#verzeichniskonvention) |
+| [009](conventions/MR-009-skills-und-review-ablage.md) <a id="mr-009"></a> | Skill-Dateien unter `.harness/skills/`, Review-Reports unter `docs/reviews/` | `.harness/skills/reviewer.md`, `.harness/skills/closure-note-reviewer.md`, `docs/reviews/` (Ablage + README); Quellen-Rolle von `review.md`  | [`modul-10-review-harness.md` §Ziel-Form: Reviewer-Skill](../.harness/baseline/v6.13.0/regelwerk/modul-10-review-harness.md#ziel-form-reviewer-skill) |
+| [010](conventions/MR-010-architektur-sicht-abschnittsfolge.md) <a id="mr-010"></a> | Architektur-Sicht: Vorlagen-Inhalt, erweiterte Abschnittsfolge | `spec/architecture.md` (Sicht-Stratum). | [`modul-03-spec.md` §Ziel-Form: Architektur-Sicht](../.harness/baseline/v6.13.0/regelwerk/modul-03-spec.md#ziel-form-architektur-sicht) |
 
-### MR-002 - Carveout-Inventar an fester Stelle statt `docs/plan/carveouts/`
+### Aufgelöste Adaptionen
 
-- **Datum:** 2026-07-24
-- **Geltungsbereich:** Carveout-Ablage;
-  [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md),
-  [`AGENTS.md`](../AGENTS.md) Abschnitt Planning-Lifecycle, `.d-check.yml` `matrix`.
-- **Adaption:** Carveouts werden **inventarisiert** in der einen Datei
-  `docs/plan/planning/in-progress/carveouts.md` (mit Plan-Anker je Eintrag),
-  nicht als je eine Datei `docs/plan/carveouts/CO-<NNN>-<titel>.md`. Das
-  `CO-*`-Schema bleibt fuer die ID-Vergabe gueltig.
-- **Begruendung:** Etablierte u-boot-Struktur, bereits in `AGENTS.md` und der
-  d-check-`matrix` (Klasse `carveout`) verankert; eine zusaetzliche
-  Ein-Datei-pro-Carveout-Ebene braechte keinen Mehrwert und erzeugte Drift.
-- **Aufloesungs-Trigger:** permanent, solange Carveouts zentral inventarisiert
-  werden.
+| MR | aufgelöst durch |
+|---|---|
+| [006](conventions/done/MR-006-modus-deklaration.md) <a id="mr-006"></a> | — (Audit abgeschlossen; das Ergebnis steht im Abschnitt Modus-Deklaration unten) |
+| [008](conventions/done/MR-008-adr-form.md) <a id="mr-008"></a> | — (Change Request ausgeführt: MADR-Form im Lastenheft, Version 0.2.0) |
 
-### MR-003 - Roadmap folgt Wellen-Template; Release-Versionen = Wellen; Ort in-progress/
+## Zusatzklassen-Deklaration für Sensors-Bindung
 
-- **Datum:** 2026-07-24
-- **Geltungsbereich:**
-  [`docs/plan/planning/in-progress/roadmap.md`](../docs/plan/planning/in-progress/roadmap.md),
-  [`docs/plan/planning/README.md`](../docs/plan/planning/README.md).
-- **Adaption:** Die Roadmap folgt der `roadmap.template.md`-Struktur der
-  vendorten Baseline
-  (Aktuelle Welle, Naechste Wellen, Meilensteine, Abhaengigkeitsgraph,
-  Abgeschlossene Wellen, Historische Trigger-Verschiebungen). u-boots
-  **Release-Versionen sind die Wellen**; Termine erscheinen nur als *Konsequenz*
-  einer abgeschlossenen Welle (Release-Datum), nicht als Treiber (Template-
-  Format-Regel "Wellen, keine Termine" damit gewahrt). Zwei Orts-/Form-
-  Abweichungen: (a) die Roadmap liegt unter
-  `docs/plan/planning/in-progress/roadmap.md` (nicht
-  `docs/plan/planning/roadmap.md` - das Regelwerk nennt beide Pfade; u-boot loest
-  zugunsten des Lifecycle-Verzeichnisses auf); (b) es gibt **keine**
-  eigenstaendigen `welle-NN-results.md` und keine Wellen-Plan-Dateien - die
-  Welle-Closure lebt im jeweiligen `done/`-Release-Cut-Slice (Detailquelle),
-  Wellen sonst inline in der Roadmap.
-- **Begruendung:** Die Template-Struktur macht Wellen-Reihenfolge, Trigger und
-  Abhaengigkeiten explizit. u-boot liefert dated Releases, aber scope-getrieben
-  (Datum = wann Scope fertig war, kein Deadline) - kompatibel mit der
-  Template-Format-Regel. Die `welle-NN-results.md`-Ebene entfaellt, weil der
-  `done/`-Release-Cut-Slice die Closure bereits vollstaendig traegt.
-- **Aufloesungs-Trigger:** permanent, solange Release-Versionen die Wellen sind.
-
-### MR-004 - Regelwerk-Lese-Form committet vendored; Baseline-Pin v6.13.0; beide Baeume
-
-- **Datum:** 2026-07-24
-- **Geltungsbereich:** `.harness/baseline/`,
-  `tools/harness/fetch-baseline-cache.sh`, [`AGENTS.md`](../AGENTS.md) Abschnitt
-  "Betriebsregelwerk (vendored Baseline)",
-  [`harness/README.md`](README.md) Abschnitt Guides, [`.d-check.yml`](../.d-check.yml)
-  (`scan.ignore`), `.gitignore`, Abschnitt Baseline oben.
-- **Adaption:** Die Lese-Form des adoptierten Regelwerks ist **committet
-  vendored** (kein Remote-ZIP pro Lauf, kein Submodule):
-  `.harness/baseline/v6.13.0/{regelwerk,templates}/` + `SHA256SUMS`, netzlos auf
-  jedem Checkout, offline verifizierbar. u-boot vendored **beide** Baeume
-  (Upstream-Default), damit die `../templates/...`-Verweise der Module netzlos
-  aufloesen und die Templates als Kopiervorlage bereitstehen - **kein**
-  Consumer-Ausschluss der Templates.
-- **Aufloesungs-Trigger / Bump-Prozedur:** Der `**Stand:**`-Pin ist nur die
-  **Skript-Eingabe**, **nicht** vollumfaenglicher Single Source of Truth. Ein
-  Versions-Bump ist als Einheit auszufuehren und fasst mindestens vier Stellen an:
-  (1) `**Stand:**`-Pin oben, (2) Vendor-Pfad `.harness/baseline/<tag>/`
-  (Skript-Lauf), (3) `AGENTS.md`-Pointer, (4) `harness/README.md`-Guides-Zeile.
-  Ein neuer Kurs-Tag wird ueber die Release-**Liste** erkannt und loest einen
-  Review-Bump aus, keinen Auto-Update. Sensor, Exit-Codes, Kadenz und
-  Zustaendigkeit stehen im Abschnitt Freshness-Audit oben
-  (`--check-freshness`, seit 2026-07-25 ausfuehrbar statt nur zugesagt).
-
-### MR-005 - Gate-Haltung: `docs-check` via direktem Container-Lauf; `scan.ignore` erweitert
-
-- **Datum:** 2026-07-24
-- **Geltungsbereich:** [`.d-check.yml`](../.d-check.yml), [`Makefile`](../Makefile)
-  (`docs-check`).
-- **Adaption (neu gefasst 2026-07-25):** u-boot bindet das **tool-generierte
-  Fragment** `d-check.mk` per `include` ein (`--print-mk`) und haelt `docs-check`
-  als duennen Alias auf dessen `doc-check`. Der Digest-Pin lebt als
-  `DCHECK_DIGEST` im `Makefile`, **nicht** im Fragment - ein Re-Generieren
-  ueberschreibt ihn damit nicht. Aktive Module:
-  `[links, anchors, ids, matrix, planning, targets]`.
-  **Arbeitsfluss-Regel aus `planning` (2026-07-25):** Das Modul koppelt "die
-  Roadmap benennt eine aktive Welle" an "ein `slice-*` liegt in `in-progress/`".
-  Eine deklarierte Welle ohne Slice in Arbeit ist damit ein **Befund**, kein
-  Zwischenzustand - wer einen Slice schliesst, zieht im selben Commit den
-  naechsten nach oder schliesst die Welle. Bewusst uebernommen statt
-  wegkonfiguriert: Eine Roadmap, die Aktivitaet behauptet, die nicht
-  stattfindet, ist genau die Drift, die vorher nur per Aufmerksamkeit auffiel.
-  **`targets`-Abgrenzung:** Autoritaet ist die Gate-Tabelle in
-  [`AGENTS.md`](../AGENTS.md) §Quality Gates; sie fuehrt Harness-**Sensoren**,
-  nicht jede Makefile-Regel. Acht Build-/Utility-Regeln stehen einzeln benannt
-  in `exempt-targets` - eine Bereichsabgrenzung, **kein** Carveout (es wird
-  keine Pruefung ausgesetzt).
-  **`ids`-Linkpolitik (seit 2026-07-25):** Alle vier Muster laufen mit
-  `link-policy: always` - Kennungen sind auch **innerhalb von Code-Spans**
-  linkpflichtig, nicht nur im nackten Fliesstext. **Kein `exempt-paths`,
-  nirgends.** Ein Verzeichnis-Glob haette den Bestand *und* jedes kuenftige
-  Dokument ausgenommen; stattdessen drei zeilengenaue Mechanismen:
-  (1) verlinken, wo die Kennung eine echte Referenz ist - in `done/` ist das
-  ausdruecklich zulaessig, weil
-  [`LH-FA-PROJDOCS-003`](../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)
-  "Querverweise" als erlaubte nachtraegliche Korrektur nennt;
-  (2) `d-check:ignore` **je Zeile**, wo die Kennung ein *Beleg* ist und kein
-  Verweis (JSON-Payload-Beispiel, `pfad:`-Feld eines Review-Findings, das den
-  Fundort zum Pruefzeitpunkt festhaelt) - die Begruendung steht an Ort und
-  Stelle; (3) Bereichs-Schreibweisen (`LH-FA-INIT-001..007`) werden zu  <!-- d-check:ignore (Notations-Beispiel, keine Referenz) -->
-  verlinkten Paaren aufgeloest, wie in
-  [`spec/architecture.md`](../spec/architecture.md) laengst ueblich.
-  **Immutabilitaets-Sensor (seit 2026-07-25):** Das Modul `vcs` schuetzt
-  **Accepted-ADRs** ueber eine Commit-Range (`make doc-immutable RANGE=…`,
-  `STAGED=1` lokal) - kein Default-Modul, weil es eine Range braucht.
-  `immutable-when: '^Accepted$'` trifft u-boots Form (Status als Zeile unter
-  `## Status`, nicht als Inline-Feld); die Status-Trennung laeuft ueber
-  `exclude-sections: [Status, Geschichte]`, weil `status-line` nur Kopf-Felder
-  strippt und der zulaessige Uebergang nach `Superseded by <NNNN>-<slug>` sonst
-  als Drift meldet (gemessen). **`done/`-Slices sind bewusst nicht erfasst:**
-  Ihre Regel "nur korrigierend aenderbar" ist semantisch; ein Diff-Vergleich
-  wuerde jede erlaubte Querverweis-Korrektur als Drift melden. Ein Sensor, der
-  die eigene Regel bricht, ist schlechter als keiner.
-  Das `slice`-Muster traegt zusaetzlich ein Versions-Suffix
-  (`(?:\.[0-9]+)*`), damit ein Name wie `slice-...-v3.5.2` vollstaendig
-  matcht statt am Punkt abzubrechen. Bewusst **kein** `MR-<NNN>`-ID-Pattern - die
-  Adaptions-IDs dieses Ledgers bleiben linkfrei. `.harness/baseline/**` liegt im
-  `scan.ignore` (tag-agnostischer Glob `**`), damit die repo-relativen Links der
-  vendorten Regelwerk-/Template-Dateien nicht gewertet werden.
-  **RTM-Trace (seit 2026-09-29):** `trace.slices` (dir `docs/plan/planning`,
-  Pattern `^(slice-.+)\.md$`) schliesst u-boots Kennungsform an. Die Belegsicht
-  bleibt auf die Liefer-Familien `LH-FA-*`/`LH-QA-*` (Default
-  `requirements.id-pattern`) beschaenkt — Lesehinweise, Abgrenzungen,
-  Zielbestimmung, Risiken u. a. sind strukturell belegfrei und wuerden als
-  Waisen nur Rauschen erzeugen. `ids`-Muster um `ÄÖÜ` ergaenzt
-  ([`LH-PÜ-001`](../spec/lastenheft.md#lh-pü-001--grundfunktion)/[`LH-PÜ-002`](../spec/lastenheft.md#lh-pü-002--hauptmodule)). `--require-complete` bleibt **aus**: advisory, weil
-  ein Spec-CR neue Kennungen ohne Slice-Coverage gebiert — ein rotes Gate
-  wird abgeschaltet statt befolgt. Begründung und Lückenbewertung im Slice
-  [`slice-gate-rtm-traceability`](../docs/plan/planning/done/slice-gate-rtm-traceability.md).
-- **Begruendung:** Bis `v0.51.1` lief `docs-check` als handgeschriebener
-  `docker run`-Aufruf, und das Fragment wurde gegen den `0.2.0`-Stand
-  abgelehnt. Gegen `v0.51.1` kehrt sich die Abwaegung um: Das Fragment bringt
-  `--network none` an jedem Target (ein Doku-Gate braucht kein Netz), fertige
-  Targets fuer die opt-in-Module samt der jeweils rund achtzehn Glieder langen
-  `--disable`-Ketten - die wachsen mit jedem neuen d-check-Modul und waeren von
-  Hand eine Drift-Quelle ohne Sensor - und den Pin an einer Stelle. Der
-  Target-Name bleibt `docs-check`, weil er in [`AGENTS.md`](../AGENTS.md),
-  [`harness/verification.md`](verification.md), den CI-Workflows und dutzenden
-  `done/`-Closures steht; ein Alias kostet eine Zeile, ein Umbenennen einen
-  Doku-Sweep durch unveraenderliche Artefakte. Die Modul-Auswahl deckt den
-  bestehenden Doku-Referenz-Vertrag. Der `scan.ignore`-Glob verengt **nicht** auf einen Tag,
-  damit kuenftige vendored Staende automatisch erfasst sind; `.harness/skills/`
-  (`MR-009`) bleibt ausserhalb des Baseline-Globs und damit pruefbar.
-- **Fragment-Re-Generierung:** Bei einem Image-Bump wird `d-check.mk` neu
-  erzeugt (`--print-mk` aus dem **neuen** Image, Ausgabe nach `d-check.mk`);
-  der Digest im `Makefile` wird separat gesetzt. Das Fragment ist generiert -
-  Handaenderungen daran waeren stille Drift und gehoeren stattdessen ins
-  `Makefile` (eigene Targets) oder in `.d-check.yml` (Konfiguration).
-- **Gate-Image-Stand:** `v0.51.1` (digest-gepinnt, Bump 2026-07-25 von `0.2.0`).
-  Der Pin war 50 Releases alt geworden - es gibt fuer ihn **keine**
-  Aktualitaets-Routine (anders als fuer die Regelwerk-Baseline, s. Abschnitt
-  Freshness-Audit). Bump-Prozedur heute: `D_CHECK_IMAGE` im `Makefile` auf den
-  Digest der Zielversion, Trockenlauf gegen die **unveraenderte**
-  `.d-check.yml` (Regression), dann diesen Stand nachziehen.
-- **Aufloesungs-Trigger:** Der Teil "Modul-Auswahl bei d-check-Upgrade
-  re-evaluieren" ist mit dem Bump auf `v0.51.1` **eingeloest**: Delta gesichtet,
-  Kandidaten benannt, Auswahl bewusst vertagt (Protokoll im Slice
-  [`slice-harness-dcheck-image-bump`](../docs/plan/planning/done/slice-harness-dcheck-image-bump.md)).
-  **Offen und ausdruecklich neu zu bewerten:** die Ablehnung des
-  `--print-mk`-Fragments oben. Sie fiel gegen den `0.2.0`-Stand; gegen
-  `v0.51.1` liefert das Fragment `--network none`, fertige Targets fuer die
-  opt-in-Module samt `--disable`-Ketten und den Pin an einer Stelle. Dagegen
-  steht der Namens-Bruch `doc-check` vs. u-boots `docs-check`. Eine
-  Adaptions-Entscheidung altert mit ihrer Grundlage - deshalb steht der Stand
-  jetzt oben im Block.
-
-### MR-006 - Modus-Deklaration pro Sub-Area
-
-- **Datum:** 2026-07-24
-- **Geltungsbereich:** Abschnitt Modus-Deklaration unten.
-- **Adaption:** u-boot traegt Bestandscode (`hexagon/`, `cmd/`, `internal/`) neben
-  den Doku-Sub-Areas. Der Abschnitt Modus-Deklaration unten ordnet jede Sub-Area
-  als GF/BF/Hybrid ein; jede BF-/Hybrid-Markierung traegt eine
-  Graduation-Bedingung. **Audit ausgefuehrt (2026-07-25):** Der Erst-Pass
-  (drei grobe Sub-Areas, pauschal GF) ist durch eine auditierte Einordnung
-  ersetzt - Drei-Achsen-Inklusion je Kandidat, dann vier Modus-Kriterien je
-  qualifizierter Sub-Area. Ergebnis: acht Sub-Areas statt drei, davon eine
-  Hybrid (`internal/adapter/driving/cli`) und eine Brownfield
-  (`internal/**/README.md`); `cmd/uboot` faellt auf Sub-Area-Aspirantin zurueck.
-  **Graduation im selben Durchlauf:** Die Hybrid-Aussage zu
-  `internal/adapter/driving/cli` hat ihre Bedingung noch in dieser Welle
-  erfuellt (beide Adapter-Konventionen stehen in der Sicht-Spec) und ist auf GF
-  gesetzt - eine Graduation, die stattgefunden hat, bleibt nicht als offene
-  Ausnahme stehen.
-- **Begruendung:** Das Regelwerk verlangt eine Modus-Aussage pro qualifizierter
-  Sub-Area; eine BF-Sub-Area ohne Graduation-Plan waere "permanente Ausnahme als
-  temporaer getarnt".
-- **Aufloesungs-Trigger:** Audit erledigt; Delivery-Verweis im Slice
-  [`slice-harness-sub-area-modus-audit`](../docs/plan/planning/done/slice-harness-sub-area-modus-audit.md)
-  §9. Re-evaluieren bei jeder neuen Pfad-Familie im Produktivcode sowie beim
-  Erfuellen einer der beiden Graduation-Bedingungen oben.
-
-### MR-007 - Ortswahl `.harness/` (dot-prefixed, committet) neben `harness/`
-
-- **Datum:** 2026-07-24
-- **Geltungsbereich:** `.harness/` (vendored Baseline, kuenftig
-  `.harness/skills/`), `harness/` (Autoren-Prosa), `.gitignore`.
-- **Adaption:** Maschinen-materialisierte / vendorte Harness-Artefakte liegen im
-  **dot-prefixed, aber getrackten** `.harness/` (Baseline unter
-  `.harness/baseline/<tag>/`; Skills-Dateien kuenftig unter `.harness/skills/`).
-  Die **handgeschriebene** Harness-Vertragsdoku bleibt im getrackten `harness/`
-  (`README.md`, `roles.md`, `review.md`, `verification.md`, `replay.md`, diese
-  Datei). `.harness/baseline/**` ist **committet** - bewusste Ausnahme zur
-  "Dot-Prefix = ignorieren"-Lesart; nur ephemere Nebenprodukte
-  (`.harness/cache/`) werden ignoriert.
-- **Begruendung:** Der Dot-Prefix haelt den vendorten/generierten Bestand optisch
-  vom Autoren-Bestand getrennt und folgt der Kurs-Oekosystem-Konvention
-  (`.harness/baseline/`). Die Trennung ist hier explizit dokumentiert, damit der
-  Zwei-Verzeichnis-Split (`.harness/` vs. `harness/`) kein
-  Verwechslungs-Fallstrick ist.
-- **Aufloesungs-Trigger:** permanent.
-
-### MR-008 - ADR-Form: Bestand lean+grandfathered, neue ADRs MADR (per CR)
-
-- **Datum:** 2026-07-24
-- **Geltungsbereich:** ADR-Form-Politik; verweist auf den CR-Slice
-  [`slice-cr-adr-format-madr`](../docs/plan/planning/done/slice-cr-adr-format-madr.md).
-  Aendert `spec/lastenheft.md` NICHT von hier aus.
-- **Adaption:** Das vendored ADR-Template (MADR-/Nygard-Stil) kollidiert mit dem
-  heutigen [`LH-FA-PROJDOCS-002`](../spec/lastenheft.md#lh-fa-projdocs-002--adr-format)
-  (Status/Datum als Inline-Felder statt `##`-Ueberschriften; Titel-/Superseded-
-  Format; zusaetzliche Pflicht-Sections). Die Angleichung aendert das
-  **Vertrags-Stratum** und ist damit ein **Change Request**, nicht per
-  conventions-MR moeglich. Die Aenderung traegt der CR-Slice, nicht dieser Block.
-  **CR ausgefuehrt (2026-07-24):** [`LH-FA-PROJDOCS-002`](../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) traegt jetzt die
-  MADR-Form; die zum CR-Zeitpunkt Accepted ADRs (`0001`-`0010`, `0013`) bleiben
-  lean + immutabel (grandfathered, Hard Rule); Proposed (`0011`, `0012`) und alle
-  neuen ADRs sind MADR-konform.
-- **Begruendung:** conventions.md ist form-bringend, nicht vertrags-aendernd; eine
-  Vertrags-Anforderung darf hier nur referenziert werden. Das Template-Feld
-  "Schaerft" deckt sich mit u-boots Referenzmodell
-  ([`ADR-0013`](../docs/plan/adr/0013-dokumentationsreferenzmodell.md) /
-  [`LH-FA-PROJDOCS-006`](../spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell)):
-  die `Schaerft`-Aufwaerts-Deklaration ist die Aenderungskopplung Spec-ADR.
-- **Aufloesungs-Trigger:** erledigt (CR ausgefuehrt 2026-07-24; Delivery-Hash im
-  CR-Slice). Die status-basierte Grandfather-Grenze gilt permanent; neue
-  Accepted-ADRs entstehen bereits MADR-konform, kein neuer Grandfather noetig.
-- **Nachtrag Baseline-`v3.5.2` (2026-07-25):** Die Baseline schaerft, dass
-  "Change Request" **kein Harness-Konstrukt** ist (kein `CR-*`-Schema, keine
-  eigene Datei, kein Gate), sondern der *externe* Vorgang der Vertrags-
-  vereinbarung; im Repo hinterlaesst ein angenommener CR nur einen **Fussabdruck**
-  (Version-Bump des Lastenhefts + Zeile in dessen `## Historie` + die geaenderten
-  `LH-*`). Dazu die Hard Rule: **weder ADR noch Slice duerfen `LH-*` je aendern**
-  - sie referenzieren nur. u-boots Praxis ist damit **inhaltlich** vereinbar
-  (die Entscheidung fiel ausserhalb des Repos, der Slice war nur das
-  Ausfuehrungs-Vehikel), der **Fussabdruck fehlt aber**: `spec/lastenheft.md`
-  hat keine `## Historie` und steht unveraendert auf Version `0.1.0`, obwohl
-  [`LH-FA-PROJDOCS-002`](../spec/lastenheft.md#lh-fa-projdocs-002--adr-format) am 2026-07-24 geaendert wurde. **Nachgezogen am
-  2026-07-25** im Folge-Slice
-  [`slice-harness-lastenheft-historie-cr-fussabdruck`](../docs/plan/planning/done/slice-harness-lastenheft-historie-cr-fussabdruck.md):
-  Das Lastenheft traegt jetzt Version `0.2.0`, Status `Accepted` und einen
-  Abschnitt Historie mit der MADR-Zeile. Die Bezeichnung "CR-Slice" oben bleibt
-  als historischer Name stehen, meint aber das **Vehikel**, nicht die
-  Entscheidungs-Autoritaet - die lag beim Projektinhaber.
-
-### MR-009 - Skill-Dateien unter `.harness/skills/`, Review-Reports unter `docs/reviews/`
-
-- **Datum:** 2026-07-25
-- **Geltungsbereich:** `.harness/skills/reviewer.md`,
-  `.harness/skills/closure-note-reviewer.md`,
-  [`docs/reviews/`](../docs/reviews/README.md) (Ablage + README);
-  Quellen-Rolle von [`review.md`](review.md) und
-  [`verification.md`](verification.md).
-- **Adaption:** Review-Wissen liegt in u-boot an **zwei** Orten mit klarer
-  Rollentrennung: die kanonische **Prosa** bleibt im Autoren-Bestand `harness/`
-  (`review.md`, `verification.md`), die vom Regelwerk geforderte **Skill-Form**
-  (Kontext-Eingang, repo-spezifische Klassifikations-Anker, Nicht-Zustaendig-
-  keiten, Output-Schema, Steering-Loop) liegt maschinen-materialisiert unter
-  `.harness/skills/` (`MR-007`-Ortswahl). Die Skills **duplizieren keine
-  Tabellen**, sie verweisen aufwaerts auf die Prosa; bei Abweichung gewinnt die
-  Prosa. Die Report-Ablage ist `docs/reviews/` (ein Report pro Lauf, Folgelaeufe
-  als neue Datei); die Report-**Vorlage** wird bewusst **nicht** ins Repo
-  kopiert, sondern aus
-  `.harness/baseline/<tag>/templates/docs/reviews/` genommen - eine zweite Kopie
-  waere eine Drift-Quelle. Zwei Abweichungen vom Vorlagen-Wortlaut: (a) u-boot
-  hat **kein** `agent-review`-Make-Target - Reviews sind agentisch, Beleg ist
-  der Report; (b) der Closure-Note-Skill hat **kein** vorgelagertes
-  computational Struktur-Gate (ein `check_closure_notes.py`-Aequivalent
-  existiert hier nicht) und traegt deshalb Struktur- **und** Inhaltspruefung,
-  mit den Pflichtfeldern aus [`verification.md`](verification.md) als
-  Struktur-Quelle.
-- **Begruendung:** Das Regelwerk fordert eine per-Repo Skill-Datei, nicht nur
-  Prosa - ohne sie driftet der Reviewer zwischen Sessions. Die Doku-Mindest-
-  struktur
-  ([`LH-FA-PROJDOCS-001`](../spec/lastenheft.md#lh-fa-projdocs-001--mindeststruktur))
-  ist als **Mindest-**, nicht als Maximalstruktur formuliert; `docs/reviews/`
-  ergaenzt sie additiv und erfuellt die dortige README-Pflicht je
-  Unterverzeichnis. Kein Change Request am Vertrags-Stratum noetig.
-- **Aufloesungs-Trigger:** permanent. Re-evaluieren, falls u-boot ein
-  computational Closure-Note-Gate einfuehrt (dann wird der Closure-Note-Skill
-  auf die semantische Schicht zurueckgeschnitten) oder falls ein
-  `agent-review`-Target entsteht.
-
-### MR-010 - Architektur-Sicht: Vorlagen-Inhalt, erweiterte Abschnittsfolge
-
-- **Datum:** 2026-10-02
-- **Geltungsbereich:** [`spec/architecture.md`](../spec/architecture.md) (Sicht-Stratum).
-- **Adaption:** Die Sicht folgt der Vorlage `architecture.template.md` im Inhalt
-  (Kopf mit Rolle und Hard Rule, `ARC-<NNN>` fuer Komponenten und externe
-  Beruehrungspunkte, Schichten mit Constraints, externe Abhaengigkeiten,
-  Sequenzen, Fehlermodelle), behaelt aber ihre **erweiterte Abschnittsfolge**
-  (Ueberblick, Schichten je Komponente, Import-Regeln, Enforcement,
-  Sequenz-Diagramme, Fehlermodelle, Tests, Anti-Patterns, Evolution). Die
-  Import-Regel-Tabelle fuehrt die Spezifikation ([`SPEC-013`](../spec/spezifikation.md#spec-013--import-regel-tabelle-der-schichten)); die Sicht
-  visualisiert sie und verweist aufwaerts.
-- **Begruendung:** Die Abschnittsnummern sind Anker fuer Verweise aus ADRs
-  (`Schaerft:`); eine Umnummerierung nach Vorlage waere ein Anker-Bruch ohne
-  Nutzen. Die Zusatzabschnitte sind reine Sicht (kein Anforderungsinhalt).
-- **Aufloesungs-Trigger:** permanent, solange die Abschnittsnummern als Anker
-  genutzt werden.
-
-## Zusatzklassen-Deklaration fuer Sensors-Bindung
-
-Ueber die kanonischen Bindung-Klassen (ADR, Carveout, Kalibrierung/Schwelle,
+Über die kanonischen Bindung-Klassen (ADR, Carveout, Kalibrierung/Schwelle,
 Reproduzierbarkeit) hinaus nutzt dieses Repo:
 
 | Klasse | Form | Bedeutung | Beispiel |
@@ -475,6 +111,8 @@ Reproduzierbarkeit) hinaus nutzt dieses Repo:
 | Golden-/Replay-Bindung | Golden-Case-Satz | Replay-Gate haengt an einem fixierten Generator-Output | Fresh-State-/Idempotenz-Cases je CLI-Generator |
 
 ## Modus-Deklaration pro Sub-Area
+
+Das Kürzel-Segment (`ADR-<KÜRZEL>-NNNN`) wird in u-boot nicht geführt; die Tabelle trägt keine Kürzel-Spalte.
 
 Stand: auditiert am 2026-07-25 (Drei-Achsen-Inklusion + vier Modus-Kriterien je
 Kandidat). Das **Audit-Protokoll** - inklusive der abgewiesenen Kandidaten

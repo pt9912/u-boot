@@ -105,7 +105,7 @@ trace:
     file-pattern: '^(slice-.+)\.md$'
 
 # Deklarations-Konsistenz Doku <-> Build-Targets. Autoritaet ist die
-# Gate-Tabelle in AGENTS.md §Quality Gates; sie fuehrt bewusst nur
+# Gate-Tabelle in harness/README.md §Sensors; sie fuehrt bewusst nur
 # HARNESS-SENSOREN, nicht jede Regel. makefiles listet nur das eigene
 # Makefile: die doc-*-Targets stammen aus dem generierten d-check.mk und
 # werden vom Werkzeug selbst dokumentiert (make doc-help).
@@ -120,8 +120,8 @@ trace:
 #   packages         — .deb/.rpm-Release-Artefakte (ADR-0017), kein Sensor
 targets:
   makefiles: [Makefile]
-  doc-tables: [AGENTS.md]
-  authority: AGENTS.md
+  doc-tables: [harness/README.md]
+  authority: harness/README.md
   exempt-targets: [help, clean, deps, compile, coverage, build, run, build-binaries, packages]
 # Immutabilitaets-Sensor fuer Accepted-ADRs (braucht eine Commit-Range,
 # laeuft deshalb NICHT in docs-check, sondern on-demand:

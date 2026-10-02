@@ -2,143 +2,118 @@
 
 ## Purpose
 
-Dieser Harness verbindet Spezifikationen, ADRs, Slice-Plaene,
-Quality-Gates und Betriebsdokumentation fuer `u-boot`. Er ist kein
-Ersatz fuer `spec/` oder `docs/`, sondern der Einstiegspunkt fuer
-Menschen und AI-Coding-Agenten.
+Dieser Harness verbindet bestehende Spezifikationen, ADRs,
+Planning-Dokumente und Gates. Er ist **kein Ersatz** für `spec/` oder
+`docs/`, sondern ein **Einstiegspunkt** für Menschen und AI-Code-Agenten.
 
-Wenn diese Datei einer kanonischen Quelle widerspricht, gewinnt die
-kanonische Quelle und diese Datei wird angepasst.
+Wenn diese Datei einer kanonischen Quelle widerspricht, **gewinnt die
+kanonische Quelle**, und diese Datei wird angepasst.
 
-## Source Precedence
+Strukturregeln (Verzeichniskonvention, ID-Schemata, Modus-Deklarationen
+pro Sub-Area, Zusatzklassen für Sensors-Bindung) sowie Adaptionen ggü.
+der adoptierten Baseline leben in [`conventions.md`](conventions.md).
+Diese Datei dupliziert sie nicht.
 
-| Rang | Quelle | Charakter |
-| --- | --- | --- |
-| 1 | [`spec/lastenheft.md`](../spec/lastenheft.md) | Vertrag: normative Anforderungen, Akzeptanzkriterien, Exit-Codes, Sprachvertrag |
-| 2 | [`spec/spezifikation.md`](../spec/spezifikation.md) | Technik: Algorithmen, Schemata, Defaults, Fehler-Codes, externe Vertraege |
-| 3 | [`spec/architecture.md`](../spec/architecture.md) | Sicht: hexagonale Architektur, Schichten, Importregeln |
+## Source precedence
+
+| Rang | Datei | Charakter |
+|---|---|---|
+| 1 | [`spec/lastenheft.md`](../spec/lastenheft.md) | vertraglich abnahmebindend (Anforderungen, Akzeptanzkriterien, Exit-Code- und Sprachvertrag) |
+| 2 | [`spec/spezifikation.md`](../spec/spezifikation.md) | technisch fortschreibbar (Algorithmen, Schemata, Defaults, Fehler-Codes, externe Verträge) |
+| 3 | [`spec/architecture.md`](../spec/architecture.md) | Komponenten/Sequenzen, meilensteinfrei |
 | 4 | [`docs/plan/adr/`](../docs/plan/adr/) | Architekturentscheidungen |
-| 5 | [`docs/plan/planning/in-progress/`](../docs/plan/planning/in-progress/) und [`next/`](../docs/plan/planning/next/) | Aktuelle Slice-Arbeit |
-| 6 | [`Makefile`](../Makefile), [`Dockerfile`](../Dockerfile), [`.golangci.yml`](../.golangci.yml), [`.github/workflows/`](../.github/workflows/) | Ausfuehrbare Vertraege |
+| 5 | [`docs/plan/planning/in-progress/`](../docs/plan/planning/in-progress/) und [`next/`](../docs/plan/planning/next/) | Wellen-Sequenz (`roadmap.md`) und aktive Slice-Arbeit |
+| 6 | [`Makefile`](../Makefile), [`Dockerfile`](../Dockerfile), [`.golangci.yml`](../.golangci.yml), [`.github/workflows/`](../.github/workflows/) | ausführbare Verträge |
 | 7 | [`docs/user/`](../docs/user/) und [`docs/maintainer/`](../docs/maintainer/) | Nutzerhandbuch; Quality, Branch Protection, Release |
-| 8 | [`README.md`](../README.md), [`README.de.md`](../README.de.md), [`CHANGELOG.md`](../CHANGELOG.md) | Produktueberblick und Release-Kommunikation |
+| 8 | [`README.md`](../README.md), [`README.de.md`](../README.de.md), [`CHANGELOG.md`](../CHANGELOG.md) | Projekt-Überblick und Release-Kommunikation |
 | 9 | [`AGENTS.md`](../AGENTS.md) | Agent-Briefing und Hard Rules |
-| 10 | Diese Datei | Harness-Einstieg |
+| 10 | diese Datei | Harness-Einstieg |
 
-## Guides
+> Die Ränge 1–3 sind die drei Spec-Straten (Vertrag, Technik, Sicht). Die Ränge 5
+> und 6 sind eine repo-lokale Ergänzung der Baseline-Tabelle (aktive Slices und
+> ausführbare Verträge als eigene Ränge); Begründung in
+> [`MR-001`](conventions/MR-001-source-precedence-drei-straten.md).
 
-Feedforward-Quellen, die Arbeit vor der Umsetzung lenken:
+## Guides (Feedforward-Quellen)
 
 | Quelle | Inhalt |
-| --- | --- |
-| [`spec/lastenheft.md`](../spec/lastenheft.md) | `LH-*`-IDs, Prioritaeten, funktionale und nicht-funktionale Anforderungen |
-| [`spec/spezifikation.md`](../spec/spezifikation.md) | `SPEC-*`-IDs, Schemata, Defaults, Fehler-Codes, externe Vertraege |
-| [`spec/architecture.md`](../spec/architecture.md) | Layering, Port-/Adapter-Regeln, depguard-Kontrakt |
-| [`docs/plan/adr/README.md`](../docs/plan/adr/README.md) | ADR-Index und Entscheidungsueberblick |
-| [`docs/plan/planning/in-progress/roadmap.md`](../docs/plan/planning/in-progress/roadmap.md) | Release- und Slice-Status |
-| [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md) | Temporaere und permanente Carveouts |
-| [`docs/user/quality.md`](../docs/maintainer/quality.md) | Quality-Gates, Linter-Profil, Coverage, Security |
-| [`harness/roles.md`](roles.md) | Rollen, Uebergaben und Konfliktpfade |
-| [`harness/review.md`](review.md) | Review-Kategorien, Prueflinsen und Output-Schema |
-| [`harness/replay.md`](replay.md) | Replay-/Golden-Set-Regeln fuer CLI-Generatoren |
-| [`harness/verification.md`](verification.md) | Verification-Evidence und Slice-Closure-Schema |
-| [`harness/conventions.md`](conventions.md) | Repo-lokale Strukturregeln: Baseline-Pin, Adaptions-Ledger (`MR-*`), Modus-Deklaration pro Sub-Area |
-| `.harness/baseline/v6.13.0/regelwerk/README.md` | Vendored Betriebsregelwerk (AI-Harness-Kurs, Index); pro Entscheidung den benoetigten Abschnitt nachschlagen |
-| [`AGENTS.md`](../AGENTS.md) | Hard Rules, Source Precedence, Minimal Workflow |
+|---|---|
+| [`spec/lastenheft.md`](../spec/lastenheft.md) | Anforderungen (`LH-*`), Akzeptanzkriterien |
+| [`spec/spezifikation.md`](../spec/spezifikation.md) | technische Details (`SPEC-*`, Verfeinerungen), Defaults |
+| [`spec/architecture.md`](../spec/architecture.md) | Komponenten (`ARC-*`), Schichten, Importregeln, depguard-Kontrakt |
+| [`docs/plan/adr/`](../docs/plan/adr/README.md) | Architekturentscheidungen, ADR-Index |
+| [`docs/plan/planning/`](../docs/plan/planning/) | Slice-Pläne und Roadmap |
+| [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md) | temporäre und permanente Carveouts |
+| [`docs/maintainer/quality.md`](../docs/maintainer/quality.md) | Quality-Gates, Linter-Profil, Coverage, Security |
+| [`AGENTS.md`](../AGENTS.md) | Hard Rules, Source Precedence, Workflow |
+| [`conventions.md`](conventions.md) | repo-lokale Strukturregeln, Adaptions-Block (`MR-*`), Modus-Deklarationen |
+| [`roles.md`](roles.md) | Rollen, Übergaben und Konfliktpfade |
+| [`review.md`](review.md) | Review-Kategorien, Prüflinsen und Output-Schema |
+| [`replay.md`](replay.md) | Replay-/Golden-Set-Regeln für CLI-Generatoren |
+| [`verification.md`](verification.md) | Verification-Evidence und Slice-Closure-Schema |
+| `.harness/skills/reviewer.md` | Reviewer-Skill: HIGH-Liste, Kategorien-Regeln, Negativbefund-Pflicht, Output-Schema (Modul 10) — nächste Rolle nach Schritt 8 des Minimal Agent Workflow, nicht Teil der Implementer-Eingabe |
+| `.harness/baseline/v6.13.0/regelwerk/` (vendored; `README.md` = Index) | adoptiertes Betriebsregelwerk in Agenten-Kurzform — **präsente nachschlagbare Vertiefung**, pro Entscheidung abschnittsweise (siehe [`AGENTS.md`](../AGENTS.md) §1); derivativ, Stand/Tag siehe [`conventions.md`](conventions.md) §Baseline |
+| `.harness/baseline/v6.13.0/templates/` (vendored, parallel) | Referenz-Form der Skelette, auf die das Regelwerk mit `../templates/…` als „Ziel-Form“ verweist (netzlos, weil parallel zu `regelwerk/`); Vorlagen zum Kopieren-und-Ausfüllen |
 
-## Sensors
+## Sensors (Feedback-Gates)
 
-Feedback-Gates, die reale Projektzustaende messen:
+| Target | Vertrag | Bindung |
+|---|---|---|
+| `make docs-check` | Doku-Referenzen (d-check): Link-Pfade, Heading-Anker, ADR-/LH-/SPEC-/Planning-Kennungs-Links, Referenzmodell, Planning-Lifecycle, Gate-Index | [`ADR-0013`](../docs/plan/adr/0013-dokumentationsreferenzmodell.md) |
+| `make lint` | statische Analyse, `depguard`, SOLID-nahe Linter; Verstöße sind PR-blockierend | [`ADR-0003`](../docs/plan/adr/0003-solid-nahes-lint-profil.md) |
+| `make test` | Unit- und Default-Tests im Docker-Test-Stage | — |
+| `make test-docker` | Integrationstests (Build-Tag `docker`) gegen eine echte Docker Engine | — |
+| `make coverage-gate` | Coverage-Schwelle, bootstrap-aware | Schwelle 90 % |
+| `make govulncheck` | Go-Vulnerability-Scan | [`ADR-0004`](../docs/plan/adr/0004-ci-system.md) |
+| `make image-scan` | Trivy HIGH/CRITICAL gegen das Runtime-Image | [`ADR-0004`](../docs/plan/adr/0004-ci-system.md) |
+| `make verify-depguard` | on-demand: die `depguard`-Regeln feuern wirklich | [`ADR-0003`](../docs/plan/adr/0003-solid-nahes-lint-profil.md) |
+| `make doc-immutable RANGE="<base>..<head>"` | on-demand: Accepted-ADRs sind über eine Commit-Range unverändert (lokal `STAGED=1`); Aufruf mit Argument, daher nicht im Makefile-Gate-Index | [`ADR-0013`](../docs/plan/adr/0013-dokumentationsreferenzmodell.md) |
+| `make gates` | alle inneren Gates: `lint` + `test` + `coverage-gate` + `docs-check` | — |
+| `make ci` | `gates` + `govulncheck` + `image-scan` | [`ADR-0004`](../docs/plan/adr/0004-ci-system.md) |
+| `make fullbuild` | volle Closure: `ci` + Runtime-Image-Build | — |
 
-| Target | Charakter | Wann verwenden |
-| --- | --- | --- |
-| `make lint` | Computational feedback: statische Analyse, depguard, SOLID-nahe Linter | Nach Go-Code- und Architektur-Aenderungen |
-| `make test` | Computational feedback: Unit- und Default-Tests im Docker-Test-Stage | Nach Codeaenderungen |
-| `make test-docker` | Computational feedback: Docker-tag Integrationstests | Nach Docker-/Compose-/E2E-Aenderungen |
-| `make coverage-gate` | Computational feedback: Coverage-Schwelle, Default 90 Prozent | Nach produktiven Codeaenderungen |
-| `make docs-check` | Computational feedback: Markdown-Link-Pfad-, Anker-, ADR-/LH-/Planning-ID-Link- und Referenzmodell-Pruefung | Nach Doku-, Spec-, ADR- oder Planning-Aenderungen |
-| `make govulncheck` | Computational feedback: Go-Vulnerability-Scan | Vor CI-/Release-Handoff |
-| `make image-scan` | Computational feedback: Trivy gegen Runtime-Image | Vor CI-/Release-Handoff |
-| `make verify-depguard` | Computational feedback: depguard-Regeln feuern wirklich | Bei Aenderungen an Layern oder depguard-Konfig |
-| `make gates` | Inner-loop Closure: lint + test + coverage-gate + docs-check | Normaler Abschluss fuer Codeaenderungen |
-| `make ci` | CI-Spiegel: gates + govulncheck + image-scan | Vor groesseren Handoffs oder Releases |
-| `make fullbuild` | Voller Buildabschluss: ci + Runtime-Image | Vor Release-Closure |
+**Aktueller Lauf-Status:** CI-Badge bzw. lokal `make help` / `make gates`.
+**Rote Gates:** keine strukturell roten; Begründung eines etwaigen Carveouts im Master-Inventar [`carveouts.md`](../docs/plan/planning/in-progress/carveouts.md).
+Läuft ein Sensor wegen Umgebung oder Sandbox nicht, wird der Grund im Handoff genannt; eine grüne Closure wird nicht behauptet, wenn der passende Sensor nicht lief.
 
-Wenn ein Sensor wegen Umgebung oder Sandbox nicht laeuft, den Grund im
-Handoff nennen. Keine gruene Closure behaupten, wenn der passende Sensor
-nicht ausgefuehrt wurde.
+## Traceability rules
 
-## Traceability
+- PRs/Commits **müssen** mindestens eine `LH-*`- oder `ADR-*`-ID nennen.
+- Neue oder geänderte Anforderungen brauchen einen Beleg: Test, Gate, Demo oder ADR.
+- Dokument-Referenzen folgen dem Referenzmodell ([`ADR-0013`](../docs/plan/adr/0013-dokumentationsreferenzmodell.md)): Normative Kraft nur auf aufwärtsgerichteten Kanten; Slice-, Carveout- und Roadmap-Kanten sind Kontext.
+- Slice-Closure braucht Verification-Evidence nach [`verification.md`](verification.md); Generator-Änderungen brauchen Replay-/Golden-Evidence nach [`replay.md`](replay.md).
+- Neue ADRs müssen im ADR-Index ergänzt werden.
+- Änderungen an Planning-Dokumenten müssen die Lifecycle-Regeln beachten (open → next → in-progress → done; reine `git mv`-Commits siehe [`AGENTS.md`](../AGENTS.md) §3.3).
+- Temporäre Carveouts brauchen parallel einen Inventar-Eintrag und einen Plan-Anker.
 
-- Dokument-Referenzen folgen dem Referenzmodell aus
-  [`ADR-0013`](../docs/plan/adr/0013-dokumentationsreferenzmodell.md):
-  Normative Kraft existiert nur auf aufwaertsgerichteten
-  Inter-Layer-Kanten plus ADR-interner Lineage; Slice-, Carveout- und
-  Roadmap-Kanten sind Kontext.
-- Jede oeffentliche Verhaltensaenderung braucht einen `LH-*`-, `ADR-*`-
-  oder Slice-Anker.
-- Neue oder geaenderte Anforderungen brauchen einen Nachweis: Test,
-  Gate, Demo, ADR oder dokumentierte Closure.
-- Slice-Closure braucht Verification-Evidence nach
-  [`harness/verification.md`](verification.md).
-- Generator-Aenderungen brauchen Replay-/Golden-Evidence nach
-  [`harness/replay.md`](replay.md).
-- Neue ADRs muessen den ADR-Index aktualisieren.
-- Planning-Dokumente folgen `open/ -> next/ -> in-progress/ -> done/`.
-- Temporaere Carveouts brauchen parallel Inventar-Eintrag und
-  Plan-Anker.
+## Safety and scope boundaries
 
-## Role Separation
+- `u-boot` ist ein CLI zum Bootstrapping reproduzierbarer Docker-Entwicklungsumgebungen, kein allgemeiner Project-Generator ohne Docker-/Compose-Vertrag.
+- Application-Code bleibt frei von konkreter externer I/O; I/O sitzt in Driven-Adaptern und wird über Ports erreicht.
+- Generierte Dateien und User-Projektdateien sind sicherheitsrelevant: Managed Blocks, Backups, Two-Phase-Planung und Bestätigungen sind Produktverträge, keine Komfortdetails.
+- CLI-Output und generierte Artefakte sind Englisch; normative Specs und Planning-Dokumente bleiben Deutsch.
+- Release- und Distributionsänderungen betrachten [`ADR-0004`](../docs/plan/adr/0004-ci-system.md)/[`ADR-0007`](../docs/plan/adr/0007-distributionswege-ghcr.md), CI-Gates sowie README und CHANGELOG zusammen.
 
-Rollen sind Kontextgrenzen, keine Personen. Die verbindliche
-Rollenreferenz liegt in [`harness/roles.md`](roles.md).
+## Minimal agent workflow
 
-Standardsequenz fuer Slice-Arbeit:
+1. Diese Datei lesen.
+2. Relevante kanonische Quelle lesen (Source Precedence beachten); die Rolle bestimmt [`roles.md`](roles.md).
+3. Betroffene IDs identifizieren (`LH-*`, `ADR-*`, Slice).
+4. Kleinste Änderung planen.
+5. Engsten nützlichen Sensor laufen lassen.
+6. Repo-weiten Gate-Lauf vor Handoff (`make gates`).
+7. Doku/Indizes aktualisieren, falls ein öffentlicher Vertrag berührt; bei Generator-Änderungen Replay-Evidence nach [`replay.md`](replay.md), bei Slice-Closure Verification-Evidence nach [`verification.md`](verification.md).
+8. Ausgeführte Sensors und verbleibende Risiken berichten.
 
-```text
-Planner -> Architect -> Implementation -> Reviewer -> Verifier -> Validator -> Planner
-```
+Dieser Workflow deckt ausschließlich die Implementer-Rolle ab. Schritt 8
+ist der Rollenwechsel, kein Abschluss: Bericht → Handoff an Reviewer
+(`.harness/skills/reviewer.md`, siehe §Guides; Findings nach
+[`review.md`](review.md)) → Verifier. Kein Self-Review — anderer Kontext findet
+andere Findings, derselbe Kontext dieselben blinden Flecken (Baseline-Regelwerk
+`modul-08-agentenrollen.md`).
 
-Jeder Rollenwechsel braucht ein Uebergabe-Artefakt. Eine Rolle darf in
-eine fruehere Rolle zurueckgeben, aber nicht deren Entscheidung
-stillschweigend ersetzen.
+## Leseordnung
 
-Review-Findings folgen [`harness/review.md`](review.md); Verification-
-Evidence folgt [`harness/verification.md`](verification.md). Das sind
-getrennte Artefakte.
-
-## Scope Boundaries
-
-- `u-boot` ist ein CLI zum Bootstrapping reproduzierbarer Docker-
-  Entwicklungsumgebungen, kein allgemeiner Project-Generator ohne
-  Docker-/Compose-Vertrag.
-- Application-Code bleibt frei von konkreter externer I/O; I/O sitzt in
-  Driven-Adaptern und wird ueber Ports erreicht.
-- Generated files und User-Projektdateien sind sicherheitsrelevant:
-  managed blocks, Backups, Two-Phase-Planung und Bestaetigungen sind
-  Produktvertraege, keine Komfortdetails.
-- CLI-Output und generierte Artefakte sind Englisch; normative Specs und
-  Planning-Dokumente koennen Deutsch bleiben.
-- Release- und Distributionsaenderungen muessen
-  [`ADR-0004`](../docs/plan/adr/0004-ci-system.md)/
-  [`ADR-0007`](../docs/plan/adr/0007-distributionswege-ghcr.md),
-  CI-Gates und README/CHANGELOG zusammen betrachten.
-
-## Minimal Agent Workflow
-
-1. Diese Datei und [`AGENTS.md`](../AGENTS.md) lesen.
-2. Rolle aus [`harness/roles.md`](roles.md) bestimmen.
-3. Relevante Spec, Architektur, ADR und aktiven Slice lesen.
-4. Bei Review-Rolle [`harness/review.md`](review.md) anwenden.
-5. Betroffene IDs und Produktvertraege benennen.
-6. Kleinste sinnvolle Aenderung ausfuehren.
-7. Engsten nuetzlichen Sensor laufen lassen.
-8. Bei Codeaenderungen nach Moeglichkeit `make gates` ausfuehren.
-9. Bei Generator-Aenderungen Replay-/Golden-Evidence nach
-   [`harness/replay.md`](replay.md) festhalten.
-10. Verification-Evidence nach [`harness/verification.md`](verification.md)
-   festhalten, wenn ein Slice geschlossen oder ein oeffentlicher Vertrag
-   beruehrt wurde.
-11. Oeffentliche Doku, Planning-Artefakte und CHANGELOG aktualisieren,
-   wenn ein oeffentlicher Vertrag beruehrt wurde.
-12. Handoff mit Rolle, ausgefuehrten Sensors, offenen Sensors und Risiken.
+1. [`AGENTS.md`](../AGENTS.md) — Hard Rules und Workflow
+2. [`spec/lastenheft.md`](../spec/lastenheft.md) — was das Produkt zusagt
+3. [`conventions.md`](conventions.md) — repo-lokale Strukturregeln und Adaptionen, bei Bedarf

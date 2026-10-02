@@ -30,8 +30,8 @@
 #
 # Integrität ist nicht Aktualität: --verify beantwortet „ist der vendorte
 # Bestand unversehrt?", --check-freshness beantwortet „ist der gepinnte Stand
-# noch der aktuelle?". Kadenz und Zuständigkeit: harness/conventions.md
-# §Freshness-Audit (MR-004).
+# noch der aktuelle?". Kadenz und Zuständigkeit: harness/conventions/MR-004-regelwerk-vendored.md
+# §Freshness-Audit.
 #
 # Tag-Quelle: ohne Argument die §Baseline-`**Stand:**`-Zeile in
 # harness/conventions.md (Skript-Eingabe; der Pin ist nicht vollumfänglicher
