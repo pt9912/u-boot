@@ -1,0 +1,45 @@
+# Slice: Harness-Dateien an die Baseline-Vorlagen angleichen
+
+> **Status:** **Done** (2026-10-02, **Delivery-Hash: `4c70f04`**).
+
+**Welle:** ohne Welle.
+**Bezug:** Baseline-Regelwerk `grundlagen-harness-dateien.md` §harness/README.md als Einstiegspunkt und §harness/conventions.md als Konventionsspeicher, `modul-09-implementierung.md` §Ziel-Form: AGENTS.md; Vorlagen unter `.harness/baseline/v6.13.0/templates/`.
+**Berührte Spec-Stellen:** —
+**Autor:** pt9912. **Datum:** 2026-10-02.
+
+## Auslöser
+
+Der Projektinhaber verlangt, `harness/README.md`, `harness/conventions.md` und `AGENTS.md` entsprechend den Vorlagen anzupassen.
+
+## Ziel und Abgrenzung
+
+**Ziel:** Die drei Dateien folgen der Gliederung der Vorlagen: `AGENTS.md` mit den Abschnitten 1–6 (Hard Rules als 3.x, Gate-Index nur als Zeiger, Dokumentations-Regeln als Tabelle); `harness/README.md` mit Purpose, Source precedence, Guides, Sensors (Target · Vertrag · Bindung), Traceability rules, Safety and scope boundaries, Minimal agent workflow, Leseordnung; `harness/conventions.md` als Index mit je einer Datei pro Adaption unter `harness/conventions/` (aktiv und `done/`) und dem Pflichtfeld „Ersetzt-Baseline-Regel“ je Eintrag.
+
+**Ausdrücklich NICHT in diesem Slice:**
+
+- **Inhaltliche Änderung der Adaptionen oder Hard Rules** — Text wird übernommen und nur neu gegliedert.
+- **Append-only-Sensor für `MR`-Dateien (`vcs`-Modul)** — die Konfiguration kennt einen Immutabilitäts-Block für ADRs; ein zweiter für `MR`-Dateien ist optional und wird nicht aktiviert.
+
+## Definition of Done
+
+- [x] Drei Dateien nach Vorlage gegliedert, zehn Adaptionen als Einzeldateien (zwei aufgelöst nach `done/`), Gate-Index zentral in `harness/README.md` (`.d-check.yml` `targets`), Verweise nachgezogen.
+- [x] `make gates` grün.
+
+## Tranchen
+
+| T | Inhalt |
+| - | ------ |
+| T1 | `harness/conventions.md` zum Index, Adaptionen als Einzeldateien mit Pflichtfeld „Ersetzt-Baseline-Regel“, Freshness-Audit und Sync-Trigger in `MR-004`. |
+| T2 | `harness/README.md` nach Vorlage, Gate-Index mit Bindung. |
+| T3 | `AGENTS.md` nach Vorlage; `.d-check.yml` (`targets.authority`), Skript-Kommentar und Verweise. |
+
+## Risiken
+
+- Der Gate-Index wandert von `AGENTS.md` nach `harness/README.md`: Das `targets`-Modul prüft gegen die neue Autorität; `make docs-check` ist grün.
+
+## Closure
+
+- **Geliefert (`4c70f04`):** `AGENTS.md` mit den Abschnitten 1–6 der Vorlage (Hard Rules 3.1–3.7 nach Vorlage, repo-spezifische Rules als 3.8–3.16 unverändert im Inhalt, Gate-Index nur als Zeiger, Dokumentations-Regeln als Tabelle); `harness/README.md` mit allen Vorlagen-Abschnitten und dem einzigen Gate-Index (Target · Vertrag · Bindung); `harness/conventions.md` als Index (Purpose, Baseline, Konventions-Quellen, `MR-000`, Tabellen „Aktive“ und „Aufgelöste“ Adaptionen, Zusatzklassen, Modus-Deklaration, Glossar) mit zehn Adaptionen als Einzeldateien unter `harness/conventions/`; `MR-006` (Audit abgeschlossen) und `MR-008` (Change Request ausgeführt) liegen unter `done/`; Freshness-Audit und Sync-Trigger stehen jetzt in `MR-004`.
+- **Anpassungen:** `.d-check.yml` `targets` (`doc-tables` und `authority` auf `harness/README.md`), Skript-Kommentar in `tools/harness/fetch-baseline-cache.sh` (`--verify` weiter ok), Verweise auf Abschnitte von `AGENTS.md` in den Adaptions-Dateien und der JSON-Vertragsdoku. Ersetzte-Baseline-Regel je Adaption verlinkt mit Anker in das vendorte Regelwerk (Linkprüfung grün).
+- **Sensoren:** `make gates` grün (lint, test, coverage-gate, docs-check); `tools/harness/fetch-baseline-cache.sh --verify` ok. Nicht ausgeführt: `make ci`, `make test-docker`.
+- **Review:** unabhängiges Review dieser Umstellung steht aus.
