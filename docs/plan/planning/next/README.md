@@ -11,7 +11,6 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| [`slice-v2-spec-schnitt-projektkapitel.md`](slice-v2-spec-schnitt-projektkapitel.md) | Lastenheft-Schnitt 3: §4.11–§4.13 als Randbedingungen, §6.2, §6.3, §7 |
 | [`slice-v2-spec-schnitt-qualitaet-akzeptanz-abschluss.md`](slice-v2-spec-schnitt-qualitaet-akzeptanz-abschluss.md) | Lastenheft-Schnitt 4 und Abschluss: §5, §8–§16, Version 0.4.0 |
 | [`slice-v2-spec-architektur-angleichung.md`](slice-v2-spec-architektur-angleichung.md) | Architektur-Sicht an die Vorlage angleichen |
 

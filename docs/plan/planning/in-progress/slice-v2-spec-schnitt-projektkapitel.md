@@ -1,6 +1,6 @@
 # Slice V2: Lastenheft-Schnitt 3: Projektkapitel als Randbedingungen, Schnittstellen und Daten
 
-> **Status:** **geplant** (`next/`) — startet nach Schnitt 2.
+> **Status:** **in Arbeit** (seit 2026-10-02).
 
 **Welle:** `welle-spec-technik-stratum` (siehe [`roadmap.md`](../in-progress/roadmap.md)).
 **Bezug:** Lastenheft §4.11 Build- und CI-Infrastruktur, §4.12 Doku-Struktur, §4.13 Architektur des Projekts, §6.2 Dateischnittstellen, §6.3 Docker-Schnittstelle, §7 Datenanforderungen (Scope).
