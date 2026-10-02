@@ -1,12 +1,15 @@
 # Architektur — u-boot
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-07-25.
+**Status:** Aktiv. **Letzte Änderung:** 2026-10-02.
 
 **Bezug:** [`LH-FA-ARCH-001`](lastenheft.md#lh-fa-arch-001--hexagonales-pattern)..[`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)
 
+**Rolle:** Sicht-Stratum — *keine* eigenen Anforderungen, derivativ: Lastenheft vor Spezifikation vor Architektur; diese Sicht visualisiert und erweitert nie.
+
 **Hard Rule:** Diese Datei enthält *keine* Wellen, Slices, Commit-Hashes,
-Meilenstein-Tags oder Closure-Daten. Sie beschreibt das Zielbild, nicht den
-Projektfortschritt; die zeitliche Schicht lebt in
+Meilenstein-Tags oder Closure-Daten, *keine* ADR-Bezüge und *keine* Historie:
+`Letzte Änderung` oben ist ein Frische-Marker, kein Protokoll. Sie beschreibt das
+Zielbild, nicht den Projektfortschritt; die zeitliche Schicht lebt in
 `docs/plan/planning/in-progress/roadmap.md` und in den Closure-Notizen der
 Slices.
 
@@ -48,11 +51,26 @@ Sechs Schichten plus Wiring, klare Verantwortungen und einseitig gerichtete Abh�
 
 Pfeile zeigen die **Aufruf-/Datenfluss-Richtung** zur Laufzeit. Die **Import-Richtung** ist nicht überall identisch: `application` importiert nur Ports (Interfaces) und kennt die konkreten Adapter nicht; Dependency Injection findet im Wiring (`cmd/uboot/`) statt. Die innere Welt (`hexagon/`) kennt die äußere Welt (`adapter/`) **nicht** — das wird per `depguard` durchgesetzt ([`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement), siehe §5).
 
+
+**Komponenten.** Jeder Kasten des Diagramms trägt eine Kennung; sie ist eine Adresse, damit ein Slice sagen kann, welche Komponente er berührt, und keine Anforderung.
+
+| ID | Komponente | Rolle |
+|---|---|---|
+| `ARC-001` | `hexagon/domain` | reine Datentypen und invariantes Verhalten, keine I/O |
+| `ARC-002` | `hexagon/application` | Use-Cases; ruft ausschließlich Ports auf |
+| `ARC-003` | `hexagon/port/driving` | Schnittstellen, die von außen (CLI) konsumiert werden |
+| `ARC-004` | `hexagon/port/driven` | Schnittstellen, die die Application nach außen ruft |
+| `ARC-005` | `adapter/driving` | konkrete Eingangs-Adapter (CLI-Kommandos) |
+| `ARC-006` | `adapter/driven` | konkrete Ausgangs-Adapter (Docker, Dateisystem, YAML, Git) |
+| `ARC-007` | `cmd/uboot` | Wiring: verbindet Application und Adapter |
+
 ---
 
 ## 2. Schichten und Verzeichnisse
 
 ### 2.1 `hexagon/domain`
+
+**Komponente:** `ARC-001`.
 
 Reine Datentypen und invariantenhaltige Verhaltensregeln ohne I/O.
 
@@ -63,6 +81,8 @@ Reine Datentypen und invariantenhaltige Verhaltensregeln ohne I/O.
 - **Tests:** Unit-Tests mit `*_test.go` im selben Paket; pure Validierung ohne Mocks.
 
 ### 2.2 `hexagon/application`
+
+**Komponente:** `ARC-002`.
 
 Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält keine externe I/O.
 
@@ -123,6 +143,8 @@ Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält keine exte
 
 ### 2.3 `hexagon/port/driving`
 
+**Komponente:** `ARC-003`.
+
 Interfaces, über die u-boot von außen angesprochen wird.
 
 - **Inhalt — je Use-Case-Familie ein Interface mit eigenem Request-/Response-Paar:**
@@ -163,6 +185,8 @@ Interfaces, über die u-boot von außen angesprochen wird.
 
 ### 2.4 `hexagon/port/driven`
 
+**Komponente:** `ARC-004`.
+
 Interfaces, über die `hexagon/application` externe Systeme nutzt.
 
 - **Inhalt:**
@@ -199,6 +223,8 @@ Interfaces, über die `hexagon/application` externe Systeme nutzt.
 
 ### 2.5 `adapter/driving`
 
+**Komponente:** `ARC-005`.
+
 Konkrete Driver — Einstiegspunkte aus der Außenwelt.
 
 - **Inhalt:** `cli/` mit Cobra. Pro Subkommando ein eigenes Cobra-Command in einer eigenen Datei.
@@ -221,6 +247,8 @@ Konkrete Driver — Einstiegspunkte aus der Außenwelt.
 - **Permanenter Carveout:** `contextcheck`-Ausnahme in `.golangci.yml`, weil Cobras `RunE`-Signatur (`func(cmd, args) error`) keinen Context-Parameter kennt — die Closure muss `cmd.Context()` extrahieren und an `runInit` durchreichen. Strikte Propagation passiert eine Ebene tiefer.
 
 ### 2.6 `adapter/driven`
+
+**Komponente:** `ARC-006`.
 
 Konkrete externe Adapter — Implementierungen der Driven-Ports.
 
@@ -245,6 +273,8 @@ Konkrete externe Adapter — Implementierungen der Driven-Ports.
 
 ### 2.7 `cmd/uboot` — Wiring-Schicht
 
+**Komponente:** `ARC-007`.
+
 Einziger Ort, an dem `application` und `adapter` zusammen importiert werden.
 
 - **Inhalt:** `main.go` instantiiert **alle** Driven-Adapter aus §2.6, konstruiert daraus **alle** Application-Services aus §2.2 und übergibt sie dem CLI-Konstruktor als Driving-Port-Implementierungen. Dazu ein signal-aware Context, der Abbruch-Signale des Betriebssystems bis in die Runtime-Aufrufe durchreicht, und das abschließende Fehler→Exit-Code-Mapping (§7.1).
@@ -254,19 +284,19 @@ Einziger Ort, an dem `application` und `adapter` zusammen importiert werden.
 
 ## 3. Externe Abhängigkeiten
 
-Welche externen Systeme und Bibliotheken Teil der Architektur sind, in welcher
+Welche externen Systeme und Bibliotheken Teil der Architektur sind (die Kennung benennt den Berührungspunkt, nicht das fremde System), in welcher
 Schicht sie auftauchen dürfen und wie austauschbar sie sind. Die
 *Wahl-Begründung* je Abhängigkeit gehört nicht hierher — sie steht in der
 jeweiligen Architekturentscheidung, die ihre Kopplung an diese Sicht aufwärts
 deklariert.
 
-| System | Rolle | Sichtbar in Schicht | Substituierbarkeit |
-| --- | --- | --- | --- |
-| Container-Runtime mit Compose-Schnittstelle (Docker-API-kompatibles Binary auf `$PATH`) | Diagnose (read-only Probes) und Lifecycle-Operationen der erzeugten Umgebung | `adapter/driven` (hinter `DockerProbe`/`DockerEngine`) | hoch — die Application kennt nur die Ports; ein Podman-Setup funktioniert als Drop-in, ein SDK-basierter Adapter wäre ein Paket-Austausch ohne Änderung an `application` |
-| CLI-Framework (Kommando-/Flag-Parsing) | Aufbau des Kommando-Baums, Flag-Bindung, Hilfe-Ausgabe | ausschließlich `adapter/driving/cli` | hoch — kein Port, kein Use-Case und kein Domänentyp kennt das Framework; der Austausch bleibt im Driving-Adapter |
-| YAML-Serialisierung | Lesen/Schreiben der Projektkonfiguration und der Compose-Datei | `adapter/driven` (hinter `YAMLCodec`) | hoch — ein Adapter-Paket |
-| `git`-Binary | optionale Repository-Initialisierung beim Anlegen eines Projekts | `adapter/driven` (hinter `Git`) | hoch — fehlt es, degradiert der Pfad kontrolliert; die Application sieht nur den Port |
-| Go-Standardbibliothek (Dateisystem, Prozess-Start, strukturiertes Logging, eingebettete Templates) | Ausführungsunterbau der Adapter sowie Template-Rendering in der Application | `adapter/*`, `hexagon/application` (nur Template-Rendering) | niedrig (Sprachumfeld) — die Domäne bleibt davon frei |
+| ID | System | Rolle | Sichtbar in Schicht | Substituierbarkeit |
+| --- | --- | --- | --- | --- |
+| `ARC-008` | Container-Runtime mit Compose-Schnittstelle (Docker-API-kompatibles Binary auf `$PATH`) | Diagnose (read-only Probes) und Lifecycle-Operationen der erzeugten Umgebung | `adapter/driven` (hinter `DockerProbe`/`DockerEngine`) | hoch — die Application kennt nur die Ports; ein Podman-Setup funktioniert als Drop-in, ein SDK-basierter Adapter wäre ein Paket-Austausch ohne Änderung an `application` |
+| `ARC-009` | CLI-Framework (Kommando-/Flag-Parsing) | Aufbau des Kommando-Baums, Flag-Bindung, Hilfe-Ausgabe | ausschließlich `adapter/driving/cli` | hoch — kein Port, kein Use-Case und kein Domänentyp kennt das Framework; der Austausch bleibt im Driving-Adapter |
+| `ARC-010` | YAML-Serialisierung | Lesen/Schreiben der Projektkonfiguration und der Compose-Datei | `adapter/driven` (hinter `YAMLCodec`) | hoch — ein Adapter-Paket |
+| `ARC-011` | `git`-Binary | optionale Repository-Initialisierung beim Anlegen eines Projekts | `adapter/driven` (hinter `Git`) | hoch — fehlt es, degradiert der Pfad kontrolliert; die Application sieht nur den Port |
+| `ARC-012` | Go-Standardbibliothek (Dateisystem, Prozess-Start, strukturiertes Logging, eingebettete Templates) | Ausführungsunterbau der Adapter sowie Template-Rendering in der Application | `adapter/*`, `hexagon/application` (nur Template-Rendering) | niedrig (Sprachumfeld) — die Domäne bleibt davon frei |
 
 Zwei Regeln halten die Liste kurz: Externe Abhängigkeiten erscheinen **nur** in
 Adaptern (Ausnahme: das I/O-freie Template-Rendering in der Application), und
@@ -287,6 +317,8 @@ durchgesetzt.
 | `adapter/driving`      | `hexagon/domain`, `hexagon/port/driving`, externe Libraries (z. B. Cobra)     | `hexagon/application`, `adapter/driven`                    |
 | `adapter/driven`       | `hexagon/domain`, `hexagon/port/driven`, externe Libraries (z. B. Docker-SDK) | `hexagon/application`, `adapter/driving`                   |
 | `cmd/uboot`            | `internal/...`, Standardbibliothek, externe Libraries                         | (frei — Wiring-Schicht)                                    |
+
+Die verbindliche Fassung dieser Tabelle steht in der Spezifikation ([`SPEC-013`](spezifikation.md#spec-013--import-regel-tabelle-der-schichten)); diese Sicht visualisiert sie.
 
 Begründung der Regeln:
 
