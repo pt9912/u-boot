@@ -47,8 +47,8 @@ u-boot init demo --template ./my-tpl    # render from a local template directory
 All subcommands respect [LH-FA-CLI-006](spec/lastenheft.md#lh-fa-cli-006--exit-codes) exit codes
 (`0` / `2` / `10` / `11` / `12` / `14`). The *Subcommand reference*
 table below maps each subcommand to its Lastenheft IDs. End-to-end
-recipes (Postgres stack, Keycloak+OTel, devcontainer, templates, CI/JSON)
-live in [`docs/user/examples.md`](docs/user/examples.md).
+tasks (Postgres stack, Keycloak+OTel, devcontainer, templates, CI/JSON)
+are described in the [user manual](docs/user/benutzerhandbuch.md) (German).
 
 ## What makes it trustworthy?
 
@@ -273,7 +273,8 @@ Full layout contract: [`LH-FA-BUILD-009` in `spec/lastenheft.md`](spec/lastenhef
 - **Devcontainer sandbox profile:**
   [`docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten`](docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten)
 - **Machine-readable CLI contract (`--json`, `--dry-run`, `--diff`):**
-  [`docs/user/cli-json-output.md`](docs/user/cli-json-output.md)
+  [`docs/maintainer/cli-json-contract.md`](docs/maintainer/cli-json-contract.md)
+  (user view: [JSON output](docs/user/benutzerhandbuch.md#json-ausgabe))
 - **User documentation:** [`docs/user/`](docs/user/)
 
 ## Build, Test, Lint

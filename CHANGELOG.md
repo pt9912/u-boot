@@ -224,7 +224,7 @@ as the canonical machine interface) is satisfied. Details below.
   unverändert) erfüllen die §322-Pflicht auch auf dem Error-Pfad.
   Allowlist-Reject-Liste schrumpft von 4 auf 1 (nur noch
   `template (bare)`). Drei Review-Runden (zwei HIGH + ein MED, alle
-  gefixt). Doku in [`docs/user/cli-json-output.md §6.9`](docs/user/cli-json-output.md).
+  gefixt). Doku in [`docs/user/cli-json-output.md §6.9`](docs/maintainer/cli-json-contract.md).
 - `feat(cli): u-boot logs --json` ([`LH-FA-CLI-007`](spec/lastenheft.md#lh-fa-cli-007--dry-run) /
   [`LH-NFA-USE-004`](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) / [`LH-FA-CLI-006`](spec/lastenheft.md#lh-fa-cli-006--exit-codes)) — siebter Folge-Slice
   (7/9) des Cluster-Slice [`slice-v1-cli-json-dry-run`](docs/plan/planning/done/slice-v1-cli-json-dry-run.md).
@@ -550,7 +550,7 @@ as the canonical machine interface) is satisfied. Details below.
   (§1838: `subcommand` verpflichtend für `command="template"`;
   Help-Parent ohne eigenes Datum). Ein Katalog-IO-Fehler mappt auf
   [`LH-NFA-REL-003`](spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)/Exit 14. Doku in
-  [`docs/user/cli-json-output.md §6.2`](docs/user/cli-json-output.md).
+  [`docs/user/cli-json-output.md §6.2`](docs/maintainer/cli-json-contract.md).
 - **Cluster-T_close** (Abschluss des [`slice-v1-cli-json-dry-run`](docs/plan/planning/done/slice-v1-cli-json-dry-run.md)-
   Clusters): die transitionale `--json`-Reject-Mechanik (Allowlist-
   Map + `applyJSONRejectGate` am Root-`PersistentPreRunE` +
@@ -562,7 +562,7 @@ as the canonical machine interface) is satisfied. Details below.
   damit er den Gate-Abbau überlebt ohne Hilfetext zu leaken. Keine
   Verhaltensänderung für Konsumenten (Exit 2 bleibt); rein interner
   Mechanik-Abbau (netto −90 LOC). Doku in
-  [`docs/user/cli-json-output.md §6.1`](docs/user/cli-json-output.md).
+  [`docs/user/cli-json-output.md §6.1`](docs/maintainer/cli-json-contract.md).
 
 ### Fixed
 
@@ -724,7 +724,7 @@ as the canonical machine interface) is satisfied. Details below.
   auf `docs/user/cli-json-output.md` §5.1 mit HTML-Marker-
   Sektion-Begrenzung, (3) Helper-Reject im Acceptance-Pfad
   für undokumentierte Codes. **Schema-Vertrag-Doku**
-  ([`docs/user/cli-json-output.md`](docs/user/cli-json-output.md))
+  ([`docs/user/cli-json-output.md`](docs/maintainer/cli-json-contract.md))
   zitiert Minimalkontrakt und Voll-Schema verbatim, dokumentiert
   Code-Registry und Per-Command-Migrations-Reihenfolge.
 - `feat(logs): u-boot logs [service] [--follow] [--tail <n>]`

@@ -60,7 +60,7 @@ Quickstart and user docs: https://github.com/pt9912/u-boot#readme`,
 	// migration completed with the Cluster-T_close; the transitional
 	// allowlist reject gate is gone). The only `--json` reject left
 	// is bare `u-boot template` (RunE-borne, see template.go). See
-	// docs/user/cli-json-output.md §6.
+	// docs/maintainer/cli-json-contract.md §6.
 	root.PersistentFlags().BoolVar(&a.json, "json", false,
 		"emit machine-readable JSON output where supported")
 
@@ -82,7 +82,7 @@ Quickstart and user docs: https://github.com/pt9912/u-boot#readme`,
 		// only remaining `--json` reject is bare `u-boot template`,
 		// handled RunE-borne via [ErrTemplateSubcommandRequired]
 		// (slice-v1-cli-json-dry-run-template T0-(a)). See
-		// docs/user/cli-json-output.md §6.1.
+		// docs/maintainer/cli-json-contract.md §6.1.
 		if a.logLevel == nil {
 			return nil
 		}

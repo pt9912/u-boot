@@ -6,3 +6,4 @@ von `u-boot` finden ihre Anleitung unter [`docs/user/`](../user/README.md).
 - [`quality.md`](quality.md) — Quality-Gate- und Linter-Profil.
 - [`branch-protection.md`](branch-protection.md) — Einrichtung der Required Status Checks für `main`.
 - [`releasing.md`](releasing.md) — Release-Ablauf (Tag, `publish`, GHCR, Binaries, Pakete, Homebrew-Tap, Fehlerbilder).
+- [`cli-json-contract.md`](cli-json-contract.md) — Vertrag der maschinenlesbaren Ausgabe (`--json`, `--dry-run`, `--diff`): Schema, Code-Registry, Migrationsstand. Nutzersicht: [Benutzerhandbuch, Anhang „JSON-Ausgabe“](../user/benutzerhandbuch.md#json-ausgabe).

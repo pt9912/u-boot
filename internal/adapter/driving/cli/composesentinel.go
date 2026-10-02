@@ -25,7 +25,7 @@ import (
 //
 // LH-Code für beide Pfade ist `LH-NFA-REL-003` (T0-(f) Konsolidierung
 // mit Doku-/Test-Pin-Pflicht für die `(code, exitCode)`-Tupel-
-// Disambiguation in `cli-json-output.md` §6.7). Exit-Code wird vom
+// Disambiguation in `cli-json-contract.md` §6.7). Exit-Code wird vom
 // separaten [ExitCode]-Helper aus dem Sentinel abgeleitet
 // (driven.ErrDockerUnavailable → 11, driven.ErrComposeRuntime → 12) —
 // dieser Helper liefert nur den LH-Code für `diagnosticItem.Code`.

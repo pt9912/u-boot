@@ -282,7 +282,8 @@ Vollständiger Layout-Kontrakt:
 - **Devcontainer-Features:**
   [`docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen`](docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen)
 - **Maschinen-lesbarer CLI-Vertrag (`--json`, `--dry-run`, `--diff`):**
-  [`docs/user/cli-json-output.md`](docs/user/cli-json-output.md)
+  [`docs/maintainer/cli-json-contract.md`](docs/maintainer/cli-json-contract.md)
+  (Nutzersicht: [JSON-Ausgabe](docs/user/benutzerhandbuch.md#json-ausgabe))
 - **User-Dokumentation:** [`docs/user/`](docs/user/)
 
 ## Build, Test, Lint

@@ -58,7 +58,7 @@ func TestMapConfigErrorToDiagnostic_AllRows(t *testing.T) {
 // `_ByDesign`: [ExitCode] is an INDEPENDENT classifier that checks
 // isValidationError BEFORE isFilesystemError, so the same synthetic
 // chain yields exit 10 (validation-sub-class). The (code, exitCode)
-// tuple is the disambiguation contract (cli-json-output.md §6.7
+// tuple is the disambiguation contract (cli-json-contract.md §6.7
 // pattern): the FS code signals the class, the exit differentiates
 // the sub-sentinel source. No real code path chains both today —
 // this is a defense-only robustness pin.

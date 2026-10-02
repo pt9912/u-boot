@@ -120,8 +120,8 @@ const (
 // in sync (slice-v1-cli-json-dry-run-doctor T0-(h) Gate 1).
 //
 // Adding a new check: append its `checkID*` constant here AND in
-// jsontestutil.DefaultAllowedCodes AND in docs/user/cli-json-
-// output.md §5.1 — the drift test breaks otherwise.
+// jsontestutil.DefaultAllowedCodes AND in docs/maintainer/cli-json-
+// contract.md §5.1 — the drift test breaks otherwise.
 func DoctorCheckIDs() []string {
 	return []string{
 		checkIDWritePermissions,

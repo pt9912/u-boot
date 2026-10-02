@@ -1,6 +1,6 @@
 // Package jsontestutil bietet schema-konforme Assertion-Helper für
 // `u-boot --json`-Ausgaben (slice-v1-cli-json-dry-run-doctor T2).
-// Spec-Anker: docs/user/cli-json-output.md zitiert das Lastenheft
+// Spec-Anker: docs/maintainer/cli-json-contract.md zitiert das Lastenheft
 // §1823-1842 (Minimalkontrakt) und §322-417 (Voll-Schema) verbatim;
 // dieses Package prüft Schema-Konformität als Go-Code, kein embedded
 // JSON-Schema, kein zusätzlicher Dep.
@@ -18,7 +18,7 @@ package jsontestutil
 //
 // Source-of-Truth-Disziplin: die zurückgegebene Map ist der
 // kanonische Code-Satz. Markdown-Doku-Form lebt in
-// docs/user/cli-json-output.md §5; der drift_test.go im
+// docs/maintainer/cli-json-contract.md §5; der drift_test.go im
 // jsontestutil-Package erzwingt symmetrische Synchronisation
 // (Gate 2 aus dem T0-(h)-Outcome).
 //

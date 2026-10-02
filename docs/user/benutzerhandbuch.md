@@ -48,11 +48,6 @@ bestehendes `u-boot`-Projekt betreuen. Sie brauchen kein Wissen über den
 inneren Aufbau von `u-boot`. Grundkenntnisse in der Kommandozeile und ein
 grobes Verständnis von Docker Compose genügen.
 
-Zusätzliche Anleitungen für Spezialthemen:
-
-- [`examples.md`](examples.md) – Beispielabläufe als Kommando-Rezepte
-- [`cli-json-output.md`](cli-json-output.md) – maschinenlesbare Ausgabe
-
 ### Voraussetzungen
 
 | Voraussetzung | Wofür |
@@ -452,12 +447,13 @@ services:
 - Ein unbekannter Dienst führt zu Exit-Code 10 mit der Liste der verfügbaren
   Dienste: `service not supported: "redis" is not in the built-in catalogue
   [postgres keycloak otel]`.
-- Braucht ein Dienst einen anderen, installiert `--with-deps` das Fehlende
-  automatisch mit, ohne Rückfrage.
+- Dienste lassen sich kombinieren, zum Beispiel `u-boot add keycloak` und
+  `u-boot add otel` im selben Projekt; danach startet `u-boot up` alle.
+- `--with-deps` installiert Dienste mit, die ein anderer Dienst voraussetzt, ohne
+  Rückfrage. Aktuell setzt keiner der eingebauten Dienste einen anderen voraus;
+  der Schalter ist daher ohne Wirkung und bricht nicht ab.
 - `.env.example` bleibt eine Vorlage. Echte Zugangsdaten gehören nur in `.env`,
   das nicht ins Git-Repository gehört.
-- Beispielabläufe für die einzelnen Dienste stehen in
-  [`examples.md`](examples.md).
 
 ### 4.4 Einen Dienst entfernen
 
@@ -1117,8 +1113,8 @@ Diagnosemeldungen und Exit-Code:
 {"status":"ok","command":"config","subcommand":"get","diagnostics":[],"exitCode":0,"data":{"path":"project.name","value":"demo-app"}}
 ```
 
-Das vollständige Schema samt Exit-Code-Matrix je Befehl steht in
-[`cli-json-output.md`](cli-json-output.md).
+Alle Felder, die Ausgabe je Befehl und die Prüfkennungen beschreibt der Anhang
+[JSON-Ausgabe](#json-ausgabe).
 
 #### Hinweise
 
@@ -1153,7 +1149,7 @@ devcontainer:
 ```bash
 u-boot config                                          # ganze Datei anzeigen
 u-boot config get project.name                         # einen Wert lesen
-u-boot config get project.name devcontainer.enabled    # mehrere, je Zeile ein Wert
+u-boot config get project.name services.postgres.enabled   # mehrere, je Zeile ein Wert
 u-boot config list                                     # alle gesetzten Pfade als pfad=wert
 ```
 
@@ -1166,8 +1162,10 @@ services.postgres.enabled=true
 ```
 
 Mit `--json` liefern `config get` bei mehreren Pfaden (oder mit `--json-array`)
-und `config list` die Form `data.entries[{path, value}]`. Ein nicht gesetzter
-oder unbekannter Pfad endet mit Exit-Code 10.
+und `config list` die Form `data.entries[{path, value}]`. Bei mehreren Pfaden gilt
+„alles oder nichts“: Ist ein Pfad unbekannt oder nicht gesetzt (zum Beispiel
+`devcontainer.enabled` in einem Projekt ohne Devcontainer), endet der Aufruf mit
+Exit-Code 10 und gibt nichts aus.
 
 ### Werte ändern
 
@@ -1493,9 +1491,9 @@ eine Liste erlaubter Internet-Ziele), ist aber keine harte Sicherheitsgrenze.
 Das gilt besonders mit verschachteltem Podman.
 
 **Wo finde ich alle Optionen eines Befehls?**
-`u-boot <befehl> --help` zeigt sie. Beispielabläufe stehen in
-[`examples.md`](examples.md), die JSON-Ausgabe in
-[`cli-json-output.md`](cli-json-output.md).
+`u-boot <befehl> --help` zeigt sie; die Optionen aller Befehle stehen auch im
+[Anhang](#optionen-je-befehl). Die JSON-Ausgabe beschreibt der Anhang
+[JSON-Ausgabe](#json-ausgabe).
 
 **Wie aktualisiere ich `u-boot`?**
 Je nach Installation: Binary neu herunterladen, `brew upgrade u-boot`, das neue
@@ -1595,6 +1593,99 @@ Die Werte `CHANGEME_…` in `.env.example` sind Platzhalter. Ersetzen Sie sie in
 | `devcontainer.user.uid` | 1 bis 65535, Standard 1000 |
 | Sicherungsdateien (`--backup`) | `<name>.bak`, `<name>.bak.1`, `<name>.bak.2`, … |
 
+### JSON-Ausgabe
+
+Mit `--json` gibt jeder Befehl genau ein JSON-Objekt auf der Standardausgabe
+aus. Bei Fehlern erscheint der Fehlertext zusätzlich auf der Fehlerausgabe.
+
+**Immer vorhanden:**
+
+| Feld | Inhalt |
+|---|---|
+| `status` | `ok`, `warn` oder `error`; folgt dem schwersten Eintrag in `diagnostics` |
+| `command` | Befehl: `init`, `add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `template` |
+| `subcommand` | nur bei `config` (`get`, `set`, `list`) und `template` (`list`) |
+| `diagnostics` | Liste der Befunde, leer (`[]`), wenn alles in Ordnung ist |
+| `exitCode` | derselbe Wert wie der Exit-Code des Prozesses |
+| `data` | Ergebnisdaten des Befehls (siehe Tabelle unten), nicht bei jedem Befehl |
+
+Jeder Eintrag in `diagnostics` hat `level` (`warn` oder `error`), `code`,
+`message` und optional `file`. Meldungen mit dem Zustand „in Ordnung“ erscheinen
+im JSON nicht; `--quiet` ändert die JSON-Ausgabe nicht.
+
+**Zusätzlich bei `--dry-run` und `--diff`** (Vorschau von schreibenden Befehlen):
+
+| Feld | Inhalt |
+|---|---|
+| `dryRun` | `true`, wenn nichts geschrieben wurde |
+| `diff` | `true`, wenn Diffs enthalten sind |
+| `plannedFiles` | Liste mit `path` und `action` (`create`, `modify` oder `delete`); mit `--diff` zusätzlich `hunks` |
+| `changes` | Liste mit `path` und `count` (Anzahl geänderter Zeilen oder Einträge) |
+
+**Beispiele:**
+
+```json
+{"status":"ok","command":"add","dryRun":true,"diff":false,"plannedFiles":[{"path":"u-boot.yaml","action":"modify"},{"path":"compose.yaml","action":"modify"},{"path":".env.example","action":"modify"}],"changes":[{"path":"u-boot.yaml","count":4},{"path":"compose.yaml","count":27},{"path":".env.example","count":6}],"diagnostics":[],"exitCode":0}
+```
+
+```json
+{"status":"error","command":"add","diagnostics":[{"level":"error","code":"LH-FA-ADD-002","message":"service not supported: \"redis\" is not in the built-in catalogue [postgres keycloak otel]"}],"exitCode":10}
+```
+
+**`data` je Befehl:**
+
+| Befehl | `data` |
+|---|---|
+| `init`, `add`, `doctor` | keine |
+| `remove` | `service`, `priorState`, `state` (zum Beispiel `deactivated`), `volumesPurged` |
+| `up` | `services`: Liste mit `name`, `state`, `port`, `ports`, `healthcheck`; auch bei einem Fehler nach dem Start (Stand der bis dahin gestarteten Dienste) |
+| `down` | `removedVolumes` (Wahrheitswert), `removedVolumeNames` (Liste) |
+| `logs` | `lines`: Liste der Log-Zeilen (nur mit `--tail`, nicht mit `--follow`) |
+| `generate` | `artifact` (zum Beispiel `readme`), `action` (zum Beispiel `created` oder `no-op`) |
+| `config get` | `path` und `value`; bei mehreren Pfaden oder `--json-array` `entries` |
+| `config list` | `entries`: Liste mit `path` und `value` |
+| `config set` | `path`, `oldValue`, `newValue`, `noOp` |
+| `template list` | Liste der Vorlagen mit `name`, `description`, `version`, `supportedAddOns`, `generatedFiles`, `requiredTools`, `variables` |
+
+Bei Fehlern von `config get` und `config set` enthält `data.hint` einen
+Reparaturvorschlag: `command` (der Befehl zum Kopieren), `action` und `argument`.
+
+**Besonderheiten:**
+
+- Ein Aufruf von `u-boot template --json` ohne `list` endet mit Exit-Code 2 und
+  gibt kein JSON aus. `u-boot logs --follow --json` ist ebenfalls ein
+  Nutzungsfehler (Exit-Code 2).
+- `doctor` endet mit `warn` und Exit-Code 0, solange nur Warnungen vorliegen;
+  mit `--strict` oder bei einem Fehler lautet der Exit-Code 11.
+- Bei `down --volumes` ohne `--yes` wird im JSON-Modus nicht gefragt, sondern
+  abgelehnt (Exit-Code 10).
+
+**Kennungen in `diagnostics[].code`:**
+
+- Prüfungen von `doctor` tragen den Namen der Prüfung (siehe Tabelle).
+- Andere Fehler tragen eine feste Kennung, die je Fehlerklasse stabil bleibt (im
+  zweiten Beispiel oben für einen unbekannten Dienst). Für die Fehlerbehandlung in
+  Skripten genügt in der Regel der `exitCode`.
+
+| Prüfung (`code`) | Bedeutung |
+|---|---|
+| `fs.write-permissions` | Schreibrecht im Verzeichnis |
+| `git.installed` | `git` vorhanden |
+| `docker.installed` | Docker vorhanden und neu genug |
+| `docker.reachable` | Docker-Daemon erreichbar |
+| `docker.compose.installed` | Compose-Plugin vorhanden und neu genug |
+| `uboot.yaml.valid` | `u-boot.yaml` gültig |
+| `compose.yaml.valid` | `compose.yaml` gültig |
+| `services.enabled-key` | alle Dienste tragen einen `enabled`-Schlüssel |
+| `devcontainer.json.valid` | `devcontainer.json` gültig |
+| `devcontainer.dockerfile.valid` | `.devcontainer/Dockerfile` lesbar |
+| `devcontainer.forwardPorts.consistency` | Weiterleitungs-Ports passen zu den Diensten |
+| `devcontainer.features.allowlist` | externe Features sind freigegeben |
+| `devcontainer.features.drift` | Features in `u-boot.yaml` und `devcontainer.json` stimmen überein |
+| `devcontainer.sandbox.runtime` | Sandbox: verschachteltes Podman passend konfiguriert |
+| `devcontainer.sandbox.egress` | Sandbox: Internet-Beschränkung passend konfiguriert |
+| `devcontainer.sandbox.credentials` | Sandbox: keine Klartext-Zugangsdaten, Token-Quelle vorhanden |
+
 ### Unterstützte Plattformen
 
 Binary: Linux, macOS und Windows, je `amd64` und `arm64`. Homebrew: macOS und
@@ -1610,11 +1701,6 @@ Linux, je `amd64` und `arm64`. Pakete: Linux `amd64` und `arm64` (`.deb`,
 Legen Sie einem Fehlerbericht bei: die Ausgabe von `u-boot --version`, die
 Ausgabe von `u-boot doctor`, Ihr Betriebssystem und den genauen Befehl. Entfernen
 Sie vorher Passwörter, Tokens und interne Adressen aus der Ausgabe.
-
-**Weiterführende Dokumentation:**
-
-- [`examples.md`](examples.md) – Beispielabläufe als Kommando-Rezepte
-- [`cli-json-output.md`](cli-json-output.md) – JSON-Schema und Exit-Code-Matrix
 
 **Lizenz:** MIT, siehe `LICENSE` im Projektarchiv.
 

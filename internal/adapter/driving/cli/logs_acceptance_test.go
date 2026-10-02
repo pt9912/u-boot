@@ -421,7 +421,7 @@ func TestLogsJSON_TrailingNewline_StrippedFromLastLine(t *testing.T) {
 //
 // `_ByDesign`-Suffix wie up-down T7-MED-1: ExitCode-Helper (cli.go)
 // checked Driven-Sentinels first → exitCode = 11 (Docker-Sub-Klasse).
-// (code, exitCode)-Tupel-Disambiguation per cli-json-output.md §6.7 ist
+// (code, exitCode)-Tupel-Disambiguation per cli-json-contract.md §6.7 ist
 // der Vertrag: der FS-Code signalisiert die Klasse, der Exit
 // differenziert die Sub-Sentinel-Quelle.
 func TestLogsJSON_MultiWrap_FSAndDocker_SwitchOrderFSFirst_ByDesign(t *testing.T) {
