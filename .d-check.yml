@@ -27,6 +27,9 @@ ids:
     - regex: '\bLH(?:-[A-ZÄÖÜ0-9]+)+-\d{3}[A-Z]?\b'
       target: spec/lastenheft.md
       link-policy: always
+    - regex: '\bSPEC-\d{3}\b'
+      target: spec/spezifikation.md
+      link-policy: always
     - regex: '\b(?:PH|TC|CO)(?:-[A-Z0-9]+)+-\d{3}[A-Z]?\b'
       target: spec/lastenheft.md
       link-policy: always
@@ -42,6 +45,8 @@ matrix:
   classes:
     - name: contract-spec
       paths: [spec/lastenheft.md]
+    - name: tech-spec
+      paths: [spec/spezifikation.md]
     - name: view-spec
       paths: [spec/architecture.md]
     - name: adr
@@ -53,11 +58,17 @@ matrix:
     - name: roadmap
       paths: ["docs/plan/planning/in-progress/roadmap.md"]
   rules:
+    - {from: contract-spec, to: tech-spec, allow: false}
     - {from: contract-spec, to: view-spec, allow: false}
     - {from: contract-spec, to: adr, allow: false}
     - {from: contract-spec, to: slice, allow: false}
     - {from: contract-spec, to: carveout, allow: false}
     - {from: contract-spec, to: roadmap, allow: false}
+    - {from: tech-spec, to: view-spec, allow: false}
+    - {from: tech-spec, to: adr, allow: false}
+    - {from: tech-spec, to: slice, allow: false}
+    - {from: tech-spec, to: carveout, allow: false}
+    - {from: tech-spec, to: roadmap, allow: false}
     - {from: view-spec, to: adr, allow: false}
     - {from: view-spec, to: slice, allow: false}
     - {from: view-spec, to: carveout, allow: false}

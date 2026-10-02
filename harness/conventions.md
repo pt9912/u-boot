@@ -116,23 +116,38 @@ Baseline still.
   Adaptionen folgen als `MR-<NNN>`.
 - **Aufloesungs-Trigger:** permanent.
 
-### MR-001 - Source Precedence mit zwei Spec-Straten, ohne Technik-Stratum
+### MR-001 - Source Precedence mit drei Spec-Straten (Vollform)
 
-- **Datum:** 2026-07-24
+- **Datum:** 2026-10-02 (Fassung 2; Fassung 1 vom 2026-07-24 fuehrte nur zwei Straten und liess das Technik-Stratum bewusst weg)
 - **Geltungsbereich:** [`AGENTS.md`](../AGENTS.md) Abschnitt Source Precedence,
-  [`harness/README.md`](README.md) Abschnitt Source Precedence.
-- **Adaption:** u-boot fuehrt eine 9-Rang-Source-Precedence mit **zwei**
-  Spec-Straten: `contract_spec` ([`spec/lastenheft.md`](../spec/lastenheft.md),
-  vertraglich) und `view_spec`
-  ([`spec/architecture.md`](../spec/architecture.md), Sicht). Ein **Technik-
-  Stratum** (`spec/spezifikation.md`) wird bewusst **nicht** gefuehrt.
+  [`harness/README.md`](README.md) Abschnitt Source Precedence,
+  `.d-check.yml` (Referenzmatrix).
+- **Adaption:** u-boot fuehrt eine 10-Rang-Source-Precedence mit **drei**
+  Spec-Straten nach Baseline-Regelwerk `modul-03-spec.md`:
+  `contract_spec` ([`spec/lastenheft.md`](../spec/lastenheft.md), Vertrag, das
+  *Was*), `tech_spec` ([`spec/spezifikation.md`](../spec/spezifikation.md),
+  Technik, das *Wie genau*) und `view_spec`
+  ([`spec/architecture.md`](../spec/architecture.md), Sicht, das *Wodurch*).
+  Konfliktregel: Lastenheft vor Spezifikation vor Architektur - die untere
+  Schicht praezisiert, erweitert nie. Die **Decken-Regel** gilt fuer alle drei:
+  kein Spec-Stratum nennt eine ADR, einen Slice, einen Carveout oder die
+  Roadmap; die Spezifikation verweist nur aufwaerts auf das Lastenheft.
   Repo-Klasse: **Tooling/Referenz**.
-- **Begruendung:** Das Technik-Stratum ist laut Regelwerk (`grundlagen-
-  konventionen` Abschnitt Spec-Straten) optional; nur Vertrag und Sicht sind
-  obligatorisch. u-boots Zwei-Straten-Klassifikation ist dort selbst als
-  Referenz-Implementierung benannt. Kein dritter Stratum -> keine Luecke.
-- **Aufloesungs-Trigger:** permanent, solange u-boot ohne separates
-  Technik-Stratum auskommt.
+- **ID-Schemata (Technik-Stratum):** Eine **Verfeinerung** einer einzelnen
+  Anforderung traegt deren Kennung mit Buchstabensuffix (`<Anforderungs-ID>.a`,
+  `.b`, ...); alles, was keine einzelne Anforderung verfeinert (Datenschemata,
+  Defaults, Fehler-Codes, Metrik-Felder, externe Vertraege), traegt
+  `SPEC-<NNN>` (dreistellig, fortlaufend je Datei). Eine `SPEC-*` ist eine
+  Adresse, keine Anforderung. Die Sicht fuehrt `ARC-<NNN>` fuer Komponenten.
+- **Begruendung:** Fassung 1 stuetzte sich auf die Optionalitaet des
+  Technik-Stratums; das Lastenheft wuchs dadurch auf rund 3000 Zeilen und
+  vermischte Vertrag und Technik (Schemata, Defaults, Build-Details). Das
+  Regelwerk (v6.13.0) macht alle drei Straten obligatorisch: Technik im
+  Vertrag zu falten verschiebt den Aenderungs-Prozess (nur per Change Request
+  aenderbar, keine schaerfende ADR moeglich). Der Projektinhaber hat die
+  Vollform am 2026-10-02 beschlossen.
+- **Aufloesungs-Trigger:** permanent. Die Befuellung der Spezifikation ist
+  Gegenstand der Welle `welle-spec-technik-stratum` (Roadmap).
 
 ### MR-002 - Carveout-Inventar an fester Stelle statt `docs/plan/carveouts/`
 

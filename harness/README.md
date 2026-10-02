@@ -14,15 +14,16 @@ kanonische Quelle und diese Datei wird angepasst.
 
 | Rang | Quelle | Charakter |
 | --- | --- | --- |
-| 1 | [`spec/lastenheft.md`](../spec/lastenheft.md) | Normative Anforderungen, Akzeptanzkriterien, Exit-Codes, Sprachvertrag |
-| 2 | [`spec/architecture.md`](../spec/architecture.md) | Hexagonale Architektur, Schichten, Importregeln |
-| 3 | [`docs/plan/adr/`](../docs/plan/adr/) | Architekturentscheidungen |
-| 4 | [`docs/plan/planning/in-progress/`](../docs/plan/planning/in-progress/) und [`next/`](../docs/plan/planning/next/) | Aktuelle Slice-Arbeit |
-| 5 | [`Makefile`](../Makefile), [`Dockerfile`](../Dockerfile), [`.golangci.yml`](../.golangci.yml), [`.github/workflows/`](../.github/workflows/) | Ausfuehrbare Vertraege |
-| 6 | [`docs/user/`](../docs/user/) | Quality, Branch Protection, Nutzerpfade |
-| 7 | [`README.md`](../README.md), [`README.de.md`](../README.de.md), [`CHANGELOG.md`](../CHANGELOG.md) | Produktueberblick und Release-Kommunikation |
-| 8 | [`AGENTS.md`](../AGENTS.md) | Agent-Briefing und Hard Rules |
-| 9 | Diese Datei | Harness-Einstieg |
+| 1 | [`spec/lastenheft.md`](../spec/lastenheft.md) | Vertrag: normative Anforderungen, Akzeptanzkriterien, Exit-Codes, Sprachvertrag |
+| 2 | [`spec/spezifikation.md`](../spec/spezifikation.md) | Technik: Algorithmen, Schemata, Defaults, Fehler-Codes, externe Vertraege |
+| 3 | [`spec/architecture.md`](../spec/architecture.md) | Sicht: hexagonale Architektur, Schichten, Importregeln |
+| 4 | [`docs/plan/adr/`](../docs/plan/adr/) | Architekturentscheidungen |
+| 5 | [`docs/plan/planning/in-progress/`](../docs/plan/planning/in-progress/) und [`next/`](../docs/plan/planning/next/) | Aktuelle Slice-Arbeit |
+| 6 | [`Makefile`](../Makefile), [`Dockerfile`](../Dockerfile), [`.golangci.yml`](../.golangci.yml), [`.github/workflows/`](../.github/workflows/) | Ausfuehrbare Vertraege |
+| 7 | [`docs/user/`](../docs/user/) und [`docs/maintainer/`](../docs/maintainer/) | Nutzerhandbuch; Quality, Branch Protection, Release |
+| 8 | [`README.md`](../README.md), [`README.de.md`](../README.de.md), [`CHANGELOG.md`](../CHANGELOG.md) | Produktueberblick und Release-Kommunikation |
+| 9 | [`AGENTS.md`](../AGENTS.md) | Agent-Briefing und Hard Rules |
+| 10 | Diese Datei | Harness-Einstieg |
 
 ## Guides
 
@@ -31,6 +32,7 @@ Feedforward-Quellen, die Arbeit vor der Umsetzung lenken:
 | Quelle | Inhalt |
 | --- | --- |
 | [`spec/lastenheft.md`](../spec/lastenheft.md) | `LH-*`-IDs, Prioritaeten, funktionale und nicht-funktionale Anforderungen |
+| [`spec/spezifikation.md`](../spec/spezifikation.md) | `SPEC-*`-IDs, Schemata, Defaults, Fehler-Codes, externe Vertraege |
 | [`spec/architecture.md`](../spec/architecture.md) | Layering, Port-/Adapter-Regeln, depguard-Kontrakt |
 | [`docs/plan/adr/README.md`](../docs/plan/adr/README.md) | ADR-Index und Entscheidungsueberblick |
 | [`docs/plan/planning/in-progress/roadmap.md`](../docs/plan/planning/in-progress/roadmap.md) | Release- und Slice-Status |

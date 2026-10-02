@@ -45,22 +45,26 @@ dort unter Baseline.
 
 In dieser Reihenfolge lesen und aufloesen:
 
-1. [`spec/lastenheft.md`](spec/lastenheft.md) - normative Anforderungen,
+1. [`spec/lastenheft.md`](spec/lastenheft.md) - Vertrag: normative Anforderungen,
    Akzeptanzkriterien, Exit-Code- und Sprachvertraege.
-2. [`spec/architecture.md`](spec/architecture.md) - Schichten,
+2. [`spec/spezifikation.md`](spec/spezifikation.md) - Technik: Algorithmen,
+   Schemata, Defaults, Fehler-Codes, externe Vertraege; praezisiert das
+   Lastenheft, erweitert es nie.
+3. [`spec/architecture.md`](spec/architecture.md) - Sicht: Schichten,
    Komponenten, Importregeln, Podman-/Docker-Annahmen.
-3. [`docs/plan/adr/`](docs/plan/adr/) - Architekturentscheidungen.
-4. Aktiver Slice in [`docs/plan/planning/in-progress/`](docs/plan/planning/in-progress/)
+4. [`docs/plan/adr/`](docs/plan/adr/) - Architekturentscheidungen.
+5. Aktiver Slice in [`docs/plan/planning/in-progress/`](docs/plan/planning/in-progress/)
    oder [`docs/plan/planning/next/`](docs/plan/planning/next/) - konkrete
    Arbeit, Tranchen, DoD und Closure-Bedingungen.
-5. Ausfuehrbare Harness-Vertraege: [`Makefile`](Makefile),
+6. Ausfuehrbare Harness-Vertraege: [`Makefile`](Makefile),
    [`Dockerfile`](Dockerfile), [`.golangci.yml`](.golangci.yml) und
    [`.github/workflows/`](.github/workflows/).
-6. Nutzer- und Quality-Doku unter [`docs/user/`](docs/user/), besonders
-   [`docs/user/quality.md`](docs/maintainer/quality.md).
-7. [`README.md`](README.md), [`README.de.md`](README.de.md) und
+7. Nutzer-Doku unter [`docs/user/`](docs/user/) und Maintainer-Doku unter
+   [`docs/maintainer/`](docs/maintainer/), besonders
+   [`docs/maintainer/quality.md`](docs/maintainer/quality.md).
+8. [`README.md`](README.md), [`README.de.md`](README.de.md) und
    [`CHANGELOG.md`](CHANGELOG.md).
-8. [`harness/README.md`](harness/README.md) und diese Datei.
+9. [`harness/README.md`](harness/README.md) und diese Datei.
 
 ## Hard Rules
 
