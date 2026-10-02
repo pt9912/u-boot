@@ -17,7 +17,7 @@ die Spezifikation beziehungsweise die Architektur-Sicht.
 
 **Ziel:** §4.11–§4.13 tragen als Vertrag nur Vorgabe und Nachweis je Anforderung (Docker-only, Gates, Doku-Struktur, hexagonale Architektur); §6.2, §6.3 und §7 sind technisch geschnitten; alle Details stehen wörtlich an ihrem neuen Ort.
 
-**Schnittregeln:** siehe [`slice-v2-spec-technik-stratum-grundlage`](../in-progress/slice-v2-spec-technik-stratum-grundlage.md) §Schnittregeln (bleibt im Lastenheft / zieht in die Spezifikation, Decken-Regel, Verbleib-Tabelle, Zeilenverweise).
+**Schnittregeln:** siehe [`slice-v2-spec-technik-stratum-grundlage`](../done/slice-v2-spec-technik-stratum-grundlage.md) §Schnittregeln (bleibt im Lastenheft / zieht in die Spezifikation, Decken-Regel, Verbleib-Tabelle, Zeilenverweise).
 
 **Ausdrücklich NICHT in diesem Slice:**
 

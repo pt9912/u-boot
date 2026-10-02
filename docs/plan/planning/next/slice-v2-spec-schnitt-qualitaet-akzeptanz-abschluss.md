@@ -17,7 +17,7 @@ konsistente Traceability-Matrix.
 
 **Ziel:** §5 und §8–§16 sind geschnitten; das Lastenheft trägt Version 0.4.0 mit Historie-Zeile; die Spezifikation ist vollständig befüllt und frei von Platzhaltern.
 
-**Schnittregeln:** siehe [`slice-v2-spec-technik-stratum-grundlage`](../in-progress/slice-v2-spec-technik-stratum-grundlage.md) §Schnittregeln (bleibt im Lastenheft / zieht in die Spezifikation, Decken-Regel, Verbleib-Tabelle, Zeilenverweise).
+**Schnittregeln:** siehe [`slice-v2-spec-technik-stratum-grundlage`](../done/slice-v2-spec-technik-stratum-grundlage.md) §Schnittregeln (bleibt im Lastenheft / zieht in die Spezifikation, Decken-Regel, Verbleib-Tabelle, Zeilenverweise).
 
 **Ausdrücklich NICHT in diesem Slice:**
 

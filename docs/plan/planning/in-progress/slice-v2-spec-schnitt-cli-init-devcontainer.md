@@ -1,6 +1,6 @@
 # Slice V2: Lastenheft-Schnitt 1: CLI-Grundverhalten, Projektinitialisierung, Devcontainer
 
-> **Status:** **geplant** (`next/`) — startet nach dem Fundament.
+> **Status:** **in Arbeit** (seit 2026-10-02) — Fundament geliefert.
 
 **Welle:** `welle-spec-technik-stratum` (siehe [`roadmap.md`](../in-progress/roadmap.md)).
 **Bezug:** Lastenheft §4.1 CLI-Grundverhalten, §4.2 Projektinitialisierung, §4.3 Devcontainer-Unterstützung, §6.1 Kommandozeilenschnittstelle (Scope).
@@ -17,7 +17,7 @@ der Verfeinerungen fest, an der die übrigen Schnitt-Slices sich orientieren.
 
 **Ziel:** Die Kapitel §4.1–§4.3 und §6.1 enthalten nur noch Vertrag (Was, Akzeptanzkriterien, Out-of-Scope); jede technische Festlegung steht wörtlich in der Spezifikation mit Kennung.
 
-**Schnittregeln:** siehe [`slice-v2-spec-technik-stratum-grundlage`](../in-progress/slice-v2-spec-technik-stratum-grundlage.md) §Schnittregeln (bleibt im Lastenheft / zieht in die Spezifikation, Decken-Regel, Verbleib-Tabelle, Zeilenverweise).
+**Schnittregeln:** siehe [`slice-v2-spec-technik-stratum-grundlage`](../done/slice-v2-spec-technik-stratum-grundlage.md) §Schnittregeln (bleibt im Lastenheft / zieht in die Spezifikation, Decken-Regel, Verbleib-Tabelle, Zeilenverweise).
 
 **Ausdrücklich NICHT in diesem Slice:**
 

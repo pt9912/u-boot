@@ -16,7 +16,7 @@ technische Festlegungen. Sie folgen den im Pilot bestimmten Schnittregeln.
 
 **Ziel:** §4.4–§4.10 enthalten nur noch Vertrag; Kataloge, Schemata, Prüflisten und Defaults stehen wörtlich in der Spezifikation mit Kennung.
 
-**Schnittregeln:** siehe [`slice-v2-spec-technik-stratum-grundlage`](../in-progress/slice-v2-spec-technik-stratum-grundlage.md) §Schnittregeln (bleibt im Lastenheft / zieht in die Spezifikation, Decken-Regel, Verbleib-Tabelle, Zeilenverweise).
+**Schnittregeln:** siehe [`slice-v2-spec-technik-stratum-grundlage`](../done/slice-v2-spec-technik-stratum-grundlage.md) §Schnittregeln (bleibt im Lastenheft / zieht in die Spezifikation, Decken-Regel, Verbleib-Tabelle, Zeilenverweise).
 
 **Ausdrücklich NICHT in diesem Slice:**
 

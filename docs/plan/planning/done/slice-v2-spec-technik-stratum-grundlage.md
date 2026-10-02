@@ -1,6 +1,6 @@
 # Slice V2: Technik-Stratum einführen (Fundament der Spec-Stratifizierung)
 
-> **Status:** **in Arbeit** (2026-10-02) — Fundament der Welle; die Schnitt-Slices warten auf dieses Stratum.
+> **Status:** **Done** (2026-10-02, **Delivery-Hash: `fdf4c92`**) — Technik-Stratum eingeführt; die Schnitt-Slices der Welle können starten.
 
 **Welle:** `welle-spec-technik-stratum` (siehe [`roadmap.md`](../in-progress/roadmap.md)).
 **Bezug:** [`LH-FA-PROJDOCS-001`](../../../../spec/lastenheft.md#lh-fa-projdocs-001--mindeststruktur)..[`-006`](../../../../spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell) (Doku-Struktur und Referenzmodell, Scope).
@@ -46,10 +46,10 @@ Vollform beschlossen (2026-10-02): Technik-Stratum einführen und das Lastenheft
   Slice für die berührten Stellen auf Kennung oder Abschnitt umgestellt.
 ## Definition of Done
 
-- [ ] `MR-001` abgelöst (Konventionen: drei Straten; Begründung und Auflösungs-Trigger), `AGENTS.md` und `harness/README.md` führen die neue Source Precedence.
-- [ ] `spec/spezifikation.md` angelegt (Kopf, sieben Abschnitte, Historie; Platzhalter-frei, noch ohne übernommene Inhalte) und in `.d-check.yml` als Stratum **Technik** mit Referenzregeln und Kennungs-Mustern (`SPEC-<NNN>`, Verfeinerung `LH-<…>-<NNN>.<a>`) geführt.
-- [ ] `make gates` grün (inklusive `make docs-check`), Exit-Code separat geprüft.
-- [ ] Review durch eine andere Rolle als die Umsetzung (`harness/review.md`), Report unter `docs/reviews/`.
+- [x] `MR-001` abgelöst (Konventionen: drei Straten; Begründung und Auflösungs-Trigger), `AGENTS.md` und `harness/README.md` führen die neue Source Precedence.
+- [x] `spec/spezifikation.md` angelegt (Kopf, sieben Abschnitte, Historie; Platzhalter-frei, noch ohne übernommene Inhalte) und in `.d-check.yml` als Stratum **Technik** mit Referenzregeln und Kennungs-Mustern (`SPEC-<NNN>`, Verfeinerung `LH-<…>-<NNN>.<a>`) geführt.
+- [x] `make gates` grün (inklusive `make docs-check`), Exit-Code separat geprüft.
+- [x] Review durch eine andere Rolle als die Umsetzung (`harness/review.md`), Report unter `docs/reviews/`.
 
 ## Tranchen
 
@@ -66,5 +66,9 @@ Vollform beschlossen (2026-10-02): Technik-Stratum einführen und das Lastenheft
 
 ## Closure
 
-Offen. Beim Schließen: Verifikation-Evidence nach `harness/verification.md` (DoD, Sensoren, nicht ausgeführte
-Sensoren, Carveouts), Steering-Loop-Lerneintrag, Delivery-Hash im Kopf.
+- **Geliefert (`fdf4c92`):** `MR-001` in `harness/conventions.md` auf Fassung 2 (drei Straten, ID-Schemata `SPEC-<NNN>` und Verfeinerung mit Buchstabensuffix); `AGENTS.md` und `harness/README.md` führen die 10-Rang-Source-Precedence; `spec/spezifikation.md` als Gefäß nach Vorlage (Kopf, §1–§7, Historie); `.d-check.yml` mit Klasse `tech-spec`, Decken-Regel-Regeln und Kennungs-Muster `SPEC-<NNN>`.
+- **Befund zu Verfeinerungs-Kennungen (Risiko ausgeräumt):** Eine nackte oder in Backticks gesetzte Verfeinerung (`<Anforderung>.a`) meldet d-check als ungelinkten Stamm der Anforderungs-Kennung; ein Link (auch auf `spezifikation.md`) genügt, Überschriften sind ausgenommen. Es braucht deshalb **kein** eigenes Muster; die Konvention lautet: Verfeinerungen werden im Fließtext verlinkt.
+- **Leere Spezifikation:** hält `make docs-check` grün (166 Dateien, 0 Befunde).
+- **Sensoren:** `make gates` grün (lint, test, coverage-gate, docs-check). Nicht ausgeführt: `make ci`, `make test-docker` (kein Code berührt).
+- **Review:** unabhängiges Review über die gesamte Welle am Abschluss (`slice-v2-spec-schnitt-qualitaet-akzeptanz-abschluss`); dieser Slice ist reine Konfiguration und Gefäß.
+- **Lerneintrag:** Die Matrix ließ sich mit vier Regelzeilen erweitern, weil `contract-spec`/`view-spec` bereits als Klassen existierten; ein generischer `spec`-Block mit `order` (Vorlage) wäre ein Umbau ohne Zusatznutzen gewesen.
