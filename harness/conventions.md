@@ -107,8 +107,8 @@ Baseline still.
 - **Geltungsbereich:** gesamtes Repo
 - **Adaption:** *keine inhaltlichen Adaptionen gegenueber Baseline-Default fuer
   Verzeichniskonvention, Lifecycle-Regeln (`open` -> `next` -> `in-progress` ->
-  `done`) und die etablierten ID-Schemata* (`ADR-<NNNN>`, `LH-*` samt
-  Verifikations-Aliassen `PH-*`/`TC-*`, `slice-<phase>-<slug>`,
+  `done`) und die etablierten ID-Schemata* (`ADR-<NNNN>`, `LH-*`,
+  `slice-<phase>-<slug>`,
   `tranche-<nr>-<slug>`, Carveout-Familie `CO-*`). Konkrete Abweichungen sind als
   eigene `MR-<NNN>` unten dokumentiert.
 - **Begruendung:** Initial-Setzung. u-boot war vor der Adoption bereits

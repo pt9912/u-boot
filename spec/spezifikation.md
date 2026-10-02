@@ -329,6 +329,79 @@ Verfeinert [`LH-FA-DEV-008`](lastenheft.md#lh-fa-dev-008--egress-restriktion).
 
 - Ist die nötige Capability nicht gewährbar, greift die Degradationstabelle der Verfeinerung [`LH-FA-DEV-007.a`](#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten); die Capability wird beim Containerstart geprüft (Warnung und Wegfall der Restriktion, bei `onUnavailable: fail` Exit-Code `11`). `u-boot doctor` prüft die Konfiguration (Schlüssel ohne Sandbox-Profil: `warn`); die Capability selbst ist vom Host aus nicht zuverlässig bestimmbar.
 
+### LH-FA-BUILD-001.b — Mindestumfang des Multi-Stage-Dockerfiles
+
+Verfeinert [`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo).
+
+Mindestumfang:
+
+- BuildKit-Direktive in der ersten Zeile des Dockerfiles.
+- Pflicht-Stages: `deps`, `compile`, `test`, `lint`, `coverage`, `build` und `runtime`; die Coverage-Stage erzwingt den Coverage-Schwellwert, die Runtime-Stage ist das minimale Endimage ([`LH-FA-BUILD-002`](lastenheft.md#lh-fa-build-002--runtime-stage-pflichten)).
+- Jede Stage ist ein eigenständiges Build-Ziel und per `docker build --target <stage>` einzeln baubar.
+
+### LH-FA-BUILD-002.b — Pflichten der Runtime-Stage
+
+Verfeinert [`LH-FA-BUILD-002`](lastenheft.md#lh-fa-build-002--runtime-stage-pflichten).
+
+- Minimales Base-Image ohne Shell.
+- Ausführung als Non-root-Benutzer.
+- `ENTRYPOINT` zeigt auf das im `build`-Stage erzeugte Binary.
+- OCI Image Labels für Quelle, Beschreibung, Lizenz und Titel sind gesetzt.
+- Keine Build-Toolchain im Endimage; alle Build-Artefakte stammen aus dem `build`-Stage.
+
+### LH-FA-BUILD-003.a — Overrides der Build-Args
+
+Verfeinert [`LH-FA-BUILD-003`](lastenheft.md#lh-fa-build-003--build-args-und-pin-politik).
+
+Overrides erfolgen über `docker build --build-arg <NAME>=<value>` bzw. die korrespondierende Makefile-Variable.
+
+### LH-FA-BUILD-007.a — Regeln des Docker-only-Workflows
+
+Verfeinert [`LH-FA-BUILD-007`](lastenheft.md#lh-fa-build-007--docker-only-workflow).
+
+- Alle MVP- und V1-Pflicht-Targets aus [`LH-FA-BUILD-005`](lastenheft.md#lh-fa-build-005--makefile-mit-standard-targets)/[`LH-FA-BUILD-006`](lastenheft.md#lh-fa-build-006--aggregator-targets) müssen ausschließlich `docker build`, `docker run` oder die Aggregation anderer solcher Targets aufrufen.
+- Voraussetzung am Host: Docker Engine und `make`. `make` ist ein bewusster Carveout zu [`LH-NFA-PORT-002`](lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten) (weit verbreitet, einzige zusätzliche Host-Abhängigkeit neben Docker). Eine Go-Toolchain am Host darf für Standard-Targets nicht vorausgesetzt werden.
+- Carveouts (z. B. ein Bash-Skript, das nicht containerisiert wird) sind im `Makefile`-Header explizit zu dokumentieren.
+
+### LH-FA-BUILD-008.a — Bootstrap-Verhalten der Coverage-Stage
+
+Verfeinert [`LH-FA-BUILD-008`](lastenheft.md#lh-fa-build-008--coverage-bootstrap).
+
+- Default-Schwellwert `0` (`ARG COVERAGE_THRESHOLD=0`).
+- Sobald `./internal/...` produktive Pakete enthält, wird die Schwelle in einem Folge-Schritt angehoben; der Override-Pfad `make coverage-gate THRESHOLD=…` muss funktionieren.
+- Leere Coverage darf in der Bootstrap-Phase nicht zu einem falschen Grün führen, das echte Test-Failures maskiert; der `go test`-Exit-Code wird über `set -o pipefail` o. ä. an die Gate-Logik durchgereicht.
+
+### LH-FA-BUILD-009.a — Go-Layout des Repositories
+
+Verfeinert [`LH-FA-BUILD-009`](lastenheft.md#lh-fa-build-009--repository-layout).
+
+- Modul-Pfad in `go.mod`: `github.com/pt9912/u-boot`.
+- Implementierungspakete leben unter `./internal/...`; öffentlich konsumierbare Pakete unter `./pkg/...` werden im MVP nicht erzeugt.
+- CLI-Entry-Points unter `./cmd/<binary>/`; das primäre Binary heißt `uboot` (Verzeichnis `./cmd/uboot/`, Go-konform ohne Bindestrich), wird beim Build aber als `u-boot` ausgeliefert (`-o /out/u-boot`).
+- Unit-Tests stehen als `*_test.go` neben dem produktiven Code im selben Paket.
+- Coverage-Messung ([`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo), [`LH-FA-BUILD-008`](lastenheft.md#lh-fa-build-008--coverage-bootstrap)) bezieht sich auf `./internal/...`; `./cmd/...` ist bewusst ausgeschlossen, weil dort nur dünne Wireup-Logik liegt.
+
+### LH-FA-ARCH-003.a — Enforcement der Import-Regeln
+
+Verfeinert [`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement).
+
+- Die Regeln werden im `lint`-Stage ([`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) per `golangci-lint` mit `depguard` durchgesetzt; Verstöße sind PR-blockierend.
+- Die `depguard`-Konfiguration in `.golangci.yml` ist deckungsgleich mit den Import-Regeln dieser Anforderung zu halten; Drift wird im Review zurückgewiesen.
+- `//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `Why:`-Kommentar dokumentiert.
+- `depguard`-Regeln gelten production-only; `*_test.go`-Dateien sind ausgenommen, damit Tests Fakes und Test-Libraries (`testify`, …) frei nutzen können.
+- Solange einzelne Schichten noch keine produktiven Pakete enthalten, dürfen `depguard`-Regelblöcke aktiv sein und nichts treffen — die Schicht-Regeln greifen automatisch, sobald das erste produktive Paket angelegt wird.
+
+### LH-QA-004.b — Pflichten des Lint-Profils
+
+Verfeinert [`LH-QA-004`](lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil).
+
+- Die Konfiguration lebt in `.golangci.yml` (v2-Schema).
+- Schwellen und Linter-Settings sind in `.golangci.yml` konfiguriert und in abgeleiteter Quality-Doku zu erklären; bei Drift gewinnt diese Anforderung, Config und Doku sind anzupassen.
+- `//nolint`-Pragmas sind verboten. Pro-Pfad-Carveouts (z. B. Tests, `cmd/uboot`) werden zentral in `.golangci.yml` unter `issues.exclude-rules` mit `Why:`-Kommentar dokumentiert.
+- Verstöße brechen den `lint`-Stage ([`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) und damit `make gates`/`make ci`/`make fullbuild`.
+- Die konkrete Linter-Auswahl muss die hier genannten Anforderungen
+  und die Architekturgrenzen aus [`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement) abdecken.
+
 ## 2. Datenstrukturen und Schemas
 
 Formate und Schemata (`u-boot.yaml`, JSON-Ausgabe, CLI-Tabellen). Jede Struktur trägt

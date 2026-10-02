@@ -11,4 +11,4 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| [`slice-v2-spec-lastenheft-coverage-default.md`](slice-v2-spec-lastenheft-coverage-default.md) | Coverage-Default im Lastenheft an die gelebte Praxis angleichen (Vertragsänderung) |
+| _(leer)_ | Aktuell kein offener Plan-Stub |

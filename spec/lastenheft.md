@@ -142,15 +142,11 @@ Das Produkt soll mindestens folgende fachliche Module besitzen:
 
 ### LH-FA-CLI-001 – CLI-Aufruf
 
-Priorität: MVP
-
-Das Produkt muss als Kommandozeilenprogramm mit dem Namen `u-boot` aufrufbar sein.
+*Priorität: MVP.* Das Produkt muss als Kommandozeilenprogramm mit dem Namen `u-boot` aufrufbar sein.
 
 ### LH-FA-CLI-002 – Hilfeausgabe
 
-Priorität: MVP
-
-Das Produkt muss eine Hilfeausgabe bereitstellen.
+*Priorität: MVP.* Das Produkt muss eine Hilfeausgabe bereitstellen.
 
 Die Hilfeausgabe muss mindestens enthalten:
 
@@ -161,15 +157,11 @@ Die Hilfeausgabe muss mindestens enthalten:
 
 ### LH-FA-CLI-003 – Versionsausgabe
 
-Priorität: MVP
-
-Das Produkt muss die installierte Version ausgeben können (`u-boot --version`).
+*Priorität: MVP.* Das Produkt muss die installierte Version ausgeben können (`u-boot --version`).
 
 ### LH-FA-CLI-004 – Fehlerausgabe
 
-Priorität: MVP
-
-Das Produkt muss verständliche Fehlermeldungen ausgeben.
+*Priorität: MVP.* Das Produkt muss verständliche Fehlermeldungen ausgeben.
 
 Fehlermeldungen müssen enthalten:
 
@@ -179,9 +171,7 @@ Fehlermeldungen müssen enthalten:
 
 ### LH-FA-CLI-005 – Verbosity und Logging
 
-Priorität: MVP
-
-Das Produkt muss ein konfigurierbares Ausgabeverbose-Level (Verbosity) unterstützen.
+*Priorität: MVP.* Das Produkt muss ein konfigurierbares Ausgabeverbose-Level (Verbosity) unterstützen.
 
 Mindestens müssen folgende Stufen unterstützt werden:
 
@@ -194,9 +184,7 @@ Werden mehrere Verbosity-Optionen gleichzeitig angegeben (z. B. `--quiet --verbo
 
 ### LH-FA-CLI-005A – Interaktivität und Automatisierung
 
-Priorität: MVP
-
-Das Produkt muss nicht-interaktive Ausführung unterstützen.
+*Priorität: MVP.* Das Produkt muss nicht-interaktive Ausführung unterstützen.
 
 Es muss mindestens folgende Optionen bieten:
 
@@ -214,9 +202,7 @@ Bei destruktiven Operationen (insb. `u-boot down --volumes` und `u-boot remove -
 
 ### LH-FA-CLI-006 – Exit Codes
 
-Priorität: MVP
-
-Das Produkt muss aussagekräftige Exit Codes liefern.
+*Priorität: MVP.* Das Produkt muss aussagekräftige Exit Codes liefern.
 
 Mindestens:
 
@@ -236,9 +222,7 @@ Für alle fachlichen Fehler ist die Verwendung von `10`, `11` oder `12` bindend.
 
 ### LH-FA-CLI-007 – Dry Run
 
-Priorität: V1
-
-Das Produkt muss für dateiverändernde Befehle einen Dry-Run-Modus unterstützen.
+*Priorität: V1.* Das Produkt muss für dateiverändernde Befehle einen Dry-Run-Modus unterstützen.
 
 Der Dry-Run muss anzeigen, welche Dateien erzeugt, geändert oder gelöscht würden, ohne Änderungen am Dateisystem vorzunehmen.
 
@@ -256,9 +240,7 @@ Für `diagnostics[*].code` und die Kopplung von `status` an den höchsten `level
 
 ### LH-FA-CLI-008 – Diff-Ausgabe
 
-Priorität: V1
-
-Das Produkt soll bei dateiverändernden Befehlen eine Diff-Ausgabe unterstützen.
+*Priorität: V1.* Das Produkt soll bei dateiverändernden Befehlen eine Diff-Ausgabe unterstützen.
 
 Die Diff-Ausgabe muss Unterschiede zwischen aktuellem und geplantem Zustand der betroffenen Dateien zeigen.
 
@@ -277,15 +259,11 @@ Für reine Vorschau-Workflows gelten die selben Exit-Codes wie bei der Nicht-Dif
 
 ### LH-FA-INIT-001 – Neues Projekt initialisieren
 
-Priorität: MVP
-
-Das Produkt muss ein neues Projekt mit `u-boot init` initialisieren können (in einem bestehenden Verzeichnis zusätzlich mit `--assume-existing`).
+*Priorität: MVP.* Das Produkt muss ein neues Projekt mit `u-boot init` initialisieren können (in einem bestehenden Verzeichnis zusätzlich mit `--assume-existing`).
 
 ### LH-FA-INIT-002 – Projektname
 
-Priorität: MVP
-
-Das Produkt muss bei der Initialisierung einen Projektnamen verwenden können.
+*Priorität: MVP.* Das Produkt muss bei der Initialisierung einen Projektnamen verwenden können.
 
 Wird kein Name explizit angegeben, verwendet das Tool standardmäßig den aktuellen Verzeichnisnamen als Basis.
 
@@ -297,9 +275,7 @@ Ist kein gültiger Name ableitbar oder angegeben, muss der Befehl mit einer klar
 
 ### LH-FA-INIT-003 – Projektstruktur erzeugen
 
-Priorität: MVP
-
-Das Produkt muss eine grundlegende Projektstruktur erzeugen.
+*Priorität: MVP.* Das Produkt muss eine grundlegende Projektstruktur erzeugen.
 
 Mindestumfang:
 
@@ -325,9 +301,7 @@ Bei aktivierter Devcontainer-Unterstützung (siehe [`LH-FA-DEV-001`](#lh-fa-dev-
 
 ### LH-FA-INIT-004 – Bestehendes Projekt erkennen
 
-Priorität: MVP
-
-Das Produkt muss erkennen, ob es in einem bestehenden Projektverzeichnis ausgeführt wird.
+*Priorität: MVP.* Das Produkt muss erkennen, ob es in einem bestehenden Projektverzeichnis ausgeführt wird.
 
 Relevante Dateien sind die Projektsteuerdateien (`u-boot.yaml`, `compose.yaml`, `.env.example`) und die Elemente des Mindestumfangs der Projektstruktur ([`LH-FA-INIT-003`](#lh-fa-init-003--projektstruktur-erzeugen)).
 
@@ -340,9 +314,7 @@ Bestehende Dateien dürfen auch bei impliziter oder expliziter Annahme als beste
 
 ### LH-FA-INIT-005 – Überschreibschutz
 
-Priorität: MVP
-
-Das Produkt muss vor dem Überschreiben bestehender Dateien schützen.
+*Priorität: MVP.* Das Produkt muss vor dem Überschreiben bestehender Dateien schützen.
 
 Standardverhalten ohne Option:
 
@@ -359,9 +331,7 @@ Für `--force`, `--backup` und nicht-interaktive Modi gilt zusätzlich die in [`
 
 ### LH-FA-INIT-006 – Projektnamen-Validierung
 
-Priorität: MVP
-
-Das Produkt muss den Projektnamen validieren.
+*Priorität: MVP.* Das Produkt muss den Projektnamen validieren.
 
 Die Validierung gilt für den explizit übergebenen und den automatisch aus dem Arbeitsverzeichnis abgeleiteten Projektnamen.
 
@@ -377,9 +347,7 @@ Ungültige Namen müssen mit einer klaren Fehlermeldung abgelehnt werden.
 
 ### LH-FA-INIT-007 – Git-Repository-Initialisierung
 
-Priorität: MVP
-
-Das Produkt muss Git-Initialisierung als Teil von `u-boot init` unterstützen.
+*Priorität: MVP.* Das Produkt muss Git-Initialisierung als Teil von `u-boot init` unterstützen.
 
 Verhalten:
 
@@ -393,9 +361,7 @@ Verhalten:
 
 ### LH-FA-DEV-001 – Devcontainer erzeugen
 
-Priorität: MVP
-
-Das Produkt muss eine Devcontainer-Konfiguration erzeugen können.
+*Priorität: MVP.* Das Produkt muss eine Devcontainer-Konfiguration erzeugen können.
 
 Die Erzeugung muss sowohl bei `u-boot init` über eine Option als auch nachträglich auslösbar sein (`u-boot init --devcontainer` bzw. `u-boot generate devcontainer`).
 
@@ -408,15 +374,11 @@ Mindestdateien:
 
 ### LH-FA-DEV-002 – VS-Code-Kompatibilität
 
-Priorität: MVP
-
-Die erzeugte Devcontainer-Konfiguration muss mit VS Code Dev Containers kompatibel sein.
+*Priorität: MVP.* Die erzeugte Devcontainer-Konfiguration muss mit VS Code Dev Containers kompatibel sein.
 
 ### LH-FA-DEV-003 – Devcontainer-Features
 
-Priorität: V1
-
-Das Produkt soll optionale Devcontainer-Features unterstützen.
+*Priorität: V1.* Das Produkt soll optionale Devcontainer-Features unterstützen.
 
 Beispiele:
 
@@ -439,9 +401,7 @@ Für optionale externe Feature-Quellen gilt:
 
 ### LH-FA-DEV-004 – Benutzerrechte
 
-Priorität: MVP
-
-Der Devcontainer soll standardmäßig mit einem nicht-root Benutzer arbeiten.
+*Priorität: MVP.* Der Devcontainer soll standardmäßig mit einem nicht-root Benutzer arbeiten.
 
 Die UID dieses Benutzers muss an den Host anpassbar sein (z. B. `501` unter macOS mit Colima):
 
@@ -451,18 +411,14 @@ Die UID dieses Benutzers muss an den Host anpassbar sein (z. B. `501` unter macO
 
 ### LH-FA-DEV-005 – Ports
 
-Priorität: MVP
-
-Das Produkt muss Ports aus aktivierten Services in der Devcontainer-Konfiguration berücksichtigen.
+*Priorität: MVP.* Das Produkt muss Ports aus aktivierten Services in der Devcontainer-Konfiguration berücksichtigen.
 
 Konkret müssen die Ports der Services in `devcontainer.json` als `forwardPorts` eingetragen werden.
 Ist keine aktive Port-Exposition in der aktuellen Projektkonfiguration vorhanden, darf `forwardPorts` fehlen.
 
 ### LH-FA-DEV-006 – Sandbox-Profil
 
-Priorität: V1
-
-Das Produkt soll ein opt-in Sandbox-Profil für Devcontainer erzeugen können, das den Einsatz autonomer Agenten (ohne Rückfrage an den Menschen) im Container auf Schadensbegrenzung auslegt. Das Profil ist eine Schadensbegrenzung und keine harte Isolationsgrenze.
+*Priorität: V1.* Das Produkt soll ein opt-in Sandbox-Profil für Devcontainer erzeugen können, das den Einsatz autonomer Agenten (ohne Rückfrage an den Menschen) im Container auf Schadensbegrenzung auslegt. Das Profil ist eine Schadensbegrenzung und keine harte Isolationsgrenze.
 
 Aktivierung über das Flag `--sandbox` (bei `u-boot init --devcontainer` und `u-boot generate devcontainer`)
 oder über die Projektkonfiguration `devcontainer.profile: sandbox` (Werte: `default` | `sandbox`, Default `default`). `--sandbox` setzt den Konfigurationsschlüssel; `--sandbox` ohne aktivierbaren Devcontainer führt zu einem fachlichen Fehler (Exit-Code `10`).
@@ -482,9 +438,7 @@ Für Devcontainer-Features oder externe Skripte, die das Profil einbindet, gelte
 
 ### LH-FA-DEV-007 – Container-Runtime im Sandbox-Devcontainer
 
-Priorität: V1
-
-Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll optional eine rootless Container-Runtime im Container bereitgestellt werden, damit Image-Builds ohne Zugriff auf einen Host-Socket möglich sind.
+*Priorität: V1.* Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll optional eine rootless Container-Runtime im Container bereitgestellt werden, damit Image-Builds ohne Zugriff auf einen Host-Socket möglich sind.
 
 - Konfigurationsschlüssel `devcontainer.sandbox.nestedRuntime` (`podman` | `none`, Default `none`).
 - Bei `podman`: rootless Podman mit `docker`-Kompatibilität im Container.
@@ -494,9 +448,7 @@ Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll optio
 
 ### LH-FA-DEV-008 – Egress-Restriktion
 
-Priorität: V2
-
-Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll eine Allowlist für ausgehenden Netzwerkverkehr aktivierbar sein.
+*Priorität: V2.* Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll eine Allowlist für ausgehenden Netzwerkverkehr aktivierbar sein.
 
 - Aktivierung über `devcontainer.sandbox.egress.enabled: true` (Default `false`); keine Flag-Variante, damit `--yes`/`--no-interactive` ([`LH-FA-CLI-005A`](#lh-fa-cli-005a--interaktivität-und-automatisierung)) ohne Sonderfall bleiben.
 - Erlaubte Ziele: `devcontainer.sandbox.egress.allow` (Liste von Hostnamen); die Default-Allowlist (gemeinsame Basis plus Ergänzungen je gewähltem Stack) ist dokumentiert.
@@ -506,9 +458,7 @@ Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll eine 
 
 ### LH-FA-DEV-009 – Git-Zugangsdaten im Sandbox-Devcontainer
 
-Priorität: V1
-
-Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) dürfen Git-Zugangsdaten weder im Image, im Workspace-Volume noch in `u-boot.yaml` oder einer anderen erzeugten Datei stehen.
+*Priorität: V1.* Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) dürfen Git-Zugangsdaten weder im Image, im Workspace-Volume noch in `u-boot.yaml` oder einer anderen erzeugten Datei stehen.
 
 - Übergabe zur Laufzeit per Umgebungsvariable oder als schreibgeschützter Secret-Mount.
 - Die Dokumentation beschreibt kurzlebige, auf das Repository begrenzte Tokens (privater Schlüssel nie im Container) und die Forderung nach Branch-Protection auf dem Remote.
@@ -520,15 +470,11 @@ Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) dürfen Gi
 
 ### LH-FA-DOC-001 – Compose-Datei erzeugen
 
-Priorität: MVP
-
-Das Produkt muss eine `compose.yaml` erzeugen können.
+*Priorität: MVP.* Das Produkt muss eine `compose.yaml` erzeugen können.
 
 ### LH-FA-DOC-002 – Dockerfile erzeugen
 
-Priorität: V1
-
-Das Produkt soll bei Bedarf ein Dockerfile für die Anwendungsentwicklung erzeugen können.
+*Priorität: V1.* Das Produkt soll bei Bedarf ein Dockerfile für die Anwendungsentwicklung erzeugen können.
 
 Das Minimum bei aktivem Devcontainer ist die Erzeugung von `.devcontainer/Dockerfile`.
 
@@ -539,15 +485,11 @@ Zusätzlich kann optional ein separates Anwendungs-Dockerfile erzeugt werden:
 
 ### LH-FA-DOC-003 – Netzwerk
 
-Priorität: MVP
-
-Das Produkt muss ein gemeinsames Docker-Netzwerk für Services definieren können.
+*Priorität: MVP.* Das Produkt muss ein gemeinsames Docker-Netzwerk für Services definieren können.
 
 ### LH-FA-DOC-004 – Volumes
 
-Priorität: MVP
-
-Das Produkt muss für aktivierte zustandsbehaftete Dienste persistente Volumes erzeugen können.
+*Priorität: MVP.* Das Produkt muss für aktivierte zustandsbehaftete Dienste persistente Volumes erzeugen können.
 
 Beispiele:
 
@@ -557,9 +499,7 @@ Beispiele:
 
 ### LH-FA-DOC-005 – Compose-Validierung
 
-Priorität: V1
-
-Das Produkt soll erzeugte Compose-Dateien auf syntaktische Gültigkeit prüfen können.
+*Priorität: V1.* Das Produkt soll erzeugte Compose-Dateien auf syntaktische Gültigkeit prüfen können.
 
 ---
 
@@ -567,18 +507,14 @@ Das Produkt soll erzeugte Compose-Dateien auf syntaktische Gültigkeit prüfen k
 
 ### LH-FA-ADD-001 – Add-on-Befehl
 
-Priorität: MVP
-
-Das Produkt muss Services mit `u-boot add <service>` hinzufügen können.
+*Priorität: MVP.* Das Produkt muss Services mit `u-boot add <service>` hinzufügen können.
 
 Der Befehl ist nur in einem initialisierten `u-boot`-Projekt nutzbar (`u-boot.yaml` vorhanden).  
 Ist keine gültige Projektkonfiguration vorhanden, ist mit klarer Fehlermeldung und Hinweis auf `u-boot init` abzubrechen.
 
 ### LH-FA-ADD-002 – PostgreSQL hinzufügen
 
-Priorität: MVP
-
-Das Produkt muss PostgreSQL als Service hinzufügen können (`u-boot add postgres`).
+*Priorität: MVP.* Das Produkt muss PostgreSQL als Service hinzufügen können (`u-boot add postgres`).
 
 Mindestumfang:
 
@@ -590,9 +526,7 @@ Mindestumfang:
 
 ### LH-FA-ADD-003 – Keycloak hinzufügen
 
-Priorität: V1
-
-Das Produkt muss Keycloak als Service hinzufügen können (`u-boot add keycloak`).
+*Priorität: V1.* Das Produkt muss Keycloak als Service hinzufügen können (`u-boot add keycloak`).
 
 Mindestumfang:
 
@@ -606,9 +540,7 @@ Mindestumfang:
 
 ### LH-FA-ADD-004 – OpenTelemetry hinzufügen
 
-Priorität: V1
-
-Das Produkt muss OpenTelemetry-Komponenten hinzufügen können (`u-boot add otel`).
+*Priorität: V1.* Das Produkt muss OpenTelemetry-Komponenten hinzufügen können (`u-boot add otel`).
 
 Mindestumfang:
 
@@ -620,17 +552,13 @@ Mindestumfang:
 
 ### LH-FA-ADD-005 – Mehrfaches Hinzufügen verhindern
 
-Priorität: MVP
-
-Das Produkt muss erkennen, ob ein Service bereits vorhanden ist.
+*Priorität: MVP.* Das Produkt muss erkennen, ob ein Service bereits vorhanden ist.
 
 Ein bereits vorhandener Service wird nicht doppelt eingefügt; `add` ist idempotent und reaktiviert einen deaktivierten Service. Ein Service gilt als registriert, sobald `services.<name>` in `u-boot.yaml` existiert, und als aktiv mit `enabled: true` und verwaltetem Eintrag in `compose.yaml`. `services.<name>.enabled` ist immer explizit zu setzen (fehlt es, gilt der Service als deaktiviert und `u-boot doctor` warnt). Inkonsistenzen werden nie stillschweigend ignoriert: Ein Block ohne Registrierung bricht den Befehl mit klarer Diagnose ab, eine Registrierung ohne Block erzeugt ihn deterministisch neu.
 
 ### LH-FA-ADD-006 – Add-on-Abhängigkeiten
 
-Priorität: V1
-
-Das Produkt muss Abhängigkeiten zwischen Add-ons erkennen.
+*Priorität: V1.* Das Produkt muss Abhängigkeiten zwischen Add-ons erkennen.
 
 Beispiele:
 
@@ -641,9 +569,7 @@ Bei erkannter Abhängigkeit (z. B. `services.keycloak.persistence: external-post
 
 ### LH-FA-ADD-007 – Service entfernen
 
-Priorität: V1
-
-Das Produkt muss einen Service wieder entfernen können (`u-boot remove <service>`).
+*Priorität: V1.* Das Produkt muss einen Service wieder entfernen können (`u-boot remove <service>`).
 
 Der Befehl ist nur in einem initialisierten `u-boot`-Projekt nutzbar (`u-boot.yaml` vorhanden).  
 Ist keine gültige Projektkonfiguration vorhanden, ist mit klarer Fehlermeldung und Hinweis auf `u-boot init` abzubrechen.
@@ -666,9 +592,7 @@ Ist der Service bereits auf `enabled: false`, darf der Aufruf idempotent als No-
 
 ### LH-FA-UP-001 – Umgebung starten
 
-Priorität: MVP
-
-Das Produkt muss die Entwicklungsumgebung starten können.
+*Priorität: MVP.* Das Produkt muss die Entwicklungsumgebung starten können.
 
 `u-boot up` muss standardmäßig auf den Stabilisierungspfad der aktivierten Dienste warten, bevor der Befehl endet.
 
@@ -683,15 +607,11 @@ Das Produkt muss die Entwicklungsumgebung starten können.
 
 ### LH-FA-UP-002 – Docker Compose verwenden
 
-Priorität: MVP
-
-Der Befehl `u-boot up` muss intern Docker Compose verwenden können.
+*Priorität: MVP.* Der Befehl `u-boot up` muss intern Docker Compose verwenden können.
 
 ### LH-FA-UP-003 – Startstatus anzeigen
 
-Priorität: MVP
-
-Nach dem Start muss das Produkt den Status der relevanten Services anzeigen.
+*Priorität: MVP.* Nach dem Start muss das Produkt den Status der relevanten Services anzeigen.
 
 Mindestangaben:
 
@@ -702,17 +622,13 @@ Mindestangaben:
 
 ### LH-FA-UP-004 – Umgebung stoppen
 
-Priorität: MVP
-
-Das Produkt muss die Umgebung stoppen können.
+*Priorität: MVP.* Das Produkt muss die Umgebung stoppen können.
 
 Das Produkt muss zwischen einem regulären Stopp (Container stoppen) und einem vollständigen Aufräumen (Container und Volumes entfernen) unterscheiden (`u-boot down` bzw. `u-boot down --volumes`).
 
 ### LH-FA-UP-005 – Logs anzeigen
 
-Priorität: V1
-
-Das Produkt soll Logs anzeigen können (`u-boot logs` für alle Services, `u-boot logs <service>` für einen).
+*Priorität: V1.* Das Produkt soll Logs anzeigen können (`u-boot logs` für alle Services, `u-boot logs <service>` für einen).
 
 Mindestens müssen folgende Optionen unterstützt werden:
 
@@ -725,15 +641,11 @@ Mindestens müssen folgende Optionen unterstützt werden:
 
 ### LH-FA-DIAG-001 – Doctor-Befehl
 
-Priorität: MVP
-
-Das Produkt muss eine Diagnosefunktion bereitstellen (`u-boot doctor`).
+*Priorität: MVP.* Das Produkt muss eine Diagnosefunktion bereitstellen (`u-boot doctor`).
 
 ### LH-FA-DIAG-002 – Lokale Voraussetzungen prüfen
 
-Priorität: MVP
-
-Die Diagnosefunktion muss mindestens prüfen:
+*Priorität: MVP.* Die Diagnosefunktion muss mindestens prüfen:
 
 - Docker installiert (Mindestversion: 24.0.0 oder neuer) **oder** ein Docker-API-kompatibler Drop-in (z. B. Podman ≥ 4.0 mit aktivem `podman.socket` und `DOCKER_HOST` darauf gezeigt); Drop-ins, deren Version nicht erkannt wird, werden als `warn` gemeldet, ohne den Exit-Code zu eskalieren.
 - Docker erreichbar
@@ -747,9 +659,7 @@ Die Diagnosefunktion muss mindestens prüfen:
 
 ### LH-FA-DIAG-003 – Fehlerklassifikation
 
-Priorität: MVP
-
-Die Diagnosefunktion muss Probleme nach Schweregrad klassifizieren.
+*Priorität: MVP.* Die Diagnosefunktion muss Probleme nach Schweregrad klassifizieren.
 
 Mögliche Stufen:
 
@@ -771,9 +681,7 @@ Optional:
 
 ### LH-FA-DIAG-004 – Reparaturhinweise
 
-Priorität: MVP
-
-Die Diagnosefunktion muss bei Problemen konkrete Reparaturhinweise ausgeben.
+*Priorität: MVP.* Die Diagnosefunktion muss bei Problemen konkrete Reparaturhinweise ausgeben.
 
 Beispiel:
 
@@ -788,9 +696,7 @@ hint: Start Docker or check your user permissions for /var/run/docker.sock.
 
 ### LH-FA-GEN-001 – Generate-Befehl
 
-Priorität: MVP
-
-Das Produkt muss Generatoren mit `u-boot generate <artifact>` anbieten.
+*Priorität: MVP.* Das Produkt muss Generatoren mit `u-boot generate <artifact>` anbieten.
 
 Erlaubte Werte für `<artifact>`:
 
@@ -803,27 +709,19 @@ Bei unbekanntem Artefakt muss der Befehl mit Exit Code `2` abbrechen und die erl
 
 ### LH-FA-GEN-002 – Changelog erzeugen
 
-Priorität: MVP
-
-Das Produkt muss ein Changelog erzeugen oder aktualisieren können (`u-boot generate changelog`).
+*Priorität: MVP.* Das Produkt muss ein Changelog erzeugen oder aktualisieren können (`u-boot generate changelog`).
 
 ### LH-FA-GEN-003 – README erzeugen
 
-Priorität: MVP
-
-Das Produkt muss eine README-Datei erzeugen können (`u-boot generate readme`).
+*Priorität: MVP.* Das Produkt muss eine README-Datei erzeugen können (`u-boot generate readme`).
 
 ### LH-FA-GEN-004 – Beispiel-ENV erzeugen
 
-Priorität: MVP
-
-Das Produkt muss eine `.env.example` erzeugen oder aktualisieren können (`u-boot generate env-example`).
+*Priorität: MVP.* Das Produkt muss eine `.env.example` erzeugen oder aktualisieren können (`u-boot generate env-example`).
 
 ### LH-FA-GEN-005 – Idempotenz
 
-Priorität: MVP
-
-Generatoren müssen möglichst idempotent arbeiten.
+*Priorität: MVP.* Generatoren müssen möglichst idempotent arbeiten.
 
 Das bedeutet:
 
@@ -837,15 +735,11 @@ Das bedeutet:
 
 ### LH-FA-TPL-001 – Projektvorlagen
 
-Priorität: V1
-
-Das Produkt soll Projektvorlagen unterstützen (`u-boot init --template <name>`, z. B. `basic`, `micronaut`, `sveltekit`, `micronaut-sveltekit`).
+*Priorität: V1.* Das Produkt soll Projektvorlagen unterstützen (`u-boot init --template <name>`, z. B. `basic`, `micronaut`, `sveltekit`, `micronaut-sveltekit`).
 
 ### LH-FA-TPL-002 – Template-Metadaten
 
-Priorität: V1
-
-Jedes Template soll Metadaten besitzen.
+*Priorität: V1.* Jedes Template soll Metadaten besitzen.
 
 Mindestangaben:
 
@@ -858,15 +752,11 @@ Mindestangaben:
 
 ### LH-FA-TPL-003 – Eigene Templates
 
-Priorität: Later
-
-Das Produkt soll später eigene lokale Templates unterstützen können (`u-boot init --template ./pfad`).
+*Priorität: Later.* Das Produkt soll später eigene lokale Templates unterstützen können (`u-boot init --template ./pfad`).
 
 ### LH-FA-TPL-004 – Templates auflisten
 
-Priorität: V1
-
-Das Produkt muss verfügbare Templates auflisten können (`u-boot template list`).
+*Priorität: V1.* Das Produkt muss verfügbare Templates auflisten können (`u-boot template list`).
 
 Die Ausgabe muss mindestens enthalten:
 
@@ -882,9 +772,7 @@ Die Ausgabe muss optional auch maschinenlesbar erfolgen können (`--json`).
 
 ### LH-FA-CONF-001 – Projektkonfiguration
 
-Priorität: MVP
-
-Das Produkt muss eine eigene Projektkonfigurationsdatei verwenden.
+*Priorität: MVP.* Das Produkt muss eine eigene Projektkonfigurationsdatei verwenden.
 
 Beispiel:
 
@@ -897,9 +785,7 @@ Die Migrationsfunktion ist in [LH-FA-CONF-006](#lh-fa-conf-006--konfiguration-mi
 
 ### LH-FA-CONF-002 – Inhalt der Konfiguration
 
-Priorität: MVP
-
-Die Konfigurationsdatei muss mindestens `schemaVersion`, `project.name`, je Dienst `services.<name>.enabled` und `devcontainer.enabled` enthalten. Optionale V1-Felder sind `services.keycloak.persistence` (`embedded` | `external-postgres`), `services.otel.enabled`, `devcontainer.featureSources.allow`, `devcontainer.user.uid` (1 bis 65535), `devcontainer.profile` (`default` | `sandbox`) sowie `devcontainer.sandbox.nestedRuntime` (`none` | `podman`), `devcontainer.sandbox.onUnavailable` (`warn` | `fail`), `devcontainer.sandbox.repository` und `devcontainer.sandbox.egress.enabled` / `.allow`.
+*Priorität: MVP.* Die Konfigurationsdatei muss mindestens `schemaVersion`, `project.name`, je Dienst `services.<name>.enabled` und `devcontainer.enabled` enthalten. Optionale V1-Felder sind `services.keycloak.persistence` (`embedded` | `external-postgres`), `services.otel.enabled`, `devcontainer.featureSources.allow`, `devcontainer.user.uid` (1 bis 65535), `devcontainer.profile` (`default` | `sandbox`) sowie `devcontainer.sandbox.nestedRuntime` (`none` | `podman`), `devcontainer.sandbox.onUnavailable` (`warn` | `fail`), `devcontainer.sandbox.repository` und `devcontainer.sandbox.egress.enabled` / `.allow`.
 
 Hinweise:
 
@@ -916,29 +802,21 @@ Hinweise:
 
 ### LH-FA-CONF-003 – Konfiguration lesen
 
-Priorität: MVP
-
-Das Produkt muss die Konfiguration lesen und bei Befehlen berücksichtigen können.
+*Priorität: MVP.* Das Produkt muss die Konfiguration lesen und bei Befehlen berücksichtigen können.
 
 ### LH-FA-CONF-004 – Konfiguration aktualisieren
 
-Priorität: MVP
-
-Das Produkt muss die Konfiguration aktualisieren können, wenn Add-ons hinzugefügt oder entfernt werden.
+*Priorität: MVP.* Das Produkt muss die Konfiguration aktualisieren können, wenn Add-ons hinzugefügt oder entfernt werden.
 
 ### LH-FA-CONF-005 – Konfiguration anzeigen und ändern
 
-Priorität: MVP
-
-Das Produkt muss einen Befehl zum Anzeigen und Ändern der Konfiguration bereitstellen (`u-boot config` zeigt die gesamte Konfiguration, `u-boot config get <pfad>` einen Wert, `u-boot config set <pfad> <wert>` setzt einen Wert).
+*Priorität: MVP.* Das Produkt muss einen Befehl zum Anzeigen und Ändern der Konfiguration bereitstellen (`u-boot config` zeigt die gesamte Konfiguration, `u-boot config get <pfad>` einen Wert, `u-boot config set <pfad> <wert>` setzt einen Wert).
 
 Beim Setzen muss die geänderte Konfiguration auf Schema-Konformität geprüft werden.
 
 ### LH-FA-CONF-006 – Konfiguration migrieren
 
-Priorität: Later
-
-Das Produkt muss ein Schema-Migrationskommando bereitstellen (`u-boot config migrate`).
+*Priorität: Later.* Das Produkt muss ein Schema-Migrationskommando bereitstellen (`u-boot config migrate`).
 
 Die Migration muss mit einem klaren Fehler auf unbekannte Zukunftsversionen reagieren und bei Migrationen mit älteren Versionen eine Sicherung anlegen.
 
@@ -955,41 +833,25 @@ Bezug:
 
 ### LH-FA-BUILD-001 – Multi-Stage Dockerfile (u-boot-Repo)
 
-Priorität: MVP
+*Priorität: MVP.* Die u-boot-Codebase muss ein Multi-Stage `Dockerfile` im Repo-Root bereitstellen.
 
-Die u-boot-Codebase muss ein Multi-Stage `Dockerfile` im Repo-Root bereitstellen.
-
-Mindestumfang:
-
-- BuildKit-Direktive in der ersten Zeile des Dockerfiles.
-- Pflicht-Stages: `deps`, `compile`, `test`, `lint`, `coverage`, `build` und `runtime`; die Coverage-Stage erzwingt den Coverage-Schwellwert, die Runtime-Stage ist das minimale Endimage ([`LH-FA-BUILD-002`](#lh-fa-build-002--runtime-stage-pflichten)).
-- Jede Stage ist ein eigenständiges Build-Ziel und per `docker build --target <stage>` einzeln baubar.
+Die Pflicht-Stages `deps`, `compile`, `test`, `lint`, `coverage`, `build` und `runtime` sind je einzeln per `docker build --target <stage>` baubar.
 
 ### LH-FA-BUILD-002 – Runtime-Stage Pflichten
 
-Priorität: MVP
+*Priorität: MVP.* Der `runtime`-Stage des u-boot-Dockerfiles muss folgende Eigenschaften erfüllen:
 
-Der `runtime`-Stage des u-boot-Dockerfiles muss folgende Eigenschaften erfüllen:
-
-- Minimales Base-Image ohne Shell.
-- Ausführung als Non-root-Benutzer.
-- `ENTRYPOINT` zeigt auf das im `build`-Stage erzeugte Binary.
-- OCI Image Labels für Quelle, Beschreibung, Lizenz und Titel sind gesetzt.
-- Keine Build-Toolchain im Endimage; alle Build-Artefakte stammen aus dem `build`-Stage.
+Das Endimage ist minimal und shell-los, läuft als Non-root-Benutzer, trägt OCI-Image-Labels und enthält keine Build-Toolchain.
 
 ### LH-FA-BUILD-003 – Build-Args und Pin-Politik
 
-Priorität: MVP
+*Priorität: MVP.* Das u-boot-Dockerfile muss versions- und schwellwertbezogene Build-Args bereitstellen: die Go-Version, die golangci-lint-Version und den Coverage-Schwellwert, jeweils mit Default. Die Hebung der Pins ist Routine ohne separaten Spec-Eintrag; der Coverage-Schwellwert lässt sich per `make coverage-gate THRESHOLD=…` überschreiben.
 
-Das u-boot-Dockerfile muss versions- und schwellwertbezogene Build-Args bereitstellen: die Go-Version, die golangci-lint-Version und den Coverage-Schwellwert, jeweils mit Default. Die Hebung der Pins ist Routine ohne separaten Spec-Eintrag; der Coverage-Schwellwert lässt sich per `make coverage-gate THRESHOLD=…` überschreiben.
-
-Overrides erfolgen über `docker build --build-arg <NAME>=<value>` bzw. die korrespondierende Makefile-Variable.
+Overrides erfolgen per `docker build --build-arg` bzw. Makefile-Variable.
 
 ### LH-FA-BUILD-004 – `.dockerignore` Pflicht
 
-Priorität: MVP
-
-Das u-boot-Repo muss eine `.dockerignore` im Repo-Root bereitstellen.
+*Priorität: MVP.* Das u-boot-Repo muss eine `.dockerignore` im Repo-Root bereitstellen.
 
 Mindestens auszuschließen sind Versionsverwaltung, IDE- und Agent-Verzeichnisse sowie lokale Build-Artefakte und Caches.
 
@@ -997,17 +859,13 @@ Die `.dockerignore` selbst gehört nicht ins Image und ist daher auszuschließen
 
 ### LH-FA-BUILD-005 – Makefile mit Standard-Targets
 
-Priorität: MVP
-
-Das u-boot-Repo muss ein `Makefile` im Repo-Root bereitstellen.
+*Priorität: MVP.* Das u-boot-Repo muss ein `Makefile` im Repo-Root bereitstellen.
 
 Pflicht-Eigenschaften: `help` als Default-Ziel, alle Targets als `.PHONY`, überschreibbare Variablen mit `?=`-Defaults. Pflicht-Targets decken Hilfe, Abhängigkeitsauflösung, Compile, Lint, Test, Coverage-Gate, Runtime-Image-Build, Smoke-Test und Aufräumen ab.
 
 ### LH-FA-BUILD-006 – Aggregator-Targets
 
-Priorität: V1
-
-Das Makefile soll Aggregator-Targets bereitstellen:
+*Priorität: V1.* Das Makefile soll Aggregator-Targets bereitstellen:
 
 - `gates` – Inner-Loop-Pflichtgates (`lint` + `test` + `coverage-gate`), PR-blockierend.
 - `ci` – `gates` plus `govulncheck` (bei Go-Stack aus [`LH-OPEN-001`](#lh-open-001--implementierungssprache-entschieden) zwingend) plus `image-scan` (Trivy-Image-Scan gegen das Runtime-Image, durch [`LH-QA-003`](#lh-qa-003--ci-fähigkeit-github-actions) als dritter PR-blockierender Job verbindlich — der `make ci`-Aggregator selbst ist V1, sein `image-scan`-Bestandteil ist über [`LH-QA-003`](#lh-qa-003--ci-fähigkeit-github-actions) MVP-Pflicht); SBOM-Erzeugung bleibt optional.
@@ -1017,35 +875,23 @@ Aggregator-Targets müssen bei Fehler eines untergeordneten Targets mit Non-Zero
 
 ### LH-FA-BUILD-007 – Docker-only-Workflow
 
-Priorität: MVP
+*Priorität: MVP.* Der Standard-Build-/Test-Workflow muss ohne hostseitige Sprach-Toolchain auskommen.
 
-Der Standard-Build-/Test-Workflow muss ohne hostseitige Sprach-Toolchain auskommen.
-
-- Alle MVP- und V1-Pflicht-Targets aus [`LH-FA-BUILD-005`](#lh-fa-build-005--makefile-mit-standard-targets)/[`LH-FA-BUILD-006`](#lh-fa-build-006--aggregator-targets) müssen ausschließlich `docker build`, `docker run` oder die Aggregation anderer solcher Targets aufrufen.
-- Voraussetzung am Host: Docker Engine und `make`. `make` ist ein bewusster Carveout zu [`LH-NFA-PORT-002`](#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten) (weit verbreitet, einzige zusätzliche Host-Abhängigkeit neben Docker). Eine Go-Toolchain am Host darf für Standard-Targets nicht vorausgesetzt werden.
-- Carveouts (z. B. ein Bash-Skript, das nicht containerisiert wird) sind im `Makefile`-Header explizit zu dokumentieren.
+Pflicht-Targets rufen ausschließlich `docker build`, `docker run` oder andere solche Targets auf. Voraussetzung am Host sind Docker Engine und `make`; `make` ist ein bewusster Carveout zu [`LH-NFA-PORT-002`](#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten). Weitere Carveouts stehen im `Makefile`-Header.
 
 ### LH-FA-BUILD-008 – Coverage-Bootstrap
 
-Priorität: MVP
+*Priorität: MVP.* Der `coverage`-Stage muss in der Bootstrap-Phase (noch keine produktiven Pakete in `./internal/...`) deterministisch mit einer leeren Coverage-Eingabe umgehen können.
 
-Der `coverage`-Stage muss in der Bootstrap-Phase (noch keine produktiven Pakete in `./internal/...`) deterministisch mit einer leeren Coverage-Eingabe umgehen können.
-
-- Default-Schwellwert `0` (`ARG COVERAGE_THRESHOLD=0`).
-- Sobald `./internal/...` produktive Pakete enthält, wird die Schwelle in einem Folge-Schritt angehoben; der Override-Pfad `make coverage-gate THRESHOLD=…` muss funktionieren.
-- Leere Coverage darf in der Bootstrap-Phase nicht zu einem falschen Grün führen, das echte Test-Failures maskiert; der `go test`-Exit-Code wird über `set -o pipefail` o. ä. an die Gate-Logik durchgereicht.
+- Der Schwellwert lässt sich per `make coverage-gate THRESHOLD=…` überschreiben.
+- Leere Coverage darf in der Bootstrap-Phase nicht zu einem falschen Grün führen, das echte Test-Failures maskiert.
 
 ### LH-FA-BUILD-009 – Repository-Layout
 
-Priorität: MVP
+*Priorität: MVP.* Das u-boot-Repo muss folgendem Go-Layout folgen:
 
-Das u-boot-Repo muss folgendem Go-Layout folgen:
-
-- Modul-Pfad in `go.mod`: `github.com/pt9912/u-boot`.
-- Implementierungspakete leben unter `./internal/...`; öffentlich konsumierbare Pakete unter `./pkg/...` werden im MVP nicht erzeugt.
-- CLI-Entry-Points unter `./cmd/<binary>/`; das primäre Binary heißt `uboot` (Verzeichnis `./cmd/uboot/`, Go-konform ohne Bindestrich), wird beim Build aber als `u-boot` ausgeliefert (`-o /out/u-boot`).
-- Unit-Tests stehen als `*_test.go` neben dem produktiven Code im selben Paket.
-- Coverage-Messung ([`LH-FA-BUILD-001`](#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo), [`LH-FA-BUILD-008`](#lh-fa-build-008--coverage-bootstrap)) bezieht sich auf `./internal/...`; `./cmd/...` ist bewusst ausgeschlossen, weil dort nur dünne Wireup-Logik liegt.
+- Implementierung unter `./internal/...`, CLI-Entry-Points unter `./cmd/<binary>/` (Binary `uboot`, ausgeliefert als `u-boot`), Unit-Tests neben dem produktiven Code im selben Paket.
+- Coverage-Messung ([`LH-FA-BUILD-001`](#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo), [`LH-FA-BUILD-008`](#lh-fa-build-008--coverage-bootstrap)) bezieht sich auf `./internal/...`; `./cmd/...` ist ausgeschlossen.
 
 ---
 
@@ -1057,9 +903,7 @@ Vorlage: die Referenzprojekte `k-deskflight` und `grid-gym` (Basis-Pattern: arch
 
 ### LH-FA-PROJDOCS-001 – Mindeststruktur
 
-Priorität: MVP
-
-Das u-boot-Repo muss `docs/` mit den Unterverzeichnissen `archive/`, `plan/adr/`, `plan/planning/` (mit `open/`, `next/`, `in-progress/`, `done/`) und `user/` bereitstellen; weitere Unterverzeichnisse sind zulässig.
+*Priorität: MVP.* Das u-boot-Repo muss `docs/` mit den Unterverzeichnissen `archive/`, `plan/adr/`, `plan/planning/` (mit `open/`, `next/`, `in-progress/`, `done/`) und `user/` bereitstellen; weitere Unterverzeichnisse sind zulässig.
 
 Jedes Unterverzeichnis muss mindestens eine `README.md` mit kurzer Zweckbeschreibung enthalten, damit Git die Struktur trackt und Newcomer den Verzeichnisstandard ohne externe Erklärung erfassen können. `.gitkeep` ist als Ersatz unzureichend, weil er den Zweck nicht kommuniziert.
 
@@ -1067,35 +911,25 @@ Abgrenzung zu Zielprojekten: Für per `u-boot init` erzeugte Zielprojekte ist nu
 
 ### LH-FA-PROJDOCS-002 – ADR-Format
 
-Priorität: MVP
-
-Architecture Decision Records in `docs/plan/adr/` folgen dem vendorten MADR-/Nygard-Template des adoptierten Baseline-Regelwerks (`.harness/baseline/<tag>/templates/docs/plan/adr/NNNN-titel.template.md`): vierstellige, nie wiederverwendete Nummer, Kopf-Felder als Inline-Felder (Status, Datum, Autor, Bezug, Schärft) und die vorgeschriebene Abschnittsfolge. Abgelöste ADRs bleiben mit dem Status „Superseded by“ erhalten.
+*Priorität: MVP.* Architecture Decision Records in `docs/plan/adr/` folgen dem vendorten MADR-/Nygard-Template des adoptierten Baseline-Regelwerks (`.harness/baseline/<tag>/templates/docs/plan/adr/NNNN-titel.template.md`): vierstellige, nie wiederverwendete Nummer, Kopf-Felder als Inline-Felder (Status, Datum, Autor, Bezug, Schärft) und die vorgeschriebene Abschnittsfolge. Abgelöste ADRs bleiben mit dem Status „Superseded by“ erhalten.
 
 ### LH-FA-PROJDOCS-003 – Planning-Lifecycle
 
-Priorität: MVP
-
-Planning-Artefakte durchlaufen den Lifecycle `open → next → in-progress → done` des adoptierten Baseline-Regelwerks: Übergang per `git mv`, kein Artefakt in mehreren Verzeichnissen, Inhalte in `done/` nur korrigierend änderbar (substanzielle Änderungen erzeugen ein neues Artefakt in `open/` oder `next/` mit Verweis auf den vorhergehenden Stand).
+*Priorität: MVP.* Planning-Artefakte durchlaufen den Lifecycle `open → next → in-progress → done` des adoptierten Baseline-Regelwerks: Übergang per `git mv`, kein Artefakt in mehreren Verzeichnissen, Inhalte in `done/` nur korrigierend änderbar (substanzielle Änderungen erzeugen ein neues Artefakt in `open/` oder `next/` mit Verweis auf den vorhergehenden Stand).
 
 Dateinamen in `planning/`: `slice-<phase>-<kebab-slug>.md` für Slice-Pläne und `tranche-<nr>-<kebab-slug>.md` für Tranchen-Pläne; die Wahl ist im `README.md` von `docs/plan/planning/` dokumentiert. Übergreifende Master-Dokumente (`roadmap.md`, `carveouts.md`) liegen dauerhaft in `in-progress/` und folgen keinem der beiden Formate.
 
 ### LH-FA-PROJDOCS-005 – Carveout-Disziplin
 
-Priorität: MVP
-
-Jeder temporäre Carveout in der u-boot-Codebase bekommt parallel zu seiner Entstehung einen Slice-Plan in `docs/plan/planning/open/` mit Auslöser, Aufhebungsbedingung und Akzeptanzkriterien (Carveout-Disziplin des adoptierten Baseline-Regelwerks) und ist im Master-Inventar `carveouts.md` und in der Roadmap sichtbar. Als temporärer Carveout zählen auch Bootstrap-Schwellwerte, bewusst leere Regelblöcke in der Tooling-Konfiguration, prospektive Doku-Phrasen und bewusst weggelassene CI-/Build-Pflichten; Spec-Open-Punkte (`LH-OPEN-*`) und ADR-Folgepunkte gelten ebenfalls. Permanente Carveouts stehen mit Begründung im Master-Inventar und brauchen keinen Aufhebungsplan.
+*Priorität: MVP.* Jeder temporäre Carveout in der u-boot-Codebase bekommt parallel zu seiner Entstehung einen Slice-Plan in `docs/plan/planning/open/` mit Auslöser, Aufhebungsbedingung und Akzeptanzkriterien (Carveout-Disziplin des adoptierten Baseline-Regelwerks) und ist im Master-Inventar `carveouts.md` und in der Roadmap sichtbar. Als temporärer Carveout zählen auch Bootstrap-Schwellwerte, bewusst leere Regelblöcke in der Tooling-Konfiguration, prospektive Doku-Phrasen und bewusst weggelassene CI-/Build-Pflichten; Spec-Open-Punkte (`LH-OPEN-*`) und ADR-Folgepunkte gelten ebenfalls. Permanente Carveouts stehen mit Begründung im Master-Inventar und brauchen keinen Aufhebungsplan.
 
 ### LH-FA-PROJDOCS-006 – Dokumentationsreferenzmodell
 
-Priorität: V1
-
-Das Repo wendet das Dokumentationsreferenzmodell (Referenz-Richtung, Decken-Regel) des adoptierten Baseline-Regelwerks an; `docs-check` erzwingt es. Das Lastenheft ist die normative Decke: Externe Normen, Standards und Vorgaben wirken im Repo nur über explizite `LH-*`-Anforderungen normativ.
+*Priorität: V1.* Das Repo wendet das Dokumentationsreferenzmodell (Referenz-Richtung, Decken-Regel) des adoptierten Baseline-Regelwerks an; `docs-check` erzwingt es. Das Lastenheft ist die normative Decke: Externe Normen, Standards und Vorgaben wirken im Repo nur über explizite `LH-*`-Anforderungen normativ.
 
 ### LH-FA-PROJDOCS-004 – Archivierung
 
-Priorität: V1
-
-Abgelöste oder veraltete Inhalte aus `user/`, `plan/` oder anderen `docs/`-Bereichen werden nach `docs/archive/` verschoben, statt sie zu löschen.
+*Priorität: V1.* Abgelöste oder veraltete Inhalte aus `user/`, `plan/` oder anderen `docs/`-Bereichen werden nach `docs/archive/` verschoben, statt sie zu löschen.
 
 - Beim Verschieben wird ein kurzer Hinweis am Anfang des Zielfiles ergänzt (z. B. `> Archiviert am YYYY-MM-DD; ersetzt durch [<Pfad>](<pfad>).`).
 - Querverweise in lebendiger Doku werden auf das neue Ziel umgebogen oder explizit als historisch markiert.
@@ -1111,9 +945,7 @@ Vorlage: die Referenzprojekte `k-deskflight` (Go, flach), `m-trace` (TypeScript,
 
 ### LH-FA-ARCH-001 – Hexagonales Pattern
 
-Priorität: MVP
-
-Die u-boot-Codebase muss dem hexagonalen Architektur-Pattern (Ports & Adapters) folgen.
+*Priorität: MVP.* Die u-boot-Codebase muss dem hexagonalen Architektur-Pattern (Ports & Adapters) folgen.
 
 Pflichten:
 
@@ -1123,25 +955,19 @@ Pflichten:
 
 ### LH-FA-ARCH-002 – Schichten und Verzeichnislayout
 
-Priorität: MVP
-
-Das u-boot-Repo muss unter `internal/` die Schichten `hexagon` (mit `domain`, `application` und `port/driving`, `port/driven`) und `adapter` (mit `driving` und `driven`) bereitstellen.
+*Priorität: MVP.* Das u-boot-Repo muss unter `internal/` die Schichten `hexagon` (mit `domain`, `application` und `port/driving`, `port/driven`) und `adapter` (mit `driving` und `driven`) bereitstellen.
 
 Die Wiring-Schicht (`cmd/uboot/`) ist die einzige Stelle, an der `application` und `adapter` zusammen importiert werden dürfen.
 
 ### LH-FA-ARCH-003 – Import-Regeln und Enforcement
 
-Priorität: MVP
-
-Die Import-Regeln der Schichten sind verbindlich. Kernaussagen: `domain` importiert nur die Go-Standardbibliothek; `application` kennt keine konkreten Adapter; die Port-Pakete `driving` und `driven` kennen einander nicht; Adapter importieren nicht `application` und nicht den jeweils anderen Adapter-Typ; nur `cmd/uboot` verbindet `application` und Adapter.
+*Priorität: MVP.* Die Import-Regeln der Schichten sind verbindlich. Kernaussagen: `domain` importiert nur die Go-Standardbibliothek; `application` kennt keine konkreten Adapter; die Port-Pakete `driving` und `driven` kennen einander nicht; Adapter importieren nicht `application` und nicht den jeweils anderen Adapter-Typ; nur `cmd/uboot` verbindet `application` und Adapter.
 
 Pflichten:
 
 - Die Regeln werden im `lint`-Stage ([`LH-FA-BUILD-001`](#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) per `golangci-lint` mit `depguard` durchgesetzt; Verstöße sind PR-blockierend.
-- Die `depguard`-Konfiguration in `.golangci.yml` ist deckungsgleich mit den Import-Regeln dieser Anforderung zu halten; Drift wird im Review zurückgewiesen.
-- `//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `Why:`-Kommentar dokumentiert.
-- `depguard`-Regeln gelten production-only; `*_test.go`-Dateien sind ausgenommen, damit Tests Fakes und Test-Libraries (`testify`, …) frei nutzen können.
-- Solange einzelne Schichten noch keine produktiven Pakete enthalten, dürfen `depguard`-Regelblöcke aktiv sein und nichts treffen — die Schicht-Regeln greifen automatisch, sobald das erste produktive Paket angelegt wird.
+- Die `depguard`-Konfiguration ist deckungsgleich mit den Import-Regeln zu halten; `//nolint:depguard` ist verboten, Carveouts stehen zentral in `.golangci.yml` mit Begründung.
+- Die Regeln gelten nur für Produktivcode; Tests sind ausgenommen.
 
 ---
 
@@ -1151,27 +977,19 @@ Pflichten:
 
 ### LH-NFA-USE-001 – Verständliche Bedienung
 
-Priorität: MVP
-
-Das Produkt muss ohne tiefes Vorwissen über die interne Implementierung bedienbar sein.
+*Priorität: MVP.* Das Produkt muss ohne tiefes Vorwissen über die interne Implementierung bedienbar sein.
 
 ### LH-NFA-USE-002 – Klare Befehle
 
-Priorität: MVP
-
-Befehle müssen sprechend, konsistent und kurz sein.
+*Priorität: MVP.* Befehle müssen sprechend, konsistent und kurz sein.
 
 ### LH-NFA-USE-003 – Lesbare Ausgaben
 
-Priorität: MVP
-
-CLI-Ausgaben müssen klar strukturiert und gut lesbar sein.
+*Priorität: MVP.* CLI-Ausgaben müssen klar strukturiert und gut lesbar sein.
 
 ### LH-NFA-USE-004 – Maschinenlesbare Ausgabe
 
-Priorität: V1
-
-Das Produkt soll optional maschinenlesbare Ausgabe unterstützen.
+*Priorität: V1.* Das Produkt soll optional maschinenlesbare Ausgabe unterstützen.
 
 Für `--dry-run`/`--diff`-Kombinationen gilt zusätzlich die JSON-Ausgabe in [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run) und [`LH-FA-CLI-008`](#lh-fa-cli-008--diff-ausgabe).
 
@@ -1196,27 +1014,19 @@ Beispiel: `u-boot doctor --json` im Erfolgsfall liefert `status: ok`, `command: 
 
 ### LH-NFA-REL-001 – Kein stilles Überschreiben
 
-Priorität: MVP
-
-Das Produkt darf bestehende Dateien nicht stillschweigend überschreiben.
+*Priorität: MVP.* Das Produkt darf bestehende Dateien nicht stillschweigend überschreiben.
 
 ### LH-NFA-REL-002 – Wiederholbare Ausführung
 
-Priorität: MVP
-
-Wiederholte Ausführung desselben Befehls darf das Projekt nicht beschädigen.
+*Priorität: MVP.* Wiederholte Ausführung desselben Befehls darf das Projekt nicht beschädigen.
 
 ### LH-NFA-REL-003 – Abbruch bei kritischen Fehlern
 
-Priorität: MVP
-
-Bei kritischen Fehlern muss das Produkt abbrechen und eine klare Fehlermeldung ausgeben.
+*Priorität: MVP.* Bei kritischen Fehlern muss das Produkt abbrechen und eine klare Fehlermeldung ausgeben.
 
 ### LH-NFA-REL-004 – Validierung erzeugter Dateien
 
-Priorität: MVP
-
-Das Produkt soll erzeugte Dateien validieren, soweit passende Validatoren verfügbar sind.
+*Priorität: MVP.* Das Produkt soll erzeugte Dateien validieren, soweit passende Validatoren verfügbar sind.
 
 Beispiele:
 
@@ -1230,29 +1040,21 @@ Beispiele:
 
 ### LH-NFA-MAINT-001 – Modulare Architektur
 
-Priorität: MVP
-
-Das Produkt muss modular aufgebaut sein.
+*Priorität: MVP.* Das Produkt muss modular aufgebaut sein.
 
 Insbesondere sollen Add-ons, Templates und Generatoren voneinander getrennt implementiert werden.
 
 ### LH-NFA-MAINT-002 – Erweiterbarkeit
 
-Priorität: MVP
-
-Neue Services müssen mit geringem Aufwand ergänzt werden können.
+*Priorität: MVP.* Neue Services müssen mit geringem Aufwand ergänzt werden können.
 
 ### LH-NFA-MAINT-003 – Testbarkeit
 
-Priorität: MVP
-
-Die fachlichen Funktionen müssen automatisiert testbar sein.
+*Priorität: MVP.* Die fachlichen Funktionen müssen automatisiert testbar sein.
 
 ### LH-NFA-MAINT-004 – Dokumentierte Schnittstellen
 
-Priorität: V1
-
-Interne Schnittstellen für Add-ons und Templates sollen dokumentiert werden.
+*Priorität: V1.* Interne Schnittstellen für Add-ons und Templates sollen dokumentiert werden.
 
 ---
 
@@ -1260,21 +1062,15 @@ Interne Schnittstellen für Add-ons und Templates sollen dokumentiert werden.
 
 ### LH-NFA-PORT-001 – Linux-Unterstützung
 
-Priorität: MVP
-
-Das Produkt muss Linux als primäre Plattform unterstützen.
+*Priorität: MVP.* Das Produkt muss Linux als primäre Plattform unterstützen.
 
 ### LH-NFA-PORT-002 – Keine unnötigen Systemabhängigkeiten
 
-Priorität: MVP
-
-Das Produkt soll möglichst wenige externe Systemabhängigkeiten benötigen.
+*Priorität: MVP.* Das Produkt soll möglichst wenige externe Systemabhängigkeiten benötigen.
 
 ### LH-NFA-PORT-003 – Containerfreundlichkeit
 
-Priorität: V1
-
-Das Produkt soll selbst in einem Container oder Devcontainer ausführbar sein können.
+*Priorität: V1.* Das Produkt soll selbst in einem Container oder Devcontainer ausführbar sein können.
 
 ---
 
@@ -1282,27 +1078,19 @@ Das Produkt soll selbst in einem Container oder Devcontainer ausführbar sein k�
 
 ### LH-NFA-SEC-001 – Keine Secrets einchecken
 
-Priorität: MVP
-
-Das Produkt darf keine echten Secrets in erzeugte Dateien schreiben.
+*Priorität: MVP.* Das Produkt darf keine echten Secrets in erzeugte Dateien schreiben.
 
 ### LH-NFA-SEC-002 – Beispielwerte markieren
 
-Priorität: MVP
-
-Beispielwerte in `.env.example` müssen eindeutig als Beispielwerte erkennbar sein.
+*Priorität: MVP.* Beispielwerte in `.env.example` müssen eindeutig als Beispielwerte erkennbar sein.
 
 ### LH-NFA-SEC-003 – Sichere Defaults
 
-Priorität: MVP
-
-Das Produkt soll sichere Standardwerte verwenden, soweit dies mit lokaler Entwicklung vereinbar ist.
+*Priorität: MVP.* Das Produkt soll sichere Standardwerte verwenden, soweit dies mit lokaler Entwicklung vereinbar ist.
 
 ### LH-NFA-SEC-004 – Keine verdeckte Ausführung fremder Skripte
 
-Priorität: MVP
-
-Das Produkt darf keinen externen ausführbaren Code aus nicht freigegebenen Quellen ohne ausdrückliche Zustimmung des Nutzers ausführen.
+*Priorität: MVP.* Das Produkt darf keinen externen ausführbaren Code aus nicht freigegebenen Quellen ohne ausdrückliche Zustimmung des Nutzers ausführen.
 
 Konkretisierung des Begriffs "externer Code aus nicht freigegebenen Quellen":
 
@@ -1322,9 +1110,7 @@ Die Zustimmung ist im interaktiven Modus durch explizite Rückfrage und im nicht
 
 ### LH-NFA-PERF-001 – Schnelle CLI-Antwort
 
-Priorität: MVP
-
-Einfache Befehle müssen auf einem typischen Entwicklungsrechner innerhalb folgender Zeiten reagieren (gemessen ohne Docker-Kommunikation, Kaltstart):
+*Priorität: MVP.* Einfache Befehle müssen auf einem typischen Entwicklungsrechner innerhalb folgender Zeiten reagieren (gemessen ohne Docker-Kommunikation, Kaltstart):
 
 MVP:
 
@@ -1337,9 +1123,7 @@ V1:
 
 ### LH-NFA-PERF-002 – Startzeit abhängig von Docker
 
-Priorität: MVP
-
-Die Startzeit von `u-boot up` darf von Docker-Images und Services abhängen, muss aber transparent dargestellt werden.
+*Priorität: MVP.* Die Startzeit von `u-boot up` darf von Docker-Images und Services abhängen, muss aber transparent dargestellt werden.
 
 Insbesondere muss der Fortschritt einzelner Services (Pull, Create, Start, Healthcheck) sichtbar sein.
 
@@ -1351,9 +1135,7 @@ Insbesondere muss der Fortschritt einzelner Services (Pull, Create, Start, Healt
 
 ### LH-SA-CLI-001 – Befehlsstruktur
 
-Priorität: MVP
-
-Die CLI soll die Grundstruktur `u-boot <command> [subcommand|args...] [options]` verwenden.
+*Priorität: MVP.* Die CLI soll die Grundstruktur `u-boot <command> [subcommand|args...] [options]` verwenden.
 `subcommand` ist für kommandospezifische Unterbefehle reserviert (z. B. `template`, `config`).
 Positionsargumente (z. B. `postgres`, `project.name`) stehen ebenfalls vor den Optionen.
 
@@ -1381,9 +1163,7 @@ Priorität: MVP/V1 gemischt (siehe Spalte)
 
 ### LH-SA-FILE-001 – Erzeugte Dateien
 
-Priorität: MVP
-
-Das Produkt soll folgende Dateien erzeugen oder aktualisieren können:
+*Priorität: MVP.* Das Produkt soll folgende Dateien erzeugen oder aktualisieren können:
 
 ```text
 README.md
@@ -1407,9 +1187,7 @@ Optional, sobald ein Anwendungs-Dockerfile ([`LH-FA-DOC-002`](#lh-fa-doc-002--do
 
 ### LH-SA-FILE-002 – Markierte verwaltete Bereiche
 
-Priorität: MVP
-
-Automatisch verwaltete Bereiche in Dateien sollen markiert werden.
+*Priorität: MVP.* Automatisch verwaltete Bereiche in Dateien sollen markiert werden.
 
 Markierungsformat: Der Anfang eines verwalteten Bereichs trägt die Markierung `BEGIN U-BOOT MANAGED BLOCK: <name>`, das Ende `END U-BOOT MANAGED BLOCK: <name>`; die Markierung steht als Kommentar der jeweiligen Dateiart (`#` bei YAML, `.env`, `Dockerfile` und Shell-Skripten, HTML-Kommentar bei Markdown, `//` bei JSONC).
 
@@ -1421,15 +1199,11 @@ Markierungsformat: Der Anfang eines verwalteten Bereichs trägt die Markierung `
 
 ### LH-SA-DOCKER-001 – Docker Compose
 
-Priorität: MVP
-
-Das Produkt muss Docker Compose aufrufen oder kompatible Compose-Dateien erzeugen können.
+*Priorität: MVP.* Das Produkt muss Docker Compose aufrufen oder kompatible Compose-Dateien erzeugen können.
 
 ### LH-SA-DOCKER-002 – Containerstatus
 
-Priorität: MVP
-
-Das Produkt muss den Status laufender Container auslesen können.
+*Priorität: MVP.* Das Produkt muss den Status laufender Container auslesen können.
 
 ---
 
@@ -1437,9 +1211,7 @@ Das Produkt muss den Status laufender Container auslesen können.
 
 ### LH-DA-001 – Projektmetadaten
 
-Priorität: MVP
-
-Das Produkt muss Projektmetadaten speichern können.
+*Priorität: MVP.* Das Produkt muss Projektmetadaten speichern können.
 
 Beispiele:
 
@@ -1451,9 +1223,7 @@ Beispiele:
 
 ### LH-DA-002 – Service-Metadaten
 
-Priorität: MVP
-
-Das Produkt muss Informationen über aktivierte Services speichern können.
+*Priorität: MVP.* Das Produkt muss Informationen über aktivierte Services speichern können.
 
 Beispiele:
 
@@ -1466,9 +1236,7 @@ Beispiele:
 
 ### LH-DA-003 – Schema-Version
 
-Priorität: MVP
-
-Die Projektkonfiguration muss eine Schema-Version enthalten.
+*Priorität: MVP.* Die Projektkonfiguration muss eine Schema-Version enthalten.
 
 Beispiel:
 
@@ -1478,9 +1246,7 @@ schemaVersion: 1
 
 ### LH-DA-004 – Schema-Migration
 
-Priorität: Later
-
-Das Produkt muss mit älteren Schema-Versionen umgehen können.
+*Priorität: Later.* Das Produkt muss mit älteren Schema-Versionen umgehen können.
 
 Anforderungen:
 
@@ -1495,9 +1261,7 @@ Anforderungen:
 
 ### LH-QA-001 – Automatisierte Tests
 
-Priorität: MVP
-
-Für zentrale Funktionen müssen automatisierte Tests vorhanden sein.
+*Priorität: MVP.* Für zentrale Funktionen müssen automatisierte Tests vorhanden sein.
 
 Mindestumfang:
 
@@ -1509,34 +1273,24 @@ Mindestumfang:
 
 ### LH-QA-002 – Testbare Akzeptanzkriterien
 
-Priorität: MVP
-
-Jede funktionale Anforderung soll durch mindestens einen Akzeptanztest überprüfbar sein.
+*Priorität: MVP.* Jede funktionale Anforderung soll durch mindestens einen Akzeptanztest überprüfbar sein.
 
 ### LH-QA-003 – CI-Fähigkeit (GitHub Actions)
 
-Priorität: MVP
-
-Das u-boot-Repo muss eine CI-Pipeline auf GitHub Actions führen.
+*Priorität: MVP.* Das u-boot-Repo muss eine CI-Pipeline auf GitHub Actions führen.
 
 Pflicht-Komposition: Die Pipeline läuft bei `pull_request` und `push` auf `main` in drei parallelen, PR-blockierenden Jobs: Gates (`make gates`), Security-Gates (`make govulncheck`) und Image-Scan (`make image-scan`, Trivy gegen das Runtime-Image, Severity HIGH und CRITICAL). Die PR-Blocking-Pflicht aller drei folgt aus diesem Eintrag, auch wenn die Make-Target-Definitionen unter [`LH-FA-BUILD-006`](#lh-fa-build-006--aggregator-targets) liegen. Der Runner braucht nur Docker und BuildKit, keine Host-Go-Toolchain ([`LH-FA-BUILD-007`](#lh-fa-build-007--docker-only-workflow)); Actions sind gepinnt, Token-Rechte minimal gehalten und jeder Job hat ein Zeitlimit. Die Required-Status-Check-Liste im GitHub-UI muss die tatsächlichen Job-Namen des Workflows verwenden.
 
 ### LH-QA-004 – Linting (SOLID-nahes Lint-Profil)
 
-Priorität: MVP
-
-Die u-boot-Codebase muss ein verschärftes Lint-Profil führen, das über die Default-Linter hinausgeht.
+*Priorität: MVP.* Die u-boot-Codebase muss ein verschärftes Lint-Profil führen, das über die Default-Linter hinausgeht.
 
 Das Profil besteht aus den Default-Lintern und SOLID-nahen Zusatz-Lintern (Komplexitäts-, Funktionslänge-, Interface-, Kopplungs- und Boundary-Signale); `depguard` für die Schicht-Regeln aus [`LH-FA-ARCH-003`](#lh-fa-arch-003--import-regeln-und-enforcement) ist Teil davon.
 
 Pflichten:
 
-- Die Konfiguration lebt in `.golangci.yml` (v2-Schema).
-- Schwellen und Linter-Settings sind in `.golangci.yml` konfiguriert und in abgeleiteter Quality-Doku zu erklären; bei Drift gewinnt diese Anforderung, Config und Doku sind anzupassen.
-- `//nolint`-Pragmas sind verboten. Pro-Pfad-Carveouts (z. B. Tests, `cmd/uboot`) werden zentral in `.golangci.yml` unter `issues.exclude-rules` mit `Why:`-Kommentar dokumentiert.
-- Verstöße brechen den `lint`-Stage ([`LH-FA-BUILD-001`](#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) und damit `make gates`/`make ci`/`make fullbuild`.
-- Die konkrete Linter-Auswahl muss die hier genannten Anforderungen
-  und die Architekturgrenzen aus [`LH-FA-ARCH-003`](#lh-fa-arch-003--import-regeln-und-enforcement) abdecken.
+- Die Konfiguration lebt in `.golangci.yml`; `//nolint`-Pragmas sind verboten, Carveouts stehen zentral dort mit Begründung.
+- Verstöße brechen den `lint`-Stage ([`LH-FA-BUILD-001`](#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) und damit `make gates`, `make ci` und `make fullbuild`; die Linter-Auswahl deckt die Architekturgrenzen aus [`LH-FA-ARCH-003`](#lh-fa-arch-003--import-regeln-und-enforcement) ab.
 
 ---
 
@@ -1544,9 +1298,7 @@ Pflichten:
 
 ### LH-AK-001 – Minimaler Init-Flow
 
-Priorität: MVP
-
-Vorbedingung: eine erreichbare Docker-Engine und Docker Compose in den jeweils geforderten Mindestversionen ([`LH-FA-DIAG-002`](#lh-fa-diag-002--lokale-voraussetzungen-prüfen), [`LH-RISK-001`](#lh-risk-001--docker-versionen)).
+*Priorität: MVP.* Vorbedingung: eine erreichbare Docker-Engine und Docker Compose in den jeweils geforderten Mindestversionen ([`LH-FA-DIAG-002`](#lh-fa-diag-002--lokale-voraussetzungen-prüfen), [`LH-RISK-001`](#lh-risk-001--docker-versionen)).
 
 Folgender Ablauf muss erfolgreich ausführbar sein:
 
@@ -1565,9 +1317,7 @@ Erwartetes Ergebnis:
 
 ### LH-AK-002 – PostgreSQL-Flow
 
-Priorität: MVP
-
-Folgender Ablauf muss erfolgreich ausführbar sein:
+*Priorität: MVP.* Folgender Ablauf muss erfolgreich ausführbar sein:
 
 ```bash
 u-boot init
@@ -1584,9 +1334,7 @@ Erwartetes Ergebnis:
 
 ### LH-AK-003 – Keycloak-Flow
 
-Priorität: V1
-
-Folgender Ablauf muss erfolgreich ausführbar sein:
+*Priorität: V1.* Folgender Ablauf muss erfolgreich ausführbar sein:
 
 ```bash
 u-boot init
@@ -1602,9 +1350,7 @@ Erwartetes Ergebnis:
 
 ### LH-AK-004 – OpenTelemetry-Flow
 
-Priorität: V1
-
-Folgender Ablauf muss erfolgreich ausführbar sein:
+*Priorität: V1.* Folgender Ablauf muss erfolgreich ausführbar sein:
 
 ```bash
 u-boot init
@@ -1622,9 +1368,7 @@ Erwartetes Ergebnis:
 
 ### LH-AK-005 – Devcontainer-Flow
 
-Priorität: MVP
-
-Folgender Ablauf muss erfolgreich ausführbar sein:
+*Priorität: MVP.* Folgender Ablauf muss erfolgreich ausführbar sein:
 
 ```bash
 u-boot init --devcontainer
@@ -1640,9 +1384,7 @@ Erwartetes Ergebnis:
 
 ### LH-AK-006 – Idempotenz
 
-Priorität: MVP
-
-Folgender Ablauf darf keine Duplikate erzeugen:
+*Priorität: MVP.* Folgender Ablauf darf keine Duplikate erzeugen:
 
 ```bash
 u-boot add postgres
@@ -1656,9 +1398,7 @@ Erwartetes Ergebnis:
 
 ### LH-AK-007 – Changelog-Generator
 
-Priorität: MVP
-
-Folgender Ablauf muss erfolgreich ausführbar sein:
+*Priorität: MVP.* Folgender Ablauf muss erfolgreich ausführbar sein:
 
 ```bash
 u-boot generate changelog
@@ -1774,167 +1514,9 @@ Nach dem MVP können ergänzt werden:
 
 ---
 
-## 13. Traceability-Matrix
+## 13. Traceability
 
-`-` bedeutet in der aktuellen Fassung noch keine getrennte Pflichtenheft-/Testfallableitung.
-`PH-*`- und `TC-*`-Kennungen sind bis zu getrennten
-Pflichtenheft-/Testfall-Artefakten Traceability-Aliase; ihre Links
-zeigen auf die zugehörige `LH-*`-Anforderung derselben Zeile.
-
-| Lastenheft-Kennung | Kurzbeschreibung               | Priorität | Spätere Ableitung im Pflichtenheft | Testfall        |
-| ------------------ | ------------------------------ | --------- | ---------------------------------- | --------------- |
-| [LH-LESE-001](#lh-lese-001--modalverben)        | Modalverben                   | -         | -                                  | -               |
-| [LH-LESE-002](#lh-lese-002--sprache)        | Sprache                       | -         | -                                  | -               |
-| [LH-LESE-003](#lh-lese-003--dokumentenordnung)        | Dokumentenordnung             | -         | -                                  | -               |
-| [LH-ZB-001](#lh-zb-001--projektziel)          | Projektziel                   | -         | -                                  | -               |
-| [LH-ZB-002](#lh-zb-002--produktvision)          | Produktvision                 | -         | -                                  | -               |
-| [LH-ZB-003](#lh-zb-003--repo-beschreibung)          | Repo-Beschreibung             | -         | -                                  | -               |
-| [LH-PE-001](#lh-pe-001--anwendungsbereich)          | Anwendungsbereich             | -         | -                                  | -               |
-| [LH-PE-002](#lh-pe-002--zielgruppen)          | Zielgruppen                   | -         | -                                  | -               |
-| [LH-PE-003](#lh-pe-003--betriebsumgebung)          | Betriebsumgebung              | -         | -                                  | -               |
-| [LH-PÜ-001](#lh-pü-001--grundfunktion)          | Grundfunktion                 | -         | -                                  | -               |
-| [LH-PÜ-002](#lh-pü-002--hauptmodule)                   | Hauptmodule                   | -         | -                                  | -               |
-| LH-MOD-001         | Projektinitialisierung        | -         | -                                  | -               |
-| LH-MOD-002         | Devcontainer-Generator       | -         | -                                  | -               |
-| LH-MOD-003         | Docker-Stack-Generator       | -         | -                                  | -               |
-| LH-MOD-004         | Service-Add-ons              | -         | -                                  | -               |
-| LH-MOD-005         | Umgebungsprüfung             | -         | -                                  | -               |
-| LH-MOD-006         | Stack-Start                  | -         | -                                  | -               |
-| LH-MOD-007         | Generatoren                  | -         | -                                  | -               |
-| LH-MOD-008         | Template-System              | -         | -                                  | -               |
-| [LH-FA-CLI-001](#lh-fa-cli-001--cli-aufruf)      | CLI-Aufruf                     | MVP       | [PH-CLI-001](#lh-fa-cli-001--cli-aufruf)                         | [TC-CLI-001](#lh-fa-cli-001--cli-aufruf)      |
-| [LH-FA-CLI-002](#lh-fa-cli-002--hilfeausgabe)      | Hilfeausgabe                   | MVP       | [PH-CLI-002](#lh-fa-cli-002--hilfeausgabe)                         | [TC-CLI-002](#lh-fa-cli-002--hilfeausgabe)      |
-| [LH-FA-CLI-003](#lh-fa-cli-003--versionsausgabe)      | Versionsausgabe                | MVP       | [PH-CLI-003](#lh-fa-cli-003--versionsausgabe)                         | [TC-CLI-003](#lh-fa-cli-003--versionsausgabe)      |
-| [LH-FA-CLI-004](#lh-fa-cli-004--fehlerausgabe)      | Fehlerausgabe                  | MVP       | [PH-CLI-004](#lh-fa-cli-004--fehlerausgabe)                         | [TC-CLI-004](#lh-fa-cli-004--fehlerausgabe)      |
-| [LH-FA-CLI-005](#lh-fa-cli-005--verbosity-und-logging)      | Verbosity und Logging          | MVP       | [PH-CLI-005](#lh-fa-cli-005--verbosity-und-logging)                         | [TC-CLI-005](#lh-fa-cli-005--verbosity-und-logging)      |
-| [LH-FA-CLI-005A](#lh-fa-cli-005a--interaktivität-und-automatisierung)     | Interaktivität und Automatisierung | MVP    | [PH-CLI-005A](#lh-fa-cli-005a--interaktivität-und-automatisierung)                        | [TC-CLI-005A](#lh-fa-cli-005a--interaktivität-und-automatisierung)     |
-| [LH-FA-CLI-006](#lh-fa-cli-006--exit-codes)      | Exit Codes                     | MVP       | [PH-CLI-006](#lh-fa-cli-006--exit-codes)                         | [TC-CLI-006](#lh-fa-cli-006--exit-codes)      |
-| [LH-FA-CLI-007](#lh-fa-cli-007--dry-run)      | Dry Run                        | V1        | [PH-CLI-007](#lh-fa-cli-007--dry-run)                         | [TC-CLI-007](#lh-fa-cli-007--dry-run)      |
-| [LH-FA-CLI-008](#lh-fa-cli-008--diff-ausgabe)      | Diff-Ausgabe                   | V1        | [PH-CLI-008](#lh-fa-cli-008--diff-ausgabe)                         | [TC-CLI-008](#lh-fa-cli-008--diff-ausgabe)      |
-| [LH-FA-INIT-001](#lh-fa-init-001--neues-projekt-initialisieren)     | Neues Projekt initialisieren    | MVP       | [PH-INIT-001](#lh-fa-init-001--neues-projekt-initialisieren)                        | [TC-INIT-001](#lh-fa-init-001--neues-projekt-initialisieren)     |
-| [LH-FA-INIT-002](#lh-fa-init-002--projektname)     | Projektname                    | MVP       | [PH-INIT-002](#lh-fa-init-002--projektname)                        | [TC-INIT-002](#lh-fa-init-002--projektname)     |
-| [LH-FA-INIT-003](#lh-fa-init-003--projektstruktur-erzeugen)     | Projektstruktur erzeugen        | MVP       | [PH-INIT-003](#lh-fa-init-003--projektstruktur-erzeugen)                        | [TC-INIT-003](#lh-fa-init-003--projektstruktur-erzeugen)     |
-| [LH-FA-INIT-004](#lh-fa-init-004--bestehendes-projekt-erkennen)     | Bestehendes Projekt erkennen    | MVP       | [PH-INIT-004](#lh-fa-init-004--bestehendes-projekt-erkennen)                        | [TC-INIT-004](#lh-fa-init-004--bestehendes-projekt-erkennen)     |
-| [LH-FA-INIT-005](#lh-fa-init-005--überschreibschutz)     | Überschreibschutz              | MVP       | [PH-INIT-005](#lh-fa-init-005--überschreibschutz)                        | [TC-INIT-005](#lh-fa-init-005--überschreibschutz)     |
-| [LH-FA-INIT-006](#lh-fa-init-006--projektnamen-validierung)     | Projektnamen-Validierung       | MVP       | [PH-INIT-006](#lh-fa-init-006--projektnamen-validierung)                        | [TC-INIT-006](#lh-fa-init-006--projektnamen-validierung)     |
-| [LH-FA-INIT-007](#lh-fa-init-007--git-repository-initialisierung)     | Git-Repository-Initialisierung | MVP       | [PH-INIT-007](#lh-fa-init-007--git-repository-initialisierung)                        | [TC-INIT-007](#lh-fa-init-007--git-repository-initialisierung)     |
-| [LH-FA-DEV-001](#lh-fa-dev-001--devcontainer-erzeugen)      | Devcontainer erzeugen          | MVP       | [PH-DEV-001](#lh-fa-dev-001--devcontainer-erzeugen)                         | [TC-DEV-001](#lh-fa-dev-001--devcontainer-erzeugen)      |
-| [LH-FA-DEV-002](#lh-fa-dev-002--vs-code-kompatibilität)      | VS-Code-Kompatibilität         | MVP       | [PH-DEV-002](#lh-fa-dev-002--vs-code-kompatibilität)                         | [TC-DEV-002](#lh-fa-dev-002--vs-code-kompatibilität)      |
-| [LH-FA-DEV-003](#lh-fa-dev-003--devcontainer-features)      | Devcontainer-Features          | V1        | [PH-DEV-003](#lh-fa-dev-003--devcontainer-features)                         | [TC-DEV-003](#lh-fa-dev-003--devcontainer-features)      |
-| [LH-FA-DEV-004](#lh-fa-dev-004--benutzerrechte)      | Benutzerrechte                 | MVP       | [PH-DEV-004](#lh-fa-dev-004--benutzerrechte)                         | [TC-DEV-004](#lh-fa-dev-004--benutzerrechte)      |
-| [LH-FA-DEV-005](#lh-fa-dev-005--ports)      | Ports                          | MVP       | [PH-DEV-005](#lh-fa-dev-005--ports)                         | [TC-DEV-005](#lh-fa-dev-005--ports)      |
-| [LH-FA-DEV-006](#lh-fa-dev-006--sandbox-profil)      | Sandbox-Profil                 | V1        | [PH-DEV-006](#lh-fa-dev-006--sandbox-profil)                         | [TC-DEV-006](#lh-fa-dev-006--sandbox-profil)      |
-| [LH-FA-DEV-007](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)      | Container-Runtime im Sandbox   | V1        | [PH-DEV-007](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)                         | [TC-DEV-007](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)      |
-| [LH-FA-DEV-008](#lh-fa-dev-008--egress-restriktion)      | Egress-Restriktion             | V2        | [PH-DEV-008](#lh-fa-dev-008--egress-restriktion)                         | [TC-DEV-008](#lh-fa-dev-008--egress-restriktion)      |
-| [LH-FA-DEV-009](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)      | Git-Zugangsdaten               | V1        | [PH-DEV-009](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)                         | [TC-DEV-009](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)      |
-| [LH-FA-DOC-001](#lh-fa-doc-001--compose-datei-erzeugen)      | Compose-Datei erzeugen         | MVP       | [PH-DOC-001](#lh-fa-doc-001--compose-datei-erzeugen)                         | [TC-DOC-001](#lh-fa-doc-001--compose-datei-erzeugen)      |
-| [LH-FA-DOC-002](#lh-fa-doc-002--dockerfile-erzeugen)      | Dockerfile erzeugen            | V1        | [PH-DOC-002](#lh-fa-doc-002--dockerfile-erzeugen)                         | [TC-DOC-002](#lh-fa-doc-002--dockerfile-erzeugen)      |
-| [LH-FA-DOC-003](#lh-fa-doc-003--netzwerk)      | Netzwerk                       | MVP       | [PH-DOC-003](#lh-fa-doc-003--netzwerk)                         | [TC-DOC-003](#lh-fa-doc-003--netzwerk)      |
-| [LH-FA-DOC-004](#lh-fa-doc-004--volumes)      | Volumes                        | MVP       | [PH-DOC-004](#lh-fa-doc-004--volumes)                         | [TC-DOC-004](#lh-fa-doc-004--volumes)      |
-| [LH-FA-DOC-005](#lh-fa-doc-005--compose-validierung)      | Compose-Validierung            | V1        | [PH-DOC-005](#lh-fa-doc-005--compose-validierung)                         | [TC-DOC-005](#lh-fa-doc-005--compose-validierung)      |
-| [LH-FA-ADD-001](#lh-fa-add-001--add-on-befehl)      | Add-on-Befehl                  | MVP       | [PH-ADD-001](#lh-fa-add-001--add-on-befehl)                         | [TC-ADD-001](#lh-fa-add-001--add-on-befehl)      |
-| [LH-FA-ADD-002](#lh-fa-add-002--postgresql-hinzufügen)      | PostgreSQL hinzufügen           | MVP       | [PH-ADD-002](#lh-fa-add-002--postgresql-hinzufügen)                         | [TC-ADD-002](#lh-fa-add-002--postgresql-hinzufügen)      |
-| [LH-FA-ADD-003](#lh-fa-add-003--keycloak-hinzufügen)      | Keycloak hinzufügen            | V1        | [PH-ADD-003](#lh-fa-add-003--keycloak-hinzufügen)                         | [TC-ADD-003](#lh-fa-add-003--keycloak-hinzufügen)      |
-| [LH-FA-ADD-004](#lh-fa-add-004--opentelemetry-hinzufügen)      | OpenTelemetry hinzufügen       | V1        | [PH-ADD-004](#lh-fa-add-004--opentelemetry-hinzufügen)                         | [TC-ADD-004](#lh-fa-add-004--opentelemetry-hinzufügen)      |
-| [LH-FA-ADD-005](#lh-fa-add-005--mehrfaches-hinzufügen-verhindern)      | Mehrfaches Hinzufügen verhindern| MVP       | [PH-ADD-005](#lh-fa-add-005--mehrfaches-hinzufügen-verhindern)                         | [TC-ADD-005](#lh-fa-add-005--mehrfaches-hinzufügen-verhindern)      |
-| [LH-FA-ADD-006](#lh-fa-add-006--add-on-abhängigkeiten)      | Add-on-Abhängigkeiten          | V1        | [PH-ADD-006](#lh-fa-add-006--add-on-abhängigkeiten)                         | [TC-ADD-006](#lh-fa-add-006--add-on-abhängigkeiten)      |
-| [LH-FA-ADD-007](#lh-fa-add-007--service-entfernen)      | Service entfernen              | V1        | [PH-ADD-007](#lh-fa-add-007--service-entfernen)                         | [TC-ADD-007](#lh-fa-add-007--service-entfernen)      |
-| [LH-FA-UP-001](#lh-fa-up-001--umgebung-starten)       | Umgebung starten               | MVP       | [PH-UP-001](#lh-fa-up-001--umgebung-starten)                          | [TC-UP-001](#lh-fa-up-001--umgebung-starten)       |
-| [LH-FA-UP-002](#lh-fa-up-002--docker-compose-verwenden)       | Docker Compose verwenden        | MVP       | [PH-UP-002](#lh-fa-up-002--docker-compose-verwenden)                          | [TC-UP-002](#lh-fa-up-002--docker-compose-verwenden)       |
-| [LH-FA-UP-003](#lh-fa-up-003--startstatus-anzeigen)       | Startstatus anzeigen           | MVP       | [PH-UP-003](#lh-fa-up-003--startstatus-anzeigen)                          | [TC-UP-003](#lh-fa-up-003--startstatus-anzeigen)       |
-| [LH-FA-UP-004](#lh-fa-up-004--umgebung-stoppen)       | Umgebung stoppen               | MVP       | [PH-UP-004](#lh-fa-up-004--umgebung-stoppen)                          | [TC-UP-004](#lh-fa-up-004--umgebung-stoppen)       |
-| [LH-FA-UP-005](#lh-fa-up-005--logs-anzeigen)       | Logs anzeigen                  | V1        | [PH-UP-005](#lh-fa-up-005--logs-anzeigen)                          | [TC-UP-005](#lh-fa-up-005--logs-anzeigen)       |
-| [LH-FA-DIAG-001](#lh-fa-diag-001--doctor-befehl)     | Doctor-Befehl                  | MVP       | [PH-DIAG-001](#lh-fa-diag-001--doctor-befehl)                        | [TC-DIAG-001](#lh-fa-diag-001--doctor-befehl)     |
-| [LH-FA-DIAG-002](#lh-fa-diag-002--lokale-voraussetzungen-prüfen)     | Lokale Voraussetzungen prüfen   | MVP       | [PH-DIAG-002](#lh-fa-diag-002--lokale-voraussetzungen-prüfen)                        | [TC-DIAG-002](#lh-fa-diag-002--lokale-voraussetzungen-prüfen)     |
-| [LH-FA-DIAG-003](#lh-fa-diag-003--fehlerklassifikation)     | Fehlerklassifikation           | MVP       | [PH-DIAG-003](#lh-fa-diag-003--fehlerklassifikation)                        | [TC-DIAG-003](#lh-fa-diag-003--fehlerklassifikation)     |
-| [LH-FA-DIAG-004](#lh-fa-diag-004--reparaturhinweise)     | Reparaturhinweise              | MVP       | [PH-DIAG-004](#lh-fa-diag-004--reparaturhinweise)                        | [TC-DIAG-004](#lh-fa-diag-004--reparaturhinweise)     |
-| [LH-FA-GEN-001](#lh-fa-gen-001--generate-befehl)      | Generate-Befehl                | MVP       | [PH-GEN-001](#lh-fa-gen-001--generate-befehl)                         | [TC-GEN-001](#lh-fa-gen-001--generate-befehl)      |
-| [LH-FA-GEN-002](#lh-fa-gen-002--changelog-erzeugen)      | Changelog erzeugen             | MVP       | [PH-GEN-002](#lh-fa-gen-002--changelog-erzeugen)                         | [TC-GEN-002](#lh-fa-gen-002--changelog-erzeugen)      |
-| [LH-FA-GEN-003](#lh-fa-gen-003--readme-erzeugen)      | README erzeugen                | MVP       | [PH-GEN-003](#lh-fa-gen-003--readme-erzeugen)                         | [TC-GEN-003](#lh-fa-gen-003--readme-erzeugen)      |
-| [LH-FA-GEN-004](#lh-fa-gen-004--beispiel-env-erzeugen)      | Beispiel-ENV erzeugen          | MVP       | [PH-GEN-004](#lh-fa-gen-004--beispiel-env-erzeugen)                         | [TC-GEN-004](#lh-fa-gen-004--beispiel-env-erzeugen)      |
-| [LH-FA-GEN-005](#lh-fa-gen-005--idempotenz)      | Idempotenz                     | MVP       | [PH-GEN-005](#lh-fa-gen-005--idempotenz)                         | [TC-GEN-005](#lh-fa-gen-005--idempotenz)      |
-| [LH-FA-TPL-001](#lh-fa-tpl-001--projektvorlagen)      | Projektvorlagen                | V1        | [PH-TPL-001](#lh-fa-tpl-001--projektvorlagen)                         | [TC-TPL-001](#lh-fa-tpl-001--projektvorlagen)      |
-| [LH-FA-TPL-002](#lh-fa-tpl-002--template-metadaten)      | Template-Metadaten             | V1        | [PH-TPL-002](#lh-fa-tpl-002--template-metadaten)                         | [TC-TPL-002](#lh-fa-tpl-002--template-metadaten)      |
-| [LH-FA-TPL-003](#lh-fa-tpl-003--eigene-templates)      | Eigene Templates               | Later     | [PH-TPL-003](#lh-fa-tpl-003--eigene-templates)                         | [TC-TPL-003](#lh-fa-tpl-003--eigene-templates)      |
-| [LH-FA-TPL-004](#lh-fa-tpl-004--templates-auflisten)      | Templates auflisten            | V1        | [PH-TPL-004](#lh-fa-tpl-004--templates-auflisten)                         | [TC-TPL-004](#lh-fa-tpl-004--templates-auflisten)      |
-| [LH-FA-CONF-001](#lh-fa-conf-001--projektkonfiguration)     | Projektkonfiguration           | MVP       | [PH-CONF-001](#lh-fa-conf-001--projektkonfiguration)                        | [TC-CONF-001](#lh-fa-conf-001--projektkonfiguration)     |
-| [LH-FA-CONF-002](#lh-fa-conf-002--inhalt-der-konfiguration)     | Inhalt der Konfiguration       | MVP       | [PH-CONF-002](#lh-fa-conf-002--inhalt-der-konfiguration)                        | [TC-CONF-002](#lh-fa-conf-002--inhalt-der-konfiguration)     |
-| [LH-FA-CONF-003](#lh-fa-conf-003--konfiguration-lesen)     | Konfiguration lesen            | MVP       | [PH-CONF-003](#lh-fa-conf-003--konfiguration-lesen)                        | [TC-CONF-003](#lh-fa-conf-003--konfiguration-lesen)     |
-| [LH-FA-CONF-004](#lh-fa-conf-004--konfiguration-aktualisieren)     | Konfiguration aktualisieren    | MVP       | [PH-CONF-004](#lh-fa-conf-004--konfiguration-aktualisieren)                        | [TC-CONF-004](#lh-fa-conf-004--konfiguration-aktualisieren)     |
-| [LH-FA-CONF-005](#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)     | Konfiguration anzeigen/ändern  | MVP       | [PH-CONF-005](#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)                        | [TC-CONF-005](#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)     |
-| [LH-FA-CONF-006](#lh-fa-conf-006--konfiguration-migrieren)     | Konfiguration migrieren        | Later     | [PH-CONF-006](#lh-fa-conf-006--konfiguration-migrieren)                        | [TC-CONF-006](#lh-fa-conf-006--konfiguration-migrieren)     |
-| [LH-FA-BUILD-001](#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)    | Multi-Stage Dockerfile (u-boot-Repo) | MVP | [PH-BUILD-001](#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)                       | [TC-BUILD-001](#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)    |
-| [LH-FA-BUILD-002](#lh-fa-build-002--runtime-stage-pflichten)    | Runtime-Stage Pflichten        | MVP       | [PH-BUILD-002](#lh-fa-build-002--runtime-stage-pflichten)                       | [TC-BUILD-002](#lh-fa-build-002--runtime-stage-pflichten)    |
-| [LH-FA-BUILD-003](#lh-fa-build-003--build-args-und-pin-politik)    | Build-Args und Pin-Politik     | MVP       | [PH-BUILD-003](#lh-fa-build-003--build-args-und-pin-politik)                       | [TC-BUILD-003](#lh-fa-build-003--build-args-und-pin-politik)    |
-| [LH-FA-BUILD-004](#lh-fa-build-004--dockerignore-pflicht)    | `.dockerignore` Pflicht        | MVP       | [PH-BUILD-004](#lh-fa-build-004--dockerignore-pflicht)                       | [TC-BUILD-004](#lh-fa-build-004--dockerignore-pflicht)    |
-| [LH-FA-BUILD-005](#lh-fa-build-005--makefile-mit-standard-targets)    | Makefile mit Standard-Targets  | MVP       | [PH-BUILD-005](#lh-fa-build-005--makefile-mit-standard-targets)                       | [TC-BUILD-005](#lh-fa-build-005--makefile-mit-standard-targets)    |
-| [LH-FA-BUILD-006](#lh-fa-build-006--aggregator-targets)    | Aggregator-Targets             | V1        | [PH-BUILD-006](#lh-fa-build-006--aggregator-targets)                       | [TC-BUILD-006](#lh-fa-build-006--aggregator-targets)    |
-| [LH-FA-BUILD-007](#lh-fa-build-007--docker-only-workflow)    | Docker-only-Workflow           | MVP       | [PH-BUILD-007](#lh-fa-build-007--docker-only-workflow)                       | [TC-BUILD-007](#lh-fa-build-007--docker-only-workflow)    |
-| [LH-FA-BUILD-008](#lh-fa-build-008--coverage-bootstrap)    | Coverage-Bootstrap             | MVP       | [PH-BUILD-008](#lh-fa-build-008--coverage-bootstrap)                       | [TC-BUILD-008](#lh-fa-build-008--coverage-bootstrap)    |
-| [LH-FA-BUILD-009](#lh-fa-build-009--repository-layout)    | Repository-Layout              | MVP       | [PH-BUILD-009](#lh-fa-build-009--repository-layout)                       | [TC-BUILD-009](#lh-fa-build-009--repository-layout)    |
-| [LH-FA-PROJDOCS-001](#lh-fa-projdocs-001--mindeststruktur) | docs/-Mindeststruktur (u-boot-Repo) | MVP  | [PH-PROJDOCS-001](#lh-fa-projdocs-001--mindeststruktur)                    | [TC-PROJDOCS-001](#lh-fa-projdocs-001--mindeststruktur) |
-| [LH-FA-PROJDOCS-002](#lh-fa-projdocs-002--adr-format) | ADR-Format                     | MVP       | [PH-PROJDOCS-002](#lh-fa-projdocs-002--adr-format)                    | [TC-PROJDOCS-002](#lh-fa-projdocs-002--adr-format) |
-| [LH-FA-PROJDOCS-003](#lh-fa-projdocs-003--planning-lifecycle) | Planning-Lifecycle             | MVP       | [PH-PROJDOCS-003](#lh-fa-projdocs-003--planning-lifecycle)                    | [TC-PROJDOCS-003](#lh-fa-projdocs-003--planning-lifecycle) |
-| [LH-FA-PROJDOCS-004](#lh-fa-projdocs-004--archivierung) | Archivierung                   | V1        | [PH-PROJDOCS-004](#lh-fa-projdocs-004--archivierung)                    | [TC-PROJDOCS-004](#lh-fa-projdocs-004--archivierung) |
-| [LH-FA-PROJDOCS-005](#lh-fa-projdocs-005--carveout-disziplin) | Carveout-Disziplin             | MVP       | [PH-PROJDOCS-005](#lh-fa-projdocs-005--carveout-disziplin)                    | [TC-PROJDOCS-005](#lh-fa-projdocs-005--carveout-disziplin) |
-| [LH-FA-PROJDOCS-006](#lh-fa-projdocs-006--dokumentationsreferenzmodell) | Dokumentationsreferenzmodell   | V1        | [PH-PROJDOCS-006](#lh-fa-projdocs-006--dokumentationsreferenzmodell)                    | [TC-PROJDOCS-006](#lh-fa-projdocs-006--dokumentationsreferenzmodell) |
-| [LH-FA-ARCH-001](#lh-fa-arch-001--hexagonales-pattern)     | Hexagonales Pattern            | MVP       | [PH-ARCH-001](#lh-fa-arch-001--hexagonales-pattern)                        | [TC-ARCH-001](#lh-fa-arch-001--hexagonales-pattern)     |
-| [LH-FA-ARCH-002](#lh-fa-arch-002--schichten-und-verzeichnislayout)     | Schichten und Verzeichnislayout | MVP      | [PH-ARCH-002](#lh-fa-arch-002--schichten-und-verzeichnislayout)                        | [TC-ARCH-002](#lh-fa-arch-002--schichten-und-verzeichnislayout)     |
-| [LH-FA-ARCH-003](#lh-fa-arch-003--import-regeln-und-enforcement)     | Import-Regeln und Enforcement  | MVP       | [PH-ARCH-003](#lh-fa-arch-003--import-regeln-und-enforcement)                        | [TC-ARCH-003](#lh-fa-arch-003--import-regeln-und-enforcement)     |
-| [LH-DA-003](#lh-da-003--schema-version)          | Schema-Version                 | MVP       | [PH-DA-003](#lh-da-003--schema-version)                          | [TC-DA-003](#lh-da-003--schema-version)       |
-| [LH-DA-004](#lh-da-004--schema-migration)          | Schema-Migration               | Later     | [PH-DA-004](#lh-da-004--schema-migration)                          | [TC-DA-004](#lh-da-004--schema-migration)       |
-| [LH-SA-CLI-001](#lh-sa-cli-001--befehlsstruktur)      | Befehlsstruktur                | MVP       | [PH-SA-CLI-001](#lh-sa-cli-001--befehlsstruktur)                      | [TC-SA-CLI-001](#lh-sa-cli-001--befehlsstruktur)   |
-| [LH-SA-CLI-002](#lh-sa-cli-002--vorgesehene-befehle)      | Vorgesehene Befehle            | MVP/V1    | [PH-SA-CLI-002](#lh-sa-cli-002--vorgesehene-befehle)                      | [TC-SA-CLI-002](#lh-sa-cli-002--vorgesehene-befehle)   |
-| [LH-SA-FILE-001](#lh-sa-file-001--erzeugte-dateien)     | Erzeugte Dateien               | MVP       | [PH-SA-FILE-001](#lh-sa-file-001--erzeugte-dateien)                     | [TC-SA-FILE-001](#lh-sa-file-001--erzeugte-dateien)  |
-| [LH-SA-FILE-002](#lh-sa-file-002--markierte-verwaltete-bereiche)     | Markierte verwaltete Bereiche  | MVP       | [PH-SA-FILE-002](#lh-sa-file-002--markierte-verwaltete-bereiche)                     | [TC-SA-FILE-002](#lh-sa-file-002--markierte-verwaltete-bereiche)  |
-| [LH-SA-DOCKER-001](#lh-sa-docker-001--docker-compose)    | Docker Compose                 | MVP       | [PH-SA-DOCKER-001](#lh-sa-docker-001--docker-compose)                   | [TC-SA-DOCKER-001](#lh-sa-docker-001--docker-compose) |
-| [LH-SA-DOCKER-002](#lh-sa-docker-002--containerstatus)    | Containerstatus                | MVP       | [PH-SA-DOCKER-002](#lh-sa-docker-002--containerstatus)                   | [TC-SA-DOCKER-002](#lh-sa-docker-002--containerstatus) |
-| [LH-NFA-USE-001](#lh-nfa-use-001--verständliche-bedienung)     | Verständliche Bedienung        | MVP       | [PH-NFA-USE-001](#lh-nfa-use-001--verständliche-bedienung)                     | [TC-NFA-USE-001](#lh-nfa-use-001--verständliche-bedienung)  |
-| [LH-NFA-USE-002](#lh-nfa-use-002--klare-befehle)     | Klare Befehle                 | MVP       | [PH-NFA-USE-002](#lh-nfa-use-002--klare-befehle)                     | [TC-NFA-USE-002](#lh-nfa-use-002--klare-befehle)  |
-| [LH-NFA-USE-003](#lh-nfa-use-003--lesbare-ausgaben)     | Lesbare Ausgaben              | MVP       | [PH-NFA-USE-003](#lh-nfa-use-003--lesbare-ausgaben)                     | [TC-NFA-USE-003](#lh-nfa-use-003--lesbare-ausgaben)  |
-| [LH-NFA-USE-004](#lh-nfa-use-004--maschinenlesbare-ausgabe)     | Maschinenlesbare Ausgabe       | V1        | [PH-NFA-USE-004](#lh-nfa-use-004--maschinenlesbare-ausgabe)                     | [TC-NFA-USE-004](#lh-nfa-use-004--maschinenlesbare-ausgabe)  |
-| [LH-NFA-REL-001](#lh-nfa-rel-001--kein-stilles-überschreiben)     | Kein stilles Überschreiben     | MVP       | [PH-NFA-REL-001](#lh-nfa-rel-001--kein-stilles-überschreiben)                     | [TC-NFA-REL-001](#lh-nfa-rel-001--kein-stilles-überschreiben)  |
-| [LH-NFA-REL-002](#lh-nfa-rel-002--wiederholbare-ausführung)     | Wiederholbare Ausführung       | MVP       | [PH-NFA-REL-002](#lh-nfa-rel-002--wiederholbare-ausführung)                     | [TC-NFA-REL-002](#lh-nfa-rel-002--wiederholbare-ausführung)  |
-| [LH-NFA-REL-003](#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)     | Abbruch bei kritischen Fehlern | MVP       | [PH-NFA-REL-003](#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)                     | [TC-NFA-REL-003](#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)  |
-| [LH-NFA-REL-004](#lh-nfa-rel-004--validierung-erzeugter-dateien)     | Validierung erzeugter Dateien  | MVP       | [PH-NFA-REL-004](#lh-nfa-rel-004--validierung-erzeugter-dateien)                     | [TC-NFA-REL-004](#lh-nfa-rel-004--validierung-erzeugter-dateien)  |
-| [LH-NFA-MAINT-001](#lh-nfa-maint-001--modulare-architektur)   | Modulare Architektur           | MVP       | [PH-NFA-MAINT-001](#lh-nfa-maint-001--modulare-architektur)                   | [TC-NFA-MAINT-001](#lh-nfa-maint-001--modulare-architektur)|
-| [LH-NFA-MAINT-002](#lh-nfa-maint-002--erweiterbarkeit)   | Erweiterbarkeit                | MVP       | [PH-NFA-MAINT-002](#lh-nfa-maint-002--erweiterbarkeit)                   | [TC-NFA-MAINT-002](#lh-nfa-maint-002--erweiterbarkeit)|
-| [LH-NFA-MAINT-003](#lh-nfa-maint-003--testbarkeit)   | Testbarkeit                    | MVP       | [PH-NFA-MAINT-003](#lh-nfa-maint-003--testbarkeit)                   | [TC-NFA-MAINT-003](#lh-nfa-maint-003--testbarkeit)|
-| [LH-NFA-MAINT-004](#lh-nfa-maint-004--dokumentierte-schnittstellen)   | Dokumentierte Schnittstellen    | V1        | [PH-NFA-MAINT-004](#lh-nfa-maint-004--dokumentierte-schnittstellen)                   | [TC-NFA-MAINT-004](#lh-nfa-maint-004--dokumentierte-schnittstellen)|
-| [LH-NFA-PORT-001](#lh-nfa-port-001--linux-unterstützung)    | Linux-Unterstützung            | MVP       | [PH-NFA-PORT-001](#lh-nfa-port-001--linux-unterstützung)                    | [TC-NFA-PORT-001](#lh-nfa-port-001--linux-unterstützung) |
-| [LH-NFA-PORT-002](#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten)    | Keine unnötigen Systemabhängigkeiten | MVP       | [PH-NFA-PORT-002](#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten)                    | [TC-NFA-PORT-002](#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten) |
-| [LH-NFA-PORT-003](#lh-nfa-port-003--containerfreundlichkeit)    | Containerfreundlichkeit        | V1        | [PH-NFA-PORT-003](#lh-nfa-port-003--containerfreundlichkeit)                    | [TC-NFA-PORT-003](#lh-nfa-port-003--containerfreundlichkeit) |
-| [LH-NFA-SEC-001](#lh-nfa-sec-001--keine-secrets-einchecken)     | Keine Secrets einchecken       | MVP       | [PH-NFA-SEC-001](#lh-nfa-sec-001--keine-secrets-einchecken)                     | [TC-NFA-SEC-001](#lh-nfa-sec-001--keine-secrets-einchecken)  |
-| [LH-NFA-SEC-002](#lh-nfa-sec-002--beispielwerte-markieren)     | Beispielwerte markieren        | MVP       | [PH-NFA-SEC-002](#lh-nfa-sec-002--beispielwerte-markieren)                     | [TC-NFA-SEC-002](#lh-nfa-sec-002--beispielwerte-markieren)  |
-| [LH-NFA-SEC-003](#lh-nfa-sec-003--sichere-defaults)     | Sichere Defaults               | MVP       | [PH-NFA-SEC-003](#lh-nfa-sec-003--sichere-defaults)                     | [TC-NFA-SEC-003](#lh-nfa-sec-003--sichere-defaults)  |
-| [LH-NFA-SEC-004](#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)     | Keine verdeckte Ausführung fremder Skripte | MVP       | [PH-NFA-SEC-004](#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)                     | [TC-NFA-SEC-004](#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)  |
-| [LH-NFA-PERF-001](#lh-nfa-perf-001--schnelle-cli-antwort)    | Schnelle CLI-Antwort           | MVP       | [PH-NFA-PERF-001](#lh-nfa-perf-001--schnelle-cli-antwort)                    | [TC-NFA-PERF-001](#lh-nfa-perf-001--schnelle-cli-antwort) |
-| [LH-NFA-PERF-002](#lh-nfa-perf-002--startzeit-abhängig-von-docker)    | Startzeit abhängig von Docker   | MVP       | [PH-NFA-PERF-002](#lh-nfa-perf-002--startzeit-abhängig-von-docker)                    | [TC-NFA-PERF-002](#lh-nfa-perf-002--startzeit-abhängig-von-docker) |
-| [LH-DA-001](#lh-da-001--projektmetadaten)          | Projektmetadaten               | MVP       | [PH-DA-001](#lh-da-001--projektmetadaten)                          | [TC-DA-001](#lh-da-001--projektmetadaten)       |
-| [LH-DA-002](#lh-da-002--service-metadaten)          | Service-Metadaten              | MVP       | [PH-DA-002](#lh-da-002--service-metadaten)                          | [TC-DA-002](#lh-da-002--service-metadaten)       |
-| [LH-QA-001](#lh-qa-001--automatisierte-tests)          | Automatisierte Tests           | MVP       | [PH-QA-001](#lh-qa-001--automatisierte-tests)                          | [TC-QA-001](#lh-qa-001--automatisierte-tests)       |
-| [LH-QA-002](#lh-qa-002--testbare-akzeptanzkriterien)          | Testbare Akzeptanzkriterien    | MVP       | [PH-QA-002](#lh-qa-002--testbare-akzeptanzkriterien)                          | [TC-QA-002](#lh-qa-002--testbare-akzeptanzkriterien)       |
-| [LH-QA-003](#lh-qa-003--ci-fähigkeit-github-actions)          | CI-Fähigkeit                  | MVP       | [PH-QA-003](#lh-qa-003--ci-fähigkeit-github-actions)                          | [TC-QA-003](#lh-qa-003--ci-fähigkeit-github-actions)       |
-| [LH-QA-004](#lh-qa-004--linting-solid-nahes-lint-profil)          | Linting (SOLID-nahes Profil)   | MVP       | [PH-QA-004](#lh-qa-004--linting-solid-nahes-lint-profil)                          | [TC-QA-004](#lh-qa-004--linting-solid-nahes-lint-profil)       |
-| [LH-AK-001](#lh-ak-001--minimaler-init-flow)          | Minimaler Init-Flow            | MVP       | [PH-AK-001](#lh-ak-001--minimaler-init-flow)                          | [TC-AK-001](#lh-ak-001--minimaler-init-flow)       |
-| [LH-AK-002](#lh-ak-002--postgresql-flow)          | PostgreSQL-Flow                | MVP       | [PH-AK-002](#lh-ak-002--postgresql-flow)                          | [TC-AK-002](#lh-ak-002--postgresql-flow)       |
-| [LH-AK-003](#lh-ak-003--keycloak-flow)          | Keycloak-Flow                  | V1        | [PH-AK-003](#lh-ak-003--keycloak-flow)                          | [TC-AK-003](#lh-ak-003--keycloak-flow)       |
-| [LH-AK-004](#lh-ak-004--opentelemetry-flow)          | OpenTelemetry-Flow             | V1        | [PH-AK-004](#lh-ak-004--opentelemetry-flow)                          | [TC-AK-004](#lh-ak-004--opentelemetry-flow)       |
-| [LH-AK-005](#lh-ak-005--devcontainer-flow)          | Devcontainer-Flow              | MVP       | [PH-AK-005](#lh-ak-005--devcontainer-flow)                          | [TC-AK-005](#lh-ak-005--devcontainer-flow)       |
-| [LH-AK-006](#lh-ak-006--idempotenz)          | Idempotenz                     | MVP       | [PH-AK-006](#lh-ak-006--idempotenz)                          | [TC-AK-006](#lh-ak-006--idempotenz)       |
-| [LH-AK-007](#lh-ak-007--changelog-generator)          | Changelog-Generator            | MVP       | [PH-AK-007](#lh-ak-007--changelog-generator)                          | [TC-AK-007](#lh-ak-007--changelog-generator)       |
-| [LH-ABG-001](#lh-abg-001--kein-vollständiges-deployment-system)         | Kein vollständiges Deployment-System | -      | [PH-ABG-001](#lh-abg-001--kein-vollständiges-deployment-system)                         | [TC-ABG-001](#lh-abg-001--kein-vollständiges-deployment-system)      |
-| [LH-ABG-002](#lh-abg-002--keine-ide-abhängigkeit)         | Keine IDE-Abhängigkeit         | -                                  | [PH-ABG-002](#lh-abg-002--keine-ide-abhängigkeit)                         | [TC-ABG-002](#lh-abg-002--keine-ide-abhängigkeit)      |
-| [LH-ABG-003](#lh-abg-003--kein-ersatz-für-docker-compose)         | Kein Ersatz für Docker Compose  | -                                  | [PH-ABG-003](#lh-abg-003--kein-ersatz-für-docker-compose)                         | [TC-ABG-003](#lh-abg-003--kein-ersatz-für-docker-compose)      |
-| [LH-RISK-001](#lh-risk-001--docker-versionen)        | Docker-Versionen               | -                                  | [PH-RISK-001](#lh-risk-001--docker-versionen)                        | [TC-RISK-001](#lh-risk-001--docker-versionen)     |
-| [LH-RISK-002](#lh-risk-002--überschreiben-manueller-änderungen)        | Überschreiben manueller Änderungen | -                               | [PH-RISK-002](#lh-risk-002--überschreiben-manueller-änderungen)                        | [TC-RISK-002](#lh-risk-002--überschreiben-manueller-änderungen)     |
-| [LH-RISK-003](#lh-risk-003--zu-großer-funktionsumfang)        | Zu großer Funktionsumfang      | -                                  | [PH-RISK-003](#lh-risk-003--zu-großer-funktionsumfang)                        | [TC-RISK-003](#lh-risk-003--zu-großer-funktionsumfang)     |
-| [LH-MVP-001](#lh-mvp-001--muss-im-mvp-enthalten-sein)         | Muss im MVP enthalten sein     | MVP                               | -                                  | -               |
-| [LH-MVP-002](#lh-mvp-002--kann-nach-dem-mvp-folgen)         | Kann nach dem MVP folgen       | -                                  | -                                  | -               |
-| [LH-OPEN-001](#lh-open-001--implementierungssprache-entschieden)        | Implementierungssprache (Go, entschieden 2026-05-21) | - | -                          | -               |
-| [LH-OPEN-002](#lh-open-002--paketierung)        | Paketierung (GHCR, Binary, Homebrew und Debian/RPM entschieden; npm/pip verworfen) | -                                  | -                                  | -               |
-| [LH-OPEN-003](#lh-open-003--plugin-system-entschieden)        | Plugin-System (statisch entschieden; kein Plugin-Loader) | -                                  | -                                  | -               |
-| [LH-OPEN-004](#lh-open-004--template-format-entschieden)        | Template-Format (YAML+`text/template` entschieden) | -                                  | -                                  | -               |
+Die Rückverfolgbarkeit von Anforderung zu Umsetzung und Test wird aus den `LH-*`-Kennungen abgeleitet (Überschriften dieses Dokuments, Verweise in Planung, Code und Tests); eine separat geführte Matrix gibt es nicht.
 
 ---
 
@@ -2034,7 +1616,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.3.3 | 2026-09-30 | [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion): Prüfung der Capability beim Containerstart statt im `u-boot doctor` präzisiert (die Capability ist vom Host aus nicht zuverlässig bestimmbar; `doctor` prüft die Konfiguration). | Vereinbarung mit dem Projektinhaber |
 | 0.3.4 | 2026-10-01 | [`LH-OPEN-002`](#lh-open-002--paketierung): Homebrew von „vertagt mit Trigger“ auf „gewählt“ gesetzt (eigener Tap, Formel aus den Release-Assets). | Vereinbarung mit dem Projektinhaber |
 | 0.3.5 | 2026-10-01 | [`LH-OPEN-002`](#lh-open-002--paketierung): Debian/RPM von „vertagt mit Trigger“ auf „gewählt“ gesetzt (`.deb`/`.rpm` für amd64 und arm64 als Release-Assets, kein gehostetes Repository). | Vereinbarung mit dem Projektinhaber |
-| 0.4.0 | 2026-10-02 | Strukturänderung ohne neue Produktzusage: Technische Festlegungen (Schemata, Beispielinstanzen, Algorithmen, Defaults, Build-/CI-, Doku- und Architektur-Details, Markierungsformate) wurden in ein eigenes technisches Dokument überführt; Projektkapitel §4.11–§4.13 und einzelne Anforderungen sind auf Vorgaben gekürzt; neue Lesehinweis-Anforderung [`LH-LESE-003`](#lh-lese-003--dokumentenordnung); die Anforderungen zu ADR-Format, Planning-Lifecycle, Carveout-Disziplin und Dokumentationsreferenzmodell sind auf Kurzzusagen gekürzt (die Einzelregeln führt das adoptierte Baseline-Regelwerk), Aufrufbeispiele und ausführliche Regelblöcke stehen in der technischen Spezifikation. Alle Anforderungs-Kennungen und Überschriften sind unverändert. | Vereinbarung mit dem Projektinhaber |
+| 0.4.0 | 2026-10-02 | Strukturänderung ohne neue Produktzusage: Technische Festlegungen (Schemata, Beispielinstanzen, Algorithmen, Defaults, Build-/CI-, Doku- und Architektur-Details, Markierungsformate) wurden in ein eigenes technisches Dokument überführt; Projektkapitel §4.11–§4.13 und einzelne Anforderungen sind auf Vorgaben gekürzt; neue Lesehinweis-Anforderung [`LH-LESE-003`](#lh-lese-003--dokumentenordnung); die Anforderungen zu ADR-Format, Planning-Lifecycle, Carveout-Disziplin und Dokumentationsreferenzmodell sind auf Kurzzusagen gekürzt (die Einzelregeln führt das adoptierte Baseline-Regelwerk), Aufrufbeispiele und ausführliche Regelblöcke stehen in der technischen Spezifikation; die Traceability-Matrix entfällt (die Rückverfolgbarkeit folgt aus den Kennungen); die veraltete Bootstrap-Angabe „Default-Schwellwert 0“ in [`LH-FA-BUILD-008`](#lh-fa-build-008--coverage-bootstrap) entfällt, der Schwellwert ist überschreibbar. Alle Anforderungs-Kennungen und Überschriften sind unverändert. | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt

@@ -1,7 +1,6 @@
 # Slice V2: Coverage-Default im Lastenheft an die gelebte Praxis angleichen
 
-> **Status:** **offen** (`open/`, 2026-10-02) — Befund aus dem Review der Welle `welle-spec-technik-stratum`
-> ([`docs/reviews/2026-10-02-welle-spec-technik-stratum.md`](../../../reviews/2026-10-02-welle-spec-technik-stratum.md), F-4). Carveout-Plan-Anker.
+> **Status:** **Done** (2026-10-02, erledigt durch die Kürzung von [`LH-FA-BUILD-008`](../../../../spec/lastenheft.md#lh-fa-build-008--coverage-bootstrap); Gegenstand entfallen) — Befund aus dem Review der Welle `welle-spec-technik-stratum` (F-4). ([`docs/reviews/2026-10-02-welle-spec-technik-stratum.md`](../../../reviews/2026-10-02-welle-spec-technik-stratum.md), F-4). Carveout-Plan-Anker.
 
 **Welle:** ohne Welle.
 **Bezug:** [`LH-FA-BUILD-008`](../../../../spec/lastenheft.md#lh-fa-build-008--coverage-bootstrap), [`LH-FA-BUILD-003`](../../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik).
@@ -24,3 +23,7 @@ Das Lastenheft nennt keinen vom Build abweichenden Default mehr (Bootstrap-Aussa
 ## Out of Scope
 
 - Änderung des Schwellwerts selbst (bleibt 90 Prozent); Gates werden nicht gelockert.
+
+## Closure
+
+- **Erledigt:** Beim Verschlanken des Lastenhefts (Welle `welle-lastenheft-verschlankung`) wurde die Bootstrap-Angabe „Default-Schwellwert `0`“ aus der Anforderung entfernt; der Schwellwert ist überschreibbar, der gelebte Wert (`90`) steht in der Spezifikation. Die Änderung ist in der Historie-Zeile 0.4.0 des Lastenhefts festgehalten. Gates unverändert.

@@ -56,7 +56,7 @@ Feedback-Gates, die reale Projektzustaende messen:
 | `make test` | Computational feedback: Unit- und Default-Tests im Docker-Test-Stage | Nach Codeaenderungen |
 | `make test-docker` | Computational feedback: Docker-tag Integrationstests | Nach Docker-/Compose-/E2E-Aenderungen |
 | `make coverage-gate` | Computational feedback: Coverage-Schwelle, Default 90 Prozent | Nach produktiven Codeaenderungen |
-| `make docs-check` | Computational feedback: Markdown-Link-Pfad-, Anker-, ADR-/LH-/Planning-ID-/Traceability-Alias-Link- und Referenzmodell-Pruefung | Nach Doku-, Spec-, ADR- oder Planning-Aenderungen |
+| `make docs-check` | Computational feedback: Markdown-Link-Pfad-, Anker-, ADR-/LH-/Planning-ID-Link- und Referenzmodell-Pruefung | Nach Doku-, Spec-, ADR- oder Planning-Aenderungen |
 | `make govulncheck` | Computational feedback: Go-Vulnerability-Scan | Vor CI-/Release-Handoff |
 | `make image-scan` | Computational feedback: Trivy gegen Runtime-Image | Vor CI-/Release-Handoff |
 | `make verify-depguard` | Computational feedback: depguard-Regeln feuern wirklich | Bei Aenderungen an Layern oder depguard-Konfig |

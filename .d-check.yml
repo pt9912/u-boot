@@ -30,7 +30,7 @@ ids:
     - regex: '\bSPEC-\d{3}\b'
       target: spec/spezifikation.md
       link-policy: always
-    - regex: '\b(?:PH|TC|CO)(?:-[A-Z0-9]+)+-\d{3}[A-Z]?\b'
+    - regex: '\bCO(?:-[A-Z0-9]+)+-\d{3}[A-Z]?\b'
       target: spec/lastenheft.md
       link-policy: always
     - regex: '\b(?:slice|tranche)-[a-z0-9][a-z0-9-]*[a-z0-9](?:\.[0-9]+)*\b'

@@ -211,7 +211,7 @@ Nur reale Make-Targets zaehlen als Harness-Sensoren:
 | `make test` | `go test ./...` im Docker-Test-Stage |
 | `make test-docker` | Docker-tag Integrationstests gegen echte Docker Engine |
 | `make coverage-gate` | Coverage-Schwelle, Default 90 Prozent |
-| `make docs-check` | Markdown-Link-Pfade, Heading-Anker, verlinkte ADR-Kennungen, LH-Kennungen in Spec-/User-/Harness-/Archiv-/Root-Doku, Planning-ID-Kennungen in nicht-normativer Doku, Traceability-Alias-Kennungen und Referenzmodell-Kanten in `docs/`, `spec/`, `harness/`, README-Dateien |
+| `make docs-check` | Markdown-Link-Pfade, Heading-Anker, verlinkte ADR-Kennungen, LH-Kennungen in Spec-/User-/Harness-/Archiv-/Root-Doku, Planning-ID-Kennungen in nicht-normativer Doku und Referenzmodell-Kanten in `docs/`, `spec/`, `harness/`, README-Dateien |
 | `make govulncheck` | Go-Vulnerability-Scan |
 | `make image-scan` | Trivy HIGH/CRITICAL gegen Runtime-Image |
 | `make verify-depguard` | On-demand Nachweis, dass depguard-Regeln feuern |
