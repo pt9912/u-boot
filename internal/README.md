@@ -60,7 +60,7 @@ pflegen ihren Detail-Stand jeweils selbst; Kurz-Inventar:
   fahren ([`LH-AK-002`](../spec/lastenheft.md#lh-ak-002--postgresql-flow) PostgreSQL-Acceptance,
   [`LH-FA-UP-004`](../spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen) §1015 Volume-Removal). Laufen ausschließlich
   über `make test-docker` — siehe
-  [`docs/user/quality.md`](../docs/user/quality.md) §2.2.
+  [`docs/user/quality.md`](../docs/maintainer/quality.md) §2.2.
 - `acceptance_test.go` — benannte Spec-Pins für
   [`LH-AK-001`](../spec/lastenheft.md#lh-ak-001--minimaler-init-flow) (Init+Doctor) und [`LH-AK-006`](../spec/lastenheft.md#lh-ak-006--idempotenz) (Doppel-Add-Idempotenz);
   [`LH-AK-007`](../spec/lastenheft.md#lh-ak-007--changelog-generator) lebt im `generate_test.go` neben den Set-Helpern;

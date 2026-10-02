@@ -2,7 +2,7 @@
 
 > **Status:** **abgeschlossen** (2026-10-01) — T1–T3 im Commit `cb8f937`, T4: Tag `v0.7.0`
 > gesetzt, `publish` und Tap-Nachzug liefen grün (Closure-Notiz). Ablauf:
-> [`docs/user/releasing.md`](../../../user/releasing.md).
+> [`docs/user/releasing.md`](../../../maintainer/releasing.md).
 
 ## Auslöser
 

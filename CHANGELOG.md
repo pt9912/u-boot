@@ -1078,9 +1078,9 @@ in [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/
   no plugins), template format (YAML + Go `text/template`), and
   the HTTP adapter (not built; CLI-only).
 - User-facing setup docs:
-  [`docs/user/quality.md`](docs/user/quality.md) (quality-gates
+  [`docs/user/quality.md`](docs/maintainer/quality.md) (quality-gates
   overview) and
-  [`docs/user/branch-protection.md`](docs/user/branch-protection.md)
+  [`docs/user/branch-protection.md`](docs/maintainer/branch-protection.md)
   (one-time GitHub UI activation of required status checks).
 - German `spec/lastenheft.md` (~3000 lines, 14 sections + 4 open
   points all decided) is the single source of truth; English
@@ -1114,7 +1114,7 @@ in [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/
 
 Before merging external PRs against `main`, activate the three
 required status checks in GitHub UI per
-[`docs/user/branch-protection.md`](docs/user/branch-protection.md):
+[`docs/user/branch-protection.md`](docs/maintainer/branch-protection.md):
 the exact match strings are the workflow `name:` fields
 (`gates (lint + test + coverage-gate)`,
 `security-gates (govulncheck)`,

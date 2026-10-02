@@ -52,7 +52,7 @@ Muster:
   Workflow-File selbst gesetzt werden); die Required-Status-Check-
   Liste muss die verbose `name:`-Felder verwenden, nicht die kurzen
   `jobs.<key>`-Identifier — siehe
-  [`docs/user/branch-protection.md`](../../user/branch-protection.md).
+  [`docs/user/branch-protection.md`](../../maintainer/branch-protection.md).
 - Trigger: `pull_request` und `push` auf `main`.
 - Runner: `ubuntu-latest` mit vorinstalliertem Docker + BuildKit.
 - Actions **SHA-gepinnt** mit Tag-Kommentar
@@ -76,7 +76,7 @@ Bewusst **noch nicht** Teil der CI-Grundentscheidung:
   `kind`) passt für u-boot nicht, weil u-boot Compose-Stacks
   orchestriert, nicht Kubernetes.
 - DCO-Bot / Branch Protection — Branch-Protection-Checkliste in
-  [`docs/user/branch-protection.md`](../../user/branch-protection.md)
+  [`docs/user/branch-protection.md`](../../maintainer/branch-protection.md)
   publiziert; DCO-Bot bleibt Out of Scope ohne eigenen Trigger.
 
 ## Konsequenzen
@@ -86,7 +86,7 @@ Positiv:
 - **Pflicht-Gates ab Tag 1 enforced**: PRs ohne grünes `gates` /
   `security-gates` / `image-scan` werden nicht gemerged, sobald die
   Branch-Protection-Required-Status-Checks aktiviert sind
-  (siehe [`docs/user/branch-protection.md`](../../user/branch-protection.md)).
+  (siehe [`docs/user/branch-protection.md`](../../maintainer/branch-protection.md)).
 - **Low maintenance**: drei Jobs, alle starten von Make-Targets aus —
   `gates`/`security-gates` delegieren komplett (`make gates`,
   `make govulncheck`), `image-scan` läuft `make build` plus die
@@ -96,7 +96,7 @@ Positiv:
   (`Makefile::TRIVY_VERSION` + `ci.yml::trivy-version`, beide auf
   derselben Trivy-Version in unterschiedlicher Schreibweise —
   Detail-Kommentare an beiden Pin-Stellen sowie in
-  [`docs/user/quality.md`](../../user/quality.md) §4).
+  [`docs/user/quality.md`](../../maintainer/quality.md) §4).
 - **Supply-Chain-Härtung**: SHA-pinned Actions verhindern den
   klassischen Tag-Move-Angriff; explizite `permissions: {}` blockt
   versehentlich neu hinzukommende Steps mit schreibendem Token.
@@ -120,7 +120,7 @@ Negativ / Trade-offs:
   Action) ergänzen.
 - **Branch-Protection im UI** ist nicht im Repo versioniert. Schritt-
   für-Schritt-Aktivierung dokumentiert in
-  [`docs/user/branch-protection.md`](../../user/branch-protection.md).
+  [`docs/user/branch-protection.md`](../../maintainer/branch-protection.md).
 
 Alternativen (verworfen):
 

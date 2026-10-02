@@ -80,7 +80,7 @@ final + Tag-Push).
   (local-templates, migration, custom-data-sources, podman-formal):
   Post-v0.4.0.
 - **Branch-Protection-UI-Aktivierung**: user-getriebener One-Shot aus
-  der v0.1.0-Era ([`docs/user/branch-protection.md`](../../../user/branch-protection.md)).
+  der v0.1.0-Era ([`docs/user/branch-protection.md`](../../../maintainer/branch-protection.md)).
 - **CHANGELOG-Kosmetik**: die `## [0.4.0]`-Sektion trägt zwei
   `### Added`-Strata (chronologisch geschichtet aus dem Unreleased-
   Block, Vorbestand) — vollständig + lesbar; eine optionale

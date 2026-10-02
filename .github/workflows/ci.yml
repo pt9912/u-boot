@@ -12,7 +12,7 @@ name: ci
 # GitHub-UI nach dem ersten grünen Lauf konfiguriert (Settings →
 # Branches → Branch protection rules → `main`); die exakten Display-
 # Namen sind die verbose `name:`-Felder der Jobs, nicht die kurzen
-# `jobs.<key>`-Identifier (siehe `docs/user/branch-protection.md`).
+# `jobs.<key>`-Identifier (siehe `docs/maintainer/branch-protection.md`).
 #
 # Docker-only-Pfad (LH-FA-BUILD-007): alle Werkzeuge laufen über
 # `docker build --target <stage>`, sodass der CI-Runner keine

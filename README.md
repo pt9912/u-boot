@@ -265,9 +265,9 @@ Full layout contract: [`LH-FA-BUILD-009` in `spec/lastenheft.md`](spec/lastenhef
 - **Architecture Decision Records:** [`docs/plan/adr/`](docs/plan/adr/)
 - **Roadmap, slices, carveouts:**
   [`docs/plan/planning/`](docs/plan/planning/)
-- **Quality gates:** [`docs/user/quality.md`](docs/user/quality.md)
+- **Quality gates:** [`docs/user/quality.md`](docs/maintainer/quality.md)
 - **Branch protection:**
-  [`docs/user/branch-protection.md`](docs/user/branch-protection.md)
+  [`docs/user/branch-protection.md`](docs/maintainer/branch-protection.md)
 - **Devcontainer features:**
   [`docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen`](docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen)
 - **Devcontainer sandbox profile:**

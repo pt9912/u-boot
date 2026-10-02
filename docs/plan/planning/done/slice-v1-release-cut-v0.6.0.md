@@ -2,7 +2,7 @@
 
 > **Status:** **abgeschlossen** (2026-10-01) — T1–T3 im Commit `76a8200`, T4: Tag `v0.6.0`
 > gesetzt und `publish` durchgelaufen (Details in der Closure-Notiz; der Tap-Nachzug des Workflows
-> scheiterte am Token und wurde von Hand ersetzt). Ablauf: [`docs/user/releasing.md`](../../../user/releasing.md).
+> scheiterte am Token und wurde von Hand ersetzt). Ablauf: [`docs/user/releasing.md`](../../../maintainer/releasing.md).
 
 ## Auslöser
 

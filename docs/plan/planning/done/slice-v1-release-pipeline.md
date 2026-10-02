@@ -209,7 +209,7 @@ ergänzt im Zuge der Release-Vorbereitung (`v0.1.0`).
   Distro-Pakete) reduziert (siehe
   [ADR-0007](../../adr/0007-distributionswege-ghcr.md)).
 - Branch-Protection-Checkliste:
-  [`docs/user/branch-protection.md`](../../../user/branch-protection.md).
+  [`docs/user/branch-protection.md`](../../../maintainer/branch-protection.md).
 - **Teilabschluss 2026-05-27:** Branch-Protection-Checkliste in
   `docs/user/branch-protection.md` veröffentlicht.
 - **Schließung 2026-05-31:** T1..T5 abgeschlossen. [ADR-0007](../../adr/0007-distributionswege-ghcr.md) setzt

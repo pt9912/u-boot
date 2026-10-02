@@ -276,9 +276,9 @@ Vollständiger Layout-Kontrakt:
 - **Roadmap, Slices, Carveouts:**
   [`docs/plan/planning/`](docs/plan/planning/)
 - **Quality Gates:**
-  [`docs/user/quality.md`](docs/user/quality.md)
+  [`docs/user/quality.md`](docs/maintainer/quality.md)
 - **Branch Protection:**
-  [`docs/user/branch-protection.md`](docs/user/branch-protection.md)
+  [`docs/user/branch-protection.md`](docs/maintainer/branch-protection.md)
 - **Devcontainer-Features:**
   [`docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen`](docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen)
 - **Maschinen-lesbarer CLI-Vertrag (`--json`, `--dry-run`, `--diff`):**

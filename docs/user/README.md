@@ -20,10 +20,6 @@ Aktuell publiziert:
   Cleanup, Config).
 - [`cli-json-output.md`](cli-json-output.md) — `--json`/`--dry-run`/
   `--diff`-Envelope-Schema und Exit-Code-Matrix pro Subcommand.
-- [`quality.md`](quality.md) — Quality-Gate-/Linter-Profil.
-- [`branch-protection.md`](branch-protection.md) — Required-Checks-Setup.
-- [`releasing.md`](releasing.md) — Release-Ablauf für Maintainer (Tag, `publish`,
-  GHCR, Binaries, Homebrew-Tap, Fehlerbilder).
 
 `examples.md` führt **Befehle**, keinen committeten Output: die
 byte-genaue Ausgabe ist in den Acceptance-/e2e-Tests gegen reale

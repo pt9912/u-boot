@@ -35,7 +35,7 @@ Feedforward-Quellen, die Arbeit vor der Umsetzung lenken:
 | [`docs/plan/adr/README.md`](../docs/plan/adr/README.md) | ADR-Index und Entscheidungsueberblick |
 | [`docs/plan/planning/in-progress/roadmap.md`](../docs/plan/planning/in-progress/roadmap.md) | Release- und Slice-Status |
 | [`docs/plan/planning/in-progress/carveouts.md`](../docs/plan/planning/in-progress/carveouts.md) | Temporaere und permanente Carveouts |
-| [`docs/user/quality.md`](../docs/user/quality.md) | Quality-Gates, Linter-Profil, Coverage, Security |
+| [`docs/user/quality.md`](../docs/maintainer/quality.md) | Quality-Gates, Linter-Profil, Coverage, Security |
 | [`harness/roles.md`](roles.md) | Rollen, Uebergaben und Konfliktpfade |
 | [`harness/review.md`](review.md) | Review-Kategorien, Prueflinsen und Output-Schema |
 | [`harness/replay.md`](replay.md) | Replay-/Golden-Set-Regeln fuer CLI-Generatoren |

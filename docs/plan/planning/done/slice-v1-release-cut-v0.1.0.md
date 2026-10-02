@@ -82,7 +82,7 @@ nicht Auto-Trigger.
   [`slice-v1-release-pipeline`](slice-v1-release-pipeline.md)
   T2/T3,
   [ADR-0007](../../adr/0007-distributionswege-ghcr.md),
-  [`docs/user/branch-protection.md`](../../../user/branch-protection.md).
+  [`docs/user/branch-protection.md`](../../../maintainer/branch-protection.md).
 - Phase: V1 (release-cut), keine Carveout-Auflösung — daher kein
   Eintrag in [`carveouts.md`](../in-progress/carveouts.md),
   sondern nur in der Roadmap.

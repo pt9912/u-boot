@@ -68,7 +68,7 @@ Nach der Aktivierung:
 GitHub bietet ab den Repository-Rulesets die Möglichkeit, die obigen
 Regeln als JSON zu exportieren und im UI wieder zu importieren. Sobald
 das Repo öffentlich oder team-geteilt wird, lohnt sich ein Export nach
-`docs/user/branch-protection-ruleset.json` als zusätzliche Quelle der
+`docs/maintainer/branch-protection-ruleset.json` als zusätzliche Quelle der
 Wahrheit. Für das Solo-Bootstrap reicht diese Markdown-Checkliste.
 
 ## Bezug

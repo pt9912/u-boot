@@ -57,7 +57,7 @@ In dieser Reihenfolge lesen und aufloesen:
    [`Dockerfile`](Dockerfile), [`.golangci.yml`](.golangci.yml) und
    [`.github/workflows/`](.github/workflows/).
 6. Nutzer- und Quality-Doku unter [`docs/user/`](docs/user/), besonders
-   [`docs/user/quality.md`](docs/user/quality.md).
+   [`docs/user/quality.md`](docs/maintainer/quality.md).
 7. [`README.md`](README.md), [`README.de.md`](README.de.md) und
    [`CHANGELOG.md`](CHANGELOG.md).
 8. [`harness/README.md`](harness/README.md) und diese Datei.
