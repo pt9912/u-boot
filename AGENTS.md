@@ -158,75 +158,24 @@ Umplanungen, keine Schließungen und keine erreichten Meilensteine.
 Herkunft in **ein** auflösbares Feld (`LH-*`, `ADR-*`). Was daneben steht, liest
 jeder Lauf mit und bezahlt es mit Kontext.
 
-### 3.8 Rollen und Review
+### 3.8 Weitere verbindliche Regeln (Zeiger)
 
-Rollen sind Kontextgrenzen. Nutze [`harness/roles.md`](harness/roles.md) für
-Planner-, Architect-, Implementation-, Reviewer-, Verifier- und
-Validator-Verträge. Wer geplant oder implementiert hat, reviewt oder
-verifiziert nicht mit demselben Eingabe-Kontext. Jeder Rollenwechsel braucht
-ein Übergabe-Artefakt: Plan, ADR-Bezug, Diff, Findings, Verification-Evidence,
-Validation-Evidence oder Closure-Notiz.
+Diese Regeln gelten unverändert; sie stehen in ihrer kanonischen Quelle und
+werden hier nicht wiederholt:
 
-Reviews folgen [`harness/review.md`](harness/review.md): Findings werden als
-HIGH/MEDIUM/LOW/INFO klassifiziert und mit Quelle, Risiko und Verifizierbarkeit
-dokumentiert. Reviewer implementieren nicht und ersetzen keine Verification.
-
-### 3.9 Spec-Traceability
-
-Code-, Test- und Doku-Änderungen müssen die betroffenen `LH-*`, `ADR-*` oder
-Slice-IDs kennen. Neue öffentliche CLI-Verträge brauchen mindestens einen Spec-
-oder ADR-Anker und einen Test- oder Gate-Nachweis. CLI-Ausgaben,
-Fehlermeldungen und generierte Dateien bleiben Englisch
-([`LH-LESE-002`](spec/lastenheft.md#lh-lese-002--sprache)), auch wenn Plan- und
-Spec-Dokumente deutsch sind.
-
-### 3.10 Dokumentationsreferenzen
-
-Referenzen zwischen Lastenheft, Spezifikation, Architektur, ADRs, Slices,
-Carveouts und Roadmap/Wellen folgen
-[`LH-FA-PROJDOCS-006`](spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell)
-und [`ADR-0013`](docs/plan/adr/0013-dokumentationsreferenzmodell.md): Normative
-Kraft existiert nur auf aufwärtsgerichteten Inter-Layer-Kanten plus
-ADR-interner Lineage. Alles Richtung Slice, Carveout oder Roadmap ist Kontext,
-Traceability oder Buchführung, keine Spezifikation.
-
-### 3.11 Verification Evidence
-
-Slice-Closure braucht Verification-Evidence nach
-[`harness/verification.md`](harness/verification.md). Gates allein reichen
-nicht: Die Evidence muss DoD, Spec-/ADR-IDs, ausgeführte Sensors, nicht
-ausgeführte Sensors und Carveouts sichtbar verbinden.
-
-### 3.12 Replay / Golden Sets
-
-Generator-Änderungen folgen [`harness/replay.md`](harness/replay.md). Neue oder
-geänderte CLI-Generatoren brauchen Golden Cases für Fresh-State, Idempotenz und
-relevante Safety-Pfade. Intentional geänderter Output muss in Slice, Test oder
-Commit begründet werden.
-
-### 3.13 Exit-Code-Verträge
-
-Die Klassifikation aus
-[`LH-FA-CLI-006`](spec/lastenheft.md#lh-fa-cli-006--exit-codes) ist ein
-Produktvertrag. Neue Subcommands müssen ihre Fehlerpfade auf die bestehenden
-Exit-Code-Kategorien abbilden und Tests für relevante Sentinels pinnen.
-
-### 3.14 Managed-Block- und Dateisicherheit
-
-Generatoren und Re-Init-Pfade dürfen User-Dateien nicht opportunistisch
-überschreiben. Nutze die vorhandenen managed-block-, Plan-and-Execute-,
-Backup- und Two-Phase-Patterns. Destruktive Operationen brauchen die im
-Spec/Slice verlangte Bestätigungslogik.
-
-### 3.15 Planning-Lifecycle und Carveouts
-
-Planning-Artefakte folgen `open/ → next/ → in-progress/ → done/`;
-Lifecycle-Bewegungen erfolgen per `git mv` (siehe 3.3). Substanzielle
-Änderungen an `done/`-Artefakten erzeugen einen neuen Slice statt die alte
-Closure umzuschreiben. Jeder neue temporäre Carveout bekommt parallel einen
-Eintrag in
-[`docs/plan/planning/in-progress/carveouts.md`](docs/plan/planning/in-progress/carveouts.md)
-und einen Plan-Anker.
+| Thema | Quelle |
+|---|---|
+| Rollen, Kontextgrenzen, Übergabe-Artefakte, kein Self-Review | [`harness/roles.md`](harness/roles.md) |
+| Review-Findings, Kategorien, Output-Schema | [`harness/review.md`](harness/review.md) |
+| Verification-Evidence und Slice-Closure | [`harness/verification.md`](harness/verification.md) |
+| Generator-Änderungen: Replay-/Golden-Cases | [`harness/replay.md`](harness/replay.md) |
+| Architektur: Schichten, Importregeln, Wiring | [`spec/architecture.md`](spec/architecture.md) |
+| Exit-Code-Klassifikation (Produktvertrag) | [`LH-FA-CLI-006`](spec/lastenheft.md#lh-fa-cli-006--exit-codes) |
+| Überschreibschutz, Managed Blocks, Backups | [`LH-FA-INIT-005`](spec/lastenheft.md#lh-fa-init-005--überschreibschutz) |
+| CLI-Sprache (Ausgaben und generierte Dateien Englisch) | [`LH-LESE-002`](spec/lastenheft.md#lh-lese-002--sprache) |
+| Dokumentationsreferenzmodell | [`LH-FA-PROJDOCS-006`](spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell), [`ADR-0013`](docs/plan/adr/0013-dokumentationsreferenzmodell.md) |
+| Planning-Lifecycle und Carveout-Disziplin | [`LH-FA-PROJDOCS-003`](spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle), [`LH-FA-PROJDOCS-005`](spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin); Bewegungen per `git mv` (siehe 3.3) |
+| Traceability-Regeln für Commits und Anforderungen | [`harness/README.md`](harness/README.md) §Traceability rules |
 
 ## 4. Quality Gates
 
