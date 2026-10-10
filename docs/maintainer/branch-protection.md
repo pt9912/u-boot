@@ -71,6 +71,29 @@ das Repo öffentlich oder team-geteilt wird, lohnt sich ein Export nach
 `docs/maintainer/branch-protection-ruleset.json` als zusätzliche Quelle der
 Wahrheit. Für das Solo-Bootstrap reicht diese Markdown-Checkliste.
 
+## Ruleset gegen Pushes aus Workflows
+
+Ein Workflow läuft in der Fassung des Branches, der ihn ausgelöst hat. Hat ein Job
+`contents: write` (hier nur `publish`, für Release-Assets und Tags), kann jeder mit Push-Recht auf einen
+Branch über geänderte Workflow-Dateien mit dem `GITHUB_TOKEN` auf `main` schreiben. Das Repository-Ruleset
+`main-nur-admin` (ID 24829691, nur in den GitHub-Einstellungen, nicht im Repo) schließt das: Es trifft
+`refs/heads/main` mit den Regeln `update`, `deletion` und `non_fast_forward` und lässt nur die Rolle
+Repository-Admin (`actor_id` 5) vorbei. Der `GITHUB_TOKEN` hat keine Admin-Rolle; direkte Pushes des
+Eigentümers gehen weiter durch. Tags, Releases, andere Branches und Pushes in andere Repos mit dem
+persönlichen Token (Homebrew-Tap) sind nicht betroffen.
+
+Prüfen:
+
+```bash
+gh api repos/pt9912/u-boot/rules/branches/main --jq '[.[].type]'   # ["update","deletion","non_fast_forward"]
+gh api repos/pt9912/u-boot/rulesets/24829691 --jq .current_user_can_bypass   # always
+```
+
+**Grenze:** Der Schutz wirkt nur gegen Identitäten ohne Admin-Rolle. Ein persönliches Token des Eigentümers
+in einem Secret umgeht ihn, weil es Admin-Rechte trägt. Ob ein Bot-Push tatsächlich abgewiesen wird, ist
+nicht beobachtet. Ein neuer Workflow, der auf `main` pushen soll, bricht an diesem Ruleset und braucht eine
+bewusste Entscheidung.
+
 ## Bezug
 
 - Auslösende Spec: [LH-QA-003](../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions) (drei Jobs `gates` / `security-gates` /
