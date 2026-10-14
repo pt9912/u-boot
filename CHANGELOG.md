@@ -11,6 +11,13 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-14
+
+Eighth release. **Own Docker daemon in the sandbox devcontainer.** `devcontainer.sandbox.nestedRuntime: docker`
+gives the sandbox container an own Docker daemon with BuildKit, Buildx and Compose for repos whose gates need a real
+Docker engine (`-o type=cacheonly`, `RUN --network=none`, `docker compose`, `--privileged` dind sidecars); it requires
+`--privileged`, which the command output reports as a relaxation. Lastenheft 0.5.0.
+
 ### Added
 
 - Sandbox devcontainer: `devcontainer.sandbox.nestedRuntime: docker` provides an own Docker daemon in the container
@@ -1139,7 +1146,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/pt9912/u-boot/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/pt9912/u-boot/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/pt9912/u-boot/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/pt9912/u-boot/compare/v0.4.0...v0.5.0

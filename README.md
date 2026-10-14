@@ -7,10 +7,10 @@ environments — project structure, Docker Compose stack, devcontainer
 configuration, service add-ons (PostgreSQL, Keycloak, OpenTelemetry, …),
 and the usual recurring artefacts (README, CHANGELOG, `.env.example`).
 
-> **Status:** `v0.7.0` released 2026-10-01 (GHCR, six-platform binaries,
-> `.deb`/`.rpm` packages, Homebrew tap). Adds Debian and RPM packages
-> ([ADR-0017](docs/plan/adr/0017-linux-pakete-nfpm.md)); `v0.6.0` brought the devcontainer sandbox profile
-> ([LH-FA-DEV-006](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)..[-009](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)) and the V1 CLI cleanup.
+> **Status:** `v0.8.0` released 2026-10-14 (GHCR, six-platform binaries,
+> `.deb`/`.rpm` packages, Homebrew tap). Adds an own Docker daemon for the sandbox devcontainer
+> (`nestedRuntime: docker`, [LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0018](docs/plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md)); `v0.7.0` brought the Debian and RPM packages
+> ([ADR-0017](docs/plan/adr/0017-linux-pakete-nfpm.md)).
 > Full release table below.
 
 The normative requirements ([`spec/lastenheft.md`](spec/lastenheft.md))
@@ -103,7 +103,7 @@ u-boot --version
 **Debian / Ubuntu / Fedora / RHEL** (`.deb` and `.rpm` from the release, amd64 and arm64):
 
 ```bash
-VERSION=0.7.0   # the release you want
+VERSION=0.8.0   # the release you want
 # Debian / Ubuntu
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"
@@ -202,6 +202,7 @@ Re-init on an existing project requires an explicit strategy
 | `v0.3.0` | 2026-06-01 | "Add-on Catalogue Expansion" milestone — `u-boot add keycloak` ([LH-FA-ADD-003](spec/lastenheft.md#lh-fa-add-003--keycloak-hinzufügen)), `add otel` ([LH-FA-ADD-004](spec/lastenheft.md#lh-fa-add-004--opentelemetry-hinzufügen)), `add <service> --with-deps` ([LH-FA-ADD-006](spec/lastenheft.md#lh-fa-add-006--add-on-abhängigkeiten)), `remove <service> [--purge]` ([LH-FA-ADD-007](spec/lastenheft.md#lh-fa-add-007--service-entfernen)), plus a doku-audit closure for three V1 spec-IDs. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.3.0). |
 | `v0.6.0` | 2026-10-01 | "Sandbox devcontainer + CLI cleanup" — `--sandbox` devcontainer profile for autonomous agents (named-volume workspace per instance, optional rootless Podman, DNS-driven egress allowlist, runtime-only git credentials; [LH-FA-DEV-006](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)..[-009](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)), multi-path atomic `config get/set` + `config list`, richer `logs`/`up`/`down`/`remove --purge`, rollback-aware `generate devcontainer`, Homebrew formula, Go 1.27.1. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.6.0). |
 | `v0.7.0` | 2026-10-01 | "Linux packages" — `.deb` and `.rpm` (amd64, arm64) as release assets via `nfpm` ([ADR-0017](docs/plan/adr/0017-linux-pakete-nfpm.md)); Keycloak acceptance test back in the default integration lane. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.7.0). |
+| `v0.8.0` | 2026-10-14 | "Docker in the sandbox" — `devcontainer.sandbox.nestedRuntime: docker` gives the sandbox devcontainer an own Docker daemon with BuildKit, Buildx and Compose; needs `--privileged`, reported as a relaxation ([LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0018](docs/plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md)). [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.8.0). |
 | `v0.5.0` | 2026-07-25 | "Security + local templates" — Go toolchain bump closes CVE-2026-39822 in the runtime image (HIGH); `u-boot init --template ./path` resolves a project from a local directory ([LH-FA-TPL-003](spec/lastenheft.md#lh-fa-tpl-003--eigene-templates)), alongside the built-in catalogue. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.5.0). |
 | `v0.4.0` | 2026-06-08 | "Machine-readable CLI" milestone — `--json` / `--dry-run` / `--diff` for all ten spec-enum subcommands ([LH-NFA-USE-004](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) Minimalkontrakt + [LH-FA-CLI-007](spec/lastenheft.md#lh-fa-cli-007--dry-run)/[LH-FA-CLI-008](spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) Voll-Schema), `u-boot logs`, devcontainer-features with a drift-doctor check. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.4.0). |
 

@@ -13,10 +13,6 @@ Dateiname-Konventionen.
 | ----- | ---------- |
 | [`carveouts.md`](carveouts.md) | Master-Dokument: Carveout-Inventar ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)) |
 | [`slice-v2-homebrew-formula.md`](slice-v2-homebrew-formula.md) | Homebrew-Formel/Tap (repo-seitig geliefert, Tap-Einrichtung offen) |
-| [`slice-cr-sandbox-docker-runtime.md`](slice-cr-sandbox-docker-runtime.md) | CR `nestedRuntime: docker` (Lastenheft 0.5.0, [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md)) |
-| [`slice-v1-sandbox-docker-generator.md`](slice-v1-sandbox-docker-generator.md) | Generator für `nestedRuntime: docker` |
-| [`slice-v1-sandbox-docker-degradation-doctor.md`](slice-v1-sandbox-docker-degradation-doctor.md) | Degradation und Doctor für `docker` |
-| [`slice-v1-sandbox-docker-integrationstest.md`](slice-v1-sandbox-docker-integrationstest.md) | Integrationstest und Doku für `docker` |
 | [`slice-v1-release-cut-v0.8.0.md`](slice-v1-release-cut-v0.8.0.md) | Release-Cut `v0.8.0` |
 | [`roadmap.md`](roadmap.md) | Master-Dokument: Slice-/Tranchen-Stand ([`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)) |
 
