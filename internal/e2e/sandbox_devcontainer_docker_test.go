@@ -510,8 +510,19 @@ func TestE2E_SandboxDevcontainer_NestedDocker_Restart(t *testing.T) {
 		}
 	}
 	initDaemon("first start")
+	if out, code := dockerExec(ctx, t, name, "docker pull -q alpine:3 >/dev/null && docker image inspect alpine:3 >/dev/null && echo PULLED"); code != 0 || !strings.Contains(out, "PULLED") {
+		t.Fatalf("pull into the daemon storage: exit %d: %s", code, out)
+	}
 	if out, code := dockerOutput(ctx, t, "restart", "-t", "0", name); code != 0 {
 		t.Fatalf("restart: %s", out)
 	}
+	// The killed daemon leaves its PID file; a live process (PID 1) under
+	// that number makes dockerd refuse to start unless the script cleans up.
+	if out, code := dockerOutput(ctx, t, "exec", "-u", "root", name, "sh", "-c", "echo 1 > /var/run/docker.pid"); code != 0 {
+		t.Fatalf("seed stale PID file: %s", out)
+	}
 	initDaemon("after restart")
+	if out, code := dockerExec(ctx, t, name, "docker image inspect alpine:3 >/dev/null && echo STORAGE_KEPT"); code != 0 || !strings.Contains(out, "STORAGE_KEPT") {
+		t.Errorf("daemon storage volume not reused after restart: exit %d: %s", code, out)
+	}
 }

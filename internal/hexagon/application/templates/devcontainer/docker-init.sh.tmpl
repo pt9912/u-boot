@@ -5,7 +5,8 @@
 # Policy devcontainer.sandbox.onUnavailable: {{.OnUnavailable}}
 on_unavailable="{{.OnUnavailable}}"
 log=/var/log/u-boot-dockerd.log
-timeout=60
+pidfile=/var/run/docker.pid
+wait_seconds=60
 
 unavailable() {
   echo "u-boot sandbox: $1" >&2
@@ -21,15 +22,18 @@ if ready; then
   exit 0
 fi
 
-# A stopped container keeps the PID and socket files of the killed daemon.
-rm -f /var/run/docker.pid /var/run/docker.sock /var/run/docker/containerd/containerd.pid
+# A daemon that is still starting keeps its PID file; a stopped container
+# keeps the PID and socket files of the killed daemon.
+pid=$(cat "$pidfile" 2>/dev/null)
+if [ -z "$pid" ] || [ "$(cat "/proc/$pid/comm" 2>/dev/null)" != "dockerd" ]; then
+  rm -f "$pidfile" /var/run/docker.sock /var/run/docker/containerd/containerd.pid
+  # The daemon needs the privileges of `--privileged` (iptables, cgroups, mounts).
+  setsid nohup dockerd --host=unix:///var/run/docker.sock --group docker >"$log" 2>&1 &
+  pid=$!
+fi
 
-# The daemon needs the privileges of `--privileged` (iptables, cgroups, mounts).
-setsid nohup dockerd --host=unix:///var/run/docker.sock --group docker >"$log" 2>&1 &
-pid=$!
-
-i=0
-while [ "$i" -lt "$timeout" ]; do
+deadline=$(($(date +%s) + wait_seconds))
+while [ "$(date +%s)" -lt "$deadline" ]; do
   if ready; then
     exit 0
   fi
@@ -37,7 +41,6 @@ while [ "$i" -lt "$timeout" ]; do
     unavailable "the nested Docker daemon exited at start (container started without --privileged?); no daemon available, see $log"
   fi
   sleep 1
-  i=$((i + 1))
 done
-unavailable "the nested Docker daemon is not ready after ${timeout}s; no daemon available, see $log"
+unavailable "the nested Docker daemon is not ready after ${wait_seconds}s; no daemon available, see $log"
 # END U-BOOT MANAGED BLOCK: init

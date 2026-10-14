@@ -680,7 +680,7 @@ func TestGenerateDevcontainer_SandboxDocker(t *testing.T) {
 		!strings.Contains(string(script), "dockerd --host=unix:///var/run/docker.sock") {
 		t.Errorf("script lacks policy/exit 11/dockerd start:\n%s", script)
 	}
-	for _, want := range []string{"timeout=60", "timeout 5 docker info", "rm -f /var/run/docker.pid"} {
+	for _, want := range []string{"wait_seconds=60", "timeout 5 docker info", `rm -f "$pidfile"`, "deadline="} {
 		if !strings.Contains(string(script), want) {
 			t.Errorf("script lacks %q:\n%s", want, script)
 		}
@@ -812,7 +812,7 @@ func TestGenerateDevcontainer_SandboxDocker_StaleBlockKeepsUserContent(t *testin
 		t.Fatalf("first generate: %v", err)
 	}
 	body, _ := fs.ReadFile(dockerInitPath())
-	stale := strings.Replace(string(body), "timeout=60", "timeout=61", 1) + "# user addition\n"
+	stale := strings.Replace(string(body), "wait_seconds=60", "wait_seconds=61", 1) + "# user addition\n"
 	if err := fs.WriteFile(dockerInitPath(), []byte(stale), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -820,11 +820,11 @@ func TestGenerateDevcontainer_SandboxDocker_StaleBlockKeepsUserContent(t *testin
 	if err != nil {
 		t.Fatalf("second generate: %v", err)
 	}
-	if resp.Action == driving.GenerateActionNoOp {
-		t.Errorf("stale block must be replaced, got NoOp")
+	if resp.Action != driving.GenerateActionUpdatedBlock {
+		t.Errorf("stale block: action = %v, want UpdatedBlock", resp.Action)
 	}
 	after, _ := fs.ReadFile(dockerInitPath())
-	if !strings.Contains(string(after), "timeout=60") || strings.Contains(string(after), "timeout=61") {
+	if !strings.Contains(string(after), "wait_seconds=60") || strings.Contains(string(after), "wait_seconds=61") {
 		t.Errorf("managed block not restored:\n%s", after)
 	}
 	if !strings.Contains(string(after), "# user addition") {

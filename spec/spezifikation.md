@@ -782,7 +782,7 @@ Werte, die im Produkt fest sind (Standardwerte, Grenzwerte, Versionsuntergrenzen
 
 Gilt für das Dockerfile im Repo-Root; Overrides per `docker build --build-arg <NAME>=<value>` bzw. Makefile-Variable.
 
-- `ARG GO_VERSION` – mit Default-Pin (Stand 2026-10-02: `1.27.1`); Hebung ist Routine ohne separaten Spec-Eintrag.
+- `ARG GO_VERSION` – mit Default-Pin (Stand 2026-10-14: `1.27.2`); Hebung ist Routine ohne separaten Spec-Eintrag.
 - `ARG GOLANGCI_LINT_VERSION` – mit Default-Pin; gleiche Pin-Politik.
 - `ARG COVERAGE_THRESHOLD` – mit Default `90` (Prozent) und Override-Pfad `make coverage-gate THRESHOLD=…`; das Bootstrap-Verhalten bei leerer Coverage-Eingabe steht in der Anforderung.
 
@@ -797,7 +797,7 @@ Mindestens auszuschließen:
 
 ### SPEC-016 — Go-Toolchain: Mindestversion und Dockerfile-Pin
 
-Mindest-Toolchain: Go 1.26 oder neuer (`go 1.26.0` in `go.mod`, analog Referenzprojekt `k-deskflight`); Default-Pin im Dockerfile als `ARG GO_VERSION` (am Entscheidungsdatum `1.26.3`, Stand 2026-10-02 `1.27.1`). Pin-Hebung ist Routine ohne separaten Spec-Eintrag.
+Mindest-Toolchain: Go 1.26 oder neuer (`go 1.26.0` in `go.mod`, analog Referenzprojekt `k-deskflight`); Default-Pin im Dockerfile als `ARG GO_VERSION` (am Entscheidungsdatum `1.26.3`, Stand 2026-10-14 `1.27.2`). Pin-Hebung ist Routine ohne separaten Spec-Eintrag.
 
 ### SPEC-018 — Standardwerte der Build- und Laufzeitumgebung
 
