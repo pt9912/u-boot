@@ -32,14 +32,14 @@ wechselt nur durch `git mv`.
 
 ## 2. Definition of Done
 
-- [ ] `v0.8.1` ist getaggt, der `publish`-Lauf ist grün (GHCR `:0.8.1` und `:latest`, sechs Binaries, vier Pakete, `SHA256SUMS`, `u-boot.rb`, Paket-Smoke, Job `tap`).
-- [ ] `make fullbuild` und `make test-docker` grün vor dem Tag.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`) — kein Self-Review.
-- [ ] Doku-Update: CHANGELOG, READMEs, Handbuch, Roadmap tragen `v0.8.1`.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register fortgeschrieben oder „keine Beobachtung angefallen" in §7 notiert.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
+- [x] `v0.8.1` ist getaggt, der `publish`-Lauf ist grün (GHCR `:0.8.1` und `:latest`, sechs Binaries, vier Pakete, `SHA256SUMS`, `u-boot.rb`, Paket-Smoke, Job `tap`).
+- [x] `make fullbuild` und `make test-docker` grün vor dem Tag.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`) — kein Self-Review.
+- [x] Doku-Update: CHANGELOG, READMEs, Handbuch, Roadmap tragen `v0.8.1`.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register fortgeschrieben oder „keine Beobachtung angefallen" in §7 notiert.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
 
 ## 3. Plan (vor Code)
 
@@ -48,7 +48,8 @@ wechselt nur durch `git mv`.
 | `CHANGELOG.md` | update | `[Unreleased]` → `[0.8.1] - 2026-10-14`, Compare-Links |
 | `cmd/uboot/main.go`, `Makefile`, `Dockerfile` | update | Versionsstrings `0.8.0-dev` → `0.8.1-dev` |
 | `README.md`, `README.de.md`, `docs/user/benutzerhandbuch.md` | update | Status, Releases-Tabelle, Version |
-| `docs/plan/planning/in-progress/roadmap.md` | update | Welle nach „Abgeschlossene Wellen" nach dem Tag |
+| `docs/plan/planning/in-progress/roadmap.md`, `docs/plan/planning/in-progress/README.md` | update | Welle nach „Abgeschlossene Wellen" nach dem Tag; Bestand |
+| `docs/reviews/2026-10-14-sandbox-docker-ce*.md` | update | Slice-Links nach `done/` |
 
 ## 4. Trigger
 
@@ -65,18 +66,18 @@ DoD vollständig: Tag gesetzt, `publish`- und Tap-Lauf kontrolliert (`releasing.
 
 ## 6. Risiken und offene Punkte
 
-- Der `publish`-Lauf scheitert (der Image-Build der Runtime holt keine Docker-Pakete; betroffen wäre nur der Devcontainer-Output) — **Ausgang:** weiter offen: Behebung per Workflow-Rerun, nie per Tag-Verschiebung (`releasing.md` §8).
+- Der `publish`-Lauf scheitert — **Ausgang:** entfallen: `publish`-Lauf `38600679867` lief grün (vier Jobs).
 - Das Lastenheft sagt Docker Desktop zu, gemessen ist nur Colima — **Ausgang:** weiter offen: [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md).
 
 ## 7. Closure-Notiz
 
-- **Was hat funktioniert:** —
-- **Was ging anders als geplant:** —
-- **Steering-Loop-Eintrag:** —
-- **Beobachtungs-Register (`../observations/`):** —
-- **Folge-Slices:** —
+- **Was hat funktioniert:** Tag `v0.8.1` auf `5aadaf3` (2026-10-14), nach grünem `ci` und `integration-docker` auf `main` sowie `make fullbuild` und `make test-docker` lokal. `publish`-Lauf `38600679867`: alle vier Jobs grün (`publish`, `tap`, Paket-Smoke `.deb` und `.rpm`); Release mit zwölf Assets, kein Prerelease; `ghcr.io/pt9912/u-boot:0.8.1` und `:latest` zeigen auf denselben Digest und melden `0.8.1`.
+- **Was ging anders als geplant:** Nichts am Ablauf; die Review-Findings des Cuts (zwei LOW) sind in der Nacharbeit erledigt.
+- **Steering-Loop-Eintrag:** Vor dem Cut ein `:latest`-Vergleich nur nach frischem `docker pull` — ein lokal gecachtes `:latest` meldete zunächst die Vorversion.
+- **Beobachtungs-Register (`../observations/`):** keine Beobachtung angefallen.
+- **Folge-Slices:** [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md); die Tap-Verifikation führt [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md).
 - **Risiken aus §6:** siehe §6
-- **Drei Paarungen:** —
+- **Drei Paarungen:** Anker (Docker-Desktop-Messung) → Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) · Register: keine Beobachtung angefallen.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
