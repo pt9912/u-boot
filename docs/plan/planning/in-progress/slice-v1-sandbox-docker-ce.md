@@ -89,3 +89,63 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 mit Treffern für die berührten Sub-Areas.
 
 Alle berührten Sub-Areas GF.
+
+## Verification Evidence
+
+Verifier-Lauf 2026-10-14 (Rolle Verifier, getrennt von Implementer und Reviewer).
+
+Scope:
+- Slice: [slice-v1-sandbox-docker-ce](slice-v1-sandbox-docker-ce.md)
+- IDs: [LH-FA-DEV-007](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [LH-FA-DEV-008](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [LH-FA-DEV-003](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [LH-NFA-SEC-004](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md), [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md)
+- Artefakte: `internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl`, `internal/hexagon/application/devcontainer_egress.go`, `internal/hexagon/application/generate_sandbox_test.go`, `internal/e2e/sandbox_devcontainer_docker_test.go`, `spec/spezifikation.md`, `docs/user/benutzerhandbuch.md`, `CHANGELOG.md`, `harness/replay.md`, [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md) samt Index; Commits `eea88cc`, `3cfa710`, `90f9122`.
+
+DoD-Abgleich (Verifier prüft, setzt keine Häkchen):
+- [x] Folge-ADR — Evidence: [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md) (Accepted, Messung Colima, Fingerprint-Pin, Egress, Schärft-Feld ersetzt Entscheidung 1 und ergänzt 6 von [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md)); Zeile im ADR-Index (`docs/plan/adr/README.md`); `git diff 6d726e0 HEAD` auf die Datei von [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md) ist leer.
+- [x] Generator — Evidence: `Dockerfile.tmpl` installiert `docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin` aus `download.docker.com` mit Fingerprint-Prüfung vor Repo-Eintrag und Install; `egressDockerAptHost()` nur bei `nestedDocker`; Golden Cases `TestGenerateDevcontainer_SandboxDocker*`, `TestGenerateDevcontainer_SandboxEgress_DockerAptHostOnlyWithDocker`; Integrationstests `TestE2E_SandboxDevcontainer_NestedDocker` (Paketherkunft, Major >= 28, Abnahmekriterien), `_NestedDocker_EgressAptUpdate` liefen im `make test-docker` grün.
+- [x] Doku — Evidence: `spec/spezifikation.md` ([LH-FA-DEV-007](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) Verfeinerung b und [SPEC-019](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)-Tabelle), `docs/user/benutzerhandbuch.md` (Abschnitt 4.11, Allowlist-Tabelle), `CHANGELOG.md` `[Unreleased]` / Changed.
+- [x] `make gates` grün — Evidence: Lauf des Verifiers, siehe Sensors.
+- [x] Review durchgeführt — Evidence: Reports `docs/reviews/2026-10-14-sandbox-docker-ce.md` und `-r2.md` liegen vor; Befunde in `3cfa710` und `90f9122` adressiert (Reviewer-Befunde sind keine Evidence; Fix-Wirkung durch die Tests unten belegt).
+- [x] Doku-Update bei öffentlichem Vertrag — Evidence: siehe Doku-Punkt; `harness/replay.md` trägt die neue Golden-Zeile.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag — Evidence: §7 dieses Slice.
+- [x] Beobachtungs-Register — Evidence: §7 „keine Beobachtung angefallen".
+- [x] Jedes Risiko aus §6 trägt einen Ausgang — Evidence: §6 (Schlüsselrotation: „weiter offen" mit Re-Evaluierungs-Trigger der ADR; Verhaltensänderung neuer Versionen: „entfallen", belegt durch `make test-docker`).
+- [x] Drei Paarungen — Evidence: §7 (Anker, Folge-Slice [slice-v1-sandbox-docker-nachholmessung-desktop](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md), Register).
+
+Hinweise des Verifiers (keine DoD-Lücke): Die Versionsaussage „Docker 29.9" in §6/§7 und im CHANGELOG ist durch den Test nur als Major >= 28 erzwungen (Versionsangabe selbst stammt aus der Messung in [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md), nicht aus einem Test). Die in §7 behauptete Negativprobe vor dem Review ist nicht aus dem Repo nachprüfbar.
+
+Sensors:
+| Sensor | Ergebnis | Evidence |
+| --- | --- | --- |
+| `make docs-check` | pass | d-check: 199 Dateien geprüft, 0 Befunde (vor Anhängen dieses Abschnitts; nach dem Anhängen erneut zu prüfen) |
+| `make gates` | pass | Ausgabe `[gates] lint + test + coverage-gate + docs-check green`, Exit 0 |
+| `make test-docker` | pass | Exit 0; Paket `internal/e2e` ok in 289 s, Paket `internal/hexagon/application` ok; privilegierte Container gegen die lokale Colima-Engine |
+
+Traceability:
+| ID | Beleg |
+| --- | --- |
+| [LH-FA-DEV-007](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) | `TestGenerateDevcontainer_SandboxDocker`, `_SandboxDocker_NotGenerated`, `_FailPolicy`; `TestE2E_SandboxDevcontainer_NestedDocker`, `_Degradation`, `_Restart` |
+| [LH-FA-DEV-008](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) | `TestGenerateDevcontainer_SandboxEgressWithDocker`, `_SandboxEgress_DockerAptHostOnlyWithDocker`; `TestE2E_SandboxDevcontainer_NestedDocker_EgressAptUpdate` (`apt-get update --error-on=any` unter Egress, example.com bleibt gesperrt) |
+| [LH-NFA-SEC-004](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) | Golden Case pinnt Reihenfolge Fingerprint-Prüfung, Repo-Eintrag, Install und das `awk`-Programm; kein Installationsskript im Dockerfile |
+| [LH-FA-DEV-003](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) | Feature `docker-in-docker` bleibt verworfen ([ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md), Entscheidung 2); keine Codeänderung |
+| [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md) | Golden Cases (Fitness Function) und `make test-docker` |
+| [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md) | Immutabilität: `git diff 6d726e0 HEAD` auf die ADR-Datei leer |
+
+Replay / Golden:
+- Affected generators: `generate devcontainer` (und `init --devcontainer --sandbox`) mit `devcontainer.sandbox.nestedRuntime: docker` — Dockerfile (Paketquelle) und `egress-init.sh` (Allowlist); `docker-init.sh` wurde in diesem Slice nicht geändert (dessen Änderungen stammen aus `9fa95ce`/`e1c2c3a` des Vorläufer-Slices).
+- Golden cases added: `TestGenerateDevcontainer_SandboxEgress_DockerAptHostOnlyWithDocker` (docker: Host vorhanden, podman: Host fehlt, Nutzer-Host bleibt).
+- Golden cases updated: `TestGenerateDevcontainer_SandboxDocker` (docker-ce-Paketliste, Repo-URL, Pin, Reihenfolge Prüfung vor Repo-Eintrag und Install, `awk`-Programm, `&&`-Kette), `_SandboxDocker_NotGenerated` (kein `docker-ce`/`download.docker.com` bei none/podman/Default-Profil), `TestGenerateDevcontainer_SandboxEgressWithDocker` (`download.docker.com` in der Allowlist); E2E `TestE2E_SandboxDevcontainer_NestedDocker` und neu `_EgressAptUpdate`.
+- Golden cases replayed: Fresh-State und Double-Run-NoOp (`_SandboxDocker`), stale block mit User-Content-Erhalt (`_SandboxDocker_StaleBlockKeepsUserContent`), Skript ohne Marker -> Konflikt ohne Write (`_SandboxDocker_ScriptConflict`); alle im grünen `make gates` und `make test-docker` enthalten. Replay Rules erfüllt: Fresh + NoOp, stale block + Preservation, Konflikt ohne Partial Write, jeweils im Test nachgelesen.
+- Intentional output changes: Dockerfile bei `nestedRuntime: docker` installiert `docker-ce` aus dem Docker-APT-Repo statt `docker.io`/`docker-cli`/`docker-buildx`/`docker-compose` aus Debian; Allowlist enthält bei `docker` zusätzlich `download.docker.com`. Begründung: [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md) (Debian-Stand Docker 26.1 zu alt). `none`/`podman` unverändert (Test `_NotGenerated`).
+
+Carveouts:
+- Neu: none
+- Gelöst: none
+- Unverändert: none berührt (`carveouts.md` nennt diesen Slice nicht)
+
+Nicht ausgeführt:
+- `make ci` / `make fullbuild` — vom Implementer lokal ausgeführt, vom Verifier nicht selbst belegbar; eine CI auf `main` entsteht erst nach dem Push, bis dahin liegt kein CI-Beleg vor.
+- Docker Desktop, Podman als Host-Engine, VS Code/Codespaces — außerhalb des Slice (Folge-Slice [slice-v1-sandbox-docker-nachholmessung-desktop](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md)).
+- Echter Schlüsselrotations-Fall (Fingerprint-Mismatch bricht Build) — nicht live ausgeführt; belegt nur über Golden Case (Prüfung gatet Repo-Eintrag und Install).
+
+Commit / Artefakt:
+- Delivery-Hash `90f9122` (letzte Code-Änderung); Implementation `eea88cc`, Review-Fixes `3cfa710`, `90f9122`.
