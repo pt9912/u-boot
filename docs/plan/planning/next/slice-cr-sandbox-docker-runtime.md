@@ -152,7 +152,7 @@ Projektinhaber |
 
 ## 2. Definition of Done
 
-- [ ] **Lastenheft 0.5.0**: [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) in der Fassung oben,
+- [x] **Lastenheft 0.5.0**: [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) in der Fassung oben,
   Versionsfeld, Historie-Zeile.
 - [ ] **Folge-ADR** (nächste freie Nummer) entscheidet die Umsetzung (§3),
   mit Messung wie [ADR-0014](../../adr/0014-nested-podman-sandbox-devcontainer.md); [ADR-0014](../../adr/0014-nested-podman-sandbox-devcontainer.md) bleibt für `podman` gültig und wird

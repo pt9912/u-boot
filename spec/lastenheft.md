@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.4.0                                                              |
+| Version          | 0.5.0                                                              |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -438,13 +438,14 @@ Für Devcontainer-Features oder externe Skripte, die das Profil einbindet, gelte
 
 ### LH-FA-DEV-007 – Container-Runtime im Sandbox-Devcontainer
 
-*Priorität: V1.* Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll optional eine rootless Container-Runtime im Container bereitgestellt werden, damit Image-Builds ohne Zugriff auf einen Host-Socket möglich sind.
+*Priorität: V1.* Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) soll optional eine Container-Runtime im Container bereitgestellt werden, damit Image-Builds und Container-Läufe ohne Zugriff auf einen Host-Socket möglich sind.
 
-- Konfigurationsschlüssel `devcontainer.sandbox.nestedRuntime` (`podman` | `none`, Default `none`).
+- Konfigurationsschlüssel `devcontainer.sandbox.nestedRuntime` (`podman` | `docker` | `none`, Default `none`).
 - Bei `podman`: rootless Podman mit `docker`-Kompatibilität im Container.
-- Das Ergebnis ist engine-neutral und startet unter Docker (inkl. Colima) und Podman.
+- Bei `docker`: ein eigener Docker-Daemon im Container mit BuildKit sowie Buildx- und Compose-Plugin. Die Docker-CLI im Container spricht ausschließlich mit diesem Daemon, sein Socket ist dem Container-Benutzer zugänglich. Der Daemon-Speicher liegt in einem benannten Volume je Instanz. `docker` verlangt `--privileged`; die Befehlsausgabe weist das als Lockerung aus, mit dem Hinweis, dass das Profil damit keine Isolationsgrenze gegenüber dem Container-Host mehr bietet.
+- Bei `podman` ist das Ergebnis engine-neutral und startet unter Docker (inkl. Colima) und Podman. Bei `docker` startet es unter Docker (inkl. Colima und Docker Desktop); Podman als Host-Engine ist für `docker` nicht zugesagt.
 
-**Degradation:** `devcontainer.sandbox.onUnavailable` (`warn` | `fail`, Default `warn`) steuert den Umgang mit fehlenden Fähigkeiten: Bei `warn` führen ein fehlendes `/dev/fuse` zu einem Fallback auf `vfs`-Storage und eine nicht gewährbare Egress-Capability zum Wegfall der Restriktion, jeweils mit Warnung; bei `fail` sind beide ein Umgebungsproblem (Exit-Code `11`). Blockierte verschachtelte User-Namespaces (Seccomp/AppArmor) bei `nestedRuntime: podman` sind in beiden Modi ein Umgebungsproblem (Exit-Code `11`). Eine ausdrücklich angeforderte Runtime wird nie stillschweigend ersetzt; jeder Fallback wird in der Befehlsausgabe und in `u-boot doctor` ausgewiesen. Ungültige Werte der Schlüssel führen zu einem fachlichen Validierungsfehler (Exit-Code `10`).
+**Degradation:** `devcontainer.sandbox.onUnavailable` (`warn` | `fail`, Default `warn`) steuert den Umgang mit fehlenden Fähigkeiten: Bei `warn` führen ein fehlendes `/dev/fuse` zu einem Fallback auf `vfs`-Storage, eine nicht gewährbare Egress-Capability zum Wegfall der Restriktion und ein Docker-Daemon, der beim Containerstart nicht betriebsbereit wird, zu einem Container ohne Daemon, jeweils mit Warnung; bei `fail` sind alle drei ein Umgebungsproblem (Exit-Code `11`). Blockierte verschachtelte User-Namespaces (Seccomp/AppArmor) bei `nestedRuntime: podman` sind in beiden Modi ein Umgebungsproblem (Exit-Code `11`). Eine ausdrücklich angeforderte Runtime wird nie stillschweigend ersetzt; jeder Fallback wird in der Befehlsausgabe und in `u-boot doctor` ausgewiesen. Ungültige Werte der Schlüssel führen zu einem fachlichen Validierungsfehler (Exit-Code `10`).
 
 ### LH-FA-DEV-008 – Egress-Restriktion
 
@@ -1615,6 +1616,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.3.4 | 2026-10-01 | [`LH-OPEN-002`](#lh-open-002--paketierung): Homebrew von „vertagt mit Trigger“ auf „gewählt“ gesetzt (eigener Tap, Formel aus den Release-Assets). | Vereinbarung mit dem Projektinhaber |
 | 0.3.5 | 2026-10-01 | [`LH-OPEN-002`](#lh-open-002--paketierung): Debian/RPM von „vertagt mit Trigger“ auf „gewählt“ gesetzt (`.deb`/`.rpm` für amd64 und arm64 als Release-Assets, kein gehostetes Repository). | Vereinbarung mit dem Projektinhaber |
 | 0.4.0 | 2026-10-02 | Strukturänderung ohne neue Produktzusage: Technische Festlegungen (Schemata, Beispielinstanzen, Algorithmen, Defaults, Build-/CI-, Doku- und Architektur-Details, Markierungsformate) wurden in ein eigenes technisches Dokument überführt; Projektkapitel §4.11–§4.13 und einzelne Anforderungen sind auf Vorgaben gekürzt; neue Lesehinweis-Anforderung [`LH-LESE-003`](#lh-lese-003--dokumentenordnung); die Anforderungen zu ADR-Format, Planning-Lifecycle, Carveout-Disziplin und Dokumentationsreferenzmodell sind auf Kurzzusagen gekürzt (die Einzelregeln führt das adoptierte Baseline-Regelwerk), Aufrufbeispiele und ausführliche Regelblöcke stehen in der technischen Spezifikation; die Traceability-Matrix entfällt (die Rückverfolgbarkeit folgt aus den Kennungen); die veraltete Bootstrap-Angabe „Default-Schwellwert 0“ in [`LH-FA-BUILD-008`](#lh-fa-build-008--coverage-bootstrap) entfällt, der Schwellwert ist überschreibbar. Alle Anforderungs-Kennungen und Überschriften sind unverändert. | Vereinbarung mit dem Projektinhaber |
+| 0.5.0 | 2026-10-14 | [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): dritter Wert `docker` für `devcontainer.sandbox.nestedRuntime` (eigener Docker-Daemon im Container, `--privileged` als ausgewiesene Lockerung, Speicher je Instanz, Degradationsfall „Daemon nicht betriebsbereit“). | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt
