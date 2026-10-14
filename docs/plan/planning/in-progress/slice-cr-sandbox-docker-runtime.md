@@ -55,7 +55,7 @@ Image-, Container-, Netz- und Volume-Namen. Parallele Instanzen desselben
 Repos kollidieren dort; außerdem ist der Socket Host-Root-Äquivalent
 ([ADR-0014](../../adr/0014-nested-podman-sandbox-devcontainer.md), Alternative A).
 
-### CR-Kern (vorgeschlagene Fassung von `LH-FA-DEV-007`)
+### CR-Kern (vorgeschlagene Fassung von [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer))
 
 > ### [LH-FA-DEV-007](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) – Container-Runtime im Sandbox-Devcontainer
 >
@@ -143,7 +143,7 @@ Repos kollidieren dort; außerdem ist der Socket Host-Root-Äquivalent
 **Historie-Zeile (§16, bei Spec-Change zu setzen):**
 
 ```text
-| 0.5.0 | (Annahmedatum) | LH-FA-DEV-007: dritter Wert `docker` für
+| 0.5.0 | (Annahmedatum) | [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): dritter Wert `docker` für
 `devcontainer.sandbox.nestedRuntime` (eigener Docker-Daemon im Container,
 `--privileged` als ausgewiesene Lockerung, Speicher je Instanz,
 Degradationsfall „Daemon nicht betriebsbereit"). | Vereinbarung mit dem
@@ -154,7 +154,7 @@ Projektinhaber |
 
 - [x] **Lastenheft 0.5.0**: [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) in der Fassung oben,
   Versionsfeld, Historie-Zeile.
-- [ ] **Folge-ADR** (nächste freie Nummer) entscheidet die Umsetzung (§3),
+- [x] **Folge-ADR** (nächste freie Nummer) entscheidet die Umsetzung (§3),
   mit Messung wie [ADR-0014](../../adr/0014-nested-podman-sandbox-devcontainer.md); [ADR-0014](../../adr/0014-nested-podman-sandbox-devcontainer.md) bleibt für `podman` gültig und wird
   nicht abgelöst — sein Contra zu Alternative B („verstößt gegen DEV-006")
   gilt für `docker` nicht mehr, weil DEV-007 es nun ausdrücklich verlangt;
@@ -163,15 +163,15 @@ Projektinhaber |
   1–7 tragen: [`slice-v1-sandbox-docker-generator`](slice-v1-sandbox-docker-generator.md) (1, 4),
   [`slice-v1-sandbox-docker-degradation-doctor`](slice-v1-sandbox-docker-degradation-doctor.md) (5, 7),
   [`slice-v1-sandbox-docker-integrationstest`](slice-v1-sandbox-docker-integrationstest.md) (2, 3, 6).
-- [ ] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+- [x] `make gates` grün.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — kein Self-Review.
-- [ ] Doku-Update: öffentliche Verträge nachgezogen (CHANGELOG, ADR-Index,
+- [x] Doku-Update: öffentliche Verträge nachgezogen (CHANGELOG, ADR-Index,
       Roadmap).
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register: keine Beobachtung angefallen, oder fortgeschrieben (§7).
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register: keine Beobachtung angefallen, oder fortgeschrieben (§7).
+- [x] Jedes Risiko aus §6 trägt einen Ausgang.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
 
 ## 3. Plan (vor Code)
 
@@ -223,30 +223,27 @@ sind angenommen; die drei Umsetzungs-Slices liegen in `open/` oder weiter.
 2. **Container-Ausbruch:** mit `--privileged` trivial. Unter macOS trifft er
    die VM von Docker Desktop/Colima, unter Linux den Host. Die Doku muss das
    so deutlich sagen wie die Podman-Warnung.
-   — **Ausgang:** weiter offen: Doku im Slice
-   [`slice-v1-sandbox-docker-integrationstest`](slice-v1-sandbox-docker-integrationstest.md).
+   — **Ausgang:** entfallen: Benutzerhandbuch benennt das Ausbruchsrisiko wie die Podman-Warnung (`6d726e0`).
 3. **Speicher und Kaltstart je Instanz:** jeder Daemon zieht und baut alles
    neu; mehrere GB je Instanz.
-   — **Ausgang:** weiter offen: Doku im Slice
-   [`slice-v1-sandbox-docker-integrationstest`](slice-v1-sandbox-docker-integrationstest.md).
+   — **Ausgang:** entfallen: Benutzerhandbuch nennt Speicher und Kaltstart je Instanz (`6d726e0`).
 4. **macOS, Docker Desktop und VS Code ungeprüft** (wie bei [ADR-0014](../../adr/0014-nested-podman-sandbox-devcontainer.md)) — die
    Zielumgebung des Anlasses; Zusage erst nach Nachholmessung.
-   — **Ausgang:** weiter offen: Nachholmessung im Slice
-   [`slice-v1-sandbox-docker-integrationstest`](slice-v1-sandbox-docker-integrationstest.md).
+   — **Ausgang:** weiter offen: Docker-Desktop-Messung im Slice
+   [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md); unter Colima gemessen ([ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md)).
 5. **Egress-Leitplanke** wird durch verschachtelte Container und
    Daemon-iptables unterlaufen.
-   — **Ausgang:** weiter offen: `doctor`-Warnung im Slice
-   [`slice-v1-sandbox-docker-degradation-doctor`](slice-v1-sandbox-docker-degradation-doctor.md).
+   — **Ausgang:** entfallen: `u-boot doctor` warnt bei `docker` mit Egress-Restriktion (`6d726e0`).
 
 ## 7. Closure-Notiz
 
-- **Was hat funktioniert:** —
-- **Was ging anders als geplant:** —
-- **Steering-Loop-Eintrag:** —
-- **Beobachtungs-Register (`../observations/`):** —
-- **Folge-Slices:** [`slice-v1-sandbox-docker-generator`](slice-v1-sandbox-docker-generator.md), [`slice-v1-sandbox-docker-degradation-doctor`](slice-v1-sandbox-docker-degradation-doctor.md), [`slice-v1-sandbox-docker-integrationstest`](slice-v1-sandbox-docker-integrationstest.md)
+- **Was hat funktioniert:** CR, Lastenheft 0.5.0, [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md) mit Messreihe und die drei Umsetzungs-Slices liefen in einem Lauf; Review ([`docs/reviews/2026-10-14-sandbox-docker-runtime.md`](../../../reviews/2026-10-14-sandbox-docker-runtime.md)) 0 HIGH, 2 MEDIUM, 5 LOW; Befunde F-1 bis F-3, F-5 und F-6 behoben (`9fa95ce`).
+- **Was ging anders als geplant:** Die drei Umsetzungs-Slices lagen kurzzeitig gleichzeitig in `in-progress/` (WIP-Limit 1 verletzt, vor dem Push korrigiert: sie wurden nacheinander geschlossen). Review F-4: Das Lastenheft sagt Docker Desktop zu, gemessen ist nur Colima — die Doku sagt Docker Desktop erst nach der Nachholmessung zu.
+- **Steering-Loop-Eintrag:** Planungs-Disziplin: Slices einzeln über `open → next → in-progress` führen (WIP-Limit 1, `Verantwortlich:` setzen), auch wenn sie im selben Lauf geliefert werden.
+- **Beobachtungs-Register (`../observations/`):** keine Beobachtung angefallen.
+- **Folge-Slices:** die drei Umsetzungs-Slices (geschlossen) und [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) (`open/`).
 - **Risiken aus §6:** siehe §6
-- **Drei Paarungen:** —
+- **Drei Paarungen:** Anker (Docker-Desktop-Messung) → Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) in `open/` · Register: keine Beobachtung angefallen.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
@@ -257,3 +254,58 @@ sind angenommen; die drei Umsetzungs-Slices liegen in `open/` oder weiter.
 mit Treffern für diese Sub-Area.
 
 Alle berührten Sub-Areas GF.
+
+## Verification Evidence
+
+Scope:
+- Slice: `slice-cr-sandbox-docker-runtime`
+- IDs: [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Änderung, Lastenheft 0.5.0), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [ADR-0014](../../adr/0014-nested-podman-sandbox-devcontainer.md), [ADR-0015](../../adr/0015-sandbox-volumes-pro-instanz.md), [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md)
+- Artefakte: `spec/lastenheft.md`, `spec/spezifikation.md`, `docs/plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md`, ADR-Index, `CHANGELOG.md`, die drei Umsetzungs-Slices
+
+DoD-Abgleich (§2):
+- [x] Lastenheft 0.5.0 — Evidence: Diff `fa6aa1b..HEAD` auf `spec/lastenheft.md` ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), Versionsfeld, §16); Inhalt nicht Zeile für Zeile gegen den CR-Kern verglichen, nur der Diff gesichtet.
+- [x] Folge-ADR — Evidence: [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md) (Accepted) und ADR-Index-Eintrag im Diff.
+- [x] Umsetzungs-Slices angelegt (Kriterien 1–7 verteilt) — Evidence: drei Slices unter `in-progress/`, Zuordnung 1/4, 5/7, 2/3/6 deckt 1–7.
+- [x] `make gates` grün — Evidence: lint, test, coverage-gate grün; `docs-check` nur mit den erwarteten `target-missing` (Link-Ziele existieren erst nach dem finalen `git mv`) und einem unerwarteten `id-unlinked` (siehe Sensors).
+- [x] Review, Report liegt vor — Evidence: `docs/reviews/2026-10-14-sandbox-docker-runtime.md` (0 HIGH, 2 MEDIUM, 5 LOW, 1 INFO).
+- [x] Doku-Update — Evidence: Diff auf `CHANGELOG.md`, ADR-Index, `roadmap.md`, `docs/user/benutzerhandbuch.md`.
+- [x] Closure-Notiz mit Steering-Loop-Eintrag — Evidence: §7.
+- [x] Beobachtungs-Register, Risiko-Ausgänge, drei Paarungen — Evidence: §6/§7; Risiko 4 „weiter offen“ ist mit Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) in `open/` gepaart.
+
+Abnahmekriterien 1–7 des CR (§1), Abgleich gegen Diff und Tests:
+- [x] 1 — `TestGenerateDevcontainer_SandboxDocker` (runArgs exakt `--privileged`, Volume `<projekt>-docker-${devcontainerId}`, keine Socket-/Bind-Mounts, eine Warnung [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)).
+- [x] 2 — `TestE2E_SandboxDevcontainer_NestedDocker` (docker info, `type=cacheonly`, `RUN --network=none`, Compose, dritte Ebene), `make test-docker` pass unter Colima.
+- [x] 3 — derselbe Test: zwei Instanzen, getrennte Daemon-IDs, gleichnamige Images/Container.
+- [x] 4 — `..._SandboxDocker_NotGenerated` (podman/none: kein `docker-init.sh`, kein `--privileged`); bestehende Podman-Goldens im Diff unverändert. Byte-Identität zur Vorversion ist nicht eigens gepinnt, nur Abwesenheit der Docker-Artefakte.
+- [x] 5 — `TestE2E_SandboxDevcontainer_NestedDocker_Degradation` (`warn` Exit 0, `fail` Exit 11, kein Podman im Image). Nur der Pfad „Daemon beendet sich beim Start“ ist getestet, nicht der 60-s-Timeout-Pfad.
+- [ ] 6 — nur für Colima erfüllt; Docker Desktop offen: Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) (`open/`). Der CR-Slice selbst liefert Kriterium 6 nicht (die Umsetzung liegt im Integrationstest-Slice), sein Risiko 4 trägt den Ausgang „weiter offen“.
+- [x] 7 — `TestDoctor_SandboxRuntime` (docker ohne Sandbox-Profil warnt „no effect“), `TestDoctor_SandboxEgress` (docker mit Egress warnt „bypass the restriction“).
+
+Sensors:
+| Sensor | Ergebnis | Evidence |
+| --- | --- | --- |
+| `make gates` | fail (nur bekannter Befund) | `lint` 0 issues, `test` ok, `coverage-gate` OK (90.90 % ≥ 90 %); `docs-check` endet mit 7 Befunden, alle durch die noch nicht erfolgte Verschiebung nach `done/` erwartet (6 × `target-missing` auf `done/slice-*sandbox-docker*`) plus 1 × `id-unlinked` in `docs/reviews/2026-10-14-sandbox-docker-runtime.md:30` (nicht erwartet, siehe Bericht) |
+| `make docs-check` | fail (7 Befunde, s. o.) | `d-check: 192 Datei(en) geprüft, 7 Befund(e)`; keine Befunde in den vier Slice-Dateien selbst |
+| `make test-docker` | pass | alle Pakete `ok`, `internal/e2e` 262 s, lief gegen die lokale Colima-Engine; Ausgabe ohne `-v`, Einzeltests nicht einzeln ausgewiesen, kein `SKIP` in der Ausgabe |
+
+Traceability:
+| ID | Beleg |
+| --- | --- |
+| [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) | Tests zu Kriterien 1–5, 7 (s. o); Lastenheft-Diff |
+| [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) / `-008` | unverändert; `TestGenerateDevcontainer_SandboxEgressWithDocker` |
+| [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md) | Accepted, ADR-Index; Umsetzung in `6d726e0`, Review-Fixes `9fa95ce` |
+| [ADR-0014](../../adr/0014-nested-podman-sandbox-devcontainer.md) / [ADR-0015](../../adr/0015-sandbox-volumes-pro-instanz.md) | `podman`-Goldens unverändert; Volume-Benennung im Golden-Test |
+
+Carveouts:
+- Neu: none (`carveouts.md` enthält keinen Eintrag zu `docker`/`sandbox`)
+- Geloest: none
+- Unveraendert: none berührt
+
+Nicht ausgefuehrt:
+- `make ci`, `make govulncheck`, `make image-scan`, `make fullbuild` — nicht Teil des Handoffs dieses Slice; der Go-Pin `2a888f7` ist daher nicht von mir gegen Trivy geprüft.
+- Docker-Desktop-Lauf — kein Docker-Desktop-Host (Folge-Slice).
+- Neuer `make docs-check` nach dem finalen `git mv` — steht aus.
+
+Commit / Artefakt:
+- Implementation `6d726e0`, Review-Fixes `9fa95ce`, Go-Pin `2a888f7`; Delivery-Hash des Slice-Closure-Commits: nach Closure-Commit.
+- Review-Report: `docs/reviews/2026-10-14-sandbox-docker-runtime.md` (Gegenstand `fa6aa1b..6d726e0`; die Fixes `9fa95ce` sind darin nicht erneut geprüft).

@@ -11,4 +11,4 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| _(leer)_ | Aktuell kein offener Plan-Stub |
+| [`slice-v1-sandbox-docker-nachholmessung-desktop`](slice-v1-sandbox-docker-nachholmessung-desktop.md) | Docker-Desktop-Messung für `nestedRuntime: docker` (Abnahmekriterium 6) |
