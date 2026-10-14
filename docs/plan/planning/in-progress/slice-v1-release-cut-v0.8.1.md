@@ -87,3 +87,56 @@ DoD vollständig: Tag gesetzt, `publish`- und Tap-Lauf kontrolliert (`releasing.
 mit Treffern für die berührten Sub-Areas.
 
 Alle berührten Sub-Areas GF.
+
+## Verification Evidence
+
+Verifier-Lauf 2026-10-14, nur lesend; Rolle getrennt von Implementer und Reviewer.
+
+Scope:
+- Slice: [slice-v1-release-cut-v0.8.1](slice-v1-release-cut-v0.8.1.md)
+- IDs: [LH-FA-DEV-007](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md), [ADR-0007](../../adr/0007-distributionswege-ghcr.md), [ADR-0016](../../adr/0016-homebrew-distribution-per-tap.md), [ADR-0017](../../adr/0017-linux-pakete-nfpm.md)
+- Artefakte: Tag `v0.8.1`, GitHub-Release, `ghcr.io/pt9912/u-boot:0.8.1` und `:latest`, `CHANGELOG.md`, `README.md`, `README.de.md`, `docs/user/benutzerhandbuch.md`, `roadmap.md`, `cmd/uboot/main.go`, `Makefile`, `Dockerfile`
+
+DoD-Abgleich:
+- [x] Tag, `publish`-Lauf grün — Evidence: `git rev-parse v0.8.1^{commit}` = `5aadaf3fc60429c70b195e4f2cd3a26f7b9c5e62` (Commit-Objekt); `gh run view 38600679867` auf `5aadaf3`: `success`, Jobs `publish (ghcr.io image push)`, `tap (homebrew formula)`, `package smoke (rpm, fedora)`, `package smoke (deb, ubuntu)` je `success`; `gh release view v0.8.1`: `isDraft=false`, `isPrerelease=false`, zwölf Assets (`SHA256SUMS`, `u-boot.rb`, sechs Binaries linux/darwin/windows je amd64/arm64, zwei `.deb`, zwei `.rpm`); frisch gepullt melden `:0.8.1` und `:latest` `u-boot version 0.8.1`, beide Digest `sha256:3fe6fafcf39d7f171079a4e00a5bf971206ecb54b8dee4d78af38e38a3bdfddf`.
+- [x] `make fullbuild` und `make test-docker` grün vor dem Tag — Evidence: lokal nur vom Implementer gelaufen, vom Verifier nicht selbst belegbar; belegt sind die CI-Läufe auf `5aadaf3`: `ci` `38599726829` (`gates`, `image-scan`, `security-gates` je `success`) und `integration-docker` `38599726948` (`success`).
+- [x] Review ohne Self-Review — Evidence: `docs/reviews/2026-10-14-release-cut-v0.8.1.md` liegt vor (0 HIGH, 0 MEDIUM, 2 LOW; beide laut Slice-§7 nachgezogen, Roadmap-Zeile für den Slice `sandbox-docker-ce` in `roadmap.md:83`, Cut-Zeile `roadmap.md:84`).
+- [x] Doku-Update — Evidence: Versionsstrings `0.8.1-dev` in `cmd/uboot/main.go:43`, `Makefile:27`, `Dockerfile:39`; `git grep 0.8.0-dev` findet nur Slice-/Report-Beschreibungen (historisch). `CHANGELOG.md:12` `[Unreleased]` leer, `:14` `[0.8.1] - 2026-10-14`, Compare-Links `:1164-1165`. `README.md:10,206`, `README.de.md:11,210`, `docs/user/benutzerhandbuch.md:4,80,106,132,1749` tragen `0.8.1`. Roadmap: „Aktuelle Welle" `roadmap.md:16` = Homebrew-Verifikation, „Abgeschlossene Wellen" `:83` (Slice) und `:84` (Cut, Tag `5aadaf3`).
+- [x] Closure-Notiz mit Steering-Loop-Eintrag — Evidence: §7 vorhanden, Tag-Hash und Steering-Loop-Eintrag gelesen.
+- [x] Beobachtungs-Register — Evidence: §7 „keine Beobachtung angefallen".
+- [x] Risiken aus §6 mit Ausgang — Evidence: §6 trägt zwei Ausgänge (entfallen mit Lauf-ID; weiter offen mit Folge-Slice).
+- [x] Drei Paarungen — Evidence: §7 verweist auf [slice-v1-sandbox-docker-nachholmessung-desktop](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) und [slice-v2-homebrew-formula](slice-v2-homebrew-formula.md); beide Dateien existieren.
+
+Sensors:
+| Sensor | Ergebnis | Evidence |
+| --- | --- | --- |
+| `gh run view 38600679867` (publish) | pass | vier Jobs `success`, Head `5aadaf3` |
+| `gh run view 38599726829` (ci) | pass | `gates`, `image-scan`, `security-gates` `success` |
+| `gh run view 38599726948` (integration-docker) | pass | `success` |
+| `docker pull` + `docker run --version` (`:0.8.1`, `:latest`) | pass | `u-boot version 0.8.1`, identischer Digest |
+| `make docs-check` | fail (erwartet) | 201 Dateien, 1 Befund: `roadmap.md:84` Ziel `../done/slice-v1-release-cut-v0.8.1.md` `target-missing`; löst sich mit dem Move nach `done/` (Lifecycle-Übergang, `AGENTS.md` 3.3 Nr. 2) auf; vor dem Move erneut ausführen. |
+
+Traceability:
+| ID | Beleg |
+| --- | --- |
+| [LH-FA-DEV-007](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) | Release-Inhalt im CHANGELOG `[0.8.1]`; Umsetzung im geschlossenen Slice `sandbox-docker-ce`; `integration-docker` `38599726948` grün |
+| [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md) | CHANGELOG, README-Releases-Tabelle, Review-Report des Cuts |
+| [ADR-0007](../../adr/0007-distributionswege-ghcr.md) | GHCR `:0.8.1` und `:latest`, gleicher Digest |
+| [ADR-0016](../../adr/0016-homebrew-distribution-per-tap.md) | Release-Asset `u-boot.rb`, Job `tap` grün; macOS-Smoke offen |
+| [ADR-0017](../../adr/0017-linux-pakete-nfpm.md) | vier Pakete im Release, Paket-Smoke deb/rpm grün |
+
+Carveouts:
+- Neu: none
+- Gelöst: none
+- Unverändert: none (nicht geändert, nicht geprüft über den Slice-Inhalt hinaus)
+
+Nicht ausgeführt (vom Verifier):
+- `make fullbuild`, `make test-docker`, `make gates` — Docker-Läufe sind dem Verifier-Auftrag nicht erlaubt; lokal vom Implementer ausgeführt, belegt durch die CI-Läufe `38599726829` und `38599726948` auf `5aadaf3`.
+- macOS-Smoke im Tap zur Formel 0.8.1 — gehört zu [slice-v2-homebrew-formula](slice-v2-homebrew-formula.md); offen.
+- Docker-Desktop-Messung — gehört zu [slice-v1-sandbox-docker-nachholmessung-desktop](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md); offen, Docker Desktop wird nicht zugesagt.
+- Pull-Läufe liefen auf arm64-Host mit linux/amd64-Image (Emulation); nur `--version` geprüft.
+
+Commit / Artefakt:
+- Tag-Commit `5aadaf3fc60429c70b195e4f2cd3a26f7b9c5e62` (Tag `v0.8.1`)
+- `publish`-Lauf `38600679867`; `ci` `38599726829`; `integration-docker` `38599726948`
+- `ghcr.io/pt9912/u-boot:0.8.1` = `:latest` = `sha256:3fe6fafcf39d7f171079a4e00a5bf971206ecb54b8dee4d78af38e38a3bdfddf`
