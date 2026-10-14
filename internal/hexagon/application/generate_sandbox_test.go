@@ -639,6 +639,9 @@ func TestGenerateDevcontainer_SandboxDocker(t *testing.T) {
 	if err != nil {
 		t.Fatalf("generate: %v", err)
 	}
+	if resp.Action != driving.GenerateActionCreated {
+		t.Errorf("fresh state: action = %v, want Created", resp.Action)
+	}
 	m := devcontainerJSONMap(t, fs)
 	if args, _ := m["runArgs"].([]any); len(args) != 1 || args[0] != "--privileged" {
 		t.Errorf("runArgs = %v, want [--privileged]", m["runArgs"])
@@ -676,6 +679,11 @@ func TestGenerateDevcontainer_SandboxDocker(t *testing.T) {
 	if !strings.Contains(string(script), `on_unavailable="warn"`) || !strings.Contains(string(script), "exit 11") ||
 		!strings.Contains(string(script), "dockerd --host=unix:///var/run/docker.sock") {
 		t.Errorf("script lacks policy/exit 11/dockerd start:\n%s", script)
+	}
+	for _, want := range []string{"timeout=60", "timeout 5 docker info", "rm -f /var/run/docker.pid"} {
+		if !strings.Contains(string(script), want) {
+			t.Errorf("script lacks %q:\n%s", want, script)
+		}
 	}
 	if exists, _ := fs.Exists(sandboxInitPath()); exists {
 		t.Errorf("sandbox-init.sh (podman) must not be generated")
@@ -771,5 +779,55 @@ func TestGenerateDevcontainer_SandboxEgressWithDocker(t *testing.T) {
 	script, _ := fs.ReadFile(egressInitPath())
 	if !strings.Contains(string(script), "registry-1.docker.io") {
 		t.Errorf("registries missing from the allowlist:\n%s", script)
+	}
+}
+
+// An existing user-owned docker-init.sh without managed block is a
+// manual conflict and nothing is written (no partial write).
+func TestGenerateDevcontainer_SandboxDocker_ScriptConflict(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, sandboxDockerYAML)
+	if err := fs.WriteFile(dockerInitPath(), []byte("#!/bin/sh\necho mine\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	_, err := generateSandbox(svc, false)
+	if !errors.Is(err, driving.ErrGenerateManualConflict) {
+		t.Fatalf("err = %v, want ErrGenerateManualConflict", err)
+	}
+	for _, path := range []string{devcontainerJSONPath(), dockerfilePath()} {
+		if exists, _ := fs.Exists(path); exists {
+			t.Errorf("%s must not be written on conflict", path)
+		}
+	}
+}
+
+// A stale managed block of docker-init.sh is replaced and the user
+// content after the block is kept.
+func TestGenerateDevcontainer_SandboxDocker_StaleBlockKeepsUserContent(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, sandboxDockerYAML)
+	if _, err := generateSandbox(svc, false); err != nil {
+		t.Fatalf("first generate: %v", err)
+	}
+	body, _ := fs.ReadFile(dockerInitPath())
+	stale := strings.Replace(string(body), "timeout=60", "timeout=61", 1) + "# user addition\n"
+	if err := fs.WriteFile(dockerInitPath(), []byte(stale), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	resp, err := generateSandbox(svc, false)
+	if err != nil {
+		t.Fatalf("second generate: %v", err)
+	}
+	if resp.Action == driving.GenerateActionNoOp {
+		t.Errorf("stale block must be replaced, got NoOp")
+	}
+	after, _ := fs.ReadFile(dockerInitPath())
+	if !strings.Contains(string(after), "timeout=60") || strings.Contains(string(after), "timeout=61") {
+		t.Errorf("managed block not restored:\n%s", after)
+	}
+	if !strings.Contains(string(after), "# user addition") {
+		t.Errorf("user content after the block was lost:\n%s", after)
 	}
 }
