@@ -20,6 +20,7 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
 | macOS-Distribution (Tap-Einrichtung offen) | Tap-Repo + Secret durch den Projektinhaber | [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) | S |
+| Docker als verschachtelte Runtime (Lastenheft 0.5.0) | CR [`slice-cr-sandbox-docker-runtime`](../next/slice-cr-sandbox-docker-runtime.md): Lastenheft 0.5.0 + Folge-ADR | [`slice-v1-sandbox-docker-generator`](../open/slice-v1-sandbox-docker-generator.md); [`slice-v1-sandbox-docker-degradation-doctor`](../open/slice-v1-sandbox-docker-degradation-doctor.md); [`slice-v1-sandbox-docker-integrationstest`](../open/slice-v1-sandbox-docker-integrationstest.md) | M |
 | Harness-Scaffolding (Produkt) | [ADR-0011](../../adr/0011-agent-harness-scaffolding.md) accepted + Spec-Erweiterung + Lizenz-Check | `slice-vN-harness-bootstrap-scaffold` (noch kein Plan) | L |
 | Podman-first / Migration / Custom-Sources | Konkretisierung je Thema offen | `slice-vN-podman-formal`; `slice-later-migration` ([`LH-FA-CONF-006`](../../../../spec/lastenheft.md#lh-fa-conf-006--konfiguration-migrieren)); `slice-later-custom-data-sources` ([`LH-DA-004`](../../../../spec/lastenheft.md#lh-da-004--schema-migration)) | L |
 

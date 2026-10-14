@@ -11,6 +11,7 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
+| [`slice-cr-sandbox-docker-runtime`](slice-cr-sandbox-docker-runtime.md) | CR: `nestedRuntime: docker` im Sandbox-Devcontainer (Lastenheft 0.5.0) |
 
 Zuvor: Der Konsolidierungs-Slice
 [`slice-v1-cli-json-envelope-consolidation`](../done/slice-v1-cli-json-envelope-consolidation.md) ist am 2026-06-08

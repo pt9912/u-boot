@@ -11,4 +11,6 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| _(leer)_ | Aktuell kein offener Plan-Stub |
+| [`slice-v1-sandbox-docker-generator`](slice-v1-sandbox-docker-generator.md) | Generator für `nestedRuntime: docker` (Abnahmekriterien 1, 4) |
+| [`slice-v1-sandbox-docker-degradation-doctor`](slice-v1-sandbox-docker-degradation-doctor.md) | Degradation und Doctor für `docker` (5, 7) |
+| [`slice-v1-sandbox-docker-integrationstest`](slice-v1-sandbox-docker-integrationstest.md) | Integrationstest, macOS-Messung, Doku (2, 3, 6) |
