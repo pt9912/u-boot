@@ -24,6 +24,11 @@ this file is the same format applied to u-boot itself.
   ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), Lastenheft 0.5.0,
   [ADR-0018](docs/plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md)).
 
+### Security
+
+- `build(deps): Go toolchain 1.27.1 → 1.27.2` — fixes three HIGH stdlib advisories (CVE-2026-78667 `net/http` Range
+  headers, CVE-2026-78669 HTTP/2 SETTINGS frames, CVE-2026-97031 `crypto/tls` ECH) that failed the Trivy image scan.
+
 ## [0.7.0] - 2026-10-01
 
 Seventh release. **Linux packages.** Every release now carries `.deb` and `.rpm` packages

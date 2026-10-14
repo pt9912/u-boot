@@ -12,7 +12,7 @@
 #   make fullbuild   — ci plus build (runtime image).
 
 IMAGE                   ?= u-boot
-GO_VERSION              ?= 1.27.1
+GO_VERSION              ?= 1.27.2
 GOLANGCI_LINT_VERSION   ?= v2.14.0
 GOVULNCHECK_VERSION     ?= v1.8.0
 PYTHON_VERSION          ?= 3.13-slim
