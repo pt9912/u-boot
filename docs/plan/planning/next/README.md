@@ -11,7 +11,6 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| [`slice-v1-sandbox-docker-ce`](slice-v1-sandbox-docker-ce.md) | Aktueller Docker aus dem Docker-APT-Repo (Patch-Release v0.8.1) |
 
 Zuvor: Der Konsolidierungs-Slice
 [`slice-v1-cli-json-envelope-consolidation`](../done/slice-v1-cli-json-envelope-consolidation.md) ist am 2026-06-08
