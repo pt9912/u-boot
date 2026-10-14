@@ -103,13 +103,22 @@ func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bo
 		data.RunArgs = append(data.RunArgs, podmanRelaxations()...)
 		postCreate = append(postCreate, "sh /usr/local/bin/u-boot-sandbox-init")
 	}
+	var postStart []string
+	if nestedDocker(dc) {
+		data.NestedDocker = true
+		data.OnUnavailable = onUnavailablePolicy(dc)
+		data.DockerVolume = name + "-docker"
+		data.RunArgs = append(data.RunArgs, dockerRelaxation())
+		postStart = append(postStart, "sudo sh /usr/local/bin/u-boot-docker-init")
+	}
 	if egressEnabled(dc) {
 		data.Egress = true
 		data.OnUnavailable = onUnavailablePolicy(dc)
 		data.EgressHosts = egressHosts(dc, cloneURL)
 		data.RunArgs = append(data.RunArgs, egressRelaxation())
-		data.PostStart = "sudo sh /usr/local/bin/u-boot-egress-init"
+		postStart = append([]string{"sudo sh /usr/local/bin/u-boot-egress-init"}, postStart...)
 	}
+	data.PostStart = strings.Join(postStart, " && ")
 	data.PostCreate = composePostCreate(postCreate, cloneURL)
 	return data
 }
@@ -130,6 +139,10 @@ func composePostCreate(steps []string, cloneURL string) string {
 	}
 	return strings.Join(steps, " && ") + " && { " + clone + "; }"
 }
+
+// dockerRelaxation is the container option an own Docker daemon needs
+// (measured, see the nested-Docker ADR).
+func dockerRelaxation() string { return "--privileged" }
 
 // egressRelaxation is the capability the egress restriction needs.
 func egressRelaxation() string { return "--cap-add=NET_ADMIN" }
@@ -228,6 +241,12 @@ func nestedPodman(dc *ubootYAMLDevcontainer) bool {
 	return dc != nil && dc.Sandbox != nil && dc.Sandbox.NestedRuntime == string(domain.NestedRuntimePodman)
 }
 
+// nestedDocker reports whether `devcontainer.sandbox.nestedRuntime`
+// is `docker` (LH-FA-DEV-007).
+func nestedDocker(dc *ubootYAMLDevcontainer) bool {
+	return dc != nil && dc.Sandbox != nil && dc.Sandbox.NestedRuntime == string(domain.NestedRuntimeDocker)
+}
+
 // onUnavailablePolicy returns the effective degradation policy
 // (`warn` default, LH-FA-DEV-007).
 func onUnavailablePolicy(dc *ubootYAMLDevcontainer) string {
@@ -253,7 +272,7 @@ func podmanRelaxations() []string {
 
 // sandboxRelaxationWarnings returns one warning per security
 // relaxation the rendered sandbox needs (nested Podman: five options,
-// LH-FA-DEV-007; egress restriction: NET_ADMIN, LH-FA-DEV-008), plus
+// nested Docker: `--privileged`, LH-FA-DEV-007; egress restriction: NET_ADMIN, LH-FA-DEV-008), plus
 // a "no effect" notice per feature that is configured without the
 // sandbox profile.
 func sandboxRelaxationWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []driving.WarningEntry {
@@ -268,6 +287,13 @@ func sandboxRelaxationWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []drivin
 			for _, r := range podmanRelaxations() {
 				warn("LH-FA-DEV-007", "security relaxation for nested Podman: "+r+" (the sandbox is much weaker than without nestedRuntime)")
 			}
+		}
+	}
+	if nestedDocker(dc) {
+		if !sandbox {
+			warn("LH-FA-DEV-007", "devcontainer.sandbox.nestedRuntime=docker has no effect without devcontainer.profile=sandbox; no nested runtime was generated")
+		} else {
+			warn("LH-FA-DEV-007", "security relaxation for the nested Docker daemon: "+dockerRelaxation()+" (the profile no longer isolates the container from its host; a container escape reaches the host or, on macOS, the engine VM)")
 		}
 	}
 	if egressEnabled(dc) {

@@ -25,12 +25,12 @@ func TestSandboxSettings_Validation(t *testing.T) {
 	})
 	t.Run("nestedRuntime", func(t *testing.T) {
 		t.Parallel()
-		for _, ok := range []string{"none", "podman"} {
+		for _, ok := range []string{"none", "podman", "docker"} {
 			if _, err := domain.NewNestedRuntime(ok); err != nil {
 				t.Errorf("nestedRuntime %q: %v", ok, err)
 			}
 		}
-		for _, bad := range []string{"", "docker", "PODMAN"} {
+		for _, bad := range []string{"", "Docker", "PODMAN", "containerd"} {
 			if _, err := domain.NewNestedRuntime(bad); !errors.Is(err, domain.ErrInvalidSandboxSetting) {
 				t.Errorf("nestedRuntime %q: err = %v", bad, err)
 			}

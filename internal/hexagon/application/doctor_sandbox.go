@@ -52,8 +52,14 @@ func credentialPatterns() []*regexp.Regexp {
 func credentialScanFiles() []string {
 	return []string{
 		"u-boot.yaml", "compose.yaml", ".env.example",
-		".devcontainer/devcontainer.json", ".devcontainer/Dockerfile", ".devcontainer/sandbox-init.sh",
+		".devcontainer/devcontainer.json", ".devcontainer/Dockerfile", ".devcontainer/sandbox-init.sh", ".devcontainer/docker-init.sh",
 	}
+}
+
+// nestedRuntimeSet reports whether a nested runtime (`podman` or
+// `docker`) is configured.
+func nestedRuntimeSet(dc *ubootYAMLDevcontainer) bool {
+	return nestedPodman(dc) || nestedDocker(dc)
 }
 
 // checkSandboxRuntime implements LH-FA-DEV-007 from the host's point
@@ -65,15 +71,19 @@ func credentialScanFiles() []string {
 // an error (exit 11).
 func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) domain.Diagnostic {
 	cfg, err := s.loadUbootYAML(baseDir)
-	if err != nil || cfg.Devcontainer == nil || !nestedPodman(cfg.Devcontainer) && !profileIsSandbox(cfg.Devcontainer) {
+	if err != nil || cfg.Devcontainer == nil || !nestedRuntimeSet(cfg.Devcontainer) && !profileIsSandbox(cfg.Devcontainer) {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityOK,
 			Message: "No sandbox nested runtime configured; check skipped."}
 	}
 	dc := cfg.Devcontainer
-	if nestedPodman(dc) && !profileIsSandbox(dc) {
+	if nestedRuntimeSet(dc) && !profileIsSandbox(dc) {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityWarn,
-			Message: "devcontainer.sandbox.nestedRuntime is `podman` but devcontainer.profile is not `sandbox`; the setting has no effect (LH-FA-DEV-007).",
+			Message: fmt.Sprintf("devcontainer.sandbox.nestedRuntime is `%s` but devcontainer.profile is not `sandbox`; the setting has no effect (LH-FA-DEV-007).", dc.Sandbox.NestedRuntime),
 			Hint:    "Run `u-boot config set devcontainer.profile sandbox` and `u-boot generate devcontainer`, or set nestedRuntime to `none`."}
+	}
+	if nestedDocker(dc) {
+		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityOK,
+			Message: "Nested Docker daemon configured; it needs `--privileged`, which removes the isolation from the container host, and the container start script checks that the daemon becomes ready (LH-FA-DEV-007)."}
 	}
 	if !nestedPodman(dc) {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityOK,
@@ -174,6 +184,11 @@ func (s *DoctorService) checkSandboxEgress(_ context.Context, baseDir string) do
 		return domain.Diagnostic{ID: checkIDSandboxEgress, Severity: domain.SeverityWarn,
 			Message: "devcontainer.sandbox.egress.enabled is set but devcontainer.profile is not `sandbox`; the setting has no effect (LH-FA-DEV-008).",
 			Hint:    "Run `u-boot config set devcontainer.profile sandbox` and `u-boot generate devcontainer`, or disable the egress restriction."}
+	}
+	if nestedDocker(cfg.Devcontainer) {
+		return domain.Diagnostic{ID: checkIDSandboxEgress, Severity: domain.SeverityWarn,
+			Message: "Egress restriction together with nestedRuntime `docker`: the traffic of nested containers and the iptables rules of the nested daemon bypass the restriction, and `--privileged` lets any process lift it (LH-FA-DEV-008).",
+			Hint:    "Treat the restriction as a guardrail only, or set `devcontainer.sandbox.nestedRuntime` to `none` or `podman`."}
 	}
 	return domain.Diagnostic{ID: checkIDSandboxEgress, Severity: domain.SeverityOK,
 		Message: "Egress restriction configured; the NET_ADMIN capability is verified when the container starts (guardrail, not a sandbox boundary)."}

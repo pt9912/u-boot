@@ -82,7 +82,7 @@ const (
 
 	// ConfigDevcontainerSandboxNestedRuntime addresses
 	// `devcontainer.sandbox.nestedRuntime` (LH-FA-DEV-007). Read +
-	// write; closed set none | podman.
+	// write; closed set none | podman | docker.
 	ConfigDevcontainerSandboxNestedRuntime
 
 	// ConfigDevcontainerSandboxOnUnavailable addresses

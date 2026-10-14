@@ -48,15 +48,18 @@ const (
 	NestedRuntimeNone NestedRuntime = "none"
 	// NestedRuntimePodman provides rootless Podman inside it.
 	NestedRuntimePodman NestedRuntime = "podman"
+	// NestedRuntimeDocker provides an own Docker daemon inside it
+	// (needs `--privileged`).
+	NestedRuntimeDocker NestedRuntime = "docker"
 )
 
 // NewNestedRuntime validates raw against the closed set.
 func NewNestedRuntime(raw string) (NestedRuntime, error) {
 	switch r := NestedRuntime(raw); r {
-	case NestedRuntimeNone, NestedRuntimePodman:
+	case NestedRuntimeNone, NestedRuntimePodman, NestedRuntimeDocker:
 		return r, nil
 	}
-	return "", fmt.Errorf("%w: devcontainer.sandbox.nestedRuntime %q; allowed: none, podman",
+	return "", fmt.Errorf("%w: devcontainer.sandbox.nestedRuntime %q; allowed: none, podman, docker",
 		ErrInvalidSandboxSetting, raw)
 }
 

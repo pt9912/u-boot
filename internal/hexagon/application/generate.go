@@ -937,6 +937,10 @@ func (s *GenerateService) planDevcontainerFiles(baseDir string, data templateDat
 		// LH-FA-DEV-007: startup check baked into the image via COPY.
 		specs = append(specs, spec{".devcontainer/sandbox-init.sh", "devcontainer/sandbox-init.sh.tmpl", managedblock.StyleHash})
 	}
+	if data.NestedDocker {
+		// LH-FA-DEV-007: daemon start script baked into the image via COPY.
+		specs = append(specs, spec{".devcontainer/docker-init.sh", "devcontainer/docker-init.sh.tmpl", managedblock.StyleHash})
+	}
 	if data.Egress {
 		// LH-FA-DEV-008: egress restriction script baked via COPY.
 		specs = append(specs, spec{".devcontainer/egress-init.sh", "devcontainer/egress-init.sh.tmpl", managedblock.StyleHash})

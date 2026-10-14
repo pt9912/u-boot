@@ -58,8 +58,8 @@ func egressBaseHosts() []string {
 	}
 }
 
-// egressPodmanHosts are added with `nestedRuntime: podman`.
-func egressPodmanHosts() []string {
+// egressRegistryHosts are added with `nestedRuntime: podman` or `docker`.
+func egressRegistryHosts() []string {
 	return []string{"registry-1.docker.io", "auth.docker.io", "production.cloudflare.docker.com", "ghcr.io"}
 }
 
@@ -90,7 +90,7 @@ func cloneSourceHost(raw string) string {
 }
 
 // egressHosts computes the effective allowlist baked into the startup
-// script: default base + podman + enabled features + clone source host
+// script: default base + registries (podman, docker) + enabled features + clone source host
 // + the user's `egress.allow`; sorted and de-duplicated (ADR-0012).
 func egressHosts(dc *ubootYAMLDevcontainer, cloneURL string) []string {
 	set := map[string]bool{}
@@ -102,8 +102,8 @@ func egressHosts(dc *ubootYAMLDevcontainer, cloneURL string) []string {
 		}
 	}
 	add(egressBaseHosts()...)
-	if nestedPodman(dc) {
-		add(egressPodmanHosts()...)
+	if nestedPodman(dc) || nestedDocker(dc) {
+		add(egressRegistryHosts()...)
 	}
 	if dc != nil {
 		byFeature := egressFeatureHosts()

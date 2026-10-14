@@ -13,6 +13,7 @@ import (
 const (
 	sandboxYAMLHead   = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n"
 	sandboxYAMLPodman = sandboxYAMLHead + "  profile: sandbox\n  sandbox:\n    nestedRuntime: podman\n"
+	sandboxYAMLDocker = sandboxYAMLHead + "  profile: sandbox\n  sandbox:\n    nestedRuntime: docker\n"
 )
 
 func runSandboxDoctor(t *testing.T, setup func(fs *fakeFS)) []domain.Diagnostic {
@@ -48,6 +49,8 @@ func TestDoctor_SandboxRuntime(t *testing.T) {
 		{"no devcontainer config", "schemaVersion: 1\nproject:\n  name: demo\n", true, false, false, domain.SeverityOK, "skipped"},
 		{"sandbox without nested runtime", sandboxYAMLHead + "  profile: sandbox\n", true, false, false, domain.SeverityOK, "nothing to check"},
 		{"podman without sandbox profile", sandboxYAMLHead + "  sandbox:\n    nestedRuntime: podman\n", true, true, false, domain.SeverityWarn, "no effect"},
+		{"docker without sandbox profile", sandboxYAMLHead + "  sandbox:\n    nestedRuntime: docker\n", true, true, false, domain.SeverityWarn, "no effect"},
+		{"docker with sandbox profile", sandboxYAMLDocker, true, false, false, domain.SeverityOK, "--privileged"},
 		{"fuse available", sandboxYAMLPodman, true, true, false, domain.SeverityOK, "/dev/fuse is available"},
 		{"fuse missing, warn policy", sandboxYAMLPodman, true, false, false, domain.SeverityWarn, "vfs"},
 		{"fuse missing, fail policy", sandboxYAMLPodman + "    onUnavailable: fail\n", true, false, false, domain.SeverityError, "`fail`"},
@@ -136,6 +139,7 @@ func TestDoctor_SandboxEgress(t *testing.T) {
 		{"off", sandboxYAMLHead, domain.SeverityOK, "not enabled"},
 		{"on without sandbox", sandboxYAMLHead + "  sandbox:\n    egress:\n      enabled: true\n", domain.SeverityWarn, "no effect"},
 		{"on with sandbox", sandboxYAMLHead + "  profile: sandbox\n  sandbox:\n    egress:\n      enabled: true\n", domain.SeverityOK, "verified when the container starts"},
+		{"on with nested docker", sandboxYAMLDocker + "    egress:\n      enabled: true\n", domain.SeverityWarn, "bypass the restriction"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

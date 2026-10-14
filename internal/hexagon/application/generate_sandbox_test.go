@@ -619,3 +619,157 @@ func TestGenerateDevcontainer_SandboxEgress_NotGenerated(t *testing.T) {
 		})
 	}
 }
+
+const sandboxDockerYAML = "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    nestedRuntime: docker\n"
+
+func dockerInitPath() string {
+	return filepath.Join(generateTestBaseDir, ".devcontainer", "docker-init.sh")
+}
+
+// LH-FA-DEV-007: nestedRuntime docker adds `--privileged` as the only
+// runArgs entry, the daemon-storage volume, the daemon start script
+// (COPY + postStartCommand) and reports the relaxation as a warning.
+func TestGenerateDevcontainer_SandboxDocker(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, sandboxDockerYAML)
+	seedGitOrigin(t, fs, "https://github.com/pt9912/demo.git")
+
+	resp, err := generateSandbox(svc, false)
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	m := devcontainerJSONMap(t, fs)
+	if args, _ := m["runArgs"].([]any); len(args) != 1 || args[0] != "--privileged" {
+		t.Errorf("runArgs = %v, want [--privileged]", m["runArgs"])
+	}
+	mounts, _ := m["mounts"].([]any)
+	if len(mounts) != 2 ||
+		mounts[0] != "source=t-uboot-gen-workspace-${devcontainerId},target=/workspaces/t-uboot-gen,type=volume" ||
+		mounts[1] != "source=t-uboot-gen-docker-${devcontainerId},target=/var/lib/docker,type=volume" {
+		t.Errorf("mounts = %v", mounts)
+	}
+	for _, mnt := range mounts {
+		if strings.Contains(mnt.(string), "docker.sock") || strings.Contains(mnt.(string), "type=bind") {
+			t.Errorf("no socket/bind mounts allowed: %v", mnt)
+		}
+	}
+	if m["postStartCommand"] != "sudo sh /usr/local/bin/u-boot-docker-init" {
+		t.Errorf("postStartCommand = %v", m["postStartCommand"])
+	}
+	if m["postCreateCommand"] != "[ -d .git ] || git clone -- https://github.com/pt9912/demo.git ." {
+		t.Errorf("postCreateCommand = %v", m["postCreateCommand"])
+	}
+	df, _ := fs.ReadFile(dockerfilePath())
+	for _, want := range []string{"docker.io docker-cli docker-buildx docker-compose", "usermod -aG docker vscode", "COPY docker-init.sh /usr/local/bin/u-boot-docker-init"} {
+		if !strings.Contains(string(df), want) {
+			t.Errorf("Dockerfile lacks %q:\n%s", want, df)
+		}
+	}
+	if strings.Contains(string(df), "podman") {
+		t.Errorf("Dockerfile must not install podman:\n%s", df)
+	}
+	script, err := fs.ReadFile(dockerInitPath())
+	if err != nil {
+		t.Fatalf("docker-init.sh not generated: %v", err)
+	}
+	if !strings.Contains(string(script), `on_unavailable="warn"`) || !strings.Contains(string(script), "exit 11") ||
+		!strings.Contains(string(script), "dockerd --host=unix:///var/run/docker.sock") {
+		t.Errorf("script lacks policy/exit 11/dockerd start:\n%s", script)
+	}
+	if exists, _ := fs.Exists(sandboxInitPath()); exists {
+		t.Errorf("sandbox-init.sh (podman) must not be generated")
+	}
+	relaxations := 0
+	for _, w := range resp.Warnings {
+		if w.Code == "LH-FA-DEV-007" && strings.Contains(w.Message, "--privileged") {
+			relaxations++
+		}
+	}
+	if relaxations != 1 {
+		t.Errorf("--privileged warnings = %d, want 1: %+v", relaxations, resp.Warnings)
+	}
+	if resp2, err := generateSandbox(svc, false); err != nil || resp2.Action != driving.GenerateActionNoOp {
+		t.Errorf("second run: action=%v err=%v, want NoOp", resp2.Action, err)
+	}
+}
+
+// onUnavailable: fail is baked into the daemon start script.
+func TestGenerateDevcontainer_SandboxDocker_FailPolicy(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, sandboxDockerYAML+"    onUnavailable: fail\n")
+	if _, err := generateSandbox(svc, false); err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	script, _ := fs.ReadFile(dockerInitPath())
+	if !strings.Contains(string(script), `on_unavailable="fail"`) {
+		t.Errorf("script lacks fail policy:\n%s", script)
+	}
+}
+
+// nestedRuntime docker without the sandbox profile generates no daemon
+// and no `--privileged`; it warns. podman and none never produce
+// `--privileged`.
+func TestGenerateDevcontainer_SandboxDocker_NotGenerated(t *testing.T) {
+	t.Parallel()
+	for name, tc := range map[string]struct {
+		yaml     string
+		wantWarn bool
+	}{
+		"podman": {sandboxPodmanYAML, false},
+		"none":   {"devcontainer:\n  enabled: true\n  profile: sandbox\n", false},
+		"docker, default profile": {"devcontainer:\n  enabled: true\n  sandbox:\n    nestedRuntime: docker\n", true},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, tc.yaml)
+			resp, err := generateSandbox(svc, false)
+			if err != nil {
+				t.Fatalf("generate: %v", err)
+			}
+			if exists, _ := fs.Exists(dockerInitPath()); exists {
+				t.Errorf("docker-init.sh must not be generated")
+			}
+			body, _ := fs.ReadFile(filepath.Join(generateTestBaseDir, ".devcontainer", "devcontainer.json"))
+			if strings.Contains(string(body), "--privileged") {
+				t.Errorf("devcontainer.json must not contain --privileged:\n%s", body)
+			}
+			df, _ := fs.ReadFile(dockerfilePath())
+			if strings.Contains(string(df), "docker.io") {
+				t.Errorf("Dockerfile must not install the Docker daemon:\n%s", df)
+			}
+			hasWarn := false
+			for _, w := range resp.Warnings {
+				hasWarn = hasWarn || (w.Code == "LH-FA-DEV-007" && strings.Contains(w.Message, "no effect"))
+			}
+			if hasWarn != tc.wantWarn {
+				t.Errorf("no-effect warning = %v, want %v (%+v)", hasWarn, tc.wantWarn, resp.Warnings)
+			}
+		})
+	}
+}
+
+// Docker + egress: both relaxations in runArgs, egress init before the
+// daemon start in postStartCommand, registries in the allowlist.
+func TestGenerateDevcontainer_SandboxEgressWithDocker(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, sandboxDockerYAML+"    egress:\n      enabled: true\n")
+	seedGitOrigin(t, fs, "https://github.com/o/r.git")
+	if _, err := generateSandbox(svc, false); err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	m := devcontainerJSONMap(t, fs)
+	if args, _ := m["runArgs"].([]any); len(args) != 2 || args[0] != "--privileged" || args[1] != "--cap-add=NET_ADMIN" {
+		t.Errorf("runArgs = %v, want --privileged + NET_ADMIN", m["runArgs"])
+	}
+	if m["postStartCommand"] != "sudo sh /usr/local/bin/u-boot-egress-init && sudo sh /usr/local/bin/u-boot-docker-init" {
+		t.Errorf("postStartCommand = %v", m["postStartCommand"])
+	}
+	script, _ := fs.ReadFile(egressInitPath())
+	if !strings.Contains(string(script), "registry-1.docker.io") {
+		t.Errorf("registries missing from the allowlist:\n%s", script)
+	}
+}

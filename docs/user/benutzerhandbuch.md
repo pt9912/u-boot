@@ -904,7 +904,7 @@ konfigurierten Clone-Quelle, siehe unten).
 |---|---|---|
 | Workspace | benanntes Volume `<projekt>-workspace-${devcontainerId}`; das Repository wird im Container geklont | Bind-Mount des Projektordners |
 | Docker-Socket des Hosts | nicht eingebunden | nicht eingebunden |
-| `--privileged` und zusätzliche Fähigkeiten | nein (außer mit verschachteltem Podman) | nein |
+| `--privileged` und zusätzliche Fähigkeiten | nein (außer mit verschachteltem Podman oder Docker; Docker verlangt `--privileged`) | nein |
 | Geheimnis-Verzeichnisse des Hosts (`~/.ssh`, `~/.aws`, …) | nicht eingebunden | nicht eingebunden |
 | Benutzer | `vscode`, nicht root | `vscode`, nicht root |
 
@@ -963,7 +963,8 @@ Was beim Containerstart passiert, wenn Fähigkeiten fehlen, steuert
 | Zustand | `warn` | `fail` |
 |---|---|---|
 | `/dev/fuse` fehlt | Rückfall auf `vfs`-Speicher, Warnung | Abbruch mit Exit-Code 11 |
-| Verschachtelte User-Namespaces blockiert (Seccomp oder AppArmor) | Abbruch mit Exit-Code 11 | Abbruch mit Exit-Code 11 |
+| Verschachtelte User-Namespaces blockiert (Seccomp oder AppArmor), nur `podman` | Abbruch mit Exit-Code 11 | Abbruch mit Exit-Code 11 |
+| Docker-Daemon wird nicht betriebsbereit (`docker`, zum Beispiel Start ohne `--privileged`) | Container ohne Daemon, Warnung | Abbruch mit Exit-Code 11 |
 
 Unter **Ubuntu 24.04** (und auf Hosts mit
 `kernel.apparmor_restrict_unprivileged_userns=1`) blockiert dieser Schalter
@@ -975,6 +976,39 @@ dann mit Exit-Code 11. Abhilfe: auf dem Container-Host
 `u-boot doctor` prüft `/dev/fuse` nur auf Linux-Hosts. Unter macOS mit Colima
 läuft die Engine in einer VM, die der Host nicht beurteilen kann; dort prüft das
 Startscript im Container.
+
+
+#### Eigener Docker-Daemon (optional)
+
+```bash
+u-boot config set devcontainer.sandbox.nestedRuntime docker
+u-boot generate devcontainer
+```
+
+Im Container läuft dann ein **eigener Docker-Daemon** (Debian-Pakete `docker.io`,
+`docker-cli`, `docker-buildx`, `docker-compose`) mit BuildKit, Buildx und
+Compose. Die `docker`-CLI spricht nur mit diesem Daemon; der Socket ist dem
+Benutzer `vscode` über die Gruppe `docker` zugänglich, `sudo` ist nicht nötig.
+Der Daemon startet beim Containerstart und liegt in einem Volume je Instanz
+(`<projekt>-docker-${devcontainerId}`). Das brauchen Repos, deren Prüfungen
+`docker buildx build -o type=cacheonly`, `RUN --network=none`, `docker compose`
+oder `docker run --privileged docker:dind` nutzen.
+
+**Warnung:** `docker` verlangt `--privileged`. `u-boot` weist das als Warnung
+aus. Das Profil bietet damit **keine Isolationsgrenze gegenüber dem
+Container-Host** mehr; ein Ausbruch trifft unter Linux den Host und unter macOS
+die VM von Docker Desktop oder Colima. Das Profil begrenzt weiterhin Workspace,
+Geheimnisse und Docker-Socket des Hosts.
+
+- Jede Instanz hat einen eigenen Daemon: gleichnamige Images, Container, Netze
+  und Volumes mehrerer Instanzen kollidieren nicht. Dafür hält jede Instanz
+  ihre Images selbst (mehrere GB) und startet kalt.
+- Wird der Daemon nicht innerhalb von 60 Sekunden bereit (zum Beispiel ohne
+  `--privileged`), gilt `devcontainer.sandbox.onUnavailable`: Warnung und
+  Container ohne Daemon (`warn`) oder Exit-Code 11 (`fail`). Podman ersetzt den
+  Daemon nie.
+- Das Standardprofil und `podman` bleiben unverändert.
+- Unter Podman als Host-Engine ist `docker` nicht zugesagt.
 
 #### Internet-Beschränkung (Egress)
 
@@ -995,7 +1029,7 @@ Standardmäßig erlaubt sind:
 | Quelle | Hosts |
 |---|---|
 | immer | `github.com`, `api.github.com`, `codeload.github.com`, `raw.githubusercontent.com`, `objects.githubusercontent.com`, `deb.debian.org`, `security.debian.org` |
-| mit `nestedRuntime: podman` | `registry-1.docker.io`, `auth.docker.io`, `production.cloudflare.docker.com`, `ghcr.io` |
+| mit `nestedRuntime: podman` oder `docker` | `registry-1.docker.io`, `auth.docker.io`, `production.cloudflare.docker.com`, `ghcr.io` |
 | Feature `node` | `registry.npmjs.org` |
 | Feature `go` | `proxy.golang.org`, `sum.golang.org`, `storage.googleapis.com` |
 | Feature `java` | `repo.maven.apache.org`, `repo1.maven.org` |
@@ -1008,8 +1042,9 @@ Standardmäßig erlaubt sind:
 - Nach einer Änderung führen Sie `u-boot generate devcontainer` aus und starten
   den Container neu.
 - Wer die Fähigkeit hat und das `sudo` des Base-Images nutzen kann, kann die
-  Regeln aufheben. Der Verkehr verschachtelter Podman-Container wird nicht
-  erfasst.
+  Regeln aufheben. Der Verkehr verschachtelter Container und die
+  iptables-Regeln eines verschachtelten Docker-Daemons umgehen die Beschränkung;
+  `u-boot doctor` warnt bei `docker` mit Beschränkung.
 - Ohne `NET_ADMIN` entfällt die Beschränkung mit einer Warnung (`warn`) oder das
   Startscript endet mit Exit-Code 11 (`fail`). `u-boot doctor` prüft nur die
   Konfiguration; ohne Sandbox-Profil ist sie wirkungslos und `doctor` warnt.
@@ -1034,7 +1069,8 @@ erzeugten Datei:
 #### Mehrere Instanzen
 
 Die Volumes heißen `<projekt>-workspace-${devcontainerId}` und (mit
-verschachteltem Podman) `<projekt>-containers-${devcontainerId}`. Das
+verschachteltem Podman) `<projekt>-containers-${devcontainerId}` beziehungsweise (mit
+verschachteltem Docker) `<projekt>-docker-${devcontainerId}`. Das
 Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
 
 - Parallele Instanzen desselben Projekts starten Sie aus **getrennten Ordnern**
@@ -1046,8 +1082,9 @@ Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
 
 #### Grenzen
 
-- Geprüft unter Docker auf Linux mit der `devcontainer`-CLI. **Nicht geprüft:**
-  macOS mit Colima, Podman als Host-Engine, VS Code und Codespaces.
+- Geprüft unter Docker auf Linux mit der `devcontainer`-CLI; `nestedRuntime: docker`
+  zusätzlich unter Colima (Linux-VM). **Nicht geprüft:** Docker Desktop,
+  Podman als Host-Engine, VS Code und Codespaces.
 - Der Wechsel von `podman` zurück auf `none` lässt eine vorhandene
   `sandbox-init.sh` im Ordner liegen; das Dockerfile verwendet sie dann nicht
   mehr.
@@ -1197,7 +1234,7 @@ mit `--json` einen strukturierten Hinweis in `data.hint` (`command`, `action`,
 | `devcontainer.features.<name>.version` | Feature-Version | zum Beispiel `21` | ja |
 | `devcontainer.features.<name>.source` | externe Feature-Quelle | URL aus der Freigabeliste | ja |
 | `devcontainer.featureSources.allow` | Freigabeliste externer Quellen | URLs, kommagetrennt | ja |
-| `devcontainer.sandbox.nestedRuntime` | Container-Laufzeit im Sandbox | `none` / `podman` | ja |
+| `devcontainer.sandbox.nestedRuntime` | Container-Laufzeit im Sandbox | `none` / `podman` / `docker` | ja |
 | `devcontainer.sandbox.onUnavailable` | Verhalten ohne Fähigkeit | `warn` / `fail` | ja |
 | `devcontainer.sandbox.repository` | Clone-Quelle statt `origin` | Git-Adresse ohne Zugangsdaten | ja |
 | `devcontainer.sandbox.egress.enabled` | Internet-Beschränkung | `true` / `false` | ja |
@@ -1427,7 +1464,9 @@ verwalteten Bereichs bleiben erhalten.
 
 Verschachteltes Podman (`nestedRuntime: podman`) braucht Fähigkeiten, die der
 Host nicht bietet, zum Beispiel blockierte User-Namespaces unter Ubuntu 24.04
-oder fehlendes `/dev/fuse`.
+oder fehlendes `/dev/fuse`. Der Docker-Daemon (`nestedRuntime: docker`) wird
+nicht bereit, wenn der Container ohne `--privileged` startet; das Log
+`/var/log/u-boot-dockerd.log` im Container nennt den Grund.
 
 #### Lösung
 
@@ -1682,7 +1721,7 @@ Reparaturvorschlag: `command` (der Befehl zum Kopieren), `action` und `argument`
 | `devcontainer.forwardPorts.consistency` | Weiterleitungs-Ports passen zu den Diensten |
 | `devcontainer.features.allowlist` | externe Features sind freigegeben |
 | `devcontainer.features.drift` | Features in `u-boot.yaml` und `devcontainer.json` stimmen überein |
-| `devcontainer.sandbox.runtime` | Sandbox: verschachteltes Podman passend konfiguriert |
+| `devcontainer.sandbox.runtime` | Sandbox: verschachtelte Runtime (Podman oder Docker) passend konfiguriert |
 | `devcontainer.sandbox.egress` | Sandbox: Internet-Beschränkung passend konfiguriert |
 | `devcontainer.sandbox.credentials` | Sandbox: keine Klartext-Zugangsdaten, Token-Quelle vorhanden |
 

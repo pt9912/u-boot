@@ -19,6 +19,11 @@
     "source={{.WorkspaceVolume}}-${devcontainerId},target={{.WorkspaceFolder}},type=volume",
     "source={{.ContainersVolume}}-${devcontainerId},target=/home/vscode/.local/share/containers,type=volume"
   ],
+{{- else if .NestedDocker}}
+  "mounts": [
+    "source={{.WorkspaceVolume}}-${devcontainerId},target={{.WorkspaceFolder}},type=volume",
+    "source={{.DockerVolume}}-${devcontainerId},target=/var/lib/docker,type=volume"
+  ],
 {{- else}}
   "mounts": ["source={{.WorkspaceVolume}}-${devcontainerId},target={{.WorkspaceFolder}},type=volume"],
 {{- end}}

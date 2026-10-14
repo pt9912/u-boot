@@ -197,8 +197,9 @@ Verfeinert [`LH-FA-DEV-007`](lastenheft.md#lh-fa-dev-007--container-runtime-im-s
 | `/dev/fuse` nicht verfügbar | Fallback auf `vfs`-Storage, Warnung mit Hinweis | Umgebungsproblem, Exit-Code `11` |
 | Nested User-Namespaces durch Seccomp/AppArmor blockiert und `nestedRuntime: podman` | Umgebungsproblem, Exit-Code `11` | Umgebungsproblem, Exit-Code `11` |
 | Egress-Capability (`NET_ADMIN`) nicht gewährbar ([`LH-FA-DEV-008`](lastenheft.md#lh-fa-dev-008--egress-restriktion)) | Egress-Restriktion entfällt, Warnung mit Hinweis auf Restriktion auf Netz-/DNS-Ebene | Umgebungsproblem, Exit-Code `11` |
+| Docker-Daemon wird beim Containerstart nicht betriebsbereit (`nestedRuntime: docker`, etwa Start ohne `--privileged`) | Container ohne Daemon, Warnung mit Hinweis; keine andere Runtime als Ersatz | Umgebungsproblem, Exit-Code `11` |
 
-Ausdrücklich angeforderte Runtime (`nestedRuntime: podman`) wird nie stillschweigend durch etwas anderes ersetzt. Jeder Fallback wird in der Befehlsausgabe und in `u-boot doctor` ausgewiesen. Die Prüfung erfolgt durch `u-boot doctor` (soweit vom Host aus ermittelbar) und beim Containerstart durch das erzeugte Startscript, das im Fehlerfall nicht-null endet. Ungültige Werte der Schlüssel führen zu einem fachlichen Validierungsfehler (Exit-Code `10`).
+Ausdrücklich angeforderte Runtime (`nestedRuntime: podman` oder `docker`) wird nie stillschweigend durch etwas anderes ersetzt. Jeder Fallback wird in der Befehlsausgabe und in `u-boot doctor` ausgewiesen. Die Prüfung erfolgt durch `u-boot doctor` (soweit vom Host aus ermittelbar) und beim Containerstart durch das erzeugte Startscript, das im Fehlerfall nicht-null endet. Ungültige Werte der Schlüssel führen zu einem fachlichen Validierungsfehler (Exit-Code `10`).
 
 ### LH-FA-ADD-005.a — Zustandsregeln für registrierte und aktive Services
 
@@ -322,6 +323,7 @@ Verfeinert [`LH-FA-INIT-005`](lastenheft.md#lh-fa-init-005--überschreibschutz).
 Verfeinert [`LH-FA-DEV-007`](lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer).
 
 - Bei `podman`: rootless Podman, ein `docker`-Kompatibilitäts-Alias, Zugriff auf `/dev/fuse`, subuid-/subgid-Bereiche für den Container-Benutzer und ein Volume für den Storage.
+- Bei `docker`: Docker-Daemon, `docker`-CLI sowie Buildx- und Compose-Plugin aus den Debian-Paketen; der Container-Benutzer gehört der Gruppe `docker` an, der Daemon startet beim Containerstart (`postStartCommand`) und gilt nach spätestens 60 Sekunden als nicht betriebsbereit; `runArgs` enthält `--privileged` und sonst keine Fähigkeitsoptionen; der Daemon-Speicher (`/var/lib/docker`) liegt in einem Volume `<projekt>-docker-${devcontainerId}`; kein Socket-Mount.
 
 ### LH-FA-DEV-008.a — Verhalten bei nicht gewährbarer Capability
 
@@ -593,7 +595,7 @@ devcontainer:
 #     uid: 1000                    # 1..65535
 #   profile: default               # default | sandbox
 #   sandbox:
-#     nestedRuntime: none          # none | podman
+#     nestedRuntime: none          # none | podman | docker
 #     onUnavailable: warn          # warn | fail
 #     repository: ''               # Clone-Quelle statt origin (URL)
 #     egress:
@@ -813,7 +815,7 @@ Die wirksame Liste ist die Vereinigung aus Basis, Ergänzungen und Nutzerliste, 
 | Quelle | Hosts |
 |---|---|
 | immer | `github.com`, `api.github.com`, `codeload.github.com`, `raw.githubusercontent.com`, `objects.githubusercontent.com`, `deb.debian.org`, `security.debian.org` |
-| `nestedRuntime: podman` | `registry-1.docker.io`, `auth.docker.io`, `production.cloudflare.docker.com`, `ghcr.io` |
+| `nestedRuntime: podman` oder `docker` | `registry-1.docker.io`, `auth.docker.io`, `production.cloudflare.docker.com`, `ghcr.io` |
 | Feature `node` | `registry.npmjs.org` |
 | Feature `go` | `proxy.golang.org`, `sum.golang.org`, `storage.googleapis.com` |
 | Feature `java` | `repo.maven.apache.org`, `repo1.maven.org` |

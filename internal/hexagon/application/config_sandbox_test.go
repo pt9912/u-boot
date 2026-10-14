@@ -73,7 +73,7 @@ func TestConfigSet_SandboxKeys_InvalidValue(t *testing.T) {
 		{"devcontainer.user.uid", "65536"},
 		{"devcontainer.user.uid", "abc"},
 		{"devcontainer.profile", "strict"},
-		{"devcontainer.sandbox.nestedRuntime", "docker"},
+		{"devcontainer.sandbox.nestedRuntime", "containerd"},
 		{"devcontainer.sandbox.onUnavailable", "ignore"},
 		{"devcontainer.sandbox.repository", "https://token@github.com/o/r.git"},
 		{"devcontainer.sandbox.repository", "https://github.com/o/r.git;rm -rf /"},

@@ -11,6 +11,19 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- Sandbox devcontainer: `devcontainer.sandbox.nestedRuntime: docker` provides an own Docker daemon in the container
+  (Debian packages `docker.io`, `docker-cli`, `docker-buildx`, `docker-compose`; BuildKit, Buildx and Compose) next to
+  `podman` and `none`. The daemon starts at container start, its storage lives in a volume per instance
+  (`<project>-docker-${devcontainerId}`), and the container user reaches it through the `docker` group; no host socket is
+  mounted. `docker` requires `--privileged`; the command output reports it as a relaxation and notes that the profile no
+  longer isolates the container from its host. A daemon that is not ready at container start degrades per
+  `devcontainer.sandbox.onUnavailable` (warning without daemon, or exit code `11`); `u-boot doctor` warns for `docker`
+  without the sandbox profile and with the egress restriction
+  ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), Lastenheft 0.5.0,
+  [ADR-0018](docs/plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md)).
+
 ## [0.7.0] - 2026-10-01
 
 Seventh release. **Linux packages.** Every release now carries `.deb` and `.rpm` packages

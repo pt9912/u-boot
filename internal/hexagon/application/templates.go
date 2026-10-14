@@ -64,6 +64,12 @@ type templateData struct {
 	OnUnavailable    string
 	ContainersVolume string
 
+	// NestedDocker switches on the LH-FA-DEV-007 own Docker daemon
+	// (sandbox profile only); DockerVolume is the named volume of the
+	// daemon storage (`/var/lib/docker`).
+	NestedDocker bool
+	DockerVolume string
+
 	// Egress switches on the LH-FA-DEV-008 outbound restriction;
 	// EgressHosts is the effective allowlist baked into the startup
 	// script. RunArgs / PostCreate / PostStart are the composed

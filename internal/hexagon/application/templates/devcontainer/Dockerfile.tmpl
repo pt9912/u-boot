@@ -23,6 +23,14 @@ RUN apt-get update \
  && chown -R vscode:vscode /home/vscode/.local
 COPY sandbox-init.sh /usr/local/bin/u-boot-sandbox-init
 {{- end}}
+{{- if .NestedDocker}}
+# Nested Docker daemon (LH-FA-DEV-007): Debian packages, daemon started at container start.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends docker.io docker-cli docker-buildx docker-compose iptables ca-certificates \
+ && rm -rf /var/lib/apt/lists/* \
+ && usermod -aG docker vscode
+COPY docker-init.sh /usr/local/bin/u-boot-docker-init
+{{- end}}
 {{- if .Egress}}
 # Egress restriction (LH-FA-DEV-008).
 RUN apt-get update \

@@ -4,8 +4,9 @@
 // (LH-FA-DEV-004/-006/-007/-009): generate the files with the
 // production adapters, build the image with the real Docker engine,
 // start it with the generated runArgs and run the generated startup
-// script plus a nested `podman run`. Colima/macOS and Podman as the
-// host engine are not covered (ADR 0014, Nachholmessung).
+// script plus a nested `podman run` (ADR 0014) or an own Docker
+// daemon (ADR 0018). Podman as the host engine is not covered; Colima
+// (Linux VM, cgroup v2) was measured for ADR 0018.
 
 package e2e_test
 
@@ -47,9 +48,9 @@ func dockerOutput(ctx context.Context, t *testing.T, args ...string) (string, in
 	return string(out), code
 }
 
-// generateSandboxProject produces a sandbox project with nested
-// Podman in a temp dir and returns the dir.
-func generateSandboxProject(ctx context.Context, t *testing.T, onUnavailable string) string {
+// generateSandboxProject produces a sandbox project with the given
+// nested runtime (`podman` | `docker`) in a temp dir and returns the dir.
+func generateSandboxProject(ctx context.Context, t *testing.T, runtime, onUnavailable string) string {
 	t.Helper()
 	dir := t.TempDir()
 	fsys := fsadapter.New()
@@ -64,7 +65,7 @@ func generateSandboxProject(ctx context.Context, t *testing.T, onUnavailable str
 	}
 	cfgSvc := application.NewConfigService(fsys, yaml, logger)
 	for path, value := range map[string]string{
-		"devcontainer.sandbox.nestedRuntime": "podman",
+		"devcontainer.sandbox.nestedRuntime": runtime,
 		"devcontainer.sandbox.onUnavailable": onUnavailable,
 	} {
 		p, err := domain.NewConfigPath(path)
@@ -197,7 +198,7 @@ func TestE2E_SandboxDevcontainer_TwoInstancesIsolated(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 	defer cancel()
-	dir := generateSandboxProject(ctx, t, "warn")
+	dir := generateSandboxProject(ctx, t, "podman", "warn")
 	image := "uboot-e2e-sandbox-multi:" + strings.ReplaceAll(filepath.Base(dir), "/", "-")
 	if out, code := dockerOutput(ctx, t, "build", "-q", "-t", image, filepath.Join(dir, ".devcontainer")); code != 0 {
 		t.Fatalf("docker build failed:\n%s", out)
@@ -276,7 +277,7 @@ func TestE2E_SandboxDevcontainer_NestedPodman(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 	defer cancel()
 
-	dir := generateSandboxProject(ctx, t, "warn")
+	dir := generateSandboxProject(ctx, t, "podman", "warn")
 
 	// LH-FA-DEV-009 / AK 4: no credential value in any generated file.
 	_ = filepath.WalkDir(dir, func(p string, d fs.DirEntry, err error) error {
@@ -341,7 +342,7 @@ func TestE2E_SandboxDevcontainer_FailPolicyWithoutFuse(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
 	defer cancel()
-	dir := generateSandboxProject(ctx, t, "fail")
+	dir := generateSandboxProject(ctx, t, "podman", "fail")
 	image := "uboot-e2e-sandbox-fail:" + strings.ReplaceAll(filepath.Base(dir), "/", "-")
 	if out, code := dockerOutput(ctx, t, "build", "-q", "-t", image, filepath.Join(dir, ".devcontainer")); code != 0 {
 		t.Fatalf("docker build failed:\n%s", out)
@@ -357,5 +358,120 @@ func TestE2E_SandboxDevcontainer_FailPolicyWithoutFuse(t *testing.T) {
 	args := append(append([]string{"run", "--rm"}, noFuse...), image, "sh", "/usr/local/bin/u-boot-sandbox-init")
 	if out, code := dockerOutput(ctx, t, args...); code != 11 {
 		t.Errorf("fail policy without /dev/fuse: exit %d, want 11:\n%s", code, out)
+	}
+}
+
+// dockerExec runs `bash -c script` in the container as user `vscode`
+// (no sudo, group `docker` from /etc/group).
+func dockerExec(ctx context.Context, t *testing.T, container, script string) (string, int) {
+	t.Helper()
+	return dockerOutput(ctx, t, "exec", "-u", "vscode", container, "bash", "-c", script)
+}
+
+const nestedDockerBuildScript = `set -e
+mkdir -p /tmp/ctx && cd /tmp/ctx
+printf 'FROM alpine:3 AS base\nRUN echo base > /base.txt\nFROM base AS final\nRUN --network=none echo nonet > /n.txt\n' > Dockerfile
+printf 'services:\n  hello:\n    image: alpine:3\n    command: ["echo","COMPOSE_OK"]\n' > compose.yaml
+docker buildx build --target base -o type=cacheonly . && echo CACHEONLY_OK
+docker build -t same:latest --target final . && echo NETWORK_NONE_OK
+docker compose up 2>&1 | grep -q COMPOSE_OK && echo COMPOSE_OK
+docker rm -f same-name >/dev/null 2>&1 || true
+docker run -d --name same-name same:latest sleep 600 >/dev/null && echo SAME_NAMES_OK
+docker run --rm --privileged docker:dind docker --version && echo THIRD_LEVEL_OK`
+
+// LH-FA-DEV-007 (nestedRuntime docker), acceptance criteria 2 and 3:
+// two instances of the same project each run an own daemon with
+// BuildKit, Buildx and Compose, as `vscode` without sudo, and
+// identically named images and containers do not collide.
+func TestE2E_SandboxDevcontainer_NestedDocker(t *testing.T) {
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Fatalf("docker CLI not on PATH: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Minute)
+	defer cancel()
+
+	dir := generateSandboxProject(ctx, t, "docker", "warn")
+	image := "uboot-e2e-sandbox-docker:" + strings.ReplaceAll(filepath.Base(dir), "/", "-")
+	if out, code := dockerOutput(ctx, t, "build", "-q", "-t", image, filepath.Join(dir, ".devcontainer")); code != 0 {
+		t.Fatalf("docker build of the generated Dockerfile failed:\n%s", out)
+	}
+	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
+
+	runArgs := generatedRunArgs(t, dir)
+	if len(runArgs) != 1 || runArgs[0] != "--privileged" {
+		t.Fatalf("runArgs = %v, want [--privileged]", runArgs)
+	}
+	mounts := generatedMounts(t, dir)
+	if len(mounts) != 2 || !strings.Contains(mounts[1], "-docker-${devcontainerId}") {
+		t.Fatalf("mounts = %v, want workspace + docker volume", mounts)
+	}
+	start := func(id string) string {
+		name := "uboot-e2e-dockerinst-" + id
+		args := []string{"run", "-d", "--name", name}
+		for _, m := range mounts {
+			args = append(args, "--mount", strings.ReplaceAll(m, "${devcontainerId}", id))
+		}
+		args = append(append(args, runArgs...), image, "sleep", "1800")
+		if out, code := dockerOutput(ctx, t, args...); code != 0 {
+			t.Fatalf("start instance %s: %s", id, out)
+		}
+		t.Cleanup(func() {
+			_, _ = dockerOutput(context.Background(), t, "rm", "-f", name)
+			for _, m := range mounts {
+				src := strings.TrimPrefix(strings.Split(strings.ReplaceAll(m, "${devcontainerId}", id), ",")[0], "source=")
+				_, _ = dockerOutput(context.Background(), t, "volume", "rm", "-f", src)
+			}
+		})
+		if out, code := dockerOutput(ctx, t, "exec", "-u", "vscode", name, "sudo", "sh", "/usr/local/bin/u-boot-docker-init"); code != 0 {
+			t.Fatalf("daemon start script (instance %s) exit %d:\n%s", id, code, out)
+		}
+		return name
+	}
+	a, b := start("idaaaa"), start("idbbbb")
+	for _, c := range []string{a, b} {
+		out, code := dockerExec(ctx, t, c, "docker info --format '{{.Driver}} {{.ID}}'")
+		if code != 0 || !strings.HasPrefix(out, "overlay2 ") {
+			t.Fatalf("%s: docker info exit %d: %s", c, code, out)
+		}
+		if out, code := dockerExec(ctx, t, c, nestedDockerBuildScript); code != 0 {
+			t.Fatalf("%s: nested docker script exit %d:\n%s", c, code, out)
+		} else {
+			for _, want := range []string{"CACHEONLY_OK", "NETWORK_NONE_OK", "COMPOSE_OK", "SAME_NAMES_OK", "THIRD_LEVEL_OK"} {
+				if !strings.Contains(out, want) {
+					t.Errorf("%s: output lacks %s:\n%s", c, want, out)
+				}
+			}
+		}
+	}
+	idA, _ := dockerExec(ctx, t, a, "docker info --format '{{.ID}}'")
+	idB, _ := dockerExec(ctx, t, b, "docker info --format '{{.ID}}'")
+	if strings.TrimSpace(idA) == "" || idA == idB {
+		t.Errorf("instances share one daemon: %q vs %q", idA, idB)
+	}
+}
+
+// LH-FA-DEV-007 degradation, acceptance criterion 5: a start without
+// `--privileged` ends without a daemon at `warn` (exit 0, warning) and
+// with exit code 11 at `fail`; podman never replaces the daemon.
+func TestE2E_SandboxDevcontainer_NestedDocker_Degradation(t *testing.T) {
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Fatalf("docker CLI not on PATH: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+	for policy, wantCode := range map[string]int{"warn": 0, "fail": 11} {
+		dir := generateSandboxProject(ctx, t, "docker", policy)
+		image := "uboot-e2e-sandbox-docker-" + policy + ":" + strings.ReplaceAll(filepath.Base(dir), "/", "-")
+		if out, code := dockerOutput(ctx, t, "build", "-q", "-t", image, filepath.Join(dir, ".devcontainer")); code != 0 {
+			t.Fatalf("docker build failed:\n%s", out)
+		}
+		t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
+		out, code := dockerOutput(ctx, t, "run", "--rm", image, "sudo", "sh", "/usr/local/bin/u-boot-docker-init")
+		if code != wantCode || !strings.Contains(out, "no daemon available") {
+			t.Errorf("policy %s without --privileged: exit %d, want %d with a warning:\n%s", policy, code, wantCode, out)
+		}
+		if out, code := dockerOutput(ctx, t, "run", "--rm", image, "sh", "-c", "command -v podman"); code == 0 {
+			t.Errorf("policy %s: podman present in the image: %s", policy, out)
+		}
 	}
 }
