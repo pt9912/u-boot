@@ -9,7 +9,7 @@
 
 **Eingangs-Kontext:**
 
-- [`slice-v1-sandbox-docker-ce`](../plan/planning/in-progress/slice-v1-sandbox-docker-ce.md) (DoD, Abgrenzung, Risiken)
+- [`slice-v1-sandbox-docker-ce`](../plan/planning/done/slice-v1-sandbox-docker-ce.md) (DoD, Abgrenzung, Risiken)
 - [ADR-0019](../plan/adr/0019-docker-daemon-aus-docker-apt-repo.md), [ADR-0018](../plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md), [ADR-0012](../plan/adr/0012-devcontainer-egress-firewall.md)
 - [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)
 - Vorgänger-Reports `2026-10-14-sandbox-docker-runtime.md`, `2026-10-14-sandbox-docker-runtime-r2.md`

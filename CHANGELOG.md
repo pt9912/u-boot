@@ -11,6 +11,11 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-10-14
+
+Patch release. **Current Docker in the sandbox devcontainer.** With `nestedRuntime: docker` the container now runs Docker's own
+packages (Docker 29.9, Buildx 0.38, Compose 5.6) instead of the older Debian archive versions (26.1, 0.13, 2.26).
+
 ### Changed
 
 - Sandbox devcontainer: with `nestedRuntime: docker` the Docker daemon, CLI, Buildx and Compose now come from the Docker APT
@@ -1156,7 +1161,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.8.1...HEAD
+[0.8.1]: https://github.com/pt9912/u-boot/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/pt9912/u-boot/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/pt9912/u-boot/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/pt9912/u-boot/compare/v0.5.0...v0.6.0
