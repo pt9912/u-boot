@@ -160,9 +160,9 @@ Projektinhaber |
   gilt für `docker` nicht mehr, weil DEV-007 es nun ausdrücklich verlangt;
   die neue ADR nennt das. ADR-Index aktualisiert.
 - [x] **Umsetzungs-Slice(s)** mit Kennung angelegt, die die Abnahmekriterien
-  1–7 tragen: [`slice-v1-sandbox-docker-generator`](../open/slice-v1-sandbox-docker-generator.md) (1, 4),
-  [`slice-v1-sandbox-docker-degradation-doctor`](../open/slice-v1-sandbox-docker-degradation-doctor.md) (5, 7),
-  [`slice-v1-sandbox-docker-integrationstest`](../open/slice-v1-sandbox-docker-integrationstest.md) (2, 3, 6).
+  1–7 tragen: [`slice-v1-sandbox-docker-generator`](slice-v1-sandbox-docker-generator.md) (1, 4),
+  [`slice-v1-sandbox-docker-degradation-doctor`](slice-v1-sandbox-docker-degradation-doctor.md) (5, 7),
+  [`slice-v1-sandbox-docker-integrationstest`](slice-v1-sandbox-docker-integrationstest.md) (2, 3, 6).
 - [ ] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — kein Self-Review.
@@ -224,19 +224,19 @@ sind angenommen; die drei Umsetzungs-Slices liegen in `open/` oder weiter.
    die VM von Docker Desktop/Colima, unter Linux den Host. Die Doku muss das
    so deutlich sagen wie die Podman-Warnung.
    — **Ausgang:** weiter offen: Doku im Slice
-   [`slice-v1-sandbox-docker-integrationstest`](../open/slice-v1-sandbox-docker-integrationstest.md).
+   [`slice-v1-sandbox-docker-integrationstest`](slice-v1-sandbox-docker-integrationstest.md).
 3. **Speicher und Kaltstart je Instanz:** jeder Daemon zieht und baut alles
    neu; mehrere GB je Instanz.
    — **Ausgang:** weiter offen: Doku im Slice
-   [`slice-v1-sandbox-docker-integrationstest`](../open/slice-v1-sandbox-docker-integrationstest.md).
+   [`slice-v1-sandbox-docker-integrationstest`](slice-v1-sandbox-docker-integrationstest.md).
 4. **macOS, Docker Desktop und VS Code ungeprüft** (wie bei [ADR-0014](../../adr/0014-nested-podman-sandbox-devcontainer.md)) — die
    Zielumgebung des Anlasses; Zusage erst nach Nachholmessung.
    — **Ausgang:** weiter offen: Nachholmessung im Slice
-   [`slice-v1-sandbox-docker-integrationstest`](../open/slice-v1-sandbox-docker-integrationstest.md).
+   [`slice-v1-sandbox-docker-integrationstest`](slice-v1-sandbox-docker-integrationstest.md).
 5. **Egress-Leitplanke** wird durch verschachtelte Container und
    Daemon-iptables unterlaufen.
    — **Ausgang:** weiter offen: `doctor`-Warnung im Slice
-   [`slice-v1-sandbox-docker-degradation-doctor`](../open/slice-v1-sandbox-docker-degradation-doctor.md).
+   [`slice-v1-sandbox-docker-degradation-doctor`](slice-v1-sandbox-docker-degradation-doctor.md).
 
 ## 7. Closure-Notiz
 
@@ -244,7 +244,7 @@ sind angenommen; die drei Umsetzungs-Slices liegen in `open/` oder weiter.
 - **Was ging anders als geplant:** —
 - **Steering-Loop-Eintrag:** —
 - **Beobachtungs-Register (`../observations/`):** —
-- **Folge-Slices:** [`slice-v1-sandbox-docker-generator`](../open/slice-v1-sandbox-docker-generator.md), [`slice-v1-sandbox-docker-degradation-doctor`](../open/slice-v1-sandbox-docker-degradation-doctor.md), [`slice-v1-sandbox-docker-integrationstest`](../open/slice-v1-sandbox-docker-integrationstest.md)
+- **Folge-Slices:** [`slice-v1-sandbox-docker-generator`](slice-v1-sandbox-docker-generator.md), [`slice-v1-sandbox-docker-degradation-doctor`](slice-v1-sandbox-docker-degradation-doctor.md), [`slice-v1-sandbox-docker-integrationstest`](slice-v1-sandbox-docker-integrationstest.md)
 - **Risiken aus §6:** siehe §6
 - **Drei Paarungen:** —
 

@@ -10,7 +10,7 @@ wechselt nur durch `git mv`.
 [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil),
 [ADR-0014](../../adr/0014-nested-podman-sandbox-devcontainer.md),
 [ADR-0015](../../adr/0015-sandbox-volumes-pro-instanz.md).
-Abnahmekriterien 5 und 7 aus dem CR [`slice-cr-sandbox-docker-runtime`](../next/slice-cr-sandbox-docker-runtime.md) (§1).
+Abnahmekriterien 5 und 7 aus dem CR [`slice-cr-sandbox-docker-runtime`](slice-cr-sandbox-docker-runtime.md) (§1).
 
 **Berührte Spec-Stellen:** — (die Spec-Änderung liefert der CR; dieser Slice
 setzt sie um). Spezifikations- und Architektur-Folgeänderungen benennt die
@@ -56,7 +56,7 @@ Pfad-Kandidaten; der Implementer-Agent schärft die Liste nach der Folge-ADR.
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): Lastenheft 0.5.0 und die Folge-ADR des CR [`slice-cr-sandbox-docker-runtime`](../next/slice-cr-sandbox-docker-runtime.md) sind angenommen; [`slice-v1-sandbox-docker-generator`](slice-v1-sandbox-docker-generator.md) ist geliefert.
+**Start** (`next` → `in-progress`): Lastenheft 0.5.0 und die Folge-ADR des CR [`slice-cr-sandbox-docker-runtime`](slice-cr-sandbox-docker-runtime.md) sind angenommen; [`slice-v1-sandbox-docker-generator`](slice-v1-sandbox-docker-generator.md) ist geliefert.
 
 **Rückführungen — vorab benannt:**
 
