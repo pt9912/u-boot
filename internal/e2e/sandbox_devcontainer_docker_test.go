@@ -17,6 +17,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -460,18 +461,13 @@ func TestE2E_SandboxDevcontainer_NestedDocker(t *testing.T) {
 	// Origin and age: Docker's own packages (docker-ce), not the Debian
 	// archive (docker.io, 26.1); a current major version.
 	for _, c := range []string{a, b} {
-		out, code := dockerExec(ctx, t, c, "dpkg-query -W -f='${Package} ' docker-ce containerd.io docker-buildx-plugin docker-compose-plugin; docker version --format '{{.Server.Version}}'")
-		if code != 0 {
-			t.Errorf("%s: package query exit %d: %s", c, code, out)
+		if out, code := dockerExec(ctx, t, c, "dpkg-query -W -f='${Package}\\n' docker-ce containerd.io docker-buildx-plugin docker-compose-plugin"); code != 0 {
+			t.Errorf("%s: packages from the Docker APT repository missing (exit %d): %s", c, code, out)
 		}
-		for _, pkg := range []string{"docker-ce", "containerd.io", "docker-buildx-plugin", "docker-compose-plugin"} {
-			if !strings.Contains(out, pkg) {
-				t.Errorf("%s: package %s from the Docker APT repository missing: %s", c, pkg, out)
-			}
-		}
-		fields := strings.Fields(out)
-		if major, _, _ := strings.Cut(fields[len(fields)-1], "."); len(major) < 2 || major < "28" {
-			t.Errorf("%s: Docker server version %q is older than 28", c, fields[len(fields)-1])
+		out, code := dockerExec(ctx, t, c, "docker version --format '{{.Server.Version}}'")
+		major, convErr := strconv.Atoi(strings.SplitN(strings.TrimSpace(out), ".", 2)[0])
+		if code != 0 || convErr != nil || major < 28 {
+			t.Errorf("%s: Docker server version %q (exit %d) is not a major version >= 28", c, strings.TrimSpace(out), code)
 		}
 	}
 	idA, _ := dockerExec(ctx, t, a, "docker info --format '{{.ID}}'")
@@ -580,10 +576,10 @@ func TestE2E_SandboxDevcontainer_NestedDocker_EgressAptUpdate(t *testing.T) {
 	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
 	args := append([]string{"run", "--rm"}, generatedRunArgs(t, dir)...)
 	args = append(args, image, "bash", "-c",
-		"sudo sh /usr/local/bin/u-boot-egress-init && sudo apt-get update 2>&1 | tail -5 && echo APT_UPDATE_OK; "+
+		"sudo sh /usr/local/bin/u-boot-egress-init && sudo apt-get update --error-on=any && echo APT_UPDATE_OK && "+
 			"! curl -sS --max-time 8 -o /dev/null https://example.com && echo BLOCKED_OK")
 	out, code := dockerOutput(ctx, t, args...)
-	if code != 0 || !strings.Contains(out, "APT_UPDATE_OK") || strings.Contains(out, "Err:") || strings.Contains(out, "Failed to fetch") || !strings.Contains(out, "BLOCKED_OK") {
+	if code != 0 || !strings.Contains(out, "APT_UPDATE_OK") || !strings.Contains(out, "BLOCKED_OK") {
 		t.Errorf("egress + docker: exit %d, want apt-get update to succeed and example.com to stay blocked:\n%s", code, out)
 	}
 }

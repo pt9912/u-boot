@@ -677,7 +677,8 @@ func TestGenerateDevcontainer_SandboxDocker(t *testing.T) {
 	repo := strings.Index(string(df), "/etc/apt/sources.list.d/docker.list")
 	install := strings.Index(string(df), "apt-get install")
 	if check < 0 || check >= repo || repo >= install || !strings.Contains(string(df), "signed-by=/etc/apt/keyrings/docker.asc") ||
-		!strings.Contains(string(df), `= "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"`) {
+		!strings.Contains(string(df), `/^pub/ {p=1} /^sub/ {p=0} /^fpr/ && p {print $10}`) ||
+		!strings.Contains(string(df), "= \"9DC858229FC7DD38854AE2D88D81803C0EBFCD88\" \\\n && echo \"deb [arch=") {
 		t.Errorf("Dockerfile must verify the key fingerprint before adding the repository and installing:\n%s", df)
 	}
 	script, err := fs.ReadFile(dockerInitPath())
