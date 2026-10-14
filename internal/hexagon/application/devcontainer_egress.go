@@ -63,6 +63,11 @@ func egressRegistryHosts() []string {
 	return []string{"registry-1.docker.io", "auth.docker.io", "production.cloudflare.docker.com", "ghcr.io"}
 }
 
+// egressDockerAptHost is the Docker APT repository that stays configured
+// in the image with `nestedRuntime: docker`; `apt-get update` in the
+// restricted container needs it.
+func egressDockerAptHost() string { return "download.docker.com" }
+
 // egressFeatureHosts are added per enabled devcontainer feature.
 func egressFeatureHosts() map[string][]string {
 	return map[string][]string{
@@ -104,6 +109,9 @@ func egressHosts(dc *ubootYAMLDevcontainer, cloneURL string) []string {
 	add(egressBaseHosts()...)
 	if nestedPodman(dc) || nestedDocker(dc) {
 		add(egressRegistryHosts()...)
+	}
+	if nestedDocker(dc) {
+		add(egressDockerAptHost())
 	}
 	if dc != nil {
 		byFeature := egressFeatureHosts()

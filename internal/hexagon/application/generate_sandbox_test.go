@@ -664,7 +664,7 @@ func TestGenerateDevcontainer_SandboxDocker(t *testing.T) {
 		t.Errorf("postCreateCommand = %v", m["postCreateCommand"])
 	}
 	df, _ := fs.ReadFile(dockerfilePath())
-	for _, want := range []string{"docker.io docker-cli docker-buildx docker-compose", "usermod -aG docker vscode", "COPY docker-init.sh /usr/local/bin/u-boot-docker-init"} {
+	for _, want := range []string{"docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin", "https://download.docker.com/linux/debian", "9DC858229FC7DD38854AE2D88D81803C0EBFCD88", "usermod -aG docker vscode", "COPY docker-init.sh /usr/local/bin/u-boot-docker-init"} {
 		if !strings.Contains(string(df), want) {
 			t.Errorf("Dockerfile lacks %q:\n%s", want, df)
 		}
@@ -745,7 +745,7 @@ func TestGenerateDevcontainer_SandboxDocker_NotGenerated(t *testing.T) {
 				t.Errorf("devcontainer.json must not contain --privileged:\n%s", body)
 			}
 			df, _ := fs.ReadFile(dockerfilePath())
-			if strings.Contains(string(df), "docker.io") {
+			if strings.Contains(string(df), "docker-ce") || strings.Contains(string(df), "download.docker.com") {
 				t.Errorf("Dockerfile must not install the Docker daemon:\n%s", df)
 			}
 			hasWarn := false
@@ -777,8 +777,39 @@ func TestGenerateDevcontainer_SandboxEgressWithDocker(t *testing.T) {
 		t.Errorf("postStartCommand = %v", m["postStartCommand"])
 	}
 	script, _ := fs.ReadFile(egressInitPath())
-	if !strings.Contains(string(script), "registry-1.docker.io") {
-		t.Errorf("registries missing from the allowlist:\n%s", script)
+	for _, host := range []string{"registry-1.docker.io", "download.docker.com"} {
+		if !strings.Contains(string(script), host) {
+			t.Errorf("%s missing from the allowlist:\n%s", host, script)
+		}
+	}
+}
+
+// download.docker.com is in the allowlist only with nestedRuntime docker;
+// the user's egress.allow entries stay in addition.
+func TestGenerateDevcontainer_SandboxEgress_DockerAptHostOnlyWithDocker(t *testing.T) {
+	t.Parallel()
+	for name, tc := range map[string]struct {
+		yaml string
+		want bool
+	}{
+		"docker": {sandboxDockerYAML + "    egress:\n      enabled: true\n      allow:\n        - api.example.com\n", true},
+		"podman": {sandboxPodmanYAML + "    egress:\n      enabled: true\n      allow:\n        - api.example.com\n", false},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, tc.yaml)
+			if _, err := generateSandbox(svc, false); err != nil {
+				t.Fatalf("generate: %v", err)
+			}
+			script, _ := fs.ReadFile(egressInitPath())
+			if got := strings.Contains(string(script), "download.docker.com"); got != tc.want {
+				t.Errorf("download.docker.com in allowlist = %v, want %v:\n%s", got, tc.want, script)
+			}
+			if !strings.Contains(string(script), "api.example.com") {
+				t.Errorf("user egress.allow entry missing:\n%s", script)
+			}
+		})
 	}
 }
 

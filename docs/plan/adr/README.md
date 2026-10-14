@@ -44,3 +44,4 @@ das MADR-Format gilt für neu angelegte ADRs sowie für die noch mutable
 | [ADR 0016](0016-homebrew-distribution-per-tap.md) | Accepted | Homebrew-Distribution über eigenen Tap, Formel als Release-Asset |
 | [ADR 0017](0017-linux-pakete-nfpm.md) | Accepted | Linux-Pakete (.deb/.rpm) per nfpm als Release-Assets |
 | [ADR 0018](0018-nested-docker-daemon-sandbox-devcontainer.md) | Accepted | Eigener Docker-Daemon im Sandbox-Devcontainer |
+| [ADR 0019](0019-docker-daemon-aus-docker-apt-repo.md) | Accepted | Docker-Daemon im Sandbox-Devcontainer aus dem Docker-APT-Repo |

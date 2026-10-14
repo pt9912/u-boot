@@ -985,8 +985,10 @@ u-boot config set devcontainer.sandbox.nestedRuntime docker
 u-boot generate devcontainer
 ```
 
-Im Container läuft dann ein **eigener Docker-Daemon** (Debian-Pakete `docker.io`,
-`docker-cli`, `docker-buildx`, `docker-compose`) mit BuildKit, Buildx und
+Im Container läuft dann ein **eigener Docker-Daemon** (Pakete `docker-ce`,
+`docker-ce-cli`, `containerd.io`, `docker-buildx-plugin`, `docker-compose-plugin` aus dem
+Docker-APT-Repository; der Image-Build prüft den Schlüssel-Fingerprint und braucht
+Netz zu `download.docker.com`) mit BuildKit, Buildx und
 Compose. Die `docker`-CLI spricht nur mit diesem Daemon; der Socket ist dem
 Benutzer `vscode` über die Gruppe `docker` zugänglich, `sudo` ist nicht nötig.
 Der Daemon startet beim Containerstart und liegt in einem Volume je Instanz
@@ -1030,6 +1032,7 @@ Standardmäßig erlaubt sind:
 |---|---|
 | immer | `github.com`, `api.github.com`, `codeload.github.com`, `raw.githubusercontent.com`, `objects.githubusercontent.com`, `deb.debian.org`, `security.debian.org` |
 | mit `nestedRuntime: podman` oder `docker` | `registry-1.docker.io`, `auth.docker.io`, `production.cloudflare.docker.com`, `ghcr.io` |
+| mit `nestedRuntime: docker` | zusätzlich `download.docker.com` |
 | Feature `node` | `registry.npmjs.org` |
 | Feature `go` | `proxy.golang.org`, `sum.golang.org`, `storage.googleapis.com` |
 | Feature `java` | `repo.maven.apache.org`, `repo1.maven.org` |

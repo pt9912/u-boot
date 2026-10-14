@@ -361,6 +361,13 @@ func TestE2E_SandboxDevcontainer_FailPolicyWithoutFuse(t *testing.T) {
 	}
 }
 
+// overlayDriver reports whether `docker info --format '{{.Driver}}'` names
+// an overlay storage backend: `overlay2` (classic graph driver) or
+// `overlayfs` (containerd image store, default of fresh Docker 29 installs).
+func overlayDriver(info string) bool {
+	return strings.HasPrefix(info, "overlay2") || strings.HasPrefix(info, "overlayfs")
+}
+
 // dockerExec runs `bash -c script` in the container as user `vscode`
 // (no sudo, group `docker` from /etc/group).
 func dockerExec(ctx context.Context, t *testing.T, container, script string) (string, int) {
@@ -430,7 +437,7 @@ func TestE2E_SandboxDevcontainer_NestedDocker(t *testing.T) {
 	a, b := start("idaaaa"), start("idbbbb")
 	for _, c := range []string{a, b} {
 		out, code := dockerExec(ctx, t, c, "docker info --format '{{.Driver}} {{.ID}}'")
-		if code != 0 || !strings.HasPrefix(out, "overlay2 ") {
+		if code != 0 || !overlayDriver(out) {
 			t.Fatalf("%s: docker info exit %d: %s", c, code, out)
 		}
 		if out, code := dockerExec(ctx, t, c, nestedDockerBuildScript); code != 0 {
@@ -505,7 +512,7 @@ func TestE2E_SandboxDevcontainer_NestedDocker_Restart(t *testing.T) {
 		if out, code := dockerOutput(ctx, t, "exec", "-u", "vscode", name, "sudo", "sh", "/usr/local/bin/u-boot-docker-init"); code != 0 {
 			t.Fatalf("%s: daemon start script exit %d:\n%s", step, code, out)
 		}
-		if out, code := dockerExec(ctx, t, name, "docker info --format '{{.Driver}}'"); code != 0 || !strings.HasPrefix(out, "overlay2") {
+		if out, code := dockerExec(ctx, t, name, "docker info --format '{{.Driver}}'"); code != 0 || !overlayDriver(out) {
 			t.Fatalf("%s: docker info exit %d: %s", step, code, out)
 		}
 	}

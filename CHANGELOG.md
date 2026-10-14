@@ -11,6 +11,16 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Changed
+
+- Sandbox devcontainer: with `nestedRuntime: docker` the Docker daemon, CLI, Buildx and Compose now come from the Docker APT
+  repository (`docker-ce`, `containerd.io`, `docker-buildx-plugin`, `docker-compose-plugin`; the image build verifies the pinned
+  signing-key fingerprint) instead of the Debian archive, so the container runs the current Docker (29.9, Buildx 0.38, Compose 5.6
+  at the time of writing) rather than 26.1. `download.docker.com` joins the default egress allowlist for `docker`; further hosts
+  go into `devcontainer.sandbox.egress.allow`
+  ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
+  [ADR-0019](docs/plan/adr/0019-docker-daemon-aus-docker-apt-repo.md)).
+
 ## [0.8.0] - 2026-10-14
 
 Eighth release. **Own Docker daemon in the sandbox devcontainer.** `devcontainer.sandbox.nestedRuntime: docker`

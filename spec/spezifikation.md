@@ -323,7 +323,7 @@ Verfeinert [`LH-FA-INIT-005`](lastenheft.md#lh-fa-init-005--überschreibschutz).
 Verfeinert [`LH-FA-DEV-007`](lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer).
 
 - Bei `podman`: rootless Podman, ein `docker`-Kompatibilitäts-Alias, Zugriff auf `/dev/fuse`, subuid-/subgid-Bereiche für den Container-Benutzer und ein Volume für den Storage.
-- Bei `docker`: Docker-Daemon, `docker`-CLI sowie Buildx- und Compose-Plugin aus den Debian-Paketen; der Container-Benutzer gehört der Gruppe `docker` an, der Daemon startet beim Containerstart (`postStartCommand`) und gilt nach spätestens 60 Sekunden als nicht betriebsbereit; `runArgs` enthält `--privileged` und, nur mit Egress-Restriktion, `--cap-add=NET_ADMIN`, sonst keine Fähigkeitsoptionen; der Daemon-Speicher (`/var/lib/docker`) liegt in einem Volume `<projekt>-docker-${devcontainerId}`; kein Socket-Mount.
+- Bei `docker`: Docker-Daemon, `docker`-CLI sowie Buildx- und Compose-Plugin aus dem Docker-APT-Repository (Schlüssel per Fingerprint geprüft); der Container-Benutzer gehört der Gruppe `docker` an, der Daemon startet beim Containerstart (`postStartCommand`) und gilt nach spätestens 60 Sekunden als nicht betriebsbereit; `runArgs` enthält `--privileged` und, nur mit Egress-Restriktion, `--cap-add=NET_ADMIN`, sonst keine Fähigkeitsoptionen; der Daemon-Speicher (`/var/lib/docker`) liegt in einem Volume `<projekt>-docker-${devcontainerId}`; kein Socket-Mount.
 
 ### LH-FA-DEV-008.a — Verhalten bei nicht gewährbarer Capability
 
@@ -816,6 +816,7 @@ Die wirksame Liste ist die Vereinigung aus Basis, Ergänzungen und Nutzerliste, 
 |---|---|
 | immer | `github.com`, `api.github.com`, `codeload.github.com`, `raw.githubusercontent.com`, `objects.githubusercontent.com`, `deb.debian.org`, `security.debian.org` |
 | `nestedRuntime: podman` oder `docker` | `registry-1.docker.io`, `auth.docker.io`, `production.cloudflare.docker.com`, `ghcr.io` |
+| `nestedRuntime: docker` | zusätzlich `download.docker.com` (Paketquelle bleibt im Image eingetragen) |
 | Feature `node` | `registry.npmjs.org` |
 | Feature `go` | `proxy.golang.org`, `sum.golang.org`, `storage.googleapis.com` |
 | Feature `java` | `repo.maven.apache.org`, `repo1.maven.org` |

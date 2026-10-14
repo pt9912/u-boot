@@ -24,9 +24,14 @@ RUN apt-get update \
 COPY sandbox-init.sh /usr/local/bin/u-boot-sandbox-init
 {{- end}}
 {{- if .NestedDocker}}
-# Nested Docker daemon (LH-FA-DEV-007): Debian packages, daemon started at container start.
-RUN apt-get update \
- && apt-get install -y --no-install-recommends docker.io docker-cli docker-buildx docker-compose iptables ca-certificates \
+# Nested Docker daemon (LH-FA-DEV-007): packages from the Docker APT repository
+# (signing key pinned by fingerprint), daemon started at container start.
+RUN install -m 0755 -d /etc/apt/keyrings \
+ && curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
+ && test "$(gpg --show-keys --with-colons /etc/apt/keyrings/docker.asc | awk -F: '/^fpr/ {print $10; exit}')" = "9DC858229FC7DD38854AE2D88D81803C0EBFCD88" \
+ && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" > /etc/apt/sources.list.d/docker.list \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin iptables ca-certificates \
  && rm -rf /var/lib/apt/lists/* \
  && usermod -aG docker vscode
 COPY docker-init.sh /usr/local/bin/u-boot-docker-init
