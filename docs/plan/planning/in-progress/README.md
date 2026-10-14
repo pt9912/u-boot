@@ -17,6 +17,7 @@ Dateiname-Konventionen.
 | [`slice-v1-sandbox-docker-generator.md`](slice-v1-sandbox-docker-generator.md) | Generator für `nestedRuntime: docker` |
 | [`slice-v1-sandbox-docker-degradation-doctor.md`](slice-v1-sandbox-docker-degradation-doctor.md) | Degradation und Doctor für `docker` |
 | [`slice-v1-sandbox-docker-integrationstest.md`](slice-v1-sandbox-docker-integrationstest.md) | Integrationstest und Doku für `docker` |
+| [`slice-v1-release-cut-v0.8.0.md`](slice-v1-release-cut-v0.8.0.md) | Release-Cut `v0.8.0` |
 | [`roadmap.md`](roadmap.md) | Master-Dokument: Slice-/Tranchen-Stand ([`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)) |
 
 (Nur die zwei Master-Dokumente liegen dauerhaft in `in-progress/`.

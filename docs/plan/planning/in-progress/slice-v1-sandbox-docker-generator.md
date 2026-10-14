@@ -140,5 +140,5 @@ Nicht ausgefuehrt:
 - Neuer `make docs-check` nach dem finalen `git mv` — steht aus.
 
 Commit / Artefakt:
-- Implementation `6d726e0`, Review-Fixes `9fa95ce`, Go-Pin `2a888f7`; Delivery-Hash des Slice-Closure-Commits: nach Closure-Commit.
-- Review-Report: `docs/reviews/2026-10-14-sandbox-docker-runtime.md` (Gegenstand `fa6aa1b..6d726e0`; die Fixes `9fa95ce` sind darin nicht erneut geprüft).
+- Implementation `6d726e0`, Review-Fixes `9fa95ce` und `e1c2c3a`, Go-Pin `2a888f7`, Golden-Tests `8bc3d15`; Delivery-Hash (letzte Code-Änderung): `e1c2c3a`.
+- Review-Report: `docs/reviews/2026-10-14-sandbox-docker-runtime.md` (Gegenstand `fa6aa1b..6d726e0`) und Folgelauf [`2026-10-14-sandbox-docker-runtime-r2`](../../../reviews/2026-10-14-sandbox-docker-runtime-r2.md) (Gegenstand `6d726e0..8bc3d15`; dessen Befunde sind in `e1c2c3a` behoben).

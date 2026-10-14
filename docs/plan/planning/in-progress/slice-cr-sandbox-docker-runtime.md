@@ -237,7 +237,7 @@ sind angenommen; die drei Umsetzungs-Slices liegen in `open/` oder weiter.
 
 ## 7. Closure-Notiz
 
-- **Was hat funktioniert:** CR, Lastenheft 0.5.0, [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md) mit Messreihe und die drei Umsetzungs-Slices liefen in einem Lauf; Review ([`docs/reviews/2026-10-14-sandbox-docker-runtime.md`](../../../reviews/2026-10-14-sandbox-docker-runtime.md)) 0 HIGH, 2 MEDIUM, 5 LOW; Befunde F-1 bis F-3, F-5 und F-6 behoben (`9fa95ce`).
+- **Was hat funktioniert:** CR, Lastenheft 0.5.0, [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md) mit Messreihe und die drei Umsetzungs-Slices liefen in einem Lauf; Review ([`docs/reviews/2026-10-14-sandbox-docker-runtime.md`](../../../reviews/2026-10-14-sandbox-docker-runtime.md)) 0 HIGH, 2 MEDIUM, 5 LOW; Befunde F-1 bis F-3, F-5 und F-6 behoben (`9fa95ce`). Folgelauf [`2026-10-14-sandbox-docker-runtime-r2`](../../../reviews/2026-10-14-sandbox-docker-runtime-r2.md): 0 HIGH, 1 MEDIUM, 4 LOW, 1 INFO; alle bis auf die INFO-Befunde (Commit-Body des Pin-Bumps) behoben (`e1c2c3a`).
 - **Was ging anders als geplant:** Die drei Umsetzungs-Slices lagen kurzzeitig gleichzeitig in `in-progress/` (WIP-Limit 1 verletzt, vor dem Push korrigiert: sie wurden nacheinander geschlossen). Review F-4: Das Lastenheft sagt Docker Desktop zu, gemessen ist nur Colima — die Doku sagt Docker Desktop erst nach der Nachholmessung zu.
 - **Steering-Loop-Eintrag:** Planungs-Disziplin: Slices einzeln über `open → next → in-progress` führen (WIP-Limit 1, `Verantwortlich:` setzen), auch wenn sie im selben Lauf geliefert werden.
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angefallen.
@@ -307,5 +307,5 @@ Nicht ausgefuehrt:
 - Neuer `make docs-check` nach dem finalen `git mv` — steht aus.
 
 Commit / Artefakt:
-- Implementation `6d726e0`, Review-Fixes `9fa95ce`, Go-Pin `2a888f7`; Delivery-Hash des Slice-Closure-Commits: nach Closure-Commit.
-- Review-Report: `docs/reviews/2026-10-14-sandbox-docker-runtime.md` (Gegenstand `fa6aa1b..6d726e0`; die Fixes `9fa95ce` sind darin nicht erneut geprüft).
+- Implementation `6d726e0`, Review-Fixes `9fa95ce` und `e1c2c3a`, Go-Pin `2a888f7`, Golden-Tests `8bc3d15`; Delivery-Hash (letzte Code-Änderung): `e1c2c3a`.
+- Review-Report: `docs/reviews/2026-10-14-sandbox-docker-runtime.md` (Gegenstand `fa6aa1b..6d726e0`) und Folgelauf [`2026-10-14-sandbox-docker-runtime-r2`](../../../reviews/2026-10-14-sandbox-docker-runtime-r2.md) (Gegenstand `6d726e0..8bc3d15`; dessen Befunde sind in `e1c2c3a` behoben).
