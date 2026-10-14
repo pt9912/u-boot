@@ -13,7 +13,7 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**v0.8.0 (Docker im Sandbox-Devcontainer)** — Slice: [`slice-v1-release-cut-v0.8.0`](slice-v1-release-cut-v0.8.0.md) (Tag-Push steht aus). Offen daneben: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (macOS-Smoke im Tap).
+**Homebrew-Verifikation** — Slice: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (v0.8.0 ist released, Tap-Nachzug lief; offen: macOS-Smoke im Tap zur Formel 0.8.0 und `brew install` auf einem Mac).
 
 ## Nächste Wellen
 
@@ -79,6 +79,7 @@ flowchart LR
 | Generate-Devcontainer-Rollback (V2-Hardening) | 2026-10-01 | [`slice-v2-generate-devcontainer-rollback-aware-write`](../done/slice-v2-generate-devcontainer-rollback-aware-write.md) (`2f12ec6`) |
 | v0.6.0 (Sandbox-Devcontainer + V1-Cleanup + Homebrew) | 2026-10-01 | [`slice-v1-release-cut-v0.6.0`](../done/slice-v1-release-cut-v0.6.0.md) — Tag `v0.6.0` auf `76a8200` |
 | Spec-Wartung und Umsetzung: Docker als verschachtelte Runtime (Lastenheft 0.5.0, `nestedRuntime: docker`) | 2026-10-14 | [`slice-cr-sandbox-docker-runtime`](../done/slice-cr-sandbox-docker-runtime.md) (`6d726e0`); [`slice-v1-sandbox-docker-generator`](../done/slice-v1-sandbox-docker-generator.md); [`slice-v1-sandbox-docker-degradation-doctor`](../done/slice-v1-sandbox-docker-degradation-doctor.md); [`slice-v1-sandbox-docker-integrationstest`](../done/slice-v1-sandbox-docker-integrationstest.md) (letzte Code-Änderung `e1c2c3a`); Review-Reports `docs/reviews/2026-10-14-sandbox-docker-runtime.md`, `-r2` |
+| v0.8.0 (Docker im Sandbox-Devcontainer, `nestedRuntime: docker`) | 2026-10-14 | [`slice-v1-release-cut-v0.8.0`](../done/slice-v1-release-cut-v0.8.0.md) — Tag `v0.8.0` auf `1f2b41b` |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-NN-results.md`; die Welle-Closure lebt vollständig im jeweiligen
