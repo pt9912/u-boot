@@ -11,4 +11,5 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
+| [`slice-v1-sandbox-docker-ce`](slice-v1-sandbox-docker-ce.md) | Aktueller Docker aus dem Docker-APT-Repo (Patch-Release v0.8.1) |
 | [`slice-v1-sandbox-docker-nachholmessung-desktop`](slice-v1-sandbox-docker-nachholmessung-desktop.md) | Docker-Desktop-Messung für `nestedRuntime: docker` (Abnahmekriterium 6) |
