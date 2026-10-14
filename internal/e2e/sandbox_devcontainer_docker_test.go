@@ -475,3 +475,43 @@ func TestE2E_SandboxDevcontainer_NestedDocker_Degradation(t *testing.T) {
 		}
 	}
 }
+
+// LH-FA-DEV-007: a container restart kills the daemon without cleanup;
+// the start script brings a new daemon up on the same storage volume.
+func TestE2E_SandboxDevcontainer_NestedDocker_Restart(t *testing.T) {
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Fatalf("docker CLI not on PATH: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+	dir := generateSandboxProject(ctx, t, "docker", "fail")
+	image := "uboot-e2e-sandbox-docker-restart:" + strings.ReplaceAll(filepath.Base(dir), "/", "-")
+	if out, code := dockerOutput(ctx, t, "build", "-q", "-t", image, filepath.Join(dir, ".devcontainer")); code != 0 {
+		t.Fatalf("docker build failed:\n%s", out)
+	}
+	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
+
+	name, volume := "uboot-e2e-dockerrestart", "uboot-e2e-dockerrestart-vol"
+	args := []string{"run", "-d", "--name", name, "--mount", "source=" + volume + ",target=/var/lib/docker,type=volume"}
+	args = append(append(args, generatedRunArgs(t, dir)...), image, "sleep", "1800")
+	if out, code := dockerOutput(ctx, t, args...); code != 0 {
+		t.Fatalf("start: %s", out)
+	}
+	t.Cleanup(func() {
+		_, _ = dockerOutput(context.Background(), t, "rm", "-f", name)
+		_, _ = dockerOutput(context.Background(), t, "volume", "rm", "-f", volume)
+	})
+	initDaemon := func(step string) {
+		if out, code := dockerOutput(ctx, t, "exec", "-u", "vscode", name, "sudo", "sh", "/usr/local/bin/u-boot-docker-init"); code != 0 {
+			t.Fatalf("%s: daemon start script exit %d:\n%s", step, code, out)
+		}
+		if out, code := dockerExec(ctx, t, name, "docker info --format '{{.Driver}}'"); code != 0 || !strings.HasPrefix(out, "overlay2") {
+			t.Fatalf("%s: docker info exit %d: %s", step, code, out)
+		}
+	}
+	initDaemon("first start")
+	if out, code := dockerOutput(ctx, t, "restart", "-t", "0", name); code != 0 {
+		t.Fatalf("restart: %s", out)
+	}
+	initDaemon("after restart")
+}

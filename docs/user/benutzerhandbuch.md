@@ -1085,8 +1085,8 @@ Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
 - Geprüft unter Docker auf Linux mit der `devcontainer`-CLI; `nestedRuntime: docker`
   zusätzlich unter Colima (Linux-VM). **Nicht geprüft:** Docker Desktop,
   Podman als Host-Engine, VS Code und Codespaces.
-- Der Wechsel von `podman` zurück auf `none` lässt eine vorhandene
-  `sandbox-init.sh` im Ordner liegen; das Dockerfile verwendet sie dann nicht
+- Der Wechsel von `podman` oder `docker` zurück auf `none` lässt eine vorhandene
+  `sandbox-init.sh` beziehungsweise `docker-init.sh` im Ordner liegen; das Dockerfile verwendet sie dann nicht
   mehr.
 
 ### 4.12 Vorlagen nutzen

@@ -613,7 +613,7 @@ WriteFile bei `ErrGenerateManualConflict`); Phase 2
 [`slice-v2-generate-devcontainer-rollback-aware-write`](../plan/planning/done/slice-v2-generate-devcontainer-rollback-aware-write.md)
 **Rollback-aware** (Best-Effort, Option 1): Vor jeder Mutation werden
 Inhalt und Mode der betroffenen Dateien (`devcontainer.json`, `Dockerfile`,
-ggf. `sandbox-init.sh`/`egress-init.sh` und `u-boot.yaml`) im Speicher
+ggf. `sandbox-init.sh`/`docker-init.sh`/`egress-init.sh` und `u-boot.yaml`) im Speicher
 gesichert; scheitert ein Schreibvorgang, werden bestehende Dateien
 wiederhergestellt, neu angelegte entfernt und ein neu angelegtes
 `.devcontainer/` gelöscht — der Disk-Zustand entspricht danach dem vor dem

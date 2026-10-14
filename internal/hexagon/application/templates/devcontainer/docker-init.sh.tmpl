@@ -15,9 +15,14 @@ unavailable() {
   exit 0
 }
 
-if docker info >/dev/null 2>&1; then
+ready() { timeout 5 docker info >/dev/null 2>&1; }
+
+if ready; then
   exit 0
 fi
+
+# A stopped container keeps the PID and socket files of the killed daemon.
+rm -f /var/run/docker.pid /var/run/docker.sock /var/run/docker/containerd/containerd.pid
 
 # The daemon needs the privileges of `--privileged` (iptables, cgroups, mounts).
 setsid nohup dockerd --host=unix:///var/run/docker.sock --group docker >"$log" 2>&1 &
@@ -25,7 +30,7 @@ pid=$!
 
 i=0
 while [ "$i" -lt "$timeout" ]; do
-  if docker info >/dev/null 2>&1; then
+  if ready; then
     exit 0
   fi
   if ! kill -0 "$pid" 2>/dev/null; then
