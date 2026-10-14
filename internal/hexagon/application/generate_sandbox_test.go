@@ -672,6 +672,14 @@ func TestGenerateDevcontainer_SandboxDocker(t *testing.T) {
 	if strings.Contains(string(df), "podman") {
 		t.Errorf("Dockerfile must not install podman:\n%s", df)
 	}
+	// The fingerprint check gates the repository entry and the install.
+	check := strings.Index(string(df), `test "$(gpg --show-keys`)
+	repo := strings.Index(string(df), "/etc/apt/sources.list.d/docker.list")
+	install := strings.Index(string(df), "apt-get install")
+	if check < 0 || check >= repo || repo >= install || !strings.Contains(string(df), "signed-by=/etc/apt/keyrings/docker.asc") ||
+		!strings.Contains(string(df), `= "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"`) {
+		t.Errorf("Dockerfile must verify the key fingerprint before adding the repository and installing:\n%s", df)
+	}
 	script, err := fs.ReadFile(dockerInitPath())
 	if err != nil {
 		t.Fatalf("docker-init.sh not generated: %v", err)

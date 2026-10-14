@@ -52,6 +52,16 @@ func dockerOutput(ctx context.Context, t *testing.T, args ...string) (string, in
 // nested runtime (`podman` | `docker`) in a temp dir and returns the dir.
 func generateSandboxProject(ctx context.Context, t *testing.T, runtime, onUnavailable string) string {
 	t.Helper()
+	return generateSandboxProjectWith(ctx, t, map[string]string{
+		"devcontainer.sandbox.nestedRuntime": runtime,
+		"devcontainer.sandbox.onUnavailable": onUnavailable,
+	})
+}
+
+// generateSandboxProjectWith produces a sandbox project with the given
+// `devcontainer.sandbox.*` settings and returns the dir.
+func generateSandboxProjectWith(ctx context.Context, t *testing.T, settings map[string]string) string {
+	t.Helper()
 	dir := t.TempDir()
 	fsys := fsadapter.New()
 	yaml := yamladapter.New()
@@ -64,10 +74,7 @@ func generateSandboxProject(ctx context.Context, t *testing.T, runtime, onUnavai
 		t.Fatalf("init --devcontainer --sandbox: %v", err)
 	}
 	cfgSvc := application.NewConfigService(fsys, yaml, logger)
-	for path, value := range map[string]string{
-		"devcontainer.sandbox.nestedRuntime": runtime,
-		"devcontainer.sandbox.onUnavailable": onUnavailable,
-	} {
+	for path, value := range settings {
 		p, err := domain.NewConfigPath(path)
 		if err != nil {
 			t.Fatal(err)
@@ -450,6 +457,23 @@ func TestE2E_SandboxDevcontainer_NestedDocker(t *testing.T) {
 			}
 		}
 	}
+	// Origin and age: Docker's own packages (docker-ce), not the Debian
+	// archive (docker.io, 26.1); a current major version.
+	for _, c := range []string{a, b} {
+		out, code := dockerExec(ctx, t, c, "dpkg-query -W -f='${Package} ' docker-ce containerd.io docker-buildx-plugin docker-compose-plugin; docker version --format '{{.Server.Version}}'")
+		if code != 0 {
+			t.Errorf("%s: package query exit %d: %s", c, code, out)
+		}
+		for _, pkg := range []string{"docker-ce", "containerd.io", "docker-buildx-plugin", "docker-compose-plugin"} {
+			if !strings.Contains(out, pkg) {
+				t.Errorf("%s: package %s from the Docker APT repository missing: %s", c, pkg, out)
+			}
+		}
+		fields := strings.Fields(out)
+		if major, _, _ := strings.Cut(fields[len(fields)-1], "."); len(major) < 2 || major < "28" {
+			t.Errorf("%s: Docker server version %q is older than 28", c, fields[len(fields)-1])
+		}
+	}
 	idA, _ := dockerExec(ctx, t, a, "docker info --format '{{.ID}}'")
 	idB, _ := dockerExec(ctx, t, b, "docker info --format '{{.ID}}'")
 	if strings.TrimSpace(idA) == "" || idA == idB {
@@ -531,5 +555,35 @@ func TestE2E_SandboxDevcontainer_NestedDocker_Restart(t *testing.T) {
 	initDaemon("after restart")
 	if out, code := dockerExec(ctx, t, name, "docker image inspect alpine:3 >/dev/null && echo STORAGE_KEPT"); code != 0 || !strings.Contains(out, "STORAGE_KEPT") {
 		t.Errorf("daemon storage volume not reused after restart: exit %d: %s", code, out)
+	}
+}
+
+// LH-FA-DEV-008 with nestedRuntime docker: the Docker APT repository stays
+// configured in the image, so `apt-get update` must work behind the egress
+// restriction (download.docker.com is in the default allowlist) while an
+// unlisted host stays blocked.
+func TestE2E_SandboxDevcontainer_NestedDocker_EgressAptUpdate(t *testing.T) {
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Fatalf("docker CLI not on PATH: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+	dir := generateSandboxProjectWith(ctx, t, map[string]string{
+		"devcontainer.sandbox.nestedRuntime":  "docker",
+		"devcontainer.sandbox.onUnavailable":  "fail",
+		"devcontainer.sandbox.egress.enabled": "true",
+	})
+	image := "uboot-e2e-sandbox-docker-egress:" + strings.ReplaceAll(filepath.Base(dir), "/", "-")
+	if out, code := dockerOutput(ctx, t, "build", "-q", "-t", image, filepath.Join(dir, ".devcontainer")); code != 0 {
+		t.Fatalf("docker build failed:\n%s", out)
+	}
+	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
+	args := append([]string{"run", "--rm"}, generatedRunArgs(t, dir)...)
+	args = append(args, image, "bash", "-c",
+		"sudo sh /usr/local/bin/u-boot-egress-init && sudo apt-get update 2>&1 | tail -5 && echo APT_UPDATE_OK; "+
+			"! curl -sS --max-time 8 -o /dev/null https://example.com && echo BLOCKED_OK")
+	out, code := dockerOutput(ctx, t, args...)
+	if code != 0 || !strings.Contains(out, "APT_UPDATE_OK") || strings.Contains(out, "Err:") || strings.Contains(out, "Failed to fetch") || !strings.Contains(out, "BLOCKED_OK") {
+		t.Errorf("egress + docker: exit %d, want apt-get update to succeed and example.com to stay blocked:\n%s", code, out)
 	}
 }

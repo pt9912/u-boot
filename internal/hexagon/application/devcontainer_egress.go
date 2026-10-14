@@ -95,7 +95,7 @@ func cloneSourceHost(raw string) string {
 }
 
 // egressHosts computes the effective allowlist baked into the startup
-// script: default base + registries (podman, docker) + enabled features + clone source host
+// script: default base + registries (podman, docker) + Docker APT host (docker) + enabled features + clone source host
 // + the user's `egress.allow`; sorted and de-duplicated (ADR-0012).
 func egressHosts(dc *ubootYAMLDevcontainer, cloneURL string) []string {
 	set := map[string]bool{}
