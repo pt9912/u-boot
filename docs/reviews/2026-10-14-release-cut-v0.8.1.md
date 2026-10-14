@@ -1,14 +1,14 @@
-# Review-Report: [`slice-v1-release-cut-v0.8.1`](../plan/planning/in-progress/slice-v1-release-cut-v0.8.1.md) — 2026-10-14
+# Review-Report: [`slice-v1-release-cut-v0.8.1`](../plan/planning/done/slice-v1-release-cut-v0.8.1.md) — 2026-10-14
 
 **Review-Art:** Code/Doku — Release-Cut-Diff gegen den Ablauf in `docs/maintainer/releasing.md` §3 Nr. 1–5 und §5, den Slice-Plan und die Slice-Vorlage der Baseline.
 
-**Gegenstand:** Commit `290ce07` (Release-Cut v0.8.1, zwölf Dateien) und [`slice-v1-release-cut-v0.8.1`](../plan/planning/in-progress/slice-v1-release-cut-v0.8.1.md) (liegt bis zur Closure in `in-progress/`, danach `done/`).
+**Gegenstand:** Commit `290ce07` (Release-Cut v0.8.1, zwölf Dateien) und [`slice-v1-release-cut-v0.8.1`](../plan/planning/done/slice-v1-release-cut-v0.8.1.md) (liegt bis zur Closure in `in-progress/`, danach `done/`).
 
 **Skill:** `.harness/skills/reviewer.md` @ 290ce07 · **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-14
 
 **Eingangs-Kontext:**
 
-- [`slice-v1-release-cut-v0.8.1`](../plan/planning/in-progress/slice-v1-release-cut-v0.8.1.md), Muster [`slice-v1-release-cut-v0.8.0`](../plan/planning/done/slice-v1-release-cut-v0.8.0.md); Vorläuferreport `2026-10-14-release-cut-v0.8.0.md` (dessen Altlasten F-1/F-2 werden nicht erneut gemeldet)
+- [`slice-v1-release-cut-v0.8.1`](../plan/planning/done/slice-v1-release-cut-v0.8.1.md), Muster [`slice-v1-release-cut-v0.8.0`](../plan/planning/done/slice-v1-release-cut-v0.8.0.md); Vorläuferreport `2026-10-14-release-cut-v0.8.0.md` (dessen Altlasten F-1/F-2 werden nicht erneut gemeldet)
 - [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0019](../plan/adr/0019-docker-daemon-aus-docker-apt-repo.md) (Status `Accepted`), [ADR-0018](../plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md)
 - [`slice-v1-sandbox-docker-ce`](../plan/planning/done/slice-v1-sandbox-docker-ce.md), [`slice-v1-sandbox-docker-nachholmessung-desktop`](../plan/planning/open/slice-v1-sandbox-docker-nachholmessung-desktop.md), [`slice-v2-homebrew-formula`](../plan/planning/in-progress/slice-v2-homebrew-formula.md)
 - `docs/maintainer/releasing.md` §3, §5; Slice-Vorlage `.harness/baseline/v6.13.0/templates/docs/plan/planning/slice.template.md`
