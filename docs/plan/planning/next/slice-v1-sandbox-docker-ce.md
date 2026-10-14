@@ -14,7 +14,7 @@ wechselt nur durch `git mv`.
 
 **Berührte Spec-Stellen:** `spezifikation.md` [SPEC-019](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) (Egress-Hosts) und die Verfeinerung [`LH-FA-DEV-007.b`](../../../../spec/spezifikation.md#lh-fa-dev-007b--ausstattung-bei-nestedruntime-podman) (Ausstattung bei `docker`); das Lastenheft bleibt unverändert ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) nennt keine Paketquelle).
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912
 
 **Autor:** pt9912. **Datum:** 2026-10-14.
 
