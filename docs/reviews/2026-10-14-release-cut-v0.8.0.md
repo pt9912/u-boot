@@ -1,14 +1,14 @@
-# Review-Report: [`slice-v1-release-cut-v0.8.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.8.0.md) — 2026-10-14
+# Review-Report: [`slice-v1-release-cut-v0.8.0`](../plan/planning/done/slice-v1-release-cut-v0.8.0.md) — 2026-10-14
 
 **Review-Art:** Code/Doku — Release-Cut-Diff gegen den Ablauf in `docs/maintainer/releasing.md` §3–§5, den Slice-Plan und die Slice-Vorlage der Baseline.
 
-**Gegenstand:** Commit `fd40f78` (Release-Cut v0.8.0, neun Dateien) und [`slice-v1-release-cut-v0.8.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.8.0.md).
+**Gegenstand:** Commit `fd40f78` (Release-Cut v0.8.0, neun Dateien) und [`slice-v1-release-cut-v0.8.0`](../plan/planning/done/slice-v1-release-cut-v0.8.0.md).
 
 **Skill:** `.harness/skills/reviewer.md` @ fd40f78 · **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-14
 
 **Eingangs-Kontext:**
 
-- [`slice-v1-release-cut-v0.8.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.8.0.md), Muster [`slice-v1-release-cut-v0.7.0`](../plan/planning/done/slice-v1-release-cut-v0.7.0.md)
+- [`slice-v1-release-cut-v0.8.0`](../plan/planning/done/slice-v1-release-cut-v0.8.0.md), Muster [`slice-v1-release-cut-v0.7.0`](../plan/planning/done/slice-v1-release-cut-v0.7.0.md)
 - [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0018](../plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md) (Status `Accepted`), Lastenheft 0.5.0
 - [`slice-v1-sandbox-docker-nachholmessung-desktop`](../plan/planning/open/slice-v1-sandbox-docker-nachholmessung-desktop.md), [`slice-v2-homebrew-formula`](../plan/planning/in-progress/slice-v2-homebrew-formula.md)
 - `docs/maintainer/releasing.md` §3 Vorbereitung, §4 Vorab-Prüfung, §5 Tag setzen
@@ -27,7 +27,7 @@ Kein Docker-Lauf, keine Änderung an bestehenden Dateien. Der Tag `v0.8.0` exist
 | F-3 | INFO | Ein v0.8.0-Eintrag unter „Abgeschlossene Wellen" fehlt bewusst: Der Slice-Plan (§3) und `releasing.md` §3 Nr. 4 verlangen die Verschiebung erst nach dem Tag; „Aktuelle Welle" nennt `v0.8.0` mit „Tag-Push steht aus" (`roadmap.md:16`). Die neue Zeile in Abgeschlossene Wellen (`roadmap.md:81`) gehört der Spec-/Umsetzungs-Arbeit, nicht dem Release, und ist konsistent (Hashes `6d726e0` und `e1c2c3a` existieren, die vier Slices liegen unter `done/`). | `docs/maintainer/releasing.md` §3 Nr. 4 | `docs/plan/planning/in-progress/roadmap.md:16`, `:81` | ja — Gegenlesen | — |
 | F-4 | INFO | `README.md` und `README.de.md` sagen „released 2026-10-14", die Releases-Tabelle und das Handbuch verlinken `releases/tag/v0.8.0` und `download/v0.8.0`, die CHANGELOG-Compare-Links zeigen auf `v0.7.0...v0.8.0`; der Tag ist noch nicht gepusht, die Ziele lösen bis zum `publish`-Lauf nicht auf. Das entspricht der Praxis früherer Cuts (siehe [`slice-v1-release-cut-v0.7.0`](../plan/planning/done/slice-v1-release-cut-v0.7.0.md)), die Aussage ist vor dem Tag-Push vorläufig. | `docs/maintainer/releasing.md` §3/§5 | `README.md:10`, `README.md:205`, `README.de.md:11`, `docs/user/benutzerhandbuch.md:106` | ja — nach dem Push: `releasing.md` §6 | — |
 | F-5 | INFO | Das Datum `2026-10-14` steht an fünf Stellen als Release-Datum fest (CHANGELOG `[0.8.0]`, beide READMEs Status und Tabelle, Handbuch „Stand"); es stimmt nur, wenn der Tag am selben Tag gesetzt wird. Der Cut-Commit trägt das Datum 2026-10-14. Wird am Folgetag getaggt, driften Tag-Datum und alle fünf Stellen. | `docs/maintainer/releasing.md` §3 Nr. 1 | `CHANGELOG.md:14`, `README.md:10`, `README.de.md:11`, `docs/user/benutzerhandbuch.md:5` | nein — Review-only (Tag-Datum nach Push gegenlesen) | — |
-| F-6 | INFO | Die Slice-DoD (§2) ist vollständig offen (alle Häkchen leer, §7 Closure-Notiz „—"); das ist vor dem Tag der Sollzustand. Offene DoD-Punkte, die diesen Review betreffen: „Review durchgeführt, Report unter `docs/reviews/`" wird mit diesem Report erfüllbar; Tag, `publish`-Lauf, `make fullbuild` und Closure-Notiz sind Verifier-/Maintainer-Aufgabe. Der Commit nennt keine Evidence für `make ci`/`make test-docker`/`make fullbuild` (der Cut-Slice v0.7.0 trug sie). | `harness/verification.md`, `docs/maintainer/releasing.md` §4 | [`slice-v1-release-cut-v0.8.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.8.0.md) (§2, Zeilen 33–42) | nein — Verifier (`make fullbuild`, `gh run list`) | — |
+| F-6 | INFO | Die Slice-DoD (§2) ist vollständig offen (alle Häkchen leer, §7 Closure-Notiz „—"); das ist vor dem Tag der Sollzustand. Offene DoD-Punkte, die diesen Review betreffen: „Review durchgeführt, Report unter `docs/reviews/`" wird mit diesem Report erfüllbar; Tag, `publish`-Lauf, `make fullbuild` und Closure-Notiz sind Verifier-/Maintainer-Aufgabe. Der Commit nennt keine Evidence für `make ci`/`make test-docker`/`make fullbuild` (der Cut-Slice v0.7.0 trug sie). | `harness/verification.md`, `docs/maintainer/releasing.md` §4 | [`slice-v1-release-cut-v0.8.0`](../plan/planning/done/slice-v1-release-cut-v0.8.0.md) (§2, Zeilen 33–42) | nein — Verifier (`make fullbuild`, `gh run list`) | — |
 
 ## Negativbefunde
 
