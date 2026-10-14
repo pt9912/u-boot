@@ -32,16 +32,16 @@ wechselt nur durch `git mv`.
 
 ## 2. Definition of Done
 
-- [ ] **Folge-ADR** (nächste freie Nummer) entscheidet Herkunft und Schlüsselpinning mit Messung (Colima); ADR-Index aktualisiert.
-- [ ] **Generator:** Dockerfile-Template installiert `docker-ce`, `docker-ce-cli`, `containerd.io`, `docker-buildx-plugin`, `docker-compose-plugin` aus `download.docker.com` mit geprüftem Schlüssel-Fingerprint; Egress-Allowlist um `download.docker.com` ergänzt; Golden Cases und Integrationstest (`//go:build docker`) belegen die Version und die Abnahmekriterien aus dem CR.
-- [ ] **Doku:** Spezifikation, Benutzerhandbuch und CHANGELOG nennen die neue Herkunft.
-- [ ] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`) — kein Self-Review.
-- [ ] Doku-Update, falls ein öffentlicher Vertrag berührt ist.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register fortgeschrieben oder „keine Beobachtung angefallen" in §7 notiert.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
+- [x] **Folge-ADR** (nächste freie Nummer) entscheidet Herkunft und Schlüsselpinning mit Messung (Colima); ADR-Index aktualisiert.
+- [x] **Generator:** Dockerfile-Template installiert `docker-ce`, `docker-ce-cli`, `containerd.io`, `docker-buildx-plugin`, `docker-compose-plugin` aus `download.docker.com` mit geprüftem Schlüssel-Fingerprint; Egress-Allowlist um `download.docker.com` ergänzt; Golden Cases und Integrationstest (`//go:build docker`) belegen die Version und die Abnahmekriterien aus dem CR.
+- [x] **Doku:** Spezifikation, Benutzerhandbuch und CHANGELOG nennen die neue Herkunft.
+- [x] `make gates` grün.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`) — kein Self-Review.
+- [x] Doku-Update, falls ein öffentlicher Vertrag berührt ist.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register fortgeschrieben oder „keine Beobachtung angefallen" in §7 notiert.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
 
 ## 3. Plan (vor Code)
 
@@ -68,18 +68,18 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 
 ## 6. Risiken und offene Punkte
 
-- Docker rotiert den Schlüssel; der gepinnte Fingerprint passt nicht mehr und der Image-Build bricht ab — **Ausgang:** weiter offen: Pin-Hebung per ADR-Folge beim Eintreten; der Build-Abbruch ist gewollt (kein stilles Weiterbauen).
-- Neuere Docker-Versionen ändern das Verhalten der Zielrepos — **Ausgang:** weiter offen: wird in der Messung dieses Slice geprüft.
+- Docker rotiert den Schlüssel; der gepinnte Fingerprint passt nicht mehr und der Image-Build bricht ab — **Ausgang:** weiter offen: Pin-Hebung per Folge-ADR beim Eintreten (Re-Evaluierungs-Trigger der ADR); der Build-Abbruch ist gewollt.
+- Neuere Docker-Versionen ändern das Verhalten der Zielrepos — **Ausgang:** entfallen: die Abnahmekriterien des CR laufen unter Docker 29.9, Buildx 0.38 und Compose 5.6 (Integrationstests, Colima und CI).
 
 ## 7. Closure-Notiz
 
-- **Was hat funktioniert:** —
-- **Was ging anders als geplant:** —
-- **Steering-Loop-Eintrag:** —
-- **Beobachtungs-Register (`../observations/`):** —
-- **Folge-Slices:** —
+- **Was hat funktioniert:** Die Umstellung auf `docker-ce` aus dem Docker-APT-Repo (Docker 29.9, Buildx 0.38, Compose 5.6) lief mit unveränderten Abnahmekriterien; `download.docker.com` steht bei `docker` in der Egress-Allowlist, der Test `apt-get update` unter Egress wird ohne den Host rot (Negativprobe, Exit 100). [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md) ersetzt Entscheidung 1 von [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md), ohne diese zu ändern. Implementation `eea88cc`, Review-Fixes `3cfa710` und `90f9122`.
+- **Was ging anders als geplant:** Der Review [`2026-10-14-sandbox-docker-ce`](../../../reviews/2026-10-14-sandbox-docker-ce.md) fand drei MEDIUM (Testtiefe), der Folgelauf [`2026-10-14-sandbox-docker-ce-r2`](../../../reviews/2026-10-14-sandbox-docker-ce-r2.md) einen weiteren (Egress-Test ohne `--error-on=any`); alle behoben. Der Storage-Treiber meldet bei Docker 29 `overlayfs` (containerd-Image-Store) statt `overlay2`; Tests und [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md) akzeptieren beide.
+- **Steering-Loop-Eintrag:** Tests, die eine Eigenschaft belegen sollen, brauchen eine Negativprobe (Eigenschaft entfernen, Test wird rot) — vor dem Review ausgeführt statt vom Reviewer nachgefordert.
+- **Beobachtungs-Register (`../observations/`):** keine Beobachtung angefallen.
+- **Folge-Slices:** [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) (Docker Desktop, unverändert offen).
 - **Risiken aus §6:** siehe §6
-- **Drei Paarungen:** —
+- **Drei Paarungen:** Anker (Docker-Desktop-Messung) → Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) · Register: keine Beobachtung angefallen.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
