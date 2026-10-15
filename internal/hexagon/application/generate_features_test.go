@@ -638,6 +638,8 @@ func TestGenerateDevcontainer_FeaturesHomebrewSdkman(t *testing.T) {
 			[]string{"ghcr.io/meaningful-ooo/devcontainer-features/homebrew:2"}, 1},
 		"sdkman": {"devcontainer:\n  enabled: true\n  features:\n    sdkman:\n      enabled: true\n",
 			[]string{"ghcr.io/devcontainers/features/java:1"}, 0},
+		"python": {"devcontainer:\n  enabled: true\n  features:\n    python:\n      enabled: true\n",
+			[]string{"ghcr.io/devcontainers/features/python:1"}, 0},
 		"java and sdkman": {"devcontainer:\n  enabled: true\n  features:\n    java:\n      enabled: true\n    sdkman:\n      enabled: true\n",
 			[]string{"ghcr.io/devcontainers/features/java:1"}, 0},
 		"both": {"devcontainer:\n  enabled: true\n  features:\n    homebrew:\n      enabled: true\n    sdkman:\n      enabled: true\n",

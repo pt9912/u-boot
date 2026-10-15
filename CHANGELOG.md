@@ -13,7 +13,8 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
-- Devcontainer features: the built-in catalogue gains `sdkman` (an alias for the official `java` feature, which installs
+- Devcontainer features: the built-in catalogue gains `python` (the official `python` feature; egress hosts `pypi.org` and
+  `files.pythonhosted.org`), `sdkman` (an alias for the official `java` feature, which installs
   SDKMAN; `java` and `sdkman` together render it once) and `homebrew` (the community feature
   `ghcr.io/meaningful-ooo/devcontainer-features/homebrew:2`). `u-boot generate devcontainer` reports a third-party catalogue
   feature as a warning (its install script runs at image build). The egress allowlist gets the hosts of both features; hosts of

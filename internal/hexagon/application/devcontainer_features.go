@@ -214,6 +214,11 @@ func featureCatalogue() map[string]featureCatalogueEntry {
 			defaultVersion: "1",
 			shortDesc:      "PostgreSQL client",
 		},
+		"python": {
+			source:         "ghcr.io/devcontainers/features/python",
+			defaultVersion: "1",
+			shortDesc:      "Python",
+		},
 		"homebrew": {
 			source:         "ghcr.io/meaningful-ooo/devcontainer-features/homebrew",
 			defaultVersion: "2",

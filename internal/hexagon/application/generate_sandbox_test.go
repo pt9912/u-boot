@@ -883,6 +883,7 @@ func TestGenerateDevcontainer_SandboxEgress_FeatureHosts(t *testing.T) {
 	}{
 		"homebrew": {"homebrew", []string{"formulae.brew.sh", "pkg-containers.githubusercontent.com"}, []string{"api.sdkman.io"}},
 		"sdkman":   {"sdkman", []string{"api.sdkman.io", "broker.sdkman.io", "repo1.maven.org"}, []string{"formulae.brew.sh"}},
+		"python":   {"python", []string{"pypi.org", "files.pythonhosted.org"}, []string{"formulae.brew.sh", "api.sdkman.io"}},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()

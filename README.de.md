@@ -159,8 +159,8 @@ Ergebnis: `u-boot.yaml`, `compose.yaml`, `README.md`, `CHANGELOG.md`,
 deklarierten Port.
 
 Eine Dev-Toolchain wird über den Devcontainer-Features-Katalog
-ergänzt ([LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), 10 Built-in-Features: `git`, `docker-cli`,
-`node`, `java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, `sdkman`, `homebrew` (Drittanbieter)):
+ergänzt ([LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), 11 Built-in-Features: `git`, `docker-cli`,
+`node`, `java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, `python`, `sdkman`, `homebrew` (Drittanbieter)):
 
 ```bash
 u-boot init my-service --devcontainer

@@ -820,6 +820,7 @@ Die wirksame Liste ist die Vereinigung aus Basis, Ergänzungen und Nutzerliste, 
 | Feature `node` | `registry.npmjs.org` |
 | Feature `go` | `proxy.golang.org`, `sum.golang.org`, `storage.googleapis.com` |
 | Feature `java` | `repo.maven.apache.org`, `repo1.maven.org` |
+| Feature `python` | `pypi.org`, `files.pythonhosted.org` |
 | Feature `sdkman` | `api.sdkman.io`, `broker.sdkman.io`, `repo.maven.apache.org`, `repo1.maven.org` |
 | Feature `homebrew` | `formulae.brew.sh`, `ghcr.io`, `pkg-containers.githubusercontent.com` |
 | Clone-Quelle | Host von `devcontainer.sandbox.repository` beziehungsweise `origin` |
@@ -887,7 +888,7 @@ Schnittstellen zu Drittsystemen mit Versionsannahme (Docker, Compose, Devcontain
 ### SPEC-023 — Devcontainer: Basis-Image und Feature-Quellen
 
 - Basis-Image des erzeugten Dockerfiles: `mcr.microsoft.com/devcontainers/base:debian`.
-- Eingebaute Features (Schlüssel → Quelle unter `ghcr.io/devcontainers/features/`, jeweils mit der Standardversion `1`): `git` → `git`, `docker-cli` → `docker-outside-of-docker`, `node` → `node`, `java` → `java`, `go` → `go`, `cpp` → `cpp`, `kubectl-helm` → `kubectl-helm-minikube`, `postgres-client` → `postgresql-client`, `sdkman` → `java` (das Feature installiert SDKMAN; teilt sich den Render-Schlüssel mit `java`, der einmal erscheint) und `homebrew` → `ghcr.io/meaningful-ooo/devcontainer-features/homebrew` mit der Standardversion `2` (Drittanbieter-Feature; die Befehlsausgabe weist es aus). Jede andere Quelle gilt als extern und braucht eine Freigabe in `devcontainer.featureSources.allow`.
+- Eingebaute Features (Schlüssel → Quelle unter `ghcr.io/devcontainers/features/`, jeweils mit der Standardversion `1`): `git` → `git`, `docker-cli` → `docker-outside-of-docker`, `node` → `node`, `java` → `java`, `go` → `go`, `cpp` → `cpp`, `kubectl-helm` → `kubectl-helm-minikube`, `postgres-client` → `postgresql-client`, `python` → `python`, `sdkman` → `java` (das Feature installiert SDKMAN; teilt sich den Render-Schlüssel mit `java`, der einmal erscheint) und `homebrew` → `ghcr.io/meaningful-ooo/devcontainer-features/homebrew` mit der Standardversion `2` (Drittanbieter-Feature; die Befehlsausgabe weist es aus). Jede andere Quelle gilt als extern und braucht eine Freigabe in `devcontainer.featureSources.allow`.
 - Externe Feature-Quellen müssen als URL mit Schema `http://`, `https://` oder `oci://` angegeben werden.
 
 ## 7. Historie

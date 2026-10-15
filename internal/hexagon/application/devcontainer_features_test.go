@@ -321,6 +321,7 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 		"kubectl-helm",
 		"node",
 		"postgres-client",
+		"python",
 		"sdkman",
 	}
 	catalogue := application.FeatureCatalogueForTest()
