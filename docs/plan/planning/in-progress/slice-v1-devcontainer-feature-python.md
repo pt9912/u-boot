@@ -24,7 +24,7 @@ wechselt nur durch `git mv`.
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- Feature-Optionen (Python-Version, Toolchain-Pakete) — der Katalog kennt keine Optionen ([ADR-0020](../../adr/0020-drittanbieter-features-im-katalog.md), Re-Evaluierungs-Trigger); die Version überschreibt der Nutzer über `devcontainer.features.python.version`.
+- Feature-Optionen (Python-Version, Toolchain-Pakete) — der Katalog kennt keine Optionen ([ADR-0020](../../adr/0020-drittanbieter-features-im-katalog.md), Re-Evaluierungs-Trigger); der Nutzer überschreibt den Tag des Features über `devcontainer.features.python.version` (der Wert ist der OCI-Tag des Features, nicht die Python-Version).
 - Weitere Schlüssel — jeder Schlüssel braucht eigene Hosts und Tests; neue Wünsche kommen als eigener Slice.
 
 ## 2. Definition of Done
@@ -45,7 +45,7 @@ wechselt nur durch `git mv`.
 |---|---|---|
 | `internal/hexagon/application/devcontainer_features.go` | update | Katalogeintrag `python` |
 | `internal/hexagon/application/devcontainer_egress.go` | update | Hosts für `python` |
-| `internal/hexagon/application/*_test.go` | update | Katalog-Schlüssel, Golden Cases |
+| `internal/hexagon/application/*_test.go` | update | Katalog-Schlüssel, Golden Cases (Render, Hosts) nach [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) |
 | `spec/spezifikation.md`, `docs/user/benutzerhandbuch.md`, `README.md`, `README.de.md`, `CHANGELOG.md`, `harness/replay.md` | update | öffentlicher Vertrag und Golden-Zeile |
 
 ## 4. Trigger
@@ -63,7 +63,7 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 
 ## 6. Risiken und offene Punkte
 
-- Das Feature installiert das Betriebssystem-Python; `pip install` ohne venv lehnt PEP 668 ab — **Ausgang:** entfallen: gemessen (Python 3.13.5, `pip install` im venv läuft mit `pypi.org` und `files.pythonhosted.org`); das Handbuch nennt den venv-Hinweis.
+- Das Feature installiert das Betriebssystem-Python; `pip install` ohne venv lehnt PEP 668 ab — **Ausgang:** entfallen: gemessen am 2026-10-15 mit der Dev-Container-CLI 0.89.0 auf `mcr.microsoft.com/devcontainers/base:debian` (Colima, arm64) und den Standardoptionen des Features: `python --version` → 3.13.5 aus `/usr/lib/python3`, `pip install` ohne venv bricht mit dem PEP-668-Hinweis ab, im venv (`python -m venv`) läuft `pip install requests` und die DNS-Abfragen gehen nur an `pypi.org` und `files.pythonhosted.org`; das Handbuch nennt den venv-Hinweis.
 - Weitere Paketquellen (private Indizes) brauchen eigene Hosts — **Ausgang:** weiter offen: der Nutzer ergänzt sie über `devcontainer.sandbox.egress.allow`.
 
 ## 7. Closure-Notiz

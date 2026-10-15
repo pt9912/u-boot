@@ -665,8 +665,11 @@ func TestGenerateDevcontainer_FeaturesHomebrewSdkman(t *testing.T) {
 			}
 			warns := 0
 			for _, w := range resp.Warnings {
-				if w.Code == "LH-NFA-SEC-004" && strings.Contains(w.Message, "third-party publisher meaningful-ooo") {
+				if w.Code == "LH-NFA-SEC-004" {
 					warns++
+					if !strings.Contains(w.Message, "third-party publisher meaningful-ooo") {
+						t.Errorf("unexpected third-party warning: %+v", w)
+					}
 				}
 			}
 			if warns != tc.wantWarns {
