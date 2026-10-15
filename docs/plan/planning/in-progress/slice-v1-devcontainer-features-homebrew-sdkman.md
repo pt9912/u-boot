@@ -31,16 +31,16 @@ Folge-ADR: Drittanbieter-Feature im eingebauten Katalog.
 
 ## 2. Definition of Done
 
-- [ ] **Folge-ADR** (nächste freie Nummer) entscheidet Drittanbieter-Features im Katalog (Quelle, Versionspin, Kennzeichnung, Messung); ADR-Index aktualisiert.
-- [ ] **Katalog und Generator:** `homebrew` und `sdkman` im Katalog; identische Render-Schlüssel (`java` und `sdkman` zusammen) erscheinen einmal in `devcontainer.json`; die Befehlsausgabe weist das Drittanbieter-Feature aus; Egress-Hosts je Feature; Golden Cases belegen Render, Warnung, Dedupe und Hosts.
-- [ ] **Doku:** Spezifikation ([SPEC-023](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen), [SPEC-019](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)), Benutzerhandbuch, READMEs und CHANGELOG nennen die neuen Schlüssel.
-- [ ] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`) — kein Self-Review.
-- [ ] Doku-Update, falls ein öffentlicher Vertrag berührt ist.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register fortgeschrieben oder „keine Beobachtung angefallen" in §7 notiert.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
+- [x] **Folge-ADR** (nächste freie Nummer) entscheidet Drittanbieter-Features im Katalog (Quelle, Versionspin, Kennzeichnung, Messung); ADR-Index aktualisiert.
+- [x] **Katalog und Generator:** `homebrew` und `sdkman` im Katalog; identische Render-Schlüssel (`java` und `sdkman` zusammen) erscheinen einmal in `devcontainer.json`; die Befehlsausgabe weist das Drittanbieter-Feature aus; Egress-Hosts je Feature; Golden Cases belegen Render, Warnung, Dedupe und Hosts.
+- [x] **Doku:** Spezifikation ([SPEC-023](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen), [SPEC-019](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)), Benutzerhandbuch, READMEs und CHANGELOG nennen die neuen Schlüssel.
+- [x] `make gates` grün.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`) — kein Self-Review.
+- [x] Doku-Update, falls ein öffentlicher Vertrag berührt ist.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register fortgeschrieben oder „keine Beobachtung angefallen" in §7 notiert.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
 
 ## 3. Plan (vor Code)
 
@@ -68,18 +68,18 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 
 ## 6. Risiken und offene Punkte
 
-- Das Community-Feature `homebrew` ändert sich oder verschwindet (Drittanbieter, Major-Pin `2`) — **Ausgang:** weiter offen: Re-Evaluierungs-Trigger der Folge-ADR; ein Build-Fehler fällt beim Image-Build auf.
-- Die Egress-Hosts reichen für `brew install` oder `sdk install` nicht aus (Download-Hosts der Hersteller wechseln) — **Ausgang:** weiter offen: der Nutzer ergänzt Hosts über `devcontainer.sandbox.egress.allow`; die Doku sagt das.
+- Das Community-Feature `homebrew` ändert sich oder verschwindet (Drittanbieter, Major-Pin `2`) — **Ausgang:** weiter offen: Re-Evaluierungs-Trigger der Folge-ADR ([ADR-0020](../../adr/0020-drittanbieter-features-im-katalog.md)); ein Build-Fehler fällt beim Image-Build auf.
+- Die Egress-Hosts reichen für `brew install` oder `sdk install` nicht aus (Download-Hosts der Hersteller wechseln) — **Ausgang:** entfallen: gemessen für `brew install jq` sowie `sdk list java`, `sdk install maven` und `sdk install gradle` ([ADR-0020](../../adr/0020-drittanbieter-features-im-katalog.md)); weitere Hosts ergänzt der Nutzer über `devcontainer.sandbox.egress.allow`, das Handbuch nennt es.
 
 ## 7. Closure-Notiz
 
-- **Was hat funktioniert:** —
-- **Was ging anders als geplant:** —
-- **Steering-Loop-Eintrag:** —
-- **Beobachtungs-Register (`../observations/`):** —
-- **Folge-Slices:** —
+- **Was hat funktioniert:** `homebrew` (Community-Feature, gekennzeichnet) und `sdkman` (Alias auf `java`) sind im Katalog; Render, Dedupe, Warnung und Egress-Hosts sind durch Golden Cases gepinnt; die Hosts sind gemessen (DNS-Abfragen von `brew install jq` und `sdk install maven/gradle`).
+- **Was ging anders als geplant:** Die Messung mit der Dev-Container-CLI zeigte, dass das Community-Feature `sdkman` einen SDK-Kandidaten statt SDKMAN installiert; `sdkman` zeigt deshalb auf das offizielle `java`-Feature (Entscheidung des Projektinhabers). Der Review [`2026-10-15-devcontainer-features-homebrew-sdkman`](../../../reviews/2026-10-15-devcontainer-features-homebrew-sdkman.md): 0 HIGH, 2 MEDIUM, 5 LOW; behoben bis auf F-1 (Zustimmungsmodell, Entscheidung des Projektinhabers: Kennzeichnung durch Warnung bei Aktivierung im Katalog).
+- **Steering-Loop-Eintrag:** Eine Annahme über ein externes Artefakt (Funktion eines Community-Features) vor der Planung messen, nicht aus dem Namen ableiten — die Messung änderte hier den Zuschnitt.
+- **Beobachtungs-Register (`../observations/`):** keine Beobachtung angefallen.
+- **Folge-Slices:** keine.
 - **Risiken aus §6:** siehe §6
-- **Drei Paarungen:** —
+- **Drei Paarungen:** Anker (Zustimmungsmodell Drittanbieter-Feature, Review F-1) → Entscheidung des Projektinhabers im [ADR-0020](../../adr/0020-drittanbieter-features-im-katalog.md) · Register: keine Beobachtung angefallen.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
