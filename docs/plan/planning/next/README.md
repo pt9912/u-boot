@@ -11,6 +11,7 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
+| [`slice-v1-devcontainer-feature-python`](slice-v1-devcontainer-feature-python.md) | Feature `python` im eingebauten Katalog (v0.9.0) |
 
 Zuvor: Der Konsolidierungs-Slice
 [`slice-v1-cli-json-envelope-consolidation`](../done/slice-v1-cli-json-envelope-consolidation.md) ist am 2026-06-08
