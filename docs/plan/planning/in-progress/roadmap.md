@@ -13,7 +13,7 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**v0.9.0 (Devcontainer-Features Homebrew, SDKMAN, Python)** — Slice: [`slice-v1-release-cut-v0.9.0`](slice-v1-release-cut-v0.9.0.md) (Tag-Push steht aus). Offen daneben: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (macOS-Smoke im Tap).
+**Homebrew-Verifikation** — Slice: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (v0.9.0 ist released, Tap-Nachzug lief; offen: macOS-Smoke im Tap zur Formel 0.9.0 und `brew install` auf einem Mac).
 
 ## Nächste Wellen
 
@@ -84,6 +84,7 @@ flowchart LR
 | v0.8.1 (aktueller Docker im Sandbox-Devcontainer) | 2026-10-14 | [`slice-v1-release-cut-v0.8.1`](../done/slice-v1-release-cut-v0.8.1.md) — Tag `v0.8.1` auf `5aadaf3` |
 | Devcontainer-Features `homebrew` und `sdkman` ([ADR-0020](../../adr/0020-drittanbieter-features-im-katalog.md)) | 2026-10-15 | [`slice-v1-devcontainer-features-homebrew-sdkman`](../done/slice-v1-devcontainer-features-homebrew-sdkman.md) (`ac59b83`); Review-Report `docs/reviews/2026-10-15-devcontainer-features-homebrew-sdkman.md` |
 | Devcontainer-Feature `python` | 2026-10-15 | [`slice-v1-devcontainer-feature-python`](../done/slice-v1-devcontainer-feature-python.md); Review-Report `docs/reviews/2026-10-15-devcontainer-feature-python.md` |
+| v0.9.0 (Devcontainer-Features Homebrew, SDKMAN, Python) | 2026-10-15 | [`slice-v1-release-cut-v0.9.0`](../done/slice-v1-release-cut-v0.9.0.md) — Tag `v0.9.0` auf `7bfd8d6` |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-NN-results.md`; die Welle-Closure lebt vollständig im jeweiligen

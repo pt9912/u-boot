@@ -32,14 +32,14 @@ wechselt nur durch `git mv`.
 
 ## 2. Definition of Done
 
-- [ ] `v0.9.0` ist getaggt, der `publish`-Lauf ist grün (GHCR `:0.9.0` und `:latest`, sechs Binaries, vier Pakete, `SHA256SUMS`, `u-boot.rb`, Paket-Smoke, Job `tap`).
-- [ ] `make fullbuild` und `make test-docker` grün vor dem Tag.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`) — kein Self-Review.
-- [ ] Doku-Update: CHANGELOG, READMEs, Handbuch, Roadmap tragen `v0.9.0`.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register fortgeschrieben oder „keine Beobachtung angefallen" in §7 notiert.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
+- [x] `v0.9.0` ist getaggt, der `publish`-Lauf ist grün (GHCR `:0.9.0` und `:latest`, sechs Binaries, vier Pakete, `SHA256SUMS`, `u-boot.rb`, Paket-Smoke, Job `tap`).
+- [x] `make fullbuild` und `make test-docker` grün vor dem Tag.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`) — kein Self-Review.
+- [x] Doku-Update: CHANGELOG, READMEs, Handbuch, Roadmap tragen `v0.9.0`.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register fortgeschrieben oder „keine Beobachtung angefallen" in §7 notiert.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
 
 ## 3. Plan (vor Code)
 
@@ -65,18 +65,18 @@ DoD vollständig: Tag gesetzt, `publish`- und Tap-Lauf kontrolliert (`releasing.
 
 ## 6. Risiken und offene Punkte
 
-- Der `publish`-Lauf scheitert — **Ausgang:** weiter offen: Behebung per Workflow-Rerun, nie per Tag-Verschiebung (`releasing.md` §8).
-- Das Zustimmungsmodell für Drittanbieter-Features im Katalog (Kennzeichnung durch Warnung bei `generate`) ist nur in [ADR-0020](../../adr/0020-drittanbieter-features-im-katalog.md) festgelegt, das Lastenheft unverändert — **Ausgang:** weiter offen: Entscheidung des Projektinhabers (Review-Befund F-1 des Slices [`slice-v1-devcontainer-features-homebrew-sdkman`](../done/slice-v1-devcontainer-features-homebrew-sdkman.md)).
+- Der `publish`-Lauf scheitert — **Ausgang:** entfallen: `publish`-Lauf `38689531814` lief grün (vier Jobs).
+- Das Zustimmungsmodell für Drittanbieter-Features im Katalog (Kennzeichnung durch Warnung bei `generate`) ist nur in [ADR-0020](../../adr/0020-drittanbieter-features-im-katalog.md) festgelegt, das Lastenheft unverändert — **Ausgang:** weiter offen: Entscheidung des Projektinhabers, ob die Kennzeichnung per Warnung als Zustimmung genügt (Review-Befund F-1 des Slices [`slice-v1-devcontainer-features-homebrew-sdkman`](../done/slice-v1-devcontainer-features-homebrew-sdkman.md)).
 
 ## 7. Closure-Notiz
 
-- **Was hat funktioniert:** —
-- **Was ging anders als geplant:** —
-- **Steering-Loop-Eintrag:** —
-- **Beobachtungs-Register (`../observations/`):** —
-- **Folge-Slices:** —
+- **Was hat funktioniert:** Tag `v0.9.0` auf `7bfd8d6` (2026-10-15), nach grünem `ci` und `integration-docker` auf `main` sowie `make fullbuild` und `make test-docker` lokal. `publish`-Lauf `38689531814`: alle vier Jobs grün (`publish`, `tap`, Paket-Smoke `.deb` und `.rpm`); Release mit zwölf Assets, kein Prerelease; `ghcr.io/pt9912/u-boot:0.9.0` und `:latest` zeigen nach frischem Pull auf denselben Digest und melden `0.9.0`.
+- **Was ging anders als geplant:** Nichts am Ablauf; die Review-Finding des Cuts (ein LOW zum CHANGELOG-Wortlaut) ist vor dem Tag behoben.
+- **Steering-Loop-Eintrag:** Vor dem Tag das Datum im Cut gegen das Tag-Datum prüfen (`date +%F`), weil es an sechs Stellen fest steht.
+- **Beobachtungs-Register (`../observations/`):** keine Beobachtung angefallen.
+- **Folge-Slices:** [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md); die Tap-Verifikation führt [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md).
 - **Risiken aus §6:** siehe §6
-- **Drei Paarungen:** —
+- **Drei Paarungen:** Anker (Zustimmungsmodell Drittanbieter-Features) → Entscheidung des Projektinhabers · Register: keine Beobachtung angefallen.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
