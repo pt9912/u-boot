@@ -748,7 +748,7 @@ devcontainer:
 
 #### Eingebauter Katalog
 
-Ohne weitere Freigabe aktivierbar. Die Standardversion ist `1`.
+Ohne weitere Freigabe aktivierbar (`homebrew` ist ein Drittanbieter-Feature: `u-boot generate devcontainer` weist es aus). Die Standardversion ist `1`, bei `homebrew` `2`.
 
 | Name | Inhalt |
 |---|---|

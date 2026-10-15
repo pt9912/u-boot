@@ -697,3 +697,49 @@ func TestGenerateDevcontainer_FeaturesHomebrew_ExternalOverrideNoWarning(t *test
 		t.Errorf("override not rendered: %v", feats)
 	}
 }
+
+// The warning names the version that is rendered, also with a version
+// override on the catalogue key.
+func TestGenerateDevcontainer_FeaturesHomebrew_WarningNamesConfiguredVersion(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  features:\n    homebrew:\n      enabled: true\n      version: \"3\"\n")
+	resp, err := generateSandbox(svc, false)
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	feats, _ := devcontainerJSONMap(t, fs)["features"].(map[string]any)
+	if _, ok := feats["ghcr.io/meaningful-ooo/devcontainer-features/homebrew:3"]; !ok {
+		t.Fatalf("version override not rendered: %v", feats)
+	}
+	found := false
+	for _, w := range resp.Warnings {
+		if w.Code == "LH-NFA-SEC-004" && strings.Contains(w.Message, "ghcr.io/meaningful-ooo/devcontainer-features/homebrew:3") {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("warning must name homebrew:3: %+v", resp.Warnings)
+	}
+}
+
+// java pinned to another version next to sdkman at the default render two
+// keys; each key is a distinct feature request.
+func TestGenerateDevcontainer_FeaturesJavaVersionAndSdkman_RenderTwoKeys(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  features:\n    java:\n      enabled: true\n      version: \"21\"\n    sdkman:\n      enabled: true\n")
+	if _, err := generateSandbox(svc, false); err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	feats, _ := devcontainerJSONMap(t, fs)["features"].(map[string]any)
+	var got []string
+	for k := range feats {
+		got = append(got, k)
+	}
+	sort.Strings(got)
+	want := []string{"ghcr.io/devcontainers/features/java:1", "ghcr.io/devcontainers/features/java:21"}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("features = %v, want %v", got, want)
+	}
+}

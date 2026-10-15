@@ -303,7 +303,8 @@ func collectDevcontainerFeatures(cfg ubootYAMLConfig) []devcontainerFeatureData 
 
 // dedupeFeatureData drops adjacent identical render keys of a sorted
 // feature list: catalogue keys that share a feature (`java` and
-// `sdkman`) render it once.
+// `sdkman`) render it once. Keys that differ in version stay separate
+// (`java` at 21 next to `sdkman` at the default render two keys).
 func dedupeFeatureData(sorted []devcontainerFeatureData) []devcontainerFeatureData {
 	out := sorted[:0]
 	for _, f := range sorted {
@@ -339,11 +340,12 @@ func thirdPartyFeatureWarnings(cfg ubootYAMLConfig) []driving.WarningEntry {
 		if !ok || cat.publisher == "" {
 			continue
 		}
+		_, version, _ := projectFeatureSourceVersion(name, "", cfg.Devcontainer.Features[name].Version)
 		out = append(out, driving.WarningEntry{
 			Code:  "LH-NFA-SEC-004",
 			Level: "warn",
 			Message: "devcontainer feature " + name + " comes from the third-party publisher " + cat.publisher +
-				" (" + cat.source + ":" + cat.defaultVersion + "); its install script runs when the image is built",
+				" (" + cat.source + ":" + version + "); its install script runs when the image is built",
 			Subject: ".devcontainer/devcontainer.json",
 		})
 	}

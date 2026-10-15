@@ -86,6 +86,38 @@ devcontainer:
 	}
 }
 
+// java and sdkman share one render key: with both enabled and the single
+// key in devcontainer.json, and with only one of them enabled, there is no
+// drift.
+func TestDoctor_FeaturesDrift_OKWithJavaAndSdkmanSharingOneKey(t *testing.T) {
+	t.Parallel()
+	for name, features := range map[string]string{
+		"both":       "    java:\n      enabled: true\n    sdkman:\n      enabled: true\n",
+		"sdkman":     "    sdkman:\n      enabled: true\n",
+		"java only":  "    java:\n      enabled: true\n    sdkman:\n      enabled: false\n",
+		"sdkman off": "    java:\n      enabled: true\n",
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs, _, _, _ := newDoctorService(t)
+			driftSeed(t, fs, "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n"+features, `{
+  "name": "demo",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {}
+  }
+}`)
+			resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+			if err != nil {
+				t.Fatalf("Check: %v", err)
+			}
+			d := findDiagnostic(t, resp.Report.Items, "devcontainer.features.drift")
+			if d.Severity != domain.SeverityOK {
+				t.Errorf("Severity = %v; message = %q", d.Severity, d.Message)
+			}
+		})
+	}
+}
+
 // TestDoctor_FeaturesDrift_Case1_FeatureMissingInJSON pins the
 // classic Case-1 drift: feature activated, JSON has no such key.
 func TestDoctor_FeaturesDrift_Case1_FeatureMissingInJSON(t *testing.T) {
