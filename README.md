@@ -7,10 +7,9 @@ environments — project structure, Docker Compose stack, devcontainer
 configuration, service add-ons (PostgreSQL, Keycloak, OpenTelemetry, …),
 and the usual recurring artefacts (README, CHANGELOG, `.env.example`).
 
-> **Status:** `v0.8.1` released 2026-10-14 (GHCR, six-platform binaries,
-> `.deb`/`.rpm` packages, Homebrew tap). Current Docker (29.9) from Docker's APT repository for the sandbox devcontainer
-> (`nestedRuntime: docker`, [LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0019](docs/plan/adr/0019-docker-daemon-aus-docker-apt-repo.md)); `v0.8.0` added the own Docker daemon
-> ([ADR-0018](docs/plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md)).
+> **Status:** `v0.9.0` released 2026-10-15 (GHCR, six-platform binaries,
+> `.deb`/`.rpm` packages, Homebrew tap). Adds the devcontainer features `python`, `sdkman` and `homebrew`
+> ([LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [ADR-0020](docs/plan/adr/0020-drittanbieter-features-im-katalog.md)); `v0.8.1` brought current Docker to the sandbox devcontainer.
 > Full release table below.
 
 The normative requirements ([`spec/lastenheft.md`](spec/lastenheft.md))
@@ -103,7 +102,7 @@ u-boot --version
 **Debian / Ubuntu / Fedora / RHEL** (`.deb` and `.rpm` from the release, amd64 and arm64):
 
 ```bash
-VERSION=0.8.1   # the release you want
+VERSION=0.9.0   # the release you want
 # Debian / Ubuntu
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"
@@ -204,6 +203,7 @@ Re-init on an existing project requires an explicit strategy
 | `v0.7.0` | 2026-10-01 | "Linux packages" — `.deb` and `.rpm` (amd64, arm64) as release assets via `nfpm` ([ADR-0017](docs/plan/adr/0017-linux-pakete-nfpm.md)); Keycloak acceptance test back in the default integration lane. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.7.0). |
 | `v0.8.0` | 2026-10-14 | "Docker in the sandbox" — `devcontainer.sandbox.nestedRuntime: docker` gives the sandbox devcontainer an own Docker daemon with BuildKit, Buildx and Compose; needs `--privileged`, reported as a relaxation ([LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0018](docs/plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md)). [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.8.0). |
 | `v0.8.1` | 2026-10-14 | "Current Docker in the sandbox" — with `nestedRuntime: docker` the container runs Docker 29.9, Buildx 0.38 and Compose 5.6 from Docker's APT repository (pinned signing key); `download.docker.com` joins the default egress allowlist ([LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0019](docs/plan/adr/0019-docker-daemon-aus-docker-apt-repo.md)). [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.8.1). |
+| `v0.9.0` | 2026-10-15 | "More devcontainer features" — built-in catalogue keys `python`, `sdkman` and `homebrew` (community feature, reported as third party) with their egress hosts ([LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [ADR-0020](docs/plan/adr/0020-drittanbieter-features-im-katalog.md)). [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.9.0). |
 | `v0.5.0` | 2026-07-25 | "Security + local templates" — Go toolchain bump closes CVE-2026-39822 in the runtime image (HIGH); `u-boot init --template ./path` resolves a project from a local directory ([LH-FA-TPL-003](spec/lastenheft.md#lh-fa-tpl-003--eigene-templates)), alongside the built-in catalogue. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.5.0). |
 | `v0.4.0` | 2026-06-08 | "Machine-readable CLI" milestone — `--json` / `--dry-run` / `--diff` for all ten spec-enum subcommands ([LH-NFA-USE-004](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) Minimalkontrakt + [LH-FA-CLI-007](spec/lastenheft.md#lh-fa-cli-007--dry-run)/[LH-FA-CLI-008](spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) Voll-Schema), `u-boot logs`, devcontainer-features with a drift-doctor check. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.4.0). |
 

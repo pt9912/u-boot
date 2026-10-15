@@ -11,6 +11,11 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-15
+
+Ninth release. **More devcontainer features.** The built-in catalogue gains `python`, `sdkman` and `homebrew`
+(the latter a community feature, reported as third party by `u-boot generate devcontainer`), each with the egress hosts it needs.
+
 ### Added
 
 - Devcontainer features: the built-in catalogue gains `python` (the official `python` feature; egress hosts `pypi.org` and
@@ -1173,7 +1178,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.8.1...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/pt9912/u-boot/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/pt9912/u-boot/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/pt9912/u-boot/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/pt9912/u-boot/compare/v0.6.0...v0.7.0
