@@ -13,7 +13,7 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**Homebrew-Verifikation** — Slice: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (v0.8.1 ist released, Tap-Nachzug lief; offen: macOS-Smoke im Tap zur Formel 0.8.1 und `brew install` auf einem Mac).
+**v0.9.0 (Devcontainer-Features Homebrew und SDKMAN)** — Slice: [`slice-v1-devcontainer-features-homebrew-sdkman`](slice-v1-devcontainer-features-homebrew-sdkman.md). Offen daneben: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (macOS-Smoke im Tap).
 
 ## Nächste Wellen
 
