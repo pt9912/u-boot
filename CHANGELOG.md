@@ -22,7 +22,7 @@ Ninth release. **More devcontainer features.** The built-in catalogue gains `pyt
   `files.pythonhosted.org`), `sdkman` (an alias for the official `java` feature, which installs
   SDKMAN; `java` and `sdkman` together render it once) and `homebrew` (the community feature
   `ghcr.io/meaningful-ooo/devcontainer-features/homebrew:2`). `u-boot generate devcontainer` reports a third-party catalogue
-  feature as a warning (its install script runs at image build). The egress allowlist gets the hosts of both features; hosts of
+  feature as a warning (its install script runs at image build). The egress allowlist gets the hosts of all three features; hosts of
   further SDKMAN candidates go into `devcontainer.sandbox.egress.allow`
   ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features),
   [`LH-NFA-SEC-004`](spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte),
