@@ -306,6 +306,7 @@ type FeatureCatalogueEntryForTest struct {
 	Source         string
 	DefaultVersion string
 	ShortDesc      string
+	Publisher      string
 }
 
 // FeatureCatalogueForTest exposes the unexported [featureCatalogue]
@@ -318,6 +319,7 @@ func FeatureCatalogueForTest() map[string]FeatureCatalogueEntryForTest {
 			Source:         v.source,
 			DefaultVersion: v.defaultVersion,
 			ShortDesc:      v.shortDesc,
+			Publisher:      v.publisher,
 		}
 	}
 	return out
@@ -334,6 +336,7 @@ func FeatureForTest(name domain.FeatureName) (FeatureCatalogueEntryForTest, bool
 		Source:         entry.source,
 		DefaultVersion: entry.defaultVersion,
 		ShortDesc:      entry.shortDesc,
+		Publisher:      entry.publisher,
 	}, true
 }
 

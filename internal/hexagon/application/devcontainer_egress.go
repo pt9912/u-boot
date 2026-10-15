@@ -74,6 +74,8 @@ func egressFeatureHosts() map[string][]string {
 		"node": {"registry.npmjs.org"},
 		"go":   {"proxy.golang.org", "sum.golang.org", "storage.googleapis.com"},
 		"java": {"repo.maven.apache.org", "repo1.maven.org"},
+		"homebrew": {"formulae.brew.sh", "ghcr.io", "pkg-containers.githubusercontent.com"},
+		"sdkman":   {"api.sdkman.io", "broker.sdkman.io", "repo.maven.apache.org", "repo1.maven.org"},
 	}
 }
 

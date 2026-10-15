@@ -10,6 +10,7 @@ import (
 
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
+	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
 // ErrInvalidFeatureSource is the domain sentinel for LH-FA-DEV-003
@@ -155,6 +156,10 @@ type featureCatalogueEntry struct {
 	source         string
 	defaultVersion string
 	shortDesc      string
+	// publisher names a third-party publisher; empty for the official
+	// `ghcr.io/devcontainers/features` namespace. The feature's install
+	// script runs at image build, so the generate output reports it.
+	publisher string
 }
 
 // featureCatalogue lists the built-in devcontainer-feature catalogue
@@ -208,6 +213,17 @@ func featureCatalogue() map[string]featureCatalogueEntry {
 			source:         "ghcr.io/devcontainers/features/postgresql-client",
 			defaultVersion: "1",
 			shortDesc:      "PostgreSQL client",
+		},
+		"homebrew": {
+			source:         "ghcr.io/meaningful-ooo/devcontainer-features/homebrew",
+			defaultVersion: "2",
+			shortDesc:      "Homebrew (community feature)",
+			publisher:      "meaningful-ooo",
+		},
+		"sdkman": {
+			source:         "ghcr.io/devcontainers/features/java",
+			defaultVersion: "1",
+			shortDesc:      "SDKMAN (installed by the official java feature)",
 		},
 	}
 }
@@ -282,6 +298,55 @@ func collectDevcontainerFeatures(cfg ubootYAMLConfig) []devcontainerFeatureData 
 		}
 		return out[i].Version < out[j].Version
 	})
+	return dedupeFeatureData(out)
+}
+
+// dedupeFeatureData drops adjacent identical render keys of a sorted
+// feature list: catalogue keys that share a feature (`java` and
+// `sdkman`) render it once.
+func dedupeFeatureData(sorted []devcontainerFeatureData) []devcontainerFeatureData {
+	out := sorted[:0]
+	for _, f := range sorted {
+		if len(out) > 0 && out[len(out)-1] == f {
+			continue
+		}
+		out = append(out, f)
+	}
+	return out
+}
+
+// thirdPartyFeatureWarnings returns one warning per enabled built-in
+// feature that comes from a third-party publisher (LH-NFA-SEC-004): the
+// feature's install script runs at image build.
+func thirdPartyFeatureWarnings(cfg ubootYAMLConfig) []driving.WarningEntry {
+	if cfg.Devcontainer == nil {
+		return nil
+	}
+	names := make([]string, 0, len(cfg.Devcontainer.Features))
+	for name, entry := range cfg.Devcontainer.Features {
+		if entry.Enabled != nil && *entry.Enabled && entry.Source == "" {
+			names = append(names, name)
+		}
+	}
+	sort.Strings(names)
+	var out []driving.WarningEntry
+	for _, name := range names {
+		featureName, err := domain.NewFeatureName(name)
+		if err != nil {
+			continue
+		}
+		cat, ok := featureFor(featureName)
+		if !ok || cat.publisher == "" {
+			continue
+		}
+		out = append(out, driving.WarningEntry{
+			Code:  "LH-NFA-SEC-004",
+			Level: "warn",
+			Message: "devcontainer feature " + name + " comes from the third-party publisher " + cat.publisher +
+				" (" + cat.source + ":" + cat.defaultVersion + "); its install script runs when the image is built",
+			Subject: ".devcontainer/devcontainer.json",
+		})
+	}
 	return out
 }
 

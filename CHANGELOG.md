@@ -11,6 +11,17 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- Devcontainer features: the built-in catalogue gains `sdkman` (an alias for the official `java` feature, which installs
+  SDKMAN; `java` and `sdkman` together render it once) and `homebrew` (the community feature
+  `ghcr.io/meaningful-ooo/devcontainer-features/homebrew:2`). `u-boot generate devcontainer` reports a third-party catalogue
+  feature as a warning (its install script runs at image build). The egress allowlist gets the hosts of both features; hosts of
+  further SDKMAN candidates go into `devcontainer.sandbox.egress.allow`
+  ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features),
+  [`LH-NFA-SEC-004`](spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte),
+  [ADR-0020](docs/plan/adr/0020-drittanbieter-features-im-katalog.md)).
+
 ## [0.8.1] - 2026-10-14
 
 Patch release. **Current Docker in the sandbox devcontainer.** With `nestedRuntime: docker` the container now runs Docker's own

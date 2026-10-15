@@ -760,6 +760,8 @@ Ohne weitere Freigabe aktivierbar. Die Standardversion ist `1`.
 | `cpp` | C++-Toolchain |
 | `kubectl-helm` | kubectl, helm und minikube |
 | `postgres-client` | PostgreSQL-Client |
+| `sdkman` | SDKMAN (das offizielle `java`-Feature installiert es; zusammen mit `java` erscheint es einmal) |
+| `homebrew` | Homebrew; **Drittanbieter-Feature** (`meaningful-ooo`, Version `2`): `u-boot generate devcontainer` weist es aus, sein Installationsskript läuft beim Image-Build |
 
 #### Externe Feature-Quellen freigeben
 
@@ -1036,6 +1038,8 @@ Standardmäßig erlaubt sind:
 | Feature `node` | `registry.npmjs.org` |
 | Feature `go` | `proxy.golang.org`, `sum.golang.org`, `storage.googleapis.com` |
 | Feature `java` | `repo.maven.apache.org`, `repo1.maven.org` |
+| Feature `sdkman` | `api.sdkman.io`, `broker.sdkman.io`, `repo.maven.apache.org`, `repo1.maven.org` |
+| Feature `homebrew` | `formulae.brew.sh`, `ghcr.io`, `pkg-containers.githubusercontent.com` |
 | Clone-Quelle | der Host von `devcontainer.sandbox.repository` beziehungsweise `origin` |
 | Ihre Ergänzungen | `devcontainer.sandbox.egress.allow` (kleingeschriebene Hostnamen, ohne Schema, Port oder Wildcard) |
 

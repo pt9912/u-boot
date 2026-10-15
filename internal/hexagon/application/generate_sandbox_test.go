@@ -871,3 +871,37 @@ func TestGenerateDevcontainer_SandboxDocker_StaleBlockKeepsUserContent(t *testin
 		t.Errorf("user content after the block was lost:\n%s", after)
 	}
 }
+
+// Egress allowlist per feature: homebrew and sdkman bring their hosts only
+// when enabled (SPEC-019).
+func TestGenerateDevcontainer_SandboxEgress_FeatureHosts(t *testing.T) {
+	t.Parallel()
+	for name, tc := range map[string]struct {
+		feature string
+		want    []string
+		absent  []string
+	}{
+		"homebrew": {"homebrew", []string{"formulae.brew.sh", "pkg-containers.githubusercontent.com"}, []string{"api.sdkman.io"}},
+		"sdkman":   {"sdkman", []string{"api.sdkman.io", "broker.sdkman.io", "repo1.maven.org"}, []string{"formulae.brew.sh"}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n    "+tc.feature+":\n      enabled: true\n  sandbox:\n    egress:\n      enabled: true\n")
+			if _, err := generateSandbox(svc, false); err != nil {
+				t.Fatalf("generate: %v", err)
+			}
+			script, _ := fs.ReadFile(egressInitPath())
+			for _, h := range tc.want {
+				if !strings.Contains(string(script), h) {
+					t.Errorf("%s missing from the allowlist:\n%s", h, script)
+				}
+			}
+			for _, h := range tc.absent {
+				if strings.Contains(string(script), h) {
+					t.Errorf("%s must not be in the allowlist:\n%s", h, script)
+				}
+			}
+		})
+	}
+}

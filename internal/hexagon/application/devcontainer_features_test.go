@@ -316,10 +316,12 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 		"docker-cli",
 		"git",
 		"go",
+		"homebrew",
 		"java",
 		"kubectl-helm",
 		"node",
 		"postgres-client",
+		"sdkman",
 	}
 	catalogue := application.FeatureCatalogueForTest()
 	got := make([]string, 0, len(catalogue))
@@ -336,11 +338,11 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 //
 //   - The key parses as a [domain.FeatureName] (slice T0-(c)).
 //   - The source is non-empty and starts with the canonical
-//     `ghcr.io/devcontainers/features/` prefix (LH-FA-DEV-003 — built-
-//     in catalogue mirrors the upstream devcontainers/features
-//     repository). Custom prefixes are reserved for external
-//     features (via the Allowlist + features.<name>.source override
-//     path), not for built-in entries.
+//     `ghcr.io/devcontainers/features/` prefix (LH-FA-DEV-003 — the
+//     built-in catalogue mirrors the upstream devcontainers/features
+//     repository), or it names a third-party publisher whose
+//     namespace is the source prefix (reported by generate,
+//     LH-NFA-SEC-004).
 //   - The default version slug is non-empty so the T3 renderer can
 //     emit `<source>:<version>` unconditionally.
 //   - The short description is non-empty so the future
@@ -358,9 +360,13 @@ func TestFeatureCatalogue_EntriesAreValid(t *testing.T) {
 			if entry.Source == "" {
 				t.Errorf("entry.Source for key %q is empty", key)
 			}
-			if !strings.HasPrefix(entry.Source, sourcePrefix) {
-				t.Errorf("entry.Source for key %q = %q, want prefix %q",
-					key, entry.Source, sourcePrefix)
+			official := strings.HasPrefix(entry.Source, sourcePrefix)
+			switch {
+			case official && entry.Publisher != "":
+				t.Errorf("entry %q is in the official namespace but names publisher %q", key, entry.Publisher)
+			case !official && (entry.Publisher == "" || !strings.HasPrefix(entry.Source, "ghcr.io/"+entry.Publisher+"/")):
+				t.Errorf("entry.Source for key %q = %q: a third-party source needs its publisher (got %q) as the registry namespace",
+					key, entry.Source, entry.Publisher)
 			}
 			if entry.DefaultVersion == "" {
 				t.Errorf("entry.DefaultVersion for key %q is empty", key)

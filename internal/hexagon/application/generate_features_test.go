@@ -7,6 +7,7 @@ import (
 	"errors"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 
@@ -620,5 +621,79 @@ func TestGenerateDevcontainer_FeaturesIdempotent(t *testing.T) {
 	}
 	if delta := len(fs.writtenPaths()) - writesAfterFirst; delta != 0 {
 		t.Errorf("second run produced %d WriteFile call(s), want 0", delta)
+	}
+}
+
+// Catalogue keys homebrew and sdkman: homebrew renders the community
+// feature and is reported as third party (LH-NFA-SEC-004); sdkman renders
+// the official java feature; java and sdkman together render it once.
+func TestGenerateDevcontainer_FeaturesHomebrewSdkman(t *testing.T) {
+	t.Parallel()
+	cases := map[string]struct {
+		yaml      string
+		wantKeys  []string
+		wantWarns int
+	}{
+		"homebrew": {"devcontainer:\n  enabled: true\n  features:\n    homebrew:\n      enabled: true\n",
+			[]string{"ghcr.io/meaningful-ooo/devcontainer-features/homebrew:2"}, 1},
+		"sdkman": {"devcontainer:\n  enabled: true\n  features:\n    sdkman:\n      enabled: true\n",
+			[]string{"ghcr.io/devcontainers/features/java:1"}, 0},
+		"java and sdkman": {"devcontainer:\n  enabled: true\n  features:\n    java:\n      enabled: true\n    sdkman:\n      enabled: true\n",
+			[]string{"ghcr.io/devcontainers/features/java:1"}, 0},
+		"both": {"devcontainer:\n  enabled: true\n  features:\n    homebrew:\n      enabled: true\n    sdkman:\n      enabled: true\n",
+			[]string{"ghcr.io/devcontainers/features/java:1", "ghcr.io/meaningful-ooo/devcontainer-features/homebrew:2"}, 1},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, tc.yaml)
+			resp, err := generateSandbox(svc, false)
+			if err != nil {
+				t.Fatalf("generate: %v", err)
+			}
+			feats, _ := devcontainerJSONMap(t, fs)["features"].(map[string]any)
+			var got []string
+			for k := range feats {
+				got = append(got, k)
+			}
+			sort.Strings(got)
+			if !reflect.DeepEqual(got, tc.wantKeys) {
+				t.Errorf("features = %v, want %v", got, tc.wantKeys)
+			}
+			warns := 0
+			for _, w := range resp.Warnings {
+				if w.Code == "LH-NFA-SEC-004" && strings.Contains(w.Message, "third-party publisher meaningful-ooo") {
+					warns++
+				}
+			}
+			if warns != tc.wantWarns {
+				t.Errorf("third-party warnings = %d, want %d: %+v", warns, tc.wantWarns, resp.Warnings)
+			}
+			if r2, err := generateSandbox(svc, false); err != nil || r2.Action != driving.GenerateActionNoOp {
+				t.Errorf("second run: action=%v err=%v, want NoOp", r2.Action, err)
+			}
+		})
+	}
+}
+
+// An external source override is not a catalogue feature: no third-party
+// warning for it (the allowlist step already is the consent).
+func TestGenerateDevcontainer_FeaturesHomebrew_ExternalOverrideNoWarning(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - https://ghcr.io/stu-bell/devcontainer-features\n  features:\n    homebrew:\n      enabled: true\n      source: https://ghcr.io/stu-bell/devcontainer-features/homebrew\n      version: \"1\"\n")
+	resp, err := generateSandbox(svc, false)
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	for _, w := range resp.Warnings {
+		if w.Code == "LH-NFA-SEC-004" {
+			t.Errorf("unexpected third-party warning for an explicit source override: %+v", w)
+		}
+	}
+	feats, _ := devcontainerJSONMap(t, fs)["features"].(map[string]any)
+	if _, ok := feats["https://ghcr.io/stu-bell/devcontainer-features/homebrew:1"]; !ok {
+		t.Errorf("override not rendered: %v", feats)
 	}
 }
