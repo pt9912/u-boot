@@ -1046,6 +1046,11 @@ Standardmäßig erlaubt sind:
 - **Wichtig:** Die Hosts des Agenten selbst (zum Beispiel dessen API) kennt
   `u-boot` nicht. Tragen Sie sie in `egress.allow` ein. Subdomains eines
   erlaubten Namens sind mitgemeint.
+- Die Features `sdkman` und `homebrew` bringen nur ihre eigenen Hosts mit. Die
+  Download-Hosts einzelner SDKMAN-Kandidaten (zum Beispiel `services.gradle.org`
+  für Gradle, `github.com` und `release-assets.githubusercontent.com` für
+  GitHub-Releases) und die Hosts weiterer Quellen von Homebrew-Formeln tragen
+  Sie bei Bedarf in `egress.allow` ein.
 - Nach einer Änderung führen Sie `u-boot generate devcontainer` aus und starten
   den Container neu.
 - Wer die Fähigkeit hat und das `sudo` des Base-Images nutzen kann, kann die
