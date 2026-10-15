@@ -13,7 +13,6 @@ Dateiname-Konventionen.
 | ----- | ---------- |
 | [`carveouts.md`](carveouts.md) | Master-Dokument: Carveout-Inventar ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)) |
 | [`slice-v2-homebrew-formula.md`](slice-v2-homebrew-formula.md) | Homebrew-Formel/Tap (repo-seitig geliefert, Tap-Einrichtung offen) |
-| [`slice-v1-devcontainer-feature-python.md`](slice-v1-devcontainer-feature-python.md) | Feature `python` im Katalog (v0.9.0) |
 | [`roadmap.md`](roadmap.md) | Master-Dokument: Slice-/Tranchen-Stand ([`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)) |
 
 (Nur die zwei Master-Dokumente liegen dauerhaft in `in-progress/`.
