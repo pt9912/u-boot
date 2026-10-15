@@ -29,15 +29,15 @@ wechselt nur durch `git mv`.
 
 ## 2. Definition of Done
 
-- [ ] **Katalog und Generator:** `python` im Katalog (offizielle Quelle, Standardversion `1`); Egress-Hosts `pypi.org` und `files.pythonhosted.org` nur bei aktivem Feature; Golden Cases belegen Render und Hosts.
-- [ ] **Doku:** Spezifikation ([SPEC-023](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen), [SPEC-019](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)), Benutzerhandbuch (inkl. Hinweis auf das Betriebssystem-Python nach PEP 668), READMEs und CHANGELOG nennen den Schlüssel.
-- [ ] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`) — kein Self-Review.
-- [ ] Doku-Update, falls ein öffentlicher Vertrag berührt ist.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register fortgeschrieben oder „keine Beobachtung angefallen" in §7 notiert.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
+- [x] **Katalog und Generator:** `python` im Katalog (offizielle Quelle, Standardversion `1`); Egress-Hosts `pypi.org` und `files.pythonhosted.org` nur bei aktivem Feature; Golden Cases belegen Render und Hosts.
+- [x] **Doku:** Spezifikation ([SPEC-023](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen), [SPEC-019](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)), Benutzerhandbuch (inkl. Hinweis auf das Betriebssystem-Python nach PEP 668), READMEs und CHANGELOG nennen den Schlüssel.
+- [x] `make gates` grün.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`) — kein Self-Review.
+- [x] Doku-Update, falls ein öffentlicher Vertrag berührt ist.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register fortgeschrieben oder „keine Beobachtung angefallen" in §7 notiert.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
 
 ## 3. Plan (vor Code)
 
@@ -68,13 +68,13 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 
 ## 7. Closure-Notiz
 
-- **Was hat funktioniert:** —
-- **Was ging anders als geplant:** —
-- **Steering-Loop-Eintrag:** —
-- **Beobachtungs-Register (`../observations/`):** —
-- **Folge-Slices:** —
+- **Was hat funktioniert:** `python` ist mit offizieller Quelle im Katalog; Render, Hosts (`pypi.org`, `files.pythonhosted.org`) und Doku inklusive PEP-668-Hinweis liefen ohne Rückführung; Implementation `a0ab388`, Review-Fix im Folgecommit. `make ci` und `make test-docker` lokal grün.
+- **Was ging anders als geplant:** Nichts am Zuschnitt. Der Review [`2026-10-15-devcontainer-feature-python`](../../../reviews/2026-10-15-devcontainer-feature-python.md) (0 HIGH, 0 MEDIUM, 3 LOW, 1 INFO) fand fehlenden Messbeleg im Slice, die Mehrdeutigkeit von `version` (OCI-Tag) und einen zu engen Warnungszähler im Golden Case; behoben.
+- **Steering-Loop-Eintrag:** Messaussagen, die in der Doku als Tatsache stehen, tragen Messdatum, Werkzeug und Umgebung im Slice oder der ADR (Review-Befund F-1).
+- **Beobachtungs-Register (`../observations/`):** keine Beobachtung angefallen.
+- **Folge-Slices:** keine.
 - **Risiken aus §6:** siehe §6
-- **Drei Paarungen:** —
+- **Drei Paarungen:** Anker (private Paketindizes brauchen eigene Hosts) → `devcontainer.sandbox.egress.allow` (Handbuch) · Register: keine Beobachtung angefallen.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
