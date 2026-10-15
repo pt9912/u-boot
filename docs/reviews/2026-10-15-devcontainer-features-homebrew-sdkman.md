@@ -1,4 +1,4 @@
-# Review-Report: [`slice-v1-devcontainer-features-homebrew-sdkman`](../plan/planning/in-progress/slice-v1-devcontainer-features-homebrew-sdkman.md) — 2026-10-15
+# Review-Report: [`slice-v1-devcontainer-features-homebrew-sdkman`](../plan/planning/done/slice-v1-devcontainer-features-homebrew-sdkman.md) — 2026-10-15
 
 **Review-Art:** Code — Diff gegen Slice-Plan, [ADR-0020](../plan/adr/0020-drittanbieter-features-im-katalog.md), Spec ([`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)) und Replay Rules (`harness/replay.md` §Replay Rules).
 
@@ -8,7 +8,7 @@
 
 **Eingangs-Kontext:**
 
-- [`slice-v1-devcontainer-features-homebrew-sdkman`](../plan/planning/in-progress/slice-v1-devcontainer-features-homebrew-sdkman.md) (DoD, Abgrenzung, Risiken)
+- [`slice-v1-devcontainer-features-homebrew-sdkman`](../plan/planning/done/slice-v1-devcontainer-features-homebrew-sdkman.md) (DoD, Abgrenzung, Risiken)
 - [ADR-0020](../plan/adr/0020-drittanbieter-features-im-katalog.md), [ADR-0012](../plan/adr/0012-devcontainer-egress-firewall.md)
 - [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)
 - [SPEC-019](../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion), [SPEC-023](../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen)

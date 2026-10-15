@@ -13,7 +13,7 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**v0.9.0 (Devcontainer-Features Homebrew und SDKMAN)** — Slice: [`slice-v1-devcontainer-features-homebrew-sdkman`](slice-v1-devcontainer-features-homebrew-sdkman.md). Offen daneben: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (macOS-Smoke im Tap).
+**v0.9.0 (Devcontainer-Features Homebrew, SDKMAN, Python)** — Slices: siehe Bestand in `in-progress/`. Offen daneben: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (macOS-Smoke im Tap).
 
 ## Nächste Wellen
 
@@ -82,6 +82,7 @@ flowchart LR
 | v0.8.0 (Docker im Sandbox-Devcontainer, `nestedRuntime: docker`) | 2026-10-14 | [`slice-v1-release-cut-v0.8.0`](../done/slice-v1-release-cut-v0.8.0.md) — Tag `v0.8.0` auf `1f2b41b` |
 | Docker aus dem Docker-APT-Repo (`nestedRuntime: docker`, [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md)) | 2026-10-14 | [`slice-v1-sandbox-docker-ce`](../done/slice-v1-sandbox-docker-ce.md) (`90f9122`); Review-Reports `docs/reviews/2026-10-14-sandbox-docker-ce.md`, `-r2` |
 | v0.8.1 (aktueller Docker im Sandbox-Devcontainer) | 2026-10-14 | [`slice-v1-release-cut-v0.8.1`](../done/slice-v1-release-cut-v0.8.1.md) — Tag `v0.8.1` auf `5aadaf3` |
+| Devcontainer-Features `homebrew` und `sdkman` ([ADR-0020](../../adr/0020-drittanbieter-features-im-katalog.md)) | 2026-10-15 | [`slice-v1-devcontainer-features-homebrew-sdkman`](../done/slice-v1-devcontainer-features-homebrew-sdkman.md) (`ac59b83`); Review-Report `docs/reviews/2026-10-15-devcontainer-features-homebrew-sdkman.md` |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-NN-results.md`; die Welle-Closure lebt vollständig im jeweiligen
