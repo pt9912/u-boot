@@ -1,14 +1,14 @@
-# Review-Report: [`slice-v1-release-cut-v0.9.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.9.0.md) — 2026-10-15
+# Review-Report: [`slice-v1-release-cut-v0.9.0`](../plan/planning/done/slice-v1-release-cut-v0.9.0.md) — 2026-10-15
 
 **Review-Art:** Code/Doku — Release-Cut-Diff gegen den Ablauf in `docs/maintainer/releasing.md` §3 Nr. 1–5 und §5, den Slice-Plan und die Slice-Vorlage der Baseline.
 
-**Gegenstand:** Commit `4a39e7e` (Release-Cut v0.9.0, zehn Dateien) und [`slice-v1-release-cut-v0.9.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.9.0.md) (liegt bis zur Closure in `in-progress/`, danach `done/`).
+**Gegenstand:** Commit `4a39e7e` (Release-Cut v0.9.0, zehn Dateien) und [`slice-v1-release-cut-v0.9.0`](../plan/planning/done/slice-v1-release-cut-v0.9.0.md) (liegt bis zur Closure in `in-progress/`, danach `done/`).
 
 **Skill:** `.harness/skills/reviewer.md` @ 4a39e7e · **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-15
 
 **Eingangs-Kontext:**
 
-- [`slice-v1-release-cut-v0.9.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.9.0.md); Vorläuferreport `2026-10-14-release-cut-v0.8.1.md` (dessen Altlasten — unsortierte Releases-Tabelle, Roadmap-Meilensteine bis v0.5.0, Roadmap-Kopfdatum — werden nicht erneut gemeldet)
+- [`slice-v1-release-cut-v0.9.0`](../plan/planning/done/slice-v1-release-cut-v0.9.0.md); Vorläuferreport `2026-10-14-release-cut-v0.8.1.md` (dessen Altlasten — unsortierte Releases-Tabelle, Roadmap-Meilensteine bis v0.5.0, Roadmap-Kopfdatum — werden nicht erneut gemeldet)
 - [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [ADR-0020](../plan/adr/0020-drittanbieter-features-im-katalog.md) (Status `Accepted`)
 - [`slice-v1-devcontainer-features-homebrew-sdkman`](../plan/planning/done/slice-v1-devcontainer-features-homebrew-sdkman.md), [`slice-v1-devcontainer-feature-python`](../plan/planning/done/slice-v1-devcontainer-feature-python.md), [`slice-v1-sandbox-docker-nachholmessung-desktop`](../plan/planning/open/slice-v1-sandbox-docker-nachholmessung-desktop.md), [`slice-v2-homebrew-formula`](../plan/planning/in-progress/slice-v2-homebrew-formula.md)
 - `docs/maintainer/releasing.md` §3, §5; Slice-Vorlage `.harness/baseline/v6.13.0/templates/docs/plan/planning/slice.template.md`
