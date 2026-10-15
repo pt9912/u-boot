@@ -11,6 +11,7 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
+| [`slice-v1-devcontainer-features-homebrew-sdkman`](slice-v1-devcontainer-features-homebrew-sdkman.md) | Features `homebrew` und `sdkman` im eingebauten Katalog (v0.9.0) |
 
 Zuvor: Der Konsolidierungs-Slice
 [`slice-v1-cli-json-envelope-consolidation`](../done/slice-v1-cli-json-envelope-consolidation.md) ist am 2026-06-08
