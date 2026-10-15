@@ -13,7 +13,7 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 
 ## Aktuelle Welle
 
-**v0.9.0 (Devcontainer-Features Homebrew, SDKMAN, Python)** — Slices: siehe Bestand in `in-progress/`. Offen daneben: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (macOS-Smoke im Tap).
+**v0.9.0 (Devcontainer-Features Homebrew, SDKMAN, Python)** — Slice: [`slice-v1-devcontainer-feature-python`](slice-v1-devcontainer-feature-python.md). Offen daneben: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (macOS-Smoke im Tap).
 
 ## Nächste Wellen
 
