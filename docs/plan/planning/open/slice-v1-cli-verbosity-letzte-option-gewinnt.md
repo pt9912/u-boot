@@ -6,7 +6,8 @@ wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — letzter Slice der Welle; folgt auf
-[`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) und
+[`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md),
+[`slice-cr-cli-quiet-weitere-ausnahmen`](../open/slice-cr-cli-quiet-weitere-ausnahmen.md) und
 [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md), weil die Pegelabbildung von
 `--quiet` (Fehler-Pegel) aus dem Slice [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) kommt.
 
@@ -21,7 +22,8 @@ Herkunft: Inventur in
 nicht geändert; der Code folgt dem Lastenheft. `spezifikation.md` und
 `architecture.md` beschreiben das Verhalten erst **nach** diesem Slice, dem Slice
 [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) **und**
-dem CR [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md);
+den CRs [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) und
+[`slice-cr-cli-quiet-weitere-ausnahmen`](../open/slice-cr-cli-quiet-weitere-ausnahmen.md);
 vorher nicht in die Spec schreiben.
 
 **Verantwortlich:** —
@@ -78,7 +80,7 @@ benutzbar).
 - [ ] Doku-Update: `docs/user/benutzerhandbuch.md` (Optionstabellen, Zeilen
       um 299 und 1280) nennt „letzte Option gewinnt"; CHANGELOG-Eintrag.
 - [ ] Spezifikation: ein `SPEC-<NNN>` in `spezifikation.md` beschreibt Pegelabbildung und Rangfolge, deckungsgleich mit
-      Lastenheft 0.8.0 (nach dem CR) und Code, an [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) verankert; Zahlenwerte aus dem Code.
+      Lastenheft 0.9.0 (nach den CRs) und Code, an [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) verankert; Zahlenwerte aus dem Code.
 - [ ] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
@@ -131,8 +133,9 @@ Steering-Loop-Lerneintrag geschrieben (§7).
   noch wahr ist. — **Ausgang:** offen bis zur Umsetzung; Test `--quiet --verbose`
   muss auch die Ausgabe-Filter prüfen.
 - **Reihenfolge-Abhängigkeit:** Die Spezifikation darf das Verhalten erst nach
-  diesem Slice, dem Slice [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) und dem CR
-  [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) beschreiben. — **Ausgang:** entfallen: der
+  diesem Slice, dem Slice [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) und den CRs
+  [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) und
+  [`slice-cr-cli-quiet-weitere-ausnahmen`](../open/slice-cr-cli-quiet-weitere-ausnahmen.md) beschreiben. — **Ausgang:** entfallen: der
   Spezifikations-Eintrag liegt in diesem Slice, dem letzten der Welle
   [`welle-cli-verbosity`](../welle-cli-verbosity.md).
 
