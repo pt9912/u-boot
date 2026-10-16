@@ -72,6 +72,15 @@ das Argument schwächer und die Entscheidung neu zu bewerten)?
   gekoppelt wird. Bei `up --quiet` werden Warnungen heute unterdrückt.
   Zu bewerten, ob der CR dadurch an Tragkraft verliert oder die
   Ausnahme `up` mitzuregeln ist.
+- `--quiet` wirkt im CLI-Adapter über den Logger-Pegel hinaus auf
+  Statusausgaben: `up` unterdrückt Statustabelle, Diagnosen und Warnungen
+  (`cli/up.go`, Rücksprung bei `flags.Quiet`); `down` unterdrückt die
+  Erfolgsmeldung und die Liste entfernter Volumes (`cli/down.go`,
+  `renderDownSuccess` in `cli/statusview.go`); `doctor` blendet OK-Items aus
+  (`cli/doctor.go`, `writeDoctorReport`). Die Formulierung „nur Fehler und
+  Warnungen" im CR-Kern ist daran zu messen. **Prüfpunkt des CR (nicht
+  entschieden):** ob „Statusmeldungen" (Standard-Stufe) von `--quiet`
+  ausgenommen sind oder die Aussage präziser zu fassen ist.
 
 ### CR-Kern (vorgeschlagene Fassung von [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging))
 
@@ -176,6 +185,11 @@ etwaige Umsetzungs-Slices liegen in `open/` oder weiter.
   unterdrückt sie. Das Sicherheitsargument des CR ist damit nicht ohne
   Weiteres durch „Logger auf Warn" belegt. — **Ausgang:** weiter offen:
   Prüfauftrag in §1, vor der Lastenheft-Änderung zu klären.
+- **`--quiet` unterdrückt mehr als „Info-Pegel":** Statustabelle von `up`,
+  Erfolgsmeldung von `down` und OK-Items von `doctor` entfallen bei `--quiet`
+  (Fundstellen in §1). Die CR-Formulierung „nur Fehler und Warnungen" deckt
+  das nur, wenn Statusmeldungen als ausgenommen gelten. — **Ausgang:** weiter
+  offen: Prüfpunkt in §1, vor der Lastenheft-Änderung zu klären.
 - **Zwischenstand der Spec:** Bis Slice
   [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md) und CR beide geschlossen sind,
   darf die Spezifikation das Verhalten nicht beschreiben. — **Ausgang:** weiter
