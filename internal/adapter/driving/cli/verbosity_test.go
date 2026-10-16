@@ -25,8 +25,9 @@ func TestExecute_VerbosityFlag_AdjustsLoggerLevel(t *testing.T) {
 		{"quiet-sets-error", []string{"--quiet", "doctor"}, slog.LevelError},
 		{"verbose-raises-to-debug", []string{"--verbose", "doctor"}, slog.LevelDebug},
 		{"debug-raises-to-debug", []string{"--debug", "doctor"}, slog.LevelDebug},
-		// LH-FA-CLI-005: the option given last decides; the former
-		// fixed order (--debug before --quiet) is gone.
+		// LH-FA-CLI-005: the verbosity option given last on the command
+		// line decides the level, in every order of --quiet, --verbose
+		// and --debug.
 		{"quiet-after-debug-wins", []string{"--debug", "--quiet", "doctor"}, slog.LevelError},
 		{"debug-after-quiet-wins", []string{"--quiet", "--debug", "doctor"}, slog.LevelDebug},
 		{"verbose-after-quiet-wins", []string{"--quiet", "--verbose", "doctor"}, slog.LevelDebug},

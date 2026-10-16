@@ -71,7 +71,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// by default, at a level mutable via *slog.LevelVar so the
 	// LH-FA-CLI-005 verbosity flags can flip it from
 	// PersistentPreRunE. Default Info; --debug / --verbose raise to
-	// Debug, --quiet lowers to Warn.
+	// Debug, --quiet lowers to Error.
 	logLevel := new(slog.LevelVar)
 	logLevel.Set(slog.LevelInfo)
 	logAdapter := logger.New(stderr, logger.FormatText, logLevel)
