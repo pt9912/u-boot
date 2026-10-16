@@ -6,7 +6,7 @@
 > Anlass: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) sagt `--quiet` – nur Fehler; der Code
 > hebt den Pegel nur auf Warn. Der Projektinhaber hat am 2026-10-16 entschieden:
 > die Stufenbeschreibung des Lastenhefts bleibt, der Code folgt ihr
-> ([`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md)); das Lastenheft
+> ([`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md)); das Lastenheft
 > bekommt eine Ausnahme für die Pflicht-Ausweisung von Sicherheitslockerungen.
 
 **Lifecycle:** Der Zustand dieses Slice ist das Verzeichnis, in dem diese
@@ -14,14 +14,14 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`.
 
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — erster Slice der Welle; ihm folgen
-[`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) und
-[`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+[`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) und
+[`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Änderung),
 [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil),
 [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer).
-Verwandt: [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) (Code: Fehler-Pegel und Ausnahme)
-und [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Code: Wahl zwischen
+Verwandt: [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) (Code: Fehler-Pegel und Ausnahme)
+und [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Code: Wahl zwischen
 mehreren Optionen; dieser CR ändert die Mehrfachangabe-Regel nicht).
 
 **Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)), §16
@@ -102,19 +102,19 @@ Sandbox-Lockerungs-Hinweise.
 - Die vier Stufenbeschreibungen: `--quiet` – nur Fehler ist der heutige Wortlaut;
   der Code folgt ihm im Umsetzungs-Slice.
 - Der Satz zu mehreren Optionen: bleibt; der Code folgt ihm erst mit
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Die Umsetzung im Code** — der Adapter ändert sich in
-  [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md); dieser CR ändert nur das Vertrags-Stratum.
+  [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md); dieser CR ändert nur das Vertrags-Stratum.
 - **Die Regel „letzte Option gewinnt"** — Code-Anpassung in
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md), nicht Teil des CR.
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md), nicht Teil des CR.
 - **Eine Spec-Beschreibung in `spezifikation.md`** — erst nach allen drei Slices
   der Welle, sonst beschreibt sie einen Zwischenstand.
 
 **Abnahmekriterien (für die Umsetzung, nicht für den Spec-Change)** — sie liegen
-in [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md):
+in [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md):
 
 1. Ein Test belegt je Subkommando, dass `--quiet` keine Statusmeldungen zeigt
    und die Lockerungs-Warnung des Sandbox-Profils ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)) bei `init`,
@@ -137,7 +137,7 @@ Projektinhaber |
 - [ ] **Lastenheft 0.8.0**: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) in der Fassung oben, Versionsfeld,
       Historie-Zeile (Verweis „Vereinbarung mit dem Projektinhaber").
 - [ ] **Umsetzungsbedarf** einem Slice zugeordnet: Abnahmekriterien 1–3 liegen in
-      [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md).
+      [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md).
 - [ ] Doku-Update: CHANGELOG (öffentlicher Vertrag berührt).
 - [ ] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
@@ -155,7 +155,7 @@ Projektinhaber |
 | `CHANGELOG.md` | update | öffentlicher Vertrag berührt |
 
 Reihenfolge: Lastenheft ändern → Umsetzung im Slice
-[`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) (die Ausnahme steht erst nach 0.8.0 im Vertrag).
+[`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) (die Ausnahme steht erst nach 0.8.0 im Vertrag).
 
 ## 4. Trigger
 
@@ -175,7 +175,7 @@ liegt vor.
 
 DoD vollständig, Review-Report liegt vor, Closure-Notiz mit
 Steering-Loop-Lerneintrag geschrieben (§7). Lastenheft 0.8.0 ist angenommen;
-der Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) liegt in `open/` oder weiter.
+der Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) liegt in `open/` oder weiter.
 
 ## 6. Risiken und offene Punkte
 
@@ -183,7 +183,7 @@ der Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fe
   ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)); andere Warnungen (Recreate-Warnung
   [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen), Drittanbieter-Features) fallen unter `--quiet` weg. — **Ausgang:**
   entfallen: die Entscheidung des Projektinhabers nennt genau eine Ausnahme; der
-  Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) legt die Code-Grenze fest.
+  Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) legt die Code-Grenze fest.
 - **Zwischenstand der Spec:** Bis alle drei Slices der Welle geschlossen sind,
   darf die Spezifikation das Verhalten nicht beschreiben. — **Ausgang:**
   entfallen: die Welle [`welle-cli-verbosity`](../welle-cli-verbosity.md) schließt erst mit dem Spezifikations-Eintrag im

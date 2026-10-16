@@ -115,7 +115,7 @@ geschrieben, `make gates` grün.
   ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)), die die Spezifikation
   nicht übernehmen darf — **Ausgang:** eingetreten:
   [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md)
-  (Code) und [`slice-cr-cli-quiet-fehler-und-warnungen`](../open/slice-cr-cli-quiet-fehler-und-warnungen.md) (Lastenheft).
+  (Code) und [`slice-cr-cli-quiet-fehler-und-warnungen`](../in-progress/slice-cr-cli-quiet-fehler-und-warnungen.md) (Lastenheft).
 
 ## 7. Closure-Notiz
 
@@ -137,7 +137,7 @@ geschrieben, `make gates` grün.
   leer und die Beobachtung trat einmal auf.
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt (erstes Auftreten).
 - **Folge-Slices:** [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md),
-  [`slice-cr-cli-quiet-fehler-und-warnungen`](../open/slice-cr-cli-quiet-fehler-und-warnungen.md).
+  [`slice-cr-cli-quiet-fehler-und-warnungen`](../in-progress/slice-cr-cli-quiet-fehler-und-warnungen.md).
 - **Risiken aus §6:** jedes trägt einen Ausgang (siehe §6).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung

@@ -78,7 +78,7 @@ kein Release, einen Release-Cut-Slice gibt es nicht.
   Skill ⊃ `harness/review.md` (die älteren Skill-HIGHs stehen nur im Skill), und eine Spec, die ein README statt den Code abschreibt.
 - **Beobachtungs-Register:** keine Beobachtung angelegt.
 - **Folge-Slices:** [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Code),
-  [`slice-cr-cli-quiet-fehler-und-warnungen`](../open/slice-cr-cli-quiet-fehler-und-warnungen.md) (CR am Lastenheft),
+  [`slice-cr-cli-quiet-fehler-und-warnungen`](../in-progress/slice-cr-cli-quiet-fehler-und-warnungen.md) (CR am Lastenheft),
   [`slice-v2-homebrew-smoke-haertung`](../open/slice-v2-homebrew-smoke-haertung.md) (aus der Vorwelle, unverändert offen).
 - **Verifikation:** `make gates` Exit 0; Verification Evidence je Slice unter `docs/reviews/`
   ([Skill-Slice](../../../reviews/2026-10-16-verification-slice-harness-dcheck-bump-reviewer-skill.md),

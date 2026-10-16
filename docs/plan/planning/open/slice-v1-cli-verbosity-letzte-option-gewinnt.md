@@ -6,12 +6,12 @@ wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — letzter Slice der Welle; folgt auf
-[`slice-cr-cli-quiet-fehler-und-warnungen`](slice-cr-cli-quiet-fehler-und-warnungen.md) und
+[`slice-cr-cli-quiet-fehler-und-warnungen`](../in-progress/slice-cr-cli-quiet-fehler-und-warnungen.md) und
 [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md), weil die Pegelabbildung von
 `--quiet` (Fehler-Pegel) aus dem Slice [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) kommt.
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Scope).
-Verwandt: [`slice-cr-cli-quiet-fehler-und-warnungen`](slice-cr-cli-quiet-fehler-und-warnungen.md)
+Verwandt: [`slice-cr-cli-quiet-fehler-und-warnungen`](../in-progress/slice-cr-cli-quiet-fehler-und-warnungen.md)
 (klärt die Zusage von `--quiet`) und [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md)
 (setzt sie im Code um; dieser Slice ändert nur die Wahl zwischen mehreren Optionen und ist logisch davon unabhängig).
 Herkunft: Inventur in
@@ -21,7 +21,7 @@ Herkunft: Inventur in
 nicht geändert; der Code folgt dem Lastenheft. `spezifikation.md` und
 `architecture.md` beschreiben das Verhalten erst **nach** diesem Slice, dem Slice
 [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) **und**
-dem CR [`slice-cr-cli-quiet-fehler-und-warnungen`](slice-cr-cli-quiet-fehler-und-warnungen.md);
+dem CR [`slice-cr-cli-quiet-fehler-und-warnungen`](../in-progress/slice-cr-cli-quiet-fehler-und-warnungen.md);
 vorher nicht in die Spec schreiben.
 
 **Verantwortlich:** —
@@ -52,7 +52,7 @@ benutzbar).
 
 - **Änderung der Pegelabbildung von `--quiet`** (Fehler-Pegel, Ausnahme für
   Sicherheitslockerungen) — das ist der Slice [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md)
-  (Zusage im CR [`slice-cr-cli-quiet-fehler-und-warnungen`](slice-cr-cli-quiet-fehler-und-warnungen.md)); dieser Slice ändert nur,
+  (Zusage im CR [`slice-cr-cli-quiet-fehler-und-warnungen`](../in-progress/slice-cr-cli-quiet-fehler-und-warnungen.md)); dieser Slice ändert nur,
   *welche* Option gilt, nicht, *was* sie bewirkt.
 - **Neue Stufe zwischen Info und Debug** — `--verbose` und `--debug` bleiben
   beide `Debug`; der Kommentar in `root.go` nennt das als vorläufig. Eine neue
@@ -132,7 +132,7 @@ Steering-Loop-Lerneintrag geschrieben (§7).
   muss auch die Ausgabe-Filter prüfen.
 - **Reihenfolge-Abhängigkeit:** Die Spezifikation darf das Verhalten erst nach
   diesem Slice, dem Slice [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) und dem CR
-  [`slice-cr-cli-quiet-fehler-und-warnungen`](slice-cr-cli-quiet-fehler-und-warnungen.md) beschreiben. — **Ausgang:** entfallen: der
+  [`slice-cr-cli-quiet-fehler-und-warnungen`](../in-progress/slice-cr-cli-quiet-fehler-und-warnungen.md) beschreiben. — **Ausgang:** entfallen: der
   Spezifikations-Eintrag liegt in diesem Slice, dem letzten der Welle
   [`welle-cli-verbosity`](../welle-cli-verbosity.md).
 
