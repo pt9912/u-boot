@@ -29,7 +29,7 @@
      `.githooks/commit-msg` schreibt das Werkzeug nur an einem freien Pfad. `planner`,
      `plan-welle`, `close-welle`, `archivierung.mk` und das Beobachtungs-Register
      legt es an; sie bleiben bis zur Entscheidung in
-     [`slice-harness-wellen-betrieb`](../../docs/plan/planning/open/slice-harness-wellen-betrieb.md)
+     [`slice-harness-wellen-betrieb`](../../docs/plan/planning/next/slice-harness-wellen-betrieb.md)
      ungenutzt ([`MR-003`](MR-003-roadmap-wellen.md) gilt weiter).
   5. **Bekannte Grenze des Werkzeugs.** `tools/harness/working-tree-hash.sh` sortiert
      ohne feste Locale; der Gate-Nachweis ist locale-abhängig, wenn `make gates` und der
@@ -38,7 +38,7 @@
   daneben driftet beim nächsten Lauf. Eigene Targets gehören in `repo.mk`, weil das
   Werkzeug das `Makefile` ohne Meldung ersetzt.
 - **Auflösungs-Trigger:** u-boot gibt das Werkzeug auf, oder
-  [`slice-harness-wellen-betrieb`](../../docs/plan/planning/open/slice-harness-wellen-betrieb.md)
+  [`slice-harness-wellen-betrieb`](../../docs/plan/planning/next/slice-harness-wellen-betrieb.md)
   entscheidet über die Wellen-Dateien (Punkt 4).
 - **Löst auf:** [`MR-011`](../conventions.md#mr-011)
 - **Ausgelöst durch Baseline-Stand:** v6.18.1

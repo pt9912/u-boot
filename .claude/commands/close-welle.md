@@ -1,6 +1,6 @@
 # Welle schließen (Harness)
 
-> **Hinweis (u-boot).** Ungenutzt, bis [`slice-harness-wellen-betrieb`](../../docs/plan/planning/open/slice-harness-wellen-betrieb.md) über die Welle-Dateien entscheidet; u-boots Wellen sind Roadmap-Zeilen ([`MR-003`](../../harness/conventions/MR-003-roadmap-wellen.md)).
+> **Hinweis (u-boot).** Ungenutzt, bis [`slice-harness-wellen-betrieb`](../../docs/plan/planning/next/slice-harness-wellen-betrieb.md) über die Welle-Dateien entscheidet; u-boots Wellen sind Roadmap-Zeilen ([`MR-003`](../../harness/conventions/MR-003-roadmap-wellen.md)).
 
 Argument: $ARGUMENTS
 
