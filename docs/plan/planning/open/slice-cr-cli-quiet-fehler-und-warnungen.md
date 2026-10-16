@@ -1,30 +1,32 @@
-# Slice CR: `--quiet` zeigt Fehler und Warnungen (`LH-FA-CLI-005`)
+# Slice CR: `--quiet` zeigt nur Fehler, mit Ausnahme der Sicherheitslockerungen (`LH-FA-CLI-005`)
 
 > **CR-Vehikel.** u-boot führt kein separates CR-Artefakt — dieser Slice
 > **ist** der Change Request am Vertrags-Stratum (Precedent:
 > [`slice-cr-sandbox-docker-runtime`](../done/slice-cr-sandbox-docker-runtime.md)).
 > Anlass: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) sagt `--quiet` – nur Fehler; der Code
-> hebt den Pegel nur auf Warn. Der Projektinhaber hat entschieden: der Code
-> behält recht, das Lastenheft wird angepasst.
+> hebt den Pegel nur auf Warn. Der Projektinhaber hat am 2026-10-16 entschieden:
+> die Stufenbeschreibung des Lastenhefts bleibt, der Code folgt ihr
+> ([`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md)); das Lastenheft
+> bekommt eine Ausnahme für die Pflicht-Ausweisung von Sicherheitslockerungen.
 
 **Lifecycle:** Der Zustand dieses Slice ist das Verzeichnis, in dem diese
 Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`.
 
-**Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — geht dem Code-Slice
-[`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md) voraus.
+**Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — erster Slice der Welle; ihm folgen
+[`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) und
+[`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Änderung),
 [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil),
 [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer).
-Verwandt: [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Code:
-„letzte Option gewinnt"; unabhängig von diesem CR umsetzbar — dieser CR klärt
-die Zusage von `--quiet`, jener die Wahl zwischen mehreren Optionen).
+Verwandt: [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) (Code: Fehler-Pegel und Ausnahme)
+und [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Code: Wahl zwischen
+mehreren Optionen; dieser CR ändert die Mehrfachangabe-Regel nicht).
 
 **Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)), §16
 (Historie), Versionsfeld. `spezifikation.md` und `architecture.md` berührt der
-CR nicht; sie beschreiben das Verhalten erst nach
-[`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md) und diesem CR.
+CR nicht; sie beschreiben das Verhalten erst nach allen drei Slices der Welle.
 
 **Verantwortlich:** —
 
@@ -34,24 +36,23 @@ CR nicht; sie beschreiben das Verhalten erst nach
 
 ## 1. Ziel und Abgrenzung
 
-**Ziel:** Lastenheft-Änderung **0.7.0 → 0.8.0**: `--quiet` heißt „nur Fehler
-und Warnungen". Der Code (`internal/adapter/driving/cli/root.go`) setzt den
-Logger bei `--quiet` auf `Warn`; das Lastenheft sagt heute „nur Fehler".
+**Ziel:** Lastenheft-Änderung **0.7.0 → 0.8.0**: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) behält
+`--quiet` – nur Fehler und nimmt die Pflicht-Ausweisung von Sicherheitslockerungen
+([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil): „jede Sicherheitslockerung in der Befehlsausgabe ausweisen";
+[`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): `--privileged` bei `docker`) als einzige Ausnahme auf.
 
-**Warum das Lastenheft und nicht der Code:** Warnungen können
-sicherheitsrelevant sein, etwa die Ausweispflicht von Sicherheitslockerungen im
-Sandbox-Profil ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): `--privileged` wird in
-der Befehlsausgabe ausgewiesen). Ein `--quiet`, das sie verschluckt, würde die
-Ausweispflicht aushebeln.
+**Warum eine Ausnahme:** Die Ausweispflicht von Sicherheitslockerungen ist eine
+eigene Zusage. Ein `--quiet`, das sie verschluckt, würde sie aushebeln; die
+Ausnahme macht den Vorrang im Vertrag ausdrücklich, statt ihn dem Code zu
+überlassen.
 
-### Offener Punkt — vor der Lastenheft-Änderung zu klären
+**Wirkung von `--quiet` (Festlegung des Projektinhabers):** `--quiet` unterdrückt
+Status- und Erfolgsmeldungen (Statustabelle von `up`, Erfolgsmeldung von `down`,
+OK-Items von `doctor`) sowie Warn- und Info-Logs; `doctor --quiet` zeigt nur
+Fehler-Items, der Exit-Code trägt das Ergebnis. Die Ausnahme sind die
+Sandbox-Lockerungs-Hinweise.
 
-Das Sicherheitsargument trägt nur, wenn die Lockerungs-Hinweise bei `--quiet`
-tatsächlich sichtbar bleiben. **Prüfauftrag:** laufen sie über den Logger (dann
-trägt `--quiet` auf Warn sie weiter) oder direkt auf stdout/stderr (dann ist
-das Argument schwächer und die Entscheidung neu zu bewerten)?
-
-**Gefundener Stand im Code (nicht entschieden):**
+### Gefundener Stand im Code
 
 - Die Lockerungs-Hinweise entstehen in
   `internal/hexagon/application/devcontainer_sandbox.go`
@@ -60,26 +61,24 @@ das Argument schwächer und die Entscheidung neu zu bewerten)?
   `warnings`). Sie laufen **nicht** über den Logger (`slog`).
 - Der CLI-Adapter schreibt sie **direkt** auf die Ausgabe:
   `fmt.Fprintf(out, "Warning (%s): %s\n", …)` in `cli/generate.go` und
-  `cli/init.go`; in `cli/up.go` ebenfalls, dort aber nach dem Rücksprung bei
-  `flags.Quiet` (`up --quiet` unterdrückt Tabelle, Diagnosen und Warnungen).
-  Eine `--quiet`-Prüfung in `generate.go`/`init.go` auf diesem Pfad wurde nicht
-  gefunden. Im JSON-Modus werden sie über `mapWarningsToDiagnostics` zu
-  `diagnostics[]` mit `level: "warn"`.
-- Folge: Das Sicherheitsargument stützt sich bei `init`/`generate` auf
-  Direktausgabe, nicht auf den Logger-Pegel; die Aussage „`--quiet` auf Warn
-  trägt sie weiter" gilt dort nur, solange die Direktausgabe nicht an `quiet`
-  gekoppelt wird. Bei `up --quiet` werden Warnungen heute unterdrückt.
-  Zu bewerten, ob der CR dadurch an Tragkraft verliert oder die
-  Ausnahme `up` mitzuregeln ist.
-- `--quiet` wirkt im CLI-Adapter über den Logger-Pegel hinaus auf
-  Statusausgaben: `up` unterdrückt Statustabelle, Diagnosen und Warnungen
-  (`cli/up.go`, Rücksprung bei `flags.Quiet`); `down` unterdrückt die
-  Erfolgsmeldung und die Liste entfernter Volumes (`cli/down.go`,
-  `renderDownSuccess` in `cli/statusview.go`); `doctor` blendet OK-Items aus
-  (`cli/doctor.go`, `writeDoctorReport`). Die Formulierung „nur Fehler und
-  Warnungen" im CR-Kern ist daran zu messen. **Prüfpunkt des CR (nicht
-  entschieden):** ob „Statusmeldungen" (Standard-Stufe) von `--quiet`
-  ausgenommen sind oder die Aussage präziser zu fassen ist.
+  `cli/init.go`, ohne `--quiet`-Prüfung. Im JSON-Modus werden sie über
+  `mapWarningsToDiagnostics` zu `diagnostics[]` mit `level: "warn"`.
+- `up` gibt die Sandbox-Hinweise **nicht** aus: der Up-Service
+  (`internal/hexagon/application/upservice.go`) ruft `sandboxRelaxationWarnings`
+  nicht auf; seine `Warnings` sind die Recreate-Warnungen
+  ([`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen)). `cli/up.go` schreibt diese Warnungen nach einem Rücksprung bei
+  `flags.Quiet`, also nur ohne `--quiet`. Der Rücksprung gilt für alles hinter der
+  Statustabelle; eine Sandbox-Lockerung hätte dort keine Sichtbarkeit unter
+  `--quiet`.
+- Der Code ruft in Produktionscode nirgends `Logger.Warn` auf
+  (`internal/adapter/driven/logger/logger.go` definiert die Methode); der Pegel
+  `Warn` bei `--quiet` (`cli/root.go`, `PersistentPreRunE`) blendet heute nur
+  `Info`-Logs aus.
+- `--quiet` wirkt im CLI-Adapter über den Logger-Pegel hinaus: `up` unterdrückt
+  Statustabelle, Diagnosen und Warnungen (`cli/up.go`); `down` die Erfolgsmeldung
+  und die Liste entfernter Volumes (`cli/down.go`, `renderDownSuccess` in
+  `cli/statusview.go`); `doctor` blendet OK-Items aus (`cli/doctor.go`,
+  `writeDoctorReport`). `--quiet --json` ist ein No-op.
 
 ### CR-Kern (vorgeschlagene Fassung von [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging))
 
@@ -89,54 +88,56 @@ das Argument schwächer und die Entscheidung neu zu bewerten)?
 >
 > Mindestens müssen folgende Stufen unterstützt werden:
 >
-> - `--quiet` – nur Fehler und Warnungen
+> - `--quiet` – nur Fehler
 > - Standard – Statusmeldungen und Fehler
 > - `--verbose` – zusätzlich Detailinformationen
 > - `--debug` – zusätzlich interne Diagnoseausgaben
+>
+> Eine Ausnahme gilt für Sicherheitslockerungen: Die Ausweisung jeder Sicherheitslockerung in der Befehlsausgabe ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)) bleibt unter `--quiet` sichtbar.
 >
 > Werden mehrere Verbosity-Optionen gleichzeitig angegeben (z. B. `--quiet --verbose`), gewinnt die zuletzt auf der Kommandozeile angegebene Option. Eine Validierungsabweisung wegen Mehrfachangabe erfolgt nicht.
 
 **Unverändert, mit Begründung:**
 
-- Standard, `--verbose`, `--debug`: der Code entspricht dem Lastenheft; kein
-  Änderungsgrund.
+- Die vier Stufenbeschreibungen: `--quiet` – nur Fehler ist der heutige Wortlaut;
+  der Code folgt ihm im Umsetzungs-Slice.
 - Der Satz zu mehreren Optionen: bleibt; der Code folgt ihm erst mit
   [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Die Umsetzung im Code** — der Code ist die Bezugsgröße dieses CR; nötige
-  Anpassungen (z. B. bei `up --quiet`, falls der Prüfauftrag das verlangt) sind
-  Folge-Slices.
+- **Die Umsetzung im Code** — der Adapter ändert sich in
+  [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md); dieser CR ändert nur das Vertrags-Stratum.
 - **Die Regel „letzte Option gewinnt"** — Code-Anpassung in
   [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md), nicht Teil des CR.
-- **Eine Spec-Beschreibung in `spezifikation.md`** — erst nach beiden Vorgängen,
-  sonst beschreibt sie einen Zwischenstand.
+- **Eine Spec-Beschreibung in `spezifikation.md`** — erst nach allen drei Slices
+  der Welle, sonst beschreibt sie einen Zwischenstand.
 
-**Abnahmekriterien (für die Umsetzung, nicht für den Spec-Change):**
+**Abnahmekriterien (für die Umsetzung, nicht für den Spec-Change)** — sie liegen
+in [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md):
 
-1. Ein Test belegt, dass `--quiet` Warnungen zeigt (mindestens die
-   Lockerungs-Warnung des Sandbox-Profils aus [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) bei `init`/`generate`
-   mit `--quiet`) und keine Statusmeldungen.
-2. `docs/user/benutzerhandbuch.md` nennt `--quiet` als „nur Fehler und
-   Warnungen" (Optionstabellen, Zeilen um 299 und 1280).
+1. Ein Test belegt je Subkommando, dass `--quiet` keine Statusmeldungen zeigt
+   und die Lockerungs-Warnung des Sandbox-Profils ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)) bei `init`,
+   `generate` und `up` sichtbar bleibt.
+2. `docs/user/benutzerhandbuch.md` nennt `--quiet` als „nur Fehler" mit der
+   Ausnahme (Optionstabellen, Zeilen um 299 und 1280).
 3. `CHANGELOG.md` trägt den Eintrag.
 
 **Historie-Zeile (§16, bei Spec-Change zu setzen):**
 
 ```text
-| 0.8.0 | (Annahmedatum) | LH-FA-CLI-005: `--quiet` zeigt Fehler und
-Warnungen (statt nur Fehler), weil Warnungen sicherheitsrelevant sein können
-(Ausweispflicht von Lockerungen im Sandbox-Profil). | Vereinbarung mit dem
+| 0.8.0 | (Annahmedatum) | LH-FA-CLI-005: `--quiet` bleibt „nur Fehler"; die
+Ausweisung von Sicherheitslockerungen im Sandbox-Profil (LH-FA-DEV-006,
+LH-FA-DEV-007) bleibt unter `--quiet` sichtbar. | Vereinbarung mit dem
 Projektinhaber |
 ```
 
 ## 2. Definition of Done
 
-- [ ] **Lastenheft 0.8.0**: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) in der Fassung oben (nach Klärung des
-      offenen Punkts), Versionsfeld, Historie-Zeile.
-- [ ] **Umsetzungsbedarf** geklärt: Abnahmekriterien 1–3 sind einem
-      Umsetzungs-Slice mit Kennung zugeordnet oder als bereits erfüllt belegt.
+- [ ] **Lastenheft 0.8.0**: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) in der Fassung oben, Versionsfeld,
+      Historie-Zeile (Verweis „Vereinbarung mit dem Projektinhaber").
+- [ ] **Umsetzungsbedarf** einem Slice zugeordnet: Abnahmekriterien 1–3 liegen in
+      [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md).
 - [ ] Doku-Update: CHANGELOG (öffentlicher Vertrag berührt).
 - [ ] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
@@ -152,47 +153,41 @@ Projektinhaber |
 |---|---|---|
 | `spec/lastenheft.md` | update | [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), Versionsfeld 0.8.0, §16-Zeile |
 | `CHANGELOG.md` | update | öffentlicher Vertrag berührt |
-| `docs/user/benutzerhandbuch.md` | update (Umsetzung) | Optionstabellen nennen „Warnungen und Fehler bleiben" bereits; Abgleich mit der neuen Fassung |
 
-Reihenfolge: Offenen Punkt klären (Prüfauftrag §1) → Lastenheft ändern →
-Umsetzungsbedarf (Abnahmekriterium 1) bewerten.
+Reihenfolge: Lastenheft ändern → Umsetzung im Slice
+[`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) (die Ausnahme steht erst nach 0.8.0 im Vertrag).
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): Projektinhaber gibt den CR frei; der
-Prüfauftrag zu den Warn-Pfaden (§1) ist abgeschlossen.
+**Start** (`next` → `in-progress`): Projektinhaber gibt den CR frei. Die
+Entscheidung vom 2026-10-16 (Pegel nur Fehler, Ausnahme Sicherheitslockerungen)
+liegt vor.
 
 **Rückführungen — vorab benannt:**
 
-- `in-progress` → `next` (zu groß, zurück zur Zerlegung): der Prüfauftrag zeigt
-  weitere Warn-Pfade mit abweichendem `--quiet`-Verhalten — dann je Pfad ein
-  Umsetzungs-Slice.
-- `in-progress` → `open` (blockiert): die Prüfung zeigt, dass die Warnungen
-  nicht über den Logger laufen und das Sicherheitsargument entfällt — die
-  Entscheidung ist dann mit dem Projektinhaber neu zu bewerten.
+- `in-progress` → `next` (zu groß, zurück zur Zerlegung): die Fassung der
+  Ausnahme verlangt, weitere Warn-Klassen (etwa
+  [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)) mitzuregeln — dann je Klasse ein Umsetzungs-Slice.
+- `in-progress` → `open` (blockiert): der Projektinhaber ändert die
+  Entscheidung zur Ausnahme.
 
 ## 5. Closure-Trigger
 
 DoD vollständig, Review-Report liegt vor, Closure-Notiz mit
 Steering-Loop-Lerneintrag geschrieben (§7). Lastenheft 0.8.0 ist angenommen;
-etwaige Umsetzungs-Slices liegen in `open/` oder weiter.
+der Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) liegt in `open/` oder weiter.
 
 ## 6. Risiken und offene Punkte
 
-- **Warn-Pfad ohne Logger:** Die Lockerungs-Hinweise laufen heute über
-  `WarningEntry` und Direktausgabe, nicht über den Logger; `up --quiet`
-  unterdrückt sie. Das Sicherheitsargument des CR ist damit nicht ohne
-  Weiteres durch „Logger auf Warn" belegt. — **Ausgang:** weiter offen:
-  Prüfauftrag in §1, vor der Lastenheft-Änderung zu klären.
-- **`--quiet` unterdrückt mehr als „Info-Pegel":** Statustabelle von `up`,
-  Erfolgsmeldung von `down` und OK-Items von `doctor` entfallen bei `--quiet`
-  (Fundstellen in §1). Die CR-Formulierung „nur Fehler und Warnungen" deckt
-  das nur, wenn Statusmeldungen als ausgenommen gelten. — **Ausgang:** weiter
-  offen: Prüfpunkt in §1, vor der Lastenheft-Änderung zu klären.
-- **Zwischenstand der Spec:** Bis Slice
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md) und CR beide geschlossen sind,
-  darf die Spezifikation das Verhalten nicht beschreiben. — **Ausgang:** weiter
-  offen: bis zur Closure beider.
+- **Reichweite der Ausnahme:** „Sicherheitslockerung" deckt die Sandbox-Hinweise
+  ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)); andere Warnungen (Recreate-Warnung
+  [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen), Drittanbieter-Features) fallen unter `--quiet` weg. — **Ausgang:**
+  entfallen: die Entscheidung des Projektinhabers nennt genau eine Ausnahme; der
+  Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) legt die Code-Grenze fest.
+- **Zwischenstand der Spec:** Bis alle drei Slices der Welle geschlossen sind,
+  darf die Spezifikation das Verhalten nicht beschreiben. — **Ausgang:**
+  entfallen: die Welle [`welle-cli-verbosity`](../welle-cli-verbosity.md) schließt erst mit dem Spezifikations-Eintrag im
+  letzten Slice.
 
 ## 7. Closure-Notiz
 
