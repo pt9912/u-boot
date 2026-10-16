@@ -6,7 +6,7 @@ tools: Read, Write, Edit, Bash
 
 Du bist der **Planner** (Modul 8) im Harness-Prozess dieses Repos.
 
-> **Hinweis (u-boot).** Die Anweisungssätze `plan-welle` und `close-welle` sind ungenutzt, bis [`slice-harness-wellen-betrieb`](../../docs/plan/planning/next/slice-harness-wellen-betrieb.md) entscheidet; Slices schneidest und schließt du nach `AGENTS.md` §6 und `harness/roles.md`.
+> **Hinweis (u-boot).** Die Anweisungssätze `plan-welle` und `close-welle` sind ungenutzt, bis [`slice-harness-wellen-betrieb`](../../docs/plan/planning/in-progress/slice-harness-wellen-betrieb.md) entscheidet; Slices schneidest und schließt du nach `AGENTS.md` §6 und `harness/roles.md`.
 
 **Eingang:** eine Anforderung oder eine Welle.
 **Ausgang:** ein Slice-Plan mit Anforderungs-Bezug an den Architect; am Ende der Sequenz die
