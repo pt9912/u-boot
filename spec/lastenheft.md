@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.8.0                                                              |
+| Version          | 0.9.0                                                              |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -186,7 +186,13 @@ Mindestens müssen folgende Stufen unterstützt werden:
 - `--verbose` – zusätzlich Detailinformationen
 - `--debug` – zusätzlich interne Diagnoseausgaben
 
-Eine Ausnahme gilt für Sicherheitslockerungen (zusätzliche Capabilities, `--privileged`, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices): Ihre Ausweisung in der Befehlsausgabe ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion)) bleibt unter `--quiet` sichtbar. Alle anderen Hinweise entfallen unter `--quiet`.
+Unter `--quiet` entfallen die Erfolgs- und Zusammenfassungsmeldungen der Subkommandos. Drei Ausnahmen bleiben unter `--quiet` sichtbar:
+
+1. die Ausweisung von Sicherheitslockerungen (zusätzliche Capabilities, `--privileged`, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices) in der Befehlsausgabe ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion));
+2. die Ausweisung der Degradations-Fallbacks (Container ohne Docker-Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion) in der Befehlsausgabe und in `u-boot doctor` ([`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer));
+3. der Fortschritt einzelner Services bei `u-boot up` (Pull, Create, Start, Healthcheck; [`LH-NFA-PERF-002`](#lh-nfa-perf-002--startzeit-abhängig-von-docker)).
+
+Alle anderen Hinweise entfallen unter `--quiet`. Ergebnisse, die selbst der Zweck eines Befehls sind (etwa die Werte von `config get`, die Ausgabe von `logs`), sind keine Status- oder Erfolgsmeldungen und bleiben.
 
 Werden mehrere Verbosity-Optionen gleichzeitig angegeben (z. B. `--quiet --verbose`), gewinnt die zuletzt auf der Kommandozeile angegebene Option. Eine Validierungsabweisung wegen Mehrfachangabe erfolgt nicht.
 
@@ -1549,6 +1555,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.6.0 | 2026-10-16 | Strukturänderung ohne neue Produktzusage: Das Lastenheft beschreibt nur noch Produktanforderungen. 22 Anforderungen an den Entwicklungsprozess der u-boot-Codebase (`LH-FA-BUILD-001`..`009`, `LH-FA-PROJDOCS-001`..`006`, `LH-FA-ARCH-001`..`003`, `LH-QA-001`..`004`) sind entfallen und bleiben als Grabsteine mit unveränderter Kennung und Überschrift bestehen; die Produktzusage zum ausgelieferten Image steht in [`LH-NFA-PORT-004`](#lh-nfa-port-004--ausgeliefertes-container-image), die Prüfbarkeit als Lesehinweis in [`LH-LESE-004`](#lh-lese-004--prüfbarkeit). Der Entwicklungsprozess steht im adoptierten Baseline-Regelwerk. | Vereinbarung mit dem Projektinhaber |
 | 0.7.0 | 2026-10-16 | [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): Zusage für `nestedRuntime: docker` auf die gemessenen Hosts eingegrenzt: Docker auf Linux und Colima (Linux-VM). Docker Desktop ist nicht mehr zugesagt, weil es nicht gemessen ist; Podman als Host-Engine bleibt ausgeschlossen. | Vereinbarung mit dem Projektinhaber |
 | 0.8.0 | 2026-10-16 | [`LH-FA-CLI-005`](#lh-fa-cli-005--verbosity-und-logging): Ausnahme für Sicherheitslockerungen unter `--quiet` ergänzt: Die Ausweisung von Sicherheitslockerungen (zusätzliche Capabilities, `--privileged`, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices) nach [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) und [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion) bleibt sichtbar, ein Skript mit `--quiet` schaltet sie nicht stumm; alle anderen Hinweise entfallen. Die Stufenbeschreibungen („`--quiet` – nur Fehler“) und die Regel „die zuletzt angegebene Option gewinnt“ bleiben unverändert. | Vereinbarung mit dem Projektinhaber |
+| 0.9.0 | 2026-10-16 | [`LH-FA-CLI-005`](#lh-fa-cli-005--verbosity-und-logging): Ausnahmen unter `--quiet` auf drei erweitert (Sicherheitslockerungen, Ausweisung der Degradations-Fallbacks nach [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), Fortschritt von `u-boot up` nach [`LH-NFA-PERF-002`](#lh-nfa-perf-002--startzeit-abhängig-von-docker)); Erfolgs- und Zusammenfassungsmeldungen aller Subkommandos entfallen unter `--quiet`; die Stufen und die Mehrfachangabe-Regel bleiben unverändert. | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt
