@@ -21,7 +21,7 @@ die Spezifikation gehören. Keine Anforderungsänderung.
 die bisher nur im Code und in den READMEs stehen); `spec/architecture.md` (Schichtbeschreibung,
 nur falls dort eine Lücke bleibt).
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912
 
 **Autor:** pt9912. **Datum:** 2026-10-16.
 
