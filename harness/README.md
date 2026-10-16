@@ -68,9 +68,17 @@ Diese Datei dupliziert sie nicht.
 | `make image-scan` | Trivy HIGH/CRITICAL gegen das Runtime-Image | [`ADR-0004`](../docs/plan/adr/0004-ci-system.md) |
 | `make verify-depguard` | on-demand: die `depguard`-Regeln feuern wirklich | [`ADR-0003`](../docs/plan/adr/0003-solid-nahes-lint-profil.md) |
 | `make doc-immutable RANGE="<base>..<head>"` | on-demand: Accepted-ADRs sind über eine Commit-Range unverändert (lokal `STAGED=1`); Aufruf mit Argument, daher nicht im Makefile-Gate-Index | [`MR-005`](conventions.md#mr-005) |
-| `make gates` | alle inneren Gates: `lint` + `test` + `coverage-gate` + `docs-check` | — |
+| `make gates` | alle inneren Gates: `lint` + `test` + `coverage-gate` + `docs-check`; endet mit `record-gates` | [`MR-011`](conventions.md#mr-011) |
 | `make ci` | `gates` + `govulncheck` + `image-scan` | [`ADR-0004`](../docs/plan/adr/0004-ci-system.md) |
 | `make fullbuild` | volle Closure: `ci` + Runtime-Image-Build | — |
+
+**Werkzeuge — genannt, weil der Lauf sie braucht, aber kein Gate:**
+
+| Target | Tut was | Bindung |
+|---|---|---|
+| `make record-gates` | stempelt Content-Hash und HEAD nach `.harness/state/`, nur nach grünen Checks; der Stop-Hook liest den Stempel | kein Gate, [`MR-011`](conventions.md#mr-011) |
+| `make slice-mv` | bewegt einen Slice per `git mv` (`SLICE=slice-<Kennung> TO=<open\|next\|in-progress\|done>`) und zieht Verweise nach, prüft nichts | kein Gate, [`MR-011`](conventions.md#mr-011) | <!-- d-check:ignore (Make-Target, keine Slice-Kennung) -->
+| `make hooks-install` | aktiviert den `commit-msg`-Hook im Klon (`core.hooksPath`) | kein Gate, [`MR-011`](conventions.md#mr-011) |
 
 **Aktueller Lauf-Status:** CI-Badge bzw. lokal `make help` / `make gates`.
 **Nicht behauptet** (geplant): — keine —.

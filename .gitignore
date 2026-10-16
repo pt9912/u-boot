@@ -24,7 +24,14 @@
 Thumbs.db
 
 # Agent / tooling working dirs
-.claude/
+.claude/*
+!.claude/agents/
+!.claude/commands/
+!.claude/hooks/
+!.claude/settings.json
+
+# Gate-Nachweis (record-gates), pro Klon
+/.harness/state/
 .codex/
 .agents/
 

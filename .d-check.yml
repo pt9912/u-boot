@@ -119,7 +119,7 @@ trace:
 #   build-binaries   — Release-Artefakte, kein Inner-Loop-Sensor
 #   packages         — .deb/.rpm-Release-Artefakte (ADR-0017), kein Sensor
 targets:
-  makefiles: [Makefile]
+  makefiles: [Makefile, harness/mk/enforce.mk, harness/mk/hooks-install.mk, harness/mk/slice-mv.mk]
   doc-tables: [harness/README.md]
   authority: harness/README.md
   exempt-targets: [help, clean, deps, compile, coverage, build, run, build-binaries, packages]

@@ -200,8 +200,16 @@ docs-check: doc-check ## Validate markdown refs, ADR links, anchors, and model e
 
 # ---- aggregators -----------------------------------------------------------
 
-gates: lint test coverage-gate docs-check ## Inner-loop mandatory gates.
+# record-gates stempelt den Gate-Nachweis und laeuft strikt nach allen Checks
+# (Ordnungskante ueber GATE_CHECKS), auch unter make -j.
+GATE_CHECKS := lint test coverage-gate docs-check
+
+include harness/mk/*.mk
+
+gates: record-gates ## Inner-loop mandatory gates.
 	@echo "[gates] lint + test + coverage-gate + docs-check green"
+
+record-gates: $(GATE_CHECKS)
 
 ci: gates govulncheck image-scan ## Gates plus govulncheck plus image-scan (mirrors ci.yml).
 	@echo "[ci] gates + govulncheck + image-scan green"

@@ -1,0 +1,1 @@
+go gofmt golangci-lint govulncheck
