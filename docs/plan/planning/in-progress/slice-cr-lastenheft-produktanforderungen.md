@@ -73,22 +73,24 @@ zur Freigabe, Vorschlag in Klammern):
 
 ## 2. Definition of Done
 
-- [ ] **Freigabe** der Einzelentscheidungen (§1 Prüfpunkte, Grabstein-Form, Version
-  `0.6.0`) durch den Projektinhaber liegt vor.
-- [ ] **Lastenheft:** 22 Anforderungen als Grabsteine (Form:
-  `### LH-FA-BUILD-001 – entfallen (0.6.0)` und ein Satz mit neuem Ort ohne <!-- d-check:ignore (Form des Grabsteins, keine Referenz) -->
-  Abwärtsverweis auf Planung/ADR), Einleitungen der Abschnitte §4.11–§4.13
-  angepasst, §12 MVP-Umfang und §9 von Verweisen auf entfallene Anforderungen
-  bereinigt, Version `0.6.0`, Zeile in §16 Historie.
-- [ ] **Spezifikation:** die 16 Verfeinerungen `…​.a`/`.b` der entfallenden
-  Anforderungen sind auf `SPEC-<NNN>` umgestellt (Zuordnungstabelle im Slice-Anhang),
-  [`SPEC-006`](../../../../spec/spezifikation.md#spec-006--build-args-des-dockerfiles-und-pin-politik)..[`SPEC-013`](../../../../spec/spezifikation.md#spec-013--import-regel-tabelle-der-schichten) nennen keine entfallene Anforderung als Eltern.
-- [ ] **Lebende Verweise nachgezogen:** `spec/architecture.md`, `AGENTS.md`,
-  `harness/` (Sensor-Dateien, README, `conventions`), `docs/user/`, `docs/maintainer/`,
-  READMEs zeigen auf den neuen Ort. Historische Stellen bleiben (Grabstein).
-- [ ] d-check-Modul `trace` und `doc-complete`: Verhalten der Grabsteine geprüft
-  (keine Requirement-Waisen-Meldung durch Grabsteine).
-- [ ] `make gates` grün.
+- [x] **Freigabe** der Einzelentscheidungen (§1 Prüfpunkte, Grabstein-Form, Version
+  `0.6.0`) durch den Projektinhaber liegt vor (2026-10-16).
+- [x] **Lastenheft:** 22 Anforderungen als Grabsteine (Überschrift und Anker
+  unverändert, darunter ein Satz `Entfallen (0.6.0)` mit neuem Ort, ohne Abwärtsverweis
+  auf Planung/ADR), Einleitungen der Abschnitte §4.11–§4.13 angepasst, §12 MVP-Umfang
+  bereinigt, Version `0.6.0`, Zeile in §16 Historie; neu
+  [`LH-NFA-PORT-004`](../../../../spec/lastenheft.md#lh-nfa-port-004--ausgeliefertes-container-image)
+  und [`LH-LESE-004`](../../../../spec/lastenheft.md#lh-lese-004--prüfbarkeit).
+- [x] **Spezifikation:** die 13 Verfeinerungen `.a`/`.b` der entfallenden Anforderungen
+  tragen neue Kennungen (Anhang), die alten Anker bleiben als HTML-Anker erhalten; Eltern-Verweise
+  zeigen auf die neuen Stellen.
+- [x] **Lebende Verweise nachgezogen:** `spec/architecture.md`, `AGENTS.md`, `harness/`
+  (Sensor-Dateien, `conventions`, MR-Einträge), Skills, `docs/maintainer/`, Planning-READMEs,
+  Carveout-Inventar, READMEs zeigen auf den neuen Ort. Historische Stellen bleiben über die
+  Grabsteine gültig (Accepted ADRs, `done/`, Reviews, `MR-008`, Code- und Konfig-Kommentare).
+- [x] `trace` und `doc-complete`: 83 Anforderungen, 0 Waisen — die Grabsteine erzeugen
+  keine Requirement-Waisen.
+- [x] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review.
@@ -153,3 +155,24 @@ keine Ausdifferenzierung nötig.
 **Vorgelagert — offene Beobachtungen sichten:** das Register ist leer.
 
 **Modus:** alle berührten Sub-Areas GF.
+
+## Anhang: Zuordnung der Verfeinerungen (alt → neu)
+
+| Alt | Neu |
+|---|---|
+| [`LH-FA-BUILD-001`](../../../../spec/lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)`.a` | [`SPEC-025`](../../../../spec/spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles) |
+| [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions)`.a` | [`SPEC-026`](../../../../spec/spezifikation.md#spec-026--komposition-der-ci-pipeline-github-actions) |
+| [`LH-QA-004`](../../../../spec/lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil)`.a` | [`SPEC-027`](../../../../spec/spezifikation.md#spec-027--zusammensetzung-des-lint-profils) |
+| [`LH-FA-PROJDOCS-002`](../../../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format)`.a` | [`SPEC-028`](../../../../spec/spezifikation.md#spec-028--bestandsregel-und-abgleich-zum-adr-format) |
+| [`LH-FA-BUILD-001`](../../../../spec/lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)`.b` | [`SPEC-029`](../../../../spec/spezifikation.md#spec-029--mindestumfang-des-multi-stage-dockerfiles) |
+| [`LH-FA-BUILD-003`](../../../../spec/lastenheft.md#lh-fa-build-003--build-args-und-pin-politik)`.a` | [`SPEC-030`](../../../../spec/spezifikation.md#spec-030--overrides-der-build-args) |
+| [`LH-FA-BUILD-007`](../../../../spec/lastenheft.md#lh-fa-build-007--docker-only-workflow)`.a` | [`SPEC-031`](../../../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows) |
+| [`LH-FA-BUILD-008`](../../../../spec/lastenheft.md#lh-fa-build-008--coverage-bootstrap)`.a` | [`SPEC-032`](../../../../spec/spezifikation.md#spec-032--bootstrap-verhalten-der-coverage-stage) |
+| [`LH-FA-BUILD-009`](../../../../spec/lastenheft.md#lh-fa-build-009--repository-layout)`.a` | [`SPEC-033`](../../../../spec/spezifikation.md#spec-033--go-layout-des-repositories) |
+| [`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)`.a` | [`SPEC-034`](../../../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln) |
+| [`LH-QA-004`](../../../../spec/lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil)`.b` | [`SPEC-035`](../../../../spec/spezifikation.md#spec-035--pflichten-des-lint-profils) |
+| [`LH-FA-BUILD-002`](../../../../spec/lastenheft.md#lh-fa-build-002--runtime-stage-pflichten)`.a` / `.b` | [`LH-NFA-PORT-004`](../../../../spec/lastenheft.md#lh-nfa-port-004--ausgeliefertes-container-image)`.a` / `.b` (Verfeinerungen der neuen Produktzusage) |
+
+Eltern-Verweise auf entfallene Anforderungen: Bau (`BUILD-001`..`009`) → [`SPEC-025`](../../../../spec/spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles)..[`SPEC-033`](../../../../spec/spezifikation.md#spec-033--go-layout-des-repositories),
+[`SPEC-006`](../../../../spec/spezifikation.md#spec-006--build-args-des-dockerfiles-und-pin-politik)..[`SPEC-008`](../../../../spec/spezifikation.md#spec-008--eigenschaften-und-pflicht-targets-des-makefiles); Architektur → [`SPEC-012`](../../../../spec/spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal), [`SPEC-034`](../../../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln); [`LH-QA-002`](../../../../spec/lastenheft.md#lh-qa-002--testbare-akzeptanzkriterien) → [`LH-LESE-004`](../../../../spec/lastenheft.md#lh-lese-004--prüfbarkeit);
+Planung, Carveouts, Referenzmodell → Baseline-Regelwerk.

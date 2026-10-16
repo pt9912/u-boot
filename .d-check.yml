@@ -142,7 +142,7 @@ targets:
 # Aenderung bleibt ein Befund - beides gegengeprueft.
 #
 # done/-Slices sind BEWUSST NICHT erfasst: Ihre Regel lautet "nur
-# korrigierend aenderbar" (LH-FA-PROJDOCS-003 nennt Tippfehler,
+# korrigierend aenderbar" (das Baseline-Regelwerk nennt Tippfehler,
 # Querverweise, Archiv-Hinweise). Das ist eine semantische Bedingung, die
 # ein Diff-Vergleich nicht treffen kann - vcs wuerde jede erlaubte
 # Querverweis-Korrektur als Drift melden. Ein Sensor, der die eigene
