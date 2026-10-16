@@ -105,7 +105,7 @@ einmalig von Hand nachgezogen (`scripts/tap-nachzug.sh`) und liegt im Tap (`Form
 Der Workflow `tap-check` prüft das Token per echtem `git push --dry-run`. Das Secret wird beim
 **nächsten Release** erprobt (Entscheidung des Projektinhabers). Der macOS-Smoke im Tap (Lauf 36887857752,
 2026-10-01) ist auf **macOS 14 (Apple Silicon) grün**: tap, trust, install, `--version`, `init`, `doctor`.
-Der Intel-Job (macos-13) stand beim Eintrag noch auf `queued` (Runner-Kapazität); er und die Prüfung auf einem
+Der Intel-Job (macos-13) stand beim Eintrag noch auf `queued`; er und die Prüfung auf einem
 echten Mac stehen aus.
 
 ## Offene Einrichtung (nur der Projektinhaber)
@@ -125,3 +125,13 @@ echten Mac stehen aus.
   (`publish`-Lauf `36894700620`). Damit ist der automatische Nachzug im echten Lauf belegt.
 - Offen: macOS-Smoke im Tap zur Formel 0.7.0 (Lauf `36894925908`, auf `queued` wegen knapper macOS-Runner)
   sowie die Prüfung von `brew install` auf einem echten Mac. Danach schließt dieser Slice.
+
+## Stand nach `v0.9.0` (2026-10-16)
+
+- `brew tap`, `brew trust` und `brew install u-boot` sind auf einem Apple-Silicon-Mac (Colima als Engine)
+  von Hand erfolgreich; `u-boot --version` zeigt 0.9.0, `init` und `doctor` enden mit Exit 0
+  (0 Fehler, 1 Warnung: Projekt ohne Services).
+- Der Smoke-Job `install (macos-14)` (arm64) im Tap-Lauf `38689711681` ist grün. Der Job `install (macos-13)`
+  bekam nie einen Runner: das Label steht nicht mehr in der Runner-Liste von GitHub (Intel heißt dort
+  `macos-15-intel`). Die Vorlage `packaging/homebrew-tap/.github/workflows/smoke.yml` nennt jetzt `macos-15-intel`.
+- Offen: Die Vorlage im Tap-Repo einspielen und den Smoke für Apple Silicon und Intel grün sehen. Danach schließt dieser Slice.

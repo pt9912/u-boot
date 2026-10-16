@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [macos-14, macos-13]
+        runner: [macos-14, macos-15-intel]
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Tap und Install aus dem Tap
