@@ -24,7 +24,7 @@ this file is the same format applied to u-boot itself.
   `--quiet` (`remove` also drops its purge warnings), and `u-boot doctor --quiet` no longer lists warn items other than a
   degradation fallback (the exit code carries the result). `u-boot doctor --strict` with only warn items still exits with `11`
   and now names the warn items in its error message. `u-boot down --quiet` holds the Compose output back and prints it only if `down` fails. `--quiet --json` is unchanged. The output of `--dry-run` and `--diff`
-  is the result of the call and stays under `--quiet`; the plan summary of `--dry-run` and the rule that the last verbosity option wins
+  is the result of the call and stays under `--quiet`. The implementation of that rule and the rule that the last verbosity option wins
   follow in a later release.
 
 ## [0.9.0] - 2026-10-15

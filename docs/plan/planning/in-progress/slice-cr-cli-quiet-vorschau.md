@@ -117,9 +117,10 @@ Der Absatz nach der Aufzählung der vier Ausnahmen lautet in 0.10.0 (Änderung k
 | 0.10.0 | 2026-10-16 | LH-FA-CLI-005: Die Ausgabe der Vorschau-Optionen
 `--dry-run` und `--diff` (Änderungsplan und Diff-Darstellung, nach
 LH-FA-CLI-007 und LH-FA-CLI-008) ist das Ergebnis des Aufrufs und bleibt
-unter `--quiet`; die Erfolgsmeldung eines tatsächlichen Schreibens entfällt
-weiter; die vier Ausnahmen, die Stufen und die Mehrfachangabe-Regel bleiben
-unverändert. | Vereinbarung mit dem Projektinhaber |
+unter `--quiet`; die Erfolgs- und Zusammenfassungsmeldung eines tatsächlichen
+Schreibens entfällt auch bei `--diff` ohne `--dry-run`; die Stufen, die vier
+Ausnahmen und die Mehrfachangabe-Regel bleiben unverändert. | Vereinbarung
+mit dem Projektinhaber |
 ```
 
 ## 2. Definition of Done
