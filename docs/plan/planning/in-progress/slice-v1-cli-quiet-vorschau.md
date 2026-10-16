@@ -35,7 +35,7 @@ die Zusammenfassung des Plans (`Would initialize …`/`Would create:`, `Would ad
 Zusammenfassungszeile), sodass `--dry-run --quiet` ohne Ausgabe und mit Exit-Code 0 endet. Kein Test kombiniert `--quiet` mit `--dry-run` oder `--diff`.
 `config get`, `config list`, `config show` und `config` lehnen die Optionen mit `ErrDryRunNotApplicable` ab; `up`, `down`, `doctor`, `logs` und `template` kennen sie nicht.
 
-**Regel (Auslegung des Lastenhefts 0.10.0, vom Projektinhaber zu bestätigen):**
+**Regel (Lastenheft 0.10.0 entscheidet, bestätigt vom Projektinhaber am 2026-10-16):**
 
 | Aufruf unter `--quiet` | Vorschau-Zusammenfassung | Diff | Erfolgsmeldung nach dem Schreiben |
 |---|---|---|---|
@@ -50,7 +50,7 @@ Die Sicherheits-/Fallback-Ausnahmen und Fehler bleiben unabhängig davon; sonsti
 
 - **Eine „Would …"-Formulierung für `remove`, `generate` und `config set` im Dry-Run** — heute melden diese Subkommandos auch ohne `--quiet` in der Vergangenheitsform
   (`Removed service …`, `Generated …`, `config: a → b.`); nur `init` und `add` unterscheiden. Das ist ein Befund ohne Bezug zu `--quiet`; dieser Slice gibt unter `--quiet` aus, was ohne `--quiet`
-  ausgegeben wird. Offene Frage an den Projektinhaber (siehe §6).
+  ausgegeben wird. Offene Frage an den Projektinhaber, getragen vom Folge-Slice [`slice-v1-cli-dry-run-would-formulierung`](../open/slice-v1-cli-dry-run-would-formulierung.md) (siehe §6).
 - **Der Compose-Strom von `down`, der CHANGELOG-Widerspruch (Review F-1, F-3)** — anderer Befund, Arbeit am Slice
   [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md).
 - **Eine Änderung des Lastenhefts** — liegt im CR [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md).
@@ -59,17 +59,17 @@ Die Sicherheits-/Fallback-Ausnahmen und Fehler bleiben unabhängig davon; sonsti
 
 ## 2. Definition of Done
 
-- [ ] [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (0.10.0) erfüllt, [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) und
+- [x] [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (0.10.0) erfüllt, [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) und
       [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) wieder tragend: je Subkommando mit Vorschau (§3) belegen Tests Happy
       (`--dry-run --quiet`, `--dry-run --diff --quiet`, `--diff --quiet`), Boundary (Erfolgsmeldung nach dem Schreiben bei `--diff --quiet` entfällt; No-op-Plan) und Negative (Fehler bleibt sichtbar; `--json --quiet` unverändert).
-- [ ] Doku-Update: `docs/user/benutzerhandbuch.md` (Optionstabellen) und `CHANGELOG.md` nennen die Vorschau als Ergebnis unter `--quiet`.
-- [ ] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+- [x] Doku-Update: `docs/user/benutzerhandbuch.md` (Optionstabellen) und `CHANGELOG.md` nennen die Vorschau als Ergebnis unter `--quiet`.
+- [x] `make gates` grün.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
 - [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft.
 
 ## 3. Plan (vor Code)
@@ -84,7 +84,7 @@ Subkommandos mit `--dry-run`/`--diff` (per Suche in `internal/adapter/driving/cl
 | `internal/adapter/driving/cli/generate.go` <!-- d-check:ignore (Pfad-Zitat) --> | update | `runGenerate`: `if !flags.Quiet` um `printGenerateSummary` lässt die Zeile entfallen; bei `DryRun` ausgeben |
 | `internal/adapter/driving/cli/config.go` <!-- d-check:ignore (Pfad-Zitat) --> | update | `runConfigSet` (`if !flags.Quiet` um `printConfigSetSummary`) und `runConfigSetMany` (`if flags.Quiet { return nil }`): bei `DryRun` ausgeben |
 | `internal/adapter/driving/cli/previewmode.go` <!-- d-check:ignore (Pfad-Zitat) --> | prüfen | Wahrheitstabelle bleibt; ein kleiner Helfer (etwa „Vorschau-Zusammenfassung unterdrücken: `quiet && !dryRun`“) vermeidet fünf Kopien der Bedingung |
-| `internal/adapter/driving/cli/quiet_modifying_test.go` <!-- d-check:ignore (Pfad-Zitat) --> | update | Happy/Boundary/Negative je Subkommando nach [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe); die Bestandstests ohne Vorschau bleiben unverändert (Kontrolle: Erfolgsmeldung entfällt weiter) |
+| `internal/adapter/driving/cli/quiet_preview_test.go` <!-- d-check:ignore (Pfad-Zitat) --> | neu | Happy/Boundary/Negative je Subkommando nach [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe); die Bestandstests ohne Vorschau (`quiet_modifying_test.go`) bleiben unverändert (Kontrolle: Erfolgsmeldung entfällt weiter) |
 | `docs/user/benutzerhandbuch.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | die beiden `--quiet`-Tabellenzeilen (Zeilen um 299 und 1280) und der Absatz zu `--dry-run` nennen die Vorschau als Ergebnis |
 | `CHANGELOG.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | sichtbare Verhaltensänderung: `--dry-run --quiet` schweigt nicht mehr |
 
@@ -111,10 +111,12 @@ Steering-Loop-Lerneintrag geschrieben (§7).
 
 ## 6. Risiken und offene Punkte
 
-- **Auslegung „Vorschau“ bei `--diff` ohne `--dry-run`:** Die Regel in §1 lässt die Erfolgsmeldung nach dem Schreiben entfallen und den Diff bleiben; der Projektinhaber hat nur
-  „Vorschau-Ausgabe bleibt“ entschieden. — **Ausgang:** offen bis zur Bestätigung (Übergabe des Planers); Test pinnt die gewählte Auslegung.
+- **Auslegung „Vorschau“ bei `--diff` ohne `--dry-run`:** Die Regel in §1 lässt die Erfolgsmeldung nach dem Schreiben entfallen und den Diff bleiben. — **Ausgang:**
+  entfallen: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) 0.10.0 entscheidet wörtlich (die Erfolgsmeldung entfällt auch bei `--diff` ohne `--dry-run`),
+  bestätigt vom Projektinhaber; Code und Pin folgen.
 - **Vergangenheitsform im Dry-Run (`remove`, `generate`, `config set`):** Unter `--quiet --dry-run` erscheint dieselbe Vergangenheitsform wie heute ohne `--quiet`,
-  obwohl nichts geschrieben wurde. — **Ausgang:** offen bis zur Entscheidung des Projektinhabers; entweder eigener Folge-Slice oder Aufnahme hier (dann Rückführung nach `next`).
+  obwohl nichts geschrieben wurde. — **Ausgang:** eingetreten:
+  [`slice-v1-cli-dry-run-would-formulierung`](../open/slice-v1-cli-dry-run-would-formulierung.md).
 - **Konflikt mit dem Code-Slice [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md):** beide ändern die Quiet-Zweige derselben fünf Dateien. — **Ausgang:** entfallen:
   dieser Slice startet erst nach dessen Closure (siehe §4).
 - **Zwischenstand der Spec:** Die Spezifikation darf das Verhalten erst nach allen Slices der Welle beschreiben. — **Ausgang:** entfallen: der Spezifikations-Eintrag liegt im letzten Slice
@@ -122,15 +124,30 @@ Steering-Loop-Lerneintrag geschrieben (§7).
 
 ## 7. Closure-Notiz
 
-Offen.
+**Belege:** Review-Report
+[`2026-10-16-slice-v1-cli-quiet-vorschau`](../../../reviews/2026-10-16-slice-v1-cli-quiet-vorschau.md) (0 HIGH, 0 MEDIUM, 1 LOW, 3 INFO; F-1 und F-2 behoben in `7ee6c76`, F-3 in den
+Folge-Slice, F-4 als Grenze). Verification Evidence
+[`2026-10-16-verification-slice-v1-cli-quiet-vorschau`](../../../reviews/2026-10-16-verification-slice-v1-cli-quiet-vorschau.md): bestanden, mit vier Auflagen für die Closure
+(hier eingelöst). `make gates` grün, Coverage 91,10 % (Schwelle 90 %); `make doc-trace`: 83 Anforderungen, 0 Waisen. Fünf Mutationen des Reviewers und zwei des Verifiers fielen rot.
 
-- **Was hat funktioniert:** —
-- **Was ging anders als geplant:** —
-- **Steering-Loop-Eintrag:** —
-- **Beobachtungs-Register (`../observations/`):** —
-- **Folge-Slices:** [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
-- **Risiken aus §6:** —
-- **Drei Paarungen:** —
+- **Was hat funktioniert:** Die Regeltabelle aus dem CR ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) 0.10.0) diente als Testmatrix: je Subkommando mit Vorschau
+  jede Zeile × jede Option, die Erwartung ist die Tabelle, nicht der Code. Der Helfer `summaryVisible` hält die Bedingung an einer Stelle statt in fünf Kopien. Der Reviewer prüfte jede
+  Schreibstelle systematisch gegen die Tabelle. Es mussten keine bestehenden Pins geändert werden, weil kein Bestandstest `--quiet` mit `--dry-run` oder `--diff` kombinierte.
+- **Was ging anders als geplant:** Der Kommentarblock von `summaryVisible` klebte am Doc-Kommentar von `previewModeFromFlags` (Review F-1). Der CHANGELOG-Satz sagte „the same text“ bei `init`,
+  wo Warnungen gefiltert werden (F-2). §3 nannte die falsche Testdatei (`quiet_modifying_test.go` statt der neuen `quiet_preview_test.go`), und §1/§6 behaupteten eine offene Bestätigung, die
+  Lastenheft 0.10.0 bereits wörtlich gab; beides berichtigt.
+- **Steering-Loop-Eintrag:** Ein neuer Helfer mit Doc-Kommentar gehört **nach** die Funktion, deren Doc-Kommentar davor steht: Ein Einfügen zwischen Doc-Kommentar und Funktion hängt beide
+  zusammen. Das ist zum dritten Mal in dieser Welle ein Kommentar-Befund aus `AGENTS.md` §3.7 (Kommentar beschreibt nicht, was da ist). Gezählt, nicht verkörpert. Befund für die Welle-Closure:
+  die Klasse „Kommentar und Gegenstand getrennt bzw. falsch zugeordnet“ berührt die 3×-Schwelle der Welle; ob sie als Regel verkörpert wird, entscheidet die Welle-Closure anhand der Slice-Belege,
+  hier wird nichts verkörpert.
+- **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt; das Register ist leer, also keine Beobachtung über der Schwelle.
+- **Folge-Slices:** [`slice-v1-cli-dry-run-would-formulierung`](../open/slice-v1-cli-dry-run-would-formulierung.md) (neu: Zeitform der Dry-Run-Zusammenfassung, Review F-3) und
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Rangfolge bei Mehrfachangabe, Spec-Eintrag).
+- **Release-Hinweis:** kein Release-Cut vor `slice-v1-cli-verbosity-letzte-option-gewinnt`; der CHANGELOG sagt „follows in a later release“.
+- **Risiken aus §6:** alle tragen ihren Ausgang: eingetreten (Vergangenheitsform im Dry-Run) oder entfallen (Auslegung `--diff` ohne `--dry-run`, Konflikt mit dem Code-Slice, Zwischenstand der Spec).
+- **Grenzen:** (1) Kein Dry-Run-Pin mit Warnungen für `generate` (Review F-4); das Verhalten ist durch Lesen bestätigt, der Warn-Pin im Dry-Run besteht nur für `init`.
+  (2) Der No-op-Pin (`TestExecute_Add_Quiet_DryRunNoOpPlanStays`) existiert nur für `add`; die übrigen Subkommandos teilen den Zweig.
+- **Drei Paarungen:** Anker (kein `liegt in`, nichts verkörpert) · Folge-Slice (beide in `open/`) · Register (leer, notiert) — getragen; Bestandseintrag in `open/README.md` bereinigt.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 

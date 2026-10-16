@@ -1,0 +1,128 @@
+# Slice v1: Dry-Run — die Zusammenfassung sagt „Would …“ in allen Subkommandos
+
+**Lifecycle:** Der Zustand dieses Slice ist das Verzeichnis, in dem diese
+Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
+wechselt nur durch `git mv`, siehe
+Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
+Übernimmt ein anderer Slice den Gegenstand oder entfällt er, geht diese Datei
+aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
+Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
+(§Ein Slice, dessen Gegenstand ein anderer übernimmt).
+
+**Welle:** ohne Welle — keine Closure-Bedingung, die von der DoD dieses Slice verschieden ist, und kein Release-Bezug.
+Herkunft: Review-Finding F-3 im [Report](../../../reviews/2026-10-16-slice-v1-cli-quiet-vorschau.md) des Slice
+[`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md) aus der Welle [`welle-cli-verbosity`](../welle-cli-verbosity.md).
+
+**Bezug:** [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Dry-Run zeigt, was geschehen würde),
+[`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) (Diff als Vorschau).
+
+**Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)) — wird in diesem Slice nicht geändert; bei Lösung C (siehe §1)
+entscheidet ein CR, kein Code. `spezifikation.md` und `architecture.md` — keine Berührung.
+
+**Verantwortlich:** —
+
+**Autor:** pt9912. **Datum:** 2026-10-16.
+
+---
+
+## 1. Ziel und Abgrenzung
+
+**Ziel:** Die Zusammenfassung eines Dry-Runs sagt in allen Subkommandos mit Vorschau, was geschehen **würde**, oder der Slice stellt fest, dass der Vertrag die Zeitform nicht festlegt.
+
+**Stand heute (im Code gefunden):** Im Dry-Run melden `init` und `add` mit „Would …“ (`Would initialize`/`Would create:`, `Would add service`/`Would repair service`/`Would change:`).
+`remove`, `generate` und `config set` melden dieselbe Zeile wie nach dem Schreiben, in der Vergangenheitsform (`Removed service …`, `Generated …`, `config: a → b.`), obwohl nichts geschrieben wurde.
+Der Befund besteht **auch ohne `--quiet`** und hat keinen Bezug zu `--quiet`; er fiel im Review des Slice
+[`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md) auf (F-3), der unter `--quiet` ausgibt, was ohne `--quiet` ausgegeben wird.
+
+**Wortlaut [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run):** „Der Dry-Run muss anzeigen, welche Dateien erzeugt, geändert oder gelöscht **würden**, ohne Änderungen am Dateisystem vorzunehmen.“
+Die Zusage nennt den Konjunktiv für den Inhalt der Anzeige, aber kein Ausgabeformat und keine Zeilen-Formulierung; die Zeitform der Zusammenfassungszeile legt sie nicht ausdrücklich fest.
+
+**Offene Frage an den Projektinhaber** (Lastenheft-Auslegung oder reiner Code-Befund):
+
+- Widerspricht die Vergangenheitsform („Removed service …“ im Dry-Run) dem „würden“ von [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)? Die Zusammenfassung behauptet ein Ergebnis, das nicht eingetreten ist;
+  eine Leserin, die nur die Zusammenfassung sieht, kann einen Dry-Run für einen echten Lauf halten. Das spricht für einen Verstoß gegen den Sinn der Zusage.
+  Gegen einen Verstoß spricht: Die Zusage verlangt den Inhalt (welche Dateien), nicht die Zeitform; die Anzeige der Dateien ist vorhanden.
+- Das ist eine Auslegung des Lastenhefts und gehört dem Projektinhaber; der Planer entscheidet sie nicht.
+
+**Lösungen:**
+
+- **A — Code vereinheitlicht:** `remove`, `generate` und `config set` (einzeln und mit mehreren Paaren) sagen im Dry-Run „Would …“; Tests pinnen Text je Subkommando, Handbuch und CHANGELOG folgen.
+  Gewählt, wenn die Auslegung „Vergangenheitsform widerspricht [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)“ gilt.
+- **B — kein Wechsel:** [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) legt die Zeitform nicht fest; der Slice schließt ohne Code (CR-frei) mit einer Begründung in §7 und `Gegenstand:` — entfallen.
+- **C — Vertrag schärfen:** Der Projektinhaber will die Zeitform im Vertrag festhalten; dann entsteht ein CR nach dem Muster [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md), der Code folgt (Lösung A).
+
+**Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
+
+- **Verhalten unter `--quiet`** — [`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md) setzt es um; der Befund besteht davon unabhängig, und dieser Slice ändert keine Quiet-Zweige.
+- **Die Rangfolge der Verbosity-Optionen** — [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+- **Das JSON-Format des Dry-Runs** (`--dry-run --json`) — ein maschinenlesbarer Vertrag ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), Pflichtfelder), der von der Zeitform der Text-Zeile unberührt bleibt.
+- **Die Texte von `init` und `add`** — sie sagen schon „Would …“; Änderung nur, falls die Vereinheitlichung auf eine gemeinsame Form es verlangt (dann im Plan §3 ergänzen).
+
+## 2. Definition of Done
+
+- [ ] Die Auslegung von [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) ist vom Projektinhaber entschieden und in §7 festgehalten; bei Lösung A erfüllt: je Subkommando
+      (`remove`, `generate`, `config set` einzeln und mit mehreren Paaren) belegen Tests Happy (Dry-Run sagt „Would …“), Boundary (kein Dry-Run: Vergangenheitsform bleibt) und Negative (Fehler und `--json` unverändert).
+- [ ] Doku-Update, falls Lösung A: `docs/user/benutzerhandbuch.md` und `CHANGELOG.md` nennen die neue Formulierung; bei B oder C entfällt es bzw. folgt dem CR.
+- [ ] `make gates` grün.
+- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+      (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
+      Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8).
+- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
+- [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
+- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft.
+
+## 3. Plan (vor Code)
+
+Gilt für Lösung A; bei B entfällt der Code, bei C kommt der CR davor.
+
+| Datei / Komponente | Änderungs-Art | Begründung |
+|---|---|---|
+| `internal/adapter/driving/cli/remove.go` <!-- d-check:ignore (Pfad-Zitat) --> | update | Zusammenfassung im Dry-Run als „Would remove service …“ (Zeile „Changed:“ analog „Would change:“) |
+| `internal/adapter/driving/cli/generate.go` <!-- d-check:ignore (Pfad-Zitat) --> | update | Zusammenfassung im Dry-Run als „Would generate …“ |
+| `internal/adapter/driving/cli/config.go` <!-- d-check:ignore (Pfad-Zitat) --> | update | `config set` (einzeln und mit mehreren Paaren) im Dry-Run als „Would set …“ statt `config: a → b.` |
+| `internal/adapter/driving/cli/quiet_preview_test.go` <!-- d-check:ignore (Pfad-Zitat) --> und Tests je Subkommando <!-- d-check:ignore (Pfad-Zitat) --> | update | die Matrix pinnt heute die Vergangenheitsform als `summary`; Texte nachziehen, Happy/Boundary/Negative nach [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) und [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) |
+| `docs/user/benutzerhandbuch.md`, `CHANGELOG.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | sichtbare Textänderung im Dry-Run |
+
+## 4. Trigger
+
+**Start** (`next` → `in-progress`): Der Projektinhaber hat die offene Frage aus §1 entschieden (A, B oder C) und priorisiert den Slice.
+
+**Rückführungen — vorab benannt:**
+
+- `in-progress` → `next` (zu groß, zurück zur Zerlegung): die Vereinheitlichung verlangt auch eine Änderung der Texte von `init` und `add` oder des JSON-Formats.
+- `in-progress` → `open` (blockiert): Lösung C — der CR zur Zeitform ist noch nicht in `done/`.
+
+## 5. Closure-Trigger
+
+DoD vollständig, Review-Report liegt vor, Closure-Notiz mit
+Steering-Loop-Lerneintrag geschrieben (§7). Bei Lösung B: Begründung in §7, keine Liefer-Punkte.
+
+## 6. Risiken und offene Punkte
+
+- **Auslegung von [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) bleibt offen:** ohne Entscheidung des Projektinhabers ist unklar, ob Code oder Vertrag zu ändern ist. — **Ausgang:** weiter offen: Entscheidung des Projektinhabers (Start-Trigger, §4); Tests werden erst danach geschrieben.
+- **Textänderung ist für Skripte sichtbar:** wer die Dry-Run-Zeile maschinell las, sieht einen anderen Text. — **Ausgang:** entfallen: [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) weist `--json` als maschinenlesbaren Weg aus; der CHANGELOG nennt die Änderung.
+- **Bestehende Pins schreiben die Vergangenheitsform fest:** die Matrix in `quiet_preview_test.go` <!-- d-check:ignore (Pfad-Zitat) --> und Bestandstests müssen mitgezogen werden. — **Ausgang:** entfallen: Der Plan (§3) nennt sie; der Implementer sucht die Texte per Grep im Test-Baum, bevor er sie ändert.
+
+## 7. Closure-Notiz
+
+Offen.
+
+- **Was hat funktioniert:** —
+- **Was ging anders als geplant:** —
+- **Steering-Loop-Eintrag:** —
+- **Beobachtungs-Register (`../observations/`):** —
+- **Folge-Slices:** —
+- **Risiken aus §6:** —
+- **Drei Paarungen:** —
+
+## 8. Sub-Area-Prüfungen und Modus-Begründung
+
+**Vorgelagert — Sub-Area-Wahl prüfen:** berührt ist `internal/adapter/driving/cli` (Sub-Area CLI laut [`harness/conventions.md`](../../../../harness/conventions.md#mr-006), Modus Greenfield, graduiert)
+sowie `docs/plan/`, `CHANGELOG.md` und `docs/user/` als öffentliche Verträge (keine Sub-Area).
+
+**Vorgelagert — offene Beobachtungen sichten:** Beobachtungs-Register
+([`../observations/`](../observations/README.md)) durchgegangen — keine Treffer
+(Register leer).
+
+Alle berührten Sub-Areas GF.
