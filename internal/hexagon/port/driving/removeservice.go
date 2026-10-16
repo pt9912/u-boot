@@ -192,12 +192,19 @@ type RemoveServiceResponse struct {
 //     notices stay visible under `--quiet`. It is a property of the
 //     entry, not of its Code: LH-FA-DEV-007 also carries "has no
 //     effect" notices. It does not appear in the JSON wire form.
+//   - DegradationFallback is true for the notices that disclose a
+//     degradation fallback of LH-FA-DEV-007 (container without
+//     daemon, `vfs` storage, no egress restriction; LH-FA-CLI-005
+//     exception 2). Those notices stay visible under `--quiet` too.
+//     Like SecurityRelaxation it is a property of the entry and does
+//     not appear in the JSON wire form.
 type WarningEntry struct {
-	Code               string `json:"code"`
-	Level              string `json:"level"`
-	Message            string `json:"message"`
-	Subject            string `json:"subject,omitempty"`
-	SecurityRelaxation bool   `json:"-"`
+	Code                string `json:"code"`
+	Level               string `json:"level"`
+	Message             string `json:"message"`
+	Subject             string `json:"subject,omitempty"`
+	SecurityRelaxation  bool   `json:"-"`
+	DegradationFallback bool   `json:"-"`
 }
 
 // All Remove sentinels below live in the `driving` package so the

@@ -84,12 +84,14 @@ func TestSandboxRelaxationWarnings_SameCodeBothFlags(t *testing.T) {
 }
 
 // LH-FA-DEV-007 degradations (no daemon, `vfs` storage, no egress
-// restriction) are excluded from the --quiet exception: they are
-// losses of capability announced at container start and in
-// `u-boot doctor`, not security relaxations, and no render-time
-// warning exists for them. The policy value (`warn`/`fail`) changes
-// the generated script, never the set of render-time warnings.
-func TestSandboxRelaxationWarnings_DegradationPolicyAddsNoFlaggedWarning(t *testing.T) {
+// restriction) arise at container start and in `u-boot doctor`; no
+// render-time warning describes one, so the policy value
+// (`warn`/`fail`) changes the generated script, never the set of
+// render-time warnings. Their disclosure is the
+// [driving.WarningEntry.DegradationFallback] flag (LH-FA-CLI-005
+// exception 2: stays visible under `--quiet`); the `doctor` items
+// carry it (TestDoctor_SandboxFallbackFlagIsOnTheItem).
+func TestSandboxRelaxationWarnings_PolicyChangesNoRenderTimeWarning(t *testing.T) {
 	t.Parallel()
 	for _, policy := range []string{"", "warn", "fail"} {
 		got := application.SandboxRelaxationWarningsForTest("podman", policy, true, true)

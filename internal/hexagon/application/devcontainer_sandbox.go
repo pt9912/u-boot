@@ -276,10 +276,11 @@ func podmanRelaxations() []string {
 // a "no effect" notice per feature that is configured without the
 // sandbox profile. Only the relaxation warnings carry
 // [driving.WarningEntry.SecurityRelaxation] (they stay visible under
-// `--quiet`, LH-FA-CLI-005). The degradation fallbacks of
-// LH-FA-DEV-007 (no daemon, `vfs` storage, no egress restriction)
+// `--quiet`, LH-FA-CLI-005 exception 1). The degradation fallbacks
+// of LH-FA-DEV-007 (no daemon, `vfs` storage, no egress restriction)
 // are not produced here: they arise at container start and in
-// `u-boot doctor`, and they are degradations, not relaxations.
+// `u-boot doctor`, where the item carries
+// [domain.Diagnostic.DegradationFallback] (exception 2).
 func sandboxRelaxationWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []driving.WarningEntry {
 	var out []driving.WarningEntry
 	add := func(code, msg string, relaxation bool) {

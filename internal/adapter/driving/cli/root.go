@@ -42,15 +42,17 @@ Quickstart and user docs: https://github.com/pt9912/u-boot#readme`,
 		"do not prompt; fail when a required confirmation cannot be resolved; exclusive with --yes")
 
 	// LH-FA-CLI-005 verbosity flags. Persistent so subcommands read
-	// a single source of truth. --quiet shows errors only: it is
-	// load-bearing for doctor (renders only SeverityError items), up
-	// and down (suppress status table / success message) and the
-	// init/generate/up warning lines (only security relaxations
-	// remain, see [writeWarning]). --quiet / --verbose / --debug
-	// also raise or lower the logger level via the PersistentPreRunE
-	// below.
+	// a single source of truth. --quiet shows errors only
+	// (LH-FA-CLI-005): every modifying subcommand drops its success
+	// and summary output, doctor renders only SeverityError items and
+	// degradation-fallback items, and the warning lines of
+	// init/generate/up keep only security relaxations and degradation
+	// fallbacks, see [visibleWarnings]. The query commands (config
+	// get/list, logs, template list) keep their output. --quiet /
+	// --verbose / --debug also raise or lower the logger level via
+	// the PersistentPreRunE below.
 	root.PersistentFlags().BoolVar(&a.quiet, "quiet", false,
-		"show errors only; security relaxations of the sandbox profile stay reported")
+		"show errors only; security relaxations, degradation fallbacks of the sandbox profile, `up` progress and the `--force` path summary stay reported")
 	root.PersistentFlags().BoolVar(&a.verbose, "verbose", false,
 		"show additional detail")
 	root.PersistentFlags().BoolVar(&a.debug, "debug", false,

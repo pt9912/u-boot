@@ -263,3 +263,58 @@ func TestExecute_Down_Quiet_IsSilent(t *testing.T) {
 		})
 	}
 }
+
+// LH-FA-CLI-005 exception 2 / LH-FA-DEV-007: the three degradation
+// fallbacks (container without daemon, `vfs` storage, no egress
+// restriction) stay visible in the command output under `--quiet`,
+// each one on its own. The flag (DegradationFallback) sits on the
+// entry: the fixtures carry the code of the unflagged notices.
+func quietFallbacks() map[string]driving.WarningEntry {
+	return map[string]driving.WarningEntry{
+		"no-daemon": {Code: "LH-FA-DEV-007", Level: "warn", DegradationFallback: true,
+			Message: "nested Docker daemon is not ready; container runs without daemon"},
+		"vfs": {Code: "LH-FA-DEV-007", Level: "warn", DegradationFallback: true,
+			Message: "/dev/fuse is not available; nested Podman falls back to vfs storage"},
+		"no-egress": {Code: "LH-FA-DEV-008", Level: "warn", DegradationFallback: true,
+			Message: "NET_ADMIN is not grantable; the egress restriction does not apply"},
+	}
+}
+
+func TestExecute_Quiet_KeepsEachDegradationFallback(t *testing.T) {
+	t.Parallel()
+	runners := map[string]func(ws []driving.WarningEntry, stdout, stderr *bytes.Buffer) error{
+		"init": func(ws []driving.WarningEntry, o, e *bytes.Buffer) error {
+			uc := &fakeInitUseCase{resp: driving.InitProjectResponse{Warnings: ws}}
+			return newApp(uc, cli.WithGetwd(sandboxGetwd)).Execute(context.Background(), []string{"--quiet", "init", "--devcontainer", "--sandbox"}, o, e)
+		},
+		"generate": func(ws []driving.WarningEntry, o, e *bytes.Buffer) error {
+			uc := &fakeGenerateUseCase{resp: driving.GenerateResponse{Artifact: domain.ArtifactDevcontainer, Action: driving.GenerateActionCreated, Warnings: ws}}
+			return newAppWithGenerate(uc, cli.WithGetwd(sandboxGetwd)).Execute(context.Background(), []string{"--quiet", "generate", "devcontainer", "--sandbox"}, o, e)
+		},
+		"up": func(ws []driving.WarningEntry, o, e *bytes.Buffer) error {
+			uc := &fakeUpUseCase{resp: driving.UpResponse{Result: domain.UpResult{Stabilized: true}, Warnings: ws}}
+			return newAppWithUp(uc, cli.WithGetwd(sandboxGetwd)).Execute(context.Background(), []string{"--quiet", "up"}, o, e)
+		},
+	}
+	for cmdName, run := range runners {
+		for fbName, fb := range quietFallbacks() {
+			cmdName, run, fbName, fb := cmdName, run, fbName, fb
+			t.Run(cmdName+"/"+fbName, func(t *testing.T) {
+				t.Parallel()
+				// The unflagged notice sits next to the fallback and must go.
+				ws := []driving.WarningEntry{quietNoEffect(), fb}
+				var stdout, stderr bytes.Buffer
+				if err := run(ws, &stdout, &stderr); err != nil {
+					t.Fatalf("Execute: %v", err)
+				}
+				out := stdout.String()
+				if !strings.Contains(out, "Warning ("+fb.Code+"): "+fb.Message) {
+					t.Errorf("--quiet hid the %s fallback:\n%s", fbName, out)
+				}
+				if strings.Contains(out, "has no effect") {
+					t.Errorf("--quiet kept the unflagged notice:\n%s", out)
+				}
+			})
+		}
+	}
+}

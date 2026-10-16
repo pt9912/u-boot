@@ -1039,10 +1039,9 @@ func TestExecute_Doctor_WarnStrict_Exit11(t *testing.T) {
 	}
 }
 
-// LH-FA-CLI-005: `doctor --quiet` shows errors only. Header, OK and
-// warn items and the summary line are gone; the exit code carries
-// the result. (Changed from "hides OK items only": the warn item and
-// the summary line used to stay.)
+// LH-FA-CLI-005: `doctor --quiet` shows the error items. Header, OK
+// and warn items and the summary line are not written; the exit code
+// carries the result.
 func TestExecute_Doctor_Quiet_ShowsOnlyErrorItems(t *testing.T) {
 	getwd := func() (string, error) { return "/tmp/x", nil }
 	doctorUC := &fakeDoctorUseCase{
@@ -1096,17 +1095,21 @@ func TestExecute_Doctor_Quiet_NoErrorsIsSilent(t *testing.T) {
 	}
 }
 
-// LH-FA-CLI-005 / LH-FA-DEV-007 (Degradations-Entscheidung): the
-// doctor items of the sandbox degradations (e.g. `vfs` fallback, no
-// egress capability) are warn items and vanish under --quiet, while
-// the error variant (onUnavailable=fail) stays visible.
-func TestExecute_Doctor_Quiet_SandboxDegradationWarnIsHidden_ErrorKept(t *testing.T) {
+// LH-FA-CLI-005 exception 2 / LH-FA-DEV-007: a degradation-fallback
+// item (DegradationFallback, here `vfs` storage) is shown by
+// `doctor --quiet` next to the error items. Warn items that share the
+// ID but are no fallback ("no effect", credentials) and OK items are
+// not shown.
+func TestExecute_Doctor_Quiet_FallbackItemAndErrorKept_OtherWarnsDropped(t *testing.T) {
 	getwd := func() (string, error) { return "/tmp/x", nil }
 	doctorUC := &fakeDoctorUseCase{
 		resp: driving.DoctorResponse{
 			Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
-				{ID: "devcontainer.sandbox.runtime", Severity: domain.SeverityWarn, Message: "/dev/fuse is not available; nested Podman will fall back to vfs storage (LH-FA-DEV-007)."},
+				{ID: "devcontainer.sandbox.runtime", Severity: domain.SeverityWarn, DegradationFallback: true, Message: "/dev/fuse is not available; nested Podman will fall back to vfs storage (LH-FA-DEV-007).", Hint: "load fuse"},
+				{ID: "devcontainer.sandbox.runtime", Severity: domain.SeverityWarn, Message: "nestedRuntime has no effect (LH-FA-DEV-007)."},
+				{ID: "devcontainer.sandbox.credentials", Severity: domain.SeverityWarn, Message: "possible plaintext git credential (LH-FA-DEV-009)."},
 				{ID: "devcontainer.sandbox.egress", Severity: domain.SeverityError, Message: "egress capability not grantable (LH-FA-DEV-007)."},
+				{ID: "fs.write-permissions", Severity: domain.SeverityOK, Message: "BaseDir is writable."},
 			}},
 		},
 	}
@@ -1115,11 +1118,96 @@ func TestExecute_Doctor_Quiet_SandboxDegradationWarnIsHidden_ErrorKept(t *testin
 		context.Background(), []string{"--quiet", "doctor"}, &stdout, &stderr,
 	)
 	out := stdout.String()
-	if strings.Contains(out, "vfs storage") {
-		t.Errorf("degradation warn item must not survive --quiet: %q", out)
+	for _, want := range []string{"vfs storage", "load fuse", "egress capability not grantable"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("--quiet hid %q: %q", want, out)
+		}
 	}
-	if !strings.Contains(out, "egress capability not grantable") {
-		t.Errorf("degradation error item must stay: %q", out)
+	for _, gone := range []string{"has no effect", "plaintext git credential", "BaseDir is writable", "Summary:"} {
+		if strings.Contains(out, gone) {
+			t.Errorf("--quiet kept %q: %q", gone, out)
+		}
+	}
+}
+
+// Without --quiet the fallback item is part of the full report like
+// every other item (boundary of the --quiet exception).
+func TestExecute_Doctor_NoQuiet_FallbackItemInFullReport(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x", nil }
+	doctorUC := &fakeDoctorUseCase{
+		resp: driving.DoctorResponse{
+			Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
+				{ID: "devcontainer.sandbox.runtime", Severity: domain.SeverityWarn, DegradationFallback: true, Message: "falls back to vfs storage."},
+				{ID: "fs.write-permissions", Severity: domain.SeverityOK, Message: "BaseDir is writable."},
+			}},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	if err := newAppWithDoctor(&fakeInitUseCase{}, doctorUC, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"doctor"}, &stdout, &stderr); err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	for _, want := range []string{"falls back to vfs storage.", "BaseDir is writable.", "Summary:"} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Errorf("full report lacks %q: %q", want, stdout.String())
+		}
+	}
+}
+
+// LH-FA-DIAG-003 / F-3: `doctor --quiet --strict` with only warn items
+// ends with exit 11 and an empty stdout; the error text (written to
+// stderr by the wiring layer) names the cause for script authors:
+// the count and the IDs of the warn items. The exit code is the
+// unchanged ErrDoctorFailures mapping.
+func TestExecute_Doctor_QuietStrict_WarnOnly_Exit11WithCauseOnStderr(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x", nil }
+	doctorUC := &fakeDoctorUseCase{
+		resp: driving.DoctorResponse{
+			Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
+				{ID: "fs.write-permissions", Severity: domain.SeverityOK, Message: "BaseDir is writable."},
+				{ID: "uboot.yaml.valid", Severity: domain.SeverityWarn, Message: "u-boot.yaml not present."},
+				{ID: "git.binary", Severity: domain.SeverityWarn, Message: "git missing."},
+			}},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDoctor(&fakeInitUseCase{}, doctorUC, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"--quiet", "doctor", "--strict"}, &stdout, &stderr,
+	)
+	if !errors.Is(err, cli.ErrDoctorFailures) {
+		t.Fatalf("err = %v, want ErrDoctorFailures", err)
+	}
+	if got := cli.ExitCode(err); got != 11 {
+		t.Errorf("ExitCode = %d, want 11 (unchanged)", got)
+	}
+	if stdout.Len() != 0 {
+		t.Errorf("--quiet printed on stdout: %q", stdout.String())
+	}
+	for _, want := range []string{"--strict", "2 warning item(s)", "uboot.yaml.valid", "git.binary"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("error text lacks %q: %v", want, err)
+		}
+	}
+}
+
+// Boundary: with an Error item the failure needs no `--strict`
+// explanation; the error is the bare sentinel.
+func TestExecute_Doctor_QuietStrict_WithError_BareSentinel(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x", nil }
+	doctorUC := &fakeDoctorUseCase{
+		resp: driving.DoctorResponse{
+			Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
+				{ID: "uboot.yaml.valid", Severity: domain.SeverityWarn, Message: "w."},
+				{ID: "docker.daemon", Severity: domain.SeverityError, Message: "daemon unreachable."},
+			}},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDoctor(&fakeInitUseCase{}, doctorUC, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"--quiet", "doctor", "--strict"}, &stdout, &stderr,
+	)
+	if !errors.Is(err, cli.ErrDoctorFailures) || strings.Contains(err.Error(), "--strict") {
+		t.Errorf("err = %v, want the bare ErrDoctorFailures", err)
 	}
 }
 

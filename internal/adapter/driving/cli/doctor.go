@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -15,8 +16,9 @@ import (
 // doctorFlags bundles the per-invocation flag state of
 // `u-boot doctor` that runDoctor actually consumes today: --strict
 // (LH-FA-DIAG-003) plus --quiet (LH-FA-CLI-005, the rendered report
-// keeps only Error items; header and summary line are status output
-// and are omitted, the exit code carries the result) plus --json (LH-NFA-USE-004, switches
+// keeps the Error items and the degradation-fallback items; header
+// and summary line are status output and are omitted, the exit code
+// carries the result) plus --json (LH-NFA-USE-004, switches
 // the renderer to the cliJSONEnvelope shape). The persistent
 // --verbose / --debug flags exist on the root command per
 // LH-FA-CLI-005 and are load-bearing at the LOGGER level since
@@ -76,7 +78,7 @@ Default checks (LH-FA-DIAG-002):
 
 Examples:
   u-boot doctor                  # full report on stdout
-  u-boot doctor --quiet          # errors only
+  u-boot doctor --quiet          # errors and degradation fallbacks only
   u-boot doctor --strict         # warn → exit 11 (CI-strict mode)`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -128,10 +130,29 @@ func runDoctor(
 	// fachlich fail-grade ist. Spec-konformer Exit-Code 11 hat
 	// Vorrang — User-Pipe-Konsumenten sehen das fachliche Ergebnis,
 	// nicht den Pipe-Status (Review M2-Findings adressiert).
-	if resp.Report.HasErrors() || (flags.Strict && resp.Report.HasWarnings()) {
+	if resp.Report.HasErrors() {
 		return ErrDoctorFailures
 	}
+	if flags.Strict && resp.Report.HasWarnings() {
+		return strictWarnFailure(resp.Report)
+	}
 	return writeErr
+}
+
+// strictWarnFailure wraps [ErrDoctorFailures] (exit 11) with the cause
+// of a `--strict` failure that has no Error item: the number and IDs
+// of the warn items. `--quiet` hides those items from stdout, so the
+// message on stderr is the only place a script author finds the
+// reason (LH-FA-DIAG-003).
+func strictWarnFailure(report domain.DiagnosticReport) error {
+	var ids []string
+	for _, item := range report.SortedByIssuesFirst() {
+		if item.Severity == domain.SeverityWarn {
+			ids = append(ids, item.ID)
+		}
+	}
+	return fmt.Errorf("%w: --strict treats %d warning item(s) as failures (%s)",
+		ErrDoctorFailures, len(ids), strings.Join(ids, ", "))
 }
 
 // writeDoctorJSON renders the doctor result as a LH-NFA-USE-004
@@ -218,14 +239,15 @@ func doctorExitCode(report domain.DiagnosticReport, strict bool) int {
 // writeDoctorReport renders the diagnostic report on out. Items are
 // sorted Errors-first then Warns then OKs (via
 // [domain.DiagnosticReport.SortedByIssuesFirst]). With `quiet` only
-// Error items are written: no header, no Warn/OK items, no summary
-// line (LH-FA-CLI-005). Hints render only on warn/error items (OK
-// items rarely carry a hint and listing one would clutter the
-// report).
+// Error items and degradation-fallback items
+// ([domain.Diagnostic.DegradationFallback], LH-FA-CLI-005 exception
+// 2) are written: no header, no other Warn/OK items, no summary line.
+// Hints render only on warn/error items (OK items rarely carry a hint
+// and listing one would clutter the report).
 func writeDoctorReport(out io.Writer, baseDir string, report domain.DiagnosticReport, quiet bool) {
 	if quiet {
 		for _, item := range report.SortedByIssuesFirst() {
-			if item.Severity == domain.SeverityError {
+			if item.Severity == domain.SeverityError || item.DegradationFallback {
 				writeDoctorItem(out, item)
 			}
 		}

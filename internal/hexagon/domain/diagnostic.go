@@ -77,6 +77,15 @@ type Diagnostic struct {
 	// is available. Sentence-case, ends with a period. Mostly set
 	// for Warn / Error; OK diagnostics rarely carry a hint.
 	Hint string
+
+	// DegradationFallback is true for a diagnostic that discloses a
+	// degradation fallback of LH-FA-DEV-007 (`vfs` storage, container
+	// without daemon, no egress restriction). `u-boot doctor --quiet`
+	// shows such an item next to the Error items (LH-FA-CLI-005,
+	// exception 2). It is a property of the item, not of its ID: one
+	// ID also carries diagnostics that are no fallback. It does not
+	// appear in the JSON wire form.
+	DegradationFallback bool
 }
 
 // DiagnosticReport is the aggregate of all [Diagnostic] entries a

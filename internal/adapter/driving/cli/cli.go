@@ -86,9 +86,11 @@ type App struct {
 
 	// quiet, verbose, debug are bound to the LH-FA-CLI-005 root
 	// PersistentFlags. --quiet additionally restricts the doctor
-	// render to SeverityError items, suppresses the up status
-	// table / down success message and the non-relaxation warning
-	// lines. --verbose and --debug both raise the logger level to
+	// render to SeverityError and degradation-fallback items and
+	// suppresses the success/summary output of the modifying
+	// subcommands and every warning line that is neither a security
+	// relaxation nor a degradation fallback. --verbose and --debug
+	// both raise the logger level to
 	// Debug via buildRootCommand's PersistentPreRunE; --quiet sets
 	// it to Error.
 	quiet   bool

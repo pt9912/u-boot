@@ -109,7 +109,10 @@ func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) d
 		msg = "/dev/fuse is not available on this host and devcontainer.sandbox.onUnavailable is `fail` (LH-FA-DEV-007)."
 	}
 	return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: sev, Message: msg,
-		Hint: "Load the fuse module (`modprobe fuse`) or set `devcontainer.sandbox.onUnavailable` to `warn`."}
+		Hint: "Load the fuse module (`modprobe fuse`) or set `devcontainer.sandbox.onUnavailable` to `warn`.",
+		// Only the warn variant is a fallback; under `fail` the item
+		// is an error and `--quiet` shows it as such.
+		DegradationFallback: sev == domain.SeverityWarn}
 }
 
 // checkSandboxCredentials implements LH-FA-DEV-009 (warn only). It is
