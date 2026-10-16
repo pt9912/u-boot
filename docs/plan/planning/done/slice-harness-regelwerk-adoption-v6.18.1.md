@@ -94,7 +94,7 @@ BEO-Register: u-boot führt keines; die Kennungsänderung ist ohne Nachlauf.
 - Keine Produktcode-Änderung.
 - Keine Übernahme der Werkzeug-Schicht aus dem `ai-harness-init`-Referenzrepo
   (`harness/mk/`, `tools/harness/*.sh`, `.githooks/`, `.claude/`):
-  [`slice-harness-werkzeug-schicht-ai-harness-init`](../in-progress/slice-harness-werkzeug-schicht-ai-harness-init.md).
+  [`slice-harness-werkzeug-schicht-ai-harness-init`](../done/slice-harness-werkzeug-schicht-ai-harness-init.md).
 
 ## 7. Closure-Notiz
 

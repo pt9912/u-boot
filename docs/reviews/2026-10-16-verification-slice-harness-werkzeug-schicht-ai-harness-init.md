@@ -1,7 +1,7 @@
 # Verification Evidence — Slice Werkzeug-Schicht ai-harness-init
 
 Rolle: Verifier (frischer Kontext), Datum 2026-10-16, Range `28cb8fe..2fd8c65`.
-Gegenstand: [`Slice`](../plan/planning/in-progress/slice-harness-werkzeug-schicht-ai-harness-init.md),
+Gegenstand: [`Slice`](../plan/planning/done/slice-harness-werkzeug-schicht-ai-harness-init.md),
 Review: [`Report`](2026-10-16-slice-harness-werkzeug-schicht-ai-harness-init.md),
 Adaption [`MR-011`](../../harness/conventions/MR-011-werkzeug-fragmente-repo-gefuehrt.md).
 
