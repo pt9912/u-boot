@@ -44,3 +44,4 @@ Sorgfalt vor Tempo. Sonst gilt: Wo eine Abkürzung trägt, nimm sie und sag in e
 **Repo-Bezug.** Rollenvertrag und Übergaben: `harness/roles.md`. Sensors neben `make gates`:
 `make test-docker` (Integrationstests, wenn ein Docker-Pfad berührt ist) und `make verify-depguard`
 (wenn Importregeln berührt sind). Ein nicht gelaufener Sensor wird im Bericht begründet.
+Die Erfassung (`make span-report`) ordnet einen Lauf seiner Rolle zu, wenn der Agenten-Typ eine der sechs Rollen `planner`, `architect`, `implementer`, `reviewer`, `verifier`, `validator` nennt; den Typ nicht umbenennen.

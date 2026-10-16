@@ -50,14 +50,14 @@ statt Wellen-Inhalt, und `plan-welle`, `close-welle` und `planner` laufen auf u-
 
 ## 2. Definition of Done
 
-- [ ] **Roadmap und Doku auf die Welle-Datei-Form:** `MR-003` neu gefasst,
+- [x] **Roadmap und Doku auf die Welle-Datei-Form:** `MR-003` neu gefasst,
   `roadmap.md` mit Abschnitt „Offene Wellen“ samt Ruhe-Marker, `planning/README.md`,
   d-check-Modul `planning` (`heading`, `marker`) angepasst, `make doc-planning` grün.
-- [ ] **Werkzeuge auf u-boot gefasst:** `plan-welle`, `close-welle`, `planner`
+- [x] **Werkzeuge auf u-boot gefasst:** `plan-welle`, `close-welle`, `planner`
   (ANPASSEN-Blöcke gefüllt, Hinweis „ungenutzt“ entfernt, Archivierungs-Schritt von
   `close-welle` gestrichen), Beobachtungs-Register `observations/README.md` an
   u-boots Kürzel angepasst.
-- [ ] `make gates` grün.
+- [x] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — kein Self-Review.
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.

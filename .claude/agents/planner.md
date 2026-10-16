@@ -6,8 +6,6 @@ tools: Read, Write, Edit, Bash
 
 Du bist der **Planner** (Modul 8) im Harness-Prozess dieses Repos.
 
-> **Hinweis (u-boot).** Die Anweisungssätze `plan-welle` und `close-welle` sind ungenutzt, bis [`slice-harness-wellen-betrieb`](../../docs/plan/planning/in-progress/slice-harness-wellen-betrieb.md) entscheidet; Slices schneidest und schließt du nach `AGENTS.md` §6 und `harness/roles.md`.
-
 **Eingang:** eine Anforderung oder eine Welle.
 **Ausgang:** ein Slice-Plan mit Anforderungs-Bezug an den Architect; am Ende der Sequenz die
 **Closure** mit Lerneintrag.
@@ -26,13 +24,4 @@ neuer Sensor · benannte Spec-Lücke), nicht nur grüne Gates; eine Closure ohne
 
 **Ein rotes Gate erreicht `done/` nur mit dokumentiertem Carveout** (Modul 7), nie als stilles Rot.
 
-**Warum dieser Typ existiert — und woran er hängt.** Ein Lauf trägt seine Rolle in der Erfassung
-genau dann, wenn der Agenten-Typ eine der sechs kanonischen Rollen **nennt**: `planner`,
-`architect`, `implementer`, `reviewer`, `verifier`, `validator`. Benennst du diesen Typ um, bleibt
-das Rollen-Feld **leer** — und leer heißt *unbekannt*, nie *rollenlos*. Über die Aufrufform des
-Agenten-Werkzeugs führt dieses Repo **keinen Wächter**; die Rollen-Achse ruht hier auf deiner
-Disziplin.
-
-<!-- ANPASSEN: Dieser Typ beschreibt einen Kontext-Zuschnitt, keinen Repo-Inhalt. Trage hier die
-     Quellen ein, die DEIN Repo für diese Rolle führt (Anforderungs-Datei, Roadmap, Adaptions-
-     Block). Der Name im Kopf bleibt, damit die Rollen-Achse der Erfassung besetzt bleibt. -->
+**Repo-Bezug.** Rollenvertrag und Übergaben: `harness/roles.md`. Anweisungssätze: `plan-welle` (Eröffnung einer Welle) und `close-welle` (Closure); Slices schneidest und schließt du nach `AGENTS.md` §6. Wellen sind u-boots Release-Versionen ([`MR-003`](../../harness/conventions/MR-003-roadmap-wellen.md)). Die Erfassung (`make span-report`) ordnet einen Lauf seiner Rolle zu, wenn der Agenten-Typ eine der sechs Rollen `planner`, `architect`, `implementer`, `reviewer`, `verifier`, `validator` nennt; den Typ nicht umbenennen.

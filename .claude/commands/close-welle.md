@@ -1,36 +1,36 @@
 # Welle schließen (Harness)
 
-> **Hinweis (u-boot).** Ungenutzt, bis [`slice-harness-wellen-betrieb`](../../docs/plan/planning/in-progress/slice-harness-wellen-betrieb.md) über die Welle-Dateien entscheidet; u-boots Wellen sind Roadmap-Zeilen ([`MR-003`](../../harness/conventions/MR-003-roadmap-wellen.md)).
-
 Argument: $ARGUMENTS
 
 Dieser Command führt die **Planner**-Rolle für die **Wellen-Closure** (Modul 6). Eine Welle schließt
 **nicht** durch einen einzelnen Slice-Übergang, sondern durch einen geordneten Ablauf, der alle ihre
-Slices bündelt — **sechs Schritte, jeder hinterlässt einen Beleg, keiner ein Datum.** Erst wenn alle
-sechs Belege vorliegen, ist die Welle *auditierbar* geschlossen.
+Slices bündelt — **fünf Schritte, jeder hinterlässt einen Beleg, keiner ein Datum.** Erst wenn alle
+fünf Belege vorliegen, ist die Welle *auditierbar* geschlossen.
 
-**Die Welle-Plan-Datei wandert bei Closure per `git mv` nach `done/`** (neben ihre Results-Notiz) —
-der Zustand ist die **Verzeichnis-Position, kein `Status:`-Feld** (wie beim Slice). Die Closure
-erzeugt **zusätzlich** eine *separate* Results-Notiz (`done/<welle-id>-results.md`).
+**Die Welle-Plan-Datei wandert bei Closure per `git mv` nach `done/`** — der Zustand ist die
+**Verzeichnis-Position, kein `Status:`-Feld** (wie beim Slice). Die Closure-Notiz steht in §7 der
+Welle-Datei; der `done/`-Release-Cut-Slice ist die Detailquelle. Eine separate Results-Datei gibt es nicht.
 
 Kanonische Quellen (vendored Regelwerk, `.harness/baseline/<tag>/regelwerk/`): Modul 6 (Roadmap /
 Wellen-Closure), Modul 7 (Carveouts), Modul 5 (Lifecycle). Bei Konflikt gilt der Kurs.
 
-## Repo-lokale Adaptionen, die du beachten MUSST (ANPASSEN an dein Repo)
-
-<!-- ANPASSEN: die Adaptionen DEINES Repos gegenüber der Baseline (dein
-     `harness/conventions.md`, „MR-Block"). Die closure-relevanten aus der
-     emittierten Schicht stehen unten; ergänze/streiche nach deinem Repo. -->
+## Repo-lokale Adaptionen, die du beachten MUSST
 
 - **Docker-only + Gate-Nachweis/Stop-Hook.** Nur `make`-Targets; `make gates` endet mit
   `record-gates`. Ein neuer Commit mit Inhalt, den kein grüner Lauf deckt, lässt den Stop-Hook rot
   (streng auch ohne Commit, wenn `.harness/stop-gate-streng` liegt oder `STOP_GATE_STRENG=1` gesetzt
   ist) → nach dem Wave-Self-Close-Commit `make gates` grün bestätigen.
 - **Strenges Doc-Gate.** `LH-`/`ADR-`/`MR-`-Kennungen in gescannten `.md` als klickbare Anker-Links —
-  die Results-Notiz und die Roadmap werden gescannt.
-- **Neue Artefakte per `cp` aus den vendored Templates** — die Results-Notiz entsteht per `cp` aus
-  `.harness/baseline/<tag>/templates/docs/plan/planning/welle-results.template.md` und wird danach
-  ausgefüllt; die Welle-Datei bleibt Quelle der Plan-Struktur für alles, was das Template offenlässt.
+  die Welle-Datei und die Roadmap werden gescannt.
+- **u-boots Wellen sind die Release-Versionen** ([`MR-003`](../../harness/conventions/MR-003-roadmap-wellen.md)):
+  Eine Welle bekommt ihre Datei `welle-<kebab-slug>.md` flach unter `docs/plan/planning/` erst bei der
+  **Eröffnung**; geplante Wellen stehen nur in der Roadmap unter *Nächste Wellen*. Es gibt **keine**
+  `welle-<Kennung>-results.md` — die Closure-Notiz steht in §7 der Welle-Datei und verweist auf den
+  `done/`-Release-Cut-Slice als Detailquelle — und **keine Archivierung** (`make archive-welle` bleibt ungenutzt).
+- **Beobachtungs-Register:** `docs/plan/planning/observations/`, Kennung `BEO-<KÜRZEL>/<slug>`; das
+  Kürzel steht in der Spalte *Kürzel* der Modus-Deklaration in `harness/conventions.md`.
+- **Roadmap-Marker:** `.d-check.yml` (`planning`) erwartet im Block „Offene Wellen“ den Ruhe-Marker genau
+  dann, wenn `in-progress/` keinen Slice trägt; `make doc-planning` prüft das.
 - **Commit via Message-Datei** (`git commit -F <datei>`).
 
 ## Vorbedingung: Kontext lesen
@@ -39,7 +39,7 @@ Wellen-Closure), Modul 7 (Carveouts), Modul 5 (Lifecycle). Bei Konflikt gilt der
    **Modul 6** on-demand und die Welle-Plan-Datei (`docs/plan/planning/<welle-id>.md`, v. a. §3
    Closure-Kriterien) lesen.
 
-## Die sechs Schritte (Modul 6 — jeder mit Beleg, keiner mit Datum)
+## Die fünf Schritte (Modul 6 — jeder mit Beleg, keiner mit Datum)
 
 2. **Schritt 1 — Trigger prüfen.** Alle Slices der Welle liegen in `done/`; `make gates` grün; die
    welle-spezifischen Closure-Kriterien aus der Welle-Datei §3 sind erfüllt (z. B. ein benannter Smoke).
@@ -55,8 +55,8 @@ Wellen-Closure), Modul 7 (Carveouts), Modul 5 (Lifecycle). Bei Konflikt gilt der
    deren Re-Evaluierungs-Bedingung längst eintrat. Keine fälligen Trigger → je Klasse eine belegte
    „0 offen"-Feststellung, kein Auslassen. **Ein Trigger ohne Wächter ist eine Absichtserklärung mit
    Verfallsdatum.**
-4. **Schritt 3 — Closure-Notiz `done/<welle-id>-results.md` schreiben** (per `cp` aus dem vendored
-   `welle-results.template.md`, dann füllen). Hält fest, *was gelernt wurde*: geliefert · was
+4. **Schritt 3 — Closure-Notiz in §7 der Welle-Datei schreiben** (Zeiger auf den `done/`-Release-Cut-Slice als
+   Detailquelle; Steering-Loop-Einträge und Register-Zeiger stehen in dessen Closure-Notiz). Hält fest, *was gelernt wurde*: geliefert · was
    funktionierte · was anders lief · **Steering-Loop-Einträge** (geschärfte Regel / neuer Sensor /
    benannte Spec-Lücke) · Zeiger aufs Beobachtungs-Register · Folge-Slices · Verifikation (die Belege
    aus Schritt 1). **Ohne Lerneintrag ist die Welle nicht „fertig", nur „weg".**
@@ -67,10 +67,10 @@ Wellen-Closure), Modul 7 (Carveouts), Modul 5 (Lifecycle). Bei Konflikt gilt der
    *gestrichen* trägt dieselbe `state.md`, mit Begründung — still löschen macht die Beobachtung
    ununterscheidbar von einer, die es nie gab.
    Erreicht kein Eintrag 3×, ist *„kein Eintrag über der Schwelle"* die Feststellung, die in die
-   Results-Notiz gehört — Auslassen ist keine Antwort. Was **unter** 3× steht, liest diese Closure
+   Closure-Notiz gehört — Auslassen ist keine Antwort. Was **unter** 3× steht, liest diese Closure
    **nicht**; dafür ist der Sichtungs-Schritt der Slice-Planung zuständig (`/plan-welle`).
    **Zugleich gehört die Welle-Plan-Datei per `git mv` nach `done/`** — wegen der repo-lokalen Hard
-   Rule 3.3 (Move ≠ Inhalt) als **eigener reiner Move-Commit** (s. Schritt 5). Der Move bricht die
+   Rule 3.3 (Move ≠ Inhalt) als **eigener reiner Move-Commit** (s. Schritt 4). Der Move bricht die
    Inbound-Links (Roadmap + die Welle-Verweise der Slices) **und** die eigenen `../`-Links der Datei
    (jetzt eine Ebene tiefer) → im selben Zug reconcilen, bis `docs-check` grün ist.
    **Zum Schluss die drei Paarungen prüfen** — erst jetzt, weil sie die gerade entstandenen Einträge
@@ -80,51 +80,14 @@ Wellen-Closure), Modul 7 (Carveouts), Modul 5 (Lifecycle). Bei Konflikt gilt der
    (c) *Register* — jede genannte Kennung `BEO-<KUERZEL>/<slug>` existiert als Verzeichnis im
    Register, und jedes Verzeichnis trägt ein nicht leeres `evidence/`. Rot heißt in allen drei
    Fällen: etwas wurde versprochen und nicht angelegt.
-5. **Schritt 4 — Zeitdokumente der Welle archivieren.** Ihre Slice-Dateien, ihr Plan und die
-   Review-Reports dieser Slices wandern nach `done/<welle-id>/archiv.zip`; an ihrer Stelle bleiben
-   gekürzte Stubs — per `cp` aus den vendored Vorlagen `archiv-stub-slice.template.md` bzw.
-   `archiv-stub-welle.template.md`; ein Stub trägt keine Abschnittsüberschriften, Review-Reports
-   bekommen keinen. Die **Ergebnisnotiz bleibt vollständig und flach**. Eingesammelt wird nach der
-   Welle, nicht nach dem Verzeichnis: die Slices, deren `Welle:` diese Welle nennt, **und** die
-   wellenlosen seit der letzten Closure; Slices einer noch offenen Welle bleiben liegen.
-   **Die Operation gehört in ein Werkzeug, nicht in Handarbeit** — dass das Archiv vollständig ist,
-   bezeugt allein der Archivierungs-Commit, und der Move bricht die Verweise auf die bewegten
-   Dateien. Liegt der Träger im Repo, führt `make archive-welle WELLE=<welle-id>` ihn; fehlt er,
-   sagt das Kommando das selbst.
-   **Gibt es noch kein `done/*/archiv.zip`, sperrt die Vorprüfung mit `[untergrenze]`:** erst
-   `make archive-welle WELLE=altbestand KENNUNG=<K>` (die wellenlosen Slices, gesammelt unter
-   `done/altbestand/`), dann die erste Wellen-Archivierung. `KENNUNG` ist Pflicht: eine Kennung
-   deines Repos, die beide Commits des Laufs tragen und die dein `commit-msg`-Träger annimmt —
-   ohne sie bricht der Lauf ab, bevor er etwas bewegt. Ein Träger ohne Schreibpfad weist den
-   Schlüssel `altbestand` mit `[kein-schreib-pfad]` ab; dann bleibt der Altbestand, wo er ist, und
-   die Sperre für die Wellen-Archivierung besteht fort — ohne `done/*/archiv.zip` gibt es keinen
-   Weg an ihr vorbei.
-   **Die Grenze zieht die Commit-Abstammung.** Liegt eine Ergebnisnotiz in `done/`, nimmt ein Lauf
-   nur die wellenlosen Slices, deren Add-Commit Vorfahr des Add-Commits einer Ergebnisnotiz ist
-   oder gleich: `altbestand` die vor irgendeiner Closure, `<welle-id>` die, deren früheste Closure
-   in der Abstammung diese Welle ist. Später geschlossene bleiben flach liegen; die Vorprüfung
-   zählt sie unter *„bleibt liegen (nach der Grenze)"*. Ein flacher Klon sperrt mit
-   `[flacher-klon]` (`git fetch --unshallow` holt die Historie), ein Pfad ohne Add-Commit mit
-   `[add-commit]`.
-   <!-- ANPASSEN: der Weg zum Träger ist die repo-spezifische Stelle; nenne hier den deines Repos.
-        Der Ziel-NAME `archive-welle` ist es nicht. Er kommt aus einem tool-eigenen Fragment, das
-        jeder Bootstrap kanonisch neu schreibt — ein umbenanntes Ziel hält darum nicht, und diese
-        Anleitung bleibt auf einem Namen stehen, den `make` nach dem nächsten Lauf nicht mehr kennt.
-        Der Aufruf endet dann laut statt still; er endet nicht erfolgreich. -->
-   Hat dein Repo das Werkzeug nicht, ist die Bedingung nicht eingetreten; **das** gehört als
-   Feststellung in die Results-Notiz, nicht in einen Handlauf. Wellen, die vor der Einführung
-   schlossen, müssen nicht nachgerüstet werden.
-   **Vor der ersten Archivierung den Geltungsbereich deiner Sensoren prüfen:** was auf `done/*.md`
-   keilt, sieht die Stubs eine Ebene tiefer nicht mehr und bleibt grün, ohne noch etwas zu prüfen.
-   Prüfe ebenso, ob die Link-/ID-Pflichten deines Doku-Gates im Stub gelten — er trägt Kennungen.
-6. **Schritt 5 — Wave-Self-Close-Commit + Move.** Der **Self-Close-Commit** (Inhalt) trägt: die
-   Results-Notiz + die Welle-Datei §7 (Verweis auf die Results-Notiz; **kein `Status:`-Feld** — der
-   Zustand ist die Position) + die Roadmap-Fortschreibung (Schritt 6). **Danach** der reine
+5. **Schritt 4 — Wave-Self-Close-Commit + Move.** Der **Self-Close-Commit** (Inhalt) trägt: die
+   Welle-Datei §7 (Closure-Notiz mit Zeiger auf den Release-Cut-Slice; **kein `Status:`-Feld** — der
+   Zustand ist die Position) + die Roadmap-Fortschreibung (Schritt 5). **Danach** der reine
    **`git mv`-Commit** der Welle-Plan-Datei nach `done/` und der **Link-Reconciliation-Commit** (Schritt 3):
    Hard Rule 3.3 trennt Move und Inhalt, daher mehrere Commits statt des einen Baseline-Self-Close-Commits
    — die Bewegung bleibt beobachtbar (ein zusammenhängender Zug). Commits via `-F`.
-7. **Schritt 6 — Roadmap fortschreiben** (`in-progress/roadmap.md`, im selben Commit): die Welle
-   bekommt ihre Zeile in *Abgeschlossene Wellen* (mit Zeiger auf die Results-Notiz), ihr Zeiger
+6. **Schritt 5 — Roadmap fortschreiben** (`in-progress/roadmap.md`, im selben Commit): die Welle
+   bekommt ihre Zeile in *Abgeschlossene Wellen* (mit Zeiger auf den Release-Cut-Slice), ihr Zeiger
    verlässt *Offene Wellen*. **Befördert wird niemand** — welche Wellen offen sind, sagen die flachen
    Welle-Dateien; die Zeilen unter *Nächste Wellen* bleiben stehen, bis ihre Welle eröffnet wird. Den
    zugehörigen Meilenstein auf *erreicht* setzen, falls die Welle ihn erfüllt; löste ein Trigger eine
@@ -134,9 +97,8 @@ Wellen-Closure), Modul 7 (Carveouts), Modul 5 (Lifecycle). Bei Konflikt gilt der
 ## Abschluss
 
 8. `make gates` grün nach dem Commit bestätigen (nach einem neuen Commit gibt der Stop-Hook erst
-   frei, wenn ein grüner Lauf dessen Inhalt deckt). Erst wenn **alle sechs Belege** vorliegen — Trigger · Carveout-Audit · Results-Notiz ·
-   Archivierung (oder ihre nicht eingetretene Start-Bedingung) · Self-Close-Commit ·
-   fortgeschriebene Roadmap — ist die Welle auditierbar geschlossen.
+   frei, wenn ein grüner Lauf dessen Inhalt deckt). Erst wenn **alle fünf Belege** vorliegen — Trigger · Carveout-Audit · Closure-Notiz ·
+   Self-Close-Commit · fortgeschriebene Roadmap — ist die Welle auditierbar geschlossen.
 
 **Merke (Modul 6):** Datum ist *Output*, nie *Trigger*. Wer die Welle am Kalendertag schließt, kappt
 halbfertige Slices und produziert genau die Auditierbarkeits-Lücke, die der Harness verhindert.

@@ -1,7 +1,5 @@
 # Welle planen (Harness)
 
-> **Hinweis (u-boot).** Ungenutzt, bis [`slice-harness-wellen-betrieb`](../../docs/plan/planning/in-progress/slice-harness-wellen-betrieb.md) über die Welle-Dateien entscheidet; u-boots Wellen sind Roadmap-Zeilen ([`MR-003`](../../harness/conventions/MR-003-roadmap-wellen.md)).
-
 Argument: $ARGUMENTS
 
 Dieser Command führt die **Planner**-Rolle für *eine* Welle (Modul 6 — Roadmap Engineering). Eine
@@ -14,14 +12,19 @@ Welle-Datei; woran gerade gearbeitet wird, sagt das `Welle:`-Feld der Slices in 
 Kanonische Quellen (vendored Regelwerk, `.harness/baseline/<tag>/regelwerk/`): Modul 6 (Roadmap),
 Modul 5 (Planning-Lifecycle), Modul 7 (Carveouts). Bei Konflikt gilt der Kurs.
 
-## Repo-lokale Adaptionen, die du beachten MUSST (ANPASSEN an dein Repo)
-
-<!-- ANPASSEN: die Adaptionen DEINES Repos gegenüber der Baseline (dein
-     `harness/conventions.md`, „MR-Block"). Die planungs-relevanten aus der
-     emittierten Schicht stehen unten; ergänze/streiche nach deinem Repo. -->
+## Repo-lokale Adaptionen, die du beachten MUSST
 
 Lies den Adaptions-Block („MR-Block") in `harness/conventions.md`; die planungs-relevanten:
 
+- **u-boots Wellen sind die Release-Versionen** ([`MR-003`](../../harness/conventions/MR-003-roadmap-wellen.md)):
+  Eine Welle bekommt ihre Datei `welle-<kebab-slug>.md` flach unter `docs/plan/planning/` erst bei der
+  **Eröffnung**; geplante Wellen stehen nur in der Roadmap unter *Nächste Wellen*. Es gibt **keine**
+  `welle-<Kennung>-results.md` — die Closure-Notiz steht in §7 der Welle-Datei und verweist auf den
+  `done/`-Release-Cut-Slice als Detailquelle — und **keine Archivierung** (`make archive-welle` bleibt ungenutzt).
+- **Beobachtungs-Register:** `docs/plan/planning/observations/`, Kennung `BEO-<KÜRZEL>/<slug>`; das
+  Kürzel steht in der Spalte *Kürzel* der Modus-Deklaration in `harness/conventions.md`.
+- **Roadmap-Marker:** `.d-check.yml` (`planning`) erwartet im Block „Offene Wellen“ den Ruhe-Marker genau
+  dann, wenn `in-progress/` keinen Slice trägt; `make doc-planning` prüft das.
 - **Neue Artefakte per `cp` aus den vendored Templates** (`.harness/baseline/<tag>/templates/…`),
   dann **in-place** ausfüllen — **keine handgeschriebenen Kopien und kein Modellieren auf ein
   bestehendes Artefakt.** Ein `cp` gefolgt von vollem Überschreiben (`Write`) ist derselbe Verstoß,
