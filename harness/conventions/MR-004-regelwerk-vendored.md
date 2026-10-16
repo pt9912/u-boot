@@ -17,9 +17,11 @@
 - **Aufloesungs-Trigger:** permanent, solange die Baseline vendored wird.
 - **Bump-Prozedur:** Der `**Stand:**`-Pin ist nur die
   **Skript-Eingabe**, **nicht** vollumfaenglicher Single Source of Truth. Ein
-  Versions-Bump ist als Einheit auszufuehren und fasst mindestens vier Stellen an:
+  Versions-Bump ist als Einheit auszufuehren und fasst mindestens fuenf Stellen an:
   (1) `**Stand:**`-Pin in `conventions.md` §Baseline, (2) Vendor-Pfad `.harness/baseline/<tag>/`
-  (Skript-Lauf), (3) `AGENTS.md`-Pointer, (4) `harness/README.md`-Guides-Zeile.
+  (Skript-Lauf), (3) `AGENTS.md`-Pointer, (4) `harness/README.md`-Guides-Zeile,
+  (5) der Symlink `.claude/rules/grundlagen-traceability.md`, dessen Ziel den Tag im Pfad traegt
+  (`ln -sfn ../../.harness/baseline/<tag>/regelwerk/grundlagen-traceability.md`).
   Ein neuer Kurs-Tag wird ueber die Release-**Liste** erkannt und loest einen
   Review-Bump aus, keinen Auto-Update. Sensor, Exit-Codes, Kadenz und
   Zustaendigkeit stehen im Abschnitt Freshness-Audit unten
@@ -62,7 +64,7 @@ Baseline still.
 - **Zustaendig:** die Rolle, die den jeweiligen Harness-/Baseline-Slice fuehrt.
 - **Auslöser bei Befund:** ein **Review-Bump** - ein eigener Slice, der die
   Aenderungen zwischen den Tags liest und den Bump als Einheit ausfuehrt
-  (`MR-004` Bump-Prozedur: Pin, Vendor-Pfad, `AGENTS.md`, `harness/README.md`).
+  (`MR-004` Bump-Prozedur: Pin, Vendor-Pfad, `AGENTS.md`, `harness/README.md`, Symlink unter `.claude/rules/`).
   **Kein Auto-Update**: Ein Regelwerks-Wechsel kann Adaptionen dieses Ledgers
   ungueltig machen; das ist eine Lese- und Entscheidungsleistung, nichts, was
   ein Skript still tut.
