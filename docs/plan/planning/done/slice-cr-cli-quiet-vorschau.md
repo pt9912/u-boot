@@ -16,7 +16,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — vierter Slice der Welle; ihm gehen
+**Welle:** [`welle-cli-verbosity`](welle-cli-verbosity.md) — vierter Slice der Welle; ihm gehen
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md),
 [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) und
 [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) voraus, ihm folgen
@@ -171,7 +171,7 @@ der Umsetzungs-Slice [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-
 - **Weitere Kollisionen mit älteren Zusagen:** Die Suche (siehe §1) fand keine über CLI-007 und CLI-008 hinaus. — **Ausgang:** entfallen: Suche nach
   `--dry-run`, `--diff`, `Vorschau`, den Kennungen der Dry-Run- und Diff-Anforderung und `--quiet` ausgewertet; der Verifier wiederholt sie vor dem Schließen.
 - **Zwischenstand der Spec:** Bis alle Slices der Welle geschlossen sind, darf die Spezifikation das Verhalten nicht
-  beschreiben. — **Ausgang:** entfallen: die Welle [`welle-cli-verbosity`](../welle-cli-verbosity.md) schließt erst mit dem
+  beschreiben. — **Ausgang:** entfallen: die Welle [`welle-cli-verbosity`](welle-cli-verbosity.md) schließt erst mit dem
   Spezifikations-Eintrag im letzten Slice.
 
 ## 7. Closure-Notiz

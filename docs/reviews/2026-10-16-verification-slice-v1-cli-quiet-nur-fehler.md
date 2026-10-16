@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** [`slice-v1-cli-quiet-nur-fehler`](../plan/planning/done/slice-v1-cli-quiet-nur-fehler.md), Welle [`welle-cli-verbosity`](../plan/planning/welle-cli-verbosity.md). Commits: `c277c47`, `72006d3`, `7a244b9` (Erstlauf); `4c68a86`, `1e35794`, `82af811` (Ausbau); `b31451e`, `2b16cf2` (Review-Fixes). Reviews: [Erstlauf](2026-10-16-slice-v1-cli-quiet-nur-fehler.md) (F-1 bis F-7), [zweiter Lauf](2026-10-16-slice-v1-cli-quiet-nur-fehler-2.md) (0 HIGH, 3 MEDIUM, 3 INFO). Entscheidungen des Projektinhabers vom 2026-10-16 sind als gegeben genommen: (1) `down --quiet` puffert, (2) Vorschau-Frage geht in die Folge-Slices, (3) Ausnahme 2 ist im Betrieb nur für `vfs` im `doctor` erreichbar.
+**Gegenstand:** [`slice-v1-cli-quiet-nur-fehler`](../plan/planning/done/slice-v1-cli-quiet-nur-fehler.md), Welle [`welle-cli-verbosity`](../plan/planning/done/welle-cli-verbosity.md). Commits: `c277c47`, `72006d3`, `7a244b9` (Erstlauf); `4c68a86`, `1e35794`, `82af811` (Ausbau); `b31451e`, `2b16cf2` (Review-Fixes). Reviews: [Erstlauf](2026-10-16-slice-v1-cli-quiet-nur-fehler.md) (F-1 bis F-7), [zweiter Lauf](2026-10-16-slice-v1-cli-quiet-nur-fehler-2.md) (0 HIGH, 3 MEDIUM, 3 INFO). Entscheidungen des Projektinhabers vom 2026-10-16 sind als gegeben genommen: (1) `down --quiet` puffert, (2) Vorschau-Frage geht in die Folge-Slices, (3) Ausnahme 2 ist im Betrieb nur für `vfs` im `doctor` erreichbar.
 
 ## Verification Evidence
 

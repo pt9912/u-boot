@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** [`slice-v1-cli-quiet-vorschau`](../plan/planning/done/slice-v1-cli-quiet-vorschau.md), Welle [`welle-cli-verbosity`](../plan/planning/welle-cli-verbosity.md). Commits: `acefc1d` (Code und Tests), `27c6de5` (Handbuch, CHANGELOG), `7ee6c76` (Review-Fixes F-1/F-2 und Report). Review: [Report](2026-10-16-slice-v1-cli-quiet-vorschau.md) (0 HIGH, 0 MEDIUM, 1 LOW, 3 INFO).
+**Gegenstand:** [`slice-v1-cli-quiet-vorschau`](../plan/planning/done/slice-v1-cli-quiet-vorschau.md), Welle [`welle-cli-verbosity`](../plan/planning/done/welle-cli-verbosity.md). Commits: `acefc1d` (Code und Tests), `27c6de5` (Handbuch, CHANGELOG), `7ee6c76` (Review-Fixes F-1/F-2 und Report). Review: [Report](2026-10-16-slice-v1-cli-quiet-vorschau.md) (0 HIGH, 0 MEDIUM, 1 LOW, 3 INFO).
 
 ## Verification Evidence
 

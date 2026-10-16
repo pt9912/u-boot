@@ -10,7 +10,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
 **Welle:** ohne Welle — kein Release-Bezug, keine Closure-Bedingung, die von der DoD dieses Slice verschieden wäre.
-Herkunft: [`welle-cli-verbosity`](../welle-cli-verbosity.md), Slice
+Herkunft: [`welle-cli-verbosity`](../done/welle-cli-verbosity.md), Slice
 [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) (zweiter Review F-4, Verifier-Auflage 3).
 
 **Bezug:** [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Absatz Degradation: jeder Fallback wird ausgewiesen),

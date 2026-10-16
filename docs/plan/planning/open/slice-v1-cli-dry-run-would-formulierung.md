@@ -11,7 +11,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Welle:** ohne Welle — keine Closure-Bedingung, die von der DoD dieses Slice verschieden ist, und kein Release-Bezug.
 Herkunft: Review-Finding F-3 im [Report](../../../reviews/2026-10-16-slice-v1-cli-quiet-vorschau.md) des Slice
-[`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md) aus der Welle [`welle-cli-verbosity`](../welle-cli-verbosity.md).
+[`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md) aus der Welle [`welle-cli-verbosity`](../done/welle-cli-verbosity.md).
 
 **Bezug:** [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Dry-Run zeigt, was geschehen würde),
 [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) (Diff als Vorschau).

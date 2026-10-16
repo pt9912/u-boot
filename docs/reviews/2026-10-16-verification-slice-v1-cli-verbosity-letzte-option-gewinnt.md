@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../plan/planning/done/slice-v1-cli-verbosity-letzte-option-gewinnt.md), letzter Slice der Welle [`welle-cli-verbosity`](../plan/planning/welle-cli-verbosity.md). Commits: `65b1fa6` (Code und Tests), `c56d134` (Handbuch, CHANGELOG), `0bfe1fa` (`SPEC-043`), `4260372` (Review-Fixes F-1/F-2 und Report). Review: [Report](2026-10-16-slice-v1-cli-verbosity-letzte-option-gewinnt.md) (1 HIGH, 0 MEDIUM, 1 LOW, 2 INFO; HIGH und LOW behoben). <!-- d-check:ignore (Commit-Hashes und SPEC-Kennung als Zitat) -->
+**Gegenstand:** [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../plan/planning/done/slice-v1-cli-verbosity-letzte-option-gewinnt.md), letzter Slice der Welle [`welle-cli-verbosity`](../plan/planning/done/welle-cli-verbosity.md). Commits: `65b1fa6` (Code und Tests), `c56d134` (Handbuch, CHANGELOG), `0bfe1fa` (`SPEC-043`), `4260372` (Review-Fixes F-1/F-2 und Report). Review: [Report](2026-10-16-slice-v1-cli-verbosity-letzte-option-gewinnt.md) (1 HIGH, 0 MEDIUM, 1 LOW, 2 INFO; HIGH und LOW behoben). <!-- d-check:ignore (Commit-Hashes und SPEC-Kennung als Zitat) -->
 
 ## Verification Evidence
 

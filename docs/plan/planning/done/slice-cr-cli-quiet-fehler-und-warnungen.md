@@ -13,7 +13,7 @@
 Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`.
 
-**Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — erster Slice der Welle; ihm folgen
+**Welle:** [`welle-cli-verbosity`](welle-cli-verbosity.md) — erster Slice der Welle; ihm folgen
 [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) und
 [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
@@ -188,7 +188,7 @@ der Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quie
   im Code ab (die Kennung eines Hinweises genügt dafür nicht, weil [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) auch „has no effect" trägt).
 - **Zwischenstand der Spec:** Bis alle drei Slices der Welle geschlossen sind,
   darf die Spezifikation das Verhalten nicht beschreiben. — **Ausgang:**
-  entfallen: die Welle [`welle-cli-verbosity`](../welle-cli-verbosity.md) schließt erst mit dem Spezifikations-Eintrag im
+  entfallen: die Welle [`welle-cli-verbosity`](welle-cli-verbosity.md) schließt erst mit dem Spezifikations-Eintrag im
   letzten Slice.
 
 ## 7. Closure-Notiz

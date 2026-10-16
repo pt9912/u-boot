@@ -14,7 +14,7 @@
 Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`.
 
-**Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — zweiter Slice der Welle; ihm geht
+**Welle:** [`welle-cli-verbosity`](welle-cli-verbosity.md) — zweiter Slice der Welle; ihm geht
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) voraus, ihm folgen
 [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) und
 [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
@@ -185,7 +185,7 @@ der Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quie
   Ausweisung „in der Befehlsausgabe und in `u-boot doctor`“; was u-boot selbst ausgibt, regelt der Code-Slice, die Skripte kennen
   `--quiet` nicht.
 - **Zwischenstand der Spec:** Bis alle Slices der Welle geschlossen sind, darf die Spezifikation das Verhalten nicht
-  beschreiben. — **Ausgang:** entfallen: die Welle [`welle-cli-verbosity`](../welle-cli-verbosity.md) schließt erst mit dem
+  beschreiben. — **Ausgang:** entfallen: die Welle [`welle-cli-verbosity`](welle-cli-verbosity.md) schließt erst mit dem
   Spezifikations-Eintrag im letzten Slice.
 
 ## 7. Closure-Notiz

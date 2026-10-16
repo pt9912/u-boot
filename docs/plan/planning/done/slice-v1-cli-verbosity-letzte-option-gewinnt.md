@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — letzter Slice der Welle; folgt auf
+**Welle:** [`welle-cli-verbosity`](welle-cli-verbosity.md) — letzter Slice der Welle; folgt auf
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md),
 [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md),
 [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md),
@@ -151,7 +151,7 @@ Steering-Loop-Lerneintrag geschrieben (§7).
   [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) und
   [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md) beschreiben. — **Ausgang:** entfallen: der
   Spezifikations-Eintrag liegt in diesem Slice, dem letzten der Welle
-  [`welle-cli-verbosity`](../welle-cli-verbosity.md).
+  [`welle-cli-verbosity`](welle-cli-verbosity.md).
 
 ## 7. Closure-Notiz
 

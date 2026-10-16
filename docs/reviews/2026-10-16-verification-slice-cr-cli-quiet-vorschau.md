@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der CR richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** CR-Slice [`slice-cr-cli-quiet-vorschau`](../plan/planning/done/slice-cr-cli-quiet-vorschau.md) (Delivery `49f459a`, Review-Fix `d7c2e3a`), Welle [`welle-cli-verbosity`](../plan/planning/welle-cli-verbosity.md). Maßstab: Slice §1 (CR-Kern, Abnahmekriterien, Historie-Zeile, Nicht-Ziele), §2 (DoD), §3, §6. Review-Report: [`2026-10-16-slice-cr-cli-quiet-vorschau.md`](2026-10-16-slice-cr-cli-quiet-vorschau.md).
+**Gegenstand:** CR-Slice [`slice-cr-cli-quiet-vorschau`](../plan/planning/done/slice-cr-cli-quiet-vorschau.md) (Delivery `49f459a`, Review-Fix `d7c2e3a`), Welle [`welle-cli-verbosity`](../plan/planning/done/welle-cli-verbosity.md). Maßstab: Slice §1 (CR-Kern, Abnahmekriterien, Historie-Zeile, Nicht-Ziele), §2 (DoD), §3, §6. Review-Report: [`2026-10-16-slice-cr-cli-quiet-vorschau.md`](2026-10-16-slice-cr-cli-quiet-vorschau.md).
 
 ## Verification Evidence
 

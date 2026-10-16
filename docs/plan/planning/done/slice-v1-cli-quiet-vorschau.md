@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — fünfter Slice der Welle; folgt auf
+**Welle:** [`welle-cli-verbosity`](welle-cli-verbosity.md) — fünfter Slice der Welle; folgt auf
 [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md) (der Vorschau-Satz steht erst mit Lastenheft 0.10.0 im Vertrag) und auf
 [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) (berührt dieselben Quiet-Zweige); ihm folgt
 [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
