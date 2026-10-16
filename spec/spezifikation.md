@@ -559,6 +559,33 @@ Verfeinert [`LH-FA-CLI-006`](lastenheft.md#lh-fa-cli-006--exit-codes) (Trennung 
 - **Fire-and-forget:** Nach `up` im Detach-Modus fragt der Adapter den Status nicht ab; das Warten und jede Statusabfrage gehören allein dem Aufrufer ([`SPEC-036`](#spec-036--stabilisierung-von-u-boot-up-takt-zustandsklassen-und-entscheidungsmatrix)).
 - **Netzprobe:** Die TCP-Probe läuft mit der übergebenen Frist und dem Kontext; Abbruch oder Fristablauf des Kontexts sind am Fehler erkennbar (`context.Canceled`, `context.DeadlineExceeded`).
 
+### SPEC-043 — Verbosity: Pegelabbildung, Rangfolge und Wirkung von `--quiet`
+
+Verfeinert [`LH-FA-CLI-005`](lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Stufen, Wirkung von `--quiet`, Mehrfachangabe) und berührt [`LH-FA-CLI-007`](lastenheft.md#lh-fa-cli-007--dry-run) (Vorschau), [`LH-FA-DEV-006`](lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) und [`LH-FA-DEV-008`](lastenheft.md#lh-fa-dev-008--egress-restriktion) (Ausweisungen), [`LH-NFA-PERF-002`](lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker) (Fortschritt von `up`) sowie [`LH-FA-INIT-005`](lastenheft.md#lh-fa-init-005--überschreibschutz) und [`LH-FA-CLI-005A`](lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) (Pfad-Zusammenfassung bei `--force`).
+
+**Pegelabbildung** (Log-Pegel des Loggers, der nach dem Parsen der Optionen und vor der Ausführung des Subkommandos gesetzt wird):
+
+| Gewählte Verbosity | Log-Pegel |
+|---|---|
+| `--quiet` | Fehler (`slog.LevelError`) |
+| keine Option | Info (`slog.LevelInfo`) |
+| `--verbose` | Debug (`slog.LevelDebug`) |
+| `--debug` | Debug (`slog.LevelDebug`) |
+
+`--verbose` und `--debug` wirken auf den Log-Pegel gleich; eine eigene Stufe zwischen Info und Debug gibt es nicht. Eine Quelle für den Pegel außerhalb dieser drei Optionen (Umgebungsvariable, Konfiguration) gibt es nicht.
+
+**Rangfolge:** Bei mehreren Optionen gewinnt die zuletzt auf der Kommandozeile angegebene, unabhängig davon, ob sie vor oder nach dem Subkommando steht: `--quiet --verbose` ist `--verbose`, `--verbose --quiet` ist `--quiet`, `--quiet --verbose --quiet` ist `--quiet`. Eine Mehrfachangabe wird weder abgewiesen noch verändert sie den Exit-Code ([`LH-FA-CLI-006`](lastenheft.md#lh-fa-cli-006--exit-codes)). Die drei Optionen teilen sich einen einzigen Zustand, den jede Angabe überschreibt; es gibt keine feste Rangfolge zwischen ihnen. `--quiet` gilt für die Ausgabe-Filter genau dann, wenn es die zuletzt angegebene Option ist: Ein nachfolgendes `--verbose` oder `--debug` hebt es auf, auch für Zusammenfassungen, Warnungen, den `doctor`-Bericht und die Pufferung der Compose-Ausgabe, nicht nur für den Log-Pegel.
+
+**Wirkung von `--quiet` auf die Ausgabe:**
+
+- Die ändernden Subkommandos (`init`, `generate`, `add`, `remove`, `config set`, `up`, `down`) geben nur Fehler aus; ihre Erfolgs- und Zusammenfassungsmeldungen entfallen, bei `remove` auch die Purge-Warnungen.
+- `doctor` schreibt nur Fehler-Einträge und Einträge eines Degradations-Fallbacks, ohne Kopf- und Summary-Zeile; der Exit-Code trägt das Ergebnis.
+- Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe.
+- Die Ausgabe von `--dry-run` und `--diff` (Änderungsplan, Diff) bleibt ([`LH-FA-CLI-007`](lastenheft.md#lh-fa-cli-007--dry-run)); die Erfolgsmeldung eines tatsächlichen Schreibens entfällt auch bei `--diff` ohne `--dry-run`.
+- Vier Ausnahmen bleiben sichtbar: (1) die Ausweisung von Sicherheitslockerungen des Sandbox-Profils ([`LH-FA-DEV-006`](lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](lastenheft.md#lh-fa-dev-008--egress-restriktion)) in der Warnungsausgabe von `init`, `generate` und `up`; (2) die Ausweisung der Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion) in der Befehlsausgabe und in `doctor`, soweit sie vom Host aus ermittelbar sind; (3) der Compose-Fortschritt von `up` ([`LH-NFA-PERF-002`](lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker)); (4) die Pfad-Zusammenfassung, die `init --force` vor dem Überschreiben ausgibt ([`LH-FA-CLI-005A`](lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung), [`LH-FA-INIT-005`](lastenheft.md#lh-fa-init-005--überschreibschutz)). Jede andere Warnung und jeder andere Hinweis entfällt.
+- `down --quiet` hält die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt, weil sie die Fehlerdetails trägt, die der Fehler selbst nicht nennt.
+- Mit `--json` ändert `--quiet` nichts: Der Umschlag und seine `diagnostics[]` bleiben vollständig, und die Compose-Ausgabe von `down` wird nicht zurückgehalten.
+
 ## 2. Datenstrukturen und Schemas
 
 Formate und Schemata (`u-boot.yaml`, JSON-Ausgabe, CLI-Tabellen). Jede Struktur trägt
@@ -1054,3 +1081,4 @@ Schnittstellen zu Drittsystemen mit Versionsannahme (Docker, Compose, Devcontain
 |---|---|
 | 2026-10-02 | Angelegt als Technik-Stratum; Schemata, Beispielinstanzen, Algorithmen, Build-/CI-, Doku- und Architektur-Details sowie Markierungsformate wörtlich aus dem Lastenheft übernommen (`SPEC-001`..`SPEC-016`, Verfeinerungen); neu aus dem Bestand von Code und Konfiguration: Standardwerte, Egress-Default-Allowlist, Code-Registry der `doctor`-Prüfungen, Telemetrie-Aussage, externe Verträge (`SPEC-017`..`SPEC-023`). |
 | 2026-10-16 | Festlegungen aus den Paket-READMEs unter `internal/` übernommen (`SPEC-036`, [`LH-FA-UP-001.a`](#lh-fa-up-001a--erkennung-probebarer-ports-in-composeyaml), `SPEC-038`..`SPEC-042`): Stabilisierung und Port-Erkennung von `up`, Bestätigungspfad von `down --volumes`, Zustandsmaschinen von `generate`, Pfade und Schreibpipeline von `config`, Schweregrade von `compose.yaml.valid`, Preflight der Compose-Engine. Zahlenwerte aus dem Quelltext. |
+| 2026-10-16 | Verbosity festgelegt (`SPEC-043`): Pegelabbildung, Rangfolge „zuletzt angegeben gewinnt“ und Wirkung von `--quiet`, deckungsgleich mit Lastenheft 0.10.0 und Code. |
