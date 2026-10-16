@@ -2,12 +2,12 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** Slice [`slice-harness-internal-readmes-festlegungen-in-spec`](../plan/planning/in-progress/slice-harness-internal-readmes-festlegungen-in-spec.md), Commit-Range `145fc42..HEAD` (Implementer `b636076`..`db27b3a`, Review-Fix `16cf4b4`, `58fd64d`, `e75655b`, Review-Report `fceea11`), Welle [`welle-harness-wartung`](../plan/planning/welle-harness-wartung.md) §3 (Closure-Trigger).
+**Gegenstand:** Slice [`slice-harness-internal-readmes-festlegungen-in-spec`](../plan/planning/done/slice-harness-internal-readmes-festlegungen-in-spec.md), Commit-Range `145fc42..HEAD` (Implementer `b636076`..`db27b3a`, Review-Fix `16cf4b4`, `58fd64d`, `e75655b`, Review-Report `fceea11`), Welle [`welle-harness-wartung`](../plan/planning/welle-harness-wartung.md) §3 (Closure-Trigger).
 
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-harness-internal-readmes-festlegungen-in-spec`](../plan/planning/in-progress/slice-harness-internal-readmes-festlegungen-in-spec.md)
+- Slice: [`slice-harness-internal-readmes-festlegungen-in-spec`](../plan/planning/done/slice-harness-internal-readmes-festlegungen-in-spec.md)
 - IDs: [`LH-LESE-003`](../../spec/lastenheft.md#lh-lese-003--dokumentenordnung), [`SPEC-012`](../../spec/spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (nur Abweichungsbefund)
 - Artefakte: `spec/spezifikation.md` (`SPEC-036`, `LH-FA-UP-001.a`, `SPEC-038`..`SPEC-042`), `spec/architecture.md` §2.1, sieben `internal/**/README.md`, `harness/conventions.md`, `internal/hexagon/port/driven/clock.go` (Kommentar) <!-- d-check:ignore (Kennungen und Pfade als Zitat) -->
 

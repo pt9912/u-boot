@@ -12,7 +12,7 @@ Dateiname-Konventionen.
 | Datei | Gegenstand |
 | ----- | ---------- |
 | [`slice-harness-dcheck-bump-reviewer-skill`](../done/slice-harness-dcheck-bump-reviewer-skill.md) | Auffrischung des Reviewer-Skills (Baseline v6.18.1); d-check-Bump liegt bei der ai-harness-init-Adoption |
-| [`slice-harness-internal-readmes-festlegungen-in-spec`](../in-progress/slice-harness-internal-readmes-festlegungen-in-spec.md) | Festlegungen aus den `internal/`-READMEs in die Spezifikation, READMEs auf Zweck und Verweis kürzen |
+| [`slice-harness-internal-readmes-festlegungen-in-spec`](../done/slice-harness-internal-readmes-festlegungen-in-spec.md) | Festlegungen aus den `internal/`-READMEs in die Spezifikation, READMEs auf Zweck und Verweis kürzen |
 
 Zuvor: Der Konsolidierungs-Slice
 [`slice-v1-cli-json-envelope-consolidation`](../done/slice-v1-cli-json-envelope-consolidation.md) ist am 2026-06-08

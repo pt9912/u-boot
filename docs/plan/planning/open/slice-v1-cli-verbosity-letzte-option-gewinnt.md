@@ -14,7 +14,7 @@ fordert keinen Release-Schnitt.
 Verwandt: [`slice-cr-cli-quiet-fehler-und-warnungen`](slice-cr-cli-quiet-fehler-und-warnungen.md)
 (klärt die Zusage von `--quiet`; dieser Slice ist davon unabhängig umsetzbar).
 Herkunft: Inventur in
-[`slice-harness-internal-readmes-festlegungen-in-spec`](../in-progress/slice-harness-internal-readmes-festlegungen-in-spec.md) §9.
+[`slice-harness-internal-readmes-festlegungen-in-spec`](../done/slice-harness-internal-readmes-festlegungen-in-spec.md) §9.
 
 **Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)) — wird
 nicht geändert; der Code folgt dem Lastenheft. `spezifikation.md` und

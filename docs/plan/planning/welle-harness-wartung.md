@@ -30,7 +30,7 @@ Das *Mehr* gegenüber den beiden Slice-DoDs: Die Reihenfolge trägt. Der Review 
 Skill, den der erste geliefert hat.
 
 - Beide Slices der Welle liegen in `done/`.
-- Der Review-Report des Slice [`slice-harness-internal-readmes-festlegungen-in-spec`](in-progress/slice-harness-internal-readmes-festlegungen-in-spec.md)
+- Der Review-Report des Slice [`slice-harness-internal-readmes-festlegungen-in-spec`](done/slice-harness-internal-readmes-festlegungen-in-spec.md)
   ist nach dem Abschluss von [`slice-harness-dcheck-bump-reviewer-skill`](done/slice-harness-dcheck-bump-reviewer-skill.md)
   entstanden (Commit-Reihenfolge belegt es).
 - `make doc-trace` meldet nach der Verlagerung keine Waise unter den Anforderungen, die vorher über die README-Liste Service → Anforderung belegt waren.
@@ -41,7 +41,7 @@ Skill, den der erste geliefert hat.
 | Slice | Titel | Bezug |
 |---|---|---|
 | [`slice-harness-dcheck-bump-reviewer-skill`](done/slice-harness-dcheck-bump-reviewer-skill.md) | Auffrischung des Reviewer-Skills (Baseline v6.18.1) | [`MR-009`](../../../harness/conventions/MR-009-skills-und-review-ablage.md) |
-| [`slice-harness-internal-readmes-festlegungen-in-spec`](in-progress/slice-harness-internal-readmes-festlegungen-in-spec.md) | Festlegungen aus den `internal/`-READMEs in die Spezifikation | [`LH-LESE-003`](../../../spec/lastenheft.md#lh-lese-003--dokumentenordnung) |
+| [`slice-harness-internal-readmes-festlegungen-in-spec`](done/slice-harness-internal-readmes-festlegungen-in-spec.md) | Festlegungen aus den `internal/`-READMEs in die Spezifikation | [`LH-LESE-003`](../../../spec/lastenheft.md#lh-lese-003--dokumentenordnung) |
 
 ## 5. Abhängigkeiten
 
