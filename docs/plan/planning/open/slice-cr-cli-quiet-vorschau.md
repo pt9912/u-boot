@@ -4,7 +4,7 @@
 > **ist** der Change Request am Vertrags-Stratum (Precedent:
 > [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md)).
 > Anlass: Der zweite Review des Code-Slices
-> [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md)
+> [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md)
 > ([Report](../../../reviews/2026-10-16-slice-v1-cli-quiet-nur-fehler-2.md), F-2) fand eine Spannung zwischen
 > [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) und
 > [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run). Der Projektinhaber hat am 2026-10-16
@@ -19,7 +19,7 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — vierter Slice der Welle; ihm gehen
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md),
 [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) und
-[`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) voraus, ihm folgen
+[`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) voraus, ihm folgen
 [`slice-v1-cli-quiet-vorschau`](slice-v1-cli-quiet-vorschau.md) und
 [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
@@ -100,7 +100,7 @@ Der Absatz nach der Aufzählung der vier Ausnahmen lautet in 0.10.0 (Änderung k
 
 - **Die Umsetzung im Code** — Adapter ändern sich in [`slice-v1-cli-quiet-vorschau`](slice-v1-cli-quiet-vorschau.md); dieser CR ändert nur das Vertrags-Stratum.
 - **Der Compose-Strom von `down` (Review F-1)** — ein anderer Befund an einer anderen Zusage; er gehört in die Arbeit am Slice
-  [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md), nicht in die Vorschau.
+  [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md), nicht in die Vorschau.
 - **Der CHANGELOG-Widerspruch (Review F-3)** — Doku des Code-Slices, kein Vertragsthema.
 - **Eine Spec-Beschreibung in `spezifikation.md`** — erst nach allen Slices der Welle, sonst beschreibt sie einen Zwischenstand.
 
@@ -154,7 +154,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
 **Start** (`next` → `in-progress`): sofort priorisierbar; die Entscheidung des Projektinhabers vom 2026-10-16 liegt vor.
-Er steht in der Welle hinter [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) (Lastenheft-Seite unabhängig davon, der Code-Slice dort bleibt auf 0.9.0).
+Er steht in der Welle hinter [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) (Lastenheft-Seite unabhängig davon, der Code-Slice dort bleibt auf 0.9.0).
 
 **Rückführungen — vorab benannt:**
 

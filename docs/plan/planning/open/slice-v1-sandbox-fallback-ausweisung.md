@@ -11,7 +11,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Welle:** ohne Welle — kein Release-Bezug, keine Closure-Bedingung, die von der DoD dieses Slice verschieden wäre.
 Herkunft: [`welle-cli-verbosity`](../welle-cli-verbosity.md), Slice
-[`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) (zweiter Review F-4, Verifier-Auflage 3).
+[`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) (zweiter Review F-4, Verifier-Auflage 3).
 
 **Bezug:** [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Absatz Degradation: jeder Fallback wird ausgewiesen),
 [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Ausnahme 2),
@@ -55,7 +55,7 @@ geschlossen — entweder im Code oder im Vertrag.
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Eine Änderung am Verhalten von `--quiet`** — die Option verursacht die Lücke nicht; Ausnahme 2 und ihre Pins stehen im Slice
-  [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md).
+  [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md).
 - **Die Ausgabe der Startscripte selbst** — sie laufen im Container und kennen weder `--quiet` noch den Host-Prozess; Gegenstand ist die Ausweisung auf dem Host.
 - **Neue Fallback-Klassen oder Sicherheitslockerungen** — eine neue Zusage; [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) zählt drei Fallbacks.
 - **Die Vorschau von `--dry-run` unter `--quiet`** — anderer Befund

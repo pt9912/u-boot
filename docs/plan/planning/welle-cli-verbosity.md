@@ -39,7 +39,7 @@ Das *Mehr* gegenüber den sechs Slice-DoDs: Die drei Stellen, an denen der Vertr
 Lastenheft, die drei Code-Slices den Adapter, und die Spezifikation beschreibt erst danach das Verhalten.
 
 - Alle sechs Slices der Welle liegen in `done/` (die zwei geschlossenen CRs, der CR
-  [`slice-cr-cli-quiet-vorschau`](open/slice-cr-cli-quiet-vorschau.md), [`slice-v1-cli-quiet-nur-fehler`](in-progress/slice-v1-cli-quiet-nur-fehler.md),
+  [`slice-cr-cli-quiet-vorschau`](open/slice-cr-cli-quiet-vorschau.md), [`slice-v1-cli-quiet-nur-fehler`](done/slice-v1-cli-quiet-nur-fehler.md),
   [`slice-v1-cli-quiet-vorschau`](open/slice-v1-cli-quiet-vorschau.md) und [`slice-v1-cli-verbosity-letzte-option-gewinnt`](open/slice-v1-cli-verbosity-letzte-option-gewinnt.md)); das Lastenheft steht auf 0.10.0.
 - Die Spezifikation trägt einen Eintrag zur Pegelabbildung und zur Rangfolge, der Lastenheft (0.10.0) und Code deckungsgleich
   beschreibt; er entstand nach dem Abschluss aller sechs Slices (Commit-Reihenfolge belegt es).
@@ -52,7 +52,7 @@ Lastenheft, die drei Code-Slices den Adapter, und die Spezifikation beschreibt e
 |---|---|---|
 | [`slice-cr-cli-quiet-fehler-und-warnungen`](done/slice-cr-cli-quiet-fehler-und-warnungen.md) | CR: Ausnahme der Sicherheitslockerungen unter `--quiet` (zuerst, geschlossen) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
 | [`slice-cr-cli-quiet-weitere-ausnahmen`](done/slice-cr-cli-quiet-weitere-ausnahmen.md) | CR: Ausnahmen Degradations-Fallbacks, Compose-Fortschritt und `--force`-Zusammenfassung unter `--quiet` (Lastenheft 0.9.0) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-NFA-PERF-002`](../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker), [`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) |
-| [`slice-v1-cli-quiet-nur-fehler`](in-progress/slice-v1-cli-quiet-nur-fehler.md) | Code: `--quiet` zeigt nur Fehler in allen Subkommandos, vier Ausnahmen bleiben (Lastenheft 0.9.0; in Arbeit) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
+| [`slice-v1-cli-quiet-nur-fehler`](done/slice-v1-cli-quiet-nur-fehler.md) | Code: `--quiet` zeigt nur Fehler in allen Subkommandos, vier Ausnahmen bleiben (Lastenheft 0.9.0; in Arbeit) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
 | [`slice-cr-cli-quiet-vorschau`](open/slice-cr-cli-quiet-vorschau.md) | CR: die Vorschau von `--dry-run` und `--diff` bleibt unter `--quiet` (Lastenheft 0.10.0) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-007`](../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) |
 | [`slice-v1-cli-quiet-vorschau`](open/slice-v1-cli-quiet-vorschau.md) | Code: `--dry-run --quiet` und `--diff --quiet` geben die Vorschau aus (nach dem CR, Lastenheft 0.10.0) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-007`](../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) |
 | [`slice-v1-cli-verbosity-letzte-option-gewinnt`](open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) | Code: die zuletzt angegebene Option gewinnt, danach der Spezifikations-Eintrag (letzter Slice) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) |
@@ -63,10 +63,10 @@ Lastenheft, die drei Code-Slices den Adapter, und die Spezifikation beschreibt e
 - Wird blockiert von: nichts; die Entscheidungen des Projektinhabers (Wirkung von `--quiet`, siehe §2) liegen vor. Innerhalb der
   Welle geht der CR [`slice-cr-cli-quiet-fehler-und-warnungen`](done/slice-cr-cli-quiet-fehler-und-warnungen.md) dem CR
   [`slice-cr-cli-quiet-weitere-ausnahmen`](done/slice-cr-cli-quiet-weitere-ausnahmen.md) voraus; dieser geht dem Slice
-  [`slice-v1-cli-quiet-nur-fehler`](in-progress/slice-v1-cli-quiet-nur-fehler.md) voraus, weil die Ausnahmen erst nach Lastenheft 0.9.0
+  [`slice-v1-cli-quiet-nur-fehler`](done/slice-v1-cli-quiet-nur-fehler.md) voraus, weil die Ausnahmen erst nach Lastenheft 0.9.0
   im Vertrag stehen. Der CR [`slice-cr-cli-quiet-vorschau`](open/slice-cr-cli-quiet-vorschau.md) folgt auf diesen Code-Slice und geht dem Code-Slice
   [`slice-v1-cli-quiet-vorschau`](open/slice-v1-cli-quiet-vorschau.md) voraus, weil der Vorschau-Satz erst nach Lastenheft 0.10.0 im Vertrag steht; der Code-Slice
-  beginnt erst nach der Closure von [`slice-v1-cli-quiet-nur-fehler`](in-progress/slice-v1-cli-quiet-nur-fehler.md), weil beide dieselben Quiet-Zweige berühren.
+  beginnt erst nach der Closure von [`slice-v1-cli-quiet-nur-fehler`](done/slice-v1-cli-quiet-nur-fehler.md), weil beide dieselben Quiet-Zweige berühren.
   [`slice-v1-cli-verbosity-letzte-option-gewinnt`](open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) kommt zuletzt (er trägt den Spezifikations-Eintrag nach allen anderen); logisch ist er von den Vorschau-Slices unabhängig,
   berührt aber ebenfalls `root.go`.
 

@@ -7,7 +7,7 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — fünfter Slice der Welle; folgt auf
 [`slice-cr-cli-quiet-vorschau`](slice-cr-cli-quiet-vorschau.md) (der Vorschau-Satz steht erst mit Lastenheft 0.10.0 im Vertrag) und auf
-[`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) (berührt dieselben Quiet-Zweige); ihm folgt
+[`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) (berührt dieselben Quiet-Zweige); ihm folgt
 [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Vorschau bleibt unter `--quiet`, ab 0.10.0),
@@ -52,7 +52,7 @@ Die Sicherheits-/Fallback-Ausnahmen und Fehler bleiben unabhängig davon; sonsti
   (`Removed service …`, `Generated …`, `config: a → b.`); nur `init` und `add` unterscheiden. Das ist ein Befund ohne Bezug zu `--quiet`; dieser Slice gibt unter `--quiet` aus, was ohne `--quiet`
   ausgegeben wird. Offene Frage an den Projektinhaber (siehe §6).
 - **Der Compose-Strom von `down`, der CHANGELOG-Widerspruch (Review F-1, F-3)** — anderer Befund, Arbeit am Slice
-  [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md).
+  [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md).
 - **Eine Änderung des Lastenhefts** — liegt im CR [`slice-cr-cli-quiet-vorschau`](slice-cr-cli-quiet-vorschau.md).
 - **Die Wahl zwischen mehreren Verbosity-Optionen** — Slice [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 - **Eine Spec-Beschreibung in `spezifikation.md`** — erst nach allen Slices der Welle, sonst beschreibt sie einen Zwischenstand.
@@ -92,12 +92,12 @@ Unter `--quiet` entfällt heute: bei `init`, `add`, `remove`, `generate`, `confi
 (und `--dry-run --diff`); der Diff selbst bleibt bereits. Reihenfolge der Ausgabe bleibt: Diff, dann Zusammenfassung.
 
 **Reihenfolge:** erst der CR [`slice-cr-cli-quiet-vorschau`](slice-cr-cli-quiet-vorschau.md) (Lastenheft 0.10.0), dann dieser Slice; er berührt dieselben Quiet-Zweige wie
-[`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) und beginnt erst nach dessen Closure, damit keine Merge-Konflikte entstehen.
+[`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) und beginnt erst nach dessen Closure, damit keine Merge-Konflikte entstehen.
 
 ## 4. Trigger
 
 **Start** (`next` → `in-progress`): Lastenheft 0.10.0 liegt vor (CR [`slice-cr-cli-quiet-vorschau`](slice-cr-cli-quiet-vorschau.md) in `done/`) und
-[`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) ist geschlossen.
+[`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) ist geschlossen.
 
 **Rückführungen — vorab benannt:**
 
@@ -115,7 +115,7 @@ Steering-Loop-Lerneintrag geschrieben (§7).
   „Vorschau-Ausgabe bleibt“ entschieden. — **Ausgang:** offen bis zur Bestätigung (Übergabe des Planers); Test pinnt die gewählte Auslegung.
 - **Vergangenheitsform im Dry-Run (`remove`, `generate`, `config set`):** Unter `--quiet --dry-run` erscheint dieselbe Vergangenheitsform wie heute ohne `--quiet`,
   obwohl nichts geschrieben wurde. — **Ausgang:** offen bis zur Entscheidung des Projektinhabers; entweder eigener Folge-Slice oder Aufnahme hier (dann Rückführung nach `next`).
-- **Konflikt mit dem Code-Slice [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md):** beide ändern die Quiet-Zweige derselben fünf Dateien. — **Ausgang:** entfallen:
+- **Konflikt mit dem Code-Slice [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md):** beide ändern die Quiet-Zweige derselben fünf Dateien. — **Ausgang:** entfallen:
   dieser Slice startet erst nach dessen Closure (siehe §4).
 - **Zwischenstand der Spec:** Die Spezifikation darf das Verhalten erst nach allen Slices der Welle beschreiben. — **Ausgang:** entfallen: der Spezifikations-Eintrag liegt im letzten Slice
   [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md).

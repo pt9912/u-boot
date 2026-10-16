@@ -2,14 +2,14 @@
 
 **Review-Art:** Code — Diff gegen Plan, [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Lastenheft 0.9.0), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-NFA-USE-004`](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) und Hard Rules (Maintainability; nicht gegen die DoD).
 
-**Gegenstand:** Commit-Range `ea07a45..HEAD` (Implementer-Commits `4c68a86`, `1e35794`, `82af811`) für den Slice [`slice-v1-cli-quiet-nur-fehler`](../plan/planning/in-progress/slice-v1-cli-quiet-nur-fehler.md) (Welle `welle-cli-verbosity`) <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->, zusätzlich die bereits im ersten Lauf geprüften Commits `c277c47`, `72006d3`, `7a244b9` (`aca134c..HEAD`). Erster Lauf: `docs/reviews/2026-10-16-slice-v1-cli-quiet-nur-fehler.md` (F-1..F-7), hier als „Erstlauf" zitiert. <!-- d-check:ignore (Pfad als Zitat) -->
+**Gegenstand:** Commit-Range `ea07a45..HEAD` (Implementer-Commits `4c68a86`, `1e35794`, `82af811`) für den Slice [`slice-v1-cli-quiet-nur-fehler`](../plan/planning/done/slice-v1-cli-quiet-nur-fehler.md) (Welle `welle-cli-verbosity`) <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->, zusätzlich die bereits im ersten Lauf geprüften Commits `c277c47`, `72006d3`, `7a244b9` (`aca134c..HEAD`). Erster Lauf: `docs/reviews/2026-10-16-slice-v1-cli-quiet-nur-fehler.md` (F-1..F-7), hier als „Erstlauf" zitiert. <!-- d-check:ignore (Pfad als Zitat) -->
 
 **Skill:** `.harness/skills/reviewer.md` @ HEAD `82af811` · <!-- d-check:ignore (Skill-Pfad als Zitat) -->
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-16
 
 **Eingangs-Kontext:**
 
-- Slice [`slice-v1-cli-quiet-nur-fehler`](../plan/planning/in-progress/slice-v1-cli-quiet-nur-fehler.md) (§1 Abgrenzung, §2 DoD, §3 Plan) <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
+- Slice [`slice-v1-cli-quiet-nur-fehler`](../plan/planning/done/slice-v1-cli-quiet-nur-fehler.md) (§1 Abgrenzung, §2 DoD, §3 Plan) <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 - [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-005A`](../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-FA-CLI-007`](../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe), [`LH-NFA-USE-004`](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DIAG-003`](../../spec/lastenheft.md#lh-fa-diag-003--fehlerklassifikation), [`LH-NFA-PERF-002`](../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker)
 - `AGENTS.md` (Hard Rules §3.2, §3.7), `harness/conventions.md`, `harness/review.md`
 - Sensors: `make test` viermal (je eine Mutation, siehe Negativbefunde; Arbeitsbaum jeweils per `git checkout --` zurückgesetzt, `git status` sauber), `make docs-check` (258 Dateien, 0 Befunde). Nicht gelaufen: `make gates`/`make lint` (kein Neu-Lauf; der Diff trägt kein `//nolint`), `make test-docker` (kein Docker-Pfad berührt), `make verify-depguard` (keine Importregel geändert; der Diff fügt in Nicht-Test-Code keine Imports außer `strings` in `doctor.go` hinzu).
