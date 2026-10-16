@@ -45,14 +45,14 @@ Lastenheft, die beiden Code-Slices den Adapter, und die Spezifikation beschreibt
 | Slice | Titel | Bezug |
 |---|---|---|
 | [`slice-cr-cli-quiet-fehler-und-warnungen`](done/slice-cr-cli-quiet-fehler-und-warnungen.md) | CR: Ausnahme der Sicherheitslockerungen unter `--quiet` (zuerst) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
-| [`slice-v1-cli-quiet-nur-fehler`](in-progress/slice-v1-cli-quiet-nur-fehler.md) | Code: `--quiet` zeigt nur Fehler, Sandbox-Lockerungs-Hinweise bleiben | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
+| [`slice-v1-cli-quiet-nur-fehler`](open/slice-v1-cli-quiet-nur-fehler.md) | Code: `--quiet` zeigt nur Fehler, Sandbox-Lockerungs-Hinweise bleiben | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
 | [`slice-v1-cli-verbosity-letzte-option-gewinnt`](open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) | Code: die zuletzt angegebene Option gewinnt, danach der Spezifikations-Eintrag | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) |
 
 ## 5. Abhängigkeiten
 
 - Blockiert: keine Welle.
 - Wird blockiert von: nichts; die Entscheidung des Projektinhabers (Wirkung von `--quiet`, siehe §2) liegt vor. Innerhalb der
-  Welle geht der CR dem Slice [`slice-v1-cli-quiet-nur-fehler`](in-progress/slice-v1-cli-quiet-nur-fehler.md) voraus, weil die Ausnahme
+  Welle geht der CR dem Slice [`slice-v1-cli-quiet-nur-fehler`](open/slice-v1-cli-quiet-nur-fehler.md) voraus, weil die Ausnahme
   erst nach Lastenheft 0.8.0 im Vertrag steht; dieser Slice geht
   [`slice-v1-cli-verbosity-letzte-option-gewinnt`](open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) voraus, weil beide
   `root.go` berühren (logisch sind sie unabhängig).
