@@ -13,6 +13,5 @@ Dateiname-Konventionen.
 | ----- | ---------- |
 | [`slice-v1-sandbox-docker-nachholmessung-desktop`](slice-v1-sandbox-docker-nachholmessung-desktop.md) | Docker-Desktop-Messung für `nestedRuntime: docker` (Abnahmekriterium 6) |
 | [`slice-v2-homebrew-smoke-haertung`](slice-v2-homebrew-smoke-haertung.md) | Härtung des Homebrew-Smoke im Tap (Build-from-source, `u-boot add`, gatendes Audit), Formel-`desc` und Workflow-Kommentar |
-| [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md) | Verbosity: die zuletzt angegebene Option gewinnt (Code folgt [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), statt fester Rangfolge) |
 | [`slice-v1-sandbox-fallback-ausweisung`](slice-v1-sandbox-fallback-ausweisung.md) | Degradations-Fallbacks Daemon und Egress host-seitig ausweisen (Code) oder [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) präzisieren (CR); Entscheidung beim Projektinhaber |
 | [`slice-v1-cli-dry-run-would-formulierung`](slice-v1-cli-dry-run-would-formulierung.md) | Dry-Run: `remove`, `generate` und `config set` sagen „Would …“ statt der Vergangenheitsform, falls [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) es verlangt (offene Frage an den Projektinhaber) |
