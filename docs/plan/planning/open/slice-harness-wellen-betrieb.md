@@ -13,7 +13,7 @@ verschieden ist (Prozess-Umbau am Harness).
 [`MR-002`](../../../../harness/conventions/MR-002-carveout-inventar.md),
 [`MR-012`](../../../../harness/conventions.md#mr-012) (Punkt 4: planner, plan-welle,
 close-welle, Register liegen ungenutzt). Voraussetzung:
-[`slice-cr-lastenheft-produktanforderungen`](../next/slice-cr-lastenheft-produktanforderungen.md)
+[`slice-cr-lastenheft-produktanforderungen`](../in-progress/slice-cr-lastenheft-produktanforderungen.md)
 — die Planungs-Anforderungen verlassen das Lastenheft; ohne sie braucht dieser Slice
 keinen Vertragswortlaut (heute schließt
 [`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)
@@ -46,7 +46,7 @@ statt Wellen-Inhalt, und `plan-welle`, `close-welle` und `planner` laufen auf u-
   Closure lebt in den `done/`-Release-Cut-Slices und in der Roadmap; nur neue Wellen
   bekommen eine Datei.
 - Änderung am Lastenheft: führt
-  [`slice-cr-lastenheft-produktanforderungen`](../next/slice-cr-lastenheft-produktanforderungen.md).
+  [`slice-cr-lastenheft-produktanforderungen`](../in-progress/slice-cr-lastenheft-produktanforderungen.md).
 
 ## 2. Definition of Done
 
