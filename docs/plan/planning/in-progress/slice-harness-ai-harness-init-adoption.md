@@ -69,8 +69,8 @@ Auffrischung des Reviewer-Skills.
 - [x] Doku-Update: `MR-011` aufgelöst (nach `conventions/done/`), `MR-004`/`MR-005`
   auf den neuen Stand, neue Adaption für `repo.mk` und das behaltene
   `fetch-baseline-cache.sh` (Freshness-Audit).
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang.
 
 ## 3. Plan (vor Code)
 
@@ -110,18 +110,45 @@ mit Steering-Loop-Eintrag geschrieben, `make gates` auf dem Stand vor dem
 ## 6. Risiken und offene Punkte
 
 - Das Werkzeug ersetzt `Makefile` und `d-check.mk` ohne Meldung; ein vergessenes
-  Target in `repo.mk` ginge verloren — **Ausgang:** offen; die Target-Liste vor
-  und nach dem Lauf wird verglichen.
+  Target in `repo.mk` ginge verloren — **Ausgang:** entfallen, der Vergleich
+  des alten Makefiles mit `make help` und `repo.mk` zeigt alle Targets erreichbar
+  (`coverage` als Alias ohne Hilfetext).
 - `d-check` springt von `v0.51.1` auf `v0.86.1`; neue Befunde im Bestand —
-  **Ausgang:** offen bis zur Closure.
-- Das Werkzeug legt Wellen-Dateien und -Commands an, die `MR-003` widersprechen —
-  **Ausgang:** weiter offen, übernimmt `slice-harness-wellen-betrieb`.
+  **Ausgang:** entfallen, `make docs-check` meldet 0 Befunde gegen die
+  unveränderte Konfiguration.
+- Das Werkzeug legt Wellen-Dateien und -Commands an, die
+  [`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md) widersprechen —
+  **Ausgang:** eingetreten, übernimmt
+  [`slice-harness-wellen-betrieb`](../open/slice-harness-wellen-betrieb.md); die
+  Dateien tragen bis dahin den Vermerk „ungenutzt“.
 - Der Träger-Binary liegt nicht im Repo (`.harness/state/bin/`, ignoriert); ohne
-  ihn erfasst `span-emit` nichts — **Ausgang:** offen; `make traeger-fetch` pro Klon.
+  ihn erfasst `span-emit` nichts — **Ausgang:** weiter offen, pro Klon
+  `make traeger-fetch` (im Klon dieser Session ausgeführt, Spans werden geschrieben).
 
 ## 7. Closure-Notiz
 
-Offen.
+Vollzogen am 2026-10-16. `ai-harness-init` `v0.8.0` ist gegen u-boot gelaufen und
+schreibt künftig `Makefile`, `d-check.mk`, `harness/mk/`, `tools/harness/` und die
+Hooks. u-boots Targets stehen in `repo.mk`, `make gates` führt zusätzlich
+`baseline-verify` und endet mit `record-gates`, d-check ist auf `v0.86.1`
+gepinnt, der Gate-Index hat zwei Teile, und `harness/sensors/` trägt zwei
+Sensor-Dateien. Review: 0 HIGH, 1 MEDIUM, 7 LOW, 2 INFO; MEDIUM und LOW bis
+auf F-8 behoben. Verifier: DoD bestätigt, alle Sensor-Läufe grün.
+
+- **Was hat funktioniert:** Der Probelauf im Wegwerf-Klon hat den Umfang vor dem
+  Eingriff gezeigt; `repo.mk` vor dem Lauf anzulegen hat jedes Target erhalten.
+- **Was ging anders als geplant:** Der Lauf hat die handgepflegten Köpfe der
+  Fragmente aus dem Vorgänger-Slice überschrieben (erwartet, MR-011 ist aufgelöst)
+  und damit `LC_ALL=C` in `working-tree-hash.sh` entfernt; das steht als Grenze in
+  [`MR-012`](../../../../harness/conventions.md#mr-012). Der Review fand dazu
+  Bump-Anweisungen für `Makefile`-Variablen in Maintainer-Doku und Workflow-Kommentaren.
+- **Steering-Loop-Eintrag:** Eine Änderung an der Werkzeug-Aufteilung zieht die
+  Stellen nach, die Variablen oder Targets beim Namen nennen — gefunden durch den
+  Review, nicht durch ein Gate — liegt in `harness/conventions/MR-012-ai-harness-init-werkzeug-des-repos.md` (Punkt 1).
+- **Folge-Slices:** [`slice-harness-wellen-betrieb`](../open/slice-harness-wellen-betrieb.md),
+  [`slice-harness-dcheck-bump-reviewer-skill`](../open/slice-harness-dcheck-bump-reviewer-skill.md)
+  (Reviewer-Skill).
+- **Risiken aus §6:** je ein Ausgang, siehe §6.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
