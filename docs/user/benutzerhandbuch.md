@@ -1097,7 +1097,8 @@ Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
 #### Grenzen
 
 - Geprüft unter Docker auf Linux mit der `devcontainer`-CLI; `nestedRuntime: docker`
-  zusätzlich unter Colima (Linux-VM). **Nicht geprüft:** Docker Desktop,
+  zusätzlich unter Colima (Linux-VM); nur diese beiden Hosts sagt das Lastenheft zu.
+  **Nicht geprüft und nicht zugesagt:** Docker Desktop,
   Podman als Host-Engine, VS Code und Codespaces.
 - Der Wechsel von `podman` oder `docker` zurück auf `none` lässt eine vorhandene
   `sandbox-init.sh` beziehungsweise `docker-init.sh` im Ordner liegen; das Dockerfile verwendet sie dann nicht

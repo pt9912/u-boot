@@ -83,3 +83,4 @@ Auf der jeweiligen Umgebung ausführen; Ergebnis (Engine-Version, VM-Typ, Kernel
 |---|---|---|
 | 2026-10-14 | Entwurf mit Messreihe (Colima 0.10.3, Docker 29.5.2, Ubuntu 24.04.4, arm64) | Umsetzungs-Slices V1 Sandbox Docker |
 | 2026-10-14 | `Accepted` durch den Projektinhaber; Docker Desktop, Podman-Host und VS Code/Codespaces bleiben bis zur Nachholmessung ungeprüft (§Nachholmessung) | Vereinbarung mit dem Projektinhaber |
+| 2026-10-16 | Das Lastenheft 0.7.0 grenzt die Zusage für `docker` auf Docker unter Linux und Colima ein; Docker Desktop ist nicht mehr zugesagt, die Nachholmessung dafür bleibt offen und hängt an keiner Welle | [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |

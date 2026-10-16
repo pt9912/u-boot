@@ -4,7 +4,10 @@
 Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`.
 
-**Welle:** [`welle-macos-verifikation`](../welle-macos-verifikation.md).
+**Welle:** ohne Welle. Das Lastenheft 0.7.0 sagt Docker Desktop für `nestedRuntime: docker` nicht mehr zu
+([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)); der Slice wartet auf
+einen Docker-Desktop-Host und trägt damit keine Closure-Bedingung einer Welle mehr. Wird die Messung gemacht, ist die Zusage per CR
+wieder aufzunehmen.
 
 **Bezug:** [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
 [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md).
