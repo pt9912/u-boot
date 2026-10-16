@@ -26,6 +26,7 @@ Thumbs.db
 # Agent / tooling working dirs
 .claude/*
 !.claude/agents/
+!.claude/rules/
 !.claude/commands/
 !.claude/hooks/
 !.claude/settings.json
