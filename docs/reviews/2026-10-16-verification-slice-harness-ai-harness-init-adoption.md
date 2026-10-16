@@ -5,7 +5,7 @@ Form nach [`harness/verification.md`](../../harness/verification.md). Verifier i
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-harness-ai-harness-init-adoption`](../plan/planning/in-progress/slice-harness-ai-harness-init-adoption.md)
+- Slice: [`slice-harness-ai-harness-init-adoption`](../plan/planning/done/slice-harness-ai-harness-init-adoption.md)
 - IDs: [`MR-012`](../../harness/conventions.md#mr-012), [`MR-011`](../../harness/conventions.md#mr-011), [`MR-004`](../../harness/conventions/MR-004-regelwerk-vendored.md), [`MR-005`](../../harness/conventions/MR-005-gate-haltung-docs-check.md); keine `LH-*`-/`ADR-*`-Änderung (der Slice nennt keine berührte Spec-Stelle).
 - Artefakte: `repo.mk`, `Makefile`, `d-check.mk`, `harness/mk/*`, `harness/sensors/*`, `.d-check.yml`, `harness/README.md`, Adaptionen; Commits `eafe636..792c53e`.
 

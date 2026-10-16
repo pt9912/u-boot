@@ -81,7 +81,7 @@
   gehen beim naechsten Lauf des Werkzeugs verloren und gehoeren stattdessen in
   `repo.mk` (eigene Targets) oder in `.d-check.yml` (Konfiguration).
 - **Gate-Image-Stand:** `v0.86.1`, digest-gepinnt in `d-check.mk`
-  ([`slice-harness-ai-harness-init-adoption`](../../docs/plan/planning/in-progress/slice-harness-ai-harness-init-adoption.md)).
+  ([`slice-harness-ai-harness-init-adoption`](../../docs/plan/planning/done/slice-harness-ai-harness-init-adoption.md)).
   Der Pin kommt mit dem Programm des Werkzeugs; es gibt fuer ihn **keine**
   Aktualitaets-Routine (anders als fuer die Regelwerk-Baseline, s. Abschnitt
   Freshness-Audit). Ein neuer Stand kommt mit einem neueren Programm; danach
