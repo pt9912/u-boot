@@ -9,7 +9,7 @@
 
 **Eingangs-Kontext:**
 
-- Slice [`slice-cr-cli-quiet-vorschau`](../plan/planning/done/slice-cr-cli-quiet-vorschau.md) (§1 CR-Kern, §2 DoD, §6 Risiken) und Folge-Slice [`slice-v1-cli-quiet-vorschau`](../plan/planning/in-progress/slice-v1-cli-quiet-vorschau.md)
+- Slice [`slice-cr-cli-quiet-vorschau`](../plan/planning/done/slice-cr-cli-quiet-vorschau.md) (§1 CR-Kern, §2 DoD, §6 Risiken) und Folge-Slice [`slice-v1-cli-quiet-vorschau`](../plan/planning/done/slice-v1-cli-quiet-vorschau.md)
 - [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-005A`](../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung), [`LH-FA-CLI-007`](../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe), [`LH-NFA-USE-004`](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe), [`LH-FA-INIT-005`](../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)
 - Vorherige Reports der Welle: `2026-10-16-slice-cr-cli-quiet-fehler-und-warnungen.md`, `2026-10-16-slice-cr-cli-quiet-weitere-ausnahmen.md` <!-- d-check:ignore (Report-Dateinamen als Zitat) -->
 - `AGENTS.md` (Hard Rules §3.4, §3.7)

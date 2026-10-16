@@ -20,13 +20,13 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md),
 [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) und
 [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) voraus, ihm folgen
-[`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md) und
+[`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md) und
 [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Änderung),
 [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Dry-Run zeigt die Dateien) und
 [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) (Diff-Ausgabe als Vorschau).
-Verwandt: [`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md) (Code: setzt die Präzisierung um).
+Verwandt: [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md) (Code: setzt die Präzisierung um).
 
 **Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)), §16
 (Historie), Versionsfeld. `spezifikation.md` und `architecture.md` berührt der
@@ -98,14 +98,14 @@ Der Absatz nach der Aufzählung der vier Ausnahmen lautet in 0.10.0 (Änderung k
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Die Umsetzung im Code** — Adapter ändern sich in [`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md); dieser CR ändert nur das Vertrags-Stratum.
+- **Die Umsetzung im Code** — Adapter ändern sich in [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md); dieser CR ändert nur das Vertrags-Stratum.
 - **Der Compose-Strom von `down` (Review F-1)** — ein anderer Befund an einer anderen Zusage; er gehört in die Arbeit am Slice
   [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md), nicht in die Vorschau.
 - **Der CHANGELOG-Widerspruch (Review F-3)** — Doku des Code-Slices, kein Vertragsthema.
 - **Eine Spec-Beschreibung in `spezifikation.md`** — erst nach allen Slices der Welle, sonst beschreibt sie einen Zwischenstand.
 
 **Abnahmekriterien (für die Umsetzung, nicht für den Spec-Change)** — sie liegen in
-[`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md):
+[`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md):
 
 1. Je Subkommando mit `--dry-run`/`--diff` belegt ein Test, dass `--dry-run --quiet` und `--diff --quiet` die Vorschau ausgeben und Fehler bleiben.
 2. Ein Test pinnt, dass die Erfolgsmeldung nach einem tatsächlichen Schreiben (`--diff` ohne `--dry-run`) unter `--quiet` entfällt.
@@ -122,7 +122,7 @@ Der Absatz nach der Aufzählung der vier Ausnahmen lautet in 0.10.0 (Änderung k
 - [x] **Lastenheft 0.10.0**: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) in der Fassung oben, Versionsfeld,
       Historie-Zeile (Verweis „Vereinbarung mit dem Projektinhaber").
 - [x] **Umsetzungsbedarf** einem Slice zugeordnet: Abnahmekriterien 1–3 liegen in
-      [`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md).
+      [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md).
 - [x] Doku-Update: CHANGELOG (öffentlicher Vertrag berührt).
 - [x] `make gates` grün.
 - [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
@@ -141,7 +141,7 @@ Der Absatz nach der Aufzählung der vier Ausnahmen lautet in 0.10.0 (Änderung k
 | `CHANGELOG.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | öffentlicher Vertrag berührt |
 
 Reihenfolge: Lastenheft ändern → Umsetzung im Slice
-[`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md) (der Vorschau-Satz steht erst nach 0.10.0 im Vertrag).
+[`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md) (der Vorschau-Satz steht erst nach 0.10.0 im Vertrag).
 
 ## 4. Trigger
 
@@ -161,7 +161,7 @@ Er steht in der Welle hinter [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-
 
 DoD vollständig, Review-Report liegt vor, Closure-Notiz mit
 Steering-Loop-Lerneintrag geschrieben (§7). Lastenheft 0.10.0 ist angenommen;
-der Umsetzungs-Slice [`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md) liegt in `open/` oder weiter.
+der Umsetzungs-Slice [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md) liegt in `open/` oder weiter.
 
 ## 6. Risiken und offene Punkte
 
@@ -194,10 +194,10 @@ F-5 im Folge-Slice); Verification Evidence
 - **Bestätigung des Projektinhabers:** Version 0.10.0 statt 0.9.1 und der Schlusssatz zu `--diff` ohne `--dry-run` sind am 2026-10-16
   bestätigt durch die Freigabe „ja, pushen und weitermachen“ auf den Statusbericht, der beide nannte.
 - **Grenze:** Der CHANGELOG nennt eine Zusage, die der Code erst mit
-  [`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md) erfüllt; kein Release-Cut davor. Im Code-Slice ist die Abbildung
+  [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md) erfüllt; kein Release-Cut davor. Im Code-Slice ist die Abbildung
   „Änderungsplan“ auf die „Would …“- und Vergangenheitsform-Ausgaben zu pinnen (F-2).
 - **Beobachtungs-Register (`../observations/`):** leer, keine Beobachtung angelegt.
-- **Folge-Slices:** [`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md),
+- **Folge-Slices:** [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md),
   [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 - **Risiken aus §6:** alle drei tragen ihren Ausgang (siehe §6): Reichweite bei `--diff` ohne `--dry-run` vom Projektinhaber bestätigt,
   ältere Zusagen per wiederholter Suche geprüft, Zwischenstand der Spec durch die Welle gedeckt.

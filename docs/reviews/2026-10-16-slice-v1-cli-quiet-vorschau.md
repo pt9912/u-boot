@@ -2,14 +2,14 @@
 
 **Review-Art:** Code — Diff gegen Plan, [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Lastenheft 0.10.0), [`LH-FA-CLI-007`](../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe), [`LH-NFA-USE-004`](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) und Hard Rules (Maintainability; die DoD-Closure prüft der Verifier)
 
-**Gegenstand:** Commit-Range `16a9603..HEAD` (Implementer-Commits `acefc1d` Code und Tests, `27c6de5` Handbuch und CHANGELOG) für den Slice [`slice-v1-cli-quiet-vorschau`](../plan/planning/in-progress/slice-v1-cli-quiet-vorschau.md) (Welle `welle-cli-verbosity`)
+**Gegenstand:** Commit-Range `16a9603..HEAD` (Implementer-Commits `acefc1d` Code und Tests, `27c6de5` Handbuch und CHANGELOG) für den Slice [`slice-v1-cli-quiet-vorschau`](../plan/planning/done/slice-v1-cli-quiet-vorschau.md) (Welle `welle-cli-verbosity`)
 
 **Skill:** `.harness/skills/reviewer.md` @ HEAD `27c6de5` · <!-- d-check:ignore (Skill-Pfad als Zitat) -->
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-16
 
 **Eingangs-Kontext:**
 
-- Slice [`slice-v1-cli-quiet-vorschau`](../plan/planning/in-progress/slice-v1-cli-quiet-vorschau.md) (§1 Regeltabelle, §2 DoD, §3 Plan, §6 Risiken)
+- Slice [`slice-v1-cli-quiet-vorschau`](../plan/planning/done/slice-v1-cli-quiet-vorschau.md) (§1 Regeltabelle, §2 DoD, §3 Plan, §6 Risiken)
 - [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-007`](../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe), [`LH-NFA-USE-004`](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)
 - `AGENTS.md` (Hard Rules §3.2, §3.7), `harness/conventions.md`, `harness/review.md`; frühere Reports `docs/reviews/2026-10-16-slice-v1-cli-quiet-nur-fehler*.md` (Herkunft F-2) <!-- d-check:ignore (Dateimuster als Zitat) -->
 - Sensors: `make test` sechsmal (Baseline grün, fünf Mutationen rot, Arbeitsbaum jeweils per `git checkout --` zurückgesetzt, `git status` sauber), `make docs-check` (Lauf nach Schreiben des Reports, Ergebnis siehe Verdikt). Nicht gelaufen: `make gates`/`make lint` (der Diff trägt kein `//nolint`; kein Neu-Lauf), `make test-docker` (kein Docker-Pfad), `make verify-depguard` (keine Importregel berührt)

@@ -2,12 +2,12 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** [`slice-v1-cli-quiet-vorschau`](../plan/planning/in-progress/slice-v1-cli-quiet-vorschau.md), Welle [`welle-cli-verbosity`](../plan/planning/welle-cli-verbosity.md). Commits: `acefc1d` (Code und Tests), `27c6de5` (Handbuch, CHANGELOG), `7ee6c76` (Review-Fixes F-1/F-2 und Report). Review: [Report](2026-10-16-slice-v1-cli-quiet-vorschau.md) (0 HIGH, 0 MEDIUM, 1 LOW, 3 INFO).
+**Gegenstand:** [`slice-v1-cli-quiet-vorschau`](../plan/planning/done/slice-v1-cli-quiet-vorschau.md), Welle [`welle-cli-verbosity`](../plan/planning/welle-cli-verbosity.md). Commits: `acefc1d` (Code und Tests), `27c6de5` (Handbuch, CHANGELOG), `7ee6c76` (Review-Fixes F-1/F-2 und Report). Review: [Report](2026-10-16-slice-v1-cli-quiet-vorschau.md) (0 HIGH, 0 MEDIUM, 1 LOW, 3 INFO).
 
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-cli-quiet-vorschau`](../plan/planning/in-progress/slice-v1-cli-quiet-vorschau.md)
+- Slice: [`slice-v1-cli-quiet-vorschau`](../plan/planning/done/slice-v1-cli-quiet-vorschau.md)
 - IDs: [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Lastenheft 0.10.0), [`LH-FA-CLI-007`](../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe), [`LH-NFA-USE-004`](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)
 - Artefakte: `internal/adapter/driving/cli/` (`init.go`, `generate.go`, `add.go`, `remove.go`, `config.go`, `previewmode.go`, neuer Test `quiet_preview_test.go`), `CHANGELOG.md`, `docs/user/benutzerhandbuch.md`. <!-- d-check:ignore (Pfade als Zitat) -->
 

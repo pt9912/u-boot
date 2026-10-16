@@ -10,7 +10,7 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md),
 [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md),
 [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md) und
-[`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md), weil die Pegelabbildung von
+[`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md), weil die Pegelabbildung von
 `--quiet` (Fehler-Pegel) aus dem Slice [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) kommt.
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Scope).
@@ -27,7 +27,7 @@ nicht geändert; der Code folgt dem Lastenheft. `spezifikation.md` und
 den CRs [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md),
 [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) und
 [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md) sowie dem Slice
-[`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md);
+[`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md);
 vorher nicht in die Spec schreiben.
 
 **Verantwortlich:** —
@@ -138,7 +138,7 @@ Steering-Loop-Lerneintrag geschrieben (§7).
   muss auch die Ausgabe-Filter prüfen.
 - **Reihenfolge-Abhängigkeit:** Die Spezifikation darf das Verhalten erst nach
   diesem Slice, den Slices [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) und
-  [`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md) und den CRs
+  [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md) und den CRs
   [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md),
   [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) und
   [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md) beschreiben. — **Ausgang:** entfallen: der

@@ -11,7 +11,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Welle:** ohne Welle — keine Closure-Bedingung, die von der DoD dieses Slice verschieden ist, und kein Release-Bezug.
 Herkunft: Review-Finding F-3 im [Report](../../../reviews/2026-10-16-slice-v1-cli-quiet-vorschau.md) des Slice
-[`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md) aus der Welle [`welle-cli-verbosity`](../welle-cli-verbosity.md).
+[`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md) aus der Welle [`welle-cli-verbosity`](../welle-cli-verbosity.md).
 
 **Bezug:** [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Dry-Run zeigt, was geschehen würde),
 [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) (Diff als Vorschau).
@@ -32,7 +32,7 @@ entscheidet ein CR, kein Code. `spezifikation.md` und `architecture.md` — kein
 **Stand heute (im Code gefunden):** Im Dry-Run melden `init` und `add` mit „Would …“ (`Would initialize`/`Would create:`, `Would add service`/`Would repair service`/`Would change:`).
 `remove`, `generate` und `config set` melden dieselbe Zeile wie nach dem Schreiben, in der Vergangenheitsform (`Removed service …`, `Generated …`, `config: a → b.`), obwohl nichts geschrieben wurde.
 Der Befund besteht **auch ohne `--quiet`** und hat keinen Bezug zu `--quiet`; er fiel im Review des Slice
-[`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md) auf (F-3), der unter `--quiet` ausgibt, was ohne `--quiet` ausgegeben wird.
+[`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md) auf (F-3), der unter `--quiet` ausgibt, was ohne `--quiet` ausgegeben wird.
 
 **Wortlaut [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run):** „Der Dry-Run muss anzeigen, welche Dateien erzeugt, geändert oder gelöscht **würden**, ohne Änderungen am Dateisystem vorzunehmen.“
 Die Zusage nennt den Konjunktiv für den Inhalt der Anzeige, aber kein Ausgabeformat und keine Zeilen-Formulierung; die Zeitform der Zusammenfassungszeile legt sie nicht ausdrücklich fest.
@@ -53,7 +53,7 @@ Die Zusage nennt den Konjunktiv für den Inhalt der Anzeige, aber kein Ausgabefo
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Verhalten unter `--quiet`** — [`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md) setzt es um; der Befund besteht davon unabhängig, und dieser Slice ändert keine Quiet-Zweige.
+- **Verhalten unter `--quiet`** — [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md) setzt es um; der Befund besteht davon unabhängig, und dieser Slice ändert keine Quiet-Zweige.
 - **Die Rangfolge der Verbosity-Optionen** — [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 - **Das JSON-Format des Dry-Runs** (`--dry-run --json`) — ein maschinenlesbarer Vertrag ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), Pflichtfelder), der von der Zeitform der Text-Zeile unberührt bleibt.
 - **Die Texte von `init` und `add`** — sie sagen schon „Would …“; Änderung nur, falls die Vereinheitlichung auf eine gemeinsame Form es verlangt (dann im Plan §3 ergänzen).
