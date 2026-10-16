@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** Slice [`slice-harness-internal-readmes-festlegungen-in-spec`](../plan/planning/done/slice-harness-internal-readmes-festlegungen-in-spec.md), Commit-Range `145fc42..HEAD` (Implementer `b636076`..`db27b3a`, Review-Fix `16cf4b4`, `58fd64d`, `e75655b`, Review-Report `fceea11`), Welle [`welle-harness-wartung`](../plan/planning/welle-harness-wartung.md) §3 (Closure-Trigger).
+**Gegenstand:** Slice [`slice-harness-internal-readmes-festlegungen-in-spec`](../plan/planning/done/slice-harness-internal-readmes-festlegungen-in-spec.md), Commit-Range `145fc42..HEAD` (Implementer `b636076`..`db27b3a`, Review-Fix `16cf4b4`, `58fd64d`, `e75655b`, Review-Report `fceea11`), Welle [`welle-harness-wartung`](../plan/planning/done/welle-harness-wartung.md) §3 (Closure-Trigger).
 
 ## Verification Evidence
 

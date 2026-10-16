@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** [`welle-harness-wartung`](../welle-harness-wartung.md) — folgt auf
+**Welle:** [`welle-harness-wartung`](welle-harness-wartung.md) — folgt auf
 [`slice-harness-dcheck-bump-reviewer-skill`](../done/slice-harness-dcheck-bump-reviewer-skill.md), damit sein Review mit dem aufgefrischten Skill läuft.
 
 **Bezug:** [`LH-LESE-003`](../../../../spec/lastenheft.md#lh-lese-003--dokumentenordnung)
