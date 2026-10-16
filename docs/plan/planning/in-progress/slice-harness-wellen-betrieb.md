@@ -18,7 +18,7 @@ Change Request auf
 (Dateinamen in `planning/`, Master-Dokumente). Der Slice ist das CR-Vehikel, wie
 [`slice-cr-adr-format-madr`](../done/slice-cr-adr-format-madr.md).
 
-**Berührte Spec-Stellen:** `LH-FA-PROJDOCS-003` (Lastenheft, Vertrags-Stratum) —
+**Berührte Spec-Stellen:** [`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle) (Lastenheft, Vertrags-Stratum) —
 Änderung nur nach Vereinbarung mit dem Projektinhaber (Lastenheft §16).
 
 **Verantwortlich:** pt9912
@@ -74,7 +74,7 @@ sich, ein `harness/conventions.md`-Eintrag reicht nicht (Lastenheft §16).
 
 ## 3. Plan (vor Code)
 
-**Vorgeschlagener Lastenheft-Wortlaut** (`LH-FA-PROJDOCS-003`, Absatz Dateinamen;
+**Vorgeschlagener Lastenheft-Wortlaut** ([`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle), Absatz Dateinamen;
 Freigabe steht aus):
 
 > Dateinamen in `planning/`: `slice-<phase>-<kebab-slug>.md` für Slice-Pläne,
@@ -84,11 +84,11 @@ Freigabe steht aus):
 > `carveouts.md`) liegen dauerhaft in `in-progress/`, das Beobachtungs-Register
 > `observations/` dauerhaft unter `planning/`; sie folgen keinem der drei Formate.
 
-§16-Zeile: `0.6.0 | 2026-10-16 | LH-FA-PROJDOCS-003: Welle-Pläne (welle-<kebab-slug>.md) und das Beobachtungs-Register als Planning-Artefakte zugelassen; Archivierung unberührt. | Vereinbarung mit dem Projektinhaber`.
+§16-Zeile (Version `0.6.0`, 2026-10-16): [`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle): Welle-Pläne (`welle-<kebab-slug>.md`) und das Beobachtungs-Register als Planning-Artefakte zugelassen; Archivierung unberührt. Verweis: Vereinbarung mit dem Projektinhaber.
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `spec/lastenheft.md` | update | `LH-FA-PROJDOCS-003`, Version, §16 (nach Freigabe) |
+| `spec/lastenheft.md` | update | [`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle), Version, §16 (nach Freigabe) |
 | `harness/conventions/MR-003-roadmap-wellen.md` | update | Release-Versionen bleiben die Wellen, aber als Welle-Dateien |
 | `docs/plan/planning/in-progress/roadmap.md` | update | „Offene Wellen“ als Zeiger, Ruhe-Marker |
 | `docs/plan/planning/README.md` | update | Slices vs. Wellen |
