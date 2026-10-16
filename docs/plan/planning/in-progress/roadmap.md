@@ -19,6 +19,8 @@ stehen in der Welle-Datei, nicht hier.
 
 Nichts in Arbeit.
 
+- [`welle-cli-verbosity`](../welle-cli-verbosity.md)
+
 ## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |

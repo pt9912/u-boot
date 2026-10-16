@@ -11,9 +11,8 @@
 Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`.
 
-**Welle:** ohne Welle — Spec-Wartung am Vertrags-Stratum; es gibt keine
-Closure-Bedingung außer der DoD dieses Slice (Wellen sind Release-Versionen,
-[`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md)).
+**Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — geht dem Code-Slice
+[`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md) voraus.
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Änderung),
 [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil),

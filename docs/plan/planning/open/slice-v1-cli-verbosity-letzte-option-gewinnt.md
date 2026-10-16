@@ -5,10 +5,9 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** ohne Welle — es gibt keine Closure-Bedingung außer der DoD dieses
-Slice; Wellen sind u-boots Release-Versionen
-([`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md)), und dieser Slice
-fordert keinen Release-Schnitt.
+**Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — folgt auf
+[`slice-cr-cli-quiet-fehler-und-warnungen`](slice-cr-cli-quiet-fehler-und-warnungen.md), weil die Pegelabbildung von
+`--quiet` aus dem CR kommt.
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Scope).
 Verwandt: [`slice-cr-cli-quiet-fehler-und-warnungen`](slice-cr-cli-quiet-fehler-und-warnungen.md)
@@ -74,6 +73,8 @@ benutzbar).
       wie `--quiet --verbose --quiet`, Einzel-Optionen, keine Option).
 - [ ] Doku-Update: `docs/user/benutzerhandbuch.md` (Optionstabellen, Zeilen
       um 299 und 1280) nennt „letzte Option gewinnt"; CHANGELOG-Eintrag.
+- [ ] Spezifikation: ein `SPEC-<NNN>` in `spezifikation.md` beschreibt Pegelabbildung und Rangfolge, deckungsgleich mit
+      Lastenheft 0.8.0 (nach dem CR) und Code, an [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) verankert; Zahlenwerte aus dem Code.
 - [ ] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
