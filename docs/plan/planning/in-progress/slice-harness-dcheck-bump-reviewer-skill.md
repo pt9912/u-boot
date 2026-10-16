@@ -40,7 +40,7 @@ Keine Anforderungsänderung — Skill-Pflege.
 
 ## 2. Definition of Done
 
-- [ ] `.harness/skills/reviewer.md` trägt die Vorlagen-Änderungen:
+- [x] `.harness/skills/reviewer.md` trägt die Vorlagen-Änderungen:
   `pfad` als Datei plus wörtliches Kurzzitat (Zeile nur als Lesehilfe), LOW nur
   mit Konventions-Anker, „Kein Stil-Polizist“, kein HIGH/MEDIUM ohne
   Failure-Szenario, `klasse` im Output-Schema, dazu die HIGH-Anker der Vorlage,
@@ -48,13 +48,13 @@ Keine Anforderungsänderung — Skill-Pflege.
   `AGENTS.md` §3.7, Norm nur im Template-Kommentar, Inline-`//nolint` nach
   `AGENTS.md` §3.2); `harness/review.md` ist im selben Zug nachgezogen, wo es
   dasselbe Schema führt.
-- [ ] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+- [x] `make gates` grün.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review.
-- [ ] Doku-Update für `MR-009`, falls deren Aussage den neuen Stand berührt.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
+- [x] Doku-Update für `MR-009`, falls deren Aussage den neuen Stand berührt.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang.
 
 ## 3. Plan (vor Code)
 
@@ -90,11 +90,33 @@ mit Steering-Loop-Eintrag geschrieben, `make gates` auf dem Stand vor dem
 
 - Der Reviewer-Skill ist durch MR-009 repo-gepflegt; die Vorlage ist kein
   Pflichtstand — übernommen wird nur, was `harness/review.md` nicht
-  widerspricht — **Ausgang:** offen bis zur Closure.
+  widerspricht — **Ausgang:** entfallen: geprüft, nichts Widersprüchliches
+  übernommen; der eine Widerspruch (Failure-Szenario gegen die Kommentar-Anker,
+  Review F-1) ist in Skill und `harness/review.md` aufgelöst.
 
 ## 7. Closure-Notiz
 
-Offen.
+**Belege:** Review-Report [`2026-10-16-slice-harness-dcheck-bump-reviewer-skill`](../../../reviews/2026-10-16-slice-harness-dcheck-bump-reviewer-skill.md)
+(0 HIGH, 1 MEDIUM, 3 LOW, 3 INFO; F-1, F-2, F-4 behoben); Verification Evidence
+[`2026-10-16-verification-slice-harness-dcheck-bump-reviewer-skill`](../../../reviews/2026-10-16-verification-slice-harness-dcheck-bump-reviewer-skill.md)
+(bestanden); `make gates` grün (Exit 0).
+
+- **Was hat funktioniert:** Der Abgleich ließ sich als Diff gegen `reviewer.template.md` führen; der Reviewer prüfte
+  ihn mit dem Skill, wie er nach dem Commit stand.
+- **Was ging anders als geplant:** Die Vorlage bringt drei HIGH-Anker mit, die der Plan nicht nannte (Kommentar,
+  Zustandsfeld, Norm nur im Template-Kommentar); sie standen durch `AGENTS.md` §3.7 schon als Repo-Regel da und
+  kamen mit hinein, die DoD wurde nachgezogen. Die neue Regel „kein HIGH/MEDIUM ohne Failure-Szenario" kollidierte
+  mit diesen Ankern (F-1); aufgelöst ist das Szenario dort das Versagen des nächsten Änderers. Der Slice nahm außerdem
+  der Roadmap den Ruhe-Marker, weil `in-progress/` nicht mehr leer war.
+- **Grenzen:** Der Skill ist die größere Menge gegenüber `harness/review.md`: die älteren Skill-HIGHs (Dual-Classifier,
+  Referenzmodell) und der Anker „Kommentar bricht mitten im Satz ab" stehen nur im Skill. Das Report-Gerüst der Baseline
+  kennt die Spalte `Risiko` nicht, die Skill und `review.md` verlangen; die vendorte Vorlage ändert dieser Slice nicht.
+- **Steering-Loop-Eintrag:** Reviewer-Skill und `harness/review.md` geschärft: `pfad` als Kurzzitat, `klasse` im Schema,
+  Failure-Szenario-Pflicht für HIGH/MEDIUM, LOW nur mit Konventions-Anker — liegt in `.harness/skills/reviewer.md`.
+  Gezählt, nicht als Regel mit Anker verkörpert, bleibt die Restlücke Skill ⊃ `review.md`.
+- **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt; die Restlücke trat zum ersten Mal auf.
+- **Folge-Slices:** keine.
+- **Risiken aus §6:** das eine Risiko trägt seinen Ausgang (entfallen, siehe §6).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
