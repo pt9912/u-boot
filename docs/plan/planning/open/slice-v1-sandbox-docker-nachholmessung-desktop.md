@@ -4,7 +4,7 @@
 Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`.
 
-**Welle:** Docker als verschachtelte Runtime (Lastenheft 0.5.0).
+**Welle:** [`welle-macos-verifikation`](../welle-macos-verifikation.md).
 
 **Bezug:** [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
 [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md).

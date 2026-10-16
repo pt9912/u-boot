@@ -6,6 +6,8 @@
 > Repo; das Tap-Repo selbst und das Secret legt der Projektinhaber an (siehe
 > §Offene Einrichtung unten). Der Slice bleibt bis dahin in `in-progress/`.
 
+**Welle:** [`welle-macos-verifikation`](../welle-macos-verifikation.md).
+
 ## Auslöser
 
 `spec/lastenheft.md` §14 listet sechs Distributionswege als

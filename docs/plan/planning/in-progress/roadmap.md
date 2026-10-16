@@ -17,16 +17,12 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Keine offene Welle-Datei. In Arbeit ist ein Slice ohne Welle (kein `Welle:`-Feld):
-[`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (v0.9.0 ist released, Tap-Nachzug lief;
-offen: macOS-Smoke im Tap zur Formel 0.9.0 und `brew install` auf einem Mac).
+- [`welle-macos-verifikation`](../welle-macos-verifikation.md)
 
 ## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
-| macOS-Distribution (Tap-Einrichtung offen) | Tap-Repo + Secret durch den Projektinhaber | [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) | S |
-| Docker als verschachtelte Runtime (Lastenheft 0.5.0): Docker-Desktop-Messung | Zugriff auf einen Mac mit Docker Desktop | [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) | S |
 | Harness-Scaffolding (Produkt) | [ADR-0011](../../adr/0011-agent-harness-scaffolding.md) accepted + Spec-Erweiterung + Lizenz-Check | `slice-vN-harness-bootstrap-scaffold` (noch kein Plan) | L |
 | Podman-first / Migration / Custom-Sources | Konkretisierung je Thema offen | `slice-vN-podman-formal`; `slice-later-migration` ([`LH-FA-CONF-006`](../../../../spec/lastenheft.md#lh-fa-conf-006--konfiguration-migrieren)); `slice-later-custom-data-sources` ([`LH-DA-004`](../../../../spec/lastenheft.md#lh-da-004--schema-migration)) | L |
 
