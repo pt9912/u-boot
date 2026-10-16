@@ -17,7 +17,7 @@ und die Familien `LH-FA-BUILD-*`, `LH-FA-PROJDOCS-*`, `LH-FA-ARCH-*`, `LH-QA-*`;
 (Dokumentenordnung) ist die Grundlage. Vorgänger-CR:
 [`slice-cr-adr-format-madr`](../done/slice-cr-adr-format-madr.md).
 Löst die Blockade von
-[`slice-harness-wellen-betrieb`](slice-harness-wellen-betrieb.md) (kein
+[`slice-harness-wellen-betrieb`](../open/slice-harness-wellen-betrieb.md) (kein
 Vertragswortlaut für Welle-Dateien mehr nötig).
 
 **Berührte Spec-Stellen:** Lastenheft (Vertrags-Stratum) §4.11–§4.13, §8, §12, §16;
@@ -69,7 +69,7 @@ zur Freigabe, Vorschlag in Klammern):
   der Slice verschiebt nur die Grenze zwischen Produkt und Prozess.
 - Umschreiben von Accepted ADRs, erledigten Slices, Reviews und Code-Kommentaren:
   ihre Verweise bleiben über die Grabsteine gültig; ADRs sind unveränderlich.
-- Der Wellen-Betrieb selbst: [`slice-harness-wellen-betrieb`](slice-harness-wellen-betrieb.md).
+- Der Wellen-Betrieb selbst: [`slice-harness-wellen-betrieb`](../open/slice-harness-wellen-betrieb.md).
 
 ## 2. Definition of Done
 
