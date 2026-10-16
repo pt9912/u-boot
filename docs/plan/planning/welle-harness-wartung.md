@@ -58,4 +58,28 @@ Skill, den der erste geliefert hat.
 
 ## 7. Closure-Notiz
 
-Offen.
+Detailquellen: die Closure-Notizen der beiden Slices
+([`slice-harness-dcheck-bump-reviewer-skill`](slice-harness-dcheck-bump-reviewer-skill.md) §7,
+[`slice-harness-internal-readmes-festlegungen-in-spec`](slice-harness-internal-readmes-festlegungen-in-spec.md) §7); die Welle ist
+kein Release, einen Release-Cut-Slice gibt es nicht.
+
+- **Geliefert:** Der Reviewer-Skill und `harness/review.md` tragen das Schema der Baseline `v6.18.1` (`pfad` als Kurzzitat,
+  `klasse`, Failure-Szenario-Pflicht, LOW mit Konventions-Anker). Sieben Festlegungen aus den `internal/`-READMEs stehen in der
+  Spezifikation (`SPEC-036`, `LH-FA-UP-001.a`, `SPEC-038` bis `SPEC-042`), die READMEs sind von 490 auf 109 Zeilen gekürzt.
+- **Closure-Trigger (§3):** Beide Slices liegen in `done/`. Der Review-Report des Spezifikations-Slice (`fceea11`) entstand nach dem
+  Move des Skill-Slice (`c9b1f4e`), also mit dem aufgefrischten Skill. `make doc-trace`: 83 Anforderungen, 0 Waisen. `make gates` grün.
+- **Was hat funktioniert:** Die Reihenfolge trug: Der Review mit dem neuen Skill fand einen echten Spec-Fehler (`SPEC-039`),
+  den die Inventur nicht gefunden hatte.
+- **Was ging anders als geplant:** Die Inventur deckte eine Abweichung Lastenheft gegen Code bei der Verbosity auf, die nicht zur Welle
+  gehört. Der Skill-Slice nahm drei HIGH-Anker über seine DoD hinaus mit (die DoD ist nachgezogen).
+- **Trigger-Audit:** Carveout: keiner berührt, `carveouts.md` unverändert; 0 offen. Bootstrap-aware Gate: `coverage-gate` 90,90 % gegen
+  90 %, unverändert; 0 offen. ADR: keine ADR trägt einen eingetretenen Re-Evaluierungs-Trigger; 0 offen.
+- **Steering-Loop-Einträge:** Kein Eintrag über der Schwelle (das Beobachtungs-Register ist leer). Gezählt, nicht verkörpert:
+  Skill ⊃ `harness/review.md` (die älteren Skill-HIGHs stehen nur im Skill), und eine Spec, die ein README statt den Code abschreibt.
+- **Beobachtungs-Register:** keine Beobachtung angelegt.
+- **Folge-Slices:** [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Code),
+  [`slice-cr-cli-quiet-fehler-und-warnungen`](../open/slice-cr-cli-quiet-fehler-und-warnungen.md) (CR am Lastenheft),
+  [`slice-v2-homebrew-smoke-haertung`](../open/slice-v2-homebrew-smoke-haertung.md) (aus der Vorwelle, unverändert offen).
+- **Verifikation:** `make gates` Exit 0; Verification Evidence je Slice unter `docs/reviews/`
+  ([Skill-Slice](../../reviews/2026-10-16-verification-slice-harness-dcheck-bump-reviewer-skill.md),
+  [Spezifikations-Slice](../../reviews/2026-10-16-verification-slice-harness-internal-readmes-festlegungen-in-spec.md)).
