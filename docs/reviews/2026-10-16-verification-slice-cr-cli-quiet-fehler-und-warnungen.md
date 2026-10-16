@@ -2,12 +2,12 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der CR richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** CR-Slice [`slice-cr-cli-quiet-fehler-und-warnungen`](../plan/planning/in-progress/slice-cr-cli-quiet-fehler-und-warnungen.md) (Delivery `b5fa4b4`, Review-Fix `5a20103`), Welle [`welle-cli-verbosity`](../plan/planning/welle-cli-verbosity.md) §3 bis §5 (CR zuerst). Maßstab: Slice §1 (CR-Kern, Nicht-Ziele), §2 (DoD), §3, §6. Review-Report: [`2026-10-16-slice-cr-cli-quiet-fehler-und-warnungen.md`](2026-10-16-slice-cr-cli-quiet-fehler-und-warnungen.md).
+**Gegenstand:** CR-Slice [`slice-cr-cli-quiet-fehler-und-warnungen`](../plan/planning/done/slice-cr-cli-quiet-fehler-und-warnungen.md) (Delivery `b5fa4b4`, Review-Fix `5a20103`), Welle [`welle-cli-verbosity`](../plan/planning/welle-cli-verbosity.md) §3 bis §5 (CR zuerst). Maßstab: Slice §1 (CR-Kern, Nicht-Ziele), §2 (DoD), §3, §6. Review-Report: [`2026-10-16-slice-cr-cli-quiet-fehler-und-warnungen.md`](2026-10-16-slice-cr-cli-quiet-fehler-und-warnungen.md).
 
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-cr-cli-quiet-fehler-und-warnungen`](../plan/planning/in-progress/slice-cr-cli-quiet-fehler-und-warnungen.md)
+- Slice: [`slice-cr-cli-quiet-fehler-und-warnungen`](../plan/planning/done/slice-cr-cli-quiet-fehler-und-warnungen.md)
 - IDs: [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Änderung), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)
 - Artefakte: `spec/lastenheft.md` (Versionsfeld, `LH-FA-CLI-005`, §16), `CHANGELOG.md` `[Unreleased]`; kein Go-Code im Diff. <!-- d-check:ignore (Pfade als Zitat) -->
 

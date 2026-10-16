@@ -10,7 +10,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — folgt auf
-[`slice-cr-cli-quiet-fehler-und-warnungen`](../in-progress/slice-cr-cli-quiet-fehler-und-warnungen.md) (die Ausnahme steht erst nach
+[`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) (die Ausnahme steht erst nach
 Lastenheft 0.8.0 im Vertrag) und geht
 [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md) voraus (siehe §4: beide ändern
 `root.go` und `verbosity_test.go`).
@@ -19,7 +19,7 @@ Lastenheft 0.8.0 im Vertrag) und geht
 [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil),
 [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer).
 Herkunft: Entscheidung des Projektinhabers (2026-10-16), festgehalten im CR
-[`slice-cr-cli-quiet-fehler-und-warnungen`](../in-progress/slice-cr-cli-quiet-fehler-und-warnungen.md).
+[`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md).
 
 **Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)) — wird
 nicht geändert; der Code folgt dem Lastenheft (Fassung aus dem CR, Lastenheft 0.8.0).
@@ -129,7 +129,7 @@ ist ein No-op).
 ## 4. Trigger
 
 **Start** (`next` → `in-progress`): Lastenheft 0.8.0 ist angenommen (der CR
-[`slice-cr-cli-quiet-fehler-und-warnungen`](../in-progress/slice-cr-cli-quiet-fehler-und-warnungen.md) liegt in `done/`) und der Projektinhaber
+[`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) liegt in `done/`) und der Projektinhaber
 priorisiert den Slice.
 
 **Reihenfolge zum Slice [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md):**

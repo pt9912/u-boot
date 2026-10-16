@@ -26,7 +26,7 @@ Code es tragen.
 - Die Welle [`welle-harness-wartung`](done/welle-harness-wartung.md) liegt in `done/` (geschlossen 2026-10-16).
 - Die Entscheidung des Projektinhabers liegt vor (2026-10-16): `--quiet` zeigt nur Fehler; die einzige Ausnahme sind die
   Sandbox-Lockerungs-Hinweise. Sie steht im CR
-  [`slice-cr-cli-quiet-fehler-und-warnungen`](in-progress/slice-cr-cli-quiet-fehler-und-warnungen.md) (vorgeschlagene Fassung von
+  [`slice-cr-cli-quiet-fehler-und-warnungen`](done/slice-cr-cli-quiet-fehler-und-warnungen.md) (vorgeschlagene Fassung von
   [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)); der Trigger ist damit eingetreten.
 
 ## 3. Closure-Trigger (Welle schließt)
@@ -44,7 +44,7 @@ Lastenheft, die beiden Code-Slices den Adapter, und die Spezifikation beschreibt
 
 | Slice | Titel | Bezug |
 |---|---|---|
-| [`slice-cr-cli-quiet-fehler-und-warnungen`](in-progress/slice-cr-cli-quiet-fehler-und-warnungen.md) | CR: Ausnahme der Sicherheitslockerungen unter `--quiet` (zuerst) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
+| [`slice-cr-cli-quiet-fehler-und-warnungen`](done/slice-cr-cli-quiet-fehler-und-warnungen.md) | CR: Ausnahme der Sicherheitslockerungen unter `--quiet` (zuerst) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
 | [`slice-v1-cli-quiet-nur-fehler`](open/slice-v1-cli-quiet-nur-fehler.md) | Code: `--quiet` zeigt nur Fehler, Sandbox-Lockerungs-Hinweise bleiben | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
 | [`slice-v1-cli-verbosity-letzte-option-gewinnt`](open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) | Code: die zuletzt angegebene Option gewinnt, danach der Spezifikations-Eintrag | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) |
 
