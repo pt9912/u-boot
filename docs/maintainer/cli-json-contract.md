@@ -103,9 +103,11 @@ auf. Der All-OK-Fall serialisiert ein leeres Array (`diagnostics: []`).
 
 ### 2.2 Konsequenz: `--quiet` ist im JSON-Modus ein No-op
 
-`--quiet` filtert im Plaintext-Output die OK-Items. Im JSON-Modus
-sind OK-/Info-Items per §2.1 bereits ausgeschlossen — `--quiet`
-hat keinen zusätzlichen Filter-Effekt. `u-boot doctor --quiet --json`
+`--quiet` zeigt im Plaintext-Output nur Fehler-Einträge und die
+Degradations-Fallback-Einträge ([LH-FA-CLI-005](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)). Im JSON-Modus
+sind OK-/Info-Items per §2.1 bereits ausgeschlossen, und `--quiet`
+filtert die Warn-Einträge nicht — `--quiet` hat keinen
+zusätzlichen Filter-Effekt. `u-boot doctor --quiet --json`
 liefert einen **semantisch identischen** Envelope wie
 `u-boot doctor --json` (gleiche `status`/`exitCode`, gleiche
 `diagnostics`-Reihenfolge mit gleichen `code`/`level`-Paaren).
