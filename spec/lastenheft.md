@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.9.0                                                              |
+| Version          | 0.10.0                                                             |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -193,7 +193,7 @@ Unter `--quiet` geben die Subkommandos, die etwas ändern (`init`, `generate`, `
 3. der Fortschritt einzelner Services bei `u-boot up` (Pull, Create, Start, Healthcheck; [`LH-NFA-PERF-002`](#lh-nfa-perf-002--startzeit-abhängig-von-docker));
 4. die Zusammenfassung der betroffenen Pfade, die `--force` vor dem Überschreiben ausgibt ([`LH-FA-CLI-005A`](#lh-fa-cli-005a--interaktivität-und-automatisierung), [`LH-FA-INIT-005`](#lh-fa-init-005--überschreibschutz)).
 
-Alle anderen Hinweise und Warnungen entfallen unter `--quiet`. Die Ausgabe der Abfragebefehle, die nichts verändern (`config get`, `config list`, `logs`, `template list`), ist das Ergebnis des Befehls und bleibt.
+Alle anderen Hinweise und Warnungen entfallen unter `--quiet`. Die Ausgabe der Abfragebefehle, die nichts verändern (`config get`, `config list`, `logs`, `template list`), ist das Ergebnis des Befehls und bleibt. Ebenso ist die Ausgabe der Vorschau-Optionen `--dry-run` und `--diff` ([`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](#lh-fa-cli-008--diff-ausgabe)) — der geplante Änderungsplan und die Diff-Darstellung — das Ergebnis des Aufrufs und bleibt. Die Erfolgs- und Zusammenfassungsmeldung, die ein tatsächliches Schreiben abschließt, ist keine Vorschau und entfällt auch bei `--diff` ohne `--dry-run`.
 
 Werden mehrere Verbosity-Optionen gleichzeitig angegeben (z. B. `--quiet --verbose`), gewinnt die zuletzt auf der Kommandozeile angegebene Option. Eine Validierungsabweisung wegen Mehrfachangabe erfolgt nicht.
 
@@ -1557,6 +1557,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.7.0 | 2026-10-16 | [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): Zusage für `nestedRuntime: docker` auf die gemessenen Hosts eingegrenzt: Docker auf Linux und Colima (Linux-VM). Docker Desktop ist nicht mehr zugesagt, weil es nicht gemessen ist; Podman als Host-Engine bleibt ausgeschlossen. | Vereinbarung mit dem Projektinhaber |
 | 0.8.0 | 2026-10-16 | [`LH-FA-CLI-005`](#lh-fa-cli-005--verbosity-und-logging): Ausnahme für Sicherheitslockerungen unter `--quiet` ergänzt: Die Ausweisung von Sicherheitslockerungen (zusätzliche Capabilities, `--privileged`, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices) nach [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) und [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion) bleibt sichtbar, ein Skript mit `--quiet` schaltet sie nicht stumm; alle anderen Hinweise entfallen. Die Stufenbeschreibungen („`--quiet` – nur Fehler“) und die Regel „die zuletzt angegebene Option gewinnt“ bleiben unverändert. | Vereinbarung mit dem Projektinhaber |
 | 0.9.0 | 2026-10-16 | [`LH-FA-CLI-005`](#lh-fa-cli-005--verbosity-und-logging): Vier Ausnahmen unter `--quiet` (Sicherheitslockerungen, Ausweisung der Degradations-Fallbacks nach [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), Fortschritt von `u-boot up` nach [`LH-NFA-PERF-002`](#lh-nfa-perf-002--startzeit-abhängig-von-docker), `--force`-Zusammenfassung nach [`LH-FA-CLI-005A`](#lh-fa-cli-005a--interaktivität-und-automatisierung) und [`LH-FA-INIT-005`](#lh-fa-init-005--überschreibschutz)); die ändernden Subkommandos geben unter `--quiet` nur Fehler aus, `u-boot doctor` nur Fehler-Einträge, die Abfragebefehle (`config get`, `config list`, `logs`, `template list`) behalten ihre Ausgabe; die Stufen und die Mehrfachangabe-Regel bleiben unverändert. | Vereinbarung mit dem Projektinhaber |
+| 0.10.0 | 2026-10-16 | [`LH-FA-CLI-005`](#lh-fa-cli-005--verbosity-und-logging): Die Ausgabe der Vorschau-Optionen `--dry-run` und `--diff` ([`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](#lh-fa-cli-008--diff-ausgabe)) ist das Ergebnis des Aufrufs und bleibt unter `--quiet`; die Erfolgs- und Zusammenfassungsmeldung eines tatsächlichen Schreibens entfällt auch bei `--diff` ohne `--dry-run`; die Stufen, die vier Ausnahmen und die Mehrfachangabe-Regel bleiben unverändert. | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt
