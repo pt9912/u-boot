@@ -1,0 +1,155 @@
+# Slice CR: Lastenheft nur mit Produktanforderungen — Prozess-Anforderungen als Grabsteine
+
+**Lifecycle:** Der Zustand dieses Slice ist das Verzeichnis, in dem diese
+Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
+wechselt nur durch `git mv`, siehe
+Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
+
+**Welle:** ohne Welle — keine Closure-Bedingung, die von der DoD dieses Slice
+verschieden ist (Change Request am Vertrags-Stratum).
+
+**Bezug:** Dieser Slice **ist** der Change Request. Prinzip (Projektinhaber,
+2026-10-16): Das Lastenheft beschreibt die Anforderungen **des Tools**, nicht die
+des Entwicklungsprozesses; der steht im Regelwerk. Betroffen sind
+[`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)
+und die Familien `LH-FA-BUILD-*`, `LH-FA-PROJDOCS-*`, `LH-FA-ARCH-*`, `LH-QA-*`;
+[`LH-LESE-003`](../../../../spec/lastenheft.md#lh-lese-003--dokumentenordnung)
+(Dokumentenordnung) ist die Grundlage. Vorgänger-CR:
+[`slice-cr-adr-format-madr`](../done/slice-cr-adr-format-madr.md).
+Löst die Blockade von
+[`slice-harness-wellen-betrieb`](slice-harness-wellen-betrieb.md) (kein
+Vertragswortlaut für Welle-Dateien mehr nötig).
+
+**Berührte Spec-Stellen:** Lastenheft (Vertrags-Stratum) §4.11–§4.13, §8, §12, §16;
+Spezifikation (Verfeinerungen der entfallenden Anforderungen); Architektur-Sicht
+(Verweise). Änderung des Lastenhefts nur nach Vereinbarung mit dem Projektinhaber
+(Lastenheft §16) — die Einzelentscheidungen in §2 stehen zur Freigabe.
+
+**Verantwortlich:** pt9912
+
+**Autor:** pt9912. **Datum:** 2026-10-16.
+
+---
+
+## 1. Ziel und Abgrenzung
+
+**Ziel:** Das Lastenheft enthält nur noch Zusagen, die das Produkt `u-boot` dem
+Nutzer gibt. Die 22 Anforderungen, die den Bau, die Doku und die Qualitätssicherung
+der u-boot-Codebase regeln, entfallen als **Grabstein** (Überschrift und ID bleiben,
+ein Satz nennt Version und neuen Ort); die ID wird nie wieder vergeben.
+
+**Warum Grabsteine:** Die IDs stehen in Accepted ADRs (unveränderlich), in
+erledigten Slices, Reviews, CI, Skripten und Code-Kommentaren (zusammen über 600
+Verweise in mehr als 200 Dateien). Ein entfernter Anker bräche sie; ein Grabstein
+hält jeden dieser Links gültig.
+
+| Familie | Anforderungen | Neuer Ort der Regelung |
+|---|---|---|
+| [`LH-FA-BUILD-001`](../../../../spec/lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)..`009` (§4.11) | Dockerfile, Runtime-Stage, Pins, `.dockerignore`, Makefile, Aggregatoren, Docker-only, Coverage-Bootstrap, Repo-Layout | Regelwerk (Docker-Harness, Quality Gates); Festlegungen bleiben als `SPEC-<NNN>`; Sensor-Dateien und `harness/README.md` |
+| [`LH-FA-PROJDOCS-001`](../../../../spec/lastenheft.md#lh-fa-projdocs-001--mindeststruktur)..`006` (§4.12) | Mindeststruktur, ADR-Format, Planning-Lifecycle, Carveouts, Referenzmodell, Archivierung | Regelwerk (Spec, ADRs, Planung, Carveouts); u-boot-Abweichungen als `MR-<NNN>` |
+| [`LH-FA-ARCH-001`](../../../../spec/lastenheft.md#lh-fa-arch-001--hexagonales-pattern)..`003` (§4.13) | hexagonales Pattern, Schichten, Import-Regeln | Architektur-Sicht `spec/architecture.md`, [`SPEC-012`](../../../../spec/spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal)/[`SPEC-013`](../../../../spec/spezifikation.md#spec-013--import-regel-tabelle-der-schichten), [`ADR-0002`](../../adr/0002-hexagonale-architektur.md) |
+| [`LH-QA-001`](../../../../spec/lastenheft.md#lh-qa-001--automatisierte-tests)..`004` (§8) | Tests, Akzeptanzkriterien, CI, Lint | Regelwerk (Quality Gates, Verification), [`ADR-0003`](../../adr/0003-solid-nahes-lint-profil.md), [`ADR-0004`](../../adr/0004-ci-system.md) |
+
+**Prüfpunkte — Produktzusagen in den Prozess-Blöcken** (je Einzelentscheidung
+zur Freigabe, Vorschlag in Klammern):
+
+1. [`LH-FA-BUILD-002`](../../../../spec/lastenheft.md#lh-fa-build-002--runtime-stage-pflichten) (Runtime-Image: minimal, shell-los, Non-root, OCI-Labels): das
+   ausgelieferte Image ist ein Produktmerkmal (Distribution, siehe [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)).
+   (Vorschlag: als Produktzusage in den Distributions-Abschnitt übernehmen, die
+   Stage-Mechanik entfällt.)
+2. [`LH-QA-002`](../../../../spec/lastenheft.md#lh-qa-002--testbare-akzeptanzkriterien) (jede funktionale Anforderung ist durch einen Akzeptanztest
+   überprüfbar): Eigenschaft des Lastenhefts selbst. (Vorschlag: als Satz in den
+   Lesehinweisen behalten.)
+3. [`LH-QA-001`](../../../../spec/lastenheft.md#lh-qa-001--automatisierte-tests), [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions), [`LH-QA-004`](../../../../spec/lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil): reine Prozess-Anforderungen.
+   (Vorschlag: entfallen.)
+
+**Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
+
+- Änderung produktbezogener Anforderungen (`LH-FA-CLI-*`, `-INIT-*`, `-DEV-*` usw.):
+  der Slice verschiebt nur die Grenze zwischen Produkt und Prozess.
+- Umschreiben von Accepted ADRs, erledigten Slices, Reviews und Code-Kommentaren:
+  ihre Verweise bleiben über die Grabsteine gültig; ADRs sind unveränderlich.
+- Der Wellen-Betrieb selbst: [`slice-harness-wellen-betrieb`](slice-harness-wellen-betrieb.md).
+
+## 2. Definition of Done
+
+- [ ] **Freigabe** der Einzelentscheidungen (§1 Prüfpunkte, Grabstein-Form, Version
+  `0.6.0`) durch den Projektinhaber liegt vor.
+- [ ] **Lastenheft:** 22 Anforderungen als Grabsteine (Form:
+  `### LH-FA-BUILD-001 – entfallen (0.6.0)` und ein Satz mit neuem Ort ohne <!-- d-check:ignore (Form des Grabsteins, keine Referenz) -->
+  Abwärtsverweis auf Planung/ADR), Einleitungen der Abschnitte §4.11–§4.13
+  angepasst, §12 MVP-Umfang und §9 von Verweisen auf entfallene Anforderungen
+  bereinigt, Version `0.6.0`, Zeile in §16 Historie.
+- [ ] **Spezifikation:** die 16 Verfeinerungen `…​.a`/`.b` der entfallenden
+  Anforderungen sind auf `SPEC-<NNN>` umgestellt (Zuordnungstabelle im Slice-Anhang),
+  [`SPEC-006`](../../../../spec/spezifikation.md#spec-006--build-args-des-dockerfiles-und-pin-politik)..[`SPEC-013`](../../../../spec/spezifikation.md#spec-013--import-regel-tabelle-der-schichten) nennen keine entfallene Anforderung als Eltern.
+- [ ] **Lebende Verweise nachgezogen:** `spec/architecture.md`, `AGENTS.md`,
+  `harness/` (Sensor-Dateien, README, `conventions`), `docs/user/`, `docs/maintainer/`,
+  READMEs zeigen auf den neuen Ort. Historische Stellen bleiben (Grabstein).
+- [ ] d-check-Modul `trace` und `doc-complete`: Verhalten der Grabsteine geprüft
+  (keine Requirement-Waisen-Meldung durch Grabsteine).
+- [ ] `make gates` grün.
+- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+      (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
+      Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review.
+- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
+
+## 3. Plan (vor Code)
+
+| Datei / Komponente | Änderungs-Art | Begründung |
+|---|---|---|
+| `spec/lastenheft.md` | update | Grabsteine, Abschnittseinleitungen, §9, §12, Version, §16 (nach Freigabe) |
+| `spec/spezifikation.md` | update | `.a`/`.b`-Verfeinerungen → `SPEC-<NNN>`; Eltern-Verweise |
+| `spec/architecture.md` | update | 23 Verweise auf `LH-FA-ARCH-*` |
+| `harness/sensors/*.md`, `harness/README.md`, `harness/conventions.md`, `harness/conventions/MR-*.md` | update | Bindungen auf Anforderungen, die entfallen |
+| `AGENTS.md` | update | Zeiger-Tabelle (§3.8) nennt `LH-FA-PROJDOCS-*` |
+| `docs/user/`, `docs/maintainer/`, `README*.md` | update | lebende Verweise |
+| `.d-check.yml` | prüfen | `trace`-Familien, `ids`-Muster |
+
+Ansatz: erst die Zuordnungstabelle (alt → neu) und die Grabstein-Texte als Entwurf
+im Anhang dieses Slice zur Freigabe, dann Lastenheft, dann Spezifikation, dann die
+lebenden Verweise, je ein Commit.
+
+## 4. Trigger
+
+**Start** (`next` → `in-progress`): Priorisierung durch den Projektinhaber
+(erfolgt 2026-10-16: Entscheidung „alle vier Familien“).
+
+**Rückführungen — vorab benannt:**
+
+- `in-progress` → `next` (zu groß): Familien einzeln als eigene CR-Slices führen
+  (Reihenfolge `PROJDOCS`, `BUILD`, `QA`, `ARCH`).
+- `in-progress` → `open` (blockiert): der Projektinhaber gibt eine Einzelentscheidung
+  (§1 Prüfpunkte) nicht frei.
+
+## 5. Closure-Trigger
+
+DoD vollständig, Review- und Verification-Evidence liegen vor, Closure-Notiz
+geschrieben, `make gates` grün.
+
+## 6. Risiken und offene Punkte
+
+- Verweise in lebenden Dokumenten bleiben auf eine entfallene Anforderung stehen und
+  wirken wie eine geltende Zusage — **Ausgang:** offen; Suche nach den 22 IDs
+  außerhalb von `done/`, `docs/reviews/` und Accepted ADRs vor der Closure.
+- Eine Produktzusage in den Prozess-Blöcken geht verloren (Prüfpunkte §1) —
+  **Ausgang:** offen bis zur Freigabe.
+- `ARCH`/`QA` tragen die Bindungen der Gates (`depguard`, Coverage-Schwelle); die
+  Sensor-Dateien und ADRs verweisen auf sie — **Ausgang:** offen; neue Bindung ist
+  die ADR oder `SPEC-<NNN>`.
+
+## 7. Closure-Notiz
+
+Offen.
+
+## 8. Sub-Area-Prüfungen und Modus-Begründung
+
+**Vorgelagert — Sub-Area-Wahl prüfen:** berührt sind `spec/`, `harness/` und
+`docs/plan/`
+([`conventions.md`](../../../../harness/conventions.md) §Modus-Deklaration);
+keine Ausdifferenzierung nötig.
+
+**Vorgelagert — offene Beobachtungen sichten:** das Register ist leer.
+
+**Modus:** alle berührten Sub-Areas GF.
