@@ -9,7 +9,7 @@ wechselt nur durch `git mv`.
 **Bezug:** [`slice-harness-regelwerk-adoption-v6.18.1`](../done/slice-harness-regelwerk-adoption-v6.18.1.md);
 [`MR-004`](../../../../harness/conventions/MR-004-regelwerk-vendored.md);
 Gates-Haltung [`MR-005`](../../../../harness/conventions/MR-005-gate-haltung-docs-check.md);
-Adaption [`MR-011`](../../../../harness/conventions/MR-011-werkzeug-fragmente-repo-gefuehrt.md).
+Adaption [`MR-011`](../../../../harness/conventions.md#mr-011).
 
 **Berührte Spec-Stellen:** —
 
@@ -54,7 +54,7 @@ die gewählten Teile einhängen.
 - [x] Entscheidung je Fragment dokumentiert (§2).
 - [x] Übernommene Teile in `Makefile` eingebunden, `harness/README.md`
   §Sensors und `.d-check.yml` (`targets.makefiles`) nachgezogen, Adaption als
-  [`MR-011`](../../../../harness/conventions/MR-011-werkzeug-fragmente-repo-gefuehrt.md).
+  [`MR-011`](../../../../harness/conventions.md#mr-011).
 - [x] `make gates` grün (lint, test, coverage-gate, docs-check; Stempel
   geschrieben, Stop-Hook gibt frei) und `make docs-check` grün.
 - [x] Review durchgeführt: [`Report`](../../../reviews/2026-10-16-slice-harness-werkzeug-schicht-ai-harness-init.md)

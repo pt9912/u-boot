@@ -1,14 +1,14 @@
 # MR-005 — Gate-Haltung: `docs-check` via direktem Container-Lauf; `scan.ignore` erweitert
 
 - **Datum:** 2026-07-24
-- **Geltungsbereich:** [`.d-check.yml`](../../.d-check.yml), [`Makefile`](../../Makefile)
+- **Geltungsbereich:** [`.d-check.yml`](../../.d-check.yml), [`d-check.mk`](../../d-check.mk)
   (`docs-check`).
 - **Ersetzt-Baseline-Regel:** [`modul-02-harness-bootstrap.md` §Gate-Fragment `d-check.mk` (Schritt 2)](../../.harness/baseline/v6.18.1/regelwerk/modul-02-harness-bootstrap.md#gate-fragment-d-checkmk-schritt-2)
-- **Adaption (neu gefasst 2026-07-25):** u-boot bindet das **tool-generierte
-  Fragment** `d-check.mk` per `include` ein (`--print-mk`) und haelt `docs-check`
-  als duennen Alias auf dessen `doc-check`. Der Digest-Pin lebt als
-  `DCHECK_DIGEST` im `Makefile`, **nicht** im Fragment - ein Re-Generieren
-  ueberschreibt ihn damit nicht. Aktive Module:
+- **Adaption (neu gefasst 2026-10-16):** `d-check.mk` schreibt
+  `ai-harness-init` ([`MR-012`](../conventions.md#mr-012)); es fuehrt `docs-check`
+  als das Befund-Gate (die Vorlage nennt es nicht `doc-check`) und traegt den
+  Image-Digest selbst. Das `Makefile` bindet es ueber die Fragmente ein, `docs-check`
+  haengt in `GATE_CHECKS`. Aktive Module:
   `[links, anchors, ids, matrix, planning, targets]`.
   **Arbeitsfluss-Regel aus `planning` (2026-07-25):** Das Modul koppelt "die
   Roadmap benennt eine aktive Welle" an "ein `slice-*` liegt in `in-progress/`".
@@ -78,17 +78,15 @@
   bestehenden Doku-Referenz-Vertrag. Der `scan.ignore`-Glob verengt **nicht** auf einen Tag,
   damit kuenftige vendored Staende automatisch erfasst sind; `.harness/skills/`
   (`MR-009`) bleibt ausserhalb des Baseline-Globs und damit pruefbar.
-- **Fragment-Re-Generierung:** Bei einem Image-Bump wird `d-check.mk` neu
-  erzeugt (`--print-mk` aus dem **neuen** Image, Ausgabe nach `d-check.mk`);
-  der Digest im `Makefile` wird separat gesetzt. Das Fragment ist generiert -
-  Handaenderungen daran waeren stille Drift und gehoeren stattdessen ins
-  `Makefile` (eigene Targets) oder in `.d-check.yml` (Konfiguration).
-- **Gate-Image-Stand:** `v0.51.1` (digest-gepinnt, Bump 2026-07-25 von `0.2.0`).
-  Der Pin war 50 Releases alt geworden - es gibt fuer ihn **keine**
+- **Fragment-Re-Generierung:** `d-check.mk` ist generiert; Handaenderungen daran
+  gehen beim naechsten Lauf des Werkzeugs verloren und gehoeren stattdessen in
+  `repo.mk` (eigene Targets) oder in `.d-check.yml` (Konfiguration).
+- **Gate-Image-Stand:** `v0.86.1` (digest-gepinnt, Bump 2026-10-16 von `v0.51.1` mit
+  dem Lauf von `ai-harness-init`, [`slice-harness-ai-harness-init-adoption`](../../docs/plan/planning/in-progress/slice-harness-ai-harness-init-adoption.md)).
+  Der Pin kommt mit dem Programm des Werkzeugs; es gibt fuer ihn **keine**
   Aktualitaets-Routine (anders als fuer die Regelwerk-Baseline, s. Abschnitt
-  Freshness-Audit). Bump-Prozedur heute: `DCHECK_DIGEST` im `Makefile` auf den
-  Digest der Zielversion, Trockenlauf gegen die **unveraenderte**
-  `.d-check.yml` (Regression), dann diesen Stand nachziehen.
+  Freshness-Audit). Ein neuer Stand kommt mit einem neueren Programm; danach
+  Trockenlauf gegen die **unveraenderte** `.d-check.yml` (Regression).
 - **Aufloesungs-Trigger:** Der Teil "Modul-Auswahl bei d-check-Upgrade
   re-evaluieren" ist mit dem Bump auf `v0.51.1` **eingeloest**: Delta gesichtet,
   Kandidaten benannt, Auswahl bewusst vertagt (Protokoll im Slice

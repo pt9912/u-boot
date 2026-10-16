@@ -8,7 +8,7 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 **Welle:** ohne Welle — keine Closure-Bedingung, die von der DoD dieses Slice
 verschieden ist (Wartungsarbeit am Harness).
 
-**Bezug:** [`MR-011`](../../../../harness/conventions/MR-011-werkzeug-fragmente-repo-gefuehrt.md)
+**Bezug:** [`MR-011`](../../../../harness/conventions.md#mr-011)
 (Auflösungs-Trigger: u-boot führt `ai-harness-init` ein),
 [`MR-004`](../../../../harness/conventions/MR-004-regelwerk-vendored.md),
 [`MR-005`](../../../../harness/conventions/MR-005-gate-haltung-docs-check.md);

@@ -3,13 +3,13 @@
 Rolle: Verifier (frischer Kontext), Datum 2026-10-16, Range `28cb8fe..2fd8c65`.
 Gegenstand: [`Slice`](../plan/planning/done/slice-harness-werkzeug-schicht-ai-harness-init.md),
 Review: [`Report`](2026-10-16-slice-harness-werkzeug-schicht-ai-harness-init.md),
-Adaption [`MR-011`](../../harness/conventions/MR-011-werkzeug-fragmente-repo-gefuehrt.md).
+Adaption [`MR-011`](../../harness/conventions.md#mr-011).
 
 ## Verification Evidence
 
 Scope:
 - Slice: slice-harness-werkzeug-schicht-ai-harness-init <!-- d-check:ignore (Slice-Kennung im Zeitdokument) -->
-- IDs: [`MR-011`](../../harness/conventions/MR-011-werkzeug-fragmente-repo-gefuehrt.md), [`MR-005`](../../harness/conventions/MR-005-gate-haltung-docs-check.md), [`MR-004`](../../harness/conventions/MR-004-regelwerk-vendored.md); keine `LH-*`/`ADR-*` berührt (Slice: „Berührte Spec-Stellen: —")
+- IDs: [`MR-011`](../../harness/conventions.md#mr-011), [`MR-005`](../../harness/conventions/MR-005-gate-haltung-docs-check.md), [`MR-004`](../../harness/conventions/MR-004-regelwerk-vendored.md); keine `LH-*`/`ADR-*` berührt (Slice: „Berührte Spec-Stellen: —")
 - Artefakte: `Makefile`, `harness/mk/`, `tools/harness/`, `.githooks/`, `.claude/`, `.gitignore`, `.d-check.yml`, `harness/README.md`, `harness/conventions.md`
 
 DoD-Abgleich:

@@ -69,3 +69,4 @@ Baseline still.
 - **Nicht-Ziele:** kein Eintrag in `make gates` oder `make ci` - ein
   Kurs-Release darf u-boots Pipeline nicht rot faerben; kein automatischer
   Vendor-Lauf; keine Pin-Mutation durch den Check.
+- **Integritaets-Gate:** `make baseline-verify` (Fragment `harness/mk/baseline.mk`, [`MR-012`](../conventions.md#mr-012)) prueft den vendorten Bestand netzlos und haengt in `make gates`; `fetch-baseline-cache.sh --verify` leistet dasselbe auf dem Host, das Skript bleibt fuer Vendor-Lauf und Freshness-Audit.
