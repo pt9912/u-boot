@@ -81,7 +81,23 @@ Vollständige Kategorie-Definitionen: [`harness/review.md`](../../harness/review
 - **Gate- oder Harness-Lockerung.** Docker-only-Workflow umgangen
   ([`SPEC-031`](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)),
   Coverage-Schwelle oder Lint-Regel still gesenkt, Host-Toolchain-Lauf als
-  alleiniger Handoff-Nachweis.
+  alleiniger Handoff-Nachweis, Inline-`//nolint` statt zentraler Ausnahme in
+  `.golangci.yml` ([`AGENTS.md`](../../AGENTS.md) §3.2).
+- **Kommentar trägt keine der Kommentar-Klassen.** Ein Kommentar in Code,
+  Konfiguration oder Skript beschreibt die verworfene Alternative („Ohne X
+  wäre …"), einen abwesenden Text („früher stand hier …") oder bricht mitten
+  im Satz ab, weil eine Teilersetzung den Rest stehen ließ. Kein Gate fängt das
+  ([`AGENTS.md`](../../AGENTS.md) §3.7; Baseline-Regelwerk
+  `grundlagen-harness-dateien.md` §Was ein Kommentar trägt).
+- **Zustandsfeld trägt Chronik.** Eine `Stand`-/`Status`-Zelle (Roadmap,
+  Beobachtungs-Register, Meilenstein) erzählt, wie der Zustand entstand, statt
+  Zustand und Beleg als Anker zu nennen; oder das Drift-Log der Roadmap
+  protokolliert Schließungen und erreichte Meilensteine. Kein Gate fängt das
+  ([`AGENTS.md`](../../AGENTS.md) §3.7).
+- **Norm nur im Template-Kommentar.** Eine Regel steht im `<!-- -->`-Block eines
+  `.template.md` und nirgends sonst; sie ist beim Adopter weg, sobald er die
+  Kommentare entfernt. Kein Gate fängt das (Baseline-Regelwerk
+  `grundlagen-harness-dateien.md` §Template-Schichtung).
 - **Dateisicherheit.** User-Dateien werden ohne managed-block-Schutz, Backup
   oder Spec-konforme Bestätigung überschrieben
   ([`LH-NFA-REL-001`](../../spec/lastenheft.md#lh-nfa-rel-001--kein-stilles-überschreiben),
@@ -114,8 +130,9 @@ Vollständige Kategorie-Definitionen: [`harness/review.md`](../../harness/review
   trägt (Modus-Drift).
 - Ein LOW-Muster wiederholt sich und wird zum Drift-Signal.
 
-**LOW** — Wartbarkeit, Doku-Präzision, einmalige Inkonsistenz ohne
-Vertragsbruch.
+**LOW** — *mit Konventions-Anker* (ADR, Hard Rule, Linter-Regel, Eintrag in
+diesem Skill): Wartbarkeit, Doku-Präzision, einmalige Inkonsistenz ohne
+Vertragsbruch. Ohne Anker ist es kein Finding.
 
 **INFO** — Beobachtung ohne Änderungspflicht, inklusive Hinweisen auf
 Zuständigkeiten anderer Rollen (Verifier, Validator).
@@ -129,6 +146,10 @@ Zuständigkeiten anderer Rollen (Verifier, Validator).
   ([`harness/verification.md`](../../harness/verification.md)).
 - Keine Validation gegen realen Nutzerbedarf — Validator-Aufgabe.
 - Keine Abwertung eines Findings, weil seine Behebung unbequem ist.
+- **Kein Stil-Polizist:** Formatierung oder Benennung ohne Konventions-Anker ist
+  kein Finding.
+- **Kein HIGH- oder MEDIUM-Finding ohne Failure-Szenario:** was sich nicht als
+  konkretes Versagen erzählen lässt, wird nicht als HIGH oder MEDIUM gemeldet.
 
 Fällt etwas auf, das in diese Kategorien gehört: INFO-Finding mit Verweis auf
 die zuständige Rolle.
@@ -140,7 +161,10 @@ Jedes Finding:
 - `kategorie`: HIGH | MEDIUM | LOW | INFO
 - `quelle`: `LH-*`-ID, ADR-Kennung, Hard-Rule-Name, `MR-*` oder
   „Maintainability"
-- `pfad`: Datei:Zeile
+- `pfad`: Datei · wörtliches, in der Datei eindeutig auffindbares Kurzzitat der
+  Stelle als Anker; die Zeile darf als Lesehilfe dazu, ist aber nicht der Anker
+- `klasse`: stabile Kurz-Bezeichnung des Fehlermusters — speist den
+  Steering-Loop-Zähler (siehe §Pflege)
 - `befund`: 1–2 beobachtbare Sätze, ohne Lösungsvorschlag
 - `risiko`: warum das relevant ist
 - `verifizierbar`: welcher Sensor bestätigt es (`make lint`, `make test`,

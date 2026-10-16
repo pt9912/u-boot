@@ -34,7 +34,7 @@ Findings werden absteigend sortiert: HIGH vor MEDIUM vor LOW vor INFO.
 | --- | --- | --- |
 | HIGH | Produktvertrag, Sicherheit, Datenintegritaet, Architekturgrenze oder CI-Gate kann brechen | ja |
 | MEDIUM | Wahrscheinliche Regression, fehlender Test, unklare Fehlerklassifikation oder relevantes Drift-Risiko | normalerweise vor Merge klaeren |
-| LOW | Wartbarkeit, Doku-Praezision oder kleine Konsistenzluecke ohne unmittelbaren Vertragsbruch | nein |
+| LOW | Wartbarkeit, Doku-Praezision oder kleine Konsistenzluecke ohne unmittelbaren Vertragsbruch; nur mit Konventions-Anker (ADR, Hard Rule, Linter-Regel, Eintrag im Reviewer-Skill) | nein |
 | INFO | Beobachtung oder Kontext ohne Aenderungspflicht | nein |
 
 ### HIGH-Anker fuer `u-boot`
@@ -51,6 +51,14 @@ Ein Finding ist HIGH, wenn es eines dieser Muster trifft:
   (`compose.yaml`, `.env.example`, devcontainer, README/CHANGELOG).
 - Neuer temporaerer Carveout entsteht ohne Inventar-Eintrag und
   Plan-Anker.
+- Ein Kommentar beschreibt die verworfene Alternative oder abwesenden
+  Text, oder eine `Stand`-/`Status`-Zelle traegt Chronik statt Zustand und
+  Beleg ([`AGENTS.md`](../AGENTS.md) §3.7); kein Gate faengt das.
+- Eine Norm steht nur im `<!-- -->`-Block eines `.template.md`; sie ist
+  beim Adopter weg, sobald er die Kommentare entfernt.
+
+Kein HIGH- und kein MEDIUM-Finding ohne Failure-Szenario: Was sich nicht
+als konkretes Versagen erzaehlen laesst, wird so nicht gemeldet.
 
 ### MEDIUM-Anker fuer `u-boot`
 
@@ -87,12 +95,17 @@ Negativbefunde fuer relevante Linsen.
 Jedes Finding verwendet dieses Schema:
 
 ```text
-<CATEGORY> <path>:<line> - <kurzer Titel>
+<CATEGORY> <path> · "<woertliches Kurzzitat>" - <kurzer Titel>
+Klasse: <stabile Kurz-Bezeichnung des Fehlermusters>
 Quelle: <LH-*|ADR-*|Hard Rule|Maintainability>
 Befund: <1-2 beobachtbare Saetze>
 Risiko: <warum das relevant ist>
 Verifizierbar: <Sensor/Test/Review-only>
 ```
+
+Das Kurzzitat steht woertlich und eindeutig auffindbar in der Datei; es ist
+der Anker. Eine Zeilennummer darf als Lesehilfe dazu, ist aber nicht der
+Anker. `Klasse` speist den Steering-Loop-Zaehler (siehe unten).
 
 Am Ende jedes Reviews:
 
@@ -111,6 +124,8 @@ Nicht geprueft:
 - Keine DoD-Closure. Das ist Verifier-Aufgabe.
 - Keine Validation gegen Nutzerbedarf. Das ist Validator-Aufgabe.
 - Keine Abwertung von Findings, weil ihre Behebung unbequem ist.
+- Kein Stil-Polizist: Formatierung oder Benennung ohne Konventions-Anker ist
+  kein Finding.
 
 ## Steering Loop
 
