@@ -106,10 +106,11 @@ Für eine bestimmte Version ersetzen Sie `latest/download` durch
 `download/v0.9.0`. Die Prüfsummen aller Dateien stehen in `SHA256SUMS` am
 jeweiligen Release.
 
-### Homebrew (macOS und Linux)
+### Homebrew (macOS)
 
-Für stabile Releases gibt es einen Homebrew-Tap für macOS und Linux (je `amd64`
-und `arm64`; Windows trägt Homebrew nicht):
+Für stabile Releases gibt es einen Homebrew-Tap für macOS (Apple Silicon und
+Intel). Unter Linux nutzen Sie das Binary oder das Container-Image; Linux-Brew
+ist nicht zugesagt:
 
 ```bash
 brew tap pt9912/u-boot
@@ -1002,7 +1003,7 @@ oder `docker run --privileged docker:dind` nutzen.
 **Warnung:** `docker` verlangt `--privileged`. `u-boot` weist das als Warnung
 aus. Das Profil bietet damit **keine Isolationsgrenze gegenüber dem
 Container-Host** mehr; ein Ausbruch trifft unter Linux den Host und unter macOS
-die VM von Docker Desktop oder Colima. Das Profil begrenzt weiterhin Workspace,
+die Colima-VM. Das Profil begrenzt weiterhin Workspace,
 Geheimnisse und Docker-Socket des Hosts.
 
 - Jede Instanz hat einen eigenen Daemon: gleichnamige Images, Container, Netze
@@ -1742,8 +1743,8 @@ Reparaturvorschlag: `command` (der Befehl zum Kopieren), `action` und `argument`
 
 ### Unterstützte Plattformen
 
-Binary: Linux, macOS und Windows, je `amd64` und `arm64`. Homebrew: macOS und
-Linux, je `amd64` und `arm64`. Pakete: Linux `amd64` und `arm64` (`.deb`,
+Binary: Linux, macOS und Windows, je `amd64` und `arm64`. Homebrew: macOS,
+`amd64` und `arm64`. Pakete: Linux `amd64` und `arm64` (`.deb`,
 `.rpm`). Container-Image: `ghcr.io/pt9912/u-boot`.
 
 ---

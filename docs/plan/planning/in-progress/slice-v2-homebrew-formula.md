@@ -1,10 +1,9 @@
 # Slice V2: Homebrew-Formula für u-boot ([`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Restweg)
 
-> **Status:** **repo-seitig geliefert, Tap-Einrichtung offen** (2026-10-01,
-> **Delivery-Hash: `0cab536`**). Die Entscheidung steht ([ADR-0016](../../adr/0016-homebrew-distribution-per-tap.md)),
-> Skeleton, Fill-Skript, Nachzug-Skript, Workflow-Änderung und Tap-Vorlagen sind im
-> Repo; das Tap-Repo selbst und das Secret legt der Projektinhaber an (siehe
-> §Offene Einrichtung unten). Der Slice bleibt bis dahin in `in-progress/`.
+> **Status:** **geliefert und belegt** (Delivery-Hash: `0cab536`). Die Entscheidung steht
+> ([ADR-0016](../../adr/0016-homebrew-distribution-per-tap.md)); Skeleton, Fill-Skript, Nachzug-Skript,
+> Workflow-Änderung und Tap-Vorlagen sind im Repo, Tap und Secret bestehen, der Smoke im Tap ist auf
+> Apple Silicon und Intel grün (siehe §Stand nach `v0.9.0`).
 
 **Welle:** [`welle-macos-verifikation`](../welle-macos-verifikation.md).
 
@@ -134,4 +133,6 @@ echten Mac stehen aus.
 - Der Smoke-Job `install (macos-14)` (arm64) im Tap-Lauf `38689711681` ist grün. Der Job `install (macos-13)`
   bekam nie einen Runner: das Label steht nicht mehr in der Runner-Liste von GitHub (Intel heißt dort
   `macos-15-intel`). Die Vorlage `packaging/homebrew-tap/.github/workflows/smoke.yml` nennt jetzt `macos-15-intel`.
-- Offen: Die Vorlage im Tap-Repo einspielen und den Smoke für Apple Silicon und Intel grün sehen. Danach schließt dieser Slice.
+- Die Vorlage liegt im Tap (Commit `a8498fd`); der Smoke-Lauf `38900477533` ist auf `macos-14` (arm64) und
+  `macos-15-intel` (amd64) grün, Formel 0.9.0.
+- Die Einrichtung aus §Offene Einrichtung ist abgeschlossen: Tap-Repo, Secret (belegt durch `v0.7.0`) und die Prüfung auf einem echten Mac.

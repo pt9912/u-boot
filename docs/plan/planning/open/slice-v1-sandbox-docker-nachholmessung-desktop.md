@@ -35,6 +35,7 @@ Abnahmekriterium 6 (Nachholmessung) aus dem CR
 
 - [ ] Integrationstest `TestE2E_SandboxDevcontainer_NestedDocker` (`//go:build docker`) läuft gegen Docker Desktop; Ergebnis (Engine-Version, VM-Typ, Kernel, cgroup) steht in der Geschichte von [ADR-0018](../../../../docs/plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md).
 - [ ] Benutzerhandbuch §Grenzen nennt Docker Desktop als geprüft oder mit der gemessenen Einschränkung.
+- [ ] Trägt die Messung, nimmt ein CR die Zusage für Docker Desktop in [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) wieder auf (Lastenheft 0.7.0 hat sie gestrichen).
 - [ ] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`) — kein Self-Review.
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
