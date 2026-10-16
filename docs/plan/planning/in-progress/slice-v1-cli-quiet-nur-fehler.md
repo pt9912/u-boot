@@ -62,7 +62,9 @@ behalten ihre Ausgabe, und vier Ausnahmen bleiben sichtbar: Sicherheitslockerung
 - `config set` schreibt eine Zusammenfassungszeile (`printConfigSetSummary`), `config get`/`config list`, `logs` und `template list`
   geben Werte aus, die der Zweck des Befehls sind.
 - Die Degradations-Fallbacks entstehen beim Containerstart (generierte Skripte) und als Items in `doctor`
-  (`internal/hexagon/application/doctor_sandbox.go`: `/dev/fuse` → `vfs`, Egress-Capability nicht gewährbar, Daemon); `doctor`
+  (host-seitig hat nur `internal/hexagon/application/doctor_sandbox.go` ein Item, und zwar für `/dev/fuse` → `vfs`; der Wegfall der
+  Egress-Restriktion und der Container ohne Daemon entstehen erst im Startscript im Container und haben kein `doctor`-Item, die
+  Ausweisung dieser beiden ist daher nur dort möglich, soweit das Startscript sie meldet); `doctor`
   zeigt unter `--quiet` nur Fehler-Items, die Fallback-Items der Stufe Warn entfielen also. Nicht jedes Warn-Item von `doctor` ist ein
   Fallback (z. B. die Credentials-Prüfung).
 - Der Compose-Fortschritt von `up` läuft auf stderr und ist von `--quiet` unberührt.
@@ -110,8 +112,10 @@ verändern, behalten ihre Ausgabe, weil sie das Ergebnis des Befehls ist: `confi
 - [ ] Die vier Ausnahmen bleiben unter `--quiet` sichtbar und sind je einzeln gepinnt: Sicherheitslockerungs-Hinweise bei
       `init`, `generate` und `up`; Degradations-Fallbacks
       ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion) in der Befehlsausgabe
-      und in `doctor`; Compose-Fortschritt von `up` auf stderr ([`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker));
-      die Pfad-Zusammenfassung von `--force` vor dem Überschreiben bei `init` und `generate`
+      und in `doctor`, soweit der Host sie ermittelt (Ist-Stand: nur der `vfs`-Fall hat ein `doctor`-Item; die beiden anderen
+      entstehen im Startscript im Container, die Lücke ist hier benannt und kein neuer Nutzer-Vertrag); Compose-Fortschritt von `up` auf stderr ([`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker));
+      die Pfad-Zusammenfassung von `--force` vor dem Überschreiben bei `init` (`generate` hat keinen `--force`-Pfad und keinen
+      `AffectedFiles`-Produzenten)
       ([`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung), [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)).
 - [ ] Die Review-Befunde sind behoben: F-1 (der Kommentar am Doctor-Test in `cli_test.go` nennt die geltende Zusage, nicht die frühere Fassung),
       F-3 (`doctor --quiet --strict` mit nur Warn-Items endet mit Exit 11 bei leerer stdout; die Fehlermeldung auf stderr nennt für
