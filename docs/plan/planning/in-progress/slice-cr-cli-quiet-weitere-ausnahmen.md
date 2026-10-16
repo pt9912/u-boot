@@ -22,7 +22,7 @@ wechselt nur durch `git mv`.
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Änderung),
 [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Degradation, Ausweisung jedes Fallbacks),
 [`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker) (Fortschrittsanzeige bei `up`).
-Verwandt: [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) (Code: setzt die drei Ausnahmen um).
+Verwandt: [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) (Code: setzt die vier Ausnahmen um).
 
 **Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)), §16
 (Historie), Versionsfeld. `spezifikation.md` und `architecture.md` berührt der
@@ -65,7 +65,7 @@ Zusammenfassungsmeldung **aller** Subkommandos, die eine ausgeben (`init`, `gene
   `internal/adapter/driving/cli/up.go` nennt [`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker) als Grund. Das Lastenheft nennt die Ausnahme bisher nicht
   (Review-Report F-6).
 
-### CR-Kern (vorgeschlagene Fassung von [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging); Entwurf)
+### CR-Kern (angenommene Fassung von [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging))
 
 > ### [LH-FA-CLI-005](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) – Verbosity und Logging
 >
@@ -78,19 +78,21 @@ Zusammenfassungsmeldung **aller** Subkommandos, die eine ausgeben (`init`, `gene
 > - `--verbose` – zusätzlich Detailinformationen
 > - `--debug` – zusätzlich interne Diagnoseausgaben
 >
-> Unter `--quiet` entfallen die Erfolgs- und Zusammenfassungsmeldungen der Subkommandos. Drei Ausnahmen bleiben unter `--quiet` sichtbar:
+> Unter `--quiet` geben die Subkommandos, die etwas ändern (`init`, `generate`, `add`, `remove`, `config set`, `up`, `down`), nur Fehler aus; ihre Erfolgs- und Zusammenfassungsmeldungen entfallen. `u-boot doctor` zeigt nur Fehler-Einträge. Vier Ausnahmen bleiben unter `--quiet` sichtbar:
 >
 > 1. die Ausweisung von Sicherheitslockerungen (zusätzliche Capabilities, `--privileged`, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices) in der Befehlsausgabe ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion));
 > 2. die Ausweisung der Degradations-Fallbacks (Container ohne Docker-Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion) in der Befehlsausgabe und in `u-boot doctor` ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer));
-> 3. der Fortschritt einzelner Services bei `u-boot up` (Pull, Create, Start, Healthcheck; [`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker)).
+> 3. der Fortschritt einzelner Services bei `u-boot up` (Pull, Create, Start, Healthcheck; [`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker));
+> 4. die Zusammenfassung der betroffenen Pfade, die `--force` vor dem Überschreiben ausgibt ([`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung), [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)).
 >
-> Alle anderen Hinweise entfallen unter `--quiet`. Ergebnisse, die selbst der Zweck eines Befehls sind (etwa die Werte von `config get`, die Ausgabe von `logs`), sind keine Status- oder Erfolgsmeldungen und bleiben.
+> Alle anderen Hinweise und Warnungen entfallen unter `--quiet`. Die Ausgabe der Abfragebefehle, die nichts verändern (`config get`, `config list`, `logs`, `template list`), ist das Ergebnis des Befehls und bleibt.
 >
 > Werden mehrere Verbosity-Optionen gleichzeitig angegeben (z. B. `--quiet --verbose`), gewinnt die zuletzt auf der Kommandozeile angegebene Option. Eine Validierungsabweisung wegen Mehrfachangabe erfolgt nicht.
 
-Der Satz zu Ergebnis-Ausgaben ist ein **Vorschlag**: Er schreibt fest, was der Code heute für `config get`/`config list`,
-`logs` und `template list` ohnehin tut; die Abgrenzung gegen `config set` (dessen Zusammenfassungszeile eine Erfolgsmeldung
-ist) trifft der Code-Slice im Prüfpunkt dort. Streicht der Projektinhaber den Satz, ändert das nichts an den drei Ausnahmen.
+Der Satz zu den Abfragebefehlen nennt das Kriterium (der Befehl ändert nichts) und die Befehle (`config get`, `config list`,
+`logs`, `template list`); `config set` zählt zu den ändernden Subkommandos. Die vierte Ausnahme folgt aus dem Review
+(F-2): [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) und [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz) verlangen die Zusammenfassung vor dem
+Überschreiben; sie ist eine Ausweisung vor einer zerstörenden Aktion wie die Sicherheitslockerungen.
 
 **Unverändert, mit Begründung:**
 
@@ -111,17 +113,19 @@ ist) trifft der Code-Slice im Prüfpunkt dort. Streicht der Projektinhaber den S
 [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md):
 
 1. Je Subkommando belegt ein Test, dass `--quiet` Erfolgs- und Zusammenfassungsmeldungen unterdrückt (`remove` mit neuer Option).
-2. Ein Test pinnt je Ausnahme, dass sie sichtbar bleibt: Lockerungs-Hinweis, Degradations-Fallback (Befehlsausgabe und `doctor`), Compose-Fortschritt bei `up`.
-3. `docs/user/benutzerhandbuch.md` und `CHANGELOG.md` nennen `--quiet` mit den drei Ausnahmen.
+2. Ein Test pinnt je Ausnahme, dass sie sichtbar bleibt: Lockerungs-Hinweis, Degradations-Fallback (Befehlsausgabe und `doctor`), Compose-Fortschritt bei `up`, `--force`-Zusammenfassung.
+3. `docs/user/benutzerhandbuch.md` und `CHANGELOG.md` nennen `--quiet` mit den vier Ausnahmen.
 
 **Historie-Zeile (§16, bei Spec-Change zu setzen):**
 
 ```text
-| 0.9.0 | 2026-10-16 | LH-FA-CLI-005: Ausnahmen unter `--quiet` auf drei
-erweitert (Sicherheitslockerungen, Ausweisung der Degradations-Fallbacks
-nach LH-FA-DEV-007, Compose-Fortschritt von `up` nach LH-NFA-PERF-002);
-Erfolgs- und Zusammenfassungsmeldungen aller Subkommandos entfallen unter
-`--quiet`; die Stufen und die Mehrfachangabe-Regel bleiben. Die geltende
+| 0.9.0 | 2026-10-16 | LH-FA-CLI-005: Vier Ausnahmen unter `--quiet`
+(Sicherheitslockerungen, Ausweisung der Degradations-Fallbacks nach
+LH-FA-DEV-007, Fortschritt von `up` nach LH-NFA-PERF-002,
+`--force`-Zusammenfassung nach LH-FA-CLI-005A und LH-FA-INIT-005); die
+ändernden Subkommandos geben unter `--quiet` nur Fehler aus, `doctor`
+nur Fehler-Einträge, die Abfragebefehle behalten ihre Ausgabe; die
+Stufen und die Mehrfachangabe-Regel bleiben. Die geltende
 Zeile steht in spec/lastenheft.md §16. | Vereinbarung mit dem
 Projektinhaber |
 ```
@@ -160,7 +164,7 @@ Compose-Fortschritt, Degradations-Fallbacks) liegt vor.
 
 - `in-progress` → `next` (zu groß, zurück zur Zerlegung): die Fassung verlangt, weitere Hinweis-Klassen mitzuregeln
   (etwa [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)) — dann je Klasse ein Umsetzungs-Slice.
-- `in-progress` → `open` (blockiert): der Projektinhaber ändert die Entscheidung zu einer der drei Ausnahmen.
+- `in-progress` → `open` (blockiert): der Projektinhaber ändert die Entscheidung zu einer der vier Ausnahmen.
 
 ## 5. Closure-Trigger
 

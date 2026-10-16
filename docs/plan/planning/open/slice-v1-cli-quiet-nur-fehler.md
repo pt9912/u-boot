@@ -1,4 +1,4 @@
-# Slice v1: `--quiet` zeigt nur Fehler — Code für alle Subkommandos und drei Ausnahmen
+# Slice v1: `--quiet` zeigt nur Fehler — Code für alle Subkommandos und vier Ausnahmen
 
 **Lifecycle:** Der Zustand dieses Slice ist das Verzeichnis, in dem diese
 Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
@@ -11,7 +11,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — dritter Slice; folgt auf
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) und
-[`slice-cr-cli-quiet-weitere-ausnahmen`](../in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md) (die drei Ausnahmen stehen erst nach
+[`slice-cr-cli-quiet-weitere-ausnahmen`](../in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md) (die vier Ausnahmen stehen erst nach
 Lastenheft 0.9.0 im Vertrag) und geht
 [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) voraus (siehe §4: beide ändern
 `root.go` und `verbosity_test.go`).
@@ -89,7 +89,7 @@ verändern; die Entscheidung steht im Test und im Handbuch.
   Pflicht.
 - **Die Ausgabe der generierten Container-Start-Skripte** — sie laufen im Container, nicht im CLI-Prozess, und kennen `--quiet`
   nicht; der Slice sichert die Ausweisung in Befehlsausgabe und `doctor`, wie der Lastenheft-Satz sie nennt.
-- **Andere Hinweis-Klassen als die drei Ausnahmen** (Recreate-Warnung
+- **Andere Hinweis-Klassen als die vier Ausnahmen** (Recreate-Warnung
   [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen), Drittanbieter-Features
   [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), „no git remote“, Purge-Warnungen von `remove`)
   — sie entfallen unter `--quiet`, soweit sie keine Fehler sind.
@@ -101,17 +101,19 @@ verändern; die Entscheidung steht im Test und im Handbuch.
       und Fallback-Items; `remove` hat die Option `--quiet` und unterdrückt auch die Purge-Warnungen
       ([`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen)), soweit sie keine Fehler sind; die Ergebnis-Ausgaben (Prüfpunkt §1) sind zugeordnet und
       gepinnt. Tests Happy/Boundary/Negative je Subkommando referenzieren die IDs.
-- [ ] Die drei Ausnahmen bleiben unter `--quiet` sichtbar und sind je einzeln gepinnt: Sicherheitslockerungs-Hinweise bei
+- [ ] Die vier Ausnahmen bleiben unter `--quiet` sichtbar und sind je einzeln gepinnt: Sicherheitslockerungs-Hinweise bei
       `init`, `generate` und `up`; Degradations-Fallbacks
       ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion) in der Befehlsausgabe
-      und in `doctor`; Compose-Fortschritt von `up` auf stderr ([`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker)).
+      und in `doctor`; Compose-Fortschritt von `up` auf stderr ([`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker));
+      die Pfad-Zusammenfassung von `--force` vor dem Überschreiben bei `init` und `generate`
+      ([`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung), [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)).
 - [ ] Die Review-Befunde sind behoben: F-1 (der Kommentar am Doctor-Test in `cli_test.go` nennt die geltende Zusage, nicht die frühere Fassung),
       F-3 (`doctor --quiet --strict` mit nur Warn-Items endet mit Exit 11 bei leerer stdout; die Fehlermeldung auf stderr nennt für
       Skript-Nutzer das auslösende Item bzw. die Ursache, ein Test pinnt Exit-Code und stderr —
       [`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003--fehlerklassifikation)), F-4 (der Kommentar in `root.go` verweist auf `visibleWarnings`, nicht auf das nicht
       vorhandene `[writeWarning]`).
 - [ ] Doku-Update: `docs/user/benutzerhandbuch.md` (Optionstabellen, Zeilen um
-      299 und 1280; `remove --quiet`) nennt `--quiet` als „nur Fehler“ mit den drei Ausnahmen;
+      299 und 1280; `remove --quiet`) nennt `--quiet` als „nur Fehler“ mit den vier Ausnahmen;
       CHANGELOG-Eintrag.
 - [ ] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
@@ -139,7 +141,7 @@ verändern; die Entscheidung steht im Test und im Handbuch.
 | `internal/adapter/driving/cli/verbosity_test.go` | update | `quiet-lowers-to-warn` → Fehler-Pegel; `debug-takes-precedence-over-quiet` bleibt unverändert (kehrt sich erst in [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) um) |
 | `internal/adapter/driving/cli/cli_test.go` | update | F-1: Kommentar am Doctor-Test auf die geltende Zusage; F-3-Pin `doctor --quiet --strict` |
 | `internal/adapter/driving/cli/sandbox_test.go`, `updown_cluster_test.go`, `statusview_test.go`, `down_acceptance_test.go`, `up_acceptance_test.go`, `doctor_json_test.go` sowie Tests zu `init`/`generate`/`add`/`remove` | update / prüfen | neue Fälle Happy/Boundary/Negative je Subkommando und je Ausnahme; `--quiet --json` unverändert — nach [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) |
-| `docs/user/benutzerhandbuch.md` | update | Optionstabellen (Zeilen um 299 und 1280): „nur Fehler; drei Ausnahmen“, `remove --quiet` |
+| `docs/user/benutzerhandbuch.md` | update | Optionstabellen (Zeilen um 299 und 1280): „nur Fehler; vier Ausnahmen“, `remove --quiet` |
 | `CHANGELOG.md` | update | sichtbare Verhaltensänderung (Erfolgsmeldungen von `init`/`generate`/`add`/`remove` entfallen unter `--quiet`, `doctor --quiet` zeigt keine übrigen Warn-Items mehr) |
 
 ## 4. Trigger
@@ -161,7 +163,7 @@ Konflikt-Vermeidung, keine Voraussetzung.
   sich nicht in einem Review-Umfang halten — Zerlegungsschnitte siehe §6.
 - `in-progress` → `open` (blockiert): Lastenheft 0.9.0 ist nicht angenommen (der CR
   [`slice-cr-cli-quiet-weitere-ausnahmen`](../in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md) noch nicht in `done/`) oder
-  der Projektinhaber ändert eine der drei Ausnahmen. Dieser Slice liegt bis zur Schließung des CR in `open/`.
+  der Projektinhaber ändert eine der vier Ausnahmen. Dieser Slice liegt bis zur Schließung des CR in `open/`.
 
 ## 5. Closure-Trigger
 
@@ -170,7 +172,7 @@ Steering-Loop-Lerneintrag geschrieben (§7).
 
 ## 6. Risiken und offene Punkte
 
-- **Umfang wächst:** Sieben Subkommandos, drei Ausnahmen und drei Review-Befunde in einem Slice. — **Ausgang:** entfallen:
+- **Umfang wächst:** Sieben Subkommandos, vier Ausnahmen und drei Review-Befunde in einem Slice. — **Ausgang:** entfallen:
   Ist der Umfang beim Start nicht tragbar, wird nach Subkommando zerlegt; Zerlegungsschnitte, in dieser Reihenfolge: (1)
   Fehler-Pegel und Review-Befunde F-1/F-3/F-4 samt `doctor`-Fallback-Items; (2) `init`/`generate`/`add` (Zusammenfassungen);
   (3) `remove` mit neuer Option `--quiet` und Purge-Warnungen; (4) `config set`/`template`-Zuordnung (Prüfpunkt §1). Die

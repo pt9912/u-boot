@@ -16,15 +16,12 @@ this file is the same format applied to u-boot itself.
 - `devcontainer.sandbox.nestedRuntime: docker` is promised on Docker under Linux and on Colima (Linux VM) only.
   Docker Desktop is no longer promised: it is not measured, and the user manual lists it as not verified.
   Homebrew is documented for macOS only (Apple Silicon and Intel); the tap smoke now runs on `macos-14` and `macos-15-intel`.
-- The contract for `--quiet` ([`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), Lastenheft 0.9.0) names three exceptions that stay visible: the
+- The contract for `--quiet` ([`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), Lastenheft 0.9.0) names four exceptions that stay visible: the
   disclosure of security relaxations in the sandbox profile, the disclosure of degradation fallbacks (container without daemon, `vfs`
-  storage, dropped egress restriction) and the per-service progress of `u-boot up`. A script cannot silence them. Success and summary
-  messages of every subcommand disappear under `--quiet`. The levels themselves are unchanged (`--quiet` shows only errors; the last
+  storage, dropped egress restriction), the per-service progress of `u-boot up` and the path summary that `--force` prints before
+  overwriting. A script cannot silence them. Success and summary messages of the subcommands that change something disappear under
+  `--quiet`; `u-boot doctor` lists only error items; the query commands (`config get`, `config list`, `logs`, `template list`) keep their output. The levels themselves are unchanged (`--quiet` shows only errors; the last
   verbosity option wins); the implementation follows in a later release.
-- `--quiet` shows errors only ([`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)): the logger level is Error, and `u-boot doctor --quiet` lists only error items (no header and
-  no summary line; the exit code carries the result, so warn items disappear too). `init`, `generate` and `up` drop every warning
-  under `--quiet` except the security-relaxation notices of the sandbox profile ([`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)..[`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)); the
-  "no git remote", "has no effect", recreate and third-party notices no longer appear. `--quiet --json` is unchanged.
 
 ## [0.9.0] - 2026-10-15
 

@@ -16,9 +16,9 @@ flach unter `docs/plan/planning/`; bei Closure wandert sie per `git mv` nach
 
 [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), der Code in `internal/adapter/driving/cli/` und
 die Spezifikation sagen dasselbe über die Verbosity: `--quiet` zeigt nur Fehler (die Erfolgs- und Zusammenfassungsmeldung aller
-Subkommandos entfällt), mit drei Ausnahmen — die Ausweisung von Sicherheitslockerungen im Sandbox-Profil
+Subkommandos entfällt), mit vier Ausnahmen — die Ausweisung von Sicherheitslockerungen im Sandbox-Profil
 ([`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)), die Ausweisung der Degradations-Fallbacks
-([`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)) und der Compose-Fortschritt von `up`
+([`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)), der Compose-Fortschritt von `up` und die Pfad-Zusammenfassung von `--force`
 ([`LH-NFA-PERF-002`](../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker)) bleiben sichtbar —, und die zuletzt
 angegebene Option gewinnt. Ein Test pro Aussage belegt es; die Spezifikation beschreibt das Verhalten erst, wenn Lastenheft und
 Code es tragen.
@@ -49,7 +49,7 @@ Lastenheft, die beiden Code-Slices den Adapter, und die Spezifikation beschreibt
 |---|---|---|
 | [`slice-cr-cli-quiet-fehler-und-warnungen`](done/slice-cr-cli-quiet-fehler-und-warnungen.md) | CR: Ausnahme der Sicherheitslockerungen unter `--quiet` (zuerst, geschlossen) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
 | [`slice-cr-cli-quiet-weitere-ausnahmen`](in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md) | CR: Ausnahmen Degradations-Fallbacks und Compose-Fortschritt unter `--quiet` (Lastenheft 0.9.0) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-NFA-PERF-002`](../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker) |
-| [`slice-v1-cli-quiet-nur-fehler`](open/slice-v1-cli-quiet-nur-fehler.md) | Code: `--quiet` zeigt nur Fehler in allen Subkommandos, drei Ausnahmen bleiben (blockiert bis Lastenheft 0.9.0) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
+| [`slice-v1-cli-quiet-nur-fehler`](open/slice-v1-cli-quiet-nur-fehler.md) | Code: `--quiet` zeigt nur Fehler in allen Subkommandos, vier Ausnahmen bleiben (blockiert bis Lastenheft 0.9.0) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
 | [`slice-v1-cli-verbosity-letzte-option-gewinnt`](open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) | Code: die zuletzt angegebene Option gewinnt, danach der Spezifikations-Eintrag | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) |
 
 ## 5. Abhängigkeiten
