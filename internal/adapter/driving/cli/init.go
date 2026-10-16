@@ -30,6 +30,10 @@ type initFlags struct {
 	Yes            bool
 	NoInteractive  bool
 
+	// Quiet is read through from the root persistent --quiet
+	// (LH-FA-CLI-005): only security-relaxation warnings are written.
+	Quiet bool
+
 	// DryRun / Diff (slice-v1-cli-json-dry-run-init T5):
 	// LH-FA-CLI-007/008 flags that route Init() through the
 	// RecordingFileSystem via the per-request fsFactory; together
@@ -151,6 +155,7 @@ Examples:
 			flags.Yes = a.yes
 			flags.NoInteractive = a.noInteractive
 			flags.JSON = a.json
+			flags.Quiet = a.quiet
 			return runInit(cmd.Context(), cmd.OutOrStdout(), cmd.ErrOrStderr(), args, *flags, a.initUseCase, a.getwd)
 		},
 	}
@@ -271,6 +276,7 @@ func runInit(
 			return err
 		}
 	}
+	resp.Warnings = visibleWarnings(resp.Warnings, flags.Quiet)
 	return printInitSummary(out, resp, flags.DryRun)
 }
 

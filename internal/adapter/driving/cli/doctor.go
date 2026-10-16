@@ -14,8 +14,9 @@ import (
 
 // doctorFlags bundles the per-invocation flag state of
 // `u-boot doctor` that runDoctor actually consumes today: --strict
-// (LH-FA-DIAG-003) plus --quiet (LH-FA-CLI-005, filters OK items
-// from the rendered report) plus --json (LH-NFA-USE-004, switches
+// (LH-FA-DIAG-003) plus --quiet (LH-FA-CLI-005, the rendered report
+// keeps only Error items; header and summary line are status output
+// and are omitted, the exit code carries the result) plus --json (LH-NFA-USE-004, switches
 // the renderer to the cliJSONEnvelope shape). The persistent
 // --verbose / --debug flags exist on the root command per
 // LH-FA-CLI-005 and are load-bearing at the LOGGER level since
@@ -25,8 +26,8 @@ import (
 // logger.Debug/Info calls are the surface they govern.
 //
 // JSON-Mode-Interaktion (slice-v1-cli-json-dry-run-doctor §T0-(e)):
-//   - --quiet --json: --quiet is a no-op in JSON mode (LH-NFA-USE-004
-//     already filters Ok/Info items out of diagnostics[]).
+//   - --quiet --json: --quiet is a no-op in JSON mode (the envelope
+//     keeps its warn diagnostics).
 //   - --strict --json: still upgrades Warn→exitCode 11; status
 //     remains "warn" because LH-NFA-USE-004 couples status to the
 //     highest diagnostics-level, not to --strict.
@@ -75,7 +76,7 @@ Default checks (LH-FA-DIAG-002):
 
 Examples:
   u-boot doctor                  # full report on stdout
-  u-boot doctor --quiet          # hide ok entries
+  u-boot doctor --quiet          # errors only
   u-boot doctor --strict         # warn → exit 11 (CI-strict mode)`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -216,11 +217,20 @@ func doctorExitCode(report domain.DiagnosticReport, strict bool) int {
 
 // writeDoctorReport renders the diagnostic report on out. Items are
 // sorted Errors-first then Warns then OKs (via
-// [domain.DiagnosticReport.SortedByIssuesFirst]); the OK band is
-// suppressed when `quiet` is true. Hints render only on warn/error
-// items (OK items rarely carry a hint and listing one would clutter
-// the report).
+// [domain.DiagnosticReport.SortedByIssuesFirst]). With `quiet` only
+// Error items are written: no header, no Warn/OK items, no summary
+// line (LH-FA-CLI-005). Hints render only on warn/error items (OK
+// items rarely carry a hint and listing one would clutter the
+// report).
 func writeDoctorReport(out io.Writer, baseDir string, report domain.DiagnosticReport, quiet bool) {
+	if quiet {
+		for _, item := range report.SortedByIssuesFirst() {
+			if item.Severity == domain.SeverityError {
+				writeDoctorItem(out, item)
+			}
+		}
+		return
+	}
 	fmt.Fprintf(out, "Diagnostic report for %s\n", baseDir)
 	fmt.Fprintln(out, "──────────────────────────────────────")
 
@@ -235,16 +245,19 @@ func writeDoctorReport(out io.Writer, baseDir string, report domain.DiagnosticRe
 		case domain.SeverityError:
 			nErr++
 		}
-		if quiet && item.Severity == domain.SeverityOK {
-			continue
-		}
-		fmt.Fprintf(out, "%s  %-*s %s\n", severityGlyph(item.Severity), idColumnWidth, item.ID, item.Message)
-		if item.Hint != "" && item.Severity != domain.SeverityOK {
-			fmt.Fprintf(out, "   → %s\n", item.Hint)
-		}
+		writeDoctorItem(out, item)
 	}
 
 	fmt.Fprintf(out, "\nSummary: %d error, %d warn, %d ok\n", nErr, nWarn, nOK)
+}
+
+// writeDoctorItem renders one report item and, for warn/error items,
+// its hint.
+func writeDoctorItem(out io.Writer, item domain.Diagnostic) {
+	fmt.Fprintf(out, "%s  %-*s %s\n", severityGlyph(item.Severity), idColumnWidth, item.ID, item.Message)
+	if item.Hint != "" && item.Severity != domain.SeverityOK {
+		fmt.Fprintf(out, "   → %s\n", item.Hint)
+	}
 }
 
 // severityGlyph returns the Unicode glyph that prefixes each

@@ -22,7 +22,7 @@ func TestExecute_VerbosityFlag_AdjustsLoggerLevel(t *testing.T) {
 		want slog.Level
 	}{
 		{"no-flag-defaults-to-info", []string{"doctor"}, slog.LevelInfo},
-		{"quiet-lowers-to-warn", []string{"--quiet", "doctor"}, slog.LevelWarn},
+		{"quiet-sets-error", []string{"--quiet", "doctor"}, slog.LevelError},
 		{"verbose-raises-to-debug", []string{"--verbose", "doctor"}, slog.LevelDebug},
 		{"debug-raises-to-debug", []string{"--debug", "doctor"}, slog.LevelDebug},
 		{"debug-takes-precedence-over-quiet", []string{"--debug", "--quiet", "doctor"}, slog.LevelDebug},

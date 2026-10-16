@@ -1039,7 +1039,42 @@ func TestExecute_Doctor_WarnStrict_Exit11(t *testing.T) {
 	}
 }
 
-func TestExecute_Doctor_Quiet_HidesOKItems(t *testing.T) {
+// LH-FA-CLI-005: `doctor --quiet` shows errors only. Header, OK and
+// warn items and the summary line are gone; the exit code carries
+// the result. (Changed from "hides OK items only": the warn item and
+// the summary line used to stay.)
+func TestExecute_Doctor_Quiet_ShowsOnlyErrorItems(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x", nil }
+	doctorUC := &fakeDoctorUseCase{
+		resp: driving.DoctorResponse{
+			Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
+				{ID: "fs.write-permissions", Severity: domain.SeverityOK, Message: "BaseDir is writable."},
+				{ID: "uboot.yaml.valid", Severity: domain.SeverityWarn, Message: "u-boot.yaml not present."},
+				{ID: "docker.daemon", Severity: domain.SeverityError, Message: "daemon unreachable.", Hint: "start docker"},
+			}},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDoctor(&fakeInitUseCase{}, doctorUC, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"--quiet", "doctor"}, &stdout, &stderr,
+	)
+	if !errors.Is(err, cli.ErrDoctorFailures) {
+		t.Fatalf("err = %v, want ErrDoctorFailures (exit code carries the result)", err)
+	}
+	out := stdout.String()
+	if !strings.Contains(out, "daemon unreachable.") || !strings.Contains(out, "start docker") {
+		t.Errorf("--quiet hid the error item or its hint: %q", out)
+	}
+	for _, gone := range []string{"BaseDir is writable", "u-boot.yaml not present", "Summary:", "Diagnostic report"} {
+		if strings.Contains(out, gone) {
+			t.Errorf("--quiet output still contains %q: %q", gone, out)
+		}
+	}
+}
+
+// LH-FA-CLI-005 boundary: without error items `doctor --quiet` is
+// silent (exit 0), even with warn and OK items present.
+func TestExecute_Doctor_Quiet_NoErrorsIsSilent(t *testing.T) {
 	getwd := func() (string, error) { return "/tmp/x", nil }
 	doctorUC := &fakeDoctorUseCase{
 		resp: driving.DoctorResponse{
@@ -1056,16 +1091,35 @@ func TestExecute_Doctor_Quiet_HidesOKItems(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Execute: %v", err)
 	}
+	if stdout.Len() != 0 {
+		t.Errorf("--quiet without error items must print nothing, got %q", stdout.String())
+	}
+}
+
+// LH-FA-CLI-005 / LH-FA-DEV-007 (Degradations-Entscheidung): the
+// doctor items of the sandbox degradations (e.g. `vfs` fallback, no
+// egress capability) are warn items and vanish under --quiet, while
+// the error variant (onUnavailable=fail) stays visible.
+func TestExecute_Doctor_Quiet_SandboxDegradationWarnIsHidden_ErrorKept(t *testing.T) {
+	getwd := func() (string, error) { return "/tmp/x", nil }
+	doctorUC := &fakeDoctorUseCase{
+		resp: driving.DoctorResponse{
+			Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
+				{ID: "devcontainer.sandbox.runtime", Severity: domain.SeverityWarn, Message: "/dev/fuse is not available; nested Podman will fall back to vfs storage (LH-FA-DEV-007)."},
+				{ID: "devcontainer.sandbox.egress", Severity: domain.SeverityError, Message: "egress capability not grantable (LH-FA-DEV-007)."},
+			}},
+		},
+	}
+	var stdout, stderr bytes.Buffer
+	_ = newAppWithDoctor(&fakeInitUseCase{}, doctorUC, cli.WithGetwd(getwd)).Execute(
+		context.Background(), []string{"--quiet", "doctor"}, &stdout, &stderr,
+	)
 	out := stdout.String()
-	if strings.Contains(out, "BaseDir is writable") {
-		t.Errorf("--quiet did not hide OK item: %q", out)
+	if strings.Contains(out, "vfs storage") {
+		t.Errorf("degradation warn item must not survive --quiet: %q", out)
 	}
-	if !strings.Contains(out, "u-boot.yaml not present") {
-		t.Errorf("--quiet hid the warn item it should keep: %q", out)
-	}
-	// Summary still includes all counts even in --quiet mode.
-	if !strings.Contains(out, "0 error, 1 warn, 1 ok") {
-		t.Errorf("summary line missing or wrong: %q", out)
+	if !strings.Contains(out, "egress capability not grantable") {
+		t.Errorf("degradation error item must stay: %q", out)
 	}
 }
 

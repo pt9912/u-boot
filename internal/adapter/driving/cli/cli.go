@@ -85,11 +85,12 @@ type App struct {
 	noInteractive bool
 
 	// quiet, verbose, debug are bound to the LH-FA-CLI-005 root
-	// PersistentFlags. --quiet additionally filters SeverityOK
-	// items from the doctor render and suppresses the up status
-	// table / down success message. --verbose and --debug both
-	// raise the logger level to Debug via buildRootCommand's
-	// PersistentPreRunE; --quiet lowers it to Warn.
+	// PersistentFlags. --quiet additionally restricts the doctor
+	// render to SeverityError items, suppresses the up status
+	// table / down success message and the non-relaxation warning
+	// lines. --verbose and --debug both raise the logger level to
+	// Debug via buildRootCommand's PersistentPreRunE; --quiet sets
+	// it to Error.
 	quiet   bool
 	verbose bool
 	debug   bool

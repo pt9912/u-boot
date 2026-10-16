@@ -41,6 +41,10 @@ type generateFlags struct {
 	DryRun bool
 	Diff   bool
 	JSON   bool
+
+	// Quiet is read through from the root persistent --quiet
+	// (LH-FA-CLI-005): only security-relaxation warnings are written.
+	Quiet bool
 }
 
 func newGenerateCommand(a *App) *cobra.Command {
@@ -93,6 +97,7 @@ Examples:
 			// Read-through persistent --json (LH-NFA-USE-004) from
 			// the App; Cobra has parsed it by RunE-time.
 			flags.JSON = a.json
+			flags.Quiet = a.quiet
 			return runGenerate(cmd.Context(), cmd.OutOrStdout(), args, *flags, a.generateUseCase, a.getwd)
 		},
 	}
@@ -216,7 +221,7 @@ func runGenerate(
 		}
 	}
 	printGenerateSummary(out, resp)
-	for _, w := range resp.Warnings {
+	for _, w := range visibleWarnings(resp.Warnings, flags.Quiet) {
 		fmt.Fprintf(out, "Warning (%s): %s\n", w.Code, w.Message)
 	}
 	return nil

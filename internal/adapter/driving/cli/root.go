@@ -42,13 +42,15 @@ Quickstart and user docs: https://github.com/pt9912/u-boot#readme`,
 		"do not prompt; fail when a required confirmation cannot be resolved; exclusive with --yes")
 
 	// LH-FA-CLI-005 verbosity flags. Persistent so subcommands read
-	// a single source of truth. --quiet is load-bearing for the
-	// doctor subcommand (filters SeverityOK items from the rendered
-	// report) and the up/down subcommands (suppress status table /
-	// success message). --quiet / --verbose / --debug also raise
-	// or lower the logger level via the PersistentPreRunE below.
+	// a single source of truth. --quiet shows errors only: it is
+	// load-bearing for doctor (renders only SeverityError items), up
+	// and down (suppress status table / success message) and the
+	// init/generate/up warning lines (only security relaxations
+	// remain, see [writeWarning]). --quiet / --verbose / --debug
+	// also raise or lower the logger level via the PersistentPreRunE
+	// below.
 	root.PersistentFlags().BoolVar(&a.quiet, "quiet", false,
-		"reduce normal output; keep warnings and errors where applicable")
+		"show errors only; security relaxations of the sandbox profile stay reported")
 	root.PersistentFlags().BoolVar(&a.verbose, "verbose", false,
 		"show additional detail")
 	root.PersistentFlags().BoolVar(&a.debug, "debug", false,
@@ -70,7 +72,8 @@ Quickstart and user docs: https://github.com/pt9912/u-boot#readme`,
 	// cmd/uboot/main.go), so the Set call here changes the level of
 	// every Logger.Debug/Info/... call that follows.
 	//
-	// Precedence: --debug > --verbose > --quiet > default(Info).
+	// Precedence: --debug > --verbose > --quiet > default(Info);
+	// --quiet sets the Error level.
 	// --debug and --verbose both map to LevelDebug today; a future
 	// slice can introduce a Verbose-only level if a service-specific
 	// pegel between Info and Debug becomes useful.
@@ -92,7 +95,7 @@ Quickstart and user docs: https://github.com/pt9912/u-boot#readme`,
 		case a.verbose:
 			a.logLevel.Set(slog.LevelDebug)
 		case a.quiet:
-			a.logLevel.Set(slog.LevelWarn)
+			a.logLevel.Set(slog.LevelError)
 		default:
 			a.logLevel.Set(slog.LevelInfo)
 		}

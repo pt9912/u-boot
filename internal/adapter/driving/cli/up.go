@@ -197,17 +197,19 @@ func runUp(ctx context.Context, stdout, stderr io.Writer, flags upFlags, useCase
 	}
 	// LH-FA-CLI-005 + M6 slice §T6 binding contract: `up --quiet`
 	// must suppress BOTH the status table AND the diagnostic
-	// section so CI scripts can rely on empty stdout for success.
+	// section so CI scripts can rely on empty stdout for success;
+	// only security-relaxation warnings may still reach stdout.
 	// The Compose progress stream on stderr is NOT affected
 	// (LH-NFA-PERF-002 requires phase visibility regardless).
-	if flags.Quiet {
-		return nil
+	if !flags.Quiet {
+		if err := renderUpStatus(stdout, resp.Result.Services); err != nil {
+			return fmt.Errorf("render status: %w", err)
+		}
+		renderUpDiagnostics(stdout, resp.Result.Diagnostics, flags.Quiet)
 	}
-	if err := renderUpStatus(stdout, resp.Result.Services); err != nil {
-		return fmt.Errorf("render status: %w", err)
-	}
-	renderUpDiagnostics(stdout, resp.Result.Diagnostics, flags.Quiet)
-	for _, w := range resp.Warnings {
+	// Under --quiet only security-relaxation warnings remain
+	// (LH-FA-CLI-005); the recreate warning (LH-FA-UP-003) is dropped.
+	for _, w := range visibleWarnings(resp.Warnings, flags.Quiet) {
 		fmt.Fprintf(stdout, "Warning (%s): %s\n", w.Code, w.Message)
 	}
 	return nil
