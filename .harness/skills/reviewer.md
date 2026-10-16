@@ -150,6 +150,10 @@ Zuständigkeiten anderer Rollen (Verifier, Validator).
   kein Finding.
 - **Kein HIGH- oder MEDIUM-Finding ohne Failure-Szenario:** was sich nicht als
   konkretes Versagen erzählen lässt, wird nicht als HIGH oder MEDIUM gemeldet.
+  Bei den Ankern *Kommentar*, *Zustandsfeld* und *Norm nur im Template-Kommentar*
+  ist das Szenario das Versagen des nächsten Änderers: Er folgt der falschen
+  Aussage, weil kein Gate sie widerlegt. Das Finding nennt diese Stelle und diesen
+  Änderer.
 
 Fällt etwas auf, das in diese Kategorien gehört: INFO-Finding mit Verweis auf
 die zuständige Rolle.

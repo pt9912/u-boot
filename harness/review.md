@@ -46,19 +46,25 @@ Ein Finding ist HIGH, wenn es eines dieser Muster trifft:
 - User-Dateien koennen ohne Spec-konforme Bestaetigung, Backup oder
   managed-block-Schutz ueberschrieben werden.
 - Docker-only-Harness, CI-Gate oder Security-Gate wird gelockert oder
-  umgangen.
+  umgangen, auch durch Inline-`//nolint` statt zentraler Ausnahme in
+  `.golangci.yml` ([`AGENTS.md`](../AGENTS.md) §3.2).
 - Generierte Artefakte koennen kaputt oder inkonsistent werden
   (`compose.yaml`, `.env.example`, devcontainer, README/CHANGELOG).
 - Neuer temporaerer Carveout entsteht ohne Inventar-Eintrag und
   Plan-Anker.
 - Ein Kommentar beschreibt die verworfene Alternative oder abwesenden
   Text, oder eine `Stand`-/`Status`-Zelle traegt Chronik statt Zustand und
-  Beleg ([`AGENTS.md`](../AGENTS.md) §3.7); kein Gate faengt das.
+  Beleg, oder das Drift-Log der Roadmap protokolliert Schliessungen und
+  erreichte Meilensteine ([`AGENTS.md`](../AGENTS.md) §3.7); kein Gate
+  faengt das.
 - Eine Norm steht nur im `<!-- -->`-Block eines `.template.md`; sie ist
   beim Adopter weg, sobald er die Kommentare entfernt.
 
 Kein HIGH- und kein MEDIUM-Finding ohne Failure-Szenario: Was sich nicht
-als konkretes Versagen erzaehlen laesst, wird so nicht gemeldet.
+als konkretes Versagen erzaehlen laesst, wird so nicht gemeldet. Bei den
+Ankern Kommentar, Zustandsfeld und Norm im Template-Kommentar ist das
+Szenario das Versagen des naechsten Aenderers: Er folgt der falschen
+Aussage, weil kein Gate sie widerlegt.
 
 ### MEDIUM-Anker fuer `u-boot`
 

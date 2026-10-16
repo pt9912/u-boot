@@ -43,7 +43,10 @@ Keine Anforderungsänderung — Skill-Pflege.
 - [ ] `.harness/skills/reviewer.md` trägt die Vorlagen-Änderungen:
   `pfad` als Datei plus wörtliches Kurzzitat (Zeile nur als Lesehilfe), LOW nur
   mit Konventions-Anker, „Kein Stil-Polizist“, kein HIGH/MEDIUM ohne
-  Failure-Szenario; `harness/review.md` ist im selben Zug nachgezogen, wo es
+  Failure-Szenario, `klasse` im Output-Schema, dazu die HIGH-Anker der Vorlage,
+  die das Repo schon trägt (Kommentar-Klassen und Zustandsfelder nach
+  `AGENTS.md` §3.7, Norm nur im Template-Kommentar, Inline-`//nolint` nach
+  `AGENTS.md` §3.2); `harness/review.md` ist im selben Zug nachgezogen, wo es
   dasselbe Schema führt.
 - [ ] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
@@ -58,7 +61,8 @@ Keine Anforderungsänderung — Skill-Pflege.
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
 | `.harness/skills/reviewer.md` | update | Angleichung an `reviewer.template.md` der Baseline `v6.18.1` |
-| `harness/review.md` | update | Output-Schema `pfad` und Kategorien-Regel, falls dort geführt |
+| `harness/review.md` | update | Output-Schema `pfad` und `klasse`, Kategorien-Regel, HIGH-Anker und Failure-Szenario-Regel, falls dort geführt |
+| `docs/plan/planning/in-progress/roadmap.md` | update | Der Slice in `in-progress/` nimmt der Roadmap den Ruhe-Marker (`make docs-check`) |
 
 Das Werkzeug `ai-harness-init` meldet bei jedem Lauf, dass der Skill von der
 mitgelieferten Fassung abweicht und nennt die Vorlage zum Abgleich; es
