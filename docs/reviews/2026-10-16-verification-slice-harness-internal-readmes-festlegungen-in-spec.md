@@ -35,7 +35,7 @@ Regelkonformität:
 - Decken-Regel: laut Review keine neue Zeile in `spec/` mit Verweis nach unten; `spec/architecture.md` trägt keinen Slice-/ADR-Bezug.
 - Welle-Closure-Trigger §3: der Review-Report (`fceea11`) liegt nach dem Move von `slice-harness-dcheck-bump-reviewer-skill` nach `done/` (`c9b1f4e`), und der Reviewer-Skill (`3ec4535`) stammt aus diesem Slice; Reihenfolge belegt per `git log`. `make doc-trace`: 83 Anforderung(en), 0 Waise(n); `LH-FA-UP-001` und `LH-FA-UP-003` tragen den Slice als Beleg. <!-- d-check:ignore (Kennungen als Zitat) -->
 
-Abweichung Lastenheft gegen Code (Verbosity): kein Teil dieses Slice; sie steht korrekt nicht in der Spezifikation. Zwei Folge-Slices liegen in `open/`: [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../plan/planning/open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) und [`slice-cr-cli-quiet-fehler-und-warnungen`](../plan/planning/done/slice-cr-cli-quiet-fehler-und-warnungen.md). Im Slice selbst fehlt der Verweis: §9 spricht nur von „offener Befund für den Projektinhaber", §6 hat keinen Eintrag. Auflage unten.
+Abweichung Lastenheft gegen Code (Verbosity): kein Teil dieses Slice; sie steht korrekt nicht in der Spezifikation. Zwei Folge-Slices liegen in `open/`: [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../plan/planning/in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md) und [`slice-cr-cli-quiet-fehler-und-warnungen`](../plan/planning/done/slice-cr-cli-quiet-fehler-und-warnungen.md). Im Slice selbst fehlt der Verweis: §9 spricht nur von „offener Befund für den Projektinhaber", §6 hat keinen Eintrag. Auflage unten.
 
 Sensors:
 | Sensor | Ergebnis | Evidence |

@@ -54,7 +54,7 @@ Die Zusage nennt den Konjunktiv für den Inhalt der Anzeige, aber kein Ausgabefo
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Verhalten unter `--quiet`** — [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md) setzt es um; der Befund besteht davon unabhängig, und dieser Slice ändert keine Quiet-Zweige.
-- **Die Rangfolge der Verbosity-Optionen** — [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+- **Die Rangfolge der Verbosity-Optionen** — [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 - **Das JSON-Format des Dry-Runs** (`--dry-run --json`) — ein maschinenlesbarer Vertrag ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), Pflichtfelder), der von der Zeitform der Text-Zeile unberührt bleibt.
 - **Die Texte von `init` und `add`** — sie sagen schon „Would …“; Änderung nur, falls die Vereinheitlichung auf eine gemeinsame Form es verlangt (dann im Plan §3 ergänzen).
 

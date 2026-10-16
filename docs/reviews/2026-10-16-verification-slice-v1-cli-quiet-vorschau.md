@@ -55,7 +55,7 @@ Sensors:
 | `make verify-depguard` | not run | keine Importregel geändert (`previewmode.go` importiert weiter nur `port/driving`) |
 | `make docs-check` | pass | nach Anlegen dieser Datei erneut gefahren, siehe Übergabe |
 
-Folge-Slices in der Welle: [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../plan/planning/open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) ist der einzige verbleibende Slice der Welle (Welle §3, Tabelle; Handbuch und CHANGELOG nennen nur noch „letzte Option gewinnt“ als folgend). Hinweis: `open/README.md` §Bestand führt die Zeile des Slice `slice-v1-cli-quiet-vorschau` noch, obwohl er in `in-progress/` liegt (Link zeigt korrekt dorthin); bei der Closure den Bestandseintrag entfernen bzw. mit dem `git mv` nachziehen. <!-- d-check:ignore (Dateiname und Ortsangabe als Zitat) -->
+Folge-Slices in der Welle: [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../plan/planning/in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md) ist der einzige verbleibende Slice der Welle (Welle §3, Tabelle; Handbuch und CHANGELOG nennen nur noch „letzte Option gewinnt“ als folgend). Hinweis: `open/README.md` §Bestand führt die Zeile des Slice `slice-v1-cli-quiet-vorschau` noch, obwohl er in `in-progress/` liegt (Link zeigt korrekt dorthin); bei der Closure den Bestandseintrag entfernen bzw. mit dem `git mv` nachziehen. <!-- d-check:ignore (Dateiname und Ortsangabe als Zitat) -->
 
 Traceability:
 | ID | Beleg |

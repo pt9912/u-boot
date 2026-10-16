@@ -77,7 +77,7 @@ kein Release, einen Release-Cut-Slice gibt es nicht.
 - **Steering-Loop-Einträge:** Kein Eintrag über der Schwelle (das Beobachtungs-Register ist leer). Gezählt, nicht verkörpert:
   Skill ⊃ `harness/review.md` (die älteren Skill-HIGHs stehen nur im Skill), und eine Spec, die ein README statt den Code abschreibt.
 - **Beobachtungs-Register:** keine Beobachtung angelegt.
-- **Folge-Slices:** [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Code),
+- **Folge-Slices:** [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Code),
   [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) (CR am Lastenheft),
   [`slice-v2-homebrew-smoke-haertung`](../open/slice-v2-homebrew-smoke-haertung.md) (aus der Vorwelle, unverändert offen).
 - **Verifikation:** `make gates` Exit 0; Verification Evidence je Slice unter `docs/reviews/`

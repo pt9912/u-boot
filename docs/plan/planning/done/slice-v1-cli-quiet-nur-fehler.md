@@ -13,7 +13,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) und
 [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) (die vier Ausnahmen stehen erst nach
 Lastenheft 0.9.0 im Vertrag) und geht
-[`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) voraus (siehe §4: beide ändern
+[`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md) voraus (siehe §4: beide ändern
 `root.go` und `verbosity_test.go`).
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Scope),
@@ -32,7 +32,7 @@ Herkunft: Entscheidungen des Projektinhabers (2026-10-16), festgehalten in den C
 nicht geändert; der Code folgt dem Lastenheft (Fassung aus dem CR, Lastenheft 0.9.0).
 `spezifikation.md` und `architecture.md` beschreiben das Verhalten erst nach
 allen Slices der Welle, im letzten
-([`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md)).
+([`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md)).
 
 **Verantwortlich:** —
 
@@ -86,7 +86,7 @@ verändern, behalten ihre Ausgabe, weil sie das Ergebnis des Befehls ist: `confi
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Die Rangfolge bei Mehrfachangabe** (`--quiet --verbose` usw.) — das ist
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md); dieser Slice ändert, *was* `--quiet`
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md); dieser Slice ändert, *was* `--quiet`
   bewirkt, nicht, *welche* Option gilt.
 - **Eine neue Pegelstufe** (etwa zwischen Info und Debug) — eine neue Zusage;
   das Lastenheft nennt vier Stufen.
@@ -158,7 +158,7 @@ verändern, behalten ihre Ausgabe, weil sie das Ergebnis des Befehls ist: `confi
 | `internal/adapter/driving/cli/config.go`, `template.go`, `logs.go` | prüfen | Prüfpunkt §1: Ergebnis-Ausgaben bleiben, `config set`-Zusammenfassung zuordnen und pinnen |
 | `internal/adapter/driving/cli/doctor.go` | update | `writeDoctorReport`: unter `--quiet` Fehler-Items und Fallback-Items; Kopf-/Summary-Zeile entfallen (Pin); F-3: Erklärung auf stderr für `--quiet --strict` mit nur Warn-Items |
 | `internal/hexagon/port/driving/removeservice.go`, `internal/hexagon/application/doctor_sandbox.go`, `internal/hexagon/application/devcontainer_sandbox.go`, `internal/hexagon/domain/diagnostic.go` | update | Kennzeichen „Fallback“ (`DegradationFallback`) an `WarningEntry` und `domain.Diagnostic`; produktiv setzt es nur `doctor_sandbox.go` (`vfs`); `devcontainer_sandbox.go` erzeugt keine Fallbacks, sondern kennzeichnet die Lockerungen; nicht im JSON; [`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)-konform, kein I/O |
-| `internal/adapter/driving/cli/verbosity_test.go` | update | `quiet-lowers-to-warn` → Fehler-Pegel; `debug-takes-precedence-over-quiet` bleibt unverändert (kehrt sich erst in [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) um) |
+| `internal/adapter/driving/cli/verbosity_test.go` | update | `quiet-lowers-to-warn` → Fehler-Pegel; `debug-takes-precedence-over-quiet` bleibt unverändert (kehrt sich erst in [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md) um) |
 | `internal/adapter/driving/cli/cli_test.go` | update | F-1: Kommentar am Doctor-Test auf die geltende Zusage; F-3-Pin `doctor --quiet --strict` |
 | `internal/adapter/driving/cli/sandbox_test.go`, `updown_cluster_test.go`, `statusview_test.go`, `down_acceptance_test.go`, `up_acceptance_test.go`, `doctor_json_test.go` sowie Tests zu `init`/`generate`/`add`/`remove` | update / prüfen | neue Fälle Happy/Boundary/Negative je Subkommando und je Ausnahme; `--quiet --json` unverändert — nach [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) |
 | `docs/user/benutzerhandbuch.md` | update | Optionstabellen (Zeilen um 299 und 1280): „nur Fehler; vier Ausnahmen“, `remove --quiet` |
@@ -170,7 +170,7 @@ verändern, behalten ihre Ausgabe, weil sie das Ergebnis des Befehls ist: `confi
 [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) liegt in `done/`) und der Projektinhaber
 priorisiert den Slice.
 
-**Reihenfolge zum Slice [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md):**
+**Reihenfolge zum Slice [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md):**
 logisch sind beide unabhängig — dieser Slice ändert die Abbildung `--quiet` →
 Pegel und die Ausgabe-Filter, jener die Auswahl unter mehreren Optionen. Sie
 berühren aber dieselbe Stelle (`PersistentPreRunE`-Switch in `root.go`) und
@@ -244,7 +244,7 @@ sechs Auflagen für die Closure (hier eingelöst). `make gates` grün, Coverage 
   [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md) (Code dazu),
   [`slice-v1-sandbox-fallback-ausweisung`](../open/slice-v1-sandbox-fallback-ausweisung.md) (Lücke der Fallback-Ausweisung, Entscheidung Code oder CR beim
   Projektinhaber) und
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Rangfolge bei Mehrfachangabe, Spec-Eintrag).
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Rangfolge bei Mehrfachangabe, Spec-Eintrag).
 - **Risiken aus §6:** alle tragen ihren Ausgang: eingetreten (Vorschau, Fallback-Ausweisung) oder entfallen (Umfang, Abgrenzung der Ausnahmen,
   `doctor`-Warn-Items, `down`-Puffer, Reihenfolge zum Folge-Slice).
 - **Release-Hinweis:** kein Release-Cut vor `slice-v1-cli-verbosity-letzte-option-gewinnt` und den beiden Vorschau-Slices; der
