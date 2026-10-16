@@ -6,7 +6,7 @@
 
 ## Scope
 
-- Slice: [`slice-harness-dcheck-bump-reviewer-skill`](../plan/planning/in-progress/slice-harness-dcheck-bump-reviewer-skill.md)
+- Slice: [`slice-harness-dcheck-bump-reviewer-skill`](../plan/planning/done/slice-harness-dcheck-bump-reviewer-skill.md)
 - IDs: [`MR-009`](../../harness/conventions/MR-009-skills-und-review-ablage.md); keine `LH-*`/`ADR-*` berührt (Slice: „Berührte Spec-Stellen: —“).
 - Artefakte: `.harness/skills/reviewer.md`, `harness/review.md`, `docs/plan/planning/in-progress/roadmap.md`, Slice-Datei (DoD/Plan-Präzisierung), Review-Report `docs/reviews/2026-10-16-slice-harness-dcheck-bump-reviewer-skill.md`. <!-- d-check:ignore (Pfade als Zitat) -->
 
