@@ -93,6 +93,9 @@ ist ein No-op).
       `doctor --quiet` zeigt nur Fehler-Items; Sandbox-Lockerungs-Hinweise bleiben
       bei `init`, `generate` und `up` sichtbar. Tests Happy/Boundary/Negative je
       Subkommando referenzieren die IDs.
+- [ ] Die Degradations-Fallbacks aus [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)
+      (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion) sind ausdrücklich der Ausnahme zugeordnet oder
+      ausgeschlossen, und ein Test pinnt die Zuordnung (das Lastenheft nennt sie weder noch schließt es sie aus).
 - [ ] Doku-Update: `docs/user/benutzerhandbuch.md` (Optionstabellen, Zeilen um
       299 und 1280) nennt `--quiet` als „nur Fehler" mit der Ausnahme;
       CHANGELOG-Eintrag.

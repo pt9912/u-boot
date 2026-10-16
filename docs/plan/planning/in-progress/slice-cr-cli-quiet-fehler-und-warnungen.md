@@ -39,7 +39,8 @@ CR nicht; sie beschreiben das Verhalten erst nach allen drei Slices der Welle.
 **Ziel:** Lastenheft-Änderung **0.7.0 → 0.8.0**: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) behält
 `--quiet` – nur Fehler und nimmt die Pflicht-Ausweisung von Sicherheitslockerungen
 ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil): „jede Sicherheitslockerung in der Befehlsausgabe ausweisen";
-[`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): `--privileged` bei `docker`) als einzige Ausnahme auf.
+[`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): `--privileged` bei `docker`;
+[`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion): Capability der Egress-Restriktion) als einzige Ausnahme auf.
 
 **Warum eine Ausnahme:** Die Ausweispflicht von Sicherheitslockerungen ist eine
 eigene Zusage. Ein `--quiet`, das sie verschluckt, würde sie aushebeln; die
@@ -126,25 +127,25 @@ in [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md):
 **Historie-Zeile (§16, bei Spec-Change zu setzen):**
 
 ```text
-| 0.8.0 | (Annahmedatum) | LH-FA-CLI-005: `--quiet` bleibt „nur Fehler"; die
-Ausweisung von Sicherheitslockerungen im Sandbox-Profil (LH-FA-DEV-006,
-LH-FA-DEV-007) bleibt unter `--quiet` sichtbar. | Vereinbarung mit dem
+| 0.8.0 | 2026-10-16 | LH-FA-CLI-005: Ausnahme für Sicherheitslockerungen
+unter `--quiet`; die Stufen und die Mehrfachangabe-Regel bleiben. Die
+geltende Zeile steht in spec/lastenheft.md §16. | Vereinbarung mit dem
 Projektinhaber |
 ```
 
 ## 2. Definition of Done
 
-- [ ] **Lastenheft 0.8.0**: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) in der Fassung oben, Versionsfeld,
+- [x] **Lastenheft 0.8.0**: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) in der Fassung oben, Versionsfeld,
       Historie-Zeile (Verweis „Vereinbarung mit dem Projektinhaber").
-- [ ] **Umsetzungsbedarf** einem Slice zugeordnet: Abnahmekriterien 1–3 liegen in
+- [x] **Umsetzungsbedarf** einem Slice zugeordnet: Abnahmekriterien 1–3 liegen in
       [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md).
-- [ ] Doku-Update: CHANGELOG (öffentlicher Vertrag berührt).
-- [ ] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+- [x] Doku-Update: CHANGELOG (öffentlicher Vertrag berührt).
+- [x] `make gates` grün.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — kein Self-Review.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang.
 - [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
 
 ## 3. Plan (vor Code)
@@ -192,7 +193,26 @@ der Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quie
 
 ## 7. Closure-Notiz
 
-Wird bei der Closure gefüllt.
+**Belege:** Review-Report [`2026-10-16-slice-cr-cli-quiet-fehler-und-warnungen`](../../../reviews/2026-10-16-slice-cr-cli-quiet-fehler-und-warnungen.md)
+(0 HIGH, 1 MEDIUM, 4 INFO; der Report entstand gegen `b5fa4b4` und führt F-1 als offen, F-1 ist in `5a20103` behoben); Verification Evidence
+[`2026-10-16-verification-slice-cr-cli-quiet-fehler-und-warnungen`](../../../reviews/2026-10-16-verification-slice-cr-cli-quiet-fehler-und-warnungen.md)
+(bestanden); `make gates` grün, `make doc-trace`: 83 Anforderungen, 0 Waisen.
+
+- **Was hat funktioniert:** Der Prüfauftrag zu den Warn-Pfaden kam vor der Lastenheft-Änderung und kippte die ursprüngliche Begründung:
+  Die Sandbox-Hinweise laufen bei `init` und `generate` am Logger vorbei, `--quiet` auf Warn hätte sie also nicht gehalten. Die Entscheidung
+  fiel danach auf „nur Fehler" mit einer Ausnahme.
+- **Was ging anders als geplant:** Der CR ist einmal umgekehrt worden (erst „Fehler und Warnungen", dann „nur Fehler" mit Ausnahme). Der Review
+  fand, dass „Sicherheitslockerung" im Satz nicht abgegrenzt war (F-1); der Satz nennt jetzt die Arten der Lockerung und schließt alle anderen Hinweise
+  aus. Die Degradations-Fallbacks aus [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)
+  sind weder genannt noch ausgeschlossen; der Umsetzungs-Slice entscheidet sie und pinnt sie im Test.
+- **Grenze:** Das CHANGELOG sagt im Präsens, was `--quiet` leistet, obwohl der Code es erst nach den beiden Umsetzungs-Slices tut.
+  Bis dahin kein Release-Cut.
+- **Steering-Loop-Eintrag:** Ein CR, dessen Begründung auf einer Annahme über den Code ruht, prüft die Annahme im Code, bevor er das Lastenheft ändert.
+  Gezählt, nicht verkörpert (einmaliges Auftreten).
+- **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt (erstes Auftreten).
+- **Folge-Slices:** [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) (trägt die Abnahmekriterien 1–3),
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+- **Risiken aus §6:** beide tragen ihren Ausgang (siehe §6).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
