@@ -2,14 +2,14 @@
 
 **Review-Art:** Code — Diff gegen Plan, [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Lastenheft 0.8.0), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-NFA-USE-004`](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) und Hard Rules (Maintainability; nicht gegen die DoD).
 
-**Gegenstand:** Commit-Range `aca134c..HEAD` (Implementer-Commits `c277c47`, `72006d3`, `7a244b9`) für den Slice [`slice-v1-cli-quiet-nur-fehler`](../plan/planning/open/slice-v1-cli-quiet-nur-fehler.md) (Welle `welle-cli-verbosity`). <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
+**Gegenstand:** Commit-Range `aca134c..HEAD` (Implementer-Commits `c277c47`, `72006d3`, `7a244b9`) für den Slice [`slice-v1-cli-quiet-nur-fehler`](../plan/planning/in-progress/slice-v1-cli-quiet-nur-fehler.md) (Welle `welle-cli-verbosity`). <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 
 **Skill:** `.harness/skills/reviewer.md` @ HEAD `7a244b9` · <!-- d-check:ignore (Skill-Pfad als Zitat) -->
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-16
 
 **Eingangs-Kontext:**
 
-- Slice [`slice-v1-cli-quiet-nur-fehler`](../plan/planning/open/slice-v1-cli-quiet-nur-fehler.md) (§1 Abgrenzung, §3 Plan) <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
+- Slice [`slice-v1-cli-quiet-nur-fehler`](../plan/planning/in-progress/slice-v1-cli-quiet-nur-fehler.md) (§1 Abgrenzung, §3 Plan) <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 - [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-NFA-USE-004`](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DIAG-003`](../../spec/lastenheft.md#lh-fa-diag-003--fehlerklassifikation), [`LH-NFA-PERF-002`](../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker)
 - `AGENTS.md` (Hard Rules §3.2, §3.7), `harness/conventions.md`, `harness/review.md`
 - Sensors: `make lint` (Exit 0); Mutation `doctor.go` (`SeverityError` → `!= SeverityOK`) per `make test`: drei Doctor-Pins rot, Arbeitsbaum per `git checkout` zurückgesetzt (`git status` sauber). Nicht gelaufen: `make test-docker` (kein Docker-Pfad berührt), `make verify-depguard` (keine Importregel geändert; `warnings.go` importiert nur den Port `driving`, wie die Nachbardateien), `make gates` (Teilsensoren `lint`, `test` einzeln gelaufen).

@@ -4,7 +4,7 @@
 > **ist** der Change Request am Vertrags-Stratum (Precedent:
 > [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md)).
 > Anlass: Der Review des Code-Slices
-> [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md)
+> [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md)
 > ([Report](../../../reviews/2026-10-16-slice-v1-cli-quiet-nur-fehler.md), F-5 und F-6) fand zwei
 > Spannungen zwischen [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) und anderen Zusagen des Lastenhefts. Der Projektinhaber hat am
 > 2026-10-16 entschieden: Die Degradations-Fallbacks und der Compose-Fortschritt bei `up`
@@ -16,13 +16,13 @@ wechselt nur durch `git mv`.
 
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — zweiter Slice der Welle; ihm geht
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) voraus, ihm folgen
-[`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) und
+[`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) und
 [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Änderung),
 [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Degradation, Ausweisung jedes Fallbacks),
 [`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker) (Fortschrittsanzeige bei `up`).
-Verwandt: [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) (Code: setzt die vier Ausnahmen um).
+Verwandt: [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) (Code: setzt die vier Ausnahmen um).
 
 **Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)), §16
 (Historie), Versionsfeld. `spezifikation.md` und `architecture.md` berührt der
@@ -53,7 +53,7 @@ müsste den Vorrang still entscheiden; die Ausnahme macht ihn im Vertrag ausdrü
 Zusammenfassungsmeldung **aller** Subkommandos, die eine ausgeben (`init`, `generate`, `add`, `remove`, `up`, `down`,
 `doctor`: nur Fehler); `remove` bekommt dafür die Option `--quiet`. Das ist der heutige Wortlaut „nur Fehler“ und braucht
 **keinen** Lastenheft-Wechsel; die Umsetzung liegt im Code-Slice
-[`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md).
+[`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md).
 
 ### Gefundener Stand im Code
 
@@ -105,14 +105,14 @@ Der Satz zu den Abfragebefehlen nennt das Kriterium (der Befehl ändert nichts) 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Die Umsetzung im Code** — Adapter und Use-Cases ändern sich in
-  [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md); dieser CR ändert nur das Vertrags-Stratum.
+  [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md); dieser CR ändert nur das Vertrags-Stratum.
 - **Die Reichweite „alle Subkommandos“** — steht im Wortlaut „nur Fehler“, braucht keinen Lastenheft-Wechsel.
 - **Die Regel „letzte Option gewinnt“** — Code in
   [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 - **Eine Spec-Beschreibung in `spezifikation.md`** — erst nach allen Slices der Welle, sonst beschreibt sie einen Zwischenstand.
 
 **Abnahmekriterien (für die Umsetzung, nicht für den Spec-Change)** — sie liegen in
-[`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md):
+[`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md):
 
 1. Je Subkommando belegt ein Test, dass `--quiet` Erfolgs- und Zusammenfassungsmeldungen unterdrückt (`remove` mit neuer Option).
 2. Ein Test pinnt je Ausnahme, dass sie sichtbar bleibt: Lockerungs-Hinweis, Degradations-Fallback (Befehlsausgabe und `doctor`), Compose-Fortschritt bei `up`, `--force`-Zusammenfassung.
@@ -137,7 +137,7 @@ Projektinhaber |
 - [x] **Lastenheft 0.9.0**: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) in der Fassung oben, Versionsfeld,
       Historie-Zeile (Verweis „Vereinbarung mit dem Projektinhaber").
 - [x] **Umsetzungsbedarf** einem Slice zugeordnet: Abnahmekriterien 1–3 liegen in
-      [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md).
+      [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md).
 - [x] Doku-Update: CHANGELOG (öffentlicher Vertrag berührt).
 - [x] `make gates` grün.
 - [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
@@ -155,7 +155,7 @@ Projektinhaber |
 | `CHANGELOG.md` | update | öffentlicher Vertrag berührt |
 
 Reihenfolge: Lastenheft ändern → Umsetzung im Slice
-[`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) (die Ausnahmen stehen erst nach 0.9.0 im Vertrag).
+[`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) (die Ausnahmen stehen erst nach 0.9.0 im Vertrag).
 
 ## 4. Trigger
 
@@ -172,7 +172,7 @@ Compose-Fortschritt, Degradations-Fallbacks) liegt vor.
 
 DoD vollständig, Review-Report liegt vor, Closure-Notiz mit
 Steering-Loop-Lerneintrag geschrieben (§7). Lastenheft 0.9.0 ist angenommen;
-der Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) liegt in `open/` oder weiter.
+der Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) liegt in `open/` oder weiter.
 
 ## 6. Risiken und offene Punkte
 
@@ -208,7 +208,7 @@ der Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quie
   `slice-v1-cli-verbosity-letzte-option-gewinnt` geliefert sind, kein Release-Cut. Die Purge- und Abhängigkeits-Warnungen von `remove` sind keine Ausnahme; der
   Code-Slice pinnt das.
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt.
-- **Folge-Slices:** [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) (trägt die Abnahmekriterien 1–3),
+- **Folge-Slices:** [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) (trägt die Abnahmekriterien 1–3),
   [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 - **Risiken aus §6:** alle drei tragen ihren Ausgang (siehe §6).
 
