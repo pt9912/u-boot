@@ -7,8 +7,10 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — letzter Slice der Welle; folgt auf
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md),
-[`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) und
-[`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md), weil die Pegelabbildung von
+[`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md),
+[`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md),
+[`slice-cr-cli-quiet-vorschau`](slice-cr-cli-quiet-vorschau.md) und
+[`slice-v1-cli-quiet-vorschau`](slice-v1-cli-quiet-vorschau.md), weil die Pegelabbildung von
 `--quiet` (Fehler-Pegel) aus dem Slice [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) kommt.
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Scope).
@@ -22,8 +24,10 @@ Herkunft: Inventur in
 nicht geändert; der Code folgt dem Lastenheft. `spezifikation.md` und
 `architecture.md` beschreiben das Verhalten erst **nach** diesem Slice, dem Slice
 [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) **und**
-den CRs [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) und
-[`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md);
+den CRs [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md),
+[`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) und
+[`slice-cr-cli-quiet-vorschau`](slice-cr-cli-quiet-vorschau.md) sowie dem Slice
+[`slice-v1-cli-quiet-vorschau`](slice-v1-cli-quiet-vorschau.md);
 vorher nicht in die Spec schreiben.
 
 **Verantwortlich:** —
@@ -80,7 +84,7 @@ benutzbar).
 - [ ] Doku-Update: `docs/user/benutzerhandbuch.md` (Optionstabellen, Zeilen
       um 299 und 1280) nennt „letzte Option gewinnt"; CHANGELOG-Eintrag.
 - [ ] Spezifikation: ein `SPEC-<NNN>` in `spezifikation.md` beschreibt Pegelabbildung und Rangfolge, deckungsgleich mit
-      Lastenheft 0.9.0 (nach den CRs) und Code, an [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) verankert; Zahlenwerte aus dem Code.
+      Lastenheft 0.10.0 (nach den CRs) und Code, an [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) verankert; Zahlenwerte aus dem Code.
 - [ ] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
@@ -133,9 +137,11 @@ Steering-Loop-Lerneintrag geschrieben (§7).
   noch wahr ist. — **Ausgang:** offen bis zur Umsetzung; Test `--quiet --verbose`
   muss auch die Ausgabe-Filter prüfen.
 - **Reihenfolge-Abhängigkeit:** Die Spezifikation darf das Verhalten erst nach
-  diesem Slice, dem Slice [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) und den CRs
-  [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) und
-  [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) beschreiben. — **Ausgang:** entfallen: der
+  diesem Slice, den Slices [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) und
+  [`slice-v1-cli-quiet-vorschau`](slice-v1-cli-quiet-vorschau.md) und den CRs
+  [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md),
+  [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) und
+  [`slice-cr-cli-quiet-vorschau`](slice-cr-cli-quiet-vorschau.md) beschreiben. — **Ausgang:** entfallen: der
   Spezifikations-Eintrag liegt in diesem Slice, dem letzten der Welle
   [`welle-cli-verbosity`](../welle-cli-verbosity.md).
 
