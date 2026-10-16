@@ -59,7 +59,7 @@ geschlossen — entweder im Code oder im Vertrag.
 - **Die Ausgabe der Startscripte selbst** — sie laufen im Container und kennen weder `--quiet` noch den Host-Prozess; Gegenstand ist die Ausweisung auf dem Host.
 - **Neue Fallback-Klassen oder Sicherheitslockerungen** — eine neue Zusage; [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) zählt drei Fallbacks.
 - **Die Vorschau von `--dry-run` unter `--quiet`** — anderer Befund
-  ([`slice-cr-cli-quiet-vorschau`](slice-cr-cli-quiet-vorschau.md)).
+  ([`slice-cr-cli-quiet-vorschau`](../in-progress/slice-cr-cli-quiet-vorschau.md)).
 
 ## 2. Definition of Done
 
