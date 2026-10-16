@@ -16,6 +16,9 @@ this file is the same format applied to u-boot itself.
 - `devcontainer.sandbox.nestedRuntime: docker` is promised on Docker under Linux and on Colima (Linux VM) only.
   Docker Desktop is no longer promised: it is not measured, and the user manual lists it as not verified.
   Homebrew is documented for macOS only (Apple Silicon and Intel); the tap smoke now runs on `macos-14` and `macos-15-intel`.
+- The contract for `--quiet` ([`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), Lastenheft 0.8.0) names one exception: the disclosure of security relaxations in the
+  sandbox profile stays visible under `--quiet`, so a script cannot silence it. The levels themselves are unchanged (`--quiet`
+  shows only errors; the last verbosity option wins); the implementation follows in a later release.
 
 ## [0.9.0] - 2026-10-15
 
