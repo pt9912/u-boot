@@ -53,21 +53,21 @@ im Code und im README, nicht in der Spezifikation (0 Treffer in `spezifikation.m
 
 ## 2. Definition of Done
 
-- [ ] **Inventur:** je README eine Liste seiner Aussagen, eingeordnet als Festlegung
+- [x] **Inventur:** je README eine Liste seiner Aussagen, eingeordnet als Festlegung
   (→ Spezifikation), Rückverfolgbarkeit (→ entfällt), Aufbau der Schicht (→ Architektur-Sicht
   oder Verweis) oder Implementierungshinweis (→ `doc.go` oder Kommentar); Abweichungen vom
   Code sind benannt.
-- [ ] **Spezifikation:** die Festlegungen stehen als `SPEC-<NNN>` (ab der nächsten freien Nummer) in
+- [x] **Spezifikation:** die Festlegungen stehen als `SPEC-<NNN>` (ab der nächsten freien Nummer) in
   `spezifikation.md`, jede an der Anforderung verankert, die sie verfeinert, mit den
   Zahlenwerten aus dem Code.
-- [ ] **READMEs** auf Zweck und Verweis gekürzt, die handgepflegte Service-Anforderungs-Liste
+- [x] **READMEs** auf Zweck und Verweis gekürzt, die handgepflegte Service-Anforderungs-Liste
   entfällt; `make docs-check` grün.
-- [ ] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+- [x] `make gates` grün.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang.
 
 ## 3. Plan (vor Code)
 
@@ -102,16 +102,43 @@ geschrieben, `make gates` grün.
 ## 6. Risiken und offene Punkte
 
 - Ein README nennt einen Wert, der vom Code abweicht; die Spezifikation übernähme die
-  falsche Zahl — **Ausgang:** offen; Werte kommen aus dem Code.
+  falsche Zahl — **Ausgang:** eingetreten und aufgelöst: der Review fand einen falschen Ist-Stand
+  (`SPEC-039`, F-1), er ist gegen den Code korrigiert; die Inventur benennt die übrigen <!-- d-check:ignore (Kennungen als Zitat) -->
+  Abweichungen README gegen Code.
 - Die Spezifikation wächst um viele Einträge und wird unübersichtlich —
-  **Ausgang:** offen; Einträge je Anforderung bündeln, nicht je Konstante.
+  **Ausgang:** entfallen: sieben Einträge (`SPEC-036`, `LH-FA-UP-001.a`, `SPEC-038` bis `SPEC-042`), <!-- d-check:ignore (Kennungen als Zitat) -->
+  je Anforderung gebündelt.
 - Die Sub-Area `internal/**/README.md` ist in `conventions.md` als Greenfield deklariert;
-  ihre Begründung nennt den Zweck „beschreiben den Code-Bestand“ — **Ausgang:** offen; die
-  Zeile wird bei der Closure nachgezogen.
+  ihre Begründung nennt den Zweck „beschreiben den Code-Bestand“ — **Ausgang:** entfallen: die
+  Zeile ist nachgezogen, der Modus bleibt Greenfield.
+- Die Inventur fand eine Abweichung Lastenheft gegen Code bei der Verbosity
+  ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)), die die Spezifikation
+  nicht übernehmen darf — **Ausgang:** eingetreten:
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md)
+  (Code) und [`slice-cr-cli-quiet-fehler-und-warnungen`](../open/slice-cr-cli-quiet-fehler-und-warnungen.md) (Lastenheft).
 
 ## 7. Closure-Notiz
 
-Offen.
+**Belege:** Review-Report [`2026-10-16-slice-harness-internal-readmes-festlegungen-in-spec`](../../../reviews/2026-10-16-slice-harness-internal-readmes-festlegungen-in-spec.md)
+(0 HIGH, 1 MEDIUM, 2 LOW, 5 INFO; alle behoben); Verification Evidence
+[`2026-10-16-verification-slice-harness-internal-readmes-festlegungen-in-spec`](../../../reviews/2026-10-16-verification-slice-harness-internal-readmes-festlegungen-in-spec.md)
+(bestanden); `make gates` grün, `make doc-trace`: 83 Anforderungen, 0 Waisen.
+
+- **Was hat funktioniert:** Die Inventur vor der Spezifikation fand die Abweichungen, bevor sie in die Spec wanderten;
+  die Werte kamen aus dem Code. Die sieben READMEs sind von 490 auf 109 Zeilen gekürzt.
+- **Was ging anders als geplant:** Das README und die Spec sagten Verschiedenes zum Changelog-Pfad (F-1): Die erste
+  Fassung von `SPEC-039` beschrieb eine Reparatur, die der Code nicht macht; der Review fing das gegen <!-- d-check:ignore (Kennungen als Zitat) -->
+  `hasChangelogUnreleased`. Ein Eintrag verfeinerte nur eine Anforderung und trug die falsche ID-Form
+  (`SPEC-037` wurde `LH-FA-UP-001.a`); der Kopf der Spec deckt jetzt auch den Mehr-Anforderungs-Fall ab. Dabei blieb die <!-- d-check:ignore (Kennungen als Zitat) -->
+  Nummer 037 als Lücke stehen, wie `SPEC-011`; die Baseline verbietet das Nachbelegen. Die Abweichung bei der <!-- d-check:ignore (Kennungen als Zitat) -->
+  Verbosity führte zu zwei Folge-Slices, siehe §6.
+- **Steering-Loop-Eintrag:** Ein Review gegen den Code fängt, was ein README-getriebener Entwurf falsch übernimmt: Die
+  Zahlenwerte einer Spec stehen aus dem Code, nie aus einem README. Gezählt, nicht verkörpert; das Beobachtungs-Register ist
+  leer und die Beobachtung trat einmal auf.
+- **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt (erstes Auftreten).
+- **Folge-Slices:** [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md),
+  [`slice-cr-cli-quiet-fehler-und-warnungen`](../open/slice-cr-cli-quiet-fehler-und-warnungen.md).
+- **Risiken aus §6:** jedes trägt einen Ausgang (siehe §6).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
