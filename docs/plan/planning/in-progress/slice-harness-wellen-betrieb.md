@@ -60,8 +60,8 @@ statt Wellen-Inhalt, und `plan-welle`, `close-welle` und `planner` laufen auf u-
 - [x] `make gates` grün.
 - [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       ([`Report`](../../../reviews/2026-10-16-slice-harness-wellen-betrieb.md); 0 HIGH, 0 MEDIUM, 4 LOW, 3 INFO; F-1 bis F-4 behoben; `.harness/skills/reviewer.md`) — kein Self-Review.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang.
 
 ## 3. Plan (vor Code)
 
@@ -93,14 +93,39 @@ geschrieben, `make gates` grün.
 ## 6. Risiken und offene Punkte
 
 - Die Roadmap trägt die Closure heute schon; eine zweite Fassung als Welle-Datei
-  dupliziert sie — **Ausgang:** offen; Welle-Dateien gelten nur für neue Wellen,
-  die Detailquelle der Closure bleibt der Release-Cut-Slice.
+  dupliziert sie — **Ausgang:** entfallen, Welle-Dateien gelten nur für neue Wellen, die
+  Detailquelle der Closure bleibt der Release-Cut-Slice
+  ([`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md) (b)).
 - `close-welle` ruft die Archivierung (Schritt 4) und verlangt sie als Vorbedingung —
-  **Ausgang:** offen; der Schritt wird für u-boot gestrichen und dort vermerkt.
+  **Ausgang:** entfallen, der Schritt und die Results-Datei sind gestrichen, `close-welle`
+  hat fünf Schritte.
+- Die Zeiger-Hälfte von „Offene Wellen“ (ein Zeiger je Welle-Datei) hat keinen Sensor —
+  **Ausgang:** weiter offen, benannt in `.d-check.yml`; kein Register, daher hier festgehalten.
 
 ## 7. Closure-Notiz
 
-Offen.
+Vollzogen am 2026-10-16. u-boot führt Wellen als Welle-Dateien: Die Roadmap trägt
+„Offene Wellen“ mit dem Ruhe-Marker (Modul `planning`, Marker-Hälfte geprüft), `MR-003` ist
+neu gefasst, `plan-welle`, `close-welle` und `planner` sind auf u-boot gefasst (ohne
+Archivierung und Results-Datei), und die Spalte Kürzel in `harness/conventions.md` bedient das
+Beobachtungs-Register. Review: 0 HIGH, 0 MEDIUM, 4 LOW, 3 INFO, F-1 bis F-4 und F-7 behoben.
+Verifier: DoD bestätigt, alle Sensor-Läufe grün.
+
+- **Was hat funktioniert:** Der Lastenheft-CR zuerst (Planungs-Anforderungen als Grabsteine) hat
+  den Vertragswortlaut für Welle-Dateien überflüssig gemacht. Der Review hat die Marker-Hälfte
+  des Sensors in einem Wegwerf-Klon in beide Richtungen belegt.
+- **Was ging anders als geplant:** Der Slice war zunächst als CR-Vehikel angelegt und wurde nach
+  der Grundsatzentscheidung (Lastenheft nur mit Produktanforderungen) auf die reine Prozess-
+  Umsetzung zurückgeschnitten. Mechanisch kopierte Vorlagentexte (Nummerierung in `close-welle`,
+  Schreibweise `KUERZEL`) fand erst der Review.
+- **Steering-Loop-Eintrag:** Nach dem Entfernen von Schritten aus einer übernommenen Anweisung
+  werden Nummerierung und Querverweise der verbleibenden Schritte geprüft — liegt in
+  `.claude/commands/close-welle.md` (Schritte 1–5).
+- **Folge-Slices:** [`slice-harness-dcheck-bump-reviewer-skill`](../open/slice-harness-dcheck-bump-reviewer-skill.md),
+  [`slice-harness-internal-readmes-festlegungen-in-spec`](../open/slice-harness-internal-readmes-festlegungen-in-spec.md).
+- **Risiken aus §6:** je ein Ausgang, siehe §6.
+- **Erste Welle-Datei:** entsteht mit der nächsten Eröffnung (`/plan-welle`); bis dahin trägt
+  die Roadmap „Keine offene Welle-Datei“.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 

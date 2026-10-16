@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-10-14.
+**Status:** Aktiv. **Letzte Änderung:** 2026-10-16.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -17,10 +17,9 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Keine offene Welle-Datei. In Arbeit sind Slices ohne Welle (kein `Welle:`-Feld):
+Keine offene Welle-Datei. In Arbeit ist ein Slice ohne Welle (kein `Welle:`-Feld):
 [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (v0.9.0 ist released, Tap-Nachzug lief;
-offen: macOS-Smoke im Tap zur Formel 0.9.0 und `brew install` auf einem Mac) und
-[`slice-harness-wellen-betrieb`](slice-harness-wellen-betrieb.md) (Harness-Wartung).
+offen: macOS-Smoke im Tap zur Formel 0.9.0 und `brew install` auf einem Mac).
 
 ## Nächste Wellen
 
