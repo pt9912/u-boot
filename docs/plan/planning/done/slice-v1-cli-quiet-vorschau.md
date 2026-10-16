@@ -8,7 +8,7 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — fünfter Slice der Welle; folgt auf
 [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md) (der Vorschau-Satz steht erst mit Lastenheft 0.10.0 im Vertrag) und auf
 [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) (berührt dieselben Quiet-Zweige); ihm folgt
-[`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+[`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Vorschau bleibt unter `--quiet`, ab 0.10.0),
 [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Dry-Run zeigt die Dateien) und
@@ -54,7 +54,7 @@ Die Sicherheits-/Fallback-Ausnahmen und Fehler bleiben unabhängig davon; sonsti
 - **Der Compose-Strom von `down`, der CHANGELOG-Widerspruch (Review F-1, F-3)** — anderer Befund, Arbeit am Slice
   [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md).
 - **Eine Änderung des Lastenhefts** — liegt im CR [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md).
-- **Die Wahl zwischen mehreren Verbosity-Optionen** — Slice [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+- **Die Wahl zwischen mehreren Verbosity-Optionen** — Slice [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 - **Eine Spec-Beschreibung in `spezifikation.md`** — erst nach allen Slices der Welle, sonst beschreibt sie einen Zwischenstand.
 
 ## 2. Definition of Done
@@ -120,7 +120,7 @@ Steering-Loop-Lerneintrag geschrieben (§7).
 - **Konflikt mit dem Code-Slice [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md):** beide ändern die Quiet-Zweige derselben fünf Dateien. — **Ausgang:** entfallen:
   dieser Slice startet erst nach dessen Closure (siehe §4).
 - **Zwischenstand der Spec:** Die Spezifikation darf das Verhalten erst nach allen Slices der Welle beschreiben. — **Ausgang:** entfallen: der Spezifikations-Eintrag liegt im letzten Slice
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
 ## 7. Closure-Notiz
 
@@ -142,7 +142,7 @@ Folge-Slice, F-4 als Grenze). Verification Evidence
   hier wird nichts verkörpert.
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt; das Register ist leer, also keine Beobachtung über der Schwelle.
 - **Folge-Slices:** [`slice-v1-cli-dry-run-would-formulierung`](../open/slice-v1-cli-dry-run-would-formulierung.md) (neu: Zeitform der Dry-Run-Zusammenfassung, Review F-3) und
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Rangfolge bei Mehrfachangabe, Spec-Eintrag).
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Rangfolge bei Mehrfachangabe, Spec-Eintrag).
 - **Release-Hinweis:** kein Release-Cut vor `slice-v1-cli-verbosity-letzte-option-gewinnt`; der CHANGELOG sagt „follows in a later release“.
 - **Risiken aus §6:** alle tragen ihren Ausgang: eingetreten (Vergangenheitsform im Dry-Run) oder entfallen (Auslegung `--diff` ohne `--dry-run`, Konflikt mit dem Code-Slice, Zwischenstand der Spec).
 - **Grenzen:** (1) Kein Dry-Run-Pin mit Warnungen für `generate` (Review F-4); das Verhalten ist durch Lesen bestätigt, der Warn-Pin im Dry-Run besteht nur für `init`.

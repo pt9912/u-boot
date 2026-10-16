@@ -15,13 +15,13 @@ wechselt nur durch `git mv`.
 
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — erster Slice der Welle; ihm folgen
 [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) und
-[`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+[`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Änderung),
 [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil),
 [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer).
 Verwandt: [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) (Code: Fehler-Pegel und Ausnahme)
-und [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Code: Wahl zwischen
+und [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Code: Wahl zwischen
 mehreren Optionen; dieser CR ändert die Mehrfachangabe-Regel nicht).
 
 **Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)), §16
@@ -103,14 +103,14 @@ Sandbox-Lockerungs-Hinweise.
 - Die vier Stufenbeschreibungen: `--quiet` – nur Fehler ist der heutige Wortlaut;
   der Code folgt ihm im Umsetzungs-Slice.
 - Der Satz zu mehreren Optionen: bleibt; der Code folgt ihm erst mit
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Die Umsetzung im Code** — der Adapter ändert sich in
   [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md); dieser CR ändert nur das Vertrags-Stratum.
 - **Die Regel „letzte Option gewinnt"** — Code-Anpassung in
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md), nicht Teil des CR.
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md), nicht Teil des CR.
 - **Eine Spec-Beschreibung in `spezifikation.md`** — erst nach allen drei Slices
   der Welle, sonst beschreibt sie einen Zwischenstand.
 
@@ -211,7 +211,7 @@ der Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quie
   Gezählt, nicht verkörpert (einmaliges Auftreten).
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt (erstes Auftreten).
 - **Folge-Slices:** [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) (trägt die Abnahmekriterien 1–3),
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 - **Risiken aus §6:** beide tragen ihren Ausgang (siehe §6).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung

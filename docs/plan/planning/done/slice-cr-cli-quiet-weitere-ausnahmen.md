@@ -17,7 +17,7 @@ wechselt nur durch `git mv`.
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — zweiter Slice der Welle; ihm geht
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) voraus, ihm folgen
 [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) und
-[`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+[`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Änderung),
 [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Degradation, Ausweisung jedes Fallbacks),
@@ -100,7 +100,7 @@ Der Satz zu den Abfragebefehlen nennt das Kriterium (der Befehl ändert nichts) 
 
 - Die vier Stufenbeschreibungen: `--quiet` – nur Fehler bleibt der Wortlaut.
 - Der Satz zu mehreren Optionen: bleibt; der Code folgt ihm mit
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
@@ -108,7 +108,7 @@ Der Satz zu den Abfragebefehlen nennt das Kriterium (der Befehl ändert nichts) 
   [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md); dieser CR ändert nur das Vertrags-Stratum.
 - **Die Reichweite „alle Subkommandos“** — steht im Wortlaut „nur Fehler“, braucht keinen Lastenheft-Wechsel.
 - **Die Regel „letzte Option gewinnt“** — Code in
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 - **Eine Spec-Beschreibung in `spezifikation.md`** — erst nach allen Slices der Welle, sonst beschreibt sie einen Zwischenstand.
 
 **Abnahmekriterien (für die Umsetzung, nicht für den Spec-Change)** — sie liegen in
@@ -209,7 +209,7 @@ der Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quie
   Code-Slice pinnt das.
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt.
 - **Folge-Slices:** [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) (trägt die Abnahmekriterien 1–3),
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 - **Risiken aus §6:** alle drei tragen ihren Ausgang (siehe §6).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung

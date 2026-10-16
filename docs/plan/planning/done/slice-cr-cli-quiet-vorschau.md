@@ -21,7 +21,7 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) und
 [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) voraus, ihm folgen
 [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md) und
-[`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+[`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Änderung),
 [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Dry-Run zeigt die Dateien) und
@@ -198,7 +198,7 @@ F-5 im Folge-Slice); Verification Evidence
   „Änderungsplan“ auf die „Would …“- und Vergangenheitsform-Ausgaben zu pinnen (F-2).
 - **Beobachtungs-Register (`../observations/`):** leer, keine Beobachtung angelegt.
 - **Folge-Slices:** [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md),
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 - **Risiken aus §6:** alle drei tragen ihren Ausgang (siehe §6): Reichweite bei `--diff` ohne `--dry-run` vom Projektinhaber bestätigt,
   ältere Zusagen per wiederholter Suche geprüft, Zwischenstand der Spec durch die Welle gedeckt.
 - **Drei Paarungen:** Anker: keine verkörperte Regel, daher kein Anker (der Eintrag trägt kein `liegt in`); Folge-Slice: beide in `open/`;

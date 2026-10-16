@@ -2,12 +2,12 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../plan/planning/in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md), letzter Slice der Welle [`welle-cli-verbosity`](../plan/planning/welle-cli-verbosity.md). Commits: `65b1fa6` (Code und Tests), `c56d134` (Handbuch, CHANGELOG), `0bfe1fa` (`SPEC-043`), `4260372` (Review-Fixes F-1/F-2 und Report). Review: [Report](2026-10-16-slice-v1-cli-verbosity-letzte-option-gewinnt.md) (1 HIGH, 0 MEDIUM, 1 LOW, 2 INFO; HIGH und LOW behoben). <!-- d-check:ignore (Commit-Hashes und SPEC-Kennung als Zitat) -->
+**Gegenstand:** [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../plan/planning/done/slice-v1-cli-verbosity-letzte-option-gewinnt.md), letzter Slice der Welle [`welle-cli-verbosity`](../plan/planning/welle-cli-verbosity.md). Commits: `65b1fa6` (Code und Tests), `c56d134` (Handbuch, CHANGELOG), `0bfe1fa` (`SPEC-043`), `4260372` (Review-Fixes F-1/F-2 und Report). Review: [Report](2026-10-16-slice-v1-cli-verbosity-letzte-option-gewinnt.md) (1 HIGH, 0 MEDIUM, 1 LOW, 2 INFO; HIGH und LOW behoben). <!-- d-check:ignore (Commit-Hashes und SPEC-Kennung als Zitat) -->
 
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../plan/planning/in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md)
+- Slice: [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../plan/planning/done/slice-v1-cli-verbosity-letzte-option-gewinnt.md)
 - IDs: [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Lastenheft 0.10.0), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)
 - Artefakte: `internal/adapter/driving/cli/` (neu `verbosity.go`, `verbosity_last_wins_test.go`; geändert `root.go`, `cli.go`, `verbosity_test.go` und elf Lesestellen), `cmd/uboot/main.go` (Kommentar), `spec/spezifikation.md` (`SPEC-043`), `CHANGELOG.md`, `docs/user/benutzerhandbuch.md`. <!-- d-check:ignore (Pfade und Kennung als Zitat) -->
 

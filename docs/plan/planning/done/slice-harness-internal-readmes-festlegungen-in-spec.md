@@ -114,7 +114,7 @@ geschrieben, `make gates` grün.
 - Die Inventur fand eine Abweichung Lastenheft gegen Code bei der Verbosity
   ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)), die die Spezifikation
   nicht übernehmen darf — **Ausgang:** eingetreten:
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md)
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md)
   (Code) und [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) (Lastenheft).
 
 ## 7. Closure-Notiz
@@ -136,7 +136,7 @@ geschrieben, `make gates` grün.
   Zahlenwerte einer Spec stehen aus dem Code, nie aus einem README. Gezählt, nicht verkörpert; das Beobachtungs-Register ist
   leer und die Beobachtung trat einmal auf.
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt (erstes Auftreten).
-- **Folge-Slices:** [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../in-progress/slice-v1-cli-verbosity-letzte-option-gewinnt.md),
+- **Folge-Slices:** [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md),
   [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md).
 - **Risiken aus §6:** jedes trägt einen Ausgang (siehe §6).
 
