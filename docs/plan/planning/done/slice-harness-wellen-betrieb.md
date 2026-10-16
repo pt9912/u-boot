@@ -121,7 +121,7 @@ Verifier: DoD bestätigt, alle Sensor-Läufe grün.
 - **Steering-Loop-Eintrag:** Nach dem Entfernen von Schritten aus einer übernommenen Anweisung
   werden Nummerierung und Querverweise der verbleibenden Schritte geprüft — liegt in
   `.claude/commands/close-welle.md` (Schritte 1–5).
-- **Folge-Slices:** [`slice-harness-dcheck-bump-reviewer-skill`](../next/slice-harness-dcheck-bump-reviewer-skill.md),
+- **Folge-Slices:** [`slice-harness-dcheck-bump-reviewer-skill`](../in-progress/slice-harness-dcheck-bump-reviewer-skill.md),
   [`slice-harness-internal-readmes-festlegungen-in-spec`](../next/slice-harness-internal-readmes-festlegungen-in-spec.md).
 - **Risiken aus §6:** je ein Ausgang, siehe §6.
 - **Erste Welle-Datei:** entsteht mit der nächsten Eröffnung (`/plan-welle`); bis dahin trägt

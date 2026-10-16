@@ -170,7 +170,7 @@ Spezifikation tragen neue Kennungen mit erhaltenen alten Ankern. Review: 0 HIGH,
   Bereichsangabe, Historie) — liegt in `docs/plan/planning/done/slice-cr-lastenheft-produktanforderungen.md` (Anhang).
 - **Folge-Slices:** [`slice-harness-wellen-betrieb`](../done/slice-harness-wellen-betrieb.md)
   (Vorbedingung erfüllt, Start frei),
-  [`slice-harness-dcheck-bump-reviewer-skill`](../next/slice-harness-dcheck-bump-reviewer-skill.md).
+  [`slice-harness-dcheck-bump-reviewer-skill`](../in-progress/slice-harness-dcheck-bump-reviewer-skill.md).
 - **Risiken aus §6:** je ein Ausgang, siehe §6.
 - **Umplanung:** Die Änderung an `slice-harness-wellen-betrieb` (Welle-Dateien und Register ja,
   Archivierung nein, kein Vertragswortlaut mehr) steht in dessen §1; die Roadmap führt diesen Slice
