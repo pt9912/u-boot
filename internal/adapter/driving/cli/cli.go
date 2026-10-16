@@ -84,18 +84,12 @@ type App struct {
 	yes           bool
 	noInteractive bool
 
-	// quiet, verbose, debug are bound to the LH-FA-CLI-005 root
-	// PersistentFlags. --quiet additionally restricts the doctor
-	// render to SeverityError and degradation-fallback items and
-	// suppresses the success/summary output of the modifying
-	// subcommands and every warning line that is neither a security
-	// relaxation nor a degradation fallback. --verbose and --debug
-	// both raise the logger level to
-	// Debug via buildRootCommand's PersistentPreRunE; --quiet sets
-	// it to Error.
-	quiet   bool
-	verbose bool
-	debug   bool
+	// verbosity is the level the LH-FA-CLI-005 root PersistentFlags
+	// --quiet / --verbose / --debug select; the option given last on
+	// the command line decides ([verbosityFlag]). Subcommands read the
+	// quiet state through [App.quiet]; buildRootCommand's
+	// PersistentPreRunE sets the logger level from it.
+	verbosity verbosity
 
 	// json is bound to the LH-NFA-USE-004 root --json PersistentFlag.
 	// Every spec-enum subcommand reads this state and emits the

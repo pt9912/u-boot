@@ -99,7 +99,7 @@ Examples:
 			// Read-through persistent --json (LH-NFA-USE-004) from
 			// the App; Cobra has parsed it by RunE-time.
 			flags.JSON = a.json
-			flags.Quiet = a.quiet
+			flags.Quiet = a.quiet()
 			return runGenerate(cmd.Context(), cmd.OutOrStdout(), args, *flags, a.generateUseCase, a.getwd)
 		},
 	}

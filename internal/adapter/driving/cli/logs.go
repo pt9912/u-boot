@@ -166,7 +166,7 @@ LH-FA-CLI-006 exit codes:
 			// JSON/Quiet read-through from the App's persistent
 			// root flags (slice-v1-cli-json-dry-run-logs T2/T5).
 			flags.JSON = a.json
-			flags.Quiet = a.quiet
+			flags.Quiet = a.quiet()
 			return runLogs(cmd.Context(), cmd.OutOrStdout(), cmd.ErrOrStderr(), args, *flags, a.logsUseCase, a.getwd)
 		},
 	}

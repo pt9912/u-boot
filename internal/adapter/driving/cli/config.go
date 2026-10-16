@@ -198,7 +198,7 @@ Examples:
 		Args: configArgsValidator(a, "show", cobra.NoArgs),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			flags.JSON = a.json
-			flags.Quiet = a.quiet
+			flags.Quiet = a.quiet()
 			return runConfigShow(cmd.Context(), cmd.OutOrStdout(), *flags, a.configUseCase, a.getwd)
 		},
 	}
@@ -224,7 +224,7 @@ the first unknown or unset path aborts with exit 10.`,
 		Args: configArgsValidator(a, "get", cobra.MinimumNArgs(1)),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			flags.JSON = a.json
-			flags.Quiet = a.quiet
+			flags.Quiet = a.quiet()
 			return runConfigGet(cmd.Context(), cmd.OutOrStdout(), args, *flags, a.configUseCase, a.getwd)
 		},
 	}
@@ -245,7 +245,7 @@ data.entries[{path,value}]). Read-only.`,
 		Args: configArgsValidator(a, "list", cobra.NoArgs),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			flags.JSON = a.json
-			flags.Quiet = a.quiet
+			flags.Quiet = a.quiet()
 			return runConfigList(cmd.Context(), cmd.OutOrStdout(), *flags, a.configUseCase, a.getwd)
 		},
 	}
@@ -266,7 +266,7 @@ an earlier one).`,
 		Args: configArgsValidator(a, "set", configSetPairsArgs),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			flags.JSON = a.json
-			flags.Quiet = a.quiet
+			flags.Quiet = a.quiet()
 			return runConfigSet(cmd.Context(), cmd.OutOrStdout(), args, *flags, a.configUseCase, a.getwd)
 		},
 	}

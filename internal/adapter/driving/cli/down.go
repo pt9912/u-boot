@@ -111,7 +111,7 @@ with --quiet they are held back and printed only if down fails
 			// global state.
 			flags.Yes = a.yes
 			flags.NoInteractive = a.noInteractive
-			flags.Quiet = a.quiet
+			flags.Quiet = a.quiet()
 			flags.JSON = a.json
 			return runDown(cmd.Context(), cmd.OutOrStdout(), cmd.ErrOrStderr(), *flags, a.downUseCase, a.getwd)
 		},

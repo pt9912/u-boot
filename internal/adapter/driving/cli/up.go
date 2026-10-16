@@ -137,7 +137,7 @@ LH-NFA-PERF-002 progress: pull/create/start/healthcheck phases stream
 to stderr live (unaffected by --quiet; silenced in --json mode).`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			flags.Quiet = a.quiet
+			flags.Quiet = a.quiet()
 			flags.JSON = a.json
 			return runUp(cmd.Context(), cmd.OutOrStdout(), cmd.ErrOrStderr(), *flags, a.upUseCase, a.getwd)
 		},

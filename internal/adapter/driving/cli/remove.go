@@ -146,7 +146,7 @@ Examples:
 			flags.Yes = a.yes
 			flags.NoInteractive = a.noInteractive
 			flags.JSON = a.json
-			flags.Quiet = a.quiet
+			flags.Quiet = a.quiet()
 			return runRemove(cmd.Context(), cmd.OutOrStdout(), cmd.ErrOrStderr(), args, *flags, a.removeServiceUseCase, a.getwd)
 		},
 	}

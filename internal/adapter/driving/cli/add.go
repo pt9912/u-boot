@@ -89,7 +89,7 @@ Examples:
 			flags.Yes = a.yes
 			flags.NoInteractive = a.noInteractive
 			flags.JSON = a.json
-			flags.Quiet = a.quiet
+			flags.Quiet = a.quiet()
 			return runAdd(cmd.Context(), cmd.OutOrStdout(), args, *flags, a.addServiceUseCase, a.getwd)
 		},
 	}

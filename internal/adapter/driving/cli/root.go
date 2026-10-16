@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"log/slog"
-
 	"github.com/spf13/cobra"
 )
 
@@ -42,21 +40,24 @@ Quickstart and user docs: https://github.com/pt9912/u-boot#readme`,
 		"do not prompt; fail when a required confirmation cannot be resolved; exclusive with --yes")
 
 	// LH-FA-CLI-005 verbosity flags. Persistent so subcommands read
-	// a single source of truth. --quiet shows errors only
-	// (LH-FA-CLI-005): every modifying subcommand drops its success
-	// and summary output, doctor renders only SeverityError items and
-	// degradation-fallback items, and the warning lines of
-	// init/generate/up keep only security relaxations and degradation
-	// fallbacks, see [visibleWarnings]. The query commands (config
-	// get/list, logs, template list) keep their output. --quiet /
-	// --verbose / --debug also raise or lower the logger level via
-	// the PersistentPreRunE below.
-	root.PersistentFlags().BoolVar(&a.quiet, "quiet", false,
-		"show errors only; security relaxations, degradation fallbacks of the sandbox profile, `up` progress and the `--force` path summary stay reported")
-	root.PersistentFlags().BoolVar(&a.verbose, "verbose", false,
-		"show additional detail")
-	root.PersistentFlags().BoolVar(&a.debug, "debug", false,
-		"show internal diagnostic output")
+	// a single source of truth. The three flags share one value
+	// ([verbosityFlag]): the option given last on the command line
+	// decides, a repeated or conflicting one is not rejected.
+	// --quiet shows errors only (LH-FA-CLI-005): every modifying
+	// subcommand drops its success and summary output, doctor renders
+	// only SeverityError items and degradation-fallback items, and the
+	// warning lines of init/generate/up keep only security relaxations
+	// and degradation fallbacks, see [visibleWarnings]. The query
+	// commands (config get/list, logs, template list) keep their
+	// output. The selected verbosity also sets the logger level in the
+	// PersistentPreRunE below.
+	a.verbosity = verbosityDefault
+	addVerbosityFlag(root, a, "quiet", verbosityQuiet,
+		"show errors only; security relaxations, degradation fallbacks of the sandbox profile, `up` progress and the `--force` path summary stay reported; the last of --quiet, --verbose and --debug wins")
+	addVerbosityFlag(root, a, "verbose", verbosityVerbose,
+		"show additional detail; the last of --quiet, --verbose and --debug wins")
+	addVerbosityFlag(root, a, "debug", verbosityDebug,
+		"show internal diagnostic output; the last of --quiet, --verbose and --debug wins")
 
 	// LH-NFA-USE-004 machine-readable output. Persistent flag,
 	// inherited by every subcommand. All spec-enum subcommand forms
@@ -74,11 +75,9 @@ Quickstart and user docs: https://github.com/pt9912/u-boot#readme`,
 	// cmd/uboot/main.go), so the Set call here changes the level of
 	// every Logger.Debug/Info/... call that follows.
 	//
-	// Precedence: --debug > --verbose > --quiet > default(Info);
-	// --quiet sets the Error level.
-	// --debug and --verbose both map to LevelDebug today; a future
-	// slice can introduce a Verbose-only level if a service-specific
-	// pegel between Info and Debug becomes useful.
+	// The level follows the verbosity option given last, see
+	// [verbosity.slogLevel]; --debug and --verbose both map to
+	// LevelDebug.
 	root.PersistentPreRunE = func(_ *cobra.Command, _ []string) error {
 		// LH-FA-CLI-005 verbosity → slog level. The LH-NFA-USE-004
 		// `--json` reject gate (allowlist + applyJSONRejectGate) was
@@ -91,16 +90,7 @@ Quickstart and user docs: https://github.com/pt9912/u-boot#readme`,
 		if a.logLevel == nil {
 			return nil
 		}
-		switch {
-		case a.debug:
-			a.logLevel.Set(slog.LevelDebug)
-		case a.verbose:
-			a.logLevel.Set(slog.LevelDebug)
-		case a.quiet:
-			a.logLevel.Set(slog.LevelError)
-		default:
-			a.logLevel.Set(slog.LevelInfo)
-		}
+		a.logLevel.Set(a.verbosity.slogLevel())
 		return nil
 	}
 
@@ -115,4 +105,11 @@ Quickstart and user docs: https://github.com/pt9912/u-boot#readme`,
 	root.AddCommand(newConfigCommand(a))
 	root.AddCommand(newTemplateCommand(a))
 	return root
+}
+
+// addVerbosityFlag registers one verbosity option as a value-less
+// persistent boolean flag of root that selects mode when given.
+func addVerbosityFlag(root *cobra.Command, a *App, name string, mode verbosity, usage string) {
+	f := root.PersistentFlags().VarPF(&verbosityFlag{app: a, mode: mode}, name, "", usage)
+	f.NoOptDefVal = "true"
 }

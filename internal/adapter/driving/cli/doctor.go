@@ -82,7 +82,7 @@ Examples:
   u-boot doctor --strict         # warn → exit 11 (CI-strict mode)`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			flags.Quiet = a.quiet
+			flags.Quiet = a.quiet()
 			flags.JSON = a.json
 			return runDoctor(cmd.Context(), cmd.OutOrStdout(), *flags, a.doctorUseCase, a.getwd)
 		},
