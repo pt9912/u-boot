@@ -15,7 +15,7 @@ verschieden ist (Nachzug zu Review-Findings am Tap-Smoke).
 und die
 [Verification von `slice-v2-homebrew-formula`](../../../reviews/2026-10-16-verification-slice-v2-homebrew-formula.md);
 Akzeptanzkriterium 4 in
-[`slice-v2-homebrew-formula`](../in-progress/slice-v2-homebrew-formula.md).
+[`slice-v2-homebrew-formula`](../done/slice-v2-homebrew-formula.md).
 
 **Berührte Spec-Stellen:** —
 
@@ -28,7 +28,7 @@ Akzeptanzkriterium 4 in
 ## 1. Ziel und Abgrenzung
 
 **Ziel:** Der Homebrew-Smoke im Tap erfüllt das Akzeptanzkriterium 4 von
-[`slice-v2-homebrew-formula`](../in-progress/slice-v2-homebrew-formula.md) voll:
+[`slice-v2-homebrew-formula`](../done/slice-v2-homebrew-formula.md) voll:
 `brew install --build-from-source` (bzw. gleichwertig), `u-boot add` im Smoke und
 ein gatendes `brew audit --strict` ohne `|| true`.
 
@@ -40,7 +40,7 @@ ein gatendes `brew audit --strict` ohne `|| true`.
 - Neue Plattformen oder Distributionswege im Tap: der Slice härtet den
   bestehenden Smoke, er erweitert den Umfang der Zusage
   [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung) nicht.
-- Änderungen an `in-progress/slice-v2-homebrew-formula.md`, Welle, Roadmap oder
+- Änderungen an `done/slice-v2-homebrew-formula.md`, Welle, Roadmap oder
   Carveout-Inventar: das führt der Verantwortliche selbst nach.
 
 ## 2. Definition of Done

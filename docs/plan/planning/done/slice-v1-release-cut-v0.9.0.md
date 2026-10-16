@@ -28,7 +28,7 @@ wechselt nur durch `git mv`.
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - Die Docker-Desktop-Messung — [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) trägt sie; die Release-Notizen und das Handbuch sagen Docker Desktop nicht zu.
-- Der macOS-Smoke im Tap zur Formel 0.9.0 — [`slice-v2-homebrew-formula`](../in-progress/slice-v2-homebrew-formula.md) führt die Tap-Verifikation.
+- Der macOS-Smoke im Tap zur Formel 0.9.0 — [`slice-v2-homebrew-formula`](../done/slice-v2-homebrew-formula.md) führt die Tap-Verifikation.
 
 ## 2. Definition of Done
 
@@ -74,7 +74,7 @@ DoD vollständig: Tag gesetzt, `publish`- und Tap-Lauf kontrolliert (`releasing.
 - **Was ging anders als geplant:** Nichts am Ablauf; die Review-Finding des Cuts (ein LOW zum CHANGELOG-Wortlaut) ist vor dem Tag behoben.
 - **Steering-Loop-Eintrag:** Vor dem Tag das Datum im Cut gegen das Tag-Datum prüfen (`date +%F`), weil es an sechs Stellen fest steht.
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angefallen.
-- **Folge-Slices:** [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md); die Tap-Verifikation führt [`slice-v2-homebrew-formula`](../in-progress/slice-v2-homebrew-formula.md).
+- **Folge-Slices:** [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md); die Tap-Verifikation führt [`slice-v2-homebrew-formula`](../done/slice-v2-homebrew-formula.md).
 - **Risiken aus §6:** siehe §6
 - **Drei Paarungen:** Anker (Zustimmungsmodell Drittanbieter-Features) → Entscheidung des Projektinhabers · Register: keine Beobachtung angefallen.
 
@@ -104,7 +104,7 @@ DoD-Abgleich:
 - [x] Closure-Notiz mit Steering-Loop-Eintrag — Evidence: §7 vorhanden, Tag-Hash und Steering-Loop-Eintrag gelesen; Lauf-ID `38689531814` und Tag-Commit stimmen mit den Befunden oben überein.
 - [x] Beobachtungs-Register — Evidence: §7 „keine Beobachtung angefallen".
 - [x] Risiken aus §6 mit Ausgang — Evidence: §6 trägt zwei Ausgänge (entfallen mit Lauf-ID; weiter offen mit Entscheidung des Projektinhabers).
-- [x] Drei Paarungen — Evidence: §7 verweist auf [slice-v1-sandbox-docker-nachholmessung-desktop](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) und [slice-v2-homebrew-formula](../in-progress/slice-v2-homebrew-formula.md); beide Dateien existieren. Die Anker-Paarung (Zustimmungsmodell) führt keinen Folge-Slice, sondern die Entscheidung des Projektinhabers; sie bleibt offen.
+- [x] Drei Paarungen — Evidence: §7 verweist auf [slice-v1-sandbox-docker-nachholmessung-desktop](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) und [slice-v2-homebrew-formula](../done/slice-v2-homebrew-formula.md); beide Dateien existieren. Die Anker-Paarung (Zustimmungsmodell) führt keinen Folge-Slice, sondern die Entscheidung des Projektinhabers; sie bleibt offen.
 
 Sensors:
 | Sensor | Ergebnis | Evidence |
@@ -131,7 +131,7 @@ Carveouts:
 
 Nicht ausgeführt (vom Verifier):
 - `make fullbuild`, `make test-docker`, `make gates` — Docker-/Make-Läufe sind dem Verifier-Auftrag nicht erlaubt; lokal vom Implementer ausgeführt, belegt durch die CI-Läufe `38688911910` und `38688911942` auf `7bfd8d6`.
-- Offen, nicht Teil dieses Cuts: macOS-Smoke im Tap zur Formel 0.9.0 — [slice-v2-homebrew-formula](../in-progress/slice-v2-homebrew-formula.md).
+- Offen, nicht Teil dieses Cuts: macOS-Smoke im Tap zur Formel 0.9.0 — [slice-v2-homebrew-formula](../done/slice-v2-homebrew-formula.md).
 - Offen, nicht Teil dieses Cuts: Docker-Desktop-Messung — [slice-v1-sandbox-docker-nachholmessung-desktop](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md); Docker Desktop wird nicht zugesagt.
 - Offen: Zustimmungsmodell für Drittanbieter-Features (Warnung bei `generate` als Zustimmung) — Entscheidung des Projektinhabers.
 - Pull-/Run-Läufe auf arm64-Host mit linux/amd64-Image (Emulation); nur `--version` geprüft.

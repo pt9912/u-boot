@@ -2,12 +2,12 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** Slice [`slice-v2-homebrew-formula`](../plan/planning/in-progress/slice-v2-homebrew-formula.md) (Delivery-Hash `0cab536`, Folgecommits bis `a4fd3a4`), Welle `welle-macos-verifikation` §3 (Closure-Trigger). <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) --> Der Slice ist in älterer Form geschrieben (Akzeptanzkriterien statt §2-DoD, Tranchen T1..T4); Maßstab sind seine vier Akzeptanzkriterien, [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md), [`LH-OPEN-002`](../../spec/lastenheft.md#lh-open-002--paketierung) und die Closure-Trigger der Welle.
+**Gegenstand:** Slice [`slice-v2-homebrew-formula`](../plan/planning/done/slice-v2-homebrew-formula.md) (Delivery-Hash `0cab536`, Folgecommits bis `a4fd3a4`), Welle `welle-macos-verifikation` §3 (Closure-Trigger). <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) --> Der Slice ist in älterer Form geschrieben (Akzeptanzkriterien statt §2-DoD, Tranchen T1..T4); Maßstab sind seine vier Akzeptanzkriterien, [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md), [`LH-OPEN-002`](../../spec/lastenheft.md#lh-open-002--paketierung) und die Closure-Trigger der Welle.
 
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v2-homebrew-formula`](../plan/planning/in-progress/slice-v2-homebrew-formula.md)
+- Slice: [`slice-v2-homebrew-formula`](../plan/planning/done/slice-v2-homebrew-formula.md)
 - IDs: [`LH-OPEN-002`](../../spec/lastenheft.md#lh-open-002--paketierung), [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md), [`ADR-0007`](../plan/adr/0007-distributionswege-ghcr.md) (nur als Bezug)
 - Artefakte: `scripts/homebrew-formula.rb.tmpl`, `scripts/homebrew-formula-fill.sh`, `scripts/tap-nachzug.sh`, `.github/workflows/publish.yml` (Jobs `publish`/`tap`), `packaging/homebrew-tap/**`, `cmd/uboot/homebrew_scripts_test.go`, README EN/DE, Tap `pt9912/homebrew-u-boot`
 

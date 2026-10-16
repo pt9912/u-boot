@@ -28,7 +28,7 @@ wechselt nur durch `git mv`.
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - Die Docker-Desktop-Messung — [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) trägt sie; die Release-Notizen und das Handbuch sagen Docker Desktop nicht zu.
-- Der macOS-Smoke im Tap zur Formel 0.8.0 — [`slice-v2-homebrew-formula`](../in-progress/slice-v2-homebrew-formula.md) führt die Tap-Verifikation.
+- Der macOS-Smoke im Tap zur Formel 0.8.0 — [`slice-v2-homebrew-formula`](../done/slice-v2-homebrew-formula.md) führt die Tap-Verifikation.
 
 ## 2. Definition of Done
 
@@ -74,7 +74,7 @@ DoD vollständig: Tag gesetzt, `publish` und Tap-Lauf kontrolliert (`releasing.m
 - **Was ging anders als geplant:** Der erste CI-Lauf nach dem Report-Commit schlug fehl (Links im Review-Report, `docs-check`); mit `1f2b41b` behoben, vor dem Tag. Vor dem Cut zeigte `image-scan` drei HIGH-Advisories der Go-Stdlib; der Go-Pin wurde auf 1.27.2 gehoben (`2a888f7`).
 - **Steering-Loop-Eintrag:** Vor dem Push `make docs-check` auch für neue Review-Reports laufen lassen; Reports verlinken Kennungen in Tabellenzellen ohne Backticks im Linktext (der Sensor wertet sie sonst als ungelinkt).
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angefallen.
-- **Folge-Slices:** [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md); die Tap-Verifikation führt [`slice-v2-homebrew-formula`](../in-progress/slice-v2-homebrew-formula.md).
+- **Folge-Slices:** [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md); die Tap-Verifikation führt [`slice-v2-homebrew-formula`](../done/slice-v2-homebrew-formula.md).
 - **Risiken aus §6:** siehe §6
 - **Drei Paarungen:** Anker (Docker-Desktop-Messung) → Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) · Register: keine Beobachtung angefallen.
 
@@ -133,7 +133,7 @@ Carveouts:
 Nicht ausgeführt (vom Verifier):
 - `make fullbuild`, `make test-docker` — Verifier führt keine Docker-Läufe und keine `make`-Targets außer `make docs-check` aus; Ersatzbeleg sind die CI-Läufe `ci` und `integration-docker` (beide success auf `1f2b41b`). Der lokale Lauf des Implementers ist nicht verifiziert.
 - Digest-Vergleich gegen die Release-Assets und `SHA256SUMS` — nicht geprüft.
-- Offen, nicht Teil dieses Slice: macOS-Smoke im Tap zur Formel 0.8.0 — [slice-v2-homebrew-formula](../in-progress/slice-v2-homebrew-formula.md); Docker-Desktop-Messung — [slice-v1-sandbox-docker-nachholmessung-desktop](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md).
+- Offen, nicht Teil dieses Slice: macOS-Smoke im Tap zur Formel 0.8.0 — [slice-v2-homebrew-formula](../done/slice-v2-homebrew-formula.md); Docker-Desktop-Messung — [slice-v1-sandbox-docker-nachholmessung-desktop](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md).
 
 Commit / Artefakt:
 - Tag-Commit `1f2b41b882289645e9279e3b3e24524a081b3e24`

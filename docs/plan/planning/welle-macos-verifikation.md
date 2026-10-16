@@ -43,7 +43,7 @@ beide Architekturen ab, und erst danach ändert sich die Aussage der Nutzerdoku.
 
 | Slice | Titel | Bezug |
 |---|---|---|
-| [`slice-v2-homebrew-formula`](in-progress/slice-v2-homebrew-formula.md) | Homebrew-Formel für u-boot | [`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002--paketierung) |
+| [`slice-v2-homebrew-formula`](done/slice-v2-homebrew-formula.md) | Homebrew-Formel für u-boot | [`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002--paketierung) |
 
 ## 5. Abhängigkeiten
 

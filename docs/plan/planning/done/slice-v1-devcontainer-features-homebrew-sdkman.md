@@ -27,7 +27,7 @@ Folge-ADR: Drittanbieter-Feature im eingebauten Katalog.
 
 - Feature-Optionen (etwa `candidate` und `version` des Community-Features `ebaskoro/sdkman`) — der Katalog kennt keine Optionen, und das Community-Feature installiert einen SDK-Kandidaten, nicht SDKMAN selbst (Messung in der Folge-ADR); `sdkman` zeigt deshalb auf das offizielle `java`-Feature.
 - Weitere Community-Features (`kubectl`-Varianten, `...-homebrew`-Features anderer Autoren) — jede Quelle braucht eine eigene Entscheidung; bis dahin gelten sie als extern mit Freigabe nach [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features).
-- Homebrew als Installationsweg von `u-boot` — der Tap besteht bereits ([`slice-v2-homebrew-formula`](../in-progress/slice-v2-homebrew-formula.md)).
+- Homebrew als Installationsweg von `u-boot` — der Tap besteht bereits ([`slice-v2-homebrew-formula`](../done/slice-v2-homebrew-formula.md)).
 
 ## 2. Definition of Done
 

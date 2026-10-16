@@ -26,7 +26,7 @@ Release-Images zeigt `0.7.0`.
 | T | Inhalt |
 | - | ------ |
 | T1–T3 | (ein Commit) **CHANGELOG** `[Unreleased]` → `[0.7.0] - 2026-10-01` mit Lead und Compare-Links; **Versionsstrings** `0.6.0-dev` → `0.7.0-dev` (`main.go`, `Makefile`, `Dockerfile`); **READMEs** Status + Releases-Zeile; **Benutzerhandbuch** 1.3 / v0.7.0; Roadmap. `make ci` und `make test-docker` grün. |
-| T4 | `git tag v0.7.0` auf dem grünen `main`-Stand, `git push origin v0.7.0`; `publish`-Lauf, Assets, Paket-Smoke und Tap kontrollieren; Closure-Notiz. Danach können [`slice-v2-distro-pakete`](slice-v2-distro-pakete.md) und [`slice-v2-homebrew-formula`](../in-progress/slice-v2-homebrew-formula.md) schließen. |
+| T4 | `git tag v0.7.0` auf dem grünen `main`-Stand, `git push origin v0.7.0`; `publish`-Lauf, Assets, Paket-Smoke und Tap kontrollieren; Closure-Notiz. Danach können [`slice-v2-distro-pakete`](slice-v2-distro-pakete.md) und [`slice-v2-homebrew-formula`](../done/slice-v2-homebrew-formula.md) schließen. |
 
 ## Out of Scope
 
@@ -40,4 +40,4 @@ Release-Images zeigt `0.7.0`.
   `u-boot.rb`), `package-smoke-deb`, `package-smoke-rpm` und `tap` (Tap-Commit `3059299` „u-boot 0.7.0“;
   damit ist das schreibberechtigte Secret `HOMEBREW_TAP_GITHUB_TOKEN` im echten Lauf belegt).
 - **Offen:** macOS-Smoke im Tap zur Formel 0.7.0 (Runner-Warteschlange) — siehe
-  [`slice-v2-homebrew-formula`](../in-progress/slice-v2-homebrew-formula.md).
+  [`slice-v2-homebrew-formula`](../done/slice-v2-homebrew-formula.md).

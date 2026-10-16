@@ -61,7 +61,7 @@ fertigen `.exe`.
 ## Out of Scope
 
 - Homebrew-Formula: eigener Slice
-  [`slice-v2-homebrew-formula.md`](../in-progress/slice-v2-homebrew-formula.md) ([ADR-0007](../../adr/0007-distributionswege-ghcr.md) §Entscheidung
+  [`slice-v2-homebrew-formula.md`](../done/slice-v2-homebrew-formula.md) ([ADR-0007](../../adr/0007-distributionswege-ghcr.md) §Entscheidung
   „Vertagt").
 - Debian/RPM-Pakete: eigener Slice
   [`slice-v2-distro-pakete.md`](slice-v2-distro-pakete.md).

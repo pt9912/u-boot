@@ -49,4 +49,4 @@ Bruch bestehender Verträge.
   bei klassischen PATs die Rechte des Benutzers). Ob das Secret korrekt ist, zeigt der nächste Release
   (Entscheidung des Projektinhabers: dort testen).
 - **Offen:** macOS-Smoke im Tap (queued) und `brew install` auf einem Mac — siehe
-  [`slice-v2-homebrew-formula`](../in-progress/slice-v2-homebrew-formula.md).
+  [`slice-v2-homebrew-formula`](../done/slice-v2-homebrew-formula.md).
