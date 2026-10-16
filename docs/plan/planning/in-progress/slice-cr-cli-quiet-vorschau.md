@@ -114,29 +114,23 @@ Der Absatz nach der Aufzählung der vier Ausnahmen lautet in 0.10.0 (Änderung k
 **Historie-Zeile (§16, bei Spec-Change zu setzen):**
 
 ```text
-| 0.10.0 | 2026-10-16 | LH-FA-CLI-005: Die Ausgabe der Vorschau-Optionen
-`--dry-run` und `--diff` (Änderungsplan und Diff-Darstellung, nach
-LH-FA-CLI-007 und LH-FA-CLI-008) ist das Ergebnis des Aufrufs und bleibt
-unter `--quiet`; die Erfolgs- und Zusammenfassungsmeldung eines tatsächlichen
-Schreibens entfällt auch bei `--diff` ohne `--dry-run`; die Stufen, die vier
-Ausnahmen und die Mehrfachangabe-Regel bleiben unverändert. | Vereinbarung
-mit dem Projektinhaber |
+| 0.10.0 | 2026-10-16 | [`LH-FA-CLI-005`](#lh-fa-cli-005--verbosity-und-logging): Die Ausgabe der Vorschau-Optionen `--dry-run` und `--diff` ([`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](#lh-fa-cli-008--diff-ausgabe)) ist das Ergebnis des Aufrufs und bleibt unter `--quiet`; die Erfolgs- und Zusammenfassungsmeldung eines tatsächlichen Schreibens entfällt auch bei `--diff` ohne `--dry-run`; die Stufen, die vier Ausnahmen und die Mehrfachangabe-Regel bleiben unverändert. | Vereinbarung mit dem Projektinhaber |
 ```
 
 ## 2. Definition of Done
 
-- [ ] **Lastenheft 0.10.0**: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) in der Fassung oben, Versionsfeld,
+- [x] **Lastenheft 0.10.0**: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) in der Fassung oben, Versionsfeld,
       Historie-Zeile (Verweis „Vereinbarung mit dem Projektinhaber").
-- [ ] **Umsetzungsbedarf** einem Slice zugeordnet: Abnahmekriterien 1–3 liegen in
+- [x] **Umsetzungsbedarf** einem Slice zugeordnet: Abnahmekriterien 1–3 liegen in
       [`slice-v1-cli-quiet-vorschau`](../open/slice-v1-cli-quiet-vorschau.md).
-- [ ] Doku-Update: CHANGELOG (öffentlicher Vertrag berührt).
-- [ ] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+- [x] Doku-Update: CHANGELOG (öffentlicher Vertrag berührt).
+- [x] `make gates` grün.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang.
 - [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
 
 ## 3. Plan (vor Code)
@@ -172,8 +166,8 @@ der Umsetzungs-Slice [`slice-v1-cli-quiet-vorschau`](../open/slice-v1-cli-quiet-
 ## 6. Risiken und offene Punkte
 
 - **Reichweite „Vorschau“ bei `--diff` ohne `--dry-run`:** Dieser Modus schreibt tatsächlich; Diff ist Vorschau, die anschließende Erfolgsmeldung nicht.
-  Der Satz trennt beides ausdrücklich, aber der Projektinhaber hat nur „Vorschau-Ausgabe bleibt“ entschieden. — **Ausgang:** offen bis zur Bestätigung durch den
-  Projektinhaber (siehe Übergabe); bei Gegenentscheidung entfällt der Schlusssatz des CR-Kerns.
+  Der Satz trennt beides ausdrücklich, aber der Projektinhaber hat nur „Vorschau-Ausgabe bleibt“ entschieden. — **Ausgang:** entfallen: vom Projektinhaber bestätigt
+  (2026-10-16, Freigabe „ja, pushen und weitermachen“ auf den Statusbericht, der den Schlusssatz nannte).
 - **Weitere Kollisionen mit älteren Zusagen:** Die Suche (siehe §1) fand keine über CLI-007 und CLI-008 hinaus. — **Ausgang:** entfallen: Suche nach
   `--dry-run`, `--diff`, `Vorschau`, den Kennungen der Dry-Run- und Diff-Anforderung und `--quiet` ausgewertet; der Verifier wiederholt sie vor dem Schließen.
 - **Zwischenstand der Spec:** Bis alle Slices der Welle geschlossen sind, darf die Spezifikation das Verhalten nicht
@@ -182,16 +176,33 @@ der Umsetzungs-Slice [`slice-v1-cli-quiet-vorschau`](../open/slice-v1-cli-quiet-
 
 ## 7. Closure-Notiz
 
-Offen.
+**Belege:** Review-Report [`2026-10-16-slice-cr-cli-quiet-vorschau`](../../../reviews/2026-10-16-slice-cr-cli-quiet-vorschau.md)
+(0 HIGH, 1 MEDIUM, 0 LOW, 4 INFO; F-1 behoben in `d7c2e3a`, F-2 im Code-Slice zu pinnen, F-3 durch `d7c2e3a` erledigt, F-4 ohne Folge,
+F-5 im Folge-Slice); Verification Evidence
+[`2026-10-16-verification-slice-cr-cli-quiet-vorschau`](../../../reviews/2026-10-16-verification-slice-cr-cli-quiet-vorschau.md)
+(bestanden, vier Auflagen); `make gates` grün, `make doc-trace`: 83 Anforderungen, 0 Waisen.
 
-- **Was hat funktioniert:** —
-- **Was ging anders als geplant:** —
-- **Steering-Loop-Eintrag:** —
-- **Beobachtungs-Register (`../observations/`):** —
+- **Was hat funktioniert:** Die Suche nach älteren kollidierenden Zusagen lief **vor** der Änderung (Lehre aus dem vorigen CR,
+  [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md)) und fand nur
+  [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) und
+  [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe). Review und Verifier wiederholten sie unabhängig, ohne weiteren Treffer.
+- **Was ging anders als geplant:** Der CHANGELOG-Satz widersprach sich im selben Satz („bleibt“ und „folgt später“ zur selben Ausgabe,
+  Review F-1); behoben in `d7c2e3a`, der Verifier bestätigte die Behebung.
+- **Steering-Loop-Eintrag:** Lerneintrag: Die Vorab-Suche gegen ältere Zusagen hat gewirkt — ein CR-Review findet danach nur noch
+  Formulierungsfehler im CHANGELOG, keine Vertragskollisionen mehr. Gezählt, nicht verkörpert: Es ist das zweite Auftreten desselben
+  Musters (Vorab-Suche gegen ältere Zusagen) mit gegenteiligem Ergebnis; der erste CR fand die Kollision erst nach dem Commit.
+- **Bestätigung des Projektinhabers:** Version 0.10.0 statt 0.9.1 und der Schlusssatz zu `--diff` ohne `--dry-run` sind am 2026-10-16
+  bestätigt durch die Freigabe „ja, pushen und weitermachen“ auf den Statusbericht, der beide nannte.
+- **Grenze:** Der CHANGELOG nennt eine Zusage, die der Code erst mit
+  [`slice-v1-cli-quiet-vorschau`](../open/slice-v1-cli-quiet-vorschau.md) erfüllt; kein Release-Cut davor. Im Code-Slice ist die Abbildung
+  „Änderungsplan“ auf die „Would …“- und Vergangenheitsform-Ausgaben zu pinnen (F-2).
+- **Beobachtungs-Register (`../observations/`):** leer, keine Beobachtung angelegt.
 - **Folge-Slices:** [`slice-v1-cli-quiet-vorschau`](../open/slice-v1-cli-quiet-vorschau.md),
   [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
-- **Risiken aus §6:** —
-- **Drei Paarungen:** —
+- **Risiken aus §6:** alle drei tragen ihren Ausgang (siehe §6): Reichweite bei `--diff` ohne `--dry-run` vom Projektinhaber bestätigt,
+  ältere Zusagen per wiederholter Suche geprüft, Zwischenstand der Spec durch die Welle gedeckt.
+- **Drei Paarungen:** Anker: keine verkörperte Regel, daher kein Anker (der Eintrag trägt kein `liegt in`); Folge-Slice: beide in `open/`;
+  Register: leer, oben vermerkt.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
