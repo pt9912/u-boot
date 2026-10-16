@@ -55,11 +55,11 @@ statt Wellen-Inhalt, und `plan-welle`, `close-welle` und `planner` laufen auf u-
   d-check-Modul `planning` (`heading`, `marker`) angepasst, `make doc-planning` grün.
 - [x] **Werkzeuge auf u-boot gefasst:** `plan-welle`, `close-welle`, `planner`
   (ANPASSEN-Blöcke gefüllt, Hinweis „ungenutzt“ entfernt, Archivierungs-Schritt von
-  `close-welle` gestrichen), Beobachtungs-Register `observations/README.md` an
-  u-boots Kürzel angepasst.
+  `close-welle` gestrichen); das Beobachtungs-Register `observations/README.md` bleibt
+  generisch, die Kürzel stehen in `harness/conventions.md` (Spalte Kürzel).
 - [x] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
-      (`.harness/skills/reviewer.md`) — kein Self-Review.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+      ([`Report`](../../../reviews/2026-10-16-slice-harness-wellen-betrieb.md); 0 HIGH, 0 MEDIUM, 4 LOW, 3 INFO; F-1 bis F-4 behoben; `.harness/skills/reviewer.md`) — kein Self-Review.
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [ ] Jedes Risiko aus §6 trägt einen Ausgang.
 
@@ -72,7 +72,7 @@ statt Wellen-Inhalt, und `plan-welle`, `close-welle` und `planner` laufen auf u-
 | `docs/plan/planning/README.md` | update | Slices vs. Wellen |
 | `.d-check.yml` | update | Modul `planning`: Überschrift und Marker |
 | `.claude/commands/plan-welle.md`, `close-welle.md`, `.claude/agents/planner.md` | update | ANPASSEN-Blöcke, Hinweis entfernen |
-| `docs/plan/planning/observations/README.md` | update | Kürzel nach `harness/conventions.md` |
+| `docs/plan/planning/observations/README.md` | unverändert | generisch, verweist auf die Kürzel-Spalte in `harness/conventions.md` |
 | `harness/conventions.md` | update | ID-Schema `BEO-<KUERZEL>/<slug>`, Kürzel-Deklaration |
 
 ## 4. Trigger

@@ -73,7 +73,7 @@ sie gilt für jeden Lauf.
   (`LH-FA-*`, `LH-QA-*`, `LH-NFA-*` u. a. Familien des Lastenhefts), `SPEC-<NNN>` und
   `ARC-<NNN>` (fest, kodieren das Stratum), `ADR-<NNNN>`, `CO-<NNN>`,
   `slice-<phase>-<slug>`, `tranche-<nr>-<slug>`, `welle-<slug>`, `MR-<NNN>`,
-  `BEO-<KÜRZEL>/<slug>`. Ein Bereichssegment wird in ADR- und Slice-Kennungen nicht
+  `BEO-<KUERZEL>/<slug>`. Ein Bereichssegment wird in ADR- und Slice-Kennungen nicht
   geführt (ein schreibender Entwickler-Kontext, Zählraum repo-weit); das Kürzel der
   Beobachtungs-Kennung steht in der Spalte Kürzel der Modus-Deklaration.
   Konkrete Abweichungen sind als eigene `MR-<NNN>` im Index unten dokumentiert.
@@ -116,7 +116,7 @@ Reproduzierbarkeit) hinaus nutzt dieses Repo:
 
 ## Modus-Deklaration pro Sub-Area
 
-Das Kürzel-Segment (`ADR-<KÜRZEL>-NNNN`) wird in u-boot nicht geführt. Die Spalte *Kürzel* dient allein den Beobachtungs-Kennungen (`BEO-<KÜRZEL>/<slug>`, [`observations/`](../docs/plan/planning/observations/README.md)); sie wird nachgeschlagen, nicht erfunden.
+Das Kürzel-Segment (`ADR-<KUERZEL>-NNNN`) wird in u-boot nicht geführt. Die Spalte *Kürzel* dient allein den Beobachtungs-Kennungen (`BEO-<KUERZEL>/<slug>`, [`observations/`](../docs/plan/planning/observations/README.md)); sie wird nachgeschlagen, nicht erfunden.
 
 Stand: auditiert am 2026-07-25 (Drei-Achsen-Inklusion + vier Modus-Kriterien je
 Kandidat). Das **Audit-Protokoll** - inklusive der abgewiesenen Kandidaten

@@ -21,7 +21,7 @@ Lies den Adaptions-Block („MR-Block") in `harness/conventions.md`; die planung
   **Eröffnung**; geplante Wellen stehen nur in der Roadmap unter *Nächste Wellen*. Es gibt **keine**
   `welle-<Kennung>-results.md` — die Closure-Notiz steht in §7 der Welle-Datei und verweist auf den
   `done/`-Release-Cut-Slice als Detailquelle — und **keine Archivierung** (`make archive-welle` bleibt ungenutzt).
-- **Beobachtungs-Register:** `docs/plan/planning/observations/`, Kennung `BEO-<KÜRZEL>/<slug>`; das
+- **Beobachtungs-Register:** `docs/plan/planning/observations/`, Kennung `BEO-<KUERZEL>/<slug>`; das
   Kürzel steht in der Spalte *Kürzel* der Modus-Deklaration in `harness/conventions.md`.
 - **Roadmap-Marker:** `.d-check.yml` (`planning`) erwartet im Block „Offene Wellen“ den Ruhe-Marker genau
   dann, wenn `in-progress/` keinen Slice trägt; `make doc-planning` prüft das.

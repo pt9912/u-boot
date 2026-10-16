@@ -17,9 +17,10 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Keine offene Welle-Datei. In Arbeit ist ein Slice ohne Welle:
+Keine offene Welle-Datei. In Arbeit sind Slices ohne Welle (kein `Welle:`-Feld):
 [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (v0.9.0 ist released, Tap-Nachzug lief;
-offen: macOS-Smoke im Tap zur Formel 0.9.0 und `brew install` auf einem Mac).
+offen: macOS-Smoke im Tap zur Formel 0.9.0 und `brew install` auf einem Mac) und
+[`slice-harness-wellen-betrieb`](slice-harness-wellen-betrieb.md) (Harness-Wartung).
 
 ## Nächste Wellen
 
@@ -70,7 +71,6 @@ flowchart LR
 | Lokale FS-Templates | 2026-06 | [`slice-later-local-templates`](../done/slice-later-local-templates.md) ([`LH-FA-TPL-003`](../../../../spec/lastenheft.md#lh-fa-tpl-003--eigene-templates)) |
 | welle-harness-adoption-v3.5.1 (Regelwerk v3.5.1 + ADR-Format-CR auf MADR) | 2026-07-24 | [`slice-harness-regelwerk-adoption-v3.5.1`](../done/slice-harness-regelwerk-adoption-v3.5.1.md) (`8d897d3`); [`slice-cr-adr-format-madr`](../done/slice-cr-adr-format-madr.md) (`7633cbb`) |
 | welle-harness-konformitaet-nachlauf (FS-1..FS-4 + `architecture.md`-Template-Konformität) | 2026-07-25 | [`slice-harness-reviewer-skills-und-review-ablage`](../done/slice-harness-reviewer-skills-und-review-ablage.md) (`d5d896a`); [`slice-harness-sub-area-modus-audit`](../done/slice-harness-sub-area-modus-audit.md) (`be3d33c`); [`slice-harness-baseline-freshness-audit`](../done/slice-harness-baseline-freshness-audit.md) (`c7fe437`); [`slice-harness-architecture-template-konformitaet`](../done/slice-harness-architecture-template-konformitaet.md) (`c35249d`); Review-Findings (`4fed84f`), Report in [`docs/reviews/`](../../../reviews/README.md) |
-
 | welle-spec-technik-stratum (Technik-Stratum `spezifikation.md`, Lastenheft 0.4.0, Architektur-Angleichung) | 2026-10-02 | [`slice-v2-spec-technik-stratum-grundlage`](../done/slice-v2-spec-technik-stratum-grundlage.md) (`fdf4c92`); [`slice-v2-spec-schnitt-cli-init-devcontainer`](../done/slice-v2-spec-schnitt-cli-init-devcontainer.md) (`8119daa`); [`slice-v2-spec-schnitt-addons-betrieb`](../done/slice-v2-spec-schnitt-addons-betrieb.md) (`5d4716e`); [`slice-v2-spec-schnitt-projektkapitel`](../done/slice-v2-spec-schnitt-projektkapitel.md) (`d4abd2b`); [`slice-v2-spec-schnitt-qualitaet-akzeptanz-abschluss`](../done/slice-v2-spec-schnitt-qualitaet-akzeptanz-abschluss.md) (`3b98b30`); [`slice-v2-spec-architektur-angleichung`](../done/slice-v2-spec-architektur-angleichung.md) (`5661be3`); Review-Report `docs/reviews/2026-10-02-welle-spec-technik-stratum.md`; [`slice-v2-spec-lastenheft-coverage-default`](../done/slice-v2-spec-lastenheft-coverage-default.md) (durch die Kürzung erledigt); [`slice-v2-spec-lastenheft-verschlankung-runde-3`](../done/slice-v2-spec-lastenheft-verschlankung-runde-3.md) (`05212da`) |
 | welle-lastenheft-verschlankung (Verhaltensdetails, Beispiele und Regelwerk-Dopplungen aus dem Lastenheft, 2984 → 1626 Zeilen) | 2026-10-02 | [`slice-v2-spec-lastenheft-verschlankung`](../done/slice-v2-spec-lastenheft-verschlankung.md) (`4cd66a5`); [`slice-v2-spec-lastenheft-verschlankung-runde-2`](../done/slice-v2-spec-lastenheft-verschlankung-runde-2.md) (`d024a1b`) |
 | welle-gate-ausbau-v0.51 (d-check-Bump + vier Sensoren) | 2026-07-25 | [`slice-gate-print-mk-einbindung`](../done/slice-gate-print-mk-einbindung.md) (`e246bbf`); [`slice-gate-planning-targets-module`](../done/slice-gate-planning-targets-module.md) (`83efe46`); [`slice-gate-ids-link-policy-always`](../done/slice-gate-ids-link-policy-always.md) (`0d896fc`); [`slice-gate-immutabilitaets-sensor`](../done/slice-gate-immutabilitaets-sensor.md) (`7d9c4c2`); Vorlauf: Image-Bump (`225627c`) |
@@ -93,8 +93,9 @@ flowchart LR
 | v0.9.0 (Devcontainer-Features Homebrew, SDKMAN, Python) | 2026-10-15 | [`slice-v1-release-cut-v0.9.0`](../done/slice-v1-release-cut-v0.9.0.md) — Tag `v0.9.0` auf `7bfd8d6` |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
-> `welle-NN-results.md`; die Welle-Closure lebt vollständig im jeweiligen
-> `done/`-Release-Cut-Slice (Detailquelle inkl. Tranchen-Hashes).
+> `welle-<Kennung>-results.md`. Die Closure bisheriger Wellen lebt vollständig im jeweiligen
+> `done/`-Release-Cut-Slice (Detailquelle inkl. Tranchen-Hashes); bei neuen Wellen steht die
+> Closure-Notiz in §7 der Welle-Datei und verweist auf diesen Slice.
 
 ## Historische Trigger-Verschiebungen
 

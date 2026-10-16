@@ -27,7 +27,7 @@ Wellen-Closure), Modul 7 (Carveouts), Modul 5 (Lifecycle). Bei Konflikt gilt der
   **Eröffnung**; geplante Wellen stehen nur in der Roadmap unter *Nächste Wellen*. Es gibt **keine**
   `welle-<Kennung>-results.md` — die Closure-Notiz steht in §7 der Welle-Datei und verweist auf den
   `done/`-Release-Cut-Slice als Detailquelle — und **keine Archivierung** (`make archive-welle` bleibt ungenutzt).
-- **Beobachtungs-Register:** `docs/plan/planning/observations/`, Kennung `BEO-<KÜRZEL>/<slug>`; das
+- **Beobachtungs-Register:** `docs/plan/planning/observations/`, Kennung `BEO-<KUERZEL>/<slug>`; das
   Kürzel steht in der Spalte *Kürzel* der Modus-Deklaration in `harness/conventions.md`.
 - **Roadmap-Marker:** `.d-check.yml` (`planning`) erwartet im Block „Offene Wellen“ den Ruhe-Marker genau
   dann, wenn `in-progress/` keinen Slice trägt; `make doc-planning` prüft das.
@@ -96,7 +96,7 @@ Wellen-Closure), Modul 7 (Carveouts), Modul 5 (Lifecycle). Bei Konflikt gilt der
 
 ## Abschluss
 
-8. `make gates` grün nach dem Commit bestätigen (nach einem neuen Commit gibt der Stop-Hook erst
+7. `make gates` grün nach dem Commit bestätigen (nach einem neuen Commit gibt der Stop-Hook erst
    frei, wenn ein grüner Lauf dessen Inhalt deckt). Erst wenn **alle fünf Belege** vorliegen — Trigger · Carveout-Audit · Closure-Notiz ·
    Self-Close-Commit · fortgeschriebene Roadmap — ist die Welle auditierbar geschlossen.
 
