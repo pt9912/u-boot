@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-- [`welle-macos-verifikation`](../welle-macos-verifikation.md)
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
@@ -86,6 +86,7 @@ flowchart LR
 | Devcontainer-Features `homebrew` und `sdkman` ([ADR-0020](../../adr/0020-drittanbieter-features-im-katalog.md)) | 2026-10-15 | [`slice-v1-devcontainer-features-homebrew-sdkman`](../done/slice-v1-devcontainer-features-homebrew-sdkman.md) (`ac59b83`); Review-Report `docs/reviews/2026-10-15-devcontainer-features-homebrew-sdkman.md` |
 | Devcontainer-Feature `python` | 2026-10-15 | [`slice-v1-devcontainer-feature-python`](../done/slice-v1-devcontainer-feature-python.md); Review-Report `docs/reviews/2026-10-15-devcontainer-feature-python.md` |
 | v0.9.0 (Devcontainer-Features Homebrew, SDKMAN, Python) | 2026-10-15 | [`slice-v1-release-cut-v0.9.0`](../done/slice-v1-release-cut-v0.9.0.md) — Tag `v0.9.0` auf `7bfd8d6` |
+| welle-macos-verifikation (Homebrew-Formel auf macOS belegt; Docker-Desktop-Zusage aus dem Lastenheft 0.7.0 genommen) | 2026-10-16 | [`slice-v2-homebrew-formula`](../done/slice-v2-homebrew-formula.md) (Detailquelle); Welle-Datei [`welle-macos-verifikation`](../done/welle-macos-verifikation.md) §7 |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-<Kennung>-results.md`. Die Closure bisheriger Wellen lebt vollständig im jeweiligen

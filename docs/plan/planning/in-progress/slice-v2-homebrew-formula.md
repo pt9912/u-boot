@@ -136,3 +136,27 @@ echten Mac stehen aus.
 - Die Vorlage liegt im Tap (Commit `a8498fd`); der Smoke-Lauf `38900477533` ist auf `macos-14` (arm64) und
   `macos-15-intel` (amd64) grün, Formel 0.9.0.
 - Die Einrichtung aus §Offene Einrichtung ist abgeschlossen: Tap-Repo, Secret (belegt durch `v0.7.0`) und die Prüfung auf einem echten Mac.
+
+## 7. Closure-Notiz
+
+**Verification Evidence:** [`2026-10-16-verification-slice-v2-homebrew-formula`](../../../reviews/2026-10-16-verification-slice-v2-homebrew-formula.md)
+(Verdikt: bestanden); Review-Report [`2026-10-16-welle-macos-verifikation`](../../../reviews/2026-10-16-welle-macos-verifikation.md)
+(0 HIGH, 1 MEDIUM, 7 LOW, 3 INFO; F-1, F-2, F-3, F-6, F-7 behoben in `a4fd3a4`).
+
+- **Was hat funktioniert:** Formel mit SHA-Pin je Plattform, automatischer Tap-Nachzug (belegt durch die Nachzüge `v0.7.0` bis `v0.9.0`),
+  README EN/DE. Der Smoke im Tap ist auf `macos-14` (arm64) und `macos-15-intel` (amd64) grün (Lauf `38900477533`, Formel 0.9.0).
+- **Was ging anders als geplant:** Die Intel-Abbrüche seit `v0.7.0` waren kein Kapazitätsproblem: `macos-13` ist bei GitHub nicht mehr
+  gelistet, der Job bekam nie einen Runner. Der Slice nannte „Runner-Kapazität"; die Ursache fand erst der Blick in die Job-Details.
+  Außerdem lag Linux-Brew in README und Handbuch als „macOS / Linux" vor, obwohl [ADR-0016](../../adr/0016-homebrew-distribution-per-tap.md)
+  es ausnimmt (F-1).
+- **Setzung (Akzeptanzkriterium 4):** Der Smoke läuft ohne `--build-from-source` und ohne `add`; `brew audit --strict` läuft mit `|| true` und
+  hat nie gatend geprüft (T1 nicht erbracht). Das bleibt als Abweichung stehen; die Härtung trägt
+  [`slice-v2-homebrew-smoke-haertung`](../open/slice-v2-homebrew-smoke-haertung.md) (zusammen mit F-5 und F-8).
+- **Mac-Erprobung:** `brew tap`, `brew trust` und `brew install u-boot` auf Apple Silicon sind eine Zusage des Projektinhabers; der Verifier kann
+  sie nicht reproduzieren. Der Smoke auf zwei echten macOS-Runnern stützt sie unabhängig.
+- **Steering-Loop-Eintrag:** Ein Smoke, der auf ein abgekündigtes Runner-Label zeigt, blieb sieben Tage „queued" statt rot zu werden; die Matrix prüft
+  kein Label gegen die GitHub-Liste. Gezählt, nicht verkörpert (einmaliger externer Anlass).
+- **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt — einmaliger externer Anlass (Runner-Abkündigung), nicht wiederholbar im
+  Sinne der 3×-Schwelle.
+- **Folge-Slices:** [`slice-v2-homebrew-smoke-haertung`](../open/slice-v2-homebrew-smoke-haertung.md).
+- **Risiken:** keine offenen; der Carveout [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung) in [`carveouts.md`](../in-progress/carveouts.md) ist aufgelöst.

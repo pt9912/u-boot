@@ -63,4 +63,26 @@ beide Architekturen ab, und erst danach ändert sich die Aussage der Nutzerdoku.
 
 ## 7. Closure-Notiz
 
-Offen.
+Detailquelle: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) §7 (die Welle trägt nur diesen Slice; einen Release-Cut-Slice gibt es
+nicht, weil sie kein Release ist).
+
+- **Geliefert:** Die Homebrew-Formel ist auf macOS belegt: Smoke im Tap auf `macos-14` (arm64) und `macos-15-intel` (amd64) grün
+  (Lauf `38900477533`, Tap-Commit `a8498fd`), `brew tap`/`trust`/`install` auf Apple Silicon durch den Projektinhaber erprobt (Zusage).
+- **Was hat funktioniert:** Die Closure-Trigger aus §3 ließen sich einzeln belegen; der Verifier prüfte den Smoke-Lauf am Log.
+- **Was ging anders als geplant:** Die Welle sollte auch die Docker-Desktop-Messung tragen. Es gibt keinen Docker-Desktop-Host; das
+  Lastenheft 0.7.0 nahm die Zusage für Docker Desktop zurück ([`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)),
+  und der Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) verließ die Welle.
+  Die Intel-Abbrüche des Smokes kamen vom abgekündigten Label `macos-13`, nicht von knappen Runnern.
+- **Trigger-Audit:** Carveout: [`LH-OPEN-002`](../../../spec/lastenheft.md#lh-open-002--paketierung) in [`carveouts.md`](in-progress/carveouts.md) aufgelöst.
+  Bootstrap-aware Gate: `coverage-gate` unverändert, 90,90 % gegen 90 %; 0 offen. ADR: [`ADR-0016`](../adr/0016-homebrew-distribution-per-tap.md)
+  und [`ADR-0018`](../adr/0018-nested-docker-daemon-sandbox-devcontainer.md) tragen keinen eingetretenen Re-Evaluierungs-Trigger (die Geschichte von
+  ADR-0018 vermerkt die Lastenheft-Eingrenzung); 0 offen.
+- **Steering-Loop-Einträge:** Kein Eintrag über der Schwelle (das Beobachtungs-Register ist leer). Gezählt, nicht verkörpert: ein Smoke gegen ein
+  abgekündigtes Runner-Label bleibt „queued" statt rot zu werden.
+- **Beobachtungs-Register:** keine Beobachtung angelegt.
+- **Folge-Slices:** [`slice-v2-homebrew-smoke-haertung`](../open/slice-v2-homebrew-smoke-haertung.md) (Smoke-Härtung, Formel-`desc`, Workflow-Kommentar);
+  [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) (ohne Welle, wartet auf einen
+  Docker-Desktop-Host).
+- **Verifikation:** `make gates` grün (Exit 0); Verification Evidence
+  [`2026-10-16-verification-slice-v2-homebrew-formula`](../../reviews/2026-10-16-verification-slice-v2-homebrew-formula.md), Review-Report
+  [`2026-10-16-welle-macos-verifikation`](../../reviews/2026-10-16-welle-macos-verifikation.md).
