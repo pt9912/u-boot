@@ -79,16 +79,15 @@ matrix:
   status:
     forbidden: [superseded, deprecated]
 
-# Planning-Lifecycle-Invariante: Die Roadmap traegt den Ruhe-Marker im
-# §Aktuelle-Welle-Block genau dann, wenn kein slice-* in in-progress/ liegt.
-# Konsequenz fuer den Arbeitsfluss (bewusst): Eine deklarierte Welle ohne
-# Slice in Arbeit ist ein Befund, kein Zwischenzustand — wer einen Slice
-# schliesst, zieht im selben Commit den naechsten nach oder schliesst die
-# Welle. Der Marker ist u-boots Formulierung (kleingeschrieben, Default
-# waere "Keine aktive Welle").
+# Planning-Lifecycle-Invariante: Die Roadmap traegt den Ruhe-Marker im Block
+# "## Offene Wellen" genau dann, wenn kein slice-* in in-progress/ liegt
+# (Baseline-Regelwerk modul-06-roadmap.md, Bullet Offene Wellen). Geprueft ist die
+# Marker-Haelfte; die Zeiger-Haelfte (ein Zeiger je flacher Welle-Datei) hat keinen
+# Sensor und steht auf der Disziplin des Planners (/plan-welle, /close-welle).
 planning:
   roadmap: docs/plan/planning/in-progress/roadmap.md
-  marker: "keine aktive Welle"
+  heading: "## Offene Wellen"
+  marker: "Nichts in Arbeit."
 
 # Traceability-Matrix (RTM, make doc-trace — advisory, DC-FA-CLI-009): Die
 # Belegsicht bleibt bewusst auf die Liefer-Familien LH-FA-* / LH-QA-*

@@ -1,6 +1,6 @@
 # docs/plan/planning
 
-Planning-Artefakte (Slice- und Tranchen-Pläne) für u-boot.
+Planning-Artefakte (Slice-, Tranchen- und Welle-Pläne) für u-boot.
 
 ## Lifecycle
 
@@ -31,17 +31,20 @@ Zwei bewusst getrennte Status-Mechanismen:
 - **Slices** (und Tranchen) tragen ihren Status über das **Verzeichnis**
   (`open/` → `next/` → `in-progress/` → `done/`). Der aktive Durchlauf nimmt
   ausschließlich Slices/Tranchen auf.
-- **Wellen** sind bei u-boot die **Release-Versionen** und werden **in der
-  Roadmap** geführt ([`in-progress/roadmap.md`](in-progress/roadmap.md):
-  Aktuelle Welle, Nächste Wellen, Meilensteine, Abgeschlossene Wellen); ihr
-  Status lebt dort, nicht in einem Lifecycle-Verzeichnis.
+- **Wellen** sind bei u-boot die **Release-Versionen**. Eine **offene** Welle liegt als flache
+  Datei `welle-<kebab-slug>.md` direkt in `planning/` (kein Lifecycle-Ordner); bei Closure wandert
+  sie per `git mv` nach `done/`. **Geplante** Wellen haben noch keine Datei: sie stehen in der
+  [`in-progress/roadmap.md`](in-progress/roadmap.md) unter *Nächste Wellen*. Die Roadmap führt
+  *Offene Wellen* (ein Zeiger je Welle-Datei), *Nächste Wellen*, Meilensteine und
+  *Abgeschlossene Wellen*.
 
 u-boot-Abweichungen vom Baseline-Default (dokumentiert in
 [`harness/conventions.md`](../../../harness/conventions.md), [`MR-003`](../../../harness/conventions/MR-003-roadmap-wellen.md)/[`MR-002`](../../../harness/conventions/MR-002-carveout-inventar.md)):
 
-- **Keine eigenständigen Welle-Plan-Dateien** und **keine
-  `welle-NN-results.md`** — die Welle-Closure lebt vollständig im jeweiligen
-  `done/`-Release-Cut-Slice (Detailquelle inkl. Tranchen-Hashes).
+- **Keine `welle-<Kennung>-results.md`** — die Closure-Notiz steht in §7 der Welle-Datei und
+  verweist auf den `done/`-Release-Cut-Slice als Detailquelle (inkl. Tranchen-Hashes).
+- **Keine Archivierung** der Zeitdokumente geschlossener Wellen (`make archive-welle` bleibt
+  ungenutzt); `done/` behält den Volltext.
 - **Aufgelöste Carveouts** wandern **nicht** nach `done/`, sondern bleiben im
   Master-Inventar [`in-progress/carveouts.md`](in-progress/carveouts.md) mit
   Audit-Trail des auflösenden Slice.
@@ -57,23 +60,30 @@ Spezifikation.
 
 ## Dateiname-Konvention
 
-Zwei verbindliche Formate, abhängig vom Artefakttyp:
+Drei verbindliche Formate, abhängig vom Artefakttyp:
 
 - `slice-<phase>-<kebab-slug>.md` – Slice-Pläne pro Meilenstein-Phase.
   Beispiel: [`slice-m1-repo-skeleton.md`](done/slice-m1-repo-skeleton.md).
 - `tranche-<nr>-<kebab-slug>.md` – Tranchen-Pläne innerhalb eines
   Slice. Beispiel: `tranche-01-init-flow.md`.
 
-Ein Artefakt verwendet genau eines der beiden Formate. Slice-Pläne sind
+- `welle-<kebab-slug>.md` – Welle-Pläne, flach in `planning/` (siehe oben).
+  Das Muster ist der Wellen-Name, nicht die Versionsnummer; die Release-Version steht im Titel.
+
+Ein Artefakt verwendet genau eines der drei Formate. Slice-Pläne sind
 für phasenübergreifende Vorhaben; Tranchen-Pläne zerlegen einen Slice in
 inkrementell auslieferbare Stücke.
 
 ## Ausnahmen: Master-Dokumente
 
-Zwei übergreifende Master-Dokumente folgen keinem der beiden Formate
+Zwei übergreifende Master-Dokumente folgen keinem der drei Formate
 und liegen dauerhaft in `in-progress/`:
 
 - [`in-progress/roadmap.md`](in-progress/roadmap.md) — Stand aller
   Slices und Tranchen (Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine).
 - [`in-progress/carveouts.md`](in-progress/carveouts.md) — Inventar
   aller bewussten Carveouts mit Plan-Verweis (Baseline-Regelwerk `modul-07-carveouts.md`).
+
+Das Beobachtungs-Register [`observations/`](observations/README.md) liegt dauerhaft unter `planning/`
+und folgt ebenfalls keinem der Formate; Form und Kürzel stehen in dessen README und in
+[`harness/conventions.md`](../../../harness/conventions.md).

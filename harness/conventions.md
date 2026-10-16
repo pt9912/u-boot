@@ -72,8 +72,10 @@ sie gilt für jeden Lauf.
   `done`), Carveout-Disziplin und ID-Schema:* Vertrags-Präfix `LH`
   (`LH-FA-*`, `LH-QA-*`, `LH-NFA-*` u. a. Familien des Lastenhefts), `SPEC-<NNN>` und
   `ARC-<NNN>` (fest, kodieren das Stratum), `ADR-<NNNN>`, `CO-<NNN>`,
-  `slice-<phase>-<slug>`, `tranche-<nr>-<slug>`, `MR-<NNN>`. Ein Bereichssegment
-  wird nicht geführt (ein schreibender Entwickler-Kontext, Zählraum repo-weit).
+  `slice-<phase>-<slug>`, `tranche-<nr>-<slug>`, `welle-<slug>`, `MR-<NNN>`,
+  `BEO-<KÜRZEL>/<slug>`. Ein Bereichssegment wird in ADR- und Slice-Kennungen nicht
+  geführt (ein schreibender Entwickler-Kontext, Zählraum repo-weit); das Kürzel der
+  Beobachtungs-Kennung steht in der Spalte Kürzel der Modus-Deklaration.
   Konkrete Abweichungen sind als eigene `MR-<NNN>` im Index unten dokumentiert.
 - **Begründung:** Initial-Setzung. u-boot war vor der Adoption bereits
   harness-geformt; dieser Block hält den konformen Grundstand fest, spätere
@@ -114,7 +116,7 @@ Reproduzierbarkeit) hinaus nutzt dieses Repo:
 
 ## Modus-Deklaration pro Sub-Area
 
-Das Kürzel-Segment (`ADR-<KÜRZEL>-NNNN`) wird in u-boot nicht geführt; die Tabelle trägt keine Kürzel-Spalte.
+Das Kürzel-Segment (`ADR-<KÜRZEL>-NNNN`) wird in u-boot nicht geführt. Die Spalte *Kürzel* dient allein den Beobachtungs-Kennungen (`BEO-<KÜRZEL>/<slug>`, [`observations/`](../docs/plan/planning/observations/README.md)); sie wird nachgeschlagen, nicht erfunden.
 
 Stand: auditiert am 2026-07-25 (Drei-Achsen-Inklusion + vier Modus-Kriterien je
 Kandidat). Das **Audit-Protokoll** - inklusive der abgewiesenen Kandidaten
@@ -122,18 +124,18 @@ Kandidat). Das **Audit-Protokoll** - inklusive der abgewiesenen Kandidaten
 [`slice-harness-sub-area-modus-audit`](../docs/plan/planning/done/slice-harness-sub-area-modus-audit.md)
 §9; hier steht nur das Ergebnis.
 
-| Sub-Area (Pfad) | Modus | Begruendung | Graduation-Bedingung / Folge-Slice |
-|---|---|---|---|
-| `spec/`, `harness/`, `docs/plan/` (Spec, Architektur, ADR, Planung, Konventionen) | Greenfield | Doku-fuehrt-Sub-Areas; Spec/Architektur beschreiben vor dem Code. | n/a (GF) |
-| `internal/hexagon/domain` | Greenfield | Reine Datentypen; I/O-Freiheit und Value-Object-Pflicht standen als Architektur-Regel vor dem Code. | n/a (GF) |
-| `internal/hexagon/application` | Greenfield | Use-Case-Schnittstellen lagen als Ports in der Architektur-Sicht, bevor die Services entstanden. | n/a (GF). Eine code-seitig entstandene Konvention (nil-tolerante Ports via `noop*`-Defaults) wird in die Sicht-Spec nachgezogen. |
-| `internal/hexagon/port` (`driving` + `driven`) | Greenfield | Kreuz-blinde Port-Trennung ist Architektur-Vorgabe und depguard-durchgesetzt. | n/a (GF) |
-| `internal/adapter/driving/cli` | Greenfield (**graduiert 2026-07-25**, vorher Hybrid) | Exit-Code- und JSON-Vertrag waren immer spec-gefuehrt; die beiden Implementierungs-Konventionen (Sentinel-Schichtung, Dual-Classifier-Regel) lebten nur im Code-Kommentar - Richtung Code -> Doku. Diese Luecke ist geschlossen: beide stehen jetzt in der Sicht-Spec (Abschnitt Fehlermodelle), die Dual-Classifier-Regel dabei praeziser als der Code-Kommentar (zentrale Klassifikation **plus** je Subkommando eine Diagnostic-Abbildung). | n/a (GF, Graduation vollzogen). Rueckstufung, falls wieder eine tragende Adapter-Konvention nur im Code entsteht. |
-| `internal/adapter/driven` | Greenfield | Adapter implementieren vorher definierte Driven-Ports; der Port-Pin (`var _ driven.X`) macht Drift zum Build-Fehler. | n/a (GF) |
-| `internal/e2e` (Test-Infrastruktur) | Greenfield | Build-Tag-Konvention (`//go:build docker`) und Fake-Clock-Pflicht sind in der Architektur-Sicht (Abschnitt Tests) verankert. | n/a (GF) |
-| `tools/`, `scripts/` (Harness-Tooling) | Greenfield | Skripte materialisieren zuerst geschriebene Konventionen (`MR-004`, `MR-005`, Coverage-Bootstrap). | n/a (GF) |
-| `internal/**/README.md` (Code-Paket-READMEs) | Greenfield (**graduiert 2026-07-25**, vorher Brownfield) | Sie beschrieben den Code-Bestand nachtraeglich, trugen Meilenstein-/Tranchen-Tags und ungelinkte `LH-*`-Kennungen, und `internal/**` lag im `scan.ignore` - eine Inventur-Linie ohne Sensor. Alle drei Punkte sind aufgeloest: Kennungen verlinkt, Status-Abschnitte entzeitlicht, Glob entfernt ([`slice-harness-internal-readme-kennungs-retrofit`](../docs/plan/planning/done/slice-harness-internal-readme-kennungs-retrofit.md)). | n/a (GF, Graduation vollzogen). **Bekannte Sensor-Grenze:** `ids` wertet nur *bare* Kennungen; in Backticks gesetzte IDs bleiben ungeprueft - die Abdeckung ist real, aber nicht vollstaendig. |
-| `cmd/uboot` (Wiring/Entrypoint) | - (keine Sub-Area) | Erfuellt nur eine der drei Inklusions-Achsen (eigenes Verzeichnis, aber keine eigene Konvention und keine eigenstaendige Inventur-Linie): **Sub-Area-Aspirantin**, gefuehrt in der Hexagon-Schichtungs-Linie. | n/a - re-evaluieren, wenn das Wiring eigene Regeln traegt (z. B. DI-Container). |
+| Sub-Area (Pfad) | Kürzel | Modus | Begruendung | Graduation-Bedingung / Folge-Slice |
+|---|---|---|---|---|
+| `spec/`, `harness/`, `docs/plan/` (Spec, Architektur, ADR, Planung, Konventionen) | DOK | Greenfield | Doku-fuehrt-Sub-Areas; Spec/Architektur beschreiben vor dem Code. | n/a (GF) |
+| `internal/hexagon/domain` | DOM | Greenfield | Reine Datentypen; I/O-Freiheit und Value-Object-Pflicht standen als Architektur-Regel vor dem Code. | n/a (GF) |
+| `internal/hexagon/application` | APP | Greenfield | Use-Case-Schnittstellen lagen als Ports in der Architektur-Sicht, bevor die Services entstanden. | n/a (GF). Eine code-seitig entstandene Konvention (nil-tolerante Ports via `noop*`-Defaults) wird in die Sicht-Spec nachgezogen. |
+| `internal/hexagon/port` (`driving` + `driven`) | PORT | Greenfield | Kreuz-blinde Port-Trennung ist Architektur-Vorgabe und depguard-durchgesetzt. | n/a (GF) |
+| `internal/adapter/driving/cli` | CLI | Greenfield (**graduiert 2026-07-25**, vorher Hybrid) | Exit-Code- und JSON-Vertrag waren immer spec-gefuehrt; die beiden Implementierungs-Konventionen (Sentinel-Schichtung, Dual-Classifier-Regel) lebten nur im Code-Kommentar - Richtung Code -> Doku. Diese Luecke ist geschlossen: beide stehen jetzt in der Sicht-Spec (Abschnitt Fehlermodelle), die Dual-Classifier-Regel dabei praeziser als der Code-Kommentar (zentrale Klassifikation **plus** je Subkommando eine Diagnostic-Abbildung). | n/a (GF, Graduation vollzogen). Rueckstufung, falls wieder eine tragende Adapter-Konvention nur im Code entsteht. |
+| `internal/adapter/driven` | ADP | Greenfield | Adapter implementieren vorher definierte Driven-Ports; der Port-Pin (`var _ driven.X`) macht Drift zum Build-Fehler. | n/a (GF) |
+| `internal/e2e` (Test-Infrastruktur) | E2E | Greenfield | Build-Tag-Konvention (`//go:build docker`) und Fake-Clock-Pflicht sind in der Architektur-Sicht (Abschnitt Tests) verankert. | n/a (GF) |
+| `tools/`, `scripts/` (Harness-Tooling) | WZG | Greenfield | Skripte materialisieren zuerst geschriebene Konventionen (`MR-004`, `MR-005`, Coverage-Bootstrap). | n/a (GF) |
+| `internal/**/README.md` (Code-Paket-READMEs) | PKG | Greenfield (**graduiert 2026-07-25**, vorher Brownfield) | Sie beschrieben den Code-Bestand nachtraeglich, trugen Meilenstein-/Tranchen-Tags und ungelinkte `LH-*`-Kennungen, und `internal/**` lag im `scan.ignore` - eine Inventur-Linie ohne Sensor. Alle drei Punkte sind aufgeloest: Kennungen verlinkt, Status-Abschnitte entzeitlicht, Glob entfernt ([`slice-harness-internal-readme-kennungs-retrofit`](../docs/plan/planning/done/slice-harness-internal-readme-kennungs-retrofit.md)). | n/a (GF, Graduation vollzogen). **Bekannte Sensor-Grenze:** `ids` wertet nur *bare* Kennungen; in Backticks gesetzte IDs bleiben ungeprueft - die Abdeckung ist real, aber nicht vollstaendig. |
+| `cmd/uboot` (Wiring/Entrypoint) | — | - (keine Sub-Area) | Erfuellt nur eine der drei Inklusions-Achsen (eigenes Verzeichnis, aber keine eigene Konvention und keine eigenstaendige Inventur-Linie): **Sub-Area-Aspirantin**, gefuehrt in der Hexagon-Schichtungs-Linie. | n/a - re-evaluieren, wenn das Wiring eigene Regeln traegt (z. B. DI-Container). |
 
 > Zwei Nicht-GF-Aussagen und ihre Bedeutung: **Hybrid** heisst, in dieser
 > Sub-Area laufen beide Richtungen nebeneinander (Vertrag fuehrt, Detail-

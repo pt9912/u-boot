@@ -11,9 +11,15 @@ liegt dauerhaft in `in-progress/` und bleibt bewusst knapp: der per-Slice-
 Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 [`docs/archive/roadmap-history-v0.1-v0.3.md`](../../../archive/roadmap-history-v0.1-v0.3.md).
 
-## Aktuelle Welle
+## Offene Wellen
 
-**Homebrew-Verifikation** — Slice: [`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (v0.9.0 ist released, Tap-Nachzug lief; offen: macOS-Smoke im Tap zur Formel 0.9.0 und `brew install` auf einem Mac).
+Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/`; woran gearbeitet
+wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
+stehen in der Welle-Datei, nicht hier.
+
+Keine offene Welle-Datei. In Arbeit ist ein Slice ohne Welle:
+[`slice-v2-homebrew-formula`](slice-v2-homebrew-formula.md) (v0.9.0 ist released, Tap-Nachzug lief;
+offen: macOS-Smoke im Tap zur Formel 0.9.0 und `brew install` auf einem Mac).
 
 ## Nächste Wellen
 
@@ -118,6 +124,8 @@ flowchart LR
 - Neue Wellen brauchen einen beobachtbaren Trigger und die wichtigsten Slices.
   Ohne ausgearbeiteten Plan bleibt eine Welle als benannter Eintrag hier, nicht
   als halbfertiger Slice.
-- Diese Datei ist die einzige zulässige Ausnahme von der
-  `slice-`/`tranche-`-Namenskonvention in `docs/plan/planning/` (siehe
-  [`../README.md`](../README.md)).
+- Diese Datei ist ein Master-Dokument und folgt keiner der Namenskonventionen in
+  `docs/plan/planning/` (siehe [`../README.md`](../README.md)).
+- Eine Welle bekommt ihre Datei (`welle-<kebab-slug>.md`) bei der Eröffnung; geplante
+  Wellen stehen nur unter *Nächste Wellen*. Schließt eine Welle, wandert die Datei nach `done/`,
+  die Zeile unter *Abgeschlossene Wellen* zeigt auf den Release-Cut-Slice als Detailquelle.
