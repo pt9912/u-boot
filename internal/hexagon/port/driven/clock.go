@@ -20,5 +20,9 @@ type Clock interface {
 	// implementation may advance internal time and return
 	// immediately (the slice-plan-mandated "no real sleep in
 	// tests" contract — see `slice-m6-up-down.md` §T4).
+	//
+	// Sleep takes no context: the production implementation delegates
+	// to time.Sleep, and the only caller is the polling loop of
+	// [UpService], which checks its own deadline between iterations.
 	Sleep(d time.Duration)
 }
