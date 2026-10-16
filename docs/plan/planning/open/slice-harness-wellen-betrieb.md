@@ -12,7 +12,7 @@ verschieden ist (Prozess-Umbau am Harness).
 (Roadmap-Form, Auflösungs-Trigger „solange Release-Versionen die Wellen sind“),
 [`MR-002`](../../../../harness/conventions/MR-002-carveout-inventar.md);
 Voraussetzung:
-[`slice-harness-ai-harness-init-adoption`](../next/slice-harness-ai-harness-init-adoption.md)
+[`slice-harness-ai-harness-init-adoption`](../in-progress/slice-harness-ai-harness-init-adoption.md)
 (das Werkzeug legt `archivierung.mk`, `plan-welle`, `close-welle`, `planner` und
 `observations/` an). Keine Anforderungsänderung — Prozessform, aber
 [`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)
@@ -37,7 +37,7 @@ Beobachtungs-Register `docs/plan/planning/observations/` als Arbeitsform.
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - Die Installation des Werkzeugs: liefert
-  [`slice-harness-ai-harness-init-adoption`](../next/slice-harness-ai-harness-init-adoption.md).
+  [`slice-harness-ai-harness-init-adoption`](../in-progress/slice-harness-ai-harness-init-adoption.md).
 - Rückwirkende Neufassung abgeschlossener Release-Cuts als Welle-Dateien: die
   Closure der bisherigen Wellen lebt in den `done/`-Release-Cut-Slices; ein
   Altbestand wird gesammelt archiviert (`archive-welle` mit `WELLE=altbestand`),
