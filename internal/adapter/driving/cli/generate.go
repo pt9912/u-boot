@@ -43,7 +43,9 @@ type generateFlags struct {
 	JSON   bool
 
 	// Quiet is read through from the root persistent --quiet
-	// (LH-FA-CLI-005): only security-relaxation warnings are written.
+	// (LH-FA-CLI-005): the summary is not written and of the
+	// warnings only security relaxations and degradation fallbacks
+	// remain.
 	Quiet bool
 }
 
@@ -220,7 +222,11 @@ func runGenerate(
 			return err
 		}
 	}
-	printGenerateSummary(out, resp)
+	// LH-FA-CLI-005: the summary is a success message; under --quiet
+	// only the exception warnings are written.
+	if !flags.Quiet {
+		printGenerateSummary(out, resp)
+	}
 	for _, w := range visibleWarnings(resp.Warnings, flags.Quiet) {
 		fmt.Fprintf(out, "Warning (%s): %s\n", w.Code, w.Message)
 	}

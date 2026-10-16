@@ -57,11 +57,10 @@ type logsFlags struct {
 	JSON bool
 
 	// Quiet read-through from the App's persistent root flag.
-	// Today logs streams Compose-Output to OutputSink directly and
-	// `--quiet` does not silence it (Status-quo from
-	// slice-v1-logs). In JSON mode `--quiet` is a no-op
-	// (Cluster-T0-(a) doctor-Pattern: `--quiet --json` is
-	// semantically identical to `--json`).
+	// `logs` is a query command: the log stream is its result, so
+	// `--quiet` does not silence it (LH-FA-CLI-005). In JSON mode
+	// `--quiet` is a no-op as well (Cluster-T0-(a) doctor-Pattern:
+	// `--quiet --json` is semantically identical to `--json`).
 	Quiet bool
 }
 

@@ -48,8 +48,8 @@ type UpRequest struct {
 	// (pull/create/start/healthcheck phases per LH-NFA-PERF-002)
 	// reaches the user. The CLI adapter wires this to `os.Stderr`;
 	// `nil` is treated as `io.Discard`.
-	// `--quiet` does **not** silence this stream — see the M6 slice
-	// for the rationale.
+	// `--quiet` does **not** silence this stream (LH-FA-CLI-005, exception 3:
+	// the progress of `up` stays visible).
 	ProgressSink io.Writer
 
 	// SilenceProgress switches the application-layer ProgressSink to

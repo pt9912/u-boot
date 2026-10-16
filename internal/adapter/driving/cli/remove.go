@@ -31,6 +31,12 @@ type removeFlags struct {
 	DryRun        bool
 	Diff          bool
 	JSON          bool
+
+	// Quiet is read through from the root persistent --quiet
+	// (LH-FA-CLI-005): the success summary, the removed-volumes line
+	// and the purge/dependency warnings (LH-FA-ADD-007) are not
+	// written; errors stay.
+	Quiet bool
 }
 
 // removeEnvelopeData is the typed `data` carrier for the JSON
@@ -140,6 +146,7 @@ Examples:
 			flags.Yes = a.yes
 			flags.NoInteractive = a.noInteractive
 			flags.JSON = a.json
+			flags.Quiet = a.quiet
 			return runRemove(cmd.Context(), cmd.OutOrStdout(), cmd.ErrOrStderr(), args, *flags, a.removeServiceUseCase, a.getwd)
 		},
 	}
@@ -277,7 +284,13 @@ func runRemove(
 			return err
 		}
 	}
-	printRemoveSummary(out, errOut, resp, flags.Purge, mode)
+	// LH-FA-CLI-005: the summary and the purge warnings are neither an
+	// error nor one of the four exceptions, so --quiet writes none of
+	// them (the contract lists the purge warnings under "all other
+	// notices").
+	if !flags.Quiet {
+		printRemoveSummary(out, errOut, resp, flags.Purge, mode)
+	}
 	return nil
 }
 

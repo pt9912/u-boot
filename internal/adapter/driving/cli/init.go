@@ -31,7 +31,9 @@ type initFlags struct {
 	NoInteractive  bool
 
 	// Quiet is read through from the root persistent --quiet
-	// (LH-FA-CLI-005): only security-relaxation warnings are written.
+	// (LH-FA-CLI-005): the summary is not written and of the
+	// warnings only security relaxations and degradation fallbacks
+	// remain.
 	Quiet bool
 
 	// DryRun / Diff (slice-v1-cli-json-dry-run-init T5):
@@ -276,7 +278,14 @@ func runInit(
 			return err
 		}
 	}
-	resp.Warnings = visibleWarnings(resp.Warnings, flags.Quiet)
+	if flags.Quiet {
+		// LH-FA-CLI-005: the summary is a success message and is not
+		// written; only the exception warnings remain. The
+		// `--force` path summary is the application's pre-write
+		// progress event (exception 4); this adapter never silences
+		// it outside JSON mode.
+		return printInitWarnings(out, visibleWarnings(resp.Warnings, true), false)
+	}
 	return printInitSummary(out, resp, flags.DryRun)
 }
 
@@ -417,8 +426,18 @@ func printInitSummary(out io.Writer, resp driving.InitProjectResponse, dryRun bo
 			}
 		}
 	}
-	for _, w := range resp.Warnings {
-		if _, err := fmt.Fprintf(out, "\nWarning (%s): %s\n", w.Code, w.Message); err != nil {
+	return printInitWarnings(out, resp.Warnings, true)
+}
+
+// printInitWarnings writes one `Warning (<code>): <message>` line per
+// entry; `blankBefore` separates each line from the summary above it.
+func printInitWarnings(out io.Writer, ws []driving.WarningEntry, blankBefore bool) error {
+	lead := ""
+	if blankBefore {
+		lead = "\n"
+	}
+	for _, w := range ws {
+		if _, err := fmt.Fprintf(out, "%sWarning (%s): %s\n", lead, w.Code, w.Message); err != nil {
 			return err
 		}
 	}

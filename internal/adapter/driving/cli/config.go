@@ -474,7 +474,12 @@ func runConfigSet(
 			return err
 		}
 	}
-	printConfigSetSummary(out, resp)
+	// LH-FA-CLI-005: `config set` changes the project, so its summary
+	// line is a success message and --quiet does not write it
+	// (`config get` / `config list` are queries and keep their output).
+	if !flags.Quiet {
+		printConfigSetSummary(out, resp)
+	}
 	return nil
 }
 
@@ -667,6 +672,9 @@ func runConfigSetMany(
 		if err := writeDiff(out, resp.PlannedFiles); err != nil {
 			return err
 		}
+	}
+	if flags.Quiet {
+		return nil
 	}
 	for _, e := range resp.Entries {
 		printConfigSetSummary(out, driving.ConfigSetResponse{Path: e.Path, OldValue: e.OldValue, NewValue: e.NewValue})

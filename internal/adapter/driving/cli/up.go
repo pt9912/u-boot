@@ -105,8 +105,9 @@ type upStatusData struct {
 //
 // The persistent flags --quiet (suppresses the status table) /
 // --verbose / --debug (LH-FA-CLI-005) are read from the App after
-// Cobra parses them. The Compose progress stream (LH-NFA-PERF-002)
-// always reaches stderr regardless of --quiet; in --json mode it is
+// Cobra parses them. The Compose progress stream (LH-NFA-PERF-002,
+// exception 3 of LH-FA-CLI-005) always reaches stderr regardless of
+// --quiet; in --json mode it is
 // silenced via UpRequest.SilenceProgress (slice-v1-cli-json-dry-run-
 // up-down T0-(c) form (d)).
 func newUpCommand(a *App) *cobra.Command {
@@ -195,20 +196,21 @@ func runUp(ctx context.Context, stdout, stderr io.Writer, flags upFlags, useCase
 	if flags.JSON {
 		return writeUpJSON(stdout, resp, flags.TimeoutSec == 0)
 	}
-	// LH-FA-CLI-005 + M6 slice §T6 binding contract: `up --quiet`
-	// must suppress BOTH the status table AND the diagnostic
-	// section so CI scripts can rely on empty stdout for success;
-	// only security-relaxation warnings may still reach stdout.
-	// The Compose progress stream on stderr is NOT affected
-	// (LH-NFA-PERF-002 requires phase visibility regardless).
+	// LH-FA-CLI-005: `up --quiet` suppresses BOTH the status table
+	// AND the diagnostic section so CI scripts can rely on empty
+	// stdout for success; only security-relaxation and
+	// degradation-fallback warnings may still reach stdout. The
+	// Compose progress stream on stderr is not affected: it is
+	// exception 3 of LH-FA-CLI-005 (LH-NFA-PERF-002).
 	if !flags.Quiet {
 		if err := renderUpStatus(stdout, resp.Result.Services); err != nil {
 			return fmt.Errorf("render status: %w", err)
 		}
 		renderUpDiagnostics(stdout, resp.Result.Diagnostics, flags.Quiet)
 	}
-	// Under --quiet only security-relaxation warnings remain
-	// (LH-FA-CLI-005); the recreate warning (LH-FA-UP-003) is dropped.
+	// Under --quiet only security-relaxation and degradation-fallback
+	// warnings remain (LH-FA-CLI-005); the recreate warning
+	// (LH-FA-UP-003) is dropped.
 	for _, w := range visibleWarnings(resp.Warnings, flags.Quiet) {
 		fmt.Fprintf(stdout, "Warning (%s): %s\n", w.Code, w.Message)
 	}

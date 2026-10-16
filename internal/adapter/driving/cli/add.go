@@ -27,6 +27,10 @@ type addFlags struct {
 	DryRun        bool
 	Diff          bool
 	JSON          bool
+
+	// Quiet is read through from the root persistent --quiet
+	// (LH-FA-CLI-005): the success summary is not written.
+	Quiet bool
 }
 
 // newAddCommand builds the `u-boot add <service>` Cobra subcommand.
@@ -85,6 +89,7 @@ Examples:
 			flags.Yes = a.yes
 			flags.NoInteractive = a.noInteractive
 			flags.JSON = a.json
+			flags.Quiet = a.quiet
 			return runAdd(cmd.Context(), cmd.OutOrStdout(), args, *flags, a.addServiceUseCase, a.getwd)
 		},
 	}
@@ -119,7 +124,8 @@ Examples:
 //     plannedFiles[] + hunks, dryRun=false, diff=true.
 //   - Human-mode --diff (with or without --dry-run) → unified-diff
 //     string on stdout via [diff.Render].
-//   - Human-mode plain → existing [printAddSummary] behaviour.
+//   - Human-mode plain → [printAddSummary]; `--quiet` writes nothing
+//     (LH-FA-CLI-005).
 func runAdd(
 	ctx context.Context,
 	out io.Writer,
@@ -173,6 +179,11 @@ func runAdd(
 		if err := writeDiff(out, resp.PlannedFiles); err != nil {
 			return err
 		}
+	}
+	// LH-FA-CLI-005: the summary is a success message and is not
+	// written under --quiet; errors returned above stay.
+	if flags.Quiet {
+		return nil
 	}
 	return printAddSummary(out, resp, flags.DryRun)
 }
