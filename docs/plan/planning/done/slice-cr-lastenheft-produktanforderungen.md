@@ -167,7 +167,7 @@ Spezifikation tragen neue Kennungen mit erhaltenen alten Ankern. Review: 0 HIGH,
   technische Dokument selbst als Ort, daher so belassen (Review F-4).
 - **Steering-Loop-Eintrag:** Eine Umnummerierung ersetzt Verweise nicht nur nach der
   Zuordnungstabelle, sondern prüft jede Ersetzung gegen den Satz, in dem sie steht (Zusammenführung,
-  Bereichsangabe, Historie) — liegt in `docs/plan/planning/in-progress/slice-cr-lastenheft-produktanforderungen.md` (Anhang).
+  Bereichsangabe, Historie) — liegt in `docs/plan/planning/done/slice-cr-lastenheft-produktanforderungen.md` (Anhang).
 - **Folge-Slices:** [`slice-harness-wellen-betrieb`](../open/slice-harness-wellen-betrieb.md)
   (Vorbedingung erfüllt, Start frei),
   [`slice-harness-dcheck-bump-reviewer-skill`](../open/slice-harness-dcheck-bump-reviewer-skill.md).
