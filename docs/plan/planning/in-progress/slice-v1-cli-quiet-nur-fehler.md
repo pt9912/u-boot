@@ -25,7 +25,8 @@ Lastenheft 0.9.0 im Vertrag) und geht
 Herkunft: Entscheidungen des Projektinhabers (2026-10-16), festgehalten in den CRs
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) und
 [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md); Befunde des Reviews
-[`2026-10-16-slice-v1-cli-quiet-nur-fehler`](../../../reviews/2026-10-16-slice-v1-cli-quiet-nur-fehler.md) (F-1 bis F-6).
+[`2026-10-16-slice-v1-cli-quiet-nur-fehler`](../../../reviews/2026-10-16-slice-v1-cli-quiet-nur-fehler.md) (erster Review, F-1 bis F-7) und
+[`2026-10-16-slice-v1-cli-quiet-nur-fehler-2`](../../../reviews/2026-10-16-slice-v1-cli-quiet-nur-fehler-2.md) (zweiter Review, F-1 bis F-6).
 
 **Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)) — wird
 nicht geändert; der Code folgt dem Lastenheft (Fassung aus dem CR, Lastenheft 0.9.0).
@@ -71,9 +72,11 @@ behalten ihre Ausgabe, und vier Ausnahmen bleiben sichtbar: Sicherheitslockerung
 
 **Ansatz:** Der Pegel kommt aus `root.go`; die Ausgabe-Filter bleiben an `a.quiet` gekoppelt. Zusammenfassungen und
 Erfolgsmeldungen der Subkommandos werden unter `--quiet` nicht geschrieben (jede Subkommando-Flag-Struct bekommt `Quiet`, wie
-in `config.go`). Ein Hinweis, der eine Ausnahme trägt, wird am Eintrag gekennzeichnet (heute `SecurityRelaxation`); Fallback-Items
-von `doctor` werden analog gekennzeichnet, damit `doctor --quiet` sie neben den Fehler-Items zeigt. Der JSON-Modus bleibt
-unverändert (`--quiet --json` ist ein No-op).
+in `config.go`). Ein Hinweis, der eine Ausnahme trägt, wird am Eintrag gekennzeichnet (`SecurityRelaxation`, `DegradationFallback`);
+Fallback-Items von `doctor` werden analog gekennzeichnet, damit `doctor --quiet` sie neben den Fehler-Items zeigt. Der
+Compose-Strom von `down` läuft unter `--quiet` ohne `--json` in einen Puffer: Der `ProgressSink` ist dann ein Puffer, der nur
+bei Fehlschlag auf stderr geschrieben und im Erfolgsfall verworfen wird; so bleiben die Fehlerdetails des Compose-Aufrufs
+erhalten, die der Adapter nicht in die Fehlermeldung übernimmt. Der JSON-Modus bleibt unverändert (`--quiet --json` ist ein No-op).
 
 **Prüfpunkt — Ergebnis-Ausgaben (das Lastenheft entscheidet, der Code setzt um und pinnt):** Die Abfragebefehle, die nichts
 verändern, behalten ihre Ausgabe, weil sie das Ergebnis des Befehls ist: `config get`, `config list` (Werte), `logs`
@@ -93,6 +96,12 @@ verändern, behalten ihre Ausgabe, weil sie das Ergebnis des Befehls ist: `confi
   Pflicht.
 - **Die Ausgabe der generierten Container-Start-Skripte** — sie laufen im Container, nicht im CLI-Prozess, und kennen `--quiet`
   nicht; der Slice sichert die Ausweisung in Befehlsausgabe und `doctor`, wie der Lastenheft-Satz sie nennt.
+- **Die Vorschau von `--dry-run` und `--diff` unter `--quiet`** — das Lastenheft nennt sie weder als Ausnahme noch als Abfrage; der
+  Vertrag wird im CR [`slice-cr-cli-quiet-vorschau`](../open/slice-cr-cli-quiet-vorschau.md) entschieden, der Code folgt in
+  [`slice-v1-cli-quiet-vorschau`](../open/slice-v1-cli-quiet-vorschau.md). Bis dahin ist `--dry-run --quiet` leer bei Exit 0.
+- **Die host-seitige Ausweisung der Fallbacks Daemon und Egress** — die Lücke besteht unabhängig von `--quiet` und ist ein Vertrags-
+  oder Code-Vorgang von [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer); sie liegt in
+  [`slice-v1-sandbox-fallback-ausweisung`](../open/slice-v1-sandbox-fallback-ausweisung.md).
 - **Andere Hinweis-Klassen als die vier Ausnahmen** (Recreate-Warnung
   [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen), Drittanbieter-Features
   [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), „no git remote“, Purge-Warnungen von `remove`)
@@ -100,16 +109,16 @@ verändern, behalten ihre Ausgabe, weil sie das Ergebnis des Befehls ist: `confi
 
 ## 2. Definition of Done
 
-- [ ] [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) erfüllt (Lastenheft 0.9.0): `--quiet` setzt den Fehler-Pegel; `init`, `generate`, `add`, `remove`,
+- [x] [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) erfüllt (Lastenheft 0.9.0): `--quiet` setzt den Fehler-Pegel; `init`, `generate`, `add`, `remove`,
       `config set`, `up` und `down` unterdrücken Erfolgs- und Zusammenfassungsmeldungen, `doctor --quiet` zeigt nur
       Fehler-Einträge und Fallback-Items (Ausnahme 2); `remove` hat die Option `--quiet`; `config get`, `config list`,
       `logs` und `template list` behalten ihre Ausgabe (Prüfpunkt §1, gepinnt). Tests Happy/Boundary/Negative je Subkommando
       referenzieren die IDs.
-- [ ] Die Purge-Warnungen und die Abhängigkeits-Warnung von `remove`
+- [x] Die Purge-Warnungen und die Abhängigkeits-Warnung von `remove`
       ([`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen)) entfallen unter `--quiet`, soweit sie keine Fehler sind: Der
       Vertrag nennt sie nicht als Ausnahme, sie fallen unter „alle anderen Hinweise und Warnungen entfallen“. Ein Test pinnt
       die Setzung ausdrücklich.
-- [ ] Die vier Ausnahmen bleiben unter `--quiet` sichtbar und sind je einzeln gepinnt: Sicherheitslockerungs-Hinweise bei
+- [x] Die vier Ausnahmen bleiben unter `--quiet` sichtbar und sind je einzeln gepinnt: Sicherheitslockerungs-Hinweise bei
       `init`, `generate` und `up`; Degradations-Fallbacks
       ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion) in der Befehlsausgabe
       und in `doctor`, soweit der Host sie ermittelt (Ist-Stand: nur der `vfs`-Fall hat ein `doctor`-Item; die beiden anderen
@@ -117,21 +126,21 @@ verändern, behalten ihre Ausgabe, weil sie das Ergebnis des Befehls ist: `confi
       die Pfad-Zusammenfassung von `--force` vor dem Überschreiben bei `init` (`generate` hat keinen `--force`-Pfad und keinen
       `AffectedFiles`-Produzenten)
       ([`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung), [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)).
-- [ ] Die Review-Befunde sind behoben: F-1 (der Kommentar am Doctor-Test in `cli_test.go` nennt die geltende Zusage, nicht die frühere Fassung),
+- [x] Die Review-Befunde sind behoben: F-1 (der Kommentar am Doctor-Test in `cli_test.go` nennt die geltende Zusage, nicht die frühere Fassung),
       F-3 (`doctor --quiet --strict` mit nur Warn-Items endet mit Exit 11 bei leerer stdout; die Fehlermeldung auf stderr nennt für
       Skript-Nutzer das auslösende Item bzw. die Ursache, ein Test pinnt Exit-Code und stderr —
       [`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003--fehlerklassifikation)), F-4 (der Kommentar in `root.go` verweist auf `visibleWarnings`, nicht auf das nicht
       vorhandene `[writeWarning]`).
-- [ ] Doku-Update: `docs/user/benutzerhandbuch.md` (Optionstabellen, Zeilen um
+- [x] Doku-Update: `docs/user/benutzerhandbuch.md` (Optionstabellen, Zeilen um
       299 und 1280; `remove --quiet`) nennt `--quiet` als „nur Fehler“ mit den vier Ausnahmen;
       CHANGELOG-Eintrag.
-- [ ] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+- [x] `make gates` grün.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8).
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
 - [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo mit Wellen-Betrieb von der Welle-Closure geprüft.
 
 ## 3. Plan (vor Code)
@@ -144,10 +153,11 @@ verändern, behalten ihre Ausgabe, weil sie das Ergebnis des Befehls ist: `confi
 | `internal/adapter/driving/cli/add.go` | update | `printAddSummary` unter `--quiet` nicht schreiben; Flag-Struct bekommt `Quiet` |
 | `internal/adapter/driving/cli/remove.go` | update | neue Option `--quiet` (Flag-Struct `Quiet`, `a.quiet` durchreichen); Erfolgsmeldung, „Removed volumes:“ und Purge-Warnungen ([`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen)) unter `--quiet` unterdrücken; Fehlerpfade bleiben |
 | `internal/adapter/driving/cli/up.go` | update / prüfen | Tabelle und Diagnosen unterdrückt, Lockerungs-Hinweise sichtbar; Compose-Fortschritt auf stderr bleibt (Kommentar auf die Ausnahme im Lastenheft umstellen) |
-| `internal/adapter/driving/cli/down.go`, `statusview.go` | prüfen | unterdrücken Erfolgsmeldung und Volume-Liste bereits; Tests pinnen es |
+| `internal/adapter/driving/cli/down.go` | update | Unter `--quiet` ohne `--json` ist der `ProgressSink` ein Puffer: Compose-Strom nur bei Fehlschlag auf stderr, im Erfolgsfall verworfen; Erfolgsmeldung und Volume-Zeile entfallen |
+| `internal/adapter/driving/cli/statusview.go` | prüfen | unterdrückt die Tabelle bereits; Tests pinnen es |
 | `internal/adapter/driving/cli/config.go`, `template.go`, `logs.go` | prüfen | Prüfpunkt §1: Ergebnis-Ausgaben bleiben, `config set`-Zusammenfassung zuordnen und pinnen |
 | `internal/adapter/driving/cli/doctor.go` | update | `writeDoctorReport`: unter `--quiet` Fehler-Items und Fallback-Items; Kopf-/Summary-Zeile entfallen (Pin); F-3: Erklärung auf stderr für `--quiet --strict` mit nur Warn-Items |
-| `internal/hexagon/port/driving/removeservice.go`, `internal/hexagon/application/doctor_sandbox.go` | update | Kennzeichen „Fallback“ an den Items bzw. `WarningEntry`s der drei Degradations-Fälle (nicht im JSON); [`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)-konform, kein I/O |
+| `internal/hexagon/port/driving/removeservice.go`, `internal/hexagon/application/doctor_sandbox.go`, `internal/hexagon/application/devcontainer_sandbox.go`, `internal/hexagon/domain/diagnostic.go` | update | Kennzeichen „Fallback“ (`DegradationFallback`) an `WarningEntry` und `domain.Diagnostic`; produktiv setzt es nur `doctor_sandbox.go` (`vfs`); `devcontainer_sandbox.go` erzeugt keine Fallbacks, sondern kennzeichnet die Lockerungen; nicht im JSON; [`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)-konform, kein I/O |
 | `internal/adapter/driving/cli/verbosity_test.go` | update | `quiet-lowers-to-warn` → Fehler-Pegel; `debug-takes-precedence-over-quiet` bleibt unverändert (kehrt sich erst in [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) um) |
 | `internal/adapter/driving/cli/cli_test.go` | update | F-1: Kommentar am Doctor-Test auf die geltende Zusage; F-3-Pin `doctor --quiet --strict` |
 | `internal/adapter/driving/cli/sandbox_test.go`, `updown_cluster_test.go`, `statusview_test.go`, `down_acceptance_test.go`, `up_acceptance_test.go`, `doctor_json_test.go` sowie Tests zu `init`/`generate`/`add`/`remove` | update / prüfen | neue Fälle Happy/Boundary/Negative je Subkommando und je Ausnahme; `--quiet --json` unverändert — nach [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) |
@@ -183,22 +193,67 @@ Steering-Loop-Lerneintrag geschrieben (§7).
 ## 6. Risiken und offene Punkte
 
 - **Umfang wächst:** Sieben Subkommandos, vier Ausnahmen und drei Review-Befunde in einem Slice. — **Ausgang:** entfallen:
-  Ist der Umfang beim Start nicht tragbar, wird nach Subkommando zerlegt; Zerlegungsschnitte, in dieser Reihenfolge: (1)
-  Fehler-Pegel und Review-Befunde F-1/F-3/F-4 samt `doctor`-Fallback-Items; (2) `init`/`generate`/`add` (Zusammenfassungen);
-  (3) `remove` mit neuer Option `--quiet` und Purge-Warnungen; (4) `config set`/`template`-Zuordnung (Prüfpunkt §1). Die
-  Ausnahmen-Pins gehören jeweils in den Slice des Subkommandos.
+  der Slice wurde ungeteilt geschlossen; zwei Reviews und eine Verification trugen den Umfang, die Zerlegung war nicht nötig.
 - **Abgrenzung der Ausnahmen:** Die Kennzeichnung kann eine Lockerung oder einen Fallback übersehen oder einen Hinweis zu
   Unrecht ausnehmen. — **Ausgang:** entfallen: der Test pinnt alle Lockerungs-Hinweise aus `sandboxRelaxationWarnings` (Podman,
   Docker, Egress), die drei Fallbacks und die ausgenommenen Hinweise einzeln.
 - **`doctor --quiet` verliert übrige Warn-Items:** Skripte, die die Warn-Zeilen lasen, sehen sie nicht mehr; der Exit-Code
   trägt das Ergebnis. — **Ausgang:** entfallen: die Folge ist gewollt (Entscheidung des Projektinhabers) und steht im
   CHANGELOG und in den Optionstabellen des Benutzerhandbuchs (DoD); F-3 sichert die Erklärbarkeit bei `--strict`.
+- **Vorschau unter `--quiet`:** `--dry-run --quiet` gibt nichts aus und endet mit Exit 0; das Lastenheft nennt die Vorschau weder
+  als Ausnahme noch als Abfrage (zweiter Review, F-2). — **Ausgang:** eingetreten:
+  [`slice-cr-cli-quiet-vorschau`](../open/slice-cr-cli-quiet-vorschau.md) und
+  [`slice-v1-cli-quiet-vorschau`](../open/slice-v1-cli-quiet-vorschau.md).
+- **Degradations-Fallbacks Daemon und Egress ohne host-seitige Ausweisung:** produktiv weist nur der `vfs`-Fall im `doctor` aus; für
+  die beiden anderen gibt es keine host-seitige Quelle, und für `init`/`generate`/`up` erzeugt keine produktive Quelle einen
+  Fallback-Eintrag. Die Lücke besteht unabhängig von `--quiet`
+  ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)). — **Ausgang:** eingetreten:
+  [`slice-v1-sandbox-fallback-ausweisung`](../open/slice-v1-sandbox-fallback-ausweisung.md).
+- **`down`-Puffer ist eine Setzung ohne ausdrückliche Lastenheft-Zeile:** Ausnahme 3 nennt nur `up`; `down` steht unter den ändernden
+  Subkommandos mit „nur Fehler“. — **Ausgang:** entfallen: Entscheidung des Projektinhabers vom 2026-10-16; der Test
+  `TestExecute_Down_Quiet_ComposeStream` pinnt Erfolgs- und Fehlerfall, der Fehlerfall ist durch „nur Fehler“ gedeckt.
 - **Reihenfolge zum Folge-Slice:** beide ändern `root.go` und `verbosity_test.go`. — **Ausgang:** entfallen: logisch
   unabhängig (§4); ein Merge-Konflikt wird beim zweiten Slice aufgelöst.
 
 ## 7. Closure-Notiz
 
-Wird bei der Closure gefüllt.
+**Belege:** Review-Reports
+[`2026-10-16-slice-v1-cli-quiet-nur-fehler`](../../../reviews/2026-10-16-slice-v1-cli-quiet-nur-fehler.md) (Erstlauf: 1 HIGH, 2 MEDIUM, 1 LOW, 3 INFO;
+F-1, F-3 und F-4 behoben, F-2 durch die Reichweite „alle Subkommandos“ behoben, F-5 und F-6 durch Lastenheft 0.9.0 aufgelöst, F-7 bleibt als
+Grenze) und
+[`2026-10-16-slice-v1-cli-quiet-nur-fehler-2`](../../../reviews/2026-10-16-slice-v1-cli-quiet-nur-fehler-2.md) (zweiter Lauf: 0 HIGH, 3 MEDIUM, 3 INFO;
+F-1 `down`-Strom und F-3 CHANGELOG behoben, F-2 Vorschau in die Folge-Slices ausgelagert, F-4 in den Fallback-Slice, F-5 und F-6 als Grenze
+bzw. gepinnt). Verification Evidence
+[`2026-10-16-verification-slice-v1-cli-quiet-nur-fehler`](../../../reviews/2026-10-16-verification-slice-v1-cli-quiet-nur-fehler.md): bestanden, mit
+sechs Auflagen für die Closure (hier eingelöst). `make gates` grün, Coverage 91,00 % (Schwelle 90 %); `make doc-trace`: 83 Anforderungen, 0 Waisen.
+
+- **Was hat funktioniert:** Die Pins prüfen Verhalten, keine Tautologien: Die Mutations-Gegenproben M1 bis M12 fielen rot, ebenso die drei des Verifiers (`down`-Strom im Fehlerfall nicht ausgeben, Fallback-Filter im `doctor`
+  entfernt, Puffer nie aktiv). Die Fehlerpins (`…_ErrorStays` je ändernder Subkommando, `…_PurgeRefusedStaysAnError`) halten den Gegenpol
+  „nicht zu viel unterdrücken“; der Wire-Ausschluss des Fallback-Flags ist für `WarningEntry` und das Doctor-Item gepinnt
+  (`TestDoctorJSON_FallbackFlagNotInWireForm`).
+- **Was ging anders als geplant:** Die Entscheidung zu den Fallbacks aus dem Erstlauf wurde durch Lastenheft 0.9.0 überholt: Aus „Spannung,
+  Architect entscheidet“ wurde Ausnahme 2 im Vertrag, der Code folgte. Der zweite Review fand drei Dinge, die der Erstlauf nicht sah: den
+  `down`-Strom (Compose-Zeilen unter `--quiet`, Fehlerdetails nur dort), die Vorschau (`--dry-run --quiet` leer bei Exit 0) und den
+  CHANGELOG-Widerspruch zur Regel „letzte Option gewinnt“. Die Zählung der Ausnahmen („eine“, „drei“, „vier“) war an mehreren Stellen
+  nachzuziehen. Der Slice-Plan nannte `doctor`-Items für Daemon und Egress, die es nicht gibt; der zweite Review fand es.
+- **Steering-Loop-Eintrag:** Ein Slice-Text beschreibt, was da ist: Der Plan nannte Quellen im Code (`doctor`-Items in `doctor_sandbox.go`), die
+  es nicht gab, und der Review fand es erst nach dem Bau. Plan-Aussagen über Code werden vor dem Schreiben im Code geprüft (Suche nach dem
+  Symbol oder der Item-ID). Zusammen mit der Finding-Klasse „Plan nennt Quellen, die es nicht gibt“ der beiden Reviews gezählt, nicht verkörpert.
+- **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt; das Register ist leer.
+- **Folge-Slices:** [`slice-cr-cli-quiet-vorschau`](../open/slice-cr-cli-quiet-vorschau.md) (CR: Vorschau unter `--quiet`, Lastenheft 0.10.0),
+  [`slice-v1-cli-quiet-vorschau`](../open/slice-v1-cli-quiet-vorschau.md) (Code dazu),
+  [`slice-v1-sandbox-fallback-ausweisung`](../open/slice-v1-sandbox-fallback-ausweisung.md) (Lücke der Fallback-Ausweisung, Entscheidung Code oder CR beim
+  Projektinhaber) und
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Rangfolge bei Mehrfachangabe, Spec-Eintrag).
+- **Risiken aus §6:** alle tragen ihren Ausgang: eingetreten (Vorschau, Fallback-Ausweisung) oder entfallen (Umfang, Abgrenzung der Ausnahmen,
+  `doctor`-Warn-Items, `down`-Puffer, Reihenfolge zum Folge-Slice).
+- **Release-Hinweis:** kein Release-Cut vor `slice-v1-cli-verbosity-letzte-option-gewinnt` und den beiden Vorschau-Slices; der
+  CHANGELOG sagt im Präsens „follows in a later release“.
+- **Grenzen:** (1) Der `--force`-Pin (`TestExecute_Init_Quiet_DoesNotSilenceForcePathSummary`) prüft nur `SilenceProgress` im Request, nicht die
+  tatsächliche Ausgabe; `generate` hat keinen `--force`-Pfad und keinen `AffectedFiles`-Produzenten. (2) Die Pins der Ausnahme 2 für `init`,
+  `generate` und `up` laufen über Fake-Use-Cases, weil keine produktive Quelle einen Fallback-Eintrag erzeugt; ebenso der
+  Lockerungs-Zweig in `up` (Erstreview F-7). Produktiv ist nur `vfs` im `doctor` erreichbar. (3) `config show` steht in keiner der
+  Lastenheft-Listen und verhält sich als Abfrage.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
