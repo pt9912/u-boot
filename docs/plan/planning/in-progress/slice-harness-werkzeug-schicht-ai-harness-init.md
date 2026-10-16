@@ -57,7 +57,8 @@ die gewählten Teile einhängen.
   [`MR-011`](../../../../harness/conventions/MR-011-werkzeug-fragmente-repo-gefuehrt.md).
 - [x] `make gates` grün (lint, test, coverage-gate, docs-check; Stempel
   geschrieben, Stop-Hook gibt frei) und `make docs-check` grün.
-- [ ] Review durchgeführt.
+- [x] Review durchgeführt: [`Report`](../../../reviews/2026-10-16-slice-harness-werkzeug-schicht-ai-harness-init.md)
+  (0 HIGH, 1 MEDIUM, 3 LOW, 2 INFO); MEDIUM und die zwei Kopf-/Hash-LOW behoben.
 - [ ] `make hooks-install` im eigenen Klon ausgeführt (bewusst nicht automatisch).
 
 ## 4. Risiken
@@ -66,6 +67,13 @@ die gewählten Teile einhängen.
   blockt auch ein Heredoc mit einem Toolchain-Wort am Zeilenanfang —
   **Ausgang:** eingetreten, Abhilfe `git commit -F <datei>` bzw. Dateien per
   Editor-Tool schreiben (in `implement-slice` vermerkt).
+- Der Guard erkennt nur das erste Wort je Segment; Toolchain-Aufrufe in
+  `if`-/`for`-Rümpfen gehen durch (Review F-4) — **Ausgang:** weiter offen,
+  der Guard ist ein Stolperdraht, keine Sandbox.
+- `make slice-mv` zieht präfixlose Links auf `../in-progress/…` um (Review F-5)
+  und `working-tree-hash.sh` braucht `sha256sum` auf dem Host (Review F-6) —
+  **Ausgang:** entfallen, beides ist Verhalten der Werkzeuge, die Links lösen auf
+  und ein fehlendes `sha256sum` bricht den Lauf laut.
 - Der Commit-Hook weist Messages ohne Kennung ab (z. B. reine Querverweis-
   Commits) — **Ausgang:** weiter offen, Aktivierung ist pro Klon freiwillig.
 
