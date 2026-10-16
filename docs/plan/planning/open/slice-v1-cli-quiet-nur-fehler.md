@@ -42,10 +42,13 @@ allen Slices der Welle, im letzten
 ## 1. Ziel und Abgrenzung
 
 **Ziel:** `--quiet` zeigt nur Fehler: der Logger-Pegel ist Fehler, die Erfolgs- und Zusammenfassungsmeldung **aller**
-Subkommandos entfällt (`init`, `generate`, `add`, `remove`, `up`, `down`, `doctor`), `remove` bekommt die Option, und drei
-Ausnahmen bleiben sichtbar: Sicherheitslockerungen, Degradations-Fallbacks
-([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)) und der Compose-Fortschritt von `up`
-([`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker)).
+Subkommandos, die etwas ändern, entfällt (`init`, `generate`, `add`, `remove`, `config set`, `up`, `down`; `doctor` zeigt nur
+Fehler-Einträge), `remove` bekommt die Option, die Abfragebefehle (`config get`, `config list`, `logs`, `template list`)
+behalten ihre Ausgabe, und vier Ausnahmen bleiben sichtbar: Sicherheitslockerungen, Degradations-Fallbacks
+([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)), der Compose-Fortschritt von `up`
+([`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker)) und die Pfad-Zusammenfassung von `--force`
+([`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung),
+[`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)).
 
 **Gefundener Stand im Code (Ausgangslage):**
 
@@ -70,11 +73,10 @@ in `config.go`). Ein Hinweis, der eine Ausnahme trägt, wird am Eintrag gekennze
 von `doctor` werden analog gekennzeichnet, damit `doctor --quiet` sie neben den Fehler-Items zeigt. Der JSON-Modus bleibt
 unverändert (`--quiet --json` ist ein No-op).
 
-**Prüfpunkt — Ergebnis-Ausgaben (nicht geraten, vom Implementer im Code zu entscheiden und im Test zu pinnen):** Ausgaben,
-die selbst der Zweck des Befehls sind, sind keine Erfolgs-/Zusammenfassungsmeldung und bleiben: `config get`, `config list`
-(Werte), `logs` (Log-Strom), `template list` (Tabelle). Zu entscheiden ist die Zuordnung von `config set` (Zeile „config: … → …“,
-eine Erfolgsmeldung, nach Wortlaut zu unterdrücken) und `config`-Hilfsausgaben sowie `template`-Unterbefehlen, die ein Ergebnis
-verändern; die Entscheidung steht im Test und im Handbuch.
+**Prüfpunkt — Ergebnis-Ausgaben (das Lastenheft entscheidet, der Code setzt um und pinnt):** Die Abfragebefehle, die nichts
+verändern, behalten ihre Ausgabe, weil sie das Ergebnis des Befehls ist: `config get`, `config list` (Werte), `logs`
+(Log-Strom), `template list` (Tabelle). `config set` ändert etwas und gehört zu den ändernden Subkommandos: Die Zeile
+„config: … → …“ (`printConfigSetSummary`) entfällt unter `--quiet`, nur Fehler bleiben. Test und Handbuch pinnen die Zuordnung.
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
@@ -97,10 +99,14 @@ verändern; die Entscheidung steht im Test und im Handbuch.
 ## 2. Definition of Done
 
 - [ ] [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) erfüllt (Lastenheft 0.9.0): `--quiet` setzt den Fehler-Pegel; `init`, `generate`, `add`, `remove`,
-      `up`, `down` und `doctor` unterdrücken Erfolgs- und Zusammenfassungsmeldungen, `doctor --quiet` zeigt nur Fehler-Items
-      und Fallback-Items; `remove` hat die Option `--quiet` und unterdrückt auch die Purge-Warnungen
-      ([`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen)), soweit sie keine Fehler sind; die Ergebnis-Ausgaben (Prüfpunkt §1) sind zugeordnet und
-      gepinnt. Tests Happy/Boundary/Negative je Subkommando referenzieren die IDs.
+      `config set`, `up` und `down` unterdrücken Erfolgs- und Zusammenfassungsmeldungen, `doctor --quiet` zeigt nur
+      Fehler-Einträge und Fallback-Items (Ausnahme 2); `remove` hat die Option `--quiet`; `config get`, `config list`,
+      `logs` und `template list` behalten ihre Ausgabe (Prüfpunkt §1, gepinnt). Tests Happy/Boundary/Negative je Subkommando
+      referenzieren die IDs.
+- [ ] Die Purge-Warnungen und die Abhängigkeits-Warnung von `remove`
+      ([`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen)) entfallen unter `--quiet`, soweit sie keine Fehler sind: Der
+      Vertrag nennt sie nicht als Ausnahme, sie fallen unter „alle anderen Hinweise und Warnungen entfallen“. Ein Test pinnt
+      die Setzung ausdrücklich.
 - [ ] Die vier Ausnahmen bleiben unter `--quiet` sichtbar und sind je einzeln gepinnt: Sicherheitslockerungs-Hinweise bei
       `init`, `generate` und `up`; Degradations-Fallbacks
       ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion) in der Befehlsausgabe

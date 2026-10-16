@@ -1,4 +1,4 @@
-# Slice CR: `--quiet` zeigt nur Fehler, mit drei benannten Ausnahmen (`LH-FA-CLI-005`)
+# Slice CR: `--quiet` zeigt nur Fehler, mit vier benannten Ausnahmen (`LH-FA-CLI-005`)
 
 > **CR-Vehikel.** u-boot führt kein separates CR-Artefakt — dieser Slice
 > **ist** der Change Request am Vertrags-Stratum (Precedent:
@@ -37,14 +37,16 @@ CR nicht; sie beschreiben das Verhalten erst nach allen Slices der Welle.
 ## 1. Ziel und Abgrenzung
 
 **Ziel:** Lastenheft-Änderung **0.8.0 → 0.9.0**: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) behält
-`--quiet` – nur Fehler und benennt **drei** Ausnahmen statt einer: die Ausweisung von Sicherheitslockerungen
+`--quiet` – nur Fehler und benennt **vier** Ausnahmen statt einer: die Ausweisung von Sicherheitslockerungen
 (bereits in 0.8.0), die Ausweisung der Degradations-Fallbacks
-([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)) und den Compose-Fortschritt von `u-boot up`
-([`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker)).
+([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)), den Compose-Fortschritt von `u-boot up`
+([`LH-NFA-PERF-002`](../../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker)) und die Zusammenfassung der betroffenen Pfade
+von `--force` ([`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung),
+[`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz)).
 
-**Warum Ausnahmen statt Auslegung:** Beide neuen Ausnahmen folgen aus eigenen Zusagen des Lastenhefts —
-„jeder Fallback wird in der Befehlsausgabe und in `u-boot doctor` ausgewiesen“ und „der Fortschritt einzelner Services
-(Pull, Create, Start, Healthcheck) muss sichtbar sein“. Ohne Benennung widersprächen sich zwei Sätze, und der Code
+**Warum Ausnahmen statt Auslegung:** Die drei neuen Ausnahmen folgen aus eigenen Zusagen des Lastenhefts —
+„jeder Fallback wird in der Befehlsausgabe und in `u-boot doctor` ausgewiesen“, „der Fortschritt einzelner Services
+(Pull, Create, Start, Healthcheck) muss sichtbar sein“ und „vor dem Schreiben muss eine Zusammenfassung der betroffenen Pfade ausgegeben werden“. Ohne Benennung widersprächen sich zwei Sätze, und der Code
 müsste den Vorrang still entscheiden; die Ausnahme macht ihn im Vertrag ausdrücklich.
 
 **Wirkung von `--quiet` (Festlegung des Projektinhabers, 2026-10-16):** `--quiet` unterdrückt die Erfolgs- und
@@ -121,28 +123,28 @@ Der Satz zu den Abfragebefehlen nennt das Kriterium (der Befehl ändert nichts) 
 ```text
 | 0.9.0 | 2026-10-16 | LH-FA-CLI-005: Vier Ausnahmen unter `--quiet`
 (Sicherheitslockerungen, Ausweisung der Degradations-Fallbacks nach
-LH-FA-DEV-007, Fortschritt von `up` nach LH-NFA-PERF-002,
+LH-FA-DEV-007, Fortschritt von `u-boot up` nach LH-NFA-PERF-002,
 `--force`-Zusammenfassung nach LH-FA-CLI-005A und LH-FA-INIT-005); die
-ändernden Subkommandos geben unter `--quiet` nur Fehler aus, `doctor`
-nur Fehler-Einträge, die Abfragebefehle behalten ihre Ausgabe; die
-Stufen und die Mehrfachangabe-Regel bleiben. Die geltende
-Zeile steht in spec/lastenheft.md §16. | Vereinbarung mit dem
+ändernden Subkommandos geben unter `--quiet` nur Fehler aus, `u-boot
+doctor` nur Fehler-Einträge, die Abfragebefehle (`config get`, `config
+list`, `logs`, `template list`) behalten ihre Ausgabe; die Stufen und die
+Mehrfachangabe-Regel bleiben unverändert. | Vereinbarung mit dem
 Projektinhaber |
 ```
 
 ## 2. Definition of Done
 
-- [ ] **Lastenheft 0.9.0**: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) in der Fassung oben, Versionsfeld,
+- [x] **Lastenheft 0.9.0**: [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) in der Fassung oben, Versionsfeld,
       Historie-Zeile (Verweis „Vereinbarung mit dem Projektinhaber").
-- [ ] **Umsetzungsbedarf** einem Slice zugeordnet: Abnahmekriterien 1–3 liegen in
+- [x] **Umsetzungsbedarf** einem Slice zugeordnet: Abnahmekriterien 1–3 liegen in
       [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md).
-- [ ] Doku-Update: CHANGELOG (öffentlicher Vertrag berührt).
-- [ ] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+- [x] Doku-Update: CHANGELOG (öffentlicher Vertrag berührt).
+- [x] `make gates` grün.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — kein Self-Review.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang.
 - [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
 
 ## 3. Plan (vor Code)
@@ -188,7 +190,27 @@ der Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quie
 
 ## 7. Closure-Notiz
 
-Wird bei der Closure gefüllt.
+**Belege:** Review-Report [`2026-10-16-slice-cr-cli-quiet-weitere-ausnahmen`](../../../reviews/2026-10-16-slice-cr-cli-quiet-weitere-ausnahmen.md)
+(0 HIGH, 3 MEDIUM, 1 LOW, 3 INFO; alle behoben in `591acb7`); Verification Evidence
+[`2026-10-16-verification-slice-cr-cli-quiet-weitere-ausnahmen`](../../../reviews/2026-10-16-verification-slice-cr-cli-quiet-weitere-ausnahmen.md)
+(bestanden, fünf Doku-Befunde zur Zählung in den Planungsdateien nachgezogen); `make gates` grün, `make doc-trace`: 83 Anforderungen, 0 Waisen.
+
+- **Was hat funktioniert:** Der Review las das Lastenheft gegen sich selbst:
+  [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) und [`LH-FA-INIT-005`](../../../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz) verlangen die
+  Zusammenfassung vor dem Überschreiben, die der erste Entwurf unter `--quiet` entfallen ließ. Daraus wurde die vierte Ausnahme.
+- **Was ging anders als geplant:** Der Satz zu den Ergebnis-Ausgaben war als Vorschlag in den CR gekommen und im Lastenheft gelandet, ohne
+  ein Kriterium zu nennen („Zweck eines Befehls" trägt auch `config set`). Er nennt jetzt das Kriterium (der Befehl ändert nichts) und die Befehle.
+  Die Zählung („drei", dann „vier" Ausnahmen) war an mehreren Planungsdateien nachzuziehen.
+- **Steering-Loop-Eintrag:** Eine Ausnahme-Regel im Lastenheft wird vor der Änderung gegen alle älteren Zusagen geprüft, die dasselbe Verhalten berühren
+  (Suche nach `--quiet`, „Zusammenfassung", „ausgewiesen"); der Review fand die Kollision erst nach dem Commit. Gezählt, nicht verkörpert
+  (zweites Auftreten nach dem ersten CR, aber ein anderes Fehlermuster).
+- **Grenze:** Das CHANGELOG sagt zukünftig, was `--quiet` leistet; bis die Slices `slice-v1-cli-quiet-nur-fehler` und
+  `slice-v1-cli-verbosity-letzte-option-gewinnt` geliefert sind, kein Release-Cut. Die Purge- und Abhängigkeits-Warnungen von `remove` sind keine Ausnahme; der
+  Code-Slice pinnt das.
+- **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt.
+- **Folge-Slices:** [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) (trägt die Abnahmekriterien 1–3),
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md).
+- **Risiken aus §6:** alle drei tragen ihren Ausgang (siehe §6).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 

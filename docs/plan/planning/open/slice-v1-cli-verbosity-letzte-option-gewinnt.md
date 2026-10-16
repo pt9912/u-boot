@@ -65,8 +65,8 @@ benutzbar).
   ohne Treffer; der Pegel kommt nur aus den drei Flags). Es gibt also nichts
   zu priorisieren; eine solche Quelle wäre ein neuer Vertrag.
 - **Die zusätzlichen `--quiet`-Wirkungen** (`doctor` zeigt nur Fehler-Items, `up`
-  und `down` unterdrücken Tabelle/Erfolgsmeldung, Sandbox-Lockerungs-Hinweise
-  bleiben sichtbar; `--quiet --json` ist No-op) — sie kommen aus
+  und `down` unterdrücken Tabelle/Erfolgsmeldung, die vier Ausnahmen aus
+  [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) bleiben sichtbar; `--quiet --json` ist No-op) — sie kommen aus
   [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md), lesen `a.quiet` und bleiben unverändert; Folge: `a.quiet` muss bei
   „letzte gewinnt" weiter genau dann wahr sein, wenn `--quiet` die gültige
   Option ist (siehe §6).
