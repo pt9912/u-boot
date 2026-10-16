@@ -7,12 +7,12 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — letzter Slice der Welle; folgt auf
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) und
-[`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md), weil die Pegelabbildung von
-`--quiet` (Fehler-Pegel) aus dem Slice [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) kommt.
+[`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md), weil die Pegelabbildung von
+`--quiet` (Fehler-Pegel) aus dem Slice [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) kommt.
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Scope).
 Verwandt: [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md)
-(klärt die Zusage von `--quiet`) und [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md)
+(klärt die Zusage von `--quiet`) und [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md)
 (setzt sie im Code um; dieser Slice ändert nur die Wahl zwischen mehreren Optionen und ist logisch davon unabhängig).
 Herkunft: Inventur in
 [`slice-harness-internal-readmes-festlegungen-in-spec`](../done/slice-harness-internal-readmes-festlegungen-in-spec.md) §9.
@@ -20,7 +20,7 @@ Herkunft: Inventur in
 **Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)) — wird
 nicht geändert; der Code folgt dem Lastenheft. `spezifikation.md` und
 `architecture.md` beschreiben das Verhalten erst **nach** diesem Slice, dem Slice
-[`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) **und**
+[`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) **und**
 dem CR [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md);
 vorher nicht in die Spec schreiben.
 
@@ -51,7 +51,7 @@ benutzbar).
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Änderung der Pegelabbildung von `--quiet`** (Fehler-Pegel, Ausnahme für
-  Sicherheitslockerungen) — das ist der Slice [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md)
+  Sicherheitslockerungen) — das ist der Slice [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md)
   (Zusage im CR [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md)); dieser Slice ändert nur,
   *welche* Option gilt, nicht, *was* sie bewirkt.
 - **Neue Stufe zwischen Info und Debug** — `--verbose` und `--debug` bleiben
@@ -65,7 +65,7 @@ benutzbar).
 - **Die zusätzlichen `--quiet`-Wirkungen** (`doctor` zeigt nur Fehler-Items, `up`
   und `down` unterdrücken Tabelle/Erfolgsmeldung, Sandbox-Lockerungs-Hinweise
   bleiben sichtbar; `--quiet --json` ist No-op) — sie kommen aus
-  [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md), lesen `a.quiet` und bleiben unverändert; Folge: `a.quiet` muss bei
+  [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md), lesen `a.quiet` und bleiben unverändert; Folge: `a.quiet` muss bei
   „letzte gewinnt" weiter genau dann wahr sein, wenn `--quiet` die gültige
   Option ist (siehe §6).
 
@@ -96,7 +96,7 @@ Stand der Rangfolge heute (im Code und in der Doku gefunden):
 |---|---|---|
 | `internal/adapter/driving/cli/root.go` | update | Flag-Definition (`BoolVar` für `quiet`/`verbose`/`debug`) und `PersistentPreRunE`-Switch mit fester Rangfolge; Kommentar „Precedence: --debug > --verbose > --quiet" ist zu ersetzen |
 | `internal/adapter/driving/cli/cli.go` | update | Felder `quiet`/`verbose`/`debug` am `App` (Kommentar „--quiet lowers it to Warn"); Lesestellen `a.quiet` in `config.go`, `up.go`, `down.go`, `doctor.go` müssen mit dem neuen Wert konsistent bleiben |
-| `internal/adapter/driving/cli/verbosity_test.go` | update | `TestExecute_VerbosityFlag_AdjustsLoggerLevel` pinnt heute `debug-takes-precedence-over-quiet` (`--debug --quiet` → Debug) — dieser Fall kehrt sich um; die Zeile `quiet-lowers-to-warn` ist bereits durch den Slice [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) auf Fehler-Pegel gesetzt; neue Fälle Happy/Boundary/Negative nach [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) |
+| `internal/adapter/driving/cli/verbosity_test.go` | update | `TestExecute_VerbosityFlag_AdjustsLoggerLevel` pinnt heute `debug-takes-precedence-over-quiet` (`--debug --quiet` → Debug) — dieser Fall kehrt sich um; die Zeile `quiet-lowers-to-warn` ist bereits durch den Slice [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) auf Fehler-Pegel gesetzt; neue Fälle Happy/Boundary/Negative nach [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) |
 | `internal/adapter/driving/cli/doctor_json_test.go`, `up_acceptance_test.go`, `logs_acceptance_test.go` | prüfen | verwenden `--quiet --json`/`--json --quiet`; unberührt, sofern `a.quiet` für Einzel-`--quiet` gleich bleibt |
 | `docs/user/benutzerhandbuch.md` | update | Optionstabellen (zwei Stellen) nennen die Optionen, aber nicht die Rangfolge; Satz „letzte gewinnt" ergänzen |
 | `CHANGELOG.md` | update | sichtbare Verhaltensänderung (`--debug --quiet` wird zu `--quiet`, also Fehler-Pegel) |
@@ -114,7 +114,7 @@ Weitere Fundstellen (nicht zu ändern): `docs/maintainer/cli-json-contract.md`
 - `in-progress` → `next` (zu groß, zurück zur Zerlegung): die gemeinsame
   Flag-Wert-Lösung zwingt zu einem Umbau der `a.quiet`-Lesestellen über mehrere
   Subkommandos hinaus — dann Umbau als eigener Slice vorziehen.
-- `in-progress` → `open` (blockiert): der Slice [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md)
+- `in-progress` → `open` (blockiert): der Slice [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md)
   ist nicht abgeschlossen oder die Pegelabbildung von `--quiet` ändert sich
   durch eine neue Entscheidung des Projektinhabers, sodass die Umsetzung hier
   berührt ist.
@@ -131,7 +131,7 @@ Steering-Loop-Lerneintrag geschrieben (§7).
   noch wahr ist. — **Ausgang:** offen bis zur Umsetzung; Test `--quiet --verbose`
   muss auch die Ausgabe-Filter prüfen.
 - **Reihenfolge-Abhängigkeit:** Die Spezifikation darf das Verhalten erst nach
-  diesem Slice, dem Slice [`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) und dem CR
+  diesem Slice, dem Slice [`slice-v1-cli-quiet-nur-fehler`](../in-progress/slice-v1-cli-quiet-nur-fehler.md) und dem CR
   [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) beschreiben. — **Ausgang:** entfallen: der
   Spezifikations-Eintrag liegt in diesem Slice, dem letzten der Welle
   [`welle-cli-verbosity`](../welle-cli-verbosity.md).

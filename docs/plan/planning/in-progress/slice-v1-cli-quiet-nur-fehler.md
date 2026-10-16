@@ -12,7 +12,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — folgt auf
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) (die Ausnahme steht erst nach
 Lastenheft 0.8.0 im Vertrag) und geht
-[`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md) voraus (siehe §4: beide ändern
+[`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) voraus (siehe §4: beide ändern
 `root.go` und `verbosity_test.go`).
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Scope),
@@ -25,7 +25,7 @@ Herkunft: Entscheidung des Projektinhabers (2026-10-16), festgehalten im CR
 nicht geändert; der Code folgt dem Lastenheft (Fassung aus dem CR, Lastenheft 0.8.0).
 `spezifikation.md` und `architecture.md` beschreiben das Verhalten erst nach
 allen drei Slices der Welle, im letzten
-([`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md)).
+([`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md)).
 
 **Verantwortlich:** —
 
@@ -69,7 +69,7 @@ ist ein No-op).
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Die Rangfolge bei Mehrfachangabe** (`--quiet --verbose` usw.) — das ist
-  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md); dieser Slice ändert, *was* `--quiet`
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md); dieser Slice ändert, *was* `--quiet`
   bewirkt, nicht, *welche* Option gilt.
 - **Eine neue Pegelstufe** (etwa zwischen Info und Debug) — eine neue Zusage;
   das Lastenheft nennt vier Stufen.
@@ -121,7 +121,7 @@ ist ein No-op).
 | `internal/adapter/driving/cli/remove.go` | prüfen | schreibt Warnungen auf `errOut` (Purge-Warnungen); keine Sandbox-Lockerung, bleibt unberührt, sofern der Implementer keine gekennzeichneten Hinweise findet |
 | `internal/adapter/driving/cli/doctor.go` | update | `writeDoctorReport`: unter `--quiet` nur Fehler-Items (heute nur OK ausgeblendet); Kopf- und Summary-Zeile gelten als Statusmeldung und entfallen — die Festlegung wird im Test gepinnt |
 | `internal/adapter/driving/cli/down.go`, `statusview.go` | prüfen | unterdrücken Erfolgsmeldung und Volume-Liste bereits; Tests pinnen es |
-| `internal/adapter/driving/cli/verbosity_test.go` | update | `TestExecute_VerbosityFlag_AdjustsLoggerLevel` pinnt `quiet-lowers-to-warn` → Fehler-Pegel; der Fall `debug-takes-precedence-over-quiet` bleibt in diesem Slice unverändert (er kehrt sich erst in [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md) um) |
+| `internal/adapter/driving/cli/verbosity_test.go` | update | `TestExecute_VerbosityFlag_AdjustsLoggerLevel` pinnt `quiet-lowers-to-warn` → Fehler-Pegel; der Fall `debug-takes-precedence-over-quiet` bleibt in diesem Slice unverändert (er kehrt sich erst in [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) um) |
 | `internal/adapter/driving/cli/sandbox_test.go`, `updown_cluster_test.go`, `statusview_test.go`, `down_acceptance_test.go`, `up_acceptance_test.go`, `doctor_json_test.go` | update / prüfen | vorhandene Pins (Warnzeilen der Sandbox- und Recreate-Hinweise ohne `--quiet`, `--quiet`-Unterdrückung von Tabelle/Erfolgsmeldung, `--quiet --json` No-op) bleiben grün; neue Fälle Happy/Boundary/Negative: `init`/`generate`/`up` mit `--quiet` zeigen den Lockerungs-Hinweis, unterdrücken „no remote" und Recreate-Warnung; `doctor --quiet` zeigt Fehler, keine Warn-/OK-Items; `down --quiet` leer; `--quiet --json` unverändert — nach [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) |
 | `docs/user/benutzerhandbuch.md` | update | Optionstabellen (Zeilen um 299 und 1280): „nur Fehler; Sicherheitslockerungen im Sandbox-Profil bleiben ausgewiesen" |
 | `CHANGELOG.md` | update | sichtbare Verhaltensänderung (`doctor --quiet` zeigt keine Warn-Items mehr; Warnungen unter `--quiet` entfallen außer Sicherheitslockerungen) |
@@ -132,7 +132,7 @@ ist ein No-op).
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) liegt in `done/`) und der Projektinhaber
 priorisiert den Slice.
 
-**Reihenfolge zum Slice [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md):**
+**Reihenfolge zum Slice [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md):**
 logisch sind beide unabhängig — dieser Slice ändert die Abbildung `--quiet` →
 Pegel und die Ausgabe-Filter, jener die Auswahl unter mehreren Optionen. Sie
 berühren aber dieselbe Stelle (`PersistentPreRunE`-Switch in `root.go`) und
