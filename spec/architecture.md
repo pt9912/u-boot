@@ -2,7 +2,7 @@
 
 **Status:** Aktiv. **Letzte Änderung:** 2026-10-02.
 
-**Bezug:** [`LH-FA-ARCH-001`](lastenheft.md#lh-fa-arch-001--hexagonales-pattern)..[`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)
+**Bezug:** [`SPEC-012`](spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal)..[`SPEC-034`](spezifikation.md#spec-034--enforcement-der-import-regeln)
 
 **Rolle:** Sicht-Stratum — *keine* eigenen Anforderungen, derivativ: Lastenheft vor Spezifikation vor Architektur; diese Sicht visualisiert und erweitert nie.
 
@@ -49,7 +49,7 @@ Sechs Schichten plus Wiring, klare Verantwortungen und einseitig gerichtete Abh�
                           └──────────────────────┘
 ```
 
-Pfeile zeigen die **Aufruf-/Datenfluss-Richtung** zur Laufzeit. Die **Import-Richtung** ist nicht überall identisch: `application` importiert nur Ports (Interfaces) und kennt die konkreten Adapter nicht; Dependency Injection findet im Wiring (`cmd/uboot/`) statt. Die innere Welt (`hexagon/`) kennt die äußere Welt (`adapter/`) **nicht** — das wird per `depguard` durchgesetzt ([`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement), siehe §5).
+Pfeile zeigen die **Aufruf-/Datenfluss-Richtung** zur Laufzeit. Die **Import-Richtung** ist nicht überall identisch: `application` importiert nur Ports (Interfaces) und kennt die konkreten Adapter nicht; Dependency Injection findet im Wiring (`cmd/uboot/`) statt. Die innere Welt (`hexagon/`) kennt die äußere Welt (`adapter/`) **nicht** — das wird per `depguard` durchgesetzt ([`SPEC-034`](spezifikation.md#spec-034--enforcement-der-import-regeln), siehe §5).
 
 
 **Komponenten.** Jeder Kasten des Diagramms trägt eine Kennung; sie ist eine Adresse, damit ein Slice sagen kann, welche Komponente er berührt, und keine Anforderung.
@@ -139,7 +139,7 @@ Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält keine exte
   dereferenzieren (§7.3).
 - **Erlaubte Imports:** `hexagon/domain`, `hexagon/port/driving`, `hexagon/port/driven` (zum Konsumieren von Driven-Ports und Implementieren von Driving-Ports).
 - **Verbotene Imports:** `adapter/*`, externe I/O-Libraries.
-- **Tests:** Unit-Tests mit Test-Doubles für Driven-Ports (Fakes oder Mocks in `_test.go`); Test-Library-Imports (z. B. `yaml.v3` für Fake-YAMLCodec) sind über den `*_test.go`-Carveout in [`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement) erlaubt.
+- **Tests:** Unit-Tests mit Test-Doubles für Driven-Ports (Fakes oder Mocks in `_test.go`); Test-Library-Imports (z. B. `yaml.v3` für Fake-YAMLCodec) sind über den `*_test.go`-Carveout in [`SPEC-034`](spezifikation.md#spec-034--enforcement-der-import-regeln) erlaubt.
 
 ### 2.3 `hexagon/port/driving`
 
@@ -165,7 +165,7 @@ Interfaces, über die u-boot von außen angesprochen wird.
 - **Sentinels** für die [`LH-FA-CLI-006`](lastenheft.md#lh-fa-cli-006--exit-codes)-Exit-Code-Klassifikation.
   Sie liegen im `driving`-Paket statt im `application`-Paket, damit der
   CLI-Adapter via `errors.Is` auf sie verzweigen kann, ohne `application` zu
-  importieren ([`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)).
+  importieren ([`SPEC-034`](spezifikation.md#spec-034--enforcement-der-import-regeln)).
   Die Familien nach Exit-Klasse:
   - **Code 10 (fachliche Validierung):** Projekt-/Datei-Kollisionen beim Init,
     Überschreibschutz-Verstöße, fehlendes oder unlesbares Projekt, unbekannte
@@ -197,7 +197,7 @@ Interfaces, über die `hexagon/application` externe Systeme nutzt.
   - **Context-Konvention:** nur Ports, deren Adapter blockieren können (Git, Docker via `os/exec`), nehmen Context; FS/YAML/Clock bleiben Context-frei (im Paket-Doc begründet).
   - `ProgressPort` (`AffectedFiles(baseDir, rows)`) zum strukturierten Reporting der [`LH-FA-INIT-005`](lastenheft.md#lh-fa-init-005--überschreibschutz) / [`LH-FA-CLI-005A`](lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) betroffenen Pfade vor jedem Re-Init-Write. `AffectedFile` trägt `Path`/`Action AffectedAction`/`Backup bool`; `AffectedAction` enumeriert `AffectedReplaceBlock`/`AffectedOverwriteFull`. Presentation lebt im Adapter.
   - `Confirmer` (`ConfirmTreatAsExisting(ctx, baseDir, indicators)`) für die [`LH-FA-INIT-004`](lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen) Soft-Existing-Detection-Prompts. Narrowly scoped per Confirm-Kontext.
-  - `Logger` (`Debug`/`Info`/`Warn`/`Error`, slog-konforme `...any`-Variadic) als [`LH-QA-004`](lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil)-Logging-Port.
+  - `Logger` (`Debug`/`Info`/`Warn`/`Error`, slog-konforme `...any`-Variadic) als [`SPEC-027`](spezifikation.md#spec-027--zusammensetzung-des-lint-profils)-Logging-Port.
   - `DockerProbe` (`Version`/`Info`/`ComposeVersion`) für die read-only [`LH-FA-DIAG-002`](lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)-Probes (`docker version --format`, `docker compose version --short`). Bewusst getrennt vom state-mutierenden `DockerEngine`, weil read-only und state-mutierend unterschiedliche Fehlerklassen tragen (§7.1). Backend-Annahme: ein Docker-API-kompatibles Engine-Binary auf `$PATH`. Heute Docker; Podman ≥ 4.0 funktioniert als Drop-in (`docker → podman`-Symlink + `DOCKER_HOST` auf `podman.socket`) — die Version-Klassifikation pinnt die Docker-Mindestwerte (24.0 / 2.20), Podman-Versionen werden vorerst als `Severity: warn` ("unrecognized version") emittiert, kein Exit-Code-Eskalation. Ein dedizierter Podman-Probe-Pfad ist ein eigener Slice (Trigger: erster konkreter Bedarf).
   - `DockerEngine` (`Up`/`Down`/`Ps`/`Logs`/…) für die state-mutierenden
     Compose-Lifecycle-Operationen. Der Adapter prüft die Erreichbarkeit der
@@ -331,12 +331,12 @@ Begründung der Regeln:
 
 ## 5. Enforcement via `golangci-lint depguard`
 
-Die Regeln aus Abschnitt 4 werden im `lint`-Stage ([`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) per `golangci-lint` mit dem `depguard`-Linter durchgesetzt. Konfiguration aktiv in [`.golangci.yml`](../.golangci.yml); das untenstehende Schema ist deckungsgleich mit der dortigen Konfiguration. Bei Änderungen müssen beide Quellen synchron gehalten werden.
+Die Regeln aus Abschnitt 4 werden im `lint`-Stage ([`SPEC-025`](spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles)) per `golangci-lint` mit dem `depguard`-Linter durchgesetzt. Konfiguration aktiv in [`.golangci.yml`](../.golangci.yml); das untenstehende Schema ist deckungsgleich mit der dortigen Konfiguration. Bei Änderungen müssen beide Quellen synchron gehalten werden.
 
 Konventionen für jeden Regelblock:
 
 - `list-mode: lax` — `deny`-only-Auswertung (Imports ohne `deny`-Treffer sind erlaubt, kein impliziter `allow`-Filter).
-- `files` enthält als erste Pattern `!**/*_test.go`, um Tests vom Enforcement auszunehmen (Tests dürfen Fakes und Test-Libraries frei importieren; [`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)).
+- `files` enthält als erste Pattern `!**/*_test.go`, um Tests vom Enforcement auszunehmen (Tests dürfen Fakes und Test-Libraries frei importieren; [`SPEC-034`](spezifikation.md#spec-034--enforcement-der-import-regeln)).
 - `deny`-Einträge nennen den blockierten Modul-Pfad und in `desc` die LH-Kennung als Begründung.
 
 ```yaml
@@ -428,7 +428,7 @@ linters:
 
 Jede `depguard`-Regel matcht mindestens ein Paket im Produktiv-Code; die Pro-Schicht-Verifikation läuft per `scripts/verify-depguard.sh` (Target `make verify-depguard`), das pro Regel einen deklariert verbotenen Import injiziert, `make lint` auf das erwartete `desc:` prüft und die Stub-Datei revertiert.
 
-`//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `desc` dokumentiert ([`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)).
+`//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `desc` dokumentiert ([`SPEC-034`](spezifikation.md#spec-034--enforcement-der-import-regeln)).
 
 ---
 
@@ -641,12 +641,12 @@ die Abdeckung über alle Kommandos hinweg vergleicht, existiert heute nicht.
 - **Domäne:** klassische Property/Value-Tests; keine Mocks nötig.
 - **Application:** Fake-Implementierungen der Driven-Ports im `_test.go`-Paket; keine echte Docker-Engine.
 - **Adapter (driven):** Integrationstests gegen echte Systeme, soweit lokal verfügbar (z. B. Docker-Engine für `adapter/driven/docker`). Ohne Docker-Engine werden diese Tests via Build-Tag (`//go:build docker`) ausgeschlossen. Build-Tag-Konvention:
-  - Default ist *aus*: `make test` (Stage `test` im Dockerfile, [`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) führt Tag-getaggte Tests nicht aus und bleibt damit auch ohne Docker-Socket grün.
+  - Default ist *aus*: `make test` (Stage `test` im Dockerfile, [`SPEC-025`](spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles)) führt Tag-getaggte Tests nicht aus und bleibt damit auch ohne Docker-Socket grün.
   - Lokal mit verfügbarer Docker-Engine: `go test -tags docker ./...`.
   - In CI: ein separater Stage / ein separates Make-Target aktiviert das Tag und mountet das Docker-Socket; dieser Pfad ist nicht Bestandteil von `make gates`, sondern ergänzt `make ci` als optionales Integrations-Smoketest-Ziel.
   - Pro Test-Datei mit dem entsprechenden Tag: erste Zeile `//go:build docker`, leere Zeile, dann `package …`.
 - **Adapter (driving):** Tabellengetriebene Tests gegen den Driving-Port mit Fake-Application.
-- Coverage-Messung ([`LH-FA-BUILD-008`](lastenheft.md#lh-fa-build-008--coverage-bootstrap)) bezieht sich auf `./internal/...`; `./cmd/...` ist ausgeschlossen.
+- Coverage-Messung ([`SPEC-032`](spezifikation.md#spec-032--bootstrap-verhalten-der-coverage-stage)) bezieht sich auf `./internal/...`; `./cmd/...` ist ausgeschlossen.
 
 ---
 
@@ -667,7 +667,7 @@ Die folgenden Muster sind verboten und werden im Review abgelehnt:
 
 Änderungen an dieser Architektur erfolgen über
 neue Architekturentscheidungen und anschließende Spec-Nachführung
-([`LH-FA-PROJDOCS-002`](lastenheft.md#lh-fa-projdocs-002--adr-format)).
+([`SPEC-028`](spezifikation.md#spec-028--bestandsregel-und-abgleich-zum-adr-format)).
 
 Geplante Erweiterungen, die im aktuellen Dokument noch nicht abgebildet sind: keine.
 

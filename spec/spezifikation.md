@@ -55,9 +55,9 @@ Verfeinert [`LH-FA-DIAG-002`](lastenheft.md#lh-fa-diag-002--lokale-voraussetzung
   Podman-Variante folgt erst bei konkretem Bedarf — die heutige
   MVP-Pflicht ist Docker.
 
-### LH-FA-BUILD-001.a — Stages des Multi-Stage-Dockerfiles
+### SPEC-025 — Stages des Multi-Stage-Dockerfiles
 
-Verfeinert [`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo).
+<a id="lh-fa-build-001a--stages-des-multi-stage-dockerfiles"></a>
 
 - BuildKit-Direktive in der ersten Zeile: `# syntax=docker/dockerfile:1.7`.
 - Pflicht-Stages im MVP:
@@ -65,14 +65,16 @@ Verfeinert [`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-docker
   - `compile` – schnelles Compile-Feedback (`go build`) ohne Tests/Lint.
   - `test` – `go test ./...`.
   - `lint` – `golangci-lint run ./...`.
-  - `coverage` – `go test -coverprofile` + Coverage-Gate gegen `COVERAGE_THRESHOLD`; Bootstrap-Verhalten und Scope sind in [`LH-FA-BUILD-008`](lastenheft.md#lh-fa-build-008--coverage-bootstrap) und [`LH-FA-BUILD-009`](lastenheft.md#lh-fa-build-009--repository-layout) definiert.
+  - `coverage` – `go test -coverprofile` + Coverage-Gate gegen `COVERAGE_THRESHOLD`; Bootstrap-Verhalten und Scope sind in [`SPEC-032`](#spec-032--bootstrap-verhalten-der-coverage-stage) und [`SPEC-033`](#spec-033--go-layout-des-repositories) definiert.
   - `build` – statisch gelinktes Binary (`CGO_ENABLED=0`, `-ldflags="-s -w"`).
-  - `runtime` – minimales Endimage ([`LH-FA-BUILD-002`](lastenheft.md#lh-fa-build-002--runtime-stage-pflichten)).
+  - `runtime` – minimales Endimage ([`LH-NFA-PORT-004`](lastenheft.md#lh-nfa-port-004--ausgeliefertes-container-image)).
 - Jeder Stage ist ein eigenständiges Build-Ziel und wird per `docker build --target <stage>` einzeln baubar.
 
-### LH-FA-BUILD-002.a — Eigenschaften der Runtime-Stage
+### LH-NFA-PORT-004.a — Eigenschaften der Runtime-Stage
 
-Verfeinert [`LH-FA-BUILD-002`](lastenheft.md#lh-fa-build-002--runtime-stage-pflichten).
+<a id="lh-fa-build-002a--eigenschaften-der-runtime-stage"></a>
+
+Verfeinert [`LH-NFA-PORT-004`](lastenheft.md#lh-nfa-port-004--ausgeliefertes-container-image).
 
 - Base-Image: `gcr.io/distroless/static-debian12:nonroot` (oder gleichwertig minimal und ohne Shell).
 - Non-root-Benutzer (Distroless-`nonroot`-User, `USER 65532:65532`).
@@ -84,31 +86,31 @@ Verfeinert [`LH-FA-BUILD-002`](lastenheft.md#lh-fa-build-002--runtime-stage-pfli
   - `org.opencontainers.image.title`
 - Keine Build-Toolchain im Endimage; alle Build-Artefakte werden aus dem `build`-Stage per `COPY --from=build` übernommen.
 
-### LH-QA-003.a — Komposition der CI-Pipeline (GitHub Actions)
+### SPEC-026 — Komposition der CI-Pipeline (GitHub Actions)
 
-Verfeinert [`LH-QA-003`](lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions).
+<a id="lh-qa-003a--komposition-der-ci-pipeline-github-actions"></a>
 
 - Workflow-Datei: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml).
 - Trigger: `pull_request` und `push` auf den Branch `main`.
-- Drei Jobs, parallel, alle PR-blockierend (Required-Status-Checks im GitHub-UI nach dem ersten grünen Lauf zu konfigurieren; die Required-Status-Check-Liste muss die tatsächlichen Workflow-`name:`-Felder verwenden, nicht die Kurz-Keys). Die drei delegierten Make-Targets sind in [`LH-FA-BUILD-005`](lastenheft.md#lh-fa-build-005--makefile-mit-standard-targets) (MVP) und [`LH-FA-BUILD-006`](lastenheft.md#lh-fa-build-006--aggregator-targets) (V1) definiert; die PR-Blocking-**Pflicht** für alle drei kommt aus diesem [`LH-QA-003`](lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions)-Eintrag (MVP). Damit ist `make govulncheck` und `make image-scan` über [`LH-QA-003`](lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions) MVP-bindend, auch wenn die jeweiligen Make-Target-Definitionen unter [`LH-FA-BUILD-006`](lastenheft.md#lh-fa-build-006--aggregator-targets) (V1) liegen:
-  - `gates (lint + test + coverage-gate)` — führt `make gates` aus (lint + test + coverage-gate, [`LH-FA-BUILD-005`](lastenheft.md#lh-fa-build-005--makefile-mit-standard-targets)/[`LH-FA-BUILD-006`](lastenheft.md#lh-fa-build-006--aggregator-targets)).
-  - `security-gates (govulncheck)` — führt `make govulncheck` aus ([`LH-FA-BUILD-006`](lastenheft.md#lh-fa-build-006--aggregator-targets), MVP-Pflicht via diesem [`LH-QA-003`](lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions)).
-  - `image-scan (trivy HIGH+CRITICAL)` — führt `make image-scan` aus (Trivy gegen das Runtime-Image, severity `HIGH,CRITICAL`, exit-code `1`; [`LH-FA-BUILD-006`](lastenheft.md#lh-fa-build-006--aggregator-targets), MVP-Pflicht via diesem [`LH-QA-003`](lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions)).
-- Runner: `ubuntu-latest`. Keine Host-Go-Toolchain ([`LH-FA-BUILD-007`](lastenheft.md#lh-fa-build-007--docker-only-workflow)); der Runner braucht nur das vorinstallierte Docker + BuildKit.
+- Drei Jobs, parallel, alle PR-blockierend (Required-Status-Checks im GitHub-UI nach dem ersten grünen Lauf zu konfigurieren; die Required-Status-Check-Liste muss die tatsächlichen Workflow-`name:`-Felder verwenden, nicht die Kurz-Keys). Die drei delegierten Make-Targets sind in [`SPEC-008`](#spec-008--eigenschaften-und-pflicht-targets-des-makefiles) (MVP) und [`SPEC-008`](#spec-008--eigenschaften-und-pflicht-targets-des-makefiles) (V1) definiert; die PR-Blocking-**Pflicht** für alle drei kommt aus diesem [`SPEC-026`](#spec-026--komposition-der-ci-pipeline-github-actions)-Eintrag (MVP). Damit ist `make govulncheck` und `make image-scan` über [`SPEC-026`](#spec-026--komposition-der-ci-pipeline-github-actions) MVP-bindend, auch wenn die jeweiligen Make-Target-Definitionen unter [`SPEC-008`](#spec-008--eigenschaften-und-pflicht-targets-des-makefiles) (V1) liegen:
+  - `gates (lint + test + coverage-gate)` — führt `make gates` aus (lint + test + coverage-gate, [`SPEC-008`](#spec-008--eigenschaften-und-pflicht-targets-des-makefiles)).
+  - `security-gates (govulncheck)` — führt `make govulncheck` aus ([`SPEC-008`](#spec-008--eigenschaften-und-pflicht-targets-des-makefiles), MVP-Pflicht via diesem [`SPEC-026`](#spec-026--komposition-der-ci-pipeline-github-actions)).
+  - `image-scan (trivy HIGH+CRITICAL)` — führt `make image-scan` aus (Trivy gegen das Runtime-Image, severity `HIGH,CRITICAL`, exit-code `1`; [`SPEC-008`](#spec-008--eigenschaften-und-pflicht-targets-des-makefiles), MVP-Pflicht via diesem [`SPEC-026`](#spec-026--komposition-der-ci-pipeline-github-actions)).
+- Runner: `ubuntu-latest`. Keine Host-Go-Toolchain ([`SPEC-031`](#spec-031--regeln-des-docker-only-workflows)); der Runner braucht nur das vorinstallierte Docker + BuildKit.
 - Actions sind **SHA-gepinnt** mit Tag-Kommentar (Supply-Chain-Härtung gegen Tag-Move). Pin-Hebung ist Routine; neuer Commit-SHA via `gh api repos/<owner>/<repo>/git/refs/tags/<tag>`.
 - Top-Level `permissions: {}` (alle Tokens entzogen); jeder Job lockert auf das Minimum (Defense-in-Depth).
 - Jeder Job mit `timeout-minutes` versehen (Empfehlung: 20).
 - Die konkrete Workflow-Ausprägung muss die hier genannten
   Anforderungen und die Build-Target-Verträge erfüllen.
 
-### LH-QA-004.a — Zusammensetzung des Lint-Profils
+### SPEC-027 — Zusammensetzung des Lint-Profils
 
-Verfeinert [`LH-QA-004`](lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil).
+<a id="lh-qa-004a--zusammensetzung-des-lint-profils"></a>
 
 Profil-Komposition (29 Linter insgesamt):
 
 - 5 Default-Linter (`govet`, `errcheck`, `staticcheck`, `unused`, `ineffassign`).
-- 24 SOLID-nahe Zusatz-Linter (Komplexitäts-, Funktionslänge-, Interface-, Kopplungs- und Boundary-Signale). **`depguard`** für die Schicht-Regeln aus [`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement) ist Teil dieser 24.
+- 24 SOLID-nahe Zusatz-Linter (Komplexitäts-, Funktionslänge-, Interface-, Kopplungs- und Boundary-Signale). **`depguard`** für die Schicht-Regeln aus [`SPEC-034`](#spec-034--enforcement-der-import-regeln) ist Teil dieser 24.
 
 ### LH-FA-CLI-005A.a — Detailregeln des Flags `--assume-existing`
 
@@ -249,9 +251,9 @@ Verfeinert [`LH-FA-DIAG-002`](lastenheft.md#lh-fa-diag-002--lokale-voraussetzung
   - bei mehreren TCP-Ports werden eindeutige Portzahlen eingetragen (Duplikate dedupliziert).
   - UDP- oder nicht eindeutig auflösbare Portangaben dürfen in `forwardPorts` fehlen; dafür ist ein `warn`-Diagnoseeintrag zulässig.
 
-### LH-FA-PROJDOCS-002.a — Bestandsregel und Abgleich zum ADR-Format
+### SPEC-028 — Bestandsregel und Abgleich zum ADR-Format
 
-Verfeinert [`LH-FA-PROJDOCS-002`](lastenheft.md#lh-fa-projdocs-002--adr-format).
+<a id="lh-fa-projdocs-002a--bestandsregel-und-abgleich-zum-adr-format"></a>
 
 **Grandfathering (Bestand).** Die zum Zeitpunkt der Format-Umstellung (Regelwerk-v3.5.1-Adoption) bereits `Accepted` ADRs (`0001`–`0010`, `0013`) bleiben in der vorherigen leanen Form (`## Status`/`## Datum` als Überschriften; Abschnitte Kontext/Entscheidung/Konsequenzen) und sind als `Accepted` **unveränderlich**; sie werden **nicht** migriert. Das MADR-Format gilt für alle **neu** angelegten ADRs sowie für noch mutable `Proposed`-ADRs (`0011`, `0012`) beim nächsten inhaltlichen Anfassen.
 
@@ -331,19 +333,21 @@ Verfeinert [`LH-FA-DEV-008`](lastenheft.md#lh-fa-dev-008--egress-restriktion).
 
 - Ist die nötige Capability nicht gewährbar, greift die Degradationstabelle der Verfeinerung [`LH-FA-DEV-007.a`](#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten); die Capability wird beim Containerstart geprüft (Warnung und Wegfall der Restriktion, bei `onUnavailable: fail` Exit-Code `11`). `u-boot doctor` prüft die Konfiguration (Schlüssel ohne Sandbox-Profil: `warn`); die Capability selbst ist vom Host aus nicht zuverlässig bestimmbar.
 
-### LH-FA-BUILD-001.b — Mindestumfang des Multi-Stage-Dockerfiles
+### SPEC-029 — Mindestumfang des Multi-Stage-Dockerfiles
 
-Verfeinert [`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo).
+<a id="lh-fa-build-001b--mindestumfang-des-multi-stage-dockerfiles"></a>
 
 Mindestumfang:
 
 - BuildKit-Direktive in der ersten Zeile des Dockerfiles.
-- Pflicht-Stages: `deps`, `compile`, `test`, `lint`, `coverage`, `build` und `runtime`; die Coverage-Stage erzwingt den Coverage-Schwellwert, die Runtime-Stage ist das minimale Endimage ([`LH-FA-BUILD-002`](lastenheft.md#lh-fa-build-002--runtime-stage-pflichten)).
+- Pflicht-Stages: `deps`, `compile`, `test`, `lint`, `coverage`, `build` und `runtime`; die Coverage-Stage erzwingt den Coverage-Schwellwert, die Runtime-Stage ist das minimale Endimage ([`LH-NFA-PORT-004`](lastenheft.md#lh-nfa-port-004--ausgeliefertes-container-image)).
 - Jede Stage ist ein eigenständiges Build-Ziel und per `docker build --target <stage>` einzeln baubar.
 
-### LH-FA-BUILD-002.b — Pflichten der Runtime-Stage
+### LH-NFA-PORT-004.b — Pflichten der Runtime-Stage
 
-Verfeinert [`LH-FA-BUILD-002`](lastenheft.md#lh-fa-build-002--runtime-stage-pflichten).
+<a id="lh-fa-build-002b--pflichten-der-runtime-stage"></a>
+
+Verfeinert [`LH-NFA-PORT-004`](lastenheft.md#lh-nfa-port-004--ausgeliefertes-container-image).
 
 - Minimales Base-Image ohne Shell.
 - Ausführung als Non-root-Benutzer.
@@ -351,58 +355,58 @@ Verfeinert [`LH-FA-BUILD-002`](lastenheft.md#lh-fa-build-002--runtime-stage-pfli
 - OCI Image Labels für Quelle, Beschreibung, Lizenz und Titel sind gesetzt.
 - Keine Build-Toolchain im Endimage; alle Build-Artefakte stammen aus dem `build`-Stage.
 
-### LH-FA-BUILD-003.a — Overrides der Build-Args
+### SPEC-030 — Overrides der Build-Args
 
-Verfeinert [`LH-FA-BUILD-003`](lastenheft.md#lh-fa-build-003--build-args-und-pin-politik).
+<a id="lh-fa-build-003a--overrides-der-build-args"></a>
 
 Overrides erfolgen über `docker build --build-arg <NAME>=<value>` bzw. die korrespondierende Makefile-Variable.
 
-### LH-FA-BUILD-007.a — Regeln des Docker-only-Workflows
+### SPEC-031 — Regeln des Docker-only-Workflows
 
-Verfeinert [`LH-FA-BUILD-007`](lastenheft.md#lh-fa-build-007--docker-only-workflow).
+<a id="lh-fa-build-007a--regeln-des-docker-only-workflows"></a>
 
-- Alle MVP- und V1-Pflicht-Targets aus [`LH-FA-BUILD-005`](lastenheft.md#lh-fa-build-005--makefile-mit-standard-targets)/[`LH-FA-BUILD-006`](lastenheft.md#lh-fa-build-006--aggregator-targets) müssen ausschließlich `docker build`, `docker run` oder die Aggregation anderer solcher Targets aufrufen.
+- Alle MVP- und V1-Pflicht-Targets aus [`SPEC-008`](#spec-008--eigenschaften-und-pflicht-targets-des-makefiles) müssen ausschließlich `docker build`, `docker run` oder die Aggregation anderer solcher Targets aufrufen.
 - Voraussetzung am Host: Docker Engine und `make`. `make` ist ein bewusster Carveout zu [`LH-NFA-PORT-002`](lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten) (weit verbreitet, einzige zusätzliche Host-Abhängigkeit neben Docker). Eine Go-Toolchain am Host darf für Standard-Targets nicht vorausgesetzt werden.
 - Carveouts (z. B. ein Bash-Skript, das nicht containerisiert wird) sind im `Makefile`-Header explizit zu dokumentieren.
 
-### LH-FA-BUILD-008.a — Bootstrap-Verhalten der Coverage-Stage
+### SPEC-032 — Bootstrap-Verhalten der Coverage-Stage
 
-Verfeinert [`LH-FA-BUILD-008`](lastenheft.md#lh-fa-build-008--coverage-bootstrap).
+<a id="lh-fa-build-008a--bootstrap-verhalten-der-coverage-stage"></a>
 
 - Default-Schwellwert `90` Prozent (`ARG COVERAGE_THRESHOLD=90`, Makefile `THRESHOLD ?= 90`); in der Bootstrap-Phase war er `0`.
 - Der Override-Pfad `make coverage-gate THRESHOLD=…` muss funktionieren.
 - Leere Coverage darf in der Bootstrap-Phase nicht zu einem falschen Grün führen, das echte Test-Failures maskiert; der `go test`-Exit-Code wird über `set -o pipefail` o. ä. an die Gate-Logik durchgereicht.
 
-### LH-FA-BUILD-009.a — Go-Layout des Repositories
+### SPEC-033 — Go-Layout des Repositories
 
-Verfeinert [`LH-FA-BUILD-009`](lastenheft.md#lh-fa-build-009--repository-layout).
+<a id="lh-fa-build-009a--go-layout-des-repositories"></a>
 
 - Modul-Pfad in `go.mod`: `github.com/pt9912/u-boot`.
 - Implementierungspakete leben unter `./internal/...`; öffentlich konsumierbare Pakete unter `./pkg/...` werden im MVP nicht erzeugt.
 - CLI-Entry-Points unter `./cmd/<binary>/`; das primäre Binary heißt `uboot` (Verzeichnis `./cmd/uboot/`, Go-konform ohne Bindestrich), wird beim Build aber als `u-boot` ausgeliefert (`-o /out/u-boot`).
 - Unit-Tests stehen als `*_test.go` neben dem produktiven Code im selben Paket.
-- Coverage-Messung ([`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo), [`LH-FA-BUILD-008`](lastenheft.md#lh-fa-build-008--coverage-bootstrap)) bezieht sich auf `./internal/...`; `./cmd/...` ist bewusst ausgeschlossen, weil dort nur dünne Wireup-Logik liegt.
+- Coverage-Messung ([`SPEC-025`](#spec-025--stages-des-multi-stage-dockerfiles), [`SPEC-032`](#spec-032--bootstrap-verhalten-der-coverage-stage)) bezieht sich auf `./internal/...`; `./cmd/...` ist bewusst ausgeschlossen, weil dort nur dünne Wireup-Logik liegt.
 
-### LH-FA-ARCH-003.a — Enforcement der Import-Regeln
+### SPEC-034 — Enforcement der Import-Regeln
 
-Verfeinert [`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement).
+<a id="lh-fa-arch-003a--enforcement-der-import-regeln"></a>
 
-- Die Regeln werden im `lint`-Stage ([`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) per `golangci-lint` mit `depguard` durchgesetzt; Verstöße sind PR-blockierend.
+- Die Regeln werden im `lint`-Stage ([`SPEC-025`](#spec-025--stages-des-multi-stage-dockerfiles)) per `golangci-lint` mit `depguard` durchgesetzt; Verstöße sind PR-blockierend.
 - Die `depguard`-Konfiguration in `.golangci.yml` ist deckungsgleich mit den Import-Regeln der Anforderung zu halten; Drift wird im Review zurückgewiesen.
 - `//nolint:depguard`-Pragmas sind verboten. Carveouts werden zentral in `.golangci.yml` mit `Why:`-Kommentar dokumentiert.
 - `depguard`-Regeln gelten production-only; `*_test.go`-Dateien sind ausgenommen, damit Tests Fakes und Test-Libraries (`testify`, …) frei nutzen können.
 - Solange einzelne Schichten noch keine produktiven Pakete enthalten, dürfen `depguard`-Regelblöcke aktiv sein und nichts treffen — die Schicht-Regeln greifen automatisch, sobald das erste produktive Paket angelegt wird.
 
-### LH-QA-004.b — Pflichten des Lint-Profils
+### SPEC-035 — Pflichten des Lint-Profils
 
-Verfeinert [`LH-QA-004`](lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil).
+<a id="lh-qa-004b--pflichten-des-lint-profils"></a>
 
 - Die Konfiguration lebt in `.golangci.yml` (v2-Schema).
 - Schwellen und Linter-Settings sind in `.golangci.yml` konfiguriert und in abgeleiteter Quality-Doku zu erklären; bei Drift gewinnt die Anforderung, Config und Doku sind anzupassen.
 - `//nolint`-Pragmas sind verboten. Pro-Pfad-Carveouts (z. B. Tests, `cmd/uboot`) werden zentral in `.golangci.yml` unter `issues.exclude-rules` mit `Why:`-Kommentar dokumentiert.
-- Verstöße brechen den `lint`-Stage ([`LH-FA-BUILD-001`](lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) und damit `make gates`/`make ci`/`make fullbuild`.
+- Verstöße brechen den `lint`-Stage ([`SPEC-025`](#spec-025--stages-des-multi-stage-dockerfiles)) und damit `make gates`/`make ci`/`make fullbuild`.
 - Die konkrete Linter-Auswahl muss die hier genannten Anforderungen
-  und die Architekturgrenzen aus [`LH-FA-ARCH-003`](lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement) abdecken.
+  und die Architekturgrenzen aus [`SPEC-034`](#spec-034--enforcement-der-import-regeln) abdecken.
 
 ## 2. Datenstrukturen und Schemas
 
@@ -637,17 +641,17 @@ Mindestlayout:
 │   └── uboot/
 │       └── main.go              # Entry point der CLI (Wiring-Schicht)
 ├── internal/                    # nicht-exportierbare Implementierung
-│   ├── hexagon/                 # innere Schichten (LH-FA-ARCH-002)
+│   ├── hexagon/                 # innere Schichten (SPEC-012)
 │   │   ├── domain/
 │   │   ├── application/
 │   │   └── port/{driving,driven}/
-│   └── adapter/                 # äußere Schichten (LH-FA-ARCH-002)
+│   └── adapter/                 # äußere Schichten (SPEC-012)
 │       ├── driving/
 │       └── driven/
 ├── spec/                        # Lastenheft, weitere Spezifikationen
 │   ├── lastenheft.md
 │   └── <weitere-spezifikation>.md
-├── docs/                        # Doku-Struktur (LH-FA-PROJDOCS-001)
+├── docs/                        # Doku-Struktur (SPEC-010)
 ├── go.mod
 ├── go.sum
 ├── Dockerfile
