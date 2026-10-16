@@ -1,7 +1,7 @@
 # internal/
 
 Nicht-exportierbare Go-Pakete für u-boot. Strukturiert nach dem
-hexagonalen Architektur-Pattern ([`LH-FA-ARCH-001`](../spec/lastenheft.md#lh-fa-arch-001--hexagonales-pattern)..[`LH-FA-ARCH-003`](../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement); Detail in
+hexagonalen Architektur-Pattern ([`SPEC-012`](../spec/spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal), [`SPEC-013`](../spec/spezifikation.md#spec-013--import-regel-tabelle-der-schichten) und [`SPEC-034`](../spec/spezifikation.md#spec-034--enforcement-der-import-regeln); Detail in
 [`../spec/architecture.md`](../spec/architecture.md)).
 
 ## Layout
@@ -85,13 +85,13 @@ Alle Subkommandos tragen `--json`, `--dry-run` und `--diff`.
 
 ## Coverage
 
-`./internal/...` ist der Coverage-Scope ([`LH-FA-BUILD-008`](../spec/lastenheft.md#lh-fa-build-008--coverage-bootstrap),
-[`LH-FA-BUILD-009`](../spec/lastenheft.md#lh-fa-build-009--repository-layout)); `./cmd/...` ist ausgeschlossen. Der Schwellwert ist
+`./internal/...` ist der Coverage-Scope ([`SPEC-032`](../spec/spezifikation.md#spec-032--bootstrap-verhalten-der-coverage-stage),
+[`SPEC-033`](../spec/spezifikation.md#spec-033--go-layout-des-repositories)); `./cmd/...` ist ausgeschlossen. Der Schwellwert ist
 aktiv und wird über `make coverage-gate` durchgesetzt.
 
 ## Import-Regeln
 
-Verbindliche Schicht-Regeln in [`LH-FA-ARCH-003`](../spec/lastenheft.md)
+Verbindliche Schicht-Regeln in [`SPEC-034`](../spec/spezifikation.md#spec-034--enforcement-der-import-regeln)
 und [`../spec/architecture.md`](../spec/architecture.md). Enforcement
 über `golangci-lint depguard` im `lint`-Stage; `//nolint:depguard` ist
 verboten.

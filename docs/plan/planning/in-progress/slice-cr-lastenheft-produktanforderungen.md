@@ -94,8 +94,8 @@ zur Freigabe, Vorschlag in Klammern):
 - [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       ([`Report`](../../../reviews/2026-10-16-slice-cr-lastenheft-produktanforderungen.md); 0 HIGH, 0 MEDIUM, 6 LOW, 2 INFO; F-1 bis F-3 und F-5 behoben; `.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang.
 
 ## 3. Plan (vor Code)
 
@@ -133,17 +133,48 @@ geschrieben, `make gates` grün.
 ## 6. Risiken und offene Punkte
 
 - Verweise in lebenden Dokumenten bleiben auf eine entfallene Anforderung stehen und
-  wirken wie eine geltende Zusage — **Ausgang:** offen; Suche nach den 22 IDs
-  außerhalb von `done/`, `docs/reviews/` und Accepted ADRs vor der Closure.
-- Eine Produktzusage in den Prozess-Blöcken geht verloren (Prüfpunkte §1) —
-  **Ausgang:** offen bis zur Freigabe.
-- `ARCH`/`QA` tragen die Bindungen der Gates (`depguard`, Coverage-Schwelle); die
-  Sensor-Dateien und ADRs verweisen auf sie — **Ausgang:** offen; neue Bindung ist
-  die ADR oder `SPEC-<NNN>`.
+  wirken wie eine geltende Zusage — **Ausgang:** entfallen, die Restsuche nach den 22
+  IDs außerhalb der Ausnahmen ist leer (auch die Markdown-Dateien unter `internal/`
+  sind nachgezogen); bewusst bleiben Accepted ADRs, `done/`, Reviews, `MR-008`, `CHANGELOG.md`
+  und Kommentare in Code und Konfiguration, die über die Grabsteine gültig sind.
+- Eine Produktzusage in den Prozess-Blöcken geht verloren — **Ausgang:** entfallen, der
+  Review hat den alten Text gegen die neuen Stellen gelesen; die Image-Zusage steht in
+  [`LH-NFA-PORT-004`](../../../../spec/lastenheft.md#lh-nfa-port-004--ausgeliefertes-container-image),
+  die Prüfbarkeit in [`LH-LESE-004`](../../../../spec/lastenheft.md#lh-lese-004--prüfbarkeit).
+- `ARCH`/`QA` tragen die Bindungen der Gates (`depguard`, Coverage-Schwelle) —
+  **Ausgang:** entfallen, Sensor-Dateien, ADRs und `harness/README.md` zeigen auf
+  [`SPEC-032`](../../../../spec/spezifikation.md#spec-032--bootstrap-verhalten-der-coverage-stage), [`SPEC-034`](../../../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln) und die ADRs; die depguard-`desc`-Zeilen bleiben mit
+  `.golangci.yml` gekoppelt unverändert.
 
 ## 7. Closure-Notiz
 
-Offen.
+Vollzogen am 2026-10-16. Das Lastenheft trägt mit Version `0.6.0` nur noch
+Produktanforderungen: 22 Prozess-Anforderungen (`LH-FA-BUILD-*`, `LH-FA-PROJDOCS-*`,
+`LH-FA-ARCH-*`, `LH-QA-*`) sind Grabsteine mit unveränderter Überschrift und Anker, die
+Produktzusagen stehen in [`LH-NFA-PORT-004`](../../../../spec/lastenheft.md#lh-nfa-port-004--ausgeliefertes-container-image) und [`LH-LESE-004`](../../../../spec/lastenheft.md#lh-lese-004--prüfbarkeit), 13 Verfeinerungen der
+Spezifikation tragen neue Kennungen mit erhaltenen alten Ankern. Review: 0 HIGH, 0 MEDIUM,
+6 LOW, 2 INFO; F-1 bis F-3 und F-5 behoben. Verifier: DoD bestätigt, eine Abweichung
+(`internal/`-READMEs) behoben, `make gates` und alle Sensor-Läufe grün.
+
+- **Was hat funktioniert:** Grabsteine mit unveränderten Ankern: über 600 Verweise in mehr als
+  200 Dateien, darunter unveränderliche ADRs, brachen nicht. Die automatische Verweis-Ersetzung
+  nach einer Zuordnungstabelle hat die lebenden Stellen in einem Zug erreicht.
+- **Was ging anders als geplant:** Die mechanische Ersetzung hat Zusammenführungen erzeugt
+  (zwei Eltern auf eine `SPEC`, ein Bereich `SPEC-012..SPEC-034`) und eine Historien-Erzählung <!-- d-check:ignore (Bereichsangabe in der Chronik, kein Verweis) -->
+  in `MR-008` umgebogen; beides fand erst die Durchsicht, die Historie wurde zurückgenommen.
+  Der Wortlaut der Grabstein-Texte nennt „technisches Dokument“ und „Architektur-Sicht“ ohne
+  Kennung; [`LH-LESE-003`](../../../../spec/lastenheft.md#lh-lese-003--dokumentenordnung) nennt das
+  technische Dokument selbst als Ort, daher so belassen (Review F-4).
+- **Steering-Loop-Eintrag:** Eine Umnummerierung ersetzt Verweise nicht nur nach der
+  Zuordnungstabelle, sondern prüft jede Ersetzung gegen den Satz, in dem sie steht (Zusammenführung,
+  Bereichsangabe, Historie) — liegt in `docs/plan/planning/in-progress/slice-cr-lastenheft-produktanforderungen.md` (Anhang).
+- **Folge-Slices:** [`slice-harness-wellen-betrieb`](../open/slice-harness-wellen-betrieb.md)
+  (Vorbedingung erfüllt, Start frei),
+  [`slice-harness-dcheck-bump-reviewer-skill`](../open/slice-harness-dcheck-bump-reviewer-skill.md).
+- **Risiken aus §6:** je ein Ausgang, siehe §6.
+- **Umplanung:** Die Änderung an `slice-harness-wellen-betrieb` (Welle-Dateien und Register ja,
+  Archivierung nein, kein Vertragswortlaut mehr) steht in dessen §1; die Roadmap führt diesen Slice
+  nicht, ein Eintrag im Drift-Log entfällt.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 

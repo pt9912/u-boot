@@ -1,7 +1,7 @@
 # internal/hexagon/application
 
 Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält
-keine externe I/O ([`LH-FA-ARCH-002`](../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)).
+keine externe I/O ([`SPEC-012`](../../../spec/spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal)).
 
 ## Status
 

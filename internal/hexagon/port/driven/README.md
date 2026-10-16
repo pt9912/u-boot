@@ -1,7 +1,7 @@
 # internal/hexagon/port/driven
 
 Interfaces, über die `internal/hexagon/application` **externe Systeme
-nutzt** ([`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)).
+nutzt** ([`SPEC-012`](../../../../spec/spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal)).
 
 Implementiert von Strukturen in `internal/adapter/driven/`.
 
@@ -34,7 +34,7 @@ Implementiert von Strukturen in `internal/adapter/driven/`.
     [`LH-FA-CLI-005A`](../../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung)-destruktive-Confirmation-Pfad von
     `u-boot down --volumes`.
 - `Logger` — `Debug`/`Info`/`Warn`/`Error` (variadisch, slog-konform)
-  als [`LH-QA-004`](../../../../spec/lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil)-Logging-Port. Production-Adapter slog-basiert.
+  als [`SPEC-027`](../../../../spec/spezifikation.md#spec-027--zusammensetzung-des-lint-profils)-Logging-Port. Production-Adapter slog-basiert.
 - `DockerProbe` — `Version`/`Info`/`ComposeVersion` für die
   [`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)-Probes. Read-only; bewusst
   getrennt vom state-mutierenden `DockerEngine`-Port.

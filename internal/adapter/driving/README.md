@@ -1,7 +1,7 @@
 # internal/adapter/driving
 
 Konkrete Driver — Einstiegspunkte aus der Außenwelt
-([`LH-FA-ARCH-002`](../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)).
+([`SPEC-012`](../../../spec/spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal)).
 
 ## Status
 

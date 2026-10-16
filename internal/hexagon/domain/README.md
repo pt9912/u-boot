@@ -1,7 +1,7 @@
 # internal/hexagon/domain
 
 Reine Datentypen und invariantes Verhalten der u-boot-Domäne. Kein I/O,
-keine externen Libraries ([`LH-FA-ARCH-002`](../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)).
+keine externen Libraries ([`SPEC-012`](../../../spec/spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal)).
 
 ## Aktueller Inhalt
 
@@ -65,4 +65,4 @@ Config-Pfade:
 ## Import-Regeln
 
 Ausschließlich Go-Standard-Library. Verstöße werden durch
-`golangci-lint depguard` im `lint`-Stage abgewiesen ([`LH-FA-ARCH-003`](../../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)).
+`golangci-lint depguard` im `lint`-Stage abgewiesen ([`SPEC-034`](../../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln)).

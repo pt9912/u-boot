@@ -1,7 +1,7 @@
 # internal/hexagon/port/driving
 
 Interfaces, über die u-boot **von außen angesprochen wird**
-([`LH-FA-ARCH-002`](../../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)).
+([`SPEC-012`](../../../../spec/spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal)).
 
 Implementiert von Strukturen in `internal/hexagon/application/`,
 verwendet von Adaptern in `internal/adapter/driving/` (z. B.

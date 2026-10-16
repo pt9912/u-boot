@@ -1,7 +1,7 @@
 # internal/adapter/driven
 
 Konkrete externe Adapter — Implementierungen der Driven-Ports aus
-`internal/hexagon/port/driven/` ([`LH-FA-ARCH-002`](../../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)).
+`internal/hexagon/port/driven/` ([`SPEC-012`](../../../spec/spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal)).
 
 Jeder Adapter pinnt sein Port-Interface per
 `var _ driven.X = (*Adapter)(nil)` im Production-Code; ein Drift
