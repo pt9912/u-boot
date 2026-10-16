@@ -141,7 +141,7 @@ verändern, behalten ihre Ausgabe, weil sie das Ergebnis des Befehls ist: `confi
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [x] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
 - [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo mit Wellen-Betrieb von der Welle-Closure geprüft.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo mit Wellen-Betrieb von der Welle-Closure geprüft.
 
 ## 3. Plan (vor Code)
 
