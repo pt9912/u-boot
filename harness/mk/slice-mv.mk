@@ -1,5 +1,5 @@
-# harness/mk/slice-mv.mk — Fragment des Lifecycle-Wechsels (Herkunft:
-# ai-harness-init, MR-011). EIN KOMMANDO, KEIN GATE.
+# harness/mk/slice-mv.mk — Fragment des Lifecycle-Wechsels, emittiert von
+# ai-harness-init. EIN KOMMANDO, KEIN GATE.
 #
 # Es liegt im Fragment-Verzeichnis wie die Gate-Fragmente, haengt aber NICHTS an
 # GATE_CHECKS und steht in keiner Prerequisite-Kette: ein Move prueft nichts, er
@@ -13,12 +13,13 @@
 # nur auf ausdruecklichen Aufruf, nie nebenbei.
 .PHONY: slice-mv
 
-# Der Ablageort des Werkzeugs ist das Repo (tools/harness/).
+# Der Ablageort des Werkzeugs ist tool-eigen und wird bei jedem Bootstrap
+# kanonisch neu geschrieben.
 SLICE_MV ?= tools/harness/slice-mv.sh
 
 # Die Pfade, die der Verweis-Nachzug ausnimmt — REPO-POLITIK, keine Mechanik des
 # Werkzeugs (die Begruendung traegt dessen Kopf). Die Vorgabe ist aus dem
-# mitgelieferten Regelwerk abgeleitet; ein Repo mit einer anderen Politik setzt
+# mitemittierten Regelwerk abgeleitet; ein Repo mit einer anderen Politik setzt
 # die Variable. Der Ort dafuer ist JEDE Make-Quelle, die der Aggregator einbindet
 # — `?=` nimmt einen frueher gesetzten Wert an, ein spaeter gesetzter gewinnt —,
 # und das Rezept unten reicht den Wert als Umgebung an das Werkzeug durch: eine
@@ -29,5 +30,5 @@ SLICE_MV_AUSGENOMMENE_PFADE ?= :!.harness/baseline :!docs/plan/adr
 # Rezept ueber einem Namen, den keine Datei traegt, und der Aufruf endet mit der
 # Meldung des Interpreters statt mit der des Fragments.
 slice-mv: ## Lifecycle-Wechsel eines Slice inkl. Verweis-Nachzug (SLICE=slice-<Kennung> TO=<open|next|in-progress|done>) — KEIN Gate
-	@test -f "$(SLICE_MV)" || { echo "slice-mv: $(SLICE_MV) liegt nicht — dieses Ziel ruft das Skript im Repo."; exit 2; }
+	@test -f "$(SLICE_MV)" || { echo "slice-mv: $(SLICE_MV) liegt nicht — das Fragment ruft das Werkzeug, das dieser Bootstrap schreibt; ein erneuter Lauf des Werkzeugs legt es ab."; exit 2; }
 	@SLICE_MV_AUSGENOMMENE_PFADE='$(SLICE_MV_AUSGENOMMENE_PFADE)' bash "$(SLICE_MV)" "$(SLICE)" "$(TO)"

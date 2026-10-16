@@ -1,227 +1,29 @@
-# u-boot — developer environment bootloader for Docker-based projects.
-#
-# Docker-only workflow (LH-FA-BUILD-007): build/lint/test/coverage all
-# run via `docker build --target <stage>` inside containers. The repo
-# has no host-side Go toolchain requirement; only Docker and `make` are
-# expected on the host. `make` is a deliberate carveout to
-# LH-NFA-PORT-002 — it is the only host dependency beyond Docker.
-#
-# Quality gates (LH-FA-BUILD-006):
-#   make gates       — inner-loop mandatory gates (lint + test + coverage-gate).
-#   make ci          — gates plus govulncheck plus image-scan (mirrors ci.yml).
-#   make fullbuild   — ci plus build (runtime image).
+# Makefile — generiert von ai-harness-init (Aggregator). Die Gate-Belange leben als
+# Fragmente unter harness/mk/*.mk; jedes haengt seine Checks an GATE_CHECKS. Der
+# Gate-Nachweis (record-gates) laeuft strikt ZULETZT via Ordnungskante auf GATE_CHECKS
+# — waehrend make -j die Checks parallelisiert; .NOTPARALLEL ist bewusst NICHT gewaehlt
+# (das serialisierte das ganze Makefile). Sprach-agnostisch: ohne --lang matchen nur
+# baseline/doc-gate/enforce, mit --lang zusaetzlich das Code-Gate-Fragment.
+GATE_CHECKS :=
 
-IMAGE                   ?= u-boot
-GO_VERSION              ?= 1.27.2
-GOLANGCI_LINT_VERSION   ?= v2.14.0
-GOVULNCHECK_VERSION     ?= v1.8.0
-PYTHON_VERSION          ?= 3.13-slim
+.PHONY: gates help
 
-# VERSION is injected at build time and becomes both `u-boot --version`
-# output (via -X main.version) and the org.opencontainers.image.version
-# OCI label on the runtime image. Default matches the in-source fallback
-# in cmd/uboot/main.go (`var version = "0.9.0-dev"`); the publish.yml
-# workflow passes VERSION=<tag-without-v> for tagged releases. CI gates
-# (lint/test/coverage/govulncheck/image-scan) and local `make build`
-# without override produce a coherent "0.9.0-dev" binary.
-VERSION                 ?= 0.9.0-dev
-# Trivy pin policy — TWO formats in play, both must be bumped together:
-#   - Makefile (here):  Docker-Hub-Tag-Konvention OHNE `v`-Prefix
-#                        → `aquasec/trivy:0.70.0`
-#   - ci.yml::image-scan: GitHub-Release-Tag-Konvention MIT `v`-Prefix
-#                        → `trivy-version: 'v0.70.0'` für trivy-action
-# Bei jeder Pin-Hebung beide Stellen synchron heben (gleiche Trivy-
-# Version, unterschiedliche Schreibweisen). Detector-/DB-Parität
-# ist sonst gebrochen.
-TRIVY_VERSION           ?= 0.70.0
-THRESHOLD               ?= 90
-
-# `--progress=plain` gives full, line-by-line BuildKit logs that survive
-# CI log truncation. Locally the default (`auto`) keeps the compact TUI.
-PROGRESS_FLAG :=
-ifeq ($(CI),1)
-PROGRESS_FLAG := --progress=plain
-endif
-
-# `--no-cache-filter <stage>` forces BuildKit to re-evaluate the given
-# stage without invalidating the `deps` cache layer. Without this, a
-# stale layer hash could mask test/lint/coverage failures.
-NO_CACHE_FILTER_TEST     := --no-cache-filter test
-NO_CACHE_FILTER_LINT     := --no-cache-filter lint
-NO_CACHE_FILTER_COVERAGE := --no-cache-filter coverage
-
-DOCKER_BUILD := docker build $(PROGRESS_FLAG) \
-    --build-arg GO_VERSION=$(GO_VERSION) \
-    --build-arg GOLANGCI_LINT_VERSION=$(GOLANGCI_LINT_VERSION) \
-    --build-arg UBOOT_VERSION=$(VERSION)
-
-.DEFAULT_GOAL := help
-
-.PHONY: help deps compile lint test test-docker coverage coverage-gate build build-binaries run clean \
-        gates ci fullbuild govulncheck packages image-scan verify-depguard docs-check
-
-help: ## Show this help.
-	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ { printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
-
-# ---- inner-loop ------------------------------------------------------------
-
-deps: ## Resolve Go module dependencies (deps-cache layer).
-	$(DOCKER_BUILD) --target deps -t $(IMAGE):deps .
-
-compile: ## Fast compile feedback (no tests/lint).
-	$(DOCKER_BUILD) --target compile -t $(IMAGE):compile .
-
-lint: ## golangci-lint with the project profile.
-	$(DOCKER_BUILD) $(NO_CACHE_FILTER_LINT) --target lint -t $(IMAGE):lint .
-
-test: ## Run `go test ./...` inside Docker.
-	$(DOCKER_BUILD) $(NO_CACHE_FILTER_TEST) --target test -t $(IMAGE):test .
-
-test-docker: ## Run //go:build docker integration tests against the host docker daemon.
-	@# Two-step target (slice-m6-docker-integrationstests Sub-T4):
-	@# 1) Build the `test-docker-tools` Dockerfile stage — golang +
-	@#    docker-ce-cli + docker-compose-plugin (from the official
-	@#    Docker repo). Cached after first build.
-	@# 2) Run the test binary in that image with `--network=host` so
-	@#    the test process and the Docker daemon share a network
-	@#    namespace (required for `NetProbe.DialTCP("localhost", ...)`
-	@#    to reach Compose-published ports — slice §Strukturelle
-	@#    Bedingungen, Netzwerk-Namespace-Voraussetzung). The
-	@#    Docker socket is also mounted so the test's Compose calls
-	@#    reach the host daemon.
-	@#
-	@#    `/tmp` wird host-shared zum Test-Container gemountet:
-	@#    `t.TempDir()` schreibt unter `/tmp/...`, und Compose-Bind-
-	@#    Mount-Pfade (z. B. die `otel-collector-config.yaml` aus
-	@#    slice-v1-otel) werden vom Daemon (Host) aufgelöst, nicht
-	@#    vom Test-Container. Ohne den Share sieht der Daemon nur
-	@#    leere Verzeichnisse statt der vom Test geschriebenen
-	@#    Dateien (slice-v1-otel T3 CI-Diagnose: Collector
-	@#    `failed to get config: ... is a directory`).
-	$(DOCKER_BUILD) --target test-docker-tools -t $(IMAGE):test-docker-tools .
-	docker run --rm --network=host \
-	    -v "$(CURDIR)":/src -w /src \
-	    -v /var/run/docker.sock:/var/run/docker.sock \
-	    -v /tmp:/tmp \
-	    $(IMAGE):test-docker-tools \
-	    go test -tags docker ./...
-
-coverage-gate: ## Coverage threshold gate (bootstrap-aware, LH-FA-BUILD-008).
-	$(DOCKER_BUILD) $(NO_CACHE_FILTER_COVERAGE) \
-	    --target coverage \
-	    --build-arg COVERAGE_THRESHOLD=$(THRESHOLD) \
-	    -t $(IMAGE):coverage .
-
-# Alias for ergonomics; the gate is the same target.
-coverage: coverage-gate
-
-build: ## Build the runtime image (distroless static, nonroot).
-	$(DOCKER_BUILD) --target runtime -t $(IMAGE):latest .
-
-run: build ## Smoke test: run `u-boot --help` from the built image.
-	docker run --rm $(IMAGE):latest --help
-
-# Cross-compiled binaries for the slice-v2-binary-distribution path.
-# Output naming convention: bin/u-boot-<os>-<arch> (no ".tar.gz" — the
-# release workflow handles packaging). Static linking + CGO=0 so the
-# binaries run on minimal hosts. -ldflags `-X main.version=$(VERSION)`
-# mirrors the runtime-image VERSION-Pin from the Dockerfile so the
-# binary's `--version` matches the surrounding release. The container
-# emits a tar stream and the host tar process extracts it into $(BIN_DIR),
-# so mounted worktrees do not receive root-owned output files.
-BIN_DIR    ?= bin
-PLATFORMS  := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64
-
-packages: build-binaries ## Build the .deb and .rpm packages (amd64, arm64) with nfpm (slice-v2-distro-pakete).
-	./scripts/build-packages.sh $(VERSION) $(BIN_DIR) packages
-
-build-binaries: ## Cross-compile u-boot binaries for all release platforms.
-	@mkdir -p $(BIN_DIR)
-	$(DOCKER_BUILD) --target binary-archive -t $(IMAGE):binary-archive .
-	@docker run --rm \
-	    -e PLATFORMS="$(PLATFORMS)" \
-	    $(IMAGE):binary-archive \
-	    | tar --no-same-owner -xf - -C $(BIN_DIR)
-	@echo "[build-binaries] $(words $(PLATFORMS)) binaries built in $(BIN_DIR)/"
-
-# ---- security gates --------------------------------------------------------
-
-# govulncheck runs inside an ephemeral Go container with the project
-# mounted in. Pinned via GOVULNCHECK_VERSION (ADR-0004 pin policy);
-# routine upgrade documented in the commit body.
-govulncheck: ## Run govulncheck against the project (LH-FA-BUILD-006).
-	docker run --rm \
-	    -v "$(CURDIR)":/src -w /src \
-	    -e GOFLAGS=-buildvcs=false \
-	    golang:$(GO_VERSION) \
-	    sh -c "go install golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION) && govulncheck ./..."
-
-# image-scan reproduces the third PR-blocking ci.yml job locally.
-# Builds the runtime image, then runs Trivy against it inside an
-# ephemeral container; HIGH/CRITICAL findings fail the build
-# (slice-v1-release-pipeline T3 / ADR-0007). Mounts the host Docker
-# socket so Trivy can resolve the just-built local tag.
-image-scan: build ## Trivy scan of the runtime image (LH-QA-003 third gate).
-	docker run --rm \
-	    -v /var/run/docker.sock:/var/run/docker.sock \
-	    aquasec/trivy:$(TRIVY_VERSION) image \
-	    --severity HIGH,CRITICAL --exit-code 1 \
-	    --no-progress \
-	    $(IMAGE):latest
-
-# verify-depguard proves each of the eight LH-FA-ARCH-003 layer rules
-# fires on a real forbidden import. Manual / on-demand: not part of
-# `gates` because each iteration runs `make lint`, so a full pass takes
-# several minutes. Re-run whenever the hexagonal layer set or the
-# depguard config changes.
-verify-depguard: ## Verify all eight depguard layer rules fire (LH-FA-ARCH-003).
-	bash scripts/verify-depguard.sh
-
-# ---- docs gates ------------------------------------------------------------
-
-# docs-check validates the markdown reference model via d-check
-# (digest-pinned container image, configured in .d-check.yml). Covered:
-# relative link paths, heading anchors, linked ADR/LH/Planning/Trace
-# ids, and reference-model edges across docs/, spec/, harness/, and
-# root *.md. tools/check_refs.py is deprecated (its line-based parser
-# misreads CommonMark multi-line code spans); its three u-boot-specific
-# lints (nested-link artifacts, LH shorthand suffixes,
-# reference-definition targets) await extraction into a rest sensor.
-#
-# The doc-* recipes live in the tool-generated d-check.mk (see its
-# header). Only the digest pin lives here, so regenerating the fragment
-# never rewrites it. `docs-check` stays the u-boot-wide target name
-# (AGENTS.md, harness/verification.md, CI, done/ closures) and aliases
-# the fragment's `doc-check`.
-DCHECK_DIGEST ?= sha256:fede3d027b2ebc1dd8534460853e57b67cc7a9a182cad2e2138c8eebf7a2d03c
-include d-check.mk
-
-docs-check: doc-check ## Validate markdown refs, ADR links, anchors, and model edges.
-
-# ---- aggregators -----------------------------------------------------------
-
-# record-gates stempelt den Gate-Nachweis und laeuft strikt nach allen Checks
-# (Ordnungskante ueber GATE_CHECKS), auch unter make -j.
-GATE_CHECKS := lint test coverage-gate docs-check
-
+# Gate-Fragmente je Belang (baseline/doc-gate/enforce + Sprach-Code-Gates) einbinden.
+# Alphabetisch (baseline < doc-gate < enforce < <lang>); die Ordnungskante unten steht
+# NACH beiden Includes und sieht GATE_CHECKS damit vollstaendig.
 include harness/mk/*.mk
 
-gates: record-gates ## Inner-loop mandatory gates.
-	@echo "[gates] lint + test + coverage-gate + docs-check green"
+# Die Targets des Repos: repo.mk gehoert dem Repo, der Bootstrap legt sie
+# nur an, wo sie fehlt. Sie steht NACH den Fragmenten, damit ihr GATE_CHECKS += die
+# Ordnungskante unten erreicht und ihr = die ?=-Vorgaben der Fragmente ueberschreibt;
+# -include, damit eine geloeschte repo.mk make nicht bricht.
+-include repo.mk
 
+help: ## Diese Hilfe
+	@grep -hE '^[a-z0-9-]+:.*##' $(MAKEFILE_LIST) | sort | awk 'BEGIN{FS=":.*##"}{printf "  %-14s %s\n",$$1,$$2}'
+
+# gates haengt allein an record-gates; record-gates haengt an ALLEN akkumulierten
+# Checks — der Nachweis laeuft strikt nach den Checks (Ordnungskante), waehrend make
+# -j die Checks parallel faehrt. Das record-gates-Rezept liefert harness/mk/enforce.mk.
+gates: record-gates ## Alle Gates (Checks parallel, Nachweis zuletzt)
 record-gates: $(GATE_CHECKS)
-
-ci: gates govulncheck image-scan ## Gates plus govulncheck plus image-scan (mirrors ci.yml).
-	@echo "[ci] gates + govulncheck + image-scan green"
-
-fullbuild: ci build ## CI plus runtime image (full closure).
-	@echo "[fullbuild] ci + runtime image green"
-
-# ---- maintenance -----------------------------------------------------------
-
-clean: ## Remove local build artefacts and built images.
-	@rm -rf out coverage $(BIN_DIR) *.out *.test
-	@-docker image rm \
-	    $(IMAGE):latest $(IMAGE):deps $(IMAGE):compile \
-	    $(IMAGE):lint $(IMAGE):test $(IMAGE):coverage 2>/dev/null || true
-	@echo "[clean] artefacts and images removed"

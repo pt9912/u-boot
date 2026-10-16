@@ -18,8 +18,10 @@
 # Message, die zusaetzlich einen nicht aufloesbaren Verweis nennt, geht mit
 # derselben Kennung durch. Die Menge ist die des mitgelieferten Regelwerks und
 # steht in den Zeilen `patterns=` und `named_slice=` unten — als Muster steht sie nur dort: der Kopf
-# nennt die Klassen in Worten, die Fehlermeldung zeigt auf die Zeile. Eine
-# weitere Kennungs-Klasse kommt als Muster in diese Zeilen.
+# nennt die Klassen in Worten, die Fehlermeldung zeigt auf die Zeile, und ein
+# erneuter Bootstrap schreibt diese Datei kanonisch neu. Ein Repo mit einer
+# eigenen Kennungs-Klasse setzt darum HOOKS_DIR auf sein eigenes Hook-Verzeichnis
+# (harness/mk/hooks-install.mk) und fuehrt dort seinen Traeger.
 # Als Kommentarzeile gilt die fuehrende Raute; ein abweichendes core.commentChar
 # liest dieses Skript nicht.
 #

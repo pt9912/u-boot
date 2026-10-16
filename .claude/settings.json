@@ -1,5 +1,41 @@
 {
     "hooks": {
+        "PostToolUse": [
+            {
+                "matcher": "",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/span-emit.sh",
+                        "timeout": 5
+                    }
+                ]
+            }
+        ],
+        "PostToolUseFailure": [
+            {
+                "matcher": "",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/span-emit.sh",
+                        "timeout": 5
+                    }
+                ]
+            }
+        ],
+        "SubagentStart": [
+            {
+                "matcher": "",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/span-emit.sh",
+                        "timeout": 5
+                    }
+                ]
+            }
+        ],
         "PreToolUse": [
             {
                 "matcher": "Bash",

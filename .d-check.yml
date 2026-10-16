@@ -105,10 +105,12 @@ trace:
     file-pattern: '^(slice-.+)\.md$'
 
 # Deklarations-Konsistenz Doku <-> Build-Targets. Autoritaet ist die
-# Gate-Tabelle in harness/README.md §Sensors; sie fuehrt bewusst nur
-# HARNESS-SENSOREN, nicht jede Regel. makefiles listet nur das eigene
-# Makefile: die doc-*-Targets stammen aus dem generierten d-check.mk und
-# werden vom Werkzeug selbst dokumentiert (make doc-help).
+# Gate-Index aus zwei Teilen: harness/README.md gehoert dem Repo (die Targets in
+# repo.mk), harness/mk/ai-harness-init.md dem Werkzeug (jeder Lauf schreibt ihn neu;
+# MR-012). authority misst gegen die Vereinigung, authority-disjoint meldet ein Target
+# in beiden Teilen (gate-declared-twice). makefiles liest das Makefile, die Fragmente
+# unter harness/mk/ und die .mk-Dateien an der Wurzel (d-check.mk, repo.mk). Der Index
+# fuehrt bewusst nur HARNESS-SENSOREN, nicht jede Regel.
 # exempt-targets sind die acht Build-/Utility-Regeln, die keine Sensoren
 # sind — jede einzeln benannt (das Modul kennt keine Globs), damit ein
 # kuenftiges Gate nicht versehentlich mit ausgenommen wird:
@@ -119,9 +121,10 @@ trace:
 #   build-binaries   — Release-Artefakte, kein Inner-Loop-Sensor
 #   packages         — .deb/.rpm-Release-Artefakte (ADR-0017), kein Sensor
 targets:
-  makefiles: [Makefile, harness/mk/enforce.mk, harness/mk/hooks-install.mk, harness/mk/slice-mv.mk]
-  doc-tables: [harness/README.md]
-  authority: harness/README.md
+  makefiles: [Makefile, "harness/mk/*.mk", "*.mk"]
+  doc-tables: [harness/README.md, harness/mk/ai-harness-init.md]
+  authority: [harness/README.md, harness/mk/ai-harness-init.md]
+  authority-disjoint: true
   exempt-targets: [help, clean, deps, compile, coverage, build, run, build-binaries, packages]
 # Immutabilitaets-Sensor fuer Accepted-ADRs (braucht eine Commit-Range,
 # laeuft deshalb NICHT in docs-check, sondern on-demand:

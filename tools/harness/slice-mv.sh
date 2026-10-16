@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # slice-mv.sh — Lifecycle-Wechsel eines Slice UND der Verweise, die er bricht,
-# Herkunft: ai-harness-init, MR-011 (repo-gefuehrt).
+# emittiert von ai-harness-init.
 #
 # ZUSAGE. `make slice-mv SLICE=slice-<Kennung> TO=<open|next|in-progress|done>`
 # bewegt den Slice per `git mv` und committet den reinen Move SOFORT als eigenen
@@ -30,11 +30,13 @@
 #
 # REPO-POLITIK statt Mechanik: die Pfade, die der EINGEHEND-Nachzug ausnimmt
 # (Variable SLICE_MV_AUSGENOMMENE_PFADE unten). Die zwei Vorgaben sind
-# Ableitungen aus dem mitgelieferten Regelwerk, keine Vorliebe des Werkzeugs:
+# Ableitungen aus dem mitemittierten Regelwerk, keine Vorliebe des Werkzeugs:
 # `.harness/baseline` ist unveraenderter Fremdtext, und eine `Accepted`-ADR
 # wird nach der Hard Rule fuer Accepted-ADRs nicht inhaltlich ueberschrieben.
-# Gesetzt wird die Variable von aussen (dieselbe in harness/mk/slice-mv.mk, s. dort);
-# der Ort dafuer ist jede Make-Quelle oder die Umgebung des Aufrufs.
+# Diese Datei wird bei jedem Bootstrap kanonisch neu geschrieben, eine Aenderung
+# an ihr ueberlebt den naechsten Lauf nicht; gesetzt wird die Variable darum von
+# aussen (dieselbe im mitemittierten Make-Fragment, s. dort) — der Ort dafuer ist
+# jede Make-Quelle oder die Umgebung des Aufrufs.
 #
 # GRENZEN (vier, jede mit ihrer Ursache):
 # (1) Das Werkzeug zieht PFADE nach, keine ZUSTANDSSAETZE. Eine Zeile
@@ -86,10 +88,10 @@ psed_i() {
 
 # REPO-POLITIK (s. Kopf): die `git grep`-Pathspecs, die der EINGEHEND-Nachzug
 # NICHT durchsucht — whitespace-getrennt, eine Angabe je Eintrag. Die Vorgabe
-# ist aus dem mitgelieferten Regelwerk abgeleitet (Fremdtext und die Hard Rule
+# ist aus dem mitemittierten Regelwerk abgeleitet (Fremdtext und die Hard Rule
 # fuer Accepted-ADRs). Ein Repo, das weitere Baeume ausnimmt oder Zeitdokumente
 # anders behandelt, setzt diese Variable in der Umgebung des Aufrufs oder in
-# einer Make-Quelle — das Make-Fragment reicht seinen Wert als Umgebung
+# einer Make-Quelle — das mitemittierte Fragment reicht seinen Wert als Umgebung
 # an dieses Skript durch. Der Vorgabewert hier greift nur, wenn von aussen keiner
 # gesetzt ist.
 SLICE_MV_AUSGENOMMENE_PFADE="${SLICE_MV_AUSGENOMMENE_PFADE:-:!.harness/baseline :!docs/plan/adr}"
@@ -186,7 +188,7 @@ rewrite_outgoing_bare_in_file() {  # $1=datei $2=from
 # `slice-ax.md`; ein Praefix, der selbst auf `-` endet, ist die Grenze). Mehrdeutig
 # — Status 2, beide Pfade auf stderr — ist derselbe exakte Name in zwei
 # Verzeichnissen oder, ohne exakten Treffer, ein zweiter Praefix-Treffer; kein
-# Treffer endet ebenfalls mit 2. (Faelle `quelle:`) beide
+# Treffer endet ebenfalls mit 2. test/slice-mv.bats (Faelle `quelle:`) deckt beide
 # Zweige und die Grenze.
 quelle_finden() {  # $1=planning-verzeichnis $2=slice
   local name="${2%.md}" muster found="" d f
