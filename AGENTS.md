@@ -177,6 +177,25 @@ werden hier nicht wiederholt:
 | Planning-Lifecycle und Carveout-Disziplin | Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine und `modul-07-carveouts.md`; Bewegungen per `git mv` (siehe 3.3) |
 | Traceability-Regeln für Commits und Anforderungen | [`harness/README.md`](harness/README.md) §Traceability rules |
 
+### 3.9 Kommentar-Selbstcheck vor dem Commit   (seit welle-cli-verbosity)
+
+Vor jedem Commit liest der Implementer `git diff` auf drei Muster, die §3.7
+verletzen und die kein Gate fängt:
+
+- **(a)** Kommentare, die beschreiben, was entfernt wurde oder früher galt
+  („former“, „früher“, „originally“, „no longer“, „is gone“, „ohne X wäre …“).
+  Der Kommentar nennt die geltende Zusage; die Chronik hält `git`.
+- **(b)** Kommentare mit Verweisen auf Symbole, Dateien oder Zahlenwerte, die
+  der Diff ändert oder umbenennt. Suche nach dem alten Namen oder Wert im
+  ganzen Baum, nicht nur in der berührten Datei.
+- **(c)** Neu eingefügte Funktionen oder Helfer zwischen einem Doc-Kommentar und
+  seiner Funktion. Ein Helfer gehört **nach** die Funktion, deren Doc-Kommentar
+  davor steht; sonst bilden beide Kommentare einen Block.
+
+**Begründung:** Ein Reviewer fängt diese Muster erst nachträglich, kein Gate
+prüft sie; in `welle-cli-verbosity` traten sie in drei Vorgängen auf, obwohl
+§3.7 sie schon verbot.
+
 ## 4. Quality Gates
 
 Regeln dieser Sektion: Baseline-Regelwerk `grundlagen-harness-dateien.md`

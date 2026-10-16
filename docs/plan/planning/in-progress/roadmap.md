@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-- [`welle-cli-verbosity`](../welle-cli-verbosity.md)
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
@@ -88,6 +88,7 @@ flowchart LR
 | v0.9.0 (Devcontainer-Features Homebrew, SDKMAN, Python) | 2026-10-15 | [`slice-v1-release-cut-v0.9.0`](../done/slice-v1-release-cut-v0.9.0.md) — Tag `v0.9.0` auf `7bfd8d6` |
 | welle-macos-verifikation (Homebrew-Formel auf macOS belegt; Docker-Desktop-Zusage aus dem Lastenheft 0.7.0 genommen) | 2026-10-16 | [`slice-v2-homebrew-formula`](../done/slice-v2-homebrew-formula.md) (Detailquelle); Welle-Datei [`welle-macos-verifikation`](../done/welle-macos-verifikation.md) §7 |
 | welle-harness-wartung (Reviewer-Skill auf Baseline-Schema; `internal/`-README-Festlegungen in der Spezifikation) | 2026-10-16 | [`slice-harness-internal-readmes-festlegungen-in-spec`](../done/slice-harness-internal-readmes-festlegungen-in-spec.md) (Detailquelle); [`slice-harness-dcheck-bump-reviewer-skill`](../done/slice-harness-dcheck-bump-reviewer-skill.md); Welle-Datei [`welle-harness-wartung`](../done/welle-harness-wartung.md) §7 |
+| welle-cli-verbosity (Verbosity-Vertrag: `--quiet` nur Fehler mit vier Ausnahmen, Vorschau bleibt, letzte Option gewinnt; Lastenheft 0.8.0 bis 0.10.0, [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet)) | 2026-10-16 | [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Detailquelle); [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md); [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md); [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md); [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md); [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md); Welle-Datei [`welle-cli-verbosity`](../done/welle-cli-verbosity.md) §7 |
 
 > **Closure-Form (Abweichung, MR-003).** u-boot führt **keine**
 > `welle-<Kennung>-results.md`. Die Closure bisheriger Wellen lebt vollständig im jeweiligen

@@ -79,4 +79,63 @@ Lastenheft, die drei Code-Slices den Adapter, und die Spezifikation beschreibt e
 
 ## 7. Closure-Notiz
 
-Offen.
+Detailquellen: die Closure-Notizen der sechs Slices
+([`slice-cr-cli-quiet-fehler-und-warnungen`](slice-cr-cli-quiet-fehler-und-warnungen.md) §7,
+[`slice-cr-cli-quiet-weitere-ausnahmen`](slice-cr-cli-quiet-weitere-ausnahmen.md) §7,
+[`slice-v1-cli-quiet-nur-fehler`](slice-v1-cli-quiet-nur-fehler.md) §7,
+[`slice-cr-cli-quiet-vorschau`](slice-cr-cli-quiet-vorschau.md) §7,
+[`slice-v1-cli-quiet-vorschau`](slice-v1-cli-quiet-vorschau.md) §7,
+[`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md) §7); die Welle ist kein Release,
+einen Release-Cut-Slice gibt es nicht (der CHANGELOG ist vollständig, ein Cut ist nicht mehr blockiert).
+
+- **Geliefert:** Das Lastenheft ging von 0.7.0 auf 0.10.0; 0.7.0 war der Stand der vorigen Welle
+  ([`welle-macos-verifikation`](welle-macos-verifikation.md), Zusage für Docker Desktop zurückgenommen), in dieser Welle entstanden 0.8.0
+  (CR 1: Ausnahme der Sicherheitslockerungen), 0.9.0 (CR 2: vier Ausnahmen) und 0.10.0 (CR 3: Vorschau bleibt); Historie in
+  [`spec/lastenheft.md`](../../../../spec/lastenheft.md) §16. Im Code zeigt `--quiet` in allen ändernden Subkommandos nur Fehler, vier
+  Ausnahmen bleiben sichtbar (Sicherheitslockerungen, Degradations-Fallbacks, Compose-Fortschritt von `up`, `--force`-Pfad-Zusammenfassung),
+  `doctor` listet nur Fehler-Einträge, `down` puffert seinen Strom, die Ausgabe von `--dry-run` und `--diff` bleibt, und die zuletzt
+  angegebene Option gewinnt. [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet)
+  beschreibt Pegelabbildung, Rangfolge und Wirkung deckungsgleich mit Lastenheft 0.10.0 und Code.
+- **Closure-Trigger (§3):** Alle sechs Slices liegen in `done/`. [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) entstand nach dem Abschluss der fünf anderen Slices
+  (`git log`: erst die Moves der fünf, dann der Spezifikations-Commit, dann der Move des sechsten). `make doc-trace`: 83 Anforderungen, 0 Waisen,
+  keine unter [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging). `make gates` grün.
+- **Was hat funktioniert:** Die Vorab-Suche gegen ältere Zusagen im Lastenheft vor einer Änderung (Lehre aus dem zweiten CR) fand beim dritten CR
+  nur noch [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) und
+  [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe); der Review fand danach keine Vertragskollision mehr. Der Review
+  gegen den Code lief vor der Spezifikation: [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) kam als letzter Slice und stimmt Aussage für Aussage mit Code und Lastenheft überein.
+- **Was ging anders als geplant:** Die Welle wuchs von zwei auf sechs Slices: Zwei CRs wurden umgekehrt oder erweitert (erst „Fehler und
+  Warnungen“, dann „nur Fehler“ mit einer, dann mit vier Ausnahmen), die Entscheidung zu `--quiet` fiel in drei Schritten (Sicherheitslockerungen,
+  weitere Ausnahmen, Vorschau), und der Code-Slice `slice-v1-cli-quiet-nur-fehler` brauchte drei Review-Runden (zwei Reports und der Verifier); die Vorschau und
+  die Rangfolge schnitten sich als eigene Slices ab. Docker- und Mac-Ressourcen waren nicht beteiligt.
+- **Trigger-Audit:** Carveout: keiner berührt, [`carveouts.md`](../in-progress/carveouts.md) unverändert; 0 offen. Bootstrap-aware Gate:
+  `coverage-gate` 91,10 % gegen 90 %; 0 offen. ADR: keine ADR trägt einen eingetretenen Re-Evaluierungs-Trigger (eine Suche nach `--quiet` und
+  Verbosity in [`docs/plan/adr/`](../../adr/README.md) trifft keine ADR; [`ADR-0003`](../../adr/0003-solid-nahes-lint-profil.md) nennt `log/slog` nur als Linter-Regel); 0 offen. Hard Rule: keine hat
+  einen eingetretenen Auflösungs-Trigger; die neue Regel `AGENTS.md` §3.9 ist permanent.
+- **Steering-Loop-Einträge:**
+  - **`AGENTS.md`** ergänzt: Pre-Commit-Selbstcheck des Implementers auf Kommentar-Muster (abwesender Text, Verweis auf Geändertes, Helfer zwischen
+    Doc-Kommentar und Funktion) — liegt in `AGENTS.md §3.9`. Auslöser:
+    [`BEO-CLI/kommentar-beschreibt-abwesendes`](../observations/BEO-CLI/kommentar-beschreibt-abwesendes/observation.md)
+    (`slice-v1-cli-quiet-nur-fehler`, `slice-v1-cli-quiet-vorschau`, `slice-v1-cli-verbosity-letzte-option-gewinnt` — 3×; vier Review-Befunde in drei Vorgängen).
+    Herkunft: `seit welle-cli-verbosity`. Entscheidung des Projektinhabers 2026-10-16: Die Regel stand schon in `AGENTS.md` §3.7 und in der HIGH-Liste des
+    Reviewers; die Implementer verletzten sie trotzdem, deshalb steht jetzt der Selbstcheck vor dem Commit. Prosa-Form: Erreicht dieselbe Klasse ein
+    **viertes** Mal die Schwelle, benennt der nächste Eintrag einen mechanischen Sensor oder begründet, warum keiner möglich ist.
+  - Gezählt, nicht verkörpert (aus den Slice-§7, ohne `liegt in`): ein CR, dessen Begründung auf einer Annahme über den Code ruht, prüft die Annahme im
+    Code vor der Änderung (einmal); eine Ausnahme-Regel im Lastenheft wird vor der Änderung gegen alle älteren Zusagen geprüft (zweimal, mit
+    gegenteiligem Ergebnis); Plan-Aussagen über Code (Quellen, Dateien) werden vor dem Schreiben im Code geprüft (`slice-v1-cli-quiet-nur-fehler`:
+    `doctor`-Items, die es nicht gibt; `slice-v1-cli-quiet-vorschau` §3: falsche Testdatei; `slice-v1-cli-verbosity-letzte-option-gewinnt` §3: unvollständige Dateiliste).
+    Für die dritte Klasse ist keine Beobachtung angelegt; die nächste Eröffnung sichtet sie.
+- **Beobachtungs-Register:** [`BEO-CLI/kommentar-beschreibt-abwesendes`](../observations/BEO-CLI/kommentar-beschreibt-abwesendes/observation.md) angelegt,
+  drei Belege (`evidence/`), Ausgang `verkörpert` ([`state.md`](../observations/BEO-CLI/kommentar-beschreibt-abwesendes/state.md)). Zeiger auf das Register:
+  [`../observations/`](../observations/README.md).
+- **Folge-Slices:** [`slice-v1-sandbox-fallback-ausweisung`](../open/slice-v1-sandbox-fallback-ausweisung.md) (Fallback-Ausweisung, Entscheidung Code oder CR beim Projektinhaber),
+  [`slice-v1-cli-dry-run-would-formulierung`](../open/slice-v1-cli-dry-run-would-formulierung.md) (Zeitform der Dry-Run-Zusammenfassung),
+  [`slice-v2-homebrew-smoke-haertung`](../open/slice-v2-homebrew-smoke-haertung.md) (aus der Vorwelle, unverändert offen),
+  [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) (ohne Welle, wartet auf einen Docker-Desktop-Host).
+  Alle vier liegen in `open/`.
+- **Verifikation:** `make gates` Exit 0 (Coverage 91,10 %, `docs-check` 0 Befunde); Verification Evidence je Slice unter `docs/reviews/`:
+  [`slice-cr-cli-quiet-fehler-und-warnungen`](../../../reviews/2026-10-16-verification-slice-cr-cli-quiet-fehler-und-warnungen.md),
+  [`slice-cr-cli-quiet-weitere-ausnahmen`](../../../reviews/2026-10-16-verification-slice-cr-cli-quiet-weitere-ausnahmen.md),
+  [`slice-v1-cli-quiet-nur-fehler`](../../../reviews/2026-10-16-verification-slice-v1-cli-quiet-nur-fehler.md),
+  [`slice-cr-cli-quiet-vorschau`](../../../reviews/2026-10-16-verification-slice-cr-cli-quiet-vorschau.md),
+  [`slice-v1-cli-quiet-vorschau`](../../../reviews/2026-10-16-verification-slice-v1-cli-quiet-vorschau.md),
+  [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../../../reviews/2026-10-16-verification-slice-v1-cli-verbosity-letzte-option-gewinnt.md).

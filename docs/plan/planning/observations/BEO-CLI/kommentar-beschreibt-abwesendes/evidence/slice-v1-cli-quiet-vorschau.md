@@ -1,0 +1,2 @@
+**Vorgang:** [`slice-v1-cli-quiet-vorschau`](../../../../done/slice-v1-cli-quiet-vorschau.md)
+**Fund:** Review-Report [`2026-10-16-slice-v1-cli-quiet-vorschau`](../../../../../../reviews/2026-10-16-slice-v1-cli-quiet-vorschau.md) F-1 (LOW): Der neue Doc-Kommentar von `summaryVisible` steht ohne Leerzeile hinter dem Doc-Kommentar von `previewModeFromFlags` und bildet mit ihm einen Block; der Helfer klebt am falschen Funktionskopf (Fehlerklasse: Einfügung trennt Kommentar von seinem Gegenstand).
