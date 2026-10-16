@@ -5,7 +5,7 @@
 > Workflow-Änderung und Tap-Vorlagen sind im Repo, Tap und Secret bestehen, der Smoke im Tap ist auf
 > Apple Silicon und Intel grün (siehe §Stand nach `v0.9.0`).
 
-**Welle:** [`welle-macos-verifikation`](../welle-macos-verifikation.md).
+**Welle:** [`welle-macos-verifikation`](welle-macos-verifikation.md).
 
 ## Auslöser
 
@@ -78,10 +78,10 @@ läuft ohne Errors.
   [`slice-v2-binary-distribution`](../done/slice-v2-binary-distribution.md)
   — Binaries existieren seit T2 `5e5166b` als GitHub-Release-Asset.
 - Carveout:
-  [`carveouts.md`](carveouts.md) §Temporäre
+  [`carveouts.md`](../in-progress/carveouts.md) §Temporäre
   Carveouts, [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung)-Zeile.
 - Roadmap:
-  [`roadmap.md`](roadmap.md) §v0.4.0+ Backlog.
+  [`roadmap.md`](../in-progress/roadmap.md) §v0.4.0+ Backlog.
 - Phase: V2 (nach v0.3.0-Milestone, Trigger-getrieben).
 
 ## Lieferstand (2026-10-01)
