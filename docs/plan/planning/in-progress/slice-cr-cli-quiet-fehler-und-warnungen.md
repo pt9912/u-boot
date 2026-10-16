@@ -93,7 +93,7 @@ Sandbox-Lockerungs-Hinweise.
 > - `--verbose` – zusätzlich Detailinformationen
 > - `--debug` – zusätzlich interne Diagnoseausgaben
 >
-> Eine Ausnahme gilt für Sicherheitslockerungen: Die Ausweisung jeder Sicherheitslockerung in der Befehlsausgabe ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)) bleibt unter `--quiet` sichtbar.
+> Eine Ausnahme gilt für Sicherheitslockerungen (zusätzliche Capabilities, `--privileged`, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices): Ihre Ausweisung in der Befehlsausgabe ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)) bleibt unter `--quiet` sichtbar. Alle anderen Hinweise entfallen unter `--quiet`.
 >
 > Werden mehrere Verbosity-Optionen gleichzeitig angegeben (z. B. `--quiet --verbose`), gewinnt die zuletzt auf der Kommandozeile angegebene Option. Eine Validierungsabweisung wegen Mehrfachangabe erfolgt nicht.
 
@@ -182,8 +182,9 @@ der Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quie
 - **Reichweite der Ausnahme:** „Sicherheitslockerung" deckt die Sandbox-Hinweise
   ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)); andere Warnungen (Recreate-Warnung
   [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen), Drittanbieter-Features) fallen unter `--quiet` weg. — **Ausgang:**
-  entfallen: die Entscheidung des Projektinhabers nennt genau eine Ausnahme; der
-  Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) legt die Code-Grenze fest.
+  entfallen: der Lastenheft-Satz nennt die Arten der Lockerung und schließt alle anderen
+  Hinweise aus; der Umsetzungs-Slice [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) bildet das
+  im Code ab (die Kennung eines Hinweises genügt dafür nicht, weil [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) auch „has no effect" trägt).
 - **Zwischenstand der Spec:** Bis alle drei Slices der Welle geschlossen sind,
   darf die Spezifikation das Verhalten nicht beschreiben. — **Ausgang:**
   entfallen: die Welle [`welle-cli-verbosity`](../welle-cli-verbosity.md) schließt erst mit dem Spezifikations-Eintrag im
