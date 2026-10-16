@@ -6,7 +6,7 @@
   [`docs/reviews/`](../../docs/reviews/README.md) (Ablage + README);
   Quellen-Rolle von [`review.md`](../review.md) und
   [`verification.md`](../verification.md).
-- **Ersetzt-Baseline-Regel:** [`modul-10-review-harness.md` §Ziel-Form: Reviewer-Skill](../../.harness/baseline/v6.13.0/regelwerk/modul-10-review-harness.md#ziel-form-reviewer-skill)
+- **Ersetzt-Baseline-Regel:** [`modul-10-review-harness.md` §Ziel-Form: Reviewer-Skill](../../.harness/baseline/v6.18.1/regelwerk/modul-10-review-harness.md#ziel-form-reviewer-skill)
 - **Adaption:** Review-Wissen liegt in u-boot an **zwei** Orten mit klarer
   Rollentrennung: die kanonische **Prosa** bleibt im Autoren-Bestand `harness/`
   (`review.md`, `verification.md`), die vom Regelwerk geforderte **Skill-Form**

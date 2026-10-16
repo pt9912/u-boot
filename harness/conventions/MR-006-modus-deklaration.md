@@ -2,7 +2,7 @@
 
 - **Datum:** 2026-07-24
 - **Geltungsbereich:** Abschnitt Modus-Deklaration in [`conventions.md`](../conventions.md).
-- **Ersetzt-Baseline-Regel:** [`grundlagen-bootstrap.md` §Modus pro Sub-Area: Greenfield vs Brownfield](../../.harness/baseline/v6.13.0/regelwerk/grundlagen-bootstrap.md#modus-pro-sub-area-greenfield-vs-brownfield)
+- **Ersetzt-Baseline-Regel:** [`grundlagen-bootstrap.md` §Modus pro Sub-Area: Greenfield vs Brownfield](../../.harness/baseline/v6.18.1/regelwerk/grundlagen-bootstrap.md#modus-pro-sub-area-greenfield-vs-brownfield)
 - **Adaption:** u-boot traegt Bestandscode (`hexagon/`, `cmd/`, `internal/`) neben
   den Doku-Sub-Areas. Der Abschnitt Modus-Deklaration in `conventions.md` ordnet jede Sub-Area
   als GF/BF/Hybrid ein; jede BF-/Hybrid-Markierung traegt eine

@@ -1,14 +1,14 @@
-# MR-004 — Regelwerk-Lese-Form committet vendored; Baseline-Pin v6.13.0; beide Baeume
+# MR-004 — Regelwerk-Lese-Form committet vendored; Baseline-Pin v6.18.1; beide Baeume
 
 - **Datum:** 2026-07-24
 - **Geltungsbereich:** `.harness/baseline/`,
   `tools/harness/fetch-baseline-cache.sh`, [`AGENTS.md`](../../AGENTS.md) §1,
   [`harness/README.md`](../README.md) §Guides, [`.d-check.yml`](../../.d-check.yml)
   (`scan.ignore`), `.gitignore`, Abschnitt Baseline in [`conventions.md`](../conventions.md).
-- **Ersetzt-Baseline-Regel:** [`modul-02-harness-bootstrap.md` §Greenfield-Bootstrap: Schritt-Sequenz (Modul 2)](../../.harness/baseline/v6.13.0/regelwerk/modul-02-harness-bootstrap.md#greenfield-bootstrap-schritt-sequenz-modul-2)
+- **Ersetzt-Baseline-Regel:** [`modul-02-harness-bootstrap.md` §Greenfield-Bootstrap: Schritt-Sequenz (Modul 2)](../../.harness/baseline/v6.18.1/regelwerk/modul-02-harness-bootstrap.md#greenfield-bootstrap-schritt-sequenz-modul-2)
 - **Adaption:** Die Lese-Form des adoptierten Regelwerks ist **committet
   vendored** (kein Remote-ZIP pro Lauf, kein Submodule):
-  `.harness/baseline/v6.13.0/{regelwerk,templates}/` + `SHA256SUMS`, netzlos auf
+  `.harness/baseline/v6.18.1/{regelwerk,templates}/` + `SHA256SUMS`, netzlos auf
   jedem Checkout, offline verifizierbar. u-boot vendored **beide** Baeume
   (Upstream-Default), damit die `../templates/...`-Verweise der Module netzlos
   aufloesen und die Templates als Kopiervorlage bereitstehen - **kein**
@@ -35,9 +35,9 @@ vendored Baseline muss an **zwei** Stellen synchron gehalten werden.
 - **T2** - Pointer in der Source-Precedence-/Kopf-Sektion von
   [`AGENTS.md`](../../AGENTS.md) (Verweis auf die vendored Baseline + Lesemodell).
 
-Beide zeigen auf `.harness/baseline/v6.13.0/regelwerk/README.md` (Index) und
+Beide zeigen auf `.harness/baseline/v6.18.1/regelwerk/README.md` (Index) und
 werden bei einem Baseline-Bump gemeinsam nachgezogen (`MR-004` Bump-Prozedur).
-Fundstelle: `.harness/baseline/v6.13.0/regelwerk/modul-02-harness-bootstrap.md`.
+Fundstelle: `.harness/baseline/v6.18.1/regelwerk/modul-02-harness-bootstrap.md`.
 
 ### Freshness-Audit
 

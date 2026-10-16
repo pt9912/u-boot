@@ -4,7 +4,7 @@
 - **Geltungsbereich:** ADR-Form-Politik; verweist auf den CR-Slice
   [`slice-cr-adr-format-madr`](../../docs/plan/planning/done/slice-cr-adr-format-madr.md).
   Aendert `spec/lastenheft.md` NICHT von hier aus.
-- **Ersetzt-Baseline-Regel:** [`modul-04-adrs.md` §Ziel-Form: ADR (MADR)](../../.harness/baseline/v6.13.0/regelwerk/modul-04-adrs.md#ziel-form-adr-madr)
+- **Ersetzt-Baseline-Regel:** [`modul-04-adrs.md` §Ziel-Form: ADR (MADR)](../../.harness/baseline/v6.18.1/regelwerk/modul-04-adrs.md#ziel-form-adr-madr)
 - **Adaption:** Das vendored ADR-Template (MADR-/Nygard-Stil) kollidiert mit dem
   heutigen [`LH-FA-PROJDOCS-002`](../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format)
   (Status/Datum als Inline-Felder statt `##`-Ueberschriften; Titel-/Superseded-

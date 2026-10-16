@@ -4,7 +4,7 @@
 - **Geltungsbereich:** [`AGENTS.md`](../../AGENTS.md) §2,
   [`harness/README.md`](../README.md) §Source precedence,
   `.d-check.yml` (Referenzmatrix).
-- **Ersetzt-Baseline-Regel:** [`grundlagen-source-precedence.md` §Source Precedence](../../.harness/baseline/v6.13.0/regelwerk/grundlagen-source-precedence.md#source-precedence)
+- **Ersetzt-Baseline-Regel:** [`grundlagen-source-precedence.md` §Source Precedence](../../.harness/baseline/v6.18.1/regelwerk/grundlagen-source-precedence.md#source-precedence)
 - **Adaption:** u-boot fuehrt eine Source-Precedence mit **drei**
   Spec-Straten an den Raengen 1 bis 3 (Baseline-Default) und zwei repo-lokalen
   Zusatz-Raengen: Rang 5 fasst Roadmap und aktive Slices zusammen, Rang 6 fuehrt die
@@ -28,7 +28,7 @@
 - **Begruendung:** Fassung 1 stuetzte sich auf die Optionalitaet des
   Technik-Stratums; das Lastenheft wuchs dadurch auf rund 3000 Zeilen und
   vermischte Vertrag und Technik (Schemata, Defaults, Build-Details). Das
-  Regelwerk (v6.13.0) macht alle drei Straten obligatorisch: Technik im
+  Regelwerk (v6.18.1) macht alle drei Straten obligatorisch: Technik im
   Vertrag zu falten verschiebt den Aenderungs-Prozess (nur per Change Request
   aenderbar, keine schaerfende ADR moeglich). Der Projektinhaber hat die
   Vollform am 2026-10-02 beschlossen.

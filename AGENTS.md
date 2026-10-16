@@ -24,9 +24,9 @@ Sensors-Bindung) leben in
 Das **Regelwerk der adoptierten Baseline** (AI-Harness-Kurs,
 `pt9912/ai-harness-course`) ist die **präsente, nachschlagbare Vertiefung**
 zu diesem Briefing: ein self-navigierbares **Modul-Bundle**
-(`.harness/baseline/v6.13.0/regelwerk/`, `README.md` = Index), **committet
+(`.harness/baseline/v6.18.1/regelwerk/`, `README.md` = Index), **committet
 vendored** samt `SHA256SUMS`, netzlos auf jedem Checkout. Das
-Integritäts-Manifest `.harness/baseline/v6.13.0/SHA256SUMS` ist offline
+Integritäts-Manifest `.harness/baseline/v6.18.1/SHA256SUMS` ist offline
 prüfbar per `tools/harness/fetch-baseline-cache.sh --verify`.
 
 Ob der gepinnte Stand noch der aktuelle ist, beantwortet ein zweiter,
@@ -48,7 +48,7 @@ Source-Precedence, ID-Schema), Drift-Audit gegen die Baseline
 vendored Baseline). Derivativ: bei Konflikt gelten die kanonischen Quellen.
 
 Die **Skelett-Vorlagen** der Baseline liegen **vendored** unter
-`.harness/baseline/v6.13.0/templates/` und tragen zwei Rollen: als
+`.harness/baseline/v6.18.1/templates/` und tragen zwei Rollen: als
 **Referenz-Form**, auf die das Regelwerk mit `../templates/…` als „Ziel-Form“
 verweist, und als Vorlage, die beim Anlegen neuer Artefakte (ADR, Slice, Welle,
 Carveout, Review-Report) **kopiert und ausgefüllt** wird statt frei zu

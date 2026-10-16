@@ -4,7 +4,7 @@
 - **Geltungsbereich:** Carveout-Ablage;
   [`docs/plan/planning/in-progress/carveouts.md`](../../docs/plan/planning/in-progress/carveouts.md),
   [`LH-FA-PROJDOCS-005`](../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin), `.d-check.yml` `matrix`.
-- **Ersetzt-Baseline-Regel:** [`modul-07-carveouts.md` §Ziel-Form: Carveout](../../.harness/baseline/v6.13.0/regelwerk/modul-07-carveouts.md#ziel-form-carveout)
+- **Ersetzt-Baseline-Regel:** [`modul-07-carveouts.md` §Ziel-Form: Carveout](../../.harness/baseline/v6.18.1/regelwerk/modul-07-carveouts.md#ziel-form-carveout)
 - **Adaption:** Carveouts werden **inventarisiert** in der einen Datei
   `docs/plan/planning/in-progress/carveouts.md` (mit Plan-Anker je Eintrag),
   nicht als je eine Datei `docs/plan/carveouts/CO-<NNN>-<titel>.md`. Das

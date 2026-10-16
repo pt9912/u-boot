@@ -82,7 +82,7 @@ verify() {
   # passieren. Der Leer-Fall scheitert ohnehin laut (exit 1). Die Under-Copy-
   # Barriere (Quelle vs. vendored) sitzt im re-vendor-Pfad, nicht hier.
   local on_disk manifest
-  on_disk="$(find "${baseline}/regelwerk" "${baseline}/templates" -type f 2>/dev/null | wc -l)"
+  on_disk="$(find "${baseline}/regelwerk" "${baseline}/templates" -type f 2>/dev/null | wc -l | tr -d " ")"
   manifest="$(grep -c . "$sums" || true)"
   [ "$on_disk" -gt 0 ] \
     || { echo "fetch-baseline-cache: 0 Dateien — leeres/kaputtes Vendoring" >&2; exit 1; }
@@ -195,7 +195,7 @@ mkdir -p "${baseline}/regelwerk" "${baseline}/templates"
 # Post-Copy-vs-Manifest-Vergleich (verify) könnte einen übergangenen Quell-Zweig
 # nicht sehen, weil Manifest und Platte beide post-copy sind.
 src_n="$(( $(find "$src_regelwerk" -type f -name '*.md' | wc -l) + $(find "$src_templates" -type f | wc -l) ))"
-dst_n="$(find "${baseline}/regelwerk" "${baseline}/templates" -type f | wc -l)"
+dst_n="$(find "${baseline}/regelwerk" "${baseline}/templates" -type f | wc -l | tr -d " ")"
 [ "$src_n" = "$dst_n" ] \
   || { echo "fetch-baseline-cache: Quelle (${src_n}) != vendored (${dst_n}) — Kopierschritt hat Dateien übergangen" >&2; exit 1; }
 

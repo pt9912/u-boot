@@ -4,7 +4,7 @@
 - **Geltungsbereich:**
   [`docs/plan/planning/in-progress/roadmap.md`](../../docs/plan/planning/in-progress/roadmap.md),
   [`docs/plan/planning/README.md`](../../docs/plan/planning/README.md).
-- **Ersetzt-Baseline-Regel:** [`modul-06-roadmap.md` §Roadmap-Struktur: fünf Abschnitte (Modul 6)](../../.harness/baseline/v6.13.0/regelwerk/modul-06-roadmap.md#roadmap-struktur-fünf-abschnitte-modul-6)
+- **Ersetzt-Baseline-Regel:** [`modul-06-roadmap.md` §Roadmap-Struktur: fünf Abschnitte (Modul 6)](../../.harness/baseline/v6.18.1/regelwerk/modul-06-roadmap.md#roadmap-struktur-fünf-abschnitte-modul-6)
 - **Adaption:** Die Roadmap folgt der `roadmap.template.md`-Struktur der
   vendorten Baseline
   (Aktuelle Welle, Naechste Wellen, Meilensteine, Abhaengigkeitsgraph,

@@ -3,7 +3,7 @@
 - **Datum:** 2026-07-24
 - **Geltungsbereich:** `.harness/` (vendored Baseline, kuenftig
   `.harness/skills/`), `harness/` (Autoren-Prosa), `.gitignore`.
-- **Ersetzt-Baseline-Regel:** [`grundlagen-harness-dateien.md` §Verzeichniskonvention](../../.harness/baseline/v6.13.0/regelwerk/grundlagen-harness-dateien.md#verzeichniskonvention)
+- **Ersetzt-Baseline-Regel:** [`grundlagen-harness-dateien.md` §Verzeichniskonvention](../../.harness/baseline/v6.18.1/regelwerk/grundlagen-harness-dateien.md#verzeichniskonvention)
 - **Adaption:** Maschinen-materialisierte / vendorte Harness-Artefakte liegen im
   **dot-prefixed, aber getrackten** `.harness/` (Baseline unter
   `.harness/baseline/<tag>/`; Skills-Dateien kuenftig unter `.harness/skills/`).

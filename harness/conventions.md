@@ -23,18 +23,18 @@ bringend für *Form*-Fragen, nicht autoritativ über Inhalt.
 ## Baseline
 
 - **Konvention:** AI-Harness-Kurs (`pt9912/ai-harness-course`)
-- **Stand:** v6.13.0 (Regelwerk-Bundle)
-- **Datum der Adoption:** 2026-07-24 (Erst-Adoption direkt auf `v3.5.1`; Review-Bumps auf `v3.5.2` am 2026-07-25 ([`slice-harness-baseline-bump-review-v3.5.2`](../docs/plan/planning/done/slice-harness-baseline-bump-review-v3.5.2.md)) und auf `v6.13.0` am 2026-09-29, 46 Releases ([`slice-harness-regelwerk-adoption-v6.13.0`](../docs/plan/planning/done/slice-harness-regelwerk-adoption-v6.13.0.md)); Verfahren in [`MR-004`](conventions/MR-004-regelwerk-vendored.md))
-- **Integritäts-Pin:** `.harness/baseline/v6.13.0/SHA256SUMS` über den vendorten
+- **Stand:** v6.18.1 (Regelwerk-Bundle)
+- **Datum der Adoption:** 2026-07-24 (Erst-Adoption direkt auf `v3.5.1`; Review-Bumps auf `v3.5.2` am 2026-07-25 ([`slice-harness-baseline-bump-review-v3.5.2`](../docs/plan/planning/done/slice-harness-baseline-bump-review-v3.5.2.md)), auf `v6.13.0` am 2026-09-29, 46 Releases ([`slice-harness-regelwerk-adoption-v6.13.0`](../docs/plan/planning/done/slice-harness-regelwerk-adoption-v6.13.0.md)) und auf `v6.18.1` am 2026-10-16, 7 Releases ([`slice-harness-regelwerk-adoption-v6.18.1`](../docs/plan/planning/done/slice-harness-regelwerk-adoption-v6.18.1.md)); Verfahren in [`MR-004`](conventions/MR-004-regelwerk-vendored.md))
+- **Integritäts-Pin:** `.harness/baseline/v6.18.1/SHA256SUMS` über den vendorten
   Bestand (`regelwerk/` + `templates/`); offline prüfbar per
   `tools/harness/fetch-baseline-cache.sh --verify`.
 
 ## Adoptierte Konventions-Quellen
 
-- **Extern (Lehrmaterial):** <https://github.com/pt9912/ai-harness-course/tree/v6.13.0>
+- **Extern (Lehrmaterial):** <https://github.com/pt9912/ai-harness-course/tree/v6.18.1>
 - **Vendored Baseline (Regelwerk + Templates):** aus dem self-contained
-  Release-Asset `lab-regelwerk.zip` (Tag `v6.13.0`) nach
-  `.harness/baseline/v6.13.0/{regelwerk,templates}/` entpackt (netzlos,
+  Release-Asset `lab-regelwerk.zip` (Tag `v6.18.1`) nach
+  `.harness/baseline/v6.18.1/{regelwerk,templates}/` entpackt (netzlos,
   `SHA256SUMS`); Index `regelwerk/README.md`. Die Skelett-Vorlagen unter
   `templates/` sind Referenz-Form („Ziel-Form“ des Regelwerks) und
   Kopiervorlage für neue Artefakte (ADR, Slice, Welle, Carveout, Review-Report).
@@ -84,16 +84,16 @@ sie gilt für jeden Lauf.
 
 | MR | Titel | Geltungsbereich | Ersetzt-Baseline-Regel |
 |---|---|---|---|
-| [001](conventions/MR-001-source-precedence-drei-straten.md) <a id="mr-001"></a> | Source Precedence mit drei Spec-Straten (Vollform) | `AGENTS.md` §2, `harness/README.md` §Source precedence, `.d-check.yml` (Referenzmatrix) | [`grundlagen-source-precedence.md` §Source Precedence](../.harness/baseline/v6.13.0/regelwerk/grundlagen-source-precedence.md#source-precedence) |
-| [002](conventions/MR-002-carveout-inventar.md) <a id="mr-002"></a> | Carveout-Inventar an fester Stelle statt `docs/plan/carveouts/` | `docs/plan/planning/in-progress/carveouts.md`, [`LH-FA-PROJDOCS-005`](../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin), `.d-check.yml` (`matrix`) | [`modul-07-carveouts.md` §Ziel-Form: Carveout](../.harness/baseline/v6.13.0/regelwerk/modul-07-carveouts.md#ziel-form-carveout) |
-| [003](conventions/MR-003-roadmap-wellen.md) <a id="mr-003"></a> | Roadmap folgt Wellen-Template; Release-Versionen = Wellen; Ort `in-progress/` | `docs/plan/planning/in-progress/roadmap.md`, `docs/plan/planning/README.md` | [`modul-06-roadmap.md` §Roadmap-Struktur: fünf Abschnitte (Modul 6)](../.harness/baseline/v6.13.0/regelwerk/modul-06-roadmap.md#roadmap-struktur-fünf-abschnitte-modul-6) |
-| [004](conventions/MR-004-regelwerk-vendored.md) <a id="mr-004"></a> | Regelwerk-Lese-Form committet vendored; Baseline-Pin; beide Bäume | `.harness/baseline/`, `tools/harness/fetch-baseline-cache.sh`, `AGENTS.md` §1, `harness/README.md` §Guides, `.d-check.yml` (`scan.ignore`) | [`modul-02-harness-bootstrap.md` §Greenfield-Bootstrap: Schritt-Sequenz (Modul 2)](../.harness/baseline/v6.13.0/regelwerk/modul-02-harness-bootstrap.md#greenfield-bootstrap-schritt-sequenz-modul-2) |
-| [005](conventions/MR-005-gate-haltung-docs-check.md) <a id="mr-005"></a> | Gate-Haltung: `docs-check` via `d-check.mk`-Fragment; `scan.ignore` erweitert | `.d-check.yml`, `Makefile` (`docs-check`) | [`modul-02-harness-bootstrap.md` §Gate-Fragment `d-check.mk` (Schritt 2)](../.harness/baseline/v6.13.0/regelwerk/modul-02-harness-bootstrap.md#gate-fragment-d-checkmk-schritt-2) |
-| [006](conventions/MR-006-modus-deklaration.md) <a id="mr-006"></a> | Modus-Deklaration pro Sub-Area | Abschnitt Modus-Deklaration in `conventions.md` | [`grundlagen-bootstrap.md` §Modus pro Sub-Area: Greenfield vs Brownfield](../.harness/baseline/v6.13.0/regelwerk/grundlagen-bootstrap.md#modus-pro-sub-area-greenfield-vs-brownfield) |
-| [007](conventions/MR-007-ortswahl-harness-verzeichnis.md) <a id="mr-007"></a> | Ortswahl `.harness/` (dot-prefixed, committet) neben `harness/` | `.harness/` (vendored Baseline, Skills), `harness/` (Autoren-Prosa), `.gitignore` | [`grundlagen-harness-dateien.md` §Verzeichniskonvention](../.harness/baseline/v6.13.0/regelwerk/grundlagen-harness-dateien.md#verzeichniskonvention) |
-| [008](conventions/MR-008-adr-form.md) <a id="mr-008"></a> | ADR-Form: Bestand lean + grandfathered, neue ADRs MADR | ADR-Form-Politik (`docs/plan/adr/`) | [`modul-04-adrs.md` §Ziel-Form: ADR (MADR)](../.harness/baseline/v6.13.0/regelwerk/modul-04-adrs.md#ziel-form-adr-madr) |
-| [009](conventions/MR-009-skills-und-review-ablage.md) <a id="mr-009"></a> | Skill-Dateien unter `.harness/skills/`, Review-Reports unter `docs/reviews/` | `.harness/skills/`, `docs/reviews/`, `harness/review.md`, `harness/verification.md` | [`modul-10-review-harness.md` §Ziel-Form: Reviewer-Skill](../.harness/baseline/v6.13.0/regelwerk/modul-10-review-harness.md#ziel-form-reviewer-skill) |
-| [010](conventions/MR-010-architektur-sicht-abschnittsfolge.md) <a id="mr-010"></a> | Architektur-Sicht: Vorlagen-Inhalt, erweiterte Abschnittsfolge | `spec/architecture.md` (Sicht-Stratum) | [`modul-03-spec.md` §Ziel-Form: Architektur-Sicht](../.harness/baseline/v6.13.0/regelwerk/modul-03-spec.md#ziel-form-architektur-sicht) |
+| [001](conventions/MR-001-source-precedence-drei-straten.md) <a id="mr-001"></a> | Source Precedence mit drei Spec-Straten (Vollform) | `AGENTS.md` §2, `harness/README.md` §Source precedence, `.d-check.yml` (Referenzmatrix) | [`grundlagen-source-precedence.md` §Source Precedence](../.harness/baseline/v6.18.1/regelwerk/grundlagen-source-precedence.md#source-precedence) |
+| [002](conventions/MR-002-carveout-inventar.md) <a id="mr-002"></a> | Carveout-Inventar an fester Stelle statt `docs/plan/carveouts/` | `docs/plan/planning/in-progress/carveouts.md`, [`LH-FA-PROJDOCS-005`](../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin), `.d-check.yml` (`matrix`) | [`modul-07-carveouts.md` §Ziel-Form: Carveout](../.harness/baseline/v6.18.1/regelwerk/modul-07-carveouts.md#ziel-form-carveout) |
+| [003](conventions/MR-003-roadmap-wellen.md) <a id="mr-003"></a> | Roadmap folgt Wellen-Template; Release-Versionen = Wellen; Ort `in-progress/` | `docs/plan/planning/in-progress/roadmap.md`, `docs/plan/planning/README.md` | [`modul-06-roadmap.md` §Roadmap-Struktur: fünf Abschnitte (Modul 6)](../.harness/baseline/v6.18.1/regelwerk/modul-06-roadmap.md#roadmap-struktur-fünf-abschnitte-modul-6) |
+| [004](conventions/MR-004-regelwerk-vendored.md) <a id="mr-004"></a> | Regelwerk-Lese-Form committet vendored; Baseline-Pin; beide Bäume | `.harness/baseline/`, `tools/harness/fetch-baseline-cache.sh`, `AGENTS.md` §1, `harness/README.md` §Guides, `.d-check.yml` (`scan.ignore`) | [`modul-02-harness-bootstrap.md` §Greenfield-Bootstrap: Schritt-Sequenz (Modul 2)](../.harness/baseline/v6.18.1/regelwerk/modul-02-harness-bootstrap.md#greenfield-bootstrap-schritt-sequenz-modul-2) |
+| [005](conventions/MR-005-gate-haltung-docs-check.md) <a id="mr-005"></a> | Gate-Haltung: `docs-check` via `d-check.mk`-Fragment; `scan.ignore` erweitert | `.d-check.yml`, `Makefile` (`docs-check`) | [`modul-02-harness-bootstrap.md` §Gate-Fragment `d-check.mk` (Schritt 2)](../.harness/baseline/v6.18.1/regelwerk/modul-02-harness-bootstrap.md#gate-fragment-d-checkmk-schritt-2) |
+| [006](conventions/MR-006-modus-deklaration.md) <a id="mr-006"></a> | Modus-Deklaration pro Sub-Area | Abschnitt Modus-Deklaration in `conventions.md` | [`grundlagen-bootstrap.md` §Modus pro Sub-Area: Greenfield vs Brownfield](../.harness/baseline/v6.18.1/regelwerk/grundlagen-bootstrap.md#modus-pro-sub-area-greenfield-vs-brownfield) |
+| [007](conventions/MR-007-ortswahl-harness-verzeichnis.md) <a id="mr-007"></a> | Ortswahl `.harness/` (dot-prefixed, committet) neben `harness/` | `.harness/` (vendored Baseline, Skills), `harness/` (Autoren-Prosa), `.gitignore` | [`grundlagen-harness-dateien.md` §Verzeichniskonvention](../.harness/baseline/v6.18.1/regelwerk/grundlagen-harness-dateien.md#verzeichniskonvention) |
+| [008](conventions/MR-008-adr-form.md) <a id="mr-008"></a> | ADR-Form: Bestand lean + grandfathered, neue ADRs MADR | ADR-Form-Politik (`docs/plan/adr/`) | [`modul-04-adrs.md` §Ziel-Form: ADR (MADR)](../.harness/baseline/v6.18.1/regelwerk/modul-04-adrs.md#ziel-form-adr-madr) |
+| [009](conventions/MR-009-skills-und-review-ablage.md) <a id="mr-009"></a> | Skill-Dateien unter `.harness/skills/`, Review-Reports unter `docs/reviews/` | `.harness/skills/`, `docs/reviews/`, `harness/review.md`, `harness/verification.md` | [`modul-10-review-harness.md` §Ziel-Form: Reviewer-Skill](../.harness/baseline/v6.18.1/regelwerk/modul-10-review-harness.md#ziel-form-reviewer-skill) |
+| [010](conventions/MR-010-architektur-sicht-abschnittsfolge.md) <a id="mr-010"></a> | Architektur-Sicht: Vorlagen-Inhalt, erweiterte Abschnittsfolge | `spec/architecture.md` (Sicht-Stratum) | [`modul-03-spec.md` §Ziel-Form: Architektur-Sicht](../.harness/baseline/v6.18.1/regelwerk/modul-03-spec.md#ziel-form-architektur-sicht) |
 
 ### Aufgelöste Adaptionen
 

@@ -3,7 +3,7 @@
 - **Datum:** 2026-07-24
 - **Geltungsbereich:** [`.d-check.yml`](../../.d-check.yml), [`Makefile`](../../Makefile)
   (`docs-check`).
-- **Ersetzt-Baseline-Regel:** [`modul-02-harness-bootstrap.md` §Gate-Fragment `d-check.mk` (Schritt 2)](../../.harness/baseline/v6.13.0/regelwerk/modul-02-harness-bootstrap.md#gate-fragment-d-checkmk-schritt-2)
+- **Ersetzt-Baseline-Regel:** [`modul-02-harness-bootstrap.md` §Gate-Fragment `d-check.mk` (Schritt 2)](../../.harness/baseline/v6.18.1/regelwerk/modul-02-harness-bootstrap.md#gate-fragment-d-checkmk-schritt-2)
 - **Adaption (neu gefasst 2026-07-25):** u-boot bindet das **tool-generierte
   Fragment** `d-check.mk` per `include` ein (`--print-mk`) und haelt `docs-check`
   als duennen Alias auf dessen `doc-check`. Der Digest-Pin lebt als

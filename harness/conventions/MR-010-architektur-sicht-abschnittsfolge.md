@@ -2,7 +2,7 @@
 
 - **Datum:** 2026-10-02
 - **Geltungsbereich:** [`spec/architecture.md`](../../spec/architecture.md) (Sicht-Stratum).
-- **Ersetzt-Baseline-Regel:** [`modul-03-spec.md` §Ziel-Form: Architektur-Sicht](../../.harness/baseline/v6.13.0/regelwerk/modul-03-spec.md#ziel-form-architektur-sicht)
+- **Ersetzt-Baseline-Regel:** [`modul-03-spec.md` §Ziel-Form: Architektur-Sicht](../../.harness/baseline/v6.18.1/regelwerk/modul-03-spec.md#ziel-form-architektur-sicht)
 - **Adaption:** Die Sicht folgt der Vorlage `architecture.template.md` im Inhalt
   (Kopf mit Rolle und Hard Rule, `ARC-<NNN>` fuer Komponenten und externe
   Beruehrungspunkte, Schichten mit Constraints, externe Abhaengigkeiten,
