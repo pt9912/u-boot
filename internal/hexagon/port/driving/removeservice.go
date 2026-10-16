@@ -186,11 +186,18 @@ type RemoveServiceResponse struct {
 //     CLI adapter maps Subject to `diagnostics[].file` or a
 //     future `diagnostics[].subject`-Field — implementation in
 //     T5 (mapWarningsToDiagnostics).
+//   - SecurityRelaxation is true for the notices that disclose a
+//     security relaxation (extra capability, `--privileged`,
+//     Seccomp/AppArmor change, extra device; LH-FA-CLI-005). Those
+//     notices stay visible under `--quiet`. It is a property of the
+//     entry, not of its Code: LH-FA-DEV-007 also carries "has no
+//     effect" notices. It does not appear in the JSON wire form.
 type WarningEntry struct {
-	Code    string `json:"code"`
-	Level   string `json:"level"`
-	Message string `json:"message"`
-	Subject string `json:"subject,omitempty"`
+	Code               string `json:"code"`
+	Level              string `json:"level"`
+	Message            string `json:"message"`
+	Subject            string `json:"subject,omitempty"`
+	SecurityRelaxation bool   `json:"-"`
 }
 
 // All Remove sentinels below live in the `driving` package so the

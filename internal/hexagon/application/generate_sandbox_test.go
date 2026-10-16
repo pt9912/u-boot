@@ -359,6 +359,11 @@ func TestGenerateDevcontainer_SandboxPodman(t *testing.T) {
 	for _, w := range resp.Warnings {
 		if w.Code == "LH-FA-DEV-007" && strings.Contains(w.Message, "security relaxation") {
 			relaxations++
+			if !w.SecurityRelaxation {
+				t.Errorf("relaxation warning not flagged SecurityRelaxation: %+v", w)
+			}
+		} else if w.SecurityRelaxation {
+			t.Errorf("non-relaxation warning flagged SecurityRelaxation: %+v", w)
 		}
 	}
 	if relaxations != 5 {

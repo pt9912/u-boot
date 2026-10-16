@@ -101,6 +101,9 @@ func TestInit_Sandbox_RendersProfileAndWarnsWithoutRemote(t *testing.T) {
 	if len(resp.Warnings) != 1 || resp.Warnings[0].Code != "LH-FA-DEV-006" {
 		t.Errorf("warnings = %+v, want one LH-FA-DEV-006", resp.Warnings)
 	}
+	if len(resp.Warnings) == 1 && resp.Warnings[0].SecurityRelaxation {
+		t.Errorf("no-remote warning must not be flagged as a security relaxation (dropped under --quiet): %+v", resp.Warnings[0])
+	}
 	dc, err := fs.ReadFile(filepath.Join(testBaseDir, ".devcontainer", "devcontainer.json"))
 	if err != nil {
 		t.Fatalf("read devcontainer.json: %v", err)

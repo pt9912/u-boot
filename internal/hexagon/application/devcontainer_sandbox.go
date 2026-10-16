@@ -274,18 +274,25 @@ func podmanRelaxations() []string {
 // relaxation the rendered sandbox needs (nested Podman: five options,
 // nested Docker: `--privileged`, LH-FA-DEV-007; egress restriction: NET_ADMIN, LH-FA-DEV-008), plus
 // a "no effect" notice per feature that is configured without the
-// sandbox profile.
+// sandbox profile. Only the relaxation warnings carry
+// [driving.WarningEntry.SecurityRelaxation] (they stay visible under
+// `--quiet`, LH-FA-CLI-005). The degradation fallbacks of
+// LH-FA-DEV-007 (no daemon, `vfs` storage, no egress restriction)
+// are not produced here: they arise at container start and in
+// `u-boot doctor`, and they are degradations, not relaxations.
 func sandboxRelaxationWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []driving.WarningEntry {
 	var out []driving.WarningEntry
-	warn := func(code, msg string) {
-		out = append(out, driving.WarningEntry{Code: code, Level: "warn", Message: msg, Subject: ".devcontainer/devcontainer.json"})
+	add := func(code, msg string, relaxation bool) {
+		out = append(out, driving.WarningEntry{Code: code, Level: "warn", Message: msg, Subject: ".devcontainer/devcontainer.json", SecurityRelaxation: relaxation})
 	}
+	warn := func(code, msg string) { add(code, msg, false) }
+	relax := func(code, msg string) { add(code, msg, true) }
 	if nestedPodman(dc) {
 		if !sandbox {
 			warn("LH-FA-DEV-007", "devcontainer.sandbox.nestedRuntime=podman has no effect without devcontainer.profile=sandbox; no nested runtime was generated")
 		} else {
 			for _, r := range podmanRelaxations() {
-				warn("LH-FA-DEV-007", "security relaxation for nested Podman: "+r+" (the sandbox is much weaker than without nestedRuntime)")
+				relax("LH-FA-DEV-007", "security relaxation for nested Podman: "+r+" (the sandbox is much weaker than without nestedRuntime)")
 			}
 		}
 	}
@@ -293,14 +300,14 @@ func sandboxRelaxationWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []drivin
 		if !sandbox {
 			warn("LH-FA-DEV-007", "devcontainer.sandbox.nestedRuntime=docker has no effect without devcontainer.profile=sandbox; no nested runtime was generated")
 		} else {
-			warn("LH-FA-DEV-007", "security relaxation for the nested Docker daemon: "+dockerRelaxation()+" (the profile no longer isolates the container from its host; a container escape reaches the host or, on macOS, the engine VM)")
+			relax("LH-FA-DEV-007", "security relaxation for the nested Docker daemon: "+dockerRelaxation()+" (the profile no longer isolates the container from its host; a container escape reaches the host or, on macOS, the engine VM)")
 		}
 	}
 	if egressEnabled(dc) {
 		if !sandbox {
 			warn("LH-FA-DEV-008", "devcontainer.sandbox.egress.enabled has no effect without devcontainer.profile=sandbox; no egress restriction was generated")
 		} else {
-			warn("LH-FA-DEV-008", "security relaxation for the egress restriction: "+egressRelaxation()+" (a guardrail, not a sandbox boundary)")
+			relax("LH-FA-DEV-008", "security relaxation for the egress restriction: "+egressRelaxation()+" (a guardrail, not a sandbox boundary)")
 		}
 	}
 	return out

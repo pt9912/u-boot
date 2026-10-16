@@ -464,3 +464,16 @@ func ConfigPathToYAMLPathForTest(path domain.ConfigPath) []string {
 func (s *InitProjectService) RunBackupForTest(baseDir, relPath string) (*driving.BackupAction, error) {
 	return s.runBackup(baseDir, relPath)
 }
+
+// SandboxRelaxationWarningsForTest exposes [sandboxRelaxationWarnings]
+// for a sandbox config built from the three values the warnings depend
+// on: nestedRuntime, onUnavailable and whether the egress restriction is
+// on.
+func SandboxRelaxationWarningsForTest(nestedRuntime, onUnavailable string, egress, sandbox bool) []driving.WarningEntry {
+	sb := &ubootYAMLDevcontainerSandbox{NestedRuntime: nestedRuntime, OnUnavailable: onUnavailable}
+	if egress {
+		on := true
+		sb.Egress = &ubootYAMLSandboxEgress{Enabled: &on}
+	}
+	return sandboxRelaxationWarnings(&ubootYAMLDevcontainer{Sandbox: sb}, sandbox)
+}
