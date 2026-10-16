@@ -31,7 +31,7 @@ Keine Anforderungsänderung — Skill-Pflege.
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - Der Bump von d-check auf `v0.86.1`: den führt
-  [`slice-harness-ai-harness-init-adoption`](slice-harness-ai-harness-init-adoption.md)
+  [`slice-harness-ai-harness-init-adoption`](../next/slice-harness-ai-harness-init-adoption.md)
   aus, weil das Werkzeug `d-check.mk` samt digest-gepinntem Image mitbringt. Der
   Dateiname dieses Slice behält die frühere Fassung seines Gegenstands.
 - `closure-note-reviewer.md`: nicht Gegenstand des Delta (nur ein

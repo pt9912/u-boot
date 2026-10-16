@@ -34,7 +34,7 @@ eigene Targets leben in `repo.mk`, der Gate-Index wird zweiteilig
 als einem Satz Vertrag bekommen Sensor-Dateien unter `harness/sensors/`.
 
 **Übernimmt:** den d-check-Bump aus
-[`slice-harness-dcheck-bump-reviewer-skill`](slice-harness-dcheck-bump-reviewer-skill.md)
+[`slice-harness-dcheck-bump-reviewer-skill`](../open/slice-harness-dcheck-bump-reviewer-skill.md)
 (das Werkzeug bringt `d-check` `v0.86.1` digest-gepinnt mit); dort bleibt die
 Auffrischung des Reviewer-Skills.
 
@@ -43,7 +43,7 @@ Auffrischung des Reviewer-Skills.
 - Wellen-Betrieb (flache Welle-Dateien, `archive-welle`, Beobachtungs-Register
   als Arbeitsform, Änderung von [`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md)):
   baut die Roadmap-Form und über hundert erledigte Slices um; eigener Slice
-  [`slice-harness-wellen-betrieb`](slice-harness-wellen-betrieb.md). Das Werkzeug
+  [`slice-harness-wellen-betrieb`](../open/slice-harness-wellen-betrieb.md). Das Werkzeug
   legt `plan-welle`, `close-welle`, `planner` und `archivierung.mk` bei diesem
   Lauf mit an; sie bleiben bis dahin ungenutzt.
 - Auffrischung von `.harness/skills/reviewer.md`: bleibt im Slice
