@@ -18,7 +18,7 @@ Herkunft:
 
 **Berührte Spec-Stellen:** —
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912
 
 **Autor:** pt9912. **Datum:** 2026-10-16.
 
@@ -53,20 +53,20 @@ Auffrischung des Reviewer-Skills.
 
 ## 2. Definition of Done
 
-- [ ] u-boots Targets stehen in `repo.mk`; `make gates` fährt dieselben
+- [x] u-boots Targets stehen in `repo.mk`; `make gates` fährt dieselben
   Checks wie vorher (`lint`, `test`, `coverage-gate`, `docs-check`) plus
   `baseline-verify` und endet mit `record-gates`; `ci` und `fullbuild` sind
   unverändert verfügbar.
-- [ ] `ai-harness-init` ist gegen das Repo gelaufen; `harness/README.md`
+- [x] `ai-harness-init` ist gegen das Repo gelaufen; `harness/README.md`
   führt die Zeile „Targets der Werkzeug-Fragmente“, `.d-check.yml` misst
   gegen beide Index-Teile (`authority-disjoint`), `make docs-check` ist grün.
-- [ ] Sensor-Dateien unter `harness/sensors/` für die Gates mit mehr als einem
+- [x] Sensor-Dateien unter `harness/sensors/` für die Gates mit mehr als einem
   Satz Vertrag; die Target-Zellen verlinken sie.
-- [ ] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
-      (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
+- [x] `make gates` grün.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+      ([`Report`](../../../reviews/2026-10-16-slice-harness-ai-harness-init-adoption.md); `.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review.
-- [ ] Doku-Update: `MR-011` aufgelöst (nach `conventions/done/`), `MR-004`/`MR-005`
+- [x] Doku-Update: `MR-011` aufgelöst (nach `conventions/done/`), `MR-004`/`MR-005`
   auf den neuen Stand, neue Adaption für `repo.mk` und das behaltene
   `fetch-baseline-cache.sh` (Freshness-Audit).
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
@@ -80,8 +80,8 @@ Auffrischung des Reviewer-Skills.
 | `Makefile`, `d-check.mk`, `harness/mk/*.mk`, `tools/harness/*` (Werkzeug-Skripte), `.claude/settings.json`, `.claude/hooks/*` | vom Werkzeug geschrieben | kanonische Teile, kein Handeingriff |
 | `harness/mk/ai-harness-init.md` | vom Werkzeug geschrieben | werkzeug-eigener Index-Teil |
 | `.d-check.yml` | update | `targets`: `makefiles`, `doc-tables`, `authority` als Listen, `authority-disjoint: true` |
-| `harness/README.md` | update | Zeile der Werkzeug-Fragmente, Zeilen von `record-gates`/`slice-mv`/`hooks-install` entfallen (jetzt im Werkzeug-Teil, disjunkt) |
-| `harness/sensors/*.md` | neu | aus `gate.template.md` für `coverage-gate`, `verify-depguard`, `test-docker` |
+| `harness/README.md` | update | Zeile der Werkzeug-Fragmente; die Zeilen von `record-gates`, `slice-mv` und `hooks-install` bleiben als Repo-Zeilen mit Bindung [`MR-012`](../../../../harness/conventions.md#mr-012) (das Werkzeug lässt Targets aus, die der Index führt) |
+| `harness/sensors/*.md` | neu | aus `gate.template.md` für `coverage-gate` und `verify-depguard`; `test-docker` ohne Sensor-Datei, sein Vertrag passt in die Index-Zelle |
 | `harness/conventions/MR-011-*`, `MR-004`, `MR-005`, `conventions.md` | update / `git mv` | Adaptionen nachziehen |
 
 Ansatz: Probelauf im Wegwerf-Klon liegt vor (Umfang: `Makefile` ersetzt,

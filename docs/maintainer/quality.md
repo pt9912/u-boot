@@ -199,7 +199,7 @@ Coverage-Messung über die `coverage`-Stage, bootstrap-aware
 make coverage-gate
 ```
 
-- Schwellwert: **90 %** (Makefile-Default `THRESHOLD ?= 90`,
+- Schwellwert: **90 %** (`repo.mk`-Default `THRESHOLD ?= 90`,
   Dockerfile-Build-Arg `ARG COVERAGE_THRESHOLD=90`). Aktiviert mit
   M3-T1, sobald produktive Pakete unter `./internal/...` existieren.
 - Override pro Aufruf, z. B. zur lokalen Diagnose:
@@ -230,7 +230,7 @@ T3 als dritter PR-blockierender CI-Job aktiv
 CI-Job).
 
 > **Trivy-Pin-Hebung berührt ZWEI Stellen:**
-> `Makefile::TRIVY_VERSION` (Docker-Hub-Tag, ohne `v`-Prefix) **und**
+> `repo.mk::TRIVY_VERSION` (Docker-Hub-Tag, ohne `v`-Prefix) **und**
 > `ci.yml::image-scan::trivy-version` (GitHub-Release-Tag, mit
 > `v`-Prefix). Detail-Kommentar am jeweiligen Pin. Wer nur eine
 > der zwei Stellen hebt, bricht die Inner-/Outer-Loop-Parität.

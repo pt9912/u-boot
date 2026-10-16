@@ -6,8 +6,7 @@
 - **Ersetzt-Baseline-Regel:** [`modul-02-harness-bootstrap.md` §Gate-Fragment `d-check.mk` (Schritt 2)](../../.harness/baseline/v6.18.1/regelwerk/modul-02-harness-bootstrap.md#gate-fragment-d-checkmk-schritt-2)
 - **Adaption (neu gefasst 2026-10-16):** `d-check.mk` schreibt
   `ai-harness-init` ([`MR-012`](../conventions.md#mr-012)); es fuehrt `docs-check`
-  als das Befund-Gate (die Vorlage nennt es nicht `doc-check`) und traegt den
-  Image-Digest selbst. Das `Makefile` bindet es ueber die Fragmente ein, `docs-check`
+  als das Befund-Gate und traegt den Image-Digest selbst. Das `Makefile` bindet es ueber die Fragmente ein, `docs-check`
   haengt in `GATE_CHECKS`. Aktive Module:
   `[links, anchors, ids, matrix, planning, targets]`.
   **Arbeitsfluss-Regel aus `planning` (2026-07-25):** Das Modul koppelt "die
@@ -19,7 +18,7 @@
   stattfindet, ist genau die Drift, die vorher nur per Aufmerksamkeit auffiel.
   **`targets`-Abgrenzung:** Autoritaet ist die Gate-Tabelle in
   [`harness/README.md`](../README.md) §Sensors; sie fuehrt Harness-**Sensoren**,
-  nicht jede Makefile-Regel. Acht Build-/Utility-Regeln stehen einzeln benannt
+  nicht jede Makefile-Regel. Neun Build-/Utility-Regeln stehen einzeln benannt
   in `exempt-targets` - eine Bereichsabgrenzung, **kein** Carveout (es wird
   keine Pruefung ausgesetzt).
   **`ids`-Linkpolitik (seit 2026-07-25):** Alle vier Muster laufen mit
@@ -81,8 +80,8 @@
 - **Fragment-Re-Generierung:** `d-check.mk` ist generiert; Handaenderungen daran
   gehen beim naechsten Lauf des Werkzeugs verloren und gehoeren stattdessen in
   `repo.mk` (eigene Targets) oder in `.d-check.yml` (Konfiguration).
-- **Gate-Image-Stand:** `v0.86.1` (digest-gepinnt, Bump 2026-10-16 von `v0.51.1` mit
-  dem Lauf von `ai-harness-init`, [`slice-harness-ai-harness-init-adoption`](../../docs/plan/planning/in-progress/slice-harness-ai-harness-init-adoption.md)).
+- **Gate-Image-Stand:** `v0.86.1`, digest-gepinnt in `d-check.mk`
+  ([`slice-harness-ai-harness-init-adoption`](../../docs/plan/planning/in-progress/slice-harness-ai-harness-init-adoption.md)).
   Der Pin kommt mit dem Programm des Werkzeugs; es gibt fuer ihn **keine**
   Aktualitaets-Routine (anders als fuer die Regelwerk-Baseline, s. Abschnitt
   Freshness-Audit). Ein neuer Stand kommt mit einem neueren Programm; danach

@@ -29,11 +29,12 @@ Die Auswertung läuft in `scripts/coverage-gate.sh` über die Ausgabe von
 |---|---|
 | 0 | Schwelle erreicht, oder Bootstrap-Modus ohne Produktionspakete |
 | 1 | Coverage unter der Schwelle (`FAIL — coverage <p>% below threshold <t>%`) |
-| 2 | Eingabe fehlt oder ist leer ohne Bootstrap, keine `total:`-Zeile, Prozentwert nicht lesbar — die Messung selbst ist gescheitert, nicht die Schwelle |
+| 2 | Eingabe fehlt oder ist leer ohne Bootstrap, keine `total:`-Zeile, Prozentwert nicht lesbar — die Messung hat keine verwertbare Zahl geliefert, die Schwelle wurde nicht geprüft |
 
-Exit 1 und Exit 2 unterscheiden den geprüften Baum (zu wenig Tests) von der
-Umgebung (`go test` ist vor der Messung gescheitert); die Zeile mit
-`hint:` nennt dann die wahrscheinliche Ursache.
+Exit 1 und Exit 2 unterscheiden den geprüften Baum (zu wenig Tests) von einer
+Messung ohne Zahl; die Zeile mit `hint:` nennt dann die wahrscheinliche Ursache.
+Scheitert `go test` im Coverage-Stage, bricht schon der Image-Build ab, bevor das
+Skript läuft.
 
 ## Sperren
 

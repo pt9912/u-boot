@@ -74,7 +74,7 @@ jobs:
       contents: read
     env:
       DOCKER_BUILDKIT: '1'
-      # LOCAL_IMAGE muss zum Makefile-Default `IMAGE ?= u-boot`
+      # LOCAL_IMAGE muss zum `repo.mk`-Default `IMAGE ?= u-boot`
       # passen — `make build` taggt `$(IMAGE):latest` lokal, und
       # der Trivy-Scan löst das Tag über den Host-Docker-Daemon auf.
       LOCAL_IMAGE: u-boot
@@ -105,13 +105,13 @@ jobs:
           exit-code: '1'
           format: 'table'
           # Trivy-Version explizit pinnen statt sich auf den
-          # Action-Default zu verlassen — Makefile-Default
+          # Action-Default zu verlassen — repo.mk-Default
           # `TRIVY_VERSION ?= 0.70.0` muss dem hier matchen,
           # damit `make image-scan` lokal denselben Detector-Code-
           # Pfad nimmt wie der CI-Job (Inner-/Outer-Loop-Parität).
           #
           # ACHTUNG Format-Spaltung: hier GitHub-Release-Tag MIT
-          # `v`-Prefix (`v0.70.0`), im Makefile Docker-Hub-Tag OHNE
+          # `v`-Prefix (`v0.70.0`), in repo.mk Docker-Hub-Tag OHNE
           # `v`-Prefix (`0.70.0`). Beim Pin-Bump beide synchron auf
           # die gleiche Version in der jeweils richtigen Schreibweise.
           trivy-version: 'v0.70.0'

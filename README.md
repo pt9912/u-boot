@@ -253,7 +253,8 @@ For building from source ([LH-FA-BUILD-007](spec/lastenheft.md#lh-fa-build-007--
 ├── spec/               # Lastenheft (contract), Spezifikation (technical), architecture (view)
 ├── docs/               # ADRs, planning, user docs (LH-FA-PROJDOCS-001)
 ├── Dockerfile          # multi-stage build (LH-FA-BUILD-001)
-├── Makefile            # docker-only workflow (LH-FA-BUILD-005)
+├── Makefile            # generated aggregator (ai-harness-init)
+├── repo.mk             # u-boot targets, docker-only workflow (LH-FA-BUILD-005)
 └── go.mod
 ```
 

@@ -58,7 +58,7 @@ Der Cut folgt dem Muster der Release-Cut-Slices (zuletzt
    Inhalt wandert unter `## [x.y.z] - <Tag-Datum>` mit kurzem Lead-Absatz. Compare-Links am
    Fuß umstellen (`[Unreleased]: …/compare/vx.y.z...HEAD`, neue Zeile `[x.y.z]: …`).
 2. **Versionsstrings** `<alt>-dev` → `<neu>-dev` an genau drei Stellen:
-   `cmd/uboot/main.go` (`var version`), `Makefile` (`VERSION ?=`), `Dockerfile`
+   `cmd/uboot/main.go` (`var version`), `repo.mk` (`VERSION ?=`), `Dockerfile`
    (`ARG UBOOT_VERSION=`), jeweils samt Kommentar-Erwähnungen. Der Tag-Build überschreibt
    den Wert per `UBOOT_VERSION`; der `-dev`-Stand gilt für lokale Builds.
 3. **READMEs** (`README.md`, `README.de.md`): Status-Block und eine Zeile in der
@@ -81,7 +81,7 @@ make fullbuild        # ci + Runtime-Image-Build
 Zusätzlich: `main` ist auf `origin/main` gepusht und der **letzte CI-Lauf auf `main` ist
 grün** (`gh run list --limit 3`). Ein roter `image-scan` blockiert den Release — typischer
 Anlass ist ein neuer Go-stdlib-Advisory; dann den Go-Pin heben (`Dockerfile` `ARG
-GO_VERSION`, `Makefile` `GO_VERSION`), siehe CHANGELOG-Einträge zu Toolchain-Bumps.
+GO_VERSION`, `repo.mk` `GO_VERSION`), siehe CHANGELOG-Einträge zu Toolchain-Bumps.
 
 ## 5. Tag setzen (Maintainer-Aktion)
 

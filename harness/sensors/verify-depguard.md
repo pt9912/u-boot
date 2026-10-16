@@ -29,7 +29,7 @@ vollen `make lint`-Lauf kostet.
 |---|---|
 | 0 | alle Regeln haben mit der erwarteten Beschreibung angeschlagen |
 | 1 | mindestens eine Regel hat nicht angeschlagen (Logs im ausgegebenen Verzeichnis) |
-| 2 | Vorbedingung verletzt: Arbeitsbaum in einem Schicht-Verzeichnis nicht sauber, Werkzeug fehlt |
+| 2 | Vorbedingung verletzt: Arbeitsbaum in einem Schicht-Verzeichnis nicht sauber |
 
 ## Sperren
 

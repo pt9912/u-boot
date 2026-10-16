@@ -41,10 +41,10 @@ jobs:
       DOCKER_BUILDKIT: '1'
       REGISTRY: ghcr.io
       IMAGE_NAME: pt9912/u-boot
-      # LOCAL_IMAGE muss zum Makefile-Default `IMAGE ?= u-boot`
+      # LOCAL_IMAGE muss zum `repo.mk`-Default `IMAGE ?= u-boot`
       # passen — `make build` taggt `$(IMAGE):latest` lokal, der
       # Workflow re-taggt das Resultat für GHCR. Falls IMAGE im
-      # Makefile gehoben wird, hier nachziehen.
+      # repo.mk gehoben wird, hier nachziehen.
       LOCAL_IMAGE: u-boot
     steps:
       - name: Checkout

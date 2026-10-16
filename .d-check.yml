@@ -111,7 +111,7 @@ trace:
 # in beiden Teilen (gate-declared-twice). makefiles liest das Makefile, die Fragmente
 # unter harness/mk/ und die .mk-Dateien an der Wurzel (d-check.mk, repo.mk). Der Index
 # fuehrt bewusst nur HARNESS-SENSOREN, nicht jede Regel.
-# exempt-targets sind die acht Build-/Utility-Regeln, die keine Sensoren
+# exempt-targets sind die neun Build-/Utility-Regeln, die keine Sensoren
 # sind — jede einzeln benannt (das Modul kennt keine Globs), damit ein
 # kuenftiges Gate nicht versehentlich mit ausgenommen wird:
 #   help/clean       — Bedienung und Aufraeumen

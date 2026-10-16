@@ -54,7 +54,7 @@ PYTHON_VERSION          ?= 3.13-slim
 # without override produce a coherent "0.9.0-dev" binary.
 VERSION                 ?= 0.9.0-dev
 # Trivy pin policy — TWO formats in play, both must be bumped together:
-#   - Makefile (here):  Docker-Hub-Tag-Konvention OHNE `v`-Prefix
+#   - repo.mk (here):  Docker-Hub-Tag-Konvention OHNE `v`-Prefix
 #                        → `aquasec/trivy:0.70.0`
 #   - ci.yml::image-scan: GitHub-Release-Tag-Konvention MIT `v`-Prefix
 #                        → `trivy-version: 'v0.70.0'` für trivy-action
@@ -194,12 +194,12 @@ image-scan: build ## Trivy scan of the runtime image (LH-QA-003 third gate).
 	    --no-progress \
 	    $(IMAGE):latest
 
-# verify-depguard proves each of the eight LH-FA-ARCH-003 layer rules
+# verify-depguard proves each of the nine LH-FA-ARCH-003 layer rules
 # fires on a real forbidden import. Manual / on-demand: not part of
 # `gates` because each iteration runs `make lint`, so a full pass takes
 # several minutes. Re-run whenever the hexagonal layer set or the
 # depguard config changes.
-verify-depguard: ## Verify all eight depguard layer rules fire (LH-FA-ARCH-003).
+verify-depguard: ## Verify all nine depguard layer rules fire (LH-FA-ARCH-003).
 	bash scripts/verify-depguard.sh
 
 # ---- gate chain ------------------------------------------------------------
