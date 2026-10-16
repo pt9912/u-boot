@@ -2,12 +2,12 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der CR richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** CR-Slice [`slice-cr-cli-quiet-weitere-ausnahmen`](../plan/planning/in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md) (Delivery `0052e1c`, Review-Fixes `591acb7`), Welle [`welle-cli-verbosity`](../plan/planning/welle-cli-verbosity.md). Maßstab: Slice §1 (CR-Kern, Abnahmekriterien, Historie-Zeile), §2 (DoD), §3, §6. Review-Report: [`2026-10-16-slice-cr-cli-quiet-weitere-ausnahmen.md`](2026-10-16-slice-cr-cli-quiet-weitere-ausnahmen.md).
+**Gegenstand:** CR-Slice [`slice-cr-cli-quiet-weitere-ausnahmen`](../plan/planning/done/slice-cr-cli-quiet-weitere-ausnahmen.md) (Delivery `0052e1c`, Review-Fixes `591acb7`), Welle [`welle-cli-verbosity`](../plan/planning/welle-cli-verbosity.md). Maßstab: Slice §1 (CR-Kern, Abnahmekriterien, Historie-Zeile), §2 (DoD), §3, §6. Review-Report: [`2026-10-16-slice-cr-cli-quiet-weitere-ausnahmen.md`](2026-10-16-slice-cr-cli-quiet-weitere-ausnahmen.md).
 
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-cr-cli-quiet-weitere-ausnahmen`](../plan/planning/in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md)
+- Slice: [`slice-cr-cli-quiet-weitere-ausnahmen`](../plan/planning/done/slice-cr-cli-quiet-weitere-ausnahmen.md)
 - IDs: [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Änderung), [`LH-FA-CLI-005A`](../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung), [`LH-FA-INIT-005`](../../spec/lastenheft.md#lh-fa-init-005--überschreibschutz), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-NFA-PERF-002`](../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker)
 - Artefakte: `spec/lastenheft.md` (Versionsfeld, `LH-FA-CLI-005`, §16), `CHANGELOG.md` `[Unreleased]`, Planungsdateien; kein Go-Code im Diff. <!-- d-check:ignore (Pfade als Zitat) -->
 

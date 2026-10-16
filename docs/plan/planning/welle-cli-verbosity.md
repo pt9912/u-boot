@@ -30,7 +30,7 @@ Code es tragen.
 - Die Entscheidungen des Projektinhabers liegen vor (2026-10-16): `--quiet` zeigt nur Fehler; die Ausnahmen sind die
   Sandbox-Lockerungs-Hinweise (CR [`slice-cr-cli-quiet-fehler-und-warnungen`](done/slice-cr-cli-quiet-fehler-und-warnungen.md))
   sowie Degradations-Fallbacks, Compose-Fortschritt von `up` und `--force`-Zusammenfassung (CR
-  [`slice-cr-cli-quiet-weitere-ausnahmen`](in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md); angenommene Fassung von
+  [`slice-cr-cli-quiet-weitere-ausnahmen`](done/slice-cr-cli-quiet-weitere-ausnahmen.md); angenommene Fassung von
   [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)); der Trigger ist damit eingetreten.
 
 ## 3. Closure-Trigger (Welle schließt)
@@ -49,7 +49,7 @@ Lastenheft, die beiden Code-Slices den Adapter, und die Spezifikation beschreibt
 | Slice | Titel | Bezug |
 |---|---|---|
 | [`slice-cr-cli-quiet-fehler-und-warnungen`](done/slice-cr-cli-quiet-fehler-und-warnungen.md) | CR: Ausnahme der Sicherheitslockerungen unter `--quiet` (zuerst, geschlossen) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
-| [`slice-cr-cli-quiet-weitere-ausnahmen`](in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md) | CR: Ausnahmen Degradations-Fallbacks, Compose-Fortschritt und `--force`-Zusammenfassung unter `--quiet` (Lastenheft 0.9.0) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-NFA-PERF-002`](../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker), [`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) |
+| [`slice-cr-cli-quiet-weitere-ausnahmen`](done/slice-cr-cli-quiet-weitere-ausnahmen.md) | CR: Ausnahmen Degradations-Fallbacks, Compose-Fortschritt und `--force`-Zusammenfassung unter `--quiet` (Lastenheft 0.9.0) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-NFA-PERF-002`](../../../spec/lastenheft.md#lh-nfa-perf-002--startzeit-abhängig-von-docker), [`LH-FA-CLI-005A`](../../../spec/lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) |
 | [`slice-v1-cli-quiet-nur-fehler`](open/slice-v1-cli-quiet-nur-fehler.md) | Code: `--quiet` zeigt nur Fehler in allen Subkommandos, vier Ausnahmen bleiben (blockiert bis Lastenheft 0.9.0) | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
 | [`slice-v1-cli-verbosity-letzte-option-gewinnt`](open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) | Code: die zuletzt angegebene Option gewinnt, danach der Spezifikations-Eintrag | [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) |
 
@@ -58,7 +58,7 @@ Lastenheft, die beiden Code-Slices den Adapter, und die Spezifikation beschreibt
 - Blockiert: keine Welle.
 - Wird blockiert von: nichts; die Entscheidungen des Projektinhabers (Wirkung von `--quiet`, siehe §2) liegen vor. Innerhalb der
   Welle geht der CR [`slice-cr-cli-quiet-fehler-und-warnungen`](done/slice-cr-cli-quiet-fehler-und-warnungen.md) dem CR
-  [`slice-cr-cli-quiet-weitere-ausnahmen`](in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md) voraus; dieser geht dem Slice
+  [`slice-cr-cli-quiet-weitere-ausnahmen`](done/slice-cr-cli-quiet-weitere-ausnahmen.md) voraus; dieser geht dem Slice
   [`slice-v1-cli-quiet-nur-fehler`](open/slice-v1-cli-quiet-nur-fehler.md) voraus, weil die Ausnahmen erst nach Lastenheft 0.9.0
   im Vertrag stehen; der Code-Slice geht
   [`slice-v1-cli-verbosity-letzte-option-gewinnt`](open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) voraus, weil beide

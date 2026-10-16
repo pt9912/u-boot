@@ -7,7 +7,7 @@ Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — letzter Slice der Welle; folgt auf
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md),
-[`slice-cr-cli-quiet-weitere-ausnahmen`](../in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md) und
+[`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) und
 [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md), weil die Pegelabbildung von
 `--quiet` (Fehler-Pegel) aus dem Slice [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) kommt.
 
@@ -23,7 +23,7 @@ nicht geändert; der Code folgt dem Lastenheft. `spezifikation.md` und
 `architecture.md` beschreiben das Verhalten erst **nach** diesem Slice, dem Slice
 [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) **und**
 den CRs [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) und
-[`slice-cr-cli-quiet-weitere-ausnahmen`](../in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md);
+[`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md);
 vorher nicht in die Spec schreiben.
 
 **Verantwortlich:** —
@@ -135,7 +135,7 @@ Steering-Loop-Lerneintrag geschrieben (§7).
 - **Reihenfolge-Abhängigkeit:** Die Spezifikation darf das Verhalten erst nach
   diesem Slice, dem Slice [`slice-v1-cli-quiet-nur-fehler`](../open/slice-v1-cli-quiet-nur-fehler.md) und den CRs
   [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) und
-  [`slice-cr-cli-quiet-weitere-ausnahmen`](../in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md) beschreiben. — **Ausgang:** entfallen: der
+  [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) beschreiben. — **Ausgang:** entfallen: der
   Spezifikations-Eintrag liegt in diesem Slice, dem letzten der Welle
   [`welle-cli-verbosity`](../welle-cli-verbosity.md).
 

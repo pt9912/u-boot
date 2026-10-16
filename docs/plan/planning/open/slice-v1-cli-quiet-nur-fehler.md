@@ -11,7 +11,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — dritter Slice; folgt auf
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) und
-[`slice-cr-cli-quiet-weitere-ausnahmen`](../in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md) (die vier Ausnahmen stehen erst nach
+[`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) (die vier Ausnahmen stehen erst nach
 Lastenheft 0.9.0 im Vertrag) und geht
 [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) voraus (siehe §4: beide ändern
 `root.go` und `verbosity_test.go`).
@@ -24,7 +24,7 @@ Lastenheft 0.9.0 im Vertrag) und geht
 [`LH-FA-DIAG-003`](../../../../spec/lastenheft.md#lh-fa-diag-003--fehlerklassifikation).
 Herkunft: Entscheidungen des Projektinhabers (2026-10-16), festgehalten in den CRs
 [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) und
-[`slice-cr-cli-quiet-weitere-ausnahmen`](../in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md); Befunde des Reviews
+[`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md); Befunde des Reviews
 [`2026-10-16-slice-v1-cli-quiet-nur-fehler`](../../../reviews/2026-10-16-slice-v1-cli-quiet-nur-fehler.md) (F-1 bis F-6).
 
 **Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)) — wird
@@ -153,7 +153,7 @@ verändern, behalten ihre Ausgabe, weil sie das Ergebnis des Befehls ist: `confi
 ## 4. Trigger
 
 **Start** (`next` → `in-progress`): Lastenheft 0.9.0 ist angenommen (der CR
-[`slice-cr-cli-quiet-weitere-ausnahmen`](../in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md) liegt in `done/`) und der Projektinhaber
+[`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) liegt in `done/`) und der Projektinhaber
 priorisiert den Slice.
 
 **Reihenfolge zum Slice [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md):**
@@ -168,7 +168,7 @@ Konflikt-Vermeidung, keine Voraussetzung.
 - `in-progress` → `next` (zu groß, zurück zur Zerlegung): Reichweite (alle Subkommandos) und Ausnahmen-Kennzeichnung lassen
   sich nicht in einem Review-Umfang halten — Zerlegungsschnitte siehe §6.
 - `in-progress` → `open` (blockiert): Lastenheft 0.9.0 ist nicht angenommen (der CR
-  [`slice-cr-cli-quiet-weitere-ausnahmen`](../in-progress/slice-cr-cli-quiet-weitere-ausnahmen.md) noch nicht in `done/`) oder
+  [`slice-cr-cli-quiet-weitere-ausnahmen`](../done/slice-cr-cli-quiet-weitere-ausnahmen.md) noch nicht in `done/`) oder
   der Projektinhaber ändert eine der vier Ausnahmen. Dieser Slice liegt bis zur Schließung des CR in `open/`.
 
 ## 5. Closure-Trigger
