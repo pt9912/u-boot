@@ -120,5 +120,4 @@ flowchart LR
   als halbfertiger Slice.
 - Diese Datei ist die einzige zulässige Ausnahme von der
   `slice-`/`tranche-`-Namenskonvention in `docs/plan/planning/` (siehe
-  Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine
-  und [`../README.md`](../README.md)).
+  [`../README.md`](../README.md)).

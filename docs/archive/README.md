@@ -2,8 +2,7 @@
 
 Abgelöste oder veraltete Doku-Inhalte aus `docs/user/`, `docs/plan/` oder
 anderen Bereichen. Statt zu löschen wird hierher verschoben, damit die
-Historie auffindbar bleibt (siehe
-Baseline-Regelwerk `modul-05-planning-harness.md`).
+Historie auffindbar bleibt.
 
 Konventionen:
 

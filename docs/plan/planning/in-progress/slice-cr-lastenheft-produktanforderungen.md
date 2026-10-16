@@ -91,8 +91,8 @@ zur Freigabe, Vorschlag in Klammern):
 - [x] `trace` und `doc-complete`: 83 Anforderungen, 0 Waisen — die Grabsteine erzeugen
   keine Requirement-Waisen.
 - [x] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
-      (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+      ([`Report`](../../../reviews/2026-10-16-slice-cr-lastenheft-produktanforderungen.md); 0 HIGH, 0 MEDIUM, 6 LOW, 2 INFO; F-1 bis F-3 und F-5 behoben; `.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review.
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [ ] Jedes Risiko aus §6 trägt einen Ausgang.

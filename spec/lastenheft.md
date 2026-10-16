@@ -1530,7 +1530,7 @@ die geänderte Anforderung selbst.
 Die Spalte **Verweis** benennt den *externen* Vorgang (Vereinbarung, Ticket,
 Vertragsanhang), nicht das interne Artefakt, das die Änderung ausgeführt hat —
 das Lastenheft verweist nie abwärts auf Planung
-([`LH-FA-PROJDOCS-006`](#lh-fa-projdocs-006--dokumentationsreferenzmodell)).
+(Decken-Regel des adoptierten Baseline-Regelwerks).
 
 | Version | Datum | Änderung | Verweis |
 | ------- | ---------- | ------------------------------------------------------------ | ---------------------------------------------- |

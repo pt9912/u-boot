@@ -1,8 +1,8 @@
 # Architektur — u-boot
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-10-02.
+**Status:** Aktiv. **Letzte Änderung:** 2026-10-16.
 
-**Bezug:** [`SPEC-012`](spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal)..[`SPEC-034`](spezifikation.md#spec-034--enforcement-der-import-regeln)
+**Bezug:** [`SPEC-012`](spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal), [`SPEC-013`](spezifikation.md#spec-013--import-regel-tabelle-der-schichten) und [`SPEC-034`](spezifikation.md#spec-034--enforcement-der-import-regeln)
 
 **Rolle:** Sicht-Stratum — *keine* eigenen Anforderungen, derivativ: Lastenheft vor Spezifikation vor Architektur; diese Sicht visualisiert und erweitert nie.
 
