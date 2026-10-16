@@ -5,7 +5,7 @@
 Rot, wenn die Gesamt-Coverage der Produktionspakete unter `THRESHOLD` liegt
 (Vorgabe 90 %), oder wenn die Messung nichts liefert, obwohl Produktionscode
 existiert. Was als Coverage-Bootstrap gilt, legt
-[`LH-FA-BUILD-008`](../../spec/lastenheft.md#lh-fa-build-008--coverage-bootstrap) fest.
+[`SPEC-032`](../../spec/spezifikation.md#spec-032--bootstrap-verhalten-der-coverage-stage) fest.
 
 ## Grenze — was das Grün nicht abdeckt
 
@@ -44,4 +44,4 @@ Skript läuft.
 
 ## Bindung
 
-Schwelle 90 %; [`LH-FA-BUILD-008`](../../spec/lastenheft.md#lh-fa-build-008--coverage-bootstrap).
+Schwelle 90 %; [`SPEC-032`](../../spec/spezifikation.md#spec-032--bootstrap-verhalten-der-coverage-stage).

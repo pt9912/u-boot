@@ -242,7 +242,7 @@ Für Konsumenten von `u-boot` ([LH-FA-DIAG-002](spec/lastenheft.md#lh-fa-diag-00
 - Git
 - Optional: VS Code mit der Dev-Containers-Extension
 
-Für den Bau aus den Quellen ([LH-FA-BUILD-007](spec/lastenheft.md#lh-fa-build-007--docker-only-workflow)):
+Für den Bau aus den Quellen ([SPEC-031](spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)):
 
 - Docker Engine
 - GNU `make` (der einzige permanente Carveout zu
@@ -257,15 +257,15 @@ Für den Bau aus den Quellen ([LH-FA-BUILD-007](spec/lastenheft.md#lh-fa-build-0
 │   ├── hexagon/{domain,application,port/{driving,driven}}/
 │   └── adapter/{driving,driven}/
 ├── spec/               # Lastenheft (Vertrag), Spezifikation (Technik), Architektur (Sicht)
-├── docs/               # ADRs, Planning, User-Doku (LH-FA-PROJDOCS-001)
-├── Dockerfile          # Multi-Stage-Build (LH-FA-BUILD-001)
+├── docs/               # ADRs, Planning, User-Doku
+├── Dockerfile          # Multi-Stage-Build
 ├── Makefile            # generierter Aggregator (ai-harness-init)
-├── repo.mk             # u-boot-Targets, Docker-only-Workflow (LH-FA-BUILD-005)
+├── repo.mk             # u-boot-Targets, Docker-only-Workflow
 └── go.mod
 ```
 
 Layout-Anforderung:
-[`LH-FA-BUILD-009`](spec/lastenheft.md#lh-fa-build-009--repository-layout); das Mindestlayout im Detail steht in
+[`SPEC-033`](spec/spezifikation.md#spec-033--go-layout-des-repositories); das Mindestlayout im Detail steht in
 [`spec/spezifikation.md`](spec/spezifikation.md).
 
 ## Dokumentation
@@ -294,7 +294,7 @@ Layout-Anforderung:
 
 ## Build, Test, Lint
 
-Der Build ist Docker-only ([LH-FA-BUILD-007](spec/lastenheft.md#lh-fa-build-007--docker-only-workflow)); es wird keine
+Der Build ist Docker-only ([SPEC-031](spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)); es wird keine
 Go-Toolchain am Host benötigt. Nur Docker und `make` müssen
 installiert sein.
 

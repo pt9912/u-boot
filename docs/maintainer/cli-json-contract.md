@@ -294,7 +294,7 @@ Der Go-Wire-Type lebt im CLI-Adapter:
   Allowlist-Erweiterung), `WithExitCode(int)`.
 
 Architektur-Grenze: Envelope-Type und Helper leben im **CLI-Adapter**,
-**nicht** in Domain oder Application ([LH-FA-ARCH-002](../../spec/lastenheft.md#lh-fa-arch-002--schichten-und-verzeichnislayout)/`-003`).
+**nicht** in Domain oder Application ([SPEC-012](../../spec/spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal)/[SPEC-034](../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln)).
 
 ---
 

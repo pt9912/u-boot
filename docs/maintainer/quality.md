@@ -3,7 +3,7 @@
 | Dokument         | Quality-Gates-Übersicht                                       |
 | ---------------- | -------------------------------------------------------------- |
 | Projektname      | `u-boot`                                                       |
-| Bezug            | [LH-QA-001](../../spec/lastenheft.md#lh-qa-001--automatisierte-tests)..[LH-QA-004](../../spec/lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil), [LH-FA-BUILD-001](../../spec/lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)..[LH-FA-BUILD-009](../../spec/lastenheft.md#lh-fa-build-009--repository-layout) in [`spec/lastenheft.md`](../../spec/lastenheft.md) |
+| Bezug            | [SPEC-025](../../spec/spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles)..[SPEC-035](../../spec/spezifikation.md#spec-035--pflichten-des-lint-profils) in [`spec/spezifikation.md`](../../spec/spezifikation.md) |
 | ADR              | [`docs/plan/adr/0003-solid-nahes-lint-profil.md`](../plan/adr/0003-solid-nahes-lint-profil.md) |
 | Status           | Entwurf 0.1.0                                                  |
 | Datum            | 2026-05-21                                                     |
@@ -13,7 +13,7 @@
 Übersicht über die verbindlichen Quality-Gates der u-boot-Codebase: was
 läuft im `lint`-Stage, was im `test`-Stage, welche Schwellen gelten,
 welche Carveouts sind dokumentiert. Das Dokument ist die Detail-Doku
-zu [LH-QA-004](../../spec/lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil); die Pflichtaussagen leben im Lastenheft, die konkreten
+zu [SPEC-027](../../spec/spezifikation.md#spec-027--zusammensetzung-des-lint-profils); die Pflichtaussagen leben in der Spezifikation, die konkreten
 Konfigurations- und Schwellwerte hier.
 
 ---
@@ -21,7 +21,7 @@ Konfigurations- und Schwellwerte hier.
 ## 1. Statische Analyse (`golangci-lint`)
 
 Statische Analyse läuft Docker-basiert über die `lint`-Stage des
-Top-Level-`Dockerfile` ([LH-FA-BUILD-001](../../spec/lastenheft.md#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)):
+Top-Level-`Dockerfile` ([SPEC-025](../../spec/spezifikation.md#spec-025--stages-des-multi-stage-dockerfiles)):
 
 ```bash
 docker build --target lint -t u-boot:lint .
@@ -42,7 +42,7 @@ SOLID-nahen Zusatzprofil aus:
 
 Die vollständige Konfiguration (5 Defaults + 24 SOLID-nahe Linter
 aus §1.2; `depguard` ist als Schicht-Regel-Linter Teil dieser 24,
-siehe [LH-FA-ARCH-003](../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)) lebt in
+siehe [SPEC-034](../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln)) lebt in
 [`.golangci.yml`](../../.golangci.yml). Damit sind 29 Linter aktiv. `//nolint`-Suppressions bleiben
 ausgeschlossen — falls ein Linter auf einem Pfad designseitig keinen
 Sinn ergibt (z. B. `testpackage` im `cmd/uboot`-Wiring), wird der Pfad
@@ -50,7 +50,7 @@ per `issues.exclude-rules` mit `Why:`-Kommentar ausgenommen; dort
 dokumentierte Scope-Definitionen sind keine Suppressions, sondern
 bewusste Profil-Entscheidungen. Verstöße brechen den Build.
 
-Verbindliche Make-Targets ([LH-FA-BUILD-005](../../spec/lastenheft.md#lh-fa-build-005--makefile-mit-standard-targets)/`-006`):
+Verbindliche Make-Targets ([SPEC-008](../../spec/spezifikation.md#spec-008--eigenschaften-und-pflicht-targets-des-makefiles)):
 
 ```bash
 make lint            # nur statische Analyse
@@ -78,7 +78,7 @@ Import-/Modulgrenzen (DIP) oder reduzierte globale Kopplung.
 | `containedctx`     | `context.Context` nicht in Structs speichern      | Y              |
 | `contextcheck`     | Context korrekt weiterreichen                     | Y              |
 | `cyclop`           | Zyklomatische Komplexität                         | Y              |
-| `depguard`         | Import-Regeln/Layer-Grenzen ([LH-FA-ARCH-003](../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement))    | Y              |
+| `depguard`         | Import-Regeln/Layer-Grenzen ([SPEC-034](../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln))    | Y              |
 | `dupl`             | Code-Duplikate                                    | Y              |
 | `fatcontext`       | Context in Loops/Closures                         | Y              |
 | `forbidigo`        | Verbotene Identifier/APIs                         | Y              |
@@ -193,7 +193,7 @@ Pin-Inventar (Stand M6-docker-int Sub-T3):
 ## 3. Coverage
 
 Coverage-Messung über die `coverage`-Stage, bootstrap-aware
-([LH-FA-BUILD-008](../../spec/lastenheft.md#lh-fa-build-008--coverage-bootstrap)):
+([SPEC-032](../../spec/spezifikation.md#spec-032--bootstrap-verhalten-der-coverage-stage)):
 
 ```bash
 make coverage-gate
@@ -235,7 +235,7 @@ CI-Job).
 > `v`-Prefix). Detail-Kommentar am jeweiligen Pin. Wer nur eine
 > der zwei Stellen hebt, bricht die Inner-/Outer-Loop-Parität.
 
-SBOM-Erzeugung ([LH-FA-BUILD-006](../../spec/lastenheft.md#lh-fa-build-006--aggregator-targets) optional) folgt bei konkretem
+SBOM-Erzeugung ([SPEC-008](../../spec/spezifikation.md#spec-008--eigenschaften-und-pflicht-targets-des-makefiles) optional) folgt bei konkretem
 Bedarf in einem eigenen Slice.
 
 ---
@@ -243,7 +243,7 @@ Bedarf in einem eigenen Slice.
 ## 5. Architektur-Enforcement
 
 `depguard` (Teil des SOLID-nahen Profils) erzwingt die Schicht-Regeln
-aus [LH-FA-ARCH-003](../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement). Detail in [`spec/architecture.md`](../../spec/architecture.md) §4.
+aus [SPEC-034](../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln). Detail in [`spec/architecture.md`](../../spec/architecture.md) §4.
 
 Die `depguard`-Regelblöcke sind heute aktiv, matchen aber nichts,
 solange `./internal/...` keinen produktiven Code enthält. Mit dem
@@ -258,7 +258,7 @@ CI läuft auf GitHub Actions; drei Workflows in
 
 - [`ci.yml`](../../.github/workflows/ci.yml) — Inner-Loop-Gates
   (`gates`, `security-gates`, `image-scan`), verbindlich aus
-  [LH-QA-003](../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions), Begründung in
+  [SPEC-026](../../spec/spezifikation.md#spec-026--komposition-der-ci-pipeline-github-actions), Begründung in
   [ADR-0004](../plan/adr/0004-ci-system.md).
 - [`integration.yml`](../../.github/workflows/integration.yml) —
   `make test-docker` gegen echten Daemon
@@ -288,7 +288,7 @@ Pflichten `ci.yml`:
     + `aquasecurity/trivy-action` (`severity: HIGH,CRITICAL`,
     `exit-code: 1`).
 - **Runner:** `ubuntu-latest` mit vorinstalliertem Docker + BuildKit.
-- **Keine Host-Toolchain:** Docker-only ([LH-FA-BUILD-007](../../spec/lastenheft.md#lh-fa-build-007--docker-only-workflow)); der
+- **Keine Host-Toolchain:** Docker-only ([SPEC-031](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)); der
   Workflow installiert weder Go noch `golangci-lint` am Runner.
 - **Actions SHA-gepinnt** mit Tag-Kommentar, z. B.
   `uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2`.

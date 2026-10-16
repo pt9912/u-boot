@@ -65,7 +65,7 @@ Vollständige Kategorie-Definitionen: [`harness/review.md`](../../harness/review
 - **Referenzmodell-Verstoß (repo-spezifisch #2).** Ein Dokument der Ränge 1–3
   (Lastenheft, Architektur-Sicht, ADR) verweist **abwärts** auf Slice, Carveout
   oder Roadmap. Normative Kraft existiert nur aufwärts
-  ([`LH-FA-PROJDOCS-006`](../../spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell));
+  (Baseline-Regelwerk `grundlagen-referenz-richtung.md` §Referenz-Richtung (SDP));
   die Änderungskopplung deklariert die ADR im `Schärft`-Feld nach oben, nie die
   Spec nach unten.
 - **Sprachvertrag verletzt.** CLI-Ausgabe, Fehlermeldung oder generierte
@@ -76,10 +76,10 @@ Vollständige Kategorie-Definitionen: [`harness/review.md`](../../harness/review
   `error`-String nicht.
 - **Architekturgrenze gebrochen.** Hexagonale Import-Regel, kreuz-blinde
   Port-Trennung oder Wiring-Grenze verletzt
-  ([`LH-FA-ARCH-003`](../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)),
+  ([`SPEC-034`](../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln)),
   oder `//nolint:depguard` als Umgehung.
 - **Gate- oder Harness-Lockerung.** Docker-only-Workflow umgangen
-  ([`LH-FA-BUILD-007`](../../spec/lastenheft.md#lh-fa-build-007--docker-only-workflow)),
+  ([`SPEC-031`](../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)),
   Coverage-Schwelle oder Lint-Regel still gesenkt, Host-Toolchain-Lauf als
   alleiniger Handoff-Nachweis.
 - **Dateisicherheit.** User-Dateien werden ohne managed-block-Schutz, Backup
@@ -88,14 +88,14 @@ Vollständige Kategorie-Definitionen: [`harness/review.md`](../../harness/review
   [`LH-SA-FILE-002`](../../spec/lastenheft.md#lh-sa-file-002--markierte-verwaltete-bereiche)).
 - **Carveout ohne Buchführung.** Neue temporäre Ausnahme ohne Eintrag im
   Carveout-Inventar *und* ohne Plan-Anker
-  ([`LH-FA-PROJDOCS-005`](../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)).
+  (Baseline-Regelwerk `modul-07-carveouts.md`).
 - **Immutabilitäts-Bruch.** Ein `Accepted`-ADR wird inhaltlich umgeschrieben
   statt durch eine Folge-Entscheidung abgelöst; oder ein grandfathered lean-ADR
   wird ohne Change Request auf die MADR-Form migriert
-  ([`LH-FA-PROJDOCS-002`](../../spec/lastenheft.md#lh-fa-projdocs-002--adr-format)).
+  ([`SPEC-028`](../../spec/spezifikation.md#spec-028--bestandsregel-und-abgleich-zum-adr-format)).
 - **Lifecycle-Bruch.** Planning-Artefakt liegt in zwei Lifecycle-Verzeichnissen
   oder wurde per Copy-Delete statt `git mv` bewegt
-  ([`LH-FA-PROJDOCS-003`](../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)).
+  (Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine).
 - **Baseline-Bump nur teilweise.** Ein Versions-Bump der vendorten Baseline
   fasst nicht alle vier Stellen der `MR-004`-Bump-Prozedur an
   ([`harness/conventions.md`](../../harness/conventions.md)).

@@ -4,7 +4,7 @@
 * Bezug: [`harness/verification.md`](../../harness/verification.md)
   (Pflichtfelder der Verification Evidence),
   [`docs/plan/planning/README.md`](../../docs/plan/planning/README.md) §Lifecycle,
-  [`LH-FA-PROJDOCS-003`](../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)
+  Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine
 * Gilt für: die Closure-Abschnitte der Slices in
   [`docs/plan/planning/done/`](../../docs/plan/planning/done/)
 
@@ -73,7 +73,7 @@ nicht Substanz diskutiert wird, wo schon das Feld fehlt.
 - **Carveout-Zeile fehlt oder widerspricht dem Inventar.** Neuer Carveout ohne
   Eintrag in
   [`carveouts.md`](../../docs/plan/planning/in-progress/carveouts.md)
-  ([`LH-FA-PROJDOCS-005`](../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)).
+  (Baseline-Regelwerk `modul-07-carveouts.md`).
 
 **MEDIUM** — genau *einer* der drei Pflicht-Inhalte fehlt oder ist unkonkret:
 

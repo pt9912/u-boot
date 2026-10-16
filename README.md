@@ -237,7 +237,7 @@ For consumers of `u-boot` ([LH-FA-DIAG-002](spec/lastenheft.md#lh-fa-diag-002--l
 - Git
 - Optional: VS Code with the Dev Containers extension
 
-For building from source ([LH-FA-BUILD-007](spec/lastenheft.md#lh-fa-build-007--docker-only-workflow)):
+For building from source ([SPEC-031](spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)):
 
 - Docker Engine
 - GNU `make` (single permanent carveout to [LH-NFA-PORT-002](spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten))
@@ -251,14 +251,14 @@ For building from source ([LH-FA-BUILD-007](spec/lastenheft.md#lh-fa-build-007--
 │   ├── hexagon/{domain,application,port/{driving,driven}}/
 │   └── adapter/{driving,driven}/
 ├── spec/               # Lastenheft (contract), Spezifikation (technical), architecture (view)
-├── docs/               # ADRs, planning, user docs (LH-FA-PROJDOCS-001)
-├── Dockerfile          # multi-stage build (LH-FA-BUILD-001)
+├── docs/               # ADRs, planning, user docs
+├── Dockerfile          # multi-stage build
 ├── Makefile            # generated aggregator (ai-harness-init)
-├── repo.mk             # u-boot targets, docker-only workflow (LH-FA-BUILD-005)
+├── repo.mk             # u-boot targets, docker-only workflow
 └── go.mod
 ```
 
-Layout requirement: [`LH-FA-BUILD-009`](spec/lastenheft.md#lh-fa-build-009--repository-layout); the detailed minimum layout is in [`spec/spezifikation.md`](spec/spezifikation.md).
+Layout requirement: [`SPEC-033`](spec/spezifikation.md#spec-033--go-layout-des-repositories); the detailed minimum layout is in [`spec/spezifikation.md`](spec/spezifikation.md).
 
 ## Documentation
 
@@ -283,7 +283,7 @@ Layout requirement: [`LH-FA-BUILD-009`](spec/lastenheft.md#lh-fa-build-009--repo
 
 ## Build, Test, Lint
 
-The build is Docker-only ([LH-FA-BUILD-007](spec/lastenheft.md#lh-fa-build-007--docker-only-workflow)); no Go toolchain on the
+The build is Docker-only ([SPEC-031](spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)); no Go toolchain on the
 host is required. Only Docker and `make` need to be installed.
 
 ```bash

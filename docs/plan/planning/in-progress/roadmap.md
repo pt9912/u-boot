@@ -102,10 +102,10 @@ flowchart LR
 ## Verwandte Dokumente
 
 - [`carveouts.md`](carveouts.md) — Master-Inventar aller temporären und
-  permanenten Carveouts ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)),
+  permanenten Carveouts (Baseline-Regelwerk `modul-07-carveouts.md`),
   plus Audit-Trail der Slices, die offene Carveouts geschlossen haben.
 - [`README.md`](../README.md) — Slice-/Tranche-Konventionen für Dateinamen in
-  `docs/plan/planning/` ([`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)).
+  `docs/plan/planning/` (Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine).
 - [`docs/archive/roadmap-history-v0.1-v0.3.md`](../../../archive/roadmap-history-v0.1-v0.3.md)
   — ausgelagerte Release-Historie.
 
@@ -120,5 +120,5 @@ flowchart LR
   als halbfertiger Slice.
 - Diese Datei ist die einzige zulässige Ausnahme von der
   `slice-`/`tranche-`-Namenskonvention in `docs/plan/planning/` (siehe
-  [`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)
+  Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine
   und [`../README.md`](../README.md)).

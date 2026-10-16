@@ -28,7 +28,7 @@
 - **Begruendung:** Das Regelwerk fordert eine per-Repo Skill-Datei, nicht nur
   Prosa - ohne sie driftet der Reviewer zwischen Sessions. Die Doku-Mindest-
   struktur
-  ([`LH-FA-PROJDOCS-001`](../../spec/lastenheft.md#lh-fa-projdocs-001--mindeststruktur))
+  ([`SPEC-010`](../../spec/spezifikation.md#spec-010--mindest-verzeichnisstruktur-unter-docs))
   ist als **Mindest-**, nicht als Maximalstruktur formuliert; `docs/reviews/`
   ergaenzt sie additiv und erfuellt die dortige README-Pflicht je
   Unterverzeichnis. Kein Change Request am Vertrags-Stratum noetig.

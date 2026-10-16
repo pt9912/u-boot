@@ -28,7 +28,7 @@
   Dokument ausgenommen; stattdessen drei zeilengenaue Mechanismen:
   (1) verlinken, wo die Kennung eine echte Referenz ist - in `done/` ist das
   ausdruecklich zulaessig, weil
-  [`LH-FA-PROJDOCS-003`](../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)
+  Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine
   "Querverweise" als erlaubte nachtraegliche Korrektur nennt;
   (2) `d-check:ignore` **je Zeile**, wo die Kennung ein *Beleg* ist und kein
   Verweis (JSON-Payload-Beispiel, `pfad:`-Feld eines Review-Findings, das den

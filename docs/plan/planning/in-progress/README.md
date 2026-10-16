@@ -11,9 +11,9 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| [`carveouts.md`](carveouts.md) | Master-Dokument: Carveout-Inventar ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)) |
+| [`carveouts.md`](carveouts.md) | Master-Dokument: Carveout-Inventar (Baseline-Regelwerk `modul-07-carveouts.md`) |
 | [`slice-v2-homebrew-formula.md`](slice-v2-homebrew-formula.md) | Homebrew-Formel/Tap (repo-seitig geliefert, Tap-Einrichtung offen) |
-| [`roadmap.md`](roadmap.md) | Master-Dokument: Slice-/Tranchen-Stand ([`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle)) |
+| [`roadmap.md`](roadmap.md) | Master-Dokument: Slice-/Tranchen-Stand (Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine) |
 
 (Nur die zwei Master-Dokumente liegen dauerhaft in `in-progress/`.
 Der JSON-CLI-Cluster [`slice-v1-cli-json-dry-run`](../done/slice-v1-cli-json-dry-run.md) (9/9 + T_close) und

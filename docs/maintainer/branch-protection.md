@@ -1,6 +1,6 @@
 # Branch Protection für `main`
 
-[LH-QA-003](../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions) verlangt, dass die drei CI-Jobs aus `.github/workflows/ci.yml`
+[SPEC-026](../../spec/spezifikation.md#spec-026--komposition-der-ci-pipeline-github-actions) verlangt, dass die drei CI-Jobs aus `.github/workflows/ci.yml`
 für jeden Pull-Request **blockierend** sind. Die exakten Required-
 Status-Check-Namen sind die Workflow-`name:`-Felder
 (`gates (lint + test + coverage-gate)`, `security-gates (govulncheck)`,
@@ -33,9 +33,9 @@ ausgeführt sein.
      Display-Namen sind die `name:`-Felder aus `.github/workflows/ci.yml`,
      nicht die kürzeren `jobs.<key>`-Identifier. Bei einer Hebung der
      `name:`-Werte muss diese Checkliste mitgezogen werden.
-     - `gates (lint + test + coverage-gate)` ([LH-QA-003](../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions))
-     - `security-gates (govulncheck)` ([LH-QA-003](../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions))
-     - `image-scan (trivy HIGH+CRITICAL)` ([LH-QA-003](../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions), geliefert mit
+     - `gates (lint + test + coverage-gate)` ([SPEC-026](../../spec/spezifikation.md#spec-026--komposition-der-ci-pipeline-github-actions))
+     - `security-gates (govulncheck)` ([SPEC-026](../../spec/spezifikation.md#spec-026--komposition-der-ci-pipeline-github-actions))
+     - `image-scan (trivy HIGH+CRITICAL)` ([SPEC-026](../../spec/spezifikation.md#spec-026--komposition-der-ci-pipeline-github-actions), geliefert mit
        [`slice-v1-release-pipeline`](../plan/planning/done/slice-v1-release-pipeline.md)
        T3, siehe
        [ADR-0007](../plan/adr/0007-distributionswege-ghcr.md))
@@ -96,7 +96,7 @@ bewusste Entscheidung.
 
 ## Bezug
 
-- Auslösende Spec: [LH-QA-003](../../spec/lastenheft.md#lh-qa-003--ci-fähigkeit-github-actions) (drei Jobs `gates` / `security-gates` /
+- Auslösende Spec: [SPEC-026](../../spec/spezifikation.md#spec-026--komposition-der-ci-pipeline-github-actions) (drei Jobs `gates` / `security-gates` /
   `image-scan`, alle PR-blockierend; image-scan via
   [slice-v1-release-pipeline](../plan/planning/done/slice-v1-release-pipeline.md) T3 in den Spec-Pflicht-Block geschrieben);
   [ADR-0004](../plan/adr/0004-ci-system.md) Folgepunkt „Branch-Protection nicht versioniert".

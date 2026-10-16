@@ -173,8 +173,8 @@ werden hier nicht wiederholt:
 | Exit-Code-Klassifikation (Produktvertrag) | [`LH-FA-CLI-006`](spec/lastenheft.md#lh-fa-cli-006--exit-codes) |
 | Überschreibschutz, Managed Blocks, Backups | [`LH-FA-INIT-005`](spec/lastenheft.md#lh-fa-init-005--überschreibschutz) |
 | CLI-Sprache (Ausgaben und generierte Dateien Englisch) | [`LH-LESE-002`](spec/lastenheft.md#lh-lese-002--sprache) |
-| Dokumentationsreferenzmodell | [`LH-FA-PROJDOCS-006`](spec/lastenheft.md#lh-fa-projdocs-006--dokumentationsreferenzmodell), [`ADR-0013`](docs/plan/adr/0013-dokumentationsreferenzmodell.md) |
-| Planning-Lifecycle und Carveout-Disziplin | [`LH-FA-PROJDOCS-003`](spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle), [`LH-FA-PROJDOCS-005`](spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin); Bewegungen per `git mv` (siehe 3.3) |
+| Dokumentationsreferenzmodell | Baseline-Regelwerk `grundlagen-referenz-richtung.md` §Referenz-Richtung (SDP), [`ADR-0013`](docs/plan/adr/0013-dokumentationsreferenzmodell.md) |
+| Planning-Lifecycle und Carveout-Disziplin | Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine und `modul-07-carveouts.md`; Bewegungen per `git mv` (siehe 3.3) |
 | Traceability-Regeln für Commits und Anforderungen | [`harness/README.md`](harness/README.md) §Traceability rules |
 
 ## 4. Quality Gates

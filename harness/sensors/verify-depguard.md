@@ -6,7 +6,7 @@ Kein Gate, sondern ein Nachweis über das Gate `make lint`: Das Skript fügt je
 Regel einen absichtlich verbotenen Import ein, lässt `make lint` laufen, prüft
 die erwartete Regel-Beschreibung in der Ausgabe und nimmt den Import wieder
 heraus. Es urteilt nicht über den Zustand des Repos, sondern darüber, ob die
-Regeln aus [`LH-FA-ARCH-003`](../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)
+Regeln aus [`SPEC-034`](../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln)
 überhaupt feuern können. Es steht nicht in `make gates`, weil jede Regel einen
 vollen `make lint`-Lauf kostet.
 
@@ -40,4 +40,4 @@ vollen `make lint`-Lauf kostet.
 ## Bindung
 
 [`ADR-0003`](../../docs/plan/adr/0003-solid-nahes-lint-profil.md);
-[`LH-FA-ARCH-003`](../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement).
+[`SPEC-034`](../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln).

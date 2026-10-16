@@ -1,7 +1,7 @@
 # u-boot Carveouts
 
 Master-Inventar aller bewussten Carveouts in der u-boot-Codebase
-([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin)). Wird laufend gepflegt und liegt deshalb dauerhaft
+(Baseline-Regelwerk `modul-07-carveouts.md`). Wird laufend gepflegt und liegt deshalb dauerhaft
 in `in-progress/`. Die Konvention ist zusätzlich als persistente
 Claude-Memory `feedback-carveouts-need-plans` hinterlegt, damit
 künftige Sessions sie nicht vergessen.
@@ -34,14 +34,14 @@ Spalten:
 | `testpackage`-Ausnahme für `cmd/uboot/` (`.golangci.yml`) | permanent | Wiring-Schicht braucht `package main`; externe `_test`-Packages sind dort nicht erzwingbar. |
 | `gochecknoglobals`-Ausnahme für `cmd/uboot/` (`.golangci.yml`) | permanent | `var version` wird per `-ldflags="-X main.version=…"` überschrieben — das ist der kanonische Go-Pattern für Build-Metadaten. |
 | Test-Carveouts in `_test.go` (`cyclop`, `gocognit`, `gocyclo`, `nestif`, `funlen`, `noctx`, `unparam`, `revive(unused-parameter)`) | permanent | Tabellengetriebene Tests und Fakes erzeugen legitim hohe Komplexität / fehlenden Context; Profil-Schwellen passen für Production-Code, nicht für Tests. |
-| `!**/*_test.go` als erste files-Pattern in jedem `depguard`-Regelblock (`.golangci.yml`, `spec/architecture.md` §4) | permanent | Tests müssen Fakes und Test-Libraries (`testify`, …) frei importieren können; Schicht-Regeln gelten production-only ([`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement)). |
-| GNU `make` als Host-Voraussetzung neben Docker ([`LH-FA-BUILD-007`](../../../../spec/lastenheft.md#lh-fa-build-007--docker-only-workflow), [`LH-NFA-PORT-002`](../../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten)) | permanent | Carveout zu [`LH-NFA-PORT-002`](../../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten) (möglichst wenige Host-Deps); `make` ist auf Linux/macOS und unter WSL/Git-Bash auf Windows praktisch durchgängig verfügbar und der pragmatischste Wrapper für Docker-only-Workflows. Windows-PowerShell-natives Setup (ohne WSL/Git-Bash) wäre eine eigene [`LH-NFA-PORT-002`](../../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten)-Erweiterung mit eigenem Slice. |
+| `!**/*_test.go` als erste files-Pattern in jedem `depguard`-Regelblock (`.golangci.yml`, `spec/architecture.md` §4) | permanent | Tests müssen Fakes und Test-Libraries (`testify`, …) frei importieren können; Schicht-Regeln gelten production-only ([`SPEC-034`](../../../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln)). |
+| GNU `make` als Host-Voraussetzung neben Docker ([`SPEC-031`](../../../../spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows), [`LH-NFA-PORT-002`](../../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten)) | permanent | Carveout zu [`LH-NFA-PORT-002`](../../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten) (möglichst wenige Host-Deps); `make` ist auf Linux/macOS und unter WSL/Git-Bash auf Windows praktisch durchgängig verfügbar und der pragmatischste Wrapper für Docker-only-Workflows. Windows-PowerShell-natives Setup (ohne WSL/Git-Bash) wäre eine eigene [`LH-NFA-PORT-002`](../../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten)-Erweiterung mit eigenem Slice. |
 | `contextcheck`-Ausnahme für `internal/adapter/driving/cli/` (`.golangci.yml`) | permanent | Cobras `RunE`-Signatur (`func(cmd, args) error`) kennt keinen Context-Parameter; der Closure muss `cmd.Context()` extrahieren und durchreichen. contextcheck sieht die Closure-Grenze nicht. Strikte Propagation passiert eine Ebene tiefer in `runInit` (Context als erster Parameter). |
 | `interfacebloat`-Ausnahme für `internal/hexagon/port/driven/filesystem.go` (`.golangci.yml`) | permanent | `driven.FileSystem` ist die zentrale FS-Abstraktion mit 12 Methoden (Exists/Lstat/ReadFile/WriteFile/WriteFileExclusive/Mkdir/MkdirAll/Rename/ReadDir/RemoveAll/Copy/CopyExclusive). Eine künstliche Aufspaltung würde Test-Fakes verkomplizieren ohne semantischen Mehrwert; das interfacebloat-Limit (10) bewusst aufgeweicht für genau diese Schnittstelle. |
 
 ## Carveout-Auflösungs-Slices (historisch)
 
-Slices, die ausschließlich offene Carveouts ([`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin))
+Slices, die ausschließlich offene Carveouts (Baseline-Regelwerk `modul-07-carveouts.md`)
 aufgelöst haben. Quelle der Wahrheit für das Carveout-Inventar
 sind die zwei Tabellen oben; diese Tabelle ist der Audit-Trail der
 Slices, die das Inventar geschrumpft haben — verbindlich verankert
@@ -51,7 +51,7 @@ Sektion, nicht die Tabelle selbst.
 | Slice | Auslöser | Phase | Status |
 | ----- | -------- | ----- | ------ |
 | [`slice-m3-init-flow`](../done/slice-m3-init-flow.md) | `LH-FA-INIT-*` initialer Flow + zwei M3-Carveouts (Coverage ✅, depguard ✅) | M3 | Done |
-| [`slice-m3-depguard-aktivierung-verifizieren`](../done/slice-m3-depguard-aktivierung-verifizieren.md) | [`LH-FA-ARCH-003`](../../../../spec/lastenheft.md#lh-fa-arch-003--import-regeln-und-enforcement) depguard-Regeln matchen bisher nichts | M3-T5 | Done |
+| [`slice-m3-depguard-aktivierung-verifizieren`](../done/slice-m3-depguard-aktivierung-verifizieren.md) | [`SPEC-034`](../../../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln) depguard-Regeln matchen bisher nichts | M3-T5 | Done |
 | [`slice-m3-gomodguard-rules`](../done/slice-m3-gomodguard-rules.md) | `gomodguard_v2.blocked: {}` leer; yaml.v3 schon drin, Cobra kommt mit T3 | M3-followup | Done |
 | [`slice-m3-retroaktive-slice-plaene`](../done/slice-m3-retroaktive-slice-plaene.md) | Bootstrap-Slices (M1/M2/M2b/M2c/M2d) liegen nicht in `done/` | Done | Done |
 | [`slice-m4-soft-existing-detection`](../done/slice-m4-soft-existing-detection.md) | [`LH-FA-INIT-004`](../../../../spec/lastenheft.md#lh-fa-init-004--bestehendes-projekt-erkennen) Soft-Erkennung + `--assume-existing` | M4-vorgezogen | Done |
@@ -76,7 +76,7 @@ Sektion, nicht die Tabelle selbst.
 
 ## Disziplin
 
-[`LH-FA-PROJDOCS-005`](../../../../spec/lastenheft.md#lh-fa-projdocs-005--carveout-disziplin) verlangt: jeder neue temporäre Carveout bekommt
+Baseline-Regelwerk `modul-07-carveouts.md` verlangt: jeder neue temporäre Carveout bekommt
 **parallel** zu seiner Entstehung einen Plan-Anker und einen Eintrag
 in der oberen Tabelle. Plan-Anker ist entweder ein Slice-Plan in
 `open/` (Standardform) **oder** ein ADR mit benannten
@@ -87,5 +87,5 @@ Tabelle.
 
 Neben [`roadmap.md`](roadmap.md) ist diese Datei die zweite zulässige
 Ausnahme von der `slice-`/`tranche-`-Konvention für Dateinamen in
-`docs/plan/planning/` (siehe [`LH-FA-PROJDOCS-003`](../../../../spec/lastenheft.md#lh-fa-projdocs-003--planning-lifecycle) und
+`docs/plan/planning/` (siehe Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine und
 [`../README.md`](../README.md)).
