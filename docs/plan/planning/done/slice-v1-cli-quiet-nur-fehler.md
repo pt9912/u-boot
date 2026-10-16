@@ -98,7 +98,7 @@ verändern, behalten ihre Ausgabe, weil sie das Ergebnis des Befehls ist: `confi
   nicht; der Slice sichert die Ausweisung in Befehlsausgabe und `doctor`, wie der Lastenheft-Satz sie nennt.
 - **Die Vorschau von `--dry-run` und `--diff` unter `--quiet`** — das Lastenheft nennt sie weder als Ausnahme noch als Abfrage; der
   Vertrag wird im CR [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md) entschieden, der Code folgt in
-  [`slice-v1-cli-quiet-vorschau`](../open/slice-v1-cli-quiet-vorschau.md). Bis dahin ist `--dry-run --quiet` leer bei Exit 0.
+  [`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md). Bis dahin ist `--dry-run --quiet` leer bei Exit 0.
 - **Die host-seitige Ausweisung der Fallbacks Daemon und Egress** — die Lücke besteht unabhängig von `--quiet` und ist ein Vertrags-
   oder Code-Vorgang von [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer); sie liegt in
   [`slice-v1-sandbox-fallback-ausweisung`](../open/slice-v1-sandbox-fallback-ausweisung.md).
@@ -203,7 +203,7 @@ Steering-Loop-Lerneintrag geschrieben (§7).
 - **Vorschau unter `--quiet`:** `--dry-run --quiet` gibt nichts aus und endet mit Exit 0; das Lastenheft nennt die Vorschau weder
   als Ausnahme noch als Abfrage (zweiter Review, F-2). — **Ausgang:** eingetreten:
   [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md) und
-  [`slice-v1-cli-quiet-vorschau`](../open/slice-v1-cli-quiet-vorschau.md).
+  [`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md).
 - **Degradations-Fallbacks Daemon und Egress ohne host-seitige Ausweisung:** produktiv weist nur der `vfs`-Fall im `doctor` aus; für
   die beiden anderen gibt es keine host-seitige Quelle, und für `init`/`generate`/`up` erzeugt keine produktive Quelle einen
   Fallback-Eintrag. Die Lücke besteht unabhängig von `--quiet`
@@ -241,7 +241,7 @@ sechs Auflagen für die Closure (hier eingelöst). `make gates` grün, Coverage 
   Symbol oder der Item-ID). Zusammen mit der Finding-Klasse „Plan nennt Quellen, die es nicht gibt“ der beiden Reviews gezählt, nicht verkörpert.
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt; das Register ist leer.
 - **Folge-Slices:** [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md) (CR: Vorschau unter `--quiet`, Lastenheft 0.10.0),
-  [`slice-v1-cli-quiet-vorschau`](../open/slice-v1-cli-quiet-vorschau.md) (Code dazu),
+  [`slice-v1-cli-quiet-vorschau`](../in-progress/slice-v1-cli-quiet-vorschau.md) (Code dazu),
   [`slice-v1-sandbox-fallback-ausweisung`](../open/slice-v1-sandbox-fallback-ausweisung.md) (Lücke der Fallback-Ausweisung, Entscheidung Code oder CR beim
   Projektinhaber) und
   [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../open/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Rangfolge bei Mehrfachangabe, Spec-Eintrag).
