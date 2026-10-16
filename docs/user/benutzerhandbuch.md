@@ -296,7 +296,7 @@ Diese Optionen gelten für jeden Befehl:
 | `--yes` | Rückfragen automatisch bejahen |
 | `--no-interactive` | nie fragen; bei einer nötigen Rückfrage abbrechen |
 | `--json` | maschinenlesbare Ausgabe |
-| `--quiet` | nur das Nötigste; Warnungen und Fehler bleiben |
+| `--quiet` | nur Fehler; Sicherheitslockerungen des Sandbox-Profils bleiben bei `init`, `generate` und `up` ausgewiesen (`doctor --quiet` zeigt nur Fehler-Einträge, ohne Kopf- und Summary-Zeile; der Exit-Code trägt das Ergebnis) |
 | `--verbose` | zusätzliche Details |
 | `--debug` | interne Diagnoseausgabe |
 | `-v`, `--version` | Version anzeigen |
@@ -1277,7 +1277,7 @@ aus, damit die Dateien in `.devcontainer/` zur Projektdatei passen.
 
 | Option | Wirkung |
 |---|---|
-| `--quiet` | nur das Nötigste; Warnungen und Fehler bleiben |
+| `--quiet` | nur Fehler; Sicherheitslockerungen des Sandbox-Profils bleiben bei `init`, `generate` und `up` ausgewiesen (`doctor --quiet` zeigt nur Fehler-Einträge, ohne Kopf- und Summary-Zeile; der Exit-Code trägt das Ergebnis) |
 | `--verbose` | zusätzliche Details |
 | `--debug` | interne Diagnoseausgabe |
 
