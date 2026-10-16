@@ -2,12 +2,12 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der CR richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** CR-Slice [`slice-cr-cli-quiet-vorschau`](../plan/planning/in-progress/slice-cr-cli-quiet-vorschau.md) (Delivery `49f459a`, Review-Fix `d7c2e3a`), Welle [`welle-cli-verbosity`](../plan/planning/welle-cli-verbosity.md). Maßstab: Slice §1 (CR-Kern, Abnahmekriterien, Historie-Zeile, Nicht-Ziele), §2 (DoD), §3, §6. Review-Report: [`2026-10-16-slice-cr-cli-quiet-vorschau.md`](2026-10-16-slice-cr-cli-quiet-vorschau.md).
+**Gegenstand:** CR-Slice [`slice-cr-cli-quiet-vorschau`](../plan/planning/done/slice-cr-cli-quiet-vorschau.md) (Delivery `49f459a`, Review-Fix `d7c2e3a`), Welle [`welle-cli-verbosity`](../plan/planning/welle-cli-verbosity.md). Maßstab: Slice §1 (CR-Kern, Abnahmekriterien, Historie-Zeile, Nicht-Ziele), §2 (DoD), §3, §6. Review-Report: [`2026-10-16-slice-cr-cli-quiet-vorschau.md`](2026-10-16-slice-cr-cli-quiet-vorschau.md).
 
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-cr-cli-quiet-vorschau`](../plan/planning/in-progress/slice-cr-cli-quiet-vorschau.md)
+- Slice: [`slice-cr-cli-quiet-vorschau`](../plan/planning/done/slice-cr-cli-quiet-vorschau.md)
 - IDs: [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Änderung), [`LH-FA-CLI-007`](../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe)
 - Artefakte: `spec/lastenheft.md` (Versionsfeld, `LH-FA-CLI-005`, §16), `CHANGELOG.md` `[Unreleased]`, Slice-Entwurf der Historie-Zeile, Review-Report; kein Go-Code im Diff. <!-- d-check:ignore (Pfade als Zitat) -->
 

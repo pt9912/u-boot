@@ -6,7 +6,7 @@ wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
 **Welle:** [`welle-cli-verbosity`](../welle-cli-verbosity.md) — fünfter Slice der Welle; folgt auf
-[`slice-cr-cli-quiet-vorschau`](../in-progress/slice-cr-cli-quiet-vorschau.md) (der Vorschau-Satz steht erst mit Lastenheft 0.10.0 im Vertrag) und auf
+[`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md) (der Vorschau-Satz steht erst mit Lastenheft 0.10.0 im Vertrag) und auf
 [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) (berührt dieselben Quiet-Zweige); ihm folgt
 [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 
@@ -53,7 +53,7 @@ Die Sicherheits-/Fallback-Ausnahmen und Fehler bleiben unabhängig davon; sonsti
   ausgegeben wird. Offene Frage an den Projektinhaber (siehe §6).
 - **Der Compose-Strom von `down`, der CHANGELOG-Widerspruch (Review F-1, F-3)** — anderer Befund, Arbeit am Slice
   [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md).
-- **Eine Änderung des Lastenhefts** — liegt im CR [`slice-cr-cli-quiet-vorschau`](../in-progress/slice-cr-cli-quiet-vorschau.md).
+- **Eine Änderung des Lastenhefts** — liegt im CR [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md).
 - **Die Wahl zwischen mehreren Verbosity-Optionen** — Slice [`slice-v1-cli-verbosity-letzte-option-gewinnt`](slice-v1-cli-verbosity-letzte-option-gewinnt.md).
 - **Eine Spec-Beschreibung in `spezifikation.md`** — erst nach allen Slices der Welle, sonst beschreibt sie einen Zwischenstand.
 
@@ -91,12 +91,12 @@ Subkommandos mit `--dry-run`/`--diff` (per Suche in `internal/adapter/driving/cl
 Unter `--quiet` entfällt heute: bei `init`, `add`, `remove`, `generate`, `config set` und `config set` mit mehreren Paaren jeweils die **Zusammenfassung des Plans bei `--dry-run`**
 (und `--dry-run --diff`); der Diff selbst bleibt bereits. Reihenfolge der Ausgabe bleibt: Diff, dann Zusammenfassung.
 
-**Reihenfolge:** erst der CR [`slice-cr-cli-quiet-vorschau`](../in-progress/slice-cr-cli-quiet-vorschau.md) (Lastenheft 0.10.0), dann dieser Slice; er berührt dieselben Quiet-Zweige wie
+**Reihenfolge:** erst der CR [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md) (Lastenheft 0.10.0), dann dieser Slice; er berührt dieselben Quiet-Zweige wie
 [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) und beginnt erst nach dessen Closure, damit keine Merge-Konflikte entstehen.
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): Lastenheft 0.10.0 liegt vor (CR [`slice-cr-cli-quiet-vorschau`](../in-progress/slice-cr-cli-quiet-vorschau.md) in `done/`) und
+**Start** (`next` → `in-progress`): Lastenheft 0.10.0 liegt vor (CR [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md) in `done/`) und
 [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md) ist geschlossen.
 
 **Rückführungen — vorab benannt:**
