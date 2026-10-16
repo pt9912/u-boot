@@ -6,7 +6,7 @@
 
 ## Scope
 
-- Slice: [`slice-harness-wellen-betrieb`](../plan/planning/in-progress/slice-harness-wellen-betrieb.md)
+- Slice: [`slice-harness-wellen-betrieb`](../plan/planning/done/slice-harness-wellen-betrieb.md)
 - IDs: [`MR-003`](../../harness/conventions/MR-003-roadmap-wellen.md), [`MR-012`](../../harness/conventions/MR-012-ai-harness-init-werkzeug-des-repos.md) Punkt 4, [`MR-002`](../../harness/conventions/MR-002-carveout-inventar.md); keine `LH-*`/`ADR-*` berührt (Slice: „Berührte Spec-Stellen: keine“).
 - Artefakte: `docs/plan/planning/in-progress/roadmap.md`, `docs/plan/planning/README.md`, `.d-check.yml`, `harness/conventions.md`, `harness/conventions/MR-003-roadmap-wellen.md`, `MR-012`, `.claude/commands/plan-welle.md`, `.claude/commands/close-welle.md`, `.claude/agents/*.md`.
 

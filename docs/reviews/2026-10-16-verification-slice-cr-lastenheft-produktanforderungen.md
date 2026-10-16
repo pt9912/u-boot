@@ -73,7 +73,7 @@
 
 ## Plan-vs-Code-Diff (Planänderungen über den CR hinaus)
 
-- **Review F-8 bestätigt:** `docs/plan/planning/in-progress/slice-harness-wellen-betrieb.md` ist im Diff mit 95 Zeilen Änderung. Es ist eine Planänderung eines **anderen** Slice, nicht Teil des CR-Umfangs „Grenze Produkt/Prozess“: <!-- d-check:ignore (Kennungen im Zeitdokument) -->
+- **Review F-8 bestätigt:** `docs/plan/planning/done/slice-harness-wellen-betrieb.md` ist im Diff mit 95 Zeilen Änderung. Es ist eine Planänderung eines **anderen** Slice, nicht Teil des CR-Umfangs „Grenze Produkt/Prozess“: <!-- d-check:ignore (Kennungen im Zeitdokument) -->
   - Titel und Ziel umgeschrieben (Archivierung gestrichen, Entscheidung „Welle-Dateien und Register ja, Archivierung nein“ vom 2026-10-16),
   - zwei DoD-Punkte ersetzt (Entscheidungs-Haken und „erste Archivierung“ entfallen; neue Punkte „Roadmap und Doku auf Welle-Datei-Form“, „Werkzeuge auf u-boot gefasst“),
   - Voraussetzung auf den CR-Slice umgestellt, `Verantwortlich` gesetzt, Nicht-Ziele erweitert.

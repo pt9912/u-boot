@@ -2,14 +2,14 @@
 
 **Review-Art:** Code (Doku-/Harness-Diff) — geprüft gegen Plan, Entscheidungen (`MR-003`, `MR-012`) und Hard Rules.
 
-**Gegenstand:** Diff `67aa428..HEAD`, insbesondere die Commits `9ed60be` und `6be822c`; Plan: [`slice-harness-wellen-betrieb`](../plan/planning/in-progress/slice-harness-wellen-betrieb.md).
+**Gegenstand:** Diff `67aa428..HEAD`, insbesondere die Commits `9ed60be` und `6be822c`; Plan: [`slice-harness-wellen-betrieb`](../plan/planning/done/slice-harness-wellen-betrieb.md).
 
 **Skill:** `.harness/skills/reviewer.md` @ `6be822c` · <!-- d-check:ignore (Skill-Pfad, Stand des Laufs) -->
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-16
 
 **Eingangs-Kontext:**
 
-- [`slice-harness-wellen-betrieb`](../plan/planning/in-progress/slice-harness-wellen-betrieb.md) (Scope, DoD, Nicht-Ziele); Entscheidung des Projektinhabers: Welle-Dateien und Register ja, keine Archivierung, keine Results-Datei
+- [`slice-harness-wellen-betrieb`](../plan/planning/done/slice-harness-wellen-betrieb.md) (Scope, DoD, Nicht-Ziele); Entscheidung des Projektinhabers: Welle-Dateien und Register ja, keine Archivierung, keine Results-Datei
 - `MR-003`, `MR-012` (`harness/conventions/`), `harness/conventions.md` (ID-Schema, Modus-Deklaration)
 - `v6.18.1` · `regelwerk/modul-06-roadmap.md` §Roadmap-Struktur: fünf Abschnitte; `v6.18.1` · `templates/docs/plan/planning/roadmap.template.md`
 - `AGENTS.md` (Hard Rules 3.1, 3.3, 3.6), `harness/roles.md`
