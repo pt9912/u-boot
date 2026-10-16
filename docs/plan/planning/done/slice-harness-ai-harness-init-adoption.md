@@ -43,7 +43,7 @@ Auffrischung des Reviewer-Skills.
 - Wellen-Betrieb (flache Welle-Dateien, `archive-welle`, Beobachtungs-Register
   als Arbeitsform, Änderung von [`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md)):
   baut die Roadmap-Form und über hundert erledigte Slices um; eigener Slice
-  [`slice-harness-wellen-betrieb`](../in-progress/slice-harness-wellen-betrieb.md). Das Werkzeug
+  [`slice-harness-wellen-betrieb`](../open/slice-harness-wellen-betrieb.md). Das Werkzeug
   legt `plan-welle`, `close-welle`, `planner` und `archivierung.mk` bei diesem
   Lauf mit an; sie bleiben bis dahin ungenutzt.
 - Auffrischung von `.harness/skills/reviewer.md`: bleibt im Slice
@@ -119,7 +119,7 @@ mit Steering-Loop-Eintrag geschrieben, `make gates` auf dem Stand vor dem
 - Das Werkzeug legt Wellen-Dateien und -Commands an, die
   [`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md) widersprechen —
   **Ausgang:** eingetreten, übernimmt
-  [`slice-harness-wellen-betrieb`](../in-progress/slice-harness-wellen-betrieb.md); die
+  [`slice-harness-wellen-betrieb`](../open/slice-harness-wellen-betrieb.md); die
   Dateien tragen bis dahin den Vermerk „ungenutzt“.
 - Der Träger-Binary liegt nicht im Repo (`.harness/state/bin/`, ignoriert); ohne
   ihn erfasst `span-emit` nichts — **Ausgang:** weiter offen, pro Klon
@@ -145,7 +145,7 @@ auf F-8 behoben. Verifier: DoD bestätigt, alle Sensor-Läufe grün.
 - **Steering-Loop-Eintrag:** Eine Änderung an der Werkzeug-Aufteilung zieht die
   Stellen nach, die Variablen oder Targets beim Namen nennen — gefunden durch den
   Review, nicht durch ein Gate — liegt in `harness/conventions/MR-012-ai-harness-init-werkzeug-des-repos.md` (Punkt 1).
-- **Folge-Slices:** [`slice-harness-wellen-betrieb`](../in-progress/slice-harness-wellen-betrieb.md),
+- **Folge-Slices:** [`slice-harness-wellen-betrieb`](../open/slice-harness-wellen-betrieb.md),
   [`slice-harness-dcheck-bump-reviewer-skill`](../open/slice-harness-dcheck-bump-reviewer-skill.md)
   (Reviewer-Skill).
 - **Risiken aus §6:** je ein Ausgang, siehe §6.
