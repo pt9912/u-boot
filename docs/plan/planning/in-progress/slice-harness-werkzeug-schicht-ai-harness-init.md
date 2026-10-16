@@ -59,7 +59,10 @@ die gewählten Teile einhängen.
   geschrieben, Stop-Hook gibt frei) und `make docs-check` grün.
 - [x] Review durchgeführt: [`Report`](../../../reviews/2026-10-16-slice-harness-werkzeug-schicht-ai-harness-init.md)
   (0 HIGH, 1 MEDIUM, 3 LOW, 2 INFO); MEDIUM und die zwei Kopf-/Hash-LOW behoben.
-- [ ] `make hooks-install` im eigenen Klon ausgeführt (bewusst nicht automatisch).
+- [x] `make hooks-install` im eigenen Klon ausgeführt (bewusst nicht automatisch);
+  `core.hooksPath` steht auf `.githooks`.
+- [x] Verification-Evidence: [`Bericht`](../../../reviews/2026-10-16-verification-slice-harness-werkzeug-schicht-ai-harness-init.md)
+  — DoD bestätigt, keine Abweichung.
 
 ## 4. Risiken
 
@@ -79,4 +82,21 @@ die gewählten Teile einhängen.
 
 ## 5. Closure-Notiz
 
-Offen.
+Vollzogen am 2026-10-16. Übernommen sind `slice-mv`, der `commit-msg`-Hook,
+`record-gates` mit Stop-Hook, der Docker-only-Guard, fünf Agenten und eine
+gekürzte `implement-slice`; abgelehnt ist, was das Bootstrap-Werkzeug selbst
+voraussetzt oder MR-003 widerspricht (§2). Review: 0 HIGH, 1 MEDIUM, 3 LOW,
+2 INFO, MEDIUM und zwei LOW behoben. Verifier: DoD bestätigt. `make gates`
+und `make docs-check` grün.
+
+**Steering-Loop-Eintrag:** Der Gate-Nachweis ist jetzt mechanisch: `make gates`
+stempelt, der Stop-Hook prüft den Stempel (liegt in `harness/mk/enforce.mk`
+und `.claude/hooks/stop-require-gates.sh`). Er blockt nach jedem neuen HEAD
+ohne frischen `make gates`-Lauf, auch nach Commits, die nur Berichte
+hinzufügen.
+
+**Risiken:** Der Guard erkennt Toolchain-Aufrufe in `if`-/`for`-Rümpfen nicht
+(F-4, weiter offen; kein Register in u-boot, daher hier benannt). Der
+Commit-Hook verlangt in jeder Message eine Kennung. Folgearbeit außerhalb
+dieses Slice: d-check-Bump auf mindestens v0.86.0 und Auffrischung von
+`.harness/skills/reviewer.md`.
