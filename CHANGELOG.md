@@ -20,13 +20,13 @@ this file is the same format applied to u-boot itself.
   disclosure of security relaxations in the sandbox profile, the disclosure of degradation fallbacks (container without daemon, `vfs`
   storage, dropped egress restriction), the per-service progress of `u-boot up` and the path summary that `--force` prints before
   overwriting. A script cannot silence them. Success and summary messages of the subcommands that change something disappear under
-  `--quiet`; `u-boot doctor` lists only error items; the query commands (`config get`, `config list`, `logs`, `template list`) keep their output. The levels themselves are unchanged (`--quiet` shows only errors; `--debug` still takes precedence over `--quiet`). `init`, `generate`, `add`, `remove` and `config set` no longer print their success summary under
+  `--quiet`; `u-boot doctor` lists only error items; the query commands (`config get`, `config list`, `logs`, `template list`) keep their output. The levels themselves are unchanged (`--quiet` shows only errors). `init`, `generate`, `add`, `remove` and `config set` no longer print their success summary under
   `--quiet` (`remove` also drops its purge warnings), and `u-boot doctor --quiet` no longer lists warn items other than a
   degradation fallback (the exit code carries the result). `u-boot doctor --strict` with only warn items still exits with `11`
   and now names the warn items in its error message. `u-boot down --quiet` holds the Compose output back and prints it only if `down` fails. `--quiet --json` is unchanged. The output of `--dry-run` and `--diff`
   is the result of the call and stays under `--quiet`: `--dry-run --quiet` prints the plan (the same summary as without `--quiet`; notices other than the
   exceptions above stay dropped) and `--diff --quiet` prints the diff, for `init`, `generate`, `add`, `remove` and `config set`; the success message after an actual write
-  is still dropped, also with `--diff` and without `--dry-run`. The rule that the last verbosity option wins follows in a later release.
+  is still dropped, also with `--diff` and without `--dry-run`. Of several verbosity options (`--quiet`, `--verbose`, `--debug`) the one given last on the command line wins, without rejection: `--quiet --verbose` shows the additional detail and lifts `--quiet` (also for summaries and warnings), `--verbose --quiet` shows errors only. `--debug --quiet` therefore no longer raises the level to debug; it is `--quiet`. The fixed order `--debug`, `--verbose`, `--quiet` is gone.
 
 ## [0.9.0] - 2026-10-15
 
