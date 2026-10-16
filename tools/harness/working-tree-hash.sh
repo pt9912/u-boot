@@ -11,7 +11,7 @@ set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 git ls-files -z --cached --others --exclude-standard \
-  | sort -zu \
+  | LC_ALL=C sort -zu \
   | while IFS= read -r -d '' f; do
       if [ -L "$f" ]; then
         printf 'LINK %s -> %s\n' "$f" "$(readlink -- "$f")"
