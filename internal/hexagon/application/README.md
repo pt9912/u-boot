@@ -11,7 +11,7 @@ Festlegungen, die im Code dieser Schicht umgesetzt sind:
 
 - Stabilisierung von `up`:
   [`SPEC-036`](../../../spec/spezifikation.md#spec-036--stabilisierung-von-u-boot-up-takt-zustandsklassen-und-entscheidungsmatrix),
-  [`SPEC-037`](../../../spec/spezifikation.md#spec-037--erkennung-probebarer-ports-in-composeyaml)
+  [`LH-FA-UP-001.a`](../../../spec/spezifikation.md#lh-fa-up-001a--erkennung-probebarer-ports-in-composeyaml)
 - Bestätigungspfad von `down --volumes`:
   [`SPEC-038`](../../../spec/spezifikation.md#spec-038--bestätigungspfad-von-u-boot-down---volumes)
 - Generatoren: [`SPEC-039`](../../../spec/spezifikation.md#spec-039--zustandsmaschinen-der-generatoren-u-boot-generate)

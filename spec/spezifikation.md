@@ -11,7 +11,7 @@ Carveouts oder die Roadmap.
 **Kennungen:** Eine Verfeinerung einer einzelnen Anforderung trägt deren Kennung mit
 Buchstabensuffix (`<Anforderungs-Kennung>.a`, `.b`, …). Alles, was keine einzelne
 Anforderung verfeinert (Schemata, Defaults, Fehler-Codes, Metrik-Felder, externe
-Verträge), trägt `SPEC-<NNN>`: dreistellig, fortlaufend je Datei, nicht je Abschnitt.
+Verträge) und jede Festlegung, die zwei oder mehr Anforderungen zugleich verfeinert, trägt `SPEC-<NNN>`: dreistellig, fortlaufend je Datei, nicht je Abschnitt.
 Eine `SPEC-*` ist eine Adresse, keine Anforderung.
 
 ---
@@ -423,7 +423,7 @@ Verfeinert [`LH-FA-UP-001`](lastenheft.md#lh-fa-up-001--umgebung-starten) und [`
   | `exited`, `dead`, `removing`, `removed` | dead |
   | jeder andere Wert | unknown |
 
-  `unknown` ist weich: Der Service gilt als noch nicht stabilisiert, `up` bricht nicht ab. Je Service und Aufruf wird einmalig eine `warn`-Diagnose `up.state.<service>.unknown` ausgegeben.
+  `unknown` ist weich: Der Service gilt als noch nicht stabilisiert, `up` bricht nicht ab. Je Service und Aufruf wird einmalig eine `warn`-Diagnose `up.state.<service>.unknown` erzeugt.
 - **Entscheidung je Service** (in alphabetischer Reihenfolge der Service-Namen aus `compose.yaml`, damit bei mehreren Fehlern stets derselbe zuerst gemeldet wird):
   - `dead` → fehlgeschlagen, das Warten endet sofort.
   - `restarting` → Der Zähler der aufeinanderfolgenden `restarting`-Beobachtungen steigt; bei `3` gilt der Service als fehlgeschlagen, darunter wird weiter gewartet. Jede andere Beobachtung setzt den Zähler auf `0` zurück. Grenze: Ein Restart-Loop, der zwischendurch `running` zeigt, wird auf dem Pfad ohne Healthcheck und ohne probebaren Port nicht erkannt.
@@ -431,11 +431,12 @@ Verfeinert [`LH-FA-UP-001`](lastenheft.md#lh-fa-up-001--umgebung-starten) und [`
   - `running` mit deklariertem Healthcheck (`healthcheck.disable` nicht `true`): solange der Health-Status nicht `healthy` ist (ohne Beachtung der Groß-/Kleinschreibung), wird weiter gewartet und nicht geprobt; bei `healthy` gilt der Service als stabilisiert. Die deklarierten TCP-Ports werden dann dennoch geprobt; ein Fehlschlag verhindert die Stabilisierung nicht, sondern erzeugt einmalig je Service die `warn`-Diagnose `up.port.<service>.unreachable` (der Healthcheck dominiert).
   - `running` ohne Healthcheck: Der Service gilt als stabilisiert, wenn alle probebaren Ports antworten; ohne probebaren Port genügt `running`.
   - In `compose.yaml` deklarierte, in der Compose-Statusabfrage (noch) nicht sichtbare Services gelten als noch nicht stabilisiert; zusätzliche, nur in der Statusabfrage sichtbare Services werden ignoriert.
+- **Reichweite der `warn`-Diagnosen** (`up.state.<service>.unknown`, `up.port.<service>.<index>`, `up.port.<service>.unreachable`): Sie erreichen den Aufrufer nur in der Antwort einer erfolgreich stabilisierten Ausführung. Bei Fehlschlag (Exit-Code `12`) und bei Zeitüberschreitung liefert `up` nur den zuletzt beobachteten Service-Status, keine Diagnosen.
 - **Abschluss:** Sind alle deklarierten Services stabilisiert, endet `up` erfolgreich. Ein fehlgeschlagener Service beendet `up` mit Exit-Code `12` (Compose-Laufzeitfehler). Ist die Wartezeit nach einer Statusabfrage abgelaufen, endet `up` mit Exit-Code `12` und nennt die noch ausstehenden Services; es findet also mindestens eine Statusabfrage statt.
-- **Nicht probebare Portangaben:** Für jeden Eintrag in `ports`, der nach [`SPEC-037`](#spec-037--erkennung-probebarer-ports-in-composeyaml) nicht probebar ist, wird vor dem Warten eine `warn`-Diagnose `up.port.<service>.<index>` ausgegeben (`<index>` ist die Position im `ports`-Array); das Warten stützt sich dann auf Healthcheck oder `running`.
+- **Nicht probebare Portangaben:** Für jeden Eintrag in `ports`, der nach [`LH-FA-UP-001.a`](#lh-fa-up-001a--erkennung-probebarer-ports-in-composeyaml) nicht probebar ist, wird vor dem Warten eine `warn`-Diagnose `up.port.<service>.<index>` ausgegeben (`<index>` ist die Position im `ports`-Array); das Warten stützt sich dann auf Healthcheck oder `running`.
 - **`--timeout=0`:** Es findet keine Statusabfrage und keine Probe statt; die Antwort trägt `stabilized=false` und eine `info`-Diagnose `up.fire-and-forget`.
 
-### SPEC-037 — Erkennung probebarer Ports in `compose.yaml`
+### LH-FA-UP-001.a — Erkennung probebarer Ports in `compose.yaml`
 
 Verfeinert [`LH-FA-UP-001`](lastenheft.md#lh-fa-up-001--umgebung-starten) (Erreichbarkeitsprüfung auf `localhost` für TCP-Ports).
 
@@ -494,7 +495,7 @@ Alle Generatoren verlangen ein initialisiertes Projekt (`u-boot.yaml` vorhanden)
 
 Zeilenenden werden für den Vergleich auf LF normalisiert, damit eine CRLF-Datei nicht als geändert gilt.
 
-**`changelog`** ersetzt einen abweichenden Bereich nie, weil der Nutzer dort Einträge pflegt ([`LH-AK-007`](lastenheft.md#lh-ak-007--changelog-generator)): Fehlt die Datei, wird sie angelegt; fehlt der Bereich oder ist er fehlerhaft markiert, gilt Exit-Code `10`; entspricht der Bereich der Vorlage oder weicht er ab, bleibt er unverändert. Fehlt außerhalb des Bereichs der Abschnitt `## [Unreleased]` und gibt es einen Release-Abschnitt (außerhalb von Codeblöcken), wird vor dem ersten Release-Abschnitt ein leerer Abschnitt `## [Unreleased]` mit den Unterabschnitten `### Added`, `### Changed` und `### Fixed` eingefügt (`repaired-manual`); gibt es keinen Release-Abschnitt, bleibt die Datei unverändert. Folge: Ändert sich die Vorlage oder der Projektname, wird ein bestehender Bereich nicht nachgezogen.
+**`changelog`** ersetzt einen abweichenden Bereich nie, weil der Nutzer dort Einträge pflegt ([`LH-AK-007`](lastenheft.md#lh-ak-007--changelog-generator)): Fehlt die Datei, wird sie angelegt; fehlt der Bereich oder ist er fehlerhaft markiert, gilt Exit-Code `10`; entspricht der Bereich der Vorlage oder weicht er ab, bleibt er unverändert. Weicht der Bereich ab, wird nur dann repariert, wenn in der **gesamten Datei** — der verwaltete Bereich eingeschlossen — kein Abschnitt `## [Unreleased]` steht (Überschriften in Codeblöcken zählen nicht) und **nach der END-Markierung** ein Release-Abschnitt `## [<Version>]` (ebenfalls außerhalb von Codeblöcken) vorhanden ist: Dann wird vor dem ersten solchen Release-Abschnitt ein leerer Abschnitt `## [Unreleased]` mit den Unterabschnitten `### Added`, `### Changed` und `### Fixed` eingefügt (`repaired-manual`). Steht `## [Unreleased]` irgendwo in der Datei, oder gibt es nach der END-Markierung keinen Release-Abschnitt, bleibt die Datei unverändert (`no-op`). Folge: Ein nutzerbearbeiteter Bereich, der `## [Unreleased]` behält, wird nicht repariert; ein Release-Abschnitt innerhalb des Bereichs verankert keine Reparatur. Folge: Ändert sich die Vorlage oder der Projektname, wird ein bestehender Bereich nicht nachgezogen.
 
 **`devcontainer`** arbeitet in zwei Phasen: Zuerst werden alle Dateien klassifiziert, ohne zu schreiben; nur wenn keine Datei den Abbruch-Zustand hat, wird geschrieben. Ein Konflikt hinterlässt also keinen Teilzustand. `forwardPorts` stammt aus den Container-Ports der aktiven Services in `compose.yaml` ([`LH-FA-DEV-005`](lastenheft.md#lh-fa-dev-005--ports)) und teilt sich die Quelle mit der `doctor`-Prüfung `devcontainer.forwardPorts.consistency`. Ist `compose.yaml` nicht parsebar, gilt Exit-Code `10`. Die Freigabe externer Feature-Quellen ([`LH-FA-DEV-003`](lastenheft.md#lh-fa-dev-003--devcontainer-features)) wird erst nach erfolgreicher Erzeugung in `u-boot.yaml` übernommen.
 
@@ -553,8 +554,8 @@ Der leere `services`-Block ist `warn`, weil ihn ein frisches `u-boot init` erzeu
 
 Verfeinert [`LH-FA-CLI-006`](lastenheft.md#lh-fa-cli-006--exit-codes) (Trennung der Codes `11` und `12`) und [`LH-FA-UP-001`](lastenheft.md#lh-fa-up-001--umgebung-starten) (`--timeout=0` als Fire-and-forget).
 
-- **Preflight** vor jedem Compose-Aufruf, in dieser Reihenfolge: (1) das `docker`-Binary ist auffindbar, (2) der Daemon antwortet, (3) das Compose-Plugin ist installiert. Scheitert ein Schritt, endet der Befehl mit Exit-Code `11` (Umgebungsproblem), ohne dass Compose aufgerufen wurde. Scheitert erst der Compose-Aufruf selbst, gilt Exit-Code `12`.
-- **Aufrufformen:** `docker compose -f <Projektverzeichnis>/compose.yaml` mit `up` (mit `-d` im Detach-Modus), `down` (mit `-v` bei `--volumes`), `ps --format json` und `logs`. Der Fortschritt von `up` und `down` (Compose-Ausgabe auf stderr) wird an die Fortschrittsausgabe weitergereicht.
+- **Preflight** vor jedem Compose-Aufruf, in dieser Reihenfolge: (1) das `docker`-Binary ist auffindbar, (2) der Daemon antwortet, (3) das Compose-Plugin ist installiert. Scheitert ein Schritt, endet der Befehl mit Exit-Code `11` (Umgebungsproblem), ohne dass Compose aufgerufen wurde. Scheitert erst der Compose-Aufruf selbst, gilt Exit-Code `12`. Ausnahme: Ist der Kontext bei `logs`, `config`, `volume ls`, `volume rm` und `--dry-run up -d` abgebrochen oder abgelaufen, wird der Kontextfehler unverpackt durchgereicht statt als Exit-Code `12` gemeldet; bei `logs` behandelt der Aufrufer `context.Canceled` und `context.DeadlineExceeded` als Erfolg (Exit-Code `0`). Die Vorschau `--dry-run up -d` ist best-effort: Scheitert der Trockenlauf selbst, bleibt der Plan leer, ohne Fehler.
+- **Aufrufformen:** `docker compose -f <Projektverzeichnis>/compose.yaml` mit `up` (mit `-d` im Detach-Modus), `down` (mit `-v` bei `--volumes`), `ps --format json`, `logs` und `config --format json`; ferner `docker volume ls` und `docker volume rm <Name>` sowie für die Vorschau `--dry-run up -d`. Der Fortschritt von `up` und `down` (Compose-Ausgabe auf stderr) wird an die Fortschrittsausgabe weitergereicht.
 - **Fire-and-forget:** Nach `up` im Detach-Modus fragt der Adapter den Status nicht ab; das Warten und jede Statusabfrage gehören allein dem Aufrufer ([`SPEC-036`](#spec-036--stabilisierung-von-u-boot-up-takt-zustandsklassen-und-entscheidungsmatrix)).
 - **Netzprobe:** Die TCP-Probe läuft mit der übergebenen Frist und dem Kontext; Abbruch oder Fristablauf des Kontexts sind am Fehler erkennbar (`context.Canceled`, `context.DeadlineExceeded`).
 
@@ -756,6 +757,8 @@ devcontainer:
 #       enabled: false
 #       allow: []
 ```
+
+`u-boot init --devcontainer` schreibt `devcontainer.enabled: true` in die neu angelegte `u-boot.yaml` ([`LH-AK-005`](lastenheft.md#lh-ak-005--devcontainer-flow)).
 
 ### SPEC-008 — Eigenschaften und Pflicht-Targets des Makefiles
 
@@ -1050,4 +1053,4 @@ Schnittstellen zu Drittsystemen mit Versionsannahme (Docker, Compose, Devcontain
 | Datum | Änderung |
 |---|---|
 | 2026-10-02 | Angelegt als Technik-Stratum; Schemata, Beispielinstanzen, Algorithmen, Build-/CI-, Doku- und Architektur-Details sowie Markierungsformate wörtlich aus dem Lastenheft übernommen (`SPEC-001`..`SPEC-016`, Verfeinerungen); neu aus dem Bestand von Code und Konfiguration: Standardwerte, Egress-Default-Allowlist, Code-Registry der `doctor`-Prüfungen, Telemetrie-Aussage, externe Verträge (`SPEC-017`..`SPEC-023`). |
-| 2026-10-16 | Festlegungen aus den Paket-READMEs unter `internal/` übernommen (`SPEC-036`..`SPEC-042`): Stabilisierung und Port-Erkennung von `up`, Bestätigungspfad von `down --volumes`, Zustandsmaschinen von `generate`, Pfade und Schreibpipeline von `config`, Schweregrade von `compose.yaml.valid`, Preflight der Compose-Engine. Zahlenwerte aus dem Quelltext. |
+| 2026-10-16 | Festlegungen aus den Paket-READMEs unter `internal/` übernommen (`SPEC-036`, [`LH-FA-UP-001.a`](#lh-fa-up-001a--erkennung-probebarer-ports-in-composeyaml), `SPEC-038`..`SPEC-042`): Stabilisierung und Port-Erkennung von `up`, Bestätigungspfad von `down --volumes`, Zustandsmaschinen von `generate`, Pfade und Schreibpipeline von `config`, Schweregrade von `compose.yaml.valid`, Preflight der Compose-Engine. Zahlenwerte aus dem Quelltext. |

@@ -139,12 +139,13 @@ Einordnung je Aussage: **F** Festlegung (→ Spezifikation), **R** Rückverfolgb
 | nil-tolerante Ports über `noop*`-Defaults | I | steht an `noop.go` und in Architektur §2.2 |
 | Service → Anforderung-Liste (`LH-FA-*`-Spannen je Service) | R | entfällt (`make doc-trace`) |
 | `up`: `pollInterval=500ms`, `dialTimeout=300ms`, Zustandsklassen, Dead-Allowlist, Restart-Zähler (Schwelle 3), Healthcheck-Dominanz, Warn-Diagnosen | F | [`SPEC-036`](../../../../spec/spezifikation.md#spec-036--stabilisierung-von-u-boot-up-takt-zustandsklassen-und-entscheidungsmatrix) |
-| `parseComposePort`: 8 Syntaxfälle, nicht probebare Formen | F | [`SPEC-037`](../../../../spec/spezifikation.md#spec-037--erkennung-probebarer-ports-in-composeyaml) |
+| `parseComposePort`: 8 Syntaxfälle, nicht probebare Formen | F | [`LH-FA-UP-001.a`](../../../../spec/spezifikation.md#lh-fa-up-001a--erkennung-probebarer-ports-in-composeyaml) |
 | `down --volumes`: §T5-Wahrheitstabelle | F | [`SPEC-038`](../../../../spec/spezifikation.md#spec-038--bestätigungspfad-von-u-boot-down---volumes) |
 | `generate`: 4-Zustands-Maschine, Changelog-Reparaturpfad, atomarer Devcontainer-Plan, `forwardPorts`-Quelle | F | [`SPEC-039`](../../../../spec/spezifikation.md#spec-039--zustandsmaschinen-der-generatoren-u-boot-generate) |
 | `config`: Pfad-Whitelist, zweistufige Validierung vor dem Schreiben, `services.<svc>.enabled` nur lesbar | F | [`SPEC-040`](../../../../spec/spezifikation.md#spec-040--konfigurationspfade-und-schreibpipeline-von-u-boot-config) |
 | `compose.yaml.valid` stuft „keine Services" als Warn ein | F | [`SPEC-041`](../../../../spec/spezifikation.md#spec-041--schweregrade-der-prüfung-composeyamlvalid) |
-| `init --devcontainer`: zwei Templates, gleiche `planFile`-Pipeline, `devcontainer.enabled: true` | A | [`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005--devcontainer-flow), Architektur §2.2 (Pipeline-Detail bleibt am Code) |
+| `init --devcontainer`: zwei Templates, gleiche `planFile`-Pipeline | A | [`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005--devcontainer-flow), Architektur §2.2 (Pipeline-Detail bleibt am Code) |
+| `init --devcontainer` setzt `devcontainer.enabled: true` | F | [`SPEC-005`](../../../../spec/spezifikation.md#spec-005--schema-der-projektkonfiguration-u-bootyaml) ([`LH-AK-005`](../../../../spec/lastenheft.md#lh-ak-005--devcontainer-flow) nennt den Wert nicht; Wert aus `executeUBootYAML`) |
 | `TemplateInitService` wird vom `InitProjectService` konsumiert | A | steht in Architektur §2.2 |
 | `managedblock/` (3 Marker-Stile), `templates/` | A / F | Architektur §2.2; Stile in [`SPEC-014`](../../../../spec/spezifikation.md#spec-014--markierungsformat-verwalteter-bereiche-je-dateityp) |
 | `remove --purge` nur über das Bestätigungs-Gate | R | [`LH-FA-ADD-007`](../../../../spec/lastenheft.md#lh-fa-add-007--service-entfernen), [`SPEC-038`](../../../../spec/spezifikation.md#spec-038--bestätigungspfad-von-u-boot-down---volumes) für den Bestätigungsmechanismus |
@@ -191,7 +192,8 @@ Abweichungen: `GenerateUseCase`, `ConfigUseCase`, `LogsUseCase` sowie die Remove
 |---|---|---|
 | Interfaces, die die Application nach außen nutzt | A | Architektur §2.4 |
 | Methodenlisten je Port | R / I | Code (Interface-Doku) |
-| `Clock.Sleep` ohne Kontext, `NetProbe` Kontext-Vorrang, `ComposeUp` ohne Status-Folgeabfrage, Preflight-Vertrag, Sentinels 11/12 | F | [`SPEC-042`](../../../../spec/spezifikation.md#spec-042--aufruf-der-compose-engine-und-preflight), Architektur §7.1 |
+| `NetProbe` Kontext-Vorrang, `ComposeUp` ohne Status-Folgeabfrage, Preflight-Vertrag, Sentinels 11/12 | F | [`SPEC-042`](../../../../spec/spezifikation.md#spec-042--aufruf-der-compose-engine-und-preflight), Architektur §7.1 |
+| `Clock.Sleep` ohne Kontext (Produktion delegiert an `time.Sleep`; nur der Polling-Loop von `up` ruft es) | I | Implementierungshinweis am Code (`internal/hexagon/port/driven/clock.go`), keine Vertragsaussage; weder [`SPEC-042`](../../../../spec/spezifikation.md#spec-042--aufruf-der-compose-engine-und-preflight) noch Architektur §7.1 tragen sie |
 | `Confirmer` mit eng benannten Methoden | A | Architektur §2.4 |
 | Verweis [`SPEC-027`](../../../../spec/spezifikation.md#spec-027--zusammensetzung-des-lint-profils) als Logging-Port | R | **falscher Anker** ([`SPEC-027`](../../../../spec/spezifikation.md#spec-027--zusammensetzung-des-lint-profils) ist das Lint-Profil); entfällt |
 | „Geplante Erweiterungen" (`Logs`, `Exec`) | — | entfällt |
