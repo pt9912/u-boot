@@ -12,7 +12,7 @@ Dateiname-Konventionen.
 | Datei | Gegenstand |
 | ----- | ---------- |
 | [`slice-v1-sandbox-docker-nachholmessung-desktop`](slice-v1-sandbox-docker-nachholmessung-desktop.md) | Docker-Desktop-Messung für `nestedRuntime: docker` (Abnahmekriterium 6) |
-| [`slice-harness-dcheck-bump-reviewer-skill`](slice-harness-dcheck-bump-reviewer-skill.md) | Auffrischung des Reviewer-Skills (Baseline v6.18.1); d-check-Bump liegt bei der ai-harness-init-Adoption |
+| [`slice-harness-dcheck-bump-reviewer-skill`](../next/slice-harness-dcheck-bump-reviewer-skill.md) | Auffrischung des Reviewer-Skills (Baseline v6.18.1); d-check-Bump liegt bei der ai-harness-init-Adoption |
 | [`slice-v2-homebrew-smoke-haertung`](slice-v2-homebrew-smoke-haertung.md) | Härtung des Homebrew-Smoke im Tap (Build-from-source, `u-boot add`, gatendes Audit), Formel-`desc` und Workflow-Kommentar |
 | [`slice-harness-ai-harness-init-adoption`](../done/slice-harness-ai-harness-init-adoption.md) | ai-harness-init als Werkzeug des Repos: Aggregator, Fragmente, `repo.mk`, Sensor-Dateien, d-check v0.86.1 |
 | [`slice-cr-lastenheft-produktanforderungen`](../done/slice-cr-lastenheft-produktanforderungen.md) | CR: Lastenheft nur mit Produktanforderungen — BUILD-, PROJDOCS-, ARCH- und QA-Anforderungen als Grabsteine |

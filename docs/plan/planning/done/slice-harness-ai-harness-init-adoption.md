@@ -34,7 +34,7 @@ eigene Targets leben in `repo.mk`, der Gate-Index wird zweiteilig
 als einem Satz Vertrag bekommen Sensor-Dateien unter `harness/sensors/`.
 
 **Übernimmt:** den d-check-Bump aus
-[`slice-harness-dcheck-bump-reviewer-skill`](../open/slice-harness-dcheck-bump-reviewer-skill.md)
+[`slice-harness-dcheck-bump-reviewer-skill`](../next/slice-harness-dcheck-bump-reviewer-skill.md)
 (das Werkzeug bringt `d-check` `v0.86.1` digest-gepinnt mit); dort bleibt die
 Auffrischung des Reviewer-Skills.
 
@@ -146,7 +146,7 @@ auf F-8 behoben. Verifier: DoD bestätigt, alle Sensor-Läufe grün.
   Stellen nach, die Variablen oder Targets beim Namen nennen — gefunden durch den
   Review, nicht durch ein Gate — liegt in `harness/conventions/MR-012-ai-harness-init-werkzeug-des-repos.md` (Punkt 1).
 - **Folge-Slices:** [`slice-harness-wellen-betrieb`](../done/slice-harness-wellen-betrieb.md),
-  [`slice-harness-dcheck-bump-reviewer-skill`](../open/slice-harness-dcheck-bump-reviewer-skill.md)
+  [`slice-harness-dcheck-bump-reviewer-skill`](../next/slice-harness-dcheck-bump-reviewer-skill.md)
   (Reviewer-Skill).
 - **Risiken aus §6:** je ein Ausgang, siehe §6.
 
