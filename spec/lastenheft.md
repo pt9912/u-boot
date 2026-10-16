@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.5.0                                                              |
+| Version          | 0.6.0                                                              |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -31,6 +31,12 @@ CLI-Ausgaben, Fehlermeldungen und erzeugte Dateien (Kommentare, Beispielwerte, R
 ### LH-LESE-003 – Dokumentenordnung
 
 Dieses Lastenheft ist der Vertrag: Es legt fest, **was** das Produkt leistet. Technische Festlegungen (Schemata, Algorithmen, Defaults, Fehler-Codes, Build- und Dokumentationsdetails) stehen in einem eigenen technischen Dokument, das dieses Lastenheft präzisiert, aber nie erweitert; bei Widerspruch gilt das Lastenheft. Das Lastenheft verweist nicht auf dieses technische Dokument.
+
+Anforderungen an den Entwicklungsprozess der u-boot-Codebase (Bau, Dokumentation, Architektur-Vorgaben, Qualitätssicherung) gehören nicht in dieses Lastenheft; sie stehen im adoptierten Baseline-Regelwerk.
+
+### LH-LESE-004 – Prüfbarkeit
+
+Jede funktionale Anforderung soll durch mindestens einen Akzeptanztest überprüfbar sein.
 
 ---
 
@@ -825,148 +831,91 @@ Die Migration muss mit einem klaren Fehler auf unbekannte Zukunftsversionen reag
 
 ## 4.11 Build- und CI-Infrastruktur des u-boot-Projekts
 
-Diese Sektion definiert die Build- und CI-Infrastruktur für die **u-boot-Codebase selbst**. Sie ist nicht zu verwechseln mit den Anforderungen aus 4.4 (`LH-FA-DOC-*`), die das Verhalten der Compose-/Dockerfile-Generatoren in den per `u-boot init` erzeugten Zielprojekten beschreiben.
-
-Bezug:
-
-- Implementierungssprache: [`LH-OPEN-001`](#lh-open-001--implementierungssprache-entschieden) (Go).
-- Vorlage: das Referenzprojekt `k-deskflight` (Docker-only-Workflow, Multi-Stage Dockerfile, Distroless-Runtime).
+Die Anforderungen dieses Abschnitts beschreiben den Bau der **u-boot-Codebase selbst** und damit den Entwicklungsprozess, nicht das Produkt. Sie sind seit 0.6.0 entfallen; die Kennungen bleiben als Grabsteine bestehen und werden nicht wieder vergeben.
 
 ### LH-FA-BUILD-001 – Multi-Stage Dockerfile (u-boot-Repo)
 
-*Priorität: MVP.* Die u-boot-Codebase muss ein Multi-Stage `Dockerfile` im Repo-Root bereitstellen.
-
-Die Pflicht-Stages `deps`, `compile`, `test`, `lint`, `coverage`, `build` und `runtime` sind je einzeln per `docker build --target <stage>` baubar.
+*Entfallen (0.6.0).* Anforderung an den Bau der u-boot-Codebase, kein Produktmerkmal; sie steht im technischen Dokument und im adoptierten Baseline-Regelwerk.
 
 ### LH-FA-BUILD-002 – Runtime-Stage Pflichten
 
-*Priorität: MVP.* Der `runtime`-Stage des u-boot-Dockerfiles muss ein minimales, shell-loses Endimage erzeugen, das als Non-root-Benutzer läuft, OCI-Image-Labels trägt, keine Build-Toolchain enthält und dessen `ENTRYPOINT` auf das im `build`-Stage erzeugte Binary zeigt.
+*Entfallen (0.6.0).* Die Produktzusage zum ausgelieferten Image steht in [`LH-NFA-PORT-004`](#lh-nfa-port-004--ausgeliefertes-container-image); die Stage-Mechanik steht im technischen Dokument.
 
 ### LH-FA-BUILD-003 – Build-Args und Pin-Politik
 
-*Priorität: MVP.* Das u-boot-Dockerfile muss versions- und schwellwertbezogene Build-Args bereitstellen: die Go-Version, die golangci-lint-Version und den Coverage-Schwellwert, jeweils mit Default. Die Hebung der Pins ist Routine ohne separaten Spec-Eintrag; der Coverage-Schwellwert lässt sich per `make coverage-gate THRESHOLD=…` überschreiben.
-
-Overrides erfolgen per `docker build --build-arg` bzw. Makefile-Variable.
+*Entfallen (0.6.0).* Anforderung an den Bau der u-boot-Codebase, kein Produktmerkmal; sie steht im technischen Dokument und im adoptierten Baseline-Regelwerk.
 
 ### LH-FA-BUILD-004 – `.dockerignore` Pflicht
 
-*Priorität: MVP.* Das u-boot-Repo muss eine `.dockerignore` im Repo-Root bereitstellen.
-
-Mindestens auszuschließen sind Versionsverwaltung, IDE- und Agent-Verzeichnisse sowie lokale Build-Artefakte und Caches.
-
-Die `.dockerignore` selbst gehört nicht ins Image und ist daher auszuschließen, sofern sie nicht von einem Stage-Build benötigt wird.
+*Entfallen (0.6.0).* Anforderung an den Bau der u-boot-Codebase, kein Produktmerkmal; sie steht im technischen Dokument und im adoptierten Baseline-Regelwerk.
 
 ### LH-FA-BUILD-005 – Makefile mit Standard-Targets
 
-*Priorität: MVP.* Das u-boot-Repo muss ein `Makefile` im Repo-Root bereitstellen.
-
-Pflicht-Eigenschaften: `help` als Default-Ziel, alle Targets als `.PHONY`, überschreibbare Variablen mit `?=`-Defaults. Pflicht-Targets decken Hilfe, Abhängigkeitsauflösung, Compile, Lint, Test, Coverage-Gate, Runtime-Image-Build, Smoke-Test und Aufräumen ab.
+*Entfallen (0.6.0).* Anforderung an den Bau der u-boot-Codebase, kein Produktmerkmal; sie steht im technischen Dokument und im adoptierten Baseline-Regelwerk.
 
 ### LH-FA-BUILD-006 – Aggregator-Targets
 
-*Priorität: V1.* Das Makefile soll Aggregator-Targets bereitstellen:
-
-- `gates` – Inner-Loop-Pflichtgates (`lint` + `test` + `coverage-gate`), PR-blockierend.
-- `ci` – `gates` plus `govulncheck` (bei Go-Stack aus [`LH-OPEN-001`](#lh-open-001--implementierungssprache-entschieden) zwingend) plus `image-scan` (Trivy-Image-Scan gegen das Runtime-Image, durch [`LH-QA-003`](#lh-qa-003--ci-fähigkeit-github-actions) als dritter PR-blockierender Job verbindlich — der `make ci`-Aggregator selbst ist V1, sein `image-scan`-Bestandteil ist über [`LH-QA-003`](#lh-qa-003--ci-fähigkeit-github-actions) MVP-Pflicht); SBOM-Erzeugung bleibt optional.
-- `fullbuild` – `ci` plus `build`; vollständiger Closure-Lauf.
-
-Aggregator-Targets müssen bei Fehler eines untergeordneten Targets mit Non-Zero-Exit abbrechen und die Fehlerursache klar benennen.
+*Entfallen (0.6.0).* Anforderung an den Bau der u-boot-Codebase, kein Produktmerkmal; sie steht im technischen Dokument und im adoptierten Baseline-Regelwerk.
 
 ### LH-FA-BUILD-007 – Docker-only-Workflow
 
-*Priorität: MVP.* Der Standard-Build-/Test-Workflow muss ohne hostseitige Sprach-Toolchain auskommen.
-
-Pflicht-Targets rufen ausschließlich `docker build`, `docker run` oder andere solche Targets auf. Voraussetzung am Host sind Docker Engine und `make`; `make` ist ein bewusster Carveout zu [`LH-NFA-PORT-002`](#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten). Weitere Carveouts stehen im `Makefile`-Header.
+*Entfallen (0.6.0).* Anforderung an den Bau der u-boot-Codebase, kein Produktmerkmal; sie steht im technischen Dokument und im adoptierten Baseline-Regelwerk.
 
 ### LH-FA-BUILD-008 – Coverage-Bootstrap
 
-*Priorität: MVP.* Der `coverage`-Stage muss in der Bootstrap-Phase (noch keine produktiven Pakete in `./internal/...`) deterministisch mit einer leeren Coverage-Eingabe umgehen können.
-
-- Der Schwellwert lässt sich per `make coverage-gate THRESHOLD=…` überschreiben.
-- Leere Coverage darf in der Bootstrap-Phase nicht zu einem falschen Grün führen, das echte Test-Failures maskiert.
+*Entfallen (0.6.0).* Anforderung an den Bau der u-boot-Codebase, kein Produktmerkmal; sie steht im technischen Dokument und im adoptierten Baseline-Regelwerk.
 
 ### LH-FA-BUILD-009 – Repository-Layout
 
-*Priorität: MVP.* Das u-boot-Repo muss folgendem Go-Layout folgen:
-
-- Implementierung unter `./internal/...`, CLI-Entry-Points unter `./cmd/<binary>/` (Binary `uboot`, ausgeliefert als `u-boot`), Unit-Tests neben dem produktiven Code im selben Paket.
-- Coverage-Messung ([`LH-FA-BUILD-001`](#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo), [`LH-FA-BUILD-008`](#lh-fa-build-008--coverage-bootstrap)) bezieht sich auf `./internal/...`; `./cmd/...` ist ausgeschlossen.
+*Entfallen (0.6.0).* Anforderung an den Bau der u-boot-Codebase, kein Produktmerkmal; sie steht im technischen Dokument und im adoptierten Baseline-Regelwerk.
 
 ---
 
 ## 4.12 Doku-Struktur des u-boot-Projekts
 
-Diese Sektion definiert die Verzeichnisstruktur unter `docs/` für die **u-boot-Codebase selbst**. Sie ist nicht zu verwechseln mit der `docs/`-Erzeugung in Zielprojekten (siehe [`LH-FA-INIT-003`](#lh-fa-init-003--projektstruktur-erzeugen), [`LH-SA-FILE-001`](#lh-sa-file-001--erzeugte-dateien)), die nur das Top-Level-Verzeichnis anlegt.
-
-Vorlage: die Referenzprojekte `k-deskflight` und `grid-gym` (Basis-Pattern: archive + plan/adr + plan/planning-Lifecycle + user).
+Die Anforderungen dieses Abschnitts beschreiben die Doku- und Planungsregeln der **u-boot-Codebase selbst** und damit den Entwicklungsprozess, nicht das Produkt. Sie sind seit 0.6.0 entfallen; die Kennungen bleiben als Grabsteine bestehen und werden nicht wieder vergeben.
 
 ### LH-FA-PROJDOCS-001 – Mindeststruktur
 
-*Priorität: MVP.* Das u-boot-Repo muss `docs/` mit den Unterverzeichnissen `archive/`, `plan/adr/`, `plan/planning/` (mit `open/`, `next/`, `in-progress/`, `done/`) und `user/` bereitstellen; weitere Unterverzeichnisse sind zulässig.
-
-Jedes Unterverzeichnis muss mindestens eine `README.md` mit kurzer Zweckbeschreibung enthalten, damit Git die Struktur trackt und Newcomer den Verzeichnisstandard ohne externe Erklärung erfassen können. `.gitkeep` ist als Ersatz unzureichend, weil er den Zweck nicht kommuniziert.
-
-Abgrenzung zu Zielprojekten: Für per `u-boot init` erzeugte Zielprojekte ist nur `docs/` als Top-Level Pflicht ([`LH-FA-INIT-003`](#lh-fa-init-003--projektstruktur-erzeugen)). Ob diese Unterstruktur auch in Zielprojekten erzeugt wird, ist eine spätere Entscheidung (z. B. via Template oder Flag) und gehört nicht zum MVP-Umfang.
+*Entfallen (0.6.0).* Regel des Entwicklungsprozesses, kein Produktmerkmal; sie steht im adoptierten Baseline-Regelwerk.
 
 ### LH-FA-PROJDOCS-002 – ADR-Format
 
-*Priorität: MVP.* Architecture Decision Records in `docs/plan/adr/` folgen dem vendorten MADR-/Nygard-Template des adoptierten Baseline-Regelwerks (`.harness/baseline/<tag>/templates/docs/plan/adr/NNNN-titel.template.md`): vierstellige, nie wiederverwendete Nummer, Kopf-Felder als Inline-Felder (Status, Datum, Autor, Bezug, Schärft) und die vorgeschriebene Abschnittsfolge. Abgelöste ADRs bleiben mit dem Status „Superseded by“ erhalten.
+*Entfallen (0.6.0).* Regel des Entwicklungsprozesses, kein Produktmerkmal; sie steht im adoptierten Baseline-Regelwerk.
 
 ### LH-FA-PROJDOCS-003 – Planning-Lifecycle
 
-*Priorität: MVP.* Planning-Artefakte durchlaufen den Lifecycle `open → next → in-progress → done` des adoptierten Baseline-Regelwerks: Übergang per `git mv`, kein Artefakt in mehreren Verzeichnissen, Inhalte in `done/` nur korrigierend änderbar (substanzielle Änderungen erzeugen ein neues Artefakt in `open/` oder `next/` mit Verweis auf den vorhergehenden Stand).
-
-Dateinamen in `planning/`: `slice-<phase>-<kebab-slug>.md` für Slice-Pläne und `tranche-<nr>-<kebab-slug>.md` für Tranchen-Pläne; die Wahl ist im `README.md` von `docs/plan/planning/` dokumentiert. Übergreifende Master-Dokumente (`roadmap.md`, `carveouts.md`) liegen dauerhaft in `in-progress/` und folgen keinem der beiden Formate.
+*Entfallen (0.6.0).* Regel des Entwicklungsprozesses, kein Produktmerkmal; sie steht im adoptierten Baseline-Regelwerk.
 
 ### LH-FA-PROJDOCS-005 – Carveout-Disziplin
 
-*Priorität: MVP.* Jeder temporäre Carveout in der u-boot-Codebase bekommt parallel zu seiner Entstehung einen Slice-Plan in `docs/plan/planning/open/` mit Auslöser, Aufhebungsbedingung und Akzeptanzkriterien (Carveout-Disziplin des adoptierten Baseline-Regelwerks) und ist im Master-Inventar `carveouts.md` und in der Roadmap sichtbar. Als temporärer Carveout zählen auch Bootstrap-Schwellwerte, bewusst leere Regelblöcke in der Tooling-Konfiguration, prospektive Doku-Phrasen und bewusst weggelassene CI-/Build-Pflichten; Spec-Open-Punkte (`LH-OPEN-*`) und ADR-Folgepunkte gelten ebenfalls. Permanente Carveouts stehen mit Begründung im Master-Inventar und brauchen keinen Aufhebungsplan.
+*Entfallen (0.6.0).* Regel des Entwicklungsprozesses, kein Produktmerkmal; sie steht im adoptierten Baseline-Regelwerk.
 
 ### LH-FA-PROJDOCS-006 – Dokumentationsreferenzmodell
 
-*Priorität: V1.* Das Repo wendet das Dokumentationsreferenzmodell (Referenz-Richtung, Decken-Regel) des adoptierten Baseline-Regelwerks an; `docs-check` erzwingt es. Das Lastenheft ist die normative Decke: Externe Normen, Standards und Vorgaben wirken im Repo nur über explizite `LH-*`-Anforderungen normativ.
+*Entfallen (0.6.0).* Regel des Entwicklungsprozesses, kein Produktmerkmal; sie steht im adoptierten Baseline-Regelwerk.
 
 ### LH-FA-PROJDOCS-004 – Archivierung
 
-*Priorität: V1.* Abgelöste oder veraltete Inhalte aus `user/`, `plan/` oder anderen `docs/`-Bereichen werden nach `docs/archive/` verschoben, statt sie zu löschen.
-
-- Beim Verschieben wird ein kurzer Hinweis am Anfang des Zielfiles ergänzt (z. B. `> Archiviert am YYYY-MM-DD; ersetzt durch [<Pfad>](<pfad>).`).
-- Querverweise in lebendiger Doku werden auf das neue Ziel umgebogen oder explizit als historisch markiert.
-- Das Verschieben erfolgt per `git mv`, damit die Historie erhalten bleibt.
+*Entfallen (0.6.0).* Regel des Entwicklungsprozesses, kein Produktmerkmal; sie steht im adoptierten Baseline-Regelwerk.
 
 ---
 
 ## 4.13 Architektur des u-boot-Projekts
 
-Diese Sektion definiert das Architektur-Pattern für die **u-boot-Codebase selbst** und trägt die Pflichten, die für jede Code-Änderung gelten.
-
-Vorlage: die Referenzprojekte `k-deskflight` (Go, flach), `m-trace` (TypeScript, driving/driven-Split) und `grid-gym` (Python, driving/driven-Split). Die konkrete Variante ist durch [`LH-FA-ARCH-001`](#lh-fa-arch-001--hexagonales-pattern)..[`LH-FA-ARCH-003`](#lh-fa-arch-003--import-regeln-und-enforcement) festgelegt.
+Die Anforderungen dieses Abschnitts beschreiben das Architektur-Pattern der **u-boot-Codebase selbst** und damit eine Entwurfsvorgabe, kein Produktmerkmal. Sie sind seit 0.6.0 entfallen; die Kennungen bleiben als Grabsteine bestehen und werden nicht wieder vergeben.
 
 ### LH-FA-ARCH-001 – Hexagonales Pattern
 
-*Priorität: MVP.* Die u-boot-Codebase muss dem hexagonalen Architektur-Pattern (Ports & Adapters) folgen.
-
-Pflichten:
-
-- Trennung zwischen reiner Domäne, Anwendungslogik, Ports (Interfaces) und Adaptern (Implementierungen).
-- Keine direkten Abhängigkeiten von Anwendungslogik oder Domäne zu externen Bibliotheken (Docker-SDK, YAML-Parser, Dateisystem).
-- Externe Zugriffe laufen ausschließlich über Driven-Ports, die in Adapter-Paketen implementiert werden.
+*Entfallen (0.6.0).* Entwurfsvorgabe für die u-boot-Codebase, kein Produktmerkmal; sie steht in der Architektur-Sicht und im technischen Dokument.
 
 ### LH-FA-ARCH-002 – Schichten und Verzeichnislayout
 
-*Priorität: MVP.* Das u-boot-Repo muss unter `internal/` die Schichten `hexagon` (mit `domain`, `application` und `port/driving`, `port/driven`) und `adapter` (mit `driving` und `driven`) bereitstellen.
-
-Die Wiring-Schicht (`cmd/uboot/`) ist die einzige Stelle, an der `application` und `adapter` zusammen importiert werden dürfen.
+*Entfallen (0.6.0).* Entwurfsvorgabe für die u-boot-Codebase, kein Produktmerkmal; sie steht in der Architektur-Sicht und im technischen Dokument.
 
 ### LH-FA-ARCH-003 – Import-Regeln und Enforcement
 
-*Priorität: MVP.* Die Import-Regeln der Schichten sind verbindlich. Kernaussagen: `domain` importiert nur die Go-Standardbibliothek; `application` kennt keine konkreten Adapter; die Port-Pakete `driving` und `driven` kennen einander nicht; Adapter importieren nicht `application` und nicht den jeweils anderen Adapter-Typ; nur `cmd/uboot` verbindet `application` und Adapter.
-
-Pflichten:
-
-- Die Regeln werden im `lint`-Stage ([`LH-FA-BUILD-001`](#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) per `golangci-lint` mit `depguard` durchgesetzt; Verstöße sind PR-blockierend.
-- Die `depguard`-Konfiguration ist deckungsgleich mit den Import-Regeln zu halten; `//nolint:depguard` ist verboten, Carveouts stehen zentral in `.golangci.yml` mit Begründung.
-- Die Regeln gelten nur für Produktivcode; Tests sind ausgenommen.
+*Entfallen (0.6.0).* Entwurfsvorgabe für die u-boot-Codebase, kein Produktmerkmal; sie steht in der Architektur-Sicht und im technischen Dokument.
 
 ---
 
@@ -1070,6 +1019,10 @@ Insbesondere sollen Add-ons, Templates und Generatoren voneinander getrennt impl
 ### LH-NFA-PORT-003 – Containerfreundlichkeit
 
 *Priorität: V1.* Das Produkt soll selbst in einem Container oder Devcontainer ausführbar sein können.
+
+### LH-NFA-PORT-004 – Ausgeliefertes Container-Image
+
+*Priorität: MVP.* Das ausgelieferte Container-Image ([`LH-OPEN-002`](#lh-open-002--paketierung)) ist minimal und enthält keine Shell und keine Build-Toolchain, läuft als Non-root-Benutzer und trägt OCI-Image-Labels; sein `ENTRYPOINT` ist das u-boot-Binary.
 
 ---
 
@@ -1260,36 +1213,19 @@ Anforderungen:
 
 ### LH-QA-001 – Automatisierte Tests
 
-*Priorität: MVP.* Für zentrale Funktionen müssen automatisierte Tests vorhanden sein.
-
-Mindestumfang:
-
-- CLI-Befehle
-- Dateigeneratoren
-- Template-Verarbeitung
-- Add-on-Erzeugung
-- Konfigurationsparser
+*Entfallen (0.6.0).* Regel des Entwicklungsprozesses, kein Produktmerkmal; sie steht im adoptierten Baseline-Regelwerk.
 
 ### LH-QA-002 – Testbare Akzeptanzkriterien
 
-*Priorität: MVP.* Jede funktionale Anforderung soll durch mindestens einen Akzeptanztest überprüfbar sein.
+*Entfallen (0.6.0).* Als Lesehinweis erhalten: [`LH-LESE-004`](#lh-lese-004--prüfbarkeit).
 
 ### LH-QA-003 – CI-Fähigkeit (GitHub Actions)
 
-*Priorität: MVP.* Das u-boot-Repo muss eine CI-Pipeline auf GitHub Actions führen.
-
-Pflicht-Komposition: Die Pipeline läuft bei `pull_request` und `push` auf `main` in drei parallelen, PR-blockierenden Jobs: Gates (`make gates`), Security-Gates (`make govulncheck`) und Image-Scan (`make image-scan`, Trivy gegen das Runtime-Image, Severity HIGH und CRITICAL). Die PR-Blocking-Pflicht aller drei folgt aus diesem Eintrag, auch wenn die Make-Target-Definitionen unter [`LH-FA-BUILD-006`](#lh-fa-build-006--aggregator-targets) liegen. Der Runner braucht nur Docker und BuildKit, keine Host-Go-Toolchain ([`LH-FA-BUILD-007`](#lh-fa-build-007--docker-only-workflow)); Actions sind gepinnt, Token-Rechte minimal gehalten und jeder Job hat ein Zeitlimit. Die Required-Status-Check-Liste im GitHub-UI muss die tatsächlichen Job-Namen des Workflows verwenden.
+*Entfallen (0.6.0).* Regel des Entwicklungsprozesses, kein Produktmerkmal; sie steht im adoptierten Baseline-Regelwerk.
 
 ### LH-QA-004 – Linting (SOLID-nahes Lint-Profil)
 
-*Priorität: MVP.* Die u-boot-Codebase muss ein verschärftes Lint-Profil führen, das über die Default-Linter hinausgeht.
-
-Das Profil besteht aus den Default-Lintern und SOLID-nahen Zusatz-Lintern (Komplexitäts-, Funktionslänge-, Interface-, Kopplungs- und Boundary-Signale); `depguard` für die Schicht-Regeln aus [`LH-FA-ARCH-003`](#lh-fa-arch-003--import-regeln-und-enforcement) ist Teil davon.
-
-Pflichten:
-
-- Die Konfiguration lebt in `.golangci.yml`; `//nolint`-Pragmas sind verboten, Carveouts stehen zentral dort mit Begründung.
-- Verstöße brechen den `lint`-Stage ([`LH-FA-BUILD-001`](#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo)) und damit `make gates`, `make ci` und `make fullbuild`; die Linter-Auswahl deckt die Architekturgrenzen aus [`LH-FA-ARCH-003`](#lh-fa-arch-003--import-regeln-und-enforcement) ab.
+*Entfallen (0.6.0).* Regel des Entwicklungsprozesses, kein Produktmerkmal; sie steht im adoptierten Baseline-Regelwerk.
 
 ---
 
@@ -1490,16 +1426,7 @@ Der MVP muss enthalten:
 - Erzeugung von `README.md`
 - Erzeugung von `CHANGELOG.md`
 - grundlegende Devcontainer-Unterstützung
-- Build-Infrastruktur der u-boot-Codebase selbst:
-  - Multi-Stage `Dockerfile` ([`LH-FA-BUILD-001`](#lh-fa-build-001--multi-stage-dockerfile-u-boot-repo))
-  - `Makefile` mit MVP-Pflicht-Targets ([`LH-FA-BUILD-005`](#lh-fa-build-005--makefile-mit-standard-targets))
-  - `.dockerignore` ([`LH-FA-BUILD-004`](#lh-fa-build-004--dockerignore-pflicht))
-  - Docker-only-Workflow ([`LH-FA-BUILD-007`](#lh-fa-build-007--docker-only-workflow))
-  - Repository-Layout nach [`LH-FA-BUILD-009`](#lh-fa-build-009--repository-layout)
-- Doku-Struktur der u-boot-Codebase nach [`LH-FA-PROJDOCS-001`](#lh-fa-projdocs-001--mindeststruktur), inkl. ADR-Format ([`LH-FA-PROJDOCS-002`](#lh-fa-projdocs-002--adr-format)), Planning-Lifecycle ([`LH-FA-PROJDOCS-003`](#lh-fa-projdocs-003--planning-lifecycle)), Carveout-Disziplin ([`LH-FA-PROJDOCS-005`](#lh-fa-projdocs-005--carveout-disziplin)) und Dokumentationsreferenzmodell ([`LH-FA-PROJDOCS-006`](#lh-fa-projdocs-006--dokumentationsreferenzmodell))
-- Architektur-Pattern (hexagonal, driving/driven-Split) nach [`LH-FA-ARCH-001`](#lh-fa-arch-001--hexagonales-pattern)..[`LH-FA-ARCH-003`](#lh-fa-arch-003--import-regeln-und-enforcement), mit Import-Enforcement via `golangci-lint depguard`
-- SOLID-nahes Lint-Profil nach [`LH-QA-004`](#lh-qa-004--linting-solid-nahes-lint-profil); die Konfiguration liegt in `.golangci.yml`, die abgeleitete Quality-Doku erklärt Linter und Carveouts
-- CI-Pipeline nach [`LH-QA-003`](#lh-qa-003--ci-fähigkeit-github-actions) (GitHub Actions, drei PR-blockierende Jobs)
+- ausgeliefertes Container-Image nach [`LH-NFA-PORT-004`](#lh-nfa-port-004--ausgeliefertes-container-image)
 
 ### LH-MVP-002 – Kann nach dem MVP folgen
 
@@ -1617,6 +1544,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.3.5 | 2026-10-01 | [`LH-OPEN-002`](#lh-open-002--paketierung): Debian/RPM von „vertagt mit Trigger“ auf „gewählt“ gesetzt (`.deb`/`.rpm` für amd64 und arm64 als Release-Assets, kein gehostetes Repository). | Vereinbarung mit dem Projektinhaber |
 | 0.4.0 | 2026-10-02 | Strukturänderung ohne neue Produktzusage: Technische Festlegungen (Schemata, Beispielinstanzen, Algorithmen, Defaults, Build-/CI-, Doku- und Architektur-Details, Markierungsformate) wurden in ein eigenes technisches Dokument überführt; Projektkapitel §4.11–§4.13 und einzelne Anforderungen sind auf Vorgaben gekürzt; neue Lesehinweis-Anforderung [`LH-LESE-003`](#lh-lese-003--dokumentenordnung); die Anforderungen zu ADR-Format, Planning-Lifecycle, Carveout-Disziplin und Dokumentationsreferenzmodell sind auf Kurzzusagen gekürzt (die Einzelregeln führt das adoptierte Baseline-Regelwerk), Aufrufbeispiele und ausführliche Regelblöcke stehen in der technischen Spezifikation; die Traceability-Matrix entfällt (die Rückverfolgbarkeit folgt aus den Kennungen); die veraltete Bootstrap-Angabe „Default-Schwellwert 0“ in [`LH-FA-BUILD-008`](#lh-fa-build-008--coverage-bootstrap) entfällt, der Schwellwert ist überschreibbar. Alle Anforderungs-Kennungen und Überschriften sind unverändert. | Vereinbarung mit dem Projektinhaber |
 | 0.5.0 | 2026-10-14 | [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): dritter Wert `docker` für `devcontainer.sandbox.nestedRuntime` (eigener Docker-Daemon im Container, `--privileged` als ausgewiesene Lockerung, Speicher je Instanz, Degradationsfall „Daemon nicht betriebsbereit“). | Vereinbarung mit dem Projektinhaber |
+| 0.6.0 | 2026-10-16 | Strukturänderung ohne neue Produktzusage: Das Lastenheft beschreibt nur noch Produktanforderungen. 22 Anforderungen an den Entwicklungsprozess der u-boot-Codebase (`LH-FA-BUILD-001`..`009`, `LH-FA-PROJDOCS-001`..`006`, `LH-FA-ARCH-001`..`003`, `LH-QA-001`..`004`) sind entfallen und bleiben als Grabsteine mit unveränderter Kennung und Überschrift bestehen; die Produktzusage zum ausgelieferten Image steht in [`LH-NFA-PORT-004`](#lh-nfa-port-004--ausgeliefertes-container-image), die Prüfbarkeit als Lesehinweis in [`LH-LESE-004`](#lh-lese-004--prüfbarkeit). Der Entwicklungsprozess steht im adoptierten Baseline-Regelwerk. | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt
