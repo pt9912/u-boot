@@ -278,14 +278,17 @@ func runInit(
 			return err
 		}
 	}
-	if flags.Quiet {
-		// LH-FA-CLI-005: the summary is a success message and is not
-		// written; only the exception warnings remain. The
-		// `--force` path summary is the application's pre-write
-		// progress event (exception 4); this adapter never silences
-		// it outside JSON mode.
+	if !summaryVisible(flags.Quiet, flags.DryRun) {
+		// LH-FA-CLI-005: the summary of an actual write is a success
+		// message and is not written; only the exception warnings
+		// remain. The `--force` path summary is the application's
+		// pre-write progress event (exception 4); this adapter never
+		// silences it outside JSON mode.
 		return printInitWarnings(out, visibleWarnings(resp.Warnings, true), false)
 	}
+	// A dry-run plan stays under --quiet; notices other than the
+	// exception warnings are still dropped.
+	resp.Warnings = visibleWarnings(resp.Warnings, flags.Quiet)
 	return printInitSummary(out, resp, flags.DryRun)
 }
 

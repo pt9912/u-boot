@@ -26,6 +26,15 @@ import (
 // copy-paste. File follows the established pattern from
 // jsonenvelope.go / statusview.go / jsonallowlist.go (pure cli-
 // package helpers, no RunE binding).
+// summaryVisible reports whether the plan or result summary of a
+// preview-capable subcommand is written. Under --quiet it stays only
+// when the call is a dry run: the plan is then the result of the call
+// (LH-FA-CLI-005, LH-FA-CLI-007). The success message that closes an
+// actual write (no flag, or --diff without --dry-run) is dropped.
+func summaryVisible(quiet, dryRun bool) bool {
+	return !quiet || dryRun
+}
+
 func previewModeFromFlags(dryRun, diffFlag bool) driving.PreviewMode {
 	if dryRun {
 		return driving.PreviewDryRun

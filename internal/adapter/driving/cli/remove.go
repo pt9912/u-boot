@@ -284,11 +284,12 @@ func runRemove(
 			return err
 		}
 	}
-	// LH-FA-CLI-005: the summary and the purge warnings are neither an
-	// error nor one of the four exceptions, so --quiet writes none of
-	// them (the contract lists the purge warnings under "all other
-	// notices").
-	if !flags.Quiet {
+	// LH-FA-CLI-005: the summary of an actual write and the purge
+	// warnings are neither an error nor one of the four exceptions, so
+	// --quiet writes none of them (the contract lists the purge
+	// warnings under "all other notices"). The plan of a dry run stays;
+	// a dry run produces no purge warnings.
+	if summaryVisible(flags.Quiet, flags.DryRun) {
 		printRemoveSummary(out, errOut, resp, flags.Purge, mode)
 	}
 	return nil

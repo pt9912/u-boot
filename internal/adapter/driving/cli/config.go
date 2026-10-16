@@ -474,10 +474,11 @@ func runConfigSet(
 			return err
 		}
 	}
-	// LH-FA-CLI-005: `config set` changes the project, so its summary
-	// line is a success message and --quiet does not write it
-	// (`config get` / `config list` are queries and keep their output).
-	if !flags.Quiet {
+	// LH-FA-CLI-005: `config set` changes the project, so the summary
+	// line of an actual write is a success message and --quiet does
+	// not write it; the plan of a dry run stays (`config get` /
+	// `config list` are queries and keep their output).
+	if summaryVisible(flags.Quiet, flags.DryRun) {
 		printConfigSetSummary(out, resp)
 	}
 	return nil
@@ -673,7 +674,7 @@ func runConfigSetMany(
 			return err
 		}
 	}
-	if flags.Quiet {
+	if !summaryVisible(flags.Quiet, flags.DryRun) {
 		return nil
 	}
 	for _, e := range resp.Entries {

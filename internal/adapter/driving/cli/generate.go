@@ -222,9 +222,10 @@ func runGenerate(
 			return err
 		}
 	}
-	// LH-FA-CLI-005: the summary is a success message; under --quiet
-	// only the exception warnings are written.
-	if !flags.Quiet {
+	// LH-FA-CLI-005: the summary of an actual write is a success
+	// message; under --quiet only the dry-run plan and the exception
+	// warnings are written.
+	if summaryVisible(flags.Quiet, flags.DryRun) {
 		printGenerateSummary(out, resp)
 	}
 	for _, w := range visibleWarnings(resp.Warnings, flags.Quiet) {

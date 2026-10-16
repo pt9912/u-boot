@@ -180,9 +180,10 @@ func runAdd(
 			return err
 		}
 	}
-	// LH-FA-CLI-005: the summary is a success message and is not
-	// written under --quiet; errors returned above stay.
-	if flags.Quiet {
+	// LH-FA-CLI-005: the summary of an actual write is a success
+	// message and is not written under --quiet; the plan of a dry run
+	// and errors returned above stay.
+	if !summaryVisible(flags.Quiet, flags.DryRun) {
 		return nil
 	}
 	return printAddSummary(out, resp, flags.DryRun)
