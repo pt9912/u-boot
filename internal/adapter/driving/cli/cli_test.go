@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 	"testing"
 	"time"
@@ -87,11 +88,18 @@ type fakeDownUseCase struct {
 	lastReq driving.DownRequest
 	resp    driving.DownResponse
 	err     error
+
+	// compose is written to the request's ProgressSink, like the
+	// Compose stream the Docker adapter forwards.
+	compose string
 }
 
 func (f *fakeDownUseCase) Down(_ context.Context, req driving.DownRequest) (driving.DownResponse, error) {
 	f.called = true
 	f.lastReq = req
+	if f.compose != "" && req.ProgressSink != nil {
+		_, _ = io.WriteString(req.ProgressSink, f.compose)
+	}
 	return f.resp, f.err
 }
 

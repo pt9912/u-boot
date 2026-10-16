@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -97,8 +98,9 @@ LH-FA-CLI-006 exit codes:
   - 12  Compose runtime failure
   - 14  filesystem read failure (u-boot.yaml / compose.yaml)
 
-LH-NFA-PERF-002 progress: compose down phases stream to stderr live
-(unaffected by --quiet; silenced in --json mode).`,
+LH-NFA-PERF-002 progress: compose down phases stream to stderr live;
+with --quiet they are held back and printed only if down fails
+(silenced in --json mode).`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			// LH-FA-CLI-005A: --yes / --no-interactive are
@@ -145,15 +147,29 @@ func runDown(ctx context.Context, stdout, stderr io.Writer, flags downFlags, use
 	if err != nil {
 		return reportError(stdout, fmt.Errorf("determine working directory: %w", err), nil, false, false, flags.JSON, "down", mapErr, nil)
 	}
+	// Under --quiet the Compose stream is buffered: it carries the
+	// failure details of `docker compose down` (the adapter's error
+	// names only the exit status), so it is printed on failure and
+	// dropped on success (LH-FA-CLI-005). `--json` leaves the stream
+	// as it is: `--quiet` does not change the JSON mode.
+	sink := stderr
+	var held *bytes.Buffer
+	if flags.Quiet && !flags.JSON {
+		held = &bytes.Buffer{}
+		sink = held
+	}
 	resp, err := useCase.Down(ctx, driving.DownRequest{
 		BaseDir:          cwd,
 		RemoveVolumes:    flags.Volumes,
 		AssumeYes:        flags.Yes,
 		NonInteractive:   flags.NoInteractive,
-		ProgressSink:     stderr,
+		ProgressSink:     sink,
 		SilenceConfirmer: flags.JSON,
 	})
 	if err != nil {
+		if held != nil {
+			_, _ = stderr.Write(held.Bytes())
+		}
 		return reportError(stdout, sanitizeBaseDir(err, cwd), nil, false, false, flags.JSON, "down", mapErr, nil)
 	}
 	if flags.JSON {

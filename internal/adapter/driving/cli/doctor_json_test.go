@@ -175,6 +175,35 @@ func TestDoctorJSON_QuietIsSemanticNoOp(t *testing.T) {
 	}
 }
 
+// TestDoctorJSON_FallbackFlagNotInWireForm pins that the degradation
+// fallback flag of a diagnostic stays out of the `doctor --json` wire
+// form (LH-NFA-USE-004): the item appears as an ordinary warn entry.
+func TestDoctorJSON_FallbackFlagNotInWireForm(t *testing.T) {
+	report := driving.DoctorResponse{Report: domain.DiagnosticReport{
+		Items: []domain.Diagnostic{
+			{ID: "devcontainer.sandbox.runtime", Severity: domain.SeverityWarn, DegradationFallback: true,
+				Message: "/dev/fuse is missing; the container falls back to vfs storage."},
+		},
+	}}
+	for _, args := range [][]string{{"--json", "doctor"}, {"--json", "--quiet", "doctor"}} {
+		var stdout bytes.Buffer
+		app := newAppWithDoctor(&fakeInitUseCase{}, &fakeDoctorUseCase{resp: report},
+			cli.WithGetwd(func() (string, error) { return "/tmp/proj", nil }))
+		if err := app.Execute(context.Background(), args, &stdout, &bytes.Buffer{}); err != nil {
+			t.Fatalf("%v: %v", args, err)
+		}
+		out := strings.ToLower(stdout.String())
+		for _, name := range []string{"degradationfallback", "securityrelaxation", "fallback\":"} {
+			if strings.Contains(out, name) {
+				t.Errorf("%v: wire form carries %q:\n%s", args, name, stdout.String())
+			}
+		}
+		if !strings.Contains(out, "devcontainer.sandbox.runtime") && !strings.Contains(out, "vfs") {
+			t.Errorf("%v: the item is missing from the wire form:\n%s", args, stdout.String())
+		}
+	}
+}
+
 // TestDoctorJSON_StrictWarnExits11 pins that --strict --json with
 // a Warn report still upgrades exitCode to 11; status remains
 // "warn" because LH-NFA-USE-004 couples status to the highest level,

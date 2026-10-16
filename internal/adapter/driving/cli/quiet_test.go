@@ -3,6 +3,7 @@ package cli_test
 import (
 	"bytes"
 	"context"
+	"errors"
 	"strings"
 	"testing"
 
@@ -259,6 +260,46 @@ func TestExecute_Down_Quiet_IsSilent(t *testing.T) {
 			}
 			if stdout.Len() != 0 {
 				t.Errorf("down --quiet printed: %q", stdout.String())
+			}
+		})
+	}
+}
+
+// down --quiet holds the Compose stream back: success prints nothing
+// on stderr, a failure prints the Compose lines (they carry the failure
+// details) together with the error. Without --quiet the stream is live;
+// --json leaves it as it is.
+func TestExecute_Down_Quiet_ComposeStream(t *testing.T) {
+	t.Parallel()
+	const compose = " Container demo-db-1  Stopping\n Container demo-db-1  Error\n"
+	failure := errors.New("docker compose down failed (exit 1)")
+	for _, tc := range []struct {
+		name       string
+		args       []string
+		err        error
+		wantStream bool
+	}{
+		{"quiet-success", []string{"--quiet", "down"}, nil, false},
+		{"quiet-failure", []string{"--quiet", "down"}, failure, true},
+		{"loud-success", []string{"down"}, nil, true},
+		{"loud-failure", []string{"down"}, failure, true},
+		{"quiet-json-success", []string{"--quiet", "--json", "down"}, nil, true},
+	} {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			uc := &fakeDownUseCase{compose: compose, err: tc.err}
+			var stdout, stderr bytes.Buffer
+			err := newAppWithDown(uc, cli.WithGetwd(func() (string, error) { return "/tmp/proj", nil })).Execute(
+				context.Background(), tc.args, &stdout, &stderr)
+			if (err != nil) != (tc.err != nil) {
+				t.Fatalf("Execute error = %v, want error: %v", err, tc.err != nil)
+			}
+			if got := strings.Contains(stderr.String(), "Container demo-db-1  Error"); got != tc.wantStream {
+				t.Errorf("compose stream on stderr = %v, want %v:\n%s", got, tc.wantStream, stderr.String())
+			}
+			if tc.err != nil && !errors.Is(err, tc.err) {
+				t.Errorf("the failure is not returned: %v", err)
 			}
 		})
 	}
