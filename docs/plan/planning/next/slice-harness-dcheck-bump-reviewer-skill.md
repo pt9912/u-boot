@@ -5,8 +5,8 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** ohne Welle — keine Closure-Bedingung, die von der DoD dieses Slice
-verschieden ist (Wartungsarbeit am Harness).
+**Welle:** [`welle-harness-wartung`](../welle-harness-wartung.md) — geht dem Slice
+[`slice-harness-internal-readmes-festlegungen-in-spec`](slice-harness-internal-readmes-festlegungen-in-spec.md) voraus.
 
 **Bezug:** [`MR-009`](../../../../harness/conventions/MR-009-skills-und-review-ablage.md)
 (Reviewer-Skill); Herkunft: Delta-Lektüre in

@@ -19,6 +19,8 @@ stehen in der Welle-Datei, nicht hier.
 
 Nichts in Arbeit.
 
+- [`welle-harness-wartung`](../welle-harness-wartung.md)
+
 ## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
