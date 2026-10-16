@@ -408,6 +408,156 @@ Overrides erfolgen über `docker build --build-arg <NAME>=<value>` bzw. die korr
 - Die konkrete Linter-Auswahl muss die hier genannten Anforderungen
   und die Architekturgrenzen aus [`SPEC-034`](#spec-034--enforcement-der-import-regeln) abdecken.
 
+### SPEC-036 — Stabilisierung von `u-boot up`: Takt, Zustandsklassen und Entscheidungsmatrix
+
+Verfeinert [`LH-FA-UP-001`](lastenheft.md#lh-fa-up-001--umgebung-starten) und [`LH-FA-UP-003`](lastenheft.md#lh-fa-up-003--startstatus-anzeigen).
+
+- **Takt:** Der Compose-Status wird alle `500 ms` abgefragt; jede einzelne TCP-Erreichbarkeitsprobe ist auf `300 ms` begrenzt. Beide Werte sind feste Konstanten ohne Flag- oder Projekt-Override.
+- **Zustandsklassen:** Der vom Compose gemeldete Container-Zustand wird ohne Beachtung von Groß-/Kleinschreibung und umgebendem Leerraum klassifiziert:
+
+  | Compose-Zustand | Klasse |
+  |---|---|
+  | `running` | running |
+  | `restarting` | restarting |
+  | `created`, `starting`, `paused` | starting |
+  | `exited`, `dead`, `removing`, `removed` | dead |
+  | jeder andere Wert | unknown |
+
+  `unknown` ist weich: Der Service gilt als noch nicht stabilisiert, `up` bricht nicht ab. Je Service und Aufruf wird einmalig eine `warn`-Diagnose `up.state.<service>.unknown` ausgegeben.
+- **Entscheidung je Service** (in alphabetischer Reihenfolge der Service-Namen aus `compose.yaml`, damit bei mehreren Fehlern stets derselbe zuerst gemeldet wird):
+  - `dead` → fehlgeschlagen, das Warten endet sofort.
+  - `restarting` → Der Zähler der aufeinanderfolgenden `restarting`-Beobachtungen steigt; bei `3` gilt der Service als fehlgeschlagen, darunter wird weiter gewartet. Jede andere Beobachtung setzt den Zähler auf `0` zurück. Grenze: Ein Restart-Loop, der zwischendurch `running` zeigt, wird auf dem Pfad ohne Healthcheck und ohne probebaren Port nicht erkannt.
+  - `starting` und `unknown` → weiter warten.
+  - `running` mit deklariertem Healthcheck (`healthcheck.disable` nicht `true`): solange der Health-Status nicht `healthy` ist (ohne Beachtung der Groß-/Kleinschreibung), wird weiter gewartet und nicht geprobt; bei `healthy` gilt der Service als stabilisiert. Die deklarierten TCP-Ports werden dann dennoch geprobt; ein Fehlschlag verhindert die Stabilisierung nicht, sondern erzeugt einmalig je Service die `warn`-Diagnose `up.port.<service>.unreachable` (der Healthcheck dominiert).
+  - `running` ohne Healthcheck: Der Service gilt als stabilisiert, wenn alle probebaren Ports antworten; ohne probebaren Port genügt `running`.
+  - In `compose.yaml` deklarierte, in der Compose-Statusabfrage (noch) nicht sichtbare Services gelten als noch nicht stabilisiert; zusätzliche, nur in der Statusabfrage sichtbare Services werden ignoriert.
+- **Abschluss:** Sind alle deklarierten Services stabilisiert, endet `up` erfolgreich. Ein fehlgeschlagener Service beendet `up` mit Exit-Code `12` (Compose-Laufzeitfehler). Ist die Wartezeit nach einer Statusabfrage abgelaufen, endet `up` mit Exit-Code `12` und nennt die noch ausstehenden Services; es findet also mindestens eine Statusabfrage statt.
+- **Nicht probebare Portangaben:** Für jeden Eintrag in `ports`, der nach [`SPEC-037`](#spec-037--erkennung-probebarer-ports-in-composeyaml) nicht probebar ist, wird vor dem Warten eine `warn`-Diagnose `up.port.<service>.<index>` ausgegeben (`<index>` ist die Position im `ports`-Array); das Warten stützt sich dann auf Healthcheck oder `running`.
+- **`--timeout=0`:** Es findet keine Statusabfrage und keine Probe statt; die Antwort trägt `stabilized=false` und eine `info`-Diagnose `up.fire-and-forget`.
+
+### SPEC-037 — Erkennung probebarer Ports in `compose.yaml`
+
+Verfeinert [`LH-FA-UP-001`](lastenheft.md#lh-fa-up-001--umgebung-starten) (Erreichbarkeitsprüfung auf `localhost` für TCP-Ports).
+
+Aus einem Eintrag des `ports`-Arrays eines Services wird ein Probe-Ziel (Host und Host-Port) abgeleitet, oder der Eintrag gilt als nicht probebar (Warnung nach [`SPEC-036`](#spec-036--stabilisierung-von-u-boot-up-takt-zustandsklassen-und-entscheidungsmatrix), kein Abbruch):
+
+| Angabe | Ergebnis |
+|---|---|
+| Zahl (`5432`) oder Kurzform ohne Doppelpunkt (`"5432"`) | probe `localhost:5432` (die Zahl gilt als Host-Port) |
+| `"HOST:CONTAINER"` (`"5432:5432"`) | probe `localhost:HOST` |
+| `"IP:HOST:CONTAINER"` (`"127.0.0.1:5432:5432"`) | probe `IP:HOST` |
+| Kurzform mit Protokoll-Suffix außer `tcp` (`"5432:5432/udp"`) | nicht probebar |
+| Bereich im Host-Port (`"5000-5010:5000-5010"`) | nicht probebar |
+| Langform (Mapping) mit `published`, `protocol` fehlend oder `tcp`, optional `host_ip` | probe `host_ip:published` (ohne `host_ip`: `localhost`); `published` darf Zahl oder Zahl-String sein |
+| Langform mit `protocol` außer `tcp`, ohne `published` oder mit Bereich | nicht probebar |
+| jede andere Form (leerer String, nicht numerischer Host-Port, mehr als drei Segmente einschließlich IPv6-Adressen in Klammern, gebrochene Zahl, Wahrheitswert, Liste) | nicht probebar |
+
+Der Protokoll-Vergleich ist unabhängig von der Groß-/Kleinschreibung. Ein Host-Port außerhalb `1`..`65535` ist nicht probebar. Die Host-Angaben `""`, `0.0.0.0` und `::` (an alle Schnittstellen gebunden) werden zu `localhost` normalisiert.
+
+### SPEC-038 — Bestätigungspfad von `u-boot down --volumes`
+
+Verfeinert [`LH-FA-UP-004`](lastenheft.md#lh-fa-up-004--umgebung-stoppen) und wendet [`LH-FA-CLI-005A`](lastenheft.md#lh-fa-cli-005a--interaktivität-und-automatisierung) auf den destruktiven Pfad an.
+
+| `--volumes` | `--yes` | `--no-interactive` | Verhalten |
+|---|---|---|---|
+| nein | beliebig | beliebig | `down` läuft ohne Rückfrage |
+| ja | ja | beliebig | `down` läuft ohne Rückfrage |
+| ja | nein | ja | Abbruch mit Exit-Code `10`; weder Rückfrage noch Compose-Aufruf |
+| ja | nein | nein | interaktive Rückfrage: Zustimmung → `down` läuft; Ablehnung → Abbruch mit Exit-Code `10`; Fehler beim Einholen der Antwort → Abbruch |
+
+Bei `--json` wird nicht gefragt: Die Antwort gilt als abgelehnt, destruktives `--volumes` verlangt dort also ausdrücklich `--yes` ([`LH-NFA-USE-004`](lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)).
+
+### SPEC-039 — Zustandsmaschinen der Generatoren (`u-boot generate`)
+
+Verfeinert [`LH-FA-GEN-001`](lastenheft.md#lh-fa-gen-001--generate-befehl) bis [`LH-FA-GEN-005`](lastenheft.md#lh-fa-gen-005--idempotenz) und [`LH-AK-007`](lastenheft.md#lh-ak-007--changelog-generator).
+
+Alle Generatoren verlangen ein initialisiertes Projekt (`u-boot.yaml` vorhanden) und schreiben in einen verwalteten Bereich mit dem Namen `init` (Markierungen nach [`SPEC-014`](#spec-014--markierungsformat-verwalteter-bereiche-je-dateityp)):
+
+| Artefakt | Datei | Markierungsstil |
+|---|---|---|
+| `changelog` | `CHANGELOG.md` | HTML-Kommentar |
+| `readme` | `README.md` | HTML-Kommentar |
+| `env-example` | `.env.example` | `#`-Kommentar |
+| `devcontainer` | `.devcontainer/devcontainer.json` | `//`-Kommentar |
+| `devcontainer` | `.devcontainer/Dockerfile` | `#`-Kommentar |
+| `devcontainer` (nur bei Sandbox-Profil mit der jeweiligen Fähigkeit) | `.devcontainer/sandbox-init.sh` (`nestedRuntime: podman`), `.devcontainer/docker-init.sh` (`nestedRuntime: docker`), `.devcontainer/egress-init.sh` (Egress-Restriktion) | `#`-Kommentar |
+
+**Zustände je Datei** (`readme`, `env-example`, je Devcontainer-Datei):
+
+| Vorgefundener Zustand | Ergebnis |
+|---|---|
+| Datei fehlt | vollständig aus der Vorlage anlegen (`created`) |
+| Datei mit verwaltetem Bereich, Inhalt entspricht der Vorlage | nichts schreiben (`no-op`) |
+| Datei mit verwaltetem Bereich, Inhalt weicht ab | nur den Bereich ersetzen (`updated-block`); Inhalt außerhalb bleibt byte-identisch |
+| Datei ohne verwalteten Bereich | Abbruch, Exit-Code `10`, nichts wird geschrieben |
+| Datei mit fehlerhaft markiertem Bereich | Abbruch, Exit-Code `10`, nichts wird geschrieben |
+
+Zeilenenden werden für den Vergleich auf LF normalisiert, damit eine CRLF-Datei nicht als geändert gilt.
+
+**`changelog`** ersetzt einen abweichenden Bereich nie, weil der Nutzer dort Einträge pflegt ([`LH-AK-007`](lastenheft.md#lh-ak-007--changelog-generator)): Fehlt die Datei, wird sie angelegt; fehlt der Bereich oder ist er fehlerhaft markiert, gilt Exit-Code `10`; entspricht der Bereich der Vorlage oder weicht er ab, bleibt er unverändert. Fehlt außerhalb des Bereichs der Abschnitt `## [Unreleased]` und gibt es einen Release-Abschnitt (außerhalb von Codeblöcken), wird vor dem ersten Release-Abschnitt ein leerer Abschnitt `## [Unreleased]` mit den Unterabschnitten `### Added`, `### Changed` und `### Fixed` eingefügt (`repaired-manual`); gibt es keinen Release-Abschnitt, bleibt die Datei unverändert. Folge: Ändert sich die Vorlage oder der Projektname, wird ein bestehender Bereich nicht nachgezogen.
+
+**`devcontainer`** arbeitet in zwei Phasen: Zuerst werden alle Dateien klassifiziert, ohne zu schreiben; nur wenn keine Datei den Abbruch-Zustand hat, wird geschrieben. Ein Konflikt hinterlässt also keinen Teilzustand. `forwardPorts` stammt aus den Container-Ports der aktiven Services in `compose.yaml` ([`LH-FA-DEV-005`](lastenheft.md#lh-fa-dev-005--ports)) und teilt sich die Quelle mit der `doctor`-Prüfung `devcontainer.forwardPorts.consistency`. Ist `compose.yaml` nicht parsebar, gilt Exit-Code `10`. Die Freigabe externer Feature-Quellen ([`LH-FA-DEV-003`](lastenheft.md#lh-fa-dev-003--devcontainer-features)) wird erst nach erfolgreicher Erzeugung in `u-boot.yaml` übernommen.
+
+### SPEC-040 — Konfigurationspfade und Schreibpipeline von `u-boot config`
+
+Verfeinert [`LH-FA-CONF-005`](lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) und [`LH-FA-CONF-002`](lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration).
+
+**Erlaubte Pfade** (jeder andere Pfad: fachlicher Validierungsfehler, Exit-Code `10`):
+
+| Pfad | Lesen | Schreiben | Werte |
+|---|---|---|---|
+| `project.name` | ja | ja | gültiger Projektname ([`SPEC-004`](#spec-004--projektnamen-muster)) |
+| `devcontainer.enabled` | ja | ja | Wahrheitswert |
+| `devcontainer.featureSources.allow` | ja | ja (Liste) | kommagetrennte Quellen |
+| `devcontainer.features.<feature>.enabled` | ja | ja | Wahrheitswert |
+| `devcontainer.features.<feature>.source` | ja | ja | gültige Quelle, die wörtlich in `devcontainer.featureSources.allow` steht |
+| `devcontainer.features.<feature>.version` | ja | ja | nicht-leerer String |
+| `devcontainer.user.uid` | ja | ja | Ganzzahl `1`..`65535` |
+| `devcontainer.profile` | ja | ja | `default` \| `sandbox` |
+| `devcontainer.sandbox.nestedRuntime` | ja | ja | `none` \| `podman` \| `docker` |
+| `devcontainer.sandbox.onUnavailable` | ja | ja | `warn` \| `fail` |
+| `devcontainer.sandbox.repository` | ja | ja | Clone-URL aus den Zeichen `A–Z a–z 0–9 . _ ~ : / @ % + = -`, nicht mit `-` beginnend, ohne eingebettete Zugangsdaten ([`LH-FA-DEV-009`](lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)) |
+| `devcontainer.sandbox.egress.enabled` | ja | ja | Wahrheitswert |
+| `devcontainer.sandbox.egress.allow` | ja | ja (Liste) | kommagetrennte Hostnamen |
+| `services.<svc>.enabled` | ja | **nein** | — |
+
+`services.<svc>.enabled` ist nur lesbar: Ein Schreibversuch endet mit Exit-Code `10` und dem Hinweis auf `u-boot add <svc>`, weil das bloße Umschalten die Zustandsregeln aus [`LH-FA-ADD-005.a`](#lh-fa-add-005a--zustandsregeln-für-registrierte-und-aktive-services) umginge. `<svc>` und `<feature>` werden auf Namensformat geprüft. Wahrheitswerte nehmen die Schreibweisen `true`, `false`, `1`, `0`, `T`, `F` u. ä. an und werden kanonisch als `true`/`false` geführt.
+
+**Schreibpipeline `config set`** — jede Stufe läuft vor dem Schreiben; schlägt eine fehl, bleibt `u-boot.yaml` byte-identisch:
+
+1. Pfad nicht schreibbar → Abbruch (vor jedem Dateizugriff).
+2. Wert in den erwarteten Typ überführen und prüfen (Wertetabelle oben).
+3. Entspricht der kanonische neue Wert dem bestehenden, wird nichts geschrieben (No-Op, alter und neuer Wert gleich).
+4. Wert im Dokument ersetzen, Kommentare und Formatierung bleiben erhalten.
+5. Das Ergebnis muss sich wieder als Projektkonfiguration einlesen lassen (sonst Schemafehler, Exit-Code `10`).
+6. Fachliche Prüfung des Ergebnisses: Der geschriebene Wert muss gebunden und gültig sein; bei `.source` muss die Quelle wörtlich (Groß-/Kleinschreibung und abschließender Schrägstrich zählen) in `devcontainer.featureSources.allow` stehen, `--yes` ersetzt diese Freigabe nicht.
+7. Schreiben.
+
+Die beiden Listenpfade (`devcontainer.featureSources.allow`, `devcontainer.sandbox.egress.allow`) hängen die neuen Einträge an die bestehende Liste an und entdoppeln sie; die Datei wird dabei neu serialisiert, Kommentare gehen verloren. `config set devcontainer.features.<feature>.enabled true` für ein Feature, das weder im eingebauten Katalog ([`SPEC-023`](#spec-023--devcontainer-basis-image-und-feature-quellen)) steht noch eine `source` trägt, ist kein Fehler, erzeugt aber eine `warn`-Diagnose ([`LH-FA-DEV-003`](lastenheft.md#lh-fa-dev-003--devcontainer-features)): Der Generator überspringt es, `doctor` meldet es. `config` ohne Argumente gibt `u-boot.yaml` unverändert (mit Kommentaren) aus.
+
+### SPEC-041 — Schweregrade der Prüfung `compose.yaml.valid`
+
+Verfeinert [`LH-FA-DIAG-002`](lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen) und [`LH-AK-001`](lastenheft.md#lh-ak-001--minimaler-init-flow).
+
+| Befund | Schweregrad |
+|---|---|
+| `compose.yaml` fehlt | `warn` |
+| `compose.yaml` nicht lesbar | `error` |
+| `compose.yaml` kein gültiges YAML | `error` |
+| gültig, aber ohne Einträge unter `services` | `warn` |
+| gültig mit mindestens einem Service | `ok` (Meldung nennt die Anzahl) |
+
+Der leere `services`-Block ist `warn`, weil ihn ein frisches `u-boot init` erzeugt und der Ablauf `init`, dann `doctor` nach [`LH-AK-001`](lastenheft.md#lh-ak-001--minimaler-init-flow) keinen `error` enthalten darf.
+
+### SPEC-042 — Aufruf der Compose-Engine und Preflight
+
+Verfeinert [`LH-FA-CLI-006`](lastenheft.md#lh-fa-cli-006--exit-codes) (Trennung der Codes `11` und `12`) und [`LH-FA-UP-001`](lastenheft.md#lh-fa-up-001--umgebung-starten) (`--timeout=0` als Fire-and-forget).
+
+- **Preflight** vor jedem Compose-Aufruf, in dieser Reihenfolge: (1) das `docker`-Binary ist auffindbar, (2) der Daemon antwortet, (3) das Compose-Plugin ist installiert. Scheitert ein Schritt, endet der Befehl mit Exit-Code `11` (Umgebungsproblem), ohne dass Compose aufgerufen wurde. Scheitert erst der Compose-Aufruf selbst, gilt Exit-Code `12`.
+- **Aufrufformen:** `docker compose -f <Projektverzeichnis>/compose.yaml` mit `up` (mit `-d` im Detach-Modus), `down` (mit `-v` bei `--volumes`), `ps --format json` und `logs`. Der Fortschritt von `up` und `down` (Compose-Ausgabe auf stderr) wird an die Fortschrittsausgabe weitergereicht.
+- **Fire-and-forget:** Nach `up` im Detach-Modus fragt der Adapter den Status nicht ab; das Warten und jede Statusabfrage gehören allein dem Aufrufer ([`SPEC-036`](#spec-036--stabilisierung-von-u-boot-up-takt-zustandsklassen-und-entscheidungsmatrix)).
+- **Netzprobe:** Die TCP-Probe läuft mit der übergebenen Frist und dem Kontext; Abbruch oder Fristablauf des Kontexts sind am Fehler erkennbar (`context.Canceled`, `context.DeadlineExceeded`).
+
 ## 2. Datenstrukturen und Schemas
 
 Formate und Schemata (`u-boot.yaml`, JSON-Ausgabe, CLI-Tabellen). Jede Struktur trägt
@@ -900,3 +1050,4 @@ Schnittstellen zu Drittsystemen mit Versionsannahme (Docker, Compose, Devcontain
 | Datum | Änderung |
 |---|---|
 | 2026-10-02 | Angelegt als Technik-Stratum; Schemata, Beispielinstanzen, Algorithmen, Build-/CI-, Doku- und Architektur-Details sowie Markierungsformate wörtlich aus dem Lastenheft übernommen (`SPEC-001`..`SPEC-016`, Verfeinerungen); neu aus dem Bestand von Code und Konfiguration: Standardwerte, Egress-Default-Allowlist, Code-Registry der `doctor`-Prüfungen, Telemetrie-Aussage, externe Verträge (`SPEC-017`..`SPEC-023`). |
+| 2026-10-16 | Festlegungen aus den Paket-READMEs unter `internal/` übernommen (`SPEC-036`..`SPEC-042`): Stabilisierung und Port-Erkennung von `up`, Bestätigungspfad von `down --volumes`, Zustandsmaschinen von `generate`, Pfade und Schreibpipeline von `config`, Schweregrade von `compose.yaml.valid`, Preflight der Compose-Engine. Zahlenwerte aus dem Quelltext. |
