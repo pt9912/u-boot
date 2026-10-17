@@ -50,7 +50,7 @@ geschlossen — entweder im Code oder im Vertrag.
 - **Lösung A — Code (verworfen).** Der Fallback wird host-seitig ermittelbar, etwa meldet das Startscript ihn an den Host (Statusdatei oder Volume), oder
   `doctor` liest den Container-Zustand; danach erzeugen `init`/`generate`/`up`/`doctor` die Einträge.
 - **Lösung B — CR (gewählt).** [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) wird auf das host-seitig Ermittelbare präzisiert; der Gegenstand liegt im CR
-  [`slice-cr-sandbox-fallback-ausweisung`](../open/slice-cr-sandbox-fallback-ausweisung.md) (dieser Slice geht mit `Gegenstand:` dorthin über).
+  [`slice-cr-sandbox-fallback-ausweisung`](../done/slice-cr-sandbox-fallback-ausweisung.md) (dieser Slice geht mit `Gegenstand:` dorthin über).
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
@@ -79,7 +79,7 @@ geschlossen — entweder im Code oder im Vertrag.
 ## 3. Plan (vor Code)
 
 Entfällt: Der Slice ist ohne Lieferung geschlossen (§7 `Gegenstand:`); der Plan des CR steht in
-[`slice-cr-sandbox-fallback-ausweisung`](../open/slice-cr-sandbox-fallback-ausweisung.md) §3. Die Tabelle bleibt als Stand der verworfenen Lösung A:
+[`slice-cr-sandbox-fallback-ausweisung`](../done/slice-cr-sandbox-fallback-ausweisung.md) §3. Die Tabelle bleibt als Stand der verworfenen Lösung A:
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
@@ -113,10 +113,10 @@ Steering-Loop-Lerneintrag geschrieben (§7).
 
 - **Was hat funktioniert:** — (nichts geliefert; der Gegenstand liegt im CR.) Die Ausgangslage in §1 hielt der Prüfung am Code stand: Der Planungslauf des CR las Startscripte und `doctor` erneut an der Stelle und fand dieselbe Lücke.
 - **Was ging anders als geplant:** Der Slice war für zwei Wege angelegt (Code oder CR) und lag bis zur Entscheidung in `open/`; am 2026-10-17 fiel sie auf den CR.
-- **Gegenstand:** übernommen von [`slice-cr-sandbox-fallback-ausweisung`](../open/slice-cr-sandbox-fallback-ausweisung.md): Lösung B (Lastenheft präzisieren); die Liefer-Punkte der DoD liegen dort.
+- **Gegenstand:** übernommen von [`slice-cr-sandbox-fallback-ausweisung`](../done/slice-cr-sandbox-fallback-ausweisung.md): Lösung B (Lastenheft präzisieren); die Liefer-Punkte der DoD liegen dort.
 - **Steering-Loop-Eintrag:** Ein Slice mit zwei Lösungswegen, dessen Entscheidung beim Projektinhaber liegt, steht bis dahin in `open/` und geht bei der Wahl des CR-Wegs mit `Gegenstand:` an den CR über, statt zwei Pläne parallel zu halten. Gezählt, nicht verkörpert; erstes Auftreten.
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt.
-- **Folge-Slices:** [`slice-cr-sandbox-fallback-ausweisung`](../open/slice-cr-sandbox-fallback-ausweisung.md) — ist eine Datei in `open/`.
+- **Folge-Slices:** [`slice-cr-sandbox-fallback-ausweisung`](../done/slice-cr-sandbox-fallback-ausweisung.md) — ist eine Datei in `open/`.
 - **Risiken aus §6:** jedes trägt einen Ausgang — siehe §6 (beide entfallen).
 - **Drei Paarungen:** Anker: keine verkörperte Regel, daher kein Anker; Folge-Slice: der CR liegt in `open/`; Register: keine Beobachtung angelegt.
 

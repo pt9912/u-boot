@@ -38,7 +38,7 @@ Der Verweis zeigt **aufwärts**: Die Spec nennt diesen Slice nie.
 host-seitig ermittelbar und werden in `u-boot doctor` und, wo ein Befehl sie feststellt, in der Befehlsausgabe ausgewiesen — auch unter `--quiet`
 ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) Ausnahme 2).
 
-**Übernimmt:** [`slice-cr-sandbox-fallback-ausweisung`](../open/slice-cr-sandbox-fallback-ausweisung.md) (Gegenstand entfallen als CR; hier der Code-Zweig, den
+**Übernimmt:** [`slice-cr-sandbox-fallback-ausweisung`](../done/slice-cr-sandbox-fallback-ausweisung.md) (Gegenstand entfallen als CR; hier der Code-Zweig, den
 [`slice-v1-sandbox-fallback-ausweisung`](../done/slice-v1-sandbox-fallback-ausweisung.md) als Lösung A beschrieb).
 
 ### Gefundener Stand im Code (Ist-Stand, gelesen am 2026-10-17)
