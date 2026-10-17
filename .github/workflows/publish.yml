@@ -212,11 +212,6 @@ jobs:
 
           echo "Uploaded $(ls bin/u-boot-* | wc -l) binaries to release $TAG."
 
-      # slice-v2-homebrew-formula (ADR-0016): one SHA256SUMS over the six binaries
-      # and the four Linux packages and — for stable tags — the Homebrew formula,
-      # filled from the four brew digests of that file, travel as further assets
-      # of the same release.
-      # The `tap` job below pulls the formula into the tap.
       # slice-v2-distro-pakete (ADR-0017): .deb and .rpm (amd64, arm64) from the
       # same Linux binaries via nfpm, attached as release assets.
       - name: Build and upload Linux packages
@@ -228,6 +223,11 @@ jobs:
           scripts/build-packages.sh "$VERSION" bin packages
           gh release upload "v$VERSION" packages/* --clobber
 
+      # slice-v2-homebrew-formula (ADR-0016): one SHA256SUMS over the six binaries
+      # and the four Linux packages and — for stable tags — the Homebrew formula,
+      # filled from the four brew digests of that file, travel as further assets
+      # of the same release.
+      # The `tap` job below pulls the formula into the tap.
       - name: Upload SHA256SUMS and Homebrew formula
         env:
           GH_TOKEN: ${{ github.token }}
