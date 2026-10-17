@@ -45,7 +45,8 @@ Quickstart and user docs: https://github.com/pt9912/u-boot#readme`,
 	// decides, a repeated or conflicting one is not rejected.
 	// --quiet shows errors only (LH-FA-CLI-005): every modifying
 	// subcommand drops its success and summary output, doctor renders
-	// only SeverityError items and degradation-fallback items, and the
+	// only SeverityError items, degradation-fallback items and
+	// security-relaxation items, and the
 	// warning lines of init/generate/up keep only security relaxations
 	// and degradation fallbacks, see [visibleWarnings]. The query
 	// commands (config get/list, logs, template list) keep their

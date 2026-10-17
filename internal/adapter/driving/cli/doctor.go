@@ -142,9 +142,10 @@ func runDoctor(
 
 // strictWarnFailure wraps [ErrDoctorFailures] (exit 11) with the cause
 // of a `--strict` failure that has no Error item: the number and IDs
-// of the warn items. `--quiet` hides those items from stdout, so the
+// of the warn items. `--quiet` hides every warn item that carries no
+// degradation-fallback or security-relaxation flag from stdout, so the
 // message on stderr is the only place a script author finds the
-// reason (LH-FA-DIAG-003).
+// reason for those items (LH-FA-DIAG-003).
 func strictWarnFailure(report domain.DiagnosticReport) error {
 	var ids []string
 	for _, item := range report.SortedByIssuesFirst() {
