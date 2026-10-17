@@ -1,9 +1,11 @@
 name: smoke
 
-# Smoke nach jedem Formel-Update (slice-v2-homebrew-formula): installiert die
-# Formel aus dem Tap auf macOS und prueft das Binary. Auf den macOS-Runnern gibt
-# es kein Docker — `doctor` meldet dort Umgebungsfehler (Exit 11), das ist hier
-# erwartet; geprueft werden Version und das Anlegen eines Projekts (init).
+# Smoke nach jedem Formel-Update (slice-v2-homebrew-formula,
+# slice-v2-homebrew-smoke-haertung): installiert die Formel aus dem Tap auf macOS,
+# fuehrt deren test-Block aus, prueft das Binary und gatet die Formel mit
+# `brew audit --strict`. Auf den macOS-Runnern gibt es kein Docker — `doctor`
+# meldet dort Umgebungsfehler (Exit 11), das ist hier erwartet; init und add
+# arbeiten nur auf Dateien und laufen voll.
 
 on:
   push:
@@ -28,7 +30,12 @@ jobs:
           # Homebrew 5 verweigert Drittanbieter-Taps, bis sie ausdruecklich
           # als vertrauenswuerdig markiert sind (wie brew es beim Abbruch nennt).
           brew trust pt9912/u-boot
-          brew install u-boot
+          # Die Formel installiert vorgebaute Release-Binaries: ihr install-Block
+          # laeuft auch ohne Flag, --build-from-source erzwingt ihn ausdruecklich
+          # und schliesst eine Bottle aus.
+          brew install --build-from-source u-boot
+      - name: Formel-test-Block
+        run: brew test u-boot
       - name: Version
         run: u-boot --version
       - name: init
@@ -36,6 +43,11 @@ jobs:
           mkdir demo && cd demo
           u-boot init demo --no-git
           test -f u-boot.yaml
+      - name: add postgres
+        run: |
+          cd demo
+          u-boot add postgres
+          grep -F "BEGIN U-BOOT MANAGED BLOCK: service.postgres" compose.yaml
       - name: "doctor (Docker fehlt auf dem Runner, Exit 11 erwartet, kein Absturz)"
         run: |
           cd demo
@@ -43,5 +55,12 @@ jobs:
           u-boot doctor
           rc=$?
           [ "$rc" = 0 ] || [ "$rc" = 11 ]
-      - name: Formel pruefen
-        run: brew audit --strict --online pt9912/u-boot/u-boot || true
+      - name: Formel pruefen (gatend)
+        env:
+          # --online fragt die GitHub-API ab; das Token vermeidet Rate-Limits.
+          HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
+        run: |
+          if ! brew audit --strict --online pt9912/u-boot/u-boot; then
+            echo "::error::brew audit --strict --online hat Befunde (siehe Ausgabe oben)."
+            exit 1
+          fi
