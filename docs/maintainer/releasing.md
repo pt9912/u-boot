@@ -66,7 +66,7 @@ Der Cut folgt dem Muster der Release-Cut-Slices (zuletzt
    Spec-Kennungen ([`AGENTS.md`](../../AGENTS.md) §5; die Kennungen stehen im CHANGELOG).
    Der Status-Block nennt den aktuellen Stand (Version, Zusagen, Grenzen), keine Chronik
    und kein „released"; das Datum steht nur in der Tabellenzeile und im CHANGELOG und wird
-   vor dem Tag gegen das Tag-Datum gehalten (§7).
+   vor dem Tag gegen das Tag-Datum gehalten (§5); §7 prüft es nachher noch einmal.
 4. **Roadmap** (`docs/plan/planning/in-progress/roadmap.md`): den Release unter „Offene Wellen"
    führen, bis der Tag gesetzt ist; danach nach „Abgeschlossene Wellen".
 5. **Release-Cut-Slice** nach dem Muster der früheren Cuts anlegen und nach dem Tag nach
@@ -88,6 +88,10 @@ Anlass ist ein neuer Go-stdlib-Advisory; dann den Go-Pin heben (`Dockerfile` `AR
 GO_VERSION`, `repo.mk` `GO_VERSION`), siehe CHANGELOG-Einträge zu Toolchain-Bumps.
 
 ## 5. Tag setzen (Maintainer-Aktion)
+
+Vor jedem Tag (auch dem Vorab-Tag) `date +%F` prüfen und das Datum in CHANGELOG, in der
+Tabellenzeile beider READMEs und im Handbuch-`Stand` gegen das Tag-Datum halten; weicht es
+ab, ist das ein weiterer Cut-Commit vor dem Tag.
 
 ```bash
 git switch main && git pull --ff-only

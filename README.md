@@ -51,16 +51,11 @@ are described in the [user manual](docs/user/benutzerhandbuch.md) (German).
 
 ## What makes it trustworthy?
 
-- **Spec-driven releases.** Three tagged releases (`v0.1.0`, `v0.2.0`,
-  `v0.3.0`) deliver every MVP and v0.3.0 add-on requirement listed in
-  [`spec/lastenheft.md`](spec/lastenheft.md).
+- **Written requirements.** What `u-boot` promises is specified in the [Lastenheft](spec/lastenheft.md) (German).
 - **Hexagonal architecture.** Layer rules enforced by `depguard` at
   every `make gates`; the ports/adapters split is a recorded
   architecture decision.
-- **Documented decisions.** 10 architecture decision records cover
-  language (Go), build (Docker-only), CI, CLI framework (Cobra),
-  distribution (GHCR + binary), template format (YAML + `text/template`),
-  plugin policy (static), and the no-HTTP-adapter stance.
+- **Recorded decisions.** Language (Go), Docker-only build, CI, CLI framework (Cobra), distribution (GHCR + binary), template format (YAML + `text/template`), static plugin policy and the absence of an HTTP adapter are fixed decisions.
 - **PR-blocking CI.** Three required GitHub-Actions jobs on every
   push: `gates (lint + test + coverage-gate)` (which also runs the
   Markdown-link validator `docs-check`), `security-gates (govulncheck)`,
@@ -205,10 +200,7 @@ Re-init on an existing project requires an explicit strategy
 | `v0.5.0` | 2026-07-25 | "Security + local templates" — Go toolchain bump closes CVE-2026-39822 in the runtime image (HIGH); `u-boot init --template ./path` resolves a project from a local directory, alongside the built-in catalogue. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.5.0). |
 | `v0.4.0` | 2026-06-08 | "Machine-readable CLI" milestone — `--json` / `--dry-run` / `--diff` for all ten subcommands, `u-boot logs`, devcontainer-features with a drift-doctor check. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.4.0). |
 
-The roadmap ([`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md))
-has the full audit trail: Phase table (M1..M8 + Closure + V1
-clusters), per-release milestone tables, carveout-resolution slices,
-and §Nächste Schritte for the in-progress backlog.
+The full change history of every release is in [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Subcommand reference
 
@@ -229,8 +221,7 @@ and §Nächste Schritte for the in-progress backlog.
 
 For consumers of `u-boot`:
 
-- Docker Engine ≥ 24.0.0 or Podman ≥ 5.0 (drop-in supported; see
-  [`spec/architecture.md §2.4`](spec/architecture.md))
+- Docker Engine ≥ 24.0.0 or Podman ≥ 5.0 (drop-in supported)
 - Docker Compose ≥ 2.20.0 or `podman compose`
 - Git
 - Optional: VS Code with the Dev Containers extension
@@ -245,7 +236,7 @@ For building from source:
 ```text
 .
 ├── cmd/uboot/          # CLI entry point (main.go) — wiring layer
-├── internal/           # hexagonal layout (see spec/architecture.md)
+├── internal/           # hexagonal layout
 │   ├── hexagon/{domain,application,port/{driving,driven}}/
 │   └── adapter/{driving,driven}/
 ├── spec/               # Lastenheft (contract), Spezifikation (technical), architecture (view)
@@ -256,16 +247,9 @@ For building from source:
 └── go.mod
 ```
 
-The detailed minimum layout is in [`spec/spezifikation.md`](spec/spezifikation.md).
-
 ## Documentation
 
 - **Lastenheft** (German, normative contract): [`spec/lastenheft.md`](spec/lastenheft.md)
-- **Spezifikation** (German, technical details; refines the Lastenheft): [`spec/spezifikation.md`](spec/spezifikation.md)
-- **Architecture specification:** [`spec/architecture.md`](spec/architecture.md)
-  (hexagonal pattern, layer rules, Podman drop-in §2.4)
-- **Roadmap, slices, carveouts:**
-  [`docs/plan/planning/`](docs/plan/planning/)
 - **Quality gates:** [`docs/user/quality.md`](docs/maintainer/quality.md)
 - **Branch protection:**
   [`docs/user/branch-protection.md`](docs/maintainer/branch-protection.md)

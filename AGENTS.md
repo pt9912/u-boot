@@ -242,7 +242,7 @@ zulässt. Kein Target nennen, das im Makefile nicht existiert — auch nicht in 
 | 3 | Neue ADRs müssen den ADR-Index aktualisieren. | — |
 | 4 | Roadmap/Status-Geschichte lebt in `docs/plan/planning/`, nicht in `spec/architecture.md`. | — |
 | 5 | Öffentliche Verträge (README, `docs/user/`, ADR-Index, Roadmap, Slice, CHANGELOG) werden nachgezogen, wenn ein öffentlicher Vertrag berührt ist. | — |
-| 6 | Nutzer-Doku (`README.md`, `README.de.md`, `docs/user/`) trägt keine Anforderungs-, ADR- oder Spec-Kennungen und keine Links darauf; Kennungen stehen im CHANGELOG, im Lastenheft, in der Spezifikation, in ADRs und in Planungsdokumenten. Eine Aussage, die eine Kennung trug, steht in Worten für den Benutzer; Status-Blöcke nennen den Stand, nicht die Chronik. | — |
+| 6 | Nutzer-Doku (`README.md`, `README.de.md`, `docs/user/`) trägt keine Anforderungs-, ADR- oder Spec-Kennungen und keine Verweise auf Planungs- und Entwicklerdokumente (Roadmap, Slices, Wellen, ADRs, `spec/spezifikation.md`, `spec/architecture.md`); ein Link ohne Anker auf `spec/lastenheft.md` als Anforderungsdokument ist erlaubt. Kennungen stehen im CHANGELOG, im Lastenheft, in der Spec, in ADRs und in Planungsdokumenten. Eine Aussage, die eine Kennung trug, steht in Worten für den Benutzer; Status-Blöcke nennen den Stand, nicht die Chronik. | — |
 
 ## 6. Minimal Agent Workflow
 

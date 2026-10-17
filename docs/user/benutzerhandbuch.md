@@ -994,12 +994,12 @@ mit einer Paketinstallation und drei Builds belegte rund 140 MB, das Volumen
 wächst mit jedem Image. Ohne `/dev/fuse` baut Podman mit `vfs`-Speicher; das
 läuft, kopiert aber jede Schicht vollständig.
 
-**Gemessen** (Docker 29.5.2 auf Colima 0.10.3, arm64, VM mit
-`kernel.apparmor_restrict_unprivileged_userns=0` in der VM und `/dev/net/tun` auf dem Container-Host): `podman build` mit `FROM`,
+**Gemessen** (Docker 29.5.2 auf Colima 0.10.3, arm64; in der VM
+`kernel.apparmor_restrict_unprivileged_userns=0`, auf dem Container-Host `/dev/net/tun`): `podman build` mit `FROM`,
 `RUN` und `COPY` baut kalt, aus dem Layer-Cache und mit `--no-cache`; `docker
 build` über den Alias ebenso; ein `RUN` mit Netz zu einem erlaubten Host
-(`apt-get update`) läuft, auch hinter der Egress-Restriktion mit der
-Default-Allowlist (gemessen mit `alpine:3` und `debian:stable-slim`; der Blob-Host von Docker Hub kann sich ändern), ein nicht gelisteter Name löst dort nicht auf. **Nicht
+(`apt-get update`) läuft auch hinter der Egress-Restriktion mit der
+Default-Allowlist (gemessen mit `debian:stable-slim`); für `alpine:3` hinter der Restriktion sind Pull und Build gemessen, ein `RUN` mit Netz nicht. Der Blob-Host von Docker Hub kann sich ändern; ein nicht gelisteter Name löst hinter der Restriktion nicht auf. **Nicht
 gemessen:** andere Hosts, andere Architekturen (amd64), CI, Docker Desktop, Podman als
 Host-Engine. **Nicht zugesagt:** `buildx`, `docker compose` und `# syntax=`-Frontends.
 

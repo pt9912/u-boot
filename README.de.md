@@ -52,17 +52,11 @@ unten listet jedes Subkommando.
 
 ## Was macht es vertrauenswürdig?
 
-- **Spec-getriebene Releases.** Drei getaggte Releases (`v0.1.0`,
-  `v0.2.0`, `v0.3.0`) liefern jede MVP- und v0.3.0-Add-on-Anforderung
-  aus [`spec/lastenheft.md`](spec/lastenheft.md).
+- **Schriftliche Anforderungen.** Was `u-boot` zusagt, steht im [Lastenheft](spec/lastenheft.md).
 - **Hexagonale Architektur.** Schicht-Regeln werden bei jedem
   `make gates` durch `depguard` enforced; die Port/Adapter-Trennung
   ist eine festgehaltene Architekturentscheidung.
-- **Dokumentierte Entscheidungen.** 10 Architecture Decision
-  Records decken Sprache (Go), Build (Docker-only), CI, CLI-
-  Framework (Cobra), Distribution (GHCR + Binary), Template-Format
-  (YAML + `text/template`), Plugin-Policy (statisch) und die
-  „kein HTTP-Adapter"-Entscheidung ab.
+- **Festgehaltene Entscheidungen.** Sprache (Go), Docker-only-Build, CI, CLI-Framework (Cobra), Distribution (GHCR + Binary), Template-Format (YAML + `text/template`), statische Plugin-Policy und der Verzicht auf einen HTTP-Adapter sind festgelegt.
 - **PR-blockierende CI.** Drei PR-blockierende GitHub-Actions-Jobs
   bei jedem Push: `gates (lint + test + coverage-gate)` (läuft auch
   den Markdown-Link-Validator `docs-check`),
@@ -205,15 +199,11 @@ Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien).
 | `v0.8.0` | 2026-10-14 | Milestone „Docker im Sandbox-Devcontainer“ — `devcontainer.sandbox.nestedRuntime: docker` gibt dem Sandbox-Devcontainer einen eigenen Docker-Daemon mit BuildKit, Buildx und Compose; verlangt `--privileged`, als Lockerung ausgewiesen. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.8.0). |
 | `v0.8.1` | 2026-10-14 | Patch „Aktueller Docker im Sandbox-Devcontainer“ — mit `nestedRuntime: docker` läuft im Container Docker 29.9, Buildx 0.38 und Compose 5.6 aus dem Docker-APT-Repository (Schlüssel gepinnt); `download.docker.com` gehört zur Default-Allowlist. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.8.1). |
 | `v0.9.0` | 2026-10-15 | Milestone „Mehr Devcontainer-Features“ — eingebaute Katalog-Schlüssel `python`, `sdkman` und `homebrew` (Community-Feature, als Drittanbieter ausgewiesen) mit ihren Egress-Hosts. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.9.0). |
-| `v0.10.0` | 2026-10-17 | Milestone „sshd, Claude Code und `podman build`“ — eingebaute Katalog-Schlüssel `sshd` und `claude-code` (Drittanbieter, ausgewiesen); `nestedRuntime: podman` baut Images, mit einer sechsten Lockerung `--device=/dev/net/tun` (gemessen auf Colima, arm64; Docker Desktop, amd64 und CI nicht gemessen); `--quiet` lässt vier Ausweisungen sichtbar und unterdrückt Erfolgsmeldungen; Docker Desktop wird nicht mehr zugesagt. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.10.0). |
+| `v0.10.0` | 2026-10-17 | „sshd, Claude Code und `podman build`“ — eingebaute Katalog-Schlüssel `sshd` und `claude-code` (Drittanbieter, ausgewiesen); `nestedRuntime: podman` baut Images, mit einer sechsten Lockerung `--device=/dev/net/tun` (gemessen auf Colima, arm64; Docker Desktop, amd64 und CI nicht gemessen); `--quiet` lässt vier Ausweisungen sichtbar und unterdrückt Erfolgsmeldungen; Docker Desktop wird nicht mehr zugesagt. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.10.0). |
 | `v0.5.0` | 2026-07-25 | „Sicherheit + lokale Templates" — Go-Toolchain-Bump schließt CVE-2026-39822 im Runtime-Image (HIGH); `u-boot init --template ./pfad` rendert ein Projekt aus einem lokalen Verzeichnis, neben dem eingebauten Katalog. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.5.0). |
 | `v0.4.0` | 2026-06-08 | Milestone „Maschinenlesbare CLI" — `--json` / `--dry-run` / `--diff` für alle zehn Subkommandos, `u-boot logs`, Devcontainer-Features mit Drift-Doctor-Check. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.4.0). |
 
-Die Roadmap
-([`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md))
-hat den vollständigen Audit-Trail: Phase-Tabelle (M1..M8 +
-Closure + V1-Cluster), per-Release-Milestone-Tabellen, Carveout-
-Auflösungs-Slices und §Nächste Schritte für das laufende Backlog.
+Die vollständige Änderungshistorie jedes Releases steht in [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Subkommando-Referenz
 
@@ -234,8 +224,7 @@ Auflösungs-Slices und §Nächste Schritte für das laufende Backlog.
 
 Für Konsumenten von `u-boot`:
 
-- Docker Engine ≥ 24.0.0 oder Podman ≥ 5.0 (Drop-in unterstützt;
-  siehe [`spec/architecture.md §2.4`](spec/architecture.md))
+- Docker Engine ≥ 24.0.0 oder Podman ≥ 5.0 (Drop-in unterstützt)
 - Docker Compose ≥ 2.20.0 oder `podman compose`
 - Git
 - Optional: VS Code mit der Dev-Containers-Extension
@@ -250,7 +239,7 @@ Für den Bau aus den Quellen:
 ```text
 .
 ├── cmd/uboot/          # CLI-Entry-Point (main.go) — Wiring-Schicht
-├── internal/           # hexagonales Layout (siehe spec/architecture.md)
+├── internal/           # hexagonales Layout
 │   ├── hexagon/{domain,application,port/{driving,driven}}/
 │   └── adapter/{driving,driven}/
 ├── spec/               # Lastenheft (Vertrag), Spezifikation (Technik), Architektur (Sicht)
@@ -261,20 +250,10 @@ Für den Bau aus den Quellen:
 └── go.mod
 ```
 
-Das Mindestlayout im Detail steht in
-[`spec/spezifikation.md`](spec/spezifikation.md).
-
 ## Dokumentation
 
 - **Lastenheft** (verbindlicher Vertrag):
   [`spec/lastenheft.md`](spec/lastenheft.md)
-- **Spezifikation** (technische Details, präzisiert das Lastenheft):
-  [`spec/spezifikation.md`](spec/spezifikation.md)
-- **Architektur-Spezifikation:**
-  [`spec/architecture.md`](spec/architecture.md) (hexagonales
-  Pattern, Schicht-Regeln, Podman-Drop-in §2.4)
-- **Roadmap, Slices, Carveouts:**
-  [`docs/plan/planning/`](docs/plan/planning/)
 - **Quality Gates:**
   [`docs/user/quality.md`](docs/maintainer/quality.md)
 - **Branch Protection:**
