@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md) — letzter Slice der Welle; ihm gehen [`slice-cr-devcontainer-agent-features-sandbox`](../done/slice-cr-devcontainer-agent-features-sandbox.md), [`slice-v1-cli-quiet-sicherheitswarnungen`](../done/slice-v1-cli-quiet-sicherheitswarnungen.md), [`slice-v1-devcontainer-feature-sshd`](slice-v1-devcontainer-feature-sshd.md) und [`slice-v1-devcontainer-feature-claude-code`](slice-v1-devcontainer-feature-claude-code.md) voraus.
+**Welle:** [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md) — letzter Slice der Welle; ihm gehen [`slice-cr-devcontainer-agent-features-sandbox`](../done/slice-cr-devcontainer-agent-features-sandbox.md), [`slice-v1-cli-quiet-sicherheitswarnungen`](../done/slice-v1-cli-quiet-sicherheitswarnungen.md), [`slice-v1-devcontainer-feature-sshd`](../in-progress/slice-v1-devcontainer-feature-sshd.md) und [`slice-v1-devcontainer-feature-claude-code`](slice-v1-devcontainer-feature-claude-code.md) voraus.
 
 **Bezug:** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Katalog), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Sandbox-Profil), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress-Hosts), [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) (Zugangsdaten); [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md). Muster: [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Spezifikations-Eintrag nach allen anderen Slices).
 
@@ -33,7 +33,7 @@ oder Test); eine Aussage ohne Fundstelle wird gestrichen. Zahlenwerte und Hosts 
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Änderungen an Code, Tests, Handbuch oder CHANGELOG** — sie liegen in den Code-Slices ([`slice-v1-devcontainer-feature-sshd`](slice-v1-devcontainer-feature-sshd.md),
+- **Änderungen an Code, Tests, Handbuch oder CHANGELOG** — sie liegen in den Code-Slices ([`slice-v1-devcontainer-feature-sshd`](../in-progress/slice-v1-devcontainer-feature-sshd.md),
   [`slice-v1-devcontainer-feature-claude-code`](slice-v1-devcontainer-feature-claude-code.md)); ein abweichender Wert wird vermerkt, nicht geändert (Folge-Slice).
 - **Änderungen am Lastenheft** — sie gehören dem CR [`slice-cr-devcontainer-agent-features-sandbox`](../done/slice-cr-devcontainer-agent-features-sandbox.md); die Spezifikation verfeinert und erweitert das Lastenheft nie.
 - **`architecture.md`** — die Sicht nennt keine einzelnen Features und, nach `AGENTS.md` §3.4, weder Slices noch ADRs.
@@ -64,7 +64,7 @@ oder Test); eine Aussage ohne Fundstelle wird gestrichen. Zahlenwerte und Hosts 
 ## 4. Trigger
 
 **Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; die vier Slices [`slice-cr-devcontainer-agent-features-sandbox`](../done/slice-cr-devcontainer-agent-features-sandbox.md),
-[`slice-v1-cli-quiet-sicherheitswarnungen`](../done/slice-v1-cli-quiet-sicherheitswarnungen.md), [`slice-v1-devcontainer-feature-sshd`](slice-v1-devcontainer-feature-sshd.md) und [`slice-v1-devcontainer-feature-claude-code`](slice-v1-devcontainer-feature-claude-code.md) liegen in `done/`;
+[`slice-v1-cli-quiet-sicherheitswarnungen`](../done/slice-v1-cli-quiet-sicherheitswarnungen.md), [`slice-v1-devcontainer-feature-sshd`](../in-progress/slice-v1-devcontainer-feature-sshd.md) und [`slice-v1-devcontainer-feature-claude-code`](slice-v1-devcontainer-feature-claude-code.md) liegen in `done/`;
 kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benannt:**
