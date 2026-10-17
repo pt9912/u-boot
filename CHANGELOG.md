@@ -42,7 +42,7 @@ this file is the same format applied to u-boot itself.
   `/dev/net/tun`: the generated `runArgs` gain a sixth security relaxation, `--device=/dev/net/tun`, and `generate` reports it like the other five.
   Measured on Colima 0.10.3 (arm64) with `kernel.apparmor_restrict_unprivileged_userns=0`; with the value `1` (the default of an Ubuntu 24.04 VM)
   nested Podman does not start (exit code `11`). Two integration tests (`TestE2E_SandboxDevcontainer_NestedPodman_Build`, `…_BuildEgress`) cover it and skip on such hosts.
-  `buildah`, `docker buildx`, `docker compose` and BuildKit frontends are not part of the container; use fully qualified image names.
+  Lastenheft 0.12.0 promises it on the measured hosts. `buildah`, `docker buildx`, `docker compose` and BuildKit frontends are not part of the container; use fully qualified image names.
 - The default egress allowlist with `nestedRuntime: podman` or `docker` gains `production.cloudfront.docker.com`: Docker Hub redirects layer downloads
   to it, and without it a pull behind the restriction failed with a DNS error
   ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).

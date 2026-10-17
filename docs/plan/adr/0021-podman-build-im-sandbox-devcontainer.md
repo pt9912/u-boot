@@ -1,6 +1,6 @@
-# ADR 0021: `podman build` im Sandbox-Devcontainer mit `nestedRuntime: podman` — Messgrenze, Abnahmetest, Zusage nach Messung
+# ADR 0021: `podman build` im Sandbox-Devcontainer mit `nestedRuntime: podman` — sechste Lockerung, Egress-Host, Abnahmetest
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Datum:** 2026-10-17
 
@@ -8,7 +8,7 @@
 
 **Bezug:** [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [ADR-0014](0014-nested-podman-sandbox-devcontainer.md), [ADR-0012](0012-devcontainer-egress-firewall.md)
 
-**Schärft:** [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) — Abnahmekriterium und Beleg für `podman build` bei `devcontainer.sandbox.nestedRuntime: podman`; ergänzt [ADR-0014](0014-nested-podman-sandbox-devcontainer.md) (Paketumfang und Lockerungsprofil bleiben unverändert).
+**Schärft:** [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) — Lockerungsprofil, Egress-Hosts und Abnahmekriterium für `podman build` bei `devcontainer.sandbox.nestedRuntime: podman`; **ersetzt** Entscheidung 2 von [ADR-0014](0014-nested-podman-sandbox-devcontainer.md) (Lockerungsprofil „genau“ fünf Optionen) und ergänzt die Default-Allowlist aus [ADR-0012](0012-devcontainer-egress-firewall.md) Entscheidung 4. Alle übrigen Entscheidungen von ADR-0014 bleiben gültig.
 
 **Regeln:** Baseline-Regelwerk `modul-04-adrs.md` §Ziel-Form: ADR (MADR).
 
@@ -16,56 +16,59 @@
 
 ## Kontext
 
-Der Projektinhaber verlangt, dass im Sandbox-Devcontainer mit `nestedRuntime: podman` mindestens `podman build` funktioniert (2026-10-17); das Kommando `buildah` ist nicht gefordert. [ADR-0014](0014-nested-podman-sandbox-devcontainer.md) hat nur `podman run --rm --network=host alpine echo …` gemessen; „Image-Builds ohne Host-Socket“ aus ihren Konsequenzen ist **nicht gemessen**. Der Abnahmepunkt „`docker build` läuft im Container ohne Docker-Socket“ des CR zum Sandbox-Devcontainer hat bisher keinen Beleg. Zu klären sind (a) ob das Paketset und die fünf Lockerungen für `podman build` genügen, (b) ob der Build mit Egress-Restriktion und Default-Allowlist läuft, (c) wo sich der Befund wiederholbar belegen lässt.
+Der Projektinhaber verlangt, dass im Sandbox-Devcontainer mit `nestedRuntime: podman` mindestens `podman build` funktioniert (2026-10-17); das Kommando `buildah` ist nicht gefordert. [ADR-0014](0014-nested-podman-sandbox-devcontainer.md) hat nur `podman run --rm --network=host alpine echo …` gemessen — mit `--network=host`, das Netzwerk der verschachtelten Container blieb außen vor. „Image-Builds ohne Host-Socket“ aus ihren Konsequenzen war nicht gemessen.
 
-Randbedingung des Projektinhabers (2026-10-17): Die Colima-Engine-VM bleibt unverändert (kein `sysctl`, kein Eingriff); amd64 wird nur über den CI-Lauf gemessen.
+**Messung (2026-10-17).** Probe-Image: das Erzeugnis des Generators (`u-boot init --devcontainer --sandbox`, `nestedRuntime: podman`, `generate devcontainer`; für Egress zusätzlich `egress.enabled`), Basis `mcr.microsoft.com/devcontainers/base@sha256:6ee2b4097c75d33e9a94d941577a3286e5d629434fba384688b06daeeaaeac99` (Debian 13.7), `podman` 5.4.2+ds1-2+b2, `crun` 1.21-1, `netavark` 1.14.0-2, `passt` 0~git20250503. Host: macOS 27.0.1 (arm64), Colima 0.10.3 (Virtualization.Framework), VM Ubuntu 24.04.4, Kernel 6.8.0-117-generic (aarch64), Docker-Client 29.9.1, Docker-Server 29.5.2.
 
-**Messung (2026-10-17).** Probe-Image: das Erzeugnis des Generators (`u-boot init --devcontainer --sandbox`, `nestedRuntime: podman`, `generate devcontainer`), Basis `mcr.microsoft.com/devcontainers/base@sha256:6ee2b4097c75d33e9a94d941577a3286e5d629434fba384688b06daeeaaeac99` (Debian 13.7). Host: macOS 27.0.1 (arm64), Colima 0.10.3 (Virtualization.Framework), VM Ubuntu 24.04.4, Kernel 6.8.0-117-generic (aarch64), Docker-Client 29.9.1, Docker-Server 29.5.2; `kernel.apparmor_restrict_unprivileged_userns = 1`.
+| Prüfung | `kernel.apparmor_restrict_unprivileged_userns = 1` (Standard der VM) | `= 0` (vom Projektinhaber gesetzt) |
+|---|---|---|
+| Startscript mit den fünf Lockerungen | **Exit-Code 11** (`unshare`: `write failed /proc/self/uid_map`; AppArmor-Profil `unconfined`); `--privileged` gleich | Exit-Code 0; `overlay`, rootless, `crun`, `netavark` |
+| Vier Lockerungen ohne `apparmor=unconfined` (`docker-default`) | Start Exit-Code 0, `podman build` scheitert: `overlay` → `mount … permission denied`, `vfs` → `remount /, flags: 0x44000: permission denied` | nicht wiederholt |
+| `podman build` (`FROM`, `RUN`, `COPY`) mit den fünf Lockerungen | nicht messbar | Pull läuft, **`RUN` scheitert**: `pasta failed with exit code 1: Failed to open() /dev/net/tun`, Exit-Code 125 |
+| dasselbe plus `--device=/dev/net/tun` | nicht messbar | **läuft** (Exit-Code 0); `podman run` des Images liefert den `COPY`- und den `RUN`-Inhalt |
+| `docker build` über den Alias; `FROM alpine` | — | Exit-Code 0; Kurzname `alpine` löst auf, `mycompany/img` nicht (`no unqualified-search-registries are defined`) |
+| Layer-Cache, `--no-cache` | — | zweiter Build 2× `Using cache`; mit `--no-cache` keiner |
+| Debian-Slim mit Paketinstallation (`RUN` mit Netz) | — | kalt 7 s, Cache 0 s, `--no-cache` 4 s; Rootless-Storage nach drei Builds 142 MB |
+| Ohne `/dev/fuse` | — | `vfs`-Fallback, Build und `docker build` laufen |
+| Egress: `FROM docker.io/library/alpine:3` mit Default-Allowlist | (Ersatzlauf als `root`) scheitert, dreimal: `lookup production.cloudfront.docker.com … server misbehaving` | scheitert gleich; **nach Aufnahme des Hosts** läuft Pull und Build, `RUN apt-get update` läuft, `getent hosts example.com` löst nicht auf, `deb.debian.org` löst auf |
+| Integrationstests | übersprungen (Degradation Exit-Code 11 geprüft) | `…NestedPodman_Build` und `…_BuildEgress` grün, ohne Skip |
 
-| Prüfung | Ergebnis |
-|---|---|
-| Paketstand im Probe-Image | `podman` 5.4.2+ds1-2+b2, `crun` 1.21-1, `conmon` 2.1.12-4, `netavark` 1.14.0-2, `passt` 0~git20250503, `uidmap` 1:4.17.4-2, `fuse-overlayfs` 1.14-1+b1, `slirp4netns` 1.2.1-1.1; nicht installiert: `buildah` (`command -v buildah` Exit-Code 1), `aardvark-dns`, `catatonit`, `runc` |
-| Abhängigkeiten `podman` (Debian 13) | Depends: `conmon`, `crun` oder `runc`, `golang-github-containers-common`, `netavark`; Recommends unter anderem `buildah`, `catatonit` oder `tini`, `passt`, `slirp4netns`, `uidmap` |
-| Startscript mit den fünf Lockerungen | **Exit-Code 11**: `unshare --user --map-root-user true` als `vscode` scheitert mit `write failed /proc/self/uid_map: Operation not permitted`; AppArmor-Profil `unconfined`. `--privileged` scheitert gleich |
-| Vier Lockerungen ohne `apparmor=unconfined` (Profil `docker-default`) | Startscript Exit-Code 0; `podman build` scheitert: `overlay` → `mount …/storage/overlay: permission denied`, `--storage-driver vfs` → `remount /, flags: 0x44000: permission denied` |
-| `podman build` rootless mit den fünf Lockerungen | **nicht messbar** auf dieser VM (siehe Zeile Startscript) |
-| Ersatzlauf als `root` im Container, fünf Lockerungen (nicht das Produkt-Profil) | Pull von `docker.io/library/alpine:3` läuft; `RUN` scheitert an `setrlimit RLIMIT_NOFILE`, mit `--ulimit` an `cgroup.subtree_control` (read-only): rootful-spezifisch, kein Befund über rootless |
-| Kurzname im Ersatzlauf (nur `podman pull`) | Alias `alpine` löst auf; `mycompany/img` scheitert (`no unqualified-search-registries are defined`) |
-| Egress-Pull im Ersatzlauf (`NET_ADMIN`, `u-boot-egress-init` Exit-Code 0) | `docker.io/library/alpine:3` und `debian:stable-slim` scheitern, dreimal wiederholt: `lookup production.cloudfront.docker.com … server misbehaving`; die Default-Allowlist trägt `production.cloudflare.docker.com` |
+Nicht gemessen: amd64; andere Engines; große Images; Kurznamen außer `alpine`.
 
 ## Entscheidung
 
-1. **Paketumfang und Lockerungsprofil aus [ADR-0014](0014-nested-podman-sandbox-devcontainer.md) bleiben unverändert.** Kein Messbefund verlangt ein weiteres Paket (auch nicht `buildah`) oder eine weitere Lockerung; die Messung des Basisfalls war nicht möglich. `apparmor=unconfined` ist gemessen nötig: mit dem Profil `docker-default` scheitert der Build an `mount`/`remount`.
-2. **Der Beleg für `podman build` ist der Integrationstest** `TestE2E_SandboxDevcontainer_NestedPodman_Build` (`//go:build docker`): `FROM`, `RUN` und `COPY` per `podman build` als `vscode`, danach ein Build aus dem Layer-Cache (`Using cache`), ein Build mit `--no-cache` und ein Build über den `docker`-Alias; jeweils mit den `runArgs` des Generators. Auf Hosts mit `kernel.apparmor_restrict_unprivileged_userns=1` prüft der Test die Degradation (Exit-Code 11) und überspringt; ein übersprungener Test belegt den Build nicht.
-3. **Zusage erst nach Messung.** Das Lastenheft sagt `podman build` erst zu, wenn der Test auf mindestens einem Host grün gelaufen ist; der Messstand (Host, Engine, Architektur) steht im Wortlaut. Bis dahin gilt: `podman build` ist **nicht gemessen und nicht zugesagt**. Handbuch und Spezifikation sagen das.
-4. **Zwei Befunde gehen an den Projektinhaber, nicht an diese ADR:** (a) Die Default-Allowlist enthält `production.cloudfront.docker.com` nicht, auf das Docker Hub den Blob-Abruf umleitet; unter Restriktion scheitert damit jeder Pull von Docker Hub (betrifft `podman` und `docker`). Die Aufnahme des Hosts ändert [`SPEC-019`](../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) und ist eine Allowlist-Entscheidung. (b) [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) sagt, `podman` starte „unter Docker (inkl. Colima)“; die Colima-VM mit Ubuntu 24.04 blockiert verschachtelte User-Namespaces (Exit-Code 11).
+1. **Sechste Lockerung: `--device=/dev/net/tun`.** Das Lockerungsprofil bei `nestedRuntime: podman` ist `--cap-add SYS_ADMIN`, `seccomp=unconfined`, `apparmor=unconfined`, `systempaths=unconfined`, `--device /dev/fuse` und `--device /dev/net/tun`; kein `--privileged`, kein `NET_ADMIN` (nicht nötig, gemessen). Das Device braucht `pasta` für das Netzwerk der verschachtelten Container; ohne es scheitert jedes `RUN`. Jede Option erscheint einzeln in der Warnungsausgabe ([`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)). Das Device muss auf dem Container-Host vorhanden sein, sonst startet der Container nicht.
+2. **Paketumfang unverändert** ([ADR-0014](0014-nested-podman-sandbox-devcontainer.md) Entscheidung 1): kein weiteres Paket, auch nicht `buildah`; `podman build` nutzt die eingebaute Bibliothek. `apparmor=unconfined` bleibt nötig (gemessen: mit `docker-default` scheitert der Build an `mount`/`remount`).
+3. **Egress ([ADR-0012](0012-devcontainer-egress-firewall.md)):** `production.cloudfront.docker.com` gehört bei `nestedRuntime: podman` und `docker` zur Default-Allowlist, weil Docker Hub Blob-Abrufe dorthin umleitet; ohne den Host scheitert jeder Pull hinter der Restriktion.
+4. **Beleg und Zusage:** Die Integrationstests `TestE2E_SandboxDevcontainer_NestedPodman_Build` (kalt, Cache, `--no-cache`, `docker`-Alias) und `…_BuildEgress` (Pull und `RUN` hinter der Restriktion) sind die Abnahme; auf Hosts mit `kernel.apparmor_restrict_unprivileged_userns=1` prüfen sie die Degradation (Exit-Code 11) und überspringen, was den Build nicht belegt. Das Lastenheft 0.12.0 sagt `podman build` mit dem Messstand zu; die Zusage „startet unter Docker (inkl. Colima)“ wird auf Hosts begrenzt, die verschachtelte User-Namespaces erlauben, weil der Standardwert der Ubuntu-24.04-VM von Colima sie blockiert.
 
 ## Verglichene Alternativen
 
 | Option | Pro | Contra |
 |---|---|---|
-| A — Nichts tun, Aussage „Image-Builds ohne Host-Socket“ stehen lassen | kein Aufwand | die Aussage bleibt ungemessen; die Anforderung des Projektinhabers bleibt unbelegt |
-| B — `sysctl kernel.apparmor_restrict_unprivileged_userns=0` in der Colima-VM oder im CI-Lauf setzen und messen | liefert den Beleg | die Colima-VM bleibt nach Entscheidung des Projektinhabers unverändert; der CI-Schritt ändert ein Gate und gehört nicht in diesen Vorgang |
-| C — `podman build` im Lastenheft ohne Messung zusagen | erfüllt den Wortlaut der Anforderung | Zusage ohne Beleg; widerspricht dem Gebot, nur Gemessenes zuzusagen |
-| D — Paket `buildah` und `aardvark-dns` vorsorglich installieren | `buildah`-Kommando verfügbar | nicht gemessen nötig; ändert Entscheidung 1 von [ADR-0014](0014-nested-podman-sandbox-devcontainer.md) ohne Befund; das Kommando ist nicht gefordert |
-| **E — Test als Beleg, Paketset und Lockerungen unverändert, Zusage erst nach grünem Messlauf** | ehrlicher Stand; Messung wiederholbar, sobald ein Host sie zulässt | die Anforderung ist bis dahin nicht belegt |
+| A — Nichts tun, nur `podman run --network=host` zusagen | keine Lockerung mehr | erfüllt die Anforderung nicht; `RUN` ohne Netz unbrauchbar |
+| B — Der Build läuft nur mit `--network=host` (kein `/dev/net/tun`) | keine sechste Option | `podman build` bekäme das Flag in jedem Aufruf; nicht der Aufruf der Zusage; nicht gemessen als Alternative |
+| C — `--privileged` | läuft | maximale Lockerung, nicht einzeln ausweisbar |
+| D — Paket `buildah` und weitere vorsorglich installieren | `buildah`-Kommando verfügbar | nicht nötig (gemessen), nicht gefordert |
+| **E — sechste Lockerung `--device=/dev/net/tun`, Paketset unverändert, Egress-Host ergänzt** | gemessen lauffähig, einzeln ausgewiesen, kleinste Änderung | ein weiteres Device im Profil, das nahe an `--privileged` liegt |
 
 ## Konsequenzen
 
-- Positiv: Der Beleg ist als Test im Repo; Handbuch und Spezifikation sagen nur Gemessenes; zwei Befunde (Egress-Host, Colima-Aussage) sind sichtbar.
-- Negativ: `podman build` bleibt unbelegt, bis ein Host mit erlaubten verschachtelten User-Namespaces den Test grün durchläuft; auf Colima mit Ubuntu-24.04-VM und auf `ubuntu-latest` (sofern der Schalter dort 1 ist) überspringt der Test.
-- Folgepflicht: Die Messung auf einem Host ohne Restriktion (oder nach Entscheidung des Projektinhabers über die Umgebung) wiederholen; danach Lastenheft-Wortlaut mit Messstand; Egress-Host-Entscheidung.
-- **Nicht verifiziert (Stand 2026-10-17):** `podman build` rootless, auf jeder Plattform (arm64 und amd64); Egress mit Build; Speicherbedarf; `vfs`-Degradation beim Build; `docker build` über den Alias.
+- Positiv: `podman build` und `docker build` laufen im Container, auch hinter der Egress-Restriktion; die Messung ist als Tests wiederholbar; Pulls von Docker Hub hinter der Restriktion funktionieren.
+- Negativ: Ein weiteres Device im Profil; `/dev/net/tun` muss auf dem Host existieren (sonst Startfehler des Containers, ohne Degradationsstufe wie bei `/dev/fuse`); auf Ubuntu-24.04-VMs mit Standardwert 1 läuft nichts davon.
+- Folgepflicht: amd64-Messung über den CI-Lauf; falls der Schalter auf dem Runner 1 ist, entscheidet der Projektinhaber über den Weg (Gate-Änderung).
+- **Nicht verifiziert (Stand 2026-10-17):** amd64; Docker Desktop; Podman als Host-Engine; Speicherbedarf großer Images.
 
 ## Fitness Function (falls maschinell prüfbar)
 
 | Tooling | Regel | Make-Target |
 |---|---|---|
-| Integrationstest (`//go:build docker`) | Sandbox-Profil mit `nestedRuntime: podman` baut per `podman build` und `docker build` ein Dockerfile mit `FROM`, `RUN`, `COPY` (kalt, Cache, `--no-cache`); auf beschränkten Hosts Degradation Exit-Code 11 und Skip | `make test-docker` |
+| Golden Case / Unit | `runArgs` bei `podman` enthält genau die sechs Optionen, je eine Warnung; die Allowlist enthält `production.cloudfront.docker.com` bei `podman` und `docker` | `make test` |
+| Integrationstest (`//go:build docker`) | `podman build` und `docker build` (kalt, Cache, `--no-cache`) sowie Build hinter der Egress-Restriktion; auf beschränkten Hosts Degradation Exit-Code 11 und Skip | `make test-docker` |
 
 ## Re-Evaluierungs-Trigger
 
-Ein Messlauf auf einem Host mit erlaubten verschachtelten User-Namespaces (dann `Accepted` und Lastenheft-Wortlaut); eine neue `podman`-Version in Debian oder ein neues Base-Image; eine Änderung der Egress-Hosts von Docker Hub; ein Befund, dass `podman build` mehr als die fünf Lockerungen oder ein weiteres Paket braucht (dann Folge-ADR).
+Eine neue `podman`-Version in Debian oder ein neues Base-Image; eine Änderung der Blob-Hosts von Docker Hub; ein Messbefund auf amd64 oder auf einer anderen Engine, der das Profil ändert; ein kleineres Profil (etwa ein `pasta`-Modus ohne `/dev/net/tun`).
 
 ## Anhang: Messbefehle (Kurzform)
 
@@ -74,13 +77,13 @@ Ein Messlauf auf einem Host mit erlaubten verschachtelten User-Namespaces (dann 
 docker run --rm -v "$M/pod":/w -w /w --user 0 u-boot:latest --no-interactive init --no-git --devcontainer --sandbox
 # … config set devcontainer.sandbox.nestedRuntime podman; generate devcontainer; docker build -t mpod-probe .devcontainer
 RA="--cap-add=SYS_ADMIN --security-opt=seccomp=unconfined --security-opt=apparmor=unconfined --security-opt=systempaths=unconfined --device=/dev/fuse"
-docker run --rm $RA mpod-probe sh /usr/local/bin/u-boot-sandbox-init             # Exit 11 auf der Colima-VM
-docker run --rm --cap-add=SYS_ADMIN --security-opt=seccomp=unconfined --security-opt=systempaths=unconfined --device=/dev/fuse \
-  mpod-probe bash -c 'podman build -t probe .'                                      # ohne apparmor=unconfined: permission denied
+docker run --rm $RA mpod-probe sh /usr/local/bin/u-boot-sandbox-init               # Exit 11 bei Schalter 1
+docker run --rm $RA mpod-probe bash -c 'podman build -t probe .'                    # Schalter 0: RUN scheitert an /dev/net/tun
+docker run --rm $RA --device=/dev/net/tun mpod-probe bash -c 'podman build -t probe .'   # läuft
 ```
 
 ## Geschichte
 
 | Datum | Ereignis | Verweis |
 |---|---|---|
-| 2026-10-17 | Entwurf mit Messprotokoll (Colima 0.10.3, Docker 29.5.2, arm64); `Proposed`, bis ein Messlauf den Build belegt | Vereinbarung mit dem Projektinhaber |
+| 2026-10-17 | Entwurf mit Messprotokoll in zwei Läufen (Colima 0.10.3, Docker 29.5.2, arm64; Schalter 1, dann 0); `Accepted` durch den Projektinhaber (Lastenheft 0.12.0) | Vereinbarung mit dem Projektinhaber |
