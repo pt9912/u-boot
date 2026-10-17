@@ -50,7 +50,7 @@ Die Sicherheits-/Fallback-Ausnahmen und Fehler bleiben unabhängig davon; sonsti
 
 - **Eine „Would …"-Formulierung für `remove`, `generate` und `config set` im Dry-Run** — heute melden diese Subkommandos auch ohne `--quiet` in der Vergangenheitsform
   (`Removed service …`, `Generated …`, `config: a → b.`); nur `init` und `add` unterscheiden. Das ist ein Befund ohne Bezug zu `--quiet`; dieser Slice gibt unter `--quiet` aus, was ohne `--quiet`
-  ausgegeben wird. Offene Frage an den Projektinhaber, getragen vom Folge-Slice [`slice-v1-cli-dry-run-would-formulierung`](../open/slice-v1-cli-dry-run-would-formulierung.md) (siehe §6).
+  ausgegeben wird. Offene Frage an den Projektinhaber, getragen vom Folge-Slice [`slice-v1-cli-dry-run-would-formulierung`](../in-progress/slice-v1-cli-dry-run-would-formulierung.md) (siehe §6).
 - **Der Compose-Strom von `down`, der CHANGELOG-Widerspruch (Review F-1, F-3)** — anderer Befund, Arbeit am Slice
   [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md).
 - **Eine Änderung des Lastenhefts** — liegt im CR [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md).
@@ -116,7 +116,7 @@ Steering-Loop-Lerneintrag geschrieben (§7).
   bestätigt vom Projektinhaber; Code und Pin folgen.
 - **Vergangenheitsform im Dry-Run (`remove`, `generate`, `config set`):** Unter `--quiet --dry-run` erscheint dieselbe Vergangenheitsform wie heute ohne `--quiet`,
   obwohl nichts geschrieben wurde. — **Ausgang:** eingetreten:
-  [`slice-v1-cli-dry-run-would-formulierung`](../open/slice-v1-cli-dry-run-would-formulierung.md).
+  [`slice-v1-cli-dry-run-would-formulierung`](../in-progress/slice-v1-cli-dry-run-would-formulierung.md).
 - **Konflikt mit dem Code-Slice [`slice-v1-cli-quiet-nur-fehler`](../done/slice-v1-cli-quiet-nur-fehler.md):** beide ändern die Quiet-Zweige derselben fünf Dateien. — **Ausgang:** entfallen:
   dieser Slice startet erst nach dessen Closure (siehe §4).
 - **Zwischenstand der Spec:** Die Spezifikation darf das Verhalten erst nach allen Slices der Welle beschreiben. — **Ausgang:** entfallen: der Spezifikations-Eintrag liegt im letzten Slice
@@ -141,7 +141,7 @@ Folge-Slice, F-4 als Grenze). Verification Evidence
   die Klasse „Kommentar und Gegenstand getrennt bzw. falsch zugeordnet“ berührt die 3×-Schwelle der Welle; ob sie als Regel verkörpert wird, entscheidet die Welle-Closure anhand der Slice-Belege,
   hier wird nichts verkörpert.
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt; das Register ist leer, also keine Beobachtung über der Schwelle.
-- **Folge-Slices:** [`slice-v1-cli-dry-run-would-formulierung`](../open/slice-v1-cli-dry-run-would-formulierung.md) (neu: Zeitform der Dry-Run-Zusammenfassung, Review F-3) und
+- **Folge-Slices:** [`slice-v1-cli-dry-run-would-formulierung`](../in-progress/slice-v1-cli-dry-run-would-formulierung.md) (neu: Zeitform der Dry-Run-Zusammenfassung, Review F-3) und
   [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Rangfolge bei Mehrfachangabe, Spec-Eintrag).
 - **Release-Hinweis:** kein Release-Cut vor `slice-v1-cli-verbosity-letzte-option-gewinnt`; der CHANGELOG sagt „follows in a later release“.
 - **Risiken aus §6:** alle tragen ihren Ausgang: eingetreten (Vergangenheitsform im Dry-Run) oder entfallen (Auslegung `--diff` ohne `--dry-run`, Konflikt mit dem Code-Slice, Zwischenstand der Spec).
