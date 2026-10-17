@@ -106,7 +106,7 @@ func TestDryRun_JSONAndErrorsUnchanged(t *testing.T) {
 			if err != nil {
 				t.Fatalf("--json: %v", err)
 			}
-			if strings.Contains(out, "Would") || !strings.Contains(out, `"dryRun":true`) {
+			if strings.Contains(out, strings.SplitN(c.dryRun, "\n", 2)[0]) || !strings.Contains(out, `"dryRun":true`) {
 				t.Errorf("--dry-run --json output changed:\n%s", out)
 			}
 			app, want := sc.failApp(t)
@@ -152,5 +152,79 @@ func TestDryRun_GenerateActions(t *testing.T) {
 				t.Errorf("write: err=%v stdout=%q, want %q", err, write, c.write)
 			}
 		})
+	}
+}
+
+// Drift guard: every GenerateAction value that the port names has a
+// summary shape. A changing action reads "Would ..." under --dry-run;
+// a value that reaches the defensive default branch (no dry-run form)
+// fails here.
+func TestDryRun_GenerateEveryActionHasADryRunForm(t *testing.T) {
+	t.Parallel()
+	for a := driving.GenerateAction(0); a.String() != "unknown"; a++ {
+		a := a
+		t.Run(a.String(), func(t *testing.T) {
+			t.Parallel()
+			app := func() *cli.App {
+				uc := generateFixture()
+				uc.resp.Action = a
+				return newAppWithGenerate(uc, cli.WithGetwd(sandboxGetwd))
+			}
+			dry, _, err := quietRun(t, app(), "generate", "changelog", "--dry-run")
+			if err != nil {
+				t.Fatalf("--dry-run: %v", err)
+			}
+			write, _, err := quietRun(t, app(), "generate", "changelog")
+			if err != nil {
+				t.Fatalf("write: %v", err)
+			}
+			if a == driving.GenerateActionNoOp {
+				if dry != write || !strings.Contains(dry, "no changes") {
+					t.Errorf("no-op differs: dry=%q write=%q", dry, write)
+				}
+				return
+			}
+			if !strings.HasPrefix(dry, "Would ") || strings.Contains(write, "Would") {
+				t.Errorf("action %s: dry=%q write=%q, want a Would form under --dry-run only", a, dry, write)
+			}
+		})
+	}
+}
+
+// Boundary: `config set` with several pairs, one unchanged and one
+// changed, writes both lines under --dry-run: the no-op line as in a
+// write, the changed one as "Would set".
+func TestDryRun_ConfigSetManyMixedPairs(t *testing.T) {
+	t.Parallel()
+	app := func(t *testing.T) *cli.App {
+		return newAppWithConfigStub(&fakeConfigUseCase{
+			setManyResp: driving.ConfigSetManyResponse{
+				Entries: []driving.ConfigSetEntry{
+					{Path: mustCfgPath(t, "project.name"), OldValue: "same", NewValue: "same"},
+					{Path: mustCfgPath(t, "devcontainer.enabled"), OldValue: "false", NewValue: "true"},
+				},
+				PlannedFiles: previewPlanned(),
+			},
+		})
+	}
+	args := []string{"config", "set", "project.name", "same", "devcontainer.enabled", "true"}
+	dry, _, err := quietRun(t, app(t), append(args, "--dry-run")...)
+	if err != nil {
+		t.Fatalf("--dry-run: %v", err)
+	}
+	for _, want := range []string{
+		"config: project.name already same; no changes.\n",
+		"config: Would set devcontainer.enabled false → true.\n",
+	} {
+		if !strings.Contains(dry, want) {
+			t.Errorf("--dry-run lacks %q:\n%s", want, dry)
+		}
+	}
+	write, _, err := quietRun(t, app(t), args...)
+	if err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	if !strings.Contains(write, "config: devcontainer.enabled false → true.\n") || strings.Contains(write, "Would") {
+		t.Errorf("write output wrong:\n%s", write)
 	}
 }

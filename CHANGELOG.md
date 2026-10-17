@@ -16,7 +16,8 @@ this file is the same format applied to u-boot itself.
 - `--dry-run`: the summary of `remove`, `generate` and `config set` (one pair or several) says what would happen, like `init` and `add` already did:
   `Would remove service "x".` with the list `Would change:`, `Would generate <artifact> (<paths>).`, `Would update <artifact> managed block (<paths>).`,
   `Would repair <artifact> structure (<paths>).` and `config: Would set <path> <old> → <new>.`. Without `--dry-run` (also with `--diff` alone) the lines keep their
-  past form, and the "already up to date; no changes." lines, the `--json` output, errors and `--quiet` are unchanged. A script that matched the old
+  past form. The "already up to date; no changes." lines, the `--json` output and errors are unchanged; `--quiet --dry-run` still shows the
+  summary (the plan is the result of the call), now with the `Would …` wording. A script that matched the old
   dry-run line must use `--json` ([`LH-FA-CLI-007`](spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-NFA-USE-004`](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)).
 
 ## [0.10.0] - 2026-10-17

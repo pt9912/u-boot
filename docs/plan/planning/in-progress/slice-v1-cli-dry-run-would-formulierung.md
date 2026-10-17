@@ -82,12 +82,16 @@ Gilt für Lösung A; bei B entfällt der Code, bei C kommt der CR davor.
 | `internal/adapter/driving/cli/generate.go` <!-- d-check:ignore (Pfad-Zitat) --> | update | Zusammenfassung im Dry-Run als „Would generate …“ |
 | `internal/adapter/driving/cli/config.go` <!-- d-check:ignore (Pfad-Zitat) --> | update | `config set` (einzeln und mit mehreren Paaren) im Dry-Run als „Would set …“ statt `config: a → b.` |
 | `internal/adapter/driving/cli/quiet_preview_test.go` <!-- d-check:ignore (Pfad-Zitat) --> und Tests je Subkommando <!-- d-check:ignore (Pfad-Zitat) --> | update | die Matrix pinnt heute die Vergangenheitsform als `summary`; Texte nachziehen, Happy/Boundary/Negative nach [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) und [`LH-FA-CLI-008`](../../../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) |
-| `internal/adapter/driving/cli/dry_run_would_test.go` <!-- d-check:ignore (Pfad-Zitat) --> | add | Happy/Boundary/Negative je Subkommando (`printGenerateSummary` je `GenerateAction`, `printRemoveSummary`, `printConfigSetSummary`; Dry-Run mit und ohne `--diff`/`--quiet`, Schreiben mit und ohne `--diff`, `--dry-run --json`, Fehler) |
+| `internal/adapter/driving/cli/dry_run_would_test.go` <!-- d-check:ignore (Pfad-Zitat) --> | add | Happy/Boundary/Negative je Subkommando (`printGenerateSummary` je `GenerateAction`, `printRemoveSummary`, `printConfigSetSummary`; Dry-Run mit und ohne `--diff`/`--quiet`, Schreiben mit und ohne `--diff`, `--dry-run --json`, Fehler; Drift-Wächter über alle `GenerateAction`-Werte, die der Port benennt, und `config set` mit gemischten Paaren: unverändert → „already X; no changes“, geändert → „Would set …“) |
 | `internal/adapter/driving/cli/remove_acceptance_test.go` <!-- d-check:ignore (Pfad-Zitat) --> | update | `TestRemove_PurgeDryRun_HumanMode_NoVolumeWarningPollution` pinnt die Dry-Run-Headline; der Kommentar „Headline-Wording bleibt heute …“ beschreibt den neuen Zustand |
 | `docs/user/benutzerhandbuch.md`, `CHANGELOG.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | sichtbare Textänderung im Dry-Run (Handbuch: Abschnitt „Vorschau statt Überraschung“; CHANGELOG: `[Unreleased]` · Changed) |
 | `docs/plan/planning/in-progress/roadmap.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | der Ruhe-Marker in „Offene Wellen“ entfällt, solange der Slice in `in-progress/` liegt (d-check `planning`); der Planner setzt ihn nach der Closure zurück |
 
 Die Änderung reicht über die drei Dateien hinaus nicht: `init` und `add` bleiben unverändert (ihre Formen sind schon „Would …“). Fundstellen: `printRemoveSummary` (`remove.go`), `printGenerateSummary` (`generate.go`), `printConfigSetSummary` (`config.go`, einzeln und über `runConfigSetMany`). Spec und Spezifikation geben den Text nicht vor.
+
+Abweichung vom Vorgehen (2026-10-17): Der Implementer hat einmal `python3` auf dem Host ausgeführt (Verstoß gegen `AGENTS.md` §3.1). Der Aufruf änderte nur Zeilen in `remove_acceptance_test.go` (Kommentar-Berichtigung und eine zusätzliche Headline-Assertion); der Nachweis dieser Änderung läuft allein über `make test` und `make gates` im Docker. Seitdem kein Host-Werkzeug mehr.
+
+Grenze: Der defensive `default`-Zweig von `printGenerateSummary` kennt `dryRun` nicht. Ein Drift-Wächter (`TestDryRun_GenerateEveryActionHasADryRunForm`) wird rot, wenn der Port eine neue `GenerateAction` benennt, die keine „Would …“-Form hat.
 
 ## 4. Trigger
 
