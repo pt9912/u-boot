@@ -101,6 +101,7 @@ func TestHomebrewFormulaDesc_EnglishASCII(t *testing.T) {
 }
 
 func TestHomebrewFormulaFill_FailsClosed(t *testing.T) {
+	missing := strings.Replace(sumsFull, "u-boot-linux-arm64", "u-boot-linux-armv7", 1)
 	malformed := strings.Replace(sumsFull, "4444444444444444444444444444444444444444444444444444444444444444", "not-a-digest", 1)
 	for name, sums := range map[string]string{"missing platform": missing, "malformed digest": malformed} {
 		body, _, err := runFill(t, "v1.2.3", sums)
