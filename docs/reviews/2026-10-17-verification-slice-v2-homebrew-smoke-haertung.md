@@ -2,12 +2,12 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** Slice [`slice-v2-homebrew-smoke-haertung`](../plan/planning/in-progress/slice-v2-homebrew-smoke-haertung.md), Commits `8b5bd3b`, `ddf2813`, `82677f1`, `88a7259`, `8877fa3` (ohne Welle). Maßstab: §1 (Ziel, Nicht-Ziele), §2 (DoD), §3 (Plan), §6 (Risiko), [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md), [`LH-OPEN-002`](../../spec/lastenheft.md#lh-open-002--paketierung), [`LH-LESE-002`](../../spec/lastenheft.md#lh-lese-002--sprache). Review-Report: [`2026-10-17-slice-v2-homebrew-smoke-haertung.md`](2026-10-17-slice-v2-homebrew-smoke-haertung.md).
+**Gegenstand:** Slice [`slice-v2-homebrew-smoke-haertung`](../plan/planning/done/slice-v2-homebrew-smoke-haertung.md), Commits `8b5bd3b`, `ddf2813`, `82677f1`, `88a7259`, `8877fa3` (ohne Welle). Maßstab: §1 (Ziel, Nicht-Ziele), §2 (DoD), §3 (Plan), §6 (Risiko), [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md), [`LH-OPEN-002`](../../spec/lastenheft.md#lh-open-002--paketierung), [`LH-LESE-002`](../../spec/lastenheft.md#lh-lese-002--sprache). Review-Report: [`2026-10-17-slice-v2-homebrew-smoke-haertung.md`](2026-10-17-slice-v2-homebrew-smoke-haertung.md).
 
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v2-homebrew-smoke-haertung`](../plan/planning/in-progress/slice-v2-homebrew-smoke-haertung.md)
+- Slice: [`slice-v2-homebrew-smoke-haertung`](../plan/planning/done/slice-v2-homebrew-smoke-haertung.md)
 - IDs: [`LH-OPEN-002`](../../spec/lastenheft.md#lh-open-002--paketierung), [`LH-LESE-002`](../../spec/lastenheft.md#lh-lese-002--sprache), [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md)
 - Artefakte: `packaging/homebrew-tap/.github/workflows/smoke.yml`, `scripts/homebrew-formula.rb.tmpl`, `cmd/uboot/homebrew_scripts_test.go`, `.github/workflows/publish.yml`, `packaging/nfpm.yaml`, `docs/maintainer/releasing.md`
 

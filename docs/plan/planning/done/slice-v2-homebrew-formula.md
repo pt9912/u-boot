@@ -151,12 +151,12 @@ echten Mac stehen aus.
   es ausnimmt (F-1).
 - **Setzung (Akzeptanzkriterium 4):** Der Smoke läuft ohne `--build-from-source` und ohne `add`; `brew audit --strict` läuft mit `|| true` und
   hat nie gatend geprüft (T1 nicht erbracht). Das bleibt als Abweichung stehen; die Härtung trägt
-  [`slice-v2-homebrew-smoke-haertung`](../in-progress/slice-v2-homebrew-smoke-haertung.md) (zusammen mit F-5 und F-8).
+  [`slice-v2-homebrew-smoke-haertung`](../done/slice-v2-homebrew-smoke-haertung.md) (zusammen mit F-5 und F-8).
 - **Mac-Erprobung:** `brew tap`, `brew trust` und `brew install u-boot` auf Apple Silicon sind eine Zusage des Projektinhabers; der Verifier kann
   sie nicht reproduzieren. Der Smoke auf zwei echten macOS-Runnern stützt sie unabhängig.
 - **Steering-Loop-Eintrag:** Ein Smoke, der auf ein abgekündigtes Runner-Label zeigt, blieb sieben Tage „queued" statt rot zu werden; die Matrix prüft
   kein Label gegen die GitHub-Liste. Gezählt, nicht verkörpert (einmaliger externer Anlass).
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt — einmaliger externer Anlass (Runner-Abkündigung), nicht wiederholbar im
   Sinne der 3×-Schwelle.
-- **Folge-Slices:** [`slice-v2-homebrew-smoke-haertung`](../in-progress/slice-v2-homebrew-smoke-haertung.md).
+- **Folge-Slices:** [`slice-v2-homebrew-smoke-haertung`](../done/slice-v2-homebrew-smoke-haertung.md).
 - **Risiken:** keine offenen; der Carveout [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung) in [`carveouts.md`](../in-progress/carveouts.md) ist aufgelöst.

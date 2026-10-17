@@ -75,7 +75,7 @@ Lastenheft, die drei Code-Slices den Adapter, und die Spezifikation beschreibt e
 - Eine neue Pegelstufe zwischen Info und Debug: `--verbose` und `--debug` bleiben beide Debug; der Kommentar in `root.go` nennt das als vorläufig.
 - Konfigurations- oder Umgebungsquellen für den Pegel: es gibt nur die drei Flags.
 - Die Sandbox-Hinweise bei `init` und `generate` auf den Logger umzustellen: ein anderer Vorgang; der CR hält den Befund fest, entscheidet aber nur über `--quiet`.
-- Die Homebrew-Smoke-Härtung ([`slice-v2-homebrew-smoke-haertung`](../in-progress/slice-v2-homebrew-smoke-haertung.md)) und die Docker-Desktop-Messung: ohne Bezug zur Verbosity.
+- Die Homebrew-Smoke-Härtung ([`slice-v2-homebrew-smoke-haertung`](../done/slice-v2-homebrew-smoke-haertung.md)) und die Docker-Desktop-Messung: ohne Bezug zur Verbosity.
 
 ## 7. Closure-Notiz
 
@@ -129,7 +129,7 @@ einen Release-Cut-Slice gibt es nicht (der CHANGELOG ist vollständig, ein Cut i
   [`../observations/`](../observations/README.md).
 - **Folge-Slices:** [`slice-v1-sandbox-fallback-ausweisung`](../open/slice-v1-sandbox-fallback-ausweisung.md) (Fallback-Ausweisung, Entscheidung Code oder CR beim Projektinhaber),
   [`slice-v1-cli-dry-run-would-formulierung`](../open/slice-v1-cli-dry-run-would-formulierung.md) (Zeitform der Dry-Run-Zusammenfassung),
-  [`slice-v2-homebrew-smoke-haertung`](../in-progress/slice-v2-homebrew-smoke-haertung.md) (aus der Vorwelle, unverändert offen),
+  [`slice-v2-homebrew-smoke-haertung`](../done/slice-v2-homebrew-smoke-haertung.md) (aus der Vorwelle, unverändert offen),
   [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md) (ohne Welle, wartet auf einen Docker-Desktop-Host).
   Alle vier liegen in `open/`.
 - **Verifikation:** `make gates` Exit 0 (Coverage 91,10 %, `docs-check` 0 Befunde); Verification Evidence je Slice unter `docs/reviews/`:

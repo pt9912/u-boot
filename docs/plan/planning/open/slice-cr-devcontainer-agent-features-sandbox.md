@@ -128,7 +128,7 @@ Kein Code, keine Spezifikation, keine Tests; `make docs-check` und `make gates` 
 ## 4. Trigger
 
 **Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; die Entscheidungen 1 bis 4 des Projektinhabers (2026-10-17) liegen vor, die Teilfrage zu Entscheidung 1 ist beim Review des CR entschieden; kein anderer Slice in `in-progress/`
-(WIP-Limit 1; solange [`slice-v2-homebrew-smoke-haertung`](../in-progress/slice-v2-homebrew-smoke-haertung.md) dort liegt, beginnt kein Slice der Welle).
+(WIP-Limit 1; solange [`slice-v2-homebrew-smoke-haertung`](../done/slice-v2-homebrew-smoke-haertung.md) dort liegt, beginnt kein Slice der Welle).
 
 **Rückführungen — vorab benannt:**
 

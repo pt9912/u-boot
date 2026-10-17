@@ -80,7 +80,7 @@ nicht, weil sie kein Release ist).
 - **Steering-Loop-Einträge:** Kein Eintrag über der Schwelle (das Beobachtungs-Register ist leer). Gezählt, nicht verkörpert: ein Smoke gegen ein
   abgekündigtes Runner-Label bleibt „queued" statt rot zu werden.
 - **Beobachtungs-Register:** keine Beobachtung angelegt.
-- **Folge-Slices:** [`slice-v2-homebrew-smoke-haertung`](../in-progress/slice-v2-homebrew-smoke-haertung.md) (Smoke-Härtung, Formel-`desc`, Workflow-Kommentar);
+- **Folge-Slices:** [`slice-v2-homebrew-smoke-haertung`](../done/slice-v2-homebrew-smoke-haertung.md) (Smoke-Härtung, Formel-`desc`, Workflow-Kommentar);
   [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md) (ohne Welle, wartet auf einen
   Docker-Desktop-Host).
 - **Verifikation:** `make gates` grün (Exit 0); Verification Evidence

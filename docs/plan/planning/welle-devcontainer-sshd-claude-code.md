@@ -27,7 +27,7 @@ Anlass (Projektinhaber, 2026-10-17): Entscheidung für Devcontainer-Features sta
 - Die Entscheidungen des Projektinhabers vom 2026-10-17 liegen vor (eingetreten): `sshd` und Claude Code kommen als eingebaute Katalog-Features (Devcontainer-Features,
   nicht Add-on-Services), als eigene Welle; `sshd` im Sandbox-Profil erlaubt mit Warnung, Claude Code im Sandbox-Profil erlaubt mit gemessenen Egress-Hosts, das Anthropic-Feature
   ein Drittanbieter-Feature nach [`ADR-0020`](../adr/0020-drittanbieter-features-im-katalog.md), und [`LH-FA-DEV-009`](../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) wird auf Agenten-Zugangsdaten erweitert. Die Einzelheiten stehen im CR.
-- Der Slice [`slice-v2-homebrew-smoke-haertung`](in-progress/slice-v2-homebrew-smoke-haertung.md) liegt in `done/` (WIP-Limit 1: solange er in
+- Der Slice [`slice-v2-homebrew-smoke-haertung`](done/slice-v2-homebrew-smoke-haertung.md) liegt in `done/` (WIP-Limit 1: solange er in
   `in-progress/` liegt, beginnt kein Slice dieser Welle; beobachtbar an der Verzeichnis-Position des Slice). Erst danach wird der CR nach `in-progress/` bewegt.
 
 ## 3. Closure-Trigger (Welle schließt)
@@ -59,7 +59,7 @@ Das *Mehr* gegenüber den vier Slice-DoDs: Die beiden Features tragen **zusammen
 ## 5. Abhängigkeiten
 
 - Blockiert: keine Welle.
-- Wird blockiert von: [`slice-v2-homebrew-smoke-haertung`](in-progress/slice-v2-homebrew-smoke-haertung.md) (WIP-Limit 1, siehe §2). Die vier **Entscheidungen des
+- Wird blockiert von: [`slice-v2-homebrew-smoke-haertung`](done/slice-v2-homebrew-smoke-haertung.md) (WIP-Limit 1, siehe §2). Die vier **Entscheidungen des
   Projektinhabers** vom 2026-10-17 liegen vor (Entscheidungsdokumentation im CR); offen ist die Teilfrage zu `sshd` (Wortlaut der Warnung, Sichtbarkeit unter `--quiet`), die der Projektinhaber beim Review des CR entscheidet; vor ihr beginnt kein Code-Slice mit der sshd-Warnung.
 - Release-Zuordnung: Die Zuordnung der Welle zu einem Release-Cut liegt beim Projektinhaber und ist offen; kein Slice der Welle hängt an ihr.
 - Reihenfolge in der Welle: der CR geht den Code-Slices voraus, weil sie die Sandbox-Regel erst nach dem Lastenheft umsetzen; `sshd` geht `claude-code` voraus
