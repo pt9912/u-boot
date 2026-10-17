@@ -109,6 +109,6 @@ Wird bei der Closure gefüllt.
 
 **Vorgelagert — Sub-Area-Wahl prüfen:** berührt sind `internal/hexagon/domain` (DOM), `internal/hexagon/application` (APP), `internal/adapter/driving/cli` (CLI) und, für die Doku, `docs/user/` (DOK) — alle Greenfield laut [`harness/conventions.md`](../../../../harness/conventions.md#mr-006) (Abschnitt Modus-Deklaration), alle erfüllen die Schwelle ≥ 2 von 3 Achsen; keine Ausdifferenzierung nötig.
 
-**Vorgelagert — offene Beobachtungen sichten:** Beobachtungs-Register ([`../observations/`](../observations/README.md)) durchgegangen — für CLI die Beobachtung `BEO-CLI/kommentar-beschreibt-abwesendes` (3×, verkörpert in `AGENTS.md §3.9`): der Kommentar-Selbstcheck gilt für Hilfetext und Doc-Kommentare des Slice (die Zusage nennen, nicht die frühere Fassung „errors and degradation fallbacks only“); sonst keine Treffer für DOM, APP und DOK.
+**Vorgelagert — offene Beobachtungen sichten:** Beobachtungs-Register ([`../observations/`](../observations/README.md)) durchgegangen — für CLI die Beobachtung `BEO-CLI/kommentar-beschreibt-abwesendes` (3×, verkörpert in `AGENTS.md §3.9`): der Kommentar-Selbstcheck gilt für Hilfetext und Doc-Kommentare des Slice (die Zusage nennen, nicht die frühere Fassung „errors and degradation fallbacks only“); sonst keine Treffer für DOM, APP und DOK. Die Beobachtung [BEO-DOK/plan-aussage-ueber-code](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) (verkörpert in `AGENTS.md §3.10`) gilt für jede Plan-Aussage über Code; sie steht in §6.
 
 Alle berührten Sub-Areas GF.

@@ -91,6 +91,6 @@ Wird bei der Closure gefüllt.
 
 **Vorgelagert — Sub-Area-Wahl prüfen:** berührt ist `spec/` (Kürzel DOK) — Modus Greenfield laut [`harness/conventions.md`](../../../../harness/conventions.md#mr-006) (Abschnitt Modus-Deklaration), erfüllt die Schwelle ≥ 2 von 3 Achsen; keine Ausdifferenzierung nötig. Der Code wird nur gelesen.
 
-**Vorgelagert — offene Beobachtungen sichten:** Beobachtungs-Register ([`../observations/`](../observations/README.md)) durchgegangen — keine Treffer für diese Sub-Area (die einzige Beobachtung `BEO-CLI/kommentar-beschreibt-abwesendes` betrifft CLI und ist verkörpert in `AGENTS.md §3.9`). Die Klasse „Plan-Aussage über Code stimmt nicht“ steht nicht im Register (siehe [`slice-v1-devcontainer-feature-sshd`](slice-v1-devcontainer-feature-sshd.md) §8); dieser Slice ist ihr Gegenmittel (DoD 2).
+**Vorgelagert — offene Beobachtungen sichten:** Beobachtungs-Register ([`../observations/`](../observations/README.md)) durchgegangen — keine Treffer für diese Sub-Area (die einzige Beobachtung `BEO-CLI/kommentar-beschreibt-abwesendes` betrifft CLI und ist verkörpert in `AGENTS.md §3.9`). Die Klasse „Plan-Aussage über Code stimmt nicht“ steht als [BEO-DOK/plan-aussage-ueber-code](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) im Register (verkörpert in `AGENTS.md §3.10`); dieser Slice ist ihr Gegenmittel (DoD 2).
 
 Alle berührten Sub-Areas GF.
