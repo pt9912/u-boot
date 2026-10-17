@@ -2,12 +2,12 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** Slice [`slice-v1-cli-dry-run-would-formulierung`](../plan/planning/in-progress/slice-v1-cli-dry-run-would-formulierung.md), Lösung A (Entscheidung des Projektinhabers 2026-10-17), Commits `73f1f4b`, `1536c8e`, `27723e2` (Range `874b6b8..HEAD`, ohne Welle). Maßstab: §1, §2 (DoD), §3 (Plan), §6, [`LH-FA-CLI-007`](../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe), [`LH-NFA-USE-004`](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe). Review-Report: [`2026-10-17-slice-v1-cli-dry-run-would-formulierung.md`](2026-10-17-slice-v1-cli-dry-run-would-formulierung.md).
+**Gegenstand:** Slice [`slice-v1-cli-dry-run-would-formulierung`](../plan/planning/done/slice-v1-cli-dry-run-would-formulierung.md), Lösung A (Entscheidung des Projektinhabers 2026-10-17), Commits `73f1f4b`, `1536c8e`, `27723e2` (Range `874b6b8..HEAD`, ohne Welle). Maßstab: §1, §2 (DoD), §3 (Plan), §6, [`LH-FA-CLI-007`](../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe), [`LH-NFA-USE-004`](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe). Review-Report: [`2026-10-17-slice-v1-cli-dry-run-would-formulierung.md`](2026-10-17-slice-v1-cli-dry-run-would-formulierung.md).
 
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-cli-dry-run-would-formulierung`](../plan/planning/in-progress/slice-v1-cli-dry-run-would-formulierung.md)
+- Slice: [`slice-v1-cli-dry-run-would-formulierung`](../plan/planning/done/slice-v1-cli-dry-run-would-formulierung.md)
 - IDs: [`LH-FA-CLI-007`](../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](../../spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe), [`LH-NFA-USE-004`](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)
 - Artefakte: `internal/adapter/driving/cli/{remove,generate,config}.go`, Tests `dry_run_would_test.go`, `quiet_preview_test.go`, `remove_acceptance_test.go`, `docs/user/benutzerhandbuch.md`, `CHANGELOG.md`, `roadmap.md` <!-- d-check:ignore (Pfad-Zitate) -->
 
