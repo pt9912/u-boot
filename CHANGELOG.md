@@ -24,8 +24,8 @@ this file is the same format applied to u-boot itself.
   `ghcr.io/anthropics/devcontainer-features/claude-code:1`, a third-party feature that `generate` reports; its install script runs at image build; no options). It needs the
   `node` feature: on the base image the build fails without Node.js, and `generate` says so. In the sandbox profile it is allowed; the generated
   `remoteEnv` then carries the reference `${localEnv:ANTHROPIC_API_KEY}` next to `GIT_TOKEN`, never a value, and with the egress restriction the
-  allowlist gains `registry.npmjs.org`, `api.anthropic.com`, `claude.ai`, `platform.claude.com` and `claude.com`
-  (hosts of telemetry, error reports, MCP connectors, updates and plugins are not included; add them to `devcontainer.sandbox.egress.allow`)
+  allowlist gains `registry.npmjs.org` and `api.anthropic.com` only
+  (the sign-in hosts and the hosts of telemetry, error reports, MCP connectors, updates and plugins are not included; add them to `devcontainer.sandbox.egress.allow`)
   ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features),
   [`LH-FA-DEV-009`](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer),
   [ADR-0020](docs/plan/adr/0020-drittanbieter-features-im-katalog.md)).

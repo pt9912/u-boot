@@ -1058,7 +1058,7 @@ Standardmäßig erlaubt sind:
 | Feature `sdkman` | `api.sdkman.io`, `broker.sdkman.io`, `repo.maven.apache.org`, `repo1.maven.org` |
 | Feature `sshd` | keine zusätzlichen Hosts |
 | Feature `homebrew` | `formulae.brew.sh`, `ghcr.io`, `pkg-containers.githubusercontent.com` |
-| Feature `claude-code` | `registry.npmjs.org`, `api.anthropic.com`, `claude.ai`, `platform.claude.com`, `claude.com` |
+| Feature `claude-code` | `registry.npmjs.org`, `api.anthropic.com` (Hosts der Anmeldung nicht: siehe [Claude Code](#claude-code-optional)) |
 | Clone-Quelle | der Host von `devcontainer.sandbox.repository` beziehungsweise `origin` |
 | Ihre Ergänzungen | `devcontainer.sandbox.egress.allow` (kleingeschriebene Hostnamen, ohne Schema, Port oder Wildcard) |
 
@@ -1066,11 +1066,11 @@ Standardmäßig erlaubt sind:
   `claude-code` (Zeile in der Tabelle). Die Hosts jedes anderen Agenten (zum
   Beispiel dessen API) tragen Sie in `egress.allow` ein. Subdomains eines
   erlaubten Namens sind mitgemeint.
-- Für `claude-code` nimmt die Liste nur Hosts auf, die für die Installation
-  und die Anmeldung oder API-Nutzung nötig sind; die Hosts von Telemetrie,
-  Fehlerberichten, MCP-Connectors, Updates und Plugins sind **nicht
-  aufgenommen** und werden bei Bedarf in `egress.allow` ergänzt (Einzelheiten im
-  Abschnitt [Claude Code](#claude-code-optional)).
+- Für `claude-code` nimmt die Liste nur den API-Host und die npm-Registry auf; die
+  Hosts der Anmeldung sowie von Telemetrie, Fehlerberichten, MCP-Connectors,
+  Updates und Plugins sind **nicht aufgenommen** und werden bei Bedarf in
+  `egress.allow` ergänzt (Einzelheiten im Abschnitt
+  [Claude Code](#claude-code-optional)).
 - Die Features `sdkman` und `homebrew` bringen nur ihre eigenen Hosts mit. Die
   Download-Hosts einzelner SDKMAN-Kandidaten (zum Beispiel `services.gradle.org`
   für Gradle, `github.com` und `release-assets.githubusercontent.com` für
@@ -1160,11 +1160,17 @@ keinen Berechtigungsmodus.
   `capAdd`, `privileged` und keinen Entrypoint mit (`installsAfter`: das Feature
   `node`), und im Image gibt es kein `~/.claude`; das Feature installiert außerdem
   ein Firewall-Skript `/usr/local/bin/init-firewall.sh`, das **nicht ausgeführt wird**.
-- **Egress:** Mit der Beschränkung erlaubt `u-boot` für `claude-code` die Hosts der
-  Tabelle oben: `registry.npmjs.org` (npm-Paket der CLI), `api.anthropic.com`
-  (gemessen: der API-Host, den die CLI zur Laufzeit abfragt) sowie `claude.ai`,
-  `platform.claude.com` und `claude.com` (Anmeldung; laut Dokumentation von
-  Anthropic, nicht gemessen: ein echter Login ist ohne Konto nicht messbar).
+- **Egress:** Mit der Beschränkung erlaubt `u-boot` für `claude-code` nur zwei Hosts
+  (Entscheidung des Projektinhabers): `api.anthropic.com` (gemessen: der API-Host,
+  den die CLI zur Laufzeit abfragt) und `registry.npmjs.org`. Die Beschränkung wirkt
+  erst beim Containerstart, der Image-Build davor ist nicht beschränkt; den Host
+  `registry.npmjs.org` bringt auch das nötige Feature `node` mit, ein Bedarf der
+  CLI zur Laufzeit ist nicht gemessen. Die Hosts der **Anmeldung** (`claude.ai`,
+  `platform.claude.com`, `claude.com`; laut Dokumentation von Anthropic, nicht
+  gemessen: ein echter Login ist ohne Konto nicht messbar) stehen **nicht** in der
+  Liste: Wer sich im Container anmeldet, ergänzt sie in `devcontainer.sandbox.egress.allow`.
+  Der Weg über einen Abo-Login oder `CLAUDE_CODE_OAUTH_TOKEN` ist nicht zugesagt
+  und nicht gemessen.
   Mit dem generierten Allowlist-Container erreichte die CLI die API (Antwort
   „Invalid API key“ auf einen absichtlich falschen Schlüssel), `example.com`
   blieb gesperrt.
@@ -1206,7 +1212,10 @@ erzeugten Datei:
   fehlenden Token-Quelle bei einem `https`-Clone und, bei aktivem Feature
   `claude-code`, vor einer fehlenden Referenz auf `ANTHROPIC_API_KEY` in
   `devcontainer.json`. Die Prüfung liest nur Projektdateien; sie sieht weder die
-  Umgebung des Hosts noch einen Schlüssel in einer anderen Datei.
+  Umgebung des Hosts noch einen Schlüssel in einer anderen Datei. Bekannte Grenze:
+  Der Ausdruck für eine Zuweisung kann einen Platzhalter nicht von einem Wert
+  unterscheiden; ein Platzhalter wie `ANTHROPIC_API_KEY=your-api-key-here` (ab zwölf
+  Zeichen) in `.env.example` löst die Warnung aus.
 
 #### Mehrere Instanzen
 
