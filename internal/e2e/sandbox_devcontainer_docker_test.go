@@ -347,6 +347,52 @@ func TestE2E_SandboxDevcontainer_NestedPodman_Build(t *testing.T) {
 	}
 }
 
+// nestedPodmanEgressBuildScript runs as `vscode` behind the egress
+// restriction: the image pull needs the registry hosts of the default
+// allowlist, a `RUN` reaches an allowed host and not an unlisted one.
+const nestedPodmanEgressBuildScript = `set -e
+sudo sh /usr/local/bin/u-boot-egress-init
+sh /usr/local/bin/u-boot-sandbox-init
+mkdir -p "$HOME/ctx" && cd "$HOME/ctx"
+printf 'FROM docker.io/library/debian:stable-slim\nRUN getent hosts deb.debian.org > /dev/null && echo ALLOWED_RESOLVES\nRUN ! getent hosts example.com && echo UNLISTED_BLOCKED\n' > Dockerfile
+podman build -t probe-egress . && echo EGRESS_BUILD_OK`
+
+// LH-FA-DEV-007 with LH-FA-DEV-008: `podman build` behind the egress
+// restriction pulls from Docker Hub (registry and blob hosts of the default
+// allowlist) and resolves only listed names in `RUN`.
+func TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress(t *testing.T) {
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Fatalf("docker CLI not on PATH: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Minute)
+	defer cancel()
+
+	dir := generateSandboxProjectWith(ctx, t, map[string]string{
+		"devcontainer.sandbox.nestedRuntime":  "podman",
+		"devcontainer.sandbox.onUnavailable":  "warn",
+		"devcontainer.sandbox.egress.enabled": "true",
+	})
+	image := "uboot-e2e-sandbox-build-egress:" + strings.ReplaceAll(filepath.Base(dir), "/", "-")
+	if out, code := dockerOutput(ctx, t, "build", "-q", "-t", image, filepath.Join(dir, ".devcontainer")); code != 0 {
+		t.Fatalf("docker build of the generated Dockerfile failed:\n%s", out)
+	}
+	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
+
+	runArgs := generatedRunArgs(t, dir)
+	skipIfNestedUsernsRestricted(ctx, t, image, runArgs)
+
+	args := append(append([]string{"run", "--rm"}, runArgs...), image, "bash", "-c", nestedPodmanEgressBuildScript)
+	out, code := dockerOutput(ctx, t, args...)
+	if code != 0 {
+		t.Fatalf("nested podman build behind egress exit %d:\n%s", code, out)
+	}
+	for _, want := range []string{"ALLOWED_RESOLVES", "UNLISTED_BLOCKED", "EGRESS_BUILD_OK"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("output lacks %s:\n%s", want, out)
+		}
+	}
+}
+
 func TestE2E_SandboxDevcontainer_NestedPodman(t *testing.T) {
 	if _, err := exec.LookPath("docker"); err != nil {
 		t.Fatalf("docker CLI not on PATH: %v", err)
