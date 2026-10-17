@@ -61,6 +61,39 @@ func TestHomebrewFormulaFill_Fills(t *testing.T) {
 	}
 }
 
+// slice-v2-homebrew-smoke-haertung (F-5, LH-LESE-002): the formula desc is
+// shown to end users by `brew info`; it is English and ASCII.
+func TestHomebrewFormulaDesc_EnglishASCII(t *testing.T) {
+	raw, err := os.ReadFile("../../scripts/homebrew-formula.rb.tmpl")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var desc string
+	for _, line := range strings.Split(string(raw), "\n") {
+		if rest, ok := strings.CutPrefix(strings.TrimSpace(line), "desc "); ok {
+			desc = strings.Trim(rest, `"`)
+			break
+		}
+	}
+	if desc == "" {
+		t.Fatal("formula template has no desc line")
+	}
+	for _, r := range desc {
+		if r > 0x7f {
+			t.Errorf("desc %q holds the non-ASCII rune %q", desc, r)
+		}
+	}
+	lower := strings.ToLower(desc)
+	for _, german := range []string{"fuer", " und ", "reproduzierbar"} {
+		if strings.Contains(lower, german) {
+			t.Errorf("desc %q holds the German fragment %q", desc, german)
+		}
+	}
+	if !strings.Contains(lower, "reproducible") {
+		t.Errorf("desc %q is not the English text", desc)
+	}
+}
+
 func TestHomebrewFormulaFill_FailsClosed(t *testing.T) {
 	missing := strings.Replace(sumsFull, "u-boot-linux-arm64", "u-boot-linux-armv7", 1)
 	malformed := strings.Replace(sumsFull, "4444444444444444444444444444444444444444444444444444444444444444", "not-a-digest", 1)
