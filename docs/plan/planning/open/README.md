@@ -11,4 +11,4 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| [`slice-v1-sandbox-fallback-ausweisung`](slice-v1-sandbox-fallback-ausweisung.md) | Degradations-Fallbacks Daemon und Egress host-seitig ausweisen (Code) oder [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) präzisieren (CR); Entscheidung beim Projektinhaber |
+| [`slice-cr-sandbox-fallback-ausweisung`](slice-cr-sandbox-fallback-ausweisung.md) | CR: [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) auf das host-seitig Ermittelbare präzisieren (Daemon- und Egress-Fallback gibt das Startscript im Container aus); wartet auf die Wortlaut-Freigabe des Projektinhabers |

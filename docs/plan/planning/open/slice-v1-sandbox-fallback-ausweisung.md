@@ -45,12 +45,12 @@ geschlossen — entweder im Code oder im Vertrag.
 - Die Lücke besteht unabhängig von `--quiet`: Die Option verbirgt nichts, was der Host ermittelt (Ausnahme 2 von
   [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) hält ausgewiesene Fallbacks sichtbar).
 
-**Offene Entscheidung des Projektinhabers (nicht beschlossen):** Zwei Lösungen stehen zur Wahl; der Slice liegt in `open/`, bis sie fällt.
+**Entscheidung des Projektinhabers (2026-10-17): Lösung B.** Zwei Lösungen standen zur Wahl; der Projektinhaber hat „B: Lastenheft präzisieren“ entschieden.
 
-- **Lösung A — Code.** Der Fallback wird host-seitig ermittelbar, etwa meldet das Startscript ihn an den Host (Statusdatei oder Volume), oder
-  `doctor` liest den Container-Zustand; danach erzeugen `init`/`generate`/`up`/`doctor` die Einträge. Kennung bleibt `slice-v1-sandbox-fallback-ausweisung`.
-- **Lösung B — CR.** [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) wird auf das host-seitig Ermittelbare präzisiert; der Slice wird dann als
-  CR unter der Kennung `slice-cr-sandbox-fallback-ausweisung` geführt (dieser Slice geht mit `Gegenstand:` dorthin über).
+- **Lösung A — Code (verworfen).** Der Fallback wird host-seitig ermittelbar, etwa meldet das Startscript ihn an den Host (Statusdatei oder Volume), oder
+  `doctor` liest den Container-Zustand; danach erzeugen `init`/`generate`/`up`/`doctor` die Einträge.
+- **Lösung B — CR (gewählt).** [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) wird auf das host-seitig Ermittelbare präzisiert; der Gegenstand liegt im CR
+  [`slice-cr-sandbox-fallback-ausweisung`](../open/slice-cr-sandbox-fallback-ausweisung.md) (dieser Slice geht mit `Gegenstand:` dorthin über).
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
@@ -71,14 +71,15 @@ geschlossen — entweder im Code oder im Vertrag.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8).
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
 - [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft, im Repo mit Wellen von der nächsten Welle-Closure (auch für Slices ohne Wellen-Zugehörigkeit).
 
 ## 3. Plan (vor Code)
 
-Der Plan hängt an der Entscheidung (§1); er wird beim Übergang `open` → `next` ausgefüllt. Pfad-Kandidaten für Lösung A:
+Entfällt: Der Slice ist ohne Lieferung geschlossen (§7 `Gegenstand:`); der Plan des CR steht in
+[`slice-cr-sandbox-fallback-ausweisung`](../open/slice-cr-sandbox-fallback-ausweisung.md) §3. Die Tabelle bleibt als Stand der verworfenen Lösung A:
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
@@ -89,7 +90,7 @@ Der Plan hängt an der Entscheidung (§1); er wird beim Übergang `open` → `ne
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): Der Projektinhaber entscheidet Code oder CR und priorisiert den Slice.
+**Start:** entfällt; der Slice ist ohne Lieferung geschlossen (§7 `Gegenstand:`). Der Projektinhaber hat am 2026-10-17 den CR gewählt; ein späterer Code-Weg (Lösung A) beginnt als neuer Slice.
 
 **Rückführungen — vorab benannt:**
 
@@ -104,14 +105,20 @@ Steering-Loop-Lerneintrag geschrieben (§7).
 ## 6. Risiken und offene Punkte
 
 - **Lösung A braucht einen Kanal Container → Host:** Eine Statusdatei oder ein Volume ist eine neue Schnittstelle und berührt das Sandbox-Profil
-  ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil): kein Host-Socket). — **Ausgang:** weiter offen bis zur Entscheidung des Projektinhabers; bei Eintritt: Zerlegung je Fallback (§4), dann
-  `eingetreten: <Folge-Slice>`.
+  ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil): kein Host-Socket). — **Ausgang:** entfallen: Lösung A ist verworfen (Entscheidung des Projektinhabers 2026-10-17); ein Kanal Container → Host entsteht nicht.
 - **Lösung B schwächt den Vertrag:** Die Präzisierung auf das host-seitig Ermittelbare nimmt eine Zusage zurück. — **Ausgang:** entfallen: der Projektinhaber entscheidet sie ausdrücklich als CR
-  (`slice-cr-sandbox-fallback-ausweisung`); ein Code-Lauf ohne diese Entscheidung ändert den Vertrag nicht.
+  (`slice-cr-sandbox-fallback-ausweisung`); die Risiken der Änderung führt der CR in seinem §6.
 
 ## 7. Closure-Notiz
 
-Wird bei der Closure gefüllt.
+- **Was hat funktioniert:** — (nichts geliefert; der Gegenstand liegt im CR.) Die Ausgangslage in §1 hielt der Prüfung am Code stand: Der Planungslauf des CR las Startscripte und `doctor` erneut an der Stelle und fand dieselbe Lücke.
+- **Was ging anders als geplant:** Der Slice war für zwei Wege angelegt (Code oder CR) und lag bis zur Entscheidung in `open/`; am 2026-10-17 fiel sie auf den CR.
+- **Gegenstand:** übernommen von [`slice-cr-sandbox-fallback-ausweisung`](../open/slice-cr-sandbox-fallback-ausweisung.md): Lösung B (Lastenheft präzisieren); die Liefer-Punkte der DoD liegen dort.
+- **Steering-Loop-Eintrag:** Ein Slice mit zwei Lösungswegen, dessen Entscheidung beim Projektinhaber liegt, steht bis dahin in `open/` und geht bei der Wahl des CR-Wegs mit `Gegenstand:` an den CR über, statt zwei Pläne parallel zu halten. Gezählt, nicht verkörpert; erstes Auftreten.
+- **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt.
+- **Folge-Slices:** [`slice-cr-sandbox-fallback-ausweisung`](../open/slice-cr-sandbox-fallback-ausweisung.md) — ist eine Datei in `open/`.
+- **Risiken aus §6:** jedes trägt einen Ausgang — siehe §6 (beide entfallen).
+- **Drei Paarungen:** Anker · Folge-Slice · Register nach dem `git mv` zu prüfen.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
