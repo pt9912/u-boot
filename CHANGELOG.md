@@ -20,6 +20,15 @@ this file is the same format applied to u-boot itself.
   [`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil),
   [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging),
   [ADR-0020](docs/plan/adr/0020-drittanbieter-features-im-katalog.md)).
+- Devcontainer features: the built-in catalogue gains `claude-code` (the Claude Code CLI from the Anthropic feature
+  `ghcr.io/anthropics/devcontainer-features/claude-code:1`, a third-party feature that `generate` reports; its install script runs at image build; no options). It needs the
+  `node` feature: on the base image the build fails without Node.js, and `generate` says so. In the sandbox profile it is allowed; the generated
+  `remoteEnv` then carries the reference `${localEnv:ANTHROPIC_API_KEY}` next to `GIT_TOKEN`, never a value, and with the egress restriction the
+  allowlist gains `registry.npmjs.org`, `api.anthropic.com`, `claude.ai`, `platform.claude.com` and `claude.com`
+  (hosts of telemetry, error reports, MCP connectors, updates and plugins are not included; add them to `devcontainer.sandbox.egress.allow`)
+  ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features),
+  [`LH-FA-DEV-009`](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer),
+  [ADR-0020](docs/plan/adr/0020-drittanbieter-features-im-katalog.md)).
 
 ### Changed
 
@@ -46,11 +55,14 @@ this file is the same format applied to u-boot itself.
   `u-boot doctor` that concern a security property of the sandbox profile (credential source, egress restriction, relaxations of the
   Docker daemon) ([`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)).
   `u-boot doctor --quiet` now lists those warn items: a plaintext credential in a project file, an https clone without a runtime
-  token source, the egress restriction together with `nestedRuntime: docker`, and `egress.enabled` without the sandbox profile
+  token source, an active agent feature without the reference of its environment variable, the egress restriction together with
+  `nestedRuntime: docker`, and `egress.enabled` without the sandbox profile
   (the restriction does not apply then). The warn item that `nestedRuntime` has no effect without the sandbox profile is a
   configuration message and stays hidden under `--quiet`; exit codes, `--strict` and `--json` are unchanged.
-  The rest of the contract follows in a later release: the run-time handover of agent credentials with its new `doctor` check and
-  the Claude Code feature.
+  The run-time handover of agent credentials is delivered with the `claude-code` feature (see Added): the existing check
+  `devcontainer.sandbox.credentials` (no new check code) also finds an Anthropic key (prefix `sk-ant-`) or a value of
+  `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` or `CLAUDE_CODE_OAUTH_TOKEN` in a project file, and looks for the
+  `${localEnv:ANTHROPIC_API_KEY}` reference while `claude-code` is active.
 
 ## [0.9.0] - 2026-10-15
 

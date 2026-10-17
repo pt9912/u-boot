@@ -296,7 +296,7 @@ Diese Optionen gelten für jeden Befehl:
 | `--yes` | Rückfragen automatisch bejahen |
 | `--no-interactive` | nie fragen; bei einer nötigen Rückfrage abbrechen |
 | `--json` | maschinenlesbare Ausgabe |
-| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen); `doctor --quiet` zeigt Fehler-Einträge sowie die Einträge der beiden Ausnahmen unten, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; andere Warnungen, etwa zur Konfiguration, entfallen). Vier Ausnahmen bleiben sichtbar: Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`) (die `sshd`-Warnung erzeugt `generate devcontainer`; die übrigen Lockerungen je nach Befehl `init`, `generate`, `up`; in `doctor` die Warn-Einträge zu einem Klartext-Zugangsschlüssel, zur fehlenden Quelle des Tokens bei einem `https`-Clone und zur Egress-Restriktion, auch die Meldung, dass sie ohne Sandbox-Profil nicht greift), Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in der Befehlsausgabe und in `doctor`, soweit vom Host aus ermittelbar), der Compose-Fortschritt von `up` und die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
+| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen); `doctor --quiet` zeigt Fehler-Einträge sowie die Einträge der beiden Ausnahmen unten, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; andere Warnungen, etwa zur Konfiguration, entfallen). Vier Ausnahmen bleiben sichtbar: Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`) (die `sshd`-Warnung erzeugt `generate devcontainer`; die übrigen Lockerungen je nach Befehl `init`, `generate`, `up`; in `doctor` die Warn-Einträge zu einem Klartext-Zugangsschlüssel, zur fehlenden Quelle des Tokens bei einem `https`-Clone, zur fehlenden Referenz auf die Umgebungsvariable eines aktiven Agenten-Features und zur Egress-Restriktion, auch die Meldung, dass sie ohne Sandbox-Profil nicht greift), Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in der Befehlsausgabe und in `doctor`, soweit vom Host aus ermittelbar), der Compose-Fortschritt von `up` und die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
 | `--verbose` | zusätzliche Details; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist |
 | `--debug` | interne Diagnoseausgabe; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist (`--verbose` und `--debug` wirken gleich) |
 | `-v`, `--version` | Version anzeigen |
@@ -605,7 +605,9 @@ Zugangsdaten, Egress).
   einer Warnung. `--strict` ist für CI gedacht.
 - `u-boot --quiet doctor` zeigt nur Fehler, Degradations-Fallbacks und die
   Warnungen zu einer Sicherheitseigenschaft des Sandbox-Profils: Klartext-Token
-  in einer Projektdatei, `https`-Clone ohne Token-Quelle, Egress-Restriktion
+  oder -Schlüssel in einer Projektdatei, `https`-Clone ohne Token-Quelle,
+  aktives Agenten-Feature ohne Referenz auf seine Umgebungsvariable,
+  Egress-Restriktion
   zusammen mit `nestedRuntime: docker` und `egress.enabled` ohne Sandbox-Profil
   (die Beschränkung greift dann nicht). Alle anderen Warnungen entfallen, auch
   die Meldung, dass `nestedRuntime` ohne Sandbox-Profil wirkungslos ist; Kopf-
@@ -758,7 +760,7 @@ devcontainer:
 
 #### Eingebauter Katalog
 
-Ohne weitere Freigabe aktivierbar (`homebrew` ist ein Drittanbieter-Feature: `u-boot generate devcontainer` weist es aus). Die Standardversion ist `1`, bei `homebrew` `2`.
+Ohne weitere Freigabe aktivierbar (`homebrew` und `claude-code` sind Drittanbieter-Features: `u-boot generate devcontainer` weist sie aus). Die Standardversion ist `1`, bei `homebrew` `2`.
 
 | Name | Inhalt |
 |---|---|
@@ -774,6 +776,7 @@ Ohne weitere Freigabe aktivierbar (`homebrew` ist ein Drittanbieter-Feature: `u-
 | `sdkman` | SDKMAN (das offizielle `java`-Feature installiert es; zusammen mit `java` erscheint es einmal) |
 | `sshd` | SSH-Server (offizielles Feature `sshd`, Login-Dienst auf Port 2222 mit Passwort- und Schlüssel-Login, Root-Login erlaubt; siehe [Login-Dienst `sshd`](#login-dienst-sshd-optional)); keine Optionen (`gatewayPorts`, `version` kennt der Katalog nicht) |
 | `homebrew` | Homebrew; **Drittanbieter-Feature** (`meaningful-ooo`, Version `2`): `u-boot generate devcontainer` weist es aus, sein Installationsskript läuft beim Image-Build |
+| `claude-code` | Claude Code CLI; **Drittanbieter-Feature** (`anthropics`, Version `1`): `u-boot generate devcontainer` weist es aus, sein Installationsskript läuft beim Image-Build; braucht das Feature `node` (siehe [Claude Code](#claude-code-optional)); keine Optionen |
 
 #### Externe Feature-Quellen freigeben
 
@@ -908,7 +911,8 @@ konfigurierten Clone-Quelle, siehe unten).
 
 3. Zugangsdaten für `https`-Remotes geben Sie zur Laufzeit mit, nicht in Dateien:
    Setzen Sie vor dem Start des Containers die Umgebungsvariable `GIT_TOKEN` auf
-   dem Host.
+   dem Host. Mit dem Feature `claude-code` gilt dasselbe für `ANTHROPIC_API_KEY`
+   (siehe [Zugangsdaten](#zugangsdaten-git-und-agent)).
 
 #### Ergebnis
 
@@ -1054,12 +1058,19 @@ Standardmäßig erlaubt sind:
 | Feature `sdkman` | `api.sdkman.io`, `broker.sdkman.io`, `repo.maven.apache.org`, `repo1.maven.org` |
 | Feature `sshd` | keine zusätzlichen Hosts |
 | Feature `homebrew` | `formulae.brew.sh`, `ghcr.io`, `pkg-containers.githubusercontent.com` |
+| Feature `claude-code` | `registry.npmjs.org`, `api.anthropic.com`, `claude.ai`, `platform.claude.com`, `claude.com` |
 | Clone-Quelle | der Host von `devcontainer.sandbox.repository` beziehungsweise `origin` |
 | Ihre Ergänzungen | `devcontainer.sandbox.egress.allow` (kleingeschriebene Hostnamen, ohne Schema, Port oder Wildcard) |
 
-- **Wichtig:** Die Hosts des Agenten selbst (zum Beispiel dessen API) kennt
-  `u-boot` nicht. Tragen Sie sie in `egress.allow` ein. Subdomains eines
+- **Wichtig:** Die Hosts eines Agenten kennt `u-boot` nur für das Feature
+  `claude-code` (Zeile in der Tabelle). Die Hosts jedes anderen Agenten (zum
+  Beispiel dessen API) tragen Sie in `egress.allow` ein. Subdomains eines
   erlaubten Namens sind mitgemeint.
+- Für `claude-code` nimmt die Liste nur Hosts auf, die für die Installation
+  und die Anmeldung oder API-Nutzung nötig sind; die Hosts von Telemetrie,
+  Fehlerberichten, MCP-Connectors, Updates und Plugins sind **nicht
+  aufgenommen** und werden bei Bedarf in `egress.allow` ergänzt (Einzelheiten im
+  Abschnitt [Claude Code](#claude-code-optional)).
 - Die Features `sdkman` und `homebrew` bringen nur ihre eigenen Hosts mit. Die
   Download-Hosts einzelner SDKMAN-Kandidaten (zum Beispiel `services.gradle.org`
   für Gradle, `github.com` und `release-assets.githubusercontent.com` für
@@ -1109,22 +1120,93 @@ diese Warnung nicht.
   auf `yes` zu; `u-boot` ändert das nicht. Der Port lauscht im Container auf allen
   Schnittstellen. Die Warnung nennt Passwort- und Schlüssel-Login und den erlaubten Root-Login. Das Profil begrenzt Schaden und ist keine Isolationsgrenze.
 
-#### Git-Zugangsdaten
+#### Claude Code (optional)
+
+```bash
+u-boot config set devcontainer.features.node.enabled true
+u-boot config set devcontainer.features.claude-code.enabled true
+u-boot generate devcontainer
+```
+
+Das Feature `claude-code` installiert die Claude Code CLI aus dem Feature von
+Anthropic (`ghcr.io/anthropics/devcontainer-features/claude-code`, Tag `1`, zum
+Messzeitpunkt Version 1.0.5). Es ist ein **Drittanbieter-Feature**: `u-boot
+generate devcontainer` weist es aus (Herausgeber `anthropics`; die Meldung
+entfällt unter `--quiet`), und sein Installationsskript läuft beim Image-Build.
+Im Sandbox-Profil ist es erlaubt. `u-boot` startet den Agenten nicht und setzt
+keinen Berechtigungsmodus.
+
+- **Das Feature `node` ist nötig:** Das Feature installiert die CLI mit `npm`.
+  Gemessen auf dem Basis-Image `mcr.microsoft.com/devcontainers/base:debian`
+  (Debian trixie) bricht der Build ohne Node.js ab, weil der Versuch des Features,
+  Node.js selbst nachzuinstallieren, Node.js ohne `npm` liefert. `u-boot generate
+  devcontainer` weist darauf hin, wenn `claude-code` ohne `node` aktiv ist.
+- **Zugangsdaten:** Im Sandbox-Profil trägt `devcontainer.json` bei aktivem Feature
+  die Referenz `"ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"` neben
+  `GIT_TOKEN`, nie einen Wert. Setzen Sie `ANTHROPIC_API_KEY` in der Host-Umgebung,
+  bevor Sie den Container starten (Quelle: Dokumentation von Anthropic, Stand
+  2026-10-17: der Schlüssel hat Vorrang vor dem Login mit einem Abonnement). Ist die
+  Variable auf dem Host nicht gesetzt, bleibt sie im Container leer; die CLI
+  behandelt das wie einen fehlenden Schlüssel (gemessen: „Not logged in“).
+  `u-boot` reicht nur diese eine Variable durch; andere Wege (etwa ein Token mit
+  `CLAUDE_CODE_OAUTH_TOKEN` oder ein Login mit `/login` im Container) gehören nicht zur
+  Zusage und sind nicht gemessen. Wohin ein Login im Container seine Zugangsdaten
+  schreibt, ist nicht gemessen; das Home von `vscode` liegt nicht im
+  Workspace-Volume (gemessen: das einzige Volume des Containers ist
+  `/workspaces/<projekt>`).
+- **Was beim Start entsteht (gemessen):** Die CLI legt `~/.claude` und
+  `~/.claude.json` im Home von `vscode` an; mit dem Schlüssel aus der Umgebung
+  stand der Schlüssel in keiner dieser Dateien. Das Feature bringt kein `mounts`,
+  `capAdd`, `privileged` und keinen Entrypoint mit (`installsAfter`: das Feature
+  `node`), und im Image gibt es kein `~/.claude`; das Feature installiert außerdem
+  ein Firewall-Skript `/usr/local/bin/init-firewall.sh`, das **nicht ausgeführt wird**.
+- **Egress:** Mit der Beschränkung erlaubt `u-boot` für `claude-code` die Hosts der
+  Tabelle oben: `registry.npmjs.org` (npm-Paket der CLI), `api.anthropic.com`
+  (gemessen: der API-Host, den die CLI zur Laufzeit abfragt) sowie `claude.ai`,
+  `platform.claude.com` und `claude.com` (Anmeldung; laut Dokumentation von
+  Anthropic, nicht gemessen: ein echter Login ist ohne Konto nicht messbar).
+  Mit dem generierten Allowlist-Container erreichte die CLI die API (Antwort
+  „Invalid API key“ auf einen absichtlich falschen Schlüssel), `example.com`
+  blieb gesperrt.
+  **Nicht aufgenommen** (optional, laut Dokumentation von Anthropic): Telemetrie und
+  Fehlerberichte (`http-intake.logs.us5.datadoghq.com`,
+  `browser-intake-us5-datadoghq.com`; gemessen wird `http-intake.logs.us5.datadoghq.com`
+  angefragt, sobald ein Schlüssel verwendet wird; abschaltbar mit
+  `DISABLE_TELEMETRY` und `DISABLE_ERROR_REPORTING`), MCP-Connectors
+  (`mcp-proxy.anthropic.com`), Update und Plugins (`downloads.claude.ai`,
+  `storage.googleapis.com`, `github.com`, `raw.githubusercontent.com`). `github.com` und
+  `raw.githubusercontent.com` sind ohnehin in der Basisliste. Wer einen dieser Hosts
+  braucht, trägt ihn in `devcontainer.sandbox.egress.allow` ein. Im Test lief die
+  CLI mit gesperrtem Telemetrie-Host.
+- **Grenzen der Messung:** Dev-Container-CLI 0.89.0, Colima, arm64, Basis-Image
+  `mcr.microsoft.com/devcontainers/base:debian`, Claude Code 2.1.302, Feature `1.0.5`;
+  der Pin `1` schwimmt, spätere Versionen können abweichen. Ein echter Login und
+  eine echte Anfrage mit gültigem Schlüssel wurden nicht ausgeführt.
+
+#### Zugangsdaten (Git und Agent)
 
 Zugangsdaten stehen **nie** im Image, im Volume, in `u-boot.yaml` oder in einer
 erzeugten Datei:
 
 - `devcontainer.json` enthält nur die Referenz
   `"GIT_TOKEN": "${localEnv:GIT_TOKEN}"`. Setzen Sie `GIT_TOKEN` in der
-  Host-Umgebung, bevor Sie den Container starten.
+  Host-Umgebung, bevor Sie den Container starten. Mit dem Feature `claude-code`
+  kommt `"ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"` hinzu; ohne das
+  Feature bleibt die Datei unverändert.
 - Ein Credential-Helper im Image liefert `$GIT_TOKEN` an `git` (nur für
   `https`-Remotes; bei `ssh` gibt es keinen Schlüssel im Container).
 - Empfohlen: **kurzlebige, auf das Repository begrenzte Tokens**, nie ein
   privater Schlüssel im Container, und **Branch-Protection** im Remote, damit ein
   kompromittierter Agent nicht auf geschützte Branches schreiben kann.
-- `u-boot doctor` warnt vor möglichen Klartext-Tokens in `u-boot.yaml`,
-  `compose.yaml`, `.env.example` und `.devcontainer/*` sowie vor einer fehlenden
-  Token-Quelle bei einem `https`-Clone.
+- `u-boot doctor` warnt vor möglichen Klartext-Tokens und -Schlüsseln in `u-boot.yaml`,
+  `compose.yaml`, `.env.example` und `.devcontainer/*` (auch Anthropic-Schlüssel
+  mit dem Präfix `sk-ant-`, nach dem Ausdruck, den die Claude Code CLI selbst zum
+  Erkennen eines Schlüssels in Text verwendet, sowie ein Wert für
+  `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` oder `CLAUDE_CODE_OAUTH_TOKEN`), vor einer
+  fehlenden Token-Quelle bei einem `https`-Clone und, bei aktivem Feature
+  `claude-code`, vor einer fehlenden Referenz auf `ANTHROPIC_API_KEY` in
+  `devcontainer.json`. Die Prüfung liest nur Projektdateien; sie sieht weder die
+  Umgebung des Hosts noch einen Schlüssel in einer anderen Datei.
 
 #### Mehrere Instanzen
 
@@ -1317,12 +1399,13 @@ aus, damit die Dateien in `.devcontainer/` zur Projektdatei passen.
 |---|---|
 | `DOCKER_HOST` | Adresse des Docker- oder Podman-Daemons |
 | `GIT_TOKEN` | Zugangsdaten für `https`-Remotes im Sandbox-Devcontainer (nur zur Laufzeit, auf dem Host gesetzt) |
+| `ANTHROPIC_API_KEY` | API-Schlüssel für das Feature `claude-code` im Sandbox-Devcontainer (nur zur Laufzeit, auf dem Host gesetzt; `devcontainer.json` trägt nur die Referenz) |
 
 ### Ausführlichkeit der Ausgabe
 
 | Option | Wirkung |
 |---|---|
-| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen); `doctor --quiet` zeigt Fehler-Einträge sowie die Einträge der beiden Ausnahmen unten, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; andere Warnungen, etwa zur Konfiguration, entfallen). Vier Ausnahmen bleiben sichtbar: Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`) (die `sshd`-Warnung erzeugt `generate devcontainer`; die übrigen Lockerungen je nach Befehl `init`, `generate`, `up`; in `doctor` die Warn-Einträge zu einem Klartext-Zugangsschlüssel, zur fehlenden Quelle des Tokens bei einem `https`-Clone und zur Egress-Restriktion, auch die Meldung, dass sie ohne Sandbox-Profil nicht greift), Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in der Befehlsausgabe und in `doctor`, soweit vom Host aus ermittelbar), der Compose-Fortschritt von `up` und die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
+| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen); `doctor --quiet` zeigt Fehler-Einträge sowie die Einträge der beiden Ausnahmen unten, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; andere Warnungen, etwa zur Konfiguration, entfallen). Vier Ausnahmen bleiben sichtbar: Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`) (die `sshd`-Warnung erzeugt `generate devcontainer`; die übrigen Lockerungen je nach Befehl `init`, `generate`, `up`; in `doctor` die Warn-Einträge zu einem Klartext-Zugangsschlüssel, zur fehlenden Quelle des Tokens bei einem `https`-Clone, zur fehlenden Referenz auf die Umgebungsvariable eines aktiven Agenten-Features und zur Egress-Restriktion, auch die Meldung, dass sie ohne Sandbox-Profil nicht greift), Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in der Befehlsausgabe und in `doctor`, soweit vom Host aus ermittelbar), der Compose-Fortschritt von `up` und die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
 | `--verbose` | zusätzliche Details; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist |
 | `--debug` | interne Diagnoseausgabe; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist (`--verbose` und `--debug` wirken gleich) |
 
@@ -1784,7 +1867,7 @@ Reparaturvorschlag: `command` (der Befehl zum Kopieren), `action` und `argument`
 | `devcontainer.features.drift` | Features in `u-boot.yaml` und `devcontainer.json` stimmen überein |
 | `devcontainer.sandbox.runtime` | Sandbox: verschachtelte Runtime (Podman oder Docker) passend konfiguriert |
 | `devcontainer.sandbox.egress` | Sandbox: Internet-Beschränkung passend konfiguriert |
-| `devcontainer.sandbox.credentials` | Sandbox: keine Klartext-Zugangsdaten, Token-Quelle vorhanden |
+| `devcontainer.sandbox.credentials` | Sandbox: keine Klartext-Zugangsdaten (Git-Token, Anthropic-Schlüssel), Quelle der Git- und Agenten-Zugangsdaten vorhanden |
 
 ### Unterstützte Plattformen
 
