@@ -1,0 +1,125 @@
+# Slice V1: Release-Cut `v0.10.0`
+
+**Lifecycle:** Der Zustand dieses Slice ist das Verzeichnis, in dem diese
+Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
+wechselt nur durch `git mv`.
+
+**Welle:** v0.10.0 (Devcontainer-Features `sshd` und Claude Code, `podman build` im Sandbox-Devcontainer, Verbosity-Vertrag; Release-Zuordnung des Projektinhabers vom 2026-10-17). Der Release trägt alles, was seit dem Tag `v0.9.0` auf `main` liegt: [`welle-devcontainer-sshd-claude-code`](../done/welle-devcontainer-sshd-claude-code.md), [`welle-cli-verbosity`](../done/welle-cli-verbosity.md), [`welle-macos-verifikation`](../done/welle-macos-verifikation.md) und [`welle-harness-wartung`](../done/welle-harness-wartung.md) (ohne Produktänderung); die Welle-Dateien selbst bleiben unverändert in `done/`.
+
+**Bezug:** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features),
+[`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil),
+[`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
+[`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer),
+[`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging),
+[ADR-0020](../../adr/0020-drittanbieter-features-im-katalog.md),
+[ADR-0021](../../adr/0021-podman-build-im-sandbox-devcontainer.md),
+[ADR-0007](../../adr/0007-distributionswege-ghcr.md),
+[ADR-0016](../../adr/0016-homebrew-distribution-per-tap.md),
+[ADR-0017](../../adr/0017-linux-pakete-nfpm.md). Ablauf:
+[`docs/maintainer/releasing.md`](../../../maintainer/releasing.md).
+
+**Berührte Spec-Stellen:** — (Spec-Version ≠ Release-Version; Lastenheft 0.12.0 liefern die Wellen, dieser Slice ändert `spec/` nicht).
+
+**Verantwortlich:** pt9912
+
+**Autor:** pt9912. **Datum:** 2026-10-17.
+
+---
+
+## 1. Ziel und Abgrenzung
+
+**Ziel:** `v0.10.0` liefert als Minor-Release die Katalog-Features `sshd` und `claude-code`, `podman build` im Sandbox-Devcontainer (mit Messstand), den Verbosity-Vertrag von `--quiet` und die Rücknahme der Docker-Desktop-Zusage: GHCR-Image, Binaries, Pakete, Homebrew-Formel.
+
+**Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
+
+- **Push und Tags durch den Implementer.** Push von `main`, Tag `v0.10.0-rc.1`, Tag `v0.10.0` und jedes Löschen eines Tags oder Release sind extern wirksam und lassen sich nicht sauber zurücknehmen ([`releasing.md`](../../../maintainer/releasing.md) Zweck). Der Implementer führt sie nicht aus; jede dieser Aktionen braucht die ausdrückliche Freigabe des Projektinhabers, einzeln (§3, Reihenfolge der Maintainer-Aktionen).
+- **Entscheidungen zu L-4 und L-5 des Validators** (sshd-Rezept im Handbuch; Standardprofil ohne Warnung) — der Slice vermerkt sie nur (§6); beide entscheidet der Projektinhaber, ein Handbuch-Rezept wäre neuer Inhalt außerhalb eines Cuts.
+- **Änderung des CI-Aufrufs** (`-v` oder Ähnliches für `go test -tags docker`) — das wäre eine Gate-Änderung ([`AGENTS.md`](../../../../AGENTS.md) §3.6); der Projektinhaber hat am 2026-10-17 „keine Workflow-Änderung“ entschieden (Beobachtung [`BEO-E2E/ci-ueberspringt-nested-podman-build`](../observations/BEO-E2E/ci-ueberspringt-nested-podman-build/observation.md)).
+- **Die beiden Slices in `open/`** ([`slice-v1-sandbox-fallback-ausweisung`](slice-v1-sandbox-fallback-ausweisung.md), [`slice-v1-cli-dry-run-would-formulierung`](slice-v1-cli-dry-run-would-formulierung.md)) — beide warten auf eine Entscheidung des Projektinhabers und gehören zu keinem Release-Inhalt; sie bleiben Bestand.
+- **Die Docker-Desktop-Messung und der macOS-Smoke im Tap zur Formel 0.10.0** — Docker Desktop wird nicht zugesagt (Lastenheft 0.7.0, [`welle-macos-verifikation`](../done/welle-macos-verifikation.md)); die Tap-Verifikation führt der Smoke-Workflow im Tap, die Erprobung auf dem Mac der Maintainer (§3, M8).
+
+## 2. Definition of Done
+
+- [ ] `v0.10.0` ist getaggt, der `publish`-Lauf ist grün (GHCR `:0.10.0` und `:latest`, sechs Binaries, vier Pakete, `SHA256SUMS`, `u-boot.rb`, Paket-Smoke, Job `tap`); ein Vorab-Tag `v0.10.0-rc.1` hat die Kette vorher ohne `:latest`, Formel und Tap-Commit geprobt und ist aufgeräumt.
+- [ ] `make gates`, `make ci`, `make test-docker` und `make fullbuild` sind vor dem Tag grün (oder der Grund für ein nicht lauffähiges Target steht im Handoff), und der letzte CI-Lauf auf dem Tag-Commit ist grün.
+- [ ] Doku-Update: CHANGELOG, READMEs, Handbuch und Roadmap tragen `v0.10.0`; die Aussage zu `podman build` nennt den Messstand; die Doppelung des `--quiet`-Klammersatzes im Handbuch ist durch einen Verweis ersetzt.
+- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`) — kein Self-Review.
+- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [ ] Beobachtungs-Register fortgeschrieben oder „keine Beobachtung angefallen“ in §7 notiert.
+- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
+- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
+
+## 3. Plan (vor Code)
+
+Jede Aussage in dieser Tabelle ist an der genannten Stelle gelesen (Stand 2026-10-17, [`AGENTS.md`](../../../../AGENTS.md) §3.10). Zeilennummern nennen den Fundort beim Schreiben; der Implementer sucht sie vor der Änderung neu. Vor dem Handoff (nach der letzten Fix-Runde) gleicht er die Tabelle gegen `git diff --stat` ab.
+
+| Datei / Komponente | Änderungs-Art | Begründung (Fundstelle) |
+|---|---|---|
+| `CHANGELOG.md` | update | `:12` `## [Unreleased]` (Inhalt `:14`–`:82`) → leerer Anker; Inhalt unter `## [0.10.0] - <Tag-Datum>` (Tag-Datum: vorläufig 2026-10-17, vor dem Tag mit `date +%F` abgleichen) mit Lead-Absatz im Stil von `:86` („Ninth release. **…**“) — also „Tenth release.“; der Lead nennt alle vier Inhalte des Release (Features `sshd`/`claude-code`, `podman build` mit Messstand, Verbosity-Vertrag, Docker-Desktop-Rücknahme), nicht nur die Welle. Compare-Links `:1251` `[Unreleased]: …/compare/v0.9.0...HEAD` → `v0.10.0...HEAD`, neue Zeile `[0.10.0]: …/compare/v0.9.0...v0.10.0`. **Glätten:** `:70`–`:71` zählt unter den `doctor`-Warn-Einträgen „relaxations of the Docker daemon“ auf; die Menge ist leer (V-4 von [`slice-v1-cli-quiet-sicherheitswarnungen`](../done/slice-v1-cli-quiet-sicherheitswarnungen.md)), `:74`–`:78` nennt die fünf tatsächlichen Einträge → Aufzählung auf „credential source and egress restriction“ kürzen und gegen `:74`–`:78` abgleichen. „follow in a later release“ steht in `[Unreleased]` nicht (gesucht, kein Treffer). `podman build`-Eintrag `:38`–`:48`: Messstand ergänzen (siehe Aussage unten). Prüfen, ob die englische Formel-/Paketbeschreibung (`packaging/nfpm.yaml`, `scripts/homebrew-formula.rb.tmpl`: Diff gegen `v0.9.0` zeigt `desc` und nfpm-Beschreibung nun Englisch, `version`-Zeile entfernt) eine Zeile braucht ([`LH-LESE-002`](../../../../spec/lastenheft.md#lh-lese-002--sprache)); sonst im Review begründen. |
+| `cmd/uboot/main.go` | update | `:43` `var version = "0.9.0-dev"` → `0.10.0-dev`. Der Beispielaufruf im Kommentar `:41` (`-X main.version=v0.2.0`) ist kein Versionsstand und bleibt. |
+| `repo.mk` | update | `:51` und `:54` (Kommentar „`var version = "0.9.0-dev"`“, „"0.9.0-dev" binary“) und `:55` `VERSION ?= 0.9.0-dev` → `0.10.0-dev`. Das `Makefile` trägt keinen Versionsstring mehr (`git grep 0.9.0-dev` am 2026-10-17: nur `cmd/uboot/main.go`, `repo.mk`, `Dockerfile`); die frühere Cut-Tabelle nannte es noch. |
+| `Dockerfile` | update | `:35` und `:37` (Kommentar) und `:39` `ARG UBOOT_VERSION=0.9.0-dev` → `0.10.0-dev`. |
+| `README.md` | update | Status-Block `:10`–`:13` (`v0.9.0` released …; die Zusammenfassung nennt `sshd`, `claude-code`, `podman build`, `--quiet`-Vertrag; Datum = Tag-Datum), `:105` `VERSION=0.9.0`, neue Zeile in der Releases-Tabelle nach `:206` (die Tabelle ist nicht nach Version sortiert: `v0.9.0` steht vor `v0.5.0`; die neue Zeile steht unmittelbar nach der `v0.9.0`-Zeile), Link `releases/tag/v0.10.0`. Feature-Zahl `:158`–`:159` „13 built-in features“ gegen `featureCatalogue()` (`internal/hexagon/application/devcontainer_features.go:175`, 13 Schlüssel: `git`, `docker-cli`, `node`, `java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, `python`, `homebrew`, `sdkman`, `sshd`, `claude-code`) — stimmt, nur erneut abgleichen. Keine Aussage zu Lastenheft-Versionsstand (`grep "Lastenheft 0\."`: kein Treffer). |
+| `README.de.md` | update | gleiches Muster: `:11`–`:14` Status, `:108` `VERSION=0.9.0`, Tabellenzeile nach `:210`, Feature-Zahl `:161`–`:162` („13 Built-in-Features“). |
+| `docs/user/benutzerhandbuch.md` | update | `:4` `Software-Version: v0.9.0`, `:5` `Stand: 2026-10-15` (→ Tag-Datum), `:80` Beispielausgabe `u-boot version 0.9.0`, `:106` `download/v0.9.0`, `:133` `VERSION=0.9.0`, `:1940` „beschreibt `u-boot` v0.9.0“. **Doppelung:** die `--quiet`-Zeile steht wortgleich zweimal (`:299` in „Allgemeine Optionen“ und `:1458` in „Ausführlichkeit der Ausgabe“; geprüft mit `diff`: identisch; der Auftrag der Closure nannte `~1417`, die Datei ist seither gewachsen). Der überlange Klammersatz („in der Befehlsausgabe erzeugt nur `generate devcontainer` …; in `doctor` …“) wird gekürzt; die Einzelheiten stehen ohnehin in 4.7 (`:606`–`:615`) und beim `sshd`-Login-Dienst (`:1135`); eine der beiden Stellen (`:1458`) verweist auf die andere statt zu wiederholen (Rang-Zeiger, [`AGENTS.md`](../../../../AGENTS.md) §3.7). **`podman build`:** Der Abschnitt `:973`–`:1010` (sechs Lockerungen, „Gemessen“-Absatz `:996`–`:1006`) und „Grenzen“ `:1275` tragen den Messstand schon teilweise; angleichen an die Aussage unten. Katalog-Tabelle `:761`–`:778` (13 Zeilen) geprüft, stimmt. Kein Lastenheft-Versionsstand im Handbuch (`grep`: kein Treffer); das Lastenheft trägt `0.12.0` (`spec/lastenheft.md:9`), das ändert dieser Slice nicht. |
+| `docs/maintainer/releasing.md` | prüfen, nur bei Abweichung ändern | Gelesen §1–§8. Drei Aussagen stimmen nicht mehr: (a) `:54`–`:55` „zuletzt [`slice-v1-release-cut-v0.5.0`]“ — der letzte Cut ist `v0.9.0`, nach diesem Cut `v0.10.0`; (b) `:75` Kommentar „lint + test + coverage-gate + docs-check“ — `harness/README.md` (§Sensors, `make gates`) nennt zusätzlich `baseline-verify`; (c) `:66` „die Welle als aktiv führen“ — der Roadmap-Block heißt „Offene Wellen“ (`roadmap.md:14`). Berichtigen; keine neue Prozessaussage. §5 bleibt (rc.1 ist dort „optional“; dieser Cut nimmt ihn, §3 Reihenfolge). |
+| `docs/plan/planning/in-progress/roadmap.md` | update | Roadmap-Konvention [`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md): Release-Versionen sind Wellen; für Release-Cuts gibt es keine Welle-Datei (`MR-003`, Rückwirkende Welle-Dateien). **Beim Start** (Slice nach `in-progress/`): `:20` „Nichts in Arbeit.“ entfällt (Ruhe-Marker gilt nur ohne Slice in `in-progress/`, `.d-check.yml` `planning`), stattdessen ein Zeiger auf diesen Slice im Block „Offene Wellen“ (Muster: `4a39e7e` bei v0.9.0). **Nach dem Tag:** Marker zurück, neue Zeile in „Abgeschlossene Wellen“ nach `:92`: `v0.10.0 (…)` mit Datum und Verweis auf diesen Slice als Detailquelle, Tag-Commit-Hash erst nach dem Tag; `:3` „Letzte Änderung“. Die Zuordnung der Welle [`welle-devcontainer-sshd-claude-code`](../done/welle-devcontainer-sshd-claude-code.md) (Zeile `:92`, Release „offen“ in deren §5) steht in der neuen Zeile; die Welle-Datei in `done/` bleibt unberührt (nur korrigierende Änderungen erlaubt). |
+| `docs/plan/planning/in-progress/README.md` | update | Bestandszeile für diesen Slice beim Start (Muster `4a39e7e`), beim Move nach `done/` entfernen. |
+| `docs/plan/planning/open/README.md` | update | Bestandszeile für diesen Slice (mit diesem Plan-Commit gesetzt; beim Move nach `next/` entfernen). |
+| `docs/plan/planning/observations/BEO-E2E/ci-ueberspringt-nested-podman-build/` | update, falls ein CI-Befund vorliegt | `state.md` nennt als Trigger den ersten CI-Lauf nach dem Push. Der Aufruf `go test -tags docker ./...` (`repo.mk:132`) läuft ohne `-v`: ein `t.Skip` (`internal/e2e/sandbox_devcontainer_docker_test.go:298`) ist im Lauf-Log **nicht** von einem Pass zu unterscheiden. Der Implementer legt nur dann eine Evidence-Datei an, wenn das Log etwas Belastbares zeigt; sonst bleibt die Beobachtung offen und der Slice nennt das (§6). |
+| `docs/reviews/<Datum>-release-cut-v0.10.0.md` | neu | Review-Report des Cuts (Reviewer-Rolle, kein Self-Review); Kennungen in Tabellenzellen ohne Backticks im Linktext, `make docs-check` vor dem Push (Lehre aus [`slice-v1-release-cut-v0.8.0`](../done/slice-v1-release-cut-v0.8.0.md) §7). |
+| `packaging/` (inkl. `packaging/homebrew-tap/`), `scripts/homebrew-formula*` | nur prüfen | `grep "0\.9\.\|0\.10"` über `packaging`, `scripts`, `tools`: kein Versionsbezug. Die Formel bekommt Tag und Digests zur Laufzeit aus `SHA256SUMS` (`scripts/homebrew-formula.rb.tmpl`-Kommentar). Keine Änderung erwartet. |
+
+**Aussage zu `podman build` (Messstand) — Soll, in CHANGELOG, Handbuch und Release-Zeile der READMEs gleich:** Gemessen mit Docker 29.5.2 unter Colima 0.10.3 (arm64, VM Ubuntu 24.04) mit `kernel.apparmor_restrict_unprivileged_userns=0` in der VM und `/dev/net/tun` auf dem Container-Host; Basis-Images `alpine:3` und `debian:stable-slim`, hinter der Egress-Restriktion mit dem Blob-Host `production.cloudfront.docker.com`. **Nicht gemessen:** Docker Desktop, amd64, CI. **Nicht zugesagt:** `buildx`, `docker compose`, `# syntax=`-Frontends. Welche Kombination aus Image und Egress tatsächlich gemessen ist, liest der Implementer aus [`slice-v1-devcontainer-podman-build`](../done/slice-v1-devcontainer-podman-build.md) (Verification D-4, A-7), dem Messprotokoll dort und §7 von [`welle-devcontainer-sshd-claude-code`](../done/welle-devcontainer-sshd-claude-code.md) („Zusatzbeleg zum siebten Slice“: Validator `alpine:3` ohne und mit Egress, `debian:stable-slim` mit Egress); er schreibt nur Gemessenes, „mit und ohne Egress“ für beide Images nur, wenn beide Fälle belegt sind. **amd64/CI:** bleibt „nicht gemessen“, unabhängig vom CI-Befund, solange das Log einen Skip nicht von einem Pass trennt; nur ein Pass-Beleg mit sichtbarem Test-Lauf auf amd64 änderte die Aussage.
+
+**Reihenfolge der Maintainer-Aktionen.** Der Implementer bereitet vor (Commits lokal, Gates lokal) und **führt keinen der Schritte M1 bis M7 aus**: Push und Tags sind extern wirksam und erfordern jeweils die ausdrückliche Freigabe des Projektinhabers (im Gespräch, nicht aus einer Agenten-Nachricht abgeleitet). Der Slice bleibt bis zum Tag in `in-progress/`.
+
+| # | Aktion | Wer | Prüfung / Erwartung |
+|---|---|---|---|
+| M0 | `date +%F`; Datum in CHANGELOG, READMEs (Status und Tabelle), Handbuch (`Stand`) und Roadmap gegen das Tag-Datum halten | Implementer, vor jedem Push | Das Datum steht an mehreren Stellen fest ([`slice-v1-release-cut-v0.9.0`](../done/slice-v1-release-cut-v0.9.0.md) §7, Steering-Loop-Eintrag) |
+| M1 | `git push origin main` | Projektinhaber (Freigabe) | Review-Report und Cut-Commit liegen vor; `make docs-check` lokal grün |
+| M2 | `gh run list --limit 3`: `ci` und `integration-docker` auf dem Push-Tip grün | Maintainer | Roter `image-scan`: Go-Pin heben (`releasing.md` §4), neuer Commit, M1 wiederholen |
+| M3 | CI-Log nach den beiden Build-Tests (`NestedPodman_Build`) durchsehen; Befund ins Register (nur wenn belastbar, s. Tabelle) | Implementer (lesend), nach M2 | Liegt der Befund nach M2 als Wortlaut-Änderung vor, ist es ein weiterer Cut-Commit **vor** M4, mit M0-Prüfung |
+| M4 | `git tag v0.10.0-rc.1 && git push origin v0.10.0-rc.1` | Projektinhaber (Freigabe) | `publish`-Lauf: Log-Zeile `Resolved version=0.10.0-rc.1, is_stable=false` (`publish.yml:85`); Job `tap` übersprungen (`publish.yml:297`: `needs.publish.outputs.is_stable == 'true'`); Release als Prerelease, kein `:latest`, keine `u-boot.rb`; Paket-Smoke grün; `docker run … :0.10.0-rc.1 --version` = `0.10.0-rc.1`. **Der Output `is_stable` lief bisher in keinem echten Tag-Lauf** (eingeführt in `82677f1`, nach `v0.9.0`); rc.1 beweist nur den Zweig `false` |
+| M5 | rc.1 aufräumen: `gh release delete v0.10.0-rc.1`, `git push --delete origin v0.10.0-rc.1`, lokal `git tag -d v0.10.0-rc.1`, GHCR-Tag `0.10.0-rc.1` entfernen (`releasing.md` §5) | Projektinhaber (Freigabe je Löschung) | Löschen ist nicht umkehrbar; GHCR-Löschung braucht ein Token mit Paket-Löschrecht (Risiko §6) |
+| M6 | `git switch main && git pull --ff-only`, `git tag v0.10.0` auf dem in M2 geprüften Commit, `git push origin v0.10.0` | Projektinhaber (Freigabe) | Der Tag-Commit ist der Commit mit grünem CI; danach wird der Tag nicht verschoben (`releasing.md` §8) |
+| M7 | `releasing.md` §6: `gh run watch`; `gh release view v0.10.0 --json assets`; `docker run --rm ghcr.io/pt9912/u-boot:0.10.0 --version`; `:latest` gleicher Digest; Job `tap` grün | Maintainer | Erwartet: zwölf Assets (sechs Binaries, vier Pakete, `SHA256SUMS`, `u-boot.rb`), kein Prerelease; **erster echter Lauf mit `is_stable=true`:** `tap` läuft, nicht übersprungen |
+| M8 | Auf einem Mac: `brew tap pt9912/u-boot`, `brew trust pt9912/u-boot`, `brew install u-boot`, `u-boot --version` = `0.10.0`; Smoke-Lauf im Tap abwarten | Projektinhaber | `brew audit --strict --online` gatet den Smoke; ein Befund färbt ihn rot (`releasing.md` §6) |
+| M9 | Nacharbeit (`releasing.md` §7): Roadmap-Zeile mit Tag-Hash und Datum, Closure-Notiz, Verification Evidence, `git mv` nach `done/` | Planner (Closure), Implementer (Roadmap) | Closure erst nach M7 |
+
+## 4. Trigger
+
+**Start** (`next` → `in-progress`): [`welle-devcontainer-sshd-claude-code`](../done/welle-devcontainer-sshd-claude-code.md) und die drei anderen Wellen seit `v0.9.0` sind geschlossen (Closure in `done/`), die Zuordnung zu `v0.10.0` hat der Projektinhaber am 2026-10-17 bestimmt, kein anderer Slice liegt in `in-progress/` (WIP-Limit 1; die beiden Slices in `open/` sind nicht eingeplant). Der Weg ist `open/` → `next/` → `in-progress/` per reinem `git mv` je Schritt (`make slice-mv SLICE=slice-v1-release-cut-v0.10.0 TO=<next|in-progress>`); der Roadmap-Marker (§3) geht in einen eigenen Commit direkt nach dem Move, beide im selben Push.
+
+**Rückführungen — vorab benannt:**
+
+- `in-progress` → `next` (zu groß, zurück zur Zerlegung): nicht vorgesehen; der Cut ist ein Commit plus Tags.
+- `in-progress` → `open` (blockiert): ein roter `image-scan` oder CI-Lauf (Go-Pin heben, `releasing.md` §4), ein fehlschlagender rc.1- oder `publish`-Lauf, dessen Ursache einen Patch-Release oder eine Korrektur der Pipeline vor dem stabilen Tag braucht (ein veröffentlichter Tag wird nicht verschoben), oder ein Befund des Reviewers, der eine Produktänderung verlangt (dann ein eigener Slice).
+
+## 5. Closure-Trigger
+
+DoD vollständig: stabiler Tag gesetzt (M6), `publish`- und Tap-Lauf kontrolliert (M7, `releasing.md` §6), rc.1 aufgeräumt (M5), Closure-Notiz mit Tag-Hash, Lauf-IDs und Steering-Loop-Eintrag, Verification Evidence (Verifier, getrennt von Implementer und Reviewer). Der Slice geht **erst nach dem Tag** nach `done/` (Rollenreihenfolge: Implementer → Reviewer → Verifier → Maintainer-Aktionen M1 bis M8 → Closure durch den Planner); der Ruhe-Marker der Roadmap steht erst dann wieder.
+
+## 6. Risiken und offene Punkte
+
+Der Ausgang jedes Risikos wird bei der Closure festgeschrieben; vorgesehen ist je Zeile unten angegeben.
+
+- Der `publish`-Lauf scheitert, weil die Pipeline seit `v0.9.0` geändert ist (`is_stable` als Job-Output und Bedingung des Jobs `tap`, Formel ohne `version`-Zeile mit vier Digests aus `SHA256SUMS`, englische Beschreibung) und kein stabiler Tag-Lauf sie bisher ausführte — **Ausgang:** offen bis M4/M7; vorgesehen „entfallen: rc.1 und `publish`-Lauf `<ID>` grün“, sonst „eingetreten“ mit Patch-Release (der Tag wird nicht verschoben).
+- Die Aussage zu amd64 und CI ist nicht belegbar: `go test -tags docker ./...` (`repo.mk:132`) läuft ohne `-v`, ein Skip der beiden Build-Tests ist im Log nicht von einem Pass zu trennen — **Ausgang:** weiter offen: → [`BEO-E2E/ci-ueberspringt-nested-podman-build`](../observations/BEO-E2E/ci-ueberspringt-nested-podman-build/observation.md); die Release-Aussage bleibt „amd64 und CI nicht gemessen“; ob der Trigger der Beobachtung mit dem heutigen Aufruf je auslösen kann, ist eine Frage an den Projektinhaber (Gate-Änderung, [`AGENTS.md`](../../../../AGENTS.md) §3.6).
+- Hinweise L-4 (kein Schritt-für-Schritt-Rezept für `sshd`: Weiterleitung eintragen, verbinden) und L-5 (Standardprofil: `sshd` ohne Warnung, `claude-code` ohne `remoteEnv`-Referenz) des Validators ([`2026-10-17-validation-welle-devcontainer-sshd-claude-code`](../../../reviews/2026-10-17-validation-welle-devcontainer-sshd-claude-code.md)) — **Ausgang:** weiter offen: Entscheidung des Projektinhabers, ob das Handbuch ein Rezept erhält; dieser Slice entscheidet nichts und schreibt kein Rezept; Hinweis liegt in der Welle-Closure (offene Entscheidung b).
+- Das Release trägt mehr als die Welle `sshd`/Claude Code (Verbosity-Vertrag mit geänderter `--quiet`-Ausgabe, Docker-Desktop-Rücknahme, `/dev/net/tun` als sechste Lockerung für bestehende `nestedRuntime: podman`-Projekte); ein Lead, der nur die Features nennt, verschweigt Verhaltensänderungen — **Ausgang:** vorgesehen „entfallen“, wenn Lead und `### Changed` alle vier Inhalte tragen (Review prüft); ob der Projektinhaber den Verbosity-Vertrag in dieser Version wünscht, wird in der Freigabe von M1 bestätigt.
+- Das Tag-Datum weicht vom festen Datum an den Stellen aus M0 ab — **Ausgang:** vorgesehen „entfallen“ mit `date +%F` vor M4 und M6 (Lehre aus `v0.9.0`).
+- Der Review-Report bricht `make docs-check` (Linkform in Tabellenzellen) — **Ausgang:** vorgesehen „entfallen“ mit `make docs-check` vor M1 (Lehre aus `v0.8.0`).
+- rc.1 lässt sich in GHCR nicht löschen (fehlendes Löschrecht des Tokens) — **Ausgang:** offen bis M5; vorgesehen „eingetreten: der Tag bleibt in GHCR stehen, im Closure vermerkt“ oder „entfallen“, wenn das Löschen gelingt; kein Nachteil für `:latest` (ein Vorab-Tag setzt es nicht).
+
+## 7. Closure-Notiz
+
+(Wird bei der Closure nach dem Tag gefüllt, Form wie [`slice-v1-release-cut-v0.9.0`](../done/slice-v1-release-cut-v0.9.0.md) §7: Tag-Hash und Lauf-IDs von rc.1 und `publish`, Was hat funktioniert, Was ging anders, Steering-Loop-Eintrag, Beobachtungs-Register, Folge-Slices, Risiken aus §6, Drei Paarungen. Der Eintrag muss einen Lerneintrag tragen, nicht nur grüne Gates.)
+
+## 8. Sub-Area-Prüfungen und Modus-Begründung
+
+**Vorgelagert — Sub-Area-Wahl prüfen:** `docs/plan/`, `docs/user/`, `docs/maintainer/`, `docs/reviews/` und Release-Dateien (`repo.mk`, `Dockerfile`) — Greenfield laut `harness/conventions.md`. `cmd/uboot` ist laut Modus-Deklaration keine Sub-Area (Aspirantin); berührt wird dort eine Zeile (`var version`), keine Konvention.
+
+**Vorgelagert — offene Beobachtungen sichten:** Register durchgegangen (`observations/`): `BEO-CLI/kommentar-beschreibt-abwesendes` und `BEO-DOK/plan-aussage-ueber-code` stehen auf `verkörpert` (kein Treffer für offene Arbeit); `BEO-E2E/ci-ueberspringt-nested-podman-build` ist `offen`, Zähler 1 und betrifft die Release-Aussage zu amd64/CI (§3, §6).
+
+Alle berührten Sub-Areas GF.
