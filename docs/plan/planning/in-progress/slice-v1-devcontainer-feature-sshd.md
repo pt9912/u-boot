@@ -49,10 +49,10 @@ Schlüssel-Login; es verlangt eine Debian- oder Ubuntu-Basis. Das Basis-Image de
 
 ## 2. Definition of Done
 
-- [ ] **Katalog und Generator:** `sshd` im Katalog (offizielle Quelle `ghcr.io/devcontainers/features/sshd`, Standardversion `1`, ohne `publisher`); Egress-Zeile nur, wenn die Messung Laufzeit-Hosts findet; das Sandbox-Verhalten folgt dem CR (erlaubt, mit Warnung, die `SecurityRelaxation` trägt); Golden Cases belegen Render, Sandbox-Verhalten, Hosts und double-run -> NoOp; ein Test belegt, dass die Warnung unter `--quiet` bei `init`, `generate` und `up` sichtbar bleibt (Happy), ohne `sshd` keine Warnung erscheint (Negative) und die Drittanbieter-Warnung eines anderen Features unter `--quiet` entfällt (Boundary); die Mutation „ohne `SecurityRelaxation`“ fällt rot.
-- [ ] **Messung:** Die Dev-Container-CLI baut ein Image mit `sshd` auf dem Basis-Image (Verfahren der Messreihe in [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md)), im Profil `default` und im Sandbox-Profil mit und ohne Egress; belegt sind: sshd lauscht auf 2222, die Feature-Metadaten (`mounts`, `capAdd`, `privileged`, `entrypoint`, `installsAfter`, Optionen) und die Laufzeit-Hosts. Der Befund steht in der Evidence; findet er eine Lockerung des Profils, geht der Slice zurück an den CR (§4).
-- [ ] **Doku:** Benutzerhandbuch (Katalogtabelle, Passwort-Setzen mit `sudo passwd`, Sicherheitshinweis zum Sandbox-Profil laut CR), `README.md`, `README.de.md`, `CHANGELOG.md` (`[Unreleased]`) und `harness/replay.md` (Golden-Zeile) nennen den Schlüssel; der Satz „follow in a later release“ im CHANGELOG-Eintrag des CR (Lastenheft 0.11.0) ist für den Teil dieses Slice angepasst (der letzte landende Code-Slice der Welle entfernt ihn).
-- [ ] `make gates` grün.
+- [x] **Katalog und Generator:** `sshd` im Katalog (offizielle Quelle `ghcr.io/devcontainers/features/sshd`, Standardversion `1`, ohne `publisher`); Egress-Zeile nur, wenn die Messung Laufzeit-Hosts findet; das Sandbox-Verhalten folgt dem CR (erlaubt, mit Warnung, die `SecurityRelaxation` trägt); Golden Cases belegen Render, Sandbox-Verhalten, Hosts und double-run -> NoOp; ein Test belegt, dass die Warnung unter `--quiet` bei `init`, `generate` und `up` sichtbar bleibt (Happy), ohne `sshd` keine Warnung erscheint (Negative) und die Drittanbieter-Warnung eines anderen Features unter `--quiet` entfällt (Boundary); die Mutation „ohne `SecurityRelaxation`“ fällt rot.
+- [x] **Messung:** Die Dev-Container-CLI baut ein Image mit `sshd` auf dem Basis-Image (Verfahren der Messreihe in [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md)), im Profil `default` und im Sandbox-Profil mit und ohne Egress; belegt sind: sshd lauscht auf 2222, die Feature-Metadaten (`mounts`, `capAdd`, `privileged`, `entrypoint`, `installsAfter`, Optionen) und die Laufzeit-Hosts. Der Befund steht in der Evidence; findet er eine Lockerung des Profils, geht der Slice zurück an den CR (§4).
+- [x] **Doku:** Benutzerhandbuch (Katalogtabelle, Passwort-Setzen mit `sudo passwd`, Sicherheitshinweis zum Sandbox-Profil laut CR), `README.md`, `README.de.md`, `CHANGELOG.md` (`[Unreleased]`) und `harness/replay.md` (Golden-Zeile) nennen den Schlüssel; der Satz „follow in a later release“ im CHANGELOG-Eintrag des CR (Lastenheft 0.11.0) ist für den Teil dieses Slice angepasst (der letzte landende Code-Slice der Welle entfernt ihn).
+- [x] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8).
@@ -74,6 +74,28 @@ Schlüssel-Login; es verlangt eine Debian- oder Ubuntu-Basis. Das Basis-Image de
 | `docs/user/benutzerhandbuch.md`, `README.md`, `README.de.md`, `CHANGELOG.md`, `harness/replay.md` | update | öffentlicher Vertrag und Golden-Zeile |
 
 Die Pfade stammen aus dem Quelltext (Lesestand 2026-10-17); der Implementer prüft jede Zeile vor der Änderung gegen den Code und trägt Abweichungen in die Evidence ein.
+
+**Umsetzungsstand und Abweichungen von der Tabelle (Implementer, 2026-10-17):**
+
+- `devcontainer_egress.go` und `generate.go` blieben unverändert: die Messung (unten) findet keinen Host, und `sandboxRelaxationWarnings` wird in `generate.go` bereits aufgerufen (`generateDevcontainer`). Neu ist `loginServiceActive` in `devcontainer_sandbox.go`; es prüft die aufgelöste Quelle der aktiven Features gegen den Katalogeintrag `sshd`.
+- `harness/replay.md` trägt eine neue Golden-Zeile für `sshd`.
+- Die Warnung entsteht nur in `generate devcontainer`: `init` rendert ohne Feature-Konfiguration (`initTemplateData` übergibt `nil`) und `up` erzeugt nur Neuanlege-Warnungen (`upservice.go`). Der Test zu `--quiet` bei `init`, `generate` und `up` belegt deshalb die Sichtbarkeit des Kennzeichens im CLI-Filter (`visibleWarnings` in `cli/warnings.go`) mit einem Eintrag im Wortlaut der Warnung; dass `init` oder `up` den Eintrag selbst erzeugen, belegt er nicht.
+
+**Messung (Dev-Container-CLI 0.89.0 im Docker-Container, Colima, Docker 29.x, arm64, Basis `mcr.microsoft.com/devcontainers/base:debian` = Debian trixie; Feature `sshd:1` löste auf Version 1.1.0 auf; Projekt mit dem erzeugten Sandbox-Profil von `u-boot`):**
+
+| Prüfung | Ergebnis |
+|---|---|
+| Feature-Metadaten (`devcontainer-feature.json`, OCI-Manifest) | `entrypoint: /usr/local/share/ssh-init.sh`, `installsAfter: common-utils`; **kein** `mounts`, `capAdd`, `privileged`, `securityOpt`; Optionen `version` (ungenutzt) und `gatewayPorts` |
+| Container (`docker inspect`) in `default`, `sandbox`, `sandbox` mit Egress | `Privileged=false`; `CapAdd` leer, mit Egress nur `NET_ADMIN` (von `u-boot`); keine Devices, keine Port-Bindungen; einziger Mount das Workspace-Volume (Sandbox); im Lauf `default` ein Mount (der Workspace, Typ nicht geprüft) |
+| Port | `ss -ltn`: `0.0.0.0:2222` und `[::]:2222` in allen drei Läufen; mit Egress zusätzlich der lokale Resolver auf `127.0.0.1:53` |
+| sshd-Konfiguration (`sshd -T`) | `passwordauthentication yes`, `pubkeyauthentication yes`, `permitrootlogin yes`, `permitemptypasswords no`, `gatewayports no` |
+| Konten | `passwd -S`: `root` und `vscode` gesperrt (`L`); `~/.ssh` fehlt |
+| Netz beim Build | `apt-get` über `deb.debian.org` (Basis-Host der Allowlist); das Feature selbst holt die Dev-Container-CLI von `ghcr.io` auf dem Host, nicht im Container |
+| Netz zur Laufzeit | `ssh-init.sh` startet nur `/etc/init.d/ssh`; kein Netzaufruf; Lauf mit Egress-Beschränkung erfolgreich, Port 2222 lauscht |
+
+Folgerungen: keine Egress-Zeile; das Feature unterläuft das Profil nicht (Risiko „Feature-Metadaten“ entfällt); die CR-Formulierung „nur Passwort-Login“ ist enger als der Befund: die Schlüssel-Anmeldung ist in der sshd-Konfiguration eingeschaltet und wirkt, sobald der Nutzer selbst einen Schlüssel einträgt, und Root-Login ist erlaubt. `u-boot` legt keine Schlüssel an und setzt kein Passwort; das Handbuch nennt beides.
+
+**Grenzen der Messung:** (1) Ein tatsächlicher SSH-Login mit gesetztem Passwort wurde nicht ausgeführt; belegt sind Port, Konfiguration und gesperrte Konten. (2) Die Netz-Hosts des Builds stammen aus dem Build-Protokoll der CLI, nicht aus einem DNS-Mitschnitt; zur Laufzeit folgt „kein Netzaufruf“ aus dem gelesenen `ssh-init.sh` und dem erfolgreichen Egress-Lauf. (3) Nur arm64 und Colima; das Feature `sshd:1` ist ein Major-Pin, spätere Versionen können abweichen. (4) Der Feature-Quelltext kam über das OCI-Artefakt von `ghcr.io/devcontainers/features/sshd`, nicht über das Repository.
 
 ## 4. Trigger
 

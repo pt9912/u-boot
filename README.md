@@ -155,8 +155,8 @@ directories — and a healthy Postgres container ready at the declared
 port.
 
 Add a development toolchain via the devcontainer features catalogue
-([LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), 11 built-in features: `git`, `docker-cli`, `node`,
-`java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, `python`, `sdkman`, `homebrew` (third-party)):
+([LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), 12 built-in features: `git`, `docker-cli`, `node`,
+`java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, `python`, `sdkman`, `sshd`, `homebrew` (third-party)):
 
 ```bash
 u-boot init my-service --devcontainer

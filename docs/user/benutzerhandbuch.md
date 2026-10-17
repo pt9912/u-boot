@@ -296,7 +296,7 @@ Diese Optionen gelten für jeden Befehl:
 | `--yes` | Rückfragen automatisch bejahen |
 | `--no-interactive` | nie fragen; bei einer nötigen Rückfrage abbrechen |
 | `--json` | maschinenlesbare Ausgabe |
-| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen); `doctor --quiet` zeigt Fehler-Einträge sowie die Einträge der beiden Ausnahmen unten, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; andere Warnungen, etwa zur Konfiguration, entfallen). Vier Ausnahmen bleiben sichtbar: Sicherheitslockerungen des Sandbox-Profils (`init`, `generate`, `up`; in `doctor` die Warn-Einträge zu einem Klartext-Zugangsschlüssel, zur fehlenden Quelle des Tokens bei einem `https`-Clone und zur Egress-Restriktion, auch die Meldung, dass sie ohne Sandbox-Profil nicht greift), Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in der Befehlsausgabe und in `doctor`, soweit vom Host aus ermittelbar), der Compose-Fortschritt von `up` und die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
+| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen); `doctor --quiet` zeigt Fehler-Einträge sowie die Einträge der beiden Ausnahmen unten, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; andere Warnungen, etwa zur Konfiguration, entfallen). Vier Ausnahmen bleiben sichtbar: Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`) (`init`, `generate`, `up`; in `doctor` die Warn-Einträge zu einem Klartext-Zugangsschlüssel, zur fehlenden Quelle des Tokens bei einem `https`-Clone und zur Egress-Restriktion, auch die Meldung, dass sie ohne Sandbox-Profil nicht greift), Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in der Befehlsausgabe und in `doctor`, soweit vom Host aus ermittelbar), der Compose-Fortschritt von `up` und die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
 | `--verbose` | zusätzliche Details; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist |
 | `--debug` | interne Diagnoseausgabe; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist (`--verbose` und `--debug` wirken gleich) |
 | `-v`, `--version` | Version anzeigen |
@@ -772,6 +772,7 @@ Ohne weitere Freigabe aktivierbar (`homebrew` ist ein Drittanbieter-Feature: `u-
 | `postgres-client` | PostgreSQL-Client |
 | `python` | Python (das Betriebssystem-Python; `pip install` außerhalb eines virtuellen Environments lehnt es nach PEP 668 ab: `python -m venv .venv` verwenden) |
 | `sdkman` | SDKMAN (das offizielle `java`-Feature installiert es; zusammen mit `java` erscheint es einmal) |
+| `sshd` | SSH-Server (offizielles Feature `sshd`, Login-Dienst auf Port 2222, nur Passwort; siehe [Login-Dienst `sshd`](#login-dienst-sshd-optional)); keine Optionen (`gatewayPorts`, `version` kennt der Katalog nicht) |
 | `homebrew` | Homebrew; **Drittanbieter-Feature** (`meaningful-ooo`, Version `2`): `u-boot generate devcontainer` weist es aus, sein Installationsskript läuft beim Image-Build |
 
 #### Externe Feature-Quellen freigeben
@@ -1051,6 +1052,7 @@ Standardmäßig erlaubt sind:
 | Feature `java` | `repo.maven.apache.org`, `repo1.maven.org` |
 | Feature `python` | `pypi.org`, `files.pythonhosted.org` |
 | Feature `sdkman` | `api.sdkman.io`, `broker.sdkman.io`, `repo.maven.apache.org`, `repo1.maven.org` |
+| Feature `sshd` | keine zusätzlichen Hosts |
 | Feature `homebrew` | `formulae.brew.sh`, `ghcr.io`, `pkg-containers.githubusercontent.com` |
 | Clone-Quelle | der Host von `devcontainer.sandbox.repository` beziehungsweise `origin` |
 | Ihre Ergänzungen | `devcontainer.sandbox.egress.allow` (kleingeschriebene Hostnamen, ohne Schema, Port oder Wildcard) |
@@ -1072,6 +1074,36 @@ Standardmäßig erlaubt sind:
 - Ohne `NET_ADMIN` entfällt die Beschränkung mit einer Warnung (`warn`) oder das
   Startscript endet mit Exit-Code 11 (`fail`). `u-boot doctor` prüft nur die
   Konfiguration; ohne Sandbox-Profil ist sie wirkungslos und `doctor` warnt.
+
+#### Login-Dienst `sshd` (optional)
+
+```bash
+u-boot config set devcontainer.features.sshd.enabled true
+u-boot generate devcontainer
+```
+
+Das offizielle Feature `sshd` installiert einen SSH-Server, der beim Containerstart
+auf Port 2222 lauscht (gemessen mit der Dev-Container-CLI 0.89.0 auf dem
+Basis-Image `mcr.microsoft.com/devcontainers/base:debian`). Im Sandbox-Profil ist
+es erlaubt; `u-boot generate devcontainer` weist den Login-Dienst mit
+einer Warnung aus, die auch unter `--quiet` sichtbar bleibt (anders als die
+Drittanbieter-Warnung eines anderen Features). Ohne Sandbox-Profil erscheint
+diese Warnung nicht.
+
+- **Passwort setzen:** Die Konten im Container sind nach dem Build gesperrt. Ein
+  Login geht erst, nachdem Sie im Container `sudo passwd $(whoami)` ausgeführt
+  haben. `u-boot` setzt kein Passwort und legt keine Schlüssel an.
+- **Port 2222 wird nicht veröffentlicht und nicht weitergeleitet:** `forwardPorts`
+  stammt nur aus den Services. Erreichbar ist der Port über das Port-Forwarding
+  Ihres Dev-Container-Werkzeugs.
+- **Keine Lockerung des Profils durch das Feature:** Es bringt weder `--privileged`
+  noch zusätzliche Fähigkeiten, Mounts oder Devices mit; nur einen Entrypoint, der
+  `sshd` startet. Mit der Egress-Beschränkung braucht es keinen zusätzlichen Host
+  (der Build holt Pakete von `deb.debian.org`, das immer erlaubt ist).
+- **Grenzen des Dienstes:** Die Konfiguration des Features lässt `PermitRootLogin`
+  auf `yes` und lässt die Anmeldung mit öffentlichem Schlüssel zu, sobald Sie
+  selbst einen Schlüssel in `~/.ssh/authorized_keys` eintragen; `u-boot` ändert das
+  nicht. Das Profil begrenzt Schaden und ist keine Isolationsgrenze.
 
 #### Git-Zugangsdaten
 
@@ -1286,7 +1318,7 @@ aus, damit die Dateien in `.devcontainer/` zur Projektdatei passen.
 
 | Option | Wirkung |
 |---|---|
-| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen); `doctor --quiet` zeigt Fehler-Einträge sowie die Einträge der beiden Ausnahmen unten, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; andere Warnungen, etwa zur Konfiguration, entfallen). Vier Ausnahmen bleiben sichtbar: Sicherheitslockerungen des Sandbox-Profils (`init`, `generate`, `up`; in `doctor` die Warn-Einträge zu einem Klartext-Zugangsschlüssel, zur fehlenden Quelle des Tokens bei einem `https`-Clone und zur Egress-Restriktion, auch die Meldung, dass sie ohne Sandbox-Profil nicht greift), Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in der Befehlsausgabe und in `doctor`, soweit vom Host aus ermittelbar), der Compose-Fortschritt von `up` und die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
+| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen); `doctor --quiet` zeigt Fehler-Einträge sowie die Einträge der beiden Ausnahmen unten, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; andere Warnungen, etwa zur Konfiguration, entfallen). Vier Ausnahmen bleiben sichtbar: Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`) (`init`, `generate`, `up`; in `doctor` die Warn-Einträge zu einem Klartext-Zugangsschlüssel, zur fehlenden Quelle des Tokens bei einem `https`-Clone und zur Egress-Restriktion, auch die Meldung, dass sie ohne Sandbox-Profil nicht greift), Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in der Befehlsausgabe und in `doctor`, soweit vom Host aus ermittelbar), der Compose-Fortschritt von `up` und die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
 | `--verbose` | zusätzliche Details; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist |
 | `--debug` | interne Diagnoseausgabe; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist (`--verbose` und `--debug` wirken gleich) |
 

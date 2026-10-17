@@ -11,6 +11,16 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- Devcontainer features: the built-in catalogue gains `sshd` (the official `sshd` feature, an SSH server on port 2222 with password
+  login only after `sudo passwd`; no options, no egress host). It is allowed in the sandbox profile; `generate` discloses the active
+  login service with a warning that stays visible under `--quiet`, and the port is not forwarded automatically
+  ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features),
+  [`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil),
+  [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging),
+  [ADR-0020](docs/plan/adr/0020-drittanbieter-features-im-katalog.md)).
+
 ### Changed
 
 - `devcontainer.sandbox.nestedRuntime: docker` is promised on Docker under Linux and on Colima (Linux VM) only.
@@ -39,8 +49,8 @@ this file is the same format applied to u-boot itself.
   token source, the egress restriction together with `nestedRuntime: docker`, and `egress.enabled` without the sandbox profile
   (the restriction does not apply then). The warn item that `nestedRuntime` has no effect without the sandbox profile is a
   configuration message and stays hidden under `--quiet`; exit codes, `--strict` and `--json` are unchanged.
-  The rest of the contract follows in a later release: the run-time handover of agent credentials with its new `doctor` check, the
-  login-service disclosure and the `sshd` and Claude Code features themselves.
+  The rest of the contract follows in a later release: the run-time handover of agent credentials with its new `doctor` check and
+  the Claude Code feature.
 
 ## [0.9.0] - 2026-10-15
 
