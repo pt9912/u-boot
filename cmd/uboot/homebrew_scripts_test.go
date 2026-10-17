@@ -101,7 +101,6 @@ func TestHomebrewFormulaDesc_EnglishASCII(t *testing.T) {
 }
 
 func TestHomebrewFormulaFill_FailsClosed(t *testing.T) {
-	missing := strings.Replace(sumsFull, "u-boot-linux-arm64", "u-boot-linux-armv7", 1)
 	malformed := strings.Replace(sumsFull, "4444444444444444444444444444444444444444444444444444444444444444", "not-a-digest", 1)
 	for name, sums := range map[string]string{"missing platform": missing, "malformed digest": malformed} {
 		body, _, err := runFill(t, "v1.2.3", sums)
@@ -111,5 +110,52 @@ func TestHomebrewFormulaFill_FailsClosed(t *testing.T) {
 	}
 	if _, _, err := runFill(t, "", sumsFull); err == nil {
 		t.Errorf("empty tag must fail")
+	}
+}
+
+// tap-nachzug: the formula carries no version line, so the check reads the four
+// download URLs. It accepts the right tag and rejects a wrong tag, a missing URL
+// and a formula without URLs (fail closed).
+func runTapCheck(t *testing.T, tag, formula string) error {
+	t.Helper()
+	if _, err := exec.LookPath("bash"); err != nil {
+		t.Skip("bash not available")
+	}
+	path := filepath.Join(t.TempDir(), "u-boot.rb")
+	if err := os.WriteFile(path, []byte(formula), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	return exec.Command("bash", "../../scripts/tap-formula-check.sh", tag, path).Run()
+}
+
+func TestTapFormulaCheck(t *testing.T) {
+	good, _, err := runFill(t, "v1.2.3", sumsFull)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := runTapCheck(t, "v1.2.3", good); err != nil {
+		t.Errorf("formula of the right tag must pass: %v", err)
+	}
+	if err := runTapCheck(t, "v1.2.4", good); err == nil {
+		t.Errorf("formula of another tag must fail")
+	}
+	mixed := strings.Replace(good, "download/v1.2.3/u-boot-linux-amd64", "download/v1.2.2/u-boot-linux-amd64", 1)
+	if err := runTapCheck(t, "v1.2.3", mixed); err == nil {
+		t.Errorf("one URL with a wrong tag must fail")
+	}
+	var kept []string
+	dropped := false
+	for _, l := range strings.Split(good, "\n") {
+		if !dropped && strings.Contains(l, "url ") {
+			dropped = true
+			continue
+		}
+		kept = append(kept, l)
+	}
+	if err := runTapCheck(t, "v1.2.3", strings.Join(kept, "\n")); err == nil {
+		t.Errorf("a formula with three URLs must fail")
+	}
+	if err := runTapCheck(t, "v1.2.3", "class UBoot < Formula\nend\n"); err == nil {
+		t.Errorf("a formula without URLs must fail")
 	}
 }

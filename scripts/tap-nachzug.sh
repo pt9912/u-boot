@@ -20,10 +20,7 @@ work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
 curl -fsSL "https://github.com/${src}/releases/download/${TAG}/u-boot.rb" -o "$work/u-boot.rb"
-grep -q "version \"${TAG#v}\"" "$work/u-boot.rb" || {
-	echo "tap-nachzug: the u-boot.rb asset of ${TAG} does not carry version ${TAG#v}." >&2
-	exit 1
-}
+"$(dirname "$0")/tap-formula-check.sh" "$TAG" "$work/u-boot.rb"
 
 git clone --depth 1 "https://x-access-token:${TAP_TOKEN}@github.com/${tap}.git" "$work/tap"
 mkdir -p "$work/tap/Formula"
