@@ -114,8 +114,9 @@ brew install u-boot
 u-boot --version              # X.Y.Z
 ```
 
-Im Tap-Repo läuft nach dem Formel-Commit der Smoke-Workflow (macOS: Install, `--version`,
-`init`; `doctor` ohne Docker nur auf „kein Absturz" geprüft).
+Im Tap-Repo läuft nach dem Formel-Commit der Smoke-Workflow (macOS: Install mit
+`--build-from-source`, `brew test`, `--version`, `init`, `add postgres`; `doctor` ohne Docker nur
+auf „kein Absturz" geprüft). `brew audit --strict --online` gatet den Lauf; ein Befund färbt ihn rot.
 
 ## 7. Nacharbeit
 
