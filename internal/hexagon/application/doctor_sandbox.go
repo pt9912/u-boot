@@ -155,9 +155,9 @@ func (s *DoctorService) checkSandboxCredentials(_ context.Context, baseDir strin
 			Hint:               "Run `u-boot generate devcontainer` to restore the `${localEnv:<NAME>}` pass-through and export the variable on the host; never store the key in project files.",
 			SecurityRelaxation: true}
 	}
-	msg := "No plaintext git credentials found; no https clone source needs a token."
+	msg := "No plaintext git or agent credentials found; no https clone source needs a token."
 	if httpsClone {
-		msg = "No plaintext git credentials found; a runtime token source is configured."
+		msg = "No plaintext git or agent credentials found; a runtime token source is configured."
 	}
 	if len(agentVars) > 0 {
 		msg += " The agent credential is passed through " + strings.Join(agentVars, ", ") + " (reference only)."

@@ -1038,8 +1038,8 @@ func TestGenerateDevcontainer_SshdAndClaudeCodeTogether(t *testing.T) {
 		"sandbox":         {"devcontainer:\n  enabled: true\n  profile: sandbox\n" + features, false, 1, nil},
 		"sandbox flag":    {"devcontainer:\n  enabled: true\n" + features, true, 1, nil},
 		"sandbox egress": {"devcontainer:\n  enabled: true\n  profile: sandbox\n" + features + "  sandbox:\n    egress:\n      enabled: true\n", false, 1, []string{
-			"api.anthropic.com", "api.github.com", "claude.ai", "claude.com", "codeload.github.com", "deb.debian.org",
-			"github.com", "objects.githubusercontent.com", "platform.claude.com", "raw.githubusercontent.com",
+			"api.anthropic.com", "api.github.com", "codeload.github.com", "deb.debian.org",
+			"github.com", "objects.githubusercontent.com", "raw.githubusercontent.com",
 			"registry.npmjs.org", "security.debian.org"}},
 	}
 	for name, tc := range cases {

@@ -292,6 +292,10 @@ func TestDoctor_SandboxCredentials_Agent(t *testing.T) {
 	const agentYAML = sandboxYAMLHead + "  profile: sandbox\n  features:\n    claude-code:\n      enabled: true\n"
 	const agentOff = sandboxYAMLHead + "  profile: sandbox\n  features:\n    claude-code:\n      enabled: false\n"
 	const withRef = `{"remoteEnv": {"GIT_TOKEN": "${localEnv:GIT_TOKEN}", "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"}}`
+	// The shape of fakeKey (prefix `sk-ant-`, at least 40 further characters of
+	// [A-Za-z0-9_-]) follows the key-finding expression inside the binary of
+	// the Claude Code CLI 2.1.302, not a documentation statement about the
+	// key format.
 	const fakeKey = "sk-ant-api03-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijkl"
 	gitCfg := func(url string) string { return "[remote \"origin\"]\n\turl = " + url + "\n" }
 	cases := []struct {
@@ -325,6 +329,10 @@ func TestDoctor_SandboxCredentials_Agent(t *testing.T) {
 		{"key in u-boot.yaml", agentYAML + "# " + fakeKey + "\n", map[string]string{".devcontainer/devcontainer.json": withRef},
 			domain.SeverityWarn, "u-boot.yaml"},
 		{"literal assignment of the variable", agentYAML, map[string]string{".env.example": "ANTHROPIC_API_KEY=plainvalue123456\n", ".devcontainer/devcontainer.json": withRef},
+			domain.SeverityWarn, ".env.example"},
+		// Known limit: the assignment expression cannot tell a placeholder
+		// from a value, so a placeholder of twelve or more characters is reported.
+		{"placeholder value is reported (known limit)", agentYAML, map[string]string{".env.example": "ANTHROPIC_API_KEY=your-api-key-here\n", ".devcontainer/devcontainer.json": withRef},
 			domain.SeverityWarn, ".env.example"},
 		{"OAuth token variable literal", agentYAML, map[string]string{"compose.yaml": "    CLAUDE_CODE_OAUTH_TOKEN: abcdefghijklmnop0123\n", ".devcontainer/devcontainer.json": withRef},
 			domain.SeverityWarn, "compose.yaml"},

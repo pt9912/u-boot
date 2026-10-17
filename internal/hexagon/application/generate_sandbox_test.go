@@ -892,8 +892,9 @@ func TestGenerateDevcontainer_SandboxEgress_FeatureHosts(t *testing.T) {
 		"sdkman":   {"sdkman", []string{"api.sdkman.io", "broker.sdkman.io", "repo1.maven.org"}, []string{"formulae.brew.sh"}},
 		"python":   {"python", []string{"pypi.org", "files.pythonhosted.org"}, []string{"formulae.brew.sh", "api.sdkman.io"}},
 		"sshd":     {"sshd", []string{"deb.debian.org"}, []string{"pypi.org", "formulae.brew.sh", "api.sdkman.io", "registry.npmjs.org"}},
-		"claude-code": {"claude-code", []string{"registry.npmjs.org", "api.anthropic.com", "claude.ai", "platform.claude.com", "claude.com"},
-			[]string{"formulae.brew.sh", "api.sdkman.io", "pypi.org", "http-intake.logs.us5.datadoghq.com", "mcp-proxy.anthropic.com", "downloads.claude.ai"}},
+		"claude-code": {"claude-code", []string{"registry.npmjs.org", "api.anthropic.com"},
+			[]string{"formulae.brew.sh", "api.sdkman.io", "pypi.org", "claude.ai", "platform.claude.com", "claude.com",
+				"http-intake.logs.us5.datadoghq.com", "mcp-proxy.anthropic.com", "downloads.claude.ai"}},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
@@ -938,12 +939,14 @@ func TestGenerateDevcontainer_SandboxEgress_SshdAddsNoHost(t *testing.T) {
 	}
 }
 
-// The Anthropic hosts are in the allowlist only while `claude-code` is
-// enabled; a disabled or absent feature leaves them out (SPEC-019 default
-// allowlist per feature).
+// The API host is in the allowlist only while `claude-code` is enabled; a
+// disabled or absent feature leaves it out (SPEC-019 default allowlist per
+// feature). The sign-in hosts are never in the default list (the user adds
+// them through `egress.allow`).
 func TestGenerateDevcontainer_SandboxEgress_ClaudeCodeHostsOnlyWhenActive(t *testing.T) {
 	t.Parallel()
-	anthropic := []string{"api.anthropic.com", "claude.ai", "platform.claude.com", "claude.com"}
+	anthropic := []string{"api.anthropic.com"}
+	signIn := []string{"claude.ai", "platform.claude.com", "claude.com"}
 	for name, tc := range map[string]struct {
 		features string
 		want     bool
@@ -966,6 +969,11 @@ func TestGenerateDevcontainer_SandboxEgress_ClaudeCodeHostsOnlyWhenActive(t *tes
 			for _, h := range anthropic {
 				if have[h] != tc.want {
 					t.Errorf("%s in allowlist = %v, want %v", h, have[h], tc.want)
+				}
+			}
+			for _, h := range signIn {
+				if have[h] {
+					t.Errorf("sign-in host %s must not be in the default allowlist", h)
 				}
 			}
 		})
