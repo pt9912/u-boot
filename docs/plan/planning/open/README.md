@@ -11,7 +11,6 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| [`slice-v2-homebrew-smoke-haertung`](../in-progress/slice-v2-homebrew-smoke-haertung.md) | Härtung des Homebrew-Smoke im Tap (Build-from-source, `u-boot add`, gatendes Audit), Formel-`desc` und Workflow-Kommentar |
 | [`slice-cr-devcontainer-agent-features-sandbox`](slice-cr-devcontainer-agent-features-sandbox.md) | CR: Sandbox-Regel für `sshd` und Claude Code und Zugangsdaten des Agenten ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)); Welle [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md), erster Slice; entfällt, wenn der Projektinhaber keine neue Zusage verlangt |
 | [`slice-v1-devcontainer-feature-sshd`](slice-v1-devcontainer-feature-sshd.md) | Katalog-Schlüssel `sshd` (offizielles Feature), Egress, Sandbox-Regel, Tests, Doku; Welle [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md), zweiter Slice |
 | [`slice-v1-devcontainer-feature-claude-code`](slice-v1-devcontainer-feature-claude-code.md) | Katalog-Schlüssel `claude-code` (Feature von Anthropic, Drittanbieter), Egress, Zugangsdaten zur Laufzeit, Tests, Doku; Welle [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md), dritter Slice |
