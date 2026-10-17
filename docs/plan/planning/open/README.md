@@ -12,5 +12,4 @@ Dateiname-Konventionen.
 | Datei | Gegenstand |
 | ----- | ---------- |
 | [`slice-v1-sandbox-fallback-ausweisung`](slice-v1-sandbox-fallback-ausweisung.md) | Degradations-Fallbacks Daemon und Egress host-seitig ausweisen (Code) oder [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) präzisieren (CR); Entscheidung beim Projektinhaber |
-| [`slice-v1-release-cut-v0.10.0`](../in-progress/slice-v1-release-cut-v0.10.0.md) | Release-Cut `v0.10.0` (Features `sshd` und Claude Code, `podman build`, Verbosity-Vertrag); Push und Tags nur durch den Projektinhaber |
 | [`slice-v1-cli-dry-run-would-formulierung`](slice-v1-cli-dry-run-would-formulierung.md) | Dry-Run: `remove`, `generate` und `config set` sagen „Would …“ statt der Vergangenheitsform, falls [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) es verlangt (offene Frage an den Projektinhaber) |
