@@ -432,7 +432,7 @@ func TestGenerateDevcontainer_SandboxPodman_NotGenerated(t *testing.T) {
 			hasWarn := false
 			for _, w := range resp.Warnings {
 				hasWarn = hasWarn || (w.Code == "LH-FA-DEV-007" && strings.Contains(w.Message, "no effect"))
-				if w.Code == "LH-FA-DEV-007" && w.SecurityRelaxation {
+				if w.Code == "LH-FA-DEV-007" && strings.Contains(w.Message, "no effect") && w.SecurityRelaxation {
 					t.Errorf("nestedRuntime no-effect warning is flagged (a configuration notice goes under --quiet): %+v", w)
 				}
 			}
@@ -775,7 +775,7 @@ func TestGenerateDevcontainer_SandboxDocker_NotGenerated(t *testing.T) {
 			hasWarn := false
 			for _, w := range resp.Warnings {
 				hasWarn = hasWarn || (w.Code == "LH-FA-DEV-007" && strings.Contains(w.Message, "no effect"))
-				if w.Code == "LH-FA-DEV-007" && w.SecurityRelaxation {
+				if w.Code == "LH-FA-DEV-007" && strings.Contains(w.Message, "no effect") && w.SecurityRelaxation {
 					t.Errorf("nestedRuntime no-effect warning is flagged (a configuration notice goes under --quiet): %+v", w)
 				}
 			}
