@@ -44,7 +44,7 @@ func TestSandboxRelaxationWarnings_FlagIsOnTheEntryNotTheCode(t *testing.T) {
 		wantPlain   int
 		flaggedText string
 	}{
-		{"podman-sandbox: five relaxations", podman, true, 5, 0, "security relaxation"},
+		{"podman-sandbox: six relaxations", podman, true, 6, 0, "security relaxation"},
 		{"docker-sandbox: --privileged", docker, true, 1, 0, "security relaxation"},
 		{"egress-sandbox: NET_ADMIN", egress, true, 1, 0, "security relaxation"},
 		{"podman-without-sandbox: has no effect", podman, false, 0, 1, ""},
@@ -98,8 +98,8 @@ func TestSandboxRelaxationWarnings_PolicyChangesNoRenderTimeWarning(t *testing.T
 	for _, policy := range []string{"", "warn", "fail"} {
 		got := application.SandboxRelaxationWarningsForTest("podman", policy, true, true)
 		flagged, plain := relaxationFlags(got)
-		if len(flagged) != 6 || len(plain) != 0 {
-			t.Errorf("policy %q: flagged=%d plain=%d, want 6/0 (5 podman + 1 egress): %+v", policy, len(flagged), len(plain), got)
+		if len(flagged) != 7 || len(plain) != 0 {
+			t.Errorf("policy %q: flagged=%d plain=%d, want 7/0 (6 podman + 1 egress): %+v", policy, len(flagged), len(plain), got)
 		}
 		for _, w := range got {
 			if strings.Contains(w.Message, "vfs") || strings.Contains(w.Message, "fall back") || strings.Contains(w.Message, "without daemon") {

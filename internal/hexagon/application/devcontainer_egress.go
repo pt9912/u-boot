@@ -58,9 +58,10 @@ func egressBaseHosts() []string {
 	}
 }
 
-// egressRegistryHosts are added with `nestedRuntime: podman` or `docker`.
+// egressRegistryHosts are added with `nestedRuntime: podman` or `docker`;
+// Docker Hub serves layer blobs from the cloudflare or the cloudfront host.
 func egressRegistryHosts() []string {
-	return []string{"registry-1.docker.io", "auth.docker.io", "production.cloudflare.docker.com", "ghcr.io"}
+	return []string{"registry-1.docker.io", "auth.docker.io", "production.cloudflare.docker.com", "production.cloudfront.docker.com", "ghcr.io"}
 }
 
 // egressDockerAptHost is the Docker APT repository that stays configured

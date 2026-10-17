@@ -268,11 +268,12 @@ func podmanRelaxations() []string {
 		"--security-opt=apparmor=unconfined",
 		"--security-opt=systempaths=unconfined",
 		"--device=/dev/fuse",
+		"--device=/dev/net/tun",
 	}
 }
 
 // sandboxRelaxationWarnings returns one warning per security
-// relaxation the rendered sandbox needs (nested Podman: five options,
+// relaxation the rendered sandbox needs (nested Podman: six options,
 // nested Docker: `--privileged`, LH-FA-DEV-007; egress restriction: NET_ADMIN, LH-FA-DEV-008; an active `sshd` feature:
 // the login service, LH-FA-DEV-006), plus
 // a "no effect" notice per feature that is configured without the

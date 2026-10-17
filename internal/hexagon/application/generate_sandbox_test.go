@@ -310,7 +310,7 @@ func TestGenerateDevcontainer_SandboxPodman(t *testing.T) {
 	}
 	m := devcontainerJSONMap(t, fs)
 	wantArgs := []any{"--cap-add=SYS_ADMIN", "--security-opt=seccomp=unconfined",
-		"--security-opt=apparmor=unconfined", "--security-opt=systempaths=unconfined", "--device=/dev/fuse"}
+		"--security-opt=apparmor=unconfined", "--security-opt=systempaths=unconfined", "--device=/dev/fuse", "--device=/dev/net/tun"}
 	gotArgs, _ := m["runArgs"].([]any)
 	if len(gotArgs) != len(wantArgs) {
 		t.Fatalf("runArgs = %v, want %v", gotArgs, wantArgs)
@@ -366,8 +366,8 @@ func TestGenerateDevcontainer_SandboxPodman(t *testing.T) {
 			t.Errorf("non-relaxation warning flagged SecurityRelaxation: %+v", w)
 		}
 	}
-	if relaxations != 5 {
-		t.Errorf("relaxation warnings = %d, want 5: %+v", relaxations, resp.Warnings)
+	if relaxations != 6 {
+		t.Errorf("relaxation warnings = %d, want 6: %+v", relaxations, resp.Warnings)
 	}
 
 	// Idempotent.
@@ -576,15 +576,17 @@ func TestGenerateDevcontainer_SandboxEgressWithPodman(t *testing.T) {
 		t.Fatalf("generate: %v", err)
 	}
 	m := devcontainerJSONMap(t, fs)
-	if args, _ := m["runArgs"].([]any); len(args) != 6 || args[5] != "--cap-add=NET_ADMIN" {
-		t.Errorf("runArgs = %v, want 5 podman options + NET_ADMIN", m["runArgs"])
+	if args, _ := m["runArgs"].([]any); len(args) != 7 || args[6] != "--cap-add=NET_ADMIN" {
+		t.Errorf("runArgs = %v, want 6 podman options + NET_ADMIN", m["runArgs"])
 	}
 	if m["postCreateCommand"] != "sh /usr/local/bin/u-boot-sandbox-init && { [ -d .git ] || git clone -- https://github.com/o/r.git .; }" {
 		t.Errorf("postCreateCommand = %v", m["postCreateCommand"])
 	}
 	script, _ := fs.ReadFile(egressInitPath())
-	if !strings.Contains(string(script), "registry-1.docker.io") {
-		t.Errorf("podman registries missing from the allowlist:\n%s", script)
+	for _, host := range []string{"registry-1.docker.io", "production.cloudflare.docker.com", "production.cloudfront.docker.com"} {
+		if !strings.Contains(string(script), host) {
+			t.Errorf("registry host %s missing from the allowlist:\n%s", host, script)
+		}
 	}
 }
 
