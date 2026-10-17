@@ -28,6 +28,14 @@ this file is the same format applied to u-boot itself.
   exceptions above stay dropped) and `--diff --quiet` prints the diff, for `init`, `generate`, `add`, `remove` and `config set`; the success message after an actual write
   is still dropped, also with `--diff` and without `--dry-run`. Of several verbosity options (`--quiet`, `--verbose`, `--debug`) the one given last on the command line wins, without rejection: `--quiet --verbose` shows the additional detail and lifts `--quiet` (also for summaries and warnings), `--verbose --quiet` shows errors only. `--debug --quiet` therefore no longer raises the level to debug; it is `--quiet`. The fixed order `--debug`, `--verbose`, `--quiet` is gone.
 
+- The sandbox profile contract grows (Lastenheft 0.11.0): credentials of an agent (for example the key of a coding agent that an
+  enabled devcontainer feature uses) never appear in the image, the workspace volume, `u-boot.yaml` or any generated file; they reach the
+  container at run time through an environment variable, and `u-boot doctor` checks the source
+  ([`LH-FA-DEV-009`](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)). A login service that is active in the container
+  (password login) is disclosed in the command output, and that disclosure stays visible under `--quiet`
+  ([`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)).
+  The `sshd` and Claude Code features themselves follow in a later release.
+
 ## [0.9.0] - 2026-10-15
 
 Ninth release. **More devcontainer features.** The built-in catalogue gains `python`, `sdkman` and `homebrew`

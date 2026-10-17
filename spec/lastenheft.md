@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.10.0                                                             |
+| Version          | 0.11.0                                                             |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -188,7 +188,7 @@ Mindestens müssen folgende Stufen unterstützt werden:
 
 Unter `--quiet` geben die Subkommandos, die etwas ändern (`init`, `generate`, `add`, `remove`, `config set`, `up`, `down`), nur Fehler aus; ihre Erfolgs- und Zusammenfassungsmeldungen entfallen. `u-boot doctor` zeigt nur Fehler-Einträge. Vier Ausnahmen bleiben unter `--quiet` sichtbar:
 
-1. die Ausweisung von Sicherheitslockerungen (zusätzliche Capabilities, `--privileged`, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices) in der Befehlsausgabe ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion));
+1. die Ausweisung von Sicherheitslockerungen (zusätzliche Capabilities, `--privileged`, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices) und eines im Container aktivierten Login-Dienstes (Passwort-Login) in der Befehlsausgabe ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion));
 2. die Ausweisung der Degradations-Fallbacks (Container ohne Docker-Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion) in der Befehlsausgabe und in `u-boot doctor` ([`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer));
 3. der Fortschritt einzelner Services bei `u-boot up` (Pull, Create, Start, Healthcheck; [`LH-NFA-PERF-002`](#lh-nfa-perf-002--startzeit-abhängig-von-docker));
 4. die Zusammenfassung der betroffenen Pfade, die `--force` vor dem Überschreiben ausgibt ([`LH-FA-CLI-005A`](#lh-fa-cli-005a--interaktivität-und-automatisierung), [`LH-FA-INIT-005`](#lh-fa-init-005--überschreibschutz)).
@@ -445,7 +445,8 @@ Das erzeugte Ergebnis im Sandbox-Profil muss:
 - keinen Container-Runtime-Socket des Hosts einbinden;
 - kein `--privileged` und keine zusätzlichen Capabilities setzen, sofern nicht durch [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) oder [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion) ausdrücklich verlangt;
 - keine Host-Dateien mit Geheimnissen (z. B. `~/.ssh`, `~/.aws`, Credential-Stores) einbinden;
-- jede Sicherheitslockerung (Capabilities, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices) in der Befehlsausgabe ausweisen.
+- jede Sicherheitslockerung (Capabilities, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices) in der Befehlsausgabe ausweisen;
+- einen im Container aktivierten Login-Dienst (Passwort-Login) in der Befehlsausgabe ausweisen.
 
 Nicht-Ziele: `u-boot` startet keinen Agenten und setzt keinen Berechtigungsmodus des Agenten.
 
@@ -474,11 +475,11 @@ Für Devcontainer-Features oder externe Skripte, die das Profil einbindet, gelte
 
 ### LH-FA-DEV-009 – Git-Zugangsdaten im Sandbox-Devcontainer
 
-*Priorität: V1.* Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) dürfen Git-Zugangsdaten weder im Image, im Workspace-Volume noch in `u-boot.yaml` oder einer anderen erzeugten Datei stehen.
+*Priorität: V1.* Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) dürfen Git-Zugangsdaten und Zugangsdaten eines Agenten (etwa der Zugangsschlüssel eines Coding-Agenten, den ein aktiviertes Devcontainer-Feature nutzt) weder im Image, im Workspace-Volume noch in `u-boot.yaml` oder einer anderen erzeugten Datei stehen.
 
-- Übergabe zur Laufzeit per Umgebungsvariable oder als schreibgeschützter Secret-Mount.
-- Die Dokumentation beschreibt kurzlebige, auf das Repository begrenzte Tokens (privater Schlüssel nie im Container) und die Forderung nach Branch-Protection auf dem Remote.
-- `u-boot doctor` prüft die Token-Quelle: fehlt sie oder liegt sie im Klartext in einer Projektdatei, `warn` (kein Abbruch).
+- Übergabe zur Laufzeit per Umgebungsvariable; Git-Zugangsdaten alternativ als schreibgeschützter Secret-Mount. Die erzeugte Konfiguration trägt nur die Referenz auf die Umgebungsvariable des Hosts, nie den Wert.
+- Die Dokumentation beschreibt kurzlebige, auf das Repository begrenzte Tokens (privater Schlüssel nie im Container) und die Forderung nach Branch-Protection auf dem Remote; für den Agenten nennt sie die Umgebungsvariable, aus der der Zugangsschlüssel stammt.
+- `u-boot doctor` prüft die Quelle der Zugangsdaten (Git-Token-Quelle, bei aktivem Agenten-Feature die Umgebungsvariable des Agenten): fehlt sie oder liegt sie im Klartext in einer Projektdatei, `warn` (kein Abbruch).
 
 ---
 
@@ -1558,6 +1559,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.8.0 | 2026-10-16 | [`LH-FA-CLI-005`](#lh-fa-cli-005--verbosity-und-logging): Ausnahme für Sicherheitslockerungen unter `--quiet` ergänzt: Die Ausweisung von Sicherheitslockerungen (zusätzliche Capabilities, `--privileged`, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices) nach [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) und [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion) bleibt sichtbar, ein Skript mit `--quiet` schaltet sie nicht stumm; alle anderen Hinweise entfallen. Die Stufenbeschreibungen („`--quiet` – nur Fehler“) und die Regel „die zuletzt angegebene Option gewinnt“ bleiben unverändert. | Vereinbarung mit dem Projektinhaber |
 | 0.9.0 | 2026-10-16 | [`LH-FA-CLI-005`](#lh-fa-cli-005--verbosity-und-logging): Vier Ausnahmen unter `--quiet` (Sicherheitslockerungen, Ausweisung der Degradations-Fallbacks nach [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), Fortschritt von `u-boot up` nach [`LH-NFA-PERF-002`](#lh-nfa-perf-002--startzeit-abhängig-von-docker), `--force`-Zusammenfassung nach [`LH-FA-CLI-005A`](#lh-fa-cli-005a--interaktivität-und-automatisierung) und [`LH-FA-INIT-005`](#lh-fa-init-005--überschreibschutz)); die ändernden Subkommandos geben unter `--quiet` nur Fehler aus, `u-boot doctor` nur Fehler-Einträge, die Abfragebefehle (`config get`, `config list`, `logs`, `template list`) behalten ihre Ausgabe; die Stufen und die Mehrfachangabe-Regel bleiben unverändert. | Vereinbarung mit dem Projektinhaber |
 | 0.10.0 | 2026-10-16 | [`LH-FA-CLI-005`](#lh-fa-cli-005--verbosity-und-logging): Die Ausgabe der Vorschau-Optionen `--dry-run` und `--diff` ([`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run), [`LH-FA-CLI-008`](#lh-fa-cli-008--diff-ausgabe)) ist das Ergebnis des Aufrufs und bleibt unter `--quiet`; die Erfolgs- und Zusammenfassungsmeldung eines tatsächlichen Schreibens entfällt auch bei `--diff` ohne `--dry-run`; die Stufen, die vier Ausnahmen und die Mehrfachangabe-Regel bleiben unverändert. | Vereinbarung mit dem Projektinhaber |
+| 0.11.0 | 2026-10-17 | [`LH-FA-DEV-009`](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer): Zusage auf Zugangsdaten eines Agenten erweitert (nie in Image, Workspace-Volume, `u-boot.yaml` oder erzeugter Datei; Übergabe per Umgebungsvariable; `doctor` prüft die Quelle); [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil): Ausweisung eines im Container aktivierten Login-Dienstes (Passwort-Login) im Sandbox-Profil; [`LH-FA-CLI-005`](#lh-fa-cli-005--verbosity-und-logging): Ausnahme 1 unter `--quiet` nennt auch diesen Login-Dienst. | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt
