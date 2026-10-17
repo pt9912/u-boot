@@ -4,19 +4,26 @@ import (
 	"errors"
 	"strings"
 	"testing"
+
+	"github.com/pt9912/u-boot/internal/adapter/driving/cli"
+	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
-// wouldCases pins, per subcommand, the dry-run summary (LH-FA-CLI-007)
-// and the summary of an actual write.
-var wouldCases = []struct {
+type wouldCase struct {
 	name   string
 	dryRun string
 	write  string
-}{
-	{"generate", "Would generate changelog (CHANGELOG.md).", "Generated changelog (CHANGELOG.md)."},
-	{"remove", "Would remove service \"postgres\".\n\nWould change:\n", "Removed service \"postgres\".\n\nChanged:\n"},
-	{"config set", "config: Would set project.name old → new.", "config: project.name old → new."},
-	{"config set many", "config: Would set devcontainer.enabled false → true.", "config: devcontainer.enabled false → true."},
+}
+
+// wouldCases pins, per subcommand, the dry-run summary (LH-FA-CLI-007)
+// and the summary of an actual write.
+func wouldCases() []wouldCase {
+	return []wouldCase{
+		{"generate", "Would generate changelog (CHANGELOG.md).", "Generated changelog (CHANGELOG.md)."},
+		{"remove", "Would remove service \"postgres\".\n\nWould change:\n", "Removed service \"postgres\".\n\nChanged:\n"},
+		{"config set", "config: Would set project.name old → new.", "config: project.name old → new."},
+		{"config set many", "config: Would set devcontainer.enabled false → true.", "config: devcontainer.enabled false → true."},
+	}
 }
 
 func wouldSubcommand(t *testing.T, name string) previewSubcommand {
@@ -34,7 +41,7 @@ func wouldSubcommand(t *testing.T, name string) previewSubcommand {
 // says what would happen, and not what happened.
 func TestDryRun_SummarySaysWould(t *testing.T) {
 	t.Parallel()
-	for _, c := range wouldCases {
+	for _, c := range wouldCases() {
 		for _, opts := range [][]string{{"--dry-run"}, {"--dry-run", "--diff"}} {
 			for _, quiet := range []bool{false, true} {
 				c, opts, quiet := c, opts, quiet
@@ -65,7 +72,7 @@ func TestDryRun_SummarySaysWould(t *testing.T) {
 // form stays and "Would" does not appear.
 func TestDryRun_ActualWriteKeepsPastForm(t *testing.T) {
 	t.Parallel()
-	for _, c := range wouldCases {
+	for _, c := range wouldCases() {
 		for _, opts := range [][]string{nil, {"--diff"}} {
 			c, opts := c, opts
 			t.Run(c.name+"/"+strings.Join(opts, " "), func(t *testing.T) {
@@ -90,7 +97,7 @@ func TestDryRun_ActualWriteKeepsPastForm(t *testing.T) {
 // the contract), and an error stays an error with --dry-run.
 func TestDryRun_JSONAndErrorsUnchanged(t *testing.T) {
 	t.Parallel()
-	for _, c := range wouldCases {
+	for _, c := range wouldCases() {
 		c := c
 		t.Run(c.name, func(t *testing.T) {
 			t.Parallel()
@@ -106,6 +113,43 @@ func TestDryRun_JSONAndErrorsUnchanged(t *testing.T) {
 			_, _, err = quietRun(t, app, append(append([]string{}, sc.cmd...), "--dry-run")...)
 			if !errors.Is(err, want) {
 				t.Errorf("err = %v, want %v", err, want)
+			}
+		})
+	}
+}
+
+// Happy/Boundary per generate action: each changing action reads
+// "Would ..." under --dry-run and keeps its past form otherwise; NoOp
+// reads the same in both modes.
+func TestDryRun_GenerateActions(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name   string
+		action driving.GenerateAction
+		dryRun string
+		write  string
+	}{
+		{"created", driving.GenerateActionCreated, "Would generate changelog (CHANGELOG.md).", "Generated changelog (CHANGELOG.md)."},
+		{"updated-block", driving.GenerateActionUpdatedBlock, "Would update changelog managed block (CHANGELOG.md).", "Updated changelog managed block (CHANGELOG.md)."},
+		{"repaired-manual", driving.GenerateActionRepairedManual, "Would repair changelog structure (CHANGELOG.md).", "Repaired changelog structure (CHANGELOG.md)."},
+		{"no-op", driving.GenerateActionNoOp, "changelog already up to date; no changes.", "changelog already up to date; no changes."},
+	}
+	for _, c := range cases {
+		c := c
+		t.Run(c.name, func(t *testing.T) {
+			t.Parallel()
+			app := func() *cli.App {
+				uc := generateFixture()
+				uc.resp.Action = c.action
+				return newAppWithGenerate(uc, cli.WithGetwd(sandboxGetwd))
+			}
+			dry, _, err := quietRun(t, app(), "generate", "changelog", "--dry-run")
+			if err != nil || !strings.Contains(dry, c.dryRun) {
+				t.Errorf("--dry-run: err=%v stdout=%q, want %q", err, dry, c.dryRun)
+			}
+			write, _, err := quietRun(t, app(), "generate", "changelog")
+			if err != nil || !strings.Contains(write, c.write) || strings.Contains(write, "Would") {
+				t.Errorf("write: err=%v stdout=%q, want %q", err, write, c.write)
 			}
 		})
 	}

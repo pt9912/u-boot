@@ -287,6 +287,17 @@ u-boot remove otel --dry-run --diff
 Beide lassen sich kombinieren. Nutzen Sie das, wann immer Sie unsicher sind: Es
 kostet nichts und ist folgenlos.
 
+Die Zusammenfassung eines `--dry-run` sagt, was geschehen würde: `init`, `add`,
+`remove`, `generate` und `config set` melden `Would …` (zum Beispiel
+`Would remove service "otel".` mit der Liste `Would change:`,
+`Would generate changelog (CHANGELOG.md).` oder
+`config: Would set project.name alt → neu.`). Ohne `--dry-run` steht dieselbe
+Zeile in der Vergangenheitsform (`Removed service …`, `Generated …`,
+`config: project.name alt → neu.`). Dasselbe gilt für `--dry-run --diff`; `--diff`
+allein schreibt und meldet die Vergangenheitsform. Die Meldung „nichts zu tun“
+(`… already up to date; no changes.`) und die `--json`-Ausgabe sind in beiden
+Fällen gleich.
+
 ### Allgemeine Optionen
 
 Diese Optionen gelten für jeden Befehl:
