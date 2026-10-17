@@ -439,7 +439,8 @@ func mapRemoveErrorToDiagnostic(err error) diagnosticItem {
 //   - Idempotent no-op (Changed=nil):
 //     "Service <name> is already disabled; no changes."
 //   - State transition (Changed!=nil):
-//     "Removed service <name>." + list of changed paths.
+//     "Removed service <name>." + list of changed paths; under
+//     `--dry-run` "Would remove service <name>." + "Would change:".
 //
 // When `--purge` was requested AND the response shows VolumesPurged=
 // false (always true in v0.3.0 — actual volume removal is deferred)
@@ -472,7 +473,11 @@ func printRemoveSummary(out, errOut io.Writer, resp driving.RemoveServiceRespons
 	if len(resp.Changed) == 0 {
 		fmt.Fprintf(out, "Service %q is already disabled; no changes.\n", name)
 	} else {
-		fmt.Fprintf(out, "Removed service %q.\n\nChanged:\n", name)
+		if previewMode == driving.PreviewDryRun {
+			fmt.Fprintf(out, "Would remove service %q.\n\nWould change:\n", name)
+		} else {
+			fmt.Fprintf(out, "Removed service %q.\n\nChanged:\n", name)
+		}
 		for _, p := range resp.Changed {
 			fmt.Fprintln(out, "  - "+p)
 		}

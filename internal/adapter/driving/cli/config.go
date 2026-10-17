@@ -479,7 +479,7 @@ func runConfigSet(
 	// not write it; the plan of a dry run stays (`config get` /
 	// `config list` are queries and keep their output).
 	if summaryVisible(flags.Quiet, flags.DryRun) {
-		printConfigSetSummary(out, resp)
+		printConfigSetSummary(out, resp, flags.DryRun)
 	}
 	return nil
 }
@@ -554,13 +554,20 @@ func mapConfigErrorToDiagnostic(err error) diagnosticItem {
 	}
 }
 
-// printConfigSetSummary writes the post-Set human-mode summary line.
-func printConfigSetSummary(out io.Writer, resp driving.ConfigSetResponse) {
+// printConfigSetSummary writes the human-mode summary line of one
+// path: `config: <path> <old> → <new>.` after a write, `config: Would
+// set <path> <old> → <new>.` under `--dry-run`; an unchanged value
+// reads the same in both modes.
+func printConfigSetSummary(out io.Writer, resp driving.ConfigSetResponse, dryRun bool) {
 	if resp.OldValue == resp.NewValue {
 		fmt.Fprintf(out, "config: %s already %s; no changes.\n", resp.Path, resp.NewValue)
 		return
 	}
-	fmt.Fprintf(out, "config: %s %s → %s.\n", resp.Path, summaryValue(resp.OldValue), summaryValue(resp.NewValue))
+	verb := ""
+	if dryRun {
+		verb = "Would set "
+	}
+	fmt.Fprintf(out, "config: %s%s %s → %s.\n", verb, resp.Path, summaryValue(resp.OldValue), summaryValue(resp.NewValue))
 }
 
 // summaryValue renders one side of the OldValue → NewValue line.
@@ -678,7 +685,7 @@ func runConfigSetMany(
 		return nil
 	}
 	for _, e := range resp.Entries {
-		printConfigSetSummary(out, driving.ConfigSetResponse{Path: e.Path, OldValue: e.OldValue, NewValue: e.NewValue})
+		printConfigSetSummary(out, driving.ConfigSetResponse{Path: e.Path, OldValue: e.OldValue, NewValue: e.NewValue}, flags.DryRun)
 	}
 	return nil
 }

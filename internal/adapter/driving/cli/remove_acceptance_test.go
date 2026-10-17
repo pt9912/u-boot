@@ -993,9 +993,8 @@ func TestRemove_TooManyArgs_JSON_EmitsCLI006Envelope(t *testing.T) {
 // WARNING-Prosa trotzdem (Logic `--purge && !VolumesPurged`) und
 // suggestierte fälschlich, dass Volume-Cleanup deferred wurde. Fix
 // in T7: WARNING wird in `PreviewDryRun` unterdrückt; nur das
-// Summary-Headline und die "Would change"-Liste landen auf stdout
-// (Headline-Wording bleibt heute "Removed service" — separate
-// "Would remove"-Wording-Drift wäre eigene Sub-Decision).
+// Summary-Headline ("Would remove service") und die "Would change"-
+// Liste landen auf stdout.
 func TestRemove_PurgeDryRun_HumanMode_NoVolumeWarningPollution(t *testing.T) {
 	stub := &removeUseCaseStub{
 		resp: driving.RemoveServiceResponse{
@@ -1022,6 +1021,9 @@ func TestRemove_PurgeDryRun_HumanMode_NoVolumeWarningPollution(t *testing.T) {
 	}
 	if strings.Contains(errs, "docker volume rm") {
 		t.Errorf("Dry-Run-Pollution: manual-cleanup-Hint darf in PreviewDryRun NICHT erscheinen; got:\n%s", errs)
+	}
+	if !strings.Contains(stdout.String(), `Would remove service "postgres".`) || !strings.Contains(stdout.String(), "Would change:") {
+		t.Errorf("Dry-Run headline must read Would remove / Would change:; got:\n%s", stdout.String())
 	}
 	// PreviewMode korrekt durchgereicht.
 	if stub.lastReq.PreviewMode != driving.PreviewDryRun {

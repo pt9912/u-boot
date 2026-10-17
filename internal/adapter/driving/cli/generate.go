@@ -226,7 +226,7 @@ func runGenerate(
 	// message; under --quiet only the dry-run plan and the exception
 	// warnings are written.
 	if summaryVisible(flags.Quiet, flags.DryRun) {
-		printGenerateSummary(out, resp)
+		printGenerateSummary(out, resp, flags.DryRun)
 	}
 	for _, w := range visibleWarnings(resp.Warnings, flags.Quiet) {
 		fmt.Fprintf(out, "Warning (%s): %s\n", w.Code, w.Message)
@@ -340,21 +340,38 @@ func manualConflictCodeFor(artifact domain.Artifact) string {
 //	NoOp            → "<artifact> already up to date; no changes."
 //	RepairedManual  → "Repaired <artifact> structure (<paths>)."
 //
+// Under `--dry-run` the three changing shapes read "Would generate",
+// "Would update <artifact> managed block" and "Would repair
+// <artifact> structure"; NoOp is unchanged.
+//
 // The Changed slice is rendered as a comma-separated parenthetical
 // so the caller sees at a glance which files were written; for NoOp
 // the line is intentionally bare (no Changed list) because nothing
 // was touched.
-func printGenerateSummary(out io.Writer, resp driving.GenerateResponse) {
+func printGenerateSummary(out io.Writer, resp driving.GenerateResponse, dryRun bool) {
 	name := resp.Artifact.String()
+	changed := strings.Join(resp.Changed, ", ")
 	switch resp.Action {
 	case driving.GenerateActionNoOp:
 		fmt.Fprintf(out, "%s already up to date; no changes.\n", name)
 	case driving.GenerateActionCreated:
-		fmt.Fprintf(out, "Generated %s (%s).\n", name, strings.Join(resp.Changed, ", "))
+		if dryRun {
+			fmt.Fprintf(out, "Would generate %s (%s).\n", name, changed)
+			return
+		}
+		fmt.Fprintf(out, "Generated %s (%s).\n", name, changed)
 	case driving.GenerateActionUpdatedBlock:
-		fmt.Fprintf(out, "Updated %s managed block (%s).\n", name, strings.Join(resp.Changed, ", "))
+		if dryRun {
+			fmt.Fprintf(out, "Would update %s managed block (%s).\n", name, changed)
+			return
+		}
+		fmt.Fprintf(out, "Updated %s managed block (%s).\n", name, changed)
 	case driving.GenerateActionRepairedManual:
-		fmt.Fprintf(out, "Repaired %s structure (%s).\n", name, strings.Join(resp.Changed, ", "))
+		if dryRun {
+			fmt.Fprintf(out, "Would repair %s structure (%s).\n", name, changed)
+			return
+		}
+		fmt.Fprintf(out, "Repaired %s structure (%s).\n", name, changed)
 	default:
 		// Defensive: a future GenerateAction value renders both its
 		// String() form and the Changed list rather than silently

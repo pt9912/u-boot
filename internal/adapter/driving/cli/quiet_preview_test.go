@@ -50,7 +50,7 @@ func previewSubcommands() []previewSubcommand {
 			},
 		},
 		{
-			name: "generate", cmd: []string{"generate", "changelog"}, summary: "Generated changelog (CHANGELOG.md).",
+			name: "generate", cmd: []string{"generate", "changelog"}, summary: "Would generate changelog (CHANGELOG.md).",
 			app: func(t *testing.T) *cli.App {
 				uc := generateFixture()
 				uc.resp.PlannedFiles = previewPlanned()
@@ -72,7 +72,7 @@ func previewSubcommands() []previewSubcommand {
 			},
 		},
 		{
-			name: "remove", cmd: []string{"remove", "postgres"}, summary: `Removed service "postgres".`,
+			name: "remove", cmd: []string{"remove", "postgres"}, summary: `Would remove service "postgres".`,
 			app: func(t *testing.T) *cli.App {
 				uc := removeFixture(t)
 				uc.resp.PlannedFiles = previewPlanned()
@@ -83,7 +83,7 @@ func previewSubcommands() []previewSubcommand {
 			},
 		},
 		{
-			name: "config set", cmd: []string{"config", "set", "project.name", "new"}, summary: "config: project.name old → new.",
+			name: "config set", cmd: []string{"config", "set", "project.name", "new"}, summary: "config: Would set project.name old → new.",
 			app: func(t *testing.T) *cli.App {
 				return newAppWithConfigStub(&fakeConfigUseCase{
 					setResp: driving.ConfigSetResponse{
@@ -98,7 +98,7 @@ func previewSubcommands() []previewSubcommand {
 		},
 		{
 			name: "config set many", cmd: []string{"config", "set", "project.name", "new", "devcontainer.enabled", "true"},
-			summary: "config: devcontainer.enabled false → true.",
+			summary: "config: Would set devcontainer.enabled false → true.",
 			app: func(t *testing.T) *cli.App {
 				return newAppWithConfigStub(&fakeConfigUseCase{
 					setManyResp: driving.ConfigSetManyResponse{
