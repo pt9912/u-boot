@@ -312,6 +312,7 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 	// removals, or renames as a visible diff and forces a deliberate
 	// update of this list when the catalogue changes.
 	want := []string{
+		"claude-code",
 		"cpp",
 		"docker-cli",
 		"git",

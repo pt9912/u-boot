@@ -235,6 +235,12 @@ func featureCatalogue() map[string]featureCatalogueEntry {
 			defaultVersion: "1",
 			shortDesc:      "SSH server (login service, port 2222)",
 		},
+		"claude-code": {
+			source:         "ghcr.io/anthropics/devcontainer-features/claude-code",
+			defaultVersion: "1",
+			shortDesc:      "Claude Code CLI (Anthropic feature; needs the node feature)",
+			publisher:      "anthropics",
+		},
 	}
 }
 

@@ -780,6 +780,7 @@ func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.Ge
 	data.Features = features
 	warnings = append(warnings, sandboxRelaxationWarnings(cfg.Devcontainer, sandbox)...)
 	warnings = append(warnings, thirdPartyFeatureWarnings(cfg)...)
+	warnings = append(warnings, agentNodeWarnings(cfg.Devcontainer)...)
 	plans, err := s.planDevcontainerFiles(req.BaseDir, data)
 	if err != nil {
 		return driving.GenerateResponse{}, err

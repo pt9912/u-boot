@@ -92,6 +92,7 @@ func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bo
 		return data
 	}
 	data.Sandbox = true
+	data.AgentEnv = agentCredentialEnv(dc)
 	data.WorkspaceVolume = name + "-workspace"
 	data.WorkspaceFolder = sandboxWorkspaceRoot + "/" + name
 	data.CloneURL = cloneURL
@@ -325,17 +326,52 @@ func sandboxRelaxationWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []drivin
 // true (LH-FA-DEV-006: a login service that is active in the container is
 // disclosed).
 func loginServiceActive(dc *ubootYAMLDevcontainer) bool {
+	return catalogueFeatureActive(dc, "sshd")
+}
+
+// catalogueFeatureActive reports whether an enabled feature resolves to
+// the source of the catalogue entry `key`; a `version` override keeps it
+// true, a `source:` override to another source makes it false.
+func catalogueFeatureActive(dc *ubootYAMLDevcontainer, key string) bool {
 	if dc == nil {
 		return false
 	}
-	sshd := featureCatalogue()["sshd"].source
+	want := featureCatalogue()[key].source
 	for name, f := range dc.Features {
 		if f.Enabled == nil || !*f.Enabled {
 			continue
 		}
-		if source, _, ok := projectFeatureSourceVersion(name, f.Source, f.Version); ok && source == sshd {
+		if source, _, ok := projectFeatureSourceVersion(name, f.Source, f.Version); ok && source == want {
 			return true
 		}
 	}
 	return false
+}
+
+// agentCredentialEnv returns the host environment variables that carry
+// the credential of an active agent feature (LH-FA-DEV-009): the
+// generated `remoteEnv` holds only the reference `${localEnv:<NAME>}`,
+// and `u-boot doctor` looks for the same reference. The Anthropic
+// documentation names `ANTHROPIC_API_KEY` as the API key variable.
+func agentCredentialEnv(dc *ubootYAMLDevcontainer) []string {
+	if catalogueFeatureActive(dc, "claude-code") {
+		return []string{"ANTHROPIC_API_KEY"}
+	}
+	return nil
+}
+
+// agentNodeWarnings returns the notice that the `claude-code` feature
+// installs through npm: on the base image without Node.js the feature's
+// own install fails (measured), so the `node` feature must be enabled.
+func agentNodeWarnings(dc *ubootYAMLDevcontainer) []driving.WarningEntry {
+	if !catalogueFeatureActive(dc, "claude-code") || catalogueFeatureActive(dc, "node") {
+		return nil
+	}
+	return []driving.WarningEntry{{
+		Code:  "LH-FA-DEV-003",
+		Level: "warn",
+		Message: "devcontainer feature claude-code installs through npm and the base image has no Node.js; " +
+			"enable the node feature (`u-boot config set devcontainer.features.node.enabled true`) or the image build fails",
+		Subject: ".devcontainer/devcontainer.json",
+	}}
 }

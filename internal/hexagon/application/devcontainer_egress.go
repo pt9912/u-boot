@@ -68,15 +68,20 @@ func egressRegistryHosts() []string {
 // restricted container needs it.
 func egressDockerAptHost() string { return "download.docker.com" }
 
-// egressFeatureHosts are added per enabled devcontainer feature.
+// egressFeatureHosts are added per enabled devcontainer feature. The
+// `claude-code` row lists the npm registry (CLI package), the API host
+// (measured at runtime) and the sign-in hosts of the Anthropic network
+// documentation; telemetry, update, MCP and plugin hosts are optional and
+// not listed.
 func egressFeatureHosts() map[string][]string {
 	return map[string][]string{
-		"node":     {"registry.npmjs.org"},
-		"go":       {"proxy.golang.org", "sum.golang.org", "storage.googleapis.com"},
-		"java":     {"repo.maven.apache.org", "repo1.maven.org"},
-		"python":   {"pypi.org", "files.pythonhosted.org"},
-		"homebrew": {"formulae.brew.sh", "ghcr.io", "pkg-containers.githubusercontent.com"},
-		"sdkman":   {"api.sdkman.io", "broker.sdkman.io", "repo.maven.apache.org", "repo1.maven.org"},
+		"node":        {"registry.npmjs.org"},
+		"go":          {"proxy.golang.org", "sum.golang.org", "storage.googleapis.com"},
+		"java":        {"repo.maven.apache.org", "repo1.maven.org"},
+		"python":      {"pypi.org", "files.pythonhosted.org"},
+		"homebrew":    {"formulae.brew.sh", "ghcr.io", "pkg-containers.githubusercontent.com"},
+		"sdkman":      {"api.sdkman.io", "broker.sdkman.io", "repo.maven.apache.org", "repo1.maven.org"},
+		"claude-code": {"registry.npmjs.org", "api.anthropic.com", "claude.ai", "platform.claude.com", "claude.com"},
 	}
 }
 

@@ -50,8 +50,12 @@ type templateData struct {
 	// Sandbox switches on the LH-FA-DEV-006 sandbox profile of the
 	// devcontainer templates; WorkspaceVolume / WorkspaceFolder name
 	// the named volume and its mount point, CloneURL (may be empty)
-	// is the `origin` URL of the project repository.
+	// is the `origin` URL of the project repository. AgentEnv names the
+	// host variables of an active agent feature (LH-FA-DEV-009); the
+	// template renders their `${localEnv:<NAME>}` references into
+	// `remoteEnv`, never a value.
 	Sandbox         bool
+	AgentEnv        []string
 	WorkspaceVolume string
 	WorkspaceFolder string
 	CloneURL        string

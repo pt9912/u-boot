@@ -27,16 +27,20 @@ const (
 	// from the host and is verified by the container start script.
 	checkIDSandboxEgress = "devcontainer.sandbox.egress"
 
-	// checkIDSandboxCredentials is the LH-FA-DEV-009 check: git
-	// credentials must not sit in plain text in a project file, and
-	// an https clone needs a runtime token source.
+	// checkIDSandboxCredentials is the LH-FA-DEV-009 check: git and
+	// agent credentials must not sit in plain text in a project file,
+	// an https clone needs a runtime token source, and an active agent
+	// feature needs the reference of its host variable.
 	checkIDSandboxCredentials = "devcontainer.sandbox.credentials"
 )
 
-// credentialPatterns detect plaintext git credentials in project
-// files (LH-FA-DEV-009): userinfo in an http(s) URL and the common
-// token prefixes / assignments. References such as
-// `${localEnv:GIT_TOKEN}` do not match.
+// credentialPatterns detect plaintext credentials in project files
+// (LH-FA-DEV-009): userinfo in an http(s) URL, the common git token
+// prefixes / assignments, and Anthropic keys. The `sk-ant-` expression is
+// the one the Claude Code CLI 2.1.302 itself uses to find a key in text
+// (read from the installed binary); the assignment pattern covers the
+// three variables of the Anthropic environment documentation.
+// References such as `${localEnv:GIT_TOKEN}` do not match.
 func credentialPatterns() []*regexp.Regexp {
 	return []*regexp.Regexp{
 		regexp.MustCompile(`https?://[^/\s:@"']+(:[^/\s@"']*)?@`),
@@ -44,6 +48,8 @@ func credentialPatterns() []*regexp.Regexp {
 		regexp.MustCompile(`\bgithub_pat_[A-Za-z0-9_]{20,}`),
 		regexp.MustCompile(`\bglpat-[A-Za-z0-9_-]{20,}`),
 		regexp.MustCompile(`(?i)\b(?:git|gh|github|gitlab)_?token\s*[=:]\s*["']?[A-Za-z0-9_\-]{12,}`),
+		regexp.MustCompile(`(?:^|[^A-Za-z0-9_-])sk-ant-[A-Za-z0-9_-]{40,}`),
+		regexp.MustCompile(`\b(?:ANTHROPIC_API_KEY|ANTHROPIC_AUTH_TOKEN|CLAUDE_CODE_OAUTH_TOKEN)\b["']?\s*[=:]\s*["']?[A-Za-z0-9_\-]{12,}`),
 	}
 }
 
@@ -116,34 +122,65 @@ func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) d
 }
 
 // checkSandboxCredentials implements LH-FA-DEV-009 (warn only). It is
-// skipped without the sandbox profile. Both warn items (plaintext
-// credential, https clone without token source) carry
+// skipped without the sandbox profile. All warn items (plaintext
+// credential, https clone without token source, active agent feature
+// without the reference of its host variable) carry
 // [domain.Diagnostic.SecurityRelaxation].
 func (s *DoctorService) checkSandboxCredentials(_ context.Context, baseDir string) domain.Diagnostic {
 	cfg, err := s.loadUbootYAML(baseDir)
 	if err != nil || !profileIsSandbox(cfg.Devcontainer) {
 		return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityOK,
-			Message: "Sandbox profile not active; git credential check skipped."}
+			Message: "Sandbox profile not active; credential check skipped."}
 	}
 	if found := s.plaintextCredentialFiles(baseDir); len(found) > 0 {
 		return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityWarn,
-			Message:            fmt.Sprintf("possible plaintext git credential in: %s (LH-FA-DEV-009).", strings.Join(found, ", ")),
-			Hint:               "Remove it from the file, revoke the token, and pass a short-lived repository-scoped token at runtime via $GIT_TOKEN.",
+			Message: fmt.Sprintf("possible plaintext credential in: %s (LH-FA-DEV-009).", strings.Join(found, ", ")),
+			Hint: "Remove it from the file, revoke the credential, and pass it at runtime: a short-lived repository-scoped token via $GIT_TOKEN, " +
+				"an agent key via its host environment variable (for example $ANTHROPIC_API_KEY).",
 			SecurityRelaxation: true}
 	}
+	agentVars := agentCredentialEnv(cfg.Devcontainer)
 	origin := effectiveCloneSource(s.fs, baseDir, cfg.Devcontainer)
-	if !strings.HasPrefix(origin, "https://") && !strings.HasPrefix(origin, "http://") {
-		return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityOK,
-			Message: "No plaintext git credentials found; no https clone source needs a token."}
-	}
-	if !s.hasTokenSource(baseDir) {
+	httpsClone := strings.HasPrefix(origin, "https://") || strings.HasPrefix(origin, "http://")
+	if httpsClone && !s.hasTokenSource(baseDir) {
 		return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityWarn,
 			Message:            "sandbox profile clones over https but devcontainer.json has no runtime token source (remoteEnv GIT_TOKEN or a read-only secret mount) (LH-FA-DEV-009).",
 			Hint:               "Run `u-boot generate devcontainer` to restore the GIT_TOKEN pass-through; never store tokens in project files.",
 			SecurityRelaxation: true}
 	}
-	return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityOK,
-		Message: "No plaintext git credentials found; a runtime token source is configured."}
+	if missing := s.missingAgentSources(baseDir, agentVars); len(missing) > 0 {
+		return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityWarn,
+			Message: fmt.Sprintf("an active agent feature needs its credential at runtime but devcontainer.json has no reference for: %s (LH-FA-DEV-009).",
+				strings.Join(missing, ", ")),
+			Hint:               "Run `u-boot generate devcontainer` to restore the `${localEnv:<NAME>}` pass-through and export the variable on the host; never store the key in project files.",
+			SecurityRelaxation: true}
+	}
+	msg := "No plaintext git credentials found; no https clone source needs a token."
+	if httpsClone {
+		msg = "No plaintext git credentials found; a runtime token source is configured."
+	}
+	if len(agentVars) > 0 {
+		msg += " The agent credential is passed through " + strings.Join(agentVars, ", ") + " (reference only)."
+	}
+	return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityOK, Message: msg}
+}
+
+// missingAgentSources returns the agent variables whose
+// `${localEnv:<NAME>}` reference is absent from devcontainer.json (the
+// file counts as absent when it cannot be read).
+func (s *DoctorService) missingAgentSources(baseDir string, vars []string) []string {
+	if len(vars) == 0 {
+		return nil
+	}
+	body, err := s.fs.ReadFile(filepath.Join(baseDir, ".devcontainer", "devcontainer.json"))
+	text := string(body)
+	var missing []string
+	for _, name := range vars {
+		if err != nil || !strings.Contains(text, "${localEnv:"+name+"}") {
+			missing = append(missing, name)
+		}
+	}
+	return missing
 }
 
 // plaintextCredentialFiles returns the sorted project files that match

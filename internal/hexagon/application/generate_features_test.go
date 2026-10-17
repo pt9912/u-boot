@@ -853,3 +853,242 @@ func TestGenerateDevcontainer_SshdLoginWarning_ThirdPartyStaysUnflagged(t *testi
 		t.Errorf("second run: action=%v err=%v, want NoOp", r2.Action, err)
 	}
 }
+
+const claudeCodeKey = "ghcr.io/anthropics/devcontainer-features/claude-code"
+
+// claudeCodeThirdPartyWarnings returns the LH-NFA-SEC-004 notices that
+// name the Anthropic publisher.
+func claudeCodeThirdPartyWarnings(ws []driving.WarningEntry) []driving.WarningEntry {
+	var out []driving.WarningEntry
+	for _, w := range ws {
+		if w.Code == "LH-NFA-SEC-004" && strings.Contains(w.Message, "third-party publisher anthropics") {
+			out = append(out, w)
+		}
+	}
+	return out
+}
+
+// LH-FA-DEV-003 / ADR-0020: `claude-code` renders the Anthropic feature at
+// the measured tag `1` (a `version` override renders as given) and is
+// reported as a third-party feature without SecurityRelaxation (the notice
+// is dropped under `--quiet`); the second run is a NoOp.
+func TestGenerateDevcontainer_ClaudeCodeRender(t *testing.T) {
+	t.Parallel()
+	cases := map[string]struct {
+		yaml string
+		want string
+	}{
+		"default tag":      {"devcontainer:\n  enabled: true\n  features:\n    claude-code:\n      enabled: true\n", claudeCodeKey + ":1"},
+		"version override": {"devcontainer:\n  enabled: true\n  features:\n    claude-code:\n      enabled: true\n      version: \"1.0\"\n", claudeCodeKey + ":1.0"},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, tc.yaml)
+			resp, err := generateSandbox(svc, false)
+			if err != nil {
+				t.Fatalf("generate: %v", err)
+			}
+			body, _ := fs.ReadFile(devcontainerJSONPath())
+			feats := parseDevcontainerFeatures(t, body)
+			if _, ok := feats[tc.want]; !ok || len(feats) != 1 {
+				t.Errorf("features = %v, want exactly %q", feats, tc.want)
+			}
+			third := claudeCodeThirdPartyWarnings(resp.Warnings)
+			if len(third) != 1 {
+				t.Fatalf("third-party notices for anthropics = %d, want 1: %+v", len(third), resp.Warnings)
+			}
+			if third[0].SecurityRelaxation || !strings.Contains(third[0].Message, tc.want) {
+				t.Errorf("notice must name %q and carry no SecurityRelaxation: %+v", tc.want, third[0])
+			}
+			if r2, err := generateSandbox(svc, false); err != nil || r2.Action != driving.GenerateActionNoOp {
+				t.Errorf("second run: action=%v err=%v, want NoOp", r2.Action, err)
+			}
+		})
+	}
+}
+
+// `claude-code` installs through npm; on the base image without Node.js its
+// own install fails (measured), so `generate` tells the user to enable the
+// `node` feature: one unflagged notice when claude-code is active and node
+// is not; none with node, with claude-code switched off, or when
+// claude-code comes from an own source.
+func TestGenerateDevcontainer_ClaudeCodeNodeNotice(t *testing.T) {
+	t.Parallel()
+	const on = "    claude-code:\n      enabled: true\n"
+	cases := map[string]struct {
+		yaml string
+		want int
+	}{
+		"claude-code alone":        {"devcontainer:\n  enabled: true\n  features:\n" + on, 1},
+		"with node":                {"devcontainer:\n  enabled: true\n  features:\n" + on + "    node:\n      enabled: true\n", 0},
+		"node switched off":        {"devcontainer:\n  enabled: true\n  features:\n" + on + "    node:\n      enabled: false\n", 1},
+		"claude-code switched off": {"devcontainer:\n  enabled: true\n  features:\n    claude-code:\n      enabled: false\n", 0},
+		"own source":               {"devcontainer:\n  enabled: true\n  featureSources:\n    allow:\n      - https://ghcr.io/me/features\n  features:\n    claude-code:\n      enabled: true\n      source: https://ghcr.io/me/features/claude-code\n", 0},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, tc.yaml)
+			resp, err := generateSandbox(svc, false)
+			if err != nil {
+				t.Fatalf("generate: %v", err)
+			}
+			got := 0
+			for _, w := range resp.Warnings {
+				if w.Code == "LH-FA-DEV-003" && strings.Contains(w.Message, "claude-code") {
+					got++
+					if w.SecurityRelaxation || w.Level != "warn" || !strings.Contains(w.Message, "devcontainer.features.node.enabled") {
+						t.Errorf("node notice must be an unflagged warn naming the node feature: %+v", w)
+					}
+				}
+			}
+			if got != tc.want {
+				t.Errorf("node notices = %d, want %d: %+v", got, tc.want, resp.Warnings)
+			}
+		})
+	}
+}
+
+// LH-FA-DEV-009: with `claude-code` active the sandbox `remoteEnv` carries
+// the reference of the host variable next to GIT_TOKEN, never a value.
+// Without the feature the block stays byte-identical to the GIT_TOKEN-only
+// form; without the sandbox profile there is no `remoteEnv`.
+func TestGenerateDevcontainer_ClaudeCodeCredentialReference(t *testing.T) {
+	t.Parallel()
+	const gitOnly = "  \"remoteEnv\": {\n    \"GIT_TOKEN\": \"${localEnv:GIT_TOKEN}\"\n  },\n"
+	const withAgent = "  \"remoteEnv\": {\n    \"GIT_TOKEN\": \"${localEnv:GIT_TOKEN}\",\n    \"ANTHROPIC_API_KEY\": \"${localEnv:ANTHROPIC_API_KEY}\"\n  },\n"
+	const on = "    claude-code:\n      enabled: true\n"
+	cases := map[string]struct {
+		yaml string
+		want string // exact remoteEnv block, "" = no remoteEnv key
+	}{
+		"sandbox with claude-code":      {"devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n" + on, withAgent},
+		"sandbox with claude-code, off": {"devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n    claude-code:\n      enabled: false\n", gitOnly},
+		"sandbox without the feature":   {"devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n    node:\n      enabled: true\n", gitOnly},
+		"sandbox with version override": {"devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n    claude-code:\n      enabled: true\n      version: \"1.0\"\n", withAgent},
+		"default profile":               {"devcontainer:\n  enabled: true\n  features:\n" + on, ""},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, tc.yaml)
+			if _, err := generateSandbox(svc, false); err != nil {
+				t.Fatalf("generate: %v", err)
+			}
+			raw, _ := fs.ReadFile(devcontainerJSONPath())
+			body := string(raw)
+			if tc.want == "" {
+				if strings.Contains(body, "remoteEnv") || strings.Contains(body, "ANTHROPIC") {
+					t.Errorf("no remoteEnv expected:\n%s", body)
+				}
+			} else if !strings.Contains(body, tc.want) {
+				t.Errorf("remoteEnv block differs, want:\n%s\ngot:\n%s", tc.want, body)
+			}
+			if strings.Contains(body, "sk-ant") {
+				t.Errorf("a key value must never be rendered:\n%s", body)
+			}
+			m := devcontainerJSONMap(t, fs)
+			if env, ok := m["remoteEnv"].(map[string]any); ok {
+				for k, v := range env {
+					if s, _ := v.(string); !strings.HasPrefix(s, "${localEnv:") || !strings.HasSuffix(s, "}") {
+						t.Errorf("remoteEnv[%s] = %q is not a ${localEnv:...} reference", k, s)
+					}
+				}
+			}
+		})
+	}
+}
+
+// egressHostList reads the baked allowlist of the egress start script.
+func egressHostList(t *testing.T, fs *fakeFS) []string {
+	t.Helper()
+	script, err := fs.ReadFile(egressInitPath())
+	if err != nil {
+		t.Fatalf("read egress script: %v", err)
+	}
+	for _, line := range strings.Split(string(script), "\n") {
+		if rest, ok := strings.CutPrefix(line, `hosts="`); ok {
+			return strings.Fields(strings.TrimSuffix(rest, `"`))
+		}
+	}
+	t.Fatalf("no hosts= line in the egress script:\n%s", script)
+	return nil
+}
+
+// Welle-Closure (golden): `sshd` and `claude-code` (with `node`) together.
+// Every render key and the agent reference appear exactly once, the second
+// run is a NoOp, and with the egress restriction the allowlist is the
+// sorted, duplicate-free union (registry.npmjs.org comes from `node` and
+// `claude-code` and stays one entry; `sshd` adds none; optional hosts of
+// the agent are absent).
+func TestGenerateDevcontainer_SshdAndClaudeCodeTogether(t *testing.T) {
+	t.Parallel()
+	const features = "  features:\n    sshd:\n      enabled: true\n    claude-code:\n      enabled: true\n    node:\n      enabled: true\n"
+	cases := map[string]struct {
+		yaml      string
+		sandbox   bool
+		wantLogin int
+		wantHosts []string
+	}{
+		"default profile": {"devcontainer:\n  enabled: true\n" + features, false, 0, nil},
+		"sandbox":         {"devcontainer:\n  enabled: true\n  profile: sandbox\n" + features, false, 1, nil},
+		"sandbox flag":    {"devcontainer:\n  enabled: true\n" + features, true, 1, nil},
+		"sandbox egress": {"devcontainer:\n  enabled: true\n  profile: sandbox\n" + features + "  sandbox:\n    egress:\n      enabled: true\n", false, 1, []string{
+			"api.anthropic.com", "api.github.com", "claude.ai", "claude.com", "codeload.github.com", "deb.debian.org",
+			"github.com", "objects.githubusercontent.com", "platform.claude.com", "raw.githubusercontent.com",
+			"registry.npmjs.org", "security.debian.org"}},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, tc.yaml)
+			resp, err := generateSandbox(svc, tc.sandbox)
+			if err != nil {
+				t.Fatalf("generate: %v", err)
+			}
+			raw, _ := fs.ReadFile(devcontainerJSONPath())
+			body := string(raw)
+			for _, key := range []string{
+				"ghcr.io/devcontainers/features/sshd:1", claudeCodeKey + ":1", "ghcr.io/devcontainers/features/node:1"} {
+				if n := strings.Count(body, `"`+key+`"`); n != 1 {
+					t.Errorf("render key %q appears %d times, want 1:\n%s", key, n, body)
+				}
+			}
+			if n := len(parseDevcontainerFeatures(t, raw)); n != 3 {
+				t.Errorf("features = %d keys, want 3", n)
+			}
+			wantAgent := 0
+			if tc.sandbox || strings.Contains(tc.yaml, "profile: sandbox") {
+				wantAgent = 1
+			}
+			if n := strings.Count(body, `"ANTHROPIC_API_KEY"`); n != wantAgent {
+				t.Errorf("ANTHROPIC_API_KEY reference appears %d times, want %d", n, wantAgent)
+			}
+			if got := len(sshdLoginWarnings(resp.Warnings)); got != tc.wantLogin {
+				t.Errorf("login warnings = %d, want %d: %+v", got, tc.wantLogin, resp.Warnings)
+			}
+			if got := len(claudeCodeThirdPartyWarnings(resp.Warnings)); got != 1 {
+				t.Errorf("anthropics notices = %d, want 1: %+v", got, resp.Warnings)
+			}
+			for _, w := range resp.Warnings {
+				if w.Code == "LH-FA-DEV-003" && strings.Contains(w.Message, "claude-code") {
+					t.Errorf("node is enabled, no node notice expected: %+v", w)
+				}
+			}
+			if tc.wantHosts != nil {
+				hosts := egressHostList(t, fs)
+				if !sort.StringsAreSorted(hosts) || !reflect.DeepEqual(hosts, tc.wantHosts) {
+					t.Errorf("egress hosts =\n%v\nwant (sorted, no duplicates)\n%v", hosts, tc.wantHosts)
+				}
+			}
+			if r2, err := generateSandbox(svc, tc.sandbox); err != nil || r2.Action != driving.GenerateActionNoOp {
+				t.Errorf("second run: action=%v err=%v, want NoOp", r2.Action, err)
+			}
+		})
+	}
+}

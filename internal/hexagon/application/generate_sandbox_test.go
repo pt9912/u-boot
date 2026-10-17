@@ -892,6 +892,8 @@ func TestGenerateDevcontainer_SandboxEgress_FeatureHosts(t *testing.T) {
 		"sdkman":   {"sdkman", []string{"api.sdkman.io", "broker.sdkman.io", "repo1.maven.org"}, []string{"formulae.brew.sh"}},
 		"python":   {"python", []string{"pypi.org", "files.pythonhosted.org"}, []string{"formulae.brew.sh", "api.sdkman.io"}},
 		"sshd":     {"sshd", []string{"deb.debian.org"}, []string{"pypi.org", "formulae.brew.sh", "api.sdkman.io", "registry.npmjs.org"}},
+		"claude-code": {"claude-code", []string{"registry.npmjs.org", "api.anthropic.com", "claude.ai", "platform.claude.com", "claude.com"},
+			[]string{"formulae.brew.sh", "api.sdkman.io", "pypi.org", "http-intake.logs.us5.datadoghq.com", "mcp-proxy.anthropic.com", "downloads.claude.ai"}},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
@@ -933,5 +935,39 @@ func TestGenerateDevcontainer_SandboxEgress_SshdAddsNoHost(t *testing.T) {
 	without := script("    git:\n      enabled: true\n")
 	if with != without {
 		t.Errorf("sshd changed the egress allowlist:\nwith:\n%s\nwithout:\n%s", with, without)
+	}
+}
+
+// The Anthropic hosts are in the allowlist only while `claude-code` is
+// enabled; a disabled or absent feature leaves them out (SPEC-019 default
+// allowlist per feature).
+func TestGenerateDevcontainer_SandboxEgress_ClaudeCodeHostsOnlyWhenActive(t *testing.T) {
+	t.Parallel()
+	anthropic := []string{"api.anthropic.com", "claude.ai", "platform.claude.com", "claude.com"}
+	for name, tc := range map[string]struct {
+		features string
+		want     bool
+	}{
+		"enabled":  {"    claude-code:\n      enabled: true\n", true},
+		"disabled": {"    claude-code:\n      enabled: false\n", false},
+		"absent":   {"    node:\n      enabled: true\n", false},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n"+tc.features+"  sandbox:\n    egress:\n      enabled: true\n")
+			if _, err := generateSandbox(svc, false); err != nil {
+				t.Fatalf("generate: %v", err)
+			}
+			have := map[string]bool{}
+			for _, h := range egressHostList(t, fs) {
+				have[h] = true
+			}
+			for _, h := range anthropic {
+				if have[h] != tc.want {
+					t.Errorf("%s in allowlist = %v, want %v", h, have[h], tc.want)
+				}
+			}
+		})
 	}
 }

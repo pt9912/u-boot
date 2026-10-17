@@ -35,6 +35,9 @@
 {{- end}}
   "remoteEnv": {
     "GIT_TOKEN": "${localEnv:GIT_TOKEN}"
+{{- range .AgentEnv}},
+    "{{.}}": "${localEnv:{{.}}}"
+{{- end}}
   },
 {{- end}}
 {{- if .ForwardPorts}}

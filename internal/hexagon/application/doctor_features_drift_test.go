@@ -123,17 +123,31 @@ func TestDoctor_FeaturesDrift_OKWithJavaAndSdkmanSharingOneKey(t *testing.T) {
 // missing render key (Case 1).
 func TestDoctor_FeaturesDrift_Sshd(t *testing.T) {
 	t.Parallel()
+	checkCatalogueFeatureDrift(t, "sshd", "ghcr.io/devcontainers/features/sshd:1")
+}
+
+// `claude-code` is projectable like every catalogue key; its render key
+// comes from the Anthropic namespace.
+func TestDoctor_FeaturesDrift_ClaudeCode(t *testing.T) {
+	t.Parallel()
+	checkCatalogueFeatureDrift(t, "claude-code", "ghcr.io/anthropics/devcontainer-features/claude-code:1")
+}
+
+// checkCatalogueFeatureDrift runs the in-sync and missing-key cases of the
+// drift check for one catalogue feature and its render key.
+func checkCatalogueFeatureDrift(t *testing.T, feature, renderKey string) {
+	t.Helper()
 	for name, tc := range map[string]struct {
 		json string
 		want domain.Severity
 	}{
-		"in sync": {`{"features": {"ghcr.io/devcontainers/features/sshd:1": {}}}`, domain.SeverityOK},
+		"in sync": {`{"features": {"` + renderKey + `": {}}}`, domain.SeverityOK},
 		"missing": {`{"features": {}}`, domain.SeverityWarn},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			svc, fs, _, _, _ := newDoctorService(t)
-			driftSeed(t, fs, "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    sshd:\n      enabled: true\n", tc.json)
+			driftSeed(t, fs, "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    "+feature+":\n      enabled: true\n", tc.json)
 			resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
 			if err != nil {
 				t.Fatalf("Check: %v", err)
@@ -142,8 +156,8 @@ func TestDoctor_FeaturesDrift_Sshd(t *testing.T) {
 			if d.Severity != tc.want {
 				t.Errorf("Severity = %v, want %v; message = %q", d.Severity, tc.want, d.Message)
 			}
-			if tc.want == domain.SeverityWarn && !strings.Contains(d.Message, "ghcr.io/devcontainers/features/sshd:1") {
-				t.Errorf("message does not name the sshd render key: %q", d.Message)
+			if tc.want == domain.SeverityWarn && !strings.Contains(d.Message, renderKey) {
+				t.Errorf("message does not name the %s render key: %q", feature, d.Message)
 			}
 		})
 	}

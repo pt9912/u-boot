@@ -282,3 +282,79 @@ func TestDoctor_SandboxOKItemsCarryNoQuietFlag(t *testing.T) {
 		}
 	}
 }
+
+// LH-FA-DEV-009 (agent credential): with `claude-code` active the check
+// looks for the `${localEnv:ANTHROPIC_API_KEY}` reference and recognises an
+// Anthropic key in plain text. Every new warn item carries
+// SecurityRelaxation and is no degradation fallback.
+func TestDoctor_SandboxCredentials_Agent(t *testing.T) {
+	t.Parallel()
+	const agentYAML = sandboxYAMLHead + "  profile: sandbox\n  features:\n    claude-code:\n      enabled: true\n"
+	const agentOff = sandboxYAMLHead + "  profile: sandbox\n  features:\n    claude-code:\n      enabled: false\n"
+	const withRef = `{"remoteEnv": {"GIT_TOKEN": "${localEnv:GIT_TOKEN}", "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"}}`
+	const fakeKey = "sk-ant-api03-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijkl"
+	gitCfg := func(url string) string { return "[remote \"origin\"]\n\turl = " + url + "\n" }
+	cases := []struct {
+		name     string
+		yaml     string
+		files    map[string]string
+		want     domain.Severity
+		contains string
+	}{
+		{"active, reference present", agentYAML, map[string]string{".devcontainer/devcontainer.json": withRef},
+			domain.SeverityOK, "ANTHROPIC_API_KEY (reference only)"},
+		{"active, devcontainer.json missing", agentYAML, nil, domain.SeverityWarn, "no reference for: ANTHROPIC_API_KEY"},
+		{"active, reference absent", agentYAML, map[string]string{".devcontainer/devcontainer.json": `{"remoteEnv": {"GIT_TOKEN": "${localEnv:GIT_TOKEN}"}}`},
+			domain.SeverityWarn, "no reference for: ANTHROPIC_API_KEY"},
+		{"active, other variable is no source", agentYAML, map[string]string{".devcontainer/devcontainer.json": `{"remoteEnv": {"ANTHROPIC_API_KEY": "${localEnv:OTHER_KEY}"}}`},
+			domain.SeverityWarn, "no reference for: ANTHROPIC_API_KEY"},
+		{"active, https clone without git token source is reported first", agentYAML,
+			map[string]string{".git/config": gitCfg("https://github.com/o/r.git"), ".devcontainer/devcontainer.json": "{}"},
+			domain.SeverityWarn, "no runtime token source"},
+		{"active, https clone with both sources", agentYAML,
+			map[string]string{".git/config": gitCfg("https://github.com/o/r.git"), ".devcontainer/devcontainer.json": withRef},
+			domain.SeverityOK, "a runtime token source is configured. The agent credential"},
+		{"inactive, reference not required", sandboxYAMLHead + "  profile: sandbox\n", map[string]string{".devcontainer/devcontainer.json": "{}"},
+			domain.SeverityOK, "no https clone"},
+		{"switched off, reference not required", agentOff, map[string]string{".devcontainer/devcontainer.json": "{}"},
+			domain.SeverityOK, "no https clone"},
+		{"key in .env.example", agentYAML, map[string]string{".env.example": "ANTHROPIC_API_KEY=" + fakeKey + "\n", ".devcontainer/devcontainer.json": withRef},
+			domain.SeverityWarn, ".env.example"},
+		{"key in devcontainer.json", agentYAML, map[string]string{".devcontainer/devcontainer.json": `{"remoteEnv": {"ANTHROPIC_API_KEY": "` + fakeKey + `"}}`},
+			domain.SeverityWarn, ".devcontainer/devcontainer.json"},
+		{"key in u-boot.yaml", agentYAML + "# " + fakeKey + "\n", map[string]string{".devcontainer/devcontainer.json": withRef},
+			domain.SeverityWarn, "u-boot.yaml"},
+		{"literal assignment of the variable", agentYAML, map[string]string{".env.example": "ANTHROPIC_API_KEY=plainvalue123456\n", ".devcontainer/devcontainer.json": withRef},
+			domain.SeverityWarn, ".env.example"},
+		{"OAuth token variable literal", agentYAML, map[string]string{"compose.yaml": "    CLAUDE_CODE_OAUTH_TOKEN: abcdefghijklmnop0123\n", ".devcontainer/devcontainer.json": withRef},
+			domain.SeverityWarn, "compose.yaml"},
+		{"empty assignment is no credential", agentYAML, map[string]string{".env.example": "ANTHROPIC_API_KEY=\n", ".devcontainer/devcontainer.json": withRef},
+			domain.SeverityOK, "reference only"},
+		{"short sk-ant- prefix text is no key", agentYAML, map[string]string{".env.example": "# keys start with sk-ant-\n", ".devcontainer/devcontainer.json": withRef},
+			domain.SeverityOK, "reference only"},
+		{"key found without the agent feature too", sandboxYAMLHead + "  profile: sandbox\n", map[string]string{".env.example": "X=" + fakeKey + "\n"},
+			domain.SeverityWarn, ".env.example"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			items := runSandboxDoctor(t, func(fs *fakeFS) {
+				writeDoctorFile(t, fs, "u-boot.yaml", tc.yaml)
+				for rel, body := range tc.files {
+					writeDoctorFile(t, fs, rel, body)
+				}
+			})
+			d := findDiagnostic(t, items, "devcontainer.sandbox.credentials")
+			if d.Severity != tc.want || !strings.Contains(d.Message, tc.contains) {
+				t.Fatalf("got %v %q, want %v containing %q", d.Severity, d.Message, tc.want, tc.contains)
+			}
+			if wantRelax := tc.want == domain.SeverityWarn; d.SecurityRelaxation != wantRelax || d.DegradationFallback {
+				t.Errorf("SecurityRelaxation = %v (want %v), DegradationFallback = %v (want false): %q",
+					d.SecurityRelaxation, wantRelax, d.DegradationFallback, d.Message)
+			}
+			if strings.Contains(d.Message, fakeKey) || strings.Contains(d.Hint, fakeKey) {
+				t.Errorf("the finding must not echo the key: %q / %q", d.Message, d.Hint)
+			}
+		})
+	}
+}
