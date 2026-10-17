@@ -26,13 +26,15 @@ Der Push eines Tags `vMAJOR.MINOR.PATCH[-PRERELEASE]` startet den Workflow `publ
 | Binaries | sechs Plattformen (Linux/macOS/Windows × amd64/arm64) als Release-Assets |
 | Linux-Pakete | vier Pakete (`.deb`/`.rpm` × amd64/arm64) per `nfpm` ([ADR-0017](../plan/adr/0017-linux-pakete-nfpm.md)) als Release-Assets |
 | `SHA256SUMS` | Prüfsummen der Binaries und Pakete als weiteres Asset |
-| Paket-Smoke | zwei Jobs installieren `.deb` (Ubuntu) und `.rpm` (Fedora) aus dem Release, prüfen `--version` und `init` |
+| Paket-Smoke | zwei Jobs installieren `.deb` (Ubuntu) und `.rpm` (Fedora) aus dem Release, prüfen `--version` und `init`; der Asset-Name kommt aus der Asset-Liste des Release (`scripts/package-asset-name.sh`), nicht aus dem Tag |
 | Homebrew-Formel | nur stabile Tags: `u-boot.rb` aus den Digests von `SHA256SUMS` |
 | Job `tap` | nur stabile Tags: zieht die Formel nach `pt9912/homebrew-u-boot` nach |
 
 Ein **Vorab-Tag** (`v0.6.0-rc.1`) durchläuft dieselbe Kette, wird aber als Prerelease
 markiert, bekommt kein `:latest`, keine Formel und keinen Tap-Commit. Das ist die
-Probe für den Release-Pfad (und hinterher löschbar).
+Probe für den Release-Pfad (und hinterher löschbar). Bei Vorabversionen heißen die Pakete
+in der Datei `0.6.0~rc.1` (nfpm), das Release-Asset `0.6.0.rc.1` (GitHub ersetzt `~`); `SHA256SUMS`
+führt die Dateinamen mit `~`. Stabile Tags haben nur eine Schreibweise.
 
 ## 2. Voraussetzungen (einmalig)
 
@@ -142,6 +144,7 @@ auf „kein Absturz" geprüft). `brew audit --strict --online` gatet den Lauf; e
 | Job `tap` warnt „secret not configured" | Secret setzen (§2), Job erneut ausführen (`gh run rerun --job`) |
 | Job `tap` schlägt fehl (z. B. `403 Permission denied`) | `gh workflow run tap-check` ausführen; PAT-Rechte/Ablauf prüfen (fine-grained: Repo ergänzen, Contents = Read and write); manuell nachziehen: `TAP_TOKEN=… TAG=vX.Y.Z scripts/tap-nachzug.sh` |
 | Formel fehlt im Tap | Asset `u-boot.rb` des Releases fehlt (Prerelease?) oder Tap-Job nicht gelaufen |
+| Paket-Smoke endet mit `curl: (22) 404` | Asset-Name falsch gewählt (Vorab-Tag: `~` im Dateinamen, `.` im Asset); `gh release view vX.Y.Z-rc.N --json assets` zeigt die Namen, `scripts/package-asset-name.sh` wählt sie; Workflow-Fix auf `main`, neuer Vorab-Tag (der alte Tag wird nicht verschoben) |
 | Trivy-`image-scan` rot | Go-Pin heben (siehe §4), erst dann taggen |
 
 Ein bereits veröffentlichter Tag wird **nicht verschoben**; ein Fehler wird mit dem nächsten

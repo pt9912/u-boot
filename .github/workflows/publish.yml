@@ -34,6 +34,8 @@ jobs:
     # Single source of "stable" for the jobs that need publish (tap).
     outputs:
       is_stable: ${{ steps.tag.outputs.is_stable }}
+      deb_asset: ${{ steps.assets.outputs.deb_asset }}
+      rpm_asset: ${{ steps.assets.outputs.rpm_asset }}
     timeout-minutes: 20
     permissions:
       contents: write    # write needed so the release-upload step can
@@ -223,6 +225,21 @@ jobs:
           scripts/build-packages.sh "$VERSION" bin packages
           gh release upload "v$VERSION" packages/* --clobber
 
+      # The smoke jobs install the asset by the name GitHub stores: nfpm names a
+      # pre-release 0.10.0~rc.1, the release asset becomes 0.10.0.rc.1. The name is
+      # read back from the release, not derived from the tag
+      # (scripts/package-asset-name.sh, tested in cmd/uboot).
+      - name: Resolve the package asset names
+        id: assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          set -euo pipefail
+          NAMES="$(gh release view "v$VERSION" --json assets -q '.assets[].name')"
+          echo "deb_asset=$(scripts/package-asset-name.sh deb <<<"$NAMES")" >> "$GITHUB_OUTPUT"
+          echo "rpm_asset=$(scripts/package-asset-name.sh rpm <<<"$NAMES")" >> "$GITHUB_OUTPUT"
+
       # slice-v2-homebrew-formula (ADR-0016): one SHA256SUMS over the six binaries
       # and the four Linux packages and — for stable tags — the Homebrew formula,
       # filled from the four brew digests of that file, travel as further assets
@@ -259,11 +276,12 @@ jobs:
       - name: Install the .deb from the release
         env:
           TAG: ${{ github.ref_name }}
+          ASSET: ${{ needs.publish.outputs.deb_asset }}
         run: |
           set -euo pipefail
           VERSION="${TAG#v}"
-          curl -fsSL -O "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/u-boot_${VERSION}_amd64.deb"
-          sudo apt-get install -y "./u-boot_${VERSION}_amd64.deb"
+          curl -fsSL -O "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/${ASSET}"
+          sudo apt-get install -y "./${ASSET}"
           u-boot --version | grep -F "$VERSION"
           mkdir demo && cd demo && u-boot init demo --no-git && test -f u-boot.yaml
 
@@ -279,11 +297,12 @@ jobs:
       - name: Install the .rpm from the release
         env:
           TAG: ${{ github.ref_name }}
+          ASSET: ${{ needs.publish.outputs.rpm_asset }}
         run: |
           set -euo pipefail
           VERSION="${TAG#v}"
-          curl -fsSL -O "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/u-boot-${VERSION}-1.x86_64.rpm"
-          dnf install -y "./u-boot-${VERSION}-1.x86_64.rpm"
+          curl -fsSL -O "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/${ASSET}"
+          dnf install -y "./${ASSET}"
           u-boot --version | grep -F "$VERSION"
           mkdir demo && cd demo && u-boot init demo --no-git && test -f u-boot.yaml
 
