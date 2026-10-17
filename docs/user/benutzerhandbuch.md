@@ -975,7 +975,7 @@ diese Lockerungen nötig; **`u-boot` weist jede einzeln als Warnung aus**:
 
 `/dev/net/tun` braucht das Netzwerk der verschachtelten Container (`pasta`);
 ohne das Device scheitert jedes `RUN` eines `podman build`. Es muss auf dem
-Container-Host vorhanden sein, sonst startet der Container nicht.
+Container-Host vorhanden sein; fehlt es, lehnt Docker den Start ab (gemessen: `error gathering device information while adding custom device … no such file or directory`), das Startscript läuft dann nicht, und `u-boot doctor` prüft das Device nicht. Abhilfe: das Kernelmodul `tun` auf dem Host laden (`modprobe tun`, nicht gemessen) oder `nestedRuntime: none` wählen. Bestehende Projekte mit `nestedRuntime: podman` brauchen das Device nach `u-boot generate devcontainer` ebenfalls.
 
 Das ist nahe an `--privileged`; der Schutz ist damit deutlich schwächer. Das
 Standardprofil (`nestedRuntime: none`) bleibt ungelockert.
@@ -986,8 +986,8 @@ Podman eingebauten Buildah-Bibliothek. Nicht vorhanden sind das Kommando
 `buildah`, `docker buildx`, `docker compose` und BuildKit-Frontends
 (`# syntax=`); wer sie braucht, wählt `nestedRuntime: docker`. Verwenden Sie in
 Dockerfiles voll qualifizierte Namen (`FROM docker.io/library/alpine:3`): Namen
-ohne Registry lösen nur über die Alias-Liste der Distribution auf (`alpine`
-löst auf, `mycompany/img` nicht), eine Suchliste für Registries ist nicht
+ohne Registry lösen nur über die Alias-Liste der Distribution auf (gemessen: `alpine`
+löst auf, `mycompany/img` nicht; andere Kurznamen sind nicht gemessen), eine Suchliste für Registries ist nicht
 gesetzt. Images und Schichten liegen im Volume
 `<projekt>-containers-${devcontainerId}`; gemessen: das Image `debian:stable-slim`
 mit einer Paketinstallation und drei Builds belegte rund 140 MB, das Volumen
@@ -999,7 +999,7 @@ läuft, kopiert aber jede Schicht vollständig.
 `RUN` und `COPY` baut kalt, aus dem Layer-Cache und mit `--no-cache`; `docker
 build` über den Alias ebenso; ein `RUN` mit Netz zu einem erlaubten Host
 (`apt-get update`) läuft, auch hinter der Egress-Restriktion mit der
-Default-Allowlist, ein nicht gelisteter Name löst dort nicht auf. **Nicht
+Default-Allowlist (gemessen mit `alpine:3` und `debian:stable-slim`; der Blob-Host von Docker Hub kann sich ändern), ein nicht gelisteter Name löst dort nicht auf. **Nicht
 gemessen:** andere Hosts und Architekturen (amd64), Docker Desktop, Podman als
 Host-Engine.
 
@@ -1063,6 +1063,7 @@ Geheimnisse und Docker-Socket des Hosts.
   Daemon nie.
 - Das Standardprofil und `podman` bleiben unverändert.
 - Unter Podman als Host-Engine ist `docker` nicht zugesagt.
+- Der Host `production.cloudfront.docker.com` der Default-Allowlist gilt auch hier, ist aber für `nestedRuntime: docker` nicht gemessen (gemessen ist der Pull mit `podman`).
 
 #### Internet-Beschränkung (Egress)
 

@@ -43,6 +43,9 @@ this file is the same format applied to u-boot itself.
   Measured on Colima 0.10.3 (arm64) with `kernel.apparmor_restrict_unprivileged_userns=0`; with the value `1` (the default of an Ubuntu 24.04 VM)
   nested Podman does not start (exit code `11`). Two integration tests (`TestE2E_SandboxDevcontainer_NestedPodman_Build`, `…_BuildEgress`) cover it and skip on such hosts.
   Lastenheft 0.12.0 promises it on the measured hosts. `buildah`, `docker buildx`, `docker compose` and BuildKit frontends are not part of the container; use fully qualified image names.
+  **Existing `nestedRuntime: podman` projects:** after the next `u-boot generate devcontainer` the container needs `/dev/net/tun` on the container host;
+  where the device is missing the engine refuses to start the container (Docker: `error gathering device information while adding custom device`), there is no degradation step and `u-boot doctor` does not check it.
+  Load the `tun` kernel module on the host (`modprobe tun`) or set `nestedRuntime: none`.
 - The default egress allowlist with `nestedRuntime: podman` or `docker` gains `production.cloudfront.docker.com`: Docker Hub redirects layer downloads
   to it, and without it a pull behind the restriction failed with a DNS error
   ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
