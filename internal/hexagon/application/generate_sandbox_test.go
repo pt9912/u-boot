@@ -806,7 +806,7 @@ func TestGenerateDevcontainer_SandboxEgressWithDocker(t *testing.T) {
 		t.Errorf("postStartCommand = %v", m["postStartCommand"])
 	}
 	script, _ := fs.ReadFile(egressInitPath())
-	for _, host := range []string{"registry-1.docker.io", "download.docker.com"} {
+	for _, host := range []string{"registry-1.docker.io", "production.cloudfront.docker.com", "download.docker.com"} {
 		if !strings.Contains(string(script), host) {
 			t.Errorf("%s missing from the allowlist:\n%s", host, script)
 		}

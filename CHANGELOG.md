@@ -35,14 +35,17 @@ this file is the same format applied to u-boot itself.
 - `devcontainer.sandbox.nestedRuntime: docker` is promised on Docker under Linux and on Colima (Linux VM) only.
   Docker Desktop is no longer promised: it is not measured, and the user manual lists it as not verified.
   Homebrew is documented for macOS only (Apple Silicon and Intel); the tap smoke now runs on `macos-14` and `macos-15-intel`.
-- `devcontainer.sandbox.nestedRuntime: podman`: the user manual no longer states that `docker build` works in the container; it
-  lists what `podman build` is (the same call as `docker build`, without `buildah`, `buildx`, `compose` or BuildKit frontends) and says that the
-  build is not measured and not promised yet ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
-  [ADR-0021](docs/plan/adr/0021-podman-build-im-sandbox-devcontainer.md)). Measured on Colima 0.10.3 (Ubuntu 24.04 VM,
-  `kernel.apparmor_restrict_unprivileged_userns=1`): nested Podman does not start there (exit code `11`). A new integration test
-  (`TestE2E_SandboxDevcontainer_NestedPodman_Build`) builds a Dockerfile in the container on hosts that allow nested user namespaces and skips elsewhere.
-  Behind the egress restriction, pulls from Docker Hub fail on `production.cloudfront.docker.com`, which the default allowlist does not carry; the manual
-  names the workaround (`devcontainer.sandbox.egress.allow`).
+- `devcontainer.sandbox.nestedRuntime: podman` builds images: `podman build` (and `docker build` through the alias) builds a Dockerfile with
+  `FROM`, `RUN` and `COPY` in the container, cold, from the layer cache and with `--no-cache`, with and without the egress restriction
+  ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
+  [ADR-0021](docs/plan/adr/0021-podman-build-im-sandbox-devcontainer.md)). A `RUN` needs the network of the nested container, which needs
+  `/dev/net/tun`: the generated `runArgs` gain a sixth security relaxation, `--device=/dev/net/tun`, and `generate` reports it like the other five.
+  Measured on Colima 0.10.3 (arm64) with `kernel.apparmor_restrict_unprivileged_userns=0`; with the value `1` (the default of an Ubuntu 24.04 VM)
+  nested Podman does not start (exit code `11`). Two integration tests (`TestE2E_SandboxDevcontainer_NestedPodman_Build`, `…_BuildEgress`) cover it and skip on such hosts.
+  `buildah`, `docker buildx`, `docker compose` and BuildKit frontends are not part of the container; use fully qualified image names.
+- The default egress allowlist with `nestedRuntime: podman` or `docker` gains `production.cloudfront.docker.com`: Docker Hub redirects layer downloads
+  to it, and without it a pull behind the restriction failed with a DNS error
+  ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
 - The contract for `--quiet` ([`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), Lastenheft 0.10.0) names four exceptions that stay visible: the
   disclosure of security relaxations in the sandbox profile, the disclosure of degradation fallbacks (container without daemon, `vfs`
   storage, dropped egress restriction), the per-service progress of `u-boot up` and the path summary that `--force` prints before
