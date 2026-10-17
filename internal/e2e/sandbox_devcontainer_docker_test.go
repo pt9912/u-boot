@@ -281,7 +281,7 @@ func generatedRunArgs(t *testing.T, dir string) []string {
 
 // skipIfNestedUsernsRestricted skips the test on hosts with
 // kernel.apparmor_restrict_unprivileged_userns=1 (Ubuntu 24.04+, Colima's
-// VM, GitHub runners): they block nested user namespaces even with
+// Ubuntu VM): they block nested user namespaces even with
 // apparmor=unconfined, so the startup script must degrade with exit 11
 // (LH-FA-DEV-007) and nested Podman cannot run. The degradation is
 // verified before the skip.
