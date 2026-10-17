@@ -313,7 +313,8 @@ func sandboxRelaxationWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []drivin
 		}
 	}
 	if sandbox && loginServiceActive(dc) {
-		relax("LH-FA-DEV-006", "login service sshd is active in the container (port 2222, password login only, after `sudo passwd`); "+
+		relax("LH-FA-DEV-006", "login service sshd is active in the container (port 2222; password and key login, root login permitted; "+
+			"the accounts stay locked until you set a password with `sudo passwd <user>` or add a key); "+
 			"the profile limits damage and is not an isolation boundary")
 	}
 	return out

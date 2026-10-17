@@ -805,6 +805,12 @@ func TestGenerateDevcontainer_SshdLoginWarning(t *testing.T) {
 					!strings.Contains(w.Message, "not an isolation boundary") {
 					t.Errorf("sshd warning lacks port, password step or boundary statement: %q", w.Message)
 				}
+				// The measured state (sshd -T): password and key login on,
+				// root login permitted; "password login only" would understate it.
+				if !strings.Contains(w.Message, "key login") || !strings.Contains(w.Message, "root login") ||
+					strings.Contains(w.Message, "password login only") || strings.Contains(w.Message, "only") {
+					t.Errorf("sshd warning must name key login and root login and not claim password-only: %q", w.Message)
+				}
 			}
 			body, _ := fs.ReadFile(devcontainerJSONPath())
 			if strings.Contains(string(body), "2222") {

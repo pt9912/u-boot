@@ -368,7 +368,7 @@ func TestExecute_Quiet_KeepsSshdLoginWarningDropsThirdParty(t *testing.T) {
 	t.Parallel()
 	sshd := driving.WarningEntry{
 		Code: "LH-FA-DEV-006", Level: "warn", SecurityRelaxation: true,
-		Message: "login service sshd is active in the container (port 2222, password login only, after `sudo passwd`)",
+		Message: "login service sshd is active in the container (port 2222; password and key login, root login permitted; the accounts stay locked until you set a password with `sudo passwd <user>` or add a key)",
 	}
 	thirdParty := driving.WarningEntry{
 		Code: "LH-NFA-SEC-004", Level: "warn",
