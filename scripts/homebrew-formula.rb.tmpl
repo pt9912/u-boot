@@ -1,12 +1,13 @@
 # u-boot.rb — Homebrew-Formel-Skeleton (slice-v2-homebrew-formula, LH-OPEN-002,
-# ADR-0016). Die Formel reist als Release-Asset desselben Tags: die vier
-# markierten Platzhalter werden im publish-Workflow aus der SHA256SUMS des Tags
-# befuellt (scripts/homebrew-formula-fill.sh); dieses Skeleton bleibt unveraendert.
+# ADR-0016). Die Formel reist als Release-Asset desselben Tags: die markierten
+# Platzhalter (Tag und vier Digests) werden im publish-Workflow aus der SHA256SUMS
+# des Tags befuellt (scripts/homebrew-formula-fill.sh); dieses Skeleton bleibt
+# unveraendert. Die Version steht nur in den URLs: Homebrew liest sie von dort,
+# eine `version`-Zeile waere fuer `brew audit --strict` redundant.
 # Vier Plattformen, nicht sechs: Homebrew traegt Windows nicht.
 class UBoot < Formula
   desc "Bootstrapper for reproducible Docker and devcontainer stacks"
   homepage "https://github.com/pt9912/u-boot"
-  version "__VERSION__"
   license "MIT"
 
   on_macos do

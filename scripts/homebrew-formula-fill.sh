@@ -7,7 +7,7 @@
 # SHA256SUMS, bricht der Lauf, statt eine Formel mit leerem Digest zu schreiben.
 #
 # AUFRUF: homebrew-formula-fill.sh <tag> <sums-datei> <skeleton> <ziel>
-#   tag         Release-Tag (z. B. v0.5.1) -> __TAG__; ohne fuehrendes "v" -> __VERSION__
+#   tag         Release-Tag (z. B. v0.5.1) -> __TAG__
 #   sums-datei  SHA256SUMS des Tags (Format: sha256sum, "<hash>  <name>")
 #   skeleton    scripts/homebrew-formula.rb.tmpl
 #   ziel        Pfad der befuellten Formel
@@ -24,7 +24,6 @@ ziel="${4:-}"
 [ -f "$sums" ] || { echo "homebrew-formula-fill: $sums does not exist — no digests without SHA256SUMS." >&2; exit 2; }
 [ -f "$skeleton" ] || { echo "homebrew-formula-fill: $skeleton does not exist." >&2; exit 2; }
 
-version="${tag#v}"
 digest() { awk -v n="u-boot-$1" '$2 == n {print $1}' "$sums"; }
 
 for plat in darwin-amd64 darwin-arm64 linux-amd64 linux-arm64; do
@@ -36,7 +35,6 @@ for plat in darwin-amd64 darwin-arm64 linux-amd64 linux-arm64; do
 done
 
 sed \
-	-e "s/__VERSION__/${version}/g" \
 	-e "s/__TAG__/${tag}/g" \
 	-e "s/__SHA256_DARWIN_AMD64__/$(digest darwin-amd64)/g" \
 	-e "s/__SHA256_DARWIN_ARM64__/$(digest darwin-arm64)/g" \

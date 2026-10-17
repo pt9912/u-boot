@@ -41,7 +41,6 @@ func TestHomebrewFormulaFill_Fills(t *testing.T) {
 		t.Fatalf("fill: %v\n%s", err, msg)
 	}
 	for _, want := range []string{
-		`version "1.2.3"`,
 		"releases/download/v1.2.3/u-boot-darwin-arm64",
 		`sha256 "1111111111111111111111111111111111111111111111111111111111111111"`, // darwin-amd64
 		`sha256 "2222222222222222222222222222222222222222222222222222222222222222"`, // darwin-arm64
@@ -58,6 +57,13 @@ func TestHomebrewFormulaFill_Fills(t *testing.T) {
 	}
 	if strings.Contains(body, "windows") {
 		t.Errorf("Homebrew carries no Windows platform")
+	}
+	// brew audit --strict rejects a `version` line that repeats the version
+	// scanned from the URL; the version lives in the URLs only.
+	for _, line := range strings.Split(body, "\n") {
+		if strings.HasPrefix(strings.TrimSpace(line), "version ") {
+			t.Errorf("formula carries a redundant version line: %q", line)
+		}
 	}
 }
 
