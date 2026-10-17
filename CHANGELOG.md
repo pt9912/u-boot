@@ -53,7 +53,9 @@ this file is the same format applied to u-boot itself.
   ([`LH-FA-DEV-009`](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)). A login service that is active in the container
   (password and key login, root login permitted) is disclosed in the command output, and that disclosure stays visible under `--quiet`, as do the warn items of
   `u-boot doctor` that concern a security property of the sandbox profile (credential source, egress restriction, relaxations of the
-  Docker daemon) ([`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)).
+  Docker daemon). The notice of `u-boot generate devcontainer` that `egress.enabled` has no effect without the sandbox profile
+  (no restriction was generated) stays visible under `--quiet` as well; the notice that `nestedRuntime` has no effect is a
+  configuration message and is dropped. Only `generate devcontainer` produces these notices; the text of the messages and the `--json` output are unchanged ([`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)).
   `u-boot doctor --quiet` now lists those warn items: a plaintext credential in a project file, an https clone without a runtime
   token source, an active agent feature without the reference of its environment variable, the egress restriction together with
   `nestedRuntime: docker`, and `egress.enabled` without the sandbox profile
