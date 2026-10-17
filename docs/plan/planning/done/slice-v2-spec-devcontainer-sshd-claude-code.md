@@ -54,7 +54,7 @@ oder Test); eine Aussage ohne Fundstelle wird gestrichen. Zahlenwerte und Hosts 
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [x] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
 - [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft, im Repo mit Wellen von der nächsten Welle-Closure (auch für Slices ohne Wellen-Zugehörigkeit).
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft, im Repo mit Wellen von der nächsten Welle-Closure (auch für Slices ohne Wellen-Zugehörigkeit).
 
 ## 3. Plan (vor Code)
 
@@ -116,7 +116,7 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 - **Beobachtungs-Register (`../observations/`):** Evidence-Datei `BEO-DOK/plan-aussage-ueber-code/evidence/slice-v2-spec-devcontainer-sshd-claude-code.md` angelegt; der Zähler steht damit bei **sieben** Vorgängen (`state.md` unverändert, Stand `verkörpert`; die Rückfall-Entscheidung steht beim Projektinhaber, siehe oben). `BEO-CLI/kommentar-beschreibt-abwesendes`: keine Beobachtung in diesem Vorgang (reine Spec- und Plan-Änderung, kein Kommentar im Diff; der Review prüfte `AGENTS.md` §3.7 an den neuen Spec-Absätzen ohne Befund).
 - **Folge-Slices:** [`slice-v1-cli-egress-ohne-profil-sichtbar`](../open/slice-v1-cli-egress-ohne-profil-sichtbar.md) (Code: `SecurityRelaxation` an der Egress-Meldung in `generate devcontainer`; zieht die Spec-Einträge zu `--quiet` und zur Warnungstabelle, Handbuch und CHANGELOG nach; Verification H-1: das Handbuch nennt `generate devcontainer` als einzigen Erzeuger) — ist eine Datei in `open/`; die Welle schließt erst nach ihm. Lastenheft-Hinweise F-6 bis F-8 (Klammer „Passwort-Login“, `doctor`-Eintrag zu Docker-Daemon-Lockerungen, Login-Dienst nur im Sandbox-Profil) gehen als Hinweise an den Projektinhaber (Lastenheft-CR nur auf seine Entscheidung), kein Folge-Slice.
 - **Risiken aus §6:** alle vier tragen einen Ausgang: eingetreten (Entwurf folgt der Plan-Prosa: F-2 bis F-5, behoben; Lastenheft und Code widersprechen sich: F-1, Folge-Slice), weiter offen (Egress „has no effect“ unter `--quiet` in `generate devcontainer`: Folge-Slice) und entfallen (Abfolge „Spezifikation zuletzt“: die Spezifikation liegt nach dem Code; die Lücke endete mit diesem Slice).
-- **Drei Paarungen:** Anker (kein `liegt in`, nichts verkörpert) · Folge-Slice (eine Datei in `open/`) · Register (Evidence-Datei angelegt, Zähler sieben) — nach dem `git mv` nach `done/` zu prüfen.
+- **Drei Paarungen:** Anker (kein `liegt in`, nichts verkörpert) · Folge-Slice (eine Datei in `open/`) · Register (Evidence-Datei angelegt, Zähler sieben) — nach dem `git mv` nach `done/` geprüft: kein Anker zu prüfen (nichts verkörpert); `open/slice-v1-cli-egress-ohne-profil-sichtbar.md` liegt; die Evidence-Datei liegt, sieben Dateien im Register.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
