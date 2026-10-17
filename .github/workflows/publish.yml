@@ -31,6 +31,9 @@ jobs:
   publish:
     name: publish (ghcr.io image push)
     runs-on: ubuntu-latest
+    # Single source of "stable" for the jobs that need publish (tap).
+    outputs:
+      is_stable: ${{ steps.tag.outputs.is_stable }}
     timeout-minutes: 20
     permissions:
       contents: write    # write needed so the release-upload step can
@@ -209,9 +212,10 @@ jobs:
 
           echo "Uploaded $(ls bin/u-boot-* | wc -l) binaries to release $TAG."
 
-      # slice-v2-homebrew-formula (ADR-0016): SHA256SUMS of the six
-      # binaries and — for stable tags — the Homebrew formula, filled from
-      # exactly these digests, travel as further assets of the same release.
+      # slice-v2-homebrew-formula (ADR-0016): one SHA256SUMS over the six binaries
+      # and the four Linux packages and — for stable tags — the Homebrew formula,
+      # filled from the four brew digests of that file, travel as further assets
+      # of the same release.
       # The `tap` job below pulls the formula into the tap.
       # slice-v2-distro-pakete (ADR-0017): .deb and .rpm (amd64, arm64) from the
       # same Linux binaries via nfpm, attached as release assets.
@@ -290,7 +294,7 @@ jobs:
   tap:
     name: tap (homebrew formula)
     needs: publish
-    if: ${{ !contains(github.ref_name, '-') }}
+    if: ${{ needs.publish.outputs.is_stable == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
