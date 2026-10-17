@@ -81,7 +81,7 @@ DoD vollständig, Review-Report liegt vor, Closure-Notiz geschrieben.
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angefallen.
 - **Folge-Slices:** [`slice-v1-sandbox-docker-integrationstest`](slice-v1-sandbox-docker-integrationstest.md) (im selben Lauf geschlossen).
 - **Risiken aus §6:** siehe §6
-- **Drei Paarungen:** Anker (Docker-Desktop-Messung) → Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) in `open/` · Register: keine Beobachtung angefallen.
+- **Drei Paarungen:** Anker (Docker-Desktop-Messung) → Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md) in `open/` · Register: keine Beobachtung angefallen.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 

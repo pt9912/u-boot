@@ -28,7 +28,7 @@ wechselt nur durch `git mv`.
 
 - Änderungen am Lockerungsprofil (`--privileged`), an Start, Degradation und Volume — die Messung zeigt nur die Paketquelle; das Verhalten bleibt wie in [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md) festgelegt.
 - Das Feature `docker-in-docker` — externe Quelle mit fremdem Installationsskript ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)); das APT-Repo mit gepinntem Schlüssel ist enger.
-- Docker Desktop und Podman als Host-Engine — der Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) führt die Docker-Desktop-Messung.
+- Docker Desktop und Podman als Host-Engine — der Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md) führt die Docker-Desktop-Messung.
 
 ## 2. Definition of Done
 
@@ -77,9 +77,9 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 - **Was ging anders als geplant:** Der Review [`2026-10-14-sandbox-docker-ce`](../../../reviews/2026-10-14-sandbox-docker-ce.md) fand drei MEDIUM (Testtiefe), der Folgelauf [`2026-10-14-sandbox-docker-ce-r2`](../../../reviews/2026-10-14-sandbox-docker-ce-r2.md) einen weiteren (Egress-Test ohne `--error-on=any`); alle behoben. Der Storage-Treiber meldet bei Docker 29 `overlayfs` (containerd-Image-Store) statt `overlay2`; Tests und [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md) akzeptieren beide.
 - **Steering-Loop-Eintrag:** Tests, die eine Eigenschaft belegen sollen, brauchen eine Negativprobe (Eigenschaft entfernen, Test wird rot) — vor dem Review ausgeführt statt vom Reviewer nachgefordert.
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angefallen.
-- **Folge-Slices:** [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) (Docker Desktop, unverändert offen).
+- **Folge-Slices:** [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md) (Docker Desktop, unverändert offen).
 - **Risiken aus §6:** siehe §6
-- **Drei Paarungen:** Anker (Docker-Desktop-Messung) → Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) · Register: keine Beobachtung angefallen.
+- **Drei Paarungen:** Anker (Docker-Desktop-Messung) → Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md) · Register: keine Beobachtung angefallen.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
@@ -109,7 +109,7 @@ DoD-Abgleich (Verifier prüft, setzt keine Häkchen):
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag — Evidence: §7 dieses Slice.
 - [x] Beobachtungs-Register — Evidence: §7 „keine Beobachtung angefallen".
 - [x] Jedes Risiko aus §6 trägt einen Ausgang — Evidence: §6 (Schlüsselrotation: „weiter offen" mit Re-Evaluierungs-Trigger der ADR; Verhaltensänderung neuer Versionen: „entfallen", belegt durch `make test-docker`).
-- [x] Drei Paarungen — Evidence: §7 (Anker, Folge-Slice [slice-v1-sandbox-docker-nachholmessung-desktop](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md), Register).
+- [x] Drei Paarungen — Evidence: §7 (Anker, Folge-Slice [slice-v1-sandbox-docker-nachholmessung-desktop](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md), Register).
 
 Hinweise des Verifiers (keine DoD-Lücke): Die Versionsaussage „Docker 29.9" in §6/§7 und im CHANGELOG ist durch den Test nur als Major >= 28 erzwungen (Versionsangabe selbst stammt aus der Messung in [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md), nicht aus einem Test). Die in §7 behauptete Negativprobe vor dem Review ist nicht aus dem Repo nachprüfbar.
 
@@ -144,7 +144,7 @@ Carveouts:
 
 Nicht ausgeführt:
 - `make ci` / `make fullbuild` — vom Implementer lokal ausgeführt, vom Verifier nicht selbst belegbar; eine CI auf `main` entsteht erst nach dem Push, bis dahin liegt kein CI-Beleg vor.
-- Docker Desktop, Podman als Host-Engine, VS Code/Codespaces — außerhalb des Slice (Folge-Slice [slice-v1-sandbox-docker-nachholmessung-desktop](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md)).
+- Docker Desktop, Podman als Host-Engine, VS Code/Codespaces — außerhalb des Slice (Folge-Slice [slice-v1-sandbox-docker-nachholmessung-desktop](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md)).
 - Echter Schlüsselrotations-Fall (Fingerprint-Mismatch bricht Build) — nicht live ausgeführt; belegt nur über Golden Case (Prüfung gatet Repo-Eintrag und Install).
 
 Commit / Artefakt:

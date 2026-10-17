@@ -230,7 +230,7 @@ sind angenommen; die drei Umsetzungs-Slices liegen in `open/` oder weiter.
 4. **macOS, Docker Desktop und VS Code ungeprüft** (wie bei [ADR-0014](../../adr/0014-nested-podman-sandbox-devcontainer.md)) — die
    Zielumgebung des Anlasses; Zusage erst nach Nachholmessung.
    — **Ausgang:** weiter offen: Docker-Desktop-Messung im Slice
-   [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md); unter Colima gemessen ([ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md)).
+   [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md); unter Colima gemessen ([ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md)).
 5. **Egress-Leitplanke** wird durch verschachtelte Container und
    Daemon-iptables unterlaufen.
    — **Ausgang:** entfallen: `u-boot doctor` warnt bei `docker` mit Egress-Restriktion (`6d726e0`).
@@ -241,9 +241,9 @@ sind angenommen; die drei Umsetzungs-Slices liegen in `open/` oder weiter.
 - **Was ging anders als geplant:** Die drei Umsetzungs-Slices lagen kurzzeitig gleichzeitig in `in-progress/` (WIP-Limit 1 verletzt, vor dem Push korrigiert: sie wurden nacheinander geschlossen). Review F-4: Das Lastenheft sagt Docker Desktop zu, gemessen ist nur Colima — die Doku sagt Docker Desktop erst nach der Nachholmessung zu.
 - **Steering-Loop-Eintrag:** Planungs-Disziplin: Slices einzeln über `open → next → in-progress` führen (WIP-Limit 1, `Verantwortlich:` setzen), auch wenn sie im selben Lauf geliefert werden.
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angefallen.
-- **Folge-Slices:** die drei Umsetzungs-Slices (geschlossen) und [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) (`open/`).
+- **Folge-Slices:** die drei Umsetzungs-Slices (geschlossen) und [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md) (`open/`).
 - **Risiken aus §6:** siehe §6
-- **Drei Paarungen:** Anker (Docker-Desktop-Messung) → Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) in `open/` · Register: keine Beobachtung angefallen.
+- **Drei Paarungen:** Anker (Docker-Desktop-Messung) → Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md) in `open/` · Register: keine Beobachtung angefallen.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
@@ -270,7 +270,7 @@ DoD-Abgleich (§2):
 - [x] Review, Report liegt vor — Evidence: `docs/reviews/2026-10-14-sandbox-docker-runtime.md` (0 HIGH, 2 MEDIUM, 5 LOW, 1 INFO).
 - [x] Doku-Update — Evidence: Diff auf `CHANGELOG.md`, ADR-Index, `roadmap.md`, `docs/user/benutzerhandbuch.md`.
 - [x] Closure-Notiz mit Steering-Loop-Eintrag — Evidence: §7.
-- [x] Beobachtungs-Register, Risiko-Ausgänge, drei Paarungen — Evidence: §6/§7; Risiko 4 „weiter offen“ ist mit Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) in `open/` gepaart.
+- [x] Beobachtungs-Register, Risiko-Ausgänge, drei Paarungen — Evidence: §6/§7; Risiko 4 „weiter offen“ ist mit Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md) in `open/` gepaart.
 
 Abnahmekriterien 1–7 des CR (§1), Abgleich gegen Diff und Tests:
 - [x] 1 — `TestGenerateDevcontainer_SandboxDocker` (runArgs exakt `--privileged`, Volume `<projekt>-docker-${devcontainerId}`, keine Socket-/Bind-Mounts, eine Warnung [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)).
@@ -278,7 +278,7 @@ Abnahmekriterien 1–7 des CR (§1), Abgleich gegen Diff und Tests:
 - [x] 3 — derselbe Test: zwei Instanzen, getrennte Daemon-IDs, gleichnamige Images/Container.
 - [x] 4 — `..._SandboxDocker_NotGenerated` (podman/none: kein `docker-init.sh`, kein `--privileged`); bestehende Podman-Goldens im Diff unverändert. Byte-Identität zur Vorversion ist nicht eigens gepinnt, nur Abwesenheit der Docker-Artefakte.
 - [x] 5 — `TestE2E_SandboxDevcontainer_NestedDocker_Degradation` (`warn` Exit 0, `fail` Exit 11, kein Podman im Image). Nur der Pfad „Daemon beendet sich beim Start“ ist getestet, nicht der 60-s-Timeout-Pfad.
-- [ ] 6 — nur für Colima erfüllt; Docker Desktop offen: Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) (`open/`). Der CR-Slice selbst liefert Kriterium 6 nicht (die Umsetzung liegt im Integrationstest-Slice), sein Risiko 4 trägt den Ausgang „weiter offen“.
+- [ ] 6 — nur für Colima erfüllt; Docker Desktop offen: Folge-Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md) (`open/`). Der CR-Slice selbst liefert Kriterium 6 nicht (die Umsetzung liegt im Integrationstest-Slice), sein Risiko 4 trägt den Ausgang „weiter offen“.
 - [x] 7 — `TestDoctor_SandboxRuntime` (docker ohne Sandbox-Profil warnt „no effect“), `TestDoctor_SandboxEgress` (docker mit Egress warnt „bypass the restriction“).
 
 Sensors:

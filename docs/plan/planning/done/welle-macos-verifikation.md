@@ -58,7 +58,7 @@ beide Architekturen ab, und erst danach ändert sich die Aussage der Nutzerdoku.
 - Docker Desktop, Podman als Host-Engine und VS Code/Codespaces:
   [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)
   sagt sie für `docker` nicht zu. Die Docker-Desktop-Messung bleibt als
-  [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md)
+  [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md)
   in `open/`, ohne Welle, bis ein Docker-Desktop-Host oder ein Nutzerbericht vorliegt.
 
 ## 7. Closure-Notiz
@@ -71,7 +71,7 @@ nicht, weil sie kein Release ist).
 - **Was hat funktioniert:** Die Closure-Trigger aus §3 ließen sich einzeln belegen; der Verifier prüfte den Smoke-Lauf am Log.
 - **Was ging anders als geplant:** Die Welle sollte auch die Docker-Desktop-Messung tragen. Es gibt keinen Docker-Desktop-Host; das
   Lastenheft 0.7.0 nahm die Zusage für Docker Desktop zurück ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)),
-  und der Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) verließ die Welle.
+  und der Slice [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md) verließ die Welle.
   Die Intel-Abbrüche des Smokes kamen vom abgekündigten Label `macos-13`, nicht von knappen Runnern.
 - **Trigger-Audit:** Carveout: [`LH-OPEN-002`](../../../../spec/lastenheft.md#lh-open-002--paketierung) in [`carveouts.md`](../in-progress/carveouts.md) aufgelöst.
   Bootstrap-aware Gate: `coverage-gate` unverändert, 90,90 % gegen 90 %; 0 offen. ADR: [`ADR-0016`](../../adr/0016-homebrew-distribution-per-tap.md)
@@ -81,7 +81,7 @@ nicht, weil sie kein Release ist).
   abgekündigtes Runner-Label bleibt „queued" statt rot zu werden.
 - **Beobachtungs-Register:** keine Beobachtung angelegt.
 - **Folge-Slices:** [`slice-v2-homebrew-smoke-haertung`](../open/slice-v2-homebrew-smoke-haertung.md) (Smoke-Härtung, Formel-`desc`, Workflow-Kommentar);
-  [`slice-v1-sandbox-docker-nachholmessung-desktop`](../open/slice-v1-sandbox-docker-nachholmessung-desktop.md) (ohne Welle, wartet auf einen
+  [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md) (ohne Welle, wartet auf einen
   Docker-Desktop-Host).
 - **Verifikation:** `make gates` grün (Exit 0); Verification Evidence
   [`2026-10-16-verification-slice-v2-homebrew-formula`](../../../reviews/2026-10-16-verification-slice-v2-homebrew-formula.md), Review-Report

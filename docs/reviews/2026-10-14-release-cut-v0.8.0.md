@@ -10,7 +10,7 @@
 
 - [`slice-v1-release-cut-v0.8.0`](../plan/planning/done/slice-v1-release-cut-v0.8.0.md), Muster [`slice-v1-release-cut-v0.7.0`](../plan/planning/done/slice-v1-release-cut-v0.7.0.md)
 - [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0018](../plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md) (Status `Accepted`), Lastenheft 0.5.0
-- [`slice-v1-sandbox-docker-nachholmessung-desktop`](../plan/planning/open/slice-v1-sandbox-docker-nachholmessung-desktop.md), [`slice-v2-homebrew-formula`](../plan/planning/done/slice-v2-homebrew-formula.md)
+- [`slice-v1-sandbox-docker-nachholmessung-desktop`](../plan/planning/done/slice-v1-sandbox-docker-nachholmessung-desktop.md), [`slice-v2-homebrew-formula`](../plan/planning/done/slice-v2-homebrew-formula.md)
 - `docs/maintainer/releasing.md` §3 Vorbereitung, §4 Vorab-Prüfung, §5 Tag setzen
 - `AGENTS.md` (Hard Rules), `harness/review.md`
 
@@ -40,7 +40,7 @@ Kein Docker-Lauf, keine Änderung an bestehenden Dateien. Der Tag `v0.8.0` exist
 | READMEs: Status-Block, Releases-Zeile `v0.8.0` und `VERSION=0.8.0` in beiden Sprachen konsistent zueinander, zum CHANGELOG und zu [LH-FA-DEV-007](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) und [ADR-0018](../plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md); Docker Desktop wird in README, Releases-Zeile und CHANGELOG nicht zugesagt | geprüft, ohne Befund |
 | Benutzerhandbuch: `Software-Version: v0.8.0`, `Stand: 2026-10-14`, Beispielausgabe, `download/v0.8.0`, `VERSION=0.8.0`, Gültigkeitsbereich konsistent; die Docker-Desktop-Erwähnungen (`:1000` Isolationswarnung, `:1086` „Nicht geprüft: Docker Desktop") sagen keine Unterstützung zu | geprüft, ohne Befund |
 | Slice gegen Vorlage: Kopf (Lifecycle, Welle, Bezug, Berührte Spec-Stellen „—" mit Begründung, Verantwortlich, Autor/Datum), §1–§8 in Vorlagenreihenfolge vorhanden; §1 Ausschlüsse mit Begründung und existierenden Folge-Slices; §4 Rückführungen vorab benannt; §6 Risiken tragen je einen Ausgang | geprüft, ohne Befund |
-| Slice-Lifecycle und Referenzmodell: Slice liegt nur in `in-progress/` (nicht doppelt), Eintrag im `in-progress/README.md` vorhanden, die vier Sandbox-Docker-Zeilen entfernt (Slices bereits unter `done/`); Ziele der Slice-Links ([slice-v1-sandbox-docker-nachholmessung-desktop](../plan/planning/open/slice-v1-sandbox-docker-nachholmessung-desktop.md), [slice-v2-homebrew-formula](../plan/planning/done/slice-v2-homebrew-formula.md)) existieren; ADR/Lastenheft verweisen nicht abwärts | geprüft, ohne Befund |
+| Slice-Lifecycle und Referenzmodell: Slice liegt nur in `in-progress/` (nicht doppelt), Eintrag im `in-progress/README.md` vorhanden, die vier Sandbox-Docker-Zeilen entfernt (Slices bereits unter `done/`); Ziele der Slice-Links ([slice-v1-sandbox-docker-nachholmessung-desktop](../plan/planning/done/slice-v1-sandbox-docker-nachholmessung-desktop.md), [slice-v2-homebrew-formula](../plan/planning/done/slice-v2-homebrew-formula.md)) existieren; ADR/Lastenheft verweisen nicht abwärts | geprüft, ohne Befund |
 | Hard Rules: kein `//nolint`, kein `git mv` im Commit, keine Gate-/Schwellenänderung, keine ADR-Änderung, `spec/architecture.md` unberührt | geprüft, ohne Befund |
 | Commit-Traceability: Message nennt [LH-FA-DEV-007](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) und [ADR-0018](../plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md) | geprüft, ohne Befund |
 
