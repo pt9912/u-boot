@@ -132,7 +132,12 @@ auf „kein Absturz" geprüft). `brew audit --strict --online` gatet den Lauf; e
 
 - Roadmap: Welle nach „Abgeschlossene Wellen", Tag-Commit-Hash und Datum eintragen.
 - Release-Cut-Slice nach `done/` (Closure-Notiz mit Hash und Sensoren).
-- CHANGELOG-Datum auf das tatsächliche Tag-Datum prüfen.
+- CHANGELOG-Datum auf das tatsächliche Tag-Datum prüfen (`git log -1 --format=%cs vX.Y.Z`); dasselbe
+  Datum steht in der Tabellenzeile beider READMEs und im Handbuch-`Stand`.
+- Vorab-Tags aufräumen: Release und Tag löschen (§5) und die GHCR-Tags der Vorab-Versionen entfernen;
+  das braucht für `gh` die Scopes `read:packages` und `delete:packages`, sonst über die Web-Oberfläche.
+- Job `tap` prüfen (§6): Er läuft nur bei stabilen Tags, ein Vorab-Tag probt ihn nicht. Schlägt er fehl,
+  steht die Behebung auf `main`, der Tag bleibt; den Tap zieht der Maintainer manuell nach (§8).
 
 ## 8. Wenn etwas schiefgeht
 
