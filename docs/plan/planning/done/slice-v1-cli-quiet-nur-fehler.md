@@ -101,7 +101,7 @@ verändern, behalten ihre Ausgabe, weil sie das Ergebnis des Befehls ist: `confi
   [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md). Bis dahin ist `--dry-run --quiet` leer bei Exit 0.
 - **Die host-seitige Ausweisung der Fallbacks Daemon und Egress** — die Lücke besteht unabhängig von `--quiet` und ist ein Vertrags-
   oder Code-Vorgang von [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer); sie liegt in
-  [`slice-v1-sandbox-fallback-ausweisung`](../open/slice-v1-sandbox-fallback-ausweisung.md).
+  [`slice-v1-sandbox-fallback-ausweisung`](../done/slice-v1-sandbox-fallback-ausweisung.md).
 - **Andere Hinweis-Klassen als die vier Ausnahmen** (Recreate-Warnung
   [`LH-FA-UP-003`](../../../../spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen), Drittanbieter-Features
   [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), „no git remote“, Purge-Warnungen von `remove`)
@@ -208,7 +208,7 @@ Steering-Loop-Lerneintrag geschrieben (§7).
   die beiden anderen gibt es keine host-seitige Quelle, und für `init`/`generate`/`up` erzeugt keine produktive Quelle einen
   Fallback-Eintrag. Die Lücke besteht unabhängig von `--quiet`
   ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)). — **Ausgang:** eingetreten:
-  [`slice-v1-sandbox-fallback-ausweisung`](../open/slice-v1-sandbox-fallback-ausweisung.md).
+  [`slice-v1-sandbox-fallback-ausweisung`](../done/slice-v1-sandbox-fallback-ausweisung.md).
 - **`down`-Puffer ist eine Setzung ohne ausdrückliche Lastenheft-Zeile:** Ausnahme 3 nennt nur `up`; `down` steht unter den ändernden
   Subkommandos mit „nur Fehler“. — **Ausgang:** entfallen: Entscheidung des Projektinhabers vom 2026-10-16; der Test
   `TestExecute_Down_Quiet_ComposeStream` pinnt Erfolgs- und Fehlerfall, der Fehlerfall ist durch „nur Fehler“ gedeckt.
@@ -242,7 +242,7 @@ sechs Auflagen für die Closure (hier eingelöst). `make gates` grün, Coverage 
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt; das Register ist leer.
 - **Folge-Slices:** [`slice-cr-cli-quiet-vorschau`](../done/slice-cr-cli-quiet-vorschau.md) (CR: Vorschau unter `--quiet`, Lastenheft 0.10.0),
   [`slice-v1-cli-quiet-vorschau`](../done/slice-v1-cli-quiet-vorschau.md) (Code dazu),
-  [`slice-v1-sandbox-fallback-ausweisung`](../open/slice-v1-sandbox-fallback-ausweisung.md) (Lücke der Fallback-Ausweisung, Entscheidung Code oder CR beim
+  [`slice-v1-sandbox-fallback-ausweisung`](../done/slice-v1-sandbox-fallback-ausweisung.md) (Lücke der Fallback-Ausweisung, Entscheidung Code oder CR beim
   Projektinhaber) und
   [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Rangfolge bei Mehrfachangabe, Spec-Eintrag).
 - **Risiken aus §6:** alle tragen ihren Ausgang: eingetreten (Vorschau, Fallback-Ausweisung) oder entfallen (Umfang, Abgrenzung der Ausnahmen,

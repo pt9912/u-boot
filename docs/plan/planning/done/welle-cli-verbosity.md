@@ -127,7 +127,7 @@ einen Release-Cut-Slice gibt es nicht (der CHANGELOG ist vollständig, ein Cut i
 - **Beobachtungs-Register:** [`BEO-CLI/kommentar-beschreibt-abwesendes`](../observations/BEO-CLI/kommentar-beschreibt-abwesendes/observation.md) angelegt,
   drei Belege (`evidence/`), Ausgang `verkörpert` ([`state.md`](../observations/BEO-CLI/kommentar-beschreibt-abwesendes/state.md)). Zeiger auf das Register:
   [`../observations/`](../observations/README.md).
-- **Folge-Slices:** [`slice-v1-sandbox-fallback-ausweisung`](../open/slice-v1-sandbox-fallback-ausweisung.md) (Fallback-Ausweisung, Entscheidung Code oder CR beim Projektinhaber),
+- **Folge-Slices:** [`slice-v1-sandbox-fallback-ausweisung`](../done/slice-v1-sandbox-fallback-ausweisung.md) (Fallback-Ausweisung, Entscheidung Code oder CR beim Projektinhaber),
   [`slice-v1-cli-dry-run-would-formulierung`](../done/slice-v1-cli-dry-run-would-formulierung.md) (Zeitform der Dry-Run-Zusammenfassung),
   [`slice-v2-homebrew-smoke-haertung`](../done/slice-v2-homebrew-smoke-haertung.md) (aus der Vorwelle, unverändert offen),
   [`slice-v1-sandbox-docker-nachholmessung-desktop`](../done/slice-v1-sandbox-docker-nachholmessung-desktop.md) (ohne Welle, wartet auf einen Docker-Desktop-Host).

@@ -177,7 +177,7 @@ an [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und
   Die Anlage der Beobachtung `BEO-CLI/…` und die Verkörperung entscheidet die Welle-Closure (Schritt 3), nicht dieser Slice; hier wird nichts verkörpert, daher kein `liegt in`.
 - **Beobachtungs-Register (`../observations/`):** nicht fortgeschrieben (das Register enthält nur die README). Belege für die spätere Beobachtung: dieselben vier Befunde (Review-Reports der drei Slices,
   Verification Evidence W2); die Anlage folgt bei der Welle-Closure.
-- **Folge-Slices:** keine aus diesem Slice. [`slice-v1-sandbox-fallback-ausweisung`](../open/slice-v1-sandbox-fallback-ausweisung.md) und
+- **Folge-Slices:** keine aus diesem Slice. [`slice-v1-sandbox-fallback-ausweisung`](../done/slice-v1-sandbox-fallback-ausweisung.md) und
   [`slice-v1-cli-dry-run-would-formulierung`](../done/slice-v1-cli-dry-run-would-formulierung.md) bleiben unberührt in `open/`.
 - **Release-Hinweis:** Der CHANGELOG ist vollständig (nichts steht mehr als „folgt"); der Release-Cut ist nicht mehr blockiert.
 - **Risiken aus §6:** alle tragen ihren Ausgang: entfallen (`a.quiet` driftet: ein Zustand, `a.quiet()` abgeleitet; Reihenfolge-Abhängigkeit: Spec nach den fünf anderen Slices).
