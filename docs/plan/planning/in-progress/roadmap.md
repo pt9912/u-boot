@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-**v0.10.0 (Devcontainer-Features `sshd` und Claude Code, `podman build`, Verbosity-Vertrag)** — Slice: [`slice-v1-release-cut-v0.10.0`](../done/slice-v1-release-cut-v0.10.0.md) (Tag-Push steht aus). Der Release trägt [`welle-devcontainer-sshd-claude-code`](../done/welle-devcontainer-sshd-claude-code.md), [`welle-cli-verbosity`](../done/welle-cli-verbosity.md), [`welle-macos-verifikation`](../done/welle-macos-verifikation.md) und [`welle-harness-wartung`](../done/welle-harness-wartung.md).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
