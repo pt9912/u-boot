@@ -1,9 +1,4 @@
-# Slice <slice-id>: <Titel>
-
-> **Template-Hinweis.** Vorlage für einen Slice-Plan. Kopiere nach
-> `docs/plan/planning/open/<slice-kennung>.md` — welche Form die Kennung hat,
-> legt `harness/conventions.md` fest (siehe Kurs §Vergabe) — und ersetze
-> Platzhalter. Lösche diesen Block.
+# Slice v2: Spezifikation zu `sshd` und `claude-code` (Katalog, Egress, Sandbox-Verhalten)
 
 **Lifecycle:** Der Zustand dieses Slice ist das Verzeichnis, in dem diese
 Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
@@ -14,228 +9,86 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** <welle-id> oder "ohne Welle" — ohne Welle immer dann, wenn es
-keine Closure-Bedingung gibt, die von der DoD dieses Slice verschieden
-ist, siehe Baseline-Regelwerk `modul-06-roadmap.md`
-§Wann Arbeit eine Welle braucht (Modul 6).
+**Welle:** [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md) — letzter Slice der Welle; ihm gehen [`slice-cr-devcontainer-agent-features-sandbox`](slice-cr-devcontainer-agent-features-sandbox.md), [`slice-v1-devcontainer-feature-sshd`](slice-v1-devcontainer-feature-sshd.md) und [`slice-v1-devcontainer-feature-claude-code`](slice-v1-devcontainer-feature-claude-code.md) voraus.
 
-**Bezug:** `<LH-FA-NN>`, `<LH-QA-NN>`, `<LH-RB-NN>` (falls eine Randbedingung betroffen ist) (Scope), ADR-<NNNN> (nur *aktive* ADRs).
+**Bezug:** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Katalog), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Sandbox-Profil), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress-Hosts), [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) (Zugangsdaten); [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md). Muster: [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Spezifikations-Eintrag nach allen anderen Slices).
 
-**Berührte Spec-Stellen:** `<SPEC-NNN>` · `<ARC-NNN>` — die Kennung nennen, wo
-das Zielelement eine trägt, sonst den Abschnitt (`spezifikation.md §N`,
-`architecture.md §N`). `—`, wenn der Slice keine Spec-Stelle berührt.
-Der Verweis zeigt **aufwärts**: Die Spec nennt diesen Slice nie
-(Baseline-Regelwerk `grundlagen-referenz-richtung.md`
-§Referenz-Richtung (SDP), `grundlagen-source-precedence.md` §ID-Schema als Klammer).
+**Berührte Spec-Stellen:** `spezifikation.md`: [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen) (eingebaute Features), [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) (Egress-Hosts je Feature), neuer Eintrag ab `SPEC-044` und §7 (Historie). `lastenheft.md` und `architecture.md` berührt der Slice nicht. <!-- d-check:ignore (SPEC-044 ist noch nicht vergeben) -->
 
-**Verantwortlich:** <Name> — oder `—` bis zur Priorisierung.
-<!-- BEDIENHINWEIS: Verantwortlich hält die Arbeit — der Rolleninhaber der
-Implementer-Rolle, gesetzt beim Übergang open→next (Baseline-Regelwerk
-modul-05-planning-harness.md §Lifecycle als State Machine). Der Autor schrieb
-den Plan; zwei Felder, zwei Fragen. Kein Statuswert: der Zustand bleibt das
-Verzeichnis. Kein Sensor prüft das Feld — es ist Deklaration. -->
+**Verantwortlich:** —
 
-**Autor:** <Name>. **Datum:** YYYY-MM-DD.
+**Autor:** pt9912. **Datum:** 2026-10-17.
 
 ---
 
 ## 1. Ziel und Abgrenzung
 
-<!-- BEDIENHINWEIS: Ziel = ein Satz, Liefer-Fokus, kein "wir machen
-aufraeumen". Abgrenzung = je Punkt eine Begruendung, nicht nur eine Nennung:
-ein Ausschluss ohne Grund ist eine Behauptung. Keine Mindestzahl — ein echter
-Ausschluss ist besser als vier erfundene. -->
+**Ziel:** Die Spezifikation beschreibt Katalog, Egress-Hosts und Sandbox-Verhalten der Features `sshd` und `claude-code` deckungsgleich mit Lastenheft (nach dem CR) und Code: die
+Katalogzeilen in [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen), die Host-Zeilen in [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) und ein neuer Eintrag ab `SPEC-044` für die Sandbox-Regel beider Features, die Übergabe der Zugangsdaten des Agenten und die Warnungen. <!-- d-check:ignore (SPEC-044 ist noch nicht vergeben) -->
 
-Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
-§Ziel-Form: Slice — Schnitt nach Lieferwert, nicht nach Schichten; jeder Slice
-ist einzeln lieferbar. **§1 nennt Ziel und Abgrenzung** (Out-of-Scope-Disziplin
-des Lastenhefts, auf den Slice-Plan angewandt); die vier Klassen des
-Ausschlusses stehen in **eben diesem Abschnitt** des Baseline-Regelwerks,
-zusammen mit der Begründungs-Pflicht je Punkt.
-
-**Ziel:** <…>
-
-**Übernimmt:** `slice-<Kennung>`, `slice-<Kennung>`. *(Nur, wenn dieser Slice
-den Gegenstand anderer aufnimmt; sonst Zeile löschen. Ohne sie ist er keine
-Adresse — Baseline-Regelwerk `modul-05-planning-harness.md` §Ein Slice, dessen
-Gegenstand ein anderer übernimmt.)*
+**Lehre der vorigen Welle (`welle-cli-verbosity`):** Der Entwurf wird gegen den **Code** gelesen, nicht gegen die Plan-Prosa der Slices. Jede Aussage trägt in der Evidence eine Fundstelle (Datei und Funktion
+oder Test); eine Aussage ohne Fundstelle wird gestrichen. Zahlenwerte und Hosts stammen aus dem Quelltext; weicht der Code vom Lastenheft ab, wird die Abweichung vermerkt und nicht in der Spezifikation geglättet.
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- <Ausschluss — Begründung.>
-- <weiterer, falls es einen gibt>
-
-**Keine Mindestzahl.** Ein Slice mit *einem* echten Ausschluss ist besser als
-einer mit vier erfundenen; die vier Klassen sind ein Suchraster, keine
-Ausfüll-Liste. Suchreihenfolge: Was übernimmt ein **Folge-Slice** (mit
-Kennung — und die Kennung muss den Punkt auch annehmen)? Was bleibt als
-**Bestand** bewusst stehen (mit Begründung)? Was wäre ein **anderer Vorgang**?
-Welche **Schicht** rührt der Slice nicht an?
-
-Was hier steht, ist die Grenze, an der ein wachsender Slice sich messen lässt:
-Wer später etwas mitnimmt, das hier ausgeschlossen war, hat den Plan
-**geändert**, nicht nur ergänzt.
+- **Änderungen an Code, Tests, Handbuch oder CHANGELOG** — sie liegen in den Code-Slices ([`slice-v1-devcontainer-feature-sshd`](slice-v1-devcontainer-feature-sshd.md),
+  [`slice-v1-devcontainer-feature-claude-code`](slice-v1-devcontainer-feature-claude-code.md)); ein abweichender Wert wird vermerkt, nicht geändert (Folge-Slice).
+- **Änderungen am Lastenheft** — sie gehören dem CR [`slice-cr-devcontainer-agent-features-sandbox`](slice-cr-devcontainer-agent-features-sandbox.md); die Spezifikation verfeinert und erweitert das Lastenheft nie.
+- **`architecture.md`** — die Sicht nennt keine einzelnen Features und, nach `AGENTS.md` §3.4, weder Slices noch ADRs.
+- **Neue `doctor`-Check-Codes in [`SPEC-017`](../../../../spec/spezifikation.md#spec-017--diagnose-codes-der-doctor-prüfungen-code-registry)** — kein Code-Slice der Welle führt einen ein; entsteht dennoch einer, gehört die Zeile in diesen Slice.
 
 ## 2. Definition of Done
 
-<!-- BEDIENHINWEIS: je Zeile ein pruefbares Kriterium. -->
-
-Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
-§Ziel-Form: Slice — **≤ 3 Liefer-Punkte**; mehr heißt: der Slice ist zu groß und
-gehört zurück zur Zerlegung. Gezählt wird nur, was mit dem Umfang wächst — die
-Gate-Läufe und die fünf Closure-Pflichten darunter zählen nicht mit.
-
-- [ ] LH-FA-<NN> erfüllt, Test referenziert.
-- [ ] LH-QA-<NN> erfüllt, Messung dokumentiert.
-- [ ] LH-RB-<NN> erfüllt, Nachweis dokumentiert (nur wenn eine Randbedingung im Scope ist).
+- [ ] **Spezifikation:** [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen) nennt die Schlüssel `sshd` (offizielle Quelle, Standardversion) und `claude-code` (Quelle, Herausgeber, Standardversion, Drittanbieter-Einstufung); [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) trägt die Host-Zeilen beider Features, soweit der Code welche führt; der neue Eintrag ab `SPEC-044` beschreibt Sandbox-Regel, Zugangsdaten-Übergabe und Warnungen; §7 (Historie) trägt die Zeile. <!-- d-check:ignore (SPEC-044 ist noch nicht vergeben) -->
+- [ ] **Gegen den Code gelesen:** Die Evidence führt je Aussage die Fundstelle; die Spezifikation entstand nach dem Move der drei anderen Slices nach `done/` (Commit-Reihenfolge belegt es).
+- [ ] **Traceability:** `make doc-trace` meldet keine Waise; `make docs-check` meldet 0 Befunde (jede neue `SPEC-`Kennung ist ein auflösbarer Anker).
 - [ ] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8).
-- [ ] Doku-Update für <Schnittstelle X> falls öffentlicher Vertrag berührt.
+- [ ] Doku-Update, falls ein öffentlicher Vertrag berührt ist.
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Reconciliation-Register (`../reconciliation.md`) fortgeschrieben, **falls dieser Slice einen Inventur-Fund auflöst** — Zeile mit Datum und auflösendem Artefakt nach *Aufgelöste Einträge* verschoben. Repos ohne Brownfield-Bootstrap haben die Datei nicht; dann entfällt das Item.
-- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben — neues Verzeichnis `BEO-<KUERZEL>/<slug>/` oder eine weitere Datei in dessen `evidence/`; **kein Zaehler wird gesetzt**, er folgt aus den Dateien. Keine Beobachtung angefallen ist ebenfalls eine Antwort und wird in §7 notiert.
+- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
 - [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo **ohne** Wellen-Betrieb hier geprüft, im Repo **mit** Wellen von der nächsten Welle-Closure (auch für Slices ohne Wellen-Zugehörigkeit).
+- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft, im Repo mit Wellen von der nächsten Welle-Closure (auch für Slices ohne Wellen-Zugehörigkeit).
 
 ## 3. Plan (vor Code)
 
-<!-- BEDIENHINWEIS: Datei- oder Komponenten-Ebene reicht; der
-Implementer-Agent erweitert die Liste in seinem ersten Lauf, inklusive
-einer Testdatei-Zeile mit der Akzeptanzkriterien-ID in `Begründung`
-(Modul 9 §Minimal Agent Workflow). -->
-
-Regeln dieser Sektion: Baseline-Regelwerk `grundlagen-bootstrap.md`
-§Was ist eine Sub-Area? — diese Liste liefert die **Pfad-Kandidaten** für §8,
-nicht die Antwort: Pfad-Berührung ist nicht hinreichend, und eine
-Aussagen-Berührung steht hier gar nicht.
-
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| <…> | neu / update / refactor | <…> |
-| <Testdatei> | neu / update | <Testarten, z. B. Happy/Boundary/Negative — nach <Akzeptanzkriterien-ID>> |
-
-**Optional: Ansatz als Liste, wenn eine Zeile pro Datei nicht trägt** — z. B.
-eine Schnittstellenänderung über viele gleichrangige Dateien mit derselben
-Begründung, oder ein Ansatz, der sich nicht auf eine Datei herunterbrechen
-lässt. Ergänzt die Tabelle, ersetzt sie nicht:
-
-- <Ansatz oder Gruppen-Änderung in einem Satz — z. B. „Schnittstelle
-  `AuthProvider.Login` bekommt Parameter `ctx`; alle zwölf Implementierer in
-  `adapter/*/auth.go` folgen mechanisch.">
-- <…>
+| `spec/spezifikation.md` ([`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen), [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion), neuer Eintrag ab `SPEC-044`, §7 Historie) | update | Katalog, Hosts, Sandbox-Regel; Platzierung des neuen Eintrags im Kapitel zu Devcontainer, die nächste freie Nummer ist beim Schreiben zu prüfen (Stand 2026-10-17: höchste vergebene Nummer [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet)) <!-- d-check:ignore (SPEC-044 ist noch nicht vergeben) --> |
+| `internal/hexagon/application/devcontainer_features.go`, `devcontainer_egress.go`, `devcontainer_sandbox.go`, `generate.go`, `doctor_sandbox.go`, `templates/devcontainer/devcontainer.json.tmpl` | lesen (Quelle der Fundstellen) | die Spezifikation wird gegen diese Dateien gelesen; keine Änderung |
 
 ## 4. Trigger
 
-<!-- BEDIENHINWEIS: Beispiele — "Wenn Welle X done." / "Wenn Carveout CO-NN
-aufgeloest." -->
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; die drei Slices [`slice-cr-devcontainer-agent-features-sandbox`](slice-cr-devcontainer-agent-features-sandbox.md),
+[`slice-v1-devcontainer-feature-sshd`](slice-v1-devcontainer-feature-sshd.md) und [`slice-v1-devcontainer-feature-claude-code`](slice-v1-devcontainer-feature-claude-code.md) liegen in `done/`;
+kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
-Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
-§Trigger je Lifecycle-Übergang und WIP-Limit.
+**Rückführungen — vorab benannt:**
 
-**Start** (`next` → `in-progress`): <…>
-
-**Rückführungen — vorab benennen, nicht erst im Nachhinein begründen:**
-
-- `in-progress` → `next` (zu groß, zurück zur Zerlegung): <Bedingung>
-- `in-progress` → `open` (blockiert — Carveout?): <Bedingung>
+- `in-progress` → `next` (zu groß, zurück zur Zerlegung): der Slice überschreitet 3 Liefer-Punkte.
+- `in-progress` → `open` (blockiert): Lastenheft und Code widersprechen sich in einem Punkt; der Widerspruch geht als Folge-Slice (CR oder Code) vor, bevor die Spezifikation ihn beschreibt.
 
 ## 5. Closure-Trigger
 
-<!-- BEDIENHINWEIS: z.B. "DoD vollstaendig + PR gemerged + Closure-Notiz
-geschrieben." -->
-
-Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
-§Closure- und Lerneintrag-Regeln — zwei beobachtbare Kriterien **und** ein
-Lerneintrag; ohne ihn ist der Slice nur abgelegt.
-
-<…>
+DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben (§7). Mit diesem Slice ist die Welle
+[`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md) schließbar.
 
 ## 6. Risiken und offene Punkte
 
-<!-- BEDIENHINWEIS: Was koennte schief gehen? Welche Carveouts entstehen
-ggf.? Die drei Ausgaenge stehen als Form in der Zeile darunter. -->
-
-Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
-§Offene Risiken werden bei Closure aufgelöst — **jedes** Risiko bekommt genau
-**einen** Ausgang, und kein Slice geht nach `done/`, während eines ohne Ausgang
-dasteht.
-
-- <Risiko> — **Ausgang:** <eingetreten: CO-NNN / slice-<Kennung> | entfallen: Grund | weiter offen: → BEO-<KUERZEL>/<slug> im Register>
+- **Der Entwurf folgt der Plan-Prosa statt dem Code** (Klasse „Plan-Aussage über Code stimmt nicht“, drei Vorgänge an der Schwelle): der Reviewer fand in `welle-harness-wartung` so einen Fehler in einem Eintrag, den die Inventur nicht fand. — **Ausgang:** entfallen: DoD 2 verlangt je Aussage eine Fundstelle im Code; bei Abweichung gilt der Code, die Abweichung steht in der Evidence (bei Closure bestätigen).
+- **Lastenheft und Code widersprechen sich** (etwa eine Warnung, die der CR anders beschreibt als der Code sie setzt). — **Ausgang:** weiter offen: gemeldet als Folge-Slice (CR oder Code), nicht in der Spezifikation geglättet (§4, Rückführung).
+- **Die Abfolge „Spezifikation zuletzt“ lässt [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen) und [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) zwischen den Code-Slices und diesem Slice hinter dem Code zurück.** — **Ausgang:** entfallen: Kein Gate prüft die Tabellen gegen den Code (nur die `doctor`-Code-Registry ist durch einen Drift-Test gebunden); die Lücke ist in der Welle benannt (Closure-Trigger) und endet mit diesem Slice.
 
 ## 7. Closure-Notiz
 
-<!-- BEDIENHINWEIS — keine Norm; faellt beim Kopieren weg (README.md
-§Verwendung, Schritt 5) und darf deshalb nichts Tragendes halten. Reihenfolge:
-diese Sektion vor dem `git mv` nach done/ fuellen — einzige Ausnahme ist das
-letzte DoD-Item in §2 (die Paarungen suchen in `done/`, also nach dem `git mv`).
-Im Repo ohne Wellen-Betrieb braucht die Closure dadurch drei Commits: Inhalt,
-`git mv`, Haekchen — das folgt aus der Hard Rule, es widerspricht ihr nicht. -->
-
-Regeln dieser Sektion: Baseline-Regelwerk `modul-06-roadmap.md`
-§Das Beobachtungs-Register (vorhandene `BEO-<KUERZEL>/<slug>` **zitieren** statt neu
-formulieren — sonst zählt das Register zwei Namen getrennt) ·
-`grundlagen-traceability.md` §Herkunfts-Anker für Steering-Loop-Regeln (das
-Feld `liegt in` steht **nur**, wenn mit diesem Slice wirklich etwas verkörpert
-wurde; Feld und Zielort auf **einer** Zeile, Sektionsangabe innerhalb der
-Backticks). Ging der Gegenstand an einen anderen Slice oder entfiel er, trägt
-diese Sektion die Zeile `Gegenstand:` mit Kennung oder Grund und jedes Risiko
-aus §6 seinen Ausgang; die Liefer-Punkte der DoD bleiben leer
-(`modul-05-planning-harness.md` §Ein Slice, dessen Gegenstand ein anderer
-übernimmt).
-
-- **Was hat funktioniert:** <…>
-- **Was ging anders als geplant:** <…>
-- **Gegenstand:** <übernommen von `slice-<Kennung>` | entfallen: <Grund>>
-  *(nur beim Ausgang ohne Arbeit; sonst Zeile löschen)*
-- **Steering-Loop-Eintrag:** <Guide oder Sensor> <geschärft/ergänzt>: <was genau>
-  — liegt in `<AGENTS.md §X | Makefile:<target> | .harness/skills/…>`.
-  Auslöser: `BEO-<KUERZEL>/<slug>` (<slice-kennung-a>, <slice-kennung-b>, <slice-kennung-c> — 3×).
-  *(Wurde mit diesem Slice nichts verkörpert — der Normalfall —, entfällt die
-  Teil-Zeile `— liegt in …` ersatzlos. Der Eintrag ist dann gezählt, nicht
-  verkörpert.)*
-- **Beobachtungs-Register (`../observations/`):** <`BEO-<KUERZEL>/<slug>/` neu angelegt, Beleg `evidence/slice-<Kennung>.md` | `evidence/slice-<Kennung>.md` in `BEO-<KUERZEL>/<slug>/` ergaenzt — Zaehler steht damit bei <N>x | keine Beobachtung angefallen>
-- **Folge-Slices:** <slice-<Kennung> (<Titel>) — ist eine Datei in `open/`>
-- **Risiken aus §6:** <jedes mit genau einem Ausgang — siehe §6>
-- **Drei Paarungen:** <nur im Repo ohne Wellen-Betrieb — Anker · Folge-Slice · Register, Ergebnis>
+Wird bei der Closure gefüllt.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
-Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
-§Ziel-Form: Sub-Area-Modus-Begründung — dort die **zwei vorgelagerten
-Schritte** (sie stehen in jedem Slice-Plan, unabhängig von Modus und
-Slice-Typ) und die **vier Pflichtkriterien** (Konventionen-Dichte ·
-Phase-Reife · Evidenz-/Diskrepanz-Risiko · Reconciliation-Aufwand), vier und
-nicht mehr.
+**Vorgelagert — Sub-Area-Wahl prüfen:** berührt ist `spec/` (Kürzel DOK) — Modus Greenfield laut [`harness/conventions.md`](../../../../harness/conventions.md#mr-006) (Abschnitt Modus-Deklaration), erfüllt die Schwelle ≥ 2 von 3 Achsen; keine Ausdifferenzierung nötig. Der Code wird nur gelesen.
 
-**Der Abschnitt selbst entfällt nie.** Die zwei vorgelagerten Prüfungen laufen
-in **jedem** Slice-Plan — sie hängen weder am Modus noch am Slice-Typ. Bedingt
-ist allein der Modus-Begründungsblock am Ende; deshalb nennt der Titel beide
-Hälften.
+**Vorgelagert — offene Beobachtungen sichten:** Beobachtungs-Register ([`../observations/`](../observations/README.md)) durchgegangen — keine Treffer für diese Sub-Area (die einzige Beobachtung `BEO-CLI/kommentar-beschreibt-abwesendes` betrifft CLI und ist verkörpert in `AGENTS.md §3.9`). Die Klasse „Plan-Aussage über Code stimmt nicht“ steht nicht im Register (siehe [`slice-v1-devcontainer-feature-sshd`](slice-v1-devcontainer-feature-sshd.md) §8); dieser Slice ist ihr Gegenmittel (DoD 2).
 
-**Vorgelagert — Sub-Area-Wahl prüfen:** <je berührter Sub-Area: erfüllt sie
-die Schwelle ≥ 2 von 3 Achsen? zu grobe vorher ausdifferenzieren>
-
-**Vorgelagert — offene Beobachtungen sichten:** <Register durchgegangen;
-je berührter Sub-Area der Treffer mit Zähler-Stand — oder "keine Treffer">
-
-**Modus-Begründungsblock — Umfang.** Pflicht, sobald mindestens eine berührte
-Sub-Area BF oder Hybrid ist — einer pro Sub-Area. Bei reinem GF genügt der
-Hinweis *"alle berührten Sub-Areas GF"*; bei reinem Refactor ohne neue
-Sub-Area-Berührung entfällt **er** — nicht der Abschnitt.
-
-<!-- Block für jede berührte Sub-Area duplizieren. Format identisch
-mit dem im Baseline-Regelwerk §Ziel-Form: Sub-Area-Modus-Begründung
-abgedruckten Block. -->
-
-### Sub-Area: <Name>
-
-- **Modus:** GF | BF | Hybrid
-- **Konventionen-Dichte:** <Beleg aus `harness/conventions.md`,
-  Adaptions-Block oder Code>
-- **Phase-Reife:** Phase 0–5 <Begründung gegen die Phase × Modus-Matrix>
-- **Evidenz-/Diskrepanz-Risiko:** <bei BF/Hybrid: was kann die
-  Inventur sichtbar machen? bei GF: meist niedrig>
-- **Reconciliation-Aufwand:** <Slice-Schätzung;
-  Graduation-/Folge-Slice-Trigger>
+Alle berührten Sub-Areas GF.

@@ -1,111 +1,90 @@
-# Welle <welle-id>: <Titel>
-
-> **Template-Hinweis.** Vorlage für eine Welle (Bündel von Slices, das
-> gemeinsam geplant und abgeschlossen wird, siehe
-> [Baseline-Regelwerk Modul 5](../../../../regelwerk/modul-05-planning-harness.md)
-> und [Modul 6](../../../../regelwerk/modul-06-roadmap.md)).
-> Kopiere nach `docs/plan/planning/<welle-id>.md` und ersetze
-> Platzhalter. Lösche diesen Block.
+# Welle welle-devcontainer-sshd-claude-code: Devcontainer-Features `sshd` und Claude Code im eingebauten Katalog
 
 **Lifecycle:** Diese Datei entsteht bei der **Eröffnung** der Welle und liegt
 flach unter `docs/plan/planning/`; bei Closure wandert sie per `git mv` nach
-`done/` (neben ihre `welle-<Kennung>-results.md`). Der Zustand ist die
-Verzeichnis-Position — kein Status-Feld. **Geplante Wellen bekommen noch keine
-Datei:** Sie stehen in der Roadmap unter *Nächste Wellen* und nirgends sonst —
-zwei Positionen, nicht drei.
+`done/`. Der Zustand ist die Verzeichnis-Position — kein Status-Feld.
+**Geplante Wellen bekommen noch keine Datei:** Sie stehen in der Roadmap unter
+*Nächste Wellen* und nirgends sonst — zwei Positionen, nicht drei.
 
-**Zielmeilenstein:** M<NN> oder "kein Meilenstein-Bezug".
+**Zielmeilenstein:** kein Meilenstein-Bezug. Die Zuordnung zu einem Release-Cut (nach v0.9.0) entscheidet der Projektinhaber; die Welle ist keine Release-Version.
 
-**Verantwortlich:** <Name>. **Datum:** YYYY-MM-DD.
+**Verantwortlich:** pt9912. **Datum:** 2026-10-17.
 
 ---
 
 ## 1. Welle-Ziel
 
-<!-- BEDIENHINWEIS: Eine Aussage, die sich an einem Lasttest oder
-Akzeptanzkriterium spiegelt. -->
+Der eingebaute Devcontainer-Feature-Katalog bietet `sshd` und `claude-code` als wählbare Schlüssel (wie `python`, `sdkman` und `homebrew`), jeweils mit
+Egress-Hosts für das Sandbox-Profil. Im Sandbox-Profil
+([`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)) gilt für beide Features eine vom Projektinhaber entschiedene und im Vertrag
+benannte Regel, und ein Zugangsschlüssel des Agenten steht in keiner erzeugten Datei, sondern wird zur Laufzeit übergeben
+([`LH-FA-DEV-009`](../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) gilt heute nur für Git-Zugangsdaten). Beide Features
+zusammen in einem Devcontainer erzeugen ein stabiles `devcontainer.json` und eine gültige Egress-Allowlist.
 
-Regeln dieser Sektion: Baseline-Regelwerk `modul-06-roadmap.md`
-§Wann Arbeit eine Welle braucht.
-
-<…>
+Anlass (Projektinhaber, 2026-10-17): Entscheidung für Devcontainer-Features statt Add-on-Services, als eigene Welle.
 
 ## 2. Trigger (Welle startet)
 
-<!-- BEDIENHINWEIS: Was muss vorher passiert sein? -->
-
-Regeln dieser Sektion: Baseline-Regelwerk `modul-06-roadmap.md`
-§Roadmap-Regeln — ein Trigger ist **beobachtbar** dann, wenn ein *anderer*
-Mensch ohne Rückfrage sagen kann, ob er eingetreten ist; ein Datum darf erwähnt
-werden, aber nie Trigger sein. Und der **Start**-Trigger ist **kein Ergebnis
-dieser Welle**: Steht er in der Slice-Liste unten, ist er falsch platziert.
-
-- <z.B. Welle <welle-vorher-id> done.>
-- <z.B. ADR-<NNNN> accepted.>
+- Die Entscheidung des Projektinhabers vom 2026-10-17 liegt vor: `sshd` und Claude Code kommen als eingebaute Katalog-Features (Devcontainer-Features,
+  nicht Add-on-Services), als eigene Welle (eingetreten).
+- Der Slice [`slice-v2-homebrew-smoke-haertung`](in-progress/slice-v2-homebrew-smoke-haertung.md) liegt in `done/` (WIP-Limit 1: solange er in
+  `in-progress/` liegt, kann kein Slice dieser Welle beginnen).
 
 ## 3. Closure-Trigger (Welle schließt)
 
-<!-- BEDIENHINWEIS: Aktion, nicht Termin. -->
+Das *Mehr* gegenüber den vier Slice-DoDs: Die beiden Features tragen **zusammen**, und die Stellen, an denen der Vertrag steht, sagen dasselbe.
 
-Regeln dieser Sektion: Baseline-Regelwerk `modul-06-roadmap.md`
-§Wann Arbeit eine Welle braucht — der Trigger muss das *Mehr* gegenüber den
-einzelnen Slice-DoDs benennen; kann er das nicht, liegt keine Welle vor.
-
-- <z.B. Alle Slices done.>
-- <z.B. `make fullbuild` grün.>
-- <z.B. Replay-Lauf gegen Golden Set durchläuft.>
-- <z.B. Closure-Notiz in `welle-<Kennung>-results.md`.>
+- Alle vier Slices der Welle liegen in `done/`; der CR [`slice-cr-devcontainer-agent-features-sandbox`](open/slice-cr-devcontainer-agent-features-sandbox.md) darf mit
+  `Gegenstand: entfallen` dort liegen, wenn der Projektinhaber keine neue Zusage verlangt.
+- **Beide Features zusammen:** Ein Golden Case aktiviert `sshd` und `claude-code` gemeinsam (einmal ohne, einmal mit Sandbox-Profil und Egress): `devcontainer.json`
+  trägt jeden Render-Schlüssel genau einmal in stabiler Reihenfolge, der zweite Lauf ist ein NoOp, die Egress-Allowlist ist die sortierte, duplikatfreie Vereinigung
+  der Hosts beider Features, und die Befehlsausgabe trägt genau die Hinweise, die der CR vorschreibt.
+- **Lauffähigkeit belegt, nicht angenommen:** Eine Messung mit der Dev-Container-CLI (Verfahren der Messreihe in
+  [`ADR-0020`](../adr/0020-drittanbieter-features-im-katalog.md)) baut ein Image mit beiden Features und startet es; das Ergebnis steht in der Evidence der beiden
+  Feature-Slices. Läuft die Messung in der Umgebung nicht, nennt die Closure den Grund (kein stilles Rot).
+- **Eine Aussage über die Hosts des Agenten:** Handbuch, README, CHANGELOG und Spezifikation sagen dasselbe; der Satz im Handbuch, `u-boot` kenne die Hosts des
+  Agenten nicht (Abschnitt Egress), ist an den neuen Stand angepasst.
+- Die Spezifikation trägt die Katalogzeilen (`sshd`, `claude-code`), die Egress-Zeilen und den neuen Eintrag ab `SPEC-044`; sie entstand **nach** dem Abschluss der <!-- d-check:ignore (SPEC-044 ist noch nicht vergeben) -->
+  drei anderen Slices und ist gegen den Code gelesen (Commit-Reihenfolge belegt es).
+- `make doc-trace` meldet keine Waise; `make docs-check` meldet 0 Befunde; `make gates` ist grün.
 
 ## 4. Slices in dieser Welle
 
-<!-- BEDIENHINWEIS: keine Status-Spalte ergaenzen. -->
-
-Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
-§Lifecycle als State Machine — der Zustand eines Slice ist sein
-Lifecycle-Verzeichnis und wird hier **nicht** gespiegelt.
-
 | Slice | Titel | Bezug |
 |---|---|---|
-| slice-<Kennung-A> | <…> | LH-FA-<NN> |
-| slice-<Kennung-B> | <…> | LH-FA-<NN> |
+| [`slice-cr-devcontainer-agent-features-sandbox`](open/slice-cr-devcontainer-agent-features-sandbox.md) | CR: Sandbox-Regel für `sshd` und Claude Code, Zugangsdaten des Agenten (zuerst; entfällt, wenn keine neue Zusage nötig ist) | [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-009`](../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) |
+| [`slice-v1-devcontainer-feature-sshd`](open/slice-v1-devcontainer-feature-sshd.md) | Code: Katalog-Schlüssel `sshd` (offizielles Feature), Egress, Sandbox-Regel, Tests, Doku | [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) |
+| [`slice-v1-devcontainer-feature-claude-code`](open/slice-v1-devcontainer-feature-claude-code.md) | Code: Katalog-Schlüssel `claude-code` (Feature von Anthropic), Egress, Zugangsdaten zur Laufzeit, Tests, Doku | [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-009`](../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) |
+| [`slice-v2-spec-devcontainer-sshd-claude-code`](open/slice-v2-spec-devcontainer-sshd-claude-code.md) | Spezifikation: Katalog, Egress-Hosts und Sandbox-Verhalten beider Features (letzter Slice) | [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) |
 
 ## 5. Abhängigkeiten
 
-<!-- BEDIENHINWEIS: Falls jemand diese Welle aendert — was bricht? -->
-
-Regeln dieser Sektion: Baseline-Regelwerk `modul-06-roadmap.md`
-§Roadmap-Struktur: fünf Abschnitte.
-
-- Blockiert: Welle <welle-id> (wegen <Vertragspunkt>).
-- Wird blockiert von: Welle <welle-id>.
+- Blockiert: keine Welle.
+- Wird blockiert von: [`slice-v2-homebrew-smoke-haertung`](in-progress/slice-v2-homebrew-smoke-haertung.md) (WIP-Limit 1, siehe §2) und den **Entscheidungen des
+  Projektinhabers**, die der CR festhält: (1) `sshd` im Sandbox-Profil (erlaubt, nur mit Warnung oder ausgeschlossen), (2) Claude Code im Sandbox-Profil mit seinen
+  Egress-Hosts, (3) Einstufung des Anthropic-Features (Drittanbieter-Feature nach [`ADR-0020`](../adr/0020-drittanbieter-features-im-katalog.md) oder andere Regel),
+  (4) ob das Lastenheft eine neue Zusage braucht (CR). Ohne (1) und (2) beginnt kein Code-Slice mit Sandbox-Anteil.
+- Reihenfolge in der Welle: der CR geht den Code-Slices voraus, weil sie die Sandbox-Regel erst nach dem Lastenheft umsetzen; `sshd` geht `claude-code` voraus
+  (beide berühren Katalog, Egress und Tests in denselben Dateien, WIP-Limit 1); der Spezifikations-Slice kommt zuletzt, weil die Spezifikation das Verhalten erst
+  beschreibt, wenn Lastenheft und Code es tragen.
 
 ## 6. Out-of-Scope für diese Welle
 
-<!-- BEDIENHINWEIS: explizite Nicht-Inhalte, schuetzt vor Scope-Creep. -->
-
-Regeln dieser Sektion: Baseline-Regelwerk `modul-06-roadmap.md`
-§Wellen-Closure-Prozedur, Eröffnung Schritt 1 — Out-of-Scope gehört zur
-Zielsetzung: Was nicht ausdrücklich ausgeschlossen ist, dehnt die Welle, bis
-der Closure-Trigger unerreichbar wird.
-
-- <…>
+- Add-on-Services (Compose) für `sshd` oder Claude Code: entschieden gegen (Anlass 2026-10-17).
+- Feature-Optionen (`gatewayPorts` und `version` von `sshd`, Optionen von Claude Code): der Katalog kennt keine Optionen; ein Optionsmodell ist ein
+  Re-Evaluierungs-Trigger von [`ADR-0020`](../adr/0020-drittanbieter-features-im-katalog.md) und ein eigener Vorgang.
+- Schlüssel-Login und Schlüsselverwaltung für `sshd` (`authorized_keys`, Host-Schlüssel): das Feature kennt nur Passwort-Login; `u-boot` verwaltet keine Schlüssel
+  und setzt kein Passwort (neue Zusage, nicht Teil dieser Welle).
+- Automatisches Eintragen von Port 2222 in `forwardPorts`: `forwardPorts` stammt aus den Services
+  ([`LH-FA-DEV-005`](../../../spec/lastenheft.md#lh-fa-dev-005--ports)); ändert der Projektinhaber das, ist es eine Plan-Änderung.
+- Konfiguration oder Start des Agenten (Berechtigungsmodus, Einstellungen, Hooks): [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)
+  nennt es als Nicht-Ziel.
+- Weitere Agenten- oder Remote-Zugangs-Features (Codex, Gemini, andere SSH-Varianten): jede Quelle braucht eine eigene Entscheidung.
+- Der Release-Cut: eigener Slice nach dieser Welle, wenn der Projektinhaber ihn wünscht.
+- Die Docker-Desktop-Messung: andere Gegenstände, ohne Bezug zu den Features.
 
 ## 7. Closure-Notiz
 
-<!--
-BEDIENHINWEIS — keine Norm; faellt beim Kopieren weg (README.md §Verwendung,
-Schritt 5) und darf deshalb nichts Tragendes halten.
-
-- Erst nach Welle-Abschluss fuellen; nur die Nummer, nicht die volle Welle-ID.
-- Ziel-Form der Ergebnis-Notiz: `welle-results.template.md` — Schwester-Vorlage
-  im Template-Verzeichnis, kein Artefakt deines Repos. Sie ist von der
-  Ruheort-Regel ausgenommen und faellt mit diesem Kommentar ohnehin weg.
--->
-
-Regeln dieser Sektion: Baseline-Regelwerk `grundlagen-traceability.md`
-§Herkunfts-Anker für Steering-Loop-Regeln — dort die **Ruheort-Regel**: Die
-beiden Zeiger unten sind so zu schreiben, wie sie vom Ruheort `done/` auflösen,
-nicht vom Schreibort.
-
-Ergebnis: <Zeiger auf `welle-<Kennung>-results.md`, Geschwister im Ruheort `done/`>
-Zähler: <Zeiger aufs Beobachtungs-Register, eine Ebene über dem Ruheort>
+Wird bei der Closure geschrieben. Form wie in [`welle-cli-verbosity`](done/welle-cli-verbosity.md) §7: Detailquellen, Geliefert, Closure-Trigger (§3), Was hat
+funktioniert, Was ging anders als geplant, Trigger-Audit, Steering-Loop-Einträge, Beobachtungs-Register, Folge-Slices, Verifikation. Die Pfade sind so zu
+schreiben, wie sie vom Ruheort `done/` auflösen.
