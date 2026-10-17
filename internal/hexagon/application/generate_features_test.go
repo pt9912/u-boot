@@ -640,6 +640,8 @@ func TestGenerateDevcontainer_FeaturesHomebrewSdkman(t *testing.T) {
 			[]string{"ghcr.io/devcontainers/features/java:1"}, 0},
 		"python": {"devcontainer:\n  enabled: true\n  features:\n    python:\n      enabled: true\n",
 			[]string{"ghcr.io/devcontainers/features/python:1"}, 0},
+		"sshd": {"devcontainer:\n  enabled: true\n  features:\n    sshd:\n      enabled: true\n",
+			[]string{"ghcr.io/devcontainers/features/sshd:1"}, 0},
 		"java and sdkman": {"devcontainer:\n  enabled: true\n  features:\n    java:\n      enabled: true\n    sdkman:\n      enabled: true\n",
 			[]string{"ghcr.io/devcontainers/features/java:1"}, 0},
 		"both": {"devcontainer:\n  enabled: true\n  features:\n    homebrew:\n      enabled: true\n    sdkman:\n      enabled: true\n",
@@ -746,5 +748,102 @@ func TestGenerateDevcontainer_FeaturesJavaVersionAndSdkman_RenderTwoKeys(t *test
 	want := []string{"ghcr.io/devcontainers/features/java:1", "ghcr.io/devcontainers/features/java:21"}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("features = %v, want %v", got, want)
+	}
+}
+
+// sshdLoginWarnings returns the LH-FA-DEV-006 login-service entries of a
+// generate response.
+func sshdLoginWarnings(ws []driving.WarningEntry) []driving.WarningEntry {
+	var out []driving.WarningEntry
+	for _, w := range ws {
+		if w.Code == "LH-FA-DEV-006" && strings.Contains(w.Message, "login service sshd") {
+			out = append(out, w)
+		}
+	}
+	return out
+}
+
+// LH-FA-DEV-006 / LH-FA-CLI-005: an active `sshd` feature in the sandbox
+// profile is disclosed with a warning that carries SecurityRelaxation (it
+// stays visible under `--quiet`); without the profile, without the feature
+// or with the feature switched off there is none. A version override keeps
+// the feature (the warning is about the source).
+func TestGenerateDevcontainer_SshdLoginWarning(t *testing.T) {
+	t.Parallel()
+	const on = "    sshd:\n      enabled: true\n"
+	cases := map[string]struct {
+		yaml    string
+		sandbox bool
+		want    int
+	}{
+		"sandbox profile with sshd":    {"devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n" + on, false, 1},
+		"sandbox flag with sshd":       {"devcontainer:\n  enabled: true\n  features:\n" + on, true, 1},
+		"sandbox with sshd version":    {"devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n    sshd:\n      enabled: true\n      version: \"2\"\n", false, 1},
+		"default profile with sshd":    {"devcontainer:\n  enabled: true\n  features:\n" + on, false, 0},
+		"sandbox without sshd":         {"devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n    node:\n      enabled: true\n", false, 0},
+		"sandbox with sshd switch off": {"devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n    sshd:\n      enabled: false\n", false, 0},
+		"sandbox with sshd unset":      {"devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n    sshd: {}\n", false, 0},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, tc.yaml)
+			resp, err := generateSandbox(svc, tc.sandbox)
+			if err != nil {
+				t.Fatalf("generate: %v", err)
+			}
+			got := sshdLoginWarnings(resp.Warnings)
+			if len(got) != tc.want {
+				t.Fatalf("sshd login warnings = %d, want %d: %+v", len(got), tc.want, resp.Warnings)
+			}
+			for _, w := range got {
+				if !w.SecurityRelaxation || w.Level != "warn" {
+					t.Errorf("sshd warning must be a warn entry with SecurityRelaxation: %+v", w)
+				}
+				if !strings.Contains(w.Message, "port 2222") || !strings.Contains(w.Message, "sudo passwd") ||
+					!strings.Contains(w.Message, "not an isolation boundary") {
+					t.Errorf("sshd warning lacks port, password step or boundary statement: %q", w.Message)
+				}
+			}
+			body, _ := fs.ReadFile(devcontainerJSONPath())
+			if strings.Contains(string(body), "2222") {
+				t.Errorf("port 2222 must not be forwarded (forwardPorts stems from services only):\n%s", body)
+			}
+		})
+	}
+}
+
+// The third-party notice of another catalogue feature stays an
+// unflagged entry next to the flagged sshd warning, so `--quiet` drops
+// only the former.
+func TestGenerateDevcontainer_SshdLoginWarning_ThirdPartyStaysUnflagged(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n    sshd:\n      enabled: true\n    homebrew:\n      enabled: true\n")
+	resp, err := generateSandbox(svc, false)
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	third, login := 0, 0
+	for _, w := range resp.Warnings {
+		switch {
+		case w.Code == "LH-NFA-SEC-004":
+			third++
+			if w.SecurityRelaxation {
+				t.Errorf("third-party notice must not carry SecurityRelaxation: %+v", w)
+			}
+		case strings.Contains(w.Message, "login service sshd"):
+			login++
+			if !w.SecurityRelaxation {
+				t.Errorf("login-service warning lost SecurityRelaxation: %+v", w)
+			}
+		}
+	}
+	if third != 1 || login != 1 {
+		t.Errorf("third-party=%d login=%d, want 1/1: %+v", third, login, resp.Warnings)
+	}
+	if r2, err := generateSandbox(svc, false); err != nil || r2.Action != driving.GenerateActionNoOp {
+		t.Errorf("second run: action=%v err=%v, want NoOp", r2.Action, err)
 	}
 }

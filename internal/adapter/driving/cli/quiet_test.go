@@ -359,3 +359,54 @@ func TestExecute_Quiet_KeepsEachDegradationFallback(t *testing.T) {
 		}
 	}
 }
+
+// LH-FA-DEV-006 / LH-FA-CLI-005 exception 1: the login-service warning
+// of an active `sshd` feature carries SecurityRelaxation, so `--quiet`
+// keeps it in init, generate and up, while the third-party notice of
+// another feature (LH-NFA-SEC-004) next to it is dropped.
+func TestExecute_Quiet_KeepsSshdLoginWarningDropsThirdParty(t *testing.T) {
+	t.Parallel()
+	sshd := driving.WarningEntry{
+		Code: "LH-FA-DEV-006", Level: "warn", SecurityRelaxation: true,
+		Message: "login service sshd is active in the container (port 2222, password login only, after `sudo passwd`)",
+	}
+	thirdParty := driving.WarningEntry{
+		Code: "LH-NFA-SEC-004", Level: "warn",
+		Message: "devcontainer feature homebrew comes from the third-party publisher meaningful-ooo",
+	}
+	warnings := []driving.WarningEntry{thirdParty, sshd}
+	for name, run := range map[string]func(*bytes.Buffer, *bytes.Buffer) error{
+		"init": func(o, e *bytes.Buffer) error {
+			uc := &fakeInitUseCase{resp: driving.InitProjectResponse{Warnings: warnings}}
+			return newApp(uc, cli.WithGetwd(sandboxGetwd)).Execute(context.Background(),
+				[]string{"--quiet", "init", "--devcontainer", "--sandbox"}, o, e)
+		},
+		"generate": func(o, e *bytes.Buffer) error {
+			uc := &fakeGenerateUseCase{resp: driving.GenerateResponse{
+				Artifact: domain.ArtifactDevcontainer, Action: driving.GenerateActionCreated, Warnings: warnings}}
+			return newAppWithGenerate(uc, cli.WithGetwd(sandboxGetwd)).Execute(context.Background(),
+				[]string{"--quiet", "generate", "devcontainer", "--sandbox"}, o, e)
+		},
+		"up": func(o, e *bytes.Buffer) error {
+			uc := &fakeUpUseCase{resp: driving.UpResponse{Result: domain.UpResult{Stabilized: true}, Warnings: warnings}}
+			return newAppWithUp(uc, cli.WithGetwd(func() (string, error) { return "/tmp/proj", nil })).Execute(
+				context.Background(), []string{"--quiet", "up"}, o, e)
+		},
+	} {
+		run := run
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			var stdout, stderr bytes.Buffer
+			if err := run(&stdout, &stderr); err != nil {
+				t.Fatalf("Execute: %v", err)
+			}
+			out := stdout.String()
+			if !strings.Contains(out, "Warning (LH-FA-DEV-006): login service sshd is active") {
+				t.Errorf("--quiet hid the sshd login-service warning:\n%s", out)
+			}
+			if strings.Contains(out, "third-party publisher") {
+				t.Errorf("--quiet kept the third-party notice:\n%s", out)
+			}
+		})
+	}
+}

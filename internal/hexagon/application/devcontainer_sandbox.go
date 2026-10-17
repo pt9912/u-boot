@@ -272,7 +272,8 @@ func podmanRelaxations() []string {
 
 // sandboxRelaxationWarnings returns one warning per security
 // relaxation the rendered sandbox needs (nested Podman: five options,
-// nested Docker: `--privileged`, LH-FA-DEV-007; egress restriction: NET_ADMIN, LH-FA-DEV-008), plus
+// nested Docker: `--privileged`, LH-FA-DEV-007; egress restriction: NET_ADMIN, LH-FA-DEV-008; an active `sshd` feature:
+// the login service, LH-FA-DEV-006), plus
 // a "no effect" notice per feature that is configured without the
 // sandbox profile. Only the relaxation warnings carry
 // [driving.WarningEntry.SecurityRelaxation] (they stay visible under
@@ -311,5 +312,29 @@ func sandboxRelaxationWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []drivin
 			relax("LH-FA-DEV-008", "security relaxation for the egress restriction: "+egressRelaxation()+" (a guardrail, not a sandbox boundary)")
 		}
 	}
+	if sandbox && loginServiceActive(dc) {
+		relax("LH-FA-DEV-006", "login service sshd is active in the container (port 2222, password login only, after `sudo passwd`); "+
+			"the profile limits damage and is not an isolation boundary")
+	}
 	return out
+}
+
+// loginServiceActive reports whether an enabled feature resolves to the
+// source of the catalogue's `sshd` entry; a `version` override keeps it
+// true (LH-FA-DEV-006: a login service that is active in the container is
+// disclosed).
+func loginServiceActive(dc *ubootYAMLDevcontainer) bool {
+	if dc == nil {
+		return false
+	}
+	sshd := featureCatalogue()["sshd"].source
+	for name, f := range dc.Features {
+		if f.Enabled == nil || !*f.Enabled {
+			continue
+		}
+		if source, _, ok := projectFeatureSourceVersion(name, f.Source, f.Version); ok && source == sshd {
+			return true
+		}
+	}
+	return false
 }

@@ -230,6 +230,11 @@ func featureCatalogue() map[string]featureCatalogueEntry {
 			defaultVersion: "1",
 			shortDesc:      "SDKMAN (installed by the official java feature)",
 		},
+		"sshd": {
+			source:         "ghcr.io/devcontainers/features/sshd",
+			defaultVersion: "1",
+			shortDesc:      "SSH server (login service, port 2222)",
+		},
 	}
 }
 

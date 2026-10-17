@@ -118,6 +118,37 @@ func TestDoctor_FeaturesDrift_OKWithJavaAndSdkmanSharingOneKey(t *testing.T) {
 	}
 }
 
+// `sshd` is projectable like every catalogue key: with the key in
+// devcontainer.json there is no drift, without it the check reports the
+// missing render key (Case 1).
+func TestDoctor_FeaturesDrift_Sshd(t *testing.T) {
+	t.Parallel()
+	for name, tc := range map[string]struct {
+		json string
+		want domain.Severity
+	}{
+		"in sync": {`{"features": {"ghcr.io/devcontainers/features/sshd:1": {}}}`, domain.SeverityOK},
+		"missing": {`{"features": {}}`, domain.SeverityWarn},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs, _, _, _ := newDoctorService(t)
+			driftSeed(t, fs, "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    sshd:\n      enabled: true\n", tc.json)
+			resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+			if err != nil {
+				t.Fatalf("Check: %v", err)
+			}
+			d := findDiagnostic(t, resp.Report.Items, "devcontainer.features.drift")
+			if d.Severity != tc.want {
+				t.Errorf("Severity = %v, want %v; message = %q", d.Severity, tc.want, d.Message)
+			}
+			if tc.want == domain.SeverityWarn && !strings.Contains(d.Message, "ghcr.io/devcontainers/features/sshd:1") {
+				t.Errorf("message does not name the sshd render key: %q", d.Message)
+			}
+		})
+	}
+}
+
 // TestDoctor_FeaturesDrift_Case1_FeatureMissingInJSON pins the
 // classic Case-1 drift: feature activated, JSON has no such key.
 func TestDoctor_FeaturesDrift_Case1_FeatureMissingInJSON(t *testing.T) {

@@ -877,8 +877,10 @@ func TestGenerateDevcontainer_SandboxDocker_StaleBlockKeepsUserContent(t *testin
 	}
 }
 
-// Egress allowlist per feature: homebrew and sdkman bring their hosts only
-// when enabled (SPEC-019).
+// Egress allowlist per feature: homebrew, sdkman and python bring their hosts only
+// when enabled (SPEC-019); `sshd` brings none (measured: the feature needs no
+// host at run time, the build reaches only the Debian mirrors of the base set),
+// so its allowlist equals the one without the feature.
 func TestGenerateDevcontainer_SandboxEgress_FeatureHosts(t *testing.T) {
 	t.Parallel()
 	for name, tc := range map[string]struct {
@@ -889,6 +891,7 @@ func TestGenerateDevcontainer_SandboxEgress_FeatureHosts(t *testing.T) {
 		"homebrew": {"homebrew", []string{"formulae.brew.sh", "pkg-containers.githubusercontent.com"}, []string{"api.sdkman.io"}},
 		"sdkman":   {"sdkman", []string{"api.sdkman.io", "broker.sdkman.io", "repo1.maven.org"}, []string{"formulae.brew.sh"}},
 		"python":   {"python", []string{"pypi.org", "files.pythonhosted.org"}, []string{"formulae.brew.sh", "api.sdkman.io"}},
+		"sshd":     {"sshd", []string{"deb.debian.org"}, []string{"pypi.org", "formulae.brew.sh", "api.sdkman.io", "registry.npmjs.org"}},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
@@ -909,5 +912,26 @@ func TestGenerateDevcontainer_SandboxEgress_FeatureHosts(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestGenerateDevcontainer_SandboxEgress_SshdAddsNoHost(t *testing.T) {
+	t.Parallel()
+	script := func(features string) string {
+		svc, fs := newGenerateService(t)
+		seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n"+features+"  sandbox:\n    egress:\n      enabled: true\n")
+		if _, err := generateSandbox(svc, false); err != nil {
+			t.Fatalf("generate: %v", err)
+		}
+		body, err := fs.ReadFile(egressInitPath())
+		if err != nil {
+			t.Fatalf("read egress script: %v", err)
+		}
+		return string(body)
+	}
+	with := script("    sshd:\n      enabled: true\n")
+	without := script("    git:\n      enabled: true\n")
+	if with != without {
+		t.Errorf("sshd changed the egress allowlist:\nwith:\n%s\nwithout:\n%s", with, without)
 	}
 }

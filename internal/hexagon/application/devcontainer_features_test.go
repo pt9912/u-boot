@@ -323,6 +323,7 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 		"postgres-client",
 		"python",
 		"sdkman",
+		"sshd",
 	}
 	catalogue := application.FeatureCatalogueForTest()
 	got := make([]string, 0, len(catalogue))
