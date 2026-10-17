@@ -25,10 +25,11 @@ func relaxationFlags(ws []driving.WarningEntry) (flagged, unflagged []driving.Wa
 	return flagged, unflagged
 }
 
-// LH-FA-CLI-005 / LH-FA-DEV-006/-007/-008: exactly the "security
-// relaxation" notices carry SecurityRelaxation (they stay visible
-// under --quiet); the flag sits on the entry, so the "has no effect"
-// notices that share the code LH-FA-DEV-007 stay unflagged.
+// LH-FA-CLI-005 / LH-FA-DEV-006/-007/-008: the "security relaxation"
+// notices and the egress "has no effect" notice (no restriction arises)
+// carry SecurityRelaxation (they stay visible under --quiet); the
+// `nestedRuntime` "has no effect" notices stay unflagged. The flag sits
+// on the entry, so the notices that share the code LH-FA-DEV-007 differ.
 func TestSandboxRelaxationWarnings_FlagIsOnTheEntryNotTheCode(t *testing.T) {
 	t.Parallel()
 	podman := sandboxCfg{runtime: "podman"}
@@ -41,14 +42,15 @@ func TestSandboxRelaxationWarnings_FlagIsOnTheEntryNotTheCode(t *testing.T) {
 		sandbox     bool
 		wantFlagged int
 		wantPlain   int
+		flaggedText string
 	}{
-		{"podman-sandbox: five relaxations", podman, true, 5, 0},
-		{"docker-sandbox: --privileged", docker, true, 1, 0},
-		{"egress-sandbox: NET_ADMIN", egress, true, 1, 0},
-		{"podman-without-sandbox: has no effect", podman, false, 0, 1},
-		{"docker-without-sandbox: has no effect", docker, false, 0, 1},
-		{"egress-without-sandbox: has no effect", egress, false, 0, 1},
-		{"no nested runtime: nothing", sandboxCfg{}, true, 0, 0},
+		{"podman-sandbox: five relaxations", podman, true, 5, 0, "security relaxation"},
+		{"docker-sandbox: --privileged", docker, true, 1, 0, "security relaxation"},
+		{"egress-sandbox: NET_ADMIN", egress, true, 1, 0, "security relaxation"},
+		{"podman-without-sandbox: has no effect", podman, false, 0, 1, ""},
+		{"docker-without-sandbox: has no effect", docker, false, 0, 1, ""},
+		{"egress-without-sandbox: has no effect, flagged", egress, false, 1, 0, "egress.enabled has no effect"},
+		{"no nested runtime: nothing", sandboxCfg{}, true, 0, 0, ""},
 	}
 	for _, tc := range cases {
 		tc := tc
@@ -59,8 +61,8 @@ func TestSandboxRelaxationWarnings_FlagIsOnTheEntryNotTheCode(t *testing.T) {
 				t.Fatalf("flagged=%d plain=%d, want %d/%d", len(flagged), len(plain), tc.wantFlagged, tc.wantPlain)
 			}
 			for _, w := range flagged {
-				if !strings.Contains(w.Message, "security relaxation") {
-					t.Errorf("flagged entry is not a relaxation notice: %q", w.Message)
+				if !strings.Contains(w.Message, tc.flaggedText) {
+					t.Errorf("flagged entry lacks %q: %q", tc.flaggedText, w.Message)
 				}
 			}
 			for _, w := range plain {

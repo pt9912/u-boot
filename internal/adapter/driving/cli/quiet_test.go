@@ -410,3 +410,54 @@ func TestExecute_Quiet_KeepsSshdLoginWarningDropsThirdParty(t *testing.T) {
 		})
 	}
 }
+
+// LH-FA-CLI-005 exception 1 / LH-FA-DEV-008: in `generate devcontainer`
+// the notice that the egress restriction has no effect without the
+// sandbox profile carries SecurityRelaxation and stays under `--quiet`;
+// the `nestedRuntime` "has no effect" notice next to it is a
+// configuration notice and goes. `--json` lists both, with and without
+// `--quiet`, and the flag is not part of the wire form.
+func TestExecute_Generate_Quiet_KeepsEgressNoEffectDropsNestedRuntimeNoEffect(t *testing.T) {
+	t.Parallel()
+	egress := driving.WarningEntry{
+		Code: "LH-FA-DEV-008", Level: "warn", SecurityRelaxation: true,
+		Message: "devcontainer.sandbox.egress.enabled has no effect without devcontainer.profile=sandbox; no egress restriction was generated",
+	}
+	nested := driving.WarningEntry{
+		Code: "LH-FA-DEV-007", Level: "warn",
+		Message: "devcontainer.sandbox.nestedRuntime=podman has no effect without devcontainer.profile=sandbox; no nested runtime was generated",
+	}
+	run := func(args ...string) string {
+		uc := &fakeGenerateUseCase{resp: driving.GenerateResponse{
+			Artifact: domain.ArtifactDevcontainer, Action: driving.GenerateActionCreated,
+			Warnings: []driving.WarningEntry{nested, egress},
+		}}
+		out, _, err := quietRun(t, newAppWithGenerate(uc, cli.WithGetwd(sandboxGetwd)), args...)
+		if err != nil {
+			t.Fatalf("Execute %v: %v", args, err)
+		}
+		return out
+	}
+
+	text := run("--quiet", "generate", "devcontainer")
+	if !strings.Contains(text, "Warning (LH-FA-DEV-008): devcontainer.sandbox.egress.enabled has no effect") {
+		t.Errorf("--quiet hid the egress no-effect warning:\n%s", text)
+	}
+	if strings.Contains(text, "nestedRuntime") {
+		t.Errorf("--quiet kept the nestedRuntime no-effect warning:\n%s", text)
+	}
+	if strings.Contains(strings.ToLower(text), "securityrelaxation") {
+		t.Errorf("the flag leaked into the text output:\n%s", text)
+	}
+
+	plain := run("--json", "generate", "devcontainer")
+	if quiet := run("--quiet", "--json", "generate", "devcontainer"); quiet != plain {
+		t.Errorf("--quiet --json differs from --json:\n quiet=%s\n plain=%s", quiet, plain)
+	}
+	if !strings.Contains(plain, "egress.enabled has no effect") || !strings.Contains(plain, "nestedRuntime=podman has no effect") {
+		t.Errorf("--json lacks a warning:\n%s", plain)
+	}
+	if strings.Contains(strings.ToLower(plain), "securityrelaxation") {
+		t.Errorf("the flag leaked into the wire form:\n%s", plain)
+	}
+}

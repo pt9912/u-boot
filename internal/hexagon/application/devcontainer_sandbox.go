@@ -276,9 +276,11 @@ func podmanRelaxations() []string {
 // nested Docker: `--privileged`, LH-FA-DEV-007; egress restriction: NET_ADMIN, LH-FA-DEV-008; an active `sshd` feature:
 // the login service, LH-FA-DEV-006), plus
 // a "no effect" notice per feature that is configured without the
-// sandbox profile. Only the relaxation warnings carry
+// sandbox profile. The relaxation warnings and the egress "no effect"
+// notice (no restriction arises) carry
 // [driving.WarningEntry.SecurityRelaxation] (they stay visible under
-// `--quiet`, LH-FA-CLI-005 exception 1). The degradation fallbacks
+// `--quiet`, LH-FA-CLI-005 exception 1); the `nestedRuntime` "no effect"
+// notices are configuration notices and stay unflagged. The degradation fallbacks
 // of LH-FA-DEV-007 (no daemon, `vfs` storage, no egress restriction)
 // are not produced here: they arise at container start and in
 // `u-boot doctor`, where the item carries
@@ -308,7 +310,7 @@ func sandboxRelaxationWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []drivin
 	}
 	if egressEnabled(dc) {
 		if !sandbox {
-			warn("LH-FA-DEV-008", "devcontainer.sandbox.egress.enabled has no effect without devcontainer.profile=sandbox; no egress restriction was generated")
+			relax("LH-FA-DEV-008", "devcontainer.sandbox.egress.enabled has no effect without devcontainer.profile=sandbox; no egress restriction was generated")
 		} else {
 			relax("LH-FA-DEV-008", "security relaxation for the egress restriction: "+egressRelaxation()+" (a guardrail, not a sandbox boundary)")
 		}
