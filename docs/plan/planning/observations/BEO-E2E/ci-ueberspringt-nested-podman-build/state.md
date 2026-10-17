@@ -1,0 +1,1 @@
+**Stand:** offen — Trigger: der erste CI-Lauf nach dem Push zeigt, ob `TestE2E_SandboxDevcontainer_NestedPodman_Build` auf `ubuntu-latest` läuft oder überspringt (`.github/workflows/integration.yml`).

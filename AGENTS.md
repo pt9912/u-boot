@@ -207,12 +207,20 @@ gelesen wurde, steht nicht im Text.
   einschließlich Tests, Doku, Packaging und Workflows.
 - Vor dem Abschluss gleicht der Autor die Tabelle gegen `git diff --stat` ab;
   jede Zeile ohne Plan-Eintrag und jeder Eintrag ohne Diff wird berichtigt.
+  Der Abgleich gilt für den Stand **nach der letzten Fix-Runde** (Review-Fix,
+  Closure), nicht nur nach der Umsetzung; er wird nach jeder späteren Änderung
+  wiederholt.
+- Ein Zustandsmarker mit Ablaufpunkt („noch nicht vergeben“, „Stand …“,
+  „Wortlaut wird vorgelegt“) wird beim Ablauf entfernt oder auf den Ist-Stand
+  gesetzt; auch eine Aussage über Verhalten („gemessene Hosts“) nennt nur, was
+  gemessen oder gelesen wurde.
 
 **Begründung:** Ein Reviewer oder Verifier fängt falsche Plan-Aussagen erst
-nachträglich, kein Gate prüft sie; in vier Vorgängen
+nachträglich, kein Gate prüft sie; in acht Vorgängen
 (`BEO-DOK/plan-aussage-ueber-code`) stand etwas im Plan, das der Code nicht
-trug, oder fehlte eine berührte Datei. Es ergänzt §3.7 und §3.9; ein neues Gate
-entsteht nicht.
+trug, oder fehlte eine berührte Datei. Es ergänzt §3.7 und §3.9; ein Sensor
+entsteht nicht: die Fehler sind meist Aussagen über Verhalten oder Zustand, die
+ein Dateilisten-Vergleich nicht sieht.
 
 ## 4. Quality Gates
 

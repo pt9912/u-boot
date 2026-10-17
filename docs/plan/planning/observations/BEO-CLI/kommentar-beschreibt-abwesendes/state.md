@@ -1,1 +1,1 @@
-**Stand:** verkörpert — liegt in `AGENTS.md §3.9`, Herkunfts-Anker `seit welle-cli-verbosity` (Ausgang entschieden bei der Closure von `welle-cli-verbosity`, 2026-10-16).
+**Stand:** verkörpert — liegt in `AGENTS.md §3.9`, Herkunfts-Anker `seit welle-cli-verbosity` (Ausgang entschieden bei der Closure von `welle-cli-verbosity`, 2026-10-16); ohne mechanischen Sensor, Begründung in [`welle-devcontainer-sshd-claude-code`](../../../../done/welle-devcontainer-sshd-claude-code.md) §7 (Projektinhaber, 2026-10-17, nach dem vierten Beleg).
