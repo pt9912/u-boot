@@ -106,11 +106,11 @@ Neu:
 
 Alt:
 
-> 2. die Ausweisung der Degradations-Fallbacks (Container ohne Docker-Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion) in der Befehlsausgabe und in `u-boot doctor` ([`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer));
+> 2. die Ausweisung der Degradations-Fallbacks (Container ohne Docker-Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion) in der Befehlsausgabe und in `u-boot doctor` ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer));
 
 Neu:
 
-> 2. die Ausweisung der Degradations-Fallbacks, soweit der Host sie ermittelt (`vfs`-Storage bei fehlendem `/dev/fuse`), in der Befehlsausgabe und in `u-boot doctor`; die Fallbacks, die erst im Container entstehen (Container ohne Docker-Daemon, Wegfall der Egress-Restriktion), gibt das Startscript im Container aus, sie liegen außerhalb der Ausgabe von `u-boot` und damit außerhalb dieser Ausnahme ([`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer));
+> 2. die Ausweisung der Degradations-Fallbacks, soweit der Host sie ermittelt (`vfs`-Storage bei fehlendem `/dev/fuse`), in der Befehlsausgabe und in `u-boot doctor`; die Fallbacks, die erst im Container entstehen (Container ohne Docker-Daemon, Wegfall der Egress-Restriktion), gibt das Startscript im Container aus, sie liegen außerhalb der Ausgabe von `u-boot` und damit außerhalb dieser Ausnahme ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer));
 
 Die Zählung „Vier Ausnahmen“ bleibt: Ausnahme 2 hat weiterhin einen Gegenstand (den `doctor`-Eintrag zu `vfs` unter `doctor --quiet`).
 
@@ -118,11 +118,11 @@ Die Zählung „Vier Ausnahmen“ bleibt: Ausnahme 2 hat weiterhin einen Gegenst
 
 Alt:
 
-> - Ist die nötige Capability nicht gewährbar, greift die Degradation aus [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (geprüft beim Containerstart; `u-boot doctor` prüft die Konfiguration).
+> - Ist die nötige Capability nicht gewährbar, greift die Degradation aus [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (geprüft beim Containerstart; `u-boot doctor` prüft die Konfiguration).
 
 Neu:
 
-> - Ist die nötige Capability nicht gewährbar, greift die Degradation aus [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (geprüft beim Containerstart; das Startscript gibt den Wegfall der Restriktion im Container aus; `u-boot doctor` prüft die Konfiguration, die Capability kennt es nicht).
+> - Ist die nötige Capability nicht gewährbar, greift die Degradation aus [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (geprüft beim Containerstart; das Startscript gibt den Wegfall der Restriktion im Container aus; `u-boot doctor` prüft die Konfiguration, die Capability kennt es nicht).
 
 **Stelle 4 — Kopf und [§16 Historie](../../../../spec/lastenheft.md#16-historie).** Versionsfeld `0.12.0` → `0.13.0`; neue Zeile:
 

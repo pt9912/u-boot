@@ -74,7 +74,7 @@ geschlossen — entweder im Code oder im Vertrag.
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [x] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
 - [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft, im Repo mit Wellen von der nächsten Welle-Closure (auch für Slices ohne Wellen-Zugehörigkeit).
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft, im Repo mit Wellen von der nächsten Welle-Closure (auch für Slices ohne Wellen-Zugehörigkeit).
 
 ## 3. Plan (vor Code)
 
@@ -118,7 +118,7 @@ Steering-Loop-Lerneintrag geschrieben (§7).
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt.
 - **Folge-Slices:** [`slice-cr-sandbox-fallback-ausweisung`](../open/slice-cr-sandbox-fallback-ausweisung.md) — ist eine Datei in `open/`.
 - **Risiken aus §6:** jedes trägt einen Ausgang — siehe §6 (beide entfallen).
-- **Drei Paarungen:** Anker · Folge-Slice · Register nach dem `git mv` zu prüfen.
+- **Drei Paarungen:** Anker: keine verkörperte Regel, daher kein Anker; Folge-Slice: der CR liegt in `open/`; Register: keine Beobachtung angelegt.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
