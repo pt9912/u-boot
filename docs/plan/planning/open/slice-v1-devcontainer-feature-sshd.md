@@ -23,8 +23,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 ## 1. Ziel und Abgrenzung
 
-**Ziel:** Der Schlüssel `sshd` ist ein eingebautes Devcontainer-Feature und rendert das offizielle Feature `ghcr.io/devcontainers/features/sshd:1`; im Sandbox-Profil gilt die
-Regel, die der CR [`slice-cr-devcontainer-agent-features-sandbox`](slice-cr-devcontainer-agent-features-sandbox.md) festlegt.
+**Ziel:** Der Schlüssel `sshd` ist ein eingebautes Devcontainer-Feature und rendert das offizielle Feature `ghcr.io/devcontainers/features/sshd:1`; im Sandbox-Profil ist `sshd` erlaubt (Entscheidung des Projektinhabers am 2026-10-17), und die Befehlsausgabe weist den Passwort-Login mit einer Warnung aus; Wortlaut und Sichtbarkeit unter `--quiet` legt der CR fest (offene Teilfrage dort). Ein sshd-Port wird nicht automatisch weitergeleitet.
 
 **Planungsgrundlage (WebFetch 2026-10-17, im Slice gegen `install.sh` und `devcontainer-feature.json` erneut zu prüfen, nicht zu übernehmen):** Das Feature lauscht auf
 Port 2222; Optionen `gatewayPorts` (Default `no`) und `version` (unbenutzt); nur Passwort-Login (der Nutzer setzt es mit `sudo passwd $(whoami)`), kein dokumentierter
@@ -50,7 +49,7 @@ Schlüssel-Login; es verlangt eine Debian- oder Ubuntu-Basis. Das Basis-Image de
 
 ## 2. Definition of Done
 
-- [ ] **Katalog und Generator:** `sshd` im Katalog (offizielle Quelle `ghcr.io/devcontainers/features/sshd`, Standardversion `1`, ohne `publisher`); Egress-Zeile nur, wenn die Messung Laufzeit-Hosts findet; das Sandbox-Verhalten folgt dem CR (erlaubt, mit Ausweisung oder Fehler mit Exit-Code `10`); Golden Cases belegen Render, Sandbox-Verhalten, Hosts und double-run -> NoOp.
+- [ ] **Katalog und Generator:** `sshd` im Katalog (offizielle Quelle `ghcr.io/devcontainers/features/sshd`, Standardversion `1`, ohne `publisher`); Egress-Zeile nur, wenn die Messung Laufzeit-Hosts findet; das Sandbox-Verhalten folgt dem CR (erlaubt, mit Warnung; Wortlaut und Sichtbarkeit unter `--quiet` nach der Entscheidung des CR); Golden Cases belegen Render, Sandbox-Verhalten, Hosts und double-run -> NoOp.
 - [ ] **Messung:** Die Dev-Container-CLI baut ein Image mit `sshd` auf dem Basis-Image (Verfahren der Messreihe in [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md)), im Profil `default` und im Sandbox-Profil mit und ohne Egress; belegt sind: sshd lauscht auf 2222, die Feature-Metadaten (`mounts`, `capAdd`, `privileged`, `entrypoint`, `installsAfter`, Optionen) und die Laufzeit-Hosts. Der Befund steht in der Evidence; findet er eine Lockerung des Profils, geht der Slice zurück an den CR (§4).
 - [ ] **Doku:** Benutzerhandbuch (Katalogtabelle, Passwort-Setzen mit `sudo passwd`, Sicherheitshinweis zum Sandbox-Profil laut CR), `README.md`, `README.de.md`, `CHANGELOG.md` (`[Unreleased]`) und `harness/replay.md` (Golden-Zeile) nennen den Schlüssel.
 - [ ] `make gates` grün.
@@ -69,7 +68,7 @@ Schlüssel-Login; es verlangt eine Debian- oder Ubuntu-Basis. Das Basis-Image de
 |---|---|---|
 | `internal/hexagon/application/devcontainer_features.go` | update | Eintrag `sshd` in `featureCatalogue()` (Quelle, Standardversion `1`, `shortDesc`) |
 | `internal/hexagon/application/devcontainer_egress.go` | update (bedingt) | Zeile in `egressFeatureHosts()` nur, wenn die Messung Hosts findet |
-| `internal/hexagon/application/devcontainer_sandbox.go`, `generate.go` | update (bedingt) | Sandbox-Regel laut CR: Ausweisung in `sandboxRelaxationWarnings` (mit oder ohne `SecurityRelaxation`) oder Fehlerpfad in `validateDevcontainerSandbox` (Exit-Code `10`); die Stelle bestimmt der Implementer aus dem Code |
+| `internal/hexagon/application/devcontainer_sandbox.go`, `generate.go` | update (bedingt) | Sandbox-Regel laut CR: Warnung in `sandboxRelaxationWarnings` (mit oder ohne `SecurityRelaxation`, je nach Entscheidung des CR); die Stelle bestimmt der Implementer aus dem Code |
 | `internal/hexagon/application/devcontainer_features_test.go`, `generate_features_test.go`, `generate_sandbox_test.go` | update | Katalogumfang, Render und Dedupe, Sandbox-Verhalten, Egress-Hosts je Feature — nach [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) |
 | `internal/hexagon/application/doctor_features_drift_test.go` | update | `sshd` ist projizierbar (`projectAllFeatureEntries`), kein Drift-Fehlalarm |
 | `docs/user/benutzerhandbuch.md`, `README.md`, `README.de.md`, `CHANGELOG.md`, `harness/replay.md` | update | öffentlicher Vertrag und Golden-Zeile |
@@ -78,7 +77,7 @@ Die Pfade stammen aus dem Quelltext (Lesestand 2026-10-17); der Implementer prü
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; der CR [`slice-cr-devcontainer-agent-features-sandbox`](slice-cr-devcontainer-agent-features-sandbox.md) liegt in `done/` (auch mit `Gegenstand: entfallen`); kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; der CR [`slice-cr-devcontainer-agent-features-sandbox`](slice-cr-devcontainer-agent-features-sandbox.md) liegt in `done/`; kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benannt:**
 
@@ -91,7 +90,7 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 
 ## 6. Risiken und offene Punkte
 
-- **`sshd` öffnet im Container einen Passwort-Login** (Nutzer-Passwort per `sudo passwd`), im Sandbox-Profil mit Zielsetzung Schadensbegrenzung. — **Ausgang:** weiter offen bis zur Entscheidung des Projektinhabers (Frage 1 im CR); danach trägt DoD 1 die gewählte Regel.
+- **`sshd` öffnet im Container einen Passwort-Login** (Nutzer-Passwort per `sudo passwd`), im Sandbox-Profil mit Zielsetzung Schadensbegrenzung; entschieden ist: erlaubt mit Warnung. — **Ausgang:** weiter offen bis der CR die Teilfrage (Wortlaut, Sichtbarkeit unter `--quiet`) entschieden hat; danach trägt DoD 1 die gewählte Fassung.
 - **Feature-Metadaten unterlaufen das Profil** (`mounts`, `capAdd`, `privileged`, `entrypoint`): u-boot erzeugt nur `devcontainer.json`; die Features bringen eigene Metadaten mit, die der Dev-Container-Lauf zusammenführt. — **Ausgang:** weiter offen: die Messung (DoD 2) entscheidet; bei Eintritt Rückführung an den CR (§4), bei Entfall wird er bei der Closure mit Verweis auf die Evidence gesetzt.
 - **Der Port 2222 ist im Sandbox-Profil nur über das Forwarding der Dev-Container-Werkzeuge erreichbar**, `u-boot` veröffentlicht ihn nicht. — **Ausgang:** entfallen: `forwardPorts` bleibt unberührt, und `doctor` warnt nur bei fehlenden Service-Ports (aus `doctor.go` gelesen); die Handbuch-Zeile nennt das.
 - **Plan-Aussage über den Code stimmt nicht** (Klasse mit drei Vorgängen an der Schwelle, siehe §8): die Fundstellen in §1 und §3 sind ein Lesestand. — **Ausgang:** weiter offen: der Implementer prüft jede Aussage vor der Änderung im Code; Abweichungen stehen in der Evidence, die Klasse zählt die Closure.
