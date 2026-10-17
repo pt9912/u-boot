@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** Slice [`slice-v2-spec-devcontainer-sshd-claude-code`](../plan/planning/done/slice-v2-spec-devcontainer-sshd-claude-code.md) (Welle [`welle-devcontainer-sshd-claude-code`](../plan/planning/welle-devcontainer-sshd-claude-code.md), letzter Slice), Commits `f266bd4..e53f38a` (`e32859a`, `38df18d`, `ef43e46`, `e53f38a`): `spec/spezifikation.md`, Roadmap-Ruhe-Marker, Plan-Tabelle. Review-Report: [`2026-10-17-slice-v2-spec-devcontainer-sshd-claude-code.md`](2026-10-17-slice-v2-spec-devcontainer-sshd-claude-code.md).
+**Gegenstand:** Slice [`slice-v2-spec-devcontainer-sshd-claude-code`](../plan/planning/done/slice-v2-spec-devcontainer-sshd-claude-code.md) (Welle [`welle-devcontainer-sshd-claude-code`](../plan/planning/done/welle-devcontainer-sshd-claude-code.md), letzter Slice), Commits `f266bd4..e53f38a` (`e32859a`, `38df18d`, `ef43e46`, `e53f38a`): `spec/spezifikation.md`, Roadmap-Ruhe-Marker, Plan-Tabelle. Review-Report: [`2026-10-17-slice-v2-spec-devcontainer-sshd-claude-code.md`](2026-10-17-slice-v2-spec-devcontainer-sshd-claude-code.md).
 
 ## Verification Evidence
 

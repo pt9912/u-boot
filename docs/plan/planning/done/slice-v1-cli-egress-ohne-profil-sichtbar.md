@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md) — Folge-Slice nach dem Spezifikations-Slice [`slice-v2-spec-devcontainer-sshd-claude-code`](../done/slice-v2-spec-devcontainer-sshd-claude-code.md) (Review F-1, Verification D-2); die Welle schließt erst nach ihm (Closure-Bedingung, die von der DoD dieses Slice verschieden ist: Lastenheft, Code, Handbuch, CHANGELOG und Spezifikation sagen über `--quiet` dasselbe).
+**Welle:** [`welle-devcontainer-sshd-claude-code`](welle-devcontainer-sshd-claude-code.md) — Folge-Slice nach dem Spezifikations-Slice [`slice-v2-spec-devcontainer-sshd-claude-code`](../done/slice-v2-spec-devcontainer-sshd-claude-code.md) (Review F-1, Verification D-2); die Welle schließt erst nach ihm (Closure-Bedingung, die von der DoD dieses Slice verschieden ist: Lastenheft, Code, Handbuch, CHANGELOG und Spezifikation sagen über `--quiet` dasselbe).
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Ausnahme 1: „dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift“), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress-Restriktion), [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (die Meldung zu `nestedRuntime` ist eine Konfigurationsmeldung). Entscheidung des Projektinhabers 2026-10-17: Code-Folge-Slice, kein Lastenheft-CR. Review: [`2026-10-17-slice-v2-spec-devcontainer-sshd-claude-code`](../../../reviews/2026-10-17-slice-v2-spec-devcontainer-sshd-claude-code.md) (F-1); Verification Evidence: [`2026-10-17-verification-slice-v2-spec-devcontainer-sshd-claude-code`](../../../reviews/2026-10-17-verification-slice-v2-spec-devcontainer-sshd-claude-code.md) (D-2, H-1, H-2).
 
@@ -84,7 +84,7 @@ Lesestand 2026-10-17; der Implementer liest jede Zeile vor der Änderung an der 
 
 ## 5. Closure-Trigger
 
-DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben (§7). Mit diesem Slice ist die Welle [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md) schließbar.
+DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben (§7). Mit diesem Slice ist die Welle [`welle-devcontainer-sshd-claude-code`](welle-devcontainer-sshd-claude-code.md) schließbar.
 
 ## 6. Risiken und offene Punkte
 
@@ -112,7 +112,7 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 - **Beobachtungs-Register (`../observations/`):** keine neue Evidence-Datei, keine neue Beobachtung. Review F-4 (Handbuch-`--quiet`-Zelle in Zeilen 299 und 1417 doppelt und überlang) wird nicht ins Register aufgenommen: Es ist ein einmaliger Review-only-INFO-Befund einer kosmetischen Doku-Eigenschaft, der aus dem Bestand stammt, ohne Wiederauftreten und ohne Klasse, die einen zweiten Beleg zählen ließe; das Register zählt Wiederauftreten einer Klasse, ein Einzelfall wäre ein Zähler 1 ohne Aussage. Er geht als **Hinweis an den Projektinhaber** (kein Folge-Slice): Ob die Zelle gekürzt und die Doppelung durch einen Verweis ersetzt werden soll (`AGENTS.md` §3.7, Rang-Zeiger statt Wiederholung), ist seine Entscheidung; ein Folge-Slice nach `open/` entsteht nur auf sie. Tritt eine zweite überlange oder doppelte Handbuch-Zelle auf, wird die Klasse dann im Register geführt.
 - **Folge-Slices:** keine. Die Hinweise F-1 (kein gemeinsamer End-to-End-Lauf von Anwendung und CLI; beide Hälften einzeln mutationsrot), F-2 und F-3 (äquivalente Mutation) erfordern keine Änderung.
 - **Risiken aus §6:** beide tragen einen Ausgang: entfallen (Kennzeichen in `--json` oder Golden-Fall) und nicht eingetreten (Plan-Aussage über Code).
-- **Roadmap:** Der Ruhe-Marker „Nichts in Arbeit.“ bleibt entfernt, weil die Welle [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md) noch unter „Offene Wellen“ steht; er kehrt mit ihrem Schluss zurück (Verifier-Auflage 1, d-check `planning`).
+- **Roadmap:** Der Ruhe-Marker „Nichts in Arbeit.“ bleibt entfernt, weil die Welle [`welle-devcontainer-sshd-claude-code`](welle-devcontainer-sshd-claude-code.md) noch unter „Offene Wellen“ steht; er kehrt mit ihrem Schluss zurück (Verifier-Auflage 1, d-check `planning`).
 - **Drei Paarungen:** Anker (kein `liegt in`, nichts verkörpert) · Folge-Slice (keiner) · Register (keine neue Evidence-Datei, Zähler unverändert) — nach dem `git mv` nach `done/` geprüft: nichts zu paaren.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung

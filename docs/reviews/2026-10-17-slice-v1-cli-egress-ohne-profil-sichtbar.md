@@ -2,7 +2,7 @@
 
 **Review-Art:** Code (gegen Plan, Spezifikation und Hard Rules)
 
-**Gegenstand:** Slice [`slice-v1-cli-egress-ohne-profil-sichtbar`](../plan/planning/done/slice-v1-cli-egress-ohne-profil-sichtbar.md), Commit-Range `3063cb1..d08146d` (Welle [`welle-devcontainer-sshd-claude-code`](../plan/planning/welle-devcontainer-sshd-claude-code.md), sechster Slice).
+**Gegenstand:** Slice [`slice-v1-cli-egress-ohne-profil-sichtbar`](../plan/planning/done/slice-v1-cli-egress-ohne-profil-sichtbar.md), Commit-Range `3063cb1..d08146d` (Welle [`welle-devcontainer-sshd-claude-code`](../plan/planning/done/welle-devcontainer-sshd-claude-code.md), sechster Slice).
 
 **Skill:** `.harness/skills/reviewer.md` @ d08146d · <!-- d-check:ignore (Pfad des Skills, Zitat des Laufs) -->
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-17

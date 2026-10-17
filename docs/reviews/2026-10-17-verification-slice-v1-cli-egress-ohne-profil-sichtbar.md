@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (Frage: Bauen wir es richtig? — gegen Plan, DoD, Spezifikation)
 
-**Gegenstand:** Slice [`slice-v1-cli-egress-ohne-profil-sichtbar`](../plan/planning/done/slice-v1-cli-egress-ohne-profil-sichtbar.md), Commits `3063cb1..HEAD` (`d08146d`), Welle [`welle-devcontainer-sshd-claude-code`](../plan/planning/welle-devcontainer-sshd-claude-code.md), sechster Slice. Eingang: Review-Report [`2026-10-17-slice-v1-cli-egress-ohne-profil-sichtbar`](2026-10-17-slice-v1-cli-egress-ohne-profil-sichtbar.md) (0 HIGH/MEDIUM/LOW, 4 INFO). Reviewer-Findings sind keine Evidence; DoD, Spec und Sensors wurden separat geprüft.
+**Gegenstand:** Slice [`slice-v1-cli-egress-ohne-profil-sichtbar`](../plan/planning/done/slice-v1-cli-egress-ohne-profil-sichtbar.md), Commits `3063cb1..HEAD` (`d08146d`), Welle [`welle-devcontainer-sshd-claude-code`](../plan/planning/done/welle-devcontainer-sshd-claude-code.md), sechster Slice. Eingang: Review-Report [`2026-10-17-slice-v1-cli-egress-ohne-profil-sichtbar`](2026-10-17-slice-v1-cli-egress-ohne-profil-sichtbar.md) (0 HIGH/MEDIUM/LOW, 4 INFO). Reviewer-Findings sind keine Evidence; DoD, Spec und Sensors wurden separat geprüft.
 
 ## Verification Evidence
 
