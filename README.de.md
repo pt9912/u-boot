@@ -9,15 +9,14 @@ OpenTelemetry, …) und wiederkehrende Artefakte (README, CHANGELOG,
 `.env.example`).
 
 > **Stand:** `v0.10.0` released 2026-10-17 (GHCR, sechs Plattform-Binaries,
-> `.deb`-/`.rpm`-Pakete, Homebrew-Tap). Ergänzt die Devcontainer-Features `sshd` und `claude-code`
-> ([LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [ADR-0020](docs/plan/adr/0020-drittanbieter-features-im-katalog.md)),
-> `podman build` im Sandbox-Devcontainer (gemessen auf Colima, arm64; Docker Desktop, amd64 und CI nicht gemessen; [LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0021](docs/plan/adr/0021-podman-build-im-sandbox-devcontainer.md))
-> und einen neuen `--quiet`-Vertrag ([LH-FA-CLI-005](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)); Docker Desktop wird nicht mehr zugesagt. Bestehende `nestedRuntime: podman`-Projekte brauchen `/dev/net/tun` auf dem Container-Host. `v0.9.0` ergänzte die Features `python`, `sdkman` und `homebrew`.
+> `.deb`-/`.rpm`-Pakete, Homebrew-Tap). Ergänzt die Devcontainer-Features `sshd` und `claude-code`,
+> `podman build` im Sandbox-Devcontainer (gemessen auf Colima, arm64; Docker Desktop, amd64 und CI nicht gemessen)
+> und einen neuen `--quiet`-Vertrag; Docker Desktop wird nicht mehr zugesagt. Bestehende `nestedRuntime: podman`-Projekte brauchen `/dev/net/tun` auf dem Container-Host. `v0.9.0` ergänzte die Features `python`, `sdkman` und `homebrew`.
 > Vollständige Release-Tabelle unten.
 
 Das verbindliche Lastenheft
 ([`spec/lastenheft.md`](spec/lastenheft.md)) ist auf Deutsch verfasst;
-CLI-Ausgaben und erzeugte Dateien sind auf Englisch ([LH-LESE-002](spec/lastenheft.md#lh-lese-002--sprache)).
+CLI-Ausgaben und erzeugte Dateien sind auf Englisch.
 
 ## Für wen ist es?
 
@@ -47,21 +46,19 @@ u-boot init demo --template basic       # Projekt aus eingebautem Template rende
 u-boot init demo --template ./mein-tpl  # Projekt aus lokalem Template-Verzeichnis rendern
 ```
 
-Alle Subkommandos respektieren die [LH-FA-CLI-006](spec/lastenheft.md#lh-fa-cli-006--exit-codes)-Exit-Codes
+Alle Subkommandos verwenden dieselben Exit-Codes
 (`0` / `2` / `10` / `11` / `12` / `14`). Die *Subkommando-Referenz*
-unten mappt jedes Subkommando auf seine Lastenheft-IDs.
+unten listet jedes Subkommando.
 
 ## Was macht es vertrauenswürdig?
 
 - **Spec-getriebene Releases.** Drei getaggte Releases (`v0.1.0`,
-  `v0.2.0`, `v0.3.0`) liefern jede MVP- und v0.3.0-V1-Add-on-Spec-ID
-  aus [`spec/lastenheft.md`](spec/lastenheft.md); die Release-Tabelle
-  unten mappt jeden Slice auf seinen `LH-FA-*`- / `LH-AK-*`-Anker.
+  `v0.2.0`, `v0.3.0`) liefern jede MVP- und v0.3.0-Add-on-Anforderung
+  aus [`spec/lastenheft.md`](spec/lastenheft.md).
 - **Hexagonale Architektur.** Schicht-Regeln werden bei jedem
-  `make gates` durch `depguard` enforced; Port/Adapter-Trennung
-  formalisiert in
-  [`ADR-0002`](docs/plan/adr/0002-hexagonale-architektur.md).
-- **ADR-getriebene Entscheidungen.** 10 Architecture Decision
+  `make gates` durch `depguard` enforced; die Port/Adapter-Trennung
+  ist eine festgehaltene Architekturentscheidung.
+- **Dokumentierte Entscheidungen.** 10 Architecture Decision
   Records decken Sprache (Go), Build (Docker-only), CI, CLI-
   Framework (Cobra), Distribution (GHCR + Binary), Template-Format
   (YAML + `text/template`), Plugin-Policy (statisch) und die
@@ -160,7 +157,7 @@ Ergebnis: `u-boot.yaml`, `compose.yaml`, `README.md`, `CHANGELOG.md`,
 deklarierten Port.
 
 Eine Dev-Toolchain wird über den Devcontainer-Features-Katalog
-ergänzt ([LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), 13 Built-in-Features: `git`, `docker-cli`,
+ergänzt (13 Built-in-Features: `git`, `docker-cli`,
 `node`, `java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, `python`, `sdkman`, `sshd`, `homebrew` und `claude-code` (beide Drittanbieter)):
 
 ```bash
@@ -174,10 +171,10 @@ u-boot generate devcontainer
 Externe Feature-Quellen brauchen einen expliziten Allowlist-
 Eintrag; siehe
 [`docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen`](docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen)
-für den `--allow-external-feature-sources`-Fluss und die
-[LH-NFA-SEC-004](spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte)-Disziplin (`--yes` reicht nicht).
+für den `--allow-external-feature-sources`-Fluss; fremde Installationsskripte
+laufen nie unbemerkt (`--yes` reicht nicht).
 
-`u-boot doctor` bringt zwei [LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)-Checks zur Feature-
+`u-boot doctor` bringt zwei Checks zur Feature-
 Konfiguration mit: `devcontainer.features.allowlist` (Error,
 wenn ein `source:`-Override nicht in der Allowlist steht) und
 `devcontainer.features.drift` (Warn, wenn `u-boot.yaml` und die
@@ -187,14 +184,12 @@ Repair via `u-boot generate devcontainer`).
 Für autonome Agenten rendert `u-boot init --devcontainer --sandbox` (bzw.
 `generate devcontainer --sandbox`) einen Sandbox-Devcontainer: Workspace in
 benanntem Volume (Clone aus `origin`), kein Bind-/Socket-Mount, optional
-rootless Podman ([LH-FA-DEV-006](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)/[LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)/[LH-FA-DEV-009](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)); siehe
+rootless Podman; siehe
 [`docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten`](docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten).
 
 Re-Init auf einem bestehenden Projekt verlangt eine explizite
 Strategie (`--force` für Managed-Block-Edits, `--backup` für
-Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien). Siehe den
-[init-Slice](docs/plan/planning/done/slice-m3-init-flow.md) für die
-[LH-FA-INIT-005](spec/lastenheft.md#lh-fa-init-005--überschreibschutz)-State-Machine.
+Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien).
 
 ---
 
@@ -202,17 +197,17 @@ Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien). Siehe den
 
 | Release | Datum | Highlights |
 | ------- | ----- | ---------- |
-| `v0.1.0` | 2026-05-31 | MVP vollständig — sieben Subkommandos (`init`, `doctor`, `add`, `up`, `down`, `generate`, `config`), alle MVP-prioritären Lastenheft-IDs geliefert. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.1.0). |
+| `v0.1.0` | 2026-05-31 | MVP vollständig — sieben Subkommandos (`init`, `doctor`, `add`, `up`, `down`, `generate`, `config`), alle MVP-prioritären Anforderungen geliefert. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.1.0). |
 | `v0.2.0` | 2026-06-01 | Container-aware `doctor`, Six-Plattform-Binary-Distribution, `template list` + `init --template basic`. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.2.0). |
-| `v0.3.0` | 2026-06-01 | Milestone „Add-on Catalogue Expansion" — `u-boot add keycloak` ([LH-FA-ADD-003](spec/lastenheft.md#lh-fa-add-003--keycloak-hinzufügen)), `add otel` ([LH-FA-ADD-004](spec/lastenheft.md#lh-fa-add-004--opentelemetry-hinzufügen)), `add <service> --with-deps` ([LH-FA-ADD-006](spec/lastenheft.md#lh-fa-add-006--add-on-abhängigkeiten)), `remove <service> [--purge]` ([LH-FA-ADD-007](spec/lastenheft.md#lh-fa-add-007--service-entfernen)) plus Doku-Audit-Closure für drei V1-Spec-IDs. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.3.0). |
-| `v0.6.0` | 2026-10-01 | Milestone „Sandbox-Devcontainer + CLI-Cleanup" — `--sandbox`-Devcontainer-Profil für autonome Agenten (Named-Volume-Workspace je Instanz, optional rootless Podman, DNS-gesteuerte Egress-Allowlist, Git-Zugangsdaten nur zur Laufzeit; [LH-FA-DEV-006](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)..[-009](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)), atomares Multi-Pfad-`config get/set` + `config list`, ausgebautes `logs`/`up`/`down`/`remove --purge`, rollback-aware `generate devcontainer`, Homebrew-Formel, Go 1.27.1. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.6.0). |
-| `v0.7.0` | 2026-10-01 | Milestone „Linux-Pakete“ — `.deb` und `.rpm` (amd64, arm64) als Release-Assets per `nfpm` ([ADR-0017](docs/plan/adr/0017-linux-pakete-nfpm.md)); Keycloak-Acceptance-Test zurück in der Standard-Integrations-Lane. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.7.0). |
-| `v0.8.0` | 2026-10-14 | Milestone „Docker im Sandbox-Devcontainer“ — `devcontainer.sandbox.nestedRuntime: docker` gibt dem Sandbox-Devcontainer einen eigenen Docker-Daemon mit BuildKit, Buildx und Compose; verlangt `--privileged`, als Lockerung ausgewiesen ([LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0018](docs/plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md)). [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.8.0). |
-| `v0.8.1` | 2026-10-14 | Patch „Aktueller Docker im Sandbox-Devcontainer“ — mit `nestedRuntime: docker` läuft im Container Docker 29.9, Buildx 0.38 und Compose 5.6 aus dem Docker-APT-Repository (Schlüssel gepinnt); `download.docker.com` gehört zur Default-Allowlist ([LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0019](docs/plan/adr/0019-docker-daemon-aus-docker-apt-repo.md)). [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.8.1). |
-| `v0.9.0` | 2026-10-15 | Milestone „Mehr Devcontainer-Features“ — eingebaute Katalog-Schlüssel `python`, `sdkman` und `homebrew` (Community-Feature, als Drittanbieter ausgewiesen) mit ihren Egress-Hosts ([LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [ADR-0020](docs/plan/adr/0020-drittanbieter-features-im-katalog.md)). [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.9.0). |
-| `v0.10.0` | 2026-10-17 | Milestone „sshd, Claude Code und `podman build`“ — eingebaute Katalog-Schlüssel `sshd` und `claude-code` (Drittanbieter, ausgewiesen); `nestedRuntime: podman` baut Images, mit einer sechsten Lockerung `--device=/dev/net/tun` (gemessen auf Colima, arm64; Docker Desktop, amd64 und CI nicht gemessen); `--quiet` lässt vier Ausweisungen sichtbar und unterdrückt Erfolgsmeldungen; Docker Desktop wird nicht mehr zugesagt ([LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [LH-FA-CLI-005](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [ADR-0020](docs/plan/adr/0020-drittanbieter-features-im-katalog.md), [ADR-0021](docs/plan/adr/0021-podman-build-im-sandbox-devcontainer.md)). [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.10.0). |
-| `v0.5.0` | 2026-07-25 | „Sicherheit + lokale Templates" — Go-Toolchain-Bump schließt CVE-2026-39822 im Runtime-Image (HIGH); `u-boot init --template ./pfad` rendert ein Projekt aus einem lokalen Verzeichnis ([LH-FA-TPL-003](spec/lastenheft.md#lh-fa-tpl-003--eigene-templates)), neben dem eingebauten Katalog. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.5.0). |
-| `v0.4.0` | 2026-06-08 | Milestone „Maschinenlesbare CLI" — `--json` / `--dry-run` / `--diff` für alle zehn Spec-Enum-Subcommands ([LH-NFA-USE-004](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) Minimalkontrakt + [LH-FA-CLI-007](spec/lastenheft.md#lh-fa-cli-007--dry-run)/[LH-FA-CLI-008](spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) Voll-Schema), `u-boot logs`, Devcontainer-Features mit Drift-Doctor-Check. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.4.0). |
+| `v0.3.0` | 2026-06-01 | Milestone „Add-on Catalogue Expansion" — `u-boot add keycloak`, `add otel`, `add <service> --with-deps`, `remove <service> [--purge]` plus Doku-Audit. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.3.0). |
+| `v0.6.0` | 2026-10-01 | Milestone „Sandbox-Devcontainer + CLI-Cleanup" — `--sandbox`-Devcontainer-Profil für autonome Agenten (Named-Volume-Workspace je Instanz, optional rootless Podman, DNS-gesteuerte Egress-Allowlist, Git-Zugangsdaten nur zur Laufzeit), atomares Multi-Pfad-`config get/set` + `config list`, ausgebautes `logs`/`up`/`down`/`remove --purge`, rollback-aware `generate devcontainer`, Homebrew-Formel, Go 1.27.1. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.6.0). |
+| `v0.7.0` | 2026-10-01 | Milestone „Linux-Pakete“ — `.deb` und `.rpm` (amd64, arm64) als Release-Assets per `nfpm`; Keycloak-Acceptance-Test zurück in der Standard-Integrations-Lane. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.7.0). |
+| `v0.8.0` | 2026-10-14 | Milestone „Docker im Sandbox-Devcontainer“ — `devcontainer.sandbox.nestedRuntime: docker` gibt dem Sandbox-Devcontainer einen eigenen Docker-Daemon mit BuildKit, Buildx und Compose; verlangt `--privileged`, als Lockerung ausgewiesen. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.8.0). |
+| `v0.8.1` | 2026-10-14 | Patch „Aktueller Docker im Sandbox-Devcontainer“ — mit `nestedRuntime: docker` läuft im Container Docker 29.9, Buildx 0.38 und Compose 5.6 aus dem Docker-APT-Repository (Schlüssel gepinnt); `download.docker.com` gehört zur Default-Allowlist. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.8.1). |
+| `v0.9.0` | 2026-10-15 | Milestone „Mehr Devcontainer-Features“ — eingebaute Katalog-Schlüssel `python`, `sdkman` und `homebrew` (Community-Feature, als Drittanbieter ausgewiesen) mit ihren Egress-Hosts. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.9.0). |
+| `v0.10.0` | 2026-10-17 | Milestone „sshd, Claude Code und `podman build`“ — eingebaute Katalog-Schlüssel `sshd` und `claude-code` (Drittanbieter, ausgewiesen); `nestedRuntime: podman` baut Images, mit einer sechsten Lockerung `--device=/dev/net/tun` (gemessen auf Colima, arm64; Docker Desktop, amd64 und CI nicht gemessen); `--quiet` lässt vier Ausweisungen sichtbar und unterdrückt Erfolgsmeldungen; Docker Desktop wird nicht mehr zugesagt. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.10.0). |
+| `v0.5.0` | 2026-07-25 | „Sicherheit + lokale Templates" — Go-Toolchain-Bump schließt CVE-2026-39822 im Runtime-Image (HIGH); `u-boot init --template ./pfad` rendert ein Projekt aus einem lokalen Verzeichnis, neben dem eingebauten Katalog. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.5.0). |
+| `v0.4.0` | 2026-06-08 | Milestone „Maschinenlesbare CLI" — `--json` / `--dry-run` / `--diff` für alle zehn Subkommandos, `u-boot logs`, Devcontainer-Features mit Drift-Doctor-Check. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.4.0). |
 
 Die Roadmap
 ([`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md))
@@ -222,22 +217,22 @@ Auflösungs-Slices und §Nächste Schritte für das laufende Backlog.
 
 ## Subkommando-Referenz
 
-| Subkommando | Spec-IDs | Kurz |
-| ----------- | -------- | ---- |
-| `init [name] [--devcontainer] [--template <name\|pfad>]` | [LH-FA-INIT-001](spec/lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren)..[LH-FA-INIT-007](spec/lastenheft.md#lh-fa-init-007--git-repository-initialisierung), [LH-FA-TPL-001](spec/lastenheft.md#lh-fa-tpl-001--projektvorlagen)/[LH-FA-TPL-003](spec/lastenheft.md#lh-fa-tpl-003--eigene-templates) | Projekt-Skelett + `git init`. `--template` nimmt einen Katalog-Namen (`basic`) oder einen lokalen Verzeichnis-Pfad (`./mein-tpl`, `~/tpl`). |
-| `doctor [--strict]` | [LH-FA-DIAG-001](spec/lastenheft.md#lh-fa-diag-001--doctor-befehl)..[LH-FA-DIAG-004](spec/lastenheft.md#lh-fa-diag-004--reparaturhinweise), [LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) | 16 Diagnose-Checks; container-aware Skip für Host-Probes. |
-| `add <service> [--with-deps]` | [LH-FA-ADD-001](spec/lastenheft.md#lh-fa-add-001--add-on-befehl)..[LH-FA-ADD-006](spec/lastenheft.md#lh-fa-add-006--add-on-abhängigkeiten) | Idempotente State-Machine für Service-Add-Ons (`postgres`, `keycloak`, `otel`); `--with-deps` installiert fehlende Abhängigkeiten automatisch. |
-| `remove <service> [--purge]` | [LH-FA-ADD-007](spec/lastenheft.md#lh-fa-add-007--service-entfernen) | Spiegel von `add` — disable + Managed-Blocks raus. |
-| `up [--timeout <s>]` | [LH-FA-UP-001](spec/lastenheft.md#lh-fa-up-001--umgebung-starten)..[LH-FA-UP-003](spec/lastenheft.md#lh-fa-up-003--startstatus-anzeigen) | Compose up + Healthcheck-Poll + TCP-Probe. |
-| `down [--volumes]` | [LH-FA-UP-004](spec/lastenheft.md#lh-fa-up-004--umgebung-stoppen) | Compose down mit destruktiver Bestätigungs-Gate. |
-| `logs [service…] [--follow] [--tail <n>] [--no-log-prefix] [--timestamps] [--since <t>] [--until <t>]` | [LH-FA-UP-005](spec/lastenheft.md#lh-fa-up-005--logs-anzeigen) | Compose-Logs streamen (alle Services oder eine Auswahl); `--follow` beendet sauber mit Exit 0 bei Ctrl-C. |
-| `generate <artifact>` | [LH-FA-GEN-001](spec/lastenheft.md#lh-fa-gen-001--generate-befehl)..[LH-FA-GEN-005](spec/lastenheft.md#lh-fa-gen-005--idempotenz) | Idempotente Block-Ersetzung via `U-BOOT MANAGED BLOCK`-Marker. |
-| `config [get\|set\|list] [<pfad>…]` | [LH-FA-CONF-001](spec/lastenheft.md#lh-fa-conf-001--projektkonfiguration)..[LH-FA-CONF-005](spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) | Whitelist-skopierte Reads/Writes mit zweistufiger Schema-Validierung. |
-| `template list [--json]` | [LH-FA-TPL-004](spec/lastenheft.md#lh-fa-tpl-004--templates-auflisten) | Eingebauten Template-Katalog browsen. |
+| Subkommando | Kurz |
+| ----------- | ---- |
+| `init [name] [--devcontainer] [--template <name\|pfad>]` | Projekt-Skelett + `git init`. `--template` nimmt einen Katalog-Namen (`basic`) oder einen lokalen Verzeichnis-Pfad (`./mein-tpl`, `~/tpl`). |
+| `doctor [--strict]` | 16 Diagnose-Checks; container-aware Skip für Host-Probes. |
+| `add <service> [--with-deps]` | Idempotente State-Machine für Service-Add-Ons (`postgres`, `keycloak`, `otel`); `--with-deps` installiert fehlende Abhängigkeiten automatisch. |
+| `remove <service> [--purge]` | Spiegel von `add` — disable + Managed-Blocks raus. |
+| `up [--timeout <s>]` | Compose up + Healthcheck-Poll + TCP-Probe. |
+| `down [--volumes]` | Compose down mit destruktiver Bestätigungs-Gate. |
+| `logs [service…] [--follow] [--tail <n>] [--no-log-prefix] [--timestamps] [--since <t>] [--until <t>]` | Compose-Logs streamen (alle Services oder eine Auswahl); `--follow` beendet sauber mit Exit 0 bei Ctrl-C. |
+| `generate <artifact>` | Idempotente Block-Ersetzung via `U-BOOT MANAGED BLOCK`-Marker. |
+| `config [get\|set\|list] [<pfad>…]` | Whitelist-skopierte Reads/Writes mit zweistufiger Schema-Validierung. |
+| `template list [--json]` | Eingebauten Template-Katalog browsen. |
 
 ## Voraussetzungen
 
-Für Konsumenten von `u-boot` ([LH-FA-DIAG-002](spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)):
+Für Konsumenten von `u-boot`:
 
 - Docker Engine ≥ 24.0.0 oder Podman ≥ 5.0 (Drop-in unterstützt;
   siehe [`spec/architecture.md §2.4`](spec/architecture.md))
@@ -245,11 +240,10 @@ Für Konsumenten von `u-boot` ([LH-FA-DIAG-002](spec/lastenheft.md#lh-fa-diag-00
 - Git
 - Optional: VS Code mit der Dev-Containers-Extension
 
-Für den Bau aus den Quellen ([SPEC-031](spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)):
+Für den Bau aus den Quellen:
 
 - Docker Engine
-- GNU `make` (der einzige permanente Carveout zu
-  [LH-NFA-PORT-002](spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten))
+- GNU `make`
 
 ## Repository-Layout
 
@@ -267,8 +261,7 @@ Für den Bau aus den Quellen ([SPEC-031](spec/spezifikation.md#spec-031--regeln-
 └── go.mod
 ```
 
-Layout-Anforderung:
-[`SPEC-033`](spec/spezifikation.md#spec-033--go-layout-des-repositories); das Mindestlayout im Detail steht in
+Das Mindestlayout im Detail steht in
 [`spec/spezifikation.md`](spec/spezifikation.md).
 
 ## Dokumentation
@@ -280,8 +273,6 @@ Layout-Anforderung:
 - **Architektur-Spezifikation:**
   [`spec/architecture.md`](spec/architecture.md) (hexagonales
   Pattern, Schicht-Regeln, Podman-Drop-in §2.4)
-- **Architecture Decision Records:**
-  [`docs/plan/adr/`](docs/plan/adr/)
 - **Roadmap, Slices, Carveouts:**
   [`docs/plan/planning/`](docs/plan/planning/)
 - **Quality Gates:**
@@ -297,7 +288,7 @@ Layout-Anforderung:
 
 ## Build, Test, Lint
 
-Der Build ist Docker-only ([SPEC-031](spec/spezifikation.md#spec-031--regeln-des-docker-only-workflows)); es wird keine
+Der Build ist Docker-only; es wird keine
 Go-Toolchain am Host benötigt. Nur Docker und `make` müssen
 installiert sein.
 
