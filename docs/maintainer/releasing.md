@@ -143,6 +143,7 @@ auf „kein Absturz" geprüft). `brew audit --strict --online` gatet den Lauf; e
 | Lauf bricht nach dem GHCR-Push | `:x.y.z` ist schon veröffentlicht; Workflow nach Behebung erneut ausführen (`--clobber` ersetzt Assets), nicht den Tag verschieben |
 | Job `tap` warnt „secret not configured" | Secret setzen (§2), Job erneut ausführen (`gh run rerun --job`) |
 | Job `tap` schlägt fehl (z. B. `403 Permission denied`) | `gh workflow run tap-check` ausführen; PAT-Rechte/Ablauf prüfen (fine-grained: Repo ergänzen, Contents = Read and write); manuell nachziehen: `TAP_TOKEN=… TAG=vX.Y.Z scripts/tap-nachzug.sh` |
+| Job `tap` meldet „the u-boot.rb asset of vX.Y.Z does not carry four download URLs“ | Die Formel trägt keine `version`-Zeile; `scripts/tap-formula-check.sh` liest die vier `url`-Zeilen und weist einen falschen Tag oder eine fehlende URL ab. Das Asset ist dann tatsächlich falsch befüllt (`scripts/homebrew-formula-fill.sh`, `SHA256SUMS` prüfen); Tap nach der Behebung manuell nachziehen (`TAP_TOKEN=… TAG=vX.Y.Z scripts/tap-nachzug.sh`) |
 | Formel fehlt im Tap | Asset `u-boot.rb` des Releases fehlt (Prerelease?) oder Tap-Job nicht gelaufen |
 | Paket-Smoke endet mit `curl: (22) 404` | Asset-Name falsch gewählt (Vorab-Tag: `~` im Dateinamen, `.` im Asset); `gh release view vX.Y.Z-rc.N --json assets` zeigt die Namen, `scripts/package-asset-name.sh` wählt sie; Workflow-Fix auf `main`, neuer Vorab-Tag (der alte Tag wird nicht verschoben) |
 | Trivy-`image-scan` rot | Go-Pin heben (siehe §4), erst dann taggen |

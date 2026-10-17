@@ -159,4 +159,8 @@ func TestTapFormulaCheck(t *testing.T) {
 	if err := runTapCheck(t, "v1.2.3", "class UBoot < Formula\nend\n"); err == nil {
 		t.Errorf("a formula without URLs must fail")
 	}
+	extra := good + "      url \"https://github.com/pt9912/u-boot/releases/download/v1.2.2/extra\"\n"
+	if err := runTapCheck(t, "v1.2.3", extra); err == nil {
+		t.Errorf("a formula with a fifth URL of another tag must fail")
+	}
 }
