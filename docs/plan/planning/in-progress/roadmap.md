@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-- [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md) — Devcontainer-Features `sshd` und Claude Code im eingebauten Katalog (vier Slices, Trigger und Closure-Kriterien in der Welle-Datei).
+- [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md) — Devcontainer-Features `sshd` und Claude Code im eingebauten Katalog (fünf Slices, Trigger und Closure-Kriterien in der Welle-Datei).
 
 ## Nächste Wellen
 
