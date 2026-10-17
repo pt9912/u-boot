@@ -960,9 +960,9 @@ u-boot config set devcontainer.sandbox.nestedRuntime podman
 u-boot generate devcontainer
 ```
 
-Im Container läuft dann rootless Podman mit einem `docker`-Alias, sodass
-`docker build` und `docker run` ohne Host-Socket möglich sind. Unter Docker sind
-dafür diese Lockerungen nötig; **`u-boot` weist jede einzeln als Warnung aus**:
+Im Container läuft dann rootless Podman mit einem `docker`-Alias (ein Symlink
+auf `podman`), ohne Zugriff auf einen Host-Socket. Unter Docker sind dafür
+diese Lockerungen nötig; **`u-boot` weist jede einzeln als Warnung aus**:
 
 ```text
 --cap-add=SYS_ADMIN
@@ -974,6 +974,20 @@ dafür diese Lockerungen nötig; **`u-boot` weist jede einzeln als Warnung aus**
 
 Das ist nahe an `--privileged`; der Schutz ist damit deutlich schwächer. Das
 Standardprofil (`nestedRuntime: none`) bleibt ungelockert.
+
+**Images bauen.** `podman build` und `docker build` sind im Container derselbe
+Aufruf (der `docker`-Alias ist ein Symlink auf `podman`); gebaut wird mit der in
+Podman eingebauten Buildah-Bibliothek. Nicht vorhanden sind das Kommando
+`buildah`, `docker buildx`, `docker compose` und BuildKit-Frontends
+(`# syntax=`); wer sie braucht, wählt `nestedRuntime: docker`. Verwenden Sie in
+Dockerfiles voll qualifizierte Namen (`FROM docker.io/library/alpine:3`): Namen
+ohne Registry lösen nur über die Alias-Liste der Distribution auf, eine
+Suchliste für Registries ist nicht gesetzt. Images und Schichten liegen im
+Volume `<projekt>-containers-${devcontainerId}`; der Speicherbedarf ist nicht
+gemessen und wächst mit jedem Image. **Der Build selbst ist noch nicht auf einem
+Host gemessen:** der Integrationstest dafür läuft nur dort, wo verschachtelte
+User-Namespaces erlaubt sind (siehe unten), und ist auf der Colima-VM
+übersprungen worden. `podman build` ist deshalb noch nicht zugesagt.
 
 Was beim Containerstart passiert, wenn Fähigkeiten fehlen, steuert
 `devcontainer.sandbox.onUnavailable` (`warn` ist der Standard, `fail` bricht ab):
@@ -989,7 +1003,11 @@ Unter **Ubuntu 24.04** (und auf Hosts mit
 verschachtelte User-Namespaces auch mit `apparmor=unconfined`; der Start endet
 dann mit Exit-Code 11. Abhilfe: auf dem Container-Host
 `sysctl kernel.apparmor_restrict_unprivileged_userns=0` setzen oder
-`nestedRuntime: none` wählen.
+`nestedRuntime: none` wählen. Gemessen: Die Linux-VM von Colima 0.10.3 (Ubuntu
+24.04.4, Kernel 6.8, Docker 29.5.2) trägt den Wert 1; dort endet der Start mit
+den fünf Lockerungen mit Exit-Code 11. Ohne `apparmor=unconfined` startet das
+Skript, aber `podman build` scheitert an `mount` und `remount` (Profil
+`docker-default`). Eine Colima-VM mit anderer Einstellung ist nicht gemessen.
 
 `u-boot doctor` prüft `/dev/fuse` nur auf Linux-Hosts. Unter macOS mit Colima
 läuft die Engine in einer VM, die der Host nicht beurteilen kann; dort prüft das
@@ -1057,6 +1075,12 @@ Standardmäßig erlaubt sind:
 | Feature `python` | `pypi.org`, `files.pythonhosted.org` |
 | Feature `sdkman` | `api.sdkman.io`, `broker.sdkman.io`, `repo.maven.apache.org`, `repo1.maven.org` |
 | Feature `sshd` | keine zusätzlichen Hosts |
+
+Gemessen mit `podman pull docker.io/library/alpine:3` unter der Restriktion:
+Docker Hub leitet den Abruf der Schichten auf `production.cloudfront.docker.com`
+um, der nicht in der Default-Allowlist steht; der Pull scheitert dann mit „server
+misbehaving“ (DNS). Tragen Sie den Host bei Bedarf in
+`devcontainer.sandbox.egress.allow` ein.
 | Feature `homebrew` | `formulae.brew.sh`, `ghcr.io`, `pkg-containers.githubusercontent.com` |
 | Feature `claude-code` | `registry.npmjs.org`, `api.anthropic.com` (Hosts der Anmeldung nicht: siehe [Claude Code](#claude-code-optional)) |
 | Clone-Quelle | der Host von `devcontainer.sandbox.repository` beziehungsweise `origin` |
@@ -1237,6 +1261,10 @@ Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
   zusätzlich unter Colima (Linux-VM); nur diese beiden Hosts sagt das Lastenheft zu.
   **Nicht geprüft und nicht zugesagt:** Docker Desktop,
   Podman als Host-Engine, VS Code und Codespaces.
+- `nestedRuntime: podman`: `podman build` im Container ist nicht gemessen und
+  nicht zugesagt; unter der Colima-VM mit Ubuntu 24.04 (Schalter
+  `kernel.apparmor_restrict_unprivileged_userns=1`) startet verschachteltes
+  Podman nicht (Exit-Code 11).
 - Der Wechsel von `podman` oder `docker` zurück auf `none` lässt eine vorhandene
   `sandbox-init.sh` beziehungsweise `docker-init.sh` im Ordner liegen; das Dockerfile verwendet sie dann nicht
   mehr.
