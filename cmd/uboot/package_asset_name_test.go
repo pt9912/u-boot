@@ -1,7 +1,9 @@
 package main
 
 import (
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -61,5 +63,46 @@ func TestPackageAssetName_FailsClosed(t *testing.T) {
 	}
 	if _, err := runAssetName(t, "zip", assetsStable); err == nil {
 		t.Errorf("unknown format must fail")
+	}
+}
+
+func TestPackageAssetName_NoRpmFails(t *testing.T) {
+	if _, err := runAssetName(t, "rpm", "SHA256SUMS\nu-boot_0.9.0_amd64.deb\n"); err == nil {
+		t.Errorf("no rpm asset must fail")
+	}
+}
+
+// The workflow step appends the output of package-asset-outputs.sh to
+// $GITHUB_OUTPUT; a failure of the script must fail the step and write nothing.
+func runAssetOutputs(t *testing.T, assets string) (string, error) {
+	t.Helper()
+	if _, err := exec.LookPath("bash"); err != nil {
+		t.Skip("bash not available")
+	}
+	cmd := exec.Command("bash", "-c", `set -euo pipefail; ../../scripts/package-asset-outputs.sh <<<"$NAMES" >> "$OUT"`)
+	out := filepath.Join(t.TempDir(), "github_output")
+	cmd.Env = append(os.Environ(), "NAMES="+assets, "OUT="+out)
+	_, err := cmd.CombinedOutput()
+	body, _ := os.ReadFile(out)
+	return string(body), err
+}
+
+func TestPackageAssetOutputs(t *testing.T) {
+	body, err := runAssetOutputs(t, assetsPrerelease)
+	want := "deb_asset=u-boot_0.10.0.rc.1_amd64.deb\nrpm_asset=u-boot-0.10.0.rc.1-1.x86_64.rpm\n"
+	if err != nil || body != want {
+		t.Errorf("got %q (%v), want %q", body, err, want)
+	}
+	for name, assets := range map[string]string{
+		"none":     "SHA256SUMS\nu-boot-linux-amd64\n",
+		"deb only": "u-boot_0.9.0_amd64.deb\n",
+		"rpm only": "u-boot-0.9.0-1.x86_64.rpm\n",
+		"two debs": assetsStable + "u-boot_1_amd64.deb\n",
+		"two rpms": assetsStable + "u-boot-1-1.x86_64.rpm\n",
+	} {
+		body, err := runAssetOutputs(t, assets)
+		if err == nil || body != "" {
+			t.Errorf("%s: must fail without output, got %q (%v)", name, body, err)
+		}
 	}
 }

@@ -228,7 +228,7 @@ jobs:
       # The smoke jobs install the asset by the name GitHub stores: nfpm names a
       # pre-release 0.10.0~rc.1, the release asset becomes 0.10.0.rc.1. The name is
       # read back from the release, not derived from the tag
-      # (scripts/package-asset-name.sh, tested in cmd/uboot).
+      # (scripts/package-asset-outputs.sh, tested in cmd/uboot; a failure of the script fails the step).
       - name: Resolve the package asset names
         id: assets
         env:
@@ -237,8 +237,7 @@ jobs:
         run: |
           set -euo pipefail
           NAMES="$(gh release view "v$VERSION" --json assets -q '.assets[].name')"
-          echo "deb_asset=$(scripts/package-asset-name.sh deb <<<"$NAMES")" >> "$GITHUB_OUTPUT"
-          echo "rpm_asset=$(scripts/package-asset-name.sh rpm <<<"$NAMES")" >> "$GITHUB_OUTPUT"
+          scripts/package-asset-outputs.sh <<<"$NAMES" >> "$GITHUB_OUTPUT"
 
       # slice-v2-homebrew-formula (ADR-0016): one SHA256SUMS over the six binaries
       # and the four Linux packages and — for stable tags — the Homebrew formula,
