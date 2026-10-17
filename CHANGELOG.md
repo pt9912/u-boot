@@ -20,9 +20,9 @@ this file is the same format applied to u-boot itself.
   disclosure of security relaxations in the sandbox profile, the disclosure of degradation fallbacks (container without daemon, `vfs`
   storage, dropped egress restriction), the per-service progress of `u-boot up` and the path summary that `--force` prints before
   overwriting. A script cannot silence them. Success and summary messages of the subcommands that change something disappear under
-  `--quiet`; `u-boot doctor` lists only error items; the query commands (`config get`, `config list`, `logs`, `template list`) keep their output. The levels themselves are unchanged (`--quiet` shows only errors). `init`, `generate`, `add`, `remove` and `config set` no longer print their success summary under
+  `--quiet`; `u-boot doctor` lists only error items, degradation fallbacks and the warn items that concern a security property of the sandbox profile (see the sandbox profile entry below); the query commands (`config get`, `config list`, `logs`, `template list`) keep their output. The levels themselves are unchanged (`--quiet` shows only errors). `init`, `generate`, `add`, `remove` and `config set` no longer print their success summary under
   `--quiet` (`remove` also drops its purge warnings), and `u-boot doctor --quiet` no longer lists warn items other than a
-  degradation fallback (the exit code carries the result). `u-boot doctor --strict` with only warn items still exits with `11`
+  degradation fallback or a security warning of the sandbox profile (the exit code carries the result). `u-boot doctor --strict` with only warn items still exits with `11`
   and now names the warn items in its error message. `u-boot down --quiet` holds the Compose output back and prints it only if `down` fails. `--quiet --json` is unchanged. The output of `--dry-run` and `--diff`
   is the result of the call and stays under `--quiet`: `--dry-run --quiet` prints the plan (the same summary as without `--quiet`; notices other than the
   exceptions above stay dropped) and `--diff --quiet` prints the diff, for `init`, `generate`, `add`, `remove` and `config set`; the success message after an actual write
@@ -35,8 +35,12 @@ this file is the same format applied to u-boot itself.
   (password login) is disclosed in the command output, and that disclosure stays visible under `--quiet`, as do the warn items of
   `u-boot doctor` that concern a security property of the sandbox profile (credential source, egress restriction, relaxations of the
   Docker daemon) ([`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)).
-  This entry states the contract only: the run-time handover of agent credentials, the new `doctor` checks and their visibility under
-  `--quiet`, the login-service disclosure and the `sshd` and Claude Code features themselves follow in a later release.
+  `u-boot doctor --quiet` now lists those warn items: a plaintext credential in a project file, an https clone without a runtime
+  token source, the egress restriction together with `nestedRuntime: docker`, and `egress.enabled` without the sandbox profile
+  (the restriction does not apply then). The warn item that `nestedRuntime` has no effect without the sandbox profile is a
+  configuration message and stays hidden under `--quiet`; exit codes, `--strict` and `--json` are unchanged.
+  The rest of the contract follows in a later release: the run-time handover of agent credentials with its new `doctor` check, the
+  login-service disclosure and the `sshd` and Claude Code features themselves.
 
 ## [0.9.0] - 2026-10-15
 
