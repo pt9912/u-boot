@@ -62,7 +62,8 @@ Der Cut folgt dem Muster der Release-Cut-Slices (zuletzt
    (`ARG UBOOT_VERSION=`), jeweils samt Kommentar-Erwähnungen. Der Tag-Build überschreibt
    den Wert per `UBOOT_VERSION`; der `-dev`-Stand gilt für lokale Builds.
 3. **READMEs** (`README.md`, `README.de.md`): Status-Block und eine Zeile in der
-   Releases-Tabelle.
+   Releases-Tabelle, in Worten für den Benutzer und ohne Anforderungs-, ADR- oder
+   Spec-Kennungen ([`AGENTS.md`](../../AGENTS.md) §5; die Kennungen stehen im CHANGELOG).
 4. **Roadmap** (`docs/plan/planning/in-progress/roadmap.md`): den Release unter „Offene Wellen"
    führen, bis der Tag gesetzt ist; danach nach „Abgeschlossene Wellen".
 5. **Release-Cut-Slice** nach dem Muster der früheren Cuts anlegen und nach dem Tag nach
