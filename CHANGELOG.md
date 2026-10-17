@@ -32,9 +32,11 @@ this file is the same format applied to u-boot itself.
   enabled devcontainer feature uses) never appear in the image, the workspace volume, `u-boot.yaml` or any generated file; they reach the
   container at run time through an environment variable, and `u-boot doctor` checks the source
   ([`LH-FA-DEV-009`](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)). A login service that is active in the container
-  (password login) is disclosed in the command output, and that disclosure stays visible under `--quiet`
-  ([`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)).
-  The `sshd` and Claude Code features themselves follow in a later release.
+  (password login) is disclosed in the command output, and that disclosure stays visible under `--quiet`, as do the warn items of
+  `u-boot doctor` that concern a security property of the sandbox profile (credential source, egress restriction, relaxations of the
+  Docker daemon) ([`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)).
+  This entry states the contract only: the run-time handover of agent credentials, the new `doctor` checks and their visibility under
+  `--quiet`, the login-service disclosure and the `sshd` and Claude Code features themselves follow in a later release.
 
 ## [0.9.0] - 2026-10-15
 
