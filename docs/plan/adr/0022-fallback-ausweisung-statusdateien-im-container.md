@@ -1,0 +1,128 @@
+# ADR 0022: Ausweisung der Degradations-Fallbacks — Statusdateien im Container, vom Host lesend gelesen
+
+**Status:** Proposed
+
+**Datum:** 2026-10-17
+
+**Autor:** pt9912
+
+**Bezug:** [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [ADR-0012](0012-devcontainer-egress-firewall.md), [ADR-0014](0014-nested-podman-sandbox-devcontainer.md), [ADR-0018](0018-nested-docker-daemon-sandbox-devcontainer.md), [ADR-0019](0019-docker-daemon-aus-docker-apt-repo.md), [ADR-0021](0021-podman-build-im-sandbox-devcontainer.md)
+
+**Schärft:** [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Absatz Degradation: „jeder Fallback wird in der Befehlsausgabe und in `u-boot doctor` ausgewiesen“) und [`LH-FA-CLI-005`](../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) Ausnahme 2 — Verfahren, mit dem der Host einen Fallback ermittelt, der erst beim Start des Devcontainers entsteht. **Ergänzt**, ersetzt nichts: Alle Entscheidungen von ADR-0012, -0014, -0018, -0019 und -0021 bleiben gültig; ADR-0012 Entscheidung 6, ADR-0014 Entscheidung 4 und ADR-0018 (Bereitschaftsprüfung, Degradation) behalten Exit-Codes und Standardfehlerausgabe der Startscripte und bekommen eine zusätzliche Ausgabe (die Statusdatei).
+
+**Regeln:** Baseline-Regelwerk `modul-04-adrs.md` §Ziel-Form: ADR (MADR).
+
+---
+
+## Kontext
+
+Das Lastenheft 0.12.0 sagt zu, dass die drei Degradations-Fallbacks (Container ohne Docker-Daemon, Wegfall der Egress-Restriktion, `vfs`-Storage) in der Befehlsausgabe und in `u-boot doctor` ausgewiesen werden. Der Projektinhaber hat am 2026-10-17 entschieden: das Lastenheft ist Zielbild und bleibt unverändert, der Code wird zum Ziel gebracht.
+
+Ist-Stand (gelesen): Die Fallbacks entstehen in den Startscripten des Containers (`sandbox-init.sh.tmpl`, `docker-init.sh.tmpl`, `egress-init.sh.tmpl`, Funktion `unavailable` bzw. der `nft`-Zweig), die das Devcontainer-Werkzeug als `postCreateCommand`/`postStartCommand` ausführt. u-boot startet den Container nicht und kennt weder Name noch ID; `DockerProbe` kennt nur `Version`, `Info`, `ComposeVersion` (`internal/hexagon/port/driven/docker.go`). `doctor` weist heute nur den `vfs`-Fall aus, und nur auf einem Linux-Host (`checkSandboxRuntime`, `doctor_sandbox.go`); Daemon- und Egress-Fallback erscheinen nirgends host-seitig. Der Plan zu dieser Frage führte die Annahmen über den Kanal als ungemessen; diese ADR misst sie.
+
+Randbedingung ([`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)): kein Pfad vom Container zum Host, keine neuen Mounts, keine neuen `runArgs`-Lockerungen. Ein Kanal darf den Host nur **lesen** lassen.
+
+**Messung (2026-10-17).** Host: macOS 27.0.1 (arm64), Colima 0.10.3 (Virtualization.Framework, VM Ubuntu 24.04.4, Kernel 6.8.0-117, `kernel.apparmor_restrict_unprivileged_userns=0`), Docker-Client 29.9.1, Docker-Server 29.5.2. Devcontainer-CLI `@devcontainers/cli` 0.89.0 in einem Wegwerf-Image (`node:22-trixie-slim`, Docker-CLI, Socket durchgereicht, Projekt unter demselben Pfad eingehängt). Probe-Projekte aus dem Generator (`u-boot init --devcontainer --sandbox`, `nestedRuntime: docker` mit Egress bzw. `podman`; `generate devcontainer`; danach in `devcontainer.json` die Lockerungen gezielt weggelassen, um die Fallbacks auszulösen). Messbefehle im Anhang.
+
+| # | Prüfung | Ergebnis (gemessen) |
+|---|---|---|
+| M1 | Wo landet die Ausgabe von `postStartCommand` (Daemon-/Egress-Fallback, Policy `warn`)? | Auf der Standardfehlerausgabe der **Devcontainer-CLI** (`[…Z] u-boot sandbox: egress restriction unavailable (NET_ADMIN not granted) …`, `… the nested Docker daemon exited at start …`). `docker logs <container>` zeigt nur `Container started` (Ausgabe von PID 1) |
+| M2 | dasselbe für `postCreateCommand` (`vfs`-Fallback) | gleich: Zeile `u-boot sandbox: /dev/fuse is not available; falling back to vfs storage` nur auf der CLI-Ausgabe |
+| M3 | Exit-Code eines Lifecycle-Skripts am Container | **nicht ablesbar.** `docker inspect` `State.ExitCode` ist der von PID 1 (`0`). Policy `warn`: CLI Exit `0`, `outcome: success`. Policy `fail` (Skript Exit `11`): CLI Exit `1`, JSON `outcome: error`, `postStartCommand from devcontainer.json failed.`, `containerId`; der Container bleibt `Up` |
+| M4 | Labels der CLI | `docker run … -l devcontainer.local_folder=<abs. Projektpfad> -l devcontainer.config_file=<abs. Pfad>/.devcontainer/devcontainer.json`; per `docker inspect` unter `.Config.Labels` lesbar. Mit `--id-label` fehlen beide (ersetzt) |
+| M5 | Labels nach `create` änderbar? | **nein**: `docker update` hat keine Label-Option; ein Docker-Event aus dem Container braucht den Daemon-Socket, den das Profil nicht einbindet |
+| M6 | Datei im Container per `docker cp <id>:<pfad> -` lesbar? | ja: laufend, gestoppt, nach `docker start`; fehlende Datei: Exit `1`, `Could not find the file …`. `/run` und `/var/log` sind keine tmpfs-Mounts: eine Datei überlebt Stop/Start desselben Containers (nicht ein neues Container-Objekt) |
+| M7 | Verhalten von `docker cp` bei manipuliertem Pfad | Symlink → Tar-Eintrag `link -> /etc/shadow`, nicht aufgelöst; FIFO und Verzeichnis → Tar-Eintrag mit Typ, kein Hängen; 300-MB-Datei → Größe steht im Tar-Header, der Strom lässt sich nach 4096 Byte schließen (0,01 s) |
+| M8 | `docker ps -a --filter label=devcontainer.local_folder=<pfad>` | liefert den Container der Probe, laufend und gestoppt |
+| M9 | `docker` **im** Devcontainer (`nestedRuntime: docker`, Daemon nicht gestartet) | `failed to connect to the docker API at unix:///var/run/docker.sock` — der Zugriff auf den Container von innen läuft nicht über die Engine; Dateien sind dort direkt lesbar. Mit laufendem verschachteltem Daemon sähe `docker ps` die verschachtelten Container, nicht den eigenen (nicht gemessen) |
+| M10 | `doctor` aus dem Runtime-Image (`docker run … u-boot doctor`) | `RuntimeEnvironment.InContainer()` greift: `docker.installed`, `docker.reachable` u. a. werden als übersprungen ausgewiesen; das distroless-Image enthält keine Docker-CLI |
+| M11 | Skript schreibt nach `/proc/1/fd/2` (Variante a′) | als Container-Benutzer (`vscode`): Zeile erscheint in `docker logs`; als `sudo tee`: `Permission denied` (im Probe-Container ohne `--privileged`) — uneinheitlich je Skript |
+| M12 | `--health-cmd` (Variante c′) | `docker inspect` zeigt `State.Health.Log` samt Ausgabe, auf 4096 Zeichen (plus `...`) abgeschnitten, drei Einträge; `docker ps` zeigt `(unhealthy)` |
+| M13 | **F8:** `--device=/dev/fuse-nonexistent` bzw. `--device=/dev/net/tun-nonexistent` | `docker run` Exit `127`: `error gathering device information while adding custom device … no such file or directory`; `docker create` Exit `0`, `docker start` Exit `1`. **Ein fehlendes Device verhindert den Start; der Container läuft nicht.** |
+| M14 | `vfs`-Pfad | Ohne `--device=/dev/fuse` in `runArgs` startet der Container, das Skript schreibt `storage.conf` mit `driver = "vfs"`; per `docker cp` lesbar |
+
+Beobachtung am Rand: Der erste CLI-Lauf nach einem `sed -i` auf den virtiofs-Mount meldete einmalig `devcontainer.json not found` (Mount-Cache der VM), der Wiederholungslauf lief; kein Befund über u-boot.
+
+**Nicht gemessen** (Stand 2026-10-17): Linux-Host ohne VM (die Kommandos `ps`, `inspect`, `cp` sind Aufrufe derselben Docker-API gegen denselben `dockerd`-Code, Übertragbarkeit angenommen), amd64, Docker Desktop, Podman als Host-Engine, die Labels von VS Code (angenommen: dieselben `devcontainer.local_folder`/`devcontainer.config_file`) und GitHub Codespaces (kein Host-`doctor`), ein per Symlink erreichter Projektpfad, mehrere Container desselben Projektordners, ein laufender verschachtelter Daemon bei `docker ps` im Container (M9).
+
+## Entscheidung
+
+1. **Mechanismus: Statusdateien im Container, vom Host mit `docker cp` gelesen** (Alternative b). Die drei Startscripte schreiben bei **jedem** Lauf, auch im Erfolgsfall, je eine kleine Statusdatei; `doctor` liest sie über die Engine. Der Host-Zweig `/dev/fuse` für Linux-Hosts (`checkSandboxRuntime`) bleibt unverändert; er ist keine zweite Quelle mit Vorrangregel, sondern ein Befund, den der Host ohne Container kennt (siehe Frage F8 zu seinem Inhalt).
+2. **Statusdatei.** Verzeichnis `/var/lib/u-boot/status/`, angelegt im erzeugten Dockerfile (Besitzer `vscode`, damit der `postCreateCommand` ohne `sudo` und die `sudo`-Scripte schreiben können), nur wenn mindestens eines der drei Scripte installiert ist. Je eine Datei `vfs` (`sandbox-init`, bei `podman`), `egress` (`egress-init`), `daemon` (`docker-init`):
+
+   ```
+   u-boot-status 1
+   result=ok|fallback|failed
+   at=2026-10-17T18:52:54Z
+   ```
+
+   `result=fallback` bei Policy `warn` und eingetretenem Fallback, `failed` bei Policy `fail` (das Skript schreibt vor `exit 11`), `ok` sonst. Das Skript schreibt in eine Temp-Datei und benennt um (`mv`), damit kein halbes Dokument lesbar ist. Die Dateien tragen **keinen Freitext** und keine Container-ID: Die Zugehörigkeit ergibt sich daraus, dass `docker cp` sie aus genau diesem Container liest. Blockierte User-Namespaces (Exit `11` in beiden Modi) bleiben ein Umgebungsproblem, kein Fallback; es wird keine Datei geschrieben. Exit-Codes und Standardfehlerausgabe der Scripte bleiben unverändert.
+3. **Identifikation (F3):** `docker ps -a --filter label=devcontainer.local_folder=<absoluter Projektordner> --format …` (M4, M8) mit dem Basisverzeichnis, das `doctor` ohnehin kennt; **kein** neues Label und keine neue `runArgs`-Option. Mehrere Treffer: der zuletzt erzeugte. Kein Treffer, keine Engine, kein Zugriff: „nicht ermittelbar“, nie ein Fallback. Die Container-ID wird vor jeder Weiterverwendung gegen `^[0-9a-f]{12,64}$` geprüft; der Filterwert wird als ein Argument ohne Shell übergeben.
+4. **Lesen (F5):** nur `docker ps` und `docker cp … -`, nie `exec`, nie `-L`. Der Adapter prüft den Tar-Header: nur eine reguläre Datei, Größe höchstens 512 Byte, sonst gilt das Dokument als ungültig und der Strom wird geschlossen (M7).
+5. **Port (F5):** ein neuer, eigener Driven-Port `DevcontainerInspector` (`FindContainer(ctx, localFolder)` → ID, laufend/gestoppt, gefunden; `ReadFile(ctx, id, path, maxBytes)` → Bytes), implementiert im Paket `internal/adapter/driven/docker` neben `Probe` und `Engine` (einziger Ort für `os/exec docker …`, kein neues Paket, keine neue `depguard`-Regel), mit Port-Pin `var _ driven.DevcontainerInspector`. `DockerProbe` bleibt schmal und unverändert. Das Parsen und die Wertemenge (`result`, `at`) liegen als Wertobjekt in `hexagon/domain` (I/O-frei, Konstruktor mit Validierung); die Application bekommt den Port per Konstruktor, nil-tolerant über einen `noop`-Default wie die übrigen Ports; das Wiring in `cmd/uboot` reicht den Adapter durch. Fehler der Engine werden nie zu Exit `11`/`12` des `doctor`: Der Bericht entsteht immer, ein Engine-Fehler ist „nicht ermittelbar“.
+6. **Ausweisung in `doctor` (F7):** je Fallback ein Item, nur wenn die zugehörige Fähigkeit konfiguriert ist: `devcontainer.sandbox.fallback.vfs`, `….daemon`, `….egress`. `result=fallback` → Warnung mit `DegradationFallback` (unter `--quiet` sichtbar); `result=failed` → Fehler (kein Fallback, der Start schlug fehl; Exit `11` wie bei jedem Fehler-Item); `result=ok` → OK; „nicht ermittelbar“ (kein Container, keine Datei, keine Engine, `doctor` im Container ohne Statusverzeichnis) → Info mit Grund, unter `--quiet` stumm; ein ungültiges Dokument → Warnung ohne `DegradationFallback` („Statusdatei ungültig, Zustand nicht ermittelbar“). `doctor --strict` endet bei der Warnung mit `11`, wie bei jeder Warnung; das ist die bestehende Semantik (`strictWarnFailure`, `driving/cli/doctor.go`) und wird nicht verändert. Die bisherigen Items `devcontainer.sandbox.runtime` und `….egress` bleiben; ihre Texte „das Startscript prüft …“ verweisen künftig auf die neuen Items (Texte, keine Entscheidung).
+7. **`doctor` im Container (Devcontainer selbst):** Ist `RuntimeEnvironment.InContainer()` wahr und `/var/lib/u-boot/status/` vorhanden, liest `doctor` die Dateien direkt über den `FileSystem`-Port (keine Engine, M9). Fehlt das Verzeichnis (etwa `doctor` aus dem Runtime-Image, M10), ist der Zustand „nicht ermittelbar“ mit diesem Grund. Das ist eine Grenze und gehört in das Handbuch: Wer `u-boot` nur als Image startet, bekommt die Ausweisung nur im Devcontainer selbst, nicht vom Host.
+8. **Vertrauensgrenze (F4):** Die Datei stammt aus einem Container, in dem ein Agent läuft, und ist mit `sudo` frei schreibbar. Sie ist ein **Hinweis, kein Beleg**: „kein Fallback gemeldet“ heißt nicht „kein Fallback aufgetreten“. Das Dokument hat deshalb eine geschlossene Schlüssel- und Wertemenge, ein Größenlimit, einen strikten Zeitstempel; `doctor` gibt nie Rohinhalt aus, nur die aufgelösten Felder. Diese Aussage steht im Handbuch und in der Beschreibung der Items; das Profil ist Schadensbegrenzung, keine Grenze ([`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)).
+9. **Stand (F6):** `postStartCommand` läuft bei jedem Start und überschreibt `egress` und `daemon`; `postCreateCommand` (`vfs`) einmal je Container und bleibt bis zum Entfernen des Containers gültig, wie die `storage.conf`, die es schreibt. Ein gestoppter Container wird gelesen; das Item nennt „Container gestoppt“ und den Zeitstempel. Ein ersetzter oder neu gebauter Container hat noch keine Dateien: „nicht ermittelbar“ bis zum ersten Start. Ein Container, der vor dieser Änderung erzeugt wurde, hat keine Dateien, bis `u-boot generate devcontainer` die Scripte erneuert und der Container neu gebaut wurde; auch das ist „nicht ermittelbar“.
+10. **Befehlsausgabe (F2): nicht entschieden.** Diese ADR liefert den Kanal und `doctor`. Ob `doctor` als „Befehlsausgabe“ genügt oder ob `generate`/`init`/`up` den Zustand ebenfalls ausweisen sollen, ist eine Frage an den Projektinhaber (siehe Konsequenzen und Slice §3); die Entscheidung ist mit dem Port billig nachrüstbar, weil jeder Befehl denselben Port nutzen kann.
+
+## Verglichene Alternativen
+
+| Option | Pro | Contra / Verwerfungsgrund |
+|---|---|---|
+| a — `doctor` liest `docker logs` bzw. den Exit-Code des Lifecycle-Skripts | keine Änderung der Scripte | **verworfen, gemessen:** die Ausgabe von `postCreate`/`postStart` steht nicht in `docker logs` (M1, M2), der Exit-Code ist am Container nicht ablesbar (M3) |
+| a′ — Skripte schreiben nach `/proc/1/fd/2`, damit `docker logs` sie zeigt | kein neuer Dateipfad | **verworfen:** geht nur aus dem Benutzer-Kontext, nicht aus `sudo tee` (M11); Log ist unbegrenzt, nicht strukturiert, ohne Stand; kein Exit-Code |
+| **b — Statusdateien, `docker cp`** | ein versionierbarer Vertrag; lesend; auch bei gestopptem Container (M6); keine Änderung an `runArgs`/Mounts; Host-seitig auf Colima und Linux dieselben Kommandos | Container-Identifikation über ein fremdes Label (M4 gemessen, andere Werkzeuge angenommen); Datei nicht vertrauenswürdig (Entscheidung 8); neuer Port und Adapter |
+| b2 — Statusdatei auf dem Workspace-Volume, Hilfscontainer liest | kein `docker ps` | **verworfen:** braucht einen Lauf auf dem Host (kein reines Lesen), ein Image und den Volume-Namen, in den `${devcontainerId}` eingeht, den u-boot nicht kennt (ADR-0015); kein Vertrauensgewinn |
+| c — Label oder Docker-Event aus dem Container | schmalster Zugriff (`inspect`) | **verworfen, gemessen:** Labels sind nach `create` unveränderlich (M5); ein Event braucht den Daemon-Socket |
+| c′ — `--health-cmd` mit Statusausgabe | nur `inspect` | **verworfen, gemessen:** Ausgabe auf 4096 Zeichen abgeschnitten, Container erscheint als `(unhealthy)` im Editor und in `docker ps` (M12), ein Fallback würde als Fehlzustand gelesen; ändert `runArgs` bestehender Projekte; periodische Ausführung |
+| d — b plus Host-Prüfung plus c′ als Rückfall | deckt mehr Zustände | c′ entfällt (s. o.); die Host-Prüfung bleibt ohnehin bestehen, ohne Vorrangregel — damit ist (d) ohne c′ gleich (b) |
+| e — `docker exec` durch `doctor` (Live-Probe: `nft list tables`, `docker info`, `test -c /dev/fuse`) | immer der aktuelle Zustand, keine Statusdatei | **verworfen (nicht gemessen):** braucht einen laufenden Container, führt vom Host aus Programme des Containers als `root` aus, spiegelt die Entscheidungslogik der Scripte in `doctor` (Drift), und was zählt, ist der Stand beim Start |
+| f — u-boot startet den Devcontainer selbst und kennt ihn dadurch | volle Kenntnis | neue Befehls- und Zusagefläche, Änderung am Vertrag; ausgeschlossen |
+| g — eigenes Label `--label u-boot.project=<name>` in `runArgs` | von u-boot kontrolliert | **verworfen:** ändert `runArgs` bestehender Projekte (die Tests pinnen die Optionsmenge je Runtime), `devcontainer.local_folder` ist je Checkout bereits eindeutig; bleibt Re-Evaluierungs-Trigger |
+
+Bewertung gegen [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil): nur (b) und (e) lassen den Host lesen, ohne den Container zum Host schreiben zu lassen; (b) fügt weder `runArgs` noch Mounts hinzu. Wartbarkeit: (b) hält die Entscheidung im Skript, `doctor` interpretiert nur drei Werte.
+
+## Konsequenzen
+
+- Positiv: Daemon-, Egress- und `vfs`-Fallback sind host-seitig ausweisbar, auch auf macOS/Colima, wo die `/dev/fuse`-Prüfung nichts sieht; kein neuer Weg Container → Host; `--quiet` zeigt die Warnungen ohne Änderung der CLI-Schicht (`visibleWarnings` filtert am Kennzeichen); der Port ist für weitere Befehle (F2) wiederverwendbar.
+- Negativ: Die Aussage ist bedingt: Container nicht gefunden, kein Engine-Zugang, `u-boot` im Runtime-Image (M10), ältere Container ohne Dateien — jeweils „nicht ermittelbar“; ein Agent kann die Datei fälschen. Die Scripte und das Dockerfile ändern sich, bestehende Projekte bekommen das nach dem nächsten `generate devcontainer` und einem Neubau (Hinweis im CHANGELOG).
+- **Akzeptiertes Negativ:** Der Stand eines gestoppten, lange nicht gestarteten Containers kann veraltet sein; er wird mit Zeitstempel und dem Vermerk „Container gestoppt“ ausgewiesen, mehr nicht. Grund: ein Zusatzmechanismus (Container-ID-Abgleich, Ablauffrist) kostet mehr als die Aussage trägt, und der Befund verschwindet nicht spurlos, weil das Item ihn nennt.
+- **Frage an den Projektinhaber (F2):** Genügt `doctor` als „Befehlsausgabe“? Ist-Stand: `generate`, `init` und `up` wissen zur Laufzeit des Containers nichts; der Container wird vom Devcontainer-Werkzeug gestartet. Optionen innerhalb der unveränderten Zusage: (i) `doctor` ist die Befehlsausgabe, der Wortlaut „in der Befehlsausgabe und in `u-boot doctor`“ liest sich dann als Aufzählung, in der `doctor` selbst Befehlsausgabe ist, und die Scripte weisen den Fallback ohnehin auf der Ausgabe des Start-Werkzeugs aus (M1, M2); (ii) `generate devcontainer` (und `init`) rufen nach dem Schreiben denselben Port auf und geben bei einem bestehenden Container mit `result=fallback` eine Warnung mit `DegradationFallback` aus — kleiner Zusatz (ein Port-Aufruf, best effort, ohne Engine still), ohne neuen Befehl und ohne neue Option; (iii) zusätzlich `up` — nicht empfohlen, weil `up` nur Compose-Projekte bedient und der Devcontainer nicht dazugehört; (iv) ein eigener Befehl — Lastenheft-Änderung, ausgeschlossen. Empfehlung: (i) mit (ii) als Nachrüstung, falls (i) dem Projektinhaber nicht genügt.
+- **Frage an den Projektinhaber (F8):** Gemessen (M13): Fehlt `/dev/fuse` auf dem Container-Host, lehnt Docker den Start ab, weil der Container `--device=/dev/fuse` trägt — wie bei `/dev/net/tun`, für das das Lastenheft das ausdrücklich so sagt. Ein `vfs`-Fallback entsteht bei den erzeugten `runArgs` nur, wenn `--device=/dev/fuse` fehlt (etwa nach Hand-Änderung, M14); der Satz „ein fehlendes `/dev/fuse` führt zu einem Fallback auf `vfs`“ trifft für die erzeugte Konfiguration unter Docker nicht zu, und die bestehende Linux-Host-Prüfung („nested Podman will fall back to vfs storage“) sagt eine Folge voraus, die Docker nicht liefert. Optionen: (A) Lastenheft-Änderung (Change Request) analog `/dev/net/tun`: fehlendes `/dev/fuse` ist keine Degradationsstufe, der Start scheitert; der `vfs`-Zweig bleibt als Rückfall im Skript und wird ausgewiesen, wenn er auftritt; (B) Zielbild halten: der `vfs`-Zweig wird gebaut und ausgewiesen wie die übrigen, die Host-Prüfung bleibt wörtlich, bleibt aber für Docker ohne Wirkung. Empfehlung: (A), weil die Messung dem Zielbild an dieser einen Stelle widerspricht; **beide** Optionen ändern an Mechanismus, Port und Scripten nichts, der Slice kann mit (B) beginnen, ohne etwas zu verbauen. Die Entscheidung liegt beim Projektinhaber; diese ADR nimmt sie nicht vorweg.
+- Folgepflicht (Umsetzungs-Slice): Statusformat und das Verfahren als `SPEC-<NNN>` in der Spezifikation, [`LH-FA-DEV-007.a`](../../../spec/spezifikation.md#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten), [`LH-FA-DEV-008.a`](../../../spec/spezifikation.md#lh-fa-dev-008a--verhalten-bei-nicht-gewährbarer-capability) und [`SPEC-043`](../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) Ausnahme 2 ohne die Einschränkung „soweit vom Host aus ermittelbar“ (statt dessen die Grenze „nicht ermittelbar“), Port und Adapter in `spec/architecture.md`, Handbuch und CHANGELOG, Golden Cases der Scripte, Tests je Fallback (Happy, „nicht ermittelbar“, ungültiges Dokument), Integrationstest (`//go:build docker`) mit Skript, Datei und Host-Adapter. Für den Test genügt das Starten der Scripte per `docker run` plus `docker cp` über den Adapter; die Devcontainer-CLI ist nur zur Messung nötig.
+- **Nicht verifiziert (Stand 2026-10-17):** siehe Messung, Absatz „Nicht gemessen“.
+
+## Fitness Function (falls maschinell prüfbar)
+
+| Tooling | Regel | Make-Target |
+|---|---|---|
+| Golden Case | Die drei Scripte schreiben ihre Statusdatei in jedem Zweig (ok, fallback, failed) atomar; das Dockerfile legt `/var/lib/u-boot/status/` an, nur bei installierten Scripten; `runArgs` und `mounts` unverändert | `make test` |
+| Unit | Wertobjekt weist alles außerhalb der geschlossenen Menge ab (Schlüssel, Werte, Zeitstempel, Größe); `doctor` bildet `fallback`/`failed`/`ok`/„nicht ermittelbar“/ungültig auf Warnung mit Kennzeichen/Fehler/OK/Info/Warnung ab; unter `--quiet` ist nur die Warnung mit Kennzeichen sichtbar | `make test` |
+| Integrationstest (`//go:build docker`) | Skript im Container schreibt die Datei, der Host-Adapter liest sie (laufend und gestoppt); Symlink, FIFO, Übergröße werden abgewiesen | `make test-docker` |
+| depguard | `os/exec docker` nur im Adapter-Paket; keine neue Regel nötig | `make lint`, `make verify-depguard` |
+
+## Re-Evaluierungs-Trigger
+
+Die Devcontainer-CLI oder VS Code ändern oder entfernen `devcontainer.local_folder` (dann Alternative g, ein eigenes Label); ein Messbefund auf Linux ohne VM, auf amd64 oder Docker Desktop, der `ps`/`cp` anders zeigt; Podman als Host-Engine wird zugesagt; der Projektinhaber entscheidet F2 oder F8 anders als hier empfohlen; ein Nutzerbericht, dass die gefälschte oder veraltete Datei zu einer falschen Entscheidung führte (dann ein Zusatzmechanismus oder Alternative e).
+
+## Anhang: Messbefehle (Kurzform)
+
+```bash
+# Probe-Projekte unter ~/uboot-measure-fallback (Colima teilt nur das Home); Generator wie in ADR-0021
+docker run --rm -v "$M/p":/w -w /w --user 0 u-boot:latest --no-interactive init --no-git --devcontainer --sandbox
+# … config set devcontainer.sandbox.nestedRuntime docker|podman; config set devcontainer.sandbox.egress.enabled true; generate devcontainer
+# Wegwerf-Image mit Docker-CLI und @devcontainers/cli 0.89.0 (Dockerfile: node:22-trixie-slim, COPY --from=docker:29-cli)
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$M/pd":"$M/pd" mfb-cli devcontainer up --workspace-folder "$M/pd"   # M1, M3, M4: runArgs [] -> Egress- und Daemon-Fallback
+docker logs <id>; docker inspect <id> --format '{{json .Config.Labels}}'                                                           # M1, M4
+docker exec -u 0 <id> sh -c 'mkdir -p /run/u-boot && printf "{}" > /run/u-boot/x'; docker cp <id>:/run/u-boot/x - | tar -xO         # M6 (laufend, nach stop, nach start)
+docker exec -u 0 <id> sh -c 'ln -s /etc/shadow l; mkfifo f; mkdir d; head -c 300000000 /dev/zero > big'; docker cp <id>:<pfad> - | tar -tvf -   # M7
+docker run --rm --device=/dev/fuse-nonexistent alpine:3 true; docker create --device=/dev/fuse-nonexistent alpine:3 true; docker start <id>  # M13
+docker run -d --health-cmd 'head -c 10000 /dev/zero | tr "\0" x; exit 1' --health-interval 2s alpine:3 sleep 60; docker inspect <id>      # M12
+```
+
+## Geschichte
+
+| Datum | Ereignis | Verweis |
+|---|---|---|
+| 2026-10-17 | Entwurf mit Messprotokoll (Colima 0.10.3, Docker 29.5.2, Devcontainer-CLI 0.89.0, arm64), `Proposed`; F2 und F8 liegen beim Projektinhaber | Vereinbarung mit dem Projektinhaber |

@@ -47,3 +47,4 @@ das MADR-Format gilt für neu angelegte ADRs sowie für die noch mutable
 | [ADR 0019](0019-docker-daemon-aus-docker-apt-repo.md) | Accepted | Docker-Daemon im Sandbox-Devcontainer aus dem Docker-APT-Repo |
 | [ADR 0020](0020-drittanbieter-features-im-katalog.md) | Accepted | Drittanbieter-Feature `homebrew` und Alias `sdkman` im Feature-Katalog |
 | [ADR 0021](0021-podman-build-im-sandbox-devcontainer.md) | Accepted | `podman build` im Sandbox-Devcontainer: sechste Lockerung `/dev/net/tun`, Egress-Host, Abnahmetest |
+| [ADR 0022](0022-fallback-ausweisung-statusdateien-im-container.md) | Proposed | Ausweisung der Degradations-Fallbacks: Statusdateien im Container, vom Host mit `docker cp` gelesen |
