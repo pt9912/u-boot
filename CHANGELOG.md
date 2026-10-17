@@ -47,7 +47,8 @@ this file is the same format applied to u-boot itself.
   where the device is missing the engine refuses to start the container (Docker: `error gathering device information while adding custom device`), there is no degradation step and `u-boot doctor` does not check it.
   Load the `tun` kernel module on the host (`modprobe tun`) or set `nestedRuntime: none`.
 - The default egress allowlist with `nestedRuntime: podman` or `docker` gains `production.cloudfront.docker.com`: Docker Hub redirects layer downloads
-  to it, and without it a pull behind the restriction failed with a DNS error
+  to it. Measured with `nestedRuntime: podman`: without the host a pull behind the restriction failed with a DNS error. With `nestedRuntime: docker`
+  the host is on the same allowlist line; the pull through the Docker daemon is not measured
   ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
 - The contract for `--quiet` ([`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), Lastenheft 0.10.0) names four exceptions that stay visible: the
   disclosure of security relaxations in the sandbox profile, the disclosure of degradation fallbacks (container without daemon, `vfs`
