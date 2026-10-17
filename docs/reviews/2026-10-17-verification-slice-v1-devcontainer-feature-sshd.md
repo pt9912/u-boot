@@ -99,7 +99,7 @@ Release-Cut-Szenario (Cut nach diesem Slice, ohne `claude-code`): der Eintrag is
 | F-3 INFO (Erzeuger nur `generate`) | **behoben, nicht blockierend** | Handbuch-Klammer, Slice-§1/§3 und DoD-Zeile benennen den Erzeuger; die Welle-Datei bleibt (V-4). |
 | F-4 INFO (`f.Source`-Zweig ungepinnt) | **nicht blockierend** | Grenze in Slice §3 mit Begründung; kein erreichbarer Fall; Katalog bleibt die einzige Quelle der Erkennung. |
 | F-5 INFO (Folgerung weiter als Beleg) | **nicht blockierend** | siehe (c); Auflage für den Ausgang von Risiko 2. |
-| F-6 INFO (Spezifikation ohne `sshd`) | **nicht blockierend** | Spezifikation zieht [`slice-v2-spec-devcontainer-sshd-claude-code`](../plan/planning/open/slice-v2-spec-devcontainer-sshd-claude-code.md) nach (`spec/spezifikation.md` führt die Katalogzeile und die Egress-Tabelle weiter ohne `sshd`, laut Welle gewollt); der Spec-Slice trägt es. |
+| F-6 INFO (Spezifikation ohne `sshd`) | **nicht blockierend** | Spezifikation zieht [`slice-v2-spec-devcontainer-sshd-claude-code`](../plan/planning/in-progress/slice-v2-spec-devcontainer-sshd-claude-code.md) nach (`spec/spezifikation.md` führt die Katalogzeile und die Egress-Tabelle weiter ohne `sshd`, laut Welle gewollt); der Spec-Slice trägt es. |
 
 ### (i) Plan-vs-Code-Diff (§3 gegen `git diff --stat 3d7501c..HEAD`, 14 Dateien)
 
