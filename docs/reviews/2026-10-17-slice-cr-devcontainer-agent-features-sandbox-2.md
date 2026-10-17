@@ -2,14 +2,14 @@
 
 **Review-Art:** Plan/Design — Nachlauf-Review der Erweiterung des CR-Kerns gegen Lastenheft, Hard Rules und die älteren Zusagen; Maintainability des Vertragstextes, keine DoD-Prüfung.
 
-**Gegenstand:** Diff `5de388c..4df2b54` (`spec/lastenheft.md`, `CHANGELOG.md`) für den Slice [`slice-cr-devcontainer-agent-features-sandbox`](../plan/planning/in-progress/slice-cr-devcontainer-agent-features-sandbox.md). Der erste Review (`2026-10-17-slice-cr-devcontainer-agent-features-sandbox.md`) lief vor dieser Erweiterung. <!-- d-check:ignore (Report-Dateiname als Zitat) -->
+**Gegenstand:** Diff `5de388c..4df2b54` (`spec/lastenheft.md`, `CHANGELOG.md`) für den Slice [`slice-cr-devcontainer-agent-features-sandbox`](../plan/planning/done/slice-cr-devcontainer-agent-features-sandbox.md). Der erste Review (`2026-10-17-slice-cr-devcontainer-agent-features-sandbox.md`) lief vor dieser Erweiterung. <!-- d-check:ignore (Report-Dateiname als Zitat) -->
 
 **Skill:** `.harness/skills/reviewer.md` (aktueller Stand im Arbeitsbaum), HEAD `48b2537` · <!-- d-check:ignore (Skill-Pfad als Zitat) -->
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-17
 
 **Eingangs-Kontext:**
 
-- Slice [`slice-cr-devcontainer-agent-features-sandbox`](../plan/planning/in-progress/slice-cr-devcontainer-agent-features-sandbox.md) (§1 Entscheidung 5, §6 Risiken) und der offene Code-Slice [`slice-v1-cli-quiet-sicherheitswarnungen`](../plan/planning/open/slice-v1-cli-quiet-sicherheitswarnungen.md) (§1 Einstufungstabelle)
+- Slice [`slice-cr-devcontainer-agent-features-sandbox`](../plan/planning/done/slice-cr-devcontainer-agent-features-sandbox.md) (§1 Entscheidung 5, §6 Risiken) und der offene Code-Slice [`slice-v1-cli-quiet-sicherheitswarnungen`](../plan/planning/open/slice-v1-cli-quiet-sicherheitswarnungen.md) (§1 Einstufungstabelle)
 - [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DIAG-003`](../../spec/lastenheft.md#lh-fa-diag-003--fehlerklassifikation)
 - Code-Bestand zum Abgleich (gelesen, nicht geändert): `internal/hexagon/application/doctor_sandbox.go` (`checkSandboxRuntime`, `checkSandboxEgress`, `checkSandboxCredentials`), `internal/adapter/driving/cli/doctor.go` (`DegradationFallback`, `--strict`) <!-- d-check:ignore (Pfade als Zitat) -->
 - `AGENTS.md` (Hard Rules §3.4, §3.7, §3.9)
