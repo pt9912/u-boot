@@ -5,9 +5,8 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`.
 
 **Welle:** ohne Welle. Das Lastenheft 0.7.0 sagt Docker Desktop für `nestedRuntime: docker` nicht mehr zu
-([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)); der Slice wartet auf
-einen Docker-Desktop-Host und trägt damit keine Closure-Bedingung einer Welle mehr. Wird die Messung gemacht, ist die Zusage per CR
-wieder aufzunehmen.
+([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)); der Slice trägt keine Closure-Bedingung
+einer Welle. Er ist ohne Lieferung geschlossen (§7 `Gegenstand:`); eine Wiederaufnahme der Zusage verlangt einen CR am Lastenheft.
 
 **Bezug:** [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
 [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md).
@@ -38,9 +37,9 @@ Abnahmekriterium 6 (Nachholmessung) aus dem CR
 - [ ] Trägt die Messung, nimmt ein CR die Zusage für Docker Desktop in [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) wieder auf (Lastenheft 0.7.0 hat sie gestrichen).
 - [ ] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`) — kein Self-Review.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register fortgeschrieben oder „keine Beobachtung angefallen" in §7 notiert.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register fortgeschrieben oder „keine Beobachtung angefallen" in §7 notiert.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang.
 - [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
 
 ## 3. Plan (vor Code)
@@ -52,7 +51,7 @@ Abnahmekriterium 6 (Nachholmessung) aus dem CR
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): Zugriff auf einen Mac mit Docker Desktop; `Verantwortlich:` gesetzt.
+**Start:** entfällt; der Slice ist ohne Lieferung geschlossen (§7 `Gegenstand:`). Eine Messung unter Docker Desktop beginnt als neuer Slice, sobald ein Nutzerbericht oder ein Host den Re-Evaluierungs-Trigger von [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md) auslöst.
 
 **Rückführungen — vorab benannt:**
 
@@ -65,17 +64,18 @@ DoD vollständig, Review-Report liegt vor, Closure-Notiz mit Steering-Loop-Lerne
 
 ## 6. Risiken und offene Punkte
 
-- Docker Desktop startet den Daemon im Container nicht (andere cgroup-/iptables-Lage in der VM) — **Ausgang:** weiter offen: wird in diesem Slice gemessen.
+- Docker Desktop startet den Daemon im Container nicht (andere cgroup-/iptables-Lage in der VM) — **Ausgang:** entfallen: Docker Desktop ist seit Lastenheft 0.7.0 nicht zugesagt und der Slice wird nicht gearbeitet; ein Nutzerbericht fällt unter den Re-Evaluierungs-Trigger von [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md).
 
 ## 7. Closure-Notiz
 
-- **Was hat funktioniert:** —
-- **Was ging anders als geplant:** —
-- **Steering-Loop-Eintrag:** —
-- **Beobachtungs-Register (`../observations/`):** —
-- **Folge-Slices:** —
-- **Risiken aus §6:** siehe §6
-- **Drei Paarungen:** —
+- **Was hat funktioniert:** — (nichts geliefert; der Slice wurde nicht gearbeitet.)
+- **Was ging anders als geplant:** Das Lastenheft 0.7.0 nahm Docker Desktop für `nestedRuntime: docker` aus der Zusage; danach blieb der Slice ohne Welle liegen.
+- **Gegenstand:** entfallen: Die Zusage für Docker Desktop ist seit Lastenheft 0.7.0 zurückgenommen ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)), und es steht kein Docker-Desktop-Host zur Verfügung. Der Re-Evaluierungs-Trigger von [ADR-0018](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md) deckt einen Nutzerbericht oder einen späteren Host ab; eine Wiederaufnahme der Zusage verlangt einen CR am Lastenheft (§2).
+- **Steering-Loop-Eintrag:** Ein Slice, dessen Voraussetzung dauerhaft fehlt, wird als entfallen geschlossen statt in `open/` gehalten. Gezählt, nicht verkörpert; erstes Auftreten.
+- **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt.
+- **Folge-Slices:** keine.
+- **Risiken aus §6:** jedes trägt einen Ausgang — siehe §6 (entfallen: Grund).
+- **Drei Paarungen:** Anker · Folge-Slice · Register nach dem `git mv` zu prüfen.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
