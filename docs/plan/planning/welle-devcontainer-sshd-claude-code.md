@@ -34,7 +34,7 @@ Anlass (Projektinhaber, 2026-10-17): Entscheidung für Devcontainer-Features sta
 
 Das *Mehr* gegenüber den vier Slice-DoDs: Die beiden Features tragen **zusammen**, und die Stellen, an denen der Vertrag steht, sagen dasselbe.
 
-- Alle vier Slices der Welle liegen in `done/`; der CR [`slice-cr-devcontainer-agent-features-sandbox`](open/slice-cr-devcontainer-agent-features-sandbox.md) liegt mit Lastenheft 0.11.0 dort.
+- Alle vier Slices der Welle liegen in `done/`; der CR [`slice-cr-devcontainer-agent-features-sandbox`](in-progress/slice-cr-devcontainer-agent-features-sandbox.md) liegt mit Lastenheft 0.11.0 dort.
 - **Beide Features zusammen:** Ein Golden Case aktiviert `sshd` und `claude-code` gemeinsam (einmal ohne, einmal mit Sandbox-Profil und Egress): `devcontainer.json`
   trägt jeden Render-Schlüssel genau einmal in stabiler Reihenfolge, der zweite Lauf ist ein NoOp, die Egress-Allowlist ist die sortierte, duplikatfreie Vereinigung
   der Hosts beider Features, und die Befehlsausgabe trägt genau die Hinweise, die der CR vorschreibt.
@@ -51,7 +51,7 @@ Das *Mehr* gegenüber den vier Slice-DoDs: Die beiden Features tragen **zusammen
 
 | Slice | Titel | Bezug |
 |---|---|---|
-| [`slice-cr-devcontainer-agent-features-sandbox`](open/slice-cr-devcontainer-agent-features-sandbox.md) | CR: Sandbox-Regel für `sshd` und Claude Code, Zugangsdaten des Agenten (zuerst; Lastenheft 0.11.0) | [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-009`](../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) |
+| [`slice-cr-devcontainer-agent-features-sandbox`](in-progress/slice-cr-devcontainer-agent-features-sandbox.md) | CR: Sandbox-Regel für `sshd` und Claude Code, Zugangsdaten des Agenten (zuerst; Lastenheft 0.11.0) | [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-009`](../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) |
 | [`slice-v1-devcontainer-feature-sshd`](open/slice-v1-devcontainer-feature-sshd.md) | Code: Katalog-Schlüssel `sshd` (offizielles Feature), Egress, Sandbox-Regel, Tests, Doku | [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) |
 | [`slice-v1-devcontainer-feature-claude-code`](open/slice-v1-devcontainer-feature-claude-code.md) | Code: Katalog-Schlüssel `claude-code` (Feature von Anthropic), Egress, Zugangsdaten zur Laufzeit, Tests, Doku | [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-009`](../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) |
 | [`slice-v2-spec-devcontainer-sshd-claude-code`](open/slice-v2-spec-devcontainer-sshd-claude-code.md) | Spezifikation: Katalog, Egress-Hosts und Sandbox-Verhalten beider Features (letzter Slice) | [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) |

@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md) — zweiter Slice der Welle; ihm geht [`slice-cr-devcontainer-agent-features-sandbox`](slice-cr-devcontainer-agent-features-sandbox.md) voraus, ihm folgen [`slice-v1-devcontainer-feature-claude-code`](slice-v1-devcontainer-feature-claude-code.md) und [`slice-v2-spec-devcontainer-sshd-claude-code`](slice-v2-spec-devcontainer-sshd-claude-code.md).
+**Welle:** [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md) — zweiter Slice der Welle; ihm geht [`slice-cr-devcontainer-agent-features-sandbox`](../in-progress/slice-cr-devcontainer-agent-features-sandbox.md) voraus, ihm folgen [`slice-v1-devcontainer-feature-claude-code`](slice-v1-devcontainer-feature-claude-code.md) und [`slice-v2-spec-devcontainer-sshd-claude-code`](slice-v2-spec-devcontainer-sshd-claude-code.md).
 
 **Bezug:** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Devcontainer-Features), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Sandbox-Profil), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress-Hosts je Feature), [`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004--benutzerrechte) (Benutzer, unter dem der Login läuft); [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md) (Katalog-Regel: offizielle Einträge brauchen das Präfix `ghcr.io/devcontainers/features/`). Muster: [`slice-v1-devcontainer-feature-python`](../done/slice-v1-devcontainer-feature-python.md).
 
@@ -77,7 +77,7 @@ Die Pfade stammen aus dem Quelltext (Lesestand 2026-10-17); der Implementer prü
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; der CR [`slice-cr-devcontainer-agent-features-sandbox`](slice-cr-devcontainer-agent-features-sandbox.md) liegt in `done/`; kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; der CR [`slice-cr-devcontainer-agent-features-sandbox`](../in-progress/slice-cr-devcontainer-agent-features-sandbox.md) liegt in `done/`; kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benannt:**
 

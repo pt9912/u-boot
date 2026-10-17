@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md) — erster Slice der Welle; ihm folgen [`slice-v1-devcontainer-feature-sshd`](slice-v1-devcontainer-feature-sshd.md), [`slice-v1-devcontainer-feature-claude-code`](slice-v1-devcontainer-feature-claude-code.md) und [`slice-v2-spec-devcontainer-sshd-claude-code`](slice-v2-spec-devcontainer-sshd-claude-code.md).
+**Welle:** [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md) — erster Slice der Welle; ihm folgen [`slice-v1-devcontainer-feature-sshd`](../open/slice-v1-devcontainer-feature-sshd.md), [`slice-v1-devcontainer-feature-claude-code`](../open/slice-v1-devcontainer-feature-claude-code.md) und [`slice-v2-spec-devcontainer-sshd-claude-code`](../open/slice-v2-spec-devcontainer-sshd-claude-code.md).
 
 **Bezug:** [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Sandbox-Profil; Änderung), [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) (Zugangsdaten; Erweiterung auf Agenten-Zugangsdaten), [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Features, Zustimmung), [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Hosts des Agenten), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (nur, falls die Teilfrage zu Entscheidung 1 „ja“ lautet). Verwandt: [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md).
 
@@ -73,10 +73,10 @@ Vorschlag für die Historie (§16): Zeile 0.11.0, 2026-10-17, Quelle „Vereinba
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Code, Katalog und Egress-Hosts** — die Code-Slices [`slice-v1-devcontainer-feature-sshd`](slice-v1-devcontainer-feature-sshd.md) und
-  [`slice-v1-devcontainer-feature-claude-code`](slice-v1-devcontainer-feature-claude-code.md) setzen um, was dieser CR festlegt; der CR ändert nur den Vertrag.
+- **Code, Katalog und Egress-Hosts** — die Code-Slices [`slice-v1-devcontainer-feature-sshd`](../open/slice-v1-devcontainer-feature-sshd.md) und
+  [`slice-v1-devcontainer-feature-claude-code`](../open/slice-v1-devcontainer-feature-claude-code.md) setzen um, was dieser CR festlegt; der CR ändert nur den Vertrag.
 - **`spezifikation.md` und `architecture.md`** — die Spezifikation beschreibt das Verhalten erst, wenn Lastenheft und Code es tragen
-  ([`slice-v2-spec-devcontainer-sshd-claude-code`](slice-v2-spec-devcontainer-sshd-claude-code.md)); die Sicht nennt keine Features.
+  ([`slice-v2-spec-devcontainer-sshd-claude-code`](../open/slice-v2-spec-devcontainer-sshd-claude-code.md)); die Sicht nennt keine Features.
 - **Eine Aufnahme von `sshd` oder Claude Code in die Beispielliste von [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)** — Beispiele sind keine Zusage; der Katalog führt sie ohne Lastenheft-Änderung (Muster `python`).
 - **Schlüssel-Login, Passwort-Setzen und Agent-Konfiguration durch `u-boot`** — [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) nennt den Agenten als Nicht-Ziel; ein Passwort setzt der Nutzer im Container.
 - **Eine ADR** — Entscheidung 3 folgt [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md); keine Folge-ADR.
@@ -141,8 +141,8 @@ DoD vollständig (Lastenheft 0.11.0 mit Historie), Review-Report liegt vor, Clos
 
 ## 6. Risiken und offene Punkte
 
-- **Die Teilfrage zu Entscheidung 1 bleibt offen** (Wortlaut der Warnung, Sichtbarkeit unter `--quiet`): der Code-Slice [`slice-v1-devcontainer-feature-sshd`](slice-v1-devcontainer-feature-sshd.md) kann die Warnung nicht festlegen. — **Ausgang:** weiter offen bis zum Review des CR; die DoD 1 verlangt die Entscheidung vor dem Move nach `done/`.
-- **Der Anmeldeweg des Agenten ist nicht die Umgebungsvariable** (Anmeldung im Container statt Schlüssel vom Host): die `doctor`-Warnung „Quelle fehlt“ wäre dann ein Fehlalarm. — **Ausgang:** weiter offen: die Messung in [`slice-v1-devcontainer-feature-claude-code`](slice-v1-devcontainer-feature-claude-code.md) belegt den Weg; weicht er ab, wird der Text von [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) im CR vor dem Code-Slice nachgezogen (Rückführung `in-progress` → `open`).
+- **Die Teilfrage zu Entscheidung 1 bleibt offen** (Wortlaut der Warnung, Sichtbarkeit unter `--quiet`): der Code-Slice [`slice-v1-devcontainer-feature-sshd`](../open/slice-v1-devcontainer-feature-sshd.md) kann die Warnung nicht festlegen. — **Ausgang:** weiter offen bis zum Review des CR; die DoD 1 verlangt die Entscheidung vor dem Move nach `done/`.
+- **Der Anmeldeweg des Agenten ist nicht die Umgebungsvariable** (Anmeldung im Container statt Schlüssel vom Host): die `doctor`-Warnung „Quelle fehlt“ wäre dann ein Fehlalarm. — **Ausgang:** weiter offen: die Messung in [`slice-v1-devcontainer-feature-claude-code`](../open/slice-v1-devcontainer-feature-claude-code.md) belegt den Weg; weicht er ab, wird der Text von [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) im CR vor dem Code-Slice nachgezogen (Rückführung `in-progress` → `open`).
 - **Die Features bringen Metadaten mit** (`mounts`, `capAdd`, `privileged`, `entrypoint` in ihrer `devcontainer-feature.json`) und unterlaufen damit „kein Host-Bind-Mount, kein `--privileged`“ des Profils; weder Plan noch Lastenheft sagen es voraus. — **Ausgang:** weiter offen: die Messung der Code-Slices entscheidet; findet sie eine Lockerung, wird dieser CR vor dem Code-Slice um die Ausweisung erweitert (Rückführung `in-progress` → `open`).
 - **Widerspruch zu einer älteren Zusage** bleibt unentdeckt, weil die Suche zu eng war. — **Ausgang:** entfallen: die Prüfungstabelle in §1 trägt die Suche (Stand 2026-10-17); der Review bestätigt sie.
 
