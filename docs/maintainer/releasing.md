@@ -52,7 +52,7 @@ Probe für den Release-Pfad (und hinterher löschbar).
 ## 3. Vorbereitung (ein Commit auf `main`)
 
 Der Cut folgt dem Muster der Release-Cut-Slices (zuletzt
-[`slice-v1-release-cut-v0.5.0`](../plan/planning/done/slice-v1-release-cut-v0.5.0.md)):
+[`slice-v1-release-cut-v0.9.0`](../plan/planning/done/slice-v1-release-cut-v0.9.0.md)):
 
 1. **CHANGELOG** (`CHANGELOG.md`): `## [Unreleased]` bleibt als leerer Anker; der bisherige
    Inhalt wandert unter `## [x.y.z] - <Tag-Datum>` mit kurzem Lead-Absatz. Compare-Links am
@@ -63,8 +63,8 @@ Der Cut folgt dem Muster der Release-Cut-Slices (zuletzt
    den Wert per `UBOOT_VERSION`; der `-dev`-Stand gilt für lokale Builds.
 3. **READMEs** (`README.md`, `README.de.md`): Status-Block und eine Zeile in der
    Releases-Tabelle.
-4. **Roadmap** (`docs/plan/planning/in-progress/roadmap.md`): die Welle als aktiv führen,
-   bis der Tag gesetzt ist; danach nach „Abgeschlossene Wellen".
+4. **Roadmap** (`docs/plan/planning/in-progress/roadmap.md`): den Release unter „Offene Wellen"
+   führen, bis der Tag gesetzt ist; danach nach „Abgeschlossene Wellen".
 5. **Release-Cut-Slice** nach dem Muster der früheren Cuts anlegen und nach dem Tag nach
    `done/` verschieben (Planning-Sensor: der Ruhe-Marker der Roadmap gilt nur, wenn kein
    Slice in `in-progress/` liegt).
@@ -72,7 +72,7 @@ Der Cut folgt dem Muster der Release-Cut-Slices (zuletzt
 ## 4. Vorab-Prüfung
 
 ```bash
-make gates            # lint + test + coverage-gate + docs-check
+make gates            # lint + test + coverage-gate + docs-check + baseline-verify
 make ci               # gates + govulncheck + image-scan (Trivy HIGH/CRITICAL)
 make test-docker      # Integrationstests gegen die echte Docker Engine
 make fullbuild        # ci + Runtime-Image-Build

@@ -1,8 +1,8 @@
 # Benutzerhandbuch: u-boot
 
 Handbuch-Version: 2.0
-Software-Version: v0.9.0
-Stand: 2026-10-15
+Software-Version: v0.10.0
+Stand: 2026-10-17
 
 ---
 
@@ -77,7 +77,7 @@ u-boot --version
 ```
 
 **Ergebnis:** Die installierte Version erscheint, zum Beispiel
-`u-boot version 0.9.0`.
+`u-boot version 0.10.0`.
 
 ### Binary (Linux, macOS, Windows)
 
@@ -103,7 +103,7 @@ Invoke-WebRequest `
 ```
 
 Für eine bestimmte Version ersetzen Sie `latest/download` durch
-`download/v0.9.0`. Die Prüfsummen aller Dateien stehen in `SHA256SUMS` am
+`download/v0.10.0`. Die Prüfsummen aller Dateien stehen in `SHA256SUMS` am
 jeweiligen Release.
 
 ### Homebrew (macOS)
@@ -130,7 +130,7 @@ Ein APT- oder DNF-Repository gibt es nicht; Sie laden das Paket und
 installieren es lokal:
 
 ```bash
-VERSION=0.9.0
+VERSION=0.10.0
 # Debian / Ubuntu
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"
@@ -296,7 +296,7 @@ Diese Optionen gelten für jeden Befehl:
 | `--yes` | Rückfragen automatisch bejahen |
 | `--no-interactive` | nie fragen; bei einer nötigen Rückfrage abbrechen |
 | `--json` | maschinenlesbare Ausgabe |
-| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen); `doctor --quiet` zeigt Fehler-Einträge sowie die Einträge der beiden Ausnahmen unten, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; andere Warnungen, etwa zur Konfiguration, entfallen). Vier Ausnahmen bleiben sichtbar: Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`) (in der Befehlsausgabe erzeugt nur `generate devcontainer` diese Warnungen: die Lockerungen, die `sshd`-Warnung und die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift, während die Meldung, dass `nestedRuntime` ohne Sandbox-Profil ohne Wirkung ist, entfällt; in `doctor` die Warn-Einträge zu einem Klartext-Zugangsschlüssel, zur fehlenden Quelle des Tokens bei einem `https`-Clone, zur fehlenden Referenz auf die Umgebungsvariable eines aktiven Agenten-Features und zur Egress-Restriktion, auch die Meldung, dass sie ohne Sandbox-Profil nicht greift), Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in der Befehlsausgabe und in `doctor`, soweit vom Host aus ermittelbar), der Compose-Fortschritt von `up` und die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
+| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen). Vier Ausnahmen bleiben sichtbar: (1) Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`); in der Befehlsausgabe erzeugt nur `generate devcontainer` diese Warnungen, dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift, während die Meldung zu `nestedRuntime` ohne Sandbox-Profil entfällt; (2) Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in der Befehlsausgabe und in `doctor`, soweit vom Host aus ermittelbar); (3) der Compose-Fortschritt von `up`; (4) die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. `doctor --quiet` zeigt Fehler-Einträge, Degradations-Fallbacks und die Warn-Einträge zu einer Sicherheitseigenschaft des Sandbox-Profils, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; Einzelheiten in Abschnitt [4.7](#47-die-umgebung-prüfen)). Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
 | `--verbose` | zusätzliche Details; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist |
 | `--debug` | interne Diagnoseausgabe; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist (`--verbose` und `--debug` wirken gleich) |
 | `-v`, `--version` | Version anzeigen |
@@ -995,13 +995,13 @@ wächst mit jedem Image. Ohne `/dev/fuse` baut Podman mit `vfs`-Speicher; das
 läuft, kopiert aber jede Schicht vollständig.
 
 **Gemessen** (Docker 29.5.2 auf Colima 0.10.3, arm64, VM mit
-`kernel.apparmor_restrict_unprivileged_userns=0`): `podman build` mit `FROM`,
+`kernel.apparmor_restrict_unprivileged_userns=0` in der VM und `/dev/net/tun` auf dem Container-Host): `podman build` mit `FROM`,
 `RUN` und `COPY` baut kalt, aus dem Layer-Cache und mit `--no-cache`; `docker
 build` über den Alias ebenso; ein `RUN` mit Netz zu einem erlaubten Host
 (`apt-get update`) läuft, auch hinter der Egress-Restriktion mit der
 Default-Allowlist (gemessen mit `alpine:3` und `debian:stable-slim`; der Blob-Host von Docker Hub kann sich ändern), ein nicht gelisteter Name löst dort nicht auf. **Nicht
-gemessen:** andere Hosts und Architekturen (amd64), Docker Desktop, Podman als
-Host-Engine.
+gemessen:** andere Hosts, andere Architekturen (amd64), CI, Docker Desktop, Podman als
+Host-Engine. **Nicht zugesagt:** `buildx`, `docker compose` und `# syntax=`-Frontends.
 
 Was beim Containerstart passiert, wenn Fähigkeiten fehlen, steuert
 `devcontainer.sandbox.onUnavailable` (`warn` ist der Standard, `fail` bricht ab):
@@ -1273,7 +1273,7 @@ Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
   **Nicht geprüft und nicht zugesagt:** Docker Desktop,
   Podman als Host-Engine, VS Code und Codespaces.
 - `nestedRuntime: podman`: `podman build` ist unter Docker auf Colima (arm64) mit
-  erlaubten verschachtelten User-Namespaces gemessen; amd64 ist nicht gemessen.
+  erlaubten verschachtelten User-Namespaces gemessen; amd64 und CI sind nicht gemessen.
   Unter einer Ubuntu-24.04-VM mit dem Schalter
   `kernel.apparmor_restrict_unprivileged_userns=1` startet verschachteltes
   Podman nicht (Exit-Code 11). Nicht verfügbar sind `buildah`, `docker buildx`,
@@ -1455,7 +1455,7 @@ aus, damit die Dateien in `.devcontainer/` zur Projektdatei passen.
 
 | Option | Wirkung |
 |---|---|
-| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen); `doctor --quiet` zeigt Fehler-Einträge sowie die Einträge der beiden Ausnahmen unten, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; andere Warnungen, etwa zur Konfiguration, entfallen). Vier Ausnahmen bleiben sichtbar: Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`) (in der Befehlsausgabe erzeugt nur `generate devcontainer` diese Warnungen: die Lockerungen, die `sshd`-Warnung und die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift, während die Meldung, dass `nestedRuntime` ohne Sandbox-Profil ohne Wirkung ist, entfällt; in `doctor` die Warn-Einträge zu einem Klartext-Zugangsschlüssel, zur fehlenden Quelle des Tokens bei einem `https`-Clone, zur fehlenden Referenz auf die Umgebungsvariable eines aktiven Agenten-Features und zur Egress-Restriktion, auch die Meldung, dass sie ohne Sandbox-Profil nicht greift), Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in der Befehlsausgabe und in `doctor`, soweit vom Host aus ermittelbar), der Compose-Fortschritt von `up` und die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
+| `--quiet` | nur Fehler; Wirkung, die vier sichtbaren Ausnahmen und die Vorrang-Regel stehen unter [Allgemeine Optionen](#allgemeine-optionen) |
 | `--verbose` | zusätzliche Details; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist |
 | `--debug` | interne Diagnoseausgabe; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist (`--verbose` und `--debug` wirken gleich) |
 
@@ -1937,6 +1937,6 @@ Sie vorher Passwörter, Tokens und interne Adressen aus der Ausgabe.
 
 **Lizenz:** MIT, siehe `LICENSE` im Projektarchiv.
 
-**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.9.0. Prüfen Sie
+**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.10.0. Prüfen Sie
 mit `u-boot --version`, welche Version Sie einsetzen. Weicht sie ab, zeigt
 `u-boot <befehl> --help` den Stand Ihrer Version.

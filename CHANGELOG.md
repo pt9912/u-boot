@@ -11,6 +11,14 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-17
+
+Tenth release. **Devcontainer features `sshd` and `claude-code`, `podman build` in the sandbox devcontainer, a new `--quiet` contract.**
+The built-in catalogue gains `sshd` and `claude-code`; `nestedRuntime: podman` builds images, which adds a sixth security relaxation
+(`--device=/dev/net/tun`) that **existing `nestedRuntime: podman` projects get after the next `u-boot generate devcontainer`** (the container host needs the
+device); `--quiet` now keeps four security and fallback disclosures visible and drops the success summaries of the subcommands that change something;
+Docker Desktop is no longer promised for `nestedRuntime: docker`. Lastenheft 0.12.0.
+
 ### Added
 
 - Devcontainer features: the built-in catalogue gains `sshd` (the official `sshd` feature, an SSH server on port 2222 with password
@@ -35,13 +43,16 @@ this file is the same format applied to u-boot itself.
 - `devcontainer.sandbox.nestedRuntime: docker` is promised on Docker under Linux and on Colima (Linux VM) only.
   Docker Desktop is no longer promised: it is not measured, and the user manual lists it as not verified.
   Homebrew is documented for macOS only (Apple Silicon and Intel); the tap smoke now runs on `macos-14` and `macos-15-intel`.
+- The descriptions of the Linux packages and of the Homebrew formula are English ([`LH-LESE-002`](spec/lastenheft.md#lh-lese-002--sprache)),
+  and the formula has no `version` line: Homebrew reads the version from the URLs.
 - `devcontainer.sandbox.nestedRuntime: podman` builds images: `podman build` (and `docker build` through the alias) builds a Dockerfile with
   `FROM`, `RUN` and `COPY` in the container, cold, from the layer cache and with `--no-cache`, with and without the egress restriction
   ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
   [ADR-0021](docs/plan/adr/0021-podman-build-im-sandbox-devcontainer.md)). A `RUN` needs the network of the nested container, which needs
   `/dev/net/tun`: the generated `runArgs` gain a sixth security relaxation, `--device=/dev/net/tun`, and `generate` reports it like the other five.
-  Measured on Colima 0.10.3 (arm64) with `kernel.apparmor_restrict_unprivileged_userns=0`; with the value `1` (the default of an Ubuntu 24.04 VM)
-  nested Podman does not start (exit code `11`). Two integration tests (`TestE2E_SandboxDevcontainer_NestedPodman_Build`, `…_BuildEgress`) cover it and skip on such hosts.
+  Measured with Docker 29.5.2 on Colima 0.10.3 (arm64, Ubuntu 24.04 VM) with `kernel.apparmor_restrict_unprivileged_userns=0` in the VM and `/dev/net/tun`
+  on the container host, with the base images `alpine:3` and `debian:stable-slim`; with the value `1` (the default of an Ubuntu 24.04 VM)
+  nested Podman does not start (exit code `11`). **Not measured:** Docker Desktop, amd64 and CI. Two integration tests (`TestE2E_SandboxDevcontainer_NestedPodman_Build`, `…_BuildEgress`) cover it and skip on such hosts.
   Lastenheft 0.12.0 promises it on the measured hosts. `buildah`, `docker buildx`, `docker compose` and BuildKit frontends are not part of the container; use fully qualified image names.
   **Existing `nestedRuntime: podman` projects:** after the next `u-boot generate devcontainer` the container needs `/dev/net/tun` on the container host;
   where the device is missing the engine refuses to start the container (Docker: `error gathering device information while adding custom device`), there is no degradation step and `u-boot doctor` does not check it.
@@ -67,8 +78,7 @@ this file is the same format applied to u-boot itself.
   container at run time through an environment variable, and `u-boot doctor` checks the source
   ([`LH-FA-DEV-009`](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)). A login service that is active in the container
   (password and key login, root login permitted) is disclosed in the command output, and that disclosure stays visible under `--quiet`, as do the warn items of
-  `u-boot doctor` that concern a security property of the sandbox profile (credential source, egress restriction, relaxations of the
-  Docker daemon). The notice of `u-boot generate devcontainer` that `egress.enabled` has no effect without the sandbox profile
+  `u-boot doctor` that concern a security property of the sandbox profile (credential source and egress restriction). The notice of `u-boot generate devcontainer` that `egress.enabled` has no effect without the sandbox profile
   (no restriction was generated) stays visible under `--quiet` as well; the notice that `nestedRuntime` has no effect is a
   configuration message and is dropped. Only `generate devcontainer` produces these notices; the text of the messages and the `--json` output are unchanged ([`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)).
   `u-boot doctor --quiet` now lists those warn items: a plaintext credential in a project file, an https clone without a runtime
@@ -1248,7 +1258,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/pt9912/u-boot/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/pt9912/u-boot/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/pt9912/u-boot/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/pt9912/u-boot/compare/v0.7.0...v0.8.0

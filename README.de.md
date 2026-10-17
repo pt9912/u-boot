@@ -8,9 +8,11 @@ Devcontainer-Konfiguration, Service-Add-Ons (PostgreSQL, Keycloak,
 OpenTelemetry, …) und wiederkehrende Artefakte (README, CHANGELOG,
 `.env.example`).
 
-> **Stand:** `v0.9.0` released 2026-10-15 (GHCR, sechs Plattform-Binaries,
-> `.deb`-/`.rpm`-Pakete, Homebrew-Tap). Ergänzt die Devcontainer-Features `python`, `sdkman` und `homebrew`
-> ([LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [ADR-0020](docs/plan/adr/0020-drittanbieter-features-im-katalog.md)); `v0.8.1` brachte den aktuellen Docker in den Sandbox-Devcontainer.
+> **Stand:** `v0.10.0` released 2026-10-17 (GHCR, sechs Plattform-Binaries,
+> `.deb`-/`.rpm`-Pakete, Homebrew-Tap). Ergänzt die Devcontainer-Features `sshd` und `claude-code`
+> ([LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [ADR-0020](docs/plan/adr/0020-drittanbieter-features-im-katalog.md)),
+> `podman build` im Sandbox-Devcontainer (gemessen auf Colima, arm64; Docker Desktop, amd64 und CI nicht gemessen; [LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0021](docs/plan/adr/0021-podman-build-im-sandbox-devcontainer.md))
+> und einen neuen `--quiet`-Vertrag ([LH-FA-CLI-005](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)); Docker Desktop wird nicht mehr zugesagt. Bestehende `nestedRuntime: podman`-Projekte brauchen `/dev/net/tun` auf dem Container-Host. `v0.9.0` ergänzte die Features `python`, `sdkman` und `homebrew`.
 > Vollständige Release-Tabelle unten.
 
 Das verbindliche Lastenheft
@@ -105,7 +107,7 @@ u-boot --version
 **Debian / Ubuntu / Fedora / RHEL** (`.deb` und `.rpm` aus dem Release, amd64 und arm64):
 
 ```bash
-VERSION=0.9.0   # gewünschtes Release
+VERSION=0.10.0   # gewünschtes Release
 # Debian / Ubuntu
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"
@@ -208,6 +210,7 @@ Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien). Siehe den
 | `v0.8.0` | 2026-10-14 | Milestone „Docker im Sandbox-Devcontainer“ — `devcontainer.sandbox.nestedRuntime: docker` gibt dem Sandbox-Devcontainer einen eigenen Docker-Daemon mit BuildKit, Buildx und Compose; verlangt `--privileged`, als Lockerung ausgewiesen ([LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0018](docs/plan/adr/0018-nested-docker-daemon-sandbox-devcontainer.md)). [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.8.0). |
 | `v0.8.1` | 2026-10-14 | Patch „Aktueller Docker im Sandbox-Devcontainer“ — mit `nestedRuntime: docker` läuft im Container Docker 29.9, Buildx 0.38 und Compose 5.6 aus dem Docker-APT-Repository (Schlüssel gepinnt); `download.docker.com` gehört zur Default-Allowlist ([LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0019](docs/plan/adr/0019-docker-daemon-aus-docker-apt-repo.md)). [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.8.1). |
 | `v0.9.0` | 2026-10-15 | Milestone „Mehr Devcontainer-Features“ — eingebaute Katalog-Schlüssel `python`, `sdkman` und `homebrew` (Community-Feature, als Drittanbieter ausgewiesen) mit ihren Egress-Hosts ([LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [ADR-0020](docs/plan/adr/0020-drittanbieter-features-im-katalog.md)). [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.9.0). |
+| `v0.10.0` | 2026-10-17 | Milestone „sshd, Claude Code und `podman build`“ — eingebaute Katalog-Schlüssel `sshd` und `claude-code` (Drittanbieter, ausgewiesen); `nestedRuntime: podman` baut Images, mit einer sechsten Lockerung `--device=/dev/net/tun` (gemessen auf Colima, arm64; Docker Desktop, amd64 und CI nicht gemessen); `--quiet` lässt vier Ausweisungen sichtbar und unterdrückt Erfolgsmeldungen; Docker Desktop wird nicht mehr zugesagt ([LH-FA-DEV-003](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [LH-FA-DEV-007](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [LH-FA-CLI-005](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [ADR-0020](docs/plan/adr/0020-drittanbieter-features-im-katalog.md), [ADR-0021](docs/plan/adr/0021-podman-build-im-sandbox-devcontainer.md)). [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.10.0). |
 | `v0.5.0` | 2026-07-25 | „Sicherheit + lokale Templates" — Go-Toolchain-Bump schließt CVE-2026-39822 im Runtime-Image (HIGH); `u-boot init --template ./pfad` rendert ein Projekt aus einem lokalen Verzeichnis ([LH-FA-TPL-003](spec/lastenheft.md#lh-fa-tpl-003--eigene-templates)), neben dem eingebauten Katalog. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.5.0). |
 | `v0.4.0` | 2026-06-08 | Milestone „Maschinenlesbare CLI" — `--json` / `--dry-run` / `--diff` für alle zehn Spec-Enum-Subcommands ([LH-NFA-USE-004](spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) Minimalkontrakt + [LH-FA-CLI-007](spec/lastenheft.md#lh-fa-cli-007--dry-run)/[LH-FA-CLI-008](spec/lastenheft.md#lh-fa-cli-008--diff-ausgabe) Voll-Schema), `u-boot logs`, Devcontainer-Features mit Drift-Doctor-Check. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.4.0). |
 
