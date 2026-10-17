@@ -53,7 +53,7 @@ Skill, den der erste geliefert hat.
 - Der Bump von d-check auf `v0.86.1`: ihn führte [`slice-harness-ai-harness-init-adoption`](slice-harness-ai-harness-init-adoption.md) aus.
 - Änderungen an Code oder Werten: der Spezifikations-Slice dokumentiert den Ist-Stand, ein abweichender Wert wird vermerkt, nicht geändert.
 - Neue Produktanforderungen: Festlegungen verfeinern vorhandene Anforderungen ([`LH-LESE-003`](../../../../spec/lastenheft.md#lh-lese-003--dokumentenordnung)).
-- Die Smoke-Härtung des Homebrew-Taps ([`slice-v2-homebrew-smoke-haertung`](../open/slice-v2-homebrew-smoke-haertung.md)) und die Docker-Desktop-Messung:
+- Die Smoke-Härtung des Homebrew-Taps ([`slice-v2-homebrew-smoke-haertung`](../in-progress/slice-v2-homebrew-smoke-haertung.md)) und die Docker-Desktop-Messung:
   andere Gegenstände, ohne Bezug zum Harness.
 
 ## 7. Closure-Notiz
@@ -79,7 +79,7 @@ kein Release, einen Release-Cut-Slice gibt es nicht.
 - **Beobachtungs-Register:** keine Beobachtung angelegt.
 - **Folge-Slices:** [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md) (Code),
   [`slice-cr-cli-quiet-fehler-und-warnungen`](../done/slice-cr-cli-quiet-fehler-und-warnungen.md) (CR am Lastenheft),
-  [`slice-v2-homebrew-smoke-haertung`](../open/slice-v2-homebrew-smoke-haertung.md) (aus der Vorwelle, unverändert offen).
+  [`slice-v2-homebrew-smoke-haertung`](../in-progress/slice-v2-homebrew-smoke-haertung.md) (aus der Vorwelle, unverändert offen).
 - **Verifikation:** `make gates` Exit 0; Verification Evidence je Slice unter `docs/reviews/`
   ([Skill-Slice](../../../reviews/2026-10-16-verification-slice-harness-dcheck-bump-reviewer-skill.md),
   [Spezifikations-Slice](../../../reviews/2026-10-16-verification-slice-harness-internal-readmes-festlegungen-in-spec.md)).
