@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md) — Folge-Slice nach dem Spezifikations-Slice [`slice-v2-spec-devcontainer-sshd-claude-code`](../in-progress/slice-v2-spec-devcontainer-sshd-claude-code.md) (Review F-1, Verification D-2); die Welle schließt erst nach ihm (Closure-Bedingung, die von der DoD dieses Slice verschieden ist: Lastenheft, Code, Handbuch, CHANGELOG und Spezifikation sagen über `--quiet` dasselbe).
+**Welle:** [`welle-devcontainer-sshd-claude-code`](../welle-devcontainer-sshd-claude-code.md) — Folge-Slice nach dem Spezifikations-Slice [`slice-v2-spec-devcontainer-sshd-claude-code`](../done/slice-v2-spec-devcontainer-sshd-claude-code.md) (Review F-1, Verification D-2); die Welle schließt erst nach ihm (Closure-Bedingung, die von der DoD dieses Slice verschieden ist: Lastenheft, Code, Handbuch, CHANGELOG und Spezifikation sagen über `--quiet` dasselbe).
 
 **Bezug:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Ausnahme 1: „dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift“), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress-Restriktion), [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (die Meldung zu `nestedRuntime` ist eine Konfigurationsmeldung). Entscheidung des Projektinhabers 2026-10-17: Code-Folge-Slice, kein Lastenheft-CR. Review: [`2026-10-17-slice-v2-spec-devcontainer-sshd-claude-code`](../../../reviews/2026-10-17-slice-v2-spec-devcontainer-sshd-claude-code.md) (F-1); Verification Evidence: [`2026-10-17-verification-slice-v2-spec-devcontainer-sshd-claude-code`](../../../reviews/2026-10-17-verification-slice-v2-spec-devcontainer-sshd-claude-code.md) (D-2, H-1, H-2).
 
@@ -72,7 +72,7 @@ Lesestand 2026-10-17; der Implementer liest jede Zeile vor der Änderung an der 
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; der Spezifikations-Slice [`slice-v2-spec-devcontainer-sshd-claude-code`](../in-progress/slice-v2-spec-devcontainer-sshd-claude-code.md) liegt in `done/`; kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; der Spezifikations-Slice [`slice-v2-spec-devcontainer-sshd-claude-code`](../done/slice-v2-spec-devcontainer-sshd-claude-code.md) liegt in `done/`; kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benannt:**
 

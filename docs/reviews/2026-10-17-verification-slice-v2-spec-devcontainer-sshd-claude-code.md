@@ -2,12 +2,12 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach `harness/verification.md`. <!-- d-check:ignore (Pfad als Zitat) -->
 
-**Gegenstand:** Slice [`slice-v2-spec-devcontainer-sshd-claude-code`](../plan/planning/in-progress/slice-v2-spec-devcontainer-sshd-claude-code.md) (Welle [`welle-devcontainer-sshd-claude-code`](../plan/planning/welle-devcontainer-sshd-claude-code.md), letzter Slice), Commits `f266bd4..e53f38a` (`e32859a`, `38df18d`, `ef43e46`, `e53f38a`): `spec/spezifikation.md`, Roadmap-Ruhe-Marker, Plan-Tabelle. Review-Report: [`2026-10-17-slice-v2-spec-devcontainer-sshd-claude-code.md`](2026-10-17-slice-v2-spec-devcontainer-sshd-claude-code.md).
+**Gegenstand:** Slice [`slice-v2-spec-devcontainer-sshd-claude-code`](../plan/planning/done/slice-v2-spec-devcontainer-sshd-claude-code.md) (Welle [`welle-devcontainer-sshd-claude-code`](../plan/planning/welle-devcontainer-sshd-claude-code.md), letzter Slice), Commits `f266bd4..e53f38a` (`e32859a`, `38df18d`, `ef43e46`, `e53f38a`): `spec/spezifikation.md`, Roadmap-Ruhe-Marker, Plan-Tabelle. Review-Report: [`2026-10-17-slice-v2-spec-devcontainer-sshd-claude-code.md`](2026-10-17-slice-v2-spec-devcontainer-sshd-claude-code.md).
 
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v2-spec-devcontainer-sshd-claude-code`](../plan/planning/in-progress/slice-v2-spec-devcontainer-sshd-claude-code.md)
+- Slice: [`slice-v2-spec-devcontainer-sshd-claude-code`](../plan/planning/done/slice-v2-spec-devcontainer-sshd-claude-code.md)
 - IDs: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [`ADR-0020`](../plan/adr/0020-drittanbieter-features-im-katalog.md)
 - Spec-Stellen: [`SPEC-017`](../../spec/spezifikation.md#spec-017--diagnose-codes-der-doctor-prüfungen-code-registry), [`SPEC-019`](../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion), [`SPEC-023`](../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen), [`SPEC-043`](../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet), [`SPEC-044`](../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten), §7 Historie
 - Diff-Umfang: `spec/spezifikation.md`, `docs/plan/planning/in-progress/roadmap.md`, der Slice (kein Code, kein Test, kein Handbuch)
