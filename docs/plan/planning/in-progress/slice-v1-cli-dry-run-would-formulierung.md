@@ -60,16 +60,16 @@ Die Zusage nennt den Konjunktiv für den Inhalt der Anzeige, aber kein Ausgabefo
 
 ## 2. Definition of Done
 
-- [ ] Die Auslegung von [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) ist vom Projektinhaber entschieden und in §7 festgehalten; bei Lösung A erfüllt: je Subkommando
+- [x] Die Auslegung von [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) ist vom Projektinhaber entschieden und in §7 festgehalten; bei Lösung A erfüllt: je Subkommando
       (`remove`, `generate`, `config set` einzeln und mit mehreren Paaren) belegen Tests Happy (Dry-Run sagt „Would …“), Boundary (kein Dry-Run: Vergangenheitsform bleibt) und Negative (Fehler und `--json` unverändert).
-- [ ] Doku-Update, falls Lösung A: `docs/user/benutzerhandbuch.md` und `CHANGELOG.md` nennen die neue Formulierung; bei B oder C entfällt es bzw. folgt dem CR.
-- [ ] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+- [x] Doku-Update, falls Lösung A: `docs/user/benutzerhandbuch.md` und `CHANGELOG.md` nennen die neue Formulierung; bei B oder C entfällt es bzw. folgt dem CR.
+- [x] `make gates` grün.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8).
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
 - [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft.
 
 ## 3. Plan (vor Code)
@@ -86,6 +86,9 @@ Gilt für Lösung A; bei B entfällt der Code, bei C kommt der CR davor.
 | `internal/adapter/driving/cli/remove_acceptance_test.go` <!-- d-check:ignore (Pfad-Zitat) --> | update | `TestRemove_PurgeDryRun_HumanMode_NoVolumeWarningPollution` pinnt die Dry-Run-Headline; der Kommentar „Headline-Wording bleibt heute …“ beschreibt den neuen Zustand |
 | `docs/user/benutzerhandbuch.md`, `CHANGELOG.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | sichtbare Textänderung im Dry-Run (Handbuch: Abschnitt „Vorschau statt Überraschung“; CHANGELOG: `[Unreleased]` · Changed) |
 | `docs/plan/planning/in-progress/roadmap.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | der Ruhe-Marker in „Offene Wellen“ entfällt, solange der Slice in `in-progress/` liegt (d-check `planning`); der Planner setzt ihn nach der Closure zurück |
+| `docs/reviews/2026-10-17-slice-v1-cli-dry-run-would-formulierung.md`, `docs/reviews/2026-10-17-verification-slice-v1-cli-dry-run-would-formulierung.md` <!-- d-check:ignore (Pfad-Zitat) --> | add | Review-Report und Verification Evidence (DoD-Artefakte) |
+| `docs/plan/planning/observations/BEO-WZG/host-werkzeug-ausserhalb-docker/`, `docs/plan/planning/observations/BEO-CLI/dry-run-log-vergangenheitsform/` <!-- d-check:ignore (Pfad-Zitat) --> | add | Beobachtungs-Register: zwei neue Beobachtungen mit je einer Evidence-Datei (Closure §7) |
+| `docs/plan/planning/open/README.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | die Bestandszeile dieses Slice entfällt (er liegt nicht mehr in `open/`) |
 
 Die Änderung reicht über die drei Dateien hinaus nicht: `init` und `add` bleiben unverändert (ihre Formen sind schon „Would …“). Fundstellen: `printRemoveSummary` (`remove.go`), `printGenerateSummary` (`generate.go`), `printConfigSetSummary` (`config.go`, einzeln und über `runConfigSetMany`). Spec und Spezifikation geben den Text nicht vor.
 
@@ -109,21 +112,37 @@ Steering-Loop-Lerneintrag geschrieben (§7). Bei Lösung B: Begründung in §7, 
 
 ## 6. Risiken und offene Punkte
 
-- **Auslegung von [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) bleibt offen:** ohne Entscheidung des Projektinhabers ist unklar, ob Code oder Vertrag zu ändern ist. — **Ausgang:** weiter offen: Entscheidung des Projektinhabers (Start-Trigger, §4); Tests werden erst danach geschrieben.
+- **Auslegung von [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) bleibt offen:** ohne Entscheidung des Projektinhabers ist unklar, ob Code oder Vertrag zu ändern ist. — **Ausgang:** entfallen: entschieden, Lösung A (Projektinhaber, 2026-10-17).
 - **Textänderung ist für Skripte sichtbar:** wer die Dry-Run-Zeile maschinell las, sieht einen anderen Text. — **Ausgang:** entfallen: [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) weist `--json` als maschinenlesbaren Weg aus; der CHANGELOG nennt die Änderung.
 - **Bestehende Pins schreiben die Vergangenheitsform fest:** die Matrix in `quiet_preview_test.go` <!-- d-check:ignore (Pfad-Zitat) --> und Bestandstests müssen mitgezogen werden. — **Ausgang:** entfallen: Der Plan (§3) nennt sie; der Implementer sucht die Texte per Grep im Test-Baum, bevor er sie ändert.
 
 ## 7. Closure-Notiz
 
-Offen.
+**Entscheidung des Projektinhabers (2026-10-17):** Lösung A, „A: Code vereinheitlichen“. [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) bleibt unverändert (kein CR); der Code folgt dem Sinn der Zusage, dass der Dry-Run nichts als geschehen behauptet. Die Lösungen B und C entfallen.
 
-- **Was hat funktioniert:** —
-- **Was ging anders als geplant:** —
-- **Steering-Loop-Eintrag:** —
-- **Beobachtungs-Register (`../observations/`):** —
-- **Folge-Slices:** —
-- **Risiken aus §6:** —
-- **Drei Paarungen:** —
+**Belege:** Review-Report [`2026-10-17-slice-v1-cli-dry-run-would-formulierung`](../../../reviews/2026-10-17-slice-v1-cli-dry-run-would-formulierung.md) (0 HIGH, 0 MEDIUM, 1 LOW, 4 INFO; Mutationsläufe M1 bis M6, alle rot). Verification Evidence [`2026-10-17-verification-slice-v1-cli-dry-run-would-formulierung`](../../../reviews/2026-10-17-verification-slice-v1-cli-dry-run-would-formulierung.md): Liefer-Punkte erfüllt, keine Diskrepanz zwischen Plan, Code, Handbuch und CHANGELOG; Auflagen 1 bis 4 in dieser Closure erfüllt. `make gates` grün (Coverage 91,20 %), `make doc-trace`: 83 Anforderungen, 0 Waisen. Commits `73f1f4b`, `1536c8e`, `27723e2`.
+
+**Fundstellen je Aussage (`AGENTS.md` §3.10):**
+
+| Aussage | Fundstelle |
+|---|---|
+| `remove` sagt im Dry-Run „Would remove service …“ und „Would change:“; `--diff` allein bleibt Vergangenheitsform | `printRemoveSummary` (Kriterium `previewMode == driving.PreviewDryRun`) in `internal/adapter/driving/cli/remove.go` |
+| `generate` sagt im Dry-Run „Would generate/update/repair …“ | `printGenerateSummary` (Parameter `dryRun`) in `internal/adapter/driving/cli/generate.go` |
+| `config set` sagt im Dry-Run „Would set …“, einzeln und je Paar | `printConfigSetSummary` und `runConfigSetMany` (reicht `flags.DryRun` durch) in `internal/adapter/driving/cli/config.go` |
+| Happy, Boundary, Negative je Subkommando | `TestDryRun_SummarySaysWould`, `TestDryRun_ActualWriteKeepsPastForm`, `TestDryRun_JSONAndErrorsUnchanged` in `internal/adapter/driving/cli/dry_run_would_test.go` |
+| Je `GenerateAction`, Drift-Wächter für den `default`-Zweig, Mischfall `config set` | `TestDryRun_GenerateActions`, `TestDryRun_GenerateEveryActionHasADryRunForm`, `TestDryRun_ConfigSetManyMixedPairs` in `dry_run_would_test.go` |
+| Die Dry-Run-Headline von `remove --purge` ist gepinnt | `TestRemove_PurgeDryRun_HumanMode_NoVolumeWarningPollution` in `internal/adapter/driving/cli/remove_acceptance_test.go` |
+| Handbuch und CHANGELOG nennen die Formulierung, den Quiet-Zusatz und den Hinweis auf `--json` | Abschnitt „Vorschau statt Überraschung“ in `docs/user/benutzerhandbuch.md`; `[Unreleased]` · Changed in `CHANGELOG.md` |
+
+- **Was hat funktioniert:** Die Mutationsläufe des Reviews (M1 bis M6) trafen jeden Zweig (Kriterium `--diff` allein, Mehrpaar-Durchreichung, `Repaired`-Zweig); der Praxislauf des Verifiers am Runtime-Image bestätigte alle Formen am Binary. Die Fix-Runde (`27723e2`) schloss F-1 bis F-4 vor der Verification.
+- **Was ging anders als geplant:** Der Implementer führte einmal `python3` auf dem Host aus (Verstoß gegen `AGENTS.md` §3.1, Review F-5). Der Aufruf änderte nur Kommentar-Berichtigung und eine Headline-Assertion in `remove_acceptance_test.go`; der Nachweis läuft über `make test` und `make gates` im Docker; im Plan §3 vermerkt. §6 (erstes Risiko) und §7 standen nach der Lieferung noch auf „offen“ und wurden erst in der Closure nachgezogen (Verifier-Auflage 2).
+- **Finding-Klassen des Reviews:** Doku-Aussage mehrdeutig zum Verbosity-Zusammenspiel (F-1, CHANGELOG-Satz zu `--quiet`; behoben) · Defensiver Zweig nicht dry-run-aware (F-2; Grenze in §3 benannt, Drift-Wächter) · Mehrpaar-Mischfall nicht gepinnt (F-3; behoben) · Teilstring-Negativ-Assert zu breit (F-4; behoben) · Host-Werkzeug außerhalb Docker (F-5, einmalig).
+- **Steering-Loop-Eintrag:** **Gezählt, nicht verkörpert.** Kein `liegt in`, nichts verkörpert, keine Entscheidung über Verkörperung. (1) Neu im Register mit je einem Beleg: `BEO-WZG/host-werkzeug-ausserhalb-docker` (F-5; eine Sperre hat den Host-Aufruf nicht verhindert) und `BEO-CLI/dry-run-log-vergangenheitsform` (Hinweis des Verifiers). (2) Die Klassen F-1 bis F-4 sind einmalig und ohne bestehenden Pfad; sie stehen hier benannt, nicht im Register: ein Zähler 1 ohne Wiederauftreten sagt nichts, tritt eine Klasse in einem zweiten Vorgang auf, legt dessen Closure den Pfad an. (3) `BEO-DOK/plan-aussage-ueber-code` und `BEO-CLI/kommentar-beschreibt-abwesendes`: die Klassen traten in diesem Vorgang nicht ein (Plan-Tabelle gegen `git diff --stat` ohne Abweichung, Kommentar-Selbstcheck ohne Befund); Zähler unverändert. **Lehre:** Ein Risiko-Ausgang „weiter offen“, der auf eine Entscheidung wartet, wird mit der Entscheidung berichtigt, nicht erst in der Closure; ein einzelner Vorgang ändert den Stand keiner Beobachtung.
+- **Beobachtungs-Register (`../observations/`):** zwei neue Verzeichnisse, je eine Evidence-Datei: [`BEO-WZG/host-werkzeug-ausserhalb-docker`](../observations/BEO-WZG/host-werkzeug-ausserhalb-docker/observation.md) (eine bestehende Beobachtung passt nicht: `BEO-WZG/kopplung-nicht-nachgezogen` meint ein Skript, das einer geänderten Form nicht folgt) und [`BEO-CLI/dry-run-log-vergangenheitsform`](../observations/BEO-CLI/dry-run-log-vergangenheitsform/observation.md). Beide stehen `offen`, unter der Schwelle von drei.
+- **Folge-Slices:** keine. Die INFO-Logzeilen im Dry-Run bleiben im Register; ein Folge-Slice entsteht nur auf Entscheidung des Projektinhabers (ob Logzeilen im Dry-Run in der Vergangenheitsform stehen dürfen, ist eine Auslegung von [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) und [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)).
+- **Risiken aus §6:** alle drei tragen einen Ausgang: entfallen (Auslegung entschieden), entfallen (Skript-Sichtbarkeit), entfallen (bestehende Pins).
+- **Roadmap:** Der Ruhe-Marker „Nichts in Arbeit.“ steht nach dem Move wieder unter „Offene Wellen“ (`in-progress/` trägt keinen Slice; d-check `planning`).
+- **Drei Paarungen:** Anker (kein `liegt in`, nichts verkörpert) · Folge-Slice (keiner) · Register (zwei Pfade, je mit nicht leerem `evidence/`; Belege liegen als `evidence/slice-v1-cli-dry-run-would-formulierung.md`) — nach dem `git mv` nach `done/` geprüft.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
