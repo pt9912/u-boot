@@ -13,7 +13,7 @@ Dateiname-Konventionen.
 | ----- | ---------- |
 | [`carveouts.md`](carveouts.md) | Master-Dokument: Carveout-Inventar (Baseline-Regelwerk `modul-07-carveouts.md`) |
 | [`slice-v2-homebrew-formula.md`](../done/slice-v2-homebrew-formula.md) | Homebrew-Formel/Tap (repo-seitig geliefert, Tap-Einrichtung offen) |
-| [`slice-v1-release-cut-v0.10.0.md`](slice-v1-release-cut-v0.10.0.md) | Release-Cut `v0.10.0` |
+| [`slice-v1-release-cut-v0.10.0.md`](../done/slice-v1-release-cut-v0.10.0.md) | Release-Cut `v0.10.0` |
 | [`roadmap.md`](roadmap.md) | Master-Dokument: Slice-/Tranchen-Stand (Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine) |
 
 (Nur die zwei Master-Dokumente liegen dauerhaft in `in-progress/`.

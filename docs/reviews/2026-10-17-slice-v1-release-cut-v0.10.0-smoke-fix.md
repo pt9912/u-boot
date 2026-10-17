@@ -2,14 +2,14 @@
 
 **Review-Art:** Code — Diff gegen Plan, Entscheidungen und Hard Rules (Maintainability); keine DoD-Prüfung (Verifier).
 
-**Gegenstand:** Commit `6e397e0` (`git show HEAD`) im Slice [`slice-v1-release-cut-v0.10.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.10.0.md): `.github/workflows/publish.yml`, `scripts/package-asset-name.sh`, `cmd/uboot/package_asset_name_test.go`, `docs/maintainer/releasing.md`, Slice §1/§3/§6. Anlass: `publish`-Lauf 39049650475 (Tag `v0.10.0-rc.1`), beide Paket-Smoke-Jobs mit `curl: (22) 404`.
+**Gegenstand:** Commit `6e397e0` (`git show HEAD`) im Slice [`slice-v1-release-cut-v0.10.0`](../plan/planning/done/slice-v1-release-cut-v0.10.0.md): `.github/workflows/publish.yml`, `scripts/package-asset-name.sh`, `cmd/uboot/package_asset_name_test.go`, `docs/maintainer/releasing.md`, Slice §1/§3/§6. Anlass: `publish`-Lauf 39049650475 (Tag `v0.10.0-rc.1`), beide Paket-Smoke-Jobs mit `curl: (22) 404`.
 
 **Skill:** `.harness/skills/reviewer.md` @ `6e397e0` · <!-- d-check:ignore (Skill-Pfad) -->
 **Modell:** Sonnet 5.5 · **Datum:** 2026-10-17
 
 **Eingangs-Kontext:**
 
-- Slice [`slice-v1-release-cut-v0.10.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.10.0.md) (§1 Befund, §3 Plan-Tabelle, §6 Risiken)
+- Slice [`slice-v1-release-cut-v0.10.0`](../plan/planning/done/slice-v1-release-cut-v0.10.0.md) (§1 Befund, §3 Plan-Tabelle, §6 Risiken)
 - [`ADR-0017`](../plan/adr/0017-linux-pakete-nfpm.md) (Linux-Pakete per nfpm)
 - `docs/maintainer/releasing.md`, `scripts/build-packages.sh`, Workflow von `v0.9.0` (`git show v0.9.0:.github/workflows/publish.yml`)
 - `AGENTS.md` §3.6, §3.7, §3.9, §3.10

@@ -1,14 +1,14 @@
-# Review-Report: [`slice-v1-release-cut-v0.10.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.10.0.md) — 2026-10-17
+# Review-Report: [`slice-v1-release-cut-v0.10.0`](../plan/planning/done/slice-v1-release-cut-v0.10.0.md) — 2026-10-17
 
 **Review-Art:** Code/Doku — Release-Cut-Diff gegen den Slice-Plan, `docs/maintainer/releasing.md` §3–§7, `AGENTS.md` (§3.6, §3.7, §3.9, §3.10, §5 Zeile 6) und das Vorbild [`slice-v1-release-cut-v0.9.0`](../plan/planning/done/slice-v1-release-cut-v0.9.0.md).
 
-**Gegenstand:** Commit-Range `630f427..HEAD` (fünf Commits `bc4860c`, `f303e4d`, `615d9ff`, `1327a91`, `cefa49c`; 13 Dateien) und [`slice-v1-release-cut-v0.10.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.10.0.md) (liegt bis zur Closure in `in-progress/`, danach `done/`).
+**Gegenstand:** Commit-Range `630f427..HEAD` (fünf Commits `bc4860c`, `f303e4d`, `615d9ff`, `1327a91`, `cefa49c`; 13 Dateien) und [`slice-v1-release-cut-v0.10.0`](../plan/planning/done/slice-v1-release-cut-v0.10.0.md) (liegt bis zur Closure in `in-progress/`, danach `done/`).
 
 **Skill:** `.harness/skills/reviewer.md` @ cefa49c · **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-17
 
 **Eingangs-Kontext:**
 
-- [`slice-v1-release-cut-v0.10.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.10.0.md); Vorbild [`slice-v1-release-cut-v0.9.0`](../plan/planning/done/slice-v1-release-cut-v0.9.0.md) und Report `2026-10-15-release-cut-v0.9.0.md`
+- [`slice-v1-release-cut-v0.10.0`](../plan/planning/done/slice-v1-release-cut-v0.10.0.md); Vorbild [`slice-v1-release-cut-v0.9.0`](../plan/planning/done/slice-v1-release-cut-v0.9.0.md) und Report `2026-10-15-release-cut-v0.9.0.md`
 - [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Lastenheft 0.12.0), [ADR-0020](../plan/adr/0020-drittanbieter-features-im-katalog.md), [ADR-0021](../plan/adr/0021-podman-build-im-sandbox-devcontainer.md)
 - [`slice-v1-devcontainer-podman-build`](../plan/planning/done/slice-v1-devcontainer-podman-build.md) §3/§7 (Messprotokoll), [`welle-devcontainer-sshd-claude-code`](../plan/planning/done/welle-devcontainer-sshd-claude-code.md) §7 (Zusatzbeleg des Validators)
 - `docs/maintainer/releasing.md`, `.github/workflows/publish.yml`, `AGENTS.md` (Hard Rules), `harness/review.md`

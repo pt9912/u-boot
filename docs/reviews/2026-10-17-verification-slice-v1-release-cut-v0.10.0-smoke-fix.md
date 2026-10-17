@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier — „Bauen wir es richtig?“ gegen Plan und DoD; keine Reparatur.
 
-**Gegenstand:** Commit `5e0897f` (`git log --oneline 6e397e0..HEAD`) im Slice [`slice-v1-release-cut-v0.10.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.10.0.md); Review: [`2026-10-17-slice-v1-release-cut-v0.10.0-smoke-fix`](2026-10-17-slice-v1-release-cut-v0.10.0-smoke-fix.md) (F-1 MEDIUM, F-3 INFO).
+**Gegenstand:** Commit `5e0897f` (`git log --oneline 6e397e0..HEAD`) im Slice [`slice-v1-release-cut-v0.10.0`](../plan/planning/done/slice-v1-release-cut-v0.10.0.md); Review: [`2026-10-17-slice-v1-release-cut-v0.10.0-smoke-fix`](2026-10-17-slice-v1-release-cut-v0.10.0-smoke-fix.md) (F-1 MEDIUM, F-3 INFO).
 
 ## Ergebnis
 

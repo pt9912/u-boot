@@ -2,12 +2,12 @@
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review, repariert nichts). Frage: Wurde der Cut richtig gebaut, gemessen an Plan, DoD und Sensors? Form nach [`harness/verification.md`](../../harness/verification.md).
 
-**Gegenstand:** Slice [`slice-v1-release-cut-v0.10.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.10.0.md), Commit-Range `630f427..HEAD` (`6536a66`, sechs Commits, 14 Dateien einschließlich Review-Report). Maßstab: §2 (DoD), §3 (Plan-Tabelle, Maintainer-Aktionen M0–M9), §6 (Risiken), [`releasing.md`](../maintainer/releasing.md) §2–§7, Vorbild [`slice-v1-release-cut-v0.9.0`](../plan/planning/done/slice-v1-release-cut-v0.9.0.md). Review-Report: [`2026-10-17-slice-v1-release-cut-v0.10.0.md`](2026-10-17-slice-v1-release-cut-v0.10.0.md) (0 HIGH, 0 MEDIUM, 3 LOW, 6 INFO). Der Slice bleibt bis nach dem Tag in `in-progress/`; geprüft ist der Teil der DoD, der **vor dem Tag** erfüllbar ist.
+**Gegenstand:** Slice [`slice-v1-release-cut-v0.10.0`](../plan/planning/done/slice-v1-release-cut-v0.10.0.md), Commit-Range `630f427..HEAD` (`6536a66`, sechs Commits, 14 Dateien einschließlich Review-Report). Maßstab: §2 (DoD), §3 (Plan-Tabelle, Maintainer-Aktionen M0–M9), §6 (Risiken), [`releasing.md`](../maintainer/releasing.md) §2–§7, Vorbild [`slice-v1-release-cut-v0.9.0`](../plan/planning/done/slice-v1-release-cut-v0.9.0.md). Review-Report: [`2026-10-17-slice-v1-release-cut-v0.10.0.md`](2026-10-17-slice-v1-release-cut-v0.10.0.md) (0 HIGH, 0 MEDIUM, 3 LOW, 6 INFO). Der Slice bleibt bis nach dem Tag in `in-progress/`; geprüft ist der Teil der DoD, der **vor dem Tag** erfüllbar ist.
 
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-release-cut-v0.10.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.10.0.md)
+- Slice: [`slice-v1-release-cut-v0.10.0`](../plan/planning/done/slice-v1-release-cut-v0.10.0.md)
 - IDs: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-LESE-002`](../../spec/lastenheft.md#lh-lese-002--sprache), [ADR-0007](../plan/adr/0007-distributionswege-ghcr.md), [ADR-0016](../plan/adr/0016-homebrew-distribution-per-tap.md), [ADR-0017](../plan/adr/0017-linux-pakete-nfpm.md), [ADR-0021](../plan/adr/0021-podman-build-im-sandbox-devcontainer.md)
 - Artefakte: `CHANGELOG.md`, `cmd/uboot/main.go`, `repo.mk`, `Dockerfile`, `README.md`, `README.de.md`, `docs/user/benutzerhandbuch.md`, `docs/maintainer/releasing.md`, `AGENTS.md`, Roadmap und Planungs-READMEs
 
