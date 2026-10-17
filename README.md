@@ -7,11 +7,11 @@ environments — project structure, Docker Compose stack, devcontainer
 configuration, service add-ons (PostgreSQL, Keycloak, OpenTelemetry, …),
 and the usual recurring artefacts (README, CHANGELOG, `.env.example`).
 
-> **Status:** `v0.10.0` released 2026-10-17 (GHCR, six-platform binaries,
-> `.deb`/`.rpm` packages, Homebrew tap). Adds the devcontainer features `sshd` and `claude-code`,
-> `podman build` in the sandbox devcontainer (measured on Colima, arm64; Docker Desktop, amd64 and CI not measured)
-> and a new `--quiet` contract; Docker Desktop is no longer promised. Existing `nestedRuntime: podman` projects need `/dev/net/tun` on the container host. `v0.9.0` added the features `python`, `sdkman` and `homebrew`.
-> Full release table below.
+> **Status:** current version `v0.10.0` (GHCR image, six-platform binaries,
+> `.deb`/`.rpm` packages, Homebrew tap). The devcontainer catalogue has 13 features, including `sshd` and `claude-code`.
+> `podman build` works in the sandbox devcontainer (measured on Colima, arm64; Docker Desktop, amd64 and CI not measured), and existing
+> `nestedRuntime: podman` projects need `/dev/net/tun` on the container host; `nestedRuntime: docker` is promised on Docker under Linux and on Colima, not on Docker Desktop.
+> `--quiet` shows only errors and four disclosures that stay visible. History: release table below and [`CHANGELOG.md`](CHANGELOG.md).
 
 The normative requirements ([`spec/lastenheft.md`](spec/lastenheft.md))
 are written in German; CLI output and generated files are English.

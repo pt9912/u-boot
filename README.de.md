@@ -8,11 +8,11 @@ Devcontainer-Konfiguration, Service-Add-Ons (PostgreSQL, Keycloak,
 OpenTelemetry, …) und wiederkehrende Artefakte (README, CHANGELOG,
 `.env.example`).
 
-> **Stand:** `v0.10.0` released 2026-10-17 (GHCR, sechs Plattform-Binaries,
-> `.deb`-/`.rpm`-Pakete, Homebrew-Tap). Ergänzt die Devcontainer-Features `sshd` und `claude-code`,
-> `podman build` im Sandbox-Devcontainer (gemessen auf Colima, arm64; Docker Desktop, amd64 und CI nicht gemessen)
-> und einen neuen `--quiet`-Vertrag; Docker Desktop wird nicht mehr zugesagt. Bestehende `nestedRuntime: podman`-Projekte brauchen `/dev/net/tun` auf dem Container-Host. `v0.9.0` ergänzte die Features `python`, `sdkman` und `homebrew`.
-> Vollständige Release-Tabelle unten.
+> **Stand:** aktuelle Version `v0.10.0` (GHCR-Image, sechs Plattform-Binaries,
+> `.deb`-/`.rpm`-Pakete, Homebrew-Tap). Der Devcontainer-Katalog hat 13 Features, darunter `sshd` und `claude-code`.
+> `podman build` läuft im Sandbox-Devcontainer (gemessen auf Colima, arm64; Docker Desktop, amd64 und CI nicht gemessen); bestehende
+> `nestedRuntime: podman`-Projekte brauchen `/dev/net/tun` auf dem Container-Host; `nestedRuntime: docker` wird unter Docker auf Linux und auf Colima zugesagt, nicht auf Docker Desktop.
+> `--quiet` zeigt nur Fehler und vier Ausweisungen, die sichtbar bleiben. Verlauf: Release-Tabelle unten und [`CHANGELOG.md`](CHANGELOG.md).
 
 Das verbindliche Lastenheft
 ([`spec/lastenheft.md`](spec/lastenheft.md)) ist auf Deutsch verfasst;

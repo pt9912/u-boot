@@ -64,6 +64,9 @@ Der Cut folgt dem Muster der Release-Cut-Slices (zuletzt
 3. **READMEs** (`README.md`, `README.de.md`): Status-Block und eine Zeile in der
    Releases-Tabelle, in Worten für den Benutzer und ohne Anforderungs-, ADR- oder
    Spec-Kennungen ([`AGENTS.md`](../../AGENTS.md) §5; die Kennungen stehen im CHANGELOG).
+   Der Status-Block nennt den aktuellen Stand (Version, Zusagen, Grenzen), keine Chronik
+   und kein „released"; das Datum steht nur in der Tabellenzeile und im CHANGELOG und wird
+   vor dem Tag gegen das Tag-Datum gehalten (§7).
 4. **Roadmap** (`docs/plan/planning/in-progress/roadmap.md`): den Release unter „Offene Wellen"
    führen, bis der Tag gesetzt ist; danach nach „Abgeschlossene Wellen".
 5. **Release-Cut-Slice** nach dem Muster der früheren Cuts anlegen und nach dem Tag nach
