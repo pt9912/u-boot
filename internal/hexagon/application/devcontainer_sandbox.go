@@ -258,8 +258,8 @@ func onUnavailablePolicy(dc *ubootYAMLDevcontainer) string {
 }
 
 // podmanRelaxations returns the container-level security relaxations the
-// nested rootless Podman setup needs under Docker (measured, see the
-// nested-Podman ADR). Each one is reported to the user individually
+// nested rootless Podman setup needs under Docker (measured, see ADR 0014 and
+// ADR 0021 for `/dev/net/tun`). Each one is reported to the user individually
 // (LH-FA-DEV-006 / -007).
 func podmanRelaxations() []string {
 	return []string{
