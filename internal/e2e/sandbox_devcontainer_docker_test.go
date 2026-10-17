@@ -4,9 +4,11 @@
 // (LH-FA-DEV-004/-006/-007/-009): generate the files with the
 // production adapters, build the image with the real Docker engine,
 // start it with the generated runArgs and run the generated startup
-// script plus a nested `podman run` (ADR 0014) or an own Docker
-// daemon (ADR 0018). Podman as the host engine is not covered; Colima
-// (Linux VM, cgroup v2) was measured for ADR 0018.
+// script plus a nested `podman run` and `podman build` (ADR 0014,
+// ADR 0021) or an own Docker daemon (ADR 0018). Podman as the host
+// engine is not covered; Colima (Linux VM, cgroup v2) was measured for
+// ADR 0018. Hosts with kernel.apparmor_restrict_unprivileged_userns=1
+// skip the nested-Podman tests.
 
 package e2e_test
 
@@ -277,6 +279,74 @@ func generatedRunArgs(t *testing.T, dir string) []string {
 	return dc.RunArgs
 }
 
+// skipIfNestedUsernsRestricted skips the test on hosts with
+// kernel.apparmor_restrict_unprivileged_userns=1 (Ubuntu 24.04+, Colima's
+// VM, GitHub runners): they block nested user namespaces even with
+// apparmor=unconfined, so the startup script must degrade with exit 11
+// (LH-FA-DEV-007) and nested Podman cannot run. The degradation is
+// verified before the skip.
+func skipIfNestedUsernsRestricted(ctx context.Context, t *testing.T, image string, runArgs []string) {
+	t.Helper()
+	sysctl, err := os.ReadFile("/proc/sys/kernel/apparmor_restrict_unprivileged_userns")
+	if err != nil || strings.TrimSpace(string(sysctl)) != "1" {
+		return
+	}
+	out, code := dockerOutput(ctx, t, append(append([]string{"run", "--rm"}, runArgs...), image, "sh", "/usr/local/bin/u-boot-sandbox-init")...)
+	if code != 11 || !strings.Contains(out, "nested user namespaces are blocked") {
+		t.Errorf("restricted host: init exit %d, want 11 with the blocked-namespaces message:\n%s", code, out)
+	}
+	t.Skip("host restricts unprivileged user namespaces (kernel.apparmor_restrict_unprivileged_userns=1); nested Podman cannot run here, degradation verified")
+}
+
+// nestedPodmanBuildScript runs as `vscode` in the sandbox container and
+// builds a Dockerfile with FROM, RUN and COPY: cold, from the layer cache,
+// with --no-cache, and through the `docker` alias.
+const nestedPodmanBuildScript = `set -e
+sh /usr/local/bin/u-boot-sandbox-init
+mkdir -p "$HOME/ctx" && cd "$HOME/ctx"
+echo copied > datei.txt
+printf 'FROM docker.io/library/alpine:3\nRUN echo ran > /run.txt\nCOPY datei.txt /datei\n' > Dockerfile
+podman build -t probe . && echo BUILD_COLD_OK
+test "$(podman run --rm probe cat /datei /run.txt | tr '\n' ' ')" = "copied ran " && echo RUN_OF_BUILT_IMAGE_OK
+podman build -t probe . > "$HOME/cached.log" 2>&1
+grep -q 'Using cache' "$HOME/cached.log" && echo BUILD_CACHE_OK
+podman build --no-cache -t probe . > "$HOME/nocache.log" 2>&1
+! grep -q 'Using cache' "$HOME/nocache.log" && echo BUILD_NOCACHE_OK
+docker build -t probe-alias . && echo DOCKER_ALIAS_OK`
+
+// LH-FA-DEV-007 (nestedRuntime podman): `podman build` and, through the
+// `docker` symlink, `docker build` build a Dockerfile inside the
+// container without a host socket. Runs only on hosts that allow nested
+// user namespaces; elsewhere it verifies the degradation and skips.
+func TestE2E_SandboxDevcontainer_NestedPodman_Build(t *testing.T) {
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Fatalf("docker CLI not on PATH: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Minute)
+	defer cancel()
+
+	dir := generateSandboxProject(ctx, t, "podman", "warn")
+	image := "uboot-e2e-sandbox-build:" + strings.ReplaceAll(filepath.Base(dir), "/", "-")
+	if out, code := dockerOutput(ctx, t, "build", "-q", "-t", image, filepath.Join(dir, ".devcontainer")); code != 0 {
+		t.Fatalf("docker build of the generated Dockerfile failed:\n%s", out)
+	}
+	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
+
+	runArgs := generatedRunArgs(t, dir)
+	skipIfNestedUsernsRestricted(ctx, t, image, runArgs)
+
+	args := append(append([]string{"run", "--rm"}, runArgs...), image, "bash", "-c", nestedPodmanBuildScript)
+	out, code := dockerOutput(ctx, t, args...)
+	if code != 0 {
+		t.Fatalf("nested podman build script exit %d:\n%s", code, out)
+	}
+	for _, want := range []string{"BUILD_COLD_OK", "RUN_OF_BUILT_IMAGE_OK", "BUILD_CACHE_OK", "BUILD_NOCACHE_OK", "DOCKER_ALIAS_OK"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("output lacks %s:\n%s", want, out)
+		}
+	}
+}
+
 func TestE2E_SandboxDevcontainer_NestedPodman(t *testing.T) {
 	if _, err := exec.LookPath("docker"); err != nil {
 		t.Fatalf("docker CLI not on PATH: %v", err)
@@ -306,19 +376,9 @@ func TestE2E_SandboxDevcontainer_NestedPodman(t *testing.T) {
 	runArgs := generatedRunArgs(t, dir)
 	nested := "sh /usr/local/bin/u-boot-sandbox-init && docker run --rm --network=host docker.io/library/alpine:3 echo NESTED_OK"
 
-	// Hosts with kernel.apparmor_restrict_unprivileged_userns=1 (Ubuntu
-	// 24.04+, e.g. GitHub runners) block nested user namespaces even
-	// with apparmor=unconfined: the startup script must degrade with
-	// exit 11 (LH-FA-DEV-007) — the nested run cannot succeed there.
-	if sysctl, err := os.ReadFile("/proc/sys/kernel/apparmor_restrict_unprivileged_userns"); err == nil && strings.TrimSpace(string(sysctl)) == "1" {
-		out, code := dockerOutput(ctx, t, append(append([]string{"run", "--rm"}, runArgs...), image, "sh", "/usr/local/bin/u-boot-sandbox-init")...)
-		if code != 11 || !strings.Contains(out, "nested user namespaces are blocked") {
-			t.Errorf("restricted host: init exit %d, want 11 with the blocked-namespaces message:\n%s", code, out)
-		}
-		t.Skip("host restricts unprivileged user namespaces (kernel.apparmor_restrict_unprivileged_userns=1); nested Podman cannot run here, degradation verified")
-	}
+	skipIfNestedUsernsRestricted(ctx, t, image, runArgs)
 
-	// AK 2: docker build/run inside the container without a socket.
+	// AK 2: docker run inside the container without a socket.
 	args := append(append([]string{"run", "--rm"}, runArgs...), image, "bash", "-c", nested)
 	if out, code := dockerOutput(ctx, t, args...); code != 0 || !strings.Contains(out, "NESTED_OK") {
 		t.Fatalf("nested podman run failed (exit %d):\n%s", code, out)
