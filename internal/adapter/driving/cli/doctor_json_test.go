@@ -204,6 +204,37 @@ func TestDoctorJSON_FallbackFlagNotInWireForm(t *testing.T) {
 	}
 }
 
+// TestDoctorJSON_SecurityRelaxationFlagNotInWireForm pins that the
+// security-relaxation flag of a diagnostic (LH-FA-CLI-005 exception 1)
+// changes nothing in the `doctor --json` output, with and without
+// `--quiet` and with `--strict`: the envelope is byte-identical to the
+// one of the same item without the flag.
+func TestDoctorJSON_SecurityRelaxationFlagNotInWireForm(t *testing.T) {
+	item := domain.Diagnostic{ID: "devcontainer.sandbox.egress", Severity: domain.SeverityWarn,
+		Message: "egress.enabled is set but the profile is not `sandbox`; the setting has no effect (LH-FA-DEV-008)."}
+	flagged := item
+	flagged.SecurityRelaxation = true
+	render := func(d domain.Diagnostic, args ...string) string {
+		var stdout bytes.Buffer
+		app := newAppWithDoctor(&fakeInitUseCase{}, &fakeDoctorUseCase{resp: driving.DoctorResponse{Report: domain.DiagnosticReport{Items: []domain.Diagnostic{d}}}},
+			cli.WithGetwd(func() (string, error) { return "/tmp/proj", nil }))
+		_ = app.Execute(context.Background(), args, &stdout, &bytes.Buffer{})
+		return stdout.String()
+	}
+	for _, args := range [][]string{{"--json", "doctor"}, {"--json", "--quiet", "doctor"}, {"--json", "doctor", "--strict"}} {
+		got, want := render(flagged, args...), render(item, args...)
+		if got != want {
+			t.Errorf("%v: the flag changes the wire form:\n got  %s\n want %s", args, got, want)
+		}
+		if !strings.Contains(got, "devcontainer.sandbox.egress") {
+			t.Errorf("%v: the item is missing from the wire form:\n%s", args, got)
+		}
+		if strings.Contains(strings.ToLower(got), "securityrelaxation") {
+			t.Errorf("%v: wire form names the flag:\n%s", args, got)
+		}
+	}
+}
+
 // TestDoctorJSON_StrictWarnExits11 pins that --strict --json with
 // a Warn report still upgrades exitCode to 11; status remains
 // "warn" because LH-NFA-USE-004 couples status to the highest level,

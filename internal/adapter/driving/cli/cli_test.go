@@ -1106,8 +1106,8 @@ func TestExecute_Doctor_Quiet_NoErrorsIsSilent(t *testing.T) {
 // LH-FA-CLI-005 exception 2 / LH-FA-DEV-007: a degradation-fallback
 // item (DegradationFallback, here `vfs` storage) is shown by
 // `doctor --quiet` next to the error items. Warn items that share the
-// ID but are no fallback ("no effect", credentials) and OK items are
-// not shown.
+// ID but are no fallback ("no effect"), warn items of other checks
+// (feature drift) and OK items are not shown.
 func TestExecute_Doctor_Quiet_FallbackItemAndErrorKept_OtherWarnsDropped(t *testing.T) {
 	getwd := func() (string, error) { return "/tmp/x", nil }
 	doctorUC := &fakeDoctorUseCase{
@@ -1115,7 +1115,7 @@ func TestExecute_Doctor_Quiet_FallbackItemAndErrorKept_OtherWarnsDropped(t *test
 			Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
 				{ID: "devcontainer.sandbox.runtime", Severity: domain.SeverityWarn, DegradationFallback: true, Message: "/dev/fuse is not available; nested Podman will fall back to vfs storage (LH-FA-DEV-007).", Hint: "load fuse"},
 				{ID: "devcontainer.sandbox.runtime", Severity: domain.SeverityWarn, Message: "nestedRuntime has no effect (LH-FA-DEV-007)."},
-				{ID: "devcontainer.sandbox.credentials", Severity: domain.SeverityWarn, Message: "possible plaintext git credential (LH-FA-DEV-009)."},
+				{ID: "devcontainer.features.drift", Severity: domain.SeverityWarn, Message: "feature node is missing in devcontainer.json."},
 				{ID: "devcontainer.sandbox.egress", Severity: domain.SeverityError, Message: "egress capability not grantable (LH-FA-DEV-007)."},
 				{ID: "fs.write-permissions", Severity: domain.SeverityOK, Message: "BaseDir is writable."},
 			}},
@@ -1131,9 +1131,141 @@ func TestExecute_Doctor_Quiet_FallbackItemAndErrorKept_OtherWarnsDropped(t *test
 			t.Errorf("--quiet hid %q: %q", want, out)
 		}
 	}
-	for _, gone := range []string{"has no effect", "plaintext git credential", "BaseDir is writable", "Summary:"} {
+	for _, gone := range []string{"has no effect", "missing in devcontainer.json", "BaseDir is writable", "Summary:"} {
 		if strings.Contains(out, gone) {
 			t.Errorf("--quiet kept %q: %q", gone, out)
+		}
+	}
+}
+
+// securityRelaxationItems are the four warn items of the sandbox checks
+// that concern a security property of the sandbox profile
+// (LH-FA-CLI-005 exception 1; LH-FA-DEV-008, LH-FA-DEV-009). The flag
+// sits on the item: the fixtures differ from the unflagged items only
+// by it.
+func securityRelaxationItems() map[string]domain.Diagnostic {
+	return map[string]domain.Diagnostic{
+		"credentials-plaintext": {ID: "devcontainer.sandbox.credentials", Severity: domain.SeverityWarn, SecurityRelaxation: true,
+			Message: "possible plaintext git credential in: .env.example (LH-FA-DEV-009).", Hint: "revoke the token"},
+		"credentials-no-token-source": {ID: "devcontainer.sandbox.credentials", Severity: domain.SeverityWarn, SecurityRelaxation: true,
+			Message: "sandbox profile clones over https but devcontainer.json has no runtime token source (LH-FA-DEV-009).", Hint: "restore GIT_TOKEN"},
+		"egress-nested-docker": {ID: "devcontainer.sandbox.egress", Severity: domain.SeverityWarn, SecurityRelaxation: true,
+			Message: "Egress restriction together with nestedRuntime `docker` bypasses the restriction (LH-FA-DEV-008).", Hint: "guardrail only"},
+		"egress-no-sandbox": {ID: "devcontainer.sandbox.egress", Severity: domain.SeverityWarn, SecurityRelaxation: true,
+			Message: "egress.enabled is set but the profile is not `sandbox`; the setting has no effect (LH-FA-DEV-008).", Hint: "set the profile"},
+	}
+}
+
+// LH-FA-CLI-005 exception 1 / LH-FA-DEV-008, LH-FA-DEV-009: each
+// security-relaxation warn item is shown by `doctor --quiet` on its
+// own, with its hint and without header and summary line (happy).
+func TestExecute_Doctor_Quiet_KeepsEachSecurityRelaxationItem(t *testing.T) {
+	for name, item := range securityRelaxationItems() {
+		t.Run(name, func(t *testing.T) {
+			doctorUC := &fakeDoctorUseCase{resp: driving.DoctorResponse{Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
+				item,
+				{ID: "fs.write-permissions", Severity: domain.SeverityOK, Message: "BaseDir is writable."},
+			}}}}
+			var stdout, stderr bytes.Buffer
+			if err := newAppWithDoctor(&fakeInitUseCase{}, doctorUC, cli.WithGetwd(func() (string, error) { return "/tmp/x", nil })).Execute(
+				context.Background(), []string{"--quiet", "doctor"}, &stdout, &stderr); err != nil {
+				t.Fatalf("Execute: %v", err)
+			}
+			out := stdout.String()
+			for _, want := range []string{item.ID, item.Message, item.Hint} {
+				if !strings.Contains(out, want) {
+					t.Errorf("--quiet hid %q: %q", want, out)
+				}
+			}
+			for _, gone := range []string{"Diagnostic report", "Summary:", "BaseDir is writable"} {
+				if strings.Contains(out, gone) {
+					t.Errorf("--quiet kept %q: %q", gone, out)
+				}
+			}
+		})
+	}
+}
+
+// Negative against over-flagging: the flag sits on the item, not on
+// the check ID. The unflagged warn items of the same IDs (the
+// `nestedRuntime` "no effect" configuration message, a second egress
+// item without the flag), the feature-check warn items, the warn items
+// of the host checks and OK items all stay hidden under `--quiet`.
+func TestExecute_Doctor_Quiet_UnflaggedWarnsStayHidden(t *testing.T) {
+	doctorUC := &fakeDoctorUseCase{resp: driving.DoctorResponse{Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
+		{ID: "devcontainer.sandbox.runtime", Severity: domain.SeverityWarn, Message: "nestedRuntime has no effect (LH-FA-DEV-007)."},
+		{ID: "devcontainer.sandbox.egress", Severity: domain.SeverityWarn, Message: "unflagged egress warning."},
+		{ID: "devcontainer.sandbox.credentials", Severity: domain.SeverityWarn, Message: "unflagged credentials warning."},
+		{ID: "devcontainer.features.allowlist", Severity: domain.SeverityWarn, Message: "feature ghost has no source."},
+		{ID: "devcontainer.features.drift", Severity: domain.SeverityWarn, Message: "feature node is missing in devcontainer.json."},
+		{ID: "docker.version", Severity: domain.SeverityWarn, Message: "docker version is old."},
+		{ID: "devcontainer.sandbox.runtime", Severity: domain.SeverityOK, Message: "Nested Docker daemon configured."},
+	}}}}
+	var stdout, stderr bytes.Buffer
+	if err := newAppWithDoctor(&fakeInitUseCase{}, doctorUC, cli.WithGetwd(func() (string, error) { return "/tmp/x", nil })).Execute(
+		context.Background(), []string{"--quiet", "doctor"}, &stdout, &stderr); err != nil {
+		t.Fatalf("Execute: %v", err)
+	}
+	if stdout.Len() != 0 {
+		t.Errorf("--quiet must print nothing for unflagged warn items, got %q", stdout.String())
+	}
+}
+
+// Boundary: the same ID carries a flagged and an unflagged item; only
+// the flagged one is shown, and without --quiet the full report keeps
+// every item and the summary counts them.
+func TestExecute_Doctor_SecurityRelaxation_QuietBoundaryAndFullReport(t *testing.T) {
+	report := domain.DiagnosticReport{Items: []domain.Diagnostic{
+		securityRelaxationItems()["egress-no-sandbox"],
+		{ID: "devcontainer.sandbox.egress", Severity: domain.SeverityWarn, Message: "unflagged egress warning."},
+		{ID: "fs.write-permissions", Severity: domain.SeverityOK, Message: "BaseDir is writable."},
+	}}
+	run := func(args ...string) string {
+		var stdout, stderr bytes.Buffer
+		app := newAppWithDoctor(&fakeInitUseCase{}, &fakeDoctorUseCase{resp: driving.DoctorResponse{Report: report}},
+			cli.WithGetwd(func() (string, error) { return "/tmp/x", nil }))
+		if err := app.Execute(context.Background(), args, &stdout, &stderr); err != nil {
+			t.Fatalf("%v: %v", args, err)
+		}
+		return stdout.String()
+	}
+	quiet := run("--quiet", "doctor")
+	if !strings.Contains(quiet, "the setting has no effect") || strings.Contains(quiet, "unflagged egress warning") {
+		t.Errorf("--quiet must show the flagged item only: %q", quiet)
+	}
+	full := run("doctor")
+	for _, want := range []string{"the setting has no effect", "unflagged egress warning.", "BaseDir is writable.", "Summary: 0 error, 2 warn, 1 ok"} {
+		if !strings.Contains(full, want) {
+			t.Errorf("full report lacks %q: %q", want, full)
+		}
+	}
+}
+
+// LH-FA-DIAG-003 / LH-FA-CLI-005 exception 1: `doctor --quiet --strict`
+// with only security-relaxation warn items ends with the unchanged exit
+// 11; the shown lines explain it, and the error text names the IDs.
+func TestExecute_Doctor_QuietStrict_OnlySecurityRelaxation_Exit11(t *testing.T) {
+	items := securityRelaxationItems()
+	doctorUC := &fakeDoctorUseCase{resp: driving.DoctorResponse{Report: domain.DiagnosticReport{Items: []domain.Diagnostic{
+		items["credentials-plaintext"], items["egress-nested-docker"],
+	}}}}
+	var stdout, stderr bytes.Buffer
+	err := newAppWithDoctor(&fakeInitUseCase{}, doctorUC, cli.WithGetwd(func() (string, error) { return "/tmp/x", nil })).Execute(
+		context.Background(), []string{"--quiet", "doctor", "--strict"}, &stdout, &stderr)
+	if !errors.Is(err, cli.ErrDoctorFailures) {
+		t.Fatalf("err = %v, want ErrDoctorFailures", err)
+	}
+	if got := cli.ExitCode(err); got != 11 {
+		t.Errorf("ExitCode = %d, want 11 (unchanged)", got)
+	}
+	for _, want := range []string{"plaintext git credential", "bypasses the restriction"} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Errorf("stdout lacks %q, the cause of exit 11: %q", want, stdout.String())
+		}
+	}
+	for _, want := range []string{"2 warning item(s)", "devcontainer.sandbox.credentials", "devcontainer.sandbox.egress"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("error text lacks %q: %v", want, err)
 		}
 	}
 }

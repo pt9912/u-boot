@@ -116,7 +116,9 @@ func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) d
 }
 
 // checkSandboxCredentials implements LH-FA-DEV-009 (warn only). It is
-// skipped without the sandbox profile.
+// skipped without the sandbox profile. Both warn items (plaintext
+// credential, https clone without token source) carry
+// [domain.Diagnostic.SecurityRelaxation].
 func (s *DoctorService) checkSandboxCredentials(_ context.Context, baseDir string) domain.Diagnostic {
 	cfg, err := s.loadUbootYAML(baseDir)
 	if err != nil || !profileIsSandbox(cfg.Devcontainer) {
@@ -125,8 +127,9 @@ func (s *DoctorService) checkSandboxCredentials(_ context.Context, baseDir strin
 	}
 	if found := s.plaintextCredentialFiles(baseDir); len(found) > 0 {
 		return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityWarn,
-			Message: fmt.Sprintf("possible plaintext git credential in: %s (LH-FA-DEV-009).", strings.Join(found, ", ")),
-			Hint:    "Remove it from the file, revoke the token, and pass a short-lived repository-scoped token at runtime via $GIT_TOKEN."}
+			Message:            fmt.Sprintf("possible plaintext git credential in: %s (LH-FA-DEV-009).", strings.Join(found, ", ")),
+			Hint:               "Remove it from the file, revoke the token, and pass a short-lived repository-scoped token at runtime via $GIT_TOKEN.",
+			SecurityRelaxation: true}
 	}
 	origin := effectiveCloneSource(s.fs, baseDir, cfg.Devcontainer)
 	if !strings.HasPrefix(origin, "https://") && !strings.HasPrefix(origin, "http://") {
@@ -135,8 +138,9 @@ func (s *DoctorService) checkSandboxCredentials(_ context.Context, baseDir strin
 	}
 	if !s.hasTokenSource(baseDir) {
 		return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityWarn,
-			Message: "sandbox profile clones over https but devcontainer.json has no runtime token source (remoteEnv GIT_TOKEN or a read-only secret mount) (LH-FA-DEV-009).",
-			Hint:    "Run `u-boot generate devcontainer` to restore the GIT_TOKEN pass-through; never store tokens in project files."}
+			Message:            "sandbox profile clones over https but devcontainer.json has no runtime token source (remoteEnv GIT_TOKEN or a read-only secret mount) (LH-FA-DEV-009).",
+			Hint:               "Run `u-boot generate devcontainer` to restore the GIT_TOKEN pass-through; never store tokens in project files.",
+			SecurityRelaxation: true}
 	}
 	return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityOK,
 		Message: "No plaintext git credentials found; a runtime token source is configured."}
@@ -176,7 +180,10 @@ func (s *DoctorService) hasTokenSource(baseDir string) bool {
 		(strings.Contains(text, "/run/secrets") && strings.Contains(text, "readonly"))
 }
 
-// checkSandboxEgress implements the static part of LH-FA-DEV-008.
+// checkSandboxEgress implements the static part of LH-FA-DEV-008. Both
+// warn items (egress without the sandbox profile, egress together with
+// `nestedRuntime: docker`) carry
+// [domain.Diagnostic.SecurityRelaxation].
 func (s *DoctorService) checkSandboxEgress(_ context.Context, baseDir string) domain.Diagnostic {
 	cfg, err := s.loadUbootYAML(baseDir)
 	if err != nil || !egressEnabled(cfg.Devcontainer) {
@@ -185,13 +192,15 @@ func (s *DoctorService) checkSandboxEgress(_ context.Context, baseDir string) do
 	}
 	if !profileIsSandbox(cfg.Devcontainer) {
 		return domain.Diagnostic{ID: checkIDSandboxEgress, Severity: domain.SeverityWarn,
-			Message: "devcontainer.sandbox.egress.enabled is set but devcontainer.profile is not `sandbox`; the setting has no effect (LH-FA-DEV-008).",
-			Hint:    "Run `u-boot config set devcontainer.profile sandbox` and `u-boot generate devcontainer`, or disable the egress restriction."}
+			Message:            "devcontainer.sandbox.egress.enabled is set but devcontainer.profile is not `sandbox`; the setting has no effect (LH-FA-DEV-008).",
+			Hint:               "Run `u-boot config set devcontainer.profile sandbox` and `u-boot generate devcontainer`, or disable the egress restriction.",
+			SecurityRelaxation: true}
 	}
 	if nestedDocker(cfg.Devcontainer) {
 		return domain.Diagnostic{ID: checkIDSandboxEgress, Severity: domain.SeverityWarn,
-			Message: "Egress restriction together with nestedRuntime `docker`: the traffic of nested containers and the iptables rules of the nested daemon bypass the restriction, and `--privileged` lets any process lift it (LH-FA-DEV-008).",
-			Hint:    "Treat the restriction as a guardrail only, or set `devcontainer.sandbox.nestedRuntime` to `none` or `podman`."}
+			Message:            "Egress restriction together with nestedRuntime `docker`: the traffic of nested containers and the iptables rules of the nested daemon bypass the restriction, and `--privileged` lets any process lift it (LH-FA-DEV-008).",
+			Hint:               "Treat the restriction as a guardrail only, or set `devcontainer.sandbox.nestedRuntime` to `none` or `podman`.",
+			SecurityRelaxation: true}
 	}
 	return domain.Diagnostic{ID: checkIDSandboxEgress, Severity: domain.SeverityOK,
 		Message: "Egress restriction configured; the NET_ADMIN capability is verified when the container starts (guardrail, not a sandbox boundary)."}

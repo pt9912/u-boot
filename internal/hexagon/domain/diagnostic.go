@@ -86,6 +86,17 @@ type Diagnostic struct {
 	// ID also carries diagnostics that are no fallback. It does not
 	// appear in the JSON wire form.
 	DegradationFallback bool
+
+	// SecurityRelaxation is true for a warn diagnostic that concerns a
+	// security property of the sandbox profile: the source of the
+	// credentials (LH-FA-DEV-009) and the egress restriction including
+	// the notice that it does not apply without the sandbox profile
+	// (LH-FA-DEV-008). `u-boot doctor --quiet` shows such an item next
+	// to the Error items (LH-FA-CLI-005, exception 1). Like
+	// DegradationFallback it is a property of the item, not of its ID,
+	// and it does not appear in the JSON wire form; it neither changes
+	// the Severity nor the exit code.
+	SecurityRelaxation bool
 }
 
 // DiagnosticReport is the aggregate of all [Diagnostic] entries a
