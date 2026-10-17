@@ -196,6 +196,24 @@ verletzen und die kein Gate fängt:
 prüft sie; in `welle-cli-verbosity` traten sie in drei Vorgängen auf, obwohl
 §3.7 sie schon verbot.
 
+### 3.10 Aussagen über Code im Plan prüfen   (seit welle-devcontainer-sshd-claude-code)
+
+Wer einen Slice-Plan, eine Closure-Notiz oder eine Spec schreibt, liest jede
+Aussage über Dateien, Funktionen, Werte oder Verhalten vorher an der Stelle im
+Code und nennt die Fundstelle (Datei und Symbol). Eine Aussage, die nicht
+gelesen wurde, steht nicht im Text.
+
+- Die Plan-Tabelle (§3 des Slice) listet jede Datei, die der Diff berührt —
+  einschließlich Tests, Doku, Packaging und Workflows.
+- Vor dem Abschluss gleicht der Autor die Tabelle gegen `git diff --stat` ab;
+  jede Zeile ohne Plan-Eintrag und jeder Eintrag ohne Diff wird berichtigt.
+
+**Begründung:** Ein Reviewer oder Verifier fängt falsche Plan-Aussagen erst
+nachträglich, kein Gate prüft sie; in vier Vorgängen
+(`BEO-DOK/plan-aussage-ueber-code`) stand etwas im Plan, das der Code nicht
+trug, oder fehlte eine berührte Datei. Es ergänzt §3.7 und §3.9; ein neues Gate
+entsteht nicht.
+
 ## 4. Quality Gates
 
 Regeln dieser Sektion: Baseline-Regelwerk `grundlagen-harness-dateien.md`

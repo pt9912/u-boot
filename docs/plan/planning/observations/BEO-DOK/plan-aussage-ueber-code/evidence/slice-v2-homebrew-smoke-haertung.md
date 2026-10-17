@@ -1,0 +1,2 @@
+**Vorgang:** [`slice-v2-homebrew-smoke-haertung`](../../../../done/slice-v2-homebrew-smoke-haertung.md)
+**Fund:** Der Plan §3 nannte `packaging/nfpm.yaml` und `docs/maintainer/releasing.md` nicht, obwohl der Diff beide ändert (Verification Evidence [`2026-10-17-verification-slice-v2-homebrew-smoke-haertung`](../../../../../../reviews/2026-10-17-verification-slice-v2-homebrew-smoke-haertung.md), Plan-vs-Code-Diff; Closure-Notiz §7). <!-- d-check:ignore (Dateinamen als Zitat) -->

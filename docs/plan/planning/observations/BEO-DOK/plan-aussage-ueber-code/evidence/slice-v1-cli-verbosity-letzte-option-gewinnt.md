@@ -1,0 +1,2 @@
+**Vorgang:** [`slice-v1-cli-verbosity-letzte-option-gewinnt`](../../../../done/slice-v1-cli-verbosity-letzte-option-gewinnt.md)
+**Fund:** Der Plan §3 nannte `verbosity.go`, `verbosity_last_wins_test.go` und `cmd/uboot/main.go` nicht, obwohl der Diff sie berührt (Verification Evidence [`2026-10-16-verification-slice-v1-cli-verbosity-letzte-option-gewinnt`](../../../../../../reviews/2026-10-16-verification-slice-v1-cli-verbosity-letzte-option-gewinnt.md), Abweichung ohne Plan-Zeile; Closure-Notiz §7 „Was ging anders als geplant“). <!-- d-check:ignore (Dateinamen als Zitat) -->

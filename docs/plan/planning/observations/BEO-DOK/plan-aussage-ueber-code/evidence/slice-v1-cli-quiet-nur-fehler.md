@@ -1,0 +1,2 @@
+**Vorgang:** [`slice-v1-cli-quiet-nur-fehler`](../../../../done/slice-v1-cli-quiet-nur-fehler.md)
+**Fund:** Der Slice-Plan §1 nannte `doctor`-Items für „Container ohne Daemon“ und „Wegfall der Egress-Restriktion“ in `doctor_sandbox.go`, die es dort nicht gibt; Review-Report [`2026-10-16-slice-v1-cli-quiet-nur-fehler-2`](../../../../../../reviews/2026-10-16-slice-v1-cli-quiet-nur-fehler-2.md) F-4 (INFO) fand es, die Closure-Notiz §7 „Was ging anders als geplant“ bestätigt es. <!-- d-check:ignore (Symbol- und Dateinamen als Zitat) -->

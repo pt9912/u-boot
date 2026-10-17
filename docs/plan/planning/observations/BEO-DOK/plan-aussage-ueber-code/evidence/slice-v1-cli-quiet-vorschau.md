@@ -1,0 +1,2 @@
+**Vorgang:** [`slice-v1-cli-quiet-vorschau`](../../../../done/slice-v1-cli-quiet-vorschau.md)
+**Fund:** Der Plan §3 nannte die Änderung der Testdatei `quiet_modifying_test.go`; der Diff legte `quiet_preview_test.go` neu an (Verification Evidence [`2026-10-16-verification-slice-v1-cli-quiet-vorschau`](../../../../../../reviews/2026-10-16-verification-slice-v1-cli-quiet-vorschau.md), Plan-vs-Code-Diff; Closure-Notiz §7 „Was ging anders als geplant“). <!-- d-check:ignore (Dateinamen als Zitat) -->
