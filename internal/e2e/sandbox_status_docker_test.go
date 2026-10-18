@@ -251,12 +251,14 @@ func TestE2E_SandboxDevcontainer_StatusFiles_Daemon(t *testing.T) {
 		extra = append(extra, "--mount", mount)
 		volumes = append(volumes, strings.TrimPrefix(strings.Split(mount, ",")[0], "source="))
 	}
-	privileged := startLabeled(ctx, t, warnDir, warnImage, extra...)
+	// Registered before the container: cleanups run last-in first-out, and a
+	// volume can only be removed after the container that uses it.
 	t.Cleanup(func() {
 		for _, v := range volumes {
 			_, _ = dockerOutput(context.Background(), t, "volume", "rm", "-f", v)
 		}
 	})
+	privileged := startLabeled(ctx, t, warnDir, warnImage, extra...)
 	if out, code := lifecycle(ctx, t, privileged, startCmd); code != 0 {
 		t.Fatalf("daemon start script exit %d:\n%s", code, out)
 	}
