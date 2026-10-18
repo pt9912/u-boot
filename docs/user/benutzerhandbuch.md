@@ -1944,7 +1944,9 @@ Das gilt besonders mit verschachteltem Podman.
 **Wo finde ich alle Optionen eines Befehls?**
 `u-boot <befehl> --help` zeigt sie; die Optionen aller Befehle stehen auch im
 [Anhang](#optionen-je-befehl). Die JSON-Ausgabe beschreibt der Anhang
-[JSON-Ausgabe](#json-ausgabe).
+[JSON-Ausgabe](#json-ausgabe). `u-boot --help` verweist auf dieses Handbuch (die
+Fassung Ihrer Version, bei einer selbst gebauten oder Entwicklungsversion nur die
+aktuelle) und auf das README.
 
 **Wie aktualisiere ich `u-boot`?**
 Je nach Installation: Binary neu herunterladen, `brew upgrade u-boot`, das neue

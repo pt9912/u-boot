@@ -11,6 +11,12 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- `u-boot --help` links the user manual (German) next to the README: the manual of the installed release (`blob/v<version>`) and the current manual (`blob/main`).
+  A build whose version is not a release version (`X.Y.Z` or `X.Y.Z-rc.N`), such as a development or self-built binary, shows only the link to `main`
+  ([`LH-FA-CLI-002`](spec/lastenheft.md#lh-fa-cli-002--hilfeausgabe)).
+
 ### Changed
 
 - `--dry-run` no longer logs a write as done. The INFO lines on stderr that report a write of `config set` and `generate` now read in the conditional when nothing was
