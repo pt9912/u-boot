@@ -9,12 +9,12 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — sechster Slice der Welle; ihm geht [`slice-v1-devcontainer-ollama-messung`](../done/slice-v1-devcontainer-ollama-messung.md) voraus (Messwerte und Folge-ADR), ihm folgt [`slice-v1-devcontainer-feature-ollama`](slice-v1-devcontainer-feature-ollama.md) (Umsetzung).
+**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — sechster Slice der Welle; ihm geht [`slice-v1-devcontainer-ollama-messung`](../done/slice-v1-devcontainer-ollama-messung.md) voraus (Messwerte und Folge-ADR), ihm folgt [`slice-v1-devcontainer-feature-ollama`](../open/slice-v1-devcontainer-feature-ollama.md) (Umsetzung).
 
 **Bezug:** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Devcontainer-Features; Erweiterung), [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Sandbox-Profil; nur bei Netzdienst-Ausweisung), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Hosts: unverändert). Verwandt: [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md) und die Folge-ADR des Mess-Slice.
 Anlass: Projektinhaber, 2026-10-18 („Lastenheft-CR: Katalog erweitert um `ollama`: Zusage nur für Gemessenes“).
 
-**Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), gegebenenfalls [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)), §16 (Historie), Versionsfeld. `spezifikation.md` und `architecture.md` berührt der CR nicht; die Spezifikation folgt im letzten Slice der Welle ([`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md)).
+**Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), gegebenenfalls [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)), §16 (Historie), Versionsfeld. `spezifikation.md` und `architecture.md` berührt der CR nicht; die Spezifikation folgt im letzten Slice der Welle ([`slice-v2-spec-sandbox-egress-ollama`](../open/slice-v2-spec-sandbox-egress-ollama.md)).
 
 **Verantwortlich:** —
 
@@ -24,7 +24,7 @@ Anlass: Projektinhaber, 2026-10-18 („Lastenheft-CR: Katalog erweitert um `olla
 
 ## 1. Ziel und Abgrenzung
 
-**Ziel:** Die Zusage „Ollama läuft als Katalog-Feature `ollama` im Devcontainer, CPU-only, Modelle im Container“ steht im Lastenheft (Änderung auf die **nächste freie Minor-Version**; `0.15.0`, wenn der Anzeige-CR `0.14.0` trägt; ein Neu-Laden-CR entsteht nach R0 nicht; der Enum-CR [`slice-cr-cli-json-command-enum`](slice-cr-cli-json-command-enum.md) folgt getrennt mit `0.16.0`, die Begründung steht dort §1), **mit den Messwerten des Mess-Slice** und in der vom Projektinhaber freigegebenen Fassung. Der Code-Slice beginnt erst danach.
+**Ziel:** Die Zusage „Ollama läuft als Katalog-Feature `ollama` im Devcontainer, CPU-only, Modelle im Container“ steht im Lastenheft (Änderung auf die **nächste freie Minor-Version**; `0.15.0`, wenn der Anzeige-CR `0.14.0` trägt; ein Neu-Laden-CR entsteht nach R0 nicht; der Enum-CR [`slice-cr-cli-json-command-enum`](../open/slice-cr-cli-json-command-enum.md) folgt getrennt mit `0.16.0`, die Begründung steht dort §1), **mit den Messwerten des Mess-Slice** und in der vom Projektinhaber freigegebenen Fassung. Der Code-Slice beginnt erst danach.
 
 **Warum eine Lastenheft-Änderung:** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) führt Beispiele auf („Git, Docker CLI, Node.js, Java, SDKMAN, PostgreSQL Client, Kubernetes Tools“), keine abschließende Liste und keine Katalogschlüssel; `python`, `homebrew` und `sdkman` kamen ohne Lastenheft-Änderung (gelesen: [`slice-cr-devcontainer-agent-features-sandbox`](../done/slice-cr-devcontainer-agent-features-sandbox.md) §1, Absatz „Katalog-Schlüssel allein sind keine Zusage“). Für `ollama` verlangt der Projektinhaber ausdrücklich eine Zusage „nur für Gemessenes“; das ist eine Aussage über Produktverhalten (Installation, CPU-only, Modellspeicher) und gehört deshalb ins Lastenheft.
 
@@ -76,7 +76,7 @@ Eine Änderung dieser Stelle zieht [`LH-FA-CLI-005`](../../../../spec/lastenheft
 
 Alt: `| Version          | 0.13.0 |` (bzw. der Stand nach dem Landen der Vorgänger-CR in dieser Welle)
 
-Neu: die nächste freie Minor-Version (Lastenheft-Commit-Reihenfolge entscheidet; nach dem Anzeige-CR `0.15.0`). Der Enum-CR [`slice-cr-cli-json-command-enum`](slice-cr-cli-json-command-enum.md) landet danach mit `0.16.0` und wird mit diesem CR **nicht** im selben Lastenheft-Commit gebündelt (Freigabestand, Review und Rücknahme verschieden, Begründung dort §1).
+Neu: die nächste freie Minor-Version (Lastenheft-Commit-Reihenfolge entscheidet; nach dem Anzeige-CR `0.15.0`). Der Enum-CR [`slice-cr-cli-json-command-enum`](../open/slice-cr-cli-json-command-enum.md) landet danach mit `0.16.0` und wird mit diesem CR **nicht** im selben Lastenheft-Commit gebündelt (Freigabestand, Review und Rücknahme verschieden, Begründung dort §1).
 
 Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 
@@ -85,7 +85,7 @@ Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Messung, Quellenwahl und Folge-ADR** — [`slice-v1-devcontainer-ollama-messung`](../done/slice-v1-devcontainer-ollama-messung.md); der CR trägt nur, was dort gemessen und entschieden ist.
-- **Code, Tests, Spezifikation, Handbuch, CHANGELOG** — [`slice-v1-devcontainer-feature-ollama`](slice-v1-devcontainer-feature-ollama.md) und [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md); das Lastenheft ist Zielbild, der Code folgt.
+- **Code, Tests, Spezifikation, Handbuch, CHANGELOG** — [`slice-v1-devcontainer-feature-ollama`](../open/slice-v1-devcontainer-feature-ollama.md) und [`slice-v2-spec-sandbox-egress-ollama`](../open/slice-v2-spec-sandbox-egress-ollama.md); das Lastenheft ist Zielbild, der Code folgt.
 - **Eine Zusage zu Hosts, Version oder Modellen** — Hosts und Version gehören in die Spezifikation ([`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion), [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen)), nicht ins Lastenheft; Modelle wählt der Nutzer.
 - **Anschluss an den Ollama des Hosts, GPU, weitere Agenten** — vom Projektinhaber ausgeschlossen bzw. nicht genannt.
 
@@ -108,7 +108,7 @@ Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
 | `spec/lastenheft.md` | update | Stellen 1 bis 3 (§3 [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), gegebenenfalls [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) und [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging); Versionsfeld; §16 Historie); erst nach Freigabe des Wortlauts und nach dem Mess-Slice |
-| `docs/plan/planning/open/slice-cr-devcontainer-ollama.md` (diese Datei) | update | Freigabe, Vorab-Suche, Closure (§7) |
+| `docs/plan/planning/in-progress/slice-cr-devcontainer-ollama.md` (diese Datei) | update | Freigabe, Vorab-Suche, Closure (§7) |
 | `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation nach `harness/review.md` und `harness/verification.md` |
 | `CHANGELOG.md` | unverändert | der CR ändert kein Produktverhalten; ein Eintrag entsteht im Code-Slice |
 
@@ -133,7 +133,7 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 
 - **Ein Satz im Lastenheft stützt sich auf einen Messwert, den der Mess-Slice nicht liefert.** — **Ausgang:** offen bis zum Start; der Satz entfällt (keine Aussage ohne Messwert).
 - **Die Zusage „Modelle überstehen den Neubau“ ist ungemessen.** — **Ausgang:** offen bis O5 des Mess-Slice; der Satz bleibt nur mit Messwert.
-- **Die Reihenfolge der Lastenheft-Versionen mit dem Anzeige-CR und dem Enum-CR kollidiert.** — **Ausgang:** offen; die Version ist die nächste freie zum Zeitpunkt des Commits, nicht vorab festgeschrieben; erwartet `0.15.0` hier und `0.16.0` im Enum-CR ([`slice-cr-cli-json-command-enum`](slice-cr-cli-json-command-enum.md), getrennt entschieden).
+- **Die Reihenfolge der Lastenheft-Versionen mit dem Anzeige-CR und dem Enum-CR kollidiert.** — **Ausgang:** offen; die Version ist die nächste freie zum Zeitpunkt des Commits, nicht vorab festgeschrieben; erwartet `0.15.0` hier und `0.16.0` im Enum-CR ([`slice-cr-cli-json-command-enum`](../open/slice-cr-cli-json-command-enum.md), getrennt entschieden).
 - **Ein Review läuft vor der Freigabe** (siehe DoD). — **Ausgang:** offen; Review über die freigegebene Fassung.
 
 ## 7. Closure-Notiz

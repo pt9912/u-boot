@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — siebter Slice der Welle; ihm gehen [`slice-v1-devcontainer-ollama-messung`](../done/slice-v1-devcontainer-ollama-messung.md) (Quelle, Messwerte, Folge-ADR) und [`slice-cr-devcontainer-ollama`](slice-cr-devcontainer-ollama.md) (Lastenheft) voraus; ihm folgt [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md).
+**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — siebter Slice der Welle; ihm gehen [`slice-v1-devcontainer-ollama-messung`](../done/slice-v1-devcontainer-ollama-messung.md) (Quelle, Messwerte, Folge-ADR) und [`slice-cr-devcontainer-ollama`](../in-progress/slice-cr-devcontainer-ollama.md) (Lastenheft) voraus; ihm folgt [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md).
 
 **Bezug:** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Devcontainer-Features; um `ollama` erweitert durch den CR), [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (Lieferkette), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Sandbox-Profil), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Hosts des Modell-Pull), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Warnungen unter `--quiet`); [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md) und die Folge-ADR des Mess-Slice (Quelle, Pin, Prüfung).
 
@@ -82,7 +82,7 @@ Abgleich der Tabelle gegen `git diff --stat` nach der **letzten** Fix-Runde (`AG
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-devcontainer-ollama-messung`](../done/slice-v1-devcontainer-ollama-messung.md) und [`slice-cr-devcontainer-ollama`](slice-cr-devcontainer-ollama.md) liegen in `done/` (die ADR ist `Accepted`, Lastenheft mit freigegebenem Wortlaut); kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-devcontainer-ollama-messung`](../done/slice-v1-devcontainer-ollama-messung.md) und [`slice-cr-devcontainer-ollama`](../in-progress/slice-cr-devcontainer-ollama.md) liegen in `done/` (die ADR ist `Accepted`, Lastenheft mit freigegebenem Wortlaut); kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benannt:**
 
