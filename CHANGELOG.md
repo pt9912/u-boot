@@ -26,6 +26,17 @@ this file is the same format applied to u-boot itself.
 
 ### Changed
 
+- Sandbox devcontainer (`nestedRuntime: podman`): the container now carries **Podman 6.1.4** instead of the Debian package (5.4.2), from the statically linked release archive of
+  the community project `podman-static` (Podman, `crun`, `conmon`, `netavark`, `aardvark-dns`, `passt`, `fuse-overlayfs` under `/usr/local`). Version, SHA-256 per architecture and the primary
+  fingerprint of the signing key are pinned in the generated Dockerfile; the image build stops before the extraction when the checksum, the key import or the signature does not match. Debian
+  still provides `uidmap` and `ca-certificates` only. The archive is a binary package from a single community maintainer and pipeline, not a script; it is downloaded at image build time, so the
+  default egress allowlist does not change. `registries.conf` searches Docker Hub only (`unqualified-search-registries = ['docker.io']`); short names other than `alpine` and `mycompany/img` are not
+  measured, and fully qualified names stay the recommendation. The `vfs` fallback (container started without `/dev/fuse`) works with Podman 6: the start script writes a user drop-in
+  (`~/.config/containers/storage.conf.d/99-u-boot-vfs.conf`) and `image_copy_tmp_dir` in the storage volume; `podman run`, `podman build` and `docker build` run under `vfs` (measured with the volume
+  mounted), and the status file still reports `fallback`. Measured with Docker 29.5.2 on Colima 0.10.3, arm64; for `amd64` the download, checksum, signature and version query are checked under
+  emulation, a nested run on `amd64`, Docker Desktop and hosts with cgroups v1 are **not measured**. **Existing projects** get the new version after the next `u-boot generate devcontainer` and
+  a rebuild of the container. Lastenheft 0.13.0 is unchanged ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
+  [ADR-0023](docs/plan/adr/0023-podman-aus-podman-static-im-sandbox-devcontainer.md)).
 - Sandbox devcontainer (`nestedRuntime: podman`): a missing `/dev/fuse` on the container host is a start error of the container engine, like `/dev/net/tun`, and no longer a
   degradation step: the generated container carries `--device=/dev/fuse`, and where the device is missing the engine refuses to start it (measured with Docker 29.5.2 on
   Colima 0.10.3, arm64: `docker run` exit code `127`, `docker start` exit code `1`, `error gathering device information while adding custom device`); the start script never runs.

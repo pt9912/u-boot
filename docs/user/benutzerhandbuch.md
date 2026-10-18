@@ -981,8 +981,25 @@ u-boot generate devcontainer
 ```
 
 Im Container läuft dann rootless Podman mit einem `docker`-Alias (ein Symlink
-auf `podman`), ohne Zugriff auf einen Host-Socket. Unter Docker sind dafür
-diese Lockerungen nötig; **`u-boot` weist jede einzeln als Warnung aus**:
+auf `podman`), ohne Zugriff auf einen Host-Socket.
+
+**Herkunft und Version.** Im Container liegt Podman 6.1.4, nicht das Debian-Paket:
+das statisch gelinkte Release-Archiv des Community-Projekts `podman-static` mit
+`crun`, `conmon`, `netavark`, `aardvark-dns`, `passt` und `fuse-overlayfs` unter
+`/usr/local`. Version, Prüfsumme je Architektur und der Fingerprint des
+Signaturschlüssels stehen im erzeugten Dockerfile; der Bau bricht vor dem
+Entpacken ab, wenn die Prüfsumme nicht stimmt, der Schlüssel nicht importierbar
+ist oder die Signatur nicht von diesem Schlüssel stammt. Aus Debian kommen nur
+`uidmap` und `ca-certificates`. Das Archiv ist ein Binärpaket, kein Skript;
+Vertrauen in die Quelle heißt Vertrauen in dieses Projekt und seine
+Build-Pipeline. Die Version ist festgelegt: eine neuere Podman-Version kommt mit
+einer neuen `u-boot`-Version, nicht von selbst. Archiv und Schlüssel lädt der Bau
+des Images, nicht der laufende Container; die Default-Allowlist braucht dafür
+keinen Host. Bestehende Projekte mit `nestedRuntime: podman` bekommen die Version
+nach `u-boot generate devcontainer` und einem Neubau des Containers.
+
+Unter Docker sind dafür diese Lockerungen nötig; **`u-boot` weist jede einzeln
+als Warnung aus**:
 
 ```text
 --cap-add=SYS_ADMIN
@@ -1007,16 +1024,20 @@ Podman eingebauten Buildah-Bibliothek. Nicht vorhanden sind das Kommando
 `buildah`, `docker buildx`, `docker compose` und BuildKit-Frontends
 (`# syntax=`); wer sie braucht, wählt `nestedRuntime: docker`. Verwenden Sie in
 Dockerfiles voll qualifizierte Namen (`FROM docker.io/library/alpine:3`): Namen
-ohne Registry lösen nur über die Alias-Liste der Distribution auf (gemessen: `alpine`
-löst auf, `mycompany/img` nicht; andere Kurznamen sind nicht gemessen), eine Suchliste für Registries ist nicht
-gesetzt. Images und Schichten liegen im Volume
+ohne Registry sucht Podman nur in Docker Hub (`registries.conf` mit
+`unqualified-search-registries = ['docker.io']`; gemessen: `alpine`
+löst auf, `mycompany/img` nicht; andere Kurznamen sind nicht gemessen). Images und
+Schichten liegen im Volume
 `<projekt>-containers-${devcontainerId}`; gemessen: das Image `debian:stable-slim`
 mit einer Paketinstallation und drei Builds belegte rund 140 MB, das Volumen
 wächst mit jedem Image. Fehlt `/dev/fuse` im Container (der Container wurde ohne
-das Device gestartet, etwa nach geänderten `runArgs`), baut Podman mit
-`vfs`-Speicher; das läuft, kopiert aber jede Schicht vollständig.
+das Device gestartet, etwa nach geänderten `runArgs`), richtet das Startscript
+`vfs`-Speicher ein (Benutzer-Konfiguration unter `~/.config/containers/`; der
+temporäre Platz für Image-Kopien liegt im Volume), und `podman run`, `podman build`
+und `docker build` laufen damit; das kopiert aber jede Schicht vollständig.
+Gemessen ist das mit eingehängtem Volume.
 
-**Gemessen** (Docker 29.5.2 auf Colima 0.10.3, arm64; in der VM
+**Gemessen** (Podman 6.1.4; Docker 29.5.2 auf Colima 0.10.3, arm64; in der VM
 `kernel.apparmor_restrict_unprivileged_userns=0`, auf dem Container-Host `/dev/net/tun`): `podman build` mit `FROM`,
 `RUN` und `COPY` baut kalt, aus dem Layer-Cache und mit `--no-cache`; `docker
 build` über den Alias ebenso; ein `RUN` mit Netz zu einem erlaubten Host
@@ -1433,8 +1454,11 @@ Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
   zusätzlich unter Colima (Linux-VM); nur diese beiden Hosts sagt das Lastenheft zu.
   **Nicht geprüft und nicht zugesagt:** Docker Desktop,
   Podman als Host-Engine, VS Code und Codespaces.
-- `nestedRuntime: podman`: `podman build` ist unter Docker auf Colima (arm64) mit
-  erlaubten verschachtelten User-Namespaces gemessen; amd64 und CI sind nicht gemessen.
+- `nestedRuntime: podman`: Podman 6.1.4 und `podman build` sind unter Docker auf
+  Colima (arm64) mit erlaubten verschachtelten User-Namespaces gemessen; für
+  amd64 sind Download, Prüfsumme, Signatur und Versionsabfrage unter Emulation
+  geprüft, ein verschachtelter Lauf auf amd64 und CI sind nicht gemessen.
+  Podman 6 unterstützt nur cgroups v2; Hosts mit cgroups v1 sind nicht gemessen.
   Unter einer Ubuntu-24.04-VM mit dem Schalter
   `kernel.apparmor_restrict_unprivileged_userns=1` startet verschachteltes
   Podman nicht (Exit-Code 11). Nicht verfügbar sind `buildah`, `docker buildx`,
