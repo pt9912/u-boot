@@ -161,7 +161,9 @@ Die Tabelle nennt jede Datei, die der Diff voraussichtlich berührt (§3.10 von 
 | `docs/plan/planning/open/README.md` | geprüft, unverändert | Die Zeile dieses Slice steht bereits dort (verweist auf `in-progress/`); der Move-Commit hat sie nachgezogen |
 | `docs/plan/planning/in-progress/roadmap.md` | update | Ruhe-Marker „Nichts in Arbeit.“ entfernt, solange dieser Slice in `in-progress/` liegt (d-check `planning`) |
 | `docs/plan/planning/done/…` (Closure) | — | die `done/`-Verweise ziehen `make slice-mv` nach |
-| `architecture.md`, `README.md`, `README.de.md`, `docs/maintainer/cli-json-contract.md`, `.golangci.yml`, `.d-check.yml`, Carveout-Inventar | geprüft, unverändert | `fuse`/`vfs` kommt dort nicht vor (Suche im Baum); kein neuer Carveout |
+| `README.md`, `README.de.md` | update | Statuszeile nennt als Host-Voraussetzung `/dev/fuse` und `/dev/net/tun` (EN/DE gespiegelt); die Suche nach `fuse` fand sie nicht, weil dort nur `/dev/net/tun` stand |
+| `docs/reviews/2026-10-18-slice-cr-sandbox-fuse-startfehler.md` | neu | Review-Report |
+| `architecture.md`, `docs/maintainer/cli-json-contract.md`, `.golangci.yml`, `.d-check.yml`, Carveout-Inventar | geprüft, unverändert | `fuse`/`vfs` kommt dort nicht vor (Suche im Baum); kein neuer Carveout |
 
 ## 4. Trigger
 
