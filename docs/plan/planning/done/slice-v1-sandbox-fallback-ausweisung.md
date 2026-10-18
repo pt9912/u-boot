@@ -116,7 +116,7 @@ Steering-Loop-Lerneintrag geschrieben (§7).
 - **Gegenstand:** übernommen von [`slice-cr-sandbox-fallback-ausweisung`](../done/slice-cr-sandbox-fallback-ausweisung.md): Lösung B (Lastenheft präzisieren); die Liefer-Punkte der DoD liegen dort.
 - **Steering-Loop-Eintrag:** Ein Slice mit zwei Lösungswegen, dessen Entscheidung beim Projektinhaber liegt, steht bis dahin in `open/` und geht bei der Wahl des CR-Wegs mit `Gegenstand:` an den CR über, statt zwei Pläne parallel zu halten. Gezählt, nicht verkörpert; erstes Auftreten.
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt.
-- **Folge-Slices:** [`slice-v1-sandbox-fallback-host-ausweisung`](../next/slice-v1-sandbox-fallback-host-ausweisung.md) — ist eine Datei in `open/`; der zwischenzeitliche CR [`slice-cr-sandbox-fallback-ausweisung`](../done/slice-cr-sandbox-fallback-ausweisung.md) entfiel am 2026-10-17 (Zielbild, Code zum Ziel).
+- **Folge-Slices:** [`slice-v1-sandbox-fallback-host-ausweisung`](../in-progress/slice-v1-sandbox-fallback-host-ausweisung.md) — ist eine Datei in `open/`; der zwischenzeitliche CR [`slice-cr-sandbox-fallback-ausweisung`](../done/slice-cr-sandbox-fallback-ausweisung.md) entfiel am 2026-10-17 (Zielbild, Code zum Ziel).
 - **Risiken aus §6:** jedes trägt einen Ausgang — siehe §6 (beide entfallen).
 - **Drei Paarungen:** Anker: keine verkörperte Regel, daher kein Anker; Folge-Slice: der CR liegt in `open/`; Register: keine Beobachtung angelegt.
 
