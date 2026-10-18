@@ -1257,8 +1257,7 @@ ist die Alternative.
 - **Schlüssel (bevorzugt):** Der Projektordner ist ein Volume, `~/.ssh` des
   Hosts ist im Container nicht eingebunden; der Schlüssel kommt also nicht über
   einen Mount in den Container.
-  1. Auf dem Host ein Schlüsselpaar erzeugen (`ssh-keygen` liegt im Basis-Image
-     `mcr.microsoft.com/devcontainers/base:debian`):
+  1. Auf dem Host ein Schlüsselpaar erzeugen:
 
      ```bash
      ssh-keygen -t ed25519 -f ~/.ssh/uboot_sshd
