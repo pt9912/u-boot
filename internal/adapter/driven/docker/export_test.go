@@ -33,3 +33,16 @@ func ProgressSinkOrDiscardForTest(sink io.Writer) io.Writer {
 func WrapComposeRunErrorForTest(ctx context.Context, runErr error, kind string) error {
 	return wrapComposeRunError(ctx, runErr, kind)
 }
+
+// Process is the exported alias of the inspector's command seam, so the
+// `_test` package can supply a fake runner.
+type Process = process
+
+// NewInspectorWithRunnerForTest builds an [Inspector] whose commands run
+// through start instead of os/exec, with an injectable environment.
+func NewInspectorWithRunnerForTest(
+	start func(ctx context.Context, args ...string) (Process, error),
+	getenv func(string) string,
+) *Inspector {
+	return &Inspector{binary: "docker", getenv: getenv, start: start}
+}
