@@ -44,6 +44,12 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 COPY egress-init.sh /usr/local/bin/u-boot-egress-init
 {{- end}}
+{{- if or .NestedPodman .NestedDocker .Egress}}
+# Status files of the container start scripts (LH-FA-DEV-007); `u-boot doctor`
+# reads them from the host. The directory belongs to the container user so the
+# `postCreateCommand` and the `sudo` scripts can write there.
+RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
+{{- end}}
 {{- if .Sandbox}}
 # Sandbox profile (LH-FA-DEV-006): workspace lives in a named volume that
 # inherits ownership from this directory.

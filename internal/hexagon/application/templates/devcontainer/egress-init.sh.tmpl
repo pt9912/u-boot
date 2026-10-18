@@ -9,13 +9,25 @@
 # Policy devcontainer.sandbox.onUnavailable: {{.OnUnavailable}}
 on_unavailable="{{.OnUnavailable}}"
 hosts="{{range $i, $h := .EgressHosts}}{{if $i}} {{end}}{{$h}}{{end}}"
+status_dir=/var/lib/u-boot/status
+
+# Writes the status file `u-boot doctor` reads: ok | fallback | failed.
+# The file is replaced as a whole; a write error never changes the exit code.
+write_status() {
+  [ -d "$status_dir" ] || return 0
+  tmp="$status_dir/.egress.$$"
+  { printf 'u-boot-status 1\nresult=%s\nat=%s\n' "$1" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$tmp" && mv -f "$tmp" "$status_dir/egress"; } 2>/dev/null || rm -f "$tmp"
+  return 0
+}
 
 # Without the NET_ADMIN capability nftables cannot be used.
 if ! nft list tables >/dev/null 2>&1; then
   echo "u-boot sandbox: egress restriction unavailable (NET_ADMIN not granted); consider restricting egress at network or DNS level" >&2
   if [ "$on_unavailable" = "fail" ]; then
+    write_status failed
     exit 11
   fi
+  write_status fallback
   exit 0
 fi
 
@@ -58,4 +70,5 @@ nft add rule ip6 u_boot_egress6 output oifname lo accept
 
 dnsmasq --conf-file="$conf"
 echo "nameserver 127.0.0.1" > /etc/resolv.conf
+write_status ok
 # END U-BOOT MANAGED BLOCK: init

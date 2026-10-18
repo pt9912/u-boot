@@ -994,3 +994,111 @@ func TestGenerateDevcontainer_SandboxEgress_ClaudeCodeHostsOnlyWhenActive(t *tes
 		})
 	}
 }
+
+// LH-FA-DEV-007 / LH-FA-DEV-008, replay contract of the start scripts: each
+// generated script writes its status file in every branch (the result
+// matches the exit path, `failed` before `exit 11`), replaces it as a whole,
+// keeps its exit codes, and the Dockerfile creates the status directory only
+// when a script is installed. `runArgs` stay as the nested-runtime tests
+// pin them. The behaviour of the written scripts runs in
+// `internal/e2e/sandbox_devcontainer_docker_test.go` (`make test-docker`).
+func TestGenerateDevcontainer_SandboxStartScriptsWriteStatusFiles(t *testing.T) {
+	t.Parallel()
+	const mkdirStatus = "RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status"
+	cases := []struct {
+		name       string
+		yaml       string
+		script     string
+		file       string
+		writes     map[string]int
+		exit11Next int
+	}{
+		{"podman", "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    nestedRuntime: podman\n", sandboxInitPath(), "vfs",
+			map[string]int{"ok": 1, "fallback": 1, "failed": 1}, 1},
+		{"docker", sandboxDockerYAML, dockerInitPath(), "daemon",
+			map[string]int{"ok": 2, "fallback": 1, "failed": 1}, 1},
+		{"egress", "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    egress:\n      enabled: true\n", egressInitPath(), "egress",
+			map[string]int{"ok": 1, "fallback": 1, "failed": 1}, 1},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, tc.yaml)
+			seedGitOrigin(t, fs, "git@github.com:pt9912/demo.git")
+			if _, err := generateSandbox(svc, false); err != nil {
+				t.Fatalf("generate: %v", err)
+			}
+			body, err := fs.ReadFile(tc.script)
+			if err != nil {
+				t.Fatalf("script not generated: %v", err)
+			}
+			script := string(body)
+			for _, want := range []string{
+				"status_dir=/var/lib/u-boot/status",
+				`printf 'u-boot-status 1\nresult=%s\nat=%s\n'`,
+				"date -u +%Y-%m-%dT%H:%M:%SZ",
+				`mv -f "$tmp" "$status_dir/` + tc.file + `"`,
+				`tmp="$status_dir/.` + tc.file + `.$$"`,
+			} {
+				if !strings.Contains(script, want) {
+					t.Errorf("script lacks %q:\n%s", want, script)
+				}
+			}
+			for result, n := range tc.writes {
+				if got := strings.Count(script, "write_status "+result+"\n"); got != n {
+					t.Errorf("write_status %s appears %d times, want %d:\n%s", result, got, n, script)
+				}
+			}
+			// `failed` is written right before the exit code 11 of the `fail` policy.
+			if got := strings.Count(script, "write_status failed\n    exit 11\n") + strings.Count(script, "write_status failed\n  exit 11\n"); got != tc.exit11Next {
+				t.Errorf("write_status failed directly before exit 11: %d times, want %d:\n%s", got, tc.exit11Next, script)
+			}
+			df, _ := fs.ReadFile(dockerfilePath())
+			if !strings.Contains(string(df), mkdirStatus) {
+				t.Errorf("Dockerfile lacks the status directory step:\n%s", df)
+			}
+		})
+	}
+	// Exit codes and stderr lines of the scripts are unchanged.
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, sandboxDockerYAML)
+	seedGitOrigin(t, fs, "git@github.com:pt9912/demo.git")
+	if _, err := generateSandbox(svc, false); err != nil {
+		t.Fatal(err)
+	}
+	script, _ := fs.ReadFile(dockerInitPath())
+	for _, want := range []string{"exit 11", "exit 0", "no daemon available, see $log", "echo \"u-boot sandbox: $1\" >&2"} {
+		if !strings.Contains(string(script), want) {
+			t.Errorf("docker-init.sh lost %q:\n%s", want, script)
+		}
+	}
+}
+
+// The Dockerfile creates the status directory only for an installed script:
+// none for the default profile, none for the sandbox profile without nested
+// runtime and egress.
+func TestGenerateDevcontainer_StatusDirectoryOnlyWithStartScripts(t *testing.T) {
+	t.Parallel()
+	cases := map[string]string{
+		"default profile":            "devcontainer:\n  enabled: true\n",
+		"sandbox without capability": "devcontainer:\n  enabled: true\n  profile: sandbox\n",
+		"nestedRuntime none":         "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    nestedRuntime: none\n",
+		"egress without sandbox":     "devcontainer:\n  enabled: true\n  sandbox:\n    egress:\n      enabled: true\n",
+	}
+	for name, yaml := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, yaml)
+			seedGitOrigin(t, fs, "git@github.com:pt9912/demo.git")
+			if _, err := generateSandbox(svc, false); err != nil {
+				t.Fatal(err)
+			}
+			df, _ := fs.ReadFile(dockerfilePath())
+			if strings.Contains(string(df), "/var/lib/u-boot/status") {
+				t.Errorf("Dockerfile creates the status directory without a start script:\n%s", df)
+			}
+		})
+	}
+}

@@ -7,18 +7,31 @@ on_unavailable="{{.OnUnavailable}}"
 log=/var/log/u-boot-dockerd.log
 pidfile=/var/run/docker.pid
 wait_seconds=60
+status_dir=/var/lib/u-boot/status
+
+# Writes the status file `u-boot doctor` reads: ok | fallback | failed.
+# The file is replaced as a whole; a write error never changes the exit code.
+write_status() {
+  [ -d "$status_dir" ] || return 0
+  tmp="$status_dir/.daemon.$$"
+  { printf 'u-boot-status 1\nresult=%s\nat=%s\n' "$1" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$tmp" && mv -f "$tmp" "$status_dir/daemon"; } 2>/dev/null || rm -f "$tmp"
+  return 0
+}
 
 unavailable() {
   echo "u-boot sandbox: $1" >&2
   if [ "$on_unavailable" = "fail" ]; then
+    write_status failed
     exit 11
   fi
+  write_status fallback
   exit 0
 }
 
 ready() { timeout 5 docker info >/dev/null 2>&1; }
 
 if ready; then
+  write_status ok
   exit 0
 fi
 
@@ -35,6 +48,7 @@ fi
 deadline=$(($(date +%s) + wait_seconds))
 while [ "$(date +%s)" -lt "$deadline" ]; do
   if ready; then
+    write_status ok
     exit 0
   fi
   if ! kill -0 "$pid" 2>/dev/null; then
