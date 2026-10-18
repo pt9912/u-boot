@@ -60,11 +60,14 @@ func buildProjectImage(ctx context.Context, t *testing.T, dir, tag string) strin
 // startLabeled starts a container the way the devcontainer CLI does (the
 // label `devcontainer.local_folder` carries the project folder) with the given
 // extra `docker run` arguments, and removes it at the end of the test. It
-// returns the container ID, read from stdout only (stderr carries the pull
-// progress of an image that is not cached).
+// returns the container ID, read from stdout only. The container carries a
+// generated name, and the cleanup is registered before `docker run`, so a
+// container whose ID cannot be read is removed as well.
 func startLabeled(ctx context.Context, t *testing.T, folder, image string, extra ...string) string {
 	t.Helper()
-	args := append([]string{"run", "-d", "-q", "--label", "devcontainer.local_folder=" + folder}, extra...)
+	name := "sbxe2e-lbl-" + strconv.FormatInt(time.Now().UnixNano(), 36)
+	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rm", "-f", "-v", name) })
+	args := append([]string{"run", "-d", "-q", "--name", name, "--label", "devcontainer.local_folder=" + folder}, extra...)
 	args = append(args, image, "sleep", "1800")
 	var stdout, stderr strings.Builder
 	cmd := exec.CommandContext(ctx, "docker", args...)
@@ -76,7 +79,6 @@ func startLabeled(ctx context.Context, t *testing.T, folder, image string, extra
 	if err != nil {
 		t.Fatalf("%v\nstderr:\n%s", err, stderr.String())
 	}
-	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rm", "-f", "-v", id) })
 	return id
 }
 
