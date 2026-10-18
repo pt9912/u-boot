@@ -93,6 +93,7 @@ Jede Aussage über Code steht mit Fundstelle (gelesen am 2026-10-18; Zeilennumme
 | `docs/user/benutzerhandbuch.md`, `CHANGELOG.md` | update | Handbuch: Absatz nach der Zusammenfassungs-Regel in `### Vorschau statt Überraschung`; CHANGELOG: `[Unreleased]` · `### Changed` |
 | `docs/plan/planning/in-progress/roadmap.md` | update | Ruhe-Marker „Nichts in Arbeit.“ durch die Arbeitszeile mit Slice-Link ersetzt (d-check `planning`) |
 | `docs/plan/planning/in-progress/slice-v1-cli-dry-run-log-would.md` | update | dieser Plan (gewählte Lösung, Tabelle) |
+| `docs/reviews/2026-10-18-slice-v1-cli-dry-run-log-would.md` | neu | Review-Report (Reviewer-Rolle) |
 | `docs/plan/planning/observations/BEO-CLI/dry-run-log-vergangenheitsform/state.md` | update (Closure) | Ausgang nach §2 |
 
 ## 4. Trigger
