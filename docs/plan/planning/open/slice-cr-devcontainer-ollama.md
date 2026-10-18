@@ -112,6 +112,8 @@ Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 | `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation nach `harness/review.md` und `harness/verification.md` |
 | `CHANGELOG.md` | unverändert | der CR ändert kein Produktverhalten; ein Eintrag entsteht im Code-Slice |
 
+**Übergabe aus dem Entwurf [`ADR-0024`](../../adr/0024-ollama-im-sandbox-devcontainer.md) (`Proposed`; gilt mit `Accepted`; Bedarf, kein Wortlaut):** Stelle 1 — Quelle und Prüfung: gepinntes Release-Archiv des Upstreams, nur per SHA-256 geprüft, **ohne Signatur** (die Grenze ist auszuweisen); Bindung: nur Loopback (gemessen); Start: nicht von selbst; Modelle im benannten Volume überstehen das **Löschen des Containers**, der Satz „überstehen den Neubau“ entfällt (nicht gemessen); wirksam nur mit Sandbox-Profil; Lauf auf `amd64` nicht verifiziert. Stelle 2 und 2a **entfallen** (Loopback, kein Netzdienst nach außen; Entscheidung 5 der ADR). [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) bleibt unverändert (die Auslegung steht in der ADR); die Hosts stehen nicht im Lastenheft.
+
 Vorab-Suche (Pflicht vor jeder Vertragsänderung, Muster [`slice-cr-devcontainer-agent-features-sandbox`](../done/slice-cr-devcontainer-agent-features-sandbox.md)): `grep -i` über `spec/lastenheft.md` nach `Feature`, `Katalog`, `Login-Dienst` und `quiet`; der Implementer führt sie vor dem Lastenheft-Commit aus und trägt die Treffer hier ein.
 
 ## 4. Trigger

@@ -49,3 +49,4 @@ das MADR-Format gilt für neu angelegte ADRs sowie für die noch mutable
 | [ADR 0021](0021-podman-build-im-sandbox-devcontainer.md) | Accepted | `podman build` im Sandbox-Devcontainer: sechste Lockerung `/dev/net/tun`, Egress-Host, Abnahmetest |
 | [ADR 0022](0022-fallback-ausweisung-statusdateien-im-container.md) | Accepted | Ausweisung der Degradations-Fallbacks: Statusdateien im Container, vom Host mit `docker cp` gelesen |
 | [ADR 0023](0023-podman-aus-podman-static-im-sandbox-devcontainer.md) | Accepted | Podman im Sandbox-Devcontainer aus `podman-static`: gepinnte, signierte Release-Archive statt Debian-Paket |
+| [ADR 0024](0024-ollama-im-sandbox-devcontainer.md) | Proposed | Ollama im Sandbox-Devcontainer aus dem Release-Archiv: gepinnte SHA-256-Prüfung ohne Signatur, nur CPU, Katalogschlüssel `ollama` (Entwurf) |
