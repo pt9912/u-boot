@@ -43,7 +43,15 @@ SOLID-nahen Zusatzprofil aus:
 Die vollständige Konfiguration (5 Defaults + 24 SOLID-nahe Linter
 aus §1.2; `depguard` ist als Schicht-Regel-Linter Teil dieser 24,
 siehe [SPEC-034](../../spec/spezifikation.md#spec-034--enforcement-der-import-regeln)) lebt in
-[`.golangci.yml`](../../.golangci.yml). Damit sind 29 Linter aktiv. `//nolint`-Suppressions bleiben
+[`.golangci.yml`](../../.golangci.yml). Damit sind 29 Linter aktiv. Daneben ist ein **Formatter** aktiv
+(`formatters.enable: gofmt` in `.golangci.yml`): `golangci-lint run` meldet
+jede Go-Datei, die `gofmt` ändern würde („File is not properly formatted
+(gofmt)“), und `make lint` bricht dann. Der Formatter zählt nicht zu den 29
+Linter-Prüfungen und sitzt nicht in der Tabelle von §1.2. Eine
+Formatierung des Bestands läuft im Docker mit der gepinnten
+`golangci-lint`-Version, nicht auf dem Host:
+`docker run --rm -v "$PWD":/src -w /src u-boot:lint golangci-lint fmt ./...`
+(Image `u-boot:lint` aus `make lint`). `//nolint`-Suppressions bleiben
 ausgeschlossen — falls ein Linter auf einem Pfad designseitig keinen
 Sinn ergibt (z. B. `testpackage` im `cmd/uboot`-Wiring), wird der Pfad
 per `issues.exclude-rules` mit `Why:`-Kommentar ausgenommen; dort

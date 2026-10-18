@@ -60,7 +60,7 @@ Diese Datei dupliziert sie nicht.
 | Target | Vertrag | Bindung |
 |---|---|---|
 | `make docs-check` | Doku-Referenzen (d-check): Link-Pfade, Heading-Anker, ADR-/LH-/SPEC-/Planning-Kennungs-Links, Referenzmodell, Planning-Lifecycle, Gate-Index | [`ADR-0013`](../docs/plan/adr/0013-dokumentationsreferenzmodell.md) |
-| `make lint` | statische Analyse, `depguard`, SOLID-nahe Linter; Verstöße sind PR-blockierend | [`ADR-0003`](../docs/plan/adr/0003-solid-nahes-lint-profil.md) |
+| `make lint` | statische Analyse, `depguard`, SOLID-nahe Linter, Formatter `gofmt`; Verstöße sind PR-blockierend | [`ADR-0003`](../docs/plan/adr/0003-solid-nahes-lint-profil.md) |
 | `make test` | Unit- und Default-Tests im Docker-Test-Stage | — |
 | `make test-docker` | Integrationstests (Build-Tag `docker`) gegen eine echte Docker Engine | — |
 | [`make coverage-gate`](sensors/coverage-gate.md) | Coverage-Schwelle, bootstrap-aware | Schwelle 90 % |

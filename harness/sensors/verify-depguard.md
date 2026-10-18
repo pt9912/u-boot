@@ -10,6 +10,13 @@ Regeln aus [`SPEC-034`](../../spec/spezifikation.md#spec-034--enforcement-der-im
 überhaupt feuern können. Es steht nicht in `make gates`, weil jede Regel einen
 vollen `make lint`-Lauf kostet.
 
+Wo kein vorhandenes, von der Regel verbotenes Paket ohne Rückweg zum Zielpaket
+existiert (Regel `domain-isoliert`: jedes Paket unter `application`, `port` und
+`adapter` importiert `domain`, ein Import daraus bildet einen Zyklus, und der
+Typecheck bricht vor `depguard` ab), legt das Skript ein Wegwerf-Paket ohne
+Importe an (`internal/hexagon/port/verifydepguardprobe`, fünftes Feld der Zeile
+in `CASES`), importiert es und entfernt es nach dem Lauf, auch bei Abbruch.
+
 ## Grenze — was das Grün nicht abdeckt
 
 1. **Je Regel ein Fall** — geprüft wird ein verbotener Import je Regel, nicht
@@ -29,7 +36,7 @@ vollen `make lint`-Lauf kostet.
 |---|---|
 | 0 | alle Regeln haben mit der erwarteten Beschreibung angeschlagen |
 | 1 | mindestens eine Regel hat nicht angeschlagen (Logs im ausgegebenen Verzeichnis) |
-| 2 | Vorbedingung verletzt: Arbeitsbaum in einem Schicht-Verzeichnis nicht sauber |
+| 2 | Vorbedingung verletzt: Arbeitsbaum in einem Schicht-Verzeichnis nicht sauber, oder ein Probe-Verzeichnis aus `CASES` existiert schon |
 
 ## Sperren
 
