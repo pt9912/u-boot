@@ -4,7 +4,7 @@
 
 ## Scope
 
-- Slice: [`slice-v1-doctor-fuse-im-container`](../plan/planning/in-progress/slice-v1-doctor-fuse-im-container.md) (in-progress), Commit-Range `e3d328e..HEAD` (`f544d13`, 8 Commits, 10 Dateien). E1 = Lösung (b), E2 = nur der `/dev/fuse`-Zweig.
+- Slice: [`slice-v1-doctor-fuse-im-container`](../plan/planning/done/slice-v1-doctor-fuse-im-container.md) (in-progress), Commit-Range `e3d328e..HEAD` (`f544d13`, 8 Commits, 10 Dateien). E1 = Lösung (b), E2 = nur der `/dev/fuse`-Zweig.
 - IDs: [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Lastenheft 0.13.0, im Diff unverändert), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes); Spezifikation [`LH-FA-DEV-007.a`](../../spec/spezifikation.md#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten), [`LH-FA-DEV-007.b`](../../spec/spezifikation.md#lh-fa-dev-007b--ausstattung-bei-nestedruntime-podman), [`SPEC-045`](../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) (gelesen, unverändert); [`ADR-0022`](../plan/adr/0022-fallback-ausweisung-statusdateien-im-container.md).
 - Eingang: DoD-Bestätigung des Implementers, Review-Report [`2026-10-18-slice-v1-doctor-fuse-im-container.md`](2026-10-18-slice-v1-doctor-fuse-im-container.md) (0 HIGH/MEDIUM, 3 LOW, 5 INFO laut Tabelle: F-1..F-3 LOW, F-4..F-7 INFO).
 - Host: Colima, Docker-Server arm64, VM-Kernel mit `kernel.apparmor_restrict_unprivileged_userns=0`; kein Host-Go.
