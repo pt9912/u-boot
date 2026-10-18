@@ -182,7 +182,7 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 
 **Drei Paarungen:** Anker: kein Feld `liegt in` in diesem Slice, nichts zu paaren. Folge-Slice: [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md) und [`slice-v2-spec-sandbox-egress-ollama`](../open/slice-v2-spec-sandbox-egress-ollama.md) liegen in `open/`. Register: die vier genannten Kennungen sind Verzeichnisse im Register und tragen je ein nicht leeres `evidence/`.
 
-**Abgleich der Plan-Tabelle und Sensor-Läufe der Closure:** *(Wird nach der letzten Änderung der Closure eingetragen.)*
+**Abgleich der Plan-Tabelle und Sensor-Läufe der Closure:** `git diff --stat 1b833ea..HEAD` nach dem letzten Inhalts-Commit vor diesem Eintrag (`6772aba`): 24 Einträge — Lastenheft, dieser Slice (Move mit Inhalt, im Diff als Löschung unter `open/` und Neuanlage unter `done/`), Roadmap, `open/README.md`, zwei Folge-Slices in `open/`, Welle-Datei, zwei Slices in `done/`, Review-Report, Verification-Report, Verification-Report des Vorgänger-Slice und elf Dateien des Registers (zwei `observation.md`, vier `state.md`, fünf Evidence-Dateien). Jeder Eintrag hat eine Zeile in der Plan-Tabelle §3, jede Zeile mit Datei-Eintrag einen Diff; `CHANGELOG.md` und `docs/maintainer/releasing.md` stehen nicht im Diff (gelesen, §3). Läufe nach `6772aba` (Exit-Code des `make`-Prozesses selbst): `make gates` Exit 0, `make doc-trace` Exit 0 (83 Anforderungen, 0 Waisen), `make docs-check` Exit 0 (431 Dateien, 0 Befunde). Dieser Eintrag ändert nur Text in dieser Datei; ein erneuter Lauf nach ihm steht im Handoff der Closure.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
