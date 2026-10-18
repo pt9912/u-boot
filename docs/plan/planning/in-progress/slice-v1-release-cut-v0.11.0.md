@@ -79,7 +79,8 @@ Jede Aussage in dieser Tabelle ist an der genannten Stelle gelesen (Stand 2026-1
 | `README.md` | update | Status-Block `:10`–`:14` (als Stand formuliert, ohne Datum und ohne „released“): Version `v0.11.0`; er nennt den Stand zur Ausweisung der Fallbacks, zum Startfehler bei fehlendem `/dev/fuse` und zum Dry-Run-Wortlaut, mit Messstand; `:99` `VERSION=0.10.0` → `0.11.0`; neue Zeile in der Releases-Tabelle unmittelbar nach der `v0.10.0`-Zeile (`:199`; die Tabelle ist nicht nach Version sortiert), Link `releases/tag/v0.11.0`; ohne Anforderungs-, ADR- oder Spec-Kennungen. Die Feature-Zahl „13 features“ (`:11`) bleibt: der Katalog ändert sich in diesem Release nicht (gelesen: `featureCatalogue()` in `internal/hexagon/application/devcontainer_features.go`, Schlüssel unverändert). |
 | `README.de.md` | update | gleiches Muster: `:11`–`:15` Status, `:101` `VERSION=0.10.0`, Tabellenzeile nach `:202`. |
 | `docs/user/benutzerhandbuch.md` | update | `:4` `Software-Version: v0.10.0`, `:5` `Stand: 2026-10-17` (→ Tag-Datum), `:80` Beispielausgabe `u-boot version 0.10.0`, `:106` `download/v0.10.0`, `:133` `VERSION=0.10.0`, `:2032` „beschreibt `u-boot` v0.10.0“. Die Anleitung für den `sshd` kommt aus [`slice-v1-handbuch-sshd-anleitung`](../done/slice-v1-handbuch-sshd-anleitung.md) und wird hier nicht geschrieben. Keine Kennungen, keine Chronik im Text. |
-| `docs/maintainer/releasing.md` | prüfen, nur bei Abweichung ändern | Gelesen §1–§8. §3 nennt als „zuletzt“ den Cut `v0.9.0` (`slice-v1-release-cut-v0.9.0`); der letzte Cut ist `v0.10.0`, nach diesem `v0.11.0` → berichtigen. Die übrigen Aussagen stimmen mit dem Ist-Stand überein (Tap-Prüfung über Download-URLs, Asset-Name aus der Asset-Liste). Eine Aussage zum Trockenlauf des Tap-Pfads kommt in §4 (Vorab-Prüfung) nur, wenn der Projektinhaber ihn als Dauerschritt will (§6). |
+| `docs/maintainer/releasing.md` | update | Gelesen §1–§8. §3 nannte als „zuletzt“ den Cut `v0.9.0`; berichtigt auf den letzten abgeschlossenen Cut `v0.10.0`. §4 trägt den Trockenlauf des Tap-Pfads als Dauerschritt (Schritte 1 bis 3 wie M-T, mit der Grenze: `is_stable`-Bedingung, echter `curl`, `git push` und Token unbewiesen); §5 hält fest, dass ein Vorab-Tag den Zweig `is_stable == true` und den Job `tap` nicht läuft. Die übrigen Aussagen stimmen mit dem Ist-Stand überein (Tap-Prüfung über Download-URLs in §8, Asset-Name aus der Asset-Liste in §1). |
+| `internal/hexagon/application/doctor.go` | update (nur Kommentar) | Doc-Kommentar von `inContainer` (Methode von `DoctorService`) nennt den dritten Nutzer `checkSandboxFallbacks`: Aufruf `s.inContainer()` beim Bau des `fallbackReader` in `internal/hexagon/application/doctor_sandbox.go`, Feld `fallbackReader.inContainer` in `internal/hexagon/application/devcontainer_fallback.go`. Kein Code, kein Test; Hinweis aus [`slice-v1-doctor-fuse-im-container`](../done/slice-v1-doctor-fuse-im-container.md) §7. |
 | `docs/plan/planning/in-progress/roadmap.md` | update | Beim Start: `Nichts in Arbeit.` (Ruhe-Marker, gilt nur ohne Slice in `in-progress/`, `.d-check.yml` `planning`) entfällt, stattdessen ein Zeiger auf diesen Slice im Block „Offene Wellen“; nach dem Tag: Marker zurück, neue Zeile in „Abgeschlossene Wellen“ nach der Zeile `v0.10.0`: `v0.11.0 (…)` mit Datum und Verweis auf diesen Slice als Detailquelle, Tag-Commit-Hash erst nach dem Tag; `**Letzte Änderung:**` im Kopf. Der Hinweis „Nach v0.11.0: …“ für die beiden Hygiene-Slices bleibt unverändert stehen. |
 | `docs/plan/planning/in-progress/README.md`, `docs/plan/planning/open/README.md` | update | Bestandszeile für diesen Slice beim Start (`in-progress/README.md`) und beim Move nach `done/` entfernt; `open/README.md` verliert die Zeile beim Start. |
 | `docs/reviews/<Datum>-slice-v1-release-cut-v0.11.0.md`, `docs/reviews/<Datum>-verification-slice-v1-release-cut-v0.11.0.md` | neu, durch Reviewer und Verifier | Review- und Verification-Report des Cuts (nicht im Implementer-Diff, aber im Cut-Diff). Kennungen in Tabellenzellen ohne Backticks im Linktext, `make docs-check` vor dem Push. |
@@ -102,6 +103,45 @@ Jede Aussage in dieser Tabelle ist an der genannten Stelle gelesen (Stand 2026-1
 | M6 | `releasing.md` §6: `gh run watch`; `gh release view v0.11.0 --json assets`; `docker run --rm ghcr.io/pt9912/u-boot:0.11.0 --version`; `:latest` gleicher Digest; Job `tap` | Maintainer | Erwartet: zwölf Assets (sechs Binaries, vier Pakete, `SHA256SUMS`, `u-boot.rb`), kein Prerelease; **erster echter Lauf des Zweigs `is_stable == true` nach dem Trockenlauf:** `tap` läuft |
 | M7 | Auf einem Mac: `brew tap pt9912/u-boot`, `brew trust pt9912/u-boot`, `brew install u-boot`, `u-boot --version` = `0.11.0`; Smoke-Lauf im Tap abwarten | Projektinhaber | `brew audit --strict --online` gatet den Smoke (`releasing.md` §6) |
 | M8 | Nacharbeit (`releasing.md` §7): Roadmap-Zeile mit Tag-Hash und Datum, Closure-Notiz, Verification Evidence, `git mv` nach `done/` | Planner (Closure), Implementer (Roadmap) | Closure erst nach M6 |
+
+**M-T ausgeführt (Implementer, 2026-10-18; Material für die Closure, §7 bleibt leer).** Befehl: `docker run -i --rm -v "$PWD":/src:ro u-boot:test bash < <Skript>` (Image aus `make test`, Arbeitsbaum schreibgeschützt, kein Netz genutzt, kein Schreiben ins Tap). Das Skript (im Scratchpad des Laufs, nicht im Repo) füllt die Formel aus einer `SHA256SUMS`-Fixture im Muster `sumsFull` und ruft die drei Skripte mit Stellvertretern von `curl` und `git`; Ausgabe:
+
+```text
+(1) homebrew-formula-fill.sh v0.11.0 <sums> scripts/homebrew-formula.rb.tmpl <Ausgabe>
+    homebrew-formula-fill: …/u-boot.rb written (tag v0.11.0, four platform digests filled).   exit=0
+    vier url-Zeilen …/releases/download/v0.11.0/u-boot-{darwin-arm64,darwin-amd64,linux-arm64,linux-amd64}
+(2a) tap-formula-check.sh v0.11.0 <Ausgabe>   exit=0
+(2b) tap-formula-check.sh v0.10.0 <Ausgabe>   exit=1
+     tap-nachzug: the u-boot.rb asset of v0.10.0 does not carry four download URLs of v0.10.0 (found 4 url lines, 0 of v0.10.0).
+(3) tap-nachzug.sh, TAP_TOKEN=dummy-token, TAG=v0.11.0, curl- und git-Stellvertreter:
+    tap-nachzug: pt9912/homebrew-u-boot updated to v0.11.0.   exit=0
+    Protokoll: curl -fsSL https://github.com/pt9912/u-boot/releases/download/v0.11.0/u-boot.rb -o <tmp>/u-boot.rb
+               git clone --depth 1 https://x-access-token:<TOKEN>@github.com/pt9912/homebrew-u-boot.git <tmp>/tap
+               git diff --quiet -- Formula/u-boot.rb
+               git status --porcelain Formula/u-boot.rb
+               git -c user.name=… -c user.email=… add Formula/u-boot.rb
+               git -c user.name=… -c user.email=… commit -m u-boot 0.11.0
+               git push origin HEAD
+(3b) tap-nachzug.sh mit TAG=v0.10.0 gegen dieselbe Formel: Abbruch mit derselben Meldung, exit=1;
+     Protokoll nur der curl-Aufruf, kein clone, kein push
+```
+
+Rot gesehen: (2b) und (3b) sind die rote Gegenprobe der Prüfung auf den Tag (ein falscher Tag in den vier URLs bricht vor `clone`); der Wächter der Skripte selbst (`TestTapFormulaCheck` in `cmd/uboot/homebrew_scripts_test.go`, fünf Fehlerfälle) läuft in `make test`. **Grenze, wie in M-T benannt:** die Bedingung `is_stable == 'true'` und der Workflow-Schritt, der echte `curl` gegen das Release-Asset, der echte `git push` und das Token sind nicht geprobt; die Stellvertreter beweisen die Reihenfolge der Aufrufe und den Commit-Text, nicht das Verhalten von `git` (der Stellvertreter von `git status` meldet immer eine Änderung, der Zweig „nichts zu tun“ ist nicht geprobt). Befund: keiner; kein Skript und kein Workflow geändert.
+
+**Vorab-Prüfung lokal (Implementer, 2026-10-18, Stand nach dem letzten Code-/Doku-Commit außer diesem Plan-Commit; Docker 29.5.2 unter Colima, arm64; nichts gepusht, kein Tag):**
+
+| Sensor | Ergebnis | Laufzeit |
+|---|---|---|
+| `make gates` | grün (`baseline-verify` 54 Dateien, `d-check` 372 Dateien 0 Befunde, Coverage-Gate 90 %); Docker-Layer-Cache für Lint und Test teilweise warm | 27,7 s |
+| `make doc-trace` | 83 Anforderungen, 0 Waisen | 1,2 s |
+| `make ci` | grün (`govulncheck`: No vulnerabilities found; `image-scan`: grün) | 47,7 s |
+| `make fullbuild` | grün (`ci` + Runtime-Image) | 42,6 s |
+| `make test-docker` | grün, alle Pakete `ok`, `internal/e2e` 739 s; der Aufruf läuft ohne `-v`, ein Skip ist im Log nicht von einem Pass zu trennen ([`BEO-E2E/ci-ueberspringt-nested-podman-build`](../observations/BEO-E2E/ci-ueberspringt-nested-podman-build/observation.md)) | 12 min 28 s |
+| `make doc-immutable RANGE="v0.10.0..HEAD"` | 151 Commits, 0 Befunde | 1,6 s |
+| `make build VERSION=0.11.0` | grün; `docker run --rm u-boot:latest --version` = `u-boot version 0.11.0`, OCI-Label `org.opencontainers.image.version` = `0.11.0` (lokales Image, nicht gepusht) | 5,7 s |
+| `make verify-depguard` | 8 von 9 PASS; `domain-isoliert` FAIL „expected desc not found in lint output“ (Bestandsproblem des Sensors, Gegenstand von [`slice-v1-harness-gofmt-und-depguard`](../open/slice-v1-harness-gofmt-und-depguard.md), nicht Teil dieses Cuts) | 56,2 s |
+
+Plan-Tabelle gegen `git diff --stat 4fb8b94..HEAD` abgeglichen: zwölf Dateien (`CHANGELOG.md`, `Dockerfile`, `README.de.md`, `README.md`, `cmd/uboot/main.go`, `docs/maintainer/releasing.md`, `in-progress/README.md`, `in-progress/roadmap.md`, `open/README.md`, `docs/user/benutzerhandbuch.md`, `internal/hexagon/application/doctor.go`, `repo.mk`), jede mit Zeile in der Tabelle; Abweichung von der Planung: die Zeile von `v0.11.0` unter „Nächste Wellen“ der Roadmap bleibt stehen (der Zeiger unter „Offene Wellen“ verweist auf sie). Datum: `date +%F` = 2026-10-18; CHANGELOG, Tabellenzeilen beider READMEs und Handbuch-`Stand` tragen 2026-10-18.
 
 ## 4. Trigger
 
