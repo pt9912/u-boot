@@ -23,8 +23,8 @@ const (
 
 	// checkIDSandboxEgress is the LH-FA-DEV-008 check: the egress
 	// restriction is only meaningful together with the sandbox
-	// profile; the NET_ADMIN capability itself cannot be determined
-	// from the host and is verified by the container start script.
+	// profile; the state of the NET_ADMIN capability at the container
+	// start is reported by [checkIDSandboxFallbackEgress].
 	checkIDSandboxEgress = "devcontainer.sandbox.egress"
 
 	// checkIDSandboxCredentials is the LH-FA-DEV-009 check: git and
@@ -89,7 +89,7 @@ func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) d
 	}
 	if nestedDocker(dc) {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityOK,
-			Message: "Nested Docker daemon configured; it needs `--privileged`, which removes the isolation from the container host, and the container start script checks that the daemon becomes ready (LH-FA-DEV-007)."}
+			Message: "Nested Docker daemon configured; it needs `--privileged`, which removes the isolation from the container host; whether the daemon became ready at the container start is reported by devcontainer.sandbox.fallback.daemon (LH-FA-DEV-007)."}
 	}
 	if !nestedPodman(dc) {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityOK,
@@ -235,5 +235,29 @@ func (s *DoctorService) checkSandboxEgress(_ context.Context, baseDir string) do
 			SecurityRelaxation: true}
 	}
 	return domain.Diagnostic{ID: checkIDSandboxEgress, Severity: domain.SeverityOK,
-		Message: "Egress restriction configured; the NET_ADMIN capability is verified when the container starts (guardrail, not a sandbox boundary)."}
+		Message: "Egress restriction configured; whether the NET_ADMIN capability was granted at the container start is reported by devcontainer.sandbox.fallback.egress (guardrail, not a sandbox boundary)."}
+}
+
+// checkSandboxFallbacks reports, per configured capability, the state its
+// container start script wrote into the status file (LH-FA-DEV-007,
+// LH-FA-DEV-008): one item per `vfs` storage, daemon and egress
+// restriction, only for the capabilities the configuration asks for. A
+// state that cannot be read is an info item, never a fallback. The
+// status file is a hint from the container, not proof: a missing report
+// does not mean that no fallback occurred.
+func (s *DoctorService) checkSandboxFallbacks(ctx context.Context, baseDir string) []domain.Diagnostic {
+	cfg, err := s.loadUbootYAML(baseDir)
+	if err != nil {
+		return nil
+	}
+	probes := configuredFallbackProbes(cfg.Devcontainer, profileIsSandbox(cfg.Devcontainer))
+	if len(probes) == 0 {
+		return nil
+	}
+	reader := &fallbackReader{inspector: s.inspector, fs: s.fs, inContainer: s.inContainer(), baseDir: baseDir}
+	items := make([]domain.Diagnostic, 0, len(probes))
+	for _, p := range probes {
+		items = append(items, fallbackDiagnostic(p, reader.read(ctx, p)))
+	}
+	return items
 }

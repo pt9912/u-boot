@@ -41,3 +41,17 @@ func (noopLogger) Debug(_ string, _ ...any) {}
 func (noopLogger) Info(_ string, _ ...any)  {}
 func (noopLogger) Warn(_ string, _ ...any)  {}
 func (noopLogger) Error(_ string, _ ...any) {}
+
+// noopDevcontainerInspector is the nil-tolerant default for the
+// [driven.DevcontainerInspector] dependency — finds no container, so a
+// service constructed without the port reports "not determinable" and
+// stays silent in `generate` and `init`.
+type noopDevcontainerInspector struct{}
+
+func (noopDevcontainerInspector) FindContainer(_ context.Context, _ string) (driven.DevcontainerContainer, bool, error) {
+	return driven.DevcontainerContainer{}, false, nil
+}
+
+func (noopDevcontainerInspector) ReadFile(_ context.Context, _, _ string, _ int) ([]byte, error) {
+	return nil, driven.ErrContainerFileNotFound
+}

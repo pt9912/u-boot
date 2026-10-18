@@ -46,5 +46,8 @@ func DefaultAllowedCodes() map[string]string {
 		"devcontainer.sandbox.runtime":           "doctor: Sandbox nested runtime (LH-FA-DEV-007)",
 		"devcontainer.sandbox.credentials":       "doctor: Sandbox git and agent credentials (LH-FA-DEV-009)",
 		"devcontainer.sandbox.egress":            "doctor: Sandbox egress restriction (LH-FA-DEV-008)",
+		"devcontainer.sandbox.fallback.vfs":      "doctor: Sandbox vfs-Fallback laut Statusdatei des Containers (LH-FA-DEV-007)",
+		"devcontainer.sandbox.fallback.daemon":   "doctor: Sandbox Container ohne Daemon laut Statusdatei des Containers (LH-FA-DEV-007)",
+		"devcontainer.sandbox.fallback.egress":   "doctor: Sandbox Wegfall der Egress-Restriktion laut Statusdatei des Containers (LH-FA-DEV-008)",
 	}
 }

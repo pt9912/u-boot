@@ -618,6 +618,57 @@ Verfeinert [`LH-FA-DEV-006`](lastenheft.md#lh-fa-dev-006--sandbox-profil) (Login
 
 Ohne Befund ist der Eintrag OK; bei aktivem Agenten-Feature nennt die Meldung die Variable und dass nur die Referenz durchgereicht wird.
 
+### SPEC-045 — Statusdateien der Startscripte und ihre Ausweisung
+
+Verfeinert [`LH-FA-DEV-007`](lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Degradation, Ausweisung jedes Fallbacks), [`LH-FA-DEV-008`](lastenheft.md#lh-fa-dev-008--egress-restriktion) (Wegfall der Egress-Restriktion) und [`LH-FA-CLI-005`](lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Ausnahme 2) und berührt [`LH-FA-DEV-006`](lastenheft.md#lh-fa-dev-006--sandbox-profil) (kein Pfad vom Container zum Host).
+
+**Statusdateien.** Jedes Startscript schreibt bei jedem Lauf, auch wenn seine Fähigkeit verfügbar ist, eine Statusdatei im Container unter `/var/lib/u-boot/status/`. Das erzeugte Dockerfile legt das Verzeichnis für den Container-Benutzer an, nur wenn mindestens ein Startscript installiert ist.
+
+| Datei | Startscript | Fähigkeit | Läuft bei |
+|---|---|---|---|
+| `vfs` | `sandbox-init.sh` | `nestedRuntime: podman` | `postCreateCommand`, einmal je Container |
+| `daemon` | `docker-init.sh` | `nestedRuntime: docker` | `postStartCommand`, bei jedem Start |
+| `egress` | `egress-init.sh` | Egress-Restriktion | `postStartCommand`, bei jedem Start |
+
+Das Dokument hat genau drei Zeilen:
+
+```
+u-boot-status 1
+result=ok|fallback|failed
+at=2026-10-17T18:52:54Z
+```
+
+`result` ist `fallback` bei der Richtlinie `warn` und eingetretenem Fallback (`vfs`-Storage, Container ohne Daemon, Wegfall der Egress-Restriktion), `failed` bei der Richtlinie `fail` (das Startscript schreibt die Datei vor dem Exit-Code `11`), sonst `ok`. `at` ist der Zeitpunkt des Scriptlaufs in UTC, Sekundengenauigkeit, Form `YYYY-MM-DDTHH:MM:SSZ`. Die Datei trägt keinen Freitext und keine Container-Kennung. Das Startscript schreibt in eine Temporärdatei und benennt sie um, sodass kein halbes Dokument lesbar ist. Blockierte verschachtelte User-Namespaces (Exit-Code `11` in beiden Richtlinien) sind ein Umgebungsproblem und kein Fallback; es entsteht keine Datei. Exit-Codes und Standardfehlerausgabe der Startscripte bleiben unverändert.
+
+**Strenge beim Lesen.** Ein Dokument ist gültig, wenn es höchstens 512 Byte umfasst, nur druckbare ASCII-Zeichen und Zeilenwechsel enthält, genau die drei Zeilen oben trägt (ein abschließender Zeilenwechsel ist zulässig), `result` einen der drei Werte hat und `at` genau die Form oben hat (keine Bruchteile, kein Offset). Jede Abweichung, auch Freitext, macht es ungültig. Ausgegeben werden nur die aufgelösten Felder, nie der Inhalt der Datei.
+
+**Ermittlung durch den Host.** `doctor`, `generate devcontainer` und `init` lesen die Dateien über die Container-Engine, ohne ein Programm im Container auszuführen:
+
+- Der Container ist der, der das Label `devcontainer.local_folder` mit dem absoluten Projektordner (dem Basisverzeichnis des Befehls) trägt; das setzt das Devcontainer-Werkzeug (gemessen mit der Devcontainer-CLI). Bei mehreren Treffern gilt der zuletzt erzeugte, auch ein gestoppter. `u-boot` setzt kein eigenes Label und fügt keine `runArgs` hinzu.
+- Gelesen wird mit `docker cp <Container>:<Pfad> -`, ohne Link-Auflösung und ohne `docker exec`. Der Tar-Kopf entscheidet vor dem Lesen: nur eine reguläre Datei von höchstens 512 Byte; Symlink, FIFO, Verzeichnis, Gerät und Übergröße machen das Dokument ungültig. Die Container-Kennung wird vor jeder Verwendung gegen `[0-9a-f]{12,64}` geprüft, der Projektordner als ein Argument ohne Shell übergeben, jeder Aufruf der Engine ist auf zehn Sekunden begrenzt.
+- Ein entfernter Engine-Zugang (`DOCKER_HOST` oder aktiver Docker-Kontext zeigt nicht auf einen lokalen Unix-Socket) gilt als nicht ermittelbar: Ein Container dort, der denselben Ordnerwert trägt, gehört zu einer anderen Maschine.
+- Läuft `u-boot` selbst im Devcontainer (Container-Erkennung), liest `doctor` die Dateien direkt aus dem Dateisystem, nach derselben Typ- und Größenprüfung; fehlt das Verzeichnis (etwa `u-boot` aus dem Runtime-Image), ist der Zustand nicht ermittelbar. `generate devcontainer` und `init` fragen dort nicht.
+
+**Nicht ermittelbar** heißt: kein Container zum Projektordner, keine oder entfernte Engine, keine Datei (ein Container, der vor den Statusdateien erzeugt wurde oder noch nie gestartet ist, hat keine; er braucht `u-boot generate devcontainer` und einen Neubau), ein Lesefehler. Das ist nie ein Fallback.
+
+**Stand.** `postStartCommand` überschreibt `daemon` und `egress` bei jedem Start; `vfs` gilt bis zum Entfernen des Containers wie die `storage.conf`, die das Script schreibt. Ein gestoppter Container wird gelesen; der Eintrag nennt den Zeitstempel und den Vermerk „container stopped".
+
+**Abbildung in `u-boot doctor`.** Je konfigurierter Fähigkeit ein Eintrag, und nur dann: `devcontainer.sandbox.fallback.vfs` (`nestedRuntime: podman`), `….daemon` (`nestedRuntime: docker`), `….egress` (Egress-Restriktion), jeweils mit Sandbox-Profil. Ohne Sandbox-Profil oder ohne die Fähigkeit entsteht kein Eintrag.
+
+| Zustand | Stufe | Kennzeichen `DegradationFallback` (sichtbar unter `--quiet`) |
+|---|---|---|
+| `result=ok` | OK | nein |
+| `result=fallback` | `warn` | ja |
+| `result=failed` | `error` (Exit-Code `11`) | nein |
+| nicht ermittelbar | `info` mit Grund | nein |
+| ungültiges Dokument | `warn` | nein |
+
+`doctor --strict` endet bei `warn` mit Exit-Code `11`, wie bei jedem `warn`-Eintrag. Ein Fehler der Engine verschiebt den Exit-Code nicht: der Bericht entsteht immer, der Fehler ist „nicht ermittelbar". `diagnostics[]` der JSON-Ausgabe trägt wie sonst nur `warn` und `error`; ein `info`-Eintrag erscheint dort nicht.
+
+**Abbildung in `generate devcontainer` und `init`.** Nach dem Schreiben fragen beide für jede Fähigkeit, die `u-boot.yaml` (bei `init` die geschriebene) konfiguriert, denselben Weg ab (ein Container-Lookup je Lauf). Meldet ein bestehender Container `result=fallback`, steht in der Warnungsausgabe eine Warnung (Level `warn`, Subjekt `.devcontainer/devcontainer.json`, Code `LH-FA-DEV-007` für `vfs` und Daemon, `LH-FA-DEV-008` für Egress) mit dem Kennzeichen `DegradationFallback`, ohne `SecurityRelaxation`; sie bleibt unter `--quiet` sichtbar ([`LH-FA-CLI-005`](lastenheft.md#lh-fa-cli-005--verbosity-und-logging) Ausnahme 2). Der Text nennt, dass es der Stand des letzten Starts des bestehenden Containers ist und die neu erzeugten Dateien erst nach einem Neubau wirken. Die Abfrage ist best effort: ohne Engine, ohne Container, ohne Datei, bei ungültigem Dokument und bei `ok` oder `failed` bleibt sie still (keine Meldung, keine Änderung des Exit-Codes); mit `--dry-run` und ohne konfigurierte Fähigkeit findet sie nicht statt. `up` und jeder andere Befehl fragen nicht.
+
+**Grenze.** Die Datei stammt aus einem Container, in dem ein Agent läuft, und ist dort mit Root-Rechten frei schreibbar. Sie ist ein Hinweis, kein Beleg: „kein Fallback gemeldet" heißt nicht „kein Fallback aufgetreten". Das Sandbox-Profil bleibt Schadensbegrenzung, keine Grenze ([`LH-FA-DEV-006`](lastenheft.md#lh-fa-dev-006--sandbox-profil)).
+
 ## 2. Datenstrukturen und Schemas
 
 Formate und Schemata (`u-boot.yaml`, JSON-Ausgabe, CLI-Tabellen). Jede Struktur trägt
@@ -1073,6 +1124,9 @@ Jede Prüfung von `u-boot doctor` trägt einen stabilen Code in `diagnostics[].c
 | `devcontainer.sandbox.runtime` | Sandbox: nested Podman (`/dev/fuse` auf dem Linux-Host: Fehler bei Fehlen, Profil-Konsistenz), [`LH-FA-DEV-007`](lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) |
 | `devcontainer.sandbox.egress` | Sandbox: Egress-Restriktion konsistent konfiguriert, [`LH-FA-DEV-008`](lastenheft.md#lh-fa-dev-008--egress-restriktion) |
 | `devcontainer.sandbox.credentials` | Sandbox: keine Klartext-Zugangsdaten (Git und Agent), Token-Quelle bei https-Clone, Referenz `${localEnv:<NAME>}` bei aktivem Agenten-Feature, [`LH-FA-DEV-009`](lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), Einzelheiten [`SPEC-044`](#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten) |
+| `devcontainer.sandbox.fallback.vfs` | Sandbox: Zustand des `vfs`-Storage-Fallbacks beim Containerstart laut Statusdatei, nur bei `nestedRuntime: podman`, [`LH-FA-DEV-007`](lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), Einzelheiten [`SPEC-045`](#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) |
+| `devcontainer.sandbox.fallback.daemon` | Sandbox: Zustand des Docker-Daemons beim Containerstart laut Statusdatei, nur bei `nestedRuntime: docker`, [`LH-FA-DEV-007`](lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), Einzelheiten [`SPEC-045`](#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) |
+| `devcontainer.sandbox.fallback.egress` | Sandbox: Zustand der Egress-Restriktion beim Containerstart laut Statusdatei, nur mit Egress-Restriktion, [`LH-FA-DEV-008`](lastenheft.md#lh-fa-dev-008--egress-restriktion), Einzelheiten [`SPEC-045`](#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) |
 
 <!-- code-registry:end -->
 

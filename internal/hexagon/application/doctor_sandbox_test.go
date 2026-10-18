@@ -160,7 +160,7 @@ func TestDoctor_SandboxEgress(t *testing.T) {
 	}{
 		{"off", sandboxYAMLHead, domain.SeverityOK, "not enabled"},
 		{"on without sandbox", sandboxYAMLHead + "  sandbox:\n    egress:\n      enabled: true\n", domain.SeverityWarn, "no effect"},
-		{"on with sandbox", sandboxYAMLHead + "  profile: sandbox\n  sandbox:\n    egress:\n      enabled: true\n", domain.SeverityOK, "verified when the container starts"},
+		{"on with sandbox", sandboxYAMLHead + "  profile: sandbox\n  sandbox:\n    egress:\n      enabled: true\n", domain.SeverityOK, "devcontainer.sandbox.fallback.egress"},
 		{"on with nested docker", sandboxYAMLDocker + "    egress:\n      enabled: true\n", domain.SeverityWarn, "bypass the restriction"},
 	}
 	for _, tc := range cases {
@@ -183,9 +183,9 @@ func TestDoctor_SandboxEgress(t *testing.T) {
 // relaxations (exception 1); the `nestedRuntime` "no effect" item is a
 // configuration message and carries neither flag; a missing `/dev/fuse`
 // on the container host is an error under both policies and carries
-// none (its Severity shows it). Host-side, no degradation fallback is
-// determinable: the `vfs`, daemon and egress fallbacks arise at
-// container start.
+// none (its Severity shows it). The degradation fallbacks (`vfs`,
+// daemon, egress) are reported by the `devcontainer.sandbox.fallback.*`
+// items, covered by TestDoctor_SandboxFallback*.
 func TestDoctor_SandboxFallbackFlagIsOnTheItem(t *testing.T) {
 	t.Parallel()
 	gitCfg := func(url string) string { return "[remote \"origin\"]\n\turl = " + url + "\n" }

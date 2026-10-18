@@ -173,6 +173,10 @@ type InitProjectService struct {
 	confirmer    driven.Confirmer
 	logger       driven.Logger
 	templateInit driving.TemplateInitUseCase
+	// inspector reads the status files of an existing devcontainer
+	// container after `init --devcontainer` wrote (LH-FA-DEV-007); never
+	// nil after construction.
+	inspector driven.DevcontainerInspector
 	// initMu serialises Init() invocations on a single service
 	// instance. The PreviewMode-aware fs/progress-swaps in Init()
 	// mutate shared s.fs/s.progress fields; concurrent Init calls
@@ -197,6 +201,20 @@ type InitProjectOption func(*InitProjectService)
 // exercise the `--template` path can omit the option.
 func WithTemplateInit(uc driving.TemplateInitUseCase) InitProjectOption {
 	return func(s *InitProjectService) { s.templateInit = uc }
+}
+
+// WithDevcontainerInspector wires the [driven.DevcontainerInspector]
+// `init --devcontainer` asks after writing (LH-FA-DEV-007): for each
+// capability the written u-boot.yaml asks for, an existing container whose
+// start script reported `result=fallback` yields a warning that carries
+// [driving.WarningEntry.DegradationFallback]. Without it (or with nil) the
+// command asks nothing.
+func WithDevcontainerInspector(i driven.DevcontainerInspector) InitProjectOption {
+	return func(s *InitProjectService) {
+		if i != nil {
+			s.inspector = i
+		}
+	}
 }
 
 // Static check: InitProjectService satisfies the driving port.
@@ -228,7 +246,7 @@ func NewInitProjectService(fs driven.FileSystem, yaml driven.YAMLCodec, git driv
 	if logger == nil {
 		logger = noopLogger{}
 	}
-	s := &InitProjectService{fs: fs, yaml: yaml, git: git, progress: progress, confirmer: confirmer, logger: logger}
+	s := &InitProjectService{fs: fs, yaml: yaml, git: git, progress: progress, confirmer: confirmer, logger: logger, inspector: noopDevcontainerInspector{}}
 	for _, opt := range opts {
 		opt(s)
 	}
@@ -283,6 +301,7 @@ func NewInitProjectServiceWithFactory(
 		progress:  progress,
 		confirmer: confirmer,
 		logger:    logger,
+		inspector: noopDevcontainerInspector{},
 	}
 	for _, opt := range opts {
 		opt(s)
@@ -469,6 +488,7 @@ func (s *InitProjectService) runInit(ctx context.Context, req driving.InitProjec
 	if yamlBackup != nil {
 		backups = append(backups, *yamlBackup)
 	}
+	warnings = append(warnings, s.existingContainerFallbackWarnings(ctx, req)...)
 
 	// initGit-Skip-Logic (T0-(n)): in Dry-Run mode skip git init
 	// — `s.git` is a separate driven port, not routed through the
@@ -483,6 +503,32 @@ func (s *InitProjectService) runInit(ctx context.Context, req driving.InitProjec
 	}
 
 	return driving.InitProjectResponse{Project: project, Created: created, Backups: backups, Warnings: warnings}, nil
+}
+
+// existingContainerFallbackWarnings asks the [driven.DevcontainerInspector]
+// after `init --devcontainer` wrote u-boot.yaml (LH-FA-DEV-007, best
+// effort): for each capability the written configuration asks for, an
+// existing container whose start script reported `result=fallback` yields
+// a warning flagged as a degradation fallback. Nothing is asked under
+// `--dry-run` (nothing was written) or when the written configuration asks
+// for no capability; every other outcome stays silent.
+func (s *InitProjectService) existingContainerFallbackWarnings(ctx context.Context, req driving.InitProjectRequest) []driving.WarningEntry {
+	if !req.Devcontainer || req.PreviewMode == driving.PreviewDryRun {
+		return nil
+	}
+	body, err := s.fs.ReadFile(filepath.Join(req.BaseDir, "u-boot.yaml"))
+	if err != nil {
+		return nil
+	}
+	var cfg ubootYAMLConfig
+	if err := s.yaml.Unmarshal(body, &cfg); err != nil {
+		return nil
+	}
+	probes := configuredFallbackProbes(cfg.Devcontainer, profileIsSandbox(cfg.Devcontainer))
+	if len(probes) == 0 {
+		return nil
+	}
+	return fallbackWarnings(ctx, &fallbackReader{inspector: s.inspector, baseDir: req.BaseDir}, probes)
 }
 
 // initTemplateData builds the shared template data of the default

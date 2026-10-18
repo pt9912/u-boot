@@ -86,6 +86,11 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// pre-probe classification (ErrDockerUnavailable vs.
 	// ErrComposeRuntime) which the engine adapter enforces.
 	dockerEngineAdapter := docker.NewEngine()
+	// The devcontainer inspector (LH-FA-DEV-007) reads the status files
+	// of the project's devcontainer container with `docker ps` and
+	// `docker cp` (never `exec`). Used by doctor, generate and init to
+	// disclose the degradation fallbacks of the container start scripts.
+	inspectorAdapter := docker.NewInspector()
 	// The netprobe adapter (M6-T3) provides TCP-reachability checks
 	// for the UpService polling loop. Stateless; depguard rule
 	// `application-no-net` enforces all net.* usage funnels through here.
@@ -139,14 +144,17 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	generateFSFactory := newPreviewFSFactory(fsAdapter)
 	removeFSFactory := newPreviewFSFactory(fsAdapter)
 	configFSFactory := newPreviewFSFactory(fsAdapter)
-	initSvc := application.NewInitProjectServiceWithFactory(initFSFactory, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter, application.WithTemplateInit(templateInitSvc))
-	doctorSvc := application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, runtimeAdapter, logAdapter)
+	initSvc := application.NewInitProjectServiceWithFactory(initFSFactory, yamlAdapter, gitAdapter, progressAdapter, confirmAdapter, logAdapter,
+		application.WithTemplateInit(templateInitSvc), application.WithDevcontainerInspector(inspectorAdapter))
+	doctorSvc := application.NewDoctorService(fsAdapter, yamlAdapter, gitAdapter, dockerAdapter, runtimeAdapter, logAdapter).
+		WithDevcontainerInspector(inspectorAdapter)
 	addSvc := application.NewAddServiceServiceWithFactory(addFSFactory, yamlAdapter, confirmAdapter, logAdapter)
 	removeSvc := application.NewRemoveServiceServiceWithFactory(removeFSFactory, yamlAdapter, confirmAdapter, logAdapter).
 		WithDockerEngine(dockerEngineAdapter)
 	upSvc := application.NewUpService(fsAdapter, yamlAdapter, dockerEngineAdapter, netprobeAdapter, clockAdapter, logAdapter)
 	downSvc := application.NewDownService(fsAdapter, dockerEngineAdapter, confirmAdapter, logAdapter)
-	generateSvc := application.NewGenerateServiceWithFactory(generateFSFactory, yamlAdapter, logAdapter)
+	generateSvc := application.NewGenerateServiceWithFactory(generateFSFactory, yamlAdapter, logAdapter).
+		WithDevcontainerInspector(inspectorAdapter)
 	configSvc := application.NewConfigServiceWithFactory(configFSFactory, yamlAdapter, logAdapter)
 	templateListSvc := application.NewTemplateListService(templateCatalogAdapter, logAdapter)
 	logsSvc := application.NewLogsService(fsAdapter, dockerEngineAdapter, logAdapter)

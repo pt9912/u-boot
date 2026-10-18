@@ -36,6 +36,10 @@ type GenerateService struct {
 	fsFactory func(driving.PreviewMode) (driven.FileSystem, driven.RecorderPort)
 	yaml      driven.YAMLCodec
 	logger    driven.Logger
+	// inspector reads the status files of an existing devcontainer
+	// container after `generate devcontainer` wrote (LH-FA-DEV-007);
+	// never nil (noop default).
+	inspector driven.DevcontainerInspector
 	// generateMu serialises Generate() invocations on a single service
 	// instance. The PreviewMode-aware s.fs-swap mutates a shared field;
 	// concurrent Generate calls would race on swap/restore pairs and
@@ -68,7 +72,20 @@ func NewGenerateService(fs driven.FileSystem, yaml driven.YAMLCodec, logger driv
 	if logger == nil {
 		logger = noopLogger{}
 	}
-	return &GenerateService{fs: fs, yaml: yaml, logger: logger}
+	return &GenerateService{fs: fs, yaml: yaml, logger: logger, inspector: noopDevcontainerInspector{}}
+}
+
+// WithDevcontainerInspector wires the [driven.DevcontainerInspector]
+// `generate devcontainer` asks after writing (LH-FA-DEV-007): an existing
+// container whose start script reported `result=fallback` yields a warning
+// that carries [driving.WarningEntry.DegradationFallback]. Without it (or
+// with nil) the command asks nothing. Returns the service for chaining.
+func (s *GenerateService) WithDevcontainerInspector(i driven.DevcontainerInspector) *GenerateService {
+	if i == nil {
+		i = noopDevcontainerInspector{}
+	}
+	s.inspector = i
+	return s
 }
 
 // NewGenerateServiceWithFactory is the slice-v1-cli-json-dry-run-
@@ -102,6 +119,7 @@ func NewGenerateServiceWithFactory(
 		fsFactory: fsFactory,
 		yaml:      yaml,
 		logger:    logger,
+		inspector: noopDevcontainerInspector{},
 	}
 }
 
@@ -743,7 +761,7 @@ type devcontainerFilePlan struct {
 // malformed, the call returns [driving.ErrGenerateManualConflict]
 // with **no** WriteFile invocations — half-written state would be
 // re-classified as a conflict on the next call.
-func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.GenerateRequest) (driving.GenerateResponse, error) {
+func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.GenerateRequest) (driving.GenerateResponse, error) {
 	// LH-FA-DEV-003 / LH-FA-DEV-003 — validate the
 	// `--allow-external-feature-sources` flag entries early (so a
 	// bad URL fails the generate before any FS side effect), but
@@ -790,6 +808,7 @@ func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.Ge
 	if err != nil {
 		return driving.GenerateResponse{}, err
 	}
+	warnings = append(warnings, s.existingContainerFallbackWarnings(ctx, req, cfg, sandbox)...)
 
 	action := devcontainerAggregateAction(hasWrite, hasReplace)
 	if profileWritten && action == driving.GenerateActionNoOp {
@@ -811,6 +830,27 @@ func (s *GenerateService) generateDevcontainer(_ context.Context, req driving.Ge
 		Changed:  changed,
 		Warnings: warnings,
 	}, nil
+}
+
+// existingContainerFallbackWarnings asks the [driven.DevcontainerInspector]
+// after the devcontainer files were written (LH-FA-DEV-007, best effort):
+// for each configured capability whose existing container reported
+// `result=fallback` it returns a warning flagged as a degradation
+// fallback. Nothing is asked under `--dry-run` (nothing was written) or
+// when the configuration asks for no capability; an engine error, no
+// container, no file, a document that is not valid and `ok`/`failed` stay
+// silent.
+func (s *GenerateService) existingContainerFallbackWarnings(
+	ctx context.Context, req driving.GenerateRequest, cfg ubootYAMLConfig, sandbox bool,
+) []driving.WarningEntry {
+	if req.PreviewMode == driving.PreviewDryRun {
+		return nil
+	}
+	probes := configuredFallbackProbes(cfg.Devcontainer, sandbox)
+	if len(probes) == 0 {
+		return nil
+	}
+	return fallbackWarnings(ctx, &fallbackReader{inspector: s.inspector, baseDir: req.BaseDir}, probes)
 }
 
 // persistSandboxProfile writes `devcontainer.profile: sandbox` into

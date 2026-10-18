@@ -31,6 +31,9 @@ type DoctorService struct {
 	docker  driven.DockerProbe
 	runtime driven.RuntimeEnvironment
 	logger  driven.Logger
+	// inspector reads the status files of the devcontainer container
+	// (LH-FA-DEV-007); never nil (noop default).
+	inspector driven.DevcontainerInspector
 }
 
 // Static check: DoctorService satisfies the driving port.
@@ -57,13 +60,26 @@ func NewDoctorService(
 		logger = noopLogger{}
 	}
 	return &DoctorService{
-		fs:      fs,
-		yaml:    yaml,
-		git:     git,
-		docker:  docker,
-		runtime: runtime,
-		logger:  logger,
+		fs:        fs,
+		yaml:      yaml,
+		git:       git,
+		docker:    docker,
+		runtime:   runtime,
+		logger:    logger,
+		inspector: noopDevcontainerInspector{},
 	}
+}
+
+// WithDevcontainerInspector wires the [driven.DevcontainerInspector]
+// through which `doctor` reads the status files of the devcontainer
+// container (LH-FA-DEV-007). Without it (or with nil) the fallback items
+// report "not determinable". Returns the service for chaining.
+func (s *DoctorService) WithDevcontainerInspector(i driven.DevcontainerInspector) *DoctorService {
+	if i == nil {
+		i = noopDevcontainerInspector{}
+	}
+	s.inspector = i
+	return s
 }
 
 // doctorCheckID enumerates the stable machine-readable IDs the
@@ -140,6 +156,9 @@ func DoctorCheckIDs() []string {
 		checkIDSandboxRuntime,
 		checkIDSandboxEgress,
 		checkIDSandboxCredentials,
+		checkIDSandboxFallbackVFS,
+		checkIDSandboxFallbackDaemon,
+		checkIDSandboxFallbackEgress,
 	}
 }
 
@@ -188,6 +207,7 @@ func (s *DoctorService) Check(ctx context.Context, req driving.DoctorRequest) (d
 		s.checkSandboxEgress(ctx, req.BaseDir),
 		s.checkSandboxCredentials(ctx, req.BaseDir),
 	}
+	items = append(items, s.checkSandboxFallbacks(ctx, req.BaseDir)...)
 	report := domain.DiagnosticReport{Items: items}
 	s.logger.Info("doctor: checks complete",
 		"baseDir", req.BaseDir,
