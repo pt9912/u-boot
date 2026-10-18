@@ -822,8 +822,8 @@ func TestGenerateDevcontainer_SandboxDocker_NotGenerated(t *testing.T) {
 		yaml     string
 		wantWarn bool
 	}{
-		"podman": {sandboxPodmanYAML, false},
-		"none":   {"devcontainer:\n  enabled: true\n  profile: sandbox\n", false},
+		"podman":                  {sandboxPodmanYAML, false},
+		"none":                    {"devcontainer:\n  enabled: true\n  profile: sandbox\n", false},
 		"docker, default profile": {"devcontainer:\n  enabled: true\n  sandbox:\n    nestedRuntime: docker\n", true},
 	} {
 		t.Run(name, func(t *testing.T) {

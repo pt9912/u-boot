@@ -219,8 +219,8 @@ func TestTemplateInitService_RenderFailureMidWalkNoPartialWrite(t *testing.T) {
 	files := &fakeTemplateFiles{
 		name: "basic",
 		fs: fstest.MapFS{
-			"a.txt.tmpl":      &fstest.MapFile{Data: []byte("hello {{ .Name }}\n")},
-			"b.broken.tmpl":   &fstest.MapFile{Data: []byte("{{ .Name")}, // unclosed
+			"a.txt.tmpl":    &fstest.MapFile{Data: []byte("hello {{ .Name }}\n")},
+			"b.broken.tmpl": &fstest.MapFile{Data: []byte("{{ .Name")}, // unclosed
 		},
 	}
 	fs := newFakeFS()

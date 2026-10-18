@@ -564,8 +564,8 @@ func TestGenerateDevcontainer_Absent_BothFilesCreated_MinimumFields(t *testing.T
 		t.Fatalf("devcontainer.json not valid after stripJSONC:\n%s", stripped)
 	}
 	var dc struct {
-		Name         string `json:"name"`
-		Build        struct {
+		Name  string `json:"name"`
+		Build struct {
 			Dockerfile string `json:"dockerfile"`
 			Context    string `json:"context"`
 		} `json:"build"`

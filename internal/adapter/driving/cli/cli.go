@@ -200,7 +200,6 @@ var ErrServiceNameMissing = errors.New("service name is required")
 // Maps to LH-FA-CLI-006 exit code 2.
 var ErrInvalidTimeout = errors.New("--timeout must be >= 0")
 
-
 // ErrDoctorFailures signals that `u-boot doctor` ran successfully
 // (use-case returned no error) but the diagnostic report contained
 // at least one SeverityError item — or at least one SeverityWarn
@@ -216,46 +215,46 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 //
 //   - 0  — no error
 //   - 2  — pure CLI / flag errors (unknown subcommand, unknown flag,
-//          missing required arg, too many positional args,
-//          ErrConflictingModeFlags, M6 `--timeout=-1`)
+//     missing required arg, too many positional args,
+//     ErrConflictingModeFlags, M6 `--timeout=-1`)
 //   - 10 — fachlicher Validierungsfehler: LH-FA-INIT-004 marker
-//          collisions (ErrProjectExists), non-marker file collision
-//          (ErrFileExists), LH-FA-INIT-006 invalid project name
-//          (ErrInvalidProjectName) or service name
-//          (ErrInvalidServiceName), LH-AK-001 missing BaseDir
-//          (ErrBaseDirMissing), LH-FA-INIT-005 unsupported
-//          backup-source kind (ErrBackupUnsupportedKind), LH-FA-INIT-005
-//          LH-FA-INIT-005 force-without-backup (ErrForceRequiresBackup),
-//          LH-FA-ADD-001 missing u-boot.yaml
-//          (ErrProjectNotInitialized), LH-FA-ADD-002 unknown
-//          service (ErrServiceUnsupported), LH-FA-ADD-005
-//          inconsistent service state (ErrServiceInconsistent),
-//          LH-FA-ADD-007 service-not-registered (ErrServiceUnregistered),
-//          LH-FA-ADD-006 add-on dependencies missing (ErrDependenciesRequired),
-//          M6 missing compose.yaml (ErrComposeFileMissing) and
-//          destructive confirmation refused (ErrConfirmationRequired)
+//     collisions (ErrProjectExists), non-marker file collision
+//     (ErrFileExists), LH-FA-INIT-006 invalid project name
+//     (ErrInvalidProjectName) or service name
+//     (ErrInvalidServiceName), LH-AK-001 missing BaseDir
+//     (ErrBaseDirMissing), LH-FA-INIT-005 unsupported
+//     backup-source kind (ErrBackupUnsupportedKind), LH-FA-INIT-005
+//     LH-FA-INIT-005 force-without-backup (ErrForceRequiresBackup),
+//     LH-FA-ADD-001 missing u-boot.yaml
+//     (ErrProjectNotInitialized), LH-FA-ADD-002 unknown
+//     service (ErrServiceUnsupported), LH-FA-ADD-005
+//     inconsistent service state (ErrServiceInconsistent),
+//     LH-FA-ADD-007 service-not-registered (ErrServiceUnregistered),
+//     LH-FA-ADD-006 add-on dependencies missing (ErrDependenciesRequired),
+//     M6 missing compose.yaml (ErrComposeFileMissing) and
+//     destructive confirmation refused (ErrConfirmationRequired)
 //   - 11 — fachlicher Umgebungsfehler: `u-boot doctor` reported at
-//          least one SeverityError, or at least one SeverityWarn
-//          with `--strict` (ErrDoctorFailures, LH-FA-DIAG-003);
-//          M6 `u-boot up`/`down` saw a Docker-environment failure
-//          before the actual Compose call (driven.ErrDockerUnavailable)
+//     least one SeverityError, or at least one SeverityWarn
+//     with `--strict` (ErrDoctorFailures, LH-FA-DIAG-003);
+//     M6 `u-boot up`/`down` saw a Docker-environment failure
+//     before the actual Compose call (driven.ErrDockerUnavailable)
 //   - 12 — fachlicher Ausführungsfehler (M6): Compose-runtime error
-//          after passing preflight (driven.ErrComposeRuntime) or
-//          stabilization timeout (driving.ErrStabilizationTimeout)
+//     after passing preflight (driven.ErrComposeRuntime) or
+//     stabilization timeout (driving.ErrStabilizationTimeout)
 //   - 14 — technischer Persistenz-/Dateisystemfehler: LH-NFA-REL-003
-//          backup-suffix exhausted (ErrBackupSuffixExhausted),
-//          backup source vanished mid-flight
-//          (ErrBackupSourceMissing); LH-FA-TPL-004 catalog adapter
-//          failure (ErrTemplateCatalog — filesystem IO / malformed
-//          embedded template.yaml); LH-FA-TPL-001 render-loop
-//          failure (ErrTemplateRender — text/template parse/exec
-//          or IO during the per-file render copy).
-//          Footnote (slice-v1-cli-json-dry-run-init T0-(f)): die
-//          Backup-Sentinels werden hier auf LH-NFA-REL-003 gezogen,
-//          obwohl LH-FA-INIT-005 (INIT-005 "Überschreibschutz") sie
-//          ursprünglich der INIT-005-Klasse zuordnete — Engineering-
-//          Entscheidung im init-Slice, um Envelope-Code und
-//          Exit-Code-Klasse (technische Persistenz) zu synchronisieren.
+//     backup-suffix exhausted (ErrBackupSuffixExhausted),
+//     backup source vanished mid-flight
+//     (ErrBackupSourceMissing); LH-FA-TPL-004 catalog adapter
+//     failure (ErrTemplateCatalog — filesystem IO / malformed
+//     embedded template.yaml); LH-FA-TPL-001 render-loop
+//     failure (ErrTemplateRender — text/template parse/exec
+//     or IO during the per-file render copy).
+//     Footnote (slice-v1-cli-json-dry-run-init T0-(f)): die
+//     Backup-Sentinels werden hier auf LH-NFA-REL-003 gezogen,
+//     obwohl LH-FA-INIT-005 (INIT-005 "Überschreibschutz") sie
+//     ursprünglich der INIT-005-Klasse zuordnete — Engineering-
+//     Entscheidung im init-Slice, um Envelope-Code und
+//     Exit-Code-Klasse (technische Persistenz) zu synchronisieren.
 //   - 1  — everything else (generic error)
 //
 // The mapping lives in the driving adapter because exit-code
@@ -442,13 +441,13 @@ func isFilesystemError(err error) bool {
 
 // isUsageError detects two distinct classes of usage-level errors:
 //
-//   (a) u-boot-defined CLI sentinels — currently
-//       [ErrConflictingModeFlags]. New sentinels in this class
-//       belong in the errors.Is block at the top.
-//   (b) Cobra-raised errors for malformed CLI input. Cobra does
-//       not export sentinels for these; we string-match the
-//       message prefix because that is the only stable handle we
-//       have.
+//	(a) u-boot-defined CLI sentinels — currently
+//	    [ErrConflictingModeFlags]. New sentinels in this class
+//	    belong in the errors.Is block at the top.
+//	(b) Cobra-raised errors for malformed CLI input. Cobra does
+//	    not export sentinels for these; we string-match the
+//	    message prefix because that is the only stable handle we
+//	    have.
 //
 // The two classes coexist on purpose — splitting into two helpers
 // would obscure the shared "return code 2" intent. Add to the

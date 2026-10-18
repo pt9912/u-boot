@@ -689,4 +689,3 @@ func TestConfigGet_S3_DevcontainerEmptyMap_ReturnsNotSet(t *testing.T) {
 		t.Errorf("err = %v, want wrap of ErrConfigValueNotSet", err)
 	}
 }
-

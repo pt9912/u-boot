@@ -14,9 +14,9 @@ func TestNewServiceName_ValidAccepts(t *testing.T) {
 		"postgres",
 		"keycloak",
 		"otel",
-		"a",                                  // 1-char edge
-		"my-service-7",                       // dashes + digits
-		"abcdefghij0123456789abcdefghij01",   // 32-char edge
+		"a",                                // 1-char edge
+		"my-service-7",                     // dashes + digits
+		"abcdefghij0123456789abcdefghij01", // 32-char edge
 	}
 	for _, in := range cases {
 		in := in
@@ -36,15 +36,15 @@ func TestNewServiceName_ValidAccepts(t *testing.T) {
 func TestNewServiceName_InvalidRejects(t *testing.T) {
 	t.Parallel()
 	cases := []string{
-		"",                                    // empty
-		"Postgres",                            // uppercase
-		"1postgres",                           // leading digit
-		"-postgres",                           // leading dash
-		"postgres-",                           // trailing dash
-		"my_service",                          // underscore (not allowed in our spec; Compose tolerates it
+		"",           // empty
+		"Postgres",   // uppercase
+		"1postgres",  // leading digit
+		"-postgres",  // leading dash
+		"postgres-",  // trailing dash
+		"my_service", // underscore (not allowed in our spec; Compose tolerates it
 		// but we want a single normalization rule for built-in services)
-		"my service",                          // space
-		strings.Repeat("a", 33),               // length over cap
+		"my service",            // space
+		strings.Repeat("a", 33), // length over cap
 	}
 	for _, in := range cases {
 		in := in

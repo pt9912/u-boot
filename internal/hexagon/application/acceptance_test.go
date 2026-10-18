@@ -435,4 +435,3 @@ func TestLHFAUP005_LogsSIGINTReturnsNil(t *testing.T) {
 		t.Errorf("Logs returned %+v, want zero LogsResponse", resp)
 	}
 }
-

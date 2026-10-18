@@ -529,7 +529,9 @@ func TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild(t *testing.
 			}
 			out, code := dockerOutput(ctx, t, append(args, contextDir)...)
 			if code == 0 {
-				t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", "uboot-e2e-sandbox-pin-negative:probe") })
+				t.Cleanup(func() {
+					_, _ = dockerOutput(context.Background(), t, "rmi", "-f", "uboot-e2e-sandbox-pin-negative:probe")
+				})
 				t.Fatalf("build with %v succeeded, want a failure before the installation:\n%s", tc.args, out)
 			}
 			if tc.want != "" && !strings.Contains(out, tc.want) {

@@ -813,10 +813,10 @@ func TestInit_RenderedTemplate_ContainsManagedBlockMarkers(t *testing.T) {
 	}
 
 	cases := map[string][2]string{
-		"compose.yaml":  {"# BEGIN U-BOOT MANAGED BLOCK: init", "# END U-BOOT MANAGED BLOCK: init"},
-		".env.example":  {"# BEGIN U-BOOT MANAGED BLOCK: init", "# END U-BOOT MANAGED BLOCK: init"},
-		"README.md":     {"<!-- BEGIN U-BOOT MANAGED BLOCK: init -->", "<!-- END U-BOOT MANAGED BLOCK: init -->"},
-		"CHANGELOG.md":  {"<!-- BEGIN U-BOOT MANAGED BLOCK: init -->", "<!-- END U-BOOT MANAGED BLOCK: init -->"},
+		"compose.yaml": {"# BEGIN U-BOOT MANAGED BLOCK: init", "# END U-BOOT MANAGED BLOCK: init"},
+		".env.example": {"# BEGIN U-BOOT MANAGED BLOCK: init", "# END U-BOOT MANAGED BLOCK: init"},
+		"README.md":    {"<!-- BEGIN U-BOOT MANAGED BLOCK: init -->", "<!-- END U-BOOT MANAGED BLOCK: init -->"},
+		"CHANGELOG.md": {"<!-- BEGIN U-BOOT MANAGED BLOCK: init -->", "<!-- END U-BOOT MANAGED BLOCK: init -->"},
 	}
 	for path, markers := range cases {
 		body, err := fs.ReadFile(filepath.Join(testBaseDir, path))
@@ -1782,8 +1782,8 @@ func TestInit_LHAK005_DevcontainerFlow_FreshProject(t *testing.T) {
 		t.Fatalf("devcontainer.json not valid JSON after stripJSONC:\n%s", stripped)
 	}
 	var dc struct {
-		Name       string `json:"name"`
-		Build      struct {
+		Name  string `json:"name"`
+		Build struct {
 			Dockerfile string `json:"dockerfile"`
 			Context    string `json:"context"`
 		} `json:"build"`
@@ -1941,11 +1941,11 @@ func sliceContains(haystack []string, needle string) bool {
 func seedM3InitFiles(t *testing.T, fs *fakeFS, baseDir string) {
 	t.Helper()
 	fixtures := map[string]string{
-		"README.md":     "<!-- BEGIN U-BOOT MANAGED BLOCK: init -->\n# stale readme\n<!-- END U-BOOT MANAGED BLOCK: init -->\n",
-		"CHANGELOG.md":  "<!-- BEGIN U-BOOT MANAGED BLOCK: init -->\n# stale changelog\n<!-- END U-BOOT MANAGED BLOCK: init -->\n",
-		"compose.yaml":  "# BEGIN U-BOOT MANAGED BLOCK: init\nname: stale\n# END U-BOOT MANAGED BLOCK: init\nservices: {}\nvolumes: {}\n",
-		".env.example":  "# BEGIN U-BOOT MANAGED BLOCK: init\n# stale env\n# END U-BOOT MANAGED BLOCK: init\n",
-		".gitignore":    "stale\n",
+		"README.md":    "<!-- BEGIN U-BOOT MANAGED BLOCK: init -->\n# stale readme\n<!-- END U-BOOT MANAGED BLOCK: init -->\n",
+		"CHANGELOG.md": "<!-- BEGIN U-BOOT MANAGED BLOCK: init -->\n# stale changelog\n<!-- END U-BOOT MANAGED BLOCK: init -->\n",
+		"compose.yaml": "# BEGIN U-BOOT MANAGED BLOCK: init\nname: stale\n# END U-BOOT MANAGED BLOCK: init\nservices: {}\nvolumes: {}\n",
+		".env.example": "# BEGIN U-BOOT MANAGED BLOCK: init\n# stale env\n# END U-BOOT MANAGED BLOCK: init\n",
+		".gitignore":   "stale\n",
 	}
 	for name, body := range fixtures {
 		if err := fs.WriteFile(filepath.Join(baseDir, name), []byte(body), 0o644); err != nil {

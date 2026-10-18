@@ -62,9 +62,10 @@ func isSupportedService(name domain.ServiceName) bool {
 // false-positive on immutable list constants (same pattern as
 // [supportedServices] above).
 //
-//nolint:unparam // result is always nil today (postgres-only catalogue);
 // slice-v1-keycloak adds the first non-nil row (Keycloak → Postgres),
 // at which point the lint exemption can be removed.
+//
+//nolint:unparam // result is always nil today (postgres-only catalogue);
 func dependenciesFor(svc domain.ServiceName) []domain.AddOnDependency {
 	switch svc.String() {
 	case "postgres":

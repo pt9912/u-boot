@@ -86,4 +86,3 @@ func TestInitProjectService_RunBackup_TypedSentinelsPassThrough(t *testing.T) {
 		t.Errorf("typed sentinel must NOT be additionally wrapped with ErrInitFileSystem; got: %v", err)
 	}
 }
-

@@ -67,9 +67,9 @@ type ubootYAMLService struct {
 // &true = enabled) so a missing key surfaces as a warn instead of
 // being silently treated as false.
 type ubootYAMLDevcontainer struct {
-	Enabled        *bool                                    `yaml:"enabled,omitempty"`
-	FeatureSources *ubootYAMLFeatureSources                 `yaml:"featureSources,omitempty"`
-	Features       map[string]ubootYAMLDevcontainerFeature  `yaml:"features,omitempty"`
+	Enabled        *bool                                   `yaml:"enabled,omitempty"`
+	FeatureSources *ubootYAMLFeatureSources                `yaml:"featureSources,omitempty"`
+	Features       map[string]ubootYAMLDevcontainerFeature `yaml:"features,omitempty"`
 	// User, Profile and Sandbox carry the Lastenheft 0.3.0 keys
 	// (LH-FA-DEV-004 UID, LH-FA-DEV-006 profile, LH-FA-DEV-007
 	// nested runtime + degradation strictness). Absent = default.

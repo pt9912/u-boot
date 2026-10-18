@@ -88,14 +88,14 @@ func (s *DoctorService) WithDevcontainerInspector(i driven.DevcontainerInspector
 // scraping. The naming convention is `<area>.<probe>` (e.g.
 // `fs.write-permissions`).
 const (
-	checkIDWritePermissions = "fs.write-permissions"
-	checkIDGitInstalled     = "git.installed"
-	checkIDDockerInstalled  = "docker.installed"
-	checkIDDockerReachable  = "docker.reachable"
-	checkIDComposeInstalled = "docker.compose.installed"
-	checkIDUbootYaml        = "uboot.yaml.valid"
-	checkIDComposeYaml      = "compose.yaml.valid"
-	checkIDDevcontainerJSON = "devcontainer.json.valid"
+	checkIDWritePermissions       = "fs.write-permissions"
+	checkIDGitInstalled           = "git.installed"
+	checkIDDockerInstalled        = "docker.installed"
+	checkIDDockerReachable        = "docker.reachable"
+	checkIDComposeInstalled       = "docker.compose.installed"
+	checkIDUbootYaml              = "uboot.yaml.valid"
+	checkIDComposeYaml            = "compose.yaml.valid"
+	checkIDDevcontainerJSON       = "devcontainer.json.valid"
 	checkIDDevcontainerDockerfile = "devcontainer.dockerfile.valid"
 	// checkIDServicesEnabledKey is the M5-T7 LH-FA-ADD-005 check:
 	// warns when a services.<name> entry in u-boot.yaml omits the
@@ -554,15 +554,15 @@ func (s *DoctorService) loadProjectYAML(p projectFileProbe, dst any) (*domain.Di
 // LH-FA-CONF-001..003 / LH-FA-INIT-006:
 //
 //   - missing file       → Warn (directory is not a u-boot project;
-//                          might be intentional, e.g. running doctor
-//                          before init).
+//     might be intentional, e.g. running doctor
+//     before init).
 //   - I/O error on probe → Error.
 //   - invalid YAML       → Error with parser message.
 //   - schemaVersion ≠ 1  → Error.
 //   - missing project.name → Error.
 //   - invalid project.name (per LH-FA-INIT-006 regex) → Error.
 //   - all checks pass    → OK with project name + schemaVersion in
-//                          the message.
+//     the message.
 //
 // The check shares the `ubootYAMLConfig` struct with
 // [InitProjectService] (same package, unexported) and uses
@@ -642,22 +642,22 @@ type composeYAMLShape struct {
 // per LH-FA-DIAG-002 / spec/lastenheft.md §4.7:
 //
 //   - missing file        → Warn (LH-FA-INIT-003 names compose.yaml
-//                          as part of the mandatory project layout,
-//                          but doctor running before init or in a
-//                          partial directory is a soft signal).
+//     as part of the mandatory project layout,
+//     but doctor running before init or in a
+//     partial directory is a soft signal).
 //   - I/O error on probe  → Error.
 //   - invalid YAML        → Error with parser message.
 //   - parsed but no `services:` → Warn (a fresh `u-boot init`
-//                          produces exactly this state — empty
-//                          services scaffold the user fills via
-//                          `u-boot add <service>`. LH-AK-001
-//                          LH-AK-001 verlangt nach `init && doctor`
-//                          "keinen `error`-Eintrag", deshalb ist
-//                          ein leerer services-Block hier
-//                          Severity Warn, nicht Error. Die
-//                          Migration von Error → Warn ist als
-//                          MVP-Closure-T2 Spec-Conformance-Fix
-//                          dokumentiert).
+//     produces exactly this state — empty
+//     services scaffold the user fills via
+//     `u-boot add <service>`. LH-AK-001
+//     LH-AK-001 verlangt nach `init && doctor`
+//     "keinen `error`-Eintrag", deshalb ist
+//     ein leerer services-Block hier
+//     Severity Warn, nicht Error. Die
+//     Migration von Error → Warn ist als
+//     MVP-Closure-T2 Spec-Conformance-Fix
+//     dokumentiert).
 //   - parsed with services → OK with service count in message.
 //
 // The exists/read/parse scaffold is shared with [checkUbootYaml] via
@@ -765,7 +765,7 @@ func (s *DoctorService) loadUbootYAML(baseDir string) (ubootYAMLConfig, error) {
 //   - missing `name`       → severityPolicy().
 //   - missing `image` and `build` → severityPolicy().
 //   - all checks pass      → OK with the devcontainer name in the
-//                            message.
+//     message.
 //
 // The severity comes from [devcontainerSeverity], which encodes the
 // LH-FA-DIAG-002-mode-dependence on u-boot.yaml's
@@ -1485,7 +1485,6 @@ func classifyDriftCase2(knownProjectableKeys, expectedKeys map[string]struct{}, 
 	sort.Strings(case2b)
 	return case2a, case2b
 }
-
 
 // formatDriftMessage composes the user-facing drift warn message
 // from the three case-buckets. Each non-empty bucket renders into

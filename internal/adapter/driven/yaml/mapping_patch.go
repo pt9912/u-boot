@@ -41,9 +41,9 @@ type markerSpan struct {
 
 // parentSpan describes a top-level YAML mapping key inside content.
 type parentSpan struct {
-	headerLineStart  int // start of the `parent:` header line (column 0)
-	headerLineEnd    int // past header line's terminating newline
-	bodyEnd          int // first byte past the last line that is part of parent's block-style body
+	headerLineStart  int  // start of the `parent:` header line (column 0)
+	headerLineEnd    int  // past header line's terminating newline
+	bodyEnd          int  // first byte past the last line that is part of parent's block-style body
 	isInlineEmpty    bool // `parent:` / `parent: {}` / `parent: null`
 	isInlineNonEmpty bool // `parent: { sub: ... }` or `parent: scalar` (anything non-empty after the colon on the same line)
 }
@@ -625,4 +625,3 @@ func appendNewParent(content []byte, parentKey, entryKey string, valueYAML []byt
 	out.Write(indented)
 	return out.Bytes()
 }
-

@@ -16,10 +16,10 @@ import (
 // err verbatim and records the last-seen context so the
 // context-propagation pin can assert on it.
 type fakeCatalog struct {
-	metas      []domain.TemplateMetadata
-	err        error
-	lastCtx    context.Context //nolint:containedctx // test-only seam for context-propagation pin
-	callCount  int
+	metas     []domain.TemplateMetadata
+	err       error
+	lastCtx   context.Context //nolint:containedctx // test-only seam for context-propagation pin
+	callCount int
 }
 
 func (f *fakeCatalog) List(ctx context.Context) ([]domain.TemplateMetadata, error) {

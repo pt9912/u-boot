@@ -210,7 +210,7 @@ func TestDetectServiceState_MalformedComposeBlock_Aborts(t *testing.T) {
 				"services:\n  postgres:\n    enabled: false\n",
 		},
 		{
-			name: "malformed block + no services entry (must not pass as inconsistent-yaml)",
+			name:      "malformed block + no services entry (must not pass as inconsistent-yaml)",
 			ubootYAML: "schemaVersion: 1\nproject:\n  name: demo\n",
 		},
 	}
@@ -451,12 +451,12 @@ func TestAdd_ExistsFailure_IsTechnical(t *testing.T) {
 // is observed in Changed.
 func TestAdd_MutatingStates_FullExecute(t *testing.T) {
 	cases := []struct {
-		name         string
-		ubootYAML    string
-		wantUBoot    bool   // is u-boot.yaml written?
-		wantCompose  bool   // compose.yaml written?
-		wantEnv      bool   // .env.example written?
-		wantPrior    domain.ServiceState
+		name        string
+		ubootYAML   string
+		wantUBoot   bool // is u-boot.yaml written?
+		wantCompose bool // compose.yaml written?
+		wantEnv     bool // .env.example written?
+		wantPrior   domain.ServiceState
 	}{
 		{
 			name:        "unregistered",
@@ -584,4 +584,3 @@ func TestPlanAdd_NonMutatingStates_ReturnError(t *testing.T) {
 		})
 	}
 }
-

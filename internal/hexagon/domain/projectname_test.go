@@ -64,18 +64,18 @@ func TestNewProjectName_InvalidRejects(t *testing.T) {
 
 func TestNormalizeProjectName(t *testing.T) {
 	cases := map[string]string{
-		"my-service":             "my-service",
-		"MyService":              "myservice",
-		"My_Service":             "my-service",
-		"My Service":             "my-service",
-		"---my--service---":      "my-service",
-		"my.service/v1":          "my-service-v1",
-		"  spaces  around  ":     "spaces-around",
-		"a":                      "a",
-		"---":                    "",
-		"":                       "",
-		"123":                    "123",
-		strings.Repeat("a", 80):  strings.Repeat("a", 63),
+		"my-service":                          "my-service",
+		"MyService":                           "myservice",
+		"My_Service":                          "my-service",
+		"My Service":                          "my-service",
+		"---my--service---":                   "my-service",
+		"my.service/v1":                       "my-service-v1",
+		"  spaces  around  ":                  "spaces-around",
+		"a":                                   "a",
+		"---":                                 "",
+		"":                                    "",
+		"123":                                 "123",
+		strings.Repeat("a", 80):               strings.Repeat("a", 63),
 		"a-" + strings.Repeat("b", 62) + "-c": "a-" + strings.Repeat("b", 61),
 	}
 	for in, want := range cases {

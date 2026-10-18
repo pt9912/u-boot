@@ -91,4 +91,3 @@ func TestGit_Version_MissingBinaryReturnsError(t *testing.T) {
 		t.Fatalf("Version with missing binary: expected error, got nil")
 	}
 }
-

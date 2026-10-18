@@ -34,8 +34,8 @@ func (f fakeStatTable) stat(name string) (os.FileInfo, error) {
 // from Stat matters.
 type fakeFileInfo struct{}
 
-func (fakeFileInfo) Name() string       { return "" }
-func (fakeFileInfo) Size() int64        { return 0 }
+func (fakeFileInfo) Name() string        { return "" }
+func (fakeFileInfo) Size() int64         { return 0 }
 func (fakeFileInfo) Mode() iofs.FileMode { return 0 }
 func (fakeFileInfo) ModTime() time.Time  { return time.Time{} }
 func (fakeFileInfo) IsDir() bool         { return false }

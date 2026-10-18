@@ -726,9 +726,9 @@ func (s *GenerateService) generateEnvExample(_ context.Context, req driving.Gene
 type devcontainerFileAction int
 
 const (
-	devcontainerActionNoOp devcontainerFileAction = iota
-	devcontainerActionWrite        // file absent → write the full rendered template
-	devcontainerActionReplaceBlock // file present, block stale → splice
+	devcontainerActionNoOp         devcontainerFileAction = iota
+	devcontainerActionWrite                               // file absent → write the full rendered template
+	devcontainerActionReplaceBlock                        // file present, block stale → splice
 )
 
 // devcontainerFilePlan is the per-file plan computed in phase 1 of

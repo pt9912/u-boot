@@ -73,7 +73,7 @@ func TestStateMachine_LH_FA_ADD_005_AllOutcomes(t *testing.T) {
 			wantChanged: nil,
 		},
 		{
-			name: "deactivated → active (reactivate)",
+			name:        "deactivated → active (reactivate)",
 			ubootYAML:   yamlDeactivated,
 			composeBody: composeBlockComplete("postgres"),
 			envBody:     envBlockComplete("postgres"),
@@ -83,7 +83,7 @@ func TestStateMachine_LH_FA_ADD_005_AllOutcomes(t *testing.T) {
 			wantChanged: []string{"u-boot.yaml", "compose.yaml"},
 		},
 		{
-			name: "inconsistent-yaml → ErrServiceInconsistent",
+			name:      "inconsistent-yaml → ErrServiceInconsistent",
 			ubootYAML: yamlUnregistered,
 			composeBody: "services:\n" +
 				"  # BEGIN U-BOOT MANAGED BLOCK: service.postgres\n" +

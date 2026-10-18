@@ -102,7 +102,6 @@ func (s *ConfigService) selectFS(mode driving.PreviewMode) (driven.FileSystem, d
 	return s.fsFactory(mode)
 }
 
-
 // Get implements [driving.ConfigUseCase.Get]. Reads u-boot.yaml,
 // unmarshals into [ubootYAMLConfig], and extracts the value at
 // req.Path. Per-path semantics (slice-m8-config.md §T3 +

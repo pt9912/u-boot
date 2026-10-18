@@ -27,12 +27,12 @@ func TestNoopDefaults_Smoke(t *testing.T) {
 // string (host:container mapping), invalid (silently skipped).
 func TestParseForwardPorts_AllShapes(t *testing.T) {
 	items := []any{
-		float64(5432),    // numeric → 5432
-		"8080:80",        // host:container → 80
+		float64(5432),       // numeric → 5432
+		"8080:80",           // host:container → 80
 		"127.0.0.1:9000:90", // ipv4-host:host:container → 90
-		"bare-string",    // unparseable → skipped
-		map[string]any{}, // map → skipped (no case)
-		float64(3000),    // duplicate numeric
+		"bare-string",       // unparseable → skipped
+		map[string]any{},    // map → skipped (no case)
+		float64(3000),       // duplicate numeric
 	}
 	got := application.ParseForwardPortsForTest(items)
 	for _, want := range []int{5432, 80, 90, 3000} {
@@ -85,10 +85,10 @@ func TestConfigPathToYAMLPath_AllKinds(t *testing.T) {
 // host:container mapping / long-form map (unsupported).
 func TestNormalisePortEntry_AllShapes(t *testing.T) {
 	cases := []struct {
-		name      string
-		raw       any
-		wantPort  int
-		wantOK    bool
+		name     string
+		raw      any
+		wantPort int
+		wantOK   bool
 	}{
 		{"int", int(5432), 5432, true},
 		{"bare string", "5432", 5432, true},

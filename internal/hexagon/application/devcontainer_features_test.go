@@ -22,7 +22,7 @@ func TestValidateFeatureSource(t *testing.T) {
 			"https://ghcr.io/devcontainers/features/node",
 			"http://example.test/features/x",
 			"oci://registry.local/features/custom",
-			"HTTPS://UPPER.CASE/path", // scheme is case-insensitive per RFC 3986
+			"HTTPS://UPPER.CASE/path",                 // scheme is case-insensitive per RFC 3986
 			"  https://leading.trailing/whitespace  ", // trimmed before parse
 		}
 		for _, in := range cases {

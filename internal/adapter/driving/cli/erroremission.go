@@ -27,6 +27,7 @@ import (
 //     UND returnt den original err so cli.ExitCode den richtigen
 //     Exit-Code bestimmen kann (add review #2 — ohne Propagation
 //     wäre die Shell-Exit 0 trotz envelope-claimed 14).
+//
 // `data` trägt subcommand-spezifische Free-Form-Inhalte: generate
 // (Folge-Slice 4/9 T5) reicht `{"artifact":"<…>"}` durch (T0-(q)
 // für den multi-artifact Error-Envelope-Kontext); init/add reichen
