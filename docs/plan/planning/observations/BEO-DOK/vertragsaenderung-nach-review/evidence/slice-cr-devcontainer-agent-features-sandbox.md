@@ -1,0 +1,2 @@
+**Vorgang:** [`slice-cr-devcontainer-agent-features-sandbox`](../../../../done/slice-cr-devcontainer-agent-features-sandbox.md)
+**Fund:** Eine Ausnahme der Verbosity-Anforderung im Lastenheft wurde mitten im Slice erweitert; der erste Review lief davor und deckte die Erweiterung nicht ab. Ein Nachlauf-Review und eine Nachverifikation waren nötig (Closure-Notiz §7, Steering-Loop-Eintrag, erstes Auftreten).

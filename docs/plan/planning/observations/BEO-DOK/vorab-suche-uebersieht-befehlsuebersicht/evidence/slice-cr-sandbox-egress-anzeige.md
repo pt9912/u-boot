@@ -1,0 +1,2 @@
+**Vorgang:** [`slice-cr-sandbox-egress-anzeige`](../../../../in-progress/slice-cr-sandbox-egress-anzeige.md)
+**Fund:** Review-Report [`2026-10-18-slice-cr-sandbox-egress-anzeige`](../../../../../../reviews/2026-10-18-slice-cr-sandbox-egress-anzeige.md) F-1 (MEDIUM): Die Vorab-Suche des Slice (Muster `config list`, `Abfragebefehl`, `allowlist`) fand die Befehlsübersicht des Lastenhefts nicht; der Wortlaut-Vorschlag hatte keine Stelle für sie. Geschlossen durch Stelle 4 des Slice (Zeile in der Befehlsübersicht, nicht freigegeben, Gate vor Release).
