@@ -1,6 +1,6 @@
 # ADR 0025: Egress-Liste im laufenden Container — Ist-Stand gemessen, Neubau statt Neu-Laden (R0), weitere Wege offen gehalten
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Datum:** 2026-10-18
 
@@ -39,7 +39,7 @@ Der Projektinhaber fragte am 2026-10-18, ob sich die Egress-Liste im laufenden S
 
 ## Entscheidung
 
-**R0 — Guardrail-Status quo** (Projektinhaber, 2026-10-18; Bestätigung dieses Wortlauts steht aus, daher `Proposed`).
+**R0 — Guardrail-Status quo** (Projektinhaber, 2026-10-18; Wortlaut bestätigt, `Accepted`).
 
 1. **Kein Neu-Laden im laufenden Container.** `u-boot` bekommt keinen Befehl, der ein Programm im Container ausführt oder eine Liste hineinlegt; der Satz „der Host führt nie ein Programm im Container aus“ ([`SPEC-045`](../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung)) bleibt unverändert. Der Weg „Liste ändern“ ist `u-boot generate devcontainer` und **Neuaufbau des Containers** (M4); das Handbuch sagt das, mit Messstand.
 2. **Kein Versprechen, dass ein Agent sich nicht selbst freischalten kann.** Gemessen: Mit dem passwortlosen `sudo` des Base-Images genügt ein `nft`-Aufruf plus das Zurücksetzen von `/etc/resolv.conf` (M1). Ohne `sudo` kann ein Prozess die Regeln nicht ändern (M1), die Namensauflösung über den Upstream-Resolver bleibt aber offen (M1 a); das Lastenheft bleibt unverändert: Die Restriktion ist ein Guardrail und keine Sandbox-Grenze ([`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
@@ -80,3 +80,4 @@ Der Projektinhaber verlangt ein Neu-Laden im laufenden Container; Nutzerberichte
 | Datum | Ereignis | Verweis |
 |---|---|---|
 | 2026-10-18 | Messung M1 bis M4 (Colima 0.10.3, Docker 29.5.2, Dev-Container-CLI 0.89.0, arm64); Entwurf mit R0 als Entscheidung des Projektinhabers (Vorschläge bestätigt), `Proposed` | Vereinbarung mit dem Projektinhaber |
+| 2026-10-18 | `Accepted` durch den Projektinhaber (Variante R0 und Wortlaut der Entscheidung 1 bis 3 bestätigt). Zum offenen DNS-Pfad am Upstream-Resolver (M1 a) entschied er: Code zum Ziel, ein eigener Folge-Slice nach der Welle schließt oder misst ihn; dieser ADR ändert das nicht, und er hält das Release nicht auf | Vereinbarung mit dem Projektinhaber |
