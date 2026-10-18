@@ -40,7 +40,7 @@ Der Verweis zeigt **aufwärts**: Die Spec nennt diesen Slice nie.
 **Ziel:** Lastenheft-Änderung **0.12.0 → 0.13.0**: Ein fehlendes `/dev/fuse` auf dem Container-Host ist keine Degradationsstufe, sondern ein Startfehler der Container-Engine (wie `/dev/net/tun`).
 Der Fallback auf `vfs`-Storage gilt nur noch für einen Container, der **ohne** das Device gestartet wurde. Spezifikation, Host-Prüfung in `u-boot doctor`, Handbuch und CHANGELOG folgen.
 
-**Reihenfolge und Abhängigkeit (vom Projektinhaber gewünscht): dieser CR → [`slice-v1-sandbox-fallback-host-ausweisung`](slice-v1-sandbox-fallback-host-ausweisung.md).**
+**Reihenfolge und Abhängigkeit (vom Projektinhaber gewünscht): dieser CR → [`slice-v1-sandbox-fallback-host-ausweisung`](../next/slice-v1-sandbox-fallback-host-ausweisung.md).**
 Der CR legt den Wortlaut der Host-Prüfung in `checkSandboxRuntime` und der Zeilen in [`LH-FA-DEV-007.a`](../../../../spec/spezifikation.md#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten) und [`.b`](../../../../spec/spezifikation.md#lh-fa-dev-007b--ausstattung-bei-nestedruntime-podman) fest; der Umsetzungs-Slice zieht danach [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet), die übrigen Sätze von [`LH-FA-DEV-007.a`](../../../../spec/spezifikation.md#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten), die Item-Beschreibung
 und die neuen `doctor`-Items nach, ohne die hier gesetzten Zeilen erneut zu ändern. Der Umsetzungs-Slice startet erst, wenn dieser CR in `done/` liegt.
 
@@ -114,11 +114,11 @@ Die Versionskonvention ergibt sich aus der Historie in §16 (kein eigener Regela
 
 - Die Konfigurationsschlüssel, `onUnavailable` und die Exit-Codes `10`/`11`: der CR ändert nur die **Ursache** des `vfs`-Fallbacks und die Einordnung des Host-Befunds.
 - Die erzeugten `runArgs` und die Startscripte: Der CR verändert kein erzeugtes Artefakt; **Golden Cases bleiben unverändert** (Beleg: `generate_sandbox_test.go` pinnt die sechs Optionen, Zeilen 311–313).
-- Die Ausweisung der Fallbacks in `doctor` und den Befehlen: [`slice-v1-sandbox-fallback-host-ausweisung`](slice-v1-sandbox-fallback-host-ausweisung.md) (nach diesem CR).
+- Die Ausweisung der Fallbacks in `doctor` und den Befehlen: [`slice-v1-sandbox-fallback-host-ausweisung`](../next/slice-v1-sandbox-fallback-host-ausweisung.md) (nach diesem CR).
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Der Kanal Container → Host und die neuen `doctor`-Items** — gehören dem Umsetzungs-Slice [`slice-v1-sandbox-fallback-host-ausweisung`](slice-v1-sandbox-fallback-host-ausweisung.md); der CR ändert nur Zusage und Host-Prüfung.
+- **Der Kanal Container → Host und die neuen `doctor`-Items** — gehören dem Umsetzungs-Slice [`slice-v1-sandbox-fallback-host-ausweisung`](../next/slice-v1-sandbox-fallback-host-ausweisung.md); der CR ändert nur Zusage und Host-Prüfung.
 - **Eine Host-Prüfung für `/dev/net/tun`** — das Lastenheft sagt ausdrücklich „`u-boot doctor` prüft das Device nicht“; eine neue Prüfung wäre eine neue Zusage und ein anderer Vorgang.
 - **Eine Änderung der erzeugten `runArgs` oder des Startscripts** — kein beobachtbares Verhalten der Generierung ändert sich; der `vfs`-Zweig bleibt (siehe Entscheidung zum Startscript-Zweig).
 - **Neue Fallback-Klassen** — [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) zählt drei Fallbacks; der CR streicht keinen davon, er verengt die Ursache von `vfs`.
@@ -144,7 +144,7 @@ Die Versionskonvention ergibt sich aus der Historie in §16 (kein eigener Regela
 ## 3. Plan (vor Code)
 
 Reihenfolge: Wortlaut-Freigabe des Projektinhabers → Lastenheft → Spezifikation → Code und Tests → Handbuch und CHANGELOG → Gates → Review → Closure. Danach startet
-[`slice-v1-sandbox-fallback-host-ausweisung`](slice-v1-sandbox-fallback-host-ausweisung.md).
+[`slice-v1-sandbox-fallback-host-ausweisung`](../next/slice-v1-sandbox-fallback-host-ausweisung.md).
 Die Tabelle nennt jede Datei, die der Diff voraussichtlich berührt (§3.10 von [`AGENTS.md`](../../../../AGENTS.md)); der Implementer gleicht sie vor dem Abschluss gegen `git diff --stat` ab.
 
 | Datei / Komponente | Änderungs-Art | Begründung |
@@ -179,7 +179,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 
 DoD vollständig, Review-Report liegt vor, Closure-Notiz mit
 Steering-Loop-Lerneintrag geschrieben (§7). Lastenheft 0.13.0 ist angenommen; der Umsetzungs-Slice
-[`slice-v1-sandbox-fallback-host-ausweisung`](slice-v1-sandbox-fallback-host-ausweisung.md) kann starten.
+[`slice-v1-sandbox-fallback-host-ausweisung`](../next/slice-v1-sandbox-fallback-host-ausweisung.md) kann starten.
 
 ## 6. Risiken und offene Punkte
 
