@@ -32,9 +32,9 @@ Eine **Verschärfung eines Gates, kein Lockern**: [`AGENTS.md`](../../../../AGEN
 **Teil A — Formatierung.**
 
 - `.golangci.yml` führt `version: "2"` und aktiviert unter `linters.enable` fünf Default-Linter und 24 SOLID-nahe Linter; **kein** `formatters`-Abschnitt (gelesen, ganze Datei). Das Lint-Ziel ist `golangci-lint run ./...` in der Docker-Stage `lint` (`Dockerfile`, `FROM golangci/golangci-lint:${GOLANGCI_LINT_VERSION} AS lint`, `RUN golangci-lint run ./...`; Ziel `lint` in `repo.mk`).
-- Der Reviewer fand Bestandsdateien, die nicht `gofmt`-konform sind (genannt: `internal/adapter/driving/cli/cli.go`, `addservice.go`, `git_test.go`; Closure-Notiz von [`slice-cr-sandbox-fuse-startfehler`](../done/slice-cr-sandbox-fuse-startfehler.md) §7). **Wie viele Dateien betroffen sind, ist nicht gemessen**; der Implementer misst es im Docker (kein Host-Werkzeug, [`AGENTS.md`](../../../../AGENTS.md) §3.1) und trägt die Zahl in den Plan-Eintrag ein.
+- Der Reviewer fand Bestandsdateien, die nicht `gofmt`-konform sind (genannt: `internal/adapter/driving/cli/cli.go`, `addservice.go`, `git_test.go`; Closure-Notiz von [`slice-cr-sandbox-fuse-startfehler`](../done/slice-cr-sandbox-fuse-startfehler.md) §7). **Gemessen im Docker** (`golangci-lint fmt --diff ./...`, Image `u-boot:lint`, [`AGENTS.md`](../../../../AGENTS.md) §3.1): 29 Dateien, Liste im Anhang A.
 - `docs/maintainer/quality.md` nennt „5 Defaults + 24 SOLID-nahe Linter“ und „Damit sind 29 Linter aktiv“ (§1, vor der reservierten §1.1) und führt die SOLID-nahen Linter in §1.2; ein Formatter ist dort nicht aufgeführt.
-- Annahme, vom Implementer an der Dokumentation der gepinnten Version von `golangci-lint` zu prüfen: Das Schema `version: "2"` aktiviert Formatter unter `formatters.enable`; ein Aufruf des Linters formatiert den Bestand in einem Lauf im Docker. Was davon in der gepinnten Version gilt, ist nicht gelesen.
+- Geprüft an der gepinnten Version `v2.14.0` (Lauf im Docker): Das Schema `version: "2"` aktiviert Formatter unter `formatters.enable`; `golangci-lint fmt ./...` formatiert den Bestand, `golangci-lint run` meldet unformatierte Dateien.
 
 **Teil B — `verify-depguard`.**
 
@@ -75,14 +75,21 @@ Jede Aussage über Code steht mit Fundstelle (gelesen am 2026-10-18). Der Implem
 
 | Datei / Komponente | Änderungs-Art | Begründung (Fundstelle) |
 |---|---|---|
-| Go-Quelldateien des Bestands (Zahl und Liste vom Implementer gemessen) | update (nur Formatierung) | eigener Commit vor der Gate-Änderung; Beleg: `make test` und `make gates` grün, kein Verhalten geändert; die Review-Stichprobe liest den Diff auf reine Whitespace- und Import-Reihenfolge-Änderungen |
-| `.golangci.yml` | update | neuer Abschnitt `formatters` mit `gofmt` (Schema v2: Annahme, in der gepinnten Version zu lesen); Kopfkommentar `# Profile: 5 Default-Linter + 24 SOLID-nahe Linter + depguard.` um den Formatter ergänzen; kein bestehender Eintrag wird entfernt oder gelockert |
-| `docs/maintainer/quality.md` | update | §1 (Absatz `Die vollständige Konfiguration (5 Defaults + 24 SOLID-nahe Linter … Damit sind 29 Linter aktiv`) und §1.2 nennen den Formatter; der Satz über die Zahl der Linter bleibt wahr, der Formatter steht daneben |
-| `scripts/verify-depguard.sh` | update | Zeile des Falls `domain-isoliert` in `CASES` mit einem Import, der keinen Zyklus bildet (Lösung des Implementers, §1); der Kommentar über `CASES` nennt die Begründung für diesen Fall |
-| `harness/sensors/verify-depguard.md` | prüfen, nur bei Abweichung ändern | gelesen: Vertrag „Je Regel ein Fall“, „Nur die Regeln der Tabelle `CASES`“; stimmt nach der Änderung, sofern der neue Fall ein Wegwerf-Paket anlegt, dessen Erwähnung unter „Vertrag“ kommt |
-| `harness/README.md` | prüfen, nur bei Abweichung ändern | gelesen: Zeile `make lint` und Zeile `make verify-depguard` im Sensors-Index; ein neues Make-Target (Formatierungslauf) wäre hier einzutragen, sonst bleibt die Datei unverändert |
-| `repo.mk`, `Dockerfile` | prüfen | gelesen: `lint` ruft `docker build --target lint`, die Stage ruft `golangci-lint run ./...`; ein Formatter in `.golangci.yml` braucht dort keine Änderung, solange der Lauf ohne weitere Option greift (der Implementer liest es nach der Änderung) |
+| Formatierung: 29 Go-Dateien (Liste im Anhang A) | update (nur Formatierung) | Commit `d94da25`, vor der Gate-Änderung; `git diff --stat`: 170 Einfügungen, 177 Entfernungen, nur Whitespace, Leerzeilen und ein Umbruch (`git diff -w`: 6 Einfügungen, 13 Entfernungen, davon Leerzeilen, ein umgebrochenes Closure-Literal in `internal/e2e/sandbox_devcontainer_docker_test.go` und die vorhandene `//nolint:unparam`-Direktive am Doc-Kommentar von `dependenciesFor` in `internal/hexagon/application/addservice.go`, die `gofmt` ans Ende des Kommentarblocks hinter eine `//`-Zeile setzt; die Direktive selbst ist vor dem Slice vorhanden und unverändert im Wortlaut); Beleg: `make test` und `go vet -tags docker ./...` (Image `u-boot:test-docker-tools`) grün, `make gates` grün |
+| `.golangci.yml` | update | Commit `2265909`: Abschnitt `formatters.enable: [gofmt]` (Schema v2 der gepinnten Version `v2.14.0`, `Dockerfile` `ARG GOLANGCI_LINT_VERSION`; `golangci-lint fmt` und der Lauf von `run` kennen den Formatter, gelesen am Lauf); Kopfkommentar um den Formatter ergänzt; kein bestehender Eintrag entfernt oder gelockert |
+| `docs/maintainer/quality.md` | update | §1, Absatz nach der Linter-Tabelle: nennt den Formatter, die Fehlermeldung und den Docker-Aufruf `golangci-lint fmt ./...` im Image `u-boot:lint` (probiert: Exit 0, keine Änderung am sauberen Baum); die Zahl 29 bleibt, der Formatter ist kein Linter; §1.2 unverändert (Tabelle der 24 SOLID-nahen Linter, ein Formatter gehört nicht hinein) |
+| `scripts/verify-depguard.sh` | update | Commit `a6deaaf`: `CASES`-Zeile `domain-isoliert` mit optionalem fünften Feld (Wegwerf-Paket `internal/hexagon/port/verifydepguardprobe`, keine Importe); Anlegen vor, Entfernen nach dem Lauf, Aufräumen im `trap`; Kommentar über `CASES` nennt die Begründung |
+| `harness/sensors/verify-depguard.md` | update | Absatz unter „Vertrag“ zum Wegwerf-Paket; Exit `2` nennt das vorhandene Probe-Verzeichnis |
+| `harness/README.md` | update | Zeile `make lint` im Sensors-Index nennt den Formatter `gofmt`; kein Target ist hinzugekommen oder entfallen |
+| `.git-blame-ignore-revs` | neu | enthält `d94da2561469a7bdbec2d0f8b05fdee3315d37af`, damit `git blame` den Format-Commit überspringt (GitHub liest die Datei von selbst, lokal `git config blame.ignoreRevsFile .git-blame-ignore-revs`); Hash erst nach dem Format-Commit bekannt, daher eigener Folge-Commit |
+| `docs/plan/planning/in-progress/roadmap.md` | update | Ruhe-Marker „Nichts in Arbeit.“ durch die Arbeitszeile mit Slice-Link ersetzt |
+| dieser Slice | update | Plan §3 und Anhang A |
+| `repo.mk`, `Dockerfile` | unverändert | gelesen: `lint` ruft `docker build --target lint`, die Stage ruft `golangci-lint run ./...`; der Formatter in `.golangci.yml` greift ohne weitere Option (`make lint` am Beispiel einer unformatierten Datei rot gesehen) |
 | `docs/reviews/<Datum>-slice-v1-harness-gofmt-und-depguard.md` | neu, durch den Reviewer | Review-Report |
+
+**Gewählter Weg Teil A:** `golangci-lint fmt ./...` im Image `u-boot:lint` (die Version `v2.14.0`, die auch das Gate `make lint` fährt); damit sind Formatierer und Prüfer derselbe Binär-Stand und der Lauf Docker-only. Ein separates `gofmt -w` im Tools-Image wäre ein zweiter Stand ohne Bindung an den Pin. Der Formatter `gofmt` des Linters läuft mit den Defaults von `golangci-lint` (inklusive `simplify`). Ein Make-Target für den Lauf wird nicht vorgeschlagen; der Aufruf steht in `docs/maintainer/quality.md` §1. Beobachtung: Eine Datei, die zugleich einen `unused`-Befund trägt, zeigte in der ersten Probe nur diesen, nicht den Formatter-Befund; die Probe mit nur einem Formatierungsfehler zeigt `File is not properly formatted (gofmt)` und Exit 2.
+
+**Gewählter Weg Teil B:** Wegwerf-Paket unter dem verbotenen Präfix `internal/hexagon/port` ohne Importe. Messung: vorher `make verify-depguard` 8 von 9 (`FAIL domain-isoliert: expected desc not found`, Exit 2 von `make` bei Skript-Exit 1), nachher 9 von 9, Exit 0. Aufräumen bei Abbruch: das Skript mit `SIGTERM` nach vier Sekunden beendet, danach fehlen Probe-Paket und Verletzungsdatei, `git status` sauber. Keine `depguard`-Regel geändert.
 
 ## 4. Trigger
 
@@ -121,3 +128,35 @@ Wird bei der Closure gefüllt.
 **Vorgelagert — offene Beobachtungen sichten:** Beobachtungs-Register ([`../observations/`](../observations/README.md)) durchgegangen — `BEO-WZG/kopplung-nicht-nachgezogen` (`offen`, Zähler 1: ein Skript folgt einer geänderten Form nicht) ist verwandt mit Teil B (das Beweis-Skript folgt der Import-Lage nicht); der Slice trägt dazu bei Bedarf einen Beleg ein. `BEO-DOK/plan-aussage-ueber-code` (verkörpert, `AGENTS.md` §3.10) gilt für die Plan-Tabelle.
 
 Alle berührten Sub-Areas GF.
+
+## Anhang A: Formatierte Dateien (Commit `d94da25`, 29)
+
+- `internal/adapter/driven/git/git_test.go`
+- `internal/adapter/driven/runtime/runtime_test.go`
+- `internal/adapter/driven/yaml/mapping_patch.go`
+- `internal/adapter/driving/cli/cli.go`
+- `internal/adapter/driving/cli/erroremission.go`
+- `internal/adapter/driving/cli/jsontestutil/coderegistry.go`
+- `internal/adapter/driving/cli/jsontestutil/jsontestutil.go`
+- `internal/e2e/sandbox_devcontainer_docker_test.go`
+- `internal/hexagon/application/acceptance_test.go`
+- `internal/hexagon/application/addservice.go`
+- `internal/hexagon/application/addservice_factory_test.go`
+- `internal/hexagon/application/addservice_t5_test.go`
+- `internal/hexagon/application/addservice_test.go`
+- `internal/hexagon/application/config.go`
+- `internal/hexagon/application/config_test.go`
+- `internal/hexagon/application/devcontainer_features_test.go`
+- `internal/hexagon/application/doctor.go`
+- `internal/hexagon/application/generate.go`
+- `internal/hexagon/application/generate_sandbox_test.go`
+- `internal/hexagon/application/generate_test.go`
+- `internal/hexagon/application/initproject.go`
+- `internal/hexagon/application/initproject_runbackup_test.go`
+- `internal/hexagon/application/initproject_test.go`
+- `internal/hexagon/application/keycloak_catalogue_test.go`
+- `internal/hexagon/application/noop_test.go`
+- `internal/hexagon/application/template_init_test.go`
+- `internal/hexagon/application/template_list_test.go`
+- `internal/hexagon/domain/projectname_test.go`
+- `internal/hexagon/domain/servicename_test.go`
