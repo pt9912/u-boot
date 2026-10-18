@@ -84,8 +84,9 @@ make test-docker      # Integrationstests gegen die echte Docker Engine
 make fullbuild        # ci + Runtime-Image-Build
 ```
 
-**Trockenlauf des Tap-Pfads** (vor dem stabilen Tag, ohne Netz, ohne Schreiben ins Tap; im Docker,
-zum Beispiel im Image `u-boot:test` aus `make test`, mit dem Arbeitsbaum als schreibgeschütztem Mount).
+**Trockenlauf des Tap-Pfads** (vor dem stabilen Tag, ohne Netzzugriff — Stellvertreter für `curl` und `git` im `PATH`, Container mit
+`--network none` — und ohne Schreiben ins Tap; im Docker, zum Beispiel im Image `u-boot:test` aus
+`make test`, mit dem Arbeitsbaum als schreibgeschütztem Mount).
 Der Job `tap` läuft nur bei stabilen Tags; ein Vorab-Tag probt ihn nicht (§1, §7). Der Trockenlauf
 führt deshalb die Skripte des Jobs gegen eine Fixture aus:
 
@@ -99,6 +100,8 @@ führt deshalb die Skripte des Jobs gegen eine Fixture aus:
    schreibt nichts) im `PATH`. Erwartet: das Protokoll zeigt `clone`, `add`, `commit -m u-boot X.Y.Z`
    und `push`; mit dem Tag des Vorgängers bricht das Skript vor `clone` ab.
 
+Das Schreibrecht des Tokens belegt der Trockenlauf nicht; das tut nur `gh workflow run tap-check` (§2).
+Der Maintainer startet es vor dem stabilen Tag, auch wenn es zuletzt grün war (der PAT läuft ab).
 Der Lauf steht im Release-Cut-Slice mit Befehl und Ausgabe. **Er beweist nicht:** die Bedingung
 `needs.publish.outputs.is_stable == 'true'` und den Schritt im Workflow, den echten `curl` gegen das
 Release-Asset, den echten `git push` und das Token. Das bleibt dem ersten stabilen Lauf (§6)
@@ -135,8 +138,11 @@ docker run --rm ghcr.io/pt9912/u-boot:X.Y.Z --version
 ```
 
 Erwartet: sechs Binaries, vier Pakete (`.deb`/`.rpm`), `SHA256SUMS`, bei stabilen Tags `u-boot.rb`; `--version` gleich
-`X.Y.Z`; `:latest` zeigt auf dieselbe Version (nur stabil). Der Job `tap` ist grün (oder
-meldet die Warnung zum fehlenden Secret). Danach auf einem Mac:
+`X.Y.Z`; `:latest` zeigt auf dieselbe Version (nur stabil). Der Job `tap` ist grün **und
+wirklich gelaufen**: Bei fehlendem Secret endet er mit einer Warnung und Exit `0`, grün ist dann nicht
+„nachgezogen“. Das Log des Schritts „Pull the formula into the tap“ zeigt `tap-nachzug: … updated to vX.Y.Z.`
+oder `tap-nachzug: tap already at vX.Y.Z; nothing to do.`; die Warnung `HOMEBREW_TAP_GITHUB_TOKEN is not
+configured` heißt: nicht gelaufen (§2, §8). Danach auf einem Mac:
 
 ```bash
 brew tap pt9912/u-boot
