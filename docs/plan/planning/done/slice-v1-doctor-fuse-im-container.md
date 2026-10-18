@@ -90,8 +90,8 @@ Umfang des Gates in (b). Der Befund betrifft nur den Zweig `/dev/fuse`. Der Zwei
 - [x] Verification Evidence (Verifier) mit **Praxislauf**: `docker run --rm -v <Projekt>:/work <Runtime-Image> doctor` mit Sandbox-Konfiguration `nestedRuntime: podman`, **ohne** `--device /dev/fuse`: Exit-Code `0`, der Eintrag `devcontainer.sandbox.runtime` ist Info; Gegenprobe auf dem Host (Linux, ohne Device) bleibt Fehler (auf Colima nur der Nicht-Linux-Zweig; nicht gemessen, wenn kein Linux-Host verfügbar).
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag; Beobachtungs-Register fortgeschrieben (`BEO-DOK/plan-aussage-ueber-code` und `BEO-DOK/spec-bedingung-ohne-code-entsprechung`, je eine Evidence-Datei) oder begründet nicht.
 - [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft.
-- [ ] Der Release-Cut [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md) trägt den Slice als erfüllten Blocker (§4, DoD) und seine Lead-Zeile zu `doctor` und `/dev/fuse` stimmt mit dem CHANGELOG überein (Schreiber: Planner bei der Closure).
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft.
+- [x] Der Release-Cut [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md) trägt den Slice als erfüllten Blocker (§4, DoD) und seine Lead-Zeile zu `doctor` und `/dev/fuse` stimmt mit dem CHANGELOG überein (Schreiber: Planner bei der Closure).
 
 ## 3. Plan (vor Code)
 
