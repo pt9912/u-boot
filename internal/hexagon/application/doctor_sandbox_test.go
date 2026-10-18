@@ -81,6 +81,27 @@ func TestDoctor_SandboxRuntime(t *testing.T) {
 	}
 }
 
+// LH-FA-DEV-007: the error for a missing `/dev/fuse` names both ways out
+// (load the module, or drop the nested runtime) under either policy.
+func TestDoctor_SandboxRuntime_FuseMissingHint(t *testing.T) {
+	t.Parallel()
+	for name, yaml := range map[string]string{"warn": sandboxYAMLPodman, "fail": sandboxYAMLPodman + "    onUnavailable: fail\n"} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			items := runSandboxDoctor(t, func(fs *fakeFS) {
+				writeDoctorFile(t, fs, "u-boot.yaml", yaml)
+				_ = fs.WriteFile("/proc/sys/kernel/osrelease", []byte("6.8\n"), 0o444)
+			})
+			d := findDiagnostic(t, items, "devcontainer.sandbox.runtime")
+			for _, want := range []string{"modprobe fuse", "nestedRuntime", "`none`"} {
+				if !strings.Contains(d.Hint, want) {
+					t.Errorf("hint %q lacks %q", d.Hint, want)
+				}
+			}
+		})
+	}
+}
+
 // LH-FA-DEV-009: plaintext credentials and the https token source.
 func TestDoctor_SandboxCredentials(t *testing.T) {
 	t.Parallel()
@@ -178,7 +199,7 @@ func TestDoctor_SandboxFallbackFlagIsOnTheItem(t *testing.T) {
 		relaxation bool
 	}{
 		{"runtime: fuse missing, warn policy is an unflagged error", sandboxYAMLPodman, nil, "devcontainer.sandbox.runtime", domain.SeverityError, false, false},
-		{"runtime: fuse missing, fail policy is an unflagged error",sandboxYAMLPodman + "    onUnavailable: fail\n", nil, "devcontainer.sandbox.runtime", domain.SeverityError, false, false},
+		{"runtime: fuse missing, fail policy is an unflagged error", sandboxYAMLPodman + "    onUnavailable: fail\n", nil, "devcontainer.sandbox.runtime", domain.SeverityError, false, false},
 		{"runtime: no effect without sandbox, same ID", sandboxYAMLHead + "  sandbox:\n    nestedRuntime: podman\n", nil, "devcontainer.sandbox.runtime", domain.SeverityWarn, false, false},
 		{"runtime: nested docker is OK and stays unflagged", sandboxYAMLDocker, nil, "devcontainer.sandbox.runtime", domain.SeverityOK, false, false},
 		{"egress: no effect without sandbox", sandboxYAMLHead + "  sandbox:\n    egress:\n      enabled: true\n", nil, "devcontainer.sandbox.egress", domain.SeverityWarn, false, true},
