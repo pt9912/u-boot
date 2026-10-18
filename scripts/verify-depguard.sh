@@ -104,7 +104,11 @@ for entry in "${CASES[@]}"; do
     fi
     PROBE_DIR="$probe"
     mkdir -p "$PROBE_DIR"
-    printf 'package %s\n' "$(basename "$PROBE_DIR")" > "$PROBE_DIR/probe.go"
+    # The package comment keeps revive's package-comments quiet, so the
+    # only finding of the case is the depguard hit it asserts on.
+    probe_name="$(basename "$PROBE_DIR")"
+    printf '// Package %s is a throwaway package of scripts/verify-depguard.sh.\npackage %s\n' \
+      "$probe_name" "$probe_name" > "$PROBE_DIR/probe.go"
   fi
 
   # No leading comment (would trip revive's package-comments per-file
