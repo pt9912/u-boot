@@ -30,6 +30,13 @@ this file is the same format applied to u-boot itself.
   the stdout summary, `--json` and the exit codes are unchanged. A script that matched the old stderr wording of a dry run must match the new one;
   `--json` is the contract for machines ([`LH-FA-CLI-007`](spec/lastenheft.md#lh-fa-cli-007--dry-run)).
 
+### Fixed
+
+- The user manual no longer says that restarting the container applies a changed `devcontainer.sandbox.egress.allow` list. The list is part of the startup script that the image
+  build copies into the image, so a restart runs the old script with the old list; rebuild the container after `u-boot generate devcontainer`. Measured with the Dev Container CLI 0.89.0
+  (stop and `devcontainer up` kept the old list, `devcontainer up --remove-existing-container` applied the new one) on Docker 29.5.2 with Colima 0.10.3, arm64; **not measured:** the editor
+  actions that correspond to a rebuild, Docker Desktop, Linux without a VM ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
+
 ## [0.11.0] - 2026-10-18
 
 Eleventh release. **Podman 6.1.4 in the sandbox devcontainer, a missing `/dev/fuse` as a start error, host-side disclosure of the degradation fallbacks, "Would …" dry-run wording.**

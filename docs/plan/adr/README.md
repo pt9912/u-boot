@@ -50,3 +50,4 @@ das MADR-Format gilt für neu angelegte ADRs sowie für die noch mutable
 | [ADR 0022](0022-fallback-ausweisung-statusdateien-im-container.md) | Accepted | Ausweisung der Degradations-Fallbacks: Statusdateien im Container, vom Host mit `docker cp` gelesen |
 | [ADR 0023](0023-podman-aus-podman-static-im-sandbox-devcontainer.md) | Accepted | Podman im Sandbox-Devcontainer aus `podman-static`: gepinnte, signierte Release-Archive statt Debian-Paket |
 | [ADR 0024](0024-ollama-im-sandbox-devcontainer.md) | Accepted | Ollama im Sandbox-Devcontainer aus dem Release-Archiv: gepinnte SHA-256-Prüfung ohne Signatur, nur CPU, Katalogschlüssel `ollama` |
+| [ADR 0025](0025-egress-liste-im-laufenden-container.md) | Proposed | Egress-Liste im laufenden Container: Ist-Stand gemessen, Neubau statt Neu-Laden (R0), weitere Wege offen gehalten |

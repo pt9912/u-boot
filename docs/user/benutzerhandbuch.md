@@ -1260,8 +1260,14 @@ Standardmäßig erlaubt sind:
   für Gradle, `github.com` und `release-assets.githubusercontent.com` für
   GitHub-Releases) und die Hosts weiterer Quellen von Homebrew-Formeln tragen
   Sie bei Bedarf in `egress.allow` ein.
-- Nach einer Änderung führen Sie `u-boot generate devcontainer` aus und starten
-  den Container neu.
+- Nach einer Änderung führen Sie `u-boot generate devcontainer` aus und bauen
+  den Container neu auf. Die Liste steht im Startscript, das beim Bau in das
+  Image kopiert wird; ein Neustart des bestehenden Containers führt das alte
+  Script mit der alten Liste aus. Gemessen mit der Dev-Container-CLI 0.89.0:
+  Stoppen und erneutes Starten (`devcontainer up`) ließ die alte Liste gelten;
+  erst `devcontainer up --remove-existing-container` baute das Image neu und
+  setzte die neue Liste durch. Welche Aktion Ihres Editors dem Neuaufbau
+  entspricht, ist nicht gemessen.
 - Wer die Fähigkeit hat und das `sudo` des Base-Images nutzen kann, kann die
   Regeln aufheben. Der Verkehr verschachtelter Container und die
   iptables-Regeln eines verschachtelten Docker-Daemons umgehen die Beschränkung;
@@ -1308,8 +1314,8 @@ u-boot generate devcontainer
 Das Installationsskript eines Features läuft beim Image-Build. Bauen Sie den
 Container deshalb nach `generate devcontainer` neu auf. Nicht gemessen ist, ob
 ein bloßer Neustart des bestehenden Containers nach einer geänderten Feature-Liste
-genügt; der Hinweis „neu starten“ der Egress-Beschränkung gilt für diese, nicht
-für die Feature-Liste.
+genügt; für die Egress-Liste ist gemessen, dass er nicht genügt (Abschnitt
+[Internet-Beschränkung (Egress)](#internet-beschränkung-egress)).
 
 **Schritt 2: Zugang einrichten**
 
