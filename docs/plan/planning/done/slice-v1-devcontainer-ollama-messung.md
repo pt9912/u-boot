@@ -91,7 +91,7 @@ Anlass: Projektinhaber, 2026-10-18 („zu 4. ollama“; Rückfrage beantwortet m
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [x] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
 - [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo mit Wellen von der Welle-Closure geprüft.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo mit Wellen von der Welle-Closure geprüft.
 
 ## 3. Plan (vor Code)
 
@@ -108,8 +108,11 @@ Anlass: Projektinhaber, 2026-10-18 („zu 4. ollama“; Rückfrage beantwortet m
 | `docs/plan/planning/open/README.md`, `docs/plan/planning/welle-sandbox-egress-ollama.md` (Inhalt, nicht nur Verweis) | update (nach dem Move, Planner-Lauf) | Zeile „geliefert (liegt in `done/`)“, Slice-Zeile der Welle-Datei; der Ruhe-Marker „Nichts in Arbeit.“ steht in der Roadmap-Zeile unten |
 | `docs/plan/planning/in-progress/roadmap.md` | update: Arbeitszeile (der Planner stellt bei der Closure den Ruhe-Marker „Nichts in Arbeit.“ wieder her) und ein von `make slice-mv` nachgezogener Link in der Tabelle der offenen Wellen (bleibt bei der Wiederherstellung stehen) | Vermerk „In Arbeit“ während des Slice |
 | Verweis-Nachzüge von `make slice-mv` (`open` → `in-progress`; Slice-Datei selbst per reinem Move): `welle-sandbox-egress-ollama.md`, `open/README.md`, `open/slice-cr-devcontainer-ollama.md`, `open/slice-v1-devcontainer-feature-ollama.md`, `open/slice-v2-spec-sandbox-egress-ollama.md`, `done/slice-v1-egress-wildcard-pruefung.md`, `BEO-DOK/messprotokoll-ausserhalb-des-repos/state.md` | update (nur Verweise) | `make slice-mv`: Pfade der Verweise auf den bewegten Slice |
+| Verweis-Nachzüge von `make slice-mv` (`in-progress` → `done`; Slice-Datei selbst per reinem Move): `roadmap.md`, `open/README.md`, `welle-sandbox-egress-ollama.md`, `open/slice-cr-devcontainer-ollama.md`, `open/slice-v1-devcontainer-feature-ollama.md`, `open/slice-v2-spec-sandbox-egress-ollama.md`, `done/slice-v1-egress-wildcard-pruefung.md`, `BEO-APP/podman-static-pin-alterung/evidence/slice-v1-devcontainer-ollama-messung.md`, `BEO-WZG/host-werkzeug-ausserhalb-docker/evidence/slice-v1-devcontainer-ollama-messung.md`, `BEO-DOK/messprotokoll-ausserhalb-des-repos/evidence/messung-slice-v1-devcontainer-ollama-messung/README.md` | update (nur Verweise) | `make slice-mv`: Pfade der Verweise auf den bewegten Slice |
 
 Kein Produktcode und kein Test in diesem Slice (`internal/**`, `spec/**` unverändert). Abgleich der Tabelle gegen `git diff --stat` nach der **letzten** Fix-Runde (`AGENTS.md` §3.10).
+
+**Abgleich nach der letzten Änderung (Closure, Planner-Lauf):** Die Tabelle ist gegen `git diff --stat 6acb1c0..HEAD` des Closure-Stands abgeglichen: jede Diff-Datei steht in einer Zeile oder Gruppe (ADR und Index; Slice samt Move; Messprotokoll-Gruppe mit der `README.md`-Änderung zu V-4; Register-Gruppen; die drei Folge-Slices; `open/README.md`, Welle-Datei, Roadmap; `done/slice-v1-egress-wildcard-pruefung.md`; zwei Reports in `docs/reviews/`), jede Zeile hat einen Diff. `internal/**`, `spec/**`, `docs/user/`, Lastenheft, `CHANGELOG.md` und `Makefile` ohne Diff (leere `git diff --stat 6acb1c0..HEAD -- internal spec docs/user README.md CHANGELOG.md Makefile`).
 
 ### Umsetzungsstand und Abweichungen von der Tabelle (Implementer, 2026-10-18)
 
