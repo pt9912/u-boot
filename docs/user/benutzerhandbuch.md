@@ -1208,8 +1208,10 @@ u-boot config set devcontainer.sandbox.egress.allow api.example.org,registry.npm
 u-boot generate devcontainer
 ```
 
-Beim Containerstart startet ein lokaler DNS-Server, der **nur erlaubte Namen**
-auflöst. Eine Firewall lässt nur Loopback, bestehende Verbindungen, DNS und die
+Beim Containerstart startet ein lokaler DNS-Server, den der Container als
+Standard-Resolver benutzt und der **nur erlaubte Namen** auflöst; Anfragen, die
+ein Prozess direkt an den DNS-Server des Netzes richtet, erfasst er nicht (siehe
+unten). Eine Firewall lässt nur Loopback, bestehende Verbindungen, DNS und die
 Adressen der erlaubten Namen durch; alles andere (IPv6 ganz) wird verworfen. Das
 ist eine Leitplanke, keine Sandbox-Grenze. Der Container braucht dafür die
 Fähigkeit `NET_ADMIN`, die `u-boot` als Lockerung ausweist.
