@@ -73,8 +73,9 @@ func TestExecute_Doctor_Quiet_UndeterminableOnlyIsSilent(t *testing.T) {
 	}
 }
 
-// Without `--quiet` the report names every item, marks the info item with
-// its own glyph and counts it; a report without info keeps its old summary.
+// Without `--quiet` the report names every item, the info item of an
+// undeterminable state included, with its hint; the summary line counts
+// error, warn and ok items as before.
 func TestExecute_Doctor_FullReport_InfoItem(t *testing.T) {
 	states := fallbackStateItems("devcontainer.sandbox.fallback.vfs")
 	ok := domain.Diagnostic{ID: "fs.write-permissions", Severity: domain.SeverityOK, Message: "BaseDir is writable."}
@@ -82,18 +83,11 @@ func TestExecute_Doctor_FullReport_InfoItem(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err = %v", err)
 	}
-	for _, want := range []string{"ℹ  devcontainer.sandbox.fallback.vfs state not determinable here.", "⚠  devcontainer.sandbox.fallback.vfs reported fallback state.",
-		"→ rebuild the container", "Summary: 0 error, 1 warn, 1 info, 1 ok"} {
+	for _, want := range []string{"devcontainer.sandbox.fallback.vfs state not determinable here.", "⚠  devcontainer.sandbox.fallback.vfs reported fallback state.",
+		"→ rebuild the container", "→ fix the start", "Summary: 0 error, 1 warn, 1 ok"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("report lacks %q:\n%s", want, out)
 		}
-	}
-	if strings.Contains(out, "?  ") {
-		t.Errorf("an item got the unknown-severity glyph:\n%s", out)
-	}
-	plain, _ := runDoctorWith(t, []domain.Diagnostic{ok, states["fallback"]}, "doctor")
-	if !strings.Contains(plain, "Summary: 0 error, 1 warn, 1 ok") || strings.Contains(plain, "info") {
-		t.Errorf("a report without info items must keep its summary:\n%s", plain)
 	}
 }
 

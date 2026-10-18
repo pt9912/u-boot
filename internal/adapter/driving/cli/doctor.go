@@ -261,13 +261,11 @@ func writeDoctorReport(out io.Writer, baseDir string, report domain.DiagnosticRe
 	fmt.Fprintln(out, "──────────────────────────────────────")
 
 	items := report.SortedByIssuesFirst()
-	var nOK, nInfo, nWarn, nErr int
+	var nOK, nWarn, nErr int
 	for _, item := range items {
 		switch item.Severity {
 		case domain.SeverityOK:
 			nOK++
-		case domain.SeverityInfo:
-			nInfo++
 		case domain.SeverityWarn:
 			nWarn++
 		case domain.SeverityError:
@@ -276,12 +274,6 @@ func writeDoctorReport(out io.Writer, baseDir string, report domain.DiagnosticRe
 		writeDoctorItem(out, item)
 	}
 
-	// The info count appears only when a check reported one, so a report
-	// without info items keeps its summary line.
-	if nInfo > 0 {
-		fmt.Fprintf(out, "\nSummary: %d error, %d warn, %d info, %d ok\n", nErr, nWarn, nInfo, nOK)
-		return
-	}
 	fmt.Fprintf(out, "\nSummary: %d error, %d warn, %d ok\n", nErr, nWarn, nOK)
 }
 
@@ -307,8 +299,6 @@ func severityGlyph(s domain.Severity) string {
 		return "⚠"
 	case domain.SeverityOK:
 		return "✓"
-	case domain.SeverityInfo:
-		return "ℹ"
 	}
 	return "?"
 }
