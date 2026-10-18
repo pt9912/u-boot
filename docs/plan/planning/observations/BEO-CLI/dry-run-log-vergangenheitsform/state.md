@@ -1,1 +1,1 @@
-**Stand:** offen — ein Beleg (`slice-v1-cli-dry-run-would-formulierung`); unter der Schwelle von drei, keine Verkörperung entschieden.
+**Stand:** gestrichen — die Ursache fiel weg: Der Dry-Run meldet auf `INFO` nur noch den Konjunktiv (`logWrite` und `devcontainerWriteMessage` in `internal/hexagon/application/dryrun_log.go`), `TestDryRunLog_WriteLines` pinnt ihn; beantwortet durch [`slice-v1-cli-dry-run-log-would`](../../../in-progress/slice-v1-cli-dry-run-log-would.md) §7. Nicht verkörpert: Zähler 1, unter der Schwelle, kein Zielort.
