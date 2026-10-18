@@ -1,0 +1,167 @@
+# Slice v1: Aktuelle Podman-Version im Sandbox-Devcontainer bei `nestedRuntime: podman` — Quelle wählen, messen, belegen
+
+**Lifecycle:** Der Zustand dieses Slice ist das Verzeichnis, in dem diese
+Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
+wechselt nur durch `git mv`, siehe
+Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
+Übernimmt ein anderer Slice den Gegenstand oder entfällt er, geht diese Datei
+aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
+Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
+(§Ein Slice, dessen Gegenstand ein anderer übernimmt).
+
+**Welle:** `v0.11.0` (Release-Versionen sind Wellen, [`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md)). **Blocker des Cuts** [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md): Der Projektinhaber verlangt die neueste Podman-Version vor dem Release (2026-10-18). Der Slice startet **erst nach der Closure** von [`slice-v1-e2e-status-ci-helfer`](../in-progress/slice-v1-e2e-status-ci-helfer.md) (§4), weil beide `internal/e2e/` ändern.
+
+**Bezug:** [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Container-Runtime im Sandbox-Devcontainer; das Lastenheft nennt keine Podman-Version), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress-Hosts), [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (keine verdeckte Ausführung fremder Skripte; bindet die Wahl der Quelle), [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Feature-Quellen; Podman bleibt ein Paket des Dockerfiles, kein Feature), [ADR-0014](../../adr/0014-nested-podman-sandbox-devcontainer.md) (Entscheidung 1: Debian-Pakete; **wird durch die Folge-ADR ersetzt**), [ADR-0021](../../adr/0021-podman-build-im-sandbox-devcontainer.md) (Lockerungsprofil, `podman build`, Egress-Host; Messprotokoll als Wiederholbasis), [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md) (Muster: Herkunft ersetzt, Schlüssel-Pin, Egress ergänzt).
+
+**Berührte Spec-Stellen:** [`LH-FA-DEV-007.b`](../../../../spec/spezifikation.md#lh-fa-dev-007b--ausstattung-bei-nestedruntime-podman) (Ausstattung: Paketliste, Herkunft, Version) · [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) (Default-Allowlist, nur falls die Quelle einen Host im laufenden Container braucht) · [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen) (nur lesen; Basis-Image bleibt `mcr.microsoft.com/devcontainers/base:debian`). Das Lastenheft ist Zielbild: die Zusage „`podman build` …“ bleibt, eine Version steht dort nicht; das Lastenheft ändert sich nur, wenn die Messung die Zusage selbst verschiebt (§1, Abgrenzung).
+
+**Verantwortlich:** —
+
+**Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-18.
+
+---
+
+## 1. Ziel und Abgrenzung
+
+**Ziel:** Mit `devcontainer.sandbox.nestedRuntime: podman` installiert das erzeugte Dockerfile die **neueste** Podman-Version aus einer gepinnten, geprüften Quelle statt des ungepinnten Debian-Pakets (heute `podman 5.4.2+ds1-2+b2`); die Lieferkette folgt dem Muster von [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md) (Signaturschlüssel- oder Digest-Pin, kein `curl | sh`, Herkunft dokumentiert), und die Messung von [ADR-0021](../../adr/0021-podman-build-im-sandbox-devcontainer.md) (sechs Lockerungen, `podman build`, `docker`-Alias, `vfs`, Egress) läuft mit der neuen Version unverändert.
+
+### Ausgangslage (gelesen am 2026-10-18)
+
+- **Heute:** `Dockerfile.tmpl`, Block `{{- if .NestedPodman}}`: `apt-get install -y --no-install-recommends podman uidmap fuse-overlayfs passt ca-certificates`, danach `ln -sf /usr/bin/podman /usr/local/bin/docker`, subuid/subgid, Verzeichnis `~/.local/share/containers`, `COPY sandbox-init.sh`. Keine Versions- oder Quellenangabe; das Basis-Image `FROM mcr.microsoft.com/devcontainers/base:debian` ist Debian 13 ([`ADR-0021`](../../adr/0021-podman-build-im-sandbox-devcontainer.md): Digest `6ee2b409…`, Debian 13.7). Das Debian-Paket ist der Stand der Distribution, nicht des Upstream.
+- **Gegenstück Docker:** `nestedRuntime: docker` holt `docker-ce` aus `download.docker.com` und bricht ab, wenn der Fingerprint des Schlüssels nicht `9DC858229FC7DD38854AE2D88D81803C0EBFCD88` ist (`Dockerfile.tmpl`, Block `NestedDocker`); die Pakete selbst sind nicht auf eine Version gepinnt ([ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md) Entscheidung 1). `devcontainer_egress.go`: `egressDockerAptHost()` liefert `download.docker.com`, weil die Paketquelle im Image eingetragen bleibt und `apt-get update` im eingeschränkten Container sie braucht.
+- **Stand der Versionen** (Upstream: `gh api repos/containers/podman/releases`; Debian: `api.ftp-master.debian.org/madison?package=podman` und `packages.debian.org`):
+
+  | Quelle | Stand |
+  |---|---|
+  | Upstream | `v6.1.4` und `v5.8.9`, beide 2026-10-12; davor `v6.1.3`/`v5.8.8` (2026-09-29). Die Releases tragen nur `podman-remote-static-linux_{amd64,arm64}.tar.gz` (Client ohne Container-Engine), `shasums`, Installer für macOS und Windows. |
+  | Debian 13 „trixie“ (`stable`) | `5.4.2+ds1-2+b2` |
+  | `trixie-backports` | kein Paket `podman` (Suche auf `packages.debian.org`: in dieser Suite nur `cockpit-podman` 131-1~bpo13+1) |
+  | Debian `forky`/`sid` | `5.8.6+ds1-3` (drei Patch-Releases hinter `5.8.9`; `libc6` in `sid`: 2.43-7) |
+  | Debian `experimental` | `6.1.1+ds1-1+b1` (nicht installierbar ohne Pin-Mix; drei Patch-Releases hinter `6.1.4`) |
+  | Kubic/OBS (`devel:kubic:libcontainers`) | `Debian_13` liefert 404; der Zweig `unstable/Debian_Testing` nennt `podman 4:4.9.2`, `buildah 1.39.4`, `netavark 1.14.1` (älter als trixie) |
+  | `quay.io/podman/stable` | Tags bis `v5.8.7` (`latest` = `v5.8.7`, zuletzt geändert 2026-10-16); **kein `v6`-Tag** (gelesen über die Quay-API) |
+  | `mgoltzsche/podman-static` | `v6.1.4` (2026-10-13, einen Tag nach Upstream), `v5.8.8` als letzte 5.8-Linie (`5.8.9` fehlt); Archive `podman-linux-{amd64,arm64}.tar.gz` (≈ 35 MB / 32 MB) mit `.asc` (GPG-Fingerprint laut README `0CCF102C4F95D89E583FF1D4F8B5AF50344BB503`) |
+
+  Kein Debian-Suite trägt die neueste Version; „neueste“ verlangt eine Upstream-nahe Quelle.
+- **Podman 6 bricht mit 5.x** (Release Notes `v6.0.0`, gelesen): braucht Buildah 1.44, Netavark/Aardvark 2.0 und Konfigurationsdateien aus `common/v0.68.0`; **entfernt** `iptables` (nur `nftables`), CNI, `slirp4netns` (nur `pasta`), cgroups v1; BoltDB wird auf SQLite migriert; Netzwerk-Isolation ist standardmäßig an; `podman commit` pausiert den Container; das Projekt zog nach `podman-container-tools` um. Das Debian-Paket 5.4.2 (Netavark 1.14) ist damit **nicht** die Basis für 6.x: Wer 6.x will, braucht Netavark ≥ 2 und `nftables` im Image, nicht nur ein neueres `podman`-Binary.
+- **Egress:** Der Image-Build läuft auf dem Container-Host mit offenem Netz; die Einschränkung ([`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md)) wirkt nur im laufenden Container. Ein neuer Host in [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) entsteht deshalb nur, wenn die Quelle **im Container** erreichbar bleiben muss (eingetragenes APT-Repo wie bei Docker); ein beim Bauen geladener Tarball oder `COPY --from` braucht keinen.
+
+### Entwurfsfrage und Alternativen (der Architect misst und entscheidet; Einordnung des Planners, nicht entscheidend)
+
+Messbar auf Colima (arm64, VM Ubuntu 24.04, mit `kernel.apparmor_restrict_unprivileged_userns=0`, wie [`ADR-0021`](../../adr/0021-podman-build-im-sandbox-devcontainer.md)); amd64 nur über den CI-Lauf `integration.yml` (`ubuntu-latest`) nach dem Push, ersatzweise ein Build mit `--platform linux/amd64` unter Emulation, der Download, Signatur und `podman --version` prüft, aber kein verschachteltes `run` belegt.
+
+| Opt. | Quelle | Pro | Contra |
+|---|---|---|---|
+| **a** | Debian: `trixie-backports` (kein Paket), `forky`/`sid` per Pin-Mix (5.8.6), `experimental` (6.1.1) | signierte Pakete, Abhängigkeiten aus einer Hand, `apt` bleibt Updatepfad, Host `deb.debian.org` ist schon in der Allowlist | **Erfüllt „neueste“ nicht** (5.8.6 < 5.8.9 < 6.1.4); Pin-Mix zieht `libc6` und weitere Pakete aus `sid` (`libc6` 2.43-7) in ein `stable`-Image; `experimental` ist als Quelle für Zielrepos unvertretbar; Podman 6 ist nirgends in `stable` |
+| **b** | `quay.io/podman/stable` (Fedora): Mehrstufen-Build, `COPY --from=quay.io/podman/stable@sha256:…` | Digest-Pin möglich, Upstream-nah (Herkunft: Projekt selbst), kein neuer Laufzeit-Host | Hat heute **kein 6.x** (`latest` = 5.8.7), erfüllt „neueste“ damit nicht; Fedora-Binaries sind glibc-dynamisch und brauchen ihre Bibliotheken (`libgpgme`, `libseccomp`, `libsubid`, `sqlite`) und Konfiguration auf Debian 13: Kompatibilität **nicht gemessen**, wahrscheinlich brüchig; [`ADR-0014`](../../adr/0014-nested-podman-sandbox-devcontainer.md) Alternative C hat Fedora als Base verworfen (hier nur Binärquelle, nicht Base) |
+| **c** | Statische Builds: Upstream nur `podman-remote-static` (Client, **nicht verwendbar**); Community `mgoltzsche/podman-static` (Podman 6.1.4 samt `crun` 1.30.1, `conmon` 2.2.1, `netavark` 2.1.0, `aardvark-dns` 2.1.0, `passt`, `fuse-overlayfs` 1.18, `catatonit`, `runc`; Alpine/musl, statisch; `amd64` und `arm64`) | **einzige gefundene Quelle für 6.1.4 auf beiden Architekturen**; ein Archiv, keine Distro-Abhängigkeiten außer `uidmap`, `nftables`; GPG-signiert; folgt Upstream binnen 1 Tag | **Ein einzelner Maintainer** (`mgoltzsche`: 178 Commits, danach `tobwen`/`srbala` mit je 14); Vertrauen ist Vertrauen in eine Person und ihre CI (Signaturschlüssel liegt als Secret im Workflow `workflow.yml`); Archiv installiert nach `/usr/local` und liefert eigene `/etc/containers/*` (`registries.conf` mit `unqualified-search-registries = docker.io, quay.io, ghcr.io, registry.fedoraproject.org` — **ändert** die gemessene Kurznamen-Aussage von [`ADR-0021`](../../adr/0021-podman-build-im-sandbox-devcontainer.md) und kann `quay.io` als neuen Pull-Host öffnen); kein Update-Pfad im Image; ohne systemd gebaut; Verhältnis zu [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (Drittbinary, aber kein Skript) ist eine Auslegung und gehört dem Projektinhaber |
+| **d** | Build aus Quelltext im Image-Build (Mehrstufe: Go ≥ 1.25, Rust für Netavark/Aardvark, C für `crun`/`conmon`/`passt`) | volle Kontrolle über Version und Tags; Quelle ist Upstream (Git-Tag, Commit-Pin); kein Drittbinary | Aufwand und Dauer **nicht gemessen**, aber hoch (sieben Komponenten, zwei Toolchains), und der Build läuft **bei jedem Nutzer** des erzeugten Dockerfiles; Wartung von sieben Versionen im Template; Reproduzierbarkeit nur mit Pins und Prüfsummen je Quelle; das Dockerfile ist ein Artefakt der Zielrepos, nicht ein Build der Pipeline |
+| **e** | Offizielle Paketquelle des Projekts oder der Distribution | wäre die sauberste Lösung | **Gibt es nicht** für Debian 13: `podman.io/docs/installation` verweist für Debian auf `apt-get install podman` (Distro-Paket); der Kubic/OBS-Zweig ist für Debian 13 nicht vorhanden und für `Testing` auf 4.9.2 stehengeblieben |
+| **f** | Pin der Version (`ARG PODMAN_VERSION`) mit Prüfsumme, in Kombination mit **c** (oder **d**) | Reproduzierbar, Pin-Hebung ist eine sichtbare Änderung; Prüfsummen je Architektur im Template | „Neueste“ gilt nur zum Zeitpunkt der letzten Hebung (Pin-Hebung je Podman-Release = Aufwand je u-boot-Release oder Automatisierung); der Pin allein prüft nicht die Herkunft, die Signatur des Archivs tut es. Gegenstück zu [`ADR-0019`](../../adr/0019-docker-daemon-aus-docker-apt-repo.md): dort ist der **Schlüssel** gepinnt, die **Pakete** nicht — „aktuell bei jedem Build“; ein Archiv mit `latest` plus Schlüssel-Pin (**f2**) hätte dieselbe Form, ein Archiv mit Versions- und Prüfsummen-Pin (**f1**) die andere |
+
+**Einordnung (Planner, nicht entscheidend):** Nur **c** (mit **f1** oder **f2**) und **d** liefern 6.1.4 auf beiden Architekturen; **a**, **b** und **e** scheitern an „neueste“ (a: 5.8.6/6.1.1 nur experimentell, b: kein 6.x, e: nicht vorhanden). **c** ist der Weg mit dem kleinsten Eingriff in `Dockerfile.tmpl` und der kleinsten Build-Zeit, trägt aber das schwächste Vertrauensmodell (Einzelperson, Alpine-Build, Signaturschlüssel in deren CI); **d** hat das stärkste Modell (Upstream-Quelle, Commit-Pins), den höchsten Aufwand je Nutzer-Build. Eine Mischform ist denkbar und gehört in die Messung: Binaries aus **c**, aber das Archiv per Prüfsumme **und** Signatur gepinnt, mit dokumentiertem Ausstiegspfad nach **d**. **Offen für den Projektinhaber** (Sicherheitsentscheidung, nicht Messung): ob ein Community-Build als Quelle für Zielrepos akzeptabel ist (Abgrenzung zu [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte): nicht „fremdes Skript“, aber „externer ausführbarer Code“).
+
+**Frage der Version: 6.1.x oder 5.8.x.** Die Linie `5.8.x` (neueste Debian-nahe, `5.8.9` Upstream, `5.8.8` in **c**) ändert an der gemessenen Ausstattung am wenigsten (Netavark 1.x, `iptables`-Pfad); **6.1.x** ist die neueste Linie und der Wunsch des Projektinhabers („die neueste Version“), bringt aber die Brüche oben. Die Messung entscheidet, ob die sechs Lockerungen und `podman build` unter 6.1.4 tragen; die Fragen, die sie beantworten muss: Netavark 2 braucht `nftables` (im Podman-Block heute nicht installiert, nur bei Egress), Netzwerk-Isolation „an“ als Default (verändert sie das Netz eines `RUN`?), `/dev/net/tun` und `pasta` unverändert nötig?, `cgroups v2` auf dem Container-Host (Docker Desktop und ältere Hosts nicht gemessen), Konflikt zwischen den mitgelieferten und den per Debian installierten Komponenten (`fuse-overlayfs`, `passt`, `crun`).
+
+**Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
+
+- **Änderung der sechs Lockerungen, des Base-Images oder der `nestedRuntime`-Werte** — Sicherheitsentscheidung des Projektinhabers ([`ADR-0014`](../../adr/0014-nested-podman-sandbox-devcontainer.md) Entscheidung 2, [`ADR-0021`](../../adr/0021-podman-build-im-sandbox-devcontainer.md) Entscheidung 1); verlangt die Messung eine siebte Lockerung, führt die Entscheidungsmatrix des Vorgängers nach `next/` zurück ([`slice-v1-devcontainer-podman-build`](../done/slice-v1-devcontainer-podman-build.md) §1) und der Slice hält an.
+- **Podman als Host-Engine, Docker Desktop, VS Code, Codespaces** — nicht gemessen, nicht zugesagt (Handbuch §Grenzen); gilt unverändert.
+- **`nestedRuntime: docker`** — andere Quelle ([ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md)); bleibt unverändert.
+- **Eine zugesagte Version im Lastenheft** — das Lastenheft ist Zielbild und sagt „`podman build`“, nicht „Podman 6“; die Version gehört in Spezifikation und Handbuch.
+- **`buildah`-Kommando, `docker buildx`, `docker compose`** — bleiben nicht zugesagt ([ADR-0021](../../adr/0021-podman-build-im-sandbox-devcontainer.md) Entscheidung 2); `podman build` nutzt die eingebaute Bibliothek. Liefert das Archiv von **c** ein `buildah`, wird es nicht zugesagt.
+- **Automatisierte Pin-Hebung** (CI-Job, Dependabot-Ersatz) — Gate-/CI-Änderung ([`AGENTS.md`](../../../../AGENTS.md) §3.6), eigener Vorgang; hier nur, wie die Hebung geschieht, wenn **f1** gewählt wird (Re-Evaluierungs-Trigger der ADR).
+- **Welle-Closure und Release-Cut** — [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md); Push und Tags führt nur der Hauptagent nach Freigabe des Projektinhabers.
+
+## 2. Definition of Done
+
+**Gezählte Liefer-Punkte: drei.** Zerfällt der Slice an einem Messbefund (neue Lockerung, `nftables`/Netzwerkbruch mit großem Umbau, Quelle unvertretbar), wird er zerlegt oder nach `next/` zurückgeführt (§4).
+
+- [ ] **Liefer-Punkt 1 — Messung und Folge-ADR:** Die Messung ist durchgeführt und im Anhang der Folge-ADR protokolliert: Host, Engine, Architektur, Kernel, `sysctl`-Stand, Base-Image-Digest, Quelle und Version samt Prüfsumme/Signatur, installierte Komponenten mit Version (`podman`, `crun`, `conmon`, `netavark`, `aardvark-dns`, `passt`, `fuse-overlayfs`), Image-Größe und Bauzeit im Vergleich zum Stand mit dem Debian-Paket, je Variante das Ergebnis (§3 Messplan P1 bis P8). Die Folge-ADR (nächste freie Nummer im ADR-Index, MADR nach [`MR-008`](../../../../harness/conventions/MR-008-adr-form.md), `Schärft:` [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), **ersetzt voraussichtlich** Entscheidung 1 von [ADR-0014](../../adr/0014-nested-podman-sandbox-devcontainer.md), Bezug [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md) und [ADR-0021](../../adr/0021-podman-build-im-sandbox-devcontainer.md)) entscheidet Quelle, Pin-Form (**f1** oder **f2**), Versionslinie und Lieferkette mit den verglichenen Alternativen aus §1; Status `Accepted` setzt der Projektinhaber, nicht der Architect. ADR-Index aktualisiert. Die gewählte Quelle ist nicht eine, deren Wahl die Sicherheitsentscheidung des Projektinhabers (§1, offen) übergeht.
+- [ ] **Liefer-Punkt 2 — Umsetzung und Beleg:** `Dockerfile.tmpl` (Block `NestedPodman`) installiert die entschiedene Version aus der entschiedenen Quelle mit Prüfung **vor** der Installation (Signatur oder Prüfsumme, Abbruch bei Abweichung; Reihenfolge im Golden Case gepinnt, Muster von `TestGenerateDevcontainer_SandboxDocker`); `devcontainer_egress.go` und [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) ändern sich nur, wenn die Quelle einen Host im laufenden Container braucht (sonst ein Test, der das belegt); Golden Cases und die Integrationstests `TestE2E_SandboxDevcontainer_NestedPodman`, `…_Build` und `…_BuildEgress` laufen mit der neuen Version, dazu eine Prüfung der installierten Version (Hauptversion gleich der entschiedenen Linie, nicht Gleichheit mit einer Zahl); [`harness/replay.md`](../../../../harness/replay.md) Zeile `nestedRuntime: podman` nachgezogen; Negativprobe (Prüfung entfernen oder verfälschen, Test wird rot) vor dem Review ausgeführt ([`slice-v1-sandbox-docker-ce`](../done/slice-v1-sandbox-docker-ce.md) §7).
+- [ ] **Liefer-Punkt 3 — Doku:** [`LH-FA-DEV-007.b`](../../../../spec/spezifikation.md#lh-fa-dev-007b--ausstattung-bei-nestedruntime-podman) (Paketliste, Quelle, Versionslinie, Verhalten unter der neuen Version) und Historie der Spezifikation; Benutzerhandbuch (Abschnitt „Verschachteltes Podman (optional)“, „Grenzen“, Allowlist-Tabelle nur bei Host-Änderung); `CHANGELOG.md` `[Unreleased]` (Nutzer-Doku ohne Kennungen und Chronik, [`AGENTS.md`](../../../../AGENTS.md) §5 Zeile 6; **bestehende** `nestedRuntime: podman`-Projekte bekommen die neue Version erst nach `u-boot generate devcontainer` und einem Neubau des Containers — das gehört in den Eintrag); Messstand in Handbuch und CHANGELOG gleichlautend (Colima, arm64; amd64 nur, soweit gemessen). Lastenheft nur, falls die Messung die Zusage verschiebt (Version steht nicht im Lastenheft).
+- [ ] `make gates` grün; `make test-docker` grün auf dem Mess-Host (Laufzeit > 5 min bei `-timeout 30m`, `repo.mk` Ziel `test-docker`), oder der Grund für einen Lauf-Ausfall steht im Messprotokoll (kein stilles Rot).
+- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`) — kein Self-Review.
+- [ ] Doku-Update, falls ein öffentlicher Vertrag berührt ist (hier: Liefer-Punkt 3).
+- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
+- [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
+- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo mit Wellen von der nächsten Welle-Closure.
+
+## 3. Plan (vor Code)
+
+Lesestand 2026-10-18; jede Zeile ist an der genannten Stelle gelesen ([`AGENTS.md`](../../../../AGENTS.md) §3.10, Schärfung aus `welle-devcontainer-sshd-claude-code`). Der Implementer sucht jede Fundstelle vor der Änderung neu, nennt sie in der Closure-Notiz und gleicht die Tabelle **nach der letzten Fix-Runde** gegen `git diff --stat <Basis>..HEAD` ab. Zeilen mit „lesen“ ändern sich nur bei Befund.
+
+### Messplan (Liefer-Punkt 1, vor jeder Änderung an Vorlage, Spec oder Doku; Architect)
+
+Gemessen wird das **Erzeugnis**: das Dockerfile, das der aus dem Repo gebaute Generator heute erzeugt (Sandbox-Profil, `nestedRuntime: podman`), und dasselbe mit der Kandidaten-Quelle. Probe-Verfahren und Befehle: Anhang von [ADR-0021](../../adr/0021-podman-build-im-sandbox-devcontainer.md). Der Build-Kontext liegt unter `~/…` (Colima teilt nur das Home). Randbedingung wie dort: die Colima-VM bleibt unverändert; der Schalter `kernel.apparmor_restrict_unprivileged_userns` steht beim Messen auf dem Wert, den der Projektinhaber nennt (Wert 1 = Exit-Code 11, nicht messbar).
+
+| # | Messung | Frage | Auswertung |
+|---|---|---|---|
+| P0 | Umgebung | Basis? | Host, Colima/Docker-Version, Architektur, Kernel, Sysctl, Digest des Base-Images; Stand der Quelle (Version, Datum, Prüfsumme, Fingerprint) |
+| P1 | Herkunft und Prüfung | Verifiziert der Build die Quelle, bricht er bei Abweichung ab? | Signatur/Prüfsumme richtig → Build grün; verfälscht (Archiv-Byte oder Fingerprint) → Build bricht ab; Fundstelle der Prüfung im Dockerfile **vor** Installation; Schlüssel-/Digest-Herkunft im Protokoll (woher stammt der Pin, wie ist er geprüft) |
+| P2 | Komponenten | Was liegt im Image, welche Version? | `podman --version`, `crun`, `conmon`, `netavark`, `aardvark-dns`, `passt`, `fuse-overlayfs`, `command -v` und Pfad (`/usr/local` gegen `/usr`); Doppelbesetzung mit Debian-Paketen; `podman info` (Storage-, Netzwerk-, Runtime-Treiber, cgroup-Manager, Firewall-Treiber) |
+| P3 | Basisfall | Läuft `u-boot-sandbox-init` und `podman run --rm --network=host alpine echo` mit sechs Lockerungen? | Exit-Codes, Meldungen; Vergleich zum Debian-Paket |
+| P4 | `podman build` | `FROM`/`RUN`/`COPY`, kalt, Cache, `--no-cache`; `docker build` über den Alias | wie [`ADR-0021`](../../adr/0021-podman-build-im-sandbox-devcontainer.md); zusätzlich `RUN` mit Netz (`debian:stable-slim`, `apt-get update`) unter Netzwerk-Isolation „an“ (Podman 6) |
+| P5 | Egress | Pull und `RUN` hinter der Default-Allowlist | wie [`ADR-0021`](../../adr/0021-podman-build-im-sandbox-devcontainer.md) (`docker.io/library/alpine:3`, `debian:stable-slim`); Befund, ob `nftables`/Netavark-Firewall-Treiber im Container laufen; Kurznamen: `alpine` und `mycompany/img` (Registries-Konfiguration der Quelle) |
+| P6 | Degradation | `vfs` ohne `/dev/fuse` | Startscript schreibt `storage.conf`; Build läuft; Statusdatei `vfs` (`u-boot-sandbox-init`, [ADR-0022](../../adr/0022-fallback-ausweisung-statusdateien-im-container.md)) |
+| P7 | Größe und Dauer | Kosten | Image-Größe, Build-Zeit kalt und mit Layer-Cache, Rootless-Storage nach drei Builds, `make test-docker`-Laufzeit gegen den Stand ohne Änderung |
+| P8 | amd64 | Trägt die Architektur-Abbildung? | Build mit `--platform linux/amd64` unter Emulation (nur Download, Prüfung, `podman --version`), danach der CI-Lauf `integration.yml` auf dem Push-Tip; nicht gemessen heißt im Handbuch „nicht gemessen“ |
+
+### Dateien
+
+| Datei / Komponente | Änderungs-Art | Begründung (Fundstelle) |
+|---|---|---|
+| `docs/plan/adr/` (Folge-ADR, `README.md` Index) | neu / update | Entscheidung, Messprotokoll, verglichene Alternativen; ersetzt Entscheidung 1 von [`ADR-0014`](../../adr/0014-nested-podman-sandbox-devcontainer.md) (Block `NestedPodman`, Paketliste `podman uidmap fuse-overlayfs passt ca-certificates`) und ändert die Aussage zum Paketumfang in [`ADR-0021`](../../adr/0021-podman-build-im-sandbox-devcontainer.md) Entscheidung 2 („unverändert“) |
+| `internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl` | update | Block `{{- if .NestedPodman}}`: Paketliste und Quelle, Prüfung, `ln -sf … docker`, subuid/subgid; Block `{{- if .Egress}}` installiert `nftables` nur bei Egress — bei Podman 6 (Netavark 2) zu lesen, ob `nftables` auch ohne Egress nötig ist |
+| `internal/hexagon/application/devcontainer_egress.go` | lesen, ändern nur bei Befund | `egressRegistryHosts()` (fünf Hosts), `egressDockerAptHost()` (nur Docker); neuer Host nur, wenn die Quelle im laufenden Container erreichbar bleiben muss |
+| `internal/hexagon/application/templates/devcontainer/sandbox-init.sh.tmpl` | lesen, ändern nur bei Befund | schreibt bei fehlendem `/dev/fuse` `~/.config/containers/storage.conf` (`driver = "vfs"`); die Konfiguration einer Quelle mit eigenem `/etc/containers/storage.conf` kann kollidieren |
+| `internal/hexagon/application/generate_sandbox_test.go` | update | `TestGenerateDevcontainer_SandboxPodman` (Zeile 301, pinnt den Dockerfile-Inhalt), `…_NotGenerated`, `TestGenerateDevcontainer_SandboxEgressWithPodman` (Zeile 570); neuer Pin: Quelle, Prüfung vor Installation, Reihenfolge; `none`/`docker` ohne die Quelle |
+| `internal/e2e/sandbox_devcontainer_docker_test.go` | update | `TestE2E_SandboxDevcontainer_NestedPodman` (Zeile 396), `…_Build` (321), `…_BuildEgress` (363); Prüfung der Version. **Reihenfolge-Abhängigkeit:** [`slice-v1-e2e-status-ci-helfer`](../in-progress/slice-v1-e2e-status-ci-helfer.md) ändert `internal/e2e/` (Helfer `startLabeled` in `sandbox_status_docker_test.go`, ggf. `sandbox_devcontainer_docker_test.go`); dieser Slice startet erst, wenn jener in `done/` liegt (§4) |
+| `internal/e2e/sandbox_status_docker_test.go` | lesen | nutzt `startLabeled`; nur bei Befund (Podman-6-Statusdatei) |
+| `spec/spezifikation.md` | update | [`LH-FA-DEV-007.b`](../../../../spec/spezifikation.md#lh-fa-dev-007b--ausstattung-bei-nestedruntime-podman) (Zeile 329: „Das Dockerfile installiert `podman`, `uidmap`, `fuse-overlayfs`, `passt` und `ca-certificates` ohne empfohlene Pakete“), [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)-Tabelle (Zeile 1086, nur bei Host-Änderung), Historie (§7) |
+| `docs/user/benutzerhandbuch.md` | update | Abschnitt „Verschachteltes Podman (optional)“ (ab Zeile 976), „Grenzen“ (ab Zeile 1435), Allowlist-Tabelle (Zeile 1172, nur bei Host-Änderung); FAQ „Funktioniert Podman?“ (Zeile 1879) betrifft Podman als **Host**-Ersatz und bleibt, **gelesen**, nicht berührt |
+| `CHANGELOG.md` | update | `[Unreleased]`, Eintrag zur neuen Version; Hinweis: bestehende Projekte nach `generate devcontainer` und Neubau |
+| `harness/replay.md` | update | Zeile `generate devcontainer` mit `nestedRuntime: podman` (Dockerfile-Pin `podman uidmap fuse-overlayfs passt`) |
+| `spec/lastenheft.md` | lesen, ändern nur bei Befund | Zusage Zeile 460 („`podman build` … rootless Podman“) nennt keine Version; Änderung nur, wenn die Messung die Zusage verschiebt (Version 0.14.0 nach Schema, Quelle „Vereinbarung mit dem Projektinhaber“) |
+| `README.md`, `README.de.md`, `docs/maintainer/releasing.md` | lesen | Bestätigen, dass keine Aussage zur Podman-Version steht (Suche beim Implementer, belegen statt „nicht berührt“) |
+| `docs/reviews/<Datum>-slice-v1-podman-aktuelle-version.md`, `…-verification-…` | neu, durch Reviewer und Verifier | Review- und Verification-Report |
+| `docs/plan/planning/open/README.md` | update | Bestandszeile (dieser Plan); beim Start in `in-progress/README.md` |
+| `docs/plan/planning/in-progress/roadmap.md` | **nicht Teil dieses Plans** | Zeile der Welle `v0.11.0` führt dieser Slice als weiteren Blocker; Eintrag durch den Lead |
+
+## 4. Trigger
+
+**Start** (`next` → `in-progress`): [`slice-v1-e2e-status-ci-helfer`](../in-progress/slice-v1-e2e-status-ci-helfer.md) liegt in `done/` (keine gleichzeitige Änderung an `internal/e2e/`); die Quelle ist vom Projektinhaber **dem Grunde nach** freigegeben (Sicherheitsfrage aus §1: Community-Binary ja/nein, oder Vorgabe **d**), sonst misst der Architect nur Kandidaten, die der Projektinhaber zulässt; `Verantwortlich:` gesetzt; WIP-Limit 1.
+
+**Rückführungen — vorab benannt, nicht erst im Nachhinein begründet:**
+
+- `in-progress` → `next` (zu groß, zurück zur Zerlegung): der Slice überschreitet drei Liefer-Punkte, oder die Messung verlangt eine siebte Lockerung oder ein anderes Base-Image (Sicherheitsentscheidung, §1 Abgrenzung).
+- `in-progress` → `open` (blockiert): Die einzige Quelle, die „neueste“ auf beiden Architekturen liefert, wird vom Projektinhaber abgelehnt (**c**) und **d** ist nicht tragbar; dann entscheidet der Projektinhaber, ob „neueste“ auf eine Version des Debian-Repos (a) begrenzt wird — das ändert die Anforderung, nicht den Slice.
+
+## 5. Closure-Trigger
+
+DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben; die Folge-ADR ist `Accepted` (durch den Projektinhaber). Erst danach darf [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md) starten.
+
+## 6. Risiken und offene Punkte
+
+- **Versionssprung 5.4 → 6.x bricht gemessene Annahmen** (Netavark 2 verlangt `nftables`, `iptables`/`slirp4netns`/CNI entfernt, Netzwerk-Isolation default an, BoltDB → SQLite, `podman commit` pausiert) — **Ausgang:** offen bis zur Messung P2 bis P5; Folge: Linie 5.8.x als Rückfall (der Projektinhaber entscheidet, nicht der Slice).
+- **Lieferkette:** Community-Archiv (**c**) hängt an einer Person und deren Signaturschlüssel; Schlüsselrotation bricht den Build (gewollt) — **Ausgang:** offen: Entscheidung im ADR; weiter offen: → Register, falls die Quelle gewählt wird und später rotiert.
+- **Kollision der Konfiguration** (`/etc/containers/*` aus dem Archiv gegen Pakete aus Debian, `registries.conf` mit `quay.io`) ändert die Kurznamen-Aussage von [ADR-0021](../../adr/0021-podman-build-im-sandbox-devcontainer.md) und kann einen neuen Pull-Host erzeugen — **Ausgang:** offen bis P5.
+- **amd64 ungemessen:** lokal nur arm64 (Colima); der Schalter `kernel.apparmor_restrict_unprivileged_userns` auf dem Runner entscheidet, ob der Test dort läuft ([ADR-0021](../../adr/0021-podman-build-im-sandbox-devcontainer.md) Folgepflicht) — **Ausgang:** offen bis zum CI-Lauf nach dem Push; die Zusage nennt amd64 als „nicht gemessen“, solange er fehlt.
+- **Image-Größe und Build-Dauer** steigen oder fallen (mitgelieferte Komponenten gegen Debian-Abhängigkeiten) — **Ausgang:** offen bis P7.
+- **`make test-docker`-Laufzeit** (`-timeout 30m`): längere Image-Builds und ein zusätzlicher Quellen-Download verlängern den Lauf — **Ausgang:** offen bis P7.
+- **Debian-Pakete und Archiv doppelt im Image** (`fuse-overlayfs`, `passt`, `crun` aus beiden Quellen): welcher Pfad zuerst gefunden wird, ist PATH-abhängig (`/usr/local` vor `/usr`) — **Ausgang:** offen bis P2; die ADR benennt, welche Debian-Pakete bleiben (`uidmap` bleibt: `newuidmap` braucht das Setuid-Bit aus dem Paket).
+- **„Neueste“ veraltet** mit **f1**: ein Pin ist beim Release `0.11.0` aktuell, nicht danach — **Ausgang:** offen: Re-Evaluierungs-Trigger der Folge-ADR (neue Podman-Hauptversion, Sicherheitslücke), Pin-Hebung per Folge-Eintrag; Automatisierung ein eigener Vorgang.
+- **Warn- und Sicherheitsfolgen:** eine neuere Version ändert das Profil nicht; dennoch bleibt die Sandbox mit sechs Lockerungen nahe `--privileged` ([ADR-0014](../../adr/0014-nested-podman-sandbox-devcontainer.md) Konsequenzen) — **Ausgang:** entfallen: Änderung des Profils ausgeschlossen (§1).
+
+## 7. Closure-Notiz
+
+Leer — füllt der Planner bei der Closure.
+
+## 8. Sub-Area-Prüfungen und Modus-Begründung
+
+**Vorgelagert — Sub-Area-Wahl prüfen:** berührt sind `internal/hexagon/application` (Dockerfile- und Egress-Erzeugung, Golden Cases; Greenfield laut [`harness/conventions.md`](../../../../harness/conventions.md)), `internal/e2e` (Greenfield), `spec/`, `docs/plan/` (Greenfield), `docs/user/`. Keine Sub-Area erfüllt weniger als zwei von drei Achsen; keine ist zu grob.
+
+**Vorgelagert — offene Beobachtungen sichten:** das Register (`../observations/`, Verzeichnisse `BEO-CLI`, `BEO-DOK`, `BEO-E2E`, `BEO-WZG`) ist für die berührten Sub-Areas nicht Satz für Satz gelesen; zu lesen **vor dem Start** (`BEO-DOK/plan-aussage-ueber-code` gilt für die Plan-Tabelle, §3; `BEO-E2E` für die e2e-Tests); Treffer und Zählerstand trägt der Implementer in §7 ein.
+
+Alle berührten Sub-Areas GF.
