@@ -11,5 +11,4 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| [`slice-v1-sandbox-fallback-host-ausweisung`](../next/slice-v1-sandbox-fallback-host-ausweisung.md) | Daemon-, Egress- und `vfs`-Fallback host-seitig ermitteln und in `u-boot doctor` und, wo ein Befehl sie feststellt, in der Befehlsausgabe ausweisen ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), Lastenheft unverändert); wartet auf die Folge-ADR des Architect zum Kanal (Rollenfolge Planner → Architect → Implementer → Reviewer → Verifier) |
 | [`slice-cr-sandbox-fuse-startfehler`](slice-cr-sandbox-fuse-startfehler.md) | Lastenheft-CR 0.12.0 → 0.13.0: ein fehlendes `/dev/fuse` auf dem Container-Host ist ein Startfehler der Engine, keine Degradationsstufe ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)); Wortlaut wartet auf die Freigabe des Projektinhabers; läuft vor [`slice-v1-sandbox-fallback-host-ausweisung`](../next/slice-v1-sandbox-fallback-host-ausweisung.md) |
