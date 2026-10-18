@@ -82,8 +82,8 @@ Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 
 ## 2. Definition of Done
 
-- [ ] **Lastenheft 0.14.0:** Stellen 1 bis 3 in der vom Projektinhaber freigegebenen Fassung (Wortlaut, Befehlsname und, falls geändert, der Subdomain-Satz), Versionsfeld, Historie-Zeile mit Datum (Verweis „Vereinbarung mit dem Projektinhaber“); die Freigabe ist im Gespräch belegt und in §7 vermerkt (Datei-Beleg besteht nicht).
-- [ ] **Vorab-Suche und Nachzug:** Die Suche gegen ältere Lastenheft-Zusagen zum Befehlsumfang (`config`, Abfragebefehle, `--quiet`, Egress) ist in §3 festgehalten; Stellen, die dadurch mitgeändert werden müssen, sind genannt.
+- [x] **Lastenheft 0.14.0:** Stellen 1 bis 3 in der vom Projektinhaber freigegebenen Fassung (Wortlaut, Befehlsname und, falls geändert, der Subdomain-Satz), Versionsfeld, Historie-Zeile mit Datum (Verweis „Vereinbarung mit dem Projektinhaber“); die Freigabe ist im Gespräch belegt und in §7 vermerkt (Datei-Beleg besteht nicht).
+- [x] **Vorab-Suche und Nachzug:** Die Suche gegen ältere Lastenheft-Zusagen zum Befehlsumfang (`config`, Abfragebefehle, `--quiet`, Egress) ist in §3 festgehalten; Stellen, die dadurch mitgeändert werden müssen, sind genannt.
 - [ ] `make gates` grün; `make doc-trace` ohne neue Waise (die neue Anforderungsaussage hat im Code-Slice ihren Beleg; bis dahin steht sie in `ADR`-/Slice-Bezug).
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
@@ -98,12 +98,13 @@ Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `spec/lastenheft.md` | update | Stellen 1 bis 3 (§3 [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging); Versionsfeld; §16 Historie); erst nach Freigabe des Wortlauts |
+| `spec/lastenheft.md` | update | Stellen 1 bis 3 (§3 [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging); Versionsfeld; §16 Historie); Wortlaut am 2026-10-18 freigegeben (§7) |
 | `docs/plan/planning/in-progress/slice-cr-sandbox-egress-anzeige.md` (diese Datei) | update | Freigabe, Vorab-Suche, Closure (§7) |
+| `docs/plan/planning/in-progress/roadmap.md` | update | Ruhe-Marker „Nichts in Arbeit.“ durch die Arbeitszeile dieses Slice ersetzt; die Closure setzt ihn zurück |
 | `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation nach `harness/review.md` und `harness/verification.md` |
 | `CHANGELOG.md` | unverändert | der CR ändert kein Produktverhalten; ein Eintrag entsteht im Code-Slice. Gelesen: `[Unreleased]` führt nur Code-Änderungen |
 
-Die Vorab-Suche (Pflicht vor jeder Vertragsänderung, Muster [`slice-cr-devcontainer-agent-features-sandbox`](../done/slice-cr-devcontainer-agent-features-sandbox.md)): `grep -i` über `spec/lastenheft.md` nach `config list`, `Abfragebefehl` und `allowlist` (am 2026-10-18 gelesen): Treffer sind der Absatz mit der Aufzählung in [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Stelle 2), die Historie-Zeile 0.9.0 (Verlaufstext, bleibt unverändert, denn Historie wird nicht umgeschrieben), der Spiegelstrich zu `podman build` in [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) („Default-Allowlist“; unberührt) und die Spiegelstriche in [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Stelle 1). Der Implementer wiederholt die Suche vor dem Lastenheft-Commit. Die Zusage in [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) („`u-boot config` zeigt die gesamte Konfiguration“) bleibt: die wirksame Egress-Liste ist abgeleitet, keine Konfiguration.
+Die Vorab-Suche (Pflicht vor jeder Vertragsänderung, Muster [`slice-cr-devcontainer-agent-features-sandbox`](../done/slice-cr-devcontainer-agent-features-sandbox.md)): `grep -i` über `spec/lastenheft.md` nach `config list`, `Abfragebefehl` und `allowlist` (am 2026-10-18 gelesen): Treffer sind der Absatz mit der Aufzählung in [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Stelle 2), die Historie-Zeile 0.9.0 (Verlaufstext, bleibt unverändert, denn Historie wird nicht umgeschrieben), der Spiegelstrich zu `podman build` in [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) („Default-Allowlist“; unberührt) und die Spiegelstriche in [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Stelle 1). Der Implementer hat die Suche vor dem Lastenheft-Commit am 2026-10-18 in einem Docker-Container (`alpine:3`, `grep -n -i`) mit denselben drei Mustern wiederholt: dieselben Treffer wie oben (Zeilen der Aufzählung in [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), `podman build` in [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), die Spiegelstriche in [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), Historie 0.9.0); weitere Stellen, die mitgeändert werden müssen, gibt es nicht. Die Zusage in [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) („`u-boot config` zeigt die gesamte Konfiguration“) bleibt: die wirksame Egress-Liste ist abgeleitet, keine Konfiguration.
 
 ## 4. Trigger
 
@@ -126,7 +127,9 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 
 ## 7. Closure-Notiz
 
-*(Wird bei der Closure gefüllt: Freigabe des Wortlauts (Gespräch), Vorab-Suche, Steering-Loop-Eintrag, Register, Folge-Slices, Risiken.)*
+**Freigabe des Wortlauts:** Der Projektinhaber hat Stellen 1 bis 3 und den Befehlsnamen `u-boot egress list` am 2026-10-18 im Gespräch ausdrücklich freigegeben („ok“ auf die wörtlich vorgelegten Texte); der Wortlaut steht unverändert im Lastenheft 0.14.0, die Historie-Zeile trägt das Datum 2026-10-18.
+
+*(Wird bei der Closure gefüllt: Vorab-Suche, Steering-Loop-Eintrag, Register, Folge-Slices, Risiken.)*
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
