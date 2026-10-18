@@ -1,0 +1,1 @@
+**Stand:** offen — Trigger: ein weiterer e2e-Test, der lokal grün und auf einem Runner ohne Image-Cache rot ist, oder das nächste Auftreten des Flakes mit gesicherter Ausgabe (siehe `observation.md`).
