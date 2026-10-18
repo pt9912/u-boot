@@ -1162,7 +1162,9 @@ func validateAllowExternalFeatureSourcesEntries(sources []string) error {
 // of `--allow-external-feature-sources` for `generate devcontainer`:
 // after the devcontainer plan-and-execute succeeded, append the
 // flag URLs to `devcontainer.featureSources.allow` and marshal-
-// rewrite u-boot.yaml. No-op when the flag slice is empty.
+// rewrite u-boot.yaml. No-op when the flag slice is empty. `mode` selects
+// the wording of the INFO line after the write (`would update allowlist`
+// under [driving.PreviewDryRun], `allowlist updated` otherwise).
 //
 // Failure modes mirror the [ConfigService.setFeatureSourcesAllow]
 // list-path: invalid URL → [driving.ErrConfigValueInvalid] (Code 10);

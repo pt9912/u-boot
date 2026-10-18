@@ -20,21 +20,18 @@ func logWrite(l driven.Logger, mode driving.PreviewMode, done, would string, arg
 }
 
 // devcontainerWriteMessage ist die Logzeile von `generate devcontainer`
-// nach einem Schreibzugriff: im Dry-Run `would <Verb>` zur Aktion,
-// sonst `<Aktion>` im bisherigen Wortlaut ([driving.GenerateAction.String]).
+// nach einem Schreibzugriff: im Dry-Run `would create` (Aktion
+// [driving.GenerateActionCreated]) oder `would update block`, sonst
+// `<Aktion>` ([driving.GenerateAction.String]). Die Plan-Phase liefert
+// nur diese beiden Aktionen ([devcontainerAggregateAction]; `NoOp`
+// endet vor der Zeile).
 func devcontainerWriteMessage(mode driving.PreviewMode, action driving.GenerateAction) string {
 	const prefix = "generate devcontainer: "
 	if mode != driving.PreviewDryRun {
 		return prefix + action.String()
 	}
-	switch action {
-	case driving.GenerateActionCreated:
+	if action == driving.GenerateActionCreated {
 		return prefix + "would create"
-	case driving.GenerateActionUpdatedBlock:
-		return prefix + "would update block"
-	default:
-		// Andere Aktionen liefert die Plan-Phase von `generate devcontainer`
-		// nicht ([devcontainerAggregateAction]).
-		return prefix + "would change"
 	}
+	return prefix + "would update block"
 }

@@ -2,6 +2,7 @@ package application_test
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -22,6 +23,7 @@ type dryRunLogCase struct {
 	name  string
 	done  string // Info-Zeile ohne Dry-Run (Vergangenheitsform)
 	would string // Info-Zeile im Dry-Run
+	args  string // Schlüssel und Werte beider Zeilen, als fmt.Sprint der Argumente
 	run   func(t *testing.T, mode driving.PreviewMode) (*fakeLogger, error)
 }
 
@@ -33,6 +35,16 @@ func infoMessages(l *fakeLogger) []string {
 		}
 	}
 	return out
+}
+
+// infoArgs liefert Schlüssel und Werte der ersten INFO-Zeile mit der Meldung.
+func infoArgs(l *fakeLogger, msg string) (string, bool) {
+	for _, e := range l.entries {
+		if e.Level == "INFO" && e.Msg == msg {
+			return fmt.Sprint(e.Args), true
+		}
+	}
+	return "", false
 }
 
 func runConfigSet(t *testing.T, seed, path, value string, mode driving.PreviewMode) (*fakeLogger, error) {
@@ -84,18 +96,22 @@ func dryRunLogCases() []dryRunLogCase {
 	}
 	return []dryRunLogCase{
 		{"config set scalar", "config set: updated", "config set: would update",
+			"[path project.name old t-uboot-config new renamed]",
 			func(t *testing.T, m driving.PreviewMode) (*fakeLogger, error) {
 				return runConfigSet(t, manyFixture, "project.name", "renamed", m)
 			}},
 		{"config set featureSources.allow", "config set: updated", "config set: would update",
+			"[path devcontainer.featureSources.allow old https://ghcr.io/orgX/features/custom-rust new https://ghcr.io/orgX/features/custom-rust,https://example.test/x]",
 			func(t *testing.T, m driving.PreviewMode) (*fakeLogger, error) {
 				return runConfigSet(t, fixtureUBootYAMLDevcontainerSeed, "devcontainer.featureSources.allow", "https://example.test/x", m)
 			}},
 		{"config set egress.allow", "config set: updated", "config set: would update",
+			"[path devcontainer.sandbox.egress.allow old  new a.example.com]",
 			func(t *testing.T, m driving.PreviewMode) (*fakeLogger, error) {
 				return runConfigSet(t, manyFixture, "devcontainer.sandbox.egress.allow", "a.example.com", m)
 			}},
 		{"config set many", "config set (many): updated", "config set (many): would update",
+			"[items 2]",
 			func(t *testing.T, m driving.PreviewMode) (*fakeLogger, error) {
 				prod := newFakeFS()
 				prod.markDirExists(configTestBaseDir)
@@ -111,16 +127,22 @@ func dryRunLogCases() []dryRunLogCase {
 				return logger, err
 			}},
 		{"generate changelog created", "generate: created", "generate: would create",
+			"[artifact changelog path CHANGELOG.md project t-uboot-gen]",
 			gen(domain.ArtifactChangelog, nil, nil)},
 		{"generate readme created", "generate: created", "generate: would create",
+			"[artifact readme path README.md project t-uboot-gen]",
 			gen(domain.ArtifactReadme, nil, nil)},
 		{"generate changelog repaired header", "generate: repaired Unreleased header", "generate: would repair Unreleased header",
+			"[artifact changelog path CHANGELOG.md project t-uboot-gen]",
 			gen(domain.ArtifactChangelog, map[string]string{"CHANGELOG.md": changelogNoUnreleased}, nil)},
 		{"generate env-example updated block", "generate: updated block", "generate: would update block",
+			"[artifact env-example path .env.example project t-uboot-gen]",
 			gen(domain.ArtifactEnvExample, map[string]string{".env.example": staleEnv}, nil)},
 		{"generate devcontainer created", "generate devcontainer: created", "generate devcontainer: would create",
+			"[project t-uboot-gen forwardPorts [] features 0 changed [.devcontainer/devcontainer.json .devcontainer/Dockerfile]]",
 			gen(domain.ArtifactDevcontainer, nil, nil)},
 		{"generate devcontainer allowlist", "generate devcontainer: allowlist updated", "generate devcontainer: would update allowlist",
+			"[added 1 total 1]",
 			func(t *testing.T, m driving.PreviewMode) (*fakeLogger, error) {
 				return gen(domain.ArtifactDevcontainer, nil, func(r *driving.GenerateRequest) {
 					r.AllowExternalFeatureSources = []string{"https://example.test/features/x"}
@@ -149,6 +171,9 @@ func TestDryRunLog_WriteLines(t *testing.T) {
 			if containsString(msgs, tc.done) {
 				t.Errorf("dry-run INFO carries past tense line %q: %q", tc.done, msgs)
 			}
+			if got, _ := infoArgs(logger, tc.would); got != tc.args {
+				t.Errorf("dry-run %q fields = %s, want %s", tc.would, got, tc.args)
+			}
 			for _, m := range msgs {
 				for _, w := range pastTense() {
 					if strings.Contains(m, w) {
@@ -165,6 +190,9 @@ func TestDryRunLog_WriteLines(t *testing.T) {
 				msgs := infoMessages(logger)
 				if !containsString(msgs, tc.done) {
 					t.Errorf("mode %v INFO lines = %q, want %q", mode, msgs, tc.done)
+				}
+				if got, _ := infoArgs(logger, tc.done); got != tc.args {
+					t.Errorf("mode %v %q fields = %s, want %s", mode, tc.done, got, tc.args)
 				}
 				if containsString(msgs, tc.would) {
 					t.Errorf("mode %v INFO carries would line %q: %q", mode, tc.would, msgs)
