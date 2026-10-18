@@ -43,8 +43,8 @@ Quickstart and user docs: ` + repoURL + `#readme
 // new file plus a single `AddCommand` line here.
 func buildRootCommand(a *App) *cobra.Command {
 	root := &cobra.Command{
-		Use:   "u-boot",
-		Short: "Developer environment bootloader for Docker-based projects",
+		Use:     "u-boot",
+		Short:   "Developer environment bootloader for Docker-based projects",
 		Long:    rootLongText(a.version),
 		Version: a.version,
 		// Disable Cobra's auto-suggest on unknown commands so the
