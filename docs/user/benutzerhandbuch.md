@@ -155,8 +155,10 @@ Zwei Einschränkungen im Container:
   Repository anschließend selbst an (`git init`).
 - **`u-boot doctor` sieht Ihre Werkzeuge nicht.** Die vier Host-Prüfungen
   (Docker, Compose-Plugin, Docker-Erreichbarkeit, git) werden übersprungen und
-  mit `?` markiert. Auch `up`, `down` und `logs` laufen im Image nicht, weil dort
-  kein Docker vorhanden ist.
+  mit `?` markiert. Auch die Prüfung des Geräts `/dev/fuse` entfällt (Eintrag
+  `devcontainer.sandbox.runtime`, Info): das Gerät im Image gehört dem
+  u-boot-Container, nicht dem Container-Host. Auch `up`, `down` und `logs` laufen
+  im Image nicht, weil dort kein Docker vorhanden ist.
 
 Für den Alltag ist ein installiertes Programm bequemer als das Image.
 
@@ -636,6 +638,11 @@ Zustand beim Containerstart (`vfs`-Speicher, Daemon, Egress).
   (`?`). Das ist kein Fehler. Die Einträge zum Containerstart liest `doctor`
   dort direkt aus dem Container, wenn es im Devcontainer selbst läuft; aus dem
   Runtime-Image ist der Zustand nicht ermittelbar.
+- Im Container ist außerdem die Prüfung des Geräts `/dev/fuse` übersprungen
+  (`devcontainer.sandbox.runtime`, Info, Exit-Code 0): das Gerät im Container ist
+  nicht das des Container-Hosts. Ein Devcontainer, der ohne das Gerät gestartet
+  wurde, erscheint im Eintrag `devcontainer.sandbox.fallback.vfs`; das Gerät des
+  Container-Hosts prüft `u-boot doctor` auf dem Host.
 
 ### 4.8 Artefakte erzeugen und aktualisieren
 
@@ -1015,7 +1022,7 @@ als Warnung aus**:
 `/dev/net/tun` braucht das Netzwerk der verschachtelten Container (`pasta`);
 ohne das Device scheitert jedes `RUN` eines `podman build`. `/dev/fuse` dient dem
 Speicher der verschachtelten Container. Beide Devices müssen auf dem
-Container-Host vorhanden sein; fehlt eines, lehnt Docker den Start ab (gemessen: `error gathering device information while adding custom device … no such file or directory`), das Startscript läuft dann nicht. `u-boot doctor` prüft `/dev/net/tun` nicht und meldet ein fehlendes `/dev/fuse` auf einem Linux-Host als Fehler (Exit-Code 11). Abhilfe: die Kernelmodule auf dem Host laden (`modprobe fuse`, `modprobe tun`; `tun` nicht gemessen) oder `nestedRuntime: none` wählen. Bestehende Projekte mit `nestedRuntime: podman` brauchen das Device nach `u-boot generate devcontainer` ebenfalls.
+Container-Host vorhanden sein; fehlt eines, lehnt Docker den Start ab (gemessen: `error gathering device information while adding custom device … no such file or directory`), das Startscript läuft dann nicht. `u-boot doctor` prüft `/dev/net/tun` nicht und meldet ein fehlendes `/dev/fuse` auf einem Linux-Host, nicht aus einem Container, als Fehler (Exit-Code 11). Abhilfe: die Kernelmodule auf dem Host laden (`modprobe fuse`, `modprobe tun`; `tun` nicht gemessen) oder `nestedRuntime: none` wählen. Bestehende Projekte mit `nestedRuntime: podman` brauchen das Device nach `u-boot generate devcontainer` ebenfalls.
 
 Das ist nahe an `--privileged`; der Schutz ist damit deutlich schwächer. Das
 Standardprofil (`nestedRuntime: none`) bleibt ungelockert.
@@ -1075,7 +1082,12 @@ Docker lehnt den Start des Containers ab. `u-boot doctor` meldet es auf Linux-Ho
 als Fehler (Exit-Code 11), unabhängig von `onUnavailable`. Unter macOS mit Colima
 läuft die Engine in einer VM, die der Host nicht beurteilen kann; dort lehnt Docker
 den Start ab, die Prüfung von `doctor` zum Gerät meldet nichts, und das
-Startscript im Container prüft die User-Namespaces.
+Startscript im Container prüft die User-Namespaces. Läuft `u-boot doctor` in einem
+Container (Runtime-Image, Devcontainer), prüft es das Gerät nicht: das `/dev/fuse`
+dort gehört dem Container, nicht dem Container-Host. Der Eintrag
+`devcontainer.sandbox.runtime` ist dann Info (Exit-Code 0); ein ohne das Gerät
+gestarteter Devcontainer erscheint im Eintrag `devcontainer.sandbox.fallback.vfs`,
+das Gerät des Container-Hosts prüft `u-boot doctor` auf dem Host.
 
 #### Fallbacks sehen
 

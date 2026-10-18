@@ -41,7 +41,10 @@ this file is the same format applied to u-boot itself.
   degradation step: the generated container carries `--device=/dev/fuse`, and where the device is missing the engine refuses to start it (measured with Docker 29.5.2 on
   Colima 0.10.3, arm64: `docker run` exit code `127`, `docker start` exit code `1`, `error gathering device information while adding custom device`); the start script never runs.
   The `vfs` storage fallback applies only to a container that was started without the device (for example after changed `runArgs`). `u-boot doctor` reports a missing `/dev/fuse` on a Linux
-  host as an **error** (exit code `11`) under both `onUnavailable` values, without the fallback flag; it does not check `/dev/net/tun`. **Regression for scripts that evaluate `doctor` without `--strict`:**
+  host outside a container as an **error** (exit code `11`) under both `onUnavailable` values, without the fallback flag; it does not check `/dev/net/tun`. Inside a container (the runtime image,
+  a devcontainer) the check is skipped (info, exit code `0`): the device there is the container's own, not the container host's, and a devcontainer started without it shows in
+  `devcontainer.sandbox.fallback.vfs`. Compared to `v0.10.0`, where a missing device inside a container was a warning ("fall back to vfs", exit code `0`), the check no longer reads the container's device at all.
+  **Regression for scripts that evaluate `doctor` without `--strict`, on a Linux host outside a container:**
   the check `devcontainer.sandbox.runtime` was a warning (exit code `0`) with `onUnavailable: warn` and now fails with exit code `11`; load the `fuse` kernel module on the container host (`modprobe fuse`)
   or set `nestedRuntime: none`. The generated files do not change. Lastenheft 0.13.0 ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
   [`LH-FA-CLI-006`](spec/lastenheft.md#lh-fa-cli-006--exit-codes), [ADR-0022](docs/plan/adr/0022-fallback-ausweisung-statusdateien-im-container.md)).
