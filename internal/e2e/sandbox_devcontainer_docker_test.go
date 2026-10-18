@@ -500,6 +500,44 @@ printf 'FROM docker.io/library/alpine:3\nRUN echo ran > /run.txt\n' > Dockerfile
 podman build -t probe . && echo VFS_BUILD_OK
 docker build -t probe-alias . && echo VFS_DOCKER_BUILD_OK`
 
+// ADR 0023 negative probe: the build stops before the installation when the
+// pinned checksum or the pinned signing key does not match. The pins are
+// `ARG`s of the generated Dockerfile; `--build-arg` replaces one value per
+// probe, the control build keeps the generated pins and must succeed (the
+// other nested-Podman tests build with them too). The checksum probe replaces
+// both architecture values, so it holds on `amd64` and `arm64` hosts.
+func TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild(t *testing.T) {
+	requireDocker(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+	dir := generateSandboxProject(ctx, t, "podman", "warn")
+	contextDir := filepath.Join(dir, ".devcontainer")
+	zeros := strings.Repeat("0", 64)
+	for name, tc := range map[string]struct {
+		args []string
+		want string
+	}{
+		"wrong checksum":                 {[]string{"PODMAN_SHA256_AMD64=" + zeros, "PODMAN_SHA256_ARM64=" + zeros}, "FAILED"},
+		"signing subkey as the pin":      {[]string{"PODMAN_SIGNING_KEY=6E8EF2F5B1F26FF78431E3D1364FA5A62B410BA4"}, ".tar.gz: OK"},
+		"unknown fingerprint as the pin": {[]string{"PODMAN_SIGNING_KEY=" + strings.Repeat("0", 40)}, ".tar.gz: OK"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			args := []string{"build", "-q", "-t", "uboot-e2e-sandbox-pin-negative:probe"}
+			for _, a := range tc.args {
+				args = append(args, "--build-arg", a)
+			}
+			out, code := dockerOutput(ctx, t, append(args, contextDir)...)
+			if code == 0 {
+				t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", "uboot-e2e-sandbox-pin-negative:probe") })
+				t.Fatalf("build with %v succeeded, want a failure before the installation:\n%s", tc.args, out)
+			}
+			if tc.want != "" && !strings.Contains(out, tc.want) {
+				t.Errorf("build output lacks %q:\n%s", tc.want, out)
+			}
+		})
+	}
+}
+
 // LH-FA-DEV-007: a `/dev/fuse` that is missing on the container host is no
 // degradation step; the engine refuses to start the container, so the start
 // script never runs. The host device is replaced by a path that does not
