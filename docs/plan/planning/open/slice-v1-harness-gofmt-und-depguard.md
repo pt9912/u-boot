@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** ohne Welle — kein Release-Bezug festgelegt; der Slice läuft **nach** dem Cut [`slice-v1-release-cut-v0.11.0`](../in-progress/slice-v1-release-cut-v0.11.0.md) und ist nicht Teil von `v0.11.0` (Entscheidung des Projektinhabers 2026-10-18, „nach belieben“). Herkunft: Nebenbefund des Reviews zu [`slice-cr-sandbox-fuse-startfehler`](../done/slice-cr-sandbox-fuse-startfehler.md) (F-4, Closure-Notiz §7: viele Bestandsdateien nicht `gofmt`-konform, kein Formatter im Gate) und Befund F-7 des Reviews zu [`slice-v1-sandbox-fallback-host-ausweisung`](../done/slice-v1-sandbox-fallback-host-ausweisung.md) (`make verify-depguard`, Fall `domain-isoliert`).
+**Welle:** ohne Welle — kein Release-Bezug festgelegt; der Slice läuft **nach** dem Cut [`slice-v1-release-cut-v0.11.0`](../done/slice-v1-release-cut-v0.11.0.md) und ist nicht Teil von `v0.11.0` (Entscheidung des Projektinhabers 2026-10-18, „nach belieben“). Herkunft: Nebenbefund des Reviews zu [`slice-cr-sandbox-fuse-startfehler`](../done/slice-cr-sandbox-fuse-startfehler.md) (F-4, Closure-Notiz §7: viele Bestandsdateien nicht `gofmt`-konform, kein Formatter im Gate) und Befund F-7 des Reviews zu [`slice-v1-sandbox-fallback-host-ausweisung`](../done/slice-v1-sandbox-fallback-host-ausweisung.md) (`make verify-depguard`, Fall `domain-isoliert`).
 
 **Bezug:** [`LH-QA-004`](../../../../spec/lastenheft.md#lh-qa-004--linting-solid-nahes-lint-profil) (Lint-Profil),
 [`ADR-0003`](../../adr/0003-solid-nahes-lint-profil.md) (Lint-Profil, `depguard`).
@@ -89,7 +89,7 @@ Jede Aussage über Code steht mit Fundstelle (gelesen am 2026-10-18). Der Implem
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`next` → `in-progress`): der Cut [`slice-v1-release-cut-v0.11.0`](../in-progress/slice-v1-release-cut-v0.11.0.md) liegt in `done/` (Entscheidung des Projektinhabers 2026-10-18: nach `v0.11.0`); kein anderer Slice liegt in `in-progress/` (WIP-Limit 1).
+**Start** (`next` → `in-progress`): der Cut [`slice-v1-release-cut-v0.11.0`](../done/slice-v1-release-cut-v0.11.0.md) liegt in `done/` (Entscheidung des Projektinhabers 2026-10-18: nach `v0.11.0`); kein anderer Slice liegt in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benannt:**
 

@@ -1,14 +1,14 @@
-# Review-Report: [`slice-v1-release-cut-v0.11.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.11.0.md) — 2026-10-18
+# Review-Report: [`slice-v1-release-cut-v0.11.0`](../plan/planning/done/slice-v1-release-cut-v0.11.0.md) — 2026-10-18
 
 **Review-Art:** Code/Doku — Release-Cut-Diff gegen den Slice-Plan, `docs/maintainer/releasing.md` §3–§8, `AGENTS.md` (§3.3, §3.6, §3.7, §3.9, §3.10, §5 Zeile 5 und 6), `.github/workflows/publish.yml` und das Vorbild [`slice-v1-release-cut-v0.10.0`](../plan/planning/done/slice-v1-release-cut-v0.10.0.md) samt dessen Review- und Verification-Report.
 
-**Gegenstand:** Commit-Range `4fb8b94..HEAD` (sieben Commits `65a49eb`, `b9f19da`, `f13000c`, `8c33154`, `f9ad37f`, `266fc1c`, `0b40ad4`; 13 Dateien) und [`slice-v1-release-cut-v0.11.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.11.0.md) (liegt bis zur Closure in `in-progress/`).
+**Gegenstand:** Commit-Range `4fb8b94..HEAD` (sieben Commits `65a49eb`, `b9f19da`, `f13000c`, `8c33154`, `f9ad37f`, `266fc1c`, `0b40ad4`; 13 Dateien) und [`slice-v1-release-cut-v0.11.0`](../plan/planning/done/slice-v1-release-cut-v0.11.0.md) (liegt bis zur Closure in `in-progress/`).
 
 **Skill:** `.harness/skills/reviewer.md` @ 0b40ad4 · **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-18
 
 **Eingangs-Kontext:**
 
-- [`slice-v1-release-cut-v0.11.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.11.0.md); Vorbild [`slice-v1-release-cut-v0.10.0`](../plan/planning/done/slice-v1-release-cut-v0.10.0.md) mit Review [`2026-10-17-slice-v1-release-cut-v0.10.0.md`](2026-10-17-slice-v1-release-cut-v0.10.0.md) und Verification [`2026-10-17-verification-slice-v1-release-cut-v0.10.0.md`](2026-10-17-verification-slice-v1-release-cut-v0.10.0.md)
+- [`slice-v1-release-cut-v0.11.0`](../plan/planning/done/slice-v1-release-cut-v0.11.0.md); Vorbild [`slice-v1-release-cut-v0.10.0`](../plan/planning/done/slice-v1-release-cut-v0.10.0.md) mit Review [`2026-10-17-slice-v1-release-cut-v0.10.0.md`](2026-10-17-slice-v1-release-cut-v0.10.0.md) und Verification [`2026-10-17-verification-slice-v1-release-cut-v0.10.0.md`](2026-10-17-verification-slice-v1-release-cut-v0.10.0.md)
 - [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-CLI-007`](../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Lastenheft 0.13.0), [ADR-0016](../plan/adr/0016-homebrew-distribution-per-tap.md), [ADR-0022](../plan/adr/0022-fallback-ausweisung-statusdateien-im-container.md), [ADR-0023](../plan/adr/0023-podman-aus-podman-static-im-sandbox-devcontainer.md)
 - `docs/maintainer/releasing.md`, `.github/workflows/publish.yml`, `scripts/tap-nachzug.sh`, `scripts/tap-formula-check.sh`, `scripts/homebrew-formula-fill.sh`, `AGENTS.md` (Hard Rules), `harness/review.md`
 
