@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — zusätzlicher CR-Slice der Welle (kein Zählplatz in der Reihe der übrigen Slices; Eintrag in §4 der Welle-Datei), ergibt sich aus Review und Verification von [`slice-v1-cli-egress-anzeige`](../in-progress/slice-v1-cli-egress-anzeige.md) (Review F-3, Verification Auflage 2). Er folgt [`slice-cr-devcontainer-ollama`](slice-cr-devcontainer-ollama.md) und geht [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md) voraus.
+**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — zusätzlicher CR-Slice der Welle (kein Zählplatz in der Reihe der übrigen Slices; Eintrag in §4 der Welle-Datei), ergibt sich aus Review und Verification von [`slice-v1-cli-egress-anzeige`](../done/slice-v1-cli-egress-anzeige.md) (Review F-3, Verification Auflage 2). Er folgt [`slice-cr-devcontainer-ollama`](slice-cr-devcontainer-ollama.md) und geht [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md) voraus.
 
 **Bezug:** [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) (bindet alle `--json`-Ausgaben an das Enum von `command`), [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (definiert das Enum). Verwandt: [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (der Befehl `u-boot egress list`), [`LH-SA-CLI-001`](../../../../spec/lastenheft.md#lh-sa-cli-001--befehlsstruktur).
 Anlass: Review-Report `2026-10-18-slice-v1-cli-egress-anzeige` F-3 und Verification-Report Auflage 2 (beide unter `docs/reviews/`); der Projektinhaber hat angeordnet, bis zum Release ohne Rückfragen weiterzumachen.
@@ -78,7 +78,7 @@ Die Reihenfolge der Welle ist verbindlich: erst [`slice-cr-devcontainer-ollama`]
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **[`SPEC-001`](../../../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) (Zeile `enum` von `command`), [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) und `architecture.md`** — gehören [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md) (Übergabe dort eingetragen); die Spezifikation folgt dem Lastenheft und dem Code.
-- **Code und Tests** — der Code liefert `command: "egress"` bereits ([`slice-v1-cli-egress-anzeige`](../in-progress/slice-v1-cli-egress-anzeige.md)); ein Gate für das Enum (etwa in `jsontestutil`) wäre ein neuer Sensor und ein eigener Slice, hier nicht angelegt: Das Lastenheft ändert nur die Aussage.
+- **Code und Tests** — der Code liefert `command: "egress"` bereits ([`slice-v1-cli-egress-anzeige`](../done/slice-v1-cli-egress-anzeige.md)); ein Gate für das Enum (etwa in `jsontestutil`) wäre ein neuer Sensor und ein eigener Slice, hier nicht angelegt: Das Lastenheft ändert nur die Aussage.
 - **Die Aufzählung der Pflicht von `subcommand`** ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)) — ein anderer Satz, eine eigene Entscheidung des Projektinhabers (siehe oben).
 - **Die Befehlsübersicht und ihre Bestätigung** ([`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle)) — Gate des Anzeige-CR ([`slice-cr-sandbox-egress-anzeige`](../done/slice-cr-sandbox-egress-anzeige.md) §7), nicht dieses.
 
@@ -110,7 +110,7 @@ Die Vorab-Suche (Pflicht vor jeder Vertragsänderung, Muster [`slice-cr-sandbox-
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-cr-devcontainer-ollama`](slice-cr-devcontainer-ollama.md) liegt in `done/` (Lastenheft-Version `0.15.0` ist vergeben); [`slice-v1-cli-egress-anzeige`](../in-progress/slice-v1-cli-egress-anzeige.md) liegt in `done/` (der Code liefert `command: "egress"`). Eine Freigabe des Wortlauts ist **keine** Start-Bedingung: Der Projektinhaber hat angeordnet, bis zum Release ohne Rückfragen weiterzumachen; der Satz geht als abgeleitet mit Gate vor dem Release ins Lastenheft.
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-cr-devcontainer-ollama`](slice-cr-devcontainer-ollama.md) liegt in `done/` (Lastenheft-Version `0.15.0` ist vergeben); [`slice-v1-cli-egress-anzeige`](../done/slice-v1-cli-egress-anzeige.md) liegt in `done/` (der Code liefert `command: "egress"`). Eine Freigabe des Wortlauts ist **keine** Start-Bedingung: Der Projektinhaber hat angeordnet, bis zum Release ohne Rückfragen weiterzumachen; der Satz geht als abgeleitet mit Gate vor dem Release ins Lastenheft.
 
 **Rückführungen — vorab benannt:**
 
