@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.14.0                                                             |
+| Version          | 0.15.0                                                             |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -404,6 +404,9 @@ Beispiele:
 - SDKMAN
 - PostgreSQL Client
 - Kubernetes Tools
+- Ollama (lokale Sprachmodelle, nur CPU)
+
+Ollama ist als eingebautes Feature `ollama` wählbar (`u-boot config set devcontainer.features.ollama.enabled true`) und wirkt im Sandbox-Profil. Es installiert Ollama im Container ohne Grafikbeschleunigung (nur CPU); die Installation stammt aus einem gepinnten Release-Archiv mit geprüfter SHA-256-Prüfsumme. Das Archiv ist nicht signiert; `u-boot` weist das beim Erzeugen aus. Der Server startet nicht von selbst und lauscht nur auf der Loopback-Adresse des Containers. Modelle lädt der Nutzer im Container (`ollama pull`); sie liegen in einem benannten Volume und überstehen das Löschen des Containers. Mit der Egress-Restriktion ([`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion)) gehören die Hosts des Modell-Pull zur Default-Allowlist. Gemessen ist das auf Docker 29.5.2, Colima 0.10.3, arm64, Ollama 0.40.6; nicht zugesagt sind GPU-Beschleunigung, ein Anschluss an einen Ollama-Dienst des Hosts, andere Architekturen und Container-Engines als gemessen, das Überstehen des Neubaus des Images sowie Auswahl oder Verwaltung von Modellen durch `u-boot`.
 
 Für optionale externe Feature-Quellen gilt:
 
@@ -1565,6 +1568,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.12.0 | 2026-10-17 | [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): Zusage für `nestedRuntime: podman` erweitert: `podman build` und `docker build` (Alias) bauen im Container ein Dockerfile mit `FROM`, `RUN`, `COPY`, auch hinter der Egress-Restriktion, gemessen auf Docker 29.5.2 unter Colima 0.10.3 (arm64, VM Ubuntu 24.04 mit `kernel.apparmor_restrict_unprivileged_userns=0`); BuildKit-Erweiterungen und `docker compose` nicht zugesagt. Die Host-Zusage für `podman` („startet unter Docker (inkl. Colima) und Podman“) ist auf Hosts mit erlaubten verschachtelten User-Namespaces begrenzt: mit dem Wert `1` endet das Startscript mit Exit-Code `11`; Podman als Host-Engine ist nicht zugesagt. | Vereinbarung mit dem Projektinhaber |
 | 0.13.0 | 2026-10-18 | [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer): Ein fehlendes `/dev/fuse` auf dem Container-Host ist wie `/dev/net/tun` keine Degradationsstufe, sondern ein Startfehler der Container-Engine (gemessen: Docker 29.5.2 auf Colima 0.10.3, `docker run` Exit-Code `127`, `docker start` Exit-Code `1`); der Fallback auf `vfs`-Storage gilt nur für einen Container, der ohne das Device gestartet wurde (etwa nach geänderten `runArgs`); `u-boot doctor` weist ein fehlendes `/dev/fuse` auf dem Container-Host als Umgebungsproblem aus, nicht als Fallback. | Vereinbarung mit dem Projektinhaber |
 | 0.14.0 | 2026-10-18 | [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion): Die wirksame Egress-Allowlist samt Herkunft jedes Hosts ist abfragbar (`u-boot egress list`; offline, ohne laufenden Container, ändert nichts); [`LH-FA-CLI-005`](#lh-fa-cli-005--verbosity-und-logging): der Abfragebefehl behält unter `--quiet` seine Ausgabe; [`LH-SA-CLI-002`](#lh-sa-cli-002--vorgesehene-befehle): die Befehlsübersicht führt den Befehl mit Priorität V2 (aus dem freigegebenen Befehl abgeleitet; Bestätigung des Projektinhabers vor dem Release ausstehend). | Vereinbarung mit dem Projektinhaber |
+| 0.15.0 | 2026-10-18 | [`LH-FA-DEV-003`](#lh-fa-dev-003--devcontainer-features): Katalog-Feature `ollama` (Ollama im Container, nur CPU, Modelle im benannten Volume) für die gemessenen Hosts und Versionen; nicht zugesagt: GPU, Anschluss an einen Ollama des Hosts, Modellverwaltung. | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt

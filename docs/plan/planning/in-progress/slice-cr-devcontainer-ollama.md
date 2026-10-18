@@ -34,9 +34,9 @@ Anlass: Projektinhaber, 2026-10-18 („Lastenheft-CR: Katalog erweitert um `olla
 - Die Egress-Hosts der Features stehen nicht im Lastenheft, sondern in [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion); [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) sagt nur, die Default-Allowlist sei „dokumentiert“. Eine Lastenheft-Aussage zu den Ollama-Hosts ist deshalb **nicht** nötig.
 - Das Lastenheft nennt heute weder `sshd` noch `claude-code` als Katalogschlüssel (Suche `grep -i "claude-code\|sshd" spec/lastenheft.md` am 2026-10-18: kein Treffer; das Lastenheft spricht vom „Login-Dienst“ und von „Zugangsdaten eines Agenten“, nicht von Schlüsseln des Katalogs); der CR führt `ollama` als **einzigen** namentlich genannten Katalogschlüssel ein, weil seine Zusage an Messbedingungen hängt.
 
-### Wortlaut-Vorschlag (alt/neu; zur Freigabe durch den Projektinhaber vor dem Lastenheft-Commit)
+### Wortlaut (alt/neu; vom Projektinhaber freigegeben und im Lastenheft übernommen)
 
-Die in eckigen Klammern gesetzten **Messwerte** (`[…]`) sind Leerstellen, die der Mess-Slice füllt; ohne Messwert gilt die Aussage nicht, und der Satz entfällt. Das Lastenheft nennt keine Slice- oder Wellen-Kennung; im Lastenheft stehen die Verweise als Anker `#…` der Datei.
+Die Messwerte des Mess-Slice sind eingetragen; eine Aussage ohne Messwert steht nicht im Text. Das Lastenheft nennt keine Slice- oder Wellen-Kennung; im Lastenheft stehen die Verweise als Anker `#…` der Datei.
 
 **Stelle 1 — [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), Beispiele und neuer Absatz.**
 
@@ -56,9 +56,9 @@ Neu (zusätzlicher Spiegelstrich am Ende der Liste):
 
 Neu (zusätzlicher Absatz zwischen der Liste und „Für optionale externe Feature-Quellen gilt:“):
 
-> Ollama ist als eingebautes Feature `ollama` wählbar (`u-boot config set devcontainer.features.ollama.enabled true`). Es installiert Ollama im Container ohne Grafikbeschleunigung (nur CPU); die Installation stammt aus einer gepinnten Quelle mit geprüfter Prüfsumme [`[Quelle und Prüfung aus der ADR des Mess-Slice]`]. Der Server läuft im Container [`[Bindung und Start aus der Messung: z. B. „nur auf der Loopback-Adresse“, „startet nicht von selbst“]`], Modelle lädt der Nutzer im Container (`ollama pull`), sie liegen in einem benannten Volume und überstehen den Neubau des Containers [`[nur, wenn gemessen]`]. Mit der Egress-Restriktion ([`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)) gehören die Hosts des Modell-Pull zur Default-Allowlist. Gemessen ist das auf [`[Messstand: Docker-Version, Colima-Version, Architektur, Ollama-Version]`]; nicht zugesagt sind GPU-Beschleunigung, ein Anschluss an einen Ollama-Dienst des Hosts, andere Architekturen und Container-Engines als gemessen sowie Auswahl oder Verwaltung von Modellen durch `u-boot`.
+> Ollama ist als eingebautes Feature `ollama` wählbar (`u-boot config set devcontainer.features.ollama.enabled true`) und wirkt im Sandbox-Profil. Es installiert Ollama im Container ohne Grafikbeschleunigung (nur CPU); die Installation stammt aus einem gepinnten Release-Archiv mit geprüfter SHA-256-Prüfsumme. Das Archiv ist nicht signiert; `u-boot` weist das beim Erzeugen aus. Der Server startet nicht von selbst und lauscht nur auf der Loopback-Adresse des Containers. Modelle lädt der Nutzer im Container (`ollama pull`); sie liegen in einem benannten Volume und überstehen das Löschen des Containers. Mit der Egress-Restriktion ([`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)) gehören die Hosts des Modell-Pull zur Default-Allowlist. Gemessen ist das auf Docker 29.5.2, Colima 0.10.3, arm64, Ollama 0.40.6; nicht zugesagt sind GPU-Beschleunigung, ein Anschluss an einen Ollama-Dienst des Hosts, andere Architekturen und Container-Engines als gemessen, das Überstehen des Neubaus des Images sowie Auswahl oder Verwaltung von Modellen durch `u-boot`.
 
-**Stelle 2 — [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), Ausweisung eines Netzdienstes (nur wenn der Mess-Slice zeigt, dass der Server auf einer anderen als der Loopback-Adresse lauscht oder über `forwardPorts`/Engine von außen erreichbar wird; sonst entfällt die Stelle).**
+**Stelle 2 — [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), Ausweisung eines Netzdienstes: entfallen** (Ollama lauscht nur auf Loopback, kein Netzdienst nach außen; [`ADR-0024`](../../adr/0024-ollama-im-sandbox-devcontainer.md) Entscheidung 5). Die folgende alt/neu-Fassung ist nicht übernommen.
 
 Alt (letzter Spiegelstrich des Abschnitts „Das erzeugte Ergebnis im Sandbox-Profil muss:“):
 
@@ -76,11 +76,11 @@ Eine Änderung dieser Stelle zieht [`LH-FA-CLI-005`](../../../../spec/lastenheft
 
 Alt: `| Version          | 0.13.0 |` (bzw. der Stand nach dem Landen der Vorgänger-CR in dieser Welle)
 
-Neu: die nächste freie Minor-Version (Lastenheft-Commit-Reihenfolge entscheidet; nach dem Anzeige-CR `0.15.0`). Der Enum-CR [`slice-cr-cli-json-command-enum`](../open/slice-cr-cli-json-command-enum.md) landet danach mit `0.16.0` und wird mit diesem CR **nicht** im selben Lastenheft-Commit gebündelt (Freigabestand, Review und Rücknahme verschieden, Begründung dort §1).
+Neu: `| Version          | 0.15.0 |` (der Anzeige-CR trägt `0.14.0`). Der Enum-CR [`slice-cr-cli-json-command-enum`](../open/slice-cr-cli-json-command-enum.md) landet danach mit `0.16.0` und wird mit diesem CR **nicht** im selben Lastenheft-Commit gebündelt (Freigabestand, Review und Rücknahme verschieden, Begründung dort §1).
 
-Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
+Neue Historie-Zeile:
 
-> | `<Version>` | `<Datum des Lastenheft-Commits>` | [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features): Katalog-Feature `ollama` (Ollama im Container, nur CPU, Modelle im benannten Volume) für die gemessenen Hosts und Versionen; nicht zugesagt: GPU, Anschluss an einen Ollama des Hosts, Modellverwaltung. | Vereinbarung mit dem Projektinhaber |
+> | 0.15.0 | 2026-10-18 | [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features): Katalog-Feature `ollama` (Ollama im Container, nur CPU, Modelle im benannten Volume) für die gemessenen Hosts und Versionen; nicht zugesagt: GPU, Anschluss an einen Ollama des Hosts, Modellverwaltung. | Vereinbarung mit dem Projektinhaber |
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
@@ -91,8 +91,8 @@ Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 
 ## 2. Definition of Done
 
-- [ ] **Lastenheft `<Version>`:** Stellen 1 und 3 (und 2/2a, falls der Mess-Slice einen Netzdienst zeigt) in der vom Projektinhaber freigegebenen Fassung, **jede Klammer mit gemessenem Wert gefüllt oder der Satz gestrichen**, Versionsfeld, Historie-Zeile mit Datum (Verweis „Vereinbarung mit dem Projektinhaber“); die Freigabe ist im Gespräch belegt und in §7 vermerkt (Datei-Beleg besteht nicht).
-- [ ] **Vorab-Suche und Nachzug:** Die Suche gegen ältere Lastenheft-Zusagen (Features, Sandbox-Regeln, Login-Dienst, `--quiet`) ist festgehalten; mitzuändernde Stellen sind genannt und geändert.
+- [x] **Lastenheft 0.15.0:** Stellen 1 und 3 in der vom Projektinhaber freigegebenen Fassung (Stellen 2/2a entfallen: Loopback), Messwerte eingetragen, Versionsfeld, Historie-Zeile mit Datum (Verweis „Vereinbarung mit dem Projektinhaber“); die Freigabe ist im Gespräch belegt und in §7 vermerkt (Datei-Beleg besteht nicht).
+- [x] **Vorab-Suche und Nachzug:** Die Suche gegen ältere Lastenheft-Zusagen (Features, Katalog, Agenten, Sandbox-Regeln, Login-Dienst, `--quiet`) ist in §7 festgehalten; mitzuändernde Stellen: keine über die freigegebenen hinaus.
 - [ ] `make gates` grün; `make doc-trace` ohne neue Waise.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
@@ -107,8 +107,10 @@ Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `spec/lastenheft.md` | update | Stellen 1 bis 3 (§3 [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), gegebenenfalls [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) und [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging); Versionsfeld; §16 Historie); erst nach Freigabe des Wortlauts und nach dem Mess-Slice |
-| `docs/plan/planning/in-progress/slice-cr-devcontainer-ollama.md` (diese Datei) | update | Freigabe, Vorab-Suche, Closure (§7) |
+| `spec/lastenheft.md` | update | Stellen 1 und 3 (§3 [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features); Versionsfeld; §16 Historie); [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) und [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) unverändert (Stellen 2/2a entfallen); gelesen: Zeilen 394 bis 417, 438 bis 477, 1058 bis 1071, Historie |
+| `docs/plan/planning/in-progress/slice-cr-devcontainer-ollama.md` (diese Datei; vorher `open/`) | update | Freigabe, Vorab-Suche, Zustandsmarker auf Ist-Stand; Closure (§7) folgt durch den Planer |
+| `docs/plan/planning/in-progress/roadmap.md` | update | Arbeitszeile ersetzt den Ruhe-Marker; Verweis-Nachzug des Moves |
+| `docs/plan/planning/done/slice-v1-cli-egress-anzeige.md`, `done/slice-v1-devcontainer-ollama-messung.md`, `done/slice-v1-sandbox-egress-neuladen-entwurf.md`, `open/README.md`, `open/slice-cr-cli-json-command-enum.md`, `open/slice-v1-devcontainer-feature-ollama.md`, `open/slice-v1-devcontainer-start-ohne-cli.md`, `open/slice-v2-spec-sandbox-egress-ollama.md`, `welle-sandbox-egress-ollama.md`, `docs/reviews/2026-10-18-slice-v1-sandbox-egress-neuladen-entwurf.md`, `docs/reviews/2026-10-18-verification-slice-v1-sandbox-egress-neuladen-entwurf.md` | update | reiner Verweis-Nachzug des Moves `open/` → `in-progress/` (`make slice-mv`), kein Inhalt |
 | `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation nach `harness/review.md` und `harness/verification.md` |
 | `CHANGELOG.md` | unverändert | der CR ändert kein Produktverhalten; ein Eintrag entsteht im Code-Slice |
 
@@ -138,7 +140,20 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 
 ## 7. Closure-Notiz
 
-*(Wird bei der Closure gefüllt: Freigabe des Wortlauts (Gespräch), Vorab-Suche, Steering-Loop-Eintrag, Register, Folge-Slices, Risiken.)*
+*(Closure durch den Planer; Steering-Loop-Eintrag, Register, Folge-Slices und Risiken folgen dort.)*
+
+**Freigabe des Wortlauts.** Im Gespräch am 2026-10-18 nach wörtlicher Vorlage der Texte (Stelle 1: Spiegelstrich und Absatz; Stelle 3: Versionsfeld und Historie-Zeile) durch den Projektinhaber freigegeben („ok“). Übernommen unverändert; einzige Anpassung: die Link-Form im Lastenheft (Anker `#lh-fa-dev-008--egress-restriktion` der eigenen Datei). Stellen 2 und 2a entfallen ([`ADR-0024`](../../adr/0024-ollama-im-sandbox-devcontainer.md)).
+
+**Vorab-Suche (2026-10-18, vor dem Lastenheft-Commit).** `grep -i` über `spec/lastenheft.md` nach `feature`, `katalog`, `login-dienst`, `quiet`, `agent`, `0.14`/`0.15`; dazu gelesen: [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), Glossar. Berührte Stellen, jeweils nicht geändert:
+
+- [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Zeilen 444 bis 456): Ausweisungspflicht nennt Lockerungen und Login-Dienst; Ollama lauscht nur auf Loopback, also kein Anlass; die Regel „Features gelten nach [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)“ trägt das Feature.
+- [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Zeilen 473 bis 477): Default-Allowlist „dokumentiert“, Herkunft „Feature“ ist vorhanden; die Hosts stehen in der Spezifikation (Folge-Slice).
+- [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (Zeilen 1059 bis 1071): erfasst Features und Skripte aus nicht freigegebenen Quellen; ein eingebautes Katalog-Feature ist keine externe Quelle, das nicht signierte Archiv trägt [`ADR-0024`](../../adr/0024-ollama-im-sandbox-devcontainer.md).
+- [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Zeilen 184 bis 198): die Warnung zum nicht signierten Archiv ist eine Hinweis-Warnung und entfällt unter `--quiet` (Ausnahme 1 betrifft Lockerungen und Login-Dienst); keine Änderung, Auslegung in der ADR.
+- [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle) (Befehlsübersicht, Zeile 1108 ff.), Glossar (Zeile 1526, Beispiele „Node.js, Docker CLI“, offene Beispiele), Modulliste (Devcontainer-Generator, Zeilen 132 bis 140) und Nicht-Kernumfang (Zeile 1373, „Kubernetes-Produktionsdeployment“): zählen keine Katalog-Features abschließend auf; die Suche nach den Beispielnamen der Liste (Node.js, Docker CLI, SDKMAN, Kubernetes) fand ihre Aufzählung nur in [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) und im Glossar.
+- [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) (Zeile 482 bis 486, „bei aktivem Agenten-Feature“): betrifft Agenten, nicht Ollama.
+
+**Nicht gelaufen:** `make test-docker` und `make verify-depguard` (kein Code, keine Importregel berührt).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
