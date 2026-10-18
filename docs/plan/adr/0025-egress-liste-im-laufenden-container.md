@@ -8,7 +8,7 @@
 
 **Bezug:** [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-006`](../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [ADR-0012](0012-devcontainer-egress-firewall.md), [ADR-0022](0022-fallback-ausweisung-statusdateien-im-container.md)
 
-**Schärft:** [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Grenze der Restriktion: „Prozesse mit der nötigen Capability können sie aufheben“; Weg „Liste ändern“) sowie — als Stellen, die nach `Accepted` nachzuführen sind — [`SPEC-045`](../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) (Absatz *Grenze*: Schreibbarkeit der Statusdatei). **Ergänzt**, ersetzt nichts: [ADR-0012](0012-devcontainer-egress-firewall.md) und [ADR-0022](0022-fallback-ausweisung-statusdateien-im-container.md) bleiben unverändert `Accepted`.
+**Schärft:** [`LH-FA-DEV-008`](../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (nur der Satz zur Grenze der Restriktion: „Prozesse mit der nötigen Capability können sie aufheben“; der Weg „Liste ändern“ steht nicht im Lastenheft, sondern im Handbuch) sowie — als Stellen, die nach `Accepted` nachzuführen sind — [`SPEC-045`](../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) (Absatz *Grenze*: Schreibbarkeit der Statusdatei). **Ergänzt**, ersetzt nichts: [ADR-0012](0012-devcontainer-egress-firewall.md) und [ADR-0022](0022-fallback-ausweisung-statusdateien-im-container.md) bleiben unverändert `Accepted`.
 
 **Regeln:** Baseline-Regelwerk `modul-04-adrs.md` §Ziel-Form: ADR (MADR).
 

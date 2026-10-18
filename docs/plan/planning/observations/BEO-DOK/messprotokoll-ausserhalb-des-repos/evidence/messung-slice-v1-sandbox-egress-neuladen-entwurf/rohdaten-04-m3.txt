@@ -1,6 +1,6 @@
 postStart exit=0
 ######## 1: docker cp einer Liste in ein Root-eigenes Verzeichnis (/etc)
-    Host-Datei: -rw-r--r--@ dburkard
+    Host-Datei: -rw-r--r--@ <Host-Benutzer geschwärzt>
 docker cp rc=0
     -rw-r--r-- 501 dialout /etc/u-boot-egress.allow
     vscode schreibt in /etc/u-boot-egress.allow: nein

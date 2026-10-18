@@ -15,8 +15,11 @@ Sonden-Durchlauf an Port 9, bei offenem Pfad; und je ein TCP-Verbindungsversuch 
 
 ## Voraussetzungen am Host (nicht im Repo)
 
-- Docker (Colima) mit Zugriff auf `debian:stable-slim`, `mcr.microsoft.com/devcontainers/base:debian` und das Netz; GNU `bash`, `mktemp`, `id`,
-  `grep` und `awk` am Host; keine Go-Toolchain, kein Python.
+- Docker (Colima) mit Zugriff auf `debian:stable-slim`, `mcr.microsoft.com/devcontainers/base:debian` und das Netz; `bash`, `mktemp`, `id`,
+  `grep`, `awk`, `head`, `tail`, `cut` und `sed` am Host (`04-m3-zustellung.sh` und `05-m4-neustart.sh` nutzen `head`, `tail`, `cut` und `sed`
+  in Pipelines auf dem Host; gemessen auf macOS, dessen `grep`, `awk` und `sed` nicht die GNU-Fassungen sind); keine Go-Toolchain, kein Python.
+- **Docker-Socket des Hosts im Messcontainer:** `05-m4-neustart.sh` startet die Dev-Container-CLI als Container mit `-v /var/run/docker.sock:/var/run/docker.sock`
+  (Image aus `Dockerfile.cli`); der Socket der Engine muss dort liegen.
 - Das Binary `bin/u-boot-linux-arm64` aus `make build-binaries` (`bin/` steht nicht im Repo).
 - **Images** (die Schritte 1 bis 3 brauchen die ersten beiden, Schritt 4 das dritte; Aufruf im Verzeichnis dieser Datei, nach Schritt 0):
   `docker build -t u-boot-messung-egress-neuladen <ziel>/.devcontainer` (das von Schritt 0 erzeugte Sandbox-Image),

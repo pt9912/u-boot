@@ -1,1 +1,1 @@
-**Stand:** offen — zwei Belege (`slice-v1-cli-dry-run-would-formulierung`, `slice-v1-devcontainer-ollama-messung`); unter der Schwelle von drei, keine Verkörperung entschieden.
+**Stand:** offen — drei Belege (`slice-v1-cli-dry-run-would-formulierung`, `slice-v1-devcontainer-ollama-messung`, `slice-v1-sandbox-egress-neuladen-entwurf`); Schwelle von drei erreicht, sobald der dritte Vorgang in `done/` liegt; Ausgang (`verkörpert` oder `geplant`) bei der Closure des dritten Vorgangs zu entscheiden, nicht vom Implementer.

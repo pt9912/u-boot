@@ -1156,8 +1156,10 @@ ohne Container, ohne Datei, bei einer ungültigen Datei und bei `ok` oder
 `up` fragt nicht.
 
 **Grenze:** Die Datei stammt aus einem Container, in dem ein Agent läuft, und ist
-dort mit Root-Rechten schreibbar. Sie ist ein Hinweis, kein Beleg: **„Nicht
-gemeldet“ heißt nicht „nicht aufgetreten“.** `u-boot` gibt nie den Inhalt der
+dort mit Root-Rechten schreibbar; gemessen ist außerdem, dass ein Prozess ohne
+`sudo` sie ersetzen kann (die Datei gehört `root`, aber das Verzeichnis
+gehört dem Benutzer `vscode`; ein Lauf auf Colima, arm64). Sie ist ein Hinweis,
+kein Beleg: **„Nicht gemeldet“ heißt nicht „nicht aufgetreten“.** `u-boot` gibt nie den Inhalt der
 Datei aus, nur die geprüften Felder; eine Datei mit anderem Format, mit mehr als
 512 Byte oder die keine reguläre Datei ist, gilt als ungültig.
 
@@ -1211,6 +1213,14 @@ auflöst. Eine Firewall lässt nur Loopback, bestehende Verbindungen, DNS und di
 Adressen der erlaubten Namen durch; alles andere (IPv6 ganz) wird verworfen. Das
 ist eine Leitplanke, keine Sandbox-Grenze. Der Container braucht dafür die
 Fähigkeit `NET_ADMIN`, die `u-boot` als Lockerung ausweist.
+
+**Grenze der Namensauflösung:** Nur der lokale DNS-Server beschränkt die Namen.
+Ein Prozess im Container kann den DNS-Server des Netzes (den Upstream-Resolver)
+auch direkt fragen und bekommt dann die Adresse eines Namens außerhalb der
+Liste, ohne `sudo`. Die Verbindung zu dieser Adresse bleibt gesperrt; gemessen
+ist die Auflösung, nicht der Durchsatz eines Datenkanals über DNS. Wer die
+Regeln ändern will, braucht weiter `sudo`. Messstand: Docker 29.5.2 auf Colima
+0.10.3 (arm64), je ein Lauf; andere Umgebungen sind nicht gemessen.
 
 Standardmäßig erlaubt sind:
 

@@ -36,6 +36,9 @@ this file is the same format applied to u-boot itself.
   build copies into the image, so a restart runs the old script with the old list; rebuild the container after `u-boot generate devcontainer`. Measured with the Dev Container CLI 0.89.0
   (stop and `devcontainer up` kept the old list, `devcontainer up --remove-existing-container` applied the new one) on Docker 29.5.2 with Colima 0.10.3, arm64; **not measured:** the editor
   actions that correspond to a rebuild, Docker Desktop, Linux without a VM ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
+- The user manual states two measured limits of the egress restriction for a process without `sudo`: it can ask the upstream resolver directly and receives the address of a name outside the list
+  (the connection to that address stays blocked; name resolution was measured, not the throughput of a data channel), and it can replace the status file, because the status directory belongs to
+  `vscode`. Changing the rules still needs `sudo`. Measured once on Docker 29.5.2 with Colima 0.10.3, arm64; **not measured:** other environments ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
 
 ## [0.11.0] - 2026-10-18
 
