@@ -641,7 +641,8 @@ Zustand beim Containerstart (`vfs`-Speicher, Daemon, Egress).
 - Im Container ist außerdem die Prüfung des Geräts `/dev/fuse` übersprungen
   (`devcontainer.sandbox.runtime`, Info, Exit-Code 0): das Gerät im Container ist
   nicht das des Container-Hosts. Ein Devcontainer, der ohne das Gerät gestartet
-  wurde, erscheint im Eintrag `devcontainer.sandbox.fallback.vfs`; das Gerät des
+  wurde, erscheint im Eintrag `devcontainer.sandbox.fallback.vfs`, soweit seine
+  Statusdatei lesbar ist (sonst „nicht ermittelbar“); das Gerät des
   Container-Hosts prüft `u-boot doctor` auf dem Host.
 
 ### 4.8 Artefakte erzeugen und aktualisieren
@@ -1087,7 +1088,7 @@ Container (Runtime-Image, Devcontainer), prüft es das Gerät nicht: das `/dev/f
 dort gehört dem Container, nicht dem Container-Host. Der Eintrag
 `devcontainer.sandbox.runtime` ist dann Info (Exit-Code 0); ein ohne das Gerät
 gestarteter Devcontainer erscheint im Eintrag `devcontainer.sandbox.fallback.vfs`,
-das Gerät des Container-Hosts prüft `u-boot doctor` auf dem Host.
+soweit seine Statusdatei lesbar ist (sonst „nicht ermittelbar“), das Gerät des Container-Hosts prüft `u-boot doctor` auf dem Host.
 
 #### Fallbacks sehen
 

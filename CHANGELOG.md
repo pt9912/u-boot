@@ -43,7 +43,8 @@ this file is the same format applied to u-boot itself.
   The `vfs` storage fallback applies only to a container that was started without the device (for example after changed `runArgs`). `u-boot doctor` reports a missing `/dev/fuse` on a Linux
   host outside a container as an **error** (exit code `11`) under both `onUnavailable` values, without the fallback flag; it does not check `/dev/net/tun`. Inside a container (the runtime image,
   a devcontainer) the check is skipped (info, exit code `0`): the device there is the container's own, not the container host's, and a devcontainer started without it shows in
-  `devcontainer.sandbox.fallback.vfs`. Compared to `v0.10.0`, where a missing device inside a container was a warning ("fall back to vfs", exit code `0`), the check no longer reads the container's device at all.
+  `devcontainer.sandbox.fallback.vfs` as far as its status file is readable (otherwise "not determinable"). Compared to `v0.10.0`, where a missing device inside a container was a warning ("fall back to vfs", exit code `0`)
+  or, with `onUnavailable: fail`, an error (exit code `11`), the check no longer reads the container's device at all (info, exit code `0` under both values).
   **Regression for scripts that evaluate `doctor` without `--strict`, on a Linux host outside a container:**
   the check `devcontainer.sandbox.runtime` was a warning (exit code `0`) with `onUnavailable: warn` and now fails with exit code `11`; load the `fuse` kernel module on the container host (`modprobe fuse`)
   or set `nestedRuntime: none`. The generated files do not change. Lastenheft 0.13.0 ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
