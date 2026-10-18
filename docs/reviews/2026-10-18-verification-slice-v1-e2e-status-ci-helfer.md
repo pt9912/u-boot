@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier („Bauen wir es richtig?“, gegen Plan und DoD; kein Review, keine Reparatur).
 
-**Gegenstand:** Slice [`slice-v1-e2e-status-ci-helfer`](../plan/planning/in-progress/slice-v1-e2e-status-ci-helfer.md), Commit-Range `575281f..HEAD` (6 Commits: `814072a`, `db4eb13`, `b440a1c`, `fe4e5f5`, `342ac02`, `cd6b0a2`). Bezug: [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`ADR-0022`](../plan/adr/0022-fallback-ausweisung-statusdateien-im-container.md), [`ADR-0004`](../plan/adr/0004-ci-system.md). Review-Eingang: [`2026-10-18-slice-v1-e2e-status-ci-helfer`](2026-10-18-slice-v1-e2e-status-ci-helfer.md) (0 HIGH, 0 MEDIUM, 1 LOW, 4 INFO).
+**Gegenstand:** Slice [`slice-v1-e2e-status-ci-helfer`](../plan/planning/done/slice-v1-e2e-status-ci-helfer.md), Commit-Range `575281f..HEAD` (6 Commits: `814072a`, `db4eb13`, `b440a1c`, `fe4e5f5`, `342ac02`, `cd6b0a2`). Bezug: [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`ADR-0022`](../plan/adr/0022-fallback-ausweisung-statusdateien-im-container.md), [`ADR-0004`](../plan/adr/0004-ci-system.md). Review-Eingang: [`2026-10-18-slice-v1-e2e-status-ci-helfer`](2026-10-18-slice-v1-e2e-status-ci-helfer.md) (0 HIGH, 0 MEDIUM, 1 LOW, 4 INFO).
 
 **Umgebung:** Colima, VM `kernel.apparmor_restrict_unprivileged_userns=0`, Docker-only (§3.1); Image `u-boot:test-docker-tools`, Rezeptur wie `repo.mk` Ziel `test-docker`.
 
@@ -45,7 +45,7 @@ Plan-Tabelle §3 gegen `git diff --stat 575281f..HEAD` (§3.10):
 | Datei im Diff | in §3 |
 |---|---|
 | `docs/plan/planning/in-progress/roadmap.md` | ja |
-| `docs/plan/planning/in-progress/slice-v1-e2e-status-ci-helfer.md` | ja | <!-- d-check:ignore (Slice-Kennung als Name) -->
+| `docs/plan/planning/done/slice-v1-e2e-status-ci-helfer.md` | ja | <!-- d-check:ignore (Slice-Kennung als Name) -->
 | `docs/plan/planning/open/README.md`, `open/slice-v1-podman-aktuelle-version.md` | ja (anderer Vorgang, `db4eb13`) | <!-- d-check:ignore (Slice-Kennung als Name) -->
 | `docs/reviews/2026-10-18-slice-v1-e2e-status-ci-helfer.md` | ja (durch den Reviewer) | <!-- d-check:ignore (Slice-Kennung als Name) -->
 | `internal/e2e/container_id_test.go` | ja |

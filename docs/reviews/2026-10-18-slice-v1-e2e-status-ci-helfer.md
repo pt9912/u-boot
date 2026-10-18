@@ -2,14 +2,14 @@
 
 **Review-Art:** Code — geprüft gegen Plan, Hard Rules und Konventionen (nicht gegen die DoD; das ist Verifier-Aufgabe).
 
-**Gegenstand:** Slice [`slice-v1-e2e-status-ci-helfer`](../plan/planning/in-progress/slice-v1-e2e-status-ci-helfer.md), Commit-Range `575281f..HEAD` (`814072a`, `db4eb13`, `b440a1c`); Code-Änderung: `internal/e2e/sandbox_status_docker_test.go`, neu `internal/e2e/container_id_test.go`.
+**Gegenstand:** Slice [`slice-v1-e2e-status-ci-helfer`](../plan/planning/done/slice-v1-e2e-status-ci-helfer.md), Commit-Range `575281f..HEAD` (`814072a`, `db4eb13`, `b440a1c`); Code-Änderung: `internal/e2e/sandbox_status_docker_test.go`, neu `internal/e2e/container_id_test.go`.
 
 **Skill:** `.harness/skills/reviewer.md` @ `3ec4535` · <!-- d-check:ignore (Skill-Pfad, existiert im Repo) -->
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-18
 
 **Eingangs-Kontext:**
 
-- Slice-Plan [`slice-v1-e2e-status-ci-helfer`](../plan/planning/in-progress/slice-v1-e2e-status-ci-helfer.md) (§1 Befund, §2 DoD, §3 Plan-Tabelle, §6 Risiken)
+- Slice-Plan [`slice-v1-e2e-status-ci-helfer`](../plan/planning/done/slice-v1-e2e-status-ci-helfer.md) (§1 Befund, §2 DoD, §3 Plan-Tabelle, §6 Risiken)
 - [`ADR-0022`](../plan/adr/0022-fallback-ausweisung-statusdateien-im-container.md), [`ADR-0004`](../plan/adr/0004-ci-system.md)
 - [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)
 - `spec/architecture.md` Abschnitt Tests (Build-Tag-Konvention)
@@ -39,7 +39,7 @@
 
 | ID | Kategorie | Befund | Quelle | Pfad | Verifizierbar | Klasse |
 |---|---|---|---|---|---|---|
-| F-1 | LOW | Die Plan-Tabelle §3 führt `docs/plan/planning/in-progress/roadmap.md` nicht, obwohl `b440a1c` sie ändert (Ruhe-Marker durch Verweis auf den Slice ersetzt); die Commit-Message nennt den Abgleich gegen `git diff --stat`. `docs/plan/planning/open/README.md` und [`slice-v1-podman-aktuelle-version`](../plan/planning/open/slice-v1-podman-aktuelle-version.md) stehen ebenfalls im Range (anderer Vorgang, Commit `db4eb13`) und nicht in der Tabelle. | `AGENTS.md` §3.10 (Tabelle listet jede berührte Datei, Abgleich gegen `git diff --stat`) | `docs/plan/planning/in-progress/slice-v1-e2e-status-ci-helfer.md` · "<!-- d-check:ignore (Zitat der Plan-Tabellenzeile) -->`docs/plan/planning/in-progress/slice-v1-e2e-status-ci-helfer.md` &#124; update" | nein — Review-only (`git diff --stat 575281f..HEAD` gegen §3) | Plan-Tabelle gegen diff --stat unvollständig |
+| F-1 | LOW | Die Plan-Tabelle §3 führt `docs/plan/planning/in-progress/roadmap.md` nicht, obwohl `b440a1c` sie ändert (Ruhe-Marker durch Verweis auf den Slice ersetzt); die Commit-Message nennt den Abgleich gegen `git diff --stat`. `docs/plan/planning/open/README.md` und [`slice-v1-podman-aktuelle-version`](../plan/planning/open/slice-v1-podman-aktuelle-version.md) stehen ebenfalls im Range (anderer Vorgang, Commit `db4eb13`) und nicht in der Tabelle. | `AGENTS.md` §3.10 (Tabelle listet jede berührte Datei, Abgleich gegen `git diff --stat`) | `docs/plan/planning/done/slice-v1-e2e-status-ci-helfer.md` · "<!-- d-check:ignore (Zitat der Plan-Tabellenzeile) -->`docs/plan/planning/done/slice-v1-e2e-status-ci-helfer.md` &#124; update" | nein — Review-only (`git diff --stat 575281f..HEAD` gegen §3) | Plan-Tabelle gegen diff --stat unvollständig |
 | F-2 | INFO | Zwei Mutationen von `containerIDFromRunOutput` überleben `make test`: ohne `TrimSpace` und ohne den CRLF-`ReplaceAll`. Jede der beiden Stellen deckt die andere beim CRLF-Fall; ein Fall mit Leerzeichen oder Tab um die ID auf derselben Zeile fehlt, und ein Fall mit mehreren IDs (letzte gewinnt) ebenso. | Maintainability | `internal/e2e/container_id_test.go` · "CRLF and trailing blank lines" | ja — `make test` mit der Mutation | Mutant überlebt (redundante Normalisierung) |
 | F-3 | INFO | `docker pull -q` vor dem Test macht den Lauf von der Registry abhängig, auch wenn `alpine:3` lokal gecacht ist (Offline-Lauf, Rate-Limit); ein Pull-Fehler endet mit `t.Fatalf`, nicht mit `t.Skip` — die Haltung ist ehrlich und entspricht §3 Schritt 3 und §6 des Plans. Der Plan nennt den Helfer allein als ausreichend für die Korrektheit. | Maintainability | `internal/e2e/sandbox_status_docker_test.go` · `docker pull alpine:3: %s` | nein — Review-only (nur mit Netz prüfbar) | Netzabhängigkeit durch Vorab-Pull |
 | F-4 | INFO | Schlägt die ID-Prüfung nach einem erfolgreichen `docker run -d` fehl (z. B. eine weitere Zeile nach der ID), endet `startLabeled` mit `t.Fatalf`, bevor `t.Cleanup` registriert ist; der Container bleibt dann liegen. Der Erfolgspfad räumt mit `rm -f -v <ID>` auf. | Maintainability | `internal/e2e/sandbox_status_docker_test.go` · `t.Fatalf("%v\nstderr:\n%s", err, stderr.String())` | nein — Review-only | Cleanup erst nach ID-Prüfung registriert |

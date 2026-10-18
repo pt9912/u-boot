@@ -1,2 +1,2 @@
-**Vorgang:** [`slice-v1-e2e-status-ci-helfer`](../../../../in-progress/slice-v1-e2e-status-ci-helfer.md)
+**Vorgang:** [`slice-v1-e2e-status-ci-helfer`](../../../../done/slice-v1-e2e-status-ci-helfer.md)
 **Fund:** `TestE2E_SandboxDevcontainer_StatusFiles_InspectorAgainstEngine` war lokal mit gecachtem `alpine:3` grün und im CI-Lauf `39103939800` rot (`seed files: Error response from daemon: page not found`), weil `startLabeled` die gemischte Ausgabe von `docker run -d` mit dem Pull-Text als Container-Namen nahm; im Vorher-Stand ohne Image reproduziert (Review-Report [`2026-10-18-slice-v1-e2e-status-ci-helfer`](../../../../../../reviews/2026-10-18-slice-v1-e2e-status-ci-helfer.md)).
