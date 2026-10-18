@@ -45,9 +45,9 @@ Die Rohdaten tragen danach keine vorsignierte URL mehr (geprüft per Suche nach 
 | 4 | `04-build-probe.sh <ziel>` mit `Dockerfile.probe` | `rohdaten-04.txt` | Probe-Image (von Hand nachgeschriebenes Sandbox-Dockerfile, dazu das erzeugte `egress-init.sh`, plus Ollama-Block ohne CUDA) |
 | 5 | `05-laufzeit.sh` mit `inner-05.sh` | `rohdaten-05-discover.txt`, `rohdaten-05-restricted-1.txt` bis `-3.txt` | Laufzeit: Bindung, Pull, Run, Speicher, DNS-Mitschnitt; mit und ohne Egress-Restriktion |
 | 6 | `06-option-a.sh` mit `Dockerfile.cli` | `rohdaten-06.txt`, `rohdaten-06-build-a.log` | Option A auf dem Basis-Image: Build bricht ab |
-| 7 | `07-option-a-quelltext.sh` | `rohdaten-07.txt` | Feature-Quelltext (OCI-Artefakt 1.0.1) |
+| 7 | `07-option-a-quelltext.sh` mit `Dockerfile.cli` | `rohdaten-07.txt` | Feature-Quelltext (OCI-Artefakt 1.0.1) |
 | 8 | `08-lieferkette.sh` | `rohdaten-08.txt` | Signatur, Provenance, Prüfsummen, Veränderlichkeit des Releases |
-| 9 | `09-option-a-mit-zstd.sh` | `rohdaten-09.txt` | Option A mit zstd im Basis-Image: Build, Entrypoint, Benutzer |
+| 9 | `09-option-a-mit-zstd.sh` mit `Dockerfile.cli` | `rohdaten-09.txt` | Option A mit zstd im Basis-Image: Build, Entrypoint, Benutzer |
 | 10 | `10-volume-und-start.sh` | `rohdaten-10.txt` | Modellspeicher (Volume), Start nach dem Egress-Skript, Verhalten bei fehlendem `NET_ADMIN` |
 | 11 | `11-archivinhalt.sh` | `rohdaten-11.txt` | entpackte Größe je Verzeichnis, beide Architekturen |
 | 12 | `12-negativprobe-pin.sh` | `rohdaten-12.txt` | falscher SHA-256-Pin bricht den Build ab |

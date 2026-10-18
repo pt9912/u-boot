@@ -65,7 +65,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 | `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation |
 | diese Slice-Datei | update | Fundstellen-Tabelle je Aussage (§3), Closure (§7) |
 
-**Übergabe aus dem Entwurf [`ADR-0024`](../../adr/0024-ollama-im-sandbox-devcontainer.md) (`Proposed`; gilt mit `Accepted`; Bedarf, kein Wortlaut):** [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen): Katalogeintrag `ollama` vom Typ Dockerfile-Block (keine OCI-Quelle, kein Render-Schlüssel), Pin und Prüfung, nur mit Sandbox-Profil, `version:` ohne `source:` ist Exit-Code `10`, `source:` macht ihn extern; [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion): Zeile `ollama` mit zwei Hosts und dem Hinweis auf die ungemessene Stabilität des Blob-Hosts. Der zweite Eintragstyp ist damit gebaut und gehört in die Beschreibung.
+**Übergabe aus dem Entwurf [`ADR-0024`](../../adr/0024-ollama-im-sandbox-devcontainer.md) (`Accepted` am 2026-10-18, Freigabe-Punkte a bis e wie vorgeschlagen; Bedarf, kein Wortlaut):** [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen): Katalogeintrag `ollama` vom Typ Dockerfile-Block (keine OCI-Quelle, kein Render-Schlüssel), Pin und Prüfung, nur mit Sandbox-Profil, `version:` ohne `source:` ist Exit-Code `10`, `source:` macht ihn extern; [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion): Zeile `ollama` mit zwei Hosts und dem Hinweis auf die ungemessene Stabilität des Blob-Hosts. Der zweite Eintragstyp ist damit gebaut und gehört in die Beschreibung.
 
 Die Fundstellen-Tabelle wird beim Schreiben der Spezifikation hier eingetragen (Aussage → Datei und Symbol, gelesen am Tag des Schreibens). Abgleich der Tabelle oben gegen `git diff --stat` nach der **letzten** Fix-Runde (`AGENTS.md` §3.10).
 
@@ -87,7 +87,7 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 - **Die Spezifikation beschreibt, was nur das Handbuch sagt, ohne Code-Entsprechung** (etwa die Subdomain-Aussage ohne Test). — **Ausgang:** offen bis zur Closure; erwartet: entfallen, weil der Wildcard-Slice Test oder Streichung geliefert hat.
 - **Die auf die höchste vergebene Kennung folgenden Nummern sind zum Start vergeben.** — **Ausgang:** offen; die Nummer ist die nächste freie zum Zeitpunkt des Schreibens (Kennung nach dem Schema der `harness/conventions.md`), nicht vorab festgeschrieben.
 - **Ein Code-Slice der Welle ändert sich nach dem Start** (Fix-Runde, Rückführung). — **Ausgang:** offen; die Fundstellen-Tabelle wird nach der letzten Änderung erneut gegen den Code gelesen (`AGENTS.md` §3.10, Abgleich nach der letzten Fix-Runde).
-- **Bedingte Einträge (Neu-Laden, zweiter Eintragstyp) hängen an Entscheidungen des Projektinhabers.** — **Ausgang:** offen bis zum Start; die DoD zählt nur, was gebaut ist.
+- **Bedingte Einträge (Neu-Laden) hängen an Entscheidungen des Projektinhabers.** Der zweite Eintragstyp und die Ollama-Warnung sind mit [`ADR-0024`](../../adr/0024-ollama-im-sandbox-devcontainer.md) (`Accepted`) entschieden und gehören in die Spezifikation, sobald der Code-Slice sie gebaut hat. — **Ausgang:** offen bis zum Start; die DoD zählt nur, was gebaut ist.
 
 ## 7. Closure-Notiz
 

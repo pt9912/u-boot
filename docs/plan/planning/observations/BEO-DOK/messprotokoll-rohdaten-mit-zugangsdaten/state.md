@@ -1,0 +1,1 @@
+**Stand:** offen — ein Beleg (`slice-v1-devcontainer-ollama-messung`); unter der Schwelle von drei, keine Verkörperung entschieden. Folge im Messskript: `inner-05.sh` schwärzt die Query vorsignierter URLs künftig (Messprotokoll-`README.md` benennt es); die URL aus dem ersten Lauf bleibt im Verlauf (öffentliches Modell, abgelaufen am 2026-10-19 16:58 UTC, kein Konto-Token).
