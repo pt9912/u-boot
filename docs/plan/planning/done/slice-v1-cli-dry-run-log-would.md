@@ -71,7 +71,7 @@ Eine dritte Lösung ist erlaubt, wenn sie das Zielbild erfüllt (im Dry-Run kein
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [x] Beobachtungs-Register (`../observations/`) fortgeschrieben: `BEO-CLI/dry-run-log-vergangenheitsform` bekommt einen Ausgang (`gestrichen` mit Begründung, weil die Ursache wegfiel, oder bleibt `offen`, wenn der Implementer einen Rest findet).
 - [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft.
 
 ## 3. Plan (vor Code)
 
@@ -91,7 +91,9 @@ Jede Aussage über Code steht mit Fundstelle (gelesen am 2026-10-18; die Tabelle
 | `internal/hexagon/application/config_t3_test.go` | unverändert | `TestConfigSet_SilenceLoggerFalse_EmitsInfo` läuft ohne Vorschau-Modus (Nullwert `PreviewNone`) und erwartet `config set: updated`; die Erwartung gilt weiter |
 | `internal/hexagon/application/dryrun_log_test.go` | neu | `TestDryRunLog_WriteLines` (Happy: Dry-Run `would`; Boundary: `PreviewNone` und `PreviewAndApply` Vergangenheitsform; je Schreibpfad; beide Zeilen tragen dieselben Schlüssel und Werte, `infoArgs`), `TestDryRunLog_GenerateDevcontainerUpdatedBlock`, `TestDryRunLog_DryRunWritesNothingAndNoOpStaysQuiet` (Negative: nichts geschrieben, No-op und Fehler ohne Info-Zeile); `fakeLogger` aus `fakes_test.go` |
 | `docs/user/benutzerhandbuch.md`, `CHANGELOG.md` | update | Handbuch: Absatz nach der Zusammenfassungs-Regel in `### Vorschau statt Überraschung`; CHANGELOG: `[Unreleased]` · `### Changed` |
-| `docs/plan/planning/in-progress/roadmap.md` | update | Ruhe-Marker „Nichts in Arbeit.“ durch die Arbeitszeile mit Slice-Link ersetzt (d-check `planning`) |
+| `docs/plan/planning/in-progress/roadmap.md` | update | Ruhe-Marker „Nichts in Arbeit.“ während der Arbeit durch die Arbeitszeile ersetzt, nach dem Move wieder gesetzt; im Diff bleibt die Linkberichtigung der Welle-Zeile `done/` (`make slice-mv`) |
+| `docs/plan/planning/done/slice-v1-release-cut-v0.11.0.md` | update (Closure) | Verweise auf diesen Slice nach `done/` nachgezogen (`make slice-mv`), kein inhaltlicher Eingriff |
+| `docs/plan/planning/open/slice-v1-cli-help-handbuch-link.md` | update (Closure, fremder Vorgang) | nur der Verweis auf diesen Slice nachgezogen (`make slice-mv`); der übrige Inhalt gehört `044e0c9` |
 | `docs/plan/planning/done/slice-v1-cli-dry-run-log-would.md` | update | dieser Plan (gewählte Lösung, Tabelle) |
 | `docs/reviews/2026-10-18-slice-v1-cli-dry-run-log-would.md` | neu | Review-Report (Reviewer-Rolle) |
 | `docs/plan/planning/observations/BEO-CLI/dry-run-log-vergangenheitsform/state.md` | update (Closure) | Ausgang nach §2 |
