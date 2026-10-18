@@ -65,14 +65,14 @@ Die Hosts der Ollama-Messung ([`slice-v1-devcontainer-ollama-messung`](../open/s
 
 ## 2. Definition of Done
 
-- [ ] **Messung:** Die Fälle a bis d sind gemessen und mit Messstand (Docker-Version, Colima-Version, Architektur, `dnsmasq`-Version aus dem Image) in der Evidence und in §3 festgehalten; das Ergebnis ist E1, E2 oder E3 (§1), jeweils mit der gemessenen Begründung.
-- [ ] **Belegte Aussage:** Bei E1 und E2 steht die Subdomain-Aussage in Handbuch (`docs/user/benutzerhandbuch.md`, Abschnitt Egress) im Wortlaut der Messung, und ein Test (`//go:build docker`) pinnt sie oder sie ist gestrichen; bei E1 trägt der Fehlertext von `NewEgressHost` den Hinweis, mit Test.
+- [x] **Messung:** Die Fälle a bis d sind gemessen und mit Messstand (Docker-Version, Colima-Version, Architektur, `dnsmasq`-Version aus dem Image) in der Evidence und in §3 festgehalten; das Ergebnis ist E1, E2 oder E3 (§1), jeweils mit der gemessenen Begründung.
+- [x] **Belegte Aussage:** Bei E1 und E2 steht die Subdomain-Aussage in Handbuch (`docs/user/benutzerhandbuch.md`, Abschnitt Egress) im Wortlaut der Messung, und ein Test (`//go:build docker`) pinnt sie oder sie ist gestrichen; bei E1 trägt der Fehlertext von `NewEgressHost` den Hinweis, mit Test.
 - [ ] **Ergebnis für die Welle:** §7 trägt `Gegenstand:` (entfallen mit Begründung, oder die benannte Vorlage an den Projektinhaber), und die Welle ([`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) §5) ist nachgeführt, falls E3 einen Slice in die Welle zieht.
-- [ ] `make gates` grün.
+- [x] `make gates` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8).
-- [ ] Doku-Update für das Handbuch, falls ein öffentlicher Vertrag berührt ist; `CHANGELOG.md` (`[Unreleased]`) nur bei geändertem Fehlertext.
+- [x] Doku-Update für das Handbuch, falls ein öffentlicher Vertrag berührt ist; `CHANGELOG.md` (`[Unreleased]`) nur bei geändertem Fehlertext.
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben — Beleg in [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md), falls die Subdomain-Aussage ohne Beleg stand (Befund steht dann in der Evidence); sonst „keine Beobachtung angefallen“ in §7.
 - [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
@@ -82,15 +82,29 @@ Die Hosts der Ollama-Messung ([`slice-v1-devcontainer-ollama-messung`](../open/s
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `internal/e2e/sandbox_devcontainer_docker_test.go` | update | neuer Test neben `TestE2E_SandboxDevcontainer_Egress` (Build-Tag `docker`): Fälle a und b, nach [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion); Fall c nur, wenn die Messung einen reproduzierbaren Namen liefert |
-| `internal/hexagon/domain/sandbox.go` | update (bedingt, E1) | Fehlertext von `NewEgressHost` für Einträge mit `*` |
-| `internal/hexagon/domain/sandbox_test.go` | update (bedingt, E1) | Test des neuen Fehlertextes (Negativfall `*.example.org`) |
-| `docs/user/benutzerhandbuch.md` | update | Abschnitt *Internet-Beschränkung (Egress)*, Punkt *Wichtig* (Subdomain-Aussage mit Messstand) |
-| `CHANGELOG.md` | update (bedingt, E1) | `[Unreleased]`: geänderter Fehlertext bei Wildcard-Eintrag |
-| `docs/plan/adr/` (Folge-ADR, Index `docs/plan/adr/README.md`) | neu / update (bedingt, E2) | nur wenn die Messung die Aussage von [ADR-0012](../../adr/0012-devcontainer-egress-firewall.md) widerlegt |
+| `internal/e2e/sandbox_devcontainer_docker_test.go` | update | neuer Test neben `TestE2E_SandboxDevcontainer_Egress` (Build-Tag `docker`): Fälle a und b (`TestE2E_SandboxDevcontainer_EgressSubdomains`, eingetreten), nach [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion); Fall c nicht getestet (Messung ohne stabiles Ziel, nur Evidence) |
+| `internal/hexagon/domain/sandbox.go` | update (eingetreten, E1) | Fehlertext von `NewEgressHost` für Einträge mit `*` |
+| `internal/hexagon/domain/sandbox_test.go` | update (eingetreten, E1; `TestNewEgressHost`) | Test des neuen Fehlertextes (Negativfall `*.example.org`) |
+| `docs/user/benutzerhandbuch.md` | update (eingetreten) | Abschnitt *Internet-Beschränkung (Egress)*, Punkt *Wichtig* (Subdomain-Aussage mit Messstand) |
+| `CHANGELOG.md` | update (eingetreten, E1) | `[Unreleased]`: geänderter Fehlertext bei Wildcard-Eintrag |
+| `docs/plan/adr/` (Folge-ADR, Index `docs/plan/adr/README.md`) | entfallen (E1, Aussage bestätigt) | nur wenn die Messung die Aussage von [ADR-0012](../../adr/0012-devcontainer-egress-firewall.md) widerlegt |
 | `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation nach `harness/review.md` und `harness/verification.md` |
-| `docs/plan/planning/observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/evidence/` | neu (bedingt) | Beleg, falls die Aussage ohne Test stand und das Ergebnis es bestätigt |
+| `docs/plan/planning/observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/evidence/` | neu (eingetreten; Datei `slice-v1-egress-wildcard-pruefung.md`) | Beleg, falls die Aussage ohne Test stand und das Ergebnis es bestätigt |
 | diese Slice-Datei | update | Messung (§3), Closure (§7) |
+| `docs/plan/planning/in-progress/roadmap.md` | update | Arbeitszeile statt Ruhe-Marker solange der Slice in `in-progress/` liegt; Ruhe-Marker bei der Closure wiederherzustellen |
+
+### Messung (2026-10-18)
+
+**Messstand:** Docker 29.5.2 (Server, arm64) auf Colima 0.10.3 (macOS Virtualization.Framework, aarch64); Wegwerf-Container `debian:stable` mit `--cap-add=NET_ADMIN`, `dnsmasq` 2.91 (Paket `dnsmasq-base` aus Debian stable), `nftables`; ausgeführt wurde das Startscript `egress-init.sh.tmpl` mit ersetzter `hosts=`-Zeile, sonst unverändert. Rohdaten (nicht im Repo): `~/egress-wildcard-messung/messung-{1,2,3}.txt`.
+
+| # | Eintrag | Befund | Bewertung |
+|---|---|---|---|
+| a | `example.org` | `example.org` und `www.example.org`: DNS `NOERROR`, HTTPS 200; `a.b.example.org`: DNS `NXDOMAIN` (an den Upstream weitergereicht, Name existiert nicht; ein nicht passender Name wie `example.com` ergibt `REFUSED`) | Subdomain erlaubt. Tiefe Subdomain mit echtem Namen: Eintrag `amazonaws.com` → `s3.amazonaws.com` (307), `s3.us-east-1.amazonaws.com` (307, zwei Ebenen), `sts.us-east-1.amazonaws.com` (302) erreichbar, `example.com` `REFUSED` |
+| b | `api.github.com` | `api.github.com` HTTPS 200; `github.com` und `www.github.com`: `REFUSED`; `uploads.api.github.com`: `NXDOMAIN` (also weitergereicht, Regel greift) | Eintrag öffnet nie den Eltern-Namen; Subdomains des Eintrags sind eingeschlossen |
+| c | `www.mozilla.org` (CNAME auf `www-mozilla.fastly-edge.com`), `files.pythonhosted.org` (CNAME auf `dualstack.python.map.fastly.net`), `deb.debian.org` (CNAME auf `debian.map.fastlydns.net`) | alle drei erreichbar (HTTPS 200, 404 für den Wurzelpfad von `files.pythonhosted.org`); die Zielnamen selbst: `REFUSED` | Die Adresse am Ende der Kette gelangt in das nftables-Set. Der Zielname braucht keinen Eintrag und löst direkt nicht auf. Kein Fall für einen Wildcard-Eintrag |
+| d | `*.example.org` und `.example.org` | `dnsmasq --test` nimmt beide an. `server=/*.example.org/…`: `example.org` `REFUSED`, `www.example.org` `NOERROR`. Mit dem vollen Startscript (`nftset=/*.example.org/…`) löst `www.example.org` auf, die Verbindung läuft in den Timeout (kein Eintrag im Set); `.example.org` verhält sich wie `example.org` | „Nur Subdomains“ ist für die Auflösung ausdrückbar, **nicht** für die Freigabe der Adresse: der `nftset`-Treffer fehlt. Mit `dnsmasq` 2.91 ergibt sich daraus keine nutzbare Form |
+
+**Ergebnis: E1** (bestätigt, kein Fall). Ein Wildcard-Eintrag fügte weder für a bis c noch für d (mit diesem `dnsmasq`) Ausdrucksstärke hinzu. Nicht gemessen: andere `dnsmasq`-Versionen, Linux-Hosts ohne VM, Docker Desktop, amd64, IPv6 (das Script sperrt IPv6 ganz).
 
 Der Abgleich der Tabelle gegen `git diff --stat` läuft nach der **letzten** Fix-Runde (`AGENTS.md` §3.10); jede Zeile mit „bedingt“ wird dabei als eingetreten oder entfallen markiert.
 
