@@ -11,7 +11,7 @@ OpenTelemetry, …) und wiederkehrende Artefakte (README, CHANGELOG,
 > **Stand:** aktuelle Version `v0.10.0` (GHCR-Image, sechs Plattform-Binaries,
 > `.deb`-/`.rpm`-Pakete, Homebrew-Tap). Der Devcontainer-Katalog hat 13 Features, darunter `sshd` und `claude-code`.
 > `podman build` läuft im Sandbox-Devcontainer (gemessen auf Colima, arm64; Docker Desktop, amd64 und CI nicht gemessen); bestehende
-> `nestedRuntime: podman`-Projekte brauchen `/dev/net/tun` auf dem Container-Host; `nestedRuntime: docker` wird unter Docker auf Linux und auf Colima zugesagt, nicht auf Docker Desktop.
+> `nestedRuntime: podman`-Projekte brauchen `/dev/fuse` und `/dev/net/tun` auf dem Container-Host; `nestedRuntime: docker` wird unter Docker auf Linux und auf Colima zugesagt, nicht auf Docker Desktop.
 > `--quiet` zeigt nur Fehler und vier Ausweisungen, die sichtbar bleiben. Verlauf: Release-Tabelle unten und [`CHANGELOG.md`](CHANGELOG.md).
 
 Das verbindliche Lastenheft

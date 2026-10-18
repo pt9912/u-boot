@@ -10,7 +10,7 @@ and the usual recurring artefacts (README, CHANGELOG, `.env.example`).
 > **Status:** current version `v0.10.0` (GHCR image, six-platform binaries,
 > `.deb`/`.rpm` packages, Homebrew tap). The devcontainer catalogue has 13 features, including `sshd` and `claude-code`.
 > `podman build` works in the sandbox devcontainer (measured on Colima, arm64; Docker Desktop, amd64 and CI not measured), and existing
-> `nestedRuntime: podman` projects need `/dev/net/tun` on the container host; `nestedRuntime: docker` is promised on Docker under Linux and on Colima, not on Docker Desktop.
+> `nestedRuntime: podman` projects need `/dev/fuse` and `/dev/net/tun` on the container host; `nestedRuntime: docker` is promised on Docker under Linux and on Colima, not on Docker Desktop.
 > `--quiet` shows only errors and four disclosures that stay visible. History: release table below and [`CHANGELOG.md`](CHANGELOG.md).
 
 The normative requirements ([`spec/lastenheft.md`](spec/lastenheft.md))
