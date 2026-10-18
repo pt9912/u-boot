@@ -196,7 +196,7 @@ verletzen und die kein Gate fängt:
 prüft sie; in `welle-cli-verbosity` traten sie in drei Vorgängen auf, obwohl
 §3.7 sie schon verbot.
 
-### 3.10 Aussagen über Code im Plan prüfen   (seit welle-devcontainer-sshd-claude-code)
+### 3.10 Aussagen über Code im Plan prüfen   (seit welle-devcontainer-sshd-claude-code; Bedingungen in Spec und Handbuch seit slice-v1-sandbox-fallback-host-ausweisung) <!-- d-check:ignore (Herkunfts-Anker, keine Verweis-Kennung) -->
 
 Wer einen Slice-Plan, eine Closure-Notiz oder eine Spec schreibt, liest jede
 Aussage über Dateien, Funktionen, Werte oder Verhalten vorher an der Stelle im
@@ -214,13 +214,24 @@ gelesen wurde, steht nicht im Text.
   „Wortlaut wird vorgelegt“) wird beim Ablauf entfernt oder auf den Ist-Stand
   gesetzt; auch eine Aussage über Verhalten („gemessene Hosts“) nennt nur, was
   gemessen oder gelesen wurde.
+- Eine Datei, die der Plan als „unverändert“ führt, wird durch eine gelesene
+  Aussage belegt, nicht durch eine Wortsuche: Der Autor liest die Stelle, die
+  der Diff berühren könnte (Kommentar, Statuszeile, Beleg-Zeiger), und trägt
+  deren Fundstelle in die Plan-Tabelle ein.
+- Eine Bedingung in Spec oder Handbuch, die eine Eigenschaft des Codes
+  behauptet („nur wenn“, „dort nicht“, „immer“, „lokale Engine“), bekommt einen
+  Test, der sie pinnt, oder wird gestrichen.  (seit slice-v1-sandbox-fallback-host-ausweisung) <!-- d-check:ignore (Herkunfts-Anker, keine Verweis-Kennung) -->
 
 **Begründung:** Ein Reviewer oder Verifier fängt falsche Plan-Aussagen erst
-nachträglich, kein Gate prüft sie; in acht Vorgängen
+nachträglich, kein Gate prüft sie; in zehn Vorgängen
 (`BEO-DOK/plan-aussage-ueber-code`) stand etwas im Plan, das der Code nicht
-trug, oder fehlte eine berührte Datei. Es ergänzt §3.7 und §3.9; ein Sensor
-entsteht nicht: die Fehler sind meist Aussagen über Verhalten oder Zustand, die
-ein Dateilisten-Vergleich nicht sieht.
+trug, oder fehlte eine berührte Datei, und zwei davon traten nach der
+Verkörperung auf, weil „unverändert“ per Suchwort statt per gelesener Aussage
+belegt war. Die Bedingung in Spec oder Handbuch ohne Test (drei Befunde in zwei
+Vorgängen, `BEO-DOK/spec-bedingung-ohne-code-entsprechung`) steht hier auf
+Entscheidung des Projektinhabers vor der Schwelle von drei Vorgängen. Es
+ergänzt §3.7 und §3.9; ein Sensor entsteht nicht: die Fehler sind meist
+Aussagen über Verhalten oder Zustand, die ein Dateilisten-Vergleich nicht sieht.
 
 ## 4. Quality Gates
 
