@@ -307,7 +307,7 @@ Diese Optionen gelten für jeden Befehl:
 | `--yes` | Rückfragen automatisch bejahen |
 | `--no-interactive` | nie fragen; bei einer nötigen Rückfrage abbrechen |
 | `--json` | maschinenlesbare Ausgabe |
-| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen). Vier Ausnahmen bleiben sichtbar: (1) Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`); in der Befehlsausgabe erzeugt nur `generate devcontainer` diese Warnungen, dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift, während die Meldung zu `nestedRuntime` ohne Sandbox-Profil entfällt; (2) Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in der Befehlsausgabe und in `doctor`, soweit vom Host aus ermittelbar); (3) der Compose-Fortschritt von `up`; (4) die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. `doctor --quiet` zeigt Fehler-Einträge, Degradations-Fallbacks und die Warn-Einträge zu einer Sicherheitseigenschaft des Sandbox-Profils, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; Einzelheiten in Abschnitt [4.7](#47-die-umgebung-prüfen)). Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
+| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen). Vier Ausnahmen bleiben sichtbar: (1) Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`); in der Befehlsausgabe erzeugt nur `generate devcontainer` diese Warnungen, dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift, während die Meldung zu `nestedRuntime` ohne Sandbox-Profil entfällt; (2) Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in `doctor` und in der Warnungsausgabe von `generate devcontainer` und `init`, soweit der Host sie aus der Statusdatei des Containers lesen kann; ein nicht ermittelbarer Zustand ist kein Fallback und entfällt); (3) der Compose-Fortschritt von `up`; (4) die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. `doctor --quiet` zeigt Fehler-Einträge, Degradations-Fallbacks und die Warn-Einträge zu einer Sicherheitseigenschaft des Sandbox-Profils, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; Einzelheiten in Abschnitt [4.7](#47-die-umgebung-prüfen)). Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
 | `--verbose` | zusätzliche Details; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist |
 | `--debug` | interne Diagnoseausgabe; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist (`--verbose` und `--debug` wirken gleich) |
 | `-v`, `--version` | Version anzeigen |
@@ -587,7 +587,11 @@ u-boot doctor --strict   # jede Warnung gilt als Fehler
 #### Ergebnis
 
 Ein Bericht über 16 Prüfungen mit vier Zuständen: `✓` in Ordnung, `⚠` Warnung,
-`✗` Fehler, `?` übersprungen. Er endet mit einer Zusammenfassung:
+`✗` Fehler, `?` übersprungen oder nicht ermittelbar. Je konfigurierter
+Sandbox-Fähigkeit (verschachteltes Podman oder Docker, Egress-Beschränkung)
+kommt ein Eintrag zum Zustand beim Containerstart hinzu (siehe
+[Fallbacks sehen](#fallbacks-sehen)). Der Bericht endet mit einer
+Zusammenfassung:
 
 ```text
 Diagnostic report for /projekt
@@ -607,8 +611,9 @@ Geprüft werden: Schreibrechte im Verzeichnis, `git`, Docker (Version ab 24.0,
 Daemon erreichbar), Compose-Plugin (ab 2.20), `u-boot.yaml`, `compose.yaml`,
 `.devcontainer/devcontainer.json` und `.devcontainer/Dockerfile` (wenn
 vorhanden), Devcontainer-Features (Freigabeliste und Abweichungen zur
-Projektdatei), Weiterleitungs-Ports sowie die drei Sandbox-Prüfungen (Laufzeit,
-Zugangsdaten, Egress).
+Projektdatei), Weiterleitungs-Ports, die drei Sandbox-Prüfungen (Laufzeit,
+Zugangsdaten, Egress) und je konfigurierter Sandbox-Fähigkeit der gemeldete
+Zustand beim Containerstart (`vfs`-Speicher, Daemon, Egress).
 
 #### Hinweise
 
@@ -625,8 +630,12 @@ Zugangsdaten, Egress).
   und Summary-Zeile entfallen ebenfalls. Der Exit-Code ändert sich nicht: Mit
   `--strict` endet auch `--quiet` bei einer dieser Warnungen mit `11`, und die
   gezeigten Zeilen nennen den Grund. `--json` bleibt unverändert.
+- Ein nicht ermittelbarer Zustand beim Containerstart erscheint nur im Bericht
+  (`?`), nicht in `--json`, und verändert den Exit-Code nicht.
 - Läuft `u-boot` im Container, werden die vier Host-Prüfungen übersprungen
-  (`?`). Das ist kein Fehler.
+  (`?`). Das ist kein Fehler. Die Einträge zum Containerstart liest `doctor`
+  dort direkt aus dem Container, wenn es im Devcontainer selbst läuft; aus dem
+  Runtime-Image ist der Zustand nicht ermittelbar.
 
 ### 4.8 Artefakte erzeugen und aktualisieren
 
@@ -1042,8 +1051,64 @@ Ein fehlendes `/dev/fuse` auf dem Container-Host ist keine Stufe dieser Tabelle:
 Docker lehnt den Start des Containers ab. `u-boot doctor` meldet es auf Linux-Hosts
 als Fehler (Exit-Code 11), unabhängig von `onUnavailable`. Unter macOS mit Colima
 läuft die Engine in einer VM, die der Host nicht beurteilen kann; dort lehnt Docker
-den Start ab, `doctor` meldet nichts, und das Startscript im Container prüft
-die User-Namespaces.
+den Start ab, die Prüfung von `doctor` zum Gerät meldet nichts, und das
+Startscript im Container prüft die User-Namespaces.
+
+#### Fallbacks sehen
+
+Jedes Startscript schreibt bei jedem Lauf eine kleine Statusdatei im Container:
+`/var/lib/u-boot/status/vfs` (`nestedRuntime: podman`), `daemon`
+(`nestedRuntime: docker`) und `egress` (Egress-Beschränkung). Sie hat drei
+Zeilen: das Format (`u-boot-status 1`), das Ergebnis (`ok`, `fallback` oder
+`failed`) und den Zeitpunkt (UTC). Exit-Codes und Meldungen der Startscripte
+bleiben, wie sie waren.
+
+`u-boot doctor` liest die Dateien vom Host über die Container-Engine (nur
+`docker ps` und `docker cp`, nie `docker exec`) und zeigt je konfigurierter
+Fähigkeit einen Eintrag:
+
+| Eintrag | Fähigkeit |
+|---|---|
+| `devcontainer.sandbox.fallback.vfs` | `nestedRuntime: podman`: Rückfall auf `vfs`-Speicher |
+| `devcontainer.sandbox.fallback.daemon` | `nestedRuntime: docker`: Container ohne Daemon |
+| `devcontainer.sandbox.fallback.egress` | Egress-Beschränkung: Wegfall der Beschränkung |
+
+| Gemeldet | Anzeige in `doctor` |
+|---|---|
+| `ok` | in Ordnung |
+| `fallback` | Warnung; bleibt unter `--quiet` sichtbar; mit `--strict` Exit-Code 11 |
+| `failed` (`onUnavailable: fail`, das Startscript endete mit Exit-Code 11) | Fehler, Exit-Code 11 |
+| nicht ermittelbar | Hinweiszeile (`?`) mit dem Grund; kein Fallback; unter `--quiet` stumm |
+| ungültige Datei | Warnung |
+
+**Nicht ermittelbar** heißt: Es gibt keinen Container zu diesem Projektordner
+(das Dev-Container-Werkzeug muss ihn mit dem Ordner dieses Projekts erzeugt
+haben), die Engine ist nicht erreichbar oder zeigt auf einen anderen Rechner
+(`DOCKER_HOST` oder Docker-Kontext), `u-boot` läuft aus dem Runtime-Image statt
+im Devcontainer, oder der Container hat noch keine Statusdatei. **Bestehende
+Container ohne Statusdateien** (vor dieser Funktion gebaut oder nie gestartet)
+brauchen `u-boot generate devcontainer` und einen Neubau; bis zum ersten Start
+danach bleibt der Zustand nicht ermittelbar.
+
+Die Datei beschreibt den letzten Start: `daemon` und `egress` schreibt jeder
+Start neu, `vfs` einmal je Container. Ein gestoppter Container wird gelesen; der
+Eintrag nennt den Zeitpunkt und „container stopped“.
+
+Nach `u-boot generate devcontainer` fragt `u-boot` denselben Weg ab und warnt,
+wenn ein **bestehender** Container zuletzt `fallback` gemeldet hat (`init
+--devcontainer` ebenso, sobald die geschriebene `u-boot.yaml` eine solche
+Fähigkeit enthält; die von `init` erzeugte Konfiguration enthält heute keine).
+Die Warnung nennt den Stand des letzten Starts des bestehenden Containers, nicht
+den der neu erzeugten Dateien, und bleibt unter `--quiet` sichtbar. Ohne Engine,
+ohne Container, ohne Datei, bei einer ungültigen Datei und bei `ok` oder
+`failed` bleibt die Abfrage still, und bei `--dry-run` findet sie nicht statt.
+`up` fragt nicht.
+
+**Grenze:** Die Datei stammt aus einem Container, in dem ein Agent läuft, und ist
+dort mit Root-Rechten schreibbar. Sie ist ein Hinweis, kein Beleg: **„Nicht
+gemeldet“ heißt nicht „nicht aufgetreten“.** `u-boot` gibt nie den Inhalt der
+Datei aus, nur die geprüften Felder; eine Datei mit anderem Format, mit mehr als
+512 Byte oder die keine reguläre Datei ist, gilt als ungültig.
 
 
 #### Eigener Docker-Daemon (optional)
@@ -1076,7 +1141,8 @@ Geheimnisse und Docker-Socket des Hosts.
 - Wird der Daemon nicht innerhalb von 60 Sekunden bereit (zum Beispiel ohne
   `--privileged`), gilt `devcontainer.sandbox.onUnavailable`: Warnung und
   Container ohne Daemon (`warn`) oder Exit-Code 11 (`fail`). Podman ersetzt den
-  Daemon nie.
+  Daemon nie. `u-boot doctor` weist das aus der Statusdatei aus (siehe
+  [Fallbacks sehen](#fallbacks-sehen)).
 - Das Standardprofil und `podman` bleiben unverändert.
 - Unter Podman als Host-Engine ist `docker` nicht zugesagt.
 - Der Host `production.cloudfront.docker.com` der Default-Allowlist gilt auch hier, ist aber für `nestedRuntime: docker` nicht gemessen (gemessen ist der Pull mit `podman`).
@@ -1134,8 +1200,10 @@ Standardmäßig erlaubt sind:
   iptables-Regeln eines verschachtelten Docker-Daemons umgehen die Beschränkung;
   `u-boot doctor` warnt bei `docker` mit Beschränkung.
 - Ohne `NET_ADMIN` entfällt die Beschränkung mit einer Warnung (`warn`) oder das
-  Startscript endet mit Exit-Code 11 (`fail`). `u-boot doctor` prüft nur die
-  Konfiguration; ohne Sandbox-Profil ist sie wirkungslos und `doctor` warnt.
+  Startscript endet mit Exit-Code 11 (`fail`). `u-boot doctor` prüft die
+  Konfiguration (ohne Sandbox-Profil ist sie wirkungslos und `doctor` warnt) und
+  weist den Wegfall der Beschränkung aus der Statusdatei aus (siehe
+  [Fallbacks sehen](#fallbacks-sehen)).
 
 #### Login-Dienst `sshd` (optional)
 
@@ -1682,7 +1750,10 @@ nicht bereit, wenn der Container ohne `--privileged` startet; das Log
 
 #### Lösung
 
-1. Lesen Sie die Meldung des Startscripts im Container-Log.
+1. Lesen Sie die Meldung des Startscripts im Container-Log. `u-boot doctor`
+   zeigt in den Einträgen `devcontainer.sandbox.fallback.*`, was die
+   Startscripte gemeldet haben (siehe [Fallbacks sehen](#fallbacks-sehen)); ein
+   nicht ermittelbarer Zustand heißt nicht, dass nichts vorlag.
 2. Setzen Sie `devcontainer.sandbox.nestedRuntime` auf `none` und erzeugen Sie
    den Devcontainer neu, wenn Sie kein verschachteltes Podman brauchen.
 3. Weitere Abhilfen stehen in Abschnitt [4.11](#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten) unter „Verschachteltes Podman".

@@ -11,6 +11,19 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- Sandbox devcontainer: the degradation fallbacks (container without Docker daemon, `vfs` storage, no egress restriction) are now disclosed from the host. The container start scripts
+  (`sandbox-init.sh`, `docker-init.sh`, `egress-init.sh`) write a small status file in the container (`/var/lib/u-boot/status/vfs`, `daemon`, `egress`; exit codes and stderr lines are unchanged),
+  and `u-boot doctor` reads it through the container engine (`docker ps` and `docker cp`, never `docker exec`) and reports one item per configured capability:
+  `devcontainer.sandbox.fallback.vfs`, `devcontainer.sandbox.fallback.daemon` and `devcontainer.sandbox.fallback.egress`. A reported `fallback` is a warning that stays visible under `--quiet`,
+  `failed` (policy `fail`) an error (exit code `11`), a state that cannot be read an info line ("not determinable", never a fallback). After writing, `u-boot generate devcontainer`
+  warns when an **existing** container reported `fallback` at its last start (also under `--quiet`; not with `--dry-run`; silent without engine, container or status file); `u-boot init` asks the
+  same way once the `u-boot.yaml` it wrote configures such a capability. The status file comes from a container that runs an agent: it is a hint, not proof, and "not reported" does not mean "not occurred".
+  **Existing projects** get the status files after the next `u-boot generate devcontainer` and a rebuild of the container; until then the state is "not determinable". The generated Dockerfile creates
+  `/var/lib/u-boot/status`; `runArgs` and mounts do not change. Lastenheft 0.13.0 is unchanged ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
+  [`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [ADR-0022](docs/plan/adr/0022-fallback-ausweisung-statusdateien-im-container.md)).
+
 ### Changed
 
 - Sandbox devcontainer (`nestedRuntime: podman`): a missing `/dev/fuse` on the container host is a start error of the container engine, like `/dev/net/tun`, and no longer a
