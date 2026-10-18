@@ -1,0 +1,141 @@
+# Slice CR: `egress` im Wertebereich des Feldes `command` der `--json`-Ausgaben (`LH-NFA-USE-004`, `LH-FA-CLI-007`)
+
+**Lifecycle:** Der Zustand dieses Slice ist das Verzeichnis, in dem diese
+Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
+wechselt nur durch `git mv`, siehe
+Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
+Übernimmt ein anderer Slice den Gegenstand oder entfällt er, geht diese Datei
+aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
+Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
+(§Ein Slice, dessen Gegenstand ein anderer übernimmt).
+
+**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — zusätzlicher CR-Slice der Welle (kein Zählplatz in der Reihe der übrigen Slices; Eintrag in §4 der Welle-Datei), ergibt sich aus Review und Verification von [`slice-v1-cli-egress-anzeige`](../done/slice-v1-cli-egress-anzeige.md) (Review F-3, Verification Auflage 2). Er folgt [`slice-cr-devcontainer-ollama`](slice-cr-devcontainer-ollama.md) und geht [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md) voraus.
+
+**Bezug:** [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) (bindet alle `--json`-Ausgaben an das Enum von `command`), [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (definiert das Enum). Verwandt: [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (der Befehl `u-boot egress list`), [`LH-SA-CLI-001`](../../../../spec/lastenheft.md#lh-sa-cli-001--befehlsstruktur).
+Anlass: Review-Report `2026-10-18-slice-v1-cli-egress-anzeige` F-3 und Verification-Report Auflage 2 (beide unter `docs/reviews/`); der Projektinhaber hat angeordnet, bis zum Release ohne Rückfragen weiterzumachen.
+
+**Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)), §16 (Historie), Versionsfeld. [`SPEC-001`](../../../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) (Zeile `enum` von `command`) berührt der CR **nicht**: Sie gehört [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md) („Spezifikation nach dem Code“, nach dem Lastenheft). `architecture.md` berührt der CR nicht.
+
+**Verantwortlich:** —
+
+**Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-18.
+
+---
+
+## 1. Ziel und Abgrenzung
+
+**Ziel:** Der Wert `egress` steht im Wertebereich des Feldes `command` im Lastenheft, damit die ausgelieferte Ausgabe `command: "egress"` von `u-boot egress list --json` innerhalb des Vertrags liegt (Änderung auf die **nächste freie Minor-Version**, erwartet `0.16.0`; Begründung unten). Der Wortlaut ist **aus dem freigegebenen Befehl `u-boot egress list` abgeleitet, nicht wortgleich freigegeben**; die Bestätigung des Projektinhabers ist ein **Gate vor dem Release** (nicht vor `done/` dieses Slice), nach dem Muster der Stelle 4 im geschlossenen Slice [`slice-cr-sandbox-egress-anzeige`](../done/slice-cr-sandbox-egress-anzeige.md) §7.
+
+**Warum eine Lastenheft-Änderung:** [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) verlangt für alle `--json`-Ausgaben den Minimalkontrakt mit `command` „als in [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) definiertes Enum“; dieses Enum nennt zehn Werte, `egress` nicht. Der Code liefert `command: "egress"` (`runEgressList` in `internal/adapter/driving/cli/egress.go`, `newDataEnvelope("egress", "list", …)`). Kein Gate prüft das Enum (`jsontestutil` verlangt `subcommand` nur für `template` und `config`, gelesen laut Review F-3); die Abweichung vom Lastenheft bliebe ohne diesen CR bestehen.
+
+### Gefundener Stand (gelesen am 2026-10-18; Fundstellen nach Datei und Absatz, ohne Zeilennummern)
+
+- `spec/lastenheft.md`, [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), Absatz „Für `--dry-run --json` ist die Ausgabe als maschinenlesbares JSON …“: `command` ist einer der Werte `init`, `add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config` oder `template`. Der Satz steht im Absatz zur Vorschau (`--dry-run --json`); `egress list` lehnt `--dry-run` und `--diff` ab (`ErrEgressPreviewNotApplicable`, Exit 2), das Enum bindet den Befehl nur über [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe).
+- Dieselbe Anforderung, Absatz „Bei gruppierten Befehlen wie `command == "template"` oder `command == "config"` muss das Feld `subcommand` gesetzt sein (z. B. `list`, `get`, `set`).“: ein Beispiel mit „wie“, keine Vollständigkeitsliste; `egress list` setzt `subcommand: "list"`.
+- `spec/lastenheft.md`, [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe), Spiegelstrich „`command` (Hauptbefehl als in [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) definiertes Enum)“ — der Verweis ist die einzige Quelle des Wertebereichs für normale `--json`-Ausgaben; und Absatz „Für `--json`-Antworten gilt zusätzlich: … bei `template` und `config` ist `subcommand` verpflichtend …“ (eine Aufzählung ohne „wie“; `egress` ist darin nicht genannt, setzt das Feld aber trotzdem).
+- `spec/lastenheft.md`, [`LH-SA-CLI-001`](../../../../spec/lastenheft.md#lh-sa-cli-001--befehlsstruktur): „`subcommand` ist für kommandospezifische Unterbefehle reserviert (z. B. `template`, `config`).“ — Beispiel, keine Liste.
+- `spec/lastenheft.md` §16 Historie: letzte Zeile `0.14.0` (Anzeige der Egress-Liste; trägt die Klausel „Bestätigung des Projektinhabers vor dem Release ausstehend“ zur Befehlsübersicht); Versionsfeld im Kopf: `0.14.0`. Der CR [`slice-cr-devcontainer-ollama`](slice-cr-devcontainer-ollama.md) belegt `0.15.0` (noch nicht gelandet).
+- `docs/maintainer/cli-json-contract.md` §6.10 (Vermerk „Offene Vertragslücke“) nennt die Lücke und verweist auf diesen Slice.
+
+### Wortlaut-Vorschlag (alt/neu; aus dem freigegebenen Befehl abgeleitet — **Bestätigung des Projektinhabers vor dem Release ausstehend**)
+
+Das Lastenheft nennt keine Slice- oder Wellen-Kennung; im Lastenheft stehen die Verweise als Anker `#…` der Datei.
+
+**Stelle 1 — [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), Wertebereich von `command`** (nur der Eintrag `egress`; sonst bleibt der Absatz unverändert).
+
+Alt:
+
+> … `command` ist einer der Werte `init`, `add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config` oder `template`. …
+
+Neu:
+
+> … `command` ist einer der Werte `init`, `add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `egress` oder `template`. …
+
+Platzierung: die Änderung steht im Enum selbst, weil [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) auf ihn verweist; eine zweite Wertemenge in [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) wäre eine Kopie, und Kopien driften. [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) bleibt unverändert.
+
+**Stelle 2 — Versionsfeld und Historie (§16).**
+
+Alt: `| Version          | 0.14.0 |` (bzw. der Stand nach dem Landen von [`slice-cr-devcontainer-ollama`](slice-cr-devcontainer-ollama.md), erwartet `0.15.0`)
+
+Neu: die nächste freie Minor-Version (Lastenheft-Commit-Reihenfolge entscheidet; erwartet `0.16.0`).
+
+Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
+
+> | `<Version>` | `<Datum des Lastenheft-Commits>` | [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run): Der Wert `egress` gehört zum Wertebereich des Feldes `command` (nach [`LH-NFA-USE-004`](#lh-nfa-use-004--maschinenlesbare-ausgabe) für alle `--json`-Ausgaben; aus dem freigegebenen Befehl `u-boot egress list` abgeleitet; Bestätigung des Projektinhabers vor dem Release ausstehend). | Vereinbarung mit dem Projektinhaber |
+
+**Gelesen, bewusst nicht geändert (Entscheidung des Projektinhabers, nicht dieses CR):** ob `egress` auch in die Aufzählung „bei `template` und `config` ist `subcommand` verpflichtend“ ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)) gehört. Der Code setzt `subcommand: "list"` immer; das Lastenheft verbietet es nicht (das Feld ist optional). Der Auftrag lautet, nur den Eintrag `egress` zu ergänzen.
+
+### Lastenheft-Version: getrennt (0.16.0), nicht gebündelt mit `slice-cr-devcontainer-ollama`
+
+Bündeln hieße: beide Änderungen im selben Lastenheft-Commit mit derselben Version `0.15.0`. Entschieden ist **getrennt**, der Enum-CR trägt `0.16.0` (oder `0.15.0`, wenn er vor dem Ollama-CR landet; die Version ist die nächste freie zum Zeitpunkt des Commits):
+
+1. **Verschiedener Freigabestand.** Der Ollama-CR trägt einen ausdrücklich freigegebenen Wortlaut (Gespräch, „Zusage nur für Gemessenes“) und die Messwerte; dieser CR trägt einen abgeleiteten, nicht freigegebenen Satz mit Gate vor dem Release. In einer Version und einer Historie-Zeile stünde das Freigegebene neben dem Unbestätigten; die Klausel „Bestätigung ausstehend“ gälte für die ganze Zeile oder für eine halbe.
+2. **Verschiedener Review.** Der Review des Ollama-CR läuft über die freigegebene Fassung (Lehre der Vorgänger-Welle); mit gebündeltem Enum-Satz bräuchte dieser Review auch den Nachlauf nach der Bestätigung (Register `BEO-DOK/vertragsaenderung-nach-review`, 2×). Getrennte Commits halten den Nachlauf auf den Diff dieses CR.
+3. **Verschiedene Rücknahme.** Lehnt der Projektinhaber den Enum-Wert ab oder ändert ihn, ist das ein CR-Nachlauf nur dieser Zeile; bei einer Bündelung läge er in der Version des Ollama-Features.
+
+Die Reihenfolge der Welle ist verbindlich: erst [`slice-cr-devcontainer-ollama`](slice-cr-devcontainer-ollama.md) (`0.15.0`), dann dieser Slice (`0.16.0`). Die Versionsangabe in [`slice-cr-devcontainer-ollama`](slice-cr-devcontainer-ollama.md) (`0.15.0` bleibt dort) ist dort mitgeführt.
+
+**Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
+
+- **[`SPEC-001`](../../../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) (Zeile `enum` von `command`), [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) und `architecture.md`** — gehören [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md) (Übergabe dort eingetragen); die Spezifikation folgt dem Lastenheft und dem Code.
+- **Code und Tests** — der Code liefert `command: "egress"` bereits ([`slice-v1-cli-egress-anzeige`](../done/slice-v1-cli-egress-anzeige.md)); ein Gate für das Enum (etwa in `jsontestutil`) wäre ein neuer Sensor und ein eigener Slice, hier nicht angelegt: Das Lastenheft ändert nur die Aussage.
+- **Die Aufzählung der Pflicht von `subcommand`** ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)) — ein anderer Satz, eine eigene Entscheidung des Projektinhabers (siehe oben).
+- **Die Befehlsübersicht und ihre Bestätigung** ([`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle)) — Gate des Anzeige-CR ([`slice-cr-sandbox-egress-anzeige`](../done/slice-cr-sandbox-egress-anzeige.md) §7), nicht dieses.
+
+## 2. Definition of Done
+
+- [ ] **Lastenheft `<Version>`:** Stellen 1 und 2 (Enum-Eintrag `egress`, Versionsfeld, Historie-Zeile mit Datum, Verweis „Vereinbarung mit dem Projektinhaber“) im Wortlaut dieses Vorschlags; die Historie-Zeile trägt die Klausel „Bestätigung des Projektinhabers vor dem Release ausstehend“, solange das Gate offen ist; die Bestätigung ist ein **Gate vor dem Release** (Welle-Datei §3), nicht vor `done/` dieses Slice.
+- [ ] **Vorab-Suche und Nachzug:** Die Suche nach den Werten des Enums (`template`, `generate`, `command`) und nach `egress` im Lastenheft ist festgehalten (Treffer unter „Gefundener Stand“ gelesen); der Vermerk „Offene Vertragslücke“ in `docs/maintainer/cli-json-contract.md` §6.10 und die Aussage „listet zehn Subcommands“ in §6 derselben Datei sind nach dem Lastenheft-Commit gegen den Ist-Stand gelesen und nachgeführt.
+- [ ] `make gates` grün; `make doc-trace` ohne neue Waise.
+- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+      (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
+      Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8); der Review läuft über den **vorgelegten** Wortlaut und über jede spätere Änderung nach der Bestätigung.
+- [ ] Doku-Update: kein Handbuch, kein CHANGELOG (kein Produktverhalten; der Code liefert den Wert bereits).
+- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
+- [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
+- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo mit Wellen von der Welle-Closure geprüft.
+
+## 3. Plan (vor Code)
+
+| Datei / Komponente | Änderungs-Art | Begründung |
+|---|---|---|
+| `spec/lastenheft.md` | update | Stellen 1 und 2 ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) Enum; Versionsfeld; §16 Historie); erst nach dem Landen von [`slice-cr-devcontainer-ollama`](slice-cr-devcontainer-ollama.md) (Version) |
+| `docs/maintainer/cli-json-contract.md` | update | §6.10 Vermerk „Offene Vertragslücke“ auf den Ist-Stand setzen (Lücke geschlossen, Bestätigung ausstehend) und §6 „listet zehn Subcommands“ prüfen; je Aussage gelesen |
+| `docs/plan/planning/open/slice-cr-cli-json-command-enum.md` (diese Datei) | update | Freigabe bzw. Gate-Stand, Vorab-Suche, Closure (§7) |
+| `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation nach `harness/review.md` und `harness/verification.md` |
+| `CHANGELOG.md` | unverändert | der CR ändert kein Produktverhalten; ein Eintrag zu `egress list --json` steht bereits im Code-Slice (zu lesen beim Start) |
+
+Die Vorab-Suche (Pflicht vor jeder Vertragsänderung, Muster [`slice-cr-sandbox-egress-anzeige`](../done/slice-cr-sandbox-egress-anzeige.md)): über `spec/lastenheft.md` nach den Mustern `command`, `Enum`, `template` und `egress` (in `alpine:3` per `docker run`, nicht auf dem Host); zusätzlich nach dem Namen eines benachbarten Befehls (hier `generate`) und nach der Befehlsübersicht, nicht nur nach Stichworten der Anforderung (Lehre aus [`BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht`](../observations/BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht/observation.md)). Gelesen am 2026-10-18 (Planner, Docker-`grep` mit den Mustern `command` und `Enum`, danach die Absätze gelesen): der Wertebereich steht an genau einer Stelle ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)); [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) verweist darauf; [`LH-SA-CLI-001`](../../../../spec/lastenheft.md#lh-sa-cli-001--befehlsstruktur) nennt nur Beispiele. Der Implementer wiederholt sie vor dem Lastenheft-Commit.
+
+## 4. Trigger
+
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-cr-devcontainer-ollama`](slice-cr-devcontainer-ollama.md) liegt in `done/` (Lastenheft-Version `0.15.0` ist vergeben); [`slice-v1-cli-egress-anzeige`](../done/slice-v1-cli-egress-anzeige.md) liegt in `done/` (der Code liefert `command: "egress"`). Eine Freigabe des Wortlauts ist **keine** Start-Bedingung: Der Projektinhaber hat angeordnet, bis zum Release ohne Rückfragen weiterzumachen; der Satz geht als abgeleitet mit Gate vor dem Release ins Lastenheft.
+
+**Rückführungen — vorab benannt:**
+
+- `in-progress` → `next` (zu groß): der Wortlaut verlangt mehr als eine Anforderung, etwa weil die Pflicht von `subcommand` mitgeändert werden soll.
+- `in-progress` → `open` (blockiert): der Projektinhaber lehnt den Wert ab oder verlangt einen anderen Wortlaut vor dem Commit; das Lastenheft bleibt unverändert.
+
+## 5. Closure-Trigger
+
+DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben (§7). Der Lastenheft-Commit führt den Satz als abgeleitet mit der Klausel „Bestätigung ausstehend“; §7 vermerkt das Gate vor dem Release. Das Gate steht in den Closure-Kriterien der Welle (§3 der Welle-Datei).
+
+## 6. Risiken und offene Punkte
+
+- **Der Projektinhaber bestätigt den Enum-Wert nicht oder ändert den Wortlaut.** — **Ausgang:** weiter offen → Release-Gate (Welle-Datei §3): Eine Ablehnung ist ein CR-Nachlauf (Review des Diffs der Änderung, nicht der ganzen Datei); `command: "egress"` müsste dann angepasst oder der Befehl umbenannt werden (ein Code-Slice).
+- **Die Reihenfolge der Lastenheft-Versionen kollidiert mit [`slice-cr-devcontainer-ollama`](slice-cr-devcontainer-ollama.md).** — **Ausgang:** offen; die Version ist die nächste freie zum Zeitpunkt des Commits (erwartet `0.16.0`), nicht vorab festgeschrieben; getrennte Versionen sind entschieden (§1).
+- **Die Spezifikation führt [`SPEC-001`](../../../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) nicht nach.** — **Ausgang:** offen; der Spezifikations-Slice trägt die Übergabe (dort eingetragen) und schließt erst nach diesem CR.
+- **Ein Review läuft vor der Bestätigung und deckt die spätere Fassung nicht ab** (Register [`BEO-DOK/vertragsaenderung-nach-review`](../observations/BEO-DOK/vertragsaenderung-nach-review/observation.md)). — **Ausgang:** offen; Review über den vorgelegten Wortlaut, Nachlauf-Review über jede Änderung nach der Bestätigung.
+
+## 7. Closure-Notiz
+
+*(Wird bei der Closure gefüllt: Vorab-Suche, Stand des Gates (Bestätigung des Projektinhabers), Steering-Loop-Eintrag, Register, Folge-Slices, Risiken.)*
+
+## 8. Sub-Area-Prüfungen und Modus-Begründung
+
+**Vorgelagert — Sub-Area-Wahl prüfen:** berührt wird allein `spec/` (DOK, Greenfield) laut [`harness/conventions.md`](../../../../harness/conventions.md#modus-deklaration-pro-sub-area); `docs/maintainer/cli-json-contract.md` zieht den Vermerk nach. Die Schwelle (zwei von drei Achsen) ist laut Modus-Deklaration erfüllt.
+
+**Vorgelagert — offene Beobachtungen sichten:** Register durchgegangen. Treffer: [`BEO-DOK/vertragsaenderung-nach-review`](../observations/BEO-DOK/vertragsaenderung-nach-review/observation.md) (offen, 2 Belege: Review über die freigegebene Fassung plus Nachlauf), [`BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht`](../observations/BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht/observation.md) (offen, 1 Beleg: Vorab-Suche nach dem Namen eines benachbarten Befehls und der Befehlsübersicht), [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) (verkörpert in `AGENTS.md` §3.10: jede Aussage dieses Plans über Code ist an Datei und Symbol gelesen). Evidenz-/Diskrepanz-Risiko: niedrig.
+
+Alle berührten Sub-Areas sind Greenfield (kein Modus-Begründungsblock nötig).

@@ -1,0 +1,1 @@
+**Stand:** offen — ein Beleg (`slice-v1-cli-egress-anzeige`); 1×, unter der Schwelle von drei, kein Ausgang. Nur gelesen (Planner, Review F-11, Verifier), nicht gefahren; die Spezifikation soll den Ist-Stand tragen (Übergabe an [`slice-v2-spec-sandbox-egress-ollama`](../../../open/slice-v2-spec-sandbox-egress-ollama.md) §1); ein Code-Eingriff ist nicht geplant.

@@ -1331,9 +1331,9 @@ registry.npmjs.org  feature:claude-code, feature:node
   Script mit der alten Liste aus. Gemessen mit der Dev-Container-CLI 0.89.0:
   Stoppen und erneutes Starten (`devcontainer up`) ließ die alte Liste gelten;
   erst `devcontainer up --remove-existing-container` baute das Image neu und
-  setzte die neue Liste durch. Gemessen auf Docker 29.5.2 mit Colima 0.10.3
-  (arm64); nicht gemessen: Docker Desktop, Linux ohne VM und die Aktion Ihres
-  Editors, die dem Neuaufbau entspricht.
+  setzte die neue Liste durch. Gemessen in einem Lauf auf Docker 29.5.2 mit
+  Colima 0.10.3 (arm64); nicht gemessen: Docker Desktop, Linux ohne VM, `amd64`
+  und die Aktion Ihres Editors (etwa VS Code), die dem Neuaufbau entspricht.
 - Wer die Fähigkeit hat und das `sudo` des Base-Images nutzen kann, kann die
   Regeln aufheben. Der Verkehr verschachtelter Container und die
   iptables-Regeln eines verschachtelten Docker-Daemons umgehen die Beschränkung;

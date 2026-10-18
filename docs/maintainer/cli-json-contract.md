@@ -1207,12 +1207,12 @@ Datum, keine Diagnose:
   ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) und das Schema der Vorschau-Ausgabe,
   [SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json))
   nennt `egress` nicht; `command: "egress"` liegt damit außerhalb des Vertrags, bis das Lastenheft
-  geändert ist. Die Lastenheft-Änderung braucht die Freigabe des Projektinhabers; ein Slice dafür
-  existiert nicht (gelesen: der Bestand von `docs/plan/planning/open/`, `next/` und
-  `in-progress/`; keiner nennt das Enum). Der
-  Spezifikations-Slice [`slice-v2-spec-sandbox-egress-ollama`](../plan/planning/open/slice-v2-spec-sandbox-egress-ollama.md)
+  geändert ist. Die Lastenheft-Änderung braucht die Bestätigung des Projektinhabers vor dem Release;
+  den Wortlaut trägt der CR-Slice
+  [`slice-cr-cli-json-command-enum`](../plan/planning/open/slice-cr-cli-json-command-enum.md).
+  Der Spezifikations-Slice [`slice-v2-spec-sandbox-egress-ollama`](../plan/planning/open/slice-v2-spec-sandbox-egress-ollama.md)
   ändert das Lastenheft nicht und trägt das Enum von [SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) als Übergabe aus dem Code-Slice
-  der Egress-Anzeige. `jsontestutil` prüft das Enum nicht (`checkSubcommand` verlangt
+  der Egress-Anzeige, nach dem CR. `jsontestutil` prüft das Enum nicht (`checkSubcommand` verlangt
   `subcommand` nur für `template` und `config`).
 
 ---

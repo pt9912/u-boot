@@ -1,0 +1,1 @@
+**Stand:** offen — ein Beleg (`slice-v1-cli-egress-anzeige`); 1×, unter der Schwelle von drei, kein Ausgang. Gelesen im Bericht des Implementers, nicht selbst gefahren; ob die Stelle im Bestand behoben wurde, ist nicht geprüft.

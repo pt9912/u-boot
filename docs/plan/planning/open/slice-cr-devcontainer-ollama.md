@@ -24,7 +24,7 @@ Anlass: Projektinhaber, 2026-10-18 („Lastenheft-CR: Katalog erweitert um `olla
 
 ## 1. Ziel und Abgrenzung
 
-**Ziel:** Die Zusage „Ollama läuft als Katalog-Feature `ollama` im Devcontainer, CPU-only, Modelle im Container“ steht im Lastenheft (Änderung auf die **nächste freie Minor-Version**; `0.15.0`, wenn der Anzeige-CR `0.14.0` trägt; ein Neu-Laden-CR entsteht nach R0 nicht), **mit den Messwerten des Mess-Slice** und in der vom Projektinhaber freigegebenen Fassung. Der Code-Slice beginnt erst danach.
+**Ziel:** Die Zusage „Ollama läuft als Katalog-Feature `ollama` im Devcontainer, CPU-only, Modelle im Container“ steht im Lastenheft (Änderung auf die **nächste freie Minor-Version**; `0.15.0`, wenn der Anzeige-CR `0.14.0` trägt; ein Neu-Laden-CR entsteht nach R0 nicht; der Enum-CR [`slice-cr-cli-json-command-enum`](slice-cr-cli-json-command-enum.md) folgt getrennt mit `0.16.0`, die Begründung steht dort §1), **mit den Messwerten des Mess-Slice** und in der vom Projektinhaber freigegebenen Fassung. Der Code-Slice beginnt erst danach.
 
 **Warum eine Lastenheft-Änderung:** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) führt Beispiele auf („Git, Docker CLI, Node.js, Java, SDKMAN, PostgreSQL Client, Kubernetes Tools“), keine abschließende Liste und keine Katalogschlüssel; `python`, `homebrew` und `sdkman` kamen ohne Lastenheft-Änderung (gelesen: [`slice-cr-devcontainer-agent-features-sandbox`](../done/slice-cr-devcontainer-agent-features-sandbox.md) §1, Absatz „Katalog-Schlüssel allein sind keine Zusage“). Für `ollama` verlangt der Projektinhaber ausdrücklich eine Zusage „nur für Gemessenes“; das ist eine Aussage über Produktverhalten (Installation, CPU-only, Modellspeicher) und gehört deshalb ins Lastenheft.
 
@@ -76,7 +76,7 @@ Eine Änderung dieser Stelle zieht [`LH-FA-CLI-005`](../../../../spec/lastenheft
 
 Alt: `| Version          | 0.13.0 |` (bzw. der Stand nach dem Landen der Vorgänger-CR in dieser Welle)
 
-Neu: die nächste freie Minor-Version (Lastenheft-Commit-Reihenfolge entscheidet; nach dem Anzeige-CR `0.15.0`).
+Neu: die nächste freie Minor-Version (Lastenheft-Commit-Reihenfolge entscheidet; nach dem Anzeige-CR `0.15.0`). Der Enum-CR [`slice-cr-cli-json-command-enum`](slice-cr-cli-json-command-enum.md) landet danach mit `0.16.0` und wird mit diesem CR **nicht** im selben Lastenheft-Commit gebündelt (Freigabestand, Review und Rücknahme verschieden, Begründung dort §1).
 
 Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 
@@ -133,7 +133,7 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 
 - **Ein Satz im Lastenheft stützt sich auf einen Messwert, den der Mess-Slice nicht liefert.** — **Ausgang:** offen bis zum Start; der Satz entfällt (keine Aussage ohne Messwert).
 - **Die Zusage „Modelle überstehen den Neubau“ ist ungemessen.** — **Ausgang:** offen bis O5 des Mess-Slice; der Satz bleibt nur mit Messwert.
-- **Die Reihenfolge der Lastenheft-Versionen mit dem Anzeige-CR kollidiert.** — **Ausgang:** offen; die Version ist die nächste freie zum Zeitpunkt des Commits, nicht vorab festgeschrieben.
+- **Die Reihenfolge der Lastenheft-Versionen mit dem Anzeige-CR und dem Enum-CR kollidiert.** — **Ausgang:** offen; die Version ist die nächste freie zum Zeitpunkt des Commits, nicht vorab festgeschrieben; erwartet `0.15.0` hier und `0.16.0` im Enum-CR ([`slice-cr-cli-json-command-enum`](slice-cr-cli-json-command-enum.md), getrennt entschieden).
 - **Ein Review läuft vor der Freigabe** (siehe DoD). — **Ausgang:** offen; Review über die freigegebene Fassung.
 
 ## 7. Closure-Notiz
