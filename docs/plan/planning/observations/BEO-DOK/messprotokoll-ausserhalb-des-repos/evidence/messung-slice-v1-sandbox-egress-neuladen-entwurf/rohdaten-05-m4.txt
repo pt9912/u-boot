@@ -1,0 +1,68 @@
+######## 0: Projekt erzeugen (Standardliste) und Container mit der Dev-Container-CLI starten
+config: devcontainer.sandbox.egress.enabled (unset) → true.
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+[2026-10-18T18:20:33.483Z] Running the postStartCommand from devcontainer.json...
+
+{"outcome":"success","containerId":"83790fb46dcafc7a80df5547bb5c1ac4874bc1fd8b2f6e2fe013c5f2f755c2d1","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/egressprobe","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRed
+-- Zustand nach dem ersten Start
+    Container 83790fb46dca, Running=true, Image sha256:8c6bfba3dc84, erzeugt 2026-10-18T18:20:33.296234879Z
+    gebackene Liste (hosts= in /usr/local/bin/u-boot-egress-init): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+    nftset-Namen der laufenden dnsmasq-Konfiguration: api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org 
+    Statusdatei: u-boot-status 1 result=ok at=2026-10-18T18:20:33Z 
+    https://example.org (neuer Eintrag): http=000
+    https://deb.debian.org (Standardeintrag): http=200
+    Zombie-Prozesse: 0
+    nft-Tabellen: [table ip u_boot_egress table ip6 u_boot_egress6 ]
+######## 1: Liste aendern (example.org dazu) und neu erzeugen
+config: devcontainer.sandbox.egress.allow (unset) → example.org.
+Updated devcontainer managed block (.devcontainer/egress-init.sh).
+    Host-Datei .devcontainer/egress-init.sh: api.github.com codeload.github.com deb.debian.org example.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+-- Zustand des Containers (unveraendert, er wurde nicht angefasst)
+    Container 83790fb46dca, Running=true, Image sha256:8c6bfba3dc84, erzeugt 2026-10-18T18:20:33.296234879Z
+    gebackene Liste (hosts= in /usr/local/bin/u-boot-egress-init): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+    nftset-Namen der laufenden dnsmasq-Konfiguration: api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org 
+    Statusdatei: u-boot-status 1 result=ok at=2026-10-18T18:20:33Z 
+    https://example.org (neuer Eintrag): http=000
+    https://deb.debian.org (Standardeintrag): http=200
+    Zombie-Prozesse: 0
+    nft-Tabellen: [table ip u_boot_egress table ip6 u_boot_egress6 ]
+######## 2: Container stoppen und mit der Dev-Container-CLI wieder starten (kein Neubau, der Container bleibt)
+[2026-10-18T18:20:39.419Z] Running the postStartCommand from devcontainer.json...
+
+{"outcome":"success","containerId":"83790fb46dcafc7a80df5547bb5c1ac4874bc1fd8b2f6e2fe013c5f2f755c2d1","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/egressprobe","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRed
+-- Zustand nach Stop und up
+    Container 83790fb46dca, Running=true, Image sha256:8c6bfba3dc84, erzeugt 2026-10-18T18:20:33.296234879Z
+    gebackene Liste (hosts= in /usr/local/bin/u-boot-egress-init): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+    nftset-Namen der laufenden dnsmasq-Konfiguration: api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org 
+    Statusdatei: u-boot-status 1 result=ok at=2026-10-18T18:20:39Z 
+    https://example.org (neuer Eintrag): http=000
+    https://deb.debian.org (Standardeintrag): http=200
+    Zombie-Prozesse: 0
+    nft-Tabellen: [table ip u_boot_egress table ip6 u_boot_egress6 ]
+######## 3: devcontainer up gegen den laufenden Container (Dockerfile-Kontext hat sich geaendert)
+[2026-10-18T18:20:40.750Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 6.8.0-117-generic arm64.
+{"outcome":"success","containerId":"83790fb46dcafc7a80df5547bb5c1ac4874bc1fd8b2f6e2fe013c5f2f755c2d1","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/egressprobe","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRed
+-- Zustand nach up
+    Container 83790fb46dca, Running=true, Image sha256:8c6bfba3dc84, erzeugt 2026-10-18T18:20:33.296234879Z
+    gebackene Liste (hosts= in /usr/local/bin/u-boot-egress-init): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+    nftset-Namen der laufenden dnsmasq-Konfiguration: api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org 
+    Statusdatei: u-boot-status 1 result=ok at=2026-10-18T18:20:39Z 
+    https://example.org (neuer Eintrag): http=000
+    https://deb.debian.org (Standardeintrag): http=200
+    Zombie-Prozesse: 0
+    nft-Tabellen: [table ip u_boot_egress table ip6 u_boot_egress6 ]
+######## 4: devcontainer up --remove-existing-container (Container neu angelegt; baut die CLI das Image neu?)
+[2026-10-18T18:20:44.635Z] Running the postStartCommand from devcontainer.json...
+
+{"outcome":"success","containerId":"5fbdc8f6cc342c41390b95e3fd89d95688b4935b89d880ad87380fd4b6ccf33a","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/egressprobe","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRed
+-- Zustand nach up --remove-existing-container
+    Container 5fbdc8f6cc34, Running=true, Image sha256:ab9d55a6b8f9, erzeugt 2026-10-18T18:20:44.43471276Z
+    gebackene Liste (hosts= in /usr/local/bin/u-boot-egress-init): api.github.com codeload.github.com deb.debian.org example.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+    nftset-Namen der laufenden dnsmasq-Konfiguration: api.github.com codeload.github.com deb.debian.org example.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org 
+    Statusdatei: u-boot-status 1 result=ok at=2026-10-18T18:20:44Z 
+    https://example.org (neuer Eintrag): http=200
+    https://deb.debian.org (Standardeintrag): http=200
+    Zombie-Prozesse: 0
+    nft-Tabellen: [table ip u_boot_egress table ip6 u_boot_egress6 ]
+######## Aufraeumen
+fertig

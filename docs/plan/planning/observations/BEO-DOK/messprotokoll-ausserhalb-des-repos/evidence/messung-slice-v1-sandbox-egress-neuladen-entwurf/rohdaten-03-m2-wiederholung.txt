@@ -1,0 +1,188 @@
+######## A: erneuter Lauf des gebackenen Scripts mit anderer Liste (Fenster ohne Filter, DNS)
+postStart exit=0
+Liste L1 (gebacken): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+Liste L2: api.github.com example.org
+Lauf: exit=0 start=1792347435.326722638 ende=1792347435.384468550 dauer_s=0.058
+Ausgabe des Laufs:
+Sonde Egress (Zustandswechsel; offen = kein Filter-Regelwerk):
+t0 epoch=1792347433.331 dauer=6s dns-name=api.github.com modus=egress
+1792347433.331 egress gesperrt (Operation not permitted)
+1792347435.330 egress offen
+1792347435.360 egress gesperrt (Operation not permitted)
+1792347439.331 ende iterationen=1088830
+Sonde DNS (Zustandswechsel; lokaler dnsmasq):
+t0 epoch=1792347433.331 dauer=6s dns-name=api.github.com modus=dns
+1792347433.334 dns antwort rcode=0
+1792347435.349 dns timeout
+1792347435.349 dns leseFehler (Connection refused)
+1792347435.360 dns sendfehler (Operation not permitted)
+1792347435.362 dns leseFehler (Connection refused)
+1792347435.383 dns antwort rcode=0
+1792347439.332 ende iterationen=10316
+Zombies im Container danach:
+    Zs   root          33 [dnsmasq] <defunct>
+    Z    nobody        34 [dnsmasq] <defunct>
+    Zs   root          69 [dnsmasq] <defunct>
+
+######## A: erneuter Lauf des gebackenen Scripts mit anderer Liste (Fenster ohne Filter, DNS)
+postStart exit=0
+Liste L1 (gebacken): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+Liste L2: api.github.com example.org
+Lauf: exit=0 start=1792347443.083884244 ende=1792347443.133948600 dauer_s=0.050
+Ausgabe des Laufs:
+Sonde Egress (Zustandswechsel; offen = kein Filter-Regelwerk):
+t0 epoch=1792347441.089 dauer=6s dns-name=api.github.com modus=egress
+1792347441.089 egress gesperrt (Operation not permitted)
+1792347443.088 egress offen
+1792347443.112 egress gesperrt (Operation not permitted)
+1792347447.089 ende iterationen=1121804
+Sonde DNS (Zustandswechsel; lokaler dnsmasq):
+t0 epoch=1792347441.089 dauer=6s dns-name=api.github.com modus=dns
+1792347441.091 dns antwort rcode=0
+1792347443.106 dns timeout
+1792347443.106 dns leseFehler (Connection refused)
+1792347443.112 dns sendfehler (Operation not permitted)
+1792347443.115 dns leseFehler (Connection refused)
+1792347443.134 dns antwort rcode=0
+1792347447.089 ende iterationen=10739
+Zombies im Container danach:
+    Zs   root          33 [dnsmasq] <defunct>
+    Z    nobody        34 [dnsmasq] <defunct>
+    Zs   root          69 [dnsmasq] <defunct>
+
+######## A: erneuter Lauf des gebackenen Scripts mit anderer Liste (Fenster ohne Filter, DNS)
+postStart exit=0
+Liste L1 (gebacken): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+Liste L2: api.github.com example.org
+Lauf: exit=0 start=1792347450.335939234 ende=1792347450.414254750 dauer_s=0.078
+Ausgabe des Laufs:
+Sonde Egress (Zustandswechsel; offen = kein Filter-Regelwerk):
+t0 epoch=1792347448.340 dauer=6s dns-name=api.github.com modus=egress
+1792347448.340 egress gesperrt (Operation not permitted)
+1792347450.340 egress offen
+1792347450.385 egress gesperrt (Operation not permitted)
+1792347454.340 ende iterationen=945133
+Sonde DNS (Zustandswechsel; lokaler dnsmasq):
+t0 epoch=1792347448.340 dauer=6s dns-name=api.github.com modus=dns
+1792347448.342 dns antwort rcode=0
+1792347450.359 dns timeout
+1792347450.359 dns leseFehler (Connection refused)
+1792347450.385 dns sendfehler (Operation not permitted)
+1792347450.388 dns leseFehler (Connection refused)
+1792347450.414 dns antwort rcode=0
+1792347454.340 ende iterationen=8920
+Zombies im Container danach:
+    Zs   root          33 [dnsmasq] <defunct>
+    Z    nobody        34 [dnsmasq] <defunct>
+    Zs   root          69 [dnsmasq] <defunct>
+
+######## A: erneuter Lauf des gebackenen Scripts mit anderer Liste (Fenster ohne Filter, DNS)
+postStart exit=0
+Liste L1 (gebacken): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+Liste L2: api.github.com example.org
+Lauf: exit=0 start=1792347458.003522585 ende=1792347458.072113655 dauer_s=0.069
+Ausgabe des Laufs:
+Sonde Egress (Zustandswechsel; offen = kein Filter-Regelwerk):
+t0 epoch=1792347456.008 dauer=6s dns-name=api.github.com modus=egress
+1792347456.008 egress gesperrt (Operation not permitted)
+1792347458.010 egress offen
+1792347458.044 egress gesperrt (Operation not permitted)
+1792347462.008 ende iterationen=1000172
+Sonde DNS (Zustandswechsel; lokaler dnsmasq):
+t0 epoch=1792347456.008 dauer=6s dns-name=api.github.com modus=dns
+1792347456.010 dns antwort rcode=0
+1792347458.028 dns timeout
+1792347458.028 dns leseFehler (Connection refused)
+1792347458.044 dns sendfehler (Operation not permitted)
+1792347458.046 dns leseFehler (Connection refused)
+1792347458.070 dns antwort rcode=0
+1792347462.008 ende iterationen=9737
+Zombies im Container danach:
+    Zs   root          33 [dnsmasq] <defunct>
+    Z    nobody        34 [dnsmasq] <defunct>
+    Zs   root          69 [dnsmasq] <defunct>
+
+######## E: atomare Variante (reload-atomar.sh): ein nft-Wechsel, dnsmasq erst nach dem Ende des alten
+postStart exit=0
+Liste L1 (gebacken): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+Liste L2: api.github.com example.org
+Lauf: exit=0 start=1792347466.145516023 ende=1792347466.169030981 dauer_s=0.024
+Ausgabe des Laufs:
+Sonde Egress (Zustandswechsel; offen = kein Filter-Regelwerk):
+t0 epoch=1792347464.151 dauer=6s dns-name=api.github.com modus=egress
+1792347464.151 egress gesperrt (Operation not permitted)
+1792347470.151 ende iterationen=902982
+Sonde DNS (Zustandswechsel; lokaler dnsmasq):
+t0 epoch=1792347464.151 dauer=6s dns-name=api.github.com modus=dns
+1792347464.154 dns antwort rcode=0
+1792347466.167 dns timeout
+1792347466.169 dns antwort rcode=0
+1792347470.151 ende iterationen=6545
+Zombies im Container danach:
+    Zs   root          33 [dnsmasq] <defunct>
+    Z    nobody        34 [dnsmasq] <defunct>
+    Zs   root          60 [dnsmasq] <defunct>
+
+######## E: atomare Variante (reload-atomar.sh): ein nft-Wechsel, dnsmasq erst nach dem Ende des alten
+postStart exit=0
+Liste L1 (gebacken): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+Liste L2: api.github.com example.org
+Lauf: exit=0 start=1792347474.366499444 ende=1792347474.385459911 dauer_s=0.019
+Ausgabe des Laufs:
+Sonde Egress (Zustandswechsel; offen = kein Filter-Regelwerk):
+t0 epoch=1792347472.375 dauer=6s dns-name=api.github.com modus=egress
+1792347472.375 egress gesperrt (Operation not permitted)
+1792347478.375 ende iterationen=1034097
+Sonde DNS (Zustandswechsel; lokaler dnsmasq):
+t0 epoch=1792347472.375 dauer=6s dns-name=api.github.com modus=dns
+1792347472.377 dns antwort rcode=0
+1792347474.389 dns timeout
+1792347474.390 dns antwort rcode=0
+1792347478.376 ende iterationen=8077
+Zombies im Container danach:
+    Zs   root          33 [dnsmasq] <defunct>
+    Z    nobody        34 [dnsmasq] <defunct>
+    Zs   root          60 [dnsmasq] <defunct>
+
+######## E: atomare Variante (reload-atomar.sh): ein nft-Wechsel, dnsmasq erst nach dem Ende des alten
+postStart exit=0
+Liste L1 (gebacken): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+Liste L2: api.github.com example.org
+Lauf: exit=0 start=1792347481.909738941 ende=1792347481.930024334 dauer_s=0.020
+Ausgabe des Laufs:
+Sonde Egress (Zustandswechsel; offen = kein Filter-Regelwerk):
+t0 epoch=1792347479.912 dauer=6s dns-name=api.github.com modus=egress
+1792347479.912 egress gesperrt (Operation not permitted)
+1792347485.912 ende iterationen=1017451
+Sonde DNS (Zustandswechsel; lokaler dnsmasq):
+t0 epoch=1792347479.912 dauer=6s dns-name=api.github.com modus=dns
+1792347479.914 dns antwort rcode=0
+1792347481.932 dns timeout
+1792347481.934 dns antwort rcode=0
+1792347485.913 ende iterationen=7477
+Zombies im Container danach:
+    Zs   root          33 [dnsmasq] <defunct>
+    Z    nobody        34 [dnsmasq] <defunct>
+    Zs   root          60 [dnsmasq] <defunct>
+
+######## E: atomare Variante (reload-atomar.sh): ein nft-Wechsel, dnsmasq erst nach dem Ende des alten
+postStart exit=0
+Liste L1 (gebacken): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+Liste L2: api.github.com example.org
+Lauf: exit=0 start=1792347490.344804689 ende=1792347490.360507257 dauer_s=0.016
+Ausgabe des Laufs:
+Sonde Egress (Zustandswechsel; offen = kein Filter-Regelwerk):
+t0 epoch=1792347488.350 dauer=6s dns-name=api.github.com modus=egress
+1792347488.350 egress gesperrt (Operation not permitted)
+1792347494.350 ende iterationen=1078595
+Sonde DNS (Zustandswechsel; lokaler dnsmasq):
+t0 epoch=1792347488.350 dauer=6s dns-name=api.github.com modus=dns
+1792347488.352 dns antwort rcode=0
+1792347490.369 dns timeout
+1792347490.371 dns antwort rcode=0
+1792347494.350 ende iterationen=7969
+Zombies im Container danach:
+    Zs   root          33 [dnsmasq] <defunct>
+    Z    nobody        34 [dnsmasq] <defunct>
+    Zs   root          60 [dnsmasq] <defunct>
+

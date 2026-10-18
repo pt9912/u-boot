@@ -1,0 +1,111 @@
+######## A: erneuter Lauf des gebackenen Scripts mit anderer Liste (Fenster ohne Filter, DNS)
+postStart exit=0
+Liste L1 (gebacken): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+Liste L2: api.github.com example.org
+Lauf: exit=0 start=1792347389.706226358 ende=1792347389.757635482 dauer_s=0.051
+Ausgabe des Laufs:
+Sonde Egress (Zustandswechsel; offen = kein Filter-Regelwerk):
+t0 epoch=1792347387.711 dauer=6s dns-name=api.github.com modus=egress
+1792347387.711 egress gesperrt (Operation not permitted)
+1792347389.710 egress offen
+1792347389.740 egress gesperrt (Operation not permitted)
+1792347393.711 ende iterationen=1094648
+Sonde DNS (Zustandswechsel; lokaler dnsmasq):
+t0 epoch=1792347387.711 dauer=6s dns-name=api.github.com modus=dns
+1792347387.731 dns timeout
+1792347387.735 dns antwort rcode=0
+1792347389.733 dns timeout
+1792347389.733 dns leseFehler (Connection refused)
+1792347389.760 dns timeout
+1792347389.763 dns antwort rcode=0
+1792347393.712 ende iterationen=8657
+Zombies im Container danach:
+    Zs   root          33 [dnsmasq] <defunct>
+    Z    nobody        34 [dnsmasq] <defunct>
+    Zs   root          69 [dnsmasq] <defunct>
+
+######## E: atomare Variante (reload-atomar.sh): ein nft-Wechsel, dnsmasq erst nach dem Ende des alten
+postStart exit=0
+Liste L1 (gebacken): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+Liste L2: api.github.com example.org
+Lauf: exit=0 start=1792347397.646470091 ende=1792347397.669122797 dauer_s=0.023
+Ausgabe des Laufs:
+Sonde Egress (Zustandswechsel; offen = kein Filter-Regelwerk):
+t0 epoch=1792347395.651 dauer=6s dns-name=api.github.com modus=egress
+1792347395.651 egress gesperrt (Operation not permitted)
+1792347401.651 ende iterationen=1132625
+Sonde DNS (Zustandswechsel; lokaler dnsmasq):
+t0 epoch=1792347395.651 dauer=6s dns-name=api.github.com modus=dns
+1792347395.654 dns antwort rcode=0
+1792347397.668 dns timeout
+1792347397.670 dns antwort rcode=0
+1792347401.652 ende iterationen=9291
+Zombies im Container danach:
+    Zs   root          33 [dnsmasq] <defunct>
+    Z    nobody        34 [dnsmasq] <defunct>
+    Zs   root          60 [dnsmasq] <defunct>
+
+######## B: 50 erneute Laeufe des gebackenen Scripts hintereinander (Startrennen)
+postStart exit=0
+Liste L1 (gebacken): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+Liste L2: api.github.com example.org
+Zusammenfassung: 50 Laeufe, 0 mit auffaelligem Zustand danach, 0 mit Fehlermeldung in der Ausgabe
+
+######## F: 50 Laeufe der atomaren Variante hintereinander
+postStart exit=0
+Liste L1 (gebacken): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+Liste L2: api.github.com example.org
+Zusammenfassung: 50 Laeufe, 0 mit auffaelligem Zustand danach, 0 mit Fehlermeldung in der Ausgabe
+
+######## G: Zeit vom SIGTERM bis zum Ende des alten dnsmasq (20 Messungen, sortiert)
+postStart exit=0
+Liste L1 (gebacken): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+Liste L2: api.github.com example.org
+lauf 3: dnsmasq 126 beendet nach 1932 us
+lauf 11: dnsmasq 350 beendet nach 2030 us
+lauf 12: dnsmasq 378 beendet nach 2032 us
+lauf 4: dnsmasq 154 beendet nach 2037 us
+lauf 8: dnsmasq 266 beendet nach 2045 us
+lauf 9: dnsmasq 294 beendet nach 2049 us
+lauf 7: dnsmasq 238 beendet nach 2050 us
+lauf 13: dnsmasq 406 beendet nach 2076 us
+lauf 2: dnsmasq 98 beendet nach 2144 us
+lauf 14: dnsmasq 434 beendet nach 2146 us
+lauf 10: dnsmasq 322 beendet nach 2176 us
+lauf 6: dnsmasq 210 beendet nach 2196 us
+lauf 18: dnsmasq 546 beendet nach 2233 us
+lauf 17: dnsmasq 518 beendet nach 2318 us
+lauf 19: dnsmasq 574 beendet nach 2337 us
+lauf 1: dnsmasq 70 beendet nach 2394 us
+lauf 16: dnsmasq 490 beendet nach 2609 us
+lauf 15: dnsmasq 462 beendet nach 2693 us
+lauf 20: dnsmasq 602 beendet nach 3062 us
+lauf 5: dnsmasq 182 beendet nach 3419 us
+20 Laeufe
+
+######## C: laufende Verbindung ueber einen Neu-Lauf, dessen Liste den Host nicht mehr enthaelt
+postStart exit=0
+Liste L1 (gebacken): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+Liste L2: api.github.com example.org
+vor dem Neu-Lauf:   Bytes=1302528 curl-lebt=ja
+Neu-Lauf mit L2 (ohne deb.debian.org) exit=0
+nach dem Neu-Lauf +1s: Bytes=1646592 curl-lebt=ja
+nach dem Neu-Lauf +3s: Bytes=2220032 curl-lebt=ja
+nach dem Neu-Lauf +6s: Bytes=2777088 curl-lebt=ja
+nach dem Neu-Lauf +9s: Bytes=3465216 curl-lebt=ja
+neue Verbindung zum selben Host:
+curl: (6) Could not resolve host: deb.debian.org
+    http=000
+
+######## D: Set nach dem Neu-Lauf; Verbindung zu einer zuvor aufgeloesten Adresse ohne neue Aufloesung
+postStart exit=0
+Liste L1 (gebacken): api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+Liste L2: api.github.com example.org
+aufgeloest: api.github.com -> 140.82.121.6
+Set vor dem Neu-Lauf: table ip u_boot_egress {set allowed {type ipv4_addrtimeout 1helements = { 140.82.121.6 expires 59m59s997ms }}}
+vor Neu-Lauf, ohne DNS: http=200
+Set nach dem Neu-Lauf: table ip u_boot_egress {set allowed {type ipv4_addrtimeout 1h}}
+nach Neu-Lauf, ohne DNS: http=000
+nach Neu-Lauf, mit DNS: http=200
+danach erneut ohne DNS (Adresse nun im Set): http=200
+

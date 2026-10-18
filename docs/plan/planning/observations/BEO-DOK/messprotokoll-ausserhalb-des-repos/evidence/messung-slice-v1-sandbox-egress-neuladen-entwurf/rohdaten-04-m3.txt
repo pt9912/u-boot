@@ -1,0 +1,45 @@
+postStart exit=0
+######## 1: docker cp einer Liste in ein Root-eigenes Verzeichnis (/etc)
+    Host-Datei: -rw-r--r--@ dburkard
+docker cp rc=0
+    -rw-r--r-- 501 dialout /etc/u-boot-egress.allow
+    vscode schreibt in /etc/u-boot-egress.allow: nein
+    vscode loescht /etc/u-boot-egress.allow: nein
+    Datei noch da
+######## 2: docker cp einer Liste in ein Verzeichnis des Benutzers (/var/lib/u-boot/status, gehoert vscode)
+docker cp rc=0
+    -rw-r--r-- 501 dialout /var/lib/u-boot/status/egress.allow
+    vscode schreibt die Datei: nein
+    vscode loescht und legt neu an: rc=0
+    -rw-r--r-- vscode vscode /var/lib/u-boot/status/egress.allow
+######## 3: Reload per docker exec -u root mit dem gebackenen Script (Liste unveraendert)
+example.org vorher: status: REFUSED
+docker exec -u root: exit=0
+api.github.com nachher: status: NOERROR
+######## 4: Host ersetzt das gebackene Script durch eine Kopie mit anderer Liste, danach der postStartCommand-Aufruf als vscode
+docker cp ueber das gebackene Script rc=0
+    -rw-r--r-- 501 dialout /usr/local/bin/u-boot-egress-init
+example.org vor dem Aufruf: status: REFUSED
+postStart exit=0
+example.org nach dem Aufruf: status: NOERROR
+######## 5: gestoppter Container
+    exec: Error response from daemon: container c05238e01612d924f40a4c82a68c1faf57e580c7d2ea61539a8a6cbbb922498b is not running
+docker cp in den gestoppten Container: rc=0
+docker cp aus dem gestoppten Container: rc=0
+    Running=false
+######## 6: nach docker start (ohne postStartCommand): Zustand der Beschraenkung
+    nft-Tabellen: []
+    resolv.conf: nameserver 192.168.5.1 
+    dnsmasq: []
+    example.com ohne Beschraenkung: http=200
+postStart exit=0
+    example.com nach postStart: http=000
+######## 7: Eigentuemer der kopierten Datei: docker cp -a und Tar-Strom mit festem Eigentuemer (Tar im Wegwerf-Container erzeugt)
+docker cp -a rc=0
+    -rw-r--r-- vscode vscode /etc/u-boot-egress-a.allow
+Tar-Strom mit owner=0: docker cp rc=0
+    -rw-r--r-- root root /etc/u-boot-egress-t0.allow
+    vscode schreibt die Datei (owner=0): nein
+Tar-Strom mit owner=1000: docker cp rc=0
+    -rw-r--r-- vscode vscode /etc/u-boot-egress-t1000.allow
+    vscode schreibt die Datei (owner=1000): ja

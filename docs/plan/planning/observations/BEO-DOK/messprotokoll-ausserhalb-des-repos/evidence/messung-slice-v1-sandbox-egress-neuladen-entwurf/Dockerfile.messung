@@ -1,0 +1,9 @@
+# Messwerkzeug-Image: das von `u-boot generate devcontainer` erzeugte Sandbox-Image (Egress aktiv, Tag
+# u-boot-messung-egress-neuladen, gebaut aus .devcontainer/Dockerfile des Probe-Projekts) plus `dnsutils`
+# (dig). Das Produkt-Image hat kein `dig`; nur die Messung braucht es. Der Bau läuft ohne Egress-Restriktion.
+FROM u-boot-messung-egress-neuladen
+USER root
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends dnsutils \
+ && rm -rf /var/lib/apt/lists/*
+USER vscode

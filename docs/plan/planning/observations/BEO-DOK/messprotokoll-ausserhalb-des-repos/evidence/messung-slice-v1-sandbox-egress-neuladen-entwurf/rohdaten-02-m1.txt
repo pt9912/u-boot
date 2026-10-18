@@ -1,0 +1,72 @@
+######## postStartCommand (als vscode)
+postStart exit=0
+######## Phase ohne sudo (als vscode)
+id: uid=1000(vscode) gid=1000(vscode) groups=1000(vscode)
+CapPrm:	0000000000000000
+CapEff:	0000000000000000
+CapBnd:	00000000a80435fb
+sudo -n true rc=0 (0 = passwortloses sudo)
+User vscode may run the following commands on 31d72a2982c2:
+    (root) NOPASSWD: ALL
+--- nft ohne sudo
+Operation not permitted (you must be root)
+netlink: Error: cache initialization failed: Operation not permitted
+--- Schreibversuch (Anhaengen ohne Inhalt) auf die Dateien der Beschraenkung
+-rw-r--r-- root root /usr/local/bin/u-boot-egress-init
+    bash: line 22: /usr/local/bin/u-boot-egress-init: Permission denied
+    /usr/local/bin/u-boot-egress-init: NICHT schreibbar
+-rw-r--r-- root root /etc/u-boot-egress-dnsmasq.conf
+    bash: line 22: /etc/u-boot-egress-dnsmasq.conf: Permission denied
+    /etc/u-boot-egress-dnsmasq.conf: NICHT schreibbar
+-rw-r--r-- root root /etc/resolv.conf
+    bash: line 22: /etc/resolv.conf: Permission denied
+    /etc/resolv.conf: NICHT schreibbar
+-rw-r--r-- root root /etc/resolv.conf.u-boot-orig
+    bash: line 22: /etc/resolv.conf.u-boot-orig: Permission denied
+    /etc/resolv.conf.u-boot-orig: NICHT schreibbar
+-rw-r--r-- nobody nogroup /run/u-boot-egress-dnsmasq.pid
+    bash: line 22: /run/u-boot-egress-dnsmasq.pid: Permission denied
+    /run/u-boot-egress-dnsmasq.pid: NICHT schreibbar
+--- dnsmasq: Prozess und Signal
+USER         PID COMMAND
+root          33 [dnsmasq] <defunct>
+nobody        34 dnsmasq --conf-file=/etc/u-boot-egress-dnsmasq.conf
+    PID laut Pid-Datei: 34
+    bash: line 28: kill: (34) - Operation not permitted
+    dnsmasq 34 lebt nach SIGTERM
+root          33 [dnsmasq] <defunct>
+nobody        34 dnsmasq --conf-file=/etc/u-boot-egress-dnsmasq.conf
+--- Statusdatei
+drwxr-xr-x vscode vscode /var/lib/u-boot/status
+-rw-r--r-- root root egress
+    status/egress: NICHT schreibbar
+--- Statusdatei ersetzen (das Verzeichnis gehoert vscode: loeschen und neu anlegen)
+ersetzen rc=0
+-rw-r--r-- vscode vscode egress
+u-boot-status 1
+result=ok
+at=2000-01-01T00:00:00Z
+--- Verkehr unter der Beschraenkung (ohne sudo)
+erlaubt api.github.com -> 200
+gesperrt example.com (Name) -> curl: (6) Could not resolve host: example.com 000
+gesperrt 1.1.1.1 (IP-Literal) -> curl: (28) Connection timed out after 5008 milliseconds 000
+--- DNS direkt an den Upstream-Resolver 192.168.5.1 (ohne sudo)
+    A 104.20.23.154
+    A 172.66.147.243
+Verbindung zur aufgeloesten Adresse 104.20.23.154 -> curl: (28) Connection timed out after 5006 milliseconds 000
+--- nft nach den Versuchen (ohne sudo nicht lesbar; mit sudo):
+table ip u_boot_egress
+table ip6 u_boot_egress6
+######## Phase mit sudo (als vscode)
+sudo -n true rc=0
+--- nft mit sudo
+table ip u_boot_egress
+table ip6 u_boot_egress6
+--- Tabellen entfernen
+delete ip rc=0
+delete ip6 rc=0
+gesperrt 1.1.1.1 (IP-Literal), Tabellen weg -> 301
+gesperrt example.com (Name), Tabellen weg, resolv.conf unveraendert -> curl: (6) Could not resolve host: example.com 000
+--- resolv.conf auf die Original-Datei zuruecksetzen
+cp rc=0
+gesperrt example.com (Name), Tabellen weg, resolv.conf zurueck -> 200
