@@ -17,8 +17,9 @@ const apparmorUsernsSysctl = "/proc/sys/kernel/apparmor_restrict_unprivileged_us
 
 const (
 	// checkIDSandboxRuntime is the LH-FA-DEV-007 check: state of the
-	// nested-runtime prerequisites that can be determined from the
-	// host (`/dev/fuse`) plus the profile/runtime consistency.
+	// nested-runtime prerequisites that can be determined from a Linux
+	// host outside a container (`/dev/fuse`) plus the profile/runtime
+	// consistency.
 	checkIDSandboxRuntime = "devcontainer.sandbox.runtime"
 
 	// checkIDSandboxEgress is the LH-FA-DEV-008 check: the egress
@@ -68,13 +69,16 @@ func nestedRuntimeSet(dc *ubootYAMLDevcontainer) bool {
 	return nestedPodman(dc) || nestedDocker(dc)
 }
 
-// checkSandboxRuntime implements LH-FA-DEV-007 from the host's point
-// of view. Skips (OK) without the sandbox profile or without a
-// nested runtime; warns when `nestedRuntime: podman` has no effect;
-// checks `/dev/fuse` on Linux hosts only (on macOS/Colima the engine
-// runs in a VM, so the host cannot tell). A missing `/dev/fuse` is
-// an error (exit 11) under both `onUnavailable` values and carries
-// no fallback flag; `/dev/net/tun` is not checked.
+// checkSandboxRuntime implements LH-FA-DEV-007. Skips (OK) without the
+// sandbox profile or without a nested runtime; warns when
+// `nestedRuntime: podman` has no effect; checks `/dev/fuse` on Linux
+// hosts outside a container only (on macOS/Colima the engine runs in a
+// VM, so the host cannot tell; inside a container the device is the
+// container's own, so the item is info and the state of a started
+// sandbox container is reported by `devcontainer.sandbox.fallback.vfs`).
+// A missing `/dev/fuse` on the host is an error (exit 11) under both
+// `onUnavailable` values and carries no fallback flag; `/dev/net/tun` is
+// not checked.
 func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) domain.Diagnostic {
 	cfg, err := s.loadUbootYAML(baseDir)
 	if err != nil || cfg.Devcontainer == nil || !nestedRuntimeSet(cfg.Devcontainer) && !profileIsSandbox(cfg.Devcontainer) {
@@ -103,6 +107,11 @@ func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) d
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityError,
 			Message: "kernel.apparmor_restrict_unprivileged_userns=1 on this host blocks nested user namespaces; rootless Podman in the sandbox cannot start (LH-FA-DEV-007, exit 11 at container start).",
 			Hint:    "Set `sysctl kernel.apparmor_restrict_unprivileged_userns=0` on the container host, or set `devcontainer.sandbox.nestedRuntime` to `none`."}
+	}
+	if s.inContainer() {
+		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityInfo,
+			Message: "/dev/fuse not checked: u-boot is running inside a container, and its /dev/fuse is the device of this container, not of the container host; a sandbox container started without the device is reported by devcontainer.sandbox.fallback.vfs (LH-FA-DEV-007).",
+			Hint:    "Run `u-boot doctor` on the container host to check /dev/fuse."}
 	}
 	if fuse, _ := s.fs.Exists("/dev/fuse"); fuse {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityOK,

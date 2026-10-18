@@ -6,7 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/pt9912/u-boot/internal/hexagon/application"
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
+	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
@@ -52,6 +54,7 @@ func TestDoctor_SandboxRuntime(t *testing.T) {
 		{"docker without sandbox profile", sandboxYAMLHead + "  sandbox:\n    nestedRuntime: docker\n", true, true, false, domain.SeverityWarn, "no effect"},
 		{"docker with sandbox profile", sandboxYAMLDocker, true, false, false, domain.SeverityOK, "--privileged"},
 		{"fuse available", sandboxYAMLPodman, true, true, false, domain.SeverityOK, "/dev/fuse is available"},
+		{"fuse available, fail policy", sandboxYAMLPodman + "    onUnavailable: fail\n", true, true, false, domain.SeverityOK, "/dev/fuse is available"},
 		{"fuse missing, warn policy", sandboxYAMLPodman, true, false, false, domain.SeverityError, "refuses to start"},
 		{"fuse missing, fail policy", sandboxYAMLPodman + "    onUnavailable: fail\n", true, false, false, domain.SeverityError, "refuses to start"},
 		{"userns restricted by AppArmor sysctl", sandboxYAMLPodman, true, true, true, domain.SeverityError, "apparmor_restrict_unprivileged_userns"},
@@ -79,6 +82,96 @@ func TestDoctor_SandboxRuntime(t *testing.T) {
 			}
 		})
 	}
+}
+
+// LH-FA-DEV-007: inside a container the `/dev/fuse` check is skipped (the
+// device read is the container's own, not the container host's): info, no
+// fallback flag, under both policies and with or without the device. The
+// configuration branches before it and the AppArmor branch stay active;
+// without a RuntimeEnvironment (`runtime == nil`) the host behavior applies.
+func TestDoctor_SandboxRuntime_InContainer(t *testing.T) {
+	t.Parallel()
+	run := func(t *testing.T, env *fakeRuntimeEnv, yaml string, fuse, restrict bool) domain.Diagnostic {
+		t.Helper()
+		fs := newFakeFS()
+		fs.markDirExists(doctorBaseDir)
+		var rt driven.RuntimeEnvironment // nil interface: no RuntimeEnvironment wired
+		if env != nil {
+			rt = env
+		}
+		svc := application.NewDoctorService(fs, &fakeYAML{}, goodGit(), goodDockerProbe(), rt, nil)
+		writeDoctorFile(t, fs, "u-boot.yaml", yaml)
+		_ = fs.WriteFile("/proc/sys/kernel/osrelease", []byte("6.8\n"), 0o444)
+		if restrict {
+			_ = fs.WriteFile("/proc/sys/kernel/apparmor_restrict_unprivileged_userns", []byte("1\n"), 0o644)
+		}
+		if fuse {
+			_ = fs.WriteFile("/dev/fuse", []byte{}, 0o666)
+		}
+		resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return findDiagnostic(t, resp.Report.Items, "devcontainer.sandbox.runtime")
+	}
+	inContainer := &fakeRuntimeEnv{inContainer: true}
+
+	for _, policy := range []string{"warn", "fail"} {
+		for _, fuse := range []bool{true, false} {
+			name := policy + "/device " + map[bool]string{true: "present", false: "missing"}[fuse]
+			t.Run("skipped "+name, func(t *testing.T) {
+				t.Parallel()
+				d := run(t, inContainer, sandboxYAMLPodman+"    onUnavailable: "+policy+"\n", fuse, false)
+				if d.Severity != domain.SeverityInfo || d.DegradationFallback {
+					t.Errorf("got %v fallback=%v %q, want info without fallback", d.Severity, d.DegradationFallback, d.Message)
+				}
+				for _, want := range []string{"inside a container", "devcontainer.sandbox.fallback.vfs"} {
+					if !strings.Contains(d.Message, want) {
+						t.Errorf("message %q lacks %q", d.Message, want)
+					}
+				}
+				if !strings.Contains(d.Hint, "container host") {
+					t.Errorf("hint %q does not name the container host", d.Hint)
+				}
+			})
+		}
+	}
+
+	t.Run("podman without sandbox profile still warns", func(t *testing.T) {
+		t.Parallel()
+		d := run(t, inContainer, sandboxYAMLHead+"  sandbox:\n    nestedRuntime: podman\n", false, false)
+		if d.Severity != domain.SeverityWarn || !strings.Contains(d.Message, "no effect") {
+			t.Errorf("got %v %q", d.Severity, d.Message)
+		}
+	})
+	t.Run("nested docker still reports privileged", func(t *testing.T) {
+		t.Parallel()
+		d := run(t, inContainer, sandboxYAMLDocker, false, false)
+		if d.Severity != domain.SeverityOK || !strings.Contains(d.Message, "--privileged") {
+			t.Errorf("got %v %q", d.Severity, d.Message)
+		}
+	})
+	t.Run("AppArmor sysctl still an error", func(t *testing.T) {
+		t.Parallel()
+		d := run(t, inContainer, sandboxYAMLPodman, true, true)
+		if d.Severity != domain.SeverityError || !strings.Contains(d.Message, "apparmor_restrict_unprivileged_userns") {
+			t.Errorf("got %v %q", d.Severity, d.Message)
+		}
+	})
+	t.Run("runtime nil keeps the host behavior", func(t *testing.T) {
+		t.Parallel()
+		d := run(t, nil, sandboxYAMLPodman, false, false)
+		if d.Severity != domain.SeverityError || !strings.Contains(d.Message, "refuses to start") {
+			t.Errorf("got %v %q", d.Severity, d.Message)
+		}
+	})
+	t.Run("not in container keeps the host behavior", func(t *testing.T) {
+		t.Parallel()
+		d := run(t, &fakeRuntimeEnv{}, sandboxYAMLPodman, false, false)
+		if d.Severity != domain.SeverityError || !strings.Contains(d.Message, "refuses to start") {
+			t.Errorf("got %v %q", d.Severity, d.Message)
+		}
+	})
 }
 
 // LH-FA-DEV-007: the error for a missing `/dev/fuse` names both ways out
