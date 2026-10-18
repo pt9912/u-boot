@@ -61,7 +61,7 @@ Neu: die nächste freie Minor-Version (Lastenheft-Commit-Reihenfolge entscheidet
 
 Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 
-> | `<Version>` | `<Datum des Lastenheft-Commits>` | [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run): Der Wert `egress` gehört zum Wertebereich des Feldes `command` (nach [`LH-NFA-USE-004`](#lh-nfa-use-004--maschinenlesbare-ausgabe) für alle `--json`-Ausgaben; aus dem freigegebenen Befehl `u-boot egress list` abgeleitet; Bestätigung des Projektinhabers vor dem Release ausstehend). | Vereinbarung mit dem Projektinhaber |
+> | `<Version>` | `<Datum des Lastenheft-Commits>` | [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run): Der Wert `egress` gehört zum Wertebereich des Feldes `command` (nach [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) für alle `--json`-Ausgaben; aus dem freigegebenen Befehl `u-boot egress list` abgeleitet; Bestätigung des Projektinhabers vor dem Release ausstehend). | Vereinbarung mit dem Projektinhaber |
 
 **Gelesen, bewusst nicht geändert (Entscheidung des Projektinhabers, nicht dieses CR):** ob `egress` auch in die Aufzählung „bei `template` und `config` ist `subcommand` verpflichtend“ ([`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)) gehört. Der Code setzt `subcommand: "list"` immer; das Lastenheft verbietet es nicht (das Feld ist optional). Der Auftrag lautet, nur den Eintrag `egress` zu ergänzen.
 
