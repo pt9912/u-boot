@@ -985,8 +985,9 @@ diese Lockerungen nötig; **`u-boot` weist jede einzeln als Warnung aus**:
 ```
 
 `/dev/net/tun` braucht das Netzwerk der verschachtelten Container (`pasta`);
-ohne das Device scheitert jedes `RUN` eines `podman build`. Es muss auf dem
-Container-Host vorhanden sein; fehlt es, lehnt Docker den Start ab (gemessen: `error gathering device information while adding custom device … no such file or directory`), das Startscript läuft dann nicht, und `u-boot doctor` prüft das Device nicht. Abhilfe: das Kernelmodul `tun` auf dem Host laden (`modprobe tun`, nicht gemessen) oder `nestedRuntime: none` wählen. Bestehende Projekte mit `nestedRuntime: podman` brauchen das Device nach `u-boot generate devcontainer` ebenfalls.
+ohne das Device scheitert jedes `RUN` eines `podman build`. `/dev/fuse` dient dem
+Speicher der verschachtelten Container. Beide Devices müssen auf dem
+Container-Host vorhanden sein; fehlt eines, lehnt Docker den Start ab (gemessen: `error gathering device information while adding custom device … no such file or directory`), das Startscript läuft dann nicht. `u-boot doctor` prüft `/dev/net/tun` nicht und meldet ein fehlendes `/dev/fuse` auf einem Linux-Host als Fehler (Exit-Code 11). Abhilfe: die Kernelmodule auf dem Host laden (`modprobe fuse`, `modprobe tun`; `tun` nicht gemessen) oder `nestedRuntime: none` wählen. Bestehende Projekte mit `nestedRuntime: podman` brauchen das Device nach `u-boot generate devcontainer` ebenfalls.
 
 Das ist nahe an `--privileged`; der Schutz ist damit deutlich schwächer. Das
 Standardprofil (`nestedRuntime: none`) bleibt ungelockert.
@@ -1002,8 +1003,9 @@ löst auf, `mycompany/img` nicht; andere Kurznamen sind nicht gemessen), eine Su
 gesetzt. Images und Schichten liegen im Volume
 `<projekt>-containers-${devcontainerId}`; gemessen: das Image `debian:stable-slim`
 mit einer Paketinstallation und drei Builds belegte rund 140 MB, das Volumen
-wächst mit jedem Image. Ohne `/dev/fuse` baut Podman mit `vfs`-Speicher; das
-läuft, kopiert aber jede Schicht vollständig.
+wächst mit jedem Image. Fehlt `/dev/fuse` im Container (der Container wurde ohne
+das Device gestartet, etwa nach geänderten `runArgs`), baut Podman mit
+`vfs`-Speicher; das läuft, kopiert aber jede Schicht vollständig.
 
 **Gemessen** (Docker 29.5.2 auf Colima 0.10.3, arm64; in der VM
 `kernel.apparmor_restrict_unprivileged_userns=0`, auf dem Container-Host `/dev/net/tun`): `podman build` mit `FROM`,
@@ -1019,7 +1021,7 @@ Was beim Containerstart passiert, wenn Fähigkeiten fehlen, steuert
 
 | Zustand | `warn` | `fail` |
 |---|---|---|
-| `/dev/fuse` fehlt | Rückfall auf `vfs`-Speicher, Warnung | Abbruch mit Exit-Code 11 |
+| `/dev/fuse` fehlt im Container (ohne das Device gestartet) | Rückfall auf `vfs`-Speicher, Warnung | Abbruch mit Exit-Code 11 |
 | Verschachtelte User-Namespaces blockiert (Seccomp oder AppArmor), nur `podman` | Abbruch mit Exit-Code 11 | Abbruch mit Exit-Code 11 |
 | Docker-Daemon wird nicht betriebsbereit (`docker`, zum Beispiel Start ohne `--privileged`) | Container ohne Daemon, Warnung | Abbruch mit Exit-Code 11 |
 
@@ -1036,9 +1038,12 @@ startet das Skript, aber `podman build` scheitert an `mount` und `remount`
 Einen dauerhaften Wert setzen Sie in der VM (`colima ssh`) in einer Datei unter
 `/etc/sysctl.d/`.
 
-`u-boot doctor` prüft `/dev/fuse` nur auf Linux-Hosts. Unter macOS mit Colima
-läuft die Engine in einer VM, die der Host nicht beurteilen kann; dort prüft das
-Startscript im Container.
+Ein fehlendes `/dev/fuse` auf dem Container-Host ist keine Stufe dieser Tabelle:
+Docker lehnt den Start des Containers ab. `u-boot doctor` meldet es auf Linux-Hosts
+als Fehler (Exit-Code 11), unabhängig von `onUnavailable`. Unter macOS mit Colima
+läuft die Engine in einer VM, die der Host nicht beurteilen kann; dort lehnt Docker
+den Start ab, `doctor` meldet nichts, und das Startscript im Container prüft
+die User-Namespaces.
 
 
 #### Eigener Docker-Daemon (optional)
@@ -1669,7 +1674,9 @@ verwalteten Bereichs bleiben erhalten.
 
 Verschachteltes Podman (`nestedRuntime: podman`) braucht Fähigkeiten, die der
 Host nicht bietet, zum Beispiel blockierte User-Namespaces unter Ubuntu 24.04
-oder fehlendes `/dev/fuse`. Der Docker-Daemon (`nestedRuntime: docker`) wird
+oder ein im Container fehlendes `/dev/fuse` unter `onUnavailable: fail`. Ein
+auf dem Container-Host fehlendes `/dev/fuse` oder `/dev/net/tun` verhindert den
+Start des Containers durch Docker, das Startscript läuft dann nicht. Der Docker-Daemon (`nestedRuntime: docker`) wird
 nicht bereit, wenn der Container ohne `--privileged` startet; das Log
 `/var/log/u-boot-dockerd.log` im Container nennt den Grund.
 

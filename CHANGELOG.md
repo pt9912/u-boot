@@ -13,6 +13,14 @@ this file is the same format applied to u-boot itself.
 
 ### Changed
 
+- Sandbox devcontainer (`nestedRuntime: podman`): a missing `/dev/fuse` on the container host is a start error of the container engine, like `/dev/net/tun`, and no longer a
+  degradation step: the generated container carries `--device=/dev/fuse`, and where the device is missing the engine refuses to start it (measured with Docker 29.5.2 on
+  Colima 0.10.3, arm64: `docker run` exit code `127`, `docker start` exit code `1`, `error gathering device information while adding custom device`); the start script never runs.
+  The `vfs` storage fallback applies only to a container that was started without the device (for example after changed `runArgs`). `u-boot doctor` reports a missing `/dev/fuse` on a Linux
+  host as an **error** (exit code `11`) under both `onUnavailable` values, without the fallback flag; it does not check `/dev/net/tun`. **Regression for scripts that evaluate `doctor` without `--strict`:**
+  the check `devcontainer.sandbox.runtime` was a warning (exit code `0`) with `onUnavailable: warn` and now fails with exit code `11`; load the `fuse` kernel module on the container host (`modprobe fuse`)
+  or set `nestedRuntime: none`. The generated files do not change. Lastenheft 0.13.0 ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
+  [`LH-FA-CLI-006`](spec/lastenheft.md#lh-fa-cli-006--exit-codes), [ADR-0022](docs/plan/adr/0022-fallback-ausweisung-statusdateien-im-container.md)).
 - `--dry-run`: the summary of `remove`, `generate` and `config set` (one pair or several) says what would happen, like `init` and `add` already did:
   `Would remove service "x".` with the list `Would change:`, `Would generate <artifact> (<paths>).`, `Would update <artifact> managed block (<paths>).`,
   `Would repair <artifact> structure (<paths>).` and `config: Would set <path> <old> → <new>.`. Without `--dry-run` (also with `--diff` alone) the lines keep their
