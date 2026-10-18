@@ -1,0 +1,1 @@
+**Stand:** offen — Trigger: Pin-Hebung samt Schlüsselprüfung vor 2027-03-08 (`internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl`, Block `NestedPodman`); Re-Evaluierungs-Trigger in [`ADR-0023`](../../../../adr/0023-podman-aus-podman-static-im-sandbox-devcontainer.md).
