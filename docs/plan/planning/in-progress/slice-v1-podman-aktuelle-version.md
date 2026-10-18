@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** `v0.11.0` (Release-Versionen sind Wellen, [`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md)). **Blocker des Cuts** [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md): Der Projektinhaber verlangt die neueste Podman-Version vor dem Release (2026-10-18). Der Slice startet **erst nach der Closure** von [`slice-v1-e2e-status-ci-helfer`](../done/slice-v1-e2e-status-ci-helfer.md) (§4), weil beide `internal/e2e/` ändern.
+**Welle:** `v0.11.0` (Release-Versionen sind Wellen, [`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md)). **Blocker des Cuts** [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md): Der Projektinhaber verlangt die neueste Podman-Version vor dem Release (2026-10-18). Der Slice startet **erst nach der Closure** von [`slice-v1-e2e-status-ci-helfer`](../done/slice-v1-e2e-status-ci-helfer.md) (§4), weil beide `internal/e2e/` ändern.
 
 **Bezug:** [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Container-Runtime im Sandbox-Devcontainer; das Lastenheft nennt keine Podman-Version), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress-Hosts), [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (keine verdeckte Ausführung fremder Skripte; bindet die Wahl der Quelle), [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Feature-Quellen; Podman bleibt ein Paket des Dockerfiles, kein Feature), [ADR-0014](../../adr/0014-nested-podman-sandbox-devcontainer.md) (Entscheidung 1: Debian-Pakete; **wird durch die Folge-ADR ersetzt**), [ADR-0021](../../adr/0021-podman-build-im-sandbox-devcontainer.md) (Lockerungsprofil, `podman build`, Egress-Host; Messprotokoll als Wiederholbasis), [ADR-0019](../../adr/0019-docker-daemon-aus-docker-apt-repo.md) (Muster: Herkunft ersetzt, Schlüssel-Pin, Egress ergänzt).
 
@@ -71,7 +71,7 @@ Messbar auf Colima (arm64, VM Ubuntu 24.04, mit `kernel.apparmor_restrict_unpriv
 - **Eine zugesagte Version im Lastenheft** — das Lastenheft ist Zielbild und sagt „`podman build`“, nicht „Podman 6“; die Version gehört in Spezifikation und Handbuch.
 - **`buildah`-Kommando, `docker buildx`, `docker compose`** — bleiben nicht zugesagt ([ADR-0021](../../adr/0021-podman-build-im-sandbox-devcontainer.md) Entscheidung 2); `podman build` nutzt die eingebaute Bibliothek. Liefert das Archiv von **c** ein `buildah`, wird es nicht zugesagt.
 - **Automatisierte Pin-Hebung** (CI-Job, Dependabot-Ersatz) — Gate-/CI-Änderung ([`AGENTS.md`](../../../../AGENTS.md) §3.6), eigener Vorgang; hier nur, wie die Hebung geschieht, wenn **f1** gewählt wird (Re-Evaluierungs-Trigger der ADR).
-- **Welle-Closure und Release-Cut** — [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md); Push und Tags führt nur der Hauptagent nach Freigabe des Projektinhabers.
+- **Welle-Closure und Release-Cut** — [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md); Push und Tags führt nur der Hauptagent nach Freigabe des Projektinhabers.
 
 ## 2. Definition of Done
 
@@ -140,7 +140,7 @@ Gemessen wird das **Erzeugnis**: das Dockerfile, das der aus dem Repo gebaute Ge
 
 ## 5. Closure-Trigger
 
-DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben; die Folge-ADR ist `Accepted` (durch den Projektinhaber). Erst danach darf [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md) starten.
+DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben; die Folge-ADR ist `Accepted` (durch den Projektinhaber). Erst danach darf [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md) starten.
 
 ## 6. Risiken und offene Punkte
 
