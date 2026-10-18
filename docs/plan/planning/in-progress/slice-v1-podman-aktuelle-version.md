@@ -143,6 +143,7 @@ Gemessen auf Colima 0.10.3 (arm64, VM Ubuntu 24.04.4, Kernel 6.8.0-117, cgroup v
 | `harness/replay.md` | update (umgesetzt) | Zeile `generate devcontainer` mit `nestedRuntime: podman` (Pin, Beleg-Tests) |
 | `spec/lastenheft.md` | gelesen, unverändert | Zusage („`podman build` … rootless Podman“) nennt keine Version; die Messung verschiebt sie nicht (Freigabe des Projektinhabers: Lastenheft bleibt Zielbild) |
 | `README.md`, `README.de.md`, `docs/maintainer/releasing.md` | gelesen, unverändert | Suche nach `podman`: `README.md` Zeilen 12–13 und 199 (`README.de.md` Zeilen 13–14) nennen `podman build` und Messstand (Release 0.10.0), `README.md` Zeilen 224–225 (`README.de.md` 227–228) die Host-Mindestversionen von Docker und Podman und Compose; keine Aussage zur Podman-Version im Container; `releasing.md` ohne Treffer |
+| `docs/reviews/2026-10-18-slice-v1-podman-aktuelle-version.md` | neu (Reviewer) | Review-Report; hier nur mit-committet |
 | `docs/plan/planning/in-progress/slice-v1-podman-aktuelle-version.md` | update | diese Tabelle (§3), nicht DoD, §6, §7 |
 | `docs/reviews/<Datum>-slice-v1-podman-aktuelle-version.md`, `…-verification-…` | neu, durch Reviewer und Verifier | Review- und Verification-Report |
 | `docs/plan/planning/open/README.md` | gelesen, unverändert | Bestandszeile (Zeile 17) verweist bereits auf `../in-progress/slice-v1-podman-aktuelle-version.md`; `in-progress/README.md` führt laut Bestand nur die Master-Dokumente |
@@ -153,9 +154,9 @@ Gemessen auf Colima 0.10.3 (arm64, VM Ubuntu 24.04.4, Kernel 6.8.0-117, cgroup v
 - **Schlüsselablauf 2027-03-08:** Nach dem Ablauf meldet `gpg --verify` weiter `VALIDSIG` (gemessen mit `--faked-system-time`); die Vorlage erzwingt weder Ablauf noch Widerruf, die Integrität trägt die SHA-256. Wiedervorlage: Pin-Hebung samt Schlüsselprüfung vor dem Datum.
 - **Negativproben:** „signing subkey as the pin“ prüft den `VALIDSIG`-Vergleich; „unknown fingerprint“ scheitert am Schlüsselabruf (HTTP 404), nicht am Vergleich; „wrong checksum“ an `sha256sum -c`. Der Zweig für unbekannte Architekturen (`exit 1`) ist als Golden auf den Template-Text gepinnt (kein Docker-only-Lauf auf einer dritten Architektur).
 - **Pins per `--build-arg` überschreibbar:** Die vier `ARG`s sind Vorgaben; die erzeugte `devcontainer.json` setzt nur `USER_UID` als Build-Argument (`devcontainer.json.tmpl`, Block `build.args`), ein Nutzer ändert die Pins nur, indem er das Dockerfile oder die Build-Argumente selbst ändert. Kein Handbuch-Hinweis.
-- **Archivinhalt:** Das `README.md` des Archivs wird nach der Extraktion entfernt (Golden und e2e `NO_ARCHIVE_README`); die Dateien unter `/etc/containers/` stammen aus dem Archiv und stehen in `LH-FA-DEV-007.b`.
+- **Archivinhalt:** Das `README.md` des Archivs wird nach der Extraktion entfernt (Golden und e2e `NO_ARCHIVE_README`); die Dateien unter `/etc/containers/` stammen aus dem Archiv und stehen in der Spezifikation (Verfeinerung zur Ausstattung bei `podman`, Zeile 329).
 - **`vfs`-Rückbau nicht vorhanden:** Das Startscript schreibt das `vfs`-Drop-in und `containers.conf` (eine vorhandene Benutzerdatei geht verloren) und entfernt sie bei einem späteren Start mit `/dev/fuse` nicht; die Statusdatei meldet dann `ok`, der Treiber bleibt `vfs`. Das Verhalten entspricht dem der vorigen `storage.conf`; ein Rückbau ist nicht umgesetzt und nicht gemessen.
-- **Build-Hosts:** `github.com`, `objects.githubusercontent.com`, `keys.openpgp.org` stehen in `LH-FA-DEV-007.b` und im Handbuch.
+- **Build-Hosts:** `github.com`, `objects.githubusercontent.com`, `keys.openpgp.org` stehen in [`LH-FA-DEV-007.b`](../../../../spec/spezifikation.md#lh-fa-dev-007b--ausstattung-bei-nestedruntime-podman) und im Handbuch.
 
 ## 4. Trigger
 
