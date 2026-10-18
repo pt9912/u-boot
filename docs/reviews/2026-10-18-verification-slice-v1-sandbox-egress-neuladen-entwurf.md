@@ -33,7 +33,7 @@
 | `BEO-WZG/host-werkzeug-ausserhalb-docker/` (Evidence neu, `state.md`) | Zeile 4 | ok |
 | Messprotokoll-Verzeichnis, 17 Dateien (5 Skripte, `inner-m1.sh`, `inner-m2.sh`, `probe.pl`, `reload-atomar.sh`, 2 Dockerfiles, README, 5 Rohdaten) | Zeile 7 | ok, `ls` zählt 17 |
 | `roadmap.md` | Zeile 9 | ok: Arbeitszeile; Rückstellung auf „Nichts in Arbeit.“ ist Closure-Aufgabe |
-| Verweis-Nachzug des Moves (`done/slice-v1-egress-wildcard-pruefung.md`, `in-progress/slice-cr-sandbox-egress-anzeige.md`, `BEO-DOK/…/state.md` und drei weitere) | Zeile 10 | ok | <!-- d-check:ignore (Kennungen als Zitat) -->
+| Verweis-Nachzug des Moves (`done/slice-v1-egress-wildcard-pruefung.md`, `done/slice-cr-sandbox-egress-anzeige.md`, `BEO-DOK/…/state.md` und drei weitere) | Zeile 10 | ok | <!-- d-check:ignore (Kennungen als Zitat) -->
 | Slice-Datei (Move, Löschung in `open/`) | Zeile 11 | ok |
 | `docs/reviews/` (Review-Report, dieser Report) | Zeile 12 | ok; dieser Report ist die letzte Datei der Range, Zeile 12 deckt ihn |
 | `internal/**`, `spec/**`, Lastenheft, `Makefile` | „kein Produktcode“ | durch den Diff bestätigt: keine Datei dort |

@@ -1,2 +1,2 @@
-**Vorgang:** [`slice-cr-sandbox-egress-anzeige`](../../../../in-progress/slice-cr-sandbox-egress-anzeige.md)
+**Vorgang:** [`slice-cr-sandbox-egress-anzeige`](../../../../done/slice-cr-sandbox-egress-anzeige.md)
 **Fund:** Die Fix-Runde `36fb552` änderte das Lastenheft nach dem Review (Zeile in der Befehlsübersicht und Klausel der Historie-Zeile 0.14.0, Stelle 4). Ein Nachlauf-Review über diese drei Zeilen lief nicht; der Verifier hat sie gelesen (Verification-Report V-2, INFO). Anders als im ersten Beleg blieb der Nachlauf-Review aus.
