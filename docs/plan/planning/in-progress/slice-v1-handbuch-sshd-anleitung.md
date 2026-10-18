@@ -76,7 +76,24 @@ Jede Aussage über Code steht mit Fundstelle (gelesen am 2026-10-18). Der Implem
 | `docs/user/benutzerhandbuch.md` | update | Abschnitt `#### Login-Dienst `sshd` (optional)` in 4.11 (gelesen: zwei Befehle, vier Aufzählungspunkte) wird zur Anleitung umgebaut; die Aussagen zu Port 2222, gesperrten Konten, `sudo passwd`, `~/.ssh/authorized_keys`, `PermitRootLogin` und der Grenze „Profil begrenzt Schaden“ stehen schon dort und wandern in die Schritte; die Katalog-Zeile `sshd` in 4.10 und die Zeile „Feature `sshd` — keine zusätzlichen Hosts“ in der Egress-Tabelle bleiben, solange sie zur neuen Fassung stimmen (Querverweis `#login-dienst-sshd-optional` bleibt gültig, wenn die Überschrift bleibt) |
 | `CHANGELOG.md` | unverändert | gelesen: der Block `[Unreleased]` führt Produktverhalten (Added, Changed); eine Handbuch-Verbesserung ohne neue Zusage ist kein Eintrag; der Release-Cut entscheidet, ob der Lead sie nennt |
 | `README.md`, `README.de.md` | unverändert | gelesen: beide nennen `sshd` nur als Katalog-Schlüssel (`README.md:11`, `:153`, `README.de.md:12`, `:155`) und in der Releases-Tabelle; keine Aussage zur Nutzung |
-| `docs/plan/planning/open/README.md`, `docs/plan/planning/in-progress/roadmap.md` | update (beim Anlegen) | Bestandszeile und Zeiger nach der Roadmap-Konvention |
+| `docs/plan/planning/open/README.md` | unverändert | Bestandszeile entstand beim Anlegen des Slice (Commits vor der Umsetzung); die Umsetzung berührt die Datei nicht |
+| `docs/plan/planning/in-progress/roadmap.md` | update | gelesen: Abschnitt „Offene Wellen“ trug „Nichts in Arbeit.“; solange ein Slice in `in-progress/` liegt, bemängelt d-check `planning` den Marker; er ist entfernt |
+| `docs/plan/planning/in-progress/slice-v1-handbuch-sshd-anleitung.md` | update | diese Tabelle um die Fundstellen der Aussagen erweitert; DoD, §6, §7 unverändert |
+
+Fundstellen der Aussagen der Anleitung (gelesen am 2026-10-18):
+
+| Aussage im Handbuch | Fundstelle |
+|---|---|
+| Port 2222, `sshd -T`: Passwort-, Schlüssel-Login, Root-Login `yes`; Konten `root`, `vscode` gesperrt; `~/.ssh` fehlt | `done/slice-v1-devcontainer-feature-sshd.md` §3 Messtabelle („`ss -ltn`: `0.0.0.0:2222`“, „`passwordauthentication yes`, `pubkeyauthentication yes`, `permitrootlogin yes`“, „`passwd -S`: `root` und `vscode` gesperrt (`L`)“) |
+| kein SSH-Login gemessen | selbe Datei, „Grenzen der Messung“ (1): „Ein tatsächlicher SSH-Login mit gesetztem Passwort wurde nicht ausgeführt“ |
+| Warnung nennt Passwort-/Schlüssel-Login, Root-Login, `sudo passwd <user>`; nur im Sandbox-Profil; unter `--quiet` sichtbar | `devcontainer_sandbox.go`: `if sandbox && loginServiceActive(dc) { relax("LH-FA-DEV-006", "login service sshd is active in the container (port 2222; password and key login, root login permitted; …` und Handbuch `--quiet`-Zeile („Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`)“) |
+| `forwardPorts` nur aus den Diensten, ohne Dienst-Ports fehlt der Schlüssel | `generate.go`: `collectDevcontainerForwardPorts` („derives the container-side ports of every active service“, `len(services) == 0` → `nil`); Vorlage `devcontainer.json.tmpl`: `{{- if .ForwardPorts}}` |
+| `runArgs` ohne Port-Veröffentlichung | `devcontainer_sandbox.go`, `devcontainerTemplateData`: `data.RunArgs` wird nur mit `podmanRelaxations()`, `dockerRelaxation()`, `egressRelaxation()` belegt |
+| Projektordner ist ein Volume, kein Host-Mount | Vorlage: `"workspaceMount": ""` und `"mounts": ["source={{.WorkspaceVolume}}-${devcontainerId},target={{.WorkspaceFolder}},type=volume"]` |
+| Container-Benutzer `vscode` | Vorlage: `"remoteUser": "vscode"` |
+| Installationsskript läuft beim Image-Build; Neubau statt Neustart | Handbuch (Abschnitt Claude Code): „sein Installationsskript läuft beim Image-Build“; die Folgerung „Neubau“ und der Editor-Befehl „Rebuild Container“ stehen als „nicht gemessen“ im Text |
+| `ssh-keygen` im Basis-Image | Auftrag des Projektinhabers: `docker run --rm mcr.microsoft.com/devcontainers/base:debian command -v ssh-keygen` → `/usr/bin/ssh-keygen` (vom Implementer nicht wiederholt) |
+| `ssh-keygen -t ed25519`, `authorized_keys`-Rechte `700`/`600`, `docker exec`, `ssh -i … -p 2222 vscode@localhost`, Weiterleitung durch Editor oder Engine | Fremdwerkzeug-Aussagen aus Allgemeinwissen, nicht an einer Dokumentation gelesen und nicht gemessen; im Text als „nicht gemessen“ gekennzeichnet |
 
 ## 4. Trigger
 
