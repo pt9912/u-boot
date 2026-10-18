@@ -1220,11 +1220,19 @@ erlaubt; `u-boot generate devcontainer` weist den Login-Dienst mit einer Warnung
 aus, die auch unter `--quiet` sichtbar bleibt (anders als die Drittanbieter-Warnung
 eines anderen Features). Ohne Sandbox-Profil erscheint diese Warnung nicht.
 
-Die Schritte stehen in der Reihenfolge der Ausführung. Aussagen über Werkzeuge
-außerhalb von `u-boot` (`ssh-keygen`, `ssh`, `docker`, der Editor) sind mit
-„nicht gemessen“ gekennzeichnet: `u-boot` hat sie nicht geprüft. Gemessen ist nur
-der Dienst im Container (Port, Konfiguration, gesperrte Konten); ein tatsächlicher
-SSH-Login ist nicht gemessen.
+Die Schritte stehen in der Reihenfolge der Ausführung. Gemessen sind:
+
+- am Feature selbst: Port 2222, die Werte der SSH-Konfiguration und die gesperrten
+  Konten;
+- an einem Näherungsaufbau (Wegwerf-Container aus dem Basis-Image mit dem
+  Debian-Paket `openssh-server` auf Port 2222 statt des Feature-Skripts, ohne
+  Editor- oder Engine-Portweiterleitung, ohne Dev-Container-CLI): die Schlüsselerzeugung
+  mit `ssh-keygen -t ed25519`, die Rechte `700` und `600`, und der Aufruf
+  `ssh -i … -p 2222 vscode@localhost` ohne Passwort.
+
+**Nicht gemessen** sind ein SSH-Login mit dem Feature selbst, die
+Portweiterleitung von Editor oder Container-Engine und `docker exec`; sie sind im
+Text so gekennzeichnet.
 
 **Schritt 1: Feature aktivieren und den Container neu aufbauen**
 
@@ -1234,22 +1242,23 @@ u-boot generate devcontainer
 ```
 
 Das Installationsskript eines Features läuft beim Image-Build. Bauen Sie den
-Container deshalb nach `generate devcontainer` neu auf, statt ihn nur neu zu
-starten (nicht gemessen: das Verhalten Ihres Dev-Container-Werkzeugs bei geänderter
-Feature-Liste; im Editor heißt der Befehl meist „Rebuild Container“).
+Container deshalb nach `generate devcontainer` neu auf. Nicht gemessen ist, ob
+ein bloßer Neustart des bestehenden Containers nach einer geänderten Feature-Liste
+genügt; der Hinweis „neu starten“ der Egress-Beschränkung gilt für diese, nicht
+für die Feature-Liste.
 
 **Schritt 2: Zugang einrichten**
 
 Die Konten `root` und `vscode` sind nach dem Build gesperrt. Ein Login geht erst,
-wenn Sie ein Passwort setzen oder einen Schlüssel eintragen; `u-boot` setzt kein
-Passwort und legt keine Schlüssel an. Wählen Sie einen der beiden Wege.
+wenn Sie einen Schlüssel eintragen oder ein Passwort setzen; `u-boot` setzt kein
+Passwort und legt keine Schlüssel an. Bevorzugt ist der Schlüssel; das Passwort
+ist die Alternative.
 
-- **Schlüssel (Schlüssel-Login):** Der Projektordner ist ein Volume, `~/.ssh` des
+- **Schlüssel (bevorzugt):** Der Projektordner ist ein Volume, `~/.ssh` des
   Hosts ist im Container nicht eingebunden; der Schlüssel kommt also nicht über
   einen Mount in den Container.
-  1. Auf dem Host ein Schlüsselpaar erzeugen (nicht gemessen: Ihr Host-Client;
-     `ssh-keygen` liegt im Basis-Image `mcr.microsoft.com/devcontainers/base:debian`,
-     gemessen mit `command -v ssh-keygen`):
+  1. Auf dem Host ein Schlüsselpaar erzeugen (`ssh-keygen` liegt im Basis-Image
+     `mcr.microsoft.com/devcontainers/base:debian`):
 
      ```bash
      ssh-keygen -t ed25519 -f ~/.ssh/uboot_sshd
@@ -1257,7 +1266,8 @@ Passwort und legt keine Schlüssel an. Wählen Sie einen der beiden Wege.
 
   2. Den Inhalt der öffentlichen Datei `~/.ssh/uboot_sshd.pub` in
      `~/.ssh/authorized_keys` des Container-Benutzers `vscode` eintragen, in einem
-     Terminal im Container (Editor-Terminal oder `docker exec`; nicht gemessen):
+     Terminal im Container (Editor-Terminal oder `docker exec`; `docker exec`
+     nicht gemessen):
 
      ```bash
      mkdir -p ~/.ssh && chmod 700 ~/.ssh
@@ -1265,11 +1275,10 @@ Passwort und legt keine Schlüssel an. Wählen Sie einen der beiden Wege.
      chmod 600 ~/.ssh/authorized_keys
      ```
 
-     Die Rechte `700` und `600` sind eine Annahme über die Prüfung des
-     SSH-Servers (nicht gemessen).
-- **Passwort (Passwort-Login):** Im Container `sudo passwd vscode` (bzw. den Namen
-  Ihres Nutzers) ausführen. `sudo passwd` ohne Argument setzt das Passwort von
-  `root`, dessen Login erlaubt ist.
+- **Passwort (Alternative):** Im Container `sudo passwd vscode` (bzw. den Namen
+  Ihres Nutzers) ausführen, mit einem starken Passwort: der Dienst erlaubt
+  Passwort-Login und Root-Login. `sudo passwd` ohne Argument setzt das Passwort
+  von `root`, dessen Login erlaubt ist.
 
 **Schritt 3: Verbinden**
 
@@ -1277,15 +1286,19 @@ Passwort und legt keine Schlüssel an. Wählen Sie einen der beiden Wege.
 `forwardPorts` in `devcontainer.json` stammt nur aus den Diensten, die `runArgs`
 des Sandbox-Profils enthalten keine Port-Veröffentlichung. Sie leiten den Port
 selbst auf den Host weiter, über die Port-Weiterleitung Ihres Dev-Container-Werkzeugs
-oder eine Port-Option der Container-Engine (nicht gemessen, wie ein Editor oder
-die CLI das tut). Danach verbinden Sie sich über den Host-Port, hier mit der
-Weiterleitung auf denselben Port (nicht gemessen):
+(nicht gemessen, wie ein Editor oder die CLI das tut) oder eine Port-Option der
+Container-Engine (nicht gemessen). Veröffentlichen Sie den Port nur an der
+Loopback-Adresse des Hosts, nach dem Muster `127.0.0.1:2222:2222`, nicht als
+`2222:2222`: sonst öffnen Passwort-Login und erlaubter Root-Login den Dienst auf
+allen Schnittstellen des Hosts. Danach verbinden Sie sich über den Host-Port, hier
+mit der Weiterleitung auf denselben Port:
 
 ```bash
 ssh -i ~/.ssh/uboot_sshd -p 2222 vscode@localhost
 ```
 
-Beim Passwort-Login entfällt `-i`.
+Beim Passwort-Login entfällt `-i`. Der Aufruf ist im Näherungsaufbau gemessen,
+nicht mit dem Feature selbst.
 
 <a id="sicherheitshinweis-sshd"></a>
 
@@ -1294,7 +1307,8 @@ Beim Passwort-Login entfällt `-i`.
 - Die Konfiguration des Features lässt Passwort-Login (`PasswordAuthentication yes`),
   Schlüssel-Login (`PubkeyAuthentication yes`, sobald Sie einen Schlüssel eintragen)
   und `PermitRootLogin yes` zu; `u-boot` ändert das nicht. Der Port lauscht im
-  Container auf allen Schnittstellen.
+  Container auf allen Schnittstellen. Veröffentlichen oder leiten Sie den Port nur
+  an die Loopback-Adresse des Hosts (`127.0.0.1`), nicht an alle Schnittstellen.
 - Das Sandbox-Profil begrenzt Schaden und ist keine Isolationsgrenze. Das Feature
   bringt weder `--privileged` noch zusätzliche Fähigkeiten, Mounts oder Devices
   mit, nur einen Entrypoint, der `sshd` startet. Mit der Egress-Beschränkung
