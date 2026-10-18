@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** ohne Welle — kein Release-Bezug festgelegt; der Slice läuft **nach** dem Cut [`slice-v1-release-cut-v0.11.0`](../done/slice-v1-release-cut-v0.11.0.md) und nach den beiden Hygiene-Slices [`slice-v1-cli-dry-run-log-would`](../done/slice-v1-cli-dry-run-log-would.md) und [`slice-v1-harness-gofmt-und-depguard`](../in-progress/slice-v1-harness-gofmt-und-depguard.md); er ist nicht Teil von `v0.11.0`. Herkunft: Wunsch des Projektinhabers 2026-10-18 („bei u-boot --help wird das readme referenziert. Können wir noch unser Handbuch in die Meldung mitaufnehmen“).
+**Welle:** ohne Welle — kein Release-Bezug festgelegt; der Slice läuft **nach** dem Cut [`slice-v1-release-cut-v0.11.0`](../done/slice-v1-release-cut-v0.11.0.md) und nach den beiden Hygiene-Slices [`slice-v1-cli-dry-run-log-would`](../done/slice-v1-cli-dry-run-log-would.md) und [`slice-v1-harness-gofmt-und-depguard`](../done/slice-v1-harness-gofmt-und-depguard.md); er ist nicht Teil von `v0.11.0`. Herkunft: Wunsch des Projektinhabers 2026-10-18 („bei u-boot --help wird das readme referenziert. Können wir noch unser Handbuch in die Meldung mitaufnehmen“).
 
 **Bezug:** [`LH-FA-CLI-002`](../../../../spec/lastenheft.md#lh-fa-cli-002--hilfeausgabe) (Hilfeausgabe),
 [`LH-FA-CLI-003`](../../../../spec/lastenheft.md#lh-fa-cli-003--versionsausgabe) (die Version, aus der der Tag-Link abgeleitet wird),
