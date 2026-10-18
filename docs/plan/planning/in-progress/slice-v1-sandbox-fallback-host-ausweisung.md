@@ -195,6 +195,7 @@ Die Tabelle nennt jede Datei, die der Diff voraussichtlich berührt (§3.10 von 
 | `README.md`, `README.de.md` | unverändert | nennen „vier Ausweisungen“, keine Einzelheiten | — |
 | `docs/plan/planning/open/README.md` | unverändert | die Zeile dieses Slice steht in `next/README.md` und zeigt auf `in-progress/` | — |
 | `docs/plan/planning/in-progress/roadmap.md` | update | Ruhe-Marker „Nichts in Arbeit.“ entfernt, solange dieser Slice in `in-progress/` liegt (d-check `planning`) | — |
+| `repo.mk` | update | in der Planung nicht aufgeführt: `go test -tags docker -timeout 30m ./...` im Ziel `test-docker`; das e2e-Paket braucht gemessen rund neun bis elf Minuten (Colima, arm64) und lief mit dem Standardlimit von zehn Minuten in den Timeout, schon der Bestand lag bei etwa neun; das CI-Limit des Jobs sind 30 Minuten. Das ist ein Zeitbudget, keine Lockerung einer Prüfung | — |
 | `docs/plan/planning/in-progress/slice-v1-sandbox-fallback-host-ausweisung.md` | update | diese Tabelle gegen `git diff --stat` abgeglichen, DoD-Zeile „Folge-ADR `Accepted`“ abgehakt, Lastenheft-Stand 0.13.0 (nach dem vorgelagerten CR) | — |
 | `docs/plan/planning/in-progress/carveouts.md`, `.golangci.yml` (depguard), `.d-check.yml` | unverändert | kein neuer Carveout, kein neues Paket | — |
 | `spec/lastenheft.md` | **unverändert** | Entscheidung 2026-10-17 | — |
