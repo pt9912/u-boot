@@ -110,3 +110,29 @@ func TestNewEgressHost(t *testing.T) {
 		}
 	}
 }
+
+// The length limit of 253 applies to the name behind `*.` as well: a
+// 253-character name is offered back, a 254-character one is not. The
+// error quotes the entry as typed, not trimmed.
+func TestNewEgressHost_WildcardLengthAndRawQuote(t *testing.T) {
+	t.Parallel()
+	label := func(n int) string { return strings.Repeat("a", n) }
+	name253 := strings.Join([]string{label(63), label(63), label(63), label(61)}, ".")
+	name254 := strings.Join([]string{label(63), label(63), label(63), label(62)}, ".")
+	if len(name253) != 253 || len(name254) != 254 {
+		t.Fatalf("fixture lengths %d, %d", len(name253), len(name254))
+	}
+	_, err := domain.NewEgressHost("*." + name253)
+	if err == nil || !strings.Contains(err.Error(), "enter "+`"`+name253+`"`+" instead") {
+		t.Errorf("253-character name behind `*.`: err = %v, want the name offered", err)
+	}
+	_, err = domain.NewEgressHost("*." + name254)
+	if err == nil || !strings.Contains(err.Error(), "wildcard") || strings.Contains(err.Error(), " instead") {
+		t.Errorf("254-character name behind `*.`: err = %v, want the generic wildcard text", err)
+	}
+	_, err = domain.NewEgressHost("  *.example.org ")
+	if err == nil || !strings.Contains(err.Error(), `entry "  *.example.org " is a wildcard`) ||
+		!strings.Contains(err.Error(), `enter "example.org" instead`) {
+		t.Errorf("untrimmed wildcard entry: err = %v, want raw quote and trimmed name", err)
+	}
+}

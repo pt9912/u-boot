@@ -1,0 +1,36 @@
+== a: allow example.org
+Dnsmasq version 2.91  Copyright (c) 2000-2025 Simon Kelley
+init exit=0
+--- dnsmasq conf
+server=/example.org/192.168.5.1
+nftset=/example.org/4#ip#u_boot_egress#allowed
+RESULT example.org | dns[status: NOERROR] A>104.20.26.136 A>172.66.157.237 | curl[200]
+RESULT www.example.org | dns[status: NOERROR] A>172.66.157.237 A>104.20.26.136 | curl[200]
+RESULT a.b.example.org | dns[status: NXDOMAIN] | curl[curl: (6) Could not resolve host: a.b.example.org
+000]
+RESULT example.com | dns[status: REFUSED] | curl[curl: (6) Could not resolve host: example.com
+000]
+== a2: allow amazonaws.com
+Dnsmasq version 2.91  Copyright (c) 2000-2025 Simon Kelley
+init exit=0
+--- dnsmasq conf
+server=/amazonaws.com/192.168.5.1
+nftset=/amazonaws.com/4#ip#u_boot_egress#allowed
+RESULT s3.amazonaws.com | dns[status: NOERROR] A>16.15.255.104 A>16.15.199.242 A>52.216.32.0 A>16.15.236.143 A>16.182.37.80 A>54.231.162.232 A>16.15.228.37 A>16.182.68.120 | curl[307]
+RESULT s3.us-east-1.amazonaws.com | dns[status: NOERROR] A>52.217.228.0 A>52.217.67.174 A>52.217.129.64 A>54.231.165.80 A>16.182.25.72 A>16.15.183.30 A>54.231.130.72 A>16.15.223.4 | curl[307]
+RESULT sts.us-east-1.amazonaws.com | dns[status: NOERROR] A>13.217.79.62 | curl[302]
+RESULT example.com | dns[status: REFUSED] | curl[curl: (6) Could not resolve host: example.com
+000]
+== b: allow api.github.com
+Dnsmasq version 2.91  Copyright (c) 2000-2025 Simon Kelley
+init exit=0
+--- dnsmasq conf
+server=/api.github.com/192.168.5.1
+nftset=/api.github.com/4#ip#u_boot_egress#allowed
+RESULT api.github.com | dns[status: NOERROR] A>140.82.121.5 | curl[200]
+RESULT github.com | dns[status: REFUSED] | curl[curl: (6) Could not resolve host: github.com
+000]
+RESULT www.github.com | dns[status: REFUSED] | curl[curl: (6) Could not resolve host: www.github.com
+000]
+RESULT uploads.api.github.com | dns[status: NXDOMAIN] | curl[curl: (6) Could not resolve host: uploads.api.github.com
+000]

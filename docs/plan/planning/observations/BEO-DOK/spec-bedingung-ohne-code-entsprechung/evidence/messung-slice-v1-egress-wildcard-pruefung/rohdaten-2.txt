@@ -1,0 +1,31 @@
+Dnsmasq version 2.91  Copyright (c) 2000-2025 Simon Kelley
+--- CNAME-Kandidaten (unrestringiert)
+pypi.org: pypi.org. 
+files.pythonhosted.org: dualstack.python.map.fastly.net. 
+www.python.org: dualstack.python.map.fastly.net. 
+registry.npmjs.org: registry.npmjs.org. 
+ghcr.io: ghcr.io. 
+docs.github.com: docs.github.com. 
+www.mozilla.org: www-mozilla.fastly-edge.com. 
+www.debian.org: www.debian.org. 
+deb.debian.org: debian.map.fastlydns.net. 
+dl.google.com: dl.google.com. 
+cdn.jsdelivr.net: cdn.jsdelivr.net.cdn.cloudflare.net. 
+www.docker.com: live-docker.pantheonsite.io. 
+registry-1.docker.io: registry-1.docker.io. 
+production.cloudflare.docker.com: production.cloudflare.docker.com. 
+Dnsmasq version 2.91  Copyright (c) 2000-2025 Simon Kelley
+=== pattern *.example.org
+dnsmasq: syntax check OK.
+example.org: status: REFUSED 
+www.example.org: status: NOERROR 172.66.157.237
+a.b.example.org: status: NXDOMAIN 
+example.com: status: REFUSED 
+=== pattern .example.org
+dnsmasq: syntax check OK.
+
+dnsmasq: failed to create listening socket for 127.0.0.1: Address already in use
+example.org: status: REFUSED 
+www.example.org: status: NOERROR 172.66.157.237
+a.b.example.org: status: NXDOMAIN 
+example.com: status: REFUSED 

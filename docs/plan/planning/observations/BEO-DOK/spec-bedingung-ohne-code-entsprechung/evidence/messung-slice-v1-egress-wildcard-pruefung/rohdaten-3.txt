@@ -1,0 +1,41 @@
+== c: allow www.mozilla.org files.pythonhosted.org deb.debian.org
+Dnsmasq version 2.91  Copyright (c) 2000-2025 Simon Kelley
+init exit=0
+--- dnsmasq conf
+server=/www.mozilla.org/192.168.5.1
+nftset=/www.mozilla.org/4#ip#u_boot_egress#allowed
+server=/files.pythonhosted.org/192.168.5.1
+nftset=/files.pythonhosted.org/4#ip#u_boot_egress#allowed
+server=/deb.debian.org/192.168.5.1
+nftset=/deb.debian.org/4#ip#u_boot_egress#allowed
+RESULT www.mozilla.org | dns[status: NOERROR] A>151.101.195.19 A>151.101.131.19 A>151.101.3.19 A>151.101.67.19 | curl[200]
+RESULT www-mozilla.fastly-edge.com | dns[status: REFUSED] | curl[curl: (6) Could not resolve host: www-mozilla.fastly-edge.com
+000]
+RESULT files.pythonhosted.org | dns[status: NOERROR] A>151.101.192.223 A>151.101.128.223 A>151.101.0.223 A>151.101.64.223 | curl[404]
+RESULT dualstack.python.map.fastly.net | dns[status: REFUSED] | curl[curl: (6) Could not resolve host: dualstack.python.map.fastly.net
+000]
+RESULT deb.debian.org | dns[status: NOERROR] A>151.101.194.132 A>151.101.130.132 A>151.101.2.132 A>151.101.66.132 | curl[200]
+== d2: allow *.example.org (full script, nftset + server)
+Dnsmasq version 2.91  Copyright (c) 2000-2025 Simon Kelley
+init exit=0
+--- dnsmasq conf
+server=/*.example.org/192.168.5.1
+nftset=/*.example.org/4#ip#u_boot_egress#allowed
+RESULT example.org | dns[status: REFUSED] | curl[curl: (6) Could not resolve host: example.org
+000]
+RESULT www.example.org | dns[status: NOERROR] A>172.66.157.237 A>104.20.26.136 | curl[curl: (28) Connection timed out after 6002 milliseconds
+000]
+RESULT a.b.example.org | dns[status: NXDOMAIN] | curl[curl: (6) Could not resolve host: a.b.example.org
+000]
+RESULT example.com | dns[status: REFUSED] | curl[curl: (6) Could not resolve host: example.com
+000]
+== d3: allow .example.org
+Dnsmasq version 2.91  Copyright (c) 2000-2025 Simon Kelley
+init exit=0
+--- dnsmasq conf
+server=/.example.org/192.168.5.1
+nftset=/.example.org/4#ip#u_boot_egress#allowed
+RESULT example.org | dns[status: NOERROR] A>104.20.26.136 A>172.66.157.237 | curl[200]
+RESULT www.example.org | dns[status: NOERROR] A>172.66.157.237 A>104.20.26.136 | curl[200]
+RESULT example.com | dns[status: REFUSED] | curl[curl: (6) Could not resolve host: example.com
+000]

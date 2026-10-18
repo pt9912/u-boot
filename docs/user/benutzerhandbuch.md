@@ -1235,14 +1235,21 @@ Standardmäßig erlaubt sind:
   Beispiel dessen API) tragen Sie in `egress.allow` ein.
 - **Subdomains:** Ein eingetragener Name schließt alle seine Subdomains ein, auch
   tiefere (`example.org` erlaubt `www.example.org`; `amazonaws.com` erlaubt
-  `s3.us-east-1.amazonaws.com`). Ein Eintrag öffnet nie den übergeordneten Namen
-  (`www.example.org` lässt `example.org` gesperrt). Einen Eintrag der Form
-  `*.example.org` gibt es nicht: Tragen Sie `example.org` ein, `u-boot` weist den
-  Eintrag mit diesem Hinweis ab. Ein Name, dessen DNS-Antwort über einen
-  `CNAME` auf einen Namen außerhalb der Liste zeigt, ist erreichbar, ohne dass
-  der Zielname eingetragen wird; der Zielname selbst löst nicht auf. Gemessen
-  mit Docker 29.5.2 auf Colima 0.10.3 (arm64) und `dnsmasq` 2.91; Linux-Hosts
-  und Docker Desktop sind nicht gemessen.
+  `s3.us-east-1.amazonaws.com`). Ein Eintrag öffnet den übergeordneten Namen
+  nicht für die Namensauflösung (mit dem Eintrag `www.example.org` löst
+  `example.org` nicht auf). Teilen sich beide Namen eine IP-Adresse, ist diese
+  nach der Auflösung des eingetragenen Namens auch bei einer Verbindung über die
+  Adresse offen. Einen Eintrag der Form `*.example.org` gibt es nicht: Tragen Sie
+  `example.org` ein, `u-boot` weist den Eintrag mit diesem Hinweis ab.
+- **Namen hinter einem CNAME:** Zeigt die DNS-Antwort eines erlaubten Namens
+  über einen `CNAME` auf einen Namen außerhalb der Liste, war der erlaubte Name
+  in den drei gemessenen Fällen erreichbar, ohne dass der Zielname eingetragen
+  wurde; der Zielname selbst löst nicht auf. Die drei Fälle (`www.mozilla.org`,
+  `files.pythonhosted.org`, `deb.debian.org`) liegen alle hinter demselben
+  CDN-Anbieter und wurden einmal gemessen. Ob jeder `CNAME`-Fall so läuft, ist
+  nicht gemessen, und es gibt keinen Test dafür.
+- **Messstand:** Docker 29.5.2 auf Colima 0.10.3 (arm64) und `dnsmasq` 2.91;
+  Linux-Hosts und Docker Desktop sind nicht gemessen.
 - Für `claude-code` nimmt die Liste nur den API-Host und die npm-Registry auf; die
   Hosts der Anmeldung sowie von Telemetrie, Fehlerberichten, MCP-Connectors,
   Updates und Plugins sind **nicht aufgenommen** und werden bei Bedarf in
