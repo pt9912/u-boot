@@ -123,13 +123,17 @@ test-docker: ## Run //go:build docker integration tests against the host docker 
 	@#    leere Verzeichnisse statt der vom Test geschriebenen
 	@#    Dateien (slice-v1-otel T3 CI-Diagnose: Collector
 	@#    `failed to get config: ... is a directory`).
+	@#
+	@#    `-timeout 30m`: das e2e-Paket braucht zwischen sieben und elf
+	@#    Minuten (Colima, arm64), das Standardlimit von `go test` sind
+	@#    zehn; der CI-Job (`integration.yml`) hat 30 Minuten.
 	$(DOCKER_BUILD) --target test-docker-tools -t $(IMAGE):test-docker-tools .
 	docker run --rm --network=host \
 	    -v "$(CURDIR)":/src -w /src \
 	    -v /var/run/docker.sock:/var/run/docker.sock \
 	    -v /tmp:/tmp \
 	    $(IMAGE):test-docker-tools \
-	    go test -tags docker ./...
+	    go test -tags docker -timeout 30m ./...
 
 coverage-gate: ## Coverage threshold gate (bootstrap-aware, LH-FA-BUILD-008).
 	$(DOCKER_BUILD) $(NO_CACHE_FILTER_COVERAGE) \
