@@ -436,7 +436,8 @@ func TestE2E_SandboxDevcontainer_NestedPodman(t *testing.T) {
 		t.Errorf("without relaxations: exit %d, want 11:\n%s", code, out)
 	}
 
-	// Degradation: without /dev/fuse and policy warn → vfs fallback.
+	// Degradation: container started without the /dev/fuse device and
+	// policy warn → vfs fallback.
 	var noFuse []string
 	for _, a := range runArgs {
 		if a != "--device=/dev/fuse" {
@@ -450,6 +451,47 @@ func TestE2E_SandboxDevcontainer_NestedPodman(t *testing.T) {
 	}
 }
 
+// LH-FA-DEV-007: a `/dev/fuse` that is missing on the container host is no
+// degradation step; the engine refuses to start the container, so the start
+// script never runs. The host device is replaced by a path that does not
+// exist; the same runArgs with the real device start the container.
+func TestE2E_SandboxDevcontainer_MissingHostFuseDeviceRefusesStart(t *testing.T) {
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Fatalf("docker CLI not on PATH: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+	dir := generateSandboxProject(ctx, t, "podman", "warn")
+	image := "uboot-e2e-sandbox-nofusehost:" + strings.ReplaceAll(filepath.Base(dir), "/", "-")
+	if out, code := dockerOutput(ctx, t, "build", "-q", "-t", image, filepath.Join(dir, ".devcontainer")); code != 0 {
+		t.Fatalf("docker build failed:\n%s", out)
+	}
+	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
+
+	runArgs := generatedRunArgs(t, dir)
+	if out, code := dockerOutput(ctx, t, append(append([]string{"run", "--rm"}, runArgs...), image, "true")...); code != 0 {
+		t.Fatalf("control: container with the generated runArgs does not start (exit %d):\n%s", code, out)
+	}
+
+	var missing []string
+	replaced := false
+	for _, a := range runArgs {
+		if a == "--device=/dev/fuse" {
+			a, replaced = "--device=/dev/fuse-nonexistent", true
+		}
+		missing = append(missing, a)
+	}
+	if !replaced {
+		t.Fatalf("generated runArgs carry no --device=/dev/fuse: %v", runArgs)
+	}
+	out, code := dockerOutput(ctx, t, append(append([]string{"run", "--rm"}, missing...), image, "true")...)
+	if code == 0 || !strings.Contains(out, "error gathering device information") {
+		t.Errorf("missing host device: exit %d, want an engine refusal (error gathering device information):\n%s", code, out)
+	}
+}
+
+// LH-FA-DEV-007: a container started without the `/dev/fuse` device (changed
+// runArgs) ends the start script with exit 11 under the `fail` policy.
 func TestE2E_SandboxDevcontainer_FailPolicyWithoutFuse(t *testing.T) {
 	if _, err := exec.LookPath("docker"); err != nil {
 		t.Fatalf("docker CLI not on PATH: %v", err)

@@ -52,10 +52,11 @@ func TestDoctor_SandboxRuntime(t *testing.T) {
 		{"docker without sandbox profile", sandboxYAMLHead + "  sandbox:\n    nestedRuntime: docker\n", true, true, false, domain.SeverityWarn, "no effect"},
 		{"docker with sandbox profile", sandboxYAMLDocker, true, false, false, domain.SeverityOK, "--privileged"},
 		{"fuse available", sandboxYAMLPodman, true, true, false, domain.SeverityOK, "/dev/fuse is available"},
-		{"fuse missing, warn policy", sandboxYAMLPodman, true, false, false, domain.SeverityWarn, "vfs"},
-		{"fuse missing, fail policy", sandboxYAMLPodman + "    onUnavailable: fail\n", true, false, false, domain.SeverityError, "`fail`"},
+		{"fuse missing, warn policy", sandboxYAMLPodman, true, false, false, domain.SeverityError, "refuses to start"},
+		{"fuse missing, fail policy", sandboxYAMLPodman + "    onUnavailable: fail\n", true, false, false, domain.SeverityError, "refuses to start"},
 		{"userns restricted by AppArmor sysctl", sandboxYAMLPodman, true, true, true, domain.SeverityError, "apparmor_restrict_unprivileged_userns"},
 		{"non-linux host cannot tell", sandboxYAMLPodman + "    onUnavailable: fail\n", false, false, false, domain.SeverityOK, "cannot be determined"},
+		{"non-linux host without fuse names the engine refusal", sandboxYAMLPodman, false, false, false, domain.SeverityOK, "refuses to start without /dev/fuse and /dev/net/tun"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -157,13 +158,13 @@ func TestDoctor_SandboxEgress(t *testing.T) {
 // checks carries exactly one of the two `--quiet` flags or none. The
 // flags sit on the item, not on the ID: `devcontainer.sandbox.runtime`
 // and `devcontainer.sandbox.egress` also emit items of the other class
-// or of none. `vfs` is a degradation fallback (exception 2); the
-// credential and egress warn items are security relaxations (exception
-// 1); the `nestedRuntime` "no effect" item is a configuration message
-// and carries neither flag; the `fail`-policy error carries none (its
-// Severity shows it). Host-side, only the `vfs` fallback is
-// determinable; the daemon and egress fallbacks arise at container
-// start.
+// or of none. The credential and egress warn items are security
+// relaxations (exception 1); the `nestedRuntime` "no effect" item is a
+// configuration message and carries neither flag; a missing `/dev/fuse`
+// on the container host is an error under both policies and carries
+// none (its Severity shows it). Host-side, no degradation fallback is
+// determinable: the `vfs`, daemon and egress fallbacks arise at
+// container start.
 func TestDoctor_SandboxFallbackFlagIsOnTheItem(t *testing.T) {
 	t.Parallel()
 	gitCfg := func(url string) string { return "[remote \"origin\"]\n\turl = " + url + "\n" }
@@ -176,8 +177,8 @@ func TestDoctor_SandboxFallbackFlagIsOnTheItem(t *testing.T) {
 		fallback   bool
 		relaxation bool
 	}{
-		{"runtime: vfs fallback (warn policy)", sandboxYAMLPodman, nil, "devcontainer.sandbox.runtime", domain.SeverityWarn, true, false},
-		{"runtime: fuse missing, fail policy is an error", sandboxYAMLPodman + "    onUnavailable: fail\n", nil, "devcontainer.sandbox.runtime", domain.SeverityError, false, false},
+		{"runtime: fuse missing, warn policy is an unflagged error", sandboxYAMLPodman, nil, "devcontainer.sandbox.runtime", domain.SeverityError, false, false},
+		{"runtime: fuse missing, fail policy is an unflagged error",sandboxYAMLPodman + "    onUnavailable: fail\n", nil, "devcontainer.sandbox.runtime", domain.SeverityError, false, false},
 		{"runtime: no effect without sandbox, same ID", sandboxYAMLHead + "  sandbox:\n    nestedRuntime: podman\n", nil, "devcontainer.sandbox.runtime", domain.SeverityWarn, false, false},
 		{"runtime: nested docker is OK and stays unflagged", sandboxYAMLDocker, nil, "devcontainer.sandbox.runtime", domain.SeverityOK, false, false},
 		{"egress: no effect without sandbox", sandboxYAMLHead + "  sandbox:\n    egress:\n      enabled: true\n", nil, "devcontainer.sandbox.egress", domain.SeverityWarn, false, true},

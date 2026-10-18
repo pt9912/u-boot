@@ -72,9 +72,9 @@ func nestedRuntimeSet(dc *ubootYAMLDevcontainer) bool {
 // of view. Skips (OK) without the sandbox profile or without a
 // nested runtime; warns when `nestedRuntime: podman` has no effect;
 // checks `/dev/fuse` on Linux hosts only (on macOS/Colima the engine
-// runs in a VM, so the host cannot tell — the container start
-// script checks there). `onUnavailable: fail` turns the finding into
-// an error (exit 11).
+// runs in a VM, so the host cannot tell). A missing `/dev/fuse` is
+// an error (exit 11) under both `onUnavailable` values and carries
+// no fallback flag; `/dev/net/tun` is not checked.
 func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) domain.Diagnostic {
 	cfg, err := s.loadUbootYAML(baseDir)
 	if err != nil || cfg.Devcontainer == nil || !nestedRuntimeSet(cfg.Devcontainer) && !profileIsSandbox(cfg.Devcontainer) {
@@ -97,7 +97,7 @@ func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) d
 	}
 	if linux, _ := s.fs.Exists("/proc/sys/kernel/osrelease"); !linux {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityOK,
-			Message: "Nested Podman prerequisites cannot be determined from this host (container engine runs in a VM); the container start script checks /dev/fuse and user namespaces."}
+			Message: "Nested Podman prerequisites cannot be determined from this host (container engine runs in a VM); the container engine refuses to start without /dev/fuse and /dev/net/tun on the container host, and the container start script checks user namespaces."}
 	}
 	if restricted, _ := s.fs.ReadFile(apparmorUsernsSysctl); strings.TrimSpace(string(restricted)) == "1" {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityError,
@@ -108,17 +108,12 @@ func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) d
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityOK,
 			Message: "/dev/fuse is available for nested Podman."}
 	}
-	sev := domain.SeverityWarn
-	msg := "/dev/fuse is not available on this host; nested Podman will fall back to vfs storage (slower) (LH-FA-DEV-007)."
-	if onUnavailablePolicy(dc) == string(domain.OnUnavailableFail) {
-		sev = domain.SeverityError
-		msg = "/dev/fuse is not available on this host and devcontainer.sandbox.onUnavailable is `fail` (LH-FA-DEV-007)."
-	}
-	return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: sev, Message: msg,
-		Hint: "Load the fuse module (`modprobe fuse`) or set `devcontainer.sandbox.onUnavailable` to `warn`.",
-		// Only the warn variant is a fallback; under `fail` the item
-		// is an error and `--quiet` shows it as such.
-		DegradationFallback: sev == domain.SeverityWarn}
+	// A missing device on the container host is not a degradation
+	// step: the engine refuses to start the container, whatever
+	// `onUnavailable` says. The item is an error and no fallback.
+	return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityError,
+		Message: "/dev/fuse is not available on this host; the container engine refuses to start the sandbox container with `--device=/dev/fuse` (LH-FA-DEV-007, exit 11).",
+		Hint:    "Load the fuse module (`modprobe fuse`) on the container host, or set `devcontainer.sandbox.nestedRuntime` to `none`."}
 }
 
 // checkSandboxCredentials implements LH-FA-DEV-009 (warn only). It is
