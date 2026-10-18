@@ -17,13 +17,13 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-In Arbeit: [`slice-v1-cli-dry-run-log-would`](slice-v1-cli-dry-run-log-would.md) (Hygiene nach `v0.11.0`, kein Release-Inhalt).
+In Arbeit: [`slice-v1-cli-dry-run-log-would`](../done/slice-v1-cli-dry-run-log-would.md) (Hygiene nach `v0.11.0`, kein Release-Inhalt).
 
 ## Nächste Wellen
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
-| Nach v0.11.0: Hygiene (kein Release-Inhalt) | [`slice-v1-release-cut-v0.11.0`](../done/slice-v1-release-cut-v0.11.0.md) liegt in `done/` | [`slice-v1-cli-dry-run-log-would`](../in-progress/slice-v1-cli-dry-run-log-would.md); [`slice-v1-harness-gofmt-und-depguard`](../open/slice-v1-harness-gofmt-und-depguard.md) | S |
+| Nach v0.11.0: Hygiene (kein Release-Inhalt) | [`slice-v1-release-cut-v0.11.0`](../done/slice-v1-release-cut-v0.11.0.md) liegt in `done/` | [`slice-v1-cli-dry-run-log-would`](../done/slice-v1-cli-dry-run-log-would.md); [`slice-v1-harness-gofmt-und-depguard`](../open/slice-v1-harness-gofmt-und-depguard.md) | S |
 | Harness-Scaffolding (Produkt) | [ADR-0011](../../adr/0011-agent-harness-scaffolding.md) accepted + Spec-Erweiterung + Lizenz-Check | `slice-vN-harness-bootstrap-scaffold` (noch kein Plan) | L |
 | Podman-first / Migration / Custom-Sources | Konkretisierung je Thema offen | `slice-vN-podman-formal`; `slice-later-migration` ([`LH-FA-CONF-006`](../../../../spec/lastenheft.md#lh-fa-conf-006--konfiguration-migrieren)); `slice-later-custom-data-sources` ([`LH-DA-004`](../../../../spec/lastenheft.md#lh-da-004--schema-migration)) | L |
 

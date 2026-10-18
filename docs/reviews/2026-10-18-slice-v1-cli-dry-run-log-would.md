@@ -9,7 +9,7 @@
 
 **Eingangs-Kontext:**
 
-- [`slice-v1-cli-dry-run-log-would`](../plan/planning/in-progress/slice-v1-cli-dry-run-log-would.md) (§1–§6)
+- [`slice-v1-cli-dry-run-log-would`](../plan/planning/done/slice-v1-cli-dry-run-log-would.md) (§1–§6)
 - Vorgänger [`slice-v1-cli-dry-run-would-formulierung`](../plan/planning/done/slice-v1-cli-dry-run-would-formulierung.md) (Zusammenfassung auf stdout)
 - [`LH-FA-CLI-007`](../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)
 - `AGENTS.md` (Hard Rules §3.2, §3.6, §3.7, §3.9, §3.10; §5)
@@ -22,7 +22,7 @@
 |---|---|---|---|---|---|---|
 | F-1 | LOW | Die Felder der Dry-Run-Zeile (`path`, `old`, `new`, `changed`, `items`) sind nicht gepinnt: Drei Mutationen (`l.Info(would)` ohne `args`, `"changed", 0` in `generateDevcontainer`, `"old", ""` im Egress-Pfad) ließen `make test` grün, obwohl Plan §3 „dieselben Felder“ zusagt. | Maintainability (Slice-Plan §3: „trägt dieselben Felder“) | `internal/hexagon/application/dryrun_log_test.go` · `infoMessages` (liest nur `e.Msg`) | ja — `make test` mit den drei Mutationen | Test pinnt Zusage „Felder unverändert“ nicht |
 | F-2 | LOW | Der Doc-Kommentar von `devcontainerWriteMessage` nennt die Nicht-Dry-Run-Zeile „im bisherigen Wortlaut“; das beschreibt einen Vorzustand statt der geltenden Zusage. | `AGENTS.md` §3.7, §3.9 (a) | `internal/hexagon/application/dryrun_log.go` · „sonst `<Aktion>` im bisherigen Wortlaut“ | Review-only | Kommentar beschreibt Vorzustand |
-| F-3 | INFO | Der Plan nennt `TestConfigSet_SilenceLoggerFalse_EmitsInfo (:72)`; das Symbol steht bei `:52`, `:72` ist die `t.Errorf`-Zeile darin. Symbol und Aussage stimmen. | `AGENTS.md` §3.10 | [`slice-v1-cli-dry-run-log-would`](../plan/planning/in-progress/slice-v1-cli-dry-run-log-would.md) §3 · „`TestConfigSet_SilenceLoggerFalse_EmitsInfo` (`:72`)“ | Review-only | Zeilenhinweis im Plan ungenau |
+| F-3 | INFO | Der Plan nennt `TestConfigSet_SilenceLoggerFalse_EmitsInfo (:72)`; das Symbol steht bei `:52`, `:72` ist die `t.Errorf`-Zeile darin. Symbol und Aussage stimmen. | `AGENTS.md` §3.10 | [`slice-v1-cli-dry-run-log-would`](../plan/planning/done/slice-v1-cli-dry-run-log-would.md) §3 · „`TestConfigSet_SilenceLoggerFalse_EmitsInfo` (`:72`)“ | Review-only | Zeilenhinweis im Plan ungenau |
 | F-4 | INFO | Der Doc-Kommentar von `applyAllowExternalFeatureSources` erwähnt den neuen Parameter `mode` nicht (kein Verhaltensfehler; `logWrite` trägt ihn). | Maintainability | `internal/hexagon/application/generate.go` · `func (s *GenerateService) applyAllowExternalFeatureSources(` | Review-only | Doc-Kommentar kennt neuen Parameter nicht |
 | F-5 | INFO | Der Zweig `would change` in `devcontainerWriteMessage` ist nicht erreichbar (`devcontainerAggregateAction` liefert nur `UpdatedBlock`, `Created`, `NoOp`) und ungetestet; `TestDryRunLog_GenerateDevcontainerUpdatedBlock` deckt `PreviewAndApply` nicht ab (andere Fälle in `TestDryRunLog_WriteLines` tun es). | Maintainability | `internal/hexagon/application/dryrun_log.go` · `return prefix + "would change"` | ja — `make test` (Zweig/Mutation) | Toter Rückfallzweig ohne Test |
 
