@@ -41,7 +41,7 @@ RUN apt-get update \
  && test "$(echo "$status" | awk '$2 == "VALIDSIG" {print $12}')" = "${PODMAN_SIGNING_KEY}" \
  && tar -xzf "podman-linux-${arch}.tar.gz" -C / --strip-components=1 --no-same-owner \
  && cd / \
- && rm -rf "$work" \
+ && rm -rf "$work" /README.md \
  && printf "unqualified-search-registries = ['docker.io']\n" > /etc/containers/registries.conf \
  && ln -sf /usr/local/bin/podman /usr/local/bin/docker \
  && (grep -q '^vscode:' /etc/subuid || echo 'vscode:100000:65536' >> /etc/subuid) \

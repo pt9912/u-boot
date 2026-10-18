@@ -402,6 +402,11 @@ func assertPodmanStaticDockerfile(t *testing.T, df string) {
 		`printf "unqualified-search-registries = ['docker.io']\n" > /etc/containers/registries.conf`,
 		"ln -sf /usr/local/bin/podman /usr/local/bin/docker",
 		"--no-same-owner",
+		// Architecture map: each supported architecture takes its own checksum,
+		// every other one stops the build (no silent fallback).
+		`amd64) sha256="${PODMAN_SHA256_AMD64}" ;; arm64) sha256="${PODMAN_SHA256_ARM64}" ;; *) echo "podman-static has no archive for $arch" >&2; exit 1 ;; esac`,
+		// The archive's README.md lands in / and is removed after the extraction.
+		`rm -rf "$work" /README.md`,
 		"COPY sandbox-init.sh /usr/local/bin/u-boot-sandbox-init",
 	} {
 		if !strings.Contains(df, want) {

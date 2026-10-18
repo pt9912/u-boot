@@ -429,7 +429,7 @@ func TestE2E_SandboxDevcontainer_NestedPodman(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("podman source/version checks failed (exit %d):\n%s", code, out)
 	}
-	for _, want := range []string{"PODMAN_MAJOR_6", "PODMAN_FROM_USR_LOCAL", "NO_DEBIAN_PODMAN", "REGISTRIES_DOCKER_IO", "DOCKER_IS_PODMAN"} {
+	for _, want := range []string{"PODMAN_MAJOR_6", "PODMAN_FROM_USR_LOCAL", "NO_DEBIAN_PODMAN", "NO_ARCHIVE_README", "REGISTRIES_DOCKER_IO", "DOCKER_IS_PODMAN"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("output lacks %s:\n%s", want, out)
 		}
@@ -485,6 +485,7 @@ sh /usr/local/bin/u-boot-sandbox-init
 podman --version | grep -q '^podman version 6\.' && echo PODMAN_MAJOR_6
 test "$(command -v podman)" = /usr/local/bin/podman && echo PODMAN_FROM_USR_LOCAL
 ! dpkg -l podman fuse-overlayfs passt 2> /dev/null | grep -q '^ii' && echo NO_DEBIAN_PODMAN
+test ! -e /README.md && echo NO_ARCHIVE_README
 grep -Fx "unqualified-search-registries = ['docker.io']" /etc/containers/registries.conf > /dev/null && echo REGISTRIES_DOCKER_IO
 test "$(readlink -f "$(command -v docker)")" = "$(readlink -f /usr/local/bin/podman)" && echo DOCKER_IS_PODMAN`
 
