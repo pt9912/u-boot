@@ -77,8 +77,8 @@ func buildRootCommand(a *App) *cobra.Command {
 	// security-relaxation items, and the
 	// warning lines of init/generate/up keep only security relaxations
 	// and degradation fallbacks, see [visibleWarnings]. The query
-	// commands (config get/list, logs, template list) keep their
-	// output. The selected verbosity also sets the logger level in the
+	// commands (config get/list, egress list, logs, template list) keep
+	// their output. The selected verbosity also sets the logger level in the
 	// PersistentPreRunE below.
 	a.verbosity = verbosityDefault
 	addVerbosityFlag(root, a, "quiet", verbosityQuiet,
@@ -133,6 +133,7 @@ func buildRootCommand(a *App) *cobra.Command {
 	root.AddCommand(newGenerateCommand(a))
 	root.AddCommand(newConfigCommand(a))
 	root.AddCommand(newTemplateCommand(a))
+	root.AddCommand(newEgressCommand(a))
 	return root
 }
 

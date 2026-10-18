@@ -216,6 +216,7 @@ The full change history of every release is in [`CHANGELOG.md`](CHANGELOG.md).
 | `logs [service…] [--follow] [--tail <n>] [--no-log-prefix] [--timestamps] [--since <t>] [--until <t>]` | Stream Compose logs (all services or a selection); `--follow` exits 0 on Ctrl-C; format flags and time range pass through to Compose. |
 | `generate <artifact>` | Idempotent block-replace via `U-BOOT MANAGED BLOCK` marker. |
 | `config [get\|set\|list] [<path>…]` | Whitelist-scoped reads/writes with two-stage schema validation; multi-path `get`, atomic multi-pair `set`, `list`. |
+| `egress list [--json]` | Show the egress allowlist of the sandbox devcontainer with the origin of each host; reads `u-boot.yaml` and `.git/config` only. |
 | `template list [--json]` | Browse the built-in template catalogue. |
 
 ## Prerequisites

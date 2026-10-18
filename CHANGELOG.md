@@ -17,6 +17,13 @@ this file is the same format applied to u-boot itself.
   A build whose version is not a release version (`X.Y.Z` or `X.Y.Z-rc.N`), such as a development or self-built binary, shows only the link to `main`;
   the tag link of a release candidate can lead nowhere once that pre-release tag has been deleted
   ([`LH-FA-CLI-002`](spec/lastenheft.md#lh-fa-cli-002--hilfeausgabe)).
+- `u-boot egress list` shows the egress allowlist and the origin of each host (`base`, `runtime`, `docker-apt`, `feature:<name>`, `clone`, `user`; a host that several origins
+  contribute lists all of them). The list is the one `u-boot generate devcontainer` writes into the start script: both come from one computation, and a test compares them.
+  The command reads only `u-boot.yaml` and `.git/config`, needs no network, no Docker and no running container, and changes nothing. It states whether the restriction is active (sandbox
+  profile and `devcontainer.sandbox.egress.enabled`) and, if it is not, shows the list that would apply on activation. The output also says that a name includes its subdomains and that the list
+  is computed from the project files, not read from a container. `--json` emits `data.{active,sandboxProfile,egressEnabled,cloneSource,hosts}`; the output stays under `--quiet`;
+  `--dry-run` and `--diff` are rejected with exit code `2`. An `origin` URL that `generate devcontainer` refuses is refused with exit code `10`
+  ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)).
 
 ### Changed
 

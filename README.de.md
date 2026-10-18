@@ -219,6 +219,7 @@ Die vollständige Änderungshistorie jedes Releases steht in [`CHANGELOG.md`](CH
 | `logs [service…] [--follow] [--tail <n>] [--no-log-prefix] [--timestamps] [--since <t>] [--until <t>]` | Compose-Logs streamen (alle Services oder eine Auswahl); `--follow` beendet sauber mit Exit 0 bei Ctrl-C. |
 | `generate <artifact>` | Idempotente Block-Ersetzung via `U-BOOT MANAGED BLOCK`-Marker. |
 | `config [get\|set\|list] [<pfad>…]` | Whitelist-skopierte Reads/Writes mit zweistufiger Schema-Validierung. |
+| `egress list [--json]` | Egress-Allowlist des Sandbox-Devcontainers mit der Herkunft je Host anzeigen; liest nur `u-boot.yaml` und `.git/config`. |
 | `template list [--json]` | Eingebauten Template-Katalog browsen. |
 
 ## Voraussetzungen

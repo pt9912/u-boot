@@ -40,6 +40,15 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 4. **Ohne aktive Restriktion:** zeigt der Befehl die Liste, die bei Aktivierung gälte, und sagt das in einer Zeile (so der Wortlaut des CR), oder er endet mit einem Hinweis ohne Liste; der Wortlaut des CR legt das fest.
 5. **Clone-Quelle ohne Remote und ungültige URL:** `resolveSandboxClone` macht daraus beim Erzeugen eine Warnung bzw. einen Fachfehler (Exit-Code `10`); der Befehl darf weder abbrechen noch raten — er lässt die Quelle `clone` weg und nennt den Grund, oder gibt den Fachfehler wie `generate` zurück. Der Architect wählt und begründet.
 
+**Umsetzungsstand der Entwurfsfragen** (Implementer, Vorschlag zur Prüfung durch den Reviewer; der Befehlsname `u-boot egress list` ist vom Projektinhaber freigegeben und steht im Lastenheft 0.14.0):
+
+1. **Ort:** Top-Level-Befehl `egress` mit dem Unterbefehl `list` (`internal/adapter/driving/cli/egress.go`, `newEgressCommand`); Verdrahtung über die Option `cli.WithEgressListUseCase` statt eines weiteren Positionsparameters von `cli.New`.
+2. **Zuschnitt:** `egressHostSources(dc, cloneURL)` (`internal/hexagon/application/devcontainer_egress.go`) liefert je Host die Quellen; `egressHosts` (die Liste des Startscripts, aufgerufen von `devcontainerTemplateData`) leitet die Host-Namen daraus ab, der Use Case `EgressListService.List` ruft dieselbe Funktion. Der Typ `driving.EgressHostEntry` und die Namen der Herkunft (`driving.EgressSource*`) liegen im Driving-Port (`internal/hexagon/port/driving/egress.go`): die CLI darf `application` nicht importieren, und die Namen sind Teil des `--json`-Vertrags.
+3. **Herkunfts-Namen:** `base`, `runtime`, `docker-apt`, `feature:<name>`, `clone`, `user`; je Host jede Quelle einmal, in der Reihenfolge `base`, `runtime`, `docker-apt`, Features nach Name, `clone`, `user`.
+4. **Ohne aktive Restriktion:** die Liste, die bei Aktivierung gälte, mit einer ersten Zeile `Egress restriction: not active (<Grund>)`; `--json` führt `active`, `sandboxProfile`, `egressEnabled` als Daten, keine Diagnose.
+5. **Clone-Quelle:** aufgelöst wie bei `generate devcontainer --sandbox` (`resolveSandboxClone`, auch bei nicht aktivem Profil, weil die Liste die bei Aktivierung geltende ist). Kein Remote und kein `sandbox.repository`: keine Quelle `clone`, `cloneSource: false` und ein Hinweis in der Ausgabe. Eine `origin`-URL, die `generate` abweist (Zugangsdaten, unzulässige Zeichen): derselbe Fachfehler, Exit-Code `10`, Diagnose [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil).
+6. **Unter `--quiet`:** die gesamte Ausgabe bleibt, byte-gleich zum Lauf ohne `--quiet` (Zustandszeile „nicht aktiv“, Tabelle und Hinweise). Begründung: [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) verlangt, dass der Befehl die fehlende Aktivierung nennt; die Zeile bestimmt, wie die Liste zu lesen ist, und ist damit Teil des Ergebnisses, kein Hinweis neben ihm. Ein Test pinnt die Gleichheit (`TestExecute_EgressList_QuietKeepsTheCompleteOutput`, `TestExecute_Quiet_QueryCommandsKeepTheirOutput`).
+
 ### Übergabe aus dem Review des CR (gelesen am 2026-10-18; Bedarf, kein Wortlaut)
 
 - **Abgrenzung in der Ausgabe:** Das Lastenheft ([`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)) nennt die Liste „die wirksame Allowlist“ und sagt, der Befehl zeige „dieselbe Liste, die `u-boot generate devcontainer` in das Startscript schreibt“; der Befehl liest nur `u-boot.yaml` und `.git/config`. Ein laufender Container trägt die Liste seines Image-Standes: gemessen in [`slice-v1-sandbox-egress-neuladen-entwurf`](../done/slice-v1-sandbox-egress-neuladen-entwurf.md), Stoppen und `devcontainer up` behält die alte Liste, erst ein Neuaufbau übernimmt die neue. Die Ausgabe trägt einen Hinweis darauf (Form entscheidet der Architect; ein Test pinnt ihn); der freigegebene Lastenheft-Wortlaut bleibt unverändert.
@@ -72,26 +81,29 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 ## 3. Plan (vor Code)
 
-Die Pfade stammen aus dem Quelltext (Lesestand 2026-10-18); der Implementer prüft jede Zeile vor der Änderung gegen den Code und trägt Abweichungen in die Evidence ein. Die Zeilen für Befehlsort und Typ-Ort hängen an der Entscheidung des Architect (§1, Fragen 1 und 2).
+Die Pfade stammen aus dem Quelltext (Lesestand 2026-10-18); der Implementer hat jede Zeile vor der Änderung gegen den Code geprüft. Befehlsort und Typ-Ort sind entschieden (§1, Umsetzungsstand der Entwurfsfragen). Stand der Tabelle: Umsetzung, abgeglichen gegen `git diff --stat` und `git status` (siehe unten).
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `internal/hexagon/application/devcontainer_egress.go` | update | `egressHosts` liefert je Host die Quellen; die `[]string`-Form wird daraus abgeleitet |
-| `internal/hexagon/application/devcontainer_sandbox.go` | update (bedingt) | `devcontainerTemplateData` nutzt die abgeleitete Form; bleibt der Aufruf gleich, entfällt die Zeile |
-| `internal/hexagon/application/egress_list.go` | neu | Use-Case-Implementierung: liest `u-boot.yaml` (`FileSystem`, `YAMLCodec`), Clone-Quelle über `effectiveCloneSource`; kein Docker-Port |
-| `internal/hexagon/port/driving/egress.go` | neu | Driving-Port: Request/Response des Use Case |
-| `internal/adapter/driving/cli/egress.go` | neu | Cobra-Befehl, menschenlesbare Ausgabe und `--json` (Hülle wie `config list`), Ablehnung von `--dry-run`/`--diff` |
-| `internal/adapter/driving/cli/root.go`, `internal/adapter/driving/cli/cli.go` | update | `AddCommand`-Zeile; Use Case an `cli.New` (Parameter oder Option) |
-| `cmd/uboot/main.go` | update | Service bauen und an `cli.New` übergeben |
-| `internal/hexagon/application/devcontainer_egress_test.go` (neu) und `generate_sandbox_test.go` | neu / update | Herkunft je Host, Gleichheit mit `hosts=` des Startscripts, Mehrfach-Herkunft, Aktivierungszustände — nach [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) |
-| `internal/hexagon/application/egress_list_test.go` | neu | Use Case: kein Remote, ungültige Clone-URL, keine `u-boot.yaml`, Egress aus |
-| `internal/adapter/driving/cli/egress_test.go`, `quiet_test.go` | neu / update | Ausgabeform, `--json`-Hülle, `--quiet` behält die Ausgabe ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)), Ablehnung von `--dry-run`/`--diff`, Hilfetext |
-| `internal/adapter/driving/cli/jsontestutil/coderegistry.go` | update (bedingt) | nur wenn der Befehl einen neuen Diagnose-Code einführt (`drift_test.go` verlangt dann [`SPEC-017`](../../../../spec/spezifikation.md#spec-017--diagnose-codes-der-doctor-prüfungen-code-registry)); im Plan: kein neuer Code |
+| `internal/hexagon/application/devcontainer_egress.go` | update | `egressHostSources` liefert je Host die Quellen; `egressHosts` (`[]string`, Liste des Startscripts) leitet daraus ab |
+| `internal/hexagon/application/devcontainer_sandbox.go` | **unverändert** (bedingt: entfallen) | `devcontainerTemplateData` ruft weiter `egressHosts(dc, cloneURL)` (gelesen: Zeile `data.EgressHosts = egressHosts(dc, cloneURL)`); kein Kommentar der Datei nennt die Form der Berechnung |
+| `internal/hexagon/application/egress_list.go` | neu | Use-Case-Implementierung `EgressListService`: liest `u-boot.yaml` (`FileSystem`, `YAMLCodec`), Clone-Quelle über `resolveSandboxClone` (→ `effectiveCloneSource`); kein Docker-Port |
+| `internal/hexagon/port/driving/egress.go` | neu | Driving-Port: Request/Response, Herkunfts-Namen, `ErrEgressFileSystem`, `EgressListUseCase` |
+| `internal/adapter/driving/cli/egress.go` | neu | Cobra-Befehl `egress`/`egress list`, menschenlesbare Ausgabe und `--json` (Hülle `newDataEnvelope`), Ablehnung von `--dry-run`/`--diff`, Fehlerabbildung |
+| `internal/adapter/driving/cli/root.go`, `internal/adapter/driving/cli/cli.go` | update | `AddCommand`-Zeile und Kommentar der Abfragebefehle bei `--quiet` (`root.go`); Feld, Option `WithEgressListUseCase`, Exit-Klassen (`ErrEgressFileSystem` → 14, `ErrEgressSubcommandRequired`/`ErrEgressPreviewNotApplicable` → 2) (`cli.go`) |
+| `cmd/uboot/main.go` | update | Service bauen und per `cli.WithEgressListUseCase` an `cli.New` übergeben |
+| `cmd/uboot/main_test.go` | update (nicht im Plan) | Nutzerpfad mit den echten Adaptern: `generate devcontainer`, dann `egress list --json`, Vergleich der Listen; der Befehl ändert keine Datei; belegt die Verdrahtung |
+| `internal/hexagon/application/devcontainer_egress_test.go` (neu) und `generate_sandbox_test.go` | neu / update | Herkunft je Host, Gleichheit mit `hosts=` des Startscripts, Mehrfach-Herkunft, Aktivierungszustände, schreibt nichts (`devcontainer_egress_test.go`); Golden-Literal der `hosts=`-Zeile (`generate_sandbox_test.go`) — nach [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) |
+| `internal/hexagon/application/egress_list_test.go` | neu | Use Case: kein Remote, `origin` mit Zugangsdaten (wie `generate`), keine `u-boot.yaml`, ungültige Konfiguration, Lese- und Prüffehler |
+| `internal/adapter/driving/cli/egress_test.go`, `quiet_modifying_test.go` | neu / update | Ausgabeform, `--json`-Hülle, `--quiet` behält die Ausgabe ([`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)), Fehlerfälle, Ablehnung von `--dry-run`/`--diff`, Hilfetext (`egress_test.go`); der Fall `egress list` in `TestExecute_Quiet_QueryCommandsKeepTheirOutput` (`quiet_modifying_test.go`; im Plan stand `quiet_test.go`, der Test liegt in `quiet_modifying_test.go`) |
+| `internal/adapter/driving/cli/jsontestutil/coderegistry.go` | **unverändert** (bedingt: entfallen) | der Befehl führt keinen neuen Diagnose-Code ein (gelesen: `DefaultAllowedCodes`; `mapEgressErrorToDiagnostic` emittiert nur [`LH-FA-INIT-001`](../../../../spec/lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren), [`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-NFA-REL-003`](../../../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)) |
 | `docs/user/benutzerhandbuch.md`, `README.md`, `README.de.md`, `CHANGELOG.md`, `harness/replay.md` | update | öffentlicher Vertrag und Golden-Zeile |
-| `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation |
-| diese Slice-Datei, `docs/plan/planning/observations/…/evidence/` | update | Umsetzungsstand, Closure (§7), Register |
+| `docs/maintainer/cli-json-contract.md` | update (nicht im Plan) | Abschnitt 6.10 (`egress list --json`), Zeile in der Mutations-Matrix; vermerkt, dass das Enum `command` in Lastenheft und Spezifikation `egress` nicht nennt |
+| `docs/plan/planning/in-progress/roadmap.md` | update | Arbeitszeile statt Ruhe-Marker |
+| `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation (nicht Teil der Umsetzung) |
+| diese Slice-Datei, `docs/plan/planning/observations/…/evidence/` | update | Umsetzungsstand (§1, §3), Closure (§7) und Register folgen bei der Closure |
 
-Abgleich der Tabelle gegen `git diff --stat` nach der **letzten** Fix-Runde (`AGENTS.md` §3.10); jede Zeile mit „bedingt“ wird als eingetreten oder entfallen markiert.
+Abgleich der Tabelle gegen `git diff --stat` nach der **letzten** Fix-Runde (`AGENTS.md` §3.10); jede Zeile mit „bedingt“ ist als eingetreten oder entfallen markiert (beide entfallen).
 
 ## 4. Trigger
 

@@ -74,6 +74,11 @@ type App struct {
 	// (LH-FA-UP-005; slice-v1-logs).
 	logsUseCase driving.LogsUseCase
 
+	// egressListUseCase implements `u-boot egress list`
+	// (LH-FA-DEV-008). Set through [WithEgressListUseCase]; nil makes
+	// the command fail with a wiring error.
+	egressListUseCase driving.EgressListUseCase
+
 	// getwd is the working-directory probe; defaults to os.Getwd.
 	// Tests inject a fake via [WithGetwd] so they do not depend on
 	// the host pwd.
@@ -115,6 +120,13 @@ type Option func(*App)
 // tests; production callers use [New] without options.
 func WithGetwd(fn func() (string, error)) Option {
 	return func(a *App) { a.getwd = fn }
+}
+
+// WithEgressListUseCase wires the use case behind `u-boot egress list`
+// (LH-FA-DEV-008). The wiring layer passes it; an option keeps the
+// positional parameters of [New] unchanged.
+func WithEgressListUseCase(uc driving.EgressListUseCase) Option {
+	return func(a *App) { a.egressListUseCase = uc }
 }
 
 // WithLogLevel hands the App a [*slog.LevelVar] that
@@ -436,7 +448,10 @@ func isFilesystemError(err error) bool {
 		// mapLogsErrorToDiagnostic checks the FS-Sentinel FIRST
 		// (T0-(e) R3-HIGH-1) so synthetic multi-`%w`-wraps with
 		// FS+Docker fall to FS+exit-14, not Docker+exit-11.
-		errors.Is(err, driving.ErrLogsFileSystem)
+		errors.Is(err, driving.ErrLogsFileSystem) ||
+		// LH-FA-DEV-008: ErrEgressFileSystem wraps the read of
+		// u-boot.yaml in `egress list` (exit 14, LH-NFA-REL-003).
+		errors.Is(err, driving.ErrEgressFileSystem)
 }
 
 // isUsageError detects two distinct classes of usage-level errors:
@@ -475,6 +490,7 @@ func isUsageError(err error) bool {
 		errors.Is(err, ErrFollowJSONNotSupported) ||
 		errors.Is(err, ErrDryRunNotApplicable) ||
 		errors.Is(err, ErrTemplateSubcommandRequired) ||
+		isEgressUsageError(err) ||
 		errors.Is(err, ErrServiceNameMissing) ||
 		errors.Is(err, driving.ErrArtifactUnknown) ||
 		errors.Is(err, driving.ErrTemplateConflictsWithFlag) {

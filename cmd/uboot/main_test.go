@@ -3,8 +3,11 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -103,4 +106,103 @@ func TestRun_InitHappyPath_WiresAllAdapters(t *testing.T) {
 	if !strings.Contains(stdout.String(), "demo") {
 		t.Errorf("stdout does not mention project name; got %q", stdout.String())
 	}
+}
+
+// LH-FA-DEV-008 at the user path with the real adapters: `generate devcontainer`
+// writes the egress script, `egress list` shows the same host list (with the
+// origin of each host), and the listing changes no file.
+func TestRun_EgressList_MatchesTheGeneratedStartScript(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	dir := t.TempDir()
+	t.Chdir(dir)
+	writeFile := func(rel, body string) {
+		t.Helper()
+		path := filepath.Join(dir, rel)
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeFile("u-boot.yaml", "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  profile: sandbox\n"+
+		"  features:\n    node:\n      enabled: true\n    claude-code:\n      enabled: true\n"+
+		"  sandbox:\n    egress:\n      enabled: true\n      allow:\n        - api.example.org\n")
+	writeFile(".git/config", "[remote \"origin\"]\n\turl = git@gitlab.example.org:o/r.git\n")
+
+	var out, errOut bytes.Buffer
+	if code := run(context.Background(), []string{"generate", "devcontainer"}, &out, &errOut); code != 0 {
+		t.Fatalf("generate devcontainer: exit %d, stderr=%q", code, errOut.String())
+	}
+	script, err := os.ReadFile(filepath.Join(dir, ".devcontainer", "egress-init.sh"))
+	if err != nil {
+		t.Fatalf("egress-init.sh: %v", err)
+	}
+	var scriptHosts []string
+	for _, line := range strings.Split(string(script), "\n") {
+		if rest, ok := strings.CutPrefix(line, `hosts="`); ok {
+			scriptHosts = strings.Fields(strings.TrimSuffix(rest, `"`))
+		}
+	}
+	if len(scriptHosts) == 0 {
+		t.Fatalf("no hosts= line in the script:\n%s", script)
+	}
+	before := snapshotTree(t, dir)
+
+	out.Reset()
+	errOut.Reset()
+	if code := run(context.Background(), []string{"egress", "list", "--json"}, &out, &errOut); code != 0 {
+		t.Fatalf("egress list: exit %d, stderr=%q", code, errOut.String())
+	}
+	var env struct {
+		Data struct {
+			Active bool `json:"active"`
+			Hosts  []struct {
+				Host    string   `json:"host"`
+				Sources []string `json:"sources"`
+			} `json:"hosts"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(out.Bytes(), &env); err != nil {
+		t.Fatalf("invalid JSON: %v\n%s", err, out.String())
+	}
+	var listed []string
+	origins := map[string]string{}
+	for _, h := range env.Data.Hosts {
+		listed = append(listed, h.Host)
+		origins[h.Host] = strings.Join(h.Sources, ",")
+	}
+	if !env.Data.Active || !reflect.DeepEqual(listed, scriptHosts) {
+		t.Errorf("active=%v; listing differs from the script:\n list   %v\n script %v", env.Data.Active, listed, scriptHosts)
+	}
+	for host, want := range map[string]string{
+		"gitlab.example.org": "clone", "api.example.org": "user", "registry.npmjs.org": "feature:claude-code,feature:node", "github.com": "base",
+	} {
+		if origins[host] != want {
+			t.Errorf("origin of %s = %q, want %q", host, origins[host], want)
+		}
+	}
+	if after := snapshotTree(t, dir); !reflect.DeepEqual(before, after) {
+		t.Errorf("egress list changed the project:\n before %v\n after  %v", before, after)
+	}
+}
+
+// snapshotTree maps every file below dir to its content.
+func snapshotTree(t *testing.T, dir string) map[string]string {
+	t.Helper()
+	files := map[string]string{}
+	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return err
+		}
+		body, err := os.ReadFile(path)
+		files[path] = string(body)
+		return err
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return files
 }

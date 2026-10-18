@@ -3,6 +3,7 @@ package application
 import (
 	"fmt"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -103,42 +104,69 @@ func cloneSourceHost(raw string) string {
 	return strings.ToLower(host)
 }
 
-// egressHosts computes the effective allowlist baked into the startup
-// script: default base + registries (podman, docker) + Docker APT host (docker) + enabled features + clone source host
-// + the user's `egress.allow`; sorted and de-duplicated (ADR-0012).
-func egressHosts(dc *ubootYAMLDevcontainer, cloneURL string) []string {
-	set := map[string]bool{}
-	add := func(hosts ...string) {
+// egressHostSources computes the effective allowlist with the origin of
+// every host: default base + registries (podman, docker) + Docker APT host
+// (docker) + enabled features + clone source host + the user's
+// `egress.allow`; sorted by host and de-duplicated (ADR-0012). A host
+// that several origins contribute lists each of them once, in the order
+// base, runtime, docker-apt, features (by key), clone, user. The startup
+// script ([egressHosts]) and `u-boot egress list` both take this list.
+func egressHostSources(dc *ubootYAMLDevcontainer, cloneURL string) []driving.EgressHostEntry {
+	origins := map[string][]string{}
+	add := func(source string, hosts ...string) {
 		for _, h := range hosts {
-			if h != "" {
-				set[h] = true
+			if h != "" && !slices.Contains(origins[h], source) {
+				origins[h] = append(origins[h], source)
 			}
 		}
 	}
-	add(egressBaseHosts()...)
+	add(driving.EgressSourceBase, egressBaseHosts()...)
 	if nestedPodman(dc) || nestedDocker(dc) {
-		add(egressRegistryHosts()...)
+		add(driving.EgressSourceRuntime, egressRegistryHosts()...)
 	}
 	if nestedDocker(dc) {
-		add(egressDockerAptHost())
+		add(driving.EgressSourceDockerAPT, egressDockerAptHost())
 	}
-	if dc != nil {
-		byFeature := egressFeatureHosts()
-		for name, f := range dc.Features {
-			if f.Enabled != nil && *f.Enabled {
-				add(byFeature[name]...)
-			}
+	byFeature := egressFeatureHosts()
+	for _, name := range enabledFeatureNames(dc) {
+		add(driving.EgressSourceFeaturePrefix+name, byFeature[name]...)
+	}
+	add(driving.EgressSourceClone, cloneSourceHost(cloneURL))
+	if dc != nil && dc.Sandbox != nil && dc.Sandbox.Egress != nil {
+		add(driving.EgressSourceUser, dc.Sandbox.Egress.Allow...)
+	}
+	entries := make([]driving.EgressHostEntry, 0, len(origins))
+	for h, sources := range origins {
+		entries = append(entries, driving.EgressHostEntry{Host: h, Sources: sources})
+	}
+	sort.Slice(entries, func(i, j int) bool { return entries[i].Host < entries[j].Host })
+	return entries
+}
+
+// enabledFeatureNames returns the keys of the devcontainer features with
+// `enabled: true`, sorted; nil for a nil or feature-less `dc`.
+func enabledFeatureNames(dc *ubootYAMLDevcontainer) []string {
+	if dc == nil {
+		return nil
+	}
+	names := make([]string, 0, len(dc.Features))
+	for name, f := range dc.Features {
+		if f.Enabled != nil && *f.Enabled {
+			names = append(names, name)
 		}
 	}
-	add(cloneSourceHost(cloneURL))
-	if dc != nil && dc.Sandbox != nil && dc.Sandbox.Egress != nil {
-		add(dc.Sandbox.Egress.Allow...)
+	sort.Strings(names)
+	return names
+}
+
+// egressHosts is the allowlist baked into the startup script: the host
+// names of [egressHostSources], sorted and without duplicates.
+func egressHosts(dc *ubootYAMLDevcontainer, cloneURL string) []string {
+	entries := egressHostSources(dc, cloneURL)
+	hosts := make([]string, 0, len(entries))
+	for _, e := range entries {
+		hosts = append(hosts, e.Host)
 	}
-	hosts := make([]string, 0, len(set))
-	for h := range set {
-		hosts = append(hosts, h)
-	}
-	sort.Strings(hosts)
 	return hosts
 }
 

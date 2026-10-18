@@ -57,8 +57,8 @@ grobes Verständnis von Docker Compose genügen.
 | Docker-Compose-Plugin ab 2.20 | dieselben Befehle |
 | `git` | `init` (außer mit `--no-git`) |
 
-**Ohne Docker** funktionieren `init`, `add`, `remove`, `generate`, `config` und
-`template list`. Nur `up`, `down` und `logs` brauchen einen erreichbaren
+**Ohne Docker** funktionieren `init`, `add`, `remove`, `generate`, `config`,
+`egress list` und `template list`. Nur `up`, `down` und `logs` brauchen einen erreichbaren
 Docker-Daemon. `u-boot doctor` meldet fehlende Werkzeuge als Befund.
 
 Podman ab 4.0 funktioniert als Ersatz für Docker, wenn `docker` auf `podman`
@@ -317,7 +317,7 @@ Diese Optionen gelten für jeden Befehl:
 | `--yes` | Rückfragen automatisch bejahen |
 | `--no-interactive` | nie fragen; bei einer nötigen Rückfrage abbrechen |
 | `--json` | maschinenlesbare Ausgabe |
-| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen). Vier Ausnahmen bleiben sichtbar: (1) Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`); in der Befehlsausgabe erzeugt nur `generate devcontainer` diese Warnungen, dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift, während die Meldung zu `nestedRuntime` ohne Sandbox-Profil entfällt; (2) Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in `doctor` und in der Warnungsausgabe von `generate devcontainer` und `init`, soweit der Host sie aus der Statusdatei des Containers lesen kann; ein nicht ermittelbarer Zustand ist kein Fallback und entfällt); (3) der Compose-Fortschritt von `up`; (4) die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. `doctor --quiet` zeigt Fehler-Einträge, Degradations-Fallbacks und die Warn-Einträge zu einer Sicherheitseigenschaft des Sandbox-Profils, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; Einzelheiten in Abschnitt [4.7](#47-die-umgebung-prüfen)). Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
+| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen). Vier Ausnahmen bleiben sichtbar: (1) Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`); in der Befehlsausgabe erzeugt nur `generate devcontainer` diese Warnungen, dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift, während die Meldung zu `nestedRuntime` ohne Sandbox-Profil entfällt; (2) Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in `doctor` und in der Warnungsausgabe von `generate devcontainer` und `init`, soweit der Host sie aus der Statusdatei des Containers lesen kann; ein nicht ermittelbarer Zustand ist kein Fallback und entfällt); (3) der Compose-Fortschritt von `up`; (4) die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. `doctor --quiet` zeigt Fehler-Einträge, Degradations-Fallbacks und die Warn-Einträge zu einer Sicherheitseigenschaft des Sandbox-Profils, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; Einzelheiten in Abschnitt [4.7](#47-die-umgebung-prüfen)). Die Abfragebefehle `config get`, `config list`, `egress list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
 | `--verbose` | zusätzliche Details; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist |
 | `--debug` | interne Diagnoseausgabe; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist (`--verbose` und `--debug` wirken gleich) |
 | `-v`, `--version` | Version anzeigen |
@@ -1242,6 +1242,52 @@ Standardmäßig erlaubt sind:
 | Clone-Quelle | der Host von `devcontainer.sandbox.repository` beziehungsweise `origin` |
 | Ihre Ergänzungen | `devcontainer.sandbox.egress.allow` (kleingeschriebene Hostnamen, ohne Schema, Port oder Wildcard) |
 
+**Die Liste anzeigen:** `u-boot egress list` zeigt die Liste, die
+`u-boot generate devcontainer` in das Startscript schreibt, und je Host seine
+Herkunft:
+
+```bash
+u-boot egress list
+u-boot egress list --json
+```
+
+```text
+Egress restriction: active.
+
+HOST                ORIGIN
+api.github.com      base
+ghcr.io             runtime, feature:homebrew
+registry.npmjs.org  feature:claude-code, feature:node
+```
+
+- **Herkunft:** `base` (immer), `runtime` (`nestedRuntime: podman` oder
+  `docker`), `docker-apt` (`nestedRuntime: docker`), `feature:<name>` (aktives
+  Feature), `clone` (Host von `devcontainer.sandbox.repository` beziehungsweise
+  `origin`) und `user` (`egress.allow`). Ein Host, den mehrere Quellen liefern,
+  nennt alle (zum Beispiel `ghcr.io` bei `podman` oder `docker` zusammen mit
+  `homebrew`).
+- **Was der Befehl liest:** nur `u-boot.yaml` und die Git-Konfiguration des
+  Projekts (`.git/config`). Er braucht weder Netz noch Docker noch einen
+  laufenden Container und ändert nichts. Ein Test vergleicht seine Liste mit der
+  Zeile `hosts=` des erzeugten `egress-init.sh`; beide stammen aus derselben
+  Berechnung.
+- **Aktiv oder nicht:** Die erste Zeile nennt, ob die Beschränkung für die
+  Konfiguration aktiv ist (Sandbox-Profil und `egress.enabled` gelten beide). Ist
+  sie es nicht, nennt die Zeile den Grund, und die Liste ist die, die bei
+  Aktivierung gälte.
+- **Clone-Quelle:** Ohne Remote `origin` in `.git/config` und ohne
+  `devcontainer.sandbox.repository` hat die Liste keinen Clone-Host; die Ausgabe
+  sagt das. Eine `origin`-URL, die `u-boot generate devcontainer` abweist
+  (Zugangsdaten oder unzulässige Zeichen), weist auch `egress list` ab
+  (Exit-Code 10).
+- **Nicht der Zustand des Containers:** Die Liste wird aus den Projektdateien
+  berechnet, nicht aus einem Container gelesen. Ein Container behält die Liste des
+  Images, aus dem er gebaut wurde (siehe den Aufzählungspunkt zum Neuaufbau
+  weiter unten).
+- **Optionen:** `--json` liefert `active`, `sandboxProfile`, `egressEnabled`,
+  `cloneSource` und `hosts` (je Host `host` und `sources`). `--quiet` ändert die
+  Ausgabe nicht. `--dry-run` und `--diff` weist der Befehl mit Exit-Code 2 ab.
+
 - **Wichtig:** Die Hosts eines Agenten kennt `u-boot` nur für das Feature
   `claude-code` (Zeile in der Tabelle). Die Hosts jedes anderen Agenten (zum
   Beispiel dessen API) tragen Sie in `egress.allow` ein.
@@ -1935,7 +1981,7 @@ nicht bereit, wenn der Container ohne `--privileged` startet; das Log
 
 **Brauche ich Docker, um `u-boot` zu benutzen?**
 Nur für `up`, `down`, `logs` und die Docker-Prüfungen von `doctor`. `init`,
-`add`, `remove`, `generate`, `config` und `template list` laufen ohne.
+`add`, `remove`, `generate`, `config`, `egress list` und `template list` laufen ohne.
 
 **Überschreibt `u-boot` meine Änderungen?**
 Nein. Außerhalb der verwalteten Bereiche wird nichts angefasst, und innerhalb
@@ -2026,6 +2072,7 @@ neuen Stand.
 | `u-boot doctor` | Umgebung prüfen | 4.7 |
 | `u-boot generate <artefakt>` | Artefakt erzeugen oder aktualisieren | 4.8–4.11 |
 | `u-boot config [get\|set\|list]` | Konfiguration lesen und ändern | 5 |
+| `u-boot egress list` | Egress-Liste mit Herkunft je Host anzeigen | 4.11 |
 | `u-boot template list` | Vorlagenkatalog anzeigen | 4.12 |
 | `u-boot completion <shell>` | Shell-Vervollständigung erzeugen | 2 |
 
@@ -2043,6 +2090,7 @@ neuen Stand.
 | `generate` | `--dry-run`, `--diff`; nur für `devcontainer`: `--sandbox`, `--allow-external-feature-sources` |
 | `config get` | `--json-array` |
 | `config set` | `--dry-run`, `--diff`, `--allow-external-feature-sources` |
+| `egress list` | keine eigenen; `--dry-run` und `--diff` werden mit Exit-Code 2 abgewiesen |
 
 ### Dienstekatalog
 
@@ -2132,6 +2180,7 @@ im JSON nicht; `--quiet` ändert die JSON-Ausgabe nicht.
 | `config get` | `path` und `value`; bei mehreren Pfaden oder `--json-array` `entries` |
 | `config list` | `entries`: Liste mit `path` und `value` |
 | `config set` | `path`, `oldValue`, `newValue`, `noOp` |
+| `egress list` | `active`, `sandboxProfile`, `egressEnabled`, `cloneSource` (Wahrheitswerte) und `hosts`: Liste mit `host` und `sources` (Herkunft) |
 | `template list` | Liste der Vorlagen mit `name`, `description`, `version`, `supportedAddOns`, `generatedFiles`, `requiredTools`, `variables` |
 
 Bei Fehlern von `config get` und `config set` enthält `data.hint` einen
@@ -2139,8 +2188,8 @@ Reparaturvorschlag: `command` (der Befehl zum Kopieren), `action` und `argument`
 
 **Besonderheiten:**
 
-- Ein Aufruf von `u-boot template --json` ohne `list` endet mit Exit-Code 2 und
-  gibt kein JSON aus. `u-boot logs --follow --json` ist ebenfalls ein
+- Ein Aufruf von `u-boot template --json` oder `u-boot egress --json` ohne `list`
+  endet mit Exit-Code 2 und gibt kein JSON aus. `u-boot logs --follow --json` ist ebenfalls ein
   Nutzungsfehler (Exit-Code 2).
 - `doctor` endet mit `warn` und Exit-Code 0, solange nur Warnungen vorliegen;
   mit `--strict` oder bei einem Fehler lautet der Exit-Code 11.

@@ -1173,3 +1173,29 @@ func TestGenerateDevcontainer_StatusDirectoryOnlyWithStartScripts(t *testing.T) 
 		})
 	}
 }
+
+// Golden (LH-FA-DEV-008, ADR-0012): the `hosts=` line of `egress-init.sh` is a
+// fixed string for a configuration with every source (Docker runtime, two
+// features with a shared host, clone source, user list with a duplicate). The
+// line is sorted and duplicate-free; a change of the computation that
+// reorders, drops or repeats a host changes this literal.
+func TestGenerateDevcontainer_SandboxEgress_HostsLineGolden(t *testing.T) {
+	t.Parallel()
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, egressConfig(featureNode+featureHomebrew, "    nestedRuntime: docker\n", "api.example.org", "ghcr.io"))
+	seedGitOrigin(t, fs, "git@gitlab.example.org:o/r.git")
+	if _, err := generateSandbox(svc, false); err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	script, err := fs.ReadFile(egressInitPath())
+	if err != nil {
+		t.Fatalf("read egress script: %v", err)
+	}
+	const want = `hosts="api.example.org api.github.com auth.docker.io codeload.github.com deb.debian.org ` +
+		`download.docker.com formulae.brew.sh ghcr.io github.com gitlab.example.org objects.githubusercontent.com ` +
+		`pkg-containers.githubusercontent.com production.cloudflare.docker.com production.cloudfront.docker.com ` +
+		`raw.githubusercontent.com registry-1.docker.io registry.npmjs.org security.debian.org"`
+	if !strings.Contains(string(script), "\n"+want+"\n") {
+		t.Errorf("the hosts= line differs from the golden line\nwant: %s\nscript:\n%s", want, script)
+	}
+}

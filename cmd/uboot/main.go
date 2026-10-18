@@ -158,9 +158,12 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	configSvc := application.NewConfigServiceWithFactory(configFSFactory, yamlAdapter, logAdapter)
 	templateListSvc := application.NewTemplateListService(templateCatalogAdapter, logAdapter)
 	logsSvc := application.NewLogsService(fsAdapter, dockerEngineAdapter, logAdapter)
+	// `egress list` (LH-FA-DEV-008) reads u-boot.yaml and .git/config through
+	// the filesystem port only: no Docker, no network, no write.
+	egressListSvc := application.NewEgressListService(fsAdapter, yamlAdapter, logAdapter)
 
 	// Driving adapter (CLI).
-	app := cli.New(version, initSvc, doctorSvc, addSvc, upSvc, downSvc, generateSvc, configSvc, templateListSvc, removeSvc, logsSvc, cli.WithLogLevel(logLevel))
+	app := cli.New(version, initSvc, doctorSvc, addSvc, upSvc, downSvc, generateSvc, configSvc, templateListSvc, removeSvc, logsSvc, cli.WithEgressListUseCase(egressListSvc), cli.WithLogLevel(logLevel))
 
 	err := app.Execute(ctx, args, stdout, stderr)
 	if err != nil {

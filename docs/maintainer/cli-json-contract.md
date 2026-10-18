@@ -1170,6 +1170,39 @@ behalten Kommentare via `yaml.v3.PatchScalar`.
 `diagnostic.message`-Emission durch `sanitizeBaseDir` (`cli/sanitize.go`,
 Pattern-Erbe up-down/remove) — absolute Pfade werden project-relativ.
 
+### 6.10 `u-boot egress list --json` (slice-v1-cli-egress-anzeige)
+
+`egress list --json` liefert den Minimalkontrakt mit `command: "egress"`,
+`subcommand: "list"`, `diagnostics: []`, `exitCode: 0` und dem `data`-Objekt
+(`egressListData`, `cli/egress.go`); der Zustand „Restriktion nicht aktiv" ist
+Datum, keine Diagnose:
+
+```json
+{ "status": "ok", "command": "egress", "subcommand": "list",
+  "diagnostics": [], "exitCode": 0,
+  "data": { "active": true, "sandboxProfile": true, "egressEnabled": true,
+            "cloneSource": true,
+            "hosts": [ { "host": "ghcr.io", "sources": ["runtime", "feature:homebrew"] } ] } }
+```
+
+- `sources` nennt jede Herkunft eines Hosts einmal, in der Reihenfolge `base`,
+  `runtime`, `docker-apt`, `feature:<name>` (nach Name), `clone`, `user`
+  (Konstanten `driving.EgressSource*`). `hosts` ist nach Host sortiert und leer
+  als `[]`.
+- Fehler (Exit 10: kein Projekt [LH-FA-INIT-001](../../spec/lastenheft.md#lh-fa-init-001--neues-projekt-initialisieren),
+  ungültige Konfiguration [LH-FA-CONF-002](../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration),
+  unzulässige `origin`-URL [LH-FA-DEV-006](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil); Exit 14:
+  [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern)) laufen durch
+  `mapEgressErrorToDiagnostic`; kein neuer Diagnose-Code.
+- `--dry-run` und `--diff` werden mit `ErrEgressPreviewNotApplicable` (Exit 2,
+  [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)) abgewiesen; bare `u-boot egress --json` ist wie bare
+  `template --json` ein RunE-Reject ohne Envelope (`ErrEgressSubcommandRequired`).
+- **Offener Spezifikationspunkt:** Das Enum von `command` ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run),
+  [SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json)) nennt `egress` nicht;
+  der Wert ist hier gesetzt, das Enum ist nachzuziehen (Lastenheft-Änderung braucht die Freigabe des
+  Projektinhabers, Spezifikation folgt in
+  [`slice-v2-spec-sandbox-egress-ollama`](../plan/planning/open/slice-v2-spec-sandbox-egress-ollama.md)).
+
 ---
 
 ## 7. Mutations-Matrix pro Subcommand
@@ -1193,6 +1226,7 @@ in derselben PR ergänzen.
 | `down` ([slice-v1-cli-json-dry-run-up-down](../plan/planning/done/slice-v1-cli-json-dry-run-up-down.md)) | — | — | — | — | — | — | — | — |
 | `logs` ([slice-v1-cli-json-dry-run-logs](../plan/planning/done/slice-v1-cli-json-dry-run-logs.md)) | — | — | — | — | — | — | — | — |
 | `config set` ([slice-v1-cli-json-dry-run-config](../plan/planning/done/slice-v1-cli-json-dry-run-config.md)) | ✓ (genau eine Zeile — `u-boot.yaml`; Scalar-`PatchScalar` oder Listen-`Marshal`-Rewrite) | — | — | — | — | — | — | — |
+| `egress list` ([slice-v1-cli-egress-anzeige](../plan/planning/in-progress/slice-v1-cli-egress-anzeige.md); read-only, nur `Exists`/`ReadFile` auf `u-boot.yaml` und `.git/config`) | — | — | — | — | — | — | — | — |
 
 Alle modifying-Subcommands sind damit migriert (`doctor`, `add`,
 `init`, `generate`, `remove`, `up`, `down`, `logs`, `config`).

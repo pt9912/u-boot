@@ -392,6 +392,11 @@ func TestExecute_Quiet_QueryCommandsKeepTheirOutput(t *testing.T) {
 			o, _, err := quietRun(t, newAppWithTemplateList(uc), a...)
 			return o, err
 		}, []string{"template", "list"}, "basic"},
+		{"egress list", func(a []string) (string, error) {
+			uc := &fakeEgressListUseCase{resp: activeEgressResponse()}
+			o, _, err := quietRun(t, newAppWithEgress(uc), a...)
+			return o, err
+		}, []string{"egress", "list"}, "api.github.com"},
 		{"logs", func(a []string) (string, error) {
 			uc := &fakeLogsUseCase{onLogs: func(req driving.LogsRequest) error {
 				_, err := req.OutputSink.Write([]byte("postgres  | ready\n"))
