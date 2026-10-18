@@ -1,7 +1,7 @@
 # Messprotokoll: Egress-Liste im laufenden Container
 
 Skripte, Dockerfiles und Rohdaten der Messung des Slice
-[`slice-v1-sandbox-egress-neuladen-entwurf`](../../../../../in-progress/slice-v1-sandbox-egress-neuladen-entwurf.md)
+[`slice-v1-sandbox-egress-neuladen-entwurf`](../../../../../done/slice-v1-sandbox-egress-neuladen-entwurf.md)
 (Ergebnisse und Grenzen: dort §3 *Messung*). Gemessen am 2026-10-18.
 
 **Messstand:** Docker 29.5.2 (Server, linux/arm64) auf Colima 0.10.3 (VM Ubuntu 24.04.4, Kernel 6.8.0-117-generic, 12 CPUs),

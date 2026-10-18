@@ -76,7 +76,7 @@ Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Code, Tests, Spezifikation, Handbuch, CHANGELOG** — [`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md) und [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md); das Lastenheft ist Zielbild, der Code folgt.
-- **Das Neu-Laden im laufenden Container** — [`slice-v1-sandbox-egress-neuladen-entwurf`](../in-progress/slice-v1-sandbox-egress-neuladen-entwurf.md); eine eigene Zusage mit Sicherheitsentscheidung.
+- **Das Neu-Laden im laufenden Container** — [`slice-v1-sandbox-egress-neuladen-entwurf`](../done/slice-v1-sandbox-egress-neuladen-entwurf.md); eine eigene Zusage mit Sicherheitsentscheidung.
 - **Eine Änderung der Default-Allowlist oder der Eingabe-Syntax** (Wildcard) — [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md).
 - **Die Anzeige des Zustands des laufenden Containers** (ob die Restriktion beim letzten Start griff) — das leistet `u-boot doctor` (`devcontainer.sandbox.fallback.egress`, [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung)); der neue Befehl bleibt offline und trifft keine Aussage über einen Container.
 

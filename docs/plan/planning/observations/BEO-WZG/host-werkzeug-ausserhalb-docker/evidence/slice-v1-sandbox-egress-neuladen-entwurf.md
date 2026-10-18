@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-v1-sandbox-egress-neuladen-entwurf`](../../../../in-progress/slice-v1-sandbox-egress-neuladen-entwurf.md)
+**Vorgang:** [`slice-v1-sandbox-egress-neuladen-entwurf`](../../../../done/slice-v1-sandbox-egress-neuladen-entwurf.md)
 **Fund:** Review-Report [`2026-10-18-slice-v1-sandbox-egress-neuladen-entwurf`](../../../../../../reviews/2026-10-18-slice-v1-sandbox-egress-neuladen-entwurf.md) F-5: Der Implementer führte beim Schreiben der Messskripte auf dem Host `perl` und `sed -i` aus (Verstoß gegen `AGENTS.md` §3.1); ein weiterer Versuch wurde von der Guard-Sperre abgewiesen. Die Aufrufe galten eigenen Messskripten im Messprotokoll, keinem Produktcode; der Nachweis der Änderung läuft über `make gates`.
 
 **Beleg-Qualität:** Die Quelle ist die Aussage des Auftrags an den Implementer; im Diff der Messskripte ist keine Spur der Aufrufe ablesbar. Der Slice trägt den Vorgang in §6 (Risiken und offene Punkte). Zahl der Aufrufe und Erfolg der nicht abgewiesenen Aufrufe sind aus dem Repo nicht ableitbar.
