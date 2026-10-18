@@ -1,0 +1,5 @@
+# Reine Formatierungs-Commits (kein Verhalten): git blame überspringt sie.
+# GitHub liest diese Datei automatisch; lokal einmalig:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+# slice-v1-harness-gofmt-und-depguard: Bestand formatiert (29 Go-Dateien)
+d94da2561469a7bdbec2d0f8b05fdee3315d37af
