@@ -1,6 +1,6 @@
 # ADR 0023: Podman im Sandbox-Devcontainer aus `podman-static` — gepinnte, signierte Release-Archive statt Debian-Paket
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Datum:** 2026-10-18
 
@@ -113,3 +113,4 @@ docker run --rm -i $RA --cap-add=NET_ADMIN mpod-egress-a sh < p5.sh   # Egress m
 | Datum | Ereignis | Verweis |
 |---|---|---|
 | 2026-10-18 | Entwurf mit Messprotokoll (Colima 0.10.3, Docker 29.5.2, arm64; Schalter 0; `amd64` unter Emulation); `Proposed`, `Accepted` setzt der Projektinhaber | Vereinbarung mit dem Projektinhaber |
+| 2026-10-18 | `Accepted` durch den Projektinhaber: Pin-Form f1 (Version 6.1.4, SHA-256 je Architektur, Primär-Fingerprint), Auslegung von [`LH-NFA-SEC-004`](../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (signiertes, gepinntes Binärarchiv ist kein verdecktes Skript), `registries.conf` nur mit `docker.io`, `vfs`-Fallback im Startscript (Entscheidung 5); Rückfall 5.8.x nicht ausgelöst | Vereinbarung mit dem Projektinhaber |
