@@ -159,7 +159,7 @@ Randbedingung aus [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [x] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
 - [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft.
 
 ## 3. Plan (vor Code)
 
@@ -196,6 +196,7 @@ Die Tabelle nennt jede Datei, die der Diff voraussichtlich berührt (§3.10 von 
 | `CHANGELOG.md` | update | Eintrag unter `[Unreleased]` (Added) | — |
 | `README.md`, `README.de.md` | unverändert | nennen „vier Ausweisungen“, keine Einzelheiten | — |
 | `docs/plan/planning/open/README.md`, `docs/plan/planning/next/README.md` | update | gelesen: die Zeile des CR in `open/README.md` und die Zeile dieses Slice in `next/README.md` verweisen auf `../done/slice-v1-sandbox-fallback-host-ausweisung.md`; `make slice-mv` zieht beide Verweise nach `done/` nach, die Zeile in `next/README.md` nennt den Stand ohne Chronik | — |
+| `docs/plan/planning/done/slice-cr-sandbox-fallback-ausweisung.md`, `docs/plan/planning/done/slice-cr-sandbox-fuse-startfehler.md`, `docs/plan/planning/done/slice-v1-sandbox-fallback-ausweisung.md` | update | reine Verweis-Nachzüge von `make slice-mv` (`../in-progress/` nach `../done/`), kein Inhalt | — |
 | `docs/plan/planning/in-progress/roadmap.md` | update | Ruhe-Marker „Nichts in Arbeit.“ entfernt, solange dieser Slice in `in-progress/` liegt (d-check `planning`), und nach dem Move wieder gesetzt; im Gesamtdiff der Range ohne Änderung | — |
 | `AGENTS.md` | update | §3.10: Überschrift mit dem Herkunfts-Anker des neuen Absatzes, zwei Absätze (Datei „unverändert“ durch gelesene Aussage belegen; Bedingung in Spec oder Handbuch mit Test oder streichen), Begründung (zehn Vorgänge); Entscheidung des Projektinhabers 2026-10-18, §7 | — |
 | `docs/plan/planning/observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/` (`observation.md`, `state.md`, `evidence/slice-cr-sandbox-fuse-startfehler.md`, `evidence/slice-v1-sandbox-fallback-host-ausweisung.md`) | neu | neue Beobachtung, zwei Vorgänge, `verkörpert` auf Entscheidung des Projektinhabers vor der Schwelle (§7) | — |
