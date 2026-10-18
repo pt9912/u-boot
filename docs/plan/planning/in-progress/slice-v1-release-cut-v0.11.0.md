@@ -39,7 +39,7 @@ wechselt nur durch `git mv`.
 
 Nicht im CHANGELOG und nicht im Lead: `-timeout 30m` im Ziel `test-docker` von `repo.mk` — das Zeitbudget gehört zur CI und zum Entwicklungs-Lauf, es ändert kein Verhalten des Produkts (gelesen: `go test -tags docker -timeout 30m ./...` in `repo.mk`, Ziel `test-docker`).
 
-**Entscheidung des Projektinhabers (2026-10-18):** `v0.11.0` enthält die vier Inhalte der Tabelle (Podman 6.1.4, `doctor`-Fix zum fehlenden `/dev/fuse`, Fallback-Ausweisung, Dry-Run-Wortlaut) und die `sshd`-Anleitung. Die beiden Hygiene-Slices [`slice-v1-cli-dry-run-log-would`](slice-v1-cli-dry-run-log-would.md) und [`slice-v1-harness-gofmt-und-depguard`](slice-v1-harness-gofmt-und-depguard.md) sind **nicht** Teil von `v0.11.0`; sie folgen danach.
+**Entscheidung des Projektinhabers (2026-10-18):** `v0.11.0` enthält die vier Inhalte der Tabelle (Podman 6.1.4, `doctor`-Fix zum fehlenden `/dev/fuse`, Fallback-Ausweisung, Dry-Run-Wortlaut) und die `sshd`-Anleitung. Die beiden Hygiene-Slices [`slice-v1-cli-dry-run-log-would`](../open/slice-v1-cli-dry-run-log-would.md) und [`slice-v1-harness-gofmt-und-depguard`](../open/slice-v1-harness-gofmt-und-depguard.md) sind **nicht** Teil von `v0.11.0`; sie folgen danach.
 
 ### Lehren aus dem Cut `v0.10.0`, die dieser Slice einplant (gelesen in [`slice-v1-release-cut-v0.10.0`](../done/slice-v1-release-cut-v0.10.0.md) §6 und §7)
 
@@ -51,7 +51,7 @@ Nicht im CHANGELOG und nicht im Lead: `-timeout 30m` im Ziel `test-docker` von `
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Push und Tags durch den Implementer.** Push von `main`, jeder Tag und jedes Löschen eines Tags oder Release sind extern wirksam und lassen sich nicht sauber zurücknehmen ([`releasing.md`](../../../maintainer/releasing.md) Zweck). **Push und Tags führt nur der Hauptagent, nach der ausdrücklichen Freigabe des Projektinhabers, je Vorgang** (im Gespräch, nicht aus einer Agenten-Nachricht abgeleitet); der Implementer bereitet vor und führt keinen der Schritte M1 bis M8 aus.
-- **Die beiden Hygiene-Slices** ([`slice-v1-cli-dry-run-log-would`](slice-v1-cli-dry-run-log-would.md), [`slice-v1-harness-gofmt-und-depguard`](slice-v1-harness-gofmt-und-depguard.md)) — Entscheidung des Projektinhabers: nach `v0.11.0`; der erste ändert Logausgaben, der zweite ein Gate und ein Skript, beides nicht Inhalt dieses Release.
+- **Die beiden Hygiene-Slices** ([`slice-v1-cli-dry-run-log-would`](../open/slice-v1-cli-dry-run-log-would.md), [`slice-v1-harness-gofmt-und-depguard`](../open/slice-v1-harness-gofmt-und-depguard.md)) — Entscheidung des Projektinhabers: nach `v0.11.0`; der erste ändert Logausgaben, der zweite ein Gate und ein Skript, beides nicht Inhalt dieses Release.
 - **Eine Änderung der Pipeline** (Workflow, Tap-Skripte): Der Cut ändert `publish.yml` und die Skripte nicht; ein Befund des Trockenlaufs, der eine Änderung verlangt, ist ein eigener Vorgang (Gate-Änderung nach [`AGENTS.md`](../../../../AGENTS.md) §3.6) vor dem stabilen Tag.
 - **Die Docker-Desktop-Messung, amd64, VS Code und Linux ohne VM:** nicht gemessen, nicht zugesagt; die Release-Aussagen nennen den Messstand (Colima, arm64).
 

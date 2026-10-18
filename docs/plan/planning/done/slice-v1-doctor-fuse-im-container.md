@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** v0.11.0 — **Blocker des Cuts** [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md): Ohne diesen Slice geht das Verhalten als Regression ins Release (Begründung §1, Gefundener Stand).
+**Welle:** v0.11.0 — **Blocker des Cuts** [`slice-v1-release-cut-v0.11.0`](../in-progress/slice-v1-release-cut-v0.11.0.md): Ohne diesen Slice geht das Verhalten als Regression ins Release (Begründung §1, Gefundener Stand).
 
 **Bezug:** [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Degradations-Absatz, Lastenheft 0.13.0; **unverändert**),
 [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Exit-Code `11`),
@@ -77,7 +77,7 @@ Umfang des Gates in (b). Der Befund betrifft nur den Zweig `/dev/fuse`. Der Zwei
 - **Eine neue Prüfung von `/dev/net/tun`** — das Lastenheft sagt „prüft `/dev/net/tun` nicht“; neue Zusage, anderer Vorgang.
 - **Der entfernte `DOCKER_HOST`** (offenes Risiko des CR: Prüfung lokal, Engine entfernt) — gleiche Familie (Host-Aussage aus einem Prozess, der den Host nicht sieht), aber anderer Auslöser und andere Erkennung; bleibt weiter offen im CR-§6, keine Handlung hier.
 - **Erzeugte Dateien (`runArgs`, Startscripts), Golden Cases** — unverändert (gelesen: `podmanRelaxations` in `internal/hexagon/application/devcontainer_sandbox.go` und `sandbox-init.sh.tmpl` berühren den Befund nicht).
-- **Push, Tag, Release** — Sache des Cuts [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md); dieser Slice blockiert ihn nur.
+- **Push, Tag, Release** — Sache des Cuts [`slice-v1-release-cut-v0.11.0`](../in-progress/slice-v1-release-cut-v0.11.0.md); dieser Slice blockiert ihn nur.
 
 ## 2. Definition of Done
 
@@ -91,7 +91,7 @@ Umfang des Gates in (b). Der Befund betrifft nur den Zweig `/dev/fuse`. Der Zwei
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag; Beobachtungs-Register fortgeschrieben (`BEO-DOK/plan-aussage-ueber-code` und `BEO-DOK/spec-bedingung-ohne-code-entsprechung`, je eine Evidence-Datei) oder begründet nicht.
 - [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
 - [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft.
-- [x] Der Release-Cut [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md) trägt den Slice als erfüllten Blocker (§4, DoD) und seine Lead-Zeile zu `doctor` und `/dev/fuse` stimmt mit dem CHANGELOG überein (Schreiber: Planner bei der Closure).
+- [x] Der Release-Cut [`slice-v1-release-cut-v0.11.0`](../in-progress/slice-v1-release-cut-v0.11.0.md) trägt den Slice als erfüllten Blocker (§4, DoD) und seine Lead-Zeile zu `doctor` und `/dev/fuse` stimmt mit dem CHANGELOG überein (Schreiber: Planner bei der Closure).
 
 ## 3. Plan (vor Code)
 
@@ -112,7 +112,7 @@ Reihenfolge: Entscheidung E1/E2 → Test zuerst (Container-Fälle rot) → Code 
 | `docs/user/benutzerhandbuch.md` | update | (1) Absatz „`/dev/net/tun` braucht das Netzwerk …“ (Sandbox-Abschnitt): „… meldet ein fehlendes `/dev/fuse` auf einem Linux-Host als Fehler (Exit-Code 11)“ → „… auf einem Linux-Host, nicht aus einem Container“; (2) Absatz nach der Degradationstabelle („Ein fehlendes `/dev/fuse` auf dem Container-Host ist keine Stufe dieser Tabelle …“) um den Container-Fall ergänzt; (3) Abschnitt `doctor`, Aufzählung „Läuft `u-boot` im Container, werden die vier Host-Prüfungen übersprungen“: nennt zusätzlich die Prüfung des Geräts (`devcontainer.sandbox.runtime`) als übersprungen (Info) und den Weg über den Eintrag zum Containerstart; (4) Abschnitt zum Runtime-Image, Aufzählung „`u-boot doctor` sieht Ihre Werkzeuge nicht“: ein Satz, dass die Gerätprüfung dort ebenfalls entfällt. Ohne Anforderungs-, ADR- oder Spec-Kennungen, Stand statt Chronik ([`AGENTS.md`](../../../../AGENTS.md) §5 Zeile 6). Zeile der Prüfungs-Tabelle (`devcontainer.sandbox.runtime`, „verschachtelte Runtime … passend konfiguriert“) gelesen, unverändert. |
 | `CHANGELOG.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | `[Unreleased]` · Changed, Eintrag „Sandbox devcontainer (`nestedRuntime: podman`): a missing `/dev/fuse` on the container host is a start error …“: der Satz zu `doctor` („reports a missing `/dev/fuse` on a Linux host as an **error** …“) wird auf „on a Linux host, not from inside a container“ begrenzt; **ehrliche Aussage gegenüber `v0.10.0`:** in `v0.10.0` las `doctor` im Container das Device des Containers und meldete ein Fehlen dort als **Warnung** (Exit-Code `0`) mit „fall back to vfs storage“; dieses Release stuft das nicht mehr als Fehler des Container-Hosts ein und prüft das Device im Container gar nicht (Info, Exit-Code `0`); **Regression-Hinweis nur für Linux-Hosts außerhalb eines Containers** (Warnung → Fehler, Exit-Code `11`). Der Zwischenstand „Fehler im Container“ wurde nie veröffentlicht (kein Eintrag dazu). Kennungen und Verweise nur im CHANGELOG erlaubt. |
 | `README.md`, `README.de.md` | prüfen, unverändert | gelesen: Status-Block nennt „`nestedRuntime: podman` projects need `/dev/fuse` and `/dev/net/tun` on the container host“ (Voraussetzung, keine Aussage zu `doctor`); stimmt mit dem Soll überein. |
-| `docs/plan/planning/open/slice-v1-release-cut-v0.11.0.md` | update (Planner) | §4 Start: dritter Blocker; §2 DoD zweites Item: Slice liegt in `done/`; die Lead-/Inhaltszeile zu `/dev/fuse` in §1 wird bei der Closure dieses Slice gegen den CHANGELOG-Wortlaut gehalten (steht im DoD oben). |
+| `docs/plan/planning/in-progress/slice-v1-release-cut-v0.11.0.md` | update (Planner) | §4 Start: dritter Blocker; §2 DoD zweites Item: Slice liegt in `done/`; die Lead-/Inhaltszeile zu `/dev/fuse` in §1 wird bei der Closure dieses Slice gegen den CHANGELOG-Wortlaut gehalten (steht im DoD oben). |
 | `docs/plan/planning/open/README.md`, `docs/plan/planning/in-progress/roadmap.md` | update (Planner) | Bestandszeile dieses Slice (Lösungsstand „(b) entschieden“ vom Implementer nachgezogen); Roadmap-Zeile `v0.11.0` (Trigger, Slices); nur die Zeile. Der Ruhe-Marker „Nichts in Arbeit.“ der Roadmap (`## Offene Wellen`) ist durch den Verweis auf diesen Slice ersetzt, solange er in `in-progress/` liegt (d-check `planning`; Implementer, Commit nach dem Praxislauf). Der `git mv` nach `done/` zieht die Links über `make slice-mv` nach. |
 | `docs/reviews/<Datum>-slice-v1-doctor-fuse-im-container.md`, `docs/reviews/<Datum>-verification-slice-v1-doctor-fuse-im-container.md` | neu | Review-Report und Verification Evidence (nicht im Implementer-Diff). |
 | `docs/plan/planning/observations/BEO-DOK/plan-aussage-ueber-code/evidence/slice-v1-doctor-fuse-im-container.md`, `docs/plan/planning/observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/evidence/slice-v1-doctor-fuse-im-container.md` | neu (Closure) | je ein Beleg (§1 „Was der CR nicht bedacht hat“); `state.md` beider Beobachtungen nennt den Vorgang als Rückfall nach Verkörperung (der Stand `verkörpert` bleibt; eine weitere Schärfung ist nicht entschieden). Die Regel in §3.10 bestand schon und hat den Vorgang nicht verhindert. |
@@ -145,7 +145,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
 **Start** (`next` → `in-progress`): Der Projektinhaber hat E1 (Lösung) und E2 (Umfang des Gates) entschieden; kein anderer Slice liegt in `in-progress/` (WIP-Limit 1). Der Slice liegt in `open/`; Weg `open/` → `next/` → `in-progress/` per reinem `git mv` je Schritt (`make slice-mv SLICE=slice-v1-doctor-fuse-im-container TO=<next|in-progress>`), der Roadmap-Marker (Ruhe-Marker aus, Zeiger an) geht in einen eigenen Commit direkt nach dem Move, beide im selben Push.
-**Er muss vor dem Cut [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md) in `done/` liegen** (dritter Blocker, dort §4).
+**Er muss vor dem Cut [`slice-v1-release-cut-v0.11.0`](../in-progress/slice-v1-release-cut-v0.11.0.md) in `done/` liegen** (dritter Blocker, dort §4).
 
 **Rückführungen — vorab benannt:**
 
@@ -154,7 +154,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 
 ## 5. Closure-Trigger
 
-DoD vollständig, Review-Report und Verification Evidence (mit Praxislauf) liegen vor, Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben (§7), Register fortgeschrieben. Danach ist der Blocker des Cuts [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md) erfüllt; Push und Tag bleiben Sache des Cuts nach Freigabe des Projektinhabers.
+DoD vollständig, Review-Report und Verification Evidence (mit Praxislauf) liegen vor, Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben (§7), Register fortgeschrieben. Danach ist der Blocker des Cuts [`slice-v1-release-cut-v0.11.0`](../in-progress/slice-v1-release-cut-v0.11.0.md) erfüllt; Push und Tag bleiben Sache des Cuts nach Freigabe des Projektinhabers.
 
 ## 6. Risiken und offene Punkte
 
@@ -211,7 +211,7 @@ DoD vollständig, Review-Report und Verification Evidence (mit Praxislauf) liege
 
 **Folge-Slices:** keine angelegt. Offen für den Projektinhaber: der Kommentar-Commit in `doctor.go` (siehe offener Hinweis; Implementer-Weg), die Messung auf Podman, Kubernetes und einem Linux-Host ohne VM (Gegenprobe), der entfernte `DOCKER_HOST` (offenes Risiko im CR, unverändert).
 
-**Roadmap und Cut:** Der Ruhe-Marker „Nichts in Arbeit.“ steht nach dem Move wieder unter „Offene Wellen“ (`in-progress/` trägt keinen Slice). Der Cut [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md) trägt alle drei Blocker als erfüllt; offen bleiben Push (nur nach Freigabe des Projektinhabers), der CI-Beleg `integration-docker` auf dem Cut-Stand (einzige `amd64`-Evidenz für Podman 6.1.4) und der Trockenlauf des Tap-Pfads M-T.
+**Roadmap und Cut:** Der Ruhe-Marker „Nichts in Arbeit.“ steht nach dem Move wieder unter „Offene Wellen“ (`in-progress/` trägt keinen Slice). Der Cut [`slice-v1-release-cut-v0.11.0`](../in-progress/slice-v1-release-cut-v0.11.0.md) trägt alle drei Blocker als erfüllt; offen bleiben Push (nur nach Freigabe des Projektinhabers), der CI-Beleg `integration-docker` auf dem Cut-Stand (einzige `amd64`-Evidenz für Podman 6.1.4) und der Trockenlauf des Tap-Pfads M-T.
 
 **Drei Paarungen:** Anker (kein `liegt in`-Feld, nichts verkörpert) · Folge-Slice (keiner) · Register (zwei Pfade, `evidence/` je nicht leer: `BEO-DOK/plan-aussage-ueber-code`, `BEO-DOK/spec-bedingung-ohne-code-entsprechung`) — nach dem `git mv` nach `done/` geprüft.
 

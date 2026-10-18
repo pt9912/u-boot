@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** ohne Welle — kein Release-Bezug festgelegt; der Slice läuft **nach** dem Cut [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md) und ist nicht Teil von `v0.11.0` (Entscheidung des Projektinhabers 2026-10-18). Herkunft: Beobachtung [`BEO-CLI/dry-run-log-vergangenheitsform`](../observations/BEO-CLI/dry-run-log-vergangenheitsform/observation.md) (Zähler 1), Slice [`slice-v1-cli-dry-run-would-formulierung`](../done/slice-v1-cli-dry-run-would-formulierung.md) (Verification, Abschnitt Diskrepanzen und Beobachtungen).
+**Welle:** ohne Welle — kein Release-Bezug festgelegt; der Slice läuft **nach** dem Cut [`slice-v1-release-cut-v0.11.0`](../in-progress/slice-v1-release-cut-v0.11.0.md) und ist nicht Teil von `v0.11.0` (Entscheidung des Projektinhabers 2026-10-18). Herkunft: Beobachtung [`BEO-CLI/dry-run-log-vergangenheitsform`](../observations/BEO-CLI/dry-run-log-vergangenheitsform/observation.md) (Zähler 1), Slice [`slice-v1-cli-dry-run-would-formulierung`](../done/slice-v1-cli-dry-run-would-formulierung.md) (Verification, Abschnitt Diskrepanzen und Beobachtungen).
 
 **Bezug:** [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Dry-Run: nichts wird geschrieben, die Ausgabe behauptet kein Ergebnis),
 [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Verbosity und Logging).
@@ -93,7 +93,7 @@ Jede Aussage über Code steht mit Fundstelle (gelesen am 2026-10-18; Zeilennumme
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`next` → `in-progress`): der Cut [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md) liegt in `done/` (Entscheidung des Projektinhabers 2026-10-18: nach `v0.11.0`); kein anderer Slice liegt in `in-progress/` (WIP-Limit 1).
+**Start** (`next` → `in-progress`): der Cut [`slice-v1-release-cut-v0.11.0`](../in-progress/slice-v1-release-cut-v0.11.0.md) liegt in `done/` (Entscheidung des Projektinhabers 2026-10-18: nach `v0.11.0`); kein anderer Slice liegt in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benannt:**
 
