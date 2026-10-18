@@ -429,7 +429,7 @@ func (s *GenerateService) generateChangelog(_ context.Context, req driving.Gener
 			return driving.GenerateResponse{}, fmt.Errorf("generate: write %q: %w: %w",
 				targetPath, driving.ErrGenerateFileSystem, err)
 		}
-		s.logger.Info("generate: created",
+		logWrite(s.logger, req.PreviewMode, "generate: created", "generate: would create",
 			"artifact", req.Artifact.String(), "path", relPath, "project", cfg.Project.Name)
 		return driving.GenerateResponse{
 			Artifact: req.Artifact,
@@ -484,7 +484,7 @@ func (s *GenerateService) generateChangelog(_ context.Context, req driving.Gener
 		return driving.GenerateResponse{}, fmt.Errorf("generate: write %q: %w: %w",
 			targetPath, driving.ErrGenerateFileSystem, err)
 	}
-	s.logger.Info("generate: repaired Unreleased header",
+	logWrite(s.logger, req.PreviewMode, "generate: repaired Unreleased header", "generate: would repair Unreleased header",
 		"artifact", req.Artifact.String(), "path", relPath, "project", cfg.Project.Name)
 	return driving.GenerateResponse{
 		Artifact: req.Artifact,
@@ -644,7 +644,7 @@ func (s *GenerateService) generateManagedFile(
 			return driving.GenerateResponse{}, fmt.Errorf("generate: write %q: %w: %w",
 				targetPath, driving.ErrGenerateFileSystem, err)
 		}
-		s.logger.Info("generate: created",
+		logWrite(s.logger, req.PreviewMode, "generate: created", "generate: would create",
 			"artifact", req.Artifact.String(), "path", relPath, "project", cfg.Project.Name)
 		return driving.GenerateResponse{
 			Artifact: req.Artifact,
@@ -703,7 +703,7 @@ func (s *GenerateService) generateManagedFile(
 		return driving.GenerateResponse{}, fmt.Errorf("generate: write %q: %w: %w",
 			targetPath, driving.ErrGenerateFileSystem, err)
 	}
-	s.logger.Info("generate: updated block",
+	logWrite(s.logger, req.PreviewMode, "generate: updated block", "generate: would update block",
 		"artifact", req.Artifact.String(), "path", relPath, "project", cfg.Project.Name)
 	return driving.GenerateResponse{
 		Artifact: req.Artifact,
@@ -820,7 +820,7 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 			"forwardPorts", ports, "features", len(features))
 		return driving.GenerateResponse{Artifact: req.Artifact, Action: action, Warnings: warnings}, nil
 	}
-	s.logger.Info("generate devcontainer: "+action.String(),
+	s.logger.Info(devcontainerWriteMessage(req.PreviewMode, action),
 		"project", cfg.Project.Name,
 		"forwardPorts", ports, "features", len(features),
 		"changed", changed)
@@ -901,7 +901,7 @@ func (s *GenerateService) writeDevcontainerPhase(
 			return fail(err)
 		}
 	}
-	if err := s.applyAllowExternalFeatureSources(req.BaseDir, req.AllowExternalFeatureSources); err != nil {
+	if err := s.applyAllowExternalFeatureSources(req.BaseDir, req.AllowExternalFeatureSources, req.PreviewMode); err != nil {
 		return fail(err)
 	}
 	// LH-FA-DEV-006: `--sandbox` persists the profile.
@@ -1167,7 +1167,7 @@ func validateAllowExternalFeatureSourcesEntries(sources []string) error {
 // Failure modes mirror the [ConfigService.setFeatureSourcesAllow]
 // list-path: invalid URL → [driving.ErrConfigValueInvalid] (Code 10);
 // FS error → [driving.ErrGenerateFileSystem] (Code 14).
-func (s *GenerateService) applyAllowExternalFeatureSources(baseDir string, sources []string) error {
+func (s *GenerateService) applyAllowExternalFeatureSources(baseDir string, sources []string, mode driving.PreviewMode) error {
 	if len(sources) == 0 {
 		return nil
 	}
@@ -1215,7 +1215,7 @@ func (s *GenerateService) applyAllowExternalFeatureSources(baseDir string, sourc
 		return fmt.Errorf("generate devcontainer: write %q: %w: %w",
 			yamlPath, driving.ErrGenerateFileSystem, err)
 	}
-	s.logger.Info("generate devcontainer: allowlist updated",
+	logWrite(s.logger, mode, "generate devcontainer: allowlist updated", "generate devcontainer: would update allowlist",
 		"added", len(merged)-len(existing), "total", len(merged))
 	return nil
 }

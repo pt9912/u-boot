@@ -280,7 +280,7 @@ func (s *ConfigService) Set(_ context.Context, req driving.ConfigSetRequest) (dr
 	}
 
 	newValue := extractConfigValueLenient(patchedCfg, req.Path)
-	logger.Info("config set: updated",
+	logWrite(logger, req.PreviewMode, "config set: updated", "config set: would update",
 		"path", req.Path.String(), "old", oldValue, "new", newValue)
 	warnings := maybeWarnOrphanFeatureActivation(logger, patchedCfg, req.Path)
 	resp := driving.ConfigSetResponse{
@@ -1002,7 +1002,7 @@ func (s *ConfigService) setFeatureSourcesAllow(
 			driving.ErrConfigFileSystem, path, err)
 	}
 
-	logger.Info("config set: updated",
+	logWrite(logger, req.PreviewMode, "config set: updated", "config set: would update",
 		"path", req.Path.String(), "old", oldValue, "new", newValue)
 	resp := driving.ConfigSetResponse{
 		Path: req.Path, OldValue: oldValue, NewValue: newValue,

@@ -190,7 +190,7 @@ func (s *ConfigService) setEgressAllow(
 	if err := fs.WriteFile(path, rewritten, defaultFileMode); err != nil {
 		return driving.ConfigSetResponse{}, fmt.Errorf("%w: write %q: %w", driving.ErrConfigFileSystem, path, err)
 	}
-	logger.Info("config set: updated", "path", req.Path.String(), "old", oldValue, "new", newValue)
+	logWrite(logger, req.PreviewMode, "config set: updated", "config set: would update", "path", req.Path.String(), "old", oldValue, "new", newValue)
 	resp := driving.ConfigSetResponse{Path: req.Path, OldValue: oldValue, NewValue: newValue}
 	if recorder != nil {
 		resp.PlannedFiles = mapCaptureToPlannedFiles(recorder.Captured(), req.BaseDir)

@@ -145,7 +145,7 @@ func (s *ConfigService) SetMany(_ context.Context, req driving.ConfigSetManyRequ
 	if err := fs.WriteFile(path, cur, defaultFileMode); err != nil {
 		return driving.ConfigSetManyResponse{}, fmt.Errorf("%w: write %q: %w", driving.ErrConfigFileSystem, path, err)
 	}
-	logger.Info("config set (many): updated", "items", len(req.Items))
+	logWrite(logger, req.PreviewMode, "config set (many): updated", "config set (many): would update", "items", len(req.Items))
 	if recorder != nil {
 		resp.PlannedFiles = mapCaptureToPlannedFiles(recorder.Captured(), req.BaseDir)
 	}
