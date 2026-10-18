@@ -1,1 +1,1 @@
-**Stand:** offen — Trigger: der erste CI-Lauf nach dem Push zeigt, ob `TestE2E_SandboxDevcontainer_NestedPodman_Build` auf `ubuntu-latest` läuft oder überspringt (`.github/workflows/integration.yml`).
+**Stand:** offen — Trigger „erster CI-Lauf nach dem Push“ ist eingetreten (`integration-docker` 39123929768 grün, `internal/e2e` 461,895 s), belegt aber nichts: der Aufruf läuft ohne `-v`, ein Skip ist nicht von einem Pass zu trennen; der Beleg bleibt aus, bis `-v` im CI-Aufruf steht (Gate-Änderung, Entscheidung des Projektinhabers).
