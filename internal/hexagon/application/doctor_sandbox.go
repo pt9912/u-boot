@@ -110,7 +110,7 @@ func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) d
 	}
 	if s.inContainer() {
 		return domain.Diagnostic{ID: checkIDSandboxRuntime, Severity: domain.SeverityInfo,
-			Message: "/dev/fuse not checked: u-boot is running inside a container, and its /dev/fuse is the device of this container, not of the container host; a sandbox container started without the device is reported by devcontainer.sandbox.fallback.vfs (LH-FA-DEV-007).",
+			Message: "/dev/fuse not checked: u-boot is running inside a container, and its /dev/fuse is the device of this container, not of the container host; whether a sandbox container was started without the device is reported by devcontainer.sandbox.fallback.vfs as far as its status file is readable (LH-FA-DEV-007).",
 			Hint:    "Run `u-boot doctor` on the container host to check /dev/fuse."}
 	}
 	if fuse, _ := s.fs.Exists("/dev/fuse"); fuse {

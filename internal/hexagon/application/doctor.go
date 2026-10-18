@@ -274,7 +274,8 @@ const hostHintSkippedInContainer = "host check skipped: u-boot is running inside
 	"slice-v0.1.1-doctor-container-awareness for the full rationale."
 
 // inContainer is the runtime gate the four host-prerequisite
-// checks use to short-circuit. It returns false when the
+// checks and checkSandboxRuntime (its `/dev/fuse` branch) use to
+// short-circuit. It returns false when the
 // RuntimeEnvironment port is nil (pre-v0.1.1 wiring stays
 // unchanged), preserving the pre-skip behaviour for legacy
 // constructors and tests that pass nil.

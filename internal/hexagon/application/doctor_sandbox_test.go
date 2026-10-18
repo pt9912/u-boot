@@ -125,7 +125,7 @@ func TestDoctor_SandboxRuntime_InContainer(t *testing.T) {
 				if d.Severity != domain.SeverityInfo || d.DegradationFallback {
 					t.Errorf("got %v fallback=%v %q, want info without fallback", d.Severity, d.DegradationFallback, d.Message)
 				}
-				for _, want := range []string{"inside a container", "devcontainer.sandbox.fallback.vfs"} {
+				for _, want := range []string{"inside a container", "devcontainer.sandbox.fallback.vfs", "status file is readable"} {
 					if !strings.Contains(d.Message, want) {
 						t.Errorf("message %q lacks %q", d.Message, want)
 					}
