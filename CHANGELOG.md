@@ -11,6 +11,15 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Changed
+
+- `--dry-run` no longer logs a write as done. The INFO lines on stderr that report a write of `config set` and `generate` now read in the conditional when nothing was
+  written: `config set: would update`, `config set (many): would update`, `generate: would create`, `generate: would update block`,
+  `generate: would repair Unreleased header`, `generate devcontainer: would create`, `generate devcontainer: would update block` and
+  `generate devcontainer: would update allowlist`. Without `--dry-run` (also with `--diff` alone) the lines keep their past tense (`config set: updated`, `generate: created`, …); levels, fields,
+  the stdout summary, `--json` and the exit codes are unchanged. A script that matched the old stderr wording of a dry run must match the new one;
+  `--json` is the contract for machines ([`LH-FA-CLI-007`](spec/lastenheft.md#lh-fa-cli-007--dry-run)).
+
 ## [0.11.0] - 2026-10-18
 
 Eleventh release. **Podman 6.1.4 in the sandbox devcontainer, a missing `/dev/fuse` as a start error, host-side disclosure of the degradation fallbacks, "Would …" dry-run wording.**

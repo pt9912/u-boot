@@ -300,6 +300,14 @@ allein schreibt und meldet die Vergangenheitsform. Die Meldung „nichts zu tun�
 (`… already up to date; no changes.`) und die `--json`-Ausgabe sind in beiden
 Fällen gleich.
 
+Auch die Logzeilen auf stderr, die ein Schreiben melden, behaupten im `--dry-run`
+nichts als geschehen: `config set` und `generate` schreiben sie im Konjunktiv
+(`config set: would update`, `generate: would create`, `generate: would update block`,
+`generate devcontainer: would update allowlist`). Ohne `--dry-run` und bei `--diff`
+allein stehen sie in der Vergangenheitsform (`config set: updated`, `generate: created`).
+Die Pegel bleiben: Die Zeilen erscheinen auf der Standardstufe und entfallen
+mit `--quiet`.
+
 ### Allgemeine Optionen
 
 Diese Optionen gelten für jeden Befehl:
