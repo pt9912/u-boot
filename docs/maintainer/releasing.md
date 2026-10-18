@@ -54,7 +54,7 @@ führt die Dateinamen mit `~`. Stabile Tags haben nur eine Schreibweise.
 ## 3. Vorbereitung (ein Commit auf `main`)
 
 Der Cut folgt dem Muster der Release-Cut-Slices (zuletzt
-[`slice-v1-release-cut-v0.9.0`](../plan/planning/done/slice-v1-release-cut-v0.9.0.md)):
+[`slice-v1-release-cut-v0.10.0`](../plan/planning/done/slice-v1-release-cut-v0.10.0.md)):
 
 1. **CHANGELOG** (`CHANGELOG.md`): `## [Unreleased]` bleibt als leerer Anker; der bisherige
    Inhalt wandert unter `## [x.y.z] - <Tag-Datum>` mit kurzem Lead-Absatz. Compare-Links am
@@ -84,6 +84,26 @@ make test-docker      # Integrationstests gegen die echte Docker Engine
 make fullbuild        # ci + Runtime-Image-Build
 ```
 
+**Trockenlauf des Tap-Pfads** (vor dem stabilen Tag, ohne Netz, ohne Schreiben ins Tap; im Docker,
+zum Beispiel im Image `u-boot:test` aus `make test`, mit dem Arbeitsbaum als schreibgeschütztem Mount).
+Der Job `tap` läuft nur bei stabilen Tags; ein Vorab-Tag probt ihn nicht (§1, §7). Der Trockenlauf
+führt deshalb die Skripte des Jobs gegen eine Fixture aus:
+
+1. `scripts/homebrew-formula-fill.sh vX.Y.Z <SHA256SUMS-Fixture> scripts/homebrew-formula.rb.tmpl <Ausgabe>`
+   erzeugt die Formel (Fixture: vier Plattform-Digests, Muster `sumsFull` in
+   `cmd/uboot/homebrew_scripts_test.go`).
+2. `scripts/tap-formula-check.sh vX.Y.Z <Ausgabe>` endet mit Exit `0`; mit dem Tag des Vorgängers
+   endet er mit Exit `1`.
+3. `scripts/tap-nachzug.sh` läuft mit `TAP_TOKEN` (Dummy) und `TAG=vX.Y.Z` und mit Stellvertretern für
+   `curl` (kopiert die Fixture-Formel an das Ziel von `-o`) und `git` (protokolliert die Aufrufe,
+   schreibt nichts) im `PATH`. Erwartet: das Protokoll zeigt `clone`, `add`, `commit -m u-boot X.Y.Z`
+   und `push`; mit dem Tag des Vorgängers bricht das Skript vor `clone` ab.
+
+Der Lauf steht im Release-Cut-Slice mit Befehl und Ausgabe. **Er beweist nicht:** die Bedingung
+`needs.publish.outputs.is_stable == 'true'` und den Schritt im Workflow, den echten `curl` gegen das
+Release-Asset, den echten `git push` und das Token. Das bleibt dem ersten stabilen Lauf (§6)
+vorbehalten; der Trockenlauf ersetzt ihn nicht.
+
 Zusätzlich: `main` ist auf `origin/main` gepusht und der **letzte CI-Lauf auf `main` ist
 grün** (`gh run list --limit 3`). Ein roter `image-scan` blockiert den Release — typischer
 Anlass ist ein neuer Go-stdlib-Advisory; dann den Go-Pin heben (`Dockerfile` `ARG
@@ -103,7 +123,8 @@ git push origin vX.Y.Z      # löst publish aus
 
 Optional zuerst ein Vorab-Tag (`vX.Y.Z-rc.1`), um die Kette ohne `:latest`, Formel und
 Tap-Commit zu proben; er lässt sich danach löschen (`gh release delete`, `git push --delete
-origin <tag>`, GHCR-Tag entfernen).
+origin <tag>`, GHCR-Tag entfernen). Der Vorab-Tag läuft den Zweig `is_stable == true` und den Job
+`tap` **nicht**; wer ihn als Probe führt, benennt in der Closure, welche Zweige er nicht lief.
 
 ## 6. Nach dem Push kontrollieren
 
