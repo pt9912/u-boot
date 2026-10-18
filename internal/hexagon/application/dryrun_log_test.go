@@ -11,10 +11,10 @@ import (
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
-// pastTense sind die Endungen und Wörter, die ein eingetretenes Ergebnis
-// melden; im Dry-Run darf keine Info-Zeile eines Schreibpfads eines davon
-// tragen (LH-FA-CLI-007, slice-v1-cli-dry-run-log-would).
-var pastTense = []string{"updated", "created", "repaired"}
+// pastTense liefert die Wörter, die ein eingetretenes Ergebnis melden; im
+// Dry-Run darf keine Info-Zeile eines Schreibpfads eines davon tragen
+// (LH-FA-CLI-007, slice-v1-cli-dry-run-log-would).
+func pastTense() []string { return []string{"updated", "created", "repaired"} }
 
 // dryRunLogCase fährt einen Schreibpfad mit dem gegebenen Vorschau-Modus
 // und liefert den Logger, der alle Zeilen mitgeschnitten hat.
@@ -150,7 +150,7 @@ func TestDryRunLog_WriteLines(t *testing.T) {
 				t.Errorf("dry-run INFO carries past tense line %q: %q", tc.done, msgs)
 			}
 			for _, m := range msgs {
-				for _, w := range pastTense {
+				for _, w := range pastTense() {
 					if strings.Contains(m, w) {
 						t.Errorf("dry-run INFO line %q contains past tense %q", m, w)
 					}
