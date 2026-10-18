@@ -8,11 +8,11 @@ Devcontainer-Konfiguration, Service-Add-Ons (PostgreSQL, Keycloak,
 OpenTelemetry, …) und wiederkehrende Artefakte (README, CHANGELOG,
 `.env.example`).
 
-> **Stand:** aktuelle Version `v0.10.0` (GHCR-Image, sechs Plattform-Binaries,
+> **Stand:** aktuelle Version `v0.11.0` (GHCR-Image, sechs Plattform-Binaries,
 > `.deb`-/`.rpm`-Pakete, Homebrew-Tap). Der Devcontainer-Katalog hat 13 Features, darunter `sshd` und `claude-code`.
-> `podman build` läuft im Sandbox-Devcontainer (gemessen auf Colima, arm64; Docker Desktop, amd64 und CI nicht gemessen); bestehende
-> `nestedRuntime: podman`-Projekte brauchen `/dev/fuse` und `/dev/net/tun` auf dem Container-Host; `nestedRuntime: docker` wird unter Docker auf Linux und auf Colima zugesagt, nicht auf Docker Desktop.
-> `--quiet` zeigt nur Fehler und vier Ausweisungen, die sichtbar bleiben. Verlauf: Release-Tabelle unten und [`CHANGELOG.md`](CHANGELOG.md).
+> `podman build` läuft im Sandbox-Devcontainer, der Podman 6.1.4 enthält (gemessen auf Colima, arm64; Linux ohne VM, Docker Desktop, amd64 und CI nicht gemessen); bestehende
+> `nestedRuntime: podman`-Projekte brauchen `/dev/fuse` und `/dev/net/tun` auf dem Container-Host: Eine Container-Engine ohne sie startet den Container nicht, und `u-boot doctor` meldet ein fehlendes `/dev/fuse` auf einem Linux-Host außerhalb eines Containers als Fehler (Exit-Code `11`). `nestedRuntime: docker` wird unter Docker auf Linux und auf Colima zugesagt, nicht auf Docker Desktop.
+> `u-boot doctor` und `u-boot generate devcontainer` weisen aus, wenn ein Sandbox-Container auf einem Rückfall läuft (kein Docker-Daemon, `vfs`-Speicher, keine Egress-Beschränkung). Die `--dry-run`-Zusammenfassungen sagen, was geschehen würde („Would …“). `--quiet` zeigt nur Fehler und vier Ausweisungen, die sichtbar bleiben. Verlauf: Release-Tabelle unten und [`CHANGELOG.md`](CHANGELOG.md).
 
 Das verbindliche Lastenheft
 ([`spec/lastenheft.md`](spec/lastenheft.md)) ist auf Deutsch verfasst;
@@ -98,7 +98,7 @@ u-boot --version
 **Debian / Ubuntu / Fedora / RHEL** (`.deb` und `.rpm` aus dem Release, amd64 und arm64):
 
 ```bash
-VERSION=0.10.0   # gewünschtes Release
+VERSION=0.11.0   # gewünschtes Release
 # Debian / Ubuntu
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"
@@ -200,6 +200,7 @@ Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien).
 | `v0.8.1` | 2026-10-14 | Patch „Aktueller Docker im Sandbox-Devcontainer“ — mit `nestedRuntime: docker` läuft im Container Docker 29.9, Buildx 0.38 und Compose 5.6 aus dem Docker-APT-Repository (Schlüssel gepinnt); `download.docker.com` gehört zur Default-Allowlist. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.8.1). |
 | `v0.9.0` | 2026-10-15 | Milestone „Mehr Devcontainer-Features“ — eingebaute Katalog-Schlüssel `python`, `sdkman` und `homebrew` (Community-Feature, als Drittanbieter ausgewiesen) mit ihren Egress-Hosts. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.9.0). |
 | `v0.10.0` | 2026-10-17 | „sshd, Claude Code und `podman build`“ — eingebaute Katalog-Schlüssel `sshd` und `claude-code` (Drittanbieter, ausgewiesen); `nestedRuntime: podman` baut Images, mit einer sechsten Lockerung `--device=/dev/net/tun` (gemessen auf Colima, arm64; Docker Desktop, amd64 und CI nicht gemessen); `--quiet` lässt vier Ausweisungen sichtbar und unterdrückt Erfolgsmeldungen; Docker Desktop wird nicht mehr zugesagt. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.10.0). |
+| `v0.11.0` | 2026-10-18 | „Podman 6, `/dev/fuse` und Ausweisung der Rückfälle“ — der Sandbox-Devcontainer mit `nestedRuntime: podman` enthält Podman 6.1.4; ein fehlendes `/dev/fuse` auf dem Container-Host ist ein Startfehler, und `u-boot doctor` meldet es auf einem Linux-Host außerhalb eines Containers (Exit-Code `11`, auch ohne `--strict`); `doctor` und `generate devcontainer` weisen Rückfälle aus (kein Daemon, `vfs`, keine Egress-Beschränkung); `--dry-run`-Zusammenfassungen sagen „Would …“ (gemessen auf Colima, arm64; Linux ohne VM, Docker Desktop, amd64 und CI nicht gemessen). [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.11.0). |
 | `v0.5.0` | 2026-07-25 | „Sicherheit + lokale Templates" — Go-Toolchain-Bump schließt CVE-2026-39822 im Runtime-Image (HIGH); `u-boot init --template ./pfad` rendert ein Projekt aus einem lokalen Verzeichnis, neben dem eingebauten Katalog. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.5.0). |
 | `v0.4.0` | 2026-06-08 | Milestone „Maschinenlesbare CLI" — `--json` / `--dry-run` / `--diff` für alle zehn Subkommandos, `u-boot logs`, Devcontainer-Features mit Drift-Doctor-Check. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.4.0). |
 

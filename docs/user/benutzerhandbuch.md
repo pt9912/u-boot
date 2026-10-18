@@ -1,8 +1,8 @@
 # Benutzerhandbuch: u-boot
 
 Handbuch-Version: 2.0
-Software-Version: v0.10.0
-Stand: 2026-10-17
+Software-Version: v0.11.0
+Stand: 2026-10-18
 
 ---
 
@@ -77,7 +77,7 @@ u-boot --version
 ```
 
 **Ergebnis:** Die installierte Version erscheint, zum Beispiel
-`u-boot version 0.10.0`.
+`u-boot version 0.11.0`.
 
 ### Binary (Linux, macOS, Windows)
 
@@ -103,7 +103,7 @@ Invoke-WebRequest `
 ```
 
 Für eine bestimmte Version ersetzen Sie `latest/download` durch
-`download/v0.10.0`. Die Prüfsummen aller Dateien stehen in `SHA256SUMS` am
+`download/v0.11.0`. Die Prüfsummen aller Dateien stehen in `SHA256SUMS` am
 jeweiligen Release.
 
 ### Homebrew (macOS)
@@ -130,7 +130,7 @@ Ein APT- oder DNF-Repository gibt es nicht; Sie laden das Paket und
 installieren es lokal:
 
 ```bash
-VERSION=0.10.0
+VERSION=0.11.0
 # Debian / Ubuntu
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"
@@ -2142,6 +2142,6 @@ Sie vorher Passwörter, Tokens und interne Adressen aus der Ausgabe.
 
 **Lizenz:** MIT, siehe `LICENSE` im Projektarchiv.
 
-**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.10.0. Prüfen Sie
+**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.11.0. Prüfen Sie
 mit `u-boot --version`, welche Version Sie einsetzen. Weicht sie ab, zeigt
 `u-boot <befehl> --help` den Stand Ihrer Version.
