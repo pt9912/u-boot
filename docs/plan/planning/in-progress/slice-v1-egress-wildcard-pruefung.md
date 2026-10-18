@@ -10,14 +10,14 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
 **Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — erster Slice der Welle (Analyse; hängt von keinem anderen Slice ab). Ihm folgen
-[`slice-cr-sandbox-egress-anzeige`](slice-cr-sandbox-egress-anzeige.md) und [`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md), deren Anzeige die hier belegte Subdomain-Aussage trägt.
+[`slice-cr-sandbox-egress-anzeige`](../open/slice-cr-sandbox-egress-anzeige.md) und [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md), deren Anzeige die hier belegte Subdomain-Aussage trägt.
 
 **Bezug:** [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress-Restriktion; `egress.allow` ist eine „Liste von Hostnamen“),
 [`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md) (Mechanismus `dnsmasq` + nftables-Set; Entscheidung 2 nennt „samt Subdomains“).
 Anlass: Projektinhaber, 2026-10-18 („in sandbox modus kann man egress nicht erweitern/konfigurieren — geht das besser?“, Vorschlag (c) Wildcards `*.example.org`).
 
 **Berührte Spec-Stellen:** [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) (Zeile *Nutzer*: „kleingeschriebene Hostnamen, ohne Schema, Port und Wildcard“) — der Slice **liest** sie und ändert die Spezifikation nicht;
-eine Änderung nimmt [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md) vor. Das Lastenheft ändert der Slice nicht.
+eine Änderung nimmt [`slice-v2-spec-sandbox-egress-ollama`](../open/slice-v2-spec-sandbox-egress-ollama.md) vor. Das Lastenheft ändert der Slice nicht.
 
 **Verantwortlich:** —
 
@@ -53,14 +53,14 @@ Das Ergebnis ist entweder *entfallen* (kein solcher Fall; „entfallen“ ist ei
 - **E2 — Aussage falsch oder nur teilweise wahr** (etwa Subdomains tiefer als eine Ebene): Handbuch und der Folge-Eintrag in der Spezifikation werden korrigiert; [`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md) bleibt unverändert `Accepted` (`AGENTS.md` §3.5), die Korrektur steht in einer Folge-ADR (nächste freie Nummer; geprüft 2026-10-18: `0024`) oder, wenn die Messung nichts Entscheidungsbedürftiges findet, in der Evidence. Ob dadurch ein Wildcard-Eintrag nötig wird, entscheidet die Messung d.
 - **E3 — echter Fall** (zum Beispiel Frage c oder d zeigt etwas, das nur ein Wildcard-Eintrag löst): Der Slice liefert eine **Entscheidungsvorlage** an den Projektinhaber (Optionen: Wildcard-Eintrag als Alias auf den Namen, Wildcard mit eigener Semantik, Eintrag des genauen Namens als Anleitung) und **keinen Code**; die Umsetzung wäre ein eigener Slice nach Lastenheft-Entscheidung (Welle §5, Eintrag).
 
-Die Hosts der Ollama-Messung ([`slice-v1-devcontainer-ollama-messung`](slice-v1-devcontainer-ollama-messung.md)) können einen Fall zeigen (zum Beispiel Modell-Blobs unter wechselnden Subdomains eines Speicher-Dienstes); zeigt sie einen, reicht der Ollama-Slice ihn an diesen Gegenstand zurück (Welle §5), er ändert die Wildcard-Entscheidung nicht selbst.
+Die Hosts der Ollama-Messung ([`slice-v1-devcontainer-ollama-messung`](../open/slice-v1-devcontainer-ollama-messung.md)) können einen Fall zeigen (zum Beispiel Modell-Blobs unter wechselnden Subdomains eines Speicher-Dienstes); zeigt sie einen, reicht der Ollama-Slice ihn an diesen Gegenstand zurück (Welle §5), er ändert die Wildcard-Entscheidung nicht selbst.
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Eine Wildcard-Syntax im Code** (`*.example.org` annehmen) — eine neue Eingabe-Zusage ist eine Entscheidung des Projektinhabers (E3), keine Folge der Analyse; ohne belegten Fall entsteht sie nicht.
 - **Eine geänderte Allowlist-Mechanik** (Proxy, andere DNS-Logik) — [`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md) Alternative D (Restriktion außerhalb des Containers) ist ein eigener Vorgang.
-- **Die Anzeige der wirksamen Liste** — [`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md); sie nutzt das Ergebnis dieses Slice für den Hinweis „Subdomains eingeschlossen“.
-- **Das Neu-Laden im laufenden Container** — [`slice-v1-sandbox-egress-neuladen-entwurf`](slice-v1-sandbox-egress-neuladen-entwurf.md).
+- **Die Anzeige der wirksamen Liste** — [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md); sie nutzt das Ergebnis dieses Slice für den Hinweis „Subdomains eingeschlossen“.
+- **Das Neu-Laden im laufenden Container** — [`slice-v1-sandbox-egress-neuladen-entwurf`](../open/slice-v1-sandbox-egress-neuladen-entwurf.md).
 - **Lastenheft und Spezifikation** — der Slice ändert keine von beiden (Lastenheft ist Zielbild; die Spezifikation folgt im Spezifikations-Slice der Welle).
 
 ## 2. Definition of Done
@@ -112,7 +112,7 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 - **Die Messung unter Colima gilt nur dort** (Docker auf Colima, arm64; `dnsmasq`-Version des Images): Linux-Hosts und Docker Desktop sind nicht gemessen. — **Ausgang:** offen bis zur Closure; erwartet: weiter offen, Grenze im Handbuch benannt (kein Register-Eintrag, solange kein zweiter Fall auftritt).
 - **Ein `CNAME`-Fall (Frage c) lässt sich ohne öffentliches Messziel nicht stabil testen**: ein Test hinge an fremdem DNS. — **Ausgang:** offen bis zur Messung; erwartet: nur Messung in der Evidence, kein Test (Grenze ausweisen).
 - **Die Messung findet, dass die Aussage in [ADR-0012](../../adr/0012-devcontainer-egress-firewall.md) nicht stimmt** (E2): [ADR-0012](../../adr/0012-devcontainer-egress-firewall.md) ist `Accepted` und unveränderlich. — **Ausgang:** offen bis zur Messung; eingetreten wäre: Folge-ADR (`0024`), nicht Umschreiben.
-- **Die Ollama-Messung zeigt später einen Fall** ([`slice-v1-devcontainer-ollama-messung`](slice-v1-devcontainer-ollama-messung.md)), nachdem dieser Slice „entfallen“ gemeldet hat. — **Ausgang:** offen; der Rückweg steht in §1 und in der Welle (§5), kein stilles Wiederöffnen.
+- **Die Ollama-Messung zeigt später einen Fall** ([`slice-v1-devcontainer-ollama-messung`](../open/slice-v1-devcontainer-ollama-messung.md)), nachdem dieser Slice „entfallen“ gemeldet hat. — **Ausgang:** offen; der Rückweg steht in §1 und in der Welle (§5), kein stilles Wiederöffnen.
 
 ## 7. Closure-Notiz
 
