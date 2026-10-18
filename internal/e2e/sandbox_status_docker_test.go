@@ -20,6 +20,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -151,6 +152,7 @@ func expectItem(t *testing.T, d domain.Diagnostic, severity domain.Severity, fal
 // LH-FA-DEV-007: the `vfs` start script writes `ok`, `fallback` and `failed`
 // into /var/lib/u-boot/status/vfs; the host reads it and `doctor` maps it.
 func TestE2E_SandboxDevcontainer_StatusFiles_VFS(t *testing.T) {
+	t.Parallel()
 	requireDocker(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
 	defer cancel()
@@ -219,6 +221,7 @@ func TestE2E_SandboxDevcontainer_StatusFiles_VFS(t *testing.T) {
 // started without `--privileged`, `failed` under policy `fail`, and `ok` when
 // the daemon becomes ready.
 func TestE2E_SandboxDevcontainer_StatusFiles_Daemon(t *testing.T) {
+	t.Parallel()
 	requireDocker(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Minute)
 	defer cancel()
@@ -241,7 +244,7 @@ func TestE2E_SandboxDevcontainer_StatusFiles_Daemon(t *testing.T) {
 
 	// With --privileged and the daemon volume the daemon becomes ready.
 	extra := append([]string(nil), generatedRunArgs(t, warnDir)...)
-	instance := "stat" + filepath.Base(warnDir)
+	instance := "stat" + strconv.FormatInt(time.Now().UnixNano(), 10)
 	var volumes []string
 	for _, m := range generatedMounts(t, warnDir) {
 		mount := strings.ReplaceAll(m, "${devcontainerId}", instance)
@@ -286,6 +289,7 @@ func TestE2E_SandboxDevcontainer_StatusFiles_Daemon(t *testing.T) {
 // LH-FA-DEV-008: the egress start script reports `ok` with NET_ADMIN,
 // `fallback` without it (policy warn) and `failed` (policy fail).
 func TestE2E_SandboxDevcontainer_StatusFiles_Egress(t *testing.T) {
+	t.Parallel()
 	requireDocker(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
 	defer cancel()
