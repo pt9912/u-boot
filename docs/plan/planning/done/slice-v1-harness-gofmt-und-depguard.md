@@ -89,7 +89,7 @@ Jede Aussage über Code steht mit Fundstelle (gelesen am 2026-10-18). Der Implem
 | `docs/plan/planning/observations/BEO-WZG/inline-nolint-gegen-suppression-verbot/` (`observation.md`, `state.md`, `evidence/slice-v1-harness-gofmt-und-depguard.md`) | neu | neue Beobachtung aus Review F-2 (§7) |
 | `docs/plan/planning/observations/BEO-WZG/kopplung-nicht-nachgezogen/` (`state.md`, `evidence/slice-v1-harness-gofmt-und-depguard.md`) | update, neu | zweiter Beleg (§7) |
 | `docs/plan/planning/open/README.md` | update | Zeile dieses Slice: Link auf `done/`, „geliefert“ |
-| `docs/plan/planning/done/slice-v1-release-cut-v0.11.0.md`, `docs/reviews/2026-10-18-verification-slice-v1-release-cut-v0.11.0.md`, `docs/plan/planning/in-progress/slice-v1-cli-help-handbuch-link.md` | update (Link) | `make slice-mv` zog die Verweise auf diesen Slice von `in-progress/` auf `done/` nach (Commit `70d2899`); kein Inhalt |
+| `docs/plan/planning/done/slice-v1-release-cut-v0.11.0.md`, `docs/reviews/2026-10-18-verification-slice-v1-release-cut-v0.11.0.md`, `docs/plan/planning/done/slice-v1-cli-help-handbuch-link.md` | update (Link) | `make slice-mv` zog die Verweise auf diesen Slice von `in-progress/` auf `done/` nach (Commit `70d2899`); kein Inhalt |
 | dieser Slice | update | Plan §3, Anhang A, DoD, §6-Ausgänge, §7 |
 | `repo.mk`, `Dockerfile` | unverändert | gelesen: `lint` ruft `docker build --target lint`, die Stage ruft `golangci-lint run ./...`; der Formatter in `.golangci.yml` greift ohne weitere Option (`make lint` am Beispiel einer unformatierten Datei rot gesehen) |
 

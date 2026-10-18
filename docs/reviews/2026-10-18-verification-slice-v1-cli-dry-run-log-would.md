@@ -4,7 +4,7 @@
 
 ## Scope
 
-- Slice: [`slice-v1-cli-dry-run-log-would`](../plan/planning/done/slice-v1-cli-dry-run-log-would.md) (in-progress), Commits der Range `fa019d0..HEAD` ohne `044e0c9` und ohne die `open/`-Änderungen des Vorgangs [`slice-v1-cli-help-handbuch-link`](../plan/planning/in-progress/slice-v1-cli-help-handbuch-link.md): `1f42dfd`, `a79bf59`, `64e853a`, `878e453`, `b35ad74`, `aacee08`, `bf2d592`, `c94eeb6`.
+- Slice: [`slice-v1-cli-dry-run-log-would`](../plan/planning/done/slice-v1-cli-dry-run-log-would.md) (in-progress), Commits der Range `fa019d0..HEAD` ohne `044e0c9` und ohne die `open/`-Änderungen des Vorgangs [`slice-v1-cli-help-handbuch-link`](../plan/planning/done/slice-v1-cli-help-handbuch-link.md): `1f42dfd`, `a79bf59`, `64e853a`, `878e453`, `b35ad74`, `aacee08`, `bf2d592`, `c94eeb6`.
 - IDs: [`LH-FA-CLI-007`](../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging).
 - Eingang: DoD-Bestätigung des Implementers; Review [`2026-10-18-slice-v1-cli-dry-run-log-would.md`](2026-10-18-slice-v1-cli-dry-run-log-would.md) (0 HIGH/MEDIUM, F-1/F-2 LOW, F-3 bis F-5 INFO).
 - Host: Colima, kein Host-Go.

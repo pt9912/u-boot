@@ -2,7 +2,7 @@
 
 **Review-Art:** Code — Code-Review gegen Plan, Hard Rules und Konventionen (nicht gegen die DoD; das ist die Frage des Verifiers).
 
-**Gegenstand:** Commits `1f42dfd`, `a79bf59`, `64e853a`, `878e453` (Range `fa019d0..HEAD`, ohne den fremden Planner-Commit `044e0c9` und dessen Dateien `docs/plan/planning/open/README.md` und [`slice-v1-cli-help-handbuch-link`](../plan/planning/in-progress/slice-v1-cli-help-handbuch-link.md)).
+**Gegenstand:** Commits `1f42dfd`, `a79bf59`, `64e853a`, `878e453` (Range `fa019d0..HEAD`, ohne den fremden Planner-Commit `044e0c9` und dessen Dateien `docs/plan/planning/open/README.md` und [`slice-v1-cli-help-handbuch-link`](../plan/planning/done/slice-v1-cli-help-handbuch-link.md)).
 
 **Skill:** `.harness/skills/reviewer.md` @ Stand HEAD · <!-- d-check:ignore (Skill-Pfad als Zitat) -->
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-18
