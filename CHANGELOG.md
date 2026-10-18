@@ -14,7 +14,8 @@ this file is the same format applied to u-boot itself.
 ### Added
 
 - `u-boot --help` links the user manual (German) next to the README: the manual of the installed release (`blob/v<version>`) and the current manual (`blob/main`).
-  A build whose version is not a release version (`X.Y.Z` or `X.Y.Z-rc.N`), such as a development or self-built binary, shows only the link to `main`
+  A build whose version is not a release version (`X.Y.Z` or `X.Y.Z-rc.N`), such as a development or self-built binary, shows only the link to `main`;
+  the tag link of a release candidate can lead nowhere once that pre-release tag has been deleted
   ([`LH-FA-CLI-002`](spec/lastenheft.md#lh-fa-cli-002--hilfeausgabe)).
 
 ### Changed
