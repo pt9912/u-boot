@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-In Arbeit: [`slice-v1-cli-egress-anzeige`](../done/slice-v1-cli-egress-anzeige.md) (Befehl `u-boot egress list`: wirksame Egress-Liste mit Herkunft je Host, dritter Slice von `welle-sandbox-egress-ollama`).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
