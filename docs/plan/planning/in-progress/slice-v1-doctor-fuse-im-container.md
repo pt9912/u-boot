@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** v0.11.0 — **Blocker des Cuts** [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md): Ohne diesen Slice geht das Verhalten als Regression ins Release (Begründung §1, Gefundener Stand).
+**Welle:** v0.11.0 — **Blocker des Cuts** [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md): Ohne diesen Slice geht das Verhalten als Regression ins Release (Begründung §1, Gefundener Stand).
 
 **Bezug:** [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Degradations-Absatz, Lastenheft 0.13.0; **unverändert**),
 [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Exit-Code `11`),
@@ -76,7 +76,7 @@ Dagegen: zusätzliche Heuristik (Existenz des Status-Verzeichnisses als Untersch
 - **Eine neue Prüfung von `/dev/net/tun`** — das Lastenheft sagt „prüft `/dev/net/tun` nicht“; neue Zusage, anderer Vorgang.
 - **Der entfernte `DOCKER_HOST`** (offenes Risiko des CR: Prüfung lokal, Engine entfernt) — gleiche Familie (Host-Aussage aus einem Prozess, der den Host nicht sieht), aber anderer Auslöser und andere Erkennung; bleibt weiter offen im CR-§6, keine Handlung hier.
 - **Erzeugte Dateien (`runArgs`, Startscripts), Golden Cases** — unverändert (gelesen: `podmanRelaxations` in `internal/hexagon/application/devcontainer_sandbox.go` und `sandbox-init.sh.tmpl` berühren den Befund nicht).
-- **Push, Tag, Release** — Sache des Cuts [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md); dieser Slice blockiert ihn nur.
+- **Push, Tag, Release** — Sache des Cuts [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md); dieser Slice blockiert ihn nur.
 
 ## 2. Definition of Done
 
@@ -90,7 +90,7 @@ Dagegen: zusätzliche Heuristik (Existenz des Status-Verzeichnisses als Untersch
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag; Beobachtungs-Register fortgeschrieben (`BEO-DOK/plan-aussage-ueber-code` und `BEO-DOK/spec-bedingung-ohne-code-entsprechung`, je eine Evidence-Datei) oder begründet nicht.
 - [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
 - [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft.
-- [ ] Der Release-Cut [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md) trägt den Slice als erfüllten Blocker (§4, DoD) und seine Lead-Zeile zu `doctor` und `/dev/fuse` stimmt mit dem CHANGELOG überein (Schreiber: Planner bei der Closure).
+- [ ] Der Release-Cut [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md) trägt den Slice als erfüllten Blocker (§4, DoD) und seine Lead-Zeile zu `doctor` und `/dev/fuse` stimmt mit dem CHANGELOG überein (Schreiber: Planner bei der Closure).
 
 ## 3. Plan (vor Code)
 
@@ -137,7 +137,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
 **Start** (`next` → `in-progress`): Der Projektinhaber hat E1 (Lösung) und E2 (Umfang des Gates) entschieden; kein anderer Slice liegt in `in-progress/` (WIP-Limit 1). Der Slice liegt in `open/`; Weg `open/` → `next/` → `in-progress/` per reinem `git mv` je Schritt (`make slice-mv SLICE=slice-v1-doctor-fuse-im-container TO=<next|in-progress>`), der Roadmap-Marker (Ruhe-Marker aus, Zeiger an) geht in einen eigenen Commit direkt nach dem Move, beide im selben Push.
-**Er muss vor dem Cut [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md) in `done/` liegen** (dritter Blocker, dort §4).
+**Er muss vor dem Cut [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md) in `done/` liegen** (dritter Blocker, dort §4).
 
 **Rückführungen — vorab benannt:**
 
@@ -146,7 +146,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 
 ## 5. Closure-Trigger
 
-DoD vollständig, Review-Report und Verification Evidence (mit Praxislauf) liegen vor, Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben (§7), Register fortgeschrieben. Danach ist der Blocker des Cuts [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md) erfüllt; Push und Tag bleiben Sache des Cuts nach Freigabe des Projektinhabers.
+DoD vollständig, Review-Report und Verification Evidence (mit Praxislauf) liegen vor, Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben (§7), Register fortgeschrieben. Danach ist der Blocker des Cuts [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md) erfüllt; Push und Tag bleiben Sache des Cuts nach Freigabe des Projektinhabers.
 
 ## 6. Risiken und offene Punkte
 
