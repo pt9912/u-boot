@@ -11,6 +11,17 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-10-18
+
+Eleventh release. **Podman 6.1.4 in the sandbox devcontainer, a missing `/dev/fuse` as a start error, host-side disclosure of the degradation fallbacks, "Would …" dry-run wording.**
+`nestedRuntime: podman` now carries Podman 6.1.4 from the pinned, signature-checked `podman-static` archive; a missing `/dev/fuse` on the container host is a start error of the container
+engine (like `/dev/net/tun`, so both devices are host prerequisites), and `u-boot doctor` reports it. `u-boot doctor` and `u-boot generate devcontainer` disclose the degradation fallbacks
+(no Docker daemon, `vfs` storage, no egress restriction) from the host; the `--dry-run` summaries of `remove`, `generate` and `config set` say "Would …".
+**Behaviour change for scripts that evaluate `doctor` without `--strict`:** on a Linux host outside a container, a missing `/dev/fuse` is now an error (exit code `11`) where `v0.10.0` reported
+a warning (exit code `0`) with `onUnavailable: warn`; inside a container (runtime image, devcontainer) the check is skipped (info, exit code `0`). **Existing projects** get Podman 6.1.4 and the
+status files after the next `u-boot generate devcontainer` and a rebuild of the container. Measured with Docker 29.5.2 on Colima 0.10.3, arm64; **not measured:** Linux without a VM, `amd64`
+(for Podman 6.1.4 only the download, checksum, signature and version query are checked; a nested run on `amd64` is not measured), Docker Desktop, VS Code. Lastenheft 0.13.0.
+
 ### Added
 
 - Sandbox devcontainer: the degradation fallbacks (container without Docker daemon, `vfs` storage, no egress restriction) are now disclosed from the host. The container start scripts
@@ -1303,7 +1314,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/pt9912/u-boot/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/pt9912/u-boot/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/pt9912/u-boot/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/pt9912/u-boot/compare/v0.8.0...v0.8.1
