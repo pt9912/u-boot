@@ -19,7 +19,7 @@ Herkunft: [`welle-cli-verbosity`](../done/welle-cli-verbosity.md), Slice
 [`ADR-0022`](../../adr/0022-fallback-ausweisung-statusdateien-im-container.md) (`Accepted`, Entscheidung dieses Slice).
 Das Lastenheft (0.12.0) ändert dieser Slice **nicht**: Es ist Zielbild, der Code wird so gebaut, dass er die Zusage erfüllt
 (Entscheidung des Projektinhabers 2026-10-17, „A: Code zum Ziel“). Die eine Stelle, an der die Messung das Ziel als unerreichbar zeigt (`/dev/fuse`), ändert der vorgelagerte
-CR [`slice-cr-sandbox-fuse-startfehler`](../in-progress/slice-cr-sandbox-fuse-startfehler.md) (Lastenheft 0.13.0), nicht dieser Slice.
+CR [`slice-cr-sandbox-fuse-startfehler`](../done/slice-cr-sandbox-fuse-startfehler.md) (Lastenheft 0.13.0), nicht dieser Slice.
 
 **Berührte Spec-Stellen:**
 `spezifikation.md` ([`LH-FA-DEV-007.a`](../../../../spec/spezifikation.md#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten),
@@ -48,7 +48,7 @@ host-seitig ermittelbar und werden in `u-boot doctor` und, wo ein Befehl sie fes
   bestehenden Container mit `result=fallback` (Warnung mit `DegradationFallback`; best effort, still ohne Engine, ohne Container, ohne Datei oder bei ungültigem Dokument; unter `--quiet` sichtbar als Ausnahme 2;
   nicht bei `--dry-run`, weil nichts geschrieben wird — Festlegung der ADR, Entscheidung 10). `up` und ein neuer Befehl bekommen die Abfrage **nicht**.
 - **F8 `/dev/fuse` — „A: Lastenheft-CR“:** Ein fehlendes `/dev/fuse` auf dem Container-Host wird wie `/dev/net/tun` als Startfehler geführt (Exit-Code `127` der Engine, kein stiller `vfs`-Fallback unter Docker);
-  die Host-Prüfung in `checkSandboxRuntime` sagt dann nicht mehr „fällt auf `vfs` zurück“. Das legt der CR [`slice-cr-sandbox-fuse-startfehler`](../in-progress/slice-cr-sandbox-fuse-startfehler.md) fest.
+  die Host-Prüfung in `checkSandboxRuntime` sagt dann nicht mehr „fällt auf `vfs` zurück“. Das legt der CR [`slice-cr-sandbox-fuse-startfehler`](../done/slice-cr-sandbox-fuse-startfehler.md) fest.
 
 **Reihenfolge und Abhängigkeit: CR → dieser Slice.** Der CR setzt den Wortlaut der Host-Prüfung in `checkSandboxRuntime` und die Zeilen in
 [`LH-FA-DEV-007.a`](../../../../spec/spezifikation.md#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten) (Tabelle) und
@@ -134,7 +134,7 @@ Randbedingung aus [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Eine Änderung des Lastenhefts** — Entscheidung des Projektinhabers: das Lastenheft ist Zielbild. Der Slice liefert Code, Tests, Spezifikations-Nachzug, Handbuch, CHANGELOG. Einzige Ausnahme `/dev/fuse`: der vorgelagerte CR [`slice-cr-sandbox-fuse-startfehler`](../in-progress/slice-cr-sandbox-fuse-startfehler.md) (Lastenheft 0.13.0), nicht dieser Slice.
+- **Eine Änderung des Lastenhefts** — Entscheidung des Projektinhabers: das Lastenheft ist Zielbild. Der Slice liefert Code, Tests, Spezifikations-Nachzug, Handbuch, CHANGELOG. Einzige Ausnahme `/dev/fuse`: der vorgelagerte CR [`slice-cr-sandbox-fuse-startfehler`](../done/slice-cr-sandbox-fuse-startfehler.md) (Lastenheft 0.13.0), nicht dieser Slice.
 - **Ein neuer Befehl oder eine neue Option** (etwa `u-boot devcontainer status`) — wäre eine neue Zusage am Vertrags-Stratum (siehe F2); eigener Vorgang mit Change Request.
 - **Ein Kanal Container → Host mit Schreibrichtung** (Socket, Bind-Mount, Rückmeldung an den Host-Prozess) — verletzt [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil); nur das Lesen durch den Host über die Engine ist im Rahmen.
 - **Änderung an `--quiet` oder an der Kennzeichnung `DegradationFallback`** — vorhanden und gepinnt; neue Items nutzen sie.
@@ -221,7 +221,7 @@ Plan-Tabelle: Die Zeile für `Dockerfile.tmpl` gilt (Statusverzeichnis), `devcon
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`next` → `in-progress`): **Erfüllt für `open` → `next` (2026-10-18):** Die Folge-ADR zu F1–F8 ist geschrieben und vom Projektinhaber angenommen (`Accepted`); F2 („doctor, plus generate“) und F8 („A: Lastenheft-CR“) sind beantwortet. **Zusätzliche Bedingung für `next` → `in-progress`:** der CR [`slice-cr-sandbox-fuse-startfehler`](../in-progress/slice-cr-sandbox-fuse-startfehler.md) liegt in `done/` (Lastenheft 0.13.0, Wortlaut von Host-Prüfung und Spezifikations-Zeilen gesetzt); vorher startet der Implementer nicht.
+**Start** (`next` → `in-progress`): **Erfüllt für `open` → `next` (2026-10-18):** Die Folge-ADR zu F1–F8 ist geschrieben und vom Projektinhaber angenommen (`Accepted`); F2 („doctor, plus generate“) und F8 („A: Lastenheft-CR“) sind beantwortet. **Zusätzliche Bedingung für `next` → `in-progress`:** der CR [`slice-cr-sandbox-fuse-startfehler`](../done/slice-cr-sandbox-fuse-startfehler.md) liegt in `done/` (Lastenheft 0.13.0, Wortlaut von Host-Prüfung und Spezifikations-Zeilen gesetzt); vorher startet der Implementer nicht.
 
 **Rückführungen — vorab benannt:**
 
@@ -246,7 +246,7 @@ Jedes Risiko bekommt bei der Closure genau einen Ausgang (eingetreten / entfalle
 - **Docker-only-Tests:** Die Nachweise brauchen eine echte Engine (`make test-docker`, Build-Tag `docker`); `make gates` führt sie nicht aus. Ein Lauf ohne Engine darf nicht als grün berichtet werden ([`harness/README.md`](../../../../harness/README.md) §Sensors). — **Ausgang:** offen.
 - **Änderung der erzeugten Ausgabe bestehender Projekte:** Neue `runArgs` (Label, `--health-cmd`) oder geänderte Startscripte erscheinen nach dem nächsten `u-boot generate devcontainer` (managed Blocks, Replay-Cases). — **Ausgang:** offen; im CHANGELOG zu nennen.
 - **Spec-Nachzug ohne Verweise nach unten:** Spezifikation und Sicht dürfen weder ADR noch diesen Slice nennen; die Entscheidung steht in der ADR (`Schärft:`), die Spec trägt die Aussage selbst. — **Ausgang:** offen; Prüfung durch `make docs-check` (Referenzmatrix) und Reviewer.
-- **`--device=/dev/fuse`-Befund (F8):** gemessen (M13): ein fehlendes `/dev/fuse` verhindert den Start, der `vfs`-Fallback ist unter den erzeugten `runArgs` unerreichbar. — **Ausgang:** eingetreten: [`slice-cr-sandbox-fuse-startfehler`](../in-progress/slice-cr-sandbox-fuse-startfehler.md) (Lastenheft-CR, Entscheidung 2026-10-17).
+- **`--device=/dev/fuse`-Befund (F8):** gemessen (M13): ein fehlendes `/dev/fuse` verhindert den Start, der `vfs`-Fallback ist unter den erzeugten `runArgs` unerreichbar. — **Ausgang:** eingetreten: [`slice-cr-sandbox-fuse-startfehler`](../done/slice-cr-sandbox-fuse-startfehler.md) (Lastenheft-CR, Entscheidung 2026-10-17).
 - **Abfrage in `generate`/`init` (F2 ii):** zusätzliche Engine-Aufrufe (`docker ps`, `docker cp`) in zwei Befehlen, die bisher keine Engine brauchen: Latenz, hängende Engine, Rauschen in `--json`. — **Ausgang:** offen; Zeitlimit je Aufruf im Adapter, alle Fehler still, Test „keine Engine“ und „--dry-run ruft den Port nicht“.
 - **Warnung beschreibt einen alten Container:** Die Abfrage nach `generate` liest den Stand des letzten Starts des bestehenden Containers; nach dem Neubau kann er überholt sein. — **Ausgang:** offen; Wortlaut der Warnung nennt „Stand des letzten Starts“ ([`ADR-0022`](../../adr/0022-fallback-ausweisung-statusdateien-im-container.md) Entscheidung 10).
 - **Reihenfolge CR → Slice:** der Slice darf nicht vor dem CR starten, sonst ändern beide dieselben Spec-Zeilen. — **Ausgang:** offen; Start-Trigger in §4.
