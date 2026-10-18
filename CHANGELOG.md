@@ -20,6 +20,9 @@ this file is the same format applied to u-boot itself.
 
 ### Changed
 
+- A wildcard entry in `devcontainer.sandbox.egress.allow` (`*.example.org`) is still rejected with exit code `10`; the error now says that subdomains of an allowed name are already
+  included and names the host to enter (`example.org`). The user manual states the measured subdomain behaviour
+  ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
 - `--dry-run` no longer logs a write as done. The INFO lines on stderr that report a write of `config set` and `generate` now read in the conditional when nothing was
   written: `config set: would update`, `config set (many): would update`, `generate: would create`, `generate: would update block`,
   `generate: would repair Unreleased header`, `generate devcontainer: would create`, `generate devcontainer: would update block` and

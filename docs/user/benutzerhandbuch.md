@@ -1232,8 +1232,17 @@ Standardmäßig erlaubt sind:
 
 - **Wichtig:** Die Hosts eines Agenten kennt `u-boot` nur für das Feature
   `claude-code` (Zeile in der Tabelle). Die Hosts jedes anderen Agenten (zum
-  Beispiel dessen API) tragen Sie in `egress.allow` ein. Subdomains eines
-  erlaubten Namens sind mitgemeint.
+  Beispiel dessen API) tragen Sie in `egress.allow` ein.
+- **Subdomains:** Ein eingetragener Name schließt alle seine Subdomains ein, auch
+  tiefere (`example.org` erlaubt `www.example.org`; `amazonaws.com` erlaubt
+  `s3.us-east-1.amazonaws.com`). Ein Eintrag öffnet nie den übergeordneten Namen
+  (`www.example.org` lässt `example.org` gesperrt). Einen Eintrag der Form
+  `*.example.org` gibt es nicht: Tragen Sie `example.org` ein, `u-boot` weist den
+  Eintrag mit diesem Hinweis ab. Ein Name, dessen DNS-Antwort über einen
+  `CNAME` auf einen Namen außerhalb der Liste zeigt, ist erreichbar, ohne dass
+  der Zielname eingetragen wird; der Zielname selbst löst nicht auf. Gemessen
+  mit Docker 29.5.2 auf Colima 0.10.3 (arm64) und `dnsmasq` 2.91; Linux-Hosts
+  und Docker Desktop sind nicht gemessen.
 - Für `claude-code` nimmt die Liste nur den API-Host und die npm-Registry auf; die
   Hosts der Anmeldung sowie von Telemetrie, Fehlerberichten, MCP-Connectors,
   Updates und Plugins sind **nicht aufgenommen** und werden bei Bedarf in

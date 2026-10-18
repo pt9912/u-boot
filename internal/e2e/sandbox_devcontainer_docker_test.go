@@ -174,6 +174,65 @@ func TestE2E_SandboxDevcontainer_Egress(t *testing.T) {
 	}
 }
 
+// egressSubdomainProbeScript rewrites the `hosts=` line of the generated
+// egress script (the allowlist is the only thing that differs) and probes
+// names under it. `reach` prints the HTTP status, `000` when the name does
+// not resolve or the address is dropped.
+const egressSubdomainProbeScript = `reach() { curl -sS -m 8 -o /dev/null -w '%{http_code}' "https://$1" 2>/dev/null || true; }
+run_with() {
+  sudo sed -i "s|^hosts=.*|hosts=\"$1\"|" /usr/local/bin/u-boot-egress-init
+  sudo sh /usr/local/bin/u-boot-egress-init
+}
+run_with "example.org amazonaws.com"
+echo "A example.org=$(reach example.org)"
+echo "A www.example.org=$(reach www.example.org)"
+echo "A s3.us-east-1.amazonaws.com=$(reach s3.us-east-1.amazonaws.com)"
+echo "A example.com=$(reach example.com)"
+run_with "www.example.org"
+echo "B www.example.org=$(reach www.example.org)"
+echo "B example.org=$(reach example.org)"
+`
+
+// LH-FA-DEV-008, ADR-0012: an allowed name covers its subdomains (one and
+// two levels), and an entry never opens its parent name.
+func TestE2E_SandboxDevcontainer_EgressSubdomains(t *testing.T) {
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Fatalf("docker CLI not on PATH: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+	dir := generateEgressProject(ctx, t, "warn")
+	image := "uboot-e2e-egress-sub:" + strings.ReplaceAll(filepath.Base(dir), "/", "-")
+	if out, code := dockerOutput(ctx, t, "build", "-q", "-t", image, filepath.Join(dir, ".devcontainer")); code != 0 {
+		t.Fatalf("docker build failed:\n%s", out)
+	}
+	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
+	args := append(append([]string{"run", "--rm"}, generatedRunArgs(t, dir)...), image, "bash", "-c", egressSubdomainProbeScript)
+	out, code := dockerOutput(ctx, t, args...)
+	if code != 0 {
+		t.Fatalf("subdomain probe exit %d:\n%s", code, out)
+	}
+	got := map[string]string{}
+	for _, line := range strings.Split(out, "\n") {
+		if tag, rest, ok := strings.Cut(strings.TrimSpace(line), " "); ok && (tag == "A" || tag == "B") {
+			if name, status, ok := strings.Cut(rest, "="); ok {
+				got[tag+" "+name] = status
+			}
+		}
+	}
+	reachable := func(key string) bool { s, ok := got[key]; return ok && s != "000" && s != "" }
+	for _, key := range []string{"A example.org", "A www.example.org", "A s3.us-east-1.amazonaws.com", "B www.example.org"} {
+		if !reachable(key) {
+			t.Errorf("%s: want reachable (entry covers the name and its subdomains), got %q\n%s", key, got[key], out)
+		}
+	}
+	for _, key := range []string{"A example.com", "B example.org"} {
+		if s, ok := got[key]; !ok || s != "000" {
+			t.Errorf("%s: want blocked (000), got %q (present %v)\n%s", key, s, ok, out)
+		}
+	}
+}
+
 func generatedMounts(t *testing.T, dir string) []string {
 	t.Helper()
 	body, err := os.ReadFile(filepath.Join(dir, ".devcontainer", "devcontainer.json"))

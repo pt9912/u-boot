@@ -121,12 +121,22 @@ var egressHostPattern = regexp.MustCompile(`^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(
 // NewEgressHost validates one entry of
 // `devcontainer.sandbox.egress.allow` (LH-FA-DEV-008): a lowercase
 // DNS host name with at least one dot and no scheme, port, path or
-// wildcard.
+// wildcard. An allowed name covers its subdomains (resolver rule
+// `server=/<name>/`, ADR-0012), so a wildcard entry is rejected with the
+// name to enter instead.
 func NewEgressHost(raw string) (string, error) {
 	h := strings.TrimSpace(raw)
-	if len(h) > 253 || !egressHostPattern.MatchString(h) {
-		return "", fmt.Errorf("%w: devcontainer.sandbox.egress.allow entry %q is not a lowercase host name (no scheme, port, path or wildcard)",
+	if len(h) <= 253 && egressHostPattern.MatchString(h) {
+		return h, nil
+	}
+	if strings.Contains(h, "*") {
+		if name := strings.TrimPrefix(h, "*."); len(name) <= 253 && egressHostPattern.MatchString(name) {
+			return "", fmt.Errorf("%w: devcontainer.sandbox.egress.allow entry %q is a wildcard; subdomains of an allowed name are already included, enter %q instead",
+				ErrInvalidSandboxSetting, raw, name)
+		}
+		return "", fmt.Errorf("%w: devcontainer.sandbox.egress.allow entry %q is a wildcard; subdomains of an allowed name are already included, enter the host name without `*`",
 			ErrInvalidSandboxSetting, raw)
 	}
-	return h, nil
+	return "", fmt.Errorf("%w: devcontainer.sandbox.egress.allow entry %q is not a lowercase host name (no scheme, port, path or wildcard)",
+		ErrInvalidSandboxSetting, raw)
 }
