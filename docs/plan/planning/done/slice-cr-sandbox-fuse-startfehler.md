@@ -139,7 +139,7 @@ Die Versionskonvention ergibt sich aus der Historie in §16 (kein eigener Regela
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [x] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
 - [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb hier geprüft.
 
 ## 3. Plan (vor Code)
 
@@ -158,9 +158,12 @@ Die Tabelle nennt jede Datei, die der Diff voraussichtlich berührt (§3.10 von 
 | `internal/hexagon/application/templates/devcontainer/sandbox-init.sh.tmpl` | prüfen | unverändert (Zweig bleibt, Kommentar „without it fuse-overlayfs fails, fall back to vfs storage“ gilt für den ohne Device gestarteten Container) |
 | `docs/user/benutzerhandbuch.md` | update | Zeilen 987–989 (`/dev/net/tun`-Absatz) um `/dev/fuse` erweitern; Zeile 1005 („Ohne `/dev/fuse` baut Podman mit `vfs`-Speicher“) auf den ohne Device gestarteten Container begrenzen; Tabelle Zeile 1022: `/dev/fuse` fehlt im Container → `vfs`/Exit-Code 11, plus Satz, dass ein fehlendes Device auf dem Container-Host den Start verhindert; Zeile 1039 („`u-boot doctor` prüft `/dev/fuse` nur auf Linux-Hosts“) nennt den Fehler-Eintrag; Zeile 1672 (Fehlerbild) verschiebt „fehlendes `/dev/fuse`“ vom Exit-Code 11 des Startscripts zum Startfehler der Engine |
 | `CHANGELOG.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | `[Unreleased]` / `Changed` (Muster: `/dev/net/tun`-Eintrag im Abschnitt `[0.10.0]`, unverändert): ein fehlendes `/dev/fuse` auf dem Container-Host ist ein Startfehler der Engine, kein `vfs`-Fallback; `u-boot doctor` weist es auf einem Linux-Host als **Fehler** aus (Exit-Code `11`, bisher Warnung mit Exit-Code `0`, mit `onUnavailable: fail` schon Fehler); Lastenheft 0.13.0; Messstand (Colima, Docker 29.5.2, arm64); das Erzeugnis von `generate devcontainer` ändert sich nicht |
-| `docs/plan/planning/open/README.md` | geprüft, unverändert | Die Zeile dieses Slice steht bereits dort (verweist auf `in-progress/`); der Move-Commit hat sie nachgezogen |
-| `docs/plan/planning/in-progress/roadmap.md` | update | Ruhe-Marker „Nichts in Arbeit.“ entfernt, solange dieser Slice in `in-progress/` liegt (d-check `planning`) |
-| `docs/plan/planning/done/…` (Closure) | — | die `done/`-Verweise ziehen `make slice-mv` nach |
+| `docs/plan/planning/open/README.md` | update | Bestandszeile dieses Slice: Freigabe-Hinweis ersetzt durch den Stand (Lastenheft 0.13.0 angenommen); der Link auf `done/` kommt von `make slice-mv` |
+| `docs/plan/planning/in-progress/roadmap.md` | update | Ruhe-Marker „Nichts in Arbeit.“ wieder gesetzt (kein Slice in `in-progress/`; d-check `planning`), Datum „Letzte Änderung“; der Diff gegen den Stand vor dem Slice ist nur das Datum |
+| `docs/plan/planning/next/README.md`, `docs/plan/planning/next/slice-v1-sandbox-fallback-host-ausweisung.md` | update | Bestandszeile und Verweise auf diesen Slice zeigen nach `done/` (`make slice-mv`); die Zeile nennt den CR als erledigt und trägt die Zeichenkodierung von „unverändert“ wieder korrekt |
+| `docs/plan/planning/done/…` (Closure) | update | dieser Slice liegt nach dem reinen Move in `done/`; DoD, §6 und §7 gefüllt |
+| `docs/plan/planning/observations/BEO-DOK/plan-aussage-ueber-code/evidence/slice-cr-sandbox-fuse-startfehler.md` | neu | neunter Beleg der Beobachtung (Review F-2) |
+| `docs/reviews/2026-10-18-verification-slice-cr-sandbox-fuse-startfehler.md` | neu | Verification Evidence |
 | `README.md`, `README.de.md` | update | Statuszeile nennt als Host-Voraussetzung `/dev/fuse` und `/dev/net/tun` (EN/DE gespiegelt); die Suche nach `fuse` fand sie nicht, weil dort nur `/dev/net/tun` stand |
 | `docs/reviews/2026-10-18-slice-cr-sandbox-fuse-startfehler.md` | neu | Review-Report |
 | `architecture.md`, `docs/maintainer/cli-json-contract.md`, `.golangci.yml`, `.d-check.yml`, Carveout-Inventar | geprüft, unverändert | `fuse`/`vfs` kommt dort nicht vor (Suche im Baum); kein neuer Carveout |

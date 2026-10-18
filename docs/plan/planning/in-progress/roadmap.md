@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-10-17.
+**Status:** Aktiv. **Letzte Änderung:** 2026-10-18.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -16,6 +16,8 @@ Audit-Trail lebt in den `done/`-Slices, die Release-Historie in
 Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/`; woran gearbeitet
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
+
+Nichts in Arbeit.
 
 ## Nächste Wellen
 

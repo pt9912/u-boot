@@ -11,4 +11,4 @@ Dateiname-Konventionen.
 
 | Datei | Gegenstand |
 | ----- | ---------- |
-| [`slice-cr-sandbox-fuse-startfehler`](../done/slice-cr-sandbox-fuse-startfehler.md) | Lastenheft-CR 0.12.0 → 0.13.0: ein fehlendes `/dev/fuse` auf dem Container-Host ist ein Startfehler der Engine, keine Degradationsstufe ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)); Wortlaut wartet auf die Freigabe des Projektinhabers; läuft vor [`slice-v1-sandbox-fallback-host-ausweisung`](../next/slice-v1-sandbox-fallback-host-ausweisung.md) |
+| [`slice-cr-sandbox-fuse-startfehler`](../done/slice-cr-sandbox-fuse-startfehler.md) | Lastenheft-CR 0.12.0 → 0.13.0: ein fehlendes `/dev/fuse` auf dem Container-Host ist ein Startfehler der Engine, keine Degradationsstufe ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)); Lastenheft 0.13.0 angenommen (2026-10-18); Umsetzung in [`slice-v1-sandbox-fallback-host-ausweisung`](../next/slice-v1-sandbox-fallback-host-ausweisung.md) |
