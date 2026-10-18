@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Nichts in Arbeit.
+In Arbeit: Welle `v0.11.0`, Slice [`slice-v1-doctor-fuse-im-container`](slice-v1-doctor-fuse-im-container.md) (Blocker des Cuts).
 
 ## Nächste Wellen
 
