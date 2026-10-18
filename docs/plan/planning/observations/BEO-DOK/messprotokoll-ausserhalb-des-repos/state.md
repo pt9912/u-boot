@@ -1,0 +1,1 @@
+**Stand:** offen — ein Beleg (Zähler 1×); Trigger: ein weiterer Messslice (zum Beispiel [`slice-v1-sandbox-egress-neuladen-entwurf`](../../../open/slice-v1-sandbox-egress-neuladen-entwurf.md) oder [`slice-v1-devcontainer-ollama-messung`](../../../open/slice-v1-devcontainer-ollama-messung.md)), dessen Review Skripte oder Rohdaten außerhalb des Repos findet.

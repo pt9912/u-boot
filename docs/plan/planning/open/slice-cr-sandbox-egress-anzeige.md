@@ -51,7 +51,7 @@ Neu (zusätzlich, direkt danach):
 
 > - Die wirksame Allowlist und die Herkunft jedes Hosts (Basis, Container-Runtime, Feature, Clone-Quelle, Nutzerliste) sind mit dem Befehl `u-boot egress list` abfragbar. Der Befehl liest nur die Projektkonfiguration (`u-boot.yaml`) und die Git-Konfiguration des Projekts, braucht weder Netz noch Docker noch einen laufenden Container, ändert nichts und zeigt dieselbe Liste, die `u-boot generate devcontainer` in das Startscript schreibt. Er weist aus, ob die Restriktion für die Konfiguration aktiv ist (Sandbox-Profil und `devcontainer.sandbox.egress.enabled`); ist sie es nicht, zeigt er die Liste, die bei Aktivierung gälte, und nennt das. Ein Name in der Liste schließt seine Subdomains ein.
 
-Der letzte Satz („Ein Name … Subdomains ein“) gilt nur, wenn [`slice-v1-egress-wildcard-pruefung`](../in-progress/slice-v1-egress-wildcard-pruefung.md) die Aussage mit E1 bestätigt; sonst entfällt er oder trägt den gemessenen Wortlaut. Der CR-Slice startet nach dem Abschluss dieses Slice.
+Der letzte Satz („Ein Name … Subdomains ein“) trägt die Messung von [`slice-v1-egress-wildcard-pruefung`](../in-progress/slice-v1-egress-wildcard-pruefung.md): Ergebnis E1 (bestätigt; Messstand Colima/arm64, `dnsmasq` 2.91, im Handbuch), gepinnt durch `TestE2E_SandboxDevcontainer_EgressSubdomains`; der Wortlaut bleibt unverändert.
 
 **Stelle 2 — [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), Aufzählung der Abfragebefehle.**
 
@@ -121,7 +121,7 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 ## 6. Risiken und offene Punkte
 
 - **Der Befehlsname ändert sich zwischen Freigabe und Architect-Entscheidung** ([`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md)). — **Ausgang:** offen; erwartet: die Freigabe nennt den Namen, der Architect hält ihn ein; sonst CR-Nachlauf (Review des Diffs der Änderung, nicht der ganzen Datei).
-- **Der Subdomain-Satz steht im Lastenheft, ohne dass die Messung ihn trägt** (E2 oder E3 des Wildcard-Slice). — **Ausgang:** offen bis zum Start; der Satz entfällt oder trägt den gemessenen Wortlaut.
+- **Der Subdomain-Satz steht im Lastenheft, ohne dass die Messung ihn trägt** (E2 oder E3 des Wildcard-Slice). — **Ausgang:** entfallen; Ergebnis E1, der Satz bleibt im Wortlaut.
 - **Ein Review läuft vor der Freigabe und deckt die spätere Fassung nicht ab** (Lehre der Vorgänger-Welle: Gezählt, nicht verkörpert, [`welle-devcontainer-sshd-claude-code`](../done/welle-devcontainer-sshd-claude-code.md) §7). — **Ausgang:** offen; der Review läuft über die freigegebene Fassung.
 
 ## 7. Closure-Notiz
