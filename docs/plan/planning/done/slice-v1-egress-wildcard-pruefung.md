@@ -76,7 +76,7 @@ Die Hosts der Ollama-Messung ([`slice-v1-devcontainer-ollama-messung`](../open/s
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [x] Beobachtungs-Register (`../observations/`) fortgeschrieben — Beleg in [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md), falls die Subdomain-Aussage ohne Beleg stand (Befund steht dann in der Evidence); sonst „keine Beobachtung angefallen“ in §7.
 - [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo mit Wellen von der Welle-Closure geprüft.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo mit Wellen von der Welle-Closure geprüft.
 
 ## 3. Plan (vor Code)
 
@@ -116,7 +116,7 @@ Die Hosts der Ollama-Messung ([`slice-v1-devcontainer-ollama-messung`](../open/s
 
 **Ergebnis: E1** (bestätigt, kein Fall). Ein Wildcard-Eintrag fügte weder für a bis c noch für d (mit diesem `dnsmasq`) Ausdrucksstärke hinzu. Nicht gemessen: andere `dnsmasq`-Versionen, Linux-Hosts ohne VM, Docker Desktop, amd64, IPv6 (das Script sperrt IPv6 ganz).
 
-Die Tabelle ist nach der Fix-Runde zum Review (F-1 bis F-7) gegen `git diff --stat 1cec55f` abgeglichen (`AGENTS.md` §3.10): jede berührte Datei hat eine Zeile, jede Zeile einen Diff, ausgenommen die Einträge „unverändert“ und „entfallen“; es steht keine Zeile mit „bedingt“ mehr in ihr. Eine spätere Änderung wiederholt den Abgleich.
+Die Tabelle ist nach der letzten Änderung (Closure: Move nach `done/`, Roadmap, `open/README.md`, Register) gegen `git diff --stat 1cec55f` abgeglichen (`AGENTS.md` §3.10; 32 Dateien, der Move erscheint als Neuanlage in `done/` und Löschung in `open/`): jede berührte Datei hat eine Zeile, jede Zeile einen Diff, ausgenommen die Einträge „unverändert“ und „entfallen“; es steht keine Zeile mit „bedingt“ mehr in ihr. Eine spätere Änderung wiederholt den Abgleich.
 
 ## 4. Trigger
 
