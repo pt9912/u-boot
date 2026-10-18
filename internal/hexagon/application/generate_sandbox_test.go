@@ -340,11 +340,7 @@ func TestGenerateDevcontainer_SandboxPodman(t *testing.T) {
 		t.Errorf("postCreateCommand = %v", m["postCreateCommand"])
 	}
 	df, _ := fs.ReadFile(dockerfilePath())
-	for _, want := range []string{"podman uidmap fuse-overlayfs passt", "COPY sandbox-init.sh /usr/local/bin/u-boot-sandbox-init", "ln -sf /usr/bin/podman /usr/local/bin/docker"} {
-		if !strings.Contains(string(df), want) {
-			t.Errorf("Dockerfile lacks %q:\n%s", want, df)
-		}
-	}
+	assertPodmanStaticDockerfile(t, string(df))
 	if strings.Index(string(df), "USER root") > strings.LastIndex(string(df), "USER vscode") {
 		t.Errorf("Dockerfile must end on USER vscode")
 	}
@@ -373,6 +369,56 @@ func TestGenerateDevcontainer_SandboxPodman(t *testing.T) {
 	// Idempotent.
 	if resp2, err := generateSandbox(svc, false); err != nil || resp2.Action != driving.GenerateActionNoOp {
 		t.Errorf("second run: action=%v err=%v, want NoOp", resp2.Action, err)
+	}
+}
+
+// assertPodmanStaticDockerfile pins the Podman block of the generated
+// Dockerfile (ADR 0023): version, both checksums and the signing key stand
+// in one place each, the checks run before the extraction, Debian installs
+// only `uidmap` and `ca-certificates`, the registries and the `docker` alias.
+func assertPodmanStaticDockerfile(t *testing.T, df string) {
+	t.Helper()
+	const (
+		shaAMD64 = "9dd51073fac5a1742f88cf3caff5554615cb4d67ba554d25e8807be635547af5"
+		shaARM64 = "c106d09d7524209ce01eb3a02a7e621e9c55ec31d0fada48439cf77aa07afdb6"
+		keyFPR   = "0CCF102C4F95D89E583FF1D4F8B5AF50344BB503"
+	)
+	for _, want := range []string{
+		"ARG PODMAN_VERSION=6.1.4\n",
+		"ARG PODMAN_SHA256_AMD64=" + shaAMD64 + "\n",
+		"ARG PODMAN_SHA256_ARM64=" + shaARM64 + "\n",
+		"ARG PODMAN_SIGNING_KEY=" + keyFPR + "\n",
+		"https://github.com/mgoltzsche/podman-static/releases/download/v${PODMAN_VERSION}/podman-linux-${arch}.tar.gz",
+		"https://keys.openpgp.org/vks/v1/by-fingerprint/${PODMAN_SIGNING_KEY}",
+		"install -y --no-install-recommends uidmap ca-certificates \\\n",
+		`printf "unqualified-search-registries = ['docker.io']\n" > /etc/containers/registries.conf`,
+		"ln -sf /usr/local/bin/podman /usr/local/bin/docker",
+		"--no-same-owner",
+		"COPY sandbox-init.sh /usr/local/bin/u-boot-sandbox-init",
+	} {
+		if !strings.Contains(df, want) {
+			t.Errorf("Dockerfile lacks %q:\n%s", want, df)
+		}
+	}
+	for _, once := range []string{shaAMD64, shaARM64, keyFPR, "6.1.4"} {
+		if n := strings.Count(df, once); n != 1 {
+			t.Errorf("Dockerfile names the pin %q %d times, want exactly once (one place)", once, n)
+		}
+	}
+	for _, unwanted := range []string{"podman uidmap", "fuse-overlayfs passt", "/usr/bin/podman", "install -y --no-install-recommends podman"} {
+		if strings.Contains(df, unwanted) {
+			t.Errorf("Dockerfile must not install podman from Debian (found %q):\n%s", unwanted, df)
+		}
+	}
+	// Order: checksum, key import, signature and primary fingerprint, then extraction.
+	last := -1
+	for _, step := range []string{"sha256sum -c -", "gpg --batch --import key.asc", "gpg --batch --status-fd 1 --verify", `"VALIDSIG" {print $12}')" = "${PODMAN_SIGNING_KEY}"`, "tar -xzf"} {
+		i := strings.Index(df, step)
+		if i < 0 || i < last {
+			t.Errorf("step %q missing or out of order (checks must run before tar -xzf):\n%s", step, df)
+			return
+		}
+		last = i
 	}
 }
 

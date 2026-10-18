@@ -420,12 +420,24 @@ func TestE2E_SandboxDevcontainer_NestedPodman(t *testing.T) {
 	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
 
 	runArgs := generatedRunArgs(t, dir)
-	nested := "sh /usr/local/bin/u-boot-sandbox-init && docker run --rm --network=host docker.io/library/alpine:3 echo NESTED_OK"
-
 	skipIfNestedUsernsRestricted(ctx, t, image, runArgs)
 
+	// ADR 0023: Podman of the pinned major line from /usr/local (no Debian
+	// package), the registries file with Docker Hub only, the `docker` alias.
+	args := append(append([]string{"run", "--rm"}, runArgs...), image, "bash", "-c", nestedPodmanVersionScript)
+	out, code := dockerOutput(ctx, t, args...)
+	if code != 0 {
+		t.Fatalf("podman source/version checks failed (exit %d):\n%s", code, out)
+	}
+	for _, want := range []string{"PODMAN_MAJOR_6", "PODMAN_FROM_USR_LOCAL", "NO_DEBIAN_PODMAN", "REGISTRIES_DOCKER_IO", "DOCKER_IS_PODMAN"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("output lacks %s:\n%s", want, out)
+		}
+	}
+
 	// AK 2: docker run inside the container without a socket.
-	args := append(append([]string{"run", "--rm"}, runArgs...), image, "bash", "-c", nested)
+	nested := "sh /usr/local/bin/u-boot-sandbox-init && docker run --rm --network=host docker.io/library/alpine:3 echo NESTED_OK"
+	args = append(append([]string{"run", "--rm"}, runArgs...), image, "bash", "-c", nested)
 	if out, code := dockerOutput(ctx, t, args...); code != 0 || !strings.Contains(out, "NESTED_OK") {
 		t.Fatalf("nested podman run failed (exit %d):\n%s", code, out)
 	}
@@ -450,6 +462,18 @@ func TestE2E_SandboxDevcontainer_NestedPodman(t *testing.T) {
 		t.Errorf("warn policy without /dev/fuse: exit %d:\n%s", code, out)
 	}
 }
+
+// nestedPodmanVersionScript checks, as `vscode` after the start script, where
+// Podman comes from (ADR 0023): major line 6, the static archive under
+// /usr/local, no Debian package, Docker Hub as the only short-name registry,
+// `docker` as the Podman alias.
+const nestedPodmanVersionScript = `set -e
+sh /usr/local/bin/u-boot-sandbox-init
+podman --version | grep -q '^podman version 6\.' && echo PODMAN_MAJOR_6
+test "$(command -v podman)" = /usr/local/bin/podman && echo PODMAN_FROM_USR_LOCAL
+! dpkg -l podman fuse-overlayfs passt 2> /dev/null | grep -q '^ii' && echo NO_DEBIAN_PODMAN
+grep -Fx "unqualified-search-registries = ['docker.io']" /etc/containers/registries.conf > /dev/null && echo REGISTRIES_DOCKER_IO
+test "$(readlink -f "$(command -v docker)")" = "$(readlink -f /usr/local/bin/podman)" && echo DOCKER_IS_PODMAN`
 
 // LH-FA-DEV-007: a `/dev/fuse` that is missing on the container host is no
 // degradation step; the engine refuses to start the container, so the start
