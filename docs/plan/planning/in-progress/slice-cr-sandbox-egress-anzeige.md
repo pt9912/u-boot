@@ -35,9 +35,9 @@ Anlass: Projektinhaber, 2026-10-18, Vorschlag (a) („Ok deine Vorschläge für 
 - **Heute sichtbar:** die Liste steht nur im erzeugten Startscript (`generate devcontainer --dry-run` oder `--diff` zeigt es als Änderungsplan) und als Tabelle der Quellen im Handbuch (Abschnitt *Internet-Beschränkung (Egress)*) und in [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion); ein Befehl, der sie samt Herkunft zeigt, existiert nicht (`internal/adapter/driving/cli/` kennt `add`, `config`, `doctor`, `down`, `generate`, `init`, `logs`, `remove`, `template`, `up`).
 - **Aufzählung der Abfragebefehle:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) nennt „Die Ausgabe der Abfragebefehle, die nichts verändern (`config get`, `config list`, `logs`, `template list`), ist das Ergebnis des Befehls und bleibt.“; dieselbe Aufzählung steht in [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) (der Spezifikations-Slice zieht sie nach).
 
-**Offene Entwurfsfrage (Architect, [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md)):** Name und Ort des Befehls. Der Wortlaut unten nennt `u-boot egress list` als Arbeitsname; Alternativen sind `u-boot config egress` (Untergruppe von `config`) und eine Option an `u-boot doctor`. Der Projektinhaber gibt Befehlsname **und** Wortlaut frei; ändert er den Namen, ändern sich die drei Stellen des Wortlauts mit.
+**Befehlsname (freigegeben):** Der Projektinhaber hat Befehlsname und Wortlaut am 2026-10-18 freigegeben (§7); `u-boot egress list` steht im Lastenheft 0.14.0. Nicht gewählt wurden `u-boot config egress` (Untergruppe von `config`) und eine Option an `u-boot doctor`. [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md) hält den Namen ein; ein anderer Name wäre ein CR-Nachlauf (§6).
 
-### Wortlaut-Vorschlag (alt/neu; zur Freigabe durch den Projektinhaber vor dem Lastenheft-Commit)
+### Wortlaut (alt/neu; am 2026-10-18 vom Projektinhaber freigegeben, im Lastenheft 0.14.0 eingetragen)
 
 Das Lastenheft nennt keine Slice- oder Wellen-Kennung; im Lastenheft stehen die Verweise als Anker `#…` der Datei.
 
@@ -69,9 +69,19 @@ Alt: `| Version          | 0.13.0 |`
 
 Neu: `| Version          | 0.14.0 |`
 
-Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
+Historie-Zeile (Datum 2026-10-18; freigegebener Wortlaut, die Zeile im Lastenheft trägt zusätzlich die Klausel zu Stelle 4):
 
-> | 0.14.0 | `<Datum des Lastenheft-Commits>` | [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion): Die wirksame Egress-Allowlist samt Herkunft jedes Hosts ist abfragbar (`u-boot egress list`; offline, ohne laufenden Container, ändert nichts); [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging): der Abfragebefehl behält unter `--quiet` seine Ausgabe. | Vereinbarung mit dem Projektinhaber |
+> | 0.14.0 | 2026-10-18 | [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion): Die wirksame Egress-Allowlist samt Herkunft jedes Hosts ist abfragbar (`u-boot egress list`; offline, ohne laufenden Container, ändert nichts); [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging): der Abfragebefehl behält unter `--quiet` seine Ausgabe. | Vereinbarung mit dem Projektinhaber |
+
+**Stelle 4 — [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle), Befehlstabelle (aus dem freigegebenen Befehl abgeleitet; Bestätigung des Projektinhabers vor dem Release ausstehend).** Die Tabelle führt jeden Befehl des Vertrags; mit `u-boot egress list` in [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) und [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) führt sie ihn ebenfalls. Der Satz ist nicht wortgleich vorgelegt worden.
+
+Alt: Tabelle ohne Zeile für den Befehl (letzte Zeilen: `u-boot config migrate` | Konfigurationsschema migrieren | Later; `u-boot template list` | Templates anzeigen | V1).
+
+Neu (eine Zeile, zwischen `u-boot config migrate` und `u-boot template list`; Priorität V2 wie die Anforderung [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)):
+
+> | `u-boot egress list`         | Egress-Liste mit Herkunft anzeigen | V2        |
+
+Die Historie-Zeile 0.14.0 nennt die Befehlsübersicht und den Zustand (abgeleitet, Bestätigung ausstehend). Weitere Stellen im Lastenheft, die Befehle nennen (gelesen am 2026-10-18, Docker-`grep` über `spec/lastenheft.md`; nicht geändert): die Wertemenge des Feldes `command` im Absatz zu `--dry-run --json` in [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (gilt für dateiverändernde Befehle; der neue Befehl lehnt `--dry-run` ab, siehe [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md) §2), die Beispiele gruppierter Befehle (`template`, `config`) in [`LH-SA-CLI-001`](../../../../spec/lastenheft.md#lh-sa-cli-001--befehlsstruktur) und in der JSON-Feldliste von [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) sowie das Laufzeit-Beispiel (`config get`) in [`LH-NFA-PERF-001`](../../../../spec/lastenheft.md#lh-nfa-perf-001--schnelle-cli-antwort); sie zählen Beispiele auf, keine Vollständigkeitsliste.
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
@@ -98,9 +108,11 @@ Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `spec/lastenheft.md` | update | Stellen 1 bis 3 (§3 [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging); Versionsfeld; §16 Historie); Wortlaut am 2026-10-18 freigegeben (§7) |
-| `docs/plan/planning/in-progress/slice-cr-sandbox-egress-anzeige.md` (diese Datei) | update | Freigabe, Vorab-Suche, Closure (§7) |
+| `spec/lastenheft.md` | update | Stellen 1 bis 3 (§3 [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging); Versionsfeld; §16 Historie); Wortlaut am 2026-10-18 freigegeben (§7). Stelle 4: Zeile in der Befehlstabelle [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle) und Klausel in der Historie-Zeile 0.14.0 (abgeleitet, Bestätigung ausstehend, §7) |
+| `docs/plan/planning/in-progress/slice-cr-sandbox-egress-anzeige.md` (diese Datei) | update | Freigabe, Vorab-Suche, Stelle 4, Abweichungen, Closure (§7) |
 | `docs/plan/planning/in-progress/roadmap.md` | update | Ruhe-Marker „Nichts in Arbeit.“ durch die Arbeitszeile dieses Slice ersetzt; die Closure setzt ihn zurück |
+| `docs/plan/planning/open/slice-v1-cli-egress-anzeige.md`, `docs/plan/planning/open/slice-v2-spec-sandbox-egress-ollama.md` | update | Verweis-Nachzug durch `make slice-mv`; dazu Übergabe der Abgrenzung und der Auslegungsfragen aus dem Review (§7), je als gelesene Aussage mit Fundstelle |
+| `docs/plan/planning/done/slice-v1-egress-wildcard-pruefung.md`, `docs/plan/planning/done/slice-v1-sandbox-egress-neuladen-entwurf.md`, `docs/plan/planning/open/README.md`, `docs/plan/planning/welle-sandbox-egress-ollama.md`, `docs/reviews/2026-10-18-verification-slice-v1-sandbox-egress-neuladen-entwurf.md` | update | Verweis-Nachzug durch `make slice-mv` (nur der Pfad von `open/` nach `in-progress/`), ohne inhaltliche Änderung |
 | `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation nach `harness/review.md` und `harness/verification.md` |
 | `CHANGELOG.md` | unverändert | der CR ändert kein Produktverhalten; ein Eintrag entsteht im Code-Slice. Gelesen: `[Unreleased]` führt nur Code-Änderungen |
 
@@ -127,7 +139,15 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 
 ## 7. Closure-Notiz
 
-**Freigabe des Wortlauts:** Der Projektinhaber hat Stellen 1 bis 3 und den Befehlsnamen `u-boot egress list` am 2026-10-18 im Gespräch ausdrücklich freigegeben („ok“ auf die wörtlich vorgelegten Texte); der Wortlaut steht unverändert im Lastenheft 0.14.0, die Historie-Zeile trägt das Datum 2026-10-18.
+**Freigabe des Wortlauts:** Der Projektinhaber hat Stellen 1 bis 3 und den Befehlsnamen `u-boot egress list` am 2026-10-18 im Gespräch ausdrücklich freigegeben („ok“ auf die wörtlich vorgelegten Texte); der Wortlaut der Stellen 1 und 2 steht unverändert im Lastenheft 0.14.0, die Historie-Zeile trägt das Datum 2026-10-18.
+
+**Nicht freigegebener Satz (Stelle 4):** Die Zeile für `u-boot egress list` in der Befehlstabelle [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle) und die zugehörige Klausel der Historie-Zeile 0.14.0 sind aus dem freigegebenen Befehl abgeleitet; Bestätigung des Projektinhabers vor dem Release ausstehend. Priorität V2 wie die Anforderung [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion).
+
+**Ist-Stand des Starts:** Der Move nach `in-progress/` (Commit `8a7a827`) erfolgte mit `Verantwortlich: —`; die Start-Bedingung „`Verantwortlich:` gesetzt“ aus §4 ist nicht erfüllt, das Feld bleibt `—`.
+
+**Abgrenzung der Anzeige (Bedarf der Folge-Slices):** Das Lastenheft nennt die Liste „die wirksame Allowlist“ und sagt, der Befehl zeige „dieselbe Liste, die `u-boot generate devcontainer` in das Startscript schreibt“; es sagt nicht, dass ein laufender Container die Liste seines Image-Standes trägt. Gemessen im Vorgänger-Slice [`slice-v1-sandbox-egress-neuladen-entwurf`](../done/slice-v1-sandbox-egress-neuladen-entwurf.md): Stoppen und `devcontainer up` behält die alte Liste, erst ein Neuaufbau übernimmt die neue. Der freigegebene Wortlaut bleibt unverändert; die Abgrenzung steht als Bedarf in [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md) (Hinweis in der Ausgabe) und [`slice-v2-spec-sandbox-egress-ollama`](../open/slice-v2-spec-sandbox-egress-ollama.md) (Spezifikation) §1.
+
+**Übergabe der Auslegungsfragen und der Folge-Stellen:** Auslegung von „Restriktion nicht aktiv“ unter `--quiet` und Reichweite der Clone-Quelle: [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md) §1; weitere Stellen mit der Aufzählung der Abfragebefehle ([`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet), Kommentar in `root.go`, Handbuch): dort und in [`slice-v2-spec-sandbox-egress-ollama`](../open/slice-v2-spec-sandbox-egress-ollama.md) §1.
 
 *(Wird bei der Closure gefüllt: Vorab-Suche, Steering-Loop-Eintrag, Register, Folge-Slices, Risiken.)*
 

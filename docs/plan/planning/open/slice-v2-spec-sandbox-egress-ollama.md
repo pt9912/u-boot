@@ -33,6 +33,12 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 - [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung): „Ermittlung durch den Host“ schließt ein Programm im Container aus; das bleibt unverändert, weil nach R0 kein Neu-Laden vom Host entsteht.
 - Höchste vergebene Kennung in `spezifikation.md`: [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung).
 
+**Übergabe aus dem Review des CR [`slice-cr-sandbox-egress-anzeige`](../in-progress/slice-cr-sandbox-egress-anzeige.md) (gelesen am 2026-10-18; Bedarf, kein Wortlaut):**
+
+- **Abgrenzung der Anzeige (Eintrag zur Egress-Anzeige):** Der Befehl zeigt die Liste, die `u-boot generate devcontainer` in das Startscript schreibt (Berechnung `egressHosts`, `internal/hexagon/application/devcontainer_egress.go`), nicht den Zustand eines laufenden Containers. Gemessen in [`slice-v1-sandbox-egress-neuladen-entwurf`](../done/slice-v1-sandbox-egress-neuladen-entwurf.md): Stoppen und `devcontainer up` behält die alte Liste, erst ein Neuaufbau übernimmt die neue. Der Eintrag nennt diese Grenze; die Messgrenzen stehen dort.
+- **Aufzählung der Abfragebefehle:** [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) führt „Die Abfragebefehle `config get`, `config list`, `logs` und `template list` behalten ihre Ausgabe.“; sie bekommt `egress list`, wie [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) im Lastenheft 0.14.0. Dieselbe Aufzählung steht im Handbuch (`docs/user/benutzerhandbuch.md`, Zeile `--quiet` der Optionstabelle) und im Kommentar bei `addVerbosityFlag` in `internal/adapter/driving/cli/root.go`; beide zieht der Code-Slice [`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md) nach.
+- **Auslegungsfragen des Code-Slice (zu spezifizieren, sobald entschieden):** Vermerk „Restriktion nicht aktiv“ unter `--quiet`; Reichweite der Clone-Quelle (nur Sandbox-Profil, nur `.git/config`, Worktrees und Submodule `""`). Fundstellen und Wortlaut der Fragen: [`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md) §1.
+
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Code, Tests, Handbuch, CHANGELOG** — die Code-Slices haben sie geliefert; dieser Slice ändert sie nicht (stellt er eine Abweichung fest, ist das ein Befund und ein neuer Slice, kein stilles Umschreiben).
