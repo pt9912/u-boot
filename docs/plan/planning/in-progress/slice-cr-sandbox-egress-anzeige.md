@@ -9,12 +9,12 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — zweiter Slice der Welle; ihm geht [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md) voraus (Ergebnis zur Subdomain-Aussage), ihm folgt [`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md) (Umsetzung).
+**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — zweiter Slice der Welle; ihm geht [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md) voraus (Ergebnis zur Subdomain-Aussage), ihm folgt [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md) (Umsetzung).
 
 **Bezug:** [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress-Restriktion; Erweiterung), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Abfragebefehle unter `--quiet`; Änderung der Aufzählung). Verwandt: [`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md).
 Anlass: Projektinhaber, 2026-10-18, Vorschlag (a) („Ok deine Vorschläge für die Verbesserungen“).
 
-**Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)), §16 (Historie), Versionsfeld. `spezifikation.md` und `architecture.md` berührt der CR nicht; die Spezifikation folgt im letzten Slice der Welle ([`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md)).
+**Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)), §16 (Historie), Versionsfeld. `spezifikation.md` und `architecture.md` berührt der CR nicht; die Spezifikation folgt im letzten Slice der Welle ([`slice-v2-spec-sandbox-egress-ollama`](../open/slice-v2-spec-sandbox-egress-ollama.md)).
 
 **Verantwortlich:** —
 
@@ -35,7 +35,7 @@ Anlass: Projektinhaber, 2026-10-18, Vorschlag (a) („Ok deine Vorschläge für 
 - **Heute sichtbar:** die Liste steht nur im erzeugten Startscript (`generate devcontainer --dry-run` oder `--diff` zeigt es als Änderungsplan) und als Tabelle der Quellen im Handbuch (Abschnitt *Internet-Beschränkung (Egress)*) und in [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion); ein Befehl, der sie samt Herkunft zeigt, existiert nicht (`internal/adapter/driving/cli/` kennt `add`, `config`, `doctor`, `down`, `generate`, `init`, `logs`, `remove`, `template`, `up`).
 - **Aufzählung der Abfragebefehle:** [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) nennt „Die Ausgabe der Abfragebefehle, die nichts verändern (`config get`, `config list`, `logs`, `template list`), ist das Ergebnis des Befehls und bleibt.“; dieselbe Aufzählung steht in [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) (der Spezifikations-Slice zieht sie nach).
 
-**Offene Entwurfsfrage (Architect, [`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md)):** Name und Ort des Befehls. Der Wortlaut unten nennt `u-boot egress list` als Arbeitsname; Alternativen sind `u-boot config egress` (Untergruppe von `config`) und eine Option an `u-boot doctor`. Der Projektinhaber gibt Befehlsname **und** Wortlaut frei; ändert er den Namen, ändern sich die drei Stellen des Wortlauts mit.
+**Offene Entwurfsfrage (Architect, [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md)):** Name und Ort des Befehls. Der Wortlaut unten nennt `u-boot egress list` als Arbeitsname; Alternativen sind `u-boot config egress` (Untergruppe von `config`) und eine Option an `u-boot doctor`. Der Projektinhaber gibt Befehlsname **und** Wortlaut frei; ändert er den Namen, ändern sich die drei Stellen des Wortlauts mit.
 
 ### Wortlaut-Vorschlag (alt/neu; zur Freigabe durch den Projektinhaber vor dem Lastenheft-Commit)
 
@@ -75,7 +75,7 @@ Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Code, Tests, Spezifikation, Handbuch, CHANGELOG** — [`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md) und [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md); das Lastenheft ist Zielbild, der Code folgt.
+- **Code, Tests, Spezifikation, Handbuch, CHANGELOG** — [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md) und [`slice-v2-spec-sandbox-egress-ollama`](../open/slice-v2-spec-sandbox-egress-ollama.md); das Lastenheft ist Zielbild, der Code folgt.
 - **Das Neu-Laden im laufenden Container** — [`slice-v1-sandbox-egress-neuladen-entwurf`](../done/slice-v1-sandbox-egress-neuladen-entwurf.md); eine eigene Zusage mit Sicherheitsentscheidung.
 - **Eine Änderung der Default-Allowlist oder der Eingabe-Syntax** (Wildcard) — [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md).
 - **Die Anzeige des Zustands des laufenden Containers** (ob die Restriktion beim letzten Start griff) — das leistet `u-boot doctor` (`devcontainer.sandbox.fallback.egress`, [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung)); der neue Befehl bleibt offline und trifft keine Aussage über einen Container.
@@ -99,7 +99,7 @@ Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
 | `spec/lastenheft.md` | update | Stellen 1 bis 3 (§3 [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging); Versionsfeld; §16 Historie); erst nach Freigabe des Wortlauts |
-| `docs/plan/planning/open/slice-cr-sandbox-egress-anzeige.md` (diese Datei) | update | Freigabe, Vorab-Suche, Closure (§7) |
+| `docs/plan/planning/in-progress/slice-cr-sandbox-egress-anzeige.md` (diese Datei) | update | Freigabe, Vorab-Suche, Closure (§7) |
 | `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation nach `harness/review.md` und `harness/verification.md` |
 | `CHANGELOG.md` | unverändert | der CR ändert kein Produktverhalten; ein Eintrag entsteht im Code-Slice. Gelesen: `[Unreleased]` führt nur Code-Änderungen |
 
@@ -120,7 +120,7 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 
 ## 6. Risiken und offene Punkte
 
-- **Der Befehlsname ändert sich zwischen Freigabe und Architect-Entscheidung** ([`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md)). — **Ausgang:** offen; erwartet: die Freigabe nennt den Namen, der Architect hält ihn ein; sonst CR-Nachlauf (Review des Diffs der Änderung, nicht der ganzen Datei).
+- **Der Befehlsname ändert sich zwischen Freigabe und Architect-Entscheidung** ([`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md)). — **Ausgang:** offen; erwartet: die Freigabe nennt den Namen, der Architect hält ihn ein; sonst CR-Nachlauf (Review des Diffs der Änderung, nicht der ganzen Datei).
 - **Der Subdomain-Satz steht im Lastenheft, ohne dass die Messung ihn trägt** (E2 oder E3 des Wildcard-Slice). — **Ausgang:** entfallen; Ergebnis E1, der Satz bleibt im Wortlaut.
 - **Ein Review läuft vor der Freigabe und deckt die spätere Fassung nicht ab** (Lehre der Vorgänger-Welle: Gezählt, nicht verkörpert, [`welle-devcontainer-sshd-claude-code`](../done/welle-devcontainer-sshd-claude-code.md) §7). — **Ausgang:** offen; der Review läuft über die freigegebene Fassung.
 
