@@ -28,7 +28,7 @@
 | `ADR-0025` (neu) und `docs/plan/adr/README.md` (Zeile `Proposed`) | Zeile 1 und Zeile 5 (Fix-Runde, `Schärft:`) | ok | <!-- d-check:ignore (Kennungen als Zitat) -->
 | `docs/user/benutzerhandbuch.md` | Zeile 2 | ok: drei Stellen (Aufzählungspunkt Neuaufbau, Absatz *Grenze der Namensauflösung*, Absatz *Grenze* unter *Fallbacks sehen*) und der `sshd`-Verweis; die Tabelle nennt alle vier |
 | `CHANGELOG.md` | Zeile 6 | ok: `Fixed` mit zwei Einträgen (Neuaufbau, zwei gemessene Grenzen) |
-| `open/slice-cr-devcontainer-ollama.md`, `open/slice-v2-spec-sandbox-egress-ollama.md`, `open/slice-v1-cli-egress-anzeige.md`, `open/README.md` | Zeile 3 (Fix-Runde, F-2) | ok: Diff vorhanden, Zustandsmarker auf R0 | <!-- d-check:ignore (Kennungen als Zitat) -->
+| `open/slice-cr-devcontainer-ollama.md`, `open/slice-v2-spec-sandbox-egress-ollama.md`, `in-progress/slice-v1-cli-egress-anzeige.md`, `open/README.md` | Zeile 3 (Fix-Runde, F-2) | ok: Diff vorhanden, Zustandsmarker auf R0 | <!-- d-check:ignore (Kennungen als Zitat) -->
 | `welle-sandbox-egress-ollama.md` | Zeile 3 (Fix-Runde) und Zeile 8 | ok: Entscheidung R0 in Tabelle §4, Closure-Trigger, Zielbild, Versionen |
 | `BEO-WZG/host-werkzeug-ausserhalb-docker/` (Evidence neu, `state.md`) | Zeile 4 | ok |
 | Messprotokoll-Verzeichnis, 17 Dateien (5 Skripte, `inner-m1.sh`, `inner-m2.sh`, `probe.pl`, `reload-atomar.sh`, 2 Dockerfiles, README, 5 Rohdaten) | Zeile 7 | ok, `ls` zählt 17 |

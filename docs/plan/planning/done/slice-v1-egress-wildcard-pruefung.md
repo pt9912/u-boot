@@ -10,7 +10,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
 **Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — erster Slice der Welle (Analyse; hängt von keinem anderen Slice ab). Ihm folgen
-[`slice-cr-sandbox-egress-anzeige`](../done/slice-cr-sandbox-egress-anzeige.md) und [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md), deren Anzeige die hier belegte Subdomain-Aussage trägt.
+[`slice-cr-sandbox-egress-anzeige`](../done/slice-cr-sandbox-egress-anzeige.md) und [`slice-v1-cli-egress-anzeige`](../in-progress/slice-v1-cli-egress-anzeige.md), deren Anzeige die hier belegte Subdomain-Aussage trägt.
 
 **Bezug:** [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress-Restriktion; `egress.allow` ist eine „Liste von Hostnamen“),
 [`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md) (Mechanismus `dnsmasq` + nftables-Set; Entscheidung 2 nennt „samt Subdomains“).
@@ -59,7 +59,7 @@ Die Hosts der Ollama-Messung ([`slice-v1-devcontainer-ollama-messung`](../done/s
 
 - **Eine Wildcard-Syntax im Code** (`*.example.org` annehmen) — eine neue Eingabe-Zusage ist eine Entscheidung des Projektinhabers (E3), keine Folge der Analyse; ohne belegten Fall entsteht sie nicht.
 - **Eine geänderte Allowlist-Mechanik** (Proxy, andere DNS-Logik) — [`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md) Alternative D (Restriktion außerhalb des Containers) ist ein eigener Vorgang.
-- **Die Anzeige der wirksamen Liste** — [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md); sie nutzt das Ergebnis dieses Slice für den Hinweis „Subdomains eingeschlossen“.
+- **Die Anzeige der wirksamen Liste** — [`slice-v1-cli-egress-anzeige`](../in-progress/slice-v1-cli-egress-anzeige.md); sie nutzt das Ergebnis dieses Slice für den Hinweis „Subdomains eingeschlossen“.
 - **Das Neu-Laden im laufenden Container** — [`slice-v1-sandbox-egress-neuladen-entwurf`](../done/slice-v1-sandbox-egress-neuladen-entwurf.md).
 - **Lastenheft und Spezifikation** — der Slice ändert keine von beiden (Lastenheft ist Zielbild; die Spezifikation folgt im Spezifikations-Slice der Welle).
 

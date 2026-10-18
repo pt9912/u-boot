@@ -9,11 +9,11 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — dritter Slice der Welle; ihm gehen [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md) und [`slice-cr-sandbox-egress-anzeige`](../done/slice-cr-sandbox-egress-anzeige.md) voraus; die Spezifikation folgt in [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md).
+**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — dritter Slice der Welle; ihm gehen [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md) und [`slice-cr-sandbox-egress-anzeige`](../done/slice-cr-sandbox-egress-anzeige.md) voraus; die Spezifikation folgt in [`slice-v2-spec-sandbox-egress-ollama`](../open/slice-v2-spec-sandbox-egress-ollama.md).
 
 **Bezug:** [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress-Restriktion; um die Abfrage erweitert durch den CR, Lastenheft 0.14.0), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Abfragebefehl behält unter `--quiet` seine Ausgabe), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Sandbox-Profil als Bedingung). Verwandt: [`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md), [`ADR-0013`](../../adr/0013-dokumentationsreferenzmodell.md).
 
-**Berührte Spec-Stellen:** [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) (Quellen der Hosts), [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) (Aufzählung der Abfragebefehle), `architecture.md` §2 (Driving-Port, neuer Use Case) — der Slice **liest** sie; die Nachführung nimmt [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md) nach dem Code vor („Spezifikation nach dem Code“). Das Lastenheft ändert nur der CR.
+**Berührte Spec-Stellen:** [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) (Quellen der Hosts), [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) (Aufzählung der Abfragebefehle), `architecture.md` §2 (Driving-Port, neuer Use Case) — der Slice **liest** sie; die Nachführung nimmt [`slice-v2-spec-sandbox-egress-ollama`](../open/slice-v2-spec-sandbox-egress-ollama.md) nach dem Code vor („Spezifikation nach dem Code“). Das Lastenheft ändert nur der CR.
 
 **Verantwortlich:** —
 
@@ -53,7 +53,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 - **Neu-Laden der Liste im laufenden Container** — [`slice-v1-sandbox-egress-neuladen-entwurf`](../done/slice-v1-sandbox-egress-neuladen-entwurf.md), eigene Zusage und Sicherheitsentscheidung.
 - **Ändern der Liste** (`egress add` o. ä.) — `u-boot config set devcontainer.sandbox.egress.allow …` (`setEgressAllow`) bleibt der Weg; ein zweiter Schreibweg wäre eine neue Zusage.
 - **Wildcards in der Eingabe** — [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md).
-- **Die Hosts von Ollama** — [`slice-v1-devcontainer-feature-ollama`](slice-v1-devcontainer-feature-ollama.md) trägt sie in `egressFeatureHosts()` ein; die Anzeige zeigt sie dann ohne weitere Änderung (belegt durch den Golden Case der Welle).
+- **Die Hosts von Ollama** — [`slice-v1-devcontainer-feature-ollama`](../open/slice-v1-devcontainer-feature-ollama.md) trägt sie in `egressFeatureHosts()` ein; die Anzeige zeigt sie dann ohne weitere Änderung (belegt durch den Golden Case der Welle).
 
 ## 2. Definition of Done
 
