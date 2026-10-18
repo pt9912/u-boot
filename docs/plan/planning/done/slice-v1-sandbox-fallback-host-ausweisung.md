@@ -195,7 +195,7 @@ Die Tabelle nennt jede Datei, die der Diff voraussichtlich berührt (§3.10 von 
 | `docs/maintainer/cli-json-contract.md` | unverändert | §2.2 gilt unverändert; neue Kennungen erscheinen in `diagnostics[]` nur als `warn`/`error` | — |
 | `CHANGELOG.md` | update | Eintrag unter `[Unreleased]` (Added) | — |
 | `README.md`, `README.de.md` | unverändert | nennen „vier Ausweisungen“, keine Einzelheiten | — |
-| `docs/plan/planning/open/README.md`, `docs/plan/planning/next/README.md` | update | gelesen: die Zeile des CR in `open/README.md` und die Zeile dieses Slice in `next/README.md` verweisen auf `../in-progress/slice-v1-sandbox-fallback-host-ausweisung.md`; `make slice-mv` zieht beide Verweise nach `done/` nach, die Zeile in `next/README.md` nennt den Stand ohne Chronik | — |
+| `docs/plan/planning/open/README.md`, `docs/plan/planning/next/README.md` | update | gelesen: die Zeile des CR in `open/README.md` und die Zeile dieses Slice in `next/README.md` verweisen auf `../done/slice-v1-sandbox-fallback-host-ausweisung.md`; `make slice-mv` zieht beide Verweise nach `done/` nach, die Zeile in `next/README.md` nennt den Stand ohne Chronik | — |
 | `docs/plan/planning/in-progress/roadmap.md` | update | Ruhe-Marker „Nichts in Arbeit.“ entfernt, solange dieser Slice in `in-progress/` liegt (d-check `planning`), und nach dem Move wieder gesetzt; im Gesamtdiff der Range ohne Änderung | — |
 | `AGENTS.md` | update | §3.10: Überschrift mit dem Herkunfts-Anker des neuen Absatzes, zwei Absätze (Datei „unverändert“ durch gelesene Aussage belegen; Bedingung in Spec oder Handbuch mit Test oder streichen), Begründung (zehn Vorgänge); Entscheidung des Projektinhabers 2026-10-18, §7 | — |
 | `docs/plan/planning/observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/` (`observation.md`, `state.md`, `evidence/slice-cr-sandbox-fuse-startfehler.md`, `evidence/slice-v1-sandbox-fallback-host-ausweisung.md`) | neu | neue Beobachtung, zwei Vorgänge, `verkörpert` auf Entscheidung des Projektinhabers vor der Schwelle (§7) | — |
@@ -203,7 +203,7 @@ Die Tabelle nennt jede Datei, die der Diff voraussichtlich berührt (§3.10 von 
 | `docs/reviews/2026-10-18-verification-slice-v1-sandbox-fallback-host-ausweisung.md` | neu | Verification-Report (Verifier); Auflagen A-1 bis A-6 sind in der Closure erfüllt | — |
 | `repo.mk` | update | in der Planung nicht aufgeführt: `-timeout 30m` im `go test`-Rezept von `test-docker` (Entscheidung des Projektinhabers 2026-10-18, §1); Zeitbudget, keine Prüfung gelockert | — |
 | `docs/reviews/2026-10-18-slice-v1-sandbox-fallback-host-ausweisung.md` | neu | Review-Report (Reviewer); die Befunde F-1 bis F-6 sind behoben, F-7 bis F-11 vermerkt | — |
-| `docs/plan/planning/in-progress/slice-v1-sandbox-fallback-host-ausweisung.md` | update | diese Tabelle gegen `git diff --stat` abgeglichen, DoD-Zeile „Folge-ADR `Accepted`“ abgehakt, Lastenheft-Stand 0.13.0 (nach dem vorgelagerten CR); in der Closure DoD, §6 (Ausgänge) und §7 | — |
+| `docs/plan/planning/done/slice-v1-sandbox-fallback-host-ausweisung.md` | update | diese Tabelle gegen `git diff --stat` abgeglichen, DoD-Zeile „Folge-ADR `Accepted`“ abgehakt, Lastenheft-Stand 0.13.0 (nach dem vorgelagerten CR); in der Closure DoD, §6 (Ausgänge) und §7 | — |
 | `docs/plan/planning/in-progress/carveouts.md`, `.golangci.yml` (depguard), `.d-check.yml` | unverändert | kein neuer Carveout, kein neues Paket | — |
 | `spec/lastenheft.md` | **unverändert** | Entscheidung 2026-10-17 | — |
 

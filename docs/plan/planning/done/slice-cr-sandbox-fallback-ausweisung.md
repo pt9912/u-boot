@@ -13,7 +13,7 @@
 > Der Projektinhaber hatte am 2026-10-17 zunächst **B — Lastenheft präzisieren** entschieden und diesen CR angelegt. **Am selben Tag hat er die Entscheidung umgekehrt:**
 > „Das Lastenheft (und die restlichen Specs) sind Zielbild“ und **„A: Code zum Ziel“**. Das Lastenheft bleibt auf 0.12.0; der Code wird so gebaut, dass er die Zusage erfüllt.
 > Dieser CR **entfällt**; der Wortlaut-Vorschlag in §1 wird nicht umgesetzt und bleibt als Stand der verworfenen Lösung B stehen. Der Gegenstand liegt im Code-Slice
-> [`slice-v1-sandbox-fallback-host-ausweisung`](../in-progress/slice-v1-sandbox-fallback-host-ausweisung.md).
+> [`slice-v1-sandbox-fallback-host-ausweisung`](../done/slice-v1-sandbox-fallback-host-ausweisung.md).
 
 **Lifecycle:** Der Zustand dieses Slice ist das Verzeichnis, in dem diese
 Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
@@ -46,7 +46,7 @@ den Grund, die Liefer-Punkte der DoD bleiben leer.
 ## 1. Ziel und Abgrenzung
 
 > **Entfallen (2026-10-17).** Dieser Abschnitt beschreibt die verworfene Lösung B; er bleibt als Stand stehen. Der Ist-Stand-Befund darunter ist an den Code-Slice
-> [`slice-v1-sandbox-fallback-host-ausweisung`](../in-progress/slice-v1-sandbox-fallback-host-ausweisung.md) übergegangen, der jede Fundstelle erneut im Code gelesen hat.
+> [`slice-v1-sandbox-fallback-host-ausweisung`](../done/slice-v1-sandbox-fallback-host-ausweisung.md) übergegangen, der jede Fundstelle erneut im Code gelesen hat.
 
 **Ziel (verworfen):** Lastenheft-Änderung **0.12.0 → 0.13.0**: [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) verspricht die
 Ausweisung eines Degradations-Fallbacks nur noch dort, wo ihn der Host ermittelt; was erst im Container entsteht, gibt das erzeugte Startscript im Container aus.
@@ -176,7 +176,7 @@ Die Wahl ist vom Projektinhaber zu bestätigen.
 ## 3. Plan (vor Code)
 
 Entfällt: Der Slice ist ohne Lieferung geschlossen (§7 `Gegenstand:`); der Plan des Code-Wegs steht in
-[`slice-v1-sandbox-fallback-host-ausweisung`](../in-progress/slice-v1-sandbox-fallback-host-ausweisung.md) §3. Die Tabelle bleibt als Stand der verworfenen Lösung B:
+[`slice-v1-sandbox-fallback-host-ausweisung`](../done/slice-v1-sandbox-fallback-host-ausweisung.md) §3. Die Tabelle bleibt als Stand der verworfenen Lösung B:
 
 Reihenfolge: Wortlaut-Freigabe des Projektinhabers → Lastenheft → Spezifikation → Handbuch und CHANGELOG → Gates → Review → Closure.
 
@@ -203,7 +203,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 
 - `in-progress` → `next` (zu groß, zurück zur Zerlegung): Die Freigabe verlangt, weitere Zusagen mitzuregeln (etwa das `--device=/dev/fuse`-Verhalten, §6) — dann je Zusage ein Slice.
 - `in-progress` → `open` (blockiert): Der Projektinhaber änderte die Entscheidung von B auf A (Code-Zweig); eingetreten am 2026-10-17, vor dem Start — der Code-Slice ist
-  [`slice-v1-sandbox-fallback-host-ausweisung`](../in-progress/slice-v1-sandbox-fallback-host-ausweisung.md), dieser CR entfällt.
+  [`slice-v1-sandbox-fallback-host-ausweisung`](../done/slice-v1-sandbox-fallback-host-ausweisung.md), dieser CR entfällt.
 
 ## 5. Closure-Trigger
 
@@ -213,19 +213,19 @@ Steering-Loop-Lerneintrag geschrieben (§7). Lastenheft 0.13.0 ist angenommen.
 ## 6. Risiken und offene Punkte
 
 - **Der CR nimmt eine Zusage zurück:** „jeder Fallback in der Befehlsausgabe und in `doctor`“ gilt künftig nur für das Host-Ermittelbare. — **Ausgang:** entfallen: Der Projektinhaber hat die Zusage nicht zurückgenommen (Zielbild, „A: Code zum Ziel“ — siehe §7); das Lastenheft bleibt unverändert.
-- **`vfs` ist nur auf Linux-Hosts host-seitig ermittelbar:** Auf macOS/Colima, den gemessenen Hosts, meldet `checkSandboxRuntime` OK und verweist auf das Startscript. — **Ausgang:** eingetreten: [`slice-v1-sandbox-fallback-host-ausweisung`](../in-progress/slice-v1-sandbox-fallback-host-ausweisung.md) (Entwurfsfrage nach dem Kanal vom Start zum Host).
-- **Spec ist dem Lastenheft voraus:** Die Spezifikation schränkt schon vor dem CR ein. — **Ausgang:** eingetreten: [`slice-v1-sandbox-fallback-host-ausweisung`](../in-progress/slice-v1-sandbox-fallback-host-ausweisung.md) zieht die Spezifikation an das Lastenheft an (Zielbild), nicht umgekehrt.
-- **Der Befund `--device=/dev/fuse` (ungemessen):** `podmanRelaxations` (`devcontainer_sandbox.go`) setzt `--device=/dev/fuse`; fehlt das Device auf dem Container-Host, lehnt die Engine nach dem Muster von `/dev/net/tun` womöglich den Start ab, sodass der `vfs`-Zweig im Startscript nicht erreicht würde. — **Ausgang:** eingetreten: [`slice-v1-sandbox-fallback-host-ausweisung`](../in-progress/slice-v1-sandbox-fallback-host-ausweisung.md) (Frage F8, Messung durch den Architect).
+- **`vfs` ist nur auf Linux-Hosts host-seitig ermittelbar:** Auf macOS/Colima, den gemessenen Hosts, meldet `checkSandboxRuntime` OK und verweist auf das Startscript. — **Ausgang:** eingetreten: [`slice-v1-sandbox-fallback-host-ausweisung`](../done/slice-v1-sandbox-fallback-host-ausweisung.md) (Entwurfsfrage nach dem Kanal vom Start zum Host).
+- **Spec ist dem Lastenheft voraus:** Die Spezifikation schränkt schon vor dem CR ein. — **Ausgang:** eingetreten: [`slice-v1-sandbox-fallback-host-ausweisung`](../done/slice-v1-sandbox-fallback-host-ausweisung.md) zieht die Spezifikation an das Lastenheft an (Zielbild), nicht umgekehrt.
+- **Der Befund `--device=/dev/fuse` (ungemessen):** `podmanRelaxations` (`devcontainer_sandbox.go`) setzt `--device=/dev/fuse`; fehlt das Device auf dem Container-Host, lehnt die Engine nach dem Muster von `/dev/net/tun` womöglich den Start ab, sodass der `vfs`-Zweig im Startscript nicht erreicht würde. — **Ausgang:** eingetreten: [`slice-v1-sandbox-fallback-host-ausweisung`](../done/slice-v1-sandbox-fallback-host-ausweisung.md) (Frage F8, Messung durch den Architect).
 - **CHANGELOG-Release `[0.10.0]` trägt das alte Versprechen:** Der veröffentlichte Abschnitt nennt die Ausweisung der Degradations-Fallbacks als sichtbar bleibend. — **Ausgang:** entfallen: Das Lastenheft bleibt unverändert, das Versprechen gilt weiter; der Code-Slice erfüllt es.
 
 ## 7. Closure-Notiz
 
 - **Was hat funktioniert:** — (nichts geliefert; der Gegenstand liegt im Code-Slice.) Der Ist-Stand in §1 hielt der erneuten Prüfung am Code stand: Der Planungslauf des Code-Slice las Startscripte, `doctor_sandbox.go` und Wiring an der Stelle und fand dieselbe Lücke; er ergänzte, dass u-boot den Devcontainer-Container gar nicht kennt.
 - **Was ging anders als geplant:** Der CR wartete auf die Wortlaut-Freigabe; vorher entschied der Projektinhaber (2026-10-17) um: „Das Lastenheft (und die restlichen Specs) sind Zielbild“ — Code zum Ziel statt Lastenheft-Einschränkung.
-- **Gegenstand:** entfallen: Entscheidung des Projektinhabers 2026-10-17 (Zielbild, Code zum Ziel); der Wortlaut-Vorschlag wird nicht umgesetzt, das Lastenheft bleibt auf 0.12.0. Der Gegenstand der Ausweisung liegt im Code-Slice [`slice-v1-sandbox-fallback-host-ausweisung`](../in-progress/slice-v1-sandbox-fallback-host-ausweisung.md).
+- **Gegenstand:** entfallen: Entscheidung des Projektinhabers 2026-10-17 (Zielbild, Code zum Ziel); der Wortlaut-Vorschlag wird nicht umgesetzt, das Lastenheft bleibt auf 0.12.0. Der Gegenstand der Ausweisung liegt im Code-Slice [`slice-v1-sandbox-fallback-host-ausweisung`](../done/slice-v1-sandbox-fallback-host-ausweisung.md).
 - **Steering-Loop-Eintrag:** Eine Lücke zwischen Lastenheft-Zusage und Code wird nicht zuerst durch Zurücknehmen der Zusage geplant, sondern die Frage „Zielbild oder Bestand“ steht vor dem Schnitt beim Projektinhaber; ein CR-Plan mit Wortlaut-Vorschlag, der vor der Freigabe entfällt, geht mit `Gegenstand:` nach `done/`. Gezählt, nicht verkörpert; zweites Auftreten (nach [`slice-v1-sandbox-fallback-ausweisung`](../done/slice-v1-sandbox-fallback-ausweisung.md): ein Slice mit zwei Lösungswegen und Entscheidung beim Projektinhaber).
 - **Beobachtungs-Register (`../observations/`):** keine Beobachtung angelegt.
-- **Folge-Slices:** [`slice-v1-sandbox-fallback-host-ausweisung`](../in-progress/slice-v1-sandbox-fallback-host-ausweisung.md) — ist eine Datei in `open/`.
+- **Folge-Slices:** [`slice-v1-sandbox-fallback-host-ausweisung`](../done/slice-v1-sandbox-fallback-host-ausweisung.md) — ist eine Datei in `open/`.
 - **Risiken aus §6:** jedes trägt einen Ausgang — siehe §6 (zwei entfallen, drei gehen in den Code-Slice über).
 - **Drei Paarungen:** Anker: keine verkörperte Regel, daher kein Anker; Folge-Slice: der Code-Slice liegt in `open/`; Register: keine Beobachtung angelegt.
 
