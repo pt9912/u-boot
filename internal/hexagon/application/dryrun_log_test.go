@@ -106,9 +106,9 @@ func dryRunLogCases() []dryRunLogCase {
 				return runConfigSet(t, fixtureUBootYAMLDevcontainerSeed, "devcontainer.featureSources.allow", "https://example.test/x", m)
 			}},
 		{"config set egress.allow", "config set: updated", "config set: would update",
-			"[path devcontainer.sandbox.egress.allow old  new a.example.com]",
+			"[path devcontainer.sandbox.egress.allow old b.example.com new b.example.com,a.example.com]",
 			func(t *testing.T, m driving.PreviewMode) (*fakeLogger, error) {
-				return runConfigSet(t, manyFixture, "devcontainer.sandbox.egress.allow", "a.example.com", m)
+				return runConfigSet(t, manyFixture+"  sandbox:\n    egress:\n      allow:\n        - b.example.com\n", "devcontainer.sandbox.egress.allow", "a.example.com", m)
 			}},
 		{"config set many", "config set (many): updated", "config set (many): would update",
 			"[items 2]",
