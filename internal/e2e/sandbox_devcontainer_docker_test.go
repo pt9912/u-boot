@@ -450,18 +450,31 @@ func TestE2E_SandboxDevcontainer_NestedPodman(t *testing.T) {
 
 	// Degradation: container started without the /dev/fuse device and
 	// policy warn → vfs fallback.
-	var noFuse []string
-	for _, a := range runArgs {
-		if a != "--device=/dev/fuse" {
-			noFuse = append(noFuse, a)
-		}
+	// The fallback must work: the effective driver is vfs, `podman run`,
+	// `podman build` and `docker build` run. The storage volume is mounted
+	// like the generated devcontainer.json mounts it (`image_copy_tmp_dir`
+	// lies there).
+	volume := "sbxe2e-vfs-" + strconv.FormatInt(time.Now().UnixNano(), 36)
+	if out, code := dockerOutput(ctx, t, "volume", "create", volume); code != 0 {
+		t.Fatalf("docker volume create: %s", out)
 	}
-	vfs := "sh /usr/local/bin/u-boot-sandbox-init && grep -q vfs ~/.config/containers/storage.conf && echo VFS_FALLBACK"
-	args = append(append([]string{"run", "--rm"}, noFuse...), image, "bash", "-c", vfs)
-	if out, code := dockerOutput(ctx, t, args...); code != 0 || !strings.Contains(out, "VFS_FALLBACK") {
+	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "volume", "rm", "-f", volume) })
+	noFuse := append(withoutArg(runArgs, "--device=/dev/fuse"), "-v", volume+":"+containersStorageTarget)
+	args = append(append([]string{"run", "--rm"}, noFuse...), image, "bash", "-c", nestedPodmanVFSScript)
+	out, code = dockerOutput(ctx, t, args...)
+	if code != 0 {
 		t.Errorf("warn policy without /dev/fuse: exit %d:\n%s", code, out)
 	}
+	for _, want := range []string{"VFS_DRIVER", "VFS_RUN_OK", "VFS_BUILD_OK", "VFS_DOCKER_BUILD_OK"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("vfs fallback output lacks %s:\n%s", want, out)
+		}
+	}
 }
+
+// containersStorageTarget is the target of the storage volume in the
+// generated devcontainer.json (pinned by TestGenerateDevcontainer_SandboxPodman).
+const containersStorageTarget = "/home/vscode/.local/share/containers"
 
 // nestedPodmanVersionScript checks, as `vscode` after the start script, where
 // Podman comes from (ADR 0023): major line 6, the static archive under
@@ -474,6 +487,18 @@ test "$(command -v podman)" = /usr/local/bin/podman && echo PODMAN_FROM_USR_LOCA
 ! dpkg -l podman fuse-overlayfs passt 2> /dev/null | grep -q '^ii' && echo NO_DEBIAN_PODMAN
 grep -Fx "unqualified-search-registries = ['docker.io']" /etc/containers/registries.conf > /dev/null && echo REGISTRIES_DOCKER_IO
 test "$(readlink -f "$(command -v docker)")" = "$(readlink -f /usr/local/bin/podman)" && echo DOCKER_IS_PODMAN`
+
+// nestedPodmanVFSScript runs without /dev/fuse and with the storage volume:
+// the start script falls back to vfs; the effective storage driver, a run and
+// builds through `podman` and the `docker` alias must work.
+const nestedPodmanVFSScript = `set -e
+sh /usr/local/bin/u-boot-sandbox-init
+test "$(podman info --format '{{.Store.GraphDriverName}}')" = vfs && echo VFS_DRIVER
+podman run --rm --network=host docker.io/library/alpine:3 echo VFS_RUN_OK
+mkdir -p "$HOME/ctx" && cd "$HOME/ctx"
+printf 'FROM docker.io/library/alpine:3\nRUN echo ran > /run.txt\n' > Dockerfile
+podman build -t probe . && echo VFS_BUILD_OK
+docker build -t probe-alias . && echo VFS_DOCKER_BUILD_OK`
 
 // LH-FA-DEV-007: a `/dev/fuse` that is missing on the container host is no
 // degradation step; the engine refuses to start the container, so the start

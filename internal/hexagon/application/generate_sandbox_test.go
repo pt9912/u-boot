@@ -351,6 +351,14 @@ func TestGenerateDevcontainer_SandboxPodman(t *testing.T) {
 	if !strings.Contains(string(script), `on_unavailable="warn"`) || !strings.Contains(string(script), "exit 11") {
 		t.Errorf("script lacks policy/exit 11:\n%s", script)
 	}
+	for _, want := range []string{
+		`driver = "vfs"`, `mount_program = ""`, "storage.conf.d/99-u-boot-vfs.conf",
+		"image_copy_tmp_dir", `copy_tmp_dir="$HOME/.local/share/containers/tmp"`,
+	} {
+		if !strings.Contains(string(script), want) {
+			t.Errorf("script lacks the vfs fallback part %q:\n%s", want, script)
+		}
+	}
 	relaxations := 0
 	for _, w := range resp.Warnings {
 		if w.Code == "LH-FA-DEV-007" && strings.Contains(w.Message, "security relaxation") {

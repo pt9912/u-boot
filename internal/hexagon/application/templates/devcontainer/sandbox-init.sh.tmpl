@@ -29,11 +29,19 @@ if ! unshare --user --map-root-user true 2>/dev/null; then
   exit 11
 fi
 
-# /dev/fuse: without it fuse-overlayfs fails, fall back to vfs storage.
+# /dev/fuse: without it fuse-overlayfs fails, fall back to vfs storage. The
+# user drop-in overrides the overlay driver of the system drop-in
+# (/etc/containers/storage.conf.d/00-podman-static.conf) and drops its
+# mount_program. `podman build` mounts a kernel overlay over the build context
+# whose upperdir lies in image_copy_tmp_dir; that directory must not sit on the
+# container's overlay root file system, so it lives in the storage volume.
 if [ ! -c /dev/fuse ]; then
   unavailable "/dev/fuse is not available; falling back to vfs storage"
-  mkdir -p "$HOME/.config/containers"
-  printf '[storage]\ndriver = "vfs"\n' > "$HOME/.config/containers/storage.conf"
+  conf_dir="$HOME/.config/containers"
+  copy_tmp_dir="$HOME/.local/share/containers/tmp"
+  mkdir -p "$conf_dir/storage.conf.d" "$copy_tmp_dir"
+  printf '[storage]\ndriver = "vfs"\n\n[storage.options.overlay]\nmount_program = ""\n' > "$conf_dir/storage.conf.d/99-u-boot-vfs.conf"
+  printf '[engine]\nimage_copy_tmp_dir = "%s"\n' "$copy_tmp_dir" > "$conf_dir/containers.conf"
 else
   write_status ok
 fi
