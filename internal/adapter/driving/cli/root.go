@@ -1,8 +1,41 @@
 package cli
 
 import (
+	"fmt"
+	"regexp"
+
 	"github.com/spf13/cobra"
 )
+
+const (
+	repoURL    = "https://github.com/pt9912/u-boot"
+	manualPath = "docs/user/benutzerhandbuch.md"
+)
+
+// releaseVersionPattern matches exactly the versions the publish workflow
+// tags as `v<version>`: MAJOR.MINOR.PATCH without leading zeros, optionally
+// followed by `-rc.N`.
+const releaseVersionPattern = `^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-rc\.(0|[1-9][0-9]*))?$`
+
+// rootLongText renders the long help text of the root command. The manual
+// link of the version (tag `v<version>`) appears only when version is a
+// release form (`X.Y.Z` or `X.Y.Z-rc.N`); every other version (`-dev`,
+// test or self-built, empty) gets the link to `main` only, because no tag
+// exists for it.
+func rootLongText(version string) string {
+	text := `u-boot bootstraps reproducible development environments:
+project structure, Docker Compose stack, devcontainer configuration,
+service add-ons, and the usual recurring artefacts (README, CHANGELOG,
+.env.example).
+
+For command details, run u-boot <command> --help.
+Quickstart and user docs: ` + repoURL + `#readme
+`
+	if regexp.MustCompile(releaseVersionPattern).MatchString(version) {
+		text += fmt.Sprintf("User manual (German), this version: %s/blob/v%s/%s\n", repoURL, version, manualPath)
+	}
+	return text + fmt.Sprintf("User manual (German), latest: %s/blob/main/%s", repoURL, manualPath)
+}
 
 // buildRootCommand assembles the root `u-boot` command with every
 // subcommand registered. Kept in its own file (separate from
@@ -12,13 +45,7 @@ func buildRootCommand(a *App) *cobra.Command {
 	root := &cobra.Command{
 		Use:   "u-boot",
 		Short: "Developer environment bootloader for Docker-based projects",
-		Long: `u-boot bootstraps reproducible development environments:
-project structure, Docker Compose stack, devcontainer configuration,
-service add-ons, and the usual recurring artefacts (README, CHANGELOG,
-.env.example).
-
-For command details, run u-boot <command> --help.
-Quickstart and user docs: https://github.com/pt9912/u-boot#readme`,
+		Long:    rootLongText(a.version),
 		Version: a.version,
 		// Disable Cobra's auto-suggest on unknown commands so the
 		// error message is plain (`unknown command "frobnicate"`)

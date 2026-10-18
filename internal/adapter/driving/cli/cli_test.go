@@ -358,6 +358,61 @@ func TestExecute_RootHelpPointsToUserDocs(t *testing.T) {
 	}
 }
 
+func helpForVersion(t *testing.T, version string) string {
+	t.Helper()
+	var stdout, stderr bytes.Buffer
+	app := cli.New(version, &fakeInitUseCase{}, &fakeDoctorUseCase{}, &fakeAddServiceUseCase{}, &fakeUpUseCase{}, &fakeDownUseCase{}, &fakeGenerateUseCase{}, &fakeConfigUseCase{}, &fakeTemplateListUseCase{}, &fakeRemoveServiceUseCase{}, &fakeLogsUseCase{})
+	if err := app.Execute(context.Background(), []string{"--help"}, &stdout, &stderr); err != nil {
+		t.Fatalf("Execute --help (version %q): %v", version, err)
+	}
+	return stdout.String()
+}
+
+func TestExecute_RootHelpManualLinks(t *testing.T) {
+	const (
+		readme = "https://github.com/pt9912/u-boot#readme"
+		latest = "https://github.com/pt9912/u-boot/blob/main/docs/user/benutzerhandbuch.md"
+	)
+	tests := []struct {
+		version string
+		tagLink string // empty: no tag link expected
+	}{
+		{"0.11.0", "https://github.com/pt9912/u-boot/blob/v0.11.0/docs/user/benutzerhandbuch.md"},
+		{"1.20.3", "https://github.com/pt9912/u-boot/blob/v1.20.3/docs/user/benutzerhandbuch.md"},
+		{"0.12.0-rc.1", "https://github.com/pt9912/u-boot/blob/v0.12.0-rc.1/docs/user/benutzerhandbuch.md"},
+		{"0.11.0-dev", ""},
+		{"0.0.0-test", ""},
+		{"0.12.0-rc1", ""},
+		{"0.12.0-beta.1", ""},
+		{"0.12.0-rc.01", ""},
+		{"01.2.3", ""},
+		{"1.2", ""},
+		{"1.2.3+meta", ""},
+		{"v0.11.0", ""},
+		{"", ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.version, func(t *testing.T) {
+			out := helpForVersion(t, tt.version)
+			for _, want := range []string{readme, latest} {
+				if !strings.Contains(out, want) {
+					t.Errorf("--help missing %q; got:\n%s", want, out)
+				}
+			}
+			if tt.tagLink == "" {
+				if strings.Contains(out, "/blob/v") {
+					t.Errorf("--help shows a tag link for version %q:\n%s", tt.version, out)
+				}
+			} else if !strings.Contains(out, tt.tagLink) {
+				t.Errorf("--help missing tag link %q; got:\n%s", tt.tagLink, out)
+			}
+			if strings.Contains(out, "LH-") {
+				t.Errorf("--help exposes internal spec IDs:\n%s", out)
+			}
+		})
+	}
+}
+
 func TestExecute_UnknownCommand(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	err := newApp(&fakeInitUseCase{}).Execute(context.Background(), []string{"frobnicate"}, &stdout, &stderr)
