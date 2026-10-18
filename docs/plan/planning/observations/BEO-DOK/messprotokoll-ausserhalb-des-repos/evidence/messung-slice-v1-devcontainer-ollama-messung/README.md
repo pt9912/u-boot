@@ -1,7 +1,7 @@
 # Messprotokoll: Ollama im Sandbox-Devcontainer
 
 Skripte, Dockerfiles und Rohdaten der Messung des Slice
-[`slice-v1-devcontainer-ollama-messung`](../../../../../in-progress/slice-v1-devcontainer-ollama-messung.md)
+[`slice-v1-devcontainer-ollama-messung`](../../../../../done/slice-v1-devcontainer-ollama-messung.md)
 (Ergebnisse und Grenzen: dort §3 *Messung*). Messstand: Docker 29.5.2 (Server, arm64) auf Colima 0.10.3
 (VM Ubuntu 24.04.4, Kernel 6.8.0-117, 12 CPUs, 23,4 GiB), Docker-Client 29.9.1, Dev-Container-CLI 0.89.0,
 Basis-Image `mcr.microsoft.com/devcontainers/base@sha256:6ee2b4097c75d33e9a94d941577a3286e5d629434fba384688b06daeeaaeac99`

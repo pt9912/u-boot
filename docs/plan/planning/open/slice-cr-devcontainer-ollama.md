@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — sechster Slice der Welle; ihm geht [`slice-v1-devcontainer-ollama-messung`](../in-progress/slice-v1-devcontainer-ollama-messung.md) voraus (Messwerte und Folge-ADR), ihm folgt [`slice-v1-devcontainer-feature-ollama`](slice-v1-devcontainer-feature-ollama.md) (Umsetzung).
+**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — sechster Slice der Welle; ihm geht [`slice-v1-devcontainer-ollama-messung`](../done/slice-v1-devcontainer-ollama-messung.md) voraus (Messwerte und Folge-ADR), ihm folgt [`slice-v1-devcontainer-feature-ollama`](slice-v1-devcontainer-feature-ollama.md) (Umsetzung).
 
 **Bezug:** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Devcontainer-Features; Erweiterung), [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Sandbox-Profil; nur bei Netzdienst-Ausweisung), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Hosts: unverändert). Verwandt: [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md) und die Folge-ADR des Mess-Slice.
 Anlass: Projektinhaber, 2026-10-18 („Lastenheft-CR: Katalog erweitert um `ollama`: Zusage nur für Gemessenes“).
@@ -84,7 +84,7 @@ Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Messung, Quellenwahl und Folge-ADR** — [`slice-v1-devcontainer-ollama-messung`](../in-progress/slice-v1-devcontainer-ollama-messung.md); der CR trägt nur, was dort gemessen und entschieden ist.
+- **Messung, Quellenwahl und Folge-ADR** — [`slice-v1-devcontainer-ollama-messung`](../done/slice-v1-devcontainer-ollama-messung.md); der CR trägt nur, was dort gemessen und entschieden ist.
 - **Code, Tests, Spezifikation, Handbuch, CHANGELOG** — [`slice-v1-devcontainer-feature-ollama`](slice-v1-devcontainer-feature-ollama.md) und [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md); das Lastenheft ist Zielbild, der Code folgt.
 - **Eine Zusage zu Hosts, Version oder Modellen** — Hosts und Version gehören in die Spezifikation ([`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion), [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen)), nicht ins Lastenheft; Modelle wählt der Nutzer.
 - **Anschluss an den Ollama des Hosts, GPU, weitere Agenten** — vom Projektinhaber ausgeschlossen bzw. nicht genannt.
@@ -118,7 +118,7 @@ Vorab-Suche (Pflicht vor jeder Vertragsänderung, Muster [`slice-cr-devcontainer
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-devcontainer-ollama-messung`](../in-progress/slice-v1-devcontainer-ollama-messung.md) liegt in `done/` (Messwerte und ADR-Status liegen vor); der Projektinhaber hat den Wortlaut freigegeben (Gespräch).
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-devcontainer-ollama-messung`](../done/slice-v1-devcontainer-ollama-messung.md) liegt in `done/` (Messwerte und ADR-Status liegen vor); der Projektinhaber hat den Wortlaut freigegeben (Gespräch).
 
 **Rückführungen — vorab benannt:**
 
