@@ -275,7 +275,9 @@ const hostHintSkippedInContainer = "host check skipped: u-boot is running inside
 
 // inContainer is the runtime gate the four host-prerequisite
 // checks and checkSandboxRuntime (its `/dev/fuse` branch) use to
-// short-circuit. It returns false when the
+// short-circuit, and checkSandboxFallbacks passes to its
+// fallbackReader to read the status files directly instead of
+// through the container engine. It returns false when the
 // RuntimeEnvironment port is nil (pre-v0.1.1 wiring stays
 // unchanged), preserving the pre-skip behaviour for legacy
 // constructors and tests that pass nil.
