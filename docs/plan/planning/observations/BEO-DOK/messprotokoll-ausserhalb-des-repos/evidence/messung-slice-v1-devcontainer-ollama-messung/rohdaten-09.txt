@@ -1,0 +1,62 @@
+sha256:f6f8735359e6d513b1d8b8aaf8bfcac1544b142885d7269e236d25b304e30c4f
+build-start 17:03:01
+build exit=0
+build-ende 17:04:06
+1:[2026-10-18T17:03:01.291Z] @devcontainers/cli 0.89.0. Node.js v22.23.3. linux 6.8.0-117-generic arm64.
+97:[2026-10-18T17:03:04.738Z] #13 1.575 >>> Downloading ollama-linux-arm64.tar.zst
+329:#13 27.74 >>> Creating ollama user...
+330:#13 27.78 >>> Adding ollama user to video group...
+332:[2026-10-18T17:03:31.112Z] #13 27.79 >>> Adding current user to ollama group...
+333:#13 27.80 >>> Creating ollama systemd service...
+334:#13 27.80 WARNING: systemd is not running
+336:#13 27.80 >>> Install complete. Run "ollama" from the command line.
+337:#13 27.80 WARNING: Unable to detect NVIDIA/AMD GPU. Install lspci or lshw to automatically detect and install GPU dependencies.
+
+[2026-10-18T17:04:06.872Z] Stop (64311 ms): Run: docker buildx build --load --build-arg BUILDKIT_INLINE_CACHE=1 --build-context dev_containers_feature_content_source=/tmp/devcontainercli-root/containe
+{"outcome":"success","imageName":["u-boot-messung-ollama-a"],"ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}
+== devcontainer up (Feature-Entrypoint: ollama serve)
+[2026-10-18T17:04:09.690Z] time=2026-10-18T17:04:09.689Z level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="23.4 GiB" available="23.4 GiB"
+time=2026-10-18T17:04:09.689Z level=INFO source=routes.go:2551 msg="vram-based default context" total_vram="0 B" default_num_ctx=4096
+{"outcome":"success","containerId":"e45e86d2df30517c49f07dc7bd5d99415deaa94f14315ee5c5abb45db43103cf","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/proj","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":
+container=e45e86d2df30
+-- Prozesse
+      1 root     /bin/sh -c echo Container started trap "exit 0" 15 ollama serve exec "$@" while sleep 1 & wait $!; do :; done -
+      7 root     ollama serve
+-- Sockets
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                       
+LISTEN 0      4096       127.0.0.1:11434      0.0.0.0:*    users:(("ollama",pid=7,fd=4))
+-- Umgebung
+-- Dateien
+-rwxr-xr-x 1 root root 27669352 Oct 17 00:45 /usr/local/bin/ollama
+ls: cannot access '/home/vscode/.ollama': No such file or directory
+drwxr-xr-x 4 root   root   4096 Oct 18 17:03 /usr/local/lib/ollama
+drwx------ 2 ollama ollama 4096 Oct 18 17:03 /usr/share/ollama
+uid=999(ollama) gid=999(ollama) groups=999(ollama),44(video)
+2.1G	/usr/local/lib/ollama
+CPP_HTTPLIB_LICENSE
+GO_LICENSE
+LLAMA_CPP_LICENSE
+LLAMA_CPP_VENDORS_LICENSE
+cuda_v12
+cuda_v13
+libggml-base.so
+libggml-base.so.0
+libggml-base.so.0.27.0
+libggml-cpu-armv8.0_1.so
+libggml-cpu-armv8.2_1.so
+libggml-cpu-armv8.2_2.so
+libggml-cpu-armv8.2_3.so
+libggml-cpu-armv8.6_1.so
+libggml-cpu-armv8.6_2.so
+libggml-cpu-armv9.2_1.so
+libggml-cpu-armv9.2_2.so
+libggml.so
+libggml.so.0
+libggml.so.0.27.0
+-- Wer startet serve
+    PID USER        PPID COMMAND
+      7 root           1 ollama serve
+-- Image-Metadaten (devcontainer.metadata)
+[ {"id":"ghcr.io/devcontainers/features/common-utils:2"}, {"id":"ghcr.io/devcontainers/features/git:1","customizations":{"vscode":{"settings":{"github.copilot.chat.codeGeneration.instructions":[{"text":"This dev container includes an up-to-date version of Git, built from source as needed, pre-installed and available on the `PATH`."}]}}}}, {"remoteUser":"vscode"}, {"id":"ghcr.io/prulloac/devcontainer-features/ollama:1","entrypoint":"ollama serve"}, {"remoteUser":"vscode"} ]
+
+size=2182626059

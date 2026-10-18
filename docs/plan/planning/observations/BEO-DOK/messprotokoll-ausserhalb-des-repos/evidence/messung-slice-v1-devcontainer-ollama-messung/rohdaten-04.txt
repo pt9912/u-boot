@@ -1,0 +1,46 @@
+== Build Probe (arm64, --no-cache)
+sha256:a1bd16965ffcfea6f98e8c5834f14f7bff788b40f754ca0f718caa73a8ded6cd
+
+real	0m37.013s
+user	0m0.076s
+sys	0m0.093s
+u-boot-messung-ollama-b size=2182601467
+u-boot-messung-ollama-probe size=402069870
+23M	/usr/local/lib/ollama
+27M	/usr/local/bin/ollama
+CPP_HTTPLIB_LICENSE
+GO_LICENSE
+LLAMA_CPP_LICENSE
+LLAMA_CPP_VENDORS_LICENSE
+libggml-base.so
+libggml-base.so.0
+libggml-base.so.0.27.0
+libggml-cpu-armv8.0_1.so
+libggml-cpu-armv8.2_1.so
+libggml-cpu-armv8.2_2.so
+libggml-cpu-armv8.2_3.so
+libggml-cpu-armv8.6_1.so
+libggml-cpu-armv8.6_2.so
+libggml-cpu-armv9.2_1.so
+libggml-cpu-armv9.2_2.so
+libggml.so
+libggml.so.0
+libggml.so.0.27.0
+libgomp.so.1
+libgomp.so.1.0.0
+libllama-common.so
+libllama-common.so.0
+libllama-common.so.0.7.0
+libllama-quantize-impl.so
+libllama-server-impl.so
+libllama.so
+libllama.so.0
+libllama.so.0.7.0
+libmtmd.so
+libmtmd.so.0
+libmtmd.so.0.7.0
+libomp.so
+llama-quantize
+llama-server
+-rwxr-xr-x 1 root root 27669352 Oct 17 00:45 /usr/local/bin/ollama
+zstd entfernt

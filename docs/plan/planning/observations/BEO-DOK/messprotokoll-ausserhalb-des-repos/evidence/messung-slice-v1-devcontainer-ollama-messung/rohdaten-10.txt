@@ -1,0 +1,58 @@
+######## V0: ohne Volume (Container-Schicht): Modell nach stop/start und nach Loeschen des Containers
+success [K[?25h[?2026l
+smollm2:135m    9077fe9d2ae1    270 MB    Less than a second ago    
+-- nach stop/start desselben Containers:
+Manifeste noch da
+259M
+-- neuer Container aus demselben Image:
+ls: cannot access '/home/vscode/.ollama': No such file or directory
+
+######## V1: benanntes Volume auf /home/vscode/.ollama, Verzeichnis im Image NICHT vorhanden
+drwxr-xr-x 2 root root 4096 Oct 18 17:10 /home/vscode/.ollama
+Couldn't find '/home/vscode/.ollama/id_ed25519'. Generating new private key.
+Error: open /home/vscode/.ollama/id_ed25519: permission denied
+curl: (7) Failed to connect to 127.0.0.1 port 11434 after 0 ms: Could not connect to server
+
+######## V2: Image mit vorbereitetem Verzeichnis (mkdir + chown vscode), benanntes Volume
+sha256:75f07e12188f4100d3878cd4df7cb90a5211a4d515ffc72e575253509a9720b2
+drwxr-xr-x 2 vscode vscode 4096 Oct 18 17:05 /home/vscode/.ollama
+-- postStart-Kette: Egress-Skript, dann serve (Hosts: Standard + registry.ollama.ai + Blob-Host)
+chain-exit=0
+LISTEN 0      4096       127.0.0.1:11434      0.0.0.0:*    users:(("ollama",pid=45,fd=4))
+    PID USER     COMMAND
+     45 vscode   ollama serve
+writing manifest 
+success 
+380M	/home/vscode/.ollama
+drwxr-xr-x 3 vscode vscode 4096 Oct 18 17:10 .
+drwx------ 1 vscode vscode 4096 Oct 18 17:05 ..
+-rw------- 1 vscode vscode  387 Oct 18 17:10 id_ed25519
+-rw-r--r-- 1 vscode vscode   81 Oct 18 17:10 id_ed25519.pub
+drwxr-xr-x 5 vscode vscode 4096 Oct 18 17:10 models
+-- docker stop / start desselben Containers: laeuft serve danach?
+    PID USER     COMMAND
+kein ollama-Prozess nach dem Neustart
+Modell-Manifeste noch da
+-- resolv.conf nach Neustart:
+nameserver 192.168.5.1
+Operation not permitted (you must be root)
+netlink: Error: cache initialization failed: Operation not permitted
+-- postStart erneut (wie bei jedem Start durch die Dev-Container-CLI)
+NAME            ID              SIZE      MODIFIED      
+qwen2.5:0.5b    a8b0c5157701    397 MB    6 seconds ago    
+LISTEN 0      4096       127.0.0.1:11434      0.0.0.0:*   
+-- Container loeschen, neuen Container mit demselben Volume: Modell ohne Netz da?
+NAME            ID              SIZE      MODIFIED       
+qwen2.5:0.5b    a8b0c5157701    397 MB    10 seconds ago    
+[?25l[?25h
+qwen2.5:0.5b    a8b0c5157701    630 MB    100% CPU     4096       llamacpp    4 minutes from now    
+
+######## S: Egress-Skript nicht verfuegbar (ohne NET_ADMIN): Kette sudo egress-init && serve
+u-boot sandbox: egress restriction unavailable (NET_ADMIN not granted); consider restricting egress at network or DNS level
+onUnavailable=warn kette-exit=0
+    PID USER     COMMAND
+     21 vscode   ollama serve
+u-boot sandbox: egress restriction unavailable (NET_ADMIN not granted); consider restricting egress at network or DNS level
+onUnavailable=fail kette-exit=11
+    PID USER     COMMAND
+serve nicht gestartet

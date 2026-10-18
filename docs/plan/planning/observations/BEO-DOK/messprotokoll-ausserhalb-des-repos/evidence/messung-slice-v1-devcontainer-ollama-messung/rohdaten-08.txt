@@ -1,0 +1,52 @@
+== Release v0.40.6
+{"assets":17,"immutable":false,"prerelease":false,"published_at":"2026-10-16T22:00:46Z","tag_name":"v0.40.6","target_commitish":"main"}
+== Assets (Name, Groesse, GitHub-Digest) mit Signatur-/Provenance-Muster
+Ollama-darwin.zip 213263254 sha256:e0d61e8ceaf8697d3be5ac2adeb964e9c205bd831a01a94afe3a839e885036d7
+Ollama.dmg 214077973 sha256:ef72a271b97690a649bede207154e8ec65e3bec73abe39555edf43695280ab43
+OllamaSetup.exe 1584629376 sha256:933794ee1d670137f5116c9de7fc7db092fa97c6b823aba848ddb8a7ea030828
+install.ps1 22627 sha256:6ce96e19e70d755db035f8064d5d2f7f788931204f77b8d8d0b93be4b4af4cde
+install.sh 15902 sha256:25f64b810b947145095956533e1bdf56eacea2673c55a7e586be4515fc882c9f
+ollama-darwin.tgz 174459907 sha256:b2b55434865a668decb494110d7fd970eed3ecc8837be2872f672ccbb95df974
+ollama-linux-amd64-mlx.tar.zst 1294491963 sha256:ad0956e72961d476bcff4a5a39296b94a5f1112d38830f2c0f0b4ab380b3d27d
+ollama-linux-amd64-rocm.tar.zst 1052352752 sha256:26ab115007303675c359f26e12a202d78ae1f3aff9ec1434db901849fdea84dc
+ollama-linux-amd64.tar.zst 1438364593 sha256:c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0
+ollama-linux-arm64-jetpack5.tar.zst 299025808 sha256:29ad9de0dece97a21d452ffbbd38231d1ae02c627195d67a1158dc5ac73309e5
+ollama-linux-arm64-jetpack6.tar.zst 270806989 sha256:a01193f70ead22ce0adae54a7164df9fef587869ab58616eaa657eb9436c1c4d
+ollama-linux-arm64.tar.zst 1560414226 sha256:0a279d9428ad17b06fdb7dddf3b059b2c148433585fa3b30676a102fc459bb9f
+ollama-windows-amd64-mlx.zip 1405012741 sha256:34a28e51f90ae9f484e1a8c00311aa2f4ffec4943fd8af51cec577b791ebd0fa
+ollama-windows-amd64-rocm.zip 256427711 sha256:bd978d0fb59c7d4a607d2fbd35f53b8c6141130f508fdaf7b578d17e8339914d
+ollama-windows-amd64.zip 1471164488 sha256:e359637575302f288d76c0007c408a4be9c7376d59c4f28684d63b232a44b427
+ollama-windows-arm64.zip 210482819 sha256:82cace1a134f88e7e7092dcf79304eff5950b88dbfabc03f19be09f8be20ee65
+sha256sum.txt 1472 sha256:6035f6b12f6cf1b516e87744e3ed9b4f81d6cac1730e9d9ca4e8db7acd7de9d0
+-- Assets, deren Name nach Signatur, Provenance oder SBOM aussieht:
+0
+== sha256sum.txt gegen GitHub-Digest (alle Assets)
+gleich (      16 Zeilen)
+== amd64-Archiv: Pruefsumme im Strom (ohne Datei)
+c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0  -
+(erwartet c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0)
+== GitHub-Attestation (API) fuer die beiden Linux-Archive
+c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0: {"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/attestations#list-attestations","status":
+0a279d9428ad17b06fdb7dddf3b059b2c148433585fa3b30676a102fc459bb9f: {"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/attestations#list-attestations","status":
+== Tag-Commit
+tag-objekt: commit 2476d5ead197abe04629651028f83d48dc75d2b2
+{"author_date":"2026-10-16T23:01:01Z","committer_date":"2026-10-16T23:01:01Z","reason":"valid","verified":true}
+== Release-Workflow: Signatur-, Attestierungs- und Pruefsummen-Schritte (Zeilen)
+543:          provenance: false
+637:          provenance: false
+657:          provenance: false
+789:        run: find . -type f -not -name 'sha256sum.txt' | xargs sha256sum | tee sha256sum.txt
+841:            [ "$payload" = dist/sha256sum.txt ] && continue
+843:            retry gh release upload "$GITHUB_REF_NAME" "$payload" --clobber &
+859:          retry gh release upload "$GITHUB_REF_NAME" dist/sha256sum.txt --clobber
+== neuere Releases (Stand der Messung)
+v0.40.7-rc0 2026-10-18T00:28:57Z prerelease=true immutable=false
+v0.40.6 2026-10-16T22:00:46Z prerelease=false immutable=false
+v0.40.5 2026-10-14T19:45:22Z prerelease=false immutable=false
+v0.40.4 2026-10-12T19:00:12Z prerelease=false immutable=false
+v0.40.3 2026-10-11T01:39:04Z prerelease=false immutable=false
+v0.40.2 2026-10-08T16:53:47Z prerelease=false immutable=false
+v0.40.1 2026-10-07T23:22:59Z prerelease=false immutable=false
+v0.40.0 2026-09-25T03:31:52Z prerelease=false immutable=false
+== Docker-Hub-Image: Attestierungen im Index (Anzahl Manifeste, Plattformen)
+[{"architecture":"amd64","os":"linux"},{"architecture":"arm64","os":"linux"}]

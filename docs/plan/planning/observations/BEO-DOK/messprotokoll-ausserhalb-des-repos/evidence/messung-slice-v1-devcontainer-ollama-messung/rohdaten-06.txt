@@ -1,0 +1,95 @@
+devcontainer-cli 0.89.0
+== Tags
+{
+    "publishedTags": [
+        "1",
+        "1.0",
+        "1.0.0",
+        "latest",
+        "1.0.1"
+    ]
+}
+
+== Manifest / Metadaten
+{
+    "manifest": {
+        "schemaVersion": 2,
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "config": {
+            "mediaType": "application/vnd.devcontainers",
+            "digest": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            "size": 2
+        },
+        "layers": [
+            {
+                "mediaType": "application/vnd.devcontainers.layer.v1+tar",
+                "digest": "sha256:daee60f59e843b210b3d89f420afff0d9713f92f8c6ebe40508b798eb85be5a3",
+                "size": 5632,
+                "annotations": {
+                    "org.opencontainers.image.title": "devcontainer-feature-ollama.tgz"
+                }
+            }
+        ],
+        "annotations": {
+            "dev.containers.metadata": "{\"name\":\"ollama\",\"id\":\"ollama\",\"version\":\"1.0.1\",\"description\":\"Installs ollama\",\"documentationURL\":\"https://github.com/prulloac/devcontainer-features/tree/main/src/ollama\",\"options\":{\"pull\":{\"type\":\"string\",\"default\":\"\",\"description\":\"comma separated list of models to pull\"}},\"entrypoint\":\"ollama serve\",\"installsAfter\":[\"ghcr.io/devcontainers/features/common-utils\"]}",
+            "com.github.package.type": "devcontainer_feature"
+        }
+    },
+    "canonicalId": "ghcr.io/prulloac/devcontainer-features/ollama@sha256:0a4b90bd26bd2d6744a3a7080769f0d15ff379918aaa15aba1f93901ac085062"
+}
+
+== Build (Debian 13, arm64)
+17:01:12
+
+real	0m2.871s
+user	0m0.201s
+sys	0m0.158s
+17:01:15
+16:[2026-10-18T17:01:13.155Z] Resolving Feature dependencies for 'ghcr.io/prulloac/devcontainer-features/ollama:1'...
+17:[2026-10-18T17:01:13.155Z] * Processing feature: ghcr.io/prulloac/devcontainer-features/ollama:1
+23:[2026-10-18T17:01:13.843Z] * Fetching feature: ollama_0_oci
+25:[2026-10-18T17:01:14.059Z] * Fetched feature: ollama_0_oci version 1.0.1
+26:[2026-10-18T17:01:14.062Z] Start: Run: docker buildx build --load --build-arg BUILDKIT_INLINE_CACHE=1 --build-context dev_containers_feature_content_source=/tmp/devcontainercli-root/container-featu
+75:#13 [dev_containers_target_stage 5/5] RUN --mount=type=bind,from=dev_containers_feature_content_source,source=ollama_0,target=/tmp/build-features-src/ollama_0     cp -ar /tmp/build-features-src/oll
+77:#13 0.140 Feature       : ollama
+78:#13 0.140 Description   : Installs ollama
+79:#13 0.140 Id            : ghcr.io/prulloac/devcontainer-features/ollama
+81:#13 0.140 Documentation : https://github.com/prulloac/devcontainer-features/tree/main/src/ollama
+89:[2026-10-18T17:01:15.035Z] #13 0.486 >>> Installing ollama to /usr/local
+91:[2026-10-18T17:01:15.681Z] #13 1.132 ERROR: This version requires zstd for extraction. Please install zstd and try again:
+92:#13 1.132   - Debian/Ubuntu: sudo apt-get install zstd
+93:#13 1.132   - RHEL/CentOS/Fedora: sudo dnf install zstd
+94:#13 1.132   - Arch: sudo pacman -S zstd
+96:[2026-10-18T17:01:15.735Z] #13 1.135 ERROR: Feature "ollama" (ghcr.io/prulloac/devcontainer-features/ollama) failed to install! Look at the documentation at https://github.com/prulloac/devcontainer
+97:#13 ERROR: process "/bin/sh -c cp -ar /tmp/build-features-src/ollama_0 /tmp/dev-container-features  && chmod -R 0755 /tmp/dev-container-features/ollama_0  && cd /tmp/dev-container-features/ollama_0
+99: > [dev_containers_target_stage 5/5] RUN --mount=type=bind,from=dev_containers_feature_content_source,source=ollama_0,target=/tmp/build-features-src/ollama_0     cp -ar /tmp/build-features-src/olla
+104:0.486 >>> Installing ollama to /usr/local
+105:1.132 ERROR: This version requires zstd for extraction. Please install zstd and try again:
+106:1.132   - Debian/Ubuntu: sudo apt-get install zstd
+107:1.132   - RHEL/CentOS/Fedora: sudo dnf install zstd
+108:1.132   - Arch: sudo pacman -S zstd
+109:1.135 ERROR: Feature "ollama" (ghcr.io/prulloac/devcontainer-features/ollama) failed to install! Look at the documentation at https://github.com/prulloac/devcontainer-features/tree/main/src/ollama
+115:  26 | >>> RUN --mount=type=bind,from=dev_containers_feature_content_source,source=ollama_0,target=/tmp/build-features-src/ollama_0 \
+116:  27 | >>>     cp -ar /tmp/build-features-src/ollama_0 /tmp/dev-container-features \
+117:  28 | >>>  && chmod -R 0755 /tmp/dev-container-features/ollama_0 \
+118:  29 | >>>  && cd /tmp/dev-container-features/ollama_0 \
+121:  32 | >>>  && rm -rf /tmp/dev-container-features/ollama_0
+124:ERROR: failed to build: failed to solve: process "/bin/sh -c cp -ar /tmp/build-features-src/ollama_0 /tmp/dev-container-features  && chmod -R 0755 /tmp/dev-container-features/ollama_0  && cd /tmp/
+126:[2026-10-18T17:01:15.739Z] Stop (1677 ms): Run: docker buildx build --load --build-arg BUILDKIT_INLINE_CACHE=1 --build-context dev_containers_feature_content_source=/tmp/devcontainercli-root/conta
+128:{"outcome":"error","message":"Command failed: docker buildx build --load --build-arg BUILDKIT_INLINE_CACHE=1 --build-context dev_containers_feature_content_source=/tmp/devcontainercli-root/contain
+== Ende Build; letzte Zeilen
+ERROR: failed to build: failed to solve: process "/bin/sh -c cp -ar /tmp/build-features-src/ollama_0 /tmp/dev-container-features  && chmod -R 0755 /tmp/dev-container-features/ollama_0  && cd /tmp/dev-
+
+[2026-10-18T17:01:15.739Z] Stop (1677 ms): Run: docker buildx build --load --build-arg BUILDKIT_INLINE_CACHE=1 --build-context dev_containers_feature_content_source=/tmp/devcontainercli-root/container
+[2026-10-18T17:01:15.739Z] Exit code 1
+{"outcome":"error","message":"Command failed: docker buildx build --load --build-arg BUILDKIT_INLINE_CACHE=1 --build-context dev_containers_feature_content_source=/tmp/devcontainercli-root/container-f
+== Ergebnis-Image
+
+Error response from daemon: No such image: u-boot-messung-ollama-a:latest
+
+Error response from daemon: No such image: u-boot-messung-ollama-a:latest
+
+Unable to find image 'u-boot-messung-ollama-a:latest' locally
+docker: Error response from daemon: pull access denied for u-boot-messung-ollama-a, repository does not exist or may require 'docker login'
+
+Run 'docker run --help' for more information

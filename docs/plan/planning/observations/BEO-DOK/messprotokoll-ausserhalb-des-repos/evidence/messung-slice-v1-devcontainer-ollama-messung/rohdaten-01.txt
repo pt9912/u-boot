@@ -1,0 +1,46 @@
+== Messstand
+2026-10-18T16:51:56Z
+docker client 29.9.1 server 29.5.2 linux/arm64
+colima version 0.10.3
+VM: CPUs=12 MemTotal=25146642432 KernelVersion=6.8.0-117-generic OS=Ubuntu 24.04.4 LTS
+basis mcr.microsoft.com/devcontainers/base@sha256:6ee2b4097c75d33e9a94d941577a3286e5d629434fba384688b06daeeaaeac99 arch=arm64 size=380195334
+== Option D: Debian-Paket
+PRETTY_NAME="Debian GNU/Linux 13 (trixie)"
+NAME="Debian GNU/Linux"
+-- policy
+-- search
+-- zstd
+zstd:
+  Installed: (none)
+  Candidate: 1.5.7+dfsg-1
+-- im Basis-Image vorhanden:
+curl ja
+zstd nein
+ca-certificates ja
+xz-utils ja
+== Option C: ollama/ollama (nur Manifest, kein Pull der Schichten)
+Name:      docker.io/ollama/ollama:0.40.6
+MediaType: application/vnd.oci.image.index.v1+json
+Digest:    sha256:265409e1d931028a8f7d5a32bcbafddd7bffbc6cc629d77efe9560adf692a5e7
+           
+Manifests: 
+  Name:      docker.io/ollama/ollama:0.40.6@sha256:40c61dbf5091e0b4cc46f406f912fb061cfeca51208f0f7173c87c3b5f795c95
+  MediaType: application/vnd.oci.image.manifest.v1+json
+  Platform:  linux/amd64
+             
+  Name:      docker.io/ollama/ollama:0.40.6@sha256:fa0d4a1e2961c6343d1dd8b2a7c6609d1ae61bfa3032eb85667f9062d109e661
+  MediaType: application/vnd.oci.image.manifest.v1+json
+  Platform:  linux/arm64
+== Option C: Manifest arm64 (Schichten, Größen)
+"sha256:039f716e16ca33cb26daaab931ecaad227d009569ee4847dcf891812d0c37a59"
+[28940087,101556398,10269856,2672882273]
+== Option C: Index roh
+[{"platform":{"architecture":"amd64","os":"linux"},"annotations":null},{"platform":{"architecture":"arm64","os":"linux"},"annotations":null}]
+== Tags latest/0.40.6 Gleichheit
+Name:      docker.io/ollama/ollama:latest
+MediaType: application/vnd.oci.image.index.v1+json
+Digest:    sha256:265409e1d931028a8f7d5a32bcbafddd7bffbc6cc629d77efe9560adf692a5e7
+           
+== Option C: Image-Config arm64
+{"Env":["PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin","LD_LIBRARY_PATH=/usr/local/nvidia/lib:/usr/local/nvidia/lib64","NVIDIA_DRIVER_CAPABILITIES=compute,utility","NVIDIA_VISIBLE_DEVICES=all","OLLAMA_HOST=0.0.0.0:11434"],"Entrypoint":["/bin/ollama"],"Cmd":["serve"],"ExposedPorts":{"11434/tcp":{}},"Volumes":null}
+

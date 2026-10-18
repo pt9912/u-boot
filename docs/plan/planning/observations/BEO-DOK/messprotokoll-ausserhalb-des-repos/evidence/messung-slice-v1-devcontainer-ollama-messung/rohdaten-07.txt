@@ -1,0 +1,59 @@
+blob sha256: daee60f59e843b210b3d89f420afff0d9713f92f8c6ebe40508b798eb85be5a3  (erwartet daee60f59e843b210b3d89f420afff0d9713f92f8c6ebe40508b798eb85be5a3)
+total 28
+drwxr-xr-x 2 1001  118 4096 Jan  6  2025 .
+drwxr-xr-x 1 root root 4096 Oct 18 17:01 ..
+-rw-r--r-- 1 1001  118  515 Jan  6  2025 README.md
+-rw-r--r-- 1 1001  118  499 Jan  6  2025 devcontainer-feature.json
+-rw-r--r-- 1 root root 5632 Oct 18 17:01 f.tar
+-rw-r--r-- 1 1001  118  797 Jan  6  2025 install.sh
+== devcontainer-feature.json
+{
+    "name": "ollama",
+    "id": "ollama",
+    "version": "1.0.1",
+    "description": "Installs ollama",
+    "documentationURL": "https://github.com/prulloac/devcontainer-features/tree/main/src/ollama",
+    "options": {
+        "pull": {
+            "type":"string",
+            "default": "",
+            "description": "comma separated list of models to pull"
+        }
+    },
+    "entrypoint": "ollama serve",
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+    ]
+}
+== install.sh
+#!/bin/bash -i
+
+set -e
+
+PULL=${PULL:-""}
+
+# Checks if packages are installed and installs them if not
+check_packages() {
+	if ! dpkg -s "$@" >/dev/null 2>&1; then
+		if [ "$(find /var/lib/apt/lists/* | wc -l)" = "0" ]; then
+			echo "Running apt-get update..."
+			apt-get update -y
+		fi
+		apt-get -y install --no-install-recommends "$@"
+	fi
+}
+
+# make sure we have curl
+check_packages ca-certificates curl
+
+curl -fsSL https://ollama.com/install.sh | sh
+
+# if PULL is not empty and not equal to "none", also ollama is serving, then pull the models
+if [ "$PULL" != "none" ] && [ "$PULL" != "" ]; then
+    # split PULL variable into array using comma as delimiter and then pass to ollama pull
+    ollama serve &
+    sleep 3
+    echo $PULL | tr ',' '\n' | xargs -I % sh -c "ollama pull %"
+fi
+
+echo 'Done!'

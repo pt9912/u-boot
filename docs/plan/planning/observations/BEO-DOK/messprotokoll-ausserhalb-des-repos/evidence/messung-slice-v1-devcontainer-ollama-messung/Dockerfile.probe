@@ -1,0 +1,33 @@
+# Sandbox-Probe: das erzeugte Dockerfile (03-projekt-erzeugen.sh, Egress aktiv) plus Block "Ollama" (Option B,
+# CUDA-Verzeichnisse nicht entpackt: CPU-only). Build-Kontext: <projekt>/.devcontainer (enthaelt egress-init.sh).
+FROM mcr.microsoft.com/devcontainers/base@sha256:6ee2b4097c75d33e9a94d941577a3286e5d629434fba384688b06daeeaaeac99
+
+USER root
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends dnsmasq-base nftables \
+ && rm -rf /var/lib/apt/lists/*
+COPY egress-init.sh /usr/local/bin/u-boot-egress-init
+RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
+RUN mkdir -p "/workspaces/ollamaprobe" && chown vscode:vscode "/workspaces/ollamaprobe"
+
+# --- Block Ollama (Option B) ---
+ARG OLLAMA_VERSION=0.40.6
+ARG OLLAMA_SHA256_AMD64=c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0
+ARG OLLAMA_SHA256_ARM64=0a279d9428ad17b06fdb7dddf3b059b2c148433585fa3b30676a102fc459bb9f
+RUN set -eu; \
+    apt-get update -qq; \
+    apt-get install -y -qq --no-install-recommends zstd; \
+    rm -rf /var/lib/apt/lists/*; \
+    case "$(dpkg --print-architecture)" in \
+      amd64) a=amd64; sha="$OLLAMA_SHA256_AMD64" ;; \
+      arm64) a=arm64; sha="$OLLAMA_SHA256_ARM64" ;; \
+      *) echo "architektur nicht unterstuetzt" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSL -o /tmp/ollama.tar.zst "https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-${a}.tar.zst"; \
+    echo "${sha}  /tmp/ollama.tar.zst" | sha256sum -c -; \
+    tar --zstd -xf /tmp/ollama.tar.zst -C /usr/local --no-same-owner --exclude='lib/ollama/cuda_*'; \
+    rm /tmp/ollama.tar.zst; \
+    apt-get purge -y -qq zstd; apt-get autoremove -y -qq; \
+    ollama --version 2>&1
+
+USER vscode

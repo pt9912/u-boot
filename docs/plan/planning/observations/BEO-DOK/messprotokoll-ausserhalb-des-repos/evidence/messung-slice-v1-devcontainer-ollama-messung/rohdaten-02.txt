@@ -1,0 +1,150 @@
+== Umleitungskette (Host, nur Header, Range 0-0)
+HTTP/2 302 
+location: https://release-assets.githubusercontent.com/github-production-release-asset/658928958/58d382e1-c5e3-4fa7-a38e-d5b75e06520d
+HTTP/2 206 
+== Build Option B (arm64, --no-cache)
+#0 building with "colima" instance using docker driver
+
+#1 transferring dockerfile: 1.39kB done
+#1 DONE 0.0s
+
+#2 DONE 0.2s
+
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/3] FROM mcr.microsoft.com/devcontainers/base@sha256:6ee2b4097c75d33e9a94d941577a3286e5d629434fba384688b06daeeaaeac99
+#4 resolve mcr.microsoft.com/devcontainers/base@sha256:6ee2b4097c75d33e9a94d941577a3286e5d629434fba384688b06daeeaaeac99 done
+#4 CACHED
+
+#5 [2/3] RUN set -eu;     apt-get update -qq;     apt-get install -y -qq --no-install-recommends zstd;     rm -rf /var/lib/apt/lists/*
+#5 1.909 debconf: unable to initialize frontend: Dialog
+#5 1.909 debconf: (TERM is not set, so the dialog frontend is not usable.)
+#5 1.909 debconf: falling back to frontend: Readline
+#5 1.912 debconf: unable to initialize frontend: Readline
+#5 1.912 debconf: (This frontend requires a controlling tty.)
+#5 1.912 debconf: falling back to frontend: Teletype
+#5 1.913 debconf: unable to initialize frontend: Teletype
+#5 1.913 debconf: (This frontend requires a controlling tty.)
+#5 1.913 debconf: falling back to frontend: Noninteractive
+#5 2.198 Selecting previously unselected package zstd.
+#5 2.198 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 25841 files and directories currently installed.)
+#5 2.209 Preparing to unpack .../zstd_1.5.7+dfsg-1_arm64.deb ...
+#5 2.210 Unpacking zstd (1.5.7+dfsg-1) ...
+#5 2.247 Setting up zstd (1.5.7+dfsg-1) ...
+#5 2.249 Processing triggers for man-db (2.13.1-1) ...
+#5 DONE 2.5s
+
+#6 [3/3] RUN set -eu;     case "$(dpkg --print-architecture)" in       amd64) a=amd64; sha="c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0" ;;       arm64) a=arm64; sha="0a279d9428ad17b06fdb7dddf3b059b2c148433585fa3b30676a102fc459bb9f" ;;       *) echo "architektur nicht unterstuetzt" >&2; exit 1 ;;     esac;     date -u +"download-start %T";     curl -fsSL -o /tmp/ollama.tar.zst "https://github.com/ollama/ollama/releases/download/v0.40.6/ollama-linux-${a}.tar.zst";     date -u +"download-ende %T";     ls -l /tmp/ollama.tar.zst;     echo "${sha}  /tmp/ollama.tar.zst" | sha256sum -c -;     zstd -dc /tmp/ollama.tar.zst | tar -t | awk -F/ '{print $1"/"$2}' | sort | uniq -c | sort -rn | head -40;     tar --zstd -xf /tmp/ollama.tar.zst -C /usr/local --no-same-owner;     rm /tmp/ollama.tar.zst;     ollama --version
+#6 0.122 download-start 16:52:53
+#6 26.67 download-ende 16:53:20
+#6 26.67 -rw-r--r-- 1 root root 1560414226 Oct 18 16:53 /tmp/ollama.tar.zst
+#6 27.29 /tmp/ollama.tar.zst: OK
+#6 28.55      50 lib/ollama
+#6 28.55       1 bin/ollama
+#6 31.22 Warning: could not connect to a running Ollama instance
+#6 31.22 Warning: client version is 0.40.6
+#6 DONE 32.0s
+
+#7 exporting to image
+#7 exporting layers
+#7 exporting layers 31.2s done
+#7 exporting manifest sha256:e27b3419b6fd8727028e122d5af338bc9592049bda14a3a7af0d6f3560c5b94d done
+#7 exporting config sha256:20897aab87fe420f38fa5fc50fb0a99c9afeec837dc3331790daf607991510bb done
+#7 exporting attestation manifest sha256:be77db2abfe51768eadc918b91c3c84c1dbd51ba5bcce0d6ef28eaa49f252591 done
+#7 exporting manifest list sha256:a3199a5b13891af0dfb2cc2f47c6d1f300540dd59674c5c6a0300b1fa39e7374 done
+#7 naming to docker.io/library/u-boot-messung-ollama-b:latest done
+#7 unpacking to docker.io/library/u-boot-messung-ollama-b:latest
+#7 unpacking to docker.io/library/u-boot-messung-ollama-b:latest 5.6s done
+#7 DONE 37.0s
+
+View build details: docker-desktop://dashboard/build/colima/colima/re4etsvc1y8j47ztj94pcc7hm
+
+real	1m12.282s
+user	0m0.099s
+sys	0m0.121s
+image size=2182601467 arch=arm64
+== Dateien
+-rwxr-xr-x 1 root root 27669352 Oct 17 00:45 /usr/local/bin/ollama
+2.1G	/usr/local/lib/ollama
+27M	/usr/local/bin/ollama
+CPP_HTTPLIB_LICENSE
+GO_LICENSE
+LLAMA_CPP_LICENSE
+LLAMA_CPP_VENDORS_LICENSE
+cuda_v12
+cuda_v13
+libggml-base.so
+libggml-base.so.0
+libggml-base.so.0.27.0
+libggml-cpu-armv8.0_1.so
+libggml-cpu-armv8.2_1.so
+libggml-cpu-armv8.2_2.so
+libggml-cpu-armv8.2_3.so
+libggml-cpu-armv8.6_1.so
+libggml-cpu-armv8.6_2.so
+libggml-cpu-armv9.2_1.so
+libggml-cpu-armv9.2_2.so
+libggml.so
+libggml.so.0
+libggml.so.0.27.0
+libgomp.so.1
+libgomp.so.1.0.0
+libllama-common.so
+libllama-common.so.0
+libllama-common.so.0.7.0
+libllama-quantize-impl.so
+libllama-server-impl.so
+libllama.so
+libllama.so.0
+libllama.so.0.7.0
+libmtmd.so
+libmtmd.so.0
+libmtmd.so.0.7.0
+libomp.so
+llama-quantize
+llama-server
+/usr/local/lib/ollama:
+CPP_HTTPLIB_LICENSE
+GO_LICENSE
+LLAMA_CPP_LICENSE
+LLAMA_CPP_VENDORS_LICENSE
+cuda_v12
+cuda_v13
+libggml-base.so
+libggml-base.so.0
+libggml-base.so.0.27.0
+libggml-cpu-armv8.0_1.so
+libggml-cpu-armv8.2_1.so
+libggml-cpu-armv8.2_2.so
+libggml-cpu-armv8.2_3.so
+libggml-cpu-armv8.6_1.so
+libggml-cpu-armv8.6_2.so
+libggml-cpu-armv9.2_1.so
+libggml-cpu-armv9.2_2.so
+libggml.so
+libggml.so.0
+libggml.so.0.27.0
+libgomp.so.1
+libgomp.so.1.0.0
+libllama-common.so
+libllama-common.so.0
+libllama-common.so.0.7.0
+libllama-quantize-impl.so
+libllama-server-impl.so
+libllama.so
+libllama.so.0
+libllama.so.0.7.0
+libmtmd.so
+libmtmd.so.0
+libmtmd.so.0.7.0
+libomp.so
+llama-quantize
+llama-server
+
+/usr/local/lib/ollama/cuda_v12:
+libcublas.so.12
+uid=1000(vscode) gid=1000(vscode) groups=1000(vscode)
+/usr/local/bin/ollama
+Warning: could not connect to a running Ollama instance
+Warning: client version is 0.40.6

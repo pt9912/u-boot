@@ -1,0 +1,11 @@
+== ollama-linux-arm64.tar.zst: Bytes je Verzeichnis (zwei Ebenen unter lib/ollama), entpackt
+  1255728288 lib/ollama/cuda_v12
+   947388648 lib/ollama/cuda_v13
+    27669352 bin/ollama/(sonst)
+    24006916 lib/ollama/(sonst)
+== ollama-linux-amd64.tar.zst: Bytes je Verzeichnis (zwei Ebenen unter lib/ollama), entpackt
+  1294259072 lib/ollama/cuda_v12
+   856680568 lib/ollama/cuda_v13
+    40275720 lib/ollama/vulkan
+    33894834 lib/ollama/(sonst)
+    29963536 bin/ollama/(sonst)

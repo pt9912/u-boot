@@ -1,0 +1,148 @@
+== Modus restricted, Hosts: [api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org registry.ollama.ai dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com], Modelle: qwen2.5:0.5b
+egress-init exit=0
+conf: server=/api.github.com/192.168.5.1
+conf: nftset=/api.github.com/4#ip#u_boot_egress#allowed
+conf: server=/codeload.github.com/192.168.5.1
+conf: nftset=/codeload.github.com/4#ip#u_boot_egress#allowed
+conf: server=/deb.debian.org/192.168.5.1
+conf: nftset=/deb.debian.org/4#ip#u_boot_egress#allowed
+conf: server=/github.com/192.168.5.1
+conf: nftset=/github.com/4#ip#u_boot_egress#allowed
+conf: server=/objects.githubusercontent.com/192.168.5.1
+conf: nftset=/objects.githubusercontent.com/4#ip#u_boot_egress#allowed
+conf: server=/raw.githubusercontent.com/192.168.5.1
+conf: nftset=/raw.githubusercontent.com/4#ip#u_boot_egress#allowed
+conf: server=/security.debian.org/192.168.5.1
+conf: nftset=/security.debian.org/4#ip#u_boot_egress#allowed
+conf: server=/registry.ollama.ai/192.168.5.1
+conf: nftset=/registry.ollama.ai/4#ip#u_boot_egress#allowed
+conf: server=/dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/192.168.5.1
+conf: nftset=/dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/4#ip#u_boot_egress#allowed
+---- 16:58:22.576 serve starten (Umgebung: OLLAMA_HOST=<ungesetzt>, HOME=/home/vscode)
+(keine OLLAMA_*-Variable)
+ls: cannot access '/home/vscode/.ollama': No such file or directory
+---- 16:58:23.615 serve bereit nach 2s
+Ollama is running
+{"version":"0.40.6"}
+-- lauschende Sockets
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                        
+LISTEN 0      4096       127.0.0.1:11434      0.0.0.0:*    users:(("ollama",pid=68,fd=4))
+-- Erreichbarkeit ueber die Container-Adresse
+container-ip=172.17.0.2
+http://172.17.0.2:11434 -> 000
+-- Server-Log (Start)
+Couldn't find '/home/vscode/.ollama/id_ed25519'. Generating new private key.
+Your new public key is: 
+
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIZWxAl8pMCSFF/upnSs1eE6znZ90hsIbMKco7qj6Cm8
+
+time=2026-10-18T16:58:22.592Z level=INFO source=routes.go:2439 msg="server config" env="map[CUDA_VISIBLE_DEVICES: GGML_VK_VISIBLE_DEVICES: GPU_DEVICE_ORDINAL: HIP_VISIBLE_DEVICES: HSA_OVERRIDE_GFX_VERSION: HTTPS_PROXY: H
+time=2026-10-18T16:58:22.593Z level=INFO source=routes.go:2441 msg="Ollama cloud disabled: false"
+time=2026-10-18T16:58:22.593Z level=INFO source=images.go:1000 msg="total blobs: 0"
+time=2026-10-18T16:58:22.593Z level=INFO source=images.go:1009 msg="total unused blobs removed: 0"
+time=2026-10-18T16:58:22.593Z level=INFO source=routes.go:2501 msg="Listening on 127.0.0.1:11434 (version 0.40.6)"
+time=2026-10-18T16:58:22.594Z level=INFO source=runner.go:60 msg="discovering available GPUs..."
+time=2026-10-18T16:58:22.594Z level=WARN source=model_show_cache.go:144 msg="model show cloud cache hydration failed" error="Get \"https://ollama.com:443/api/tags?ts=1792342702\": dial tcp: lookup ollama.com on 127.0.0.1
+time=2026-10-18T16:58:22.594Z level=WARN source=model_recommendations.go:168 msg="model recommendations refresh failed" error="Get \"https://ollama.com/api/experimental/model-recommendations?ts=1792342702\": dial tcp: lo
+time=2026-10-18T16:58:22.594Z level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=5m15.219624424s consecutive_failures=1
+time=2026-10-18T16:58:22.615Z level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="23.4 GiB" available="23.4 GiB"
+time=2026-10-18T16:58:22.615Z level=INFO source=routes.go:2551 msg="vram-based default context" total_vram="0 B" default_num_ctx=4096
+[GIN] 2026/10/18 - 16:58:23 | 200 |     116.376µs |       127.0.0.1 | GET      "/"
+[GIN] 2026/10/18 - 16:58:23 | 200 |      31.209µs |       127.0.0.1 | GET      "/"
+[GIN] 2026/10/18 - 16:58:23 | 200 |      63.709µs |       127.0.0.1 | GET      "/api/version"
+-- ~/.ollama nach dem Start
+/home/vscode/.ollama:
+total 20
+drwxr-xr-x 3 vscode vscode 4096 Oct 18 16:58 .
+drwx------ 1 vscode vscode 4096 Oct 18 16:58 ..
+-rw------- 1 vscode vscode  387 Oct 18 16:58 id_ed25519
+-rw-r--r-- 1 vscode vscode   81 Oct 18 16:58 id_ed25519.pub
+drwxr-xr-x 3 vscode vscode 4096 Oct 18 16:58 models
+
+/home/vscode/.ollama/models:
+total 12
+drwxr-xr-x 3 vscode vscode 4096 Oct 18 16:58 .
+drwxr-xr-x 3 vscode vscode 4096 Oct 18 16:58 ..
+drwxr-xr-x 2 vscode vscode 4096 Oct 18 16:58 blobs
+
+/home/vscode/.ollama/models/blobs:
+total 8
+drwxr-xr-x 2 vscode vscode 4096 Oct 18 16:58 .
+drwxr-xr-x 3 vscode vscode 4096 Oct 18 16:58 ..
+-- DNS-Anfragen seit Serverstart (vor dem Pull)
+      4 ollama.com
+---- 16:58:23.650 pull qwen2.5:0.5b
+pulling c5396e06af29: 100% ▕█████████████████ ▏ 397 MB/397 MB   62 MB/s      0spulling manifest 
+pulling c5396e06af29: 100% ▕█████████████████ ▏ 397 MB/397 MB   62 MB/s      0s
+pulling eb4402837c78: 100% ▕██████████████████▏ 1.5 KB                         pulling manifest 
+pulling eb4402837c78: 100% ▕██████████████████▏ 1.5 KB                         
+pulling 005f95c74751: 100% ▕██████████████████▏  490 B                         
+success 
+pull exit=0 dauer=10.3678s
+-- DNS-Anfragen waehrend des Pulls (qwen2.5:0.5b)
+     10 dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com
+      4 registry.ollama.ai
+-- DNS-Antworten (CNAME-Kette) waehrend des Pulls
+---- 16:58:34.023 Speicher nach dem Pull
+380M	/home/vscode/.ollama
+/home/vscode/.ollama:
+total 20
+drwxr-xr-x 3 vscode vscode 4096 Oct 18 16:58 .
+drwx------ 1 vscode vscode 4096 Oct 18 16:58 ..
+-rw------- 1 vscode vscode  387 Oct 18 16:58 id_ed25519
+-rw-r--r-- 1 vscode vscode   81 Oct 18 16:58 id_ed25519.pub
+drwxr-xr-x 5 vscode vscode 4096 Oct 18 16:58 models
+
+/home/vscode/.ollama/models:
+total 20
+drwxr-xr-x 5 vscode vscode 4096 Oct 18 16:58 .
+drwxr-xr-x 3 vscode vscode 4096 Oct 18 16:58 ..
+drwxr-xr-x 2 vscode vscode 4096 Oct 18 16:58 blobs
+drwxr-xr-x 3 vscode vscode 4096 Oct 18 16:58 manifests
+drwxr-xr-x 3 vscode vscode 4096 Oct 18 16:58 manifests-v2
+
+/home/vscode/.ollama/models/blobs:
+total 388528
+drwxr-xr-x 2 vscode vscode      4096 Oct 18 16:58 .
+drwxr-xr-x 5 vscode vscode      4096 Oct 18 16:58 ..
+-rw-r--r-- 1 vscode vscode       490 Oct 18 16:58 sha256-005f95c7475154a17e84b85cd497949d6dd2a4f9d77c096e3c66e4d9c32acaf5
+-rw-r--r-- 1 vscode vscode        68 Oct 18 16:58 sha256-66b9ea09bd5b7099cbb4fc820f31b575c0366fa439b08245566692c6784e281e
+-rw-r--r-- 1 vscode vscode     11343 Oct 18 16:58 sha256-832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e
+-rw-r--r-- 1 vscode vscode       857 Oct 18 16:58 sha256-a8b0c51577010a279d933d14c2a8ab4b268079d44c5c8830c0a93900f1827c67
+-rw-r--r-- 1 vscode vscode 397807936 Oct 18 16:58 sha256-c5396e06af294bd101b30dce59131a76d2b773e76950acc870eda801d3ab0515
+-rw-r--r-- 1 vscode vscode      1482 Oct 18 16:58 sha256-eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175
+overlay         197G  159G   29G  85% /
+---- 16:58:34.025 run qwen2.5:0.5b (CPU-only)
+⠋ ⠹ ⠸ ⠼ ⠴ OK.
+run dauer=0.6s
+-- ollama ps
+NAME            ID              SIZE      PROCESSOR    CONTEXT    RUNNER      UNTIL              
+qwen2.5:0.5b    a8b0c5157701    630 MB    100% CPU     4096       llamacpp    4 minutes from now    
+-- Prozesse (RSS in kB)
+    192 651040 1545036 /usr/local/lib/ollama/llama-server --model /home/vscode/.ollama/models/blobs/sha256-c5396e06af294bd101b30dce59131a76d2b773e76950acc870eda
+     68 38316 2254332 ollama serve
+      1  3324   7456 bash /m/inner-05.sh restricted api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercon
+-- cgroup memory.peak
+1097129984
+-- DNS-Anfragen waehrend run
+-- Server-Log (GPU/CPU-Zeilen)
+time=2026-10-18T16:58:22.592Z level=INFO source=routes.go:2439 msg="server config" env="map[CUDA_VISIBLE_DEVICES: GGML_VK_VISIBLE_DEVICES: GPU_DEVICE_ORDINAL: HIP_VISIBLE_DEVICES: HSA_OVERRIDE_GFX_VERSION: HTTPS_PROXY: HTTP_PROXY: LLAMA_ARG
+time=2026-10-18T16:58:22.594Z level=INFO source=runner.go:60 msg="discovering available GPUs..."
+time=2026-10-18T16:58:22.615Z level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="23.4 GiB" available="23.4 GiB"
+time=2026-10-18T16:58:22.615Z level=INFO source=routes.go:2551 msg="vram-based default context" total_vram="0 B" default_num_ctx=4096
+time=2026-10-18T16:58:34.083Z level=INFO source=sched.go:1189 msg="disabling mmap for llama-server load by default" model=/home/vscode/.ollama/models/blobs/sha256-c5396e06af294bd101b30dce59131a76d2b773e76950acc870eda801d3ab0515 reason=cpu
+time=2026-10-18T16:58:34.084Z level=INFO source=sched.go:664 msg="system memory" total="23.4 GiB" free="23.0 GiB" free_swap="0 B"
+load_backend: loaded CPU backend from /usr/local/lib/ollama/libggml-cpu-armv8.2_2.so
+cmn  common_param:   - CPU     : CPU (23981 MiB, 23981 MiB free)
+cmn  common_param: system_info: n_threads = 12 (n_threads_batch = 12) / 12 | CPU : NEON = 1 | ARM_FMA = 1 | FP16_VA = 1 | DOTPROD = 1 | LLAMAFILE = 1 | REPACK = 1 | 
+cmn  common_init_: fitting params to device memory ...
+common_params_fit_impl: getting device memory data for initial parameters:
+common_memory_breakdown_print: | memory breakdown [MiB] | total   free    self   model   context   compute    unaccounted |
+---- 16:58:34.657 alle DNS-Anfragen (eindeutig)
+     10 dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com
+      4 ollama.com
+      4 registry.ollama.ai
+
+real	0m16.177s
+user	0m0.012s
+sys	0m0.010s

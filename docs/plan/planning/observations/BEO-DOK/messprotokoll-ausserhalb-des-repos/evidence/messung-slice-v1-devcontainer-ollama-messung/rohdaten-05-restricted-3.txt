@@ -1,0 +1,83 @@
+== Modus restricted, Hosts: [api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org], Modelle: qwen2.5:0.5b
+egress-init exit=0
+conf: server=/api.github.com/192.168.5.1
+conf: nftset=/api.github.com/4#ip#u_boot_egress#allowed
+conf: server=/codeload.github.com/192.168.5.1
+conf: nftset=/codeload.github.com/4#ip#u_boot_egress#allowed
+conf: server=/deb.debian.org/192.168.5.1
+conf: nftset=/deb.debian.org/4#ip#u_boot_egress#allowed
+conf: server=/github.com/192.168.5.1
+conf: nftset=/github.com/4#ip#u_boot_egress#allowed
+conf: server=/objects.githubusercontent.com/192.168.5.1
+conf: nftset=/objects.githubusercontent.com/4#ip#u_boot_egress#allowed
+conf: server=/raw.githubusercontent.com/192.168.5.1
+conf: nftset=/raw.githubusercontent.com/4#ip#u_boot_egress#allowed
+conf: server=/security.debian.org/192.168.5.1
+conf: nftset=/security.debian.org/4#ip#u_boot_egress#allowed
+---- 16:59:49.915 serve starten (Umgebung: OLLAMA_HOST=<ungesetzt>, HOME=/home/vscode)
+(keine OLLAMA_*-Variable)
+ls: cannot access '/home/vscode/.ollama': No such file or directory
+---- 16:59:50.948 serve bereit nach 2s
+Ollama is running
+{"version":"0.40.6"}
+-- lauschende Sockets
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                        
+LISTEN 0      4096       127.0.0.1:11434      0.0.0.0:*    users:(("ollama",pid=68,fd=4))
+-- Erreichbarkeit ueber die Container-Adresse
+container-ip=172.17.0.2
+http://172.17.0.2:11434 -> 000
+-- Server-Log (Start)
+Couldn't find '/home/vscode/.ollama/id_ed25519'. Generating new private key.
+Your new public key is: 
+
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJfuG0JVYj4aUigfOO6ipgMq4lda/7S67DWMSH24tebb
+
+time=2026-10-18T16:59:49.934Z level=INFO source=routes.go:2439 msg="server config" env="map[CUDA_VISIBLE_DEVICES: GGML_VK_VISIBLE_DEVICES: GPU_DEVICE_ORDINAL: HIP_VISIBLE_DEVICES: HSA_OVERRIDE_GFX_VERSION: HTTPS_PROXY: H
+time=2026-10-18T16:59:49.934Z level=INFO source=routes.go:2441 msg="Ollama cloud disabled: false"
+time=2026-10-18T16:59:49.934Z level=INFO source=images.go:1000 msg="total blobs: 0"
+time=2026-10-18T16:59:49.934Z level=INFO source=images.go:1009 msg="total unused blobs removed: 0"
+time=2026-10-18T16:59:49.935Z level=INFO source=routes.go:2501 msg="Listening on 127.0.0.1:11434 (version 0.40.6)"
+time=2026-10-18T16:59:49.935Z level=INFO source=runner.go:60 msg="discovering available GPUs..."
+time=2026-10-18T16:59:49.935Z level=WARN source=model_show_cache.go:144 msg="model show cloud cache hydration failed" error="Get \"https://ollama.com:443/api/tags?ts=1792342789\": dial tcp: lookup ollama.com on 127.0.0.1
+time=2026-10-18T16:59:49.936Z level=WARN source=model_recommendations.go:168 msg="model recommendations refresh failed" error="Get \"https://ollama.com/api/experimental/model-recommendations?ts=1792342789\": dial tcp: lo
+time=2026-10-18T16:59:49.936Z level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=5m50.599768003s consecutive_failures=1
+time=2026-10-18T16:59:49.956Z level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="23.4 GiB" available="23.4 GiB"
+time=2026-10-18T16:59:49.956Z level=INFO source=routes.go:2551 msg="vram-based default context" total_vram="0 B" default_num_ctx=4096
+[GIN] 2026/10/18 - 16:59:50 | 200 |      92.209µs |       127.0.0.1 | GET      "/"
+[GIN] 2026/10/18 - 16:59:50 | 200 |      19.833µs |       127.0.0.1 | GET      "/"
+[GIN] 2026/10/18 - 16:59:50 | 200 |      35.542µs |       127.0.0.1 | GET      "/api/version"
+-- ~/.ollama nach dem Start
+/home/vscode/.ollama:
+total 20
+drwxr-xr-x 3 vscode vscode 4096 Oct 18 16:59 .
+drwx------ 1 vscode vscode 4096 Oct 18 16:59 ..
+-rw------- 1 vscode vscode  387 Oct 18 16:59 id_ed25519
+-rw-r--r-- 1 vscode vscode   81 Oct 18 16:59 id_ed25519.pub
+drwxr-xr-x 3 vscode vscode 4096 Oct 18 16:59 models
+
+/home/vscode/.ollama/models:
+total 12
+drwxr-xr-x 3 vscode vscode 4096 Oct 18 16:59 .
+drwxr-xr-x 3 vscode vscode 4096 Oct 18 16:59 ..
+drwxr-xr-x 2 vscode vscode 4096 Oct 18 16:59 blobs
+
+/home/vscode/.ollama/models/blobs:
+total 8
+drwxr-xr-x 2 vscode vscode 4096 Oct 18 16:59 .
+drwxr-xr-x 3 vscode vscode 4096 Oct 18 16:59 ..
+-- DNS-Anfragen seit Serverstart (vor dem Pull)
+      4 ollama.com
+---- 16:59:50.977 pull qwen2.5:0.5b
+Error: pull model manifest: Get "https://registry.ollama.ai/v2/library/qwen2.5/manifests/0.5b": dial tcp: lookup registry.ollama.ai on 127.0.0.1:53: server misbehaving
+pull exit=1 dauer=0.0102434s
+-- DNS-Anfragen waehrend des Pulls (qwen2.5:0.5b)
+      4 registry.ollama.ai
+-- DNS-Antworten (CNAME-Kette) waehrend des Pulls
+dnsmasq[57]: config error
+---- 16:59:50.992 alle DNS-Anfragen (eindeutig)
+      4 ollama.com
+      4 registry.ollama.ai
+
+real	0m5.012s
+user	0m0.008s
+sys	0m0.007s
