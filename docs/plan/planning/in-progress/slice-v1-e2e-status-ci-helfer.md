@@ -80,10 +80,11 @@ Jede Aussage über Code steht mit Fundstelle ([`AGENTS.md`](../../../../AGENTS.m
 | Datei / Komponente | Änderungs-Art | Begründung (Fundstelle) |
 |---|---|---|
 | `internal/e2e/sandbox_status_docker_test.go` | update | `startLabeled` (Zeilen 64 bis 75): stdout getrennt, ID-Prüfung, `-q`; `docker pull -q docker.io/library/alpine:3` vor Zeile 351 in `TestE2E_SandboxDevcontainer_StatusFiles_InspectorAgainstEngine` (Zeile 340) |
-| `internal/e2e/` (neue untagged Testdatei, Name beim Implementer) | neu | reine Funktion `containerIDFromRunOutput` und ihre Tests auf Fake-Ausgaben; Fälle: nur ID, Pull-Zeilen plus ID, leer, Fehlerzeile plus ID, Ausgabe ohne ID — nach dem Befund oben |
+| `internal/e2e/container_id_test.go` (untagged) | neu | reine Funktion `containerIDFromRunOutput` und ihre Tests auf Fake-Ausgaben; Fälle: nur ID, Pull-Zeilen plus ID, leer, Fehlerzeile plus ID, Ausgabe ohne ID — nach dem Befund oben |
 | `internal/e2e/sandbox_devcontainer_docker_test.go` | unverändert | gelesen: `dockerOutput` (Zeile 40) liefert `CombinedOutput()` und hat viele Aufrufer, die gemischte Ausgabe erwarten (Fehlermeldungen, `strings.Contains`); die beiden `docker run -d --name`-Starts (Zeilen 225 und 573) setzen den Namen selbst und nutzen ein gebautes Image |
 | `repo.mk`, `Dockerfile`, `.github/workflows/integration.yml` | unverändert | gelesen: `test-docker` führt `go test -tags docker -timeout 30m ./...` im Image `test-docker-tools` aus (`repo.mk`, Ziel `test-docker`); Gate- und CI-Änderungen sind ausgeschlossen (§1) |
-| `harness/replay.md`, `docs/maintainer/quality.md` | vom Implementer zu lesen | beschreiben sie `startLabeled` oder die Voraussetzungen von `test-docker` (Image-Cache, Netz)? Die Aussage ist beim Lesen zu belegen, ehe die Zeile „unverändert“ heißt |
+| `harness/replay.md`, `docs/maintainer/quality.md` | unverändert | gelesen (Wortsuche nach `startLabeled`, `alpine`, `Image-Cache`, `dockerOutput`): beide Dateien nennen keinen dieser Begriffe, also beschreiben sie weder den Helfer noch Image-Cache-Voraussetzungen von `test-docker` |
+| `docs/plan/planning/in-progress/slice-v1-e2e-status-ci-helfer.md` | update | diese Tabelle (Dateiname der neuen Testdatei, Abgleich gegen `git diff --stat`) |
 | `docs/reviews/<Datum>-slice-v1-e2e-status-ci-helfer.md` | neu, durch den Reviewer | Review-Report |
 | `docs/plan/planning/observations/BEO-E2E/` | vom Implementer zu entscheiden | Tritt die Klasse „Test grün nur mit lokalem Cache“ als Beobachtung auf, neues Verzeichnis oder Beleg in §7; sonst „keine Beobachtung“ |
 
