@@ -99,7 +99,7 @@ DoD vollständig, Review-Report liegt vor, Verification-Evidence und Closure-Not
 - **Der Docker-Test ist langsam, groß (Image, Download) und netzabhängig**; auf einem Runner ohne Cache rot ([`BEO-E2E/test-gruen-nur-mit-lokalem-cache`](../observations/BEO-E2E/test-gruen-nur-mit-lokalem-cache/observation.md), [`BEO-E2E/ci-ueberspringt-nested-podman-build`](../observations/BEO-E2E/ci-ueberspringt-nested-podman-build/observation.md)). — **Ausgang:** offen; der Test trägt das Build-Tag, die Closure nennt Lauf oder Grund; kein Workflow-Eingriff (Gate-Änderung, `AGENTS.md` §3.6).
 - **Der Pin altert** (Ollama veröffentlicht häufig). — **Ausgang:** weiter offen: Trigger der ADR und Register-Eintrag (Muster `podman-static`).
 - **Eine Bedingung in Handbuch oder CHANGELOG hat keine Entsprechung im Code** („Server nur auf Loopback“, „Modelle überstehen den Neubau“). — **Ausgang:** offen bis zur Closure; jede Bedingung hat einen Test oder entfällt ([`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md), `AGENTS.md` §3.10).
-- **Hosts des Modell-Pull wechseln** (Blob-Speicher unter Subdomains). — **Ausgang:** offen; Rückgabe an [`slice-v1-egress-wildcard-pruefung`](../in-progress/slice-v1-egress-wildcard-pruefung.md) laut Welle §5, nicht still in die Default-Liste.
+- **Hosts des Modell-Pull wechseln** (Blob-Speicher unter Subdomains). — **Ausgang:** offen; Rückgabe an [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md) laut Welle §5, nicht still in die Default-Liste.
 
 ## 7. Closure-Notiz
 

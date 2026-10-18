@@ -90,7 +90,7 @@ Neu (Satzteil nach dem Semikolon gilt nur, wenn M1 bestätigt, dass `sudo` des B
 - **Die Umsetzung (Befehl, Port, Reload-Script) und der Lastenheft-Commit** — Folge-Slices nach der Entscheidung (V2); ein Slice, der misst und entscheidet, setzt nicht um (Rollentrennung, `harness/roles.md`).
 - **Das Entziehen von `sudo`** (Option S) — ändert Benutzerrechte und alle Start-Scripte; eigener Vorgang mit eigener Messung.
 - **Die Anzeige der wirksamen Liste** — [`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md); `reload` nutzt später dieselbe Berechnung, aber der Slice hängt nicht an ihr.
-- **Wildcards** — [`slice-v1-egress-wildcard-pruefung`](../in-progress/slice-v1-egress-wildcard-pruefung.md).
+- **Wildcards** — [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md).
 - **Docker Desktop, Linux-Host, amd64** — nicht gemessen, nicht zugesagt; jede Aussage nennt den Messstand (Colima, arm64).
 
 ## 2. Definition of Done

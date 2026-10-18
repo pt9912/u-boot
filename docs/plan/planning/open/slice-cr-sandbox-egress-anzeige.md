@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — zweiter Slice der Welle; ihm geht [`slice-v1-egress-wildcard-pruefung`](../in-progress/slice-v1-egress-wildcard-pruefung.md) voraus (Ergebnis zur Subdomain-Aussage), ihm folgt [`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md) (Umsetzung).
+**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — zweiter Slice der Welle; ihm geht [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md) voraus (Ergebnis zur Subdomain-Aussage), ihm folgt [`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md) (Umsetzung).
 
 **Bezug:** [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress-Restriktion; Erweiterung), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Abfragebefehle unter `--quiet`; Änderung der Aufzählung). Verwandt: [`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md).
 Anlass: Projektinhaber, 2026-10-18, Vorschlag (a) („Ok deine Vorschläge für die Verbesserungen“).
@@ -51,7 +51,7 @@ Neu (zusätzlich, direkt danach):
 
 > - Die wirksame Allowlist und die Herkunft jedes Hosts (Basis, Container-Runtime, Feature, Clone-Quelle, Nutzerliste) sind mit dem Befehl `u-boot egress list` abfragbar. Der Befehl liest nur die Projektkonfiguration (`u-boot.yaml`) und die Git-Konfiguration des Projekts, braucht weder Netz noch Docker noch einen laufenden Container, ändert nichts und zeigt dieselbe Liste, die `u-boot generate devcontainer` in das Startscript schreibt. Er weist aus, ob die Restriktion für die Konfiguration aktiv ist (Sandbox-Profil und `devcontainer.sandbox.egress.enabled`); ist sie es nicht, zeigt er die Liste, die bei Aktivierung gälte, und nennt das. Ein Name in der Liste schließt seine Subdomains ein.
 
-Der letzte Satz („Ein Name … Subdomains ein“) trägt die Messung von [`slice-v1-egress-wildcard-pruefung`](../in-progress/slice-v1-egress-wildcard-pruefung.md): Ergebnis E1 (bestätigt; Messstand Colima/arm64, `dnsmasq` 2.91, im Handbuch), gepinnt durch `TestE2E_SandboxDevcontainer_EgressSubdomains`; der Wortlaut bleibt unverändert.
+Der letzte Satz („Ein Name … Subdomains ein“) trägt die Messung von [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md): Ergebnis E1 (bestätigt; Messstand Colima/arm64, `dnsmasq` 2.91, im Handbuch), gepinnt durch `TestE2E_SandboxDevcontainer_EgressSubdomains`; der Wortlaut bleibt unverändert.
 
 **Stelle 2 — [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), Aufzählung der Abfragebefehle.**
 
@@ -77,7 +77,7 @@ Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 
 - **Code, Tests, Spezifikation, Handbuch, CHANGELOG** — [`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md) und [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md); das Lastenheft ist Zielbild, der Code folgt.
 - **Das Neu-Laden im laufenden Container** — [`slice-v1-sandbox-egress-neuladen-entwurf`](slice-v1-sandbox-egress-neuladen-entwurf.md); eine eigene Zusage mit Sicherheitsentscheidung.
-- **Eine Änderung der Default-Allowlist oder der Eingabe-Syntax** (Wildcard) — [`slice-v1-egress-wildcard-pruefung`](../in-progress/slice-v1-egress-wildcard-pruefung.md).
+- **Eine Änderung der Default-Allowlist oder der Eingabe-Syntax** (Wildcard) — [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md).
 - **Die Anzeige des Zustands des laufenden Containers** (ob die Restriktion beim letzten Start griff) — das leistet `u-boot doctor` (`devcontainer.sandbox.fallback.egress`, [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung)); der neue Befehl bleibt offline und trifft keine Aussage über einen Container.
 
 ## 2. Definition of Done
@@ -107,7 +107,7 @@ Die Vorab-Suche (Pflicht vor jeder Vertragsänderung, Muster [`slice-cr-devconta
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-egress-wildcard-pruefung`](../in-progress/slice-v1-egress-wildcard-pruefung.md) liegt in `done/` (Ergebnis zur Subdomain-Aussage ist Teil des Wortlauts); der Projektinhaber hat den Wortlaut und den Befehlsnamen freigegeben (Gespräch).
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md) liegt in `done/` (Ergebnis zur Subdomain-Aussage ist Teil des Wortlauts); der Projektinhaber hat den Wortlaut und den Befehlsnamen freigegeben (Gespräch).
 
 **Rückführungen — vorab benannt:**
 
