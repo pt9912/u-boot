@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Nichts in Arbeit.
+**v0.11.0 (Dry-Run-Wortlaut, fehlendes `/dev/fuse` als Startfehler, host-seitige Ausweisung der Fallbacks, Handbuch-Anleitung für `sshd`, Podman 6.1.4)** — Slice: [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md) (Tag-Push steht aus; Details zum Inhalt in der Zeile unter „Nächste Wellen“).
 
 ## Nächste Wellen
 
