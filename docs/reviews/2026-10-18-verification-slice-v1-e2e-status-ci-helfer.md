@@ -34,7 +34,7 @@ Review-Findings am Code:
 
 | Finding | Status | Beleg |
 |---|---|---|
-| F-1 (LOW, Plan-Tabelle) | behoben | §3 führt `roadmap.md`, `open/README.md`, `in-progress/slice-v1-podman-aktuelle-version.md` (als anderer Vorgang) und den Review-Report; Abgleich siehe unten | <!-- d-check:ignore (Slice-Kennung als Name) -->
+| F-1 (LOW, Plan-Tabelle) | behoben | §3 führt `roadmap.md`, `open/README.md`, `done/slice-v1-podman-aktuelle-version.md` (als anderer Vorgang) und den Review-Report; Abgleich siehe unten | <!-- d-check:ignore (Slice-Kennung als Name) -->
 | F-2 (INFO, Mutanten) | behoben | drei neue Fälle in `container_id_test.go`; `ReplaceAll` entfernt |
 | F-3 (INFO, Pull-Abhängigkeit) | als Risiko geführt | §6 „Pull-Fehler des Tests“, Ausgang offen |
 | F-4 (INFO, Cleanup vor ID) | behoben | `t.Cleanup(rm -f -v <name>)` steht vor `docker run`; der Container trägt den generierten Namen `sbxe2e-lbl-…` |
@@ -46,7 +46,7 @@ Plan-Tabelle §3 gegen `git diff --stat 575281f..HEAD` (§3.10):
 |---|---|
 | `docs/plan/planning/in-progress/roadmap.md` | ja |
 | `docs/plan/planning/done/slice-v1-e2e-status-ci-helfer.md` | ja | <!-- d-check:ignore (Slice-Kennung als Name) -->
-| `docs/plan/planning/open/README.md`, `in-progress/slice-v1-podman-aktuelle-version.md` | ja (anderer Vorgang, `db4eb13`) | <!-- d-check:ignore (Slice-Kennung als Name) -->
+| `docs/plan/planning/open/README.md`, `done/slice-v1-podman-aktuelle-version.md` | ja (anderer Vorgang, `db4eb13`) | <!-- d-check:ignore (Slice-Kennung als Name) -->
 | `docs/reviews/2026-10-18-slice-v1-e2e-status-ci-helfer.md` | ja (durch den Reviewer) | <!-- d-check:ignore (Slice-Kennung als Name) -->
 | `internal/e2e/container_id_test.go` | ja |
 | `internal/e2e/sandbox_status_docker_test.go` | ja |

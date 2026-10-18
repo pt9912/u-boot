@@ -4,7 +4,7 @@
 
 ## Scope
 
-- Slice: [`slice-v1-podman-aktuelle-version`](../plan/planning/in-progress/slice-v1-podman-aktuelle-version.md) (in-progress), Commit-Range `314b1e9..HEAD` (`d6bbe4d`, 12 Commits, 12 Dateien).
+- Slice: [`slice-v1-podman-aktuelle-version`](../plan/planning/done/slice-v1-podman-aktuelle-version.md) (in-progress), Commit-Range `314b1e9..HEAD` (`d6bbe4d`, 12 Commits, 12 Dateien).
 - IDs: [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte); Spezifikation [`LH-FA-DEV-007.b`](../../spec/spezifikation.md#lh-fa-dev-007b--ausstattung-bei-nestedruntime-podman); [`ADR-0023`](../plan/adr/0023-podman-aus-podman-static-im-sandbox-devcontainer.md) (Accepted).
 - Eingang: DoD-Bestätigung des Implementers, Review-Report [`2026-10-18-slice-v1-podman-aktuelle-version.md`](2026-10-18-slice-v1-podman-aktuelle-version.md) (0 HIGH/MEDIUM, 3 LOW, 5 INFO).
 - Host: Colima, Docker-Server 29.5.2, arm64, VM mit `kernel.apparmor_restrict_unprivileged_userns=0`; kein Host-Go.
