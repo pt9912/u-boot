@@ -53,7 +53,7 @@ for m in "${models[@]}"; do
   mark "pull $m"
   n1=$(wc -l < $log)
   s=$(date +%s.%N)
-  ollama pull "$m" 2>&1 | strip | grep -E '100%|success|Error|error|dial|lookup|timeout' | tail -8
+  ollama pull "$m" 2>&1 | strip | sed -E 's/\?[^" ]*/?[Query entfernt: vorsignierte URL]/g' | grep -E '100%|success|Error|error|dial|lookup|timeout' | tail -8
   rc=${PIPESTATUS[0]}
   e=$(date +%s.%N)
   echo "pull exit=$rc dauer=$(echo "$e - $s" | bc 2>/dev/null || awk "BEGIN{print $e-$s}")s"

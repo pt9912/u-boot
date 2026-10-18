@@ -70,7 +70,7 @@ drwxr-xr-x 3 vscode vscode 4096 Oct 18 16:58 ..
 -- DNS-Anfragen seit Serverstart (vor dem Pull)
       4 ollama.com
 ---- 16:58:39.780 pull qwen2.5:0.5b
-Error: max retries exceeded: Get "https://dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/ollama/docker/registry/v2/blobs/sha256/c5/c5396e06af294bd101b30dce59131a76d2b773e76950acc870eda801d3ab0515/data?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=66040c77ac1b787c3af820529859349a%2F20261018%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20261018T165842Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=ee1c1390e8b2e5ec2310b77632a855889451cd25f01628595b710a970c9d9e88": lookup dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com on 127.0.0.1:53: server misbehaving
+Error: max retries exceeded: Get "https://dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com/ollama/docker/registry/v2/blobs/sha256/c5/c5396e06af294bd101b30dce59131a76d2b773e76950acc870eda801d3ab0515/data?[Query entfernt: vorsignierte URL]": lookup dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com on 127.0.0.1:53: server misbehaving
 pull exit=1 dauer=66.1814s
 -- DNS-Anfragen waehrend des Pulls (qwen2.5:0.5b)
      48 dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com

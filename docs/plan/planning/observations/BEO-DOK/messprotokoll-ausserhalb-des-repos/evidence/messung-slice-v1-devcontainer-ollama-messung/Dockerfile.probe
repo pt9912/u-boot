@@ -1,5 +1,7 @@
-# Sandbox-Probe: das erzeugte Dockerfile (03-projekt-erzeugen.sh, Egress aktiv) plus Block "Ollama" (Option B,
-# CUDA-Verzeichnisse nicht entpackt: CPU-only). Build-Kontext: <projekt>/.devcontainer (enthaelt egress-init.sh).
+# Sandbox-Probe: von Hand nachgeschriebenes Sandbox-Dockerfile (Paketliste, Arbeitsverzeichnis und USER fest eingetragen;
+# die Zeile `git config --system credential.helper` der Vorlage fehlt) plus Block "Ollama" (Option B, CUDA-Verzeichnisse
+# nicht entpackt: CPU-only). Von u-boot erzeugt ist nur egress-init.sh (03-projekt-erzeugen.sh, Egress aktiv).
+# Build-Kontext: <projekt>/.devcontainer.
 FROM mcr.microsoft.com/devcontainers/base@sha256:6ee2b4097c75d33e9a94d941577a3286e5d629434fba384688b06daeeaaeac99
 
 USER root
