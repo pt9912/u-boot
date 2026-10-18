@@ -60,18 +60,24 @@ func buildProjectImage(ctx context.Context, t *testing.T, dir, tag string) strin
 // startLabeled starts a container the way the devcontainer CLI does (the
 // label `devcontainer.local_folder` carries the project folder) with the given
 // extra `docker run` arguments, and removes it at the end of the test. It
-// returns the container name.
+// returns the container ID, read from stdout only (stderr carries the pull
+// progress of an image that is not cached).
 func startLabeled(ctx context.Context, t *testing.T, folder, image string, extra ...string) string {
 	t.Helper()
-	args := append([]string{"run", "-d", "--label", "devcontainer.local_folder=" + folder}, extra...)
+	args := append([]string{"run", "-d", "-q", "--label", "devcontainer.local_folder=" + folder}, extra...)
 	args = append(args, image, "sleep", "1800")
-	out, code := dockerOutput(ctx, t, args...)
-	if code != 0 {
-		t.Fatalf("docker run failed (exit %d):\n%s", code, out)
+	var stdout, stderr strings.Builder
+	cmd := exec.CommandContext(ctx, "docker", args...)
+	cmd.Stdout, cmd.Stderr = &stdout, &stderr
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("docker run failed: %v\nstdout:\n%s\nstderr:\n%s", err, stdout.String(), stderr.String())
 	}
-	name := strings.TrimSpace(out)
-	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rm", "-f", "-v", name) })
-	return name
+	id, err := containerIDFromRunOutput(stdout.String())
+	if err != nil {
+		t.Fatalf("%v\nstderr:\n%s", err, stderr.String())
+	}
+	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rm", "-f", "-v", id) })
+	return id
 }
 
 func removeContainer(ctx context.Context, t *testing.T, name string) {
@@ -348,6 +354,9 @@ func TestE2E_SandboxDevcontainer_StatusFiles_InspectorAgainstEngine(t *testing.T
 		t.Fatalf("no container yet: found=%v err=%v", found, err)
 	}
 
+	if out, code := dockerOutput(ctx, t, "pull", "-q", "docker.io/library/alpine:3"); code != 0 {
+		t.Fatalf("docker pull alpine:3: %s", out)
+	}
 	first := startLabeled(ctx, t, folder, "docker.io/library/alpine:3")
 	script := `set -e
 mkdir -p ` + statusDirInContainer + `
