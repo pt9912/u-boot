@@ -17,7 +17,7 @@ Herkunft: [`welle-cli-verbosity`](../done/welle-cli-verbosity.md), Slice
 [`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md), [`ADR-0013`](../../adr/0013-dokumentationsreferenzmodell.md),
 [`ADR-0018`](../../adr/0018-nested-docker-daemon-sandbox-devcontainer.md), [`ADR-0019`](../../adr/0019-docker-daemon-aus-docker-apt-repo.md),
 [`ADR-0022`](../../adr/0022-fallback-ausweisung-statusdateien-im-container.md) (`Accepted`, Entscheidung dieses Slice).
-Das Lastenheft (0.12.0) ändert dieser Slice **nicht**: Es ist Zielbild, der Code wird so gebaut, dass er die Zusage erfüllt
+Das Lastenheft (0.13.0, Stand nach dem vorgelagerten CR) ändert dieser Slice **nicht**: Es ist Zielbild, der Code wird so gebaut, dass er die Zusage erfüllt
 (Entscheidung des Projektinhabers 2026-10-17, „A: Code zum Ziel“). Die eine Stelle, an der die Messung das Ziel als unerreichbar zeigt (`/dev/fuse`), ändert der vorgelagerte
 CR [`slice-cr-sandbox-fuse-startfehler`](../done/slice-cr-sandbox-fuse-startfehler.md) (Lastenheft 0.13.0), nicht dieser Slice.
 
@@ -150,7 +150,7 @@ Randbedingung aus [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006
       Port und Adapter in `spec/architecture.md` (ohne ADR-, Slice- oder Wellen-Verweise, [`AGENTS.md`](../../../../AGENTS.md) §3.4); Historie-Zeile in `spezifikation.md` §7.
 - [ ] Doku-Update: `docs/user/benutzerhandbuch.md` und CHANGELOG nennen den geltenden Stand der Ausweisung (öffentlicher Vertrag).
 - [ ] `make gates` grün; `make test-docker` auf dem Entwicklungs-Host (Colima) grün oder mit benanntem Grund nicht gelaufen; `make doc-trace` ohne neue Waise.
-- [ ] Folge-ADR (Architect) ist `Accepted` und im ADR-Index eingetragen, bevor der Implementer beginnt.
+- [x] Folge-ADR (Architect) ist `Accepted` und im ADR-Index eingetragen, bevor der Implementer beginnt.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8).
@@ -162,36 +162,41 @@ Randbedingung aus [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006
 ## 3. Plan (vor Code)
 
 Rollenreihenfolge: **Planner** (dieser Plan) → **Architect** (Folge-ADR zu F1–F8, Messung auf Colima/Linux; Modul 8: Entscheidungen prüfen und vorschlagen) und **Projektinhaber** (F1, F2, F7, F8) → **Implementer** → **Reviewer** → **Verifier**.
-Die Tabelle nennt jede Datei, die der Diff voraussichtlich berührt (§3.10 von [`AGENTS.md`](../../../../AGENTS.md)); welche Zeilen bleiben, hängt von der Wahl ab (Spalte „abhängig von“). Der Implementer gleicht sie vor dem Abschluss gegen `git diff --stat` ab.
+Die Tabelle nennt jede Datei, die der Diff voraussichtlich berührt (§3.10 von [`AGENTS.md`](../../../../AGENTS.md)). Der Implementer hat sie nach der letzten Änderung gegen `git diff --stat` abgeglichen; Zeilen „unverändert“ und die zwei Zeilen „in der Planung nicht aufgeführt“ halten das Ergebnis des Abgleichs fest.
 
 | Datei / Komponente | Änderungs-Art | Begründung | abhängig von |
 |---|---|---|---|
 | `docs/plan/adr/` (neue ADR, nächste freie Nummer) und `docs/plan/adr/README.md` (Index) | update (erledigt: `Accepted` 2026-10-18, Index nachgezogen) | Folge-ADR: Mechanismus, Messung, verglichene Alternativen; Schärft [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer); Muster [`ADR-0019`](../../adr/0019-docker-daemon-aus-docker-apt-repo.md) | Architect, Projektinhaber |
-| `internal/hexagon/application/templates/devcontainer/sandbox-init.sh.tmpl`, `docker-init.sh.tmpl`, `egress-init.sh.tmpl` | update | Skripte schreiben das Statusdokument (Schlüssel, Stand, Zeitstempel) an jedem der drei Fallback-Punkte und im Erfolgsfall; Exit-Codes und Stderr-Zeilen bleiben | (b), (c′), (d); bei (a) nur Ausgabekanal |
-| `internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl` | update | Statusverzeichnis anlegen (Besitzer/Rechte, damit der `postCreateCommand` als Container-Benutzer und die `sudo`-Skripte schreiben können); `Dockerfile.tmpl` verweist heute auf `u-boot-docker-init` | (b), (d) |
-| `internal/hexagon/application/devcontainer_sandbox.go` | update | ggf. `runArgs` (Label für F3, `--health-cmd` für (c′)); `composePostCreate`/`postStart` unverändert, solange die Skriptaufrufe bleiben | F3, (c′) |
-| `internal/hexagon/domain/` (neue Datei) | neu | Wertobjekt für das Statusdokument (geschlossene Schlüsselmenge, Konstruktor mit Validierung) und seine Fehler-Sentinel; I/O-frei | (b), (c′), (d) |
-| `internal/hexagon/port/driven/` (neue Datei) und `port/driven/README.md` | neu / update | Driven-Port zum Lesen des Container-Zustands (Name und Schnitt: F5); `DockerProbe` bleibt read-only und schmal oder wächst um genau die gewählten Methoden | alle außer reinem Host-Weg |
-| `internal/adapter/driven/docker/` (neue Datei + Test, Port-Pin `var _ driven.X`) | neu | `os/exec docker ps/inspect/cp` hinter dem Port; einziger Ort, an dem `os/exec docker …` läuft ([`ADR-0002`](../../adr/0002-hexagonale-architektur.md)); Parser mit Größenlimit | (a), (b), (c′), (d) |
-| `internal/hexagon/application/doctor.go` | update | Konstruktor `NewDoctorService` und `checkSandbox…`-Liste (Zeile um 187) um den neuen Port und die Items erweitern; In-Container-Zweig über `RuntimeEnvironment` | alle |
-| `internal/hexagon/application/generate.go` | update | `generateDevcontainer` (Zeile 746; Warnungen Zeile 781): nach `writeDevcontainerPhase` den Port je konfigurierter Fähigkeit abfragen und bei `result=fallback` eine Warnung mit `DegradationFallback` an `warnings` hängen; nicht bei `PreviewDryRun`; Engine-Fehler, fehlender Container, fehlende oder ungültige Datei bleiben still; Port nil-tolerant über `noop`; Konstruktor `NewGenerateServiceWithFactory` (Zeile 88) bekommt den Port | F2 (ii) |
-| `internal/hexagon/application/initproject.go` | update | `Init` (Warnungen aus `initTemplateData`, Zeile 452): dieselbe Abfrage für `init --devcontainer` nach `executeUBootYAML`, nicht bei `PreviewDryRun`; Option nach dem Muster `WithTemplateInit` (Zeile 142 in `cmd/uboot/main.go`) | F2 (ii) |
-| `internal/hexagon/application/noop.go` | update | `noop`-Default des Ports `DevcontainerInspector` (liefert „nicht gefunden“) | alle |
-| `internal/hexagon/application/generate_*_test.go`, `initproject_*_test.go`, `fakes_test.go` | neu / update | Fake-Port; Happy (`fallback` → eine Warnung mit `DegradationFallback`), Boundary (`ok`, `failed`, ungültiges Dokument, Engine-Fehler → keine Warnung, Exit-Code unverändert; `--dry-run` ruft den Port nicht), Negative (kein Container) — nach F2 (ii) | F2 (ii) |
-| `internal/hexagon/application/doctor_sandbox.go` | update | neue Items (etwa Daemon, Egress, `vfs` aus dem Dokument) mit `DegradationFallback`; `checkSandboxRuntime` (Zweig `nestedDocker`, Zweig ohne Linux-Host) und `checkSandboxEgress` verweisen nicht mehr nur auf das Startscript; Kommentar an `checkIDSandboxEgress` berichtigen | alle |
-| `internal/hexagon/application/doctor_sandbox_test.go`, `fakes_test.go`, `doctor_test.go` | update | Happy/Boundary/Negative je Fallback gegen Fake-Port; Strenge `warn`/`fail`; „nicht ermittelbar“; manipuliertes Dokument | alle |
-| `internal/hexagon/application/generate_sandbox_test.go` | update | Replay-/Golden-Assertions für die geänderten Skripte und `runArgs` ([`harness/replay.md`](../../../../harness/replay.md)) | immer |
-| `cmd/uboot/main.go` (Wiring, Zeile 143) | update | Port-Adapter an `NewDoctorService`, `NewGenerateServiceWithFactory` und den Init-Service übergeben | alle |
-| `internal/adapter/driving/cli/doctor.go`, `warnings.go`, `quiet_test.go` | prüfen / update | `writeDoctorReport`/`visibleWarnings` filtern am Kennzeichen; voraussichtlich nur neue Test-Pins (`--quiet` zeigt die neuen Items) | voraussichtlich nur Tests |
-| `internal/e2e/sandbox_devcontainer_docker_test.go` (Build-Tag `docker`) | update | echte Docker-Engine: Skript erzeugt Dokument, Host-Adapter liest es, je Fallback (`_Degradation`, `_FailPolicyWithoutFuse`, Egress ohne `NET_ADMIN`) | alle; `make test-docker` |
-| `spec/spezifikation.md` | update | [`LH-FA-DEV-007.a`](../../../../spec/spezifikation.md#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten), [`LH-FA-DEV-008.a`](../../../../spec/spezifikation.md#lh-fa-dev-008a--verhalten-bei-nicht-gewährbarer-capability), [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) Ausnahme 2, ggf. neue `SPEC-<NNN>` für das Statusformat, §7 Historie | immer |
-| `spec/architecture.md` | update | Driven-Port und Adapter im Abschnitt Adapter/Ports (Absatz zu `docker/` und `DockerProbe`), Abschnitt Fehlermodelle bei eigener Fehlerklasse; keine ADR-/Slice-Verweise | wenn neuer Port |
-| `docs/user/benutzerhandbuch.md` | update | Tabellenzeile `--quiet` (Zeile 310), `doctor`-Absatz (Zeile 617) und Abschnitt „Die Umgebung prüfen“, Degradationstabelle (um Zeile 1020), Daemon-Absatz (um 1073), Egress-Absatz (um 1131): was `doctor` ausweist und was „nicht ermittelbar“ heißt; die Warnung von `generate devcontainer` und `init` bei einem bestehenden Container mit `result=fallback` und ihre Grenzen (best effort, Stand des letzten Starts, nicht bei `--dry-run`); die Zeilen zu `/dev/fuse` (Zeilen 1005, 1022, 1039, 1672) setzt der vorgelagerte CR, nicht dieser Slice | immer |
-| `docs/maintainer/cli-json-contract.md` | prüfen | §2.2 beschreibt den `doctor`-Filter; neue Item-Kennungen erscheinen in `diagnostics[]` | falls neue Item-Kennungen |
-| `CHANGELOG.md` | update | Eintrag unter `[Unreleased]` (Added/Changed); ein Container-Label oder `--health-cmd` wäre als Änderung der erzeugten Ausgabe zu nennen | immer |
-| `README.md`, `README.de.md` | prüfen | nennen „vier Ausweisungen“, keine Einzelheiten; voraussichtlich unverändert | — |
-| `docs/plan/planning/open/README.md` | update | Zeile dieses Slice | immer |
-| `docs/plan/planning/in-progress/carveouts.md`, `.golangci.yml` (depguard), `.d-check.yml` | prüfen | kein neuer Carveout erwartet; depguard-Regeln greifen für neue Dateien in bestehenden Paketen von selbst, ein neues Paket braucht die Regel | falls neues Paket |
+| `internal/hexagon/application/templates/devcontainer/sandbox-init.sh.tmpl`, `docker-init.sh.tmpl`, `egress-init.sh.tmpl` | update | je Skript die Funktion `write_status` (Temp-Datei, `mv -f`, Fehler ändern den Exit-Code nicht) und ein Aufruf in jedem Zweig (`ok`, `fallback`, `failed` vor `exit 11`); Exit-Codes und Stderr-Zeilen bleiben | — |
+| `internal/hexagon/application/templates/devcontainer/Dockerfile.tmpl` | update | `RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode …`, nur bei `NestedPodman`, `NestedDocker` oder `Egress` | — |
+| `internal/hexagon/application/devcontainer_sandbox.go` | unverändert | kein Label, keine `runArgs`; `composePostCreate` und die Startkommandos bleiben | — |
+| `internal/hexagon/domain/sandbox_status.go`, `sandbox_status_test.go` | neu | Wertobjekt `SandboxStatus` mit `ParseSandboxStatus` (geschlossene Schlüssel- und Wertemenge, 512 Byte, strikter UTC-Zeitstempel) und `ErrInvalidSandboxStatus`; I/O-frei | — |
+| `internal/hexagon/port/driven/devcontainer_inspector.go` | neu | Driven-Port `DevcontainerInspector` (`FindContainer`, `ReadFile`) mit `ErrContainerFileNotFound`, `ErrContainerFileInvalid`, `ErrContainerEngineNotLocal`; `port/driven/README.md` unverändert | — |
+| `internal/adapter/driven/docker/inspector.go`, `inspector_test.go`, `export_test.go` | neu / update | `Inspector` neben `Probe` und `Engine` (Port-Pin `var _ driven.DevcontainerInspector`): `docker ps`, `docker cp … -` mit Tar-Kopf-Prüfung, `docker context inspect` für die Engine-Prüfung; einziger Ort, an dem dieser `os/exec docker …` läuft; Fake-Runner-Tests | — |
+| `internal/hexagon/application/devcontainer_fallback.go` | neu | in der Planung nicht aufgeführt: die drei `fallbackProbe` je Fähigkeit, `fallbackReader` (Host über den Port, im Devcontainer über `FileSystem`), Abbildung auf `domain.Diagnostic` und auf Warnungen | — |
+| `internal/hexagon/application/doctor.go` | update | Feld `inspector`, `WithDevcontainerInspector` (statt neuem Konstruktor-Parameter, damit die Aufrufstellen unverändert bleiben), `Check` hängt `checkSandboxFallbacks` an, `DoctorCheckIDs` um die drei Kennungen | — |
+| `internal/hexagon/application/doctor_sandbox.go` | update | `checkSandboxFallbacks`; die Texte von `checkSandboxRuntime` (Zweig `nestedDocker`) und `checkSandboxEgress` verweisen auf die neuen Items; Kommentare an den Kennungen berichtigt | — |
+| `internal/hexagon/application/generate.go` | update | Feld `inspector`, `WithDevcontainerInspector`, `existingContainerFallbackWarnings` nach `writeDevcontainerPhase`: nicht bei `PreviewDryRun`, nicht ohne konfigurierte Fähigkeit | — |
+| `internal/hexagon/application/initproject.go` | update | Feld `inspector`, Option `WithDevcontainerInspector`, `existingContainerFallbackWarnings` nach `executeUBootYAML` (liest die geschriebene `u-boot.yaml`) | — |
+| `internal/hexagon/application/noop.go` | update | `noopDevcontainerInspector` (findet keinen Container) | — |
+| `cmd/uboot/main.go` | update | `docker.NewInspector()` an `doctorSvc`, `generateSvc` und die Option des Init-Service | — |
+| `internal/hexagon/application/devcontainer_fallback_test.go` | neu | Fake-Inspector; `doctor` je Fähigkeit und Zustand, nur konfigurierte Fähigkeiten, im Devcontainer über `FileSystem`; `generate devcontainer` und `init`: Warnung bei `fallback`, still sonst, kein Aufruf bei `--dry-run` und ohne Fähigkeit | — |
+| `internal/hexagon/application/doctor_sandbox_test.go` | update | zwei Pins nachgezogen (Egress-Text, Kommentar zum Kennzeichen); `fakes_test.go` und `doctor_test.go` bleiben | — |
+| `internal/hexagon/application/generate_sandbox_test.go` | update | Replay-/Golden-Assertions der Startscripte und des Dockerfile ([`harness/replay.md`](../../../../harness/replay.md)) | — |
+| `harness/replay.md` | update | zwei Zeilen: Startscripte mit Statusdateien, Abfrage in `generate`/`init` | — |
+| `internal/adapter/driving/cli/doctor_fallback_test.go` | neu | `doctor` je Zustand: `--quiet`, `--strict`, `--json`, Volltext; `doctor.go`, `warnings.go` und `quiet_test.go` bleiben | — |
+| `internal/adapter/driving/cli/jsontestutil/coderegistry.go` | update | in der Planung nicht aufgeführt: die drei Kennungen in `DefaultAllowedCodes` (Drift-Test gegen die Registry der Spezifikation) | — |
+| `internal/e2e/sandbox_status_docker_test.go` (Build-Tag `docker`) | neu | echte Engine: Container mit Label `devcontainer.local_folder`, Startscripte per `docker exec`, Lesen mit Inspector und `doctor`, je Fähigkeit `ok`/`fallback`/`failed`; Inspector gegen Symlink, FIFO, Verzeichnis, Übergröße, gestoppten und mehrere Container, entfernte Engine; `sandbox_devcontainer_docker_test.go` bleibt | — |
+| `spec/spezifikation.md` | update | [`LH-FA-DEV-007.a`](../../../../spec/spezifikation.md#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten), [`LH-FA-DEV-008.a`](../../../../spec/spezifikation.md#lh-fa-dev-008a--verhalten-bei-nicht-gewährbarer-capability), [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) Ausnahme 2, neu [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) (Statusformat, Ermittlung, Abbildung), drei Zeilen in der Registry von [`SPEC-017`](../../../../spec/spezifikation.md#spec-017--diagnose-codes-der-doctor-prüfungen-code-registry), §7 Historie | — |
+| `spec/architecture.md` | update | Port `DevcontainerInspector` (Abschnitt Driven-Ports), Adapter im Paket `docker/`, Zeile `ARC-008`; kein neuer Fehlerklassen-Abschnitt (die Sentinels sind keine Exit-Code-Fälle) | — |
+| `docs/user/benutzerhandbuch.md` | update | Abschnitt „Fallbacks sehen“, `--quiet`-Zeile, doctor-Abschnitt, Daemon- und Egress-Absatz, Fehlerbehebung; die `/dev/fuse`-Zeilen setzt der vorgelagerte CR | — |
+| `docs/maintainer/cli-json-contract.md` | unverändert | §2.2 gilt unverändert; neue Kennungen erscheinen in `diagnostics[]` nur als `warn`/`error` | — |
+| `CHANGELOG.md` | update | Eintrag unter `[Unreleased]` (Added) | — |
+| `README.md`, `README.de.md` | unverändert | nennen „vier Ausweisungen“, keine Einzelheiten | — |
+| `docs/plan/planning/open/README.md` | unverändert | die Zeile dieses Slice steht in `next/README.md` und zeigt auf `in-progress/` | — |
+| `docs/plan/planning/in-progress/roadmap.md` | update | Ruhe-Marker „Nichts in Arbeit.“ entfernt, solange dieser Slice in `in-progress/` liegt (d-check `planning`) | — |
+| `docs/plan/planning/in-progress/slice-v1-sandbox-fallback-host-ausweisung.md` | update | diese Tabelle gegen `git diff --stat` abgeglichen, DoD-Zeile „Folge-ADR `Accepted`“ abgehakt, Lastenheft-Stand 0.13.0 (nach dem vorgelagerten CR) | — |
+| `docs/plan/planning/in-progress/carveouts.md`, `.golangci.yml` (depguard), `.d-check.yml` | unverändert | kein neuer Carveout, kein neues Paket | — |
 | `spec/lastenheft.md` | **unverändert** | Entscheidung 2026-10-17 | — |
 
 ### Architect: Entwurf und Messprotokoll (2026-10-17)
@@ -216,6 +221,8 @@ Empfehlung: Alternative (b), Statusdateien im Container (`/var/lib/u-boot/status
 Weitere Messbefunde für den Implementer: (1) `doctor` aus dem Runtime-Image (`InContainer()`) überspringt die Docker-Prüfungen und erreicht keine Engine — die Ausweisung vom Host gilt nur für einen Host-Install (Binary, Paket, Homebrew); im Devcontainer selbst liest `doctor` die Dateien direkt über `FileSystem`; (2) `/run` und `/var/log` sind keine tmpfs-Mounts, daher ist der Statusort `/var/lib/u-boot/status/` im Dockerfile anzulegen; (3) der erste CLI-Lauf nach einem `sed -i` auf virtiofs meldete einmalig „config not found“, kein Befund über u-boot.
 Plan-Tabelle: Die Zeile für `Dockerfile.tmpl` gilt (Statusverzeichnis), `devcontainer_sandbox.go` bleibt bei (b) unverändert (kein Label, keine `runArgs`); die neue Port-Datei heißt `devcontainer_inspector.go` (Name vorgeschlagen), die Wertobjekt-Datei in `domain` `sandbox_status.go`.
 
+**Messung des Implementers (2026-10-18, Colima 0.10.3, Docker 29.5.2, arm64).** `docker ps -a --no-trunc --filter label=… --format '{{.ID}} {{.State}}'` listet mehrere Container desselben Labels nach Erzeugung absteigend (der zuletzt erzeugte zuerst, auch wenn ein älterer läuft); der Adapter nimmt die erste Zeile, ein Integrationstest mit zwei Containern pinnt das. `docker context inspect --format '{{.Endpoints.docker.Host}}'` nennt den Socket des aktuellen Kontexts (`unix:///Users/…/.colima/default/docker.sock`); ein nicht lokaler Wert (`tcp://`, `ssh://`) oder ein solcher `DOCKER_HOST` gilt als nicht ermittelbar, damit ein Container auf einer entfernten Engine mit demselben Ordnerwert kein Falsch-Positiv erzeugt. Beleg für die Startscripte: `make test-docker` (Tests `TestE2E_SandboxDevcontainer_StatusFiles_*`, Lauf mit `-run StatusFiles -v -count=1` im Image `u-boot:test-docker-tools`, alle vier ohne Überspringen). Die Devcontainer-CLI ist nicht Teil des Repo-Werkzeugs (kein Node im Image `u-boot:test-docker-tools`); die Tests erzeugen den Container selbst mit dem Label `devcontainer.local_folder` und führen die erzeugten Lifecycle-Kommandos per `docker exec` als Container-Benutzer aus. Für die CLI selbst bleiben die Messläufe M1 bis M14 der ADR der Beleg.
+
 ## 4. Trigger
 
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
@@ -231,7 +238,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 ## 5. Closure-Trigger
 
 DoD vollständig, Review-Report liegt vor, Closure-Notiz mit
-Steering-Loop-Lerneintrag geschrieben (§7). Das Lastenheft steht danach unverändert auf 0.12.0; die Spezifikation trägt dieselbe Zusage ohne die Einschränkung.
+Steering-Loop-Lerneintrag geschrieben (§7). Das Lastenheft steht danach unverändert auf 0.13.0; die Spezifikation trägt dieselbe Zusage ohne die Einschränkung.
 
 ## 6. Risiken und offene Punkte
 

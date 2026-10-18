@@ -1097,7 +1097,7 @@ Eintrag nennt den Zeitpunkt und „container stopped“.
 Nach `u-boot generate devcontainer` fragt `u-boot` denselben Weg ab und warnt,
 wenn ein **bestehender** Container zuletzt `fallback` gemeldet hat (`init
 --devcontainer` ebenso, sobald die geschriebene `u-boot.yaml` eine solche
-Fähigkeit enthält; die von `init` erzeugte Konfiguration enthält heute keine).
+Fähigkeit enthält; die von `init` erzeugte Konfiguration enthält keine).
 Die Warnung nennt den Stand des letzten Starts des bestehenden Containers, nicht
 den der neu erzeugten Dateien, und bleibt unter `--quiet` sichtbar. Ohne Engine,
 ohne Container, ohne Datei, bei einer ungültigen Datei und bei `ok` oder
