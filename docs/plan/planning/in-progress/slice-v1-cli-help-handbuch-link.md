@@ -49,7 +49,7 @@ Auf die Rückfrage „Link auf Tag oder `main`?“: „können wir beides machen
    User manual (German), latest: https://github.com/pt9912/u-boot/blob/main/docs/user/benutzerhandbuch.md
    ```
 
-   Bei `…-dev` entfällt die mittlere Zeile; die letzte Zeile heißt dann ebenfalls „latest“. Der Wortlaut darf kein `LH-` enthalten (bestehender Test).
+   Bei jeder Version außerhalb der Release-Formen (etwa `…-dev`) entfällt die mittlere Zeile; die letzte Zeile heißt dann ebenfalls „latest“. Der Wortlaut darf kein `LH-` enthalten (bestehender Test).
 5. **Handarbeit pro Cut.** Keine: Der Tag-Link folgt `version`, die der Cut ohnehin an den drei Stellen setzt; `docs/maintainer/releasing.md` und die Vorlage der Cut-Slices bleiben unverändert (Beleg: §3 Schritt 2 setzt nur die Versionsstrings, der Link wird zur Laufzeit abgeleitet).
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
@@ -62,8 +62,8 @@ Auf die Rückfrage „Link auf Tag oder `main`?“: „können wir beides machen
 
 ## 2. Definition of Done
 
-- [ ] **Code:** `u-boot --help` enthält neben dem README-Link den Tag-Link und den `main`-Link (Wortlaut §1, Entwurf 4); bei einer Version mit Suffix `-dev` (und bei leerer Version) enthält sie nur den `main`-Link und **keinen** Tag-Link ([`LH-FA-CLI-002`](../../../../spec/lastenheft.md#lh-fa-cli-002--hilfeausgabe), [`LH-LESE-002`](../../../../spec/lastenheft.md#lh-lese-002--sprache)).
-- [ ] **Test:** ein Test baut den `App` mit `0.11.0` und prüft beide Links vollständig (Tag `v0.11.0`, `main`, Pfad `docs/user/benutzerhandbuch.md`); ein zweiter mit `0.11.0-dev` prüft den `main`-Link und die Abwesenheit von `/blob/v`; ein dritter mit einer Vorabversion (`0.12.0-rc1`) prüft den Tag-Link `v0.12.0-rc1`. Mutation: Der Tag-Link ohne `v`, die Verzweigung auf `-dev` entfernt und der `main`-Link durch den Tag-Link ersetzt — jede Mutation lässt mindestens einen Test rot werden, am Beispiel gesehen und zurückgenommen. Der bestehende Test `TestExecute_RootHelpPointsToUserDocs` bleibt grün (README-Link, kein `LH-`, keine Katalog-Begriffe).
+- [ ] **Code:** `u-boot --help` enthält neben dem README-Link den Tag-Link und den `main`-Link (Wortlaut §1, Entwurf 4), wenn die Version eine Release-Form ist (`X.Y.Z` oder `X.Y.Z-rc.N`); bei jeder anderen Version (`-dev`, `0.0.0-test`, `0.12.0-rc1`, leer) enthält sie nur den `main`-Link und **keinen** Tag-Link ([`LH-FA-CLI-002`](../../../../spec/lastenheft.md#lh-fa-cli-002--hilfeausgabe), [`LH-LESE-002`](../../../../spec/lastenheft.md#lh-lese-002--sprache)).
+- [ ] **Test:** ein Test baut den `App` mit `0.11.0` und prüft beide Links vollständig (Tag `v0.11.0`, `main`, Pfad `docs/user/benutzerhandbuch.md`); ein Fall mit `0.11.0-dev` (und `0.0.0-test`, `0.12.0-rc1`, leer u. a.) prüft den `main`-Link und die Abwesenheit von `/blob/v`; ein Fall mit der Vorabversion `0.12.0-rc.1` prüft den Tag-Link `v0.12.0-rc.1`. Mutation: Der Tag-Link ohne `v`, die Regex gelockert und die Verzweigung entfernt — jede Mutation lässt mindestens einen Test rot werden, am Beispiel gesehen und zurückgenommen. Der bestehende Test `TestExecute_RootHelpPointsToUserDocs` bleibt grün (README-Link, kein `LH-`, keine Katalog-Begriffe).
 - [ ] Doku-Update ([`AGENTS.md`](../../../../AGENTS.md) §5 Zeile 5): `CHANGELOG.md` `[Unreleased]` nennt die Änderung (Added: `u-boot --help` zeigt den Handbuch-Link der Version und den des aktuellen Handbuchs; Dev-Builds nur den aktuellen); das Handbuch erhält einen Satz im FAQ „Wo finde ich alle Optionen eines Befehls?“ (die Hilfe verweist auf das Handbuch Ihrer Version), oder §7 begründet, warum nicht.
 - [ ] `docs/maintainer/releasing.md` und die Cut-Vorlage unverändert; §7 hält fest, dass der Cut keinen neuen Handarbeitsschritt trägt (der Cut-Slice des nächsten Release ist der Beleg: kein Link wird von Hand gesetzt).
 - [ ] `make gates` grün; `make doc-trace` ohne neue Waise.
@@ -92,6 +92,11 @@ Jede Aussage über Code steht mit Fundstelle (Datei und Symbol, gelesen am 2026-
 | `docs/maintainer/releasing.md`, Cut-Vorlage | unverändert | gelesen: §3 Schritt 2 setzt die drei Versionsstrings; der Link wird aus `version` abgeleitet, es entsteht kein Handarbeitsschritt |
 | `docs/reviews/<Datum>-slice-v1-cli-help-handbuch-link.md` | neu, durch den Reviewer | Review-Report |
 
+**Hinweise aus dem Review** (`docs/reviews/2026-10-18-slice-v1-cli-help-handbuch-link.md`):
+
+- **Gelöschte Vorab-Tags.** `docs/maintainer/releasing.md` §5 und §7 löschen Vorab-Tags nach dem Cut; ein danach noch laufendes `X.Y.Z-rc.N`-Binary zeigt einen Tag-Link, der ins Leere führt (die Tags `v0.10.0-rc.1` und `v0.11.0-rc.1` bestehen nicht mehr). Der `main`-Link bleibt gültig. Der CHANGELOG-Eintrag nennt die Grenze in einem Satz.
+- **Laufzeit.** `rootLongText` kompiliert die Regex bei jedem Aufruf (`root.go`, `regexp.MustCompile`); der Mehraufwand ist ein einmaliger Regex-Abgleich je Prozess. Die Grenze [`LH-NFA-PERF-001`](../../../../spec/lastenheft.md#lh-nfa-perf-001--schnelle-cli-antwort) (unter 200 ms) wurde nicht gemessen; der Docker-Lauf (1,5 s einschließlich Container-Start) taugt dafür nicht.
+
 ## 4. Trigger
 
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
@@ -113,11 +118,11 @@ DoD vollständig, Review-Report liegt vor, Closure-Notiz mit Steering-Loop-Lerne
 
 Jedes Risiko bekommt bei der Closure genau einen Ausgang (eingetreten / entfallen / weiter offen).
 
-- **Toter Link bei Dev-Build, Fork oder umbenanntem Repo:** Dev-Builds sind durch die `-dev`-Verzweigung abgedeckt; ein Fork oder ein umbenanntes Repo zeigt weiter auf `pt9912/u-boot`. Ein selbst gebautes Binary mit einer beliebigen Version (etwa `0.0.0-test`) bekäme einen Tag-Link, dessen Tag nicht existiert. — **Ausgang:** offen; Mitigation: Test pinnt die Regel; die Grenze (nur `-dev` ist ausgenommen) steht im Code-Kommentar als Zusage.
-- **Link zum Handbuch einer Version ohne Tag:** Ein Release-Build trägt `version` ohne `-dev`; der Tag entsteht erst mit dem Cut. Ein vor dem Tag gebautes Binary mit der Release-Version zeigt kurz ins Leere. — **Ausgang:** offen; Mitigation: `publish.yml` baut erst aus dem Tag, `make build` setzt `-dev`.
+- **Toter Link bei Dev-Build, Fork oder umbenanntem Repo:** Dev-Builds und jede Version außerhalb der Release-Formen (`0.0.0-test`, `0.12.0-rc1`, leer) bekommen nur den `main`-Link; ein Fork oder ein umbenanntes Repo zeigt weiter auf `pt9912/u-boot`, und ein selbst gebautes Binary mit einer Release-Form als Version bekäme einen Tag-Link, dessen Tag es dort nicht gibt. — **Ausgang:** offen; Mitigation: Test pinnt die Regel; die Grenze (nur `X.Y.Z` und `X.Y.Z-rc.N` tragen den Tag-Link) steht im Code-Kommentar als Zusage.
+- **Link zum Handbuch einer Version ohne Tag:** Ein Release-Build trägt `version` in einer Release-Form; der Tag entsteht erst mit dem Cut. Ein vor dem Tag gebautes Binary mit der Release-Version zeigt kurz ins Leere. — **Ausgang:** offen; Mitigation: `publish.yml` baut erst aus dem Tag, `make build` setzt `-dev`.
 - **Hartkodierung der Repo-URL:** `https://github.com/pt9912/u-boot` in `root.go` (schon heute für den README-Link). — **Ausgang:** offen; Mitigation: eine Konstante, ein Test pinnt sie; ein Umzug des Repos ist ein eigener Vorgang.
 - **Pfad- oder Anker-Änderung des Handbuchs:** `docs/user/benutzerhandbuch.md` wird verschoben oder umbenannt; die Links in alten Binaries bleiben auf dem Tag gültig (Tag friert den Stand ein), der `main`-Link bricht. — **Ausgang:** offen; Mitigation: der Test nennt den Pfad; eine Umbenennung des Handbuchs zieht den Test (und damit den Code) nach.
-- **Der Test pinnt den Wortlaut zu eng:** Das Mutationsbeispiel zeigt, welche Teile (Tag mit `v`, Pfad, `-dev`-Ausnahme) tragend sind; der Satz „(German)“ ist es nicht. — **Ausgang:** offen.
+- **Der Test pinnt den Wortlaut zu eng:** Das Mutationsbeispiel zeigt, welche Teile (Tag mit `v`, Pfad, Release-Form-Regex) tragend sind; der Satz „(German)“ ist es nicht. — **Ausgang:** offen.
 
 ## 7. Closure-Notiz
 
