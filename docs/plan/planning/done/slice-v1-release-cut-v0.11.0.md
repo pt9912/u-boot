@@ -64,7 +64,7 @@ Nicht im CHANGELOG und nicht im Lead: `-timeout 30m` im Ziel `test-docker` von `
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [x] Beobachtungs-Register fortgeschrieben oder „keine Beobachtung angefallen“ in §7 notiert.
 - [x] Jedes Risiko aus §6 trägt einen Ausgang.
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen.
 
 ## 3. Plan (vor Code)
 
@@ -142,6 +142,8 @@ Rot gesehen: (2b) und (3b) sind die rote Gegenprobe der Prüfung auf den Tag (ei
 | `make verify-depguard` | 8 von 9 PASS; `domain-isoliert` FAIL „expected desc not found in lint output“ (Bestandsproblem des Sensors, Gegenstand von [`slice-v1-harness-gofmt-und-depguard`](../open/slice-v1-harness-gofmt-und-depguard.md), nicht Teil dieses Cuts) | 56,2 s |
 
 Plan-Tabelle nach der letzten Änderung gegen `git diff --stat 4fb8b94` abgeglichen (Stand nach der Review-Runde): vierzehn Dateien (`CHANGELOG.md`, `Dockerfile`, `README.de.md`, `README.md`, `cmd/uboot/main.go`, `docs/maintainer/releasing.md`, `in-progress/README.md`, `in-progress/roadmap.md`, dieser Slice, `open/README.md`, `docs/reviews/2026-10-18-slice-v1-release-cut-v0.11.0.md`, `docs/user/benutzerhandbuch.md`, `internal/hexagon/application/doctor.go`, `repo.mk`), jede mit Zeile in der Tabelle; der Verification-Report folgt durch den Verifier. Die Zeile von `v0.11.0` unter „Nächste Wellen“ der Roadmap ist nach dem Review (F-3) entfallen, ihr Inhalt steht im Zeiger. Datum: `date +%F` = 2026-10-18; CHANGELOG, Tabellenzeilen beider READMEs und Handbuch-`Stand` tragen 2026-10-18.
+
+**Abgleich bei der Closure (Planner, 2026-10-18, `git diff --stat 4fb8b94`, 23 Dateien):** Die Zeilen der Tabelle decken `CHANGELOG.md`, `Dockerfile`, `README.de.md`, `README.md`, `cmd/uboot/main.go`, `docs/maintainer/releasing.md`, `internal/hexagon/application/doctor.go`, `repo.mk`, `docs/user/benutzerhandbuch.md`, `roadmap.md`, `open/README.md`, diesen Slice und beide Reports. Hinzu kamen bei der Closure, ohne eigene Tabellenzeile: die `state.md` von `BEO-E2E/ci-ueberspringt-nested-podman-build` und `BEO-WZG/kopplung-nicht-nachgezogen` (Zeile „observations“, „je nach Befund“) sowie Link-Nachzüge von `slice-mv` in sechs `done/`- und `open/`-Slices und einem Verification-Report. `in-progress/README.md` steht nicht im Diff, weil Zeile und Entfernung sich seit `4fb8b94` aufheben (gelesen: keine Bestandszeile mehr). Gelesen als „kein Diff“: `publish.yml`, `tap-nachzug.sh`, `tap-formula-check.sh`, `homebrew-formula-fill.sh`, `packaging/` stehen nicht in `git diff --stat`.
 
 ## 4. Trigger
 

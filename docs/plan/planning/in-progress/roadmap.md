@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-**v0.11.0 (Dry-Run-Wortlaut, fehlendes `/dev/fuse` als Startfehler, host-seitige Ausweisung der Fallbacks, Handbuch-Anleitung für `sshd`, Podman 6.1.4)** — Slice: [`slice-v1-release-cut-v0.11.0`](../done/slice-v1-release-cut-v0.11.0.md) (Tag-Push steht aus). Der Release trägt [`slice-v1-handbuch-sshd-anleitung`](../done/slice-v1-handbuch-sshd-anleitung.md), [`slice-v1-e2e-status-ci-helfer`](../done/slice-v1-e2e-status-ci-helfer.md), [`slice-v1-podman-aktuelle-version`](../done/slice-v1-podman-aktuelle-version.md) und [`slice-v1-doctor-fuse-im-container`](../done/slice-v1-doctor-fuse-im-container.md) (alle in `done/`). Bedingung für den Tag: der CI-Lauf `integration-docker` ist auf dem Commit nach dem Push grün.
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
