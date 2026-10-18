@@ -642,6 +642,18 @@ func TestGenerateDevcontainer_SandboxEgressWithPodman(t *testing.T) {
 			t.Errorf("registry host %s missing from the allowlist:\n%s", host, script)
 		}
 	}
+	// The Podman archive and its key are fetched at image build time on the
+	// container host; no host of that source is allowed in the running container.
+	for _, host := range []string{"keys.openpgp.org", "mgoltzsche", "quay.io", "registry.fedoraproject.org"} {
+		if strings.Contains(string(script), host) {
+			t.Errorf("host %s must not be on the allowlist:\n%s", host, script)
+		}
+	}
+	df, _ := fs.ReadFile(dockerfilePath())
+	assertPodmanStaticDockerfile(t, string(df))
+	if !strings.Contains(string(df), "dnsmasq-base nftables") {
+		t.Errorf("Dockerfile with egress lacks nftables:\n%s", df)
+	}
 }
 
 // Egress off (default) or without the sandbox profile: no script, no
