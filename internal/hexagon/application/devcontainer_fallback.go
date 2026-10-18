@@ -166,7 +166,7 @@ func (r *fallbackReader) read(ctx context.Context, p fallbackProbe) statusReadin
 	raw, err := r.inspector.ReadFile(ctx, r.container.ID, file, domain.SandboxStatusMaxBytes)
 	switch {
 	case errors.Is(err, driven.ErrContainerFileNotFound):
-		return undetermined("the container has no status file (it was created before the status files existed, or has not been started yet)")
+		return undetermined("the container has no status file (it was created before the status files existed, has not been started yet, or the start script ended before it wrote)")
 	case errors.Is(err, driven.ErrContainerFileInvalid):
 		return invalidStatus()
 	case err != nil:
@@ -186,7 +186,7 @@ func (r *fallbackReader) readLocal(file string) statusReading {
 	info, err := r.fs.Lstat(file)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			return undetermined("the container has no status file (it was created before the status files existed, or has not been started yet)")
+			return undetermined("the container has no status file (it was created before the status files existed, has not been started yet, or the start script ended before it wrote)")
 		}
 		return undetermined("the status file could not be read")
 	}
