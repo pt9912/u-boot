@@ -12,16 +12,17 @@ const (
 	manualPath = "docs/user/benutzerhandbuch.md"
 )
 
-// releaseVersionPattern matches exactly the versions the publish workflow
-// tags as `v<version>`: MAJOR.MINOR.PATCH without leading zeros, optionally
-// followed by `-rc.N`.
+// releaseVersionPattern captures the documented release forms `X.Y.Z` and
+// `X.Y.Z-rc.N` (numbers without leading zeros). It is a subset of what the
+// publish workflow accepts as a tag; any other version gets the `main` link
+// only.
 const releaseVersionPattern = `^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-rc\.(0|[1-9][0-9]*))?$`
 
 // rootLongText renders the long help text of the root command. The manual
 // link of the version (tag `v<version>`) appears only when version is a
 // release form (`X.Y.Z` or `X.Y.Z-rc.N`); every other version (`-dev`,
-// test or self-built, empty) gets the link to `main` only, because no tag
-// exists for it.
+// test or self-built, empty) gets the link to `main` only, because a tag
+// of that form is not promised.
 func rootLongText(version string) string {
 	text := `u-boot bootstraps reproducible development environments:
 project structure, Docker Compose stack, devcontainer configuration,
