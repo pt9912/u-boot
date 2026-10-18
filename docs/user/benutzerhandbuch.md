@@ -640,7 +640,9 @@ Zustand beim Containerstart (`vfs`-Speicher, Daemon, Egress).
   Runtime-Image ist der Zustand nicht ermittelbar.
 - Im Container ist außerdem die Prüfung des Geräts `/dev/fuse` übersprungen
   (`devcontainer.sandbox.runtime`, Info, Exit-Code 0): das Gerät im Container ist
-  nicht das des Container-Hosts. Ein Devcontainer, der ohne das Gerät gestartet
+  nicht das des Container-Hosts. Die Prüfung des Schalters
+  `kernel.apparmor_restrict_unprivileged_userns` im selben Eintrag gilt weiter:
+  bei dem Wert 1 meldet er auch im Container einen Fehler (Exit-Code 11). Ein Devcontainer, der ohne das Gerät gestartet
   wurde, erscheint im Eintrag `devcontainer.sandbox.fallback.vfs`, soweit seine
   Statusdatei lesbar ist (sonst „nicht ermittelbar“); das Gerät des
   Container-Hosts prüft `u-boot doctor` auf dem Host.
@@ -1086,7 +1088,9 @@ den Start ab, die Prüfung von `doctor` zum Gerät meldet nichts, und das
 Startscript im Container prüft die User-Namespaces. Läuft `u-boot doctor` in einem
 Container (Runtime-Image, Devcontainer), prüft es das Gerät nicht: das `/dev/fuse`
 dort gehört dem Container, nicht dem Container-Host. Der Eintrag
-`devcontainer.sandbox.runtime` ist dann Info (Exit-Code 0); ein ohne das Gerät
+`devcontainer.sandbox.runtime` ist dann Info (Exit-Code 0), es sei denn, die
+Prüfung des Schalters `kernel.apparmor_restrict_unprivileged_userns` davor
+meldet einen Fehler (Wert 1, Exit-Code 11); ein ohne das Gerät
 gestarteter Devcontainer erscheint im Eintrag `devcontainer.sandbox.fallback.vfs`,
 soweit seine Statusdatei lesbar ist (sonst „nicht ermittelbar“), das Gerät des Container-Hosts prüft `u-boot doctor` auf dem Host.
 
@@ -1473,7 +1477,8 @@ Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
   Colima (arm64) mit erlaubten verschachtelten User-Namespaces gemessen; für
   amd64 sind Download, Prüfsumme, Signatur und Versionsabfrage unter Emulation
   geprüft, ein verschachtelter Lauf auf amd64 und CI sind nicht gemessen.
-  Podman 6 unterstützt nur cgroups v2; Hosts mit cgroups v1 sind nicht gemessen.
+  Podman 6 unterstützt nur cgroups v2 (laut Release-Notes, nicht gemessen);
+  Hosts mit cgroups v1 sind davon betroffen.
   Unter einer Ubuntu-24.04-VM mit dem Schalter
   `kernel.apparmor_restrict_unprivileged_userns=1` startet verschachteltes
   Podman nicht (Exit-Code 11). Nicht verfügbar sind `buildah`, `docker buildx`,

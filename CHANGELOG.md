@@ -18,9 +18,9 @@ Eleventh release. **Podman 6.1.4 in the sandbox devcontainer, a missing `/dev/fu
 engine (like `/dev/net/tun`, so both devices are host prerequisites), and `u-boot doctor` reports it. `u-boot doctor` and `u-boot generate devcontainer` disclose the degradation fallbacks
 (no Docker daemon, `vfs` storage, no egress restriction) from the host; the `--dry-run` summaries of `remove`, `generate` and `config set` say "Would …".
 **Behaviour change for scripts that evaluate `doctor` without `--strict`:** on a Linux host outside a container, a missing `/dev/fuse` is now an error (exit code `11`) where `v0.10.0` reported
-a warning (exit code `0`) with `onUnavailable: warn`; inside a container (runtime image, devcontainer) the check is skipped (info, exit code `0`). **Existing projects** get Podman 6.1.4 and the
+a warning (exit code `0`) with `onUnavailable: warn`; inside a container (runtime image, devcontainer) the `/dev/fuse` check is skipped (info, exit code `0`; the check of `kernel.apparmor_restrict_unprivileged_userns` before it still applies). **Existing projects** get Podman 6.1.4 and the
 status files after the next `u-boot generate devcontainer` and a rebuild of the container. Measured with Docker 29.5.2 on Colima 0.10.3, arm64; **not measured:** Linux without a VM, `amd64`
-(for Podman 6.1.4 only the download, checksum, signature and version query are checked; a nested run on `amd64` is not measured), Docker Desktop, VS Code. Lastenheft 0.13.0.
+(for Podman 6.1.4 only the download, checksum, signature and version query are checked; a nested run on `amd64` is not measured), Docker Desktop, VS Code. Podman 6 supports only cgroups v2 (read from its release notes, not measured), so hosts with cgroups v1 are affected. Lastenheft 0.13.0.
 
 ### Added
 
@@ -45,7 +45,8 @@ status files after the next `u-boot generate devcontainer` and a rebuild of the 
   measured, and fully qualified names stay the recommendation. The `vfs` fallback (container started without `/dev/fuse`) works with Podman 6: the start script writes a user drop-in
   (`~/.config/containers/storage.conf.d/99-u-boot-vfs.conf`) and `image_copy_tmp_dir` in the storage volume; `podman run`, `podman build` and `docker build` run under `vfs` (measured with the volume
   mounted), and the status file still reports `fallback`. Measured with Docker 29.5.2 on Colima 0.10.3, arm64; for `amd64` the download, checksum, signature and version query are checked under
-  emulation, a nested run on `amd64`, Docker Desktop and hosts with cgroups v1 are **not measured**. **Existing projects** get the new version after the next `u-boot generate devcontainer` and
+  emulation, a nested run on `amd64` and Docker Desktop are **not measured**. Podman 6 supports only cgroups v2 (its release notes for `v6.0.0`; read, not measured), so **hosts with cgroups v1 are affected**:
+  `u-boot doctor` does not check the cgroup version of the container host. **Existing projects** get the new version after the next `u-boot generate devcontainer` and
   a rebuild of the container. Lastenheft 0.13.0 is unchanged ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
   [ADR-0023](docs/plan/adr/0023-podman-aus-podman-static-im-sandbox-devcontainer.md)).
 - Sandbox devcontainer (`nestedRuntime: podman`): a missing `/dev/fuse` on the container host is a start error of the container engine, like `/dev/net/tun`, and no longer a
@@ -53,9 +54,9 @@ status files after the next `u-boot generate devcontainer` and a rebuild of the 
   Colima 0.10.3, arm64: `docker run` exit code `127`, `docker start` exit code `1`, `error gathering device information while adding custom device`); the start script never runs.
   The `vfs` storage fallback applies only to a container that was started without the device (for example after changed `runArgs`). `u-boot doctor` reports a missing `/dev/fuse` on a Linux
   host outside a container as an **error** (exit code `11`) under both `onUnavailable` values, without the fallback flag; it does not check `/dev/net/tun`. Inside a container (the runtime image,
-  a devcontainer) the check is skipped (info, exit code `0`): the device there is the container's own, not the container host's, and a devcontainer started without it shows in
+  a devcontainer) the `/dev/fuse` check is skipped (info, exit code `0`; the check of `kernel.apparmor_restrict_unprivileged_userns` that precedes it in the same item applies unchanged, so a value of `1` is still an error, exit code `11`, there too): the device there is the container's own, not the container host's, and a devcontainer started without it shows in
   `devcontainer.sandbox.fallback.vfs` as far as its status file is readable (otherwise "not determinable"). Compared to `v0.10.0`, where a missing device inside a container was a warning ("fall back to vfs", exit code `0`)
-  or, with `onUnavailable: fail`, an error (exit code `11`), the check no longer reads the container's device at all (info, exit code `0` under both values).
+  or, with `onUnavailable: fail`, an error (exit code `11`), the `/dev/fuse` check no longer reads the container's device at all (info, exit code `0` under both values, as long as the AppArmor check before it passes).
   **Regression for scripts that evaluate `doctor` without `--strict`, on a Linux host outside a container:**
   the check `devcontainer.sandbox.runtime` was a warning (exit code `0`) with `onUnavailable: warn` and now fails with exit code `11`; load the `fuse` kernel module on the container host (`modprobe fuse`)
   or set `nestedRuntime: none`. The generated files do not change. Lastenheft 0.13.0 ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
