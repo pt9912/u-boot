@@ -13,7 +13,7 @@ var containerIDPattern = regexp.MustCompile(`^[0-9a-f]{64}$`)
 // wrote to stdout: the last non-empty line, which must be a 64-digit
 // lowercase hex string. Any other output is an error naming the whole output.
 func containerIDFromRunOutput(stdout string) (string, error) {
-	lines := strings.Split(strings.ReplaceAll(stdout, "\r\n", "\n"), "\n")
+	lines := strings.Split(stdout, "\n")
 	for i := len(lines) - 1; i >= 0; i-- {
 		line := strings.TrimSpace(lines[i])
 		if line == "" {
