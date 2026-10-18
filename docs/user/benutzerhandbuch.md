@@ -994,8 +994,10 @@ ist oder die Signatur nicht von diesem Schlüssel stammt. Aus Debian kommen nur
 Vertrauen in die Quelle heißt Vertrauen in dieses Projekt und seine
 Build-Pipeline. Die Version ist festgelegt: eine neuere Podman-Version kommt mit
 einer neuen `u-boot`-Version, nicht von selbst. Archiv und Schlüssel lädt der Bau
-des Images, nicht der laufende Container; die Default-Allowlist braucht dafür
-keinen Host. Bestehende Projekte mit `nestedRuntime: podman` bekommen die Version
+des Images, nicht der laufende Container: Der Bau braucht `github.com`,
+`objects.githubusercontent.com` und `keys.openpgp.org` offen (er läuft auf dem
+Container-Host, nicht hinter der Egress-Restriktion); die Default-Allowlist des
+laufenden Containers braucht keinen dieser Hosts zusätzlich. Bestehende Projekte mit `nestedRuntime: podman` bekommen die Version
 nach `u-boot generate devcontainer` und einem Neubau des Containers.
 
 Unter Docker sind dafür diese Lockerungen nötig; **`u-boot` weist jede einzeln
