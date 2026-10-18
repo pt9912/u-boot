@@ -51,7 +51,14 @@ Linter-Prüfungen und sitzt nicht in der Tabelle von §1.2. Eine
 Formatierung des Bestands läuft im Docker mit der gepinnten
 `golangci-lint`-Version, nicht auf dem Host:
 `docker run --rm -v "$PWD":/src -w /src u-boot:lint golangci-lint fmt ./...`
-(Image `u-boot:lint` aus `make lint`). `//nolint`-Suppressions bleiben
+(Image `u-boot:lint` aus `make lint`). Der Container läuft als `root`:
+geänderte Dateien gehören danach `root`, wo Docker Bind-Mounts nicht auf den
+Host-Nutzer abbildet (auf Colima/macOS gemessen: Eigentümer unverändert; auf
+Linux-Hosts nicht gemessen) — dort `--user "$(id -u):$(id -g)"` und
+`-e GOLANGCI_LINT_CACHE=/tmp/golangci-cache -e HOME=/tmp` ergänzen (mit dieser
+Kombination als Nicht-`root` lauffähig gemessen, `--diff` auf einem Probe-Modul). `gofmt` läuft mit dem
+Default des Linters, also mit `simplify` (wie `gofmt -s`): der Formatter
+vereinfacht auch Ausdrücke, nicht nur Whitespace. `//nolint`-Suppressions bleiben
 ausgeschlossen — falls ein Linter auf einem Pfad designseitig keinen
 Sinn ergibt (z. B. `testpackage` im `cmd/uboot`-Wiring), wird der Pfad
 per `issues.exclude-rules` mit `Why:`-Kommentar ausgenommen; dort

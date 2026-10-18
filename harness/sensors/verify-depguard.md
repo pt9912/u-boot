@@ -15,7 +15,10 @@ existiert (Regel `domain-isoliert`: jedes Paket unter `application`, `port` und
 `adapter` importiert `domain`, ein Import daraus bildet einen Zyklus, und der
 Typecheck bricht vor `depguard` ab), legt das Skript ein Wegwerf-Paket ohne
 Importe an (`internal/hexagon/port/verifydepguardprobe`, fünftes Feld der Zeile
-in `CASES`), importiert es und entfernt es nach dem Lauf, auch bei Abbruch.
+in `CASES`), importiert es und entfernt es nach dem Lauf, auch bei Abbruch. Das
+Paket trägt einen Paketkommentar, damit `revive` (`package-comments`) nicht
+anschlägt: Im Lauf dieses Falls ist der `depguard`-Treffer der einzige Befund,
+und der rote Exit von `make lint` belegt die Regel, nicht einen Begleitbefund.
 
 ## Grenze — was das Grün nicht abdeckt
 
