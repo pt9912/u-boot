@@ -49,7 +49,7 @@ Anlass: Projektinhaber, 2026-10-18, Vorschlag (b): Neu-Laden im laufenden Contai
 | Opt. | Weg | Auslöser | Was ein Prozess im Container ohne `sudo` damit kann | Was mit `sudo` | Eingriff |
 |---|---|---|---|---|---|
 | R0 | **Kein Neu-Laden**; die Doku nennt den richtigen Weg (Neubau des Images) | — | nichts neues | nichts neues | nur Handbuch (und M4) |
-| R1 | **Vom Host**: ein Befehl (Arbeitsname `u-boot egress reload`) berechnet die Liste aus `u-boot.yaml` (dieselbe Berechnung wie [`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md)), stellt sie per Container-Engine als Root zu und führt das Reload-Script aus (`docker exec -u root`) | Nutzer auf dem Host | nichts: der Auslöser liegt auf dem Host, die Liste in einer Root-eigenen Datei | wie heute (`sudo` kann die Regeln ohnehin aufheben) | neuer Driven-Port (`Exec`-artig), Reload-Script im Image (einmal Neubau), Lastenheft-Zusage, Spec-Änderung in [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) |
+| R1 | **Vom Host**: ein Befehl (Arbeitsname `u-boot egress reload`) berechnet die Liste aus `u-boot.yaml` (dieselbe Berechnung wie [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md)), stellt sie per Container-Engine als Root zu und führt das Reload-Script aus (`docker exec -u root`) | Nutzer auf dem Host | nichts: der Auslöser liegt auf dem Host, die Liste in einer Root-eigenen Datei | wie heute (`sudo` kann die Regeln ohnehin aufheben) | neuer Driven-Port (`Exec`-artig), Reload-Script im Image (einmal Neubau), Lastenheft-Zusage, Spec-Änderung in [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) |
 | R2 | **Zwei Schritte**: Host legt die Liste per `docker cp` in ein Root-eigenes Verzeichnis, der Nutzer führt im Container `sudo sh /usr/local/bin/u-boot-egress-reload` aus | Nutzer im Container, mit `sudo` | nichts (braucht `sudo`) | alles, was `sudo` heute schon kann | kleinerer Port (nur Schreiben), aber eine Aktion im Container; Doku |
 | R3 | **Im Container ohne `sudo`** auslösbar (Beobachter der Datei `/workspaces/…/egress.allow` oder eine `sudoers`-Regel für einen Reload-Befehl mit nutzerbestimmter Liste) | Prozess im Container | **kann sich selbst Hosts freischalten** | wie heute | **verworfen als Vorschlag**: widerspricht dem Wunsch des Projektinhabers; hier nur genannt, damit die Ablehnung begründet ist |
 | R4 | **Außerhalb des Containers** (Proxy oder Netz-/DNS-Ebene, [`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md) Alternative D) | Host | nichts, auch nicht mit `sudo` | nichts | eigener Vorgang, Host-Konfiguration ist Nicht-Ziel von `u-boot` |
@@ -59,7 +59,7 @@ Anlass: Projektinhaber, 2026-10-18, Vorschlag (b): Neu-Laden im laufenden Contai
 
 ### Wortlaut-Vorschlag (alt/neu; **nur** wenn R1 oder R2 gewählt wird und M1 es trägt; Freigabe des Projektinhabers vor dem Lastenheft-Commit im Folge-CR-Slice)
 
-Version: die nächste freie Nummer zum Zeitpunkt des Lastenheft-Commits (nach [`slice-cr-sandbox-egress-anzeige`](slice-cr-sandbox-egress-anzeige.md) also `0.15.0` oder höher, je nach Reihenfolge des Landens mit dem Ollama-CR).
+Version: die nächste freie Nummer zum Zeitpunkt des Lastenheft-Commits (nach [`slice-cr-sandbox-egress-anzeige`](../open/slice-cr-sandbox-egress-anzeige.md) also `0.15.0` oder höher, je nach Reihenfolge des Landens mit dem Ollama-CR).
 
 **Stelle 1 — [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), Spiegelstrich zur Grenze der Restriktion.**
 
@@ -89,7 +89,7 @@ Neu (Satzteil nach dem Semikolon gilt nur, wenn M1 bestätigt, dass `sudo` des B
 
 - **Die Umsetzung (Befehl, Port, Reload-Script) und der Lastenheft-Commit** — Folge-Slices nach der Entscheidung (V2); ein Slice, der misst und entscheidet, setzt nicht um (Rollentrennung, `harness/roles.md`).
 - **Das Entziehen von `sudo`** (Option S) — ändert Benutzerrechte und alle Start-Scripte; eigener Vorgang mit eigener Messung.
-- **Die Anzeige der wirksamen Liste** — [`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md); `reload` nutzt später dieselbe Berechnung, aber der Slice hängt nicht an ihr.
+- **Die Anzeige der wirksamen Liste** — [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md); `reload` nutzt später dieselbe Berechnung, aber der Slice hängt nicht an ihr.
 - **Wildcards** — [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md).
 - **Docker Desktop, Linux-Host, amd64** — nicht gemessen, nicht zugesagt; jede Aussage nennt den Messstand (Colima, arm64).
 
@@ -125,7 +125,7 @@ Kein Produktcode, kein Test, kein Lastenheft in diesem Slice. Abgleich der Tabel
 
 ## 4. Trigger
 
-**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; kein anderer Slice in `in-progress/` (WIP-Limit 1). Er hängt von keinem Slice der Welle ab und kann nach dem Wildcard-Slice oder parallel zur Planung der Anzeige starten; er läuft nach [`slice-v1-cli-egress-anzeige`](slice-v1-cli-egress-anzeige.md), wenn die Welle in der Reihenfolge der Tabelle arbeitet.
+**Start** (`next` → `in-progress`): `Verantwortlich:` gesetzt; kein anderer Slice in `in-progress/` (WIP-Limit 1). Er hängt von keinem Slice der Welle ab und kann nach dem Wildcard-Slice oder parallel zur Planung der Anzeige starten; er läuft nach [`slice-v1-cli-egress-anzeige`](../open/slice-v1-cli-egress-anzeige.md), wenn die Welle in der Reihenfolge der Tabelle arbeitet.
 
 **Rückführungen — vorab benannt:**
 

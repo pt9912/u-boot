@@ -34,7 +34,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 ### Entwurfsfragen (der Architect entscheidet und begründet; Einordnung des Planners, nicht entscheidend)
 
-1. **Name und Ort des Befehls:** (i) neues Top-Level-Kommando `egress` mit Unterbefehl `list` (Platz für ein späteres `reload`, siehe [`slice-v1-sandbox-egress-neuladen-entwurf`](slice-v1-sandbox-egress-neuladen-entwurf.md)); (ii) `config egress` (neben `get`, `list`, `set`; aber die Liste ist abgeleitet, kein Konfigurationspfad); (iii) eine Option von `doctor` (aber `doctor` prüft, es listet nicht). Maßgebend ist der Wortlaut des CR; der Planner ordnet (i) als den kleinsten Eingriff in die Bedeutung der bestehenden Befehle ein.
+1. **Name und Ort des Befehls:** (i) neues Top-Level-Kommando `egress` mit Unterbefehl `list` (Platz für ein späteres `reload`, siehe [`slice-v1-sandbox-egress-neuladen-entwurf`](../in-progress/slice-v1-sandbox-egress-neuladen-entwurf.md)); (ii) `config egress` (neben `get`, `list`, `set`; aber die Liste ist abgeleitet, kein Konfigurationspfad); (iii) eine Option von `doctor` (aber `doctor` prüft, es listet nicht). Maßgebend ist der Wortlaut des CR; der Planner ordnet (i) als den kleinsten Eingriff in die Bedeutung der bestehenden Befehle ein.
 2. **Zuschnitt der Berechnung:** `egressHosts` wird zu einer Funktion, die je Host die Liste der Quellen liefert (Typ im Paket `application`), und die bisherige `[]string`-Form wird aus ihr abgeleitet — nur so kann die Anzeige nicht von der Skript-Liste abweichen. Ob der Typ in `domain` gehört (reiner Datentyp, wie `domain.NewEgressHost`) oder im Paket bleibt, entscheidet der Architect nach `spec/architecture.md`.
 3. **Herkunfts-Namen:** feste, kleine Menge (`base`, `runtime`, `docker-apt`, `feature:<name>`, `clone`, `user`) mit stabiler Schreibweise für `--json`; ein Host mit mehreren Quellen nennt alle (belegt: `ghcr.io`, `registry.npmjs.org`).
 4. **Ohne aktive Restriktion:** zeigt der Befehl die Liste, die bei Aktivierung gälte, und sagt das in einer Zeile (so der Wortlaut des CR), oder er endet mit einem Hinweis ohne Liste; der Wortlaut des CR legt das fest.
@@ -43,7 +43,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Der Zustand des laufenden Containers** (griff die Restriktion beim Start?) — das leistet `doctor` (`checkSandboxFallbacks`); der Befehl bleibt offline, sonst bräuchte er den `DevcontainerInspector` und verlöre die Eigenschaft „ohne Docker“.
-- **Neu-Laden der Liste im laufenden Container** — [`slice-v1-sandbox-egress-neuladen-entwurf`](slice-v1-sandbox-egress-neuladen-entwurf.md), eigene Zusage und Sicherheitsentscheidung.
+- **Neu-Laden der Liste im laufenden Container** — [`slice-v1-sandbox-egress-neuladen-entwurf`](../in-progress/slice-v1-sandbox-egress-neuladen-entwurf.md), eigene Zusage und Sicherheitsentscheidung.
 - **Ändern der Liste** (`egress add` o. ä.) — `u-boot config set devcontainer.sandbox.egress.allow …` (`setEgressAllow`) bleibt der Weg; ein zweiter Schreibweg wäre eine neue Zusage.
 - **Wildcards in der Eingabe** — [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md).
 - **Die Hosts von Ollama** — [`slice-v1-devcontainer-feature-ollama`](slice-v1-devcontainer-feature-ollama.md) trägt sie in `egressFeatureHosts()` ein; die Anzeige zeigt sie dann ohne weitere Änderung (belegt durch den Golden Case der Welle).
