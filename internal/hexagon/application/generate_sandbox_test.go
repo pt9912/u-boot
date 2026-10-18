@@ -1001,7 +1001,7 @@ func TestGenerateDevcontainer_SandboxEgress_ClaudeCodeHostsOnlyWhenActive(t *tes
 // keeps its exit codes, and the Dockerfile creates the status directory only
 // when a script is installed. `runArgs` stay as the nested-runtime tests
 // pin them. The behaviour of the written scripts runs in
-// `internal/e2e/sandbox_devcontainer_docker_test.go` (`make test-docker`).
+// `internal/e2e/sandbox_status_docker_test.go` (`make test-docker`).
 func TestGenerateDevcontainer_SandboxStartScriptsWriteStatusFiles(t *testing.T) {
 	t.Parallel()
 	const mkdirStatus = "RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status"

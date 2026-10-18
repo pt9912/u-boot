@@ -283,9 +283,10 @@ func podmanRelaxations() []string {
 // `--quiet`, LH-FA-CLI-005 exception 1); the `nestedRuntime` "no effect"
 // notices are configuration notices and stay unflagged. The degradation fallbacks
 // of LH-FA-DEV-007 (no daemon, `vfs` storage, no egress restriction)
-// are not produced here: they arise at container start and in
-// `u-boot doctor`, where the item carries
-// [domain.Diagnostic.DegradationFallback] (exception 2).
+// are not produced here: they arise at container start and are disclosed
+// from the status files, in `u-boot doctor` and, for an existing container,
+// by `generate devcontainer` (see [fallbackWarnings]); both carry the
+// fallback flag (exception 2).
 func sandboxRelaxationWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []driving.WarningEntry {
 	var out []driving.WarningEntry
 	add := func(code, msg string, relaxation bool) {
