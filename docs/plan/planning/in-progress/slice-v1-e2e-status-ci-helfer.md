@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** `v0.11.0` (Release-Versionen sind Wellen, [`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md)). **Blocker des Cuts** [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md): dessen DoD verlangt einen grünen CI-Lauf auf dem Tag-Commit, und `integration-docker` ist auf `7f9f2f5` rot. Der Slice läuft vor dem Cut.
+**Welle:** `v0.11.0` (Release-Versionen sind Wellen, [`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md)). **Blocker des Cuts** [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md): dessen DoD verlangt einen grünen CI-Lauf auf dem Tag-Commit, und `integration-docker` ist auf `7f9f2f5` rot. Der Slice läuft vor dem Cut.
 
 **Bezug:** [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) und [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (die Datei `internal/e2e/sandbox_status_docker_test.go` trägt beide im Kopfkommentar), [`ADR-0022`](../../adr/0022-fallback-ausweisung-statusdateien-im-container.md) (Statusdateien, Vertrauensgrenze des Inspector-Adapters, die der betroffene Test gegen eine echte Engine prüft), [`ADR-0004`](../../adr/0004-ci-system.md) (CI-System; der Job `integration-docker` ist dessen Sensor). Der Slice **lockert kein Gate** ([`AGENTS.md`](../../../../AGENTS.md) §3.6): Er macht einen Test robust, der auf einem Runner ohne Image-Cache fälschlich rot wird; der Test prüft danach dasselbe wie vorher.
 
@@ -92,7 +92,7 @@ Jede Aussage über Code steht mit Fundstelle ([`AGENTS.md`](../../../../AGENTS.m
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`open` → `next` → `in-progress`): Priorisierung durch den Projektinhaber; der Slice geht dem Cut [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md) voraus. WIP-Limit 1: kein anderer Slice liegt in `in-progress/`.
+**Start** (`open` → `next` → `in-progress`): Priorisierung durch den Projektinhaber; der Slice geht dem Cut [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md) voraus. WIP-Limit 1: kein anderer Slice liegt in `in-progress/`.
 
 **Rückführungen — vorab benannt:**
 
