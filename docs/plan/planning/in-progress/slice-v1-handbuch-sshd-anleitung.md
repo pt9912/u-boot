@@ -5,7 +5,7 @@ Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
 wechselt nur durch `git mv`, siehe
 Baseline-Regelwerk `modul-05-planning-harness.md` §Lifecycle als State Machine.
 
-**Welle:** `v0.11.0` (Release-Zuordnung des Projektinhabers vom 2026-10-18; Release-Versionen sind Wellen, [`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md)). Der Slice läuft vor dem Cut [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md); der Cut nimmt den Stand des Handbuchs mit.
+**Welle:** `v0.11.0` (Release-Zuordnung des Projektinhabers vom 2026-10-18; Release-Versionen sind Wellen, [`MR-003`](../../../../harness/conventions/MR-003-roadmap-wellen.md)). Der Slice läuft vor dem Cut [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md); der Cut nimmt den Stand des Handbuchs mit.
 
 **Bezug:** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Katalog-Feature `sshd`),
 [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Sicherheitsaussage: das Profil ist Schadensbegrenzung, keine Isolationsgrenze),
@@ -91,7 +91,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 
 ## 5. Closure-Trigger
 
-DoD vollständig, Review-Report liegt vor, Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben (§7). Der Cut [`slice-v1-release-cut-v0.11.0`](slice-v1-release-cut-v0.11.0.md) startet erst, wenn dieser Slice in `done/` liegt.
+DoD vollständig, Review-Report liegt vor, Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben (§7). Der Cut [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md) startet erst, wenn dieser Slice in `done/` liegt.
 
 ## 6. Risiken und offene Punkte
 

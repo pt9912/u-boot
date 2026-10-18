@@ -23,7 +23,7 @@ Nichts in Arbeit.
 
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
-| v0.11.0 (Dry-Run-Wortlaut, fehlendes `/dev/fuse` als Startfehler, host-seitige Ausweisung der Fallbacks, Handbuch-Anleitung für `sshd`) | [`slice-v1-handbuch-sshd-anleitung`](../open/slice-v1-handbuch-sshd-anleitung.md) liegt in `done/` | [`slice-v1-handbuch-sshd-anleitung`](../open/slice-v1-handbuch-sshd-anleitung.md); [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md) | S |
+| v0.11.0 (Dry-Run-Wortlaut, fehlendes `/dev/fuse` als Startfehler, host-seitige Ausweisung der Fallbacks, Handbuch-Anleitung für `sshd`) | [`slice-v1-handbuch-sshd-anleitung`](../in-progress/slice-v1-handbuch-sshd-anleitung.md) liegt in `done/` | [`slice-v1-handbuch-sshd-anleitung`](../in-progress/slice-v1-handbuch-sshd-anleitung.md); [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md) | S |
 | Nach v0.11.0: Hygiene (kein Release-Inhalt) | [`slice-v1-release-cut-v0.11.0`](../open/slice-v1-release-cut-v0.11.0.md) liegt in `done/` | [`slice-v1-cli-dry-run-log-would`](../open/slice-v1-cli-dry-run-log-would.md); [`slice-v1-harness-gofmt-und-depguard`](../open/slice-v1-harness-gofmt-und-depguard.md) | S |
 | Harness-Scaffolding (Produkt) | [ADR-0011](../../adr/0011-agent-harness-scaffolding.md) accepted + Spec-Erweiterung + Lizenz-Check | `slice-vN-harness-bootstrap-scaffold` (noch kein Plan) | L |
 | Podman-first / Migration / Custom-Sources | Konkretisierung je Thema offen | `slice-vN-podman-formal`; `slice-later-migration` ([`LH-FA-CONF-006`](../../../../spec/lastenheft.md#lh-fa-conf-006--konfiguration-migrieren)); `slice-later-custom-data-sources` ([`LH-DA-004`](../../../../spec/lastenheft.md#lh-da-004--schema-migration)) | L |
