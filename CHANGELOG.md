@@ -21,8 +21,10 @@ this file is the same format applied to u-boot itself.
   contribute lists all of them). The list is the one `u-boot generate devcontainer` writes into the start script: both come from one computation, and a test compares them.
   The command reads only `u-boot.yaml` and `.git/config`, needs no network, no Docker and no running container, and changes nothing. It states whether the restriction is active (sandbox
   profile and `devcontainer.sandbox.egress.enabled`) and, if it is not, shows the list that would apply on activation. The output also says that a name includes its subdomains and that the list
-  is computed from the project files, not read from a container. `--json` emits `data.{active,sandboxProfile,egressEnabled,cloneSource,hosts}`; the output stays under `--quiet`;
-  `--dry-run` and `--diff` are rejected with exit code `2`. An `origin` URL that `generate devcontainer` refuses is refused with exit code `10`
+  is computed from the project files, not read from a container; that note carries its measurement limits (Dev Container CLI 0.89.0 on Colima, arm64; the editor actions are not measured).
+  `--json` emits `data.{active,sandboxProfile,egressEnabled,cloneSource,hosts}`; the output stays under `--quiet`;
+  `--dry-run` and `--diff` are rejected with exit code `2`. The clone source is resolved as for `generate devcontainer --sandbox`, also while the restriction is not active: an `origin`
+  URL that this resolution refuses (credentials, unsafe characters) is refused with exit code `10`
   ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)).
 
 ### Changed

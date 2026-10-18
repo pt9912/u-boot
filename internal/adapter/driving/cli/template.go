@@ -67,9 +67,10 @@ Coming in later slices:
 		// envelope. The reject is RunE-borne (not gate-borne) since
 		// the Cluster-T_close removed the allowlist gate; it must
 		// fire here so `--json template` does not leak help text.
-		// Envelope-LOS by design — the only gate-less reject form of
+		// Envelope-LOS by design — the gate-less reject form of
 		// the cluster (slice-v1-cli-json-dry-run-template T0-(a)/(f),
-		// moved here from template-T3).
+		// moved here from template-T3); bare `egress --json` rejects the
+		// same way (egress.go).
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if a.json {
 				return ErrTemplateSubcommandRequired

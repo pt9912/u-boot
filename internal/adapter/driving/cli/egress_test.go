@@ -144,7 +144,8 @@ func TestExecute_EgressList_Notes(t *testing.T) {
 		"A name in the list also allows its subdomains.",
 		"No clone host: there is no git remote 'origin' in .git/config and no devcontainer.sandbox.repository.",
 		"It is not read from a container: a container keeps the list of the image it was built from",
-		"stopping and starting it again kept the old list, `devcontainer up --remove-existing-container` applied the new one",
+		"stopping and starting it again kept the old list, `devcontainer up --remove-existing-container` applied the new one;",
+		"measured on Colima, arm64; editor actions not measured).",
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("output lacks %q:\n%s", want, out)

@@ -216,7 +216,8 @@ func renderEgressListText(out io.Writer, resp driving.EgressListResponse) error 
 	}
 	b.WriteString("- The list is computed from u-boot.yaml and the git configuration, as `u-boot generate devcontainer` writes it into the start script.\n")
 	b.WriteString("  It is not read from a container: a container keeps the list of the image it was built from (measured with the Dev Container CLI 0.89.0:\n")
-	b.WriteString("  stopping and starting it again kept the old list, `devcontainer up --remove-existing-container` applied the new one).\n")
+	b.WriteString("  stopping and starting it again kept the old list, `devcontainer up --remove-existing-container` applied the new one;\n")
+	b.WriteString("  measured on Colima, arm64; editor actions not measured).\n")
 	if _, err := io.WriteString(out, b.String()); err != nil {
 		return fmt.Errorf("write egress list: %w", err)
 	}

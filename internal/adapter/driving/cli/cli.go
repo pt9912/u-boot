@@ -99,8 +99,9 @@ type App struct {
 	// json is bound to the LH-NFA-USE-004 root --json PersistentFlag.
 	// Every spec-enum subcommand reads this state and emits the
 	// envelope (migration completed at Cluster-T_close; the
-	// transitional reject gate is gone). bare `template --json` is
-	// the only RunE-borne reject (ErrTemplateSubcommandRequired).
+	// transitional reject gate does not exist). Bare `template --json` and bare
+	// `egress --json` are the RunE-borne rejects
+	// (ErrTemplateSubcommandRequired, ErrEgressSubcommandRequired).
 	json bool
 
 	// logLevel is the slog level handle the wiring layer also
@@ -123,8 +124,8 @@ func WithGetwd(fn func() (string, error)) Option {
 }
 
 // WithEgressListUseCase wires the use case behind `u-boot egress list`
-// (LH-FA-DEV-008). The wiring layer passes it; an option keeps the
-// positional parameters of [New] unchanged.
+// (LH-FA-DEV-008). Without it `egress list` ends with a "not wired"
+// error.
 func WithEgressListUseCase(uc driving.EgressListUseCase) Option {
 	return func(a *App) { a.egressListUseCase = uc }
 }

@@ -92,8 +92,9 @@ func buildRootCommand(a *App) *cobra.Command {
 	// inherited by every subcommand. All spec-enum subcommand forms
 	// read a.json from their RunE and emit the envelope (the
 	// migration completed with the Cluster-T_close; the transitional
-	// allowlist reject gate is gone). The only `--json` reject left
-	// is bare `u-boot template` (RunE-borne, see template.go). See
+	// allowlist reject gate does not exist). Two `--json` rejects remain: bare
+	// `u-boot template` and bare `u-boot egress` (RunE-borne, see
+	// template.go and egress.go). See
 	// docs/maintainer/cli-json-contract.md §6.
 	root.PersistentFlags().BoolVar(&a.json, "json", false,
 		"emit machine-readable JSON output where supported")
@@ -112,8 +113,9 @@ func buildRootCommand(a *App) *cobra.Command {
 		// `--json` reject gate (allowlist + applyJSONRejectGate) was
 		// REMOVED at Cluster-T_close: all spec-enum subcommand forms
 		// carry `--json` now, so there is nothing left to reject. The
-		// only remaining `--json` reject is bare `u-boot template`,
-		// handled RunE-borne via [ErrTemplateSubcommandRequired]
+		// remaining `--json` rejects are bare `u-boot template` and
+		// bare `u-boot egress`, handled RunE-borne via
+		// [ErrTemplateSubcommandRequired] and [ErrEgressSubcommandRequired]
 		// (slice-v1-cli-json-dry-run-template T0-(a)). See
 		// docs/maintainer/cli-json-contract.md §6.1.
 		if a.logLevel == nil {

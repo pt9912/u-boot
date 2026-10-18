@@ -2,10 +2,10 @@ package application_test
 
 import (
 	"context"
+	iofs "io/fs"
 	"path/filepath"
 	"reflect"
 	"sort"
-	"strings"
 	"testing"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application"
@@ -238,21 +238,136 @@ func TestEgressList_ActivationStateAndSameList(t *testing.T) {
 	}
 }
 
-// LH-FA-DEV-008: the listing reads and changes nothing: it writes no file
-// and reads only u-boot.yaml and `.git/config`.
-func TestEgressList_WritesNothingAndReadsOnlyTheProjectFiles(t *testing.T) {
+// recordingFS records every call that reaches the file-system port, with the
+// operation and the path, and delegates to the in-memory fake.
+type recordingFS struct {
+	*fakeFS
+	calls []string
+}
+
+func (r *recordingFS) rec(op, path string) { r.calls = append(r.calls, op+" "+path) }
+
+func (r *recordingFS) Exists(path string) (bool, error) {
+	r.rec("Exists", path)
+	return r.fakeFS.Exists(path)
+}
+
+func (r *recordingFS) ReadFile(path string) ([]byte, error) {
+	r.rec("ReadFile", path)
+	return r.fakeFS.ReadFile(path)
+}
+
+func (r *recordingFS) WriteFile(path string, data []byte, mode iofs.FileMode) error {
+	r.rec("WriteFile", path)
+	return r.fakeFS.WriteFile(path, data, mode)
+}
+
+func (r *recordingFS) WriteFileExclusive(path string, data []byte, mode iofs.FileMode) error {
+	r.rec("WriteFileExclusive", path)
+	return r.fakeFS.WriteFileExclusive(path, data, mode)
+}
+
+func (r *recordingFS) Mkdir(path string, mode iofs.FileMode) error {
+	r.rec("Mkdir", path)
+	return r.fakeFS.Mkdir(path, mode)
+}
+
+func (r *recordingFS) MkdirAll(path string, mode iofs.FileMode) error {
+	r.rec("MkdirAll", path)
+	return r.fakeFS.MkdirAll(path, mode)
+}
+
+func (r *recordingFS) Rename(src, dst string) error {
+	r.rec("Rename", src)
+	return r.fakeFS.Rename(src, dst)
+}
+
+func (r *recordingFS) ReadDir(path string) ([]iofs.DirEntry, error) {
+	r.rec("ReadDir", path)
+	return r.fakeFS.ReadDir(path)
+}
+
+func (r *recordingFS) Lstat(path string) (iofs.FileInfo, error) {
+	r.rec("Lstat", path)
+	return r.fakeFS.Lstat(path)
+}
+
+func (r *recordingFS) RemoveAll(path string) error {
+	r.rec("RemoveAll", path)
+	return r.fakeFS.RemoveAll(path)
+}
+
+func (r *recordingFS) Copy(src, dst string, mode iofs.FileMode) error {
+	r.rec("Copy", src)
+	return r.fakeFS.Copy(src, dst, mode)
+}
+
+func (r *recordingFS) CopyExclusive(src, dst string, mode iofs.FileMode) error {
+	r.rec("CopyExclusive", src)
+	return r.fakeFS.CopyExclusive(src, dst, mode)
+}
+
+// LH-FA-DEV-008: the listing reads and changes nothing: every call to the
+// file-system port is an `Exists` or `ReadFile` on `u-boot.yaml` or
+// `.git/config`; nothing else (no write, no directory, no other path) reaches
+// the port.
+func TestEgressList_OnlyProbesAndReadsTheTwoProjectFiles(t *testing.T) {
 	t.Parallel()
 	_, fs := newGenerateService(t)
 	seedUBootYAMLWithFeatures(t, fs, egressConfig(featureNode, ""))
 	seedGitOrigin(t, fs, "git@gitlab.example.org:o/r.git")
-	before := len(fs.writes)
-	listEgress(t, fs)
-	if len(fs.writes) != before || len(fs.mkdirs) != 0 {
-		t.Errorf("egress list wrote: writes %v, mkdirs %v", fs.writes[before:], fs.mkdirs)
+	rec := &recordingFS{fakeFS: fs}
+	writesBefore := len(fs.writes)
+	if _, err := application.NewEgressListService(rec, &fakeYAML{}, nil).List(context.Background(),
+		driving.EgressListRequest{BaseDir: generateTestBaseDir}); err != nil {
+		t.Fatalf("egress list: %v", err)
 	}
-	for path, n := range fs.readFileCalls {
-		if n > 0 && !strings.HasSuffix(path, "u-boot.yaml") && !strings.HasSuffix(path, filepath.Join(".git", "config")) {
-			t.Errorf("egress list read %s", path)
+	yamlPath := filepath.Join(generateTestBaseDir, "u-boot.yaml")
+	gitPath := filepath.Join(generateTestBaseDir, ".git", "config")
+	allowed := map[string]bool{
+		"Exists " + yamlPath: true, "ReadFile " + yamlPath: true,
+		"Exists " + gitPath: true, "ReadFile " + gitPath: true,
+	}
+	seen := map[string]bool{}
+	for _, call := range rec.calls {
+		seen[call] = true
+		if !allowed[call] {
+			t.Errorf("egress list called %q on the file-system port; allowed: Exists and ReadFile on u-boot.yaml and .git/config", call)
+		}
+	}
+	for call := range allowed {
+		if !seen[call] {
+			t.Errorf("egress list did not call %q", call)
+		}
+	}
+	if len(fs.writes) != writesBefore || len(fs.mkdirs) != 0 {
+		t.Errorf("egress list wrote: writes %v, mkdirs %v", fs.writes[writesBefore:], fs.mkdirs)
+	}
+}
+
+// LH-FA-DEV-008: the origins of a host list its features in key order. The
+// features of a project live in a map; the listing sorts them, so the same
+// project always shows the same order (a run per feature set is not enough to
+// notice a missing sort, so the listing is built many times).
+func TestEgressList_FeatureOriginsAreSortedByName(t *testing.T) {
+	t.Parallel()
+	features := featureNode + featureClaudeCode + featureHomebrew +
+		"    java:\n      enabled: true\n    sdkman:\n      enabled: true\n" +
+		"    python:\n      enabled: true\n    go:\n      enabled: true\n"
+	_, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, egressConfig(features, ""))
+	want := map[string][]string{
+		"registry.npmjs.org":    {"feature:claude-code", "feature:node"},
+		"repo.maven.apache.org": {"feature:java", "feature:sdkman"},
+		"repo1.maven.org":       {"feature:java", "feature:sdkman"},
+		"ghcr.io":               {"feature:homebrew"},
+	}
+	for i := range 100 {
+		got := egressOrigins(listEgress(t, fs))
+		for host, w := range want {
+			if !reflect.DeepEqual(got[host], w) {
+				t.Fatalf("run %d: origins of %s = %v, want %v", i, host, got[host], w)
+			}
 		}
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"slices"
 	"strings"
 	"testing"
 
@@ -64,8 +65,9 @@ func TestRootJSON_AcceptsTemplateList_FlagBeforeSubcommand(t *testing.T) {
 // transitional reject gate is gone, so EVERY registered Cobra form
 // (Spec-Enum incl. grouped subcommands — config/get/set,
 // template/list count separately) must respond to `--json` without
-// panicking. The only `--json` reject left is bare `u-boot template`
-// (RunE-borne ErrTemplateSubcommandRequired). A new subcommand that
+// panicking. Two `--json` rejects remain: bare `u-boot template`
+// (RunE-borne ErrTemplateSubcommandRequired) and bare `u-boot egress`
+// (ErrEgressSubcommandRequired). A new subcommand that
 // forgets `--json` handling and leaks help shows up here.
 func TestRootJSON_AllFormsRespondPostTClose(t *testing.T) {
 	app := newApp(&fakeInitUseCase{})
@@ -73,19 +75,28 @@ func TestRootJSON_AllFormsRespondPostTClose(t *testing.T) {
 	if len(paths) == 0 {
 		t.Fatal("Cobra tree walk returned zero paths — walker broken")
 	}
+	bareRejects := map[string]error{
+		"u-boot template": cli.ErrTemplateSubcommandRequired,
+		"u-boot egress":   cli.ErrEgressSubcommandRequired,
+	}
+	for want := range bareRejects {
+		if !slices.Contains(paths, want) {
+			t.Errorf("tree walk does not list %q", want)
+		}
+	}
 	for _, path := range paths {
 		t.Run(path, func(t *testing.T) {
 			args := append([]string{"--json"}, strings.Split(strings.TrimPrefix(path, "u-boot "), " ")...)
 			args = appendStubArgs(args, path)
 			var stdout bytes.Buffer
 			err := newApp(&fakeInitUseCase{}).Execute(context.Background(), args, &stdout, &bytes.Buffer{})
-			// bare `template` is the one RunE-borne reject form.
-			if path == "u-boot template" {
-				if !errors.Is(err, cli.ErrTemplateSubcommandRequired) {
-					t.Errorf("bare `template --json` must reject with ErrTemplateSubcommandRequired, got %v", err)
+			// bare `template` and bare `egress` are the RunE-borne reject forms.
+			if want, ok := bareRejects[path]; ok {
+				if !errors.Is(err, want) {
+					t.Errorf("bare `%s --json` must reject with %v, got %v", path, want, err)
 				}
 				if strings.Contains(stdout.String(), "Usage:") {
-					t.Errorf("bare `template --json` must not leak help to stdout, got: %q", stdout.String())
+					t.Errorf("bare `%s --json` must not leak help to stdout, got: %q", path, stdout.String())
 				}
 				return
 			}

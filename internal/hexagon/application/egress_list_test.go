@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application"
@@ -99,6 +100,82 @@ func TestEgressList_NoCloneSourceIsNotAnError(t *testing.T) {
 	resp := listEgress(t, fs)
 	if resp.CloneSource || originsContain(resp, "clone") {
 		t.Errorf("no remote: CloneSource=%v, clone origin=%v, want neither", resp.CloneSource, originsContain(resp, "clone"))
+	}
+}
+
+// LH-FA-DEV-008: the clone host is part of the list that would apply on
+// activation, so it is resolved while the restriction is not active — without
+// the sandbox profile, with `egress.enabled` off or unset, and from `origin` as
+// from `sandbox.repository` (the resolution of `generate devcontainer --sandbox`).
+func TestEgressList_CloneHostIsResolvedWithoutActiveRestriction(t *testing.T) {
+	t.Parallel()
+	const repository = "    repository: https://git.example.net/o/r.git\n"
+	const origin = "git@gitlab.example.org:o/r.git"
+	type cloneCase struct{ yaml, origin, host string }
+	cases := map[string]cloneCase{
+		"no sandbox profile, egress on, origin": {
+			"devcontainer:\n  enabled: true\n  sandbox:\n    egress:\n      enabled: true\n", origin, "gitlab.example.org"},
+		"sandbox profile, egress off, origin": {
+			"devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    egress:\n      enabled: false\n", origin, "gitlab.example.org"},
+		"sandbox profile, egress not set, origin": {
+			"devcontainer:\n  enabled: true\n  profile: sandbox\n", origin, "gitlab.example.org"},
+		"no sandbox profile, repository wins over origin": {
+			"devcontainer:\n  enabled: true\n  sandbox:\n" + repository, origin, "git.example.net"},
+		"no devcontainer section, origin": {"", origin, "gitlab.example.org"},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			_, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, tc.yaml)
+			seedGitOrigin(t, fs, tc.origin)
+			resp := listEgress(t, fs)
+			if resp.Active() {
+				t.Fatalf("the case must not be active: profile=%v enabled=%v", resp.SandboxProfile, resp.EgressEnabled)
+			}
+			if !resp.CloneSource {
+				t.Errorf("CloneSource = false, want true")
+			}
+			if got := egressOrigins(resp)[tc.host]; !reflect.DeepEqual(got, []string{"clone"}) {
+				t.Errorf("origins of %s = %v, want [clone]", tc.host, got)
+			}
+		})
+	}
+}
+
+// LH-FA-DEV-008, LH-FA-DEV-006: an `origin` URL that `generate devcontainer
+// --sandbox` refuses (credentials) fails the listing also while the restriction
+// is not active; the sentinel is the one the CLI classifies as exit 10 with the
+// diagnostic LH-FA-DEV-006. A `sandbox.repository` with credentials is refused
+// by the validation of the configuration (exit 10, LH-FA-CONF-002), whatever
+// the profile.
+func TestEgressList_UnsafeCloneUrlIsRefusedWithoutActiveRestriction(t *testing.T) {
+	t.Parallel()
+	const credentials = "https://user:secret@example.org/o/r.git"
+	type unsafeCase struct {
+		yaml, origin string
+		want         error
+	}
+	cases := map[string]unsafeCase{
+		"origin, no sandbox profile": {
+			"devcontainer:\n  enabled: true\n", credentials, domain.ErrInvalidSandboxSetting},
+		"origin, sandbox profile, egress off": {
+			"devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    egress:\n      enabled: false\n", credentials, domain.ErrInvalidSandboxSetting},
+		"repository, no sandbox profile": {
+			"devcontainer:\n  enabled: true\n  sandbox:\n    repository: " + credentials + "\n", "", driving.ErrConfigSchemaInvalid},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			_, fs := newGenerateService(t)
+			seedUBootYAMLWithFeatures(t, fs, tc.yaml)
+			if tc.origin != "" {
+				seedGitOrigin(t, fs, tc.origin)
+			}
+			if err := egressListErr(fs); !errors.Is(err, tc.want) {
+				t.Fatalf("err = %v, want %v", err, tc.want)
+			}
+		})
 	}
 }
 

@@ -361,12 +361,16 @@ Die **Übergangs-Mechanik** — eine Allowlist-Map plus
 noch nicht migrierten Formen mit Exit 2 rejectete — wurde im
 **Cluster-T_close entfernt** (es gibt nichts mehr zu rejecten).
 
-Die **einzige verbliebene `--json`-Reject-Form** ist bare
-`u-boot template` (ohne Subcommand): [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)/[LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) machen `subcommand`
+Es bleiben **zwei `--json`-Reject-Formen**, beide RunE-getragen und
+envelope-LOS (Exit 2): bare `u-boot template` (`ErrTemplateSubcommandRequired`)
+und bare `u-boot egress` (`ErrEgressSubcommandRequired`, §6.10), jeweils ohne
+Subcommand.
+
+Bei `template`: [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)/[LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) machen `subcommand`
 für `command="template"` verpflichtend, und der Help-Parent hat kein
 eigenes Datum — er kann also keinen spec-validen Envelope erzeugen.
-Dieser Reject ist **RunE-getragen** (`ErrTemplateSubcommandRequired`,
-Exit 2, envelope-LOS), nicht mehr gate-getragen — siehe §6.2.
+Dieser Reject ist **RunE-getragen**, nicht mehr gate-getragen — siehe §6.2.
+`egress` ist ein Help-Parent ohne eigenes Datum und weist `--json` gleichartig ab.
 
 ### 6.2 `u-boot template list --json` (slice-v1-cli-json-dry-run-template, done)
 
@@ -1197,11 +1201,19 @@ Datum, keine Diagnose:
 - `--dry-run` und `--diff` werden mit `ErrEgressPreviewNotApplicable` (Exit 2,
   [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)) abgewiesen; bare `u-boot egress --json` ist wie bare
   `template --json` ein RunE-Reject ohne Envelope (`ErrEgressSubcommandRequired`).
-- **Offener Spezifikationspunkt:** Das Enum von `command` ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run),
-  [SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json)) nennt `egress` nicht;
-  der Wert ist hier gesetzt, das Enum ist nachzuziehen (Lastenheft-Änderung braucht die Freigabe des
-  Projektinhabers, Spezifikation folgt in
-  [`slice-v2-spec-sandbox-egress-ollama`](../plan/planning/open/slice-v2-spec-sandbox-egress-ollama.md)).
+- **Offene Vertragslücke:** [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)
+  bindet **alle** `--json`-Ausgaben an das Enum von `command` („Hauptbefehl als in
+  [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) definiertes Enum“). Dieses Enum
+  ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) und das Schema der Vorschau-Ausgabe,
+  [SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json))
+  nennt `egress` nicht; `command: "egress"` liegt damit außerhalb des Vertrags, bis das Lastenheft
+  geändert ist. Die Lastenheft-Änderung braucht die Freigabe des Projektinhabers; ein Slice dafür
+  existiert nicht (gelesen: der Bestand von `docs/plan/planning/open/`, `next/` und
+  `in-progress/`; keiner nennt das Enum). Der
+  Spezifikations-Slice [`slice-v2-spec-sandbox-egress-ollama`](../plan/planning/open/slice-v2-spec-sandbox-egress-ollama.md)
+  ändert das Lastenheft nicht und trägt das Enum von [SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) als Übergabe aus dem Code-Slice
+  der Egress-Anzeige. `jsontestutil` prüft das Enum nicht (`checkSubcommand` verlangt
+  `subcommand` nur für `template` und `config`).
 
 ---
 

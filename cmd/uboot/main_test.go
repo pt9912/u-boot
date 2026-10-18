@@ -189,6 +189,53 @@ func TestRun_EgressList_MatchesTheGeneratedStartScript(t *testing.T) {
 	}
 }
 
+// LH-FA-DEV-008, LH-FA-DEV-006, LH-FA-CLI-006 at the user path: an `origin` URL
+// with credentials ends `egress list` with exit 10 and the diagnostic
+// LH-FA-DEV-006 also for a project without the sandbox profile and without an
+// active restriction; the listing changes no file.
+func TestRun_EgressList_UnsafeOriginExits10WithoutActiveRestriction(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	dir := t.TempDir()
+	t.Chdir(dir)
+	for rel, body := range map[string]string{
+		"u-boot.yaml": "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n",
+		".git/config": "[remote \"origin\"]\n\turl = https://user:secret@example.org/o/r.git\n",
+	} {
+		path := filepath.Join(dir, rel)
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	before := snapshotTree(t, dir)
+
+	var out, errOut bytes.Buffer
+	code := run(context.Background(), []string{"egress", "list", "--json"}, &out, &errOut)
+	if code != 10 {
+		t.Fatalf("egress list: exit %d, want 10; stdout=%q stderr=%q", code, out.String(), errOut.String())
+	}
+	var env struct {
+		Status      string `json:"status"`
+		ExitCode    int    `json:"exitCode"`
+		Diagnostics []struct {
+			Code string `json:"code"`
+		} `json:"diagnostics"`
+	}
+	if err := json.Unmarshal(out.Bytes(), &env); err != nil {
+		t.Fatalf("invalid JSON: %v\n%s", err, out.String())
+	}
+	if env.Status != "error" || env.ExitCode != 10 || len(env.Diagnostics) != 1 || env.Diagnostics[0].Code != "LH-FA-DEV-006" {
+		t.Errorf("envelope = %+v, want status error, exitCode 10 and one diagnostic LH-FA-DEV-006", env)
+	}
+	if after := snapshotTree(t, dir); !reflect.DeepEqual(before, after) {
+		t.Errorf("the failed egress list changed the project:\n before %v\n after  %v", before, after)
+	}
+}
+
 // snapshotTree maps every file below dir to its content.
 func snapshotTree(t *testing.T, dir string) map[string]string {
 	t.Helper()
