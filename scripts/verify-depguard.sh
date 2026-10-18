@@ -46,21 +46,35 @@ if [ -n "$dirty" ]; then
 fi
 
 VIOLATION_FILE=""
+PROBE_DIR=""
 cleanup() {
   if [ -n "$VIOLATION_FILE" ] && [ -f "$VIOLATION_FILE" ]; then
     rm -f "$VIOLATION_FILE"
   fi
+  if [ -n "$PROBE_DIR" ] && [ -d "$PROBE_DIR" ]; then
+    rm -rf "$PROBE_DIR"
+  fi
 }
 trap cleanup EXIT INT TERM
 
-# Each row: rule|target-dir|forbidden-import|expected-desc-substring
+# Each row: rule|target-dir|forbidden-import|expected-desc-substring[|probe-dir]
 #
 # The forbidden import is picked so it cannot form a Go import cycle
 # with the target package — depguard only runs after typecheck, so a
 # cycle would mask the rule. The expected desc must match a deny entry
 # in .golangci.yml for the named rule.
+#
+# Optional fifth field: a throwaway package directory the script creates
+# (a bare `package` clause, no imports) before the run and removes after
+# it, including on abort (trap). Used where no existing package that the
+# rule forbids is free of an import path back to the target: every
+# existing package under internal/hexagon/{application,port} and
+# internal/adapter imports internal/hexagon/domain (directly or via
+# port/driven), so injecting one into domain forms a cycle. The probe
+# package imports nothing, hence no cycle; it lies under the denied
+# prefix of the rule (…/internal/hexagon/port).
 CASES=(
-  "domain-isoliert|internal/hexagon/domain|github.com/pt9912/u-boot/internal/hexagon/port/driven|domain must not depend on port"
+  "domain-isoliert|internal/hexagon/domain|github.com/pt9912/u-boot/internal/hexagon/port/verifydepguardprobe|domain must not depend on port|internal/hexagon/port/verifydepguardprobe"
   "application-no-adapter|internal/hexagon/application|github.com/pt9912/u-boot/internal/adapter/driven/clock|application must depend on ports, not on adapter implementations"
   "application-no-net|internal/hexagon/application|net|application must not depend on net stdlib"
   "port-no-application|internal/hexagon/port/driving|github.com/pt9912/u-boot/internal/adapter/driven/clock|port must not depend on adapter"
@@ -76,11 +90,22 @@ echo "[verify-depguard] logs in $LOG_DIR"
 
 failures=0
 for entry in "${CASES[@]}"; do
-  IFS='|' read -r rule dir bad_import desc <<< "$entry"
+  probe=""
+  IFS='|' read -r rule dir bad_import desc probe <<< "$entry"
 
   pkg_name="$(basename "$dir")"
   VIOLATION_FILE="$dir/verify_depguard_violation.go"
   log="$LOG_DIR/$rule.log"
+
+  if [ -n "$probe" ]; then
+    if [ -e "$probe" ]; then
+      echo "[verify-depguard] FATAL: probe dir $probe already exists" >&2
+      exit 2
+    fi
+    PROBE_DIR="$probe"
+    mkdir -p "$PROBE_DIR"
+    printf 'package %s\n' "$(basename "$PROBE_DIR")" > "$PROBE_DIR/probe.go"
+  fi
 
   # No leading comment (would trip revive's package-comments per-file
   # rule against an extra-doc form), and the blank import sits inside an
@@ -105,6 +130,10 @@ EOF
 
   rm -f "$VIOLATION_FILE"
   VIOLATION_FILE=""
+  if [ -n "$PROBE_DIR" ]; then
+    rm -rf "$PROBE_DIR"
+    PROBE_DIR=""
+  fi
 
   if [ $rc -eq 0 ]; then
     echo "[verify-depguard] FAIL $rule: make lint succeeded but should have failed"
