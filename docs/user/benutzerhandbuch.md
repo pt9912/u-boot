@@ -1126,7 +1126,7 @@ Fähigkeit einen Eintrag:
 |---|---|
 | `ok` | in Ordnung |
 | `fallback` | Warnung; bleibt unter `--quiet` sichtbar; mit `--strict` Exit-Code 11 |
-| `failed` (`onUnavailable: fail`, das Startscript endete mit Exit-Code 11) | Fehler, Exit-Code 11 |
+| `failed` (das Startscript endete mit Exit-Code 11: `onUnavailable: fail`, bei der Egress-Beschränkung auch unter `warn`, wenn der lokale DNS-Server nicht zu den Firewall-Regeln passt) | Fehler, Exit-Code 11 |
 | nicht ermittelbar | Hinweiszeile (`?`) mit dem Grund; kein Fallback; unter `--quiet` stumm |
 | ungültige Datei | Warnung |
 
@@ -1210,28 +1210,54 @@ u-boot generate devcontainer
 ```
 
 Beim Containerstart startet ein lokaler DNS-Server, den der Container als
-Standard-Resolver benutzt und der **nur erlaubte Namen** auflöst; Anfragen, die
-ein Prozess direkt an den DNS-Server des Netzes richtet, erfasst er nicht (siehe
-unten). Eine Firewall lässt nur Loopback, bestehende Verbindungen, DNS und die
-Adressen der erlaubten Namen durch; alles andere (IPv6 ganz) wird verworfen. Das
+Standard-Resolver benutzt und der **nur erlaubte Namen** auflöst; auch die
+DNS-Server des Netzes (die Upstream-Resolver) beantworten einem Prozess ohne
+`sudo` keinen anderen Namen (siehe unten). Eine Firewall lässt nur Loopback,
+bestehende Verbindungen, DNS vom lokalen DNS-Server zu den Upstream-Resolvern und
+die Adressen der erlaubten Namen durch; alles andere (IPv6 ganz) wird verworfen. Das
 ist eine Leitplanke, keine Sandbox-Grenze. Der Container braucht dafür die
 Fähigkeit `NET_ADMIN`, die `u-boot` als Lockerung ausweist.
 
-**Grenze der Namensauflösung:** Nur der lokale DNS-Server beschränkt die Namen.
-Ein Prozess im Container kann den DNS-Server des Netzes (den Upstream-Resolver)
-auch direkt fragen und bekommt dann die Adresse eines Namens außerhalb der
-Liste, ohne `sudo`. Die Verbindung zu dieser Adresse bleibt gesperrt; gemessen
-ist die Auflösung, nicht der Durchsatz eines Datenkanals über DNS. Wer die
-Regeln ändern will, braucht weiter `sudo`. Messstand: Docker 29.5.2 auf Colima
-0.10.3 (arm64), je ein Lauf; andere Umgebungen sind nicht gemessen.
+**Namensauflösung und ihre Grenze:** Die Firewall lässt DNS (Port 53, UDP und
+TCP) zu den Upstream-Resolvern nur für den Benutzer des lokalen DNS-Servers zu
+(`nobody`; das Startscript legt ihn in der Konfiguration des DNS-Servers fest und
+leitet die Regel aus demselben Wert ab). Ein Prozess ohne `sudo` bekommt deshalb
+über die Upstream-Resolver keine Antwort für einen Namen außerhalb der Liste;
+erlaubte Namen löst der lokale DNS-Server weiter auf. Ein Docker-Test belegt das
+(`make test-docker`). Messstand: nativer Linux-x86_64-Host, Docker 29.9.1, zwei
+Läufe; **nicht gemessen und nicht zugesagt:** Colima, Docker Desktop, arm64, die
+CI, `nestedRuntime: docker`, ein benutzerdefiniertes Docker-Netz, Podman-Netzwerkmodi
+außer dem Standard und `--network=host`, Upstream-Resolver mit IPv6-Adresse.
 
-Das gilt auch für verschachtelte Container: Ein verschachtelter Podman-Container fragt
-den Upstream-Resolver des Docker-Hosts direkt, und die Beschränkung lässt das zu. Ein
-`podman build` hinter der Beschränkung scheitert deshalb auf Linux (`amd64`, native Docker
-Engine 29.9.1, zwei Läufe) an einem `RUN`-Schritt, der erwartet, dass ein Name außerhalb der
-Liste nicht auflöst: `example.com` löste auf (nur IPv6-Adressen), die Verbindung zur Adresse
-blieb gesperrt. Mit einem anderen Upstream-Resolver (`--dns 9.9.9.9`) lief der Bau in einem Lauf durch.
-Auf Colima (arm64) und in der CI ist das nicht gemessen.
+Das schließt die Regel nicht:
+
+- Alles mit `sudo`: Wer `sudo` nutzt, hebt die Regeln auf oder fragt als `nobody`
+  (der Docker-Test fragt so den Upstream-Resolver und bekommt eine Antwort).
+- Verkehr zu den Adressen erlaubter Namen auf jedem Port und Protokoll: Das ist
+  die Liste selbst.
+- Anfragen nach Unternamen erlaubter Namen: Der lokale DNS-Server leitet sie an den
+  Upstream-Resolver weiter. Das ist ein Weg, Daten zum zuständigen DNS-Server des
+  erlaubten Namens zu schicken (im Laboraufbau gemessen: höchstens 3 650 bis 5 640
+  Anfragen je Sekunde, ohne Test, der es pinnt); bei den Standard-Namen betreibt ihn
+  kein Dritter, bei von Ihnen ergänzten Namen kann es anders sein (nicht gemessen).
+  Der Betreiber des Upstream-Resolvers sieht diese Anfragen.
+
+**Verschachtelte Container:** Ein verschachtelter Podman-Container fragt als Benutzer
+`vscode`; seine Anfragen an die Upstream-Resolver des Docker-Hosts werden mit der Regel
+verworfen. Ein Name außerhalb der Liste braucht darin etwa 36 Sekunden bis zur
+Fehlermeldung statt etwa 20 Millisekunden (der erste Nameserver lehnt ab, die
+verworfenen Rückfälle laufen in die Zeitgrenze); ein `podman build` mit einem
+`RUN`-Schritt, der einen solchen Namen auflöst, dauert um diese Zeit länger
+(nachgestellter Ablauf: 43 statt 7 Sekunden). Der Bau läuft hinter der Beschränkung
+durch (Docker-Test, Linux `amd64`, native Docker Engine 29.9.1). `podman run --dns 8.8.8.8`
+(ein Upstream-Resolver des Messhosts) löst nichts mehr auf, auch keinen erlaubten Namen;
+die Standard-Namensauflösung und `--network=host` bleiben nutzbar. Auf Colima (arm64)
+und in der CI ist das nicht gemessen.
+
+Das Startscript bricht mit Exit-Code 11 ab und schreibt `failed` in die Statusdatei,
+auch bei `onUnavailable: warn`, wenn der Benutzer `nobody` im Image fehlt oder der lokale
+DNS-Server nicht unter diesem Benutzer läuft: Ein Weiterlaufen würde die Beschränkung
+still aufweichen oder den DNS-Server sperren.
 
 Standardmäßig erlaubt sind:
 
@@ -1369,8 +1395,8 @@ registry.npmjs.org  feature:claude-code, feature:node
   `u-boot doctor` warnt bei `docker` mit Beschränkung. Gemessen auf Linux (`amd64`) in
   zwei Läufen: Ein verschachtelter Docker-Container erreichte `example.com` und eine
   gesperrte Adresse; ein verschachtelter Podman-Container nicht (Zeitüberschreitung).
-  Die Namensauflösung eines verschachtelten Podman-Containers beschränkt die Beschränkung nicht
-  (siehe *Grenze der Namensauflösung* im Abschnitt zur Egress-Beschränkung).
+  Die Namensauflösung eines verschachtelten Podman-Containers läuft über den lokalen DNS-Server
+  oder wird verworfen (siehe *Namensauflösung und ihre Grenze* im Abschnitt zur Egress-Beschränkung).
 - Führen Sie das Startscript in einem laufenden Container mit aktiver Beschränkung erneut aus
   (es löscht seine Regeln und baut sie neu auf), gilt die Beschränkung kurz nicht. Gemessen
   auf Linux (`amd64`, ein Host) in zwei Messungen zu je 30 Läufen: In 27 und 28 Läufen wurde währenddessen ein
@@ -1719,8 +1745,9 @@ Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
   geprüft. Ein verschachtelter Lauf (`podman run` eines kleinen Images, ohne und
   hinter der Egress-Beschränkung, mit einem Pull hinter ihr) ist auf Linux x86_64
   (`amd64`, native Docker Engine 29.9.1, 2026-10-19) in zwei Läufen gemessen, zusammen mit dem
-  Feature `ollama`; `podman build` auf `amd64` hinter der Egress-Beschränkung scheitert an der Namensauflösung
-  (siehe *Grenze der Namensauflösung* im Abschnitt zur Egress-Beschränkung); die CI ist nicht gemessen.
+  Feature `ollama`; `podman build` auf `amd64` hinter der Egress-Beschränkung läuft durch, braucht aber
+  bei einem Namen außerhalb der Liste etwa 36 Sekunden je Name länger
+  (siehe *Namensauflösung und ihre Grenze* im Abschnitt zur Egress-Beschränkung); die CI ist nicht gemessen.
   Podman 6 unterstützt nur cgroups v2 (laut Release-Notes, nicht gemessen);
   Hosts mit cgroups v1 sind davon betroffen.
   Unter einer Ubuntu-24.04-VM mit dem Schalter
