@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (Frage: „Bauen wir es richtig?“, gegen Plan, DoD und Entscheidungen). Kein Review, keine Validierung, keine Reparatur.
 
-**Gegenstand:** Slice [`slice-v1-egress-hinweise-neuaufbau-und-messstand`](../plan/planning/in-progress/slice-v1-egress-hinweise-neuaufbau-und-messstand.md) (`in-progress/`), Commit-Range `1e445d3..HEAD` (HEAD `e78d71f`, lokal). Implementierung: `c772352` (Hinweis und Texte), `31a55b6` (Spezifikation, Handbuch, CHANGELOG, Replay-Tabelle), `ee092eb` (Plan-Tabelle). Review-Report `c5be3c7`. Fix-Runde: `dccfa44` (Wildcard-Fehler nennt die Tiefe, Test für erste Aktivierung und Abschalten), `12b3dca` (Spezifikation, Handbuch, CHANGELOG nennen, wann der Hinweis nicht erscheint), `e78d71f` (Plan-Tabelle). `git diff --stat -M 1e445d3..HEAD`: 15 Dateien, 434 Einfügungen, 25 Löschungen; eine neue Testdatei, ein neuer Review-Report.
+**Gegenstand:** Slice [`slice-v1-egress-hinweise-neuaufbau-und-messstand`](../plan/planning/done/slice-v1-egress-hinweise-neuaufbau-und-messstand.md) (`in-progress/`), Commit-Range `1e445d3..HEAD` (HEAD `e78d71f`, lokal). Implementierung: `c772352` (Hinweis und Texte), `31a55b6` (Spezifikation, Handbuch, CHANGELOG, Replay-Tabelle), `ee092eb` (Plan-Tabelle). Review-Report `c5be3c7`. Fix-Runde: `dccfa44` (Wildcard-Fehler nennt die Tiefe, Test für erste Aktivierung und Abschalten), `12b3dca` (Spezifikation, Handbuch, CHANGELOG nennen, wann der Hinweis nicht erscheint), `e78d71f` (Plan-Tabelle). `git diff --stat -M 1e445d3..HEAD`: 15 Dateien, 434 Einfügungen, 25 Löschungen; eine neue Testdatei, ein neuer Review-Report.
 
 **Eingang:** Implementer-Zusage (DoD, Plan-Tabelle, Fix-Runde), Review [`2026-10-19-slice-v1-egress-hinweise-neuaufbau-und-messstand`](2026-10-19-slice-v1-egress-hinweise-neuaufbau-und-messstand.md) (0 HIGH, 0 MEDIUM, 2 LOW, 4 INFO), Entscheidungen des Projektinhabers vom 2026-10-19: (a) Subdomain-Texte auf das Gemessene kürzen, (b) der Neuaufbau-Hinweis bei `generate devcontainer` entfällt unter `--quiet`.
 
@@ -114,7 +114,7 @@ An den Projektinhaber: keine neue Entscheidung. Die Lücke von `doc-immutable` b
 ## 9. Verification Evidence (Block nach `harness/verification.md`)
 
 Scope:
-- Slice: [`slice-v1-egress-hinweise-neuaufbau-und-messstand`](../plan/planning/in-progress/slice-v1-egress-hinweise-neuaufbau-und-messstand.md)
+- Slice: [`slice-v1-egress-hinweise-neuaufbau-und-messstand`](../plan/planning/done/slice-v1-egress-hinweise-neuaufbau-und-messstand.md)
 - IDs: [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`ADR-0025`](../plan/adr/0025-egress-liste-im-laufenden-container.md) (gelesen, unverändert)
 - Artefakte: `internal/hexagon/application/generate.go`, `internal/adapter/driving/cli/egress.go`, `internal/hexagon/domain/sandbox.go`, zugehörige Tests, `spec/spezifikation.md` ([`SPEC-043`](../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet), [`SPEC-046`](../../spec/spezifikation.md#spec-046--egress-anzeige-u-boot-egress-list-berechnung-ausgabe-und-abgrenzung)), `docs/user/benutzerhandbuch.md`, `CHANGELOG.md`, `harness/replay.md`
 
