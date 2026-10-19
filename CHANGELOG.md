@@ -11,6 +11,19 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- `u-boot generate devcontainer` warns when it replaces an existing `.devcontainer/egress-init.sh`: an existing container keeps the egress list of the image it was built from and has to be rebuilt
+  (`devcontainer up --remove-existing-container`). The warning does not appear when the file is written for the first time, when nothing changes or under `--dry-run`; `--quiet` drops it, and with
+  `--json` it is one entry of `diagnostics[]` (envelope status `warn`, exit code `0`, as for every warning). The command does not check whether a container exists
+  ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)).
+
+### Changed
+
+- The `Notes:` of `u-boot egress list` and its `--help` say that a changed list takes effect after a rebuild of the container, and state the subdomain behaviour only as far as a test pins it
+  (an entry covers its subdomains one and two levels below it; an entry for a subdomain does not open its parent name for a connection by name). The error for a wildcard entry reads
+  "an allowed name already covers its subdomains" ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
+
 ## [0.12.0] - 2026-10-19
 
 Twelfth release. **Egress list display (`u-boot egress list`), Ollama as a sandbox devcontainer feature, subdomain clarification for the egress allowlist.**

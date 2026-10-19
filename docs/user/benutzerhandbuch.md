@@ -1353,6 +1353,14 @@ registry.npmjs.org  feature:claude-code, feature:node
   setzte die neue Liste durch. Gemessen in einem Lauf auf Docker 29.5.2 mit
   Colima 0.10.3 (arm64); nicht gemessen: Docker Desktop, Linux ohne VM, `amd64`
   und die Aktion Ihres Editors (etwa VS Code), die dem Neuaufbau entspricht.
+  Ändert `u-boot generate devcontainer` ein bestehendes `egress-init.sh`, gibt
+  der Befehl dazu eine Warnung aus: Ein bestehender Container behält die
+  Egress-Liste des Images, aus dem er gebaut wurde, und ist neu aufzubauen
+  (`devcontainer up --remove-existing-container`). Die Warnung erscheint nicht
+  beim ersten Schreiben der Datei, nicht ohne Änderung und nicht unter
+  `--dry-run`; unter `--quiet` entfällt sie, mit `--json` steht sie in
+  `diagnostics[]`, und der Umschlag trägt dann den Status `warn` (Exit-Code 0).
+  Der Befehl prüft nicht, ob ein Container existiert.
 - Wer die Fähigkeit hat und das `sudo` des Base-Images nutzen kann, kann die
   Regeln aufheben. Der Verkehr verschachtelter Container und die
   iptables-Regeln eines verschachtelten Docker-Daemons umgehen die Beschränkung;
