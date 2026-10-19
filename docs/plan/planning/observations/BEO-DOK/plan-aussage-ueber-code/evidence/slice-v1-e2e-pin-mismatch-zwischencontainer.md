@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v1-e2e-pin-mismatch-zwischencontainer`](../../../../done/slice-v1-e2e-pin-mismatch-zwischencontainer.md)
+**Fund:** Review-Report [`2026-10-19-slice-v1-e2e-pin-mismatch-zwischencontainer`](../../../../../../reviews/2026-10-19-slice-v1-e2e-pin-mismatch-zwischencontainer.md) (LOW 2): Der Plan nannte „Pin in Path/Args“ des Zwischencontainers, der Wert des Pins steht im Env (Path/Args tragen nur den Variablennamen im Skripttext); zwei Zwischenläufe der Umsetzung prüften Path/Args und blieben wirkungslos grün. Dazu LOW 1: die Zusage zur Zuordnung war weiter als der Code (gleichzeitige Läufe). Beide behoben (`18f4edc`, `b37c715`). Rückfall nach der Verkörperung in `AGENTS.md` §3.10; sechsundzwanzigster Vorgang.
+
+**Beleg-Qualität:** am Baum bestätigt (Verifier, Verification-Report Abschnitt 7: Suche in der Slice-Datei, Aussage nur noch als Messaussage).
