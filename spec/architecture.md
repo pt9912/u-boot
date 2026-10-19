@@ -1,6 +1,6 @@
 # Architektur — u-boot
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-10-16.
+**Status:** Aktiv. **Letzte Änderung:** 2026-10-19.
 
 **Bezug:** [`SPEC-012`](spezifikation.md#spec-012--schichten-und-verzeichnislayout-unter-internal), [`SPEC-013`](spezifikation.md#spec-013--import-regel-tabelle-der-schichten) und [`SPEC-034`](spezifikation.md#spec-034--enforcement-der-import-regeln)
 
@@ -117,6 +117,14 @@ Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält keine exte
     ([`LH-FA-GEN-001`](lastenheft.md#lh-fa-gen-001--generate-befehl)..[`LH-FA-GEN-005`](lastenheft.md#lh-fa-gen-005--idempotenz)).
   - `ConfigService` — Projektkonfiguration lesen, anzeigen und ändern
     ([`LH-FA-CONF-001`](lastenheft.md#lh-fa-conf-001--projektkonfiguration)..[`LH-FA-CONF-005`](lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern)).
+  - `EgressListService` — wirksame Egress-Allowlist samt Herkunft je Host
+    berechnen
+    ([`LH-FA-DEV-008`](lastenheft.md#lh-fa-dev-008--egress-restriktion)). Liest
+    nur `u-boot.yaml` und die Git-Konfiguration des Projekts über `FileSystem`
+    und `YAMLCodec`; er braucht keinen Docker-, Netz- oder Schreibzugriff. Die
+    Berechnung der Liste teilt er mit dem Devcontainer-Generator
+    (`GenerateService`), sodass Anzeige und erzeugtes Startscript dieselbe Liste
+    tragen.
   - `TemplateListService` — Projektvorlagen auflisten
     ([`LH-FA-TPL-004`](lastenheft.md#lh-fa-tpl-004--templates-auflisten)).
   - `TemplateInitService` — Initialisierung aus einer Vorlage
@@ -150,8 +158,8 @@ Interfaces, über die u-boot von außen angesprochen wird.
 - **Inhalt — je Use-Case-Familie ein Interface mit eigenem Request-/Response-Paar:**
   `InitProjectUseCase`, `DoctorUseCase`, `AddServiceUseCase`,
   `RemoveServiceUseCase`, `UpUseCase`, `DownUseCase`, `LogsUseCase`,
-  `GenerateUseCase`, `ConfigUseCase`, `TemplateListUseCase`,
-  `TemplateInitUseCase`. Die Request-/Response-Typen sind Teil des Ports, nicht
+  `GenerateUseCase`, `ConfigUseCase`, `EgressListUseCase`,
+  `TemplateListUseCase`, `TemplateInitUseCase`. Die Request-/Response-Typen sind Teil des Ports, nicht
   des Adapters: Sie transportieren ausschließlich Domänen- und Primitivwerte,
   damit weder Cobra-Flags noch Ausgabeformate in die innere Welt lecken.
 - **Zwei Vertrags-Eigenschaften, die in den Interfaces selbst festgeschrieben
@@ -175,7 +183,8 @@ Interfaces, über die u-boot von außen angesprochen wird.
     Namens-Validierungen aus `hexagon/domain`.
   - **Code 12 (fachliche Ausführung):** Stabilisierungs-Timeout beim Start.
   - **Code 14 (technische Persistenz):** Backup-Slot-Fehler (Quelle
-    verschwunden, Suffix-Raum erschöpft).
+    verschwunden, Suffix-Raum erschöpft) und Lesefehler der Projektkonfiguration
+    bei der Egress-Anzeige.
 
   Die vollständige, aktuelle Liste steht im Code — sie wächst mit jedem neuen
   Use-Case. Diese Sicht nennt die Familien und ihre Zuordnung; verbindlich für
@@ -230,7 +239,10 @@ Konkrete Driver — Einstiegspunkte aus der Außenwelt.
 
 - **Inhalt:** `cli/` mit Cobra. Pro Subkommando ein eigenes Cobra-Command in einer eigenen Datei.
   - Implementiert sind `init`, `add`, `remove`, `up`, `down`, `logs`, `doctor`,
-    `generate`, `config` (mit `get`/`set`) und `template` (mit `list`).
+    `generate`, `config` (mit `get`/`set`), `egress` (mit `list`) und `template`
+    (mit `list`). `egress list` ist ein reiner Abfragebefehl: Er weist
+    `--dry-run` und `--diff` mit Exit-Code 2 ab, behält seine Ausgabe unter
+    `--quiet` und trägt eine eigene Diagnostic-Abbildung (§7.2).
   - Lokale Flags pro Subkommando (z. B. `init`: `--no-git`/`--force`/`--backup`/`--assume-existing`).
   - **Maschinenlesbare Ausgabe:** Jedes Subkommando trägt `--json`, `--dry-run`
     und `--diff` ([`LH-NFA-USE-004`](lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe),

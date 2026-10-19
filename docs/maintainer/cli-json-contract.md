@@ -148,7 +148,7 @@ der Spezifikation ([SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-
     },
     "command": {
       "type": "string",
-      "enum": ["init", "add", "remove", "up", "down", "doctor", "logs", "generate", "config", "template"]
+      "enum": ["init", "add", "remove", "up", "down", "doctor", "logs", "generate", "config", "egress", "template"]
     },
     "dryRun": {
       "type": "boolean"
@@ -1207,8 +1207,8 @@ Datum, keine Diagnose:
   `command: "egress"` liegt damit im Vertrag. Der Wortlaut ist aus dem freigegebenen Befehl
   abgeleitet; die Bestätigung des Projektinhabers steht vor dem Release aus. Das Schema der
   Vorschau-Ausgabe ([SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json))
-  führt das Enum erst im Spezifikations-Slice
-  [`slice-v2-spec-sandbox-egress-ollama`](../plan/planning/in-progress/slice-v2-spec-sandbox-egress-ollama.md) nach.
+  führt den Wert `egress` im Enum; die Egress-Anzeige beschreibt
+  [SPEC-046](../../spec/spezifikation.md#spec-046--egress-anzeige-u-boot-egress-list-berechnung-ausgabe-und-abgrenzung).
   `jsontestutil` prüft das Enum nicht (`checkSubcommand` verlangt `subcommand` nur für `template`
   und `config`).
 
