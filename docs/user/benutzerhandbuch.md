@@ -1375,7 +1375,7 @@ registry.npmjs.org  feature:claude-code, feature:node
 - **Messstand:** Die Aussagen dieses Abschnitts sind auf Docker 29.5.2 mit Colima 0.10.3 (arm64) und
   `dnsmasq` 2.91 gemessen. Zusätzlich gibt es Messungen auf einem nativen Linux-x86_64-Host mit Docker 29.9.1
   (2026-10-19, zwei Läufe): der Pull von Modellen hinter der Beschränkung, das erneute Ausführen
-  des Startscripts und der Verkehr verschachtelter Container (siehe unten und den Abschnitt zu
+  des Startscripts (frühere Fassung) und der Verkehr verschachtelter Container (siehe unten und den Abschnitt zu
   Ollama). Docker Desktop ist nicht gemessen.
 - Für `claude-code` nimmt die Liste nur den API-Host und die npm-Registry auf; die
   Hosts der Anmeldung sowie von Telemetrie, Fehlerberichten, MCP-Connectors,
@@ -1414,19 +1414,35 @@ registry.npmjs.org  feature:claude-code, feature:node
   gesperrte Adresse; ein verschachtelter Podman-Container nicht (Zeitüberschreitung).
   Die Namensauflösung eines verschachtelten Podman-Containers läuft über den lokalen DNS-Server
   oder wird verworfen (siehe *Namensauflösung und ihre Grenze* im Abschnitt zur Egress-Beschränkung).
-- Führen Sie das Startscript in einem laufenden Container mit aktiver Beschränkung erneut aus
-  (es löscht seine Regeln und baut sie neu auf), gilt die Beschränkung kurz nicht. Gemessen
-  auf Linux (`amd64`, ein Host) in zwei Messungen zu je 30 Läufen: In 27 und 28 Läufen wurde währenddessen ein
-  Verbindungsversuch zum Gateway des Containers (Port 9) nicht verworfen, sondern vom Gateway abgelehnt,
-  also nicht von der Beschränkung aufgehalten (mit Beschränkung läuft derselbe Versuch in die Frist);
-  die gemessene Spanne betrug bis zu 48 und 50 ms und ist eine
-  Untergrenze, weil die Messung in Abständen von wenigen Millisekunden abtastet. In 30 und 27 Läufen ließ
-  sich ein erlaubter Name für 30 bis 76 Millisekunden nicht auflösen; in 19 und 14 Läufen schlug
-  ein Aufruf eines erlaubten Hosts in dieser Zeit fehl, binnen 6 bis 73 ms, in zwei Läufen der ersten
-  Messung erst nach der Frist von 3 s. Ein Aufruf eines gesperrten Namens gelang in
-  keinem Lauf; außerhalb der Läufe gab es weder einen Treffer noch einen Ausfall. Die
-  Beschränkung bleibt eine Leitplanke und keine Sicherheitsgrenze. Die IPv6-Regeln sind nicht
-  gemessen.
+- **Startscript erneut ausführen:** Führen Sie das Startscript in einem laufenden
+  Container mit aktiver Beschränkung erneut aus (mit `sudo`), ersetzt es beide
+  Tabellen in einer einzigen nftables-Transaktion, tauscht danach den lokalen
+  DNS-Server aus und schreibt `/etc/resolv.conf` zuletzt. Das ist die Struktur
+  des Scripts; ein Test pinnt sie. Ein Docker-Test führt das Script elfmal
+  hintereinander aus: Jeder Lauf endet mit Exit-Code 0 und dem Status `ok`, es
+  läuft genau ein DNS-Server unter dem Benutzer der Regeln, beide Tabellen
+  bestehen, ein erlaubter Name löst auf, und die Liste der erreichbaren Adressen
+  ist nach dem Lauf leer. Währenddessen versucht eine Sonde laufend eine
+  Verbindung zum Gateway des Containers (Port 9); die Beschränkung hält sie auf,
+  ein Treffer würde den Test färben. **Nicht zugesagt** ist, dass nie ein
+  Zeitraum ohne Beschränkung entsteht oder die Auflösung eines erlaubten Namens
+  nie aussetzt: Eine Zählung von null heißt „kein Treffer“, nicht „kein Fenster“,
+  weil die Sonde nur in Abständen von Millisekunden abtastet. Schlägt die
+  Transaktion fehl, meldet das Script das, schreibt den Status `failed` und endet
+  mit Exit-Code 11, auch bei `warn`; das bisherige Regelwerk und der bisherige
+  DNS-Server bleiben bestehen (ein Test pinnt das mit einer ungültigen
+  Regelzeile).
+  **Nicht gemessen** für diese Fassung: die Zeiten auf `amd64`, Docker Desktop und
+  in der CI, die Zeiten unter Last des Hosts, mit verschachtelter Laufzeit und die
+  IPv6-Tabelle (geprüft ist nur, dass beide Tabellen bestehen,
+  nicht ein Fenster). Gemessen ist nur die **frühere Fassung**, die ihre Tabellen löschte
+  und danach neu aufbaute (Linux, `amd64`, ein Host, zwei Messungen zu je 30 Läufen):
+  In 27 und 28 Läufen wurde währenddessen ein Verbindungsversuch zum Gateway
+  (Port 9) nicht verworfen, sondern vom Gateway abgelehnt, bis zu 48 und 50 ms
+  lang (eine Untergrenze); in 30 und 27 Läufen ließ sich ein erlaubter Name für
+  30 bis 76 Millisekunden nicht auflösen. Diese Zahlen sagen nichts über die
+  neue Fassung. Die Beschränkung bleibt eine Leitplanke und keine
+  Sicherheitsgrenze.
 - Der Pull eines Images mit verschachteltem Docker lief direkt nach dem Start der Beschränkung in
   einem von zwei vollständigen Läufen in eine Zeitüberschreitung (`i/o timeout`) und gelang 15 Sekunden später;
   im anderen Lauf gelang er sofort. Die Ursache ist nicht untersucht.

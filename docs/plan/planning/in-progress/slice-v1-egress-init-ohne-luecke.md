@@ -26,7 +26,7 @@ Anlass: Befund B-1 der `amd64`-Messung: Der Wiederholungslauf von `egress-init.s
 
 **Ziel:** Ein erneuter Lauf von `egress-init.sh` in einem Container mit aktiver Restriktion ersetzt beide Tabellen in einer einzigen `nft -f`-Transaktion und wechselt den Resolver geordnet ([`ADR-0027`](../../adr/0027-egress-init-wiederholungslauf-atomar.md) Entscheidung 1 und 4). Zugesagt wird die Struktur, die ein Golden Case pinnt; ein Fenster von null und ein Ausfall der Namensauflösung von null sind **nicht** zugesagt, und was ungemessen ist, steht ausgewiesen im Handbuch (Entscheidung 3).
 
-### Gefundener Stand (gelesen am 2026-10-19)
+### Gefundener Stand vor der Umsetzung (gelesen am 2026-10-19)
 
 - **Der Neuaufbau im Template:** `internal/hexagon/application/templates/devcontainer/egress-init.sh.tmpl`, Abschnitt „Re-run safe“ (Kommentarzeile): der alte `dnsmasq` bekommt `kill`, danach `nft delete table ip u_boot_egress` und `nft delete table ip6 u_boot_egress6`; dahinter `nft add table`, `set`, `chain` und jede `rule` einzeln, danach der Start von `dnsmasq` (`dnsmasq --conf-file`, mit Prüfung von Rückgabewert und UID) und `echo "nameserver 127.0.0.1" > /etc/resolv.conf`. Zwischen den `nft delete table` und den ersten `nft add rule` gilt keine Tabelle, zwischen dem `kill` und dem Start von `dnsmasq` läuft kein lokaler Resolver. Der Kommentar sagt „Re-run safe“ (gelesen im Template nach der Umsetzung von [`ADR-0026`](../../adr/0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md); Zeilenbezüge stehen nicht mehr, weil die Umsetzung das Template verlängert hat).
 - **Gemessen:** [`ADR-0025`](../../adr/0025-egress-liste-im-laufenden-container.md) M2 (`arm64`, Colima): Fenster ohne Filter-Regelwerk 24 bis 45 ms, Ausfall des lokalen `dnsmasq` 28 bis 55 ms; die **atomare Variante** (Messskript, kein Produktcode: Wechsel in einer nft-Transaktion, `dnsmasq` erst nach dem Ende des alten) zeigte in fünf Läufen keinen Zustand `offen` und einen Ausfall von höchstens 24 ms. `amd64` (Messfrage A7, 30 Läufe je Messung): Befund B-1 oben. Die Sonde ist ein Verbindungsversuch zum Gateway des Containers auf Port 9, abgelehnt statt verworfen; die Zählung ist eine Untergrenze.
@@ -48,8 +48,8 @@ Der Projektinhaber entschied am 2026-10-19: Die Änderung trägt eine Folge-ADR,
 ## 2. Definition of Done
 
 - [x] **Entscheidung:** Trägerin der Umsetzung ist [`ADR-0027`](../../adr/0027-egress-init-wiederholungslauf-atomar.md), `Accepted` vor dem Code (2026-10-19). Die Messung E1 bis E3 entfällt auf Entscheidung des Projektinhabers; es gibt kein Messskript und kein Messprotokoll, die Lücken stehen in [`ADR-0027`](../../adr/0027-egress-init-wiederholungslauf-atomar.md) Entscheidung 3 und im Handbuch.
-- [ ] **Template, Golden Case und Docker-Test:** `egress-init.sh.tmpl` ersetzt beide Tabellen in einer `nft -f`-Transaktion und wechselt den Resolver nach [`ADR-0027`](../../adr/0027-egress-init-wiederholungslauf-atomar.md) Entscheidung 1 und 4; Golden Case nach [`harness/replay.md`](../../../../harness/replay.md) pinnt die Struktur (Fresh-State und zweiter Lauf des Startscripts); ein Docker-Test (`//go:build docker`) führt das Startscript wiederholt aus, weist ein Fenster nur als Treffer ab (Untergrenze) und prüft den Fehlerzweig der Transaktion (§6).
-- [ ] **Handbuch und CHANGELOG** auf den Ist-Stand (Abschnitt *Internet-Beschränkung (Egress)*: die Zählungen und die Aussage „Untergrenze“ gelten für die alte Fassung; für die neue Fassung steht die Struktur und was ungemessen ist, [`ADR-0027`](../../adr/0027-egress-init-wiederholungslauf-atomar.md) Entscheidung 3).
+- [x] **Template, Golden Case und Docker-Test:** `egress-init.sh.tmpl` ersetzt beide Tabellen in einer `nft -f`-Transaktion und wechselt den Resolver nach [`ADR-0027`](../../adr/0027-egress-init-wiederholungslauf-atomar.md) Entscheidung 1 und 4; Golden Case nach [`harness/replay.md`](../../../../harness/replay.md) pinnt die Struktur (Fresh-State und zweiter Lauf des Startscripts); ein Docker-Test (`//go:build docker`) führt das Startscript wiederholt aus, weist ein Fenster nur als Treffer ab (Untergrenze) und prüft den Fehlerzweig der Transaktion (§6).
+- [x] **Handbuch und CHANGELOG** auf den Ist-Stand (Abschnitt *Internet-Beschränkung (Egress)*: die Zählungen und die Aussage „Untergrenze“ gelten für die alte Fassung; für die neue Fassung steht die Struktur und was ungemessen ist, [`ADR-0027`](../../adr/0027-egress-init-wiederholungslauf-atomar.md) Entscheidung 3).
 - [ ] `make gates` grün; `make test-docker` grün (Code geändert); Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`); Closure-Notiz mit Steering-Loop-Lerneintrag; Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist; jedes Risiko aus §6 trägt einen Ausgang; die drei Paarungen sind getragen.
 
 ## 3. Plan (vor Code)
@@ -58,13 +58,14 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `internal/hexagon/application/templates/devcontainer/egress-init.sh.tmpl` | update | Neuaufbau ohne Lücke (Abschnitt von `kill` und `nft delete table` bis zum Schreiben von `resolv.conf`), Variante nach E1 |
-| `internal/hexagon/application/generate_sandbox_test.go` und gegebenenfalls ein Golden-Literal | update | Golden Case für den zweiten Lauf des Startscripts ([`harness/replay.md`](../../../../harness/replay.md)); Testnamen ergänzt der Architect |
-| `internal/e2e/sandbox_devcontainer_docker_test.go` | update | Docker-Test für den Wiederholungslauf (Fenster, Auflösung eines erlaubten Namens) |
+| `internal/hexagon/application/templates/devcontainer/egress-init.sh.tmpl` | update | Neuaufbau in einer `nft -f`-Transaktion, geordneter Resolver-Wechsel, Fehlerzweig (Abschnitt von der `dnsmasq`-Konfiguration bis zum Schreiben von `resolv.conf`) |
+| `internal/hexagon/application/generate_sandbox_test.go` | update | Golden Case `TestGenerateDevcontainer_SandboxEgress_RerunIsOneTransaction` (Struktur des zweiten Laufs, [`harness/replay.md`](../../../../harness/replay.md)); die Pins von `..._UpstreamDNSOnlyForTheResolverUser` (Regelzeilen in der `nft -f`-Eingabe) und `..._SandboxStartScriptsWriteStatusFiles` (fünf `failed`-Zweige) folgen der neuen Form |
+| `harness/replay.md` | update | Zeile der Startscripte: fünf `failed`-Zweige, Verweis auf den Golden Case und den Docker-Test zum zweiten Lauf |
+| `internal/e2e/sandbox_devcontainer_docker_test.go` | update | Docker-Test `TestE2E_SandboxDevcontainer_EgressRerun` (elf Läufe, Sonde als Untergrenze, Set geleert, Fehlerzweig der Transaktion) |
 | `tools/messung/<name>/` und `docs/messungen/<slice>/` | entfällt | Die Messung E1 bis E3 entfällt (Entscheidung des Projektinhabers, 2026-10-19); es entsteht nichts |
 | `docs/plan/adr/0027-egress-init-wiederholungslauf-atomar.md` und `docs/plan/adr/README.md` | neu (vor der Umsetzung, `Accepted`) | Trägerin der Umsetzung; ergänzt [`ADR-0025`](../../adr/0025-egress-liste-im-laufenden-container.md), das `Accepted` bleibt unverändert |
 | `spec/spezifikation.md` | unverändert | trägt keinen Satz zum zweiten Lauf ([`ADR-0027`](../../adr/0027-egress-init-wiederholungslauf-atomar.md), Feld `Schärft`); eine Nachführung entscheidet [`slice-v2-spec-upstream-dns-egress-init`](../open/slice-v2-spec-upstream-dns-egress-init.md) |
-| `docs/user/benutzerhandbuch.md`, `CHANGELOG.md` | update | Ist-Stand und Messstand der neuen Fassung |
+| `docs/user/benutzerhandbuch.md`, `CHANGELOG.md` | update | Ist-Stand der neuen Fassung (Struktur zugesagt, Ungemessenes ausgewiesen) |
 | diese Slice-Datei, `open/README.md`, Register, Roadmap bei Start und Closure; `docs/reviews/` | update; neu | Lifecycle, Review und Verifikation |
 | `spec/lastenheft.md`, `.github/workflows/`, `Makefile`, `repo.mk` | unverändert | keine Zusage-Änderung, keine Gate-Änderung |
 
@@ -91,6 +92,13 @@ DoD vollständig, Review-Report und Verification-Report liegen vor, Closure-Noti
 ## 7. Closure-Notiz
 
 *(Wird bei der Closure gefüllt.)*
+
+**Vermerk des Implementers (Stand der Umsetzung, keine Closure):**
+
+- Umsetzung nach [`ADR-0027`](../../adr/0027-egress-init-wiederholungslauf-atomar.md): die Transaktion (`add table`, `delete table`, `add table` je Tabelle in einer `nft -f`-Eingabe unter `/run/u-boot-egress.nft`) läuft **vor** dem Resolver-Wechsel; schlägt sie fehl, bleibt auch der alte Resolver. Beide Idiome (Erstlauf ohne Tabelle, Wiederholungslauf) laufen im Docker-Test.
+- Lücke: der Docker-Test färbt das Entfernen des begrenzten Wartens nach dem `kill` nicht rot (der alte Resolver endet schnell genug); das Warten pinnt nur der Golden Case. Die Sonde des Docker-Tests färbt das Wiederherstellen eines eigenständigen `nft delete table` vor der Transaktion rot (zwei von zwei Läufen).
+- Beobachtung: keine neue angefallen; `BEO-DOK/zusage-weiter-als-messung` wurde beim Handbuch gelesen (Zahlen der früheren Fassung gegen den Slice-Kopf, keine Aussage über die neue Fassung ohne Test).
+- Spezifikation: nicht geändert; [`slice-v2-spec-upstream-dns-egress-init`](../open/slice-v2-spec-upstream-dns-egress-init.md) nimmt den zweiten Lauf nicht zwingend auf (die Spezifikation trägt dazu keinen Satz).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
