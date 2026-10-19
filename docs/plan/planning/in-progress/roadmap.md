@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-In Arbeit: [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md) (Spezifikation und Sicht: Egress-Anzeige, Katalog und Hosts von `ollama`; letzter Slice von `welle-sandbox-egress-ollama`).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
