@@ -1594,7 +1594,9 @@ ollama run smollm2:135m "Reply with the single word OK."
   (gemessen).
 - **Grenzen der Messung:** Docker 29.5.2, Colima 0.10.3, `arm64`, Ollama `0.40.6`.
   `amd64` ist nur durch die gepinnte Prüfsumme und den Archivinhalt belegt, ein Lauf dort
-  ist **nicht verifiziert**. Nicht gemessen: Docker Desktop, Linux ohne VM, größere
+  ist **nicht verifiziert**. Nicht gemessen: ein Lauf von `ollama` zusammen mit
+  `nestedRuntime` (die Reihenfolge der Volumes wird erzeugt, der Lauf ist nicht
+  gemessen), Docker Desktop, Linux ohne VM, größere
   Modelle und Mindest-Speicher, `OLLAMA_NO_CLOUD`, ein Start des Servers über die
   Dev-Container-CLI. GPU-Beschleunigung, ein Anschluss an einen Ollama-Dienst des Hosts
   und die Verwaltung von Modellen durch `u-boot` gibt es nicht.
