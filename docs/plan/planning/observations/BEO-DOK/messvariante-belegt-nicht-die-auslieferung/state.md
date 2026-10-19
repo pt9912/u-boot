@@ -1,0 +1,1 @@
+**Stand:** offen — 1× (eine Evidence-Datei); kein Fehler aufgetreten, weil die ausgelieferte Umsetzung zusätzlich im Docker-Test und im bisher roten Test gefahren wurde; Trigger: ein weiterer Messslice, dessen Variante von der Umsetzung abweicht, oder eine Aussage, die an der Variante gemessen und als Aussage über die Umsetzung gelesen wurde.
