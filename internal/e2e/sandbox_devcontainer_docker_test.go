@@ -1013,9 +1013,22 @@ func TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild(t *testing.T) {
 	dir := generateSandboxProjectWith(ctx, t, map[string]string{"devcontainer.features.ollama.enabled": "true"})
 	zeros := strings.Repeat("0", 64)
 	const tag = "uboot-e2e-ollama-pin-negative:probe"
-	out, code := dockerOutput(ctx, t, "build", "-q", "-t", tag,
-		"--build-arg", "OLLAMA_SHA256_AMD64="+zeros, "--build-arg", "OLLAMA_SHA256_ARM64="+zeros,
+	pin := "OLLAMA_SHA256_AMD64=" + zeros
+	before := containerIDs(ctx, t)
+	// The classic builder (the `test-docker-tools` image has no buildx) keeps
+	// the container of the failed step unless `--force-rm` is set.
+	out, code := dockerOutput(ctx, t, "build", "-q", "--force-rm", "-t", tag,
+		"--build-arg", pin, "--build-arg", "OLLAMA_SHA256_ARM64="+zeros,
 		filepath.Join(dir, ".devcontainer"))
+	t.Cleanup(func() {
+		left := newContainersWithCommand(context.Background(), t, before, pin)
+		for _, id := range left {
+			_, _ = dockerOutput(context.Background(), t, "rm", "-f", id)
+		}
+		if len(left) > 0 {
+			t.Errorf("the failed build left %d container(s) whose command or environment carries the zero pin", len(left))
+		}
+	})
 	if code == 0 {
 		t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", tag) })
 		t.Fatalf("build with a wrong checksum succeeded, want a failure before the extraction:\n%s", out)
@@ -1023,4 +1036,35 @@ func TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild(t *testing.T) {
 	if !strings.Contains(out, "FAILED") {
 		t.Errorf("build output lacks the checksum failure:\n%s", out)
 	}
+}
+
+// containerIDs lists the IDs of all containers (`docker ps -a`) at call time.
+func containerIDs(ctx context.Context, t *testing.T) map[string]bool {
+	t.Helper()
+	out, code := dockerOutput(ctx, t, "ps", "-a", "-q", "--no-trunc")
+	if code != 0 {
+		t.Fatalf("docker ps: %s", out)
+	}
+	ids := map[string]bool{}
+	for _, id := range strings.Fields(out) {
+		ids[id] = true
+	}
+	return ids
+}
+
+// newContainersWithCommand returns the containers that are not in `before`
+// and whose Path, Args or Env contain needle; every other container is left out.
+func newContainersWithCommand(ctx context.Context, t *testing.T, before map[string]bool, needle string) []string {
+	t.Helper()
+	var found []string
+	for id := range containerIDs(ctx, t) {
+		if before[id] {
+			continue
+		}
+		out, code := dockerOutput(ctx, t, "inspect", "--format", "{{.Path}} {{.Args}} {{.Config.Env}}", id)
+		if code == 0 && strings.Contains(out, needle) {
+			found = append(found, id)
+		}
+	}
+	return found
 }
