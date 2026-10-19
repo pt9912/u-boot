@@ -1023,10 +1023,11 @@ func TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild(t *testing.T) {
 	t.Cleanup(func() {
 		left := newContainersWithCommand(context.Background(), t, before, pin)
 		for _, id := range left {
-			_, _ = dockerOutput(context.Background(), t, "rm", "-f", id)
-		}
-		if len(left) > 0 {
-			t.Errorf("the failed build left %d container(s) whose command or environment carries the zero pin", len(left))
+			if rmOut, rmCode := dockerOutput(context.Background(), t, "rm", "-f", id); rmCode != 0 {
+				t.Errorf("the failed build left container %.12s with the zero pin; removing it failed: %s", id, rmOut)
+				continue
+			}
+			t.Errorf("the failed build left container %.12s with the zero pin; cleanup removed it", id)
 		}
 	})
 	if code == 0 {
@@ -1054,6 +1055,8 @@ func containerIDs(ctx context.Context, t *testing.T) map[string]bool {
 
 // newContainersWithCommand returns the containers that are not in `before`
 // and whose Path, Args or Env contain needle; every other container is left out.
+// Two runs against the same daemon at the same time are not told apart: both
+// would see the other's container as new.
 func newContainersWithCommand(ctx context.Context, t *testing.T, before map[string]bool, needle string) []string {
 	t.Helper()
 	var found []string
