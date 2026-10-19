@@ -51,7 +51,7 @@ Quelle: `spec/lastenheft.md` Zeile 472 (Spiegelstrich in `LH-FA-DEV-008`), Zeile
 | `cmd/uboot/main.go`, `cmd/uboot/main_test.go` | 10 | ok |
 | `docs/user/benutzerhandbuch.md`, `README.md`, `README.de.md`, `CHANGELOG.md`, `harness/replay.md` | 13 | ok |
 | `docs/maintainer/cli-json-contract.md` | 14 | ok |
-| `open/slice-v2-spec-sandbox-egress-ollama.md` | 15 | ok | <!-- d-check:ignore (Kennungen als Zitat) -->
+| `in-progress/slice-v2-spec-sandbox-egress-ollama.md` | 15 | ok | <!-- d-check:ignore (Kennungen als Zitat) -->
 | `in-progress/roadmap.md` | 16 | ok |
 | `docs/reviews/2026-10-18-slice-v1-cli-egress-anzeige.md` | 17 | ok | <!-- d-check:ignore (Kennungen als Zitat) -->
 | Slice-Datei | 18 | ok |

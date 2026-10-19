@@ -41,7 +41,7 @@ Weitere Lastenheft-Prüfungen: Link-Anker `#lh-fa-dev-008--egress-restriktion`, 
 | `spec/lastenheft.md` | Zeile 1 (Stellen 1 bis 4) | ok |
 | `done/slice-cr-sandbox-egress-anzeige.md` (Move + Inhalt) | Zeile 2 | ok; Move in `8a7a827` rein, Inhalt danach | <!-- d-check:ignore (Kennungen als Zitat) -->
 | `in-progress/roadmap.md` | Zeile 3 | ok (Arbeitszeile; Rückstellung ist Closure-Aufgabe) |
-| `done/slice-v1-cli-egress-anzeige.md`, `open/slice-v2-spec-sandbox-egress-ollama.md` | Zeile 4 | ok (Verweis-Nachzug und Übergabe aus dem Review, Diff gelesen) | <!-- d-check:ignore (Kennungen als Zitat) -->
+| `done/slice-v1-cli-egress-anzeige.md`, `in-progress/slice-v2-spec-sandbox-egress-ollama.md` | Zeile 4 | ok (Verweis-Nachzug und Übergabe aus dem Review, Diff gelesen) | <!-- d-check:ignore (Kennungen als Zitat) -->
 | `done/slice-v1-egress-wildcard-pruefung.md`, `done/slice-v1-sandbox-egress-neuladen-entwurf.md`, `open/README.md`, `welle-sandbox-egress-ollama.md`, `docs/reviews/2026-10-18-verification-slice-v1-sandbox-egress-neuladen-entwurf.md` | Zeile 5 | ok (je 2 bis 6 Zeilen Pfad-Nachzug) | <!-- d-check:ignore (Kennungen als Zitat) -->
 | `docs/reviews/2026-10-18-slice-cr-sandbox-egress-anzeige.md` (neu) | Zeile 6 | ok | <!-- d-check:ignore (Kennungen als Zitat) -->
 | dieser Report | Zeile 6 („Verification Evidence“) | ok, Report ist die letzte Datei der Range |

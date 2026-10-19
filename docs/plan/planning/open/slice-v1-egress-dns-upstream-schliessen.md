@@ -47,7 +47,7 @@ Anlass: Befund M1 (a) aus [`slice-v1-sandbox-egress-neuladen-entwurf`](../done/s
 - **Entziehen von `sudo`** (Option S aus [`ADR-0025`](../../adr/0025-egress-liste-im-laufenden-container.md)) — ändert Benutzerrechte und alle Startscripte; mit `sudo` bleibt die Restriktion ein Guardrail ([`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)), das Ziel hier ist nur der Weg *ohne* `sudo`.
 - **Neu-Laden der Liste im laufenden Container** — entschieden gegen (R0, [`ADR-0025`](../../adr/0025-egress-liste-im-laufenden-container.md)).
 - **Eine Restriktion außerhalb des Containers** (Proxy, Netz-/DNS-Ebene) — eigener Vorgang ([`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md) Alternative D).
-- **Die Nachführung von [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) *Grenze* (Schreibbarkeit der Statusdatei)** — Spezifikations-Slice der Welle ([`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md)).
+- **Die Nachführung von [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) *Grenze* (Schreibbarkeit der Statusdatei)** — Spezifikations-Slice der Welle ([`slice-v2-spec-sandbox-egress-ollama`](../in-progress/slice-v2-spec-sandbox-egress-ollama.md)).
 - **Änderung des Lastenhefts** — nach dem Stand oben nicht erwartet (Zielbild, Code folgt); zeigt D3, dass der Pfad grundsätzlich nicht schließbar ist, geht der Befund an den Projektinhaber, und das Handbuch bleibt bei der ausgewiesenen Grenze.
 - **Docker Desktop, Linux-Host ohne VM, `amd64`** — nicht gemessen, nicht zugesagt; jede Aussage nennt den Messstand.
 

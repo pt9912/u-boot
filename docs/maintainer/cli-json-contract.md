@@ -1208,7 +1208,7 @@ Datum, keine Diagnose:
   abgeleitet; die Bestätigung des Projektinhabers steht vor dem Release aus. Das Schema der
   Vorschau-Ausgabe ([SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json))
   führt das Enum erst im Spezifikations-Slice
-  [`slice-v2-spec-sandbox-egress-ollama`](../plan/planning/open/slice-v2-spec-sandbox-egress-ollama.md) nach.
+  [`slice-v2-spec-sandbox-egress-ollama`](../plan/planning/in-progress/slice-v2-spec-sandbox-egress-ollama.md) nach.
   `jsontestutil` prüft das Enum nicht (`checkSubcommand` verlangt `subcommand` nur für `template`
   und `config`).
 
