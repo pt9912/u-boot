@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — erster Slice der Welle (Analyse; hängt von keinem anderen Slice ab). Ihm folgen
+**Welle:** [`welle-sandbox-egress-ollama`](welle-sandbox-egress-ollama.md) — erster Slice der Welle (Analyse; hängt von keinem anderen Slice ab). Ihm folgen
 [`slice-cr-sandbox-egress-anzeige`](../done/slice-cr-sandbox-egress-anzeige.md) und [`slice-v1-cli-egress-anzeige`](../done/slice-v1-cli-egress-anzeige.md), deren Anzeige die hier belegte Subdomain-Aussage trägt.
 
 **Bezug:** [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress-Restriktion; `egress.allow` ist eine „Liste von Hostnamen“),
@@ -67,7 +67,7 @@ Die Hosts der Ollama-Messung ([`slice-v1-devcontainer-ollama-messung`](../done/s
 
 - [x] **Messung:** Die Fälle a bis d sind gemessen und mit Messstand (Docker-Version, Colima-Version, Architektur, `dnsmasq`-Version aus dem Image) in der Evidence und in §3 festgehalten; das Ergebnis ist E1, E2 oder E3 (§1), jeweils mit der gemessenen Begründung.
 - [x] **Belegte Aussage:** Bei E1 und E2 steht die Subdomain-Aussage in Handbuch (`docs/user/benutzerhandbuch.md`, Abschnitt Egress) im Wortlaut der Messung, und ein Test (`//go:build docker`) pinnt sie oder sie ist gestrichen; bei E1 trägt der Fehlertext von `NewEgressHost` den Hinweis, mit Test.
-- [x] **Ergebnis für die Welle:** §7 trägt `Gegenstand:` (entfallen mit Begründung, oder die benannte Vorlage an den Projektinhaber), und die Welle ([`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) §5) ist nachgeführt, falls E3 einen Slice in die Welle zieht.
+- [x] **Ergebnis für die Welle:** §7 trägt `Gegenstand:` (entfallen mit Begründung, oder die benannte Vorlage an den Projektinhaber), und die Welle ([`welle-sandbox-egress-ollama`](welle-sandbox-egress-ollama.md) §5) ist nachgeführt, falls E3 einen Slice in die Welle zieht.
 - [x] `make gates` grün.
 - [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des

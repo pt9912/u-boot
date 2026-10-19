@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** ohne Welle. Der Slice ist ein eigener Slice **nach** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) (Entscheidung des Projektinhabers, 2026-10-18) und hält deren Closure und das Release nicht auf; er hat keine Closure-Bedingung, die von seiner DoD verschieden wäre. Reihenfolge: nach der Closure jener Welle.
+**Welle:** ohne Welle. Der Slice ist ein eigener Slice **nach** [`welle-sandbox-egress-ollama`](../done/welle-sandbox-egress-ollama.md) (Entscheidung des Projektinhabers, 2026-10-18) und hält deren Closure und das Release nicht auf; er hat keine Closure-Bedingung, die von seiner DoD verschieden wäre. Reihenfolge: nach der Closure jener Welle.
 
 **Bezug:** [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress-Restriktion: „Allowlist für ausgehenden Netzwerkverkehr“; Zielbild, Code folgt), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Sandbox-Profil: Schadensbegrenzung); [`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md) (Mechanismus `dnsmasq` + nftables-Set, `Accepted`), [`ADR-0025`](../../adr/0025-egress-liste-im-laufenden-container.md) (Messbefund M1 a, `Accepted`).
 Anlass: Befund M1 (a) aus [`slice-v1-sandbox-egress-neuladen-entwurf`](../done/slice-v1-sandbox-egress-neuladen-entwurf.md); Entscheidung des Projektinhabers (2026-10-18): Code zum Ziel, eigener Folge-Slice, das Lastenheft wird nicht abgeschwächt.
@@ -83,7 +83,7 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 
 ## 4. Trigger
 
-**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) ist geschlossen (Reihenfolge-Entscheidung des Projektinhabers); kein anderer Slice in `in-progress/` (WIP-Limit 1). Der Start hängt nicht am Release.
+**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`welle-sandbox-egress-ollama`](../done/welle-sandbox-egress-ollama.md) ist geschlossen (Reihenfolge-Entscheidung des Projektinhabers); kein anderer Slice in `in-progress/` (WIP-Limit 1). Der Start hängt nicht am Release.
 
 **Rückführungen — vorab benannt:**
 
