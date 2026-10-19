@@ -1,3 +1,5 @@
-**Stand:** offen, drei Belege (`slice-cr-devcontainer-agent-features-sandbox`, `slice-cr-sandbox-egress-anzeige`, `slice-cr-lastenheft-zielbild`); Schwelle von drei erreicht, Ausgang nicht zugewiesen.
+**Stand:** offen, vier Belege (`slice-cr-devcontainer-agent-features-sandbox`, `slice-cr-sandbox-egress-anzeige`, `slice-cr-lastenheft-zielbild`, `slice-v2-spec-zielbild`); Schwelle von drei erreicht, Ausgang nicht zugewiesen.
 
 **Lese-Schritt der Slice-Closure** ([`slice-cr-lastenheft-zielbild`](../../../done/slice-cr-lastenheft-zielbild.md) §7, 2026-10-19): Eine neue Hard Rule in `AGENTS.md` oder ein Sensor liegt beim Projektinhaber und wird nicht ohne seine Entscheidung verkörpert; sie steht in §7 des Slice als „zur Entscheidung vorgelegt“, mit dem Vorschlag des Verification-Reports (Nachlauf-Review über den Diff einer Vertragstext-Änderung in der Fix-Runde, oder ein benannter Prüfpunkt des Verifiers).
+
+**Lese-Schritt der Slice-Closure** ([`slice-v2-spec-zielbild`](../../../done/slice-v2-spec-zielbild.md) §7, 2026-10-19): vierter Beleg (Spezifikation statt Lastenheft, Fix-Runde nach dem Review). Die Verkörperung als Regel oder Sensor liegt weiter beim Projektinhaber und ist in [`slice-cr-lastenheft-zielbild`](../../../done/slice-cr-lastenheft-zielbild.md) §7 als „zur Entscheidung vorgelegt“ geführt; sie wird nicht eigenmächtig verkörpert.
