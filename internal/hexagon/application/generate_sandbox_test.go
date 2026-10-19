@@ -1185,7 +1185,7 @@ func TestGenerateDevcontainer_SandboxStartScriptsWriteStatusFiles(t *testing.T) 
 				}
 			}
 			// `failed` is written right before every exit code 11: the `fail` policy of the
-			// start scripts, and for `egress` also the two resolver branches under any policy.
+			// start scripts, and for `egress` also the three resolver branches under any policy.
 			if got := strings.Count(script, "write_status failed\n    exit 11\n") + strings.Count(script, "write_status failed\n  exit 11\n"); got != tc.exit11Next {
 				t.Errorf("write_status failed directly before exit 11: %d times, want %d:\n%s", got, tc.exit11Next, script)
 			}
