@@ -15,7 +15,7 @@ this file is the same format applied to u-boot itself.
 
 - `u-boot generate devcontainer` warns when it replaces an existing `.devcontainer/egress-init.sh`: an existing container keeps the egress list of the image it was built from and has to be rebuilt
   (`devcontainer up --remove-existing-container`). The warning does not appear when the file is written for the first time, when nothing changes or under `--dry-run`; `--quiet` drops it, and with
-  `--json` it is one entry of `diagnostics[]` (envelope status `warn`, exit code `0`, as for every warning). The warning appears only when the managed block of an existing `egress-init.sh` is replaced: activating the restriction for the first time (the script is created) and switching it off (the script stays in place) give no warning. The command does not check whether a container exists
+  `--json` it is one entry of `diagnostics[]` (envelope status `warn`, exit code `0`, as for every warning). The warning appears only when the managed block of an existing `egress-init.sh` is replaced: activating the restriction for the first time (the script is created) and switching it off (the script stays in place) give no warning
   ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)).
 
 ### Changed

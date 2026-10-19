@@ -1363,7 +1363,6 @@ registry.npmjs.org  feature:claude-code, feature:node
   (der Befehl ändert `devcontainer.json` und das Dockerfile und lässt das Script
   stehen), nicht ohne Änderung und nicht unter `--dry-run`; unter `--quiet` entfällt sie, mit `--json` steht sie in
   `diagnostics[]`, und der Umschlag trägt dann den Status `warn` (Exit-Code 0).
-  Der Befehl prüft nicht, ob ein Container existiert.
 - Wer die Fähigkeit hat und das `sudo` des Base-Images nutzen kann, kann die
   Regeln aufheben. Der Verkehr verschachtelter Container und die
   iptables-Regeln eines verschachtelten Docker-Daemons umgehen die Beschränkung;
