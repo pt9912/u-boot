@@ -1,6 +1,6 @@
 # ADR 0027: Wiederholungslauf von `egress-init.sh` — eigene Tabellen in einer einzigen `nft -f`-Transaktion, Resolver-Wechsel ohne Not, Zusage nur im Messstand
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Datum:** 2026-10-19
 
@@ -34,9 +34,9 @@ Der Projektinhaber entschied am 2026-10-19: Die Änderung bekommt diese kurze Fo
    - **Ungemessen und ausgewiesen:** die Wirkung der Variante auf `amd64`, auf Docker Desktop und in der CI; die IPv6-Tabelle (in M2 und B-1 nicht gemessen; die Sonden decken IPv4); das Verhalten unter Last des Hosts; der Wiederholungslauf mit `nestedRuntime`; ob die Transaktion im Produkt-Script dieselben Zeiten zeigt wie das Messskript (die Variante war ein Skript, kein Produktcode). Die Zählungen sind Untergrenzen; eine Null in einer späteren Messung hieße „kein Treffer“, nicht „kein Fenster“.
    - Eine Bedingung im Handbuch oder in der Spezifikation zum zweiten Lauf hat einen Test oder entfällt (`AGENTS.md` §3.10; Beobachtung `BEO-DOK/zusage-weiter-als-messung`): Das Handbuch trägt für die neue Fassung nur, was gemessen oder gepinnt ist, und weist die Zählungen von B-1 als Stand der alten Fassung aus.
 
-4. **Eine fehlgeschlagene Transaktion** (offener Punkt zur Freigabe, siehe unten): Ein `nft -f`, das nicht durchläuft, ändert nichts am Regelwerk (die Transaktion ist atomar, nach der `nft`-Dokumentation; im Produkt-Script ungemessen). Das Script bricht dann mit Meldung, Statusdatei `failed` und Exit-Code `11` ab, unabhängig von `onUnavailable`, wie die Abbruchfälle aus [ADR-0026](0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md) Entscheidung 2 (Umgebungsproblem, vom Generator nicht zu verantworten). Es führt keinen neuen Exit-Code ein; heute ist der Fall ungeprüft (Statusdatei `ok` trotz fehlender Regeln möglich). Beim Wiederholungslauf bleibt dabei das alte Regelwerk bestehen.
+4. **Eine fehlgeschlagene Transaktion**: Ein `nft -f`, das nicht durchläuft, ändert nichts am Regelwerk (die Transaktion ist atomar, nach der `nft`-Dokumentation; im Produkt-Script ungemessen). Das Script bricht dann mit Meldung, Statusdatei `failed` und Exit-Code `11` ab, unabhängig von `onUnavailable`, wie die Abbruchfälle aus [ADR-0026](0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md) Entscheidung 2 (Umgebungsproblem, vom Generator nicht zu verantworten). Es führt keinen neuen Exit-Code ein; heute ist der Fall ungeprüft (Statusdatei `ok` trotz fehlender Regeln möglich). Beim Wiederholungslauf bleibt dabei das alte Regelwerk bestehen.
 
-**Freigabe-Punkte des Projektinhabers vor `Accepted`** (Empfehlungen, keine Entscheidungen):
+**Freigabe-Punkte des Projektinhabers vor `Accepted`** (Empfehlungen, vom Projektinhaber alle angenommen, siehe Geschichte):
 
 - a) Beide Tabellen in einer `nft -f`-Transaktion ersetzen, ohne eigenes `delete`-Fenster; `dnsmasq`-Wechsel mit begrenztem Warten und `resolv.conf` zuletzt; Exit-Codes, Statusdatei und `skuid`-Regel unverändert (Entscheidung 1). Empfehlung: ja.
 - b) Abgrenzung: kein Neu-Laden vom Host, R1 bis R4 und S offen (Entscheidung 2). Empfehlung: ja.
@@ -78,5 +78,6 @@ Eine Messung auf `amd64`, Docker Desktop oder in der CI, die für die neue Fassu
 | Datum | Ereignis | Verweis |
 |---|---|---|
 | 2026-10-19 | Entscheidung des Projektinhabers im Gespräch: kurze Folge-ADR, die [ADR-0025](0025-egress-liste-im-laufenden-container.md) ergänzt; keine neue Messung (abgebrochen), Belege M2 und B-1; Entwurf, `Proposed`, `Accepted` setzt der Projektinhaber | Vereinbarung mit dem Projektinhaber |
+| 2026-10-19 | `Accepted` durch den Projektinhaber („ok“, im Gespräch, auf die Vorlage der Freigabe-Punkte a bis d mit dem Hinweis, dass Punkt d wegfällt, wenn er nicht gewollt ist): (a) bis (d) wie empfohlen | Vereinbarung mit dem Projektinhaber |
 
 Nach `Accepted` wird diese Datei **nicht mehr inhaltlich überschrieben**. Spätere Korrekturen oder Schärfungen entstehen als neue ADR mit `Supersedes` auf [ADR-0027](0027-egress-init-wiederholungslauf-atomar.md).
