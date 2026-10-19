@@ -65,7 +65,7 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 | `harness/replay.md` und Golden-Dateien | update, falls die Ausgabe von `generate` oder `egress list` in einem Golden Case steht | Replay-Evidence nach `harness/replay.md` |
 | diese Slice-Datei, `open/README.md`, Register, Roadmap bei Start und Closure; `docs/reviews/` | update; neu | Lifecycle, Review und Verifikation |
 
-**Abgleich gegen `git diff --stat -M 1e445d3..HEAD` (Stand nach der Umsetzung, vor Review):** 13 Dateien, jede mit einer Zeile oben oder in der Sammelzeile (Spezifikation, Handbuch, CHANGELOG, `harness/replay.md`); `generate_acceptance_test.go`, `internal/adapter/driving/cli/generate.go` und `internal/hexagon/port/driving/` stehen als unverändert gelesen und fehlen im Diff.
+**Abgleich gegen `git diff --stat -M 1e445d3..HEAD` (Stand nach der Review-Fix-Runde):** 15 Dateien, jede mit einer Zeile oben oder in der Sammelzeile (Spezifikation, Handbuch, CHANGELOG, `harness/replay.md`, diese Slice-Datei, Review-Report unter `docs/reviews/`); die Fix-Runde berührte nur Dateien, die schon im Diff standen; `generate_acceptance_test.go`, `internal/adapter/driving/cli/generate.go` und `internal/hexagon/port/driving/` stehen als unverändert gelesen und fehlen im Diff.
 
 ## 4. Trigger
 
