@@ -1,0 +1,6 @@
+######## Gegenprobe: Variante mit falscher UID (DNSUID=1234), 2026-10-19T12:04:46.846Z
+postStart (skuid, DNSUID=1234) exit=0
+[gegenprobe-falsche-uid] dnsmasq-prozesse=1 uid=65534, pid-lebt=ja accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal-api.github.com='status: REFUSED' direkt-example.com=keine resolv.conf=127.0.0.1:1 status=result=ok
+Pruefung aus 09-d4.sh meldet den Zustand als auffaellig: ja
+AUSSAGE skuid gegenprobe falsche-uid pruefung-auffaellig=ja
+AUSSAGE skuid gegenprobe falsche-uid lokal-aufloesung=ausgefallen

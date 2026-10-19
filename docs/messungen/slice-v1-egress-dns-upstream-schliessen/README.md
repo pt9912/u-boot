@@ -19,7 +19,7 @@ Handbuch und ADR sind unverändert.
 |---|---|
 | Host | Linux 6.8.0-139-generic x86_64 (Ubuntu 24.04.5), 20 CPUs, cgroup v2, `kernel.apparmor_restrict_unprivileged_userns=0` |
 | Docker | Client und Server 29.9.1 (linux/amd64), Speichertreiber overlay2, kein Colima |
-| Datum, Läufe | 2026-10-19; **zwei vollständige Läufe** (`00-alles.sh`), 178 `AUSSAGE`-Zeilen, beide gleich (`vergleich.sh`, Exit 0); die Rohdaten dieses Verzeichnisses sind Lauf 1, `rohdaten-lauf2-aussagen.txt` trägt die Aussagen von Lauf 2 |
+| Datum, Läufe | 2026-10-19; **zwei vollständige Läufe** (`00-alles.sh`), 180 `AUSSAGE`-Zeilen, beide gleich (`vergleich.sh`, Exit 0); die Rohdaten dieses Verzeichnisses sind Lauf 1, `rohdaten-lauf2-aussagen.txt` trägt die Aussagen von Lauf 2 |
 | u-boot | `u-boot version 0.12.0-dev`, `make build` (Runtime-Image), Stand des Commits `d2f8294`; die Messprojekte erzeugt `u-boot init --devcontainer --sandbox`, `egress.enabled: true`, `onUnavailable: warn`, ohne und mit `nestedRuntime: podman` |
 | Image | Basis `mcr.microsoft.com/devcontainers/base:debian` (Debian 13 trixie), `dnsmasq` 2.91, `nftables` 1.1.3, `sudo` 1.9.16p2, Podman 6.1.4 (nur Image `pod`); `vscode` UID 1000, `nobody` UID 65534, `dnsmasq` UID 999 |
 | Upstream-Liste | `1.1.1.1` und `8.8.8.8` (aus der `resolv.conf` des Containers, die Docker vom Host ableitet) |
@@ -50,6 +50,7 @@ Handbuch und ADR sind unverändert.
 | 7 | `07-d3-netz.sh`, `inner-d3-netz.sh` | `rohdaten-07-d3-netz.txt` | D3 Zusatz: benutzerdefiniertes Netz mit IPv6, Docker-eigener Resolver |
 | 8 | `08-d5.sh`, `inner-d5.sh`, `dnsq.pl` | `rohdaten-08-d5.txt` | D5: Datenkanal über erlaubte Namen |
 | 9 | `09-d4.sh`, `inner-d4.sh` | `rohdaten-09-d4.txt` | D4: zweiter Lauf, Neustart, Neuaufbau, 50 Läufe |
+| 9b | `09b-gegenprobe.sh` | `rohdaten-09b-gegenprobe.txt` | Gegenprobe: Variante mit falscher UID sperrt den `dnsmasq`; die Prüfung aus Schritt 9 muss anschlagen |
 | 10 | `10-aufraeumen.sh` | `rohdaten-11.txt`, `rohdaten-11-nachher.txt` | Aufräumen nach Präfix |
 | — | `vergleich.sh <lauf-1> <lauf-2>` | `rohdaten-lauf2-aussagen.txt` | vergleicht die `AUSSAGE`-Zeilen zweier Läufe |
 
@@ -104,7 +105,7 @@ Docker-Resolvers an den Host-Upstream gehen aus dem Namensraum des Containers un
 aus demselben Image — je ein `dnsmasq` (UID 65534), Pid lebt, 7 `accept`-Regeln (davon 4 mit `meta skuid` in der Variante, keine Regelanhäufung),
 beide Tabellen vorhanden, `api.github.com` lokal `NOERROR`, Statusdatei `result=ok`. 50 erneute Läufe hintereinander je Fall: 0 auffällige
 Zustände, 0 Meldungen (Ist und Variante, beide Läufe). Nach dem `docker restart` hat Docker `/etc/resolv.conf` neu geschrieben (kein `127.0.0.1`),
-das Startscript stellt es wieder her. Nicht erneut gemessen: das Fenster ohne Filter beim erneuten Lauf (die Variante ändert den Ablauf nicht, nur zwei Regeln).
+das Startscript stellt es wieder her. Gegenprobe (`09b`): Mit `DNSUID=1234` löst der lokale `dnsmasq` einen erlaubten Namen nicht mehr auf (`status: REFUSED` statt `NOERROR`), die Prüfung aus Schritt 9 meldet den Zustand als auffällig (beide Läufe). Nicht erneut gemessen: das Fenster ohne Filter beim erneuten Lauf (die Variante ändert den Ablauf nicht, nur zwei Regeln).
 
 **D5.** Der `dnsmasq` leitet Anfragen für beliebige Unternamen eines erlaubten Namens an den Upstream weiter (mit der Variante: alle `kanal1.api.github.com`-Anfragen
 kamen am Upstream an, keine für `example.com`). Obergrenze im Laboraufbau (Gegenüber auf demselben Host als Upstream, sequenzielle Anfragen mit drei Labels zu je

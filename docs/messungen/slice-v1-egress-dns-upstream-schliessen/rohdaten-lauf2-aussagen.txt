@@ -165,6 +165,8 @@ rohdaten-08-d5.txt AUSSAGE skuid d5 am-upstream-angekommen-kanal1-example.com=ne
 rohdaten-08-d5.txt AUSSAGE skuid d5 direkt-an-upstream=keine
 rohdaten-08-d5.txt AUSSAGE skuid d5 untername-erlaubter-name=antwort
 rohdaten-08-d5.txt AUSSAGE skuid d5 untername-unlisteter-name=keine
+rohdaten-09b-gegenprobe.txt AUSSAGE skuid gegenprobe falsche-uid lokal-aufloesung=ausgefallen
+rohdaten-09b-gegenprobe.txt AUSSAGE skuid gegenprobe falsche-uid pruefung-auffaellig=ja
 rohdaten-09-d4.txt AUSSAGE ist d4 50-laeufe-auffaellig=0 meldungen=0
 rohdaten-09-d4.txt AUSSAGE ist d4 erster-lauf dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=antwort resolv=1 status=result=ok
 rohdaten-09-d4.txt AUSSAGE ist d4 nach-neustart dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=antwort resolv=1 status=result=ok
