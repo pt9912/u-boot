@@ -54,14 +54,18 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `internal/adapter/driving/cli/generate.go` (`printGenerateSummary`) und, falls der Grund der Änderung in der Antwort fehlt, `internal/hexagon/port/driving/generate.go` samt Anwendungsschicht | update | der Hinweis braucht die Information, dass `egress-init.sh` geändert wurde; ob sie aus `resp.Changed` abgeleitet oder in der Antwort getragen wird, entscheidet der Architect |
-| `internal/adapter/driving/cli/generate_acceptance_test.go` (Block „Human-Mode“) | update | Fall Listenänderung, Gegenfall, `--dry-run`, `--quiet` |
+| `internal/hexagon/application/generate.go` (`egressRebuildWarnings`, `egressInitRel`, Aufruf in `generateDevcontainer`) | update | der Hinweis entsteht in der Anwendungsschicht aus dem Plan der Dateien (Aktion `ReplaceBlock` von `egress-init.sh`) als `WarningEntry`; keine Port-Änderung, die Rückführung `in-progress` → `next` entfällt |
+| `internal/adapter/driving/cli/generate.go` (`printGenerateSummary`, Zeile 231 `visibleWarnings`), `internal/hexagon/port/driving/removeservice.go` (`WarningEntry`) | unverändert | gelesen: die Ausgabe der Warnungen und die Wirkung von `--quiet` laufen über `visibleWarnings` und die Kennzeichen der `WarningEntry`; der Hinweis trägt keines, also entfällt er unter `--quiet` |
+| `internal/hexagon/application/generate_egress_rebuild_test.go` | neu | Hinweis bei geänderter Liste, Gegenfälle (erstes Schreiben, NoOp, Änderung ohne `egress-init.sh`, `--dry-run`) |
+| `internal/adapter/driving/cli/quiet_test.go` (`TestExecute_Generate_EgressRebuildNotice_QuietAndJSON`) | update | `--quiet` entfällt, `--json` behält den Eintrag in `diagnostics[]` (Status `warn`); `generate_acceptance_test.go` bleibt unverändert |
 | `internal/adapter/driving/cli/egress.go`, `internal/adapter/driving/cli/egress_test.go` (`TestExecute_EgressList_Notes`) | update | Langhilfe und `Notes:` mit Messstand beziehungsweise gekürzt; `Notes:` nennen den Neuaufbau (Pin) |
-| `internal/hexagon/domain/sandbox.go` (`NewEgressHost`), `internal/adapter/driving/cli/config_egress_wildcard_test.go` | update | Wortlaut des Wildcard-Fehlers |
+| `internal/hexagon/domain/sandbox.go` (`NewEgressHost`), `internal/hexagon/domain/sandbox_test.go`, `internal/adapter/driving/cli/config_egress_wildcard_test.go` | update | Wortlaut des Wildcard-Fehlers |
 | `internal/e2e/sandbox_devcontainer_docker_test.go` (Kommentar, Zeile 197) | update | Kommentar auf das Gemessene |
 | `spec/spezifikation.md` ([`SPEC-046`](../../../../spec/spezifikation.md#spec-046--egress-anzeige-u-boot-egress-list-berechnung-ausgabe-und-abgrenzung) und die vom Architect benannten Stellen), `docs/user/benutzerhandbuch.md`, `CHANGELOG.md` | update | Ein Vertrag, vier Stellen (Welle-Kriterium der Vorgänger-Welle: Text im Code gleich Text in Spec, Handbuch, CHANGELOG) |
 | `harness/replay.md` und Golden-Dateien | update, falls die Ausgabe von `generate` oder `egress list` in einem Golden Case steht | Replay-Evidence nach `harness/replay.md` |
 | diese Slice-Datei, `open/README.md`, Register, Roadmap bei Start und Closure; `docs/reviews/` | update; neu | Lifecycle, Review und Verifikation |
+
+**Abgleich gegen `git diff --stat -M 1e445d3..HEAD` (Stand nach der Umsetzung, vor Review):** 13 Dateien, jede mit einer Zeile oben oder in der Sammelzeile (Spezifikation, Handbuch, CHANGELOG, `harness/replay.md`); `generate_acceptance_test.go`, `internal/adapter/driving/cli/generate.go` und `internal/hexagon/port/driving/` stehen als unverändert gelesen und fehlen im Diff.
 
 ## 4. Trigger
 
