@@ -1,6 +1,6 @@
 # ADR 0026: Upstream-DNS im Sandbox-Devcontainer nur für den dnsmasq — nftables-Regel nach Benutzer (`meta skuid`), Benutzer festgelegt, Grenze ausgewiesen
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Datum:** 2026-10-19
 
@@ -119,5 +119,6 @@ Ein Basis-Image, dessen `dnsmasq` einen anderen Benutzer trägt oder dem `nobody
 | Datum | Ereignis | Verweis |
 |---|---|---|
 | 2026-10-19 | Messung D1 bis D5 auf einem nativen Linux-x86_64-Host, zwei Läufe; Entscheidung des Projektinhabers im Gespräch (Auswahl): Weg A (nftables-Regel nach Benutzer im Template, Folge-ADR); Entwurf, `Proposed`, `Accepted` setzt der Projektinhaber | Vereinbarung mit dem Projektinhaber |
+| 2026-10-19 | `Accepted` durch den Projektinhaber („Alle sieben (a bis g) wie empfohlen“, im Gespräch, auf die Vorlage der Freigabe-Punkte a bis g) wie vorgeschlagen: (a) die Regel gilt, Port 53 zu den Upstreams nur für den `dnsmasq`-Benutzer (Entscheidung 1); (b) Benutzer `nobody` per `user=`, Regel aus demselben Wert, Schreibweise nach Messung im Plan der Umsetzung (Entscheidung 2); (c) Abbruch bei Abweichung mit Exit-Code `11` und Statusdatei `failed`, auch bei `warn` (Entscheidung 2); (d) Grenze der Zusage ausgewiesen (Entscheidung 3); (e) Wartezeit und `--dns`-Verlust im verschachtelten Container akzeptiert (Entscheidung 4); (f) Lastenheft und Spezifikation unverändert, Spezifikationsfrage an den Spezifikations-Slice (Entscheidung 5); (g) Umsetzung ohne vorherige Messung auf Colima/`arm64`, CI und `nestedRuntime: docker`, Zusage mit Messstand | Vereinbarung mit dem Projektinhaber |
 
 Nach `Accepted` wird diese Datei **nicht mehr inhaltlich überschrieben**. Spätere Korrekturen oder Schärfungen entstehen als neue ADR mit `Supersedes` auf [ADR-0026](0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md).

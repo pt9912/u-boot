@@ -51,4 +51,4 @@ das MADR-Format gilt für neu angelegte ADRs sowie für die noch mutable
 | [ADR 0023](0023-podman-aus-podman-static-im-sandbox-devcontainer.md) | Accepted | Podman im Sandbox-Devcontainer aus `podman-static`: gepinnte, signierte Release-Archive statt Debian-Paket |
 | [ADR 0024](0024-ollama-im-sandbox-devcontainer.md) | Accepted | Ollama im Sandbox-Devcontainer aus dem Release-Archiv: gepinnte SHA-256-Prüfung ohne Signatur, nur CPU, Katalogschlüssel `ollama` |
 | [ADR 0025](0025-egress-liste-im-laufenden-container.md) | Accepted | Egress-Liste im laufenden Container: Ist-Stand gemessen, Neubau statt Neu-Laden (R0), weitere Wege offen gehalten |
-| [ADR 0026](0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md) | Proposed | Upstream-DNS im Sandbox-Devcontainer nur für den dnsmasq: nftables-Regel nach Benutzer (`meta skuid`), Benutzer festgelegt, Grenze ausgewiesen |
+| [ADR 0026](0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md) | Accepted | Upstream-DNS im Sandbox-Devcontainer nur für den dnsmasq: nftables-Regel nach Benutzer (`meta skuid`), Benutzer festgelegt, Grenze ausgewiesen |
