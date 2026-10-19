@@ -7,8 +7,9 @@ environments — project structure, Docker Compose stack, devcontainer
 configuration, service add-ons (PostgreSQL, Keycloak, OpenTelemetry, …),
 and the usual recurring artefacts (README, CHANGELOG, `.env.example`).
 
-> **Status:** current version `v0.11.0` (GHCR image, six-platform binaries,
-> `.deb`/`.rpm` packages, Homebrew tap). The devcontainer catalogue has 14 features, including `sshd`, `claude-code` and `ollama` (sandbox profile only).
+> **Status:** current version `v0.12.0` (GHCR image, six-platform binaries,
+> `.deb`/`.rpm` packages, Homebrew tap). The devcontainer catalogue has 14 features, including `sshd`, `claude-code` and `ollama` (CPU only, sandbox profile only; cloud models of Ollama are not included; measured on Colima, arm64, and in two runs on one Linux x86_64 host, not in CI).
+> `u-boot egress list` shows the egress allowlist of a project with the origin of each host; a changed list takes effect after a rebuild of the container.
 > `podman build` works in the sandbox devcontainer, which carries Podman 6.1.4 (measured on Colima, arm64; Linux without a VM, Docker Desktop, amd64 and CI not measured), and existing
 > `nestedRuntime: podman` projects need `/dev/fuse` and `/dev/net/tun` on the container host: a container engine without them refuses to start the container, and `u-boot doctor` reports a missing `/dev/fuse` on a Linux host outside a container as an error (exit code `11`). `nestedRuntime: docker` is promised on Docker under Linux and on Colima, not on Docker Desktop.
 > `u-boot doctor` and `u-boot generate devcontainer` disclose when a sandbox container runs on a fallback (no Docker daemon, `vfs` storage, no egress restriction). `--dry-run` summaries say what would happen ("Would …"). `--quiet` shows only errors and four disclosures that stay visible. History: release table below and [`CHANGELOG.md`](CHANGELOG.md).
@@ -96,7 +97,7 @@ u-boot --version
 **Debian / Ubuntu / Fedora / RHEL** (`.deb` and `.rpm` from the release, amd64 and arm64):
 
 ```bash
-VERSION=0.11.0   # the release you want
+VERSION=0.12.0   # the release you want
 # Debian / Ubuntu
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"
@@ -198,6 +199,7 @@ Re-init on an existing project requires an explicit strategy
 | `v0.9.0` | 2026-10-15 | "More devcontainer features" — built-in catalogue keys `python`, `sdkman` and `homebrew` (community feature, reported as third party) with their egress hosts. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.9.0). |
 | `v0.10.0` | 2026-10-17 | "sshd, Claude Code and `podman build`" — built-in catalogue keys `sshd` and `claude-code` (third party, reported); `nestedRuntime: podman` builds images, with a sixth relaxation `--device=/dev/net/tun` (measured on Colima, arm64; Docker Desktop, amd64 and CI not measured); `--quiet` keeps four disclosures visible and drops success summaries; Docker Desktop no longer promised. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.10.0). |
 | `v0.11.0` | 2026-10-18 | "Podman 6, `/dev/fuse` and fallback disclosure" — the sandbox devcontainer with `nestedRuntime: podman` carries Podman 6.1.4; a missing `/dev/fuse` on the container host is a start error and `u-boot doctor` reports it on a Linux host outside a container (exit code `11`, also without `--strict`); `doctor` and `generate devcontainer` disclose fallbacks (no daemon, `vfs`, no egress restriction); `--dry-run` summaries say "Would …" (measured on Colima, arm64; Linux without a VM, Docker Desktop, amd64 and CI not measured). [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.11.0). |
+| `v0.12.0` | 2026-10-19 | "Egress list and Ollama" — `u-boot egress list` shows the effective egress allowlist with the origin of each host; a wildcard entry is rejected with a hint to enter the parent name, and the manual states the measured subdomain behaviour; a changed list takes effect after a rebuild of the container; the new catalogue key `ollama` installs Ollama (CPU only, sandbox profile only, cloud models not included); `--help` links the user manual (measured on Colima, arm64, and `ollama` in two runs on one Linux x86_64 host; Docker Desktop, Linux behind a VM and CI not measured). [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.12.0). |
 | `v0.5.0` | 2026-07-25 | "Security + local templates" — Go toolchain bump closes CVE-2026-39822 in the runtime image (HIGH); `u-boot init --template ./path` resolves a project from a local directory, alongside the built-in catalogue. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.5.0). |
 | `v0.4.0` | 2026-06-08 | "Machine-readable CLI" milestone — `--json` / `--dry-run` / `--diff` for all ten subcommands, `u-boot logs`, devcontainer-features with a drift-doctor check. [GitHub release](https://github.com/pt9912/u-boot/releases/tag/v0.4.0). |
 

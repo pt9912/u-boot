@@ -1,8 +1,8 @@
 # Benutzerhandbuch: u-boot
 
 Handbuch-Version: 2.0
-Software-Version: v0.11.0
-Stand: 2026-10-18
+Software-Version: v0.12.0
+Stand: 2026-10-19
 
 ---
 
@@ -77,7 +77,7 @@ u-boot --version
 ```
 
 **Ergebnis:** Die installierte Version erscheint, zum Beispiel
-`u-boot version 0.11.0`.
+`u-boot version 0.12.0`.
 
 ### Binary (Linux, macOS, Windows)
 
@@ -103,7 +103,7 @@ Invoke-WebRequest `
 ```
 
 Für eine bestimmte Version ersetzen Sie `latest/download` durch
-`download/v0.11.0`. Die Prüfsummen aller Dateien stehen in `SHA256SUMS` am
+`download/v0.12.0`. Die Prüfsummen aller Dateien stehen in `SHA256SUMS` am
 jeweiligen Release.
 
 ### Homebrew (macOS)
@@ -130,7 +130,7 @@ Ein APT- oder DNF-Repository gibt es nicht; Sie laden das Paket und
 installieren es lokal:
 
 ```bash
-VERSION=0.11.0
+VERSION=0.12.0
 # Debian / Ubuntu
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"
@@ -1621,6 +1621,13 @@ ollama run smollm2:135m "Reply with the single word OK."
   `ollama.com`, `example.com` und `huggingface.co` ließen sich nicht auflösen. `ollama.com` ist nicht aufgenommen: gesperrt
   meldet der Server beim Start zwei Warnzeilen, Start, Pull und Lauf funktionierten
   (gemessen).
+- **Cloud-Modelle sind nicht enthalten:** Ein Cloud-Modell von Ollama (Modellname mit der
+  Endung `-cloud`, etwa `gpt-oss:120b-cloud`) lässt sich ziehen: `ollama pull` meldet `success`,
+  und das Modell steht in `ollama list`. Es läuft aber nicht: `ollama run` scheitert, weil sich
+  `ollama.com` nicht auflösen lässt; der Host steht nicht in der Allowlist, und `u-boot` nimmt ihn
+  für `ollama` nicht auf. `ollama signin` meldete ohne Konto `account unavailable`; ob ein
+  Cloud-Modell mit Konto läuft, ist nicht gemessen. Gemessen in einem Lauf auf Linux (`amd64`,
+  native Docker Engine 29.9.1, Ollama `0.40.6`) hinter der Egress-Beschränkung.
 - **Grenzen der Messung:** Zwei Messumgebungen (auf dem `amd64`-Host zwei Läufe), Ollama `0.40.6`:
   Docker 29.5.2 auf Colima 0.10.3 (`arm64`) und, am 2026-10-19, Linux x86_64 (`amd64`) mit
   einer nativen Docker Engine 29.9.1 ohne VM (Kernel 6.8, `kernel.apparmor_restrict_unprivileged_userns=0`,
@@ -2368,6 +2375,6 @@ Sie vorher Passwörter, Tokens und interne Adressen aus der Ausgabe.
 
 **Lizenz:** MIT, siehe `LICENSE` im Projektarchiv.
 
-**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.11.0. Prüfen Sie
+**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.12.0. Prüfen Sie
 mit `u-boot --version`, welche Version Sie einsetzen. Weicht sie ab, zeigt
 `u-boot <befehl> --help` den Stand Ihrer Version.

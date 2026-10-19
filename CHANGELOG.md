@@ -11,6 +11,19 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-10-19
+
+Twelfth release. **Egress list display (`u-boot egress list`), Ollama as a sandbox devcontainer feature, subdomain clarification for the egress allowlist.**
+`u-boot egress list` shows the effective egress allowlist with the origin of each host, offline and from the project files; its `--json` output reports `command: "egress"`, which joins the
+values of the `command` field. A wildcard entry (`*.example.org`) in `devcontainer.sandbox.egress.allow` is still rejected with exit code `10`, and the error now names the host to enter;
+the manual states the measured behaviour for subdomains. The built-in catalogue gains `ollama` (local language models, **CPU only**, effective **only with the sandbox profile**): the generated Dockerfile
+installs Ollama 0.40.6 from the pinned, checksum-verified release archive, and with the egress restriction the default allowlist gains the two hosts of the model pull.
+**Not included: cloud models of Ollama** (names ending in `-cloud`). Such a model can be pulled, but it does not run: the host `ollama.com` is not on the allowlist, and signing in was not examined (no account).
+**A changed egress allowlist takes effect only after a rebuild of the container**; there is no reload of a running container, and a restart keeps the old list.
+`u-boot --help` links the user manual, and the `--dry-run` log lines of `config set` and `generate` read in the conditional. Lastenheft 0.17.0.
+**Measured** with Docker 29.5.2 on Colima 0.10.3 (arm64) and, for the `ollama` feature, in two runs on **one** Linux x86_64 host with a native Docker Engine 29.9.1 (2026-10-19; no CI run);
+**not measured:** Docker Desktop, Linux behind a VM, larger models, whether the second model-pull host stays the same, a nested `podman build` on `amd64`.
+
 ### Added
 
 - Devcontainer features: the built-in catalogue gains `ollama` (Ollama, local language models, CPU only). `u-boot config set devcontainer.features.ollama.enabled true` makes the
@@ -76,6 +89,11 @@ this file is the same format applied to u-boot itself.
   allowed name fail for 30 to 76 ms in 30 and 27 runs; no connection by a blocked name succeeded. A nested Docker container reached `example.com` and a blocked address
   during the restriction, a nested Podman container did not (two runs; the manual already named nested traffic as outside the restriction). Not changed: the restriction stays a guardrail
   ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
+- The user manual says that a cloud model of Ollama (a model name ending in `-cloud`) cannot be run in the sandbox devcontainer: `ollama pull` succeeded and the model appeared in
+  `ollama list`, but `ollama run` failed because the name `ollama.com` did not resolve (the host is not on the allowlist, and the feature does not add it), and `ollama signin` reported
+  `account unavailable`; whether a cloud model works with an account was not examined. Measured once on Linux x86_64 with a native Docker Engine 29.9.1 and Ollama 0.40.6 (2026-10-19, behind
+  the egress restriction); **not measured:** other environments ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features),
+  [`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
 
 ## [0.11.0] - 2026-10-18
 
@@ -1381,7 +1399,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/pt9912/u-boot/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/pt9912/u-boot/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/pt9912/u-boot/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/pt9912/u-boot/compare/v0.8.1...v0.9.0
