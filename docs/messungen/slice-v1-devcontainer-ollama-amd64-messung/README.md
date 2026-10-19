@@ -83,7 +83,7 @@ scheiterte der erste Versuch ebenfalls).
   der `arm64`-Messung unter Colima); Hosts und Antworten sind dadurch mitgeschnitten.
 - `rohdaten-08.txt`: Die Sonden `B1` bis `B8` (acht versetzte Schleifen, zusammen rund alle 7 ms ein Versuch) verbinden sich mit dem Gateway des Containers (Port 9, Frist 50 ms); ein Ausgang ungleich 124
   (Frist) heißt: die Verbindung wurde nicht verworfen, die Restriktion galt in dem Moment nicht. Das Fenster ist die Spanne vom ersten bis zum letzten
-  Treffer eines Laufs und damit eine **Untergrenze** (zwischen zwei Sonden kann eine Lücke liegen). Es gibt keinen Treffer außerhalb der Läufe. Die
+  Treffer eines Laufs und damit eine **Untergrenze** (die Tabelle je Lauf ist vollständig; die Ereignisliste darunter ist auf 400 Zeilen gekürzt) (zwischen zwei Sonden kann eine Lücke liegen). Es gibt keinen Treffer außerhalb der Läufe. Die
   Sonden decken IPv4; die IPv6-Tabelle des Skripts ist nicht gemessen.
 - `rohdaten-10.txt`: Die Dev-Container-CLI vergibt Container und Images selbst; das Skript findet sie über das Label `devcontainer.local_folder`.
   Der erste `up` dauerte 2,7 s, weil das Image aus dem Docker-Cache kam; der zweite mit `--build-no-cache` baute das Image neu (50,6 s).
