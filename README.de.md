@@ -278,7 +278,7 @@ installiert sein.
 ```bash
 make help                       # alle Targets auflisten
 make build                      # Runtime-Image bauen (Distroless)
-make gates                      # lint + test + coverage-gate + docs-check
+make gates                      # lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung
 make ci                         # gates + govulncheck + image-scan
 make fullbuild                  # ci + build (vollständiger Closure-Lauf)
 ```

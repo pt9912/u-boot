@@ -78,7 +78,7 @@ Der Cut folgt dem Muster der Release-Cut-Slices (zuletzt
 ## 4. Vorab-Prüfung
 
 ```bash
-make gates            # lint + test + coverage-gate + docs-check + baseline-verify
+make gates            # lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung
 make ci               # gates + govulncheck + image-scan (Trivy HIGH/CRITICAL)
 make test-docker      # Integrationstests gegen die echte Docker Engine
 make fullbuild        # ci + Runtime-Image-Build

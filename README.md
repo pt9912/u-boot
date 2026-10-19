@@ -274,7 +274,7 @@ host is required. Only Docker and `make` need to be installed.
 ```bash
 make help                       # list all targets
 make build                      # build runtime image (distroless)
-make gates                      # lint + test + coverage-gate + docs-check
+make gates                      # lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung
 make ci                         # gates + govulncheck + image-scan
 make fullbuild                  # ci + build (full closure)
 ```

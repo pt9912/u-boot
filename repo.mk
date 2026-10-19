@@ -35,7 +35,7 @@
 # LH-NFA-PORT-002 — it is the only host dependency beyond Docker.
 #
 # Quality gates (LH-FA-BUILD-006):
-#   make gates       — inner-loop mandatory gates (lint + test + coverage-gate + docs-check + baseline-verify).
+#   make gates       — inner-loop mandatory gates (lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung).
 #   make ci          — gates plus govulncheck plus image-scan (mirrors ci.yml).
 #   make fullbuild   — ci plus build (runtime image).
 
@@ -86,7 +86,7 @@ DOCKER_BUILD := docker build $(PROGRESS_FLAG) \
 .DEFAULT_GOAL := help
 
 .PHONY: deps compile lint test test-docker coverage coverage-gate build build-binaries run clean \
-        ci fullbuild govulncheck packages image-scan verify-depguard
+        ci fullbuild govulncheck packages image-scan verify-depguard ablage-pruefung
 
 # ---- inner-loop ------------------------------------------------------------
 
@@ -211,6 +211,16 @@ verify-depguard: ## Verify all nine depguard layer rules fire (LH-FA-ARCH-003).
 # docs-check (d-check.mk) und baseline-verify (harness/mk/baseline.mk) haengen sich selbst
 # an GATE_CHECKS; hier kommen die Code-Gates dazu.
 GATE_CHECKS += lint test coverage-gate
+
+# ablage-pruefung: Positivliste der Ablage im Planning-Baum und unter docs/
+# (harness/conventions.md, Abschnitt Ablage von Messprotokollen und Skripten).
+# bash + git auf dem Host, kein Docker (Muster tools/harness/history-range-guard.sh);
+# das Skript und sein Waechter-Test liegen unter tools/harness/.
+ablage-pruefung: ## Ablage im Planning-Baum und unter docs/ gegen die Positivliste pruefen.
+	@bash tools/harness/ablage-pruefung.sh
+	@bash tools/harness/ablage-pruefung-test.sh
+
+GATE_CHECKS += ablage-pruefung
 
 ci: gates govulncheck image-scan ## Gates plus govulncheck plus image-scan (mirrors ci.yml).
 	@echo "[ci] gates + govulncheck + image-scan green"

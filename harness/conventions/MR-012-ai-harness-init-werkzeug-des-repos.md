@@ -3,7 +3,7 @@
 - **Datum:** 2026-10-16
 - **Geltungsbereich:** [`Makefile`](../../Makefile), [`repo.mk`](../../repo.mk),
   [`d-check.mk`](../../d-check.mk), `harness/mk/`, `tools/harness/` (außer
-  `fetch-baseline-cache.sh`), `.claude/settings.json`, `.claude/hooks/`,
+  `fetch-baseline-cache.sh`, `ablage-pruefung.sh` und `ablage-pruefung-test.sh`), `.claude/settings.json`, `.claude/hooks/`,
   [`harness/mk/ai-harness-init.md`](../mk/ai-harness-init.md),
   [`.d-check.yml`](../../.d-check.yml) (`targets`), [`harness/README.md`](../README.md) §Sensors.
 - **Ersetzt-Baseline-Regel:** [`grundlagen-harness-dateien.md` §harness/README.md als Einstiegspunkt](../../.harness/baseline/v6.18.1/regelwerk/grundlagen-harness-dateien.md#harnessreadmemd-als-einstiegspunkt)
@@ -24,7 +24,13 @@
      als Zeile führt.
   3. **`fetch-baseline-cache.sh` bleibt.** Es trägt Vendor-Lauf und Freshness-Audit
      ([`MR-004`](MR-004-regelwerk-vendored.md)); das Gate `baseline-verify` des Werkzeugs
-     verifiziert den Bestand netzlos und ergänzt `make gates`.
+     verifiziert den Bestand netzlos und ergänzt `make gates`. Ebenso repo-geführt
+     sind `ablage-pruefung.sh` und sein Wächter-Test `ablage-pruefung-test.sh`
+     (Target `ablage-pruefung` in `repo.mk`, Zeile in [`harness/README.md`](../README.md) §Sensors,
+     Regel in [`conventions.md`](../conventions.md#ablage-von-messprotokollen-und-skripten)):
+     Das Werkzeug schreibt nur die Dateien seiner eigenen Liste und lässt eine fremde
+     Datei in `tools/harness/` bei einem erneuten Lauf stehen (an einem Testklon gelesen:
+     ein zweiter Lauf entfernt eine fremde `*.sh` dort nicht).
   4. **Repo-geführte Dateien bleiben.** Skills, `implement-slice`, die Agenten und
      `.githooks/commit-msg` schreibt das Werkzeug nur an einem freien Pfad. `planner`,
      `plan-welle`, `close-welle` und das Beobachtungs-Register legt es an; sie sind auf u-boot
