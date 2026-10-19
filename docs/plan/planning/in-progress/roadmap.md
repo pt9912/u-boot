@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Nichts in Arbeit.
+In Arbeit: [`slice-cr-lastenheft-zielbild`](slice-cr-lastenheft-zielbild.md) (Lastenheft-CR 0.17.0: Prozesszustand aus der Historie streichen; wellenlos, Zuordnung v0.12.0).
 
 ## Nächste Wellen
 
