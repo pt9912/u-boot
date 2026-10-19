@@ -1272,7 +1272,7 @@ Docker-Test prüft sie):
   die Regeln und der DNS-Server des vorigen Laufs unverändert stehen (ein Docker-Test prüft
   beides mit einer ungültigen Regelzeile). Ein Host, auf dem `nft` die IPv6-Tabelle nicht
   anlegen kann, endet ebenso ohne Regel mit Exit-Code 11 (gelesen im Script; auf einem
-  solchen Host nicht gelaufen). Zuvor blieb in diesem Fall die IPv4-Beschränkung bestehen.
+  solchen Host nicht gelaufen).
 - **DNS-Server startet nicht oder läuft unter einem anderen Benutzer:** Die Regeln mit der
   Richtlinie `drop` stehen. Im ersten Lauf zeigt `/etc/resolv.conf` nicht auf den lokalen
   DNS-Server (ein Docker-Test prüft das); in einem wiederholten Lauf bleibt der Eintrag
