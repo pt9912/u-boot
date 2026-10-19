@@ -54,7 +54,7 @@ Entscheidungs-Konformität: keine Accepted-ADR im Diff (`AGENTS.md` §3.5), kein
 |---|---|---|
 | `spec/lastenheft.md` | Zeile 1 | ok (Abschnitt 2) |
 | `docs/maintainer/cli-json-contract.md` | Zeile 2 | ok; zwei Hunks (§6, §6.10), je Aussage gegen Code gelesen (`egress.go`: `newDataEnvelope("egress", "list", …)`, `ErrEgressSubcommandRequired`, `ErrEgressPreviewNotApplicable`) |
-| `in-progress/slice-cr-cli-json-command-enum.md` | Zeile 3 | ok | <!-- d-check:ignore (Kennungen als Zitat) -->
+| `done/slice-cr-cli-json-command-enum.md` | Zeile 3 | ok | <!-- d-check:ignore (Kennungen als Zitat) -->
 | `docs/reviews/2026-10-19-slice-cr-cli-json-command-enum.md` (neu) | Zeile 4 | ok | <!-- d-check:ignore (Kennungen als Zitat) -->
 | `docs/user/benutzerhandbuch.md` | Zeile 5 (durch den Review-Fix ergänzt) | ok |
 | `in-progress/roadmap.md` | Zeile 6 (durch den Review-Fix ergänzt) | ok: Arbeitszeile „In Arbeit: …“ (Zustand und Anker, keine Chronik) und Verweis in der Welle-Zeile |

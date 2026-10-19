@@ -102,7 +102,7 @@ Die Reihenfolge der Welle ist verbindlich: erst [`slice-cr-devcontainer-ollama`]
 |---|---|---|
 | `spec/lastenheft.md` | update | Stellen 1 und 2 ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) Enum; Versionsfeld; §16 Historie); erst nach dem Landen von [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md) (Version) |
 | `docs/maintainer/cli-json-contract.md` | update | §6.10 Vermerk „Offene Vertragslücke“ auf den Ist-Stand setzen (Lücke geschlossen, Bestätigung ausstehend) und §6 „listet zehn Subcommands“ prüfen; je Aussage gelesen |
-| `docs/plan/planning/in-progress/slice-cr-cli-json-command-enum.md` (diese Datei) | update | Freigabe bzw. Gate-Stand, Vorab-Suche, Closure (§7) |
+| `docs/plan/planning/done/slice-cr-cli-json-command-enum.md` (diese Datei) | update | Freigabe bzw. Gate-Stand, Vorab-Suche, Closure (§7) |
 | `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation nach `harness/review.md` und `harness/verification.md` |
 | `docs/user/benutzerhandbuch.md` | update | Tabelle „Immer vorhanden“: `command` führt `egress`, `subcommand` führt `egress` (`list`); gelesen gegen `runEgressList` in `internal/adapter/driving/cli/egress.go` |
 | `docs/plan/planning/in-progress/roadmap.md` | update | Arbeitszeile (bei der Closure zurück auf „Nichts in Arbeit.“); Verweis-Nachzug des Moves |
