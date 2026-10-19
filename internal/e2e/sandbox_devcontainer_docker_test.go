@@ -880,3 +880,144 @@ func TestE2E_SandboxDevcontainer_NestedDocker_EgressAptUpdate(t *testing.T) {
 		t.Errorf("egress + docker: exit %d, want apt-get update to succeed and example.com to stay blocked:\n%s", code, out)
 	}
 }
+
+// ollamaImageScript runs as `vscode` in the image without volume and without
+// egress: the pinned version, no GPU libraries, no `zstd`, a model store the
+// container user owns, and no environment variable that sets a listen
+// address.
+const ollamaImageScript = `ollama --version 2>&1 | grep -F '0.40.6' > /dev/null && echo OLLAMA_VERSION_PINNED
+test -d /usr/local/lib/ollama && echo OLLAMA_LIB_PRESENT
+test -z "$(ls /usr/local/lib/ollama | grep -E '^(cuda_|vulkan)')" && echo NO_GPU_LIBRARIES
+! command -v zstd > /dev/null && echo NO_ZSTD
+test "$(stat -c %U:%G /home/vscode/.ollama)" = vscode:vscode && echo STORE_OWNED_BY_VSCODE
+test "$(env | grep -c '^OLLAMA' || true)" = 0 && echo NO_OLLAMA_ENV`
+
+// ollamaServerScript runs as `vscode` in the container behind the egress
+// restriction: it starts the server like the user does, then reports the
+// listening sockets, the container-address probe, the compute library, the
+// pull of a small model through the two allowlisted hosts, a run on the CPU, the
+// key file in the model store, and an unlisted host.
+const ollamaServerScript = `sudo sh /usr/local/bin/u-boot-egress-init
+nohup ollama serve > /tmp/ollama.log 2>&1 &
+for i in $(seq 1 30); do curl -fsS -m 2 http://127.0.0.1:11434/ > /dev/null 2>&1 && break; sleep 1; done
+curl -fsS -m 2 http://127.0.0.1:11434/ | grep -F 'Ollama is running' > /dev/null && echo LOOPBACK_ANSWERS
+echo "LISTEN:$(ss -ltn | awk '$4 ~ /:11434$/ {print $4}' | tr '\n' ' ')"
+ip4="$(hostname -I | awk '{print $1}')"
+if curl -sS -m 3 -o /dev/null "http://$ip4:11434/" 2> /dev/null; then echo CONTAINER_ADDRESS_REACHABLE; else echo CONTAINER_ADDRESS_REFUSED; fi
+grep -F 'library=cpu' /tmp/ollama.log > /dev/null && echo LIBRARY_CPU
+if ollama pull smollm2:135m > /tmp/pull.log 2>&1; then echo PULL_OK; else echo PULL_FAILED; tail -5 /tmp/pull.log; fi
+ollama list | grep -E '^smollm2:135m' > /dev/null && echo MODEL_LISTED
+test -f /home/vscode/.ollama/id_ed25519 && echo KEY_IN_MODEL_STORE
+run_out="$(ollama run smollm2:135m 'Reply with the single word OK.' 2>&1)" && test -n "$run_out" && echo RUN_OK
+if curl -sS -m 6 -o /dev/null https://example.com 2> /dev/null; then echo FOREIGN_REACHABLE; else echo FOREIGN_BLOCKED; fi`
+
+// ollamaRestartScript starts the server in a fresh container that mounts the
+// volumes of the removed one: the model survives the removal.
+const ollamaRestartScript = `nohup ollama serve > /tmp/ollama.log 2>&1 &
+for i in $(seq 1 30); do curl -fsS -m 2 http://127.0.0.1:11434/ > /dev/null 2>&1 && break; sleep 1; done
+ollama list | grep -E '^smollm2:135m' > /dev/null && echo MODEL_SURVIVES_CONTAINER_REMOVAL`
+
+// LH-FA-DEV-003 (feature `ollama`), LH-FA-DEV-008: the generated Dockerfile
+// builds; the image carries the pinned Ollama without GPU libraries and
+// `zstd`; behind the egress restriction the server the user starts listens on
+// loopback only (the container address refuses), runs on the CPU, pulls a
+// model through the two default-allowlist hosts while an unlisted host stays
+// blocked; the model survives the removal of the container. The test needs
+// network access and about 1.5 GB of download; the amd64 run is not a
+// verification of the architecture claim until a CI run with a visible pass.
+func TestE2E_SandboxDevcontainer_Ollama(t *testing.T) {
+	requireDocker(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Minute)
+	defer cancel()
+	dir := generateSandboxProjectWith(ctx, t, map[string]string{
+		"devcontainer.features.ollama.enabled": "true",
+		"devcontainer.sandbox.egress.enabled":  "true",
+		"devcontainer.sandbox.onUnavailable":   "warn",
+	})
+	image := buildProjectImage(ctx, t, dir, "uboot-e2e-ollama")
+
+	out, code := dockerOutput(ctx, t, "run", "--rm", image, "bash", "-c", ollamaImageScript)
+	if code != 0 {
+		t.Fatalf("image checks exit %d:\n%s", code, out)
+	}
+	for _, want := range []string{"OLLAMA_VERSION_PINNED", "OLLAMA_LIB_PRESENT", "NO_GPU_LIBRARIES", "NO_ZSTD", "STORE_OWNED_BY_VSCODE", "NO_OLLAMA_ENV"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("image checks lack %s:\n%s", want, out)
+		}
+	}
+
+	mounts := generatedMounts(t, dir)
+	if len(mounts) != 2 || !strings.Contains(mounts[1], "target=/home/vscode/.ollama,type=volume") {
+		t.Fatalf("mounts = %v, want workspace volume and model volume", mounts)
+	}
+	id := "ollama" + strconv.FormatInt(time.Now().UnixNano(), 36)
+	t.Cleanup(func() {
+		for _, m := range mounts {
+			src := strings.TrimPrefix(strings.Split(strings.ReplaceAll(m, "${devcontainerId}", id), ",")[0], "source=")
+			_, _ = dockerOutput(context.Background(), t, "volume", "rm", "-f", src)
+		}
+	})
+	start := func(name string, withRunArgs bool) {
+		args := []string{"run", "-d", "--name", name}
+		for _, m := range mounts {
+			args = append(args, "--mount", strings.ReplaceAll(m, "${devcontainerId}", id))
+		}
+		if withRunArgs {
+			args = append(args, generatedRunArgs(t, dir)...)
+		}
+		args = append(args, image, "sleep", "1800")
+		t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rm", "-f", name) })
+		if out, code := dockerOutput(ctx, t, args...); code != 0 {
+			t.Fatalf("start %s: %s", name, out)
+		}
+	}
+
+	first := "uboot-e2e-ollama-" + id
+	start(first, true)
+	out, code = dockerExec(ctx, t, first, ollamaServerScript)
+	if code != 0 {
+		t.Errorf("server script exit %d:\n%s", code, out)
+	}
+	for _, want := range []string{"LOOPBACK_ANSWERS", "LISTEN:127.0.0.1:11434 \n", "CONTAINER_ADDRESS_REFUSED", "LIBRARY_CPU", "PULL_OK", "MODEL_LISTED", "KEY_IN_MODEL_STORE", "RUN_OK", "FOREIGN_BLOCKED"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("server script output lacks %q:\n%s", want, out)
+		}
+	}
+	for _, bad := range []string{"CONTAINER_ADDRESS_REACHABLE", "FOREIGN_REACHABLE", "PULL_FAILED"} {
+		if strings.Contains(out, bad) {
+			t.Errorf("server script output has %q:\n%s", bad, out)
+		}
+	}
+
+	if out, code := dockerOutput(ctx, t, "rm", "-f", first); code != 0 {
+		t.Fatalf("remove %s: %s", first, out)
+	}
+	second := "uboot-e2e-ollama-again-" + id
+	start(second, false)
+	out, code = dockerExec(ctx, t, second, ollamaRestartScript)
+	if code != 0 || !strings.Contains(out, "MODEL_SURVIVES_CONTAINER_REMOVAL") {
+		t.Errorf("model volume after removing the container: exit %d:\n%s", code, out)
+	}
+}
+
+// ADR-0024 negative probe: the build stops before the extraction when the
+// pinned checksum does not match; `--build-arg` replaces both architecture
+// values, so the probe holds on `amd64` and `arm64` hosts.
+func TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild(t *testing.T) {
+	requireDocker(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Minute)
+	defer cancel()
+	dir := generateSandboxProjectWith(ctx, t, map[string]string{"devcontainer.features.ollama.enabled": "true"})
+	zeros := strings.Repeat("0", 64)
+	const tag = "uboot-e2e-ollama-pin-negative:probe"
+	out, code := dockerOutput(ctx, t, "build", "-q", "-t", tag,
+		"--build-arg", "OLLAMA_SHA256_AMD64="+zeros, "--build-arg", "OLLAMA_SHA256_ARM64="+zeros,
+		filepath.Join(dir, ".devcontainer"))
+	if code == 0 {
+		t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", tag) })
+		t.Fatalf("build with a wrong checksum succeeded, want a failure before the extraction:\n%s", out)
+	}
+	if !strings.Contains(out, "FAILED") {
+		t.Errorf("build output lacks the checksum failure:\n%s", out)
+	}
+}
