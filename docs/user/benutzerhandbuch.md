@@ -1321,8 +1321,11 @@ registry.npmjs.org  feature:claude-code, feature:node
   `files.pythonhosted.org`, `deb.debian.org`) liegen alle hinter demselben
   CDN-Anbieter und wurden einmal gemessen. Ob jeder `CNAME`-Fall so läuft, ist
   nicht gemessen, und es gibt keinen Test dafür.
-- **Messstand:** Docker 29.5.2 auf Colima 0.10.3 (arm64) und `dnsmasq` 2.91;
-  Linux-Hosts und Docker Desktop sind nicht gemessen.
+- **Messstand:** Die Aussagen dieses Abschnitts sind auf Docker 29.5.2 mit Colima 0.10.3 (arm64) und
+  `dnsmasq` 2.91 gemessen. Zusätzlich gibt es Messungen auf einem nativen Linux-x86_64-Host mit Docker 29.9.1
+  (2026-10-19, zwei Läufe): der Pull von Modellen hinter der Beschränkung, das erneute Ausführen
+  des Startscripts und der Verkehr verschachtelter Container (siehe unten und den Abschnitt zu
+  Ollama). Docker Desktop ist nicht gemessen.
 - Für `claude-code` nimmt die Liste nur den API-Host und die npm-Registry auf; die
   Hosts der Anmeldung sowie von Telemetrie, Fehlerberichten, MCP-Connectors,
   Updates und Plugins sind **nicht aufgenommen** und werden bei Bedarf in
@@ -1346,20 +1349,23 @@ registry.npmjs.org  feature:claude-code, feature:node
   Regeln aufheben. Der Verkehr verschachtelter Container und die
   iptables-Regeln eines verschachtelten Docker-Daemons umgehen die Beschränkung;
   `u-boot doctor` warnt bei `docker` mit Beschränkung. Gemessen auf Linux (`amd64`) in
-  einem Lauf: Ein verschachtelter Docker-Container erreichte `example.com` und eine
+  zwei Läufen: Ein verschachtelter Docker-Container erreichte `example.com` und eine
   gesperrte Adresse; ein verschachtelter Podman-Container nicht (Zeitüberschreitung).
 - Führen Sie das Startscript in einem laufenden Container mit aktiver Beschränkung erneut aus
   (es löscht seine Regeln und baut sie neu auf), gilt die Beschränkung kurz nicht. Gemessen
-  auf Linux (`amd64`, 30 Läufe, ein Host): In 28 Läufen gelang währenddessen eine Verbindung
-  zu einer gesperrten Adresse; die gemessene Spanne betrug bis zu 59 ms und ist eine
-  Untergrenze, weil die Messung in Abständen von wenigen Millisekunden abtastet. In 27 Läufen ließ
-  sich ein erlaubter Name für einige Dutzend Millisekunden nicht auflösen, in 15 Läufen schlug
-  ein Aufruf eines erlaubten Hosts in dieser Zeit fehl. Ein Aufruf eines gesperrten Namens gelang in
+  auf Linux (`amd64`, ein Host) in zwei Messungen zu je 30 Läufen: In 27 und 28 Läufen wurde währenddessen ein
+  Verbindungsversuch zum Gateway des Containers (Port 9) nicht verworfen, sondern vom Gateway abgelehnt,
+  also nicht von der Beschränkung aufgehalten (mit Beschränkung läuft derselbe Versuch in die Frist);
+  die gemessene Spanne betrug bis zu 48 und 50 ms und ist eine
+  Untergrenze, weil die Messung in Abständen von wenigen Millisekunden abtastet. In 30 und 27 Läufen ließ
+  sich ein erlaubter Name für 30 bis 76 Millisekunden nicht auflösen; in 19 und 14 Läufen schlug
+  ein Aufruf eines erlaubten Hosts in dieser Zeit fehl, binnen 6 bis 73 ms, in zwei Läufen der ersten
+  Messung erst nach der Frist von 3 s. Ein Aufruf eines gesperrten Namens gelang in
   keinem Lauf; außerhalb der Läufe gab es weder einen Treffer noch einen Ausfall. Die
   Beschränkung bleibt eine Leitplanke und keine Sicherheitsgrenze. Die IPv6-Regeln sind nicht
   gemessen.
 - Der Pull eines Images mit verschachteltem Docker lief direkt nach dem Start der Beschränkung in
-  einem von zwei Läufen in eine Zeitüberschreitung (`i/o timeout`) und gelang 15 Sekunden später;
+  einem von zwei vollständigen Läufen in eine Zeitüberschreitung (`i/o timeout`) und gelang 15 Sekunden später;
   im anderen Lauf gelang er sofort. Die Ursache ist nicht untersucht.
 - Ohne `NET_ADMIN` entfällt die Beschränkung mit einer Warnung (`warn`) oder das
   Startscript endet mit Exit-Code 11 (`fail`). `u-boot doctor` prüft die
@@ -1596,7 +1602,7 @@ ollama run smollm2:135m "Reply with the single word OK."
 - **Modell-Speicher:** Die Modelle liegen unter `/home/vscode/.ollama` in dem benannten
   Volume `<projekt>-ollama-${devcontainerId}` und überstehen das **Löschen des Containers**
   (ein neuer Container mit demselben Volume listet das Modell). Dass sie den Neubau des
-  Images überstehen, ist nicht zugesagt; gemessen ist es auf Linux (`amd64`) in einem Lauf: Mit
+  Images überstehen, ist nicht zugesagt; gemessen ist es auf Linux (`amd64`) in zwei Läufen: Mit
   der Dev-Container-CLI 0.89.0 (`devcontainer up --remove-existing-container --build-no-cache`)
   behielt das Volume seinen Namen, und das Modell war danach gelistet. Die Aktion eines Editors
   (etwa VS Code) für den Neuaufbau ist nicht gemessen. Das Volume enthält außerdem
@@ -1609,11 +1615,11 @@ ollama run smollm2:135m "Reply with the single word OK."
   derselbe bleibt. Wechselt er, bricht der Pull ab (gemessen ohne diesen Host: nach 66
   Sekunden `max retries exceeded`); dann tragen Sie den neuen Namen in
   `devcontainer.sandbox.egress.allow` ein. Auf Linux (`amd64`) lief der Pull beider Modelle in
-  einem Lauf über dieselben zwei Hosts (9 bis 12 Sekunden je Modell, an einem Netzstandort);
+  beiden Läufen über dieselben zwei Hosts (im ersten Lauf 8,7 und 10,5 Sekunden, an einem Netzstandort);
   `ollama.com`, `example.com` und `huggingface.co` ließen sich nicht auflösen. `ollama.com` ist nicht aufgenommen: gesperrt
   meldet der Server beim Start zwei Warnzeilen, Start, Pull und Lauf funktionierten
   (gemessen).
-- **Grenzen der Messung:** Zwei Messumgebungen, je ein Lauf, Ollama `0.40.6`:
+- **Grenzen der Messung:** Zwei Messumgebungen (auf dem `amd64`-Host zwei Läufe), Ollama `0.40.6`:
   Docker 29.5.2 auf Colima 0.10.3 (`arm64`) und, am 2026-10-19, Linux x86_64 (`amd64`) mit
   einer nativen Docker Engine 29.9.1 ohne VM (Kernel 6.8, `kernel.apparmor_restrict_unprivileged_userns=0`,
   `/dev/fuse` und `/dev/net/tun` vorhanden). Auf dem `amd64`-Host baute das erzeugte
@@ -1622,7 +1628,7 @@ ollama run smollm2:135m "Reply with the single word OK."
   überstanden das Löschen des Containers und den Neuaufbau, und die Kombination mit
   `nestedRuntime: podman` und mit `nestedRuntime: docker` baute, ließ die Paketliste unverändert
   und führte einen kleinen verschachtelten Container aus, während der Server und ein Pull liefen. Das
-  ist **eine Messung auf einem Host, kein Lauf in der CI**: Ein CI-Lauf von `amd64` ist nicht
+  sind **zwei Messläufe auf einem Host, kein Lauf in der CI**: Ein CI-Lauf von `amd64` ist nicht
   gemessen. Nicht gemessen: Docker Desktop, Linux hinter einer VM, größere
   Modelle und Mindest-Speicher, `OLLAMA_NO_CLOUD`, ein Start des Servers über die
   `devcontainer.json` (gemessen ist der Start von Hand und der Egress-Start durch die
@@ -1683,7 +1689,7 @@ Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
   amd64 sind Download, Prüfsumme, Signatur und Versionsabfrage unter Emulation
   geprüft. Ein verschachtelter Lauf (`podman run` eines kleinen Images, ohne und
   hinter der Egress-Beschränkung, mit einem Pull hinter ihr) ist auf Linux x86_64
-  (`amd64`, native Docker Engine 29.9.1, 2026-10-19) in einem Lauf gemessen, zusammen mit dem
+  (`amd64`, native Docker Engine 29.9.1, 2026-10-19) in zwei Läufen gemessen, zusammen mit dem
   Feature `ollama`; `podman build` auf `amd64` und CI sind nicht gemessen.
   Podman 6 unterstützt nur cgroups v2 (laut Release-Notes, nicht gemessen);
   Hosts mit cgroups v1 sind davon betroffen.
