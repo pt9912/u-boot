@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-cr-devcontainer-ollama`](../../../../in-progress/slice-cr-devcontainer-ollama.md)
+**Vorgang:** [`slice-cr-devcontainer-ollama`](../../../../done/slice-cr-devcontainer-ollama.md)
 **Fund:** Review-Report [`2026-10-18-slice-cr-devcontainer-ollama`](../../../../../../reviews/2026-10-18-slice-cr-devcontainer-ollama.md) F-3 und F-4 (beide LOW), Verification-Report [`2026-10-18-verification-slice-cr-devcontainer-ollama`](../../../../../../reviews/2026-10-18-verification-slice-cr-devcontainer-ollama.md) V-8, Rückfall nach der Verkörperung in `AGENTS.md` §3.10: **F-3** die Plan-Aussage „eine Aussage ohne Messwert steht nicht im Text“ stimmte nicht (Generator-Zusagen ohne Messwert); **F-4** und **V-8** Zustandsmarker nach der Freigabe nicht auf den Ist-Stand (Stelle 3 „Alt“, „Variante, nur bei Bedarf“, [`LH-FA-DEV-006`](../../../../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) im Kopf, in der Tabelle der Welle-Datei und in `open/README.md`). Berichtigt in der Closure.
 
 **Beleg-Qualität:** Zustandsmarker am Baum bestätigt (Verifier); die Plan-Tabelle selbst war vollständig.

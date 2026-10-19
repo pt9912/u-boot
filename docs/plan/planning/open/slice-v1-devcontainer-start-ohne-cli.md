@@ -64,7 +64,7 @@ Eine Option **e** (kein Docker-Socket, sondern ein Socket-Proxy mit eingeschrän
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Produktcode, Befehl, Port, Dockerfile-Änderung, Workflow-Änderung** — dieser Slice misst und entwirft; die Zusage ist neu (ein Befehl, der Container startet), und das Lastenheft ist das Zielbild: Wortlaut erst nach Freigabe des Projektinhabers. Umsetzung: Folge-Slices nach dem ADR (siehe §7, *Folge-Slices*).
-- **Änderung von `spec/lastenheft.md`, `spec/spezifikation.md`, `spec/architecture.md`** — der Slice prüft den Bedarf und legt einen Wortlaut-Vorschlag vor; geschrieben wird er in einem eigenen CR-Slice nach der Freigabe ([`slice-cr-devcontainer-ollama`](../in-progress/slice-cr-devcontainer-ollama.md) ist das Muster dieser Trennung).
+- **Änderung von `spec/lastenheft.md`, `spec/spezifikation.md`, `spec/architecture.md`** — der Slice prüft den Bedarf und legt einen Wortlaut-Vorschlag vor; geschrieben wird er in einem eigenen CR-Slice nach der Freigabe ([`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md) ist das Muster dieser Trennung).
 - **Option c (Nachbau ohne CLI) als Umsetzung** — nur als Vergleich im ADR; ein Nachbau ändert den Aufwand um eine Größenordnung und gehört zurück zur Zerlegung, falls der Architect ihn wählt.
 - **VS Code, JetBrains oder andere Editoren** — nicht der Gegenstand; der Slice vergleicht (S9) nur, ob der neue Weg sie nicht stört.
 - **`u-boot up` startet den Devcontainer mit** — `up` betrifft den Compose-Stack ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)); ein gemeinsamer Start wäre eine Änderung dieser Zusage und braucht eine eigene Entscheidung.

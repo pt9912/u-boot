@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-cr-devcontainer-ollama`](../../../../in-progress/slice-cr-devcontainer-ollama.md)
+**Vorgang:** [`slice-cr-devcontainer-ollama`](../../../../done/slice-cr-devcontainer-ollama.md)
 **Fund:** Review-Report [`2026-10-18-slice-cr-devcontainer-ollama`](../../../../../../reviews/2026-10-18-slice-cr-devcontainer-ollama.md) F-1 (MEDIUM: „die Hosts des Modell-Pull“ allgemeiner als die Messung der ADR, Stabilität des Blob-Hosts nicht gemessen) und F-2 (MEDIUM: „weist aus“ neben Ausweisungen, die unter `--quiet` bleiben); Verification-Report [`2026-10-18-verification-slice-cr-devcontainer-ollama`](../../../../../../reviews/2026-10-18-verification-slice-cr-devcontainer-ollama.md) V-1, V-2.
 
 **Beleg-Qualität:** beide Befunde belegt durch Lesen des Wortlauts gegen [`ADR-0024`](../../../../../adr/0024-ollama-im-sandbox-devcontainer.md) (Entscheidungen 3 und 7) und [`LH-FA-CLI-005`](../../../../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging); keine Messung wiederholt. Der Wortlaut ist unverändert (Entscheidung des Projektinhabers vor dem Release).
