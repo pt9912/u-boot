@@ -2146,8 +2146,8 @@ aus. Bei Fehlern erscheint der Fehlertext zusätzlich auf der Fehlerausgabe.
 | Feld | Inhalt |
 |---|---|
 | `status` | `ok`, `warn` oder `error`; folgt dem schwersten Eintrag in `diagnostics` |
-| `command` | Befehl: `init`, `add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `template` |
-| `subcommand` | nur bei `config` (`get`, `set`, `list`) und `template` (`list`) |
+| `command` | Befehl: `init`, `add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `egress`, `template` |
+| `subcommand` | nur bei `config` (`get`, `set`, `list`), `egress` (`list`) und `template` (`list`) |
 | `diagnostics` | Liste der Befunde, leer (`[]`), wenn alles in Ordnung ist |
 | `exitCode` | derselbe Wert wie der Exit-Code des Prozesses |
 | `data` | Ergebnisdaten des Befehls (siehe Tabelle unten), nicht bei jedem Befehl |

@@ -336,7 +336,7 @@ Weitere Subcommand-Sektionen kommen mit den jeweiligen Folge-Slices
 
 Spec-Enum ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)) listet elf Werte; alle
 sollen `--json` tragen ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)). Zehn davon
-migrieren **inkrementell** über neun Folge-Slices unterhalb des Cluster-
+(alle außer `egress`, siehe §6.10) migrieren **inkrementell** über neun Folge-Slices unterhalb des Cluster-
 Slices [`slice-v1-cli-json-dry-run`](../plan/planning/done/slice-v1-cli-json-dry-run.md);
 Reihenfolge gemäß Cluster-T0-(e):
 
