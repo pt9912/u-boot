@@ -24,6 +24,11 @@ open/ → next/ → in-progress/ → done/
   [`../../../harness/verification.md`](../../../harness/verification.md)
   tragen oder auf ein eigenes Evidence-Artefakt verweisen.
 
+## Ablage
+
+Im Planning-Baum liegen nur Dokumente; wohin Skripte und Messprotokolle gehören, steht in
+[`harness/conventions.md`](../../../harness/conventions.md#ablage-von-messprotokollen-und-skripten).
+
 ## Slices vs. Wellen — zwei Status-Mechanismen
 
 Zwei bewusst getrennte Status-Mechanismen:

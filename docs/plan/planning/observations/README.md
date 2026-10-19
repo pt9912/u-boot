@@ -14,6 +14,11 @@ BEO-<KUERZEL>/<slug>/
 └── evidence/<vorgangs-id>.md je Auftreten eine Datei
 ```
 
+Unter `observations/` liegen nur Beobachtungen in dieser Form; Skripte und Messprotokolle
+gehören an die Orte, die
+[`harness/conventions.md`](../../../../harness/conventions.md#ablage-von-messprotokollen-und-skripten)
+nennt.
+
 `<KUERZEL>` wird nachgeschlagen, nicht erfunden: es ist das Sub-Area-Kürzel
 aus der Modus-Deklaration in `harness/conventions.md`. Diese Spalte trägt
 jedes Repo für diesen Zweck — unabhängig davon, ob seine ADR- oder

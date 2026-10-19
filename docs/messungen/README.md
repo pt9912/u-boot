@@ -5,6 +5,8 @@ liegt hier im Repo, nicht im Home-Verzeichnis des Messenden.
 
 ## Ablage
 
+Die Regel steht in [`harness/conventions.md`](../../harness/conventions.md#ablage-von-messprotokollen-und-skripten); hier ihre Anwendung auf dieses Verzeichnis.
+
 - **Protokoll hier:** ein Verzeichnis je Vorgang unter `docs/messungen/` mit `README.md` (Messstand, Reihenfolge und Aufruf, Lesehilfen)
   und den Rohdaten als `.txt` oder `.log`. Der Verzeichnisname ist die Kennung des Vorgangs, der die Messung auslöste.
 - **Skripte und Hilfs-Dockerfiles unter `tools/messung/<name>/`**, nicht hier: Ein Skript und seine Hilfsdateien
