@@ -114,6 +114,8 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 | `docs/plan/planning/done/slice-v1-devcontainer-ollama-messung.md`, `…/slice-v1-sandbox-egress-neuladen-entwurf.md` | update (nur Querverweise: sechs Links) | Link-Ziele auf `docs/messungen/…`; Ortsaussagen in Prosa bleiben (Zeitdokument-Grenze, §1) |
 | `docs/plan/planning/open/slice-v1-devcontainer-start-ohne-cli.md`, `…/slice-v1-egress-dns-upstream-schliessen.md` | update | ein gebrochener Link je Datei und die geplanten Ablageorte künftiger Protokolle (`docs/messungen/`, `tools/messung/`) |
 | `docs/plan/planning/observations/BEO-DOK/messprotokoll-ausserhalb-des-repos/state.md`, `…/evidence/slice-v1-egress-wildcard-pruefung.md`, `…/spec-bedingung-ohne-code-entsprechung/evidence/slice-v2-spec-sandbox-egress-ollama.md` | update | Ortsangaben auf die neuen Orte (gelesen, je eine Stelle) |
+| `docs/plan/planning/observations/BEO-DOK/doc-immutable-greift-nicht-bei-inline-status/` (`observation.md`, `state.md`, `evidence/slice-v1-messskripte-nach-tools.md`) | neu | Beobachtung zur Gate-Lücke bei Inline-Status (Review F-1) |
+| `docs/maintainer/quality.md` (Befehlszeile `make gates`, Zeile 72) | update | Gate-Kette nachgezogen; die Jobnamen `gates (…)` in Zeilen 300 und 317 sind Namen des Workflows und bleiben |
 | `docs/plan/planning/open/README.md` (Zeile zu diesem Slice) | update | die Zeile nennt die Entscheidungen (a) und (b) als offen; nach der Entscheidung bleibt nur (c) |
 | `docs/reviews/…-slice-v1-messskripte-nach-tools.md` (Review) und `…-verification-…` | neu | Review und Verifikation |
 | diese Slice-Datei, `open/README.md`, Register, Roadmap bei Start und Closure | update | Lifecycle |
