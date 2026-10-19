@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-In Arbeit: [`slice-v1-egress-init-ohne-luecke`](slice-v1-egress-init-ohne-luecke.md) (Messung: Wiederholungslauf von `egress-init.sh` ohne Fenster ohne Restriktion; Umsetzung erst nach Messbefund und Entscheidung; wellenlos).
+In Arbeit: [`slice-v1-egress-init-ohne-luecke`](../done/slice-v1-egress-init-ohne-luecke.md) (Messung: Wiederholungslauf von `egress-init.sh` ohne Fenster ohne Restriktion; Umsetzung erst nach Messbefund und Entscheidung; wellenlos).
 
 ## Nächste Wellen
 
