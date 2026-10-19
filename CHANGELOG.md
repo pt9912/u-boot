@@ -20,7 +20,14 @@ this file is the same format applied to u-boot itself.
   and it and the "no effect" notice go under `--quiet`. The image starts no server and sets neither a listen address nor a port forwarding: the server the user starts listens on loopback only, and a call
   through the container address fails. A `version` override without `source` is rejected with exit code `10`. With the egress restriction the default allowlist gains `registry.ollama.ai` and
   `dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com` (measured for two models at one time and place; whether the second name stays the same is **not measured**). Models survive removing the
-  container; surviving an image rebuild is **not measured**. Measured with Docker 29.5.2 on Colima 0.10.3 (arm64) and Ollama 0.40.6; `amd64` is pinned but its run is **not verified**; a run together with `nestedRuntime` is **not measured** (the order of the volumes is generated); not provided:
+  container, and they survived a rebuild of the image in the measurements below. Measured with Docker 29.5.2 on Colima 0.10.3 (arm64) and Ollama 0.40.6, and in **one run on one host** on
+  2026-10-19: Linux x86_64 (`amd64`), native Docker Engine 29.9.1 without a VM, kernel 6.8.0, `kernel.apparmor_restrict_unprivileged_userns=0`, Ollama 0.40.6. On that host the generated
+  Dockerfile built (download of the archive 1.44 GB, image 1.01 GB against 0.95 GB without the block), the server listened on loopback only and reported `library=cpu`, `smollm2:135m` and
+  `qwen2.5:0.5b` were pulled and run behind the egress restriction through the two hosts above, `ollama.com`, `example.com` and `huggingface.co` stayed blocked, the models survived
+  removing the container and a rebuild with Dev Container CLI 0.89.0 (`devcontainer up --remove-existing-container --build-no-cache`), and the combination with `nestedRuntime: podman` and with
+  `nestedRuntime: docker` built, left the package list unchanged and ran a small nested container while the server and a pull ran. This is no CI run: the two Docker integration tests of the feature ran once
+  with a visible pass on that host; a run in CI is **not measured**. **Not measured:** Docker Desktop, Linux behind a VM, larger models, whether the second host stays the same over time and
+  region; not provided:
   GPU acceleration, a connection to an Ollama of the host, managing models
   ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features),
   [`LH-NFA-SEC-004`](spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte),
@@ -63,6 +70,12 @@ this file is the same format applied to u-boot itself.
 - The user manual states two measured limits of the egress restriction for a process without `sudo`: it can ask the upstream resolver directly and receives the address of a name outside the list
   (the connection to that address stays blocked; name resolution was measured, not the throughput of a data channel), and it can replace the status file, because the status directory belongs to
   `vscode`. Changing the rules still needs `sudo`. Measured once on Docker 29.5.2 with Colima 0.10.3, arm64; **not measured:** other environments ([`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
+- The user manual no longer says that a nested run on `amd64` is not measured, and it states two limits of the egress restriction that one run measured. On Linux x86_64 with a native
+  Docker Engine 29.9.1 (2026-10-19, one run, no CI run): a nested `podman run` and a nested `docker run` of a small image worked with and without the restriction. Running the startup script
+  again in a container with an active restriction (30 runs) left the restriction off in 28 runs for a measured span of up to 59 ms (a lower bound; a connection to a blocked address succeeded) and made name resolution of an
+  allowed name fail for some tens of milliseconds in 27 runs; no connection by a blocked name succeeded. A nested Docker container reached `example.com` and a blocked address
+  during the restriction, a nested Podman container did not (one run; the manual already named nested traffic as outside the restriction). Not changed: the restriction stays a guardrail
+  ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
 
 ## [0.11.0] - 2026-10-18
 
