@@ -1230,7 +1230,7 @@ den Upstream-Resolver des Docker-Hosts direkt, und die Beschränkung lässt das 
 `podman build` hinter der Beschränkung scheitert deshalb auf Linux (`amd64`, native Docker
 Engine 29.9.1, zwei Läufe) an einem `RUN`-Schritt, der erwartet, dass ein Name außerhalb der
 Liste nicht auflöst: `example.com` löste auf (nur IPv6-Adressen), die Verbindung zur Adresse
-blieb gesperrt. Mit einem anderen Upstream-Resolver (`--dns 9.9.9.9`) lief der Bau durch.
+blieb gesperrt. Mit einem anderen Upstream-Resolver (`--dns 9.9.9.9`) lief der Bau in einem Lauf durch.
 Auf Colima (arm64) und in der CI ist das nicht gemessen.
 
 Standardmäßig erlaubt sind:

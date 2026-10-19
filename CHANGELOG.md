@@ -23,7 +23,7 @@ installs Ollama 0.40.6 from the pinned, checksum-verified release archive, and w
 `u-boot --help` links the user manual, and the `--dry-run` log lines of `config set` and `generate` read in the conditional. Lastenheft 0.17.0.
 **Measured** with Docker 29.5.2 on Colima 0.10.3 (arm64) and, for the `ollama` feature, in two runs on **one** Linux x86_64 host with a native Docker Engine 29.9.1 (2026-10-19; no CI run);
 **not measured:** Docker Desktop, Linux behind a VM, larger models, whether the second model-pull host stays the same.
-**Known on `amd64`:** a nested `podman build` behind the egress restriction fails at a `RUN` step that expects an unlisted name not to resolve: `example.com` resolves (IPv6 addresses only), because the nested container asks the upstream resolver of the Docker host directly, and the restriction allows that; the connection to the address stays blocked. Measured in two runs on one Linux x86_64 host (native Docker Engine 29.9.1); with another upstream resolver (`--dns 9.9.9.9`) the build passed; on Colima, arm64, and in CI not measured.
+**Known on `amd64`:** a nested `podman build` behind the egress restriction fails at a `RUN` step that expects an unlisted name not to resolve: `example.com` resolves (IPv6 addresses only), because the nested container asks the upstream resolver of the Docker host directly, and the restriction allows that; the connection to the address stays blocked. Measured in two runs on one Linux x86_64 host (native Docker Engine 29.9.1); with another upstream resolver (`--dns 9.9.9.9`) the build passed (one run); on Colima, arm64, and in CI not measured.
 
 ### Added
 
