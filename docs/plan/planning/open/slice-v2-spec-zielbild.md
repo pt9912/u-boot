@@ -16,7 +16,7 @@ Anlass: Äußerung des Projektinhabers vom 2026-10-19 („specs sind Zielbild“
 
 **Berührte Spec-Stellen:** [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) (Zeile `ollama`, *Namen und Subdomains*), [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) (*Ermittlung durch den Host*, *Grenze*), [`SPEC-046`](../../../../spec/spezifikation.md#spec-046--egress-anzeige-u-boot-egress-list-berechnung-ausgabe-und-abgrenzung) (*Abgrenzung zum laufenden Container*), [`SPEC-047`](../../../../spec/spezifikation.md#spec-047--feature-ollama-im-sandbox-devcontainer-installation-volume-meldungen-und-grenzen) (*Nicht zugesagt*), als Kandidaten [`LH-FA-DEV-007.b`](../../../../spec/spezifikation.md#lh-fa-dev-007b--ausstattung-bei-nestedruntime-podman), [`SPEC-006`](../../../../spec/spezifikation.md#spec-006--build-args-des-dockerfiles-und-pin-politik) und [`SPEC-016`](../../../../spec/spezifikation.md#spec-016--go-toolchain-mindestversion-und-dockerfile-pin) (datierte Pin-Stände); gelesen und ohne Befund: [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen), [`SPEC-024`](../../../../spec/spezifikation.md#spec-024--beispielaufrufe-zu-den-anforderungen), [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet), [`SPEC-044`](../../../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten) (§1). Der Verweis zeigt aufwärts: Die Spezifikation nennt diesen Slice nie.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-19.
 
