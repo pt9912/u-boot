@@ -67,12 +67,26 @@ erwarte() {
 
 # mutation <name> <pfad> — legt die Datei an, stagt sie und erwartet Rot mit dem Pfad.
 mutation() {
+  local name="$1" pfad="$2" inhalt="${3:-}" art="${4:-datei}"
+  neues_repo
+  mkdir -p "$(dirname "$pfad")"
+  case "$art" in
+    symlink) ln -s ziel "$pfad" ;;
+    *) printf '%s' "$inhalt" >"$pfad" ;;
+  esac
+  git add -A
+  [ "$art" = "exec" ] && git update-index --chmod=+x -- "$pfad"
+  erwarte "$name" 1 "$pfad"
+}
+
+# gruen <name> <pfad> — legt die Datei an, stagt sie und erwartet Gruen (Gegenprobe zu zu engen Regeln).
+gruen() {
   local name="$1" pfad="$2"
   neues_repo
   mkdir -p "$(dirname "$pfad")"
   : >"$pfad"
   git add -A
-  erwarte "$name" 1 "$pfad"
+  erwarte "$name" 0 "OK"
 }
 
 neues_repo
@@ -89,6 +103,20 @@ mutation "Beobachtung mit fremdem Dateinamen" docs/plan/planning/observations/BE
 mutation "Datei neben der Beobachtung" docs/plan/planning/observations/BEO-DOK/loses.md
 mutation "Nicht-md-Datei im Planning-Baum" docs/plan/planning/in-progress/grafik.png
 mutation ".gitkeep in einem vierten Verzeichnis" docs/plan/planning/in-progress/.gitkeep
+mutation "Skript ohne Endung mit Ausfuehrungsbit" docs/messungen/slice-a/run "echo x" exec
+mutation "Skript ohne Endung, Shebang, ausserhalb von messungen" docs/user/run $'#!/bin/sh\necho x\n'
+mutation "Grossgeschriebenes Skript" docs/messungen/slice-a/RUN.SH
+mutation "Grossgeschriebenes Skript ausserhalb von messungen" docs/user/Run.SH
+mutation "dockerfile kleingeschrieben" docs/messungen/slice-a/dockerfile
+mutation "PowerShell-Skript" docs/messungen/slice-a/x.ps1
+mutation "json unter messungen" docs/messungen/slice-a/x.json
+mutation "png unter messungen" docs/messungen/slice-a/x.png
+mutation "grossgeschriebene Endung TXT" docs/messungen/slice-a/rohdaten.TXT
+mutation "versteckte Datei unter messungen" docs/messungen/slice-a/.rohdaten.txt
+mutation "Datei ohne Endung unter messungen" docs/messungen/slice-a/rohdaten
+mutation "Symlink unter messungen" docs/messungen/slice-a/link.md "" symlink
+mutation "md mit Ausfuehrungsbit" docs/messungen/slice-a/notiz.md "" exec
+gruen "png ausserhalb von messungen und planning ist erlaubt" docs/user/bild.png
 
 # Eine Datei, die git nicht verfolgt, ist nicht Gegenstand (Grenze: git ls-files, nicht der Arbeitsbaum).
 neues_repo

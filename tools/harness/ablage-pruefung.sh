@@ -1,18 +1,23 @@
 #!/usr/bin/env bash
-# ablage-pruefung — Positivliste der Ablage im Planning-Baum und unter docs/.
+# ablage-pruefung — Positivliste der Ablage unter docs/ (harness/conventions.md,
+# Abschnitt "Ablage von Messprotokollen und Skripten").
 #
-# ZUSAGE (harness/conventions.md, Abschnitt "Ablage von Messprotokollen und Skripten"):
-#   1. Im Planning-Baum (docs/plan/planning/) liegen nur *.md und die drei Platzhalter
-#      open/.gitkeep, next/.gitkeep, done/.gitkeep.
-#   2. Unter docs/plan/planning/observations/ liegt nur die Beobachtungsform:
-#      README.md und BEO-<KUERZEL>/<slug>/{observation.md,state.md,evidence/<vorgangs-id>.md}.
-#   3. Unter docs/ liegt kein Skript und kein Dockerfile (*.sh, *.bash, *.pl, *.py, *.awk,
-#      *.mk, Dockerfile*).
+# GEPRUEFT wird die Menge der von git verfolgten Dateien unter docs/ (`git ls-files -s`,
+# Index eingeschlossen), nicht der Arbeitsbaum. Eine Datei ausserhalb der Liste wird
+# umgezogen (Skripte nach tools/messung/<name>/, Protokolle nach docs/messungen/<kennung>/);
+# die Liste hier zu erweitern ist eine bewusste Aenderung mit Begruendung.
 #
-# GEPRUEFT wird die Menge der von git verfolgten Dateien (`git ls-files`, Index eingeschlossen),
-# nicht der Arbeitsbaum. Eine Datei ausserhalb der Positivliste wird umgezogen (Skripte nach
-# tools/messung/<name>/, Protokolle nach docs/messungen/<kennung>/); die Liste hier zu erweitern
-# ist eine bewusste Aenderung mit Begruendung, keine Ausnahme im Aufrufer.
+# Regeln, in dieser Reihenfolge je Datei:
+#   1. Modus: unter docs/ nur 100644 (kein Ausfuehrungsbit, kein Symlink).
+#   2. Planning-Baum (docs/plan/planning/): nur Namen auf `.md` (kleingeschrieben) und
+#      open/.gitkeep, next/.gitkeep, done/.gitkeep; unter observations/ nur README.md und
+#      BEO-<KUERZEL>/<slug>/{observation.md,state.md,evidence/<vorgangs-id>.md}.
+#   3. docs/messungen/: nur nicht-versteckte Dateien auf `.md`, `.txt`, `.log` (kleingeschrieben).
+#   4. Im uebrigen docs/: kein Name auf .sh .bash .pl .py .awk .mk .ps1 oder Dockerfile*
+#      (Gross-/Kleinschreibung gleich).
+#   5. Unter docs/ beginnt keine Datei mit `#!` (Shebang).
+#
+# Nicht geprueft: Inhalt jenseits der ersten zwei Bytes, Dateien ausserhalb von docs/.
 #
 # Kein Docker, kein Netz: bash + git (Muster history-range-guard.sh). Exit 0: alles in der Liste.
 # Exit 1: mindestens eine Datei ausserhalb. Exit 2: kein git-Arbeitsbaum.
@@ -28,12 +33,17 @@ planning="docs/plan/planning/"
 observations="docs/plan/planning/observations/"
 beobachtung='^docs/plan/planning/observations/(README\.md|BEO-[A-Z0-9]+/[^/]+/(observation\.md|state\.md|evidence/[^/]+\.md))$'
 platzhalter='^docs/plan/planning/(open|next|done)/\.gitkeep$'
-skript='(\.(sh|bash|pl|py|awk|mk)$|(^|/)Dockerfile[^/]*$)'
+protokoll='^docs/messungen/(.*/)?[^./][^/]*\.(md|txt|log)$'
+skript='(\.(sh|bash|pl|py|awk|mk|ps1)$|(^|/)dockerfile[^/]*$)'
 
-# bewerte <pfad> — gibt den Grund aus, wenn der Pfad ausserhalb der Positivliste liegt;
+# bewerte <modus> <pfad> — gibt den Grund aus, wenn der Pfad ausserhalb der Positivliste liegt;
 # gibt nichts aus, wenn er drin liegt.
 bewerte() {
-  local f="$1"
+  local modus="$1" f="$2" klein
+  if [ "$modus" != "100644" ]; then
+    echo "unter docs/ nur normale Dateien ohne Ausfuehrungsbit (Modus $modus)"
+    return 0
+  fi
   case "$f" in
     "$observations"*)
       [[ "$f" =~ $beobachtung ]] ||
@@ -41,26 +51,38 @@ bewerte() {
       ;;
     "$planning"*)
       if [[ "$f" == *.md ]] || [[ "$f" =~ $platzhalter ]]; then
-        return 0
+        :
+      else
+        echo "im Planning-Baum nur *.md und open/next/done/.gitkeep"
       fi
-      echo "im Planning-Baum nur *.md und open/next/done/.gitkeep"
       ;;
-    docs/*)
-      if [[ "$f" =~ $skript ]]; then
+    docs/messungen/*)
+      [[ "$f" =~ $protokoll ]] ||
+        echo "unter docs/messungen/ nur .md, .txt, .log (Skripte nach tools/messung/<name>/)"
+      ;;
+    *)
+      klein="$(printf '%s' "$f" | tr '[:upper:]' '[:lower:]')"
+      if [[ "$klein" =~ $skript ]]; then
         echo "unter docs/ kein Skript und kein Dockerfile (Skripte nach tools/messung/<name>/)"
       fi
       ;;
   esac
+  if [ -f "$f" ] && [ "$(head -c 2 -- "$f")" = "#!" ]; then
+    echo "unter docs/ keine Datei mit Shebang (Skripte nach tools/messung/<name>/)"
+  fi
 }
 
 fehler=0
-while IFS= read -r -d '' f; do
-  grund="$(bewerte "$f")"
+while IFS= read -r -d '' eintrag; do
+  meta="${eintrag%%$'\t'*}"
+  f="${eintrag#*$'\t'}"
+  modus="${meta%% *}"
+  grund="$(bewerte "$modus" "$f")"
   if [ -n "$grund" ]; then
     echo "ablage-pruefung: $f -- $grund" >&2
     fehler=$((fehler + 1))
   fi
-done < <(git ls-files -z -- docs)
+done < <(git ls-files -s -z -- docs)
 
 if [ "$fehler" -ne 0 ]; then
   echo "ablage-pruefung: $fehler Datei(en) ausserhalb der Positivliste." >&2
