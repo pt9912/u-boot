@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** ohne Welle. Release-Zuordnung: der nächste Release-Cut `v0.12.0`, der die Welle [`welle-sandbox-egress-ollama`](../done/welle-sandbox-egress-ollama.md) ausliefert (deren Closure ist geschlossen; der Slice gehört nicht zu ihr und hält sie nicht auf). Er hat keine Closure-Bedingung, die von seiner DoD verschieden wäre. Er ist der **erste** einer verbindlichen Folge von drei Slices (1 → 2 → 3): erst der Vertrag (dieser Slice), dann die Spezifikation [`slice-v2-spec-zielbild`](slice-v2-spec-zielbild.md), dann die Messung [`slice-v1-devcontainer-ollama-amd64-messung`](slice-v1-devcontainer-ollama-amd64-messung.md).
+**Welle:** ohne Welle. Release-Zuordnung: der nächste Release-Cut `v0.12.0`, der die Welle [`welle-sandbox-egress-ollama`](../done/welle-sandbox-egress-ollama.md) ausliefert (deren Closure ist geschlossen; der Slice gehört nicht zu ihr und hält sie nicht auf). Er hat keine Closure-Bedingung, die von seiner DoD verschieden wäre. Er ist der **erste** einer verbindlichen Folge von drei Slices (1 → 2 → 3): erst der Vertrag (dieser Slice), dann die Spezifikation [`slice-v2-spec-zielbild`](../open/slice-v2-spec-zielbild.md), dann die Messung [`slice-v1-devcontainer-ollama-amd64-messung`](../open/slice-v1-devcontainer-ollama-amd64-messung.md).
 
 **Bezug:** [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle) (Befehlsübersicht; Historie-Zeile 0.14.0), [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Wertebereich von `command`; Historie-Zeile 0.16.0), [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Gegenstand der Zeile 0.14.0). Das Lastenheft führt seine Änderungen in [§16 Historie](../../../../spec/lastenheft.md#16-historie). Kein ADR.
 Anlass: Äußerung des Projektinhabers vom 2026-10-19 — „Was hat „bestätigung ausstehend“ im lastenheft verloren“ und „specs sind Zielbild“. Ein Prozesszustand gehört in die Welle-Datei und den Slice, nicht in den Vertrag (`AGENTS.md` §3.7 *Zustandsfelder*, §3.10 *Zustandsmarker mit Ablaufpunkt*).
@@ -70,7 +70,7 @@ Die Version ist die nächste freie zum Zeitpunkt des Commits (`0.17.0`, solange 
 
 - **Eine Freigabe der beiden Wortlaute** — Entscheidung des Projektinhabers; der Slice streicht eine Buchführungs-Klausel, er bestätigt nichts. Die Gates 1 und 2 sind weder erfüllt noch entfallen.
 - **Andere Prozesszustände oder Messstände im Lastenheft** (etwa „gemessen auf Docker 29.5.2 unter Colima 0.10.3“ in den Zeilen 0.12.0 und 0.13.0 oder im Absatz zu `ollama` in [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)) — der Projektinhaber hat die Klausel „Bestätigung ausstehend“ benannt; ein Messstand im Vertrag ist die gewollte „Zusage nur für Gemessenes“ ([`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md)), kein Prozesszustand.
-- **Spezifikation und Messstände dort** — [`slice-v2-spec-zielbild`](slice-v2-spec-zielbild.md); die Spezifikation folgt dem Lastenheft.
+- **Spezifikation und Messstände dort** — [`slice-v2-spec-zielbild`](../open/slice-v2-spec-zielbild.md); die Spezifikation folgt dem Lastenheft.
 - **Der Wortlaut der Anforderungen** (Befehlsübersicht, Enum, `subcommand`-Pflicht) — unverändert; eine Änderung wäre ein eigener CR nach Äußerung des Projektinhabers.
 - **Umschreiben der geschlossenen `done/`-Dateien und Berichte** — Chronik; nur der Vermerk in der Welle-Datei (§3) wird gesetzt, weil dort das Gate selbst steht.
 
@@ -116,7 +116,7 @@ Die Vorab-Suche (Pflicht vor jeder Vertragsänderung; Lehre aus [`BEO-DOK/vorab-
 
 ## 5. Closure-Trigger
 
-DoD vollständig, Review-Report und Verification-Report liegen vor, Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben (§7). **Reihenfolge der Folge:** [`slice-v2-spec-zielbild`](slice-v2-spec-zielbild.md) startet erst, wenn dieser Slice in `done/` liegt; [`slice-v1-devcontainer-ollama-amd64-messung`](slice-v1-devcontainer-ollama-amd64-messung.md) erst nach jenem. Die Gates 1 und 2 sind kein Closure-Kriterium dieses Slice (sie hängen am Release-Cut).
+DoD vollständig, Review-Report und Verification-Report liegen vor, Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben (§7). **Reihenfolge der Folge:** [`slice-v2-spec-zielbild`](../open/slice-v2-spec-zielbild.md) startet erst, wenn dieser Slice in `done/` liegt; [`slice-v1-devcontainer-ollama-amd64-messung`](../open/slice-v1-devcontainer-ollama-amd64-messung.md) erst nach jenem. Die Gates 1 und 2 sind kein Closure-Kriterium dieses Slice (sie hängen am Release-Cut).
 
 ## 6. Risiken und offene Punkte
 
