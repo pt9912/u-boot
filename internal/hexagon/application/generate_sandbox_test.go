@@ -651,6 +651,7 @@ func TestGenerateDevcontainer_SandboxEgress_UpstreamDNSOnlyForTheResolverUser(t 
 			`output meta skuid "$dns_uid" ip daddr "$ns" tcp dport 53 accept`,
 			`awk '/^Uid:/ {print $2}'`,
 			`if [ "$running_uid" != "$dns_uid" ]; then`,
+			`if ! dnsmasq --conf-file="$conf"; then`,
 		} {
 			if strings.Count(script, want) != 1 {
 				t.Errorf("policy %s: %q appears %d times, want 1:\n%s", policy, want, strings.Count(script, want), script)
@@ -669,6 +670,7 @@ func TestGenerateDevcontainer_SandboxEgress_UpstreamDNSOnlyForTheResolverUser(t 
 		for _, branch := range []string{
 			"does not exist\" >&2\n  write_status failed\n  exit 11\n",
 			"(uid $dns_uid)\" >&2\n  write_status failed\n  exit 11\n",
+			"did not start\" >&2\n  write_status failed\n  exit 11\n",
 		} {
 			if !strings.Contains(script, branch) {
 				t.Errorf("policy %s: script lacks the abort branch %q:\n%s", policy, branch, script)
@@ -1150,7 +1152,7 @@ func TestGenerateDevcontainer_SandboxStartScriptsWriteStatusFiles(t *testing.T) 
 		{"docker", sandboxDockerYAML, dockerInitPath(), "daemon",
 			map[string]int{"ok": 2, "fallback": 1, "failed": 1}, 1},
 		{"egress", "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    egress:\n      enabled: true\n", egressInitPath(), "egress",
-			map[string]int{"ok": 1, "fallback": 1, "failed": 3}, 3},
+			map[string]int{"ok": 1, "fallback": 1, "failed": 4}, 4},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1182,7 +1184,8 @@ func TestGenerateDevcontainer_SandboxStartScriptsWriteStatusFiles(t *testing.T) 
 					t.Errorf("write_status %s appears %d times, want %d:\n%s", result, got, n, script)
 				}
 			}
-			// `failed` is written right before the exit code 11 of the `fail` policy.
+			// `failed` is written right before every exit code 11: the `fail` policy of the
+			// start scripts, and for `egress` also the two resolver branches under any policy.
 			if got := strings.Count(script, "write_status failed\n    exit 11\n") + strings.Count(script, "write_status failed\n  exit 11\n"); got != tc.exit11Next {
 				t.Errorf("write_status failed directly before exit 11: %d times, want %d:\n%s", got, tc.exit11Next, script)
 			}

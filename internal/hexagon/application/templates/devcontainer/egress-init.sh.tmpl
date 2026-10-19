@@ -33,8 +33,9 @@ if ! nft list tables >/dev/null 2>&1; then
 fi
 
 # The dnsmasq user is set once: `user=` in the configuration and `meta skuid`
-# in the upstream rules read the same value. A missing user or a dnsmasq that
-# runs under another uid ends in exit 11 under every onUnavailable policy.
+# in the upstream rules read the same value. A missing user, a dnsmasq that
+# does not start and one that runs under another uid end in exit 11 under
+# every onUnavailable policy.
 dns_user=nobody
 dns_uid=$(id -u "$dns_user" 2>/dev/null)
 if [ -z "$dns_uid" ]; then
@@ -82,7 +83,11 @@ nft add table ip6 u_boot_egress6
 nft add chain ip6 u_boot_egress6 output '{ type filter hook output priority 0; policy drop; }'
 nft add rule ip6 u_boot_egress6 output oifname lo accept
 
-dnsmasq --conf-file="$conf"
+if ! dnsmasq --conf-file="$conf"; then
+  echo "u-boot sandbox: egress restriction failed: the local resolver did not start" >&2
+  write_status failed
+  exit 11
+fi
 # The upstream rules name one uid; a resolver under another uid would be blocked.
 running_uid=$(awk '/^Uid:/ {print $2}' "/proc/$(cat "$pidfile" 2>/dev/null)/status" 2>/dev/null)
 if [ "$running_uid" != "$dns_uid" ]; then

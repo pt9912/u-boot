@@ -268,7 +268,9 @@ for ns in $UPS; do
   for p in udp tcp; do echo "DIRECT $p example.com=$(dnsq $p $ns example.com)"; done
 done
 ns1=$(echo $UPS | cut -d' ' -f1)
-echo "LIMIT sudo-as-resolver-user=$(sudo setpriv --reuid="$(id -u nobody)" --regid="$(id -g nobody)" --clear-groups perl /tmp/dnsq.pl udp "$ns1" example.com)"
+for p in udp tcp; do
+  echo "LIMIT $p sudo-as-resolver-user=$(sudo setpriv --reuid="$(id -u nobody)" --regid="$(id -g nobody)" --clear-groups perl /tmp/dnsq.pl $p "$ns1" example.com)"
+done
 echo "LOCAL api.github.com=$(getent hosts api.github.com | head -1 | cut -d' ' -f1 | grep -c .)"
 echo "LOCAL example.com=$(getent hosts example.com | head -1 | cut -d' ' -f1 | grep -c .)"
 echo "HTTPS api.github.com=$(curl -sS -m 10 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w '%{http_code}' https://api.github.com 2>/dev/null)"
@@ -277,17 +279,21 @@ echo "RULES skuid=$(sudo nft list chain ip u_boot_egress output | grep -c "meta 
 echo "STATUS $(grep '^result=' /var/lib/u-boot/status/egress)"
 `
 
-// egressAbortProbeScript starts mutated copies of the generated script:
-// the uid of the upstream rules differs from the uid of the resolver, and
-// the resolver user does not exist. Both end with exit 11 and status
-// `failed` although the policy is `warn`.
+// egressAbortProbeScript starts mutated copies of the generated script on a
+// fresh container: the resolver user does not exist (abort before the tables),
+// the resolver does not start, and the uid of the upstream rules differs from
+// the uid of the resolver (abort after the tables). All end with exit 11 and
+// status `failed` although the policy is `warn`; the state afterwards is
+// printed: tables present, and whether /etc/resolv.conf points at the resolver.
 const egressAbortProbeScript = `set -u
 src=/usr/local/bin/u-boot-egress-init
-sed 's/^dns_uid=.*/dns_uid=1234/' $src > /tmp/uid-differs.sh
 sed 's/^dns_user=.*/dns_user=u_boot_no_such_user/' $src > /tmp/user-missing.sh
-for m in uid-differs user-missing; do
+sed 's|^if ! dnsmasq --conf-file="$conf"; then|if ! dnsmasq --conf-file=/nonexistent; then|' $src > /tmp/not-started.sh
+sed 's/^dns_uid=.*/dns_uid=1234/' $src > /tmp/uid-differs.sh
+for m in user-missing not-started uid-differs; do
   sudo sh /tmp/$m.sh 2>/tmp/$m.err; echo "ABORT $m exit=$? $(grep '^result=' /var/lib/u-boot/status/egress)"
   sed "s/^/ERR $m: /" /tmp/$m.err
+  echo "STATE $m tables=$(sudo nft list tables | grep -c u_boot_egress) drop=$(sudo nft list chain ip u_boot_egress output 2>/dev/null | grep -c 'policy drop') resolver-in-resolv.conf=$(grep -c '^nameserver 127.0.0.1' /etc/resolv.conf)"
 done
 `
 
@@ -330,7 +336,7 @@ func TestE2E_SandboxDevcontainer_EgressUpstreamDNS(t *testing.T) {
 		}
 		for _, want := range []string{
 			"DIRECT udp example.com=none", "DIRECT tcp example.com=none",
-			"LIMIT sudo-as-resolver-user=answer",
+			"LIMIT udp sudo-as-resolver-user=answer", "LIMIT tcp sudo-as-resolver-user=answer",
 			"LOCAL api.github.com=1", "LOCAL example.com=0", "HTTPS api.github.com=200",
 			"STATUS result=ok",
 		} {
@@ -357,17 +363,22 @@ func TestE2E_SandboxDevcontainer_EgressUpstreamDNS(t *testing.T) {
 		}
 	})
 
-	t.Run("uid mismatch and missing user abort", func(t *testing.T) {
+	t.Run("abort branches", func(t *testing.T) {
 		args := append(append([]string{"run", "--rm"}, runArgs...), image, "bash", "-c", egressAbortProbeScript)
 		out, code := dockerOutput(ctx, t, args...)
 		if code != 0 {
 			t.Fatalf("probe exit %d:\n%s", code, out)
 		}
 		for _, want := range []string{
-			"ABORT uid-differs exit=11 result=failed",
-			"ERR uid-differs: u-boot sandbox: egress restriction failed: the local resolver is not running as 'nobody'",
 			"ABORT user-missing exit=11 result=failed",
 			"ERR user-missing: u-boot sandbox: egress restriction not set up: the user 'u_boot_no_such_user' for the local resolver does not exist",
+			"STATE user-missing tables=0 drop=0 resolver-in-resolv.conf=0",
+			"ABORT not-started exit=11 result=failed",
+			"ERR not-started: u-boot sandbox: egress restriction failed: the local resolver did not start",
+			"STATE not-started tables=2 drop=1 resolver-in-resolv.conf=0",
+			"ABORT uid-differs exit=11 result=failed",
+			"ERR uid-differs: u-boot sandbox: egress restriction failed: the local resolver is not running as 'nobody'",
+			"STATE uid-differs tables=2 drop=1 resolver-in-resolv.conf=0",
 		} {
 			if !strings.Contains(out, want) {
 				t.Errorf("output lacks %q:\n%s", want, out)

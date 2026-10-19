@@ -39,7 +39,8 @@ const (
 	SandboxStatusFallback SandboxStatusResult = "fallback"
 	// SandboxStatusFailed means the start script ended with exit code
 	// 11: policy `fail`, or, for the egress script, a local resolver that
-	// does not match the firewall rules under any policy.
+	// is missing, did not start or does not match the firewall rules
+	// under any policy.
 	SandboxStatusFailed SandboxStatusResult = "failed"
 )
 

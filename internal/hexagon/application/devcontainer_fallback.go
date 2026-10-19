@@ -74,8 +74,8 @@ func egressProbe() fallbackProbe {
 		file:     "egress",
 		what:     "the egress restriction",
 		fallback: "the egress restriction is not active because the NET_ADMIN capability was not granted",
-		failed:   "the start script ended with exit code 11: the NET_ADMIN capability was not granted (onUnavailable: fail), or the local resolver does not run under the user of the firewall rules (any onUnavailable)",
-		hint:     "Start the container with the generated runArgs (`--cap-add=NET_ADMIN`), or restrict egress at network or DNS level.",
+		failed:   "the start script ended with exit code 11: the NET_ADMIN capability was not granted (onUnavailable: fail), the user 'nobody' for the local resolver does not exist, or the local resolver did not start or does not run as 'nobody' (the last two under any onUnavailable)",
+		hint:     "Start the container with the generated runArgs (`--cap-add=NET_ADMIN`), or restrict egress at network or DNS level. After exit code 11 with the capability granted, read the message of the start script on standard error in the container log: it names a missing user 'nobody' or a resolver that did not start or runs under another user.",
 	}
 }
 
