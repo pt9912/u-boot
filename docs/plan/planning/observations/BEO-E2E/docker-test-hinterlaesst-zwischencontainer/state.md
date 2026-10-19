@@ -1,0 +1,1 @@
+**Stand:** offen — 1× (eine Evidence-Datei); der Test `TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild` räumt seit [`slice-v1-e2e-pin-mismatch-zwischencontainer`](../../../done/slice-v1-e2e-pin-mismatch-zwischencontainer.md) auf; Trigger: Messung der drei Teilfälle von `NestedPodman_PinMismatchBreaksBuild` im Folge-Slice (siehe `observation.md`).
