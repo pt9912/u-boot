@@ -1,22 +1,26 @@
 # Messprotokoll: Ollama im Sandbox-Devcontainer
 
-Skripte, Dockerfiles und Rohdaten der Messung des Slice
-[`slice-v1-devcontainer-ollama-messung`](../../../../../done/slice-v1-devcontainer-ollama-messung.md)
-(Ergebnisse und Grenzen: dort §3 *Messung*). Messstand: Docker 29.5.2 (Server, arm64) auf Colima 0.10.3
+Rohdaten und Ablauf der Messung des Slice
+[`slice-v1-devcontainer-ollama-messung`](../../plan/planning/done/slice-v1-devcontainer-ollama-messung.md)
+(Ergebnisse und Grenzen: dort §3 *Messung*). Skripte und Dockerfiles liegen unter
+`tools/messung/devcontainer-ollama/` (Ablage: [`docs/messungen/README.md`](../README.md)). Messstand: Docker 29.5.2 (Server, arm64) auf Colima 0.10.3
 (VM Ubuntu 24.04.4, Kernel 6.8.0-117, 12 CPUs, 23,4 GiB), Docker-Client 29.9.1, Dev-Container-CLI 0.89.0,
 Basis-Image `mcr.microsoft.com/devcontainers/base@sha256:6ee2b4097c75d33e9a94d941577a3286e5d629434fba384688b06daeeaaeac99`
 (Debian 13, arm64), Ollama 0.40.6. Gemessen am 2026-10-18; Netzzugriff nur auf öffentliche Release-Seiten und Registries.
 
 ## Reihenfolge und Aufruf
 
-Jedes Skript wird im eigenen Verzeichnis aufgerufen; die Ausgabe entspricht der Rohdatei in der Spalte rechts.
+Jedes Skript wird im Verzeichnis `tools/messung/devcontainer-ollama/` aufgerufen; seine Ausgabe wird in die Rohdatei in der Spalte rechts in
+diesem Verzeichnis umgeleitet (`bash 02-build-b.sh > "$P/rohdaten-02.txt" 2>&1`, mit `P` = `../../../docs/messungen/` plus Name des
+Verzeichnisses dieser Datei). `06-option-a.sh` legt `rohdaten-06-build-a.log` in das Verzeichnis `OUT` (Vorgabe: das aktuelle Verzeichnis;
+für dieses Protokoll `OUT="$P"`).
 Voraussetzungen: Docker (Colima), `gh` mit Anmeldung, `jq`, `curl` auf dem Host; für Schritt 3 die Binaries aus `make build-binaries`
 (`bin/`, nicht im Repo).
 
 Zwei Voraussetzungen außerhalb des Repos, die mehrere Schritte teilen:
 
-- **Image `u-boot-messung-devcontainer-cli`** (`docker build -f Dockerfile.cli -t u-boot-messung-devcontainer-cli .`, im Verzeichnis dieser
-  Datei): Schritte 6, 7 und 9 laufen darin.
+- **Image `u-boot-messung-devcontainer-cli`** (`docker build -f Dockerfile.cli -t u-boot-messung-devcontainer-cli .`, im Verzeichnis
+  `tools/messung/devcontainer-ollama/`): Schritte 6, 7 und 9 laufen darin.
 - **Messordner `~/ollama-messung/`** (außerhalb des Repos; Downloads und das erzeugte Probe-Projekt): Das Ziel von Schritt 3 liegt dort
   (`~/ollama-messung/<projekt>`), Schritt 4 liest es als `<ziel>`; die Arbeitsverzeichnisse der Schritte 6 und 9 liegen ebenfalls dort. Der
   Ordner ist aus den Skripten erzeugbar: Die Schritte 3, 6 und 9 löschen das übergebene Verzeichnis und legen es neu an; der Aufrufer

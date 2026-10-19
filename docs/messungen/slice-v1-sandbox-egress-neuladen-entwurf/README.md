@@ -1,8 +1,9 @@
 # Messprotokoll: Egress-Liste im laufenden Container
 
-Skripte, Dockerfiles und Rohdaten der Messung des Slice
-[`slice-v1-sandbox-egress-neuladen-entwurf`](../../../../../done/slice-v1-sandbox-egress-neuladen-entwurf.md)
-(Ergebnisse und Grenzen: dort §3 *Messung*). Gemessen am 2026-10-18.
+Rohdaten und Ablauf der Messung des Slice
+[`slice-v1-sandbox-egress-neuladen-entwurf`](../../plan/planning/done/slice-v1-sandbox-egress-neuladen-entwurf.md)
+(Ergebnisse und Grenzen: dort §3 *Messung*). Skripte, Dockerfiles und die Sonde `probe.pl` liegen unter
+`tools/messung/sandbox-egress-neuladen-entwurf/` (Ablage: [`docs/messungen/README.md`](../README.md)). Gemessen am 2026-10-18.
 
 **Messstand:** Docker 29.5.2 (Server, linux/arm64) auf Colima 0.10.3 (VM Ubuntu 24.04.4, Kernel 6.8.0-117-generic, 12 CPUs),
 Docker-Client 29.9.1, Dev-Container-CLI 0.89.0, Basis-Image
@@ -21,7 +22,7 @@ Sonden-Durchlauf an Port 9, bei offenem Pfad; und je ein TCP-Verbindungsversuch 
 - **Docker-Socket des Hosts im Messcontainer:** `05-m4-neustart.sh` startet die Dev-Container-CLI als Container mit `-v /var/run/docker.sock:/var/run/docker.sock`
   (Image aus `Dockerfile.cli`); der Socket der Engine muss dort liegen.
 - Das Binary `bin/u-boot-linux-arm64` aus `make build-binaries` (`bin/` steht nicht im Repo).
-- **Images** (die Schritte 1 bis 3 brauchen die ersten beiden, Schritt 4 das dritte; Aufruf im Verzeichnis dieser Datei, nach Schritt 0):
+- **Images** (die Schritte 1 bis 3 brauchen die ersten beiden, Schritt 4 das dritte; Aufruf im Verzeichnis `tools/messung/sandbox-egress-neuladen-entwurf/`, nach Schritt 0):
   `docker build -t u-boot-messung-egress-neuladen <ziel>/.devcontainer` (das von Schritt 0 erzeugte Sandbox-Image),
   danach `docker build -f Dockerfile.messung -t u-boot-messung-egress-neuladen-dig .` (plus `dig`; das Produkt-Image hat kein `dig`)
   und `docker build -f Dockerfile.cli -t u-boot-messung-devcontainer-cli .` (Dev-Container-CLI).
@@ -31,7 +32,8 @@ Sonden-Durchlauf an Port 9, bei offenem Pfad; und je ein TCP-Verbindungsversuch 
 
 ## Reihenfolge und Aufruf
 
-Jedes Skript wird im eigenen Verzeichnis aufgerufen; die Ausgabe entspricht der Rohdatei in der Spalte rechts.
+Jedes Skript wird im Verzeichnis `tools/messung/sandbox-egress-neuladen-entwurf/` aufgerufen; seine Ausgabe wird in die Rohdatei in der Spalte rechts in
+diesem Verzeichnis umgeleitet (`bash 02-m1-rechte.sh > "$P/rohdaten-02-m1.txt" 2>&1`, mit `P` = `../../../docs/messungen/` plus Name des Verzeichnisses dieser Datei).
 
 | Schritt | Skript | Rohdaten | Messfrage |
 |---|---|---|---|
