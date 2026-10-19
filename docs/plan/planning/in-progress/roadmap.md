@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Nichts in Arbeit.
+In Arbeit: [`slice-v1-egress-dns-upstream-schliessen`](slice-v1-egress-dns-upstream-schliessen.md) (Messung: Weg zum Upstream-Resolver für Prozesse ohne `sudo`; Umsetzung erst nach Messbefund und Entscheidung; wellenlos).
 
 ## Nächste Wellen
 
