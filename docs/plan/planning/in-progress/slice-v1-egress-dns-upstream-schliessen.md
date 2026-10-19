@@ -55,14 +55,14 @@ Anlass: Befund M1 (a) aus [`slice-v1-sandbox-egress-neuladen-entwurf`](../done/s
 ## 2. Definition of Done
 
 - [x] **Messung D1 bis D4** (D5 falls D2 den Pfad schließt) gemessen, mit Messstand, Skripten und Rohdaten im Repo (Ablage wie das Messprotokoll des Vorgängers); je Frage ein Ergebnis oder die Angabe „nicht gemessen“ mit Grund. Beleg: `eab3c2a` und `445fa99` (Skripte, Rohdaten, [Protokoll](../../../messungen/slice-v1-egress-dns-upstream-schliessen/README.md)), Ergebnis je Frage in §3 *Umsetzung (Implementer)*; Messstand ein nativer Linux-x86_64-Host (nicht Colima).
-- [ ] **Entscheidungs-ADR und Umsetzung:** (Entscheidungs-ADR: [`ADR-0026`](../../adr/0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md), `Accepted` (2026-10-19); die Umsetzung steht aus.) Eine Folge-ADR zu [`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md) (`Accepted` bleibt unverändert) trägt den Messbefund und den gewählten Weg; bei einem Weg, der schließt: Änderung am Startscript-Template, Golden Case und Docker-Test (`//go:build docker`), der den direkten Upstream-Pfad ohne `sudo` abweist und die erlaubten Namen weiter auflöst; Handbuch (Absatz *Grenze der Namensauflösung*) und `CHANGELOG.md` auf den Ist-Stand. Bei einem Weg, der nicht schließt: die Grenze steht ausgewiesen im Handbuch, und der Projektinhaber hat entschieden.
-- [ ] **Der Test `TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress` ist abgenommen:** Er wird mit dieser Änderung grün oder wird mit Begründung angepasst (Ausgang in §7); bis dahin bleibt `make test-docker` auf einem Host, dessen Upstream-Resolver ein Rückfall-Nameserver von Podman ist, rot.
+- [x] **Entscheidungs-ADR und Umsetzung:** (Entscheidungs-ADR: [`ADR-0026`](../../adr/0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md), `Accepted` (2026-10-19); Umsetzung: `f691fab`, `6d85215`, `c1e6c07`, Belege in §3 *Umsetzung (Implementer)* Phase 2.) Eine Folge-ADR zu [`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md) (`Accepted` bleibt unverändert) trägt den Messbefund und den gewählten Weg; bei einem Weg, der schließt: Änderung am Startscript-Template, Golden Case und Docker-Test (`//go:build docker`), der den direkten Upstream-Pfad ohne `sudo` abweist und die erlaubten Namen weiter auflöst; Handbuch (Absatz *Grenze der Namensauflösung*) und `CHANGELOG.md` auf den Ist-Stand. Bei einem Weg, der nicht schließt: die Grenze steht ausgewiesen im Handbuch, und der Projektinhaber hat entschieden.
+- [x] **Der Test `TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress` ist abgenommen:** Er wird mit dieser Änderung grün oder wird mit Begründung angepasst (Ausgang in §7); bis dahin bleibt `make test-docker` auf einem Host, dessen Upstream-Resolver ein Rückfall-Nameserver von Podman ist, rot. (Beleg: grün und unverändert gefahren, §3 Phase 2; der Ausgang in §7 folgt bei der Closure.)
 - [ ] **Die Spec-Stelle**, die nach dem Befund nachzuführen ist (falls eine), ist benannt; die Nachführung selbst entsteht als eigener Spezifikations-Slice nach dem Code.
-- [ ] `make gates` grün; `make test-docker` grün, wenn Code geändert wurde.
+- [x] `make gates` grün; `make test-docker` grün, wenn Code geändert wurde (Belege: §3 Phase 2).
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8).
-- [ ] Doku-Update: Handbuch, ADR-Index, `CHANGELOG.md`, soweit der öffentliche Vertrag berührt ist.
+- [x] Doku-Update: Handbuch, ADR-Index, `CHANGELOG.md`, soweit der öffentliche Vertrag berührt ist (Handbuch, READMEs und `CHANGELOG.md`: `c1e6c07`; der ADR-Index trägt [`ADR-0026`](../../adr/0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md) seit dem ADR-Commit).
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
 - [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
@@ -77,11 +77,13 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 | Messprotokoll unter `docs/messungen/slice-v1-egress-dns-upstream-schliessen/` (Rohdaten, README mit Messstand und Voraussetzungen) und Skripte unter `tools/messung/egress-dns-upstream/` (24 Dateien: `lib.sh`, `00-` bis `10-` mit `09b-gegenprobe.sh`, `inner-*.sh`, `variante.sh`, `vergleich.sh`, `dnsq.pl`, `Dockerfile.messung`) | neu (`eab3c2a`, `445fa99`) | D1 bis D5; im Repo statt außerhalb ([`BEO-DOK/messprotokoll-ausserhalb-des-repos`](../observations/BEO-DOK/messprotokoll-ausserhalb-des-repos/observation.md)) |
 | `docs/messungen/README.md` | update (`eab3c2a`) | Tabelle *Bestand*: eine Zeile für das neue Protokoll (gelesen: die Tabelle führt je Protokoll Verzeichnis und Skriptpfad) |
 | `docs/plan/adr/0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md` und `docs/plan/adr/README.md` | neu / update | Folge-ADR zu [`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md) mit Messbefund und Weg: [`ADR-0026`](../../adr/0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md), `Accepted` (2026-10-19; Weg A, Freigabe-Punkte a bis g) |
-| `internal/hexagon/application/templates/devcontainer/egress-init.sh.tmpl` | update (nur wenn die Messung einen Weg trägt) | die Regeln zu Zeilen 63 bis 66 und ihre Voraussetzung (D1) |
-| Golden Case und Test des erzeugten Scripts (`TestGenerateDevcontainer_SandboxEgress` und die Golden-Dateien; der Architect liest die Stellen) | update | das erzeugte Script ändert sich; Replay-Evidence nach `harness/replay.md` |
-| `internal/e2e` (Docker-Test, Build-Tag `docker`) | neu / update | belegt die Zusage: direkter Upstream-Pfad ohne `sudo` abgewiesen, erlaubte Namen lösen auf; dazu `TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress` (roter Test, Abnahme in der DoD) |
-| `docs/user/benutzerhandbuch.md`, `CHANGELOG.md` | update | Absatz *Grenze der Namensauflösung* und die Aussage zum lokalen DNS-Server auf den Ist-Stand |
-| diese Slice-Datei, `open/README.md`, Roadmap bei Start und Closure | update; Moves | Lifecycle |
+| `internal/hexagon/application/templates/devcontainer/egress-init.sh.tmpl` | update (`f691fab`) | `dns_user`/`dns_uid`, `user=` in der Konfiguration, `meta skuid` in den zwei Upstream-Regeln, zwei Abbruchzweige (Exit 11, `failed`) |
+| `internal/hexagon/application/generate_sandbox_test.go` (Test des erzeugten Scripts; gelesen: es gibt keine Golden-Dateien zu `egress-init.sh`, nur Teilstring-Tests) | update (`f691fab`) | neuer Test `TestGenerateDevcontainer_SandboxEgress_UpstreamDNSOnlyForTheResolverUser`; `TestGenerateDevcontainer_SandboxStartScriptsWriteStatusFiles` zählt für `egress` drei `failed`-Zweige statt einem |
+| `harness/replay.md` | update (`6d85215`) | zwei Zeilen der Replay-Tabelle nennen die neuen Zusagen und ihre Evidence-Tests |
+| `internal/e2e/sandbox_devcontainer_docker_test.go` (Build-Tag `docker`) | update (`f691fab`) | neuer Test `TestE2E_SandboxDevcontainer_EgressUpstreamDNS`; `TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress` (roter Test, Abnahme in der DoD) bleibt unverändert und lief grün |
+| `internal/hexagon/application/devcontainer_fallback.go` (`egressProbe`), `internal/hexagon/domain/sandbox_status.go` (Kommentar zu `SandboxStatusFailed`) | update (`f691fab`) | die Doctor-Meldung für `failed` nannte nur die fehlende Capability; Folge des neuen Abbruchgrundes (gelesen: kein Test pinnt den Wortlaut) |
+| `docs/user/benutzerhandbuch.md`, `CHANGELOG.md`, `README.md`, `README.de.md` | update (`c1e6c07`) | Absatz *Namensauflösung und ihre Grenze* (vormals *Grenze der Namensauflösung*), verschachtelte Container, Statusdatei-Tabelle, zwei Verweise; README-Satz zum verschachtelten `podman build`; CHANGELOG `Changed` |
+| diese Slice-Datei, `open/README.md`, Roadmap bei Start und Closure | update; Moves | Lifecycle (Phase 2: nur diese Datei; `open/README.md` und Roadmap unverändert, nicht gelesen auf Berührung) |
 | `docs/reviews/` | neu (Reviewer, Verifier) | Review und Verifikation |
 
 ### Umsetzung (Implementer, 2026-10-19; Phase 1: nur die Messung; nichts gepusht, kein Tag)
@@ -148,6 +150,44 @@ Commits: `eab3c2a` (Skripte, Rohdaten, Protokoll, Bestandszeile), `445fa99` (Geg
 | `make test-docker`, `make verify-depguard` | **nicht gelaufen**: kein Produktcode, keine Importregel berührt |
 
 **Plan-Tabelle gegen `git diff --stat -M d2f8294..HEAD`** (Stand nach dem Stand-Commit dieses Abschnitts): 42 Dateien: 24 unter `tools/messung/egress-dns-upstream/`, 16 unter `docs/messungen/slice-v1-egress-dns-upstream-schliessen/` (README und 15 Rohdaten), `docs/messungen/README.md` und diese Slice-Datei; jede ist in der Tabelle geführt (erste Zeile, Zeile zu `docs/messungen/README.md`, Zeile *diese Slice-Datei*). Die Kopie von Lauf 2 liegt als `rohdaten-lauf2-aussagen.txt` im Protokoll, die übrigen Rohdaten von Lauf 2 (Scratchpad) sind nicht im Repo. Gelesen als **unverändert**: `egress-init.sh.tmpl` (Zeilen 36 und 63 bis 66 gelesen; `variante.sh` ersetzt genau diese beiden Regeln, `sed` bricht sonst ab), `internal/e2e/sandbox_devcontainer_docker_test.go` (`nestedPodmanEgressBuildScript` und `TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress` gelesen, Ablauf nachgestellt), `docs/user/benutzerhandbuch.md` (Absatz *Grenze der Namensauflösung* gelesen: Stand ist „Colima, je ein Lauf“ und die Cut-Messung zum verschachtelten Podman; nicht berührt), `docs/plan/adr/` ([`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md) Alternative C2 und [`ADR-0025`](../../adr/0025-egress-liste-im-laufenden-container.md) M1 a gelesen, nicht berührt).
+
+### Umsetzung (Implementer, 2026-10-19; Phase 2: Umsetzung nach [`ADR-0026`](../../adr/0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md); nichts gepusht, kein Tag)
+
+Commits: `f691fab` (Template, Unit- und Docker-Tests, Doctor-Meldung), `6d85215` (Replay-Tabelle), `c1e6c07` (Handbuch, READMEs, CHANGELOG); der Stand dieses Abschnitts folgt als eigener Commit.
+
+**Umsetzung.** `egress-init.sh.tmpl`: `dns_user=nobody` einmal gesetzt; `dns_uid=$(id -u "$dns_user")` (numerisch, wie gemessen; der Name in `meta skuid` ist nicht gemessen und nicht verwendet); die Konfiguration schreibt `user=$dns_user`; beide Upstream-Regeln tragen `meta skuid "$dns_uid"`. Fehlt der Benutzer (Prüfung vor dem Löschen der Tabellen), oder läuft der Prozess aus der Pid-Datei nach dem Start unter einer anderen UID (Prüfung vor dem Schreiben von `/etc/resolv.conf`), meldet das Script auf `stderr`, schreibt `failed` und endet mit Exit 11, unabhängig von `onUnavailable`. Die Pid-Datei wird vor dem Start gelöscht, damit ein nicht gestarteter `dnsmasq` die Prüfung nicht über einen alten Eintrag besteht. Bei Abbruch nach dem Anlegen der Tabellen bleibt `/etc/resolv.conf` unberührt; die Tabellen (Richtlinie `drop`) bleiben, die Statusdatei trägt `failed`.
+
+**Wortlaut der Meldungen** (`stderr`): `u-boot sandbox: egress restriction not set up: the user 'nobody' for the local resolver does not exist` und `u-boot sandbox: egress restriction failed: the local resolver is not running as 'nobody' (uid 65534)`.
+
+**Abweichung vom Auftrag/Plan:** keine vom ADR. Zusätzlich geändert, weil sonst falsch: die Doctor-Meldung für `failed` des Egress-Eintrags (`egressProbe`, `devcontainer_fallback.go`) und der Kommentar zu `SandboxStatusFailed` nannten nur `onUnavailable: fail`; beide nennen jetzt auch den neuen Grund. Lastenheft und Spezifikation unverändert.
+
+**Sensoren.**
+
+| Sensor | Ergebnis |
+|---|---|
+| `make test` | grün |
+| `make gates` | Exit 0 (Coverage 91,40 % gegen 90 %) |
+| `make test-docker` (volles Paket, Stand vor der Doctor-Meldung) | `ok internal/e2e 611,4 s`, alle Pakete grün |
+| gezielt `TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress` mit `-v` (Aufruf wie `make test-docker`, mit `-run`) | PASS in 62 s, kein SKIP; vor der Umsetzung rot (Cut-Befund, Messprotokoll) |
+| gezielt `TestE2E_SandboxDevcontainer_EgressUpstreamDNS` | PASS in 25 s |
+| `make verify-depguard` | nicht gelaufen: keine Importregel berührt |
+
+**Wächter-Mutationen** (je eine Mutation am Template, rot gesehen, danach zurückgesetzt):
+
+| Wächter | Mutation | Gesehen |
+|---|---|---|
+| Docker-Test „direkt nicht auflösbar“ | `meta skuid` aus beiden Regeln entfernt | rot: `DIRECT udp/tcp example.com=answer` (4 von 4) |
+| Unit-Test (Regel je Protokoll) | `meta skuid` nur aus der `tcp`-Regel entfernt | rot: Zählung und „Regel ohne Benutzerbedingung“ |
+| Docker-Test (UID des `dnsmasq` gleich Regel) | `user=daemon` statt `user=$dns_user` | rot: `INIT_EXIT=11` |
+| Unit-Test (`user=`-Zeile) | `user=`-Zeile gelöscht | rot: `echo "user=$dns_user"` kommt 0-mal vor (das Verhalten bleibt gleich, weil `nobody` der Standard des `dnsmasq` ist; den Wächter trägt der Unit-Test) |
+| Docker-Test (UID-Abweichung bricht ab) | UID-Prüfung nach dem Start abgeschaltet | rot: `ABORT uid-differs exit=0 result=ok` (der Zustand der Gegenprobe der Messung) |
+| Docker-Test (fehlender Benutzer bricht ab) | Prüfung vor den Tabellen abgeschaltet | rot: `ABORT user-missing exit=0 result=ok` |
+
+**Replay / Golden** (`harness/replay.md`): *Affected generators:* `generate devcontainer` mit `devcontainer.sandbox.egress.enabled`. *Golden cases added:* `TestGenerateDevcontainer_SandboxEgress_UpstreamDNSOnlyForTheResolverUser` (Teilstring- und Reihenfolge-Pins des erzeugten `egress-init.sh`, beide Richtlinien). *Golden cases updated:* `TestGenerateDevcontainer_SandboxStartScriptsWriteStatusFiles` (Fall `egress`: `failed` 1 → 3, `exit 11` direkt danach 1 → 3). *Golden cases replayed:* `TestGenerateDevcontainer_SandboxEgress*`, `…_StartScriptsWriteStatusFiles`, `…_NotGenerated`, `…_EgressRebuildNotice*` (grün, `make test`). Es gibt keine Whole-File-Golden-Datei zu `egress-init.sh`. *Intentional output changes:* der verwaltete Block von `egress-init.sh` (skuid-Bedingung, `user=`-Zeile, zwei Abbruchzweige, `rm -f` der Pid-Datei) wegen [`ADR-0026`](../../adr/0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md); Konfigurationen ohne Egress erzeugen kein Script und bleiben unverändert.
+
+**Offen für Folge-Vorgänge (Meldung, kein Eingriff):** [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) und die Egress-Zeile der Degradation (`spec/spezifikation.md`: Capability-Prüfung, Exit 11 nur bei `onUnavailable: fail`) kennen den Abbruch bei `warn` nicht; die Entscheidung liegt beim Spezifikations-Slice nach [`ADR-0026`](../../adr/0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md) Entscheidung 5.
+
+**Plan-Tabelle gegen `git diff --stat -M 4524ffe..HEAD`** (Stand nach dem Stand-Commit dieses Abschnitts): 11 Dateien; jede ist in der Tabelle geführt (`egress-init.sh.tmpl`, `generate_sandbox_test.go`, `sandbox_devcontainer_docker_test.go`, `devcontainer_fallback.go`, `sandbox_status.go`, `harness/replay.md`, `benutzerhandbuch.md`, `CHANGELOG.md`, `README.md`, `README.de.md`, diese Datei). Gelesen als **unverändert**: `internal/e2e/sandbox_status_docker_test.go` (`TestE2E_SandboxDevcontainer_StatusFiles_Egress` gelesen: prüft `ok`, `fallback`, `failed` über die Capability, nicht berührt, im vollen `make test-docker` grün), `spec/spezifikation.md` und `spec/lastenheft.md` (gelesen: kein Satz zur DNS-Regel; Zeile zur Capability-Prüfung siehe oben), `docs/plan/adr/` (nicht berührt).
 
 ## 4. Trigger
 
