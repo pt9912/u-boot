@@ -48,7 +48,7 @@ Anlass: Befund B-1 der `amd64`-Messung: Der Wiederholungslauf von `egress-init.s
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
 - **Ein Neu-Laden der Liste im laufenden Container vom Host aus (R1, R2)** — entschieden gegen (Entscheidung 1 von [`ADR-0025`](../../adr/0025-egress-liste-im-laufenden-container.md)); der Slice ändert den Wiederholungslauf des Startscripts, nicht den Weg „Liste ändern“.
-- **Der offene Pfad zum Upstream-Resolver ohne `sudo`** — Gegenstand von [`slice-v1-egress-dns-upstream-schliessen`](slice-v1-egress-dns-upstream-schliessen.md).
+- **Der offene Pfad zum Upstream-Resolver ohne `sudo`** — Gegenstand von [`slice-v1-egress-dns-upstream-schliessen`](../in-progress/slice-v1-egress-dns-upstream-schliessen.md).
 - **Entziehen von `sudo`, Restriktion außerhalb des Containers (S, R4)** — eigene Vorgänge, in [`ADR-0025`](../../adr/0025-egress-liste-im-laufenden-container.md) offen gehalten.
 - **Der Verkehr verschachtelter Container (B-2 der Messung)** — anderer Mechanismus (Beobachtung [`BEO-APP/nested-docker-umgeht-egress-podman-nicht`](../observations/BEO-APP/nested-docker-umgeht-egress-podman-nicht/observation.md)).
 - **Änderung des Lastenhefts** — nicht erwartet: Die Restriktion bleibt eine Leitplanke ([`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
