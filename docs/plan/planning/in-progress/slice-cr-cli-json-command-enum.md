@@ -84,8 +84,8 @@ Die Reihenfolge der Welle ist verbindlich: erst [`slice-cr-devcontainer-ollama`]
 
 ## 2. Definition of Done
 
-- [ ] **Lastenheft `<Version>`:** Stellen 1 und 2 (Enum-Eintrag `egress`, Versionsfeld, Historie-Zeile mit Datum, Verweis „Vereinbarung mit dem Projektinhaber“) im Wortlaut dieses Vorschlags; die Historie-Zeile trägt die Klausel „Bestätigung des Projektinhabers vor dem Release ausstehend“, solange das Gate offen ist; die Bestätigung ist ein **Gate vor dem Release** (Welle-Datei §3), nicht vor `done/` dieses Slice.
-- [ ] **Vorab-Suche und Nachzug:** Die Suche nach den Werten des Enums (`template`, `generate`, `command`) und nach `egress` im Lastenheft ist festgehalten (Treffer unter „Gefundener Stand“ gelesen); der Vermerk „Offene Vertragslücke“ in `docs/maintainer/cli-json-contract.md` §6.10 und die Aussage „listet zehn Subcommands“ in §6 derselben Datei sind nach dem Lastenheft-Commit gegen den Ist-Stand gelesen und nachgeführt.
+- [x] **Lastenheft 0.16.0:** Stellen 1 und 2 (Enum-Eintrag `egress`, Versionsfeld, Historie-Zeile mit Datum, Verweis „Vereinbarung mit dem Projektinhaber“) im Wortlaut dieses Vorschlags; die Historie-Zeile trägt die Klausel „Bestätigung des Projektinhabers vor dem Release ausstehend“, solange das Gate offen ist; die Bestätigung ist ein **Gate vor dem Release** (Welle-Datei §3), nicht vor `done/` dieses Slice.
+- [x] **Vorab-Suche und Nachzug:** Die Suche nach den Werten des Enums (`template`, `generate`, `command`) und nach `egress` im Lastenheft ist festgehalten (Treffer unter „Gefundener Stand“ gelesen); der Vermerk „Offene Vertragslücke“ in `docs/maintainer/cli-json-contract.md` §6.10 und die Aussage „listet zehn Subcommands“ in §6 derselben Datei sind nach dem Lastenheft-Commit gegen den Ist-Stand gelesen und nachgeführt.
 - [ ] `make gates` grün; `make doc-trace` ohne neue Waise.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des

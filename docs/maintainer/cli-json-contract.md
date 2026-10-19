@@ -334,9 +334,9 @@ Weitere Subcommand-Sektionen kommen mit den jeweiligen Folge-Slices
 
 ## 6. Per-Command-Migrations-Reihenfolge
 
-Spec-Enum ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)) listet zehn Subcommands; alle
-sollen `--json` tragen ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)). Migration läuft
-**inkrementell** über neun Folge-Slices unterhalb des Cluster-
+Spec-Enum ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)) listet elf Werte; alle
+sollen `--json` tragen ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)). Zehn davon
+migrieren **inkrementell** über neun Folge-Slices unterhalb des Cluster-
 Slices [`slice-v1-cli-json-dry-run`](../plan/planning/done/slice-v1-cli-json-dry-run.md);
 Reihenfolge gemäß Cluster-T0-(e):
 
@@ -1201,19 +1201,16 @@ Datum, keine Diagnose:
 - `--dry-run` und `--diff` werden mit `ErrEgressPreviewNotApplicable` (Exit 2,
   [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)) abgewiesen; bare `u-boot egress --json` ist wie bare
   `template --json` ein RunE-Reject ohne Envelope (`ErrEgressSubcommandRequired`).
-- **Offene Vertragslücke:** [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)
-  bindet **alle** `--json`-Ausgaben an das Enum von `command` („Hauptbefehl als in
-  [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) definiertes Enum“). Dieses Enum
-  ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) und das Schema der Vorschau-Ausgabe,
-  [SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json))
-  nennt `egress` nicht; `command: "egress"` liegt damit außerhalb des Vertrags, bis das Lastenheft
-  geändert ist. Die Lastenheft-Änderung braucht die Bestätigung des Projektinhabers vor dem Release;
-  den Wortlaut trägt der CR-Slice
-  [`slice-cr-cli-json-command-enum`](../plan/planning/in-progress/slice-cr-cli-json-command-enum.md).
-  Der Spezifikations-Slice [`slice-v2-spec-sandbox-egress-ollama`](../plan/planning/open/slice-v2-spec-sandbox-egress-ollama.md)
-  ändert das Lastenheft nicht und trägt das Enum von [SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) als Übergabe aus dem Code-Slice
-  der Egress-Anzeige, nach dem CR. `jsontestutil` prüft das Enum nicht (`checkSubcommand` verlangt
-  `subcommand` nur für `template` und `config`).
+- **Vertrag:** [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)
+  bindet **alle** `--json`-Ausgaben an das Enum von `command`. Das Enum in
+  [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) nennt `egress`;
+  `command: "egress"` liegt damit im Vertrag. Der Wortlaut ist aus dem freigegebenen Befehl
+  abgeleitet; die Bestätigung des Projektinhabers steht vor dem Release aus. Das Schema der
+  Vorschau-Ausgabe ([SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json))
+  führt das Enum erst im Spezifikations-Slice
+  [`slice-v2-spec-sandbox-egress-ollama`](../plan/planning/open/slice-v2-spec-sandbox-egress-ollama.md) nach.
+  `jsontestutil` prüft das Enum nicht (`checkSubcommand` verlangt `subcommand` nur für `template`
+  und `config`).
 
 ---
 
