@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-v1-devcontainer-feature-ollama`](../../../../in-progress/slice-v1-devcontainer-feature-ollama.md)
+**Vorgang:** [`slice-v1-devcontainer-feature-ollama`](../../../../done/slice-v1-devcontainer-feature-ollama.md)
 **Fund:** Review-Report [`2026-10-19-slice-v1-devcontainer-feature-ollama`](../../../../../../reviews/2026-10-19-slice-v1-devcontainer-feature-ollama.md) F-7 (INFO): kein Docker-Test baut `ollama` zusammen mit `nestedRuntime` `podman` oder `docker`. Verification-Report [`2026-10-19-verification-slice-v1-devcontainer-feature-ollama`](../../../../../../reviews/2026-10-19-verification-slice-v1-devcontainer-feature-ollama.md) Abschnitt 6: Bau und Versionsprobe in einem getrennten Worktree grün (45,9 s und 52,9 s), `apt-get purge --auto-remove zstd` entfernte in diesen Images die geprüften Pakete nicht; Lauf von Podman oder Docker in der Kombination nicht gemessen.
 
 **Beleg-Qualität:** Bau gemessen (Verifier), Lauf nicht; der temporäre Test wurde nicht committet.

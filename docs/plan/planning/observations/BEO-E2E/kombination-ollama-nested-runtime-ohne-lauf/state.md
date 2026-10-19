@@ -1,1 +1,1 @@
-**Stand:** offen, 1× — Vorgang [`slice-v1-devcontainer-feature-ollama`](../../../in-progress/slice-v1-devcontainer-feature-ollama.md) (Review F-7, Verifier Abschnitt 6: Bau und Versionsprobe grün, Lauf nicht gemessen). Kein Ausgang; kein Test, kein Carveout.
+**Stand:** offen, 1× — Vorgang [`slice-v1-devcontainer-feature-ollama`](../../../done/slice-v1-devcontainer-feature-ollama.md) (Review F-7, Verifier Abschnitt 6: Bau und Versionsprobe grün, Lauf nicht gemessen). Kein Ausgang; kein Test, kein Carveout.
