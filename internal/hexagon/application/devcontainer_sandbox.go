@@ -93,14 +93,14 @@ func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bo
 	}
 	data.Sandbox = true
 	data.AgentEnv = agentCredentialEnv(dc)
-	data.WorkspaceVolume = name + "-workspace"
 	data.WorkspaceFolder = sandboxWorkspaceRoot + "/" + name
 	data.CloneURL = cloneURL
+	data.Mounts = []string{volumeMount(name+"-workspace", data.WorkspaceFolder)}
 	var postCreate []string
 	if nestedPodman(dc) {
 		data.NestedPodman = true
 		data.OnUnavailable = onUnavailablePolicy(dc)
-		data.ContainersVolume = name + "-containers"
+		data.Mounts = append(data.Mounts, volumeMount(name+"-containers", "/home/vscode/.local/share/containers"))
 		data.RunArgs = append(data.RunArgs, podmanRelaxations()...)
 		postCreate = append(postCreate, "sh /usr/local/bin/u-boot-sandbox-init")
 	}
@@ -108,9 +108,13 @@ func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bo
 	if nestedDocker(dc) {
 		data.NestedDocker = true
 		data.OnUnavailable = onUnavailablePolicy(dc)
-		data.DockerVolume = name + "-docker"
+		data.Mounts = append(data.Mounts, volumeMount(name+"-docker", "/var/lib/docker"))
 		data.RunArgs = append(data.RunArgs, dockerRelaxation())
 		postStart = append(postStart, "sudo sh /usr/local/bin/u-boot-docker-init")
+	}
+	if dockerfileBlockFeatureActive(dc, featureOllama) {
+		data.Ollama = true
+		data.Mounts = append(data.Mounts, volumeMount(name+"-ollama", "/home/vscode/.ollama"))
 	}
 	if egressEnabled(dc) {
 		data.Egress = true
@@ -122,6 +126,12 @@ func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bo
 	data.PostStart = strings.Join(postStart, " && ")
 	data.PostCreate = composePostCreate(postCreate, cloneURL)
 	return data
+}
+
+// volumeMount is the `mounts` entry of a named volume: one volume per
+// devcontainer instance (`${devcontainerId}`), mounted at target.
+func volumeMount(volume, target string) string {
+	return "source=" + volume + "-${devcontainerId},target=" + target + ",type=volume"
 }
 
 // composePostCreate joins the optional init steps and the clone step

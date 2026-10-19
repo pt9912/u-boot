@@ -307,6 +307,9 @@ type FeatureCatalogueEntryForTest struct {
 	DefaultVersion string
 	ShortDesc      string
 	Publisher      string
+	// DockerfileBlock marks an entry without OCI source whose installation
+	// the sandbox Dockerfile carries.
+	DockerfileBlock bool
 }
 
 // FeatureCatalogueForTest exposes the unexported [featureCatalogue]
@@ -316,10 +319,11 @@ func FeatureCatalogueForTest() map[string]FeatureCatalogueEntryForTest {
 	out := map[string]FeatureCatalogueEntryForTest{}
 	for k, v := range featureCatalogue() {
 		out[k] = FeatureCatalogueEntryForTest{
-			Source:         v.source,
-			DefaultVersion: v.defaultVersion,
-			ShortDesc:      v.shortDesc,
-			Publisher:      v.publisher,
+			Source:          v.source,
+			DefaultVersion:  v.defaultVersion,
+			ShortDesc:       v.shortDesc,
+			Publisher:       v.publisher,
+			DockerfileBlock: v.dockerfileBlock,
 		}
 	}
 	return out
@@ -333,10 +337,11 @@ func FeatureForTest(name domain.FeatureName) (FeatureCatalogueEntryForTest, bool
 		return FeatureCatalogueEntryForTest{}, false
 	}
 	return FeatureCatalogueEntryForTest{
-		Source:         entry.source,
-		DefaultVersion: entry.defaultVersion,
-		ShortDesc:      entry.shortDesc,
-		Publisher:      entry.publisher,
+		Source:          entry.source,
+		DefaultVersion:  entry.defaultVersion,
+		ShortDesc:       entry.shortDesc,
+		Publisher:       entry.publisher,
+		DockerfileBlock: entry.dockerfileBlock,
 	}, true
 }
 

@@ -74,7 +74,10 @@ func egressDockerAptHost() string { return "download.docker.com" }
 // `claude-code` row lists the API host (measured at runtime) and the npm
 // registry (the required `node` feature brings npm; its use at run time is
 // not measured). The sign-in hosts and the hosts of telemetry, updates, MCP
-// and plugins are not listed; the user adds them to `egress.allow`.
+// and plugins are not listed; the user adds them to `egress.allow`. The
+// `ollama` row lists the manifest host and the blob host of the model pull
+// (measured for two models at one time and place; `ollama.com` is not
+// needed and the install hosts are used by the image build only).
 func egressFeatureHosts() map[string][]string {
 	return map[string][]string{
 		"node":        {"registry.npmjs.org"},
@@ -84,6 +87,7 @@ func egressFeatureHosts() map[string][]string {
 		"homebrew":    {"formulae.brew.sh", "ghcr.io", "pkg-containers.githubusercontent.com"},
 		"sdkman":      {"api.sdkman.io", "broker.sdkman.io", "repo.maven.apache.org", "repo1.maven.org"},
 		"claude-code": {"registry.npmjs.org", "api.anthropic.com"},
+		"ollama":      {"registry.ollama.ai", "dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com"},
 	}
 }
 

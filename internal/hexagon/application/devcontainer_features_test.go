@@ -321,6 +321,7 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 		"java",
 		"kubectl-helm",
 		"node",
+		"ollama",
 		"postgres-client",
 		"python",
 		"sdkman",
@@ -350,6 +351,9 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 //     emit `<source>:<version>` unconditionally.
 //   - The short description is non-empty so the future
 //     `feature list` UX and doctor hints have a label to surface.
+//   - A Dockerfile-block entry (`ollama`) carries no source, default
+//     version or publisher; the generated Dockerfile holds its pin
+//     (ADR-0024 decision 2).
 func TestFeatureCatalogue_EntriesAreValid(t *testing.T) {
 	t.Parallel()
 	const sourcePrefix = "ghcr.io/devcontainers/features/"
@@ -359,6 +363,21 @@ func TestFeatureCatalogue_EntriesAreValid(t *testing.T) {
 			t.Parallel()
 			if _, err := domain.NewFeatureName(key); err != nil {
 				t.Errorf("key %q is not a valid FeatureName: %v", key, err)
+			}
+			if entry.ShortDesc == "" {
+				t.Errorf("entry.ShortDesc for key %q is empty", key)
+			}
+			if entry.DockerfileBlock {
+				// ADR-0024 decision 2: a Dockerfile-block entry has no OCI
+				// source, version or publisher (the namespace rule applies to
+				// OCI sources), and its template carries the pin.
+				if entry.Source != "" || entry.DefaultVersion != "" || entry.Publisher != "" {
+					t.Errorf("Dockerfile-block entry %q must carry no source, defaultVersion or publisher: %+v", key, entry)
+				}
+				if !strings.Contains(ollamaSandboxDockerfile(t), "ARG "+strings.ToUpper(key)+"_VERSION=") {
+					t.Errorf("Dockerfile template lacks the pin ARG %s_VERSION for the Dockerfile-block entry %q", strings.ToUpper(key), key)
+				}
+				return
 			}
 			if entry.Source == "" {
 				t.Errorf("entry.Source for key %q is empty", key)
@@ -373,9 +392,6 @@ func TestFeatureCatalogue_EntriesAreValid(t *testing.T) {
 			}
 			if entry.DefaultVersion == "" {
 				t.Errorf("entry.DefaultVersion for key %q is empty", key)
-			}
-			if entry.ShortDesc == "" {
-				t.Errorf("entry.ShortDesc for key %q is empty", key)
 			}
 		})
 	}

@@ -253,3 +253,60 @@ func snapshotTree(t *testing.T, dir string) map[string]string {
 	}
 	return files
 }
+
+// LH-FA-DEV-003, LH-FA-CLI-005 at the user path (Verification-Report pins V-3
+// and V-5): `generate devcontainer` reports the supply-chain limit of the
+// `ollama` feature with the sandbox profile and the "no effect" statement
+// without it; `--quiet` drops both, and a `version` override without
+// `source` ends with exit 10.
+func TestRun_Generate_OllamaNotices(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	const head = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n"
+	const feature = "  features:\n    ollama:\n      enabled: true\n"
+	for name, tc := range map[string]struct {
+		yaml     string
+		wantCode int
+		wantText string
+	}{
+		"sandbox":         {head + "  profile: sandbox\n" + feature, 0, "Warning (LH-NFA-SEC-004): devcontainer feature ollama"},
+		"default profile": {head + feature, 0, "Warning (LH-FA-DEV-003): devcontainer feature ollama has no effect without devcontainer.profile=sandbox"},
+		"version without source": {head + "  profile: sandbox\n  features:\n    ollama:\n      enabled: true\n      version: \"0.40.7\"\n",
+			10, ""},
+	} {
+		t.Run(name, func(t *testing.T) {
+			dir := t.TempDir()
+			t.Chdir(dir)
+			if err := os.WriteFile(filepath.Join(dir, "u-boot.yaml"), []byte(tc.yaml), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.MkdirAll(filepath.Join(dir, ".git"), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(dir, ".git", "config"), []byte("[remote \"origin\"]\n\turl = git@gitlab.example.org:o/r.git\n"), 0o644); err != nil {
+				t.Fatal(err)
+			}
+
+			var out, errOut bytes.Buffer
+			if code := run(context.Background(), []string{"generate", "devcontainer"}, &out, &errOut); code != tc.wantCode {
+				t.Fatalf("generate devcontainer: exit %d, want %d; stdout=%q stderr=%q", code, tc.wantCode, out.String(), errOut.String())
+			}
+			if tc.wantText != "" && !strings.Contains(out.String(), tc.wantText) {
+				t.Errorf("stdout lacks %q:\n%s", tc.wantText, out.String())
+			}
+			if tc.wantCode != 0 {
+				return
+			}
+
+			out.Reset()
+			errOut.Reset()
+			if code := run(context.Background(), []string{"--quiet", "generate", "devcontainer"}, &out, &errOut); code != 0 {
+				t.Fatalf("--quiet generate devcontainer: exit %d; stdout=%q stderr=%q", code, out.String(), errOut.String())
+			}
+			if strings.Contains(strings.ToLower(out.String()+errOut.String()), "ollama") {
+				t.Errorf("--quiet must drop the ollama notice:\nstdout=%q\nstderr=%q", out.String(), errOut.String())
+			}
+		})
+	}
+}

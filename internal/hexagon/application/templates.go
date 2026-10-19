@@ -48,31 +48,35 @@ type templateData struct {
 	UID int
 
 	// Sandbox switches on the LH-FA-DEV-006 sandbox profile of the
-	// devcontainer templates; WorkspaceVolume / WorkspaceFolder name
-	// the named volume and its mount point, CloneURL (may be empty)
+	// devcontainer templates; WorkspaceFolder is the mount point of the
+	// workspace volume, CloneURL (may be empty)
 	// is the `origin` URL of the project repository. AgentEnv names the
 	// host variables of an active agent feature (LH-FA-DEV-009); the
 	// template renders their `${localEnv:<NAME>}` references into
 	// `remoteEnv`, never a value.
 	Sandbox         bool
 	AgentEnv        []string
-	WorkspaceVolume string
 	WorkspaceFolder string
 	CloneURL        string
 
+	// Mounts are the `mounts` entries of the sandbox profile in render
+	// order: the workspace volume first, then the volume of each enabled
+	// capability (Podman storage, Docker daemon storage, Ollama models).
+	Mounts []string
+
 	// NestedPodman switches on the LH-FA-DEV-007 rootless Podman
 	// setup (sandbox profile only); OnUnavailable is the
-	// `warn` | `fail` policy baked into the startup script,
-	// ContainersVolume the named volume for the Podman storage.
-	NestedPodman     bool
-	OnUnavailable    string
-	ContainersVolume string
+	// `warn` | `fail` policy baked into the startup script.
+	NestedPodman  bool
+	OnUnavailable string
 
 	// NestedDocker switches on the LH-FA-DEV-007 own Docker daemon
-	// (sandbox profile only); DockerVolume is the named volume of the
-	// daemon storage (`/var/lib/docker`).
+	// (sandbox profile only).
 	NestedDocker bool
-	DockerVolume string
+
+	// Ollama switches on the Ollama installation block of the sandbox
+	// Dockerfile (LH-FA-DEV-003, sandbox profile only).
+	Ollama bool
 
 	// Egress switches on the LH-FA-DEV-008 outbound restriction;
 	// EgressHosts is the effective allowlist baked into the startup

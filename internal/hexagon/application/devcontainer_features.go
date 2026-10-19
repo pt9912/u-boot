@@ -160,7 +160,16 @@ type featureCatalogueEntry struct {
 	// `ghcr.io/devcontainers/features` namespace. The feature's install
 	// script runs at image build, so the generate output reports it.
 	publisher string
+	// dockerfileBlock marks an entry that is no OCI feature: the sandbox
+	// Dockerfile carries its installation (the pin stays in the template),
+	// so the entry has no `source`, no `defaultVersion` and renders no key
+	// under `features`. A `source:` override turns it into an external OCI
+	// feature without the block.
+	dockerfileBlock bool
 }
+
+// featureOllama is the catalogue key of the Dockerfile-block feature.
+const featureOllama = "ollama"
 
 // featureCatalogue lists the built-in devcontainer-feature catalogue
 // per LH-FA-DEV-003 + T0-Outcomes (c). Built-in entries
@@ -240,6 +249,10 @@ func featureCatalogue() map[string]featureCatalogueEntry {
 			defaultVersion: "1",
 			shortDesc:      "Claude Code CLI (Anthropic feature; needs the node feature)",
 			publisher:      "anthropics",
+		},
+		featureOllama: {
+			shortDesc:       "Ollama, CPU only (Dockerfile block; sandbox profile only)",
+			dockerfileBlock: true,
 		},
 	}
 }
@@ -406,7 +419,9 @@ func projectFeatureEntry(name string, entry ubootYAMLDevcontainerFeature) (devco
 //     defaultVersion applies when Version is empty.
 //
 // Returns ("", "", false) for the orphan case (no Source override
-// and the name is not in the catalogue) — caller skips silently.
+// and the name is not in the catalogue) — caller skips silently — and
+// for a Dockerfile-block entry without Source override (`ollama`): it
+// renders no key, so the drift check stays silent for it.
 // Slice-followup-devcontainer-features-drift-doctor Review-Followup
 // S1 extracted this helper to remove the synthetic-`Enabled=&true`-
 // probe in [projectAllFeatureEntries].
@@ -423,7 +438,7 @@ func projectFeatureSourceVersion(name, source, version string) (resolvedSource, 
 		return "", "", false
 	}
 	cat, found := featureFor(featureName)
-	if !found {
+	if !found || cat.dockerfileBlock {
 		return "", "", false
 	}
 	v := version
@@ -431,6 +446,48 @@ func projectFeatureSourceVersion(name, source, version string) (resolvedSource, 
 		v = cat.defaultVersion
 	}
 	return cat.source, v, true
+}
+
+// dockerfileBlockFeatureActive reports whether the catalogue entry `key`
+// is a Dockerfile-block feature that is enabled without a `source:`
+// override. Only then the sandbox Dockerfile carries its block.
+func dockerfileBlockFeatureActive(dc *ubootYAMLDevcontainer, key string) bool {
+	if dc == nil {
+		return false
+	}
+	if !featureCatalogue()[key].dockerfileBlock {
+		return false
+	}
+	f, ok := dc.Features[key]
+	return ok && f.Enabled != nil && *f.Enabled && f.Source == ""
+}
+
+// ollamaWarnings returns the one notice `generate devcontainer` gives for
+// an active `ollama` feature: with the sandbox profile the supply-chain
+// limit (the archive is checked by its SHA-256 only, the upstream
+// publishes no signature), without it the statement that nothing was
+// generated. Neither carries [driving.WarningEntry.SecurityRelaxation], so
+// `--quiet` drops both.
+func ollamaWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []driving.WarningEntry {
+	if !dockerfileBlockFeatureActive(dc, featureOllama) {
+		return nil
+	}
+	if !sandbox {
+		return []driving.WarningEntry{{
+			Code:    "LH-FA-DEV-003",
+			Level:   "warn",
+			Message: "devcontainer feature ollama has no effect without devcontainer.profile=sandbox; no Ollama installation was generated",
+			Subject: ".devcontainer/devcontainer.json",
+		}}
+	}
+	return []driving.WarningEntry{{
+		Code:  "LH-NFA-SEC-004",
+		Level: "warn",
+		Message: "devcontainer feature ollama installs the release archive from github.com/ollama/ollama (version pinned as OLLAMA_VERSION in .devcontainer/Dockerfile) when the image is built; " +
+			"it is checked by its SHA-256 only, the upstream publishes no signature, " +
+			"so the check does not protect against a release that was harmful from the start",
+		Subject: ".devcontainer/devcontainer.json",
+	}}
 }
 
 // validateDevcontainerFeatures runs the LH-FA-DEV-003 schema checks
@@ -441,6 +498,9 @@ func projectFeatureSourceVersion(name, source, version string) (resolvedSource, 
 //   - Every non-empty `Source:` value passes [validateFeatureSource]
 //     (URL-format check only — allowlist-membership enforcement is
 //     T4's job).
+//   - A Dockerfile-block entry (`ollama`) has no `Version:` override
+//     without a `Source:` override: its pin hangs on the checksums in
+//     the Dockerfile, so another version could not be checked.
 //   - Every entry in [ubootYAMLFeatureSources.Allow] passes
 //     [validateFeatureSource] (T4 will additionally silent-dedupe at
 //     write time; here we only reject invalid entries).
@@ -481,6 +541,10 @@ func validateDevcontainerFeatures(dc *ubootYAMLDevcontainer) error {
 			if err := validateFeatureSource(entry.Source); err != nil {
 				return fmt.Errorf("features.%s.source: %w", k, err)
 			}
+		}
+		if entry.Source == "" && entry.Version != "" && featureCatalogue()[k].dockerfileBlock {
+			return fmt.Errorf("%w: features.%s.version: the %s installation is pinned in the Dockerfile; "+
+				"a version override needs a source: override", ErrInvalidFeatureSource, k, k)
 		}
 	}
 	return nil

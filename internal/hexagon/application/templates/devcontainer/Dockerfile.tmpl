@@ -64,6 +64,35 @@ RUN install -m 0755 -d /etc/apt/keyrings \
  && usermod -aG docker vscode
 COPY docker-init.sh /usr/local/bin/u-boot-docker-init
 {{- end}}
+{{- if .Ollama}}
+# Ollama (LH-FA-DEV-003): the CPU-only release archive of ollama/ollama.
+# Version and checksums are pinned here, in one place; the build stops before
+# the extraction unless the SHA-256 matches. The upstream publishes no
+# signature: the check catches a release asset that was swapped later, not a
+# release that was harmful from the start. The GPU libraries stay out of the
+# image; `zstd` is installed for the extraction and removed in the same step.
+# The image starts no server and sets no listen address. The model store
+# belongs to the container user, so the named volume mounted there inherits
+# that ownership.
+ARG OLLAMA_VERSION=0.40.6
+ARG OLLAMA_SHA256_AMD64=c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0
+ARG OLLAMA_SHA256_ARM64=0a279d9428ad17b06fdb7dddf3b059b2c148433585fa3b30676a102fc459bb9f
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends zstd \
+ && rm -rf /var/lib/apt/lists/* \
+ && arch="$(dpkg --print-architecture)" \
+ && case "$arch" in amd64) sha256="${OLLAMA_SHA256_AMD64}" ;; arm64) sha256="${OLLAMA_SHA256_ARM64}" ;; *) echo "ollama has no archive for $arch" >&2; exit 1 ;; esac \
+ && work="$(mktemp -d)" \
+ && cd "$work" \
+ && curl -fsSLO "https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-${arch}.tar.zst" \
+ && echo "${sha256}  ollama-linux-${arch}.tar.zst" | sha256sum -c - \
+ && tar --zstd -xf "ollama-linux-${arch}.tar.zst" -C /usr/local --no-same-owner --exclude='lib/ollama/cuda_*' --exclude='lib/ollama/vulkan' \
+ && cd / \
+ && rm -rf "$work" \
+ && apt-get purge -y --auto-remove zstd \
+ && mkdir -p /home/vscode/.ollama \
+ && chown vscode:vscode /home/vscode/.ollama
+{{- end}}
 {{- if .Egress}}
 # Egress restriction (LH-FA-DEV-008).
 RUN apt-get update \
