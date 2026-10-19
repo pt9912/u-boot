@@ -1300,14 +1300,18 @@ registry.npmjs.org  feature:claude-code, feature:node
 - **Wichtig:** Die Hosts eines Agenten kennt `u-boot` nur für das Feature
   `claude-code` (Zeile in der Tabelle). Die Hosts jedes anderen Agenten (zum
   Beispiel dessen API) tragen Sie in `egress.allow` ein.
-- **Subdomains:** Ein eingetragener Name schließt alle seine Subdomains ein, auch
-  tiefere (`example.org` erlaubt `www.example.org`; `amazonaws.com` erlaubt
-  `s3.us-east-1.amazonaws.com`). Ein Eintrag öffnet den übergeordneten Namen
-  nicht für die Namensauflösung (mit dem Eintrag `www.example.org` löst
-  `example.org` nicht auf). Teilen sich beide Namen eine IP-Adresse, ist diese
-  nach der Auflösung des eingetragenen Namens auch bei einer Verbindung über die
-  Adresse offen. Einen Eintrag der Form `*.example.org` gibt es nicht: Tragen Sie
-  `example.org` ein, `u-boot` weist den Eintrag mit diesem Hinweis ab.
+- **Subdomains:** Ein Test ruft die Namen auf und liest den HTTP-Status (`000`:
+  der Name löst nicht auf oder die Adresse wird verworfen; der Test trennt beides
+  nicht). Mit dem Eintrag `example.org` sind `example.org` und `www.example.org`
+  erreichbar, mit dem Eintrag `amazonaws.com` auch `s3.us-east-1.amazonaws.com`
+  (zwei Ebenen darunter), `example.com` ist es nicht. Mit dem Eintrag
+  `www.example.org` ist `www.example.org` erreichbar und `example.org` bei der
+  Verbindung per Name nicht. Gemessen (je ein Lauf, Stand unter *Messstand*): In
+  diesem Fall löste `example.org` nicht auf, und beide Namen hatten dieselben
+  IP-Adressen. Ob eine Verbindung zu `example.org` über die Adresse möglich ist,
+  wenn es sich mit dem eingetragenen Namen eine Adresse teilt, ist nicht geprüft
+  und nicht ausgeschlossen. Einen Eintrag der Form `*.example.org` gibt es nicht:
+  Tragen Sie `example.org` ein, `u-boot` weist den Eintrag mit diesem Hinweis ab.
 - **Namen hinter einem CNAME:** Zeigt die DNS-Antwort eines erlaubten Namens
   über einen `CNAME` auf einen Namen außerhalb der Liste, war der erlaubte Name
   in den drei gemessenen Fällen erreichbar, ohne dass der Zielname eingetragen
@@ -1556,7 +1560,7 @@ Dockerfile-Block.
   nach höchstens zwei Sekunden).
 - **Nur Loopback:** `u-boot` setzt weder `OLLAMA_HOST` noch eine Portweiterleitung. Der
   Server lauscht dann nur auf `127.0.0.1:11434`; ein Aufruf über die Adresse des
-  Containers wird abgelehnt. Das gilt für die gepinnte Version; setzen Sie `OLLAMA_HOST`
+  Containers scheitert. Das gilt für die gepinnte Version; setzen Sie `OLLAMA_HOST`
   selbst, ist das Ihre Entscheidung und nicht zugesagt.
 - **Nur CPU:** Das Dockerfile entpackt die Verzeichnisse `cuda_*` und `vulkan` des
   Archivs nicht; der Server meldet `library=cpu`. Der Download des Archivs bleibt bei jedem
