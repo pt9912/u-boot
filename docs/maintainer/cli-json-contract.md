@@ -1209,7 +1209,7 @@ Datum, keine Diagnose:
   nennt `egress` nicht; `command: "egress"` liegt damit außerhalb des Vertrags, bis das Lastenheft
   geändert ist. Die Lastenheft-Änderung braucht die Bestätigung des Projektinhabers vor dem Release;
   den Wortlaut trägt der CR-Slice
-  [`slice-cr-cli-json-command-enum`](../plan/planning/open/slice-cr-cli-json-command-enum.md).
+  [`slice-cr-cli-json-command-enum`](../plan/planning/in-progress/slice-cr-cli-json-command-enum.md).
   Der Spezifikations-Slice [`slice-v2-spec-sandbox-egress-ollama`](../plan/planning/open/slice-v2-spec-sandbox-egress-ollama.md)
   ändert das Lastenheft nicht und trägt das Enum von [SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) als Übergabe aus dem Code-Slice
   der Egress-Anzeige, nach dem CR. `jsontestutil` prüft das Enum nicht (`checkSubcommand` verlangt
