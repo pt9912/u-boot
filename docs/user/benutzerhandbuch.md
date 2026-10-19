@@ -1306,9 +1306,11 @@ registry.npmjs.org  feature:claude-code, feature:node
   erreichbar, mit dem Eintrag `amazonaws.com` auch `s3.us-east-1.amazonaws.com`
   (zwei Ebenen darunter), `example.com` ist es nicht. Mit dem Eintrag
   `www.example.org` ist `www.example.org` erreichbar und `example.org` bei der
-  Verbindung per Name nicht. Gemessen (je ein Lauf, Stand unter *Messstand*): In
-  diesem Fall löste `example.org` nicht auf, und beide Namen hatten dieselben
-  IP-Adressen. Ob eine Verbindung zu `example.org` über die Adresse möglich ist,
+  Verbindung per Name nicht. Gemessen (je ein Lauf, Stand unter *Messstand*): Beim
+  Eintrag `api.github.com` lösten `github.com` und `www.github.com` nicht auf, und
+  mit dem Eintrag `example.org` hatten `example.org` und `www.example.org`
+  dieselben IP-Adressen. Der Eintrag `www.example.org` selbst ist nicht gemessen;
+  die Aussage zu `example.org` gilt analog zum Eintrag `api.github.com`. Ob eine Verbindung zu `example.org` über die Adresse möglich ist,
   wenn es sich mit dem eingetragenen Namen eine Adresse teilt, ist nicht geprüft
   und nicht ausgeschlossen. Einen Eintrag der Form `*.example.org` gibt es nicht:
   Tragen Sie `example.org` ein, `u-boot` weist den Eintrag mit diesem Hinweis ab.
