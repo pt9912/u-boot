@@ -134,6 +134,7 @@ Betreiber des Upstream-Resolvers sichtbar.
 
 Colima, Docker Desktop, Linux hinter einer VM, `arm64`, die CI und der GitHub-Runner; `nestedRuntime: docker` (der verschachtelte `dockerd` läuft als `root`; sein
 Verkehr läuft über die Weiterleitung, nicht über die Kette `output`); Podman mit anderem Netzwerkmodus als `pasta` (Standard) und `host`; eine IPv6-fähige Upstream-Liste;
-echte Namen mit kontrollierbarem autoritativen Server (D5 misst nur bis zum Upstream); Last des Hosts; das Fenster ohne Filter des erneuten Laufs (D4); eine
-Umsetzung im Template (keine; Golden Case, Docker-Test und Handbuch sind unberührt); die Wirkung auf den Go-Test selbst (`make test-docker` lief nicht, der
-Ablauf des Tests ist im Wegwerf-Container nachgestellt).
+echte Namen mit kontrollierbarem autoritativen Server (D5 misst nur bis zum Upstream); Last des Hosts; das Fenster ohne Filter des erneuten Laufs (D4).
+
+Außerhalb des Messstands dieser Messung (Stand nach der Umsetzung im Template): Die Messung lief mit der Messvariante, nicht mit dem Template; das Template trägt die Regel seit der Umsetzung
+(`user=nobody` in der Konfiguration und die numerische UID in `meta skuid` sind dort geprüft), und der Go-Test `TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress` lief grün (Docker-Test, gezielt mit `-v`; das volle `make test-docker`: 611,4 s, grün); der Ablauf des Tests ist in dieser Messung im Wegwerf-Container nachgestellt.

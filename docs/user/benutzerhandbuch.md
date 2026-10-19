@@ -1075,6 +1075,7 @@ Was beim Containerstart passiert, wenn Fähigkeiten fehlen, steuert
 | `/dev/fuse` fehlt im Container (ohne das Device gestartet) | Rückfall auf `vfs`-Speicher, Warnung | Abbruch mit Exit-Code 11 |
 | Verschachtelte User-Namespaces blockiert (Seccomp oder AppArmor), nur `podman` | Abbruch mit Exit-Code 11 | Abbruch mit Exit-Code 11 |
 | Docker-Daemon wird nicht betriebsbereit (`docker`, zum Beispiel Start ohne `--privileged`) | Container ohne Daemon, Warnung | Abbruch mit Exit-Code 11 |
+| Egress-Beschränkung: Benutzer `nobody` fehlt, lokaler DNS-Server startet nicht oder läuft unter einem anderen Benutzer | Abbruch mit Exit-Code 11 | Abbruch mit Exit-Code 11 |
 
 Unter **Ubuntu 24.04** (und auf Hosts mit
 `kernel.apparmor_restrict_unprivileged_userns=1`) blockiert dieser Schalter
@@ -1126,7 +1127,7 @@ Fähigkeit einen Eintrag:
 |---|---|
 | `ok` | in Ordnung |
 | `fallback` | Warnung; bleibt unter `--quiet` sichtbar; mit `--strict` Exit-Code 11 |
-| `failed` (das Startscript endete mit Exit-Code 11: `onUnavailable: fail`, bei der Egress-Beschränkung auch unter `warn`, wenn der lokale DNS-Server nicht zu den Firewall-Regeln passt) | Fehler, Exit-Code 11 |
+| `failed` (das Startscript endete mit Exit-Code 11: `onUnavailable: fail`, bei der Egress-Beschränkung auch unter `warn`, wenn der Benutzer `nobody` fehlt oder der lokale DNS-Server nicht startet oder nicht unter ihm läuft) | Fehler, Exit-Code 11 |
 | nicht ermittelbar | Hinweiszeile (`?`) mit dem Grund; kein Fallback; unter `--quiet` stumm |
 | ungültige Datei | Warnung |
 
@@ -1248,16 +1249,30 @@ verworfen. Ein Name außerhalb der Liste braucht darin etwa 36 Sekunden bis zur
 Fehlermeldung statt etwa 20 Millisekunden (der erste Nameserver lehnt ab, die
 verworfenen Rückfälle laufen in die Zeitgrenze); ein `podman build` mit einem
 `RUN`-Schritt, der einen solchen Namen auflöst, dauert um diese Zeit länger
-(nachgestellter Ablauf: 43 statt 7 Sekunden). Der Bau läuft hinter der Beschränkung
-durch (Docker-Test, Linux `amd64`, native Docker Engine 29.9.1). `podman run --dns 8.8.8.8`
+(nachgestellter Ablauf: 43 statt 7 Sekunden). Diese Zeiten und das Verhalten von `--dns`,
+der Standard-Namensauflösung und `--network=host` sind gemessen; kein Test pinnt sie.
+Dass der Bau hinter der Beschränkung durchläuft, pinnt ein Docker-Test (Linux `amd64`, native Docker Engine 29.9.1). `podman run --dns 8.8.8.8`
 (ein Upstream-Resolver des Messhosts) löst nichts mehr auf, auch keinen erlaubten Namen;
 die Standard-Namensauflösung und `--network=host` bleiben nutzbar. Auf Colima (arm64)
 und in der CI ist das nicht gemessen.
 
 Das Startscript bricht mit Exit-Code 11 ab und schreibt `failed` in die Statusdatei,
-auch bei `onUnavailable: warn`, wenn der Benutzer `nobody` im Image fehlt oder der lokale
-DNS-Server nicht unter diesem Benutzer läuft: Ein Weiterlaufen würde die Beschränkung
-still aufweichen oder den DNS-Server sperren.
+auch bei `onUnavailable: warn`, wenn der Benutzer `nobody` im Image fehlt, der lokale
+DNS-Server nicht startet oder nicht unter diesem Benutzer läuft: Ein Weiterlaufen würde die
+Beschränkung still aufweichen oder den DNS-Server sperren. Der Container bleibt danach in
+einem von zwei Zuständen (ein Docker-Test prüft sie):
+
+- **Benutzer fehlt:** Das Script bricht ab, bevor es Regeln anlegt. Im ersten Lauf hat der
+  Container dann **keine** Beschränkung und sein DNS ist unverändert; die Meldung steht auf
+  der Standardfehlerausgabe des Startscripts (Container-Log), und `u-boot doctor` zeigt `failed`.
+- **DNS-Server startet nicht oder läuft unter einem anderen Benutzer:** Die Regeln mit der
+  Richtlinie `drop` stehen, `/etc/resolv.conf` zeigt nicht auf den lokalen DNS-Server: Es
+  gibt keine Namensauflösung, aber auch keine offene Verbindung.
+
+Das Startscript der Beschränkung ist im `postStartCommand` mit `&&` vor das Startscript des
+verschachtelten Docker-Daemons gesetzt (gelesen, kein Test mit Abbruch): Bei einem Abbruch startet
+mit `nestedRuntime: docker` kein Daemon, und die Statusdatei `daemon` bleibt die des
+vorigen Starts.
 
 Standardmäßig erlaubt sind:
 
@@ -2138,7 +2153,10 @@ oder ein im Container fehlendes `/dev/fuse` unter `onUnavailable: fail`. Ein
 auf dem Container-Host fehlendes `/dev/fuse` oder `/dev/net/tun` verhindert den
 Start des Containers durch Docker, das Startscript läuft dann nicht. Der Docker-Daemon (`nestedRuntime: docker`) wird
 nicht bereit, wenn der Container ohne `--privileged` startet; das Log
-`/var/log/u-boot-dockerd.log` im Container nennt den Grund.
+`/var/log/u-boot-dockerd.log` im Container nennt den Grund. Das Startscript der
+Egress-Beschränkung endet mit Exit-Code 11, auch unter `warn`, wenn der Benutzer
+`nobody` im Image fehlt oder der lokale DNS-Server nicht startet oder nicht unter
+diesem Benutzer läuft; die Meldung nennt den Grund.
 
 #### Lösung
 
