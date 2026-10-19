@@ -647,8 +647,8 @@ func TestGenerateDevcontainer_SandboxEgress_UpstreamDNSOnlyForTheResolverUser(t 
 			"dns_user=nobody\n",
 			`dns_uid=$(id -u "$dns_user" 2>/dev/null)`,
 			`echo "user=$dns_user"`,
-			`output meta skuid "$dns_uid" ip daddr "$ns" udp dport 53 accept`,
-			`output meta skuid "$dns_uid" ip daddr "$ns" tcp dport 53 accept`,
+			`output meta skuid $dns_uid ip daddr $ns udp dport 53 accept"`,
+			`output meta skuid $dns_uid ip daddr $ns tcp dport 53 accept"`,
 			`awk '/^Uid:/ {print $2}'`,
 			`if [ "$running_uid" != "$dns_uid" ]; then`,
 			`if ! dnsmasq --conf-file="$conf"; then`,
@@ -683,6 +683,72 @@ func TestGenerateDevcontainer_SandboxEgress_UpstreamDNSOnlyForTheResolverUser(t 
 		resolv := strings.Index(script, `echo "nameserver 127.0.0.1" > /etc/resolv.conf`)
 		if start < 0 || start >= check || check >= resolv {
 			t.Errorf("policy %s: order dnsmasq start (%d), uid check (%d), resolv.conf (%d) is wrong", policy, start, check, resolv)
+		}
+	}
+}
+
+// Golden (LH-FA-DEV-008 / ADR-0027): the script run again replaces both tables
+// in one `nft -f` input (`add table`, `delete table`, `add table` per table,
+// no other `nft add`/`nft delete` call), applies it before the resolver is
+// touched, stops the old resolver with a bounded wait before the new one
+// starts, writes resolv.conf after the checked start, and ends a transaction
+// that does not go through with status `failed` and exit 11 under every
+// policy. The test pins the structure; the timing is not pinned.
+func TestGenerateDevcontainer_SandboxEgress_RerunIsOneTransaction(t *testing.T) {
+	t.Parallel()
+	for _, policy := range []string{"warn", "fail"} {
+		svc, fs := newGenerateService(t)
+		seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    onUnavailable: "+policy+"\n    egress:\n      enabled: true\n")
+		seedGitOrigin(t, fs, "git@github.com:pt9912/demo.git")
+		if _, err := generateSandbox(svc, false); err != nil {
+			t.Fatalf("generate: %v", err)
+		}
+		body, err := fs.ReadFile(egressInitPath())
+		if err != nil {
+			t.Fatal(err)
+		}
+		script := string(body)
+		if got := strings.Count(script, `nft -f "$rules"`); got != 1 {
+			t.Errorf("policy %s: %d `nft -f` calls, want 1", policy, got)
+		}
+		for _, line := range strings.Split(script, "\n") {
+			trimmed := strings.TrimSpace(line)
+			if strings.HasPrefix(trimmed, "#") {
+				continue
+			}
+			if strings.Contains(trimmed, "nft add") || strings.Contains(trimmed, "nft delete") {
+				t.Errorf("policy %s: a table or rule is changed outside the transaction: %q", policy, line)
+			}
+		}
+		for _, table := range []string{"ip u_boot_egress", "ip6 u_boot_egress6"} {
+			seq := `echo "add table ` + table + `"` + "\n  " + `echo "delete table ` + table + `"` + "\n  " + `echo "add table ` + table + `"`
+			if strings.Count(script, seq) != 1 {
+				t.Errorf("policy %s: the input lacks the sequence add, delete, add for %s:\n%s", policy, table, script)
+			}
+		}
+		order := []string{
+			`} > "$conf"`,
+			`nft -f "$rules"`,
+			`kill "$old_pid"`,
+			`! process_gone "$old_pid"`,
+			`dnsmasq --conf-file="$conf"`,
+			`if [ "$running_uid" != "$dns_uid" ]`,
+			`echo "nameserver 127.0.0.1" > /etc/resolv.conf`,
+			`write_status ok`,
+		}
+		prev := -1
+		for _, marker := range order {
+			at := strings.Index(script, marker)
+			if at < 0 || at <= prev {
+				t.Errorf("policy %s: %q at %d does not follow the previous step (%d); order: configuration, transaction, stop of the old resolver, wait, start, uid check, resolv.conf, status", policy, marker, at, prev)
+			}
+			prev = at
+		}
+		if !strings.Contains(script, `[ "$waited" -lt 50 ]`) {
+			t.Errorf("policy %s: the wait for the old resolver is not bounded", policy)
+		}
+		if !strings.Contains(script, "could not be applied (a previous rule set stays in place)\" >&2\n  write_status failed\n  exit 11\nfi\n") {
+			t.Errorf("policy %s: the failed transaction does not end with status failed and exit 11:\n%s", policy, script)
 		}
 	}
 }
@@ -1152,7 +1218,7 @@ func TestGenerateDevcontainer_SandboxStartScriptsWriteStatusFiles(t *testing.T) 
 		{"docker", sandboxDockerYAML, dockerInitPath(), "daemon",
 			map[string]int{"ok": 2, "fallback": 1, "failed": 1}, 1},
 		{"egress", "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    egress:\n      enabled: true\n", egressInitPath(), "egress",
-			map[string]int{"ok": 1, "fallback": 1, "failed": 4}, 4},
+			map[string]int{"ok": 1, "fallback": 1, "failed": 5}, 5},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1185,7 +1251,7 @@ func TestGenerateDevcontainer_SandboxStartScriptsWriteStatusFiles(t *testing.T) 
 				}
 			}
 			// `failed` is written right before every exit code 11: the `fail` policy of the
-			// start scripts, and for `egress` also the three resolver branches under any policy.
+			// start scripts, and for `egress` also the four branches under any policy (resolver user, nft transaction, resolver start, resolver uid).
 			if got := strings.Count(script, "write_status failed\n    exit 11\n") + strings.Count(script, "write_status failed\n  exit 11\n"); got != tc.exit11Next {
 				t.Errorf("write_status failed directly before exit 11: %d times, want %d:\n%s", got, tc.exit11Next, script)
 			}

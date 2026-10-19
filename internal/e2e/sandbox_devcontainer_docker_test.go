@@ -19,6 +19,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -379,6 +380,147 @@ func TestE2E_SandboxDevcontainer_EgressUpstreamDNS(t *testing.T) {
 			"ABORT uid-differs exit=11 result=failed",
 			"ERR uid-differs: u-boot sandbox: egress restriction failed: the local resolver is not running as 'nobody'",
 			"STATE uid-differs tables=2 drop=1 resolver-in-resolv.conf=0",
+		} {
+			if !strings.Contains(out, want) {
+				t.Errorf("output lacks %q:\n%s", want, out)
+			}
+		}
+	})
+}
+
+// egressRerunProbeScript runs the generated egress script once, then ten more
+// times while a sampler tries a connection to the container's gateway on port 9
+// (blocked by the restriction: the attempt is dropped and the 50 ms timeout
+// ends it; without a restriction the gateway answers, usually with a refusal).
+// An attempt that ends before the timeout is a hit. The sampler is a lower
+// bound: a window shorter than one attempt can pass unseen. Each run prints
+// exit code, status, live resolvers (zombies excluded), tables, the uid of the
+// resolver next to the uid in the rules, the resolver entry of resolv.conf and
+// the answer of the local resolver for an allowed name. At the end it resolves
+// an allowed name, runs the script once more and counts whether the set of
+// reachable addresses holds elements before and after.
+const egressRerunProbeScript = `set -u
+src=/usr/local/bin/u-boot-egress-init
+live_dnsmasq() {
+  n=0
+  for d in /proc/[0-9]*; do
+    if [ "$(cat $d/comm 2>/dev/null)" = dnsmasq ] && [ "$(awk '/^State:/ {print $2}' $d/status 2>/dev/null)" != Z ]; then n=$((n + 1)); fi
+  done
+  echo $n
+}
+report() {
+  echo "RUN $1 exit=$2 $(grep '^result=' /var/lib/u-boot/status/egress) dnsmasq=$(live_dnsmasq) tables=$(sudo nft list tables | grep -c u_boot_egress) uid=$(awk '/^Uid:/ {print $2}' /proc/$(cat /run/u-boot-egress-dnsmasq.pid)/status) rule=$(id -u nobody) resolv=$(grep -c '^nameserver 127.0.0.1' /etc/resolv.conf) local=$(getent hosts api.github.com | grep -c .)"
+}
+h=$(awk '$2=="00000000" {print $3; exit}' /proc/net/route)
+gw=$(printf '%d.%d.%d.%d' 0x$(echo $h | cut -c7-8) 0x$(echo $h | cut -c5-6) 0x$(echo $h | cut -c3-4) 0x$(echo $h | cut -c1-2))
+attempt() { timeout 0.05 bash -c "echo > /dev/tcp/$gw/9" 2>/dev/null; }
+attempt; rc=$?; if [ $rc -le 1 ]; then echo "BASELINE answers=1"; else echo "BASELINE answers=0"; fi
+sudo sh $src; report 1 $?
+rm -f /tmp/stop; : > /tmp/hits
+( while [ ! -f /tmp/stop ]; do attempt; rc=$?; if [ $rc -le 1 ]; then echo hit >> /tmp/hits; fi; done ) &
+for n in 2 3 4 5 6 7 8 9 10 11; do sudo sh $src; report $n $?; done
+touch /tmp/stop; wait
+echo "HITS=$(wc -l < /tmp/hits)"
+getent hosts api.github.com >/dev/null; before=$(sudo nft list set ip u_boot_egress allowed | grep -c 'elements = ')
+sudo sh $src
+echo "SET before=$before after=$(sudo nft list set ip u_boot_egress allowed | grep -c 'elements = ')"
+echo "LOCAL example.com=$(getent hosts example.com | grep -c .)"
+echo "HTTPS api.github.com=$(curl -sS -m 10 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w '%{http_code}' https://api.github.com 2>/dev/null)"
+`
+
+// egressTransactionFailureProbeScript starts a copy of the generated script
+// whose rule input holds an invalid line: first on a fresh container (no
+// tables), then after a successful run. Both runs end with exit 11 and status
+// `failed` although the policy is `warn`; the second leaves the chain, the
+// resolver and resolv.conf as the first run set them.
+const egressTransactionFailureProbeScript = `set -u
+src=/usr/local/bin/u-boot-egress-init
+chain_sum() { sudo nft list chain ip u_boot_egress output 2>/dev/null | md5sum | cut -d' ' -f1; }
+sed 's|^  echo "add rule ip u_boot_egress output oifname lo accept"|  echo "add rule ip u_boot_egress output bogus-keyword"|' $src > /tmp/bad.sh
+if cmp -s $src /tmp/bad.sh; then echo "MUTATION not applied"; fi
+sudo sh /tmp/bad.sh 2>/tmp/bad1.err; echo "FRESH exit=$? $(grep '^result=' /var/lib/u-boot/status/egress) tables=$(sudo nft list tables | grep -c u_boot_egress) resolv=$(grep -c '^nameserver 127.0.0.1' /etc/resolv.conf)"
+sed 's/^/ERR fresh: /' /tmp/bad1.err | grep 'u-boot sandbox'
+sudo sh $src; echo "INIT exit=$?"
+before=$(chain_sum); pid=$(cat /run/u-boot-egress-dnsmasq.pid)
+sudo sh /tmp/bad.sh 2>/tmp/bad2.err; code=$?
+same=0; if [ "$(cat /run/u-boot-egress-dnsmasq.pid)" = "$pid" ] && [ -d /proc/$pid ]; then same=1; fi
+unchanged=0; if [ "$(chain_sum)" = "$before" ]; then unchanged=1; fi
+echo "RERUN exit=$code $(grep '^result=' /var/lib/u-boot/status/egress) tables=$(sudo nft list tables | grep -c u_boot_egress) chain-unchanged=$unchanged same-resolver=$same resolv=$(grep -c '^nameserver 127.0.0.1' /etc/resolv.conf)"
+sed 's/^/ERR rerun: /' /tmp/bad2.err | grep 'u-boot sandbox'
+`
+
+// LH-FA-DEV-008, ADR-0027: the start script run again replaces the tables in
+// one transaction and the resolver in order: every run ends with exit 0 and
+// status `ok`, exactly one resolver runs under the uid of the rules, both
+// tables exist, an allowed name resolves, the set of reachable addresses is
+// emptied, and the sampler sees no attempt that passes the restriction. The sampler counts a lower bound; a zero is
+// "no hit", not "no window" (ADR-0027 decision 3). A transaction that does not
+// go through ends with exit 11 and status `failed` under `warn` and leaves the
+// previous rules and resolver in place.
+func TestE2E_SandboxDevcontainer_EgressRerun(t *testing.T) {
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Fatalf("docker CLI not on PATH: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+	dir := generateEgressProject(ctx, t, "warn")
+	image := "uboot-e2e-egress-rerun:" + strings.ReplaceAll(filepath.Base(dir), "/", "-")
+	if out, code := dockerOutput(ctx, t, "build", "-q", "-t", image, filepath.Join(dir, ".devcontainer")); code != 0 {
+		t.Fatalf("docker build failed:\n%s", out)
+	}
+	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
+	runArgs := generatedRunArgs(t, dir)
+
+	t.Run("repeated runs", func(t *testing.T) {
+		args := append(append([]string{"run", "--rm"}, runArgs...), image, "bash", "-c", egressRerunProbeScript)
+		out, code := dockerOutput(ctx, t, args...)
+		if code != 0 {
+			t.Fatalf("probe exit %d:\n%s", code, out)
+		}
+		runLine := regexp.MustCompile(`^RUN (\d+) exit=0 result=ok dnsmasq=1 tables=2 uid=(\d+) rule=(\d+) resolv=1 local=1$`)
+		runs := 0
+		for _, l := range strings.Split(out, "\n") {
+			if !strings.HasPrefix(l, "RUN ") {
+				continue
+			}
+			m := runLine.FindStringSubmatch(strings.TrimSpace(l))
+			if m == nil || m[2] != m[3] {
+				t.Errorf("run line %q: want exit 0, status ok, one resolver, two tables, resolver uid = rule uid, resolv.conf on the resolver, allowed name resolved", l)
+				continue
+			}
+			runs++
+		}
+		if runs != 11 {
+			t.Errorf("%d clean run lines, want 11:\n%s", runs, out)
+		}
+		for _, want := range []string{"LOCAL example.com=0", "HTTPS api.github.com=200", "SET before=1 after=0"} {
+			if !strings.Contains(out, want) {
+				t.Errorf("output lacks %q:\n%s", want, out)
+			}
+		}
+		switch {
+		case strings.Contains(out, "BASELINE answers=0"):
+			t.Logf("the gateway does not answer on port 9 without a restriction; the window sampler is inconclusive on this host:\n%s", out)
+		case !strings.Contains(out, "HITS=0\n"):
+			t.Errorf("an attempt passed the restriction during a repeated run (a window; the count is a lower bound):\n%s", out)
+		}
+	})
+
+	t.Run("failed transaction", func(t *testing.T) {
+		args := append(append([]string{"run", "--rm"}, runArgs...), image, "bash", "-c", egressTransactionFailureProbeScript)
+		out, code := dockerOutput(ctx, t, args...)
+		if code != 0 {
+			t.Fatalf("probe exit %d:\n%s", code, out)
+		}
+		if strings.Contains(out, "MUTATION not applied") {
+			t.Fatalf("the probe did not change the rule input:\n%s", out)
+		}
+		for _, want := range []string{
+			"FRESH exit=11 result=failed tables=0 resolv=0",
+			"ERR fresh: u-boot sandbox: egress restriction failed: the nftables rules could not be applied",
+			"INIT exit=0",
+			"RERUN exit=11 result=failed tables=2 chain-unchanged=1 same-resolver=1 resolv=1",
+			"ERR rerun: u-boot sandbox: egress restriction failed: the nftables rules could not be applied",
 		} {
 			if !strings.Contains(out, want) {
 				t.Errorf("output lacks %q:\n%s", want, out)
