@@ -16,7 +16,7 @@ Anlass: Befund M1 (a) aus [`slice-v1-sandbox-egress-neuladen-entwurf`](../done/s
 
 **Berührte Spec-Stellen:** [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) *Grenze* (nur der Teil zur Schreibbarkeit der Statusdatei; dessen Nachführung gehört dem Spezifikations-Slice der Welle, nicht diesem Slice), [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) (Allowlist; der Architect liest, ob ein DNS-Satz dort steht). Der Slice **liest** sie und ändert keine; ist nach der Messung eine Spec-Änderung nötig, benennt der Architect die Stelle, und ein eigener Spezifikations-Slice folgt dem Code.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-18.
 
