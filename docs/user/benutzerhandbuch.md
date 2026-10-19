@@ -1356,9 +1356,12 @@ registry.npmjs.org  feature:claude-code, feature:node
   Ändert `u-boot generate devcontainer` ein bestehendes `egress-init.sh`, gibt
   der Befehl dazu eine Warnung aus: Ein bestehender Container behält die
   Egress-Liste des Images, aus dem er gebaut wurde, und ist neu aufzubauen
-  (`devcontainer up --remove-existing-container`). Die Warnung erscheint nicht
-  beim ersten Schreiben der Datei, nicht ohne Änderung und nicht unter
-  `--dry-run`; unter `--quiet` entfällt sie, mit `--json` steht sie in
+  (`devcontainer up --remove-existing-container`). Die Warnung erscheint nur, wenn der Block eines bestehenden
+  `egress-init.sh` ersetzt wird, also nicht beim ersten Schreiben der Datei (auch
+  nicht bei der ersten Aktivierung der Beschränkung, bei der der Befehl das Script
+  anlegt und `devcontainer.json` und das Dockerfile ändert), nicht beim Abschalten
+  (der Befehl ändert `devcontainer.json` und das Dockerfile und lässt das Script
+  stehen), nicht ohne Änderung und nicht unter `--dry-run`; unter `--quiet` entfällt sie, mit `--json` steht sie in
   `diagnostics[]`, und der Umschlag trägt dann den Status `warn` (Exit-Code 0).
   Der Befehl prüft nicht, ob ein Container existiert.
 - Wer die Fähigkeit hat und das `sudo` des Base-Images nutzen kann, kann die
