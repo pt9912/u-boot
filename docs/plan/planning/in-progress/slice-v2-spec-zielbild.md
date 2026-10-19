@@ -71,8 +71,8 @@ Klassen: **A** = Messstand oder Ist-Zustand, kommt aus der Spezifikation und ste
 
 ## 2. Definition of Done
 
-- [ ] **Spezifikation:** Jede Zeile der Fundstellen-Tabelle der Klasse A ist entschieden und umgesetzt; jede Zeile der Klasse C trägt vor dem Commit ihre Entscheidung (gestrichen, oder gepinnt mit Testname in der Tabelle); Zeilen der Klassen B und D bleiben im Wortlaut; die Historie trägt eine neue Zeile ohne Messstand; `spec/spezifikation.md` verweist nirgends abwärts (Decken-Regel, `AGENTS.md` §3.4).
-- [ ] **Nichts geht verloren, ein Vertrag an vier Stellen:** Vor dem Entfernen steht jede Klasse-A-Aussage im Handbuch (Spalte *Handbuch* der Tabelle belegt, Zeile 17 ergänzt); Handbuch und CHANGELOG `[Unreleased]` nennen denselben Ist-Zustand wie vor dem Slice (Vergleich Satz für Satz, vorher/nachher); das Handbuch trägt weiterhin keine Anforderungs-, ADR- oder Spec-Kennungen (`AGENTS.md` §5 Regel 6).
+- [x] **Spezifikation:** Jede Zeile der Fundstellen-Tabelle der Klasse A ist entschieden und umgesetzt; jede Zeile der Klasse C trägt vor dem Commit ihre Entscheidung (gestrichen, oder gepinnt mit Testname in der Tabelle); Zeilen der Klassen B und D bleiben im Wortlaut; die Historie trägt eine neue Zeile ohne Messstand; `spec/spezifikation.md` verweist nirgends abwärts (Decken-Regel, `AGENTS.md` §3.4).
+- [x] **Nichts geht verloren, ein Vertrag an vier Stellen:** Vor dem Entfernen steht jede Klasse-A-Aussage im Handbuch (Spalte *Handbuch* der Tabelle belegt, Zeile 17 ergänzt); Handbuch und CHANGELOG `[Unreleased]` nennen denselben Ist-Zustand wie vor dem Slice (Vergleich Satz für Satz, vorher/nachher); das Handbuch trägt weiterhin keine Anforderungs-, ADR- oder Spec-Kennungen (`AGENTS.md` §5 Regel 6).
 - [ ] **Review und Verifikation:** Review-Report und Verification-Report unter `docs/reviews/` (`.harness/skills/reviewer.md`; kein Self-Review); der Verifier liest die Kopplung (Lastenheft · Spezifikation · Handbuch · CHANGELOG) gegen den Code, nicht gegen den Plan.
 - [ ] `make gates` grün; `make doc-trace`, `make doc-planning`, `make docs-check` ohne Befund. Läufe und Exit-Codes in §7.
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag; Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist; jedes Risiko aus §6 trägt einen Ausgang; die drei Paarungen sind getragen.
@@ -93,6 +93,40 @@ Die Tabelle nennt die Dateien, die der Diff berührt; der Implementer gleicht si
 | `docs/reviews/` (Review-Report, Verification-Report) | neu | Review und Verifikation nach `harness/review.md` und `harness/verification.md` |
 | `docs/plan/planning/observations/` (`BEO-DOK/zusage-weiter-als-messung`, `BEO-DOK/spec-bedingung-ohne-code-entsprechung`, `BEO-WZG/kopplung-nicht-nachgezogen`, `BEO-CLI/subdomain-text-ohne-vorbehalt`, `BEO-E2E/kombination-ollama-nested-runtime-ohne-lauf`: `state.md`, `evidence/`) | update, neu | Register bei der Closure (§7), soweit der Review ein Auftreten belegt |
 | `docs/plan/planning/open/README.md`, `in-progress/roadmap.md` und Verweis-Nachzüge von `make slice-mv` | update | Bestandszeile, Arbeitszeile bei Start und Closure („Nichts in Arbeit.“ wieder herstellen) |
+
+### Umsetzung (Implementer, 2026-10-19)
+
+Entscheidungen je Zeile der Fundstellen-Tabelle (Fundstelle im Handbuch: `docs/user/benutzerhandbuch.md`, Abschnitt und Aufzählungspunkt, wie in der Spalte *Handbuch*; die Tabelle selbst bleibt als Vorab-Stand unverändert):
+
+| # | Klasse | Entscheidung | Handbuch (vor dem Streichen gelesen) / Test |
+|---|---|---|---|
+| 1 | A | Satz zum Messstand gestrichen; „keinen breiteren Eintrag für den Blob-Host“ (Zusage) bleibt | *Ollama (optional)*, Punkt *Egress* („Nicht gemessen: …“) und Egress-Tabelle |
+| 2 | B | unverändert | `TestGenerateDevcontainer_Ollama_EgressHostsAndTogetherWithClaudeCode`, `TestE2E_SandboxDevcontainer_Ollama` |
+| 3 | B | Zusage unverändert; der Halbsatz „Gepinnt ist ein Docker-Test …“ gestrichen | Punkt *Subdomains* (trägt ihn); `TestE2E_SandboxDevcontainer_EgressSubdomains` |
+| 4 | A | gestrichen | Punkt *Subdomains* und *Messstand* |
+| 5 | A | gestrichen | Punkt *Subdomains* |
+| 6 | A | gestrichen; die Spezifikation schweigt zum offenen Resolver (wie zu `CNAME`), keine Bindung ohne Code-Entsprechung | Absatz *Grenze der Namensauflösung* mit Messstand |
+| 7 | A | gestrichen | Punkt *Namen hinter einem CNAME* |
+| 8 | B | unverändert | `TestNewEgressHost`, `TestConfigSet_EgressAllowWildcard_Exit10WithHint` |
+| 9 | A/C | Klammer und Satz „das setzt das Devcontainer-Werkzeug“ gestrichen; es bleibt die Abfrage über das Label | Statusdatei, „*Nicht ermittelbar* heißt …“ trägt die Werkzeug-Aussage; `TestE2E_SandboxDevcontainer_StatusFiles_InspectorAgainstEngine` |
+| 10 | A/B | Messstand gestrichen; Zusage „Verzeichnis gehört `vscode`, ein Prozess ohne `sudo` kann die Datei ersetzen“ bleibt (Folgepflicht der Entscheidung zur Egress-Liste im laufenden Container erfüllt) | Absatz *Grenze* der Statusdatei; `TestGenerateDevcontainer_SandboxStartScriptsWriteStatusFiles` (`mkdir`, `chown vscode:vscode`) |
+| 11 | A/C | Messstand gestrichen; „behält die Liste des Images“ und „wirkt nach einem Neuaufbau“ bleiben, ergänzt um „(das Startscript mit der Liste wird beim Bau ins Image kopiert)“ | Punkt „Nach einer Änderung führen Sie …“; Pin: `TestGenerateDevcontainer_SandboxEgress` (Dockerfile enthält `COPY egress-init.sh`), `TestExecute_EgressList_Notes` (Text der Ausgabe). Das Verhalten eines gestoppten Containers pinnt kein Test; die Aussage folgt aus dem kopierten Script |
+| 12 | B/A | letzter Satz sagt nur noch, dass die Ausgabe den Behalt der Liste und den Neuaufbau nennt; kein Wortlaut des Messstands | `TestExecute_EgressList_Notes` pinnt den Wortlaut der Ausgabe (der Wortlaut ändert der Code-Slice zu den Hinweisen) |
+| 13 | D | unverändert | — |
+| 14 | D | unverändert | — |
+| 15 | D | unverändert | Handbuch Punkt *Modell-Speicher* |
+| 16 | A/D | Klammer „(`amd64` ist nicht verifiziert)“ gestrichen; die Grenze verweist auf das Lastenheft | Handbuch Punkt *Grenzen der Messung* |
+| 17 | A | gestrichen, **nachdem** Handbuch (*Grenzen der Messung*) und CHANGELOG `[Unreleased]` die Grenze tragen (Commit davor) | Handbuch, Punkt *Grenzen der Messung*; CHANGELOG, Eintrag `ollama` |
+| 18 | D | unverändert | — |
+| 19 | A/C | drei Klammern („gemessen mit …“) gestrichen; „Kurzname `alpine` löst über Docker Hub auf, `mycompany/img` wird nur dort gesucht“ bleibt als Folge von `registries.conf`; „löst nicht auf“ entfällt (Klasse C, Messung ohne Test) | *Images bauen* und Absatz **Gemessen**; Pins: `TestGenerateDevcontainer_SandboxPodman` (schreibt `unqualified-search-registries = ['docker.io']`), `TestE2E_SandboxDevcontainer_NestedPodman` (`REGISTRIES_DOCKER_IO`); Bau: `TestE2E_SandboxDevcontainer_NestedPodman_Build`, `..._BuildEgress` |
+| 20 | A | Stand-Angaben gestrichen (Zustandsfeld); der Wert steht im `Dockerfile` (`ARG GO_VERSION`) | `Dockerfile`; kein Handbuch-Bedarf |
+| 21 | — | nicht gelesen/verändert | — |
+
+Neue Historienzeile in der Spezifikation (§7 Historie); die vier Zeilen vom 2026-10-19 bleiben im Wortlaut.
+
+**Gestrichen ohne Ersatz in der Spezifikation (Aussage steht im Handbuch):** Messstände der Zeilen 1, 4, 5, 6, 7, 10, 11, 17, 19; Pin-Stand Zeile 20 (Dockerfile). **Abweichung vom Plan:** Zeile 6 und 7 schweigen beide; die Beschreibung der Resolver-Grenze liegt im Handbuch, nicht in der Spezifikation.
+
+**Abgleich Plan-Tabelle gegen `git diff --stat 6af82fd..HEAD`** (nach der letzten Änderung): `CHANGELOG.md`, `docs/user/benutzerhandbuch.md`, `spec/spezifikation.md` und diese Slice-Datei: je mit Plan-Eintrag. Ohne Diff bleiben die Plan-Zeilen zu Review-/Verification-Report, Beobachtungs-Register, `open/README.md` und Roadmap (Closure, nicht Teil der Implementer-Arbeit). Keine Datei im Diff ohne Plan-Eintrag.
 
 ## 4. Trigger
 
