@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Nichts in Arbeit.
+In Arbeit: [`slice-v1-messskripte-nach-tools`](slice-v1-messskripte-nach-tools.md) (Messskripte und Dockerfiles nach `tools/messung/`, Messprotokolle nach `docs/messungen/`, Prüfskript gegen Nicht-Dokumente im Planning-Baum; wellenlos).
 
 ## Nächste Wellen
 
