@@ -18,16 +18,16 @@
 #5 transferring context: 3.24kB done
 #5 DONE 0.0s
 
-#6 [2/6] RUN apt-get update  && apt-get install -y --no-install-recommends dnsmasq-base nftables  && rm -rf /var/lib/apt/lists/*
+#6 [3/6] COPY egress-init.sh /usr/local/bin/u-boot-egress-init
 #6 CACHED
 
 #7 [4/6] RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
 #7 CACHED
 
-#8 [5/6] RUN mkdir -p "/workspaces/u-boot-messung-amd64-bas" && chown vscode:vscode "/workspaces/u-boot-messung-amd64-bas"
+#8 [2/6] RUN apt-get update  && apt-get install -y --no-install-recommends dnsmasq-base nftables  && rm -rf /var/lib/apt/lists/*
 #8 CACHED
 
-#9 [3/6] COPY egress-init.sh /usr/local/bin/u-boot-egress-init
+#9 [5/6] RUN mkdir -p "/workspaces/u-boot-messung-amd64-bas" && chown vscode:vscode "/workspaces/u-boot-messung-amd64-bas"
 #9 CACHED
 
 #10 [6/6] RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'

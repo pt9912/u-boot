@@ -1,0 +1,84 @@
+== A6 nestedRuntime docker + ollama, 2026-10-19T06:31:03.519Z
+build dok exit=0 dauer=0.5s size=1379941701
+AUSSAGE bau-dok-exit=0
+build dokn exit=0 dauer=0.4s size=1313419437
+AUSSAGE bau-dokn-exit=0
+-- Paketliste ohne Ollama-Block (dokn) gegen mit Ollama-Block (dok) (dpkg-query; leer: der Block entfernt und hinterlaesst nichts)
+Pakete dokn=300 dok=300
+(kein Unterschied)
+AUSSAGE paketdiff-docker=0
+-- Pakete der Runtime im Image (Auszug)
+ca-certificates 20250419
+containerd.io 2.4.2-2~debian.13~trixie
+dnsmasq-base 2.91-1+deb13u2
+docker-ce 5:29.9.1-1~debian.13~trixie
+docker-ce-cli 5:29.9.1-1~debian.13~trixie
+iptables 1.8.11-2
+libzstd1 1.5.7+dfsg-1
+nftables 1.1.3-1
+-- Versionen im Image
+Docker version 29.9.1, build dfc520d
+Docker version 29.9.1, build b26fb77
+containerd containerd v2.4.2 b7a25261e029d68978bbf290df0a62fc819b3c51
+AUSSAGE ollama-version-docker=version is 0.40.6
+-- mounts (Reihenfolge) und runArgs der erzeugten devcontainer.json
+  mount 1: target=/workspaces/u-boot-messung-amd64-dok
+  mount 2: target=/var/lib/docker
+  mount 3: target=/home/vscode/.ollama
+  runArgs: --privileged --cap-add=NET_ADMIN
+AUSSAGE mount-ziele-docker=target=/workspaces/u-boot-messung-amd64-dok target=/var/lib/docker target=/home/vscode/.ollama 
+start exit=0
+---- 2026-10-19T06:31:09.481Z ohne Egress: Daemon im Container starten (docker-init), docker run eines kleinen Images
+docker-init-exit=0
+client=29.9.1 server=29.9.1 os/arch=linux/amd64
+Unable to find image 'alpine:3' locally
+3: Pulling from library/alpine
+e2de96513ba9: Pulling fs layer
+e2de96513ba9: Download complete
+6d0606d1815c: Download complete
+797dd00a0fc7: Download complete
+e2de96513ba9: Pull complete
+Digest: sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
+Status: Downloaded newer image for alpine:3
+NESTED_RUN_OK
+0
+exit=0
+AUSSAGE nested-run-ohne-egress-docker=0
+---- 2026-10-19T06:31:13.837Z postStartCommand: Egress-Restriktion
+egress-init-exit=0
+u-boot-status 1
+result=ok
+at=2026-10-19T06:31:13Z
+-- mit Egress: Lauf des bereits geladenen Images (--pull=never)
+NESTED_RUN_OK
+exit=0
+AUSSAGE nested-run-mit-egress-docker=0
+-- mit Egress: Pull eines weiteren Images (busybox:1.36; Hosts der Laufzeit stehen in der Liste)
+Error response from daemon: failed to resolve reference "docker.io/library/busybox:1.36": failed to do request: Head "https://registry-1.docker.io/v2/library/busybox/manifests/1.36": dial tcp 34.237.181.64:443: i/o timeout
+exit=1
+AUSSAGE nested-pull-mit-egress-docker=1
+-- Pull ist gescheitert; erneuter Versuch nach 15 s (ein Prozess, der /etc/resolv.conf vor dem Start der Restriktion gelesen hat, kann den alten Resolver weiter nutzen; hier nur gemessen, nicht diagnostiziert)
+docker.io/library/busybox:1.36
+exit=0
+AUSSAGE nested-pull-mit-egress-nach-15s-docker=0
+-- mit Egress: Zugriff aus dem verschachtelten Container auf einen gesperrten Host (example.com; Exit 0 = erreicht)
+wget-exit=0
+AUSSAGE nested-gesperrt-example.com-docker=0
+-- mit Egress: Zugriff aus dem verschachtelten Container auf eine gesperrte Adresse ohne Namen (1.1.1.1, Port 80; Exit 0 = erreicht)
+wget-exit=0
+AUSSAGE nested-gesperrt-1.1.1.1-docker=0
+-- Gegenstueck: derselbe Zugriff aus dem Container selbst (Exit 6 = Name nicht aufgeloest)
+curl: (6) Could not resolve host: example.com
+curl-exit=6
+---- 2026-10-19T06:32:06.222Z gleichzeitig: ollama serve + Pull und ein Lauf in der verschachtelten Laufzeit
+pull-exit=0 nested-exit=0
+CONCURRENT_NESTED_OK
+NAME            ID              SIZE      MODIFIED               
+smollm2:135m    9077fe9d2ae1    270 MB    Less than a second ago    
+AUSSAGE gleichzeitig-pull-exit-docker=0
+AUSSAGE gleichzeitig-nested-exit-docker=0
+AUSSAGE ollama-library-cpu-docker=1
+-- Volumes der Laufzeit
+u-boot-messung-amd64-dok-docker-k1
+u-boot-messung-amd64-dok-ollama-k1
+u-boot-messung-amd64-dok-workspace-k1

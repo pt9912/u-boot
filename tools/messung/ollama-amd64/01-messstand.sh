@@ -33,16 +33,5 @@ aussage "ollama-version=$OLLAMA_VERSION"
 aussage "sha256-amd64=$SHA_AMD64"
 
 echo
-echo "== A10 Teil 1: Docker-Objekte VOR der Messung (Namen; in rohdaten-11-vorher.txt)"
-{
-  echo "## docker ps -a"; docker ps -a --format '{{.Names}}\t{{.Image}}'  | sort
-  echo "## docker images"; docker images --format '{{.Repository}}:{{.Tag}}\t{{.ID}}' | sort
-  echo "## docker volume ls"; docker volume ls -q | sort
-  echo "## docker network ls"; docker network ls --format '{{.Name}}' | sort
-} > "$OUT/rohdaten-11-vorher.txt"
-echo "Container: $(docker ps -a -q | wc -l)  Images (Eintraege): $(docker images -q | wc -l)  Volumes: $(docker volume ls -q | wc -l)  Netze: $(docker network ls -q | wc -l)"
-echo "Objekte mit dem Praefix $PFX vorher:"
-docker ps -a --format '{{.Names}}' | grep "^$PFX" || echo "  keine Container"
-docker images --format '{{.Repository}}:{{.Tag}}' | grep "^$PFX" || echo "  keine Images"
-docker volume ls -q | grep "^$PFX" || echo "  keine Volumes"
-docker network ls --format '{{.Name}}' | grep "^$PFX" || echo "  keine Netze"
+echo "== A10 Teil 1: Docker-Objekte VOR der Messung (Anzahl je Art, Objekte mit dem Praefix; auch in rohdaten-11-vorher.txt)"
+bestand | tee "$OUT/rohdaten-11-vorher.txt"

@@ -1,5 +1,5 @@
-== A2 Archiv und --exclude-Muster, 2026-10-19T05:31:05.410Z
-download exit=0 dauer=24.2s
+== A2 Archiv und --exclude-Muster, 2026-10-19T06:18:06.797Z
+download exit=0 dauer=24.1s
 archivgroesse-bytes=1438364593
 archiv/ollama-linux-amd64.tar.zst: OK
 AUSSAGE archiv-sha256=c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0

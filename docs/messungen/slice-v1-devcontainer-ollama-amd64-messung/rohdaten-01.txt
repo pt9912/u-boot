@@ -1,4 +1,4 @@
-== A0 Messstand, 2026-10-19T05:29:17.382Z
+== A0 Messstand, 2026-10-19T06:16:03.390Z
 -- Docker (Client und Server)
 client=29.9.1 api=1.56 os/arch=linux/amd64
 server=29.9.1 api=1.56 os/arch=linux/amd64
@@ -12,12 +12,12 @@ kernel.apparmor_restrict_unprivileged_userns=0
 /dev/net/tun vorhanden
 -- Plattenplatz vor der Messung (Docker-Datenverzeichnis des Daemons, aus einem Container gelesen)
 TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
-Images          319       4         83.23GB   37.35GB (44%)
-Containers      4         4         370.6MB   0B (0%)
-Local Volumes   128       6         97.8GB    38.78GB (39%)
-Build Cache     384       0         12.2GB    2.267GB
+Images          352       5         90.5GB    43.92GB (48%)
+Containers      5         5         210.9MB   0B (0%)
+Local Volumes   144       6         98.82GB   38.78GB (39%)
+Build Cache     659       0         27.84GB   10.75GB
 Filesystem      Size  Used Avail Use% Mounted on
-/dev/nvme0n1p1  288G  236G   38G  87% /d
+/dev/nvme0n1p1  288G  239G   35G  88% /d
 -- Basis-Image
 id=sha256:8cee2173cfe11857aaa6e1509f4f86404407f5d707a9a5be307176af501f0c97 digest=mcr.microsoft.com/devcontainers/base@sha256:1f851004adcd3dff3776b4a1da86727cf52280b0fdc9d5b0568c9c7d74274286 created=2026-09-10T12:18:56.789795263Z arch=amd64 size=940948130
 Debian GNU/Linux 13 (trixie)
@@ -32,10 +32,7 @@ AUSSAGE basis-image-digest=mcr.microsoft.com/devcontainers/base@sha256:1f851004a
 AUSSAGE ollama-version=0.40.6
 AUSSAGE sha256-amd64=c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0
 
-== A10 Teil 1: Docker-Objekte VOR der Messung (Namen; in rohdaten-11-vorher.txt)
-Container: 5  Images (Eintraege): 334  Volumes: 128  Netze: 3
-Objekte mit dem Praefix u-boot-messung-amd64 vorher:
-  keine Container
-  keine Images
-  keine Volumes
-  keine Netze
+== A10 Teil 1: Docker-Objekte VOR der Messung (Anzahl je Art, Objekte mit dem Praefix; auch in rohdaten-11-vorher.txt)
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=5 images=335 volumes=144 netze=3
+-- Objekte mit dem Praefix u-boot-messung-amd64 (Name beginnt mit u-boot-messung-amd64 oder vsc-u-boot-messung-amd64)

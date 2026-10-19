@@ -1,0 +1,15 @@
+== A8 Docker-Tests mit -v, 2026-10-19T06:33:30.043Z
+bau: docker build  --build-arg GO_VERSION=1.27.2 --build-arg GOLANGCI_LINT_VERSION=v2.14.0 --build-arg UBOOT_VERSION=0.11.0-dev --target test-docker-tools -t u-boot-messung-amd64-ub:test-docker-tools .
+bau-exit=0
+=== RUN   TestE2E_SandboxDevcontainer_Ollama
+--- PASS: TestE2E_SandboxDevcontainer_Ollama (16.63s)
+=== RUN   TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild
+--- PASS: TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild (31.51s)
+PASS
+ok  	github.com/pt9912/u-boot/internal/e2e	48.149s
+go-test-exit=0 gesamtdauer=55.6s
+AUSSAGE go-test-exit=0
+-- Container nach dem Testlauf, die vorher nicht da waren: 1
+zwischencontainer id=b7b011722db6 status=exited exit=1 name=/xenodochial_franklin erstellt=2026-10-19T06:33:55.645546549Z
+zwischencontainer-des-fehlgeschlagenen-baus=1
+AUSSAGE zwischencontainer-nach-negativprobe=1

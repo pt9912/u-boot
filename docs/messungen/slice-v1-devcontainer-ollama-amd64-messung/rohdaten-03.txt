@@ -1,19 +1,19 @@
-== A1 Bau, 2026-10-19T05:30:06.946Z
+== A1 Bau, 2026-10-19T06:17:10.687Z
 -- Groesse des Downloads (Metrik: Content-Length des Archivs, nicht Image-Groesse)
 content-length: 1438364593
 AUSSAGE archiv-name=ollama-linux-amd64.tar.zst
----- 2026-10-19T05:30:07.964Z Bau kalt (--no-cache), Variante oll
-build oll --no-cache exit=0 dauer=42.7s
+---- 2026-10-19T06:17:11.867Z Bau kalt (--no-cache), Variante oll
+build oll --no-cache exit=0 dauer=41.7s
 AUSSAGE bau-kalt-exit=0
 -- Zeilen des Builds zur Pruefsumme und zum Archiv
-#6 29.58 ollama-linux-amd64.tar.zst: OK
+#6 30.26 ollama-linux-amd64.tar.zst: OK
 AUSSAGE sha256sum-c=1
----- 2026-10-19T05:30:51.347Z Bau aus dem Cache, Variante oll
-build oll  exit=0 dauer=0.5s
+---- 2026-10-19T06:17:54.146Z Bau aus dem Cache, Variante oll
+build oll  exit=0 dauer=0.4s
 AUSSAGE bau-cache-exit=0
 -- CACHED-Schritte im zweiten Bau: 6 von 11 Schritten
 -- Image (Metrik .Size, Bytes und GB)
-sha256:9329d20a0672cda38f73b6fb67f66b775c5d5b520a159b6b09192857224f9dbb size=1013158921 arch=amd64
+sha256:7a5828205ac64eeda95ce070ea976526caf37a74d6236944b958d9557487cabe size=1013158921 arch=amd64
 image-size-gb(10^9)=1.01
 -- Inhalt des Images (als Benutzer des Images)
 uid=1000(vscode) gid=1000(vscode) groups=1000(vscode)
@@ -80,7 +80,7 @@ keine OLLAMA_*-Variable
 AUSSAGE ollama-version-im-image=version is 0.40.6
 AUSSAGE eigentuemer-ollama-dir=vscode:vscode
 AUSSAGE zstd-im-image=nein
----- 2026-10-19T05:30:54.720Z Gegenprobe: Variante bas (ohne Ollama-Block), Paketliste gegen oll
+---- 2026-10-19T06:17:57.335Z Gegenprobe: Variante bas (ohne Ollama-Block), Paketliste gegen oll
 build bas  exit=0 dauer=0.6s
 Pakete bas=292 oll=292
 -- diff dpkg bas -> oll (leer: der Ollama-Block hinterlaesst keine Paketaenderung)
@@ -89,5 +89,5 @@ AUSSAGE paketdiff-bas-oll=0
 bas size=946749835
 -- Plattenplatz nach dem Bau
 TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
-Images          322       4         83.32GB   37.44GB (44%)
-Containers      4         4         167.5MB   0B (0%)
+Images          355       4         90.58GB   44GB (48%)
+Containers      4         4         74.64MB   0B (0%)

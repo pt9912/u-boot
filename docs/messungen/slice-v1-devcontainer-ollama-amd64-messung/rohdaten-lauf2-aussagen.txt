@@ -1,0 +1,92 @@
+rohdaten-01.txt AUSSAGE docker-server-arch=amd64
+rohdaten-01.txt AUSSAGE basis-image-digest=mcr.microsoft.com/devcontainers/base@sha256:1f851004adcd3dff3776b4a1da86727cf52280b0fdc9d5b0568c9c7d74274286
+rohdaten-01.txt AUSSAGE ollama-version=0.40.6
+rohdaten-01.txt AUSSAGE sha256-amd64=c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0
+rohdaten-02.txt AUSSAGE u-boot-version=u-boot version 0.11.0-dev
+rohdaten-02.txt AUSSAGE projekt-oll-ollama-block=1
+rohdaten-02.txt AUSSAGE projekt-bas-ollama-block=0
+rohdaten-02.txt AUSSAGE projekt-pod-ollama-block=1
+rohdaten-02.txt AUSSAGE projekt-podn-ollama-block=0
+rohdaten-02.txt AUSSAGE projekt-dok-ollama-block=1
+rohdaten-02.txt AUSSAGE projekt-dokn-ollama-block=0
+rohdaten-03.txt AUSSAGE archiv-name=ollama-linux-amd64.tar.zst
+rohdaten-03.txt AUSSAGE bau-kalt-exit=0
+rohdaten-03.txt AUSSAGE sha256sum-c=1
+rohdaten-03.txt AUSSAGE bau-cache-exit=0
+rohdaten-03.txt AUSSAGE ollama-version-im-image=version is 0.40.6
+rohdaten-03.txt AUSSAGE eigentuemer-ollama-dir=vscode:vscode
+rohdaten-03.txt AUSSAGE zstd-im-image=nein
+rohdaten-03.txt AUSSAGE paketdiff-bas-oll=0
+rohdaten-04.txt AUSSAGE archiv-sha256=c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0
+rohdaten-04.txt AUSSAGE archiv-hat-cuda-verzeichnisse=16
+rohdaten-04.txt AUSSAGE archiv-hat-vulkan-verzeichnis=2
+rohdaten-04.txt AUSSAGE image-gleich-archiv-mit-mustern=ja
+rohdaten-04.txt AUSSAGE muster-ohne-treffer-tar-exit=0
+rohdaten-05-discover.txt AUSSAGE serve-bereit=Ollama is running
+rohdaten-05-discover.txt AUSSAGE bindung=127.0.0.1:11434
+rohdaten-05-discover.txt AUSSAGE container-adresse-curl-exit=7
+rohdaten-05-discover.txt AUSSAGE library-cpu=1
+rohdaten-05-discover.txt AUSSAGE pull-smollm2:135m-exit=0
+rohdaten-05-discover.txt AUSSAGE pull-qwen2.5:0.5b-exit=0
+rohdaten-05-discover.txt AUSSAGE run-smollm2:135m-exit=0 antwort-nichtleer=ja
+rohdaten-05-discover.txt AUSSAGE run-qwen2.5:0.5b-exit=0 antwort-nichtleer=ja
+rohdaten-05-restricted.txt AUSSAGE serve-bereit=Ollama is running
+rohdaten-05-restricted.txt AUSSAGE bindung=127.0.0.1:11434
+rohdaten-05-restricted.txt AUSSAGE container-adresse-curl-exit=7
+rohdaten-05-restricted.txt AUSSAGE gesperrte-adresse-curl-exit=28
+rohdaten-05-restricted.txt AUSSAGE library-cpu=1
+rohdaten-05-restricted.txt AUSSAGE pull-smollm2:135m-exit=0
+rohdaten-05-restricted.txt AUSSAGE pull-qwen2.5:0.5b-exit=0
+rohdaten-05-restricted.txt AUSSAGE run-smollm2:135m-exit=0 antwort-nichtleer=ja
+rohdaten-05-restricted.txt AUSSAGE run-qwen2.5:0.5b-exit=0 antwort-nichtleer=ja
+rohdaten-05-restricted.txt AUSSAGE gesperrt-ollama.com-curl-exit=6
+rohdaten-05-restricted.txt AUSSAGE gesperrt-example.com-curl-exit=6
+rohdaten-05-restricted.txt AUSSAGE gesperrt-huggingface.co-curl-exit=6
+rohdaten-06.txt AUSSAGE mounts-anzahl=2
+rohdaten-06.txt AUSSAGE mount-2-ziel=target=/home/vscode/.ollama
+rohdaten-06.txt AUSSAGE volume-eigentuemer-vor-dem-start=vscode:vscode
+rohdaten-06.txt AUSSAGE modell-nach-rm-gelistet=1
+rohdaten-06.txt AUSSAGE schluessel-nach-rm-gleich=ja
+rohdaten-06.txt AUSSAGE neubau-image-id-verschieden=ja
+rohdaten-06.txt AUSSAGE modell-nach-neubau-gelistet=1
+rohdaten-06.txt AUSSAGE schluessel-nach-neubau-gleich=ja
+rohdaten-07-docker.txt AUSSAGE bau-dok-exit=0
+rohdaten-07-docker.txt AUSSAGE bau-dokn-exit=0
+rohdaten-07-docker.txt AUSSAGE paketdiff-docker=0
+rohdaten-07-docker.txt AUSSAGE ollama-version-docker=version is 0.40.6
+rohdaten-07-docker.txt AUSSAGE mount-ziele-docker=target=/workspaces/u-boot-messung-amd64-dok target=/var/lib/docker target=/home/vscode/.ollama
+rohdaten-07-docker.txt AUSSAGE nested-run-ohne-egress-docker=0
+rohdaten-07-docker.txt AUSSAGE nested-run-mit-egress-docker=0
+rohdaten-07-docker.txt AUSSAGE nested-pull-mit-egress-docker=1
+rohdaten-07-docker.txt AUSSAGE nested-pull-mit-egress-nach-15s-docker=0
+rohdaten-07-docker.txt AUSSAGE nested-gesperrt-example.com-docker=0
+rohdaten-07-docker.txt AUSSAGE nested-gesperrt-1.1.1.1-docker=0
+rohdaten-07-docker.txt AUSSAGE gleichzeitig-pull-exit-docker=0
+rohdaten-07-docker.txt AUSSAGE gleichzeitig-nested-exit-docker=0
+rohdaten-07-docker.txt AUSSAGE ollama-library-cpu-docker=1
+rohdaten-07-podman.txt AUSSAGE bau-pod-exit=0
+rohdaten-07-podman.txt AUSSAGE bau-podn-exit=0
+rohdaten-07-podman.txt AUSSAGE paketdiff-podman=0
+rohdaten-07-podman.txt AUSSAGE ollama-version-podman=version is 0.40.6
+rohdaten-07-podman.txt AUSSAGE mount-ziele-podman=target=/workspaces/u-boot-messung-amd64-pod target=/home/vscode/.local/share/containers target=/home/vscode/.ollama
+rohdaten-07-podman.txt AUSSAGE nested-run-ohne-egress-podman=0
+rohdaten-07-podman.txt AUSSAGE nested-run-mit-egress-podman=0
+rohdaten-07-podman.txt AUSSAGE nested-pull-mit-egress-podman=0
+rohdaten-07-podman.txt AUSSAGE nested-gesperrt-example.com-podman=1
+rohdaten-07-podman.txt AUSSAGE nested-gesperrt-1.1.1.1-podman=1
+rohdaten-07-podman.txt AUSSAGE gleichzeitig-pull-exit-podman=0
+rohdaten-07-podman.txt AUSSAGE gleichzeitig-nested-exit-podman=0
+rohdaten-07-podman.txt AUSSAGE ollama-library-cpu-podman=1
+rohdaten-08.txt AUSSAGE basislinie-ohne-restriktion-b-exit=1
+rohdaten-08.txt AUSSAGE basislinie-mit-restriktion-b-exit=124
+rohdaten-08.txt AUSSAGE laeufe=30 skript-exit-ungleich-0=0
+rohdaten-08.txt AUSSAGE laeufe-mit-fenster-B=28 laeufe-mit-N-treffer=0 laeufe-mit-A-ausfall=14 laeufe-mit-D-ausfall=27
+rohdaten-08.txt AUSSAGE sonden-ausserhalb-der-laeufe: B-treffer=0 A-ausfaelle=0 D-ausfaelle=0
+rohdaten-09.txt AUSSAGE go-test-exit=0
+rohdaten-09.txt AUSSAGE zwischencontainer-nach-negativprobe=1
+rohdaten-10.txt AUSSAGE a9-cli-version=0.89.0
+rohdaten-10.txt AUSSAGE a9-up-container-laeuft=ja
+rohdaten-10.txt AUSSAGE a9-volume-name-gleich-nach-neuaufbau=ja
+rohdaten-10.txt AUSSAGE a9-anzahl-ollama-volumes=1
+rohdaten-10.txt AUSSAGE a9-modell-nach-neuaufbau=1
+rohdaten-11.txt AUSSAGE objekte-mit-praefix-nachher=0

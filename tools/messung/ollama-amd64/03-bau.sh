@@ -36,7 +36,9 @@ echo "-- CACHED-Schritte im zweiten Bau: $(grep -c ' CACHED' "$WORK/cache") von 
 
 echo "-- Image (Metrik .Size, Bytes und GB)"
 docker image inspect "$(vimg oll)" --format '{{.Id}} size={{.Size}} arch={{.Architecture}}'
-docker image inspect "$(vimg oll)" --format '{{.Size}}' | awk '{printf "image-size-gb(10^9)=%.2f\n", $1/1e9}'
+groesse=$(docker image inspect "$(vimg oll)" --format '{{.Size}}')
+hundertstel=$(( (groesse + 5000000) / 10000000 ))
+echo "image-size-gb(10^9)=$((hundertstel / 100)).$(printf '%02d' $((hundertstel % 100)))"
 echo "-- Inhalt des Images (als Benutzer des Images)"
 docker run --rm "$(vimg oll)" bash -c '
   id

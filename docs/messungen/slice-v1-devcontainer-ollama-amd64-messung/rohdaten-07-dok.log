@@ -9,34 +9,34 @@
 
 #3 [internal] load .dockerignore
 #3 transferring context: 2B done
-#3 DONE 0.0s
+#3 DONE 0.1s
 
 #4 [1/9] FROM mcr.microsoft.com/devcontainers/base:debian
 #4 DONE 0.0s
 
 #5 [internal] load build context
 #5 transferring context: 5.57kB done
-#5 DONE 0.0s
+#5 DONE 0.1s
 
 #6 [3/9] COPY docker-init.sh /usr/local/bin/u-boot-docker-init
 #6 CACHED
 
-#7 [6/9] COPY egress-init.sh /usr/local/bin/u-boot-egress-init
+#7 [4/9] RUN apt-get update  && apt-get install -y --no-install-recommends zstd  && rm -rf /var/lib/apt/lists/*  && arch="$(dpkg --print-architecture)"  && case "$arch" in amd64) sha256="c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0" ;; arm64) sha256="0a279d9428ad17b06fdb7dddf3b059b2c148433585fa3b30676a102fc459bb9f" ;; *) echo "ollama has no archive for $arch" >&2; exit 1 ;; esac  && work="$(mktemp -d)"  && cd "$work"  && curl -fsSLO "https://github.com/ollama/ollama/releases/download/v0.40.6/ollama-linux-${arch}.tar.zst"  && echo "${sha256}  ollama-linux-${arch}.tar.zst" | sha256sum -c -  && tar --zstd -xf "ollama-linux-${arch}.tar.zst" -C /usr/local --no-same-owner --exclude='lib/ollama/cuda_*' --exclude='lib/ollama/vulkan'  && cd /  && rm -rf "$work"  && apt-get purge -y --auto-remove zstd  && mkdir -p /home/vscode/.ollama  && chown vscode:vscode /home/vscode/.ollama
 #7 CACHED
 
-#8 [2/9] RUN install -m 0755 -d /etc/apt/keyrings  && curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc  && test "$(gpg --show-keys --with-colons /etc/apt/keyrings/docker.asc | awk -F: '/^pub/ {p=1} /^sub/ {p=0} /^fpr/ && p {print $10}')" = "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" > /etc/apt/sources.list.d/docker.list  && apt-get update  && apt-get install -y --no-install-recommends docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin iptables ca-certificates  && rm -rf /var/lib/apt/lists/*  && usermod -aG docker vscode
+#8 [6/9] COPY egress-init.sh /usr/local/bin/u-boot-egress-init
 #8 CACHED
 
-#9 [5/9] RUN apt-get update  && apt-get install -y --no-install-recommends dnsmasq-base nftables  && rm -rf /var/lib/apt/lists/*
+#9 [2/9] RUN install -m 0755 -d /etc/apt/keyrings  && curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc  && test "$(gpg --show-keys --with-colons /etc/apt/keyrings/docker.asc | awk -F: '/^pub/ {p=1} /^sub/ {p=0} /^fpr/ && p {print $10}')" = "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" > /etc/apt/sources.list.d/docker.list  && apt-get update  && apt-get install -y --no-install-recommends docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin iptables ca-certificates  && rm -rf /var/lib/apt/lists/*  && usermod -aG docker vscode
 #9 CACHED
 
 #10 [7/9] RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
 #10 CACHED
 
-#11 [4/9] RUN apt-get update  && apt-get install -y --no-install-recommends zstd  && rm -rf /var/lib/apt/lists/*  && arch="$(dpkg --print-architecture)"  && case "$arch" in amd64) sha256="c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0" ;; arm64) sha256="0a279d9428ad17b06fdb7dddf3b059b2c148433585fa3b30676a102fc459bb9f" ;; *) echo "ollama has no archive for $arch" >&2; exit 1 ;; esac  && work="$(mktemp -d)"  && cd "$work"  && curl -fsSLO "https://github.com/ollama/ollama/releases/download/v0.40.6/ollama-linux-${arch}.tar.zst"  && echo "${sha256}  ollama-linux-${arch}.tar.zst" | sha256sum -c -  && tar --zstd -xf "ollama-linux-${arch}.tar.zst" -C /usr/local --no-same-owner --exclude='lib/ollama/cuda_*' --exclude='lib/ollama/vulkan'  && cd /  && rm -rf "$work"  && apt-get purge -y --auto-remove zstd  && mkdir -p /home/vscode/.ollama  && chown vscode:vscode /home/vscode/.ollama
+#11 [8/9] RUN mkdir -p "/workspaces/u-boot-messung-amd64-dok" && chown vscode:vscode "/workspaces/u-boot-messung-amd64-dok"
 #11 CACHED
 
-#12 [8/9] RUN mkdir -p "/workspaces/u-boot-messung-amd64-dok" && chown vscode:vscode "/workspaces/u-boot-messung-amd64-dok"
+#12 [5/9] RUN apt-get update  && apt-get install -y --no-install-recommends dnsmasq-base nftables  && rm -rf /var/lib/apt/lists/*
 #12 CACHED
 
 #13 [9/9] RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
@@ -44,6 +44,6 @@
 
 #14 exporting to image
 #14 exporting layers done
-#14 writing image sha256:ba15e43a0b80fcd18aac69059fe9c84f7ebf0b6eb638f0261bc508705d4069ab done
+#14 writing image sha256:ba15e43a0b80fcd18aac69059fe9c84f7ebf0b6eb638f0261bc508705d4069ab 0.0s done
 #14 naming to docker.io/library/u-boot-messung-amd64-img-dok 0.0s done
 #14 DONE 0.1s

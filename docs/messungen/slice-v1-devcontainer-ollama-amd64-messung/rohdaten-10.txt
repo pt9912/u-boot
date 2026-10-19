@@ -1,33 +1,33 @@
-== A9 Dev-Container-CLI, 2026-10-19T05:37:41.119Z
+== A9 Dev-Container-CLI, 2026-10-19T06:24:03.248Z
 devcontainer-cli 0.89.0
 AUSSAGE a9-cli-version=0.89.0
----- 2026-10-19T05:37:44.790Z devcontainer up (erster Aufbau)
-[2026-10-19T05:37:45.847Z]  ---> Using cache
+---- 2026-10-19T06:24:08.095Z devcontainer up (erster Aufbau)
+[2026-10-19T06:24:08.902Z]  ---> Using cache
  ---> 3d5a45a788bc
 Step 10/15 : RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
-[2026-10-19T05:37:45.848Z]  ---> Using cache
+[2026-10-19T06:24:08.902Z]  ---> Using cache
  ---> e9f3acfe0cec
 Step 11/15 : RUN mkdir -p "/workspaces/u-boot-messung-amd64-oll" && chown vscode:vscode "/workspaces/u-boot-messung-amd64-oll"
-[2026-10-19T05:37:45.848Z]  ---> Using cache
+[2026-10-19T06:24:08.902Z]  ---> Using cache
  ---> 817ff9bb203d
 Step 12/15 : RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
-[2026-10-19T05:37:45.849Z]  ---> Using cache
+[2026-10-19T06:24:08.903Z]  ---> Using cache
  ---> cbeab72a8e71
 Step 13/15 : USER vscode
-[2026-10-19T05:37:45.849Z]  ---> Using cache
+[2026-10-19T06:24:08.903Z]  ---> Using cache
  ---> 68954b10d8e1
-Step 14/15 : FROM $_DEV_CONTAINERS_BASE_IMAGE AS dev_containers_target_stage
-[2026-10-19T05:37:45.850Z]  ---> 68954b10d8e1
-[2026-10-19T05:37:45.850Z] Step 15/15 : LABEL devcontainer.metadata="[ {\"id\":\"ghcr.io/devcontainers/features/common-utils:2\"}, {\"id\":\"ghcr.io/devcontainers/features/git:1\",\"customizations\":{\"vscode\":{\"settings\":{\"github.copilot.chat.codeGeneration.instructions\":[{\"text\":\"This dev container includes an up-to-date version of Git, built from source as needed, pre-installed and available on the `PATH`.\"}]}}}}, {\"remoteUser\":\"vscode\"}, {\"postStartCommand\":\"sudo sh /usr/local/bin/u-boot-egress-init\",\"mounts\":[\"source=u-boot-messung-amd64-oll-workspace-\${devcontainerId},target=/workspaces/u-boot-messung-amd64-oll,type=volume\",\"source=u-boot-messung-amd64-oll-ollama-\${devcontainerId},target=/home/vscode/.ollama,type=volume\"],\"remoteUser\":\"vscode\",\"remoteEnv\":{\"GIT_TOKEN\":\"\${localEnv:GIT_TOKEN}\"}} ]"
-[2026-10-19T05:37:45.854Z]  ---> Using cache
+[2026-10-19T06:24:08.903Z] Step 14/15 : FROM $_DEV_CONTAINERS_BASE_IMAGE AS dev_containers_target_stage
+[2026-10-19T06:24:08.903Z]  ---> 68954b10d8e1
+[2026-10-19T06:24:08.903Z] Step 15/15 : LABEL devcontainer.metadata="[ {\"id\":\"ghcr.io/devcontainers/features/common-utils:2\"}, {\"id\":\"ghcr.io/devcontainers/features/git:1\",\"customizations\":{\"vscode\":{\"settings\":{\"github.copilot.chat.codeGeneration.instructions\":[{\"text\":\"This dev container includes an up-to-date version of Git, built from source as needed, pre-installed and available on the `PATH`.\"}]}}}}, {\"remoteUser\":\"vscode\"}, {\"postStartCommand\":\"sudo sh /usr/local/bin/u-boot-egress-init\",\"mounts\":[\"source=u-boot-messung-amd64-oll-workspace-\${devcontainerId},target=/workspaces/u-boot-messung-amd64-oll,type=volume\",\"source=u-boot-messung-amd64-oll-ollama-\${devcontainerId},target=/home/vscode/.ollama,type=volume\"],\"remoteUser\":\"vscode\",\"remoteEnv\":{\"GIT_TOKEN\":\"\${localEnv:GIT_TOKEN}\"}} ]"
+[2026-10-19T06:24:08.904Z]  ---> Using cache
  ---> 49e7633166d5
-Successfully built 49e7633166d5
-[2026-10-19T05:37:45.874Z] Successfully tagged vsc-u-boot-messung-amd64-oll-4337edbfaee2c8d7f9831918bc66240087ae7c00e477bdd526023efbb850968e:latest
-[2026-10-19T05:37:45.994Z] Start: Run: docker run --sig-proxy=false -a STDOUT -a STDERR --mount source=u-boot-messung-amd64-oll-workspace-0a9mbcf4up64j3achegfalhenaq4gfp19imk58425hlv4mvt70q4,target=/workspaces/u-boot-messung-amd64-oll,type=volume --mount source=u-boot-messung-amd64-oll-ollama-0a9mbcf4up64j3achegfalhenaq4gfp19imk58425hlv4mvt70q4,target=/home/vscode/.ollama,type=volume -l devcontainer.local_folder=/w/u-boot-messung-amd64-oll -l devcontainer.config_file=/w/u-boot-messung-amd64-oll/.devcontainer/devcontainer.json --cap-add=NET_ADMIN --entrypoint /bin/sh vsc-u-boot-messung-amd64-oll-4337edbfaee2c8d7f9831918bc66240087ae7c00e477bdd526023efbb850968e-uid -c echo Container started
-[2026-10-19T05:37:46.570Z] Container started
-[2026-10-19T05:37:46.889Z] Running the postStartCommand from devcontainer.json...
-{"outcome":"success","containerId":"f1c51518809e596790803e2953ac4197aef3376405fb997ef721f266e93fa8bd","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/u-boot-messung-amd64-oll","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}}
-up-exit=0 dauer=2.7s
+[2026-10-19T06:24:08.904Z] Successfully built 49e7633166d5
+[2026-10-19T06:24:08.937Z] Successfully tagged vsc-u-boot-messung-amd64-oll-4337edbfaee2c8d7f9831918bc66240087ae7c00e477bdd526023efbb850968e:latest
+[2026-10-19T06:24:09.019Z] Start: Run: docker run --sig-proxy=false -a STDOUT -a STDERR --mount source=u-boot-messung-amd64-oll-workspace-0a9mbcf4up64j3achegfalhenaq4gfp19imk58425hlv4mvt70q4,target=/workspaces/u-boot-messung-amd64-oll,type=volume --mount source=u-boot-messung-amd64-oll-ollama-0a9mbcf4up64j3achegfalhenaq4gfp19imk58425hlv4mvt70q4,target=/home/vscode/.ollama,type=volume -l devcontainer.local_folder=/w/u-boot-messung-amd64-oll -l devcontainer.config_file=/w/u-boot-messung-amd64-oll/.devcontainer/devcontainer.json --cap-add=NET_ADMIN --entrypoint /bin/sh vsc-u-boot-messung-amd64-oll-4337edbfaee2c8d7f9831918bc66240087ae7c00e477bdd526023efbb850968e-uid -c echo Container started
+[2026-10-19T06:24:09.541Z] Container started
+[2026-10-19T06:24:09.859Z] Running the postStartCommand from devcontainer.json...
+{"outcome":"success","containerId":"f1d9a2d4539e5353221cef4cab3c4f87045134dbc0db1108dd08fcb5cd9b8adb","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/u-boot-messung-amd64-oll","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}}
+up-exit=0 dauer=2.4s
 container laeuft: ja
 AUSSAGE a9-up-container-laeuft=ja
 -- Volumes (Name mit devcontainerId)
@@ -36,20 +36,20 @@ u-boot-messung-amd64-oll-workspace-0a9mbcf4up64j3achegfalhenaq4gfp19imk58425hlv4
 -- Egress-Skript lief als postStartCommand? (Status-Datei)
 u-boot-status 1
 result=ok
-at=2026-10-19T05:37:47Z
+at=2026-10-19T06:24:10Z
 success 
 NAME            ID              SIZE      MODIFIED               
 smollm2:135m    9077fe9d2ae1    270 MB    Less than a second ago    
----- 2026-10-19T05:37:58.738Z devcontainer up --remove-existing-container --build-no-cache (Neuaufbau)
-[2026-10-19T05:38:45.631Z]  ---> Removed intermediate container b6d2708e28ea
- ---> 15b668f5144a
-[2026-10-19T05:38:45.631Z] Successfully built 15b668f5144a
-[2026-10-19T05:38:45.650Z] Successfully tagged vsc-u-boot-messung-amd64-oll-4337edbfaee2c8d7f9831918bc66240087ae7c00e477bdd526023efbb850968e:latest
-[2026-10-19T05:38:48.278Z] Start: Run: docker run --sig-proxy=false -a STDOUT -a STDERR --mount source=u-boot-messung-amd64-oll-workspace-0a9mbcf4up64j3achegfalhenaq4gfp19imk58425hlv4mvt70q4,target=/workspaces/u-boot-messung-amd64-oll,type=volume --mount source=u-boot-messung-amd64-oll-ollama-0a9mbcf4up64j3achegfalhenaq4gfp19imk58425hlv4mvt70q4,target=/home/vscode/.ollama,type=volume -l devcontainer.local_folder=/w/u-boot-messung-amd64-oll -l devcontainer.config_file=/w/u-boot-messung-amd64-oll/.devcontainer/devcontainer.json --cap-add=NET_ADMIN --entrypoint /bin/sh vsc-u-boot-messung-amd64-oll-4337edbfaee2c8d7f9831918bc66240087ae7c00e477bdd526023efbb850968e-uid -c echo Container started
-[2026-10-19T05:38:48.625Z] Container started
-[2026-10-19T05:38:48.899Z] Running the postStartCommand from devcontainer.json...
-{"outcome":"success","containerId":"09140d624c3dc9b9d065304fb8930c59c7ab965ee3b93167b42ca67780a992fd","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/u-boot-messung-amd64-oll","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}}
-up-exit=0 dauer=50.6s
+---- 2026-10-19T06:24:19.631Z devcontainer up --remove-existing-container --build-no-cache (Neuaufbau)
+[2026-10-19T06:25:09.062Z]  ---> Removed intermediate container 69651a0fb472
+ ---> e220de36bd00
+[2026-10-19T06:25:09.062Z] Successfully built e220de36bd00
+[2026-10-19T06:25:09.081Z] Successfully tagged vsc-u-boot-messung-amd64-oll-4337edbfaee2c8d7f9831918bc66240087ae7c00e477bdd526023efbb850968e:latest
+[2026-10-19T06:25:12.867Z] Start: Run: docker run --sig-proxy=false -a STDOUT -a STDERR --mount source=u-boot-messung-amd64-oll-workspace-0a9mbcf4up64j3achegfalhenaq4gfp19imk58425hlv4mvt70q4,target=/workspaces/u-boot-messung-amd64-oll,type=volume --mount source=u-boot-messung-amd64-oll-ollama-0a9mbcf4up64j3achegfalhenaq4gfp19imk58425hlv4mvt70q4,target=/home/vscode/.ollama,type=volume -l devcontainer.local_folder=/w/u-boot-messung-amd64-oll -l devcontainer.config_file=/w/u-boot-messung-amd64-oll/.devcontainer/devcontainer.json --cap-add=NET_ADMIN --entrypoint /bin/sh vsc-u-boot-messung-amd64-oll-4337edbfaee2c8d7f9831918bc66240087ae7c00e477bdd526023efbb850968e-uid -c echo Container started
+[2026-10-19T06:25:13.327Z] Container started
+[2026-10-19T06:25:13.543Z] Running the postStartCommand from devcontainer.json...
+{"outcome":"success","containerId":"f99e947365d5a2a709ae7b1519d4463f53b6da78fea4f023889700020d483d0e","remoteUser":"vscode","remoteWorkspaceFolder":"/workspaces/u-boot-messung-amd64-oll","ociAuthDiagnostics":{"authLookupWouldBeBlocked":false,"registryRedirectWouldPreventCredentialForwarding":false,"authServerRedirect":false}}
+up-exit=0 dauer=54.4s
 neuer container: ja
 -- Volumes nach dem Neuaufbau
 u-boot-messung-amd64-oll-ollama-0a9mbcf4up64j3achegfalhenaq4gfp19imk58425hlv4mvt70q4
@@ -57,5 +57,5 @@ u-boot-messung-amd64-oll-workspace-0a9mbcf4up64j3achegfalhenaq4gfp19imk58425hlv4
 AUSSAGE a9-volume-name-gleich-nach-neuaufbau=ja
 AUSSAGE a9-anzahl-ollama-volumes=1
 NAME            ID              SIZE      MODIFIED       
-smollm2:135m    9077fe9d2ae1    270 MB    51 seconds ago    
+smollm2:135m    9077fe9d2ae1    270 MB    55 seconds ago    
 AUSSAGE a9-modell-nach-neuaufbau=1

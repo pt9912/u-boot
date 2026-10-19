@@ -1,7 +1,7 @@
 == make build IMAGE=u-boot-messung-amd64-ub (Repo-Stand: Arbeitsverzeichnis u-boot)
-make build exit=0 dauer=6.3s
-#18 naming to docker.io/library/u-boot-messung-amd64-ub:latest 0.0s done
-#18 DONE 0.1s
+make build exit=0 dauer=6.0s
+#17 naming to docker.io/library/u-boot-messung-amd64-ub:latest 0.0s done
+#17 DONE 0.0s
 make: Verzeichnis „/Development/u-boot“ wird verlassen
 image=sha256:79e1afe5be93d12f907c5a00ee86bf7a5d6656a6b779cfcc4d3d3e74b54a07fa size=9290330 arch=amd64
 u-boot version 0.11.0-dev

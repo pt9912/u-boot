@@ -1,4 +1,4 @@
-== A6 nestedRuntime podman + ollama, 2026-10-19T05:33:42.365Z
+== A6 nestedRuntime podman + ollama, 2026-10-19T06:20:32.062Z
 build pod exit=0 dauer=0.6s size=1107058698
 AUSSAGE bau-pod-exit=0
 build podn exit=0 dauer=0.5s size=1040644124
@@ -25,10 +25,10 @@ AUSSAGE ollama-version-podman=version is 0.40.6
   runArgs: --cap-add=SYS_ADMIN --security-opt=seccomp=unconfined --security-opt=apparmor=unconfined --security-opt=systempaths=unconfined --device=/dev/fuse --device=/dev/net/tun --cap-add=NET_ADMIN
 AUSSAGE mount-ziele-podman=target=/workspaces/u-boot-messung-amd64-pod target=/home/vscode/.local/share/containers target=/home/vscode/.ollama 
 start exit=0
----- 2026-10-19T05:33:48.476Z postCreateCommand (sandbox-init), ohne Egress
+---- 2026-10-19T06:20:39.286Z postCreateCommand (sandbox-init), ohne Egress
 exit=0
----- 2026-10-19T05:33:48.517Z ohne Egress: podman run eines kleinen Images (Pull von Docker Hub)
-time="2026-10-19T05:33:48Z" level=warning msg="\"/\" is not a shared mount, this could cause issues or missing mounts with rootless containers"
+---- 2026-10-19T06:20:39.335Z ohne Egress: podman run eines kleinen Images (Pull von Docker Hub)
+time="2026-10-19T06:20:39Z" level=warning msg="\"/\" is not a shared mount, this could cause issues or missing mounts with rootless containers"
 Trying to pull docker.io/library/alpine:3...
 Getting image source signatures
 Copying blob sha256:e2de96513ba9eb53b431787ec8a65cdde380ac4772a3e4c4b714dcfde2a102b5
@@ -38,11 +38,11 @@ NESTED_RUN_OK
 0
 exit=0
 AUSSAGE nested-run-ohne-egress-podman=0
----- 2026-10-19T05:33:51.428Z postStartCommand: Egress-Restriktion
+---- 2026-10-19T06:20:42.649Z postStartCommand: Egress-Restriktion
 egress-init-exit=0
 u-boot-status 1
 result=ok
-at=2026-10-19T05:33:51Z
+at=2026-10-19T06:20:42Z
 -- mit Egress: Lauf des bereits geladenen Images (--pull=never)
 NESTED_RUN_OK
 exit=0
@@ -62,7 +62,7 @@ AUSSAGE nested-gesperrt-1.1.1.1-podman=1
 -- Gegenstueck: derselbe Zugriff aus dem Container selbst (Exit 6 = Name nicht aufgeloest)
 curl: (6) Could not resolve host: example.com
 curl-exit=6
----- 2026-10-19T05:34:17.558Z gleichzeitig: ollama serve + Pull und ein Lauf in der verschachtelten Laufzeit
+---- 2026-10-19T06:21:08.883Z gleichzeitig: ollama serve + Pull und ein Lauf in der verschachtelten Laufzeit
 pull-exit=0 nested-exit=0
 CONCURRENT_NESTED_OK
 NAME            ID              SIZE      MODIFIED               

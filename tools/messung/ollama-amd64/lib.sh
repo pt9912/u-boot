@@ -1,10 +1,10 @@
 # Gemeinsame Definitionen der Skripte (wird mit `. ./lib.sh` eingebunden, nicht aufgerufen).
-# Voraussetzungen auf dem Host: docker, make und die Shell (bash, date, tee, mkdir, cp, rm, ls, wc, grep, diff).
-# Jede Auswertung (jq, sed, awk, sha256sum, tar, curl, ss, ip) laeuft in einem Container.
+# Voraussetzungen auf dem Host: docker, make und die Shell mit Standardwerkzeugen (bash, coreutils: date, tee, mkdir, cp, cat, cut,
+# tr, head, tail, id, sleep, wc, sort; grep, diff). awk und sed laufen nur im Container, ebenso jq, sha256sum, tar, curl, ss, ip.
 #
 # Umgebung der Skripte:
 #   WORK  Messordner AUSSERHALB des Repos (Downloads, erzeugte Projekte); wird vom Aufrufer gewaehlt
-#   OUT   Ausgabeverzeichnis der Rohdaten und der erzeugten Dateien (Vorgabe: das Evidence-Verzeichnis dieser Messung im Repo)
+#   OUT   Ausgabeverzeichnis der Rohdaten (Vorgabe: docs/messungen/slice-v1-devcontainer-ollama-amd64-messung)
 #   ROOT  Repo-Wurzel (Vorgabe: drei Ebenen ueber diesem Verzeichnis)
 
 here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -46,12 +46,34 @@ rohdaten() {
 
 now() { date -u +%Y-%m-%dT%H:%M:%S.%3NZ; }
 mark() { echo "---- $(now) $*"; }
-sekunden() { awk -v a="$1" -v b="$2" 'BEGIN{printf "%.1f", b-a}'; }
+# Differenz zweier `date +%s.%N`-Werte in Sekunden mit einer Nachkommastelle (Ganzzahl-Arithmetik der Shell).
+sekunden() { local a=${1/./} b=${2/./}; local d=$(( (b - a) / 100000000 )); echo "$((d / 10)).$((d % 10))"; }
 # Eine stabile Aussage, die ein zweiter Lauf wiederholen muss (siehe README, Abschnitt Wiederholung).
 aussage() { echo "AUSSAGE $*"; }
 
-# Anzahl der Zeilen mit einem Muster (fuer Aussagen).
-anzahl() { grep -c -E "$1" || true; }
+# Bestand der Docker-Objekte auf stdout: je Art nur die Anzahl und die Objekte, deren Name das Praefix der Messung traegt (auch die
+# Images der Dev-Container-CLI, vsc-<Praefix>-…). Namen anderer Objekte des Hosts werden nirgends ausgegeben.
+bestand() {
+  local pat="^(vsc-)?$PFX" n
+  echo "Namen fremder Objekte nicht ausgewiesen, nur Anzahl"
+  echo "container=$(docker ps -a -q | wc -l) images=$(docker images -q | wc -l) volumes=$(docker volume ls -q | wc -l) netze=$(docker network ls -q | wc -l)"
+  echo "-- Objekte mit dem Praefix $PFX (Name beginnt mit $PFX oder vsc-$PFX)"
+  docker ps -a --format '{{.Names}}' | while read -r n; do [[ $n =~ $pat ]] && echo "container $n"; done
+  docker images --format '{{.Repository}}:{{.Tag}}' | while read -r n; do [[ $n =~ $pat ]] && echo "image $n"; done
+  docker volume ls -q | while read -r n; do [[ $n =~ $pat ]] && echo "volume $n"; done
+  docker network ls --format '{{.Name}}' | while read -r n; do [[ $n =~ $pat ]] && echo "netz $n"; done
+  return 0
+}
+# Entfernt die Objekte, die bestand() mit dem Praefix ausweist; einzige Loesch-Funktion der Skripte fuer Objekte ausserhalb ihrer
+# eigenen Schritte. Loescht nach dem Namen, nie nach Argumenten, ungetaggten Images oder Zeitfenstern.
+praefix_entfernen() {
+  local pat="^(vsc-)?$PFX" n
+  docker ps -a --format '{{.Names}}' | while read -r n; do [[ $n =~ $pat ]] && { echo "entferne container $n"; docker rm -f -v "$n" > /dev/null; }; done
+  docker volume ls -q | while read -r n; do [[ $n =~ $pat ]] && { echo "entferne volume $n"; docker volume rm "$n" > /dev/null; }; done
+  docker network ls --format '{{.Name}}' | while read -r n; do [[ $n =~ $pat ]] && { echo "entferne netz $n"; docker network rm "$n" > /dev/null; }; done
+  docker images --format '{{.Repository}}:{{.Tag}}' | while read -r n; do [[ $n =~ $pat ]] && { echo "entferne image $n"; docker rmi "$n" > /dev/null; }; done
+  return 0
+}
 
 # Variante -> Projektverzeichnis, Projektname und Image-Tag
 vdir() { echo "$WORK/p-$1"; }

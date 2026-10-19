@@ -1,11 +1,11 @@
-== A3/A4 Modus restricted, 2026-10-19T05:32:49.632Z
+== A3/A4 Modus restricted, 2026-10-19T06:19:40.909Z
 runArgs laut devcontainer.json:   "runArgs": ["--cap-add=NET_ADMIN"],
 resolver des Containers vor dem Skript: 2 Eintrag/Eintraege (erster IPv4-Upstream vorhanden: ja)
 egress-init exit=0
 -- Status-Datei des Skripts
 u-boot-status 1
 result=ok
-at=2026-10-19T05:32:50Z
+at=2026-10-19T06:19:41Z
 -- nft-Tabellen
 table ip u_boot_egress
 table ip6 u_boot_egress6
@@ -36,7 +36,7 @@ conf: nftset=/registry.ollama.ai/4#ip#u_boot_egress#allowed
 conf: server=/security.debian.org/1.1.1.1
 conf: server=/security.debian.org/8.8.8.8
 conf: nftset=/security.debian.org/4#ip#u_boot_egress#allowed
----- 05:32:52.356 serve starten (HOME=/home/vscode)
+---- 06:19:43.623 serve starten (HOME=/home/vscode)
 (keine OLLAMA_*-Variable gesetzt: OLLAMA_HOST ungesetzt)
 AUSSAGE serve-bereit=Ollama is running
 serve bereit nach 0.5s
@@ -46,61 +46,61 @@ State  Recv-Q Send-Q Local Address:Port  Peer Address:Port
 LISTEN 0      4096       127.0.0.1:11434      0.0.0.0:*   
 AUSSAGE bindung=127.0.0.1:11434 
 -- Erreichbarkeit ueber die Container-Adresse (Exit-Code von curl: 7 = abgelehnt, 28 = Zeitueberschreitung/verworfen)
-container-adresse: curl-exit=7 (curl: (7) Failed to connect to 172.17.0.5 port 11434 after 0 ms: Could not connect to server)
+container-adresse: curl-exit=7 (curl: (7) Failed to connect to 172.17.0.6 port 11434 after 0 ms: Could not connect to server)
 AUSSAGE container-adresse-curl-exit=7
 -- Gegenstueck: eine verworfene Verbindung (gesperrte Adresse, kein Namens-Aufruf)
 gesperrte Adresse 1.1.1.1: curl-exit=28 (curl: (28) Connection timed out after 3002 milliseconds)
 AUSSAGE gesperrte-adresse-curl-exit=28
 -- Server-Log: Start, Bibliothek, Threads
-time=2026-10-19T05:32:52.375Z level=INFO source=routes.go:2439 msg="server config" env="map[CUDA_VISIBLE_DEVICES: GGML_VK_VISIBLE_DEVICES: GPU_DEVICE_ORDINAL: HIP_VISIBLE_DEVICES: HSA_OVERRIDE_GFX_VERSION: HTTPS_PROXY: HTTP_PROXY: LLAMA_ARG_FIT: LLAMA_ARG_FIT_
-time=2026-10-19T05:32:52.375Z level=INFO source=routes.go:2501 msg="Listening on 127.0.0.1:11434 (version 0.40.6)"
-time=2026-10-19T05:32:52.421Z level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="31.1 GiB" available="31.1 GiB"
+time=2026-10-19T06:19:43.643Z level=INFO source=routes.go:2439 msg="server config" env="map[CUDA_VISIBLE_DEVICES: GGML_VK_VISIBLE_DEVICES: GPU_DEVICE_ORDINAL: HIP_VISIBLE_DEVICES: HSA_OVERRIDE_GFX_VERSION: HTTPS_PROXY: HTTP_PROXY: LLAMA_ARG_FIT: LLAMA_ARG_FIT_
+time=2026-10-19T06:19:43.644Z level=INFO source=routes.go:2501 msg="Listening on 127.0.0.1:11434 (version 0.40.6)"
+time=2026-10-19T06:19:43.712Z level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="31.1 GiB" available="31.1 GiB"
 AUSSAGE library-cpu=1
 -- ~/.ollama nach dem Start
 total 24
-drwxr-xr-x 1 vscode vscode 4096 Oct 19 05:32 .
-drwx------ 1 vscode vscode 4096 Oct 19 05:30 ..
--rw------- 1 vscode vscode  387 Oct 19 05:32 id_ed25519
--rw-r--r-- 1 vscode vscode   81 Oct 19 05:32 id_ed25519.pub
-drwxr-xr-x 3 vscode vscode 4096 Oct 19 05:32 models
+drwxr-xr-x 1 vscode vscode 4096 Oct 19 06:19 .
+drwx------ 1 vscode vscode 4096 Oct 19 06:17 ..
+-rw------- 1 vscode vscode  387 Oct 19 06:19 id_ed25519
+-rw-r--r-- 1 vscode vscode   81 Oct 19 06:19 id_ed25519.pub
+drwxr-xr-x 3 vscode vscode 4096 Oct 19 06:19 models
 -- DNS-Anfragen seit Serverstart (vor dem Pull)
       4 ollama.com
----- 05:32:55.966 pull smollm2:135m
-pulling f535f83ec568: 100% ▕█████████████████ ▏ 270 MB/270 MB   37 MB/s      0spulling manifest 
-pulling f535f83ec568: 100% ▕█████████████████ ▏ 270 MB/270 MB   37 MB/s      0s
+---- 06:19:47.249 pull smollm2:135m
+pulling f535f83ec568: 100% ▕█████████████████ ▏ 269 MB/270 MB   59 MB/s      0spulling manifest 
+pulling f535f83ec568: 100% ▕█████████████████ ▏ 269 MB/270 MB   59 MB/s      0s
 pulling b0f58c4c1a3c: 100% ▕██████████████████▏  561 B                         
 success 
-pull smollm2:135m exit=0 dauer=12.0s
+pull smollm2:135m exit=0 dauer=8.7s
 AUSSAGE pull-smollm2:135m-exit=0
 -- DNS-Anfragen waehrend des Pulls (smollm2:135m)
      12 dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com
       4 registry.ollama.ai
 -- Antworten fuer Namen ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
----- 05:33:07.982 pull qwen2.5:0.5b
+---- 06:19:55.990 pull qwen2.5:0.5b
 pulling 005f95c74751: 100% ▕██████████████████▏  490 B                         
 success 
-pull qwen2.5:0.5b exit=0 dauer=9.6s
+pull qwen2.5:0.5b exit=0 dauer=10.5s
 AUSSAGE pull-qwen2.5:0.5b-exit=0
 -- DNS-Anfragen waehrend des Pulls (qwen2.5:0.5b)
      10 dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com
       2 registry.ollama.ai
 -- Antworten fuer Namen ausserhalb der Liste (REFUSED/NXDOMAIN/NODATA/config)
----- 05:33:17.630 Speicher nach den Pulls
+---- 06:20:06.508 Speicher nach den Pulls
 638M	/home/vscode/.ollama
 NAME            ID              SIZE      MODIFIED               
 qwen2.5:0.5b    a8b0c5157701    397 MB    Less than a second ago    
-smollm2:135m    9077fe9d2ae1    270 MB    9 seconds ago             
----- 05:33:17.713 run smollm2:135m (CPU)
-⠙ ⠹ ⠸ ⠼ ⠴ Reply with the single word OK.
+smollm2:135m    9077fe9d2ae1    270 MB    10 seconds ago            
+---- 06:20:06.613 run smollm2:135m (CPU)
+⠙ ⠙ ⠸ ⠼ ⠴ Reply with the single word OK.
 run smollm2:135m exit=0 dauer=0.7s
 AUSSAGE run-smollm2:135m-exit=0 antwort-nichtleer=ja
 -- ollama ps
 NAME            ID              SIZE      PROCESSOR    CONTEXT    RUNNER      UNTIL              
 smollm2:135m    9077fe9d2ae1    383 MB    100% CPU     4096       llamacpp    4 minutes from now    
 -- DNS-Anfragen waehrend run
----- 05:33:18.422 run qwen2.5:0.5b (CPU)
-⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠇ ⠇ OK.
-run qwen2.5:0.5b exit=0 dauer=1.1s
+---- 06:20:07.318 run qwen2.5:0.5b (CPU)
+⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏ ⠋ ⠙ ⠹ OK.
+run qwen2.5:0.5b exit=0 dauer=1.4s
 AUSSAGE run-qwen2.5:0.5b-exit=0 antwort-nichtleer=ja
 -- ollama ps
 NAME            ID              SIZE      PROCESSOR    CONTEXT    RUNNER      UNTIL              
@@ -108,16 +108,16 @@ qwen2.5:0.5b    a8b0c5157701    486 MB    100% CPU     4096       llamacpp    4 
 smollm2:135m    9077fe9d2ae1    383 MB    100% CPU     4096       llamacpp    4 minutes from now    
 -- DNS-Anfragen waehrend run
 -- cgroup memory.peak (Bytes)
-1623834624
+1617698816
 -- Server-Log (Bibliothek/Threads waehrend der Laeufe)
 cmn          init: llama threadpool init, n_threads = 6
 cmn  common_param: system_info: n_threads = 6 (n_threads_batch = 6) / 20 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX_VNNI = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | LLAMAFILE = 1 | REPACK = 1 | 
 srv          init: using 19 threads for HTTP server
-time=2026-10-19T05:32:52.376Z level=INFO source=runner.go:60 msg="discovering available GPUs..."
-time=2026-10-19T05:32:52.421Z level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="31.1 GiB" available="31.1 GiB"
-time=2026-10-19T05:33:18.281Z level=INFO source=sched.go:788 msg="loaded runners" count=1
-time=2026-10-19T05:33:19.272Z level=INFO source=sched.go:788 msg="loaded runners" count=2
----- 05:33:19.544 gesperrte Hosts (Namensaufloesung ueber den Resolver des Skripts, dann curl)
+time=2026-10-19T06:19:43.648Z level=INFO source=runner.go:60 msg="discovering available GPUs..."
+time=2026-10-19T06:19:43.712Z level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="31.1 GiB" available="31.1 GiB"
+time=2026-10-19T06:20:07.174Z level=INFO source=sched.go:788 msg="loaded runners" count=1
+time=2026-10-19T06:20:08.431Z level=INFO source=sched.go:788 msg="loaded runners" count=2
+---- 06:20:08.719 gesperrte Hosts (Namensaufloesung ueber den Resolver des Skripts, dann curl)
 ollama.com: curl-exit=6 (curl: (6) Could not resolve host: ollama.com)
 AUSSAGE gesperrt-ollama.com-curl-exit=6
 example.com: curl-exit=6 (curl: (6) Could not resolve host: example.com)
@@ -127,11 +127,11 @@ AUSSAGE gesperrt-huggingface.co-curl-exit=6
 -- erlaubte Hosts (Gegenprobe)
 github.com: curl-exit=0 ()
 registry.ollama.ai: curl-exit=0 ()
----- 05:33:19.787 alle DNS-Anfragen der Sitzung (eindeutig, A/AAAA)
+---- 06:20:08.950 alle DNS-Anfragen der Sitzung (eindeutig, A/AAAA)
      22 dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com
       4 example.com
       2 github.com
       4 huggingface.co
       8 ollama.com
       8 registry.ollama.ai
-container-exit=0  gesamtdauer=31.5s
+container-exit=0  gesamtdauer=29.5s

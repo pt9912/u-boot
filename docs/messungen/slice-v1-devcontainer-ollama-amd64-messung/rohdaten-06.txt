@@ -1,14 +1,14 @@
-== A5 Volume, 2026-10-19T05:33:24.192Z
+== A5 Volume, 2026-10-19T06:20:13.554Z
 -- mounts laut devcontainer.json (Reihenfolge wie dort)
   source=u-boot-messung-amd64-oll-workspace-${devcontainerId},target=/workspaces/u-boot-messung-amd64-oll,type=volume
   source=u-boot-messung-amd64-oll-ollama-${devcontainerId},target=/home/vscode/.ollama,type=volume
 AUSSAGE mounts-anzahl=2
 AUSSAGE mount-2-ziel=target=/home/vscode/.ollama
----- 2026-10-19T05:33:24.939Z Container 1: neues Volume, Eigentuemer, Pull hinter der Restriktion
+---- 2026-10-19T06:20:14.197Z Container 1: neues Volume, Eigentuemer, Pull hinter der Restriktion
 vscode:vscode 755 /home/vscode/.ollama
 vscode:vscode 755 /workspaces/u-boot-messung-amd64-oll
-drwxr-xr-x 2 vscode vscode 4096 Oct 19 05:30 .
-drwx------ 1 vscode vscode 4096 Oct 19 05:30 ..
+drwxr-xr-x 2 vscode vscode 4096 Oct 19 06:17 .
+drwx------ 1 vscode vscode 4096 Oct 19 06:17 ..
 AUSSAGE volume-eigentuemer-vor-dem-start=vscode:vscode
 success 
 NAME            ID              SIZE      MODIFIED               
@@ -16,24 +16,24 @@ smollm2:135m    9077fe9d2ae1    270 MB    Less than a second ago
 -- Schluesselpaar (nur Name, Rechte, Eigentuemer; Pruefsumme des PUBLIC-Teils)
 vscode:vscode 600 /home/vscode/.ollama/id_ed25519
 vscode:vscode 644 /home/vscode/.ollama/id_ed25519.pub
-pub-sha256-anfang=80796176996fd012
+pub-sha256-anfang=e709890ff435b099
 -- Volumes nach dem Start
 u-boot-messung-amd64-oll-ollama-m1
 u-boot-messung-amd64-oll-workspace-m1
 volume u-boot-messung-amd64-oll-ollama-m1 driver=local scope=local
----- 2026-10-19T05:33:34.598Z Container 1 loeschen (docker rm -f), Volume bleibt
+---- 2026-10-19T06:20:23.911Z Container 1 loeschen (docker rm -f), Volume bleibt
 u-boot-messung-amd64-oll-ollama-m1
 u-boot-messung-amd64-oll-workspace-m1
----- 2026-10-19T05:33:35.019Z Container 2: neuer Container, dasselbe Volume
+---- 2026-10-19T06:20:24.269Z Container 2: neuer Container, dasselbe Volume
 NAME            ID              SIZE      MODIFIED     
 smollm2:135m    9077fe9d2ae1    270 MB    1 second ago    
 -- Lauf ohne neuen Pull
-⠙ ⠙ ⠹ ⠸ ⠴ Reply with the single word OK.
+⠙ ⠹ ⠸ ⠼ ⠼ Reply with the single word OK.
 AUSSAGE modell-nach-rm-gelistet=1
 AUSSAGE schluessel-nach-rm-gleich=ja
----- 2026-10-19T05:33:37.137Z Neubau des Images von Hand (angehaengte Schicht), dasselbe Volume
+---- 2026-10-19T06:20:26.438Z Neubau des Images von Hand (angehaengte Schicht), dasselbe Volume
 build-neubau exit=0
-image alt: sha256:9329d20a0672cda38f73b6fb67f66b775c5d5b520a159b6b09192857224f9dbb
+image alt: sha256:7a5828205ac64eeda95ce070ea976526caf37a74d6236944b958d9557487cabe
 image neu: sha256:9121dd9185e1122998ae7f136991b2c0892519aa07739ab2b3a3e6b69369d05f
 AUSSAGE neubau-image-id-verschieden=ja
 NAME            ID              SIZE      MODIFIED      

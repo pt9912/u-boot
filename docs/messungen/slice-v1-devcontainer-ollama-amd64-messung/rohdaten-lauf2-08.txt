@@ -1,0 +1,454 @@
+== A7 Wiederholungslauf von egress-init.sh, 30 Laeufe, 2026-10-19T06:32:20.275Z
+-- Gateway vorhanden: ja
+-- Basislinie ohne Restriktion (vor dem ersten Start des Skripts): B-Sonde
+B ohne Restriktion exit=1 (1 = abgelehnt, 124 = Frist)
+AUSSAGE basislinie-ohne-restriktion-b-exit=1
+-- erster Start des Skripts
+egress-init exit=0 dauer=111 ms
+-- Basislinie mit Restriktion: B-Sonde (Exit 124 erwartet), N-Sonde, A-Sonde, D-Sonde
+B mit Restriktion exit=124
+N exit=6
+A exit=0
+D exit=0
+AUSSAGE basislinie-mit-restriktion-b-exit=124
+
+== Auswertung (30 Laeufe des Skripts; Zeitfenster je Lauf: von Start des Skripts bis 1,5 s nach seinem Ende)
+Sonden insgesamt: B=10140 N=5685 A=376 D=3785
+lauf init-ms  B-treffer fenster-ms fenster-ab-ms N-treffer A-ausfall  A-ms     D-ausfall (ms)
+1    90       22        38         20            0        1          11       5 (59)
+2    83       31        38         13            0        0          0        4 (46)
+3    85       33        25         27            0        1          8        4 (46)
+4    78       6         26         20            0        1          10       4 (44)
+5    81       46        29         21            0        1          7        5 (61)
+6    80       0         0          0             0        1          10       4 (48)
+7    76       9         33         15            0        1          15       4 (46)
+8    79       40        31         12            0        1          10       4 (47)
+9    88       0         0          0             0        0          0        5 (59)
+10   74       24        32         14            0        1          10       4 (45)
+11   106      31        40         30            0        0          0        5 (76)
+12   78       33        35         14            0        0          0        5 (61)
+13   75       21        22         25            0        0          0        3 (31)
+14   100      47        48         18            0        1          14       4 (65)
+15   77       2         5          43            0        0          0        4 (47)
+16   93       16        14         47            0        0          0        5 (63)
+17   81       28        26         25            0        0          0        4 (48)
+18   84       18        42         14            0        0          0        4 (45)
+19   83       56        32         21            0        1          11       4 (47)
+20   97       28        50         13            0        1          6        5 (61)
+21   64       1         4          31            0        0          0        3 (33)
+22   86       27        37         15            0        0          0        5 (58)
+23   66       7         12         22            0        0          0        0 (0)
+24   82       15        29         21            0        0          0        0 (0)
+25   92       13        30         22            0        1          7        0 (0)
+26   90       6         31         24            0        0          0        4 (45)
+27   90       13        27         34            0        1          6        4 (43)
+28   72       36        32         12            0        0          0        3 (30)
+29   68       10        28         9             0        1          8        3 (34)
+30   92       48        32         27            0        0          0        5 (63)
+AUSSAGE laeufe=30 skript-exit-ungleich-0=0
+AUSSAGE laeufe-mit-fenster-B=28 laeufe-mit-N-treffer=0 laeufe-mit-A-ausfall=14 laeufe-mit-D-ausfall=27
+fenster-B: max 50 ms, Summe 827 ms
+AUSSAGE sonden-ausserhalb-der-laeufe: B-treffer=0 A-ausfaelle=0 D-ausfaelle=0
+
+-- Ereignisse: B-Treffer (Exit ungleich 124), A- und D-Ausfaelle, N-Treffer (Zeit in ms seit Start des Laufs; Lauf 0 = ausserhalb)
+lauf=1 sonde=B4 exit=1 t0=+20ms t1=+24ms
+lauf=1 sonde=B5 exit=1 t0=+21ms t1=+25ms
+lauf=1 sonde=D exit=2 t0=+23ms t1=+25ms
+lauf=1 sonde=B4 exit=1 t0=+25ms t1=+29ms
+lauf=1 sonde=B5 exit=1 t0=+27ms t1=+31ms
+lauf=1 sonde=B4 exit=1 t0=+30ms t1=+33ms
+lauf=1 sonde=B5 exit=1 t0=+32ms t1=+35ms
+lauf=1 sonde=B8 exit=1 t0=+33ms t1=+36ms
+lauf=1 sonde=B4 exit=1 t0=+33ms t1=+35ms
+lauf=1 sonde=B5 exit=1 t0=+36ms t1=+39ms
+lauf=1 sonde=D exit=2 t0=+37ms t1=+38ms
+lauf=1 sonde=B4 exit=1 t0=+37ms t1=+40ms
+lauf=1 sonde=B8 exit=1 t0=+37ms t1=+41ms
+lauf=1 sonde=B5 exit=1 t0=+40ms t1=+44ms
+lauf=1 sonde=B4 exit=1 t0=+41ms t1=+44ms
+lauf=1 sonde=B8 exit=1 t0=+42ms t1=+46ms
+lauf=1 sonde=B4 exit=1 t0=+45ms t1=+49ms
+lauf=1 sonde=B5 exit=1 t0=+45ms t1=+48ms
+lauf=1 sonde=B8 exit=1 t0=+47ms t1=+51ms
+lauf=1 sonde=B5 exit=1 t0=+49ms t1=+51ms
+lauf=1 sonde=B4 exit=1 t0=+49ms t1=+53ms
+lauf=1 sonde=D exit=2 t0=+50ms t1=+52ms
+lauf=1 sonde=B8 exit=1 t0=+52ms t1=+54ms
+lauf=1 sonde=B5 exit=1 t0=+52ms t1=+56ms
+lauf=1 sonde=B6 exit=1 t0=+54ms t1=+57ms
+lauf=1 sonde=A exit=6 t0=+63ms t1=+74ms
+lauf=1 sonde=D exit=2 t0=+64ms t1=+66ms
+lauf=1 sonde=D exit=2 t0=+79ms t1=+82ms
+lauf=2 sonde=B3 exit=1 t0=+13ms t1=+17ms
+lauf=2 sonde=B1 exit=1 t0=+15ms t1=+18ms
+lauf=2 sonde=B5 exit=1 t0=+17ms t1=+21ms
+lauf=2 sonde=B7 exit=1 t0=+17ms t1=+21ms
+lauf=2 sonde=B3 exit=1 t0=+18ms t1=+21ms
+lauf=2 sonde=D exit=2 t0=+19ms t1=+21ms
+lauf=2 sonde=B1 exit=1 t0=+20ms t1=+23ms
+lauf=2 sonde=B5 exit=1 t0=+22ms t1=+26ms
+lauf=2 sonde=B7 exit=1 t0=+22ms t1=+25ms
+lauf=2 sonde=B3 exit=1 t0=+22ms t1=+26ms
+lauf=2 sonde=B1 exit=1 t0=+24ms t1=+29ms
+lauf=2 sonde=B7 exit=1 t0=+26ms t1=+29ms
+lauf=2 sonde=B5 exit=1 t0=+27ms t1=+31ms
+lauf=2 sonde=B3 exit=1 t0=+28ms t1=+31ms
+lauf=2 sonde=B1 exit=1 t0=+30ms t1=+33ms
+lauf=2 sonde=B7 exit=1 t0=+30ms t1=+33ms
+lauf=2 sonde=B5 exit=1 t0=+32ms t1=+34ms
+lauf=2 sonde=D exit=2 t0=+33ms t1=+35ms
+lauf=2 sonde=B3 exit=1 t0=+33ms t1=+36ms
+lauf=2 sonde=B1 exit=1 t0=+34ms t1=+38ms
+lauf=2 sonde=B7 exit=1 t0=+35ms t1=+38ms
+lauf=2 sonde=B5 exit=1 t0=+35ms t1=+38ms
+lauf=2 sonde=B3 exit=1 t0=+38ms t1=+41ms
+lauf=2 sonde=B5 exit=1 t0=+39ms t1=+42ms
+lauf=2 sonde=B1 exit=1 t0=+39ms t1=+42ms
+lauf=2 sonde=B7 exit=1 t0=+40ms t1=+43ms
+lauf=2 sonde=B3 exit=1 t0=+42ms t1=+45ms
+lauf=2 sonde=B1 exit=1 t0=+43ms t1=+47ms
+lauf=2 sonde=B5 exit=1 t0=+44ms t1=+46ms
+lauf=2 sonde=B7 exit=1 t0=+44ms t1=+47ms
+lauf=2 sonde=B3 exit=1 t0=+47ms t1=+50ms
+lauf=2 sonde=B5 exit=1 t0=+47ms t1=+51ms
+lauf=2 sonde=D exit=2 t0=+48ms t1=+49ms
+lauf=2 sonde=B1 exit=1 t0=+48ms t1=+51ms
+lauf=2 sonde=D exit=2 t0=+62ms t1=+65ms
+lauf=3 sonde=D exit=2 t0=+25ms t1=+27ms
+lauf=3 sonde=B3 exit=1 t0=+27ms t1=+29ms
+lauf=3 sonde=B1 exit=1 t0=+28ms t1=+32ms
+lauf=3 sonde=B5 exit=1 t0=+28ms t1=+31ms
+lauf=3 sonde=B7 exit=1 t0=+28ms t1=+32ms
+lauf=3 sonde=B3 exit=1 t0=+30ms t1=+32ms
+lauf=3 sonde=B5 exit=1 t0=+31ms t1=+34ms
+lauf=3 sonde=B7 exit=1 t0=+32ms t1=+35ms
+lauf=3 sonde=B1 exit=1 t0=+33ms t1=+37ms
+lauf=3 sonde=B3 exit=1 t0=+33ms t1=+36ms
+lauf=3 sonde=B5 exit=1 t0=+35ms t1=+37ms
+lauf=3 sonde=B7 exit=1 t0=+36ms t1=+40ms
+lauf=3 sonde=B3 exit=1 t0=+37ms t1=+40ms
+lauf=3 sonde=B1 exit=1 t0=+37ms t1=+41ms
+lauf=3 sonde=B5 exit=1 t0=+38ms t1=+41ms
+lauf=3 sonde=B2 exit=1 t0=+39ms t1=+43ms
+lauf=3 sonde=D exit=2 t0=+40ms t1=+42ms
+lauf=3 sonde=B4 exit=1 t0=+40ms t1=+43ms
+lauf=3 sonde=B7 exit=1 t0=+41ms t1=+44ms
+lauf=3 sonde=B3 exit=1 t0=+41ms t1=+44ms
+lauf=3 sonde=B8 exit=1 t0=+42ms t1=+44ms
+lauf=3 sonde=B5 exit=1 t0=+42ms t1=+44ms
+lauf=3 sonde=B1 exit=1 t0=+42ms t1=+46ms
+lauf=3 sonde=B3 exit=1 t0=+45ms t1=+47ms
+lauf=3 sonde=B2 exit=1 t0=+45ms t1=+48ms
+lauf=3 sonde=B8 exit=1 t0=+45ms t1=+48ms
+lauf=3 sonde=B4 exit=1 t0=+45ms t1=+47ms
+lauf=3 sonde=B5 exit=1 t0=+45ms t1=+48ms
+lauf=3 sonde=B7 exit=1 t0=+45ms t1=+48ms
+lauf=3 sonde=B1 exit=1 t0=+47ms t1=+51ms
+lauf=3 sonde=B3 exit=1 t0=+48ms t1=+51ms
+lauf=3 sonde=B4 exit=1 t0=+48ms t1=+51ms
+lauf=3 sonde=B7 exit=1 t0=+49ms t1=+52ms
+lauf=3 sonde=B5 exit=1 t0=+49ms t1=+51ms
+lauf=3 sonde=B2 exit=1 t0=+49ms t1=+51ms
+lauf=3 sonde=D exit=2 t0=+54ms t1=+56ms
+lauf=3 sonde=D exit=2 t0=+69ms t1=+71ms
+lauf=3 sonde=A exit=6 t0=+69ms t1=+77ms
+lauf=4 sonde=D exit=2 t0=+18ms t1=+20ms
+lauf=4 sonde=B8 exit=1 t0=+20ms t1=+24ms
+lauf=4 sonde=B8 exit=1 t0=+25ms t1=+29ms
+lauf=4 sonde=B8 exit=1 t0=+30ms t1=+33ms
+lauf=4 sonde=D exit=2 t0=+32ms t1=+35ms
+lauf=4 sonde=B8 exit=1 t0=+34ms t1=+37ms
+lauf=4 sonde=B8 exit=1 t0=+38ms t1=+42ms
+lauf=4 sonde=B8 exit=1 t0=+43ms t1=+46ms
+lauf=4 sonde=D exit=2 t0=+46ms t1=+48ms
+lauf=4 sonde=A exit=6 t0=+53ms t1=+63ms
+lauf=4 sonde=D exit=2 t0=+60ms t1=+62ms
+lauf=5 sonde=D exit=2 t0=+13ms t1=+16ms
+lauf=5 sonde=B5 exit=1 t0=+21ms t1=+25ms
+lauf=5 sonde=B4 exit=1 t0=+21ms t1=+26ms
+lauf=5 sonde=B8 exit=1 t0=+21ms t1=+25ms
+lauf=5 sonde=B1 exit=1 t0=+22ms t1=+24ms
+lauf=5 sonde=B6 exit=1 t0=+24ms t1=+28ms
+lauf=5 sonde=B2 exit=1 t0=+24ms t1=+28ms
+lauf=5 sonde=B1 exit=1 t0=+26ms t1=+30ms
+lauf=5 sonde=B5 exit=1 t0=+26ms t1=+29ms
+lauf=5 sonde=A exit=6 t0=+26ms t1=+33ms
+lauf=5 sonde=B8 exit=1 t0=+26ms t1=+30ms
+lauf=5 sonde=B4 exit=1 t0=+27ms t1=+30ms
+lauf=5 sonde=D exit=2 t0=+28ms t1=+31ms
+lauf=5 sonde=B2 exit=1 t0=+28ms t1=+32ms
+lauf=5 sonde=B3 exit=1 t0=+29ms t1=+32ms
+lauf=5 sonde=B6 exit=1 t0=+29ms t1=+32ms
+lauf=5 sonde=B7 exit=1 t0=+29ms t1=+32ms
+lauf=5 sonde=B5 exit=1 t0=+30ms t1=+35ms
+lauf=5 sonde=B1 exit=1 t0=+31ms t1=+35ms
+lauf=5 sonde=B4 exit=1 t0=+31ms t1=+35ms
+lauf=5 sonde=B8 exit=1 t0=+31ms t1=+34ms
+lauf=5 sonde=B6 exit=1 t0=+33ms t1=+36ms
+lauf=5 sonde=B7 exit=1 t0=+33ms t1=+36ms
+lauf=5 sonde=B3 exit=1 t0=+34ms t1=+38ms
+lauf=5 sonde=B2 exit=1 t0=+34ms t1=+37ms
+lauf=5 sonde=B8 exit=1 t0=+35ms t1=+38ms
+lauf=5 sonde=B5 exit=1 t0=+36ms t1=+38ms
+lauf=5 sonde=B1 exit=1 t0=+36ms t1=+39ms
+lauf=5 sonde=B4 exit=1 t0=+36ms t1=+39ms
+lauf=5 sonde=B7 exit=1 t0=+37ms t1=+39ms
+lauf=5 sonde=B6 exit=1 t0=+37ms t1=+40ms
+lauf=5 sonde=B2 exit=1 t0=+38ms t1=+40ms
+lauf=5 sonde=B5 exit=1 t0=+39ms t1=+41ms
+lauf=5 sonde=B3 exit=1 t0=+39ms t1=+43ms
+lauf=5 sonde=B8 exit=1 t0=+39ms t1=+43ms
+lauf=5 sonde=B1 exit=1 t0=+40ms t1=+43ms
+lauf=5 sonde=B4 exit=1 t0=+40ms t1=+44ms
+lauf=5 sonde=B7 exit=1 t0=+41ms t1=+44ms
+lauf=5 sonde=B2 exit=1 t0=+41ms t1=+44ms
+lauf=5 sonde=B6 exit=1 t0=+41ms t1=+45ms
+lauf=5 sonde=B5 exit=1 t0=+42ms t1=+45ms
+lauf=5 sonde=D exit=2 t0=+43ms t1=+45ms
+lauf=5 sonde=B1 exit=1 t0=+43ms t1=+46ms
+lauf=5 sonde=B3 exit=1 t0=+44ms t1=+48ms
+lauf=5 sonde=B4 exit=1 t0=+44ms t1=+48ms
+lauf=5 sonde=B8 exit=1 t0=+45ms t1=+47ms
+lauf=5 sonde=B7 exit=1 t0=+45ms t1=+48ms
+lauf=5 sonde=B2 exit=1 t0=+45ms t1=+49ms
+lauf=5 sonde=B6 exit=1 t0=+46ms t1=+49ms
+lauf=5 sonde=B5 exit=1 t0=+46ms t1=+49ms
+lauf=5 sonde=D exit=2 t0=+57ms t1=+59ms
+lauf=5 sonde=D exit=2 t0=+72ms t1=+74ms
+lauf=6 sonde=D exit=2 t0=+14ms t1=+17ms
+lauf=6 sonde=A exit=6 t0=+27ms t1=+37ms
+lauf=6 sonde=D exit=2 t0=+29ms t1=+32ms
+lauf=6 sonde=D exit=2 t0=+45ms t1=+47ms
+lauf=6 sonde=D exit=2 t0=+60ms t1=+62ms
+lauf=7 sonde=D exit=2 t0=+14ms t1=+17ms
+lauf=7 sonde=B5 exit=1 t0=+15ms t1=+20ms
+lauf=7 sonde=B5 exit=1 t0=+21ms t1=+26ms
+lauf=7 sonde=A exit=6 t0=+23ms t1=+38ms
+lauf=7 sonde=B5 exit=1 t0=+27ms t1=+32ms
+lauf=7 sonde=D exit=2 t0=+29ms t1=+32ms
+lauf=7 sonde=B1 exit=1 t0=+32ms t1=+37ms
+lauf=7 sonde=B5 exit=1 t0=+33ms t1=+37ms
+lauf=7 sonde=B1 exit=1 t0=+38ms t1=+42ms
+lauf=7 sonde=B5 exit=1 t0=+38ms t1=+41ms
+lauf=7 sonde=B5 exit=1 t0=+43ms t1=+47ms
+lauf=7 sonde=B1 exit=1 t0=+43ms t1=+48ms
+lauf=7 sonde=D exit=2 t0=+44ms t1=+46ms
+lauf=7 sonde=D exit=2 t0=+58ms t1=+61ms
+lauf=8 sonde=B5 exit=1 t0=+12ms t1=+15ms
+lauf=8 sonde=B1 exit=1 t0=+12ms t1=+16ms
+lauf=8 sonde=B5 exit=1 t0=+16ms t1=+20ms
+lauf=8 sonde=B1 exit=1 t0=+18ms t1=+20ms
+lauf=8 sonde=B4 exit=1 t0=+18ms t1=+22ms
+lauf=8 sonde=D exit=2 t0=+18ms t1=+20ms
+lauf=8 sonde=B7 exit=1 t0=+19ms t1=+22ms
+lauf=8 sonde=B3 exit=1 t0=+19ms t1=+23ms
+lauf=8 sonde=B2 exit=1 t0=+20ms t1=+23ms
+lauf=8 sonde=B1 exit=1 t0=+21ms t1=+24ms
+lauf=8 sonde=B5 exit=1 t0=+21ms t1=+24ms
+lauf=8 sonde=B4 exit=1 t0=+23ms t1=+28ms
+lauf=8 sonde=B7 exit=1 t0=+23ms t1=+27ms
+lauf=8 sonde=B8 exit=1 t0=+24ms t1=+28ms
+lauf=8 sonde=B2 exit=1 t0=+25ms t1=+29ms
+lauf=8 sonde=B3 exit=1 t0=+25ms t1=+29ms
+lauf=8 sonde=B5 exit=1 t0=+25ms t1=+28ms
+lauf=8 sonde=B1 exit=1 t0=+25ms t1=+29ms
+lauf=8 sonde=B7 exit=1 t0=+28ms t1=+30ms
+lauf=8 sonde=B8 exit=1 t0=+28ms t1=+31ms
+lauf=8 sonde=B5 exit=1 t0=+29ms t1=+32ms
+lauf=8 sonde=B4 exit=1 t0=+29ms t1=+32ms
+lauf=8 sonde=B1 exit=1 t0=+30ms t1=+33ms
+lauf=8 sonde=B2 exit=1 t0=+30ms t1=+33ms
+lauf=8 sonde=B3 exit=1 t0=+30ms t1=+33ms
+lauf=8 sonde=B7 exit=1 t0=+32ms t1=+35ms
+lauf=8 sonde=B6 exit=1 t0=+32ms t1=+36ms
+lauf=8 sonde=B5 exit=1 t0=+32ms t1=+36ms
+lauf=8 sonde=D exit=2 t0=+33ms t1=+35ms
+lauf=8 sonde=B8 exit=1 t0=+33ms t1=+37ms
+lauf=8 sonde=B4 exit=1 t0=+33ms t1=+39ms
+lauf=8 sonde=B2 exit=1 t0=+33ms t1=+37ms
+lauf=8 sonde=B3 exit=1 t0=+34ms t1=+38ms
+lauf=8 sonde=B1 exit=1 t0=+35ms t1=+38ms
+lauf=8 sonde=B7 exit=1 t0=+36ms t1=+41ms
+lauf=8 sonde=B5 exit=1 t0=+37ms t1=+41ms
+lauf=8 sonde=B6 exit=1 t0=+37ms t1=+41ms
+lauf=8 sonde=B8 exit=1 t0=+38ms t1=+41ms
+lauf=8 sonde=B2 exit=1 t0=+38ms t1=+42ms
+lauf=8 sonde=B3 exit=1 t0=+39ms t1=+43ms
+lauf=8 sonde=B1 exit=1 t0=+39ms t1=+43ms
+lauf=8 sonde=B4 exit=1 t0=+40ms t1=+43ms
+lauf=8 sonde=D exit=2 t0=+47ms t1=+50ms
+lauf=8 sonde=A exit=6 t0=+53ms t1=+63ms
+lauf=8 sonde=D exit=2 t0=+63ms t1=+65ms
+lauf=9 sonde=D exit=2 t0=+17ms t1=+19ms
+lauf=9 sonde=D exit=2 t0=+31ms t1=+34ms
+lauf=9 sonde=D exit=2 t0=+45ms t1=+47ms
+lauf=9 sonde=D exit=2 t0=+59ms t1=+61ms
+lauf=9 sonde=D exit=2 t0=+73ms t1=+75ms
+lauf=10 sonde=D exit=2 t0=+14ms t1=+16ms
+lauf=10 sonde=B4 exit=1 t0=+14ms t1=+16ms
+lauf=10 sonde=B2 exit=1 t0=+14ms t1=+16ms
+lauf=10 sonde=B5 exit=1 t0=+15ms t1=+18ms
+lauf=10 sonde=B4 exit=1 t0=+17ms t1=+20ms
+lauf=10 sonde=B2 exit=1 t0=+17ms t1=+20ms
+lauf=10 sonde=B5 exit=1 t0=+19ms t1=+21ms
+lauf=10 sonde=B4 exit=1 t0=+21ms t1=+24ms
+lauf=10 sonde=B2 exit=1 t0=+21ms t1=+24ms
+lauf=10 sonde=B5 exit=1 t0=+22ms t1=+24ms
+lauf=10 sonde=B5 exit=1 t0=+25ms t1=+28ms
+lauf=10 sonde=B2 exit=1 t0=+25ms t1=+30ms
+lauf=10 sonde=B4 exit=1 t0=+26ms t1=+30ms
+lauf=10 sonde=D exit=2 t0=+29ms t1=+31ms
+lauf=10 sonde=B5 exit=1 t0=+29ms t1=+33ms
+lauf=10 sonde=B2 exit=1 t0=+31ms t1=+34ms
+lauf=10 sonde=B4 exit=1 t0=+32ms t1=+35ms
+lauf=10 sonde=B5 exit=1 t0=+34ms t1=+37ms
+lauf=10 sonde=B2 exit=1 t0=+34ms t1=+37ms
+lauf=10 sonde=B4 exit=1 t0=+36ms t1=+40ms
+lauf=10 sonde=B5 exit=1 t0=+38ms t1=+40ms
+lauf=10 sonde=B2 exit=1 t0=+38ms t1=+41ms
+lauf=10 sonde=B4 exit=1 t0=+41ms t1=+43ms
+lauf=10 sonde=B5 exit=1 t0=+41ms t1=+45ms
+lauf=10 sonde=B2 exit=1 t0=+42ms t1=+45ms
+lauf=10 sonde=D exit=2 t0=+42ms t1=+44ms
+lauf=10 sonde=B4 exit=1 t0=+44ms t1=+46ms
+lauf=10 sonde=A exit=6 t0=+53ms t1=+63ms
+lauf=10 sonde=D exit=2 t0=+56ms t1=+59ms
+lauf=11 sonde=D exit=2 t0=+18ms t1=+21ms
+lauf=11 sonde=B3 exit=1 t0=+30ms t1=+33ms
+lauf=11 sonde=B8 exit=1 t0=+31ms t1=+34ms
+lauf=11 sonde=D exit=2 t0=+33ms t1=+35ms
+lauf=11 sonde=B3 exit=1 t0=+34ms t1=+38ms
+lauf=11 sonde=B7 exit=1 t0=+35ms t1=+38ms
+lauf=11 sonde=B8 exit=1 t0=+35ms t1=+38ms
+lauf=11 sonde=B6 exit=1 t0=+38ms t1=+43ms
+lauf=11 sonde=B7 exit=1 t0=+39ms t1=+42ms
+lauf=11 sonde=B8 exit=1 t0=+39ms t1=+42ms
+lauf=11 sonde=B3 exit=1 t0=+39ms t1=+44ms
+lauf=11 sonde=B5 exit=1 t0=+42ms t1=+46ms
+lauf=11 sonde=B8 exit=1 t0=+43ms t1=+49ms
+lauf=11 sonde=B7 exit=1 t0=+43ms t1=+47ms
+lauf=11 sonde=B2 exit=1 t0=+45ms t1=+49ms
+lauf=11 sonde=B5 exit=1 t0=+47ms t1=+55ms
+lauf=11 sonde=B3 exit=1 t0=+48ms t1=+51ms
+lauf=11 sonde=B7 exit=1 t0=+48ms t1=+54ms
+lauf=11 sonde=B6 exit=1 t0=+48ms t1=+55ms
+lauf=11 sonde=D exit=2 t0=+49ms t1=+57ms
+lauf=11 sonde=B8 exit=1 t0=+50ms t1=+54ms
+lauf=11 sonde=B2 exit=1 t0=+50ms t1=+55ms
+lauf=11 sonde=B4 exit=1 t0=+50ms t1=+55ms
+lauf=11 sonde=B3 exit=1 t0=+54ms t1=+59ms
+lauf=11 sonde=B4 exit=1 t0=+56ms t1=+59ms
+lauf=11 sonde=B6 exit=1 t0=+56ms t1=+61ms
+lauf=11 sonde=B5 exit=1 t0=+56ms t1=+64ms
+lauf=11 sonde=B7 exit=1 t0=+58ms t1=+63ms
+lauf=11 sonde=B2 exit=1 t0=+59ms t1=+64ms
+lauf=11 sonde=B8 exit=1 t0=+59ms t1=+65ms
+lauf=11 sonde=B3 exit=1 t0=+63ms t1=+68ms
+lauf=11 sonde=B6 exit=1 t0=+63ms t1=+69ms
+lauf=11 sonde=B1 exit=1 t0=+64ms t1=+68ms
+lauf=11 sonde=B7 exit=1 t0=+64ms t1=+69ms
+lauf=11 sonde=D exit=2 t0=+73ms t1=+77ms
+lauf=11 sonde=D exit=2 t0=+92ms t1=+94ms
+lauf=12 sonde=D exit=2 t0=+12ms t1=+15ms
+lauf=12 sonde=B8 exit=1 t0=+14ms t1=+17ms
+lauf=12 sonde=B8 exit=1 t0=+18ms t1=+21ms
+lauf=12 sonde=B6 exit=1 t0=+21ms t1=+25ms
+lauf=12 sonde=B8 exit=1 t0=+21ms t1=+25ms
+lauf=12 sonde=B4 exit=1 t0=+23ms t1=+26ms
+lauf=12 sonde=B6 exit=1 t0=+25ms t1=+28ms
+lauf=12 sonde=B8 exit=1 t0=+26ms t1=+28ms
+lauf=12 sonde=D exit=2 t0=+27ms t1=+29ms
+lauf=12 sonde=B4 exit=1 t0=+28ms t1=+31ms
+lauf=12 sonde=B8 exit=1 t0=+29ms t1=+31ms
+lauf=12 sonde=B6 exit=1 t0=+29ms t1=+32ms
+lauf=12 sonde=B4 exit=1 t0=+32ms t1=+35ms
+lauf=12 sonde=B6 exit=1 t0=+32ms t1=+35ms
+lauf=12 sonde=B8 exit=1 t0=+33ms t1=+36ms
+lauf=12 sonde=B6 exit=1 t0=+36ms t1=+39ms
+lauf=12 sonde=B4 exit=1 t0=+36ms t1=+39ms
+lauf=12 sonde=B1 exit=1 t0=+36ms t1=+40ms
+lauf=12 sonde=B3 exit=1 t0=+37ms t1=+40ms
+lauf=12 sonde=B5 exit=1 t0=+37ms t1=+40ms
+lauf=12 sonde=B8 exit=1 t0=+38ms t1=+41ms
+lauf=12 sonde=B7 exit=1 t0=+39ms t1=+42ms
+lauf=12 sonde=B2 exit=1 t0=+39ms t1=+42ms
+lauf=12 sonde=B6 exit=1 t0=+40ms t1=+43ms
+lauf=12 sonde=B4 exit=1 t0=+40ms t1=+44ms
+lauf=12 sonde=B3 exit=1 t0=+41ms t1=+44ms
+lauf=12 sonde=B1 exit=1 t0=+41ms t1=+44ms
+lauf=12 sonde=D exit=2 t0=+41ms t1=+44ms
+lauf=12 sonde=B5 exit=1 t0=+41ms t1=+45ms
+lauf=12 sonde=B8 exit=1 t0=+43ms t1=+47ms
+lauf=12 sonde=B7 exit=1 t0=+43ms t1=+47ms
+lauf=12 sonde=B2 exit=1 t0=+44ms t1=+48ms
+lauf=12 sonde=B6 exit=1 t0=+45ms t1=+48ms
+lauf=12 sonde=B4 exit=1 t0=+45ms t1=+48ms
+lauf=12 sonde=B1 exit=1 t0=+45ms t1=+49ms
+lauf=12 sonde=B3 exit=1 t0=+45ms t1=+49ms
+lauf=12 sonde=D exit=2 t0=+56ms t1=+59ms
+lauf=12 sonde=D exit=2 t0=+71ms t1=+73ms
+lauf=13 sonde=B5 exit=1 t0=+25ms t1=+28ms
+lauf=13 sonde=D exit=2 t0=+26ms t1=+27ms
+lauf=13 sonde=B8 exit=1 t0=+26ms t1=+30ms
+lauf=13 sonde=B1 exit=1 t0=+27ms t1=+31ms
+lauf=13 sonde=B3 exit=1 t0=+27ms t1=+31ms
+lauf=13 sonde=B5 exit=1 t0=+30ms t1=+33ms
+lauf=13 sonde=B8 exit=1 t0=+31ms t1=+34ms
+lauf=13 sonde=B1 exit=1 t0=+31ms t1=+36ms
+lauf=13 sonde=B3 exit=1 t0=+32ms t1=+35ms
+lauf=13 sonde=B5 exit=1 t0=+35ms t1=+38ms
+lauf=13 sonde=B8 exit=1 t0=+36ms t1=+40ms
+lauf=13 sonde=B3 exit=1 t0=+36ms t1=+39ms
+lauf=13 sonde=B1 exit=1 t0=+37ms t1=+41ms
+lauf=13 sonde=B7 exit=1 t0=+37ms t1=+41ms
+lauf=13 sonde=B4 exit=1 t0=+39ms t1=+42ms
+lauf=13 sonde=D exit=2 t0=+39ms t1=+42ms
+lauf=13 sonde=B5 exit=1 t0=+40ms t1=+44ms
+lauf=13 sonde=B6 exit=1 t0=+40ms t1=+43ms
+lauf=13 sonde=B3 exit=1 t0=+40ms t1=+44ms
+lauf=13 sonde=B8 exit=1 t0=+41ms t1=+44ms
+lauf=13 sonde=B1 exit=1 t0=+42ms t1=+45ms
+lauf=13 sonde=B7 exit=1 t0=+42ms t1=+46ms
+lauf=13 sonde=B4 exit=1 t0=+43ms t1=+47ms
+lauf=13 sonde=D exit=2 t0=+54ms t1=+57ms
+lauf=14 sonde=D exit=2 t0=+15ms t1=+17ms
+lauf=14 sonde=B6 exit=1 t0=+18ms t1=+22ms
+lauf=14 sonde=B7 exit=1 t0=+19ms t1=+25ms
+lauf=14 sonde=B4 exit=1 t0=+20ms t1=+33ms
+lauf=14 sonde=B3 exit=1 t0=+21ms t1=+25ms
+lauf=14 sonde=B8 exit=1 t0=+21ms t1=+25ms
+lauf=14 sonde=B6 exit=1 t0=+23ms t1=+26ms
+lauf=14 sonde=B1 exit=1 t0=+24ms t1=+29ms
+lauf=14 sonde=B8 exit=1 t0=+27ms t1=+32ms
+lauf=14 sonde=B3 exit=1 t0=+27ms t1=+31ms
+lauf=14 sonde=B7 exit=1 t0=+27ms t1=+31ms
+lauf=14 sonde=B5 exit=1 t0=+27ms t1=+30ms
+lauf=14 sonde=B6 exit=1 t0=+27ms t1=+31ms
+lauf=14 sonde=D exit=2 t0=+29ms t1=+33ms
+lauf=14 sonde=B1 exit=1 t0=+30ms t1=+34ms
+lauf=14 sonde=B5 exit=1 t0=+32ms t1=+35ms
+lauf=14 sonde=B3 exit=1 t0=+33ms t1=+37ms
+lauf=14 sonde=B7 exit=1 t0=+33ms t1=+37ms
+lauf=14 sonde=B8 exit=1 t0=+33ms t1=+37ms
+lauf=14 sonde=B6 exit=1 t0=+34ms t1=+40ms
+lauf=14 sonde=B4 exit=1 t0=+34ms t1=+38ms
+lauf=14 sonde=B2 exit=1 t0=+34ms t1=+38ms
+lauf=14 sonde=B1 exit=1 t0=+35ms t1=+39ms
+lauf=14 sonde=B5 exit=1 t0=+37ms t1=+41ms
+lauf=14 sonde=B8 exit=1 t0=+38ms t1=+42ms
+lauf=14 sonde=B3 exit=1 t0=+38ms t1=+42ms
+lauf=14 sonde=B7 exit=1 t0=+38ms t1=+42ms
+lauf=14 sonde=B4 exit=1 t0=+39ms t1=+46ms
+lauf=14 sonde=B2 exit=1 t0=+40ms t1=+45ms
+lauf=14 sonde=B1 exit=1 t0=+40ms t1=+44ms
+lauf=14 sonde=B6 exit=1 t0=+41ms t1=+46ms
+lauf=14 sonde=B5 exit=1 t0=+42ms t1=+46ms
+lauf=14 sonde=B7 exit=1 t0=+43ms t1=+50ms
+lauf=14 sonde=B3 exit=1 t0=+44ms t1=+50ms
+lauf=14 sonde=B8 exit=1 t0=+44ms t1=+49ms
+lauf=14 sonde=B1 exit=1 t0=+45ms t1=+48ms
+lauf=14 sonde=B5 exit=1 t0=+47ms t1=+50ms
+lauf=14 sonde=B4 exit=1 t0=+47ms t1=+61ms
+lauf=14 sonde=D exit=2 t0=+48ms t1=+55ms
+lauf=14 sonde=B2 exit=1 t0=+49ms t1=+57ms
+container-exit=0

@@ -18,19 +18,19 @@
 #5 transferring context: 5.50kB done
 #5 DONE 0.0s
 
-#6 [3/8] COPY docker-init.sh /usr/local/bin/u-boot-docker-init
+#6 [2/8] RUN install -m 0755 -d /etc/apt/keyrings  && curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc  && test "$(gpg --show-keys --with-colons /etc/apt/keyrings/docker.asc | awk -F: '/^pub/ {p=1} /^sub/ {p=0} /^fpr/ && p {print $10}')" = "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" > /etc/apt/sources.list.d/docker.list  && apt-get update  && apt-get install -y --no-install-recommends docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin iptables ca-certificates  && rm -rf /var/lib/apt/lists/*  && usermod -aG docker vscode
 #6 CACHED
 
-#7 [5/8] COPY egress-init.sh /usr/local/bin/u-boot-egress-init
+#7 [4/8] RUN apt-get update  && apt-get install -y --no-install-recommends dnsmasq-base nftables  && rm -rf /var/lib/apt/lists/*
 #7 CACHED
 
 #8 [6/8] RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
 #8 CACHED
 
-#9 [2/8] RUN install -m 0755 -d /etc/apt/keyrings  && curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc  && test "$(gpg --show-keys --with-colons /etc/apt/keyrings/docker.asc | awk -F: '/^pub/ {p=1} /^sub/ {p=0} /^fpr/ && p {print $10}')" = "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" > /etc/apt/sources.list.d/docker.list  && apt-get update  && apt-get install -y --no-install-recommends docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin iptables ca-certificates  && rm -rf /var/lib/apt/lists/*  && usermod -aG docker vscode
+#9 [3/8] COPY docker-init.sh /usr/local/bin/u-boot-docker-init
 #9 CACHED
 
-#10 [4/8] RUN apt-get update  && apt-get install -y --no-install-recommends dnsmasq-base nftables  && rm -rf /var/lib/apt/lists/*
+#10 [5/8] COPY egress-init.sh /usr/local/bin/u-boot-egress-init
 #10 CACHED
 
 #11 [7/8] RUN mkdir -p "/workspaces/u-boot-messung-amd64-dokn" && chown vscode:vscode "/workspaces/u-boot-messung-amd64-dokn"
@@ -41,6 +41,6 @@
 
 #13 exporting to image
 #13 exporting layers done
-#13 writing image sha256:a7b42c21633846aabe00fa2b2da708b6bbacf636692f01be7c5de81a64ddc7d4 done
+#13 writing image sha256:a7b42c21633846aabe00fa2b2da708b6bbacf636692f01be7c5de81a64ddc7d4 0.0s done
 #13 naming to docker.io/library/u-boot-messung-amd64-img-dokn 0.0s done
-#13 DONE 0.0s
+#13 DONE 0.1s
