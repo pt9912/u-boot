@@ -1,1 +1,3 @@
-**Stand:** offen, zwei Belege (`slice-cr-devcontainer-agent-features-sandbox`, `slice-cr-sandbox-egress-anzeige`); unter der Schwelle von drei.
+**Stand:** offen, drei Belege (`slice-cr-devcontainer-agent-features-sandbox`, `slice-cr-sandbox-egress-anzeige`, `slice-cr-lastenheft-zielbild`); Schwelle von drei erreicht, Ausgang nicht zugewiesen.
+
+**Lese-Schritt der Slice-Closure** ([`slice-cr-lastenheft-zielbild`](../../../done/slice-cr-lastenheft-zielbild.md) §7, 2026-10-19): Eine neue Hard Rule in `AGENTS.md` oder ein Sensor liegt beim Projektinhaber und wird nicht ohne seine Entscheidung verkörpert; sie steht in §7 des Slice als „zur Entscheidung vorgelegt“, mit dem Vorschlag des Verification-Reports (Nachlauf-Review über den Diff einer Vertragstext-Änderung in der Fix-Runde, oder ein benannter Prüfpunkt des Verifiers).

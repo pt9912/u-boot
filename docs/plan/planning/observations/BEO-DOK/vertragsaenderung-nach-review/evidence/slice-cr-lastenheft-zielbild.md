@@ -1,0 +1,2 @@
+**Vorgang:** [`slice-cr-lastenheft-zielbild`](../../../../done/slice-cr-lastenheft-zielbild.md)
+**Fund:** Die Fix-Runde `2100532` änderte das Lastenheft nach dem Review (Zeile 0.17.0, Review F-4: „nur noch“); der Review-Report und der DoD-Haken bezogen sich auf den Vorzustand `2b137a6`. Ein Nachlauf-Review über diese Zeile lief nicht; der Verifier hat den Endtext gegen den Wortlaut-Vorschlag gelesen (Verification-Report V-1, LOW).
