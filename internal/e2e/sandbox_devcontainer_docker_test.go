@@ -193,8 +193,11 @@ echo "B www.example.org=$(reach www.example.org)"
 echo "B example.org=$(reach example.org)"
 `
 
-// LH-FA-DEV-008, ADR-0012: an allowed name covers its subdomains (one and
-// two levels), and an entry never opens its parent name.
+// LH-FA-DEV-008, ADR-0012: the entry example.org makes example.org and
+// www.example.org reachable and example.com not; the entry amazonaws.com
+// makes s3.us-east-1.amazonaws.com (two levels below it) reachable; the
+// entry www.example.org makes www.example.org reachable and example.org not
+// by name.
 func TestE2E_SandboxDevcontainer_EgressSubdomains(t *testing.T) {
 	if _, err := exec.LookPath("docker"); err != nil {
 		t.Fatalf("docker CLI not on PATH: %v", err)

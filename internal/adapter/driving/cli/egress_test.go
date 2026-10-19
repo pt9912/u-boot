@@ -141,7 +141,8 @@ func TestExecute_EgressList_Notes(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, want := range []string{
-		"A name in the list also allows its subdomains.",
+		"A name in the list also allows its subdomains, one and two levels below it; an entry for a subdomain (www.example.org) does not open its parent name (example.org) for a connection by name.",
+		"a container keeps the list of the image it was built from, so a changed list takes effect after a rebuild of the container",
 		"No clone host: there is no git remote 'origin' in .git/config and no devcontainer.sandbox.repository.",
 		"It is not read from a container: a container keeps the list of the image it was built from",
 		"stopping and starting it again kept the old list, `devcontainer up --remove-existing-container` applied the new one;",

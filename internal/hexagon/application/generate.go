@@ -809,6 +809,7 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 	if err != nil {
 		return driving.GenerateResponse{}, err
 	}
+	warnings = append(warnings, egressRebuildWarnings(plans, req.PreviewMode)...)
 	warnings = append(warnings, s.existingContainerFallbackWarnings(ctx, req, cfg, sandbox)...)
 
 	action := devcontainerAggregateAction(hasWrite, hasReplace)
@@ -831,6 +832,34 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 		Changed:  changed,
 		Warnings: warnings,
 	}, nil
+}
+
+// egressInitRel is the managed start script that carries the egress list
+// (the `hosts=` line, LH-FA-DEV-008).
+const egressInitRel = ".devcontainer/egress-init.sh"
+
+// egressRebuildWarnings returns the one notice that an existing container
+// keeps the egress list of its image: it appears when a write replaced the
+// managed block of an existing [egressInitRel]. A file written for the
+// first time, an unchanged file and a `--dry-run` (nothing was written) give
+// none. The entry carries neither SecurityRelaxation nor DegradationFallback,
+// so `--quiet` drops it (LH-FA-CLI-005).
+func egressRebuildWarnings(plans []devcontainerFilePlan, mode driving.PreviewMode) []driving.WarningEntry {
+	if mode == driving.PreviewDryRun {
+		return nil
+	}
+	for _, p := range plans {
+		if p.relPath == egressInitRel && p.action == devcontainerActionReplaceBlock {
+			return []driving.WarningEntry{{
+				Code:  "LH-FA-DEV-008",
+				Level: "warn",
+				Message: egressInitRel + " changed; an existing container keeps the egress list of the image it was built from, " +
+					"so rebuild the container for the new list to take effect (`devcontainer up --remove-existing-container`)",
+				Subject: egressInitRel,
+			}}
+		}
+	}
+	return nil
 }
 
 // existingContainerFallbackWarnings asks the [driven.DevcontainerInspector]
@@ -986,7 +1015,7 @@ func (s *GenerateService) planDevcontainerFiles(baseDir string, data templateDat
 	}
 	if data.Egress {
 		// LH-FA-DEV-008: egress restriction script baked via COPY.
-		specs = append(specs, spec{".devcontainer/egress-init.sh", "devcontainer/egress-init.sh.tmpl", managedblock.StyleHash})
+		specs = append(specs, spec{egressInitRel, "devcontainer/egress-init.sh.tmpl", managedblock.StyleHash})
 	}
 	plans := make([]devcontainerFilePlan, 0, len(specs))
 	for _, spec := range specs {

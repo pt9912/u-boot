@@ -96,10 +96,13 @@ it changes nothing.
 It states whether the restriction is active for the configuration: the sandbox
 profile (devcontainer.profile) and devcontainer.sandbox.egress.enabled must both
 be set. If it is not active, the list is the one that would apply on activation.
-A name in the list also allows its subdomains.
+A name in the list also allows its subdomains, one and two levels below it; an entry
+for a subdomain (www.example.org) does not open its parent name (example.org) for a
+connection by name.
 
 The list is computed from the project files.
-It is not read from a container: a container keeps the list of the image it was built from.
+It is not read from a container: a container keeps the list of the image it was built from,
+so a changed list takes effect after a rebuild of the container.
 
 The output stays under --quiet (it is the result of the command). --json emits
 the envelope with data.{active,sandboxProfile,egressEnabled,cloneSource,hosts}.
@@ -210,12 +213,12 @@ func renderEgressListText(out io.Writer, resp driving.EgressListResponse) error 
 		return fmt.Errorf("flush egress-list writer: %w", err)
 	}
 	b.WriteString("\nNotes:\n")
-	b.WriteString("- A name in the list also allows its subdomains.\n")
+	b.WriteString("- A name in the list also allows its subdomains, one and two levels below it; an entry for a subdomain (www.example.org) does not open its parent name (example.org) for a connection by name.\n")
 	if !resp.CloneSource {
 		b.WriteString("- No clone host: there is no git remote 'origin' in .git/config and no devcontainer.sandbox.repository.\n")
 	}
 	b.WriteString("- The list is computed from u-boot.yaml and the git configuration, as `u-boot generate devcontainer` writes it into the start script.\n")
-	b.WriteString("  It is not read from a container: a container keeps the list of the image it was built from (measured with the Dev Container CLI 0.89.0:\n")
+	b.WriteString("  It is not read from a container: a container keeps the list of the image it was built from, so a changed list takes effect after a rebuild of the container (measured with the Dev Container CLI 0.89.0:\n")
 	b.WriteString("  stopping and starting it again kept the old list, `devcontainer up --remove-existing-container` applied the new one;\n")
 	b.WriteString("  measured on Colima, arm64; editor actions not measured).\n")
 	if _, err := io.WriteString(out, b.String()); err != nil {

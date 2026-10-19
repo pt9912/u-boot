@@ -84,13 +84,13 @@ func TestNewEgressHost(t *testing.T) {
 		want    []string
 		wantNot []string
 	}{
-		{"*.example.org", []string{"wildcard", "already included", `"example.org"`}, []string{"not a lowercase"}},
-		{"*example.org", []string{"wildcard", "already included", "without `*`"}, []string{"not a lowercase"}},
+		{"*.example.org", []string{"wildcard", "already covers its subdomains", `"example.org"`}, []string{"not a lowercase"}},
+		{"*example.org", []string{"wildcard", "already covers its subdomains", "without `*`"}, []string{"not a lowercase"}},
 		{"*.*.example.org", []string{"wildcard", "without `*`"}, []string{"not a lowercase"}},
 		{"api.*.example.org", []string{"wildcard", "without `*`"}, nil},
-		{"Example.org", []string{"not a lowercase host name"}, []string{"already included"}},
-		{"https://example.org", []string{"not a lowercase host name"}, []string{"already included"}},
-		{"localhost", []string{"not a lowercase host name"}, []string{"already included"}},
+		{"Example.org", []string{"not a lowercase host name"}, []string{"already covers its subdomains"}},
+		{"https://example.org", []string{"not a lowercase host name"}, []string{"already covers its subdomains"}},
+		{"localhost", []string{"not a lowercase host name"}, []string{"already covers its subdomains"}},
 	}
 	for _, tc := range cases {
 		_, err := domain.NewEgressHost(tc.raw)

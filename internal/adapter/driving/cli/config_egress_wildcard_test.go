@@ -29,13 +29,13 @@ func TestConfigSet_EgressAllowWildcard_Exit10WithHint(t *testing.T) {
 		want []string
 	}{
 		{"single pair", []string{"config", "set", key, "*.example.org"},
-			[]string{`entry "*.example.org" is a wildcard`, `enter "example.org" instead`}},
+			[]string{`entry "*.example.org" is a wildcard`, "an allowed name already covers its subdomains", `enter "example.org" instead`}},
 		{"single pair, wildcard after a valid entry", []string{"config", "set", key, "api.example.org, *.example.org"},
-			[]string{`entry "*.example.org" is a wildcard`, `enter "example.org" instead`}},
+			[]string{`entry "*.example.org" is a wildcard`, "an allowed name already covers its subdomains", `enter "example.org" instead`}},
 		{"single pair, no valid name behind the star", []string{"config", "set", key, "*.*.example.org"},
-			[]string{`entry "*.*.example.org" is a wildcard`, "without `*`"}},
+			[]string{`entry "*.*.example.org" is a wildcard`, "an allowed name already covers its subdomains", "without `*`"}},
 		{"several pairs", []string{"config", "set", "devcontainer.profile", "sandbox", key, "*.example.org"},
-			[]string{`entry "*.example.org" is a wildcard`, `enter "example.org" instead`}},
+			[]string{`entry "*.example.org" is a wildcard`, "an allowed name already covers its subdomains", `enter "example.org" instead`}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

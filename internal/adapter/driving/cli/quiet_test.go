@@ -3,6 +3,7 @@ package cli_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"strings"
 	"testing"
@@ -459,5 +460,53 @@ func TestExecute_Generate_Quiet_KeepsEgressNoEffectDropsNestedRuntimeNoEffect(t 
 	}
 	if strings.Contains(strings.ToLower(plain), "securityrelaxation") {
 		t.Errorf("the flag leaked into the wire form:\n%s", plain)
+	}
+}
+
+// LH-FA-DEV-008, LH-FA-CLI-005: the rebuild notice of `generate devcontainer`
+// carries no flag. The human output shows it and `--quiet` drops it; the JSON
+// envelope keeps it in `diagnostics[]` under `--quiet` too.
+func TestExecute_Generate_EgressRebuildNotice_QuietAndJSON(t *testing.T) {
+	t.Parallel()
+	notice := driving.WarningEntry{
+		Code: "LH-FA-DEV-008", Level: "warn", Subject: ".devcontainer/egress-init.sh",
+		Message: ".devcontainer/egress-init.sh changed; an existing container keeps the egress list of the image it was built from, so rebuild the container for the new list to take effect",
+	}
+	newUC := func() *fakeGenerateUseCase {
+		return &fakeGenerateUseCase{resp: driving.GenerateResponse{
+			Artifact: domain.ArtifactDevcontainer, Action: driving.GenerateActionUpdatedBlock,
+			Changed:  []string{".devcontainer/egress-init.sh"},
+			Warnings: []driving.WarningEntry{notice},
+		}}
+	}
+	run := func(args ...string) string {
+		t.Helper()
+		var stdout, stderr bytes.Buffer
+		if err := newAppWithGenerate(newUC(), cli.WithGetwd(sandboxGetwd)).Execute(context.Background(), args, &stdout, &stderr); err != nil {
+			t.Fatalf("Execute %v: %v", args, err)
+		}
+		return stdout.String()
+	}
+	if out := run("generate", "devcontainer"); !strings.Contains(out, "Warning (LH-FA-DEV-008): .devcontainer/egress-init.sh changed") {
+		t.Errorf("default output lacks the rebuild notice:\n%s", out)
+	}
+	if out := run("--quiet", "generate", "devcontainer"); strings.Contains(out, "Warning (") || strings.Contains(out, "rebuild the container") {
+		t.Errorf("--quiet kept the rebuild notice:\n%s", out)
+	}
+	for _, args := range [][]string{{"--json", "generate", "devcontainer"}, {"--quiet", "--json", "generate", "devcontainer"}} {
+		var env struct {
+			Status      string `json:"status"`
+			ExitCode    int    `json:"exitCode"`
+			Diagnostics []struct {
+				Level, Code, Message string
+			} `json:"diagnostics"`
+		}
+		if err := json.Unmarshal([]byte(run(args...)), &env); err != nil {
+			t.Fatalf("%v: envelope: %v", args, err)
+		}
+		if env.Status != "warn" || env.ExitCode != 0 || len(env.Diagnostics) != 1 ||
+			env.Diagnostics[0].Code != "LH-FA-DEV-008" || !strings.Contains(env.Diagnostics[0].Message, "rebuild the container") {
+			t.Errorf("%v: envelope = %+v, want status warn (as for every warning), exit 0 and the notice as one diagnostic", args, env)
+		}
 	}
 }
