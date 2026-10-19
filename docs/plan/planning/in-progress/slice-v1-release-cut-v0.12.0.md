@@ -89,7 +89,7 @@ Jede Aussage in dieser Tabelle ist an der genannten Stelle gelesen (Stand 2026-1
 | `docs/maintainer/releasing.md` | update | `:57` nennt als „zuletzt“ den Cut `v0.10.0`; berichtigt auf den letzten abgeschlossenen Cut `v0.11.0`. Die übrigen Aussagen (§1 bis §8) stimmen mit dem Ist-Stand überein (gelesen). |
 | `docs/plan/planning/in-progress/roadmap.md` | update | Beim Start: `Nichts in Arbeit.` (Ruhe-Marker, `.d-check.yml` `planning`) entfällt, stattdessen ein Zeiger auf diesen Slice im Block „Offene Wellen“; die Zeile der Welle `welle-sandbox-egress-ollama` unter „Abgeschlossene Wellen“ nennt „Release-Zuordnung und zwei Release-Gates offen“ — berichtigt auf den Ist-Stand (Gates bestätigt, 2026-10-19; Release `v0.12.0`); nach dem Tag: Marker zurück, neue Zeile `v0.12.0` nach `v0.11.0` mit Datum und Verweis auf diesen Slice, Tag-Commit-Hash erst nach dem Tag; `**Letzte Änderung:**` im Kopf. Die Zeile von `welle-ollama-cloud-modelle` unter „Nächste Wellen“ trägt den Trigger „Release der Welle … geschnitten“; er tritt mit dem Tag ein, die Roadmap nennt es dann (Planner). |
 | `docs/plan/planning/observations/BEO-E2E/ci-ueberspringt-nested-podman-build/state.md` | update | Register: Trigger eingetreten (ohne `-v` kein Beleg), Befunde zum Workflow und zum Test (Auftrag 6). |
-| `docs/plan/planning/open/README.md` | update | Verweis-Nachzug durch `make slice-mv` (der Slice steht dort nicht als Bestandszeile; gelesen). |
+| `docs/plan/planning/open/README.md` | kein Diff (gelesen) | Der Slice steht dort nicht als Bestandszeile; `make slice-mv` zog nichts nach (0 eingehende Verweise). |
 | `cmd/uboot/package_asset_name_test.go`, `scripts/package-asset-name.sh`, `internal/adapter/driving/cli/cli_test.go` | kein Diff (gelesen) | `cli_test.go` `:380`–`:391`: die Versionen `0.11.0`, `0.12.0-rc.1` usw. sind Eingaben der Tabelle für die Handbuch-Links, kein Versionsstand. |
 | `.github/workflows/*.yml`, `scripts/`, `packaging/`, `spec/`, `docs/plan/adr/` | kein Diff (gelesen) | Workflow-Änderungen sind Gate-Änderungen (§1, nicht Gegenstand); `spec/lastenheft.md` `:9` `Version 0.17.0` bleibt. |
 | `docs/reviews/<Datum>-slice-v1-release-cut-v0.12.0.md`, `docs/reviews/<Datum>-verification-slice-v1-release-cut-v0.12.0.md` | neu, durch Reviewer und Verifier | Review- und Verification-Report des Cuts (nicht im Implementer-Diff). Kennungen in Tabellenzellen ohne Backticks im Linktext. |
@@ -110,6 +110,61 @@ Jede Aussage in dieser Tabelle ist an der genannten Stelle gelesen (Stand 2026-1
 | M6 | `releasing.md` §6: `gh run watch`; `gh release view v0.12.0 --json assets`; `docker run --rm ghcr.io/pt9912/u-boot:0.12.0 --version`; `:latest` gleicher Digest; Job `tap` wirklich gelaufen | Maintainer | zwölf Assets, kein Prerelease |
 | M7 | Auf einem Mac: `brew tap pt9912/u-boot`, `brew install u-boot`, `u-boot --version` = `0.12.0` | Projektinhaber | `releasing.md` §6 |
 | M8 | Nacharbeit (`releasing.md` §7): Roadmap-Zeile mit Tag-Hash und Datum, Closure-Notiz, Verification Evidence, `git mv` nach `done/` | Planner (Closure), Implementer (Roadmap) | Closure erst nach M6 |
+
+### Umsetzung (Implementer, 2026-10-19; nichts gepusht, kein Tag)
+
+Commits dieses Cuts (lokal): `332b171` (Vermerk der Gates 1 und 2 in der Welle-Datei und in den drei CR-Slices), `ed4d51f` (Plan, `open/`), `f1d0c94` und `e85c084` (`make slice-mv` nach `in-progress/`), `cc58225` (Roadmap: Zeiger, Zeile der Welle), `fb4641c` (CHANGELOG, Versionsstrings, READMEs, Handbuch, `releasing.md`), `51bf62e` (Register).
+
+**Gates 1 und 2.** Der Vermerk (Wortlaut: bestätigt am 2026-10-19 durch den Projektinhaber im Gespräch; Wortlaut unverändert) steht in [`welle-sandbox-egress-ollama`](../done/welle-sandbox-egress-ollama.md) bei Gate 1, Gate 2, §7 Punkt 8 und im *Auftrag an den Release-Cut*, ferner im Zustandsmarker „offen“ von [`slice-cr-lastenheft-zielbild`](../done/slice-cr-lastenheft-zielbild.md) (§1 Absatz „Das Streichen ist keine Freigabe“ und §7 „Stand der Gates 1 und 2“; die Frage E-3 bleibt unverändert, Chronik) sowie im „Stand des Gates“ von [`slice-cr-sandbox-egress-anzeige`](../done/slice-cr-sandbox-egress-anzeige.md) und [`slice-cr-cli-json-command-enum`](../done/slice-cr-cli-json-command-enum.md) (die Welle-Datei verlangt den Vermerk „in dieser Datei und in den beiden CR-Slices“). Die Zeile der Welle in der Roadmap trägt den Ist-Stand.
+
+**Sensoren (Docker, Host `linux/amd64`, Docker Engine 29.9.1; Exit-Codes der `make`-Prozesse):**
+
+| Sensor | Ergebnis | Laufzeit |
+|---|---|---|
+| `make gates` | Exit 0 (`baseline-verify` v6.18.1 OK, 54 Dateien; `d-check` 500 Dateien, 0 Befunde; Coverage 91,40 % gegen 90 %) | 38,1 s |
+| `make docs-check` / `make doc-planning` | je 500 Dateien, 0 Befunde | — |
+| `make doc-trace` | 83 Anforderungen, 0 Waisen | — |
+| `make ci` | Exit 0 (`govulncheck`: No vulnerabilities found; `image-scan` HIGH/CRITICAL: grün; Trivy meldet nur, Version 0.76.0 sei verfügbar, gepinnt ist 0.70.0) | 1 min 43,7 s |
+| `make fullbuild` | Exit 0 (`ci` + Runtime-Image); `docker run --rm u-boot:latest --version` = `u-boot version 0.12.0-dev`, OCI-Label `0.12.0-dev` | 1 min 01,8 s |
+| `make build VERSION=0.12.0` | Exit 0; `--version` = `u-boot version 0.12.0`, OCI-Label `0.12.0` (lokales Image, nicht gepusht) | — |
+| `make doc-immutable RANGE="v0.11.0..HEAD"` | 253 Commits, 0 Befunde (Accepted-ADRs unverändert) | — |
+| `make test-docker` | **Exit 2**: ein roter Test, `TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress` (26,94 s); alle übrigen Pakete `ok` (`internal/e2e` FAIL nach 594,958 s, wegen dieses einen Tests); der Aufruf läuft ohne `-v` | 10 min 05 s |
+| `make verify-depguard` | **nicht gelaufen**: keine Importregel berührt, kein Produktcode im Diff | — |
+
+**Plan-Tabelle gegen `git diff --stat ed4d51f..HEAD`:** elf Einträge (`CHANGELOG.md`, `Dockerfile`, `README.de.md`, `README.md`, `cmd/uboot/main.go`, `docs/maintainer/releasing.md`, `roadmap.md`, diese Datei, `state.md` von `BEO-E2E/ci-ueberspringt-nested-podman-build`, `docs/user/benutzerhandbuch.md`, `repo.mk`); jeder hat eine Zeile in der Tabelle. `open/README.md` steht nicht im Diff (der Slice hatte dort nie eine Bestandszeile; gelesen: keine Zeile für `slice-v1-release-cut-v0.12.0`). Gelesen als „kein Diff“: `cli_test.go` `:380`–`:391` (Eingaben der Link-Tabelle), `.github/workflows/`, `scripts/`, `packaging/`, `spec/lastenheft.md` `:9` (`Version 0.17.0`). Nicht in diesem Abgleich stehen die vier Dateien in `done/` aus `332b171` (Vermerke vor dem Plan-Commit; ihr Auftrag steht in §1 unter *Aufträge an den Release-Cut*, Punkt 1).
+
+**M-T ausgeführt (Trockenlauf des Tap-Pfads).** Befehl: `docker run -i --rm --network none -v "$PWD":/src:ro u-boot:test bash < <Skript>` (Image aus `make test`, Arbeitsbaum schreibgeschützt, ohne Netz; das Skript liegt im Scratchpad des Laufs, nicht im Repo). Ausgabe (Auszug, Exit-Codes):
+
+```text
+(1) homebrew-formula-fill.sh v0.12.0 <sums> scripts/homebrew-formula.rb.tmpl <Ausgabe>   exit=0   (vier url-Zeilen mit v0.12.0)
+(2a) tap-formula-check.sh v0.12.0 <Ausgabe>   exit=0
+(2b) tap-formula-check.sh v0.11.0 <Ausgabe>   exit=1
+     tap-nachzug: the u-boot.rb asset of v0.11.0 does not carry four download URLs of v0.11.0 (found 4 url lines, 0 of v0.11.0).
+(3)  tap-nachzug.sh, TAP_TOKEN=dummy-token, TAG=v0.12.0, curl- und git-Stellvertreter:   exit=0
+     Protokoll: curl … -o <tmp>/u-boot.rb · git clone --depth 1 … · git diff --quiet · git … add · git … commit -m u-boot 0.12.0 · git push origin HEAD
+(3b) tap-nachzug.sh mit TAG=v0.11.0 gegen dieselbe Formel: exit=1, Protokoll nur der curl-Aufruf, kein clone, kein push
+```
+
+Rot gesehen: (2b) und (3b) sind die rote Gegenprobe der Prüfung auf den Tag. **Grenze, wie in M-T benannt:** die Bedingung `is_stable == 'true'` und der Workflow-Schritt, der echte `curl` gegen das Release-Asset, der echte `git push` und das Token sind nicht geprobt; der Stellvertreter von `git` meldet immer eine Änderung. Befund: keiner; kein Skript und kein Workflow geändert.
+
+**Befund zum roten Test (Auftrag 4) — gemessen mit eigenen Läufen in Wegwerf-Containern (Namen `u-boot-cut-*`, Image `u-boot-cut-img:sbx`, nach dem Lauf entfernt; das Projektverzeichnis lag im Scratchpad, nicht im Repo; keine Produktänderung):**
+
+- **Reproduziert:** `docker run … u-boot:test-docker-tools go test -tags docker -count=1 -v -run TestE2E_SandboxDevcontainer_NestedPodman_BuildEgress ./internal/e2e/` auf dem nativen `amd64`-Host: `--- FAIL` (31,16 s). `STEP 3/3: RUN ! getent hosts example.com …` gibt `2606:4700:10::ac42:93f3 example.com` und `2606:4700:10::6814:179a example.com` aus, der Bau bricht ab. Schritt 2 (`getent hosts deb.debian.org`) gelingt.
+- **Ursache (Messung):** Im Sandbox-Container steht nach `u-boot-egress-init` `nameserver 127.0.0.1` (der lokale `dnsmasq`). Ein verschachtelter Container (Podman 6.1.4, `pasta`, `netavark`) bekommt `nameserver 169.254.1.1` (Weiterleitung von `pasta`), dazu die Rückfall-Nameserver `nameserver 8.8.8.8` und `nameserver 8.8.4.4`. Die Upstream-Liste des Docker-Hosts (`/etc/resolv.conf.u-boot-orig` im Container: `1.1.1.1`, `8.8.8.8`) enthält `8.8.8.8`; `egress-init.sh` lässt `ip daddr <Upstream> udp/tcp dport 53` durch. Der verschachtelte Container fragt also `8.8.8.8` direkt und bekommt Antworten für jeden Namen. Einzelmessungen: `--dns 169.254.1.1` allein: keine Antwort (der `dnsmasq` verweigert); `--dns 8.8.8.8`: Antwort; `--dns 127.0.0.1`: keine Antwort; `--network=none`: keine Antwort; Verbindung zur aufgelösten Adresse (`/dev/tcp/104.20.23.154/80`): Zeitüberschreitung, also gesperrt.
+- **Gegenprobe (rot gesehen → grün):** derselbe Skript-Text des Tests im Sandbox-Container, gestartet mit `docker run --dns 9.9.9.9` (Upstream-Liste `9.9.9.9`): `STEP 3/3 … UNLISTED_BLOCKED`, `EGRESS_BUILD_OK`, Exit 0. Der Test hängt damit am Upstream-Resolver des Docker-Hosts, nicht an `amd64` und nicht an Podman 6.1.4. Auf Colima und auf dem GitHub-Runner ist der Upstream-Resolver nicht gemessen.
+- **Einordnung:** Es ist die im Handbuch ausgewiesene Grenze („ein Prozess ohne `sudo` kann den Upstream-Resolver direkt fragen und erhält die Adresse eines Namens außerhalb der Liste; die Verbindung bleibt gesperrt“), hier für verschachtelte Container: der Rückfall `8.8.8.8` von Podman trifft einen Upstream des Hosts. Es ist kein Fehler des Cuts. Der Test unterstellt dagegen, dass ein unlisteter Name im `RUN` nicht auflöst; das gilt nur, wenn der Upstream-Resolver des Hosts kein Rückfall-Nameserver von Podman ist. Eine Korrektur (Test pinnen oder das Skript `egress-init.sh` ändern, sodass nur der lokale Resolver Port 53 darf) ist ein eigener Slice und eine Produktentscheidung; sie gehört nicht in den Cut. Der Cut sagt deshalb **nicht**, der Docker-Lauf sei grün; er nennt den einen roten Test und die Ursache.
+- **Auf der CI:** `integration-docker` läuft bei `push` und `pull_request` auf `main` und per `workflow_dispatch` (`.github/workflows/integration.yml`, `on:`); der Job ruft `make test-docker` ohne `-v` auf (`repo.mk` `test-docker`). Die letzten Läufe auf `main` sind grün (`gh run list`, 2026-10-19: `integration-docker` 39187068499 auf `b9ae4e7`, `ci` 39187068493). Ob der Test dort läuft oder überspringt (`skipIfNestedUsernsRestricted` überspringt bei `kernel.apparmor_restrict_unprivileged_userns=1`), ist ohne `-v` und ohne abrufbares Log nicht zu entscheiden (`gh run view 39187068499 --log` lieferte keine Zeilen); ein Lauf auf dem GitHub-Runner ist nicht gemessen.
+
+**CI-Hinweise an den Projektinhaber (Gate-Gegenstand, `AGENTS.md` §3.6; der Cut ändert kein Workflow):**
+
+1. Der Kopfkommentar von `.github/workflows/integration.yml` beschreibt `continue-on-error: true` als zeitlich befristete, geltende Maßnahme; die Datei enthält das Flag nicht (der Kommentar stimmt nicht mit dem Workflow überein).
+2. Dem Aufruf von `make test-docker` fehlt `-v` (`repo.mk`, `go test -tags docker -timeout 30m ./...`): ein Skip ist von einem Pass nicht zu trennen; Voraussetzung dafür, `amd64` im Sinn von [`ADR-0024`](../../adr/0024-ollama-im-sandbox-devcontainer.md) Entscheidung 10 als „verifiziert“ zu führen.
+3. `integration-docker` ist kein Pflicht-Check, und `main` hat gar keine Branch Protection: `gh api repos/pt9912/u-boot/branches/main/protection/required_status_checks` meldet `Branch not protected` (HTTP 404, 2026-10-19). `docs/maintainer/quality.md` nennt drei Required Status Checks für `ci` (`gates`, `security-gates`, `image-scan`); `integration-docker` steht nicht darunter, und gesetzt ist laut der Abfrage keiner.
+4. Das Zusammentreffen aus 2 und dem roten Test: lokal rot, auf der CI grün oder übersprungen, ohne `-v` nicht unterscheidbar.
+
+**Aussage zum Docker-Lauf in diesem Cut:** `make gates`, `make ci` und `make fullbuild` sind grün; `make test-docker` ist **rot** (ein Test, Ursache gemessen, nicht Produkt-Defekt des Cuts). Eine grüne Closure des Docker-Laufs wird nicht behauptet.
+
+**Befehle für Push und Tag (nach ausdrücklicher Freigabe des Projektinhabers, je Vorgang; nicht durch den Implementer):** siehe M0 bis M8 oben; M0 zuerst: `date +%F` muss `2026-10-19` sein, sonst Datum in `CHANGELOG.md`, beiden READMEs und im Handbuch-`Stand` nachziehen (ein weiterer Cut-Commit).
 
 ## 4. Trigger
 
