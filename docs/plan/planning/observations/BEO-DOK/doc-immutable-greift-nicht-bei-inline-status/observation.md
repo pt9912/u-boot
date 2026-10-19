@@ -1,0 +1,5 @@
+# `doc-immutable` greift nicht bei ADRs mit Inline-Status
+
+**Sub-Area:** `spec/`, `harness/`, `docs/plan/` (Kürzel DOK, Greenfield laut [`harness/conventions.md`](../../../../../../harness/conventions.md#mr-006)) — das Gate prüft die Unveränderlichkeit von Accepted-ADRs ([`AGENTS.md`](../../../../../../AGENTS.md) §3.5); seine Konfiguration (`.d-check.yml`, Abschnitt `vcs`) liegt in `harness/`-Nähe, die geprüften Dateien unter `docs/plan/adr/`.
+
+`make doc-immutable` wertet `immutable-when: '^Accepted$'` nur in einem Abschnitt `## Status`. 13 der 24 Accepted-ADRs führen den Status inline (`**Status:** Accepted`): die ADRs 0012 und 0014 bis 0025, darunter [`ADR-0024`](../../../../adr/0024-ollama-im-sandbox-devcontainer.md) und [`ADR-0025`](../../../../adr/0025-egress-liste-im-laufenden-container.md). Eine Änderung an ihrem Entscheidungstext meldet das Gate nicht (0 Befunde); der Kommentar in `.d-check.yml` beschreibt nur die Abschnittsform. Das Gate bleibt grün, die Lücke ist ohne Gegenprobe unsichtbar.
