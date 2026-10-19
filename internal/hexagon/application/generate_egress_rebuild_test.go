@@ -143,3 +143,56 @@ func TestGenerateDevcontainer_EgressRebuildNotice_DryRunGivesNone(t *testing.T) 
 		t.Errorf("the real run after the dry-run gave %d notices, want 1", len(n))
 	}
 }
+
+// Activating and switching off the restriction give no notice: the first
+// activation creates egress-init.sh and replaces the managed blocks of
+// devcontainer.json and Dockerfile; switching off replaces those two blocks
+// and leaves egress-init.sh in place (it is no longer planned).
+func TestGenerateDevcontainer_EgressRebuildNotice_NotForActivationAndSwitchOff(t *testing.T) {
+	t.Parallel()
+	const off = "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    egress:\n      enabled: false\n"
+	svc, fs := newGenerateService(t)
+	seedUBootYAMLWithFeatures(t, fs, off)
+	if _, err := generateSandbox(svc, false); err != nil {
+		t.Fatalf("fresh generate: %v", err)
+	}
+	if ok, _ := fs.Exists(egressInitPath()); ok {
+		t.Fatalf("egress-init.sh exists while the restriction is off")
+	}
+	jsonBefore, _ := fs.ReadFile(devcontainerJSONPath())
+	dockerBefore, _ := fs.ReadFile(dockerfilePath())
+
+	seedUBootYAMLWithFeatures(t, fs, egressRebuildAllowA)
+	resp, err := generateSandbox(svc, false)
+	if err != nil {
+		t.Fatalf("activation: %v", err)
+	}
+	if n := egressRebuildNotices(resp.Warnings); len(n) != 0 {
+		t.Errorf("first activation gave the rebuild notice: %+v", n)
+	}
+	if ok, _ := fs.Exists(egressInitPath()); !ok {
+		t.Errorf("activation did not create egress-init.sh")
+	}
+	jsonOn, _ := fs.ReadFile(devcontainerJSONPath())
+	dockerOn, _ := fs.ReadFile(dockerfilePath())
+	if string(jsonOn) == string(jsonBefore) || string(dockerOn) == string(dockerBefore) {
+		t.Errorf("activation left devcontainer.json or Dockerfile unchanged")
+	}
+
+	seedUBootYAMLWithFeatures(t, fs, off)
+	resp, err = generateSandbox(svc, false)
+	if err != nil {
+		t.Fatalf("switch off: %v", err)
+	}
+	if n := egressRebuildNotices(resp.Warnings); len(n) != 0 {
+		t.Errorf("switching off gave the rebuild notice: %+v", n)
+	}
+	if ok, _ := fs.Exists(egressInitPath()); !ok {
+		t.Errorf("switching off removed egress-init.sh")
+	}
+	jsonOff, _ := fs.ReadFile(devcontainerJSONPath())
+	dockerOff, _ := fs.ReadFile(dockerfilePath())
+	if string(jsonOff) == string(jsonOn) || string(dockerOff) == string(dockerOn) {
+		t.Errorf("switching off left devcontainer.json or Dockerfile unchanged")
+	}
+}

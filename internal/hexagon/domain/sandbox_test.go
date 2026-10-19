@@ -84,8 +84,8 @@ func TestNewEgressHost(t *testing.T) {
 		want    []string
 		wantNot []string
 	}{
-		{"*.example.org", []string{"wildcard", "already covers its subdomains", `"example.org"`}, []string{"not a lowercase"}},
-		{"*example.org", []string{"wildcard", "already covers its subdomains", "without `*`"}, []string{"not a lowercase"}},
+		{"*.example.org", []string{"wildcard", "already covers its subdomains, one and two levels below it", `"example.org"`}, []string{"not a lowercase"}},
+		{"*example.org", []string{"wildcard", "already covers its subdomains, one and two levels below it", "without `*`"}, []string{"not a lowercase"}},
 		{"*.*.example.org", []string{"wildcard", "without `*`"}, []string{"not a lowercase"}},
 		{"api.*.example.org", []string{"wildcard", "without `*`"}, nil},
 		{"Example.org", []string{"not a lowercase host name"}, []string{"already covers its subdomains"}},

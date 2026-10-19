@@ -131,10 +131,10 @@ func NewEgressHost(raw string) (string, error) {
 	}
 	if strings.Contains(h, "*") {
 		if name := strings.TrimPrefix(h, "*."); len(name) <= 253 && egressHostPattern.MatchString(name) {
-			return "", fmt.Errorf("%w: devcontainer.sandbox.egress.allow entry %q is a wildcard; an allowed name already covers its subdomains, enter %q instead",
+			return "", fmt.Errorf("%w: devcontainer.sandbox.egress.allow entry %q is a wildcard; an allowed name already covers its subdomains, one and two levels below it, enter %q instead",
 				ErrInvalidSandboxSetting, raw, name)
 		}
-		return "", fmt.Errorf("%w: devcontainer.sandbox.egress.allow entry %q is a wildcard; an allowed name already covers its subdomains, enter the host name without `*`",
+		return "", fmt.Errorf("%w: devcontainer.sandbox.egress.allow entry %q is a wildcard; an allowed name already covers its subdomains, one and two levels below it, enter the host name without `*`",
 			ErrInvalidSandboxSetting, raw)
 	}
 	return "", fmt.Errorf("%w: devcontainer.sandbox.egress.allow entry %q is not a lowercase host name (no scheme, port, path or wildcard)",
