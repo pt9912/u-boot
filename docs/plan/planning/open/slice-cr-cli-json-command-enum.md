@@ -16,7 +16,7 @@ Anlass: Review-Report `2026-10-18-slice-v1-cli-egress-anzeige` F-3 und Verificat
 
 **Berührte Spec-Stellen:** `lastenheft.md` §3 ([`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run)), §16 (Historie), Versionsfeld. [`SPEC-001`](../../../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) (Zeile `enum` von `command`) berührt der CR **nicht**: Sie gehört [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md) („Spezifikation nach dem Code“, nach dem Lastenheft). `architecture.md` berührt der CR nicht.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-18.
 
