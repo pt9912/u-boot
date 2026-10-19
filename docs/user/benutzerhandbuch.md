@@ -1075,7 +1075,7 @@ Was beim Containerstart passiert, wenn Fähigkeiten fehlen, steuert
 | `/dev/fuse` fehlt im Container (ohne das Device gestartet) | Rückfall auf `vfs`-Speicher, Warnung | Abbruch mit Exit-Code 11 |
 | Verschachtelte User-Namespaces blockiert (Seccomp oder AppArmor), nur `podman` | Abbruch mit Exit-Code 11 | Abbruch mit Exit-Code 11 |
 | Docker-Daemon wird nicht betriebsbereit (`docker`, zum Beispiel Start ohne `--privileged`) | Container ohne Daemon, Warnung | Abbruch mit Exit-Code 11 |
-| Egress-Beschränkung: Benutzer `nobody` fehlt, lokaler DNS-Server startet nicht oder läuft unter einem anderen Benutzer | Abbruch mit Exit-Code 11 | Abbruch mit Exit-Code 11 |
+| Egress-Beschränkung: Benutzer `nobody` fehlt, die nftables-Regeln lassen sich nicht anwenden, lokaler DNS-Server startet nicht oder läuft unter einem anderen Benutzer | Abbruch mit Exit-Code 11 | Abbruch mit Exit-Code 11 |
 
 Unter **Ubuntu 24.04** (und auf Hosts mit
 `kernel.apparmor_restrict_unprivileged_userns=1`) blockiert dieser Schalter
@@ -1127,7 +1127,7 @@ Fähigkeit einen Eintrag:
 |---|---|
 | `ok` | in Ordnung |
 | `fallback` | Warnung; bleibt unter `--quiet` sichtbar; mit `--strict` Exit-Code 11 |
-| `failed` (das Startscript endete mit Exit-Code 11: `onUnavailable: fail`, bei der Egress-Beschränkung auch unter `warn`, wenn der Benutzer `nobody` fehlt oder der lokale DNS-Server nicht startet oder nicht unter ihm läuft) | Fehler, Exit-Code 11 |
+| `failed` (das Startscript endete mit Exit-Code 11: `onUnavailable: fail`, bei der Egress-Beschränkung auch unter `warn`, wenn der Benutzer `nobody` fehlt, die nftables-Regeln sich nicht anwenden lassen oder der lokale DNS-Server nicht startet oder nicht unter ihm läuft) | Fehler, Exit-Code 11 |
 | nicht ermittelbar | Hinweiszeile (`?`) mit dem Grund; kein Fallback; unter `--quiet` stumm |
 | ungültige Datei | Warnung |
 
@@ -1257,14 +1257,22 @@ die Standard-Namensauflösung und `--network=host` bleiben nutzbar. Auf Colima (
 und in der CI ist das nicht gemessen.
 
 Das Startscript bricht mit Exit-Code 11 ab und schreibt `failed` in die Statusdatei,
-auch bei `onUnavailable: warn`, wenn der Benutzer `nobody` im Image fehlt, der lokale
-DNS-Server nicht startet oder nicht unter diesem Benutzer läuft: Ein Weiterlaufen würde die
-Beschränkung still aufweichen oder den DNS-Server sperren. Der Container bleibt danach in
-einem von zwei Zuständen (ein Docker-Test prüft sie):
+auch bei `onUnavailable: warn`, wenn der Benutzer `nobody` im Image fehlt, die
+nftables-Regeln sich nicht anwenden lassen, der lokale DNS-Server nicht startet oder nicht
+unter diesem Benutzer läuft: Ein Weiterlaufen würde die Beschränkung still aufweichen oder
+den DNS-Server sperren. Der Container bleibt danach in einem von drei Zuständen (ein
+Docker-Test prüft sie):
 
 - **Benutzer fehlt:** Das Script bricht ab, bevor es Regeln anlegt. Im ersten Lauf hat der
   Container dann **keine** Beschränkung und sein DNS ist unverändert; die Meldung steht auf
   der Standardfehlerausgabe des Startscripts (Container-Log), und `u-boot doctor` zeigt `failed`.
+- **Die nftables-Regeln lassen sich nicht anwenden:** Das Script ersetzt die Regeln in einer
+  einzigen Transaktion und ändert bei einem Fehler nichts. Im ersten Lauf hat der Container
+  dann **keine** Beschränkung und sein DNS ist unverändert; in einem wiederholten Lauf bleiben
+  die Regeln und der DNS-Server des vorigen Laufs unverändert stehen (ein Docker-Test prüft
+  beides mit einer ungültigen Regelzeile). Ein Host, auf dem `nft` die IPv6-Tabelle nicht
+  anlegen kann, endet ebenso ohne Regel mit Exit-Code 11 (gelesen im Script; auf einem
+  solchen Host nicht gelaufen). Zuvor blieb in diesem Fall die IPv4-Beschränkung bestehen.
 - **DNS-Server startet nicht oder läuft unter einem anderen Benutzer:** Die Regeln mit der
   Richtlinie `drop` stehen. Im ersten Lauf zeigt `/etc/resolv.conf` nicht auf den lokalen
   DNS-Server (ein Docker-Test prüft das); in einem wiederholten Lauf bleibt der Eintrag
@@ -1418,13 +1426,16 @@ registry.npmjs.org  feature:claude-code, feature:node
   Container mit aktiver Beschränkung erneut aus (mit `sudo`), ersetzt es beide
   Tabellen in einer einzigen nftables-Transaktion, tauscht danach den lokalen
   DNS-Server aus und schreibt `/etc/resolv.conf` zuletzt. Das ist die Struktur
-  des Scripts; ein Test pinnt sie. Ein Docker-Test führt das Script elfmal
-  hintereinander aus: Jeder Lauf endet mit Exit-Code 0 und dem Status `ok`, es
+  des Scripts; ein Test pinnt sie. Ein Docker-Test führt das Script zwölfmal
+  hintereinander aus: Jeder der ersten elf Läufe endet mit Exit-Code 0 und dem Status `ok`, es
   läuft genau ein DNS-Server unter dem Benutzer der Regeln, beide Tabellen
-  bestehen, ein erlaubter Name löst auf, und die Liste der erreichbaren Adressen
-  ist nach dem Lauf leer. Währenddessen versucht eine Sonde laufend eine
-  Verbindung zum Gateway des Containers (Port 9); die Beschränkung hält sie auf,
-  ein Treffer würde den Test färben. **Nicht zugesagt** ist, dass nie ein
+  bestehen (die IPv6-Tabelle mit einer verwerfenden Kette und der Regel für
+  Loopback), und ein erlaubter Name löst auf; nach dem zwölften Lauf ist die Liste
+  der erreichbaren Adressen leer. Währenddessen versucht eine Sonde laufend eine
+  Verbindung zum Gateway des Containers (Port 9); die Beschränkung hält sie auf.
+  Ein Treffer färbt den Test nur, wenn das Gateway vorher ohne Beschränkung auf die
+  Sonde geantwortet hat; antwortet es nicht, meldet der Test nur, dass die Sonde auf
+  diesem Rechner nichts aussagt, und bleibt grün. **Nicht zugesagt** ist, dass nie ein
   Zeitraum ohne Beschränkung entsteht oder die Auflösung eines erlaubten Namens
   nie aussetzt: Eine Zählung von null heißt „kein Treffer“, nicht „kein Fenster“,
   weil die Sonde nur in Abständen von Millisekunden abtastet. Schlägt die
@@ -1434,8 +1445,8 @@ registry.npmjs.org  feature:claude-code, feature:node
   Regelzeile).
   **Nicht gemessen** für diese Fassung: die Zeiten auf `amd64`, Docker Desktop und
   in der CI, die Zeiten unter Last des Hosts, mit verschachtelter Laufzeit und die
-  IPv6-Tabelle (geprüft ist nur, dass beide Tabellen bestehen,
-  nicht ein Fenster). Gemessen ist nur die **frühere Fassung**, die ihre Tabellen löschte
+  IPv6-Tabelle (geprüft ist nur, dass beide Tabellen bestehen und die
+  IPv6-Kette verwirft und Loopback zulässt, nicht ein Fenster). Gemessen ist nur die **frühere Fassung**, die ihre Tabellen löschte
   und danach neu aufbaute (Linux, `amd64`, ein Host, zwei Messungen zu je 30 Läufen):
   In 27 und 28 Läufen wurde währenddessen ein Verbindungsversuch zum Gateway
   (Port 9) nicht verworfen, sondern vom Gateway abgelehnt, bis zu 48 und 50 ms
@@ -2173,8 +2184,8 @@ Start des Containers durch Docker, das Startscript läuft dann nicht. Der Docker
 nicht bereit, wenn der Container ohne `--privileged` startet; das Log
 `/var/log/u-boot-dockerd.log` im Container nennt den Grund. Das Startscript der
 Egress-Beschränkung endet mit Exit-Code 11, auch unter `warn`, wenn der Benutzer
-`nobody` im Image fehlt oder der lokale DNS-Server nicht startet oder nicht unter
-diesem Benutzer läuft; die Meldung nennt den Grund.
+`nobody` im Image fehlt, die nftables-Regeln sich nicht anwenden lassen oder der
+lokale DNS-Server nicht startet oder nicht unter diesem Benutzer läuft; die Meldung nennt den Grund.
 
 #### Lösung
 
