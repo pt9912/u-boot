@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v2-spec-sandbox-egress-ollama`](../../../../in-progress/slice-v2-spec-sandbox-egress-ollama.md)
+**Fund:** Review-Report [`2026-10-19-slice-v2-spec-sandbox-egress-ollama`](../../../../../../reviews/2026-10-19-slice-v2-spec-sandbox-egress-ollama.md) F-1 (MEDIUM: die Aussage der Spezifikation zum Elternnamen war unbedingt und stärker als Test und Messung) und Verification-Report [`2026-10-19-verification-slice-v2-spec-sandbox-egress-ollama`](../../../../../../reviews/2026-10-19-verification-slice-v2-spec-sandbox-egress-ollama.md) V-1 (MEDIUM: nach der Berichtigung stand ein Fall als „gemessen“, den das Messprotokoll nur analog trägt). Beide Male ist die Zusage weiter als der Lauf, der sie belegt: zuerst ohne Grenze, dann mit einer Messmarke auf einem nicht gefahrenen Fall.
+
+**Beleg-Qualität:** belegt durch Lesen von Spezifikation, Handbuch, CHANGELOG und Messprotokoll; zweiter Vorgang dieser Beobachtung.

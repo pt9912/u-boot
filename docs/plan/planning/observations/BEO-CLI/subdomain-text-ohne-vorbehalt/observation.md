@@ -1,0 +1,7 @@
+# Ausgabe- und Fehlertexte sagen „Subdomains“ ohne den Vorbehalt von Spezifikation und Handbuch
+
+**Sub-Area:** `internal/adapter/driving/cli` (Kürzel CLI, Greenfield laut [`harness/conventions.md`](../../../../../../harness/conventions.md#mr-006)) — die Texte der Ausgabe von `u-boot egress list` und des Fehlers zu `*` stehen im Driving-Adapter; der Kommentar bei `NewEgressHost` im Domain-Paket und der Testkommentar in `internal/e2e` tragen dieselbe Aussage.
+
+Die Langhilfe und die Zeile `Notes:` von `u-boot egress list` (`internal/adapter/driving/cli/egress.go`, durch `TestExecute_EgressList_Notes` gepinnt), die Fehlermeldung zu einem Eintrag mit `*` (`internal/hexagon/domain/sandbox.go`, `NewEgressHost`, durch `TestConfigSet_EgressAllowWildcard_Exit10WithHint` gepinnt) und der Kommentar „an entry never opens its parent name“ in `internal/e2e/sandbox_devcontainer_docker_test.go` sagen „A name in the list also allows its subdomains“ und Ähnliches ohne Vorbehalt. Belegt sind die positive Richtung durch drei Fälle und die Gegenrichtung durch den Status `000` für einen Namen; Spezifikation und Handbuch tragen diese Fälle und Grenzen. Die Texte zu ändern ist ein Code-Slice (Textänderung samt Test).
+
+**Trigger:** ein Code-Slice, der `egress.go`, `NewEgressHost` oder den Subdomain-Test berührt, oder der Release-Cut der Welle. Leser ist die Slice-Planung (§8, Sichtungs-Schritt) jedes Slice, der diese Texte berührt.
