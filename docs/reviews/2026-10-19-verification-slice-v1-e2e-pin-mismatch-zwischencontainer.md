@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (Frage: „Bauen wir es richtig?“, gegen Plan, DoD und Entscheidungen). Kein Review, keine Validierung, keine Reparatur.
 
-**Gegenstand:** Slice [`slice-v1-e2e-pin-mismatch-zwischencontainer`](../plan/planning/in-progress/slice-v1-e2e-pin-mismatch-zwischencontainer.md) (`in-progress/`), Commit-Range `5eab741..HEAD` (HEAD `b37c715`). Implementierung: `1689c68` (Test), `be66a0a` (Slice-Stand). Review-Report `7422493`. Fix-Runde: `18f4edc` (Test), `b37c715` (Slice). Bezug: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`ADR-0024`](../plan/adr/0024-ollama-im-sandbox-devcontainer.md).
+**Gegenstand:** Slice [`slice-v1-e2e-pin-mismatch-zwischencontainer`](../plan/planning/done/slice-v1-e2e-pin-mismatch-zwischencontainer.md) (`in-progress/`), Commit-Range `5eab741..HEAD` (HEAD `b37c715`). Implementierung: `1689c68` (Test), `be66a0a` (Slice-Stand). Review-Report `7422493`. Fix-Runde: `18f4edc` (Test), `b37c715` (Slice). Bezug: [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`ADR-0024`](../plan/adr/0024-ollama-im-sandbox-devcontainer.md).
 
 **Eingang:** Implementer-Zusage (DoD, Plan-Tabelle, Messtabelle), Review [`2026-10-19-slice-v1-e2e-pin-mismatch-zwischencontainer`](2026-10-19-slice-v1-e2e-pin-mismatch-zwischencontainer.md) (0 HIGH, 0 MEDIUM, 2 LOW, 4 INFO).
 
