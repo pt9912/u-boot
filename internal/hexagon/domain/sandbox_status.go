@@ -38,7 +38,8 @@ const (
 	// `warn`): `vfs` storage, no daemon, or no egress restriction.
 	SandboxStatusFallback SandboxStatusResult = "fallback"
 	// SandboxStatusFailed means the start script ended with exit code
-	// 11 (policy `fail`).
+	// 11: policy `fail`, or, for the egress script, a local resolver that
+	// does not match the firewall rules under any policy.
 	SandboxStatusFailed SandboxStatusResult = "failed"
 )
 

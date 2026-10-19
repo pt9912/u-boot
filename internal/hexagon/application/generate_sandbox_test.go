@@ -624,6 +624,67 @@ func TestGenerateDevcontainer_SandboxEgress(t *testing.T) {
 	}
 }
 
+// LH-FA-DEV-008 / ADR-0026: Port 53 to the upstream resolvers is open only
+// for the user of the local dnsmasq. The user is set once (`user=` in the
+// configuration, `meta skuid` in both upstream rules), both are read from
+// the same variable, and a missing user or a dnsmasq under another uid
+// ends the script with status `failed` and exit 11 under every policy.
+func TestGenerateDevcontainer_SandboxEgress_UpstreamDNSOnlyForTheResolverUser(t *testing.T) {
+	t.Parallel()
+	for _, policy := range []string{"warn", "fail"} {
+		svc, fs := newGenerateService(t)
+		seedUBootYAMLWithFeatures(t, fs, "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    onUnavailable: "+policy+"\n    egress:\n      enabled: true\n")
+		seedGitOrigin(t, fs, "git@github.com:pt9912/demo.git")
+		if _, err := generateSandbox(svc, false); err != nil {
+			t.Fatalf("generate: %v", err)
+		}
+		body, err := fs.ReadFile(egressInitPath())
+		if err != nil {
+			t.Fatal(err)
+		}
+		script := string(body)
+		for _, want := range []string{
+			"dns_user=nobody\n",
+			`dns_uid=$(id -u "$dns_user" 2>/dev/null)`,
+			`echo "user=$dns_user"`,
+			`output meta skuid "$dns_uid" ip daddr "$ns" udp dport 53 accept`,
+			`output meta skuid "$dns_uid" ip daddr "$ns" tcp dport 53 accept`,
+			`awk '/^Uid:/ {print $2}'`,
+			`if [ "$running_uid" != "$dns_uid" ]; then`,
+		} {
+			if strings.Count(script, want) != 1 {
+				t.Errorf("policy %s: %q appears %d times, want 1:\n%s", policy, want, strings.Count(script, want), script)
+			}
+		}
+		if got := strings.Count(script, "dport 53 accept"); got != 2 {
+			t.Errorf("policy %s: %d rules for port 53, want 2 (udp, tcp)", policy, got)
+		}
+		for _, line := range strings.Split(script, "\n") {
+			if strings.Contains(line, "dport 53 accept") && !strings.Contains(line, "meta skuid") {
+				t.Errorf("policy %s: upstream DNS rule without a user condition: %q", policy, line)
+			}
+		}
+		// Both abort branches (user missing, uid differs) leave status and
+		// exit code independent of the onUnavailable policy.
+		for _, branch := range []string{
+			"does not exist\" >&2\n  write_status failed\n  exit 11\n",
+			"(uid $dns_uid)\" >&2\n  write_status failed\n  exit 11\n",
+		} {
+			if !strings.Contains(script, branch) {
+				t.Errorf("policy %s: script lacks the abort branch %q:\n%s", policy, branch, script)
+			}
+		}
+		// The uid check sits after the resolver start and before resolv.conf
+		// points at it.
+		start := strings.Index(script, `dnsmasq --conf-file="$conf"`)
+		check := strings.Index(script, `if [ "$running_uid" != "$dns_uid" ]`)
+		resolv := strings.Index(script, `echo "nameserver 127.0.0.1" > /etc/resolv.conf`)
+		if start < 0 || start >= check || check >= resolv {
+			t.Errorf("policy %s: order dnsmasq start (%d), uid check (%d), resolv.conf (%d) is wrong", policy, start, check, resolv)
+		}
+	}
+}
+
 // Podman + egress: both relaxation sets in runArgs, both init steps in
 // the right lifecycle hook, podman registries in the allowlist.
 func TestGenerateDevcontainer_SandboxEgressWithPodman(t *testing.T) {
@@ -1089,7 +1150,7 @@ func TestGenerateDevcontainer_SandboxStartScriptsWriteStatusFiles(t *testing.T) 
 		{"docker", sandboxDockerYAML, dockerInitPath(), "daemon",
 			map[string]int{"ok": 2, "fallback": 1, "failed": 1}, 1},
 		{"egress", "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    egress:\n      enabled: true\n", egressInitPath(), "egress",
-			map[string]int{"ok": 1, "fallback": 1, "failed": 1}, 1},
+			map[string]int{"ok": 1, "fallback": 1, "failed": 3}, 3},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

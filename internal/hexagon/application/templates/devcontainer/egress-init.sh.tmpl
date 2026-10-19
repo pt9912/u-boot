@@ -5,7 +5,8 @@
 # `u-boot config set devcontainer.sandbox.egress.allow <host>`.
 #
 # Mechanism: a local dnsmasq resolves only the allowed names and adds the
-# answers to an nftables set; everything else is dropped by nftables.
+# answers to an nftables set; everything else is dropped by nftables. Port 53
+# to the upstream resolvers is open only for the user of that dnsmasq.
 # Policy devcontainer.sandbox.onUnavailable: {{.OnUnavailable}}
 on_unavailable="{{.OnUnavailable}}"
 hosts="{{range $i, $h := .EgressHosts}}{{if $i}} {{end}}{{$h}}{{end}}"
@@ -31,6 +32,17 @@ if ! nft list tables >/dev/null 2>&1; then
   exit 0
 fi
 
+# The dnsmasq user is set once: `user=` in the configuration and `meta skuid`
+# in the upstream rules read the same value. A missing user or a dnsmasq that
+# runs under another uid ends in exit 11 under every onUnavailable policy.
+dns_user=nobody
+dns_uid=$(id -u "$dns_user" 2>/dev/null)
+if [ -z "$dns_uid" ]; then
+  echo "u-boot sandbox: egress restriction not set up: the user '$dns_user' for the local resolver does not exist" >&2
+  write_status failed
+  exit 11
+fi
+
 # Keep the original resolver configuration (restart-safe).
 [ -f /etc/resolv.conf.u-boot-orig ] || cp /etc/resolv.conf /etc/resolv.conf.u-boot-orig
 upstreams=$(awk '/^nameserver/ && $2 !~ /:/ {print $2}' /etc/resolv.conf.u-boot-orig)
@@ -39,6 +51,7 @@ conf=/etc/u-boot-egress-dnsmasq.conf
 
 # Re-run safe: stop a previous resolver, drop the previous tables.
 if [ -f "$pidfile" ]; then kill "$(cat "$pidfile")" 2>/dev/null || true; fi
+rm -f "$pidfile"
 nft delete table ip u_boot_egress 2>/dev/null || true
 nft delete table ip6 u_boot_egress6 2>/dev/null || true
 
@@ -47,6 +60,7 @@ nft delete table ip6 u_boot_egress6 2>/dev/null || true
   echo "bind-interfaces"
   echo "no-resolv"
   echo "no-hosts"
+  echo "user=$dns_user"
   echo "pid-file=$pidfile"
   for h in $hosts; do
     for ns in $upstreams; do echo "server=/$h/$ns"; done
@@ -61,14 +75,21 @@ nft add rule ip u_boot_egress output oifname lo accept
 nft add rule ip u_boot_egress output ct state established,related accept
 nft add rule ip u_boot_egress output ip daddr @allowed accept
 for ns in $upstreams; do
-  nft add rule ip u_boot_egress output ip daddr "$ns" udp dport 53 accept
-  nft add rule ip u_boot_egress output ip daddr "$ns" tcp dport 53 accept
+  nft add rule ip u_boot_egress output meta skuid "$dns_uid" ip daddr "$ns" udp dport 53 accept
+  nft add rule ip u_boot_egress output meta skuid "$dns_uid" ip daddr "$ns" tcp dport 53 accept
 done
 nft add table ip6 u_boot_egress6
 nft add chain ip6 u_boot_egress6 output '{ type filter hook output priority 0; policy drop; }'
 nft add rule ip6 u_boot_egress6 output oifname lo accept
 
 dnsmasq --conf-file="$conf"
+# The upstream rules name one uid; a resolver under another uid would be blocked.
+running_uid=$(awk '/^Uid:/ {print $2}' "/proc/$(cat "$pidfile" 2>/dev/null)/status" 2>/dev/null)
+if [ "$running_uid" != "$dns_uid" ]; then
+  echo "u-boot sandbox: egress restriction failed: the local resolver is not running as '$dns_user' (uid $dns_uid)" >&2
+  write_status failed
+  exit 11
+fi
 echo "nameserver 127.0.0.1" > /etc/resolv.conf
 write_status ok
 # END U-BOOT MANAGED BLOCK: init

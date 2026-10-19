@@ -236,6 +236,146 @@ func TestE2E_SandboxDevcontainer_EgressSubdomains(t *testing.T) {
 	}
 }
 
+// egressUpstreamDNSProbeScript runs in the container with the generated
+// egress script. `dnsq` asks one server directly and prints `answer` when a
+// reply with a successful code and at least one answer record arrives within
+// three seconds, `none` otherwise.
+const egressUpstreamDNSProbeScript = `set -u
+cat > /tmp/dnsq.pl <<'PERL'
+use strict; use warnings;
+use IO::Socket::INET; use IO::Select;
+my ($proto, $srv, $name) = @ARGV;
+my $id = int(rand 65536);
+my $q = pack('nnnnnn', $id, 0x0100, 1, 0, 0, 0) . join('', map { pack('C', length $_) . $_ } split(/\./, $name)) . "\0" . pack('nn', 1, 1);
+my $buf = '';
+if ($proto eq 'udp') {
+  my $s = IO::Socket::INET->new(PeerAddr => $srv, PeerPort => 53, Proto => 'udp') or do { print "none\n"; exit };
+  $s->send($q);
+  $s->recv($buf, 512) if IO::Select->new($s)->can_read(3);
+} else {
+  my $s = IO::Socket::INET->new(PeerAddr => $srv, PeerPort => 53, Proto => 'tcp', Timeout => 3) or do { print "none\n"; exit };
+  $s->print(pack('n', length $q) . $q);
+  if (IO::Select->new($s)->can_read(3)) { my $l = ''; $s->read($l, 2); $s->read($buf, unpack('n', $l)) if length $l == 2; }
+}
+my ($rid, $fl, $qd, $an) = length $buf >= 12 ? unpack('nnnn', $buf) : (-1, 0xf, 0, 0);
+print(($rid == $id && ($fl & 0xf) == 0 && $an > 0) ? "answer\n" : "none\n");
+PERL
+dnsq() { perl /tmp/dnsq.pl "$@"; }
+sudo sh /usr/local/bin/u-boot-egress-init; echo "INIT_EXIT=$?"
+UPS=$(awk '/^nameserver/ && $2 !~ /:/ {print $2}' /etc/resolv.conf.u-boot-orig)
+echo "UPSTREAMS=$(echo $UPS | wc -w)"
+for ns in $UPS; do
+  for p in udp tcp; do echo "DIRECT $p example.com=$(dnsq $p $ns example.com)"; done
+done
+ns1=$(echo $UPS | cut -d' ' -f1)
+echo "LIMIT sudo-as-resolver-user=$(sudo setpriv --reuid="$(id -u nobody)" --regid="$(id -g nobody)" --clear-groups perl /tmp/dnsq.pl udp "$ns1" example.com)"
+echo "LOCAL api.github.com=$(getent hosts api.github.com | head -1 | cut -d' ' -f1 | grep -c .)"
+echo "LOCAL example.com=$(getent hosts example.com | head -1 | cut -d' ' -f1 | grep -c .)"
+echo "HTTPS api.github.com=$(curl -sS -m 10 --retry 3 --retry-delay 2 --retry-all-errors -o /dev/null -w '%{http_code}' https://api.github.com 2>/dev/null)"
+echo "UID dnsmasq=$(awk '/^Uid:/ {print $2}' /proc/$(cat /run/u-boot-egress-dnsmasq.pid)/status) rule=$(id -u nobody)"
+echo "RULES skuid=$(sudo nft list chain ip u_boot_egress output | grep -c "meta skuid $(id -u nobody) ip daddr .* dport 53 accept") upstreams=$(echo $UPS | wc -w)"
+echo "STATUS $(grep '^result=' /var/lib/u-boot/status/egress)"
+`
+
+// egressAbortProbeScript starts mutated copies of the generated script:
+// the uid of the upstream rules differs from the uid of the resolver, and
+// the resolver user does not exist. Both end with exit 11 and status
+// `failed` although the policy is `warn`.
+const egressAbortProbeScript = `set -u
+src=/usr/local/bin/u-boot-egress-init
+sed 's/^dns_uid=.*/dns_uid=1234/' $src > /tmp/uid-differs.sh
+sed 's/^dns_user=.*/dns_user=u_boot_no_such_user/' $src > /tmp/user-missing.sh
+for m in uid-differs user-missing; do
+  sudo sh /tmp/$m.sh 2>/tmp/$m.err; echo "ABORT $m exit=$? $(grep '^result=' /var/lib/u-boot/status/egress)"
+  sed "s/^/ERR $m: /" /tmp/$m.err
+done
+`
+
+// LH-FA-DEV-008, ADR-0026: a process without sudo gets no answer for a name
+// outside the allowlist from the upstream resolvers (UDP and TCP port 53);
+// allowed names resolve through the local resolver; the uid of the resolver
+// matches the uid in the rules; the limit holds: as the resolver user (via
+// sudo) the upstream answers. A uid mismatch or a missing resolver user
+// stops the start script with exit 11 and status `failed`, also under
+// onUnavailable warn.
+func TestE2E_SandboxDevcontainer_EgressUpstreamDNS(t *testing.T) {
+	if _, err := exec.LookPath("docker"); err != nil {
+		t.Fatalf("docker CLI not on PATH: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+	dir := generateEgressProject(ctx, t, "warn")
+	image := "uboot-e2e-egress-dns:" + strings.ReplaceAll(filepath.Base(dir), "/", "-")
+	if out, code := dockerOutput(ctx, t, "build", "-q", "-t", image, filepath.Join(dir, ".devcontainer")); code != 0 {
+		t.Fatalf("docker build failed:\n%s", out)
+	}
+	t.Cleanup(func() { _, _ = dockerOutput(context.Background(), t, "rmi", "-f", image) })
+	runArgs := generatedRunArgs(t, dir)
+
+	t.Run("direct path closed", func(t *testing.T) {
+		args := append(append([]string{"run", "--rm"}, runArgs...), image, "bash", "-c", egressUpstreamDNSProbeScript)
+		out, code := dockerOutput(ctx, t, args...)
+		if code != 0 {
+			t.Fatalf("probe exit %d:\n%s", code, out)
+		}
+		lines := map[string]bool{}
+		for _, l := range strings.Split(out, "\n") {
+			lines[strings.TrimSpace(l)] = true
+		}
+		if !lines["INIT_EXIT=0"] {
+			t.Fatalf("start script did not exit 0:\n%s", out)
+		}
+		if lines["UPSTREAMS=0"] {
+			t.Skipf("no IPv4 upstream resolver in /etc/resolv.conf of the container:\n%s", out)
+		}
+		for _, want := range []string{
+			"DIRECT udp example.com=none", "DIRECT tcp example.com=none",
+			"LIMIT sudo-as-resolver-user=answer",
+			"LOCAL api.github.com=1", "LOCAL example.com=0", "HTTPS api.github.com=200",
+			"STATUS result=ok",
+		} {
+			if !lines[want] {
+				t.Errorf("output lacks %q:\n%s", want, out)
+			}
+		}
+		for _, l := range strings.Split(out, "\n") {
+			if strings.HasPrefix(l, "DIRECT ") && !strings.HasSuffix(l, "=none") {
+				t.Errorf("direct upstream query got an answer: %q\n%s", l, out)
+			}
+			if rest, ok := strings.CutPrefix(l, "UID dnsmasq="); ok {
+				got, want, _ := strings.Cut(rest, " rule=")
+				if got == "" || got != want {
+					t.Errorf("resolver uid %q differs from the uid in the rules %q", got, want)
+				}
+			}
+			if rest, ok := strings.CutPrefix(l, "RULES skuid="); ok {
+				n, ups, _ := strings.Cut(rest, " upstreams=")
+				if upN, err := strconv.Atoi(ups); err != nil || n != strconv.Itoa(2*upN) {
+					t.Errorf("rules with meta skuid = %s, want 2 per upstream (%s upstreams)", n, ups)
+				}
+			}
+		}
+	})
+
+	t.Run("uid mismatch and missing user abort", func(t *testing.T) {
+		args := append(append([]string{"run", "--rm"}, runArgs...), image, "bash", "-c", egressAbortProbeScript)
+		out, code := dockerOutput(ctx, t, args...)
+		if code != 0 {
+			t.Fatalf("probe exit %d:\n%s", code, out)
+		}
+		for _, want := range []string{
+			"ABORT uid-differs exit=11 result=failed",
+			"ERR uid-differs: u-boot sandbox: egress restriction failed: the local resolver is not running as 'nobody'",
+			"ABORT user-missing exit=11 result=failed",
+			"ERR user-missing: u-boot sandbox: egress restriction not set up: the user 'u_boot_no_such_user' for the local resolver does not exist",
+		} {
+			if !strings.Contains(out, want) {
+				t.Errorf("output lacks %q:\n%s", want, out)
+			}
+		}
+	})
+}
+
 func generatedMounts(t *testing.T, dir string) []string {
 	t.Helper()
 	body, err := os.ReadFile(filepath.Join(dir, ".devcontainer", "devcontainer.json"))
