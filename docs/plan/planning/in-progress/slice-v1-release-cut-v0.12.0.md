@@ -58,7 +58,7 @@ wechselt nur durch `git mv`.
 - **Push, Tags und jede Aktion mit Außenwirkung durch den Implementer.** Push von `main`, jeder Tag, `gh release` und jedes Löschen sind extern wirksam und lassen sich nicht sauber zurücknehmen ([`releasing.md`](../../../maintainer/releasing.md) Zweck). **Push und Tags führt nur der Hauptagent, nach der ausdrücklichen Freigabe des Projektinhabers, je Vorgang**; der Implementer bereitet vor und führt keinen der Schritte M1 bis M8 aus.
 - **Eine Änderung der Pipeline** (Workflows, Tap-Skripte, `-v` im Aufruf von `make test-docker`, Required Checks): Gate-Änderung nach [`AGENTS.md`](../../../../AGENTS.md) §3.6; der Cut meldet die CI-Befunde an den Projektinhaber.
 - **Eine Produktänderung zum roten Test:** Der Cut untersucht die Ursache nur lesend und mit Messläufen außerhalb des Repos; eine Korrektur ist ein eigener Slice.
-- **Die Folge-Slices der Welle** ([`slice-v1-egress-hinweise-neuaufbau-und-messstand`](slice-v1-egress-hinweise-neuaufbau-und-messstand.md) für L-2/L-3 u. a.): sie folgen dem Cut, die ausgelieferten Meldungen tragen den Stand der Closure.
+- **Die Folge-Slices der Welle** ([`slice-v1-egress-hinweise-neuaufbau-und-messstand`](../open/slice-v1-egress-hinweise-neuaufbau-und-messstand.md) für L-2/L-3 u. a.): sie folgen dem Cut, die ausgelieferten Meldungen tragen den Stand der Closure.
 - **Änderung des Lastenhefts oder der Spezifikation:** Die Version `0.17.0` bleibt; die Bestätigung der Gates ändert keinen Wortlaut.
 - **Umschreiben der Historie:** Entscheidung des Projektinhabers (oben).
 
