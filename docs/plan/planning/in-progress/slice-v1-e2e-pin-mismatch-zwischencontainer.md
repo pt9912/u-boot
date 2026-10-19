@@ -24,12 +24,12 @@ Anlass: Befund B-4 der `amd64`-Messung. Belegt (Messfrage A8, zwei Läufe): Nach
 
 ## 1. Ziel und Abgrenzung
 
-**Ziel:** Die Negativprobe `TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild` hinterlässt nach ihrem Lauf keinen Container des fehlgeschlagenen Baus auf dem Docker-Host, ohne einen fremden Container anzufassen.
+**Ziel:** Die Negativprobe `TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild` hinterlässt nach ihrem Lauf keinen Container des fehlgeschlagenen Baus auf dem Docker-Host; der Eingriff entfernt nur Container, die nach der Vorher-Liste neu entstanden sind und den Null-Pin im Env tragen (zwei gleichzeitige Läufe desselben Tests gegen denselben Daemon sind nicht ausgeschlossen).
 
 ### Gefundener Stand (gelesen am 2026-10-19)
 
 - **Der Test:** `internal/e2e/sandbox_devcontainer_docker_test.go`, `TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild` (ab Zeile 1006): `generateSandboxProjectWith`, dann `dockerOutput(ctx, t, "build", "-q", "-t", tag, "--build-arg", "OLLAMA_SHA256_AMD64="+zeros, "--build-arg", "OLLAMA_SHA256_ARM64="+zeros, …)`; der Test erwartet einen Exit-Code ungleich 0 und die Ausgabe `FAILED`. Eine `t.Cleanup`-Funktion steht nur im Pfad, in dem der Bau wider Erwarten gelingt (`rmi -f` des Tags); für den Container des fehlgeschlagenen Baus steht keine.
-- **Das Rohdatum:** [`rohdaten-09.txt`](../../../messungen/slice-v1-devcontainer-ollama-amd64-messung/rohdaten-09.txt) weist einen neuen Container nach dem Lauf aus (`status=exited exit=1`), dessen `Path`/`Args` den Pin `OLLAMA_SHA256_AMD64` tragen; das Aufräum-Skript des Messprotokolls entfernt ihn nicht, weil nichts ihn eindeutig der Messung zuordnet (`tools/messung/ollama-amd64/09-tests.sh` weist ihn aus, `11-aufraeumen.sh` löscht nur nach Präfix).
+- **Das Rohdatum:** [`rohdaten-09.txt`](../../../messungen/slice-v1-devcontainer-ollama-amd64-messung/rohdaten-09.txt) weist einen neuen Container nach dem Lauf aus (`status=exited exit=1`), ohne weitere Angabe zu Path, Args oder Env (der Env-Befund ist eine eigene Messung dieses Slice, siehe „Umsetzung (Implementer)“); das Aufräum-Skript des Messprotokolls entfernt ihn nicht, weil nichts ihn eindeutig der Messung zuordnet (`tools/messung/ollama-amd64/09-tests.sh` weist ihn aus, `11-aufraeumen.sh` löscht nur nach Präfix).
 - **Nicht untersucht:** welcher Builder den Container hinterlässt (klassischer Builder oder BuildKit im Image `test-docker-tools`) und ob der Docker-Daemon des CI-Runners dasselbe tut; die Messung zeigt das Ergebnis auf einem Host, nicht den Mechanismus. Ob andere Docker-Tests in `internal/e2e/` Container nach fehlgeschlagenen Bauten hinterlassen, ist nicht gelesen.
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
@@ -41,7 +41,7 @@ Anlass: Befund B-4 der `amd64`-Messung. Belegt (Messfrage A8, zwei Läufe): Nach
 
 ## 2. Definition of Done
 
-- [x] **Mechanismus gemessen und Test-Eingriff:** Der Slice belegt, welcher Builder den Container hinterlässt, und räumt ihn im Test auf (Kandidaten, vom Architect zu messen und zu wählen: eine Build-Option, die Zwischencontainer auch bei einem Fehler entfernt, wo der Builder sie unterstützt; sonst die Differenz der Container-Listen vor und nach dem Bau, beschränkt auf den neu entstandenen Container mit dem Pin im `Path`/`Args`). Der Eingriff berührt keinen fremden Container.
+- [x] **Mechanismus gemessen und Test-Eingriff:** Der Slice belegt, welcher Builder den Container hinterlässt, und räumt ihn im Test auf (Kandidaten, vom Architect zu messen und zu wählen: eine Build-Option, die Zwischencontainer auch bei einem Fehler entfernt, wo der Builder sie unterstützt; sonst die Differenz der Container-Listen vor und nach dem Bau, beschränkt auf den neu entstandenen Container mit dem Null-Pin im Env). Der Eingriff entfernt nur Container, die nach der Vorher-Liste neu entstanden sind und den Null-Pin im Env tragen; zwei gleichzeitige Läufe desselben Tests gegen denselben Daemon sind nicht ausgeschlossen.
 - [x] **Pin des Eingriffs:** Ein Test oder eine Prüfung im selben Docker-Testlauf stellt sicher, dass nach `PinMismatchBreaksBuild` kein Container des fehlgeschlagenen Baus bleibt; der Fall wird einmal rot gesehen (Eingriff entfernt) und ist danach grün.
 - [ ] `make gates` grün; `make test-docker` grün; Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`); Closure-Notiz mit Steering-Loop-Lerneintrag; Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist; jedes Risiko aus §6 trägt einen Ausgang; die drei Paarungen sind getragen.
 
@@ -72,7 +72,7 @@ DoD vollständig, Review-Report und Verification-Report liegen vor, Closure-Noti
 
 ## 6. Risiken und offene Punkte
 
-- **Das Aufräumen entfernt einen fremden Container auf einem geteilten Host.** — **Ausgang:** weiter offen bis zum Architect-Schnitt; Zuordnung nur über den neu entstandenen Container mit dem Pin im Befehl, nie über Status oder Zeitfenster allein.
+- **Das Aufräumen entfernt einen fremden Container auf einem geteilten Host.** — **Ausgang:** weiter offen bis zum Architect-Schnitt; Zuordnung nur über den nach der Vorher-Liste neu entstandenen Container mit dem Null-Pin im Env, nie über Status oder Zeitfenster allein; zwei gleichzeitige Läufe desselben Tests gegen denselben Daemon sind nicht ausgeschlossen (der erste Lauf könnte den Zwischencontainer des zweiten entfernen).
 - **Der Mechanismus unterscheidet sich zwischen lokalem Host und CI-Runner.** — **Ausgang:** weiter offen; der Slice belegt den Fall auf dem Host, den CI-Lauf nennt er als nicht gemessen.
 
 ## Umsetzung (Implementer)
@@ -92,11 +92,13 @@ DoD vollständig, Review-Report und Verification-Report liegen vor, Closure-Noti
 | Gegenprobe: `--force-rm` entfernt, Prüfung aktiv | 3 | 3 | `FAIL`: „the failed build left 1 container(s) …“; der Cleanup hat den Container entfernt |
 | Änderung wie geliefert | 3 | 4 | `PASS`; kein Container im Status `exited` auf dem Host |
 
-Die Gesamtzahl taugt auf diesem geteilten Host nicht als Beleg: Ein fremder Lauf (Image `golang:1.27-alpine`) startete und beendete Container zwischen den Messungen, das erklärt die 4 nachher; der Beleg ist die Prüfung nach Pin und neuer ID, nicht die Zahl. Die Gegenprobe findet genau einen Container mit dem Null-Pin, den Zwischencontainer aus [`rohdaten-09.txt`](../../../messungen/slice-v1-devcontainer-ollama-amd64-messung/rohdaten-09.txt). Zwei Zwischenläufe mit einer Prüfung über Path/Args blieben grün, weil der Pin dort nicht steht; sie sind verworfen, die Prüfung liest das Env.
+Die Gesamtzahl taugt auf diesem geteilten Host nicht als Beleg: Läufe anderer Arbeiten auf dem Host starteten und beendeten Container zwischen den Messungen, das erklärt die 4 nachher; der Beleg ist die Prüfung nach Pin und neuer ID, nicht die Zahl. Die Gegenprobe findet genau einen Container mit dem Null-Pin, den Zwischencontainer, den [`rohdaten-09.txt`](../../../messungen/slice-v1-devcontainer-ollama-amd64-messung/rohdaten-09.txt) als `exited`, Exit 1 ausweist. Hinweis: Zwei verworfene Zwischenläufe prüften Path/Args; sie blieben wirkungslos grün, weil der Pin nur im Env steht (Path/Args tragen den Variablennamen im Skripttext, nicht den Wert). Die Prüfung liest das Env.
 
 **Rote Mutation:** `--force-rm` aus dem `docker build`-Aufruf entfernen färbt den Test rot (Tabelle, erste Zeile).
 
-**Zweites Vorkommen (nur gemeldet, nicht behoben):** `TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild` (dieselbe Datei) baut in drei Teilfällen absichtlich fehlschlagende Images ohne `--force-rm` und ohne Cleanup; gleicher Mechanismus, nicht gemessen. Das ist ein Folge-Vorgang (§1: allgemeine Aufräum-Hilfe erst bei zweitem Vorkommen, eigener Vorgang).
+**Zweites Vorkommen (nur gemeldet, nicht behoben):** `TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild` (dieselbe Datei) baut in drei Teilfällen absichtlich fehlschlagende Images ohne `--force-rm` und ohne Cleanup; gleicher Mechanismus, nicht gemessen. **Vermerk für die Closure:** Folge-Vorgang für diesen Test (drei Teilfälle, gleiche Klasse, nicht gemessen); die Anlage des Folge-Slice macht der Planner bei der Closure (§1: allgemeine Aufräum-Hilfe erst bei zweitem Vorkommen, eigener Vorgang).
+
+**Abgleich Plan-Tabelle gegen `git diff --stat -M 5eab741..HEAD` (nach der Fix-Runde zum Review):** drei Dateien: der Test, diese Slice-Datei und der Review-Report unter `docs/reviews/` (Zeile „diese Slice-Datei, … `docs/reviews/`“); jede Zeile hat einen Plan-Eintrag, jeder Eintrag mit Diff eine Zeile.
 
 **Nicht gemessen:** der Docker-Daemon des CI-Runners und ein Host mit BuildKit-Standard (§6, zweites Risiko).
 
