@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (Frage: „Bauen wir es richtig?“, gegen Plan, DoD und Entscheidungen). Kein Review, keine Validierung, keine Reparatur.
 
-**Gegenstand:** Slice [`slice-v1-messskripte-nach-tools`](../plan/planning/in-progress/slice-v1-messskripte-nach-tools.md) (`in-progress/`), Commit-Range `e952311..HEAD` (HEAD `77dde24`, lokal). Implementierung: `4e3a4d4` (Move Werkzeug), `b541202` (Move Protokolle), `98f76a4` (Pfad-Berichtigung), `79c749f` (ADR-Berichtigung), `ae39ec2` (Nachzug), `42bb8b2` (Entscheidung (c)), `6bf964b` (Hinweis a1), `7f0bdc4` (Gate a3), `2f21a06` (Plan-Tabelle). Review-Report `ccb4e31`. Fix-Runde: `afce363` (F-2), `c9dc3b3` (F-3), `51173b8` (F-4), `3c094c3` (F-5), `7d27441` (F-6), `3e36489` (F-1, Beobachtung), `589464d` (F-1, F-7, F-8, Plan), `77dde24` (Plan-Tabelle nach der Fix-Runde). `git diff --stat -M e952311..HEAD`: 86 Dateien, davon 52 reine Renames, 3 Renames mit Inhaltsänderung (zwei Protokoll-READMEs, `06-option-a.sh`), 8 neue Dateien, 23 geänderte.
+**Gegenstand:** Slice [`slice-v1-messskripte-nach-tools`](../plan/planning/done/slice-v1-messskripte-nach-tools.md) (`in-progress/`), Commit-Range `e952311..HEAD` (HEAD `77dde24`, lokal). Implementierung: `4e3a4d4` (Move Werkzeug), `b541202` (Move Protokolle), `98f76a4` (Pfad-Berichtigung), `79c749f` (ADR-Berichtigung), `ae39ec2` (Nachzug), `42bb8b2` (Entscheidung (c)), `6bf964b` (Hinweis a1), `7f0bdc4` (Gate a3), `2f21a06` (Plan-Tabelle). Review-Report `ccb4e31`. Fix-Runde: `afce363` (F-2), `c9dc3b3` (F-3), `51173b8` (F-4), `3c094c3` (F-5), `7d27441` (F-6), `3e36489` (F-1, Beobachtung), `589464d` (F-1, F-7, F-8, Plan), `77dde24` (Plan-Tabelle nach der Fix-Runde). `git diff --stat -M e952311..HEAD`: 86 Dateien, davon 52 reine Renames, 3 Renames mit Inhaltsänderung (zwei Protokoll-READMEs, `06-option-a.sh`), 8 neue Dateien, 23 geänderte.
 
 **Eingang:** Implementer-Zusage (DoD, Plan-Tabelle, Fix-Runde), Review [`2026-10-19-slice-v1-messskripte-nach-tools`](2026-10-19-slice-v1-messskripte-nach-tools.md) (kein HIGH; F-1, F-2 MEDIUM; F-3 bis F-7 LOW; F-8 bis F-12 INFO), Vorgaben des Projektinhabers vom 2026-10-19: (1) im Planning-Baum nur Dokumente, unter `observations/` nur Beobachtungen; (2) Messprotokolle unter `docs/messungen/<slice>/` nur `.md`, `.txt`, `.log`; (3) Skripte, Dockerfiles, Sonde unter `tools/messung/<name>/`; (4) entschieden (a) a1+a3, (b) b3, (c) Vorschlag übernommen, nicht widersprochen.
 
@@ -121,7 +121,7 @@ Entscheidung (c) bleibt im Slice, in `open/README.md` und in `42bb8b2` als „Vo
 ## 9. Verification Evidence (Block nach `harness/verification.md`)
 
 Scope:
-- Slice: [`slice-v1-messskripte-nach-tools`](../plan/planning/in-progress/slice-v1-messskripte-nach-tools.md)
+- Slice: [`slice-v1-messskripte-nach-tools`](../plan/planning/done/slice-v1-messskripte-nach-tools.md)
 - IDs: [`ADR-0024`](../plan/adr/0024-ollama-im-sandbox-devcontainer.md), [`ADR-0025`](../plan/adr/0025-egress-liste-im-laufenden-container.md) (nur Messungs-Zeile und *Geschichte*); keine `LH-*`
 - Artefakte: `tools/messung/**`, `docs/messungen/**`, `tools/harness/ablage-pruefung.sh`, `tools/harness/ablage-pruefung-test.sh`, `repo.mk`, `harness/README.md`, `harness/conventions.md`, MR-012
 

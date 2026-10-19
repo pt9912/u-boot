@@ -2,7 +2,7 @@
 
 **Review-Art:** Code-/Doku-Review (Messskripte, Rohdaten, Handbuch und CHANGELOG gegen Plan, Entscheidungen und Hard Rules; die Rohdaten wurden selbst gelesen, nicht aus dem Slice übernommen)
 
-**Gegenstand:** Bereich `7956c49..HEAD` ohne `docs/plan/planning/in-progress/slice-v1-messskripte-nach-tools.md` und `docs/plan/planning/open/README.md` (Commits `7880f16`, `2d6dd97`, `ed4a837`; die Commits `f256068`, `141516a`, `e60e142` gehören zum Planner des Slice `slice-v1-messskripte-nach-tools` und sind nicht Teil des Reviews). `git diff --stat`: 50 Dateien, 5018 Einfügungen, 20 Löschungen — 18 Dateien unter `tools/messung/ollama-amd64/`, 29 unter `docs/messungen/slice-v1-devcontainer-ollama-amd64-messung/`, dazu `CHANGELOG.md`, `docs/user/benutzerhandbuch.md` und die Slice-Datei. Arbeitsbaum zu Beginn sauber, HEAD `ed4a837`. <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
+**Gegenstand:** Bereich `7956c49..HEAD` ohne `docs/plan/planning/done/slice-v1-messskripte-nach-tools.md` und `docs/plan/planning/open/README.md` (Commits `7880f16`, `2d6dd97`, `ed4a837`; die Commits `f256068`, `141516a`, `e60e142` gehören zum Planner des Slice `slice-v1-messskripte-nach-tools` und sind nicht Teil des Reviews). `git diff --stat`: 50 Dateien, 5018 Einfügungen, 20 Löschungen — 18 Dateien unter `tools/messung/ollama-amd64/`, 29 unter `docs/messungen/slice-v1-devcontainer-ollama-amd64-messung/`, dazu `CHANGELOG.md`, `docs/user/benutzerhandbuch.md` und die Slice-Datei. Arbeitsbaum zu Beginn sauber, HEAD `ed4a837`. <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 
 **Skill:** `.harness/skills/reviewer.md` @ HEAD `ed4a837` · **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-19
 
