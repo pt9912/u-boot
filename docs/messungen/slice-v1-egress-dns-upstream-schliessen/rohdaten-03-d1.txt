@@ -1,0 +1,29 @@
+######## D1, 2026-10-19T11:40:41.137Z
+postStart (ist) exit=0
+Upstream-Liste: 1.1.1.1 8.8.8.8 
+-- Benutzer im Image
+uid=1000(vscode) gid=1000(vscode) groups=1000(vscode)
+vscode:x:1000:1000::/home/vscode:/bin/bash
+nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+dnsmasq:x:999:65534:dnsmasq:/var/lib/misc:/usr/sbin/nologin
+-- Prozess dnsmasq nach dem Startscript
+USER           UID     PID    PPID COMMAND
+nobody       65534      36       1 dnsmasq --conf-file=/etc/u-boot-egress-dnsmasq.conf
+pid-datei=36; /proc/36/status: Uid: 65534 65534 65534 65534
+-- dnsmasq-Konfiguration: user=? (Zeilen mit user oder group)
+0
+-- Zaehler je Benutzer-ID (Messinstrument): vor den Upstream-Regeln zaehlen zwei nicht terminierende Regeln
+-- Anfrage 1: vscode fragt den lokalen Resolver nach einem erlaubten Namen (der dnsmasq fragt den Upstream)
+140.82.121.6
+-- Anfrage 2: vscode fragt den ersten Upstream direkt
+104.20.23.154
+172.66.147.243
+-- Zaehler
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 65534 counter packets 2 bytes 166
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 1000 counter packets 1 bytes 80
+pakete skuid 1000 (vscode, direkte Anfrage): 1; pakete skuid 65534 (nobody, dnsmasq): 2
+AUSSAGE d1 dnsmasq-benutzer=nobody
+AUSSAGE d1 dnsmasq-uid=65534
+AUSSAGE d1 vscode-uid=1000
+AUSSAGE d1 zaehler-vscode-groesser-null=ja
+AUSSAGE d1 zaehler-dnsmasq-groesser-null=ja

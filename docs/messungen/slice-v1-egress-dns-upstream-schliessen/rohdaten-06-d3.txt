@@ -1,0 +1,204 @@
+antwort-container bereit: 172.17.0.6
+Antwort-Container R=172.17.0.6
+
+######## D3, Fall ohne, 2026-10-19T11:45:54.880Z
+(kein Startscript: Kontrolle, die Sonden erkennen einen offenen Pfad)
+Upstream-Liste: 1.1.1.1 8.8.8.8; Antwort-Container R=172.17.0.6 (nicht in der Upstream-Liste, nicht im Set)
+--- 1. Grundfall: UDP und TCP an den ersten Upstream 1.1.1.1 (Name example.com)
+    udp53 @1.1.1.1: offen (104.20.23.154)
+AUSSAGE ohne d3 udp53-upstream=offen
+    tcp53 @1.1.1.1: offen (172.66.147.243)
+AUSSAGE ohne d3 tcp53-upstream=offen
+--- 2. anderer Upstream: R (Port 53, UDP und TCP), nicht in der Upstream-Liste
+    udp53 @R: offen (203.0.113.7)
+AUSSAGE ohne d3 udp53-anderer-resolver-R=offen
+    tcp53 @R: offen (203.0.113.7)
+AUSSAGE ohne d3 tcp53-anderer-resolver-R=offen
+--- 3. andere Portnummer und Port 853 / 443 am Upstream 1.1.1.1 (TCP; UDP 5353)
+    tcp853 1.1.1.1: offen (nc rc=0)
+AUSSAGE ohne d3 tcp853-upstream=offen
+    tcp443 1.1.1.1: offen (nc rc=0)
+AUSSAGE ohne d3 tcp443-upstream=offen
+    udp5353 @1.1.1.1: gesperrt (dig rc=9)
+AUSSAGE ohne d3 udp5353-upstream=gesperrt
+--- 4. ICMP
+    ping 1.1.1.1: offen (Echo-Antwort)
+AUSSAGE ohne d3 icmp-upstream=offen
+    ping R: offen (Echo-Antwort)
+AUSSAGE ohne d3 icmp-R=offen
+--- 5. IPv6
+    IPv6-Adressen im Container (ausser ::1): 0; IPv6-Routen: 0
+    udp53 @2001:4860:4860::8888: gesperrt (dig rc=9)
+AUSSAGE ohne d3 ipv6-extern-udp53=gesperrt
+--- 6. R als erlaubte Adresse (Messvorbereitung: die Adresse wird per sudo in das Set eingetragen, wie der dnsmasq es fuer einen erlaubten Namen taete)
+Error: No such file or directory
+add element ip u_boot_egress allowed { 172.17.0.6 }
+               ^^^^^^^^^^^^^
+    eintrag rc=1
+    udp53 @R (im Set): offen (203.0.113.7)
+AUSSAGE ohne d3 udp53-erlaubte-adresse-R=offen
+    tcp53 @R (im Set): offen (203.0.113.7)
+AUSSAGE ohne d3 tcp53-erlaubte-adresse-R=offen
+    udp5353 @R (im Set): offen (203.0.113.7)
+AUSSAGE ohne d3 udp5353-erlaubte-adresse-R=offen
+    tcp853 R: offen (nc rc=0)
+AUSSAGE ohne d3 tcp853-erlaubte-adresse-R=offen
+    tcp443 R: offen (nc rc=0)
+AUSSAGE ohne d3 tcp443-erlaubte-adresse-R=offen
+    ping R (im Set): offen (Echo-Antwort)
+AUSSAGE ohne d3 icmp-erlaubte-adresse-R=offen
+--- 7. Zaehler und Regeln am Ende
+Error: No such file or directory
+list chain ip u_boot_egress output
+              ^^^^^^^^^^^^^
+--- 8. Docker-eigener Resolver 127.0.0.11 (bei benutzerdefiniertem Netz); hier Standard-Bruecke:
+grep: /etc/resolv.conf.u-boot-orig: No such file or directory
+    resolv.conf-Original: 
+    udp53 @127.0.0.11: gesperrt (dig rc=9)
+AUSSAGE ohne d3 udp53-127.0.0.11=gesperrt
+--- 9. mit sudo (Grenze: Guardrail; die sudoers-Regel des Images erlaubt nur (root) NOPASSWD: ALL)
+    sudoers: (root) NOPASSWD: ALL
+AUSSAGE ohne d3 sudo-root-udp53-upstream=offen
+AUSSAGE ohne d3 sudo-setpriv-nobody-udp53-upstream=offen
+
+######## D3, Fall ist, 2026-10-19T11:46:01.982Z
+postStart (ist, zaehler) exit=0
+Upstream-Liste: 1.1.1.1 8.8.8.8; Antwort-Container R=172.17.0.6 (nicht in der Upstream-Liste, nicht im Set)
+--- 1. Grundfall: UDP und TCP an den ersten Upstream 1.1.1.1 (Name example.com)
+    udp53 @1.1.1.1: offen (104.20.23.154)
+AUSSAGE ist d3 udp53-upstream=offen
+    tcp53 @1.1.1.1: offen (104.20.23.154)
+AUSSAGE ist d3 tcp53-upstream=offen
+--- 2. anderer Upstream: R (Port 53, UDP und TCP), nicht in der Upstream-Liste
+    udp53 @R: gesperrt (dig rc=9)
+AUSSAGE ist d3 udp53-anderer-resolver-R=gesperrt
+    tcp53 @R: gesperrt (dig rc=9)
+AUSSAGE ist d3 tcp53-anderer-resolver-R=gesperrt
+--- 3. andere Portnummer und Port 853 / 443 am Upstream 1.1.1.1 (TCP; UDP 5353)
+    tcp853 1.1.1.1: gesperrt (nc rc=1)
+AUSSAGE ist d3 tcp853-upstream=gesperrt
+    tcp443 1.1.1.1: gesperrt (nc rc=1)
+AUSSAGE ist d3 tcp443-upstream=gesperrt
+    udp5353 @1.1.1.1: gesperrt (dig rc=9)
+AUSSAGE ist d3 udp5353-upstream=gesperrt
+--- 4. ICMP
+    ping 1.1.1.1: gesperrt (keine Echo-Antwort)
+AUSSAGE ist d3 icmp-upstream=gesperrt
+    ping R: gesperrt (keine Echo-Antwort)
+AUSSAGE ist d3 icmp-R=gesperrt
+--- 5. IPv6
+    IPv6-Adressen im Container (ausser ::1): 0; IPv6-Routen: 0
+    udp53 @2001:4860:4860::8888: gesperrt (dig rc=9)
+AUSSAGE ist d3 ipv6-extern-udp53=gesperrt
+--- 6. R als erlaubte Adresse (Messvorbereitung: die Adresse wird per sudo in das Set eingetragen, wie der dnsmasq es fuer einen erlaubten Namen taete)
+    eintrag rc=0
+    udp53 @R (im Set): offen (203.0.113.7)
+AUSSAGE ist d3 udp53-erlaubte-adresse-R=offen
+    tcp53 @R (im Set): offen (203.0.113.7)
+AUSSAGE ist d3 tcp53-erlaubte-adresse-R=offen
+    udp5353 @R (im Set): offen (203.0.113.7)
+AUSSAGE ist d3 udp5353-erlaubte-adresse-R=offen
+    tcp853 R: offen (nc rc=0)
+AUSSAGE ist d3 tcp853-erlaubte-adresse-R=offen
+    tcp443 R: offen (nc rc=0)
+AUSSAGE ist d3 tcp443-erlaubte-adresse-R=offen
+    ping R (im Set): offen (Echo-Antwort)
+AUSSAGE ist d3 icmp-erlaubte-adresse-R=offen
+--- 7. Zaehler und Regeln am Ende
+    table ip u_boot_egress {
+    chain output {
+    type filter hook output priority filter; policy drop;
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 65534 counter packets 0 bytes 0
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid != 65534 counter packets 15 bytes 1004
+    oifname "lo" accept
+    ct state established,related accept
+    ip daddr @allowed accept
+    ip daddr 1.1.1.1 udp dport 53 accept
+    ip daddr 1.1.1.1 tcp dport 53 accept
+    ip daddr 8.8.8.8 udp dport 53 accept
+    ip daddr 8.8.8.8 tcp dport 53 accept
+    meta l4proto { tcp, udp } th dport 53 counter packets 3 bytes 200 drop
+    }
+    }
+--- 8. Docker-eigener Resolver 127.0.0.11 (bei benutzerdefiniertem Netz); hier Standard-Bruecke:
+    resolv.conf-Original: nameserver 1.1.1.1 nameserver 8.8.8.8 
+    udp53 @127.0.0.11: gesperrt (dig rc=9)
+AUSSAGE ist d3 udp53-127.0.0.11=gesperrt
+--- 9. mit sudo (Grenze: Guardrail; die sudoers-Regel des Images erlaubt nur (root) NOPASSWD: ALL)
+    sudoers: (root) NOPASSWD: ALL
+AUSSAGE ist d3 sudo-root-udp53-upstream=offen
+AUSSAGE ist d3 sudo-setpriv-nobody-udp53-upstream=offen
+
+######## D3, Fall skuid, 2026-10-19T11:46:21.259Z
+postStart (skuid, zaehler) exit=0
+Upstream-Liste: 1.1.1.1 8.8.8.8; Antwort-Container R=172.17.0.6 (nicht in der Upstream-Liste, nicht im Set)
+--- 1. Grundfall: UDP und TCP an den ersten Upstream 1.1.1.1 (Name example.com)
+    udp53 @1.1.1.1: gesperrt (dig rc=9)
+AUSSAGE skuid d3 udp53-upstream=gesperrt
+    tcp53 @1.1.1.1: gesperrt (dig rc=9)
+AUSSAGE skuid d3 tcp53-upstream=gesperrt
+--- 2. anderer Upstream: R (Port 53, UDP und TCP), nicht in der Upstream-Liste
+    udp53 @R: gesperrt (dig rc=9)
+AUSSAGE skuid d3 udp53-anderer-resolver-R=gesperrt
+    tcp53 @R: gesperrt (dig rc=9)
+AUSSAGE skuid d3 tcp53-anderer-resolver-R=gesperrt
+--- 3. andere Portnummer und Port 853 / 443 am Upstream 1.1.1.1 (TCP; UDP 5353)
+    tcp853 1.1.1.1: gesperrt (nc rc=1)
+AUSSAGE skuid d3 tcp853-upstream=gesperrt
+    tcp443 1.1.1.1: gesperrt (nc rc=1)
+AUSSAGE skuid d3 tcp443-upstream=gesperrt
+    udp5353 @1.1.1.1: gesperrt (dig rc=9)
+AUSSAGE skuid d3 udp5353-upstream=gesperrt
+--- 4. ICMP
+    ping 1.1.1.1: gesperrt (keine Echo-Antwort)
+AUSSAGE skuid d3 icmp-upstream=gesperrt
+    ping R: gesperrt (keine Echo-Antwort)
+AUSSAGE skuid d3 icmp-R=gesperrt
+--- 5. IPv6
+    IPv6-Adressen im Container (ausser ::1): 0; IPv6-Routen: 0
+    udp53 @2001:4860:4860::8888: gesperrt (dig rc=9)
+AUSSAGE skuid d3 ipv6-extern-udp53=gesperrt
+--- 6. R als erlaubte Adresse (Messvorbereitung: die Adresse wird per sudo in das Set eingetragen, wie der dnsmasq es fuer einen erlaubten Namen taete)
+    eintrag rc=0
+    udp53 @R (im Set): offen (203.0.113.7)
+AUSSAGE skuid d3 udp53-erlaubte-adresse-R=offen
+    tcp53 @R (im Set): offen (203.0.113.7)
+AUSSAGE skuid d3 tcp53-erlaubte-adresse-R=offen
+    udp5353 @R (im Set): offen (203.0.113.7)
+AUSSAGE skuid d3 udp5353-erlaubte-adresse-R=offen
+    tcp853 R: offen (nc rc=0)
+AUSSAGE skuid d3 tcp853-erlaubte-adresse-R=offen
+    tcp443 R: offen (nc rc=0)
+AUSSAGE skuid d3 tcp443-erlaubte-adresse-R=offen
+    ping R (im Set): offen (Echo-Antwort)
+AUSSAGE skuid d3 icmp-erlaubte-adresse-R=offen
+--- 7. Zaehler und Regeln am Ende
+    table ip u_boot_egress {
+    chain output {
+    type filter hook output priority filter; policy drop;
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 65534 counter packets 0 bytes 0
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid != 65534 counter packets 12 bytes 802
+    oifname "lo" accept
+    ct state established,related accept
+    ip daddr @allowed accept
+    meta skuid 65534 ip daddr 1.1.1.1 udp dport 53 accept
+    meta skuid 65534 ip daddr 1.1.1.1 tcp dport 53 accept
+    meta skuid 65534 ip daddr 8.8.8.8 udp dport 53 accept
+    meta skuid 65534 ip daddr 8.8.8.8 tcp dport 53 accept
+    meta l4proto { tcp, udp } th dport 53 counter packets 6 bytes 400 drop
+    }
+    }
+--- 8. Docker-eigener Resolver 127.0.0.11 (bei benutzerdefiniertem Netz); hier Standard-Bruecke:
+    resolv.conf-Original: nameserver 1.1.1.1 nameserver 8.8.8.8 
+    udp53 @127.0.0.11: gesperrt (dig rc=9)
+AUSSAGE skuid d3 udp53-127.0.0.11=gesperrt
+--- 9. mit sudo (Grenze: Guardrail; die sudoers-Regel des Images erlaubt nur (root) NOPASSWD: ALL)
+    sudoers: (root) NOPASSWD: ALL
+AUSSAGE skuid d3 sudo-root-udp53-upstream=gesperrt
+AUSSAGE skuid d3 sudo-setpriv-nobody-udp53-upstream=offen
+
+######## Eingang am Antwort-Container (Anfragen und Nutzdaten, die ankamen)
+dns53.log: Anfragen (query[...]) gesamt=8
+dns5353.log: Anfragen (query[...]) gesamt=3
+tcp853.in: 69 Bytes, davon Zeichenketten u-boot-messung-:       3 u-boot-messung-tcp853 ;
+tcp443.in: 69 Bytes, davon Zeichenketten u-boot-messung-:       3 u-boot-messung-tcp443 ;

@@ -1,0 +1,11 @@
+# Messwerkzeug-Image: das von `u-boot generate devcontainer` erzeugte Sandbox-Image (Egress aktiv, ohne nestedRuntime; Tag
+# u-boot-messung-dns-img-sbx) plus dig (dnsutils), nc (netcat-openbsd), ping (iputils-ping). Das Produkt-Image hat diese Werkzeuge
+# nicht; nur die Messung braucht sie. Der Bau laeuft ohne Egress-Restriktion. Die nested-Podman-Faelle (D2) laufen mit dem
+# unveraenderten Produkt-Image u-boot-messung-dns-img-pod.
+ARG BASE_IMG=u-boot-messung-dns-img-sbx
+FROM ${BASE_IMG}
+USER root
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends dnsutils netcat-openbsd iputils-ping \
+ && rm -rf /var/lib/apt/lists/*
+USER vscode

@@ -1,0 +1,178 @@
+rohdaten-02.txt AUSSAGE projekt-pod-runargs="runArgs":["--cap-add=SYS_ADMIN","--security-opt=seccomp=unconfined","--security-opt=apparmor=unconfined","--security-opt=systempaths=unconfined","--device=/dev/fuse","--device=/dev/net/tun","--cap-add=NET_ADMIN"],
+rohdaten-02.txt AUSSAGE projekt-sbx-runargs="runArgs":["--cap-add=NET_ADMIN"],
+rohdaten-02.txt AUSSAGE u-boot-version=u-boot version 0.12.0-dev
+rohdaten-03-d1.txt AUSSAGE d1 dnsmasq-benutzer=nobody
+rohdaten-03-d1.txt AUSSAGE d1 dnsmasq-uid=65534
+rohdaten-03-d1.txt AUSSAGE d1 vscode-uid=1000
+rohdaten-03-d1.txt AUSSAGE d1 zaehler-dnsmasq-groesser-null=ja
+rohdaten-03-d1.txt AUSSAGE d1 zaehler-vscode-groesser-null=ja
+rohdaten-04-d2.txt AUSSAGE ist getent api.github.com=adresse
+rohdaten-04-d2.txt AUSSAGE ist getent deb.debian.org=adresse
+rohdaten-04-d2.txt AUSSAGE ist getent example.com=keine
+rohdaten-04-d2.txt AUSSAGE ist https api.github.com=200
+rohdaten-04-d2.txt AUSSAGE ist https deb.debian.org=200
+rohdaten-04-d2.txt AUSSAGE ist https example.com (Name)=000
+rohdaten-04-d2.txt AUSSAGE ist https zur direkt aufgeloesten Adresse von example.com=000
+rohdaten-04-d2.txt AUSSAGE ist lokal api.github.com=antwort
+rohdaten-04-d2.txt AUSSAGE ist lokal codeload.github.com=antwort
+rohdaten-04-d2.txt AUSSAGE ist lokal deb.debian.org=antwort
+rohdaten-04-d2.txt AUSSAGE ist lokal example.com=leer
+rohdaten-04-d2.txt AUSSAGE ist lokal github.com=antwort
+rohdaten-04-d2.txt AUSSAGE ist lokal objects.githubusercontent.com=antwort
+rohdaten-04-d2.txt AUSSAGE ist lokal raw.githubusercontent.com=antwort
+rohdaten-04-d2.txt AUSSAGE ist lokal security.debian.org=antwort
+rohdaten-04-d2.txt AUSSAGE ist upstream-direkt 1.1.1.1 tcp example.com=antwort
+rohdaten-04-d2.txt AUSSAGE ist upstream-direkt 1.1.1.1 udp api.github.com=antwort
+rohdaten-04-d2.txt AUSSAGE ist upstream-direkt 1.1.1.1 udp example.com=antwort
+rohdaten-04-d2.txt AUSSAGE ist upstream-direkt 8.8.8.8 tcp example.com=antwort
+rohdaten-04-d2.txt AUSSAGE ist upstream-direkt 8.8.8.8 udp example.com=antwort
+rohdaten-04-d2.txt AUSSAGE skuid getent api.github.com=adresse
+rohdaten-04-d2.txt AUSSAGE skuid getent deb.debian.org=adresse
+rohdaten-04-d2.txt AUSSAGE skuid getent example.com=keine
+rohdaten-04-d2.txt AUSSAGE skuid https api.github.com=200
+rohdaten-04-d2.txt AUSSAGE skuid https deb.debian.org=200
+rohdaten-04-d2.txt AUSSAGE skuid https example.com (Name)=000
+rohdaten-04-d2.txt AUSSAGE skuid https zur direkt aufgeloesten Adresse von example.com=entfaellt
+rohdaten-04-d2.txt AUSSAGE skuid lokal api.github.com=antwort
+rohdaten-04-d2.txt AUSSAGE skuid lokal codeload.github.com=antwort
+rohdaten-04-d2.txt AUSSAGE skuid lokal deb.debian.org=antwort
+rohdaten-04-d2.txt AUSSAGE skuid lokal example.com=leer
+rohdaten-04-d2.txt AUSSAGE skuid lokal github.com=antwort
+rohdaten-04-d2.txt AUSSAGE skuid lokal objects.githubusercontent.com=antwort
+rohdaten-04-d2.txt AUSSAGE skuid lokal raw.githubusercontent.com=antwort
+rohdaten-04-d2.txt AUSSAGE skuid lokal security.debian.org=antwort
+rohdaten-04-d2.txt AUSSAGE skuid upstream-direkt 1.1.1.1 tcp example.com=keine
+rohdaten-04-d2.txt AUSSAGE skuid upstream-direkt 1.1.1.1 udp api.github.com=keine
+rohdaten-04-d2.txt AUSSAGE skuid upstream-direkt 1.1.1.1 udp example.com=keine
+rohdaten-04-d2.txt AUSSAGE skuid upstream-direkt 8.8.8.8 tcp example.com=keine
+rohdaten-04-d2.txt AUSSAGE skuid upstream-direkt 8.8.8.8 udp example.com=keine
+rohdaten-05-d2-nested.txt AUSSAGE ist nested-build-exit=1
+rohdaten-05-d2-nested.txt AUSSAGE ist nested-dns-verworfen=ja
+rohdaten-05-d2-nested.txt AUSSAGE ist nested-run [--dns 8.8.8.8 (Upstream des Docker-Hosts)] api.github.com=adresse
+rohdaten-05-d2-nested.txt AUSSAGE ist nested-run [--dns 8.8.8.8 (Upstream des Docker-Hosts)] deb.debian.org=adresse
+rohdaten-05-d2-nested.txt AUSSAGE ist nested-run [--dns 8.8.8.8 (Upstream des Docker-Hosts)] example.com=adresse
+rohdaten-05-d2-nested.txt AUSSAGE ist nested-run [--dns 9.9.9.9 (kein Upstream des Docker-Hosts)] api.github.com=keine
+rohdaten-05-d2-nested.txt AUSSAGE ist nested-run [--dns 9.9.9.9 (kein Upstream des Docker-Hosts)] deb.debian.org=keine
+rohdaten-05-d2-nested.txt AUSSAGE ist nested-run [--dns 9.9.9.9 (kein Upstream des Docker-Hosts)] example.com=keine
+rohdaten-05-d2-nested.txt AUSSAGE ist nested-run [--network=host] api.github.com=adresse
+rohdaten-05-d2-nested.txt AUSSAGE ist nested-run [--network=host] deb.debian.org=adresse
+rohdaten-05-d2-nested.txt AUSSAGE ist nested-run [--network=host] example.com=keine
+rohdaten-05-d2-nested.txt AUSSAGE ist nested-run [(Vorgabe: pasta, Standard-DNS)] api.github.com=adresse
+rohdaten-05-d2-nested.txt AUSSAGE ist nested-run [(Vorgabe: pasta, Standard-DNS)] deb.debian.org=adresse
+rohdaten-05-d2-nested.txt AUSSAGE ist nested-run [(Vorgabe: pasta, Standard-DNS)] example.com=adresse
+rohdaten-05-d2-nested.txt AUSSAGE skuid nested-build-exit=0
+rohdaten-05-d2-nested.txt AUSSAGE skuid nested-dns-verworfen=ja
+rohdaten-05-d2-nested.txt AUSSAGE skuid nested-run [--dns 8.8.8.8 (Upstream des Docker-Hosts)] api.github.com=keine
+rohdaten-05-d2-nested.txt AUSSAGE skuid nested-run [--dns 8.8.8.8 (Upstream des Docker-Hosts)] deb.debian.org=keine
+rohdaten-05-d2-nested.txt AUSSAGE skuid nested-run [--dns 8.8.8.8 (Upstream des Docker-Hosts)] example.com=keine
+rohdaten-05-d2-nested.txt AUSSAGE skuid nested-run [--dns 9.9.9.9 (kein Upstream des Docker-Hosts)] api.github.com=keine
+rohdaten-05-d2-nested.txt AUSSAGE skuid nested-run [--dns 9.9.9.9 (kein Upstream des Docker-Hosts)] deb.debian.org=keine
+rohdaten-05-d2-nested.txt AUSSAGE skuid nested-run [--dns 9.9.9.9 (kein Upstream des Docker-Hosts)] example.com=keine
+rohdaten-05-d2-nested.txt AUSSAGE skuid nested-run [--network=host] api.github.com=adresse
+rohdaten-05-d2-nested.txt AUSSAGE skuid nested-run [--network=host] deb.debian.org=adresse
+rohdaten-05-d2-nested.txt AUSSAGE skuid nested-run [--network=host] example.com=keine
+rohdaten-05-d2-nested.txt AUSSAGE skuid nested-run [(Vorgabe: pasta, Standard-DNS)] api.github.com=adresse
+rohdaten-05-d2-nested.txt AUSSAGE skuid nested-run [(Vorgabe: pasta, Standard-DNS)] deb.debian.org=adresse
+rohdaten-05-d2-nested.txt AUSSAGE skuid nested-run [(Vorgabe: pasta, Standard-DNS)] example.com=keine
+rohdaten-06-d3.txt AUSSAGE ist d3 icmp-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE ist d3 icmp-R=gesperrt
+rohdaten-06-d3.txt AUSSAGE ist d3 icmp-upstream=gesperrt
+rohdaten-06-d3.txt AUSSAGE ist d3 ipv6-extern-udp53=gesperrt
+rohdaten-06-d3.txt AUSSAGE ist d3 sudo-root-udp53-upstream=offen
+rohdaten-06-d3.txt AUSSAGE ist d3 sudo-setpriv-nobody-udp53-upstream=offen
+rohdaten-06-d3.txt AUSSAGE ist d3 tcp443-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE ist d3 tcp443-upstream=gesperrt
+rohdaten-06-d3.txt AUSSAGE ist d3 tcp53-anderer-resolver-R=gesperrt
+rohdaten-06-d3.txt AUSSAGE ist d3 tcp53-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE ist d3 tcp53-upstream=offen
+rohdaten-06-d3.txt AUSSAGE ist d3 tcp853-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE ist d3 tcp853-upstream=gesperrt
+rohdaten-06-d3.txt AUSSAGE ist d3 udp53-127.0.0.11=gesperrt
+rohdaten-06-d3.txt AUSSAGE ist d3 udp5353-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE ist d3 udp5353-upstream=gesperrt
+rohdaten-06-d3.txt AUSSAGE ist d3 udp53-anderer-resolver-R=gesperrt
+rohdaten-06-d3.txt AUSSAGE ist d3 udp53-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE ist d3 udp53-upstream=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 icmp-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 icmp-R=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 icmp-upstream=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 ipv6-extern-udp53=gesperrt
+rohdaten-06-d3.txt AUSSAGE ohne d3 sudo-root-udp53-upstream=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 sudo-setpriv-nobody-udp53-upstream=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 tcp443-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 tcp443-upstream=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 tcp53-anderer-resolver-R=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 tcp53-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 tcp53-upstream=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 tcp853-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 tcp853-upstream=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 udp53-127.0.0.11=gesperrt
+rohdaten-06-d3.txt AUSSAGE ohne d3 udp5353-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 udp5353-upstream=gesperrt
+rohdaten-06-d3.txt AUSSAGE ohne d3 udp53-anderer-resolver-R=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 udp53-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE ohne d3 udp53-upstream=offen
+rohdaten-06-d3.txt AUSSAGE skuid d3 icmp-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE skuid d3 icmp-R=gesperrt
+rohdaten-06-d3.txt AUSSAGE skuid d3 icmp-upstream=gesperrt
+rohdaten-06-d3.txt AUSSAGE skuid d3 ipv6-extern-udp53=gesperrt
+rohdaten-06-d3.txt AUSSAGE skuid d3 sudo-root-udp53-upstream=gesperrt
+rohdaten-06-d3.txt AUSSAGE skuid d3 sudo-setpriv-nobody-udp53-upstream=offen
+rohdaten-06-d3.txt AUSSAGE skuid d3 tcp443-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE skuid d3 tcp443-upstream=gesperrt
+rohdaten-06-d3.txt AUSSAGE skuid d3 tcp53-anderer-resolver-R=gesperrt
+rohdaten-06-d3.txt AUSSAGE skuid d3 tcp53-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE skuid d3 tcp53-upstream=gesperrt
+rohdaten-06-d3.txt AUSSAGE skuid d3 tcp853-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE skuid d3 tcp853-upstream=gesperrt
+rohdaten-06-d3.txt AUSSAGE skuid d3 udp53-127.0.0.11=gesperrt
+rohdaten-06-d3.txt AUSSAGE skuid d3 udp5353-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE skuid d3 udp5353-upstream=gesperrt
+rohdaten-06-d3.txt AUSSAGE skuid d3 udp53-anderer-resolver-R=gesperrt
+rohdaten-06-d3.txt AUSSAGE skuid d3 udp53-erlaubte-adresse-R=offen
+rohdaten-06-d3.txt AUSSAGE skuid d3 udp53-upstream=gesperrt
+rohdaten-07-d3-netz.txt AUSSAGE ist d3-netz docker-resolver-127.0.0.11 api.github.com=keine
+rohdaten-07-d3-netz.txt AUSSAGE ist d3-netz docker-resolver-127.0.0.11 example.com=keine
+rohdaten-07-d3-netz.txt AUSSAGE ist d3-netz getent example.com=keine
+rohdaten-07-d3-netz.txt AUSSAGE ist d3-netz ipv6-icmp-R6=gesperrt
+rohdaten-07-d3-netz.txt AUSSAGE ist d3-netz ipv6-tcp53-R6=gesperrt
+rohdaten-07-d3-netz.txt AUSSAGE ist d3-netz ipv6-tcp853-R6=gesperrt
+rohdaten-07-d3-netz.txt AUSSAGE ist d3-netz ipv6-udp53-R6=gesperrt
+rohdaten-07-d3-netz.txt AUSSAGE ist d3-netz lokaler-dnsmasq api.github.com=keine
+rohdaten-07-d3-netz.txt AUSSAGE ohne d3-netz docker-resolver-127.0.0.11 api.github.com=antwort
+rohdaten-07-d3-netz.txt AUSSAGE ohne d3-netz docker-resolver-127.0.0.11 example.com=antwort
+rohdaten-07-d3-netz.txt AUSSAGE ohne d3-netz getent example.com=adresse
+rohdaten-07-d3-netz.txt AUSSAGE ohne d3-netz ipv6-icmp-R6=offen
+rohdaten-07-d3-netz.txt AUSSAGE ohne d3-netz ipv6-tcp53-R6=offen
+rohdaten-07-d3-netz.txt AUSSAGE ohne d3-netz ipv6-tcp853-R6=gesperrt
+rohdaten-07-d3-netz.txt AUSSAGE ohne d3-netz ipv6-udp53-R6=offen
+rohdaten-07-d3-netz.txt AUSSAGE ohne d3-netz lokaler-dnsmasq api.github.com=keine
+rohdaten-07-d3-netz.txt AUSSAGE skuid d3-netz docker-resolver-127.0.0.11 api.github.com=keine
+rohdaten-07-d3-netz.txt AUSSAGE skuid d3-netz docker-resolver-127.0.0.11 example.com=keine
+rohdaten-07-d3-netz.txt AUSSAGE skuid d3-netz getent example.com=keine
+rohdaten-07-d3-netz.txt AUSSAGE skuid d3-netz ipv6-icmp-R6=gesperrt
+rohdaten-07-d3-netz.txt AUSSAGE skuid d3-netz ipv6-tcp53-R6=gesperrt
+rohdaten-07-d3-netz.txt AUSSAGE skuid d3-netz ipv6-tcp853-R6=gesperrt
+rohdaten-07-d3-netz.txt AUSSAGE skuid d3-netz ipv6-udp53-R6=gesperrt
+rohdaten-07-d3-netz.txt AUSSAGE skuid d3-netz lokaler-dnsmasq api.github.com=keine
+rohdaten-08-d5.txt AUSSAGE ist d5 am-upstream-angekommen-kanal1-api.github.com=ja
+rohdaten-08-d5.txt AUSSAGE ist d5 am-upstream-angekommen-kanal1-example.com=nein
+rohdaten-08-d5.txt AUSSAGE ist d5 direkt-an-upstream=antwort
+rohdaten-08-d5.txt AUSSAGE ist d5 untername-erlaubter-name=antwort
+rohdaten-08-d5.txt AUSSAGE ist d5 untername-unlisteter-name=keine
+rohdaten-08-d5.txt AUSSAGE skuid d5 am-upstream-angekommen-kanal1-api.github.com=ja
+rohdaten-08-d5.txt AUSSAGE skuid d5 am-upstream-angekommen-kanal1-example.com=nein
+rohdaten-08-d5.txt AUSSAGE skuid d5 direkt-an-upstream=keine
+rohdaten-08-d5.txt AUSSAGE skuid d5 untername-erlaubter-name=antwort
+rohdaten-08-d5.txt AUSSAGE skuid d5 untername-unlisteter-name=keine
+rohdaten-09-d4.txt AUSSAGE ist d4 50-laeufe-auffaellig=0 meldungen=0
+rohdaten-09-d4.txt AUSSAGE ist d4 erster-lauf dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=antwort resolv=1 status=result=ok
+rohdaten-09-d4.txt AUSSAGE ist d4 nach-neustart dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=antwort resolv=1 status=result=ok
+rohdaten-09-d4.txt AUSSAGE ist d4 neuaufbau dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=antwort resolv=1 status=result=ok
+rohdaten-09-d4.txt AUSSAGE ist d4 zweiter-lauf dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=antwort resolv=1 status=result=ok
+rohdaten-09-d4.txt AUSSAGE skuid d4 50-laeufe-auffaellig=0 meldungen=0
+rohdaten-09-d4.txt AUSSAGE skuid d4 erster-lauf dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=4 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=keine resolv=1 status=result=ok
+rohdaten-09-d4.txt AUSSAGE skuid d4 nach-neustart dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=4 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=keine resolv=1 status=result=ok
+rohdaten-09-d4.txt AUSSAGE skuid d4 neuaufbau dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=4 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=keine resolv=1 status=result=ok
+rohdaten-09-d4.txt AUSSAGE skuid d4 zweiter-lauf dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=4 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=keine resolv=1 status=result=ok
+rohdaten-11.txt AUSSAGE objekte-mit-praefix-nachher=0

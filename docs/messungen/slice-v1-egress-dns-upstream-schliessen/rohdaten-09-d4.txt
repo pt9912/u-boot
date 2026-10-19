@@ -1,0 +1,74 @@
+
+######## D4, Fall ist, 2026-10-19T11:47:50.738Z
+-- erster Lauf (postStartCommand)
+postStart (ist) exit=0
+[erster-lauf] dnsmasq-prozesse=1 uid=65534, pid-lebt=ja accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal-api.github.com='status: NOERROR' direkt-example.com=antwort resolv.conf=127.0.0.1:1 status=result=ok
+AUSSAGE ist d4 erster-lauf dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=antwort resolv=1 status=result=ok
+-- zweiter Lauf im selben Container
+postStart (ist) exit=0
+[zweiter-lauf] dnsmasq-prozesse=1 uid=65534, pid-lebt=ja accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal-api.github.com='status: NOERROR' direkt-example.com=antwort resolv.conf=127.0.0.1:1 status=result=ok
+AUSSAGE ist d4 zweiter-lauf dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=antwort resolv=1 status=result=ok
+-- docker restart, danach der Lauf des postStartCommand
+nach dem Neustart, vor dem Lauf: resolv.conf=0 (0 = von Docker neu geschrieben), dnsmasq-prozesse=0, Original-Datei vorhanden=ja
+postStart (ist) exit=0
+[nach-neustart] dnsmasq-prozesse=1 uid=65534, pid-lebt=ja accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal-api.github.com='status: NOERROR' direkt-example.com=antwort resolv.conf=127.0.0.1:1 status=result=ok
+AUSSAGE ist d4 nach-neustart dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=antwort resolv=1 status=result=ok
+-- Neuaufbau: neuer Container aus demselben Image
+postStart (ist) exit=0
+[neuaufbau] dnsmasq-prozesse=1 uid=65534, pid-lebt=ja accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal-api.github.com='status: NOERROR' direkt-example.com=antwort resolv.conf=127.0.0.1:1 status=result=ok
+AUSSAGE ist d4 neuaufbau dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=antwort resolv=1 status=result=ok
+-- 50 erneute Laeufe hintereinander (Rennen um den Port des dnsmasq); je Lauf Zustand pruefen, Auffaelliges wird ausgegeben
+[lauf-1] dnsmasq-prozesse=1 uid=65534, pid-lebt=ja accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal-api.github.com='status: NOERROR' direkt-example.com=antwort resolv.conf=127.0.0.1:1 status=result=ok
+[lauf-50] dnsmasq-prozesse=1 uid=65534, pid-lebt=ja accept-regeln=7 skuid-regeln=0 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal-api.github.com='status: NOERROR' direkt-example.com=antwort resolv.conf=127.0.0.1:1 status=result=ok
+Zusammenfassung: 50 Laeufe, 0 mit auffaelligem Zustand danach, 0 mit Fehlermeldung oder Exit ungleich 0
+AUSSAGE ist d4 50-laeufe-auffaellig=0 meldungen=0
+-- Regeln nach dem 50. Lauf
+    table ip u_boot_egress {
+    chain output {
+    type filter hook output priority filter; policy drop;
+    oifname "lo" accept
+    ct state established,related accept
+    ip daddr @allowed accept
+    ip daddr 1.1.1.1 udp dport 53 accept
+    ip daddr 1.1.1.1 tcp dport 53 accept
+    ip daddr 8.8.8.8 udp dport 53 accept
+    ip daddr 8.8.8.8 tcp dport 53 accept
+    }
+    }
+
+######## D4, Fall skuid, 2026-10-19T11:48:06.697Z
+-- erster Lauf (postStartCommand)
+postStart (skuid) exit=0
+[erster-lauf] dnsmasq-prozesse=1 uid=65534, pid-lebt=ja accept-regeln=7 skuid-regeln=4 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal-api.github.com='status: NOERROR' direkt-example.com=keine resolv.conf=127.0.0.1:1 status=result=ok
+AUSSAGE skuid d4 erster-lauf dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=4 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=keine resolv=1 status=result=ok
+-- zweiter Lauf im selben Container
+postStart (skuid) exit=0
+[zweiter-lauf] dnsmasq-prozesse=1 uid=65534, pid-lebt=ja accept-regeln=7 skuid-regeln=4 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal-api.github.com='status: NOERROR' direkt-example.com=keine resolv.conf=127.0.0.1:1 status=result=ok
+AUSSAGE skuid d4 zweiter-lauf dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=4 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=keine resolv=1 status=result=ok
+-- docker restart, danach der Lauf des postStartCommand
+nach dem Neustart, vor dem Lauf: resolv.conf=0 (0 = von Docker neu geschrieben), dnsmasq-prozesse=0, Original-Datei vorhanden=ja
+postStart (skuid) exit=0
+[nach-neustart] dnsmasq-prozesse=1 uid=65534, pid-lebt=ja accept-regeln=7 skuid-regeln=4 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal-api.github.com='status: NOERROR' direkt-example.com=keine resolv.conf=127.0.0.1:1 status=result=ok
+AUSSAGE skuid d4 nach-neustart dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=4 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=keine resolv=1 status=result=ok
+-- Neuaufbau: neuer Container aus demselben Image
+postStart (skuid) exit=0
+[neuaufbau] dnsmasq-prozesse=1 uid=65534, pid-lebt=ja accept-regeln=7 skuid-regeln=4 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal-api.github.com='status: NOERROR' direkt-example.com=keine resolv.conf=127.0.0.1:1 status=result=ok
+AUSSAGE skuid d4 neuaufbau dnsmasq-prozesse=1 uid=65534, accept-regeln=7 skuid-regeln=4 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal='status: NOERROR' direkt=keine resolv=1 status=result=ok
+-- 50 erneute Laeufe hintereinander (Rennen um den Port des dnsmasq); je Lauf Zustand pruefen, Auffaelliges wird ausgegeben
+[lauf-1] dnsmasq-prozesse=1 uid=65534, pid-lebt=ja accept-regeln=7 skuid-regeln=4 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal-api.github.com='status: NOERROR' direkt-example.com=keine resolv.conf=127.0.0.1:1 status=result=ok
+[lauf-50] dnsmasq-prozesse=1 uid=65534, pid-lebt=ja accept-regeln=7 skuid-regeln=4 tabellen='table ip u_boot_egress table ip6 u_boot_egress6' lokal-api.github.com='status: NOERROR' direkt-example.com=keine resolv.conf=127.0.0.1:1 status=result=ok
+Zusammenfassung: 50 Laeufe, 0 mit auffaelligem Zustand danach, 0 mit Fehlermeldung oder Exit ungleich 0
+AUSSAGE skuid d4 50-laeufe-auffaellig=0 meldungen=0
+-- Regeln nach dem 50. Lauf
+    table ip u_boot_egress {
+    chain output {
+    type filter hook output priority filter; policy drop;
+    oifname "lo" accept
+    ct state established,related accept
+    ip daddr @allowed accept
+    meta skuid 65534 ip daddr 1.1.1.1 udp dport 53 accept
+    meta skuid 65534 ip daddr 1.1.1.1 tcp dport 53 accept
+    meta skuid 65534 ip daddr 8.8.8.8 udp dport 53 accept
+    meta skuid 65534 ip daddr 8.8.8.8 tcp dport 53 accept
+    }
+    }

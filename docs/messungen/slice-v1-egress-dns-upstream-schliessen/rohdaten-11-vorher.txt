@@ -1,0 +1,7 @@
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=3 images=340 volumes=219 netze=3
+-- Objekte mit dem Praefix u-boot-messung-dns
+image u-boot-messung-dns-img-tool:latest
+image u-boot-messung-dns-img-pod:latest
+image u-boot-messung-dns-img-sbx:latest
+image u-boot-messung-dns-ub:latest

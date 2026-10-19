@@ -1,0 +1,30 @@
+== Aufraeumen, 2026-10-19T11:49:19.277Z
+-- vorher (rohdaten-11-vorher.txt)
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=3 images=340 volumes=219 netze=3
+-- Objekte mit dem Praefix u-boot-messung-dns
+image u-boot-messung-dns-img-tool:latest
+image u-boot-messung-dns-img-pod:latest
+image u-boot-messung-dns-img-sbx:latest
+image u-boot-messung-dns-ub:latest
+-- vor dem Aufraeumen
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=3 images=340 volumes=219 netze=3
+-- Objekte mit dem Praefix u-boot-messung-dns
+image u-boot-messung-dns-img-tool:latest
+image u-boot-messung-dns-img-pod:latest
+image u-boot-messung-dns-img-sbx:latest
+image u-boot-messung-dns-ub:latest
+-- Entfernen
+entferne image u-boot-messung-dns-img-tool:latest
+entferne image u-boot-messung-dns-img-pod:latest
+entferne image u-boot-messung-dns-img-sbx:latest
+entferne image u-boot-messung-dns-ub:latest
+-- nachher (rohdaten-11-nachher.txt)
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=4 images=336 volumes=219 netze=3
+-- Objekte mit dem Praefix u-boot-messung-dns
+AUSSAGE objekte-mit-praefix-nachher=0
+
+vorher:  container=3 images=340 volumes=219 netze=3
+nachher: container=4 images=336 volumes=219 netze=3

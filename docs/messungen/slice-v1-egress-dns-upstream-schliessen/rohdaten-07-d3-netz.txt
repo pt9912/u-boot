@@ -1,0 +1,64 @@
+netz angelegt: exit=0
+antwort-container bereit: fd00:6d73:6e00:7::2 172.17.1.2
+Antwort-Container (IPv6) R6=fd00:6d73:6e00:7::2
+
+######## D3 Netz, Fall ohne, 2026-10-19T11:46:51.722Z
+(kein Startscript: Kontrolle)
+resolv.conf-Original: nameserver 127.0.0.11 # Overrides: [nameservers] 
+IPv6-Adressen (ausser ::1): 2; eigene Adresse: fd00:6d73:6e00:7::3/64
+AUSSAGE ohne d3-netz ipv6-udp53-R6=offen
+AUSSAGE ohne d3-netz ipv6-tcp53-R6=offen
+AUSSAGE ohne d3-netz ipv6-tcp853-R6=gesperrt
+AUSSAGE ohne d3-netz ipv6-icmp-R6=offen
+--- Docker-eigener Resolver 127.0.0.11 (Name ausserhalb der Liste: example.com; Name der Liste: api.github.com)
+    @127.0.0.11 example.com: 172.66.147.243
+AUSSAGE ohne d3-netz docker-resolver-127.0.0.11 example.com=antwort
+    @127.0.0.11 api.github.com: 140.82.121.5
+AUSSAGE ohne d3-netz docker-resolver-127.0.0.11 api.github.com=antwort
+    getent example.com (resolv.conf): 2606:4700:10::ac42:93f3
+AUSSAGE ohne d3-netz getent example.com=adresse
+    lokaler dnsmasq api.github.com: keine Antwort
+AUSSAGE ohne d3-netz lokaler-dnsmasq api.github.com=keine
+--- Regeln (sudo nur zum Lesen)
+
+######## D3 Netz, Fall ist, 2026-10-19T11:46:52.538Z
+postStart (ist) exit=0
+resolv.conf-Original: nameserver 127.0.0.11 # Overrides: [nameservers] 
+IPv6-Adressen (ausser ::1): 2; eigene Adresse: fd00:6d73:6e00:7::3/64
+AUSSAGE ist d3-netz ipv6-udp53-R6=gesperrt
+AUSSAGE ist d3-netz ipv6-tcp53-R6=gesperrt
+AUSSAGE ist d3-netz ipv6-tcp853-R6=gesperrt
+AUSSAGE ist d3-netz ipv6-icmp-R6=gesperrt
+--- Docker-eigener Resolver 127.0.0.11 (Name ausserhalb der Liste: example.com; Name der Liste: api.github.com)
+    @127.0.0.11 example.com: keine Antwort
+AUSSAGE ist d3-netz docker-resolver-127.0.0.11 example.com=keine
+    @127.0.0.11 api.github.com: keine Antwort
+AUSSAGE ist d3-netz docker-resolver-127.0.0.11 api.github.com=keine
+    getent example.com (resolv.conf): keine Adresse
+AUSSAGE ist d3-netz getent example.com=keine
+    lokaler dnsmasq api.github.com: keine Antwort
+AUSSAGE ist d3-netz lokaler-dnsmasq api.github.com=keine
+--- Regeln (sudo nur zum Lesen)
+    table ip u_boot_egress
+    table ip6 u_boot_egress6
+
+######## D3 Netz, Fall skuid, 2026-10-19T11:47:01.501Z
+postStart (skuid) exit=0
+resolv.conf-Original: nameserver 127.0.0.11 # Overrides: [nameservers] 
+IPv6-Adressen (ausser ::1): 2; eigene Adresse: fd00:6d73:6e00:7::3/64
+AUSSAGE skuid d3-netz ipv6-udp53-R6=gesperrt
+AUSSAGE skuid d3-netz ipv6-tcp53-R6=gesperrt
+AUSSAGE skuid d3-netz ipv6-tcp853-R6=gesperrt
+AUSSAGE skuid d3-netz ipv6-icmp-R6=gesperrt
+--- Docker-eigener Resolver 127.0.0.11 (Name ausserhalb der Liste: example.com; Name der Liste: api.github.com)
+    @127.0.0.11 example.com: keine Antwort
+AUSSAGE skuid d3-netz docker-resolver-127.0.0.11 example.com=keine
+    @127.0.0.11 api.github.com: keine Antwort
+AUSSAGE skuid d3-netz docker-resolver-127.0.0.11 api.github.com=keine
+    getent example.com (resolv.conf): keine Adresse
+AUSSAGE skuid d3-netz getent example.com=keine
+    lokaler dnsmasq api.github.com: keine Antwort
+AUSSAGE skuid d3-netz lokaler-dnsmasq api.github.com=keine
+--- Regeln (sudo nur zum Lesen)
+    table ip u_boot_egress
+    table ip6 u_boot_egress6

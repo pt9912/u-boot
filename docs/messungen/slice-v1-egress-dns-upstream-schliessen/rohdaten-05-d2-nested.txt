@@ -1,0 +1,159 @@
+runArgs der erzeugten devcontainer.json (pod): --cap-add=SYS_ADMIN --security-opt=seccomp=unconfined --security-opt=apparmor=unconfined --security-opt=systempaths=unconfined --device=/dev/fuse --device=/dev/net/tun --cap-add=NET_ADMIN
+
+######## D2 nested, Modus ist, 2026-10-19T11:41:15.923Z
+id: uid=1000(vscode) gid=1000(vscode) groups=1000(vscode)
+-- Startscript des Egress (ist, mit Zaehlern)
+egress-init exit=0
+-- weitere Zaehler (Messinstrument, nicht terminierend): Benutzer-ID 1000 (vscode), allein und mit Ziel 8.8.8.8 oder 8.8.4.4, an Port 53
+resolv.conf des Sandbox-Containers: nameserver 127.0.0.1 
+-- sandbox-init
+sandbox-init exit=0
+-- podman build (Dockerfile: Schritt 1 resolv.conf anzeigen, Schritt 2 getent deb.debian.org, Schritt 3 ! getent example.com)
+time="2026-10-19T11:41:16Z" level=warning msg="\"/\" is not a shared mount, this could cause issues or missing mounts with rootless containers"
+STEP 1/4: FROM docker.io/library/debian:stable-slim
+Trying to pull docker.io/library/debian:stable-slim...
+Getting image source signatures
+Copying blob sha256:90ecb15ebb389405c9fa3c6d01d1f22d7be80cbb79a2691150993046f3a23dc7
+Copying config sha256:787cd32c15da653c63f8689246f8199870afdbe8d822b7e560d651e20d6def02
+Writing manifest to image destination
+STEP 2/4: RUN cat /etc/resolv.conf
+nameserver 169.254.1.1
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+--> 3b3771081135
+STEP 3/4: RUN getent hosts deb.debian.org > /dev/null && echo ALLOWED_RESOLVES
+ALLOWED_RESOLVES
+--> 3e34365dbe45
+STEP 4/4: RUN ! getent hosts example.com && echo UNLISTED_BLOCKED
+2606:4700:10::ac42:93f3 example.com
+2606:4700:10::6814:179a example.com
+Error: building at STEP "RUN ! getent hosts example.com && echo UNLISTED_BLOCKED": while running runtime: exit status 1
+podman build exit=1 dauer=7s
+AUSSAGE ist nested-build-exit=1
+-- Zaehler nach dem Bau (Versuche anderer Benutzer als nobody: Pakete an Port 53, nicht ueber lo; 'drop' = bis zum Ende nicht angenommen)
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 1000 ip daddr 8.8.4.4 counter packets 0 bytes 0
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 1000 ip daddr 8.8.8.8 counter packets 1 bytes 57
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 1000 counter packets 1 bytes 57
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 65534 counter packets 14 bytes 1090
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid != 65534 counter packets 1 bytes 57
+    meta l4proto { tcp, udp } th dport 53 counter packets 0 bytes 0 drop
+-- podman run (Vorgabe: pasta, Standard-DNS)
+resolv.conf: nameserver 169.254.1.1 nameserver 8.8.8.8 nameserver 8.8.4.4 
+example.com: 2606:4700:10::6814:179a (21 ms)
+deb.debian.org: 2a04:4e42:600::644 (3 ms)
+api.github.com: 140.82.121.5 (21 ms)
+AUSSAGE ist nested-run [(Vorgabe: pasta, Standard-DNS)] example.com=adresse
+AUSSAGE ist nested-run [(Vorgabe: pasta, Standard-DNS)] deb.debian.org=adresse
+AUSSAGE ist nested-run [(Vorgabe: pasta, Standard-DNS)] api.github.com=adresse
+-- podman run --dns 8.8.8.8 (Upstream des Docker-Hosts)
+resolv.conf: nameserver 8.8.8.8 
+example.com: 2606:4700:10::ac42:93f3 (22 ms)
+deb.debian.org: 2a04:4e42:600::644 (17 ms)
+api.github.com: 140.82.121.5 (31 ms)
+AUSSAGE ist nested-run [--dns 8.8.8.8 (Upstream des Docker-Hosts)] example.com=adresse
+AUSSAGE ist nested-run [--dns 8.8.8.8 (Upstream des Docker-Hosts)] deb.debian.org=adresse
+AUSSAGE ist nested-run [--dns 8.8.8.8 (Upstream des Docker-Hosts)] api.github.com=adresse
+-- podman run --dns 9.9.9.9 (kein Upstream des Docker-Hosts)
+resolv.conf: nameserver 9.9.9.9 
+example.com: keine Adresse (20022 ms)
+deb.debian.org: keine Adresse (20022 ms)
+api.github.com: keine Adresse (20022 ms)
+AUSSAGE ist nested-run [--dns 9.9.9.9 (kein Upstream des Docker-Hosts)] example.com=keine
+AUSSAGE ist nested-run [--dns 9.9.9.9 (kein Upstream des Docker-Hosts)] deb.debian.org=keine
+AUSSAGE ist nested-run [--dns 9.9.9.9 (kein Upstream des Docker-Hosts)] api.github.com=keine
+-- podman run --network=host
+resolv.conf: nameserver 127.0.0.1 
+example.com: keine Adresse (5 ms)
+deb.debian.org: 2a04:4e42:600::644 (11 ms)
+api.github.com: 140.82.121.5 (19 ms)
+AUSSAGE ist nested-run [--network=host] example.com=keine
+AUSSAGE ist nested-run [--network=host] deb.debian.org=adresse
+AUSSAGE ist nested-run [--network=host] api.github.com=adresse
+-- Zaehler nach den Einzelproben
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 1000 ip daddr 8.8.4.4 counter packets 0 bytes 0
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 1000 ip daddr 8.8.8.8 counter packets 6 bytes 351
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 1000 counter packets 18 bytes 1059
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 65534 counter packets 21 bytes 1587
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid != 65534 counter packets 18 bytes 1059
+    meta l4proto { tcp, udp } th dport 53 counter packets 12 bytes 708 drop
+AUSSAGE ist nested-dns-verworfen=ja
+
+######## D2 nested, Modus skuid, 2026-10-19T11:42:26.758Z
+id: uid=1000(vscode) gid=1000(vscode) groups=1000(vscode)
+-- Startscript des Egress (skuid, mit Zaehlern)
+egress-init exit=0
+-- weitere Zaehler (Messinstrument, nicht terminierend): Benutzer-ID 1000 (vscode), allein und mit Ziel 8.8.8.8 oder 8.8.4.4, an Port 53
+resolv.conf des Sandbox-Containers: nameserver 127.0.0.1 
+-- sandbox-init
+sandbox-init exit=0
+-- podman build (Dockerfile: Schritt 1 resolv.conf anzeigen, Schritt 2 getent deb.debian.org, Schritt 3 ! getent example.com)
+time="2026-10-19T11:42:27Z" level=warning msg="\"/\" is not a shared mount, this could cause issues or missing mounts with rootless containers"
+STEP 1/4: FROM docker.io/library/debian:stable-slim
+Trying to pull docker.io/library/debian:stable-slim...
+Getting image source signatures
+Copying blob sha256:90ecb15ebb389405c9fa3c6d01d1f22d7be80cbb79a2691150993046f3a23dc7
+Copying config sha256:787cd32c15da653c63f8689246f8199870afdbe8d822b7e560d651e20d6def02
+Writing manifest to image destination
+STEP 2/4: RUN cat /etc/resolv.conf
+nameserver 169.254.1.1
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+--> be2a097dbf1e
+STEP 3/4: RUN getent hosts deb.debian.org > /dev/null && echo ALLOWED_RESOLVES
+ALLOWED_RESOLVES
+--> 71a927a50800
+STEP 4/4: RUN ! getent hosts example.com && echo UNLISTED_BLOCKED
+UNLISTED_BLOCKED
+COMMIT probe-egress
+--> f819de3252a8
+Successfully tagged localhost/probe-egress:latest
+<id>
+podman build exit=0 dauer=43s
+AUSSAGE skuid nested-build-exit=0
+-- Zaehler nach dem Bau (Versuche anderer Benutzer als nobody: Pakete an Port 53, nicht ueber lo; 'drop' = bis zum Ende nicht angenommen)
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 1000 ip daddr 8.8.4.4 counter packets 4 bytes 228
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 1000 ip daddr 8.8.8.8 counter packets 4 bytes 228
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 1000 counter packets 8 bytes 456
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 65534 counter packets 14 bytes 1090
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid != 65534 counter packets 8 bytes 456
+    meta l4proto { tcp, udp } th dport 53 counter packets 8 bytes 456 drop
+-- podman run (Vorgabe: pasta, Standard-DNS)
+resolv.conf: nameserver 169.254.1.1 nameserver 8.8.8.8 nameserver 8.8.4.4 
+example.com: keine Adresse (36040 ms)
+deb.debian.org: 2a04:4e42:200::644 (11 ms)
+api.github.com: 140.82.121.5 (28 ms)
+AUSSAGE skuid nested-run [(Vorgabe: pasta, Standard-DNS)] example.com=keine
+AUSSAGE skuid nested-run [(Vorgabe: pasta, Standard-DNS)] deb.debian.org=adresse
+AUSSAGE skuid nested-run [(Vorgabe: pasta, Standard-DNS)] api.github.com=adresse
+-- podman run --dns 8.8.8.8 (Upstream des Docker-Hosts)
+resolv.conf: nameserver 8.8.8.8 
+example.com: keine Adresse (20030 ms)
+deb.debian.org: keine Adresse (20021 ms)
+api.github.com: keine Adresse (20022 ms)
+AUSSAGE skuid nested-run [--dns 8.8.8.8 (Upstream des Docker-Hosts)] example.com=keine
+AUSSAGE skuid nested-run [--dns 8.8.8.8 (Upstream des Docker-Hosts)] deb.debian.org=keine
+AUSSAGE skuid nested-run [--dns 8.8.8.8 (Upstream des Docker-Hosts)] api.github.com=keine
+-- podman run --dns 9.9.9.9 (kein Upstream des Docker-Hosts)
+resolv.conf: nameserver 9.9.9.9 
+example.com: keine Adresse (20023 ms)
+deb.debian.org: keine Adresse (20021 ms)
+api.github.com: keine Adresse (20022 ms)
+AUSSAGE skuid nested-run [--dns 9.9.9.9 (kein Upstream des Docker-Hosts)] example.com=keine
+AUSSAGE skuid nested-run [--dns 9.9.9.9 (kein Upstream des Docker-Hosts)] deb.debian.org=keine
+AUSSAGE skuid nested-run [--dns 9.9.9.9 (kein Upstream des Docker-Hosts)] api.github.com=keine
+-- podman run --network=host
+resolv.conf: nameserver 127.0.0.1 
+example.com: keine Adresse (3 ms)
+deb.debian.org: 2a04:4e42:600::644 (17 ms)
+api.github.com: 140.82.121.6 (17 ms)
+AUSSAGE skuid nested-run [--network=host] example.com=keine
+AUSSAGE skuid nested-run [--network=host] deb.debian.org=adresse
+AUSSAGE skuid nested-run [--network=host] api.github.com=adresse
+-- Zaehler nach den Einzelproben
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 1000 ip daddr 8.8.4.4 counter packets 8 bytes 456
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 1000 ip daddr 8.8.8.8 counter packets 20 bytes 1164
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 1000 counter packets 40 bytes 2328
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 65534 counter packets 23 bytes 1729
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid != 65534 counter packets 40 bytes 2328
+    meta l4proto { tcp, udp } th dport 53 counter packets 40 bytes 2328 drop
+AUSSAGE skuid nested-dns-verworfen=ja

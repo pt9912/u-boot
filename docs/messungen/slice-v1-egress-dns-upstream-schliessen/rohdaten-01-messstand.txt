@@ -1,0 +1,16 @@
+== Messstand, 2026-10-19T11:40:15.319Z
+host: Linux 6.8.0-139-generic x86_64
+docker-client: 29.9.1
+docker-server: 29.9.1 (linux/amd64)
+engine-os: Ubuntu 24.04.5 LTS; cgroup 2; cpus 20; storage overlay2
+kernel.apparmor_restrict_unprivileged_userns=0
+-- Resolver des Hosts (Anzahl der nameserver-Zeilen; Adressen siehe Upstream-Liste im Container)
+nameserver-zeilen=1
+-- Bestand vorher
+Namen fremder Objekte nicht ausgewiesen, nur Anzahl
+container=3 images=340 volumes=219 netze=3
+-- Objekte mit dem Praefix u-boot-messung-dns
+image u-boot-messung-dns-img-tool:latest
+image u-boot-messung-dns-img-pod:latest
+image u-boot-messung-dns-img-sbx:latest
+image u-boot-messung-dns-ub:latest

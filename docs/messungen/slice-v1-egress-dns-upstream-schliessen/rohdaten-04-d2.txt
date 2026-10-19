@@ -1,0 +1,117 @@
+
+######## D2, Modus ist, 2026-10-19T11:40:46.179Z
+postStart (ist, zaehler) exit=0
+id: uid=1000(vscode) gid=1000(vscode) groups=1000(vscode)
+Upstream-Liste (resolv.conf.u-boot-orig): 1.1.1.1
+8.8.8.8
+resolv.conf: nameserver 127.0.0.1 
+Liste der erlaubten Namen: api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+--- 1. direkt an jeden Upstream (UDP und TCP), Name ausserhalb der Liste (example.com)
+    @1.1.1.1 udp example.com: antwort 104.20.23.154 172.66.147.243 
+AUSSAGE ist upstream-direkt 1.1.1.1 udp example.com=antwort
+    @1.1.1.1 tcp example.com: antwort 104.20.23.154 172.66.147.243 
+AUSSAGE ist upstream-direkt 1.1.1.1 tcp example.com=antwort
+    @8.8.8.8 udp example.com: antwort 104.20.23.154 172.66.147.243 
+AUSSAGE ist upstream-direkt 8.8.8.8 udp example.com=antwort
+    @8.8.8.8 tcp example.com: antwort 104.20.23.154 172.66.147.243 
+AUSSAGE ist upstream-direkt 8.8.8.8 tcp example.com=antwort
+--- 1b. direkt an den ersten Upstream, Name der Liste (api.github.com)
+    @1.1.1.1 udp api.github.com: antwort 20.250.119.72 
+AUSSAGE ist upstream-direkt 1.1.1.1 udp api.github.com=antwort
+--- 2. ueber den lokalen Resolver (127.0.0.1, dnsmasq)
+    @127.0.0.1 example.com: dig rc=0, keine Adresse ()
+AUSSAGE ist lokal example.com=leer
+    Status @127.0.0.1 example.com: status: REFUSED
+    @127.0.0.1 api.github.com: antwort 20.250.119.72 
+AUSSAGE ist lokal api.github.com=antwort
+    @127.0.0.1 codeload.github.com: antwort 140.82.113.10 
+AUSSAGE ist lokal codeload.github.com=antwort
+    @127.0.0.1 deb.debian.org: antwort debian.map.fastlydns.net. 151.101.2.132 
+AUSSAGE ist lokal deb.debian.org=antwort
+    @127.0.0.1 github.com: antwort 140.82.121.4 
+AUSSAGE ist lokal github.com=antwort
+    @127.0.0.1 objects.githubusercontent.com: antwort 185.199.111.133 185.199.108.133 
+AUSSAGE ist lokal objects.githubusercontent.com=antwort
+    @127.0.0.1 raw.githubusercontent.com: antwort 185.199.109.133 185.199.111.133 
+AUSSAGE ist lokal raw.githubusercontent.com=antwort
+    @127.0.0.1 security.debian.org: antwort 151.101.2.132 151.101.194.132 
+AUSSAGE ist lokal security.debian.org=antwort
+--- 3. ueber getent (resolv.conf) wie ein Programm
+    getent api.github.com: 20.250.119.72 (18 ms)
+AUSSAGE ist getent api.github.com=adresse
+    getent deb.debian.org: 2a04:4e42:200::644 (17 ms)
+AUSSAGE ist getent deb.debian.org=adresse
+    getent example.com: keine Adresse (3 ms)
+AUSSAGE ist getent example.com=keine
+--- 4. Verbindung
+AUSSAGE ist https api.github.com=200
+AUSSAGE ist https deb.debian.org=200
+AUSSAGE ist https example.com (Name)=000
+AUSSAGE ist https zur direkt aufgeloesten Adresse von example.com=000
+--- 5. Zaehler der Messvariante (sudo nur zum Lesen der Regeln)
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 65534 counter packets 16 bytes 1368
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid != 65534 counter packets 14 bytes 967
+    ip daddr 1.1.1.1 udp dport 53 accept
+    ip daddr 1.1.1.1 tcp dport 53 accept
+    ip daddr 8.8.8.8 udp dport 53 accept
+    ip daddr 8.8.8.8 tcp dport 53 accept
+    meta l4proto { tcp, udp } th dport 53 counter packets 0 bytes 0 drop
+
+######## D2, Modus skuid, 2026-10-19T11:40:53.049Z
+postStart (skuid, zaehler) exit=0
+id: uid=1000(vscode) gid=1000(vscode) groups=1000(vscode)
+Upstream-Liste (resolv.conf.u-boot-orig): 1.1.1.1
+8.8.8.8
+resolv.conf: nameserver 127.0.0.1 
+Liste der erlaubten Namen: api.github.com codeload.github.com deb.debian.org github.com objects.githubusercontent.com raw.githubusercontent.com security.debian.org
+--- 1. direkt an jeden Upstream (UDP und TCP), Name ausserhalb der Liste (example.com)
+    @1.1.1.1 udp example.com: keine Antwort (dig rc=9, Zeitueberschreitung)
+AUSSAGE skuid upstream-direkt 1.1.1.1 udp example.com=keine
+    @1.1.1.1 tcp example.com: keine Antwort (dig rc=9, Zeitueberschreitung)
+AUSSAGE skuid upstream-direkt 1.1.1.1 tcp example.com=keine
+    @8.8.8.8 udp example.com: keine Antwort (dig rc=9, Zeitueberschreitung)
+AUSSAGE skuid upstream-direkt 8.8.8.8 udp example.com=keine
+    @8.8.8.8 tcp example.com: keine Antwort (dig rc=9, Zeitueberschreitung)
+AUSSAGE skuid upstream-direkt 8.8.8.8 tcp example.com=keine
+--- 1b. direkt an den ersten Upstream, Name der Liste (api.github.com)
+    @1.1.1.1 udp api.github.com: keine Antwort (dig rc=9, Zeitueberschreitung)
+AUSSAGE skuid upstream-direkt 1.1.1.1 udp api.github.com=keine
+--- 2. ueber den lokalen Resolver (127.0.0.1, dnsmasq)
+    @127.0.0.1 example.com: dig rc=0, keine Adresse ()
+AUSSAGE skuid lokal example.com=leer
+    Status @127.0.0.1 example.com: status: REFUSED
+    @127.0.0.1 api.github.com: antwort 140.82.121.6 
+AUSSAGE skuid lokal api.github.com=antwort
+    @127.0.0.1 codeload.github.com: antwort 140.82.121.10 
+AUSSAGE skuid lokal codeload.github.com=antwort
+    @127.0.0.1 deb.debian.org: antwort debian.map.fastlydns.net. 151.101.66.132 
+AUSSAGE skuid lokal deb.debian.org=antwort
+    @127.0.0.1 github.com: antwort 140.82.121.3 
+AUSSAGE skuid lokal github.com=antwort
+    @127.0.0.1 objects.githubusercontent.com: antwort 185.199.110.133 185.199.111.133 
+AUSSAGE skuid lokal objects.githubusercontent.com=antwort
+    @127.0.0.1 raw.githubusercontent.com: antwort 185.199.110.133 185.199.111.133 
+AUSSAGE skuid lokal raw.githubusercontent.com=antwort
+    @127.0.0.1 security.debian.org: antwort 151.101.194.132 151.101.2.132 
+AUSSAGE skuid lokal security.debian.org=antwort
+--- 3. ueber getent (resolv.conf) wie ein Programm
+    getent api.github.com: 140.82.121.6 (17 ms)
+AUSSAGE skuid getent api.github.com=adresse
+    getent deb.debian.org: 2a04:4e42:600::644 (17 ms)
+AUSSAGE skuid getent deb.debian.org=adresse
+    getent example.com: keine Adresse (2 ms)
+AUSSAGE skuid getent example.com=keine
+--- 4. Verbindung
+AUSSAGE skuid https api.github.com=200
+AUSSAGE skuid https deb.debian.org=200
+AUSSAGE skuid https example.com (Name)=000
+    (keine direkt aufgeloeste Adresse: Verbindungsprobe entfaellt)
+AUSSAGE skuid https zur direkt aufgeloesten Adresse von example.com=entfaellt
+--- 5. Zaehler der Messvariante (sudo nur zum Lesen der Regeln)
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid 65534 counter packets 16 bytes 1368
+    oifname != "lo" meta l4proto { tcp, udp } th dport 53 meta skuid != 65534 counter packets 10 bytes 683
+    meta skuid 65534 ip daddr 1.1.1.1 udp dport 53 accept
+    meta skuid 65534 ip daddr 1.1.1.1 tcp dport 53 accept
+    meta skuid 65534 ip daddr 8.8.8.8 udp dport 53 accept
+    meta skuid 65534 ip daddr 8.8.8.8 tcp dport 53 accept
+    meta l4proto { tcp, udp } th dport 53 counter packets 10 bytes 683 drop

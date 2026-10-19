@@ -1,0 +1,52 @@
+antwort-container bereit: 172.17.0.5
+Antwort-Container (= Upstream des Sandbox-Containers) R=172.17.0.5
+
+######## D5, Fall ist, 2026-10-19T11:47:15.394Z
+postStart (ist) exit=0
+Upstream-Liste: 172.17.0.5 
+--- 1. direkt an den Upstream R, Name ausserhalb der Liste
+AUSSAGE ist d5 direkt-an-upstream=antwort
+--- 2. ueber den lokalen Resolver: Untername eines erlaubten Namens (kanal1.api.github.com) und Name ausserhalb der Liste (kanal1.example.com)
+    kanal1.api.github.com: 203.0.113.7
+AUSSAGE ist d5 untername-erlaubter-name=antwort
+    kanal1.example.com: keine Antwort
+AUSSAGE ist d5 untername-unlisteter-name=keine
+--- 3. Durchsatz: 5 s nacheinander Anfragen mit drei Labels zu je 63 Hex-Zeichen vor api.github.com an den lokalen Resolver (MESSWERT, zeitabhaengig)
+MESSWERT ist lokal-api.github.com: queries=18253 antworten=18253 rcode0=18253 sekunden=5.00 zeichen=3449817
+--- 4. dasselbe, aber ein Name ausserhalb der Liste (example.com) an den lokalen Resolver
+MESSWERT ist lokal-example.com: queries=40686 antworten=40686 rcode0=0 sekunden=3.00 zeichen=7689654
+--- 5. Vergleich: direkt an den Upstream R (nur im Fall ist offen)
+MESSWERT ist direkt-R: queries=46459 antworten=46459 rcode0=46459 sekunden=5.00 zeichen=8780751
+-- am Antwort-Container angekommen (Log dns53.log)
+Anfragen gesamt: 64714
+davon unter api.github.com: 18254
+davon unter example.com: 46460
+Absender (Adressen, Anzahl):  64714 172.17.0.7;
+Beispielzeile (gekuerzt): Oct 19 11:47:16 dnsmasq[16]: query[A] kanal1.api.github.com from 172.17.0.7
+AUSSAGE ist d5 am-upstream-angekommen-kanal1-api.github.com=ja
+AUSSAGE ist d5 am-upstream-angekommen-kanal1-example.com=nein
+
+######## D5, Fall skuid, 2026-10-19T11:47:30.581Z
+postStart (skuid) exit=0
+Upstream-Liste: 172.17.0.5 
+--- 1. direkt an den Upstream R, Name ausserhalb der Liste
+AUSSAGE skuid d5 direkt-an-upstream=keine
+--- 2. ueber den lokalen Resolver: Untername eines erlaubten Namens (kanal1.api.github.com) und Name ausserhalb der Liste (kanal1.example.com)
+    kanal1.api.github.com: 203.0.113.7
+AUSSAGE skuid d5 untername-erlaubter-name=antwort
+    kanal1.example.com: keine Antwort
+AUSSAGE skuid d5 untername-unlisteter-name=keine
+--- 3. Durchsatz: 5 s nacheinander Anfragen mit drei Labels zu je 63 Hex-Zeichen vor api.github.com an den lokalen Resolver (MESSWERT, zeitabhaengig)
+MESSWERT skuid lokal-api.github.com: queries=20426 antworten=20426 rcode0=20426 sekunden=5.00 zeichen=3860514
+--- 4. dasselbe, aber ein Name ausserhalb der Liste (example.com) an den lokalen Resolver
+MESSWERT skuid lokal-example.com: queries=42057 antworten=42057 rcode0=0 sekunden=3.00 zeichen=7948773
+--- 5. Vergleich: direkt an den Upstream R (nur im Fall ist offen)
+MESSWERT skuid direkt-R: queries=0 antworten=0 rcode0=0 sekunden=5.00 zeichen=0
+-- am Antwort-Container angekommen (Log dns53.log)
+Anfragen gesamt: 20427
+davon unter api.github.com: 20427
+davon unter example.com: 0
+Absender (Adressen, Anzahl):  20427 172.17.0.7;
+Beispielzeile (gekuerzt): Oct 19 11:47:33 dnsmasq[16]: query[A] kanal1.api.github.com from 172.17.0.7
+AUSSAGE skuid d5 am-upstream-angekommen-kanal1-api.github.com=ja
+AUSSAGE skuid d5 am-upstream-angekommen-kanal1-example.com=nein
