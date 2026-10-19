@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-v2-spec-sandbox-egress-ollama`](../../../../in-progress/slice-v2-spec-sandbox-egress-ollama.md)
+**Vorgang:** [`slice-v2-spec-sandbox-egress-ollama`](../../../../done/slice-v2-spec-sandbox-egress-ollama.md)
 **Fund:** Review-Report [`2026-10-19-slice-v2-spec-sandbox-egress-ollama`](../../../../../../reviews/2026-10-19-slice-v2-spec-sandbox-egress-ollama.md) F-4 (die Plan-Tabelle sagte „vier Zeilen“ für §7 Historie, der Diff trug drei) und F-5 sowie Verification-Report [`2026-10-19-verification-slice-v2-spec-sandbox-egress-ollama`](../../../../../../reviews/2026-10-19-verification-slice-v2-spec-sandbox-egress-ollama.md) V-3 (Marker „Slice-Datei im Commit danach“ stand nach dem Commit weiter; die Fundstelle des Messprotokolls nannte einen nur mit Registerkenntnis auflösbaren Pfad; der Abgleich der Dateizahl war mit dem Verifier-Report um eine Datei veraltet). Rückfall nach der Verkörperung in `AGENTS.md` §3.10; behoben in der Fix-Runde `958e129` und in der Closure.
 
 **Beleg-Qualität:** am Baum bestätigt (Diff-Stat `f51eb02..HEAD`, Lesen der Historie-Zeilen).

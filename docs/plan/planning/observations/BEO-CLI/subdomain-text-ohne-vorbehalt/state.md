@@ -1,1 +1,1 @@
-**Stand:** offen, 1× — Vorgang [`slice-v2-spec-sandbox-egress-ollama`](../../../in-progress/slice-v2-spec-sandbox-egress-ollama.md) (Verification V-2, LOW). Kein Ausgang; ob die Texte einen Vorbehalt bekommen, entscheidet der Projektinhaber, ein Code-Slice folgt frühestens nach dem Release.
+**Stand:** offen, 1× — Vorgang [`slice-v2-spec-sandbox-egress-ollama`](../../../done/slice-v2-spec-sandbox-egress-ollama.md) (Verification V-2, LOW). Kein Ausgang; ob die Texte einen Vorbehalt bekommen, entscheidet der Projektinhaber, ein Code-Slice folgt frühestens nach dem Release.
