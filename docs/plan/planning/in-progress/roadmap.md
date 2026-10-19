@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-10-18.
+**Status:** Aktiv. **Letzte Änderung:** 2026-10-19.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-In Arbeit: [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md) (Lastenheft-CR: Katalog-Feature `ollama`, nur für Gemessenes, sechster Slice von `welle-sandbox-egress-ollama`).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
