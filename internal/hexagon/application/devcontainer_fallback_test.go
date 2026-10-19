@@ -169,21 +169,21 @@ func TestDoctor_SandboxFallback_StatesPerCapability(t *testing.T) {
 	}
 }
 
-// ADR-0026: the egress start script ends in exit 11 for three causes; the
+// ADR-0026, ADR-0027: the egress start script ends in exit 11 for four causes; the
 // status file carries no free text, so the message and the repair hint of a
-// `failed` egress item name all three and point to the start script's own
+// `failed` egress item name all four and point to the start script's own
 // message in the container log.
 func TestDoctor_SandboxFallback_EgressFailedNamesEveryCause(t *testing.T) {
 	t.Parallel()
 	insp := newFakeInspector(true)
 	insp.setStatus("egress", "failed")
 	d := fallbackItems(doctorWithInspector(t, yamlEgressOnly, insp, nil))[idEgress]
-	for _, want := range []string{"NET_ADMIN capability was not granted", "the user 'nobody' for the local resolver does not exist", "did not start or does not run as 'nobody'"} {
+	for _, want := range []string{"NET_ADMIN capability was not granted", "the user 'nobody' for the local resolver does not exist", "the nftables rules could not be applied", "did not start or does not run as 'nobody'"} {
 		if !strings.Contains(d.Message, want) {
 			t.Errorf("message lacks %q: %q", want, d.Message)
 		}
 	}
-	for _, want := range []string{"--cap-add=NET_ADMIN", "message of the start script on standard error in the container log", "missing user 'nobody'"} {
+	for _, want := range []string{"--cap-add=NET_ADMIN", "message of the start script on standard error in the container log", "missing user 'nobody'", "nftables rules that could not be applied"} {
 		if !strings.Contains(d.Hint, want) {
 			t.Errorf("hint lacks %q: %q", want, d.Hint)
 		}
