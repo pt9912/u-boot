@@ -12,8 +12,8 @@ Basis-Image `mcr.microsoft.com/devcontainers/base@sha256:6ee2b4097c75d33e9a94d94
 
 Jedes Skript wird im Verzeichnis `tools/messung/devcontainer-ollama/` aufgerufen; seine Ausgabe wird in die Rohdatei in der Spalte rechts in
 diesem Verzeichnis umgeleitet (`bash 02-build-b.sh > "$P/rohdaten-02.txt" 2>&1`, mit `P` = `../../../docs/messungen/` plus Name des
-Verzeichnisses dieser Datei). `06-option-a.sh` legt `rohdaten-06-build-a.log` in das Verzeichnis `OUT` (Vorgabe: das aktuelle Verzeichnis;
-für dieses Protokoll `OUT="$P"`).
+Verzeichnisses dieser Datei). `06-option-a.sh` legt `rohdaten-06-build-a.log` in das Verzeichnis `OUT`; `OUT` ist Pflicht (ohne Angabe bricht das Skript vor dem Lauf ab),
+für dieses Protokoll `OUT="$P"`.
 Voraussetzungen: Docker (Colima), `gh` mit Anmeldung, `jq`, `curl` auf dem Host; für Schritt 3 die Binaries aus `make build-binaries`
 (`bin/`, nicht im Repo).
 

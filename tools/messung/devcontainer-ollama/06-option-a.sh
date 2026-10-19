@@ -1,12 +1,13 @@
 #!/bin/bash
 # O1 (Option A): Community-Feature ghcr.io/prulloac/devcontainer-features/ollama mit der Dev-Container-CLI messen.
-# Aufruf: 06-option-a.sh <arbeitsverzeichnis> > rohdaten-06.txt 2>&1
-# OUT ist das Ausgabeverzeichnis des Build-Logs rohdaten-06-build-a.log (Vorgabe: das Arbeitsverzeichnis des Aufrufs,
-# im Protokoll docs/messungen/slice-v1-devcontainer-ollama-messung/).
+# Aufruf: OUT=<protokollverzeichnis> 06-option-a.sh <arbeitsverzeichnis> > "$OUT/rohdaten-06.txt" 2>&1
+# OUT ist Pflicht: das Verzeichnis, in das das Build-Log rohdaten-06-build-a.log kopiert wird
+# (im Protokoll docs/messungen/slice-v1-devcontainer-ollama-messung/).
 # Voraussetzung: docker build -f Dockerfile.cli -t u-boot-messung-devcontainer-cli .   (Dev-Container-CLI + Docker-CLI)
 # Die CLI laeuft in einem Wegwerf-Container mit dem Docker-Socket der Colima-VM.
 set -u
 w=${1:?arbeitsverzeichnis}
+out=${OUT:?OUT (Protokollverzeichnis fuer rohdaten-06-build-a.log)}
 rm -rf "$w"; mkdir -p "$w/proj/.devcontainer"; w=$(cd "$w" && pwd)
 cat > "$w/proj/.devcontainer/devcontainer.json" <<'JSON'
 {
@@ -36,4 +37,4 @@ echo "== Ergebnis-Image"
 docker image inspect u-boot-messung-ollama-a --format 'size={{.Size}} arch={{.Architecture}}' 2>&1
 docker image inspect u-boot-messung-ollama-a --format '{{index .Config.Labels "devcontainer.metadata"}}' 2>&1 | head -c 3000; echo
 docker run --rm --entrypoint '' u-boot-messung-ollama-a bash -c 'command -v ollama && ls -l $(command -v ollama); ollama --version 2>&1; du -sh /usr/local/lib/ollama 2>&1; ls /usr/local/lib/ollama 2>&1 | head; ls -ld /usr/share/ollama /home/vscode/.ollama 2>&1; id ollama 2>&1; ls /etc/systemd/system/ollama.service 2>&1'
-cp "$w/build-a.log" "${OUT:-.}/rohdaten-06-build-a.log" 2>/dev/null || true
+cp "$w/build-a.log" "$out/rohdaten-06-build-a.log"
