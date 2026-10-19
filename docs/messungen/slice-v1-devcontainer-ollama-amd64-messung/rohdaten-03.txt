@@ -1,0 +1,93 @@
+== A1 Bau, 2026-10-19T05:30:06.946Z
+-- Groesse des Downloads (Metrik: Content-Length des Archivs, nicht Image-Groesse)
+content-length: 1438364593
+AUSSAGE archiv-name=ollama-linux-amd64.tar.zst
+---- 2026-10-19T05:30:07.964Z Bau kalt (--no-cache), Variante oll
+build oll --no-cache exit=0 dauer=42.7s
+AUSSAGE bau-kalt-exit=0
+-- Zeilen des Builds zur Pruefsumme und zum Archiv
+#6 29.58 ollama-linux-amd64.tar.zst: OK
+AUSSAGE sha256sum-c=1
+---- 2026-10-19T05:30:51.347Z Bau aus dem Cache, Variante oll
+build oll  exit=0 dauer=0.5s
+AUSSAGE bau-cache-exit=0
+-- CACHED-Schritte im zweiten Bau: 6 von 11 Schritten
+-- Image (Metrik .Size, Bytes und GB)
+sha256:9329d20a0672cda38f73b6fb67f66b775c5d5b520a159b6b09192857224f9dbb size=1013158921 arch=amd64
+image-size-gb(10^9)=1.01
+-- Inhalt des Images (als Benutzer des Images)
+uid=1000(vscode) gid=1000(vscode) groups=1000(vscode)
+-- ollama --version
+Warning: could not connect to a running Ollama instance
+Warning: client version is 0.40.6
+-- Eigentuemer
+root:root /usr/local/bin/ollama
+vscode:vscode /home/vscode/.ollama
+-- lib/ollama
+CPP_HTTPLIB_LICENSE
+DLPACK_LICENSE
+FMT_LICENSE
+GO_LICENSE
+LLAMA_CPP_LICENSE
+LLAMA_CPP_VENDORS_LICENSE
+MLX_C_LICENSE
+MLX_LICENSE
+PICOJSON_LICENSE
+XGRAMMAR_LICENSE
+XGRAMMAR_NOTICE
+libggml-base.so
+libggml-base.so.0
+libggml-base.so.0.27.0
+libggml-cpu-alderlake.so
+libggml-cpu-cannonlake.so
+libggml-cpu-cascadelake.so
+libggml-cpu-cooperlake.so
+libggml-cpu-haswell.so
+libggml-cpu-icelake.so
+libggml-cpu-ivybridge.so
+libggml-cpu-piledriver.so
+libggml-cpu-sandybridge.so
+libggml-cpu-sapphirerapids.so
+libggml-cpu-skylakex.so
+libggml-cpu-sse42.so
+libggml-cpu-x64.so
+libggml-cpu-zen4.so
+libggml.so
+libggml.so.0
+libggml.so.0.27.0
+libgomp.so.1
+libgomp.so.1.0.0
+libllama-common.so
+libllama-common.so.0
+libllama-common.so.0.7.0
+libllama-quantize-impl.so
+libllama-server-impl.so
+libllama.so
+libllama.so.0
+libllama.so.0.7.0
+libmtmd.so
+libmtmd.so.0
+libmtmd.so.0.7.0
+llama-quantize
+llama-server
+-- zstd im Image
+kein zstd
+-- Groesse /usr/local
+33M	/usr/local/lib/ollama
+29M	/usr/local/bin/ollama
+-- OLLAMA_*-Umgebung
+keine OLLAMA_*-Variable
+AUSSAGE ollama-version-im-image=version is 0.40.6
+AUSSAGE eigentuemer-ollama-dir=vscode:vscode
+AUSSAGE zstd-im-image=nein
+---- 2026-10-19T05:30:54.720Z Gegenprobe: Variante bas (ohne Ollama-Block), Paketliste gegen oll
+build bas  exit=0 dauer=0.6s
+Pakete bas=292 oll=292
+-- diff dpkg bas -> oll (leer: der Ollama-Block hinterlaesst keine Paketaenderung)
+(kein Unterschied)
+AUSSAGE paketdiff-bas-oll=0
+bas size=946749835
+-- Plattenplatz nach dem Bau
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          322       4         83.32GB   37.44GB (44%)
+Containers      4         4         167.5MB   0B (0%)

@@ -1,0 +1,6 @@
+# Messwerkzeug fuer A9: Dev-Container-CLI (npm) mit Docker-CLI; spricht ueber den Docker-Socket mit dem Daemon des Messhosts.
+# Kein Teil des Produkts; das Image heisst u-boot-messung-amd64-devcontainer-cli.
+FROM docker:29-cli AS dockercli
+FROM node:22-trixie-slim
+COPY --from=dockercli /usr/local/bin/docker /usr/local/bin/docker
+RUN npm install -g @devcontainers/cli

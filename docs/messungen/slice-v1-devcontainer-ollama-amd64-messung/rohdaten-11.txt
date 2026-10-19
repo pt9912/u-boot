@@ -1,0 +1,76 @@
+== A10 Aufraeumen, 2026-10-19T05:52:49.538Z
+-- Objekte der Messung vor dem Aufraeumen
+  keine Container
+u-boot-messung-amd64-img-dokn:latest
+u-boot-messung-amd64-img-dok:latest
+  keine Volumes
+  keine Netze
+
+-- Objekte mit dem Praefix nachher
+  keine Container
+  keine Images
+  keine Volumes
+  keine Netze
+AUSSAGE objekte-mit-praefix-nachher=0
+
+-- Unterschied der Listen vorher -> nachher ('<' nur vorher, '>' nur nachher; Fremdes, das waehrend der Messung auf dem Host kam oder ging, steht hier ebenfalls)
+2d1
+< awesome_shannon	odr-review:source
+6c5,6
+< upbeat_taussig	mcr.microsoft.com/devcontainers/base:debian
+---
+> pgr-it-2546341-pg	postgres:17-alpine
+> sleepy_rhodes	mcr.microsoft.com/devcontainers/base:debian
+192,194c192,194
+< odata-recorder:build	5bc2576fe697
+< odata-recorder:gegenproben	9592191b03ac
+< odata-recorder:lint	bc6aa150fe79
+---
+> odata-recorder:build	c9753a53a0c8
+> odata-recorder:gegenproben	6bc08183901e
+> odata-recorder:lint	5c64d44a03c7
+196,197c196
+< odata-recorder:test	5eecfc23d6e6
+< odr-review:source	605d4eddfcdb
+---
+> odata-recorder:test	94c408e77118
+275,276c274,275
+< pgwire-recorder:integration	726221b834dc
+< pgwire-recorder:test	cac87e09edbc
+---
+> pgwire-recorder:integration	d2492171ee9c
+> pgwire-recorder:test	896a6380df32
+344a344
+> 043b92f9b5836f01c56e2fef56e2a337b272269898eb73ad3d2fa2ebd4e4e2d1
+347a348
+> 163a2d0189db3b2d4e0908072d96eafe96155801e43472242fbc8db3edb29f10
+355a357
+> 395257c3fc24dc7118ddba1725057aa2c26222f9fa53a70c33be6d7c9403fde6
+356a359
+> 46112e546145e46508d25ab144e4f93230a7b0448f261742de3c5ecd4e0ce13a
+357a361
+> 4b52eebbd1d20c0671dcab7c13ec967c2387113c7abc94cc6b4f7d0d49c28012
+358a363
+> 5230c4e22018710ccb39f126d6454b41242c323c1106ca90e091bc26ff855fe7
+372a378
+> 89379acbc4fc8e1942c4a635941596aef62cb2f25abe34216c571c98b9189829
+373a380
+> 8cc52b2c318a2ec14b479d318f7187bfc5823b4017d7d767215a03f27bb75fea
+378a386
+> a5b7a15593b10b416f72bfb7b64d3d4c8fd6e8119fdbb945ab58d342b3fe1038
+406a415
+> d8679e3d4db3582aaafa9b2f0377774d1b52ef9b1e829cae0ac7abbf854df71b
+423a433
+> f91db37797bfd88c6c13bbbc1bf292dbfcdce175dba2cc112a9a9dedef1ef869
+456a467
+> pgr-it-2546341-daten
+474a486
+> pgr-it-2546341-net
+
+-- Build-Cache und Platz (der Build-Cache bleibt; er wurde nicht geleert)
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          326       5         85.69GB   39.22GB (45%)
+Containers      5         5         74.64MB   0B (0%)
+Local Volumes   140       8         98.82GB   38.78GB (39%)
+Build Cache     520       43        18.93GB   5.857GB
+/dev/nvme0n1p1  288G  239G   35G  88% /d

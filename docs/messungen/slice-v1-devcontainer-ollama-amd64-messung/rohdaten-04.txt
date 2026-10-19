@@ -1,0 +1,49 @@
+== A2 Archiv und --exclude-Muster, 2026-10-19T05:31:05.410Z
+download exit=0 dauer=24.2s
+archivgroesse-bytes=1438364593
+archiv/ollama-linux-amd64.tar.zst: OK
+AUSSAGE archiv-sha256=c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0
+-- tar-Version
+tar (GNU tar) 1.35
+-- Eintraege des Archivs je Wurzelverzeichnis
+      1 bin/ollama
+     64 lib/ollama
+-- Eintraege unter lib/ollama/ je Unterverzeichnis (Dateien direkt unter lib/ollama/ als '.')
+     46 .
+      8 cuda_v12
+      8 cuda_v13
+      2 vulkan
+AUSSAGE archiv-hat-cuda-verzeichnisse=16
+AUSSAGE archiv-hat-vulkan-verzeichnis=2
+
+-- Entpacken mit den Mustern des Generators (Pfad: -C /x1)
+tar-exit=0
+entpackt-mib=61
+ausgeschlossene-treffer=0
+keine Unterverzeichnisse unter lib/ollama
+-- Entpacken ohne Muster (Pfad: -C /x2)
+tar-exit=0
+entpackt-mib=2151
+/x2/lib/ollama/cuda_v12/
+/x2/lib/ollama/cuda_v13/
+/x2/lib/ollama/vulkan/
+
+-- Vergleich: Inhalt von /usr/local/lib/ollama im gebauten Image (03) gegen Entpacken mit Mustern
+Dateiliste Image == Dateiliste Archiv mit Mustern (36 Dateien)
+AUSSAGE image-gleich-archiv-mit-mustern=ja
+
+-- Muster OHNE Treffer (Kette wie im Dockerfile: tar && naechster Schritt)
+KETTE_LAEUFT_WEITER
+kette-exit=0
+tar-exit=0
+stdout-stderr-bytes=0
+AUSSAGE muster-ohne-treffer-tar-exit=0
+
+-- Gegenprobe: falsch geschriebenes Muster schliesst NICHTS aus (zeigt, dass die Muster wirken)
+tar-exit=0
+entpackt-mib=2151
+/x7/lib/ollama/cuda_v12/
+/x7/lib/ollama/cuda_v13/
+/x7/lib/ollama/vulkan/
+-- Gegenprobe: das Muster 'lib/ollama/cuda_*' ohne Anker (kein Praefix 'lib/ollama/') trifft ebenfalls (GNU tar: Muster passen auf Namensteile)
+keine Unterverzeichnisse

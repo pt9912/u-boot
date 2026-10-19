@@ -1,0 +1,43 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 2.98kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/devcontainers/base:debian
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/7] FROM mcr.microsoft.com/devcontainers/base:debian
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 36B done
+#5 DONE 0.0s
+
+#6 [2/7] RUN apt-get update  && apt-get install -y --no-install-recommends zstd  && rm -rf /var/lib/apt/lists/*  && arch="$(dpkg --print-architecture)"  && case "$arch" in amd64) sha256="c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0" ;; arm64) sha256="0a279d9428ad17b06fdb7dddf3b059b2c148433585fa3b30676a102fc459bb9f" ;; *) echo "ollama has no archive for $arch" >&2; exit 1 ;; esac  && work="$(mktemp -d)"  && cd "$work"  && curl -fsSLO "https://github.com/ollama/ollama/releases/download/v0.40.6/ollama-linux-${arch}.tar.zst"  && echo "${sha256}  ollama-linux-${arch}.tar.zst" | sha256sum -c -  && tar --zstd -xf "ollama-linux-${arch}.tar.zst" -C /usr/local --no-same-owner --exclude='lib/ollama/cuda_*' --exclude='lib/ollama/vulkan'  && cd /  && rm -rf "$work"  && apt-get purge -y --auto-remove zstd  && mkdir -p /home/vscode/.ollama  && chown vscode:vscode /home/vscode/.ollama
+#6 CACHED
+
+#7 [3/7] RUN apt-get update  && apt-get install -y --no-install-recommends dnsmasq-base nftables  && rm -rf /var/lib/apt/lists/*
+#7 CACHED
+
+#8 [4/7] COPY egress-init.sh /usr/local/bin/u-boot-egress-init
+#8 CACHED
+
+#9 [5/7] RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
+#9 CACHED
+
+#10 [6/7] RUN mkdir -p "/workspaces/u-boot-messung-amd64-oll" && chown vscode:vscode "/workspaces/u-boot-messung-amd64-oll"
+#10 CACHED
+
+#11 [7/7] RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
+#11 CACHED
+
+#12 exporting to image
+#12 exporting layers done
+#12 writing image sha256:9329d20a0672cda38f73b6fb67f66b775c5d5b520a159b6b09192857224f9dbb 0.0s done
+#12 naming to docker.io/library/u-boot-messung-amd64-img-oll done
+#12 DONE 0.0s

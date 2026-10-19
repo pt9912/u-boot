@@ -1,0 +1,159 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 2.98kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/devcontainers/base:debian
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/7] FROM mcr.microsoft.com/devcontainers/base:debian
+#4 CACHED
+
+#5 [internal] load build context
+#5 transferring context: 3.31kB done
+#5 DONE 0.1s
+
+#6 [2/7] RUN apt-get update  && apt-get install -y --no-install-recommends zstd  && rm -rf /var/lib/apt/lists/*  && arch="$(dpkg --print-architecture)"  && case "$arch" in amd64) sha256="c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0" ;; arm64) sha256="0a279d9428ad17b06fdb7dddf3b059b2c148433585fa3b30676a102fc459bb9f" ;; *) echo "ollama has no archive for $arch" >&2; exit 1 ;; esac  && work="$(mktemp -d)"  && cd "$work"  && curl -fsSLO "https://github.com/ollama/ollama/releases/download/v0.40.6/ollama-linux-${arch}.tar.zst"  && echo "${sha256}  ollama-linux-${arch}.tar.zst" | sha256sum -c -  && tar --zstd -xf "ollama-linux-${arch}.tar.zst" -C /usr/local --no-same-owner --exclude='lib/ollama/cuda_*' --exclude='lib/ollama/vulkan'  && cd /  && rm -rf "$work"  && apt-get purge -y --auto-remove zstd  && mkdir -p /home/vscode/.ollama  && chown vscode:vscode /home/vscode/.ollama
+#6 0.404 Get:1 http://deb.debian.org/debian trixie InRelease [140 kB]
+#6 0.433 Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+#6 0.438 Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+#6 0.453 Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9678 kB]
+#6 0.634 Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [4412 B]
+#6 0.634 Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [269 kB]
+#6 1.281 Fetched 10.2 MB in 1s (11.0 MB/s)
+#6 1.281 Reading package lists...
+#6 1.807 Reading package lists...
+#6 2.289 Building dependency tree...
+#6 2.408 Reading state information...
+#6 2.598 The following NEW packages will be installed:
+#6 2.598   zstd
+#6 2.669 0 upgraded, 1 newly installed, 0 to remove and 53 not upgraded.
+#6 2.669 Need to get 756 kB of archives.
+#6 2.669 After this operation, 2376 kB of additional disk space will be used.
+#6 2.669 Get:1 http://deb.debian.org/debian trixie/main amd64 zstd amd64 1.5.7+dfsg-1 [756 kB]
+#6 2.842 debconf: unable to initialize frontend: Dialog
+#6 2.842 debconf: (TERM is not set, so the dialog frontend is not usable.)
+#6 2.842 debconf: falling back to frontend: Readline
+#6 2.848 debconf: unable to initialize frontend: Readline
+#6 2.848 debconf: (This frontend requires a controlling tty.)
+#6 2.848 debconf: falling back to frontend: Teletype
+#6 2.852 debconf: unable to initialize frontend: Teletype
+#6 2.852 debconf: (This frontend requires a controlling tty.)
+#6 2.852 debconf: falling back to frontend: Noninteractive
+#6 3.577 Fetched 756 kB in 0s (8410 kB/s)
+#6 3.634 Selecting previously unselected package zstd.
+#6 3.634 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 25464 files and directories currently installed.)
+#6 3.689 Preparing to unpack .../zstd_1.5.7+dfsg-1_amd64.deb ...
+#6 3.708 Unpacking zstd (1.5.7+dfsg-1) ...
+#6 3.886 Setting up zstd (1.5.7+dfsg-1) ...
+#6 3.974 Processing triggers for man-db (2.13.1-1) ...
+#6 29.58 ollama-linux-amd64.tar.zst: OK
+#6 32.35 Reading package lists...
+#6 32.36 Building dependency tree...
+#6 32.36 Reading state information...
+#6 32.36 The following packages will be REMOVED:
+#6 32.36   zstd*
+#6 32.50 0 upgraded, 0 newly installed, 1 to remove and 0 not upgraded.
+#6 32.50 After this operation, 2376 kB disk space will be freed.
+#6 32.52 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 25487 files and directories currently installed.)
+#6 32.57 Removing zstd (1.5.7+dfsg-1) ...
+#6 32.78 Processing triggers for man-db (2.13.1-1) ...
+#6 DONE 33.5s
+
+#7 [3/7] RUN apt-get update  && apt-get install -y --no-install-recommends dnsmasq-base nftables  && rm -rf /var/lib/apt/lists/*
+#7 0.421 Get:1 http://deb.debian.org/debian trixie InRelease [140 kB]
+#7 0.444 Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+#7 0.448 Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+#7 0.462 Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9678 kB]
+#7 0.640 Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [4412 B]
+#7 0.640 Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [269 kB]
+#7 1.259 Fetched 10.2 MB in 1s (11.4 MB/s)
+#7 1.259 Reading package lists...
+#7 1.816 Reading package lists...
+#7 2.394 Building dependency tree...
+#7 2.556 Reading state information...
+#7 2.747 The following additional packages will be installed:
+#7 2.747   libdbus-1-3 libnetfilter-conntrack3 libnfnetlink0 libnftables1 libnftnl11
+#7 2.748 Suggested packages:
+#7 2.748   firewalld
+#7 2.748 Recommended packages:
+#7 2.748   dns-root-data dbus
+#7 2.800 The following NEW packages will be installed:
+#7 2.800   dnsmasq-base libdbus-1-3 libnetfilter-conntrack3 libnfnetlink0 libnftables1
+#7 2.800   libnftnl11 nftables
+#7 2.879 0 upgraded, 7 newly installed, 0 to remove and 53 not upgraded.
+#7 2.879 Need to get 1215 kB of archives.
+#7 2.879 After this operation, 3318 kB of additional disk space will be used.
+#7 2.879 Get:1 http://deb.debian.org/debian trixie/main amd64 libnftnl11 amd64 1.2.9-1 [65.0 kB]
+#7 2.894 Get:2 http://deb.debian.org/debian trixie/main amd64 libnftables1 amd64 1.1.3-1 [332 kB]
+#7 2.906 Get:3 http://deb.debian.org/debian trixie/main amd64 nftables amd64 1.1.3-1 [75.9 kB]
+#7 2.907 Get:4 http://deb.debian.org/debian trixie/main amd64 libdbus-1-3 amd64 1.16.2-2 [178 kB]
+#7 2.910 Get:5 http://deb.debian.org/debian trixie/main amd64 libnfnetlink0 amd64 1.0.2-3 [14.4 kB]
+#7 2.910 Get:6 http://deb.debian.org/debian trixie/main amd64 libnetfilter-conntrack3 amd64 1.1.0-1 [42.1 kB]
+#7 2.911 Get:7 http://deb.debian.org/debian trixie/main amd64 dnsmasq-base amd64 2.91-1+deb13u2 [507 kB]
+#7 3.049 debconf: unable to initialize frontend: Dialog
+#7 3.049 debconf: (TERM is not set, so the dialog frontend is not usable.)
+#7 3.049 debconf: falling back to frontend: Readline
+#7 3.055 debconf: unable to initialize frontend: Readline
+#7 3.055 debconf: (This frontend requires a controlling tty.)
+#7 3.055 debconf: falling back to frontend: Teletype
+#7 3.059 debconf: unable to initialize frontend: Teletype
+#7 3.059 debconf: (This frontend requires a controlling tty.)
+#7 3.059 debconf: falling back to frontend: Noninteractive
+#7 3.616 Fetched 1215 kB in 0s (12.2 MB/s)
+#7 3.692 Selecting previously unselected package libnftnl11:amd64.
+#7 3.692 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 25464 files and directories currently installed.)
+#7 3.705 Preparing to unpack .../0-libnftnl11_1.2.9-1_amd64.deb ...
+#7 3.749 Unpacking libnftnl11:amd64 (1.2.9-1) ...
+#7 3.904 Selecting previously unselected package libnftables1:amd64.
+#7 3.906 Preparing to unpack .../1-libnftables1_1.1.3-1_amd64.deb ...
+#7 3.925 Unpacking libnftables1:amd64 (1.1.3-1) ...
+#7 4.135 Selecting previously unselected package nftables.
+#7 4.137 Preparing to unpack .../2-nftables_1.1.3-1_amd64.deb ...
+#7 4.159 Unpacking nftables (1.1.3-1) ...
+#7 4.316 Selecting previously unselected package libdbus-1-3:amd64.
+#7 4.318 Preparing to unpack .../3-libdbus-1-3_1.16.2-2_amd64.deb ...
+#7 4.338 Unpacking libdbus-1-3:amd64 (1.16.2-2) ...
+#7 4.476 Selecting previously unselected package libnfnetlink0:amd64.
+#7 4.478 Preparing to unpack .../4-libnfnetlink0_1.0.2-3_amd64.deb ...
+#7 4.496 Unpacking libnfnetlink0:amd64 (1.0.2-3) ...
+#7 4.630 Selecting previously unselected package libnetfilter-conntrack3:amd64.
+#7 4.632 Preparing to unpack .../5-libnetfilter-conntrack3_1.1.0-1_amd64.deb ...
+#7 4.650 Unpacking libnetfilter-conntrack3:amd64 (1.1.0-1) ...
+#7 4.797 Selecting previously unselected package dnsmasq-base.
+#7 4.798 Preparing to unpack .../6-dnsmasq-base_2.91-1+deb13u2_amd64.deb ...
+#7 4.822 Unpacking dnsmasq-base (2.91-1+deb13u2) ...
+#7 4.964 Setting up libnftnl11:amd64 (1.2.9-1) ...
+#7 5.017 Setting up libdbus-1-3:amd64 (1.16.2-2) ...
+#7 5.078 Setting up libnfnetlink0:amd64 (1.0.2-3) ...
+#7 5.132 Setting up libnftables1:amd64 (1.1.3-1) ...
+#7 5.184 Setting up nftables (1.1.3-1) ...
+#7 5.321 Setting up libnetfilter-conntrack3:amd64 (1.1.0-1) ...
+#7 5.372 Setting up dnsmasq-base (2.91-1+deb13u2) ...
+#7 5.546 Processing triggers for libc-bin (2.41-12+deb13u3) ...
+#7 5.614 Processing triggers for man-db (2.13.1-1) ...
+#7 DONE 6.8s
+
+#8 [4/7] COPY egress-init.sh /usr/local/bin/u-boot-egress-init
+#8 DONE 0.2s
+
+#9 [5/7] RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
+#9 DONE 0.4s
+
+#10 [6/7] RUN mkdir -p "/workspaces/u-boot-messung-amd64-oll" && chown vscode:vscode "/workspaces/u-boot-messung-amd64-oll"
+#10 DONE 0.4s
+
+#11 [7/7] RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
+#11 DONE 0.4s
+
+#12 exporting to image
+#12 exporting layers
+#12 exporting layers 0.5s done
+#12 writing image sha256:9329d20a0672cda38f73b6fb67f66b775c5d5b520a159b6b09192857224f9dbb done
+#12 naming to docker.io/library/u-boot-messung-amd64-img-oll 0.0s done
+#12 DONE 0.6s

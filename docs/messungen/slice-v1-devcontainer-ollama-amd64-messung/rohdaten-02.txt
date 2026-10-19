@@ -1,0 +1,171 @@
+== make build IMAGE=u-boot-messung-amd64-ub (Repo-Stand: Arbeitsverzeichnis u-boot)
+make build exit=0 dauer=6.3s
+#18 naming to docker.io/library/u-boot-messung-amd64-ub:latest 0.0s done
+#18 DONE 0.1s
+make: Verzeichnis „/Development/u-boot“ wird verlassen
+image=sha256:79e1afe5be93d12f907c5a00ee86bf7a5d6656a6b779cfcc4d3d3e74b54a07fa size=9290330 arch=amd64
+u-boot version 0.11.0-dev
+-- sha256 der beiden Vorlagen, aus denen die Projekte entstehen
+9c476fb6b44a9b9990c2ba3e8dfc634406d23e09d8c30300fcc608986c110049  /t/Dockerfile.tmpl
+a7defad561d1d0c43ffca60f780ce85a4e0214a73c545aa0a030135db5c5e35a  /t/egress-init.sh.tmpl
+AUSSAGE u-boot-version=u-boot version 0.11.0-dev
+
+== Projekt oll (ollama=true, nestedRuntime=none)
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+Warning (LH-NFA-SEC-004): devcontainer feature ollama installs the release archive from github.com/ollama/ollama (version pinned as OLLAMA_VERSION in .devcontainer/Dockerfile) when the image is built; it is checked by its SHA-256 only, the upstream publishes no signature, so the check does not protect against a release that was harmful from the start
+Egress restriction: active.
+api.github.com                                             base
+codeload.github.com                                        base
+dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com  feature:ollama
+deb.debian.org                                             base
+github.com                                                 base
+objects.githubusercontent.com                              base
+raw.githubusercontent.com                                  base
+registry.ollama.ai                                         feature:ollama
+security.debian.org                                        base
+AUSSAGE projekt-oll-ollama-block=1
+
+== Projekt bas (ollama=false, nestedRuntime=none)
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+Egress restriction: active.
+api.github.com                 base
+codeload.github.com            base
+deb.debian.org                 base
+github.com                     base
+objects.githubusercontent.com  base
+raw.githubusercontent.com      base
+security.debian.org            base
+AUSSAGE projekt-bas-ollama-block=0
+
+== Projekt pod (ollama=true, nestedRuntime=podman)
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/sandbox-init.sh, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-007): security relaxation for nested Podman: --cap-add=SYS_ADMIN (the sandbox is much weaker than without nestedRuntime)
+Warning (LH-FA-DEV-007): security relaxation for nested Podman: --security-opt=seccomp=unconfined (the sandbox is much weaker than without nestedRuntime)
+Warning (LH-FA-DEV-007): security relaxation for nested Podman: --security-opt=apparmor=unconfined (the sandbox is much weaker than without nestedRuntime)
+Warning (LH-FA-DEV-007): security relaxation for nested Podman: --security-opt=systempaths=unconfined (the sandbox is much weaker than without nestedRuntime)
+Warning (LH-FA-DEV-007): security relaxation for nested Podman: --device=/dev/fuse (the sandbox is much weaker than without nestedRuntime)
+Warning (LH-FA-DEV-007): security relaxation for nested Podman: --device=/dev/net/tun (the sandbox is much weaker than without nestedRuntime)
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+Warning (LH-NFA-SEC-004): devcontainer feature ollama installs the release archive from github.com/ollama/ollama (version pinned as OLLAMA_VERSION in .devcontainer/Dockerfile) when the image is built; it is checked by its SHA-256 only, the upstream publishes no signature, so the check does not protect against a release that was harmful from the start
+Egress restriction: active.
+api.github.com                                             base
+auth.docker.io                                             runtime
+codeload.github.com                                        base
+dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com  feature:ollama
+deb.debian.org                                             base
+ghcr.io                                                    runtime
+github.com                                                 base
+objects.githubusercontent.com                              base
+production.cloudflare.docker.com                           runtime
+production.cloudfront.docker.com                           runtime
+raw.githubusercontent.com                                  base
+registry-1.docker.io                                       runtime
+registry.ollama.ai                                         feature:ollama
+security.debian.org                                        base
+AUSSAGE projekt-pod-ollama-block=1
+
+== Projekt podn (ollama=false, nestedRuntime=podman)
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/sandbox-init.sh, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-007): security relaxation for nested Podman: --cap-add=SYS_ADMIN (the sandbox is much weaker than without nestedRuntime)
+Warning (LH-FA-DEV-007): security relaxation for nested Podman: --security-opt=seccomp=unconfined (the sandbox is much weaker than without nestedRuntime)
+Warning (LH-FA-DEV-007): security relaxation for nested Podman: --security-opt=apparmor=unconfined (the sandbox is much weaker than without nestedRuntime)
+Warning (LH-FA-DEV-007): security relaxation for nested Podman: --security-opt=systempaths=unconfined (the sandbox is much weaker than without nestedRuntime)
+Warning (LH-FA-DEV-007): security relaxation for nested Podman: --device=/dev/fuse (the sandbox is much weaker than without nestedRuntime)
+Warning (LH-FA-DEV-007): security relaxation for nested Podman: --device=/dev/net/tun (the sandbox is much weaker than without nestedRuntime)
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+Egress restriction: active.
+api.github.com                    base
+auth.docker.io                    runtime
+codeload.github.com               base
+deb.debian.org                    base
+ghcr.io                           runtime
+github.com                        base
+objects.githubusercontent.com     base
+production.cloudflare.docker.com  runtime
+production.cloudfront.docker.com  runtime
+raw.githubusercontent.com         base
+registry-1.docker.io              runtime
+security.debian.org               base
+AUSSAGE projekt-podn-ollama-block=0
+
+== Projekt dok (ollama=true, nestedRuntime=docker)
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/docker-init.sh, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-007): security relaxation for the nested Docker daemon: --privileged (the profile no longer isolates the container from its host; a container escape reaches the host or, on macOS, the engine VM)
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+Warning (LH-NFA-SEC-004): devcontainer feature ollama installs the release archive from github.com/ollama/ollama (version pinned as OLLAMA_VERSION in .devcontainer/Dockerfile) when the image is built; it is checked by its SHA-256 only, the upstream publishes no signature, so the check does not protect against a release that was harmful from the start
+Egress restriction: active.
+api.github.com                                             base
+auth.docker.io                                             runtime
+codeload.github.com                                        base
+dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com  feature:ollama
+deb.debian.org                                             base
+download.docker.com                                        docker-apt
+ghcr.io                                                    runtime
+github.com                                                 base
+objects.githubusercontent.com                              base
+production.cloudflare.docker.com                           runtime
+production.cloudfront.docker.com                           runtime
+raw.githubusercontent.com                                  base
+registry-1.docker.io                                       runtime
+registry.ollama.ai                                         feature:ollama
+security.debian.org                                        base
+AUSSAGE projekt-dok-ollama-block=1
+
+== Projekt dokn (ollama=false, nestedRuntime=docker)
+Updated devcontainer managed block (.devcontainer/devcontainer.json, .devcontainer/Dockerfile, .devcontainer/docker-init.sh, .devcontainer/egress-init.sh).
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+Warning (LH-FA-DEV-007): security relaxation for the nested Docker daemon: --privileged (the profile no longer isolates the container from its host; a container escape reaches the host or, on macOS, the engine VM)
+Warning (LH-FA-DEV-008): security relaxation for the egress restriction: --cap-add=NET_ADMIN (a guardrail, not a sandbox boundary)
+Egress restriction: active.
+api.github.com                    base
+auth.docker.io                    runtime
+codeload.github.com               base
+deb.debian.org                    base
+download.docker.com               docker-apt
+ghcr.io                           runtime
+github.com                        base
+objects.githubusercontent.com     base
+production.cloudflare.docker.com  runtime
+production.cloudfront.docker.com  runtime
+raw.githubusercontent.com         base
+registry-1.docker.io              runtime
+security.debian.org               base
+AUSSAGE projekt-dokn-ollama-block=0
+
+-- Block 'Ollama' im erzeugten Dockerfile (Variante oll)
+16:ARG OLLAMA_VERSION=0.40.6
+17-ARG OLLAMA_SHA256_AMD64=c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0
+18-ARG OLLAMA_SHA256_ARM64=0a279d9428ad17b06fdb7dddf3b059b2c148433585fa3b30676a102fc459bb9f
+19-RUN apt-get update \
+20- && apt-get install -y --no-install-recommends zstd \
+21- && rm -rf /var/lib/apt/lists/* \
+22- && arch="$(dpkg --print-architecture)" \
+23- && case "$arch" in amd64) sha256="${OLLAMA_SHA256_AMD64}" ;; arm64) sha256="${OLLAMA_SHA256_ARM64}" ;; *) echo "ollama has no archive for $arch" >&2; exit 1 ;; esac \
+24- && work="$(mktemp -d)" \
+25- && cd "$work" \
+26- && curl -fsSLO "https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-linux-${arch}.tar.zst" \
+27- && echo "${sha256}  ollama-linux-${arch}.tar.zst" | sha256sum -c - \
+28- && tar --zstd -xf "ollama-linux-${arch}.tar.zst" -C /usr/local --no-same-owner --exclude='lib/ollama/cuda_*' --exclude='lib/ollama/vulkan' \
+29- && cd / \
+30- && rm -rf "$work" \
+31- && apt-get purge -y --auto-remove zstd \
+32- && mkdir -p /home/vscode/.ollama \
+33- && chown vscode:vscode /home/vscode/.ollama
+34-# Egress restriction (LH-FA-DEV-008).
+35-RUN apt-get update \
+36- && apt-get install -y --no-install-recommends dnsmasq-base nftables \
+37- && rm -rf /var/lib/apt/lists/*
+38-COPY egress-init.sh /usr/local/bin/u-boot-egress-init
+39-# Status files of the container start scripts (LH-FA-DEV-007); `u-boot doctor`
+40-# reads them from the host. The directory belongs to the container user so the
+41-# `postCreateCommand` and the `sudo` scripts can write there.
+42-RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
+43-# Sandbox profile (LH-FA-DEV-006): workspace lives in a named volume that
+44-# inherits ownership from this directory.

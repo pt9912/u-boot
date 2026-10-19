@@ -1,0 +1,53 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 5.32kB done
+#1 WARN: SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "PODMAN_SIGNING_KEY") (line 16)
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/devcontainers/base:debian
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/9] FROM mcr.microsoft.com/devcontainers/base:debian
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 5.64kB done
+#5 DONE 0.0s
+
+#6 [3/9] COPY sandbox-init.sh /usr/local/bin/u-boot-sandbox-init
+#6 CACHED
+
+#7 [4/9] RUN apt-get update  && apt-get install -y --no-install-recommends zstd  && rm -rf /var/lib/apt/lists/*  && arch="$(dpkg --print-architecture)"  && case "$arch" in amd64) sha256="c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0" ;; arm64) sha256="0a279d9428ad17b06fdb7dddf3b059b2c148433585fa3b30676a102fc459bb9f" ;; *) echo "ollama has no archive for $arch" >&2; exit 1 ;; esac  && work="$(mktemp -d)"  && cd "$work"  && curl -fsSLO "https://github.com/ollama/ollama/releases/download/v0.40.6/ollama-linux-${arch}.tar.zst"  && echo "${sha256}  ollama-linux-${arch}.tar.zst" | sha256sum -c -  && tar --zstd -xf "ollama-linux-${arch}.tar.zst" -C /usr/local --no-same-owner --exclude='lib/ollama/cuda_*' --exclude='lib/ollama/vulkan'  && cd /  && rm -rf "$work"  && apt-get purge -y --auto-remove zstd  && mkdir -p /home/vscode/.ollama  && chown vscode:vscode /home/vscode/.ollama
+#7 CACHED
+
+#8 [6/9] COPY egress-init.sh /usr/local/bin/u-boot-egress-init
+#8 CACHED
+
+#9 [7/9] RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
+#9 CACHED
+
+#10 [2/9] RUN apt-get update  && apt-get install -y --no-install-recommends uidmap ca-certificates  && rm -rf /var/lib/apt/lists/*  && arch="$(dpkg --print-architecture)"  && case "$arch" in amd64) sha256="9dd51073fac5a1742f88cf3caff5554615cb4d67ba554d25e8807be635547af5" ;; arm64) sha256="c106d09d7524209ce01eb3a02a7e621e9c55ec31d0fada48439cf77aa07afdb6" ;; *) echo "podman-static has no archive for $arch" >&2; exit 1 ;; esac  && work="$(mktemp -d)"  && cd "$work"  && url="https://github.com/mgoltzsche/podman-static/releases/download/v6.1.4/podman-linux-${arch}.tar.gz"  && curl -fsSLO "$url"  && curl -fsSLO "$url.asc"  && echo "${sha256}  podman-linux-${arch}.tar.gz" | sha256sum -c -  && curl -fsSL "https://keys.openpgp.org/vks/v1/by-fingerprint/0CCF102C4F95D89E583FF1D4F8B5AF50344BB503" -o key.asc  && export GNUPGHOME="$work/gnupg"  && install -d -m 0700 "$GNUPGHOME"  && gpg --batch --import key.asc  && status="$(gpg --batch --status-fd 1 --verify "podman-linux-${arch}.tar.gz.asc" "podman-linux-${arch}.tar.gz")"  && test "$(echo "$status" | awk '$2 == "VALIDSIG" {print $12}')" = "0CCF102C4F95D89E583FF1D4F8B5AF50344BB503"  && tar -xzf "podman-linux-${arch}.tar.gz" -C / --strip-components=1 --no-same-owner  && cd /  && rm -rf "$work" /README.md  && printf "unqualified-search-registries = ['docker.io']\n" > /etc/containers/registries.conf  && ln -sf /usr/local/bin/podman /usr/local/bin/docker  && (grep -q '^vscode:' /etc/subuid || echo 'vscode:100000:65536' >> /etc/subuid)  && (grep -q '^vscode:' /etc/subgid || echo 'vscode:100000:65536' >> /etc/subgid)  && mkdir -p /home/vscode/.local/share/containers  && chown -R vscode:vscode /home/vscode/.local
+#10 CACHED
+
+#11 [5/9] RUN apt-get update  && apt-get install -y --no-install-recommends dnsmasq-base nftables  && rm -rf /var/lib/apt/lists/*
+#11 CACHED
+
+#12 [8/9] RUN mkdir -p "/workspaces/u-boot-messung-amd64-pod" && chown vscode:vscode "/workspaces/u-boot-messung-amd64-pod"
+#12 CACHED
+
+#13 [9/9] RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
+#13 CACHED
+
+#14 exporting to image
+#14 exporting layers done
+#14 writing image sha256:4dbbbf32957d805f5d2ddcfcb0efa4fb7d55e4fde3db6e2992fd572de59fb109 0.0s done
+#14 naming to docker.io/library/u-boot-messung-amd64-img-pod 0.0s done
+#14 DONE 0.1s
+
+ [33m1 warning found (use docker --debug to expand):
+[0m - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "PODMAN_SIGNING_KEY") (line 16)

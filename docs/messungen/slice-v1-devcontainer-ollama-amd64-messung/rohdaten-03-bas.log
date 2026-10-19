@@ -1,0 +1,40 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.31kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/devcontainers/base:debian
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/6] FROM mcr.microsoft.com/devcontainers/base:debian
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 3.24kB done
+#5 DONE 0.0s
+
+#6 [2/6] RUN apt-get update  && apt-get install -y --no-install-recommends dnsmasq-base nftables  && rm -rf /var/lib/apt/lists/*
+#6 CACHED
+
+#7 [4/6] RUN mkdir -p /var/lib/u-boot/status && chown vscode:vscode /var/lib/u-boot/status
+#7 CACHED
+
+#8 [5/6] RUN mkdir -p "/workspaces/u-boot-messung-amd64-bas" && chown vscode:vscode "/workspaces/u-boot-messung-amd64-bas"
+#8 CACHED
+
+#9 [3/6] COPY egress-init.sh /usr/local/bin/u-boot-egress-init
+#9 CACHED
+
+#10 [6/6] RUN git config --system credential.helper '!f() { test -n "$GIT_TOKEN" && printf "username=x-access-token\npassword=%s\n" "$GIT_TOKEN"; }; f'
+#10 CACHED
+
+#11 exporting to image
+#11 exporting layers done
+#11 writing image sha256:5f5b1c424caef1a3d9c86b9adca888b6ba575d6aa7e36af5c0c5edd8c7366a6c done
+#11 naming to docker.io/library/u-boot-messung-amd64-img-bas 0.0s done
+#11 DONE 0.0s

@@ -1,0 +1,8 @@
+# Messwerkzeug fuer A2: Basis-Image der Messung mit zstd, damit GNU tar das Archiv lesen und entpacken kann.
+# Kein Teil des Produkts; das Image heisst u-boot-messung-amd64-tar.
+FROM mcr.microsoft.com/devcontainers/base:debian
+USER root
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends zstd \
+ && rm -rf /var/lib/apt/lists/*
+USER vscode

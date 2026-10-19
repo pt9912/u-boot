@@ -1,0 +1,76 @@
+== A6 nestedRuntime podman + ollama, 2026-10-19T05:33:42.365Z
+build pod exit=0 dauer=0.6s size=1107058698
+AUSSAGE bau-pod-exit=0
+build podn exit=0 dauer=0.5s size=1040644124
+AUSSAGE bau-podn-exit=0
+-- Paketliste ohne Ollama-Block (podn) gegen mit Ollama-Block (pod) (dpkg-query; leer: der Block entfernt und hinterlaesst nichts)
+Pakete podn=294 pod=294
+(kein Unterschied)
+AUSSAGE paketdiff-podman=0
+-- Pakete der Runtime im Image (Auszug)
+ca-certificates 20250419
+dnsmasq-base 2.91-1+deb13u2
+libzstd1 1.5.7+dfsg-1
+nftables 1.1.3-1
+uidmap 1:4.17.4-2
+-- Versionen im Image
+podman version 6.1.4
+crun version 1.30.1
+lrwxrwxrwx 1 root root 21 Oct 19 05:17 /usr/local/bin/docker -> /usr/local/bin/p
+AUSSAGE ollama-version-podman=version is 0.40.6
+-- mounts (Reihenfolge) und runArgs der erzeugten devcontainer.json
+  mount 1: target=/workspaces/u-boot-messung-amd64-pod
+  mount 2: target=/home/vscode/.local/share/containers
+  mount 3: target=/home/vscode/.ollama
+  runArgs: --cap-add=SYS_ADMIN --security-opt=seccomp=unconfined --security-opt=apparmor=unconfined --security-opt=systempaths=unconfined --device=/dev/fuse --device=/dev/net/tun --cap-add=NET_ADMIN
+AUSSAGE mount-ziele-podman=target=/workspaces/u-boot-messung-amd64-pod target=/home/vscode/.local/share/containers target=/home/vscode/.ollama 
+start exit=0
+---- 2026-10-19T05:33:48.476Z postCreateCommand (sandbox-init), ohne Egress
+exit=0
+---- 2026-10-19T05:33:48.517Z ohne Egress: podman run eines kleinen Images (Pull von Docker Hub)
+time="2026-10-19T05:33:48Z" level=warning msg="\"/\" is not a shared mount, this could cause issues or missing mounts with rootless containers"
+Trying to pull docker.io/library/alpine:3...
+Getting image source signatures
+Copying blob sha256:e2de96513ba9eb53b431787ec8a65cdde380ac4772a3e4c4b714dcfde2a102b5
+Copying config sha256:320994c3b997e2ec6433f717f153e108023c5bec8fefa8d76b83451d16d05ea8
+Writing manifest to image destination
+NESTED_RUN_OK
+0
+exit=0
+AUSSAGE nested-run-ohne-egress-podman=0
+---- 2026-10-19T05:33:51.428Z postStartCommand: Egress-Restriktion
+egress-init-exit=0
+u-boot-status 1
+result=ok
+at=2026-10-19T05:33:51Z
+-- mit Egress: Lauf des bereits geladenen Images (--pull=never)
+NESTED_RUN_OK
+exit=0
+AUSSAGE nested-run-mit-egress-podman=0
+-- mit Egress: Pull eines weiteren Images (docker.io/library/busybox:1.36; Hosts der Laufzeit stehen in der Liste)
+b116e155074440ffd9e449559433feb4cd2341eb3554b1da1c638c976e56451d
+exit=0
+AUSSAGE nested-pull-mit-egress-podman=0
+-- mit Egress: Zugriff aus dem verschachtelten Container auf einen gesperrten Host (example.com; Exit 0 = erreicht)
+wget: download timed out
+wget-exit=1
+AUSSAGE nested-gesperrt-example.com-podman=1
+-- mit Egress: Zugriff aus dem verschachtelten Container auf eine gesperrte Adresse ohne Namen (1.1.1.1, Port 80; Exit 0 = erreicht)
+wget: download timed out
+wget-exit=1
+AUSSAGE nested-gesperrt-1.1.1.1-podman=1
+-- Gegenstueck: derselbe Zugriff aus dem Container selbst (Exit 6 = Name nicht aufgeloest)
+curl: (6) Could not resolve host: example.com
+curl-exit=6
+---- 2026-10-19T05:34:17.558Z gleichzeitig: ollama serve + Pull und ein Lauf in der verschachtelten Laufzeit
+pull-exit=0 nested-exit=0
+CONCURRENT_NESTED_OK
+NAME            ID              SIZE      MODIFIED               
+smollm2:135m    9077fe9d2ae1    270 MB    Less than a second ago    
+AUSSAGE gleichzeitig-pull-exit-podman=0
+AUSSAGE gleichzeitig-nested-exit-podman=0
+AUSSAGE ollama-library-cpu-podman=1
+-- Volumes der Laufzeit
+u-boot-messung-amd64-pod-containers-k1
+u-boot-messung-amd64-pod-ollama-k1
+u-boot-messung-amd64-pod-workspace-k1
