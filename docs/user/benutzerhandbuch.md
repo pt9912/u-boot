@@ -1266,8 +1266,10 @@ einem von zwei Zuständen (ein Docker-Test prüft sie):
   Container dann **keine** Beschränkung und sein DNS ist unverändert; die Meldung steht auf
   der Standardfehlerausgabe des Startscripts (Container-Log), und `u-boot doctor` zeigt `failed`.
 - **DNS-Server startet nicht oder läuft unter einem anderen Benutzer:** Die Regeln mit der
-  Richtlinie `drop` stehen, `/etc/resolv.conf` zeigt nicht auf den lokalen DNS-Server: Es
-  gibt keine Namensauflösung, aber auch keine offene Verbindung.
+  Richtlinie `drop` stehen. Im ersten Lauf zeigt `/etc/resolv.conf` nicht auf den lokalen
+  DNS-Server (ein Docker-Test prüft das); in einem wiederholten Lauf bleibt der Eintrag
+  des vorigen Laufs stehen (gelesen, kein Test). In beiden Fällen gibt es keine
+  Namensauflösung, aber auch keine offene Verbindung.
 
 Das Startscript der Beschränkung ist im `postStartCommand` mit `&&` vor das Startscript des
 verschachtelten Docker-Daemons gesetzt (gelesen, kein Test mit Abbruch): Bei einem Abbruch startet
