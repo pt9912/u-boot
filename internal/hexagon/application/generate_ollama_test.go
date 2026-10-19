@@ -186,7 +186,7 @@ func TestGenerateDevcontainer_Ollama_Sandbox(t *testing.T) {
 // ADR-0024 decision 3 and 5, Verification-Report pins V-3 and V-5: the
 // supply-chain notice and the "no effect" notice carry neither
 // SecurityRelaxation nor DegradationFallback, so `--quiet` drops both
-// (the filter is the CLI's, see cmd/uboot TestRun_Generate_Quiet_OllamaNoticesDropped).
+// (the filter is the CLI's, see cmd/uboot TestRun_Generate_OllamaNotices).
 // Without the sandbox profile the Dockerfile has no block, the JSON no
 // volume, and the notice says that nothing was generated.
 func TestGenerateDevcontainer_Ollama_NoticesAreNotRelaxations(t *testing.T) {

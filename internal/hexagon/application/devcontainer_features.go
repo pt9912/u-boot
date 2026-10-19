@@ -142,9 +142,9 @@ func normaliseFeatureSources(in []string) ([]string, error) {
 // the render pipeline (T3: source + defaultVersion → JSON key form
 // `<source>:<version>`) and the catalogue lookup (T2: name →
 // source/version resolution when [ubootYAMLDevcontainerFeature.Source]
-// is empty). Slice-v1-devcontainer-features T0-(c) defines the
-// shape; adding a new built-in feature means: drop a new entry into
-// [featureCatalogue], done — no other code change.
+// is empty). A new OCI-feature entry in [featureCatalogue] needs no
+// other code; an entry with `dockerfileBlock` additionally needs the
+// Dockerfile block it names (see [dockerfileBlockFeatureActive]).
 //
 // `source` is the canonical OCI ref **without** URL scheme (e.g.
 // `ghcr.io/devcontainers/features/node`) because devcontainer.json
@@ -178,9 +178,8 @@ const featureOllama = "ollama"
 // match any catalogue key must declare a `source:` override and have
 // that source in [ubootYAMLFeatureSources.Allow] (T4 enforcement).
 //
-// The default-version slug is `1` across the board today; once
-// upstream tags drift apart the per-entry pin can be adjusted
-// without changing call sites.
+// `defaultVersion` is the per-entry pin (the major-version slug of the
+// upstream tag); an entry with `dockerfileBlock` carries none.
 func featureCatalogue() map[string]featureCatalogueEntry {
 	return map[string]featureCatalogueEntry{
 		"git": {

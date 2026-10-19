@@ -78,6 +78,8 @@ Die Pfade stammen aus dem Quelltext (Lesestand 2026-10-18); der Implementer prü
 | `docs/plan/planning/observations/BEO-APP/…` | entfällt | der zweite Beleg zur Pin-Alterung liegt aus dem Mess-Slice vor; hier nur bei einem dritten Auftreten |
 | `docs/reviews/` (Review-Report, Verification Evidence) | neu | Review und Verifikation |
 | diese Slice-Datei | update | Umsetzungsstand, Closure (§7) |
+| `cmd/uboot/main_test.go` | update | `TestRun_Generate_OllamaNotices`: der CLI-Filter von `--quiet` für die Ollama-Meldungen (die Meldungen tragen weder `SecurityRelaxation` noch `DegradationFallback`) |
+| `docs/plan/planning/in-progress/roadmap.md` | fremd | die Zeile aus `054091b` (Folge-Welle `welle-ollama-cloud-modelle`, nach dem Release der Egress-Ollama-Welle) steht im Bereich `1e57e82..HEAD`; sie gehört zur Folge-Welle, nicht zu diesem Slice |
 
 Abgleich der Tabelle gegen `git diff --stat` nach der **letzten** Fix-Runde (`AGENTS.md` §3.10); jede Zeile mit „bedingt“ wird als eingetreten oder entfallen markiert.
 
