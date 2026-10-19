@@ -63,7 +63,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 - **Neu-Laden der Liste im laufenden Container** — [`slice-v1-sandbox-egress-neuladen-entwurf`](../done/slice-v1-sandbox-egress-neuladen-entwurf.md), eigene Zusage und Sicherheitsentscheidung.
 - **Ändern der Liste** (`egress add` o. ä.) — `u-boot config set devcontainer.sandbox.egress.allow …` (`setEgressAllow`) bleibt der Weg; ein zweiter Schreibweg wäre eine neue Zusage.
 - **Wildcards in der Eingabe** — [`slice-v1-egress-wildcard-pruefung`](../done/slice-v1-egress-wildcard-pruefung.md).
-- **Die Hosts von Ollama** — [`slice-v1-devcontainer-feature-ollama`](../open/slice-v1-devcontainer-feature-ollama.md) trägt sie in `egressFeatureHosts()` ein; die Anzeige zeigt sie dann ohne weitere Änderung (belegt durch den Golden Case der Welle).
+- **Die Hosts von Ollama** — [`slice-v1-devcontainer-feature-ollama`](../in-progress/slice-v1-devcontainer-feature-ollama.md) trägt sie in `egressFeatureHosts()` ein; die Anzeige zeigt sie dann ohne weitere Änderung (belegt durch den Golden Case der Welle).
 
 ## 2. Definition of Done
 

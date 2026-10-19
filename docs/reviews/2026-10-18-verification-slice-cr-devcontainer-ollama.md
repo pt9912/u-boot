@@ -41,7 +41,7 @@ Keine Slice-, Wellen-, ADR-Kennung in den neuen Zeilen (`AGENTS.md` §3.4). Der 
 | `spec/lastenheft.md` | Zeile 1 | ok (Abschnitt 2) |
 | `done/slice-cr-devcontainer-ollama.md` | Zeile 2 | ok | <!-- d-check:ignore (Kennungen als Zitat) -->
 | `in-progress/roadmap.md` | Zeile 3 | ok: Arbeitszeile „In Arbeit: …“ ersetzt den Ruhe-Marker, Zustand und Anker ohne Chronik; Verweis der Welle-Zeile nachgezogen |
-| `done/slice-v1-cli-egress-anzeige.md`, `done/slice-v1-devcontainer-ollama-messung.md`, `done/slice-v1-sandbox-egress-neuladen-entwurf.md`, `open/README.md`, `done/slice-cr-cli-json-command-enum.md`, `open/slice-v1-devcontainer-feature-ollama.md`, `open/slice-v1-devcontainer-start-ohne-cli.md`, `open/slice-v2-spec-sandbox-egress-ollama.md`, `welle-sandbox-egress-ollama.md`, zwei Reports in `docs/reviews/` | Zeile 4 (Verweis-Nachzug) | ok; Diffs der Feature-, Spec-Slice-, Welle-, README- und Roadmap-Dateien gelesen: reine Pfad-Änderungen `open/` nach `in-progress/`, kein Inhalt | <!-- d-check:ignore (Kennungen als Zitat) -->
+| `done/slice-v1-cli-egress-anzeige.md`, `done/slice-v1-devcontainer-ollama-messung.md`, `done/slice-v1-sandbox-egress-neuladen-entwurf.md`, `open/README.md`, `done/slice-cr-cli-json-command-enum.md`, `in-progress/slice-v1-devcontainer-feature-ollama.md`, `open/slice-v1-devcontainer-start-ohne-cli.md`, `open/slice-v2-spec-sandbox-egress-ollama.md`, `welle-sandbox-egress-ollama.md`, zwei Reports in `docs/reviews/` | Zeile 4 (Verweis-Nachzug) | ok; Diffs der Feature-, Spec-Slice-, Welle-, README- und Roadmap-Dateien gelesen: reine Pfad-Änderungen `open/` nach `in-progress/`, kein Inhalt | <!-- d-check:ignore (Kennungen als Zitat) -->
 | `docs/reviews/2026-10-18-slice-cr-devcontainer-ollama.md` (neu) | Zeile 5 | ok | <!-- d-check:ignore (Kennungen als Zitat) -->
 | `CHANGELOG.md` | „unverändert“ | bestätigt: nicht im Diff |
 
@@ -73,7 +73,7 @@ Entscheidungs-Konformität gegen `ADR-0024` (`Accepted`): Absatz stimmt mit den 
 | F-7 INFO Freigabe nur im Gespräch | **ausgewiesen, nicht prüfbar** | Abschnitt 8 |
 | F-8 INFO Host-Werkzeuge im Review-Lauf | **ausgewiesen** | Register `BEO-WZG/host-werkzeug-ausserhalb-docker` (Ausweisung im Report; Zähler entscheidet die Closure); ein weiterer Beleg aus diesem Lauf siehe V-10 |
 
-### Folge-Slice-Pins (gelesen: `open/slice-v1-devcontainer-feature-ollama.md`, `open/slice-v2-spec-sandbox-egress-ollama.md`)
+### Folge-Slice-Pins (gelesen: `in-progress/slice-v1-devcontainer-feature-ollama.md`, `open/slice-v2-spec-sandbox-egress-ollama.md`)
 
 Gefragt war, ob die Pins als DoD oder Test getragen werden. Ergebnis je Pin:
 

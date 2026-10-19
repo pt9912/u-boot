@@ -9,11 +9,11 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — siebter Slice der Welle; ihm gehen [`slice-v1-devcontainer-ollama-messung`](../done/slice-v1-devcontainer-ollama-messung.md) (Quelle, Messwerte, Folge-ADR) und [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md) (Lastenheft) voraus; ihm folgt [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md).
+**Welle:** [`welle-sandbox-egress-ollama`](../welle-sandbox-egress-ollama.md) — siebter Slice der Welle; ihm gehen [`slice-v1-devcontainer-ollama-messung`](../done/slice-v1-devcontainer-ollama-messung.md) (Quelle, Messwerte, Folge-ADR) und [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md) (Lastenheft) voraus; ihm folgt [`slice-v2-spec-sandbox-egress-ollama`](../open/slice-v2-spec-sandbox-egress-ollama.md).
 
 **Bezug:** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Devcontainer-Features; um `ollama` erweitert durch den CR), [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (Lieferkette), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Sandbox-Profil), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Hosts des Modell-Pull), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Warnungen unter `--quiet`); [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md) und die Folge-ADR des Mess-Slice (Quelle, Pin, Prüfung).
 
-**Berührte Spec-Stellen:** [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen) (Katalog) und [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) (Hosts) bleiben bis [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md) ohne den Schlüssel; das Lastenheft ändert nur der CR.
+**Berührte Spec-Stellen:** [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen) (Katalog) und [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) (Hosts) bleiben bis [`slice-v2-spec-sandbox-egress-ollama`](../open/slice-v2-spec-sandbox-egress-ollama.md) ohne den Schlüssel; das Lastenheft ändert nur der CR.
 
 **Verantwortlich:** pt9912
 
@@ -41,7 +41,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 - **Anschluss an den Ollama des Hosts, GPU, Modellverwaltung, Feature-Optionen** (`pull`) — vom Projektinhaber ausgeschlossen bzw. Re-Evaluierungs-Trigger von [`ADR-0020`](../../adr/0020-drittanbieter-features-im-katalog.md); der Nutzer holt Modelle im Container.
 - **Weitere Agenten** — kein Agent außer Ollama genannt.
 - **Portweiterleitung des Servers nach außen** (`forwardPorts`) — [`LH-FA-DEV-005`](../../../../spec/lastenheft.md#lh-fa-dev-005--ports) lässt `forwardPorts` aus den Services entstehen; eine Änderung wäre eine Plan-Änderung (Muster `sshd`).
-- **Die Spezifikation** ([`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen), [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)) — sie folgt in [`slice-v2-spec-sandbox-egress-ollama`](slice-v2-spec-sandbox-egress-ollama.md).
+- **Die Spezifikation** ([`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen), [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion)) — sie folgt in [`slice-v2-spec-sandbox-egress-ollama`](../open/slice-v2-spec-sandbox-egress-ollama.md).
 
 ## 2. Definition of Done
 
