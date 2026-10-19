@@ -9,8 +9,8 @@ diese Datei wiederholt sie nicht. Skripte liegen unter `tools/messung/egress-wil
 
 ## Aufruf
 
-`run.sh <repo-wurzel> [fall...]` im Verzeichnis `tools/messung/egress-wildcard-pruefung/`, mit Fall aus `a a2 b c d d2 d3 cd-c cd-d`
-(ohne Angabe: `a a2 b c d2 d3 cd-c cd-d`). Voraussetzung: Docker mit Zugriff auf `debian:stable` und `--cap-add=NET_ADMIN`.
+`run.sh <repo-wurzel> [fall...]` im Verzeichnis `tools/messung/egress-wildcard-pruefung/`, mit Fall aus `a a2 b c d2 d3 cd-c cd-d`
+(ohne Angabe: alle acht; ein anderer Fall endet mit „unbekannter Fall“, Exit 2). Voraussetzung: Docker mit Zugriff auf `debian:stable` und `--cap-add=NET_ADMIN`.
 `run.sh` ruft `inner.sh` (Startscript `egress-init.sh.tmpl` mit ersetzter `hosts=`-Zeile) und `inner-cd.sh` (Messungen ohne Allowlist)
 in Wegwerf-Containern. Die Ausgabe wird in die Rohdatei in diesem Verzeichnis umgeleitet.
 
