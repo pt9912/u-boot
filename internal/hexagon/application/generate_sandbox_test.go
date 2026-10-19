@@ -670,7 +670,7 @@ func TestGenerateDevcontainer_SandboxEgress_UpstreamDNSOnlyForTheResolverUser(t 
 		for _, branch := range []string{
 			"does not exist\" >&2\n  write_status failed\n  exit 11\n",
 			"(uid $dns_uid)\" >&2\n  write_status failed\n  exit 11\n",
-			"did not start\" >&2\n  write_status failed\n  exit 11\n",
+			"did not start${old_alive:+ (the previous resolver was still running after 5 seconds)}\" >&2\n  write_status failed\n  exit 11\n",
 		} {
 			if !strings.Contains(script, branch) {
 				t.Errorf("policy %s: script lacks the abort branch %q:\n%s", policy, branch, script)
@@ -743,6 +743,15 @@ func TestGenerateDevcontainer_SandboxEgress_RerunIsOneTransaction(t *testing.T) 
 				t.Errorf("policy %s: %q at %d does not follow the previous step (%d); order: configuration, transaction, stop of the old resolver, wait, start, uid check, resolv.conf, status", policy, marker, at, prev)
 			}
 			prev = at
+		}
+		// The IPv6 table holds a chain with policy drop and the loopback rule.
+		for _, want := range []string{
+			`echo "add chain ip6 u_boot_egress6 output { type filter hook output priority 0; policy drop; }"`,
+			`echo "add rule ip6 u_boot_egress6 output oifname lo accept"`,
+		} {
+			if strings.Count(script, want) != 1 {
+				t.Errorf("policy %s: the input lacks the IPv6 line %q:\n%s", policy, want, script)
+			}
 		}
 		if !strings.Contains(script, `[ "$waited" -lt 50 ]`) {
 			t.Errorf("policy %s: the wait for the old resolver is not bounded", policy)

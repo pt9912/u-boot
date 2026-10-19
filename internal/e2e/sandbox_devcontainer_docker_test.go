@@ -409,7 +409,7 @@ live_dnsmasq() {
   echo $n
 }
 report() {
-  echo "RUN $1 exit=$2 $(grep '^result=' /var/lib/u-boot/status/egress) dnsmasq=$(live_dnsmasq) tables=$(sudo nft list tables | grep -c u_boot_egress) uid=$(awk '/^Uid:/ {print $2}' /proc/$(cat /run/u-boot-egress-dnsmasq.pid)/status) rule=$(id -u nobody) resolv=$(grep -c '^nameserver 127.0.0.1' /etc/resolv.conf) local=$(getent hosts api.github.com | grep -c .)"
+  echo "RUN $1 exit=$2 $(grep '^result=' /var/lib/u-boot/status/egress) dnsmasq=$(live_dnsmasq) tables=$(sudo nft list tables | grep -c u_boot_egress) uid=$(awk '/^Uid:/ {print $2}' /proc/$(cat /run/u-boot-egress-dnsmasq.pid)/status) rule=$(id -u nobody) resolv=$(grep -c '^nameserver 127.0.0.1' /etc/resolv.conf) local=$(getent hosts api.github.com | grep -c .) ip6drop=$(sudo nft list chain ip6 u_boot_egress6 output | grep -c 'policy drop') ip6lo=$(sudo nft list chain ip6 u_boot_egress6 output | grep -c 'oifname .lo. accept')"
 }
 h=$(awk '$2=="00000000" {print $3; exit}' /proc/net/route)
 gw=$(printf '%d.%d.%d.%d' 0x$(echo $h | cut -c7-8) 0x$(echo $h | cut -c5-6) 0x$(echo $h | cut -c3-4) 0x$(echo $h | cut -c1-2))
@@ -477,7 +477,7 @@ func TestE2E_SandboxDevcontainer_EgressRerun(t *testing.T) {
 		if code != 0 {
 			t.Fatalf("probe exit %d:\n%s", code, out)
 		}
-		runLine := regexp.MustCompile(`^RUN (\d+) exit=0 result=ok dnsmasq=1 tables=2 uid=(\d+) rule=(\d+) resolv=1 local=1$`)
+		runLine := regexp.MustCompile(`^RUN (\d+) exit=0 result=ok dnsmasq=1 tables=2 uid=(\d+) rule=(\d+) resolv=1 local=1 ip6drop=1 ip6lo=1$`)
 		runs := 0
 		for _, l := range strings.Split(out, "\n") {
 			if !strings.HasPrefix(l, "RUN ") {
@@ -485,7 +485,7 @@ func TestE2E_SandboxDevcontainer_EgressRerun(t *testing.T) {
 			}
 			m := runLine.FindStringSubmatch(strings.TrimSpace(l))
 			if m == nil || m[2] != m[3] {
-				t.Errorf("run line %q: want exit 0, status ok, one resolver, two tables, resolver uid = rule uid, resolv.conf on the resolver, allowed name resolved", l)
+				t.Errorf("run line %q: want exit 0, status ok, one resolver, two tables, a dropping IPv6 chain with its loopback rule, resolver uid = rule uid, resolv.conf on the resolver, allowed name resolved", l)
 				continue
 			}
 			runs++

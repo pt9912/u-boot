@@ -102,7 +102,9 @@ fi
 
 # Resolver switch: the new configuration is written; the old resolver is
 # stopped and awaited for at most 5 seconds (both bind 127.0.0.1:53), then the
-# new one starts.
+# new one starts. The message of a failed start names an old resolver that is
+# still running.
+old_alive=
 if [ -f "$pidfile" ]; then
   old_pid=$(cat "$pidfile")
   kill "$old_pid" 2>/dev/null || true
@@ -111,11 +113,12 @@ if [ -f "$pidfile" ]; then
     sleep 0.1
     waited=$((waited + 1))
   done
+  process_gone "$old_pid" || old_alive=1
 fi
 rm -f "$pidfile"
 
 if ! dnsmasq --conf-file="$conf"; then
-  echo "u-boot sandbox: egress restriction failed: the local resolver did not start" >&2
+  echo "u-boot sandbox: egress restriction failed: the local resolver did not start${old_alive:+ (the previous resolver was still running after 5 seconds)}" >&2
   write_status failed
   exit 11
 fi
