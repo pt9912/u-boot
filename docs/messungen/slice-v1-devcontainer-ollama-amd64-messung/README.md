@@ -2,7 +2,7 @@
 
 Rohdaten (diese Dateien) und Skripte
 ([`tools/messung/ollama-amd64/`](../../../tools/messung/ollama-amd64/)) der Messung des Slice
-[`slice-v1-devcontainer-ollama-amd64-messung`](../../plan/planning/in-progress/slice-v1-devcontainer-ollama-amd64-messung.md)
+[`slice-v1-devcontainer-ollama-amd64-messung`](../../plan/planning/done/slice-v1-devcontainer-ollama-amd64-messung.md)
 (Messfragen A0 bis A10; Ergebnisse und Befunde: dort §7). Die Messung ist **keine** Verifikation im Sinn von
 [`ADR-0024`](../../plan/adr/0024-ollama-im-sandbox-devcontainer.md) Entscheidung 10: Sie ist ein Lauf auf einem Host und kein CI-Lauf.
 

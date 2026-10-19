@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-v1-devcontainer-ollama-amd64-messung`](../../../../in-progress/slice-v1-devcontainer-ollama-amd64-messung.md)
+**Vorgang:** [`slice-v1-devcontainer-ollama-amd64-messung`](../../../../done/slice-v1-devcontainer-ollama-amd64-messung.md)
 **Fund:** Messfrage A6 auf einem nativen Linux-`amd64`-Host (Docker 29.9.1): im zweiten vollständigen Lauf `nested-pull-mit-egress-docker=1` (`i/o timeout`) und `nested-pull-mit-egress-nach-15s-docker=0`; im ersten Lauf `nested-pull-mit-egress-docker=0` (erster Versuch). Rohdaten: [`rohdaten-lauf2-07-docker.txt`](../../../../../../messungen/slice-v1-devcontainer-ollama-amd64-messung/rohdaten-lauf2-07-docker.txt), [`rohdaten-07-docker.txt`](../../../../../../messungen/slice-v1-devcontainer-ollama-amd64-messung/rohdaten-07-docker.txt). Die Zählung „einem von zwei Läufen“ ist an diesen beiden committeten Dateien prüfbar (Review F-1 behoben, Verification Abschnitt 2).
 
 **Beleg-Qualität:** am Rohdatum bestätigt (Verifier); ein Host, zwei Läufe, Ursache nicht untersucht.
