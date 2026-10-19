@@ -18,11 +18,12 @@ Twelfth release. **Egress list display (`u-boot egress list`), Ollama as a sandb
 values of the `command` field. A wildcard entry (`*.example.org`) in `devcontainer.sandbox.egress.allow` is still rejected with exit code `10`, and the error now names the host to enter;
 the manual states the measured behaviour for subdomains. The built-in catalogue gains `ollama` (local language models, **CPU only**, effective **only with the sandbox profile**): the generated Dockerfile
 installs Ollama 0.40.6 from the pinned, checksum-verified release archive, and with the egress restriction the default allowlist gains the two hosts of the model pull.
-**Not included: cloud models of Ollama** (names ending in `-cloud`). Such a model can be pulled, but it does not run: the host `ollama.com` is not on the allowlist, and signing in was not examined (no account).
+**Not included: cloud models of Ollama** (names ending in `-cloud`). Such a model can be pulled, but it does not run: the host `ollama.com` is not on the allowlist, and `ollama signin` without an account reported `account unavailable` (signing in with an account was not examined).
 **A changed egress allowlist takes effect only after a rebuild of the container**; there is no reload of a running container, and a restart keeps the old list.
 `u-boot --help` links the user manual, and the `--dry-run` log lines of `config set` and `generate` read in the conditional. Lastenheft 0.17.0.
 **Measured** with Docker 29.5.2 on Colima 0.10.3 (arm64) and, for the `ollama` feature, in two runs on **one** Linux x86_64 host with a native Docker Engine 29.9.1 (2026-10-19; no CI run);
-**not measured:** Docker Desktop, Linux behind a VM, larger models, whether the second model-pull host stays the same, a nested `podman build` on `amd64`.
+**not measured:** Docker Desktop, Linux behind a VM, larger models, whether the second model-pull host stays the same.
+**Known on `amd64`:** a nested `podman build` behind the egress restriction fails at a `RUN` step that expects an unlisted name not to resolve: `example.com` resolves (IPv6 addresses only), because the nested container asks the upstream resolver of the Docker host directly, and the restriction allows that; the connection to the address stays blocked. Measured in two runs on one Linux x86_64 host (native Docker Engine 29.9.1); with another upstream resolver (`--dns 9.9.9.9`) the build passed; on Colima, arm64, and in CI not measured.
 
 ### Added
 
@@ -87,11 +88,11 @@ installs Ollama 0.40.6 from the pinned, checksum-verified release archive, and w
   Docker Engine 29.9.1 (2026-10-19, two runs, no CI run): a nested `podman run` and a nested `docker run` of a small image worked with and without the restriction. Running the startup script
   again in a container with an active restriction (two measurements of 30 runs) left the restriction off in 27 and 28 runs for a measured span of up to 48 and 50 ms (a lower bound; a connection attempt to the container's gateway on port 9 was refused by the gateway instead of dropped) and made name resolution of an
   allowed name fail for 30 to 76 ms in 30 and 27 runs; no connection by a blocked name succeeded. A nested Docker container reached `example.com` and a blocked address
-  during the restriction, a nested Podman container did not (two runs; the manual already named nested traffic as outside the restriction). Not changed: the restriction stays a guardrail
+  during the restriction, a nested Podman container did not (two runs; the manual already named nested traffic as outside the restriction). The name resolution of a nested Podman container is not restricted either (see the lead). Not changed: the restriction stays a guardrail
   ([`LH-FA-DEV-007`](spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
 - The user manual says that a cloud model of Ollama (a model name ending in `-cloud`) cannot be run in the sandbox devcontainer: `ollama pull` succeeded and the model appeared in
-  `ollama list`, but `ollama run` failed because the name `ollama.com` did not resolve (the host is not on the allowlist, and the feature does not add it), and `ollama signin` reported
-  `account unavailable`; whether a cloud model works with an account was not examined. Measured once on Linux x86_64 with a native Docker Engine 29.9.1 and Ollama 0.40.6 (2026-10-19, behind
+  `ollama list`, but `ollama run` failed because the name `ollama.com` did not resolve (the host is not on the allowlist, and the feature does not add it), and `ollama signin` without an account reported
+  `account unavailable`; signing in with an account, and whether a cloud model works with an account, was not examined. Measured once on Linux x86_64 with a native Docker Engine 29.9.1 and Ollama 0.40.6 (2026-10-19, behind
   the egress restriction); **not measured:** other environments ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features),
   [`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)).
 

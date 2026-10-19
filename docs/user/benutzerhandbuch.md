@@ -1225,6 +1225,14 @@ ist die Auflösung, nicht der Durchsatz eines Datenkanals über DNS. Wer die
 Regeln ändern will, braucht weiter `sudo`. Messstand: Docker 29.5.2 auf Colima
 0.10.3 (arm64), je ein Lauf; andere Umgebungen sind nicht gemessen.
 
+Das gilt auch für verschachtelte Container: Ein verschachtelter Podman-Container fragt
+den Upstream-Resolver des Docker-Hosts direkt, und die Beschränkung lässt das zu. Ein
+`podman build` hinter der Beschränkung scheitert deshalb auf Linux (`amd64`, native Docker
+Engine 29.9.1, zwei Läufe) an einem `RUN`-Schritt, der erwartet, dass ein Name außerhalb der
+Liste nicht auflöst: `example.com` löste auf (nur IPv6-Adressen), die Verbindung zur Adresse
+blieb gesperrt. Mit einem anderen Upstream-Resolver (`--dns 9.9.9.9`) lief der Bau durch.
+Auf Colima (arm64) und in der CI ist das nicht gemessen.
+
 Standardmäßig erlaubt sind:
 
 | Quelle | Hosts |
@@ -1351,6 +1359,8 @@ registry.npmjs.org  feature:claude-code, feature:node
   `u-boot doctor` warnt bei `docker` mit Beschränkung. Gemessen auf Linux (`amd64`) in
   zwei Läufen: Ein verschachtelter Docker-Container erreichte `example.com` und eine
   gesperrte Adresse; ein verschachtelter Podman-Container nicht (Zeitüberschreitung).
+  Die Namensauflösung eines verschachtelten Podman-Containers beschränkt die Beschränkung nicht
+  (siehe *Grenze der Namensauflösung* im Abschnitt zur Egress-Beschränkung).
 - Führen Sie das Startscript in einem laufenden Container mit aktiver Beschränkung erneut aus
   (es löscht seine Regeln und baut sie neu auf), gilt die Beschränkung kurz nicht. Gemessen
   auf Linux (`amd64`, ein Host) in zwei Messungen zu je 30 Läufen: In 27 und 28 Läufen wurde währenddessen ein
@@ -1625,8 +1635,8 @@ ollama run smollm2:135m "Reply with the single word OK."
   Endung `-cloud`, etwa `gpt-oss:120b-cloud`) lässt sich ziehen: `ollama pull` meldet `success`,
   und das Modell steht in `ollama list`. Es läuft aber nicht: `ollama run` scheitert, weil sich
   `ollama.com` nicht auflösen lässt; der Host steht nicht in der Allowlist, und `u-boot` nimmt ihn
-  für `ollama` nicht auf. `ollama signin` meldete ohne Konto `account unavailable`; ob ein
-  Cloud-Modell mit Konto läuft, ist nicht gemessen. Gemessen in einem Lauf auf Linux (`amd64`,
+  für `ollama` nicht auf. `ollama signin` meldete ohne Konto `account unavailable`; eine Anmeldung mit Konto
+  und ob ein Cloud-Modell mit Konto läuft, sind nicht gemessen. Gemessen in einem Lauf auf Linux (`amd64`,
   native Docker Engine 29.9.1, Ollama `0.40.6`) hinter der Egress-Beschränkung.
 - **Grenzen der Messung:** Zwei Messumgebungen (auf dem `amd64`-Host zwei Läufe), Ollama `0.40.6`:
   Docker 29.5.2 auf Colima 0.10.3 (`arm64`) und, am 2026-10-19, Linux x86_64 (`amd64`) mit
@@ -1699,7 +1709,8 @@ Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
   geprüft. Ein verschachtelter Lauf (`podman run` eines kleinen Images, ohne und
   hinter der Egress-Beschränkung, mit einem Pull hinter ihr) ist auf Linux x86_64
   (`amd64`, native Docker Engine 29.9.1, 2026-10-19) in zwei Läufen gemessen, zusammen mit dem
-  Feature `ollama`; `podman build` auf `amd64` und CI sind nicht gemessen.
+  Feature `ollama`; `podman build` auf `amd64` hinter der Egress-Beschränkung scheitert an der Namensauflösung
+  (siehe *Grenze der Namensauflösung* im Abschnitt zur Egress-Beschränkung); die CI ist nicht gemessen.
   Podman 6 unterstützt nur cgroups v2 (laut Release-Notes, nicht gemessen);
   Hosts mit cgroups v1 sind davon betroffen.
   Unter einer Ubuntu-24.04-VM mit dem Schalter
