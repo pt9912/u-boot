@@ -16,7 +16,7 @@ Anlass: Validator-Bericht [`2026-10-19-validation-welle-sandbox-egress-ollama`](
 
 **Berührte Spec-Stellen:** — (der Slice liest [`SPEC-047`](../../../../spec/spezifikation.md#spec-047--feature-ollama-im-sandbox-devcontainer-installation-volume-meldungen-und-grenzen) und [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion); nach [`slice-v2-spec-zielbild`](../done/slice-v2-spec-zielbild.md) tragen sie keinen Messstand, und dieser Slice trägt keinen hinein; zeigt die Messung eine Abweichung des Verhaltens von einer dortigen Zusage, ist das ein Befund, siehe §4). Der Verweis zeigt aufwärts: Die Spezifikation nennt diesen Slice nie.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-19.
 
