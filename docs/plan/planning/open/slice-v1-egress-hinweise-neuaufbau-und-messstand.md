@@ -16,7 +16,7 @@ Anlass: Validator-Bericht [`2026-10-19-validation-welle-sandbox-egress-ollama`](
 
 **Berührte Spec-Stellen:** [`SPEC-046`](../../../../spec/spezifikation.md#spec-046--egress-anzeige-u-boot-egress-list-berechnung-ausgabe-und-abgrenzung) (Egress-Anzeige; trägt die `Notes:`-Zeilen), [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) (Subdomain-Aussage und Messstand), [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) (Verhalten unter `--quiet`). Der Slice **liest** sie; der Architect liest ihren Inhalt (hier sind nur die Titel gelesen) und benennt, welche Stelle eine Nachführung braucht. Der Verweis zeigt aufwärts: Die Spec nennt diesen Slice nie.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-19.
 
