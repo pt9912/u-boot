@@ -16,7 +16,7 @@ Anlass: Äußerung des Projektinhabers vom 2026-10-19 — „Was hat „bestäti
 
 **Berührte Spec-Stellen:** — (das Lastenheft ist Rang 1 und ändert nur seine Historie; `SPEC-*` und `ARC-*` bleiben unverändert, gelesen in §3). Der Verweis zeigt aufwärts: Das Lastenheft nennt diesen Slice nie.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-19.
 
