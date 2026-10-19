@@ -9,7 +9,7 @@ OpenTelemetry, …) und wiederkehrende Artefakte (README, CHANGELOG,
 `.env.example`).
 
 > **Stand:** aktuelle Version `v0.11.0` (GHCR-Image, sechs Plattform-Binaries,
-> `.deb`-/`.rpm`-Pakete, Homebrew-Tap). Der Devcontainer-Katalog hat 13 Features, darunter `sshd` und `claude-code`.
+> `.deb`-/`.rpm`-Pakete, Homebrew-Tap). Der Devcontainer-Katalog hat 14 Features, darunter `sshd`, `claude-code` und `ollama` (nur im Sandbox-Profil).
 > `podman build` läuft im Sandbox-Devcontainer, der Podman 6.1.4 enthält (gemessen auf Colima, arm64; Linux ohne VM, Docker Desktop, amd64 und CI nicht gemessen); bestehende
 > `nestedRuntime: podman`-Projekte brauchen `/dev/fuse` und `/dev/net/tun` auf dem Container-Host: Eine Container-Engine ohne sie startet den Container nicht, und `u-boot doctor` meldet ein fehlendes `/dev/fuse` auf einem Linux-Host außerhalb eines Containers als Fehler (Exit-Code `11`). `nestedRuntime: docker` wird unter Docker auf Linux und auf Colima zugesagt, nicht auf Docker Desktop.
 > `u-boot doctor` und `u-boot generate devcontainer` weisen aus, wenn ein Sandbox-Container auf einem Rückfall läuft (kein Docker-Daemon, `vfs`-Speicher, keine Egress-Beschränkung). Die `--dry-run`-Zusammenfassungen sagen, was geschehen würde („Would …“). `--quiet` zeigt nur Fehler und vier Ausweisungen, die sichtbar bleiben. Verlauf: Release-Tabelle unten und [`CHANGELOG.md`](CHANGELOG.md).
@@ -151,8 +151,8 @@ Ergebnis: `u-boot.yaml`, `compose.yaml`, `README.md`, `CHANGELOG.md`,
 deklarierten Port.
 
 Eine Dev-Toolchain wird über den Devcontainer-Features-Katalog
-ergänzt (13 Built-in-Features: `git`, `docker-cli`,
-`node`, `java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, `python`, `sdkman`, `sshd`, `homebrew` und `claude-code` (beide Drittanbieter)):
+ergänzt (14 Built-in-Features: `git`, `docker-cli`,
+`node`, `java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, `python`, `sdkman`, `sshd`, `homebrew` und `claude-code` (beide Drittanbieter) sowie `ollama` (nur CPU, nur im Sandbox-Profil)):
 
 ```bash
 u-boot init my-service --devcontainer

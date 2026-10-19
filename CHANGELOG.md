@@ -13,6 +13,20 @@ this file is the same format applied to u-boot itself.
 
 ### Added
 
+- Devcontainer features: the built-in catalogue gains `ollama` (Ollama, local language models, CPU only). `u-boot config set devcontainer.features.ollama.enabled true` makes the
+  sandbox Dockerfile install Ollama 0.40.6 from the pinned release archive of `ollama/ollama` (SHA-256 checked before the extraction; the GPU libraries are left out; `zstd` is removed again)
+  and mounts the named volume `<project>-ollama-${devcontainerId}` on `/home/vscode/.ollama`. It is no OCI feature and renders no key under `features`; it takes effect only with the sandbox
+  profile (without it `generate devcontainer` says so and generates nothing). The upstream publishes no signature for the archive; `generate devcontainer` reports that with a warning that is no security relaxation,
+  and it and the "no effect" notice go under `--quiet`. The image starts no server and sets neither a listen address nor a port forwarding: the server the user starts listens on loopback only, and a call
+  through the container address is refused. A `version` override without `source` is rejected with exit code `10`. With the egress restriction the default allowlist gains `registry.ollama.ai` and
+  `dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com` (measured for two models at one time and place; whether the second name stays the same is **not measured**). Models survive removing the
+  container; surviving an image rebuild is **not measured**. Measured with Docker 29.5.2 on Colima 0.10.3 (arm64) and Ollama 0.40.6; `amd64` is pinned but its run is **not verified**; not provided:
+  GPU acceleration, a connection to an Ollama of the host, managing models
+  ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features),
+  [`LH-NFA-SEC-004`](spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte),
+  [`LH-FA-DEV-008`](spec/lastenheft.md#lh-fa-dev-008--egress-restriktion),
+  [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging),
+  [ADR-0024](docs/plan/adr/0024-ollama-im-sandbox-devcontainer.md)).
 - `u-boot --help` links the user manual (German) next to the README: the manual of the installed release (`blob/v<version>`) and the current manual (`blob/main`).
   A build whose version is not a release version (`X.Y.Z` or `X.Y.Z-rc.N`), such as a development or self-built binary, shows only the link to `main`;
   the tag link of a release candidate can lead nowhere once that pre-release tag has been deleted

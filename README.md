@@ -8,7 +8,7 @@ configuration, service add-ons (PostgreSQL, Keycloak, OpenTelemetry, …),
 and the usual recurring artefacts (README, CHANGELOG, `.env.example`).
 
 > **Status:** current version `v0.11.0` (GHCR image, six-platform binaries,
-> `.deb`/`.rpm` packages, Homebrew tap). The devcontainer catalogue has 13 features, including `sshd` and `claude-code`.
+> `.deb`/`.rpm` packages, Homebrew tap). The devcontainer catalogue has 14 features, including `sshd`, `claude-code` and `ollama` (sandbox profile only).
 > `podman build` works in the sandbox devcontainer, which carries Podman 6.1.4 (measured on Colima, arm64; Linux without a VM, Docker Desktop, amd64 and CI not measured), and existing
 > `nestedRuntime: podman` projects need `/dev/fuse` and `/dev/net/tun` on the container host: a container engine without them refuses to start the container, and `u-boot doctor` reports a missing `/dev/fuse` on a Linux host outside a container as an error (exit code `11`). `nestedRuntime: docker` is promised on Docker under Linux and on Colima, not on Docker Desktop.
 > `u-boot doctor` and `u-boot generate devcontainer` disclose when a sandbox container runs on a fallback (no Docker daemon, `vfs` storage, no egress restriction). `--dry-run` summaries say what would happen ("Would …"). `--quiet` shows only errors and four disclosures that stay visible. History: release table below and [`CHANGELOG.md`](CHANGELOG.md).
@@ -149,8 +149,8 @@ directories — and a healthy Postgres container ready at the declared
 port.
 
 Add a development toolchain via the devcontainer features catalogue
-(13 built-in features: `git`, `docker-cli`, `node`,
-`java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, `python`, `sdkman`, `sshd`, `homebrew` and `claude-code` (both third-party)):
+(14 built-in features: `git`, `docker-cli`, `node`,
+`java`, `go`, `cpp`, `kubectl-helm`, `postgres-client`, `python`, `sdkman`, `sshd`, `homebrew` and `claude-code` (both third-party), and `ollama` (CPU only, sandbox profile only)):
 
 ```bash
 u-boot init my-service --devcontainer

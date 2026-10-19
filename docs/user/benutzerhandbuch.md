@@ -815,6 +815,7 @@ Ohne weitere Freigabe aktivierbar (`homebrew` und `claude-code` sind Drittanbiet
 | `sshd` | SSH-Server (offizielles Feature `sshd`, Login-Dienst auf Port 2222 mit Passwort- und Schlüssel-Login, Root-Login erlaubt; siehe [Login-Dienst `sshd`](#login-dienst-sshd-optional)); keine Optionen (`gatewayPorts`, `version` kennt der Katalog nicht) |
 | `homebrew` | Homebrew; **Drittanbieter-Feature** (`meaningful-ooo`, Version `2`): `u-boot generate devcontainer` weist es aus, sein Installationsskript läuft beim Image-Build |
 | `claude-code` | Claude Code CLI; **Drittanbieter-Feature** (`anthropics`, Version `1`): `u-boot generate devcontainer` weist es aus, sein Installationsskript läuft beim Image-Build; braucht das Feature `node` (siehe [Claude Code](#claude-code-optional)); keine Optionen |
+| `ollama` | Ollama (lokale Sprachmodelle, nur CPU); wirkt nur im Sandbox-Profil. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv (SHA-256 geprüft, vom Upstream nicht signiert; `u-boot generate devcontainer` weist das aus), dazu ein benanntes Volume für die Modelle; keine Optionen, `version` nur zusammen mit `source` (siehe [Ollama](#ollama-optional)) |
 
 #### Externe Feature-Quellen freigeben
 
@@ -1239,6 +1240,7 @@ Standardmäßig erlaubt sind:
 | Feature `sshd` | keine zusätzlichen Hosts |
 | Feature `homebrew` | `formulae.brew.sh`, `ghcr.io`, `pkg-containers.githubusercontent.com` |
 | Feature `claude-code` | `registry.npmjs.org`, `api.anthropic.com` (Hosts der Anmeldung nicht: siehe [Claude Code](#claude-code-optional)) |
+| Feature `ollama` | `registry.ollama.ai`, `dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com` (Modell-Pull; Stabilität des zweiten Namens nicht gemessen: siehe [Ollama](#ollama-optional)) |
 | Clone-Quelle | der Host von `devcontainer.sandbox.repository` beziehungsweise `origin` |
 | Ihre Ergänzungen | `devcontainer.sandbox.egress.allow` (kleingeschriebene Hostnamen, ohne Schema, Port oder Wildcard) |
 
@@ -1521,6 +1523,76 @@ keinen Berechtigungsmodus.
   der Pin `1` schwimmt, spätere Versionen können abweichen. Ein echter Login und
   eine echte Anfrage mit gültigem Schlüssel wurden nicht ausgeführt.
 
+#### Ollama (optional)
+
+```bash
+u-boot config set devcontainer.features.ollama.enabled true
+u-boot generate devcontainer
+```
+
+Das Feature `ollama` installiert Ollama (lokale Sprachmodelle) im Sandbox-Container,
+nur für die CPU. Es ist kein OCI-Feature und erscheint nicht unter `features` in
+`devcontainer.json`: Das erzeugte Dockerfile lädt beim Image-Build das Archiv
+`ollama-linux-<arch>.tar.zst` aus dem Release `0.40.6` von `github.com/ollama/ollama`,
+prüft die SHA-256-Prüfsumme **vor** dem Entpacken (bei einer Abweichung bricht der Build
+ab) und entpackt es nach `/usr/local`. Version und Prüfsummen stehen an einer Stelle im
+Dockerfile. Eine andere Version gibt es nicht: `version` ohne `source` weist `u-boot` mit
+Exit-Code `10` ab, und eine `source:`-Überschreibung macht den Schlüssel zu einem
+externen Feature (Freigabe wie unter
+[Externe Feature-Quellen freigeben](#externe-feature-quellen-freigeben)) ohne
+Dockerfile-Block.
+
+- **Nur im Sandbox-Profil:** Ohne Sandbox-Profil erzeugt `u-boot` keinen
+  Dockerfile-Block und kein Volume und meldet, dass das Feature keine Wirkung hat.
+- **Die Lieferkette hat eine Grenze:** Der Upstream veröffentlicht für das Archiv keine
+  Signatur und keine Herkunftsbescheinigung (gemessen für das Release `0.40.6`). Die
+  Prüfsumme stammt aus demselben Release. Sie schützt davor, dass eine Datei des Releases
+  später ausgetauscht wird; sie schützt nicht vor einem Release, das von Anfang an
+  schadhaft war. `u-boot generate devcontainer` weist das aus. Die Meldung ist keine
+  Sicherheitslockerung des Profils und entfällt unter `--quiet`, ebenso die Meldung, dass
+  das Feature ohne Sandbox-Profil keine Wirkung hat.
+- **Kein Auto-Start:** Der Container startet den Server nicht; `devcontainer.json`
+  trägt keinen Startbefehl dafür. Sie starten ihn im Container selbst (gemessen: bereit
+  nach höchstens zwei Sekunden).
+- **Nur Loopback:** `u-boot` setzt weder `OLLAMA_HOST` noch eine Portweiterleitung. Der
+  Server lauscht dann nur auf `127.0.0.1:11434`; ein Aufruf über die Adresse des
+  Containers wird abgelehnt. Das gilt für die gepinnte Version; setzen Sie `OLLAMA_HOST`
+  selbst, ist das Ihre Entscheidung und nicht zugesagt.
+- **Nur CPU:** Das Dockerfile entpackt die Verzeichnisse `cuda_*` und `vulkan` des
+  Archivs nicht; der Server meldet `library=cpu`. Der Download des Archivs bleibt bei jedem
+  Image-Build groß (gemessen: 1,56 GB für `arm64`, 1,44 GB für `amd64`); der Bau läuft
+  ohne Egress-Beschränkung.
+
+Modell holen und nutzen (im Terminal des Containers):
+
+```bash
+ollama serve > /tmp/ollama.log 2>&1 &
+ollama pull smollm2:135m
+ollama run smollm2:135m "Reply with the single word OK."
+```
+
+- **Modell-Speicher:** Die Modelle liegen unter `/home/vscode/.ollama` in dem benannten
+  Volume `<projekt>-ollama-${devcontainerId}` und überstehen das **Löschen des Containers**
+  (ein neuer Container mit demselben Volume listet das Modell). Dass sie den Neubau des
+  Images überstehen, ist nicht gemessen und nicht zugesagt. Das Volume enthält außerdem
+  das Schlüsselpaar `id_ed25519`, das der Server beim ersten Start anlegt; geben Sie das
+  Volume nicht weiter. Wofür Ollama den Schlüssel verwendet, ist nicht gemessen.
+- **Egress:** Mit der Beschränkung erlaubt `u-boot` für `ollama` zwei Hosts:
+  `registry.ollama.ai` (Manifeste) und `dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com`
+  (Modell-Dateien). Damit lief der Pull von `qwen2.5:0.5b` und `smollm2:135m`. **Nicht
+  gemessen:** ob der Name des zweiten Hosts über Zeit, Region und weitere Modelle
+  derselbe bleibt. Wechselt er, bricht der Pull ab (gemessen ohne diesen Host: nach 66
+  Sekunden `max retries exceeded`); dann tragen Sie den neuen Namen in
+  `devcontainer.sandbox.egress.allow` ein. `ollama.com` ist nicht aufgenommen: gesperrt
+  meldet der Server beim Start zwei Warnzeilen, Start, Pull und Lauf funktionierten
+  (gemessen).
+- **Grenzen der Messung:** Docker 29.5.2, Colima 0.10.3, `arm64`, Ollama `0.40.6`.
+  `amd64` ist nur durch die gepinnte Prüfsumme und den Archivinhalt belegt, ein Lauf dort
+  ist **nicht verifiziert**. Nicht gemessen: Docker Desktop, Linux ohne VM, größere
+  Modelle und Mindest-Speicher, `OLLAMA_NO_CLOUD`, ein Start des Servers über die
+  Dev-Container-CLI. GPU-Beschleunigung, ein Anschluss an einen Ollama-Dienst des Hosts
+  und die Verwaltung von Modellen durch `u-boot` gibt es nicht.
+
 #### Zugangsdaten (Git und Agent)
 
 Zugangsdaten stehen **nie** im Image, im Volume, in `u-boot.yaml` oder in einer
@@ -1553,7 +1625,8 @@ erzeugten Datei:
 
 Die Volumes heißen `<projekt>-workspace-${devcontainerId}` und (mit
 verschachteltem Podman) `<projekt>-containers-${devcontainerId}` beziehungsweise (mit
-verschachteltem Docker) `<projekt>-docker-${devcontainerId}`. Das
+verschachteltem Docker) `<projekt>-docker-${devcontainerId}`, mit dem Feature `ollama` zusätzlich
+`<projekt>-ollama-${devcontainerId}`. Das
 Dev-Containers-Werkzeug löst `devcontainerId` pro Projektordner auf.
 
 - Parallele Instanzen desselben Projekts starten Sie aus **getrennten Ordnern**
