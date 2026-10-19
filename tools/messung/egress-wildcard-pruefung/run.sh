@@ -1,6 +1,6 @@
 #!/bin/bash
 # Reproduziert die Messung der Fälle a bis d (Egress, Subdomains und Wildcard).
-# Aufruf: run.sh <repo-wurzel> [fall...]   mit Fall aus: a a2 b c d d2 d3 cd-c cd-d
+# Aufruf: run.sh <repo-wurzel> [fall...]   mit Fall aus: a a2 b c d2 d3 cd-c cd-d
 # Voraussetzung: Docker mit Zugriff auf `debian:stable` und `--cap-add=NET_ADMIN`.
 # Der Container führt das Startscript `egress-init.sh.tmpl` mit ersetzter
 # `hosts=`-Zeile aus (inner.sh) beziehungsweise die Messungen ohne Allowlist
