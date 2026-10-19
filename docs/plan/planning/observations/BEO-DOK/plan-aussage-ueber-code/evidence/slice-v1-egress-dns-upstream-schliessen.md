@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-v1-egress-dns-upstream-schliessen`](../../../../in-progress/slice-v1-egress-dns-upstream-schliessen.md)
+**Vorgang:** [`slice-v1-egress-dns-upstream-schliessen`](../../../../done/slice-v1-egress-dns-upstream-schliessen.md)
 **Fund:** Verification-Report [`2026-10-19-verification-slice-v1-egress-dns-upstream-schliessen`](../../../../../../reviews/2026-10-19-verification-slice-v1-egress-dns-upstream-schliessen.md): V1 die Zählung der `failed`-Zweige des Templates stand nach der Fix-Runde an drei Stellen auf einer anderen Zahl als im Template und im Unit-Test (Replay-Tabelle, Test-Kommentar, Phase-2-Notiz des Slice); V3 die Plan-Zeile „nicht gelesen auf Berührung“ für `open/README.md` und Roadmap, deren Zeilen nach der Umsetzung überholt waren („Umsetzung erst nach Messbefund und Entscheidung“); V4 Zeilenbezüge auf das Template in einem offenen Slice, die der Diff um bis zu 26 Zeilen verschob. Behoben in der Fix-Runde und bei der Closure. Rückfall nach der Verkörperung in `AGENTS.md` §3.10; siebenundzwanzigster Vorgang.
 
 **Beleg-Qualität:** am Baum bestätigt (Verifier: Template und Slice gelesen, Zahl am Unit-Test gegengelesen).

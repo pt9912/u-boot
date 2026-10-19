@@ -1,7 +1,7 @@
 # Messprotokoll: Pfad zum Upstream-Resolver für Prozesse ohne `sudo`
 
 Rohdaten und Ablauf der Messung (Fragen D1 bis D5) des Slice
-[`slice-v1-egress-dns-upstream-schliessen`](../../plan/planning/in-progress/slice-v1-egress-dns-upstream-schliessen.md)
+[`slice-v1-egress-dns-upstream-schliessen`](../../plan/planning/done/slice-v1-egress-dns-upstream-schliessen.md)
 (Auswertung, Einordnung und Empfehlung: dort, Abschnitt *Umsetzung (Implementer)*). Skripte, Hilfs-Dockerfile und Sonden liegen unter
 `tools/messung/egress-dns-upstream/` (Ablage: [`docs/messungen/README.md`](../README.md)). Gemessen am 2026-10-19.
 

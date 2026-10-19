@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** ohne Welle, Release-Zuordnung: nächster Release nach `v0.12.0` (Zuordnung des Planners; die Entscheidung über die Reihenfolge liegt beim Projektinhaber). Der Slice hat keine Closure-Bedingung, die von seiner DoD verschieden wäre. Er folgt dem Code von [`slice-v1-egress-dns-upstream-schliessen`](../in-progress/slice-v1-egress-dns-upstream-schliessen.md) (Reihenfolge „Spezifikation nach dem Code“, Muster [`slice-v2-spec-sandbox-egress-ollama`](../done/slice-v2-spec-sandbox-egress-ollama.md)); der Start verlangt, dass jener Slice in `done/` liegt (§4).
+**Welle:** ohne Welle, Release-Zuordnung: nächster Release nach `v0.12.0` (Zuordnung des Planners; die Entscheidung über die Reihenfolge liegt beim Projektinhaber). Der Slice hat keine Closure-Bedingung, die von seiner DoD verschieden wäre. Er folgt dem Code von [`slice-v1-egress-dns-upstream-schliessen`](../done/slice-v1-egress-dns-upstream-schliessen.md) (Reihenfolge „Spezifikation nach dem Code“, Muster [`slice-v2-spec-sandbox-egress-ollama`](../done/slice-v2-spec-sandbox-egress-ollama.md)); der Start verlangt, dass jener Slice in `done/` liegt (§4).
 
 **Bezug:** [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Egress-Restriktion), [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Degradation und Strenge der Sandbox-Fähigkeiten, `onUnavailable`); [`ADR-0026`](../../adr/0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md) (`Accepted`; Entscheidung 2: Abbruch auch bei `warn`; Entscheidung 5: die Spezifikationsfrage geht an diesen Slice), [`ADR-0012`](../../adr/0012-devcontainer-egress-firewall.md).
 Anlass: Auflage 1 des Verification-Reports [`2026-10-19-verification-slice-v1-egress-dns-upstream-schliessen`](../../../reviews/2026-10-19-verification-slice-v1-egress-dns-upstream-schliessen.md): Die Spezifikation trägt drei Stellen, die der Code nach [`ADR-0026`](../../adr/0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md) überholt hat, und für die Frage aus Entscheidung 5 gab es keinen Anker.
@@ -72,7 +72,7 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 
 ## 4. Trigger
 
-**Start** (`open` → `next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-egress-dns-upstream-schliessen`](../in-progress/slice-v1-egress-dns-upstream-schliessen.md) liegt in `done/`; kein anderer Slice in `in-progress/` (WIP-Limit 1); die Reihenfolge entscheidet der Projektinhaber.
+**Start** (`open` → `next` → `in-progress`): `Verantwortlich:` gesetzt; [`slice-v1-egress-dns-upstream-schliessen`](../done/slice-v1-egress-dns-upstream-schliessen.md) liegt in `done/`; kein anderer Slice in `in-progress/` (WIP-Limit 1); die Reihenfolge entscheidet der Projektinhaber.
 
 **Rückführungen — vorab benannt:**
 
