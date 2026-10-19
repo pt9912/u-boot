@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v1-egress-hinweise-neuaufbau-und-messstand`](../../../../done/slice-v1-egress-hinweise-neuaufbau-und-messstand.md)
+**Fund:** Verification-Report [`2026-10-19-verification-slice-v1-egress-hinweise-neuaufbau-und-messstand`](../../../../../../reviews/2026-10-19-verification-slice-v1-egress-hinweise-neuaufbau-und-messstand.md) §7 (INFO): Die Plan-Zeile zum E2E-Test nannte „Kommentar, Zeile 197“; der Kommentar beginnt nach der Änderung in Zeile 196 (Zeilenangabe der Plan-Tabelle nach der Umsetzung verrutscht, Dateiliste vollständig). Behoben: Die Zeile nennt den Testnamen `TestE2E_SandboxDevcontainer_EgressSubdomains` statt einer Zeile. Rückfall nach der Verkörperung in `AGENTS.md` §3.10; fünfundzwanzigster Vorgang.
+
+**Beleg-Qualität:** am Baum bestätigt (Verifier, Diff-Stat `1e445d3..HEAD` gegen die Tabellenzeilen gelesen).

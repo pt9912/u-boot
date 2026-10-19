@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-In Arbeit: [`slice-v1-egress-hinweise-neuaufbau-und-messstand`](slice-v1-egress-hinweise-neuaufbau-und-messstand.md) (Hinweis auf den Neuaufbau bei `generate devcontainer`, Subdomain-Texte auf das Gemessene gekürzt; wellenlos).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
