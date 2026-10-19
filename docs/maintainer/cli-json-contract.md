@@ -1204,8 +1204,7 @@ Datum, keine Diagnose:
 - **Vertrag:** [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)
   bindet **alle** `--json`-Ausgaben an das Enum von `command`. Das Enum in
   [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) nennt `egress`;
-  `command: "egress"` liegt damit im Vertrag. Der Wortlaut ist aus dem freigegebenen Befehl
-  abgeleitet; die Bestätigung des Projektinhabers steht vor dem Release aus. Das Schema der
+  `command: "egress"` liegt damit im Vertrag. Das Schema der
   Vorschau-Ausgabe ([SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json))
   führt den Wert `egress` im Enum; die Egress-Anzeige beschreibt
   [SPEC-046](../../spec/spezifikation.md#spec-046--egress-anzeige-u-boot-egress-list-berechnung-ausgabe-und-abgrenzung).
