@@ -69,7 +69,7 @@ Verbindliche Make-Targets ([SPEC-008](../../spec/spezifikation.md#spec-008--eige
 
 ```bash
 make lint            # nur statische Analyse
-make gates           # lint + test + coverage-gate
+make gates           # lint + test + coverage-gate + docs-check + baseline-verify + ablage-pruefung
 make ci              # gates + govulncheck + image-scan
 ```
 
