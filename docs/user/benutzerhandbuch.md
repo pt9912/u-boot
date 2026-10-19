@@ -1614,8 +1614,10 @@ ollama run smollm2:135m "Reply with the single word OK."
   gemessen:** ob der Name des zweiten Hosts über Zeit, Region und weitere Modelle
   derselbe bleibt. Wechselt er, bricht der Pull ab (gemessen ohne diesen Host: nach 66
   Sekunden `max retries exceeded`); dann tragen Sie den neuen Namen in
-  `devcontainer.sandbox.egress.allow` ein. Auf Linux (`amd64`) lief der Pull beider Modelle in
-  beiden Läufen über dieselben zwei Hosts (im ersten Lauf 8,7 und 10,5 Sekunden, an einem Netzstandort);
+  `devcontainer.sandbox.egress.allow` ein. Auf Linux (`amd64`) lief der Pull beider Modelle im
+  ersten Lauf (8,7 und 10,5 Sekunden, an einem Netzstandort) über genau diese zwei Hosts, die dort
+  mitgeschnitten wurden; im zweiten Lauf gelang der Pull ebenfalls, die Hosts sind dort nicht
+  mitgeschnitten;
   `ollama.com`, `example.com` und `huggingface.co` ließen sich nicht auflösen. `ollama.com` ist nicht aufgenommen: gesperrt
   meldet der Server beim Start zwei Warnzeilen, Start, Pull und Lauf funktionierten
   (gemessen).

@@ -23,7 +23,7 @@ this file is the same format applied to u-boot itself.
   container, and they survived a rebuild of the image in the measurements below. Measured with Docker 29.5.2 on Colima 0.10.3 (arm64) and Ollama 0.40.6, and in **two runs on one host** on
   2026-10-19: Linux x86_64 (`amd64`), native Docker Engine 29.9.1 without a VM, kernel 6.8.0, `kernel.apparmor_restrict_unprivileged_userns=0`, Ollama 0.40.6. On that host the generated
   Dockerfile built (download of the archive 1.44 GB, image 1.01 GB against 0.95 GB without the block), the server listened on loopback only and reported `library=cpu`, `smollm2:135m` and
-  `qwen2.5:0.5b` were pulled and run behind the egress restriction through the two hosts above, `ollama.com`, `example.com` and `huggingface.co` stayed blocked, the models survived
+  `qwen2.5:0.5b` were pulled and run behind the egress restriction (in the first run through exactly the two hosts above, which were recorded there; the second run pulled successfully, its hosts were not recorded), `ollama.com`, `example.com` and `huggingface.co` stayed blocked, the models survived
   removing the container and a rebuild with Dev Container CLI 0.89.0 (`devcontainer up --remove-existing-container --build-no-cache`), and the combination with `nestedRuntime: podman` and with
   `nestedRuntime: docker` built, left the package list unchanged and ran a small nested container while the server and a pull ran. This is no CI run: the two Docker integration tests of the feature ran in each
   run with a visible pass on that host; a run in CI is **not measured**. **Not measured:** Docker Desktop, Linux behind a VM, larger models, whether the second host stays the same over time and
