@@ -1,0 +1,122 @@
+
+######## Messstand
+Zeit (UTC): 2026-10-20T19:09:04Z
+Host: Linux 6.8.0-147-generic x86_64
+u-boot: u-boot version 0.12.0-dev
+docker context: default
+Docker Client 29.9.1 (linux/amd64), Server 29.9.1 (linux/amd64)
+Engine: Ubuntu 24.04.5 LTS, Architektur x86_64, Cgroup 2
+colima: nicht gefunden
+Ordner im geteilten Bereich: /tmp/ubl-shared
+Ordner außerhalb: /tmp/ubl-outside
+
+######## Projekt: Standardprofil, geteilter Bereich (Ordner unter /tmp/ubl-shared)
+Projektpfad: /tmp/ubl-shared/ubl-FG8Qe7
+Initialized u-boot project "probe".
+
+Created:
+  - docker/
+  - scripts/
+  - docs/
+  - .devcontainer/
+  - README.md
+  - CHANGELOG.md
+  - compose.yaml
+  - .env.example
+  - .gitignore
+  - .devcontainer/devcontainer.json
+  - .devcontainer/Dockerfile
+  - u-boot.yaml
+-> exit=0 dauer=0 s
+
+######## Standardprofil, geteilter Bereich: up
+-> exit=0 dauer=6 s
+Umschlag (Auszug):
+"status":"warn" "exitCode":0 "containerId":"ead5692b73506dc65c8e6fca43feba8807554c931e03b8cd24e4a28cda6fc02d" 
+stderr (letzte 5 Zeilen):
+Container: ead5692b7350
+Label devcontainer.local_folder: /tmp/ubl-shared/ubl-FG8Qe7
+Label devcontainer.config_file: /tmp/ubl-shared/ubl-FG8Qe7/.devcontainer/devcontainer.json
+Einhaengungen mit docker.sock: 0
+Benutzer im Container: vscode (uid 1000)
+kein Workspace-Volume: kein Marker
+
+######## Standardprofil, geteilter Bereich: down
+Devcontainer stopped: container ead5692b7350 (not removed)
+-> exit=0 dauer=1 s
+laeuft nach down: false
+Devcontainer container ead5692b7350 is not running; nothing to stop
+-> exit=0 dauer=0 s
+
+######## Standardprofil, geteilter Bereich: up (nach down)
+gleicher Container: ja
+
+######## Standardprofil, geteilter Bereich: up --recreate
+neuer Container: ja
+alter Container noch da: nein
+
+######## Standardprofil, geteilter Bereich: down (Aufräumen folgt)
+Devcontainer stopped: container 358dc5b3d378 (not removed)
+-> exit=0 dauer=0 s
+
+######## Projekt: Sandbox-Profil, geteilter Bereich (Ordner unter /tmp/ubl-shared)
+Projektpfad: /tmp/ubl-shared/ubl-kDSJPq
+Initialized u-boot project "probe".
+
+Created:
+  - docker/
+  - scripts/
+  - docs/
+  - .devcontainer/
+  - README.md
+  - CHANGELOG.md
+  - compose.yaml
+  - .env.example
+  - .gitignore
+  - .devcontainer/devcontainer.json
+  - .devcontainer/Dockerfile
+  - u-boot.yaml
+
+Warning (LH-FA-DEV-006): sandbox profile: no git remote 'origin' found; no clone step generated. Add a remote (or set devcontainer.sandbox.repository) and run `u-boot generate devcontainer` to add it
+-> exit=0 dauer=0 s
+
+######## Sandbox-Profil, geteilter Bereich: up
+-> exit=0 dauer=8 s
+Umschlag (Auszug):
+"status":"warn" "exitCode":0 "containerId":"08e41b42567820c11f5f748e949a11e38ef405c16f7c31a75d516f4bf3821124" 
+stderr (letzte 5 Zeilen):
+Container: 08e41b425678
+Label devcontainer.local_folder: /tmp/ubl-shared/ubl-kDSJPq
+Label devcontainer.config_file: /tmp/ubl-shared/ubl-kDSJPq/.devcontainer/devcontainer.json
+Einhaengungen mit docker.sock: 0
+Benutzer im Container: vscode (uid 1000)
+Marker geschrieben in /workspaces/probe
+
+######## Sandbox-Profil, geteilter Bereich: down
+Devcontainer stopped: container 08e41b425678 (not removed)
+-> exit=0 dauer=1 s
+laeuft nach down: false
+Devcontainer container 08e41b425678 is not running; nothing to stop
+-> exit=0 dauer=0 s
+
+######## Sandbox-Profil, geteilter Bereich: up (nach down)
+gleicher Container: ja
+
+######## Sandbox-Profil, geteilter Bereich: up --recreate
+neuer Container: ja
+alter Container noch da: nein
+Marker nach --recreate: marker
+
+######## Sandbox-Profil, geteilter Bereich: down (Aufräumen folgt)
+Devcontainer stopped: container 0196638c308b (not removed)
+-> exit=0 dauer=0 s
+
+######## Probe der Grenze: Ordner außerhalb des geteilten Bereichs
+Projektpfad: /tmp/ubl-outside/ubl-JOafIJ
+-> exit=0 dauer=4 s
+Umschlag (Auszug):
+"status":"warn" "exitCode":0 
+stderr (letzte 5 Zeilen):
+
+######## Ende
+fertig
