@@ -649,13 +649,39 @@ func TestLauncher_Docker_S6_LimitRemoteEnvValueIsOnHelperCommandLine(t *testing.
 	}
 }
 
+// Limit of LH-FA-DEV-009 (documented in the port and in the slice): with
+// `containerEnv` the resolved value is in `Config.Env` of the started
+// devcontainer, as long as the container exists; the launcher does not mask
+// container metadata. The test pins this observation; if it turns red, the
+// value does not stay in the metadata and the limit may be dropped from the
+// text. The `remoteEnv` pattern leaves no such trace (see
+// `…ValueIsNeverInImageLabelFileOrCommandLine`).
+func TestLauncher_Docker_S6_LimitContainerEnvValueIsInDevContainerMetadata(t *testing.T) {
+	suffix := randomHex(t)
+	name := "UBL_TEST_META_" + suffix
+	value := "placeholder-meta-" + suffix
+	t.Setenv(name, value)
+	folder := newProject(t, imageConfig(map[string]any{
+		"containerEnv": map[string]string{"UBL_META": "${localEnv:" + name + "}"},
+	}), nil)
+	res := mustUp(t, driven.DevcontainerUpOptions{ProjectFolder: folder, EnvNames: []string{name}})
+	doc, _ := inspect(t, res.ContainerID)
+	want := "UBL_META=" + value
+	for _, entry := range doc.Config.Env {
+		if entry == want {
+			return
+		}
+	}
+	t.Errorf("Config.Env of the devcontainer lacks %q: containerEnv does not leave the value in the metadata; drop the limit", want)
+}
+
 // LH-FA-DEV-009, S6: a devcontainer.json that writes `${localEnv:NAME}` into
 // `containerEnv` makes the CLI print `docker run … -e X=<value>` on its
 // stderr. The launcher replaces the value by a placeholder in the progress it
 // forwards and in the error text, on success and on failure. Guard: the same
 // value is on a command line inside the helper container (the CLI writes it
 // there; the launcher cannot mask a process list), so the helper scan sees
-// what it is meant to see, and the stream without masking would carry it.
+// the value, and the `[masked]` in the progress stands for a replaced value.
 func TestLauncher_Docker_S6_ContainerEnvValueIsMaskedInProgressAndError(t *testing.T) {
 	suffix := randomHex(t)
 	name := "UBL_TEST_MASK_" + suffix

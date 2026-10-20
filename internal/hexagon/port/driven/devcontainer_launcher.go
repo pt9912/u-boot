@@ -12,9 +12,9 @@ import (
 // failed: the build of the helper image, the start of the helper container,
 // a CLI outcome other than `success`, or `docker stop`
 // ([DevcontainerLauncher]); also a request the launcher rejects before any
-// docker call (second line of defence behind [ValidateDevcontainerProjectFolder]
-// and [ValidateDevcontainerEnvName], which the application runs first and
-// maps to exit code 10). The CLI maps it to exit code 12 (LH-FA-CLI-006); a
+// docker call: the launcher applies [ValidateDevcontainerProjectFolder] and
+// [ValidateDevcontainerEnvName] itself, so a caller that did not run them
+// first gets this error. The CLI maps it to exit code 12 (LH-FA-CLI-006); a
 // missing Docker binary, an unreachable daemon and a remote engine stay
 // [ErrDockerUnavailable] and [ErrContainerEngineNotLocal] (exit code 11).
 var ErrDevcontainerRuntime = errors.New("devcontainer runtime failed")
@@ -59,8 +59,11 @@ type DevcontainerUpOptions struct {
 	// The devcontainer CLI itself writes the value of a variable that
 	// devcontainer.json references through `${localEnv:NAME}` into the
 	// command lines of `docker` processes inside the helper container
-	// (`docker run -e`, `docker exec -e`) for the duration of the command.
-	// Names that are not set on the host are skipped.
+	// (`docker run -e`, `docker exec -e`) for the duration of the command;
+	// with `containerEnv` the resolved value also stays in the metadata
+	// (`Config.Env`) of the started devcontainer for as long as the
+	// container exists. The launcher masks neither. Names that are not
+	// set on the host are skipped.
 	EnvNames []string
 	// Recreate removes an existing container before the start
 	// (`--remove-existing-container`); volumes stay.
@@ -70,7 +73,11 @@ type DevcontainerUpOptions struct {
 	// fails.
 	ReadOnlyProject bool
 	// Progress receives the build output of the helper image and the
-	// stderr of the devcontainer CLI; nil discards it. The value of a
+	// stderr of the devcontainer CLI; nil discards it. While EnvNames
+	// names a set variable with a maskable value, the launcher holds back
+	// the last bytes of the stderr stream (up to the length of the longest
+	// value minus one) until the next write or the end of the call, so the
+	// last line of a step can appear late. The value of a
 	// variable in EnvNames is replaced by a placeholder in what the
 	// launcher forwards here and in its error texts, where the value
 	// appears byte for byte and is at least four bytes long; a value
@@ -80,7 +87,11 @@ type DevcontainerUpOptions struct {
 }
 
 // DevcontainerUpResult is the result line of a successful
-// `devcontainer up`.
+// `devcontainer up`. The launcher reads the line from the unmasked stdout of
+// the CLI and returns its fields as data for the caller, not as an output
+// stream: a passed value that equals a field (a user name, a part of the
+// container ID) leaves the field unchanged, and a caller that prints a field
+// decides what appears.
 type DevcontainerUpResult struct {
 	// ContainerID is the ID of the started devcontainer (lower-case hex).
 	ContainerID string
@@ -95,8 +106,10 @@ type DevcontainerUpResult struct {
 // Container CLI in a short-lived helper container that holds the engine
 // socket; `Stop` stops the container with `docker stop`.
 //
-// Both methods check the environment first (Docker binary on the `PATH`,
-// daemon answers, engine is local) and fail with [ErrDockerUnavailable] or
+// Each method first rejects an invalid argument as [ErrDevcontainerRuntime]
+// without a docker call (`Up`: project folder, then variable names; `Stop`:
+// container ID), then checks the environment (Docker binary on the `PATH`,
+// daemon answers, engine is local) and fails with [ErrDockerUnavailable] or
 // [ErrContainerEngineNotLocal]; every later failure is
 // [ErrDevcontainerRuntime]. A cancelled context ends `Up` with the context
 // error after the helper container has been removed.

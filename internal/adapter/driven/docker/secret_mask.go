@@ -4,15 +4,16 @@ import (
 	"bytes"
 	"io"
 	"sort"
+	"strings"
 	"sync"
 )
 
 const (
 	// maskPlaceholder replaces every masked value.
 	maskPlaceholder = "[masked]"
-	// minMaskedValueLen is the shortest value that is masked. A shorter
-	// value would turn the replaced text into noise; the limit is part of
-	// the promise of [driven.DevcontainerUpOptions.Progress].
+	// minMaskedValueLen is the shortest value that is masked; the replaced
+	// text of a shorter value is noise. The limit is part of the promise of
+	// [driven.DevcontainerUpOptions.Progress].
 	minMaskedValueLen = 4
 )
 
@@ -42,6 +43,16 @@ func newMaskingWriter(dst io.Writer, values []string) *maskingWriter {
 	}
 	sort.SliceStable(w.values, func(i, j int) bool { return len(w.values[i]) > len(w.values[j]) })
 	return w
+}
+
+// maskString returns s with the values replaced as a maskingWriter replaces
+// them in a stream.
+func maskString(s string, values []string) string {
+	var out strings.Builder
+	w := newMaskingWriter(&out, values)
+	_, _ = w.Write([]byte(s))
+	_ = w.Flush()
+	return out.String()
 }
 
 // Write implements [io.Writer].

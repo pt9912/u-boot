@@ -188,19 +188,20 @@ func (l *Launcher) EnsureImage(ctx context.Context, progress io.Writer) (string,
 
 // runUp starts the helper container and reads the result line. A helper
 // container that outlives a failed or cancelled run is removed by name.
+// stdout is kept unmasked and only parsed: the result line is data for the
+// caller, and the error texts that quote it are masked. stderr goes through
+// the masking writer before it reaches the tail buffer and the progress.
 func (l *Launcher) runUp(ctx context.Context, image, name string, envNames []string, opts driven.DevcontainerUpOptions) (driven.DevcontainerUpResult, error) {
 	stdout := &tailBuffer{limit: upStdoutLimit}
 	stderr := &tailBuffer{limit: upStderrTail}
 	values := l.passedValues(envNames)
-	maskedStdout := newMaskingWriter(stdout, values)
 	maskedStderr := newMaskingWriter(io.MultiWriter(stderr, progressSinkOrDiscard(opts.Progress)), values)
 	cmd := exec.CommandContext(ctx, l.binary, runArgs(name, image, envNames, opts)...)
 	cmd.Cancel = func() error { return cmd.Process.Signal(os.Interrupt) }
 	cmd.WaitDelay = l.abortGrace
-	cmd.Stdout = maskedStdout
+	cmd.Stdout = stdout
 	cmd.Stderr = maskedStderr
 	runErr := cmd.Run()
-	_ = maskedStdout.Flush()
 	_ = maskedStderr.Flush()
 	if runErr != nil {
 		detail := ""
@@ -217,7 +218,7 @@ func (l *Launcher) runUp(ctx context.Context, image, name string, envNames []str
 	}
 	result, err := parseUpResult(stdout.String())
 	if err != nil {
-		return driven.DevcontainerUpResult{}, fmt.Errorf("devcontainer up: %s (%s): %w", err.Error(), stderr.String(), driven.ErrDevcontainerRuntime)
+		return driven.DevcontainerUpResult{}, fmt.Errorf("devcontainer up: %s (%s): %w", maskString(err.Error(), values), stderr.String(), driven.ErrDevcontainerRuntime)
 	}
 	return result, nil
 }

@@ -439,8 +439,8 @@ func TestLauncher_Up_ResultLineSurvivesLargeStdout(t *testing.T) {
 }
 
 // LH-FA-DEV-009: the value of a passed variable is replaced by a placeholder
-// in the progress the adapter forwards, in its error texts and in the result,
-// also when the value is split over two writes.
+// in the progress the adapter forwards and in its error texts, also when the
+// value is split over two writes.
 func TestLauncher_Up_MasksPassedValues(t *testing.T) {
 	const secret = "placeholder-token-value"
 	runLine := "docker run -e X=" + secret + " --rm image\n"
@@ -448,7 +448,7 @@ func TestLauncher_Up_MasksPassedValues(t *testing.T) {
 		name            string
 		setup           func(t *testing.T, f *fakeDocker)
 		fails           bool
-		placeholderIn   string // "progress", "error" or "result"
+		placeholderIn   string // "progress" or "error"
 		placeholderWant bool
 	}{
 		{"stderr, run succeeds", func(t *testing.T, f *fakeDocker) { f.write(t, "run-stderr", runLine) }, false, "progress", true},
@@ -465,9 +465,6 @@ func TestLauncher_Up_MasksPassedValues(t *testing.T) {
 		{"outcome message", func(t *testing.T, f *fakeDocker) {
 			f.write(t, "run-stdout", `{"outcome":"error","message":"hook printed `+secret+`"}`+"\n")
 		}, true, "error", true},
-		{"result line carries the value", func(t *testing.T, f *fakeDocker) {
-			f.write(t, "run-stdout", strings.Replace(launcherSuccessOut, "vscode", secret, 1)+"\n")
-		}, false, "result", true},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -477,11 +474,11 @@ func TestLauncher_Up_MasksPassedValues(t *testing.T) {
 			opts.EnvNames = []string{"GIT_TOKEN"}
 			var progress bytes.Buffer
 			opts.Progress = &progress
-			res, err := f.launcher(map[string]string{"GIT_TOKEN": secret}).Up(context.Background(), opts)
+			_, err := f.launcher(map[string]string{"GIT_TOKEN": secret}).Up(context.Background(), opts)
 			if (err != nil) != tc.fails {
 				t.Fatalf("Up error = %v, want failure %v", err, tc.fails)
 			}
-			texts := map[string]string{"progress": progress.String(), "result": res.RemoteUser}
+			texts := map[string]string{"progress": progress.String()}
 			if err != nil {
 				texts["error"] = err.Error()
 			}
@@ -492,6 +489,92 @@ func TestLauncher_Up_MasksPassedValues(t *testing.T) {
 			}
 			if tc.placeholderWant && !strings.Contains(texts[tc.placeholderIn], "[masked]") {
 				t.Errorf("%s %q shows no placeholder: the probe cannot tell masking from absence", tc.placeholderIn, texts[tc.placeholderIn])
+			}
+		})
+	}
+}
+
+// LH-FA-DEV-009, ADR-0028 Entscheidung 3: the result line is read from the
+// unmasked stdout. A passed value that occurs in it (as the outcome, as a
+// part of the container ID, as a field value) neither disturbs the detection
+// of success nor changes a field of the result; the fields are data for the
+// caller, not output.
+func TestLauncher_Up_ResultLineMayCarryThePassedValue(t *testing.T) {
+	for _, value := range []string{"success", "outcome", "0123", "abcdef0123456789", "vscode", "/workspaces/project", "containerId"} {
+		t.Run(value, func(t *testing.T) {
+			f := newFakeDocker(t)
+			opts := upOptions()
+			opts.EnvNames = []string{"GIT_TOKEN"}
+			res, err := f.launcher(map[string]string{"GIT_TOKEN": value}).Up(context.Background(), opts)
+			if err != nil {
+				t.Fatalf("Up with the value %q in the result line: %v", value, err)
+			}
+			want := driven.DevcontainerUpResult{
+				ContainerID:           strings.Repeat("0123456789abcdef", 4),
+				RemoteUser:            "vscode",
+				RemoteWorkspaceFolder: "/workspaces/project",
+			}
+			if res != want {
+				t.Errorf("result = %+v, want %+v", res, want)
+			}
+		})
+	}
+}
+
+// A passed value in the message of a failed outcome, or equal to the outcome,
+// is masked in the error text; the failure itself stays ErrDevcontainerRuntime.
+func TestLauncher_Up_MasksValueInFailedOutcome(t *testing.T) {
+	f := newFakeDocker(t)
+	f.write(t, "run-stdout", `{"outcome":"error","message":"hook printed error-token-value"}`+"\n")
+	opts := upOptions()
+	opts.EnvNames = []string{"GIT_TOKEN", "OTHER_TOKEN"}
+	env := map[string]string{"GIT_TOKEN": "error-token-value", "OTHER_TOKEN": "error"}
+	_, err := f.launcher(env).Up(context.Background(), opts)
+	if !errors.Is(err, driven.ErrDevcontainerRuntime) {
+		t.Fatalf("error = %v, want ErrDevcontainerRuntime", err)
+	}
+	for _, value := range env {
+		if strings.Contains(err.Error(), value) {
+			t.Errorf("the value %q is in the error text %q", value, err)
+		}
+	}
+	if !strings.Contains(err.Error(), "[masked]") {
+		t.Errorf("error %q shows no placeholder", err)
+	}
+}
+
+// The held-back end of stderr is released when the call ends. On success the
+// closing line of the CLI (no final newline), which a value of 23 bytes holds
+// back, reaches the progress; on failure the fake binary's last line
+// `run-boom` does, in the progress and in the error text.
+func TestLauncher_Up_ReleasesHeldStderrTail(t *testing.T) {
+	const secret = "placeholder-token-value"
+	const closing = "closing line of the CLI"
+	for _, fails := range []bool{false, true} {
+		name, stderr, want := "run succeeds", "docker run -e X="+secret+" --rm\n"+closing, "docker run -e X=[masked] --rm\n"+closing
+		if fails {
+			name, stderr = "run fails", stderr+"\n"
+			want += "\nrun-boom"
+		}
+		t.Run(name, func(t *testing.T) {
+			f := newFakeDocker(t)
+			f.write(t, "run-stderr", stderr)
+			if fails {
+				f.flag(t, "run-fail")
+			}
+			opts := upOptions()
+			opts.EnvNames = []string{"GIT_TOKEN"}
+			var progress bytes.Buffer
+			opts.Progress = &progress
+			_, err := f.launcher(map[string]string{"GIT_TOKEN": secret}).Up(context.Background(), opts)
+			if (err != nil) != fails {
+				t.Fatalf("Up error = %v, want failure %v", err, fails)
+			}
+			if got := progress.String(); got != want+"\n" && got != want {
+				t.Errorf("progress = %q, want %q", got, want)
+			}
+			if fails && !strings.Contains(err.Error(), want) {
+				t.Errorf("error %q lacks the end of stderr %q", err, want)
 			}
 		})
 	}
