@@ -102,7 +102,7 @@ Die Liefer-Punkte sind drei (ADR · Lastenheft-Wortlaut-Vorschlag · Folge-Slice
 
 - [ ] **Entscheidungs-ADR (Rolle Architect):** ein neues ADR (nächste freie Nummer, MADR-Form, `Proposed`; `Accepted` durch den Projektinhaber) hält fest: Wahl a2 mit Vergleich der Optionen a1, a′, b, c, d; Belegbasis und die Liste „nicht gemessen, nicht zugesagt“ aus der Tabelle oben; Lieferkette (Pin-Form für `@devcontainers/cli` und die Basis-Images, Integritätsprüfung, Pflege) nach dem Muster von [`ADR-0023`](../../adr/0023-podman-aus-podman-static-im-sandbox-devcontainer.md) und [`ADR-0024`](../../adr/0024-ollama-im-sandbox-devcontainer.md); Socket-Haltung (kurzlebig, `--rm`, nicht im gestarteten Container) und ihre Ausweisung in der Befehlsausgabe; Befehlsform `u-boot devcontainer up` / `down` (Flags, Exit-Codes 11 und 12, `--quiet`, `--json`); Port im Hexagon (I/O im Driven-Adapter); Zusage-Menge, die dem Wortlaut „Linux und macOS mit Colima“ nur so weit folgt, wie Belegbasis und Tests des Umsetzungs-Slice sie tragen. `docs/plan/adr/README.md` führt es im Index.
 - [ ] **Lastenheft-Wortlaut-Vorschlag** in der Closure-Notiz (§7), als Alt/Neu je Stelle: die neue Anforderung (Kennung nach Schema des Lastenhefts durch den Architect), die Zeile(n) in [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle) samt Priorität, der Bezug zu [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen) und [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (der Hilfs-Container ist nicht das erzeugte Ergebnis, die Lockerung wird ausgewiesen), ggf. [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) zu `--quiet`. Das Lastenheft trägt keine Messstände (nur Zusage-Mengen). Geschrieben wird er erst im CR-Slice nach Freigabe.
-- [ ] **Folge-Slices als Dateien in `open/`** (Kennungen vergibt der Architect nach dem ADR; mindestens Lastenheft-CR · Code · Spezifikation, höchstens fünf, Handbuch und `CHANGELOG.md` im Code-Slice), jeder mit Plan-Tabelle (§3.10 gelesen, nicht vermutet), Bezug, DoD und Trigger; `docs/plan/planning/open/README.md` führt sie im Bestand. Der Code-Slice nennt die Docker-Tests mit Wächter für S1, S2, S3, S5, S6, S7, S8 und S9 aus der Tabelle oben.
+- [ ] **Folge-Slices als Dateien in `open/`** (Kennungen vergibt der Architect nach dem ADR; mindestens Lastenheft-CR · Code · Spezifikation, höchstens fünf, Handbuch und `CHANGELOG.md` im Code-Slice), jeder mit Plan-Tabelle (§3.10 gelesen, nicht vermutet), Bezug, DoD und Trigger; `docs/plan/planning/open/README.md` führt sie im Bestand. Der Code-Slice nennt die Docker-Tests mit Wächter für S1, S2, S3, S4, S5, S6, S7, S8 und S9 aus der Tabelle oben.
 - [ ] **Priorität und Release-Zuordnung** sind vom Projektinhaber entschieden und im ADR oder in §7 vermerkt (Vorschlag oben).
 - [ ] `make gates` grün (Exit-Code von `make` selbst), `make docs-check` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
@@ -164,7 +164,67 @@ DoD vollständig, Review-Report und Verification-Evidence liegen vor, Closure-No
 
 ## 7. Closure-Notiz
 
-*(Wird bei der Closure gefüllt: Wortlaut-Vorschlag, Folge-Slices, Steering-Loop-Eintrag.)*
+*(Die Closure-Bullets — was funktioniert hat, Steering-Loop-Eintrag, Register, Risiken, Paarungen — füllt der Planner bei der Closure. Die drei Abschnitte darunter sind das Ergebnis der Rolle Architect und die Liefer-Punkte der DoD.)*
+
+### Entscheidungs-ADR
+
+[`ADR-0028`](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md), `Proposed`; `Accepted` setzt der Projektinhaber (Freigabe-Punkte a bis i). Gewählt ist a2 mit Vergleich gegen a1, a′, b, c, d und e. **Verlagerung von S1, S3, S4 und S8 in die Docker-Tests des Umsetzungs-Slice: bestätigt.** S4 ist am Messweg teilweise belegt (Stop/`up`, `--remove-existing-container`), die Tests prüfen ihn am Befehl und ergänzen `down` und das Überleben eines benannten Volumes; die DoD-Zeile „Folge-Slices“ nannte S4 nicht und nennt ihn jetzt. Die Verlagerung von S2, S5, S6, S7 und S9 bleibt wie in §1.
+
+### Lastenheft-Wortlaut-Vorschlag (Alt/Neu je Stelle; geschrieben wird er erst im CR-Slice nach Freigabe)
+
+Gelesen am 2026-10-20 in `spec/lastenheft.md`: [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen) (Mindestdateien, der Befehl erzeugt keine Datei), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) (letzte der Familie `LH-FA-DEV`, die neue Anforderung bekommt die Nummer 010), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle), Versionsfeld `0.17.0`, §16 Historie (letzte Zeile `0.17.0`). Das Lastenheft trägt keine Messstände und keine Prozesszustände; die Zusage-Menge folgt dem Wortlaut von [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Version 0.7.0: „unter Docker auf Linux und unter Colima (Linux-VM)“). Die Priorität `V2` und die Versionsnummer (nächste freie Minor-Version zum Zeitpunkt des CR; `0.18.0` ist durch [`slice-cr-lastenheft-messstaende`](../open/slice-cr-lastenheft-messstaende.md) vorgesehen) sind offen.
+
+**Stelle 1 — neue Anforderung** in §4.3, nach [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer). Alt: — (neu). Neu:
+
+> ### LH-FA-DEV-010 – Devcontainer ohne Editor starten <!-- d-check:ignore (Kennung des Vorschlags, im Lastenheft erst nach dem CR) -->
+>
+> *Priorität: V2.* Das Produkt soll den erzeugten Devcontainer eines Projekts starten und stoppen können, ohne dass auf dem Host ein Devcontainer-fähiger Editor, Node.js oder die Dev-Container-CLI installiert ist; auf dem Host genügen Docker (Client und lokale Engine).
+>
+> - `u-boot devcontainer up` startet den Devcontainer des Projekts im Basisverzeichnis mit der Dev-Container-CLI, die `u-boot` in einem kurzlebigen Hilfs-Container ausführt. Das Hilfs-Image baut `u-boot` lokal aus gepinnten Quellen; der erste Aufruf braucht Netzzugriff. `--recreate` entfernt einen vorhandenen Container und legt ihn neu an; benannte Volumes bleiben erhalten. Nach dem Start weist der Befehl die Degradations-Fallbacks des Containers aus ([`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)).
+> - `u-boot devcontainer down` stoppt den Container; er entfernt weder den Container noch seine Volumes.
+> - Der Hilfs-Container bindet für die Dauer des Aufrufs den Container-Runtime-Socket des Hosts ein. Der Befehl weist diese Sicherheitslockerung in der Befehlsausgabe aus; der gestartete Devcontainer erhält den Socket durch diesen Befehl nicht. Das erzeugte Ergebnis nach [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) bleibt davon unberührt.
+> - Zugangsdaten gibt der Befehl nur als Umgebungsvariablen weiter, auf die die erzeugte Konfiguration mit `${localEnv:<NAME>}` verweist ([`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)); sie stehen nie in einer Datei oder einem Image.
+> - Fehlerklassen ([`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)): Exit-Code `10`, wenn das Basisverzeichnis keine Devcontainer-Konfiguration enthält; `11`, wenn Docker nicht erreichbar oder die Engine nicht lokal ist; `12` bei jedem Fehler beim Bau oder Start.
+> - Der Befehl startet unter Docker auf Linux und unter Colima (Linux-VM); Docker Desktop, Podman als Host-Engine, eine entfernte Engine und Windows sind nicht zugesagt. Im ausgelieferten Container-Image ([`LH-NFA-PORT-004`](../../../../spec/lastenheft.md#lh-nfa-port-004--ausgeliefertes-container-image)) läuft er nicht.
+> - Nicht-Ziele: `u-boot` startet keinen Agenten ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil)), und der Befehl startet nicht den Compose-Stack ([`LH-FA-UP-001`](../../../../spec/lastenheft.md#lh-fa-up-001--umgebung-starten)).
+
+Grenze des Wortlauts: Er nennt weder Standard- noch Sandbox-Profil einzeln und sagt „Linux und Colima“ als Menge, nicht als Messstand. Was davon trägt, entscheiden die Docker-Tests (Linux) und die Einzelmessung (Colima) des Befehl-Slice; widerlegt eine Zeile die Zusage, geht der Befehl-Slice zurück an den Architect, und ein Folge-CR schneidet die Zusage zurück (Muster der Version 0.7.0 von [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)). „Weist aus“ ist hier gewollt: Die Ausweisung bleibt unter `--quiet` (Stelle 3).
+
+**Stelle 2 — [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle), Befehlsübersicht** (zwei Zeilen nach `u-boot egress list`; Priorität nach der Entscheidung des Projektinhabers).
+
+Alt: die Tabelle endet bei `u-boot egress list` (V2) und `u-boot template list` (V1). Neu:
+
+> | `u-boot devcontainer up`     | Devcontainer ohne Editor starten   | V2        |
+> | `u-boot devcontainer down`   | Devcontainer stoppen               | V2        |
+
+**Stelle 3 — [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), `--quiet`** (zwei Satzteile).
+
+Alt (a): „Unter `--quiet` geben die Subkommandos, die etwas ändern (`init`, `generate`, `add`, `remove`, `config set`, `up`, `down`), nur Fehler aus; …“ Neu: „… (`init`, `generate`, `add`, `remove`, `config set`, `up`, `down`, `devcontainer up`, `devcontainer down`) …“.
+
+Alt (b), Ausnahme 1: „die Ausweisung von Sicherheitslockerungen (zusätzliche Capabilities, `--privileged`, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices) und eines im Container aktivierten Login-Dienstes (Passwort-Login) in der Befehlsausgabe ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), …)“. Neu: „… zusätzliche Devices, der Einbindung des Container-Runtime-Sockets in den Hilfs-Container von `u-boot devcontainer up`) und eines im Container aktivierten Login-Dienstes … ([`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), …, `LH-FA-DEV-010`)“ <!-- d-check:ignore (Kennung des Vorschlags) -->. Die Ausnahmen 2 bis 4 bleiben; der Fortschritt von `devcontainer up` ist keine Ausnahme und entfällt unter `--quiet` bis auf Fehler.
+
+**Stelle 4 — [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), Wertebereich von `command`** (nur der Eintrag `devcontainer`; die Wertemenge steht nur dort, [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) verweist darauf).
+
+Alt: „… `command` ist einer der Werte `init`, `add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `egress` oder `template`. …“ Neu: „… `generate`, `config`, `egress`, `devcontainer` oder `template`. …“. Der Befehl setzt `subcommand` (`up`, `down`); das Beispiel „wie `command == "template"` oder `command == "config"`“ bleibt ein Beispiel, wie beim Zusatz `egress`.
+
+**Stelle 5 — [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), Abgrenzung** (ein Zusatz am Spiegelstrich).
+
+Alt: „- keinen Container-Runtime-Socket des Hosts einbinden;“. Neu: „- keinen Container-Runtime-Socket des Hosts einbinden (der kurzlebige Hilfs-Container von `u-boot devcontainer up` gehört nicht zum erzeugten Ergebnis, siehe `LH-FA-DEV-010`);“ <!-- d-check:ignore (Kennung des Vorschlags) -->.
+
+**Stelle 6 — Versionsfeld und Historie (§16).** Alt: `| Version | 0.17.0 |`. Neu: nächste freie Minor-Version. Neue Zeile: „`LH-FA-DEV-010`: neue Anforderung (Devcontainer ohne Editor starten und stoppen, Hilfs-Container mit Socket-Ausweisung, Zusage-Menge Linux und Colima); `LH-SA-CLI-002`: zwei Zeilen; `LH-FA-CLI-005`: `--quiet` für die neuen Befehle und die Socket-Ausweisung als Teil von Ausnahme 1; `LH-FA-CLI-007`: Wert `devcontainer`; `LH-FA-DEV-006`: Abgrenzung des Hilfs-Containers.“ <!-- d-check:ignore (Kennung des Vorschlags) -->
+
+**Unverändert, mit Grund:** [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen) und [`LH-FA-DEV-002`](../../../../spec/lastenheft.md#lh-fa-dev-002--vs-code-kompatibilität) (Dateien und Kompatibilität bleiben, der Befehl erzeugt nichts), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (die Klassen 10, 11 und 12 bestehen), [`LH-NFA-PORT-002`](../../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten) und [`LH-NFA-PORT-004`](../../../../spec/lastenheft.md#lh-nfa-port-004--ausgeliefertes-container-image) (der Befehl läuft im Image nicht, das Image bleibt), [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (die Auslegung steht im ADR, der Wortlaut trägt sie), [`LH-ABG-002`](../../../../spec/lastenheft.md#lh-abg-002--keine-ide-abhängigkeit) (der Befehl setzt sie um).
+
+### Folge-Slices (Dateien in `open/`)
+
+Vier Folge-Slices, Reihenfolge 1 → 2 → 3 → 4; der Gesamtzuschnitt passt in die Grenze von fünf, **keine Rückführung** nach §4 nötig. Priorität und Release-Zuordnung sind offen (Vorschlag des Planners: V2, nächstes Minor nach dem Befehl-Slice); jeder Folge-Slice trägt das als offene Frage.
+
+| Nr. | Slice | Gegenstand |
+|---|---|---|
+| 1 | [`slice-cr-devcontainer-start-ohne-editor`](../open/slice-cr-devcontainer-start-ohne-editor.md) | Lastenheft-CR nach dem Wortlaut oben, nach Freigabe |
+| 2 | [`slice-v1-devcontainer-start-fundament`](../open/slice-v1-devcontainer-start-fundament.md) | Port `DevcontainerLauncher`, Adapter, eingebetteter Kontext mit Pins, Docker-Tests S2, S5, S6 |
+| 3 | [`slice-v1-cli-devcontainer-up-down`](../open/slice-v1-cli-devcontainer-up-down.md) | Befehl `devcontainer up`/`down`, Handbuch, `CHANGELOG.md`, Docker-Tests S1, S3, S4, S8, S9, Einzelmessung Colima |
+| 4 | [`slice-v2-spec-devcontainer-start`](../open/slice-v2-spec-devcontainer-start.md) | Spezifikation und Sicht nach dem Code (Stellen aus [`ADR-0028`](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) Entscheidung 10) |
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
