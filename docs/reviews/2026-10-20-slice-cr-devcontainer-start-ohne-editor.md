@@ -1,4 +1,4 @@
-# Review-Report: [`slice-cr-devcontainer-start-ohne-editor`](../plan/planning/in-progress/slice-cr-devcontainer-start-ohne-editor.md) — 2026-10-20
+# Review-Report: [`slice-cr-devcontainer-start-ohne-editor`](../plan/planning/done/slice-cr-devcontainer-start-ohne-editor.md) — 2026-10-20
 
 **Review-Art:** Lastenheft-CR (Vertragstext, kein Produktcode). Maßstab ist der freigegebene, unverändert zu übernehmende Wortlaut in [`slice-v1-devcontainer-start-ohne-cli`](../plan/planning/done/slice-v1-devcontainer-start-ohne-cli.md) §7 (Stellen 1 bis 6), [`ADR-0028`](../plan/adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) und [`ADR-0029`](../plan/adr/0029-devcontainer-start-exit-11-und-socket-haltung.md) (beide `Accepted`).
 
@@ -17,7 +17,7 @@
 Keine HIGH-, keine MEDIUM-Findings.
 
 ```text
-LOW docs/plan/planning/in-progress/slice-cr-devcontainer-start-ohne-editor.md · "Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt" - Plan-Tabelle nennt nicht alle berührten Dateien
+LOW docs/plan/planning/done/slice-cr-devcontainer-start-ohne-editor.md · "Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt" - Plan-Tabelle nennt nicht alle berührten Dateien
 Klasse: plan-tabelle-ohne-diff-abgleich
 Quelle: AGENTS.md §3.10
 Befund: git diff --stat 9e6933b..HEAD berührt zwölf Dateien; die Tabelle führt vier Zeilen (lastenheft.md, roadmap.md, open/README.md, docs/reviews/). Ohne Eintrag: [`open/slice-cr-lastenheft-messstaende.md`](../plan/planning/open/slice-cr-lastenheft-messstaende.md), welle-devcontainer-start-ohne-editor.md, open/slice-v1-cli-devcontainer-up-down.md, open/slice-v1-devcontainer-start-fundament.md, open/slice-v2-spec-devcontainer-start.md, done/slice-v1-devcontainer-start-ohne-cli.md, der Slice selbst (Verantwortlich) sowie die beiden bestehenden Reports unter docs/reviews/ (Linknachzug durch slice-mv; die Zeile nennt "neu (Reviewer, Verifier)"). Die Zeile roadmap.md sagt "bei der Closure", der Diff berührt sie schon beim Start.
@@ -62,7 +62,7 @@ Verifizierbar: make doc-trace
 ```
 
 ```text
-INFO docs/plan/planning/in-progress/slice-cr-devcontainer-start-ohne-editor.md · "Freigabe des Projektinhabers** im Gespräch belegt und in §7 vermerkt" - Nachlauf-Review und Freigabe-Vermerk stehen aus
+INFO docs/plan/planning/done/slice-cr-devcontainer-start-ohne-editor.md · "Freigabe des Projektinhabers** im Gespräch belegt und in §7 vermerkt" - Nachlauf-Review und Freigabe-Vermerk stehen aus
 Klasse: vertragsaenderung-nach-review
 Quelle: BEO-DOK/vertragsaenderung-nach-review
 Befund: §7 ist leer (Closure steht aus). Jede Änderung von spec/lastenheft.md nach diesem Report braucht einen Nachlauf-Review über den Diff. Zuständig für DoD-Closure: Verifier.

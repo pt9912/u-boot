@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (Frage: „Bauen wir es richtig?“, gegen Plan, DoD und Entscheidungen). Kein Review, keine Validierung, keine Reparatur; es wurde kein Planungsdokument geändert und nichts committet.
 
-**Gegenstand:** Lastenheft-CR [`slice-cr-devcontainer-start-ohne-editor`](../plan/planning/in-progress/slice-cr-devcontainer-start-ohne-editor.md) (`in-progress/`, kein Produktcode), `HEAD` = `2981c43`, Diff-Basis `9e6933b..HEAD` (5 Commits, 13 Dateien). Maßstab: der freigegebene, unverändert zu übernehmende Wortlaut in [`slice-v1-devcontainer-start-ohne-cli`](../plan/planning/done/slice-v1-devcontainer-start-ohne-cli.md) §7 (Stellen 1 bis 6, Entscheidungsvermerk Punkte 1 bis 3), [`ADR-0028`](../plan/adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) und [`ADR-0029`](../plan/adr/0029-devcontainer-start-exit-11-und-socket-haltung.md) (beide `Accepted`).
+**Gegenstand:** Lastenheft-CR [`slice-cr-devcontainer-start-ohne-editor`](../plan/planning/done/slice-cr-devcontainer-start-ohne-editor.md) (`in-progress/`, kein Produktcode), `HEAD` = `2981c43`, Diff-Basis `9e6933b..HEAD` (5 Commits, 13 Dateien). Maßstab: der freigegebene, unverändert zu übernehmende Wortlaut in [`slice-v1-devcontainer-start-ohne-cli`](../plan/planning/done/slice-v1-devcontainer-start-ohne-cli.md) §7 (Stellen 1 bis 6, Entscheidungsvermerk Punkte 1 bis 3), [`ADR-0028`](../plan/adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) und [`ADR-0029`](../plan/adr/0029-devcontainer-start-exit-11-und-socket-haltung.md) (beide `Accepted`).
 
 **Eingang:** Review-Report [`2026-10-20-slice-cr-devcontainer-start-ohne-editor`](2026-10-20-slice-cr-devcontainer-start-ohne-editor.md) (0 HIGH, 0 MEDIUM, 2 LOW, 4 INFO; Fix-Commit `2981c43`) als Eingang, nicht als Beweis; Wortlaut, Fix-Runde und Pläne unten am Ist-Stand nachgelesen.
 
@@ -31,7 +31,7 @@ Alle Kästchen im Slice sind leer; für einen Slice in `in-progress/` ist das de
 | 3 | Freigabe des Projektinhabers belegt **und in §7 vermerkt** | **offen** | Die Freigabe ist belegt (Eltern-Slice §7 Entscheidungsvermerk, Punkte 1 bis 3); §7 des CR-Slice trägt noch „*(Wird bei der Closure gefüllt.)*“. Closure-Aufgabe des Planners, kein Mangel des Wortlauts |
 | 4 | `make gates` grün, `make docs-check` grün | **erfüllt** | Abschnitt 1; `docs-check` in `gates` (Exit 0) und nach diesem Report (Abschnitt 7) |
 | 5 | Review durchgeführt, Report liegt unter `docs/reviews/` vor | **erfüllt** | [`2026-10-20-slice-cr-devcontainer-start-ohne-editor`](2026-10-20-slice-cr-devcontainer-start-ohne-editor.md) (im Commit `2981c43`, Skill `.harness/skills/reviewer.md`, eigener Kontext); Befunde in der Fix-Runde bearbeitet (Abschnitt 5) |
-| 6 | Doku-Update: Roadmap-Zeile „In Arbeit“ bei der Closure; Handbuch und `CHANGELOG.md` unverändert | **teilweise erfüllt, Rest offen** | `roadmap.md` trägt „In Arbeit“ mit dem Verweis auf [`slice-cr-devcontainer-start-ohne-editor`](../plan/planning/in-progress/slice-cr-devcontainer-start-ohne-editor.md) (seit Start); die Änderung bei der Closure steht aus. Handbuch und `CHANGELOG.md` im Diff unberührt (erfüllt) |
+| 6 | Doku-Update: Roadmap-Zeile „In Arbeit“ bei der Closure; Handbuch und `CHANGELOG.md` unverändert | **teilweise erfüllt, Rest offen** | `roadmap.md` trägt „In Arbeit“ mit dem Verweis auf [`slice-cr-devcontainer-start-ohne-editor`](../plan/planning/done/slice-cr-devcontainer-start-ohne-editor.md) (seit Start); die Änderung bei der Closure steht aus. Handbuch und `CHANGELOG.md` im Diff unberührt (erfüllt) |
 | 7 | Closure-Notiz mit Steering-Loop-Lerneintrag | **offen** | §7 leer; Closure-Aufgabe des Planners |
 | 8 | Beobachtungs-Register fortgeschrieben oder „keine Beobachtung“ in §7 | **offen** | im Diff kein Eintrag unter `observations/`; Closure-Aufgabe (Kandidat: [`BEO-DOK/vertragsaenderung-nach-review`](../plan/planning/observations/BEO-DOK/vertragsaenderung-nach-review/observation.md), Nachlauf-Befund Abschnitt 6) |
 | 9 | Jedes Risiko aus §6 trägt einen Ausgang | **formal erfüllt** | alle vier Risiken tragen „Ausgang: weiter offen“ mit Begründung; die Ausgänge „eingetreten/entfallen“ setzt der Planner bei der Closure (Risiko 3 „Wortlaut ändert sich nach dem Review“: nach Abschnitt 1 nicht eingetreten für `spec/`) |
@@ -81,7 +81,7 @@ Fix-Runde (`2981c43`, 3 Dateien): (a) Plan-Tabelle ergänzt, (b) S4-Test im Befe
 ## 6. Findings
 
 ```text
-LOW docs/plan/planning/in-progress/slice-cr-devcontainer-start-ohne-editor.md · Plan-Tabelle §3, Zeile „update (nur Verweise)“ - die Zeile führt open/slice-v1-cli-devcontainer-up-down.md nur als Verweis-Nachzug
+LOW docs/plan/planning/done/slice-cr-devcontainer-start-ohne-editor.md · Plan-Tabelle §3, Zeile „update (nur Verweise)“ - die Zeile führt open/slice-v1-cli-devcontainer-up-down.md nur als Verweis-Nachzug
 V-1  Klasse: plan-tabelle-ohne-diff-abgleich · Quelle: AGENTS.md §3.10
 Befund: Der Fix-Commit 2981c43 hat in open/slice-v1-cli-devcontainer-up-down.md inhaltlich den Test S4 geändert (Marker im Volume nach down). Die Tabelle, die der Fix-Commit selbst ergänzt hat, nennt für diese Datei „nur Verweise“; der Abgleich „nach der letzten Fix-Runde“ ist damit für diese Datei nicht nachgeführt.
 Risiko: gering; die Änderung ist im Diff sichtbar, die Tabelle ist als Maßstab für den nächsten Leser unvollständig.
@@ -107,7 +107,7 @@ V-4  Wie im Review (INFO 4) bestätigt: Die Zeile ist `ok` über den Slice-Beleg
 ```
 
 ```text
-INFO docs/plan/planning/in-progress/slice-cr-devcontainer-start-ohne-editor.md · DoD „Freigabe … in §7 vermerkt“
+INFO docs/plan/planning/done/slice-cr-devcontainer-start-ohne-editor.md · DoD „Freigabe … in §7 vermerkt“
 V-5  Klasse: vertragsaenderung-nach-review · Die Freigabe ist im Eltern-Slice §7 belegt; der Vermerk im CR-Slice §7 entsteht mit der Closure. Nachlauf-Review: nicht ausgelöst, solange `git diff 69280df..HEAD -- spec/` leer bleibt (Stand: leer). Wird `spec/lastenheft.md` vor oder bei der Closure noch angefasst, ist ein Nachlauf-Review über genau diesen Diff nötig, bevor der Slice nach done/ geht.
 ```
 

@@ -19,7 +19,7 @@ stehen in der Welle-Datei, nicht hier.
 
 Offen: [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md) (Devcontainer ohne Editor und ohne Node/CLI auf dem Host starten: `u-boot devcontainer up` und `down`; fünf Slices; Priorität V2, Release das nächste Minor nach `v0.12.0`, die Nummer vergibt der Release-Cut).
 
-In Arbeit: [`slice-cr-devcontainer-start-ohne-editor`](slice-cr-devcontainer-start-ohne-editor.md) (Lastenheft-CR: Devcontainer ohne Editor starten; erster Folge-Slice von [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md)).
+In Arbeit: [`slice-cr-devcontainer-start-ohne-editor`](../done/slice-cr-devcontainer-start-ohne-editor.md) (Lastenheft-CR: Devcontainer ohne Editor starten; erster Folge-Slice von [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md)).
 
 ## Nächste Wellen
 
