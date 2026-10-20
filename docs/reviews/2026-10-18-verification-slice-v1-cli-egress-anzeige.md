@@ -55,7 +55,7 @@ Quelle: `spec/lastenheft.md` Zeile 472 (Spiegelstrich in `LH-FA-DEV-008`), Zeile
 | `in-progress/roadmap.md` | 16 | ok |
 | `docs/reviews/2026-10-18-slice-v1-cli-egress-anzeige.md` | 17 | ok | <!-- d-check:ignore (Kennungen als Zitat) -->
 | Slice-Datei | 18 | ok |
-| `open/README.md`, `in-progress/slice-v1-devcontainer-start-ohne-cli.md` | — | **gehören nicht zu diesem Slice** (stammen aus `6743254`); der Plan führt sie zu Recht nicht, der Review weist sie aus; die Range `9953000..HEAD` enthält sie dennoch (V-6) | <!-- d-check:ignore (Kennungen als Zitat) -->
+| `open/README.md`, `done/slice-v1-devcontainer-start-ohne-cli.md` | — | **gehören nicht zu diesem Slice** (stammen aus `6743254`); der Plan führt sie zu Recht nicht, der Review weist sie aus; die Range `9953000..HEAD` enthält sie dennoch (V-6) | <!-- d-check:ignore (Kennungen als Zitat) -->
 | `jsontestutil/coderegistry.go`, `devcontainer_sandbox.go` | 2, 12 („unverändert, bedingt entfallen“) | bestätigt: nicht im Diff; die gelesenen Fundstellen stimmen (`devcontainerTemplateData` ruft weiter `egressHosts`) |
 
 Mit diesem Report wächst die Range auf 28 Dateien; die Closure ändert den Slice, die Roadmap und das Register. Der Abgleich ist nach der Closure ein drittes Mal zu wiederholen (`AGENTS.md` §3.10, V-1).
