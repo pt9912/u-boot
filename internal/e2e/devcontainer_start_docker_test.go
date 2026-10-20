@@ -311,6 +311,29 @@ func dcOwnerUID(t *testing.T, path string) uint32 {
 	return st.Uid
 }
 
+// dcProjectImages returns the names (`repository:tag`) of the images
+// `vsc-<project>-…` the devcontainer CLI built for the project folder. The
+// name, not the ID: `--recreate` builds the image again.
+func dcProjectImages(t *testing.T, dir string) map[string]bool {
+	t.Helper()
+	out := dcMustDocker(t, "images", "--format", "{{.Repository}}:{{.Tag}}", "--filter", "reference=vsc-"+filepath.Base(dir)+"-*")
+	ids := map[string]bool{}
+	for _, id := range strings.Fields(out) {
+		ids[id] = true
+	}
+	return ids
+}
+
+// dcRequireImagesKept fails when an image name of before is gone.
+func dcRequireImagesKept(t *testing.T, step string, before, after map[string]bool) {
+	t.Helper()
+	for id := range before {
+		if !after[id] {
+			t.Errorf("%s: the image %s of the devcontainer CLI is gone", step, id)
+		}
+	}
+}
+
 // dcVolumeHolds reports whether a file in the volume contains needle.
 func dcVolumeHolds(ctx context.Context, t *testing.T, image, volume, needle string) bool {
 	t.Helper()
@@ -432,6 +455,13 @@ func TestDevcontainerUp_Docker_S1_S4_SandboxProfileVolumes(t *testing.T) {
 	if volume == "" {
 		t.Fatalf("no named volume at %s: %+v", workspace, doc.Mounts)
 	}
+	// The images `vsc-<project>-…` are there after `down` and after
+	// `--recreate` (the manual states it); the guard is that the start created
+	// some.
+	images := dcProjectImages(t, dir)
+	if len(images) == 0 {
+		t.Fatalf("the start left no image vsc-%s-…, the check of their survival would be empty", filepath.Base(dir))
+	}
 
 	// S6, word "volume": the placeholder value of GIT_TOKEN, which the
 	// start passed by name, is in no volume of the container; the guard puts it
@@ -466,6 +496,7 @@ func TestDevcontainerUp_Docker_S1_S4_SandboxProfileVolumes(t *testing.T) {
 	if after := dcInspect(t, id); after.State.Running {
 		t.Errorf("the container still runs after down")
 	}
+	dcRequireImagesKept(t, "down", images, dcProjectImages(t, dir))
 	again, err := svc.Down(ctx, driving.DevcontainerDownRequest{BaseDir: dir})
 	if err != nil || again.Stopped || again.ContainerID != id {
 		t.Errorf("second Down = %+v err=%v, want the same container and nothing stopped", again, err)
@@ -484,6 +515,7 @@ func TestDevcontainerUp_Docker_S1_S4_SandboxProfileVolumes(t *testing.T) {
 	if newID == id || dcExists(id) {
 		t.Errorf("recreate: new ID %s, old container still there = %v", newID, dcExists(id))
 	}
+	dcRequireImagesKept(t, "recreate", images, dcProjectImages(t, dir))
 	if got := dcInspect(t, newID).volumeAt(workspace); got != volume {
 		t.Errorf("workspace volume after recreate = %q, want %q", got, volume)
 	}
@@ -541,9 +573,8 @@ func TestDevcontainerUp_Docker_S1_FallbackDisclosureNeedsUbootYAML(t *testing.T)
 
 // LH-FA-DEV-004, S3: with `devcontainer.user.uid: 4321` the container user has
 // UID 4321 and a file it creates in the bind-mounted project folder belongs to
-// 4321 on the host (the host folder is owned by root: the helper container runs
-// as root, so `updateRemoteUserUID` leaves the generated UID alone). The guard
-// is the default-UID case in the standard-profile test (owner 1000 ≠ 4321).
+// 4321 on the host. The guard is the default-UID case in the standard-profile
+// test (owner 1000 ≠ 4321).
 func TestDevcontainerUp_Docker_S3_ConfiguredUID(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), dcTestBudget)
 	defer cancel()
@@ -562,17 +593,21 @@ func TestDevcontainerUp_Docker_S3_ConfiguredUID(t *testing.T) {
 }
 
 // LH-FA-DEV-004, S3, observation: the result of `updateRemoteUserUID` when the
-// project folder belongs to another UID than the generated one. The CLI runs in
-// the helper container as root; observed: it does not adapt the UID of the
-// container user to the owner of the project folder, so the user keeps UID 1000
-// and the file it creates belongs to 1000 on the host. The manual states only
-// this; the UID of the host comes from `devcontainer.user.uid`.
+// project folder belongs to another UID than the generated one. Observed: the
+// UID of the container user is not adapted to the owner of the project folder,
+// so the user keeps UID 1000 and the file it creates belongs to 1000 on the
+// host. The helper container runs as root; no test separates that from the
+// cause, so neither this test nor the manual states one. The UID of the host
+// comes from `devcontainer.user.uid`.
 func TestDevcontainerUp_Docker_S3_ObserveUpdateRemoteUserUID(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), dcTestBudget)
 	defer cancel()
+	if os.Geteuid() != 0 {
+		t.Skip("giving the project folder to UID 2000 needs root; make test-docker runs the tests as root")
+	}
 	dir := dcGenerateProject(ctx, t, false, nil)
 	if err := os.Chown(dir, 2000, 2000); err != nil {
-		t.Fatalf("chown of the project folder (the test needs to run as root): %v", err)
+		t.Fatalf("chown of the project folder to UID 2000: %v", err)
 	}
 	s := dcMustUp(ctx, t, dcService(), dir, false)
 	id := s.resp.ContainerID
@@ -732,7 +767,16 @@ func TestDevcontainerUp_Docker_S8_FolderTheEngineCannotSeeExits12(t *testing.T) 
 	defer cancel()
 	requireDocker(t)
 	missing := filepath.Join(os.TempDir(), "uboot-s8-invisible-"+dcSuffix())
-	t.Cleanup(func() { _ = os.RemoveAll(missing) })
+	// The guard below makes the daemon create `missing` (owned by the daemon's
+	// user); a container removes it, so the test leaves nothing behind whoever
+	// runs it.
+	t.Cleanup(func() {
+		if os.RemoveAll(missing) == nil {
+			return
+		}
+		_, _ = dcDocker("run", "--rm", "-v", filepath.Dir(missing)+":/parent", "--entrypoint", "rm",
+			dcBaseImage, "-rf", "/parent/"+filepath.Base(missing))
+	})
 
 	_, err := dockeradapter.NewLauncher().Up(ctx, driven.DevcontainerUpOptions{ProjectFolder: missing})
 	if !errors.Is(err, driven.ErrDevcontainerRuntime) || cli.ExitCode(err) != 12 {
@@ -742,7 +786,7 @@ func TestDevcontainerUp_Docker_S8_FolderTheEngineCannotSeeExits12(t *testing.T) 
 		t.Errorf("--mount created the missing source %s", missing)
 	}
 
-	// The guard: `-v` would have created it.
+	// The guard: the same source with `-v` is created by the daemon.
 	if out, err := dcDocker("run", "--rm", "-v", missing+":/probe", "--entrypoint", "true", dcBaseImage); err != nil {
 		t.Fatalf("docker run -v with a missing source: %v (%s)", err, out)
 	}

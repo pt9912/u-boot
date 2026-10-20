@@ -786,10 +786,10 @@ ein Ordner, den die Engine nicht sieht, ergibt Exit-Code 12.
 
 **Zugangsdaten.** Der Befehl reicht nur Variablen durch, auf die `devcontainer.json`
 mit `${localEnv:NAME}` verweist und die auf dem Host gesetzt sind, und zwar als Name,
-nie als Wert auf der Kommandozeile von `u-boot`. Der Wert steht dabei weder in einem
-Image noch in den Labels des Devcontainers, in einer Datei im Projektordner oder in den
-Volumes des Sandbox-Profils (geprüft). Zwei Grenzen gehören dazu: `remoteEnv` ist die für
-Zugangsdaten vorgesehene Form. Bei `containerEnv` steht der aufgelöste Wert in den
+nie als Wert auf der Kommandozeile von `u-boot`. Bei der Form `remoteEnv` steht der Wert
+weder in einem Image noch in den Labels des Devcontainers, in einer Datei im Projektordner
+oder in den Volumes des Sandbox-Profils (geprüft). Zwei Grenzen gehören dazu: `remoteEnv` ist
+die für Zugangsdaten vorgesehene Form. Bei `containerEnv` steht der aufgelöste Wert in den
 Metadaten (`Config.Env`) des Devcontainers, solange dieser besteht; für die Dauer eines
 Lebenszyklus-Befehls steht er auf einer Kommandozeile im Hilfs-Container (`docker exec -e`
 bei `remoteEnv`, `docker run -e` bei `containerEnv`), sichtbar für Prozesse mit Zugriff auf
@@ -844,26 +844,28 @@ Volumes (zum Beispiel der Workspace des Sandbox-Profils) bleiben erhalten. Die H
 Die Fehlermeldung von `up` enthält bei Exit-Code 12 das Ende der Ausgabe der CLI.
 
 **Was zurückbleibt.** Neben dem Hilfs-Image (`u-boot-devcontainer-cli:…`) legt die
-Dev-Container-CLI je Projekt Images `vsc-<Ordnername>-…` und `…-uid` an; sie bleiben nach
-`down` und nach `--recreate` liegen. Aufräumen mit `docker image rm` oder `docker image prune`.
+Dev-Container-CLI je Projekt Images `vsc-<Ordnername>-…` an (gemessen auch `…-uid`); sie
+sind nach `down` und nach `--recreate` weiter vorhanden (getestet; `--recreate` baut sie neu).
+Aufräumen mit `docker image rm` oder `docker image prune`.
 
 **Abbruch mit Strg-C.** Die CLI im Hilfs-Container beendet sich auf das Signal nicht;
 `u-boot` wartet bis zu zehn Sekunden (gemessen: 10,5 Sekunden bis zur Rückkehr) und entfernt
 dann den Hilfs-Container. Es bleibt kein Hilfs-Container zurück. Der Dev-Container, den die CLI
 bis dahin angelegt hat, bleibt bestehen.
 
-**Benutzer-ID.** Die CLI läuft im Hilfs-Container als `root`; ihr `updateRemoteUserUID`
-passt die Benutzer-ID im Container nicht an den Besitzer des Projektordners an (beobachtet bei
-einem Ordner mit der UID 2000: der Benutzer behielt 1000). Dateien, die der Benutzer im
+**Benutzer-ID.** Die Benutzer-ID im Container wird nicht an den Besitzer des Projektordners
+angepasst (beobachtet bei einem Ordner mit der UID 2000: der Benutzer behielt 1000). Die CLI
+läuft im Hilfs-Container als `root`; ob das der Grund ist, ist nicht geprüft. Dateien, die der Benutzer im
 eingebundenen Projektordner anlegt, gehören im Standardprofil der Benutzer-ID aus
 `devcontainer.user.uid` (getestet mit 4321; Standard 1000). Setzen Sie sie auf Ihre
 Host-UID, wenn Sie die Dateien als Host-Benutzer bearbeiten wollen.
 
 **Features und Reichweite.** Als Katalog-Feature ist `node` im Test installiert worden und
 nutzbar; andere Features sind nicht geprüft. Zugesagt ist der Befehl auf einem Linux-Host mit
-lokaler Docker-Engine auf `amd64`. **Nicht zugesagt und nicht gemessen:** macOS mit Colima,
-Docker Desktop, rootless Docker, Podman als Host-Engine, eine entfernte Engine, Linux auf
-`arm64` und Windows. `u-boot up` startet den Devcontainer nicht mit.
+lokaler Docker-Engine auf `amd64`. **Nicht zugesagt:** macOS mit Colima, Docker Desktop,
+rootless Docker, Podman als Host-Engine, eine entfernte Engine, Linux auf `arm64` und Windows.
+Der Befehl selbst ist auf keinem dieser Hosts gemessen; auf Colima ist nur der Messweg
+(die Dev-Container-CLI in einem Wegwerf-Container) gelaufen. `u-boot up` startet den Devcontainer nicht mit.
 
 ### 4.10 Devcontainer-Features nutzen
 
@@ -2558,12 +2560,12 @@ Reparaturvorschlag: `command` (der Befehl zum Kopieren), `action` und `argument`
 
 - Ein Aufruf von `u-boot template --json` oder `u-boot egress --json` ohne `list`
   endet mit Exit-Code 2 und gibt kein JSON aus; `u-boot devcontainer` ohne `up`
-  oder `down` ebenso, auch ohne `--json`.
+  oder `down` ebenso, auch ohne `--json`. `u-boot logs --follow --json` ist ebenfalls ein
+  Nutzungsfehler (Exit-Code 2).
 - Der Umschlag von `devcontainer up` trägt auch im Erfolgsfall `status: warn`, weil die
   Ausweisung des Docker-Sockets (Abschnitt 4.9) ein Eintrag `warn` in `diagnostics` ist;
   der Exit-Code ist `0`. Bei einem Fehler, nachdem der Hilfs-Container gestartet werden sollte,
-  steht diese Warnung vor dem Fehler-Eintrag. `u-boot logs --follow --json` ist ebenfalls ein
-  Nutzungsfehler (Exit-Code 2).
+  steht diese Warnung vor dem Fehler-Eintrag.
 - `doctor` endet mit `warn` und Exit-Code 0, solange nur Warnungen vorliegen;
   mit `--strict` oder bei einem Fehler lautet der Exit-Code 11.
 - Bei `down --volumes` ohne `--yes` wird im JSON-Modus nicht gefragt, sondern

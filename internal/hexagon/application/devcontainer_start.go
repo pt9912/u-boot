@@ -24,7 +24,7 @@ const socketRelaxationCode = "LH-FA-DEV-010"
 
 // socketRelaxationMessage is the disclosure text. Each of its parts has a
 // test: the helper holds the engine socket (`TestRunArgs`), the generated
-// configuration does not mount it (`TestDevcontainerUp_Docker_S1…`) and a
+// configuration does not mount it (`TestDevcontainerUp_Docker_S1_S9_StandardProfile`, `TestDevcontainerUp_Docker_S1_S4_SandboxProfileVolumes`) and a
 // hand-written one can (`TestLauncher_Docker_S6_GuardHandWrittenSocketMountIsDetected`),
 // and an `initializeCommand` runs with the socket
 // (`TestLauncher_Docker_S6_InitializeCommandRunsWithSocket`).
