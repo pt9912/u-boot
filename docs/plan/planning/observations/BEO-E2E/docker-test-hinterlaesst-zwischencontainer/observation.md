@@ -6,7 +6,7 @@ Ein Docker-Test, der ein Image absichtlich fehlschlagend baut (Negativprobe zu e
 
 ## Benannt, nicht gezählt
 
-- **Zweites Vorkommen, gelesen, nicht gemessen:** `TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild` baut in drei Teilfällen ohne `--force-rm` und ohne Cleanup. Gleicher Mechanismus ist vermutet; die Messung steht im Folge-Slice [`slice-v1-e2e-nested-podman-pin-mismatch-zwischencontainer`](../../../open/slice-v1-e2e-nested-podman-pin-mismatch-zwischencontainer.md).
+- **Zweites Vorkommen, gelesen, nicht gemessen:** `TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild` baut in drei Teilfällen ohne `--force-rm` und ohne Cleanup. Gleicher Mechanismus ist vermutet; die Messung steht im Folge-Slice [`slice-v1-e2e-nested-podman-pin-mismatch-zwischencontainer`](../../../in-progress/slice-v1-e2e-nested-podman-pin-mismatch-zwischencontainer.md).
 - **CI-Runner nicht gemessen:** ob der Daemon des Runners denselben Container hinterlässt, ist offen.
 
 **Trigger:** Der Folge-Slice misst die drei Teilfälle; ein Teilfall mit Zwischencontainer ist der zweite Beleg (eigene Evidence-Datei), ein Befund ohne Container (oder BuildKit-Verhalten) ist die Antwort, die der Stand festhält.
