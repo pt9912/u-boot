@@ -334,9 +334,9 @@ Weitere Subcommand-Sektionen kommen mit den jeweiligen Folge-Slices
 
 ## 6. Per-Command-Migrations-Reihenfolge
 
-Spec-Enum ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)) listet elf Werte; alle
+Spec-Enum ([LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)) listet zwölf Werte; alle
 sollen `--json` tragen ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)). Zehn davon
-(alle außer `egress`, siehe §6.10) migrieren **inkrementell** über neun Folge-Slices unterhalb des Cluster-
+(alle außer `egress` und `devcontainer`, siehe §6.10 und §6.11) migrieren **inkrementell** über neun Folge-Slices unterhalb des Cluster-
 Slices [`slice-v1-cli-json-dry-run`](../plan/planning/done/slice-v1-cli-json-dry-run.md);
 Reihenfolge gemäß Cluster-T0-(e):
 
@@ -361,10 +361,11 @@ Die **Übergangs-Mechanik** — eine Allowlist-Map plus
 noch nicht migrierten Formen mit Exit 2 rejectete — wurde im
 **Cluster-T_close entfernt** (es gibt nichts mehr zu rejecten).
 
-Es bleiben **zwei `--json`-Reject-Formen**, beide RunE-getragen und
-envelope-LOS (Exit 2): bare `u-boot template` (`ErrTemplateSubcommandRequired`)
-und bare `u-boot egress` (`ErrEgressSubcommandRequired`, §6.10), jeweils ohne
-Subcommand.
+Es bleiben **drei Reject-Formen**, alle RunE-getragen und
+envelope-LOS (Exit 2): bare `u-boot template` (`ErrTemplateSubcommandRequired`),
+bare `u-boot egress` (`ErrEgressSubcommandRequired`, §6.10) und bare
+`u-boot devcontainer` (`ErrDevcontainerSubcommandRequired`, §6.11; anders als die
+beiden anderen endet es auch ohne `--json` mit Exit 2), jeweils ohne Subcommand.
 
 Bei `template`: [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)/[LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) machen `subcommand`
 für `command="template"` verpflichtend, und der Help-Parent hat kein
@@ -1211,6 +1212,65 @@ Datum, keine Diagnose:
   `jsontestutil` prüft das Enum nicht (`checkSubcommand` verlangt `subcommand` nur für `template`
   und `config`).
 
+### 6.11 `u-boot devcontainer up --json` / `devcontainer down --json` (slice-v1-cli-devcontainer-up-down)
+
+Beide Unterbefehle liefern den Minimalkontrakt mit `command: "devcontainer"`,
+`subcommand: "up"` beziehungsweise `"down"` und dem `data`-Objekt
+(`devcontainerUpData`, `devcontainerDownData`, `cli/devcontainer.go`); kein Feld
+trägt `omitempty`. Beide sind read-only auf dem lokalen Dateisystem: `--dry-run`
+und `--diff` werden mit `ErrDevcontainerPreviewNotApplicable` (Exit 2,
+[LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes)) abgewiesen, auch dann mit Envelope;
+bare `u-boot devcontainer` (mit und ohne `--json`) endet mit
+`ErrDevcontainerSubcommandRequired` (Exit 2) und ohne Envelope, wie bare `egress --json`.
+
+```json
+{ "status": "warn", "command": "devcontainer", "subcommand": "up",
+  "diagnostics": [ { "level": "warn", "code": "LH-FA-DEV-010",
+                     "message": "this command mounts the host container-engine socket into a short-lived helper container (…)" } ],
+  "exitCode": 0,
+  "data": { "containerId": "0123…cdef", "remoteUser": "vscode", "remoteWorkspaceFolder": "/workspaces/demo" } }
+```
+
+```json
+{ "status": "ok", "command": "devcontainer", "subcommand": "down",
+  "diagnostics": [], "exitCode": 0,
+  "data": { "containerId": "0123…cdef", "stopped": true } }
+```
+
+- **`status` von `up` ist `warn`, auch im Erfolgsfall.** Die Ausweisung der
+  Socket-Lockerung ist eine Warnung ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)
+  kennt nur `warn` und `error`); sie ist immer `diagnostics[0]` und trägt den Text der Konsole.
+  Ein Skript wertet den Exit-Code aus, nicht `status: ok`. `down` startet keinen
+  Hilfs-Container und trägt keine Ausweisung (`status: ok`).
+- **Weitere Einträge von `up`:** je ein `warn` mit `file: ".devcontainer/devcontainer.json"` für einen
+  Degradations-Fallback, den der Container nach dem Start meldet
+  ([LH-FA-DEV-007](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
+  [LH-FA-DEV-008](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)); sie setzen eine `u-boot.yaml` voraus.
+- **Fehler-Envelope von `up`:** die Ausweisung bleibt `diagnostics[0]`, wenn der Aufruf bis zum Start des Hilfs-Containers
+  gekommen ist (auch bei Exit 11 aus der Vorab-Prüfung: der Text beschreibt den Befehl, nicht den Zustand); der Fehler ist der
+  letzte Eintrag. Ein Fehler davor (Exit 10) trägt keine Ausweisung. `data` fehlt im Fehlerfall.
+- **`data.containerId` von `down`** ist der leere String, wenn es für das Projekt keinen Container gibt;
+  `stopped` ist `false`, wenn nichts zu stoppen war (Exit 0).
+- **Codes:** die Klassen 10, 11 und 12 von `devcontainer` tragen [LH-FA-DEV-010](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten),
+  ein Lesefehler [LH-NFA-REL-003](../../spec/lastenheft.md#lh-nfa-rel-003--abbruch-bei-kritischen-fehlern) (Exit 14),
+  Aufrufformfehler [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes). Die Abbildung steht je Unterbefehl in `mapDevcontainerUpErrorToDiagnostic` und
+  `mapDevcontainerDownErrorToDiagnostic`, die Exit-Codes in `ExitCode` (zwei Klassifikatoren, je Sentinel ein Pin-Test):
+
+  | Sentinel | Exit | `up` | `down` |
+  |---|---|---|---|
+  | `driven.ErrDockerUnavailable`, `driven.ErrContainerEngineNotLocal` | 11 | ✓ | ✓ |
+  | `driving.ErrDevcontainerStartScriptFailed` (Statusdatei `result=failed`) | 11 | ✓ | — |
+  | `driven.ErrDevcontainerRuntime` | 12 | ✓ | ✓ (`docker stop`) |
+  | `driving.ErrDevcontainerConfigMissing`, `…ProjectFolderInvalid`, `…EnvNameInvalid` | 10 | ✓ | — |
+  | `driving.ErrDevcontainerFileSystem` | 14 | ✓ | — |
+  | `ErrDevcontainerSubcommandRequired`, `ErrDevcontainerPreviewNotApplicable` | 2 | ✓ | ✓ |
+
+- **`--quiet`** ist im JSON-Modus ein No-op; der Fortschritt (Bau des Hilfs-Images, Ausgabe der CLI) wird unter `--json`
+  nicht geschrieben, bei einem Fehler enthält die Meldung des Fehler-Eintrags das gekürzte Ende der CLI-Ausgabe.
+- **Vertrag:** [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) bindet alle
+  `--json`-Ausgaben an das Enum von `command`; [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)
+  nennt `devcontainer`. `jsontestutil` prüft das Enum nicht und verlangt `subcommand` nur für `template` und `config`.
+
 ---
 
 ## 7. Mutations-Matrix pro Subcommand
@@ -1235,6 +1295,8 @@ in derselben PR ergänzen.
 | `logs` ([slice-v1-cli-json-dry-run-logs](../plan/planning/done/slice-v1-cli-json-dry-run-logs.md)) | — | — | — | — | — | — | — | — |
 | `config set` ([slice-v1-cli-json-dry-run-config](../plan/planning/done/slice-v1-cli-json-dry-run-config.md)) | ✓ (genau eine Zeile — `u-boot.yaml`; Scalar-`PatchScalar` oder Listen-`Marshal`-Rewrite) | — | — | — | — | — | — | — |
 | `egress list` ([slice-v1-cli-egress-anzeige](../plan/planning/done/slice-v1-cli-egress-anzeige.md); read-only, nur `Exists`/`ReadFile` auf `u-boot.yaml` und `.git/config`) | — | — | — | — | — | — | — | — |
+| `devcontainer up` ([slice-v1-cli-devcontainer-up-down](../plan/planning/in-progress/slice-v1-cli-devcontainer-up-down.md); liest `.devcontainer/devcontainer.json` und `u-boot.yaml`, schreibt keine Projektdatei) | — | — | — | — | — | — | — | — |
+| `devcontainer down` ([slice-v1-cli-devcontainer-up-down](../plan/planning/in-progress/slice-v1-cli-devcontainer-up-down.md); liest nichts, schreibt nichts) | — | — | — | — | — | — | — | — |
 
 Alle modifying-Subcommands sind damit migriert (`doctor`, `add`,
 `init`, `generate`, `remove`, `up`, `down`, `logs`, `config`).

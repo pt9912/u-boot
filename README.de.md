@@ -222,6 +222,8 @@ Die vollständige Änderungshistorie jedes Releases steht in [`CHANGELOG.md`](CH
 | `generate <artifact>` | Idempotente Block-Ersetzung via `U-BOOT MANAGED BLOCK`-Marker. |
 | `config [get\|set\|list] [<pfad>…]` | Whitelist-skopierte Reads/Writes mit zweistufiger Schema-Validierung. |
 | `egress list [--json]` | Egress-Allowlist des Sandbox-Devcontainers mit der Herkunft je Host anzeigen; liest nur `u-boot.yaml` und `.git/config`. |
+| `devcontainer up [--recreate]` | Devcontainer des Projekts ohne Editor, Node.js und Dev-Container-CLI auf dem Host starten (nur Docker): die CLI läuft in einem kurzlebigen Hilfs-Container, der das Engine-Socket hält; der Befehl sagt das vor dem Start, auch unter `--quiet`. |
+| `devcontainer down` | Diesen Container stoppen; er entfernt weder den Container noch ein Volume. |
 | `template list [--json]` | Eingebauten Template-Katalog browsen. |
 
 ## Voraussetzungen

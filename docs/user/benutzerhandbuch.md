@@ -2,7 +2,7 @@
 
 Handbuch-Version: 2.0
 Software-Version: v0.12.0
-Stand: 2026-10-19
+Stand: 2026-10-20
 
 ---
 
@@ -54,17 +54,19 @@ grobes Verständnis von Docker Compose genügen.
 |---|---|
 | `u-boot` (Binary, Paket, Homebrew oder Container-Image) | alle Befehle |
 | Docker Engine ab 24.0 | `up`, `down`, `logs` und die Docker-Prüfungen von `doctor` |
-| Docker-Compose-Plugin ab 2.20 | dieselben Befehle |
+| Docker-Compose-Plugin ab 2.20 | dieselben Befehle (nicht `devcontainer up` und `devcontainer down`) |
+| Docker (Client und lokale Engine; gemessen mit 29.9.1) | `devcontainer up` und `devcontainer down` (Abschnitt 4.9) |
 | `git` | `init` (außer mit `--no-git`) |
 
 **Ohne Docker** funktionieren `init`, `add`, `remove`, `generate`, `config`,
-`egress list` und `template list`. Nur `up`, `down` und `logs` brauchen einen erreichbaren
-Docker-Daemon. `u-boot doctor` meldet fehlende Werkzeuge als Befund.
+`egress list` und `template list`. Nur `up`, `down`, `logs`, `devcontainer up` und
+`devcontainer down` brauchen einen erreichbaren Docker-Daemon. `u-boot doctor` meldet
+fehlende Werkzeuge als Befund.
 
 Podman ab 4.0 funktioniert als Ersatz für Docker, wenn `docker` auf `podman`
 zeigt und `DOCKER_HOST` auf den Podman-Socket gesetzt ist. `u-boot doctor`
 meldet Podman-Versionen als Warnung („unrecognized version"), bricht aber nicht
-ab.
+ab. Für `devcontainer up` und `devcontainer down` ist Podman als Host-Engine nicht zugesagt.
 
 ---
 
@@ -157,8 +159,9 @@ Zwei Einschränkungen im Container:
   (Docker, Compose-Plugin, Docker-Erreichbarkeit, git) werden übersprungen und
   mit `?` markiert. Auch die Prüfung des Geräts `/dev/fuse` entfällt (Eintrag
   `devcontainer.sandbox.runtime`, Info): das Gerät im Image gehört dem
-  u-boot-Container, nicht dem Container-Host. Auch `up`, `down` und `logs` laufen
-  im Image nicht, weil dort kein Docker vorhanden ist.
+  u-boot-Container, nicht dem Container-Host. Auch `up`, `down`, `logs`,
+  `devcontainer up` und `devcontainer down` laufen im Image nicht, weil dort kein Docker
+  vorhanden ist (Exit-Code 11).
 
 Für den Alltag ist ein installiertes Programm bequemer als das Image.
 
@@ -317,7 +320,7 @@ Diese Optionen gelten für jeden Befehl:
 | `--yes` | Rückfragen automatisch bejahen |
 | `--no-interactive` | nie fragen; bei einer nötigen Rückfrage abbrechen |
 | `--json` | maschinenlesbare Ausgabe |
-| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up` und `down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen). Vier Ausnahmen bleiben sichtbar: (1) Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`); in der Befehlsausgabe erzeugt nur `generate devcontainer` diese Warnungen, dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift, während die Meldung zu `nestedRuntime` ohne Sandbox-Profil entfällt; (2) Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in `doctor` und in der Warnungsausgabe von `generate devcontainer` und `init`, soweit der Host sie aus der Statusdatei des Containers lesen kann; ein nicht ermittelbarer Zustand ist kein Fallback und entfällt); (3) der Compose-Fortschritt von `up`; (4) die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. `doctor --quiet` zeigt Fehler-Einträge, Degradations-Fallbacks und die Warn-Einträge zu einer Sicherheitseigenschaft des Sandbox-Profils, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; Einzelheiten in Abschnitt [4.7](#47-die-umgebung-prüfen)). Die Abfragebefehle `config get`, `config list`, `egress list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
+| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up`, `down`, `devcontainer up` und `devcontainer down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt; bei `devcontainer up` hält es den Fortschritt zurück und gibt ihn nur bei einem Fehler aus), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen). Vier Ausnahmen bleiben sichtbar: (1) Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`); in der Befehlsausgabe erzeugen nur `generate devcontainer` und `devcontainer up` (die Einbindung des Docker-Sockets in den Hilfs-Container) diese Warnungen, dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift, während die Meldung zu `nestedRuntime` ohne Sandbox-Profil entfällt; (2) Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in `doctor` und in der Warnungsausgabe von `generate devcontainer`, `init` und `devcontainer up`, soweit der Host sie aus der Statusdatei des Containers lesen kann; ein nicht ermittelbarer Zustand ist kein Fallback und entfällt); (3) der Compose-Fortschritt von `up`; (4) die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. `doctor --quiet` zeigt Fehler-Einträge, Degradations-Fallbacks und die Warn-Einträge zu einer Sicherheitseigenschaft des Sandbox-Profils, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; Einzelheiten in Abschnitt [4.7](#47-die-umgebung-prüfen)). Die Abfragebefehle `config get`, `config list`, `egress list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
 | `--verbose` | zusätzliche Details; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist |
 | `--debug` | interne Diagnoseausgabe; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist (`--verbose` und `--debug` wirken gleich) |
 | `-v`, `--version` | Version anzeigen |
@@ -692,8 +695,8 @@ Byte für Byte erhalten.
 #### Voraussetzung
 
 Ein `u-boot`-Projekt. Zum Starten des Devcontainers brauchen Sie einen
-Devcontainer-fähigen Editor (zum Beispiel VS Code) oder die
-`devcontainer`-CLI.
+Devcontainer-fähigen Editor (zum Beispiel VS Code), die `devcontainer`-CLI oder
+Docker allein mit `u-boot devcontainer up` (siehe unten in diesem Abschnitt).
 
 #### Vorgehen
 
@@ -735,6 +738,132 @@ ergeben sich aus den aktivierten Diensten.
   auseinanderlaufen (Warnung); `u-boot generate devcontainer` behebt das.
 - Werkzeuge im Container (Node.js, Java, Go, …) fügen Sie als Features hinzu
   (siehe 4.10). Für autonome Agenten gibt es ein eigenes Profil (siehe 4.11).
+- Den Container starten Sie mit einem Editor, mit der `devcontainer`-CLI oder ohne
+  beides mit `u-boot devcontainer up` (siehe unten).
+
+#### Den Devcontainer ohne Editor starten und stoppen
+
+```bash
+u-boot devcontainer up              # startet den Devcontainer des Projekts
+u-boot devcontainer up --recreate   # entfernt den Container und legt ihn neu an
+u-boot devcontainer down            # stoppt den Container
+```
+
+Auf dem Host genügen Docker (Client und lokale Engine). Ein Editor, Node.js und
+die `devcontainer`-CLI sind nicht nötig. `up` liest `.devcontainer/devcontainer.json`
+im aktuellen Verzeichnis und führt die Dev-Container-CLI in einem kurzlebigen
+Hilfs-Container aus.
+
+**Erster Aufruf.** `u-boot` baut das Hilfs-Image lokal aus gepinnten Quellen: die
+Dev-Container-CLI aus der npm-Registry (feste Version, Lockdatei mit Prüfsummen,
+Installation ohne Installationsskripte der Pakete) und die Basis-Images `node` und
+`docker` (jeweils mit Digest). Der erste Aufruf braucht deshalb Netzzugriff und baut;
+spätere Aufrufe nutzen das Image weiter. Ein erster Aufruf ohne Netz ist nicht
+zugesagt. Einzelmessung (Linux, `amd64`, Docker 29.9.1, keine Zusage): Das Image ist
+1716 MiB groß. Der Bau dauerte bei vorhandenen Basis-Images 8 bis 19 Sekunden. Der
+erste `up` eines Projekts, dessen Basis-Image erst gezogen wurde, dauerte 52 Sekunden,
+weitere Starts 1 bis 5 Sekunden. Trivy meldete im Betriebssystem-Anteil des Node-Images
+597 Funde (HIGH und CRITICAL), in der Dev-Container-CLI selbst keinen. Das Image entsteht
+bei Ihnen und wird weder mit `u-boot` ausgeliefert noch dauerhaft geprüft; alte
+Hilfs-Images räumt `u-boot` nicht ab (`docker image prune`).
+
+**Sicherheit: das Docker-Socket.** Der Hilfs-Container bindet für die Dauer des Aufrufs
+das Engine-Socket des Hosts ein (`/var/run/docker.sock`). Das ist Root-Äquivalenz auf der
+Engine. `u-boot devcontainer up` sagt das, bevor es den Hilfs-Container startet, auch
+unter `--quiet`; mit `--json` steht es als Eintrag `warn` in `diagnostics`. Der
+Devcontainer, den `u-boot` erzeugt (Standard- und Sandbox-Profil), bindet das Socket nicht
+ein. Eine handgeschriebene `.devcontainer/devcontainer.json` kann es einbinden, und ihr
+`initializeCommand` läuft mit dem Zugriff des Hilfs-Containers. **Lesen Sie die Datei vor
+dem ersten Start, wenn Dritte oder ein Agent im Projektordner schreiben dürfen.** Das
+betrifft das Standardprofil: Im Sandbox-Profil liegt der Workspace in einem Volume, der
+Projektordner des Hosts ist im Container nicht eingehängt.
+
+Der Projektordner ist im Hilfs-Container unter demselben Pfad wie auf dem Host
+schreibend eingehängt, weil ein `initializeCommand` in ihn schreiben darf. Das
+Home-Verzeichnis und Geheimnis-Verzeichnisse wie `~/.ssh` sind nicht eingehängt. Ein
+Projektpfad mit Komma, Anführungszeichen oder Zeilenumbruch wird abgewiesen (Exit-Code 10);
+ein Ordner, den die Engine nicht sieht, ergibt Exit-Code 12.
+
+**Zugangsdaten.** Der Befehl reicht nur Variablen durch, auf die `devcontainer.json`
+mit `${localEnv:NAME}` verweist und die auf dem Host gesetzt sind, und zwar als Name,
+nie als Wert auf der Kommandozeile von `u-boot`. Der Wert steht dabei weder in einem
+Image noch in den Labels des Devcontainers, in einer Datei im Projektordner oder in den
+Volumes des Sandbox-Profils (geprüft). Zwei Grenzen gehören dazu: `remoteEnv` ist die für
+Zugangsdaten vorgesehene Form. Bei `containerEnv` steht der aufgelöste Wert in den
+Metadaten (`Config.Env`) des Devcontainers, solange dieser besteht; für die Dauer eines
+Lebenszyklus-Befehls steht er auf einer Kommandozeile im Hilfs-Container (`docker exec -e`
+bei `remoteEnv`, `docker run -e` bei `containerEnv`), sichtbar für Prozesse mit Zugriff auf
+den Daemon (zum Beispiel `docker top`). Die Maskierung ersetzt den Wert nur im Fortschritt
+und in den Fehlermeldungen von `u-boot`, und nur, wenn er unverändert vorkommt und
+mindestens vier Byte lang ist; kodierte Formen und kürzere Werte bleiben stehen. Andere
+Quellen für `${localEnv:…}` (Features, weitere Konfigurationsdateien) liest der Befehl nicht;
+Proxy-Variablen und Zugangsdaten für private Basis-Images reicht er nicht durch.
+
+**Ausgabe.**
+
+- `up` meldet nach dem Start den Container (die ersten 12 Zeichen der ID), den Benutzer
+  im Container und den Workspace. Der Fortschritt (Bau des Hilfs-Images, Ausgabe der CLI)
+  geht auf die Fehlerausgabe.
+- `--quiet`: Die Erfolgsmeldung und der Fortschritt entfallen (bei einem Fehler wird der
+  Fortschritt nachträglich ausgegeben); die Ausweisung des Sockets und die Fallbacks
+  (siehe unten) bleiben sichtbar.
+- `--json`: genau ein Umschlag auf der Standardausgabe, `command` ist `devcontainer`,
+  `subcommand` ist `up` oder `down`. Der Fortschritt entfällt. **Der Umschlag eines
+  erfolgreichen `up` trägt `status: warn`**, weil die Ausweisung des Sockets eine
+  Warnung ist (der Exit-Code ist trotzdem `0`); prüfen Sie in Skripten den Exit-Code, nicht
+  `status: ok`. Die Felder von `data` stehen im Abschnitt „JSON-Ausgabe“ im Anhang.
+- `--dry-run` und `--diff` werden mit Exit-Code 2 abgewiesen, ebenso `u-boot devcontainer`
+  ohne Unterbefehl: Der Befehl schreibt keine Projektdatei.
+
+**Fallbacks nach dem Start.** Wie `doctor` und `generate devcontainer` weist `up` die
+Degradations-Fallbacks des Sandbox-Containers aus (Container ohne Daemon, `vfs`-Storage,
+Wegfall der Egress-Restriktion), mit dem Stand des letzten Starts. Der Befehl findet die
+Statusdateien über die Fähigkeiten, die `u-boot.yaml` im Projektordner anfordert; **ohne
+`u-boot.yaml` weist `up` nichts aus** und endet trotzdem mit Exit-Code 0.
+
+**Stoppen, Neuanlage und Volumes.** `u-boot devcontainer down` stoppt den Container und
+entfernt weder ihn noch ein Volume; es braucht keinen Hilfs-Container und bindet kein
+Socket ein. Ohne Container oder bei einem schon gestoppten Container endet es mit
+Exit-Code 0. Es heißt anders als `u-boot down`: Das baut die Compose-Umgebung ab,
+`devcontainer down` stoppt nur. Ein folgendes `u-boot devcontainer up` startet denselben
+Container wieder. `up --recreate` entfernt den Container und legt ihn neu an; benannte
+Volumes (zum Beispiel der Workspace des Sandbox-Profils) bleiben erhalten. Die Hinweise von
+`u-boot` zu einer geänderten Egress-Liste nennen `devcontainer up --remove-existing-container`;
+`u-boot devcontainer up --recreate` bewirkt dasselbe.
+
+**Exit-Codes von `devcontainer up`:**
+
+| Code | Fall |
+|---|---|
+| `2` | `u-boot devcontainer` ohne Unterbefehl; `--dry-run` oder `--diff` |
+| `10` | keine `.devcontainer/devcontainer.json` im aktuellen Verzeichnis; Pfad mit Komma, Anführungszeichen oder Zeilenumbruch; ein `${localEnv:NAME}` mit einem Namen, der kein einfacher Variablenname ist |
+| `11` | kein `docker` im `PATH` (so auch im Container-Image von `u-boot`), der Daemon antwortet nicht, die Engine ist nicht lokal (zum Beispiel `DOCKER_HOST=tcp://…`), oder ein Startscript des Containers bricht ab und meldet `failed` in seiner Statusdatei (`onUnavailable: fail`); der letzte Fall braucht die `u-boot.yaml` des Projekts, sonst lautet der Exit-Code `12`; bei `devcontainer down` gelten die ersten drei Fälle |
+| `12` | jeder andere Fehler beim Bau oder Start: der Bau des Images scheitert, ein Lebenszyklus-Befehl wie `postStartCommand` endet mit einem Fehler, die Engine sieht den Projektordner nicht; bei `down` ein Fehler von `docker stop` |
+| `14` | Lesefehler im Dateisystem |
+
+Die Fehlermeldung von `up` enthält bei Exit-Code 12 das Ende der Ausgabe der CLI.
+
+**Was zurückbleibt.** Neben dem Hilfs-Image (`u-boot-devcontainer-cli:…`) legt die
+Dev-Container-CLI je Projekt Images `vsc-<Ordnername>-…` und `…-uid` an; sie bleiben nach
+`down` und nach `--recreate` liegen. Aufräumen mit `docker image rm` oder `docker image prune`.
+
+**Abbruch mit Strg-C.** Die CLI im Hilfs-Container beendet sich auf das Signal nicht;
+`u-boot` wartet bis zu zehn Sekunden (gemessen: 10,5 Sekunden bis zur Rückkehr) und entfernt
+dann den Hilfs-Container. Es bleibt kein Hilfs-Container zurück. Der Dev-Container, den die CLI
+bis dahin angelegt hat, bleibt bestehen.
+
+**Benutzer-ID.** Die CLI läuft im Hilfs-Container als `root`; ihr `updateRemoteUserUID`
+passt die Benutzer-ID im Container nicht an den Besitzer des Projektordners an (beobachtet bei
+einem Ordner mit der UID 2000: der Benutzer behielt 1000). Dateien, die der Benutzer im
+eingebundenen Projektordner anlegt, gehören im Standardprofil der Benutzer-ID aus
+`devcontainer.user.uid` (getestet mit 4321; Standard 1000). Setzen Sie sie auf Ihre
+Host-UID, wenn Sie die Dateien als Host-Benutzer bearbeiten wollen.
+
+**Features und Reichweite.** Als Katalog-Feature ist `node` im Test installiert worden und
+nutzbar; andere Features sind nicht geprüft. Zugesagt ist der Befehl auf einem Linux-Host mit
+lokaler Docker-Engine auf `amd64`. **Nicht zugesagt und nicht gemessen:** macOS mit Colima,
+Docker Desktop, rootless Docker, Podman als Host-Engine, eine entfernte Engine, Linux auf
+`arm64` und Windows. `u-boot up` startet den Devcontainer nicht mit.
 
 ### 4.10 Devcontainer-Features nutzen
 
@@ -960,7 +1089,7 @@ konfigurierten Clone-Quelle, siehe unten).
 | Eigenschaft | Sandbox-Profil | Standardprofil |
 |---|---|---|
 | Workspace | benanntes Volume `<projekt>-workspace-${devcontainerId}`; das Repository wird im Container geklont | Bind-Mount des Projektordners |
-| Docker-Socket des Hosts | nicht eingebunden | nicht eingebunden |
+| Docker-Socket des Hosts (im erzeugten Devcontainer; der Hilfs-Container von `u-boot devcontainer up` bindet es ein, siehe 4.9) | nicht eingebunden | nicht eingebunden |
 | `--privileged` und zusätzliche Fähigkeiten | nein (außer mit verschachteltem Podman oder Docker; Docker verlangt `--privileged`) | nein |
 | Geheimnis-Verzeichnisse des Hosts (`~/.ssh`, `~/.aws`, …) | nicht eingebunden | nicht eingebunden |
 | Benutzer | `vscode`, nicht root | `vscode`, nicht root |
@@ -1744,6 +1873,9 @@ erzeugten Datei:
   Feature bleibt die Datei unverändert.
 - Ein Credential-Helper im Image liefert `$GIT_TOKEN` an `git` (nur für
   `https`-Remotes; bei `ssh` gibt es keinen Schlüssel im Container).
+- Starten Sie den Container mit `u-boot devcontainer up`, reicht der Befehl nur den Namen
+  der Variable durch; die Grenzen dieses Wegs (Metadaten bei `containerEnv`, Kommandozeile
+  im Hilfs-Container während eines Lebenszyklus-Befehls) stehen in Abschnitt 4.9.
 - Empfohlen: **kurzlebige, auf das Repository begrenzte Tokens**, nie ein
   privater Schlüssel im Container, und **Branch-Protection** im Remote, damit ein
   kompromittierter Agent nicht auf geschützte Branches schreiben kann.
@@ -1987,13 +2119,14 @@ Handarbeit bräuchte:
 | Aufgabe | Benötigtes Recht |
 |---|---|
 | Dateien anlegen und ändern (`init`, `add`, `remove`, `generate`, `config set`) | Schreibrecht im Projektverzeichnis (`doctor` prüft das: `fs.write-permissions`) |
-| `up`, `down`, `logs` | Zugriff auf den Docker-Daemon; unter Linux meist Mitgliedschaft in der Gruppe `docker` |
+| `up`, `down`, `logs`, `devcontainer up`, `devcontainer down` | Zugriff auf den Docker-Daemon; unter Linux meist Mitgliedschaft in der Gruppe `docker` |
 | Installation in `/usr/local/bin` oder per Paket | Administratorrechte (`sudo`) |
 | `git`-Funktionen von `init` | `git` installiert und konfiguriert |
 
 Hinweis: Im Devcontainer läuft Ihre Arbeit als Benutzer `vscode`, nicht als
 root. Weder das Standard- noch das Sandbox-Profil bindet das Docker-Socket des
-Hosts oder Ihre Geheimnis-Verzeichnisse ein.
+Hosts oder Ihre Geheimnis-Verzeichnisse ein. Das gilt für den erzeugten Devcontainer;
+der Hilfs-Container von `u-boot devcontainer up` ist davon ausgenommen (siehe 4.9).
 
 ---
 
@@ -2009,8 +2142,8 @@ Werten Sie in Skripten diese Codes aus:
 | `1` | allgemeiner Fehler |
 | `2` | falsche Benutzung (unbekanntes Flag, fehlendes Argument, widersprüchliche Modus-Flags, ungültiger `--timeout`, `--tail`, `--since`) |
 | `10` | fachlicher Fehler (ungültiger Name oder Wert, fehlendes Projekt, nicht unterstützter Dienst, verweigerte Bestätigung, vorhandene Datei) |
-| `11` | Umgebungsproblem (Docker nicht erreichbar, Compose-Plugin fehlt; auch `doctor` mit Fehlern) |
-| `12` | Laufzeitfehler von Compose (auch Zeitüberschreitung bei `up`) |
+| `11` | Umgebungsproblem (Docker nicht erreichbar, Compose-Plugin fehlt; auch `doctor` mit Fehlern; bei `devcontainer up` auch ein abgebrochenes Startscript des Containers) |
+| `12` | Laufzeitfehler von Compose (auch Zeitüberschreitung bei `up`); bei `devcontainer up` und `devcontainer down` ein Fehler beim Bau oder Start (Abschnitt 4.9) |
 | `14` | Dateisystem- oder Persistenzfehler |
 
 ### Fehler: „project not initialized: u-boot.yaml missing"
@@ -2208,8 +2341,9 @@ lokale DNS-Server nicht startet oder nicht unter diesem Benutzer läuft; die Mel
 ## 8. FAQ
 
 **Brauche ich Docker, um `u-boot` zu benutzen?**
-Nur für `up`, `down`, `logs` und die Docker-Prüfungen von `doctor`. `init`,
-`add`, `remove`, `generate`, `config`, `egress list` und `template list` laufen ohne.
+Nur für `up`, `down`, `logs`, `devcontainer up`, `devcontainer down` und die
+Docker-Prüfungen von `doctor`. `init`, `add`, `remove`, `generate`, `config`,
+`egress list` und `template list` laufen ohne.
 
 **Überschreibt `u-boot` meine Änderungen?**
 Nein. Außerhalb der verwalteten Bereiche wird nichts angefasst, und innerhalb
@@ -2245,7 +2379,7 @@ Aus dem Container heraus sind die Werkzeuge Ihres Rechners nicht sichtbar. Ein
 Fehlschlag wäre irreführend, deshalb der Zustand `?`.
 
 **Ist das Sandbox-Profil eine sichere Isolation?**
-Nein. Es begrenzt Schäden (kein Host-Docker-Socket, kein `--privileged`, optional
+Nein. Es begrenzt Schäden (kein Host-Docker-Socket im Container, kein `--privileged`, optional
 eine Liste erlaubter Internet-Ziele), ist aber keine harte Sicherheitsgrenze.
 Das gilt besonders mit verschachteltem Podman.
 
@@ -2301,6 +2435,8 @@ neuen Stand.
 | `u-boot generate <artefakt>` | Artefakt erzeugen oder aktualisieren | 4.8–4.11 |
 | `u-boot config [get\|set\|list]` | Konfiguration lesen und ändern | 5 |
 | `u-boot egress list` | Egress-Liste mit Herkunft je Host anzeigen | 4.11 |
+| `u-boot devcontainer up` | Devcontainer ohne Editor starten | 4.9 |
+| `u-boot devcontainer down` | Devcontainer stoppen (entfernt nichts) | 4.9 |
 | `u-boot template list` | Vorlagenkatalog anzeigen | 4.12 |
 | `u-boot completion <shell>` | Shell-Vervollständigung erzeugen | 2 |
 
@@ -2319,6 +2455,8 @@ neuen Stand.
 | `config get` | `--json-array` |
 | `config set` | `--dry-run`, `--diff`, `--allow-external-feature-sources` |
 | `egress list` | keine eigenen; `--dry-run` und `--diff` werden mit Exit-Code 2 abgewiesen |
+| `devcontainer up` | `--recreate`; `--dry-run` und `--diff` werden mit Exit-Code 2 abgewiesen |
+| `devcontainer down` | keine eigenen; `--dry-run` und `--diff` werden mit Exit-Code 2 abgewiesen |
 
 ### Dienstekatalog
 
@@ -2366,8 +2504,8 @@ aus. Bei Fehlern erscheint der Fehlertext zusätzlich auf der Fehlerausgabe.
 | Feld | Inhalt |
 |---|---|
 | `status` | `ok`, `warn` oder `error`; folgt dem schwersten Eintrag in `diagnostics` |
-| `command` | Befehl: `init`, `add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `egress`, `template` |
-| `subcommand` | nur bei `config` (`get`, `set`, `list`), `egress` (`list`) und `template` (`list`) |
+| `command` | Befehl: `init`, `add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `egress`, `devcontainer`, `template` |
+| `subcommand` | nur bei `config` (`get`, `set`, `list`), `egress` (`list`), `devcontainer` (`up`, `down`) und `template` (`list`) |
 | `diagnostics` | Liste der Befunde, leer (`[]`), wenn alles in Ordnung ist |
 | `exitCode` | derselbe Wert wie der Exit-Code des Prozesses |
 | `data` | Ergebnisdaten des Befehls (siehe Tabelle unten), nicht bei jedem Befehl |
@@ -2409,6 +2547,8 @@ im JSON nicht; `--quiet` ändert die JSON-Ausgabe nicht.
 | `config list` | `entries`: Liste mit `path` und `value` |
 | `config set` | `path`, `oldValue`, `newValue`, `noOp` |
 | `egress list` | `active`, `sandboxProfile`, `egressEnabled`, `cloneSource` (Wahrheitswerte) und `hosts`: Liste mit `host` und `sources` (Herkunft) |
+| `devcontainer up` | `containerId` (volle ID), `remoteUser`, `remoteWorkspaceFolder`; nicht bei einem Fehler |
+| `devcontainer down` | `containerId` (leer, wenn es keinen Container gibt) und `stopped` (Wahrheitswert; `false`, wenn nichts zu stoppen war) |
 | `template list` | Liste der Vorlagen mit `name`, `description`, `version`, `supportedAddOns`, `generatedFiles`, `requiredTools`, `variables` |
 
 Bei Fehlern von `config get` und `config set` enthält `data.hint` einen
@@ -2417,7 +2557,12 @@ Reparaturvorschlag: `command` (der Befehl zum Kopieren), `action` und `argument`
 **Besonderheiten:**
 
 - Ein Aufruf von `u-boot template --json` oder `u-boot egress --json` ohne `list`
-  endet mit Exit-Code 2 und gibt kein JSON aus. `u-boot logs --follow --json` ist ebenfalls ein
+  endet mit Exit-Code 2 und gibt kein JSON aus; `u-boot devcontainer` ohne `up`
+  oder `down` ebenso, auch ohne `--json`.
+- Der Umschlag von `devcontainer up` trägt auch im Erfolgsfall `status: warn`, weil die
+  Ausweisung des Docker-Sockets (Abschnitt 4.9) ein Eintrag `warn` in `diagnostics` ist;
+  der Exit-Code ist `0`. Bei einem Fehler, nachdem der Hilfs-Container gestartet werden sollte,
+  steht diese Warnung vor dem Fehler-Eintrag. `u-boot logs --follow --json` ist ebenfalls ein
   Nutzungsfehler (Exit-Code 2).
 - `doctor` endet mit `warn` und Exit-Code 0, solange nur Warnungen vorliegen;
   mit `--strict` oder bei einem Fehler lautet der Exit-Code 11.
