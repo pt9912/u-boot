@@ -108,11 +108,11 @@ Die Liefer-Punkte sind drei (ADR · Lastenheft-Wortlaut-Vorschlag · Folge-Slice
 - [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor: [`2026-10-20-slice-v1-devcontainer-start-ohne-cli`](../../../reviews/2026-10-20-slice-v1-devcontainer-start-ohne-cli.md), Verification [`2026-10-20-verify-slice-v1-devcontainer-start-ohne-cli`](../../../reviews/2026-10-20-verify-slice-v1-devcontainer-start-ohne-cli.md)
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8).
-- [ ] Doku-Update: ADR-Index (Zeilen 56 und 57), `open/README.md`, Roadmap-Zeile „Offen:“ und Welle sind auf den Ist-Stand; offen bis nach dem Move: die Roadmap-Zeile „In Arbeit“ (Ruhe-Marker, siehe §7, *Closure-Commits*); Handbuch und `CHANGELOG.md` bleiben unverändert (öffentlicher Vertrag nicht berührt).
+- [x] Doku-Update: ADR-Index (Zeilen 56 und 57), `open/README.md`, Roadmap-Zeile „Offen:“ und Welle sind auf den Ist-Stand; die Roadmap-Zeile „In Arbeit“ trägt den Ruhe-Marker; Handbuch und `CHANGELOG.md` bleiben unverändert (öffentlicher Vertrag nicht berührt).
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag (§7).
 - [x] Beobachtungs-Register (`../observations/`) fortgeschrieben: vier Evidence-Dateien (§7, *Beobachtungs-Register*).
 - [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen) (§7, *Risiken aus §6*).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — von der Slice-Closure geprüft; die Welle prüft sie bei ihrer Closure für die Welle als Ganzes. Closure-Commit `<HASH>`.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — von der Slice-Closure geprüft; die Welle prüft sie bei ihrer Closure für die Welle als Ganzes. Closure-Commit `1828bd5`.
 
 ## 3. Plan (vor Code)
 
