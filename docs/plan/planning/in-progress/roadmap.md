@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Nichts in Arbeit.
+In Arbeit: [`slice-v1-e2e-nested-podman-pin-mismatch-zwischencontainer`](slice-v1-e2e-nested-podman-pin-mismatch-zwischencontainer.md) (Docker-Test räumt die Zwischencontainer der fehlgeschlagenen Baue auf; wellenlos).
 
 ## Nächste Wellen
 
