@@ -1,6 +1,6 @@
 # ADR 0028: Devcontainer ohne Editor und ohne Node auf dem Host starten — Dev-Container-CLI im lokal gebauten Hilfs-Image, Docker-Socket nur für den Befehl, `u-boot devcontainer up` und `down`
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Datum:** 2026-10-20
 
@@ -92,7 +92,7 @@ Jede Entscheidung nennt die Gegenoption, die verworfen wird.
     - [`SPEC-001`](../../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json): Wertebereich von `command` um `devcontainer`.
     - `spec/architecture.md`: Port und Adapter (Abschnitte 2.4 und 2.6) und die externe Abhängigkeit (Abschnitt 3: Hilfs-Container).
 
-**Freigabe-Punkte des Projektinhabers vor `Accepted`** (Empfehlungen, keine Entscheidungen):
+**Freigabe-Punkte des Projektinhabers vor `Accepted`** (Empfehlungen, vom Projektinhaber alle angenommen, siehe Geschichte):
 
 - a) Weg a2 mit dem Vergleich unten; a1, a′, b, c, d und e verworfen (Entscheidung 1 und 8). Empfehlung: ja.
 - b) Befehlsform: `u-boot devcontainer up [--recreate]` und `down` (stoppt nur, entfernt nichts, Exit 0 bei „nichts zu tun“); Exit-Codes 2/10/11/12/14 nach Entscheidung 3; `--dry-run`/`--diff` abgewiesen. Empfehlung: ja, `down` beibehalten (Alternative `stop`).
@@ -142,5 +142,6 @@ Ein Docker-Test des Umsetzungs-Slice, der eine Zeile der Belegbasis oder der Zus
 | Datum | Ereignis | Verweis |
 |---|---|---|
 | 2026-10-20 | Entscheidungen des Projektinhabers im Gespräch (Reichweite, Beschaffung a2, Socket, Befehlsform, a′ entfällt); Entwurf, `Proposed`, `Accepted` setzt der Projektinhaber | Vereinbarung mit dem Projektinhaber |
+| 2026-10-20 | `Accepted` durch den Projektinhaber („ADR-0028 mit allen Punkten freigeben“, im Gespräch, auf die Vorlage der Freigabe-Punkte a bis i): (a) bis (i) wie empfohlen. Der Lastenheft-Wortlaut und die Priorität/Release-Zuordnung sind damit nicht freigegeben; beides entscheidet der Projektinhaber gesondert | Vereinbarung mit dem Projektinhaber |
 
 Nach `Accepted` wird diese Datei **nicht mehr inhaltlich überschrieben**. Spätere Korrekturen oder Schärfungen entstehen als neue ADR mit `Supersedes` auf [ADR-0028](0028-devcontainer-start-ohne-editor-hilfs-image.md).
