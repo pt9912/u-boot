@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) (Label `devcontainer.local_folder`: der Spiegelpfad-Test S2 trägt, dass die Stelle für Container dieses Wegs wahr bleibt), [`SPEC-042`](../../../../spec/spezifikation.md#spec-042--aufruf-der-compose-engine-und-preflight) (gilt für Compose-Aufrufe; der Launcher hat eine eigene Vorab-Prüfung), `architecture.md` §2.4 und §2.6 (Port und Adapter). Der Slice **liest** sie und ändert keine; die Nachführung ist der Spezifikations-Slice. Der Verweis zeigt aufwärts.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912.
 
 **Autor:** pt9912 (Rolle Architect). **Datum:** 2026-10-20.
 
