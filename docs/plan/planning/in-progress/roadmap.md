@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-In Arbeit: [`slice-v2-spec-upstream-dns-egress-init`](slice-v2-spec-upstream-dns-egress-init.md) (Spezifikation nach dem Code: Abbruch des Egress-Startscripts auch unter `warn`, Kette `egress && docker`, Regel zum Upstream-DNS; wellenlos).
+In Arbeit: [`slice-v2-spec-upstream-dns-egress-init`](../done/slice-v2-spec-upstream-dns-egress-init.md) (Spezifikation nach dem Code: Abbruch des Egress-Startscripts auch unter `warn`, Kette `egress && docker`, Regel zum Upstream-DNS; wellenlos).
 
 ## Nächste Wellen
 
