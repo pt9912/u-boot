@@ -70,7 +70,15 @@ type Launcher struct {
 	// namePrefix starts the name of every helper container this Launcher
 	// starts; the default is helperContainerPrefix.
 	namePrefix string
-	output     func(ctx context.Context, args ...string) (string, error)
+	// imageRepo is the repository part of the helper image tag; the default
+	// is helperImageRepo. A test that removes the image uses its own
+	// repository, so it neither removes nor races with the image another
+	// package of the same test run starts containers from.
+	imageRepo string
+	// buildArgs are inserted into `docker build` before the tag; empty by
+	// default.
+	buildArgs []string
+	output    func(ctx context.Context, args ...string) (string, error)
 }
 
 // Static check: Launcher satisfies the DevcontainerLauncher port.
@@ -88,6 +96,7 @@ func WithLauncherBinary(path string) *Launcher {
 		probe:      WithBinary(path),
 		abortGrace: defaultAbortGrace,
 		namePrefix: helperContainerPrefix,
+		imageRepo:  helperImageRepo,
 		output:     WithInspectorBinary(path).output,
 	}
 }
@@ -158,7 +167,7 @@ func (l *Launcher) Stop(ctx context.Context, containerID string) error {
 // progress (nil discards it). `--force-rm` removes the intermediate
 // container of a failed step, so a failed build leaves no container.
 func (l *Launcher) EnsureImage(ctx context.Context, progress io.Writer) (string, error) {
-	tag, err := helperImageTag()
+	tag, err := helperImageTag(l.imageRepo)
 	if err != nil {
 		return "", fmt.Errorf("helper image context: %s: %w", err.Error(), driven.ErrDevcontainerRuntime)
 	}
@@ -173,7 +182,8 @@ func (l *Launcher) EnsureImage(ctx context.Context, progress io.Writer) (string,
 		return "", fmt.Errorf("helper image context: %s: %w", err.Error(), driven.ErrDevcontainerRuntime)
 	}
 	stderr := &tailBuffer{limit: upStderrTail}
-	cmd := exec.CommandContext(ctx, l.binary, "build", "--force-rm", "-t", tag, "-")
+	args := append([]string{"build", "--force-rm"}, l.buildArgs...)
+	cmd := exec.CommandContext(ctx, l.binary, append(args, "-t", tag, "-")...)
 	cmd.Stdin = bytes.NewReader(buildContext)
 	cmd.Stdout = progressSinkOrDiscard(progress)
 	cmd.Stderr = io.MultiWriter(stderr, progressSinkOrDiscard(progress))
@@ -356,7 +366,7 @@ func helperCLIVersion(packageJSON []byte) (string, error) {
 
 // helperImageTag is `<repo>:<CLI version>-<first 12 hex of the context
 // hash>`: a changed pin changes the tag, so the image is built anew.
-func helperImageTag() (string, error) {
+func helperImageTag(repo string) (string, error) {
 	files, err := helperContextFiles()
 	if err != nil {
 		return "", err
@@ -370,7 +380,7 @@ func helperImageTag() (string, error) {
 		fmt.Fprintf(hash, "%s\x00%d\x00", name, len(files[name]))
 		hash.Write(files[name])
 	}
-	return fmt.Sprintf("%s:%s-%s", helperImageRepo, version, hex.EncodeToString(hash.Sum(nil))[:12]), nil
+	return fmt.Sprintf("%s:%s-%s", repo, version, hex.EncodeToString(hash.Sum(nil))[:12]), nil
 }
 
 // helperContextTar is the build context as a tar stream with fixed

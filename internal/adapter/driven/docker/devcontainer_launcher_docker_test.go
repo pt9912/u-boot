@@ -765,10 +765,14 @@ func TestLauncher_Docker_S6_GuardCommandLineScanFindsValueInArguments(t *testing
 // after its tag was removed, and the CLI inside answers with the pin.
 func TestLauncher_Docker_S5_BuildFromEmbeddedContext(t *testing.T) {
 	requireDocker(t)
-	tag, err := docker.HelperImageTagForTest()
+	// The image lives in a repository of this test: the product tag is in use
+	// by the devcontainer tests of other packages that run at the same time.
+	repo := "u-boot-devcontainer-cli-s5-" + randomHex(t)
+	tag, err := docker.HelperImageTagInRepoForTest(repo)
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() { _, _ = tryDocker("rmi", "-f", tag) })
 	pin, err := docker.HelperCLIVersionForTest()
 	if err != nil {
 		t.Fatal(err)
@@ -778,7 +782,7 @@ func TestLauncher_Docker_S5_BuildFromEmbeddedContext(t *testing.T) {
 		t.Fatalf("image %s still exists after rmi", tag)
 	}
 	var progress bytes.Buffer
-	got, err := docker.NewLauncher().EnsureImage(context.Background(), &progress)
+	got, err := docker.NewLauncherWithImageRepoForTest(repo).EnsureImage(context.Background(), &progress)
 	if err != nil || got != tag {
 		t.Fatalf("EnsureImage = %q, %v; want %q\n%s", got, err, tag, progress.String())
 	}

@@ -106,7 +106,21 @@ func HelperContextNamesForTest() []string { return helperContextNames() }
 func HelperContextTarForTest() ([]byte, error) { return helperContextTar() }
 
 // HelperImageTagForTest exposes [helperImageTag].
-func HelperImageTagForTest() (string, error) { return helperImageTag() }
+func HelperImageTagForTest() (string, error) { return helperImageTag(helperImageRepo) }
+
+// HelperImageTagInRepoForTest exposes [helperImageTag] for another repository.
+func HelperImageTagInRepoForTest(repo string) (string, error) { return helperImageTag(repo) }
+
+// NewLauncherWithImageRepoForTest builds a [Launcher] on the `docker` binary
+// on `$PATH` whose helper image has the tag `<repo>:<version>-<hash>` and is
+// built without the layer cache, so a test can remove and rebuild its image
+// from scratch without touching the product tag.
+func NewLauncherWithImageRepoForTest(repo string) *Launcher {
+	l := NewLauncher()
+	l.imageRepo = repo
+	l.buildArgs = []string{"--no-cache"}
+	return l
+}
 
 // HelperCLIVersionForTest exposes [helperCLIVersion] for the embedded
 // package.json.

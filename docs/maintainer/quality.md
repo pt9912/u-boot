@@ -187,6 +187,10 @@ muss den Docker-Daemon erreichen UND im selben Network-Namespace
 wie der Daemon laufen, damit `NetProbe.DialTCP("localhost", ...)`-
 Pins gegen Compose-veröffentlichte Ports funktionieren.
 
+`go test` läuft mit `-v`: Pass und Skip jedes Tests stehen im Log, auch im
+CI-Lauf, sodass ein übersprungener Test dort von einem bestandenen
+unterscheidbar ist.
+
 CI-Pfad: separater Workflow `.github/workflows/integration.yml`
 (siehe §6). Aktuell mit `continue-on-error: true` als
 Stabilisierungs-Maßnahme; Aufhebung nach drei aufeinanderfolgenden
