@@ -24,7 +24,7 @@ Anlass: Entscheidungen des Projektinhabers vom 2026-10-20 im Eltern-Slice; der W
 
 ## 1. Ziel und Abgrenzung
 
-**Ziel:** Das Lastenheft sagt den Befehl `u-boot devcontainer up` / `down` zu: eine neue Anforderung, die zwei Zeilen der Befehlsübersicht, die `--quiet`-Regel samt Ausweisung der Socket-Lockerung, den Wert `devcontainer` im Enum von `command` und die Abgrenzung des Hilfs-Containers vom erzeugten Ergebnis. Es ist das **Zielbild**: kein Messstand, kein Prozesszustand, keine Slice-Kennung. Die Zusage-Menge ist „unter Docker auf Linux und unter Colima (Linux-VM)“; ob sie trägt, entscheiden die Docker-Tests und die Einzelmessung des Befehl-Slice, nicht dieser CR.
+**Ziel:** Das Lastenheft sagt den Befehl `u-boot devcontainer up` / `down` zu: eine neue Anforderung, die zwei Zeilen der Befehlsübersicht, die `--quiet`-Regel samt Ausweisung der Socket-Lockerung, den Wert `devcontainer` im Enum von `command` und die Abgrenzung des Hilfs-Containers vom erzeugten Ergebnis. Es ist das **Zielbild**: kein Messstand, kein Prozesszustand, keine Slice-Kennung. Die Zusage-Menge ist „unter Docker auf einem Linux-Host mit lokaler Engine (`amd64`)“; Colima steht nicht darin und kommt durch einen Folge-CR nach der Einzelmessung hinzu. Ob die Linux-Zusage trägt, entscheiden die Docker-Tests des Befehl-Slice, nicht dieser CR.
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
@@ -76,7 +76,7 @@ DoD vollständig, Review-Report und Verification-Evidence liegen vor, Freigabe d
 
 ## 6. Risiken und offene Punkte
 
-- **Der Wortlaut sagt mehr zu als die Tests tragen** (Colima ohne CI, Standardprofil mit UID ≠ 1000). — **Ausgang:** weiter offen; der Befehl-Slice trägt die Tests und die Einzelmessung, ein widerlegender Befund geht zurück an den Architect und führt zu einem Folge-CR ([`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)).
+- **Der Wortlaut sagt mehr zu als die Tests tragen** (Standardprofil mit UID ≠ 1000). — **Ausgang:** weiter offen; der Befehl-Slice trägt die Tests und die Einzelmessung, ein widerlegender Befund geht zurück an den Architect und führt zu einem Folge-CR ([`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)).
 - **Ein Wort trägt eine Wirkung an anderer Stelle** („weist aus“ bleibt unter `--quiet`). — **Ausgang:** weiter offen; der Reviewer prüft jedes Verb des Wortlauts gegen Stelle 3.
 - **Der Wortlaut ändert sich nach dem Review.** — **Ausgang:** weiter offen; Nachlauf-Review über den Diff jeder Änderung ([`BEO-DOK/vertragsaenderung-nach-review`](../observations/BEO-DOK/vertragsaenderung-nach-review/observation.md)).
 - **Versionsnummer kollidiert mit [`slice-cr-lastenheft-messstaende`](../open/slice-cr-lastenheft-messstaende.md).** — **Ausgang:** weiter offen; die Nummer ist die nächste freie zum Zeitpunkt des Schreibens, nicht vorab vergeben.
