@@ -915,11 +915,10 @@ func TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild(t *testing.
 			if tc.want != "" && !strings.Contains(out, tc.want) {
 				t.Errorf("build output lacks %q:\n%s", tc.want, out)
 			}
-			// Without the classic builder no intermediate container exists and
-			// the leftover check above finds nothing whatever the flag does. The
-			// removal of the failed step's container stands directly before the
-			// failure line; earlier steps print the same words when the layer
-			// cache is cold.
+			// The leftover check above finds a container only if the classic
+			// builder created one. The removal of the failed step's container
+			// stands directly before the failure line; earlier steps print the
+			// same words when the layer cache is cold.
 			if !failedStepRemoved.MatchString(out) {
 				t.Errorf("build output does not show the failed step's container removed, so the leftover check proves nothing (builder is not the classic one, or --force-rm is missing):\n%s", out)
 			}
