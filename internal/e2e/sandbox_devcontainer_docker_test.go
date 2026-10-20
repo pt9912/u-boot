@@ -856,6 +856,11 @@ printf 'FROM docker.io/library/alpine:3\nRUN echo ran > /run.txt\n' > Dockerfile
 podman build -t probe . && echo VFS_BUILD_OK
 docker build -t probe-alias . && echo VFS_DOCKER_BUILD_OK`
 
+// failedStepRemoved matches the classic builder's removal of the container of
+// a failed step, which its output prints right before "The command … returned
+// a non-zero code".
+var failedStepRemoved = regexp.MustCompile(`Removed intermediate container [0-9a-f]+\s*\n\s*The command '`)
+
 // ADR 0023 negative probe: the build stops before the installation when the
 // pinned checksum or the pinned signing key does not match. The pins are
 // `ARG`s of the generated Dockerfile; `--build-arg` replaces one value per
@@ -872,25 +877,51 @@ func TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild(t *testing.
 	for name, tc := range map[string]struct {
 		args []string
 		want string
+		// pin is the build argument whose value the failed step's container
+		// carries in its Env; it identifies the container of this probe.
+		pin string
 	}{
-		"wrong checksum":                 {[]string{"PODMAN_SHA256_AMD64=" + zeros, "PODMAN_SHA256_ARM64=" + zeros}, "FAILED"},
-		"signing subkey as the pin":      {[]string{"PODMAN_SIGNING_KEY=6E8EF2F5B1F26FF78431E3D1364FA5A62B410BA4"}, ".tar.gz: OK"},
-		"unknown fingerprint as the pin": {[]string{"PODMAN_SIGNING_KEY=" + strings.Repeat("0", 40)}, ".tar.gz: OK"},
+		"wrong checksum":                 {[]string{"PODMAN_SHA256_AMD64=" + zeros, "PODMAN_SHA256_ARM64=" + zeros}, "FAILED", "PODMAN_SHA256_AMD64=" + zeros},
+		"signing subkey as the pin":      {[]string{"PODMAN_SIGNING_KEY=6E8EF2F5B1F26FF78431E3D1364FA5A62B410BA4"}, ".tar.gz: OK", "PODMAN_SIGNING_KEY=6E8EF2F5B1F26FF78431E3D1364FA5A62B410BA4"},
+		"unknown fingerprint as the pin": {[]string{"PODMAN_SIGNING_KEY=" + strings.Repeat("0", 40)}, ".tar.gz: OK", "PODMAN_SIGNING_KEY=" + strings.Repeat("0", 40)},
 	} {
 		t.Run(name, func(t *testing.T) {
-			args := []string{"build", "-q", "-t", "uboot-e2e-sandbox-pin-negative:probe"}
+			const tag = "uboot-e2e-sandbox-pin-negative:probe"
+			before := containerIDs(ctx, t)
+			// The classic builder (the `test-docker-tools` image has no buildx)
+			// keeps the container of the failed step unless `--force-rm` is
+			// set. The build is not quiet: its output names the removal.
+			args := []string{"build", "--force-rm", "-t", tag}
 			for _, a := range tc.args {
 				args = append(args, "--build-arg", a)
 			}
 			out, code := dockerOutput(ctx, t, append(args, contextDir)...)
+			t.Cleanup(func() {
+				left := newContainersWithCommand(context.Background(), t, before, tc.pin)
+				for _, id := range left {
+					if rmOut, rmCode := dockerOutput(context.Background(), t, "rm", "-f", id); rmCode != 0 {
+						t.Errorf("the failed build left container %.12s with the pin %s; removing it failed: %s", id, tc.pin, rmOut)
+						continue
+					}
+					t.Errorf("the failed build left container %.12s with the pin %s; cleanup removed it", id, tc.pin)
+				}
+			})
 			if code == 0 {
 				t.Cleanup(func() {
-					_, _ = dockerOutput(context.Background(), t, "rmi", "-f", "uboot-e2e-sandbox-pin-negative:probe")
+					_, _ = dockerOutput(context.Background(), t, "rmi", "-f", tag)
 				})
 				t.Fatalf("build with %v succeeded, want a failure before the installation:\n%s", tc.args, out)
 			}
 			if tc.want != "" && !strings.Contains(out, tc.want) {
 				t.Errorf("build output lacks %q:\n%s", tc.want, out)
+			}
+			// Without the classic builder no intermediate container exists and
+			// the leftover check above finds nothing whatever the flag does. The
+			// removal of the failed step's container stands directly before the
+			// failure line; earlier steps print the same words when the layer
+			// cache is cold.
+			if !failedStepRemoved.MatchString(out) {
+				t.Errorf("build output does not show the failed step's container removed, so the leftover check proves nothing (builder is not the classic one, or --force-rm is missing):\n%s", out)
 			}
 		})
 	}

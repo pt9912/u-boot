@@ -16,7 +16,7 @@ Anlass: Der Vorgänger räumte `TestE2E_SandboxDevcontainer_Ollama_PinMismatchBr
 
 **Berührte Spec-Stellen:** — (reine Test-Hygiene; kein Satz der Spezifikation oder der Sicht ist berührt).
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-19.
 
@@ -41,8 +41,8 @@ Anlass: Der Vorgänger räumte `TestE2E_SandboxDevcontainer_Ollama_PinMismatchBr
 
 ## 2. Definition of Done
 
-- [ ] **Mechanismus gemessen und Test-Eingriff:** Der Slice misst je Teilfall, ob und welcher Container zurückbleibt und welchen Pin er im Env (oder anderswo) trägt; dann gilt dieselbe Lösung wie im Vorgänger (`--force-rm` im Bau und Prüfung nach neuer ID und Pin, `newContainersWithCommand` mit dem Pin des Teilfalls als Suchwort) oder eine begründete andere. Der Eingriff entfernt nur Container, die nach der Vorher-Liste neu entstanden sind und den Pin des Teilfalls tragen; zwei gleichzeitige Läufe desselben Tests gegen denselben Daemon sind nicht ausgeschlossen.
-- [ ] **Pin des Eingriffs:** Die Prüfung steht im selben Docker-Testlauf, deckt alle drei Teilfälle und wird je Teilfall (oder für den Test als Ganzes, mit Begründung) einmal rot gesehen (Eingriff entfernt) und ist danach grün.
+- [x] **Mechanismus gemessen und Test-Eingriff:** Der Slice misst je Teilfall, ob und welcher Container zurückbleibt und welchen Pin er im Env (oder anderswo) trägt; dann gilt dieselbe Lösung wie im Vorgänger (`--force-rm` im Bau und Prüfung nach neuer ID und Pin, `newContainersWithCommand` mit dem Pin des Teilfalls als Suchwort) oder eine begründete andere. Der Eingriff entfernt nur Container, die nach der Vorher-Liste neu entstanden sind und den Pin des Teilfalls tragen; zwei gleichzeitige Läufe desselben Tests gegen denselben Daemon sind nicht ausgeschlossen.
+- [x] **Pin des Eingriffs:** Die Prüfung steht im selben Docker-Testlauf, deckt alle drei Teilfälle und wird je Teilfall (oder für den Test als Ganzes, mit Begründung) einmal rot gesehen (Eingriff entfernt) und ist danach grün.
 - [ ] `make gates` grün; der berührte Docker-Test gezielt grün (der volle `make test-docker` nur, wenn der Fremdtest `NestedPodman_BuildEgress` nicht mehr rot ist, sonst mit benannter Begründung); Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`); Closure-Notiz mit Steering-Loop-Lerneintrag; Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist; jedes Risiko aus §6 trägt einen Ausgang; die drei Paarungen sind getragen.
 
 ## 3. Plan (vor Code)
@@ -52,8 +52,8 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
 | `internal/e2e/sandbox_devcontainer_docker_test.go` (`TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild`; Helfer `newContainersWithCommand`) | update | Aufräumen der Zwischencontainer je Teilfall (`--force-rm`, Vorher-Liste, `t.Cleanup`, Suchwort je Teilfall); der Helfer bleibt, wie er ist, oder wird begründet verallgemeinert |
-| `docs/messungen/<slice>/` und `tools/messung/<name>/` | entfällt (erwartet) | Der Vorgänger maß den Mechanismus im Wegwerf-Kontext und führte das Protokoll als Text im Slice; hier gilt dasselbe, es sei denn, die Messung wird wiederholbar gebraucht |
-| `docs/maintainer/quality.md` | unverändert (nicht gelesen für diesen Slice) | Im Vorgänger gelesen: keine Konvention zum Aufräumen von Docker-Objekten in Tests; der Implementer liest sie vor der Änderung erneut |
+| `docs/messungen/<slice>/` und `tools/messung/<name>/` | entfällt | Der Vorgänger maß den Mechanismus im Wegwerf-Kontext und führte das Protokoll als Text im Slice; hier gilt dasselbe, es sei denn, die Messung wird wiederholbar gebraucht |
+| `docs/maintainer/quality.md` | unverändert | gelesen (Suche nach Aufräumen/Container/cleanup): keine Konvention zum Aufräumen von Docker-Objekten in Tests; die Treffer betreffen den Lint-Container, den Test-Container mit `--network=host` und Trivy |
 | diese Slice-Datei, `open/README.md`, Register, Roadmap bei Start und Closure; `docs/reviews/` | update; neu | Lifecycle, Review und Verifikation |
 | `internal/hexagon/**`, `internal/adapter/**`, `Makefile`, `repo.mk`, `.github/workflows/`, `spec/` | unverändert (erwartet) | kein Produktcode, keine Gate-Änderung |
 
@@ -76,6 +76,38 @@ DoD vollständig, Review-Report und Verification-Report liegen vor, Closure-Noti
 - **Ein Wechsel des Test-Images auf einen Builder mit buildx (BuildKit) macht die Prüfung vakuum-grün.** — **Ausgang:** weiter offen bis zur Umsetzung; der Vorgänger maß, dass das Image `test-docker-tools` kein buildx trägt und der klassische Builder den Container behält; BuildKit legt nach dieser Annahme keinen solchen Container an, die Prüfung fände dann nichts und bliebe grün, ohne dass ein Test es sagt. Der Slice führt dazu entweder eine Prüfung, die den klassischen Builder voraussetzt (der Test wird rot, wenn der Bau keinen Container anlegt und der Mechanismus damit nicht mehr belegt ist), oder benennt die Lücke als Beobachtung im Register. Ein Wechsel des Images ist eine Gate-Änderung und liegt beim Projektinhaber.
 - **Der Docker-Daemon des CI-Runners verhält sich anders als der lokale Host.** — **Ausgang:** weiter offen; nicht gemessen, weder im Vorgänger noch hier geplant; der Slice belegt den Fall auf dem Host und nennt den CI-Lauf als nicht gemessen.
 - **Die drei Teilfälle scheitern an verschiedenen Schritten, der Pin steht womöglich nicht in jedem Fall im Env des Zwischencontainers.** — **Ausgang:** weiter offen; die Messung je Teilfall entscheidet, welches Suchwort trägt. Ein Teilfall ohne belegbare Zuordnung bleibt ohne Eingriff und ist in §7 ausgewiesen.
+
+## Umsetzung (Implementer)
+
+**Änderung:** `internal/e2e/sandbox_devcontainer_docker_test.go`, `TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild`: jeder Teilfall hält vorher die Container-IDs fest (`containerIDs`), baut mit `--force-rm` und ohne `-q` und prüft in einem `t.Cleanup` mit `newContainersWithCommand`, ob ein neu entstandener Container den Pin des Teilfalls trägt (Feld `pin` der Tabelle); einen solchen entfernt er mit `docker rm -f` und meldet den Fehler. Der Helfer blieb unverändert. Zusätzlich verlangt jeder Teilfall in der Bau-Ausgabe die Zeile „Removed intermediate container …“ unmittelbar vor „The command '…“ (`failedStepRemoved`): sie belegt, dass der klassische Builder einen Container des fehlgeschlagenen Schritts angelegt und `--force-rm` ihn entfernt hat.
+
+**Mechanismus je Teilfall (gemessen auf dem Host, Docker 29.9.1, nativer `amd64`, 2026-10-20; Lauf im Image `u-boot:test-docker-tools`, Test-Binary mit der Änderung, aber ohne `--force-rm` und mit einer vorübergehenden Ausgabe von `docker inspect`; die Ausgabe ist wieder entfernt):**
+
+| Teilfall | Pin im Env des zurückbleibenden Containers | Zustand des Containers | Zuordnung |
+|---|---|---|---|
+| wrong checksum | `PODMAN_SHA256_AMD64=` plus 64 Nullen (und ARM64 ebenso) | `exited`, Exit 1 (`sha256sum -c`: `FAILED`) | genau ein neuer Container, Pin im Env |
+| signing subkey as the pin | `PODMAN_SIGNING_KEY=6E8E…0BA4` | `exited`, Exit 1 (`VALIDSIG`-Vergleich) | genau ein neuer Container, Pin im Env |
+| unknown fingerprint as the pin | `PODMAN_SIGNING_KEY=` plus 40 Nullen | `exited`, Exit 22 (`curl -f` auf den Schlüssel: 404) | genau ein neuer Container, Pin im Env |
+
+Alle drei Teilfälle scheitern im selben `RUN`-Schritt (Step 7/12), an verschiedenen Stellen darin; der Wert steht in jedem Fall im Env des Containers. Mit `--force-rm` bleibt keiner zurück. Vorher/nachher der Container-Liste des Hosts, gleicher Lauf, geliefertes Testprogramm: dieselbe Menge IDs (3 vorher, 3 nachher, Prüfsumme der sortierten ID-Liste gleich).
+
+**Warum das „Removed …“-Muster mit Nachbarzeile:** Ein erster Entwurf prüfte nur das Vorkommen von „Removed intermediate container“. Bei kaltem Schicht-Cache (der erste Teilfall des Mutationslaufs) druckt der klassische Builder die Zeile auch für erfolgreiche Zwischenschritte; die Prüfung blieb dort grün, obwohl der Container des fehlgeschlagenen Schritts zurückblieb. Das Muster verlangt deshalb die unmittelbar folgende Zeile „The command '“.
+
+**Rote Mutationen (Gegenbeispiele, alle gesehen):**
+
+| Mutation | Ergebnis |
+|---|---|
+| `--force-rm` aus dem `docker build` entfernt | `FAIL` in allen drei Teilfällen: „the failed build left container … with the pin …; cleanup removed it“ und „does not show the failed step's container removed“ |
+| Muster `failedStepRemoved` verfälscht (kein Treffer möglich), `--force-rm` bleibt | `FAIL` in allen drei Teilfällen (der Wächter gegen den vakuum-grünen Lauf greift) |
+| geliefert | `PASS`, alle drei Teilfälle |
+
+**Wechsel auf BuildKit:** nicht ausgeführt (das Image hat kein buildx; ein Wechsel ist eine Gate-Änderung beim Projektinhaber). Gedeckt durch die Bedingung: BuildKit druckt „Removed intermediate container“ nicht, der Test würde rot (Wirkung aus der Mutation „Muster ohne Treffer“ abgeleitet, nicht mit BuildKit gesehen).
+
+**Sensoren (Implementer, Stand nach der letzten Änderung am Test):** `make gates` Exit 0. Der berührte Test gezielt im Image des Ziels `test-docker` (`-tags docker -timeout 30m -v -count=1 -run '^TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild$' ./internal/e2e/`): `PASS`, drei Teilfälle. Voller `make test-docker`: Exit 0 (`internal/e2e` 655,7 s; `NestedPodman_BuildEgress` ist darin grün); die Liste der Container-IDs des Hosts war danach gleich der vorher. `make verify-depguard` lief nicht (keine Importregel berührt).
+
+**Abgleich Plan-Tabelle gegen `git diff --stat` (Stand der Umsetzung, vor Review):** Der Diff berührt den Test (Zeile 1) und diese Slice-Datei (Sammelzeile); `quality.md`, `docs/messungen/`, `tools/messung/`, Produktcode, `Makefile`, `repo.mk`, Workflows und `spec/` sind nicht im Diff. Review-Report, Register und Roadmap folgen mit Review und Closure.
+
+**Nicht gemessen:** der Docker-Daemon des CI-Runners; zwei gleichzeitige Läufe desselben Tests gegen denselben Daemon (sie sähen jeweils den Container des anderen als neu, wie im Vorgänger).
 
 ## 7. Closure-Notiz
 
