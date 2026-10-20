@@ -17,7 +17,9 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-In Arbeit: [`slice-v1-devcontainer-start-ohne-cli`](slice-v1-devcontainer-start-ohne-cli.md) (Entscheidung und Entwurf: Devcontainer ohne Editor und ohne Node/CLI auf dem Host starten; ohne neue Messreihe; wellenlos).
+Offen: [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md) (Devcontainer ohne Editor und ohne Node/CLI auf dem Host starten: `u-boot devcontainer up` und `down`; fünf Slices; Release-Zuordnung offen).
+
+In Arbeit: [`slice-v1-devcontainer-start-ohne-cli`](slice-v1-devcontainer-start-ohne-cli.md) (Entscheidung und Entwurf: Devcontainer ohne Editor und ohne Node/CLI auf dem Host starten; ohne neue Messreihe; Eltern-Slice von [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md)).
 
 ## Nächste Wellen
 
