@@ -6,7 +6,7 @@ Ein Docker-Test, der ein Image absichtlich fehlschlagend baut (Negativprobe zu e
 
 ## Benannt, nicht gezählt
 
-- **Zweites Vorkommen, gezählt:** `TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild` hinterließ in drei Teilfällen je einen Container, gleicher Mechanismus, Pin im Env; gemessen und geräumt im Folge-Slice [`slice-v1-e2e-nested-podman-pin-mismatch-zwischencontainer`](../../../in-progress/slice-v1-e2e-nested-podman-pin-mismatch-zwischencontainer.md) (Evidence-Datei). Der Test trägt zusätzlich einen Wächter (`failedStepRemoved`), der unter BuildKit rot statt vakuum-grün wird.
+- **Zweites Vorkommen, gezählt:** `TestE2E_SandboxDevcontainer_NestedPodman_PinMismatchBreaksBuild` hinterließ in drei Teilfällen je einen Container, gleicher Mechanismus, Pin im Env; gemessen und geräumt im Folge-Slice [`slice-v1-e2e-nested-podman-pin-mismatch-zwischencontainer`](../../../done/slice-v1-e2e-nested-podman-pin-mismatch-zwischencontainer.md) (Evidence-Datei). Der Test trägt zusätzlich einen Wächter (`failedStepRemoved`), der unter BuildKit rot statt vakuum-grün wird.
 - **Ollama-Wächterlücke:** `TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild` baut mit `-q --force-rm` und trägt keinen Wächter; unter BuildKit (Wechsel des Test-Images) bliebe er grün, ohne dass ein Test es sagt. Offen, Ausgang beim Projektinhaber (Folge-Slice oder nicht).
 - **CI-Runner nicht gemessen:** ob der Daemon des Runners denselben Container hinterlässt, ist offen.
 - **Grenzen der Eingriffe:** zwei gleichzeitige Läufe gegen einen Daemon sind nicht ausgeschlossen; der Wächter hängt am Wortlaut des klassischen Builders.

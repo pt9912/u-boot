@@ -2,7 +2,7 @@
 
 **Review-Art:** Code-Review eines Docker-Tests (Test-Hygiene, kein Produktcode) mit Prüfung der Slice-Aussagen im Abschnitt Umsetzung; Mutationen und Rohdaten selbst nachvollzogen, nichts vom Implementer übernommen.
 
-**Gegenstand:** `git show 034e124` (zwei Dateien: `internal/e2e/sandbox_devcontainer_docker_test.go`, [`docs/plan/planning/in-progress/slice-v1-e2e-nested-podman-pin-mismatch-zwischencontainer.md`](../plan/planning/in-progress/slice-v1-e2e-nested-podman-pin-mismatch-zwischencontainer.md)); Vorgänger [`slice-v1-e2e-pin-mismatch-zwischencontainer`](../plan/planning/done/slice-v1-e2e-pin-mismatch-zwischencontainer.md).
+**Gegenstand:** `git show 034e124` (zwei Dateien: `internal/e2e/sandbox_devcontainer_docker_test.go`, [`docs/plan/planning/done/slice-v1-e2e-nested-podman-pin-mismatch-zwischencontainer.md`](../plan/planning/done/slice-v1-e2e-nested-podman-pin-mismatch-zwischencontainer.md)); Vorgänger [`slice-v1-e2e-pin-mismatch-zwischencontainer`](../plan/planning/done/slice-v1-e2e-pin-mismatch-zwischencontainer.md).
 
 **Skill:** `.harness/skills/reviewer.md` @ HEAD `034e124` · **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-20
 
