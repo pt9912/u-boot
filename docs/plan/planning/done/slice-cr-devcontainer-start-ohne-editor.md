@@ -43,11 +43,11 @@ Anlass: Entscheidungen des Projektinhabers vom 2026-10-20 im Eltern-Slice; der W
 - [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor: [`2026-10-20-slice-cr-devcontainer-start-ohne-editor`](../../../reviews/2026-10-20-slice-cr-devcontainer-start-ohne-editor.md), Verification [`2026-10-20-verify-slice-cr-devcontainer-start-ohne-editor`](../../../reviews/2026-10-20-verify-slice-cr-devcontainer-start-ohne-editor.md)
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8).
-- [ ] Doku-Update: Roadmap-Zeile „In Arbeit“ bei der Closure; Handbuch und `CHANGELOG.md` unverändert (kein Verhalten).
+- [x] Doku-Update: Roadmap-Zeile „In Arbeit“ bei der Closure; Handbuch und `CHANGELOG.md` unverändert (kein Verhalten).
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag (§7).
 - [x] Beobachtungs-Register (`../observations/`) fortgeschrieben: zwei Evidence-Dateien (§7, *Beobachtungs-Register*).
 - [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen) (§6, §7 *Risiken aus §6*).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — von der Slice-Closure geprüft (§7). Closure-Commit `<HASH>`.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — von der Slice-Closure geprüft (§7). Closure-Commit `91a1fb3`.
 
 ## 3. Plan (vor Code)
 
@@ -125,7 +125,7 @@ Kein Produktcode, keine Spezifikation, kein Handbuch, kein `CHANGELOG.md`.
 - **Risiken aus §6:** alle vier tragen einen Ausgang. Entfallen: „Wort trägt eine Wirkung an anderer Stelle“ (Review und Verification haben jedes Verb gegen Stelle 3 gelesen), „Wortlaut ändert sich nach dem Review“ (nicht eingetreten, `spec/` seit `69280df` unverändert), „Versionsnummer kollidiert“ (`0.18.0` vergeben, Messstände-CR nachgezogen). Weiter offen mit Anker: „Wortlaut sagt mehr zu als die Tests tragen“ im Befehl-Slice [`slice-v1-cli-devcontainer-up-down`](../open/slice-v1-cli-devcontainer-up-down.md) (Docker-Tests S1, S3, S4, S8, S9 und Einzelmessung Colima).
 - **Zur Entscheidung vorgelegt (Projektinhaber), nicht entschieden:** (a) Teilsensor „Dateiliste der Plan-Tabelle gegen `git diff --stat`“ zu `BEO-DOK/plan-aussage-ueber-code` (30 Vorgänge, wiederholt vorgelegt). (b) Rückfall von `BEO-DOK/spec-bedingung-ohne-code-entsprechung` (9 Vorgänge): ob [`AGENTS.md`](../../../../AGENTS.md) §3.10 um den Lastenheft-Text im Plan erweitert wird (so schon im Eltern-Slice vorgelegt). (c) Ob ein Vorgang, der eine offene Beobachtung nicht wiederholt (hier `vertragsaenderung-nach-review`: Wortlaut vor dem Review, danach unverändert), im Register geführt wird und wie; die Beobachtungsform kennt nur Auftreten. Ausgänge werden hier nicht zugewiesen.
 - **Drei Paarungen:** Anker: kein Feld `liegt in` in diesem Slice (nichts verkörpert), nichts zu paaren. Folge-Slice: die drei Dateien in `open/` existieren. Register: die beiden Verzeichnisse oben haben je eine neue Evidence-Datei; die übrigen Verzeichnisse sind unverändert.
-- **Closure-Commits:** Inhalt (dieser Abschnitt, DoD, Plan-Tabelle, Welle, `open/README.md`, Register), danach der reine `git mv` (`make slice-mv`), danach der Nachzug: Roadmap-Zeile „In Arbeit“ (Ruhe-Marker „Nichts in Arbeit.“), die Zeile „Doku-Update“ der DoD und der Closure-Commit-Hash in der letzten DoD-Zeile (`<HASH>`).
+- **Closure-Commits:** Inhalt (dieser Abschnitt, DoD, Plan-Tabelle, Welle, `open/README.md`, Register), danach der reine `git mv` (`make slice-mv`), danach der Nachzug: Roadmap-Zeile „In Arbeit“ (Ruhe-Marker „Nichts in Arbeit.“), die Zeile „Doku-Update“ der DoD und der Closure-Commit-Hash in der letzten DoD-Zeile (`91a1fb3`).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
