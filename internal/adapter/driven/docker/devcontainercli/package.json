@@ -1,0 +1,9 @@
+{
+  "name": "u-boot-devcontainer-cli",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Pinned Dev Container CLI of the u-boot helper image.",
+  "dependencies": {
+    "@devcontainers/cli": "0.89.0"
+  }
+}

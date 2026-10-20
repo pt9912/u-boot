@@ -150,11 +150,16 @@ func (i *Inspector) ReadFile(ctx context.Context, containerID, path string, maxB
 // requireLocalEngine fails with [driven.ErrContainerEngineNotLocal] when
 // the engine the CLI would talk to is not a local unix socket: a
 // container on a remote engine that carries the same `local_folder` value
-// belongs to another machine.
-func (i *Inspector) requireLocalEngine(ctx context.Context) error {
-	host := strings.TrimSpace(i.getenv("DOCKER_HOST"))
+// belongs to another machine. It reads `DOCKER_HOST` through getenv and,
+// without it, the host of the current Docker context through output.
+func requireLocalEngine(
+	ctx context.Context,
+	getenv func(string) string,
+	output func(ctx context.Context, args ...string) (string, error),
+) error {
+	host := strings.TrimSpace(getenv("DOCKER_HOST"))
 	if host == "" {
-		out, err := i.output(ctx, "context", "inspect", "--format", "{{.Endpoints.docker.Host}}")
+		out, err := output(ctx, "context", "inspect", "--format", "{{.Endpoints.docker.Host}}")
 		if err != nil {
 			return fmt.Errorf("docker context inspect: %w", err)
 		}
@@ -164,6 +169,10 @@ func (i *Inspector) requireLocalEngine(ctx context.Context) error {
 		return driven.ErrContainerEngineNotLocal
 	}
 	return nil
+}
+
+func (i *Inspector) requireLocalEngine(ctx context.Context) error {
+	return requireLocalEngine(ctx, i.getenv, i.output)
 }
 
 // output runs the command to completion and returns its stdout (at most
