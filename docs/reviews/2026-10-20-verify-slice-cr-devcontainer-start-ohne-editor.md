@@ -72,18 +72,18 @@ Gesucht in den hinzugefügten Zeilen von `spec/lastenheft.md` nach `ADR-`, `slic
 | zwei bestehende Reports des Eltern-Slice (je eine Zeile, Linknachzug) | Zeile 4 („Reports des Eltern-Slice bleiben, der Verschiebe-Werkzeugaufruf zieht nur Verweise nach“) | ok |
 | der CR-Slice selbst | Zeile 5 | ok |
 | [`slice-v1-devcontainer-start-ohne-cli`](../plan/planning/done/slice-v1-devcontainer-start-ohne-cli.md), `welle-devcontainer-start-ohne-editor.md`, [`slice-v1-devcontainer-start-fundament`](../plan/planning/done/slice-v1-devcontainer-start-fundament.md), [`slice-v2-spec-devcontainer-start`](../plan/planning/open/slice-v2-spec-devcontainer-start.md) | Zeile 6 („nur Verweise“) | ok (Diffs gelesen: nur Pfad `open/` → `in-progress/`; in der Welle zusätzlich die Aussage zur Versionsnummer, von der Zeile genannt) |
-| [`slice-v1-cli-devcontainer-up-down`](../plan/planning/open/slice-v1-cli-devcontainer-up-down.md) | Zeile 6 („update (nur Verweise)“) | **Abweichung**, siehe V-1 |
+| [`slice-v1-cli-devcontainer-up-down`](../plan/planning/in-progress/slice-v1-cli-devcontainer-up-down.md) | Zeile 6 („update (nur Verweise)“) | **Abweichung**, siehe V-1 |
 | [`slice-cr-lastenheft-messstaende`](../plan/planning/open/slice-cr-lastenheft-messstaende.md) | Zeile 7 | ok |
 | Dateien „unverändert“ (`spec/spezifikation.md`, `spec/architecture.md`, Handbuch, `CHANGELOG.md`, `internal/`, `cmd/`) | Zeile 8 | im Diff nicht enthalten, bestätigt |
 
-Fix-Runde (`2981c43`, 3 Dateien): (a) Plan-Tabelle ergänzt, (b) S4-Test im Befehl-Slice [`slice-v1-cli-devcontainer-up-down`](../plan/planning/open/slice-v1-cli-devcontainer-up-down.md): „im Sandbox-Profil überlebt ein Marker im benannten Volume `down`, ein folgendes `up` und `--recreate`“ mit Wächter (`docker volume rm`), (c) der Review-Report. Der neue Satz deckt den Halbsatz „er entfernt weder den Container noch seine Volumes“ aus [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) und widerspricht keiner anderen Stelle desselben Slice (DoD-Zeile „benanntes Volume mit Marker überlebt“ und die Rückführung „`--recreate` entfernt das Volume“ bleiben verträglich, vgl. V-3). Die Fix-Runde berührt `spec/` nicht (Abschnitt 1).
+Fix-Runde (`2981c43`, 3 Dateien): (a) Plan-Tabelle ergänzt, (b) S4-Test im Befehl-Slice [`slice-v1-cli-devcontainer-up-down`](../plan/planning/in-progress/slice-v1-cli-devcontainer-up-down.md): „im Sandbox-Profil überlebt ein Marker im benannten Volume `down`, ein folgendes `up` und `--recreate`“ mit Wächter (`docker volume rm`), (c) der Review-Report. Der neue Satz deckt den Halbsatz „er entfernt weder den Container noch seine Volumes“ aus [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) und widerspricht keiner anderen Stelle desselben Slice (DoD-Zeile „benanntes Volume mit Marker überlebt“ und die Rückführung „`--recreate` entfernt das Volume“ bleiben verträglich, vgl. V-3). Die Fix-Runde berührt `spec/` nicht (Abschnitt 1).
 
 ## 6. Findings
 
 ```text
-LOW docs/plan/planning/done/slice-cr-devcontainer-start-ohne-editor.md · Plan-Tabelle §3, Zeile „update (nur Verweise)“ - die Zeile führt open/slice-v1-cli-devcontainer-up-down.md nur als Verweis-Nachzug
+LOW docs/plan/planning/done/slice-cr-devcontainer-start-ohne-editor.md · Plan-Tabelle §3, Zeile „update (nur Verweise)“ - die Zeile führt in-progress/slice-v1-cli-devcontainer-up-down.md nur als Verweis-Nachzug
 V-1  Klasse: plan-tabelle-ohne-diff-abgleich · Quelle: AGENTS.md §3.10
-Befund: Der Fix-Commit 2981c43 hat in open/slice-v1-cli-devcontainer-up-down.md inhaltlich den Test S4 geändert (Marker im Volume nach down). Die Tabelle, die der Fix-Commit selbst ergänzt hat, nennt für diese Datei „nur Verweise“; der Abgleich „nach der letzten Fix-Runde“ ist damit für diese Datei nicht nachgeführt.
+Befund: Der Fix-Commit 2981c43 hat in in-progress/slice-v1-cli-devcontainer-up-down.md inhaltlich den Test S4 geändert (Marker im Volume nach down). Die Tabelle, die der Fix-Commit selbst ergänzt hat, nennt für diese Datei „nur Verweise“; der Abgleich „nach der letzten Fix-Runde“ ist damit für diese Datei nicht nachgeführt.
 Risiko: gering; die Änderung ist im Diff sichtbar, die Tabelle ist als Maßstab für den nächsten Leser unvollständig.
 Verifizierbar: git diff --stat 9e6933b..HEAD gegen §3; Behebung: Planner (Zeile um „S4: Marker im Volume nach down“ ergänzen), bei der Closure.
 ```
@@ -97,7 +97,7 @@ Verifizierbar: Review-only (Reviewer-Artefakt; der Verifier repariert nichts).
 ```
 
 ```text
-INFO docs/plan/planning/open/slice-v1-cli-devcontainer-up-down.md · S4 und Rückführung - „--recreate: benannte Volumes bleiben erhalten“ ist nur im Sandbox-Profil gepinnt
+INFO docs/plan/planning/in-progress/slice-v1-cli-devcontainer-up-down.md · S4 und Rückführung - „--recreate: benannte Volumes bleiben erhalten“ ist nur im Sandbox-Profil gepinnt
 V-3  Rest des zweiten LOW-Findings des Reviews: Das Standardprofil hat kein benanntes Volume; die Zusage im Lastenheft nennt kein Profil. Die Rückführung („--recreate entfernt das Volume“) nennt die down-Seite nicht ausdrücklich. Kein Widerspruch, kein Test fehlt für ein vorhandenes Volume; Hinweis für den Befehl-Slice.
 ```
 

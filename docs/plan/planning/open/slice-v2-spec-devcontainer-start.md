@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md). Vierter und letzter von vier Folge-Slices von [`slice-v1-devcontainer-start-ohne-cli`](../done/slice-v1-devcontainer-start-ohne-cli.md); nach [`slice-v1-cli-devcontainer-up-down`](../open/slice-v1-cli-devcontainer-up-down.md) (Spezifikation nach dem Code, Muster [`slice-v2-spec-sandbox-egress-ollama`](../done/slice-v2-spec-sandbox-egress-ollama.md)). Priorität V2; Release: das nächste Minor nach `v0.12.0` (die Nummer vergibt der Release-Cut).
+**Welle:** [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md). Vierter und letzter von vier Folge-Slices von [`slice-v1-devcontainer-start-ohne-cli`](../done/slice-v1-devcontainer-start-ohne-cli.md); nach [`slice-v1-cli-devcontainer-up-down`](../in-progress/slice-v1-cli-devcontainer-up-down.md) (Spezifikation nach dem Code, Muster [`slice-v2-spec-sandbox-egress-ollama`](../done/slice-v2-spec-sandbox-egress-ollama.md)). Priorität V2; Release: das nächste Minor nach `v0.12.0` (die Nummer vergibt der Release-Cut).
 
 **Bezug:** die neue Anforderung des Lastenhefts aus [`slice-cr-devcontainer-start-ohne-editor`](../done/slice-cr-devcontainer-start-ohne-editor.md), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer); [`ADR-0028`](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) (muss `Accepted` sein; Entscheidung 10 nennt die Stellen).
 
@@ -27,7 +27,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Code, Tests, Handbuch, `CHANGELOG.md`** — liegen in [`slice-v1-devcontainer-start-fundament`](../done/slice-v1-devcontainer-start-fundament.md) und [`slice-v1-cli-devcontainer-up-down`](../open/slice-v1-cli-devcontainer-up-down.md).
+- **Code, Tests, Handbuch, `CHANGELOG.md`** — liegen in [`slice-v1-devcontainer-start-fundament`](../done/slice-v1-devcontainer-start-fundament.md) und [`slice-v1-cli-devcontainer-up-down`](../in-progress/slice-v1-cli-devcontainer-up-down.md).
 - **`spec/lastenheft.md`** — der CR liegt davor ([`slice-cr-devcontainer-start-ohne-editor`](../done/slice-cr-devcontainer-start-ohne-editor.md)); die Spezifikation präzisiert das Lastenheft, erweitert es nie.
 - **Pins, Digests, Versionen im Wortlaut der Spezifikation** — sie stehen in den eingebetteten Dateien und im Golden Case des Fundament-Slice (ein Stand, kein Zustand); die Spezifikation nennt die Pin-Form, nicht die Zahlen.
 - **Messstände** — sie stehen im Handbuch und im Messprotokoll; die Spezifikation führt Zusagen und Grenzen als Zielbild (Muster [`slice-v2-spec-zielbild`](../done/slice-v2-spec-zielbild.md)).
@@ -65,7 +65,7 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; sie wird n
 
 ## 4. Trigger
 
-**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-v1-cli-devcontainer-up-down`](../open/slice-v1-cli-devcontainer-up-down.md) ist geschlossen (Spezifikation nach dem Code); kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-v1-cli-devcontainer-up-down`](../in-progress/slice-v1-cli-devcontainer-up-down.md) ist geschlossen (Spezifikation nach dem Code); kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benannt:**
 
