@@ -42,8 +42,14 @@ image) [ -e "$D/image-missing" ] && exit 1; exit 0 ;;
 build) cat > "$D/context.tar"; [ -e "$D/build-fail" ] && { echo 'build-boom' >&2; exit 1; }; exit 0 ;;
 run)
   [ -e "$D/run-hang" ] && exec sleep 30
+  [ -e "$D/run-stderr" ] && cat "$D/run-stderr" >&2
+  [ -e "$D/run-stderr-b" ] && { cat "$D/run-stderr-a" >&2; sleep 0.3; cat "$D/run-stderr-b" >&2; }
   [ -e "$D/run-fail" ] && { echo 'run-boom' >&2; exit 3; }
   cat "$D/run-stdout"; exit 0 ;;
+rm)
+  [ -e "$D/rm-fail" ] && { echo 'rm-boom' >&2; exit 1; }
+  [ -e "$D/rm-nosuch" ] && { echo 'Error response from daemon: No such container: x' >&2; exit 1; }
+  exit 0 ;;
 stop) [ -e "$D/stop-fail" ] && { echo 'stop-boom' >&2; exit 1; }; exit 0 ;;
 esac
 exit 0
@@ -347,6 +353,24 @@ func TestLauncher_Up_RuntimeFailures(t *testing.T) {
 // context error and removes the helper container by name.
 func TestLauncher_Up_CancelRemovesHelperContainer(t *testing.T) {
 	f := newFakeDocker(t)
+	err := cancelHangingUp(t, f)
+	if !errors.Is(err, context.Canceled) || errors.Is(err, driven.ErrDevcontainerRuntime) {
+		t.Errorf("error = %v, want the context error", err)
+	}
+	run, rm := f.call(t, "run"), f.call(t, "rm")
+	name := run[3]
+	if !strings.HasPrefix(name, docker.HelperContainerPrefixForTest) {
+		t.Fatalf("helper container name %q lacks the prefix", name)
+	}
+	if strings.Join(rm, " ") != "rm -f "+name {
+		t.Errorf("rm argv = %q, want rm -f %s", rm, name)
+	}
+}
+
+// cancelHangingUp starts an Up whose `docker run` hangs, cancels it once
+// `docker run` was seen and returns the error of Up.
+func cancelHangingUp(t *testing.T, f *fakeDocker) error {
+	t.Helper()
 	f.flag(t, "run-hang")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -365,19 +389,163 @@ func TestLauncher_Up_CancelRemovesHelperContainer(t *testing.T) {
 	cancel()
 	select {
 	case err := <-done:
-		if !errors.Is(err, context.Canceled) || errors.Is(err, driven.ErrDevcontainerRuntime) {
-			t.Errorf("error = %v, want the context error", err)
-		}
+		return err
 	case <-time.After(30 * time.Second):
 		t.Fatal("Up did not return after cancel")
+		return nil
 	}
-	run, rm := f.call(t, "run"), f.call(t, "rm")
-	name := run[3]
-	if !strings.HasPrefix(name, docker.HelperContainerPrefixForTest) {
-		t.Fatalf("helper container name %q lacks the prefix", name)
+}
+
+// ADR-0028 Entscheidung 4, Lebensdauer: a failing `docker rm -f` is
+// reported, except for a container that is already gone.
+func TestLauncher_Up_ReportsFailedHelperRemoval(t *testing.T) {
+	t.Run("run fails, rm fails", func(t *testing.T) {
+		f := newFakeDocker(t)
+		f.flag(t, "run-fail", "rm-fail")
+		_, err := f.launcher(nil).Up(context.Background(), upOptions())
+		if !errors.Is(err, driven.ErrDevcontainerRuntime) || !strings.Contains(err.Error(), "may still run") || !strings.Contains(err.Error(), "rm-boom") {
+			t.Errorf("error = %v, want ErrDevcontainerRuntime that reports the failed rm", err)
+		}
+	})
+	t.Run("cancelled, rm fails", func(t *testing.T) {
+		f := newFakeDocker(t)
+		f.flag(t, "rm-fail")
+		err := cancelHangingUp(t, f)
+		if !errors.Is(err, context.Canceled) || errors.Is(err, driven.ErrDevcontainerRuntime) ||
+			!strings.Contains(err.Error(), "may still run") || !strings.Contains(err.Error(), "rm-boom") {
+			t.Errorf("error = %v, want the context error that reports the failed rm", err)
+		}
+	})
+	t.Run("run fails, container already gone", func(t *testing.T) {
+		f := newFakeDocker(t)
+		f.flag(t, "run-fail", "rm-nosuch")
+		_, err := f.launcher(nil).Up(context.Background(), upOptions())
+		if !errors.Is(err, driven.ErrDevcontainerRuntime) || strings.Contains(err.Error(), "may still run") {
+			t.Errorf("error = %v, want ErrDevcontainerRuntime without a rm report", err)
+		}
+	})
+}
+
+// ADR-0028 Entscheidung 3: the result line is the last non-empty line, also
+// when stdout is longer than the buffer the adapter keeps.
+func TestLauncher_Up_ResultLineSurvivesLargeStdout(t *testing.T) {
+	f := newFakeDocker(t)
+	noise := strings.Repeat("hook output line that is not the result\n", (2<<20)/40)
+	f.write(t, "run-stdout", noise+launcherSuccessOut+"\n")
+	res, err := f.launcher(nil).Up(context.Background(), upOptions())
+	if err != nil || len(res.ContainerID) != 64 {
+		t.Fatalf("Up with %d bytes of stdout: result %+v, error %v", len(noise), res, err)
 	}
-	if strings.Join(rm, " ") != "rm -f "+name {
-		t.Errorf("rm argv = %q, want rm -f %s", rm, name)
+}
+
+// LH-FA-DEV-009: the value of a passed variable is replaced by a placeholder
+// in the progress the adapter forwards, in its error texts and in the result,
+// also when the value is split over two writes.
+func TestLauncher_Up_MasksPassedValues(t *testing.T) {
+	const secret = "placeholder-token-value"
+	runLine := "docker run -e X=" + secret + " --rm image\n"
+	cases := []struct {
+		name            string
+		setup           func(t *testing.T, f *fakeDocker)
+		fails           bool
+		placeholderIn   string // "progress", "error" or "result"
+		placeholderWant bool
+	}{
+		{"stderr, run succeeds", func(t *testing.T, f *fakeDocker) { f.write(t, "run-stderr", runLine) }, false, "progress", true},
+		{"stderr, run fails", func(t *testing.T, f *fakeDocker) { f.write(t, "run-stderr", runLine); f.flag(t, "run-fail") }, true, "error", true},
+		{"stderr without final newline", func(t *testing.T, f *fakeDocker) {
+			f.write(t, "run-stderr", "docker run -e X="+secret)
+			f.flag(t, "run-fail")
+		}, true, "error", true},
+		{"value split over two writes", func(t *testing.T, f *fakeDocker) {
+			f.write(t, "run-stderr-a", "docker run -e X=placeholder-tok")
+			f.write(t, "run-stderr-b", "en-value --rm image\n")
+			f.flag(t, "run-fail")
+		}, true, "error", true},
+		{"outcome message", func(t *testing.T, f *fakeDocker) {
+			f.write(t, "run-stdout", `{"outcome":"error","message":"hook printed `+secret+`"}`+"\n")
+		}, true, "error", true},
+		{"result line carries the value", func(t *testing.T, f *fakeDocker) {
+			f.write(t, "run-stdout", strings.Replace(launcherSuccessOut, "vscode", secret, 1)+"\n")
+		}, false, "result", true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			f := newFakeDocker(t)
+			tc.setup(t, f)
+			opts := upOptions()
+			opts.EnvNames = []string{"GIT_TOKEN"}
+			var progress bytes.Buffer
+			opts.Progress = &progress
+			res, err := f.launcher(map[string]string{"GIT_TOKEN": secret}).Up(context.Background(), opts)
+			if (err != nil) != tc.fails {
+				t.Fatalf("Up error = %v, want failure %v", err, tc.fails)
+			}
+			texts := map[string]string{"progress": progress.String(), "result": res.RemoteUser}
+			if err != nil {
+				texts["error"] = err.Error()
+			}
+			for where, text := range texts {
+				if strings.Contains(text, secret) {
+					t.Errorf("the value is in the %s: %q", where, text)
+				}
+			}
+			if tc.placeholderWant && !strings.Contains(texts[tc.placeholderIn], "[masked]") {
+				t.Errorf("%s %q shows no placeholder: the probe cannot tell masking from absence", tc.placeholderIn, texts[tc.placeholderIn])
+			}
+		})
+	}
+}
+
+// LH-FA-DEV-009: a value is masked only when it is passed, set and at least
+// four bytes long; other text stays as it is.
+func TestLauncher_Up_MasksOnlyPassedLongValues(t *testing.T) {
+	const text = "short=abc unlisted=placeholder-unlisted unset=ok\n"
+	f := newFakeDocker(t)
+	f.write(t, "run-stderr", text)
+	opts := upOptions()
+	opts.EnvNames = []string{"SHORT", "NOT_SET"}
+	var progress bytes.Buffer
+	opts.Progress = &progress
+	env := map[string]string{"SHORT": "abc", "UNLISTED": "placeholder-unlisted"}
+	if _, err := f.launcher(env).Up(context.Background(), opts); err != nil {
+		t.Fatal(err)
+	}
+	if got := progress.String(); got != text {
+		t.Errorf("progress = %q, want the text unchanged", got)
+	}
+}
+
+// The masking writer replaces every occurrence of every value, whatever the
+// chunk boundaries are: every split of the stream into two writes, and a
+// write per byte, give the result of a one-shot replacement.
+func TestMaskingWriter_AllSplitsEqualOneShot(t *testing.T) {
+	values := []string{"secret-one", "secret-one-longer", "ab", "line1\nline2", ""}
+	stream := "x secret-one-longer y secret-one z secret-onesecret-one\nline1\nline2 ab secret-on"
+	want := strings.NewReplacer("secret-one-longer", "[masked]", "secret-one", "[masked]", "line1\nline2", "[masked]").Replace(stream)
+	for cut := 0; cut <= len(stream); cut++ {
+		var out bytes.Buffer
+		w := docker.NewMaskingWriterForTest(&out, values)
+		for _, part := range []string{stream[:cut], stream[cut:]} {
+			if n, err := w.Write([]byte(part)); err != nil || n != len(part) {
+				t.Fatalf("Write = %d, %v", n, err)
+			}
+		}
+		if err := w.Flush(); err != nil {
+			t.Fatal(err)
+		}
+		if out.String() != want {
+			t.Fatalf("cut %d: output\n%q\nwant\n%q", cut, out.String(), want)
+		}
+	}
+	var out bytes.Buffer
+	w := docker.NewMaskingWriterForTest(&out, values)
+	for i := 0; i < len(stream); i++ {
+		_, _ = w.Write([]byte{stream[i]})
+	}
+	_ = w.Flush()
+	if out.String() != want {
+		t.Errorf("byte-wise output\n%q\nwant\n%q", out.String(), want)
 	}
 }
 

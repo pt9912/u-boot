@@ -59,6 +59,29 @@ func NewLauncherForTest(binary string, lookupEnv func(string) (string, bool), ab
 	return l
 }
 
+// NewLauncherWithNamePrefixForTest builds a [Launcher] on the `docker`
+// binary on `$PATH` whose helper containers are named `<prefix><8 hex>`, so
+// a test can find and remove its own containers only.
+func NewLauncherWithNamePrefixForTest(prefix string) *Launcher {
+	l := NewLauncher()
+	l.namePrefix = prefix
+	return l
+}
+
+// MaskingWriterForTest is the masking writer of the launcher streams.
+type MaskingWriterForTest struct{ w *maskingWriter }
+
+// NewMaskingWriterForTest exposes [newMaskingWriter].
+func NewMaskingWriterForTest(dst io.Writer, values []string) *MaskingWriterForTest {
+	return &MaskingWriterForTest{w: newMaskingWriter(dst, values)}
+}
+
+// Write forwards to the masking writer.
+func (m *MaskingWriterForTest) Write(p []byte) (int, error) { return m.w.Write(p) }
+
+// Flush forwards to the masking writer.
+func (m *MaskingWriterForTest) Flush() error { return m.w.Flush() }
+
 // HelperContainerPrefixForTest is the name prefix of every helper
 // container.
 const HelperContainerPrefixForTest = helperContainerPrefix

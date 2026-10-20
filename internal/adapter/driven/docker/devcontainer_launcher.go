@@ -14,7 +14,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"regexp"
 	"strings"
 	"time"
 
@@ -41,8 +40,8 @@ const (
 	// helperRemoveTimeout bounds `docker rm -f` of a helper container after
 	// a failed or cancelled run.
 	helperRemoveTimeout = 30 * time.Second
-	// upStdoutLimit bounds the stdout kept from the helper container; the
-	// CLI prints its result line there.
+	// upStdoutLimit bounds the stdout kept from the helper container (its
+	// tail: the CLI prints the result line last).
 	upStdoutLimit = 1 << 20
 	// upStderrTail is the stderr tail kept for error messages.
 	upStderrTail = 4096
@@ -59,8 +58,6 @@ func helperContextNames() []string {
 	return []string{"Dockerfile", "package.json", "package-lock.json"}
 }
 
-var envNamePattern = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)
-
 // Launcher is the production [driven.DevcontainerLauncher] adapter. It runs
 // `docker build -`, `docker run`, `docker stop`, `docker rm -f` and the
 // environment checks; it never uses Compose. Construct with [NewLauncher]
@@ -70,6 +67,9 @@ type Launcher struct {
 	lookupEnv  func(string) (string, bool)
 	probe      *Probe
 	abortGrace time.Duration
+	// namePrefix starts the name of every helper container this Launcher
+	// starts; the default is helperContainerPrefix.
+	namePrefix string
 	output     func(ctx context.Context, args ...string) (string, error)
 }
 
@@ -87,6 +87,7 @@ func WithLauncherBinary(path string) *Launcher {
 		lookupEnv:  os.LookupEnv,
 		probe:      WithBinary(path),
 		abortGrace: defaultAbortGrace,
+		namePrefix: helperContainerPrefix,
 		output:     WithInspectorBinary(path).output,
 	}
 }
@@ -117,8 +118,8 @@ func (l *Launcher) preflight(ctx context.Context) error {
 
 // Up implements [driven.DevcontainerLauncher.Up].
 func (l *Launcher) Up(ctx context.Context, opts driven.DevcontainerUpOptions) (driven.DevcontainerUpResult, error) {
-	if err := validateProjectFolder(opts.ProjectFolder); err != nil {
-		return driven.DevcontainerUpResult{}, err
+	if err := driven.ValidateDevcontainerProjectFolder(opts.ProjectFolder); err != nil {
+		return driven.DevcontainerUpResult{}, rejectedInput(err)
 	}
 	envNames, err := l.passedEnvNames(opts.EnvNames)
 	if err != nil {
@@ -131,7 +132,7 @@ func (l *Launcher) Up(ctx context.Context, opts driven.DevcontainerUpOptions) (d
 	if err != nil {
 		return driven.DevcontainerUpResult{}, err
 	}
-	return l.runUp(ctx, image, helperContainerPrefix+randomSuffix(), envNames, opts)
+	return l.runUp(ctx, image, l.namePrefix+randomSuffix(), envNames, opts)
 }
 
 // Stop implements [driven.DevcontainerLauncher.Stop].
@@ -188,19 +189,31 @@ func (l *Launcher) EnsureImage(ctx context.Context, progress io.Writer) (string,
 // runUp starts the helper container and reads the result line. A helper
 // container that outlives a failed or cancelled run is removed by name.
 func (l *Launcher) runUp(ctx context.Context, image, name string, envNames []string, opts driven.DevcontainerUpOptions) (driven.DevcontainerUpResult, error) {
-	stdout := &limitedBuffer{limit: upStdoutLimit}
+	stdout := &tailBuffer{limit: upStdoutLimit}
 	stderr := &tailBuffer{limit: upStderrTail}
+	values := l.passedValues(envNames)
+	maskedStdout := newMaskingWriter(stdout, values)
+	maskedStderr := newMaskingWriter(io.MultiWriter(stderr, progressSinkOrDiscard(opts.Progress)), values)
 	cmd := exec.CommandContext(ctx, l.binary, runArgs(name, image, envNames, opts)...)
 	cmd.Cancel = func() error { return cmd.Process.Signal(os.Interrupt) }
 	cmd.WaitDelay = l.abortGrace
-	cmd.Stdout = stdout
-	cmd.Stderr = io.MultiWriter(stderr, progressSinkOrDiscard(opts.Progress))
-	if err := cmd.Run(); err != nil {
-		l.removeHelper(ctx, name)
+	cmd.Stdout = maskedStdout
+	cmd.Stderr = maskedStderr
+	runErr := cmd.Run()
+	_ = maskedStdout.Flush()
+	_ = maskedStderr.Flush()
+	if runErr != nil {
+		detail := ""
+		if rmErr := l.removeHelper(ctx, name); rmErr != nil {
+			detail = "; the helper container may still run: " + rmErr.Error()
+		}
 		if ctxErr := ctx.Err(); ctxErr != nil {
+			if detail != "" {
+				return driven.DevcontainerUpResult{}, fmt.Errorf("%w%s", ctxErr, detail)
+			}
 			return driven.DevcontainerUpResult{}, ctxErr
 		}
-		return driven.DevcontainerUpResult{}, fmt.Errorf("devcontainer up failed (%s: %s): %w", err.Error(), stderr.String(), driven.ErrDevcontainerRuntime)
+		return driven.DevcontainerUpResult{}, fmt.Errorf("devcontainer up failed (%s: %s)%s: %w", runErr.Error(), stderr.String(), detail, driven.ErrDevcontainerRuntime)
 	}
 	result, err := parseUpResult(stdout.String())
 	if err != nil {
@@ -210,11 +223,32 @@ func (l *Launcher) runUp(ctx context.Context, image, name string, envNames []str
 }
 
 // removeHelper removes the helper container by name, also when ctx is
-// cancelled; an absent container is not an error.
-func (l *Launcher) removeHelper(ctx context.Context, name string) {
+// cancelled; an absent container is not an error, any other failure is
+// returned.
+func (l *Launcher) removeHelper(ctx context.Context, name string) error {
 	rmCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), helperRemoveTimeout)
 	defer cancel()
-	_ = exec.CommandContext(rmCtx, l.binary, "rm", "-f", name).Run()
+	out, err := exec.CommandContext(rmCtx, l.binary, "rm", "-f", name).CombinedOutput()
+	if err != nil && !strings.Contains(strings.ToLower(string(out)), "no such container") {
+		return fmt.Errorf("docker rm -f %s failed (%s: %s)", name, err.Error(), tailOf(out))
+	}
+	return nil
+}
+
+// passedValues returns the host values of the passed variables; the
+// launcher masks them in everything it forwards or reports.
+func (l *Launcher) passedValues(names []string) []string {
+	values := make([]string, 0, len(names))
+	for _, name := range names {
+		values = append(values, l.getenv(name))
+	}
+	return values
+}
+
+// rejectedInput classifies a request the launcher refuses before any docker
+// call.
+func rejectedInput(err error) error {
+	return fmt.Errorf("%s: %w", err.Error(), driven.ErrDevcontainerRuntime)
 }
 
 // passedEnvNames validates the requested names and keeps those set on the
@@ -222,24 +256,14 @@ func (l *Launcher) removeHelper(ctx context.Context, name string) {
 func (l *Launcher) passedEnvNames(names []string) ([]string, error) {
 	var passed []string
 	for _, name := range names {
-		if !envNamePattern.MatchString(name) {
-			return nil, fmt.Errorf("environment variable name %q is not a plain name: %w", name, driven.ErrDevcontainerRuntime)
+		if err := driven.ValidateDevcontainerEnvName(name); err != nil {
+			return nil, rejectedInput(err)
 		}
 		if _, ok := l.lookupEnv(name); ok {
 			passed = append(passed, name)
 		}
 	}
 	return passed, nil
-}
-
-// validateProjectFolder rejects a folder that is not an absolute path or
-// that contains a character a `--mount` value cannot carry (comma, double
-// quote, line break) or a NUL.
-func validateProjectFolder(folder string) error {
-	if !strings.HasPrefix(folder, "/") || strings.ContainsAny(folder, ",\"\n\r\x00") {
-		return fmt.Errorf("project folder %q is not an absolute path a --mount value can carry: %w", folder, driven.ErrDevcontainerRuntime)
-	}
-	return nil
 }
 
 // runArgs is the argument list of the helper container: removed at the end
@@ -389,7 +413,8 @@ func tailOf(out []byte) string {
 	return strings.TrimSpace(string(out))
 }
 
-// tailBuffer keeps the last limit bytes and discards the earlier ones.
+// tailBuffer keeps the last limit bytes and discards the earlier ones; the
+// backing slice is compacted once it holds twice the limit.
 type tailBuffer struct {
 	data  []byte
 	limit int
@@ -397,10 +422,17 @@ type tailBuffer struct {
 
 func (b *tailBuffer) Write(p []byte) (int, error) {
 	b.data = append(b.data, p...)
-	if len(b.data) > b.limit {
-		b.data = b.data[len(b.data)-b.limit:]
+	if len(b.data) > 2*b.limit {
+		n := copy(b.data, b.data[len(b.data)-b.limit:])
+		b.data = b.data[:n]
 	}
 	return len(p), nil
 }
 
-func (b *tailBuffer) String() string { return strings.TrimSpace(string(b.data)) }
+func (b *tailBuffer) String() string {
+	data := b.data
+	if len(data) > b.limit {
+		data = data[len(data)-b.limit:]
+	}
+	return strings.TrimSpace(string(data))
+}

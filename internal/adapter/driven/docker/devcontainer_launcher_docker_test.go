@@ -17,6 +17,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -91,10 +92,27 @@ func removeImages(reference string) {
 	_, _ = tryDocker(append([]string{"rmi", "-f"}, strings.Fields(ids)...)...)
 }
 
-// helperLeftovers lists containers that carry the helper name prefix.
+// helperPrefix is the helper-container name prefix of one test: the product
+// prefix, a hash of the test name and a dash. A test starts, counts and
+// removes only containers below its own prefix, so it neither removes nor
+// counts the helper container of another run on the same daemon.
+func helperPrefix(t *testing.T) string {
+	t.Helper()
+	sum := sha256.Sum256([]byte(t.Name()))
+	return docker.HelperContainerPrefixForTest + "t" + hex.EncodeToString(sum[:4]) + "-"
+}
+
+// testLauncher is the production launcher with the helper-container name
+// prefix of the test.
+func testLauncher(t *testing.T) *docker.Launcher {
+	t.Helper()
+	return docker.NewLauncherWithNamePrefixForTest(helperPrefix(t))
+}
+
+// helperLeftovers lists the containers below the helper name prefix of the test.
 func helperLeftovers(t *testing.T) []string {
 	t.Helper()
-	out := mustDocker(t, "ps", "-a", "--filter", "name="+docker.HelperContainerPrefixForTest, "--format", "{{.Names}}")
+	out := mustDocker(t, "ps", "-a", "--filter", "name="+helperPrefix(t), "--format", "{{.Names}}")
 	return strings.Fields(out)
 }
 
@@ -116,7 +134,7 @@ func newProject(t *testing.T, config map[string]any, extra map[string]string) st
 	}
 	t.Cleanup(func() {
 		removeContainers("label=" + folderLabel + "=" + folder)
-		removeContainers("name=" + docker.HelperContainerPrefixForTest)
+		removeContainers("name=" + helperPrefix(t))
 		removeImages("vsc-" + filepath.Base(folder) + "-*")
 	})
 	return folder
@@ -149,7 +167,7 @@ func up(t *testing.T, opts driven.DevcontainerUpOptions) (driven.DevcontainerUpR
 	defer cancel()
 	var progress bytes.Buffer
 	opts.Progress = &progress
-	res, err := docker.NewLauncher().Up(ctx, opts)
+	res, err := testLauncher(t).Up(ctx, opts)
 	return res, progress.String(), err
 }
 
@@ -388,9 +406,10 @@ func TestLauncher_Docker_S6_Lifetime(t *testing.T) {
 		folder := newProject(t, imageConfig(map[string]any{"initializeCommand": "sleep 120"}), nil)
 		ctx, cancel := context.WithTimeout(context.Background(), launcherTestBudget)
 		defer cancel()
+		launcher := testLauncher(t)
 		done := make(chan error, 1)
 		go func() {
-			_, err := docker.NewLauncher().Up(ctx, driven.DevcontainerUpOptions{ProjectFolder: folder})
+			_, err := launcher.Up(ctx, driven.DevcontainerUpOptions{ProjectFolder: folder})
 			done <- err
 		}()
 		deadline := time.Now().Add(5 * time.Minute)
@@ -420,12 +439,12 @@ func TestLauncher_Docker_S6_Lifetime(t *testing.T) {
 	})
 	t.Run("guard: a run without --rm leaves a helper container", func(t *testing.T) {
 		requireDocker(t)
-		t.Cleanup(func() { removeContainers("name=" + docker.HelperContainerPrefixForTest) })
+		t.Cleanup(func() { removeContainers("name=" + helperPrefix(t)) })
 		tag, err := docker.NewLauncher().EnsureImage(context.Background(), nil)
 		if err != nil {
 			t.Fatalf("EnsureImage: %v", err)
 		}
-		args := docker.RunArgsForTest(docker.HelperContainerPrefixForTest+"guard-"+randomHex(t), tag, nil,
+		args := docker.RunArgsForTest(helperPrefix(t)+"guard-"+randomHex(t), tag, nil,
 			driven.DevcontainerUpOptions{ProjectFolder: "/tmp"})
 		var noRm []string
 		for _, a := range args {
@@ -468,21 +487,47 @@ func cmdlineHolders(value string) []string {
 	return holders
 }
 
-// scanDuring polls cmdlineHolders until stop is closed and returns the hits.
-func scanDuring(value string, stop <-chan struct{}) <-chan []string {
+// helperCmdlineHolders returns the lines of `docker top` of the helper
+// containers below prefix that contain value: the command lines of the
+// processes inside the helper container (the devcontainer CLI and the
+// `docker` commands it runs), which the test container's /proc does not show.
+func helperCmdlineHolders(prefix, value string) []string {
+	ids, err := tryDocker("ps", "-q", "--filter", "name="+prefix)
+	if err != nil {
+		return nil
+	}
+	var holders []string
+	for _, id := range strings.Fields(ids) {
+		out, topErr := tryDocker("top", id)
+		if topErr != nil {
+			continue
+		}
+		for _, line := range strings.Split(out, "\n") {
+			if strings.Contains(line, value) {
+				holders = append(holders, line)
+			}
+		}
+	}
+	return holders
+}
+
+// scanDuring polls probe until ctx is done and returns the distinct hits.
+// The goroutine ends with ctx; the caller cancels it with defer, so a failed
+// test does not leave it running.
+func scanDuring(ctx context.Context, probe func() []string) <-chan []string {
 	out := make(chan []string, 1)
 	go func() {
 		seen := map[string]bool{}
 		var hits []string
 		for {
-			for _, h := range cmdlineHolders(value) {
+			for _, h := range probe() {
 				if !seen[h] {
 					seen[h] = true
 					hits = append(hits, h)
 				}
 			}
 			select {
-			case <-stop:
+			case <-ctx.Done():
 				out <- hits
 				return
 			case <-time.After(15 * time.Millisecond):
@@ -527,9 +572,12 @@ func TestLauncher_Docker_S6_EnvReachesOnlyPassedNames(t *testing.T) {
 	}
 }
 
-// LH-FA-DEV-009, S6: the value of a passed variable is in no image, no
-// label of the started container, no file under the project folder and on
-// no command line while the helper container runs.
+// LH-FA-DEV-009, S6: with the `remoteEnv` pattern the value of a passed
+// variable is in no image, no label of the started container, no file under
+// the project folder and on no command line of a process in the test
+// container (`/proc`, sampled every 15 ms plus the duration of the scan; the
+// launcher's own `docker run` is such a process). The command lines inside
+// the helper container are not covered: see the limit test below.
 func TestLauncher_Docker_S6_ValueIsNeverInImageLabelFileOrCommandLine(t *testing.T) {
 	suffix := randomHex(t)
 	name := "UBL_TEST_SECRET_" + suffix
@@ -541,10 +589,11 @@ func TestLauncher_Docker_S6_ValueIsNeverInImageLabelFileOrCommandLine(t *testing
 		"postCreateCommand": "printenv UBL_SECRET > /tmp/ubl-secret; true",
 	}), nil)
 
-	stop := make(chan struct{})
-	hits := scanDuring(value, stop)
+	scanCtx, stopScan := context.WithCancel(context.Background())
+	defer stopScan()
+	hits := scanDuring(scanCtx, func() []string { return cmdlineHolders(value) })
 	res := mustUp(t, driven.DevcontainerUpOptions{ProjectFolder: folder, EnvNames: []string{name}})
-	close(stop)
+	stopScan()
 	if got := <-hits; len(got) != 0 {
 		t.Errorf("the value was on a command line: %q", got)
 	}
@@ -573,6 +622,91 @@ func TestLauncher_Docker_S6_ValueIsNeverInImageLabelFileOrCommandLine(t *testing
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+// Limit of LH-FA-DEV-009 (documented in the port and in the slice): the
+// Dev Container CLI hands a `remoteEnv` value to a lifecycle command as
+// `docker exec -e NAME=<value>`, so the value is on a command line inside
+// the helper container for the duration of that command (`docker top`, also
+// visible on the host). The test pins this observation; if it turns red, the
+// CLI does not do it and the limit may be dropped from the text.
+func TestLauncher_Docker_S6_LimitRemoteEnvValueIsOnHelperCommandLine(t *testing.T) {
+	suffix := randomHex(t)
+	name := "UBL_TEST_LIMIT_" + suffix
+	value := "placeholder-limit-" + suffix
+	t.Setenv(name, value)
+	folder := newProject(t, imageConfig(map[string]any{
+		"remoteEnv":         map[string]string{"UBL_SECRET": "${localEnv:" + name + "}"},
+		"postCreateCommand": "sleep 4",
+	}), nil)
+	scanCtx, stopScan := context.WithCancel(context.Background())
+	defer stopScan()
+	hits := scanDuring(scanCtx, func() []string { return helperCmdlineHolders(helperPrefix(t), value) })
+	mustUp(t, driven.DevcontainerUpOptions{ProjectFolder: folder, EnvNames: []string{name}})
+	stopScan()
+	if len(<-hits) == 0 {
+		t.Errorf("no command line in the helper container carried the value: the CLI does not write remoteEnv into `docker exec -e`; drop the limit")
+	}
+}
+
+// LH-FA-DEV-009, S6: a devcontainer.json that writes `${localEnv:NAME}` into
+// `containerEnv` makes the CLI print `docker run … -e X=<value>` on its
+// stderr. The launcher replaces the value by a placeholder in the progress it
+// forwards and in the error text, on success and on failure. Guard: the same
+// value is on a command line inside the helper container (the CLI writes it
+// there; the launcher cannot mask a process list), so the helper scan sees
+// what it is meant to see, and the stream without masking would carry it.
+func TestLauncher_Docker_S6_ContainerEnvValueIsMaskedInProgressAndError(t *testing.T) {
+	suffix := randomHex(t)
+	name := "UBL_TEST_MASK_" + suffix
+	value := "placeholder-mask-" + suffix
+	t.Setenv(name, value)
+	config := func(extra map[string]any) map[string]any {
+		cfg := imageConfig(map[string]any{
+			"containerEnv":      map[string]string{"X": "${localEnv:" + name + "}"},
+			"remoteEnv":         map[string]string{"UBL_SECRET": "${localEnv:" + name + "}"},
+			"initializeCommand": "sleep 3",
+		})
+		for k, v := range extra {
+			cfg[k] = v
+		}
+		return cfg
+	}
+	opts := driven.DevcontainerUpOptions{EnvNames: []string{name}}
+
+	t.Run("Up succeeds", func(t *testing.T) {
+		opts.ProjectFolder = newProject(t, config(nil), nil)
+		scanCtx, stopScan := context.WithCancel(context.Background())
+		defer stopScan()
+		hits := scanDuring(scanCtx, func() []string { return helperCmdlineHolders(helperPrefix(t), value) })
+		_, progress, err := up(t, opts)
+		stopScan()
+		if err != nil {
+			t.Fatalf("Up: %v\nprogress:\n%s", err, progress)
+		}
+		if len(<-hits) == 0 {
+			t.Errorf("guard: the helper scan did not see the value the CLI writes into its own `docker run -e X=…`; the probe cannot tell masking from absence")
+		}
+		if strings.Contains(progress, value) {
+			t.Errorf("the value is in the progress:\n%s", progress)
+		}
+		if !strings.Contains(progress, "-e X=[masked]") {
+			t.Errorf("the progress shows no masked `-e X=` of the CLI (the stream the test must cover):\n%s", progress)
+		}
+	})
+	t.Run("Up fails", func(t *testing.T) {
+		opts.ProjectFolder = newProject(t, config(map[string]any{"postCreateCommand": "exit 1"}), nil)
+		_, progress, err := up(t, opts)
+		if !errors.Is(err, driven.ErrDevcontainerRuntime) {
+			t.Fatalf("Up error = %v, want ErrDevcontainerRuntime\nprogress:\n%s", err, progress)
+		}
+		if strings.Contains(err.Error(), value) || strings.Contains(progress, value) {
+			t.Errorf("the value is in the error text or the progress:\n%v\n%s", err, progress)
+		}
+		if !strings.Contains(progress, "[masked]") {
+			t.Errorf("the progress shows no placeholder:\n%s", progress)
+		}
+	})
 }
 
 // Guard of the command-line check: it finds a value that is part of an
