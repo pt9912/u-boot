@@ -45,18 +45,18 @@ Anlass: Auflage 1 des Verification-Reports [`2026-10-19-verification-slice-v1-eg
 
 ## 2. Definition of Done
 
-- [x] **Drei überholte Stellen nachgeführt:** [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) (Absatz zu `result` und Absatz *Stand*) und die Degradationstabelle von [`LH-FA-DEV-007.a`](../../../../spec/spezifikation.md#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten) nennen den Abbruch mit Exit-Code `11` und `failed` auch unter `warn` (Benutzer fehlt, Resolver startet nicht, Resolver läuft unter anderer UID) und die Folge für die Kette `egress && docker`; jede Bedingung trägt einen Test aus dem Abschnitt *Pinnende Tests* oder wird gestrichen; eine **Fundstellen-Tabelle** (Datei und Symbol, gelesen) steht in §3.
+- [x] **Drei überholte Stellen nachgeführt:** [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) (Absatz zu `result` und Absatz *Stand*) und die Degradationstabelle von [`LH-FA-DEV-007.a`](../../../../spec/spezifikation.md#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten) nennen den Abbruch mit Exit-Code `11` und `failed` auch unter `warn` (Benutzer fehlt, Resolver startet nicht, Resolver läuft unter anderer UID) und die Folge für die Kette `egress && docker`; jede Bedingung trägt einen Test aus dem Abschnitt *Pinnende Tests* oder wird gestrichen; eine **Fundstellen-Tabelle** (Datei und Symbol, gelesen) steht in §3. Commits `b6706f1`, `d3a7d06`, `e2061e7`.
 - [x] **Frage der Spezifikationsstelle beantwortet:** Der Architect entscheidet, ob die Zusage („Upstream-DNS nur für den Benutzer des lokalen Resolvers“) samt Grenze einen eigenen Eintrag braucht (neue Kennung) oder in [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) beziehungsweise [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) steht oder ganz entfällt; jede Zusage hat einen pinnenden Test, die Grenze (`sudo`, Adressen erlaubter Namen, Unternamen) steht als Grenze, nicht als Messstand; §7 Historie trägt je Änderung eine Zeile; `make doc-trace` meldet keine Waise, `make docs-check` keine Befunde.
-- [x] **Ein Vertrag, vier Stellen:** Lastenheft, Spezifikation, Handbuch und `CHANGELOG.md` sagen über den Abbruch unter `warn` und die Regel dasselbe wie der Code (gelesen, Stichprobe des Verifiers).
-- [ ] `make gates` grün.
-- [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
+- [x] **Ein Vertrag, vier Stellen:** Lastenheft, Spezifikation, Handbuch und `CHANGELOG.md` sagen über den Abbruch unter `warn` und die Regel dasselbe wie der Code (gelesen, Stichprobe des Verifiers). Nach V-5 in `e2061e7` erneut gegengelesen: das Handbuch trägt zu den Fällen 3 und 4 nur noch Gezähltes (Tabellen, Kette `drop`, `/etc/resolv.conf`).
+- [x] `make gates` grün — Exit 0 auf dem Stand nach `e2061e7` (Closure-Lauf, siehe §7); Verifier-Lauf auf `8bb5d59`.
+- [x] Review durchgeführt, Report unter `docs/reviews/` liegt vor (`eae98a6`, Fix-Runde `d3a7d06`, `8bb5d59`)
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8).
-- [ ] Doku-Update, falls ein öffentlicher Vertrag berührt ist.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
-- [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist.
-- [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
-- [ ] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb in der Closure dieses Slice geprüft.
+- [x] Doku-Update, falls ein öffentlicher Vertrag berührt ist — Handbuch und `CHANGELOG.md` (`d3a7d06`, `e2061e7`); README unberührt.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag — §7.
+- [x] Beobachtungs-Register (`../observations/`) fortgeschrieben — §7.
+- [x] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen) — §6.
+- [x] Die drei Paarungen (Anker · Folge-Slice · Register) sind getragen — im Repo ohne Wellen-Betrieb in der Closure dieses Slice geprüft (§7).
 
 ## 3. Plan (vor Code)
 
@@ -74,14 +74,18 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 
 | Datei | Ist |
 |---|---|
-| `spec/spezifikation.md` | geändert: [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) (Absatz zu `result`, Absatz *Stand*), Degradationstabelle von [`LH-FA-DEV-007.a`](../../../../spec/spezifikation.md#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten) (neue Zeile), [`LH-FA-DEV-008.a`](../../../../spec/spezifikation.md#lh-fa-dev-008a--verhalten-bei-nicht-gewährbarer-capability) (ein Satz), neu [`SPEC-048`](../../../../spec/spezifikation.md#spec-048--startscript-der-egress-restriktion-upstream-dns-abbruch-und-wiederholungslauf), Historie der Spezifikation (fünf Zeilen, je Änderung eine). [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) unverändert |
-| `docs/user/benutzerhandbuch.md` | geändert in der Fix-Runde: Satz zur Datei des Daemon-Scripts nach Exit-Code 11 gestrichen (Verkettung nur als Text gepinnt) |
+| `spec/spezifikation.md` | geändert: [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) (Absatz zu `result`, Absatz *Stand*), Degradationstabelle von [`LH-FA-DEV-007.a`](../../../../spec/spezifikation.md#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten) (neue Zeile), [`LH-FA-DEV-008.a`](../../../../spec/spezifikation.md#lh-fa-dev-008a--verhalten-bei-nicht-gewährbarer-capability) (ein Satz), neu [`SPEC-048`](../../../../spec/spezifikation.md#spec-048--startscript-der-egress-restriktion-upstream-dns-abbruch-und-wiederholungslauf), Historie der Spezifikation (sechs Zeilen, je Änderung eine); die Auflagen-Runde (`e2061e7`) streicht die ungepinnten Bedingungen (`established,related`, `ipv4_addr`, Pid-Datei, „erster“ Lauf, Teststand-Satz der Verkettung). [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion) unverändert |
+| `docs/user/benutzerhandbuch.md` | geändert in der Fix-Runde (`d3a7d06`): Satz zur Datei des Daemon-Scripts nach Exit-Code 11 gestrichen; in der Auflagen-Runde (`e2061e7`): Satz „keine Namensauflösung, aber auch keine offene Verbindung“ gestrichen, „im ersten Lauf“ und „(ein Docker-Test prüft sie)“ auf das Gezählte begrenzt |
 | `CHANGELOG.md` | geändert in der Fix-Runde: der Absatz zum Upstream-DNS nennt auch „der Resolver startet nicht“ |
 | `spec/lastenheft.md` | unverändert, gelesen: [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) Absatz *Degradation* (Zeile 467) und [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Zeilen 469 bis 478) nennen den Abbruch aus anderem Grund nicht und widersprechen ihm nicht |
 | `spec/architecture.md` | unverändert, gelesen: die Treffer zu „egress“ (Zeilen 120 bis 122, 161, 187, 242) betreffen `EgressListService` und den Befehl `egress list`; die Sicht nennt weder Startscripte noch ihren Abbruch |
 | `internal/**`, `Makefile`, `repo.mk`, `.github/workflows/` | unverändert |
 | diese Datei | geändert (Verantwortlich, DoD, dieser Abschnitt, Fundstellen, Befunde) |
 | `docs/reviews/2026-10-20-slice-v2-spec-upstream-dns-egress-init.md` | neu (Review-Report, Commit eae98a6) |
+| `docs/reviews/2026-10-20-verification-slice-v2-spec-upstream-dns-egress-init.md` | neu (Verification-Report, Commit b324446) |
+| Roadmap, `open/README.md`, Beobachtungs-Register (`spec-bedingung-ohne-code-entsprechung`: `evidence/` und `state.md`) | Closure: Marker auf Ist-Stand, siebter Beleg |
+
+Abgleich nach der letzten Fix-Runde: `git diff --stat 058bbf8..HEAD` nennt `spec/spezifikation.md`, `docs/user/benutzerhandbuch.md`, `CHANGELOG.md`, die Slice-Datei, beide Reports und die Closure-Dateien (Roadmap, `open/README.md`, Register); jede Datei steht oben, kein Eintrag ohne Diff.
 
 ### Entscheidung zur Stelle der Zusagen
 
@@ -130,13 +134,35 @@ DoD vollständig, Review-Report und Verification-Report liegen vor, Closure-Noti
 
 ## 6. Risiken und offene Punkte
 
-- **Eine Spec-Bedingung ohne pinnenden Test** (Klasse [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md)) — **Ausgang:** weiter offen bis zur Closure; jede Bedingung trägt einen Test aus §1 oder entfällt.
-- **Die Verkettung `egress && docker` ist nur als Text gepinnt, das Verhalten der Shell-Kette nicht ausgeführt** — **Ausgang:** weiter offen bis zur Closure; die Spezifikation sagt „die Kette ist so verkettet“, nicht „das Docker-Script läuft nicht“, solange kein Test den Abbruch ausführt, oder der Architect benennt den Test, der es tut.
-- **Der Code ändert sich vor dem Start** (Entscheidung des Projektinhabers zum fehlenden Benutzer im Erstlauf) — **Ausgang:** weiter offen; Rückführung `in-progress` → `open` (§4).
+- **Eine Spec-Bedingung ohne pinnenden Test** (Klasse [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md)) — **Ausgang:** eingetreten. Die Fix-Runde führte drei ungepinnte Bedingungen ein (`established,related`, `ipv4_addr`/IPv4-Beschränkung, Pid-Datei als Ursache), dazu im Handbuch einen Satz ohne Test („keine offene Verbindung“); Verification V-1, V-2, V-3, V-5, alle in `e2061e7` durch Streichen behoben.
+- **Die Verkettung `egress && docker` ist nur als Text gepinnt, das Verhalten der Shell-Kette nicht ausgeführt** — **Ausgang:** entfallen als Aussage, offen als Lücke. Die Spezifikation sagt nur noch, dass das `postStartCommand` beide Scripte mit `&&` verkettet, und die Folge als Semantik von `&&`; der Satz zum Teststand ist gestrichen (V-4). Dass die Kette bei Exit 11 das Docker-Script auslässt, führt kein Test aus; Folge-Punkt 1 in §7.
+- **Der Code ändert sich vor dem Start** (Entscheidung des Projektinhabers zum fehlenden Benutzer im Erstlauf) — **Ausgang:** entfallen. Der Code blieb bis zur Closure unverändert (`git diff --stat 058bbf8..HEAD -- internal` leer, Verifier §1); eine Entscheidung des Projektinhabers zum fehlenden Benutzer im Erstlauf ist nicht gefallen und bleibt Folge-Punkt 5 in §7.
 
 ## 7. Closure-Notiz
 
-*(Wird bei der Closure gefüllt.)*
+**Gegenstand:** Die Spezifikation trägt die Abbruchfälle des Egress-Startscripts (Exit-Code `11` und `failed` auch unter `warn`), die Regel zum Upstream-DNS samt Grenze und die Struktur des Wiederholungslaufs als eigenen Eintrag [`SPEC-048`](../../../../spec/spezifikation.md#spec-048--startscript-der-egress-restriktion-upstream-dns-abbruch-und-wiederholungslauf); [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung), die Degradationstabelle von [`LH-FA-DEV-007.a`](../../../../spec/spezifikation.md#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten) und [`LH-FA-DEV-008.a`](../../../../spec/spezifikation.md#lh-fa-dev-008a--verhalten-bei-nicht-gewährbarer-capability) verweisen darauf. Das Lastenheft ist unverändert.
+
+**Commits:** Umsetzung `b6706f1`; Review `eae98a6`, Fix-Runde `d3a7d06`, `8bb5d59`; Verification `b324446` (GO mit Auflagen); Auflagen `e2061e7`.
+
+**Evidence** (nach [`harness/verification.md`](../../../../harness/verification.md)): Verification-Report [`2026-10-20-verification-slice-v2-spec-upstream-dns-egress-init`](../../../reviews/2026-10-20-verification-slice-v2-spec-upstream-dns-egress-init.md), Review [`2026-10-20-slice-v2-spec-upstream-dns-egress-init`](../../../reviews/2026-10-20-slice-v2-spec-upstream-dns-egress-init.md). Sensors: `make gates`, `make docs-check`, `make doc-trace` grün auf dem Stand der Closure. **Nicht ausgeführt:** `make test-docker` (der Diff enthält keinen Code, kein Template, keinen Test; die Aussagen sind gegen den Wortlaut der Docker-Tests gelesen, deren Ergebnisse stammen aus dem Verification-Report des Code-Slice), `make verify-depguard` (keine Importregel berührt). Carveouts: neu none, gelöst none, unverändert.
+
+**Auflagen des Verifiers:** V-1 bis V-3 (drei Bedingungen ohne Test) und V-4 (Teststand-Satz) in `e2061e7` durch Streichen behoben; V-5 (Handbuch stärker als Spezifikation, „ein Docker-Test prüft sie“) auf das Gezählte begrenzt; V-6 („im ersten Lauf“ bei Fall 4) umformuliert; V-7 (Zustandsmarker in Roadmap und `open/README.md`) im Nachzug nach dem Move.
+
+**Steering-Loop-Einträge**
+
+- *Beobachtung:* [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md), siebter Vorgang (`evidence/slice-v2-spec-upstream-dns-egress-init.md`). Die Fix-Runde zum Review (F-5 bis F-8) ersetzte zu weite Aussagen durch neue, ebenso ungepinnte (`established,related`, `ipv4_addr`, Pid-Datei), und das Handbuch behielt einen Satz, den die Spezifikation schon gestrichen hatte (V-5). Rückfall nach der Verkörperung in `AGENTS.md §3.10`. Ausgang **nicht zugewiesen**; die Beobachtung liegt über der Schwelle, die Frage nach einer Schärfung liegt beim Projektinhaber (zur Entscheidung vorgelegt). Kandidat für eine geschärfte Regel: Wer eine Aussage nach einem Finding umformuliert, liest die neue Fassung wie eine neue (Test oder streichen), und eine Streichung in der Spezifikation löst das Gegenlesen der drei anderen Stellen aus (Handbuch, `CHANGELOG.md`, Lastenheft) im selben Commit.
+- *Nachbarklasse, nicht mitgezählt:* [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md). V-5 („ein Docker-Test prüft sie“ über den Zählern des Tests) und F-8 sind derselbe Mechanismus (Text reicht weiter als der Beleg), aber ohne Messstand als Gegenstand; ob sie dort zählen, entscheidet der Projektinhaber. Zählstand dort unverändert.
+- *Gelesen, kein neuer Eintrag:* [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) trat nicht auf; die Fundstellen-Tabelle und der Abgleich gegen `git diff --stat` trugen.
+
+**Paarungen:** *Anker* — keine neue Regel verkörpert, kein Anker zu paaren (die Schärfung ist zur Entscheidung vorgelegt). *Folge-Slice* — keine Regel `geplant`; die Folge-Punkte unten tragen keinen Slice und sind als solche benannt. *Register* — der siebte Beleg liegt als Datei vor, `state.md` ist fortgeschrieben; die Eintragung in das Register entspricht dem Eintrag oben.
+
+**Folge-Punkte (ohne Slice, Entscheidung des Projektinhabers):**
+
+1. Die Kette `egress-init.sh && docker-init.sh` ist nicht ausgeführt getestet (nur der Text des `postStartCommand`); ein Test mit Abbruch des Egress-Scripts würde die Folge für das Docker-Script pinnen.
+2. Die Ablehnung der `nft`-Transaktion durch den Kernel (statt durch eine ungültige Regelzeile) ist nicht erzeugt.
+3. IPv6-Upstream-Resolver sind nicht zugesagt; ein Test könnte die Grenze pinnen.
+4. Handbuch/Spec-Gegenprobe: ein mechanischer Sensor, der Sätze des Handbuchs mit „ein Test prüft“ gegen Testnamen paart, existiert nicht; die Gegenprobe bleibt Lesen (siehe Lerneintrag).
+5. Entscheidung, ob ein fehlender Benutzer `nobody` im Erstlauf offen bleiben darf (Abbruch statt Restriktion bleibt der Ist-Stand).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
