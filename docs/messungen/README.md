@@ -24,3 +24,4 @@ Die Regel steht in [`harness/conventions.md`](../../harness/conventions.md#ablag
 | [`slice-v1-egress-wildcard-pruefung`](slice-v1-egress-wildcard-pruefung/README.md) | `tools/messung/egress-wildcard-pruefung/` |
 | [`slice-v1-devcontainer-ollama-amd64-messung`](slice-v1-devcontainer-ollama-amd64-messung/README.md) | `tools/messung/ollama-amd64/` |
 | [`slice-v1-egress-dns-upstream-schliessen`](slice-v1-egress-dns-upstream-schliessen/README.md) | `tools/messung/egress-dns-upstream/` |
+| [`slice-v1-devcontainer-start-fundament`](slice-v1-devcontainer-start-fundament/README.md) | `tools/messung/devcontainer-start-fundament/` |

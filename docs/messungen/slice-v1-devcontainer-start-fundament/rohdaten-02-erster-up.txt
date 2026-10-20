@@ -1,0 +1,18 @@
+######## 0: Messstand
+datum_utc=2026-10-20T08:38:19Z
+host_arch=x86_64
+client=29.9.1 server=29.9.1 server_os_arch=linux/amd64
+######## 1: erster up (Basis-Image des Projekts wird gezogen, Container wird angelegt)
+{"outcome":"success","containerId":"3ec5d63f7af9e8542342583c4b546e9b3e4f288f19390ba219ff871f507a6b12","remoteUser":"vsco
+erster up (kalt): dauer=52.0 s container=3ec5d63f7af9
+######## 2: up gegen den laufenden Container
+{"outcome":"success","containerId":"3ec5d63f7af9e8542342583c4b546e9b3e4f288f19390ba219ff871f507a6b12","remoteUser":"vsco
+up, laeuft: dauer=1.2 s container=3ec5d63f7af9
+######## 3: Container stoppen, dann up
+{"outcome":"success","containerId":"3ec5d63f7af9e8542342583c4b546e9b3e4f288f19390ba219ff871f507a6b12","remoteUser":"vsco
+up nach stop: dauer=1.8 s container=3ec5d63f7af9
+######## 4: up --remove-existing-container
+{"outcome":"success","containerId":"5ac6466306cd95efbdd32c9a1e8db471167d23de6144f3f552a15464647bd296","remoteUser":"vsco
+up --remove-existing-container: dauer=4.6 s container=5ac6466306cd
+######## Aufraeumen
+fertig

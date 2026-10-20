@@ -1,0 +1,53 @@
+######## 0: Messstand
+datum_utc=2026-10-20T08:36:35Z
+host_arch=x86_64
+client=29.9.1 server=29.9.1 server_os_arch=linux/amd64
+kontext_dateien=Dockerfile package.json package-lock.json 
+kontext_bytes=10240
+FROM docker:29-cli@sha256:6fae2214c3121a28d5aa639d09032f61310b7c9c75ffbad1025f261a1b621800 AS dockercli
+FROM node:22-bookworm@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8
+######## 1: Plattformen der Basis-Images (Index-Digest gilt fuer alle gelisteten Plattformen)
+-- docker:29-cli@sha256:6fae2214c3121a28d5aa639d09032f61310b7c9c75ffbad1025f261a1b621800
+Name:      docker.io/library/docker:29-cli@sha256:6fae2214c3121a28d5aa639d09032f61310b7c9c75ffbad1025f261a1b621800
+MediaType: application/vnd.oci.image.index.v1+json
+Digest:    sha256:6fae2214c3121a28d5aa639d09032f61310b7c9c75ffbad1025f261a1b621800
+  Platform:    linux/amd64
+  Platform:    linux/arm/v6
+  Platform:    linux/arm/v7
+  Platform:    linux/arm64/v8
+-- node:22-bookworm@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8
+Name:      docker.io/library/node:22-bookworm@sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8
+MediaType: application/vnd.oci.image.index.v1+json
+Digest:    sha256:0e5f906573693feaa1e21057ebdcfdb5bd5021f050b2dc7c9deceb629c7da2a8
+  Platform:    linux/amd64
+  Platform:    linux/arm/v7
+  Platform:    linux/arm64/v8
+  Platform:    linux/ppc64le
+######## 2: Bauzeit kalt (--no-cache) und warm (Layer-Cache), Bau aus Tar-Strom auf stdin
+kalt: exit=0 dauer=7.8 s
+warm, Tag fehlt (Layer im Cache): exit=0 dauer=1.7 s
+warm, Tag vorhanden: exit=0 dauer=1.2 s
+######## 3: Groesse
+groesse_bytes=1799126108 architektur=amd64
+groesse_mib=1716
+devcontainer --version: 0.89.0
+######## 4: Trivy (Aufruf wie make image-scan, ohne --exit-code, nur Schwachstellen; die Zusammenfassung nennt je Ziel die Anzahl, hier nur Ziele mit Anzahl > 0)
+-- severity=HIGH,CRITICAL
+2026-10-20T08:37:28Z	INFO	Detected OS	family="debian" version="12.15"
+│                                      Target                                      │   Type   │ Vulnerabilities │
+│ u-boot-messung-hilfs-image:messung (debian 12.15)                                │  debian  │       597       │
+│ usr/local/lib/node_modules/npm/node_modules/@npmcli/metavuln-calculator/node_mo- │ node-pkg │        1        │
+│ usr/local/lib/node_modules/npm/node_modules/brace-expansion/package.json         │ node-pkg │        5        │
+│ usr/local/lib/node_modules/npm/node_modules/http-cache-semantics/package.json    │ node-pkg │        1        │
+│ usr/local/lib/node_modules/npm/node_modules/ip-address/package.json              │ node-pkg │        1        │
+│ usr/local/lib/node_modules/npm/node_modules/pacote/package.json                  │ node-pkg │        1        │
+│ usr/local/lib/node_modules/npm/node_modules/picomatch/package.json               │ node-pkg │        1        │
+│ usr/local/lib/node_modules/npm/node_modules/sigstore/package.json                │ node-pkg │        1        │
+│ usr/local/libexec/docker/cli-plugins/docker-buildx                               │ gobinary │        7        │
+-- severity=CRITICAL
+2026-10-20T08:38:05Z	INFO	Detected OS	family="debian" version="12.15"
+│                                      Target                                      │   Type   │ Vulnerabilities │
+│ u-boot-messung-hilfs-image:messung (debian 12.15)                                │  debian  │       21        │
+######## Aufraeumen
+Mess-Image entfernt
+fertig
