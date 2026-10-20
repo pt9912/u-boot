@@ -27,7 +27,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Code, Tests, Handbuch, `CHANGELOG.md`** — liegen in [`slice-v1-devcontainer-start-fundament`](../in-progress/slice-v1-devcontainer-start-fundament.md) und [`slice-v1-cli-devcontainer-up-down`](../open/slice-v1-cli-devcontainer-up-down.md).
+- **Code, Tests, Handbuch, `CHANGELOG.md`** — liegen in [`slice-v1-devcontainer-start-fundament`](../done/slice-v1-devcontainer-start-fundament.md) und [`slice-v1-cli-devcontainer-up-down`](../open/slice-v1-cli-devcontainer-up-down.md).
 - **`spec/lastenheft.md`** — der CR liegt davor ([`slice-cr-devcontainer-start-ohne-editor`](../done/slice-cr-devcontainer-start-ohne-editor.md)); die Spezifikation präzisiert das Lastenheft, erweitert es nie.
 - **Pins, Digests, Versionen im Wortlaut der Spezifikation** — sie stehen in den eingebetteten Dateien und im Golden Case des Fundament-Slice (ein Stand, kein Zustand); die Spezifikation nennt die Pin-Form, nicht die Zahlen.
 - **Messstände** — sie stehen im Handbuch und im Messprotokoll; die Spezifikation führt Zusagen und Grenzen als Zielbild (Muster [`slice-v2-spec-zielbild`](../done/slice-v2-spec-zielbild.md)).

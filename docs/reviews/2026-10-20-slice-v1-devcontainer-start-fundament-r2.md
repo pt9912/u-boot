@@ -1,4 +1,4 @@
-# Review-Report: [`slice-v1-devcontainer-start-fundament`](../plan/planning/in-progress/slice-v1-devcontainer-start-fundament.md) (Nachlauf r2) — 2026-10-20
+# Review-Report: [`slice-v1-devcontainer-start-fundament`](../plan/planning/done/slice-v1-devcontainer-start-fundament.md) (Nachlauf r2) — 2026-10-20
 
 **Review-Art:** Code-Review der Review-Fix-Runde gegen Plan, Entscheidungen und Hard Rules (Produktcode, Docker-Tests, Messskripte, Slice-Dokument). Die DoD prüft der Verifier.
 
@@ -6,7 +6,7 @@
 
 **Skill:** `.harness/skills/reviewer.md` @ HEAD `fe396e7` · **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-20
 
-**Eingangs-Kontext:** [`slice-v1-devcontainer-start-fundament`](../plan/planning/in-progress/slice-v1-devcontainer-start-fundament.md) (§3, §6, §7 samt „Review-Fix-Runde“), der Erst-Review, [`ADR-0028`](../plan/adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) (Entscheidungen 3, 4, 9), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), `spec/architecture.md` §2.4 und §2.6, `.golangci.yml` (`depguard`), [`AGENTS.md`](../../AGENTS.md) (§3.1, §3.2, §3.6, §3.7, §3.9, §3.10), `harness/conventions.md` (Modus-Deklaration PORT, ADP).
+**Eingangs-Kontext:** [`slice-v1-devcontainer-start-fundament`](../plan/planning/done/slice-v1-devcontainer-start-fundament.md) (§3, §6, §7 samt „Review-Fix-Runde“), der Erst-Review, [`ADR-0028`](../plan/adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) (Entscheidungen 3, 4, 9), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), `spec/architecture.md` §2.4 und §2.6, `.golangci.yml` (`depguard`), [`AGENTS.md`](../../AGENTS.md) (§3.1, §3.2, §3.6, §3.7, §3.9, §3.10), `harness/conventions.md` (Modus-Deklaration PORT, ADP).
 
 **Selbst gelesen (nichts vom Implementer übernommen):** `internal/adapter/driven/docker/{secret_mask.go,devcontainer_launcher.go,devcontainer_launcher_test.go,devcontainer_launcher_docker_test.go,export_test.go}`, `internal/hexagon/port/driven/{devcontainer_launcher.go,devcontainer_launcher_test.go}`, den Diff beider Messskripte, den Slice (§3, §6, §7), `git diff --stat eea0c92..HEAD`, Suche nach den Aufrufern von `ValidateDevcontainer…` im ganzen Baum.
 

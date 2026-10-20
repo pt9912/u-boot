@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md). Dritter von vier Folge-Slices von [`slice-v1-devcontainer-start-ohne-cli`](../done/slice-v1-devcontainer-start-ohne-cli.md); nach [`slice-v1-devcontainer-start-fundament`](../in-progress/slice-v1-devcontainer-start-fundament.md) und vor [`slice-v2-spec-devcontainer-start`](../open/slice-v2-spec-devcontainer-start.md). Priorität V2; Release: das nächste Minor nach `v0.12.0` (die Nummer vergibt der Release-Cut).
+**Welle:** [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md). Dritter von vier Folge-Slices von [`slice-v1-devcontainer-start-ohne-cli`](../done/slice-v1-devcontainer-start-ohne-cli.md); nach [`slice-v1-devcontainer-start-fundament`](../done/slice-v1-devcontainer-start-fundament.md) und vor [`slice-v2-spec-devcontainer-start`](../open/slice-v2-spec-devcontainer-start.md). Priorität V2; Release: das nächste Minor nach `v0.12.0` (die Nummer vergibt der Release-Cut).
 
 **Bezug:** die neue Anforderung des Lastenhefts aus [`slice-cr-devcontainer-start-ohne-editor`](../done/slice-cr-devcontainer-start-ohne-editor.md) (Devcontainer ohne Editor starten; Kennung steht nach dem CR im Lastenheft), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (`--quiet`, Ausweisung), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (10, 11, 12), [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) und [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) (`--json`, Enum `command`), [`LH-FA-DEV-004`](../../../../spec/lastenheft.md#lh-fa-dev-004--benutzerrechte) (UID), [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Ausweisung der Fallbacks), [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) (Zugangsdaten), [`LH-NFA-PORT-004`](../../../../spec/lastenheft.md#lh-nfa-port-004--ausgeliefertes-container-image); [`ADR-0028`](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) (muss `Accepted` sein; Entscheidungen 3, 6, 8, 9).
 
@@ -27,7 +27,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Port, Adapter, eingebetteter Kontext, Pins** — [`slice-v1-devcontainer-start-fundament`](../in-progress/slice-v1-devcontainer-start-fundament.md); dieser Slice ruft sie nur auf.
+- **Port, Adapter, eingebetteter Kontext, Pins** — [`slice-v1-devcontainer-start-fundament`](../done/slice-v1-devcontainer-start-fundament.md); dieser Slice ruft sie nur auf.
 - **`spec/`** (Lastenheft, Spezifikation, Sicht) — der Lastenheft-CR liegt davor, die Spezifikation danach ([`slice-v2-spec-devcontainer-start`](../open/slice-v2-spec-devcontainer-start.md)); Bedingungen im Handbuch brauchen einen Test aus diesem Slice oder entfallen (`AGENTS.md` §3.10).
 - **`u-boot up` startet den Devcontainer mit** — `up` betrifft den Compose-Stack; ein gemeinsamer Start wäre eine eigene Entscheidung.
 - **Weitere CLI-Optionen** (`--build-no-cache`, Verzeichnis-Option, `--remove` bei `down`) — nicht Teil der Entscheidung ([`ADR-0028`](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) Entscheidung 3); sie lassen sich ohne Folge-ADR ergänzen, wenn ein Nutzer sie braucht.
@@ -89,7 +89,7 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 
 ## 4. Trigger
 
-**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-v1-devcontainer-start-fundament`](../in-progress/slice-v1-devcontainer-start-fundament.md) ist geschlossen; kein anderer Slice in `in-progress/` (WIP-Limit 1); der Projektinhaber steht für die Einzelmessung auf Colima bereit (die Einzelmessung ist Teil der Verification, nicht des Starts).
+**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-v1-devcontainer-start-fundament`](../done/slice-v1-devcontainer-start-fundament.md) ist geschlossen; kein anderer Slice in `in-progress/` (WIP-Limit 1); der Projektinhaber steht für die Einzelmessung auf Colima bereit (die Einzelmessung ist Teil der Verification, nicht des Starts).
 
 **Rückführungen — vorab benannt:**
 

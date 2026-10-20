@@ -1,7 +1,7 @@
 # Messprotokoll: Hilfs-Image des Devcontainer-Starts
 
 Rohdaten und Ablauf der Einmal-Messung des Slice
-[`slice-v1-devcontainer-start-fundament`](../../plan/planning/in-progress/slice-v1-devcontainer-start-fundament.md)
+[`slice-v1-devcontainer-start-fundament`](../../plan/planning/done/slice-v1-devcontainer-start-fundament.md)
 (DoD: Größe, Bauzeit kalt und warm, Dauer des ersten `up`, Trivy HIGH/CRITICAL). Skripte liegen unter
 `tools/messung/devcontainer-start-fundament/` (Ablage: [`docs/messungen/README.md`](../README.md)).
 
