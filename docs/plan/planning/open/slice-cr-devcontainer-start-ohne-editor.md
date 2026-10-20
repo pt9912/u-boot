@@ -9,10 +9,10 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md). Erster von vier Folge-Slices von [`slice-v1-devcontainer-start-ohne-cli`](../in-progress/slice-v1-devcontainer-start-ohne-cli.md) (Reihenfolge CR → Fundament → Befehl → Spezifikation, Muster [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md)). Release-Zuordnung offen (Vorschlag des Planners: V2, nächstes Minor nach dem Befehl-Slice; entscheidet der Projektinhaber).
+**Welle:** [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md). Erster von vier Folge-Slices von [`slice-v1-devcontainer-start-ohne-cli`](../in-progress/slice-v1-devcontainer-start-ohne-cli.md) (Reihenfolge CR → Fundament → Befehl → Spezifikation, Muster [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md)). Priorität V2; Release: das nächste Minor nach `v0.12.0` (die Nummer vergibt der Release-Cut).
 
 **Bezug:** [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Abgrenzung zum Hilfs-Container), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (`--quiet`, Ausnahme 1), [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) (Enum `command`), [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle) (Befehlsübersicht), [`LH-FA-DEV-001`](../../../../spec/lastenheft.md#lh-fa-dev-001--devcontainer-erzeugen) und [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Nachbarn, unverändert bzw. Muster der Zusage-Menge); [`ADR-0028`](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) (Träger der Entscheidung, muss `Accepted` sein).
-Anlass: Entscheidungen des Projektinhabers vom 2026-10-20 im Eltern-Slice; der Wortlaut liegt dort in §7 (*Lastenheft-Wortlaut-Vorschlag*, Stellen 1 bis 6) und wird hier unverändert übernommen, soweit der Projektinhaber ihn freigibt.
+Anlass: Entscheidungen des Projektinhabers vom 2026-10-20 im Eltern-Slice; der Wortlaut liegt dort in §7 (*Lastenheft-Wortlaut-Vorschlag*, Stellen 1 bis 6) und wird hier unverändert übernommen (vom Projektinhaber freigegeben).
 
 **Berührte Spec-Stellen:** `lastenheft.md` §4.3 (neue Anforderung nach [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle), §16 (Historie), Versionsfeld. `SPEC-*` und `ARC-*` berührt der CR nicht (siehe den Spezifikations-Slice). Der Verweis zeigt aufwärts: Das Lastenheft nennt diesen Slice nie.
 
@@ -32,12 +32,12 @@ Anlass: Entscheidungen des Projektinhabers vom 2026-10-20 im Eltern-Slice; der W
 - **`spec/spezifikation.md` und `spec/architecture.md`** — eine Spezifikation nach dem Code ([`slice-v2-spec-devcontainer-start`](../open/slice-v2-spec-devcontainer-start.md)); der Wertebereich von `command` in [`SPEC-001`](../../../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) gehört dorthin, nicht in den CR.
 - **Handbuch und `CHANGELOG.md`** — es ändert sich kein Verhalten; der Befehl kommt mit dem Befehl-Slice.
 - **Eine Zusage über das Belegte hinaus** — keine Aussage zu Docker Desktop, Podman als Host-Engine, entfernter Engine, Windows; der Wortlaut nennt sie als nicht zugesagt. Zurücknehmen, was der Befehl-Slice widerlegt, ist ein Folge-CR.
-- **Priorität und Release-Nummer festlegen** — Entscheidung des Projektinhabers (Stelle 2 des Wortlauts).
+- **Die Release-Nummer festlegen** — das Release ist das nächste Minor nach `v0.12.0`, die Nummer vergibt der Release-Cut; die Priorität V2 steht im Wortlaut (Stelle 2).
 
 ## 2. Definition of Done
 
 - [ ] **Wortlaut im Lastenheft** nach Stelle 1 bis 5 des Eltern-Slice (neue Anforderung `LH-FA-DEV-010` <!-- d-check:ignore (Kennung des Vorschlags) -->, Befehlsübersicht, `--quiet`, Enum, Abgrenzung), so freigegeben vom Projektinhaber; Zielbild ohne Prozesszustand und ohne Messstand.
-- [ ] **Versionsfeld und Historie (§16)** auf die nächste freie Minor-Version, eine Zeile mit den Stellen; Priorität (Vorschlag `V2`) in der Anforderung und in der Befehlsübersicht gleich.
+- [ ] **Versionsfeld und Historie (§16)** auf die nächste freie Minor-Version, eine Zeile mit den Stellen; Priorität (`V2`) in der Anforderung und in der Befehlsübersicht gleich.
 - [ ] **Freigabe des Projektinhabers** im Gespräch belegt und in §7 vermerkt (`BEO-DOK/vertragsaenderung-nach-review`: kein Wortlaut nach dem Review ohne Nachlauf-Review über den Diff).
 - [ ] `make gates` grün, `make docs-check` grün.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
