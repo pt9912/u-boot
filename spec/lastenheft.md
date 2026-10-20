@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.17.0                                                             |
+| Version          | 0.18.0                                                             |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -186,9 +186,9 @@ Mindestens müssen folgende Stufen unterstützt werden:
 - `--verbose` – zusätzlich Detailinformationen
 - `--debug` – zusätzlich interne Diagnoseausgaben
 
-Unter `--quiet` geben die Subkommandos, die etwas ändern (`init`, `generate`, `add`, `remove`, `config set`, `up`, `down`), nur Fehler aus; ihre Erfolgs- und Zusammenfassungsmeldungen entfallen. `u-boot doctor` zeigt nur Fehler-Einträge. Vier Ausnahmen bleiben unter `--quiet` sichtbar:
+Unter `--quiet` geben die Subkommandos, die etwas ändern (`init`, `generate`, `add`, `remove`, `config set`, `up`, `down`, `devcontainer up`, `devcontainer down`), nur Fehler aus; ihre Erfolgs- und Zusammenfassungsmeldungen entfallen. `u-boot doctor` zeigt nur Fehler-Einträge. Vier Ausnahmen bleiben unter `--quiet` sichtbar:
 
-1. die Ausweisung von Sicherheitslockerungen (zusätzliche Capabilities, `--privileged`, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices) und eines im Container aktivierten Login-Dienstes (Passwort-Login) in der Befehlsausgabe ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion)) sowie die Warn-Einträge von `u-boot doctor`, die eine Sicherheitseigenschaft des Sandbox-Profils betreffen (Quelle der Zugangsdaten nach [`LH-FA-DEV-009`](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), Egress-Restriktion nach [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion), Sicherheitslockerungen des Docker-Daemons nach [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)); dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift; die Meldung, dass die Container-Runtime ohne Sandbox-Profil keine Wirkung hat, ist eine Konfigurationsmeldung und gehört nicht dazu;
+1. die Ausweisung von Sicherheitslockerungen (zusätzliche Capabilities, `--privileged`, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices, der Einbindung des Container-Runtime-Sockets in den Hilfs-Container von `u-boot devcontainer up`) und eines im Container aktivierten Login-Dienstes (Passwort-Login) in der Befehlsausgabe ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-010`](#lh-fa-dev-010--devcontainer-ohne-editor-starten)) sowie die Warn-Einträge von `u-boot doctor`, die eine Sicherheitseigenschaft des Sandbox-Profils betreffen (Quelle der Zugangsdaten nach [`LH-FA-DEV-009`](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), Egress-Restriktion nach [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion), Sicherheitslockerungen des Docker-Daemons nach [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)); dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift; die Meldung, dass die Container-Runtime ohne Sandbox-Profil keine Wirkung hat, ist eine Konfigurationsmeldung und gehört nicht dazu;
 2. die Ausweisung der Degradations-Fallbacks (Container ohne Docker-Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion) in der Befehlsausgabe und in `u-boot doctor` ([`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer));
 3. der Fortschritt einzelner Services bei `u-boot up` (Pull, Create, Start, Healthcheck; [`LH-NFA-PERF-002`](#lh-nfa-perf-002--startzeit-abhängig-von-docker));
 4. die Zusammenfassung der betroffenen Pfade, die `--force` vor dem Überschreiben ausgibt ([`LH-FA-CLI-005A`](#lh-fa-cli-005a--interaktivität-und-automatisierung), [`LH-FA-INIT-005`](#lh-fa-init-005--überschreibschutz)).
@@ -245,7 +245,7 @@ Der Dry-Run muss anzeigen, welche Dateien erzeugt, geändert oder gelöscht wür
 
 Bei gleichzeitiger Verwendung von `--dry-run` und `--json` muss die Ausgabe streng maschinenlesbar (`JSON`) erfolgen und keine unstrukturierten Text-UI-Zeilen enthalten.
 
-Für `--dry-run --json` ist die Ausgabe als maschinenlesbares JSON mit mindestens den Pflichtfeldern `status`, `command`, `dryRun`, `diff`, `plannedFiles`, `changes`, `diagnostics` und `exitCode` zu liefern; `command` ist einer der Werte `init`, `add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `egress` oder `template`. Jeder Eintrag in `plannedFiles` trägt `path` und `action` (`create`, `modify` oder `delete`), jeder Eintrag in `changes` trägt `path` und `count`, jeder Eintrag in `diagnostics` trägt `level` (`warn` oder `error`), `code` und `message` (optional `file`).
+Für `--dry-run --json` ist die Ausgabe als maschinenlesbares JSON mit mindestens den Pflichtfeldern `status`, `command`, `dryRun`, `diff`, `plannedFiles`, `changes`, `diagnostics` und `exitCode` zu liefern; `command` ist einer der Werte `init`, `add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `egress`, `devcontainer` oder `template`. Jeder Eintrag in `plannedFiles` trägt `path` und `action` (`create`, `modify` oder `delete`), jeder Eintrag in `changes` trägt `path` und `count`, jeder Eintrag in `diagnostics` trägt `level` (`warn` oder `error`), `code` und `message` (optional `file`).
 
 Bei gruppierten Befehlen wie `command == "template"` oder `command == "config"` muss das Feld `subcommand` gesetzt sein (z. B. `list`, `get`, `set`).
 
@@ -445,7 +445,7 @@ Das erzeugte Ergebnis im Sandbox-Profil muss:
 
 - einen nicht-root Benutzer verwenden ([`LH-FA-DEV-004`](#lh-fa-dev-004--benutzerrechte));
 - das Host-Arbeitsverzeichnis nicht per Bind-Mount einbinden: Der Workspace liegt in einem benannten Volume, das Repository wird im Container geklont (Quelle: `devcontainer.sandbox.repository`, sonst `origin`; URLs mit Zugangsdaten oder unzulässigen Zeichen sind ein fachlicher Fehler, Exit-Code `10`; ohne Quelle entfällt der Clone-Schritt mit Warnung);
-- keinen Container-Runtime-Socket des Hosts einbinden;
+- keinen Container-Runtime-Socket des Hosts einbinden (der kurzlebige Hilfs-Container von `u-boot devcontainer up` gehört nicht zum erzeugten Ergebnis, siehe [`LH-FA-DEV-010`](#lh-fa-dev-010--devcontainer-ohne-editor-starten));
 - kein `--privileged` und keine zusätzlichen Capabilities setzen, sofern nicht durch [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) oder [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion) ausdrücklich verlangt;
 - keine Host-Dateien mit Geheimnissen (z. B. `~/.ssh`, `~/.aws`, Credential-Stores) einbinden;
 - jede Sicherheitslockerung (Capabilities, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices) in der Befehlsausgabe ausweisen;
@@ -484,6 +484,18 @@ Für Devcontainer-Features oder externe Skripte, die das Profil einbindet, gelte
 - Übergabe zur Laufzeit per Umgebungsvariable; Git-Zugangsdaten alternativ als schreibgeschützter Secret-Mount. Die erzeugte Konfiguration trägt nur die Referenz auf die Umgebungsvariable des Hosts, nie den Wert.
 - Die Dokumentation beschreibt kurzlebige, auf das Repository begrenzte Tokens (privater Schlüssel nie im Container) und die Forderung nach Branch-Protection auf dem Remote; für den Agenten nennt sie die Umgebungsvariable, aus der der Zugangsschlüssel stammt.
 - `u-boot doctor` prüft die Quelle der Zugangsdaten (Git-Token-Quelle, bei aktivem Agenten-Feature die Umgebungsvariable des Agenten): fehlt sie oder liegt sie im Klartext in einer Projektdatei, `warn` (kein Abbruch).
+
+### LH-FA-DEV-010 – Devcontainer ohne Editor starten
+
+*Priorität: V2.* Das Produkt soll den erzeugten Devcontainer eines Projekts starten und stoppen können, ohne dass auf dem Host ein Devcontainer-fähiger Editor, Node.js oder die Dev-Container-CLI installiert ist; auf dem Host genügen Docker (Client und lokale Engine).
+
+- `u-boot devcontainer up` startet den Devcontainer des Projekts im Basisverzeichnis mit der Dev-Container-CLI, die `u-boot` in einem kurzlebigen Hilfs-Container ausführt. Das Hilfs-Image baut `u-boot` lokal aus gepinnten Quellen; der erste Aufruf braucht Netzzugriff. `--recreate` entfernt einen vorhandenen Container und legt ihn neu an; benannte Volumes bleiben erhalten. Nach dem Start weist der Befehl die Degradations-Fallbacks des Containers aus ([`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer)).
+- `u-boot devcontainer down` stoppt den Container; er entfernt weder den Container noch seine Volumes.
+- Der Hilfs-Container bindet für die Dauer des Aufrufs den Container-Runtime-Socket des Hosts ein. Der Befehl weist diese Sicherheitslockerung in der Befehlsausgabe aus; der gestartete Devcontainer erhält den Socket durch diesen Befehl nicht. Das erzeugte Ergebnis nach [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil) bleibt davon unberührt.
+- Zugangsdaten gibt der Befehl nur als Umgebungsvariablen weiter, auf die die erzeugte Konfiguration mit `${localEnv:<NAME>}` verweist ([`LH-FA-DEV-009`](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)); sie stehen nie in einer Datei oder einem Image.
+- Fehlerklassen ([`LH-FA-CLI-006`](#lh-fa-cli-006--exit-codes)): Exit-Code `10`, wenn das Basisverzeichnis keine Devcontainer-Konfiguration enthält; `11`, wenn Docker nicht erreichbar oder die Engine nicht lokal ist oder wenn ein Startscript des Containers wegen eines Umgebungsproblems abbricht (wie bei `doctor`); `12` bei Fehlern beim Bau oder Start, die kein Umgebungsproblem sind.
+- Der Befehl startet unter Docker auf einem Linux-Host mit lokaler Engine (`amd64`); alle übrigen Hosts und Engines, darunter Colima, Docker Desktop, rootless Docker, Podman als Host-Engine, eine entfernte Engine, Linux-`arm64` und Windows, sind nicht zugesagt. Die Fallback-Ausweisung nach dem Start setzt eine `u-boot.yaml` im Basisverzeichnis voraus. Der Exit-Code `11` für den Startscript-Abbruch setzt die Statusdatei des Containers voraus, die der Befehl über die `u-boot.yaml` im Basisverzeichnis findet: ohne diese Datei endet der Befehl bei einem Startscript-Abbruch mit `12`. Im ausgelieferten Container-Image ([`LH-NFA-PORT-004`](#lh-nfa-port-004--ausgeliefertes-container-image)) läuft er nicht.
+- Nicht-Ziele: `u-boot` startet keinen Agenten ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)), und der Befehl startet nicht den Compose-Stack ([`LH-FA-UP-001`](#lh-fa-up-001--umgebung-starten)).
 
 ---
 
@@ -1122,6 +1134,8 @@ Priorität: MVP/V1 gemischt (siehe Spalte)
 | `u-boot config`              | Konfiguration anzeigen oder ändern | MVP       |
 | `u-boot config migrate`      | Konfigurationsschema migrieren     | Later     |
 | `u-boot egress list`         | Egress-Liste mit Herkunft anzeigen | V2        |
+| `u-boot devcontainer up`     | Devcontainer ohne Editor starten   | V2        |
+| `u-boot devcontainer down`   | Devcontainer stoppen               | V2        |
 | `u-boot template list`       | Templates anzeigen                 | V1        |
 
 ---
@@ -1571,6 +1585,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.15.0 | 2026-10-18 | [`LH-FA-DEV-003`](#lh-fa-dev-003--devcontainer-features): Katalog-Feature `ollama` (Ollama im Container, nur CPU, Modelle im benannten Volume) für die gemessenen Hosts und Versionen; nicht zugesagt: GPU, Anschluss an einen Ollama des Hosts, Modellverwaltung. | Vereinbarung mit dem Projektinhaber |
 | 0.16.0 | 2026-10-19 | [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run): Der Wert `egress` gehört zum Wertebereich des Feldes `command` (nach [`LH-NFA-USE-004`](#lh-nfa-use-004--maschinenlesbare-ausgabe) für alle `--json`-Ausgaben). | Vereinbarung mit dem Projektinhaber |
 | 0.17.0 | 2026-10-19 | §16 Historie: Die Zeilen 0.14.0 ([`LH-SA-CLI-002`](#lh-sa-cli-002--vorgesehene-befehle)) und 0.16.0 ([`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run)) nennen die Änderung der Anforderung. Der Wortlaut der Anforderungen bleibt unverändert. | Vereinbarung mit dem Projektinhaber |
+| 0.18.0 | 2026-10-20 | [`LH-FA-DEV-010`](#lh-fa-dev-010--devcontainer-ohne-editor-starten): neue Anforderung (Devcontainer ohne Editor starten und stoppen, Hilfs-Container mit Socket-Ausweisung, Zusage-Menge Linux-Host `amd64`); [`LH-SA-CLI-002`](#lh-sa-cli-002--vorgesehene-befehle): zwei Zeilen; [`LH-FA-CLI-005`](#lh-fa-cli-005--verbosity-und-logging): `--quiet` für die neuen Befehle und die Socket-Ausweisung als Teil von Ausnahme 1; [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run): Wert `devcontainer`; [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil): Abgrenzung des Hilfs-Containers. | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt
