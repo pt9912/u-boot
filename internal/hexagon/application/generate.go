@@ -880,7 +880,7 @@ func (s *GenerateService) existingContainerFallbackWarnings(
 	if len(probes) == 0 {
 		return nil
 	}
-	return fallbackWarnings(ctx, &fallbackReader{inspector: s.inspector, baseDir: req.BaseDir}, probes)
+	return fallbackWarnings(ctx, &fallbackReader{inspector: s.inspector, baseDir: req.BaseDir}, probes, generateFallbackWording())
 }
 
 // persistSandboxProfile writes `devcontainer.profile: sandbox` into

@@ -91,6 +91,11 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// `docker cp` (never `exec`). Used by doctor, generate and init to
 	// disclose the degradation fallbacks of the container start scripts.
 	inspectorAdapter := docker.NewInspector()
+	// The devcontainer launcher (LH-FA-DEV-010) builds the helper image and
+	// runs the Dev Container CLI in a helper container that holds the engine
+	// socket; `devcontainer down` stops the container through it. Used only
+	// by the devcontainer start service.
+	launcherAdapter := docker.NewLauncher()
 	// The netprobe adapter (M6-T3) provides TCP-reachability checks
 	// for the UpService polling loop. Stateless; depguard rule
 	// `application-no-net` enforces all net.* usage funnels through here.
@@ -162,8 +167,14 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// the filesystem port only: no Docker, no network, no write.
 	egressListSvc := application.NewEgressListService(fsAdapter, yamlAdapter, logAdapter)
 
+	// `devcontainer up|down` (LH-FA-DEV-010) reads the devcontainer
+	// configuration and u-boot.yaml through the filesystem port and starts and
+	// stops through the launcher; the inspector finds the container and its
+	// status files.
+	devcontainerSvc := application.NewDevcontainerStartService(fsAdapter, yamlAdapter, launcherAdapter, inspectorAdapter, logAdapter)
+
 	// Driving adapter (CLI).
-	app := cli.New(version, initSvc, doctorSvc, addSvc, upSvc, downSvc, generateSvc, configSvc, templateListSvc, removeSvc, logsSvc, cli.WithEgressListUseCase(egressListSvc), cli.WithLogLevel(logLevel))
+	app := cli.New(version, initSvc, doctorSvc, addSvc, upSvc, downSvc, generateSvc, configSvc, templateListSvc, removeSvc, logsSvc, cli.WithEgressListUseCase(egressListSvc), cli.WithDevcontainerUseCase(devcontainerSvc), cli.WithLogLevel(logLevel))
 
 	err := app.Execute(ctx, args, stdout, stderr)
 	if err != nil {

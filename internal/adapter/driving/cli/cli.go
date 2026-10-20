@@ -79,6 +79,11 @@ type App struct {
 	// the command fail with a wiring error.
 	egressListUseCase driving.EgressListUseCase
 
+	// devcontainerUseCase implements `u-boot devcontainer up|down`
+	// (LH-FA-DEV-010). Set through [WithDevcontainerUseCase]; nil makes
+	// the commands fail with a wiring error.
+	devcontainerUseCase driving.DevcontainerUseCase
+
 	// getwd is the working-directory probe; defaults to os.Getwd.
 	// Tests inject a fake via [WithGetwd] so they do not depend on
 	// the host pwd.
@@ -128,6 +133,13 @@ func WithGetwd(fn func() (string, error)) Option {
 // error.
 func WithEgressListUseCase(uc driving.EgressListUseCase) Option {
 	return func(a *App) { a.egressListUseCase = uc }
+}
+
+// WithDevcontainerUseCase wires the use case behind `u-boot devcontainer up`
+// and `u-boot devcontainer down` (LH-FA-DEV-010). Without it both commands
+// end with a "not wired" error.
+func WithDevcontainerUseCase(uc driving.DevcontainerUseCase) Option {
+	return func(a *App) { a.devcontainerUseCase = uc }
 }
 
 // WithLogLevel hands the App a [*slog.LevelVar] that
@@ -250,10 +262,16 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 //     least one SeverityError, or at least one SeverityWarn
 //     with `--strict` (ErrDoctorFailures, LH-FA-DIAG-003);
 //     M6 `u-boot up`/`down` saw a Docker-environment failure
-//     before the actual Compose call (driven.ErrDockerUnavailable)
+//     before the actual Compose call (driven.ErrDockerUnavailable);
+//     `u-boot devcontainer` found a remote engine
+//     (driven.ErrContainerEngineNotLocal) or a container start
+//     script that reported `result=failed`
+//     (driving.ErrDevcontainerStartScriptFailed, LH-FA-DEV-010)
 //   - 12 — fachlicher Ausführungsfehler (M6): Compose-runtime error
 //     after passing preflight (driven.ErrComposeRuntime) or
-//     stabilization timeout (driving.ErrStabilizationTimeout)
+//     stabilization timeout (driving.ErrStabilizationTimeout);
+//     `u-boot devcontainer` build or start failure
+//     (driven.ErrDevcontainerRuntime)
 //   - 14 — technischer Persistenz-/Dateisystemfehler: LH-NFA-REL-003
 //     backup-suffix exhausted (ErrBackupSuffixExhausted),
 //     backup source vanished mid-flight
@@ -284,11 +302,13 @@ func ExitCode(err error) int {
 	if err == nil {
 		return 0
 	}
-	// Driven-port sentinels first (M6 slice §Sentinel-Schichtung).
-	if errors.Is(err, driven.ErrDockerUnavailable) {
+	// Driven-port sentinels first (M6 slice §Sentinel-Schichtung); the
+	// start script abort of `devcontainer up` is checked with the
+	// environment class before the runtime class it replaces.
+	if isEnvironmentError(err) {
 		return 11
 	}
-	if errors.Is(err, driven.ErrComposeRuntime) {
+	if isRuntimeError(err) {
 		return 12
 	}
 	if errors.Is(err, driving.ErrStabilizationTimeout) {
@@ -308,6 +328,22 @@ func ExitCode(err error) int {
 		return 2
 	}
 	return 1
+}
+
+// isEnvironmentError returns true for the engine-side sentinels of exit code
+// 11: Docker binary or daemon unavailable, a remote engine, and the abort of
+// a container start script (`devcontainer up`, ADR-0029).
+func isEnvironmentError(err error) bool {
+	return errors.Is(err, driven.ErrDockerUnavailable) ||
+		errors.Is(err, driven.ErrContainerEngineNotLocal) ||
+		errors.Is(err, driving.ErrDevcontainerStartScriptFailed)
+}
+
+// isRuntimeError returns true for the engine-side sentinels of exit code 12:
+// the Compose runtime and the build or start of the devcontainer.
+func isRuntimeError(err error) bool {
+	return errors.Is(err, driven.ErrComposeRuntime) ||
+		errors.Is(err, driven.ErrDevcontainerRuntime)
 }
 
 // isValidationError returns true for the LH-FA-CLI-006 code-10
@@ -331,11 +367,18 @@ func isValidationError(err error) bool {
 		// vom selben Spec-Anker (LH-FA-CLI-005A).
 		errors.Is(err, driving.ErrConfirmerUnavailable) ||
 		errors.Is(err, driving.ErrGenerateManualConflict) ||
-		isServiceValidationError(err) ||
+		isLifecycleValidationError(err) ||
 		isConfigValidationError(err) ||
 		isTemplateInitValidationError(err) ||
 		errors.Is(err, domain.ErrInvalidProjectName) ||
 		errors.Is(err, domain.ErrInvalidServiceName)
+}
+
+// isLifecycleValidationError bundles the exit-10 sentinels of the commands
+// that act on the services of the project and on its devcontainer, so
+// [isValidationError] stays under the gocyclo threshold.
+func isLifecycleValidationError(err error) bool {
+	return isServiceValidationError(err) || isDevcontainerValidationError(err)
 }
 
 // isServiceValidationError bundles the add-on lifecycle sentinels
@@ -452,7 +495,17 @@ func isFilesystemError(err error) bool {
 		errors.Is(err, driving.ErrLogsFileSystem) ||
 		// LH-FA-DEV-008: ErrEgressFileSystem wraps the read of
 		// u-boot.yaml in `egress list` (exit 14, LH-NFA-REL-003).
-		errors.Is(err, driving.ErrEgressFileSystem)
+		errors.Is(err, driving.ErrEgressFileSystem) ||
+		// LH-FA-DEV-010: ErrDevcontainerFileSystem wraps the read of
+		// `.devcontainer/devcontainer.json` in `devcontainer up`.
+		errors.Is(err, driving.ErrDevcontainerFileSystem)
+}
+
+// isGroupUsageError reports the usage-class sentinels of the command groups
+// `egress` and `devcontainer` (exit 2), so [isUsageError] stays under the
+// gocyclo threshold.
+func isGroupUsageError(err error) bool {
+	return isEgressUsageError(err) || isDevcontainerUsageError(err)
 }
 
 // isUsageError detects two distinct classes of usage-level errors:
@@ -491,7 +544,7 @@ func isUsageError(err error) bool {
 		errors.Is(err, ErrFollowJSONNotSupported) ||
 		errors.Is(err, ErrDryRunNotApplicable) ||
 		errors.Is(err, ErrTemplateSubcommandRequired) ||
-		isEgressUsageError(err) ||
+		isGroupUsageError(err) ||
 		errors.Is(err, ErrServiceNameMissing) ||
 		errors.Is(err, driving.ErrArtifactUnknown) ||
 		errors.Is(err, driving.ErrTemplateConflictsWithFlag) {

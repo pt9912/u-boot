@@ -482,3 +482,8 @@ func SandboxRelaxationWarningsForTest(nestedRuntime, onUnavailable string, egres
 	}
 	return sandboxRelaxationWarnings(&ubootYAMLDevcontainer{Sandbox: sb}, sandbox)
 }
+
+// LocalEnvNamesForTest exposes the package-internal localEnvNames helper to
+// external _test packages so the `${localEnv:<NAME>}` extraction can be
+// table-tested without a filesystem.
+func LocalEnvNamesForTest(text string) []string { return localEnvNames(text) }

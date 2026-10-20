@@ -136,6 +136,7 @@ func buildRootCommand(a *App) *cobra.Command {
 	root.AddCommand(newConfigCommand(a))
 	root.AddCommand(newTemplateCommand(a))
 	root.AddCommand(newEgressCommand(a))
+	root.AddCommand(newDevcontainerCommand(a))
 	return root
 }
 

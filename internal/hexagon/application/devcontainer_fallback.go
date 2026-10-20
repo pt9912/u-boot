@@ -247,12 +247,38 @@ func fallbackDiagnostic(p fallbackProbe, rd statusReading) domain.Diagnostic {
 		Message: fmt.Sprintf("The container start script reported %s as available%s; the container reports this about itself.", p.what, suffix)}
 }
 
+// fallbackWording is the part of a fallback warning that depends on the
+// command: how the state of the container is introduced and what the
+// regenerated files need.
+type fallbackWording struct {
+	// subject introduces the reported time: "state of <subject> at its last
+	// start (<time>): ".
+	subject string
+	// tail ends the warning text; empty for none.
+	tail string
+}
+
+// generateFallbackWording is the text of `generate` and `init`: the
+// container exists before the command runs and keeps its image.
+func generateFallbackWording() fallbackWording {
+	return fallbackWording{
+		subject: "the existing devcontainer container",
+		tail:    "; the regenerated files take effect after the container is rebuilt",
+	}
+}
+
+// startFallbackWording is the text of `devcontainer up`: the command started
+// (or found running) the container and regenerates no file.
+func startFallbackWording() fallbackWording {
+	return fallbackWording{subject: "the devcontainer container"}
+}
+
 // fallbackWarnings returns one warning per probe whose existing container
 // reports `result=fallback` (LH-FA-DEV-007, LH-FA-CLI-005 exception 2):
 // the warning carries the fallback flag and states that it is the state of
-// the existing container's last start. Every other outcome (ok, failed,
-// not determinable, invalid) is silent.
-func fallbackWarnings(ctx context.Context, r *fallbackReader, probes []fallbackProbe) []driving.WarningEntry {
+// the container's last start, in the wording of the command. Every other
+// outcome (ok, failed, not determinable, invalid) is silent.
+func fallbackWarnings(ctx context.Context, r *fallbackReader, probes []fallbackProbe, w fallbackWording) []driving.WarningEntry {
 	var out []driving.WarningEntry
 	for _, p := range probes {
 		rd := r.read(ctx, p)
@@ -262,9 +288,8 @@ func fallbackWarnings(ctx context.Context, r *fallbackReader, probes []fallbackP
 		out = append(out, driving.WarningEntry{
 			Code:  p.code,
 			Level: "warn",
-			Message: "state of the existing devcontainer container at its last start (" +
-				rd.status.At().Format(time.RFC3339) + "): " + p.fallback +
-				"; the regenerated files take effect after the container is rebuilt",
+			Message: "state of " + w.subject + " at its last start (" +
+				rd.status.At().Format(time.RFC3339) + "): " + p.fallback + w.tail,
 			Subject:             ".devcontainer/devcontainer.json",
 			DegradationFallback: true,
 		})

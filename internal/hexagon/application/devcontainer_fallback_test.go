@@ -540,6 +540,10 @@ func TestGenerateDevcontainer_ExistingContainerFallbackWarning(t *testing.T) {
 			if !strings.Contains(w.Message, "last start") || !strings.Contains(w.Message, fallbackAt) {
 				t.Errorf("message %q must say it is the state of the last start of the existing container", w.Message)
 			}
+			if !strings.Contains(w.Message, "state of the existing devcontainer container at its last start") ||
+				!strings.HasSuffix(w.Message, "; the regenerated files take effect after the container is rebuilt") {
+				t.Errorf("message %q lacks the wording of `generate` (existing container, rebuild instruction)", w.Message)
+			}
 			if len(insp.findFolders) != 1 || insp.findFolders[0] != generateTestBaseDir {
 				t.Errorf("FindContainer calls = %v", insp.findFolders)
 			}
@@ -742,6 +746,10 @@ func TestInit_ExistingContainerFallbackWarning(t *testing.T) {
 	got := initFallbackWarnings(resp)
 	if len(got) != 1 || got[0].Code != "LH-FA-DEV-007" || got[0].SecurityRelaxation || !strings.Contains(got[0].Message, "last start") {
 		t.Errorf("warnings = %+v, want one flagged vfs warning naming the last start", resp.Warnings)
+	}
+	if len(got) == 1 && (!strings.Contains(got[0].Message, "state of the existing devcontainer container at its last start") ||
+		!strings.HasSuffix(got[0].Message, "; the regenerated files take effect after the container is rebuilt")) {
+		t.Errorf("message %q lacks the wording of `init` and `generate` (existing container, rebuild instruction)", got[0].Message)
 	}
 	if len(insp.findFolders) != 1 || insp.findFolders[0] != testBaseDir {
 		t.Errorf("FindContainer calls = %v", insp.findFolders)

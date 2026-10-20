@@ -528,7 +528,7 @@ func (s *InitProjectService) existingContainerFallbackWarnings(ctx context.Conte
 	if len(probes) == 0 {
 		return nil
 	}
-	return fallbackWarnings(ctx, &fallbackReader{inspector: s.inspector, baseDir: req.BaseDir}, probes)
+	return fallbackWarnings(ctx, &fallbackReader{inspector: s.inspector, baseDir: req.BaseDir}, probes, generateFallbackWording())
 }
 
 // initTemplateData builds the shared template data of the default

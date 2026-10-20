@@ -310,3 +310,115 @@ func TestRun_Generate_OllamaNotices(t *testing.T) {
 		})
 	}
 }
+
+// devcontainerRunEnvelope is the part of the `--json` envelope the
+// devcontainer wiring tests read.
+type devcontainerRunEnvelope struct {
+	Status      string `json:"status"`
+	Command     string `json:"command"`
+	Subcommand  string `json:"subcommand"`
+	ExitCode    int    `json:"exitCode"`
+	Diagnostics []struct {
+		Level   string `json:"level"`
+		Code    string `json:"code"`
+		Message string `json:"message"`
+	} `json:"diagnostics"`
+}
+
+// projectWithDevcontainer writes a project folder with a devcontainer
+// configuration, makes it the working directory and removes every `docker`
+// binary from the PATH, so the wiring meets the same situation as the
+// released container image: no Docker client.
+func projectWithDevcontainer(t *testing.T) {
+	t.Helper()
+	dir := t.TempDir()
+	path := filepath.Join(dir, ".devcontainer", "devcontainer.json")
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(`{"name": "demo", "image": "debian"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	t.Chdir(dir)
+	t.Setenv("PATH", t.TempDir())
+	t.Setenv("DOCKER_HOST", "")
+}
+
+// LH-FA-DEV-010, LH-FA-CLI-006 at the user path: without a docker binary
+// `devcontainer up` ends with exit 11 and names the socket relaxation in the
+// envelope; nothing is written into the project.
+func TestRun_DevcontainerUp_NoDockerBinaryExits11(t *testing.T) {
+	projectWithDevcontainer(t)
+	before := snapshotTree(t, ".")
+
+	var out, errOut bytes.Buffer
+	code := run(context.Background(), []string{"devcontainer", "up", "--json"}, &out, &errOut)
+	if code != 11 {
+		t.Fatalf("exit %d, want 11; stdout=%q stderr=%q", code, out.String(), errOut.String())
+	}
+	var env devcontainerRunEnvelope
+	if err := json.Unmarshal(out.Bytes(), &env); err != nil {
+		t.Fatalf("invalid JSON: %v\n%s", err, out.String())
+	}
+	if env.Status != "error" || env.Command != "devcontainer" || env.Subcommand != "up" || env.ExitCode != 11 ||
+		len(env.Diagnostics) != 2 || env.Diagnostics[0].Level != "warn" || env.Diagnostics[1].Level != "error" ||
+		env.Diagnostics[0].Code != "LH-FA-DEV-010" || env.Diagnostics[1].Code != "LH-FA-DEV-010" ||
+		!strings.Contains(env.Diagnostics[1].Message, "docker binary not on PATH") {
+		t.Errorf("envelope = %+v", env)
+	}
+	if after := snapshotTree(t, "."); !reflect.DeepEqual(before, after) {
+		t.Errorf("the failed start changed the project:\n before %v\n after  %v", before, after)
+	}
+}
+
+// LH-FA-DEV-010: `devcontainer down` cannot ask the engine without a docker
+// binary; that is an environment failure (exit 11), not "nothing to stop".
+func TestRun_DevcontainerDown_NoDockerBinaryExits11(t *testing.T) {
+	projectWithDevcontainer(t)
+
+	var out, errOut bytes.Buffer
+	code := run(context.Background(), []string{"devcontainer", "down", "--json"}, &out, &errOut)
+	if code != 11 {
+		t.Fatalf("exit %d, want 11; stdout=%q stderr=%q", code, out.String(), errOut.String())
+	}
+	var env devcontainerRunEnvelope
+	if err := json.Unmarshal(out.Bytes(), &env); err != nil {
+		t.Fatalf("invalid JSON: %v\n%s", err, out.String())
+	}
+	if env.Status != "error" || env.Subcommand != "down" || env.ExitCode != 11 || len(env.Diagnostics) != 1 || env.Diagnostics[0].Code != "LH-FA-DEV-010" {
+		t.Errorf("envelope = %+v", env)
+	}
+}
+
+// LH-FA-DEV-010, LH-FA-CLI-006: a folder without `.devcontainer/devcontainer.json`
+// ends with exit 10 before any docker call (no docker binary is needed to see
+// it) and without the socket disclosure: no helper container was started.
+func TestRun_DevcontainerUp_NoConfigurationExits10(t *testing.T) {
+	projectWithDevcontainer(t)
+	if err := os.Remove(filepath.Join(".devcontainer", "devcontainer.json")); err != nil {
+		t.Fatal(err)
+	}
+
+	var out, errOut bytes.Buffer
+	code := run(context.Background(), []string{"devcontainer", "up"}, &out, &errOut)
+	if code != 10 || out.Len() != 0 || !strings.Contains(errOut.String(), ".devcontainer/devcontainer.json") {
+		t.Errorf("exit %d, stdout=%q stderr=%q, want exit 10, no stdout and the file named", code, out.String(), errOut.String())
+	}
+}
+
+// LH-FA-DEV-010: the group is wired into the real command tree.
+func TestRun_Devcontainer_WiredAndBareExits2(t *testing.T) {
+	var out, errOut bytes.Buffer
+	if code := run(context.Background(), []string{"devcontainer"}, &out, &errOut); code != 2 {
+		t.Errorf("bare devcontainer: exit %d, want 2", code)
+	}
+	out.Reset()
+	if code := run(context.Background(), []string{"devcontainer", "--help"}, &out, &errOut); code != 0 ||
+		!strings.Contains(out.String(), "up [--recreate]") || !strings.Contains(out.String(), "down ") {
+		t.Errorf("devcontainer --help: exit %d, stdout=%q", code, out.String())
+	}
+	out.Reset()
+	if code := run(context.Background(), []string{"--help"}, &out, &errOut); code != 0 || !strings.Contains(out.String(), "devcontainer") {
+		t.Errorf("--help lacks the devcontainer command: exit %d", code)
+	}
+}
