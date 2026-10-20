@@ -68,6 +68,7 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 | `internal/hexagon/port/driven/README.md` | **unverändert** | gelesen: nennt Schicht, Zweck und Verweise (Architektur, [`SPEC-042`](../../../../spec/spezifikation.md#spec-042--aufruf-der-compose-engine-und-preflight) für die Compose-Engine, [`SPEC-013`](../../../../spec/spezifikation.md#spec-013--import-regel-tabelle-der-schichten)); keine Port-Liste, die den Launcher nachführen müsste |
 | `cmd/uboot/main.go`, `internal/adapter/driving/cli/` | **unverändert** | kein Wiring, kein Befehl in diesem Slice (`main.go` gelesen: der Adapter wird erst im Befehl-Slice konstruiert) |
 | `Dockerfile` (Stufe `test-docker-tools`), `repo.mk` (`test-docker`), `.github/workflows/integration.yml` | **unverändert**, Risiko Laufzeit (§6) | gelesen: `test-docker-tools` bringt `docker-ce-cli` und das Compose-Plugin, kein buildx-Plugin; `test-docker` hängt Socket und `/tmp` unter demselben Pfad ein und läuft mit `-timeout 30m`; `integration.yml` hat `timeout-minutes: 30`. Läuft der Bau des Kontexts mit diesem Client nicht, ist das ein Befund an den Architect, keine stille Änderung der Fristen oder des Test-Images |
+| `docs/plan/planning/observations/BEO-APP/podman-static-pin-alterung/` (`state.md`, `evidence/<vorgangs-id>.md`) | update | dritter Beleg der Pin-Alterung bei der Closure (DoD, Beobachtungs-Register); gelesen: das Verzeichnis trägt `observation.md`, `state.md` und zwei Evidence-Dateien (`slice-v1-devcontainer-ollama-messung.md`, `slice-v1-podman-aktuelle-version.md`); die neue Datei folgt der Beobachtungsform der Ablage-Regel |
 | `docs/user/benutzerhandbuch.md`, `CHANGELOG.md`, `spec/` | **unverändert** | kein nutzersichtbarer Vertrag; Handbuch und `CHANGELOG.md` im Befehl-Slice, `spec/` im Spezifikations-Slice |
 
 **Docker-Tests mit Wächter** (jede Zusage hat eine Probe, die rot wird, wenn sie falsch wäre; Projekt in `t.TempDir()` unter dem geteilten `/tmp`, ein handgeschriebenes `devcontainer.json` ohne Features auf `mcr.microsoft.com/devcontainers/base:debian`):
@@ -92,7 +93,7 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 
 ## 5. Closure-Trigger
 
-DoD vollständig, Review-Report und Verification-Evidence liegen vor, jede Zeile der Zusage-Tabelle ([`ADR-0028`](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) Entscheidung 9) für den Adapter hat einen grünen, nicht übersprungenen Test samt Wächter oder steht als „nicht zugesagt“ in §7, Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben.
+DoD vollständig, Review-Report und Verification-Evidence liegen vor, jede Zeile der Zusage-Tabelle ([`ADR-0028`](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) Entscheidung 9) für den Adapter hat einen grünen Test samt Wächter, dessen Lauf die Closure-Notiz nennt (ein Skip ist im CI-Lauf von `make test-docker` erst mit `-v` sichtbar, das der Befehl-Slice einführt; bis dahin zeigt der Nachweis ein lokaler `make test-docker`-Lauf mit Ausgabe, der Test steht ohne `t.Skip`-Pfad im Code), oder steht als „nicht zugesagt“ in §7, Closure-Notiz mit Steering-Loop-Lerneintrag geschrieben.
 
 ## 6. Risiken und offene Punkte
 
