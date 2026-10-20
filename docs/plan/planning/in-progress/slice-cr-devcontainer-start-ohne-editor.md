@@ -56,9 +56,12 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; sie wird n
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
 | `spec/lastenheft.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | Stellen 1 bis 6 des Wortlauts. Gelesen am 2026-10-20: [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) ist die letzte Anforderung von §4.3 (die neue steht danach, Nummer 010); Befehlstabelle in [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle) endet mit `egress list` (V2) und `template list` (V1); Versionsfeld `0.17.0`, letzte Historie-Zeile `0.17.0` |
-| `docs/plan/planning/in-progress/roadmap.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | Zeile „In Arbeit“ bei der Closure |
+| `docs/plan/planning/in-progress/roadmap.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | Zeile „In Arbeit“ bei Start und bei der Closure |
 | `docs/plan/planning/open/README.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | Bestand (Zeile dieses Slice) |
-| `docs/reviews/` <!-- d-check:ignore (Pfad-Zitat) --> | neu (Reviewer, Verifier) | Review und Verifikation |
+| `docs/reviews/` <!-- d-check:ignore (Pfad-Zitat) --> | neu (Reviewer, Verifier) | Review und Verifikation dieses Slice; die Reports des Eltern-Slice bleiben, `make slice-mv` zieht nur Verweise nach |
+| `docs/plan/planning/in-progress/slice-cr-devcontainer-start-ohne-editor.md` (diese Datei) | update | `Verantwortlich:`, Plan-Tabelle, Closure; Move per `make slice-mv` |
+| `docs/plan/planning/done/slice-v1-devcontainer-start-ohne-cli.md`, `welle-devcontainer-start-ohne-editor.md`, `open/slice-v1-devcontainer-start-fundament.md`, `open/slice-v1-cli-devcontainer-up-down.md`, `open/slice-v2-spec-devcontainer-start.md` <!-- d-check:ignore (Pfad-Zitate) --> | update (nur Verweise) | `make slice-mv` zieht den Pfad dieses Slice nach (`open/` → `in-progress/`); die Welle-Zeile zur Versionsnummer nennt, dass `0.18.0` vergeben ist |
+| `docs/plan/planning/open/slice-cr-lastenheft-messstaende.md` <!-- d-check:ignore (Pfad-Zitat) --> | update | Versionsangaben „nächste freie Version nach `0.18.0`“ (Titel, Historie-Frage, Stand `0.18.0`), weil dieser Slice `0.18.0` belegt |
 | `spec/spezifikation.md`, `spec/architecture.md`, `docs/user/benutzerhandbuch.md`, `CHANGELOG.md`, `internal/`, `cmd/` <!-- d-check:ignore (Pfad-Zitate) --> | **unverändert** | kein Code, kein Verhalten; [`SPEC-001`](../../../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) (Zeile `enum` von `command`) und [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) zieht der Spezifikations-Slice nach dem Code nach (Befund im [ADR](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) Entscheidung 10) |
 
 ## 4. Trigger
