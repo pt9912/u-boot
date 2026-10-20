@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-10-19.
+**Status:** Aktiv. **Letzte Änderung:** 2026-10-20.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-In Arbeit: [`slice-v2-spec-upstream-dns-egress-init`](../done/slice-v2-spec-upstream-dns-egress-init.md) (Spezifikation nach dem Code: Abbruch des Egress-Startscripts auch unter `warn`, Kette `egress && docker`, Regel zum Upstream-DNS; wellenlos).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
