@@ -1,6 +1,6 @@
 # ADR 0029: Devcontainer-Start — Abbruch des Startscripts ergibt Exit 11, Socket-Haltung geschärft (Verhältnis zu `LH-NFA-SEC-004`, Inhalt von `devcontainer.json` als Rest-Risiko, bedingt-genauer Warntext)
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Datum:** 2026-10-20
 
@@ -87,6 +87,7 @@ S8 widerlegt den 11-Pfad (die CLI lässt den Container nicht lesbar zurück, die
 
 | Datum | Ereignis | Verweis |
 |---|---|---|
-| 2026-10-20 | Entscheidungen des Projektinhabers zu F-2 (Exit 11) und F-5 (Socket-Haltung a bis c) im Gespräch; Entwurf, `Proposed`, `Accepted` setzt der Projektinhaber | [Review-Report](../../reviews/2026-10-20-slice-v1-devcontainer-start-ohne-cli.md) |
+| 2026-10-20 | Entscheidungen des Projektinhabers zu F-2 (Exit 11) und F-5 (Socket-Haltung a bis c) im Gespräch; Entwurf, `Proposed` | [Review-Report](../../reviews/2026-10-20-slice-v1-devcontainer-start-ohne-cli.md) |
+| 2026-10-20 | `Accepted` durch den Projektinhaber | — |
 
 Nach `Accepted` wird diese Datei **nicht mehr inhaltlich überschrieben**. Spätere Korrekturen oder Schärfungen entstehen als neue ADR mit `Supersedes ADR-0029`.
