@@ -1141,9 +1141,8 @@ brauchen `u-boot generate devcontainer` und einen Neubau; bis zum ersten Start
 danach bleibt der Zustand nicht ermittelbar.
 
 Die Datei beschreibt den letzten Start: `daemon` und `egress` schreibt jeder
-Start neu, den das Script erreicht (endet das Egress-Script mit Exit-Code 11,
-läuft das Daemon-Script nicht, und seine Datei stammt vom vorigen Start; bei
-blockierten User-Namespaces entsteht keine `vfs`-Datei), `vfs` einmal je
+Start neu, den das Script erreicht (bei blockierten User-Namespaces entsteht
+keine `vfs`-Datei), `vfs` einmal je
 Container. Ein gestoppter Container wird gelesen; der
 Eintrag nennt den Zeitpunkt und „container stopped“.
 
