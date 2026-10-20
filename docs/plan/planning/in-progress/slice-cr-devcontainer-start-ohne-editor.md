@@ -16,7 +16,7 @@ Anlass: Entscheidungen des Projektinhabers vom 2026-10-20 im Eltern-Slice; der W
 
 **Berührte Spec-Stellen:** `lastenheft.md` §4.3 (neue Anforderung nach [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle), §16 (Historie), Versionsfeld. `SPEC-*` und `ARC-*` berührt der CR nicht (siehe den Spezifikations-Slice). Der Verweis zeigt aufwärts: Das Lastenheft nennt diesen Slice nie.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912.
 
 **Autor:** pt9912 (Rolle Architect). **Datum:** 2026-10-20.
 
