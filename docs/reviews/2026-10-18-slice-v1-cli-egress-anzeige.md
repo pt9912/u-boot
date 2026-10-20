@@ -2,7 +2,7 @@
 
 **Review-Art:** Code-Review (Diff gegen Slice-Plan, Lastenheft 0.14.0, Architektur-Sicht, ADR-0012/ADR-0013, Hard Rules; Wartbarkeit, keine DoD-Closure). <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 
-**Gegenstand:** Inhalts-Commit `94581b9` (HEAD, 21 Dateien); die Move-Commits `7a93b3a` (reiner Move) und `9953000` (Verweis-Nachzug) nur als Verschiebung bzw. Nachzug gelesen. Die Range `9953000..HEAD` zeigt 23 Dateien: zwei davon (`docs/plan/planning/open/README.md`, `docs/plan/planning/open/slice-v1-devcontainer-start-ohne-cli.md`) stammen aus `6743254` und gehören nicht zu diesem Slice. Arbeitsbaum zu Beginn sauber. <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
+**Gegenstand:** Inhalts-Commit `94581b9` (HEAD, 21 Dateien); die Move-Commits `7a93b3a` (reiner Move) und `9953000` (Verweis-Nachzug) nur als Verschiebung bzw. Nachzug gelesen. Die Range `9953000..HEAD` zeigt 23 Dateien: zwei davon (`docs/plan/planning/open/README.md`, `docs/plan/planning/in-progress/slice-v1-devcontainer-start-ohne-cli.md`) stammen aus `6743254` und gehören nicht zu diesem Slice. Arbeitsbaum zu Beginn sauber. <!-- d-check:ignore (Kennung als Zitat im Lauf-Beleg) -->
 
 **Skill:** `.harness/skills/reviewer.md` @ HEAD `94581b9` · **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-18
 
