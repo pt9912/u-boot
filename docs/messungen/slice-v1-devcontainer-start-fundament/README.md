@@ -13,9 +13,13 @@ Adapter selbst läuft in den Docker-Tests des Slice). Keine Zahl dieses Protokol
 
 ## Reihenfolge und Aufruf
 
-Jedes Skript wird im Verzeichnis `tools/messung/devcontainer-start-fundament/` aufgerufen; seine Ausgabe wird in die Rohdatei in der Spalte
-rechts in diesem Verzeichnis umgeleitet (`P` ist der Pfad dieses Verzeichnisses, von `tools/messung/devcontainer-start-fundament/` aus gesehen `../../../docs/messungen/` plus Verzeichnisname). Voraussetzung: nur Docker, `tar` und
-`date` auf dem Host; Netzzugriff auf die Registries, auf `mirror.gcr.io` (Trivy-Datenbank) und für den Pull des Trivy-Images.
+Jedes Skript wird im Verzeichnis `tools/messung/devcontainer-start-fundament/` aufgerufen; seine Ausgabe wird in die Rohdatei der Tabelle
+geschrieben. `P` steht für den Pfad dieses Verzeichnisses, von dort aus gesehen `../../../docs/messungen/` plus Verzeichnisname.
+
+**Voraussetzung:** ein Linux-Host mit Docker, Bash und den GNU-Werkzeugen, die die Skripte aufrufen (`tar` mit `--mtime`, `--owner` und `--group`,
+`date +%N`, `stat -c`, `awk`, `sed`, `grep`, `cut`, `mktemp`, `head`, `tr`); Netzzugriff auf die Registries, auf `mirror.gcr.io` (Trivy-Datenbank) und für
+den Pull des Trivy-Images. Gelaufen ist es nur auf Linux (`x86_64`). Auf macOS laufen `date +%N`, `stat -c` und die `tar`-Optionen nicht; ein Lauf dort
+ist nicht belegt und braucht GNU-Werkzeuge oder eine Anpassung der Skripte.
 
 | Schritt | Aufruf | Rohdaten | Messfrage |
 |---|---|---|---|

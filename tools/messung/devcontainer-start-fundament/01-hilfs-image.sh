@@ -2,7 +2,9 @@
 # Messung 1: Hilfs-Image aus dem eingebetteten Kontext — Plattformen der Basis-Images, Bauzeit kalt und warm, Groesse,
 # Trivy HIGH/CRITICAL.
 # Aufruf: 01-hilfs-image.sh <repo-wurzel> > rohdaten-01-hilfs-image.txt 2>&1
-# Voraussetzung: nur Docker und tar/date auf dem Host. Der Kontext ist der Tar-Strom, den der Adapter an `docker build -`
+# Voraussetzung: Linux-Host mit Docker, Bash und GNU-Werkzeugen (tar mit --mtime/--owner/--group, date +%N, stat -c, awk, sed, grep, cut, mktemp, tr).
+# Auf macOS laufen date +%N, stat -c und die tar-Optionen nicht; dort ist das Skript nicht belegt.
+# Der Kontext ist der Tar-Strom, den der Adapter an `docker build -`
 # uebergibt (dieselben drei Dateien, Reihenfolge Dockerfile, package.json, package-lock.json). "Kalt" heisst: ohne
 # Layer-Cache (`--no-cache`), die beiden Basis-Images sind lokal vorhanden; ein Pull der Basis-Images ist nicht Teil.
 # Das Image traegt einen Mess-Tag und wird am Ende entfernt.

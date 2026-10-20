@@ -2,7 +2,8 @@
 # Messung 2: Dauer von `devcontainer up` im Hilfs-Container mit der Argumentliste des Adapters — erster Start mit kaltem
 # Basis-Image des Projekts, Wiederholung gegen den laufenden Container, Neustart nach `docker stop`, `--remove-existing-container`.
 # Aufruf: 02-erster-up.sh <repo-wurzel> <arbeitsverzeichnis> > rohdaten-02-erster-up.txt 2>&1
-# Voraussetzung: nur Docker und tar/date auf dem Host; das Hilfs-Image wird aus dem eingebetteten Kontext gebaut (Tag
+# Voraussetzung: Linux-Host mit Docker, Bash und GNU-Werkzeugen (tar mit --mtime/--owner/--group, date +%N, awk, mktemp, head, cut);
+# auf macOS nicht belegt (siehe 01-hilfs-image.sh). Das Hilfs-Image wird aus dem eingebetteten Kontext gebaut (Tag
 # u-boot-messung-hilfs-image:messung). Das Projekt ist handgeschrieben: ein Image ohne Features und ohne Startscripte.
 # Das Basis-Image `base:ubuntu` darf lokal nicht vorhanden sein (sonst bricht das Skript ab): "kalt" heisst, der erste `up`
 # zieht es. Nach dem Lauf werden Container, Image und Volume dieser Messung entfernt, die Basis-Images des Hilfs-Images bleiben.
