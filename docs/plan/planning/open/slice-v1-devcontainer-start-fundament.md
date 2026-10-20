@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md). Zweiter von vier Folge-Slices von [`slice-v1-devcontainer-start-ohne-cli`](../done/slice-v1-devcontainer-start-ohne-cli.md); nach [`slice-cr-devcontainer-start-ohne-editor`](../open/slice-cr-devcontainer-start-ohne-editor.md) und vor [`slice-v1-cli-devcontainer-up-down`](../open/slice-v1-cli-devcontainer-up-down.md). Priorität V2; Release: das nächste Minor nach `v0.12.0` (die Nummer vergibt der Release-Cut). Der Slice liefert noch keinen Befehl und keine nutzersichtbare Änderung.
+**Welle:** [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md). Zweiter von vier Folge-Slices von [`slice-v1-devcontainer-start-ohne-cli`](../done/slice-v1-devcontainer-start-ohne-cli.md); nach [`slice-cr-devcontainer-start-ohne-editor`](../in-progress/slice-cr-devcontainer-start-ohne-editor.md) und vor [`slice-v1-cli-devcontainer-up-down`](../open/slice-v1-cli-devcontainer-up-down.md). Priorität V2; Release: das nächste Minor nach `v0.12.0` (die Nummer vergibt der Release-Cut). Der Slice liefert noch keinen Befehl und keine nutzersichtbare Änderung.
 
 **Bezug:** [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (gepinnter externer Code; die Ausnahme der Anforderung für Pakete einer Image-Build-Pipeline trägt, [`ADR-0029`](../../adr/0029-devcontainer-start-exit-11-und-socket-haltung.md) Entscheidung 2), [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) (Zugangsdaten nur als Umgebung), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Socket nicht im erzeugten Ergebnis), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Sentinels für 11 und 12), [`LH-NFA-PORT-002`](../../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten); [`ADR-0028`](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) (muss `Accepted` sein; Entscheidungen 1, 2, 4, 5, 7), Muster [`ADR-0023`](../../adr/0023-podman-aus-podman-static-im-sandbox-devcontainer.md) und [`ADR-0024`](../../adr/0024-ollama-im-sandbox-devcontainer.md).
 
@@ -84,7 +84,7 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 
 ## 4. Trigger
 
-**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`ADR-0028`](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) ist `Accepted`; [`slice-cr-devcontainer-start-ohne-editor`](../open/slice-cr-devcontainer-start-ohne-editor.md) ist geschlossen; kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`ADR-0028`](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) ist `Accepted`; [`slice-cr-devcontainer-start-ohne-editor`](../in-progress/slice-cr-devcontainer-start-ohne-editor.md) ist geschlossen; kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benannt:**
 

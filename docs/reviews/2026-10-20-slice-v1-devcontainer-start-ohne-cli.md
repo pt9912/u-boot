@@ -6,7 +6,7 @@
 
 **Skill:** `.harness/skills/reviewer.md` @ HEAD `e793d2e` · **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-20
 
-**Eingangs-Kontext:** [`slice-v1-devcontainer-start-ohne-cli`](../plan/planning/done/slice-v1-devcontainer-start-ohne-cli.md) (§1 bis §7), die vier Folge-Slices ([`slice-cr-devcontainer-start-ohne-editor`](../plan/planning/open/slice-cr-devcontainer-start-ohne-editor.md), [`slice-v1-devcontainer-start-fundament`](../plan/planning/open/slice-v1-devcontainer-start-fundament.md), [`slice-v1-cli-devcontainer-up-down`](../plan/planning/open/slice-v1-cli-devcontainer-up-down.md), [`slice-v2-spec-devcontainer-start`](../plan/planning/open/slice-v2-spec-devcontainer-start.md)), [`welle-devcontainer-start-ohne-editor`](../plan/planning/welle-devcontainer-start-ohne-editor.md); `AGENTS.md` §3.4 bis §3.10, §5; `harness/review.md`; `harness/conventions.md` (MR-008, Ablage-Regel).
+**Eingangs-Kontext:** [`slice-v1-devcontainer-start-ohne-cli`](../plan/planning/done/slice-v1-devcontainer-start-ohne-cli.md) (§1 bis §7), die vier Folge-Slices ([`slice-cr-devcontainer-start-ohne-editor`](../plan/planning/in-progress/slice-cr-devcontainer-start-ohne-editor.md), [`slice-v1-devcontainer-start-fundament`](../plan/planning/open/slice-v1-devcontainer-start-fundament.md), [`slice-v1-cli-devcontainer-up-down`](../plan/planning/open/slice-v1-cli-devcontainer-up-down.md), [`slice-v2-spec-devcontainer-start`](../plan/planning/open/slice-v2-spec-devcontainer-start.md)), [`welle-devcontainer-start-ohne-editor`](../plan/planning/welle-devcontainer-start-ohne-editor.md); `AGENTS.md` §3.4 bis §3.10, §5; `harness/review.md`; `harness/conventions.md` (MR-008, Ablage-Regel).
 
 **Selbst gelesen:**
 
