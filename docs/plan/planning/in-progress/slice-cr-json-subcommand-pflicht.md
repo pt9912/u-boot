@@ -248,7 +248,7 @@ Die Tabelle nennt jede Datei, die der Diff voraussichtlich berührt, und die gel
 - **F-4 — Handbuch:** `show` bei `config` in der Zeile `subcommand` mitnehmen (Vorschlag: ja, ein Wort in der Zeile, die die jetzt bindende Pflicht für Nutzer beschreibt) oder streichen; das Handbuch stand nicht in der Aufzählung der Entscheidung. — *Entschieden:* mitnehmen, nur mit Werten, die der Code setzt.
 - **F-5 — Register:** Die Drift der Kopien in `cli-json-contract.md` §2 und §3 entstand im Vorgang [`slice-v2-spec-devcontainer-start`](../done/slice-v2-spec-devcontainer-start.md), der in [`BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht`](../observations/BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht/observation.md) schon einen Beleg trägt. Vorschlag: Nachtrag in dessen Evidence-Datei, kein neuer Zähler (Register-README: ein Vorgang zählt einmal); die Alternative, eine eigene Evidence-Datei, bräuchte einen anderen abgeschlossenen Vorgang als Kennung. — *Entschieden:* Nachtrag, kein neuer Zähler, keine neue Datei.
 
-Unabhängig von [`slice-cr-lastenheft-messstaende`](slice-cr-lastenheft-messstaende.md) und dem Folge-CR für Colima aus [`slice-v1-devcontainer-start-colima-messung`](slice-v1-devcontainer-start-colima-messung.md): wer zuerst ins Lastenheft schreibt, bekommt die kleinere Versionsnummer.
+Unabhängig von [`slice-cr-lastenheft-messstaende`](../open/slice-cr-lastenheft-messstaende.md) und dem Folge-CR für Colima aus [`slice-v1-devcontainer-start-colima-messung`](../open/slice-v1-devcontainer-start-colima-messung.md): wer zuerst ins Lastenheft schreibt, bekommt die kleinere Versionsnummer.
 
 **Rückführungen — vorab benannt:**
 
@@ -262,7 +262,7 @@ DoD vollständig, Review-Report und Verification-Evidence liegen vor, Freigabe d
 ## 6. Risiken und offene Punkte
 
 - **Der Wortlaut wird nicht freigegeben oder geändert.** — **Ausgang:** entfallen; der Projektinhaber hat ihn am 2026-10-21 unverändert freigegeben (§7).
-- **Die Versionsnummer kollidiert** mit [`slice-cr-lastenheft-messstaende`](slice-cr-lastenheft-messstaende.md) oder dem Folge-CR für Colima. — **Ausgang:** weiter offen; Version ist die nächste freie zum Zeitpunkt des Commits, Versionsangaben im jeweils anderen offenen Slice werden nachgezogen (Zeile in §3).
+- **Die Versionsnummer kollidiert** mit [`slice-cr-lastenheft-messstaende`](../open/slice-cr-lastenheft-messstaende.md) oder dem Folge-CR für Colima. — **Ausgang:** weiter offen; Version ist die nächste freie zum Zeitpunkt des Commits, Versionsangaben im jeweils anderen offenen Slice werden nachgezogen (Zeile in §3).
 - **Die Vorab-Suche übersieht eine weitere Kopie** ([`BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht`](../observations/BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht/observation.md), Schwelle erreicht). — **Ausgang:** weiter offen; Suche mit Feldern, Werten und Aufzählungen (§3), Wiederholung durch den Implementer, Review prüft die Fundstellen.
 - **Vertragstext ändert sich nach dem Review** ([`BEO-DOK/vertragsaenderung-nach-review`](../observations/BEO-DOK/vertragsaenderung-nach-review/observation.md)). — **Ausgang:** weiter offen; Nachlauf-Review über den Diff (DoD).
 - **Der Wächter bleibt ohne Wirkung belegt:** alle heutigen Tests pinnen `subcommand` schon einzeln, die generische Prüfung greift erst bei einem Test ohne Pin. — **Ausgang:** weiter offen; Wächter-Test im Paket `jsontestutil` und Mutationen M1 bis M4, M5 ausdrücklich als Beleg der Einzel-Pins.
