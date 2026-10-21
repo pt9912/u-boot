@@ -848,9 +848,10 @@ Dev-Container-CLI je Projekt Images `vsc-<Ordnername>-…` an (gemessen auch `�
 sind nach `down` und nach `--recreate` weiter vorhanden (getestet; `--recreate` baut sie neu).
 Aufräumen mit `docker image rm` oder `docker image prune`.
 
-**Abbruch mit Strg-C.** Die CLI im Hilfs-Container beendet sich auf das Signal nicht;
-`u-boot` wartet bis zu zehn Sekunden (gemessen: 10,5 Sekunden bis zur Rückkehr) und entfernt
-dann den Hilfs-Container. Es bleibt kein Hilfs-Container zurück. Der Dev-Container, den die CLI
+**Abbruch mit Strg-C.** Beobachtet: Die CLI im Hilfs-Container beendet sich auf das Signal
+nicht früher; die Ursache ist nicht untersucht. `u-boot` wartet bis zu zehn Sekunden (gemessen:
+10,1 Sekunden in der CI, 10,5 Sekunden lokal bis zur Rückkehr) und entfernt dann den
+Hilfs-Container. Es bleibt kein Hilfs-Container zurück. Der Dev-Container, den die CLI
 bis dahin angelegt hat, bleibt bestehen.
 
 **Benutzer-ID.** Die Benutzer-ID im Container wird nicht an den Besitzer des Projektordners

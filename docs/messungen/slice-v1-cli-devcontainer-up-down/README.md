@@ -43,7 +43,9 @@ Beide Ordner lagen unter `/tmp` und waren für die Engine sichtbar; der Lauf pr�
 
 ## Einzelmessung macOS mit Colima
 
-Nicht gelaufen. Sie braucht einen macOS-Host mit Colima und liegt beim Projektinhaber; der Aufruf steht oben,
+Nicht gelaufen. Entscheidung des Projektinhabers (2026-10-21): Sie wird nach dem Release im Slice
+[`slice-v1-devcontainer-start-colima-messung`](../../plan/planning/open/slice-v1-devcontainer-start-colima-messung.md) nachgeholt.
+Sie braucht einen macOS-Host mit Colima und liegt beim Projektinhaber; der Aufruf steht oben,
 `<host>` im Dateinamen der Rohdaten nennt den Host (zum Beispiel `colima-arm64`). Das Protokoll hält fest: Colima- und Docker-Version
 und Architektur (das Skript schreibt sie im Abschnitt „Messstand“), den Projektpfad im geteilten Bereich und außerhalb. Trägt der Ablauf auf Colima
 (Exit 0 und Fortgang wie im Probelauf, bei „außerhalb“ Exit 12 statt eines leeren Bind-Mounts), ist das Ergebnis die Grundlage eines Folge-Änderungsantrags, der Colima in die
