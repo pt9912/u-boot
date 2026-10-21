@@ -1,0 +1,1 @@
+**Stand:** offen — 2× (`welle-sandbox-egress-ollama`, `welle-devcontainer-start-ohne-editor`); unter der Schwelle von drei, kein Ausgang. Ob Hilfe und Textausgabe Anforderungs-Kennungen tragen sollen, ist eine Produktfrage beim Projektinhaber ([`welle-devcontainer-start-ohne-editor`](../../../done/welle-devcontainer-start-ohne-editor.md) §7, offene Entscheidung (j)).

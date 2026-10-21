@@ -1,0 +1,4 @@
+**Vorgang:** [`welle-sandbox-egress-ollama`](../../../../done/welle-sandbox-egress-ollama.md)
+**Fund:** Validator-Bericht [`2026-10-19-validation-welle-sandbox-egress-ollama`](../../../../../../reviews/2026-10-19-validation-welle-sandbox-egress-ollama.md) L-9 (INFO): Warnungen tragen Anforderungs-Kennungen ([`LH-FA-DEV-007`](../../../../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-NFA-SEC-004`](../../../../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) und weitere) als Präfix; für einen Nutzer ohne Lastenheft nicht auflösbar. Die Closure jener Welle legte keinen Register-Eintrag an („als Beobachtung zu führen, falls sie wiederkehren“); mit dem Bericht vom 2026-10-21 kehrte der Fund wieder.
+
+**Beleg-Qualität:** gelesen im Validator-Bericht, nicht vom Planner nachgefahren; Vorbestand, nicht aus jener Welle entstanden.
