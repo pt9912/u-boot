@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** ohne Welle. Folge-Punkt von [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md) und von [`slice-v1-cli-devcontainer-up-down`](../done/slice-v1-cli-devcontainer-up-down.md), eigener Slice nach dem Release (er hält die Closure der Welle und den Release nicht auf; es gibt keine Closure-Bedingung, die von der DoD dieses Slice verschieden wäre). Priorität V2.
+**Welle:** ohne Welle. Folge-Punkt von [`welle-devcontainer-start-ohne-editor`](../done/welle-devcontainer-start-ohne-editor.md) und von [`slice-v1-cli-devcontainer-up-down`](../done/slice-v1-cli-devcontainer-up-down.md), eigener Slice nach dem Release (er hält die Closure der Welle und den Release nicht auf; es gibt keine Closure-Bedingung, die von der DoD dieses Slice verschieden wäre). Priorität V2.
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Zusage-Menge: Linux-Host `amd64` mit lokaler Engine; Colima „nicht zugesagt“); [`ADR-0028`](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) Entscheidung 9 (Zeile „macOS, Colima, `arm64`“ als Einzelmessung des Projektinhabers) und Freigabe-Punkt h; [`LH-NFA-PORT-002`](../../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten).
 

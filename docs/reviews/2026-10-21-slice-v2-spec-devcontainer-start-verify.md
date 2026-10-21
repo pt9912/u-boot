@@ -122,7 +122,7 @@ Kein HIGH, kein MEDIUM.
 
 ## 7. Welle `welle-devcontainer-start-ohne-editor`: Stand nach diesem Slice (nur Bericht)
 
-Quelle: [`welle-devcontainer-start-ohne-editor`](../plan/planning/welle-devcontainer-start-ohne-editor.md) §3 (Closure-Trigger) und §4.
+Quelle: [`welle-devcontainer-start-ohne-editor`](../plan/planning/done/welle-devcontainer-start-ohne-editor.md) §3 (Closure-Trigger) und §4.
 
 | Closure-Kriterium der Welle | Stand nach Closure dieses Slice |
 |---|---|
