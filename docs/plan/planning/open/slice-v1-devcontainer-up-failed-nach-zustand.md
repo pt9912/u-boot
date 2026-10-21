@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-devcontainer-shell-und-zweites-up`](../welle-devcontainer-shell-und-zweites-up.md) (Release `v0.14.0`). Zweiter von sechs Slices; nach [`slice-cr-devcontainer-shell-und-zweites-up`](slice-cr-devcontainer-shell-und-zweites-up.md), vor [`slice-v1-devcontainer-shell-fundament`](slice-v1-devcontainer-shell-fundament.md). Der Befehl `shell` setzt auf das Urteil nach dem Zustand auf ([`ADR-0031`](../../adr/0031-devcontainer-shell-ohne-editor.md) Entscheidung 1, *Startphase*).
+**Welle:** [`welle-devcontainer-shell-und-zweites-up`](../welle-devcontainer-shell-und-zweites-up.md) (Release `v0.14.0`). Zweiter von sechs Slices; nach [`slice-cr-devcontainer-shell-und-zweites-up`](../in-progress/slice-cr-devcontainer-shell-und-zweites-up.md), vor [`slice-v1-devcontainer-shell-fundament`](slice-v1-devcontainer-shell-fundament.md). Der Befehl `shell` setzt auf das Urteil nach dem Zustand auf ([`ADR-0031`](../../adr/0031-devcontainer-shell-ohne-editor.md) Entscheidung 1, *Startphase*).
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Fehlerklassen in der Fassung des CR), [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) (Strenge `onUnavailable: fail`), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (Abbruch des Egress-Startscripts), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Klasse 11), [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) („Weitere Felder sind erlaubt“: `alreadyRunning`), [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) (Umschlag); [`ADR-0030`](../../adr/0030-devcontainer-up-failed-nach-zustand.md) (Entscheidungen 1 bis 3, `Accepted`), [`ADR-0029`](../../adr/0029-devcontainer-start-exit-11-und-socket-haltung.md) (Entscheidung 1 bis auf die zwei abgelösten Stellen; Grenze (ii) gilt fort).
 
@@ -105,7 +105,7 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-cr-devcontainer-shell-und-zweites-up`](slice-cr-devcontainer-shell-und-zweites-up.md) liegt in `done/` (das Lastenheft trägt Stelle 1, den Satz zur Klasse `11` beim erneuten `up`); kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-cr-devcontainer-shell-und-zweites-up`](../in-progress/slice-cr-devcontainer-shell-und-zweites-up.md) liegt in `done/` (das Lastenheft trägt Stelle 1, den Satz zur Klasse `11` beim erneuten `up`); kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benennen, nicht erst im Nachhinein begründen:**
 

@@ -100,7 +100,7 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-cr-devcontainer-shell-und-zweites-up`](slice-cr-devcontainer-shell-und-zweites-up.md) liegt in `done/` (das Lastenheft sagt `shell` zu); [`slice-v1-devcontainer-up-failed-nach-zustand`](slice-v1-devcontainer-up-failed-nach-zustand.md) liegt in `done/` (Reihenfolge der Welle; ist er blockiert, darf dieser Slice vorgezogen werden, weil er ihn inhaltlich nicht braucht — die Umstellung steht dann in §5 der Welle-Datei); kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-cr-devcontainer-shell-und-zweites-up`](../in-progress/slice-cr-devcontainer-shell-und-zweites-up.md) liegt in `done/` (das Lastenheft sagt `shell` zu); [`slice-v1-devcontainer-up-failed-nach-zustand`](slice-v1-devcontainer-up-failed-nach-zustand.md) liegt in `done/` (Reihenfolge der Welle; ist er blockiert, darf dieser Slice vorgezogen werden, weil er ihn inhaltlich nicht braucht — die Umstellung steht dann in §5 der Welle-Datei); kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benennen, nicht erst im Nachhinein begründen:**
 
