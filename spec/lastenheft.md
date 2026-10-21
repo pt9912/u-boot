@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.18.0                                                             |
+| Version          | 0.19.0                                                             |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -971,11 +971,11 @@ Für alle `--json`-Ausgaben gilt ergänzend ein gemeinsames Minimalkontrakt-Sche
 
 - `status` (`ok`/`warn`/`error`)
 - `command` (Hauptbefehl als in [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run) definiertes Enum)
-- optional `subcommand` (für gruppierte Befehle wie `template` oder `config`)
+- `subcommand` (Unterbefehl; verpflichtend bei den gruppierten Befehlen `template`, `config`, `egress` und `devcontainer`, bei den übrigen Befehlen optional)
 - `diagnostics` (Liste von Objekten mit mind. `level`, `code`, `message`, optional `file`)
 - `exitCode` (vgl. [`LH-FA-CLI-006`](#lh-fa-cli-006--exit-codes))
 
-Für `--json`-Antworten gilt zusätzlich: `diagnostics.level` ist `warn` oder `error`; enthält `diagnostics` keinen Eintrag, darf es als `[]` ausgegeben werden und `status` ist `ok`, andernfalls folgt `status` dem höchsten `level` (`error` → `error`, `warn` ohne `error` → `warn`); `diagnostics.file` ist optional; bei `template` und `config` ist `subcommand` verpflichtend, und `diagnostics.code` trägt die Kennung der verursachenden Anforderung oder einen dokumentierten tool-internen Code.
+Für `--json`-Antworten gilt zusätzlich: `diagnostics.level` ist `warn` oder `error`; enthält `diagnostics` keinen Eintrag, darf es als `[]` ausgegeben werden und `status` ist `ok`, andernfalls folgt `status` dem höchsten `level` (`error` → `error`, `warn` ohne `error` → `warn`); `diagnostics.file` ist optional, und `diagnostics.code` trägt die Kennung der verursachenden Anforderung oder einen dokumentierten tool-internen Code.
 
 Für normale (`--json` ohne `--dry-run`/`--diff`) Ausgaben ist der obige Minimalkontrakt bindend.
 Für `--dry-run`- oder `--diff`-Ausgaben mit `--json` gilt zusätzlich das vollständige Schema aus [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run) als bindender Pflichtkontrakt (inkl. `plannedFiles`, `changes`, `dryRun`, `diff`).
@@ -1586,6 +1586,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.16.0 | 2026-10-19 | [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run): Der Wert `egress` gehört zum Wertebereich des Feldes `command` (nach [`LH-NFA-USE-004`](#lh-nfa-use-004--maschinenlesbare-ausgabe) für alle `--json`-Ausgaben). | Vereinbarung mit dem Projektinhaber |
 | 0.17.0 | 2026-10-19 | §16 Historie: Die Zeilen 0.14.0 ([`LH-SA-CLI-002`](#lh-sa-cli-002--vorgesehene-befehle)) und 0.16.0 ([`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run)) nennen die Änderung der Anforderung. Der Wortlaut der Anforderungen bleibt unverändert. | Vereinbarung mit dem Projektinhaber |
 | 0.18.0 | 2026-10-20 | [`LH-FA-DEV-010`](#lh-fa-dev-010--devcontainer-ohne-editor-starten): neue Anforderung (Devcontainer ohne Editor starten und stoppen, Hilfs-Container mit Socket-Ausweisung, Zusage-Menge Linux-Host `amd64`); [`LH-SA-CLI-002`](#lh-sa-cli-002--vorgesehene-befehle): zwei Zeilen; [`LH-FA-CLI-005`](#lh-fa-cli-005--verbosity-und-logging): `--quiet` für die neuen Befehle und die Socket-Ausweisung als Teil von Ausnahme 1; [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run): Wert `devcontainer`; [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil): Abgrenzung des Hilfs-Containers. | Vereinbarung mit dem Projektinhaber |
+| 0.19.0 | 2026-10-21 | [`LH-NFA-USE-004`](#lh-nfa-use-004--maschinenlesbare-ausgabe): `subcommand` ist auch bei `egress` und `devcontainer` verpflichtend; die Pflicht für die vier gruppierten Befehle (`template`, `config`, `egress`, `devcontainer`) steht im Feld `subcommand` des Minimalkontrakts. | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt

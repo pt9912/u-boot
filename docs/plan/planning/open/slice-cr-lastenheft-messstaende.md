@@ -1,4 +1,4 @@
-# Slice CR: Lastenheft ohne Messstände — Messumgebungen in [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) und [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) als Zusage-Grenze statt als „gemessen: Colima, arm64“ (Lastenheft, nächste freie Version nach 0.18.0)
+# Slice CR: Lastenheft ohne Messstände — Messumgebungen in [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) und [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) als Zusage-Grenze statt als „gemessen: Colima, arm64“ (Lastenheft, nächste freie Version nach 0.19.0)
 
 **Lifecycle:** Der Zustand dieses Slice ist das Verzeichnis, in dem diese
 Datei liegt — eines von `open/`, `next/`, `in-progress/`, `done/`. Er
@@ -49,7 +49,7 @@ Die Fundstellen mit Klasse (Klassen wie in [`slice-v2-spec-zielbild`](../done/sl
 ### Offene Fragen an den Projektinhaber (vor dem Wortlaut)
 
 1. **Zusage-Menge.** Sagt das Lastenheft für `ollama` und für `podman build` die Architektur `arm64` unter Colima zu, oder auch `amd64` auf Linux (gemessen in einer Einzelmessung, ohne CI-Lauf; [`ADR-0024`](../../adr/0024-ollama-im-sandbox-devcontainer.md) Entscheidung 10 bleibt „nicht verifiziert“)? Ohne diese Entscheidung kann der Wortlaut die Messumgebung nicht durch die Menge ersetzen.
-2. **Historie.** Tragen die Zeilen 0.7.0, 0.12.0, 0.13.0 und 0.15.0 ihre Messangaben weiter (Chronik einer Version), oder bekommt eine neue Zeile der nächsten freien Version (nach 0.18.0) die Aussage „die Messangaben der Anforderungstexte entfallen“, ohne die älteren Zeilen zu ändern (Vorbild: Zeile 0.17.0 von [`slice-cr-lastenheft-zielbild`](../done/slice-cr-lastenheft-zielbild.md))?
+2. **Historie.** Tragen die Zeilen 0.7.0, 0.12.0, 0.13.0 und 0.15.0 ihre Messangaben weiter (Chronik einer Version), oder bekommt eine neue Zeile der nächsten freien Version (nach 0.19.0) die Aussage „die Messangaben der Anforderungstexte entfallen“, ohne die älteren Zeilen zu ändern (Vorbild: Zeile 0.17.0 von [`slice-cr-lastenheft-zielbild`](../done/slice-cr-lastenheft-zielbild.md))?
 3. **Der Wortlaut selbst.** Der CR legt einen Alt/Neu-Vorschlag je Stelle vor; die Freigabe erfolgt je Stelle durch den Projektinhaber (Muster: Wortlaut-Vorschlag in [`slice-cr-lastenheft-zielbild`](../done/slice-cr-lastenheft-zielbild.md)).
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
@@ -62,7 +62,7 @@ Die Fundstellen mit Klasse (Klassen wie in [`slice-v2-spec-zielbild`](../done/sl
 
 ## 2. Definition of Done
 
-- [ ] **Wortlaut freigegeben:** Der Projektinhaber hat die Fragen 1 bis 3 entschieden; die Stellen der Klasse **A** in `spec/lastenheft.md` tragen keine Messumgebung mehr; jede Zusage-Menge steht im Wortlaut; die Klassen **B** und **C** sind unverändert; die Version (nächste freie Minor-Version zum Zeitpunkt des Commits; zuletzt `0.18.0`) und die neue Historie-Zeile nennen die Änderung ohne Messangabe.
+- [ ] **Wortlaut freigegeben:** Der Projektinhaber hat die Fragen 1 bis 3 entschieden; die Stellen der Klasse **A** in `spec/lastenheft.md` tragen keine Messumgebung mehr; jede Zusage-Menge steht im Wortlaut; die Klassen **B** und **C** sind unverändert; die Version (nächste freie Minor-Version zum Zeitpunkt des Commits; zuletzt `0.19.0`) und die neue Historie-Zeile nennen die Änderung ohne Messangabe.
 - [ ] **Abgleich nach unten:** Handbuch (Abschnitte *Ollama (optional)* und *Container-Runtime*) und CHANGELOG sagen über die Zusage-Menge dasselbe wie der neue Wortlaut; `make doc-trace` und `make docs-check` melden keinen Befund; jede Aussage des Plans über das Lastenheft ist am Absatz gelesen (`AGENTS.md` §3.10).
 - [ ] `make gates` grün; Review durchgeführt, Report unter `docs/reviews/` liegt vor (`.harness/skills/reviewer.md`); Closure-Notiz mit Steering-Loop-Lerneintrag; Beobachtungs-Register (`../observations/`) fortgeschrieben, oder in §7 notiert, dass keine Beobachtung angefallen ist; jedes Risiko aus §6 trägt einen Ausgang; die drei Paarungen sind getragen.
 
