@@ -250,7 +250,7 @@ CI-Job).
 
 > **Trivy-Pin-Hebung berührt ZWEI Stellen:**
 > `repo.mk::TRIVY_VERSION` (Docker-Hub-Tag, ohne `v`-Prefix) **und**
-> `ci.yml::image-scan::trivy-version` (GitHub-Release-Tag, mit
+> `ci.yml::image-scan::version` (GitHub-Release-Tag, mit
 > `v`-Prefix). Detail-Kommentar am jeweiligen Pin. Wer nur eine
 > der zwei Stellen hebt, bricht die Inner-/Outer-Loop-Parität.
 

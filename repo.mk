@@ -57,7 +57,7 @@ VERSION                 ?= 0.12.0-dev
 #   - repo.mk (here):  Docker-Hub-Tag-Konvention OHNE `v`-Prefix
 #                        → `aquasec/trivy:0.70.0`
 #   - ci.yml::image-scan: GitHub-Release-Tag-Konvention MIT `v`-Prefix
-#                        → `trivy-version: 'v0.70.0'` für trivy-action
+#                        → Eingabe `version: 'v0.70.0'` der trivy-action
 # Bei jeder Pin-Hebung beide Stellen synchron heben (gleiche Trivy-
 # Version, unterschiedliche Schreibweisen). Detector-/DB-Parität
 # ist sonst gebrochen.

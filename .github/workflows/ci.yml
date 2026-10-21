@@ -114,4 +114,9 @@ jobs:
           # `v`-Prefix (`v0.70.0`), in repo.mk Docker-Hub-Tag OHNE
           # `v`-Prefix (`0.70.0`). Beim Pin-Bump beide synchron auf
           # die gleiche Version in der jeweils richtigen Schreibweise.
-          trivy-version: 'v0.70.0'
+          #
+          # Die Eingabe heißt `version` (action.yaml der oben gepinnten
+          # Action); ein unbekannter Eingabename erzeugt im Lauf nur die
+          # Annotation „Unexpected input(s)“, und es gilt der Default der
+          # Action.
+          version: 'v0.70.0'
