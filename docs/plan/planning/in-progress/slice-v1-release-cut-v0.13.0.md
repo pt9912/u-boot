@@ -33,7 +33,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** — (Spec-Version ≠ Release-Version; Lastenheft `0.18.0` liefern die Slices, `spec/lastenheft.md` Zeile 9 gelesen; dieser Slice ändert `spec/` nicht).
 
-**Verantwortlich:** — (wird beim Start gesetzt, §4).
+**Verantwortlich:** pt9912 (Rolle Implementer, Start 2026-10-21); Freigaben: Projektinhaber.
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-21.
 
@@ -43,7 +43,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Ziel:** `v0.13.0` liefert als Minor-Release den Block `[Unreleased]` des CHANGELOG — die Befehle `u-boot devcontainer up [--recreate]` und `u-boot devcontainer down` (Zusage: Linux-Host `amd64` mit lokaler Docker-Engine), DNS zu den Upstream-Resolvern nur für den Benutzer des lokalen Resolvers, den Wiederholungslauf des Egress-Startscripts in einer Transaktion und die Warnung von `generate devcontainer` beim Ersetzen von `egress-init.sh` — als GHCR-Image, Binaries, Pakete und Homebrew-Formel; Release-Text und Handbuch tragen die Aufträge der Welle-Closure (L-1, L-2, L-3/L-4, L-7) mit Beleg, und der Trivy-Pin der CI greift (L-10). Dieser Slice bereitet vor und lässt den Tag zu; Push und Tag führt nur der Hauptagent nach ausdrücklicher Freigabe des Projektinhabers im Gespräch.
 
-### Versionsnummer: `v0.13.0` (Vorschlag des Planners, Bestätigung beim Start, §4)
+### Versionsnummer: `v0.13.0` (Vorschlag des Planners, vom Projektinhaber bestätigt am 2026-10-21, §7)
 
 Gelesen: `CHANGELOG.md` Zeilen 12 bis 41 (`[Unreleased]`, zwei Einträge *Added*, drei *Changed*, kein *Removed*), `git rev-parse v0.12.0` (`9c28c5c`), die Welle-Datei (Kopf, *Zielmeilenstein*: „das nächste Minor-Release nach `v0.12.0`“, die Nummer vergibt der Release-Cut).
 
@@ -179,7 +179,7 @@ Der Implementer bereitet vor (Commits lokal, Gates lokal) und **führt M1, M3 un
 | M-T | Trockenlauf des Tap-Pfads (`releasing.md` §4), im Docker, `--network none`, ohne Schreiben ins Tap | Implementer; Ergebnis in §3 | `tap-formula-check.sh` Exit `0` mit `v0.13.0` und Exit `1` mit `v0.12.0`; `tap-nachzug.sh` mit Stellvertretern protokolliert mit `v0.13.0` `clone`, `add`, `commit -m u-boot 0.13.0` und `push` und bricht mit `v0.12.0` vor `clone` ab. **Beweist nicht:** `is_stable`, echter `curl`, echter `git push`, Token |
 | M1 | `git push origin main` | Hauptagent, nach Freigabe des Projektinhabers | Review- und Verification-Report liegen vor (Verifier vor M1: ein Befund zum Release-Text fällt vor dem Push, Lerneintrag des Cuts `v0.12.0`); `make docs-check` lokal grün |
 | M2 | `gh run list --limit 4`: `ci` und `integration-docker` auf dem Push-Tip | Maintainer | `ci` grün; Job `image-scan` ohne Annotation „Unexpected input(s)“, Log `version: v0.70.0` (L-10). `integration-docker` grün, Log: `--- SKIP` genau die vier Nested-Podman-Tests, `--- FAIL` 0; abweichend: Release-Aussage vor dem Tag nachziehen. Abschnitt „Operating System“ der Logs lesen (§6, Runner-Wechsel) |
-| M3 | Optional: `git tag v0.13.0-rc.1 && git push origin v0.13.0-rc.1` | Hauptagent, nach Freigabe des Projektinhabers | Frage an den Projektinhaber (§6); probt `is_stable == true` und den Job `tap` nicht, hinterlässt Aufräumlast |
+| M3 | Vorab-Tag `v0.13.0-rc.1`: entfällt | — | Entscheidung des Projektinhabers vom 2026-10-21: direkt stabil, kein Vorab-Tag (§7) |
 | M4 | `gh workflow run tap-check` | Maintainer, unmittelbar vor M5 | grün = das Token darf auf das Tap schreiben (`releasing.md` §2, §4) |
 | M5 | `git switch main && git pull --ff-only`, `git tag v0.13.0` auf dem in M2 geprüften Commit, `git push origin v0.13.0` | **Hauptagent, nur nach ausdrücklicher Freigabe des Projektinhabers im Gespräch** | Nach dem Push wird der Tag nicht verschoben (`releasing.md` §8) |
 | M6 | `releasing.md` §6: `gh run watch`; `gh release view v0.13.0 --json assets,isPrerelease,isDraft`; `docker run --rm ghcr.io/pt9912/u-boot:0.13.0 --version`; Digest `:0.13.0` = `:latest`; Log des Jobs `tap` | Maintainer | DoD Punkt 3, Kontrollzeilen |
@@ -213,9 +213,9 @@ Der Ausgang jedes Risikos wird bei der Closure festgeschrieben.
 
 - **Die neuen Handbuch-Sätze (L-1, L-2) oder der Lead sagen mehr, als gemessen ist** (Register: [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md), 9×, und [`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md), 12×, verkörpert in [`AGENTS.md`](../../../../AGENTS.md) §3.10). Gegenmittel: Beleg-Tabelle (§3); Exit `11` steht als „nicht gemessen“, `docker exec -e` nur mit Gegenprobe. — **Ausgang:** bei der Closure.
 - **Die Release-Aussage zur CI weicht vom Lauf auf dem Push-Tip ab** (andere Zahl übersprungener Tests, etwa nach einem Runner-Wechsel; [`BEO-E2E/ci-ueberspringt-nested-podman-build`](../observations/BEO-E2E/ci-ueberspringt-nested-podman-build/observation.md)). Gegenmittel: M2 zählt `--- SKIP`; abweichend wird der Satz vor dem Tag nachgezogen. — **Ausgang:** bei der Closure.
-- **Runner-Wechsel `ubuntu-latest` → Ubuntu 26:** Lauf 39540751668 trägt die Notice „The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026“; der Job lief noch auf Ubuntu 24.04.5 (Log, Abschnitt „Operating System“). `ci.yml`, `integration.yml` und `publish.yml` (Zeilen 33 und 316) laufen auf `ubuntu-latest`; auf welchem Image der letzte stabile `publish`-Lauf (39224848402, 2026-10-19) lief, ist nicht gelesen (`gh run view --job 117968525028 --log` liefert keine Zeilen). Der erste `publish`-Lauf auf dem neuen Image kann dieser Tag sein; auf einem anderen Kernel kann sich auch das Überspringen der Nested-Podman-Tests ändern. Gegenmittel: M2 liest das Betriebssystem der Läufe auf dem Push-Tip; ein Vorab-Tag (M3) würde den Bau-Teil von `publish` auf dem aktuellen Image proben (Frage an den Projektinhaber). — **Ausgang:** bei der Closure (Betriebssystem des `publish`-Laufs aus dem Log).
+- **Runner-Wechsel `ubuntu-latest` → Ubuntu 26:** Lauf 39540751668 trägt die Notice „The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026“; der Job lief noch auf Ubuntu 24.04.5 (Log, Abschnitt „Operating System“). `ci.yml`, `integration.yml` und `publish.yml` (Zeilen 33 und 316) laufen auf `ubuntu-latest`; auf welchem Image der letzte stabile `publish`-Lauf (39224848402, 2026-10-19) lief, ist nicht gelesen (`gh run view --job 117968525028 --log` liefert keine Zeilen). Der erste `publish`-Lauf auf dem neuen Image kann dieser Tag sein; auf einem anderen Kernel kann sich auch das Überspringen der Nested-Podman-Tests ändern. Gegenmittel: M2 liest das Betriebssystem der Läufe auf dem Push-Tip; ein Vorab-Tag (M3) hätte den Bau-Teil von `publish` auf dem aktuellen Image geprobt — der Projektinhaber hat ihn am 2026-10-21 nicht gewählt (§7), der stabile Lauf ist damit die erste Probe. — **Ausgang:** bei der Closure (Betriebssystem des `publish`-Laufs aus dem Log).
 - **L-10 ändert mehr als die Eingabe** (anderer Trivy-Stand, neue Funde, roter `image-scan`). Gelesen: Default der Action und Pin sind beide `v0.70.0` (*Befund L-10*), der gescannte Stand bleibt gleich. — **Ausgang:** bei der Closure (Log des Push-Tips).
-- **[`ADR-0004`](../../adr/0004-ci-system.md) nennt die Eingabe `trivy-version`** (Zeilen 93 und 96), nach L-10 heißt sie `version`. Die ADR ist `Accepted` und bleibt unverändert; ihre Entscheidung (eigenständiger Pin, zwei Pin-Stellen) gilt weiter, nur der Name der Eingabe im Text weicht ab. Eine Folge-ADR hält der Planner nicht für nötig (keine Entscheidung ändert sich); Frage an den Projektinhaber. — **Ausgang:** bei der Closure.
+- **[`ADR-0004`](../../adr/0004-ci-system.md) nennt die Eingabe `trivy-version`** (Zeilen 93 und 96), nach L-10 heißt sie `version`. Die ADR ist `Accepted` und bleibt unverändert; ihre Entscheidung (eigenständiger Pin, zwei Pin-Stellen) gilt weiter, nur der Name der Eingabe im Text weicht ab. Eine Folge-ADR hält der Planner nicht für nötig (keine Entscheidung ändert sich); der Projektinhaber hat am 2026-10-21 so entschieden (§7): keine Folge-ADR, die Abweichung wird benannt. — **Ausgang:** bei der Closure.
 - **Gepinnte Quellen altern ohne Wächter** ([`BEO-APP/podman-static-pin-alterung`](../observations/BEO-APP/podman-static-pin-alterung/observation.md), 3×, Ausgang beim Projektinhaber): der Release liefert drei neue Pins im eingebetteten Kontext des Hilfs-Images (Node-Basis, Docker-CLI-Basis, `@devcontainers/cli` `0.89.0`); das Datum 2027-03-08 (Signaturschlüssel von `podman-static`) liegt nach dem heutigen. Der Cut liest, verkörpert nichts. — **Ausgang:** bei der Closure (voraussichtlich weiter offen beim Projektinhaber).
 - **Ein neuer Advisory macht `image-scan` vor dem Tag rot** (Go-stdlib oder Basis-Image). — **Ausgang:** bei der Closure; eingetreten → Rückführung (§4).
 - **Der Job `tap` scheitert im stabilen Lauf**, obwohl M-T grün war (M-T probt Skripte, nicht `is_stable`, Download, Push und Token). Gegenmittel: `tap-check` unmittelbar vor dem Tag (M4). — **Ausgang:** bei der Closure.
@@ -230,6 +230,16 @@ Der Ausgang jedes Risikos wird bei der Closure festgeschrieben.
 ## 7. Closure-Notiz
 
 *(Wird bei der Closure gefüllt, nach M6 und vor dem `git mv` nach `done/`.)*
+
+**Entscheidungen des Projektinhabers (2026-10-21, im Gespräch; an den Implementer übermittelt durch den Hauptagenten, beim Start vermerkt).** Keine davon ist eine Freigabe von Push oder Tag (§1 *NICHT*).
+
+1. **Version `v0.13.0` bestätigt** — Start-Bedingung (2) aus §4 erfüllt.
+2. **Direkt stabil taggen, kein Vorab-Tag:** M3 entfällt. Was ein Vorab-Tag geprobt hätte (Bau-Teil von `publish` auf dem aktuellen Runner-Image, §6) und was er ohnehin nicht probt (`is_stable == true`, Job `tap`), trägt dann der stabile Lauf; M-T und `tap-check` (M4) bleiben.
+3. **READMEs: „Podman ≥ 5.0“ auf 4.0 angleichen** — [`LH-FA-DIAG-002`](../../../../spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen) (Rang 1) und Handbuch nennen 4.0.
+4. **Handbuch-Satz zu `docker exec -e NAME` nur mit eigener Gegenprobe** des Implementers (real, Docker-only, Wegwerf-Verzeichnis im Scratchpad, danach aufgeräumt), sonst entfällt er. Ergebnis in §3 *Umsetzung*.
+5. **Datum im CHANGELOG: das Datum des Cut-Tags**, gesetzt 2026-10-21; M0 prüft es vor dem Tag erneut.
+6. **[`ADR-0004`](../../adr/0004-ci-system.md) bleibt unverändert** (`Accepted`); die Abweichung beim Namen der Eingabe (`trivy-version` im ADR-Text, `version` in `ci.yml`) wird benannt, keine Folge-ADR.
+7. **`Verantwortlich:` beim Start gesetzt** (Kopf).
 
 **Vorgemerkt für die Closure** (Nacharbeit nach [`releasing.md`](../../../maintainer/releasing.md) §7 und M8):
 

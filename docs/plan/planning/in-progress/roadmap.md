@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Nichts in Arbeit.
+**v0.13.0 (`u-boot devcontainer up` und `down`, Egress-Änderungen seit `v0.12.0`; trägt die Welle `welle-devcontainer-start-ohne-editor` und die Slices seit `v0.12.0`)** — Slice: [`slice-v1-release-cut-v0.13.0`](slice-v1-release-cut-v0.13.0.md) (Tag-Push steht aus).
 
 ## Nächste Wellen
 
