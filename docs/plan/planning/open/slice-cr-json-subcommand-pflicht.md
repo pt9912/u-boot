@@ -16,7 +16,7 @@ Anlass: Entscheidung des Projektinhabers vom 2026-10-21 im Gespräch zu (e): „
 
 **Berührte Spec-Stellen:** `lastenheft.md` [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe), §16 (Historie), Versionsfeld; `spezifikation.md` [`LH-NFA-USE-004.a`](../../../../spec/spezifikation.md#lh-nfa-use-004a--regeln-für---json-antworten), [`SPEC-001`](../../../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json), §7 (Historie). `architecture.md`: — (gelesen, Zeile in §3). Der Verweis zeigt aufwärts: Lastenheft und Spezifikation nennen diesen Slice nie.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (Rolle Implementer, Start 2026-10-21); Freigaben: Projektinhaber.
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-21.
 
@@ -26,7 +26,7 @@ Anlass: Entscheidung des Projektinhabers vom 2026-10-21 im Gespräch zu (e): „
 
 **Ziel:** Das Lastenheft verlangt `subcommand` in jeder `--json`-Ausgabe der gruppierten Befehle `template`, `config`, `egress` und `devcontainer`, die Spezifikation führt die Pflicht für alle vier, und `jsontestutil` prüft sie für alle vier als Wächter; die Kopien in [`cli-json-contract.md`](../../../maintainer/cli-json-contract.md) folgen. Der Code setzt `subcommand` heute in jedem Umschlag der vier Befehle (Fundstellen unten); der CR schließt den Vertrag um den Bestand und ändert kein Verhalten.
 
-**Entscheidung des Projektinhabers** (2026-10-21, im Gespräch, zu (e)): „Vertrag schließen“ — kleiner CR: in [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) wird `subcommand` für `template`, `config`, `egress` und `devcontainer` verpflichtend (Lastenheft `0.18.0` → `0.19.0`); [`SPEC-001`](../../../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) bekommt `egress` in den `allOf`-Block; `checkSubcommand` prüft alle vier Befehle; Schema-Kopie und Lastenheft-Zitat in `cli-json-contract.md` werden angeglichen; kein Produktcode. **Den Wortlaut legt dieser Plan als Vorschlag vor** (unten); freigegeben wird er vom Projektinhaber beim Start (§4), nicht durch den Plan.
+**Entscheidung des Projektinhabers** (2026-10-21, im Gespräch, zu (e)): „Vertrag schließen“ — kleiner CR: in [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) wird `subcommand` für `template`, `config`, `egress` und `devcontainer` verpflichtend (Lastenheft `0.18.0` → `0.19.0`); [`SPEC-001`](../../../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) bekommt `egress` in den `allOf`-Block; `checkSubcommand` prüft alle vier Befehle; Schema-Kopie und Lastenheft-Zitat in `cli-json-contract.md` werden angeglichen; kein Produktcode. **Den Wortlaut legt dieser Plan als Vorschlag vor** (unten); der Projektinhaber hat ihn am 2026-10-21 beim Start freigegeben, unverändert, Variante A (§4, §7).
 
 ### Gefundener Stand (gelesen am 2026-10-21 auf `8ae2431e`; Fundstellen nach Datei, Abschnitt und Symbol)
 
@@ -64,7 +64,7 @@ Anlass: Entscheidung des Projektinhabers vom 2026-10-21 im Gespräch zu (e): „
 - §6.10 und §6.11, Punkt **Vertrag:** „`checkSubcommand` verlangt `subcommand` nur für `template` und `config`“ (§6.10) beziehungsweise „verlangt `subcommand` nur für `template` und `config`“ (§6.11).
 - `docs/user/benutzerhandbuch.md`, Abschnitt *JSON-Ausgabe*, Tabelle „Immer vorhanden“, Zeile `subcommand`: „nur bei `config` (`get`, `set`, `list`), `egress` (`list`), `devcontainer` (`up`, `down`) und `template` (`list`)“ — nennt alle vier Befehle; bei `config` fehlt `show` (bares `config --json`, `runConfigShow`), bekannt als V-5b aus [`slice-cr-cli-json-command-enum`](../done/slice-cr-cli-json-command-enum.md) §7 und dort nicht behoben (Frage F-4).
 
-### Wortlaut-Vorschlag Lastenheft (alt/neu; Freigabe des Projektinhabers beim Start)
+### Wortlaut-Vorschlag Lastenheft (alt/neu; vom Projektinhaber freigegeben am 2026-10-21, Variante A, §7)
 
 Das Lastenheft nennt keine Slice- oder Wellen-Kennung. Die Verweise stehen hier als Pfad vom Slice aus; im Lastenheft sind es Anker `#…` der Datei.
 
@@ -89,7 +89,7 @@ Neu:
 > … `diagnostics.file` ist optional, und `diagnostics.code` trägt die Kennung der verursachenden Anforderung oder einen dokumentierten tool-internen Code.
 
 Begründung der Form (Variante A): Die Pflicht steht danach an **einer** Stelle der Anforderung, im Feld selbst; heute stehen „optional … wie `template` oder `config`“ und „bei `template` und `config` verpflichtend“ an zwei Stellen, und eine Ergänzung müsste beide treffen — die Lücke dieses CR ist genau eine solche zweite Kopie. „Bei den übrigen Befehlen optional“ hält den Vertrag der übrigen Befehle unverändert (heute „optional“; der Code lässt das Feld bei ihnen weg, `TestMinimalEnvelope_SubcommandOmittedWhenEmpty`).
-**Variante B** (kleinerer Eingriff, Frage F-3): Stelle 1 wie oben, Stelle 2 statt der Streichung „bei `template`, `config`, `egress` und `devcontainer` ist `subcommand` verpflichtend, und …“ — dann steht die Liste zweimal.
+**Variante B** (kleinerer Eingriff, Frage F-3; vom Projektinhaber nicht gewählt, §7): Stelle 1 wie oben, Stelle 2 statt der Streichung „bei `template`, `config`, `egress` und `devcontainer` ist `subcommand` verpflichtend, und …“ — dann steht die Liste zweimal.
 
 **Stelle 3 — Versionsfeld und Historie (§16).** Die Version ist die nächste freie Minor-Version zum Zeitpunkt des Lastenheft-Commits; beim heutigen Stand `0.19.0`.
 
@@ -101,15 +101,15 @@ Neue Historie-Zeile (Datum: das des Lastenheft-Commits):
 
 > | 0.19.0 | `<Datum des Lastenheft-Commits>` | [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe): `subcommand` ist auch bei `egress` und `devcontainer` verpflichtend; die Pflicht für die vier gruppierten Befehle (`template`, `config`, `egress`, `devcontainer`) steht im Feld `subcommand` des Minimalkontrakts. | Vereinbarung mit dem Projektinhaber |
 
-(Bei Variante B entfällt der zweite Halbsatz.)
+(Bei Variante B entfiele der zweite Halbsatz; gewählt ist Variante A, die Zeile trägt beide Halbsätze.)
 
-**Gelesen, unverändert vorgeschlagen** (Frage F-2):
+**Gelesen, unverändert vorgeschlagen** (Frage F-2; der Projektinhaber hat am 2026-10-21 entschieden, dass die Beispiele bleiben, §7):
 
 - [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), Absatz „Bei gruppierten Befehlen wie `command == "template"` oder `command == "config"` muss das Feld `subcommand` gesetzt sein (z. B. `list`, `get`, `set`).“ — ein Beispiel („wie“) in der Anforderung zur Vorschau; `egress` und `devcontainer` erzeugen keine Vorschau-Ausgabe, und für jede `--json`-Ausgabe, auch die Vorschau, gilt die Pflicht aus [`LH-NFA-USE-004`](../../../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe).
 - [`LH-SA-CLI-001`](../../../../spec/lastenheft.md#lh-sa-cli-001--befehlsstruktur), „(z. B. `template`, `config`)“ — Beispiel für die Befehlsstruktur, keine Liste.
 - [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), Enum von `command` — nennt `egress` und `devcontainer` bereits.
 
-### Wortlaut-Vorschlag Spezifikation (nach dem Lastenheft-Commit, deckungsgleich mit ihm)
+### Wortlaut-Vorschlag Spezifikation (nach dem Lastenheft-Commit, deckungsgleich mit ihm; vom Projektinhaber freigegeben am 2026-10-21, §7)
 
 Die Spezifikation verweist nur aufwärts; keine Slice-, ADR- oder Wellen-Kennung. Die Verweise stehen hier als Pfad vom Slice aus; in der Spezifikation sind es Anker `#…` der Datei beziehungsweise `lastenheft.md#…`, und die Historie-Zeile führt die Kennung der Schema-Stelle wie ihre Nachbarzeilen ohne Link.
 
@@ -240,13 +240,13 @@ Die Tabelle nennt jede Datei, die der Diff voraussichtlich berührt, und die gel
 
 ## 4. Trigger
 
-**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; kein anderer Slice in `in-progress/` (WIP-Limit 1); der Projektinhaber hat entschieden:
+**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; kein anderer Slice in `in-progress/` (WIP-Limit 1); der Projektinhaber hat entschieden (erfüllt am 2026-10-21, Entscheidungen in §7):
 
-- **F-1 — Wortlaut:** Stellen 1 bis 3 (Lastenheft) und S1 bis S5 (Spezifikation) freigegeben, wie vorgelegt oder geändert.
-- **F-2 — Beispiele:** [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) („Bei gruppierten Befehlen wie …“) und [`LH-SA-CLI-001`](../../../../spec/lastenheft.md#lh-sa-cli-001--befehlsstruktur) („z. B. `template`, `config`“) bleiben (Vorschlag) oder werden angeglichen (dann je eine weitere Stelle im selben CR).
-- **F-3 — Form:** Variante A (Pflicht einmal, im Feld `subcommand`; Teilsatz im Absatz entfällt; Vorschlag) oder Variante B (Liste an beiden Stellen).
-- **F-4 — Handbuch:** `show` bei `config` in der Zeile `subcommand` mitnehmen (Vorschlag: ja, ein Wort in der Zeile, die die jetzt bindende Pflicht für Nutzer beschreibt) oder streichen; das Handbuch stand nicht in der Aufzählung der Entscheidung.
-- **F-5 — Register:** Die Drift der Kopien in `cli-json-contract.md` §2 und §3 entstand im Vorgang [`slice-v2-spec-devcontainer-start`](../done/slice-v2-spec-devcontainer-start.md), der in [`BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht`](../observations/BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht/observation.md) schon einen Beleg trägt. Vorschlag: Nachtrag in dessen Evidence-Datei, kein neuer Zähler (Register-README: ein Vorgang zählt einmal); die Alternative, eine eigene Evidence-Datei, bräuchte einen anderen abgeschlossenen Vorgang als Kennung.
+- **F-1 — Wortlaut:** Stellen 1 bis 3 (Lastenheft) und S1 bis S5 (Spezifikation) freigegeben, wie vorgelegt oder geändert. — *Entschieden:* freigegeben wie vorgelegt.
+- **F-2 — Beispiele:** [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) („Bei gruppierten Befehlen wie …“) und [`LH-SA-CLI-001`](../../../../spec/lastenheft.md#lh-sa-cli-001--befehlsstruktur) („z. B. `template`, `config`“) bleiben (Vorschlag) oder werden angeglichen (dann je eine weitere Stelle im selben CR). — *Entschieden:* sie bleiben unverändert.
+- **F-3 — Form:** Variante A (Pflicht einmal, im Feld `subcommand`; Teilsatz im Absatz entfällt; Vorschlag) oder Variante B (Liste an beiden Stellen). — *Entschieden:* Variante A.
+- **F-4 — Handbuch:** `show` bei `config` in der Zeile `subcommand` mitnehmen (Vorschlag: ja, ein Wort in der Zeile, die die jetzt bindende Pflicht für Nutzer beschreibt) oder streichen; das Handbuch stand nicht in der Aufzählung der Entscheidung. — *Entschieden:* mitnehmen, nur mit Werten, die der Code setzt.
+- **F-5 — Register:** Die Drift der Kopien in `cli-json-contract.md` §2 und §3 entstand im Vorgang [`slice-v2-spec-devcontainer-start`](../done/slice-v2-spec-devcontainer-start.md), der in [`BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht`](../observations/BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht/observation.md) schon einen Beleg trägt. Vorschlag: Nachtrag in dessen Evidence-Datei, kein neuer Zähler (Register-README: ein Vorgang zählt einmal); die Alternative, eine eigene Evidence-Datei, bräuchte einen anderen abgeschlossenen Vorgang als Kennung. — *Entschieden:* Nachtrag, kein neuer Zähler, keine neue Datei.
 
 Unabhängig von [`slice-cr-lastenheft-messstaende`](slice-cr-lastenheft-messstaende.md) und dem Folge-CR für Colima aus [`slice-v1-devcontainer-start-colima-messung`](slice-v1-devcontainer-start-colima-messung.md): wer zuerst ins Lastenheft schreibt, bekommt die kleinere Versionsnummer.
 
@@ -261,7 +261,7 @@ DoD vollständig, Review-Report und Verification-Evidence liegen vor, Freigabe d
 
 ## 6. Risiken und offene Punkte
 
-- **Der Wortlaut wird nicht freigegeben oder geändert.** — **Ausgang:** weiter offen; Rückführung nach `open`, das Lastenheft bleibt unverändert.
+- **Der Wortlaut wird nicht freigegeben oder geändert.** — **Ausgang:** entfallen; der Projektinhaber hat ihn am 2026-10-21 unverändert freigegeben (§7).
 - **Die Versionsnummer kollidiert** mit [`slice-cr-lastenheft-messstaende`](slice-cr-lastenheft-messstaende.md) oder dem Folge-CR für Colima. — **Ausgang:** weiter offen; Version ist die nächste freie zum Zeitpunkt des Commits, Versionsangaben im jeweils anderen offenen Slice werden nachgezogen (Zeile in §3).
 - **Die Vorab-Suche übersieht eine weitere Kopie** ([`BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht`](../observations/BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht/observation.md), Schwelle erreicht). — **Ausgang:** weiter offen; Suche mit Feldern, Werten und Aufzählungen (§3), Wiederholung durch den Implementer, Review prüft die Fundstellen.
 - **Vertragstext ändert sich nach dem Review** ([`BEO-DOK/vertragsaenderung-nach-review`](../observations/BEO-DOK/vertragsaenderung-nach-review/observation.md)). — **Ausgang:** weiter offen; Nachlauf-Review über den Diff (DoD).
@@ -271,7 +271,15 @@ DoD vollständig, Review-Report und Verification-Evidence liegen vor, Freigabe d
 
 ## 7. Closure-Notiz
 
-*Wird bei der Closure geschrieben; vorher leer.*
+*Die Closure-Notiz wird bei der Closure geschrieben. Beim Start vermerkt sind nur die Entscheidungen des Projektinhabers.*
+
+**Entscheidungen des Projektinhabers (2026-10-21, im Gespräch; an den Implementer übermittelt durch den Hauptagenten, beim Start vermerkt).**
+
+1. **F-1 — Wortlaut freigegeben:** Lastenheft Stellen 1 bis 3 und Spezifikation S1 bis S5, wie in §1 vorgeschlagen.
+2. **F-3 — Variante A:** Die Pflicht steht nur im Spiegelstrich `subcommand` des Minimalkontrakts; der Teilsatz „bei `template` und `config` ist `subcommand` verpflichtend“ im Absatz „Für `--json`-Antworten gilt zusätzlich“ entfällt; die Historie-Zeile `0.19.0` trägt beide Halbsätze.
+3. **F-2 — Beispiele bleiben:** Die Beispielsätze in [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run) und [`LH-SA-CLI-001`](../../../../spec/lastenheft.md#lh-sa-cli-001--befehlsstruktur) bleiben unverändert.
+4. **F-4 — Handbuch mitnehmen:** In der Tabellenzeile `subcommand` wird bei `config` der Wert `show` ergänzt; die Zeile nennt nur Werte, die der Code setzt. Gelesen in `internal/adapter/driving/cli/config.go`: `newConfigCommand` (`configArgsValidator(a, "show", …)`) und `runConfigShow` setzen `show`, `newConfigGetCommand`/`runConfigGet` `get`, `newConfigSetCommand`/`runConfigSet` `set`, `newConfigListCommand` (`configArgsValidator(a, "list", …)`) und `runConfigList` (`writeConfigEntries(out, "list", …)`) `list` — `list` in der heutigen Zeile stimmt.
+5. **F-5 — Register:** Nachtrag in der bestehenden Evidence-Datei `evidence/slice-v2-spec-devcontainer-start.md` von [`BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht`](../observations/BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht/observation.md), kein neuer Zähler und keine neue Datei; geschrieben bei der Closure (Plan-Tabelle §3).
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
