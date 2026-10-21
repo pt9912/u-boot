@@ -1,4 +1,4 @@
-# Review-Report: [`slice-v1-cli-devcontainer-up-down`](../plan/planning/in-progress/slice-v1-cli-devcontainer-up-down.md) — 2026-10-20
+# Review-Report: [`slice-v1-cli-devcontainer-up-down`](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md) — 2026-10-20
 
 **Review-Art:** Code-Review gegen Plan, Entscheidungen und Hard Rules (Wartbarkeit). Die DoD-Frage („Bauen wir es richtig?“) gehört dem Verifier und wird hier nicht beantwortet. Nichts vom Implementer ist ungeprüft übernommen; jede Einschätzung der Übergabe (§7) ist am Code, an den Tests oder an der ADR nachgelesen.
 
@@ -8,7 +8,7 @@
 
 **Eingangs-Kontext:**
 
-- [`slice-v1-cli-devcontainer-up-down`](../plan/planning/in-progress/slice-v1-cli-devcontainer-up-down.md) (§1 bis §8, einschließlich Plan-Tabelle, Zusage-Tabelle und Implementer-Übergabe)
+- [`slice-v1-cli-devcontainer-up-down`](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md) (§1 bis §8, einschließlich Plan-Tabelle, Zusage-Tabelle und Implementer-Übergabe)
 - [`ADR-0028`](../plan/adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) (Entscheidungen 3, 4, 6, 9) und [`ADR-0029`](../plan/adr/0029-devcontainer-start-exit-11-und-socket-haltung.md) (Entscheidungen 1, 3, 4; beide `Accepted`)
 - [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Lastenheft 0.18.0), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-NFA-USE-004`](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe), [`LH-FA-DEV-004`](../../spec/lastenheft.md#lh-fa-dev-004--benutzerrechte), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)
 - `AGENTS.md` §3.1 bis §3.10, §5 Regel 6; `harness/conventions.md` (Modus: alle berührten Sub-Areas Greenfield); Review-Skill und `harness/review.md`

@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** ohne Welle. Folge-Punkt von [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md) und von [`slice-v1-cli-devcontainer-up-down`](../in-progress/slice-v1-cli-devcontainer-up-down.md), eigener Slice nach dem Release (er hält die Closure der Welle und den Release nicht auf; es gibt keine Closure-Bedingung, die von der DoD dieses Slice verschieden wäre). Priorität V2.
+**Welle:** ohne Welle. Folge-Punkt von [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md) und von [`slice-v1-cli-devcontainer-up-down`](../done/slice-v1-cli-devcontainer-up-down.md), eigener Slice nach dem Release (er hält die Closure der Welle und den Release nicht auf; es gibt keine Closure-Bedingung, die von der DoD dieses Slice verschieden wäre). Priorität V2.
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Zusage-Menge: Linux-Host `amd64` mit lokaler Engine; Colima „nicht zugesagt“); [`ADR-0028`](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) Entscheidung 9 (Zeile „macOS, Colima, `arm64`“ als Einzelmessung des Projektinhabers) und Freigabe-Punkt h; [`LH-NFA-PORT-002`](../../../../spec/lastenheft.md#lh-nfa-port-002--keine-unnötigen-systemabhängigkeiten).
 
@@ -25,7 +25,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Ziel:** Der ausgelieferte Befehl `u-boot devcontainer up` und `down` ist auf macOS mit Colima (`arm64`) einmal gemessen, und das Protokoll entscheidet nach einer vorab festgelegten Regel, ob Colima in die Zusage aufgenommen wird.
 
-**Herkunft.** Der Befehl-Slice [`slice-v1-cli-devcontainer-up-down`](../in-progress/slice-v1-cli-devcontainer-up-down.md) hatte die Einzelmessung in seiner DoD. Entscheidung des Projektinhabers (2026-10-21): „Die Colima-Messung wird nach dem Release nachgeholt.“ Die DoD-Zeile ging dort per Plan-Eintrag (§6 und §7 des Befehl-Slice) hierher; Colima bleibt in Lastenheft, Handbuch und `CHANGELOG.md` „nicht zugesagt“, das Release behauptet nur Linux/`amd64`.
+**Herkunft.** Der Befehl-Slice [`slice-v1-cli-devcontainer-up-down`](../done/slice-v1-cli-devcontainer-up-down.md) hatte die Einzelmessung in seiner DoD. Entscheidung des Projektinhabers (2026-10-21): „Die Colima-Messung wird nach dem Release nachgeholt.“ Die DoD-Zeile ging dort per Plan-Eintrag (§6 und §7 des Befehl-Slice) hierher; Colima bleibt in Lastenheft, Handbuch und `CHANGELOG.md` „nicht zugesagt“, das Release behauptet nur Linux/`amd64`.
 
 **Vorhanden** (aus dem Befehl-Slice, nicht Teil dieses Slice): das Messskript `tools/messung/devcontainer-start-befehl/01-einzelmessung.sh`, das Protokoll-Gerüst `docs/messungen/slice-v1-cli-devcontainer-up-down/README.md` mit der Entscheidungsregel und ein Probelauf auf Linux (`rohdaten-00-probelauf-linux.txt`).
 

@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md). Vierter und letzter von vier Folge-Slices von [`slice-v1-devcontainer-start-ohne-cli`](../done/slice-v1-devcontainer-start-ohne-cli.md); nach [`slice-v1-cli-devcontainer-up-down`](../in-progress/slice-v1-cli-devcontainer-up-down.md) (Spezifikation nach dem Code, Muster [`slice-v2-spec-sandbox-egress-ollama`](../done/slice-v2-spec-sandbox-egress-ollama.md)). Priorität V2; Release: das nächste Minor nach `v0.12.0` (die Nummer vergibt der Release-Cut).
+**Welle:** [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md). Vierter und letzter von vier Folge-Slices von [`slice-v1-devcontainer-start-ohne-cli`](../done/slice-v1-devcontainer-start-ohne-cli.md); nach [`slice-v1-cli-devcontainer-up-down`](../done/slice-v1-cli-devcontainer-up-down.md) (Spezifikation nach dem Code, Muster [`slice-v2-spec-sandbox-egress-ollama`](../done/slice-v2-spec-sandbox-egress-ollama.md)). Priorität V2; Release: das nächste Minor nach `v0.12.0` (die Nummer vergibt der Release-Cut).
 
 **Bezug:** die neue Anforderung des Lastenhefts aus [`slice-cr-devcontainer-start-ohne-editor`](../done/slice-cr-devcontainer-start-ohne-editor.md), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-FA-CLI-007`](../../../../spec/lastenheft.md#lh-fa-cli-007--dry-run), [`LH-FA-DEV-007`](../../../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer); [`ADR-0028`](../../adr/0028-devcontainer-start-ohne-editor-hilfs-image.md) (muss `Accepted` sein; Entscheidung 10 nennt die Stellen).
 
@@ -27,7 +27,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Ausdrücklich NICHT in diesem Slice** — je Punkt mit Begründung:
 
-- **Code, Tests, Handbuch, `CHANGELOG.md`** — liegen in [`slice-v1-devcontainer-start-fundament`](../done/slice-v1-devcontainer-start-fundament.md) und [`slice-v1-cli-devcontainer-up-down`](../in-progress/slice-v1-cli-devcontainer-up-down.md).
+- **Code, Tests, Handbuch, `CHANGELOG.md`** — liegen in [`slice-v1-devcontainer-start-fundament`](../done/slice-v1-devcontainer-start-fundament.md) und [`slice-v1-cli-devcontainer-up-down`](../done/slice-v1-cli-devcontainer-up-down.md).
 - **`spec/lastenheft.md`** — der CR liegt davor ([`slice-cr-devcontainer-start-ohne-editor`](../done/slice-cr-devcontainer-start-ohne-editor.md)); die Spezifikation präzisiert das Lastenheft, erweitert es nie.
 - **Pins, Digests, Versionen im Wortlaut der Spezifikation** — sie stehen in den eingebetteten Dateien und im Golden Case des Fundament-Slice (ein Stand, kein Zustand); die Spezifikation nennt die Pin-Form, nicht die Zahlen.
 - **Messstände** — sie stehen im Handbuch und im Messprotokoll; die Spezifikation führt Zusagen und Grenzen als Zielbild (Muster [`slice-v2-spec-zielbild`](../done/slice-v2-spec-zielbild.md)).
@@ -65,7 +65,7 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; sie wird n
 
 ## 4. Trigger
 
-**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-v1-cli-devcontainer-up-down`](../in-progress/slice-v1-cli-devcontainer-up-down.md) ist geschlossen (Spezifikation nach dem Code); kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-v1-cli-devcontainer-up-down`](../done/slice-v1-cli-devcontainer-up-down.md) ist geschlossen (Spezifikation nach dem Code); kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benannt:**
 
@@ -81,7 +81,7 @@ DoD vollständig, Review-Report und Verification-Evidence liegen vor, die Beleg-
 - **Die Spezifikation sagt mehr, als die Tests tragen** (Bedingung zu Engines, Pfaden, Plattformen). — **Ausgang:** weiter offen; die Beleg-Tabelle ist das Gegenmittel ([`BEO-DOK/spec-bedingung-ohne-code-entsprechung`](../observations/BEO-DOK/spec-bedingung-ohne-code-entsprechung/observation.md), [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)).
 - **Die Sicht trägt einen Meilenstein-, Slice- oder ADR-Bezug.** — **Ausgang:** weiter offen; `AGENTS.md` §3.4 und der Reviewer; die Sicht beschreibt Zustand, nicht Verlauf.
 - **Eine weitere Stelle zählt die Befehle mit Fallback-Ausweisung auf**, die der Architect nicht gelesen hat. — **Ausgang:** weiter offen; Suche über die Befehlsnamen und Lesen jedes Treffers (Muster [`BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht`](../observations/BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht/observation.md)).
-- **Übernommene Entscheidungen des Architect aus dem Befehl-Slice** ([`slice-v1-cli-devcontainer-up-down`](../in-progress/slice-v1-cli-devcontainer-up-down.md) §7, Verification V-10 und Befunde 5 und 8, Review F-14): (a) Die Ausweisung der Socket-Lockerung erscheint auch bei Exit 11 aus der Vorab-Prüfung, weil der Launcher prüft und startet in einem Aufruf; ob ein Port-Schritt `Preflight` die Menge auf gestartete Hilfs-Container verkleinern soll, ist offen. (b) Ob die Spezifikation zu `updateRemoteUserUID` etwas sagt: beobachtet ist, dass der Benutzer die UID 1000 behält; die Ursache ist nicht getrennt, die Stelle sagt höchstens die Beobachtung. (c) F-14: die Nachführung von [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) und [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) gehört in diesen Slice. — **Ausgang:** weiter offen; Entscheidung des Architect, hier kein Text.
+- **Übernommene Entscheidungen des Architect aus dem Befehl-Slice** ([`slice-v1-cli-devcontainer-up-down`](../done/slice-v1-cli-devcontainer-up-down.md) §7, Verification V-10 und Befunde 5 und 8, Review F-14): (a) Die Ausweisung der Socket-Lockerung erscheint auch bei Exit 11 aus der Vorab-Prüfung, weil der Launcher prüft und startet in einem Aufruf; ob ein Port-Schritt `Preflight` die Menge auf gestartete Hilfs-Container verkleinern soll, ist offen. (b) Ob die Spezifikation zu `updateRemoteUserUID` etwas sagt: beobachtet ist, dass der Benutzer die UID 1000 behält; die Ursache ist nicht getrennt, die Stelle sagt höchstens die Beobachtung. (c) F-14: die Nachführung von [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet) und [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) gehört in diesen Slice. — **Ausgang:** weiter offen; Entscheidung des Architect, hier kein Text.
 
 ## 7. Closure-Notiz
 

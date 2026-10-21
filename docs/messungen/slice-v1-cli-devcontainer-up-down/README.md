@@ -1,7 +1,7 @@
 # Messprotokoll: Einzelmessung des Befehls `devcontainer up` und `down`
 
 Ablauf und Rohdaten der Einzelmessung des ausgelieferten Befehls aus dem Slice
-[`slice-v1-cli-devcontainer-up-down`](../../plan/planning/in-progress/slice-v1-cli-devcontainer-up-down.md).
+[`slice-v1-cli-devcontainer-up-down`](../../plan/planning/done/slice-v1-cli-devcontainer-up-down.md).
 Das Skript liegt unter `tools/messung/devcontainer-start-befehl/` (Ablage:
 [`docs/messungen/README.md`](../README.md)). Keine Zahl dieses Protokolls ist eine Zusage.
 

@@ -1295,8 +1295,8 @@ in derselben PR ergänzen.
 | `logs` ([slice-v1-cli-json-dry-run-logs](../plan/planning/done/slice-v1-cli-json-dry-run-logs.md)) | — | — | — | — | — | — | — | — |
 | `config set` ([slice-v1-cli-json-dry-run-config](../plan/planning/done/slice-v1-cli-json-dry-run-config.md)) | ✓ (genau eine Zeile — `u-boot.yaml`; Scalar-`PatchScalar` oder Listen-`Marshal`-Rewrite) | — | — | — | — | — | — | — |
 | `egress list` ([slice-v1-cli-egress-anzeige](../plan/planning/done/slice-v1-cli-egress-anzeige.md); read-only, nur `Exists`/`ReadFile` auf `u-boot.yaml` und `.git/config`) | — | — | — | — | — | — | — | — |
-| `devcontainer up` ([slice-v1-cli-devcontainer-up-down](../plan/planning/in-progress/slice-v1-cli-devcontainer-up-down.md); liest `.devcontainer/devcontainer.json` und `u-boot.yaml`, schreibt keine Projektdatei) | — | — | — | — | — | — | — | — |
-| `devcontainer down` ([slice-v1-cli-devcontainer-up-down](../plan/planning/in-progress/slice-v1-cli-devcontainer-up-down.md); liest nichts, schreibt nichts) | — | — | — | — | — | — | — | — |
+| `devcontainer up` ([slice-v1-cli-devcontainer-up-down](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md); liest `.devcontainer/devcontainer.json` und `u-boot.yaml`, schreibt keine Projektdatei) | — | — | — | — | — | — | — | — |
+| `devcontainer down` ([slice-v1-cli-devcontainer-up-down](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md); liest nichts, schreibt nichts) | — | — | — | — | — | — | — | — |
 
 Alle modifying-Subcommands sind damit migriert (`doctor`, `add`,
 `init`, `generate`, `remove`, `up`, `down`, `logs`, `config`).
