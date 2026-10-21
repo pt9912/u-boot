@@ -174,7 +174,7 @@ func TestFullEnvelope_EmptyArraysSerialiseAsBracketBracket(t *testing.T) {
 
 // TestMinimalEnvelope_SubcommandOmittedWhenEmpty pins that
 // Subcommand is omitempty (LH-NFA-USE-004: optional for non-grouped
-// commands, mandatory for template/config).
+// commands, mandatory for template, config, egress and devcontainer).
 func TestMinimalEnvelope_SubcommandOmittedWhenEmpty(t *testing.T) {
 	raw, err := cli.MinimalEnvelopeForTest("doctor", "", nil, 0)
 	if err != nil {
@@ -189,8 +189,9 @@ func TestMinimalEnvelope_SubcommandOmittedWhenEmpty(t *testing.T) {
 	}
 }
 
-// TestMinimalEnvelope_SubcommandPresentWhenSet pins that the
-// template/config gruppierten Befehle carry subcommand verbatim.
+// TestMinimalEnvelope_SubcommandPresentWhenSet pins that a set
+// subcommand is carried verbatim, the form of the grouped commands
+// template, config, egress and devcontainer (shown with `template list`).
 func TestMinimalEnvelope_SubcommandPresentWhenSet(t *testing.T) {
 	raw, err := cli.MinimalEnvelopeForTest("template", "list", nil, 0)
 	if err != nil {

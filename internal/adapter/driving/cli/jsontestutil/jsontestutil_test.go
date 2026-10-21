@@ -127,12 +127,60 @@ func TestAssertMinimalEnvelope_RejectsMissingRequired(t *testing.T) {
 	}
 }
 
-func TestAssertMinimalEnvelope_RejectsBadSubcommandForTemplate(t *testing.T) {
+// TestAssertMinimalEnvelope_RequiresSubcommandForGroupedCommands pins the
+// rule of LH-NFA-USE-004 without a [jsontestutil.WithSubcommand] pin: for
+// each grouped command (template, config, egress, devcontainer) an envelope
+// without `subcommand` and one with an empty `subcommand` are reported, one
+// with a value passes; `doctor` without `subcommand` passes.
+func TestAssertMinimalEnvelope_RequiresSubcommandForGroupedCommands(t *testing.T) {
+	forms := []struct {
+		name     string
+		field    string
+		required bool
+	}{
+		{"missing", "", true},
+		{"empty", `"subcommand":"",`, true},
+		{"set", `"subcommand":"list",`, false},
+	}
+	for _, cmd := range []string{"template", "config", "egress", "devcontainer"} {
+		want := fmt.Sprintf("subcommand required when command == %q", cmd)
+		for _, f := range forms {
+			t.Run(cmd+"/"+f.name, func(t *testing.T) {
+				r := newRecorder(t)
+				raw := []byte(`{"status":"ok","command":"` + cmd + `",` + f.field + `"diagnostics":[],"exitCode":0}`)
+				jsontestutil.AssertMinimalEnvelope(r, raw)
+				if got := containsSubstring(r.errors, want); got != f.required {
+					t.Errorf("reported %q = %v, want %v; errors=%v", want, got, f.required, r.errors)
+				}
+				if !f.required && len(r.errors) != 0 {
+					t.Errorf("expected no errors, got %v", r.errors)
+				}
+			})
+		}
+	}
+	t.Run("doctor/missing", func(t *testing.T) {
+		r := newRecorder(t)
+		raw := []byte(`{"status":"ok","command":"doctor","diagnostics":[],"exitCode":0}`)
+		jsontestutil.AssertMinimalEnvelope(r, raw)
+		if len(r.errors) != 0 {
+			t.Errorf("subcommand is optional for doctor, got errors: %v", r.errors)
+		}
+	})
+}
+
+// TestAssertFullEnvelope_RequiresSubcommandForGroupedCommands pins that the
+// full-schema helper applies the same rule (LH-NFA-USE-004): a preview
+// envelope of `config` without `subcommand` is reported.
+func TestAssertFullEnvelope_RequiresSubcommandForGroupedCommands(t *testing.T) {
 	r := newRecorder(t)
-	raw := []byte(`{"status":"ok","command":"template","diagnostics":[],"exitCode":0}`)
-	jsontestutil.AssertMinimalEnvelope(r, raw)
-	if !containsSubstring(r.errors, "subcommand required") {
-		t.Errorf("expected subcommand-required reject for command=template, errors=%v", r.errors)
+	raw := []byte(`{
+		"status":"ok","command":"config",
+		"dryRun":true,"diff":false,"plannedFiles":[],"changes":[],
+		"diagnostics":[],"exitCode":0
+	}`)
+	jsontestutil.AssertFullEnvelope(r, raw)
+	if !containsSubstring(r.errors, `subcommand required when command == "config"`) {
+		t.Errorf("expected subcommand-required reject for command=config, errors=%v", r.errors)
 	}
 }
 

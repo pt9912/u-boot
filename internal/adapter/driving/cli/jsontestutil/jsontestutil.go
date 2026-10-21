@@ -52,8 +52,9 @@ func WithCommand(cmd string) AssertOption {
 }
 
 // WithSubcommand pinnt den `subcommand`-Wert. LH-NFA-USE-004 fordert
-// `subcommand`-Pflicht bei `command ∈ {template, config}` —
-// wird vom Helper bei den beiden Commands auch ohne Option geprüft.
+// `subcommand`-Pflicht bei `command ∈ {template, config, egress,
+// devcontainer}` — wird vom Helper bei diesen vier Commands auch ohne
+// Option geprüft.
 func WithSubcommand(sub string) AssertOption {
 	return func(c *assertConfig) { c.expectedSubcommand = sub }
 }
@@ -111,13 +112,14 @@ func WithDataKeyPresent(key string, value any) AssertOption {
 	}
 }
 
-// AssertMinimalEnvelope prüft den Minimalkontrakt aus LH-NFA-USE-
-// 004 LH-NFA-USE-004 gegen raw. Failures via t.Errorf — Helper failt nicht
+// AssertMinimalEnvelope prüft den Minimalkontrakt aus LH-NFA-USE-004
+// gegen raw. Failures via t.Errorf — Helper failt nicht
 // fatal, damit Tests mehrere Befunde gleichzeitig sehen.
 //
 // Geprüft wird:
 //   - Pflicht-Set: status, command, diagnostics, exitCode
-//     (subcommand Pflicht bei template/config, sonst optional)
+//     (subcommand Pflicht bei template/config/egress/devcontainer,
+//     sonst optional)
 //   - status ∈ {ok, warn, error}
 //   - diagnostics[i].level ∈ {warn, error} (NICHT ok, NICHT info)
 //   - diagnostics[i].code in DefaultAllowedCodes oder LH-konform
@@ -239,8 +241,9 @@ func checkSubcommand(t testing.TB, env map[string]any, cfg assertConfig) {
 	cmd, _ := env["command"].(string)
 	sub, hasSub := env["subcommand"].(string)
 
-	// LH-NFA-USE-004: subcommand Pflicht bei template/config.
-	if cmd == "template" || cmd == "config" {
+	// LH-NFA-USE-004: subcommand Pflicht bei den gruppierten Befehlen
+	// template, config, egress und devcontainer.
+	if slices.Contains([]string{"template", "config", "egress", "devcontainer"}, cmd) {
 		if !hasSub || sub == "" {
 			t.Errorf("subcommand required when command == %q (LH-NFA-USE-004)", cmd)
 		}
