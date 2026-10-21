@@ -6,7 +6,7 @@ flach unter `docs/plan/planning/`; bei Closure wandert sie per `git mv` nach
 **Geplante Wellen bekommen noch keine Datei:** Sie stehen in der Roadmap unter
 *Nächste Wellen* und nirgends sonst — zwei Positionen, nicht drei.
 
-**Zielmeilenstein:** Release-Version, das nächste Minor-Release nach `v0.12.0` (Priorität V2); die Nummer vergibt der Release-Cut. Die Welle ist diesem Release zugeordnet (§5). *Vermerk 2026-10-21 (Release-Cut):* vergeben: `v0.13.0`, vom Projektinhaber bestätigt ([`slice-v1-release-cut-v0.13.0`](../in-progress/slice-v1-release-cut-v0.13.0.md) §7).
+**Zielmeilenstein:** Release-Version, das nächste Minor-Release nach `v0.12.0` (Priorität V2); die Nummer vergibt der Release-Cut. Die Welle ist diesem Release zugeordnet (§5). *Vermerk 2026-10-21 (Release-Cut):* vergeben: `v0.13.0`, vom Projektinhaber bestätigt ([`slice-v1-release-cut-v0.13.0`](../done/slice-v1-release-cut-v0.13.0.md) §7).
 
 **Verantwortlich:** pt9912. **Datum:** 2026-10-20.
 

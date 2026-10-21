@@ -1,4 +1,4 @@
-# Verification-Report: [`slice-v1-release-cut-v0.13.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.13.0.md) — 2026-10-21
+# Verification-Report: [`slice-v1-release-cut-v0.13.0`](../plan/planning/done/slice-v1-release-cut-v0.13.0.md) — 2026-10-21
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review, repariert nichts). Frage: Wurde der Cut richtig gebaut, gemessen an Plan, DoD, Entscheidungen des Projektinhabers und Sensors? Form nach [`harness/verification.md`](../../harness/verification.md). Kein Inhalt geändert außer dieser Datei, nichts committet, nichts gepusht, kein Tag, kein `gh workflow run`; `gh` nur lesend.
 
@@ -11,7 +11,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-release-cut-v0.13.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.13.0.md)
+- Slice: [`slice-v1-release-cut-v0.13.0`](../plan/planning/done/slice-v1-release-cut-v0.13.0.md)
 - IDs: [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-FA-DIAG-002`](../../spec/lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen), [ADR-0028](../plan/adr/0028-devcontainer-start-ohne-editor-hilfs-image.md), [ADR-0029](../plan/adr/0029-devcontainer-start-exit-11-und-socket-haltung.md), [ADR-0026](../plan/adr/0026-upstream-dns-im-sandbox-devcontainer-nur-fuer-den-dnsmasq.md), [ADR-0027](../plan/adr/0027-egress-init-wiederholungslauf-atomar.md), [ADR-0004](../plan/adr/0004-ci-system.md), [ADR-0007](../plan/adr/0007-distributionswege-ghcr.md), [ADR-0016](../plan/adr/0016-homebrew-distribution-per-tap.md), [ADR-0017](../plan/adr/0017-linux-pakete-nfpm.md)
 - Artefakte: `CHANGELOG.md`, `README.md`, `README.de.md`, `docs/user/benutzerhandbuch.md`, `cmd/uboot/main.go`, `repo.mk`, `Dockerfile`, `.github/workflows/ci.yml`, `docs/maintainer/quality.md`, `docs/maintainer/releasing.md`, Roadmap, `open/README.md`, Colima-Folge-Slice, Vermerk im Welle-Kopf, Review-Report
 
