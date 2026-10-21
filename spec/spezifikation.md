@@ -273,7 +273,7 @@ Für `--json`-Antworten gilt zusätzlich:
 - `diagnostics.code` folgt der Konvention: LH-Kennung der verursachenden Anforderung (z. B. [`LH-FA-DEV-003`](lastenheft.md#lh-fa-dev-003--devcontainer-features)). Tool-interne Codes ohne LH-Bezug dürfen nur dann verwendet werden, wenn ihre Bedeutung in der Dokumentation festgehalten ist (Verweis: [`LH-FA-CLI-007`](lastenheft.md#lh-fa-cli-007--dry-run)).
 - `diagnostics.file` ist optional.
 - `status` ist an den höchsten in `diagnostics` enthaltenen `level` gekoppelt: `error` → `status == "error"`; `warn` ohne `error` → `status == "warn"`; sonst `status == "ok"`.
-- Bei `command == "template"`, `command == "config"` oder `command == "devcontainer"` ist `subcommand` verpflichtend.
+- Bei `command == "template"`, `command == "config"`, `command == "egress"` oder `command == "devcontainer"` ist `subcommand` verpflichtend.
 - Die Felder `status`, `command`, `diagnostics` und `exitCode` sind minimal verpflichtend und sollten mit anderen Feldern ergänzt werden.
 
 ### LH-FA-CLI-006.a — Zuordnung von Fehlern zu Exit-Codes
@@ -819,7 +819,7 @@ Für `--dry-run --json` ist die Ausgabe mindestens wie folgt als maschinenlesbar
   "properties": {
     "subcommand": {
       "type": "string",
-      "description": "Unterkommando bei gruppierten Hauptkommandos wie `template`, `config` oder `devcontainer`"
+      "description": "Unterkommando der gruppierten Hauptkommandos `template`, `config`, `egress` und `devcontainer`"
     },
     "status": {
       "type": "string",
@@ -907,6 +907,17 @@ Für `--dry-run --json` ist die Ausgabe mindestens wie folgt als maschinenlesbar
     {
       "if": {
         "properties": {
+          "command": { "const": "egress" }
+        },
+        "required": ["command"]
+      },
+      "then": {
+        "required": ["subcommand"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
           "command": { "const": "devcontainer" }
         },
         "required": ["command"]
@@ -923,6 +934,8 @@ Für `--dry-run --json` ist die Ausgabe mindestens wie folgt als maschinenlesbar
 Der Wert `egress` gehört zum Feld `command` für die `--json`-Ausgabe von `u-boot egress list` ([`LH-NFA-USE-004`](lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) bindet alle `--json`-Ausgaben an dieses Enum); der Befehl setzt `subcommand: "list"` und weist `--dry-run` und `--diff` ab ([`SPEC-046`](#spec-046--egress-anzeige-u-boot-egress-list-berechnung-ausgabe-und-abgrenzung)).
 
 Der Wert `devcontainer` gehört zum Feld `command` für die `--json`-Ausgabe von `u-boot devcontainer up` und `u-boot devcontainer down`; der Befehl setzt `subcommand` auf `up` beziehungsweise `down` und weist `--dry-run` und `--diff` ab ([`SPEC-049`](#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes)).
+
+Die Pflicht von `subcommand` für `template`, `config`, `egress` und `devcontainer` gilt für jede `--json`-Ausgabe ([`LH-NFA-USE-004.a`](#lh-nfa-use-004a--regeln-für---json-antworten)); `allOf` gibt sie für das Schema der Vorschau wieder, auch für `egress` und `devcontainer`, die keine Vorschau-Ausgabe erzeugen.
 
 ### SPEC-002 — Beispielinstanz einer Vorschau-Ausgabe (`add --dry-run --json`)
 
@@ -1347,3 +1360,4 @@ Schnittstellen zu Drittsystemen mit Versionsannahme (Docker, Compose, Devcontain
 | 2026-10-20 | `SPEC-048` auf die gepinnte Stärke begrenzt: Aussagen zum Wiederholungslauf, zur Ablehnung durch `nft`, zu den Abbruchfällen 3 und 4, zur Doctor-Meldung und zur IPv4-Beschränkung der Upstream-Regeln. |
 | 2026-10-20 | `SPEC-048` und `SPEC-045` führen nur noch Bedingungen mit pinnendem Test: gestrichen sind der Weiterlauf bestehender Verbindungen, die IPv4-Beschränkung samt Set-Typ, die Pid-Datei als Ursache des Falls 4, das „erste“ der Abbruchfälle 3 und 4 und der Satz zum Teststand der Verkettung. |
 | 2026-10-21 | Devcontainer ohne Editor festgelegt, deckungsgleich mit Lastenheft 0.18.0 und Code (`SPEC-049`): Aufruf, Voraussetzungen und Vorab-Prüfung der Engine, Hilfs-Image mit Pin-Form, Argumente des Hilfs-Containers, Spiegelpfad, Umgebung und Maskierung samt Grenzen, Abbildung eines Startscript-Abbruchs auf Exit-Code `11`, Ausweisung des Sockets, Ausgabe unter `--quiet` und `--json`, Exit-Codes. `SPEC-043`, `SPEC-045`, `SPEC-001`, `SPEC-024`, `SPEC-048` und [`LH-FA-DEV-007.a`](#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten) nennen den Befehl in ihren Aufzählungen. Nicht durch einen Test belegt und deshalb nicht zugesagt sind der Exit-Code bei einem `failed` aus einem früheren Lauf und das Verhalten der Vorab-Prüfung ohne Compose-Plugin; nicht jede Bedingung ist durch eine Mutation des Codes als wirksam gesehen. |
+| 2026-10-21 | [`LH-NFA-USE-004.a`](#lh-nfa-use-004a--regeln-für---json-antworten) und `SPEC-001` folgen dem Lastenheft 0.19.0: `subcommand` ist auch bei `egress` verpflichtend (Regel, Beschreibung des Feldes, Block in `allOf`); ein Absatz nennt die Herkunft der Pflicht aus dem Minimalkontrakt. |
