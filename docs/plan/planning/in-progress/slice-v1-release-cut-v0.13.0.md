@@ -80,7 +80,7 @@ Jede neue Aussage in Handbuch, CHANGELOG und READMEs braucht einen Beleg nach [`
 - **Andere Änderungen an der Pipeline** als die Eingabe `version` (L-10): kein Trivy-Pin-Bump (das Log meldet `0.76.0` als verfügbar; ein Bump ist eine eigene Entscheidung, [`AGENTS.md`](../../../../AGENTS.md) §3.6), keine Änderung an `publish.yml`, `integration.yml`, Runner-Labels, Required Checks oder am Kopfkommentar von `integration.yml` (offene Entscheidung (f)).
 - **Pin-Inventur als Schritt in `releasing.md`** ([`BEO-APP/podman-static-pin-alterung`](../observations/BEO-APP/podman-static-pin-alterung/observation.md)): als Vorschlag vorgelegt, Entscheidung des Projektinhabers steht aus; der Cut verkörpert nichts und liest die Pins nur als Risiko (§6).
 - **Änderung von Lastenheft, Spezifikation oder ADRs:** Lastenheft `0.18.0` bleibt; [`ADR-0004`](../../adr/0004-ci-system.md) ist `Accepted` und bleibt unverändert, auch wo ihr Text die Eingabe `trivy-version` nennt (§6).
-- **Die Colima-Messung** ([`slice-v1-devcontainer-start-colima-messung`](slice-v1-devcontainer-start-colima-messung.md)): Folge-Slice mit dem Trigger „Release geschnitten“; der Cut vermerkt den Eintritt bei der Closure (§7), misst nicht.
+- **Die Colima-Messung** ([`slice-v1-devcontainer-start-colima-messung`](../open/slice-v1-devcontainer-start-colima-messung.md)): Folge-Slice mit dem Trigger „Release geschnitten“; der Cut vermerkt den Eintritt bei der Closure (§7), misst nicht.
 - **Aufräumen alter Vorab-Tags** (`v0.11.0-rc.1`, GHCR-Tags `0.10.0-rc.*`): beim Projektinhaber offen seit dem Cut `v0.12.0`, nicht freigegeben.
 
 ## 2. Definition of Done
@@ -125,7 +125,7 @@ Jede Aussage in dieser Tabelle ist an der genannten Stelle gelesen (Stand 2026-1
 | `docs/plan/planning/done/welle-devcontainer-start-ohne-editor.md` | update (datierter Vermerk) | `:9` *Zielmeilenstein* „die Nummer vergibt der Release-Cut“: Vermerk „vergeben: `v0.13.0`“ an den Absatz angehängt, kein Ursprungstext gelöscht (Muster: Vermerke des Cuts `v0.12.0` in vier `done/`-Dateien). |
 | `docs/plan/planning/open/README.md` | update | Planner (dieser Commit): neue Zeile für diesen Slice. Cut: Zeile `:43` („Release das nächste Minor nach `v0.12.0`“) bekommt die Nummer. Die Moves ziehen den Link dieser Zeile per `make slice-mv` nach. |
 | `docs/plan/planning/open/slice-v1-devcontainer-start-colima-messung.md` | update (Closure, Planner) | `:76` Start-Trigger „das Release ist geschnitten (das nächste Minor nach `v0.12.0` …)“: Vermerk „eingetreten: Tag `v0.13.0`“ erst nach dem Tag (§7). |
-| `docs/plan/planning/open/slice-v1-release-cut-v0.13.0.md` (dieser Slice, wandert) | neu, update | Plan (Planner), Moves per `make slice-mv` nach `in-progress/` und `done/` (reine Commits, [`AGENTS.md`](../../../../AGENTS.md) §3.3), Umsetzung in §3 (Implementer), Fix-Runden, Closure (Planner). |
+| `docs/plan/planning/in-progress/slice-v1-release-cut-v0.13.0.md` (dieser Slice, wandert) | neu, update | Plan (Planner), Moves per `make slice-mv` nach `in-progress/` und `done/` (reine Commits, [`AGENTS.md`](../../../../AGENTS.md) §3.3), Umsetzung in §3 (Implementer), Fix-Runden, Closure (Planner). |
 | `docs/plan/planning/observations/BEO-E2E/ci-ueberspringt-nested-podman-build/state.md` | update (Closure) | Stand auf dem Push-Tip und im `publish`-Lauf (Zahl der SKIP, Betriebssystem des Runners, §6). |
 | `docs/plan/planning/observations/…` (weitere) | neu oder update, nur bei Befund (Closure) | Ein Vorgang zu [`BEO-DOK/plan-aussage-ueber-code`](../observations/BEO-DOK/plan-aussage-ueber-code/observation.md) oder [`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md) bekommt eine Evidence-Datei; keine Beobachtung angefallen ist ebenfalls eine Antwort (§7). |
 | `docs/reviews/<Datum>-slice-v1-release-cut-v0.13.0.md`, `docs/reviews/<Datum>-verification-slice-v1-release-cut-v0.13.0.md` | neu, durch Reviewer und Verifier | Review- und Verification-Report (nicht im Implementer-Diff). |
@@ -234,7 +234,7 @@ Der Ausgang jedes Risikos wird bei der Closure festgeschrieben.
 **Vorgemerkt für die Closure** (Nacharbeit nach [`releasing.md`](../../../maintainer/releasing.md) §7 und M8):
 
 - Tag-Hash (`git rev-parse v0.13.0`), Tag-Datum (`git log -1 --format=%cs v0.13.0`) gegen die fünf Datumsstellen aus M0; Lauf-IDs von `ci`, `integration-docker` (Push-Tip), `tap-check` und `publish`; Betriebssystem des `publish`-Laufs; Ergebnis von M6 und M7.
-- **Colima-Folge-Slice:** Der Start-Trigger von [`slice-v1-devcontainer-start-colima-messung`](slice-v1-devcontainer-start-colima-messung.md) („das Release ist geschnitten“, §4 dort) ist mit dem Tag eingetreten; Vermerk dort mit Tag `v0.13.0` und hier in den Folge-Slices. Er braucht weiter `Verantwortlich:` und einen macOS-Host mit Colima.
+- **Colima-Folge-Slice:** Der Start-Trigger von [`slice-v1-devcontainer-start-colima-messung`](../open/slice-v1-devcontainer-start-colima-messung.md) („das Release ist geschnitten“, §4 dort) ist mit dem Tag eingetreten; Vermerk dort mit Tag `v0.13.0` und hier in den Folge-Slices. Er braucht weiter `Verantwortlich:` und einen macOS-Host mit Colima.
 - Stand der Register-Einträge aus §6 und §8, je Risiko ein Ausgang.
 - Freigabe von Push und Tag: Wortlaut oder Zeitpunkt der ausdrücklichen Freigabe des Projektinhabers im Gespräch; wer Push und Tag ausführte.
 
