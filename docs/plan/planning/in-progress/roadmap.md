@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-In Arbeit: [`slice-cr-json-subcommand-pflicht`](slice-cr-json-subcommand-pflicht.md) (Lastenheft-CR ohne Welle: `subcommand` verpflichtend in der `--json`-Ausgabe der gruppierten Befehle `template`, `config`, `egress` und `devcontainer`, Spezifikation und Wächter in `jsontestutil`; kein Produktverhalten; Herkunft: offene Entscheidung (e) der Closure von [`welle-devcontainer-start-ohne-editor`](../done/welle-devcontainer-start-ohne-editor.md)).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
