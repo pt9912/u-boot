@@ -1,6 +1,6 @@
 # u-boot Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-10-20.
+**Status:** Aktiv. **Letzte Änderung:** 2026-10-21.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen (Kurs Modul 6, vendored unter
@@ -19,7 +19,7 @@ stehen in der Welle-Datei, nicht hier.
 
 Offen: [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md) (Devcontainer ohne Editor und ohne Node/CLI auf dem Host starten: `u-boot devcontainer up` und `down`; fünf Slices; Priorität V2, Release das nächste Minor nach `v0.12.0`, die Nummer vergibt der Release-Cut).
 
-In Arbeit: [`slice-v1-cli-devcontainer-up-down`](../done/slice-v1-cli-devcontainer-up-down.md) (Befehl `u-boot devcontainer up` und `down` mit Application, CLI, Ausgabe, Handbuch und Docker-Tests; dritter Folge-Slice von [`welle-devcontainer-start-ohne-editor`](../welle-devcontainer-start-ohne-editor.md)).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
