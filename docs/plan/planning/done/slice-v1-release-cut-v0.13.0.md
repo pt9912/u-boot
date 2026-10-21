@@ -334,6 +334,7 @@ Der Ausgang jedes Risikos wird bei der Closure festgeschrieben.
 - **Folge-Slices:** [`slice-v1-devcontainer-start-colima-messung`](../open/slice-v1-devcontainer-start-colima-messung.md) (Datei in `open/`): Start-Trigger „das Release ist geschnitten“ eingetreten mit dem Tag `v0.13.0` (Vermerk dort und in `open/README.md`); er braucht weiter `Verantwortlich:` und einen macOS-Host mit Colima. *Nächste Wellen* der Roadmap unverändert.
 - **Offen beim Projektinhaber:**
   - M7: Installation über den Tap auf einem Mac (`brew tap pt9912/u-boot`, `brew trust pt9912/u-boot`, `brew install u-boot` oder `brew upgrade u-boot`, `u-boot --version` = `0.13.0`).
+    *Vermerk 2026-10-21:* Der Projektinhaber hat M7 im Gespräch bestätigt: auf macOS meldet `u-boot --version` nach der Installation über den Tap `u-boot version 0.13.0` (Ausgabe vom Projektinhaber, vom Orchestrator nicht selbst gemessen; ob per `brew install` oder `brew upgrade`, ist nicht genannt).
   - V-1: Präzisierung von Handbuch §7 Schritt 3 („nach Strg-C während eines `postCreateCommand`“) mit dem nächsten Cut, optional.
   - Die offenen Entscheidungen (a) bis (k) der Welle-Closure (§6), darunter (k): keine Maschinenevidenz für verschachteltes Podman in der CI.
   - Die Vorschläge zu den Register-Einträgen über der Schwelle (Welle-Closure §7), darunter die Pin-Inventur zu `BEO-APP/podman-static-pin-alterung`.
