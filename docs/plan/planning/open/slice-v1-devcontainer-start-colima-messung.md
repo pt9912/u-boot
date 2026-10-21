@@ -73,7 +73,7 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; sie wird n
 
 ## 4. Trigger
 
-**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; **das Release ist geschnitten** (das nächste Minor nach `v0.12.0`, vergeben als `v0.13.0`; der Release-Cut-Slice liegt in `done/`); der Projektinhaber steht mit einem macOS-Host mit Colima bereit; kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; **das Release ist geschnitten** (das nächste Minor nach `v0.12.0`, vergeben als `v0.13.0`; der Release-Cut-Slice liegt in `done/`); der Projektinhaber steht mit einem macOS-Host mit Colima bereit; kein anderer Slice in `in-progress/` (WIP-Limit 1). *Vermerk 2026-10-21 (Closure des Release-Cut):* die Bedingung „das Release ist geschnitten“ ist eingetreten: Tag `v0.13.0` auf `df4e5cc3`, 2026-10-21; der Cut-Slice [`slice-v1-release-cut-v0.13.0`](../done/slice-v1-release-cut-v0.13.0.md) liegt in `done/`. Offen bleiben `Verantwortlich:` und der macOS-Host mit Colima.
 
 **Rückführungen — vorab benannt:**
 

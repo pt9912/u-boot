@@ -1,0 +1,5 @@
+# Ein CI-Lauf wird über die Ausgabe des Lese-Werkzeugs beurteilt, nicht über den Lauf
+
+**Sub-Area:** `docs/plan/` (Kürzel DOK, Greenfield laut [`harness/conventions.md`](../../../../../../harness/conventions.md#mr-006)) — Slice-Plan, Closure-Notiz und Verification-Report sind der Ort, an dem die Aussage über einen CI-Lauf steht.
+
+Eine Aussage über einen Job der CI (Betriebssystem des Runners, Zahl übersprungener Tests, ob eine Warnung ausgegeben wurde) stützt sich auf das, was ein Lese-Werkzeug zeigt, und nicht auf den Lauf. Zwei Formen: (1) `gh run view --job <id> --log` liefert keine Zeile, und der Text folgert „nicht gelesen“ oder „kein Log“, obwohl `gh api repos/<owner>/<repo>/actions/jobs/<id>/logs` das volle Log liefert; (2) eine Textsuche nach einer Warnung im Log trifft den mitgedruckten Quelltext des Schritt-Skripts (`echo "::warning::…"` im Run-Block), obwohl die Warnung nicht ausgegeben wurde — ausgegebene Warnungen stehen in den Annotationen des Jobs (`gh api repos/<owner>/<repo>/check-runs/<id>/annotations`). Kein Gate prüft das; ein Verifier findet es, wenn er den zweiten Weg geht.

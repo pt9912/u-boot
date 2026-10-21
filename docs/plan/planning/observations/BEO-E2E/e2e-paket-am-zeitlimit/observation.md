@@ -1,0 +1,5 @@
+# Das e2e-Paket überschreitet lokal das Zeitlimit von `make test-docker`; der Kommentar zum Limit trägt einen überholten Messstand
+
+**Sub-Area:** `internal/e2e` (Kürzel E2E, Greenfield laut [`harness/conventions.md`](../../../../../../harness/conventions.md#mr-006)) — dort liegen die Tests, deren Summe das Limit trifft; das Limit selbst steht im Ziel `test-docker` in `repo.mk` (`go test -v -tags docker -timeout 30m ./...`) und im Job `integration-docker` (`timeout-minutes: 30`).
+
+`make test-docker` endet auf einem Host mit Exit 2, weil das Paket `internal/e2e` das Limit `-timeout 30m` überschreitet (`panic: test timed out after 30m0s`), nicht weil ein Test rot ist: 0 `--- FAIL`, die Tests nach dem Abbruch ohne Ergebnis. Der Kopplungs-Kommentar im Ziel begründet das Limit mit „sieben bis elf Minuten (Colima, arm64)“; auf einem nativen `amd64`-Host, auf dem die in der CI übersprungenen Nested-Podman-Tests laufen, reicht das Limit nicht. Der Lauf zählt dann für die Release-Aussage nicht, und Tests, die nach dem Abbruch kämen, haben auf diesem Host kein Ergebnis.
