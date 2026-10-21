@@ -1,4 +1,4 @@
-# Review-Report: [`slice-cr-devcontainer-shell-und-zweites-up`](../plan/planning/in-progress/slice-cr-devcontainer-shell-und-zweites-up.md) — zweites Nachlauf-Review — 2026-10-21
+# Review-Report: [`slice-cr-devcontainer-shell-und-zweites-up`](../plan/planning/done/slice-cr-devcontainer-shell-und-zweites-up.md) — zweites Nachlauf-Review — 2026-10-21
 
 **Review-Art:** Nachlauf-Review eines Lastenheft-Diffs nach der Fix-Runde 2 ([`BEO-DOK/vertragsaenderung-nach-review`](../plan/planning/observations/BEO-DOK/vertragsaenderung-nach-review/observation.md)). Geprüft wird gegen die Entscheidungen des Projektinhabers zu Nachlauf-F-1 und Nachlauf-F-2 (CR-Slice §7, Punkte 10 bis 12), gegen [`ADR-0031`](../plan/adr/0031-devcontainer-shell-ohne-editor.md) Entscheidungen 1 bis 3 und gegen die Hard Rules (`AGENTS.md` §3.4, §3.10). Die DoD-Frage gehört dem Verifier.
 
