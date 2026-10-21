@@ -1,4 +1,4 @@
-# Verification-Report: [`slice-cr-json-subcommand-pflicht`](../plan/planning/in-progress/slice-cr-json-subcommand-pflicht.md) — 2026-10-21
+# Verification-Report: [`slice-cr-json-subcommand-pflicht`](../plan/planning/done/slice-cr-json-subcommand-pflicht.md) — 2026-10-21
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review, repariert nichts). Frage: Wurde der CR richtig gebaut, gemessen an Plan, DoD, den Entscheidungen des Projektinhabers und den Sensoren? Form nach [`harness/verification.md`](../../harness/verification.md). Außer dieser Datei ist nichts geändert, nichts committet, nichts gepusht. Jede Mutation ist zurückgesetzt, `git status` war danach jeweils leer.
 
@@ -17,7 +17,7 @@
 
 Scope:
 
-- Slice: [`slice-cr-json-subcommand-pflicht`](../plan/planning/in-progress/slice-cr-json-subcommand-pflicht.md)
+- Slice: [`slice-cr-json-subcommand-pflicht`](../plan/planning/done/slice-cr-json-subcommand-pflicht.md)
 - IDs: [`LH-NFA-USE-004`](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe). Berührt sind nur die Befehle aus [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) (`egress list`) und [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (`devcontainer up`/`down`), deren Text unverändert bleibt. Keine ADR ist berührt.
 - Artefakte: `spec/lastenheft.md`, `spec/spezifikation.md`, `jsontestutil.go`, `jsontestutil_test.go`, `jsonenvelope_test.go` (nur Kommentare), `docs/maintainer/cli-json-contract.md`, `docs/user/benutzerhandbuch.md`, Roadmap, `open/README.md`, Messstände-CR, Slice, Review-Report.
 
