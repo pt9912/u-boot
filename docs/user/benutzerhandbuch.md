@@ -1,8 +1,8 @@
 # Benutzerhandbuch: u-boot
 
 Handbuch-Version: 2.0
-Software-Version: v0.12.0
-Stand: 2026-10-20
+Software-Version: v0.13.0
+Stand: 2026-10-21
 
 ---
 
@@ -79,7 +79,7 @@ u-boot --version
 ```
 
 **Ergebnis:** Die installierte Version erscheint, zum Beispiel
-`u-boot version 0.12.0`.
+`u-boot version 0.13.0`.
 
 ### Binary (Linux, macOS, Windows)
 
@@ -105,7 +105,7 @@ Invoke-WebRequest `
 ```
 
 Für eine bestimmte Version ersetzen Sie `latest/download` durch
-`download/v0.12.0`. Die Prüfsummen aller Dateien stehen in `SHA256SUMS` am
+`download/v0.13.0`. Die Prüfsummen aller Dateien stehen in `SHA256SUMS` am
 jeweiligen Release.
 
 ### Homebrew (macOS)
@@ -132,7 +132,7 @@ Ein APT- oder DNF-Repository gibt es nicht; Sie laden das Paket und
 installieren es lokal:
 
 ```bash
-VERSION=0.12.0
+VERSION=0.13.0
 # Debian / Ubuntu
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"
@@ -815,6 +815,23 @@ Proxy-Variablen und Zugangsdaten für private Basis-Images reicht er nicht durch
 - `--dry-run` und `--diff` werden mit Exit-Code 2 abgewiesen, ebenso `u-boot devcontainer`
   ohne Unterbefehl: Der Befehl schreibt keine Projektdatei.
 
+**Im Container arbeiten.** Ohne Editor öffnen Sie eine Shell im Container mit `docker exec`.
+Container, Benutzer und Workspace stehen in der Erfolgsmeldung von `up`:
+
+```bash
+docker exec -it -u <Benutzer> -w <Workspace> <Container> bash
+```
+
+In dieser Shell gilt `remoteEnv` aus `devcontainer.json` nicht: Im Sandbox-Profil ist
+`GIT_TOKEN` dort nicht gesetzt (beobachtet in einem Lauf, Linux `amd64`, Docker 29.9.1). Eine
+Variable geben Sie mit `docker exec -e <NAME>` ausdrücklich mit; `docker` übernimmt dann den Wert
+aus Ihrer Umgebung, und ist die Variable dort nicht gesetzt, fehlt sie auch im Container
+(geprüft in einem Lauf mit `GIT_TOKEN`, Linux `amd64`, Docker 29.9.2):
+
+```bash
+docker exec -it -e GIT_TOKEN -u <Benutzer> -w <Workspace> <Container> bash
+```
+
 **Fallbacks nach dem Start.** Wie `doctor` und `generate devcontainer` weist `up` die
 Degradations-Fallbacks des Sandbox-Containers aus (Container ohne Daemon, `vfs`-Storage,
 Wegfall der Egress-Restriktion), mit dem Stand des letzten Starts. Der Befehl findet die
@@ -853,6 +870,17 @@ nicht früher; die Ursache ist nicht untersucht. `u-boot` wartet bis zu zehn Sek
 10,1 Sekunden in der CI, 10,5 Sekunden lokal bis zur Rückkehr) und entfernt dann den
 Hilfs-Container. Es bleibt kein Hilfs-Container zurück. Der Dev-Container, den die CLI
 bis dahin angelegt hat, bleibt bestehen.
+
+**Erneutes `up` nach einem Fehler oder Abbruch.** Beobachtet in je einem Lauf (Linux `amd64`,
+Docker 29.9.1): Endete `up` mit Exit-Code 12, weil ein `postStartCommand` mit einem Fehler
+endete, lief der Devcontainer weiter, und das folgende `up` endete mit Exit-Code 0 und
+`Devcontainer started`, ohne das `postStartCommand` erneut auszuführen. Nach Strg-C während
+eines `postCreateCommand` ebenso: Der Devcontainer lief weiter, das folgende `up` endete mit
+Exit-Code 0, und das abgebrochene `postCreateCommand` lief nicht erneut. Andere Fehler (etwa ein
+gescheiterter Bau) und Exit-Code 11 aus einem Startscript sind nicht gemessen. Ein Exit-Code 0
+des zweiten `up` heißt in diesen Fällen nicht, dass die Lebenszyklus-Befehle durchgelaufen
+sind. Abhilfe: `u-boot devcontainer up --recreate` entfernt den Container und legt ihn neu an;
+benannte Volumes bleiben erhalten.
 
 **Benutzer-ID.** Die Benutzer-ID im Container wird nicht an den Besitzer des Projektordners
 angepasst (beobachtet bei einem Ordner mit der UID 2000: der Benutzer behielt 1000). Die CLI
@@ -1878,7 +1906,10 @@ erzeugten Datei:
   `https`-Remotes; bei `ssh` gibt es keinen Schlüssel im Container).
 - Starten Sie den Container mit `u-boot devcontainer up`, reicht der Befehl nur den Namen
   der Variable durch; die Grenzen dieses Wegs (Metadaten bei `containerEnv`, Kommandozeile
-  im Hilfs-Container während eines Lebenszyklus-Befehls) stehen in Abschnitt 4.9.
+  im Hilfs-Container während eines Lebenszyklus-Befehls) stehen in Abschnitt 4.9. In einer
+  Shell, die Sie ohne Editor mit `docker exec` öffnen, gilt `remoteEnv` nicht, und `GIT_TOKEN`
+  ist dort nicht gesetzt; geben Sie die Variable mit `docker exec -e GIT_TOKEN` mit (Abschnitt
+  4.9, „Im Container arbeiten“).
 - Empfohlen: **kurzlebige, auf das Repository begrenzte Tokens**, nie ein
   privater Schlüssel im Container, und **Branch-Protection** im Remote, damit ein
   kompromittierter Agent nicht auf geschützte Branches schreiben kann.
@@ -2329,7 +2360,13 @@ lokale DNS-Server nicht startet oder nicht unter diesem Benutzer läuft; die Mel
    nicht ermittelbarer Zustand heißt nicht, dass nichts vorlag.
 2. Setzen Sie `devcontainer.sandbox.nestedRuntime` auf `none` und erzeugen Sie
    den Devcontainer neu, wenn Sie kein verschachteltes Podman brauchen.
-3. Weitere Abhilfen stehen in Abschnitt [4.11](#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten) unter „Verschachteltes Podman".
+3. Haben Sie den Container mit `u-boot devcontainer up` gestartet, legen Sie ihn nach einer
+   Änderung mit `u-boot devcontainer up --recreate` neu an. Ein erneutes `up` ohne
+   `--recreate` verwendet den bestehenden Container und führte in den beobachteten Fällen die
+   Lebenszyklus-Befehle nicht erneut aus (nach Exit-Code 12 und nach einem Abbruch, Abschnitt
+   [4.9](#49-einen-devcontainer-einrichten)); nach Exit-Code 11 aus einem Startscript ist das
+   nicht gemessen.
+4. Weitere Abhilfen stehen in Abschnitt [4.11](#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten) unter „Verschachteltes Podman".
 
 ### Wenn nichts davon hilft
 
@@ -2616,6 +2653,6 @@ Sie vorher Passwörter, Tokens und interne Adressen aus der Ausgabe.
 
 **Lizenz:** MIT, siehe `LICENSE` im Projektarchiv.
 
-**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.12.0. Prüfen Sie
+**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.13.0. Prüfen Sie
 mit `u-boot --version`, welche Version Sie einsetzen. Weicht sie ab, zeigt
 `u-boot <befehl> --help` den Stand Ihrer Version.

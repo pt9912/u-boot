@@ -8,9 +8,10 @@ Devcontainer-Konfiguration, Service-Add-Ons (PostgreSQL, Keycloak,
 OpenTelemetry, …) und wiederkehrende Artefakte (README, CHANGELOG,
 `.env.example`).
 
-> **Stand:** aktuelle Version `v0.12.0` (GHCR-Image, sechs Plattform-Binaries,
-> `.deb`-/`.rpm`-Pakete, Homebrew-Tap). Der Devcontainer-Katalog hat 14 Features, darunter `sshd`, `claude-code` und `ollama` (nur CPU, nur im Sandbox-Profil; Cloud-Modelle von Ollama sind nicht enthalten; gemessen auf Colima, arm64, und in zwei Läufen auf einem Linux-x86_64-Host, nicht in der CI).
-> `u-boot egress list` zeigt die Egress-Allowlist eines Projekts mit der Herkunft jedes Hosts; eine geänderte Liste wirkt nach einem Neuaufbau des Containers.
+> **Stand:** aktuelle Version `v0.13.0` (GHCR-Image, sechs Plattform-Binaries,
+> `.deb`-/`.rpm`-Pakete, Homebrew-Tap). `u-boot devcontainer up` und `down` starten und stoppen den Devcontainer ohne Editor, Node.js und Dev-Container-CLI auf dem Host: zugesagt auf einem Linux-Host (`amd64`) mit lokaler Docker-Engine, nicht auf macOS mit Colima; der erste Aufruf braucht Netzzugriff und baut lokal ein Hilfs-Image von rund 1,7 GiB; der Hilfs-Container hält für die Dauer des Aufrufs das Engine-Socket, und der Befehl sagt das. Die Docker-Integrationstests laufen in der CI; die vier Tests zum verschachtelten Podman werden dort übersprungen.
+> Der Devcontainer-Katalog hat 14 Features, darunter `sshd`, `claude-code` und `ollama` (nur CPU, nur im Sandbox-Profil; Cloud-Modelle von Ollama sind nicht enthalten; gemessen auf Colima, arm64, und in zwei Läufen auf einem Linux-x86_64-Host, nicht in der CI).
+> `u-boot egress list` zeigt die Egress-Allowlist eines Projekts mit der Herkunft jedes Hosts; eine geänderte Liste wirkt nach einem Neuaufbau des Containers. Die Egress-Beschränkung öffnet DNS zu den Upstream-Resolvern nur für ihren lokalen Resolver.
 > `podman build` läuft im Sandbox-Devcontainer, der Podman 6.1.4 enthält (gemessen auf Colima, arm64; auf nativem Linux x86_64 mit Docker 29.9.1 läuft ein `podman build` hinter der Egress-Beschränkung durch, und ein Name außerhalb der Allowlist kostet etwa 36 Sekunden Wartezeit, siehe Handbuch; Docker Desktop und CI nicht gemessen); bestehende
 > `nestedRuntime: podman`-Projekte brauchen `/dev/fuse` und `/dev/net/tun` auf dem Container-Host: Eine Container-Engine ohne sie startet den Container nicht, und `u-boot doctor` meldet ein fehlendes `/dev/fuse` auf einem Linux-Host außerhalb eines Containers als Fehler (Exit-Code `11`). `nestedRuntime: docker` wird unter Docker auf Linux und auf Colima zugesagt, nicht auf Docker Desktop.
 > `u-boot doctor` und `u-boot generate devcontainer` weisen aus, wenn ein Sandbox-Container auf einem Rückfall läuft (kein Docker-Daemon, `vfs`-Speicher, keine Egress-Beschränkung). Die `--dry-run`-Zusammenfassungen sagen, was geschehen würde („Would …“). `--quiet` zeigt nur Fehler und vier Ausweisungen, die sichtbar bleiben. Verlauf: Release-Tabelle unten und [`CHANGELOG.md`](CHANGELOG.md).
@@ -99,7 +100,7 @@ u-boot --version
 **Debian / Ubuntu / Fedora / RHEL** (`.deb` und `.rpm` aus dem Release, amd64 und arm64):
 
 ```bash
-VERSION=0.12.0   # gewünschtes Release
+VERSION=0.13.0   # gewünschtes Release
 # Debian / Ubuntu
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"
@@ -203,6 +204,7 @@ Vollüberschreibung mit `.bak[.N]`-Sicherheitskopien).
 | `v0.10.0` | 2026-10-17 | „sshd, Claude Code und `podman build`“ — eingebaute Katalog-Schlüssel `sshd` und `claude-code` (Drittanbieter, ausgewiesen); `nestedRuntime: podman` baut Images, mit einer sechsten Lockerung `--device=/dev/net/tun` (gemessen auf Colima, arm64; Docker Desktop, amd64 und CI nicht gemessen); `--quiet` lässt vier Ausweisungen sichtbar und unterdrückt Erfolgsmeldungen; Docker Desktop wird nicht mehr zugesagt. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.10.0). |
 | `v0.11.0` | 2026-10-18 | „Podman 6, `/dev/fuse` und Ausweisung der Rückfälle“ — der Sandbox-Devcontainer mit `nestedRuntime: podman` enthält Podman 6.1.4; ein fehlendes `/dev/fuse` auf dem Container-Host ist ein Startfehler, und `u-boot doctor` meldet es auf einem Linux-Host außerhalb eines Containers (Exit-Code `11`, auch ohne `--strict`); `doctor` und `generate devcontainer` weisen Rückfälle aus (kein Daemon, `vfs`, keine Egress-Beschränkung); `--dry-run`-Zusammenfassungen sagen „Would …“ (gemessen auf Colima, arm64; Linux ohne VM, Docker Desktop, amd64 und CI nicht gemessen). [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.11.0). |
 | `v0.12.0` | 2026-10-19 | „Egress-Liste und Ollama“ — `u-boot egress list` zeigt die wirksame Egress-Allowlist mit der Herkunft jedes Hosts; ein Wildcard-Eintrag wird mit dem Hinweis abgewiesen, den übergeordneten Namen einzutragen, und das Handbuch nennt das gemessene Verhalten für Subdomains; eine geänderte Liste wirkt nach einem Neuaufbau des Containers; der neue Katalog-Schlüssel `ollama` installiert Ollama (nur CPU, nur im Sandbox-Profil, Cloud-Modelle nicht enthalten); `--help` verlinkt das Benutzerhandbuch (gemessen auf Colima, arm64, und `ollama` in zwei Läufen auf einem Linux-x86_64-Host; Docker Desktop, Linux hinter einer VM und CI nicht gemessen; auf amd64 scheitert ein verschachtelter `podman build` hinter der Egress-Beschränkung an der Namensauflösung, siehe Handbuch). [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.12.0). |
+| `v0.13.0` | 2026-10-21 | „Devcontainer ohne Editor“ — `u-boot devcontainer up [--recreate]` und `down` starten und stoppen den Devcontainer ohne Editor, Node.js und Dev-Container-CLI auf dem Host (nur Docker; ein kurzlebiger Hilfs-Container hält das Engine-Socket, und der Befehl sagt das); zugesagt auf einem Linux-Host (`amd64`) mit lokaler Docker-Engine, nicht auf macOS mit Colima; der erste Aufruf braucht Netzzugriff und baut ein Hilfs-Image von rund 1,7 GiB; die Egress-Beschränkung öffnet DNS zu den Upstream-Resolvern nur für ihren lokalen Resolver, und ein erneuter Lauf ihres Startscripts setzt die Regeln in einer Transaktion (bestehende Projekte nach `u-boot generate devcontainer` und einem Neuaufbau; die DNS-Änderung gemessen in zwei Läufen auf einem Linux-x86_64-Host); Docker-Integrationstests in der CI grün, die vier Tests zum verschachtelten Podman dort übersprungen. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.13.0). |
 | `v0.5.0` | 2026-07-25 | „Sicherheit + lokale Templates" — Go-Toolchain-Bump schließt CVE-2026-39822 im Runtime-Image (HIGH); `u-boot init --template ./pfad` rendert ein Projekt aus einem lokalen Verzeichnis, neben dem eingebauten Katalog. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.5.0). |
 | `v0.4.0` | 2026-06-08 | Milestone „Maschinenlesbare CLI" — `--json` / `--dry-run` / `--diff` für alle zehn Subkommandos, `u-boot logs`, Devcontainer-Features mit Drift-Doctor-Check. [GitHub-Release](https://github.com/pt9912/u-boot/releases/tag/v0.4.0). |
 
@@ -230,10 +232,10 @@ Die vollständige Änderungshistorie jedes Releases steht in [`CHANGELOG.md`](CH
 
 Für Konsumenten von `u-boot`:
 
-- Docker Engine ≥ 24.0.0 oder Podman ≥ 5.0 (Drop-in unterstützt)
+- Docker Engine ≥ 24.0.0 oder Podman ≥ 4.0 (Drop-in unterstützt; für `devcontainer up`/`down` nicht zugesagt)
 - Docker Compose ≥ 2.20.0 oder `podman compose`
 - Git
-- Optional: VS Code mit der Dev-Containers-Extension
+- Optional, zum Starten des Devcontainers: VS Code mit der Dev-Containers-Extension, die Dev-Container-CLI oder Docker allein mit `u-boot devcontainer up`
 
 Für den Bau aus den Quellen:
 
@@ -264,8 +266,12 @@ Für den Bau aus den Quellen:
   [`docs/user/quality.md`](docs/maintainer/quality.md)
 - **Branch Protection:**
   [`docs/user/branch-protection.md`](docs/maintainer/branch-protection.md)
+- **Devcontainer ohne Editor (`devcontainer up`/`down`):**
+  [`docs/user/benutzerhandbuch.md#den-devcontainer-ohne-editor-starten-und-stoppen`](docs/user/benutzerhandbuch.md#den-devcontainer-ohne-editor-starten-und-stoppen)
 - **Devcontainer-Features:**
   [`docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen`](docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen)
+- **Sandbox-Profil des Devcontainers:**
+  [`docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten`](docs/user/benutzerhandbuch.md#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten)
 - **Maschinen-lesbarer CLI-Vertrag (`--json`, `--dry-run`, `--diff`):**
   [`docs/maintainer/cli-json-contract.md`](docs/maintainer/cli-json-contract.md)
   (Nutzersicht: [JSON-Ausgabe](docs/user/benutzerhandbuch.md#json-ausgabe))
