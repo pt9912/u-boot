@@ -50,33 +50,37 @@ der Test-Helper `AssertMinimalEnvelope` rejected sie aktiv.
 
 ## 2. Minimalkontrakt ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe))
 
-Verbatim-Zitat des Lastenhefts:
+Zitat des Lastenhefts ([LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe)):
 
 > Für alle `--json`-Ausgaben gilt ergänzend ein gemeinsames
 > Minimalkontrakt-Schema:
 >
 > - `status` (`ok`/`warn`/`error`)
 > - `command` (Hauptbefehl als in [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run) definiertes Enum)
-> - optional `subcommand` (für gruppierte Befehle wie `template`
->   oder `config`)
+> - `subcommand` (Unterbefehl; verpflichtend bei den gruppierten
+>   Befehlen `template`, `config`, `egress` und `devcontainer`, bei
+>   den übrigen Befehlen optional)
 > - `diagnostics` (Liste von Objekten mit mind. `level`, `code`,
 >   `message`, optional `file`)
 > - `exitCode` (vgl. [LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes))
->
+
+Zitat der Spezifikation ([LH-NFA-USE-004.a](../../spec/spezifikation.md#lh-nfa-use-004a--regeln-für---json-antworten)):
+
 > Für `--json`-Antworten gilt zusätzlich:
 >
 > - `diagnostics`, wenn leer, darf als `[]` ausgegeben werden.
 > - `diagnostics.level` darf nur `warn` oder `error` enthalten.
 > - `diagnostics.code` folgt der Konvention: LH-Kennung der
->   verursachenden Anforderung (z. B. [LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)). Tool-
->   interne Codes ohne LH-Bezug dürfen nur dann verwendet werden,
+>   verursachenden Anforderung (z. B. [LH-FA-DEV-003](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features)).
+>   Tool-interne Codes ohne LH-Bezug dürfen nur dann verwendet werden,
 >   wenn ihre Bedeutung in der Dokumentation festgehalten ist
 >   (Verweis: [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)).
 > - `diagnostics.file` ist optional.
 > - `status` ist an den höchsten in `diagnostics` enthaltenen
 >   `level` gekoppelt: `error` → `status == "error"`; `warn` ohne
 >   `error` → `status == "warn"`; sonst `status == "ok"`.
-> - Bei `command == "template"` oder `command == "config"` ist
+> - Bei `command == "template"`, `command == "config"`,
+>   `command == "egress"` oder `command == "devcontainer"` ist
 >   `subcommand` verpflichtend.
 > - Die Felder `status`, `command`, `diagnostics` und `exitCode`
 >   sind minimal verpflichtend und sollten mit anderen Feldern
@@ -140,7 +144,7 @@ der Spezifikation ([SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-
   "properties": {
     "subcommand": {
       "type": "string",
-      "description": "Unterkommando bei gruppierten Hauptkommandos wie `template` oder `config`"
+      "description": "Unterkommando der gruppierten Hauptkommandos `template`, `config`, `egress` und `devcontainer`"
     },
     "status": {
       "type": "string",
@@ -148,7 +152,7 @@ der Spezifikation ([SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-
     },
     "command": {
       "type": "string",
-      "enum": ["init", "add", "remove", "up", "down", "doctor", "logs", "generate", "config", "egress", "template"]
+      "enum": ["init", "add", "remove", "up", "down", "doctor", "logs", "generate", "config", "egress", "devcontainer", "template"]
     },
     "dryRun": {
       "type": "boolean"
@@ -218,6 +222,28 @@ der Spezifikation ([SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-
       "if": {
         "properties": {
           "command": { "const": "config" }
+        },
+        "required": ["command"]
+      },
+      "then": {
+        "required": ["subcommand"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command": { "const": "egress" }
+        },
+        "required": ["command"]
+      },
+      "then": {
+        "required": ["subcommand"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "command": { "const": "devcontainer" }
         },
         "required": ["command"]
       },
@@ -371,7 +397,9 @@ Bei `template`: [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschi
 für `command="template"` verpflichtend, und der Help-Parent hat kein
 eigenes Datum — er kann also keinen spec-validen Envelope erzeugen.
 Dieser Reject ist **RunE-getragen**, nicht mehr gate-getragen — siehe §6.2.
-`egress` ist ein Help-Parent ohne eigenes Datum und weist `--json` gleichartig ab.
+`egress` ist ein Help-Parent ohne eigenes Datum, `devcontainer` eine Gruppe ohne eigenes Datum;
+[LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) macht `subcommand` auch für `command="egress"` und
+`command="devcontainer"` verpflichtend, und beide weisen `--json` gleichartig ab.
 
 ### 6.2 `u-boot template list --json` (slice-v1-cli-json-dry-run-template, done)
 
@@ -1209,8 +1237,9 @@ Datum, keine Diagnose:
   Vorschau-Ausgabe ([SPEC-001](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json))
   führt den Wert `egress` im Enum; die Egress-Anzeige beschreibt
   [SPEC-046](../../spec/spezifikation.md#spec-046--egress-anzeige-u-boot-egress-list-berechnung-ausgabe-und-abgrenzung).
-  `jsontestutil` prüft das Enum nicht (`checkSubcommand` verlangt `subcommand` nur für `template`
-  und `config`).
+  [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) macht `subcommand` für
+  `command: "egress"` verpflichtend; `checkSubcommand` in `jsontestutil` prüft es, das Enum prüft
+  `jsontestutil` nicht.
 
 ### 6.11 `u-boot devcontainer up --json` / `devcontainer down --json` (slice-v1-cli-devcontainer-up-down)
 
@@ -1269,7 +1298,8 @@ bare `u-boot devcontainer` (mit und ohne `--json`) endet mit
   nicht geschrieben, bei einem Fehler enthält die Meldung des Fehler-Eintrags das gekürzte Ende der CLI-Ausgabe.
 - **Vertrag:** [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) bindet alle
   `--json`-Ausgaben an das Enum von `command`; [LH-FA-CLI-007](../../spec/lastenheft.md#lh-fa-cli-007--dry-run)
-  nennt `devcontainer`. `jsontestutil` prüft das Enum nicht und verlangt `subcommand` nur für `template` und `config`.
+  nennt `devcontainer`. [LH-NFA-USE-004](../../spec/lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe) macht `subcommand` für
+  `command: "devcontainer"` verpflichtend; `checkSubcommand` in `jsontestutil` prüft es, das Enum prüft `jsontestutil` nicht.
 
 ---
 

@@ -2545,7 +2545,7 @@ aus. Bei Fehlern erscheint der Fehlertext zusätzlich auf der Fehlerausgabe.
 |---|---|
 | `status` | `ok`, `warn` oder `error`; folgt dem schwersten Eintrag in `diagnostics` |
 | `command` | Befehl: `init`, `add`, `remove`, `up`, `down`, `doctor`, `logs`, `generate`, `config`, `egress`, `devcontainer`, `template` |
-| `subcommand` | nur bei `config` (`get`, `set`, `list`), `egress` (`list`), `devcontainer` (`up`, `down`) und `template` (`list`) |
+| `subcommand` | nur bei `config` (`show` für `u-boot config` ohne Unterbefehl, `get`, `set`, `list`), `egress` (`list`), `devcontainer` (`up`, `down`) und `template` (`list`) |
 | `diagnostics` | Liste der Befunde, leer (`[]`), wenn alles in Ordnung ist |
 | `exitCode` | derselbe Wert wie der Exit-Code des Prozesses |
 | `data` | Ergebnisdaten des Befehls (siehe Tabelle unten), nicht bei jedem Befehl |
