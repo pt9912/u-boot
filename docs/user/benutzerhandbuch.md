@@ -1068,8 +1068,19 @@ ein. Für die Features gilt:
 
   ```bash
   u-boot config set devcontainer.features.docker-cli.enabled false
-  # nur, wenn Sie Docker im Container brauchen (ein eigener Docker-Daemon, Abschnitt 4.11):
+  ```
+
+  Brauchen Sie Docker im Container, setzen Sie zusätzlich (das Profil bekommt
+  dann `--privileged`, ein eigener Docker-Daemon, Abschnitt 4.11):
+
+  ```bash
   u-boot config set devcontainer.sandbox.nestedRuntime docker
+  ```
+
+  Danach erzeugen Sie den Devcontainer neu und legen einen vorhandenen
+  Container neu an:
+
+  ```bash
   u-boot generate devcontainer
   u-boot devcontainer up --recreate   # legt einen vorhandenen Container neu an
   ```
