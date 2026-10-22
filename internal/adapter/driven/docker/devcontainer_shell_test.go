@@ -250,6 +250,7 @@ func TestLauncher_Shell_SessionEndIsNoError(t *testing.T) {
 		{name: "status 127, the OCI line on standard error", exit: "127", stderr: msgOCI + "\n"},
 		{name: "status 127, the OCI line and other text on standard error", exit: "127", stdout: msgOCI + "\n", stderr: "warning\n"},
 		{name: "status 127, other text on standard output", exit: "127", stdout: "bash: foo: command not found\n"},
+		{name: "status 1, the OCI line as the only output", exit: "1", stdout: msgOCI + "\n"},
 		{name: "terminal, status 127, the OCI line", exit: "127", stdout: msgOCI + "\n", edit: terminal},
 		{name: "status 1, the terminal message without a terminal", exit: "1", stderr: msgNoTerminal + "\n"},
 	}
@@ -341,6 +342,42 @@ func TestLauncher_Shell_CancelWithoutTerminalEndsWithTheContextError(t *testing.
 		}
 	case <-time.After(10 * time.Second):
 		t.Fatal("Shell did not return after cancel: the client was not interrupted (the fake session runs 30 s)")
+	}
+}
+
+// ADR-0034 Entscheidung 1 (Entscheidung 4 von ADR-0031): without a terminal a
+// cancelled context sends SIGINT to the client, not SIGKILL. The fake client
+// records the signal it can catch; a kill leaves no record.
+func TestLauncher_Shell_CancelWithoutTerminalSendsSIGINTToTheClient(t *testing.T) {
+	f := newFakeDocker(t)
+	f.flag(t, "session-trap")
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	done := make(chan error, 1)
+	go func() { done <- f.launcher(nil).Shell(ctx, shellOptions(nil)) }()
+	ready := filepath.Join(f.dir, "trap-ready")
+	deadline := time.Now().Add(20 * time.Second)
+	for {
+		if _, err := os.Stat(ready); err == nil {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("the fake client did not install its signal handlers")
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	cancel()
+	select {
+	case err := <-done:
+		if !errors.Is(err, context.Canceled) {
+			t.Errorf("error = %v, want the context error", err)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("Shell did not return after cancel")
+	}
+	got, _ := os.ReadFile(filepath.Join(f.dir, "signal"))
+	if strings.TrimSpace(string(got)) != "INT" {
+		t.Errorf("the client received %q, want the signal INT", got)
 	}
 }
 

@@ -61,6 +61,7 @@ exec)
     [ -e "$D/session-copy-stdin" ] && cat > "$D/stdin.copy"
     [ -e "$D/session-stdout" ] && cat "$D/session-stdout"
     [ -e "$D/session-stderr" ] && cat "$D/session-stderr" >&2
+    [ -e "$D/session-trap" ] && { trap 'echo INT > "$D/signal"; exit 0' INT; trap 'echo TERM > "$D/signal"; exit 0' TERM; touch "$D/trap-ready"; while :; do sleep 0.05; done; }
     [ -e "$D/session-hang" ] && exec sleep 30
     [ -e "$D/session-delay" ] && { sleep 1; echo session-done; }
     [ -e "$D/session-exit" ] && exit "$(cat "$D/session-exit")"
