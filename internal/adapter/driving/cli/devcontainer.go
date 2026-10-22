@@ -45,7 +45,7 @@ type devcontainerFlags struct {
 
 // devcontainerUpData is the typed `data` carrier of `devcontainer up
 // --json`; no field is omitempty. `alreadyRunning` is true when the container
-// ran before the call.
+// ran before the call and the command ran without `--recreate`.
 type devcontainerUpData struct {
 	ContainerID           string `json:"containerId"`
 	RemoteUser            string `json:"remoteUser"`
@@ -123,8 +123,10 @@ u-boot.yaml there is nothing to read). It reports a degradation fallback of the
 sandbox profile as a warning. A start script that reported a failure ends the
 command with exit 11, also when the container was already running and this
 call did not run the script; "u-boot devcontainer up --recreate" creates the
-container anew. If the container was already running, the result line says
-"already running" and the JSON data carry alreadyRunning: true.
+container anew. If the container was already running and the command runs
+without --recreate, the result line says "already running" and the JSON data
+carry alreadyRunning: true; with --recreate the line says "started" and
+alreadyRunning is false.
 
 Exit codes (LH-FA-CLI-006):
   0   success

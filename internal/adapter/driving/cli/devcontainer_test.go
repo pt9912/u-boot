@@ -123,8 +123,10 @@ func TestExecute_DevcontainerUp_HelpSaysWhatTheGeneratedConfigurationMounts(t *t
 // ADR-0030 decisions 1 and 2: the help of `devcontainer up` says that a start
 // script's failure ends the command with exit 11 also for an earlier start of
 // an already running container, names `--recreate`, and names the result line
-// and the JSON field of an already running container. The behaviour behind each
-// sentence has its test (the application tests of `Up` and
+// and the JSON field of an already running container together with the
+// exception of `--recreate` (the line says "started", the field is false). The
+// behaviour behind each sentence has its test (the application tests of `Up`,
+// among them recreate_skips_the_query, and
 // TestExecute_DevcontainerUp_AlreadyRunning).
 func TestExecute_DevcontainerUp_HelpSaysWhenExit11AndAlreadyRunning(t *testing.T) {
 	t.Parallel()
@@ -136,7 +138,8 @@ func TestExecute_DevcontainerUp_HelpSaysWhenExit11AndAlreadyRunning(t *testing.T
 	for _, part := range []string{
 		"A start script that reported a failure ends the command with exit 11, also when the container was already running and this call did not run the script;",
 		`"u-boot devcontainer up --recreate" creates the container anew.`,
-		`If the container was already running, the result line says "already running" and the JSON data carry alreadyRunning: true.`,
+		`If the container was already running and the command runs without --recreate, the result line says "already running" and the JSON data carry alreadyRunning: true; ` +
+			`with --recreate the line says "started" and alreadyRunning is false.`,
 		"script of the container aborted for an environment reason (also in an earlier start of the container, if u-boot.yaml configures the capability)",
 	} {
 		if !strings.Contains(text, part) {
