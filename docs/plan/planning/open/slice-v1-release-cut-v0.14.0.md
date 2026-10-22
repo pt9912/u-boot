@@ -31,7 +31,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** — (Spec-Version ≠ Release-Version; Lastenheft `0.21.0` liefern die Slices, `spec/lastenheft.md` Zeile 9 gelesen; dieser Slice ändert `spec/` nicht).
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (Rolle Implementer, Start 2026-10-23); Freigaben: Projektinhaber.
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-22.
 
@@ -224,6 +224,11 @@ Der Ausgang jedes Risikos wird bei der Closure festgeschrieben.
 1. **Nummer `v0.14.0`:** gilt (Kopf der Welle-Datei).
 2. **Vorab-Tag:** Vorschlag des Planners — kein Vorab-Tag, M3 entfällt (wie `v0.13.0` und `v0.13.1`).
 3. **Entscheidung (m):** der Release-Text nennt die Grenze (e) nicht (Vorschlag), oder nennt sie.
+
+**Entscheidungen beim Start** (2026-10-23, vom Hauptagenten gemäß dem Auftrag „mach weiter ohne nachzufragen“ übermittelt und beim Start vermerkt; Zweifel entscheidet der Implementer nach Plan, ADR und Lastenheft und begründet sie in §3):
+
+4. **Entscheidungen 1 bis 3 gelten nach Planner-Vorschlag:** Nummer `v0.14.0`; kein Vorab-Tag, M3 entfällt; **(m): nein**, der Release-Text nennt die Grenze (e) nicht (kein Satz in CHANGELOG, READMEs und Handbuch). Die Entscheidungen (j) und (l) bleiben **offen** beim Projektinhaber; der Cut entscheidet sie nicht.
+5. **Reichweite der Freigabe:** Push (M1) und Tag (M5) führt nur der Hauptagent, je Vorgang nach ausdrücklicher Freigabe des Projektinhabers; **Subagenten pushen und taggen nie**, auch nicht lokal.
 
 Die Closure-Notiz entsteht nach M6 (Planner): Was hat funktioniert, was ging anders, Steering-Loop-Eintrag, Beobachtungs-Register, Folge-Slices (N-1, N-3, N-5 mit (l); N-6 mit dem Folge-Slice in `open/`), Risiken aus §6, Verifikation, drei Paarungen.
 
