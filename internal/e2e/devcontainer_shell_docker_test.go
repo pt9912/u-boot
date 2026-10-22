@@ -15,10 +15,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -31,6 +33,13 @@ import (
 // of the launcher). The tests see the helper during the start; a prefix that
 // differs from the product's fails that guard.
 const dcHelperPrefix = "u-boot-devcontainer-up-"
+
+// dcHelperName is the name of a helper container of the binary: the prefix and
+// eight hex characters (`randomSuffix` of the launcher). The helper containers
+// that the tests of the launcher package start carry a test infix
+// (`…-t<hash>-<suffix>`) and run in parallel with this package under
+// `go test ./...`; they are not the binary's and do not match.
+var dcHelperName = regexp.MustCompile(`^` + regexp.QuoteMeta(dcHelperPrefix) + `[0-9a-f]{8}$`)
 
 // lockedBuffer is a buffer that the writer goroutine of os/exec and the test
 // read and write concurrently.
@@ -54,8 +63,8 @@ func (l *lockedBuffer) String() string {
 // dcQuote quotes s as one word for `sh -c`.
 func dcQuote(s string) string { return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'" }
 
-// dcHelperNames lists the containers (running or not) whose name holds the
-// prefix of the helper container.
+// dcHelperNames lists the containers (running or not) whose name has the form
+// of a helper container of the binary ([dcHelperName]).
 func dcHelperNames() map[string]bool {
 	out, err := dcDocker("ps", "-a", "--filter", "name="+dcHelperPrefix, "--format", "{{.Names}}")
 	names := map[string]bool{}
@@ -63,7 +72,9 @@ func dcHelperNames() map[string]bool {
 		return names
 	}
 	for _, n := range strings.Fields(out) {
-		names[n] = true
+		if dcHelperName.MatchString(n) {
+			names[n] = true
+		}
 	}
 	return names
 }
@@ -410,12 +421,20 @@ func TestDevcontainerShell_Docker_Session(t *testing.T) {
 			t.Errorf("guard: the check of Config.Env does not find a value passed with `docker run -e`")
 		}
 		// The search for a helper container finds one started by hand.
-		hand := dcHelperPrefix + "guard-" + suffix
+		hand := dcHelperPrefix + fmt.Sprintf("%08x", time.Now().UnixNano()&0xffffffff)
 		t.Cleanup(func() { _, _ = dcDocker("rm", "-f", hand) })
 		before := dcHelperNames()
 		dcMustDocker(t, "run", "-d", "--name", hand, dcBaseImage, "sleep", "60")
 		if found := dcNewHelpers(before); len(found) != 1 || found[0] != hand {
 			t.Errorf("guard: the search for helper containers found %v, want the one started by hand", found)
+		}
+		// A helper container of a test of the launcher package (test infix) is
+		// not the binary's and is not counted.
+		foreign := dcHelperPrefix + "tb4c391e5-" + suffix[:8]
+		t.Cleanup(func() { _, _ = dcDocker("rm", "-f", foreign) })
+		dcMustDocker(t, "run", "-d", "--name", foreign, dcBaseImage, "sleep", "60")
+		if found := dcNewHelpers(before); len(found) != 1 || found[0] != hand {
+			t.Errorf("guard: the search found %v, want only the container of the binary's form, not the one with a test infix", found)
 		}
 	})
 
