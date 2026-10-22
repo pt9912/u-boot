@@ -236,7 +236,8 @@ func TestDevcontainerUp_ValidationFailuresRaiseNoDisclosureAndStartNothing(t *te
 }
 
 // ADR-0028 decision 7: the engine sentinels keep their identity through the
-// service, and a non-runtime failure reads no status file.
+// service, and a non-runtime failure reads no status file; the only question
+// to the inspector is the query before the launcher (ADR-0030 decision 2).
 func TestDevcontainerUp_EngineSentinelsPassThrough(t *testing.T) {
 	t.Parallel()
 	for _, want := range []error{driven.ErrDockerUnavailable, driven.ErrContainerEngineNotLocal, context.Canceled} {
@@ -251,8 +252,9 @@ func TestDevcontainerUp_EngineSentinelsPassThrough(t *testing.T) {
 			if !errors.Is(err, want) || errors.Is(err, driving.ErrDevcontainerStartScriptFailed) || errors.Is(err, driven.ErrDevcontainerRuntime) {
 				t.Errorf("err = %v, want only %v", err, want)
 			}
-			if insp.calls() != 0 {
-				t.Errorf("the inspector was asked %d times after %v", insp.calls(), want)
+			if len(insp.readPaths) != 0 || len(insp.findFolders) != 1 {
+				t.Errorf("the inspector read %d files and was asked %d times after %v, want 0 reads and the one query before the launcher",
+					len(insp.readPaths), len(insp.findFolders), want)
 			}
 		})
 	}
@@ -321,7 +323,8 @@ func (e *runtimeErr) Unwrap() error { return driven.ErrDevcontainerRuntime }
 
 // LH-FA-DEV-007 after the start: a container whose start script reported
 // `fallback` yields a degradation-fallback warning in the wording of `up`;
-// everything else is silent.
+// `ok` and a missing `u-boot.yaml` are silent. `failed` is no warning: it ends
+// the call (TestDevcontainerUp_FailedStatusAfterSuccess).
 func TestDevcontainerUp_FallbackWarningsAfterStart(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
@@ -337,7 +340,6 @@ func TestDevcontainerUp_FallbackWarningsAfterStart(t *testing.T) {
 		{"daemon", yamlDocker, "daemon", "fallback", "LH-FA-DEV-007", "no Docker daemon", 1},
 		{"egress", yamlEgressOnly, "egress", "fallback", "LH-FA-DEV-008", "egress restriction is not active", 1},
 		{"ok is silent", yamlPodman, "vfs", "ok", "", "", 0},
-		{"failed is silent after a success", yamlPodman, "vfs", "failed", "", "", 0},
 		{"no u-boot.yaml: no disclosure (not an error)", "", "vfs", "fallback", "", "", 0},
 	}
 	for _, tc := range cases {
@@ -367,6 +369,165 @@ func TestDevcontainerUp_FallbackWarningsAfterStart(t *testing.T) {
 				t.Errorf("message %q is not the wording of `up`", w.Message)
 			}
 		})
+	}
+}
+
+// ADR-0030 decision 1 (fitness function), LH-FA-DEV-010: after a successful
+// run of the devcontainer CLI, `result=failed` in the status file of a
+// configured capability ends the call with the start-script sentinel, in the
+// class of exit 11 and not of exit 12. The message carries the sentence of the
+// capability, the time of the report, that the container runs and this call
+// did not run the script, and `--recreate`. Every other state stays a success.
+func TestDevcontainerUp_FailedStatusAfterSuccess(t *testing.T) {
+	t.Parallel()
+	const tail = "the container is running and this call did not run the start script; `u-boot devcontainer up --recreate` creates the container anew"
+	reported := "(reported at " + fallbackAt + ")"
+	vfsPath := fallbackStatusDir + "/vfs"
+	cases := []struct {
+		name      string
+		ubootYAML string
+		status    map[string]string
+		notFound  bool
+		readErrs  map[string]error
+		wantErr   bool
+		contains  []string
+		absent    []string
+	}{
+		{"vfs failed", yamlPodman, map[string]string{"vfs": "failed"}, false, nil, true,
+			[]string{"/dev/fuse was not available in the container (onUnavailable: fail) " + reported + "; " + tail}, nil},
+		{"daemon failed", yamlDocker, map[string]string{"daemon": "failed"}, false, nil, true,
+			[]string{"the nested Docker daemon did not become ready (onUnavailable: fail) " + reported + "; " + tail}, nil},
+		{"egress failed", yamlEgressOnly, map[string]string{"egress": "failed"}, false, nil, true,
+			[]string{"the NET_ADMIN capability was not granted (onUnavailable: fail)", reported + "; " + tail}, nil},
+		{"one of two failed", yamlDockerEgress, map[string]string{"daemon": "ok", "egress": "failed"}, false, nil, true,
+			[]string{"NET_ADMIN"}, []string{"nested Docker daemon"}},
+		{"failed wins over a fallback of another capability", yamlDockerEgress, map[string]string{"daemon": "fallback", "egress": "failed"}, false, nil, true,
+			[]string{"NET_ADMIN"}, []string{"the container has no Docker daemon"}},
+		{"the first failed capability is named", yamlPodmanEgress, map[string]string{"vfs": "failed", "egress": "failed"}, false, nil, true,
+			[]string{"/dev/fuse"}, []string{"NET_ADMIN"}},
+		{"ok", yamlPodman, map[string]string{"vfs": "ok"}, false, nil, false, nil, nil},
+		{"fallback is a warning, no abort", yamlPodman, map[string]string{"vfs": "fallback"}, false, nil, false, nil, nil},
+		{"no status file", yamlPodman, nil, false, nil, false, nil, nil},
+		{"no container", yamlPodman, map[string]string{"vfs": "failed"}, true, nil, false, nil, nil},
+		{"failed file of an unconfigured capability", yamlPodman, map[string]string{"daemon": "failed"}, false, nil, false, nil, nil},
+		{"no u-boot.yaml", "", map[string]string{"vfs": "failed"}, false, nil, false, nil, nil},
+		{"profile is not sandbox", sandboxYAMLHead + "  nope: 1\n", map[string]string{"vfs": "failed"}, false, nil, false, nil, nil},
+		{"invalid status document", yamlPodman, map[string]string{"vfs": "failed"}, false,
+			map[string]error{vfsPath: driven.ErrContainerFileInvalid}, false, nil, nil},
+		{"status file cannot be read", yamlPodman, map[string]string{"vfs": "failed"}, false,
+			map[string]error{vfsPath: errors.New("engine hiccup")}, false, nil, nil},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			l := newLauncher()
+			insp := newFakeInspector(true)
+			insp.found = !tc.notFound
+			for file, result := range tc.status {
+				insp.setStatus(file, result)
+			}
+			for path, err := range tc.readErrs {
+				insp.readErrs[path] = err
+			}
+			svc, _ := devcontainerSvc(t, plainConfig, tc.ubootYAML, l, insp)
+			resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir})
+			if len(l.upOpts) != 1 {
+				t.Fatalf("launcher Up calls = %d, want 1", len(l.upOpts))
+			}
+			if !tc.wantErr {
+				if err != nil || resp.ContainerID != fallbackContainerID {
+					t.Fatalf("resp = %+v, err = %v, want a success", resp, err)
+				}
+				return
+			}
+			if !errors.Is(err, driving.ErrDevcontainerStartScriptFailed) || errors.Is(err, driven.ErrDevcontainerRuntime) {
+				t.Fatalf("err = %v, want the start-script sentinel and not the runtime class", err)
+			}
+			if resp.ContainerID != "" || len(resp.Warnings) != 0 || resp.AlreadyRunning {
+				t.Errorf("resp = %+v, want the zero response", resp)
+			}
+			for _, want := range tc.contains {
+				if !strings.Contains(err.Error(), want) {
+					t.Errorf("message %q lacks %q", err, want)
+				}
+			}
+			for _, unwanted := range tc.absent {
+				if strings.Contains(err.Error(), unwanted) {
+					t.Errorf("message %q holds %q", err, unwanted)
+				}
+			}
+		})
+	}
+}
+
+// ADR-0030 decision 2 (fitness function), LH-FA-DEV-010: the response says the
+// container was already running when the inspector found it running before
+// the launcher and the CLI reports the same ID. The query comes before the
+// launcher, names the project folder and is skipped with Recreate; a stopped
+// or absent container, another ID and a failed query give false, and the failed
+// query is no error.
+func TestDevcontainerUp_AlreadyRunning(t *testing.T) {
+	t.Parallel()
+	running := driven.DevcontainerContainer{ID: fallbackContainerID, Running: true}
+	cases := []struct {
+		name        string
+		recreate    bool
+		answers     []findAnswer
+		want        bool
+		wantQueries int
+	}{
+		{"running before, same ID", false, nil, true, 1},
+		{"stopped before", false, []findAnswer{{container: driven.DevcontainerContainer{ID: fallbackContainerID}, found: true}}, false, 1},
+		{"no container before", false, []findAnswer{{}}, false, 1},
+		{"another ID before", false, []findAnswer{{container: driven.DevcontainerContainer{ID: strings.Repeat("f", 64), Running: true}, found: true}}, false, 1},
+		{"the query fails", false, []findAnswer{{container: running, found: true, err: errors.New("engine hiccup")}}, false, 1},
+		{"the engine is not local", false, []findAnswer{{err: driven.ErrContainerEngineNotLocal}}, false, 1},
+		{"recreate skips the query", true, nil, false, 0},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			l := newLauncher()
+			insp := newFakeInspector(true)
+			insp.findAnswers = tc.answers
+			queriesBeforeLauncher := -1
+			l.onUp = func() { queriesBeforeLauncher = len(insp.findFolders) }
+			svc, _ := devcontainerSvc(t, plainConfig, "", l, insp)
+			resp, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir, Recreate: tc.recreate})
+			if err != nil {
+				t.Fatalf("Up: %v", err)
+			}
+			if resp.AlreadyRunning != tc.want || resp.ContainerID != fallbackContainerID {
+				t.Errorf("resp = %+v, want AlreadyRunning %v", resp, tc.want)
+			}
+			if queriesBeforeLauncher != tc.wantQueries || len(insp.findFolders) != tc.wantQueries {
+				t.Errorf("queries before the launcher = %d, in all = %d, want %d and %d (without u-boot.yaml nothing asks afterwards)",
+					queriesBeforeLauncher, len(insp.findFolders), tc.wantQueries, tc.wantQueries)
+			}
+			for _, folder := range insp.findFolders {
+				if folder != devcontainerTestBaseDir {
+					t.Errorf("the query names %q, want the project folder", folder)
+				}
+			}
+		})
+	}
+}
+
+// The query before the launcher and the reading of the status files are two
+// questions: a failed first answer does not make the status files unreadable,
+// and the container found afterwards is the one whose files are read.
+func TestDevcontainerUp_QueryBeforeTheLauncherDoesNotSpoilTheStatusReading(t *testing.T) {
+	t.Parallel()
+	insp := newFakeInspector(true)
+	insp.findAnswers = []findAnswer{{err: errors.New("engine hiccup")}}
+	insp.setStatus("vfs", "failed")
+	svc, _ := devcontainerSvc(t, plainConfig, yamlPodman, newLauncher(), insp)
+	_, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: devcontainerTestBaseDir})
+	if !errors.Is(err, driving.ErrDevcontainerStartScriptFailed) {
+		t.Fatalf("err = %v, want the start-script sentinel", err)
+	}
+	if len(insp.findFolders) != 2 {
+		t.Errorf("queries = %d, want the one before the launcher and the one of the status reading", len(insp.findFolders))
 	}
 }
 

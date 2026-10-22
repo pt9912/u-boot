@@ -27,16 +27,26 @@ func statusText(result string) []byte {
 // fakeInspector is the [driven.DevcontainerInspector] test double: one
 // container (or none, or an engine error) and canned files by path. It
 // counts every call so a test can assert the engine was (not) asked.
+// findAnswers, when set, are the answers of the first FindContainer calls in
+// order; later calls get the fixed answer.
 type fakeInspector struct {
-	mu        sync.Mutex
-	container driven.DevcontainerContainer
-	found     bool
-	findErr   error
-	files     map[string][]byte
-	readErrs  map[string]error
+	mu          sync.Mutex
+	container   driven.DevcontainerContainer
+	found       bool
+	findErr     error
+	findAnswers []findAnswer
+	files       map[string][]byte
+	readErrs    map[string]error
 
 	findFolders []string
 	readPaths   []string
+}
+
+// findAnswer is one canned answer of FindContainer.
+type findAnswer struct {
+	container driven.DevcontainerContainer
+	found     bool
+	err       error
 }
 
 func newFakeInspector(running bool) *fakeInspector {
@@ -62,6 +72,11 @@ func (f *fakeInspector) FindContainer(_ context.Context, localFolder string) (dr
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.findFolders = append(f.findFolders, localFolder)
+	if len(f.findAnswers) > 0 {
+		a := f.findAnswers[0]
+		f.findAnswers = f.findAnswers[1:]
+		return a.container, a.found && a.err == nil, a.err
+	}
 	return f.container, f.found && f.findErr == nil, f.findErr
 }
 

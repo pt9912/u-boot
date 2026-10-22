@@ -43,6 +43,12 @@ type DevcontainerUpResponse struct {
 	// the start (LH-FA-DEV-007); it does not hold the disclosure that
 	// [DevcontainerUpRequest.OnWarning] receives.
 	Warnings []WarningEntry
+	// AlreadyRunning is true when the container of the project ran before the
+	// call and the devcontainer CLI reports the same ID (ADR-0030 decision 2).
+	// It is false with [DevcontainerUpRequest.Recreate], for a container that
+	// was stopped or absent before the call, for another ID, and when the
+	// engine could not be asked before the call.
+	AlreadyRunning bool
 }
 
 // DevcontainerDownRequest is the input for [DevcontainerUseCase.Down]
@@ -83,12 +89,13 @@ var ErrDevcontainerEnvNameInvalid = errors.New("devcontainer: localEnv reference
 // configuration. Maps to exit code 14 (LH-NFA-REL-003).
 var ErrDevcontainerFileSystem = errors.New("devcontainer: filesystem read failed")
 
-// ErrDevcontainerStartScriptFailed signals that the devcontainer CLI did
-// not succeed and a start script of the container reported `result=failed`
-// in its status file (ADR-0029 decision 1). Maps to exit code 11, like the
-// same cause in `u-boot doctor`. The error does not wrap
-// `driven.ErrDevcontainerRuntime` (exit code 12), so the two classes do not
-// overlap.
+// ErrDevcontainerStartScriptFailed signals that a start script of the
+// container reported `result=failed` in its status file: in the run of the
+// devcontainer CLI that failed, or in an earlier start of the same container
+// while the CLI succeeded (ADR-0029 decision 1, ADR-0030 decision 1). Maps to
+// exit code 11, like the same cause in `u-boot doctor`. The error does not
+// wrap `driven.ErrDevcontainerRuntime` (exit code 12), so the two classes do
+// not overlap.
 var ErrDevcontainerStartScriptFailed = errors.New("devcontainer: a container start script reported a failure")
 
 // DevcontainerUseCase is the driving port of `u-boot devcontainer up` and
@@ -103,9 +110,15 @@ var ErrDevcontainerStartScriptFailed = errors.New("devcontainer: a container sta
 //     `${localEnv:<NAME>}` ([ErrDevcontainerEnvNameInvalid]).
 //   - Up hands every failure of the engine through with its sentinel
 //     identity (`driven.ErrDockerUnavailable`,
-//     `driven.ErrContainerEngineNotLocal`, `driven.ErrDevcontainerRuntime`);
-//     a failed start whose container reports `result=failed` is
-//     [ErrDevcontainerStartScriptFailed] instead of the runtime sentinel.
+//     `driven.ErrContainerEngineNotLocal`, `driven.ErrDevcontainerRuntime`).
+//   - After the devcontainer CLI ran, Up reads the status files of the
+//     capabilities `u-boot.yaml` configures. A file with `result=failed` ends
+//     the call with [ErrDevcontainerStartScriptFailed]: after a failed start
+//     instead of the runtime sentinel, after a successful start instead of the
+//     response, also when the file stems from an earlier start of the same
+//     container.
+//   - Up reports in [DevcontainerUpResponse.AlreadyRunning] whether the
+//     container ran before the call; a failed query is no failure of Up.
 //   - Down stops a running container and succeeds when there is none or it
 //     is stopped. It never removes a container or a volume.
 type DevcontainerUseCase interface {

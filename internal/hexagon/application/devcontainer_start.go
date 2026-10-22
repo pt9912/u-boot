@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"time"
 
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driven"
@@ -126,25 +127,66 @@ func (s *DevcontainerStartService) Up(ctx context.Context, req driving.Devcontai
 		})
 	}
 	s.logger.Debug("devcontainer up", "recreate", req.Recreate, "envNames", len(names))
+	runningBefore := s.runningContainerID(ctx, req)
 	res, err := s.launcher.Up(ctx, driven.DevcontainerUpOptions{
 		ProjectFolder: req.BaseDir,
 		EnvNames:      names,
 		Recreate:      req.Recreate,
 		Progress:      req.ProgressSink,
 	})
-	probes := s.fallbackProbes(req.BaseDir)
-	reader := &fallbackReader{inspector: s.inspector, baseDir: req.BaseDir}
-	if err != nil {
-		if errors.Is(err, driven.ErrDevcontainerRuntime) && startScriptFailed(ctx, reader, probes) {
-			return driving.DevcontainerUpResponse{}, fmt.Errorf("devcontainer up: %w: %v", driving.ErrDevcontainerStartScriptFailed, err)
-		}
-		return driving.DevcontainerUpResponse{}, err
+	return s.startOutcome(ctx, req.BaseDir, runningBefore, res, err)
+}
+
+// runningContainerID returns the ID of the project's container if it runs
+// before the launcher is called (ADR-0030 decision 2), else the empty string:
+// with `--recreate` (the container is removed, so the query is skipped), with
+// no container, a stopped one, and when the engine cannot be asked. A failed
+// query is no failure of the command; the launcher reports an engine problem
+// itself.
+func (s *DevcontainerStartService) runningContainerID(ctx context.Context, req driving.DevcontainerUpRequest) string {
+	if req.Recreate {
+		return ""
+	}
+	container, found, err := s.inspector.FindContainer(ctx, req.BaseDir)
+	if err != nil || !found || !container.Running {
+		return ""
+	}
+	return container.ID
+}
+
+// startOutcome judges the result of the launcher by the state of the container
+// (ADR-0030 decision 1). Only a start that succeeded or failed with the runtime
+// class reads the status files, through one [fallbackReader]: an engine
+// problem or an abort keeps its class and asks nothing. A `result=failed` of a
+// configured capability ends the call with
+// [driving.ErrDevcontainerStartScriptFailed], whether the CLI failed (the
+// message keeps its output) or succeeded (the file stems from an earlier start
+// of the container). Otherwise the response carries the fallback warnings and
+// whether the container ran before the call.
+func (s *DevcontainerStartService) startOutcome(
+	ctx context.Context, baseDir, runningBefore string, res driven.DevcontainerUpResult, launchErr error,
+) (driving.DevcontainerUpResponse, error) {
+	if launchErr != nil && !errors.Is(launchErr, driven.ErrDevcontainerRuntime) {
+		return driving.DevcontainerUpResponse{}, launchErr
+	}
+	probes := s.fallbackProbes(baseDir)
+	reader := &fallbackReader{inspector: s.inspector, baseDir: baseDir}
+	failedProbe, failedReading, failed := firstFailedScript(ctx, reader, probes)
+	switch {
+	case launchErr != nil && failed:
+		return driving.DevcontainerUpResponse{}, fmt.Errorf("devcontainer up: %w: %v", driving.ErrDevcontainerStartScriptFailed, launchErr)
+	case launchErr != nil:
+		return driving.DevcontainerUpResponse{}, launchErr
+	case failed:
+		return driving.DevcontainerUpResponse{}, fmt.Errorf("devcontainer up: %w: %s",
+			driving.ErrDevcontainerStartScriptFailed, failedAfterStartText(failedProbe, failedReading))
 	}
 	return driving.DevcontainerUpResponse{
 		ContainerID:           res.ContainerID,
 		RemoteUser:            res.RemoteUser,
 		RemoteWorkspaceFolder: res.RemoteWorkspaceFolder,
 		Warnings:              fallbackWarnings(ctx, reader, probes, startFallbackWording()),
+		AlreadyRunning:        runningBefore != "" && runningBefore == res.ContainerID,
 	}, nil
 }
 
@@ -199,16 +241,28 @@ func (s *DevcontainerStartService) fallbackProbes(baseDir string) []fallbackProb
 	return configuredFallbackProbes(cfg.Devcontainer, profileIsSandbox(cfg.Devcontainer))
 }
 
-// startScriptFailed reports whether one of the status files reports
-// `result=failed` (ADR-0029 decision 1). The file describes the last run of
-// its script, not necessarily this start.
-func startScriptFailed(ctx context.Context, r *fallbackReader, probes []fallbackProbe) bool {
+// firstFailedScript returns the first of the probes, in their order, whose
+// status file reports `result=failed`, with the reading (ADR-0029 decision 1,
+// ADR-0030 decision 1). The file describes the last run of its script in the
+// container, not necessarily this call.
+func firstFailedScript(ctx context.Context, r *fallbackReader, probes []fallbackProbe) (fallbackProbe, statusReading, bool) {
 	for _, p := range probes {
 		if rd := r.read(ctx, p); rd.outcome == statusReported && rd.status.Result() == domain.SandboxStatusFailed {
-			return true
+			return p, rd, true
 		}
 	}
-	return false
+	return fallbackProbe{}, statusReading{}, false
+}
+
+// failedAfterStartText is the message of a `result=failed` that the devcontainer
+// CLI's successful run leaves standing (ADR-0030 decision 1): the sentence of
+// the capability (the one `doctor` shows), the time of the report, that the
+// container runs and this call did not run the start script, and the way
+// out.
+func failedAfterStartText(p fallbackProbe, rd statusReading) string {
+	return p.failed + " (reported at " + rd.status.At().Format(time.RFC3339) + "); " +
+		"the container is running and this call did not run the start script; " +
+		"`u-boot devcontainer up --recreate` creates the container anew"
 }
 
 // Down implements [driving.DevcontainerUseCase.Down].
