@@ -902,28 +902,33 @@ func TestDevcontainerUp_Docker_S8_SecondUpAfterStartScriptAbort(t *testing.T) {
 	})
 }
 
-// The files in the container to which the postStartCommand and the
-// postAttachCommand of the counter test append one line per run.
+// The files in the container to which the postCreateCommand, the
+// postStartCommand and the postAttachCommand of the counter test append one
+// line per run.
 const (
+	dcCreateCounterFile = "/tmp/u-boot-create-count"
 	dcStartCounterFile  = "/tmp/u-boot-start-count"
 	dcAttachCounterFile = "/tmp/u-boot-attach-count"
 )
 
-// LH-FA-DEV-010, ADR-0030 decision 2: a project whose postStartCommand appends
-// a line to a file per run. The second and third `up` against the running
-// container leave the number of lines unchanged and report `alreadyRunning:
-// true` (envelope) and "Devcontainer already running" (text); after `down` the
-// next `up` starts the same container, the line count grows by one and
-// `alreadyRunning` is false. The postAttachCommand of the same project is the
-// counter-sample: the Dev Container CLI runs it for every `up`, so its file
-// grows with each call, and the test sees a lifecycle command that does run
-// again. A change in these semantics (a new version of the CLI) is a
-// re-evaluation trigger of the decision.
+// LH-FA-DEV-010, ADR-0030 decision 2: a project whose postCreateCommand,
+// postStartCommand and postAttachCommand each append a line to a file per run.
+// The second and third `up` against the running container leave the lines of
+// the postCreateCommand and the postStartCommand unchanged (the two commands
+// `u-boot` generates) and report `alreadyRunning: true` (envelope) and
+// "Devcontainer already running" (text); after `down` the next `up` starts the
+// same container, the postStartCommand file grows by one, the
+// postCreateCommand file does not, and `alreadyRunning` is false. The
+// postAttachCommand is the counter-sample: the Dev Container CLI runs it for
+// every `up`, so its file grows with each call, and the test sees a lifecycle
+// command that does run again. A change in these semantics (a new version of
+// the CLI) is a re-evaluation trigger of the decision.
 func TestDevcontainerUp_Docker_AlreadyRunningLifecycleCounters(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), dcTestBudget)
 	defer cancel()
 	dir := dcHandWritten(t, map[string]string{
 		"devcontainer.json": `{"name": "cnt", "image": "` + dcBaseImage + `", ` +
+			`"postCreateCommand": "echo run >> ` + dcCreateCounterFile + `", ` +
 			`"postStartCommand": "echo run >> ` + dcStartCounterFile + `", ` +
 			`"postAttachCommand": "echo run >> ` + dcAttachCounterFile + `"}`,
 	})
@@ -936,9 +941,12 @@ func TestDevcontainerUp_Docker_AlreadyRunningLifecycleCounters(t *testing.T) {
 		}
 		return n
 	}
-	// counts checks the lines of both files: postStartCommand and postAttachCommand.
-	counts := func(step, id string, wantStart, wantAttach int) {
+	// counts checks the lines of the three files, one per lifecycle command.
+	counts := func(step, id string, wantCreate, wantStart, wantAttach int) {
 		t.Helper()
+		if n := lines(id, dcCreateCounterFile); n != wantCreate {
+			t.Errorf("%s: postCreateCommand ran %d times, want %d", step, n, wantCreate)
+		}
 		if n := lines(id, dcStartCounterFile); n != wantStart {
 			t.Errorf("%s: postStartCommand ran %d times, want %d", step, n, wantStart)
 		}
@@ -956,16 +964,16 @@ func TestDevcontainerUp_Docker_AlreadyRunningLifecycleCounters(t *testing.T) {
 	}
 
 	id := up("first up", false)
-	counts("after the first up", id, 1, 1)
+	counts("after the first up", id, 1, 1, 1)
 	if again := up("second up", true); again != id {
 		t.Errorf("second up reports container %s, want the same %s", again, id)
 	}
-	counts("after the second up", id, 1, 2)
+	counts("after the second up", id, 1, 1, 2)
 	stdout, _, code := dcRun(ctx, t, dir, nil, "devcontainer", "up")
 	if want := "Devcontainer already running: container " + id[:12] + ","; code != 0 || !strings.Contains(stdout, want) {
 		t.Errorf("third up (text): exit %d, stdout:\n%s\nwant a line with %q", code, stdout, want)
 	}
-	counts("after the third up", id, 1, 3)
+	counts("after the third up", id, 1, 1, 3)
 
 	if _, stderr, code := dcRun(ctx, t, dir, nil, "devcontainer", "down"); code != 0 {
 		t.Fatalf("down: exit %d, stderr:\n%s", code, stderr)
@@ -973,7 +981,7 @@ func TestDevcontainerUp_Docker_AlreadyRunningLifecycleCounters(t *testing.T) {
 	if restarted := up("up after down", false); restarted != id {
 		t.Errorf("up after down reports container %s, want the same %s", restarted, id)
 	}
-	counts("after down and up", id, 2, 4)
+	counts("after down and up", id, 1, 2, 4)
 }
 
 // ADR-0028 decision 3, S8: a path with a character a `--mount` value cannot
