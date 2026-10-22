@@ -19,18 +19,29 @@ const testContainerID = "0123456789abcdef0123456789abcdef0123456789abcdef0123456
 
 // fakeDevcontainerUseCase records the requests and plays the use case: it
 // raises the configured disclosure through OnWarning, writes progress, and
-// returns the configured response or error.
+// returns the configured response or error. As `Shell` it also raises the
+// fallback warnings of upResp after the progress, writes the session lines to
+// the streams of the request, and returns shellErr.
 type fakeDevcontainerUseCase struct {
-	upCalls   int
-	upReq     driving.DevcontainerUpRequest
-	upResp    driving.DevcontainerUpResponse
-	upErr     error
-	disclose  []driving.WarningEntry
-	progress  string
-	downCalls int
-	downReq   driving.DevcontainerDownRequest
-	downResp  driving.DevcontainerDownResponse
-	downErr   error
+	upCalls    int
+	upReq      driving.DevcontainerUpRequest
+	upResp     driving.DevcontainerUpResponse
+	upErr      error
+	disclose   []driving.WarningEntry
+	progress   string
+	downCalls  int
+	downReq    driving.DevcontainerDownRequest
+	downResp   driving.DevcontainerDownResponse
+	downErr    error
+	shellCalls int
+	shellReq   driving.DevcontainerShellRequest
+	shellErr   error
+	sessionOut string
+	sessionErr string
+	// ctxKey names a value of the context that Shell reads into ctxValue, so a
+	// test can see that the context of the command reached the use case.
+	ctxKey   any
+	ctxValue any
 }
 
 func (f *fakeDevcontainerUseCase) Up(_ context.Context, req driving.DevcontainerUpRequest) (driving.DevcontainerUpResponse, error) {
@@ -53,8 +64,32 @@ func (f *fakeDevcontainerUseCase) Down(_ context.Context, req driving.Devcontain
 	return f.downResp, f.downErr
 }
 
-func (f *fakeDevcontainerUseCase) Shell(context.Context, driving.DevcontainerShellRequest) error {
-	return nil
+func (f *fakeDevcontainerUseCase) Shell(ctx context.Context, req driving.DevcontainerShellRequest) error {
+	f.shellCalls++
+	if f.ctxKey != nil {
+		f.ctxValue = ctx.Value(f.ctxKey)
+	}
+	f.shellReq = req
+	for _, w := range f.disclose {
+		if req.OnWarning != nil {
+			req.OnWarning(w)
+		}
+	}
+	if f.progress != "" && req.ProgressSink != nil {
+		_, _ = io.WriteString(req.ProgressSink, f.progress)
+	}
+	for _, w := range f.upResp.Warnings {
+		if req.OnWarning != nil {
+			req.OnWarning(w)
+		}
+	}
+	if f.sessionOut != "" && req.Stdout != nil {
+		_, _ = io.WriteString(req.Stdout, f.sessionOut)
+	}
+	if f.sessionErr != "" && req.Stderr != nil {
+		_, _ = io.WriteString(req.Stderr, f.sessionErr)
+	}
+	return f.shellErr
 }
 
 func newAppWithDevcontainer(uc driving.DevcontainerUseCase, opts ...cli.Option) *cli.App {
@@ -444,7 +479,7 @@ func TestExecute_Devcontainer_SentinelsPerSubcommand(t *testing.T) {
 // nothing.
 func TestExecute_Devcontainer_NotWired(t *testing.T) {
 	t.Parallel()
-	for _, sub := range []string{"up", "down"} {
+	for _, sub := range []string{"up", "down", "shell"} {
 		_, _, err := quietRun(t, newApp(&fakeInitUseCase{}, cli.WithGetwd(sandboxGetwd)), "devcontainer", sub)
 		if err == nil || !strings.Contains(err.Error(), "not wired") || cli.ExitCode(err) != 1 {
 			t.Errorf("%s: err=%v exit=%d", sub, err, cli.ExitCode(err))

@@ -523,6 +523,42 @@ func TestRun_DevcontainerDown_NoDockerBinaryExits11(t *testing.T) {
 	}
 }
 
+// LH-FA-DEV-010, LH-FA-CLI-006, ADR-0031 decision 2 at the user path: without a
+// docker binary `devcontainer shell` ends with exit 11 before a session can
+// begin, writes the socket disclosure and the error to stderr and nothing to
+// stdout, and changes nothing in the project. `--json` is rejected with exit 2
+// before any of that.
+func TestRun_DevcontainerShell_NoDockerBinaryExits11(t *testing.T) {
+	projectWithDevcontainer(t)
+	before := snapshotTree(t, ".")
+
+	var out, errOut bytes.Buffer
+	code := run(context.Background(), []string{"devcontainer", "shell"}, &out, &errOut)
+	if code != 11 || out.Len() != 0 {
+		t.Fatalf("exit %d, stdout=%q stderr=%q, want exit 11 and no stdout", code, out.String(), errOut.String())
+	}
+	if !strings.Contains(errOut.String(), "Warning (LH-FA-DEV-010): this command mounts the host container-engine socket") ||
+		!strings.Contains(errOut.String(), "for the duration of the start)") ||
+		!strings.Contains(errOut.String(), "docker binary not on PATH") {
+		t.Errorf("stderr lacks the disclosure of the start or the error:\n%s", errOut.String())
+	}
+	if after := snapshotTree(t, "."); !reflect.DeepEqual(before, after) {
+		t.Errorf("the failed start changed the project:\n before %v\n after  %v", before, after)
+	}
+
+	out.Reset()
+	errOut.Reset()
+	code = run(context.Background(), []string{"devcontainer", "shell", "--json"}, &out, &errOut)
+	var env devcontainerRunEnvelope
+	if err := json.Unmarshal(out.Bytes(), &env); err != nil {
+		t.Fatalf("--json: invalid JSON: %v\n%s", err, out.String())
+	}
+	if code != 2 || env.Command != "devcontainer" || env.Subcommand != "shell" || env.ExitCode != 2 || len(env.Diagnostics) != 1 ||
+		env.Diagnostics[0].Code != "LH-FA-CLI-006" || strings.Contains(errOut.String(), "Warning") {
+		t.Errorf("--json: exit %d, envelope %+v, stderr %q, want exit 2, subcommand shell and no disclosure", code, env, errOut.String())
+	}
+}
+
 // LH-FA-DEV-010, LH-FA-CLI-006: a folder without `.devcontainer/devcontainer.json`
 // ends with exit 10 before any docker call (no docker binary is needed to see
 // it) and without the socket disclosure: no helper container was started.
@@ -547,7 +583,7 @@ func TestRun_Devcontainer_WiredAndBareExits2(t *testing.T) {
 	}
 	out.Reset()
 	if code := run(context.Background(), []string{"devcontainer", "--help"}, &out, &errOut); code != 0 ||
-		!strings.Contains(out.String(), "up [--recreate]") || !strings.Contains(out.String(), "down ") {
+		!strings.Contains(out.String(), "up [--recreate]") || !strings.Contains(out.String(), "down ") || !strings.Contains(out.String(), "shell ") {
 		t.Errorf("devcontainer --help: exit %d, stdout=%q", code, out.String())
 	}
 	out.Reset()

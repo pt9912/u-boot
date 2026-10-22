@@ -114,6 +114,10 @@ func marshalEnvelopeForTest(env cliJSONEnvelope) ([]byte, error) {
 	return json.Marshal(env)
 }
 
+// IsTerminalForTest exposes the terminal check `devcontainer shell` applies to
+// its standard input.
+func IsTerminalForTest(r io.Reader) bool { return isTerminal(r) }
+
 // WalkRootCommandPathsForTest enumerates every command path under the
 // constructed root: all runnable leaves PLUS every help-parent
 // (cobra.NoArgs without RunE → prints help; cobra.NoArgs with

@@ -17,24 +17,32 @@ import (
 // devcontainer`, with and without `--json`: the group has no data of its own.
 // Like bare `egress --json` it ends with exit 2 (usage class via
 // [isUsageError]) and without an envelope.
-var ErrDevcontainerSubcommandRequired = errors.New("u-boot devcontainer requires a subcommand (try `u-boot devcontainer up` or `u-boot devcontainer down`)")
+var ErrDevcontainerSubcommandRequired = errors.New("u-boot devcontainer requires a subcommand (try `u-boot devcontainer up`, `u-boot devcontainer down` or `u-boot devcontainer shell`)")
 
 // ErrDevcontainerPreviewNotApplicable is returned when `--dry-run` or
-// `--diff` is given to `devcontainer up` or `devcontainer down`: neither
-// command writes a project file, so there is nothing to preview. Maps to
-// exit 2.
-var ErrDevcontainerPreviewNotApplicable = errors.New("--dry-run/--diff is not applicable to `devcontainer up` and `devcontainer down` (they write no project file)")
+// `--diff` is given to `devcontainer up`, `devcontainer down` or
+// `devcontainer shell`: none of the commands writes a project file, so there
+// is nothing to preview. Maps to exit 2.
+var ErrDevcontainerPreviewNotApplicable = errors.New("--dry-run/--diff is not applicable to `devcontainer up`, `devcontainer down` and `devcontainer shell` (they write no project file)")
 
-// isDevcontainerUsageError reports the two usage-class sentinels of the
+// ErrDevcontainerShellJSONNotApplicable is returned when `--json` is given to
+// `devcontainer shell`: the command opens an interactive session, and the
+// standard output belongs to it. Maps to exit 2; with `--json` the rejection
+// itself is written as an envelope (LH-NFA-USE-004).
+var ErrDevcontainerShellJSONNotApplicable = errors.New("--json is not applicable to `devcontainer shell` (the command opens an interactive session)")
+
+// isDevcontainerUsageError reports the usage-class sentinels of the
 // devcontainer commands (exit 2); [isUsageError] takes them as one
 // condition.
 func isDevcontainerUsageError(err error) bool {
-	return errors.Is(err, ErrDevcontainerSubcommandRequired) || errors.Is(err, ErrDevcontainerPreviewNotApplicable)
+	return errors.Is(err, ErrDevcontainerSubcommandRequired) ||
+		errors.Is(err, ErrDevcontainerPreviewNotApplicable) ||
+		errors.Is(err, ErrDevcontainerShellJSONNotApplicable)
 }
 
-// devcontainerFlags bundles the flag state of `devcontainer up` and
-// `devcontainer down`. DryRun and Diff are registered only so Cobra parses
-// them and the RunE can reject them with an envelope.
+// devcontainerFlags bundles the flag state of `devcontainer up`,
+// `devcontainer down` and `devcontainer shell`. DryRun and Diff are registered
+// only so Cobra parses them and the RunE can reject them with an envelope.
 type devcontainerFlags struct {
 	Recreate bool
 	DryRun   bool
@@ -62,25 +70,26 @@ type devcontainerDownData struct {
 }
 
 // newDevcontainerCommand builds the `u-boot devcontainer` group
-// (LH-FA-DEV-010). Children: `up`, `down`.
+// (LH-FA-DEV-010). Children: `up`, `down`, `shell`.
 func newDevcontainerCommand(a *App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "devcontainer",
-		Short: "Start and stop the devcontainer of the project without an editor",
-		Long: `Start and stop the devcontainer of the project without a devcontainer-capable
-editor, without Node.js and without the Dev Container CLI on the host; Docker
-(client and local engine) is enough.
+		Short: "Start, stop and enter the devcontainer of the project without an editor",
+		Long: `Start, stop and enter the devcontainer of the project without a
+devcontainer-capable editor, without Node.js and without the Dev Container CLI
+on the host; Docker (client and local engine) is enough.
 
 Subcommands:
 
   u-boot devcontainer up [--recreate]   start the devcontainer
-  u-boot devcontainer down              stop the devcontainer`,
+  u-boot devcontainer down              stop the devcontainer
+  u-boot devcontainer shell             start the devcontainer and open a shell in it`,
 		Args: cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			return ErrDevcontainerSubcommandRequired
 		},
 	}
-	cmd.AddCommand(newDevcontainerUpCommand(a), newDevcontainerDownCommand(a))
+	cmd.AddCommand(newDevcontainerUpCommand(a), newDevcontainerDownCommand(a), newDevcontainerShellCommand(a))
 	return cmd
 }
 
@@ -188,6 +197,72 @@ Examples:
 			flags.Quiet = a.quiet()
 			flags.JSON = a.json
 			return runDevcontainerDown(cmd.Context(), cmd.OutOrStdout(), *flags, a.devcontainerUseCase, a.getwd)
+		},
+	}
+	registerDevcontainerPreviewFlags(cmd, flags)
+	return cmd
+}
+
+func newDevcontainerShellCommand(a *App) *cobra.Command {
+	flags := &devcontainerFlags{}
+	cmd := &cobra.Command{
+		Use:   "shell",
+		Short: "Start the devcontainer of the project and open a shell in it",
+		Long: `Start the devcontainer that .devcontainer/devcontainer.json in the current
+directory describes, as "u-boot devcontainer up" does without --recreate, and
+open an interactive shell in the container. The host needs Docker (client and
+local engine), nothing else.
+
+The shell runs as the remote user in the workspace folder that the start
+reports. Of the host variables that the generated devcontainer.json hands to
+the container as "NAME": "${localEnv:NAME}" entries, those that are set on the
+host are set in the shell; the others are absent.
+
+The helper container of the start holds the engine socket of the host for the
+duration of the start (root-equivalent access to the engine). The command says
+so before it starts the helper, also under --quiet. The shell runs without a
+helper container and without a socket that this command mounts.
+
+Everything u-boot itself prints (that notice, the progress of the start,
+warnings and errors) goes to standard error; standard output belongs to the
+shell. --quiet holds the progress back. With a terminal on standard input the
+shell is attached to it; otherwise it reads its commands from standard input.
+
+A start script of the container that reported a failure ends the command with
+exit 11 and opens no shell, also when the container was already running;
+"u-boot devcontainer up --recreate" creates the container anew. Once the shell
+has begun, the command ends with exit 0 whatever the exit status of the shell
+was; to run one command in the container and get its exit code, use "docker
+exec".
+
+--json, --dry-run, --diff and arguments are rejected with exit 2. --yes and
+--no-interactive have no effect: the command asks for no confirmation.
+
+Exit codes:
+  0   the shell has begun and ended
+  2   CLI validation (unknown flag, arguments, --json, --dry-run/--diff)
+  10  no .devcontainer/devcontainer.json in the current directory; a directory
+      path with a comma, double quote or line break; a ${localEnv:NAME}
+      reference whose name is not a plain variable name
+  11  no docker binary on the PATH (for example in the released container
+      image), the daemon does not answer, the engine is not local, or a start
+      script of the container aborted for an environment reason (also in an
+      earlier start of the container, if u-boot.yaml configures the
+      capability)
+  12  any other failure of the build or the start; the check before the shell
+      opens fails (user, workspace folder or shell missing in the container)
+  14  filesystem read failure
+
+Examples:
+  u-boot devcontainer shell
+  u-boot --quiet devcontainer shell`,
+		Args: jsonArgsValidator(a, "devcontainer", "shell", cobra.NoArgs, mapDevcontainerShellErrorToDiagnostic, false),
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			flags.Quiet = a.quiet()
+			flags.JSON = a.json
+			return runDevcontainerShell(cmd.Context(),
+				devcontainerStreams{in: cmd.InOrStdin(), stdout: cmd.OutOrStdout(), stderr: cmd.ErrOrStderr()},
+				*flags, a.devcontainerUseCase, a.getwd, a.terminalProbe)
 		},
 	}
 	registerDevcontainerPreviewFlags(cmd, flags)
@@ -335,6 +410,72 @@ func runDevcontainerDown(
 	return nil
 }
 
+// devcontainerStreams are the streams of `devcontainer shell`: the standard
+// input of the session and the two output streams of the command.
+type devcontainerStreams struct {
+	in     io.Reader
+	stdout io.Writer
+	stderr io.Writer
+}
+
+// runDevcontainerShell delegates to the use case, which starts the container
+// and opens the session. Everything u-boot itself writes goes to stderr:
+// the socket disclosure and the fallback warnings (as they arrive, before the
+// session begins), the progress of the start (held back under `--quiet` and
+// written only when the call fails) and the error. Stdout belongs to the
+// session, and no success line follows it. The streams reach the session
+// unchanged (in production the files of the process, so a terminal on the
+// standard input is passed on); stdout and stderr must be two distinct
+// writers, because the session writes to both from separate goroutines.
+//
+// `--dry-run`, `--diff` and `--json` end with exit 2 before anything else,
+// with `--json` as an envelope; `--yes` and `--no-interactive` are not read,
+// the command asks for no confirmation.
+func runDevcontainerShell(
+	ctx context.Context, streams devcontainerStreams, flags devcontainerFlags,
+	uc driving.DevcontainerUseCase, getwd func() (string, error), terminalProbe func(io.Reader) bool,
+) error {
+	fail := func(err error) error {
+		return reportDevcontainerError(streams.stdout, err, flags, "shell", mapDevcontainerShellErrorToDiagnostic, nil)
+	}
+	switch {
+	case flags.DryRun || flags.Diff:
+		return fail(ErrDevcontainerPreviewNotApplicable)
+	case flags.JSON:
+		return fail(ErrDevcontainerShellJSONNotApplicable)
+	case uc == nil:
+		return fail(errors.New("devcontainer shell: use case not wired"))
+	}
+	cwd, err := getwd()
+	if err != nil {
+		return fail(fmt.Errorf("determine working directory: %w", err))
+	}
+	sink := streams.stderr
+	var held *bytes.Buffer
+	if flags.Quiet {
+		held = &bytes.Buffer{}
+		sink = held
+	}
+	err = uc.Shell(ctx, driving.DevcontainerShellRequest{
+		BaseDir:      cwd,
+		ProgressSink: sink,
+		OnWarning: func(w driving.WarningEntry) {
+			writeWarnings(streams.stderr, visibleWarnings([]driving.WarningEntry{w}, flags.Quiet))
+		},
+		Stdin:    streams.in,
+		Stdout:   streams.stdout,
+		Stderr:   streams.stderr,
+		Terminal: terminalProbe(streams.in),
+	})
+	if err != nil {
+		if held != nil {
+			_, _ = streams.stderr.Write(held.Bytes())
+		}
+		return fail(sanitizeBaseDir(err, cwd))
+	}
+	return nil
+}
+
 // writeWarnings renders warnings in the human form of the other commands.
 func writeWarnings(out io.Writer, ws []driving.WarningEntry) {
 	for _, w := range ws {
@@ -389,6 +530,15 @@ func mapDevcontainerDownErrorToDiagnostic(err error) diagnosticItem {
 	if code, matched := mapDevcontainerEngineSentinel(err); matched {
 		return diagnosticItem{Level: "error", Code: code, Message: err.Error()}
 	}
+	return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
+}
+
+// mapDevcontainerShellErrorToDiagnostic maps a `devcontainer shell` error to
+// its diagnostic. `--json` is rejected before the use case runs, so the only
+// errors that reach an envelope are the usage errors of the command (exit 2,
+// code LH-FA-CLI-006); an engine sentinel of the use case never appears in
+// one, and the mapping does not pretend it could.
+func mapDevcontainerShellErrorToDiagnostic(err error) diagnosticItem {
 	return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
 }
 

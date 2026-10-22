@@ -93,8 +93,9 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	inspectorAdapter := docker.NewInspector()
 	// The devcontainer launcher (LH-FA-DEV-010) builds the helper image and
 	// runs the Dev Container CLI in a helper container that holds the engine
-	// socket; `devcontainer down` stops the container through it. Used only
-	// by the devcontainer start service.
+	// socket; `devcontainer down` stops the container through it and
+	// `devcontainer shell` opens its session through it. Used only by the
+	// devcontainer start service.
 	launcherAdapter := docker.NewLauncher()
 	// The netprobe adapter (M6-T3) provides TCP-reachability checks
 	// for the UpService polling loop. Stateless; depguard rule
@@ -167,10 +168,10 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	// the filesystem port only: no Docker, no network, no write.
 	egressListSvc := application.NewEgressListService(fsAdapter, yamlAdapter, logAdapter)
 
-	// `devcontainer up|down` (LH-FA-DEV-010) reads the devcontainer
-	// configuration and u-boot.yaml through the filesystem port and starts and
-	// stops through the launcher; the inspector finds the container and its
-	// status files.
+	// `devcontainer up|down|shell` (LH-FA-DEV-010) reads the devcontainer
+	// configuration and u-boot.yaml through the filesystem port and starts,
+	// stops and enters through the launcher; the inspector finds the container
+	// and its status files.
 	devcontainerSvc := application.NewDevcontainerStartService(fsAdapter, yamlAdapter, launcherAdapter, inspectorAdapter, logAdapter)
 
 	// Driving adapter (CLI).

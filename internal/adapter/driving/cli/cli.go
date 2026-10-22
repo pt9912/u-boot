@@ -79,7 +79,7 @@ type App struct {
 	// the command fail with a wiring error.
 	egressListUseCase driving.EgressListUseCase
 
-	// devcontainerUseCase implements `u-boot devcontainer up|down`
+	// devcontainerUseCase implements `u-boot devcontainer up|down|shell`
 	// (LH-FA-DEV-010). Set through [WithDevcontainerUseCase]; nil makes
 	// the commands fail with a wiring error.
 	devcontainerUseCase driving.DevcontainerUseCase
@@ -88,6 +88,16 @@ type App struct {
 	// Tests inject a fake via [WithGetwd] so they do not depend on
 	// the host pwd.
 	getwd func() (string, error)
+
+	// stdin is the standard input of the commands that read it
+	// (`devcontainer shell`); nil means os.Stdin. Tests inject a reader via
+	// [WithStdin].
+	stdin io.Reader
+
+	// terminalProbe decides whether a standard input is a terminal; defaults
+	// to [isTerminal]. Tests inject the answer via [WithTerminalProbe] so they
+	// need no pseudo-terminal.
+	terminalProbe func(io.Reader) bool
 
 	// yes and noInteractive are bound to the root command's
 	// PersistentFlags by [buildRootCommand].
@@ -135,11 +145,25 @@ func WithEgressListUseCase(uc driving.EgressListUseCase) Option {
 	return func(a *App) { a.egressListUseCase = uc }
 }
 
-// WithDevcontainerUseCase wires the use case behind `u-boot devcontainer up`
-// and `u-boot devcontainer down` (LH-FA-DEV-010). Without it both commands
-// end with a "not wired" error.
+// WithDevcontainerUseCase wires the use case behind `u-boot devcontainer up`,
+// `u-boot devcontainer down` and `u-boot devcontainer shell` (LH-FA-DEV-010).
+// Without it the three commands end with a "not wired" error.
 func WithDevcontainerUseCase(uc driving.DevcontainerUseCase) Option {
 	return func(a *App) { a.devcontainerUseCase = uc }
+}
+
+// WithStdin sets the standard input of the commands that read it
+// (`u-boot devcontainer shell`). Intended for tests; production callers use
+// [New] without it and the commands read os.Stdin.
+func WithStdin(r io.Reader) Option {
+	return func(a *App) { a.stdin = r }
+}
+
+// WithTerminalProbe replaces the decision whether a standard input is a
+// terminal (`u-boot devcontainer shell`). Intended for tests, which have no
+// pseudo-terminal; production callers use [New] without it.
+func WithTerminalProbe(fn func(io.Reader) bool) Option {
+	return func(a *App) { a.terminalProbe = fn }
 }
 
 // WithLogLevel hands the App a [*slog.LevelVar] that
@@ -171,6 +195,7 @@ func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.Doc
 		removeServiceUseCase: removeUC,
 		logsUseCase:          logsUC,
 		getwd:                os.Getwd,
+		terminalProbe:        isTerminal,
 	}
 	for _, opt := range opts {
 		opt(a)
@@ -179,8 +204,9 @@ func New(version string, initUC driving.InitProjectUseCase, doctorUC driving.Doc
 }
 
 // Execute parses args and dispatches to the matching subcommand. It
-// reads stdin / writes stdout/stderr through the provided streams so
-// the wiring layer (and tests) can substitute buffers. Returns the
+// writes stdout/stderr through the provided streams so the wiring layer
+// (and tests) can substitute buffers; the commands that read the standard
+// input take os.Stdin, or the reader of [WithStdin]. Returns the
 // CLI-level error (non-nil on bad flag, unknown command, use-case
 // failure); the wiring layer maps it to an exit code.
 func (a *App) Execute(ctx context.Context, args []string, stdout, stderr io.Writer) error {
@@ -188,6 +214,9 @@ func (a *App) Execute(ctx context.Context, args []string, stdout, stderr io.Writ
 	cmd.SetArgs(args)
 	cmd.SetOut(stdout)
 	cmd.SetErr(stderr)
+	if a.stdin != nil {
+		cmd.SetIn(a.stdin)
+	}
 	return cmd.ExecuteContext(ctx)
 }
 
@@ -241,7 +270,8 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 //   - 0  — no error
 //   - 2  — pure CLI / flag errors (unknown subcommand, unknown flag,
 //     missing required arg, too many positional args,
-//     ErrConflictingModeFlags, M6 `--timeout=-1`)
+//     ErrConflictingModeFlags, M6 `--timeout=-1`, `--json` or
+//     `--dry-run`/`--diff` on `devcontainer shell`)
 //   - 10 — fachlicher Validierungsfehler: LH-FA-INIT-004 marker
 //     collisions (ErrProjectExists), non-marker file collision
 //     (ErrFileExists), LH-FA-INIT-006 invalid project name
@@ -270,7 +300,8 @@ var ErrDoctorFailures = errors.New("doctor report contains failures")
 //   - 12 — fachlicher Ausführungsfehler (M6): Compose-runtime error
 //     after passing preflight (driven.ErrComposeRuntime) or
 //     stabilization timeout (driving.ErrStabilizationTimeout);
-//     `u-boot devcontainer` build or start failure
+//     `u-boot devcontainer` build or start failure, or the failure of
+//     the check that precedes the session of `devcontainer shell`
 //     (driven.ErrDevcontainerRuntime)
 //   - 14 — technischer Persistenz-/Dateisystemfehler: LH-NFA-REL-003
 //     backup-suffix exhausted (ErrBackupSuffixExhausted),
@@ -303,8 +334,8 @@ func ExitCode(err error) int {
 		return 0
 	}
 	// Driven-port sentinels first (M6 slice §Sentinel-Schichtung); the
-	// start script abort of `devcontainer up` is checked with the
-	// environment class before the runtime class it replaces.
+	// start script abort of `devcontainer up` and `devcontainer shell` is
+	// checked with the environment class before the runtime class it replaces.
 	if isEnvironmentError(err) {
 		return 11
 	}
@@ -333,7 +364,8 @@ func ExitCode(err error) int {
 // isEnvironmentError returns true for the engine-side sentinels of exit code
 // 11: Docker binary or daemon unavailable, a remote engine, and the abort of
 // a container start script, also one that an earlier start of the container
-// reported (`devcontainer up`, ADR-0029, ADR-0030).
+// reported (`devcontainer up` and `devcontainer shell`, ADR-0029, ADR-0030,
+// ADR-0031).
 func isEnvironmentError(err error) bool {
 	return errors.Is(err, driven.ErrDockerUnavailable) ||
 		errors.Is(err, driven.ErrContainerEngineNotLocal) ||
@@ -499,7 +531,8 @@ func isFilesystemError(err error) bool {
 		// u-boot.yaml in `egress list` (exit 14, LH-NFA-REL-003).
 		errors.Is(err, driving.ErrEgressFileSystem) ||
 		// LH-FA-DEV-010: ErrDevcontainerFileSystem wraps the read of
-		// `.devcontainer/devcontainer.json` in `devcontainer up`.
+		// `.devcontainer/devcontainer.json` in `devcontainer up` and `devcontainer
+		// shell`.
 		errors.Is(err, driving.ErrDevcontainerFileSystem)
 }
 
