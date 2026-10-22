@@ -357,7 +357,8 @@ func dcVolumeHolds(ctx context.Context, t *testing.T, image, volume, needle stri
 // LH-FA-DEV-010, S1 / S3 / S9, standard profile: the generated project starts,
 // the container user is the generated one, a catalogue feature is installed,
 // the labels are the ones of the devcontainer CLI, the started container holds
-// no engine socket and no label of u-boot's own. With the default UID the file a
+// no engine socket (the project has no feature that mounts it) and no label of
+// u-boot's own. With the default UID the file a
 // container user creates in the bind-mounted project folder does not belong to
 // UID 4321 (guard of the S3 test).
 func TestDevcontainerUp_Docker_S1_S9_StandardProfile(t *testing.T) {
@@ -397,7 +398,9 @@ func TestDevcontainerUp_Docker_S1_S9_StandardProfile(t *testing.T) {
 	if !doc.bindsFolder(dir) {
 		t.Errorf("the standard profile does not mount the project folder: %+v", doc.Mounts)
 	}
-	// ADR-0029 decision 3: the generated configuration does not mount the socket.
+	// ADR-0032 decision 5: a project without a feature that mounts the socket
+	// mounts none (the counter-sample of
+	// TestDevcontainerUp_Docker_StandardProfileDockerCLIMountsTheSocket).
 	if doc.hasSocket() {
 		t.Errorf("the started container holds the engine socket: %+v", doc.Mounts)
 	}
@@ -416,6 +419,62 @@ func TestDevcontainerUp_Docker_S1_S9_StandardProfile(t *testing.T) {
 	}
 	if uid := dcOwnerUID(t, filepath.Join(dir, "probe-default")); uid != 1000 {
 		t.Errorf("owner of the file with the default UID = %d, want 1000", uid)
+	}
+}
+
+// dcFeatureOptions sets the options of one rendered feature key in the
+// generated devcontainer.json. The generator renders every key with an empty
+// option object and u-boot has no setting for options, so the file is the
+// only place to set one.
+func dcFeatureOptions(t *testing.T, dir, key, options string) {
+	t.Helper()
+	path := filepath.Join(dir, ".devcontainer", "devcontainer.json")
+	body, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rendered := []byte(`"` + key + `": {}`)
+	if !bytes.Contains(body, rendered) {
+		t.Fatalf("devcontainer.json has no feature key %q with empty options:\n%s", key, body)
+	}
+	body = bytes.Replace(body, rendered, []byte(`"`+key+`": `+options), 1)
+	if err := os.WriteFile(path, body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// LH-FA-DEV-006, ADR-0032 decision 5, standard profile with the catalogue
+// feature `docker-cli`: the start mounts the engine socket of the host into
+// the container. It is the measurement behind the statement of `up` that the
+// generated configuration mounts the socket if a feature that does so is
+// enabled; the project of the test above, without that feature, is the
+// counter-sample. The project is generated and started with the production
+// adapters, the container is read with `docker inspect`.
+//
+// One deviation from the generated project: the default base image
+// (`mcr.microsoft.com/devcontainers/base:debian`, Debian trixie) cannot take
+// the feature with its default option `moby: true` (the install script stops
+// with "The 'moby' option is not supported on debian 'trixie'"), so the
+// rendered key carries `{"moby": false}`. The mount comes from the metadata
+// of the feature and does not depend on that option.
+func TestDevcontainerUp_Docker_StandardProfileDockerCLIMountsTheSocket(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), dcTestBudget)
+	defer cancel()
+	dir := dcGenerateProject(ctx, t, false, map[string]string{"devcontainer.features.docker-cli.enabled": "true"})
+	dcFeatureOptions(t, dir, "ghcr.io/devcontainers/features/docker-outside-of-docker:1", `{"moby": false}`)
+
+	s := dcMustUp(ctx, t, dcService(), dir, false)
+	doc := dcInspect(t, s.resp.ContainerID)
+	if !doc.State.Running {
+		t.Fatalf("the container is not running: %+v", s.resp)
+	}
+	if !doc.hasSocket() {
+		t.Errorf("the container started with the feature docker-cli holds no engine socket: %+v", doc.Mounts)
+	}
+	for _, m := range doc.Mounts {
+		if strings.Contains(m.Source, "docker.sock") || strings.Contains(m.Destination, "docker.sock") {
+			t.Logf("socket mount: type=%s source=%s destination=%s", m.Type, m.Source, m.Destination)
+		}
 	}
 }
 
