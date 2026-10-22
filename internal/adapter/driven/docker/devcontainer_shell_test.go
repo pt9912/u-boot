@@ -260,6 +260,13 @@ func TestLauncher_Shell_SessionEndIsNoError(t *testing.T) {
 		{name: "status 126, other output before the missing-user line", exit: "126", stdout: "output\n" + msgUserGoneOnStdout + "\n"},
 		{name: "status 126, other output after the missing-user line", exit: "126", stdout: msgUserGoneOnStdout + "\nmore output\n"},
 		{name: "terminal, status 126, the missing-user line", exit: "126", stdout: msgUserGoneOnStdout + "\r\n", edit: terminal},
+		{name: "status 126, the missing-user line of a user whose name begins with the session user", exit: "126", stdout: "unable to find user vscode2: no matching entries in passwd file\r\n"},
+		{name: "status 126, the missing-user line of the session user for a session as vscode2", exit: "126", stdout: msgUserGoneOnStdout + "\r\n",
+			edit: func(o *driven.DevcontainerShellOptions) { o.User = "vscode2" }},
+		{name: "status 1, the daemon message about a user whose name begins with the session user", exit: "1",
+			stderr: "Error response from daemon: unable to find user vscode2: no matching entries in passwd file\n"},
+		{name: "status 126, the missing-user line followed by more blank output than the head holds", exit: "126",
+			stdout: msgUserGoneOnStdout + "\n" + strings.Repeat("\n", 5000)},
 		{name: "terminal, status 127, the OCI line", exit: "127", stdout: msgOCI + "\n", edit: terminal},
 		{name: "status 1, the terminal message without a terminal", exit: "1", stderr: msgNoTerminal + "\n"},
 	}
@@ -310,6 +317,8 @@ func TestLauncher_Shell_ClientErrorBeforeSessionIsRuntimeFailure(t *testing.T) {
 		{name: "the engine does not answer after the probe", exit: "1", stderr: msgEngineDown + "\n", flags: []string{"daemon-down-late"}},
 		{name: "the workspace does not exist after the probe", exit: "127", stdout: msgOCI + "\n"},
 		{name: "the user does not exist after the probe (engine 28.0.4: status 126 on standard output)", exit: "126", stdout: msgUserGoneOnStdout + "\r\n"},
+		{name: "the user vscode2 does not exist after the probe (engine 28.0.4)", exit: "126", stdout: "unable to find user vscode2: no matching entries in passwd file\r\n",
+			edit: func(o *driven.DevcontainerShellOptions) { o.User = "vscode2" }},
 		{name: "terminal, the container is not running", exit: "1", stderr: msgNotRunning + "\n", edit: terminal},
 		{name: "terminal, standard input is no terminal", exit: "1", stderr: msgNoTerminal + "\n", edit: terminal},
 	}

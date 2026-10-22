@@ -214,7 +214,9 @@ type DevcontainerLauncher interface {
 	// also recognises an `OCI runtime exec failed` of the client and the
 	// form of 28.0.4; with Terminal the client owns Stdout, so the launcher
 	// does not see lines on that stream. Any other message of the client is
-	// part of the session.
+	// part of the session. A session without Terminal whose only output is
+	// such a message about this container or user, and that ends with the
+	// status of the client in that case, is taken for a client error.
 	//
 	// A cancelled context ends a session without Terminal (the launcher
 	// interrupts the client) with the context error. With Terminal the

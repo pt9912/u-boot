@@ -193,7 +193,7 @@ func (l *Launcher) clientMessageOnStderr(ctx context.Context, opts driven.Devcon
 	first := stderr.firstLine()
 	switch {
 	case strings.HasPrefix(first, clientDaemonErrorPrefix):
-		named := strings.Contains(first, opts.ContainerID) || strings.Contains(first, clientUserMissingText+opts.User)
+		named := strings.Contains(first, opts.ContainerID) || strings.Contains(first, missingUserLead(opts.User))
 		return first, named
 	case strings.HasPrefix(first, clientEngineDownPrefix):
 		return first, l.engineUnreachable(ctx)
@@ -223,9 +223,14 @@ func ociFailureOnStdout(opts driven.DevcontainerShellOptions, exit int, stdout, 
 func userMissingOnStdout(opts driven.DevcontainerShellOptions, exit int, stdout, stderr *headBuffer) (string, bool) {
 	line := stdout.firstLine()
 	found := !opts.Terminal && exit == 126 && stderr.total == 0 && stdout.singleLine() &&
-		strings.HasPrefix(line, clientUserMissingText+opts.User)
+		strings.HasPrefix(line, missingUserLead(opts.User))
 	return line, found
 }
+
+// missingUserLead is how a message about a missing user begins: the text, the
+// user and a colon. The colon ends the name, so a message about `vscode2` does
+// not name the user `vscode`.
+func missingUserLead(user string) string { return clientUserMissingText + user + ":" }
 
 // engineUnreachable asks the engine again, independent of the cancellation of
 // ctx.
