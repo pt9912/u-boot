@@ -320,7 +320,7 @@ Diese Optionen gelten für jeden Befehl:
 | `--yes` | Rückfragen automatisch bejahen |
 | `--no-interactive` | nie fragen; bei einer nötigen Rückfrage abbrechen |
 | `--json` | maschinenlesbare Ausgabe |
-| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up`, `down`, `devcontainer up` und `devcontainer down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt; bei `devcontainer up` hält es den Fortschritt zurück und gibt ihn nur bei einem Fehler aus), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen). Vier Ausnahmen bleiben sichtbar: (1) Sicherheitslockerungen des Sandbox-Profils und ein im Container aktivierter Login-Dienst (Feature `sshd`); in der Befehlsausgabe erzeugen nur `generate devcontainer` und `devcontainer up` (die Einbindung des Docker-Sockets in den Hilfs-Container) diese Warnungen, dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift, während die Meldung zu `nestedRuntime` ohne Sandbox-Profil entfällt; (2) Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in `doctor` und in der Warnungsausgabe von `generate devcontainer`, `init` und `devcontainer up`, soweit der Host sie aus der Statusdatei des Containers lesen kann; ein nicht ermittelbarer Zustand ist kein Fallback und entfällt); (3) der Compose-Fortschritt von `up`; (4) die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. `doctor --quiet` zeigt Fehler-Einträge, Degradations-Fallbacks und die Warn-Einträge zu einer Sicherheitseigenschaft des Sandbox-Profils, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; Einzelheiten in Abschnitt [4.7](#47-die-umgebung-prüfen)). Die Abfragebefehle `config get`, `config list`, `egress list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
+| `--quiet` | nur Fehler: Erfolgs- und Zusammenfassungsmeldungen von `init`, `generate`, `add`, `remove`, `config set`, `up`, `down`, `devcontainer up` und `devcontainer down` entfallen (bei `down` hält `--quiet` die Compose-Ausgabe zurück und gibt sie nur aus, wenn `down` fehlschlägt; bei `devcontainer up` hält es den Fortschritt zurück und gibt ihn nur bei einem Fehler aus), ebenso die übrigen Hinweise und Warnungen (bei `remove` auch die Purge-Warnungen). Vier Ausnahmen bleiben sichtbar: (1) Sicherheitslockerungen des Sandbox-Profils, ein im Container aktivierter Login-Dienst (Feature `sshd`), die Lockerungen des Features `go` und die Warnung je Feature aus einer externen Quelle; in der Befehlsausgabe erzeugen nur `generate devcontainer` und `devcontainer up` (die Einbindung des Docker-Sockets in den Hilfs-Container) diese Warnungen, dazu gehört die Meldung, dass die Egress-Restriktion ohne Sandbox-Profil nicht greift, während die Meldung zu `nestedRuntime` ohne Sandbox-Profil entfällt; (2) Degradations-Fallbacks (Container ohne Daemon, `vfs`-Storage, Wegfall der Egress-Restriktion; in `doctor` und in der Warnungsausgabe von `generate devcontainer`, `init` und `devcontainer up`, soweit der Host sie aus der Statusdatei des Containers lesen kann; ein nicht ermittelbarer Zustand ist kein Fallback und entfällt); (3) der Compose-Fortschritt von `up`; (4) die Pfad-Zusammenfassung, die `--force` vor dem Überschreiben ausgibt. `doctor --quiet` zeigt Fehler-Einträge, Degradations-Fallbacks und die Warn-Einträge zu einer Sicherheitseigenschaft des Sandbox-Profils, ohne Kopf- und Summary-Zeile (der Exit-Code trägt das Ergebnis; Einzelheiten in Abschnitt [4.7](#47-die-umgebung-prüfen)). Die Abfragebefehle `config get`, `config list`, `egress list`, `logs` und `template list` behalten ihre Ausgabe, ebenso die Vorschau von `--dry-run` (geplante Änderungen) und `--diff` (Diff): sie ist das Ergebnis des Aufrufs. Die Erfolgsmeldung eines tatsächlichen Schreibens entfällt dagegen auch bei `--diff` ohne `--dry-run`. Mit `--json` ändert `--quiet` nichts. Bei mehreren der Optionen `--quiet`, `--verbose` und `--debug` gilt die zuletzt auf der Kommandozeile angegebene, ohne Abweisung: `--quiet --verbose` zeigt zusätzliche Details und hebt `--quiet` auf (auch für Zusammenfassungen und Warnungen), `--verbose --quiet` zeigt nur Fehler. So lässt sich ein Alias wie `alias ub='u-boot --quiet'` mit `ub --verbose` überstimmen |
 | `--verbose` | zusätzliche Details; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist |
 | `--debug` | interne Diagnoseausgabe; gilt nur, wenn es die zuletzt angegebene der Optionen `--quiet`, `--verbose`, `--debug` ist (`--verbose` und `--debug` wirken gleich) |
 | `-v`, `--version` | Version anzeigen |
@@ -623,8 +623,9 @@ nennt.
 Geprüft werden: Schreibrechte im Verzeichnis, `git`, Docker (Version ab 24.0,
 Daemon erreichbar), Compose-Plugin (ab 2.20), `u-boot.yaml`, `compose.yaml`,
 `.devcontainer/devcontainer.json` und `.devcontainer/Dockerfile` (wenn
-vorhanden), Devcontainer-Features (Freigabeliste und Abweichungen zur
-Projektdatei), Weiterleitungs-Ports, die drei Sandbox-Prüfungen (Laufzeit,
+vorhanden), Devcontainer-Features (Freigabeliste, im Sandbox-Profil das
+Feature `docker-cli` als Fehler und Abweichungen zur Projektdatei),
+Weiterleitungs-Ports, die drei Sandbox-Prüfungen (Laufzeit,
 Zugangsdaten, Egress) und je konfigurierter Sandbox-Fähigkeit der gemeldete
 Zustand beim Containerstart (`vfs`-Speicher, Daemon, Egress).
 
@@ -732,8 +733,10 @@ ergeben sich aus den aktivierten Diensten.
   abgelehnt (Exit-Code 10). Bei einem anderen Wert als 1000 erzeugt `u-boot` ein
   Build-Argument `USER_UID` und einen `usermod`-Schritt im Dockerfile; das gilt
   für beide Profile.
-- Das Standardprofil bindet den Projektordner ein, aber weder das Docker-Socket
-  des Hosts noch Geheimnis-Verzeichnisse wie `~/.ssh` oder `~/.aws`.
+- Das Standardprofil bindet den Projektordner ein, aber keine
+  Geheimnis-Verzeichnisse wie `~/.ssh` oder `~/.aws`. Das Docker-Socket des
+  Hosts bindet es ein, wenn ein Feature es tut, zum Beispiel `docker-cli`
+  (siehe *Sicherheit: das Docker-Socket* weiter unten).
 - `u-boot doctor` meldet, wenn `devcontainer.json` und `u-boot.yaml`
   auseinanderlaufen (Warnung); `u-boot generate devcontainer` behebt das.
 - Werkzeuge im Container (Node.js, Java, Go, …) fügen Sie als Features hinzu
@@ -770,9 +773,15 @@ Hilfs-Images räumt `u-boot` nicht ab (`docker image prune`).
 **Sicherheit: das Docker-Socket.** Der Hilfs-Container bindet für die Dauer des Aufrufs
 das Engine-Socket des Hosts ein (`/var/run/docker.sock`). Das ist Root-Äquivalenz auf der
 Engine. `u-boot devcontainer up` sagt das, bevor es den Hilfs-Container startet, auch
-unter `--quiet`; mit `--json` steht es als Eintrag `warn` in `diagnostics`. Der
-Devcontainer, den `u-boot` erzeugt (Standard- und Sandbox-Profil), bindet das Socket nicht
-ein. Eine handgeschriebene `.devcontainer/devcontainer.json` kann es einbinden, und ihr
+unter `--quiet`; mit `--json` steht es als Eintrag `warn` in `diagnostics`.
+
+Der Devcontainer, den `u-boot` erzeugt, bindet das Socket ein, wenn ein Feature es tut:
+Das Feature `docker-cli` bindet im Standardprofil das Docker-Socket des Hosts in den
+Container ein; der Zugriff auf die Engine des Hosts ist Root-Äquivalenz auf der Engine.
+Das Sandbox-Profil weist `docker-cli` ab (siehe 4.10 und 4.11). Ein Feature aus einer
+externen Quelle kann das Socket ebenfalls einbinden; `u-boot` liest dessen Metadaten nicht
+und warnt im Sandbox-Profil davor (siehe 4.10). Eine handgeschriebene
+`.devcontainer/devcontainer.json` kann es einbinden, und ihr
 `initializeCommand` läuft mit dem Zugriff des Hilfs-Containers. **Lesen Sie die Datei vor
 dem ersten Start, wenn Dritte oder ein Agent im Projektordner schreiben dürfen.** Das
 betrifft das Standardprofil: Im Sandbox-Profil liegt der Workspace in einem Volume, der
@@ -963,10 +972,10 @@ Ohne weitere Freigabe aktivierbar (`homebrew` und `claude-code` sind Drittanbiet
 | Name | Inhalt |
 |---|---|
 | `git` | Git |
-| `docker-cli` | Docker-CLI (nutzt den Docker des Hosts: „docker-outside-of-docker“) |
+| `docker-cli` | Docker-CLI („docker-outside-of-docker“): bindet das Docker-Socket des Hosts in den Container ein (Root-Äquivalenz auf der Engine). Im Sandbox-Profil nicht wählbar: `u-boot generate devcontainer` endet dann mit Exit-Code 10 (siehe [Features im Sandbox-Profil](#features-im-sandbox-profil)) |
 | `node` | Node.js |
 | `java` | Java und SDKMAN |
-| `go` | Go-Toolchain |
+| `go` | Go-Toolchain; das Feature verlangt laut seinen Metadaten die Fähigkeit `SYS_PTRACE` und `seccomp=unconfined`, die `u-boot generate devcontainer` im Sandbox-Profil als Sicherheitslockerung ausweist (siehe [Features im Sandbox-Profil](#features-im-sandbox-profil)) |
 | `cpp` | C++-Toolchain |
 | `kubectl-helm` | kubectl, helm und minikube |
 | `postgres-client` | PostgreSQL-Client |
@@ -1039,12 +1048,48 @@ atomar (siehe Abschnitt 5).
   nichts.
 - Eigene Features aus einem lokalen Verzeichnis (statt einer URL) werden nicht
   unterstützt.
+- Im Sandbox-Profil weist `u-boot generate devcontainer` jedes aktivierte
+  Feature aus einer externen Quelle mit einer Warnung aus (siehe
+  [Features im Sandbox-Profil](#features-im-sandbox-profil)).
+
+#### Features im Sandbox-Profil
+
+Das Sandbox-Profil (Abschnitt 4.11) bindet das Docker-Socket des Hosts nicht
+ein. Für die Features gilt:
+
+- **`docker-cli` ist im Sandbox-Profil nicht wählbar.** Ist das Profil
+  `sandbox` (in `u-boot.yaml` oder mit `--sandbox`) und das Feature aktiv, endet
+  `u-boot generate devcontainer` mit Exit-Code 10 und schreibt nichts, auch nicht
+  mit `--dry-run`; `--sandbox` wird dann nicht in `u-boot.yaml` übernommen.
+  `u-boot doctor` meldet dasselbe als Fehler. Die Meldung nennt die Abhilfe:
+
+  ```bash
+  u-boot config set devcontainer.features.docker-cli.enabled false
+  # oder, für einen eigenen Docker-Daemon im Container (Abschnitt 4.11):
+  u-boot config set devcontainer.sandbox.nestedRuntime docker
+  u-boot generate devcontainer
+  u-boot devcontainer up --recreate   # legt einen vorhandenen Container neu an
+  ```
+
+  `config set` bleibt auch in einem solchen Projekt möglich. Im Standardprofil
+  bleibt `docker-cli` wählbar.
+- **`go`:** Das Feature verlangt laut seinen Metadaten die Fähigkeit
+  `SYS_PTRACE` und `seccomp=unconfined`. Im Sandbox-Profil weist
+  `u-boot generate devcontainer` beide als Sicherheitslockerung aus, je eine
+  Warnung, auch unter `--quiet`; `u-boot` schreibt sie nicht in
+  `devcontainer.json`. Ohne Sandbox-Profil weist `u-boot` sie nicht aus.
+- **Features aus einer externen Quelle** (siehe oben, *Externe Feature-Quellen
+  freigeben*): Im Sandbox-Profil weist `u-boot generate devcontainer` jedes
+  aktivierte Feature mit einer Warnung aus, auch unter `--quiet`. `u-boot` liest
+  die Metadaten eines solchen Features nicht, und das Profil sagt für dieses
+  Feature keine seiner Eigenschaften zu, etwa den Verzicht auf das Docker-Socket.
 
 #### Prüfungen durch `u-boot doctor`
 
 | Schweregrad | Auslöser | Abhilfe |
 |---|---|---|
 | Fehler | `source` ist gesetzt, steht aber nicht in `featureSources.allow` | URL freigeben (siehe oben) |
+| Fehler | Das Profil ist `sandbox`, und das Feature `docker-cli` ist aktiv | `docker-cli` abschalten oder `nestedRuntime: docker` setzen, `u-boot generate devcontainer` ausführen und den Container neu anlegen (siehe [Features im Sandbox-Profil](#features-im-sandbox-profil)) |
 | Warnung | Name steht nicht im Katalog und hat keine `source`; er wird beim Erzeugen übersprungen | `source` setzen oder den Eintrag entfernen |
 | Warnung | `enabled:` fehlt bei einem Feature-Eintrag | `enabled` setzen |
 | Warnung | Feature ist aktiv, fehlt aber in `devcontainer.json` (oder die Datei fehlt) | `u-boot generate devcontainer` |
@@ -1120,8 +1165,8 @@ konfigurierten Clone-Quelle, siehe unten).
 | Eigenschaft | Sandbox-Profil | Standardprofil |
 |---|---|---|
 | Workspace | benanntes Volume `<projekt>-workspace-${devcontainerId}`; das Repository wird im Container geklont | Bind-Mount des Projektordners |
-| Docker-Socket des Hosts (im erzeugten Devcontainer; der Hilfs-Container von `u-boot devcontainer up` bindet es ein, siehe 4.9) | nicht eingebunden | nicht eingebunden |
-| `--privileged` und zusätzliche Fähigkeiten | nein (außer mit verschachteltem Podman oder Docker; Docker verlangt `--privileged`) | nein |
+| Docker-Socket des Hosts (im erzeugten Devcontainer; der Hilfs-Container von `u-boot devcontainer up` bindet es ein, siehe 4.9) | nicht eingebunden; das Feature `docker-cli` wird abgewiesen (Exit-Code 10), für ein Feature aus einer externen Quelle sagt das Profil nichts zu (Warnung) | eingebunden, wenn ein Feature es tut, zum Beispiel `docker-cli` |
+| `--privileged` und zusätzliche Fähigkeiten | nein (außer mit verschachteltem Podman oder Docker, Docker verlangt `--privileged`, und außer den Lockerungen, die ein Feature wie `go` mitbringt und `u-boot` ausweist) | nein (was ein Feature wie `go` mitbringt, weist `u-boot` hier nicht aus) |
 | Geheimnis-Verzeichnisse des Hosts (`~/.ssh`, `~/.aws`, …) | nicht eingebunden | nicht eingebunden |
 | Benutzer | `vscode`, nicht root | `vscode`, nicht root |
 
@@ -1129,6 +1174,9 @@ konfigurierten Clone-Quelle, siehe unten).
 
 - `--sandbox` ohne `--devcontainer` (bei `init`) oder bei einem anderen Artefakt
   als `devcontainer` (bei `generate`) ist ein Fehler.
+- Ist das Feature `docker-cli` aktiv, endet `u-boot generate devcontainer` im
+  Sandbox-Profil mit Exit-Code 10 und schreibt nichts; die Meldung nennt die
+  Abhilfe (siehe [Features im Sandbox-Profil](#features-im-sandbox-profil)).
 
 #### Clone-Quelle
 
@@ -2158,8 +2206,10 @@ Handarbeit bräuchte:
 | `git`-Funktionen von `init` | `git` installiert und konfiguriert |
 
 Hinweis: Im Devcontainer läuft Ihre Arbeit als Benutzer `vscode`, nicht als
-root. Weder das Standard- noch das Sandbox-Profil bindet das Docker-Socket des
-Hosts oder Ihre Geheimnis-Verzeichnisse ein. Das gilt für den erzeugten Devcontainer;
+root. Ihre Geheimnis-Verzeichnisse bindet weder das Standard- noch das
+Sandbox-Profil ein. Das Docker-Socket des Hosts bindet das Standardprofil ein, wenn ein
+Feature es tut, zum Beispiel `docker-cli`; das Sandbox-Profil weist dieses Feature ab
+(siehe 4.9 und 4.10). Das gilt für den erzeugten Devcontainer;
 der Hilfs-Container von `u-boot devcontainer up` ist davon ausgenommen (siehe 4.9).
 
 ---
@@ -2336,6 +2386,30 @@ von Hand bearbeitet. `u-boot doctor` meldet eine Warnung
 
 Führen Sie `u-boot generate devcontainer` aus. Eigene Änderungen außerhalb des
 verwalteten Bereichs bleiben erhalten.
+
+### Fehler: Sandbox-Profil mit dem Feature `docker-cli` (Exit-Code 10)
+
+#### Ursache
+
+Das Profil ist `sandbox`, und das Feature `docker-cli` ist aktiv. Das Feature
+bindet das Docker-Socket des Hosts in den Container ein, was das Sandbox-Profil
+nicht tut; `u-boot generate devcontainer` endet deshalb mit Exit-Code 10 und
+schreibt nichts, auch nicht mit `--dry-run`. `u-boot doctor` meldet dasselbe als
+Fehler (Exit-Code 11).
+
+#### Lösung
+
+1. Schalten Sie das Feature ab, oder geben Sie dem Container einen eigenen
+   Docker-Daemon (Abschnitt 4.11):
+
+   ```bash
+   u-boot config set devcontainer.features.docker-cli.enabled false
+   # oder
+   u-boot config set devcontainer.sandbox.nestedRuntime docker
+   ```
+
+2. Erzeugen Sie den Devcontainer neu: `u-boot generate devcontainer`.
+3. Legen Sie einen vorhandenen Container neu an: `u-boot devcontainer up --recreate`.
 
 ### Fehler: Sandbox-Container startet nicht (Exit-Code 11 im Startscript)
 
@@ -2629,7 +2703,7 @@ Reparaturvorschlag: `command` (der Befehl zum Kopieren), `action` und `argument`
 | `devcontainer.json.valid` | `devcontainer.json` gültig |
 | `devcontainer.dockerfile.valid` | `.devcontainer/Dockerfile` lesbar |
 | `devcontainer.forwardPorts.consistency` | Weiterleitungs-Ports passen zu den Diensten |
-| `devcontainer.features.allowlist` | externe Features sind freigegeben |
+| `devcontainer.features.allowlist` | externe Features sind freigegeben; im Sandbox-Profil ist das Feature `docker-cli` nicht aktiv |
 | `devcontainer.features.drift` | Features in `u-boot.yaml` und `devcontainer.json` stimmen überein |
 | `devcontainer.sandbox.runtime` | Sandbox: verschachtelte Runtime (Podman oder Docker) passend konfiguriert |
 | `devcontainer.sandbox.egress` | Sandbox: Internet-Beschränkung passend konfiguriert |

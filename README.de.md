@@ -172,7 +172,8 @@ laufen nie unbemerkt (`--yes` reicht nicht).
 
 `u-boot doctor` bringt zwei Checks zur Feature-
 Konfiguration mit: `devcontainer.features.allowlist` (Error,
-wenn ein `source:`-Override nicht in der Allowlist steht) und
+wenn ein `source:`-Override nicht in der Allowlist steht oder wenn im
+Sandbox-Profil das Feature `docker-cli` aktiv ist) und
 `devcontainer.features.drift` (Warn, wenn `u-boot.yaml` und die
 gerenderte `devcontainer.json`-Features-Map auseinanderlaufen —
 Repair via `u-boot generate devcontainer`).

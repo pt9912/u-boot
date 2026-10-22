@@ -169,7 +169,8 @@ unnoticed (`--yes` is not sufficient).
 
 `u-boot doctor` adds two checks against the feature
 configuration: `devcontainer.features.allowlist` (Error when a
-`source:` override is not in the allowlist) and
+`source:` override is not in the allowlist, or when the sandbox profile
+is on and the feature `docker-cli` is active) and
 `devcontainer.features.drift` (Warn when `u-boot.yaml` and the
 rendered `devcontainer.json` features map disagree — repair via
 `u-boot generate devcontainer`).

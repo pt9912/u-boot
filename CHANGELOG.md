@@ -11,6 +11,19 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Fixed
+
+- The sandbox profile promises not to mount the container-engine socket of the host. The built-in feature `docker-cli` (`docker-outside-of-docker`) does mount it, and both profiles rendered the feature. `u-boot generate devcontainer` now ends with exit code `10` when the sandbox profile (from `devcontainer.profile: sandbox` or `--sandbox`) and an active `docker-cli` meet: nothing is written, also with `--dry-run`, and `--sandbox` is not written to `u-boot.yaml`. `u-boot doctor` reports the same state as an error of `devcontainer.features.allowlist` (exit code `11`). The standard profile keeps `docker-cli`.
+  The error message names the way out: `u-boot config set devcontainer.features.docker-cli.enabled false`, or `u-boot config set devcontainer.sandbox.nestedRuntime docker` for a Docker daemon of its own in the container; then `u-boot generate devcontainer` again, and recreate an existing container with `u-boot devcontainer up --recreate`. `config set` stays possible in such a project.
+  Measured with a started container in the standard profile (one Docker test, Linux `amd64`): the container carries a bind mount of `/var/run/docker.sock`. The test sets the feature option `moby: false` in the rendered key, because the install script of the feature stops with its default option on the default base image `mcr.microsoft.com/devcontainers/base:debian` (Debian trixie).
+  Affected: `v0.6.0` to `v0.13.0` ([`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-006`](spec/lastenheft.md#lh-fa-cli-006--exit-codes)).
+- The disclosure of `u-boot devcontainer up`, its `--help` and the manual said that the devcontainer configuration that `u-boot` generates does not mount the socket, for both profiles. They now say that the generated configuration mounts it if a feature that does so is enabled, such as the built-in feature `docker-cli`, and that the sandbox profile rejects that feature. The text does not say "only": `u-boot` does not read the metadata of a feature from an external source ([`LH-FA-DEV-010`](spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)).
+
+### Changed
+
+- **Behaviour change for scripts:** a project with the sandbox profile and an active `docker-cli` ended `u-boot generate devcontainer` with exit code `0`; it now ends with `10`, and `u-boot doctor` ends with `11` (see above).
+- `u-boot generate devcontainer` in the sandbox profile warns about each active built-in feature that adds container options (`go`: `--cap-add=SYS_PTRACE` and `--security-opt=seccomp=unconfined`, one warning each, read from the metadata of the feature) and about each enabled feature with a `source:` override (`u-boot` does not read its metadata, and the profile promises none of its properties for it). Both kinds of warning stay visible under `--quiet`; the exit code and the written files do not change. The Lastenheft allows the options that a built-in feature brings when the command output discloses them ([`LH-FA-DEV-006`](spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging)). Lastenheft 0.21.0.
+
 ## [0.13.0] - 2026-10-21
 
 Thirteenth release. **Start and stop the devcontainer without an editor (`u-boot devcontainer up` and `down`), DNS to the upstream resolvers only for the local resolver of the egress restriction, a repeated run of the egress start script in one transaction.**
