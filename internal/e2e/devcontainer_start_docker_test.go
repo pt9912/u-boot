@@ -902,31 +902,49 @@ func TestDevcontainerUp_Docker_S8_SecondUpAfterStartScriptAbort(t *testing.T) {
 	})
 }
 
-// dcCounterFile is the file in the container to which the postStartCommand of
-// the counter test appends one line per run.
-const dcCounterFile = "/tmp/u-boot-up-count"
+// The files in the container to which the postStartCommand and the
+// postAttachCommand of the counter test append one line per run.
+const (
+	dcStartCounterFile  = "/tmp/u-boot-start-count"
+	dcAttachCounterFile = "/tmp/u-boot-attach-count"
+)
 
 // LH-FA-DEV-010, ADR-0030 decision 2: a project whose postStartCommand appends
-// a line to a file per run. The second `up` against the running container
-// leaves the number of lines unchanged and reports `alreadyRunning: true`
-// (envelope) and "Devcontainer already running" (text); after `down` the next
-// `up` starts the same container, the line count grows by one and
-// `alreadyRunning` is false. The growth after `down` is the guard of the
-// counter: a counter that does not count would not grow.
-func TestDevcontainerUp_Docker_AlreadyRunningPostStartCounter(t *testing.T) {
+// a line to a file per run. The second and third `up` against the running
+// container leave the number of lines unchanged and report `alreadyRunning:
+// true` (envelope) and "Devcontainer already running" (text); after `down` the
+// next `up` starts the same container, the line count grows by one and
+// `alreadyRunning` is false. The postAttachCommand of the same project is the
+// counter-sample: the Dev Container CLI runs it for every `up`, so its file
+// grows with each call, and the test sees a lifecycle command that does run
+// again. A change in these semantics (a new version of the CLI) is a
+// re-evaluation trigger of the decision.
+func TestDevcontainerUp_Docker_AlreadyRunningLifecycleCounters(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), dcTestBudget)
 	defer cancel()
 	dir := dcHandWritten(t, map[string]string{
-		"devcontainer.json": `{"name": "cnt", "image": "` + dcBaseImage + `", "postStartCommand": "echo run >> ` + dcCounterFile + `"}`,
+		"devcontainer.json": `{"name": "cnt", "image": "` + dcBaseImage + `", ` +
+			`"postStartCommand": "echo run >> ` + dcStartCounterFile + `", ` +
+			`"postAttachCommand": "echo run >> ` + dcAttachCounterFile + `"}`,
 	})
-	lines := func(id string) int {
+	lines := func(id, file string) int {
 		t.Helper()
-		out, code := dcExec(ctx, t, id, "vscode", "wc -l < "+dcCounterFile)
+		out, code := dcExec(ctx, t, id, "vscode", "wc -l < "+file)
 		n, err := strconv.Atoi(strings.TrimSpace(out))
 		if code != 0 || err != nil {
-			t.Fatalf("lines of %s: exit %d, output %q (%v)", dcCounterFile, code, out, err)
+			t.Fatalf("lines of %s: exit %d, output %q (%v)", file, code, out, err)
 		}
 		return n
+	}
+	// counts checks the lines of both files: postStartCommand and postAttachCommand.
+	counts := func(step, id string, wantStart, wantAttach int) {
+		t.Helper()
+		if n := lines(id, dcStartCounterFile); n != wantStart {
+			t.Errorf("%s: postStartCommand ran %d times, want %d", step, n, wantStart)
+		}
+		if n := lines(id, dcAttachCounterFile); n != wantAttach {
+			t.Errorf("%s: postAttachCommand ran %d times, want %d", step, n, wantAttach)
+		}
 	}
 	up := func(step string, wantAlready bool) string {
 		t.Helper()
@@ -938,22 +956,16 @@ func TestDevcontainerUp_Docker_AlreadyRunningPostStartCounter(t *testing.T) {
 	}
 
 	id := up("first up", false)
-	if n := lines(id); n != 1 {
-		t.Fatalf("lines after the first up = %d, want 1", n)
-	}
+	counts("after the first up", id, 1, 1)
 	if again := up("second up", true); again != id {
 		t.Errorf("second up reports container %s, want the same %s", again, id)
 	}
-	if n := lines(id); n != 1 {
-		t.Errorf("lines after the second up = %d, want 1: the postStartCommand ran against a running container", n)
-	}
+	counts("after the second up", id, 1, 2)
 	stdout, _, code := dcRun(ctx, t, dir, nil, "devcontainer", "up")
 	if want := "Devcontainer already running: container " + id[:12] + ","; code != 0 || !strings.Contains(stdout, want) {
 		t.Errorf("third up (text): exit %d, stdout:\n%s\nwant a line with %q", code, stdout, want)
 	}
-	if n := lines(id); n != 1 {
-		t.Errorf("lines after the third up = %d, want 1", n)
-	}
+	counts("after the third up", id, 1, 3)
 
 	if _, stderr, code := dcRun(ctx, t, dir, nil, "devcontainer", "down"); code != 0 {
 		t.Fatalf("down: exit %d, stderr:\n%s", code, stderr)
@@ -961,9 +973,7 @@ func TestDevcontainerUp_Docker_AlreadyRunningPostStartCounter(t *testing.T) {
 	if restarted := up("up after down", false); restarted != id {
 		t.Errorf("up after down reports container %s, want the same %s", restarted, id)
 	}
-	if n := lines(id); n != 2 {
-		t.Errorf("lines after down and up = %d, want 2: the postStartCommand runs again after a stop", n)
-	}
+	counts("after down and up", id, 2, 4)
 }
 
 // ADR-0028 decision 3, S8: a path with a character a `--mount` value cannot
