@@ -120,6 +120,31 @@ func TestExecute_DevcontainerUp_HelpSaysWhatTheGeneratedConfigurationMounts(t *t
 	}
 }
 
+// ADR-0030 decisions 1 and 2: the help of `devcontainer up` says that a start
+// script's failure ends the command with exit 11 also for an earlier start of
+// an already running container, names `--recreate`, and names the result line
+// and the JSON field of an already running container. The behaviour behind each
+// sentence has its test (the application tests of `Up` and
+// TestExecute_DevcontainerUp_AlreadyRunning).
+func TestExecute_DevcontainerUp_HelpSaysWhenExit11AndAlreadyRunning(t *testing.T) {
+	t.Parallel()
+	out, errOut, err := quietRun(t, newAppWithDevcontainer(&fakeDevcontainerUseCase{}), "devcontainer", "up", "--help")
+	if err != nil {
+		t.Fatalf("devcontainer up --help: %v", err)
+	}
+	text := strings.Join(strings.Fields(out+errOut), " ")
+	for _, part := range []string{
+		"A start script that reported a failure ends the command with exit 11, also when the container was already running and this call did not run the script;",
+		`"u-boot devcontainer up --recreate" creates the container anew.`,
+		`If the container was already running, the result line says "already running" and the JSON data carry alreadyRunning: true.`,
+		"script of the container aborted for an environment reason (also in an earlier start of the container, if u-boot.yaml configures the capability)",
+	} {
+		if !strings.Contains(text, part) {
+			t.Errorf("help lacks %q:\n%s", part, text)
+		}
+	}
+}
+
 // ADR-0028 decision 3: neither subcommand writes a project file, so
 // `--dry-run` and `--diff` end with exit 2 before the use case runs.
 func TestExecute_Devcontainer_RejectsPreviewFlagsAndArguments(t *testing.T) {
@@ -233,6 +258,7 @@ func TestExecute_DevcontainerUp_JSON(t *testing.T) {
 			ContainerID           *string `json:"containerId"`
 			RemoteUser            *string `json:"remoteUser"`
 			RemoteWorkspaceFolder *string `json:"remoteWorkspaceFolder"`
+			AlreadyRunning        *bool   `json:"alreadyRunning"`
 		} `json:"data"`
 	}
 	if err := json.Unmarshal([]byte(out), &env); err != nil {
@@ -252,6 +278,11 @@ func TestExecute_DevcontainerUp_JSON(t *testing.T) {
 		env.Data.RemoteWorkspaceFolder == nil || *env.Data.RemoteWorkspaceFolder != "/workspaces/demo" {
 		t.Errorf("data = %+v", env.Data)
 	}
+	// ADR-0030 decision 2: the field is always there, false for a container
+	// that was started by the call.
+	if env.Data.AlreadyRunning == nil || *env.Data.AlreadyRunning {
+		t.Errorf("data.alreadyRunning = %v, want present and false", env.Data.AlreadyRunning)
+	}
 	quiet, _, err := quietRun(t, newAppWithDevcontainer(startedUseCase()), "--quiet", "devcontainer", "up", "--json")
 	if err != nil || quiet != out {
 		t.Errorf("--quiet --json differs from --json (err=%v):\n%s\n%s", err, quiet, out)
@@ -261,6 +292,57 @@ func TestExecute_DevcontainerUp_JSON(t *testing.T) {
 	if !strings.Contains(console, "Warning (LH-FA-DEV-010): "+d.Message+"\n") {
 		t.Errorf("the console text differs from the JSON message %q:\n%s", d.Message, console)
 	}
+}
+
+// ADR-0030 decision 2, LH-FA-CLI-007: a container that was already running
+// changes the result line and the field `alreadyRunning`, not the exit code,
+// the envelope status or the warnings; `--quiet` writes no result line, as for
+// a started container.
+func TestExecute_DevcontainerUp_AlreadyRunning(t *testing.T) {
+	t.Parallel()
+	running := func() *fakeDevcontainerUseCase {
+		uc := startedUseCase()
+		uc.upResp.AlreadyRunning = true
+		return uc
+	}
+	t.Run("human", func(t *testing.T) {
+		t.Parallel()
+		out, _, err := quietRun(t, newAppWithDevcontainer(running()), "devcontainer", "up")
+		if err != nil {
+			t.Fatal(err)
+		}
+		lines := strings.Split(strings.TrimSpace(out), "\n")
+		if len(lines) != 3 ||
+			!strings.HasPrefix(lines[0], "Warning (LH-FA-DEV-010):") ||
+			lines[1] != "Devcontainer already running: container 0123456789ab, remote user vscode, workspace /workspaces/demo" ||
+			!strings.HasPrefix(lines[2], "Warning (LH-FA-DEV-007):") {
+			t.Errorf("stdout lines (disclosure, result, fallback):\n%s", out)
+		}
+		if strings.Contains(out, "Devcontainer started") {
+			t.Errorf("an already running container is not reported as started:\n%s", out)
+		}
+	})
+	t.Run("quiet", func(t *testing.T) {
+		t.Parallel()
+		out, _, err := quietRun(t, newAppWithDevcontainer(running()), "--quiet", "devcontainer", "up")
+		if err != nil || strings.Contains(out, "Devcontainer ") {
+			t.Errorf("err=%v stdout=%q, want no result line", err, out)
+		}
+	})
+	t.Run("json", func(t *testing.T) {
+		t.Parallel()
+		out, _, err := quietRun(t, newAppWithDevcontainer(running()), "devcontainer", "up", "--json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		jsontestutil.AssertMinimalEnvelope(t, []byte(out),
+			jsontestutil.WithCommand("devcontainer"), jsontestutil.WithSubcommand("up"), jsontestutil.WithExitCode(0),
+			jsontestutil.WithExpectedCodes("LH-FA-DEV-010", "LH-FA-DEV-007"),
+			jsontestutil.WithDataKeyPresent("alreadyRunning", true), jsontestutil.WithDataKeyPresent("containerId", testContainerID))
+		if !strings.Contains(out, `"status":"warn"`) {
+			t.Errorf("the status stays warn (the disclosure):\n%s", out)
+		}
+	})
 }
 
 // ADR-0028 decision 4: a failed `up` keeps the disclosure in the envelope when

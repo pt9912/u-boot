@@ -44,11 +44,13 @@ type devcontainerFlags struct {
 }
 
 // devcontainerUpData is the typed `data` carrier of `devcontainer up
-// --json`; no field is omitempty.
+// --json`; no field is omitempty. `alreadyRunning` is true when the container
+// ran before the call.
 type devcontainerUpData struct {
 	ContainerID           string `json:"containerId"`
 	RemoteUser            string `json:"remoteUser"`
 	RemoteWorkspaceFolder string `json:"remoteWorkspaceFolder"`
+	AlreadyRunning        bool   `json:"alreadyRunning"`
 }
 
 // devcontainerDownData is the typed `data` carrier of `devcontainer down
@@ -115,10 +117,14 @@ meant for credentials.
 stay. It is the editor-neutral form of "devcontainer up
 --remove-existing-container".
 
-After the start the command reports the degradation fallbacks of the sandbox
-profile that the container's start scripts wrote (they are read through the
-capabilities configured in u-boot.yaml; without u-boot.yaml there is nothing
-to report).
+After the start the command reads the status files that the container's start
+scripts wrote (through the capabilities configured in u-boot.yaml; without
+u-boot.yaml there is nothing to read). It reports a degradation fallback of the
+sandbox profile as a warning. A start script that reported a failure ends the
+command with exit 11, also when the container was already running and this
+call did not run the script; "u-boot devcontainer up --recreate" creates the
+container anew. If the container was already running, the result line says
+"already running" and the JSON data carry alreadyRunning: true.
 
 Exit codes (LH-FA-CLI-006):
   0   success
@@ -128,7 +134,9 @@ Exit codes (LH-FA-CLI-006):
       reference whose name is not a plain variable name
   11  no docker binary on the PATH (for example in the released container
       image), the daemon does not answer, the engine is not local, or a start
-      script of the container aborted for an environment reason
+      script of the container aborted for an environment reason (also in an
+      earlier start of the container, if u-boot.yaml configures the
+      capability)
   12  any other failure of the build or the start
   14  filesystem read failure
 
@@ -264,13 +272,20 @@ func runDevcontainerUp(
 		return fail(sanitizeBaseDir(err, cwd))
 	}
 	if flags.JSON {
-		data := devcontainerUpData{ContainerID: resp.ContainerID, RemoteUser: resp.RemoteUser, RemoteWorkspaceFolder: resp.RemoteWorkspaceFolder}
+		data := devcontainerUpData{
+			ContainerID: resp.ContainerID, RemoteUser: resp.RemoteUser,
+			RemoteWorkspaceFolder: resp.RemoteWorkspaceFolder, AlreadyRunning: resp.AlreadyRunning,
+		}
 		diags := mapWarningsToDiagnostics(append(raised, resp.Warnings...))
 		return writeEnvelope(stdout, newDataEnvelope("devcontainer", "up", data, diags, 0))
 	}
 	if !flags.Quiet {
-		fmt.Fprintf(stdout, "Devcontainer started: container %s, remote user %s, workspace %s\n",
-			shortContainerID(resp.ContainerID), resp.RemoteUser, resp.RemoteWorkspaceFolder)
+		outcome := "started"
+		if resp.AlreadyRunning {
+			outcome = "already running"
+		}
+		fmt.Fprintf(stdout, "Devcontainer %s: container %s, remote user %s, workspace %s\n",
+			outcome, shortContainerID(resp.ContainerID), resp.RemoteUser, resp.RemoteWorkspaceFolder)
 	}
 	writeWarnings(stdout, visibleWarnings(resp.Warnings, flags.Quiet))
 	return nil

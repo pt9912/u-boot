@@ -332,7 +332,8 @@ func ExitCode(err error) int {
 
 // isEnvironmentError returns true for the engine-side sentinels of exit code
 // 11: Docker binary or daemon unavailable, a remote engine, and the abort of
-// a container start script (`devcontainer up`, ADR-0029).
+// a container start script, also one that an earlier start of the container
+// reported (`devcontainer up`, ADR-0029, ADR-0030).
 func isEnvironmentError(err error) bool {
 	return errors.Is(err, driven.ErrDockerUnavailable) ||
 		errors.Is(err, driven.ErrContainerEngineNotLocal) ||
