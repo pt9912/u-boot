@@ -82,7 +82,7 @@ func TestExecute_DevcontainerShell_Help(t *testing.T) {
 		"The shell runs without a helper container and without a socket that this command mounts.",
 		"goes to standard error; standard output belongs to the shell. --quiet holds the progress back.",
 		"With a terminal on standard input the shell is attached to it; otherwise it reads its commands from standard input.",
-		`A start script of the container that reported a failure ends the command with exit 11 and opens no shell, also when the container was already running; "u-boot devcontainer up --recreate" creates the container anew.`,
+		`A start script of the container that reported a failure ends the command with exit 11 and opens no shell, also when the container was already running; this needs the u-boot.yaml of the project, without it no status file is read. "u-boot devcontainer up --recreate" creates the container anew.`,
 		"Once the shell has begun, the command ends with exit 0 whatever the exit status of the shell was;",
 		`use "docker exec".`,
 		"--json, --dry-run, --diff and arguments are rejected with exit 2. --yes and --no-interactive have no effect: the command asks for no confirmation.",
@@ -158,7 +158,8 @@ func TestExecute_DevcontainerShell_RejectsFlagsAndArguments(t *testing.T) {
 	})
 }
 
-// Both sentinels of exit class 2 are in `ExitCode`.
+// The usage sentinels of the devcontainer group, also wrapped, are exit class 2
+// in `ExitCode`.
 func TestExitCode_DevcontainerShellUsageSentinels(t *testing.T) {
 	t.Parallel()
 	for _, err := range []error{

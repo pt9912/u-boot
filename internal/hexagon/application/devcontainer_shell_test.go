@@ -47,6 +47,7 @@ func TestSessionEnvNames(t *testing.T) {
 		{"a key that is no plain name", `{"A-B": "${localEnv:A-B}"}`, nil},
 		{"an entry in a line comment", "// \"A\": \"${localEnv:A}\"\n{}", nil},
 		{"an entry in a block comment", `{/* "A": "${localEnv:A}" */}`, nil},
+		{"an entry outside remoteEnv counts, the form is read wherever it stands", `{"containerEnv": {"A": "${localEnv:A}"}}`, []string{"A"}},
 		{"an entry after a line comment", "{ // note\n\"A\": \"${localEnv:A}\"}", []string{"A"}},
 		{"an entry after a block comment", `{/* note */ "A": "${localEnv:A}"}`, []string{"A"}},
 		{"// in a string starts no comment", `{"url": "http://example.test/x", "A": "${localEnv:A}"}`, []string{"A"}},

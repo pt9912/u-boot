@@ -78,8 +78,9 @@ type DevcontainerShellRequest struct {
 	Stderr io.Writer
 
 	// Terminal allocates a terminal for the session. The adapter sets it when
-	// its standard input is a terminal; Stdin and Stdout are then the files
-	// of that terminal.
+	// its standard input is a terminal; Stdin is then the file of that
+	// terminal. Stdout is passed as given and is not checked: it may be no
+	// terminal (a pipe), a combination that no test covers.
 	Terminal bool
 }
 
