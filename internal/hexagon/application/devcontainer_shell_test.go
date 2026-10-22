@@ -396,6 +396,39 @@ func TestDevcontainerShell_ValidationFailuresRaiseNoDisclosureAndStartNothing(t 
 	}
 }
 
+// The start phase is shared, the name of the command in its texts is not: the
+// errors of `up` still begin with "devcontainer up: " (and none with "shell").
+func TestDevcontainerUp_ErrorsNameUp(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name    string
+		baseDir string
+		config  string
+		yaml    string
+		status  bool
+	}{
+		{"no configuration", devcontainerTestBaseDir, "", "", false},
+		{"folder", "/tmp/a,b", plainConfig, "", false},
+		{"variable name", devcontainerTestBaseDir, `"${localEnv:A-B}"`, "", false},
+		{"failed status after a start", devcontainerTestBaseDir, plainConfig, yamlPodman, true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			l := newLauncher()
+			insp := newFakeInspector(true)
+			if tc.status {
+				insp.setStatus("vfs", "failed")
+			}
+			svc, _ := devcontainerSvc(t, tc.config, tc.yaml, l, insp)
+			_, err := svc.Up(context.Background(), driving.DevcontainerUpRequest{BaseDir: tc.baseDir})
+			if err == nil || !strings.HasPrefix(err.Error(), "devcontainer up: ") {
+				t.Errorf("err = %v, want a message that begins with \"devcontainer up: \"", err)
+			}
+		})
+	}
+}
+
 // The error of the session passes through with its identity: a failed probe
 // is the runtime class, which the CLI maps to exit code 12.
 func TestDevcontainerShell_SessionErrorPassesThrough(t *testing.T) {
