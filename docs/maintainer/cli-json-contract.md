@@ -1241,7 +1241,18 @@ Datum, keine Diagnose:
   `command: "egress"` verpflichtend; `checkSubcommand` in `jsontestutil` prüft es, das Enum prüft
   `jsontestutil` nicht.
 
-### 6.11 `u-boot devcontainer up --json` / `devcontainer down --json` (slice-v1-cli-devcontainer-up-down)
+### 6.11 `u-boot devcontainer up --json` / `devcontainer down --json` (slice-v1-cli-devcontainer-up-down); `devcontainer shell` (slice-v1-cli-devcontainer-shell)
+
+`u-boot devcontainer shell` hat keine `--json`-Ausgabe: Der Befehl öffnet eine
+interaktive Sitzung, und die Standardausgabe gehört ihr. `--json` endet mit
+`ErrDevcontainerShellJSONNotApplicable` (Exit 2), und diese Abweisung ist der einzige
+Umschlag des Befehls: Minimalkontrakt mit `command: "devcontainer"`,
+`subcommand: "shell"`, ein Eintrag `error` mit dem Code
+[LH-FA-CLI-006](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), `exitCode: 2`, ohne `data`. Dasselbe gilt für
+`--dry-run`/`--diff` (`ErrDevcontainerPreviewNotApplicable`) und für ein Argument mit `--json`. Die Abbildung steht in
+`mapDevcontainerShellErrorToDiagnostic` (nur Klasse 2); Fehler des Use-Case erreichen keinen Umschlag, weil `--json`
+vor dem Aufruf abgewiesen wird. Die Exit-Codes der Fehler des Befehls ohne `--json` laufen über `ExitCode`
+(10, 11, 12, 14 wie bei `up`; `TestExecute_DevcontainerShell_SentinelsAndExitCodes`).
 
 Beide Unterbefehle liefern den Minimalkontrakt mit `command: "devcontainer"`,
 `subcommand: "up"` beziehungsweise `"down"` und dem `data`-Objekt
@@ -1300,6 +1311,10 @@ bare `u-boot devcontainer` (mit und ohne `--json`) endet mit
   | `driving.ErrDevcontainerConfigMissing`, `…ProjectFolderInvalid`, `…EnvNameInvalid` | 10 | ✓ | — |
   | `driving.ErrDevcontainerFileSystem` | 14 | ✓ | — |
   | `ErrDevcontainerSubcommandRequired`, `ErrDevcontainerPreviewNotApplicable` | 2 | ✓ | ✓ |
+  | `ErrDevcontainerShellJSONNotApplicable` | 2 | — | — (nur `shell`) |
+
+  Die Spalte `shell` entspricht der Spalte `up` ohne Umschlag (die Fehler erscheinen als Text auf der Fehlerausgabe,
+  Exit-Code wie `up`); die Probe vor der Sitzung scheitert als `driven.ErrDevcontainerRuntime` (Exit 12).
 
 - **`--quiet`** ist im JSON-Modus ein No-op; der Fortschritt (Bau des Hilfs-Images, Ausgabe der CLI) wird unter `--json`
   nicht geschrieben, bei einem Fehler enthält die Meldung des Fehler-Eintrags das gekürzte Ende der CLI-Ausgabe.
@@ -1333,7 +1348,8 @@ in derselben PR ergänzen.
 | `config set` ([slice-v1-cli-json-dry-run-config](../plan/planning/done/slice-v1-cli-json-dry-run-config.md)) | ✓ (genau eine Zeile — `u-boot.yaml`; Scalar-`PatchScalar` oder Listen-`Marshal`-Rewrite) | — | — | — | — | — | — | — |
 | `egress list` ([slice-v1-cli-egress-anzeige](../plan/planning/done/slice-v1-cli-egress-anzeige.md); read-only, nur `Exists`/`ReadFile` auf `u-boot.yaml` und `.git/config`) | — | — | — | — | — | — | — | — |
 | `devcontainer up` ([slice-v1-cli-devcontainer-up-down](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md); liest `.devcontainer/devcontainer.json` und `u-boot.yaml`, schreibt keine Projektdatei) | — | — | — | — | — | — | — | — |
-| `devcontainer down` ([slice-v1-cli-devcontainer-up-down](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md); liest nichts, schreibt nichts) | — | — | — | — | — | — | — | — |
+| `devcontainer down` ([slice-v1-cli-devcontainer-up-down](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md); liest nichts, schreibt nichts) | — | — | — | — | — | — | — |
+| `devcontainer shell` ([slice-v1-cli-devcontainer-shell](../plan/planning/in-progress/slice-v1-cli-devcontainer-shell.md); liest `.devcontainer/devcontainer.json` und `u-boot.yaml` wie `up`, schreibt keine Projektdatei, keine Mutation; kein `--json`, `--dry-run`, `--diff`) | — | — | — | — | — | — | — | — | — |
 
 Alle modifying-Subcommands sind damit migriert (`doctor`, `add`,
 `init`, `generate`, `remove`, `up`, `down`, `logs`, `config`).

@@ -226,16 +226,17 @@ The full change history of every release is in [`CHANGELOG.md`](CHANGELOG.md).
 | `egress list [--json]` | Show the egress allowlist of the sandbox devcontainer with the origin of each host; reads `u-boot.yaml` and `.git/config` only. |
 | `devcontainer up [--recreate]` | Start the devcontainer of the project without an editor, Node.js or the Dev Container CLI on the host (Docker only): the CLI runs in a short-lived helper container that holds the engine socket, which the command says before it starts (also under `--quiet`). |
 | `devcontainer down` | Stop that container; it removes neither the container nor a volume. |
+| `devcontainer shell` | Start the devcontainer like `devcontainer up` and open an interactive shell in it, as the user and in the workspace the start reports and with the credentials the generated configuration passes on; the shell itself runs without a helper container and without a socket that the command mounts. |
 | `template list [--json]` | Browse the built-in template catalogue. |
 
 ## Prerequisites
 
 For consumers of `u-boot`:
 
-- Docker Engine ≥ 24.0.0 or Podman ≥ 4.0 (drop-in supported; not promised for `devcontainer up`/`down`)
+- Docker Engine ≥ 24.0.0 or Podman ≥ 4.0 (drop-in supported; not promised for `devcontainer up`/`down`/`shell`)
 - Docker Compose ≥ 2.20.0 or `podman compose`
 - Git
-- Optional, to start the devcontainer: VS Code with the Dev Containers extension, the Dev Container CLI, or Docker alone with `u-boot devcontainer up`
+- Optional, to start the devcontainer: VS Code with the Dev Containers extension, the Dev Container CLI, or Docker alone with `u-boot devcontainer up` and `u-boot devcontainer shell`
 
 For building from source:
 
@@ -264,7 +265,7 @@ For building from source:
 - **Quality gates:** [`docs/user/quality.md`](docs/maintainer/quality.md)
 - **Branch protection:**
   [`docs/user/branch-protection.md`](docs/maintainer/branch-protection.md)
-- **Devcontainer without an editor (`devcontainer up`/`down`):**
+- **Devcontainer without an editor (`devcontainer up`/`down`/`shell`):**
   [`docs/user/benutzerhandbuch.md#den-devcontainer-ohne-editor-starten-und-stoppen`](docs/user/benutzerhandbuch.md#den-devcontainer-ohne-editor-starten-und-stoppen)
 - **Devcontainer features:**
   [`docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen`](docs/user/benutzerhandbuch.md#410-devcontainer-features-nutzen)
