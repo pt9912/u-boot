@@ -814,7 +814,8 @@ Proxy-Variablen und Zugangsdaten für private Basis-Images reicht er nicht durch
   im Container und den Workspace: `Devcontainer started: container <ID>, remote user <Benutzer>,
   workspace <Pfad>`. Lief der Container schon vor dem Aufruf und meldet die Dev-Container-CLI
   dieselbe Kennung, lautet die Zeile `Devcontainer already running: …` mit denselben Angaben;
-  der Aufruf hat dann nichts gestartet. Mit `--recreate` lautet sie immer `started`. Der
+  der Container lief schon, dieser Aufruf hat ihn nicht gestartet. Mit `--recreate` lautet sie
+  immer `started`. Der
   Fortschritt (Bau des Hilfs-Images, Ausgabe der CLI) geht auf die Fehlerausgabe.
 - `--quiet`: Die Erfolgsmeldung und der Fortschritt entfallen (bei einem Fehler wird der
   Fortschritt nachträglich ausgegeben); die Ausweisung des Sockets und die Fallbacks
@@ -888,15 +889,16 @@ bis dahin angelegt hat, bleibt bestehen.
 Containers, nicht nach dem Ablauf des einzelnen Aufrufs. Ohne `--recreate` verwendet ein
 erneutes `up` den vorhandenen Container:
 
-- **Läuft er, führt die Dev-Container-CLI das `postStartCommand` nicht erneut aus**, das
-  `postAttachCommand` aber bei jedem `up` (getestet mit der Dev-Container-CLI 0.89.0 an einem
-  Projekt, dessen beide Befehle je Lauf eine Zeile in eine Datei im Container schreiben; Linux
-  `amd64`, lokale Engine, Docker 29.9.2, ein Lauf). Nach `u-boot devcontainer down` und
-  `up` läuft das `postStartCommand` wieder, im selben Container; `up --recreate` legt ihn neu an.
-  Die Zeile von `up` sagt bei einem laufenden Container `Devcontainer already running`, im
-  JSON-Umschlag ist `alreadyRunning` `true`.
-- **Meldet die Statusdatei eines Startscripts `failed`, endet jedes erneute `up` ohne
-  `--recreate` wieder mit Exit-Code 11**, auch wenn die Dev-Container-CLI selbst gelingt. Die
+- **Gegen einen laufenden Container führt die Dev-Container-CLI das `postCreateCommand` und das
+  `postStartCommand` nicht erneut aus**, das `postAttachCommand` aber bei jedem `up` (getestet mit
+  der Dev-Container-CLI 0.89.0 an einem Projekt, dessen drei Befehle je Lauf eine Zeile in eine
+  Datei im Container schreiben; Linux `amd64`, lokale Engine, Docker 29.9.2, ein Lauf). Ist der
+  Container gestoppt, läuft nach `u-boot devcontainer down` und `up` das `postStartCommand`
+  wieder, im selben Container, das `postCreateCommand` nicht; `up --recreate` legt den Container
+  neu an. Die Zeile von `up` sagt bei einem laufenden Container `Devcontainer already running`,
+  im JSON-Umschlag ist `alreadyRunning` `true`.
+- **Meldet nach dem Aufruf die Statusdatei eines Startscripts `failed`, endet jedes erneute `up`
+  ohne `--recreate` wieder mit Exit-Code 11**, auch wenn die Dev-Container-CLI selbst gelingt. Die
   Meldung nennt die Ursache der Fähigkeit (wie `doctor`), den Zeitpunkt der Statusdatei, dass der
   Container läuft und dieser Aufruf das Startscript nicht ausgeführt hat, und
   `u-boot devcontainer up --recreate`. Getestet mit dem Startscript der Egress-Beschränkung unter
@@ -916,8 +918,9 @@ erneutes `up` den vorhandenen Container:
   `postCreateCommand` lief nicht erneut. Andere Fehler (etwa ein gescheiterter Bau) sind nicht
   gemessen.
 
-Ein Exit-Code 0 des zweiten `up` heißt also nicht, dass die Lebenszyklus-Befehle durchgelaufen
-sind. Abhilfe: `u-boot devcontainer up --recreate` entfernt den Container und legt ihn neu an;
+Ein Exit-Code 0 des zweiten `up` heißt also nicht, dass das `postCreateCommand` und das
+`postStartCommand` durchgelaufen sind: Gegen einen laufenden Container führt `up` sie nicht erneut
+aus. Abhilfe: `u-boot devcontainer up --recreate` entfernt den Container und legt ihn neu an;
 benannte Volumes bleiben erhalten.
 
 **Benutzer-ID.** Die Benutzer-ID im Container wird nicht an den Besitzer des Projektordners
@@ -2481,12 +2484,13 @@ lokale DNS-Server nicht startet oder nicht unter diesem Benutzer läuft; die Mel
 2. Setzen Sie `devcontainer.sandbox.nestedRuntime` auf `none` und erzeugen Sie
    den Devcontainer neu, wenn Sie kein verschachteltes Podman brauchen.
 3. Haben Sie den Container mit `u-boot devcontainer up` gestartet, legen Sie ihn nach einer
-   Änderung mit `u-boot devcontainer up --recreate` neu an. Ein erneutes `up` ohne
-   `--recreate` verwendet den bestehenden Container und führt das `postStartCommand` nicht
-   erneut aus; meldet die Statusdatei eines Startscripts `failed`, endet es wieder mit
-   Exit-Code 11. Beheben Sie die Ursache und legen Sie den Container mit `--recreate` neu an
-   (Abschnitt [4.9](#49-einen-devcontainer-einrichten), „Erneutes `up` nach einem Fehler oder
-   Abbruch“).
+   Änderung mit `u-boot devcontainer up --recreate` neu an. Gegen einen laufenden Container
+   führt ein erneutes `up` ohne `--recreate` das `postCreateCommand` und das `postStartCommand`
+   nicht erneut aus; ist der Container gestoppt, läuft das `postStartCommand` nach `down` und
+   `up` wieder. Meldet nach dem Aufruf die Statusdatei eines Startscripts `failed`, endet `up`
+   wieder mit Exit-Code 11. Beheben Sie die Ursache und legen Sie den Container mit `--recreate`
+   neu an (Abschnitt [4.9](#49-einen-devcontainer-einrichten), „Erneutes `up` nach einem Fehler
+   oder Abbruch“).
 4. Weitere Abhilfen stehen in Abschnitt [4.11](#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten) unter „Verschachteltes Podman".
 
 ### Wenn nichts davon hilft
