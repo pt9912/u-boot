@@ -2,7 +2,7 @@
 
 * Rolle: Reviewer (frischer Kontext, nicht der Autor)
 * Gegenstand: Diff `3b2b5984..2ac89eb4` (drei Commits: Fix-Runde, Verlinkung des Reports, Plan-Nachtrag §3), Plan
-  [`slice-v1-cli-devcontainer-shell`](../plan/planning/done/slice-v1-cli-devcontainer-shell.md),
+  [`slice-v1-cli-devcontainer-shell`](../plan/planning/in-progress/slice-v1-cli-devcontainer-shell.md),
   Vorbericht [`2026-10-22-slice-v1-cli-devcontainer-shell`](2026-10-22-slice-v1-cli-devcontainer-shell.md)
 * Geprüft gegen: die fünf Findings des Vorberichts, [`ADR-0031`](../plan/adr/0031-devcontainer-shell-ohne-editor.md),
   [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten),
@@ -26,7 +26,7 @@ Keine.
 
 **L-1 · Plan-Nachtrag verweist auf einen Bericht ohne Artefakt**
 * quelle: AGENTS.md §3.10 (Abgleich der Plan-Tabelle nach der letzten Fix-Runde), `harness/roles.md` (Übergaben als benennbares Artefakt)
-* pfad: [`docs/plan/planning/done/slice-v1-cli-devcontainer-shell.md`](../plan/planning/done/slice-v1-cli-devcontainer-shell.md) · „Sensoren und Abgleich der Plan-Tabelle: siehe den Bericht an den Hauptagenten“
+* pfad: [`docs/plan/planning/in-progress/slice-v1-cli-devcontainer-shell.md`](../plan/planning/in-progress/slice-v1-cli-devcontainer-shell.md) · „Sensoren und Abgleich der Plan-Tabelle: siehe den Bericht an den Hauptagenten“
 * klasse: uebergabe-ohne-artefakt
 * befund: Die Sensorläufe und der Tabellenabgleich der Fix-Runde stehen nicht im Plan, sondern verweisen auf eine
   Nachricht, die nach dem Lauf nicht auflösbar ist. Die Dateien der Runde (`devcontainer_shell_test.go` in

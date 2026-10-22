@@ -1349,7 +1349,7 @@ in derselben PR ergänzen.
 | `egress list` ([slice-v1-cli-egress-anzeige](../plan/planning/done/slice-v1-cli-egress-anzeige.md); read-only, nur `Exists`/`ReadFile` auf `u-boot.yaml` und `.git/config`) | — | — | — | — | — | — | — | — |
 | `devcontainer up` ([slice-v1-cli-devcontainer-up-down](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md); liest `.devcontainer/devcontainer.json` und `u-boot.yaml`, schreibt keine Projektdatei) | — | — | — | — | — | — | — | — |
 | `devcontainer down` ([slice-v1-cli-devcontainer-up-down](../plan/planning/done/slice-v1-cli-devcontainer-up-down.md); liest nichts, schreibt nichts) | — | — | — | — | — | — | — | — |
-| `devcontainer shell` ([slice-v1-cli-devcontainer-shell](../plan/planning/done/slice-v1-cli-devcontainer-shell.md); liest `.devcontainer/devcontainer.json` und `u-boot.yaml` wie `up`, schreibt keine Projektdatei, keine Mutation; kein `--json`, `--dry-run`, `--diff`) | — | — | — | — | — | — | — | — |
+| `devcontainer shell` ([slice-v1-cli-devcontainer-shell](../plan/planning/in-progress/slice-v1-cli-devcontainer-shell.md); liest `.devcontainer/devcontainer.json` und `u-boot.yaml` wie `up`, schreibt keine Projektdatei, keine Mutation; kein `--json`, `--dry-run`, `--diff`) | — | — | — | — | — | — | — | — |
 
 Alle modifying-Subcommands sind damit migriert (`doctor`, `add`,
 `init`, `generate`, `remove`, `up`, `down`, `logs`, `config`).

@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-v1-cli-devcontainer-shell`](../../../../done/slice-v1-cli-devcontainer-shell.md)
+**Vorgang:** [`slice-v1-cli-devcontainer-shell`](../../../../in-progress/slice-v1-cli-devcontainer-shell.md)
 **Fund:** Verification-Report [`2026-10-22-slice-v1-cli-devcontainer-shell-verify`](../../../../../../reviews/2026-10-22-slice-v1-cli-devcontainer-shell-verify.md) V-1 (LOW): In `docs/maintainer/cli-json-contract.md` §7 (Mutations-Matrix, Kopf: Name plus acht Spalten) verlor die Zeile `devcontainer down` im Diff eine Zelle (acht statt neun), die neue Zeile `devcontainer shell` hatte eine zu viel (zehn statt neun). Gelesen am Stand des Vorgängers (`git show 41e0b262:docs/maintainer/cli-json-contract.md`, Zeile `down` mit neun Zellen) und am Ist-Stand; behoben, danach tragen alle Zeilen der Tabelle neun Zellen. Der Reviewer (Review und Nachlauf) hat es nicht gefunden.
 
 **Beleg-Qualität:** belegt durch Lesen und Zählen (Verifier; Planner bei der Behebung). Erster Vorgang.

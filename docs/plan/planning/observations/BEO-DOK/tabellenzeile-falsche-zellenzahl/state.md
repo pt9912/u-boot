@@ -1,1 +1,1 @@
-**Stand:** offen, 1× — Vorgang [`slice-v1-cli-devcontainer-shell`](../../../done/slice-v1-cli-devcontainer-shell.md) (Verification V-1, LOW, in der Closure behoben; alle zwölf Zeilen der Tabelle haben neun Zellen). Unter der Schwelle von drei, kein Ausgang; kein Slice, kein Carveout.
+**Stand:** offen, 1× — Vorgang [`slice-v1-cli-devcontainer-shell`](../../../in-progress/slice-v1-cli-devcontainer-shell.md) (Verification V-1, LOW, in der Closure behoben; alle zwölf Zeilen der Tabelle haben neun Zellen). Unter der Schwelle von drei, kein Ausgang; kein Slice, kein Carveout.
