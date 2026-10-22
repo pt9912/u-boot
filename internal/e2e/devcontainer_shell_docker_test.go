@@ -28,8 +28,8 @@ import (
 
 // dcHelperPrefix is the name prefix of the helper container of the start; the
 // binary carries it without a test prefix (the constant `helperContainerPrefix`
-// of the launcher). The tests see the helper during the start and so notice a
-// prefix that no longer matches.
+// of the launcher). The tests see the helper during the start; a prefix that
+// differs from the product's fails that guard.
 const dcHelperPrefix = "u-boot-devcontainer-up-"
 
 // lockedBuffer is a buffer that the writer goroutine of os/exec and the test

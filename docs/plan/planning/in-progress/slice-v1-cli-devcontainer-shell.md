@@ -121,6 +121,90 @@ Der Projektinhaber hat angeordnet, ohne Rückfrage weiterzumachen. Der Plan übe
 9. **Standardströme:** Der Befehl übergibt `cmd.OutOrStdout()` als `Stdout` und `cmd.ErrOrStderr()` als `Stderr` unverändert, also in der Produktion `os.Stdout` und `os.Stderr` (verschiedene Dateien). Ein Wrapper (zur Serialisierung) entfiele: Mit Terminal reicht der Launcher Dateien unverändert an den Client weiter. `Stdin` ist in der Produktion `os.Stdin`, eine Datei; die Bedingung für den Test zu `cmd.WaitDelay` (ein Reader, der keine Datei ist) tritt im Befehl nicht ein, und die CLI-Tests geben ihn an einen Fake, nicht an den Launcher.
 10. **Docker-Test am Befehl:** Er läuft das gebaute Binary (`ubootBinary`), nicht den Dienst; die „Variable eines Agenten“ ist ein zusätzlicher gleichnamiger Eintrag in `remoteEnv` der erzeugten Konfiguration (die Form, die der Generator für `AgentEnv` schreibt, `devcontainer.json.tmpl` Zeilen 33 bis 38), weil das Katalog-Feature `claude-code` eine npm-Installation im Container braucht (Netz, Minuten) und der Test die Weitergabe der Namensliste prüft, nicht das Feature. Der Hilfs-Container der Startphase trägt in der Produktion das Namenspräfix `u-boot-devcontainer-up-` ohne Testpräfix; der Test zählt deshalb die Container mit diesem Präfix **vor** dem Aufruf und **mit der ersten Zeile der Sitzung**, und prüft den Unterschied. Zusätzlich fährt ein Test das Binary unter `script`: Er belegt, dass die Erkennung mit einem Terminal an der Standardeingabe „Terminal ja“ ergibt (der dritte Pin des Terminal-Pfads; der Plan verlangt ihn nicht, das Risiko in §6 „weiter offen“ wird dadurch enger).
 
+### Umsetzung (Implementer, 2026-10-22)
+
+Kein Push, kein Tag, nichts auf GitHub. Keine Rückführung nach §4 eingetreten, keine Annahme von [`ADR-0031`](../../adr/0031-devcontainer-shell-ohne-editor.md) oder [`ADR-0034`](../../adr/0034-devcontainer-shell-ende-des-clients-und-keine-login-shell.md) widerlegt.
+
+**Commits** (ab `41e0b262`): `a6aad529` Start · `7110bf46`/`dee4b8ed` Move und Verweis-Nachzug (`make slice-mv`) · `348aba10` Roadmap · `acda8097` Port und Application · `2400a826` CLI, Terminal-Erkennung, Wiring, Tests · `8b45ef28` Docker-Tests · `f297e42a` Test zum Befehlsnamen von `up` · `75ef7564` Doku (Handbuch, READMEs, `CHANGELOG.md`, JSON-Kontrakt) · dieser Abschnitt.
+
+**Ist gegen Plan.** Die Fundstellen der Plan-Tabelle waren am Ist-Stand (`41e0b262`) verschoben; Zeilennummern gelten nicht mehr (Port `devcontainer.go`, `devcontainer_start.go`, `devcontainer.go` des CLI), die Aussagen stimmten: `Up` ohne die Antwort als gemeinsame Startphase möglich (kein Umbau des Vertrags von `Up`), `ExitCode` hat für den rohen Fehler des Kontexts keinen Zweig (Klasse `1`), `jsontestutil` prüft `subcommand` nur auf Vorhandensein (unverändert, `TestExecute_DevcontainerShell_RejectsFlagsAndArguments` nutzt `AssertMinimalEnvelope` mit `WithSubcommand("shell")`). Abweichungen von der Plan-Tabelle: `devcontainer_fallback.go` (Kommentar von `startFallbackWording`) geändert, `export_test.go` der Application und des CLI bekommen je eine Brücke, `terminal.go` neu, neue Testdateien `devcontainer_shell_test.go` (Application, CLI) und `devcontainer_shell_docker_test.go` (e2e) statt Erweiterung der vorhandenen. `cmd/uboot/main.go` ändert nur Kommentare (der Dienst trägt `Shell`, das Wiring ist unverändert), `main_test.go` bekommt den Wiring-Test ohne `docker` (Exit `11`, Ausweisung auf der Fehlerausgabe). `cli.go`: Felder `stdin`, `terminalProbe`, Optionen `WithStdin`, `WithTerminalProbe`, Kommentare. Die Dokumente: Handbuch (4.9, 4.11, Voraussetzungen, Optionen, Rechte, FAQ, Befehlsübersicht, Anhang), beide READMEs, `CHANGELOG.md`, JSON-Kontrakt §6.11 und §7. Die Handbuch-Zeile `subcommand` trägt weiter die ungepinnte Bedingung „nur bei“ (V-1 aus `slice-cr-json-subcommand-pflicht`); der Diff berührt die Zeile und ergänzt `shell` mit dem Zusatz „nur im Umschlag der Abweisung“, den `TestExecute_DevcontainerShell_RejectsFlagsAndArguments` pinnt; die Bedingung „nur bei config, egress, devcontainer, template“ pinnt weiter kein Test (Hinweis an den Projektinhaber, nicht Gegenstand).
+
+**Vorab-Suche** (Baum ohne `docs/plan`, `docs/reviews`, `.harness`, `spec/`; Treffer für `devcontainer up`, `devcontainer down`, `up|down`, `up/down`, Werte von `subcommand`): geändert — Handbuch (Zeilen zu Voraussetzungen, Daemon-Zugriff, Podman, Container-Image, `--quiet`, Profil-Tabelle, Rechte, Exit-Codes §7, FAQ, Befehlsübersicht, Optionen je Befehl, `subcommand`, `data`, Besonderheiten), beide READMEs (Tabelle, *Prerequisites*, Link-Liste), `CHANGELOG.md`, JSON-Kontrakt, Kommentare in `cli.go` (Feld, Option, `ExitCode`, `isEnvironmentError`, `isFilesystemError`), `cmd/uboot/main.go` (zwei Kommentare), Port `devcontainer.go`, `devcontainer_fallback.go`. Gelesen und unverändert: `egress.go` Zeile 222 und `generate.go` Zeile 863 (Hinweis `--remove-existing-container`, nennt den Befehl `up` als Weg zur Neuanlage), `devcontainer_sandbox.go` Zeile 401 (`up --recreate`), Handbuch Zeilen 700, 744 f. und *Stoppen, Neuanlage und Volumes* (nennen `up` als Weg, keine Aufzählung), `compose`-`up/down` in `up.go`, `down.go`, `logs.go`, `remove.go`, `config.go` (Compose), `jsontestutil.go`. Die alten Treffer von `socketRelaxationMessage` stehen nur in `done/`-Plänen (Chronik, nicht angefasst).
+
+**Beleg-Tabelle (Satz → Test).**
+
+| Satz in Hilfe, Handbuch, CHANGELOG | Test |
+|---|---|
+| Start wie `up` ohne `--recreate` | `TestDevcontainerShell_StartIsUpWithoutRecreate` (Application) |
+| Benutzer, Workspace, Kennung der Ergebniszeile; Namensliste; Terminal und Ströme werden durchgereicht | `TestDevcontainerShell_OpensTheSessionWithTheResultOfTheStart`, `…PassesTheTerminalFlagBothWays`, `TestSessionEnvNames`, `TestWithoutComments`; am Binary `TestDevcontainerShell_Docker_Session/session_without_a_terminal` |
+| Variablen gesetzt, soweit auf dem Host gesetzt; ungesetzte fehlt; Verweise anderer Form nicht | `TestDevcontainerShell_Docker_Session` (Token, Agenten-Variable, ungesetzte), Zeilen „another name“, „a default“, „a reference in mounts“ von `TestSessionEnvNames` |
+| Ausweisung vor dem Start, auch unter `--quiet`, „Dauer des Starts“ | `TestDevcontainerShell_SocketDisclosureNamesTheStart`, `TestExecute_DevcontainerShell_Quiet`, `TestRun_DevcontainerShell_NoDockerBinaryExits11`, Docker-Test (Standardfehlerausgabe) |
+| Shell ohne Hilfs-Container, ohne vom Befehl eingebundenen Socket | `TestDevcontainerShell_Docker_Session` (Zählung der Hilfs-Container, Wächter), `TestShellArgs` des Fundaments (kein `-v`) |
+| Ausgabe von `u-boot` auf der Fehlerausgabe, Standardausgabe der Shell, keine Erfolgszeile | `TestExecute_DevcontainerShell_HumanOutput`, Docker-Test (Standardausgabe enthält genau die Sitzungszeilen) |
+| `--quiet` hält den Fortschritt zurück, Ausgabe der Shell unverändert | `TestExecute_DevcontainerShell_Quiet` (mit Wächter ohne `--quiet`) |
+| Terminal an der Standardeingabe angeschlossen, sonst Standardeingabe | `TestExecute_DevcontainerShell_Terminal`, `TestIsTerminal`, Docker-Test unter `script` mit Gegenprobe über eine Pipe; im Adapter `TestShell_Docker_Terminal_UnderScript` |
+| `failed` → Exit `11`, keine Shell; `--recreate` als Weg; ohne `u-boot.yaml` öffnet die Shell | `TestDevcontainerShell_FailedStatusOpensNoSession`, `…FailedStatusNobodyReadsDoesNotStopTheSession`, `TestDevcontainerShell_Docker_FailedStatusOpensNoSession` |
+| Prüfung vor der Shell scheitert → `12` | `TestExecute_DevcontainerShell_SentinelsAndExitCodes` (Abbildung), `…SessionErrorPassesThrough`; die Probe selbst am Adapter (Fundament, `TestShell_Docker_Probe`) |
+| Exit `0` nach Beginn der Shell, was immer ihr Status war | `TestExecute_DevcontainerShell_HumanOutput` (Use-Case `nil` → `0`), Docker-Test (Skript endet mit `exit 3`, Prozess `0`) |
+| `--json`, `--dry-run`, `--diff`, Argumente → `2`, `--json` als Umschlag mit `subcommand: shell` | `TestExecute_DevcontainerShell_RejectsFlagsAndArguments`, `TestExitCode_DevcontainerShellUsageSentinels`, `TestRun_DevcontainerShell_NoDockerBinaryExits11` |
+| `--yes`/`--no-interactive` ohne Wirkung | `TestExecute_DevcontainerShell_YesAndNoInteractiveHaveNoEffect` |
+| Hilfe ohne Kennung, ohne Aussage zu Signalen/Login-Shell/Sitzungsende | `TestExecute_DevcontainerShell_Help` |
+| „Beenden Sie die Sitzung mit `exit` … `kill -9` …“ (Wortlaut aus [`ADR-0034`](../../adr/0034-devcontainer-shell-ende-des-clients-und-keine-login-shell.md)) | im Fundament `TestShell_Docker_ClientEnd`, `TestShell_Docker_Terminal_UnderScript`; kein Test am Befehl (Plan §1: entfällt) |
+| Wert nicht in `Config.Env` des Devcontainers | `TestDevcontainerShell_Docker_Session/guards_of_the_session` (mit Wächter-Container `docker run -e`) |
+
+Nicht gesagt, weil ohne Test am Befehl: Verhalten beim Abbruch durch ein Signal an `u-boot` (Exit-Code der Klasse `1` ist nicht zugesagt), Lebenszyklus-Befehle bei `shell`, Dauer, Login-Shell, `~/.bashrc`.
+
+**Mutationen** (Unit: `go test -run` im Test-Image `u-boot:test-docker-tools`; Docker: gezielter Docker-Lauf; danach `git checkout -- internal cmd`, `git diff -- internal cmd` leer; alle rot, wo nicht anders vermerkt):
+
+| Nr | Änderung | rot in |
+|---|---|---|
+| M1 | `Shell` startet mit `recreate: true` | `TestDevcontainerShell_StartIsUpWithoutRecreate` |
+| M2 | `Shell` fragt den Inspector vorab (`reportRunning`) | dieselbe |
+| M3 | Ausweisung von `shell` mit „call“ | `…SocketDisclosureNamesTheStart` |
+| M4 | Fallback-Warnungen nicht an `OnWarning` | `…FallbackWarningsComeBeforeTheSession/fallback` |
+| M5 | Sitzung bekommt `localEnvNames` statt `sessionEnvNames` | `…OpensTheSessionWithTheResultOfTheStart` |
+| M6 | `withoutComments` gibt den Text unverändert zurück | `TestWithoutComments`, drei Zeilen von `TestSessionEnvNames` |
+| M7 | Gleichheit Schlüsselname = Referenzname entfernt | `TestSessionEnvNames/another_name_in_the_reference` |
+| M8 | Benutzer und Workspace vertauscht | `…OpensTheSessionWithTheResultOfTheStart` |
+| M9 | `Terminal: false` an den Launcher | `…PassesTheTerminalFlagBothWays` |
+| M10 | Escape in Zeichenketten ignoriert | `TestWithoutComments`, `TestSessionEnvNames` je eine Zeile |
+| M11 | fester Name „up“ in der Konfigurationsprüfung | `…ValidationFailuresRaiseNoDisclosureAndStartNothing` |
+| M12 | Fehler der Startphase ignoriert | `…FailedStatusOpensNoSession`, `…StartFailuresOpenNoSession`, `…ValidationFailures…`, `…UnwiredPortsAreErrors` |
+| M13 | Zeichenketten werden nicht ausgenommen | sieben Zeilen von `TestSessionEnvNames`/`TestWithoutComments` |
+| M14 | `Up` trägt den Namen „shell“ | `TestDevcontainerUp_ErrorsNameUp` |
+| C1 | `--json` wird nicht abgewiesen | `…RejectsFlagsAndArguments` (drei Fälle), `TestRun_DevcontainerShell_NoDockerBinaryExits11` |
+| C2 | `--dry-run`/`--diff` nicht abgewiesen | `…RejectsFlagsAndArguments` (zwei Fälle) |
+| C3 | Warnungen auf der Standardausgabe | `…HumanOutput`, `…Quiet`, `TestRun_DevcontainerShell_NoDockerBinaryExits11` |
+| C4 | `--quiet` hält den Fortschritt nicht zurück | `…Quiet` |
+| C5 | gehaltener Fortschritt wird bei Fehler nicht geschrieben | `…Quiet/the_progress_of_a_failed_call_is_written_after_all` |
+| C6 | `Terminal: true` immer | `…HumanOutput`, `…Terminal` (beide Teile) |
+| C7 | `visibleWarnings(…, false)` | `…Quiet/a_notice_that_is_neither…` |
+| C8 | Anforderungskennung der Exit-Code-Zeile im Langtext | `…Help` |
+| C9 | Nullgerät zählt als Terminal | `TestIsTerminal`, `…Terminal` |
+| C10 | jede Datei ist ein Terminal | dieselben |
+| C12 | `SetIn` entfällt | `…Terminal` |
+| C13 | Sentinel nicht in `isDevcontainerUsageError` | `TestExitCode_DevcontainerShellUsageSentinels`, `…RejectsFlagsAndArguments`, Wiring-Test |
+| C14 | `context.Background()` statt `cmd.Context()` | `…HumanOutput` |
+| C15 | `--no-interactive` bricht ab | `…YesAndNoInteractiveHaveNoEffect` |
+| D1 | `sessionEnvNames(config[:0])` | `TestDevcontainerShell_Docker_Session` (Sitzung, Wächter) |
+| D2 | Erfolgszeile auf stdout | Docker-Test, beide |
+| D3 | `Terminal: false` | `…Session/terminal_under_script` (nach 21 s) |
+| D4 | Fehler der Startphase ignoriert | `…FailedStatusOpensNoSession` |
+| D5 | `--rm` aus dem Launcher entfernt | `…Session/session_without_a_terminal` („helper containers exist during the session“) |
+| D6 | `containerEnv` mit `GIT_TOKEN` in der Vorlage | `…Session` rot (die Sitzung schlägt am Start oder an der Zeilenprüfung fehl, bevor `Config.Env` geprüft wird; die Prüfung selbst belegt nur der Wächter-Container) |
+
+Nicht gefahren: C11 (Standard-Probe auf „immer ja“; durch `…Terminal/the_default_probe` mit Pipe und Nullgerät abgedeckt, nicht als Mutation gesehen), C16 bis C18 (Registrierung des Befehls, Code der Abbildung, Sentinel in `isEnvironmentError`; nicht als Mutation gesehen, Registrierung fängt `…Help` und jeder Befehlstest).
+
+**Docker-Tests lokal** (Image `u-boot:test-docker-tools`, `docker run --network=host … -run 'TestDevcontainerShell_Docker_'`, Linux `amd64`, Engine und Client 29.9.2): `TestDevcontainerShell_Docker_Session` PASS (drei Teile) und `…FailedStatusOpensNoSession` PASS, ein Lauf nach dem Fix der Kennungsprüfung (28,8 s). Die Engine 28.0.4 des CI-Runners ist nicht gefahren: Die neuen Tests pinnen keinen Meldungstext der Engine (die Erkennung der Fehler des Clients liegt im Fundament). Aufgeräumt: kein Container, kein Image `vsc-dcs…`, kein Hilfs-Container zurück; Go-Cache-Volume `ubl-shell-gocache` am Ende entfernt.
+
+**Sensoren** (Exit-Codes): `make lint` 0; Lint mit `run.build-tags: [docker]` in einer Kopie (Scratchpad, `.golangci.yml` im Repo unverändert) Exit 1 mit denselben neun Befunden wie vor dem Slice in `internal/e2e` (acht `contextcheck`, ein `revive`), keiner in den neuen Dateien; `make gates` 0 (`coverage-gate` 92,00 % gegen 90 %, `docs-check` 0 Befunde, `ablage-pruefung` 26 Fälle ohne Fehlschlag); `make doc-trace` 0 (84 Anforderungen, 0 Waisen); `make doc-immutable RANGE="v0.13.1..HEAD"` 0 Befunde; `make doc-commits RANGE="origin/main..HEAD"` 0 Befunde. `make verify-depguard` nicht gelaufen: Es kam kein Import hinzu, der eine Regel berührt (Application importiert `io` und `strings`, der CLI-Adapter `io`, `os`). `make test-docker` als Ganzes nicht gelaufen (Zeitlimit des Pakets, [`BEO-E2E/e2e-paket-am-zeitlimit`](../observations/BEO-E2E/e2e-paket-am-zeitlimit/observation.md)); der Beleg für §5 ist der CI-Lauf `integration-docker` auf dem Push-Tip, den der Hauptagent liest.
+
+**Abgleich der Plan-Tabelle** (AGENTS.md §3.10) gegen `git diff --stat 41e0b262..HEAD`: Jede Go-, Doku- und Test-Datei des Diffs hat eine Zeile der Tabelle oder steht oben bei *Ist gegen Plan* (`terminal.go`, `devcontainer_fallback.go`, `export_test.go`, die neuen Testdateien). Die Dateien unter `docs/plan/planning/done/`, `observations/`, `docs/reviews/` und `open/` (Welle-Datei, Spezifikations-Plan) stammen aus dem Verweis-Nachzug von `make slice-mv` (`dee4b8ed`). Unverändert und gelesen: `spec/` (Lastenheft, Spezifikation, Sicht), ADRs, `jsontestutil/`, `.golangci.yml`, `Makefile`. `docs/plan/planning/open/README.md` ändert die Closure.
+
+**Kommentar-/Marker-Selbstcheck** (AGENTS.md §3.9, am Diff `41e0b262..HEAD` über `internal` und `cmd`): (a) zwei Treffer der Wortsuche („no longer“) in einem Test-Kommentar und einer Fehlermeldung des Docker-Tests; der Kommentar ist auf den Indikativ umgestellt, die Meldung ist Prüftext; (b) kein Symbol umbenannt außer `socketRelaxationMessage` (jetzt `socketRelaxationText`) und `referencedEnvNames` (Methode → Funktion): Suche im Baum findet den alten Namen nur in `done/`-Plänen und in der Plan-Tabelle dieses Slice; (c) kein Helfer zwischen einem Doc-Kommentar und seiner Funktion. Handbuch, READMEs: keine Kennung im Diff (Suche nach `LH-`, `ADR-`, `SPEC-`, `ARC-`, `slice-`, `welle-` in den hinzugefügten Zeilen ohne Treffer).
+
+**Offene Punkte und was der Closure bleibt:** (1) `integration-docker` und `ci` auf dem Push-Tip; (2) Review und Verification (frischer Kontext); (3) DoD-Haken, Closure-Notiz mit Lerneintrag, Register (Eingaben: `BEO-DOK/zusage-weiter-als-messung` — Terminal-Pfad jetzt mit drei Pins; `BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht`; `BEO-E2E/e2e-paket-am-zeitlimit` — die drei neuen Docker-Tests laufen lokal zusammen in rund 30 s mit gecachten Images), Ausgang je Risiko aus §6, Move nach `done/`, `open/README.md`, Roadmap „Nichts in Arbeit.“; (4) Hinweise an den Projektinhaber: das Zeichengerät-Limit der Terminal-Erkennung (kein `ioctl`, keine neue Abhängigkeit), Kommentare zählen bei `sessionEnvNames` nicht (anders als bei `localEnvNames` für den Hilfs-Container), „Variable eines Agenten“ im Docker-Test als zusätzlicher `remoteEnv`-Eintrag statt über das Feature `claude-code`.
+
 ## 4. Trigger
 
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
