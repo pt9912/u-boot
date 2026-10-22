@@ -337,15 +337,7 @@ func TestDoctor_FeaturesAllowlist_SandboxProfileWithDockerCLI(t *testing.T) {
 				t.Fatalf("Severity = %v, want %v; message = %q", d.Severity, tc.want, d.Message)
 			}
 			if tc.want == domain.SeverityError {
-				for _, part := range []string{
-					"docker-cli",
-					"`u-boot config set devcontainer.features.docker-cli.enabled false`",
-					"`u-boot config set devcontainer.sandbox.nestedRuntime docker`",
-				} {
-					if !strings.Contains(d.Message, part) {
-						t.Errorf("message %q lacks %q", d.Message, part)
-					}
-				}
+				requireWayOutIsDisablingTheFeature(t, d.Message)
 			}
 		})
 	}

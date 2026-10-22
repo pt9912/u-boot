@@ -8,13 +8,16 @@ import (
 	"strings"
 )
 
-// ErrInvalidSandboxSetting signals that a value for one of the
+// ErrInvalidSandboxSetting signals a business error of the
 // LH-FA-DEV-004 / LH-FA-DEV-006 / LH-FA-DEV-007 devcontainer
-// settings (`devcontainer.user.uid`, `devcontainer.profile`,
-// `devcontainer.sandbox.nestedRuntime`,
-// `devcontainer.sandbox.onUnavailable`) is outside its closed value
-// set. Lives in the domain layer so the CLI adapter can include it in
-// the exit-code-10 mapping without importing the application layer.
+// settings: a value of `devcontainer.user.uid`, `devcontainer.profile`,
+// `devcontainer.sandbox.nestedRuntime` or
+// `devcontainer.sandbox.onUnavailable` outside its closed value set, or a
+// request the sandbox profile rejects (`--sandbox` without a devcontainer,
+// an `origin` URL that cannot be written into the devcontainer safely, a
+// built-in feature that mounts the container-engine socket of the host).
+// Lives in the domain layer so the CLI adapter can include it in the
+// exit-code-10 mapping without importing the application layer.
 var ErrInvalidSandboxSetting = errors.New("invalid sandbox setting")
 
 // DevcontainerProfile is the closed value set of

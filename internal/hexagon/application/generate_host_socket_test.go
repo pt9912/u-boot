@@ -22,6 +22,34 @@ const (
 	defaultDockerCLIYAML = "devcontainer:\n  enabled: true\n  features:\n    docker-cli:\n      enabled: true\n"
 )
 
+// requireWayOutIsDisablingTheFeature pins the way out that the message of the
+// rejection (in `generate devcontainer` and in `doctor`) names: disabling the
+// feature, then generating again and recreating an existing container; a
+// Docker daemon inside the container (`nestedRuntime: docker`) is an
+// additional step for whoever needs Docker there, never an alternative to
+// disabling, because `nestedRuntime: docker` alone does not lift the rejection
+// (TestGenerateDevcontainer_SandboxNestedDocker_DoesNotLiftTheRejection).
+func requireWayOutIsDisablingTheFeature(t *testing.T, message string) {
+	t.Helper()
+	disable := "disable the feature (`u-boot config set devcontainer.features.docker-cli.enabled false`)"
+	nested := "also set `u-boot config set devcontainer.sandbox.nestedRuntime docker`"
+	for _, part := range []string{
+		"docker-cli", disable, nested, "recreate an existing container (`u-boot devcontainer up --recreate`)",
+	} {
+		if !strings.Contains(message, part) {
+			t.Errorf("message %q lacks %q", message, part)
+		}
+	}
+	i, j := strings.Index(message, disable), strings.Index(message, nested)
+	if i < 0 || j < i {
+		t.Errorf("message must name disabling the feature before the additional nestedRuntime step: %q", message)
+		return
+	}
+	if strings.Contains(message[i:j], " or ") {
+		t.Errorf("message offers nestedRuntime as an alternative to disabling the feature: %q", message)
+	}
+}
+
 func generateDevcontainerDryRun(svc *application.GenerateService, sandbox bool) (driving.GenerateResponse, error) {
 	return svc.Generate(context.Background(), driving.GenerateRequest{
 		BaseDir: generateTestBaseDir, Artifact: domain.ArtifactDevcontainer, Sandbox: sandbox,
@@ -68,17 +96,7 @@ func TestGenerateDevcontainer_SandboxRejectsHostSocketFeature(t *testing.T) {
 			if !errors.Is(err, domain.ErrInvalidSandboxSetting) {
 				t.Fatalf("err = %v, want domain.ErrInvalidSandboxSetting", err)
 			}
-			// The message names the feature and both ways out.
-			for _, part := range []string{
-				"docker-cli",
-				"`u-boot config set devcontainer.features.docker-cli.enabled false`",
-				"`u-boot config set devcontainer.sandbox.nestedRuntime docker`",
-				"recreate an existing container (`u-boot devcontainer up --recreate`)",
-			} {
-				if !strings.Contains(err.Error(), part) {
-					t.Errorf("error %q lacks %q", err, part)
-				}
-			}
+			requireWayOutIsDisablingTheFeature(t, err.Error())
 			if got := fs.writtenPaths(); !reflect.DeepEqual(got, writesBefore) {
 				t.Errorf("the rejected call wrote %v (before: %v)", got, writesBefore)
 			}
@@ -93,6 +111,46 @@ func TestGenerateDevcontainer_SandboxRejectsHostSocketFeature(t *testing.T) {
 			}
 		})
 	}
+}
+
+// LH-FA-DEV-006 / LH-FA-DEV-007: `nestedRuntime: docker` gives the container a
+// Docker daemon of its own and does not lift the rejection of `docker-cli`:
+// with both set, the call ends with the business error. With the feature
+// switched off the same configuration generates, with `--privileged` as the
+// only `runArgs` entry, no socket mount and no key of the feature.
+func TestGenerateDevcontainer_SandboxNestedDocker_DoesNotLiftTheRejection(t *testing.T) {
+	t.Parallel()
+	const nestedDocker = "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    nestedRuntime: docker\n  features:\n    docker-cli:\n      enabled: "
+	t.Run("docker-cli active", func(t *testing.T) {
+		t.Parallel()
+		svc, fs := newGenerateService(t)
+		seedUBootYAMLWithFeatures(t, fs, nestedDocker+"true\n")
+		seedGitOrigin(t, fs, "git@github.com:pt9912/demo.git")
+		_, err := generateSandbox(svc, false)
+		if !errors.Is(err, domain.ErrInvalidSandboxSetting) {
+			t.Fatalf("err = %v, want domain.ErrInvalidSandboxSetting", err)
+		}
+		if ok, _ := fs.Exists(devcontainerJSONPath()); ok {
+			t.Error("devcontainer.json exists after the rejected call")
+		}
+	})
+	t.Run("docker-cli switched off", func(t *testing.T) {
+		t.Parallel()
+		svc, fs := newGenerateService(t)
+		seedUBootYAMLWithFeatures(t, fs, nestedDocker+"false\n")
+		seedGitOrigin(t, fs, "git@github.com:pt9912/demo.git")
+		if _, err := generateSandbox(svc, false); err != nil {
+			t.Fatalf("generate: %v", err)
+		}
+		body, _ := fs.ReadFile(devcontainerJSONPath())
+		m := devcontainerJSONMap(t, fs)
+		if args, _ := m["runArgs"].([]any); len(args) != 1 || args[0] != "--privileged" {
+			t.Errorf("runArgs = %v, want [--privileged]", m["runArgs"])
+		}
+		if bytes.Contains(body, []byte("docker.sock")) || bytes.Contains(body, []byte("docker-outside-of-docker")) {
+			t.Errorf("devcontainer.json carries the socket or the feature:\n%s", body)
+		}
+	})
 }
 
 // LH-FA-DEV-006: the rejection is a rule of the sandbox profile. The

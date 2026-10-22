@@ -451,12 +451,13 @@ func dcFeatureOptions(t *testing.T, dir, key, options string) {
 // counter-sample. The project is generated and started with the production
 // adapters, the container is read with `docker inspect`.
 //
-// One deviation from the generated project: the default base image
-// (`mcr.microsoft.com/devcontainers/base:debian`, Debian trixie) cannot take
-// the feature with its default option `moby: true` (the install script stops
-// with "The 'moby' option is not supported on debian 'trixie'"), so the
-// rendered key carries `{"moby": false}`. The mount comes from the metadata
-// of the feature and does not depend on that option.
+// Limit: the project differs from the generated one in one option. With the
+// default option `moby: true` the install script of the feature stopped on
+// the base image `mcr.microsoft.com/devcontainers/base:debian` (Debian trixie
+// at the time; one run on 2026-10-22, "The 'moby' option is not supported on
+// debian 'trixie'"), so the rendered key carries `{"moby": false}`. That the
+// mount does not depend on the option is read from the static `mounts` of the
+// feature metadata, not measured with `moby: true`.
 func TestDevcontainerUp_Docker_StandardProfileDockerCLIMountsTheSocket(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), dcTestBudget)
 	defer cancel()

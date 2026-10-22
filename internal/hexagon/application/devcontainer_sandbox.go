@@ -375,10 +375,13 @@ func featureRelaxationWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []drivin
 // sandboxHostSocketFeatureMessage returns the reason the sandbox profile
 // rejects an active feature that mounts the container-engine socket of the
 // host (`docker-cli`), with the way out; it is empty without the sandbox
-// profile or without such a feature (LH-FA-DEV-006). `generate devcontainer`
-// wraps it in [domain.ErrInvalidSandboxSetting] (exit 10), `doctor` reports
-// it as an error (exit 11). It does not belong to [validateDevcontainer]:
-// `config` loads with that function, and the way out is a `config set`.
+// profile or without such a feature (LH-FA-DEV-006). The way out is to
+// disable the feature; `nestedRuntime: docker` alone does not lift the
+// rejection and the text names it only as an additional step for a Docker
+// daemon inside the container. `generate devcontainer` wraps the text in
+// [domain.ErrInvalidSandboxSetting] (exit 10), `doctor` reports it as an
+// error (exit 11). It does not belong to [validateDevcontainer]: `config`
+// loads with that function, and the way out is a `config set`.
 func sandboxHostSocketFeatureMessage(dc *ubootYAMLDevcontainer, sandbox bool) string {
 	if !sandbox {
 		return ""
@@ -392,9 +395,10 @@ func sandboxHostSocketFeatureMessage(dc *ubootYAMLDevcontainer, sandbox bool) st
 		disable[i] = "`u-boot config set devcontainer.features." + name + ".enabled false`"
 	}
 	return "the sandbox profile does not mount the container-engine socket of the host, but the devcontainer feature " +
-		strings.Join(names, ", ") + " does; disable the feature (" + strings.Join(disable, ", ") + ") " +
-		"or give the container a Docker daemon of its own (`u-boot config set devcontainer.sandbox.nestedRuntime docker`), " +
-		"generate the devcontainer again and recreate an existing container (`u-boot devcontainer up --recreate`)"
+		strings.Join(names, ", ") + " does; disable the feature (" + strings.Join(disable, ", ") + ") and, " +
+		"if you need Docker inside the container, also set `u-boot config set devcontainer.sandbox.nestedRuntime docker` " +
+		"for a Docker daemon of its own in the container; then generate the devcontainer again " +
+		"and recreate an existing container (`u-boot devcontainer up --recreate`)"
 }
 
 // loginServiceActive reports whether an enabled feature resolves to the

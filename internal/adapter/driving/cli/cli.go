@@ -440,8 +440,9 @@ func isConfigValidationError(err error) bool {
 		// reference it without violating the
 		// `adapter-no-application` depguard rule.
 		errors.Is(err, domain.ErrInvalidFeatureSource) ||
-		// Lastenheft 0.3.0 (LH-FA-DEV-004/-006/-007): out-of-set value
-		// of the sandbox/UID settings → exit 10.
+		// Lastenheft 0.3.0 (LH-FA-DEV-004/-006/-007): a business error of
+		// the sandbox/UID settings (a value outside its set, or a request
+		// the sandbox profile rejects) → exit 10.
 		errors.Is(err, domain.ErrInvalidSandboxSetting)
 }
 

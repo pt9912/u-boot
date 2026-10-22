@@ -191,11 +191,14 @@ const featureOllama = "ollama"
 // upstream tag); an entry with `dockerfileBlock` carries none.
 //
 // `bindsHostSocket` and `relaxations` carry the security properties of the
-// pinned feature version, read from its metadata (`mounts`, `privileged`,
+// pinned feature version, taken from its metadata (`mounts`, `privileged`,
 // `capAdd`, `securityOpt`; also `entrypoint` and `dependsOn` for what the
-// feature pulls in). Whoever adds an entry or raises a `defaultVersion`
-// reads these keys and fills the two fields; `TestFeatureCatalogue_SecurityProperties`
-// pins the table, not the upstream.
+// feature pulls in). The metadata of every OCI entry was read except `cpp`
+// and `postgres-client`: `ghcr.io` knew no feature under their sources when
+// it was read (2026-10-21); those two carry neither field and stand
+// unread. Whoever adds an entry or raises a
+// `defaultVersion` reads these keys and fills the two fields;
+// `TestFeatureCatalogue_SecurityProperties` pins the table, not the upstream.
 func featureCatalogue() map[string]featureCatalogueEntry {
 	return map[string]featureCatalogueEntry{
 		"git": {

@@ -150,8 +150,8 @@ func TestSandboxRelaxationWarnings_FeatureOptionsAreDisclosed(t *testing.T) {
 			}
 			var options []string
 			for _, w := range got {
-				if w.Code != "LH-FA-DEV-006" || w.Level != "warn" || !w.SecurityRelaxation {
-					t.Errorf("warning must be LH-FA-DEV-006, warn and flagged SecurityRelaxation: %+v", w)
+				if w.Code != "LH-FA-DEV-006" || w.Level != "warn" || !w.SecurityRelaxation || w.Subject != ".devcontainer/devcontainer.json" {
+					t.Errorf("warning must be LH-FA-DEV-006, warn, flagged SecurityRelaxation and about .devcontainer/devcontainer.json: %+v", w)
 				}
 				if !strings.Contains(w.Message, "feature go:") {
 					t.Errorf("warning does not name the feature: %q", w.Message)
@@ -202,8 +202,8 @@ func TestSandboxRelaxationWarnings_ExternalFeatureEachGetsOne(t *testing.T) {
 				if !strings.Contains(w.Message, "comes from the external source") {
 					continue
 				}
-				if w.Code != "LH-FA-DEV-006" || w.Level != "warn" || !w.SecurityRelaxation {
-					t.Errorf("warning must be LH-FA-DEV-006, warn and flagged SecurityRelaxation: %+v", w)
+				if w.Code != "LH-FA-DEV-006" || w.Level != "warn" || !w.SecurityRelaxation || w.Subject != ".devcontainer/devcontainer.json" {
+					t.Errorf("warning must be LH-FA-DEV-006, warn, flagged SecurityRelaxation and about .devcontainer/devcontainer.json: %+v", w)
 				}
 				if !strings.Contains(w.Message, "does not read its metadata") {
 					t.Errorf("warning does not say that u-boot reads no metadata: %q", w.Message)
