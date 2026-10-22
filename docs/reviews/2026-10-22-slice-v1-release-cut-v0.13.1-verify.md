@@ -1,4 +1,4 @@
-# Verification-Report: [`slice-v1-release-cut-v0.13.1`](../plan/planning/in-progress/slice-v1-release-cut-v0.13.1.md) — 2026-10-22
+# Verification-Report: [`slice-v1-release-cut-v0.13.1`](../plan/planning/done/slice-v1-release-cut-v0.13.1.md) — 2026-10-22
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review, repariert nichts). Frage: Wurde der Cut richtig gebaut, gemessen an Plan, DoD, Entscheidungen des Projektinhabers und Sensors? Form nach [`harness/verification.md`](../../harness/verification.md). Kein Inhalt geändert außer dieser Datei; nichts committet, nichts gepusht, kein Tag, kein `gh workflow run`, nichts auf GitHub geschrieben (`gh` nur lesend: `GET`).
 
@@ -11,7 +11,7 @@
 ## Verification Evidence
 
 Scope:
-- Slice: [`slice-v1-release-cut-v0.13.1`](../plan/planning/in-progress/slice-v1-release-cut-v0.13.1.md)
+- Slice: [`slice-v1-release-cut-v0.13.1`](../plan/planning/done/slice-v1-release-cut-v0.13.1.md)
 - IDs: [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`ADR-0032`](../plan/adr/0032-katalog-features-socket-und-lockerungen.md), [`ADR-0004`](../plan/adr/0004-ci-system.md), [`ADR-0007`](../plan/adr/0007-distributionswege-ghcr.md), [`ADR-0016`](../plan/adr/0016-homebrew-distribution-per-tap.md), [`ADR-0017`](../plan/adr/0017-linux-pakete-nfpm.md)
 - Artefakte: `CHANGELOG.md`, `README.md`, `README.de.md`, `docs/user/benutzerhandbuch.md`, `cmd/uboot/main.go`, `repo.mk`, `Dockerfile`, `docs/maintainer/releasing.md`, Roadmap, `open/README.md`, zwei Pläne in `open/`, Advisory-Entwurf (Scratchpad), `.github/workflows/publish.yml` (lesend)
 

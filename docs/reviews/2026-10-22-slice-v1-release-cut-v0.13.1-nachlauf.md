@@ -1,4 +1,4 @@
-# Review-Report: [`slice-v1-release-cut-v0.13.1`](../plan/planning/in-progress/slice-v1-release-cut-v0.13.1.md) — Nachlauf-Review der Fix-Runde nach dem Review — 2026-10-22
+# Review-Report: [`slice-v1-release-cut-v0.13.1`](../plan/planning/done/slice-v1-release-cut-v0.13.1.md) — Nachlauf-Review der Fix-Runde nach dem Review — 2026-10-22
 
 **Review-Art:** Code/Doku, Nachlauf (klein) — die Release-Texte und der Advisory-Entwurf der Fix-Runde gegen Plan, Entscheidungen 27 bis 32, [`releasing.md`](../maintainer/releasing.md) §3 und die Hard Rules (`AGENTS.md` §3.7, §3.9, §3.10, §5 Regel 6). Wartbarkeit und Wahrheit des Textes, keine DoD-Closure (Verifier). Das erste Review ([`2026-10-22-slice-v1-release-cut-v0.13.1`](2026-10-22-slice-v1-release-cut-v0.13.1.md): F-1 bis F-8) ist Kontext und nicht erneut geprüft; geprüft ist, ob F-1 bis F-5 im Diff behoben sind und ob der Diff Neues einführt. Keine Einschätzung des Implementers ist ungeprüft übernommen.
 
@@ -8,7 +8,7 @@
 
 **Eingangs-Kontext:**
 
-- Slice [`slice-v1-release-cut-v0.13.1`](../plan/planning/in-progress/slice-v1-release-cut-v0.13.1.md) §3 *Fix-Runde nach dem Review*, §6, §7 Entscheidungen 27 bis 32
+- Slice [`slice-v1-release-cut-v0.13.1`](../plan/planning/done/slice-v1-release-cut-v0.13.1.md) §3 *Fix-Runde nach dem Review*, §6, §7 Entscheidungen 27 bis 32
 - [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes); [`ADR-0032`](../plan/adr/0032-katalog-features-socket-und-lockerungen.md) (Entscheidung 6, `Accepted`, ohne Diff)
 - [`releasing.md`](../maintainer/releasing.md) §3, §6, §8; `AGENTS.md` §3.7, §3.9, §3.10, §5 Regel 6
 - Vorheriges Review am Bereich: [`2026-10-22-slice-v1-release-cut-v0.13.1`](2026-10-22-slice-v1-release-cut-v0.13.1.md)
