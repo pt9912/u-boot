@@ -1061,21 +1061,22 @@ ein. Für die Features gilt:
   `sandbox` (in `u-boot.yaml` oder mit `--sandbox`) und das Feature aktiv, endet
   `u-boot generate devcontainer` mit Exit-Code 10 und schreibt nichts, auch nicht
   mit `--dry-run`; `--sandbox` wird dann nicht in `u-boot.yaml` übernommen.
-  `u-boot doctor` meldet dasselbe als Fehler. Die Meldung nennt die Abhilfe:
-  das Feature abschalten, neu erzeugen und einen vorhandenen Container neu
-  anlegen.
+  `u-boot doctor` meldet dasselbe als Fehler. Die Meldung nennt die Abhilfe in
+  dieser Reihenfolge: das Feature abschalten, wer Docker im Container braucht
+  zusätzlich `nestedRuntime: docker` setzen, dann neu erzeugen und einen
+  vorhandenen Container neu anlegen.
 
   ```bash
   u-boot config set devcontainer.features.docker-cli.enabled false
+  # nur, wenn Sie Docker im Container brauchen (ein eigener Docker-Daemon, Abschnitt 4.11):
+  u-boot config set devcontainer.sandbox.nestedRuntime docker
   u-boot generate devcontainer
   u-boot devcontainer up --recreate   # legt einen vorhandenen Container neu an
   ```
 
-  Brauchen Sie Docker im Container, setzen Sie zusätzlich
-  `u-boot config set devcontainer.sandbox.nestedRuntime docker` (ein eigener
-  Docker-Daemon im Container, Abschnitt 4.11). `nestedRuntime: docker` allein
-  hebt den Fehler nicht auf. `config set` bleibt auch in einem solchen Projekt
-  möglich. Im Standardprofil bleibt `docker-cli` wählbar.
+  `nestedRuntime: docker` allein hebt den Fehler nicht auf. `config set` bleibt
+  auch in einem solchen Projekt möglich. Im Standardprofil bleibt `docker-cli`
+  wählbar.
 - **`go`:** Das Feature verlangt laut seinen Metadaten die Fähigkeit
   `SYS_PTRACE` und `seccomp=unconfined`. Im Sandbox-Profil weist
   `u-boot generate devcontainer` beide als Sicherheitslockerung aus, je eine
