@@ -113,7 +113,7 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; sie wird n
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-cr-devcontainer-shell-und-zweites-up`](../done/slice-cr-devcontainer-shell-und-zweites-up.md), [`slice-v1-devcontainer-up-failed-nach-zustand`](slice-v1-devcontainer-up-failed-nach-zustand.md), [`slice-v1-devcontainer-shell-fundament`](slice-v1-devcontainer-shell-fundament.md) und [`slice-v1-cli-devcontainer-shell`](slice-v1-cli-devcontainer-shell.md) liegen in `done/`; kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-cr-devcontainer-shell-und-zweites-up`](../done/slice-cr-devcontainer-shell-und-zweites-up.md), [`slice-v1-devcontainer-up-failed-nach-zustand`](../in-progress/slice-v1-devcontainer-up-failed-nach-zustand.md), [`slice-v1-devcontainer-shell-fundament`](slice-v1-devcontainer-shell-fundament.md) und [`slice-v1-cli-devcontainer-shell`](slice-v1-cli-devcontainer-shell.md) liegen in `done/`; kein anderer Slice in `in-progress/` (WIP-Limit 1).
 
 **Rückführungen — vorab benennen, nicht erst im Nachhinein begründen:**
 
