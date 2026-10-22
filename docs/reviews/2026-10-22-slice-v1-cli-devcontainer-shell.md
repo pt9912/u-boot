@@ -3,8 +3,8 @@
 * Rolle: Reviewer (frischer Kontext, nicht der Autor)
 * Gegenstand: Diff `41e0b262..HEAD` (10 Commits), Plan
   [`slice-v1-cli-devcontainer-shell`](../plan/planning/in-progress/slice-v1-cli-devcontainer-shell.md)
-* Geprüft gegen: Plan, ADR-0029/0030/0031/0033/0034, `LH-FA-DEV-010`, `LH-FA-CLI-005`,
-  `LH-FA-CLI-006`, `LH-SA-CLI-002`, AGENTS.md §3.1 bis §3.10, §5 Regel 1 und 6.
+* Geprüft gegen: Plan, [`ADR-0029`](../plan/adr/0029-devcontainer-start-exit-11-und-socket-haltung.md), [`ADR-0030`](../plan/adr/0030-devcontainer-up-failed-nach-zustand.md), [`ADR-0031`](../plan/adr/0031-devcontainer-shell-ohne-editor.md), [`ADR-0033`](../plan/adr/0033-devcontainer-up-laufender-container-lebenszyklus-befehle.md), [`ADR-0034`](../plan/adr/0034-devcontainer-shell-ende-des-clients-und-keine-login-shell.md), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging),
+  [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-SA-CLI-002`](../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle), AGENTS.md §3.1 bis §3.10, §5 Regel 1 und 6.
   Nicht geprüft gegen die DoD (Verifier).
 * Sensoren: `make gates` Exit 0 (lint, test, coverage-gate, docs-check, baseline-verify,
   ablage-pruefung). `make test-docker` nicht gefahren: Der Reviewer stützt sich auf das Lesen
@@ -27,7 +27,7 @@
   (`TestExecute_DevcontainerShell_Quiet`, `TestDevcontainerShell_FallbackWarningsComeBeforeTheSession`,
   `visibleWarnings` in `runDevcontainerShell`); das Wort „nur“ macht die erste Aufzählung falsch.
 * risiko: Ein Nutzer, der `--quiet` setzt, liest, dass `shell` die Sicherheitslockerung nicht
-  ausgibt; die Ausweisung ist aber ein Produktvertrag (ADR-0031 Entscheidung 2). Die Vorab-Suche
+  ausgibt; die Ausweisung ist aber ein Produktvertrag ([`ADR-0031`](../plan/adr/0031-devcontainer-shell-ohne-editor.md) Entscheidung 2). Die Vorab-Suche
   des Plans nennt die Zelle als „geändert“, die zwei Aufzählungen sind übersehen.
 * verifizierbar: Review-only (`make docs-check` fängt das nicht)
 
@@ -87,7 +87,7 @@ vom Docker-Test unter `script` gedeckt. Kein Handbuch-Satz behauptet mehr. Entsc
 Projektinhabers bleibt (Plan §3).
 
 **I-2 · `sessionEnvNames` ignoriert Kommentare, `localEnvNames` nicht (Schwerpunkt 4)**.
-Konsistent mit Least-Privilege und mit der Fitness Function von ADR-0031; die Teilmengen-
+Konsistent mit Least-Privilege und mit der Fitness Function von [`ADR-0031`](../plan/adr/0031-devcontainer-shell-ohne-editor.md); die Teilmengen-
 Beziehung gilt (jede Session-Variable steht auch in `localEnvNames`). Der Test
 `…OpensTheSessionWithTheResultOfTheStart` (Mutation M5) pinnt den Unterschied. Beobachtung:
 Der Hilfs-Container, der das Engine-Socket hält, bekommt weiter auch die Namen aus
@@ -122,7 +122,7 @@ Push-Tip) sind Sache des Verifiers.
 * Kennungen: keine `LH-`/`ADR-`/`SPEC-`/`ARC-`/`slice-`/`welle-` in den hinzugefügten Zeilen von
   `docs/user/`, `README.md`, `README.de.md`; Hilfe ohne Kennung (Test).
 * Handbuch/Hilfe/CHANGELOG ohne Aussagen zu Lebenszyklus-Befehlen, Login-Shell, Dauer oder
-  Abbruchcode (die `kill -9`-Aussage folgt ADR-0034; Test im Fundament).
+  Abbruchcode (die `kill -9`-Aussage folgt [`ADR-0034`](../plan/adr/0034-devcontainer-shell-ende-des-clients-und-keine-login-shell.md); Test im Fundament).
 * §3.9 (a) bis (c): keine Chronik-Kommentare im Diff (Wortsuche und Lesen), kein Helfer zwischen
   Doc-Kommentar und Funktion; umbenannte Symbole (`socketRelaxationText`, `referencedEnvNames`)
   ohne Altnamen in Kommentaren.
