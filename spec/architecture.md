@@ -126,19 +126,31 @@ Anwendungslogik (Use-Cases). Orchestriert Domäne und Ports, enthält keine exte
     (`GenerateService`), sodass Anzeige und erzeugtes Startscript dieselbe Liste
     tragen.
   - `DevcontainerStartService` — den Devcontainer des Projekts ohne Editor
-    starten und stoppen
+    starten, stoppen und betreten
     ([`LH-FA-DEV-010`](lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten),
     Einzelheiten [`SPEC-049`](spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes)).
-    Prüft vor dem Start, was der Hilfs-Container tragen muss (Konfigurationsdatei
-    vorhanden, Projektpfad und Variablennamen zulässig), liest die Variablennamen
-    aus dem Text der Konfiguration über `FileSystem`, gibt die Ausweisung der
-    Socket-Einbindung über einen Rückruf des Requests aus, bevor er den
-    `DevcontainerLauncher` aufruft, und entscheidet nach einem Fehler des Starts
-    anhand der Statusdateien (über `DevcontainerInspector`), ob ein Startscript
-    abgebrochen hat (Klasse 11 statt 12). `Down` findet den Container über den
-    Inspector und stoppt ihn über den Launcher. Launcher und Inspector sind für
-    diesen Service Pflicht-Ports ohne wirkungslosen Standard: Ein fehlender Port
-    macht `Up` und `Down` zu einem Fehler.
+    `Up` und `Shell` teilen eine Startphase: Sie prüft, was der Hilfs-Container
+    tragen muss (Konfigurationsdatei vorhanden, Projektpfad und Variablennamen
+    zulässig), liest die Variablennamen aus dem Text der Konfiguration über
+    `FileSystem`, gibt die Ausweisung der Socket-Einbindung über einen Rückruf
+    des Requests aus, bevor sie den `DevcontainerLauncher` aufruft, und urteilt
+    nach dem Lauf der Dev-Container-CLI nach dem Zustand des Containers: Sie
+    liest die Statusdateien (über `DevcontainerInspector`) und ordnet ein
+    `failed` einer konfigurierten Fähigkeit der Klasse 11 zu, nach einem
+    gelungenen Lauf wie nach einem Fehler (Klasse 11 statt 12); nach einem Fehler
+    der Vorab-Prüfung oder einem Abbruch liest sie nichts. `Up` fragt vor dem
+    Launcher den Inspector, ob der Container schon lief, und meldet es in der
+    Antwort. `Shell` ist die Startphase ohne `Recreate` und ohne diese Abfrage;
+    danach öffnet es über `DevcontainerLauncher.Shell` die Sitzung mit
+    Kennung, Benutzer und Arbeitsverzeichnis der Antwort des Launchers, den
+    Variablennamen aus den Einträgen `"<NAME>": "${localEnv:<NAME>}"` des
+    Konfigurationstexts (ohne Kommentare) und den Strömen des Requests. Die
+    Fallback-Warnungen der Startphase gehen über den Rückruf des Requests
+    hinaus, bevor die Sitzung beginnt, weil `Shell` erst nach der Sitzung
+    zurückkehrt. `Down` findet den Container über den Inspector und stoppt ihn
+    über den Launcher. Launcher und Inspector sind für diesen Service
+    Pflicht-Ports ohne wirkungslosen Standard: Ein fehlender Port macht `Up`,
+    `Down` und `Shell` zu einem Fehler.
   - `TemplateListService` — Projektvorlagen auflisten
     ([`LH-FA-TPL-004`](lastenheft.md#lh-fa-tpl-004--templates-auflisten)).
   - `TemplateInitService` — Initialisierung aus einer Vorlage
@@ -173,7 +185,10 @@ Interfaces, über die u-boot von außen angesprochen wird.
   `InitProjectUseCase`, `DoctorUseCase`, `AddServiceUseCase`,
   `RemoveServiceUseCase`, `UpUseCase`, `DownUseCase`, `LogsUseCase`,
   `GenerateUseCase`, `ConfigUseCase`, `EgressListUseCase`,
-  `DevcontainerUseCase` (`Up`/`Down`), `TemplateListUseCase`,
+  `DevcontainerUseCase` (`Up`/`Down`/`Shell`; `Shell` kehrt erst nach dem Ende
+  der Sitzung zurück und liefert nur einen Fehler, sein Request trägt neben dem
+  Projektordner die Ströme der Sitzung und die Angabe, ob die Standardeingabe
+  ein Terminal ist), `TemplateListUseCase`,
   `TemplateInitUseCase`. Die Request-/Response-Typen sind Teil des Ports, nicht
   des Adapters: Sie transportieren ausschließlich Domänen- und Primitivwerte,
   damit weder Cobra-Flags noch Ausgabeformate in die innere Welt lecken.
@@ -199,7 +214,7 @@ Interfaces, über die u-boot von außen angesprochen wird.
     unzulässiger Projektpfad oder Variablenname) sowie die Namens-Validierungen
     aus `hexagon/domain`.
   - **Code 11 (Umgebung):** Abbruch eines Startscripts des gestarteten
-    Containers beim Devcontainer-Start.
+    Containers beim Devcontainer-Start (`Up` und `Shell`).
   - **Code 12 (fachliche Ausführung):** Stabilisierungs-Timeout beim Start.
   - **Code 14 (technische Persistenz):** Backup-Slot-Fehler (Quelle
     verschwunden, Suffix-Raum erschöpft), Lesefehler der Projektkonfiguration
@@ -229,7 +244,7 @@ Interfaces, über die `hexagon/application` externe Systeme nutzt.
   - `Logger` (`Debug`/`Info`/`Warn`/`Error`, slog-konforme `...any`-Variadic) als [`SPEC-027`](spezifikation.md#spec-027--zusammensetzung-des-lint-profils)-Logging-Port.
   - `DockerProbe` (`Version`/`Info`/`ComposeVersion`) für die read-only [`LH-FA-DIAG-002`](lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)-Probes (`docker version --format`, `docker compose version --short`). Bewusst getrennt vom state-mutierenden `DockerEngine`, weil read-only und state-mutierend unterschiedliche Fehlerklassen tragen (§7.1). Backend-Annahme: ein Docker-API-kompatibles Engine-Binary auf `$PATH`. Heute Docker; Podman ≥ 4.0 funktioniert als Drop-in (`docker → podman`-Symlink + `DOCKER_HOST` auf `podman.socket`) — die Version-Klassifikation pinnt die Docker-Mindestwerte (24.0 / 2.20), Podman-Versionen werden vorerst als `Severity: warn` ("unrecognized version") emittiert, kein Exit-Code-Eskalation. Ein dedizierter Podman-Probe-Pfad ist ein eigener Slice (Trigger: erster konkreter Bedarf).
   - `DevcontainerInspector` (`FindContainer`/`ReadFile`) für das lesende Ermitteln des Devcontainer-Containers eines Projekts und seiner Statusdateien ([`LH-FA-DEV-007`](lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), Einzelheiten [`SPEC-045`](spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung)). Ein eigener Port statt einer Erweiterung von `DockerProbe`, weil `DockerProbe` schmal bleibt (Version, Erreichbarkeit, Compose-Plugin) und der Container-Zugriff andere Fehlerfälle trägt (kein Container, keine Datei, kein regulärer Dateityp, entfernte Engine). Er führt nur `docker ps` und `docker cp … -` aus, nie `docker exec`; Fehler sind kein Exit-Code-Fall (Klasse 11 oder 12), sondern machen den Zustand „nicht ermittelbar“. Das Parsen und die Wertemenge des Statusdokuments liegen als Wertobjekt in `hexagon/domain` (I/O-frei); die Application erhält den Port per Konstruktor und fällt ohne ihn auf einen Default zurück, der keinen Container findet. Ausgenommen ist der Service des Devcontainer-Starts (§2.2): Er verlangt den Port, und `Down` meldet einen Fehler der Container-Abfrage als Umgebungsfehler (Klasse 11) statt als „nicht ermittelbar“.
-  - `DevcontainerLauncher` (`Up`/`Stop`) für Start und Stopp des Devcontainers ohne Editor ([`LH-FA-DEV-010`](lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), Einzelheiten [`SPEC-049`](spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes)). Ein eigener Port statt einer Erweiterung von `DockerEngine` (Compose) und `DevcontainerInspector` (lesend), weil er andere Fehlerklassen trägt: Der Sentinel `ErrDevcontainerRuntime` (Klasse 12) steht im Port neben den wiederverwendeten `ErrDockerUnavailable` und `ErrContainerEngineNotLocal` (Klasse 11); `ErrComposeRuntime` bleibt Compose vorbehalten. Der Port nimmt einen Kontext, weil sein Adapter Prozesse startet und ein Abbruch bis in den Hilfs-Container reichen muss. Das Port-Paket trägt neben den Deklarationen die zwei Prüffunktionen `ValidateDevcontainerProjectFolder` und `ValidateDevcontainerEnvName` (I/O-frei, nur Standardbibliothek): Die Zeichenmenge, die ein Hilfs-Container tragen kann, steht einmal, und Application und Adapter rufen sie; das Port-Paket `driving` trägt mit dem Konstruktor `NewConfigHintError` ebenfalls Code neben seinen Deklarationen.
+  - `DevcontainerLauncher` (`Up`/`Stop`/`Shell`) für Start, Stopp und Betreten des Devcontainers ohne Editor ([`LH-FA-DEV-010`](lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), Einzelheiten [`SPEC-049`](spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes)). Ein eigener Port statt einer Erweiterung von `DockerEngine` (Compose) und `DevcontainerInspector` (lesend), weil er andere Fehlerklassen trägt: Der Sentinel `ErrDevcontainerRuntime` (Klasse 12) steht im Port neben den wiederverwendeten `ErrDockerUnavailable` und `ErrContainerEngineNotLocal` (Klasse 11); `ErrComposeRuntime` bleibt Compose vorbehalten. `Shell` öffnet eine Sitzung im laufenden Container mit dem `docker exec` des Host-Clients und startet keinen Hilfs-Container: zuerst eine Probe mit Benutzer und Arbeitsverzeichnis der Sitzung (`bash -c true`, sonst `sh -c true`), dann die Sitzung ohne Socket, Mount und Privileg; scheitert die Probe oder endet der Client vor dem Beginn der Sitzung mit einem eigenen Fehler, ist das `ErrDevcontainerRuntime`, und nach dem Beginn der Sitzung ist ihr Ende kein Fehler. Der Port nimmt einen Kontext, weil sein Adapter Prozesse startet und ein Abbruch bis in den Hilfs-Container reichen muss; bei `Shell` unterbricht ein Abbruch ohne Terminal den Client der Sitzung, und mit Terminal beobachtet der Adapter den Kontext nach dem Beginn der Sitzung nicht. Das Port-Paket trägt neben den Deklarationen die vier Prüffunktionen `ValidateDevcontainerProjectFolder`, `ValidateDevcontainerEnvName`, `ValidateDevcontainerShellUser` und `ValidateDevcontainerWorkspace` (I/O-frei, nur Standardbibliothek): Die Zeichenmenge, die ein Hilfs-Container oder ein `docker exec` als ein Argument tragen kann, steht einmal; die Application ruft die Prüfung des Projektordners und der Variablennamen, der Adapter ruft alle vier; das Port-Paket `driving` trägt mit dem Konstruktor `NewConfigHintError` ebenfalls Code neben seinen Deklarationen.
   - `DockerEngine` (`Up`/`Down`/`Ps`/`Logs`/…) für die state-mutierenden
     Compose-Lifecycle-Operationen. Der Adapter prüft die Erreichbarkeit der
     Runtime intern vor jedem Kommando (§6, Use-Case „Umgebung starten") und
@@ -261,13 +276,21 @@ Konkrete Driver — Einstiegspunkte aus der Außenwelt.
 - **Inhalt:** `cli/` mit Cobra. Pro Subkommando ein eigenes Cobra-Command in einer eigenen Datei.
   - Implementiert sind `init`, `add`, `remove`, `up`, `down`, `logs`, `doctor`,
     `generate`, `config` (mit `get`/`set`), `egress` (mit `list`), `devcontainer`
-    (mit `up`/`down`) und `template` (mit `list`). `egress list` ist ein reiner
+    (mit `up`/`down`/`shell`) und `template` (mit `list`). `egress list` ist ein reiner
     Abfragebefehl: Er weist `--dry-run` und `--diff` mit Exit-Code 2 ab, behält
     seine Ausgabe unter `--quiet` und trägt eine eigene Diagnostic-Abbildung
-    (§7.2). `devcontainer up` und `devcontainer down` weisen `--dry-run` und
-    `--diff` ebenfalls mit Exit-Code 2 ab (sie schreiben keine Projektdatei),
-    der Aufruf ohne Unterbefehl endet mit Exit-Code 2, und jeder der beiden
-    Unterbefehle trägt eine eigene Diagnostic-Abbildung (§7.2).
+    (§7.2). `devcontainer up`, `devcontainer down` und `devcontainer shell`
+    weisen `--dry-run` und `--diff` ebenfalls mit Exit-Code 2 ab (sie schreiben
+    keine Projektdatei), der Aufruf ohne Unterbefehl endet mit Exit-Code 2, und
+    jeder der drei Unterbefehle trägt eine eigene Diagnostic-Abbildung (§7.2).
+    `devcontainer shell` weist außerdem `--json` mit Exit-Code 2 ab (der
+    Befehl ist interaktiv, die Standardausgabe gehört der Sitzung), schreibt selbst
+    nur auf die Standardfehlerausgabe und reicht Standardeingabe,
+    Standardausgabe und Standardfehlerausgabe unverändert an die Sitzung weiter;
+    ob die Standardeingabe ein Terminal ist, entscheidet der Adapter (ein
+    Zeichengerät, das nicht das Nullgerät ist) und gibt es im Request weiter.
+    Die Diagnostic-Abbildung von `shell` kennt nur die Sentinels der Klasse 2,
+    weil `--json` vor dem Aufruf des Use-Case abgewiesen wird.
   - Lokale Flags pro Subkommando (z. B. `init`: `--no-git`/`--force`/`--backup`/`--assume-existing`).
   - **Maschinenlesbare Ausgabe:** Jedes Subkommando trägt `--json`, `--dry-run`
     und `--diff` ([`LH-NFA-USE-004`](lastenheft.md#lh-nfa-use-004--maschinenlesbare-ausgabe),
@@ -298,7 +321,7 @@ Konkrete externe Adapter — Implementierungen der Driven-Ports.
   - `progress/` — `ProgressPort`-Adapter (TextWriter rendert Events auf einen `io.Writer`).
   - `confirm/` — `Confirmer`-Adapter (`bufio.Scanner` über stdin, Prompt auf stderr, Default `[y/N]`).
   - `logger/` — `Logger`-Adapter via `log/slog` (Text + JSON-Format konfigurierbar).
-  - `docker/` — vier Adapter im selben Paket: `DockerProbe` via `os/exec docker` (read-only diagnostics für [LH-FA-DIAG-002](lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)), `DockerEngine` für die Compose-Lifecycle-Operationen, `DevcontainerInspector` für das Lesen der Statusdateien des Devcontainer-Containers und `DevcontainerLauncher` für Start und Stopp des Devcontainers. Der Inspector prüft vor dem Lesen den Tar-Kopf (nur reguläre Datei, Größe), begrenzt jeden Aufruf zeitlich und behandelt eine entfernte Engine (`DOCKER_HOST` oder Docker-Kontext ohne lokalen Unix-Socket) als nicht ermittelbar. Der Engine-Adapter prüft die Erreichbarkeit der Runtime vor jedem Kommando und trennt dabei die Fehlerklassen 11 und 12 (§7.1). Der Launcher trägt den Kontext des Hilfs-Images eingebettet (`go:embed`: `Dockerfile`, `package.json`, `package-lock.json`) und baut das Image per `docker build` nur, wenn sein Tag fehlt. Er startet die Dev-Container-CLI in einem kurzlebigen Hilfs-Container (`docker run --rm`, Engine-Socket und Projektordner als `--mount`, Variablen nur als Name), entfernt diesen bei Fehler und Abbruch, maskiert die Werte durchgereichter Variablen in Fortschritt und Fehlertexten, stoppt Container mit `docker stop` und prüft vor `Up` und `Stop` Binary, Daemon und lokale Engine (§7.1); die Prüfung auf eine lokale Engine ist dieselbe Funktion wie beim Inspector.
+  - `docker/` — vier Adapter im selben Paket: `DockerProbe` via `os/exec docker` (read-only diagnostics für [LH-FA-DIAG-002](lastenheft.md#lh-fa-diag-002--lokale-voraussetzungen-prüfen)), `DockerEngine` für die Compose-Lifecycle-Operationen, `DevcontainerInspector` für das Lesen der Statusdateien des Devcontainer-Containers und `DevcontainerLauncher` für Start, Stopp und Betreten des Devcontainers. Der Inspector prüft vor dem Lesen den Tar-Kopf (nur reguläre Datei, Größe), begrenzt jeden Aufruf zeitlich und behandelt eine entfernte Engine (`DOCKER_HOST` oder Docker-Kontext ohne lokalen Unix-Socket) als nicht ermittelbar. Der Engine-Adapter prüft die Erreichbarkeit der Runtime vor jedem Kommando und trennt dabei die Fehlerklassen 11 und 12 (§7.1). Der Launcher trägt den Kontext des Hilfs-Images eingebettet (`go:embed`: `Dockerfile`, `package.json`, `package-lock.json`) und baut das Image per `docker build` nur, wenn sein Tag fehlt. Er startet die Dev-Container-CLI in einem kurzlebigen Hilfs-Container (`docker run --rm`, Engine-Socket und Projektordner als `--mount`, Variablen nur als Name), entfernt diesen bei Fehler und Abbruch, maskiert die Werte durchgereichter Variablen in Fortschritt und Fehlertexten, stoppt Container mit `docker stop` und prüft vor `Up`, `Stop` und `Shell` Binary, Daemon und lokale Engine (§7.1); die Prüfung auf eine lokale Engine ist dieselbe Funktion wie beim Inspector. Die Sitzung von `Shell` läuft über `docker exec` des Host-Clients, ohne Hilfs-Container: Im Container ruft der Adapter nur die Probe und die Sitzung auf. Er zeichnet den Kopf der Fehlerausgabe des Clients (ohne Terminal auch den der Standardausgabe) auf und erkennt an der Meldung des Clients, ob `docker exec` vor dem Beginn der Sitzung geendet hat (der Exit-Status des Clients trennt das nicht vom Exit-Status der Shell); mit Terminal gibt er Standardeingabe und Standardausgabe unverändert an den Client weiter, damit der Client das Terminal dort findet.
   - `netprobe/` — `NetProbe`-Adapter für die Erreichbarkeits-Prüfung startender Services.
   - `runtime/` — `RuntimeEnvironment`-Adapter (Container-Self-Detection).
   - `localtemplates/` und `externaltemplates/` — zwei `TemplateCatalog`-/`TemplateFiles`-Quellen: eingebettete Vorlagen und ein lokales Verzeichnis ([`LH-FA-TPL-003`](lastenheft.md#lh-fa-tpl-003--eigene-templates)). Dieselben Ports, austauschbare Herkunft — der Use-Case sieht keinen Unterschied.
@@ -330,7 +353,7 @@ deklariert.
 
 | ID | System | Rolle | Sichtbar in Schicht | Substituierbarkeit |
 | --- | --- | --- | --- | --- |
-| `ARC-008` | Container-Runtime mit Compose-Schnittstelle (Docker-API-kompatibles Binary auf `$PATH`) | Diagnose (read-only Probes, Statusdateien des Devcontainer-Containers), Lifecycle-Operationen der erzeugten Umgebung und der kurzlebige Hilfs-Container, der mit dem Engine-Socket die gepinnte Dev-Container-CLI aus dem lokal gebauten Hilfs-Image ausführt | `adapter/driven` (hinter `DockerProbe`/`DockerEngine`/`DevcontainerInspector`/`DevcontainerLauncher`) | hoch — die Application kennt nur die Ports; ein Podman-Setup funktioniert als Drop-in (für den Hilfs-Container des `DevcontainerLauncher` ist Podman als Host-Engine nicht zugesagt), ein SDK-basierter Adapter wäre ein Paket-Austausch ohne Änderung an `application` |
+| `ARC-008` | Container-Runtime mit Compose-Schnittstelle (Docker-API-kompatibles Binary auf `$PATH`) | Diagnose (read-only Probes, Statusdateien des Devcontainer-Containers), Lifecycle-Operationen der erzeugten Umgebung, der kurzlebige Hilfs-Container, der mit dem Engine-Socket die gepinnte Dev-Container-CLI aus dem lokal gebauten Hilfs-Image ausführt, und die Sitzung von `devcontainer shell` (`docker exec` des Host-Clients) | `adapter/driven` (hinter `DockerProbe`/`DockerEngine`/`DevcontainerInspector`/`DevcontainerLauncher`) | hoch — die Application kennt nur die Ports; ein Podman-Setup funktioniert als Drop-in (für den Hilfs-Container des `DevcontainerLauncher` ist Podman als Host-Engine nicht zugesagt), ein SDK-basierter Adapter wäre ein Paket-Austausch ohne Änderung an `application` |
 | `ARC-009` | CLI-Framework (Kommando-/Flag-Parsing) | Aufbau des Kommando-Baums, Flag-Bindung, Hilfe-Ausgabe | ausschließlich `adapter/driving/cli` | hoch — kein Port, kein Use-Case und kein Domänentyp kennt das Framework; der Austausch bleibt im Driving-Adapter |
 | `ARC-010` | YAML-Serialisierung | Lesen/Schreiben der Projektkonfiguration und der Compose-Datei | `adapter/driven` (hinter `YAMLCodec`) | hoch — ein Adapter-Paket |
 | `ARC-011` | `git`-Binary | optionale Repository-Initialisierung beim Anlegen eines Projekts | `adapter/driven` (hinter `Git`) | hoch — fehlt es, degradiert der Pfad kontrolliert; die Application sieht nur den Port |
@@ -604,8 +627,8 @@ keine Exit-Codes; der Adapter kennt keine Use-Case-Interna.
 | Nicht-interaktiver Lauf trifft auf eine offene Bestätigungsfrage; ebenso sich ausschließende Modus-Flags | `adapter/driving` | `adapter/driving` | 2 | Fehlertext; der Vertrag verzweigt hier bewusst gegen die Zeile darüber |
 | Diagnose-Befund im strikten Modus | `hexagon/application` (Report), Schwelle im Adapter | `adapter/driving` | 11 | Report-Ausgabe, Severity je Befund |
 | Container-Runtime nicht erreichbar (auch: entfernte Engine beim Devcontainer-Start) | `port/driven`-Sentinel aus dem Adapter | `adapter/driving` | 11 | Fehlertext mit Reparaturhinweis |
-| Abbruch eines Startscripts im gestarteten Devcontainer (Statusdatei `failed`) nach einem Fehler des Starts | `hexagon/application` als `port/driving`-Sentinel, anhand der Statusdateien | `adapter/driving` | 11 | Fehlertext mit dem Ende der Ausgabe der Dev-Container-CLI |
-| Laufzeitfehler der Runtime (Compose-Start, Stabilisierungs-Timeout; Bau des Hilfs-Images, Start des Hilfs-Containers und Fehler der Dev-Container-CLI beim Devcontainer-Start) | `port/driven`- bzw. `port/driving`-Sentinel | `adapter/driving` | 12 | Fehlertext, ggf. Teil-Status |
+| Abbruch eines Startscripts im gestarteten Devcontainer (Statusdatei `failed`) nach dem Lauf der Dev-Container-CLI, gelungen oder fehlgeschlagen | `hexagon/application` als `port/driving`-Sentinel, anhand der Statusdateien | `adapter/driving` | 11 | nach einem Fehler der CLI der Fehlertext mit dem Ende ihrer Ausgabe, nach einem gelungenen Lauf der Satz der Fähigkeit mit dem Hinweis, dass der Aufruf das Startscript nicht ausführte |
+| Laufzeitfehler der Runtime (Compose-Start, Stabilisierungs-Timeout; Bau des Hilfs-Images, Start des Hilfs-Containers und Fehler der Dev-Container-CLI beim Devcontainer-Start; Probe der Sitzung von `devcontainer shell` und Fehler des Clients vor dem Beginn der Sitzung) | `port/driven`- bzw. `port/driving`-Sentinel | `adapter/driving` | 12 | Fehlertext, ggf. Teil-Status |
 | Technischer Dateisystem-/Persistenzfehler (unerwartete IO-, Permission-, Backup-Slot-Fehler) | `hexagon/application` als `port/driving`-Sentinel | `adapter/driving` | 14 | Fehlertext; Plan-Phase verhindert Teil-Schreibzustände |
 | Alles übrige | — | `adapter/driving` | 1 | generischer Fehlertext |
 
@@ -624,9 +647,12 @@ Prüf-Reihenfolge folgt damit der Schicht-Hierarchie, nicht der Lesereihenfolge
 im Code. Sentinels überschneiden sich nicht. Der Abbruch eines Startscripts beim
 Devcontainer-Start (Driving-Sentinel, Klasse 11) weicht von der Reihenfolge ab:
 Er steht in der Umgebungs-Klasse vor der Laufzeit-Klasse (12), die er ersetzt.
-Die Application erzeugt ihn nur aus einem Laufzeitfehler des Launchers, dessen
-Statusdatei `failed` meldet, und trägt dabei den Laufzeit-Sentinel nicht weiter;
-trägt ein Fehler dennoch beide, gilt Klasse 11.
+Die Application erzeugt ihn aus dem Zustand des Containers: nach einem
+Laufzeitfehler des Launchers, dessen Statusdatei `failed` meldet, und nach einem
+gelungenen Lauf, dessen Statusdatei `failed` meldet; im ersten Fall trägt sie den
+Laufzeit-Sentinel nicht weiter. Nach einem Fehler der Klasse 11 aus der
+Vorab-Prüfung und nach einem Abbruch liest sie keine Statusdatei und behält die
+Klasse. Trägt ein Fehler dennoch beide Sentinels, gilt Klasse 11.
 
 **Dual-Classifier-Regel.** Ein Driving-Sentinel wird im Driving-Adapter über
 **zwei voneinander unabhängige Klassifikatoren** geführt:
