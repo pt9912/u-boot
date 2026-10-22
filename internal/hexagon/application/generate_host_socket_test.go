@@ -73,7 +73,7 @@ func TestGenerateDevcontainer_SandboxRejectsHostSocketFeature(t *testing.T) {
 				"docker-cli",
 				"`u-boot config set devcontainer.features.docker-cli.enabled false`",
 				"`u-boot config set devcontainer.sandbox.nestedRuntime docker`",
-				"recreate an existing container",
+				"recreate an existing container (`u-boot devcontainer up --recreate`)",
 			} {
 				if !strings.Contains(err.Error(), part) {
 					t.Errorf("error %q lacks %q", err, part)

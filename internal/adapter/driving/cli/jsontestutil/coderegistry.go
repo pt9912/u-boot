@@ -41,7 +41,7 @@ func DefaultAllowedCodes() map[string]string {
 		"devcontainer.dockerfile.valid":         "doctor: .devcontainer/Dockerfile parsebar",
 		"services.enabled-key":                  "doctor: u-boot.yaml services-Block konsistent",
 		"devcontainer.forwardPorts.consistency": "doctor: devcontainer.json forwardPorts konsistent",
-		"devcontainer.features.allowlist":       "doctor: devcontainer features auf Allowlist",
+		"devcontainer.features.allowlist":       "doctor: devcontainer features auf Allowlist, im Sandbox-Profil kein Feature mit Socket des Hosts (LH-FA-DEV-006)",
 		"devcontainer.features.drift":           "doctor: devcontainer features ohne Drift",
 		"devcontainer.sandbox.runtime":          "doctor: Sandbox nested runtime (LH-FA-DEV-007)",
 		"devcontainer.sandbox.credentials":      "doctor: Sandbox git and agent credentials (LH-FA-DEV-009)",
