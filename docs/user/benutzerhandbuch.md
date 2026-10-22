@@ -1062,17 +1062,20 @@ ein. Für die Features gilt:
   `u-boot generate devcontainer` mit Exit-Code 10 und schreibt nichts, auch nicht
   mit `--dry-run`; `--sandbox` wird dann nicht in `u-boot.yaml` übernommen.
   `u-boot doctor` meldet dasselbe als Fehler. Die Meldung nennt die Abhilfe:
+  das Feature abschalten, neu erzeugen und einen vorhandenen Container neu
+  anlegen.
 
   ```bash
   u-boot config set devcontainer.features.docker-cli.enabled false
-  # oder, für einen eigenen Docker-Daemon im Container (Abschnitt 4.11):
-  u-boot config set devcontainer.sandbox.nestedRuntime docker
   u-boot generate devcontainer
   u-boot devcontainer up --recreate   # legt einen vorhandenen Container neu an
   ```
 
-  `config set` bleibt auch in einem solchen Projekt möglich. Im Standardprofil
-  bleibt `docker-cli` wählbar.
+  Brauchen Sie Docker im Container, setzen Sie zusätzlich
+  `u-boot config set devcontainer.sandbox.nestedRuntime docker` (ein eigener
+  Docker-Daemon im Container, Abschnitt 4.11). `nestedRuntime: docker` allein
+  hebt den Fehler nicht auf. `config set` bleibt auch in einem solchen Projekt
+  möglich. Im Standardprofil bleibt `docker-cli` wählbar.
 - **`go`:** Das Feature verlangt laut seinen Metadaten die Fähigkeit
   `SYS_PTRACE` und `seccomp=unconfined`. Im Sandbox-Profil weist
   `u-boot generate devcontainer` beide als Sicherheitslockerung aus, je eine
@@ -1089,7 +1092,7 @@ ein. Für die Features gilt:
 | Schweregrad | Auslöser | Abhilfe |
 |---|---|---|
 | Fehler | `source` ist gesetzt, steht aber nicht in `featureSources.allow` | URL freigeben (siehe oben) |
-| Fehler | Das Profil ist `sandbox`, und das Feature `docker-cli` ist aktiv | `docker-cli` abschalten oder `nestedRuntime: docker` setzen, `u-boot generate devcontainer` ausführen und den Container neu anlegen (siehe [Features im Sandbox-Profil](#features-im-sandbox-profil)) |
+| Fehler | Das Profil ist `sandbox`, und das Feature `docker-cli` ist aktiv | `docker-cli` abschalten (wer Docker im Container braucht, setzt zusätzlich `nestedRuntime: docker`), `u-boot generate devcontainer` ausführen und den Container neu anlegen (siehe [Features im Sandbox-Profil](#features-im-sandbox-profil)) |
 | Warnung | Name steht nicht im Katalog und hat keine `source`; er wird beim Erzeugen übersprungen | `source` setzen oder den Eintrag entfernen |
 | Warnung | `enabled:` fehlt bei einem Feature-Eintrag | `enabled` setzen |
 | Warnung | Feature ist aktiv, fehlt aber in `devcontainer.json` (oder die Datei fehlt) | `u-boot generate devcontainer` |
@@ -2399,14 +2402,16 @@ Fehler (Exit-Code 11).
 
 #### Lösung
 
-1. Schalten Sie das Feature ab, oder geben Sie dem Container einen eigenen
-   Docker-Daemon (Abschnitt 4.11):
+1. Schalten Sie das Feature ab:
 
    ```bash
    u-boot config set devcontainer.features.docker-cli.enabled false
-   # oder
-   u-boot config set devcontainer.sandbox.nestedRuntime docker
    ```
+
+   Brauchen Sie Docker im Container, setzen Sie zusätzlich
+   `u-boot config set devcontainer.sandbox.nestedRuntime docker` (ein eigener
+   Docker-Daemon im Container, Abschnitt 4.11). `nestedRuntime: docker` allein
+   hebt den Fehler nicht auf.
 
 2. Erzeugen Sie den Devcontainer neu: `u-boot generate devcontainer`.
 3. Legen Sie einen vorhandenen Container neu an: `u-boot devcontainer up --recreate`.
