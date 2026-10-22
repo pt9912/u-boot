@@ -54,7 +54,7 @@ führt die Dateinamen mit `~`. Stabile Tags haben nur eine Schreibweise.
 ## 3. Vorbereitung (ein Commit auf `main`)
 
 Der Cut folgt dem Muster der Release-Cut-Slices (zuletzt
-[`slice-v1-release-cut-v0.12.0`](../plan/planning/done/slice-v1-release-cut-v0.12.0.md)):
+[`slice-v1-release-cut-v0.13.0`](../plan/planning/done/slice-v1-release-cut-v0.13.0.md)):
 
 1. **CHANGELOG** (`CHANGELOG.md`): `## [Unreleased]` bleibt als leerer Anker; der bisherige
    Inhalt wandert unter `## [x.y.z] - <Tag-Datum>` mit kurzem Lead-Absatz. Compare-Links am
