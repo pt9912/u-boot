@@ -911,18 +911,21 @@ const (
 	dcAttachCounterFile = "/tmp/u-boot-attach-count"
 )
 
-// LH-FA-DEV-010, ADR-0030 decision 2: a project whose postCreateCommand,
-// postStartCommand and postAttachCommand each append a line to a file per run.
-// The second and third `up` against the running container leave the lines of
-// the postCreateCommand and the postStartCommand unchanged (the two commands
-// `u-boot` generates) and report `alreadyRunning: true` (envelope) and
-// "Devcontainer already running" (text); after `down` the next `up` starts the
-// same container, the postStartCommand file grows by one, the
-// postCreateCommand file does not, and `alreadyRunning` is false. The
-// postAttachCommand is the counter-sample: the Dev Container CLI runs it for
-// every `up`, so its file grows with each call, and the test sees a lifecycle
-// command that does run again. A change in these semantics (a new version of
-// the CLI) is a re-evaluation trigger of the decision.
+// LH-FA-DEV-010, ADR-0033 decision 1 (the counts below are its table) and
+// ADR-0030 decision 2: a project whose postCreateCommand, postStartCommand and
+// postAttachCommand each append a line to a file per run. The second and third
+// `up` against the running container leave the lines of the postCreateCommand
+// and the postStartCommand unchanged (the two commands `u-boot` generates) and
+// report `alreadyRunning: true` (envelope) and "Devcontainer already running"
+// (text); after `down` the next `up` starts the same container, the
+// postStartCommand file grows by one, the postCreateCommand file does not, and
+// `alreadyRunning` is false. The postAttachCommand is the counter-sample: the
+// Dev Container CLI runs it for every `up`, so its file grows with each call,
+// and the test sees a lifecycle command that does run again. The test is the
+// fitness function of ADR-0033: it turns red when the CLI runs the
+// postCreateCommand or the postStartCommand again against a running container
+// or stops running the postAttachCommand on every `up`; that is its
+// re-evaluation trigger, and a new pin of the CLI is read against it.
 func TestDevcontainerUp_Docker_AlreadyRunningLifecycleCounters(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), dcTestBudget)
 	defer cancel()
