@@ -384,12 +384,12 @@ func TestLauncher_Shell_TerminalHandsTheStandardStreamsToTheClient(t *testing.T)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer stdin.Close()
+	t.Cleanup(func() { _ = stdin.Close() })
 	stdout, err := os.Create(filepath.Join(dir, "stdout"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer stdout.Close()
+	t.Cleanup(func() { _ = stdout.Close() })
 	for _, terminal := range []bool{true, false} {
 		f := newFakeDocker(t)
 		f.flag(t, "session-record-fds")
