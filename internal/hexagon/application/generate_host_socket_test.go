@@ -24,9 +24,10 @@ const (
 
 // requireWayOutIsDisablingTheFeature pins the way out that the message of the
 // rejection (in `generate devcontainer` and in `doctor`) names, in this order:
-// disabling the feature; for whoever needs Docker inside the container the
-// additional `nestedRuntime: docker`; generating the devcontainer again;
-// recreating an existing container. `nestedRuntime: docker` is never an
+// disabling the feature; the additional `nestedRuntime: docker`, named as a
+// conditional step ("if you need Docker inside the container, also set …") for
+// a Docker daemon of its own in the container; generating the devcontainer
+// again; recreating an existing container. `nestedRuntime: docker` is never an
 // alternative to disabling, because it alone does not lift the rejection
 // (TestGenerateDevcontainer_SandboxNestedDocker_DoesNotLiftTheRejection).
 func requireWayOutIsDisablingTheFeature(t *testing.T, message string) {
@@ -36,7 +37,8 @@ func requireWayOutIsDisablingTheFeature(t *testing.T, message string) {
 	}
 	steps := []string{
 		"disable the feature (`u-boot config set devcontainer.features.docker-cli.enabled false`)",
-		"also set `u-boot config set devcontainer.sandbox.nestedRuntime docker`",
+		"if you need Docker inside the container, also set `u-boot config set devcontainer.sandbox.nestedRuntime docker` " +
+			"for a Docker daemon of its own in the container",
 		"then generate the devcontainer again",
 		"recreate an existing container (`u-boot devcontainer up --recreate`)",
 	}
@@ -123,8 +125,10 @@ func TestGenerateDevcontainer_SandboxRejectsHostSocketFeature(t *testing.T) {
 // LH-FA-DEV-006 / LH-FA-DEV-007: `nestedRuntime: docker` gives the container a
 // Docker daemon of its own and does not lift the rejection of `docker-cli`:
 // with both set, the call ends with the business error. With the feature
-// switched off the same configuration generates, with `--privileged` as the
-// only `runArgs` entry, no socket mount and no key of the feature.
+// switched off the same configuration generates: without an egress
+// restriction `--privileged` is the only `runArgs` entry (with one,
+// `--cap-add=NET_ADMIN` joins it), and there is no socket mount and no key of
+// the feature.
 func TestGenerateDevcontainer_SandboxNestedDocker_DoesNotLiftTheRejection(t *testing.T) {
 	t.Parallel()
 	const nestedDocker = "devcontainer:\n  enabled: true\n  profile: sandbox\n  sandbox:\n    nestedRuntime: docker\n  features:\n    docker-cli:\n      enabled: "
