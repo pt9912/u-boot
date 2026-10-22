@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/pt9912/u-boot/internal/hexagon/application"
+	"github.com/pt9912/u-boot/internal/hexagon/domain"
 	"github.com/pt9912/u-boot/internal/hexagon/port/driving"
 )
 
@@ -184,6 +185,39 @@ func TestConfigSet_FeatureEnabled(t *testing.T) {
 	}
 	if resp.NewValue != "true" {
 		t.Errorf("NewValue = %q, want true", resp.NewValue)
+	}
+}
+
+// LH-FA-DEV-006, the way out of the rejection: in a project with the
+// sandbox profile and an active `docker-cli`, `generate devcontainer` ends
+// with the business error, `config set …docker-cli.enabled false` still
+// succeeds (the rejection is not a rule of the schema check that `config`
+// runs when it loads u-boot.yaml), and `generate devcontainer` succeeds
+// afterwards.
+func TestConfigSet_SandboxProfileWithDockerCLI_DisablingStillWorks(t *testing.T) {
+	t.Parallel()
+	svc, fs := newConfigService(t)
+	seedConfigUbootYAMLWithDevcontainer(t, fs, "schemaVersion: 1\nproject:\n  name: t-uboot-config\n"+
+		"devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n    docker-cli:\n      enabled: true\n")
+	gen := application.NewGenerateService(fs, &fakeYAML{}, nil)
+	genReq := driving.GenerateRequest{BaseDir: configTestBaseDir, Artifact: domain.ArtifactDevcontainer}
+
+	if _, err := gen.Generate(context.Background(), genReq); !errors.Is(err, domain.ErrInvalidSandboxSetting) {
+		t.Fatalf("generate before the way out: err = %v, want domain.ErrInvalidSandboxSetting", err)
+	}
+	resp, err := svc.Set(context.Background(), driving.ConfigSetRequest{
+		BaseDir: configTestBaseDir,
+		Path:    mustConfigPath(t, "devcontainer.features.docker-cli.enabled"),
+		Value:   "false",
+	})
+	if err != nil {
+		t.Fatalf("config set …docker-cli.enabled false: %v", err)
+	}
+	if resp.OldValue != "true" || resp.NewValue != "false" {
+		t.Errorf("config set: %q -> %q, want true -> false", resp.OldValue, resp.NewValue)
+	}
+	if _, err := gen.Generate(context.Background(), genReq); err != nil {
+		t.Errorf("generate after the way out: %v", err)
 	}
 }
 

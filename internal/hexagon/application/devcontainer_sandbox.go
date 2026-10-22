@@ -285,7 +285,8 @@ func podmanRelaxations() []string {
 // sandboxRelaxationWarnings returns one warning per security
 // relaxation the rendered sandbox needs (nested Podman: six options,
 // nested Docker: `--privileged`, LH-FA-DEV-007; egress restriction: NET_ADMIN, LH-FA-DEV-008; an active `sshd` feature:
-// the login service, LH-FA-DEV-006), plus
+// the login service, LH-FA-DEV-006; the options and the external sources of
+// features, see [featureRelaxationWarnings]), plus
 // a "no effect" notice per feature that is configured without the
 // sandbox profile. The relaxation warnings and the egress "no effect"
 // notice (no restriction arises) carry
@@ -332,7 +333,68 @@ func sandboxRelaxationWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []drivin
 			"the accounts stay locked until you set a password with `sudo passwd <user>` or add a key); "+
 			"the profile limits damage and is not an isolation boundary")
 	}
+	return append(out, featureRelaxationWarnings(dc, sandbox)...)
+}
+
+// featureRelaxationWarnings returns, for the sandbox profile only, one
+// warning per container option an active built-in feature adds
+// ([featureCatalogueEntry.relaxations]) and one warning per enabled entry
+// with a `source:` override: u-boot reads no metadata of an external feature,
+// so the profile promises nothing for it (LH-FA-DEV-006). Every entry carries
+// [driving.WarningEntry.SecurityRelaxation] and stays visible under `--quiet`
+// (LH-FA-CLI-005 exception 1). Both groups come in sorted key order, the
+// built-in ones first.
+func featureRelaxationWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []driving.WarningEntry {
+	if !sandbox || dc == nil {
+		return nil
+	}
+	var out []driving.WarningEntry
+	relax := func(msg string) {
+		out = append(out, driving.WarningEntry{
+			Code: "LH-FA-DEV-006", Level: "warn", Message: msg,
+			Subject: ".devcontainer/devcontainer.json", SecurityRelaxation: true,
+		})
+	}
+	cat := featureCatalogue()
+	for _, key := range activeRelaxingFeatures(dc) {
+		for _, option := range cat[key].relaxations {
+			relax("security relaxation for the devcontainer feature " + key + ": " + option +
+				" (the feature asks for it in its metadata; the profile limits damage and is not an isolation boundary)")
+		}
+	}
+	for _, name := range sortedFeatureNames(dc.Features) {
+		if f := dc.Features[name]; f.Enabled != nil && *f.Enabled && f.Source != "" {
+			relax("devcontainer feature " + name + " comes from the external source " + f.Source +
+				"; u-boot does not read its metadata, so the sandbox profile makes none of its promises for this feature " +
+				"(it can mount the container-engine socket or host paths, add capabilities and pull in further features)")
+		}
+	}
 	return out
+}
+
+// sandboxHostSocketFeatureMessage returns the reason the sandbox profile
+// rejects an active feature that mounts the container-engine socket of the
+// host (`docker-cli`), with the way out; it is empty without the sandbox
+// profile or without such a feature (LH-FA-DEV-006). `generate devcontainer`
+// wraps it in [domain.ErrInvalidSandboxSetting] (exit 10), `doctor` reports
+// it as an error (exit 11). It does not belong to [validateDevcontainer]:
+// `config` loads with that function, and the way out is a `config set`.
+func sandboxHostSocketFeatureMessage(dc *ubootYAMLDevcontainer, sandbox bool) string {
+	if !sandbox {
+		return ""
+	}
+	names := activeHostSocketFeatures(dc)
+	if len(names) == 0 {
+		return ""
+	}
+	disable := make([]string, len(names))
+	for i, name := range names {
+		disable[i] = "`u-boot config set devcontainer.features." + name + ".enabled false`"
+	}
+	return "the sandbox profile does not mount the container-engine socket of the host, but the devcontainer feature " +
+		strings.Join(names, ", ") + " does; disable the feature (" + strings.Join(disable, ", ") + ") " +
+		"or give the container a Docker daemon of its own (`u-boot config set devcontainer.sandbox.nestedRuntime docker`), " +
+		"generate the devcontainer again and recreate an existing container (`u-boot devcontainer up --recreate`)"
 }
 
 // loginServiceActive reports whether an enabled feature resolves to the

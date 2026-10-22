@@ -267,8 +267,10 @@ func TestGenerateDevcontainer_Ollama_DefaultProfileGeneratesNothing(t *testing.T
 }
 
 // `enabled: false`, an absent key and a `source:` override produce no
-// block, no volume and no ollama notice; the override renders the external
-// feature like any catalogue key (ADR-0024 decision 2).
+// block, no volume and no notice of the Dockerfile block; the override
+// renders the external feature like any catalogue key (ADR-0024 decision 2)
+// and, in the sandbox profile, gets the one warning about a feature from an
+// external source (ADR-0032 decision 3).
 func TestGenerateDevcontainer_Ollama_NotActive(t *testing.T) {
 	t.Parallel()
 	const external = "ghcr.io/example/features/ollama"
@@ -297,8 +299,18 @@ func TestGenerateDevcontainer_Ollama_NotActive(t *testing.T) {
 			if strings.Contains(strings.ToLower(string(df)), "ollama") || strings.Contains(string(raw), "ollama-") {
 				t.Errorf("no block and no volume expected:\n%s\n%s", df, raw)
 			}
-			if n := ollamaNotices(resp.Warnings); len(n) != 0 {
-				t.Errorf("no ollama notice expected: %+v", n)
+			wantNotices := 0
+			if tc.wantKeys != nil {
+				wantNotices = 1
+			}
+			notices := ollamaNotices(resp.Warnings)
+			if len(notices) != wantNotices {
+				t.Errorf("ollama notices = %d, want %d: %+v", len(notices), wantNotices, notices)
+			}
+			for _, n := range notices {
+				if !strings.Contains(n.Message, "comes from the external source") {
+					t.Errorf("only the warning about an external feature expected, no notice of the Dockerfile block: %+v", n)
+				}
 			}
 			var got []string
 			for k := range parseDevcontainerFeatures(t, raw) {

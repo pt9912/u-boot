@@ -1,6 +1,7 @@
 package application_test
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -106,5 +107,112 @@ func TestSandboxRelaxationWarnings_PolicyChangesNoRenderTimeWarning(t *testing.T
 				t.Errorf("policy %q: degradation text in render-time warning: %q", policy, w.Message)
 			}
 		}
+	}
+}
+
+const featuresYAMLHead = "devcontainer:\n  enabled: true\n  profile: sandbox\n  features:\n"
+
+// LH-FA-DEV-006 / LH-FA-CLI-005: an active built-in feature that adds
+// container options is disclosed in the sandbox profile with one warning per
+// option (the capability and the seccomp profile of `go`), each flagged with
+// SecurityRelaxation so that `--quiet` keeps it. `init: true` of the feature
+// is no relaxation and stays out. A `version` override keeps the feature
+// active, a `source:` override makes it another feature; without the sandbox
+// profile, with the feature switched off or unset nothing is disclosed.
+func TestSandboxRelaxationWarnings_FeatureOptionsAreDisclosed(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name    string
+		yaml    string
+		sandbox bool
+		want    int
+	}{
+		{"go in the sandbox profile", featuresYAMLHead + "    go:\n      enabled: true\n", true, 2},
+		{"go with a version override", featuresYAMLHead + "    go:\n      enabled: true\n      version: \"2\"\n", true, 2},
+		{"go next to node", featuresYAMLHead + "    go:\n      enabled: true\n    node:\n      enabled: true\n", true, 2},
+		{"go without the sandbox profile", featuresYAMLHead + "    go:\n      enabled: true\n", false, 0},
+		{"go switched off", featuresYAMLHead + "    go:\n      enabled: false\n", true, 0},
+		{"go unset", featuresYAMLHead + "    go: {}\n", true, 0},
+		{"go with a source override is another feature", featuresYAMLHead + "    go:\n      enabled: true\n      source: oci://registry.example.test/features/go\n", true, 0},
+		{"features without options", featuresYAMLHead + "    node:\n      enabled: true\n    kubectl-helm:\n      enabled: true\n", true, 0},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			var got []driving.WarningEntry
+			for _, w := range application.SandboxRelaxationWarningsForYAMLTest(t, []byte(tc.yaml), tc.sandbox) {
+				if strings.Contains(w.Message, "security relaxation for the devcontainer feature") {
+					got = append(got, w)
+				}
+			}
+			if len(got) != tc.want {
+				t.Fatalf("warnings = %d, want %d: %+v", len(got), tc.want, got)
+			}
+			var options []string
+			for _, w := range got {
+				if w.Code != "LH-FA-DEV-006" || w.Level != "warn" || !w.SecurityRelaxation {
+					t.Errorf("warning must be LH-FA-DEV-006, warn and flagged SecurityRelaxation: %+v", w)
+				}
+				if !strings.Contains(w.Message, "feature go:") {
+					t.Errorf("warning does not name the feature: %q", w.Message)
+				}
+				if strings.Contains(w.Message, "init") {
+					t.Errorf("warning discloses `init: true`, which is no relaxation: %q", w.Message)
+				}
+				options = append(options, w.Message)
+			}
+			if tc.want == 2 {
+				joined := strings.Join(options, "\n")
+				if !strings.Contains(joined, "--cap-add=SYS_PTRACE") || !strings.Contains(joined, "--security-opt=seccomp=unconfined") {
+					t.Errorf("warnings lack one of the two options:\n%s", joined)
+				}
+			}
+		})
+	}
+}
+
+// LH-FA-DEV-006: a feature from an external source gets one warning in the
+// sandbox profile, per enabled entry with a `source:` override, in name
+// order, flagged with SecurityRelaxation: u-boot does not read the metadata
+// of such a feature and the profile promises nothing for it. No warning
+// without the sandbox profile, for a switched-off or unset entry, or for a
+// catalogue key without `source:`.
+func TestSandboxRelaxationWarnings_ExternalFeatureEachGetsOne(t *testing.T) {
+	t.Parallel()
+	const two = "    zeta:\n      enabled: true\n      source: https://example.test/zeta\n" +
+		"    alpha:\n      enabled: true\n      source: oci://registry.example.test/alpha\n"
+	cases := []struct {
+		name    string
+		yaml    string
+		sandbox bool
+		want    []string
+	}{
+		{"two external features, in name order", featuresYAMLHead + two, true, []string{"alpha", "zeta"}},
+		{"without the sandbox profile", featuresYAMLHead + two, false, nil},
+		{"switched off", featuresYAMLHead + "    alpha:\n      enabled: false\n      source: oci://registry.example.test/alpha\n", true, nil},
+		{"enabled unset", featuresYAMLHead + "    alpha:\n      source: oci://registry.example.test/alpha\n", true, nil},
+		{"catalogue key without source", featuresYAMLHead + "    node:\n      enabled: true\n", true, nil},
+		{"catalogue key with a source", featuresYAMLHead + "    node:\n      enabled: true\n      source: oci://registry.example.test/node\n", true, []string{"node"}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			var names []string
+			for _, w := range application.SandboxRelaxationWarningsForYAMLTest(t, []byte(tc.yaml), tc.sandbox) {
+				if !strings.Contains(w.Message, "comes from the external source") {
+					continue
+				}
+				if w.Code != "LH-FA-DEV-006" || w.Level != "warn" || !w.SecurityRelaxation {
+					t.Errorf("warning must be LH-FA-DEV-006, warn and flagged SecurityRelaxation: %+v", w)
+				}
+				if !strings.Contains(w.Message, "does not read its metadata") {
+					t.Errorf("warning does not say that u-boot reads no metadata: %q", w.Message)
+				}
+				names = append(names, strings.Fields(strings.TrimPrefix(w.Message, "devcontainer feature "))[0])
+			}
+			if !reflect.DeepEqual(names, tc.want) {
+				t.Errorf("features warned about = %v, want %v", names, tc.want)
+			}
+		})
 	}
 }

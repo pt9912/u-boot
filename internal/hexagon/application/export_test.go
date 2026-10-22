@@ -310,6 +310,11 @@ type FeatureCatalogueEntryForTest struct {
 	// DockerfileBlock marks an entry without OCI source whose installation
 	// the sandbox Dockerfile carries.
 	DockerfileBlock bool
+	// BindsHostSocket marks a feature that mounts the container-engine
+	// socket of the host.
+	BindsHostSocket bool
+	// Relaxations lists the container options the feature adds to the start.
+	Relaxations []string
 }
 
 // FeatureCatalogueForTest exposes the unexported [featureCatalogue]
@@ -324,6 +329,8 @@ func FeatureCatalogueForTest() map[string]FeatureCatalogueEntryForTest {
 			ShortDesc:       v.shortDesc,
 			Publisher:       v.publisher,
 			DockerfileBlock: v.dockerfileBlock,
+			BindsHostSocket: v.bindsHostSocket,
+			Relaxations:     v.relaxations,
 		}
 	}
 	return out
@@ -342,6 +349,8 @@ func FeatureForTest(name domain.FeatureName) (FeatureCatalogueEntryForTest, bool
 		ShortDesc:       entry.shortDesc,
 		Publisher:       entry.publisher,
 		DockerfileBlock: entry.dockerfileBlock,
+		BindsHostSocket: entry.bindsHostSocket,
+		Relaxations:     entry.relaxations,
 	}, true
 }
 
@@ -481,6 +490,15 @@ func SandboxRelaxationWarningsForTest(nestedRuntime, onUnavailable string, egres
 		sb.Egress = &ubootYAMLSandboxEgress{Enabled: &on}
 	}
 	return sandboxRelaxationWarnings(&ubootYAMLDevcontainer{Sandbox: sb}, sandbox)
+}
+
+// SandboxRelaxationWarningsForYAMLTest exposes [sandboxRelaxationWarnings]
+// for the `devcontainer:` sub-tree of a u-boot.yaml fixture, so the
+// warnings about features can be table-tested without a generate flow.
+func SandboxRelaxationWarningsForYAMLTest(t *testing.T, yamlBody []byte, sandbox bool) []driving.WarningEntry {
+	t.Helper()
+	cfg := mustParseUBootYAML(t, yamlBody)
+	return sandboxRelaxationWarnings(cfg.Devcontainer, sandbox)
 }
 
 // LocalEnvNamesForTest exposes the package-internal localEnvNames helper to

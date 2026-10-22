@@ -397,6 +397,29 @@ func TestFeatureCatalogue_EntriesAreValid(t *testing.T) {
 	}
 }
 
+// LH-FA-DEV-006: the security properties of every catalogue entry. Only
+// `docker-cli` mounts the container-engine socket of the host, only `go`
+// adds container options (exactly the capability and the seccomp profile
+// of the pinned feature version; `init: true` is no relaxation), and
+// `kubectl-helm` carries neither (its named volume is no host path, socket
+// or capability). The test pins the table of the catalogue, not the upstream
+// metadata.
+func TestFeatureCatalogue_SecurityProperties(t *testing.T) {
+	t.Parallel()
+	wantSocket := map[string]bool{"docker-cli": true}
+	wantRelaxations := map[string][]string{
+		"go": {"--cap-add=SYS_PTRACE", "--security-opt=seccomp=unconfined"},
+	}
+	for key, entry := range application.FeatureCatalogueForTest() {
+		if entry.BindsHostSocket != wantSocket[key] {
+			t.Errorf("%s: BindsHostSocket = %v, want %v", key, entry.BindsHostSocket, wantSocket[key])
+		}
+		if !reflect.DeepEqual(entry.Relaxations, wantRelaxations[key]) {
+			t.Errorf("%s: Relaxations = %v, want %v", key, entry.Relaxations, wantRelaxations[key])
+		}
+	}
+}
+
 // TestFeatureFor_LookupContract pins the (name → entry, ok) contract
 // of featureFor: known keys return the entry with ok=true; unknown
 // names return the zero-valued entry with ok=false so callers can
@@ -433,7 +456,7 @@ func TestFeatureFor_LookupContract(t *testing.T) {
 		if ok {
 			t.Errorf("featureFor(unknown-feature): ok = true, want false (entry = %+v)", entry)
 		}
-		if entry != (application.FeatureCatalogueEntryForTest{}) {
+		if !reflect.DeepEqual(entry, application.FeatureCatalogueEntryForTest{}) {
 			t.Errorf("entry on miss = %+v, want zero value", entry)
 		}
 	})

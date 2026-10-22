@@ -311,6 +311,139 @@ func TestRun_Generate_OllamaNotices(t *testing.T) {
 	}
 }
 
+// writeFeatureProject writes a project folder with the given u-boot.yaml and a
+// git remote, and makes it the working directory.
+func writeFeatureProject(t *testing.T, yaml string) string {
+	t.Helper()
+	dir := t.TempDir()
+	t.Chdir(dir)
+	if err := os.WriteFile(filepath.Join(dir, "u-boot.yaml"), []byte(yaml), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(dir, ".git"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, ".git", "config"), []byte("[remote \"origin\"]\n\turl = git@gitlab.example.org:o/r.git\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	return dir
+}
+
+// LH-FA-DEV-006, LH-FA-CLI-005 at the user path (real adapters): in the
+// sandbox profile `generate devcontainer` discloses the two options of `go`
+// and each feature from an external source, and `--quiet` keeps these
+// warnings (they carry SecurityRelaxation); the default profile discloses
+// none of them.
+func TestRun_Generate_SandboxFeatureWarnings(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	const head = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n"
+	const features = "  features:\n    go:\n      enabled: true\n    acme:\n      enabled: true\n      source: oci://registry.example.test/acme\n"
+	want := []string{
+		"Warning (LH-FA-DEV-006): security relaxation for the devcontainer feature go: --cap-add=SYS_PTRACE",
+		"Warning (LH-FA-DEV-006): security relaxation for the devcontainer feature go: --security-opt=seccomp=unconfined",
+		"Warning (LH-FA-DEV-006): devcontainer feature acme comes from the external source oci://registry.example.test/acme",
+	}
+	for _, tc := range []struct {
+		name  string
+		yaml  string
+		quiet bool
+		shown bool
+	}{
+		{"sandbox profile", head + "  profile: sandbox\n" + features, false, true},
+		{"sandbox profile, quiet", head + "  profile: sandbox\n" + features, true, true},
+		{"default profile", head + features, false, false},
+		{"default profile, quiet", head + features, true, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			writeFeatureProject(t, tc.yaml)
+			args := []string{"generate", "devcontainer"}
+			if tc.quiet {
+				args = append([]string{"--quiet"}, args...)
+			}
+			var out, errOut bytes.Buffer
+			if code := run(context.Background(), args, &out, &errOut); code != 0 {
+				t.Fatalf("%v: exit %d, want 0; stdout=%q stderr=%q", args, code, out.String(), errOut.String())
+			}
+			for _, w := range want {
+				if got := strings.Contains(out.String(), w); got != tc.shown {
+					t.Errorf("stdout contains %q = %v, want %v:\n%s", w, got, tc.shown, out.String())
+				}
+			}
+		})
+	}
+}
+
+// LH-FA-DEV-006, LH-FA-CLI-006 at the user path (real adapters): the sandbox
+// profile with an active `docker-cli` ends `generate devcontainer` with exit
+// 10 and the code LH-FA-DEV-006, also under `--dry-run` and `--json`, and
+// creates nothing; `config set …docker-cli.enabled false` then succeeds and
+// the next `generate devcontainer` ends with 0. The default profile keeps
+// `docker-cli`.
+func TestRun_Generate_SandboxHostSocketFeatureIsRejected(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	const base = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n"
+	const feature = "  features:\n    docker-cli:\n      enabled: true\n"
+	const remedy = "`u-boot config set devcontainer.features.docker-cli.enabled false`"
+
+	dir := writeFeatureProject(t, base+"  profile: sandbox\n"+feature)
+	before, err := os.ReadFile(filepath.Join(dir, "u-boot.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, args := range [][]string{
+		{"generate", "devcontainer"},
+		{"generate", "devcontainer", "--dry-run"},
+		{"generate", "devcontainer", "--sandbox"},
+	} {
+		var out, errOut bytes.Buffer
+		if code := run(context.Background(), args, &out, &errOut); code != 10 {
+			t.Fatalf("%v: exit %d, want 10; stdout=%q stderr=%q", args, code, out.String(), errOut.String())
+		}
+		if !strings.Contains(errOut.String()+out.String(), remedy) {
+			t.Errorf("%v: no output names the way out %s:\nstdout=%q\nstderr=%q", args, remedy, out.String(), errOut.String())
+		}
+	}
+	var out, errOut bytes.Buffer
+	if code := run(context.Background(), []string{"--json", "generate", "devcontainer", "--dry-run"}, &out, &errOut); code != 10 {
+		t.Fatalf("--json --dry-run: exit %d, want 10; stdout=%q stderr=%q", code, out.String(), errOut.String())
+	}
+	var env devcontainerRunEnvelope
+	if err := json.Unmarshal(out.Bytes(), &env); err != nil {
+		t.Fatalf("--json envelope: %v\n%s", err, out.String())
+	}
+	if env.ExitCode != 10 || len(env.Diagnostics) != 1 || env.Diagnostics[0].Code != "LH-FA-DEV-006" || env.Diagnostics[0].Level != "error" {
+		t.Errorf("envelope = %+v, want exit code 10 and one error diagnostic LH-FA-DEV-006", env)
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".devcontainer")); err == nil {
+		t.Error("the rejected calls created .devcontainer")
+	}
+	if after, _ := os.ReadFile(filepath.Join(dir, "u-boot.yaml")); !bytes.Equal(after, before) {
+		t.Errorf("u-boot.yaml changed:\n%s", after)
+	}
+
+	out.Reset()
+	errOut.Reset()
+	if code := run(context.Background(), []string{"config", "set", "devcontainer.features.docker-cli.enabled", "false"}, &out, &errOut); code != 0 {
+		t.Fatalf("config set …docker-cli.enabled false: exit %d; stdout=%q stderr=%q", code, out.String(), errOut.String())
+	}
+	out.Reset()
+	errOut.Reset()
+	if code := run(context.Background(), []string{"generate", "devcontainer"}, &out, &errOut); code != 0 {
+		t.Fatalf("generate devcontainer after the way out: exit %d; stdout=%q stderr=%q", code, out.String(), errOut.String())
+	}
+
+	writeFeatureProject(t, base+feature)
+	out.Reset()
+	errOut.Reset()
+	if code := run(context.Background(), []string{"generate", "devcontainer"}, &out, &errOut); code != 0 {
+		t.Fatalf("default profile with docker-cli: exit %d, want 0; stdout=%q stderr=%q", code, out.String(), errOut.String())
+	}
+}
+
 // devcontainerRunEnvelope is the part of the `--json` envelope the
 // devcontainer wiring tests read.
 type devcontainerRunEnvelope struct {

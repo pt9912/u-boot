@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -289,6 +290,38 @@ func TestGenerateJSON_URLRejectLHDEV003(t *testing.T) {
 	}
 	if got := diags[0].(map[string]any)["code"]; got != "LH-FA-DEV-003" {
 		t.Errorf("diagnostics[0].code: want LH-FA-DEV-003, got %v", got)
+	}
+}
+
+// LH-FA-DEV-006: a built-in feature the sandbox profile rejects ends
+// `generate devcontainer` with exit 10 and the code LH-FA-DEV-006 in the
+// `--json` envelope, which carries the message with the way out; the
+// sentinel is the one of the credential-bearing origin URL.
+func TestGenerateJSON_SandboxFeatureRejectLHDEV006(t *testing.T) {
+	const msg = "the sandbox profile does not mount the container-engine socket of the host, but the devcontainer feature docker-cli does; " +
+		"disable the feature (`u-boot config set devcontainer.features.docker-cli.enabled false`)"
+	stub := &fakeGenerateUseCase{err: fmt.Errorf("%w: %s", domain.ErrInvalidSandboxSetting, msg)}
+	app := newAppWithGenerateStub(stub)
+
+	var stdout bytes.Buffer
+	execErr := app.Execute(context.Background(), []string{"--json", "generate", "devcontainer", "--sandbox"}, &stdout, &bytes.Buffer{})
+	if execErr == nil || !errors.Is(execErr, domain.ErrInvalidSandboxSetting) {
+		t.Fatalf("want ErrInvalidSandboxSetting, got %v", execErr)
+	}
+	if cli.ExitCode(execErr) != 10 {
+		t.Errorf("ExitCode: want 10, got %d", cli.ExitCode(execErr))
+	}
+	env := unmarshalGenerateEnv(t, stdout.Bytes())
+	diags, _ := env["diagnostics"].([]any)
+	if len(diags) != 1 {
+		t.Fatalf("diagnostics: want 1, got %d", len(diags))
+	}
+	first := diags[0].(map[string]any)
+	if first["code"] != "LH-FA-DEV-006" || first["level"] != "error" {
+		t.Errorf("diagnostics[0] = %v, want level error and code LH-FA-DEV-006", first)
+	}
+	if got, _ := first["message"].(string); !strings.Contains(got, msg) {
+		t.Errorf("diagnostics[0].message = %q, want the message with the way out", got)
 	}
 }
 

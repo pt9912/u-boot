@@ -166,6 +166,15 @@ type featureCatalogueEntry struct {
 	// under `features`. A `source:` override turns it into an external OCI
 	// feature without the block.
 	dockerfileBlock bool
+	// bindsHostSocket marks a feature that mounts the container-engine
+	// socket of the host into the container (its metadata `mounts`). The
+	// sandbox profile rejects an active entry with it (LH-FA-DEV-006).
+	bindsHostSocket bool
+	// relaxations lists the container options a feature adds to the start
+	// (its metadata `capAdd`, `securityOpt`, `privileged`), in the form of
+	// [podmanRelaxations]. The sandbox profile discloses each as a security
+	// relaxation (LH-FA-DEV-006).
+	relaxations []string
 }
 
 // featureOllama is the catalogue key of the Dockerfile-block feature.
@@ -180,6 +189,13 @@ const featureOllama = "ollama"
 //
 // `defaultVersion` is the per-entry pin (the major-version slug of the
 // upstream tag); an entry with `dockerfileBlock` carries none.
+//
+// `bindsHostSocket` and `relaxations` carry the security properties of the
+// pinned feature version, read from its metadata (`mounts`, `privileged`,
+// `capAdd`, `securityOpt`; also `entrypoint` and `dependsOn` for what the
+// feature pulls in). Whoever adds an entry or raises a `defaultVersion`
+// reads these keys and fills the two fields; `TestFeatureCatalogue_SecurityProperties`
+// pins the table, not the upstream.
 func featureCatalogue() map[string]featureCatalogueEntry {
 	return map[string]featureCatalogueEntry{
 		"git": {
@@ -188,9 +204,10 @@ func featureCatalogue() map[string]featureCatalogueEntry {
 			shortDesc:      "Git CLI",
 		},
 		"docker-cli": {
-			source:         "ghcr.io/devcontainers/features/docker-outside-of-docker",
-			defaultVersion: "1",
-			shortDesc:      "Docker CLI (outside-of-docker)",
+			source:          "ghcr.io/devcontainers/features/docker-outside-of-docker",
+			defaultVersion:  "1",
+			shortDesc:       "Docker CLI (outside-of-docker)",
+			bindsHostSocket: true,
 		},
 		"node": {
 			source:         "ghcr.io/devcontainers/features/node",
@@ -206,6 +223,7 @@ func featureCatalogue() map[string]featureCatalogueEntry {
 			source:         "ghcr.io/devcontainers/features/go",
 			defaultVersion: "1",
 			shortDesc:      "Go toolchain",
+			relaxations:    []string{"--cap-add=SYS_PTRACE", "--security-opt=seccomp=unconfined"},
 		},
 		"cpp": {
 			source:         "ghcr.io/devcontainers/features/cpp",
@@ -263,6 +281,34 @@ func featureCatalogue() map[string]featureCatalogueEntry {
 func featureFor(name domain.FeatureName) (featureCatalogueEntry, bool) {
 	entry, ok := featureCatalogue()[name.String()]
 	return entry, ok
+}
+
+// activeCatalogueKeys returns the sorted keys of the catalogue entries for
+// which hasProperty holds and whose feature is active in dc (see
+// [catalogueFeatureActive]: an enabled entry resolving to the catalogue
+// source; a `version` override keeps it active, a `source:` override does
+// not).
+func activeCatalogueKeys(dc *ubootYAMLDevcontainer, hasProperty func(featureCatalogueEntry) bool) []string {
+	var keys []string
+	for key, entry := range featureCatalogue() {
+		if hasProperty(entry) && catalogueFeatureActive(dc, key) {
+			keys = append(keys, key)
+		}
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+// activeHostSocketFeatures returns the sorted catalogue keys of the active
+// features that mount the container-engine socket of the host.
+func activeHostSocketFeatures(dc *ubootYAMLDevcontainer) []string {
+	return activeCatalogueKeys(dc, func(e featureCatalogueEntry) bool { return e.bindsHostSocket })
+}
+
+// activeRelaxingFeatures returns the sorted catalogue keys of the active
+// features that add container options ([featureCatalogueEntry.relaxations]).
+func activeRelaxingFeatures(dc *ubootYAMLDevcontainer) []string {
+	return activeCatalogueKeys(dc, func(e featureCatalogueEntry) bool { return len(e.relaxations) > 0 })
 }
 
 // devcontainerFeatureData is the per-feature projection that

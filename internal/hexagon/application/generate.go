@@ -789,6 +789,12 @@ func (s *GenerateService) generateDevcontainer(ctx context.Context, req driving.
 	features := collectDevcontainerFeatures(cfg)
 
 	sandbox := req.Sandbox || profileIsSandbox(cfg.Devcontainer)
+	// LH-FA-DEV-006: the rejection stands before any plan and write, so a
+	// rejected call changes nothing, under `--dry-run` as well, and the
+	// profile of `--sandbox` is not persisted.
+	if msg := sandboxHostSocketFeatureMessage(cfg.Devcontainer, sandbox); msg != "" {
+		return driving.GenerateResponse{}, fmt.Errorf("%w: %s", domain.ErrInvalidSandboxSetting, msg)
+	}
 	cloneURL, warnings, err := resolveSandboxClone(s.fs, req.BaseDir, sandbox, cfg.Devcontainer)
 	if err != nil {
 		return driving.GenerateResponse{}, err

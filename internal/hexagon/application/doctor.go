@@ -114,8 +114,10 @@ const (
 	// + LH-FA-CONF-002). Validates that every entry in
 	// `cfg.Devcontainer.Features` is either catalogue-aktivierbar
 	// or carries a `source:` override whose value appears in
-	// `cfg.Devcontainer.FeatureSources.Allow`. Drift detection (the
-	// over-Spec Teil B) lives in
+	// `cfg.Devcontainer.FeatureSources.Allow`; it also reports an
+	// error for the sandbox profile with an active feature that mounts
+	// the container-engine socket of the host (LH-FA-DEV-006). Drift
+	// detection (the over-Spec Teil B) lives in
 	// [checkIDDevcontainerFeaturesDrift].
 	checkIDDevcontainerFeaturesAllowlist = "devcontainer.features.allowlist"
 
@@ -1187,7 +1189,7 @@ func joinIntsAscending(ports []int) string {
 // checkDevcontainerFeaturesAllowlist is the slice-v1-devcontainer-
 // features T5 Teil A check (LH-FA-DEV-003). It walks
 // `cfg.Devcontainer.Features` and classifies each entry into one of
-// three diagnostic shapes; the worst-severity classification wins
+// four diagnostic shapes; the worst-severity classification wins
 // per check call.
 //
 // Classifications (per feature entry):
@@ -1198,6 +1200,11 @@ func joinIntsAscending(ports []int) string {
 //     points the user at `config set devcontainer.featureSources.allow
 //     <url>` (or `--allow-external-feature-sources <url>`); `--yes`
 //     does not substitute (LH-NFA-SEC-004).
+//   - **Feature the sandbox profile rejects (Error, LH-FA-DEV-006):**
+//     `devcontainer.profile` of u-boot.yaml is `sandbox` and an
+//     active catalogue feature mounts the container-engine socket of
+//     the host (`docker-cli`); the condition and the way out are those
+//     of `generate devcontainer` ([sandboxHostSocketFeatureMessage]).
 //   - **Orphan activation (Warn):** Source override is empty and the
 //     feature name is not in the built-in catalogue. The renderer
 //     silently skips this entry (T3 contract); the doctor surfaces
@@ -1235,20 +1242,17 @@ func (s *DoctorService) checkDevcontainerFeaturesAllowlist(_ context.Context, ba
 		}
 	}
 	allowlistViolations, orphanActivations, enabledKeyMissing := classifyFeatureEntries(cfg)
+	socketRejection := sandboxHostSocketFeatureMessage(cfg.Devcontainer, profileIsSandbox(cfg.Devcontainer))
 
-	// Worst-severity wins: allowlist violation (Error) > orphan /
-	// enabled-missing (Warn) > OK. Combine multiple findings into
-	// one message so the user sees the full picture at once.
-	if len(allowlistViolations) > 0 {
-		msg := fmt.Sprintf(
-			"feature(s) with `source:` override not in devcontainer.featureSources.allow: %s. "+
-				"Add the URL via `u-boot config set devcontainer.featureSources.allow <url>` or "+
-				"`--allow-external-feature-sources <url>` (LH-FA-DEV-003; `--yes` is not sufficient, LH-NFA-SEC-004).",
-			strings.Join(allowlistViolations, ", "))
+	// Worst-severity wins: allowlist violation or a feature the sandbox
+	// profile rejects (Error) > orphan / enabled-missing (Warn) > OK.
+	// Combine multiple findings into one message so the user sees the
+	// full picture at once.
+	if len(allowlistViolations) > 0 || socketRejection != "" {
 		return domain.Diagnostic{
 			ID:       checkIDDevcontainerFeaturesAllowlist,
 			Severity: domain.SeverityError,
-			Message:  msg,
+			Message:  featureErrorMessage(allowlistViolations, socketRejection),
 		}
 	}
 	if len(orphanActivations) > 0 || len(enabledKeyMissing) > 0 {
@@ -1275,6 +1279,25 @@ func (s *DoctorService) checkDevcontainerFeaturesAllowlist(_ context.Context, ba
 		Severity: domain.SeverityOK,
 		Message:  "All devcontainer features are catalogue-activatable or allowlist-conformant.",
 	}
+}
+
+// featureErrorMessage joins the findings of Error severity of
+// [DoctorService.checkDevcontainerFeaturesAllowlist]: the allowlist
+// violations (empty when there are none) and the reason the sandbox profile
+// rejects a feature (empty when it does not).
+func featureErrorMessage(allowlistViolations []string, socketRejection string) string {
+	var parts []string
+	if len(allowlistViolations) > 0 {
+		parts = append(parts, fmt.Sprintf(
+			"feature(s) with `source:` override not in devcontainer.featureSources.allow: %s. "+
+				"Add the URL via `u-boot config set devcontainer.featureSources.allow <url>` or "+
+				"`--allow-external-feature-sources <url>` (LH-FA-DEV-003; `--yes` is not sufficient, LH-NFA-SEC-004).",
+			strings.Join(allowlistViolations, ", ")))
+	}
+	if socketRejection != "" {
+		parts = append(parts, socketRejection)
+	}
+	return strings.Join(parts, " ")
 }
 
 // sortedFeatureNames returns the keys of the features-map in

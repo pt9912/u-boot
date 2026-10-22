@@ -288,3 +288,87 @@ devcontainer:
 		t.Errorf("Severity = %v, want Error (combination); message = %q", d.Severity, d.Message)
 	}
 }
+
+const doctorSandboxFeaturesHead = `schemaVersion: 1
+project:
+  name: demo
+devcontainer:
+  enabled: true
+  profile: sandbox
+  features:
+`
+
+// LH-FA-DEV-006: `doctor` reports the sandbox profile with an active
+// `docker-cli` as an error of `devcontainer.features.allowlist` (the
+// severity behind exit 11) and names the way out of `generate`. The standard
+// profile, a switched-off entry, `go` (its options are disclosed by
+// `generate devcontainer`, not by `doctor`) and an allowed external feature
+// stay quiet; the check keeps no new identifier.
+func TestDoctor_FeaturesAllowlist_SandboxProfileWithDockerCLI(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name string
+		yaml string
+		want domain.Severity
+	}{
+		{"sandbox profile with docker-cli", doctorSandboxFeaturesHead + "    docker-cli:\n      enabled: true\n", domain.SeverityError},
+		{"sandbox profile with docker-cli and a version", doctorSandboxFeaturesHead + "    docker-cli:\n      enabled: true\n      version: \"2\"\n", domain.SeverityError},
+		{"standard profile with docker-cli", "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    docker-cli:\n      enabled: true\n", domain.SeverityOK},
+		{"sandbox profile, docker-cli switched off", doctorSandboxFeaturesHead + "    docker-cli:\n      enabled: false\n", domain.SeverityOK},
+		{"sandbox profile with go", doctorSandboxFeaturesHead + "    go:\n      enabled: true\n", domain.SeverityOK},
+		{
+			"sandbox profile with an allowed external feature",
+			doctorSandboxFeaturesHead + "    other:\n      enabled: true\n      source: https://allowed.test/feature\n" +
+				"  featureSources:\n    allow:\n      - https://allowed.test/feature\n",
+			domain.SeverityOK,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs, _, _, _ := newDoctorService(t)
+			seedDoctorUbootYAMLFeatures(t, fs, tc.yaml)
+			resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+			if err != nil {
+				t.Fatalf("Check: %v", err)
+			}
+			d := findDiagnostic(t, resp.Report.Items, "devcontainer.features.allowlist")
+			if d.Severity != tc.want {
+				t.Fatalf("Severity = %v, want %v; message = %q", d.Severity, tc.want, d.Message)
+			}
+			if tc.want == domain.SeverityError {
+				for _, part := range []string{
+					"docker-cli",
+					"`u-boot config set devcontainer.features.docker-cli.enabled false`",
+					"`u-boot config set devcontainer.sandbox.nestedRuntime docker`",
+				} {
+					if !strings.Contains(d.Message, part) {
+						t.Errorf("message %q lacks %q", d.Message, part)
+					}
+				}
+			}
+		})
+	}
+}
+
+// The error of the sandbox profile and an allowlist violation share the
+// check: one error message carries both findings.
+func TestDoctor_FeaturesAllowlist_SandboxProfileAndAllowlistViolationTogether(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	seedDoctorUbootYAMLFeatures(t, fs, doctorSandboxFeaturesHead+
+		"    docker-cli:\n      enabled: true\n    rogue:\n      enabled: true\n      source: https://uninvited.test/feature\n")
+	resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	d := findDiagnostic(t, resp.Report.Items, "devcontainer.features.allowlist")
+	if d.Severity != domain.SeverityError {
+		t.Fatalf("Severity = %v, want Error; message = %q", d.Severity, d.Message)
+	}
+	for _, part := range []string{"rogue", "devcontainer.featureSources.allow", "docker-cli", "nestedRuntime"} {
+		if !strings.Contains(d.Message, part) {
+			t.Errorf("message %q lacks %q", d.Message, part)
+		}
+	}
+}

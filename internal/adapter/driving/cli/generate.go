@@ -294,7 +294,8 @@ func mapGenerateErrorToDiagnostic(err error, artifact domain.Artifact) diagnosti
 		return diagnosticItem{Level: "error", Code: "LH-FA-DEV-003", Message: err.Error()}
 	case errors.Is(err, domain.ErrInvalidSandboxSetting):
 		// LH-FA-DEV-006 (origin URL with credentials / unsafe
-		// characters); ExitCode maps via isConfigValidationError (10).
+		// characters, and a built-in feature the sandbox profile rejects);
+		// ExitCode maps via isConfigValidationError (10).
 		return diagnosticItem{Level: "error", Code: "LH-FA-DEV-006", Message: err.Error()}
 	case errors.Is(err, driving.ErrArtifactUnknown):
 		return diagnosticItem{Level: "error", Code: "LH-FA-CLI-006", Message: err.Error()}
