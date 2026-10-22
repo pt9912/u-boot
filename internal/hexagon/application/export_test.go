@@ -505,3 +505,12 @@ func SandboxRelaxationWarningsForYAMLTest(t *testing.T, yamlBody []byte, sandbox
 // external _test packages so the `${localEnv:<NAME>}` extraction can be
 // table-tested without a filesystem.
 func LocalEnvNamesForTest(text string) []string { return localEnvNames(text) }
+
+// SessionEnvNamesForTest exposes the package-internal sessionEnvNames helper
+// (the entries `"<NAME>": "${localEnv:<NAME>}"` of the session of
+// `devcontainer shell`) to external _test packages.
+func SessionEnvNamesForTest(text string) []string { return sessionEnvNames(text) }
+
+// WithoutCommentsForTest exposes the package-internal comment stripper that
+// sessionEnvNames reads through.
+func WithoutCommentsForTest(text string) string { return withoutComments(text) }

@@ -267,8 +267,9 @@ func generateFallbackWording() fallbackWording {
 	}
 }
 
-// startFallbackWording is the text of `devcontainer up`: the command started
-// (or found running) the container and regenerates no file.
+// startFallbackWording is the text of `devcontainer up` and `devcontainer
+// shell`: the command started (or found running) the container and regenerates
+// no file.
 func startFallbackWording() fallbackWording {
 	return fallbackWording{subject: "the devcontainer container"}
 }

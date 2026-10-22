@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	iofs "io/fs"
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/pt9912/u-boot/internal/hexagon/domain"
@@ -23,11 +25,13 @@ const devcontainerConfigRel = ".devcontainer/devcontainer.json"
 // relaxation names (LH-FA-DEV-010).
 const socketRelaxationCode = "LH-FA-DEV-010"
 
-// socketRelaxationMessage is the disclosure text. Each of its parts has a
-// test: the helper holds the engine socket (`TestRunArgs`), the generated
-// configuration mounts it if a feature that does so is enabled, such as
-// `docker-cli` (`TestDevcontainerUp_Docker_StandardProfileDockerCLIMountsTheSocket`;
-// the project without that feature, `TestDevcontainerUp_Docker_S1_S9_StandardProfile`,
+// socketRelaxationText is the disclosure text. duration names how long the
+// helper container holds the socket: "call" for `up`, "start" for `shell`,
+// whose session binds no socket. Each of its parts has a test: the helper
+// holds the engine socket (`TestRunArgs`), the generated configuration mounts
+// it if a feature that does so is enabled, such as `docker-cli`
+// (`TestDevcontainerUp_Docker_StandardProfileDockerCLIMountsTheSocket`; the
+// project without that feature, `TestDevcontainerUp_Docker_S1_S9_StandardProfile`,
 // is the counter-sample), the sandbox profile rejects that feature
 // (`TestGenerateDevcontainer_SandboxRejectsHostSocketFeature`), a hand-written
 // configuration can mount it (`TestLauncher_Docker_S6_GuardHandWrittenSocketMountIsDetected`),
@@ -35,12 +39,14 @@ const socketRelaxationCode = "LH-FA-DEV-010"
 // (`TestLauncher_Docker_S6_InitializeCommandRunsWithSocket`). The text does
 // not say "only": a feature from an external source can mount the socket
 // without u-boot seeing it.
-const socketRelaxationMessage = "this command mounts the host container-engine socket into a short-lived helper container " +
-	"(root-equivalent access to the engine for the duration of the call); " +
-	"the devcontainer configuration that u-boot generates mounts it if a feature that does so is enabled, " +
-	"such as the built-in feature docker-cli (the sandbox profile rejects that feature); " +
-	"a hand-written " + devcontainerConfigRel + " can mount it, " +
-	"and an initializeCommand declared there runs with this access"
+func socketRelaxationText(duration string) string {
+	return "this command mounts the host container-engine socket into a short-lived helper container " +
+		"(root-equivalent access to the engine for the duration of the " + duration + "); " +
+		"the devcontainer configuration that u-boot generates mounts it if a feature that does so is enabled, " +
+		"such as the built-in feature docker-cli (the sandbox profile rejects that feature); " +
+		"a hand-written " + devcontainerConfigRel + " can mount it, " +
+		"and an initializeCommand declared there runs with this access"
+}
 
 // localEnvRef matches `${localEnv:NAME}` and `${localEnv:NAME:default}` and
 // captures NAME.
@@ -63,9 +69,84 @@ func localEnvNames(text string) []string {
 	return names
 }
 
+// sessionEnvEntry matches an entry `"<NAME>": "${localEnv:<NAME>}"` and
+// captures the name of the key and the name of the reference; the two must be
+// equal.
+var sessionEnvEntry = regexp.MustCompile(`"([A-Za-z_][A-Za-z0-9_]*)"\s*:\s*"\$\{localEnv:([A-Za-z_][A-Za-z0-9_]*)\}"`)
+
+// sessionEnvNames returns the sorted, distinct variable names of the entries
+// `"<NAME>": "${localEnv:<NAME>}"` in the text of devcontainer.json: the form
+// that the generated configuration writes for `remoteEnv`. It reads the text
+// without its comments (an entry that is commented out passes nothing), finds
+// the form wherever it stands, not only below `remoteEnv`, and does not ask
+// whether a name is set on the host (the launcher leaves an unset name out).
+// A reference of another form (a different name, a default, a path in `mounts`)
+// is no entry; no other source of references is read.
+func sessionEnvNames(text string) []string {
+	seen := map[string]bool{}
+	var names []string
+	for _, m := range sessionEnvEntry.FindAllStringSubmatch(withoutComments(text), -1) {
+		if m[1] == m[2] && !seen[m[1]] {
+			seen[m[1]] = true
+			names = append(names, m[1])
+		}
+	}
+	sort.Strings(names)
+	return names
+}
+
+// withoutComments returns text without the comments of JSON with comments:
+// `//` up to the end of the line and `/* … */`. Characters inside a string are
+// kept, so a `//` in a URL starts no comment. A line comment leaves its line
+// break and a block comment one space, so the tokens next to it stay apart; an
+// unterminated block comment runs to the end of the text.
+func withoutComments(text string) string {
+	var b strings.Builder
+	for i := 0; i < len(text); {
+		switch {
+		case text[i] == '"':
+			end := stringEnd(text, i)
+			b.WriteString(text[i:end])
+			i = end
+		case strings.HasPrefix(text[i:], "//"):
+			if nl := strings.IndexByte(text[i:], '\n'); nl < 0 {
+				i = len(text)
+			} else {
+				i += nl
+			}
+		case strings.HasPrefix(text[i:], "/*"):
+			if end := strings.Index(text[i+2:], "*/"); end < 0 {
+				i = len(text)
+			} else {
+				i += end + 4
+			}
+			b.WriteByte(' ')
+		default:
+			b.WriteByte(text[i])
+			i++
+		}
+	}
+	return b.String()
+}
+
+// stringEnd returns the index after the string that begins with the quote at
+// text[start]; an unterminated string ends at the end of the text. A backslash
+// escapes the next character.
+func stringEnd(text string, start int) int {
+	for i := start + 1; i < len(text); i++ {
+		switch text[i] {
+		case '\\':
+			i++
+		case '"':
+			return i + 1
+		}
+	}
+	return len(text)
+}
+
 // DevcontainerStartService implements [driving.DevcontainerUseCase]
-// (`u-boot devcontainer up` and `down`, LH-FA-DEV-010). It reads the
-// project files through the [driven.FileSystem] port, starts and stops
+// (`u-boot devcontainer up`, `down` and `shell`, LH-FA-DEV-010). It reads the
+// project files through the [driven.FileSystem] port, starts, stops and enters
 // through the [driven.DevcontainerLauncher] and finds the container and its
 // status files through the [driven.DevcontainerInspector].
 type DevcontainerStartService struct {
@@ -81,7 +162,7 @@ var _ driving.DevcontainerUseCase = (*DevcontainerStartService)(nil)
 
 // NewDevcontainerStartService constructs the service. Launcher and inspector
 // are mandatory ports without a nil-tolerant default: a missing one makes
-// `Up` and `Down` fail instead of reporting "nothing to do". A nil logger
+// `Up`, `Down` and `Shell` fail instead of reporting "nothing to do". A nil logger
 // is routed to [noopLogger].
 func NewDevcontainerStartService(
 	fs driven.FileSystem,
@@ -110,31 +191,97 @@ func (s *DevcontainerStartService) wired(command, baseDir string) error {
 
 // Up implements [driving.DevcontainerUseCase.Up].
 func (s *DevcontainerStartService) Up(ctx context.Context, req driving.DevcontainerUpRequest) (driving.DevcontainerUpResponse, error) {
-	if err := s.wired("up", req.BaseDir); err != nil {
-		return driving.DevcontainerUpResponse{}, err
-	}
-	if driven.ValidateDevcontainerProjectFolder(req.BaseDir) != nil {
-		return driving.DevcontainerUpResponse{}, fmt.Errorf("devcontainer up: %w: the path must be absolute and hold no comma, double quote or line break",
-			driving.ErrDevcontainerProjectFolderInvalid)
-	}
-	names, err := s.referencedEnvNames(req.BaseDir)
+	resp, _, err := s.start(ctx, startRequest{
+		command: "up", baseDir: req.BaseDir, recreate: req.Recreate, reportRunning: true,
+		duration: "call", progress: req.ProgressSink, onWarning: req.OnWarning,
+	})
+	return resp, err
+}
+
+// Shell implements [driving.DevcontainerUseCase.Shell]: the start of Up
+// without Recreate, then one session in the started container. The fallback
+// warnings of the start go to OnWarning before the session begins, because the
+// call returns only when the session has ended. The variables of the session
+// come from the entries of the configuration that the start has just read.
+func (s *DevcontainerStartService) Shell(ctx context.Context, req driving.DevcontainerShellRequest) error {
+	resp, config, err := s.start(ctx, startRequest{
+		command: "shell", baseDir: req.BaseDir, duration: "start", progress: req.ProgressSink, onWarning: req.OnWarning,
+	})
 	if err != nil {
-		return driving.DevcontainerUpResponse{}, err
+		return err
 	}
 	if req.OnWarning != nil {
-		req.OnWarning(driving.WarningEntry{
-			Code: socketRelaxationCode, Level: "warn", Message: socketRelaxationMessage, SecurityRelaxation: true,
+		for _, w := range resp.Warnings {
+			req.OnWarning(w)
+		}
+	}
+	names := sessionEnvNames(config)
+	s.logger.Debug("devcontainer shell: opening the session", "envNames", len(names), "terminal", req.Terminal)
+	return s.launcher.Shell(ctx, driven.DevcontainerShellOptions{
+		ContainerID: resp.ContainerID,
+		User:        resp.RemoteUser,
+		Workspace:   resp.RemoteWorkspaceFolder,
+		EnvNames:    names,
+		Stdin:       req.Stdin,
+		Stdout:      req.Stdout,
+		Stderr:      req.Stderr,
+		Terminal:    req.Terminal,
+	})
+}
+
+// startRequest is what `up` and `shell` hand to [DevcontainerStartService.start].
+type startRequest struct {
+	// command names the command in error texts: "up" or "shell".
+	command  string
+	baseDir  string
+	recreate bool
+	// reportRunning asks the inspector, before the launcher, whether the
+	// container already runs (ADR-0030 decision 2); only `up` reports it.
+	reportRunning bool
+	// duration completes the disclosure of the socket, see [socketRelaxationText].
+	duration  string
+	progress  io.Writer
+	onWarning func(driving.WarningEntry)
+}
+
+// start is the start phase that `up` and `shell` share (ADR-0031 decision 1):
+// validation, the disclosure of the socket, the launcher, and the judgement by
+// the state of the container ([DevcontainerStartService.startOutcome]). It
+// returns the response and the text of devcontainer.json it started from.
+func (s *DevcontainerStartService) start(ctx context.Context, r startRequest) (driving.DevcontainerUpResponse, string, error) {
+	if err := s.wired(r.command, r.baseDir); err != nil {
+		return driving.DevcontainerUpResponse{}, "", err
+	}
+	if driven.ValidateDevcontainerProjectFolder(r.baseDir) != nil {
+		return driving.DevcontainerUpResponse{}, "", fmt.Errorf("devcontainer %s: %w: the path must be absolute and hold no comma, double quote or line break",
+			r.command, driving.ErrDevcontainerProjectFolderInvalid)
+	}
+	config, err := s.readConfig(r.command, r.baseDir)
+	if err != nil {
+		return driving.DevcontainerUpResponse{}, "", err
+	}
+	names, err := referencedEnvNames(r.command, config)
+	if err != nil {
+		return driving.DevcontainerUpResponse{}, "", err
+	}
+	if r.onWarning != nil {
+		r.onWarning(driving.WarningEntry{
+			Code: socketRelaxationCode, Level: "warn", Message: socketRelaxationText(r.duration), SecurityRelaxation: true,
 		})
 	}
-	s.logger.Debug("devcontainer up", "recreate", req.Recreate, "envNames", len(names))
-	runningBefore := s.runningContainerID(ctx, req)
+	s.logger.Debug("devcontainer "+r.command, "recreate", r.recreate, "envNames", len(names))
+	runningBefore := ""
+	if r.reportRunning {
+		runningBefore = s.runningContainerID(ctx, r.baseDir, r.recreate)
+	}
 	res, err := s.launcher.Up(ctx, driven.DevcontainerUpOptions{
-		ProjectFolder: req.BaseDir,
+		ProjectFolder: r.baseDir,
 		EnvNames:      names,
-		Recreate:      req.Recreate,
-		Progress:      req.ProgressSink,
+		Recreate:      r.recreate,
+		Progress:      r.progress,
 	})
-	return s.startOutcome(ctx, req.BaseDir, runningBefore, res, err)
+	resp, err := s.startOutcome(ctx, r.command, r.baseDir, runningBefore, res, err)
+	return resp, config, err
 }
 
 // runningContainerID returns the ID of the project's container if it runs
@@ -143,11 +290,11 @@ func (s *DevcontainerStartService) Up(ctx context.Context, req driving.Devcontai
 // no container, a stopped one, and when the engine cannot be asked. A failed
 // query is no failure of the command; the launcher reports an engine problem
 // itself.
-func (s *DevcontainerStartService) runningContainerID(ctx context.Context, req driving.DevcontainerUpRequest) string {
-	if req.Recreate {
+func (s *DevcontainerStartService) runningContainerID(ctx context.Context, baseDir string, recreate bool) string {
+	if recreate {
 		return ""
 	}
-	container, found, err := s.inspector.FindContainer(ctx, req.BaseDir)
+	container, found, err := s.inspector.FindContainer(ctx, baseDir)
 	if err != nil || !found || !container.Running {
 		return ""
 	}
@@ -162,9 +309,10 @@ func (s *DevcontainerStartService) runningContainerID(ctx context.Context, req d
 // [driving.ErrDevcontainerStartScriptFailed], whether the CLI failed (the
 // message keeps its output) or succeeded (the file stems from an earlier start
 // of the container). Otherwise the response carries the fallback warnings and
-// whether the container ran before the call.
+// whether the container ran before the call. command names the command in the
+// error texts.
 func (s *DevcontainerStartService) startOutcome(
-	ctx context.Context, baseDir, runningBefore string, res driven.DevcontainerUpResult, launchErr error,
+	ctx context.Context, command, baseDir, runningBefore string, res driven.DevcontainerUpResult, launchErr error,
 ) (driving.DevcontainerUpResponse, error) {
 	if launchErr != nil && !errors.Is(launchErr, driven.ErrDevcontainerRuntime) {
 		return driving.DevcontainerUpResponse{}, launchErr
@@ -174,12 +322,12 @@ func (s *DevcontainerStartService) startOutcome(
 	failedProbe, failedReading, failed := firstFailedScript(ctx, reader, probes)
 	switch {
 	case launchErr != nil && failed:
-		return driving.DevcontainerUpResponse{}, fmt.Errorf("devcontainer up: %w: %v", driving.ErrDevcontainerStartScriptFailed, launchErr)
+		return driving.DevcontainerUpResponse{}, fmt.Errorf("devcontainer %s: %w: %v", command, driving.ErrDevcontainerStartScriptFailed, launchErr)
 	case launchErr != nil:
 		return driving.DevcontainerUpResponse{}, launchErr
 	case failed:
-		return driving.DevcontainerUpResponse{}, fmt.Errorf("devcontainer up: %w: %s",
-			driving.ErrDevcontainerStartScriptFailed, failedAfterStartText(failedProbe, failedReading))
+		return driving.DevcontainerUpResponse{}, fmt.Errorf("devcontainer %s: %w: %s",
+			command, driving.ErrDevcontainerStartScriptFailed, failedAfterStartText(failedProbe, failedReading))
 	}
 	return driving.DevcontainerUpResponse{
 		ContainerID:           res.ContainerID,
@@ -190,31 +338,39 @@ func (s *DevcontainerStartService) startOutcome(
 	}, nil
 }
 
-// referencedEnvNames reads `.devcontainer/devcontainer.json` and returns the
-// variable names it references through `${localEnv:<NAME>}`. A missing file
-// is [driving.ErrDevcontainerConfigMissing], a read failure
-// [driving.ErrDevcontainerFileSystem], a name the launcher could not pass
-// [driving.ErrDevcontainerEnvNameInvalid].
-func (s *DevcontainerStartService) referencedEnvNames(baseDir string) ([]string, error) {
+// readConfig returns the text of `.devcontainer/devcontainer.json`. A missing
+// file is [driving.ErrDevcontainerConfigMissing], a read failure
+// [driving.ErrDevcontainerFileSystem]. command names the command in the error
+// texts.
+func (s *DevcontainerStartService) readConfig(command, baseDir string) (string, error) {
 	path := filepath.Join(baseDir, devcontainerConfigRel)
 	exists, err := s.fs.Exists(path)
 	if err != nil {
-		return nil, fmt.Errorf("devcontainer up: probe %q: %w: %w", path, driving.ErrDevcontainerFileSystem, err)
+		return "", fmt.Errorf("devcontainer %s: probe %q: %w: %w", command, path, driving.ErrDevcontainerFileSystem, err)
 	}
 	if !exists {
-		return nil, fmt.Errorf("devcontainer up: %w (looked for %s)", driving.ErrDevcontainerConfigMissing, devcontainerConfigRel)
+		return "", fmt.Errorf("devcontainer %s: %w (looked for %s)", command, driving.ErrDevcontainerConfigMissing, devcontainerConfigRel)
 	}
 	body, err := s.fs.ReadFile(path)
 	if err != nil {
 		if errors.Is(err, iofs.ErrNotExist) {
-			return nil, fmt.Errorf("devcontainer up: %w (looked for %s)", driving.ErrDevcontainerConfigMissing, devcontainerConfigRel)
+			return "", fmt.Errorf("devcontainer %s: %w (looked for %s)", command, driving.ErrDevcontainerConfigMissing, devcontainerConfigRel)
 		}
-		return nil, fmt.Errorf("devcontainer up: read %q: %w: %w", path, driving.ErrDevcontainerFileSystem, err)
+		return "", fmt.Errorf("devcontainer %s: read %q: %w: %w", command, path, driving.ErrDevcontainerFileSystem, err)
 	}
-	names := localEnvNames(string(body))
+	return string(body), nil
+}
+
+// referencedEnvNames returns the variable names the text of devcontainer.json
+// references through `${localEnv:<NAME>}`, for the helper container of the
+// start. A name the launcher could not pass is
+// [driving.ErrDevcontainerEnvNameInvalid]. command names the command in the
+// error text.
+func referencedEnvNames(command, text string) ([]string, error) {
+	names := localEnvNames(text)
 	for _, name := range names {
 		if driven.ValidateDevcontainerEnvName(name) != nil {
-			return nil, fmt.Errorf("devcontainer up: %w: %q in %s", driving.ErrDevcontainerEnvNameInvalid, name, devcontainerConfigRel)
+			return nil, fmt.Errorf("devcontainer %s: %w: %q in %s", command, driving.ErrDevcontainerEnvNameInvalid, name, devcontainerConfigRel)
 		}
 	}
 	return names, nil

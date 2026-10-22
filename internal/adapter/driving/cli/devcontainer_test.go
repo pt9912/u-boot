@@ -53,6 +53,10 @@ func (f *fakeDevcontainerUseCase) Down(_ context.Context, req driving.Devcontain
 	return f.downResp, f.downErr
 }
 
+func (f *fakeDevcontainerUseCase) Shell(context.Context, driving.DevcontainerShellRequest) error {
+	return nil
+}
+
 func newAppWithDevcontainer(uc driving.DevcontainerUseCase, opts ...cli.Option) *cli.App {
 	return newApp(&fakeInitUseCase{}, append([]cli.Option{cli.WithDevcontainerUseCase(uc), cli.WithGetwd(sandboxGetwd)}, opts...)...)
 }

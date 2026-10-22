@@ -18,16 +18,20 @@ import (
 const devcontainerTestBaseDir = "/tmp/u-boot-devcontainer-test/demo"
 
 // fakeLauncher is the [driven.DevcontainerLauncher] test double: it records
-// every call and returns the configured result or error. onUp runs at the
-// start of Up, so a test can look at what happened before the call.
+// every call and returns the configured result or error. onUp and onShell run
+// at the start of Up and Shell, so a test can look at what happened before the
+// call.
 type fakeLauncher struct {
-	mu       sync.Mutex
-	upOpts   []driven.DevcontainerUpOptions
-	upResult driven.DevcontainerUpResult
-	upErr    error
-	onUp     func()
-	stopIDs  []string
-	stopErr  error
+	mu        sync.Mutex
+	upOpts    []driven.DevcontainerUpOptions
+	upResult  driven.DevcontainerUpResult
+	upErr     error
+	onUp      func()
+	stopIDs   []string
+	stopErr   error
+	shellOpts []driven.DevcontainerShellOptions
+	shellErr  error
+	onShell   func()
 }
 
 func (f *fakeLauncher) Up(_ context.Context, opts driven.DevcontainerUpOptions) (driven.DevcontainerUpResult, error) {
@@ -47,8 +51,15 @@ func (f *fakeLauncher) Stop(_ context.Context, containerID string) error {
 	return f.stopErr
 }
 
-// Shell satisfies the port; the service does not open sessions.
-func (f *fakeLauncher) Shell(context.Context, driven.DevcontainerShellOptions) error { return nil }
+func (f *fakeLauncher) Shell(_ context.Context, opts driven.DevcontainerShellOptions) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.shellOpts = append(f.shellOpts, opts)
+	if f.onShell != nil {
+		f.onShell()
+	}
+	return f.shellErr
+}
 
 // devcontainerSvc builds the service on a fake filesystem that holds
 // `.devcontainer/devcontainer.json` (when config is not empty) and u-boot.yaml

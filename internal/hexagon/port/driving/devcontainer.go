@@ -51,6 +51,38 @@ type DevcontainerUpResponse struct {
 	AlreadyRunning bool
 }
 
+// DevcontainerShellRequest is the input for [DevcontainerUseCase.Shell]
+// (`u-boot devcontainer shell`, LH-FA-DEV-010).
+type DevcontainerShellRequest struct {
+	// BaseDir is the absolute project folder; the CLI adapter passes the
+	// working directory. Mandatory.
+	BaseDir string
+
+	// ProgressSink receives the build output of the helper image and the
+	// output of the devcontainer CLI during the start; nil discards it.
+	ProgressSink io.Writer
+
+	// OnWarning receives, synchronously, first the disclosure of the socket
+	// relaxation before the helper container is started (it is not called
+	// when the request fails before that point), then each degradation
+	// fallback the container reports after the start, before the session
+	// begins. nil discards them.
+	OnWarning func(WarningEntry)
+
+	// Stdin, Stdout and Stderr are the streams of the session. The use case
+	// writes nothing of its own to them. Stdout and Stderr must not be one
+	// shared writer: the session writes to both from separate goroutines. A
+	// nil stream is the null device.
+	Stdin  io.Reader
+	Stdout io.Writer
+	Stderr io.Writer
+
+	// Terminal allocates a terminal for the session. The adapter sets it when
+	// its standard input is a terminal; Stdin and Stdout are then the files
+	// of that terminal.
+	Terminal bool
+}
+
 // DevcontainerDownRequest is the input for [DevcontainerUseCase.Down]
 // (`u-boot devcontainer down`).
 type DevcontainerDownRequest struct {
@@ -98,8 +130,8 @@ var ErrDevcontainerFileSystem = errors.New("devcontainer: filesystem read failed
 // not overlap.
 var ErrDevcontainerStartScriptFailed = errors.New("devcontainer: a container start script reported a failure")
 
-// DevcontainerUseCase is the driving port of `u-boot devcontainer up` and
-// `u-boot devcontainer down` (LH-FA-DEV-010).
+// DevcontainerUseCase is the driving port of `u-boot devcontainer up`,
+// `u-boot devcontainer down` and `u-boot devcontainer shell` (LH-FA-DEV-010).
 //
 // Contract:
 //
@@ -121,7 +153,19 @@ var ErrDevcontainerStartScriptFailed = errors.New("devcontainer: a container sta
 //     container ran before the call; a failed query is no failure of Up.
 //   - Down stops a running container and succeeds when there is none or it
 //     is stopped. It never removes a container or a volume.
+//   - Shell runs the start of Up without Recreate: the same validation errors,
+//     the same sentinel identities, and the same judgement by the state of the
+//     container, so a status file with `result=failed` ends the call with
+//     [ErrDevcontainerStartScriptFailed] and opens no session. Its disclosure
+//     of the socket names the duration of the start. After the start it opens
+//     one interactive session in the container as the remote user in the
+//     workspace folder the start reported, with the host variables that
+//     `"<NAME>": "${localEnv:<NAME>}"` entries of the configuration name and
+//     that are set. It returns when the session ends: nil whatever the exit
+//     status of the shell was, an error when the session does not begin
+//     (`driven.ErrDevcontainerRuntime` when the probe of the session fails).
 type DevcontainerUseCase interface {
 	Up(ctx context.Context, req DevcontainerUpRequest) (DevcontainerUpResponse, error)
 	Down(ctx context.Context, req DevcontainerDownRequest) (DevcontainerDownResponse, error)
+	Shell(ctx context.Context, req DevcontainerShellRequest) error
 }
