@@ -173,12 +173,18 @@ func TestSandboxRelaxationWarnings_FeatureOptionsAreDisclosed(t *testing.T) {
 
 // LH-FA-DEV-006: a feature from an external source gets one warning in the
 // sandbox profile, per enabled entry with a `source:` override, in name
-// order, flagged with SecurityRelaxation: u-boot does not read the metadata
-// of such a feature and the profile promises nothing for it. No warning
-// without the sandbox profile, for a switched-off or unset entry, or for a
-// catalogue key without `source:`.
+// order, flagged with SecurityRelaxation: the text names the feature and its
+// source and says that u-boot does not read the metadata of such a feature, so
+// the profile promises none of its properties for it. No warning without the
+// sandbox profile, for a switched-off or unset entry, or for a catalogue key
+// without `source:`.
 func TestSandboxRelaxationWarnings_ExternalFeatureEachGetsOne(t *testing.T) {
 	t.Parallel()
+	sources := map[string]string{
+		"alpha": "oci://registry.example.test/alpha",
+		"zeta":  "https://example.test/zeta",
+		"node":  "oci://registry.example.test/node",
+	}
 	const two = "    zeta:\n      enabled: true\n      source: https://example.test/zeta\n" +
 		"    alpha:\n      enabled: true\n      source: oci://registry.example.test/alpha\n"
 	cases := []struct {
@@ -205,10 +211,14 @@ func TestSandboxRelaxationWarnings_ExternalFeatureEachGetsOne(t *testing.T) {
 				if w.Code != "LH-FA-DEV-006" || w.Level != "warn" || !w.SecurityRelaxation || w.Subject != ".devcontainer/devcontainer.json" {
 					t.Errorf("warning must be LH-FA-DEV-006, warn, flagged SecurityRelaxation and about .devcontainer/devcontainer.json: %+v", w)
 				}
-				if !strings.Contains(w.Message, "does not read its metadata") {
-					t.Errorf("warning does not say that u-boot reads no metadata: %q", w.Message)
+				name := strings.Fields(strings.TrimPrefix(w.Message, "devcontainer feature "))[0]
+				if want := "devcontainer feature " + name + " comes from the external source " + sources[name]; !strings.Contains(w.Message, want) {
+					t.Errorf("warning does not name the feature and its source (%q): %q", want, w.Message)
 				}
-				names = append(names, strings.Fields(strings.TrimPrefix(w.Message, "devcontainer feature "))[0])
+				if want := "u-boot does not read its metadata, so the sandbox profile makes none of its promises for this feature"; !strings.Contains(w.Message, want) {
+					t.Errorf("warning does not say that u-boot reads no metadata and that the profile promises nothing for the feature (%q): %q", want, w.Message)
+				}
+				names = append(names, name)
 			}
 			if !reflect.DeepEqual(names, tc.want) {
 				t.Errorf("features warned about = %v, want %v", names, tc.want)
