@@ -205,6 +205,20 @@ Nicht gefahren: C11 (Standard-Probe auf „immer ja“; durch `…Terminal/the_d
 
 **Offene Punkte und was der Closure bleibt:** (1) `integration-docker` und `ci` auf dem Push-Tip; (2) Review und Verification (frischer Kontext); (3) DoD-Haken, Closure-Notiz mit Lerneintrag, Register (Eingaben: `BEO-DOK/zusage-weiter-als-messung` — Terminal-Pfad jetzt mit drei Pins; `BEO-DOK/vorab-suche-uebersieht-befehlsuebersicht`; `BEO-E2E/e2e-paket-am-zeitlimit` — die drei neuen Docker-Tests laufen lokal zusammen in rund 30 s mit gecachten Images), Ausgang je Risiko aus §6, Move nach `done/`, `open/README.md`, Roadmap „Nichts in Arbeit.“; (4) Hinweise an den Projektinhaber: das Zeichengerät-Limit der Terminal-Erkennung (kein `ioctl`, keine neue Abhängigkeit), Kommentare zählen bei `sessionEnvNames` nicht (anders als bei `localEnvNames` für den Hilfs-Container), „Variable eines Agenten“ im Docker-Test als zusätzlicher `remoteEnv`-Eintrag statt über das Feature `claude-code`.
 
+### Fix-Runde nach dem Review (Implementer, 2026-10-22)
+
+Report: `docs/reviews/2026-10-22-slice-v1-cli-devcontainer-shell.md` (0 HIGH, 1 MEDIUM, 4 LOW, GO mit Auflage). Kein Push, kein Tag. Commits: Fix-Runde (M-1, L-1 bis L-4), Verlinken der Kennungen im Report (inhaltlich unverändert, `docs-check` id-unlinked), dieser Abschnitt.
+
+| Finding | Ausgang |
+|---|---|
+| M-1 | Behoben: Handbuch `--quiet`, Ausnahme (1) nennt `devcontainer shell` unter den Befehlen mit Socket-Ausweisung (das „nur“ entfällt), Ausnahme (2) und der Absatz *Fallbacks nach dem Start* nennen `shell`. Gleiche Lücke in READMEs, Hilfe (`--quiet`-Usage ist allgemein) und Kontrakt gesucht: keine weitere Aufzählung. Verhalten gepinnt durch `TestExecute_DevcontainerShell_Quiet` und `…FallbackWarningsComeBeforeTheSession` (Mutationen C3, C7, M4 aus der Umsetzung rot); der Wortlaut des Handbuchs selbst hat keinen Test (Review-only). |
+| L-1 | Behoben: Langtext nennt „this needs the u-boot.yaml of the project, without it no status file is read“; `TestExecute_DevcontainerShell_Help` pinnt den Satz. Mutation (Satz aus dem Langtext entfernt): `…Help` rot. |
+| L-2 | Behoben durch beides: Handbuch ohne Ortsangabe („als Einträge … weitergibt“); neuer Fall in `TestSessionEnvNames` pinnt, dass die Form auch außerhalb von `remoteEnv` zählt. Mutation (Rückgabe `nil` bei `containerEnv` im Text): der Fall ist rot. |
+| L-3 | Behoben: Port-Kommentar sagt, `Stdin` sei die Datei des Terminals, `Stdout` werde unverändert durchgereicht, nicht geprüft; der gemischte Fall (Eingabe Terminal, Ausgabe Pipe) ist nicht getestet und nicht zugesagt. |
+| L-4 | Behoben: Kommentar am Test benennt die Sentinels der Gruppe, auch umhüllt. |
+
+Sensoren und Abgleich der Plan-Tabelle: siehe den Bericht an den Hauptagenten; Dateien dieser Runde (`devcontainer.go` des CLI und des Ports, zwei Testdateien, Handbuch, Report-Links) haben Zeilen der Plan-Tabelle.
+
 ## 4. Trigger
 
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
