@@ -3,7 +3,7 @@
 * Rolle: Reviewer (frischer Kontext, nicht Autor), Review-Art: Nachlauf-Review der Fix-Runde gegen den ersten Report
   [`2026-10-22-slice-v2-spec-devcontainer-shell-und-zweites-up`](2026-10-22-slice-v2-spec-devcontainer-shell-und-zweites-up.md) (4 LOW, GO)
 * Gegenstand: Diff `3635dcc2..HEAD` (Fix-Commit `e600abc9` und zwei Nachträge): `spec/spezifikation.md` (vier Stellen) und Plan
-  [`slice-v2-spec-devcontainer-shell-und-zweites-up`](../plan/planning/in-progress/slice-v2-spec-devcontainer-shell-und-zweites-up.md) §3 (Sicht-Zeile, Streichungstabelle, Nachtrag *Fix-Runde nach dem Review*)
+  [`slice-v2-spec-devcontainer-shell-und-zweites-up`](../plan/planning/done/slice-v2-spec-devcontainer-shell-und-zweites-up.md) §3 (Sicht-Zeile, Streichungstabelle, Nachtrag *Fix-Runde nach dem Review*)
 * Geprüft gegen: Plan, [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten),
   [`SPEC-045`](../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung) *Stand*, Grenze (e) im Fundament-Slice
   [`slice-v1-devcontainer-shell-fundament`](../plan/planning/done/slice-v1-devcontainer-shell-fundament.md), Code

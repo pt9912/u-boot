@@ -2,7 +2,7 @@
 
 * Rolle: Reviewer (frischer Kontext, nicht der Autor), Review-Art: Design-Review der Doku gegen Plan, Lastenheft, ADRs und Code
 * Gegenstand: Diff `0d653453..HEAD` (10 Commits), Plan
-  [`slice-v2-spec-devcontainer-shell-und-zweites-up`](../plan/planning/in-progress/slice-v2-spec-devcontainer-shell-und-zweites-up.md);
+  [`slice-v2-spec-devcontainer-shell-und-zweites-up`](../plan/planning/done/slice-v2-spec-devcontainer-shell-und-zweites-up.md);
   Änderungen an `spec/spezifikation.md` ([`SPEC-049`](../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) und die Nachzüge in [`SPEC-043`](../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet), [`SPEC-045`](../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung), [`SPEC-048`](../../spec/spezifikation.md#spec-048--startscript-der-egress-restriktion-upstream-dns-abbruch-und-wiederholungslauf), [`SPEC-001`](../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json), [`SPEC-024`](../../spec/spezifikation.md#spec-024--beispielaufrufe-zu-den-anforderungen), der Absatz zu [`LH-FA-DEV-007.a`](../../spec/spezifikation.md#lh-fa-dev-007a--degradation-und-strenge-der-sandbox-fähigkeiten), Änderungshistorie), an `spec/architecture.md` (§2.2 bis §2.6, ARC-008, §7.1, §7.2) und am Plan §3 (Beleg-Tabelle B1 bis B29, Streichungen)
 * Geprüft gegen: Plan, Lastenheft 0.21.0
   ([`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten),

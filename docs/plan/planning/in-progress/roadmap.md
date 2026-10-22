@@ -19,7 +19,7 @@ stehen in der Welle-Datei, nicht hier.
 
 Offen: [`welle-devcontainer-shell-und-zweites-up`](../welle-devcontainer-shell-und-zweites-up.md) (Shell im Devcontainer ohne Editor, `u-boot devcontainer shell`, und erneutes `up` nach dem Zustand des Containers; sechs Slices, der Release-Cut zuletzt; Release `v0.14.0`).
 
-In Arbeit: [`slice-v2-spec-devcontainer-shell-und-zweites-up`](slice-v2-spec-devcontainer-shell-und-zweites-up.md) (fünfter Slice der Welle `v0.14.0`: Spezifikation und Sicht zu `u-boot devcontainer shell` und zum erneuten `up` nach dem Zustand des Containers, mit Beleg-Tabelle).
+In Arbeit: [`slice-v2-spec-devcontainer-shell-und-zweites-up`](../done/slice-v2-spec-devcontainer-shell-und-zweites-up.md) (fünfter Slice der Welle `v0.14.0`: Spezifikation und Sicht zu `u-boot devcontainer shell` und zum erneuten `up` nach dem Zustand des Containers, mit Beleg-Tabelle).
 
 ## Nächste Wellen
 
