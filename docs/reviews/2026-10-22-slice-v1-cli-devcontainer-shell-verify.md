@@ -1,4 +1,4 @@
-# Verification-Report: [`slice-v1-cli-devcontainer-shell`](../plan/planning/in-progress/slice-v1-cli-devcontainer-shell.md) — 2026-10-22
+# Verification-Report: [`slice-v1-cli-devcontainer-shell`](../plan/planning/done/slice-v1-cli-devcontainer-shell.md) — 2026-10-22
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review, repariert nichts). Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD, [`ADR-0031`](../plan/adr/0031-devcontainer-shell-ohne-editor.md), [`ADR-0034`](../plan/adr/0034-devcontainer-shell-ende-des-clients-und-keine-login-shell.md), [`ADR-0033`](../plan/adr/0033-devcontainer-up-laufender-container-lebenszyklus-befehle.md), [`ADR-0030`](../plan/adr/0030-devcontainer-up-failed-nach-zustand.md), [`ADR-0029`](../plan/adr/0029-devcontainer-start-exit-11-und-socket-haltung.md), [`ADR-0032`](../plan/adr/0032-katalog-features-socket-und-lockerungen.md), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) und [`LH-SA-CLI-002`](../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle)?
 
@@ -10,7 +10,7 @@
 
 Scope:
 
-- Slice: [`slice-v1-cli-devcontainer-shell`](../plan/planning/in-progress/slice-v1-cli-devcontainer-shell.md), vierter von sechs der Welle [`welle-devcontainer-shell-und-zweites-up`](../plan/planning/welle-devcontainer-shell-und-zweites-up.md).
+- Slice: [`slice-v1-cli-devcontainer-shell`](../plan/planning/done/slice-v1-cli-devcontainer-shell.md), vierter von sechs der Welle [`welle-devcontainer-shell-und-zweites-up`](../plan/planning/welle-devcontainer-shell-und-zweites-up.md).
 - IDs: [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-SA-CLI-002`](../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`ADR-0031`](../plan/adr/0031-devcontainer-shell-ohne-editor.md), [`ADR-0034`](../plan/adr/0034-devcontainer-shell-ende-des-clients-und-keine-login-shell.md), [`ADR-0033`](../plan/adr/0033-devcontainer-up-laufender-container-lebenszyklus-befehle.md), [`ADR-0030`](../plan/adr/0030-devcontainer-up-failed-nach-zustand.md), [`ADR-0029`](../plan/adr/0029-devcontainer-start-exit-11-und-socket-haltung.md).
 - Artefakte: `Shell` in `internal/hexagon/application/devcontainer_start.go` (gemeinsame Startphase `start`, `sessionEnvNames`, `withoutComments`), Port `internal/hexagon/port/driving/devcontainer.go`, CLI `internal/adapter/driving/cli/devcontainer.go` und `terminal.go`, Docker-Tests `internal/e2e/devcontainer_shell_docker_test.go`, Handbuch, READMEs, `CHANGELOG.md`, `docs/maintainer/cli-json-contract.md`.
 
