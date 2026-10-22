@@ -125,8 +125,8 @@ func (l *Launcher) runSession(ctx context.Context, shell string, envNames []stri
 	cmd.Stdin = opts.Stdin
 	stdout, stderr := &headBuffer{limit: shellHeadLimit}, &headBuffer{limit: shellHeadLimit}
 	if opts.Terminal {
-		// The client finds the terminal on its standard output; a pipe in
-		// between would take it away.
+		// The client receives the terminal directly: standard input and
+		// standard output are passed unchanged.
 		cmd.Stdout = opts.Stdout
 	} else {
 		cmd.Stdout = &teeWriter{dst: opts.Stdout, head: stdout}

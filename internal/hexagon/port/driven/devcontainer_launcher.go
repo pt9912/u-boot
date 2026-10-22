@@ -90,14 +90,17 @@ type DevcontainerShellOptions struct {
 	// line, the `docker` client takes it from the environment of the
 	// process. Names that are not set on the host are skipped, so a variable
 	// the host lacks is absent in the session. The launcher masks nothing in
-	// the session: what the shell prints reaches Stdout and Stderr as it is.
+	// the session: what the shell prints reaches the caller as it is.
 	EnvNames []string
 	// Stdin, Stdout and Stderr are the streams of the session. The launcher
-	// writes nothing of its own to Stdout; Stderr receives what the shell
-	// and the `docker` client write to it. A nil stream is the null device.
-	// With Terminal, Stdin and Stdout are handed to the `docker` client as
-	// they are when they are files, so the client finds the terminal on
-	// them; Stdin must then be a terminal.
+	// writes nothing of its own to Stdout. Without Terminal, Stdout receives
+	// the standard output of the shell, and Stderr its standard error and the
+	// messages of the `docker` client. With Terminal the shell writes through
+	// the terminal, so Stdout receives everything the shell prints and
+	// Stderr only the messages of the `docker` client. A nil stream is the
+	// null device. With Terminal, Stdin and Stdout are handed to the
+	// `docker` client as they are when they are files, so the client finds
+	// the terminal on them; Stdin must then be a terminal.
 	Stdin  io.Reader
 	Stdout io.Writer
 	Stderr io.Writer
