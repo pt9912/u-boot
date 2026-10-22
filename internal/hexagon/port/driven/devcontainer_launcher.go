@@ -95,9 +95,9 @@ type DevcontainerShellOptions struct {
 	// Stdin, Stdout and Stderr are the streams of the session. The launcher
 	// writes nothing of its own to Stdout; Stderr receives what the shell
 	// and the `docker` client write to it. A nil stream is the null device.
-	// With Terminal, Stdin, Stdout and Stderr are handed to the `docker`
-	// client as they are when they are files, so the client finds the
-	// terminal on them; Stdin must then be a terminal.
+	// With Terminal, Stdin and Stdout are handed to the `docker` client as
+	// they are when they are files, so the client finds the terminal on
+	// them; Stdin must then be a terminal.
 	Stdin  io.Reader
 	Stdout io.Writer
 	Stderr io.Writer

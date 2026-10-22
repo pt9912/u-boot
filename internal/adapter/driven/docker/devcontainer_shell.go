@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	// shellHeadLimit bounds the head of each stream of a session without
-	// terminal that the launcher keeps to recognise an error of the docker
-	// client.
+	// shellHeadLimit bounds the head of standard error, and without a
+	// terminal of standard output, that the launcher keeps to recognise an
+	// error of the docker client.
 	shellHeadLimit = 4096
 
 	// Messages of the docker client (Docker 29.9.2) that end `docker exec`
