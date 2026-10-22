@@ -1,0 +1,5 @@
+# Ein unumkehrbarer Schritt steht im Plan vor der Kontrolle seiner Voraussetzung
+
+**Sub-Area:** `spec/`, `harness/`, `docs/plan/` (Kürzel DOK, Greenfield laut [`harness/conventions.md`](../../../../../../harness/conventions.md#mr-006)) — der Slice-Plan (Reihenfolge der Maintainer-Aktionen, Risiken) ist der Ort, an dem die Reihenfolge und das Risiko für den Fehlerfall stehen.
+
+Ein Plan ordnet einen Schritt mit Außenwirkung, der sich nicht zurücknehmen lässt (hier: die Veröffentlichung eines Security Advisory; laut OpenAPI-Beschreibung 1.1.4 ist der Wechsel `published` → `draft` ungültig), vor die Kontrolle, die seine Voraussetzung prüft (hier: der Lauf `publish`, der die gepatchte Version ausliefert), und führt das Risiko für den Fehlerfall nicht. Scheitert die Voraussetzung danach, nennt die Veröffentlichung eine Zusage, die nicht eingelöst ist. Kein Gate prüft die Reihenfolge der Schritte im Plan; der Reviewer fand die Lücke beim Lesen der Aktionsfolge gegen [`releasing.md`](../../../../../maintainer/releasing.md) §8.
