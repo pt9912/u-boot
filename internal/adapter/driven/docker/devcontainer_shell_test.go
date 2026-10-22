@@ -234,6 +234,7 @@ func TestLauncher_Shell_SessionEndIsNoError(t *testing.T) {
 		edit   func(*driven.DevcontainerShellOptions)
 	}{
 		{name: "status 0", exit: "0"},
+		{name: "status 0, the message names this container", exit: "0", stderr: msgNotRunning + "\n"},
 		{name: "status 1, silent", exit: "1"},
 		{name: "status 2", exit: "2"},
 		{name: "status 126", exit: "126"},
@@ -247,6 +248,7 @@ func TestLauncher_Shell_SessionEndIsNoError(t *testing.T) {
 		{name: "status 1, the user message of another user", exit: "1", stderr: "Error response from daemon: unable to find user other: no matching entries in passwd file\n"},
 		{name: "status 127, the OCI line after other output", exit: "127", stdout: "output\n" + msgOCI + "\n"},
 		{name: "status 127, the OCI line on standard error", exit: "127", stderr: msgOCI + "\n"},
+		{name: "status 127, the OCI line and other text on standard error", exit: "127", stdout: msgOCI + "\n", stderr: "warning\n"},
 		{name: "status 127, other text on standard output", exit: "127", stdout: "bash: foo: command not found\n"},
 		{name: "terminal, status 127, the OCI line", exit: "127", stdout: msgOCI + "\n", edit: terminal},
 		{name: "status 1, the terminal message without a terminal", exit: "1", stderr: msgNoTerminal + "\n"},
@@ -337,8 +339,8 @@ func TestLauncher_Shell_CancelWithoutTerminalEndsWithTheContextError(t *testing.
 		if !errors.Is(err, context.Canceled) || errors.Is(err, driven.ErrDevcontainerRuntime) {
 			t.Errorf("error = %v, want the context error", err)
 		}
-	case <-time.After(30 * time.Second):
-		t.Fatal("Shell did not return after cancel")
+	case <-time.After(10 * time.Second):
+		t.Fatal("Shell did not return after cancel: the client was not interrupted (the fake session runs 30 s)")
 	}
 }
 
