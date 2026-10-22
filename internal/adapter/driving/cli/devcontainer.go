@@ -99,10 +99,11 @@ reuse it.
 The helper container holds the engine socket of the host for the duration of
 the call (root-equivalent access to the engine). The command says so before it
 starts the helper, also under --quiet. The devcontainer configuration that
-u-boot generates does not mount the socket; a hand-written
-.devcontainer/devcontainer.json can, and its initializeCommand runs with this
-access: read the file before the first start if somebody else can write to the
-project folder.
+u-boot generates mounts the socket if a feature that does so is enabled, such
+as the built-in feature docker-cli (the sandbox profile rejects that feature);
+a hand-written .devcontainer/devcontainer.json can mount it, and its
+initializeCommand runs with this access: read the file before the first start
+if somebody else can write to the project folder.
 
 Only the variables that devcontainer.json references as ${localEnv:NAME} and
 that are set on the host reach the helper container, by name. The command

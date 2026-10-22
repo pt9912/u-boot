@@ -95,6 +95,31 @@ func TestExecute_Devcontainer_BareIsUsageError(t *testing.T) {
 	}
 }
 
+// ADR-0032 decision 5: the help of `devcontainer up` says what the generated
+// configuration mounts: the socket, if a feature that does so is enabled, such
+// as `docker-cli`, which the sandbox profile rejects. The sentence is the
+// sense of the disclosure `up` raises before the start.
+func TestExecute_DevcontainerUp_HelpSaysWhatTheGeneratedConfigurationMounts(t *testing.T) {
+	t.Parallel()
+	out, errOut, err := quietRun(t, newAppWithDevcontainer(&fakeDevcontainerUseCase{}), "devcontainer", "up", "--help")
+	if err != nil {
+		t.Fatalf("devcontainer up --help: %v", err)
+	}
+	text := strings.Join(strings.Fields(out+errOut), " ")
+	for _, part := range []string{
+		"The devcontainer configuration that u-boot generates mounts the socket if a feature that does so is enabled, " +
+			"such as the built-in feature docker-cli (the sandbox profile rejects that feature);",
+		"a hand-written .devcontainer/devcontainer.json can mount it, and its initializeCommand runs with this access",
+	} {
+		if !strings.Contains(text, part) {
+			t.Errorf("help lacks %q:\n%s", part, text)
+		}
+	}
+	if strings.Contains(text, "does not mount the socket") {
+		t.Errorf("help keeps the sentence that the generated configuration does not mount the socket:\n%s", text)
+	}
+}
+
 // ADR-0028 decision 3: neither subcommand writes a project file, so
 // `--dry-run` and `--diff` end with exit 2 before the use case runs.
 func TestExecute_Devcontainer_RejectsPreviewFlagsAndArguments(t *testing.T) {

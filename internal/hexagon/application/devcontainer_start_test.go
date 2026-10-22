@@ -135,8 +135,10 @@ func TestDevcontainerUp_PassesRequestToLauncher(t *testing.T) {
 	}
 }
 
-// ADR-0028 decision 4 / ADR-0029 decision 3: the socket disclosure reaches
-// OnWarning before the launcher starts, carries the three parts, and is a
+// ADR-0028 decision 4 / ADR-0029 decision 3 / ADR-0032 decision 5: the socket
+// disclosure reaches OnWarning before the launcher starts, carries its parts
+// (the helper, the generated configuration with a feature that mounts the
+// socket, the hand-written configuration, the initializeCommand), and is a
 // security relaxation.
 func TestDevcontainerUp_SocketDisclosureBeforeStart(t *testing.T) {
 	t.Parallel()
@@ -164,7 +166,8 @@ func TestDevcontainerUp_SocketDisclosureBeforeStart(t *testing.T) {
 	}
 	for _, part := range []string{
 		"mounts the host container-engine socket into a short-lived helper container", "root-equivalent access",
-		"u-boot generates does not mount it", "hand-written .devcontainer/devcontainer.json can mount it",
+		"u-boot generates mounts it if a feature that does so is enabled, such as the built-in feature docker-cli (the sandbox profile rejects that feature)",
+		"hand-written .devcontainer/devcontainer.json can mount it",
 		"initializeCommand declared there runs with this access",
 	} {
 		if !strings.Contains(strings.Join(strings.Fields(w.Message), " "), part) {
@@ -173,6 +176,12 @@ func TestDevcontainerUp_SocketDisclosureBeforeStart(t *testing.T) {
 	}
 	if strings.Contains(w.Message, "does not receive it") {
 		t.Errorf("disclosure %q keeps the unconditional claim of ADR-0028", w.Message)
+	}
+	// ADR-0032 decision 5: the generated configuration is not said to
+	// leave the socket out, and the text does not say "only" (a feature from
+	// an external source can mount the socket without u-boot seeing it).
+	if strings.Contains(w.Message, "does not mount it") || strings.Contains(" "+w.Message+" ", " only ") {
+		t.Errorf("disclosure %q keeps the old claim or says \"only\"", w.Message)
 	}
 }
 

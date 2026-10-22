@@ -24,14 +24,21 @@ const socketRelaxationCode = "LH-FA-DEV-010"
 
 // socketRelaxationMessage is the disclosure text. Each of its parts has a
 // test: the helper holds the engine socket (`TestRunArgs`), the generated
-// configuration does not mount it (`TestDevcontainerUp_Docker_S1_S9_StandardProfile`, `TestDevcontainerUp_Docker_S1_S4_SandboxProfileVolumes`) and a
-// hand-written one can (`TestLauncher_Docker_S6_GuardHandWrittenSocketMountIsDetected`),
+// configuration mounts it if a feature that does so is enabled, such as
+// `docker-cli` (`TestDevcontainerUp_Docker_StandardProfileDockerCLIMountsTheSocket`;
+// the project without that feature, `TestDevcontainerUp_Docker_S1_S9_StandardProfile`,
+// is the counter-sample), the sandbox profile rejects that feature
+// (`TestGenerateDevcontainer_SandboxRejectsHostSocketFeature`), a hand-written
+// configuration can mount it (`TestLauncher_Docker_S6_GuardHandWrittenSocketMountIsDetected`),
 // and an `initializeCommand` runs with the socket
-// (`TestLauncher_Docker_S6_InitializeCommandRunsWithSocket`).
+// (`TestLauncher_Docker_S6_InitializeCommandRunsWithSocket`). The text does
+// not say "only": a feature from an external source can mount the socket
+// without u-boot seeing it.
 const socketRelaxationMessage = "this command mounts the host container-engine socket into a short-lived helper container " +
 	"(root-equivalent access to the engine for the duration of the call); " +
-	"the devcontainer configuration that u-boot generates does not mount it, " +
-	"but a hand-written " + devcontainerConfigRel + " can mount it, " +
+	"the devcontainer configuration that u-boot generates mounts it if a feature that does so is enabled, " +
+	"such as the built-in feature docker-cli (the sandbox profile rejects that feature); " +
+	"a hand-written " + devcontainerConfigRel + " can mount it, " +
 	"and an initializeCommand declared there runs with this access"
 
 // localEnvRef matches `${localEnv:NAME}` and `${localEnv:NAME:default}` and
