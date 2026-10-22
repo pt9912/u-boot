@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** — (Spec-Version ≠ Release-Version; Lastenheft `0.21.0` liefert der Fix, `spec/lastenheft.md` Zeile 9 gelesen; dieser Slice ändert `spec/` nicht).
 
-**Verantwortlich:** — (gesetzt beim Start, Rolle Implementer); Freigaben: Projektinhaber.
+**Verantwortlich:** pt9912 (Rolle Implementer, Start 2026-10-22); Freigaben: Projektinhaber.
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-22.
 
@@ -335,6 +335,15 @@ aus §6 seinen Ausgang; die Liefer-Punkte der DoD bleiben leer
 18. **Gegenprobe zu N4 (Wirkungsprobe 5) empfohlen, nicht Pflicht:** Sie stärkt B6 von einem auf zwei Läufe; ohne sie bleibt der Text bei „in one run“. Eine Pflicht verlängerte den Cut um einen Bau mit Netz ohne neue Aussage.
 19. **Ökosystem `go`, Paketname `github.com/pt9912/u-boot`:** der Modulpfad steht in `go.mod` Zeile 1, die API kennt `go` (gelesen); Rückfall `other`. `cwe_ids` bleibt optional (Vorschlag `CWE-668`).
 20. **Keine CI-Zahlen im Release-Text** (B18): Der Cut `v0.13.0` stellte den CI-Satz unter den Vorbehalt, ihn „vor dem Tag nachzuziehen“; das verlangte einen weiteren Commit und M2 erneut.
+
+**Entscheidungen beim Start** (2026-10-22, vom Hauptagenten gemäß dem Auftrag des Projektinhabers „mach weiter ohne nachzufragen“ übermittelt und beim Start vermerkt; der Wortlaut des Projektinhabers liegt hier nur in den zitierten Teilen vor):
+
+21. **Reichweite der Freigabe (ergänzt Entscheidung 3):** „mit dem Fix pushen“ und „mach weiter ohne nachzufragen“ (Projektinhaber, im Gespräch, 2026-10-21 und 2026-10-22) gelten für den Push von `main` (M1), den Tag `v0.13.1` (M5) und die Veröffentlichung des Advisory (M5b). Der Hauptagent führt sie aus, wenn M2 und M4 grün sind; **Subagenten pushen und taggen nie.**
+22. **`cwe_ids`: `CWE-668`** (Exposure of Resource to Wrong Sphere) im Advisory-Entwurf; das schließt die Frage aus Entscheidung 19.
+23. **Keine GHSA-Kennung im CHANGELOG** (bestätigt Entscheidung 7); die Kennung steht in der Closure.
+24. **N4 bleibt unentschieden und ist nicht Teil des Releases** (bestätigt Entscheidung 4). Die Gegenprobe zu N4 (Wirkungsprobe 5, zweiter Lauf des Docker-Tests mit der Standard-Option `moby: true`, also ohne `dcFeatureOptions`) darf der Implementer fahren, wenn sie billig ist; nur mit Beleg (Datum, Umgebung, Zahl der Läufe) steht im Text „in two runs“, sonst „in one run“ (Entscheidung 18).
+25. **Wirkungsprobe der Abhilfe-Folge am gebauten Binary vor dem Text** (Register [`BEO-DOK/abhilfe-ohne-wirkungsprobe`](../observations/BEO-DOK/abhilfe-ohne-wirkungsprobe/observation.md)): Sandbox-Projekt mit `docker-cli`, Wegwerf-Ordner im Scratchpad, `--network none`, eigene UID, Exit-Codes festgehalten. Dieselbe Folge optional mit dem Image `ghcr.io/pt9912/u-boot:0.13.0`; nur dann steht im Advisory, dass die Abhilfe auch ohne Update wirkt (B19).
+26. **Das Advisory legt der Implementer nicht an.** Er bereitet den Entwurfstext als Datei im Scratchpad vor (`payload.json` für `gh api --method POST repos/pt9912/u-boot/security-advisories --input`, dazu `README.txt` mit den Aufrufen für Anlegen und Veröffentlichen und dem Rückfall `ecosystem: other`); die JSON-Datei wird im Docker auf Gültigkeit geprüft. Anlegen (M3b) und Veröffentlichen (M5b) führt der Hauptagent. Der Text gehört zur Wahrheitsprüfung des Verifiers (Entscheidung 15).
 
 **Aufträge an die Closure** (Planner, nach M6; der Ausgang je Auftrag steht in der Closure):
 
