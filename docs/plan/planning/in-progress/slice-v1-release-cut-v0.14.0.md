@@ -84,7 +84,7 @@ Jede neue Aussage in Handbuch, CHANGELOG und READMEs braucht einen Beleg nach [`
 
 Drei Liefer-Punkte; Gate-Läufe, die Kontrollen unter Punkt 2 und die Closure-Pflichten darunter zählen nicht mit.
 
-- [ ] **Release-Text und Handbuch:** `CHANGELOG.md` trägt `## [0.14.0] - <Tag-Datum>` mit Lead nach den Aufträgen A-1 und A-2 und den Vergleichslinks; Versionsstrings `0.14.0-dev` an den drei Stellen; beide READMEs (Status-Block, Tabellenzeile, `VERSION=`) und das Handbuch (Kopf, Versionsbeispiele, Gültigkeitsbereich, A-3 in 4.9 und beim Spiegelstrich zu `shell`) tragen `v0.14.0`. Jede neue Aussage steht mit ihrem Beleg in der Beleg-Tabelle (§3); Handbuch und READMEs tragen keine Kennungen ([`AGENTS.md`](../../../../AGENTS.md) §5 Regel 6). *Beleg:* —
+- [x] **Release-Text und Handbuch:** `CHANGELOG.md` trägt `## [0.14.0] - <Tag-Datum>` mit Lead nach den Aufträgen A-1 und A-2 und den Vergleichslinks; Versionsstrings `0.14.0-dev` an den drei Stellen; beide READMEs (Status-Block, Tabellenzeile, `VERSION=`) und das Handbuch (Kopf, Versionsbeispiele, Gültigkeitsbereich, A-3 in 4.9 und beim Spiegelstrich zu `shell`) tragen `v0.14.0`. Jede neue Aussage steht mit ihrem Beleg in der Beleg-Tabelle (§3); Handbuch und READMEs tragen keine Kennungen ([`AGENTS.md`](../../../../AGENTS.md) §5 Regel 6). *Beleg:* Cut-Commit `9c6fedf1`, §3 *Umsetzung* (Abweichung 1: kein CI-Satz; Review und Verification stehen aus).
 - [ ] **Tag und Kontrolle:** Vor dem Tag sind `make gates`, `make ci` und `make fullbuild` grün, `make test-docker` ist gelaufen (Ergebnis mit Zahl der übersprungenen Tests in §3), der Trockenlauf des Tap-Pfads (M-T) ist festgehalten, `tap-check` ist grün, und `ci` und `integration-docker` auf dem Push-Tip sind grün mit den neuen Docker-Tests sichtbar bestanden (M2). **Erst danach und nur nach ausdrücklicher Freigabe des Projektinhabers im Gespräch:** Tag `v0.14.0` gesetzt und gepusht (M5). Kontrolle nach [`releasing.md`](../../../maintainer/releasing.md) §6 (M6). *Beleg:* —
   - [ ] Release-Workflow `publish`: Jobs `publish`, `tap`, Paket-Smoke rpm/fedora und deb/ubuntu `success` (Lauf-ID in §7). *Beleg:* —
   - [ ] GHCR-Image: `docker run --rm ghcr.io/pt9912/u-boot:0.14.0 --version` meldet `0.14.0`; `:0.14.0` und `:latest` tragen denselben Digest. *Beleg:* —
@@ -181,6 +181,60 @@ Der Implementer bereitet vor (Commits lokal, Gates lokal) und **führt M1 und M5
 ### Sensoren (vom Implementer vor dem Handoff, Exit-Codes der `make`-Prozesse in §3 *Umsetzung*)
 
 `make gates`, `make ci`, `make fullbuild`, `make test-docker` (mit `-v`: Zahl von PASS, SKIP und FAIL aus dem Log; ein lokaler Lauf ersetzt den CI-Lauf nicht; am Paket-Zeitlimit von 30 Minuten endete der lokale Lauf im Cut `v0.13.0` mit Exit 2 ohne roten Test, [`BEO-E2E/e2e-paket-am-zeitlimit`](../observations/BEO-E2E/e2e-paket-am-zeitlimit/observation.md)), `make build VERSION=0.14.0` mit `docker run --rm u-boot:latest --version` = `u-boot version 0.14.0` (lokal, nicht gepusht), `make doc-immutable RANGE="v0.13.1..HEAD"`, `make doc-trace`, `make doc-commits RANGE="origin/main..HEAD"`, `make doc-planning`; M-T. `make verify-depguard` entfällt (keine Importregel berührt), mit Begründung zu nennen.
+
+### Umsetzung (Implementer, 2026-10-23; nichts gepusht, kein Tag)
+
+**Commits** (lokal, `origin/main` = `f9680634`): `ff351704` Start (Verantwortlich, Entscheidungen 4 und 5 in §7) · `8bb06e9f` reiner Move nach `in-progress/` · `d0cd12c5` Verweis-Nachzug · `51a1efe4` Start (Roadmap-Zeiger, Zustandsmarker in `open/README.md` und Welle-Datei) · `9c6fedf1` **Cut-Commit** (`Release v0.14.0 …`; der Tag gehört auf den letzten Commit des Cuts nach allen Fix-Runden, M5). Die Commit-Message des Cuts trägt keine `SPEC-`/`ARC-`Kennung (vorher gesucht).
+
+**M0:** `date +%F` = `2026-10-23` (Ortszeit CEST, Zeit beim Cut kurz nach Mitternacht; die Uhr im Container und `date -u` stehen noch auf 2026-10-22, UTC). Das Datum steht in `CHANGELOG.md` (`## [0.14.0] - 2026-10-23`), in der Tabellenzeile beider READMEs und im Handbuch-`Stand`. **Weicht `date +%F` vor M1 oder M5 ab, wird neu geschnitten** (weiterer Cut-Commit, M2 auf dem neuen Push-Tip erneut, `releasing.md` §5); `git log -1 --format=%cs v0.14.0` nutzt die Ortszeit des Committers.
+
+**Ist gegen Plan — Abweichungen und Entscheidungen im Zweifel:**
+
+1. **Kein CI-Satz im Lead.** Das Soll (*Aussage des Release*, Punkt *CI*) nennt die Docker-Integrationstests in der CI mit vier übersprungenen Tests; belegt ist das nur durch den Lauf auf `df4e5cc3` (Cut `v0.13.0`), nicht durch den Push-Tip, und M2 steht aus. Eine Aussage ohne Beleg steht nicht im Text ([`AGENTS.md`](../../../../AGENTS.md) §3.10), und ein Satz „vor dem Tag nachzuziehen“ kostet einen weiteren Commit und M2 erneut (Muster Cut `v0.13.1`, Entscheidung 20). Der Lead lässt den CI-Satz weg; die Statusblöcke beider READMEs behalten ihren bestehenden Satz („Die Docker-Integrationstests laufen in der CI; die vier Tests zum verschachtelten Podman werden dort übersprungen“, unverändert). **Nach M2** kann der Hauptagent den Satz mit der Zahl des Push-Tip ergänzen, wenn er will; das wäre ein weiterer Cut-Commit vor dem Tag.
+2. **Halbsatz A-3 auch im Lead.** Der Absatz *Behaviour change for scripts* sagt, dass `--recreate` nach Behebung der Ursache hilft und die Ursache fortbestehend wieder `11` ergibt (ein Lauf). Beleg: Validator-Bericht, Punkt (ii), Zeilen „`up --recreate` bei fortbestehender Ursache“ und „… nach Behebung“. Grund: Der Lead sagt `--recreate` im Absatz zu A-1 ohnehin; ohne den Halbsatz stünde im Lead, was das Handbuch jetzt berichtigt.
+3. **Entscheidungen beim Start** stehen als Nummern 4 und 5 in §7 (die Nummern 1 bis 3 gab es im Plan): (m) nein, kein Vorab-Tag, (j) und (l) offen.
+4. **Nutzerdoku:** Der Satz zu `shell` in den Statusblöcken steht in Worten ohne Kennungen; die Tabellenzeile folgt dem Muster `v0.13.0`. Das Handbuch ändert nur Kopf, Versionsbeispiele, Gültigkeitsbereich und den Halbsatz A-3 an den zwei Stellen (`Erneutes up …` zweiter Spiegelstrich; Spiegelstrich *Start und Fehler* zu `shell`); `:953` („`u-boot` 0.13.0“, Messstand) und §7 sind unverändert (gelesen).
+5. **Vorab-Suche** (`grep -rln "0\.13\.1"` über `*.go`, `*.mk`, `*.md`, `*.yml`, `Makefile`, `Dockerfile` außerhalb von `docs/plan/`, `docs/reviews/`, `.harness/`): nach dem Cut nur noch `CHANGELOG.md` (Kopf `[0.13.1]`, Vergleichslinks), die Tabellenzeile `v0.13.1` beider READMEs und `docs/maintainer/releasing.md:57` (Zeiger „zuletzt“, Closure). Die Versionsstellen laut Plan sind alle geändert.
+6. **Rot gesehen — Grenze:** Kein Test pinnt die Nummer (`main_test.go` prüft „nicht leer“); eine falsche Versionszeile färbt kein Gate. Die Wächter sind die Prüfung `--version` = Tag im Workflow `publish` (nach dem Push) und der Befund unten (`make build VERSION=0.14.0` meldet `0.14.0`, der Standardbau `0.14.0-dev`). Die Prüfung auf den Tag in M-T ist rot gesehen (2b, 3b).
+
+**Sensoren** (Docker, Host `linux/amd64`, Docker Engine 29.9.2; Exit-Codes der `make`-Prozesse):
+
+| Sensor | Ergebnis |
+|---|---|
+| `make docs-check` (vor dem Cut-Commit) | Exit 0, 721 Dateien, 0 Befunde |
+| `make gates` (auf `9c6fedf1`) | Exit 0: `lint` 0 issues; `coverage-gate` 92,00 % gegen 90 %; `docs-check` 721 Dateien, 0 Befunde; `baseline-verify` v6.18.1 OK, 54 Dateien; `ablage-pruefung` 26 Fälle, 0 Fehlschläge |
+| `make ci` (auf `9c6fedf1`) | **Exit 0**: `govulncheck` „No vulnerabilities found“; `image-scan`: `u-boot:latest (debian 12.15)` 0, `usr/local/bin/u-boot` 0 (Trivy 0.70.0; kein neuer Advisory seit `v0.13.1`) |
+| `make fullbuild` | Exit 0; `docker run --rm u-boot:latest --version` = `u-boot version 0.14.0-dev`, OCI-Label `0.14.0-dev` |
+| `make build VERSION=0.14.0` | Exit 0; `--version` = `u-boot version 0.14.0`, OCI-Label `0.14.0` (lokales Image, nicht gepusht) |
+| `make doc-trace` | Exit 0, 84 Anforderungen, 0 Waisen |
+| `make doc-immutable RANGE="v0.13.1..HEAD"` | Exit 0, 125 Commits, 0 Befunde |
+| `make doc-commits RANGE="origin/main..HEAD"` | Exit 0, 7 Commits (bis `9c6fedf1`), 0 Befunde |
+| `make doc-planning` | Exit 0, 721 Dateien, 0 Befunde |
+| `make test-docker` (`-v`, auf `9c6fedf1`) | **Exit 2** nach 30 min 9 s: Log 3136 `--- PASS` (Tests und Unterfälle), 0 `--- SKIP`, **1 `--- FAIL`**, `panic: test timed out after 30m0s` während `TestE2E_SandboxDevcontainer_Ollama_PinMismatchBreaksBuild` (Paket-Zeitlimit, [`BEO-E2E/e2e-paket-am-zeitlimit`](../observations/BEO-E2E/e2e-paket-am-zeitlimit/observation.md), wie im Cut `v0.13.1`); 23 Pakete `ok`, `FAIL` nur für `internal/e2e`. Das eine `--- FAIL`: `TestE2E_SandboxDevcontainer_NestedDocker_EgressAptUpdate` (144,53 s) — `apt-get install` im Bau von `download.docker.com` endete mit `SSL routines::unexpected eof while reading` (`E: Failed to fetch … containerd.io …`), eine Störung des Netzwegs, kein Fehler des Codes (keine Datei mit `download.docker.com` hat sich seit `v0.13.1` geändert, `git log v0.13.1..HEAD -- <Dateien>` leer). Einzellauf mit `-run '…EgressAptUpdate$'`: **FAIL** (65,39 s, derselbe Fehler), dann **PASS** (52,41 s); ein `curl` auf dasselbe `.deb` im Container lief durch (HTTP 200, 23 MB in 5 s). Also transient, drei Läufe, ein PASS. Nested-Podman-Tests liefen und bestanden (`…NestedPodman` 58,67 s, `…_Build` 58,15 s, `…_BuildEgress` 106,07 s), daher 0 SKIP statt der vier der CI. Die neun Tests aus M2 sind `--- PASS`: `TestShell_Docker_NoTerminal_UserWorkspaceAndEnvironment` (5,02 s), `…_Probe` (5,07 s), `…_B18_SessionDoesNotBegin` (8,30 s), `…_Terminal_UnderScript` (3,36 s), `…_ClientEnd` (13,77 s), `TestDevcontainerShell_Docker_Session` (15,79 s), `…_FailedStatusOpensNoSession` (11,48 s), `TestDevcontainerUp_Docker_S8_SecondUpAfterStartScriptAbort` (20,18 s), `…_AlreadyRunningLifecycleCounters` (10,36 s). Ohne Ergebnis blieben die Tests nach dem Ollama-Test im Paket `internal/e2e`. **Der lokale Lauf ersetzt den CI-Lauf nicht** (M2). Der Lauf hinterließ zwei beendete Container des fehlgeschlagenen Baus (`funny_dhawan`, `awesome_shockley`, Image-ID `7bf4a633c2c7`), die ich nicht entfernen durfte (Berechtigung verweigert); sie gehören nicht in den Arbeitsbaum (`git status` leer) |
+| `make verify-depguard` | **nicht gelaufen**: keine Importregel und kein Go-Import berührt (Produktcode im Diff: `var version` in `cmd/uboot/main.go`) |
+
+**M-T ausgeführt (Trockenlauf des Tap-Pfads).** Befehl: `docker run -i --rm --network none -v /Development/u-boot:/src:ro u-boot:test bash < <Skript>` (Image aus `make gates`, Arbeitsbaum schreibgeschützt; Skript im Scratchpad, nicht im Repo; Fixture nach `sumsFull` in `cmd/uboot/homebrew_scripts_test.go`; Stellvertreter für `curl` und `git` im `PATH`). Ausgabe:
+
+```text
+(1)  homebrew-formula-fill.sh v0.14.0 <sums> scripts/homebrew-formula.rb.tmpl <Ausgabe>   exit=0   (vier url-Zeilen mit v0.14.0)
+(2a) tap-formula-check.sh v0.14.0 <Ausgabe>   exit=0
+(2b) tap-formula-check.sh v0.13.1 <Ausgabe>   exit=1
+     tap-nachzug: the u-boot.rb asset of v0.13.1 does not carry four download URLs of v0.13.1 (found 4 url lines, 0 of v0.13.1).
+(3)  tap-nachzug.sh, TAP_TOKEN=dummy-token, TAG=v0.14.0:   exit=0
+     Protokoll: curl … /releases/download/v0.14.0/u-boot.rb -o <tmp> · git clone --depth 1 … · git diff --quiet -- Formula/u-boot.rb · git … add Formula/u-boot.rb · git … commit -m u-boot 0.14.0 · git push origin HEAD
+     tap-nachzug: pt9912/homebrew-u-boot updated to v0.14.0.
+(3b) tap-nachzug.sh mit TAG=v0.13.1 gegen dieselbe Formel: exit=1, Protokoll nur der curl-Aufruf, 0 clone-Aufrufe, kein push
+```
+
+Rot gesehen: (2b) und (3b) sind die rote Gegenprobe der Prüfung auf den Tag. **Grenze, wie in M-T benannt:** `is_stable == 'true'` und der Workflow-Schritt, der echte `curl` gegen das Release-Asset, der echte `git push` und das Token sind nicht geprobt; der Stellvertreter von `git` meldet immer eine Änderung. Befund: keiner; kein Skript geändert. `tap-check` (M4) ist Sache des Hauptagenten.
+
+**Beleg-Tabelle (Abgleich der Texte):** Jede Aussage des Lead ist in der Tabelle oben belegt (Zeilen 1 bis 8; die Zeile 9 *CI* entfällt, Abweichung 1). Gelesen vor dem Schreiben: Validator-Bericht Zeilen 13 bis 20 (Messumgebung, Grenze zu Punkt (viii)) und 38 bis 48 (Punkt (ii)) sowie Punkt (iii); `CHANGELOG.md` Zeilen 16, 20, 21 (unverändert, jetzt unter `[0.14.0]`). Grenze (e) steht in keinem Text (Entscheidung (m)).
+
+**Abgleich der Plan-Tabelle** (`git diff --stat 2ffa0b23..HEAD` nach `9c6fedf1`): `CHANGELOG.md`, `cmd/uboot/main.go`, `repo.mk`, `Dockerfile`, `README.md`, `README.de.md`, `docs/user/benutzerhandbuch.md`, `docs/plan/planning/in-progress/roadmap.md`, Welle-Datei, `docs/plan/planning/open/README.md`, dieser Slice — jede Zeile hat einen Plan-Eintrag, jeder Eintrag mit Diff einen Diff. Kein Diff, belegt durch Lesung: `docs/maintainer/releasing.md` (Zeiger `:56`–`:57` „zuletzt“ `v0.13.1`, Closure), `spec/`, `docs/plan/adr/` (`make doc-immutable` Exit 0), `.github/workflows/`, `scripts/`, `packaging/`, `Makefile`, `go.mod`, `tools/`, `internal/`. Der Abgleich wird nach jeder späteren Änderung wiederholt.
+
+**Kommentar-Selbstcheck** ([`AGENTS.md`](../../../../AGENTS.md) §3.9): (a) kein Kommentar im Diff beschreibt Entferntes; die Kommentare in `repo.mk` und `Dockerfile` nennen den geltenden Wert `0.14.0-dev`; (b) der alte Wert `0.13.1-dev` steht im ganzen Baum nicht mehr außerhalb von Planung, Reviews und Changelog (Suche über `.go`, `.mk`, `Dockerfile`); (c) keine neue Funktion.
+
+**Offen für M1/M5 (Hauptagent):** Review und Verification vor M1 (Reviewer, Verifier in frischem Kontext); `date +%F` vor M1 und M5; `make docs-check` lokal vor M1; M2 mit der Zahl `--- SKIP` und den neun Tests aus M2; `tap-check` (M4) unmittelbar vor M5; kein Zwischenstand ohne Verweis-Nachzug als Push-Spitze (die Moves liegen als zwei Commits hinter dem Inhaltscommit, alle in einem Push).
 
 ## 4. Trigger
 
