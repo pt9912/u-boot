@@ -41,7 +41,7 @@ Keine.
 `spec/spezifikation.md` (Abschnitt zu `--quiet`) nennt `devcontainer up`, aber nicht `shell`, in der Liste der ändernden
 Subkommandos, in Ausnahme (1) und (2) sowie bei den Kennzeichnungen. Das Handbuch und das Lastenheft nennen `shell`.
 Der Plan führt `spec/` als „unverändert“ und verweist auf den Folge-Slice
-[`slice-v2-spec-devcontainer-shell-und-zweites-up`](../plan/planning/open/slice-v2-spec-devcontainer-shell-und-zweites-up.md);
+[`slice-v2-spec-devcontainer-shell-und-zweites-up`](../plan/planning/in-progress/slice-v2-spec-devcontainer-shell-und-zweites-up.md);
 die Behauptung „keine weitere Aufzählung“ in der M-1-Zeile des Nachtrags gilt damit nur für `docs/user/`, READMEs, Hilfe und
 CHANGELOG. Zuständigkeit: Folge-Slice; Eingabe für den Verifier.
 

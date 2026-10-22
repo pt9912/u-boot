@@ -69,7 +69,7 @@
 - Risiko: Der nächste Änderer von `singleLine` streicht die Prüfung, kein Test wird rot; die Zusage „genau diese eine Zeile“ gilt für lange Ausgaben nicht mehr.
 - Verifizierbar: `make test` mit Mutation M-A (hier gelaufen, Exit 0)
 
-**F-4 · LOW** [`slice-v2-spec-devcontainer-shell-und-zweites-up`](../plan/planning/open/slice-v2-spec-devcontainer-shell-und-zweites-up.md) · „auf der Engine 28.0.4 des CI-Runners (Client 29.9.2) wird der Fall“ — Plan-Aussage durch den Fix veraltet
+**F-4 · LOW** [`slice-v2-spec-devcontainer-shell-und-zweites-up`](../plan/planning/in-progress/slice-v2-spec-devcontainer-shell-und-zweites-up.md) · „auf der Engine 28.0.4 des CI-Runners (Client 29.9.2) wird der Fall“ — Plan-Aussage durch den Fix veraltet
 - Klasse: Plan-Aussage nach Änderung nicht nachgezogen
 - Quelle: `AGENTS.md` §3.10 (Aussagen über Verhalten; Abgleich nach der letzten Änderung), §3.9 (b) sinngemäß
 - Befund: Der Plan (aus `80c88dca`) sagt, auf der Engine 28.0.4 werde „Benutzer nach der Probe entfernt“ nicht erkannt und `Shell` liefere keinen Fehler. Seit `8fa83a34` ist das ohne Terminal falsch; `f25b456b` berührt die Datei nicht, der Abgleich des CI-Fix führt `open/` nicht auf.

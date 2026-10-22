@@ -69,7 +69,7 @@ zusammen mit der Begründungs-Pflicht je Punkt.
 
 - **Code, Tests, Handbuch, READMEs, `CHANGELOG.md`** — die Code-Slices davor; dieser Slice schreibt nur `spec/spezifikation.md` und `spec/architecture.md`. Findet er eine Bedingung ohne Test, wird sie gestrichen oder als „nicht zugesagt“ geführt, nicht durch einen Test hier nachgeholt (ein Test ist Code; Folge-Slice, wenn der Projektinhaber die Zusage will). Wo das Lastenheft den Fall bindet, steht statt „nicht zugesagt“ eine benannte Grenze mit der Fehlerklasse (so beim Fall „die Prüfung gelingt, die Sitzung beginnt nicht“, Zeile zum Exit-Code `12` oben).
 - **Das Lastenheft** — der CR dieser Welle; die Spezifikation präzisiert und erweitert nicht ([`AGENTS.md`](../../../../AGENTS.md) §2).
-- **Aussagen zu Colima, `updateRemoteUserUID` und zum Port-Schritt `Preflight`** — offene Entscheidungen (b), (c) und der Folge-Slice [`slice-v1-devcontainer-start-colima-messung`](slice-v1-devcontainer-start-colima-messung.md); dieser Slice ändert die heutigen Sätze dazu nicht.
+- **Aussagen zu Colima, `updateRemoteUserUID` und zum Port-Schritt `Preflight`** — offene Entscheidungen (b), (c) und der Folge-Slice [`slice-v1-devcontainer-start-colima-messung`](../open/slice-v1-devcontainer-start-colima-messung.md); dieser Slice ändert die heutigen Sätze dazu nicht.
 - **ADR-Bezüge in Spezifikation und Sicht** — die Straten verweisen nicht abwärts ([`AGENTS.md`](../../../../AGENTS.md) §3.4).
 
 ## 2. Definition of Done
