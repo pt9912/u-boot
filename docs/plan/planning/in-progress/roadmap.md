@@ -19,7 +19,7 @@ stehen in der Welle-Datei, nicht hier.
 
 Offen: [`welle-devcontainer-shell-und-zweites-up`](../welle-devcontainer-shell-und-zweites-up.md) (Shell im Devcontainer ohne Editor, `u-boot devcontainer shell`, und erneutes `up` nach dem Zustand des Containers; sechs Slices, der Release-Cut zuletzt; Release `v0.14.0`).
 
-In Arbeit: [`slice-v1-sandbox-features-socket-und-lockerungen`](slice-v1-sandbox-features-socket-und-lockerungen.md) (Patch-Release `v0.13.1` von `main`, Lastenheft `0.21.0`: Katalog-Features im Sandbox-Profil, `docker-cli` ein fachlicher Fehler, Lockerungen von `go` und externe Features ausgewiesen, Socket-Aussagen von `devcontainer up`, Hilfe und Handbuch für beide Profile; ohne Welle-Datei).
+Nichts in Arbeit.
 
 ## Nächste Wellen
 
