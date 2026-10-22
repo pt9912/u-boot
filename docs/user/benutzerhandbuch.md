@@ -1,8 +1,8 @@
 # Benutzerhandbuch: u-boot
 
 Handbuch-Version: 2.0
-Software-Version: v0.13.1
-Stand: 2026-10-22
+Software-Version: v0.14.0
+Stand: 2026-10-23
 
 ---
 
@@ -79,7 +79,7 @@ u-boot --version
 ```
 
 **Ergebnis:** Die installierte Version erscheint, zum Beispiel
-`u-boot version 0.13.1`.
+`u-boot version 0.14.0`.
 
 ### Binary (Linux, macOS, Windows)
 
@@ -105,7 +105,7 @@ Invoke-WebRequest `
 ```
 
 Für eine bestimmte Version ersetzen Sie `latest/download` durch
-`download/v0.13.1`. Die Prüfsummen aller Dateien stehen in `SHA256SUMS` am
+`download/v0.14.0`. Die Prüfsummen aller Dateien stehen in `SHA256SUMS` am
 jeweiligen Release.
 
 ### Homebrew (macOS)
@@ -132,7 +132,7 @@ Ein APT- oder DNF-Repository gibt es nicht; Sie laden das Paket und
 installieren es lokal:
 
 ```bash
-VERSION=0.13.1
+VERSION=0.14.0
 # Debian / Ubuntu
 curl -fsSLO "https://github.com/pt9912/u-boot/releases/download/v${VERSION}/u-boot_${VERSION}_amd64.deb"
 sudo apt install "./u-boot_${VERSION}_amd64.deb"
@@ -852,8 +852,8 @@ u-boot devcontainer shell
 - **Terminal.** Ist die Standardeingabe ein Terminal, ist die Shell daran angeschlossen; sonst liest sie
   ihre Befehle von der Standardeingabe (`printf 'id -un\n' | u-boot devcontainer shell`).
 - **Start und Fehler.** Es gelten die Fehlerklassen von `up`. Meldet die Statusdatei eines Startscripts
-  `failed`, öffnet `shell` keine Shell und endet mit Exit-Code 11; danach hilft
-  `u-boot devcontainer up --recreate` und dann ein neues `shell`. Das setzt wie bei `up` die
+  `failed`, öffnet `shell` keine Shell und endet mit Exit-Code 11; nach Behebung der
+  Ursache hilft `u-boot devcontainer up --recreate` und dann ein neues `shell`. Das setzt wie bei `up` die
   `u-boot.yaml` voraus: ohne sie öffnet `shell` auch in einem Container mit gescheitertem Startscript
   die Shell. Scheitert vor dem Öffnen die Prüfung, ob Benutzer, Workspace und Shell im Container
   vorhanden sind, endet `shell` mit Exit-Code 12.
@@ -940,7 +940,9 @@ erneutes `up` den vorhandenen Container:
   ohne `--recreate` wieder mit Exit-Code 11**, auch wenn die Dev-Container-CLI selbst gelingt. Die
   Meldung nennt die Ursache der Fähigkeit (wie `doctor`), den Zeitpunkt der Statusdatei, dass der
   Container läuft und dieser Aufruf das Startscript nicht ausgeführt hat, und
-  `u-boot devcontainer up --recreate`. Getestet mit dem Startscript der Egress-Beschränkung unter
+  `u-boot devcontainer up --recreate`. `--recreate` hilft nach Behebung der Ursache; besteht sie
+  fort, endete auch das neu angelegte `up` wieder mit Exit-Code 11 (ein Lauf, Linux `amd64`,
+  Docker 29.9.2). Getestet mit dem Startscript der Egress-Beschränkung unter
   `onUnavailable: fail` ohne die Capability `NET_ADMIN`: das erste, das zweite (mit `--json`:
   `exitCode` 11) und ein drittes `up` endeten mit Exit-Code 11 (für die Startscripte von
   `nestedRuntime: podman` und `docker` nur im Unit-Test mit nachgebildeter Engine). Das braucht
@@ -2822,6 +2824,6 @@ Sie vorher Passwörter, Tokens und interne Adressen aus der Ausgabe.
 
 **Lizenz:** MIT, siehe `LICENSE` im Projektarchiv.
 
-**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.13.1. Prüfen Sie
+**Gültigkeitsbereich:** Dieses Handbuch beschreibt `u-boot` v0.14.0. Prüfen Sie
 mit `u-boot --version`, welche Version Sie einsetzen. Weicht sie ab, zeigt
 `u-boot <befehl> --help` den Stand Ihrer Version.

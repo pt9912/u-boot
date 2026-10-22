@@ -11,6 +11,15 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-10-23
+
+Fourteenth release. **Open a shell in the devcontainer without an editor (`u-boot devcontainer shell`); `u-boot devcontainer up` judges by the state of the container.**
+`u-boot devcontainer shell` starts the devcontainer like `u-boot devcontainer up` (without `--recreate`) and opens an interactive shell in it, as the user and in the workspace the start reports, with the credentials that the generated `devcontainer.json` passes on as `${localEnv:NAME}`; Docker (client and local engine) is enough. The helper container holds the engine socket of the host only for the duration of the start (the command says so before it starts the helper, also under `--quiet`); the shell runs without a helper container and without a socket that the command mounts (measured in one session: no container `u-boot-devcontainer-up-…` ran, and the value of `GIT_TOKEN` was not in `docker inspect` of the container; Linux `amd64`, Docker 29.9.2).
+**Promised only on a Linux host (`amd64`) with a local Docker engine** (Docker tests, measured with Docker 29.9.2); **not promised:** macOS with Colima (whoever installs `u-boot` with Homebrew finds the command, but it is not promised there), Docker Desktop, rootless Docker, Podman as host engine, a remote engine, Linux `arm64`, Windows. The interactive session is measured under `script` (a pseudo-terminal); a terminal operated by a person is not measured.
+**Behaviour change for scripts:** a repeated `u-boot devcontainer up` without `--recreate` against a container whose start script reported `failed` ends with exit code `11` instead of `0`, also when the Dev Container CLI itself succeeds; the message names `--recreate`, which helps once the cause is fixed (with the cause still present, the recreated `up` ended with `11` again in one run). This needs the `u-boot.yaml` of the project (entry below).
+**Limit of a repeated `up`:** against a running container, a repeated `up` without `--recreate` does not run the `postCreateCommand` and the `postStartCommand` again (the `postAttachCommand` runs on every `up`; entry below). After exit code `12` (a `postStartCommand` ended with 3) and after Ctrl-C during a `postCreateCommand`, the devcontainer kept running, and the following `up` ended with exit code `0` and `Devcontainer already running` without running the command again (one run each, Linux `amd64`, Docker 29.9.2; after Ctrl-C the command returned after 10.5 seconds). Exit code `0` therefore does not mean that the lifecycle commands ran through; `shell` then opens the session. Other failures (for example a failed build) are not measured. `u-boot devcontainer up --recreate` creates the container anew.
+New in the `--json` output of `u-boot devcontainer up`: `data.alreadyRunning` (always present, additive). Lastenheft 0.21.0.
+
 ### Added
 
 - `u-boot devcontainer shell` starts the devcontainer like `u-boot devcontainer up` (without `--recreate`) and opens an interactive shell in it, as the user and in the workspace the start reports. The variables that the generated `devcontainer.json` passes on as `"NAME": "${localEnv:NAME}"` entries (in the sandbox profile `GIT_TOKEN` and the key of an agent) are set in the shell when they are set on the host. The helper container holds the engine socket only for the duration of the start, and the command says so before it starts the helper, also under `--quiet`; the shell runs without a helper container and without a socket that the command mounts. Everything `u-boot` prints goes to standard error, standard output belongs to the shell. Once the shell has begun the command ends with exit code `0` whatever the exit status of the shell was; a container whose start script reported `failed` opens no shell (exit code `11`); `--json`, `--dry-run`, `--diff` and arguments end with exit code `2`. End the session with `exit`; if `u-boot` ends in another way (for example `kill -9`), the shell in the container can keep running with its commands. Promised on a Linux host (`amd64`) with a local Docker engine, like `up`.
@@ -1484,7 +1493,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.13.1...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/pt9912/u-boot/compare/v0.13.1...v0.14.0
 [0.13.1]: https://github.com/pt9912/u-boot/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/pt9912/u-boot/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/pt9912/u-boot/compare/v0.11.0...v0.12.0
