@@ -290,12 +290,12 @@ func shellQuote(s string) string { return "'" + strings.ReplaceAll(s, "'", `'\''
 // session" at a point the test controls.
 func shimDocker(t *testing.T, action string) (binary, dir string) {
 	t.Helper()
-	real, err := exec.LookPath("docker")
+	dockerPath, err := exec.LookPath("docker")
 	if err != nil {
 		t.Fatalf("docker CLI not on PATH: %v", err)
 	}
 	dir = t.TempDir()
-	script := "#!/bin/sh\nREAL=" + shellQuote(real) + "\nD=" + shellQuote(dir) + "\n" +
+	script := "#!/bin/sh\nREAL=" + shellQuote(dockerPath) + "\nD=" + shellQuote(dir) + "\n" +
 		"case \"$1 $*\" in\n\"exec \"*\" -i \"*) " + action + " ;;\nesac\n" +
 		"if [ -e \"$D/down\" ]; then DOCKER_HOST=tcp://127.0.0.1:1; export DOCKER_HOST; fi\n" +
 		"exec \"$REAL\" \"$@\"\n"
@@ -380,9 +380,8 @@ func TestShell_Docker_B18_SessionDoesNotBegin(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer in.Close()
-		defer out.Close()
-		var stdout, stderr bytes.Buffer
+		t.Cleanup(func() { _ = in.Close(); _ = out.Close() })
+		var stdout, stderr syncBuffer
 		ctx, cancel := context.WithTimeout(context.Background(), launcherTestBudget)
 		defer cancel()
 		done := make(chan error, 1)
@@ -560,15 +559,33 @@ func TestShell_Docker_Terminal_UnderScript(t *testing.T) {
 	const check = "if test -t 0 && test -t 1; then echo TTY$((20+1))=yes; else echo TTY$((20+1))=no; fi\n"
 	t.Run("with a terminal", func(t *testing.T) {
 		id := newVscodeContainer(t)
+		// Each startup file sets a variable; the session shows which file the
+		// shell read.
+		mustDocker(t, "exec", "-u", "vscode", id, "sh", "-c",
+			"echo 'export UBL_BASHRC_READ=yes' >> /home/vscode/.bashrc && echo 'export UBL_PROFILE_READ=yes' >> /home/vscode/.profile")
 		s := startUnderScript(t, "terminal", id)
 		s.sync(t, "SYNC")
 		s.send(check)
 		if !s.waitFor("TTY21=yes", 20*time.Second) {
 			t.Fatalf("the session found no terminal on standard input and output:\n%q", s.out.String())
 		}
+		// The kind of shell: not a login shell, started as `bash`, interactive,
+		// reads ~/.bashrc and not ~/.profile. The typed commands carry
+		// `$((…))`, `$0` and `${…}`, so only the answers contain the values.
 		s.send("shopt -q login_shell && echo LOGIN$((1+1))=yes || echo LOGIN$((1+1))=no\n")
-		s.waitFor("LOGIN2=", 20*time.Second)
-		t.Logf("measured: login shell = %v", strings.Contains(s.out.String(), "LOGIN2=yes"))
+		if !s.waitFor("LOGIN2=", 20*time.Second) {
+			t.Fatalf("the shell gave no answer about the login shell:\n%q", s.out.String())
+		}
+		if !strings.Contains(s.out.String(), "LOGIN2=no") {
+			t.Errorf("the shell is a login shell or answered otherwise:\n%q", s.out.String())
+		}
+		s.send(`echo "ARG0=[$0] INTERACTIVE=${-//[^i]/} BASHRC=${UBL_BASHRC_READ:-unset} PROFILE=${UBL_PROFILE_READ:-unset} KIND$((1+1))"` + "\n")
+		if !s.waitFor("KIND2", 20*time.Second) {
+			t.Fatalf("the shell gave no answer about its kind:\n%q", s.out.String())
+		}
+		if want := "ARG0=[bash] INTERACTIVE=i BASHRC=yes PROFILE=unset KIND2"; !strings.Contains(s.out.String(), want) {
+			t.Errorf("the answer about the kind of shell lacks %q:\n%q", want, s.out.String())
+		}
 		s.send("sleep 300\n")
 		time.Sleep(time.Second)
 		s.send("\x03")
@@ -665,6 +682,8 @@ func TestShell_Docker_ClientEnd(t *testing.T) {
 	t.Run("without a terminal, busy shell: outlives the client", func(t *testing.T) {
 		id := newVscodeContainer(t)
 		cancel := startNoTerminal(t, id, "echo started\nsleep 300\n")
+		requireProcs(t, id, "bash", 1, "before the cancel")
+		requireProcs(t, id, "sleep", 1, "before the cancel (the command must run, or the case is the idle one)")
 		if err := cancel(); !errors.Is(err, context.Canceled) {
 			t.Errorf("Shell error = %v, want the context error", err)
 		}
@@ -685,10 +704,13 @@ func TestShell_Docker_ClientEnd(t *testing.T) {
 			id := newVscodeContainer(t)
 			s := startUnderScript(t, "terminal", id)
 			s.sync(t, "SYNC")
+			wantSleep := 0
 			if busy {
 				s.send("sleep 300\n")
-				time.Sleep(time.Second)
+				wantSleep = 1
 			}
+			requireProcs(t, id, "bash", 1, "before the kill")
+			requireProcs(t, id, "sleep", wantSleep, "before the kill")
 			pids := clientPIDs(id)
 			if len(pids) != 1 {
 				t.Fatalf("docker exec clients of the session = %v, want one", pids)
@@ -701,6 +723,19 @@ func TestShell_Docker_ClientEnd(t *testing.T) {
 			if procs := containerProcs(t, id, "bash"); len(procs) != 1 {
 				t.Errorf("bash processes after the client was killed = %v; the observation is that the shell stays", procs)
 			}
+			if procs := containerProcs(t, id, "sleep"); len(procs) != wantSleep {
+				t.Errorf("sleep processes after the client was killed = %v, want %d; the observation is that the command stays with its shell", procs, wantSleep)
+			}
 		})
+	}
+}
+
+// requireProcs fails the test unless exactly want processes called comm run in
+// the container within 15 s; when names what the check stands for.
+func requireProcs(t *testing.T, id, comm string, want int, when string) {
+	t.Helper()
+	procs := waitProcs(t, id, comm, 15*time.Second, func(n int) bool { return n == want })
+	if len(procs) != want {
+		t.Fatalf("%s processes %s = %v, want %d", comm, when, procs, want)
 	}
 }
