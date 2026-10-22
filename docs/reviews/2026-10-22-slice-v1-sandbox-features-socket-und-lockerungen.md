@@ -1,4 +1,4 @@
-# Review-Report: [`slice-v1-sandbox-features-socket-und-lockerungen`](../plan/planning/in-progress/slice-v1-sandbox-features-socket-und-lockerungen.md) — 2026-10-22
+# Review-Report: [`slice-v1-sandbox-features-socket-und-lockerungen`](../plan/planning/done/slice-v1-sandbox-features-socket-und-lockerungen.md) — 2026-10-22
 
 **Review-Art:** Code-Review (mit Doku-Anteil: Lastenheft 0.21.0, Spezifikation, Handbuch, READMEs, CHANGELOG) gegen Plan, Entscheidungen und Hard Rules (Wartbarkeit). Die DoD-Frage gehört dem Verifier und wird hier nicht beantwortet. Nichts vom Implementer ist ungeprüft übernommen: Abweisung, Warnungen, `doctor`, Texte, Wortlaut, Beleg-Tabelle und Plan-Tabelle sind am Code, am Test und am Diff gelesen; drei Mutationen und zwei Proben sind selbst gelaufen.
 
@@ -8,7 +8,7 @@
 
 **Eingangs-Kontext:**
 
-- [`slice-v1-sandbox-features-socket-und-lockerungen`](../plan/planning/in-progress/slice-v1-sandbox-features-socket-und-lockerungen.md) (§1 Befund und Wortlaut-Tabelle, §2 DoD, §3 Plan-Tabelle, Beleg-Tabelle B1 bis B14, *Umsetzung* mit M1 bis M12, §4, §6, §7 Entscheidungen 1 bis 13)
+- [`slice-v1-sandbox-features-socket-und-lockerungen`](../plan/planning/done/slice-v1-sandbox-features-socket-und-lockerungen.md) (§1 Befund und Wortlaut-Tabelle, §2 DoD, §3 Plan-Tabelle, Beleg-Tabelle B1 bis B14, *Umsetzung* mit M1 bis M12, §4, §6, §7 Entscheidungen 1 bis 13)
 - [`ADR-0032`](../plan/adr/0032-katalog-features-socket-und-lockerungen.md) (`Accepted`; der Slice folgt ihr und darf nicht weiter gehen), [`ADR-0029`](../plan/adr/0029-devcontainer-start-exit-11-und-socket-haltung.md) Entscheidung 3, [`ADR-0031`](../plan/adr/0031-devcontainer-shell-ohne-editor.md) Entscheidung 1, [`ADR-0020`](../plan/adr/0020-drittanbieter-features-im-katalog.md)
 - [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Lastenheft 0.21.0), [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (Ausnahme 1), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)
 - [`SPEC-017`](../../spec/spezifikation.md#spec-017--diagnose-codes-der-doctor-prüfungen-code-registry), [`SPEC-023`](../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen), [`SPEC-043`](../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet), [`SPEC-049`](../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes), [`SPEC-050`](../../spec/spezifikation.md#spec-050--katalog-features-im-sandbox-profil-abweisung-von-docker-cli-lockerungen-von-go-features-aus-externen-quellen)

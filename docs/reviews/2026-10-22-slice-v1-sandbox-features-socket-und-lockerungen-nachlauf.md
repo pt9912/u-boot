@@ -1,4 +1,4 @@
-# Review-Report: [`slice-v1-sandbox-features-socket-und-lockerungen`](../plan/planning/in-progress/slice-v1-sandbox-features-socket-und-lockerungen.md) — Nachlauf der Fix-Runde — 2026-10-22
+# Review-Report: [`slice-v1-sandbox-features-socket-und-lockerungen`](../plan/planning/done/slice-v1-sandbox-features-socket-und-lockerungen.md) — Nachlauf der Fix-Runde — 2026-10-22
 
 **Review-Art:** Nachlauf-Review über Vertrags- und Nutzertext (Code-Review gegen Plan, Entscheidungen und Hard Rules, Wartbarkeit). Die DoD-Frage gehört dem Verifier und wird hier nicht beantwortet. Der Erstlauf ([`2026-10-22-slice-v1-sandbox-features-socket-und-lockerungen`](2026-10-22-slice-v1-sandbox-features-socket-und-lockerungen.md): F-1 MEDIUM, F-2 bis F-5, F-11) ist Kontext und nicht erneut geprüft. Nichts vom Implementer ist ungeprüft übernommen: Meldung, Pins, Test, Spezifikation, Handbuch und CHANGELOG sind am Quelltext und am Diff gelesen.
 
@@ -8,7 +8,7 @@
 
 **Eingangs-Kontext:**
 
-- Slice [`slice-v1-sandbox-features-socket-und-lockerungen`](../plan/planning/in-progress/slice-v1-sandbox-features-socket-und-lockerungen.md) (§3 *Fix-Runde*, Beleg-Tabelle B11 und B12, §7 *Hinweis zur ADR* und Nebenbefund N4), [`ADR-0032`](../plan/adr/0032-katalog-features-socket-und-lockerungen.md) (`Accepted`; Entscheidung 1 und 2, *Kontext*, *Nicht Gegenstand* (a))
+- Slice [`slice-v1-sandbox-features-socket-und-lockerungen`](../plan/planning/done/slice-v1-sandbox-features-socket-und-lockerungen.md) (§3 *Fix-Runde*, Beleg-Tabelle B11 und B12, §7 *Hinweis zur ADR* und Nebenbefund N4), [`ADR-0032`](../plan/adr/0032-katalog-features-socket-und-lockerungen.md) (`Accepted`; Entscheidung 1 und 2, *Kontext*, *Nicht Gegenstand* (a))
 - [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)
 - [`SPEC-044`](../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten) (Definition „aktiv“, Sandbox-Regel für `runArgs`)
 - `AGENTS.md` §3.4, §3.7, §3.9, §3.10, §5 Regel 6

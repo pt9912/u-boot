@@ -1,4 +1,4 @@
-# Review-Report: [`slice-v1-sandbox-features-socket-und-lockerungen`](../plan/planning/in-progress/slice-v1-sandbox-features-socket-und-lockerungen.md) — zweites Nachlauf-Review der Fix-Runde 2 — 2026-10-22
+# Review-Report: [`slice-v1-sandbox-features-socket-und-lockerungen`](../plan/planning/done/slice-v1-sandbox-features-socket-und-lockerungen.md) — zweites Nachlauf-Review der Fix-Runde 2 — 2026-10-22
 
 **Review-Art:** Code-Review gegen Plan, Entscheidungen und Hard Rules (Wartbarkeit) über Vertrags- und Nutzertext. Die DoD-Frage gehört dem Verifier und wird hier nicht beantwortet. Das vorige Nachlauf-Review ([`2026-10-22-slice-v1-sandbox-features-socket-und-lockerungen-nachlauf`](2026-10-22-slice-v1-sandbox-features-socket-und-lockerungen-nachlauf.md): N-1 bis N-3 LOW, N-4 und N-5 INFO) ist Kontext und nicht erneut geprüft; geprüft ist, ob seine fünf Findings im Diff behoben sind und ob der Diff Neues einführt. Nichts vom Implementer ist ungeprüft übernommen: Aussagen sind an Meldung, Tests, Katalog und Hilfe des Quelltexts gelesen.
 
@@ -8,7 +8,7 @@
 
 **Eingangs-Kontext:**
 
-- Slice [`slice-v1-sandbox-features-socket-und-lockerungen`](../plan/planning/in-progress/slice-v1-sandbox-features-socket-und-lockerungen.md) (§3 *Fix-Runde 2*, §7), [`ADR-0032`](../plan/adr/0032-katalog-features-socket-und-lockerungen.md) (`Accepted`; Entscheidung 1, 2, 6)
+- Slice [`slice-v1-sandbox-features-socket-und-lockerungen`](../plan/planning/done/slice-v1-sandbox-features-socket-und-lockerungen.md) (§3 *Fix-Runde 2*, §7), [`ADR-0032`](../plan/adr/0032-katalog-features-socket-und-lockerungen.md) (`Accepted`; Entscheidung 1, 2, 6)
 - [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-007`](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)
 - Meldung `sandboxHostSocketFeatureMessage` (`internal/hexagon/application/devcontainer_sandbox.go`, im Bereich unverändert) als Referenz der Reihenfolge
 - `AGENTS.md` §3.4, §3.7, §3.9, §3.10, §5 Regel 6
