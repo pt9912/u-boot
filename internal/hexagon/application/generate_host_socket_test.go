@@ -23,29 +23,36 @@ const (
 )
 
 // requireWayOutIsDisablingTheFeature pins the way out that the message of the
-// rejection (in `generate devcontainer` and in `doctor`) names: disabling the
-// feature, then generating again and recreating an existing container; a
-// Docker daemon inside the container (`nestedRuntime: docker`) is an
-// additional step for whoever needs Docker there, never an alternative to
-// disabling, because `nestedRuntime: docker` alone does not lift the rejection
+// rejection (in `generate devcontainer` and in `doctor`) names, in this order:
+// disabling the feature; for whoever needs Docker inside the container the
+// additional `nestedRuntime: docker`; generating the devcontainer again;
+// recreating an existing container. `nestedRuntime: docker` is never an
+// alternative to disabling, because it alone does not lift the rejection
 // (TestGenerateDevcontainer_SandboxNestedDocker_DoesNotLiftTheRejection).
 func requireWayOutIsDisablingTheFeature(t *testing.T, message string) {
 	t.Helper()
-	disable := "disable the feature (`u-boot config set devcontainer.features.docker-cli.enabled false`)"
-	nested := "also set `u-boot config set devcontainer.sandbox.nestedRuntime docker`"
-	for _, part := range []string{
-		"docker-cli", disable, nested, "recreate an existing container (`u-boot devcontainer up --recreate`)",
-	} {
-		if !strings.Contains(message, part) {
-			t.Errorf("message %q lacks %q", message, part)
+	if !strings.Contains(message, "docker-cli") {
+		t.Errorf("message %q does not name the feature", message)
+	}
+	steps := []string{
+		"disable the feature (`u-boot config set devcontainer.features.docker-cli.enabled false`)",
+		"also set `u-boot config set devcontainer.sandbox.nestedRuntime docker`",
+		"then generate the devcontainer again",
+		"recreate an existing container (`u-boot devcontainer up --recreate`)",
+	}
+	at := make([]int, len(steps))
+	for i, step := range steps {
+		at[i] = strings.Index(message, step)
+		if at[i] < 0 {
+			t.Errorf("message %q lacks %q", message, step)
+			return
+		}
+		if i > 0 && at[i] < at[i-1] {
+			t.Errorf("message names %q before %q: %q", step, steps[i-1], message)
+			return
 		}
 	}
-	i, j := strings.Index(message, disable), strings.Index(message, nested)
-	if i < 0 || j < i {
-		t.Errorf("message must name disabling the feature before the additional nestedRuntime step: %q", message)
-		return
-	}
-	if strings.Contains(message[i:j], " or ") {
+	if strings.Contains(message[at[0]:at[1]], " or ") {
 		t.Errorf("message offers nestedRuntime as an alternative to disabling the feature: %q", message)
 	}
 }

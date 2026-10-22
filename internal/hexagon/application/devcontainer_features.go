@@ -173,7 +173,8 @@ type featureCatalogueEntry struct {
 	// relaxations lists the container options a feature adds to the start
 	// (its metadata `capAdd`, `securityOpt`, `privileged`), in the form of
 	// [podmanRelaxations]. The sandbox profile discloses each as a security
-	// relaxation (LH-FA-DEV-006).
+	// relaxation (LH-FA-DEV-006). An entry with `bindsHostSocket` lists none:
+	// the sandbox profile rejects it.
 	relaxations []string
 }
 
