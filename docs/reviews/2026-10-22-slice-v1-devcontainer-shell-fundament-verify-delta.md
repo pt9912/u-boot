@@ -1,4 +1,4 @@
-# Verification-Report (Nachprüfung des Deltas): [`slice-v1-devcontainer-shell-fundament`](../plan/planning/in-progress/slice-v1-devcontainer-shell-fundament.md) — 2026-10-22
+# Verification-Report (Nachprüfung des Deltas): [`slice-v1-devcontainer-shell-fundament`](../plan/planning/done/slice-v1-devcontainer-shell-fundament.md) — 2026-10-22
 
 **Rolle:** Verifier (frischer Kontext, kein Self-Review, repariert nichts). Frage: Verletzt der Delta-Diff seit meinem ersten Report die DoD, trägt er die Zusagen von [`ADR-0031`](../plan/adr/0031-devcontainer-shell-ohne-editor.md), [`ADR-0034`](../plan/adr/0034-devcontainer-shell-ende-des-clients-und-keine-login-shell.md) und Lastenheft `0.21.0`, und ist der Slice für die Closure bereit? Form nach [`harness/verification.md`](../../harness/verification.md), kürzer als der erste Report [`2026-10-22-slice-v1-devcontainer-shell-fundament-verify`](2026-10-22-slice-v1-devcontainer-shell-fundament-verify.md), dessen Befunde V-1 bis V-10 hier nicht wiederholt werden. Außer dieser Datei ist im Repo nichts geändert, nichts committet, nichts gepusht, nichts auf GitHub geschrieben (`gh` nur lesend). Mutationen und Sonden liefen in einer Kopie von `HEAD` (`git archive`) im Scratchpad; Messskripte lagen ebenfalls dort. Docker-in-Docker 28.0.4 diente nur zum Messen und ist mit seinem Volume, dem Socket-Verzeichnis und dem Image vollständig entfernt. `git status` im Repo war nach jedem Schritt leer und ist am Ende bis auf diese Datei leer.
 
@@ -12,7 +12,7 @@
 
 Scope:
 
-- Slice: [`slice-v1-devcontainer-shell-fundament`](../plan/planning/in-progress/slice-v1-devcontainer-shell-fundament.md), dritter von sechs der Welle [`welle-devcontainer-shell-und-zweites-up`](../plan/planning/welle-devcontainer-shell-und-zweites-up.md) (Release `v0.14.0`).
+- Slice: [`slice-v1-devcontainer-shell-fundament`](../plan/planning/done/slice-v1-devcontainer-shell-fundament.md), dritter von sechs der Welle [`welle-devcontainer-shell-und-zweites-up`](../plan/planning/welle-devcontainer-shell-und-zweites-up.md) (Release `v0.14.0`).
 - IDs: [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes); [`ADR-0031`](../plan/adr/0031-devcontainer-shell-ohne-editor.md) (`Accepted`, unverändert), [`ADR-0034`](../plan/adr/0034-devcontainer-shell-ende-des-clients-und-keine-login-shell.md) (`Accepted`, unverändert).
 - Artefakte des Deltas: `internal/adapter/driven/docker/devcontainer_shell.go` (`userMissingOnStdout`, `missingUserLead`, `headBuffer.singleLine`, Aufrufkette in `clientErrorBeforeSession`, Vergleich in `clientMessageOnStderr`), `internal/adapter/driven/docker/devcontainer_shell_test.go`, `internal/hexagon/port/driven/devcontainer_launcher.go` (Doc-Kommentar von `Shell`), der Slice, der Nachlauf-Report, Planungsdateien der Closure-Vorbereitung.
 

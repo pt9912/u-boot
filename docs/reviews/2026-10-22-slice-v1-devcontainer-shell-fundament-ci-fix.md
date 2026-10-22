@@ -1,4 +1,4 @@
-# Review-Report (Nachlauf, klein, Code): CI-Fix von [`slice-v1-devcontainer-shell-fundament`](../plan/planning/in-progress/slice-v1-devcontainer-shell-fundament.md) — 2026-10-22
+# Review-Report (Nachlauf, klein, Code): CI-Fix von [`slice-v1-devcontainer-shell-fundament`](../plan/planning/done/slice-v1-devcontainer-shell-fundament.md) — 2026-10-22
 
 **Review-Art:** Nachlauf-Review gegen Plan, Entscheidungen und Hard Rules (Wartbarkeit), nur der CI-Fix. Die DoD-Frage gehört dem Verifier. Nichts vom Implementer ist ungeprüft übernommen: die Erkennung, ihre Bindungen, die Wächterfälle, die Port-Doc und die Engine-Matrix sind am Code, an den Tests und am Slice-Text gelesen; vier Mutationen und eine Sonde sind selbst gelaufen. Die Docker-Tests und die Messungen gegen Engine 28.0.4 sind gelesen, nicht wiederholt.
 
@@ -55,7 +55,7 @@
 - Risiko: Failure-Szenario: Sitzung als `dev` ohne Terminal, im Inneren `docker exec -u developer <anderer Container> …` gegen eine Engine der Form 28.0.4 als einzige Ausgabe und letzter Befehl; die Zeile `unable to find user developer: …` beginnt mit `unable to find user dev`, eine begonnene Sitzung endet mit Exit `12` statt `0`. Sehr eng, aber enger gefasst, als der Text zusagt. Der Vergleich der Fehlerausgabe (`strings.Contains`) hat dieselbe Eigenschaft und ist unverändert.
 - Verifizierbar: `make test` mit dem Sondenfall (hier gelaufen, Exit 2)
 
-**F-2 · LOW** [`slice-v1-devcontainer-shell-fundament`](../plan/planning/in-progress/slice-v1-devcontainer-shell-fundament.md) · „(d) eine Sitzung ohne Terminal, deren einzige Ausgabe eine Zeile“ — neue Klasse falscher Positive nicht benannt
+**F-2 · LOW** [`slice-v1-devcontainer-shell-fundament`](../plan/planning/done/slice-v1-devcontainer-shell-fundament.md) · „(d) eine Sitzung ohne Terminal, deren einzige Ausgabe eine Zeile“ — neue Klasse falscher Positive nicht benannt
 - Klasse: Grenze der Erkennung am Meldungstext
 - Quelle: `AGENTS.md` §3.10 (Bedingung in Spec ohne Test; die Grenzen gehen in den Spezifikations-Slice), [`ADR-0034`](../plan/adr/0034-devcontainer-shell-ende-des-clients-und-keine-login-shell.md) Entscheidung 4 (Zusage-Menge)
 - Befund: Der CI-Fix erweitert (a) und (b), nicht (d); „eine Sitzung ohne Terminal, deren einzige Ausgabe die Zeile `unable to find user <Benutzer der Sitzung>…` ist und die mit Status 126 endet, gilt als Fehler des Clients“ steht in keiner benannten Grenze.
@@ -76,7 +76,7 @@
 - Risiko: Der Spezifikations-Slice schreibt die Grenze aus dem Satz ab; der Verweis „ist vor dem Schreiben zu lesen“ mildert, nennt aber den Ist-Stand nicht.
 - Verifizierbar: Review-only (Zuständigkeit Planner)
 
-**F-5 · INFO** [`slice-v1-devcontainer-shell-fundament`](../plan/planning/in-progress/slice-v1-devcontainer-shell-fundament.md) · „Der Exit-Status des Clients im fehlgeschlagenen Fall steht nicht im Log.“ — Status 126 nur am Docker-in-Docker gemessen
+**F-5 · INFO** [`slice-v1-devcontainer-shell-fundament`](../plan/planning/done/slice-v1-devcontainer-shell-fundament.md) · „Der Exit-Status des Clients im fehlgeschlagenen Fall steht nicht im Log.“ — Status 126 nur am Docker-in-Docker gemessen
 - Klasse: Messung an Ersatzaufbau
 - Quelle: `AGENTS.md` §3.10
 - Befund: Die Bindung `exit == 126` stützt sich auf die Messung gegen `docker:28.0.4-dind`; der Lauf des Runners (host-installierte 28.0.4, gleicher Text) zeigt den Status nicht. Zuständigkeit Verifier: der Lauf `integration-docker` auf dem neuen Push-Tip entscheidet, ob der Status auf dem Runner 126 ist.
