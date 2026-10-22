@@ -65,7 +65,7 @@ Gate-Läufe und die fünf Closure-Pflichten darunter zählen nicht mit.
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8). Ändert eine Fix-Runde Vertragstext, liest ein Nachlauf-Review im frischen Kontext genau diesen Diff, bevor der Verifier startet.
-- [ ] Doku-Update: Spezifikation (bei A und B), Lastenheft (bei B), Handbuch und `CHANGELOG.md` nur, wenn sie die Ausnahme tragen (nicht gelesen).
+- [ ] Doku-Update: Spezifikation (bei A und B), Lastenheft (bei B), Handbuch 4.9 (*Ende*: „Hat die Shell begonnen, endet der Befehl mit Exit-Code 0, was immer der Exit-Status …“, Zeile 860 am 2026-10-22 gelesen) sagt `0` ohne Ausnahme; bei den Wegen B und C entscheidet der Slice, ob das Handbuch die Grenze nennt; `CHANGELOG.md` nicht gelesen.
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben — neues Verzeichnis `BEO-<KUERZEL>/<slug>/` oder eine weitere Datei in dessen `evidence/`; **kein Zaehler wird gesetzt**, er folgt aus den Dateien. Keine Beobachtung angefallen ist ebenfalls eine Antwort und wird in §7 notiert.
 - [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
