@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes) (*Fallbacks und Abbruch eines Startscripts*, *Ausgabe von `up`*, Tabelle *Exit-Codes*), [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung), [`SPEC-048`](../../../../spec/spezifikation.md#spec-048--startscript-der-egress-restriktion-upstream-dns-abbruch-und-wiederholungslauf). Der Slice **liest** sie und ändert keine; die Nachführung ist [`slice-v2-spec-devcontainer-shell-und-zweites-up`](slice-v2-spec-devcontainer-shell-und-zweites-up.md). Der Verweis zeigt aufwärts.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (Rolle Implementer, Start 2026-10-22); Freigaben: Projektinhaber.
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-21.
 
@@ -100,12 +100,22 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; der Implem
 | `docs/plan/planning/observations/` <!-- d-check:ignore (Pfad-Zitat) --> | update (Closure) | Evidence je angefallener Beobachtung |
 | `spec/` <!-- d-check:ignore (Pfad-Zitat) --> | **unverändert** | Lastenheft im CR davor, Spezifikation und Sicht im Spezifikations-Slice danach |
 
+### Entscheidungen beim Start (Implementer, 2026-10-22; Zweifelsfälle nach Plan, ADR und Lastenheft)
+
+Der Plan überlässt dem Implementer mehrere Punkte (Reihenfolge der Abfrage, Ort der Meldung, Fake des Inspectors, Rang-Zeiger in `cli.go`); die Punkte 1 bis 3 sind hier entschieden, bevor Code entsteht (4 und 5 legen den Umgang mit Handbuch und Mutationen fest), der Rest steht in *Umsetzung*.
+
+1. **Reihenfolge in `Up`.** Vorab-Prüfung (Konfiguration, Pfad, Namen) → Ausweisung über `OnWarning` → Abfrage `FindContainer` (nur ohne `--recreate`) → Launcher. Grund: Die Ausweisung des Sockets erscheint sofort, auch wenn die Abfrage bei nicht antwortender Engine bis zur Zeitgrenze des Inspectors dauert; die ADR beschreibt die Ausgabe von Exit 11 so, dass die Ausweisung „schon erschienen“ ist, bevor der Fehler steht ([`ADR-0030`](../../adr/0030-devcontainer-up-failed-nach-zustand.md) Entscheidung 1, *Ausgabe*). Die Abfrage bleibt vor dem Start des Hilfs-Containers.
+2. **Meldung nach einem gelungenen Lauf.** `Up` prüft die konfigurierten Fähigkeiten in der Reihenfolge `vfs`, `daemon`, `egress` und nennt die erste mit `result=failed` (wie `startScriptFailed` im Fehlerpfad); die Meldung trägt den Satz der Fähigkeit aus `fallbackProbe.failed` (derselbe wie bei `doctor`), den Zeitpunkt `at` der Datei, dass der Container läuft und dieser Aufruf das Startscript nicht ausgeführt hat, und `u-boot devcontainer up --recreate`. Sie entsteht in `devcontainer_start.go` neben der Prüfung; `devcontainer_fallback.go` bleibt unverändert (der Doc-Kommentar von `fallbackWarnings`, `failed` sei dort still, gilt weiter, weil `Up` `failed` vor diesem Aufruf prüft und `generate` und `init` es weiter still übergehen).
+3. **Ein Reader je Aufruf, nach dem Launcher.** Die vorgezogene Abfrage ist eine eigene `FindContainer`-Abfrage; der `fallbackReader` bleibt wie heute (eine Abfrage nach dem Launcher, nur mit konfigurierter Fähigkeit), weil der Container nach dem Launcher ein anderer sein kann als davor (`--recreate`, Neuanlage nach dem Entfernen).
+4. **Zusagen im Handbuch.** Das Handbuch sagt über die CLI gegen einen laufenden Container nur, was der Zähler-Test zeigt (`postStartCommand` läuft nicht erneut, läuft nach `down` und `up` wieder); die Beobachtungen des Validators zu `postCreateCommand` und Exit 12 bleiben als „beobachtet in einem Lauf“ stehen und werden nicht erweitert ([`BEO-DOK/zusage-weiter-als-messung`](../observations/BEO-DOK/zusage-weiter-als-messung/observation.md)).
+5. **Mutationen.** Der Plan nennt keine; der Implementer legt sie in *Umsetzung* fest (je Zusage der DoD eine, die ihren Test rot färbt) und fährt sie.
+
 ## 4. Trigger
 
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-cr-devcontainer-shell-und-zweites-up`](../done/slice-cr-devcontainer-shell-und-zweites-up.md) liegt in `done/` (das Lastenheft trägt Stelle 1, den Satz zur Klasse `11` beim erneuten `up`); kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-cr-devcontainer-shell-und-zweites-up`](../done/slice-cr-devcontainer-shell-und-zweites-up.md) liegt in `done/` (das Lastenheft trägt Stelle 1, den Satz zur Klasse `11` beim erneuten `up`); kein anderer Slice in `in-progress/` (WIP-Limit 1). Erfüllt am 2026-10-22: `Verantwortlich:` gesetzt; der CR liegt in `done/` ([`slice-cr-devcontainer-shell-und-zweites-up`](../done/slice-cr-devcontainer-shell-und-zweites-up.md), gelesen) und `spec/lastenheft.md` trägt Version `0.21.0` mit dem Satz zur Klasse `11` beim erneuten `up` (Zeile 497, gelesen) und der Zusage-Menge „ohne diese Datei … ein erneutes `up` meldet einen früheren Abbruch nicht“ (Zeile 498); `in-progress/` trägt `README.md`, `carveouts.md` und `roadmap.md`, keinen Slice. Der Projektinhaber hat angeordnet, ohne Rückfrage weiterzumachen (2026-10-22): Zweifelsfälle entscheidet der Implementer nach Plan, [`ADR-0030`](../../adr/0030-devcontainer-up-failed-nach-zustand.md) und Lastenheft; die Begründung steht in §3 *Umsetzung*.
 
 **Rückführungen — vorab benennen, nicht erst im Nachhinein begründen:**
 
