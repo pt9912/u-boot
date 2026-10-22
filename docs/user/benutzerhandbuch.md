@@ -811,8 +811,11 @@ Proxy-Variablen und Zugangsdaten für private Basis-Images reicht er nicht durch
 **Ausgabe.**
 
 - `up` meldet nach dem Start den Container (die ersten 12 Zeichen der ID), den Benutzer
-  im Container und den Workspace. Der Fortschritt (Bau des Hilfs-Images, Ausgabe der CLI)
-  geht auf die Fehlerausgabe.
+  im Container und den Workspace: `Devcontainer started: container <ID>, remote user <Benutzer>,
+  workspace <Pfad>`. Lief der Container schon vor dem Aufruf und meldet die Dev-Container-CLI
+  dieselbe Kennung, lautet die Zeile `Devcontainer already running: …` mit denselben Angaben;
+  der Aufruf hat dann nichts gestartet. Mit `--recreate` lautet sie immer `started`. Der
+  Fortschritt (Bau des Hilfs-Images, Ausgabe der CLI) geht auf die Fehlerausgabe.
 - `--quiet`: Die Erfolgsmeldung und der Fortschritt entfallen (bei einem Fehler wird der
   Fortschritt nachträglich ausgegeben); die Ausweisung des Sockets und die Fallbacks
   (siehe unten) bleiben sichtbar.
@@ -845,7 +848,8 @@ docker exec -it -e GIT_TOKEN -u <Benutzer> -w <Workspace> <Container> bash
 Degradations-Fallbacks des Sandbox-Containers aus (Container ohne Daemon, `vfs`-Storage,
 Wegfall der Egress-Restriktion), mit dem Stand des letzten Starts. Der Befehl findet die
 Statusdateien über die Fähigkeiten, die `u-boot.yaml` im Projektordner anfordert; **ohne
-`u-boot.yaml` weist `up` nichts aus** und endet trotzdem mit Exit-Code 0.
+`u-boot.yaml` weist `up` nichts aus** und endet trotzdem mit Exit-Code 0. Meldet eine
+Statusdatei `failed`, ist das kein Fallback, sondern Exit-Code 11 (Tabelle unten).
 
 **Stoppen, Neuanlage und Volumes.** `u-boot devcontainer down` stoppt den Container und
 entfernt weder ihn noch ein Volume; es braucht keinen Hilfs-Container und bindet kein
@@ -863,7 +867,7 @@ Volumes (zum Beispiel der Workspace des Sandbox-Profils) bleiben erhalten. Die H
 |---|---|
 | `2` | `u-boot devcontainer` ohne Unterbefehl; `--dry-run` oder `--diff` |
 | `10` | keine `.devcontainer/devcontainer.json` im aktuellen Verzeichnis; Pfad mit Komma, Anführungszeichen oder Zeilenumbruch; ein `${localEnv:NAME}` mit einem Namen, der kein einfacher Variablenname ist |
-| `11` | kein `docker` im `PATH` (so auch im Container-Image von `u-boot`), der Daemon antwortet nicht, die Engine ist nicht lokal (zum Beispiel `DOCKER_HOST=tcp://…`), oder ein Startscript des Containers bricht ab und meldet `failed` in seiner Statusdatei (unter `onUnavailable: fail`; das Startscript der Egress-Beschränkung auch unter `warn`, wenn der Benutzer `nobody` im Image fehlt, die nftables-Regeln sich nicht anwenden lassen oder der lokale DNS-Server nicht startet oder nicht unter diesem Benutzer läuft; siehe [Fallbacks sehen](#fallbacks-sehen)); der letzte Fall braucht die `u-boot.yaml` des Projekts, sonst lautet der Exit-Code `12`; bei `devcontainer down` gelten die ersten drei Fälle |
+| `11` | kein `docker` im `PATH` (so auch im Container-Image von `u-boot`), der Daemon antwortet nicht, die Engine ist nicht lokal (zum Beispiel `DOCKER_HOST=tcp://…`), oder ein Startscript des Containers bricht ab und meldet `failed` in seiner Statusdatei (unter `onUnavailable: fail`; das Startscript der Egress-Beschränkung auch unter `warn`, wenn der Benutzer `nobody` im Image fehlt, die nftables-Regeln sich nicht anwenden lassen oder der lokale DNS-Server nicht startet oder nicht unter diesem Benutzer läuft; siehe [Fallbacks sehen](#fallbacks-sehen)), auch wenn die Statusdatei den Abbruch aus einem früheren Start desselben Containers meldet und die Dev-Container-CLI selbst gelingt (siehe „Erneutes `up` nach einem Fehler oder Abbruch“); der letzte Fall braucht die `u-boot.yaml` des Projekts, sonst lautet der Exit-Code `12`, und ein erneutes `up` meldet einen früheren Abbruch nicht; bei `devcontainer down` gelten die ersten drei Fälle |
 | `12` | jeder andere Fehler beim Bau oder Start: der Bau des Images scheitert, ein Lebenszyklus-Befehl wie `postStartCommand` endet mit einem Fehler, die Engine sieht den Projektordner nicht; bei `down` ein Fehler von `docker stop` |
 | `14` | Lesefehler im Dateisystem |
 
@@ -880,14 +884,39 @@ nicht früher; die Ursache ist nicht untersucht. `u-boot` wartet bis zu zehn Sek
 Hilfs-Container. Es bleibt kein Hilfs-Container zurück. Der Dev-Container, den die CLI
 bis dahin angelegt hat, bleibt bestehen.
 
-**Erneutes `up` nach einem Fehler oder Abbruch.** Beobachtet in je einem Lauf (Linux `amd64`,
-Docker 29.9.1): Endete `up` mit Exit-Code 12, weil ein `postStartCommand` mit einem Fehler
-endete, lief der Devcontainer weiter, und das folgende `up` endete mit Exit-Code 0 und
-`Devcontainer started`, ohne das `postStartCommand` erneut auszuführen. Nach Strg-C während
-eines `postCreateCommand` ebenso: Der Devcontainer lief weiter, das folgende `up` endete mit
-Exit-Code 0, und das abgebrochene `postCreateCommand` lief nicht erneut. Andere Fehler (etwa ein
-gescheiterter Bau) und Exit-Code 11 aus einem Startscript sind nicht gemessen. Ein Exit-Code 0
-des zweiten `up` heißt in diesen Fällen nicht, dass die Lebenszyklus-Befehle durchgelaufen
+**Erneutes `up` nach einem Fehler oder Abbruch.** `up` urteilt nach dem Zustand des
+Containers, nicht nach dem Ablauf des einzelnen Aufrufs. Ohne `--recreate` verwendet ein
+erneutes `up` den vorhandenen Container:
+
+- **Läuft er, führt die Dev-Container-CLI das `postStartCommand` nicht erneut aus**, das
+  `postAttachCommand` aber bei jedem `up` (getestet mit der Dev-Container-CLI 0.89.0 an einem
+  Projekt, dessen beide Befehle je Lauf eine Zeile in eine Datei im Container schreiben; Linux
+  `amd64`, lokale Engine, Docker 29.9.2, ein Lauf). Nach `u-boot devcontainer down` und
+  `up` läuft das `postStartCommand` wieder, im selben Container; `up --recreate` legt ihn neu an.
+  Die Zeile von `up` sagt bei einem laufenden Container `Devcontainer already running`, im
+  JSON-Umschlag ist `alreadyRunning` `true`.
+- **Meldet die Statusdatei eines Startscripts `failed`, endet jedes erneute `up` ohne
+  `--recreate` wieder mit Exit-Code 11**, auch wenn die Dev-Container-CLI selbst gelingt. Die
+  Meldung nennt die Ursache der Fähigkeit (wie `doctor`), den Zeitpunkt der Statusdatei, dass der
+  Container läuft und dieser Aufruf das Startscript nicht ausgeführt hat, und
+  `u-boot devcontainer up --recreate`. Getestet mit dem Startscript der Egress-Beschränkung unter
+  `onUnavailable: fail` ohne die Capability `NET_ADMIN`: das erste, das zweite (mit `--json`:
+  `exitCode` 11) und ein drittes `up` endeten mit Exit-Code 11 (für die Startscripte von
+  `nestedRuntime: podman` und `docker` nur im Unit-Test mit nachgebildeter Engine). Das braucht
+  die `u-boot.yaml`: ohne sie meldet ein erneutes `up` einen früheren Abbruch nicht und endet
+  mit Exit-Code 0 (getestet: dasselbe Projekt ohne `u-boot.yaml`, erstes `up` Exit-Code 12,
+  zweites 0).
+- **Ohne Statusdatei bleibt ein Abbruch unsichtbar.** Bricht ein Lebenszyklus-Befehl ab, der keine
+  Statusdatei schreibt (ein eigenes `postStartCommand` oder `postCreateCommand`), merkt ein
+  erneutes `up` es nicht. Beobachtet in je einem Lauf (Linux `amd64`, Docker 29.9.1, `u-boot`
+  0.13.0): Endete `up` mit Exit-Code 12, weil ein `postStartCommand` mit einem Fehler endete,
+  lief der Devcontainer weiter, und das folgende `up` endete mit Exit-Code 0, ohne das
+  `postStartCommand` erneut auszuführen. Nach Strg-C während eines `postCreateCommand` ebenso:
+  Der Devcontainer lief weiter, das folgende `up` endete mit Exit-Code 0, und das abgebrochene
+  `postCreateCommand` lief nicht erneut. Andere Fehler (etwa ein gescheiterter Bau) sind nicht
+  gemessen.
+
+Ein Exit-Code 0 des zweiten `up` heißt also nicht, dass die Lebenszyklus-Befehle durchgelaufen
 sind. Abhilfe: `u-boot devcontainer up --recreate` entfernt den Container und legt ihn neu an;
 benannte Volumes bleiben erhalten.
 
@@ -2241,7 +2270,7 @@ Werten Sie in Skripten diese Codes aus:
 | `1` | allgemeiner Fehler |
 | `2` | falsche Benutzung (unbekanntes Flag, fehlendes Argument, widersprüchliche Modus-Flags, ungültiger `--timeout`, `--tail`, `--since`) |
 | `10` | fachlicher Fehler (ungültiger Name oder Wert, fehlendes Projekt, nicht unterstützter Dienst, verweigerte Bestätigung, vorhandene Datei) |
-| `11` | Umgebungsproblem (Docker nicht erreichbar, Compose-Plugin fehlt; auch `doctor` mit Fehlern; bei `devcontainer up` auch ein abgebrochenes Startscript des Containers) |
+| `11` | Umgebungsproblem (Docker nicht erreichbar, Compose-Plugin fehlt; auch `doctor` mit Fehlern; bei `devcontainer up` auch ein abgebrochenes Startscript des Containers, auch aus einem früheren Start desselben Containers) |
 | `12` | Laufzeitfehler von Compose (auch Zeitüberschreitung bei `up`); bei `devcontainer up` und `devcontainer down` ein Fehler beim Bau oder Start (Abschnitt 4.9) |
 | `14` | Dateisystem- oder Persistenzfehler |
 
@@ -2453,10 +2482,11 @@ lokale DNS-Server nicht startet oder nicht unter diesem Benutzer läuft; die Mel
    den Devcontainer neu, wenn Sie kein verschachteltes Podman brauchen.
 3. Haben Sie den Container mit `u-boot devcontainer up` gestartet, legen Sie ihn nach einer
    Änderung mit `u-boot devcontainer up --recreate` neu an. Ein erneutes `up` ohne
-   `--recreate` verwendet den bestehenden Container und führte in den beobachteten Fällen die
-   Lebenszyklus-Befehle nicht erneut aus (nach Exit-Code 12 und nach einem Abbruch, Abschnitt
-   [4.9](#49-einen-devcontainer-einrichten)); nach Exit-Code 11 aus einem Startscript ist das
-   nicht gemessen.
+   `--recreate` verwendet den bestehenden Container und führt das `postStartCommand` nicht
+   erneut aus; meldet die Statusdatei eines Startscripts `failed`, endet es wieder mit
+   Exit-Code 11. Beheben Sie die Ursache und legen Sie den Container mit `--recreate` neu an
+   (Abschnitt [4.9](#49-einen-devcontainer-einrichten), „Erneutes `up` nach einem Fehler oder
+   Abbruch“).
 4. Weitere Abhilfen stehen in Abschnitt [4.11](#411-einen-sandbox-devcontainer-für-autonome-agenten-einrichten) unter „Verschachteltes Podman".
 
 ### Wenn nichts davon hilft
@@ -2678,7 +2708,7 @@ im JSON nicht; `--quiet` ändert die JSON-Ausgabe nicht.
 | `config list` | `entries`: Liste mit `path` und `value` |
 | `config set` | `path`, `oldValue`, `newValue`, `noOp` |
 | `egress list` | `active`, `sandboxProfile`, `egressEnabled`, `cloneSource` (Wahrheitswerte) und `hosts`: Liste mit `host` und `sources` (Herkunft) |
-| `devcontainer up` | `containerId` (volle ID), `remoteUser`, `remoteWorkspaceFolder`; nicht bei einem Fehler |
+| `devcontainer up` | `containerId` (volle ID), `remoteUser`, `remoteWorkspaceFolder`, `alreadyRunning` (Wahrheitswert; `true`, wenn der Container vor dem Aufruf lief und die Dev-Container-CLI dieselbe Kennung meldet); nicht bei einem Fehler |
 | `devcontainer down` | `containerId` (leer, wenn es keinen Container gibt) und `stopped` (Wahrheitswert; `false`, wenn nichts zu stoppen war) |
 | `template list` | Liste der Vorlagen mit `name`, `description`, `version`, `supportedAddOns`, `generatedFiles`, `requiredTools`, `variables` |
 

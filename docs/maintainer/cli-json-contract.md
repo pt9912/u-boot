@@ -1257,7 +1257,8 @@ bare `u-boot devcontainer` (mit und ohne `--json`) endet mit
   "diagnostics": [ { "level": "warn", "code": "LH-FA-DEV-010",
                      "message": "this command mounts the host container-engine socket into a short-lived helper container (…)" } ],
   "exitCode": 0,
-  "data": { "containerId": "0123…cdef", "remoteUser": "vscode", "remoteWorkspaceFolder": "/workspaces/demo" } }
+  "data": { "containerId": "0123…cdef", "remoteUser": "vscode", "remoteWorkspaceFolder": "/workspaces/demo",
+            "alreadyRunning": false } }
 ```
 
 ```json
@@ -1271,6 +1272,12 @@ bare `u-boot devcontainer` (mit und ohne `--json`) endet mit
   kennt nur `warn` und `error`); sie ist immer `diagnostics[0]` und trägt den Text der Konsole.
   Ein Skript wertet den Exit-Code aus, nicht `status: ok`. `down` startet keinen
   Hilfs-Container und trägt keine Ausweisung (`status: ok`).
+- **`data.alreadyRunning` von `up`** ist `true`, wenn der Container vor dem Aufruf lief und die Dev-Container-CLI
+  dieselbe Kennung meldet; sonst `false` (auch mit `--recreate`, bei einem gestoppten oder fehlenden Container,
+  einer anderen Kennung und wenn die Abfrage vor dem Aufruf fehlschlägt). Das Feld ändert weder `status` noch
+  `exitCode` noch die Einträge von `diagnostics[]`; `up` fragt dafür einmal den Inspector vor dem Start des
+  Hilfs-Containers (`DevcontainerInspector.FindContainer`), und ein Fehler der Abfrage ist kein Fehler des Befehls
+  (`TestDevcontainerUp_AlreadyRunning`, `TestExecute_DevcontainerUp_AlreadyRunning`).
 - **Weitere Einträge von `up`:** je ein `warn` mit `file: ".devcontainer/devcontainer.json"` für einen
   Degradations-Fallback, den der Container nach dem Start meldet
   ([LH-FA-DEV-007](../../spec/lastenheft.md#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer),
@@ -1288,7 +1295,7 @@ bare `u-boot devcontainer` (mit und ohne `--json`) endet mit
   | Sentinel | Exit | `up` | `down` |
   |---|---|---|---|
   | `driven.ErrDockerUnavailable`, `driven.ErrContainerEngineNotLocal` | 11 | ✓ | ✓ |
-  | `driving.ErrDevcontainerStartScriptFailed` (Statusdatei `result=failed`) | 11 | ✓ | — |
+  | `driving.ErrDevcontainerStartScriptFailed` (Statusdatei `result=failed`, auch nach einem gelungenen Lauf der Dev-Container-CLI) | 11 | ✓ | — |
   | `driven.ErrDevcontainerRuntime` | 12 | ✓ | ✓ (`docker stop`) |
   | `driving.ErrDevcontainerConfigMissing`, `…ProjectFolderInvalid`, `…EnvNameInvalid` | 10 | ✓ | — |
   | `driving.ErrDevcontainerFileSystem` | 14 | ✓ | — |
