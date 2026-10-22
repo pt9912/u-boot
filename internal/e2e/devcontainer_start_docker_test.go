@@ -242,6 +242,25 @@ func dcWithoutNetAdmin(t *testing.T, dir string) {
 	}
 }
 
+// dcEgressFailProject generates a sandbox project whose egress start script
+// aborts: the egress restriction is on, `onUnavailable` is `fail` and the
+// container lacks the `NET_ADMIN` capability. With removeYAML the project has
+// no `u-boot.yaml`, so `up` finds no status file to read.
+func dcEgressFailProject(ctx context.Context, t *testing.T, removeYAML bool) string {
+	t.Helper()
+	dir := dcGenerateProject(ctx, t, true, map[string]string{
+		"devcontainer.sandbox.egress.enabled": "true",
+		"devcontainer.sandbox.onUnavailable":  "fail",
+	})
+	dcWithoutNetAdmin(t, dir)
+	if removeYAML {
+		if err := os.Remove(filepath.Join(dir, "u-boot.yaml")); err != nil {
+			t.Fatal(err)
+		}
+	}
+	return dir
+}
+
 // dcHandWritten writes a hand-made project: devcontainer.json (and further
 // files below .devcontainer) with the given content.
 func dcHandWritten(t *testing.T, files map[string]string) string {
@@ -725,6 +744,30 @@ func dcRun(ctx context.Context, t *testing.T, dir string, env map[string]string,
 	return stdout.String(), stderr.String(), code
 }
 
+// dcEnvelope is the part of the `--json` envelope of `devcontainer up` that
+// the tests read; `alreadyRunning` is a pointer so that its absence is seen.
+type dcEnvelope struct {
+	Status      string                                  `json:"status"`
+	ExitCode    int                                     `json:"exitCode"`
+	Diagnostics []struct{ Level, Code, Message string } `json:"diagnostics"`
+	Data        struct {
+		ContainerID    string `json:"containerId"`
+		AlreadyRunning *bool  `json:"alreadyRunning"`
+	} `json:"data"`
+}
+
+// dcUpJSON runs `u-boot devcontainer up --json` in dir and returns the decoded
+// envelope and the exit code of the process.
+func dcUpJSON(ctx context.Context, t *testing.T, dir string) (dcEnvelope, int) {
+	t.Helper()
+	stdout, stderr, code := dcRun(ctx, t, dir, nil, "devcontainer", "up", "--json")
+	var env dcEnvelope
+	if err := json.Unmarshal([]byte(stdout), &env); err != nil {
+		t.Fatalf("stdout is not one JSON envelope: %v\nstdout:\n%s\nstderr:\n%s", err, stdout, stderr)
+	}
+	return env, code
+}
+
 // LH-FA-CLI-006, LH-FA-DEV-010, ADR-0028 decision 3, ADR-0029 decision 1, S8:
 // the table "case → expected exit" of the real process. Under `--json` the
 // `exitCode` of the envelope equals the exit code of the process.
@@ -745,19 +788,7 @@ func TestDevcontainerUp_Docker_S8_FailurePicture(t *testing.T) {
 	}
 	noEnv := func(*testing.T) map[string]string { return nil }
 	egressFail := func(removeYAML bool) func(*testing.T) string {
-		return func(t *testing.T) string {
-			dir := dcGenerateProject(ctx, t, true, map[string]string{
-				"devcontainer.sandbox.egress.enabled": "true",
-				"devcontainer.sandbox.onUnavailable":  "fail",
-			})
-			dcWithoutNetAdmin(t, dir)
-			if removeYAML {
-				if err := os.Remove(filepath.Join(dir, "u-boot.yaml")); err != nil {
-					t.Fatal(err)
-				}
-			}
-			return dir
-		}
+		return func(t *testing.T) string { return dcEgressFailProject(ctx, t, removeYAML) }
 	}
 	cases := []testCase{
 		{"no docker binary on the PATH", handProject(map[string]string{"devcontainer.json": hand}),
@@ -798,6 +829,140 @@ func TestDevcontainerUp_Docker_S8_FailurePicture(t *testing.T) {
 				t.Errorf("last diagnostic = %+v, want an error containing %q", last, tc.message)
 			}
 		})
+	}
+}
+
+// LH-FA-DEV-010, ADR-0030 decision 1, follow-up to S8: a repeated `up` judges
+// by the state of the container. In the project whose egress start script
+// aborts (capability withdrawn, `onUnavailable: fail`) and that has a
+// u-boot.yaml, the first `up` ends with 11 and so do the second (the envelope
+// carries `exitCode` 11; the message says that the container runs and that the
+// call did not run the start script, and names `--recreate`) and a third in
+// text mode. Guard in the same container: without the u-boot.yaml the next `up`
+// ends with 0 and reports an already running container, so the 11 rests on the
+// configuration that finds the status file. Guard in a project without
+// u-boot.yaml from the start: the first `up` ends with 12, the second with 0.
+func TestDevcontainerUp_Docker_S8_SecondUpAfterStartScriptAbort(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), dcTestBudget)
+	defer cancel()
+	runningContainers := func(t *testing.T, dir string) int {
+		t.Helper()
+		return len(strings.Fields(dcMustDocker(t, "ps", "-q", "--filter", "label="+dcFolderLbl+"="+dir)))
+	}
+
+	t.Run("with u-boot.yaml", func(t *testing.T) {
+		dir := dcEgressFailProject(ctx, t, false)
+		first, code := dcUpJSON(ctx, t, dir)
+		if code != 11 || first.ExitCode != 11 {
+			t.Fatalf("first up: exit %d, envelope %+v, want 11", code, first)
+		}
+		if n := runningContainers(t, dir); n != 1 {
+			t.Fatalf("running containers after the first up = %d, want the one the call left behind", n)
+		}
+		second, code := dcUpJSON(ctx, t, dir)
+		if code != 11 || second.ExitCode != 11 || second.Status != "error" || len(second.Diagnostics) == 0 {
+			t.Fatalf("second up: exit %d, envelope %+v, want 11 with status error", code, second)
+		}
+		last := second.Diagnostics[len(second.Diagnostics)-1]
+		t.Logf("last diagnostic of the second up: %.700s", last.Message)
+		for _, want := range []string{
+			"the NET_ADMIN capability was not granted",
+			"the container is running and this call did not run the start script",
+			"u-boot devcontainer up --recreate",
+		} {
+			if last.Level != "error" || !strings.Contains(last.Message, want) {
+				t.Errorf("last diagnostic = %+v, want an error containing %q", last, want)
+			}
+		}
+		_, stderr, code := dcRun(ctx, t, dir, nil, "devcontainer", "up")
+		if code != 11 || !strings.Contains(stderr, "u-boot devcontainer up --recreate") {
+			t.Errorf("third up (text): exit %d, stderr:\n%s", code, stderr)
+		}
+
+		// Guard: the same container, the configuration that finds the status file gone.
+		if err := os.Remove(filepath.Join(dir, "u-boot.yaml")); err != nil {
+			t.Fatal(err)
+		}
+		without, code := dcUpJSON(ctx, t, dir)
+		if code != 0 || without.ExitCode != 0 || without.Data.AlreadyRunning == nil || !*without.Data.AlreadyRunning {
+			t.Errorf("up without u-boot.yaml: exit %d, envelope %+v, want 0 and alreadyRunning true", code, without)
+		}
+	})
+
+	t.Run("without u-boot.yaml from the start", func(t *testing.T) {
+		dir := dcEgressFailProject(ctx, t, true)
+		first, code := dcUpJSON(ctx, t, dir)
+		if code != 12 || first.ExitCode != 12 {
+			t.Fatalf("first up: exit %d, envelope %+v, want 12", code, first)
+		}
+		second, code := dcUpJSON(ctx, t, dir)
+		if code != 0 || second.ExitCode != 0 || second.Data.AlreadyRunning == nil || !*second.Data.AlreadyRunning {
+			t.Errorf("second up: exit %d, envelope %+v, want 0 and alreadyRunning true: the earlier abort is not reported without u-boot.yaml", code, second)
+		}
+	})
+}
+
+// dcCounterFile is the file in the container to which the postStartCommand of
+// the counter test appends one line per run.
+const dcCounterFile = "/tmp/u-boot-up-count"
+
+// LH-FA-DEV-010, ADR-0030 decision 2: a project whose postStartCommand appends
+// a line to a file per run. The second `up` against the running container
+// leaves the number of lines unchanged and reports `alreadyRunning: true`
+// (envelope) and "Devcontainer already running" (text); after `down` the next
+// `up` starts the same container, the line count grows by one and
+// `alreadyRunning` is false. The growth after `down` is the guard of the
+// counter: a counter that does not count would not grow.
+func TestDevcontainerUp_Docker_AlreadyRunningPostStartCounter(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), dcTestBudget)
+	defer cancel()
+	dir := dcHandWritten(t, map[string]string{
+		"devcontainer.json": `{"name": "cnt", "image": "` + dcBaseImage + `", "postStartCommand": "echo run >> ` + dcCounterFile + `"}`,
+	})
+	lines := func(id string) int {
+		t.Helper()
+		out, code := dcExec(ctx, t, id, "vscode", "wc -l < "+dcCounterFile)
+		n, err := strconv.Atoi(strings.TrimSpace(out))
+		if code != 0 || err != nil {
+			t.Fatalf("lines of %s: exit %d, output %q (%v)", dcCounterFile, code, out, err)
+		}
+		return n
+	}
+	up := func(step string, wantAlready bool) string {
+		t.Helper()
+		env, code := dcUpJSON(ctx, t, dir)
+		if code != 0 || env.ExitCode != 0 || env.Data.AlreadyRunning == nil || *env.Data.AlreadyRunning != wantAlready {
+			t.Fatalf("%s: exit %d, envelope %+v, want 0 and alreadyRunning %v", step, code, env, wantAlready)
+		}
+		return env.Data.ContainerID
+	}
+
+	id := up("first up", false)
+	if n := lines(id); n != 1 {
+		t.Fatalf("lines after the first up = %d, want 1", n)
+	}
+	if again := up("second up", true); again != id {
+		t.Errorf("second up reports container %s, want the same %s", again, id)
+	}
+	if n := lines(id); n != 1 {
+		t.Errorf("lines after the second up = %d, want 1: the postStartCommand ran against a running container", n)
+	}
+	stdout, _, code := dcRun(ctx, t, dir, nil, "devcontainer", "up")
+	if want := "Devcontainer already running: container " + id[:12] + ","; code != 0 || !strings.Contains(stdout, want) {
+		t.Errorf("third up (text): exit %d, stdout:\n%s\nwant a line with %q", code, stdout, want)
+	}
+	if n := lines(id); n != 1 {
+		t.Errorf("lines after the third up = %d, want 1", n)
+	}
+
+	if _, stderr, code := dcRun(ctx, t, dir, nil, "devcontainer", "down"); code != 0 {
+		t.Fatalf("down: exit %d, stderr:\n%s", code, stderr)
+	}
+	if restarted := up("up after down", false); restarted != id {
+		t.Errorf("up after down reports container %s, want the same %s", restarted, id)
+	}
+	if n := lines(id); n != 2 {
+		t.Errorf("lines after down and up = %d, want 2: the postStartCommand runs again after a stop", n)
 	}
 }
 
