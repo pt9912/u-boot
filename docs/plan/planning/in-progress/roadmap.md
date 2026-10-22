@@ -19,7 +19,7 @@ stehen in der Welle-Datei, nicht hier.
 
 Offen: [`welle-devcontainer-shell-und-zweites-up`](../welle-devcontainer-shell-und-zweites-up.md) (Shell im Devcontainer ohne Editor, `u-boot devcontainer shell`, und erneutes `up` nach dem Zustand des Containers; sechs Slices, der Release-Cut zuletzt; Release `v0.14.0`).
 
-Nichts in Arbeit.
+In Arbeit: [`slice-v1-devcontainer-shell-fundament`](slice-v1-devcontainer-shell-fundament.md) (dritter Slice der Welle `v0.14.0`: Port-Methode `DevcontainerLauncher.Shell` und `docker exec` des Hosts mit Probe der Shell, Docker-Tests am Adapter mit dem Terminal-Pfad unter `script`; kein Befehl).
 
 ## Nächste Wellen
 
