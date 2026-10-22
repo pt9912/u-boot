@@ -25,6 +25,7 @@ const (
 	clientEngineDownPrefix  = "Cannot connect to the Docker daemon at "
 	clientNoTerminalText    = "cannot attach stdin to a TTY-enabled container because stdin is not a terminal"
 	clientOCIFailurePrefix  = "OCI runtime exec failed: "
+	clientUserMissingText   = "unable to find user "
 )
 
 // Shell implements [driven.DevcontainerLauncher.Shell].
@@ -159,7 +160,8 @@ func (l *Launcher) runSession(ctx context.Context, shell string, envNames []stri
 // The exit status of the shell cannot tell the two apart (status 1 is also
 // the status of a shell whose last command failed); the message of the
 // client can, where the client is the only writer to the stream
-// ([Launcher.clientMessageOnStderr], [ociFailureOnStdout]).
+// ([Launcher.clientMessageOnStderr], [ociFailureOnStdout],
+// [userMissingOnStdout]).
 func (l *Launcher) clientErrorBeforeSession(ctx context.Context, opts driven.DevcontainerShellOptions, exit int, stdout, stderr *headBuffer) (string, bool) {
 	if exit == 0 {
 		return "", false
@@ -167,7 +169,10 @@ func (l *Launcher) clientErrorBeforeSession(ctx context.Context, opts driven.Dev
 	if text, ok := l.clientMessageOnStderr(ctx, opts, stdout, stderr); ok {
 		return text, true
 	}
-	return ociFailureOnStdout(opts, exit, stdout, stderr)
+	if text, ok := ociFailureOnStdout(opts, exit, stdout, stderr); ok {
+		return text, true
+	}
+	return userMissingOnStdout(opts, exit, stdout, stderr)
 }
 
 // clientMessageOnStderr recognises the messages the client prints on
@@ -188,7 +193,7 @@ func (l *Launcher) clientMessageOnStderr(ctx context.Context, opts driven.Devcon
 	first := stderr.firstLine()
 	switch {
 	case strings.HasPrefix(first, clientDaemonErrorPrefix):
-		named := strings.Contains(first, opts.ContainerID) || strings.Contains(first, "unable to find user "+opts.User)
+		named := strings.Contains(first, opts.ContainerID) || strings.Contains(first, clientUserMissingText+opts.User)
 		return first, named
 	case strings.HasPrefix(first, clientEngineDownPrefix):
 		return first, l.engineUnreachable(ctx)
@@ -205,6 +210,20 @@ func (l *Launcher) clientMessageOnStderr(ctx context.Context, opts driven.Devcon
 func ociFailureOnStdout(opts driven.DevcontainerShellOptions, exit int, stdout, stderr *headBuffer) (string, bool) {
 	line := stdout.firstLine()
 	found := !opts.Terminal && (exit == 126 || exit == 127) && stderr.total == 0 && strings.HasPrefix(line, clientOCIFailurePrefix)
+	return line, found
+}
+
+// userMissingOnStdout recognises the form in which Docker 28.0.4 reports a
+// user that does not exist in the container: the line `unable to find user
+// <user>: …` on the stream of the session with status 126 and no prefix of
+// the daemon; Docker 29.9.2 prints it with the prefix on standard error
+// ([Launcher.clientMessageOnStderr]). Without a terminal the line is the
+// whole output of the client; with a terminal the client owns standard output
+// and the launcher does not see it.
+func userMissingOnStdout(opts driven.DevcontainerShellOptions, exit int, stdout, stderr *headBuffer) (string, bool) {
+	line := stdout.firstLine()
+	found := !opts.Terminal && exit == 126 && stderr.total == 0 && stdout.singleLine() &&
+		strings.HasPrefix(line, clientUserMissingText+opts.User)
 	return line, found
 }
 
@@ -239,6 +258,21 @@ func (b *headBuffer) firstLine() string {
 		}
 	}
 	return ""
+}
+
+// singleLine reports whether the whole stream is one non-empty line: nothing
+// was dropped from the head, and no second non-empty line follows.
+func (b *headBuffer) singleLine() bool {
+	if b.total > len(b.data) {
+		return false
+	}
+	lines := 0
+	for _, line := range strings.Split(string(b.data), "\n") {
+		if strings.TrimSpace(line) != "" {
+			lines++
+		}
+	}
+	return lines == 1
 }
 
 // teeWriter records what passes in head and forwards it to dst; a nil dst

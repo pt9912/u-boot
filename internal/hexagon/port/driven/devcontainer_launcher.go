@@ -205,12 +205,16 @@ type DevcontainerLauncher interface {
 	// not reach the caller. The launcher recognises a failure of the
 	// `docker` client before the session begins by the message of the
 	// client and returns it as [ErrDevcontainerRuntime]: the container is
-	// not running or does not exist, the user does not exist after the
-	// probe, the engine does not answer, a terminal was requested on
-	// standard input that is none; without Terminal also an `OCI runtime
-	// exec failed` of the client (with Terminal the client owns Stdout, so
-	// the launcher does not see the line). Any other message of the client
-	// is part of the session.
+	// not running or does not exist, the engine does not answer, a terminal
+	// was requested on standard input that is none, and, on the engines
+	// measured (28.0.4 and 29.9.2, client 29.9.2), the user does not exist
+	// after the probe. The engines differ in the form of that message:
+	// 29.9.2 puts it on the standard error of the client, 28.0.4 on the
+	// stream of the session with status 126. Without Terminal the launcher
+	// also recognises an `OCI runtime exec failed` of the client and the
+	// form of 28.0.4; with Terminal the client owns Stdout, so the launcher
+	// does not see lines on that stream. Any other message of the client is
+	// part of the session.
 	//
 	// A cancelled context ends a session without Terminal (the launcher
 	// interrupts the client) with the context error. With Terminal the

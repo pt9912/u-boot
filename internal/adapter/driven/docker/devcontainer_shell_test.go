@@ -29,6 +29,9 @@ const (
 	msgEngineDown = "Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?"
 	msgNoTerminal = "cannot attach stdin to a TTY-enabled container because stdin is not a terminal"
 	msgOCI        = `OCI runtime exec failed: exec failed: unable to start container process: chdir to cwd ("/workspaces/project") set in config.json failed: no such file or directory`
+	// Engine 28.0.4 reports a missing user on the stream of the session, with
+	// status 126 and without the prefix of the daemon.
+	msgUserGoneOnStdout = "unable to find user vscode: no matching entries in passwd file"
 	// A `docker` command inside the session prints this about another container.
 	msgOtherContainer = "Error response from daemon: No such container: some-other-container"
 )
@@ -251,6 +254,12 @@ func TestLauncher_Shell_SessionEndIsNoError(t *testing.T) {
 		{name: "status 127, the OCI line and other text on standard error", exit: "127", stdout: msgOCI + "\n", stderr: "warning\n"},
 		{name: "status 127, other text on standard output", exit: "127", stdout: "bash: foo: command not found\n"},
 		{name: "status 1, the OCI line as the only output", exit: "1", stdout: msgOCI + "\n"},
+		{name: "status 126, the missing-user line of another user", exit: "126", stdout: "unable to find user other: no matching entries in passwd file\r\n"},
+		{name: "status 1, the missing-user line as the only output", exit: "1", stdout: msgUserGoneOnStdout + "\r\n"},
+		{name: "status 126, the missing-user line and text on standard error", exit: "126", stdout: msgUserGoneOnStdout + "\r\n", stderr: "warning\n"},
+		{name: "status 126, other output before the missing-user line", exit: "126", stdout: "output\n" + msgUserGoneOnStdout + "\n"},
+		{name: "status 126, other output after the missing-user line", exit: "126", stdout: msgUserGoneOnStdout + "\nmore output\n"},
+		{name: "terminal, status 126, the missing-user line", exit: "126", stdout: msgUserGoneOnStdout + "\r\n", edit: terminal},
 		{name: "terminal, status 127, the OCI line", exit: "127", stdout: msgOCI + "\n", edit: terminal},
 		{name: "status 1, the terminal message without a terminal", exit: "1", stderr: msgNoTerminal + "\n"},
 	}
@@ -300,6 +309,7 @@ func TestLauncher_Shell_ClientErrorBeforeSessionIsRuntimeFailure(t *testing.T) {
 		{name: "the user does not exist after the probe", exit: "1", stderr: msgUserGone + "\n"},
 		{name: "the engine does not answer after the probe", exit: "1", stderr: msgEngineDown + "\n", flags: []string{"daemon-down-late"}},
 		{name: "the workspace does not exist after the probe", exit: "127", stdout: msgOCI + "\n"},
+		{name: "the user does not exist after the probe (engine 28.0.4: status 126 on standard output)", exit: "126", stdout: msgUserGoneOnStdout + "\r\n"},
 		{name: "terminal, the container is not running", exit: "1", stderr: msgNotRunning + "\n", edit: terminal},
 		{name: "terminal, standard input is no terminal", exit: "1", stderr: msgNoTerminal + "\n", edit: terminal},
 	}
