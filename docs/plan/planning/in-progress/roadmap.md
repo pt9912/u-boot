@@ -19,7 +19,7 @@ stehen in der Welle-Datei, nicht hier.
 
 Offen: [`welle-devcontainer-shell-und-zweites-up`](../welle-devcontainer-shell-und-zweites-up.md) (Shell im Devcontainer ohne Editor, `u-boot devcontainer shell`, und erneutes `up` nach dem Zustand des Containers; sechs Slices, der Release-Cut zuletzt; Release `v0.14.0`).
 
-In Arbeit: [`slice-v1-cli-devcontainer-shell`](slice-v1-cli-devcontainer-shell.md) (vierter Slice der Welle `v0.14.0`, wieder offen: `integration-docker` war auf dem Push-Tip der Closure rot, CI-Fix-Runde).
+In Arbeit: [`slice-v1-cli-devcontainer-shell`](../done/slice-v1-cli-devcontainer-shell.md) (vierter Slice der Welle `v0.14.0`, wieder offen: `integration-docker` war auf dem Push-Tip der Closure rot, CI-Fix-Runde).
 
 ## Nächste Wellen
 

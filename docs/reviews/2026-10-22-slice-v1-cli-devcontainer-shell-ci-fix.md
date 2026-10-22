@@ -2,7 +2,7 @@
 
 * Rolle: Reviewer (frischer Kontext, nicht der Autor)
 * Gegenstand: Diff `d537ae24..7d63e04f` (Move, Roadmap, Test-Fix `36b30fcd`, Plan-Nachtrag), Plan
-  [`slice-v1-cli-devcontainer-shell`](../plan/planning/in-progress/slice-v1-cli-devcontainer-shell.md) §3 *CI-Fix-Runde* und §7
+  [`slice-v1-cli-devcontainer-shell`](../plan/planning/done/slice-v1-cli-devcontainer-shell.md) §3 *CI-Fix-Runde* und §7
 * Geprüft gegen: [`ADR-0031`](../plan/adr/0031-devcontainer-shell-ohne-editor.md),
   [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), AGENTS.md §3.7, §3.9, §3.10.
   Nicht geprüft gegen die DoD (Verifier).
@@ -24,7 +24,7 @@ Keine.
 
 **L-1 · Kein Tabellenabgleich nach der CI-Fix-Runde**
 * quelle: AGENTS.md §3.10 (Abgleich gegen `git diff --stat` nach jeder späteren Änderung)
-* pfad: [`docs/plan/planning/in-progress/slice-v1-cli-devcontainer-shell.md`](../plan/planning/in-progress/slice-v1-cli-devcontainer-shell.md) · „CI-Fix-Runde (Implementer, 2026-10-22)“
+* pfad: [`docs/plan/planning/done/slice-v1-cli-devcontainer-shell.md`](../plan/planning/done/slice-v1-cli-devcontainer-shell.md) · „CI-Fix-Runde (Implementer, 2026-10-22)“
 * klasse: tabellenabgleich-nach-fix-runde-fehlt
 * befund: Der Nachtrag nennt Befund, Ursache, Fix, Mutationen und Engine-Matrix, aber keinen Abgleich der Plan-Tabelle gegen den
   Diff der Runde. Der Abgleich weiter oben („66 Namen“) gilt für den Stand vor Move und Fix.

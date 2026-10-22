@@ -1,4 +1,4 @@
-**Vorgang:** [`slice-v1-cli-devcontainer-shell`](../../../../in-progress/slice-v1-cli-devcontainer-shell.md)
+**Vorgang:** [`slice-v1-cli-devcontainer-shell`](../../../../done/slice-v1-cli-devcontainer-shell.md)
 **Fund:** Selbstauskunft des Implementers, übernommen aus dem Auftrag des Hauptagenten für die Closure: Bei der Rücksetzung einer Mutation per `git checkout` ging eine nicht committete Änderung verloren. Belegt ist das Verfahren: Die Mutationstabelle in §3 des Slice schließt mit „danach `git checkout -- internal cmd`, `git diff -- internal cmd` leer“, und der Verifier setzte seine Mutationen ebenso zurück, nachdem er den Arbeitsbaum als sauber festgestellt hatte ([Verification-Report](../../../../../../reviews/2026-10-22-slice-v1-cli-devcontainer-shell-verify.md), Abschnitt *Mutationen*). Was verloren ging und wie es wiederhergestellt wurde, steht in keiner Datei; der Endstand des Diffs ist vollständig (Reviewer und Verifier lasen ihn gegen die Beleg-Tabelle).
 
 **Beleg-Qualität:** Die Quelle ist die Aussage des Laufs; der Mechanismus folgt aus dem Verfahren und ist an der Mutationstabelle lesbar, der Vorfall nicht. Erster Vorgang.
