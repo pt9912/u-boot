@@ -372,6 +372,47 @@ func TestLauncher_Shell_TerminalSessionIgnoresTheContext(t *testing.T) {
 	}
 }
 
+// ADR-0031 Entscheidung 4: with a terminal the client gets the standard input
+// and output of the caller as they are, because it looks for the terminal on
+// them; without a terminal the launcher records standard output on its way
+// (guard: the same probe sees a pipe there).
+func TestLauncher_Shell_TerminalHandsTheStandardStreamsToTheClient(t *testing.T) {
+	dir := t.TempDir()
+	stdin, err := os.Create(filepath.Join(dir, "stdin"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer stdin.Close()
+	stdout, err := os.Create(filepath.Join(dir, "stdout"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer stdout.Close()
+	for _, terminal := range []bool{true, false} {
+		f := newFakeDocker(t)
+		f.flag(t, "session-record-fds")
+		err := f.launcher(nil).Shell(context.Background(), shellOptions(func(o *driven.DevcontainerShellOptions) {
+			o.Terminal = terminal
+			o.Stdin, o.Stdout = stdin, stdout
+		}))
+		if err != nil {
+			t.Fatalf("Terminal=%v: Shell: %v", terminal, err)
+		}
+		fd0, _ := os.ReadFile(filepath.Join(f.dir, "fd0.link"))
+		fd1, _ := os.ReadFile(filepath.Join(f.dir, "fd1.link"))
+		gotIn, gotOut := strings.TrimSpace(string(fd0)), strings.TrimSpace(string(fd1))
+		if gotIn != stdin.Name() {
+			t.Errorf("Terminal=%v: standard input of the client = %q, want the file of the caller %q", terminal, gotIn, stdin.Name())
+		}
+		if terminal && gotOut != stdout.Name() {
+			t.Errorf("Terminal: standard output of the client = %q, want the file of the caller %q", gotOut, stdout.Name())
+		}
+		if !terminal && !strings.HasPrefix(gotOut, "pipe:") {
+			t.Errorf("no Terminal: standard output of the client = %q, want a pipe; the probe cannot tell the two apart", gotOut)
+		}
+	}
+}
+
 // waitForSession blocks until the fake docker has seen the session.
 func waitForSession(t *testing.T, f *fakeDocker) {
 	t.Helper()

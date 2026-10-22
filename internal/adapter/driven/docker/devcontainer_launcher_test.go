@@ -57,6 +57,7 @@ stop) [ -e "$D/stop-fail" ] && { echo 'stop-boom' >&2; exit 1; }; exit 0 ;;
 exec)
   case " $* " in
   *" -i "*)
+    [ -e "$D/session-record-fds" ] && { l0=$(readlink /proc/$$/fd/0); l1=$(readlink /proc/$$/fd/1); echo "$l0" > "$D/fd0.link"; echo "$l1" > "$D/fd1.link"; }
     [ -e "$D/session-copy-stdin" ] && cat > "$D/stdin.copy"
     [ -e "$D/session-stdout" ] && cat "$D/session-stdout"
     [ -e "$D/session-stderr" ] && cat "$D/session-stderr" >&2
