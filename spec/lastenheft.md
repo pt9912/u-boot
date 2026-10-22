@@ -6,7 +6,7 @@
 | Kurzbeschreibung | CLI-Tool zum Bootstrapping reproduzierbarer Entwicklungsumgebungen |
 | Zielplattform    | Linux, Docker, VS Code Dev Containers                              |
 | Hauptnutzer      | Softwareentwickler, DevOps-Engineers, technische Teams             |
-| Version          | 0.20.0                                                             |
+| Version          | 0.21.0                                                             |
 | Status           | Accepted                                                           |
 | Datum            | 2026-05-21 (Erstfassung; Änderungen siehe §16 Historie)            |
 
@@ -445,15 +445,15 @@ Das erzeugte Ergebnis im Sandbox-Profil muss:
 
 - einen nicht-root Benutzer verwenden ([`LH-FA-DEV-004`](#lh-fa-dev-004--benutzerrechte));
 - das Host-Arbeitsverzeichnis nicht per Bind-Mount einbinden: Der Workspace liegt in einem benannten Volume, das Repository wird im Container geklont (Quelle: `devcontainer.sandbox.repository`, sonst `origin`; URLs mit Zugangsdaten oder unzulässigen Zeichen sind ein fachlicher Fehler, Exit-Code `10`; ohne Quelle entfällt der Clone-Schritt mit Warnung);
-- keinen Container-Runtime-Socket des Hosts einbinden (der kurzlebige Hilfs-Container von `u-boot devcontainer up` und `u-boot devcontainer shell` gehört nicht zum erzeugten Ergebnis, siehe [`LH-FA-DEV-010`](#lh-fa-dev-010--devcontainer-ohne-editor-starten));
-- kein `--privileged` und keine zusätzlichen Capabilities setzen, sofern nicht durch [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) oder [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion) ausdrücklich verlangt;
+- keinen Container-Runtime-Socket des Hosts einbinden (der kurzlebige Hilfs-Container von `u-boot devcontainer up` und `u-boot devcontainer shell` gehört nicht zum erzeugten Ergebnis, siehe [`LH-FA-DEV-010`](#lh-fa-dev-010--devcontainer-ohne-editor-starten)); ein eingebautes Devcontainer-Feature, das den Socket einbindet (`docker-cli`), ist im Sandbox-Profil ein fachlicher Fehler (Exit-Code `10`);
+- kein `--privileged` und keine zusätzlichen Capabilities setzen, sofern nicht durch [`LH-FA-DEV-007`](#lh-fa-dev-007--container-runtime-im-sandbox-devcontainer) oder [`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion) ausdrücklich verlangt oder von einem aktivierten eingebauten Feature mitgebracht und in der Befehlsausgabe ausgewiesen (`go`: `SYS_PTRACE`, `seccomp=unconfined`);
 - keine Host-Dateien mit Geheimnissen (z. B. `~/.ssh`, `~/.aws`, Credential-Stores) einbinden;
 - jede Sicherheitslockerung (Capabilities, Seccomp-/AppArmor-Anpassungen, zusätzliche Devices) in der Befehlsausgabe ausweisen;
 - einen im Container aktivierten Login-Dienst (Passwort-Login) in der Befehlsausgabe ausweisen.
 
 Nicht-Ziele: `u-boot` startet keinen Agenten und setzt keinen Berechtigungsmodus des Agenten.
 
-Für Devcontainer-Features oder externe Skripte, die das Profil einbindet, gelten [`LH-FA-DEV-003`](#lh-fa-dev-003--devcontainer-features) und [`LH-NFA-SEC-004`](#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) unverändert; das Profil gibt keine externe Quelle implizit frei.
+Für Devcontainer-Features oder externe Skripte, die das Profil einbindet, gelten [`LH-FA-DEV-003`](#lh-fa-dev-003--devcontainer-features) und [`LH-NFA-SEC-004`](#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) unverändert; das Profil gibt keine externe Quelle implizit frei. Für ein Feature aus einer externen Quelle sagt das Profil die Eigenschaften oben nicht zu, denn `u-boot` liest dessen Metadaten nicht; die Befehlsausgabe weist das je aktiviertem Feature aus.
 
 ### LH-FA-DEV-007 – Container-Runtime im Sandbox-Devcontainer
 
@@ -1590,6 +1590,7 @@ das Lastenheft verweist nie abwärts auf Planung
 | 0.18.0 | 2026-10-20 | [`LH-FA-DEV-010`](#lh-fa-dev-010--devcontainer-ohne-editor-starten): neue Anforderung (Devcontainer ohne Editor starten und stoppen, Hilfs-Container mit Socket-Ausweisung, Zusage-Menge Linux-Host `amd64`); [`LH-SA-CLI-002`](#lh-sa-cli-002--vorgesehene-befehle): zwei Zeilen; [`LH-FA-CLI-005`](#lh-fa-cli-005--verbosity-und-logging): `--quiet` für die neuen Befehle und die Socket-Ausweisung als Teil von Ausnahme 1; [`LH-FA-CLI-007`](#lh-fa-cli-007--dry-run): Wert `devcontainer`; [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil): Abgrenzung des Hilfs-Containers. | Vereinbarung mit dem Projektinhaber |
 | 0.19.0 | 2026-10-21 | [`LH-NFA-USE-004`](#lh-nfa-use-004--maschinenlesbare-ausgabe): `subcommand` ist auch bei `egress` und `devcontainer` verpflichtend; die Pflicht für die vier gruppierten Befehle (`template`, `config`, `egress`, `devcontainer`) steht im Feld `subcommand` des Minimalkontrakts. | Vereinbarung mit dem Projektinhaber |
 | 0.20.0 | 2026-10-21 | [`LH-FA-DEV-010`](#lh-fa-dev-010--devcontainer-ohne-editor-starten): Exit-Code `11` auch, wenn die Statusdatei den Abbruch aus einem früheren Start desselben Containers meldet (ohne `u-boot.yaml` meldet ein erneutes `up` einen früheren Abbruch nicht); neuer Befehl `u-boot devcontainer shell` (Start wie `up`, danach eine interaktive Shell im Container ohne Hilfs-Container, ohne vom Befehl eingebundenen Socket des Hosts, mit den Umgebungsvariablen aus `${localEnv:<NAME>}`, Exit-Code `0` nach Beginn der Shell); Socket bei `shell` nur für die Dauer des Starts; [`LH-SA-CLI-002`](#lh-sa-cli-002--vorgesehene-befehle): eine Zeile; [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil): Abgrenzung des Hilfs-Containers auch für `shell`; [`LH-FA-CLI-005`](#lh-fa-cli-005--verbosity-und-logging): Socket-Ausweisung von `shell` als Teil von Ausnahme 1 und `devcontainer shell` unter den ändernden Befehlen. | Vereinbarung mit dem Projektinhaber |
+| 0.21.0 | 2026-10-22 | [`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil): ein eingebautes Devcontainer-Feature, das den Socket einbindet (`docker-cli`), ist im Sandbox-Profil ein fachlicher Fehler (Exit-Code `10`); Lockerungen, die ein aktiviertes eingebautes Feature mitbringt (`go`), sind erlaubt, wenn die Befehlsausgabe sie ausweist; für ein Feature aus einer externen Quelle sagt das Profil die Eigenschaften nicht zu, die Befehlsausgabe weist das je aktiviertem Feature aus. | Vereinbarung mit dem Projektinhaber |
 
 **Status-Wechsel `Entwurf` → `Accepted` (2026-07-25).** Bis dahin trug dieses
 Dokument formal `Entwurf`, obwohl seine IDs bereits als bindend behandelt
