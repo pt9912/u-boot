@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** [`SPEC-049`](../../../../spec/spezifikation.md#spec-049--devcontainer-ohne-editor-starten-und-stoppen-u-boot-devcontainer-up-und-down-aufruf-vorab-prüfung-umgebung-ausgabe-und-exit-codes), [`SPEC-045`](../../../../spec/spezifikation.md#spec-045--statusdateien-der-startscripte-und-ihre-ausweisung), [`SPEC-048`](../../../../spec/spezifikation.md#spec-048--startscript-der-egress-restriktion-upstream-dns-abbruch-und-wiederholungslauf), [`SPEC-043`](../../../../spec/spezifikation.md#spec-043--verbosity-pegelabbildung-rangfolge-und-wirkung-von---quiet), [`SPEC-024`](../../../../spec/spezifikation.md#spec-024--beispielaufrufe-zu-den-anforderungen) (Beispielaufrufe, Auftrag A3 des CR) und der Absatz unter dem Schema von [`SPEC-001`](../../../../spec/spezifikation.md#spec-001--json-schema-der-vorschau-ausgabe---dry-run---json) (Auftrag A2 des CR; das Schema selbst gelesen und voraussichtlich unverändert); `architecture.md` §2.2, §2.3, §2.4, §2.5, §2.6 (§2.3 und §2.5 sind Funde der Vorab-Suche, nicht im *Schärft* der ADRs). Der Verweis zeigt aufwärts: Spezifikation und Sicht nennen diesen Slice nie.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (Rolle Implementer, Start 2026-10-22); Freigaben: Projektinhaber.
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-21.
 
@@ -119,7 +119,7 @@ Die Tabelle nennt die Dateien, die der Diff voraussichtlich berührt; sie wird n
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-cr-devcontainer-shell-und-zweites-up`](../done/slice-cr-devcontainer-shell-und-zweites-up.md), [`slice-v1-devcontainer-up-failed-nach-zustand`](../done/slice-v1-devcontainer-up-failed-nach-zustand.md), [`slice-v1-devcontainer-shell-fundament`](../done/slice-v1-devcontainer-shell-fundament.md) und [`slice-v1-cli-devcontainer-shell`](../done/slice-v1-cli-devcontainer-shell.md) liegen in `done/`; kein anderer Slice in `in-progress/` (WIP-Limit 1).
+**Start** (`open` → `in-progress`, ggf. über `next`): `Verantwortlich:` gesetzt; [`slice-cr-devcontainer-shell-und-zweites-up`](../done/slice-cr-devcontainer-shell-und-zweites-up.md), [`slice-v1-devcontainer-up-failed-nach-zustand`](../done/slice-v1-devcontainer-up-failed-nach-zustand.md), [`slice-v1-devcontainer-shell-fundament`](../done/slice-v1-devcontainer-shell-fundament.md) und [`slice-v1-cli-devcontainer-shell`](../done/slice-v1-cli-devcontainer-shell.md) liegen in `done/`; kein anderer Slice in `in-progress/` (WIP-Limit 1). Erfüllt am 2026-10-22: `Verantwortlich:` gesetzt; die vier Slices liegen in `done/` (`ls`); `in-progress/` trägt `README.md`, `carveouts.md` und `roadmap.md`, keinen Slice; `origin/main` und `HEAD` sind `0d653453`, der Arbeitsbaum ist sauber. Der Projektinhaber hat angeordnet, ohne Rückfrage weiterzumachen: Zweifelsfälle entscheidet der Implementer nach Plan, ADR und Lastenheft; die Begründung steht in §3.
 
 **Rückführungen — vorab benennen, nicht erst im Nachhinein begründen:**
 
