@@ -47,6 +47,9 @@ func (f *fakeLauncher) Stop(_ context.Context, containerID string) error {
 	return f.stopErr
 }
 
+// Shell satisfies the port; the service does not open sessions.
+func (f *fakeLauncher) Shell(context.Context, driven.DevcontainerShellOptions) error { return nil }
+
 // devcontainerSvc builds the service on a fake filesystem that holds
 // `.devcontainer/devcontainer.json` (when config is not empty) and u-boot.yaml
 // (when ubootYAML is not empty).

@@ -36,7 +36,10 @@ const fakeDockerScript = `#!/bin/sh
 D='%DIR%'
 { for a in "$@"; do printf '%s\n' "$a"; done; echo '--'; } >> "$D/argv.log"
 case "$1" in
-version) [ -e "$D/daemon-down" ] && exit 1; echo 29.0.0; exit 0 ;;
+version)
+  [ -e "$D/daemon-down" ] && exit 1
+  [ -e "$D/daemon-down-late" ] && grep -q -x -e '-i' "$D/argv.log" && exit 1
+  echo 29.0.0; exit 0 ;;
 context) [ -e "$D/context-fail" ] && exit 1; cat "$D/context-host"; exit 0 ;;
 image) [ -e "$D/image-missing" ] && exit 1; exit 0 ;;
 build) cat > "$D/context.tar"; [ -e "$D/build-fail" ] && { echo 'build-boom' >&2; exit 1; }; exit 0 ;;
@@ -51,6 +54,23 @@ rm)
   [ -e "$D/rm-nosuch" ] && { echo 'Error response from daemon: No such container: x' >&2; exit 1; }
   exit 0 ;;
 stop) [ -e "$D/stop-fail" ] && { echo 'stop-boom' >&2; exit 1; }; exit 0 ;;
+exec)
+  case " $* " in
+  *" -i "*)
+    [ -e "$D/session-copy-stdin" ] && cat > "$D/stdin.copy"
+    [ -e "$D/session-stdout" ] && cat "$D/session-stdout"
+    [ -e "$D/session-stderr" ] && cat "$D/session-stderr" >&2
+    [ -e "$D/session-hang" ] && exec sleep 30
+    [ -e "$D/session-delay" ] && { sleep 1; echo session-done; }
+    [ -e "$D/session-exit" ] && exit "$(cat "$D/session-exit")"
+    exit 0 ;;
+  esac
+  n=$#; i=0
+  for a in "$@"; do i=$((i+1)); [ "$i" -eq $((n-2)) ] && shell=$a; done
+  [ -e "$D/user-missing" ] && { echo 'Error response from daemon: unable to find user nosuchuser: no matching entries in passwd file' >&2; exit 1; }
+  [ -e "$D/workspace-missing" ] && { echo 'OCI runtime exec failed: exec failed: unable to start container process: chdir to cwd ("/nonexistent") set in config.json failed: no such file or directory'; exit 127; }
+  [ -e "$D/$shell-missing" ] && { echo "OCI runtime exec failed: exec failed: unable to start container process: exec: \"$shell\": executable file not found in \$PATH"; exit 127; }
+  exit 0 ;;
 esac
 exit 0
 `
@@ -281,7 +301,8 @@ func TestLauncher_Preflight(t *testing.T) {
 			l := f.launcher(tc.env)
 			_, upErr := l.Up(context.Background(), upOptions())
 			stopErr := l.Stop(context.Background(), strings.Repeat("a", 12))
-			for name, err := range map[string]error{"Up": upErr, "Stop": stopErr} {
+			shellErr := l.Shell(context.Background(), shellOptions(nil))
+			for name, err := range map[string]error{"Up": upErr, "Stop": stopErr, "Shell": shellErr} {
 				if !errors.Is(err, tc.want) {
 					t.Errorf("%s error = %v, want %v", name, err, tc.want)
 				}
@@ -289,7 +310,7 @@ func TestLauncher_Preflight(t *testing.T) {
 					t.Errorf("%s error %v is classified as runtime failure", name, err)
 				}
 			}
-			for _, verb := range []string{"build", "run", "stop"} {
+			for _, verb := range []string{"build", "run", "stop", "exec"} {
 				if f.call(t, verb) != nil {
 					t.Errorf("docker %s ran although the environment check failed", verb)
 				}
@@ -305,6 +326,9 @@ func TestLauncher_Preflight_MissingBinary(t *testing.T) {
 	}
 	if err := l.Stop(context.Background(), strings.Repeat("a", 12)); !errors.Is(err, driven.ErrDockerUnavailable) {
 		t.Errorf("Stop error = %v, want ErrDockerUnavailable", err)
+	}
+	if err := l.Shell(context.Background(), shellOptions(nil)); !errors.Is(err, driven.ErrDockerUnavailable) {
+		t.Errorf("Shell error = %v, want ErrDockerUnavailable", err)
 	}
 }
 

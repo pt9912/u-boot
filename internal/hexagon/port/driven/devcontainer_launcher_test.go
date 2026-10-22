@@ -37,3 +37,33 @@ func TestValidateDevcontainerEnvName(t *testing.T) {
 		}
 	}
 }
+
+// ADR-0031 Entscheidung 1: the user of the session is one argument of
+// `docker exec -u`.
+func TestValidateDevcontainerShellUser(t *testing.T) {
+	for _, ok := range []string{"vscode", "root", "1000", "vscode:vscode", "1000:1000", "a b"} {
+		if err := driven.ValidateDevcontainerShellUser(ok); err != nil {
+			t.Errorf("user %q rejected: %v", ok, err)
+		}
+	}
+	for _, bad := range []string{"", "-u", "--privileged", "a\nb", "a\rb", "a\x00b"} {
+		if err := driven.ValidateDevcontainerShellUser(bad); err == nil {
+			t.Errorf("user %q accepted", bad)
+		}
+	}
+}
+
+// ADR-0031 Entscheidung 1: the workspace of the session is one argument of
+// `docker exec -w`.
+func TestValidateDevcontainerWorkspace(t *testing.T) {
+	for _, ok := range []string{"/", "/workspaces/project", "/workspaces/with space", "/w/a,b", `/w/a"b`} {
+		if err := driven.ValidateDevcontainerWorkspace(ok); err != nil {
+			t.Errorf("workspace %q rejected: %v", ok, err)
+		}
+	}
+	for _, bad := range []string{"", "relative/dir", "-w", "/w/a\nb", "/w/a\rb", "/w/a\x00b"} {
+		if err := driven.ValidateDevcontainerWorkspace(bad); err == nil {
+			t.Errorf("workspace %q accepted", bad)
+		}
+	}
+}

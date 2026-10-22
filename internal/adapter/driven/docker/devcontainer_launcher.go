@@ -59,7 +59,8 @@ func helperContextNames() []string {
 }
 
 // Launcher is the production [driven.DevcontainerLauncher] adapter. It runs
-// `docker build -`, `docker run`, `docker stop`, `docker rm -f` and the
+// `docker build -`, `docker run`, `docker stop`, `docker rm -f`,
+// `docker exec` (the session of [Launcher.Shell] and its probe) and the
 // environment checks; it never uses Compose. Construct with [NewLauncher]
 // or [WithLauncherBinary].
 type Launcher struct {

@@ -91,6 +91,16 @@ func RunArgsForTest(name, image string, envNames []string, opts driven.Devcontai
 	return runArgs(name, image, envNames, opts)
 }
 
+// ShellArgsForTest exposes [shellArgs].
+func ShellArgsForTest(opts driven.DevcontainerShellOptions, envNames []string, shell string) []string {
+	return shellArgs(opts, envNames, shell)
+}
+
+// ProbeArgsForTest exposes [probeArgs].
+func ProbeArgsForTest(opts driven.DevcontainerShellOptions, shell string) []string {
+	return probeArgs(opts, shell)
+}
+
 // ParseUpResultForTest exposes [parseUpResult].
 func ParseUpResultForTest(stdout string) (driven.DevcontainerUpResult, error) {
 	return parseUpResult(stdout)

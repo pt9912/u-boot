@@ -8,13 +8,15 @@ import (
 	"strings"
 )
 
-// ErrDevcontainerRuntime signals that starting or stopping a devcontainer
-// failed: the build of the helper image, the start of the helper container,
-// a CLI outcome other than `success`, or `docker stop`
-// ([DevcontainerLauncher]); also a request the launcher rejects before any
-// docker call: the launcher applies [ValidateDevcontainerProjectFolder] and
-// [ValidateDevcontainerEnvName] itself, so a caller that did not run them
-// first gets this error. The CLI maps it to exit code 12 (LH-FA-CLI-006); a
+// ErrDevcontainerRuntime signals that starting, stopping or entering a
+// devcontainer failed: the build of the helper image, the start of the helper
+// container, a CLI outcome other than `success`, `docker stop`, or the probe
+// or the start of a session ([DevcontainerLauncher]); also a request the
+// launcher rejects before any docker call: the launcher applies
+// [ValidateDevcontainerProjectFolder], [ValidateDevcontainerEnvName],
+// [ValidateDevcontainerShellUser] and [ValidateDevcontainerWorkspace]
+// itself, so a caller that did not run them first gets this error. The CLI
+// maps it to exit code 12 (LH-FA-CLI-006); a
 // missing Docker binary, an unreachable daemon and a remote engine stay
 // [ErrDockerUnavailable] and [ErrContainerEngineNotLocal] (exit code 11).
 var ErrDevcontainerRuntime = errors.New("devcontainer runtime failed")
@@ -45,6 +47,63 @@ func ValidateDevcontainerEnvName(name string) error {
 		return fmt.Errorf("environment variable name %q is not a plain name", name)
 	}
 	return nil
+}
+
+// ValidateDevcontainerShellUser rejects a user the launcher cannot hand to
+// `docker exec -u` as one argument: an empty one, one that begins with a
+// dash, and one that holds a line break or a NUL. A name, a numeric ID and
+// `name:group` pass; whether the user exists in the container is the
+// business of the probe of [DevcontainerLauncher.Shell]. The launcher applies
+// it again.
+func ValidateDevcontainerShellUser(user string) error {
+	if user == "" || strings.HasPrefix(user, "-") || strings.ContainsAny(user, "\n\r\x00") {
+		return fmt.Errorf("user %q is not a user `docker exec -u` can take as one argument", user)
+	}
+	return nil
+}
+
+// ValidateDevcontainerWorkspace rejects a working directory that is not an
+// absolute path or that holds a line break or a NUL. Whether the directory
+// exists in the container is the business of the probe of
+// [DevcontainerLauncher.Shell]. The launcher applies it again.
+func ValidateDevcontainerWorkspace(workspace string) error {
+	if !strings.HasPrefix(workspace, "/") || strings.ContainsAny(workspace, "\n\r\x00") {
+		return fmt.Errorf("workspace %q is not an absolute path `docker exec -w` can take as one argument", workspace)
+	}
+	return nil
+}
+
+// DevcontainerShellOptions parameterises [DevcontainerLauncher.Shell].
+type DevcontainerShellOptions struct {
+	// ContainerID is the ID of the running devcontainer (lower-case hex, the
+	// full ID or a prefix of at least 12 characters), as the result of
+	// [DevcontainerLauncher.Up] reports it.
+	ContainerID string
+	// User is the user of the session (`docker exec -u`): the RemoteUser of
+	// the result of [DevcontainerLauncher.Up].
+	User string
+	// Workspace is the working directory of the session (`docker exec -w`):
+	// the RemoteWorkspaceFolder of the result of [DevcontainerLauncher.Up].
+	Workspace string
+	// EnvNames lists the host environment variables handed to the session by
+	// name (`docker exec -e NAME`); the value stays out of every command
+	// line, the `docker` client takes it from the environment of the
+	// process. Names that are not set on the host are skipped, so a variable
+	// the host lacks is absent in the session. The launcher masks nothing in
+	// the session: what the shell prints reaches Stdout and Stderr as it is.
+	EnvNames []string
+	// Stdin, Stdout and Stderr are the streams of the session. The launcher
+	// writes nothing of its own to Stdout; Stderr receives what the shell
+	// and the `docker` client write to it. A nil stream is the null device.
+	// With Terminal, Stdin, Stdout and Stderr are handed to the `docker`
+	// client as they are when they are files, so the client finds the
+	// terminal on them; Stdin must then be a terminal.
+	Stdin  io.Reader
+	Stdout io.Writer
+	Stderr io.Writer
+	// Terminal allocates a terminal for the session (`-t`). The caller sets
+	// it when its standard input is a terminal.
+	Terminal bool
 }
 
 // DevcontainerUpOptions parameterises [DevcontainerLauncher.Up].
@@ -101,14 +160,16 @@ type DevcontainerUpResult struct {
 	RemoteWorkspaceFolder string
 }
 
-// DevcontainerLauncher starts and stops the devcontainer of a project
-// without an editor and without Node on the host: `Up` runs the Dev
+// DevcontainerLauncher starts, stops and enters the devcontainer of a
+// project without an editor and without Node on the host: `Up` runs the Dev
 // Container CLI in a short-lived helper container that holds the engine
-// socket; `Stop` stops the container with `docker stop`.
+// socket; `Stop` stops the container with `docker stop`; `Shell` opens a
+// session in the running container with `docker exec` of the host.
 //
 // Each method first rejects an invalid argument as [ErrDevcontainerRuntime]
 // without a docker call (`Up`: project folder, then variable names; `Stop`:
-// container ID), then checks the environment (Docker binary on the `PATH`,
+// container ID; `Shell`: container ID, user, workspace, then variable
+// names), then checks the environment (Docker binary on the `PATH`,
 // daemon answers, engine is local) and fails with [ErrDockerUnavailable] or
 // [ErrContainerEngineNotLocal]; every later failure is
 // [ErrDevcontainerRuntime]. A cancelled context ends `Up` with the context
@@ -125,4 +186,33 @@ type DevcontainerLauncher interface {
 	// least 12 hex characters). It neither removes the container nor
 	// starts a helper container.
 	Stop(ctx context.Context, containerID string) error
+
+	// Shell opens a session in the running container and returns when the
+	// session ends. It starts no helper container and binds no engine
+	// socket, mount or privilege into the session. A probe with the user
+	// and workspace of opts runs first (`bash -c true`, else `sh -c true`,
+	// each non-interactive and without variables); the first shell that
+	// ends with status 0 is the shell of the session and starts without an
+	// argument. The probe fails as [ErrDevcontainerRuntime] when neither
+	// shell runs: user or workspace missing in the container, no shell in
+	// the image, container not running.
+	//
+	// Once the session has begun, its end is no error: the exit status of
+	// the shell, also after the container ended during the session, does
+	// not reach the caller. The launcher recognises a failure of the
+	// `docker` client before the session begins by the message of the
+	// client and returns it as [ErrDevcontainerRuntime]: the container is
+	// not running or does not exist, the user does not exist after the
+	// probe, the engine does not answer, a terminal was requested on
+	// standard input that is none; without Terminal also an `OCI runtime
+	// exec failed` of the client (with Terminal the client owns Stdout, so
+	// the launcher does not see the line). Any other message of the client
+	// is part of the session.
+	//
+	// A cancelled context ends a session without Terminal (the launcher
+	// interrupts the client) with the context error. With Terminal the
+	// launcher does not observe the context once the session has begun: the
+	// client owns the terminal, and Ctrl-C reaches the shell in the
+	// container.
+	Shell(ctx context.Context, opts DevcontainerShellOptions) error
 }
