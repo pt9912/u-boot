@@ -28,7 +28,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** — (Spec-Version ≠ Release-Version; Lastenheft `0.22.0` liefern die Slices; dieser Slice ändert `spec/` nicht).
 
-**Verantwortlich:** — (wird beim Start gesetzt).
+**Verantwortlich:** pt9912 (Rolle Implementer, Start 2026-10-23); Freigaben: Projektinhaber.
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-23.
 
@@ -216,7 +216,7 @@ Der Ausgang jedes Risikos wird bei der Closure festgeschrieben.
 
 ## 7. Closure-Notiz
 
-**Entscheidungen beim Start** (Implementer, mit dem Projektinhaber): *(offen)* — Nummer `v0.15.0` (bestätigt, Welle-Datei §5), kein Vorab-Tag (M3, Vorschlag des Planners), kein CI-Satz im Lead vor M2 (Vorschlag).
+**Entscheidungen beim Start** (2026-10-23, Implementer nach dem Auftrag des Hauptagenten; der Wortlaut einer Freigabe des Projektinhabers liegt nicht vor): (1) Nummer `v0.15.0` (bestätigt, Welle-Datei §5); (2) kein Vorab-Tag, M3 entfällt (Vorschlag des Planners, Planvorgabe); (3) kein CI-Satz im Lead vor M2 (Vorschlag des Planners, Planvorgabe); (4) **Reichweite:** Push (M1) und Tag (M5) führt nur der Hauptagent, je Vorgang nach ausdrücklicher Freigabe des Projektinhabers; der Implementer pusht und taggt nie, auch nicht lokal.
 
 *(Wird bei der Closure gefüllt: Was hat funktioniert · Was ging anders · Steering-Loop-Eintrag (Lerneintrag; `liegt in` nur bei Verkörperung) · Beobachtungs-Register · Folge-Slices · Risiken aus §6 · Drei Paarungen.)*
 
