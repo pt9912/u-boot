@@ -2,7 +2,7 @@
 
 **Rolle:** Reviewer (Modul 10, [`.harness/skills/reviewer.md`](../../.harness/skills/reviewer.md), [`harness/review.md`](../../harness/review.md)), frischer Kontext. Prüfung gegen Plan, Entscheidungen und Hard Rules, nicht gegen die DoD (Verifier).
 
-**Gegenstand:** Commit `995c5dbe` (7 Dateien) gegen den Erst-Report [`2026-10-23-slice-v1-forge-cli-quellen-messung.md`](2026-10-23-slice-v1-forge-cli-quellen-messung.md): Slice [`slice-v1-forge-cli-quellen-messung`](../plan/planning/in-progress/slice-v1-forge-cli-quellen-messung.md), [`ADR-0035`](../plan/adr/0035-forge-clis-gh-und-glab-im-devcontainer.md) (`Proposed`), Messprotokoll und Wortlaut-Entwurf unter [`docs/messungen/slice-v1-forge-cli-quellen-messung/`](../messungen/slice-v1-forge-cli-quellen-messung/README.md), Skripte unter `tools/messung/forge-cli/`.
+**Gegenstand:** Commit `995c5dbe` (7 Dateien) gegen den Erst-Report [`2026-10-23-slice-v1-forge-cli-quellen-messung.md`](2026-10-23-slice-v1-forge-cli-quellen-messung.md): Slice [`slice-v1-forge-cli-quellen-messung`](../plan/planning/done/slice-v1-forge-cli-quellen-messung.md), [`ADR-0035`](../plan/adr/0035-forge-clis-gh-und-glab-im-devcontainer.md) (`Proposed`), Messprotokoll und Wortlaut-Entwurf unter [`docs/messungen/slice-v1-forge-cli-quellen-messung/`](../messungen/slice-v1-forge-cli-quellen-messung/README.md), Skripte unter `tools/messung/forge-cli/`.
 
 **Eingang gelesen:** `git show 995c5dbe` vollständig, Erst-Report (F-1 bis F-9), Messprotokoll (geänderte Abschnitte und D-Zeilen), die ADR (geänderte Zeilen und Restsuche), Wortlaut-Entwurf, Plan-Tabelle des Slice, `AGENTS.md` §3.7, §3.9, §3.10.
 

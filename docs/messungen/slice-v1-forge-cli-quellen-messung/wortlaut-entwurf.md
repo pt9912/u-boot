@@ -1,6 +1,6 @@
 # Wortlaut-Entwurf für den Lastenheft-CR: `gh` und `glab` als Katalog-Features
 
-Entwurf des Slice [`slice-v1-forge-cli-quellen-messung`](../../plan/planning/in-progress/slice-v1-forge-cli-quellen-messung.md); **kein Eintrag im Lastenheft**. Der Projektinhaber gibt
+Entwurf des Slice [`slice-v1-forge-cli-quellen-messung`](../../plan/planning/done/slice-v1-forge-cli-quellen-messung.md); **kein Eintrag im Lastenheft**. Der Projektinhaber gibt
 den Wortlaut frei; erst danach entsteht der CR-Slice der Welle ([`welle-forge-cli-gh-glab`](../../plan/planning/welle-forge-cli-gh-glab.md) §4), der das Lastenheft auf die nächste freie Minor-Version ändert
 (gelesen am 2026-10-23: `spec/lastenheft.md` trägt `0.21.0`; nächste freie Version `0.22.0`). Messwerte und Rohdaten: [`README.md`](README.md) (Aussagen A bis F).
 

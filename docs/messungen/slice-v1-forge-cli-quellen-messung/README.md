@@ -1,7 +1,7 @@
 # Messprotokoll: Forge-CLIs `gh` und `glab` im Devcontainer — Quelle, Lieferkette, Hosts, Token-Umgang
 
 Rohdaten und Ablauf der Messung des Slice
-[`slice-v1-forge-cli-quellen-messung`](../../plan/planning/in-progress/slice-v1-forge-cli-quellen-messung.md).
+[`slice-v1-forge-cli-quellen-messung`](../../plan/planning/done/slice-v1-forge-cli-quellen-messung.md).
 Skripte und Hilfsdateien liegen unter `tools/messung/forge-cli/` (Ablage: [`docs/messungen/README.md`](../README.md)).
 Die Entscheidungsvorlage zur Quelle ist [`ADR-0035`](../../plan/adr/0035-forge-clis-gh-und-glab-im-devcontainer.md) (`Proposed`), der Wortlaut-Entwurf für den
 Lastenheft-CR steht in [`wortlaut-entwurf.md`](wortlaut-entwurf.md).
