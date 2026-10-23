@@ -36,6 +36,8 @@ u() { local d=$1; shift; docker run --rm -v "$WORK/$d":/w -w /w -u "$(id -u):$(i
 redact() {
   docker run --rm -i "$BASE" sed -u -E \
     -e 's/\?[^" ]*(X-Amz|Signature|Credential|token=|sig=|X-Goog)[^" ]*/?[Query entfernt: vorsignierte URL]/g' \
+    -e 's/(Authorization:? +)([A-Za-z]+ +)?[^ ]+/\1[entfernt]/g' \
+    -e 's/(Bearer|Basic) +[^ ]+/\1 [entfernt]/g' \
     -e 's/(Authorization|Bearer|X-Amz-[A-Za-z-]*)[:= ]+[^ ]+/\1 [entfernt]/g' \
     -e 's/(ghp_|gho_|ghu_|ghs_|ghr_|github_pat_|glpat-)[A-Za-z0-9_-]{8,}/\1[entfernt]/g' \
     -e "s#/home/$(id -un)#/home/<benutzer>#g"

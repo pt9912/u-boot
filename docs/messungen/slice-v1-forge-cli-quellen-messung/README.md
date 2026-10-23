@@ -161,7 +161,7 @@ Die Skripte verwenden nur den Platzhalter `MESSUNG-KEIN-ECHTES-TOKEN` und rufen 
 `ghr_`, `github_pat_`, `glpat-`) und den Home-Pfad. Die signierte Adresse eines Attestierungs-Bundles (A10) wird abgerufen und nicht ausgegeben. Vor dem Commit durchsucht
 (`grep -rIn` über dieses Verzeichnis und `tools/messung/forge-cli` nach den Präfixen, `Bearer `, `Authorization`, `X-Amz`, `Signature=`, `sig=`,
 dem Namen des Home-Verzeichnisses): Treffer **nur** in den Skripten, und zwar die Regeln von `redact` und die Header-Zeile `Authorization: Bearer $tok` der anonymen
-`ghcr.io`-Abfrage (Variable, kein Wert); in den Rohdateien kein Treffer (die Beschreibung in diesem Absatz nennt die Muster und trifft sie selbst). Die Suche nach Token-Werten (Präfixe `ghp_`, `gho_`, `ghu_`, `ghs_`, `ghr_`, `github_pat_`, `glpat-`, `sk-ant-`, je mindestens 20 Zeichen danach) über `docs/messungen/` und `tools/messung/` ist leer.
+`ghcr.io`-Abfrage (Variable, kein Wert); in den Rohdateien kein Treffer (die Beschreibung in diesem Absatz nennt die Muster und trifft sie selbst). Die Suche nach Token-Werten (Präfixe `ghp_`, `gho_`, `ghu_`, `ghs_`, `ghr_`, `github_pat_`, `glpat-`, `sk-ant-`, je mindestens 20 Zeichen danach) über `docs/messungen/` und `tools/messung/` ist leer. Die Regel für `Authorization:`-Zeilen in `redact` ließ den Wert hinter `Bearer` stehen und wurde nach den Läufen berichtigt (Gegenprobe mit einer Beispielzeile: danach entfällt der Wert); die Rohdaten sind mit der früheren Regel entstanden und tragen keine solche Zeile (Suche oben).
 
 ## Lesehilfen
 
