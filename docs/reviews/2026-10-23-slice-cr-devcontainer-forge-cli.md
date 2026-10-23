@@ -6,7 +6,7 @@
 
 **Skill:** `.harness/skills/reviewer.md` · **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-23
 
-**Eingangs-Kontext:** Slice [`slice-cr-devcontainer-forge-cli`](../plan/planning/in-progress/slice-cr-devcontainer-forge-cli.md) (§1, §3, §6, §7 Freigabe), Entwurf [`wortlaut-entwurf.md`](../messungen/slice-v1-forge-cli-quellen-messung/wortlaut-entwurf.md), `spec/lastenheft.md` (Diff), `AGENTS.md` §3.4, §3.7, §3.10, §5 Regel 6, Welle-Datei, `open/README.md`, [`slice-cr-lastenheft-messstaende`](../plan/planning/open/slice-cr-lastenheft-messstaende.md).
+**Eingangs-Kontext:** Slice [`slice-cr-devcontainer-forge-cli`](../plan/planning/done/slice-cr-devcontainer-forge-cli.md) (§1, §3, §6, §7 Freigabe), Entwurf [`wortlaut-entwurf.md`](../messungen/slice-v1-forge-cli-quellen-messung/wortlaut-entwurf.md), `spec/lastenheft.md` (Diff), `AGENTS.md` §3.4, §3.7, §3.10, §5 Regel 6, Welle-Datei, `open/README.md`, [`slice-cr-lastenheft-messstaende`](../plan/planning/open/slice-cr-lastenheft-messstaende.md).
 
 **Sensor:** `make gates` selbst gelaufen, Exit-Code 0 (Log im Scratchpad). `make test-docker`, `make verify-depguard`: nicht gelaufen, kein Code-, Docker- oder Importregel-Pfad im Diff.
 
@@ -23,7 +23,7 @@
 
 ### F-1 MEDIUM
 - `quelle`: AGENTS.md §3.10 (Aussage über den Plan/Freigabe prüfen), Maintainability
-- `pfad`: [`slice-cr-devcontainer-forge-cli`](../plan/planning/in-progress/slice-cr-devcontainer-forge-cli.md) (Abschnitt 7) · „S1 mit dem Halbsatz umgestellt, sonst wortgleich“
+- `pfad`: [`slice-cr-devcontainer-forge-cli`](../plan/planning/done/slice-cr-devcontainer-forge-cli.md) (Abschnitt 7) · „S1 mit dem Halbsatz umgestellt, sonst wortgleich“
 - `klasse`: freigabe-abweichung-nicht-ausgewiesen
 - `befund`: §7 nennt als einzige Abweichung vom Entwurf den Halbsatz (Punkt 1) und die Hostnamen (Punkt 2). Im Lastenheft weichen zusätzlich ab: S1 „`u-boot config set devcontainer.features.gh.enabled true`, analog `glab`“ statt des zweiten ausgeschriebenen Befehls; S2 ohne „im Container“ (Entwurf: „installiert sein Werkzeug im Container aus …“); S6 „Aufrufe mit gültigem Token“ statt „Aufrufe, die ein gültiges Token brauchen“. Die Zeile „sonst wortgleich“ ist damit unzutreffend. Ob der Projektinhaber den verdichteten Wortlaut (der dem §7-Absatz entspricht) gesehen hat, ist aus dem Repo nicht ablesbar.
 - `risiko`: Die Freigabe-Spur belegt die Wortgleichheit nicht; der Verifier vergleicht gegen §7 und der Entwurf bleibt unverändert daneben stehen. Inhaltlich klein (S2 Ollama-Absatz hat „im Container“, hier fehlt es), aber eine nicht ausgewiesene Abweichung bei einer Vertragsänderung.

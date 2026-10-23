@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (`harness/verification.md`), frischer Kontext. **Modell:** claude-sonnet-5-5.
 
-**Gegenstand:** Slice [`slice-cr-devcontainer-forge-cli`](../plan/planning/in-progress/slice-cr-devcontainer-forge-cli.md), Welle `welle-forge-cli-gh-glab`, Diff `dd4d5e1a..ffcefebd`; Review-Report [`2026-10-23-slice-cr-devcontainer-forge-cli.md`](2026-10-23-slice-cr-devcontainer-forge-cli.md).
+**Gegenstand:** Slice [`slice-cr-devcontainer-forge-cli`](../plan/planning/done/slice-cr-devcontainer-forge-cli.md), Welle `welle-forge-cli-gh-glab`, Diff `dd4d5e1a..ffcefebd`; Review-Report [`2026-10-23-slice-cr-devcontainer-forge-cli.md`](2026-10-23-slice-cr-devcontainer-forge-cli.md).
 
 **Urteil: schließbar** (offen bleiben nur Closure-Schritte der Implementer-Rolle, siehe Punkt "Offen für die Closure").
 
