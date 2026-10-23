@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** — (der Slice ändert `spec/spezifikation.md` und `spec/architecture.md` nicht). [`SPEC-019`](../../../../spec/spezifikation.md#spec-019--default-allowlist-der-egress-restriktion), [`SPEC-023`](../../../../spec/spezifikation.md#spec-023--devcontainer-basis-image-und-feature-quellen) und [`SPEC-044`](../../../../spec/spezifikation.md#spec-044--features-sshd-und-claude-code-im-devcontainer-warnungen-und-zugangsdaten) präzisieren das Lastenheft nach dem Code in `slice-v2-spec-forge-cli`. Der Verweis zeigt aufwärts: Die Spec nennt diesen Slice nie.
 
-**Verantwortlich:** — (bis zur Priorisierung; der Implementer trägt sich beim Start ein).
+**Verantwortlich:** pt9912 (Rolle Implementer, Start 2026-10-23).
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-23.
 

@@ -101,12 +101,13 @@ func assertOllamaDockerfile(t *testing.T, df string) {
 	}
 }
 
-// ollamaSandboxDockerfile renders the Dockerfile of a sandbox project with
-// `ollama` enabled; the catalogue test looks for the pin there.
-func ollamaSandboxDockerfile(t *testing.T) string {
+// blockSandboxDockerfile renders the Dockerfile of a sandbox project with the
+// Dockerfile-block feature `key` enabled; the catalogue test looks for the
+// pin there.
+func blockSandboxDockerfile(t *testing.T, key string) string {
 	t.Helper()
 	svc, fs := newGenerateService(t)
-	seedUBootYAMLWithFeatures(t, fs, sandboxProfile+ollamaFeature)
+	seedUBootYAMLWithFeatures(t, fs, sandboxProfile+"  features:\n    "+key+":\n      enabled: true\n")
 	if _, err := generateSandbox(svc, false); err != nil {
 		t.Fatalf("generate: %v", err)
 	}

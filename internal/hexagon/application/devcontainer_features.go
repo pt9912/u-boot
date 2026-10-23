@@ -160,10 +160,11 @@ type featureCatalogueEntry struct {
 	// `ghcr.io/devcontainers/features` namespace. The feature's install
 	// script runs at image build, so the generate output reports it.
 	publisher string
-	// dockerfileBlock marks an entry that is no OCI feature: the sandbox
-	// Dockerfile carries its installation (the pin stays in the template),
-	// so the entry has no `source`, no `defaultVersion` and renders no key
-	// under `features`. A `source:` override turns it into an external OCI
+	// dockerfileBlock marks an entry that is no OCI feature: the Dockerfile
+	// carries its installation (the pin stays in the template; `ollama` in
+	// the sandbox profile only, `gh` and `glab` in both profiles), so the
+	// entry has no `source`, no `defaultVersion` and renders no key under
+	// `features`. A `source:` override turns it into an external OCI
 	// feature without the block.
 	dockerfileBlock bool
 	// bindsHostSocket marks a feature that mounts the container-engine
@@ -178,8 +179,12 @@ type featureCatalogueEntry struct {
 	relaxations []string
 }
 
-// featureOllama is the catalogue key of the Dockerfile-block feature.
-const featureOllama = "ollama"
+// Catalogue keys of the Dockerfile-block features.
+const (
+	featureOllama = "ollama"
+	featureGh     = "gh"
+	featureGlab   = "glab"
+)
 
 // featureCatalogue lists the built-in devcontainer-feature catalogue
 // per LH-FA-DEV-003 + T0-Outcomes (c). Built-in entries
@@ -273,6 +278,14 @@ func featureCatalogue() map[string]featureCatalogueEntry {
 		},
 		featureOllama: {
 			shortDesc:       "Ollama, CPU only (Dockerfile block; sandbox profile only)",
+			dockerfileBlock: true,
+		},
+		featureGh: {
+			shortDesc:       "GitHub CLI (Dockerfile block)",
+			dockerfileBlock: true,
+		},
+		featureGlab: {
+			shortDesc:       "GitLab CLI (Dockerfile block)",
 			dockerfileBlock: true,
 		},
 	}
@@ -469,8 +482,8 @@ func projectFeatureEntry(name string, entry ubootYAMLDevcontainerFeature) (devco
 //
 // Returns ("", "", false) for the orphan case (no Source override
 // and the name is not in the catalogue) — caller skips silently — and
-// for a Dockerfile-block entry without Source override (`ollama`): it
-// renders no key, so the drift check stays silent for it.
+// for a Dockerfile-block entry without Source override (`ollama`, `gh`,
+// `glab`): it renders no key, so the drift check stays silent for it.
 // Slice-followup-devcontainer-features-drift-doctor Review-Followup
 // S1 extracted this helper to remove the synthetic-`Enabled=&true`-
 // probe in [projectAllFeatureEntries].
@@ -499,7 +512,8 @@ func projectFeatureSourceVersion(name, source, version string) (resolvedSource, 
 
 // dockerfileBlockFeatureActive reports whether the catalogue entry `key`
 // is a Dockerfile-block feature that is enabled without a `source:`
-// override. Only then the sandbox Dockerfile carries its block.
+// override. Only then the Dockerfile can carry its block; the profile
+// decides per feature whether it does.
 func dockerfileBlockFeatureActive(dc *ubootYAMLDevcontainer, key string) bool {
 	if dc == nil {
 		return false
@@ -539,6 +553,39 @@ func ollamaWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []driving.WarningEn
 	}}
 }
 
+// forgeCLIWarnings returns the one notice `generate devcontainer` gives for
+// each active forge-CLI feature (`gh`, `glab`), in both profiles: the archive
+// is checked by its SHA-256 only. For both archives no signature was found by
+// the search pattern (not exhaustive); for `gh` the project publishes a GitHub
+// attestation that `u-boot` does not verify. The notices carry neither
+// [driving.WarningEntry.SecurityRelaxation] nor
+// [driving.WarningEntry.DegradationFallback], so `--quiet` drops them.
+func forgeCLIWarnings(dc *ubootYAMLDevcontainer) []driving.WarningEntry {
+	var out []driving.WarningEntry
+	if dockerfileBlockFeatureActive(dc, featureGh) {
+		out = append(out, driving.WarningEntry{
+			Code:  "LH-NFA-SEC-004",
+			Level: "warn",
+			Message: "devcontainer feature gh installs the release archive of cli/cli from github.com (version pinned as GH_VERSION in .devcontainer/Dockerfile) when the image is built; " +
+				"it is checked by its SHA-256 only, no signature was found for the archive (by search pattern, not exhaustive), " +
+				"and the GitHub attestation the project publishes is not verified by u-boot, " +
+				"so the check does not protect against a release that was harmful from the start",
+			Subject: ".devcontainer/devcontainer.json",
+		})
+	}
+	if dockerfileBlockFeatureActive(dc, featureGlab) {
+		out = append(out, driving.WarningEntry{
+			Code:  "LH-NFA-SEC-004",
+			Level: "warn",
+			Message: "devcontainer feature glab installs the release archive of gitlab-org/cli from gitlab.com (version pinned as GLAB_VERSION in .devcontainer/Dockerfile) when the image is built; " +
+				"it is checked by its SHA-256 only and no signature was found for the archive (by search pattern, not exhaustive), " +
+				"so the check does not protect against a release that was harmful from the start",
+			Subject: ".devcontainer/devcontainer.json",
+		})
+	}
+	return out
+}
+
 // validateDevcontainerFeatures runs the LH-FA-DEV-003 schema checks
 // on the `devcontainer:` sub-tree that T1 owns:
 //
@@ -547,7 +594,7 @@ func ollamaWarnings(dc *ubootYAMLDevcontainer, sandbox bool) []driving.WarningEn
 //   - Every non-empty `Source:` value passes [validateFeatureSource]
 //     (URL-format check only — allowlist-membership enforcement is
 //     T4's job).
-//   - A Dockerfile-block entry (`ollama`) has no `Version:` override
+//   - A Dockerfile-block entry (`ollama`, `gh`, `glab`) has no `Version:` override
 //     without a `Source:` override: its pin hangs on the checksums in
 //     the Dockerfile, so another version could not be checked.
 //   - Every entry in [ubootYAMLFeatureSources.Allow] passes

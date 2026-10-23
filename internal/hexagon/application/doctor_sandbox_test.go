@@ -481,3 +481,117 @@ func TestDoctor_SandboxCredentials_Agent(t *testing.T) {
 		})
 	}
 }
+
+// LH-FA-DEV-009 (forge-CLI token): with `gh` or `glab` active the check
+// looks for the `${localEnv:GH_TOKEN}` or `${localEnv:GITLAB_TOKEN}`
+// reference and recognises the token forms and assignments of both tools in
+// plain text. A feature that is off, replaced by an external source, or a
+// project without the sandbox profile leaves the check without a finding on
+// the reference. Every warn item carries SecurityRelaxation and is no
+// degradation fallback.
+func TestDoctor_SandboxCredentials_ForgeCLI(t *testing.T) {
+	t.Parallel()
+	const (
+		head      = sandboxYAMLHead + "  profile: sandbox\n"
+		ghOn      = head + "  features:\n    gh:\n      enabled: true\n"
+		glabOn    = head + "  features:\n    glab:\n      enabled: true\n"
+		bothOn    = head + "  features:\n    gh:\n      enabled: true\n    glab:\n      enabled: true\n"
+		ghOff     = head + "  features:\n    gh:\n      enabled: false\n"
+		ghSource  = head + "  featureSources:\n    allow:\n      - https://ghcr.io/example/features/gh\n  features:\n    gh:\n      enabled: true\n      source: https://ghcr.io/example/features/gh\n"
+		ghDefault = sandboxYAMLHead + "  features:\n    gh:\n      enabled: true\n"
+		gitRef    = `"GIT_TOKEN": "${localEnv:GIT_TOKEN}"`
+		ghRef     = `"GH_TOKEN": "${localEnv:GH_TOKEN}"`
+		glabRef   = `"GITLAB_TOKEN": "${localEnv:GITLAB_TOKEN}"`
+		// Invented values of the shape of the token forms; no real token.
+		fakeGh   = "ghp_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+		fakeGlab = "glpat-ABCDEFGHIJKLMNOPQRST"
+	)
+	remote := func(parts ...string) string { return `{"remoteEnv": {` + strings.Join(parts, ", ") + `}}` }
+	dcJSON := ".devcontainer/devcontainer.json"
+	cases := []struct {
+		name     string
+		yaml     string
+		files    map[string]string
+		want     domain.Severity
+		contains string
+	}{
+		{"gh, reference present", ghOn, map[string]string{dcJSON: remote(gitRef, ghRef)}, domain.SeverityOK, "GH_TOKEN (reference only)"},
+		{"glab, reference present", glabOn, map[string]string{dcJSON: remote(gitRef, glabRef)}, domain.SeverityOK, "GITLAB_TOKEN (reference only)"},
+		{"both, references present", bothOn, map[string]string{dcJSON: remote(gitRef, ghRef, glabRef)}, domain.SeverityOK, "GH_TOKEN, GITLAB_TOKEN (reference only)"},
+		{"gh, devcontainer.json missing", ghOn, nil, domain.SeverityWarn, "no reference for: GH_TOKEN"},
+		{"gh, reference absent", ghOn, map[string]string{dcJSON: remote(gitRef)}, domain.SeverityWarn, "no reference for: GH_TOKEN"},
+		{"glab, reference absent", glabOn, map[string]string{dcJSON: remote(gitRef)}, domain.SeverityWarn, "no reference for: GITLAB_TOKEN"},
+		{"both, one reference absent", bothOn, map[string]string{dcJSON: remote(gitRef, ghRef)}, domain.SeverityWarn, "no reference for: GITLAB_TOKEN"},
+		{"gh, other variable is no source", ghOn, map[string]string{dcJSON: remote(gitRef, `"GH_TOKEN": "${localEnv:OTHER_TOKEN}"`)}, domain.SeverityWarn, "no reference for: GH_TOKEN"},
+		{"gh, assignment in .env.example", ghOn, map[string]string{".env.example": "GH_TOKEN=plainvalue123456\n", dcJSON: remote(gitRef, ghRef)}, domain.SeverityWarn, ".env.example"},
+		{"glab, assignment in compose.yaml", glabOn, map[string]string{"compose.yaml": "    GITLAB_TOKEN: plainvalue123456\n", dcJSON: remote(gitRef, glabRef)}, domain.SeverityWarn, "compose.yaml"},
+		{"gh token form in devcontainer.json", ghOn, map[string]string{dcJSON: remote(gitRef, ghRef, `"X": "`+fakeGh+`"`)}, domain.SeverityWarn, dcJSON},
+		{"glab token form in u-boot.yaml", glabOn + "# " + fakeGlab + "\n", map[string]string{dcJSON: remote(gitRef, glabRef)}, domain.SeverityWarn, "u-boot.yaml"},
+		{"empty assignment is no credential", ghOn, map[string]string{".env.example": "GH_TOKEN=\n", dcJSON: remote(gitRef, ghRef)}, domain.SeverityOK, "reference only"},
+		{"gh switched off, reference not required", ghOff, map[string]string{dcJSON: "{}"}, domain.SeverityOK, "no https clone"},
+		{"gh from an external source, reference not required", ghSource, map[string]string{dcJSON: "{}"}, domain.SeverityOK, "no https clone"},
+		{"default profile, check skipped", ghDefault, nil, domain.SeverityOK, "credential check skipped"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			items := runSandboxDoctor(t, func(fs *fakeFS) {
+				writeDoctorFile(t, fs, "u-boot.yaml", tc.yaml)
+				for rel, body := range tc.files {
+					writeDoctorFile(t, fs, rel, body)
+				}
+			})
+			d := findDiagnostic(t, items, "devcontainer.sandbox.credentials")
+			if d.Severity != tc.want || !strings.Contains(d.Message, tc.contains) {
+				t.Fatalf("got %v %q, want %v containing %q", d.Severity, d.Message, tc.want, tc.contains)
+			}
+			if wantRelax := tc.want == domain.SeverityWarn; d.SecurityRelaxation != wantRelax || d.DegradationFallback {
+				t.Errorf("SecurityRelaxation = %v (want %v), DegradationFallback = %v (want false): %q",
+					d.SecurityRelaxation, wantRelax, d.DegradationFallback, d.Message)
+			}
+			for _, fake := range []string{fakeGh, fakeGlab} {
+				if strings.Contains(d.Message, fake) || strings.Contains(d.Hint, fake) {
+					t.Errorf("the finding must not echo the token: %q / %q", d.Message, d.Hint)
+				}
+			}
+		})
+	}
+}
+
+// BEO-DOK/abhilfe-ohne-wirkungsprobe: the remedy the finding names works in
+// the order of its text. A feature enabled after the last `generate
+// devcontainer` has no reference (warn); `generate devcontainer` writes it;
+// the next check passes.
+func TestDoctor_SandboxCredentials_ForgeCLIRemedyRestoresReference(t *testing.T) {
+	t.Parallel()
+	svc, fs, _, _, _ := newDoctorService(t)
+	gen := application.NewGenerateService(fs, &fakeYAML{}, nil)
+	generate := func() {
+		t.Helper()
+		if _, err := gen.Generate(context.Background(), driving.GenerateRequest{BaseDir: doctorBaseDir, Artifact: domain.ArtifactDevcontainer}); err != nil {
+			t.Fatalf("generate devcontainer: %v", err)
+		}
+	}
+	credentials := func() domain.Diagnostic {
+		t.Helper()
+		resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+		if err != nil {
+			t.Fatalf("Check: %v", err)
+		}
+		return findDiagnostic(t, resp.Report.Items, "devcontainer.sandbox.credentials")
+	}
+	const sandbox = sandboxYAMLHead + "  profile: sandbox\n"
+	writeDoctorFile(t, fs, "u-boot.yaml", sandbox)
+	generate()
+	writeDoctorFile(t, fs, "u-boot.yaml", sandbox+"  features:\n    gh:\n      enabled: true\n    glab:\n      enabled: true\n")
+
+	d := credentials()
+	if d.Severity != domain.SeverityWarn || !strings.Contains(d.Message, "no reference for: GH_TOKEN, GITLAB_TOKEN") ||
+		!strings.Contains(d.Hint, "u-boot generate devcontainer") {
+		t.Fatalf("before the remedy: %v %q / %q, want a warn naming both variables and the command", d.Severity, d.Message, d.Hint)
+	}
+	generate()
+	if d := credentials(); d.Severity != domain.SeverityOK || !strings.Contains(d.Message, "GH_TOKEN, GITLAB_TOKEN (reference only)") {
+		t.Errorf("after the remedy: %v %q, want OK with both references", d.Severity, d.Message)
+	}
+}

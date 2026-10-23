@@ -11,6 +11,14 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+### Added
+
+- Catalogue features `gh` (GitHub CLI) and `glab` (GitLab CLI) ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-009`](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)). `u-boot config set devcontainer.features.gh.enabled true` (and `glab`) makes `u-boot generate devcontainer` write a Dockerfile block per tool in the default and in the sandbox profile: the pinned release archive (`gh` 2.103.0 of `cli/cli`, `glab` 1.124.0 of `gitlab-org/cli`), checked by its SHA-256 before the extraction, only the program extracted. No signature was found for either archive (by search pattern, not exhaustive); the GitHub attestation of `gh` is not verified by `u-boot`; `u-boot generate devcontainer` prints one notice per active feature, and `--quiet` drops it. `version:` without `source:` ends with exit code `10`. With the egress restriction the hosts `api.github.com` and `github.com` (`gh`; both are in the base list already) and `gitlab.com` (`glab`) are allowed. In the sandbox profile `remoteEnv` passes `GH_TOKEN` and `GITLAB_TOKEN` as `${localEnv:…}` references next to `GIT_TOKEN` (never a value), and `u-boot doctor` checks the reference and plain-text tokens in project files. The default profile gets no token reference. Calls with a valid token, hosts after a sign-in, telemetry and update hosts, self-hosted instances, `glab duo` and `glab orbit` are not promised.
+
+### Changed
+
+- With `gh` or `glab` active, the generated Dockerfile of the default profile carries `USER root` ahead of the block (it stood there before only with the sandbox profile or a UID override). Configurations without the two features render byte-identical.
+
 ## [0.14.0] - 2026-10-23
 
 Fourteenth release. **Open a shell in the devcontainer without an editor (`u-boot devcontainer shell`); `u-boot devcontainer up` judges by the state of the container.**

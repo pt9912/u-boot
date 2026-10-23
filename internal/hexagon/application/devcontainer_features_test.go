@@ -315,7 +315,9 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 		"claude-code",
 		"cpp",
 		"docker-cli",
+		"gh",
 		"git",
+		"glab",
 		"go",
 		"homebrew",
 		"java",
@@ -351,7 +353,7 @@ func TestFeatureCatalogue_KeysCoverSpecExamples(t *testing.T) {
 //     emit `<source>:<version>` unconditionally.
 //   - The short description is non-empty so the future
 //     `feature list` UX and doctor hints have a label to surface.
-//   - A Dockerfile-block entry (`ollama`) carries no source, default
+//   - A Dockerfile-block entry (`ollama`, `gh`, `glab`) carries no source, default
 //     version or publisher; the generated Dockerfile holds its pin
 //     (ADR-0024 decision 2).
 func TestFeatureCatalogue_EntriesAreValid(t *testing.T) {
@@ -374,7 +376,7 @@ func TestFeatureCatalogue_EntriesAreValid(t *testing.T) {
 				if entry.Source != "" || entry.DefaultVersion != "" || entry.Publisher != "" {
 					t.Errorf("Dockerfile-block entry %q must carry no source, defaultVersion or publisher: %+v", key, entry)
 				}
-				if !strings.Contains(ollamaSandboxDockerfile(t), "ARG "+strings.ToUpper(key)+"_VERSION=") {
+				if !strings.Contains(blockSandboxDockerfile(t, key), "ARG "+strings.ToUpper(key)+"_VERSION=") {
 					t.Errorf("Dockerfile template lacks the pin ARG %s_VERSION for the Dockerfile-block entry %q", strings.ToUpper(key), key)
 				}
 				return

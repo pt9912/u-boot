@@ -77,7 +77,10 @@ func egressDockerAptHost() string { return "download.docker.com" }
 // and plugins are not listed; the user adds them to `egress.allow`. The
 // `ollama` row lists the manifest host and the blob host of the model pull
 // (measured for two models at one time and place; `ollama.com` is not
-// needed and the install hosts are used by the image build only).
+// needed and the install hosts are used by the image build only). The `gh`
+// row lists the two GitHub hosts and the `glab` row `gitlab.com`; hosts that
+// follow a sign-in, telemetry, update hosts and the hosts of `glab duo` and
+// `glab orbit` are not listed.
 func egressFeatureHosts() map[string][]string {
 	return map[string][]string{
 		"node":        {"registry.npmjs.org"},
@@ -88,6 +91,8 @@ func egressFeatureHosts() map[string][]string {
 		"sdkman":      {"api.sdkman.io", "broker.sdkman.io", "repo.maven.apache.org", "repo1.maven.org"},
 		"claude-code": {"registry.npmjs.org", "api.anthropic.com"},
 		"ollama":      {"registry.ollama.ai", "dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com"},
+		"gh":          {"api.github.com", "github.com"},
+		"glab":        {"gitlab.com"},
 	}
 }
 

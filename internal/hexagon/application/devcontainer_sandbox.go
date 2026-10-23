@@ -88,6 +88,8 @@ func devcontainerTemplateData(name string, dc *ubootYAMLDevcontainer, sandbox bo
 	if dc != nil && dc.User != nil && dc.User.UID != nil && *dc.User.UID != domain.DefaultContainerUID {
 		data.UID = *dc.User.UID
 	}
+	data.Gh = dockerfileBlockFeatureActive(dc, featureGh)
+	data.Glab = dockerfileBlockFeatureActive(dc, featureGlab)
 	if !sandbox {
 		return data
 	}
@@ -429,15 +431,25 @@ func catalogueFeatureActive(dc *ubootYAMLDevcontainer, key string) bool {
 }
 
 // agentCredentialEnv returns the host environment variables that carry
-// the credential of an active agent feature (LH-FA-DEV-009): the
-// generated `remoteEnv` holds only the reference `${localEnv:<NAME>}`,
-// and `u-boot doctor` looks for the same reference. The Anthropic
-// documentation names `ANTHROPIC_API_KEY` as the API key variable.
+// the credential of an active agent or forge-CLI feature (LH-FA-DEV-009):
+// the generated `remoteEnv` holds only the reference `${localEnv:<NAME>}`,
+// and `u-boot doctor` looks for the same reference. The order is fixed
+// (`ANTHROPIC_API_KEY`, `GH_TOKEN`, `GITLAB_TOKEN`) because it is the render
+// order. The Anthropic documentation names `ANTHROPIC_API_KEY` as the API key
+// variable; the help of `gh` and `glab` names `GH_TOKEN` and `GITLAB_TOKEN`
+// first in their rank of token variables.
 func agentCredentialEnv(dc *ubootYAMLDevcontainer) []string {
+	var env []string
 	if catalogueFeatureActive(dc, "claude-code") {
-		return []string{"ANTHROPIC_API_KEY"}
+		env = append(env, "ANTHROPIC_API_KEY")
 	}
-	return nil
+	if dockerfileBlockFeatureActive(dc, featureGh) {
+		env = append(env, "GH_TOKEN")
+	}
+	if dockerfileBlockFeatureActive(dc, featureGlab) {
+		env = append(env, "GITLAB_TOKEN")
+	}
+	return env
 }
 
 // agentNodeWarnings returns the notice that the `claude-code` feature

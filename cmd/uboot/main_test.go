@@ -591,3 +591,105 @@ func TestRun_Devcontainer_WiredAndBareExits2(t *testing.T) {
 		t.Errorf("--help lacks the devcontainer command: exit %d", code)
 	}
 }
+
+// LH-FA-DEV-003, LH-FA-CLI-005 at the user path with the real adapters:
+// `config set devcontainer.features.gh.enabled true` and the same for `glab`
+// are accepted; `generate devcontainer` then writes both blocks and reports
+// one supply-chain notice per feature in the default and in the sandbox
+// profile; `--quiet` drops both notices, the blocks stay; a `version`
+// override without `source` ends with exit 10.
+func TestRun_Generate_ForgeCLINotices(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	const head = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n"
+	for name, profile := range map[string]string{"default profile": "", "sandbox profile": "  profile: sandbox\n"} {
+		t.Run(name, func(t *testing.T) {
+			dir := writeFeatureProject(t, head+profile)
+			for _, key := range []string{"gh", "glab"} {
+				var out, errOut bytes.Buffer
+				if code := run(context.Background(), []string{"config", "set", "devcontainer.features." + key + ".enabled", "true"}, &out, &errOut); code != 0 {
+					t.Fatalf("config set %s: exit %d, stdout=%q stderr=%q", key, code, out.String(), errOut.String())
+				}
+			}
+			var out, errOut bytes.Buffer
+			if code := run(context.Background(), []string{"generate", "devcontainer"}, &out, &errOut); code != 0 {
+				t.Fatalf("generate devcontainer: exit %d; stdout=%q stderr=%q", code, out.String(), errOut.String())
+			}
+			for _, want := range []string{
+				"Warning (LH-NFA-SEC-004): devcontainer feature gh installs the release archive",
+				"Warning (LH-NFA-SEC-004): devcontainer feature glab installs the release archive",
+			} {
+				if n := strings.Count(out.String(), want); n != 1 {
+					t.Errorf("stdout contains %q %d times, want 1:\n%s", want, n, out.String())
+				}
+			}
+			df, err := os.ReadFile(filepath.Join(dir, ".devcontainer", "Dockerfile"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, want := range []string{"ARG GH_VERSION=", "ARG GLAB_VERSION="} {
+				if !strings.Contains(string(df), want) {
+					t.Errorf("Dockerfile lacks %q", want)
+				}
+			}
+
+			out.Reset()
+			errOut.Reset()
+			if code := run(context.Background(), []string{"--quiet", "generate", "devcontainer"}, &out, &errOut); code != 0 {
+				t.Fatalf("--quiet generate devcontainer: exit %d; stdout=%q stderr=%q", code, out.String(), errOut.String())
+			}
+			if got := strings.ToLower(out.String() + errOut.String()); strings.Contains(got, "feature gh") || strings.Contains(got, "feature glab") {
+				t.Errorf("--quiet must drop the notices of gh and glab:\nstdout=%q\nstderr=%q", out.String(), errOut.String())
+			}
+		})
+	}
+
+	for _, key := range []string{"gh", "glab"} {
+		t.Run("version without source "+key, func(t *testing.T) {
+			writeFeatureProject(t, head+"  features:\n    "+key+":\n      enabled: true\n      version: \"9.9.9\"\n")
+			var out, errOut bytes.Buffer
+			if code := run(context.Background(), []string{"generate", "devcontainer"}, &out, &errOut); code != 10 {
+				t.Fatalf("generate devcontainer: exit %d, want 10; stdout=%q stderr=%q", code, out.String(), errOut.String())
+			}
+		})
+	}
+}
+
+// LH-FA-DEV-008 at the user path: `egress list` names the origin of the hosts
+// of the forge-CLI features. The two GitHub hosts of `gh` are in the base list
+// as well; `gitlab.com` comes from `glab` alone.
+func TestRun_EgressList_ForgeCLIHostOrigins(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+	writeFeatureProject(t, "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  profile: sandbox\n"+
+		"  features:\n    gh:\n      enabled: true\n    glab:\n      enabled: true\n"+
+		"  sandbox:\n    egress:\n      enabled: true\n")
+	var out, errOut bytes.Buffer
+	if code := run(context.Background(), []string{"egress", "list", "--json"}, &out, &errOut); code != 0 {
+		t.Fatalf("egress list: exit %d, stderr=%q", code, errOut.String())
+	}
+	var env struct {
+		Data struct {
+			Hosts []struct {
+				Host    string   `json:"host"`
+				Sources []string `json:"sources"`
+			} `json:"hosts"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(out.Bytes(), &env); err != nil {
+		t.Fatalf("invalid JSON: %v\n%s", err, out.String())
+	}
+	origins := map[string]string{}
+	for _, h := range env.Data.Hosts {
+		origins[h.Host] = strings.Join(h.Sources, ",")
+	}
+	for host, want := range map[string]string{
+		"github.com": "base,feature:gh", "api.github.com": "base,feature:gh", "gitlab.com": "feature:glab", "codeload.github.com": "base",
+	} {
+		if origins[host] != want {
+			t.Errorf("origin of %s = %q, want %q", host, origins[host], want)
+		}
+	}
+}

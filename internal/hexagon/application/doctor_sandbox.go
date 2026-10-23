@@ -29,9 +29,10 @@ const (
 	checkIDSandboxEgress = "devcontainer.sandbox.egress"
 
 	// checkIDSandboxCredentials is the LH-FA-DEV-009 check: git and
-	// agent credentials must not sit in plain text in a project file,
-	// an https clone needs a runtime token source, and an active agent
-	// feature needs the reference of its host variable.
+	// agent and forge-CLI credentials must not sit in plain text in a
+	// project file, an https clone needs a runtime token source, and an
+	// active agent or forge-CLI feature needs the reference of its host
+	// variable.
 	checkIDSandboxCredentials = "devcontainer.sandbox.credentials"
 )
 
@@ -127,8 +128,8 @@ func (s *DoctorService) checkSandboxRuntime(_ context.Context, baseDir string) d
 
 // checkSandboxCredentials implements LH-FA-DEV-009 (warn only). It is
 // skipped without the sandbox profile. All warn items (plaintext
-// credential, https clone without token source, active agent feature
-// without the reference of its host variable) carry
+// credential, https clone without token source, active agent or forge-CLI
+// feature without the reference of its host variable) carry
 // [domain.Diagnostic.SecurityRelaxation].
 func (s *DoctorService) checkSandboxCredentials(_ context.Context, baseDir string) domain.Diagnostic {
 	cfg, err := s.loadUbootYAML(baseDir)
@@ -140,7 +141,7 @@ func (s *DoctorService) checkSandboxCredentials(_ context.Context, baseDir strin
 		return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityWarn,
 			Message: fmt.Sprintf("possible plaintext credential in: %s (LH-FA-DEV-009).", strings.Join(found, ", ")),
 			Hint: "Remove it from the file, revoke the credential, and pass it at runtime: a short-lived repository-scoped token via $GIT_TOKEN, " +
-				"an agent key via its host environment variable (for example $ANTHROPIC_API_KEY).",
+				"an agent key or forge-CLI token via its host environment variable (for example $ANTHROPIC_API_KEY, $GH_TOKEN, $GITLAB_TOKEN).",
 			SecurityRelaxation: true}
 	}
 	agentVars := agentCredentialEnv(cfg.Devcontainer)
@@ -154,7 +155,7 @@ func (s *DoctorService) checkSandboxCredentials(_ context.Context, baseDir strin
 	}
 	if missing := s.missingAgentSources(baseDir, agentVars); len(missing) > 0 {
 		return domain.Diagnostic{ID: checkIDSandboxCredentials, Severity: domain.SeverityWarn,
-			Message: fmt.Sprintf("an active agent feature needs its credential at runtime but devcontainer.json has no reference for: %s (LH-FA-DEV-009).",
+			Message: fmt.Sprintf("an active agent or forge-CLI feature needs its credential at runtime but devcontainer.json has no reference for: %s (LH-FA-DEV-009).",
 				strings.Join(missing, ", ")),
 			Hint:               "Run `u-boot generate devcontainer` to restore the `${localEnv:<NAME>}` pass-through and export the variable on the host; never store the key in project files.",
 			SecurityRelaxation: true}

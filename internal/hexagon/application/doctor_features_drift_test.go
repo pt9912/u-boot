@@ -608,3 +608,31 @@ devcontainer:
 		})
 	}
 }
+
+// `gh` and `glab` are catalogue-activatable (no orphan finding) and render no
+// key, so the drift and allowlist checks stay silent whether or not
+// devcontainer.json has a `features` entry for them.
+func TestDoctor_FeaturesDrift_ForgeCLI(t *testing.T) {
+	t.Parallel()
+	const yaml = "schemaVersion: 1\nproject:\n  name: demo\ndevcontainer:\n  enabled: true\n  features:\n    gh:\n      enabled: true\n    glab:\n      enabled: true\n"
+	for name, jsonBody := range map[string]string{
+		"features empty": `{"features": {}}`,
+		"no features":    `{"name": "demo"}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			svc, fs, _, _, _ := newDoctorService(t)
+			driftSeed(t, fs, yaml, jsonBody)
+			resp, err := svc.Check(context.Background(), driving.DoctorRequest{BaseDir: doctorBaseDir})
+			if err != nil {
+				t.Fatalf("Check: %v", err)
+			}
+			for _, id := range []string{"devcontainer.features.drift", "devcontainer.features.allowlist"} {
+				d := findDiagnostic(t, resp.Report.Items, id)
+				if d.Severity != domain.SeverityOK {
+					t.Errorf("%s: Severity = %v, want OK; message = %q", id, d.Severity, d.Message)
+				}
+			}
+		})
+	}
+}

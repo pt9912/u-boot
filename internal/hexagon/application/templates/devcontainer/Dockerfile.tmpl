@@ -3,7 +3,7 @@
 FROM mcr.microsoft.com/devcontainers/base:debian
 
 # Non-root default user (LH-FA-DEV-004).
-{{- if or .UID .Sandbox}}
+{{- if or .UID .Sandbox .Gh .Glab}}
 USER root
 {{- if .UID}}
 ARG USER_UID={{.UID}}
@@ -92,6 +92,48 @@ RUN apt-get update \
  && apt-get purge -y --auto-remove zstd \
  && mkdir -p /home/vscode/.ollama \
  && chown vscode:vscode /home/vscode/.ollama
+{{- end}}
+{{- if .Gh}}
+# GitHub CLI (LH-FA-DEV-003): the release archive of cli/cli, only bin/gh is
+# extracted. Version and checksums are pinned here, in one place; the build
+# stops before the extraction unless the SHA-256 matches. The check catches a
+# release asset that was swapped later, not a release that was harmful from
+# the start: no signature was found for the archive (by search pattern, not
+# exhaustive), and the GitHub attestation the project publishes is not
+# verified. The image stores no token and runs no `gh auth login`.
+ARG GH_VERSION=2.103.0
+ARG GH_SHA256_AMD64=fdd768eb70f6409f80fcfa9f3a1c0adf0fc98d827ab3ce0bed2ac22762c5d786
+ARG GH_SHA256_ARM64=7f322df34e624d14f5ec0c4acb121fd6dfa14392fdbbd1066aa8e0a05ac3721e
+RUN arch="$(dpkg --print-architecture)" \
+ && case "$arch" in amd64) sha256="${GH_SHA256_AMD64}" ;; arm64) sha256="${GH_SHA256_ARM64}" ;; *) echo "gh has no archive for $arch" >&2; exit 1 ;; esac \
+ && work="$(mktemp -d)" \
+ && cd "$work" \
+ && curl -fsSLO "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_${arch}.tar.gz" \
+ && echo "${sha256}  gh_${GH_VERSION}_linux_${arch}.tar.gz" | sha256sum -c - \
+ && tar -xzf "gh_${GH_VERSION}_linux_${arch}.tar.gz" -C /usr/local --strip-components=1 --no-same-owner "gh_${GH_VERSION}_linux_${arch}/bin/gh" \
+ && cd / \
+ && rm -rf "$work"
+{{- end}}
+{{- if .Glab}}
+# GitLab CLI (LH-FA-DEV-003): the release archive of gitlab-org/cli, only
+# bin/glab is extracted. Version and checksums are pinned here, in one place;
+# the build stops before the extraction unless the SHA-256 matches. The check
+# catches a release asset that was swapped later, not a release that was
+# harmful from the start: no signature was found for the archive (by search
+# pattern, not exhaustive). The image stores no token and runs no
+# `glab auth login`.
+ARG GLAB_VERSION=1.124.0
+ARG GLAB_SHA256_AMD64=63df684842b0697e418649dd64374d37ac1da0fbcdcb422d6a5557222f8bb40f
+ARG GLAB_SHA256_ARM64=0716395a0efeb991fc844b33fe55310645afcbd9b9746e50c725e9d1cd1b8d16
+RUN arch="$(dpkg --print-architecture)" \
+ && case "$arch" in amd64) sha256="${GLAB_SHA256_AMD64}" ;; arm64) sha256="${GLAB_SHA256_ARM64}" ;; *) echo "glab has no archive for $arch" >&2; exit 1 ;; esac \
+ && work="$(mktemp -d)" \
+ && cd "$work" \
+ && curl -fsSLO "https://gitlab.com/gitlab-org/cli/-/releases/v${GLAB_VERSION}/downloads/glab_${GLAB_VERSION}_linux_${arch}.tar.gz" \
+ && echo "${sha256}  glab_${GLAB_VERSION}_linux_${arch}.tar.gz" | sha256sum -c - \
+ && tar -xzf "glab_${GLAB_VERSION}_linux_${arch}.tar.gz" -C /usr/local --no-same-owner bin/glab \
+ && cd / \
+ && rm -rf "$work"
 {{- end}}
 {{- if .Egress}}
 # Egress restriction (LH-FA-DEV-008).

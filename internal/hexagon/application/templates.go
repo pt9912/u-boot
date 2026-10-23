@@ -51,7 +51,7 @@ type templateData struct {
 	// devcontainer templates; WorkspaceFolder is the mount point of the
 	// workspace volume, CloneURL (may be empty)
 	// is the `origin` URL of the project repository. AgentEnv names the
-	// host variables of an active agent feature (LH-FA-DEV-009); the
+	// host variables of an active agent or forge-CLI feature (LH-FA-DEV-009); the
 	// template renders their `${localEnv:<NAME>}` references into
 	// `remoteEnv`, never a value.
 	Sandbox         bool
@@ -77,6 +77,11 @@ type templateData struct {
 	// Ollama switches on the Ollama installation block of the sandbox
 	// Dockerfile (LH-FA-DEV-003, sandbox profile only).
 	Ollama bool
+
+	// Gh and Glab switch on the installation block of the GitHub and the
+	// GitLab CLI in the Dockerfile (LH-FA-DEV-003, both profiles).
+	Gh   bool
+	Glab bool
 
 	// Egress switches on the LH-FA-DEV-008 outbound restriction;
 	// EgressHosts is the effective allowlist baked into the startup

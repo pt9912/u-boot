@@ -1058,6 +1058,8 @@ Ohne weitere Freigabe aktivierbar (`homebrew` und `claude-code` sind Drittanbiet
 | `homebrew` | Homebrew; **Drittanbieter-Feature** (`meaningful-ooo`, Version `2`): `u-boot generate devcontainer` weist es aus, sein Installationsskript läuft beim Image-Build |
 | `claude-code` | Claude Code CLI; **Drittanbieter-Feature** (`anthropics`, Version `1`): `u-boot generate devcontainer` weist es aus, sein Installationsskript läuft beim Image-Build; braucht das Feature `node` (siehe [Claude Code](#claude-code-optional)); keine Optionen |
 | `ollama` | Ollama (lokale Sprachmodelle, nur CPU); wirkt nur im Sandbox-Profil. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv (SHA-256 geprüft, vom Upstream nicht signiert; `u-boot generate devcontainer` weist das aus), dazu ein benanntes Volume für die Modelle; keine Optionen, `version` nur zusammen mit `source` (siehe [Ollama](#ollama-optional)) |
+| `gh` | GitHub-CLI. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv von `cli/cli` (SHA-256 geprüft, nur das Programm `gh` entpackt; keine Signatur gefunden, die GitHub-Attestierung des Projekts prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus). Wirkt im Standard- und im Sandbox-Profil; im Standardprofil steht dafür `USER root` im Dockerfile; keine Optionen, `version` nur zusammen mit `source` |
+| `glab` | GitLab-CLI. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv von `gitlab-org/cli` (SHA-256 geprüft, nur das Programm `glab` entpackt; keine Signatur gefunden; `u-boot generate devcontainer` weist das aus). Wirkt im Standard- und im Sandbox-Profil; im Standardprofil steht dafür `USER root` im Dockerfile; keine Optionen, `version` nur zusammen mit `source` |
 
 #### Externe Feature-Quellen freigeben
 
@@ -1594,6 +1596,8 @@ Standardmäßig erlaubt sind:
 | Feature `homebrew` | `formulae.brew.sh`, `ghcr.io`, `pkg-containers.githubusercontent.com` |
 | Feature `claude-code` | `registry.npmjs.org`, `api.anthropic.com` (Hosts der Anmeldung nicht: siehe [Claude Code](#claude-code-optional)) |
 | Feature `ollama` | `registry.ollama.ai`, `dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com` (Modell-Pull; Stabilität des zweiten Namens nicht gemessen: siehe [Ollama](#ollama-optional)) |
+| Feature `gh` | `api.github.com`, `github.com` (beide stehen schon in der Zeile „immer“) |
+| Feature `glab` | `gitlab.com` |
 | Clone-Quelle | der Host von `devcontainer.sandbox.repository` beziehungsweise `origin` |
 | Ihre Ergänzungen | `devcontainer.sandbox.egress.allow` (kleingeschriebene Hostnamen, ohne Schema, Port oder Wildcard) |
 
