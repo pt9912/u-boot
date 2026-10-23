@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v1-devcontainer-feature-gh-glab`](../../../../done/slice-v1-devcontainer-feature-gh-glab.md)
+**Fund:** Der Trigger der Beobachtung („ein weiterer Katalogeintrag mit Dockerfile-Block“) ist eingetreten: `gh` und `glab` sind zwei Blöcke mehr im Dockerfile neben `ollama` und den Runtime-Blöcken. Das Golden X4 pinnt Reihenfolge der Blöcke, `mounts` ohne Volume für `gh`/`glab`, die sortierte Vereinigung der Hosts und den NoOp des zweiten Laufs; die Kombination `gh` + `glab` + `ollama` + `nestedRuntime` (Podman oder Docker) wurde weder gebaut noch gestartet ([Verify-Report](../../../../../../reviews/2026-10-23-slice-v1-devcontainer-feature-gh-glab-verify.md), Abschnitt *Ungemessen*).
+
+**Beleg-Qualität:** Golden gelesen und gelaufen (Verifier, Mutation „Block von `gh` vor `USER root`“ färbt es rot), Lauf nicht gemessen. Die Beobachtung bleibt offen; kein Test, kein Carveout, nichts zugesagt.

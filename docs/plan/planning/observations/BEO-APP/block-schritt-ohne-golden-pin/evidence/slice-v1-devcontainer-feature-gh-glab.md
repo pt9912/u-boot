@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v1-devcontainer-feature-gh-glab`](../../../../done/slice-v1-devcontainer-feature-gh-glab.md)
+**Fund:** Verify-Report [`2026-10-23-slice-v1-devcontainer-feature-gh-glab-verify`](../../../../../../reviews/2026-10-23-slice-v1-devcontainer-feature-gh-glab-verify.md) V-1 (LOW): Mutation M6 (`chown vscode:vscode /usr/local/bin/gh` im `gh`-Block, Zeile 114 des Templates) bleibt in allen Unit- und Golden-Tests grün und färbt nur `BuildsInBothProfiles` (beide Profile, `OWNER:vscode root`). Review-Report [`2026-10-23-slice-v1-devcontainer-feature-gh-glab`](../../../../../../reviews/2026-10-23-slice-v1-devcontainer-feature-gh-glab.md) F-4 (INFO): `&& cd / \` → `&& cd /tmp \` blieb in beiden Paketen grün. Beide nicht behoben; die Closure ändert keinen Produktcode.
+
+**Beleg-Qualität:** nachgefahren (Verifier mit M6 in zwei Fassungen, Reviewer mit der `cd`-Mutation; Baum danach sauber). Erster Vorgang.
