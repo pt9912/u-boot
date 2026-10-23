@@ -1,8 +1,8 @@
-# Review-Report: [`slice-v1-handbuch-forge-cli-nachbesserung`](../plan/planning/in-progress/slice-v1-handbuch-forge-cli-nachbesserung.md) — 2026-10-23
+# Review-Report: [`slice-v1-handbuch-forge-cli-nachbesserung`](../plan/planning/done/slice-v1-handbuch-forge-cli-nachbesserung.md) — 2026-10-23
 
 **Review-Art:** Code (Handbuch-Text und Tests gegen Plan und Hard Rules)
 
-**Gegenstand:** Diff `f010a1f0..dd9d8b79` (Slice [`slice-v1-handbuch-forge-cli-nachbesserung`](../plan/planning/in-progress/slice-v1-handbuch-forge-cli-nachbesserung.md), Welle `welle-forge-cli-gh-glab`; Anlass: Befunde M-1, M-2 (Handbuch-Teil) und L-1 des Validator-Berichts `2026-10-23-welle-forge-cli-gh-glab-validierung`)
+**Gegenstand:** Diff `f010a1f0..dd9d8b79` (Slice [`slice-v1-handbuch-forge-cli-nachbesserung`](../plan/planning/done/slice-v1-handbuch-forge-cli-nachbesserung.md), Welle `welle-forge-cli-gh-glab`; Anlass: Befunde M-1, M-2 (Handbuch-Teil) und L-1 des Validator-Berichts `2026-10-23-welle-forge-cli-gh-glab-validierung`)
 
 **Skill:** `.harness/skills/reviewer.md` @ `dd9d8b79`
 **Modell:** claude-sonnet-5-5 · **Datum:** 2026-10-23
