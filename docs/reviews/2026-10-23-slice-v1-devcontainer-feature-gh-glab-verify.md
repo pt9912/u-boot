@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (Modul 11, [`harness/verification.md`](../../harness/verification.md)), frischer Kontext. Frage: Wurde der Slice richtig gebaut, gemessen an Plan, [`ADR-0035`](../plan/adr/0035-forge-clis-gh-und-glab-im-devcontainer.md) (`Accepted`), Lastenheft `0.22.0` und DoD?
 
-**Gegenstand:** Commit-Range `db989760..HEAD` (HEAD `604dea7f`), Slice [`slice-v1-devcontainer-feature-gh-glab`](../plan/planning/in-progress/slice-v1-devcontainer-feature-gh-glab.md), Welle [`welle-forge-cli-gh-glab`](../plan/planning/welle-forge-cli-gh-glab.md), [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), Review [`2026-10-23-slice-v1-devcontainer-feature-gh-glab.md`](2026-10-23-slice-v1-devcontainer-feature-gh-glab.md).
+**Gegenstand:** Commit-Range `db989760..HEAD` (HEAD `604dea7f`), Slice [`slice-v1-devcontainer-feature-gh-glab`](../plan/planning/done/slice-v1-devcontainer-feature-gh-glab.md), Welle [`welle-forge-cli-gh-glab`](../plan/planning/welle-forge-cli-gh-glab.md), [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), Review [`2026-10-23-slice-v1-devcontainer-feature-gh-glab.md`](2026-10-23-slice-v1-devcontainer-feature-gh-glab.md).
 
 ## Urteil
 

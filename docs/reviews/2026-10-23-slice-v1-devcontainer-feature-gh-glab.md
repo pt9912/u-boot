@@ -2,7 +2,7 @@
 
 **Rolle:** Reviewer (Modul 10, [`.harness/skills/reviewer.md`](../../.harness/skills/reviewer.md), [`harness/review.md`](../../harness/review.md)), frischer Kontext. Prüfung gegen Plan, [`ADR-0035`](../plan/adr/0035-forge-clis-gh-und-glab-im-devcontainer.md), Lastenheft 0.22.0 und Hard Rules, nicht gegen die DoD (Verifier).
 
-**Gegenstand:** Commit-Range `db989760..HEAD` (`a87749da`, `b7102f19`, `b930721a`, `19139e31`), Slice [`slice-v1-devcontainer-feature-gh-glab`](../plan/planning/in-progress/slice-v1-devcontainer-feature-gh-glab.md), Welle [`welle-forge-cli-gh-glab`](../plan/planning/welle-forge-cli-gh-glab.md), [`ADR-0035`](../plan/adr/0035-forge-clis-gh-und-glab-im-devcontainer.md), [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer).
+**Gegenstand:** Commit-Range `db989760..HEAD` (`a87749da`, `b7102f19`, `b930721a`, `19139e31`), Slice [`slice-v1-devcontainer-feature-gh-glab`](../plan/planning/done/slice-v1-devcontainer-feature-gh-glab.md), Welle [`welle-forge-cli-gh-glab`](../plan/planning/welle-forge-cli-gh-glab.md), [`ADR-0035`](../plan/adr/0035-forge-clis-gh-und-glab-im-devcontainer.md), [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer).
 
 ## Ergebnis
 
