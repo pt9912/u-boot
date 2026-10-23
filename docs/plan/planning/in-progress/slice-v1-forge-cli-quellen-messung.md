@@ -46,8 +46,8 @@ zusammen mit der Begründungs-Pflicht je Punkt.
 
 - **Der Lastenheft-CR und der Katalogeintrag im Code** — eigene Slices der Welle (Welle-Datei §4); die Zusage beruht auf der Messung, der CR schreibt sie danach, der Code folgt dem Lastenheft.
 - **Ein Produktcode-Eingriff** (Katalog, Egress-Tabelle, Vorlagen) — der Slice liefert Messskript, Protokoll, ADR und Entwurf, wie [`slice-v1-devcontainer-ollama-messung`](../done/slice-v1-devcontainer-ollama-messung.md).
-- **N1 bis N3 von [`ADR-0032`](../../adr/0032-katalog-features-socket-und-lockerungen.md)** ([`slice-v1-katalog-features-quellen-und-freigabe`](slice-v1-katalog-features-quellen-und-freigabe.md)) — anderer Gegenstand (Quellen von `cpp` und `postgres-client`, Render-Schlüssel, Freigabeprüfung in `generate`). Berührt die Messung eine externe Quelle, **nennt** das Protokoll diese Abhängigkeit als Ergebnis, der Slice behebt sie nicht (Welle-Datei §5).
-- **N4, der Bau von `docker-cli` auf dem Standard-Basis-Image** ([`slice-v1-docker-cli-bau-auf-standard-basis-image`](slice-v1-docker-cli-bau-auf-standard-basis-image.md)) — andere Ursache; zeigt die Messung dort einen gleichartigen Bau-Fehler bei `gh` oder `glab`, ist das ein Befund des Protokolls mit Ausgang, kein Umbau hier.
+- **N1 bis N3 von [`ADR-0032`](../../adr/0032-katalog-features-socket-und-lockerungen.md)** ([`slice-v1-katalog-features-quellen-und-freigabe`](../open/slice-v1-katalog-features-quellen-und-freigabe.md)) — anderer Gegenstand (Quellen von `cpp` und `postgres-client`, Render-Schlüssel, Freigabeprüfung in `generate`). Berührt die Messung eine externe Quelle, **nennt** das Protokoll diese Abhängigkeit als Ergebnis, der Slice behebt sie nicht (Welle-Datei §5).
+- **N4, der Bau von `docker-cli` auf dem Standard-Basis-Image** ([`slice-v1-docker-cli-bau-auf-standard-basis-image`](../open/slice-v1-docker-cli-bau-auf-standard-basis-image.md)) — andere Ursache; zeigt die Messung dort einen gleichartigen Bau-Fehler bei `gh` oder `glab`, ist das ein Befund des Protokolls mit Ausgang, kein Umbau hier.
 - **Selbst gehostete Instanzen, weitere Forge-Werkzeuge, Anmeldung durch `u-boot`** — Out-of-Scope der Welle (Welle-Datei §6); das Protokoll misst `github.com` und `gitlab.com` und sagt nichts über andere.
 
 ## 2. Definition of Done
@@ -100,7 +100,7 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 **Rückführungen — vorab benennen, nicht erst im Nachhinein begründen:**
 
 - `in-progress` → `next` (zu groß, zurück zur Zerlegung): die Messung zeigt, dass jedes Werkzeug einen eigenen Weg braucht und die Teilung in zwei Messungs-Slices sinnvoller ist; die Teilung entscheidet der Planner.
-- `in-progress` → `open` (blockiert): (a) eine Quelle verlangt eine externe Quelle, deren Auflösung und Freigabeprüfung ([`slice-v1-katalog-features-quellen-und-freigabe`](slice-v1-katalog-features-quellen-und-freigabe.md), N2 und N3) offen sind, und der Projektinhaber entscheidet über die Reihenfolge nicht; (b) der Projektinhaber entscheidet eine Quellenwahl nicht, die vom Muster abweicht.
+- `in-progress` → `open` (blockiert): (a) eine Quelle verlangt eine externe Quelle, deren Auflösung und Freigabeprüfung ([`slice-v1-katalog-features-quellen-und-freigabe`](../open/slice-v1-katalog-features-quellen-und-freigabe.md), N2 und N3) offen sind, und der Projektinhaber entscheidet über die Reihenfolge nicht; (b) der Projektinhaber entscheidet eine Quellenwahl nicht, die vom Muster abweicht.
 
 ## 5. Closure-Trigger
 
