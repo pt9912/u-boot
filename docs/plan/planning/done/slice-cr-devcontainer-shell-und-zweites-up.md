@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-devcontainer-shell-und-zweites-up`](../welle-devcontainer-shell-und-zweites-up.md) (Release `v0.14.0`). Erster von sechs Slices (Reihenfolge CR → Verhalten von `up` → Fundament von `shell` → Befehl `shell` → Spezifikation → Release-Cut; Muster [`slice-cr-devcontainer-start-ohne-editor`](../done/slice-cr-devcontainer-start-ohne-editor.md)).
+**Welle:** [`welle-devcontainer-shell-und-zweites-up`](welle-devcontainer-shell-und-zweites-up.md) (Release `v0.14.0`). Erster von sechs Slices (Reihenfolge CR → Verhalten von `up` → Fundament von `shell` → Befehl `shell` → Spezifikation → Release-Cut; Muster [`slice-cr-devcontainer-start-ohne-editor`](../done/slice-cr-devcontainer-start-ohne-editor.md)).
 
 **Bezug:** [`LH-FA-DEV-010`](../../../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten) (Fehlerklassen, neuer Befehl, Socket-Dauer), [`LH-SA-CLI-002`](../../../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle) (Befehlsübersicht), [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil) (Abgrenzung des Hilfs-Containers), [`LH-FA-CLI-005`](../../../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging) (`--quiet`, Ausnahme 1; Fund der Vorab-Suche, §1); [`ADR-0030`](../../adr/0030-devcontainer-up-failed-nach-zustand.md) (Entscheidung des Projektinhabers c) und [`ADR-0031`](../../adr/0031-devcontainer-shell-ohne-editor.md) (Entscheidung des Projektinhabers e), beide `Accepted` seit `ec8fdf5a`.
 

@@ -19,7 +19,7 @@
 
 Scope:
 
-- Slice: [`slice-cr-devcontainer-shell-und-zweites-up`](../plan/planning/done/slice-cr-devcontainer-shell-und-zweites-up.md), Lastenheft `0.19.0` → `0.20.0`, Teil von [`welle-devcontainer-shell-und-zweites-up`](../plan/planning/welle-devcontainer-shell-und-zweites-up.md).
+- Slice: [`slice-cr-devcontainer-shell-und-zweites-up`](../plan/planning/done/slice-cr-devcontainer-shell-und-zweites-up.md), Lastenheft `0.19.0` → `0.20.0`, Teil von [`welle-devcontainer-shell-und-zweites-up`](../plan/planning/done/welle-devcontainer-shell-und-zweites-up.md).
 - IDs: [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-SA-CLI-002`](../../spec/lastenheft.md#lh-sa-cli-002--vorgesehene-befehle), [`LH-FA-DEV-006`](../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-CLI-005`](../../spec/lastenheft.md#lh-fa-cli-005--verbosity-und-logging); Träger [`ADR-0030`](../plan/adr/0030-devcontainer-up-failed-nach-zustand.md) und [`ADR-0031`](../plan/adr/0031-devcontainer-shell-ohne-editor.md) (beide `Accepted`, unverändert).
 - Artefakte: `spec/lastenheft.md`, Slice, Roadmap, `open/README.md`, Messstände-CR, Welle-Datei, drei Review-Reports; fremd (Planner): die Pläne der Folge-Slices.
 

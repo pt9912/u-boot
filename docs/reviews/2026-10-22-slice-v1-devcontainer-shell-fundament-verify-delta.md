@@ -12,7 +12,7 @@
 
 Scope:
 
-- Slice: [`slice-v1-devcontainer-shell-fundament`](../plan/planning/done/slice-v1-devcontainer-shell-fundament.md), dritter von sechs der Welle [`welle-devcontainer-shell-und-zweites-up`](../plan/planning/welle-devcontainer-shell-und-zweites-up.md) (Release `v0.14.0`).
+- Slice: [`slice-v1-devcontainer-shell-fundament`](../plan/planning/done/slice-v1-devcontainer-shell-fundament.md), dritter von sechs der Welle [`welle-devcontainer-shell-und-zweites-up`](../plan/planning/done/welle-devcontainer-shell-und-zweites-up.md) (Release `v0.14.0`).
 - IDs: [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten), [`LH-FA-CLI-006`](../../spec/lastenheft.md#lh-fa-cli-006--exit-codes); [`ADR-0031`](../plan/adr/0031-devcontainer-shell-ohne-editor.md) (`Accepted`, unverändert), [`ADR-0034`](../plan/adr/0034-devcontainer-shell-ende-des-clients-und-keine-login-shell.md) (`Accepted`, unverändert).
 - Artefakte des Deltas: `internal/adapter/driven/docker/devcontainer_shell.go` (`userMissingOnStdout`, `missingUserLead`, `headBuffer.singleLine`, Aufrufkette in `clientErrorBeforeSession`, Vergleich in `clientMessageOnStderr`), `internal/adapter/driven/docker/devcontainer_shell_test.go`, `internal/hexagon/port/driven/devcontainer_launcher.go` (Doc-Kommentar von `Shell`), der Slice, der Nachlauf-Report, Planungsdateien der Closure-Vorbereitung.
 
