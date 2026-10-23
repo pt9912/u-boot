@@ -11,9 +11,18 @@ this file is the same format applied to u-boot itself.
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-10-23
+
+Fifteenth release. **Forge CLIs in the devcontainer: the catalogue features `gh` (GitHub CLI) and `glab` (GitLab CLI).**
+`u-boot config set devcontainer.features.gh.enabled true` (and `glab`), then `u-boot generate devcontainer`: the tool is in the container after the build, in the default and in the sandbox profile (entry below). A token reaches the container only as an environment variable of the host (`GH_TOKEN`, `GITLAB_TOKEN`); in the sandbox profile `devcontainer.json` carries a `${localEnv:…}` reference, never a value. The default profile carries no reference; the way there, `docker exec -e GH_TOKEN`, is in the user manual (measured once with a placeholder).
+**Promised only on a Linux host (`amd64`) with a local Docker engine** (measured with Docker 29.9.2); **not promised:** macOS with Colima (whoever installs `u-boot` with Homebrew finds the features, but they are not promised there), Docker Desktop, rootless Docker, Podman as host engine, a remote engine, Linux `arm64`, Windows.
+**No authenticated call of `gh` or `glab` is measured:** every call with a token variable ran with a placeholder and ended in 401 or `Bad credentials`. Measured is what works without a valid token: the build of the generated Dockerfile in both profiles (also once per profile without the layer cache, downloads from GitHub and GitLab, base image already local), the versions, the notices, the egress hosts and the behaviour with and without the variable. Not promised: `glab duo` and `glab orbit`, self-hosted instances, hosts after a sign-in, telemetry and update hosts (the user manual names them).
+**Limit of `version:`:** `version:` without `source:` ends `u-boot generate devcontainer` with exit code `10`. `u-boot config set devcontainer.features.<feature>.version <value>` does not check this yet: it reports success and writes the entry, and then `generate`, `doctor` and every further `config set` reject the project (one run, Linux `amd64`); the way out is to remove the `version` entry from `u-boot.yaml` by hand. The check in `config set` is a follow-up, not part of this release.
+Configurations without `gh` and `glab` render byte-identical. Lastenheft 0.22.0.
+
 ### Added
 
-- Catalogue features `gh` (GitHub CLI) and `glab` (GitLab CLI) ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-009`](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)). `u-boot config set devcontainer.features.gh.enabled true` (and `glab`) makes `u-boot generate devcontainer` write a Dockerfile block per tool in the default and in the sandbox profile: the pinned release archive (`gh` 2.103.0 of `cli/cli`, `glab` 1.124.0 of `gitlab-org/cli`), checked by its SHA-256 before the extraction, only the program extracted. No signature was found for either archive (by search pattern, not exhaustive); the GitHub attestation of `gh` is not verified by `u-boot`; `u-boot generate devcontainer` prints one notice per active feature, and `--quiet` drops it. `version:` without `source:` ends with exit code `10`. With the egress restriction the hosts `api.github.com` and `github.com` (`gh`; both are in the base list already) and `gitlab.com` (`glab`) are allowed. In the sandbox profile `remoteEnv` passes `GH_TOKEN` and `GITLAB_TOKEN` as `${localEnv:…}` references next to `GIT_TOKEN` (never a value), and `u-boot doctor` checks the reference and plain-text tokens in project files. The default profile gets no token reference. Calls with a valid token, hosts after a sign-in, telemetry and update hosts, self-hosted instances, `glab duo` and `glab orbit` are not promised.
+- Catalogue features `gh` (GitHub CLI) and `glab` (GitLab CLI) ([`LH-FA-DEV-003`](spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-009`](spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)). `u-boot config set devcontainer.features.gh.enabled true` (and `glab`) makes `u-boot generate devcontainer` write a Dockerfile block per tool in the default and in the sandbox profile: the pinned release archive (`gh` 2.103.0 of `cli/cli`, `glab` 1.124.0 of `gitlab-org/cli`), checked by its SHA-256 before the extraction, only the program extracted. No signature was found for either archive (by search pattern, not exhaustive); the GitHub attestation of `gh` is not verified by `u-boot`; `u-boot generate devcontainer` prints one notice per active feature, and `--quiet` drops it. `version:` without `source:` ends `u-boot generate devcontainer` with exit code `10` (`u-boot config set` does not check it yet, see the lead above). With the egress restriction the hosts `api.github.com` and `github.com` (`gh`; both are in the base list already) and `gitlab.com` (`glab`) are allowed. In the sandbox profile `remoteEnv` passes `GH_TOKEN` and `GITLAB_TOKEN` as `${localEnv:…}` references next to `GIT_TOKEN` (never a value), and `u-boot doctor` checks the reference and plain-text tokens in project files. The default profile gets no token reference. Calls with a valid token, hosts after a sign-in, telemetry and update hosts, self-hosted instances, `glab duo` and `glab orbit` are not promised.
 
 ### Changed
 
@@ -1501,7 +1510,8 @@ the exact match strings are the workflow `name:` fields
 `image-scan (trivy HIGH+CRITICAL)`), not the shorter `jobs.<key>`
 identifiers.
 
-[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/pt9912/u-boot/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/pt9912/u-boot/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/pt9912/u-boot/compare/v0.13.1...v0.14.0
 [0.13.1]: https://github.com/pt9912/u-boot/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/pt9912/u-boot/compare/v0.12.0...v0.13.0
