@@ -2054,6 +2054,27 @@ gibt es nicht: `version` ohne `source` weist `u-boot` mit Exit-Code `10` ab, und
 unter [Externe Feature-Quellen freigeben](#externe-feature-quellen-freigeben)) ohne
 Dockerfile-Block.
 
+Steht in `u-boot.yaml` ein `version` zu `gh` oder `glab` ohne `source`, lehnen
+`u-boot generate devcontainer` und jedes weitere `u-boot config set` die Datei mit
+Exit-Code `10` ab, und `u-boot doctor` meldet in der Prüfung `uboot.yaml.valid` einen
+Fehler. Die Abhilfe: Entfernen Sie den Eintrag `version` in `u-boot.yaml` von Hand; danach
+läuft `u-boot generate devcontainer` wieder. Zurzeit meldet auch
+`u-boot config set devcontainer.features.gh.version <Wert>` ohne `source` Erfolg und
+schreibt den Eintrag, und erst der nächste Befehl lehnt die Datei ab.
+
+**Anmeldung in kurzer Form.** `u-boot` meldet nichts an und speichert kein Token; die
+Werkzeuge lesen es aus einer Umgebungsvariable, `GH_TOKEN` für `gh` und `GITLAB_TOKEN` für
+`glab`. Im Sandbox-Profil setzen Sie die Variable auf dem Host, bevor Sie
+`u-boot devcontainer up` oder `u-boot devcontainer shell` aufrufen; beide geben sie weiter.
+Im Standardprofil steht keine Token-Referenz in `devcontainer.json`, und `shell` gibt die
+Variablen nicht weiter; dort geben Sie die Variable mit `docker exec -e GH_TOKEN -u <Benutzer>
+<Container> …` mit (gemessen mit einem Platzhalter).
+
+Ohne Variable endet `gh api` mit Exit-Code 4, `glab` liest ein öffentliches Projekt weiter;
+mit einem Platzhalter antworten die Werkzeuge mit `401`, ein Aufruf mit einem gültigen
+Token ist nicht gemessen. `gh auth login` und `glab auth login` im Container sind nicht
+geprüft. Die Spiegelstriche unten tragen die Belege und Messvorbehalte.
+
 - **Beide Profile:** Die Features wirken im Standard- und im Sandbox-Profil. Im
   Standardprofil steht dafür `USER root` im Dockerfile (nur mit einem aktiven Feature oder
   einer UID-Überschreibung, bei beidem einmal); `devcontainer.json` bleibt dort
@@ -2076,8 +2097,9 @@ Dockerfile-Block.
   [Zugangsdaten](#zugangsdaten-git-und-agent)). Die Werkzeuge lesen auch `GITHUB_TOKEN`,
   `GITLAB_ACCESS_TOKEN` und `OAUTH_TOKEN` (gemessen mit einem Platzhalter: sie versuchen
   die Anfrage mit dem Wert); `u-boot` reicht nur `GH_TOKEN` und `GITLAB_TOKEN` durch.
-  `u-boot devcontainer shell` öffnet die Shell mit den beiden Variablen, soweit sie auf dem
-  Host gesetzt sind; eine auf dem Host ungesetzte Variable fehlt in der Sitzung.
+  Im Sandbox-Profil öffnet `u-boot devcontainer shell` die Shell mit den beiden Variablen,
+  soweit sie auf dem Host gesetzt sind; eine auf dem Host ungesetzte Variable fehlt in der
+  Sitzung. Im Standardprofil gibt `shell` sie nicht weiter (siehe unten).
 - **Ohne Variable** (gemessen mit einer in der Umgebung des Werkzeugs nicht gesetzten
   Variable): `gh api` endet mit Exit-Code 4 und dem Hinweis, `gh auth login` auszuführen oder
   `GH_TOKEN` zu setzen; `gh auth status` endet mit Exit-Code 1. `glab` liest ein
@@ -2095,9 +2117,18 @@ Dockerfile-Block.
 - **Standardprofil, keine Token-Referenz:** Das Standardprofil erzeugt kein `remoteEnv`
   und damit keine Token-Referenz; `u-boot doctor` prüft die Variable dort nicht. Das
   Feature wirkt trotzdem: Das Programm liegt im Image. Die gemessene Quelle des Tokens ist
-  die Umgebungsvariable des Werkzeugs; wie sie im Standardprofil in den Container kommt,
-  regelt `u-boot` nicht, und ein bestimmter Weg ist weder zugesagt noch gemessen. Das
-  Sandbox-Profil reicht die Variable des Hosts durch.
+  die Umgebungsvariable des Werkzeugs. `u-boot devcontainer shell` gibt nur Variablen
+  weiter, auf die `devcontainer.json` verweist; im Standardprofil also weder `GH_TOKEN` noch
+  `GITLAB_TOKEN`. Der gemessene Weg ist `docker exec -e GH_TOKEN -u <Benutzer> <Container> …`
+  (ebenso `-e GITLAB_TOKEN`): Ist die Variable auf dem Host gesetzt, kommt sie im Aufruf an,
+  ohne `-e` fehlt sie, und ist sie auf dem Host ungesetzt, fehlt sie auch im Container
+  (gemessen mit einem Platzhalter statt eines Tokens, Linux `amd64`, lokale Docker Engine
+  29.9.2, ein Lauf, in einem Container ohne die Forge-CLIs; die Antwort der Werkzeuge auf einen
+  Platzhalter steht im vorigen Spiegelstrich). Ein Aufruf von `gh` oder `glab` mit einem
+  gültigen Token auf diesem Weg ist nicht gemessen und nicht zugesagt. `gh auth login` und
+  `glab auth login` im Container sind nicht geprüft: Kein Aufruf mit einem Token, und ob
+  ein dabei abgelegtes Token das Neuanlegen des Containers übersteht, ist nicht geprüft.
+  Das Sandbox-Profil reicht die Variable des Hosts durch.
 - **`doctor`:** Im Sandbox-Profil warnt `u-boot doctor` bei aktivem Feature, wenn
   `devcontainer.json` die Referenz auf `GH_TOKEN` beziehungsweise `GITLAB_TOKEN` nicht
   trägt, und vor Token-Mustern und Zuweisungen mit einem Wert in den Projektdateien. Die
@@ -2165,9 +2196,11 @@ erzeugten Datei:
   im Hilfs-Container während eines Lebenszyklus-Befehls) stehen in Abschnitt 4.9. In einer
   Shell, die Sie ohne Editor mit `docker exec` öffnen, gilt `remoteEnv` nicht, und `GIT_TOKEN`
   ist dort nicht gesetzt; geben Sie die Variable mit `docker exec -e GIT_TOKEN` mit (Abschnitt
-  4.9, „Im Container arbeiten“). `u-boot devcontainer shell` öffnet die Shell mit `GIT_TOKEN`,
-  dem Schlüssel des Agenten und den Token-Variablen von `gh` und `glab`, soweit sie auf dem
-  Host gesetzt sind.
+  4.9, „Im Container arbeiten“). Im Sandbox-Profil öffnet `u-boot devcontainer shell` die
+  Shell mit `GIT_TOKEN`, dem Schlüssel des Agenten und den Token-Variablen von `gh` und
+  `glab`, soweit sie auf dem Host gesetzt sind; im Standardprofil gibt `shell` nur die
+  Variablen weiter, auf die die `devcontainer.json` verweist (siehe
+  [Forge-CLIs](#forge-clis-optional)).
 - Empfohlen: **kurzlebige, auf das Repository begrenzte Tokens**, nie ein
   privater Schlüssel im Container, und **Branch-Protection** im Remote, damit ein
   kompromittierter Agent nicht auf geschützte Branches schreiben kann.

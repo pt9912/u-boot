@@ -19,7 +19,7 @@ stehen in der Welle-Datei, nicht hier.
 
 Offen: [`welle-forge-cli-gh-glab`](../welle-forge-cli-gh-glab.md) (Forge-CLIs `gh` und `glab` als Katalog-Features im Devcontainer, auch im Sandbox-Profil; sechs Slices (die Kennung des sechsten vorläufig), der Release-Cut zuletzt; Release `v0.15.0`).
 
-Nichts in Arbeit.
+In Arbeit: [`slice-v1-handbuch-forge-cli-nachbesserung`](slice-v1-handbuch-forge-cli-nachbesserung.md) (fünfter Slice der Welle `welle-forge-cli-gh-glab`: Handbuch zu Standardprofil-Weg, `shell`-Sätzen, Anmeldung und Abhilfe bei ungültiger `version`, mit Aussage-Beleg-Tabelle).
 
 ## Nächste Wellen
 
