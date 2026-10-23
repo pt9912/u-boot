@@ -17,6 +17,8 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
+Offen: [`welle-forge-cli-gh-glab`](../welle-forge-cli-gh-glab.md) (Forge-CLIs `gh` und `glab` als Katalog-Features im Devcontainer, auch im Sandbox-Profil; sechs Slices (vier davon als Kennung vorläufig), der Release-Cut zuletzt; Release `v0.15.0`).
+
 Nichts in Arbeit.
 
 ## Nächste Wellen
@@ -24,7 +26,6 @@ Nichts in Arbeit.
 | Welle | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|
 | `welle-ollama-cloud-modelle` (Cloud-Modelle von Ollama mit Claude Code im Sandbox-Devcontainer, `ollama launch claude`) | Release der Welle `welle-sandbox-egress-ollama` geschnitten (eingetreten: `v0.12.0`, 2026-10-19); Beauftragung durch den Projektinhaber (2026-10-19, eingetreten: Lücke im Lastenheft 0.15.0, Cloud-Modelle sind weder zugesagt noch ausgeschlossen) | `slice-v1-ollama-cloud-messung` (Hosts, Anmeldung, Zusammenspiel mit `claude-code`; noch kein Plan), danach ADR, Lastenheft-CR, Code, Spezifikation | M |
-| `welle-forge-cli-gh-glab` (Katalog-Features für die Forge-CLIs `gh` (GitHub) und `glab` (GitLab) im Devcontainer, auch im Sandbox-Profil mit Egress-Hosts und ohne Zugangsdaten in erzeugten Dateien) | Beauftragung durch den Projektinhaber (2026-10-19, eingetreten); Eröffnung nach dem Release-Cut der laufenden Linie (eingetreten: `v0.12.0`, 2026-10-19; die Welle ist beauftragt, aber noch nicht eröffnet, ihre Datei steht aus) | `slice-v1-forge-cli-quellen-messung` (Quelle und Prüfung der Lieferkette je Werkzeug, Hosts im Sandbox-Profil, Umgang mit Tokens; noch kein Plan), danach ADR, Lastenheft-CR, Code `gh`, Code `glab`, Spezifikation | M |
 | Harness-Scaffolding (Produkt) | [ADR-0011](../../adr/0011-agent-harness-scaffolding.md) accepted + Spec-Erweiterung + Lizenz-Check | `slice-vN-harness-bootstrap-scaffold` (noch kein Plan) | L |
 | Podman-first / Migration / Custom-Sources | Konkretisierung je Thema offen | `slice-vN-podman-formal`; `slice-later-migration` ([`LH-FA-CONF-006`](../../../../spec/lastenheft.md#lh-fa-conf-006--konfiguration-migrieren)); `slice-later-custom-data-sources` ([`LH-DA-004`](../../../../spec/lastenheft.md#lh-da-004--schema-migration)) | L |
 
