@@ -81,7 +81,7 @@ Aussagen-Berührung steht hier gar nicht.
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
-| `tools/messung/forge-cli/` | neu | Messskripte `00-alles.sh` bis `08-aufraeumen.sh`, `lib.sh`, `inner-02*.sh`, `inner-03*.sh`, `inner-07.sh`, `Dockerfile.cli`, vier `block-*.dockerfile`; Muster `tools/messung/ollama-amd64/` (gelesen: `lib.sh`, `02-projekte.sh`, `03-bau.sh`, `05-laufzeit.sh`, `inner-05.sh`, `10-devcontainer-cli.sh`, `11-aufraeumen.sh`, `Dockerfile.cli`) |
+| `tools/messung/forge-cli/` | neu | Messskripte `00-alles.sh` bis `08-aufraeumen.sh`, `lib.sh`, `redact-probe.sh` (Gegenprobe zu `redact`), `inner-02*.sh`, `inner-03*.sh`, `inner-07.sh`, `Dockerfile.cli`, vier `block-*.dockerfile`; Muster `tools/messung/ollama-amd64/` (gelesen: `lib.sh`, `02-projekte.sh`, `03-bau.sh`, `05-laufzeit.sh`, `inner-05.sh`, `10-devcontainer-cli.sh`, `11-aufraeumen.sh`, `Dockerfile.cli`) |
 | `docs/messungen/slice-v1-forge-cli-quellen-messung/` | neu | `README.md` (Messprotokoll), `wortlaut-entwurf.md` (Wortlaut-Entwurf für den CR) und Rohdaten (`.txt`, `.log`); Umgebung, Datum, Läufe je Aussage; keine Tokenwerte |
 | `docs/plan/adr/0035-forge-clis-gh-und-glab-im-devcontainer.md`, `docs/plan/adr/README.md` | neu / update | Folge-ADR nach MADR ([`MR-008`](../../../../harness/conventions/MR-008-adr-form.md)), Status `Proposed`; Index-Zeile (letzte ADR-Datei am 2026-10-23: `0034-…`) |
 | `docs/messungen/README.md` | update | Zeile im Bestand (Verzeichnis und Skripte) |

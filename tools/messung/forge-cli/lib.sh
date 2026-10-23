@@ -32,14 +32,22 @@ tool() { docker run --rm -i -u "$(id -u):$(id -g)" -v "$WORK":/w -v "$here":/m:r
 # u-boot im Messordner: u <unterverzeichnis> <argumente...>
 u() { local d=$1; shift; docker run --rm -v "$WORK/$d":/w -w /w -u "$(id -u):$(id -g)" -e HOME=/tmp "$UB" "$@"; }
 
-# Schwaerzt vorsignierte URLs, Autorisierungs-Header, bekannte Token-Praefixe und den Home-Pfad, bevor eine Zeile in eine Rohdatei gelangt.
+# Schwaerzt vorsignierte URLs, Autorisierungs- und Token-Header (Gross-/Kleinschreibung gleich), Zuweisungen an Namen mit TOKEN, SECRET, PASSWORD
+# oder API_KEY, JSON-Felder mit solchen Namen, Zugangsdaten in URLs, bekannte Token-Praefixe und den Home-Pfad, bevor eine Zeile in eine Rohdatei
+# gelangt. Grenze: ein Token ohne Praefix und ohne eine dieser Formen (etwa als nacktes Wort in einer Fehlermeldung) wird nicht erkannt;
+# Verweise auf eine Variable (Wert beginnt mit $ oder %) und Zeilen AUSSAGE (Messwerte, ohne Zugangsdaten) bleiben stehen; redact-probe.sh pinnt die Formen, nicht die Vollstaendigkeit.
 redact() {
   docker run --rm -i "$BASE" sed -u -E \
-    -e 's/\?[^" ]*(X-Amz|Signature|Credential|token=|sig=|X-Goog)[^" ]*/?[Query entfernt: vorsignierte URL]/g' \
-    -e 's/(Authorization:? +)([A-Za-z]+ +)?[^ ]+/\1[entfernt]/g' \
-    -e 's/(Bearer|Basic) +[^ ]+/\1 [entfernt]/g' \
-    -e 's/(Authorization|Bearer|X-Amz-[A-Za-z-]*)[:= ]+[^ ]+/\1 [entfernt]/g' \
-    -e 's/(ghp_|gho_|ghu_|ghs_|ghr_|github_pat_|glpat-)[A-Za-z0-9_-]{8,}/\1[entfernt]/g' \
+    -e 's/\?[^" ]*(X-Amz|Signature|Credential|token=|sig=|X-Goog)[^" ]*/?[Query entfernt: vorsignierte URL]/gI' \
+    -e 's/(Authorization:? +)([A-Za-z]+ +)?[^ ]+/\1[entfernt]/gI' \
+    -e 's/(Bearer|Basic) +[^ ]+/\1 [entfernt]/gI' \
+    -e 's/(Authorization|Bearer|X-Amz-[A-Za-z-]*)[:= ]+[^ ]+/\1 [entfernt]/gI' \
+    -e 's/((private|job|deploy|auth|access)-token|x-[a-z-]*token): *[^ ]+/\1: [entfernt]/gI' \
+    -e '/^AUSSAGE /!s/([A-Za-z0-9_.-]*(token|secret|passw(or)?d|api_?key)[A-Za-z0-9_.-]*)=[^ $%][^ ]*/\1=[entfernt]/gI' \
+    -e 's/"([A-Za-z0-9_]*(token|secret|passw(or)?d|api_?key|authorization)[A-Za-z0-9_]*)" *: *"[^"$][^"]*"/"\1":"[entfernt]"/gI' \
+    -e 's#(://[^/:@ ]*):[^/@ ]+@#\1:[entfernt]@#g' \
+    -e 's#(x-access-token|oauth2):[^/@ ]+@#\1:[entfernt]@#gI' \
+    -e 's/(ghp_|gho_|ghu_|ghs_|ghr_|github_pat_|glpat-|glptt-|gldt-|glrt-|sk-ant-)[A-Za-z0-9_-]{8,}/\1[entfernt]/g' \
     -e "s#/home/$(id -un)#/home/<benutzer>#g"
 }
 
@@ -53,7 +61,7 @@ now() { date -u +%Y-%m-%dT%H:%M:%S.%3NZ; }
 mark() { echo "---- $(now) $*"; }
 # Differenz zweier `date +%s.%N`-Werte in Sekunden mit einer Nachkommastelle (Ganzzahl-Arithmetik der Shell).
 sekunden() { local a=${1/./} b=${2/./}; local d=$(( (b - a) / 100000000 )); echo "$((d / 10)).$((d % 10))"; }
-# Eine stabile Aussage, die ein zweiter Lauf wiederholen muss (siehe README, Abschnitt Wiederholung).
+# Eine stabile Aussage, die ein zweiter Lauf wiederholen muss (siehe README, Abschnitt Lesehilfen).
 aussage() { echo "AUSSAGE $*"; }
 
 # Bestand der Docker-Objekte auf stdout: je Art nur die Anzahl und die Objekte, deren Name das Praefix der Messung traegt (auch die

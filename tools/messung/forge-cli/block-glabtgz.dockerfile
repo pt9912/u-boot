@@ -1,6 +1,6 @@
 # HAND-Variante (kein Katalogeintrag, nicht von u-boot erzeugt), Form des Ollama-Blocks: gepinntes Release-Archiv von gitlab-org/cli.
 # Version und Pruefsummen (aus checksums.txt des Release, gelesen am 2026-10-23) stehen hier; der Bau bricht vor dem Entpacken ab, wenn die
-# SHA-256 nicht passt. Das Projekt veroeffentlicht keine Signatur und keine Attestierung fuer die Archive (rohdaten-03.txt).
+# SHA-256 nicht passt. Nach dem Suchmuster der Messung (rohdaten-03.txt, nicht abschliessend) wurde keine Signatur und keine Attestierung fuer die Archive gefunden.
 ARG GLAB_VERSION=1.124.0
 ARG GLAB_SHA256_AMD64=63df684842b0697e418649dd64374d37ac1da0fbcdcb422d6a5557222f8bb40f
 ARG GLAB_SHA256_ARM64=0716395a0efeb991fc844b33fe55310645afcbd9b9746e50c725e9d1cd1b8d16
