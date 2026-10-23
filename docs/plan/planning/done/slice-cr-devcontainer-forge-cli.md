@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** [`welle-forge-cli-gh-glab`](../welle-forge-cli-gh-glab.md) (Release `v0.15.0`). Zweiter von fünf Slices (Reihenfolge Messung → CR → Code → Spezifikation → Release-Cut, Welle §4; Muster [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md) und [`slice-cr-devcontainer-shell-und-zweites-up`](../done/slice-cr-devcontainer-shell-und-zweites-up.md)).
+**Welle:** [`welle-forge-cli-gh-glab`](welle-forge-cli-gh-glab.md) (Release `v0.15.0`). Zweiter von fünf Slices (Reihenfolge Messung → CR → Code → Spezifikation → Release-Cut, Welle §4; Muster [`slice-cr-devcontainer-ollama`](../done/slice-cr-devcontainer-ollama.md) und [`slice-cr-devcontainer-shell-und-zweites-up`](../done/slice-cr-devcontainer-shell-und-zweites-up.md)).
 
 **Bezug:** [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Katalog, Beispiele, Zusage-Grenzen), [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer) (Zugangsdaten eines Forge-Werkzeugs, Token-Variablen, `doctor`); [`ADR-0035`](../../adr/0035-forge-clis-gh-und-glab-im-devcontainer.md) (`Accepted`, Entscheidungen des Projektinhabers a bis d, f und h vom 2026-10-23). Unverändert und nur gelesen: [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (Begründung §1, *Stelle 3*).
 

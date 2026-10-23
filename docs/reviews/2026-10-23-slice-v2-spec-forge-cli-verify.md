@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (Modul 11, [`harness/verification.md`](../../harness/verification.md)), frischer Kontext, kein Self-Review, kein Reparieren. Frage: Wurde der Slice richtig gebaut, gemessen an Plan, DoD, [`ADR-0035`](../plan/adr/0035-forge-clis-gh-und-glab-im-devcontainer.md), Lastenheft `0.22.0` und Code?
 
-**Gegenstand:** [`slice-v2-spec-forge-cli`](../plan/planning/done/slice-v2-spec-forge-cli.md) (Welle [`welle-forge-cli-gh-glab`](../plan/planning/welle-forge-cli-gh-glab.md)), Diff `d22b7d61..b52a531d`, Vertrag [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte). Review: [`2026-10-23-slice-v2-spec-forge-cli.md`](2026-10-23-slice-v2-spec-forge-cli.md) (kein HIGH/MEDIUM, drei LOW), Fix-Runde `b52a531d`.
+**Gegenstand:** [`slice-v2-spec-forge-cli`](../plan/planning/done/slice-v2-spec-forge-cli.md) (Welle [`welle-forge-cli-gh-glab`](../plan/planning/done/welle-forge-cli-gh-glab.md)), Diff `d22b7d61..b52a531d`, Vertrag [`LH-FA-DEV-003`](../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-009`](../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer), [`LH-FA-DEV-008`](../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion), [`LH-NFA-SEC-004`](../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte). Review: [`2026-10-23-slice-v2-spec-forge-cli.md`](2026-10-23-slice-v2-spec-forge-cli.md) (kein HIGH/MEDIUM, drei LOW), Fix-Runde `b52a531d`.
 
 ## Ergebnis
 

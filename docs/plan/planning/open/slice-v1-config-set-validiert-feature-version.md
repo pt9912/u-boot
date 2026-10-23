@@ -9,7 +9,7 @@ aus `open/` oder `next/` nach `done/` — §7 nennt in der Zeile `Gegenstand:`
 Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 (§Ein Slice, dessen Gegenstand ein anderer übernimmt).
 
-**Welle:** ohne Welle. Folge-Punkt von [`welle-forge-cli-gh-glab`](../welle-forge-cli-gh-glab.md) (Befund M-2 des Validator-Berichts [`2026-10-23-welle-forge-cli-gh-glab-validierung`](../../../reviews/2026-10-23-welle-forge-cli-gh-glab-validierung.md)); **nicht vor dem Release-Cut `v0.15.0`**, die Release-Zuordnung trifft der Projektinhaber. Es gibt keine Closure-Bedingung, die von der DoD dieses Slice verschieden wäre. Den Handbuch-Satz mit der Abhilfe liefert vor dem Cut [`slice-v1-handbuch-forge-cli-nachbesserung`](../done/slice-v1-handbuch-forge-cli-nachbesserung.md).
+**Welle:** ohne Welle. Folge-Punkt von [`welle-forge-cli-gh-glab`](../done/welle-forge-cli-gh-glab.md) (Befund M-2 des Validator-Berichts [`2026-10-23-welle-forge-cli-gh-glab-validierung`](../../../reviews/2026-10-23-welle-forge-cli-gh-glab-validierung.md)); **nicht vor dem Release-Cut `v0.15.0`**, die Release-Zuordnung trifft der Projektinhaber. Es gibt keine Closure-Bedingung, die von der DoD dieses Slice verschieden wäre. Den Handbuch-Satz mit der Abhilfe liefert vor dem Cut [`slice-v1-handbuch-forge-cli-nachbesserung`](../done/slice-v1-handbuch-forge-cli-nachbesserung.md).
 
 **Bezug:** [`LH-FA-CONF-005`](../../../../spec/lastenheft.md#lh-fa-conf-005--konfiguration-anzeigen-und-ändern) („Beim Setzen muss die geänderte Konfiguration auf Schema-Konformität geprüft werden“), [`LH-FA-CONF-002`](../../../../spec/lastenheft.md#lh-fa-conf-002--inhalt-der-konfiguration) (ungültige Werte: fachlicher Validierungsfehler, Exit-Code `10`), [`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) (Katalog), [`LH-FA-CLI-006`](../../../../spec/lastenheft.md#lh-fa-cli-006--exit-codes) (Exit-Codes); [`ADR-0035`](../../adr/0035-forge-clis-gh-und-glab-im-devcontainer.md) (Entscheidung 2: `version` ohne `source` ist ein Validierungsfehler) und [`ADR-0024`](../../adr/0024-ollama-im-sandbox-devcontainer.md) (dieselbe Regel für `ollama`).
 
@@ -113,7 +113,7 @@ Aussagen-Berührung steht hier gar nicht. Jede Aussage über Dateien, Funktionen
 Regeln dieser Sektion: Baseline-Regelwerk `modul-05-planning-harness.md`
 §Trigger je Lifecycle-Übergang und WIP-Limit.
 
-**Start** (`next` → `in-progress`): Der Release `v0.15.0` ist geschnitten (`slice-v1-release-cut-v0.15.0`, Datei erst beim Trigger der Welle [`welle-forge-cli-gh-glab`](../welle-forge-cli-gh-glab.md); beobachtbar: der Slice liegt in `done/`, Tag `v0.15.0` gesetzt) **und** der Projektinhaber gibt den Slice frei (Release-Zuordnung); kein anderer Slice liegt in `in-progress/` (WIP-Limit 1). Der Schwester-Slice [`slice-v1-handbuch-forge-cli-nachbesserung`](../done/slice-v1-handbuch-forge-cli-nachbesserung.md) liegt dann in `done/` (er ist Teil der Welle und läuft vor dem Cut).
+**Start** (`next` → `in-progress`): Der Release `v0.15.0` ist geschnitten (`slice-v1-release-cut-v0.15.0`, Datei erst beim Trigger der Welle [`welle-forge-cli-gh-glab`](../done/welle-forge-cli-gh-glab.md); beobachtbar: der Slice liegt in `done/`, Tag `v0.15.0` gesetzt) **und** der Projektinhaber gibt den Slice frei (Release-Zuordnung); kein anderer Slice liegt in `in-progress/` (WIP-Limit 1). Der Schwester-Slice [`slice-v1-handbuch-forge-cli-nachbesserung`](../done/slice-v1-handbuch-forge-cli-nachbesserung.md) liegt dann in `done/` (er ist Teil der Welle und läuft vor dem Cut).
 
 **Rückführungen — vorab benannt:**
 
