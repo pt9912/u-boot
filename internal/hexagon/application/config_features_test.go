@@ -566,6 +566,8 @@ func TestConfigSet_ForgeVersionWithoutSource_RejectsEverySet(t *testing.T) {
 		for _, set := range []struct{ path, value string }{
 			{"project.name", "other-name"},
 			{"devcontainer.features." + key + ".enabled", "false"},
+			{"devcontainer.features." + key + ".version", "8.8.8"},
+			{"devcontainer.featureSources.allow", "https://example.test/x"},
 		} {
 			t.Run(key+"/"+set.path, func(t *testing.T) {
 				t.Parallel()

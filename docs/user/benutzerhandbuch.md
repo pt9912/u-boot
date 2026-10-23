@@ -2064,11 +2064,12 @@ schreibt den Eintrag, und erst der nächste Befehl lehnt die Datei ab.
 
 **Anmeldung in kurzer Form.** `u-boot` meldet nichts an und speichert kein Token; die
 Werkzeuge lesen es aus einer Umgebungsvariable, `GH_TOKEN` für `gh` und `GITLAB_TOKEN` für
-`glab`. Im Sandbox-Profil setzen Sie die Variable auf dem Host, bevor Sie
-`u-boot devcontainer up` oder `u-boot devcontainer shell` aufrufen; beide geben sie weiter.
-Im Standardprofil steht keine Token-Referenz in `devcontainer.json`, und `shell` gibt die
+`glab`. Im Sandbox-Profil trägt `devcontainer.json` die Referenz auf die Variable; setzen
+Sie sie auf dem Host, bevor Sie `u-boot devcontainer shell` aufrufen, dann gibt `shell` sie
+weiter. Im Standardprofil steht keine Token-Referenz in `devcontainer.json`, und `shell` gibt die
 Variablen nicht weiter; dort geben Sie die Variable mit `docker exec -e GH_TOKEN -u <Benutzer>
-<Container> …` mit (gemessen mit einem Platzhalter).
+<Container> …` mit. Gemessen mit einem Platzhalter ist nur, dass die Variable dann im
+Container ankommt; eine Anfrage von `gh` oder `glab` auf diesem Weg ist nicht gemessen.
 
 Ohne Variable endet `gh api` mit Exit-Code 4, `glab` liest ein öffentliches Projekt weiter;
 mit einem Platzhalter antworten die Werkzeuge mit `401`, ein Aufruf mit einem gültigen
