@@ -405,8 +405,12 @@ Beispiele:
 - PostgreSQL Client
 - Kubernetes Tools
 - Ollama (lokale Sprachmodelle, nur CPU)
+- GitHub CLI (`gh`)
+- GitLab CLI (`glab`)
 
 Ollama ist als eingebautes Feature `ollama` wählbar (`u-boot config set devcontainer.features.ollama.enabled true`) und wirkt im Sandbox-Profil. Es installiert Ollama im Container ohne Grafikbeschleunigung (nur CPU); die Installation stammt aus einem gepinnten Release-Archiv mit geprüfter SHA-256-Prüfsumme. Das Archiv ist nicht signiert; `u-boot` weist das beim Erzeugen aus. Der Server startet nicht von selbst und lauscht nur auf der Loopback-Adresse des Containers. Modelle lädt der Nutzer im Container (`ollama pull`); sie liegen in einem benannten Volume und überstehen das Löschen des Containers. Mit der Egress-Restriktion ([`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion)) gehören die Hosts des Modell-Pull zur Default-Allowlist. Gemessen ist das auf Docker 29.5.2, Colima 0.10.3, arm64, Ollama 0.40.6; nicht zugesagt sind GPU-Beschleunigung, ein Anschluss an einen Ollama-Dienst des Hosts, andere Architekturen und Container-Engines als gemessen, das Überstehen des Neubaus des Images sowie Auswahl oder Verwaltung von Modellen durch `u-boot`.
+
+`gh` (GitHub CLI) und `glab` (GitLab CLI) sind in beiden Profilen (Standard und Sandbox) als eingebaute Features `gh` und `glab` wählbar (`u-boot config set devcontainer.features.gh.enabled true`, analog `glab`). Jedes installiert sein Werkzeug aus einem gepinnten Release-Archiv des Upstream-Projekts (`cli/cli`, `gitlab-org/cli`) mit geprüfter SHA-256-Prüfsumme. Für die Archive hat die Messung keine Signatur gefunden (nach dem Suchmuster, nicht abschließend); für `gh` veröffentlicht das Projekt eine GitHub-Attestierung, die `u-boot` nicht prüft. `u-boot` weist das beim Erzeugen aus. Mit der Egress-Restriktion ([`LH-FA-DEV-008`](#lh-fa-dev-008--egress-restriktion)) stehen die Hosts von `gh` in der Default-Allowlist und kommt für `glab` ein Host hinzu. Anmeldung und Zugangsdaten: siehe [`LH-FA-DEV-009`](#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer); `u-boot` führt weder `gh auth login` noch `glab auth login` aus und speichert kein Token. Nicht zugesagt: Aufrufe mit gültigem Token und deren Hosts, Telemetrie-/Update-Hosts einer interaktiven Sitzung, selbst gehostete Instanzen, andere Versionen als die gepinnten; außerdem `glab duo`, `glab orbit` und das Nachladen weiterer Programme durch `glab`.
 
 Für optionale externe Feature-Quellen gilt:
 
@@ -479,11 +483,11 @@ Für Devcontainer-Features oder externe Skripte, die das Profil einbindet, gelte
 
 ### LH-FA-DEV-009 – Git-Zugangsdaten im Sandbox-Devcontainer
 
-*Priorität: V1.* Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) dürfen Git-Zugangsdaten und Zugangsdaten eines Agenten (etwa der Zugangsschlüssel eines Coding-Agenten, den ein aktiviertes Devcontainer-Feature nutzt) weder im Image, im Workspace-Volume noch in `u-boot.yaml` oder einer anderen erzeugten Datei stehen.
+*Priorität: V1.* Im Sandbox-Profil ([`LH-FA-DEV-006`](#lh-fa-dev-006--sandbox-profil)) dürfen Git-Zugangsdaten und Zugangsdaten eines Agenten oder eines Forge-Werkzeugs (etwa der Zugangsschlüssel eines Coding-Agenten oder das Token für `gh` oder `glab`, die ein aktiviertes Devcontainer-Feature nutzt) weder im Image, im Workspace-Volume noch in `u-boot.yaml` oder einer anderen erzeugten Datei stehen.
 
 - Übergabe zur Laufzeit per Umgebungsvariable; Git-Zugangsdaten alternativ als schreibgeschützter Secret-Mount. Die erzeugte Konfiguration trägt nur die Referenz auf die Umgebungsvariable des Hosts, nie den Wert.
-- Die Dokumentation beschreibt kurzlebige, auf das Repository begrenzte Tokens (privater Schlüssel nie im Container) und die Forderung nach Branch-Protection auf dem Remote; für den Agenten nennt sie die Umgebungsvariable, aus der der Zugangsschlüssel stammt.
-- `u-boot doctor` prüft die Quelle der Zugangsdaten (Git-Token-Quelle, bei aktivem Agenten-Feature die Umgebungsvariable des Agenten): fehlt sie oder liegt sie im Klartext in einer Projektdatei, `warn` (kein Abbruch).
+- Die Dokumentation beschreibt kurzlebige, auf das Repository begrenzte Tokens (privater Schlüssel nie im Container) und die Forderung nach Branch-Protection auf dem Remote; für den Agenten und für `gh` und `glab` nennt sie die Umgebungsvariable, aus der der Zugangsschlüssel beziehungsweise das Token stammt (`GH_TOKEN` für `gh`, `GITLAB_TOKEN` für `glab`).
+- `u-boot doctor` prüft die Quelle der Zugangsdaten (Git-Token-Quelle, bei aktivem Agenten-Feature die Umgebungsvariable des Agenten, bei aktivem `gh`- oder `glab`-Feature deren Token-Variable): fehlt sie oder liegt sie im Klartext in einer Projektdatei, `warn` (kein Abbruch).
 
 ### LH-FA-DEV-010 – Devcontainer ohne Editor starten
 
