@@ -59,14 +59,14 @@ Gate-Läufe und die fünf Closure-Pflichten darunter zählen nicht mit.
 
 Drei Liefer-Punkte; Gate-Läufe und Closure-Pflichten darunter zählen nicht mit.
 
-- [ ] **Katalog und Generator mit den Tests B1 bis B11** ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)): `gh` und `glab` sind wählbare Schlüssel; Quelle, Version und Prüfung genau die der ADR; der Block steht **in beiden Profilen** (je Profil ein pinnender Test für beide Features); die Ausweisung beim Erzeugen, die Hosts, die Token-Referenz in `remoteEnv` (Sandbox-Profil) und die Prüfung der Variable durch `doctor` stehen nach der Tabelle in §3 *Test-Aufträge*, jede Zeile mit Test und **einer Mutation, die ihn rot färbt**; bestehende Konfigurationen rendern byte-identisch (die vorhandenen Golden Cases bleiben unverändert grün); ein Golden Case nach [`harness/replay.md`](../../../../harness/replay.md) (Fresh-State, Double-Run-NoOp, veralteter Block, erhaltener Nutzerinhalt, kein Teilschreiben bei Exit `10`). *Beleg:* Tests und die Mutationstabelle in §7 (Mutation, Test, Exit-Code rot, Wiederherstellung belegt).
-- [ ] **Lauf belegt** (`//go:build docker`): Bau des erzeugten Dockerfiles **in beiden Profilen** mit beiden Features (`gh --version` meldet 2.103.0, `glab --version` 1.124.0, Binary-Eigentümer `root`, Image-Benutzer `vscode`), Negativprobe je Feature (verfälschte Prüfsumme bricht den Bau ab, ohne hinterlassenen Container), hinter der Egress-Restriktion der Aufruf, den die Messung belegt (`glab` mit `gitlab.com` in der Liste gelingt, ohne den Host scheitert er mit der gemessenen Meldung), und die Kanarienwerte `GH_TOKEN`/`GITLAB_TOKEN` stehen weder in einer erzeugten Datei noch im Image noch im Workspace-Volume. Läuft der Test in der Umgebung nicht, nennt die Closure den Grund (kein stilles Rot). *Beleg:* Läufe und Exit-Codes in §7, Mutationstabelle für die Docker-Tests.
-- [ ] **Kleine Doku, die der Code wahr machen muss** (kennungsfrei in `docs/user`, `README.md`, `README.de.md`; `CHANGELOG.md` unter `[Unreleased]`; Golden-Zeile in [`harness/replay.md`](../../../../harness/replay.md)): Katalog- und Egress-Zeilen und die Zahl der Katalog-Features, nicht der Abschnitt mit den Token-Variablen (§1, Spec-Slice). Jede Aussage dort hat einen Test aus Punkt 1 oder 2 oder steht nicht dort ([`AGENTS.md`](../../../../AGENTS.md) §3.10).
-- [ ] `make gates` grün; `make test-docker` für die neuen Tests gezielt gefahren (das Paket als Ganzes überschreitet lokal das Zeitlimit, [`BEO-E2E/e2e-paket-am-zeitlimit`](../observations/BEO-E2E/e2e-paket-am-zeitlimit/observation.md)), Laufzeit der neuen Tests in §7.
+- [x] **Katalog und Generator mit den Tests B1 bis B11** ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)): `gh` und `glab` sind wählbare Schlüssel; Quelle, Version und Prüfung genau die der ADR; der Block steht **in beiden Profilen** (je Profil ein pinnender Test für beide Features); die Ausweisung beim Erzeugen, die Hosts, die Token-Referenz in `remoteEnv` (Sandbox-Profil) und die Prüfung der Variable durch `doctor` stehen nach der Tabelle in §3 *Test-Aufträge*, jede Zeile mit Test und **einer Mutation, die ihn rot färbt**; bestehende Konfigurationen rendern byte-identisch (die vorhandenen Golden Cases bleiben unverändert grün); ein Golden Case nach [`harness/replay.md`](../../../../harness/replay.md) (Fresh-State, Double-Run-NoOp, veralteter Block, erhaltener Nutzerinhalt, kein Teilschreiben bei Exit `10`). *Beleg:* Tests und die Mutationstabelle in §7 (Mutation, Test, Exit-Code rot, Wiederherstellung belegt).
+- [x] **Lauf belegt** (`//go:build docker`): Bau des erzeugten Dockerfiles **in beiden Profilen** mit beiden Features (`gh --version` meldet 2.103.0, `glab --version` 1.124.0, Binary-Eigentümer `root`, Image-Benutzer `vscode`), Negativprobe je Feature (verfälschte Prüfsumme bricht den Bau ab, ohne hinterlassenen Container), hinter der Egress-Restriktion der Aufruf, den die Messung belegt (`glab` mit `gitlab.com` in der Liste gelingt, ohne den Host scheitert er mit der gemessenen Meldung), und die Kanarienwerte `GH_TOKEN`/`GITLAB_TOKEN` stehen weder in einer erzeugten Datei noch im Image noch im Workspace-Volume. Läuft der Test in der Umgebung nicht, nennt die Closure den Grund (kein stilles Rot). *Beleg:* Läufe und Exit-Codes in §7, Mutationstabelle für die Docker-Tests.
+- [x] **Kleine Doku, die der Code wahr machen muss** (kennungsfrei in `docs/user`, `README.md`, `README.de.md`; `CHANGELOG.md` unter `[Unreleased]`; Golden-Zeile in [`harness/replay.md`](../../../../harness/replay.md)): Katalog- und Egress-Zeilen und die Zahl der Katalog-Features, nicht der Abschnitt mit den Token-Variablen (§1, Spec-Slice). Jede Aussage dort hat einen Test aus Punkt 1 oder 2 oder steht nicht dort ([`AGENTS.md`](../../../../AGENTS.md) §3.10).
+- [x] `make gates` grün; `make test-docker` für die neuen Tests gezielt gefahren (das Paket als Ganzes überschreitet lokal das Zeitlimit, [`BEO-E2E/e2e-paket-am-zeitlimit`](../observations/BEO-E2E/e2e-paket-am-zeitlimit/observation.md)), Laufzeit der neuen Tests in §7. (gezielt über das Image `test-docker-tools` mit denselben Optionen wie das Target, siehe §7 Umsetzung)
 - [ ] Review durchgeführt, Report unter `docs/reviews/` liegt vor
       (`.harness/skills/reviewer.md`) — Rollenwechsel nach Schritt 8 des
       Minimal Agent Workflow (`AGENTS.md` §6), kein Self-Review (Modul 8).
-- [ ] Doku-Update, soweit ein öffentlicher Vertrag berührt ist: genau der Umfang von Liefer-Punkt 3; der Rest ist an `slice-v2-spec-forge-cli` übergeben (Welle §4 und §5 nachgezogen).
+- [x] Doku-Update, soweit ein öffentlicher Vertrag berührt ist: genau der Umfang von Liefer-Punkt 3; der Rest ist an `slice-v2-spec-forge-cli` übergeben (Welle §4 und §5 nachgezogen).
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
 - [ ] Beobachtungs-Register (`../observations/`) fortgeschrieben — neues Verzeichnis `BEO-<KUERZEL>/<slug>/` oder eine weitere Datei in dessen `evidence/`; **kein Zaehler wird gesetzt**, er folgt aus den Dateien. Keine Beobachtung angefallen ist ebenfalls eine Antwort und wird in §7 notiert.
 - [ ] Jedes Risiko aus §6 trägt einen Ausgang (eingetreten / entfallen / weiter offen).
@@ -216,6 +216,51 @@ aus §6 seinen Ausgang; die Liefer-Punkte der DoD bleiben leer
 - **Folge-Slices:** `slice-v2-spec-forge-cli` (Eigentümer von B10 und des Handbuch-Abschnitts; die Datei entsteht nach diesem Slice, Welle §4, und ist deshalb noch kein Folge-Slice im Sinn der Paarung).
 - **Risiken aus §6:** jedes mit genau einem Ausgang.
 - **Drei Paarungen:** Anker · Folge-Slice · Register, Ergebnis nach dem Move.
+
+### Umsetzung (Implementer, Code-Commit `b930721a`)
+
+**Mutationsprotokoll.** Vor der ersten Mutation: Code und Tests committet, `git status --short` leer. Jede Mutation: Änderung am Produktcode, `git diff` als Patch gesichert, gezielter Lauf der genannten Tests, Rücknahme mit `git apply -R <patch>` (Exit `0`), danach `git diff` leer und `git status --short` leer (nie `git checkout`/`git restore`). Die Änderungen wurden mit dem Editor gesetzt und als Patch gesichert, nicht mit `git apply` gesetzt. Befehl der Läufe: `docker run --rm -v <repo>:/src -w /src u-boot:test-docker-tools go test -count=1 -run <Auswahl> <Pakete>` (nicht `make test`: das Target baut und fährt die ganze Suite; die Auswahl ist das gezielte Äquivalent im Image `test-docker-tools`); Docker-Tests mit `--network=host`, Socket und `/tmp` wie `make test-docker` und `-tags docker`. Der Exit-Code jedes roten Laufs ist `1`.
+
+| # | Änderung am Produktcode | Rot gefärbt (Test) | Docker-Test rot |
+|---|---|---|---|
+| B1 (a) | `Dockerfile.tmpl`: `or .UID .Sandbox .Gh .Glab` → `or .UID .Sandbox` | `…ForgeCLI_BlocksInBothProfiles`, `…UserRootOnlyWithReason` | `TestE2E_ForgeCLI_BuildsInBothProfiles/default_profile` (kein `gh` im Image) |
+| B1 (b) | `devcontainerTemplateData`: `Gh`/`Glab` erst nach dem frühen `return` des Standardprofils | dieselben zwei | — |
+| B2 | Eintrag `glab` aus `featureCatalogue()` entfernt | `TestFeatureCatalogue_KeysCoverSpecExamples` | — |
+| B3 (a) | Zeile `sha256sum -c -` aus dem `gh`-Block entfernt | `…BlocksInBothProfiles`, `…TogetherWithOllamaAndRuntime`, `…ActivateAndDeactivateLater` | `TestE2E_ForgeCLI_PinMismatchBreaksBuild/GH` (Bau gelingt trotz Nullprüfsumme) |
+| B3 (b) | letzte Ziffer von `GH_SHA256_AMD64` geändert | dieselben drei | — |
+| B4 | `gh attestation verify …` in den `gh`-Block | `…BlocksInBothProfiles` | — |
+| B5 (a) | Attestierungs-Passage aus der `gh`-Meldung gestrichen | `TestGenerateDevcontainer_ForgeCLI_Notices` | — |
+| B5 (b) | „attestation is not verified“ in die `glab`-Meldung | `…ForgeCLI_Notices` | — |
+| B5 (c) | `SecurityRelaxation: true` an der `gh`-Meldung | `…ForgeCLI_Notices`, `TestRun_Generate_ForgeCLINotices` (`--quiet` unterdrückt sie nicht mehr) | — |
+| B6 (a) | Zeile `glab` aus `egressFeatureHosts()` | `…EgressHosts`, `…TogetherWithOllamaAndRuntime`, `TestRun_EgressList_ForgeCLIHostOrigins` | `TestE2E_ForgeCLI_EgressHosts` |
+| B6 (b) | `api.github.com` aus `egressBaseHosts()` und der `gh`-Zeile | `…EgressHosts`, `TestRun_EgressList_ForgeCLIHostOrigins` | — |
+| B7 | `RUN gh auth login --with-token < /dev/null` im `gh`-Block | `…BlocksInBothProfiles` | — |
+| B9 (a) | `GH_TOKEN` aus `agentCredentialEnv` entfernt | `…ForgeCLI_RemoteEnvReferences` | `TestE2E_ForgeCLI_TokenReferencesCarryNoValue` (`printenv` leer) |
+| B9 (b) | `devcontainer.json.tmpl`: `"{{.}}": "{{.}}"` statt der Referenz | `…RemoteEnvReferences` | — |
+| B9 (c) | `ENV GH_TOKEN=placeholder-value-0123` im `gh`-Block | `…BlocksInBothProfiles`, `…RemoteEnvReferences` | — |
+| B11 (a) | `GITLAB_TOKEN` aus `agentCredentialEnv` entfernt | `TestDoctor_SandboxCredentials_ForgeCLI`, `…ForgeCLIRemedyRestoresReference` | — |
+| B11 (b) | Schweregrad `warn` → `ok` bei fehlender Referenz | dieselben zwei | — |
+| X1 | `remoteEnv` auch im Standardprofil (Vorlage und `AgentEnv` vor dem frühen `return`) | `…ForgeCLI_DefaultProfileJSONUnchanged` | — |
+| X2 | Flag `dockerfileBlock` am Eintrag `gh` entfernt | `…VersionOverrideWithoutSourceRejected`, `TestRun_Generate_ForgeCLINotices` (Exit `10` fehlt) | — |
+| X3 | `dockerfileBlockFeatureActive` ignoriert `f.Source` | `…SourceOverrideIsExternalFeature` | — |
+| X4 | `gh`-Block vor `USER root` verschoben | `…TogetherWithOllamaAndRuntime` | — |
+| X5 | `dockerfileBlockFeatureActive` liefert für `gh` immer wahr | `…ActivateAndDeactivateLater` | — |
+| X6 | `projectFeatureSourceVersion` liefert für `gh` einen Schlüssel (`name != featureGh` in der Ausnahme) | `TestDoctor_FeaturesDrift_ForgeCLI` | — |
+
+Zu B4, B8, B10: B4 hat nur den Golden-Test des Blocks (Mutation B4); B8 ist eine Nicht-Zusage ohne Test; B10 (Handbuch nennt die Variablennamen) liegt beim Spezifikations-Slice, der Test der Namen ist B9 (a).
+
+**Läufe** (Host: Linux 6.8.0-147 `x86_64`, Docker 29.9.2 Client und Server, `linux/amd64`; Netz zu `github.com` und `gitlab.com` vorhanden).
+
+| Lauf | Exit | Laufzeit |
+|---|---|---|
+| `make gates` (Stand nach den Mutationsläufen und dem Eintrag dieses Abschnitts: lint, Tests, Coverage 92,0 % gegen Schwelle 90 %, `docs-check` 0 Befunde, `baseline-verify`, `ablage-pruefung`) | `0` | — |
+| `TestE2E_ForgeCLI_BuildsInBothProfiles` (beide Profile; Standardprofil erstmals gebaut: Bau gelingt, `gh version 2.103.0`, `glab 1.124.0`, Eigentümer `root`, Benutzer `vscode`) | `0` | 71,1 s (Unterfälle 37,2 s und 33,9 s); ein erster Lauf scheiterte an meinem Test (die Prüfung „kein Token-Speicher“ lief nach dem ersten Aufruf der Werkzeuge, die ihr Konfigurationsverzeichnis anlegen), Skript umgestellt, zweiter Lauf grün |
+| `TestE2E_ForgeCLI_PinMismatchBreaksBuild` (je Feature Nullprüfsumme, kein Container zurückgeblieben) | `0` | 22,7 s |
+| `TestE2E_ForgeCLI_EgressHosts` (`glab` mit Host gelingt, ohne Host scheitert mit `lookup gitlab.com`) | `0` | 50,0 s |
+| `TestE2E_ForgeCLI_TokenReferencesCarryNoValue` (Kanarienwerte in Sitzung, nicht in Dateien, Image, Volumes, `Config.Env`; Wächter finden den Wert) | `0` | 31,1 s |
+| `TestStreamContains_FindsNeedleAcrossReads` | `0` | 0,00 s |
+
+Der Bau im Standardprofil, im Plan als ungemessen geführt, ist gelungen; die Annahme der Entscheidung 3 trägt.
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 
