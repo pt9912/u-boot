@@ -2,7 +2,7 @@
 
 **Rolle:** Verifier (Modul 11, [`harness/verification.md`](../../harness/verification.md)), frischer Kontext, kein Self-Review, kein Reparieren. Frage: Wurde der Release-Cut richtig gebaut, gemessen an Plan, DoD und ausgeführten Sensoren, **bis zur Push-Reife (M1)**? Die Punkte nach M1 (Tag, `publish`, GHCR, Tap-Job, CI auf dem Push-Tip) sind nicht Gegenstand dieses Berichts.
 
-**Gegenstand:** [`slice-v1-release-cut-v0.14.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.14.0.md), Range `f9680634..0721a30d` (neun Commits vor `origin/main`, nichts gepusht, kein Tag `v0.14*`), Vertrag [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten); Eingang: Plan §2/§3, Validierungsbericht [`2026-10-22-welle-devcontainer-shell-und-zweites-up-validierung`](2026-10-22-welle-devcontainer-shell-und-zweites-up-validierung.md), Review-Report [`2026-10-23-slice-v1-release-cut-v0.14.0`](2026-10-23-slice-v1-release-cut-v0.14.0.md) (Eingang, nicht Beleg), [`releasing.md`](../maintainer/releasing.md).
+**Gegenstand:** [`slice-v1-release-cut-v0.14.0`](../plan/planning/done/slice-v1-release-cut-v0.14.0.md), Range `f9680634..0721a30d` (neun Commits vor `origin/main`, nichts gepusht, kein Tag `v0.14*`), Vertrag [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten); Eingang: Plan §2/§3, Validierungsbericht [`2026-10-22-welle-devcontainer-shell-und-zweites-up-validierung`](2026-10-22-welle-devcontainer-shell-und-zweites-up-validierung.md), Review-Report [`2026-10-23-slice-v1-release-cut-v0.14.0`](2026-10-23-slice-v1-release-cut-v0.14.0.md) (Eingang, nicht Beleg), [`releasing.md`](../maintainer/releasing.md).
 
 ## Ergebnis
 

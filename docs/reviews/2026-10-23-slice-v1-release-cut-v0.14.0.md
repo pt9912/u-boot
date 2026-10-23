@@ -2,7 +2,7 @@
 
 **Rolle:** Reviewer (Modul 10, [`.harness/skills/reviewer.md`](../../.harness/skills/reviewer.md), [`harness/review.md`](../../harness/review.md)), frischer Kontext. Prüfung gegen Plan, Validierungsbericht, Release-Prozess und Hard Rules, nicht gegen die DoD (Verifier).
 
-**Gegenstand:** Commit-Range `f9680634..08babc88` (Release-Cut `v0.14.0`, Welle `welle-devcontainer-shell-und-zweites-up`, Slice [`slice-v1-release-cut-v0.14.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.14.0.md), Vertrag [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)): Start- und Move-Commits `ff351704`, `8bb06e9f`, `d0cd12c5`, `51a1efe4`, Cut-Commit `9c6fedf1`, Umsetzung §3 `08babc88`.
+**Gegenstand:** Commit-Range `f9680634..08babc88` (Release-Cut `v0.14.0`, Welle `welle-devcontainer-shell-und-zweites-up`, Slice [`slice-v1-release-cut-v0.14.0`](../plan/planning/done/slice-v1-release-cut-v0.14.0.md), Vertrag [`LH-FA-DEV-010`](../../spec/lastenheft.md#lh-fa-dev-010--devcontainer-ohne-editor-starten)): Start- und Move-Commits `ff351704`, `8bb06e9f`, `d0cd12c5`, `51a1efe4`, Cut-Commit `9c6fedf1`, Umsetzung §3 `08babc88`.
 
 **Eingang gelesen:** Plan (§1 bis §3, Beleg-Tabelle, Umsetzung), [`2026-10-22-welle-devcontainer-shell-und-zweites-up-validierung`](2026-10-22-welle-devcontainer-shell-und-zweites-up-validierung.md) (Auflagen A-1 bis A-3), [`releasing.md`](../maintainer/releasing.md) §3 bis §5, [`AGENTS.md`](../../AGENTS.md) §3.7, §3.9, §3.10, §5 Regel 6, Lastenheft-Tabelle zu den Exit-Codes und Spezifikation zu den Grenzen der Erkennung bei `shell`.
 
@@ -23,7 +23,7 @@
 ### F-2 — LOW — Beleg für „transient, ohne Code-Bezug“ steht auf einer Wortsuche, die Dateiliste trägt ihn
 
 - `kategorie`: LOW · `quelle`: [`AGENTS.md`](../../AGENTS.md) §3.10 (Aussage über Code per Lesung, nicht per Suchwort) · `klasse`: unveraenderter-beleg-per-suche
-- `pfad`: [`slice-v1-release-cut-v0.14.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.14.0.md) · „keine Datei mit `download.docker.com` hat sich seit `v0.13.1` geändert“
+- `pfad`: [`slice-v1-release-cut-v0.14.0`](../plan/planning/done/slice-v1-release-cut-v0.14.0.md) · „keine Datei mit `download.docker.com` hat sich seit `v0.13.1` geändert“
 - `befund`: Die Begründung nennt die Suche nach dem Host-Namen. Gelesen habe ich stattdessen `git diff v0.13.1..HEAD --stat -- internal/e2e`: Geändert sind nur `devcontainer_shell_docker_test.go` (neu) und `devcontainer_start_docker_test.go`; `sandbox_devcontainer_docker_test.go` (dort liegt `TestE2E_SandboxDevcontainer_NestedDocker_EgressAptUpdate`) und alle Generator-/Template-Pfade außerhalb von `internal/adapter`, `internal/hexagon`, `cmd/uboot` sind seit `v0.13.1` unverändert; das `Dockerfile` hat nur die Versionszeilen geändert. Der Code-Bezug ist damit ausgeschlossen, aber über die Dateiliste, nicht über die genannte Suche. Zwei von drei Läufen scheiterten am selben Netzfehler (`unexpected eof`), einer bestand: das stützt „Netzweg“, belegt aber keine Rate.
 - `risiko`: Der Satz „transient“ steht im Plan als Befund; ein späterer Leser übernimmt ihn ohne die Dateiliste. Kein Einfluss auf die Release-Entscheidung.
 - `verifizierbar`: Review-only (Belege: `git diff v0.13.1..HEAD --stat -- internal/e2e`); Gegenprobe ist M2 (siehe INFO-Hinweis zu M2).
