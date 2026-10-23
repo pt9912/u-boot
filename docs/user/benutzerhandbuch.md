@@ -2087,8 +2087,9 @@ Dockerfile-Block.
   dem Host ungesetzt ist und im Container als leere Zeichenkette ankommt.
 - **Mit Variable, ohne Anmeldung durch `u-boot`:** Das Werkzeug versucht die Anfrage mit
   dem Token aus der Umgebung. Gemessen mit einem **Platzhalter** statt eines gültigen
-  Tokens: Die Antwort ist `401`, und bei `glab` scheitern damit auch die Aufrufe gegen ein
-  öffentliches Projekt, die ohne Variable gelingen. `glab auth status` meldet, dass es ein
+  Tokens: Die Antwort ist `401`, und bei `glab` scheitern damit auch `glab api` und `glab repo view`
+  gegen ein öffentliches Projekt, die ohne Variable gelingen (`glab release list` und
+  `glab release download` sind mit Variable nicht gemessen). `glab auth status` meldet, dass es ein
   Token in der Umgebungsvariable gefunden hat, mit maskiertem Wert. Ein Aufruf mit einem
   **gültigen** Token ist nicht gemessen und nicht zugesagt.
 - **Standardprofil, keine Token-Referenz:** Das Standardprofil erzeugt kein `remoteEnv`
@@ -2127,8 +2128,8 @@ Dockerfile-Block.
   Aktualisierung sowie die Hosts von `glab duo` und `glab orbit`; wer sie braucht, trägt
   sie in `devcontainer.sandbox.egress.allow` ein. Ohne `gitlab.com` in der Liste scheitert
   `glab` an der Namensauflösung (gemessen: `lookup gitlab.com`), und der Client wiederholt
-  die Anfragen: Die Aufrufreihe der Messung dauerte 127,8 statt 20,0 Sekunden mit dem Host
-  in der Liste (ein Host, ein Lauf, keine Dauer eines einzelnen Aufrufs).
+  die Anfragen: Der Containerlauf der Messung dauerte 127,8 statt 20,0 Sekunden mit dem Host
+  in der Liste (ganzer Lauf samt Start, ein Host, ein Lauf, keine Dauer eines einzelnen Aufrufs).
 - **Nicht zugesagt:** Aufrufe mit gültigem Token und deren Hosts; Telemetrie- und
   Update-Hosts einer interaktiven Sitzung; GitHub Enterprise und GitLab Self-Managed;
   andere Versionen als die gepinnten; `glab duo`, `glab orbit` und das Nachladen weiterer
