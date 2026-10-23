@@ -1,0 +1,4 @@
+**Vorgang:** [`slice-v2-spec-forge-cli`](../../../../done/slice-v2-spec-forge-cli.md)
+**Fund:** Selbstauskunft des Implementers im Bericht: Er hat Host-`python` ausgeführt, obwohl der Plan (§3 *Ansatz*) kein Host-`python` und kein `sed` für Quelltext zulässt, und eine Datei `ping.txt` mit einem Heredoc angelegt. Der Diff des Slice enthält keinen Code; der Nachweis der Änderung läuft über `make gates`. Ziel und Zweck der beiden Aufrufe sind aus dem Repo nicht ableitbar.
+
+**Beleg-Qualität:** Die Quelle ist die Aussage des Implementers im Bericht an den Planner; im Diff ist keine Spur der Aufrufe ablesbar, `ping.txt` liegt nicht im Repo. Zahl der Aufrufe und Wirkung sind aus dem Repo nicht ableitbar. Der Vorgang ist abgeschlossen und die Datei trägt seine Kennung; das Dateisystem zählt ihn einmal. Der Plan hatte die Regel im Wortlaut genannt, der Verstoß trat trotzdem auf.
