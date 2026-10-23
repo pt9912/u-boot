@@ -636,7 +636,7 @@ Zustand beim Containerstart (`vfs`-Speicher, Daemon, Egress).
 - `u-boot --quiet doctor` zeigt nur Fehler, Degradations-Fallbacks und die
   Warnungen zu einer Sicherheitseigenschaft des Sandbox-Profils: Klartext-Token
   oder -Schlüssel in einer Projektdatei, `https`-Clone ohne Token-Quelle,
-  aktives Agenten-Feature ohne Referenz auf seine Umgebungsvariable,
+  aktives Feature (`claude-code`, `gh`, `glab`) ohne Referenz auf seine Umgebungsvariable,
   Egress-Restriktion
   zusammen mit `nestedRuntime: docker` und `egress.enabled` ohne Sandbox-Profil
   (die Beschränkung greift dann nicht). Alle anderen Warnungen entfallen, auch
@@ -841,8 +841,8 @@ u-boot devcontainer shell
 ```
 
 - **Umgebung.** Die Variablen, die das erzeugte `devcontainer.json` als Einträge
-  `"NAME": "${localEnv:NAME}"` weitergibt (im Sandbox-Profil `GIT_TOKEN` und der Schlüssel eines
-  Agenten), sind in der Shell gesetzt, soweit sie auf dem Host gesetzt sind; eine auf dem Host nicht
+  `"NAME": "${localEnv:NAME}"` weitergibt (im Sandbox-Profil `GIT_TOKEN`, der Schlüssel eines
+  Agenten und die Token-Variablen von `gh` und `glab`), sind in der Shell gesetzt, soweit sie auf dem Host gesetzt sind; eine auf dem Host nicht
   gesetzte Variable fehlt in der Shell. Verweise in anderer Form (etwa ein Pfad in `mounts`, ein
   anderer Name, ein Standardwert) gibt `shell` nicht weiter und sagt dafür nichts zu.
 - **Ausgabe.** Alles, was `u-boot` selbst ausgibt (die Ausweisung des Sockets, der Fortschritt des
@@ -1058,8 +1058,8 @@ Ohne weitere Freigabe aktivierbar (`homebrew` und `claude-code` sind Drittanbiet
 | `homebrew` | Homebrew; **Drittanbieter-Feature** (`meaningful-ooo`, Version `2`): `u-boot generate devcontainer` weist es aus, sein Installationsskript läuft beim Image-Build |
 | `claude-code` | Claude Code CLI; **Drittanbieter-Feature** (`anthropics`, Version `1`): `u-boot generate devcontainer` weist es aus, sein Installationsskript läuft beim Image-Build; braucht das Feature `node` (siehe [Claude Code](#claude-code-optional)); keine Optionen |
 | `ollama` | Ollama (lokale Sprachmodelle, nur CPU); wirkt nur im Sandbox-Profil. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv (SHA-256 geprüft, vom Upstream nicht signiert; `u-boot generate devcontainer` weist das aus), dazu ein benanntes Volume für die Modelle; keine Optionen, `version` nur zusammen mit `source` (siehe [Ollama](#ollama-optional)) |
-| `gh` | GitHub-CLI. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv von `cli/cli` (SHA-256 geprüft, nur das Programm `gh` entpackt; keine Signatur gefunden (nach Suchmuster, nicht abschließend), die GitHub-Attestierung des Projekts prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus). Wirkt im Standard- und im Sandbox-Profil; im Standardprofil steht dafür `USER root` im Dockerfile; keine Optionen, `version` nur zusammen mit `source` |
-| `glab` | GitLab-CLI. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv von `gitlab-org/cli` (SHA-256 geprüft, nur das Programm `glab` entpackt; keine Signatur gefunden (nach Suchmuster, nicht abschließend); `u-boot generate devcontainer` weist das aus). Wirkt im Standard- und im Sandbox-Profil; im Standardprofil steht dafür `USER root` im Dockerfile; keine Optionen, `version` nur zusammen mit `source` |
+| `gh` | GitHub-CLI. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv von `cli/cli` (SHA-256 geprüft, nur das Programm `gh` entpackt; keine Signatur gefunden (nach Suchmuster, nicht abschließend), die GitHub-Attestierung des Projekts prüft `u-boot` nicht; `u-boot generate devcontainer` weist das aus). Wirkt im Standard- und im Sandbox-Profil; im Standardprofil steht dafür `USER root` im Dockerfile; keine Optionen, `version` nur zusammen mit `source` (siehe [Forge-CLIs](#forge-clis-optional)) |
+| `glab` | GitLab-CLI. Kein OCI-Feature: Das erzeugte Dockerfile installiert ein gepinntes Release-Archiv von `gitlab-org/cli` (SHA-256 geprüft, nur das Programm `glab` entpackt; keine Signatur gefunden (nach Suchmuster, nicht abschließend); `u-boot generate devcontainer` weist das aus). Wirkt im Standard- und im Sandbox-Profil; im Standardprofil steht dafür `USER root` im Dockerfile; keine Optionen, `version` nur zusammen mit `source` (siehe [Forge-CLIs](#forge-clis-optional)) |
 
 #### Externe Feature-Quellen freigeben
 
@@ -1245,7 +1245,8 @@ konfigurierten Clone-Quelle, siehe unten).
 
 3. Zugangsdaten für `https`-Remotes geben Sie zur Laufzeit mit, nicht in Dateien:
    Setzen Sie vor dem Start des Containers die Umgebungsvariable `GIT_TOKEN` auf
-   dem Host. Mit dem Feature `claude-code` gilt dasselbe für `ANTHROPIC_API_KEY`
+   dem Host. Mit dem Feature `claude-code` gilt dasselbe für `ANTHROPIC_API_KEY`,
+   mit `gh` für `GH_TOKEN` und mit `glab` für `GITLAB_TOKEN`
    (siehe [Zugangsdaten](#zugangsdaten-git-und-agent)).
 
 #### Ergebnis
@@ -1596,8 +1597,8 @@ Standardmäßig erlaubt sind:
 | Feature `homebrew` | `formulae.brew.sh`, `ghcr.io`, `pkg-containers.githubusercontent.com` |
 | Feature `claude-code` | `registry.npmjs.org`, `api.anthropic.com` (Hosts der Anmeldung nicht: siehe [Claude Code](#claude-code-optional)) |
 | Feature `ollama` | `registry.ollama.ai`, `dd20bb891979d25aebc8bec07b2b3bbc.r2.cloudflarestorage.com` (Modell-Pull; Stabilität des zweiten Namens nicht gemessen: siehe [Ollama](#ollama-optional)) |
-| Feature `gh` | `api.github.com`, `github.com` (beide stehen schon in der Zeile „immer“) |
-| Feature `glab` | `gitlab.com` |
+| Feature `gh` | `api.github.com`, `github.com` (beide stehen schon in der Zeile „immer“; Hosts nach einer Anmeldung nicht: siehe [Forge-CLIs](#forge-clis-optional)) |
+| Feature `glab` | `gitlab.com` (Hosts nach einer Anmeldung nicht: siehe [Forge-CLIs](#forge-clis-optional)) |
 | Clone-Quelle | der Host von `devcontainer.sandbox.repository` beziehungsweise `origin` |
 | Ihre Ergänzungen | `devcontainer.sandbox.egress.allow` (kleingeschriebene Hostnamen, ohne Schema, Port oder Wildcard) |
 
@@ -2032,6 +2033,118 @@ ollama run smollm2:135m "Reply with the single word OK."
   Dev-Container-CLI). GPU-Beschleunigung, ein Anschluss an einen Ollama-Dienst des Hosts
   und die Verwaltung von Modellen durch `u-boot` gibt es nicht.
 
+#### Forge-CLIs (optional)
+
+```bash
+u-boot config set devcontainer.features.gh.enabled true
+u-boot config set devcontainer.features.glab.enabled true
+u-boot generate devcontainer
+```
+
+Die Features `gh` und `glab` installieren die GitHub-CLI und die GitLab-CLI im Container.
+Sie sind keine OCI-Features und erscheinen nicht unter `features` in `devcontainer.json`:
+Das erzeugte Dockerfile lädt beim Image-Build das Release-Archiv des Upstream-Projekts
+(`gh` von `cli/cli` auf `github.com`, `glab` von `gitlab-org/cli` auf `gitlab.com`),
+prüft die SHA-256-Prüfsumme **vor** dem Entpacken (bei einer Abweichung bricht der Build
+ab) und entpackt nur das Programm nach `/usr/local`. Version und Prüfsummen stehen an
+einer Stelle im Dockerfile. Stand beim Schreiben dieses Handbuchs: `gh` 2.103.0 und
+`glab` 1.124.0; maßgeblich sind die Zahlen im erzeugten Dockerfile. Eine andere Version
+gibt es nicht: `version` ohne `source` weist `u-boot` mit Exit-Code `10` ab, und eine
+`source:`-Überschreibung macht den Schlüssel zu einem externen Feature (Freigabe wie
+unter [Externe Feature-Quellen freigeben](#externe-feature-quellen-freigeben)) ohne
+Dockerfile-Block.
+
+- **Beide Profile:** Die Features wirken im Standard- und im Sandbox-Profil. Im
+  Standardprofil steht dafür `USER root` im Dockerfile (nur mit einem aktiven Feature oder
+  einer UID-Überschreibung, bei beidem einmal); `devcontainer.json` bleibt dort
+  unverändert. Die Features legen kein Volume an.
+- **Die Lieferkette hat eine Grenze:** Die Prüfsumme stammt aus demselben Release wie das
+  Archiv. Sie schützt davor, dass eine Datei des Releases später ausgetauscht wird; sie
+  schützt nicht vor einem Release, das von Anfang an schadhaft war. Für beide Archive hat
+  die Messung keine Signatur gefunden (nach dem Suchmuster der Messung, nicht
+  abschließend). Für `gh` veröffentlicht das Projekt eine GitHub-Attestierung; `u-boot`
+  prüft sie nicht. `u-boot generate devcontainer` weist das aus, je Feature eine Meldung in
+  jedem Profil. Die Meldung ist keine Sicherheitslockerung des Profils und entfällt unter
+  `--quiet`; die Blöcke im Dockerfile bleiben.
+- **Token-Variablen:** Für `gh` gilt `GH_TOKEN`, für `glab` `GITLAB_TOKEN`. Im
+  Sandbox-Profil trägt `devcontainer.json` bei aktivem Feature die Referenz
+  `"GH_TOKEN": "${localEnv:GH_TOKEN}"` beziehungsweise
+  `"GITLAB_TOKEN": "${localEnv:GITLAB_TOKEN}"` neben `GIT_TOKEN`, nie einen Wert. Setzen
+  Sie die Variable in der Host-Umgebung, bevor Sie den Container starten. `u-boot` führt
+  weder `gh auth login` noch `glab auth login` aus und speichert kein Token; nutzen Sie
+  kurzlebige, auf das Repository begrenzte Token (siehe
+  [Zugangsdaten](#zugangsdaten-git-und-agent)). Die Werkzeuge lesen auch `GITHUB_TOKEN`,
+  `GITLAB_ACCESS_TOKEN` und `OAUTH_TOKEN` (gemessen mit einem Platzhalter: sie versuchen
+  die Anfrage mit dem Wert); `u-boot` reicht nur `GH_TOKEN` und `GITLAB_TOKEN` durch.
+  `u-boot devcontainer shell` öffnet die Shell mit den beiden Variablen, soweit sie auf dem
+  Host gesetzt sind; eine auf dem Host ungesetzte Variable fehlt in der Sitzung.
+- **Ohne Variable** (gemessen mit einer in der Umgebung des Werkzeugs nicht gesetzten
+  Variable): `gh api` endet mit Exit-Code 4 und dem Hinweis, `gh auth login` auszuführen oder
+  `GH_TOKEN` zu setzen; `gh auth status` endet mit Exit-Code 1. `glab` liest ein
+  öffentliches Projekt ohne Token (`glab api`, `glab repo view`, `glab release list`,
+  `glab release download`: Exit-Code 0); `glab auth status` endet mit Exit-Code 1, und
+  `glab repo clone` scheitert (`401 Unauthorized`). **Nicht gemessen:** eine Variable, die auf
+  dem Host ungesetzt ist und im Container als leere Zeichenkette ankommt.
+- **Mit Variable, ohne Anmeldung durch `u-boot`:** Das Werkzeug versucht die Anfrage mit
+  dem Token aus der Umgebung. Gemessen mit einem **Platzhalter** statt eines gültigen
+  Tokens: Die Antwort ist `401`, und bei `glab` scheitern damit auch die Aufrufe gegen ein
+  öffentliches Projekt, die ohne Variable gelingen. `glab auth status` meldet, dass es ein
+  Token in der Umgebungsvariable gefunden hat, mit maskiertem Wert. Ein Aufruf mit einem
+  **gültigen** Token ist nicht gemessen und nicht zugesagt.
+- **Standardprofil, keine Token-Referenz:** Das Standardprofil erzeugt kein `remoteEnv`
+  und damit keine Token-Referenz; `u-boot doctor` prüft die Variable dort nicht. Das
+  Feature wirkt trotzdem: Das Programm liegt im Image. Die gemessene Quelle des Tokens ist
+  die Umgebungsvariable des Werkzeugs; wie sie im Standardprofil in den Container kommt,
+  regelt `u-boot` nicht, und ein bestimmter Weg ist weder zugesagt noch gemessen. Das
+  Sandbox-Profil reicht die Variable des Hosts durch.
+- **`doctor`:** Im Sandbox-Profil warnt `u-boot doctor` bei aktivem Feature, wenn
+  `devcontainer.json` die Referenz auf `GH_TOKEN` beziehungsweise `GITLAB_TOKEN` nicht
+  trägt, und vor Token-Mustern und Zuweisungen mit einem Wert in den Projektdateien. Die
+  Abhilfe der Meldung ist `u-boot generate devcontainer`. Die Prüfung liest nur
+  Projektdateien, nicht die Umgebung des Hosts.
+- **Git-Protokoll von `glab`:** Das Standardprotokoll für Git ist `ssh` (gemessen:
+  `glab config get git_protocol` ergibt `ssh`). Im Container liegt kein Schlüssel, und nur
+  `https`-Remotes bekommen Zugangsdaten (siehe [Zugangsdaten](#zugangsdaten-git-und-agent)).
+  `glab config set git_protocol https --global` stellt auf `https` um (gemessen: Exit-Code
+  0; der Clone-Weg danach ist nicht gemessen). `gh` führt `https` als Standard
+  (`gh config list`).
+- **`gh auth setup-git`:** Führen Sie den Befehl im Container selbst aus (gemessen mit
+  `--hostname github.com` und einem Platzhalter in `GH_TOKEN`, ein Lauf), schreibt er
+  `~/.gitconfig` mit je einem leeren und einem `gh auth git-credential`-Eintrag für
+  `github.com` und `gist.github.com`, ohne ein Token im Inhalt. Der Eintrag
+  setzt für diese Hosts `gh` an die Stelle des Credential-Helpers des Images, der
+  `GIT_TOKEN` liefert; die Wirkung auf einen Git-Aufruf ist nicht gemessen.
+- **Telemetrie:** `glab` führt `telemetry` und `check_update` in
+  `~/.config/glab-cli/config.yml` (gemessen: beide `true`); `gh` nennt in `gh help
+  environment` die Variablen `GH_TELEMETRY` und `DO_NOT_TRACK`. `u-boot` setzt keine
+  Umgebungsvariable dafür: Das erzeugte Dockerfile hat kein `ENV`, und `remoteEnv` trägt
+  nur Referenzen auf Variablen des Hosts. **Nicht gemessen:** die Wirkung der Schalter, und welche Hosts
+  Telemetrie und Aktualisierungsprüfung in einer interaktiven Sitzung ansprechen (die
+  Aufrufe der Messung liefen ohne Terminal).
+- **Egress:** Mit der Beschränkung erlaubt `u-boot` `api.github.com` und `github.com`
+  (beide stehen schon in der Basisliste) für `gh` und `gitlab.com` für `glab`. **Nicht
+  aufgenommen:** Hosts, die auf eine Anmeldung folgen, Hosts von Telemetrie und
+  Aktualisierung sowie die Hosts von `glab duo` und `glab orbit`; wer sie braucht, trägt
+  sie in `devcontainer.sandbox.egress.allow` ein. Ohne `gitlab.com` in der Liste scheitert
+  `glab` an der Namensauflösung (gemessen: `lookup gitlab.com`), und der Client wiederholt
+  die Anfragen: Die Aufrufreihe der Messung dauerte 127,8 statt 20,0 Sekunden mit dem Host
+  in der Liste (ein Host, ein Lauf, keine Dauer eines einzelnen Aufrufs).
+- **Nicht zugesagt:** Aufrufe mit gültigem Token und deren Hosts; Telemetrie- und
+  Update-Hosts einer interaktiven Sitzung; GitHub Enterprise und GitLab Self-Managed;
+  andere Versionen als die gepinnten; `glab duo`, `glab orbit` und das Nachladen weiterer
+  Programme durch `glab`; ein Bau auf `arm64` (die Prüfsummen für `arm64` stehen im
+  Dockerfile, der Bau ist nicht gelaufen); die Kombination mit `ollama` und
+  `nestedRuntime` über die Reihenfolge der Blöcke im Dockerfile, die Volumes und die Hosts
+  hinaus.
+- **Grenzen der Messung:** Linux `amd64` (x86_64), lokale Docker Engine 29.9.2,
+  Dev-Container-CLI 0.89.0, Basis-Image `mcr.microsoft.com/devcontainers/base:debian`,
+  `gh` 2.103.0, `glab` 1.124.0, gemessen am 2026-10-23, ein gewerteter Lauf je Aussage.
+  Es wurde kein Token angelegt oder verwendet, die Aufrufe liefen ohne Terminal. Die
+  Aufrufe der Werkzeuge liefen in Containern, deren Dockerfile den Block von Hand trug
+  (dasselbe Archiv wie im erzeugten Block); am von `u-boot` erzeugten Dockerfile laufen in
+  einem Docker-Test der Bau in beiden Profilen, die Versionen, ein Aufruf von `glab` gegen
+  ein öffentliches Projekt hinter der Egress-Beschränkung und die Token-Referenzen.
+
 #### Zugangsdaten (Git und Agent)
 
 Zugangsdaten stehen **nie** im Image, im Volume, in `u-boot.yaml` oder in einer
@@ -2040,8 +2153,10 @@ erzeugten Datei:
 - `devcontainer.json` enthält nur die Referenz
   `"GIT_TOKEN": "${localEnv:GIT_TOKEN}"`. Setzen Sie `GIT_TOKEN` in der
   Host-Umgebung, bevor Sie den Container starten. Mit dem Feature `claude-code`
-  kommt `"ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"` hinzu; ohne das
-  Feature bleibt die Datei unverändert.
+  kommt `"ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"` hinzu, mit `gh` und `glab`
+  `"GH_TOKEN": "${localEnv:GH_TOKEN}"` und `"GITLAB_TOKEN": "${localEnv:GITLAB_TOKEN}"`
+  (siehe [Forge-CLIs](#forge-clis-optional)); ohne diese Features bleibt die Datei
+  unverändert.
 - Ein Credential-Helper im Image liefert `$GIT_TOKEN` an `git` (nur für
   `https`-Remotes; bei `ssh` gibt es keinen Schlüssel im Container).
 - Starten Sie den Container mit `u-boot devcontainer up`, reicht der Befehl nur den Namen
@@ -2049,8 +2164,9 @@ erzeugten Datei:
   im Hilfs-Container während eines Lebenszyklus-Befehls) stehen in Abschnitt 4.9. In einer
   Shell, die Sie ohne Editor mit `docker exec` öffnen, gilt `remoteEnv` nicht, und `GIT_TOKEN`
   ist dort nicht gesetzt; geben Sie die Variable mit `docker exec -e GIT_TOKEN` mit (Abschnitt
-  4.9, „Im Container arbeiten“). `u-boot devcontainer shell` öffnet die Shell mit `GIT_TOKEN`
-  und dem Schlüssel des Agenten, soweit sie auf dem Host gesetzt sind.
+  4.9, „Im Container arbeiten“). `u-boot devcontainer shell` öffnet die Shell mit `GIT_TOKEN`,
+  dem Schlüssel des Agenten und den Token-Variablen von `gh` und `glab`, soweit sie auf dem
+  Host gesetzt sind.
 - Empfohlen: **kurzlebige, auf das Repository begrenzte Tokens**, nie ein
   privater Schlüssel im Container, und **Branch-Protection** im Remote, damit ein
   kompromittierter Agent nicht auf geschützte Branches schreiben kann.
@@ -2061,7 +2177,8 @@ erzeugten Datei:
   `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` oder `CLAUDE_CODE_OAUTH_TOKEN`), vor einer
   fehlenden Token-Quelle bei einem `https`-Clone und, bei aktivem Feature
   `claude-code`, vor einer fehlenden Referenz auf `ANTHROPIC_API_KEY` in
-  `devcontainer.json`. Die Prüfung liest nur Projektdateien; sie sieht weder die
+  `devcontainer.json`, bei aktivem `gh` oder `glab` ebenso auf `GH_TOKEN`
+  beziehungsweise `GITLAB_TOKEN`. Die Prüfung liest nur Projektdateien; sie sieht weder die
   Umgebung des Hosts noch einen Schlüssel in einer anderen Datei. Bekannte Grenze:
   Der Ausdruck für eine Zuweisung kann einen Platzhalter nicht von einem Wert
   unterscheiden; ein Platzhalter wie `ANTHROPIC_API_KEY=your-api-key-here` (ab zwölf
@@ -2275,6 +2392,8 @@ aus, damit die Dateien in `.devcontainer/` zur Projektdatei passen.
 | `DOCKER_HOST` | Adresse des Docker- oder Podman-Daemons |
 | `GIT_TOKEN` | Zugangsdaten für `https`-Remotes im Sandbox-Devcontainer (nur zur Laufzeit, auf dem Host gesetzt) |
 | `ANTHROPIC_API_KEY` | API-Schlüssel für das Feature `claude-code` im Sandbox-Devcontainer (nur zur Laufzeit, auf dem Host gesetzt; `devcontainer.json` trägt nur die Referenz) |
+| `GH_TOKEN` | Token für das Feature `gh` im Sandbox-Devcontainer (nur zur Laufzeit, auf dem Host gesetzt; `devcontainer.json` trägt nur die Referenz) |
+| `GITLAB_TOKEN` | Token für das Feature `glab` im Sandbox-Devcontainer (nur zur Laufzeit, auf dem Host gesetzt; `devcontainer.json` trägt nur die Referenz) |
 
 ### Ausführlichkeit der Ausgabe
 
@@ -2808,7 +2927,7 @@ Reparaturvorschlag: `command` (der Befehl zum Kopieren), `action` und `argument`
 | `devcontainer.features.drift` | Features in `u-boot.yaml` und `devcontainer.json` stimmen überein |
 | `devcontainer.sandbox.runtime` | Sandbox: verschachtelte Runtime (Podman oder Docker) passend konfiguriert |
 | `devcontainer.sandbox.egress` | Sandbox: Internet-Beschränkung passend konfiguriert |
-| `devcontainer.sandbox.credentials` | Sandbox: keine Klartext-Zugangsdaten (Git-Token, Anthropic-Schlüssel), Quelle der Git- und Agenten-Zugangsdaten vorhanden |
+| `devcontainer.sandbox.credentials` | Sandbox: keine Klartext-Zugangsdaten (Git-Token, Anthropic-Schlüssel, Token für `gh` und `glab`), Quelle der Git-, Agenten- und Forge-Zugangsdaten vorhanden |
 
 ### Unterstützte Plattformen
 
