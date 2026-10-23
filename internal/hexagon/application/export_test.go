@@ -308,7 +308,8 @@ type FeatureCatalogueEntryForTest struct {
 	ShortDesc      string
 	Publisher      string
 	// DockerfileBlock marks an entry without OCI source whose installation
-	// the sandbox Dockerfile carries.
+	// the generated Dockerfile carries, in the default and in the sandbox
+	// profile.
 	DockerfileBlock bool
 	// BindsHostSocket marks a feature that mounts the container-engine
 	// socket of the host.
