@@ -104,8 +104,9 @@ Alle Bauten kalt (`--no-cache`), Image-Größe in Byte (`docker image inspect`),
 | C11 | Negativprobe: erste Stelle der SHA-256 in `ghtgz` verfälscht | Build Exit 1 (`computed checksum did NOT match`, `FAILED`), kein Image | `rohdaten-06.txt` |
 
 Versionen, die der Bau zog (`latest` am 2026-10-23): `gh` 2.103.0, `glab` 1.124.0. Die Features pinnen die Werkzeug-Version **nicht**: ohne Option `version` gilt `latest` zur Bauzeit
-(A5 bis A9). Die Archiv-Pins der Varianten `*tgz` stehen in `block-ghtgz.dockerfile` und `block-glabtgz.dockerfile`; der `arm64`-Pin (je Datei) ist aus den Prüfsummen-Dateien
-der Releases gelesen, **nicht** gebaut.
+(A5 bis A9). Die Archiv-Pins der Varianten `*tgz` stehen in `block-ghtgz.dockerfile` und `block-glabtgz.dockerfile`; der `arm64`-Pin (je Datei) ist **nicht** gebaut und steht
+in keiner Rohdatei als gelesene Ausgabe der Prüfsummen-Dateien (`glab`: nur im Dockerfile-Block und im Bau-Log von `glabtgz`; `gh`: zusätzlich `rohdaten-03.txt`); er wurde am 2026-10-23 im Verification-Lauf live gegen die
+Prüfsummen-Dateien der Releases nachgelesen und stimmt.
 
 ### D. Hosts im laufenden Container (Laufzeit, Docker, `--cap-add=NET_ADMIN`)
 
