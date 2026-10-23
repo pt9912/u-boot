@@ -70,7 +70,7 @@ Lifecycle-Verzeichnis und wird hier **nicht** gespiegelt.
 | `slice-v2-spec-forge-cli` (Datei entsteht nach dem Code) | Spezifikation und Sicht nach dem Code, mit Beleg-Tabelle (Bedingung → Test oder Streichung) | [`LH-FA-DEV-003`](../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features) |
 | `slice-v1-release-cut-v0.15.0` (Datei erst beim Trigger) | Release-Cut `v0.15.0`: `CHANGELOG.md` zuordnen, Lead mit Plattform und Grenzen, Aufträge aus dem Validator-Bericht; Tag und Push nur nach ausdrücklicher Freigabe | [`ADR-0004`](../adr/0004-ci-system.md), [`ADR-0007`](../adr/0007-distributionswege-ghcr.md) |
 
-Die Kennungen der Slices ab Zeile 2 sind **vorläufig** (Muster der Vorwellen); die Dateien entstehen, wenn ihr Inhalt feststeht, damit sie keine Zustandsmarker mit Ablaufpunkt tragen ([`AGENTS.md`](../../../AGENTS.md) §3.10). Die Folge-ADR gehört zum Messungs-Slice (Muster [`slice-v1-devcontainer-ollama-messung`](done/slice-v1-devcontainer-ollama-messung.md)), sie ist kein eigener Slice. Ob `gh` und `glab` ein gemeinsamer oder zwei getrennte Code-Slices werden, hängt vom Messergebnis ab (gleiche Quelle und Form: einer genügt); die Teilung entscheidet der Planner beim Anlegen der Dateien.
+Die Kennungen der Slices ab Zeile 2 sind **vorläufig** (Muster der Vorwellen); die Dateien entstehen, wenn ihr Inhalt feststeht, damit sie keine Zustandsmarker mit Ablaufpunkt tragen ([`AGENTS.md`](../../../AGENTS.md) §3.10). Die Folge-ADR gehört zum Messungs-Slice (Muster [`slice-v1-devcontainer-ollama-messung`](done/slice-v1-devcontainer-ollama-messung.md)), sie ist kein eigener Slice. Ob `gh` und `glab` ein gemeinsamer oder zwei getrennte Code-Slices werden, hängt vom Messergebnis ab (gleiche Quelle und Form: einer genügt); die Teilung entscheidet der Planner beim Anlegen der Dateien. Die Messung schlägt einen gemeinsamen Code-Slice für beide Werkzeuge vor (gleiche Quellenform, gleicher Eintragstyp; [`ADR-0035`](../adr/0035-forge-clis-gh-und-glab-im-devcontainer.md) Freigabe-Punkt g).
 
 **Nicht in der Tabelle, aber berührt:** [`slice-v1-katalog-features-quellen-und-freigabe`](open/slice-v1-katalog-features-quellen-und-freigabe.md) (ohne Welle; Abgrenzung in §5).
 
@@ -86,8 +86,9 @@ Regeln dieser Sektion: Baseline-Regelwerk `modul-06-roadmap.md`
 ### Offene Fragen an den Projektinhaber
 
 1. **Release-Nummer:** `v0.15.0` ist im Auftrag genannt (das nächste Minor nach `v0.14.0`); bitte bestätigen.
-2. **Katalog-Slice (N1 bis N3):** abgegrenzt und ohne Welle (Empfehlung des Planners: Messung zuerst, dann die Entscheidung), oder N3 (und N2) vorab in diese Welle ziehen, falls `glab` nur über eine externe Quelle kommt? Die Frage ist erst nach dem Messergebnis entscheidbar; bis dahin gilt die Abgrenzung.
+2. **Katalog-Slice (N1 bis N3):** abgegrenzt und ohne Welle (Empfehlung des Planners: Messung zuerst, dann die Entscheidung), oder N3 (und N2) vorab in diese Welle ziehen, falls `glab` nur über eine externe Quelle kommt? Die Frage ist erst nach dem Messergebnis entscheidbar; bis dahin gilt die Abgrenzung. Messergebnis: Die Empfehlung der ADR (Dockerfile-Block, Katalogeintrag ohne `source:`) braucht weder N2 noch N3; der Weg über `source:` baut in der erzeugten Form nicht (Messprotokoll B1).
 3. **Reihenfolge der Wellen:** `welle-ollama-cloud-modelle` bleibt in *Nächste Wellen*; bitte bestätigen, dass diese Welle zuerst läuft.
+4. **Quellenwahl und Wortlaut:** Die Freigabe-Punkte a bis g der [`ADR-0035`](../adr/0035-forge-clis-gh-und-glab-im-devcontainer.md) (Quelle von `gh` und `glab`, Token-Variablen, Wirkung mit und ohne Sandbox-Profil, Telemetrie, Nachmessung mit gültigem Token, Teilung der Code-Slices) und der Wortlaut-Entwurf ([`wortlaut-entwurf.md`](../../messungen/slice-v1-forge-cli-quellen-messung/wortlaut-entwurf.md)) liegen dem Projektinhaber vor; die Quellenwahl, die vom Muster der Katalog-Features abweicht, entscheidet er.
 
 ## 6. Out-of-Scope für diese Welle
 
