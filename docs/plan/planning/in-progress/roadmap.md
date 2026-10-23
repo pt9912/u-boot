@@ -17,7 +17,7 @@ Derivativ: Der Zustand sind die flachen Welle-Dateien unter `docs/plan/planning/
 wird, sagt das `Welle:`-Feld der Slices in `in-progress/`. Ziel, Trigger und Closure-Kriterien
 stehen in der Welle-Datei, nicht hier.
 
-Offen: [`welle-forge-cli-gh-glab`](../welle-forge-cli-gh-glab.md) (Forge-CLIs `gh` und `glab` als Katalog-Features im Devcontainer, auch im Sandbox-Profil; sechs Slices (die Kennung des sechsten vorläufig), der Release-Cut zuletzt; Release `v0.15.0`).
+Offen: [`welle-forge-cli-gh-glab`](../welle-forge-cli-gh-glab.md) (Forge-CLIs `gh` und `glab` als Katalog-Features im Devcontainer, auch im Sandbox-Profil; sechs Slices, der Release-Cut [`slice-v1-release-cut-v0.15.0`](../open/slice-v1-release-cut-v0.15.0.md) zuletzt; Release `v0.15.0`).
 
 Nichts in Arbeit.
 
