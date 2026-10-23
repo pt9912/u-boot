@@ -15,7 +15,7 @@ Kennung oder Grund, die Liefer-Punkte der DoD bleiben leer
 
 **Berührte Spec-Stellen:** `lastenheft.md` §4.3 ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features), [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer)), §16 (Historie), Versionsfeld. `SPEC-*` und `ARC-*` berührt der CR nicht (das tut `slice-v2-spec-forge-cli` nach dem Code). Der Verweis zeigt aufwärts: Das Lastenheft nennt diesen Slice nie.
 
-**Verantwortlich:** —
+**Verantwortlich:** pt9912 (Rolle Implementer, Start 2026-10-23); Freigaben: Projektinhaber.
 
 **Autor:** pt9912 (Rolle Planner). **Datum:** 2026-10-23.
 
@@ -149,7 +149,21 @@ aus §6 seinen Ausgang; die Liefer-Punkte der DoD bleiben leer
 (`modul-05-planning-harness.md` §Ein Slice, dessen Gegenstand ein anderer
 übernimmt).
 
-*(Wird bei der Umsetzung und Closure gefüllt, in dieser Reihenfolge: **Freigabe** je Stelle mit Datum und freigegebenem Wortlaut · Vorab-Suche mit Fundstellen · Beleg-Tabelle (Bedingung → Messaussage oder Test) · Verifikation mit Exit-Codes · Was hat funktioniert · Was ging anders · Steering-Loop-Eintrag · Beobachtungs-Register · Folge-Slices · Risiken aus §6.)*
+Reihenfolge dieser Sektion: Freigabe je Stelle (Rückfrage beim Projektinhaber, beim Start vermerkt) · Vorab-Suche mit Fundstellen · Beleg-Tabelle (Bedingung → Messaussage oder Test) · Verifikation mit Exit-Codes · Closure.
+
+### Freigabe
+
+**Entscheidungen des Projektinhabers (2026-10-23, Rückfrage im Gespräch; an den Implementer übermittelt durch den Hauptagenten, beim Start vermerkt).** Der Wortlaut ist je Stelle freigegeben; ein geänderter Satz steht hier im freigegebenen Wortlaut. Der Entwurf ([`wortlaut-entwurf.md`](../../../messungen/slice-v1-forge-cli-quellen-messung/wortlaut-entwurf.md)) bleibt unverändert; die Abweichungen tragen die Punkte 1 und 2.
+
+1. **Stelle 1 ([`LH-FA-DEV-003`](../../../../spec/lastenheft.md#lh-fa-dev-003--devcontainer-features): zwei Spiegelstriche `gh`/`glab` und ein Absatz) — freigegeben,** mit den Antworten zu Frage 1 und 2 aus §1:
+   - **Frage 1 — Ja:** S1 trägt den Halbsatz „in beiden Profilen (Standard und Sandbox)“. Die Bedingung braucht im Code-Slice einen pinnenden Test (Auftrag A1 unten; Eintrag in der Welle-Datei §5).
+   - **Frage 2 — Nein:** Die Hostnamen (`api.github.com`, `github.com`, `gitlab.com`) stehen in der Spezifikation, nicht im Lastenheft; die Hostnamen-Passage von S4 entfällt und S4 lautet hostnamenfrei. Der Implementer hat das so umgesetzt (Umsetzung der Antwort, nicht ein Wortlaut des Projektinhabers; der Reviewer prüft sie).
+   - Freigegebener Absatz (Umsetzung im Lastenheft: S1 mit dem Halbsatz umgestellt, sonst wortgleich): „`gh` (GitHub CLI) und `glab` (GitLab CLI) sind in beiden Profilen (Standard und Sandbox) als eingebaute Features `gh` und `glab` wählbar (`u-boot config set devcontainer.features.gh.enabled true`, analog `glab`). Jedes installiert sein Werkzeug aus einem gepinnten Release-Archiv des Upstream-Projekts (`cli/cli`, `gitlab-org/cli`) mit geprüfter SHA-256-Prüfsumme. Für die Archive hat die Messung keine Signatur gefunden (nach dem Suchmuster, nicht abschließend); für `gh` veröffentlicht das Projekt eine GitHub-Attestierung, die `u-boot` nicht prüft. `u-boot` weist das beim Erzeugen aus. Mit der Egress-Restriktion ([`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion)) stehen die Hosts von `gh` in der Default-Allowlist und kommt für `glab` ein Host hinzu. Anmeldung und Zugangsdaten: siehe [`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer); `u-boot` führt weder `gh auth login` noch `glab auth login` aus und speichert kein Token. Nicht zugesagt: Aufrufe mit gültigem Token und deren Hosts, Telemetrie-/Update-Hosts einer interaktiven Sitzung, selbst gehostete Instanzen, andere Versionen als die gepinnten; außerdem `glab duo`, `glab orbit` und das Nachladen weiterer Programme durch `glab`.“
+2. **Stelle 2 ([`LH-FA-DEV-009`](../../../../spec/lastenheft.md#lh-fa-dev-009--git-zugangsdaten-im-sandbox-devcontainer): drei Passagen) — freigegeben** wie im Entwurf (*Neu*-Wortlaut unverändert).
+3. **Stelle 3 — keine Änderung** an [`LH-FA-DEV-006`](../../../../spec/lastenheft.md#lh-fa-dev-006--sandbox-profil), [`LH-FA-DEV-008`](../../../../spec/lastenheft.md#lh-fa-dev-008--egress-restriktion) und [`LH-NFA-SEC-004`](../../../../spec/lastenheft.md#lh-nfa-sec-004--keine-verdeckte-ausführung-fremder-skripte) (kein Widerspruch des Projektinhabers zum Entwurf; die Hostnamen-Antwort bestätigt die Ablage in der Spezifikation).
+4. **Stelle 4 — Version `0.22.0` (Frage 3),** wenn dieser CR vor [`slice-cr-lastenheft-messstaende`](../open/slice-cr-lastenheft-messstaende.md) nach `done/` geht; die Versionsangaben jenes Slice und seiner Zeile in `open/README.md` werden mit dem Lastenheft-Commit nachgezogen (§3, §6). Die Historie-Zeile nennt nur die freigegebenen Stellen.
+
+*(Folgt bei der Umsetzung und Closure: Vorab-Suche · Beleg-Tabelle · Verifikation mit Exit-Codes · Was hat funktioniert · Was ging anders · Steering-Loop-Eintrag · Beobachtungs-Register · Folge-Slices · Risiken aus §6.)*
 
 ## 8. Sub-Area-Prüfungen und Modus-Begründung
 

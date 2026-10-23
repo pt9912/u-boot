@@ -19,7 +19,7 @@ stehen in der Welle-Datei, nicht hier.
 
 Offen: [`welle-forge-cli-gh-glab`](../welle-forge-cli-gh-glab.md) (Forge-CLIs `gh` und `glab` als Katalog-Features im Devcontainer, auch im Sandbox-Profil; fünf Slices (die Kennungen ab dem dritten vorläufig), der Release-Cut zuletzt; Release `v0.15.0`).
 
-Nichts in Arbeit.
+**v0.15.0 (Forge-CLIs `gh` und `glab` als Katalog-Features im Devcontainer; trägt die Welle `welle-forge-cli-gh-glab`; Lastenheft 0.21.0)** — Slice: [`slice-cr-devcontainer-forge-cli`](slice-cr-devcontainer-forge-cli.md).
 
 ## Nächste Wellen
 
