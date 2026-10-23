@@ -2,7 +2,7 @@
 
 * Rolle: Reviewer (`.harness/skills/reviewer.md`), frischer Kontext
 * Gegenstand: `git diff 07353780..HEAD` (HEAD `7f630132`), Welle `welle-forge-cli-gh-glab`
-* Maßstab: Plan ([`slice-v1-release-cut-v0.15.0`](../plan/planning/in-progress/slice-v1-release-cut-v0.15.0.md)), Muster des Cuts `v0.14.0`, `docs/maintainer/releasing.md`, `AGENTS.md` §3.7, §3.9, §3.10, §5 Regel 6; nicht die DoD (Verifier)
+* Maßstab: Plan ([`slice-v1-release-cut-v0.15.0`](../plan/planning/done/slice-v1-release-cut-v0.15.0.md)), Muster des Cuts `v0.14.0`, `docs/maintainer/releasing.md`, `AGENTS.md` §3.7, §3.9, §3.10, §5 Regel 6; nicht die DoD (Verifier)
 * Sensor: `make gates` selbst gefahren, Exit 0 (`GATES_EXIT=0`, `ablage-pruefung` 26 Fälle 0 Fehlschläge). `make test-docker` und `make verify-depguard` nicht gefahren: Produktcode im Diff ist nur `var version`; das lokale `test-docker`-Ergebnis des Implementers wird nur auf Darstellung geprüft, nicht reproduziert (Lauf über 30 Minuten, ersetzt ohnehin keinen CI-Lauf).
 
 ## Findings
